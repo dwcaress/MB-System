@@ -20,20 +20,20 @@
 	:user-data              ()
 	:actions                (
 		(
-		:from                   (menu_file "Load")
-		:when                   (Notify )
-		:to                     (popup_load)
-		:function_type          :user_defined
-		:arg_type               ()
-		:action                 (Show)
-		)
-		(
 		:from                   (menu_file "Show Colors")
 		:when                   (Notify )
 		:to                     (menu_file "Show Colors")
 		:function_type          CallFunction
 		:arg_type               ()
 		:action                 (action_show_colors)
+		)
+		(
+		:from                   (menu_file "Load")
+		:when                   (Notify )
+		:to                     (popup_load)
+		:function_type          :user_defined
+		:arg_type               ()
+		:action                 (Show)
 		)
 	)
 )
@@ -45,7 +45,7 @@
 	:height                 764
 	:background-color       ""
 	:foreground-color       ""
-	:label                  "MBEDIT Version $Id: mbedit.G,v 3.1 1993-08-17 04:32:17 caress Exp $"
+	:label                  "MBEDIT Version $Id: mbedit.G,v 3.2 1993-08-30 19:03:20 caress Exp $"
 	:label-type             :string
 	:initial-state          :open
 	:show-footer            t
@@ -65,7 +65,7 @@
 	:x                      0
 	:y                      0
 	:width                  897
-	:height                 107
+	:height                 134
 	:background-color       ""
 	:foreground-color       ""
 	:initial-state          :visible
@@ -128,97 +128,15 @@
 )
 (
 	:type                   :slider
-	:name                   slider_number_pings
-	:owner                  controls_mbedit
-	:help                   ""
-	:x                      160
-	:y                      8
-	:width                  364
-	:height                 20
-	:value-x                331
-	:value-y                8
-	:slider-width           100
-	:ticks                  0
-	:foreground-color       ""
-	:label                  "Number of pings shown:"
-	:label-type             :string
-	:layout-type            :horizontal
-	:orientation            :horizontal
-	:show-endboxes          nil
-	:show-range             t
-	:show-value             t
-	:min-value              1
-	:max-value              20
-	:min-value-string       ""
-	:max-value-string       ""
-	:min-tick-string        ""
-	:max-tick-string        ""
-	:initial-value          10
-	:initial-state          :active
-	:notify-handler         set_number_pings
-	:event-handler          nil
-	:user-data              ()
-	:actions                (
-		(
-		:from                   (window_mbedit slider_number_pings)
-		:when                   (Notify )
-		:to                     (window_mbedit slider_number_pings)
-		:function_type          CallFunction
-		:arg_type               ()
-		:action                 (set_number_pings)
-		)
-	)
-)
-(
-	:type                   :text-field
-	:name                   textfield_x_interval
-	:owner                  controls_mbedit
-	:help                   ""
-	:x                      560
-	:y                      8
-	:width                  246
-	:height                 15
-	:value-x                731
-	:value-y                8
-	:value-length           5
-	:stored-length          80
-	:rows                   3
-	:foreground-color       ""
-	:text-type              :numeric
-	:label                  "X Axis Tick Interval (m):"
-	:label-type             :string
-	:layout-type            :horizontal
-	:value-underlined       t
-	:max-value              100
-	:min-value              0
-	:initial-value          0
-	:initial-state          :active
-	:read-only              nil
-	:notify-handler         do_x_interval
-	:event-handler          nil
-	:user-data              ()
-	:actions                (
-		(
-		:from                   (window_mbedit textfield_x_interval)
-		:when                   (Notify )
-		:to                     (window_mbedit textfield_x_interval)
-		:function_type          CallFunction
-		:arg_type               ()
-		:action                 (do_x_interval)
-		)
-	)
-)
-(
-	:type                   :slider
 	:name                   slider_scale_x
 	:owner                  controls_mbedit
 	:help                   ""
 	:x                      160
-	:y                      32
+	:y                      8
 	:width                  380
 	:height                 20
 	:value-x                319
-	:value-y                32
+	:value-y                8
 	:slider-width           100
 	:ticks                  0
 	:foreground-color       ""
@@ -253,14 +171,96 @@
 )
 (
 	:type                   :text-field
+	:name                   textfield_x_interval
+	:owner                  controls_mbedit
+	:help                   ""
+	:x                      552
+	:y                      8
+	:width                  246
+	:height                 15
+	:value-x                723
+	:value-y                8
+	:value-length           5
+	:stored-length          80
+	:rows                   3
+	:foreground-color       ""
+	:text-type              :numeric
+	:label                  "X Axis Tick Interval (m):"
+	:label-type             :string
+	:layout-type            :horizontal
+	:value-underlined       t
+	:max-value              100
+	:min-value              0
+	:initial-value          0
+	:initial-state          :active
+	:read-only              nil
+	:notify-handler         do_x_interval
+	:event-handler          nil
+	:user-data              ()
+	:actions                (
+		(
+		:from                   (window_mbedit textfield_x_interval)
+		:when                   (Notify )
+		:to                     (window_mbedit textfield_x_interval)
+		:function_type          CallFunction
+		:arg_type               ()
+		:action                 (do_x_interval)
+		)
+	)
+)
+(
+	:type                   :slider
+	:name                   slider_scale_y
+	:owner                  controls_mbedit
+	:help                   ""
+	:x                      160
+	:y                      32
+	:width                  380
+	:height                 20
+	:value-x                319
+	:value-y                32
+	:slider-width           100
+	:ticks                  0
+	:foreground-color       ""
+	:label                  "Y Scale (m/100 pixels):"
+	:label-type             :string
+	:layout-type            :horizontal
+	:orientation            :horizontal
+	:show-endboxes          nil
+	:show-range             t
+	:show-value             t
+	:min-value              1
+	:max-value              10000
+	:min-value-string       ""
+	:max-value-string       ""
+	:min-tick-string        ""
+	:max-tick-string        ""
+	:initial-value          1000
+	:initial-state          :active
+	:notify-handler         set_scale_y
+	:event-handler          nil
+	:user-data              ()
+	:actions                (
+		(
+		:from                   (window_mbedit slider_scale_y)
+		:when                   (Notify )
+		:to                     (window_mbedit slider_scale_y)
+		:function_type          CallFunction
+		:arg_type               ()
+		:action                 (set_scale_y)
+		)
+	)
+)
+(
+	:type                   :text-field
 	:name                   textfield_y_interval
 	:owner                  controls_mbedit
 	:help                   ""
-	:x                      560
+	:x                      552
 	:y                      32
 	:width                  246
 	:height                 15
-	:value-x                731
+	:value-x                723
 	:value-y                32
 	:value-length           5
 	:stored-length          80
@@ -352,19 +352,19 @@
 )
 (
 	:type                   :slider
-	:name                   slider_scale_y
+	:name                   slider_number_pings
 	:owner                  controls_mbedit
 	:help                   ""
 	:x                      160
 	:y                      56
-	:width                  380
+	:width                  364
 	:height                 20
-	:value-x                319
+	:value-x                331
 	:value-y                56
 	:slider-width           100
 	:ticks                  0
 	:foreground-color       ""
-	:label                  "Y Scale (m/100 pixels):"
+	:label                  "Number of pings shown:"
 	:label-type             :string
 	:layout-type            :horizontal
 	:orientation            :horizontal
@@ -372,24 +372,24 @@
 	:show-range             t
 	:show-value             t
 	:min-value              1
-	:max-value              10000
+	:max-value              20
 	:min-value-string       ""
 	:max-value-string       ""
 	:min-tick-string        ""
 	:max-tick-string        ""
-	:initial-value          1000
+	:initial-value          10
 	:initial-state          :active
-	:notify-handler         set_scale_y
+	:notify-handler         set_number_pings
 	:event-handler          nil
 	:user-data              ()
 	:actions                (
 		(
-		:from                   (window_mbedit slider_scale_y)
+		:from                   (window_mbedit slider_number_pings)
 		:when                   (Notify )
-		:to                     (window_mbedit slider_scale_y)
+		:to                     (window_mbedit slider_number_pings)
 		:function_type          CallFunction
 		:arg_type               ()
-		:action                 (set_scale_y)
+		:action                 (set_number_pings)
 		)
 	)
 )
@@ -398,11 +398,11 @@
 	:name                   slider_buffer_size
 	:owner                  controls_mbedit
 	:help                   ""
-	:x                      560
+	:x                      552
 	:y                      56
 	:width                  330
 	:height                 20
-	:value-x                689
+	:value-x                681
 	:value-y                56
 	:slider-width           100
 	:ticks                  0
@@ -442,7 +442,7 @@
 	:owner                  controls_mbedit
 	:help                   ""
 	:x                      8
-	:y                      80
+	:y                      72
 	:width                  68
 	:height                 19
 	:constant-width         nil
@@ -472,7 +472,7 @@
 	:owner                  controls_mbedit
 	:help                   ""
 	:x                      88
-	:y                      80
+	:y                      72
 	:width                  65
 	:height                 19
 	:constant-width         nil
@@ -540,11 +540,11 @@
 	:name                   slider_buffer_hold
 	:owner                  controls_mbedit
 	:help                   ""
-	:x                      560
+	:x                      552
 	:y                      80
 	:width                  331
 	:height                 20
-	:value-x                690
+	:value-x                682
 	:value-y                80
 	:slider-width           100
 	:ticks                  0
@@ -579,14 +579,98 @@
 	)
 )
 (
+	:type                   :setting
+	:name                   setting_mode
+	:owner                  controls_mbedit
+	:help                   ""
+	:x                      8
+	:y                      104
+	:width                  197
+	:height                 23
+	:value-x                55
+	:value-y                104
+	:rows                   1
+	:columns                0
+	:layout-type            :horizontal
+	:foreground-color       ""
+	:setting-type           :exclusive
+	:selection-required     t
+	:label                  "Mode:"
+	:label-type             :string
+	:notify-handler         nil
+	:event-handler          nil
+	:choices                ("Pick" "Erase" "Restore" )
+	:choice-label-types     (:string :string :string )
+	:choice-colors          ("" "" "" )
+	:initial-selections     (nil nil nil )
+	:initial-state          :active
+	:user-data              ()
+	:actions                (
+		(
+		:from                   (window_mbedit setting_mode "Pick")
+		:when                   (Notify )
+		:to                     (window_mbedit setting_mode "Pick")
+		:function_type          CallFunction
+		:arg_type               ()
+		:action                 (set_mode_pick)
+		)
+		(
+		:from                   (window_mbedit setting_mode "Erase")
+		:when                   (Notify )
+		:to                     (window_mbedit setting_mode "Erase")
+		:function_type          CallFunction
+		:arg_type               ()
+		:action                 (set_mode_erase)
+		)
+		(
+		:from                   (window_mbedit setting_mode "Restore")
+		:when                   (Notify )
+		:to                     (window_mbedit setting_mode "Restore")
+		:function_type          CallFunction
+		:arg_type               ()
+		:action                 (set_mode_restore)
+		)
+	)
+)
+(
+	:type                   :button
+	:name                   button_goto
+	:owner                  controls_mbedit
+	:help                   ""
+	:x                      272
+	:y                      104
+	:width                  53
+	:height                 19
+	:constant-width         nil
+	:button-type            :normal
+	:foreground-color       ""
+	:label                  "Go To"
+	:label-type             :string
+	:initial-state          :active
+	:menu                   nil
+	:notify-handler         nil
+	:event-handler          nil
+	:user-data              ()
+	:actions                (
+		(
+		:from                   (window_mbedit button_goto)
+		:when                   (Notify )
+		:to                     (popup_goto)
+		:function_type          :user_defined
+		:arg_type               ()
+		:action                 (Show)
+		)
+	)
+)
+(
 	:type                   :canvas-pane
 	:name                   canvas_mbedit
 	:owner                  window_mbedit
 	:help                   ""
 	:x                      0
-	:y                      107
+	:y                      134
 	:width                  897
-	:height                 657
+	:height                 630
 	:background-color       ""
 	:foreground-color       ""
 	:initial-state          :visible
@@ -597,7 +681,7 @@
 	:horizontal-scrollbar   nil
 	:scrollable-width       897
 	:vertical-scrollbar     nil
-	:scrollable-height      657
+	:scrollable-height      630
 	:repaint-proc           nil
 	:event-handler          do_event
 	:drawing-model          :xview
@@ -819,6 +903,253 @@
 		:from                   (popup_load button_load_ok)
 		:when                   (Notify )
 		:to                     (popup_load)
+		:function_type          :user_defined
+		:arg_type               ()
+		:action                 (Hide)
+		)
+	)
+)
+(
+	:type                   :popup-window
+	:name                   popup_goto
+	:owner                  window_mbedit
+	:width                  179
+	:height                 220
+	:background-color       ""
+	:foreground-color       ""
+	:label                  "Great Leap Forward?"
+	:label-type             :string
+	:initial-state          :invisible
+	:show-footer            t
+	:resizable              t
+	:pinned                 nil
+	:done-handler           nil
+	:event-handler          nil
+	:user-data              ()
+	:actions                ()
+)
+(
+	:type                   :control-area
+	:name                   controls1
+	:owner                  popup_goto
+	:help                   ""
+	:x                      0
+	:y                      0
+	:width                  179
+	:height                 220
+	:background-color       ""
+	:foreground-color       ""
+	:initial-state          :visible
+	:show-border            nil
+	:menu                   nil
+	:event-handler          nil
+	:user-data              ()
+	:actions                ()
+)
+(
+	:type                   :text-field
+	:name                   textfield_year
+	:owner                  controls1
+	:help                   ""
+	:x                      24
+	:y                      24
+	:width                  113
+	:height                 15
+	:value-x                66
+	:value-y                24
+	:value-length           4
+	:stored-length          4
+	:rows                   3
+	:foreground-color       ""
+	:text-type              :numeric
+	:label                  "Year:"
+	:label-type             :string
+	:layout-type            :horizontal
+	:value-underlined       t
+	:max-value              2062
+	:min-value              1962
+	:initial-value          0
+	:initial-state          :active
+	:read-only              nil
+	:notify-handler         nil
+	:event-handler          nil
+	:user-data              ()
+	:actions                ()
+)
+(
+	:type                   :text-field
+	:name                   textfield_month
+	:owner                  controls1
+	:help                   ""
+	:x                      24
+	:y                      48
+	:width                  125
+	:height                 15
+	:value-x                78
+	:value-y                48
+	:value-length           2
+	:stored-length          2
+	:rows                   3
+	:foreground-color       ""
+	:text-type              :numeric
+	:label                  "Month:"
+	:label-type             :string
+	:layout-type            :horizontal
+	:value-underlined       t
+	:max-value              12
+	:min-value              1
+	:initial-value          2
+	:initial-state          :active
+	:read-only              nil
+	:notify-handler         nil
+	:event-handler          nil
+	:user-data              ()
+	:actions                ()
+)
+(
+	:type                   :text-field
+	:name                   textfield_day
+	:owner                  controls1
+	:help                   ""
+	:x                      24
+	:y                      72
+	:width                  108
+	:height                 15
+	:value-x                61
+	:value-y                72
+	:value-length           2
+	:stored-length          2
+	:rows                   3
+	:foreground-color       ""
+	:text-type              :numeric
+	:label                  "Day:"
+	:label-type             :string
+	:layout-type            :horizontal
+	:value-underlined       t
+	:max-value              31
+	:min-value              1
+	:initial-value          21
+	:initial-state          :active
+	:read-only              nil
+	:notify-handler         nil
+	:event-handler          nil
+	:user-data              ()
+	:actions                ()
+)
+(
+	:type                   :text-field
+	:name                   textfield_hour
+	:owner                  controls1
+	:help                   ""
+	:x                      24
+	:y                      96
+	:width                  115
+	:height                 15
+	:value-x                68
+	:value-y                96
+	:value-length           2
+	:stored-length          2
+	:rows                   3
+	:foreground-color       ""
+	:text-type              :numeric
+	:label                  "Hour:"
+	:label-type             :string
+	:layout-type            :horizontal
+	:value-underlined       t
+	:max-value              23
+	:min-value              0
+	:initial-value          0
+	:initial-state          :active
+	:read-only              nil
+	:notify-handler         nil
+	:event-handler          nil
+	:user-data              ()
+	:actions                ()
+)
+(
+	:type                   :text-field
+	:name                   textfield_minute
+	:owner                  controls1
+	:help                   ""
+	:x                      24
+	:y                      120
+	:width                  130
+	:height                 15
+	:value-x                83
+	:value-y                120
+	:value-length           2
+	:stored-length          2
+	:rows                   3
+	:foreground-color       ""
+	:text-type              :numeric
+	:label                  "Minute:"
+	:label-type             :string
+	:layout-type            :horizontal
+	:value-underlined       t
+	:max-value              59
+	:min-value              0
+	:initial-value          0
+	:initial-state          :active
+	:read-only              nil
+	:notify-handler         nil
+	:event-handler          nil
+	:user-data              ()
+	:actions                ()
+)
+(
+	:type                   :text-field
+	:name                   textfield_second
+	:owner                  controls1
+	:help                   ""
+	:x                      24
+	:y                      144
+	:width                  130
+	:height                 15
+	:value-x                83
+	:value-y                144
+	:value-length           2
+	:stored-length          2
+	:rows                   3
+	:foreground-color       ""
+	:text-type              :numeric
+	:label                  "Second:"
+	:label-type             :string
+	:layout-type            :horizontal
+	:value-underlined       t
+	:max-value              59
+	:min-value              0
+	:initial-value          0
+	:initial-state          :active
+	:read-only              nil
+	:notify-handler         nil
+	:event-handler          nil
+	:user-data              ()
+	:actions                ()
+)
+(
+	:type                   :button
+	:name                   button_goto_apply
+	:owner                  controls1
+	:help                   ""
+	:x                      56
+	:y                      176
+	:width                  53
+	:height                 19
+	:constant-width         nil
+	:button-type            :normal
+	:foreground-color       ""
+	:label                  "Apply"
+	:label-type             :string
+	:initial-state          :active
+	:menu                   nil
+	:notify-handler         nil
+	:event-handler          nil
+	:user-data              ()
+	:actions                (
+		(
+		:from                   (popup_goto button_goto_apply)
+		:when                   (Notify )
+		:to                     (popup_goto)
 		:function_type          :user_defined
 		:arg_type               ()
 		:action                 (Hide)
