@@ -1,53 +1,32 @@
 /*--------------------------------------------------------------------
- *    The MB-system:	mbsys_reson.h	8/20/94
- *	$Id: mbsys_reson.h,v 4.4 1999-01-01 23:41:06 caress Exp $
+ *    The MB-system:	mbf_cbat8101.h	8/21/94
+ *	$Id: mbf_cbat8101.h,v 4.0 1999-01-01 23:38:01 caress Exp $
  *
- *    Copyright (c) 1994 by 
- *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
+ *    Copyright (c) 1998 by 
+ *    D. W. Caress (caress@mbari.org)
+ *      Monterey Bay Aquarium Research Institute
+ *      Moss Landing, CA 95039
  *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
- *    Lamont-Doherty Earth Observatory
- *    Palisades, NY  10964
+ *      Lamont-Doherty Earth Observatory
+ *      Palisades, NY  10964
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- * mbsys_reson.h defines the data structures used by MBIO functions
- * to store data from Reson SeaBat 9001 multibeam sonar systems.
- * The data formats which are commonly used to store Reson 
- * data in files include
- *      MBF_CBAT9001 : MBIO ID 81
+ * mbf_cbat8101.h defines the data structures used by MBIO functions
+ * to store multibeam data read from the MBF_CBAT8101 format (MBIO id 82).  
  *
- *
- * Author:	D. W. Caress (L-DEO)
- * Date:	August 20, 1994
+ * Author:	D. W. Caress
+ * Date:	December 10, 1998
  *
  * $Log: not supported by cvs2svn $
- * Revision 4.3  1998/10/05 17:46:15  caress
- * MB-System version 4.6beta
- *
- * Revision 4.2  1997/04/21  17:02:07  caress
- * MB-System 4.5 Beta Release.
- *
- * Revision 4.1  1995/07/13  19:15:09  caress
- * Intermediate check-in during major bug-fixing flail.
- *
- * Revision 4.1  1995/07/13  19:15:09  caress
- * Intermediate check-in during major bug-fixing flail.
- *
- * Revision 4.0  1994/10/21  12:35:08  caress
- * Release V4.0
- *
- * Revision 1.1  1994/10/21  12:20:01  caress
- * Initial revision
- *
- *
  *
  */
 /*
- * Notes on the MBSYS_RESON data:
+ * Notes on the MBF_CBAT8101 data format:
  *   1. Reson SeaBat products are high frequency, 
  *      shallow water multibeam sonars.
- *      Reson SeaBat 9001 systems output both bathymetry
+ *      Reson SeaBat 8101 systems output both bathymetry
  *      and amplitude information for 60 beams.
  *      Reson SeaBat 8101 systems output both bathymetry
  *      and amplitude information for up to 101 beams.
@@ -69,11 +48,11 @@
  *      in longitude and latitude, the original navigation must
  *      be unprojected.
  *   5. The Reson data formats supported by MB-System include:
- *        MBF_CBAT9001 - a binary format designed by John Hughes Clarke
+ *        MBF_CBAT8101 - a binary format designed by John Hughes Clarke
  *           of the University of New Brunswick. Parameter and
  *           sound velocity profile records are included.
- *        MBF_CBAT8101 - a modified version of the above format
- *           supporting Reson 8101 data.
+ *        MBF_CBAT8101 - a clone of the above format supporting
+ *           Reson 8101 data.
  *        MBF_HYPC8101 - the ASCII format used by the HYPACK system
  *           of Coastal Oceanographics in conjunction with
  *           Reson 8101 data. This format is supported as read-only 
@@ -82,7 +61,7 @@
  *           supports data from a large number of sonars, including
  *           Reson sonars. MB-System handles GSF separately from
  *           other formats.
- *   6. For the UNB-style formats MBF_CBAT9001 and MBF_CBAT8101, 
+ *   6. For the UNB-style formats MBF_CBAT8101 and MBF_CBAT8101, 
  *      each data telegram is preceded by a two byte start code and
  *      followed by a three byte end code consisting of 0x03
  *      followed by two bytes representing the checksum for
@@ -95,7 +74,7 @@
  *         0x0243: Sound velocity profile                2016 data bytes
  *         0x0244: SeaBat 9001 bathymetry                 752 data bytes
  *         0x0245: Short sound velocity profile           816 data bytes
- *         0x0246: SeaBat 8101 bathymetry***              752 data bytes
+ *         0x0246: SeaBat 8101 bathymetry***             1244 data bytes
  *         0x0247: Heading***                             752 data bytes
  *         0x0248: Attitude***                            752 data bytes
  *            *** Defined only for MB-System
@@ -434,41 +413,11 @@
  *
  */
 
-/* sonar types */
-#define	MBSYS_RESON_UNKNOWN	0
-#define	MBSYS_RESON_SEABAT9001	1
-#define	MBSYS_RESON_SEABAT8101	2
-
 /* maximum number of beams and pixels */
-#define	MBSYS_RESON_MAXBEAMS	101
-#define	MBSYS_RESON_COMMENT_LENGTH	200
+#define	MBF_CBAT8101_MAXBEAMS	101
+#define	MBF_CBAT8101_COMMENT_LENGTH	200
 
-/* telegram types */
-#define	RESON_NONE		0
-#define	RESON_COMMENT		0x0240
-#define	RESON_NAV		0x0241
-#define	RESON_PARAMETER		0x0242
-#define	RESON_SVP		0x0243
-#define	RESON_BATH_9001		0x0244
-#define	RESON_SHORT_SVP		0x0245
-#define	RESON_BATH_8101		0x0246
-#define	RESON_POS		0x0247
-#define	RESON_HEADING		0x0248
-#define	RESON_ATTITUDE		0x0249
-
-/* telegram sizes */
-#define	RESON_COMMENT_SIZE	200
-#define	RESON_NAV_SIZE		36
-#define	RESON_PARAMETER_SIZE	44
-#define	RESON_SVP_SIZE		2016
-#define	RESON_BATH_9001_SIZE	752
-#define	RESON_SHORT_SVP_SIZE	816
-#define	RESON_BATH_8101_SIZE	1244
-#define	RESON_HEADING_SIZE	10
-#define	RESON_ATTITUDE_SIZE	14
-
-/* internal data structure */
-struct mbsys_reson_struct
+struct mbf_cbat8101_struct
 	{
 	/* type of data record */
 	int	kind;			/* Data vs Comment */
@@ -491,13 +440,13 @@ struct mbsys_reson_struct
 	short	time_delay;	/* positioning system delay (sec) */
 	short	transducer_depth;	/* tranducer depth (meters) */
 	short	transducer_height;	/* reference height (meters) */
-	short	transducer_x;	/* reference athwartships offset (meters) */
-	short	transducer_y;	/* reference fore-aft offset (meters) */
+	short	transducer_x;	/* reference fore-aft offset (meters) */
+	short	transducer_y;	/* reference athwartships offset (meters) */
 	short	antenna_x;	/* antenna athwartships offset (meters) */
-	short	antenna_y;	/* antenna fore-aft offset (meters) */
+	short	antenna_y;	/* antenna athwartships offset (meters) */
 	short	antenna_z;	/* antenna height (meters) */
 	short	motion_sensor_x;/* motion sensor athwartships offset (meters) */
-	short	motion_sensor_y;/* motion sensor fore-aft offset (meters) */
+	short	motion_sensor_y;/* motion sensor athwartships offset (meters) */
 	short	motion_sensor_z;/* motion sensor height offset (meters) */
 	short	spare;
 	short	line_number;
@@ -507,7 +456,7 @@ struct mbsys_reson_struct
 	/* comment */
 	char	comment[MBSYS_RESON_COMMENT_LENGTH];
 
-	/* position (navigation telegrams) */
+	/* position (position telegrams) */
 	int	pos_year;
 	int	pos_month;
 	int	pos_day;
@@ -581,3 +530,4 @@ struct mbsys_reson_struct
 				/* ??? */
 
 	};
+

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbbath.c	3/31/93
- *    $Id: mbbath.c,v 4.25 1998-10-05 19:19:24 caress Exp $
+ *    $Id: mbbath.c,v 4.26 1999-01-01 23:34:40 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -20,6 +20,9 @@
  * Date:	March 31, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.25  1998/10/05  19:19:24  caress
+ * MB-System version 4.6beta
+ *
  * Revision 4.24  1997/09/15  19:11:06  caress
  * Real Version 4.5
  *
@@ -165,7 +168,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbbath.c,v 4.25 1998-10-05 19:19:24 caress Exp $";
+	static char rcs_id[] = "$Id: mbbath.c,v 4.26 1999-01-01 23:34:40 caress Exp $";
 	static char program_name[] = "MBBATH";
 	static char help_message[] =  "MBBATH calculates bathymetry from \
 the travel time data by raytracing \nthrough a layered water velocity \
@@ -1569,129 +1572,6 @@ int	*error;
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       roll_correction: %f\n",
 						*roll_correction);
-		fprintf(stderr,"dbg2       error:           %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:          %d\n",status);
-		}
-
-	/* return status */
-	return(status);
-}
-/*--------------------------------------------------------------------*/
-int mb_takeoff_to_rollpitch(verbose,theta,phi,alpha,beta,error)
-int	verbose;
-double	theta;
-double	phi;
-double	*alpha;
-double	*beta;
-int	*error;
-{
-	char	*function_name = "mb_takeoff_to_rollpitch";
-	int	status = MB_SUCCESS;
-	double	x, y, z;
-	int	i, j;
-	
-
-	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBBATH function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       theta:      %f\n",theta);
-		fprintf(stderr,"dbg2       phi:        %f\n",phi);
-		}
-		
-	/* convert to cartesian coordinates */
-	x = sin(DTR * theta) * cos(DTR * phi);
-	y = sin(DTR * theta) * sin(DTR * phi);
-	z = cos(DTR * theta);
-
-	/* convert to roll-pitch coordinates */
-	*alpha = asin(y);
-	*beta = acos(x / cos(*alpha));
-	*alpha *= RTD;
-	*beta *= RTD;
-
-	/* assume success */
-	*error = MB_ERROR_NO_ERROR;
-	status = MB_SUCCESS;
-
-	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBBATH function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       alpha:           %f\n",*alpha);
-		fprintf(stderr,"dbg2       beta:            %f\n",*beta);
-		fprintf(stderr,"dbg2       error:           %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:          %d\n",status);
-		}
-
-	/* return status */
-	return(status);
-}
-/*--------------------------------------------------------------------*/
-int mb_rollpitch_to_takeoff(verbose,alpha,beta,theta,phi,error)
-int	verbose;
-double	alpha;
-double	beta;
-double	*theta;
-double	*phi;
-int	*error;
-{
-	char	*function_name = "mb_rollpitch_to_takeoff";
-	int	status = MB_SUCCESS;
-	double	x, y, z;
-	double	aa;
-	int	i, j;
-	
-
-	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBBATH function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       alpha:      %f\n",alpha);
-		fprintf(stderr,"dbg2       beta:       %f\n",beta);
-		}
-		
-	/* convert to cartesian coordinates */
-	x = cos(DTR * alpha) * cos(DTR * beta);
-	y = sin(DTR * alpha);
-	z = cos(DTR * alpha) * sin(DTR * beta);
-
-	/* convert to takeoff angle coordinates */
-	*theta = acos(z);
-	aa = y / sin(*theta);
-	if (aa > 1.0)
-	    *phi = 0.5 * M_PI;
-	else if (aa < -1.0)
-	    *phi = -0.5 * M_PI;
-	else
-	    *phi = asin(aa);
-	*theta *= RTD;
-	*phi *= RTD;
-	if (x < 0.0)
-		*phi = 180.0 - *phi;
-
-	/* assume success */
-	*error = MB_ERROR_NO_ERROR;
-	status = MB_SUCCESS;
-
-	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBBATH function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       theta:           %f\n",*theta);
-		fprintf(stderr,"dbg2       phi:             %f\n",*phi);
 		fprintf(stderr,"dbg2       error:           %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:          %d\n",status);

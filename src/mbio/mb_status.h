@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbio_status.h	2/1/93
- *    $Id: mb_status.h,v 4.12 1998-12-17 23:01:15 caress Exp $
+ *    $Id: mb_status.h,v 4.13 1999-01-01 23:41:06 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -18,6 +18,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.12  1998/12/17  23:01:15  caress
+ * MB-System version 4.6beta4
+ *
  * Revision 4.11  1998/10/20 05:00:37  caress
  * Added some new data record types.
  *
@@ -98,7 +101,7 @@
 #define	MB_DATA_VELOCITY_PROFILE	5	/* general */
 #define	MB_DATA_STANDBY			6	/* Hydrosweep DS */
 #define	MB_DATA_NAV_SOURCE		7	/* Hydrosweep DS */
-#define	MB_DATA_PARAMETER		8	/* SeaBeam 2100 */
+#define	MB_DATA_PARAMETER		8	/* general */
 #define	MB_DATA_START			9	/* Simrad */
 #define	MB_DATA_STOP			10	/* Simrad */
 #define	MB_DATA_NAV			11	/* Simrad */
@@ -106,8 +109,8 @@
 #define	MB_DATA_CLOCK			13	/* Simrad */
 #define	MB_DATA_TIDE			14	/* Simrad */
 #define	MB_DATA_HEIGHT			15	/* Simrad */
-#define	MB_DATA_HEADING			16	/* Simrad */
-#define	MB_DATA_ATTITUDE		17	/* Simrad */
+#define	MB_DATA_HEADING			16	/* Simrad, Hypack */
+#define	MB_DATA_ATTITUDE		17	/* Simrad, Hypack */
 #define	MB_DATA_ANGLE			18	/* HSMD */
 #define	MB_DATA_EVENT			19	/* HSMD */
 #define	MB_DATA_HISTORY			20	/* GSF */

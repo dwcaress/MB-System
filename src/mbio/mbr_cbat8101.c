@@ -1,62 +1,30 @@
 /*--------------------------------------------------------------------
- *    The MB-system:	mbr_cbat9001.c	8/8/94
- *	$Id: mbr_cbat9001.c,v 4.9 1999-01-01 23:41:06 caress Exp $
+ *    The MB-system:	mbr_cbat8101.c	8/8/94
+ *	$Id: mbr_cbat8101.c,v 4.0 1999-01-01 23:38:01 caress Exp $
  *
- *    Copyright (c) 1994 by 
- *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
+ *    Copyright (c) 1998 by 
+ *    D. W. Caress (caress@mbari.org)
+ *      Monterey Bay Aquarium Research Institute
+ *      Moss Landing, CA 95039
  *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
- *    Lamont-Doherty Earth Observatory
- *    Palisades, NY  10964
+ *      Lamont-Doherty Earth Observatory
+ *      Palisades, NY  10964
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- * mbr_cbat9001.c contains the functions for reading and writing
- * multibeam data in the CBAT9001 format.  
+ * mbr_cbat8101.c contains the functions for reading and writing
+ * multibeam data in the CBAT8101 format.  
  * These functions include:
- *   mbr_alm_cbat9001	- allocate read/write memory
- *   mbr_dem_cbat9001	- deallocate read/write memory
- *   mbr_rt_cbat9001	- read and translate data
- *   mbr_wt_cbat9001	- translate and write data
+ *   mbr_alm_cbat8101	- allocate read/write memory
+ *   mbr_dem_cbat8101	- deallocate read/write memory
+ *   mbr_rt_cbat8101	- read and translate data
+ *   mbr_wt_cbat8101	- translate and write data
  *
  * Author:	D. W. Caress
- * Date:	August 8, 1994
+ * Date:	December 10, 1998
+ *
  * $Log: not supported by cvs2svn $
- * Revision 4.8  1998/10/05 17:46:15  caress
- * MB-System version 4.6beta
- *
- * Revision 4.7  1997/07/28  14:58:19  caress
- * Fixed typos.
- *
- * Revision 4.6  1997/07/25  14:19:53  caress
- * Version 4.5beta2.
- * Much mucking, particularly with Simrad formats.
- *
- * Revision 4.5  1997/04/21  17:02:07  caress
- * MB-System 4.5 Beta Release.
- *
- * Revision 4.4  1996/04/22  13:21:19  caress
- * Now have DTR and MIN/MAX defines in mb_define.h
- *
- * Revision 4.4  1996/04/22  13:21:19  caress
- * Now have DTR and MIN/MAX defines in mb_define.h
- *
- * Revision 4.3  1996/04/22  10:57:09  caress
- * DTR define now in mb_io.h
- *
- * Revision 4.2  1995/07/13  19:13:36  caress
- * Intermediate check-in during major bug-fixing flail.
- *
- * Revision 4.1  1995/03/06  19:38:54  caress
- * Changed include strings.h to string.h for POSIX compliance.
- *
- * Revision 4.0  1994/10/21  12:34:54  caress
- * Release V4.0
- *
- * Revision 1.1  1994/10/21  12:20:01  caress
- * Initial revision
- *
- *
  *
  */
 
@@ -71,19 +39,19 @@
 #include "../../include/mb_io.h"
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_reson.h"
-#include "../../include/mbf_cbat9001.h"
+#include "../../include/mbf_cbat8101.h"
 
 /* include for byte swapping on little-endian machines */
 #include "../../include/mb_swap.h"
 
 /*--------------------------------------------------------------------*/
-int mbr_alm_cbat9001(verbose,mbio_ptr,error)
+int mbr_alm_cbat8101(verbose,mbio_ptr,error)
 int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_cbat9001.c,v 4.9 1999-01-01 23:41:06 caress Exp $";
-	char	*function_name = "mbr_alm_cbat9001";
+	static char res_id[]="$Id: mbr_cbat8101.c,v 4.0 1999-01-01 23:38:01 caress Exp $";
+	char	*function_name = "mbr_alm_cbat8101";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 
@@ -104,7 +72,7 @@ int	*error;
 	status = MB_SUCCESS;
 
 	/* allocate memory for data structure */
-	mb_io_ptr->structure_size = sizeof(struct mbf_cbat9001_struct);
+	mb_io_ptr->structure_size = sizeof(struct mbf_cbat8101_struct);
 	mb_io_ptr->data_structure_size = 0;
 	status = mb_malloc(verbose,mb_io_ptr->structure_size,
 				&mb_io_ptr->raw_data,error);
@@ -112,7 +80,7 @@ int	*error;
 				&mb_io_ptr->store_data,error);
 
 	/* initialize everything to zeros */
-	mbr_zero_cbat9001(verbose,mb_io_ptr->raw_data,error);
+	mbr_zero_cbat8101(verbose,mb_io_ptr->raw_data,error);
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -129,12 +97,12 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_dem_cbat9001(verbose,mbio_ptr,error)
+int mbr_dem_cbat8101(verbose,mbio_ptr,error)
 int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	char	*function_name = "mbr_dem_cbat9001";
+	char	*function_name = "mbr_dem_cbat8101";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 
@@ -170,14 +138,14 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_zero_cbat9001(verbose,data_ptr,error)
+int mbr_zero_cbat8101(verbose,data_ptr,error)
 int	verbose;
 char	*data_ptr;
 int	*error;
 {
-	char	*function_name = "mbr_zero_cbat9001";
+	char	*function_name = "mbr_zero_cbat8101";
 	int	status = MB_SUCCESS;
-	struct mbf_cbat9001_struct *data;
+	struct mbf_cbat8101_struct *data;
 	int	i;
 
 	/* print input debug statements */
@@ -191,13 +159,13 @@ int	*error;
 		}
 
 	/* get pointer to data descriptor */
-	data = (struct mbf_cbat9001_struct *) data_ptr;
+	data = (struct mbf_cbat8101_struct *) data_ptr;
 
 	/* initialize everything to zeros */
 	if (data != NULL)
 		{
 		data->kind = MB_DATA_NONE;
-		data->sonar = MBSYS_RESON_SEABAT9001;
+		data->sonar = MBSYS_RESON_SEABAT8101;
 		data->par_year = 0;
 		data->par_month = 0;
 		data->par_day = 0;
@@ -232,7 +200,7 @@ int	*error;
 		data->line_number = 0;
 		data->start_or_stop = 0;
 		data->transducer_serial_number = 0;
-		for (i=0;i<MBF_CBAT9001_COMMENT_LENGTH;i++)
+		for (i=0;i<MBF_CBAT8101_COMMENT_LENGTH;i++)
 			data->comment[i] = '\0';
 
 		/* position (position telegrams) */
@@ -291,8 +259,8 @@ int	*error;
 		data->gain1 = 0;
 		data->gain2 = 0;
 		data->gain3 = 0;
-		data->beams_bath = MBF_CBAT9001_MAXBEAMS;
-		for (i=0;i<MBF_CBAT9001_MAXBEAMS;i++)
+		data->beams_bath = MBF_CBAT8101_MAXBEAMS;
+		for (i=0;i<MBF_CBAT8101_MAXBEAMS;i++)
 			{
 			data->bath[i] = 0;
 			data->bath_acrosstrack[i] = 0;
@@ -323,16 +291,16 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_rt_cbat9001(verbose,mbio_ptr,store_ptr,error)
+int mbr_rt_cbat8101(verbose,mbio_ptr,store_ptr,error)
 int	verbose;
 char	*mbio_ptr;
 char	*store_ptr;
 int	*error;
 {
-	char	*function_name = "mbr_rt_cbat9001";
+	char	*function_name = "mbr_rt_cbat8101";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
-	struct mbf_cbat9001_struct *data;
+	struct mbf_cbat8101_struct *data;
 	struct mbsys_reson_struct *store;
 	short *data_ss, *store_ss;
 	short *beam_ss;
@@ -354,7 +322,7 @@ int	*error;
 
 	/* get pointers to mbio descriptor and data structures */
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
-	data = (struct mbf_cbat9001_struct *) mb_io_ptr->raw_data;
+	data = (struct mbf_cbat8101_struct *) mb_io_ptr->raw_data;
 	store = (struct mbsys_reson_struct *) store_ptr;
 
 	/* reset values in mb_io_ptr */
@@ -390,7 +358,7 @@ int	*error;
 		}
 
 	/* read next data from file */
-	status = mbr_cbat9001_rd_data(verbose,mbio_ptr,error);
+	status = mbr_cbat8101_rd_data(verbose,mbio_ptr,error);
 
 	/* set error and kind in mb_io_ptr */
 	mb_io_ptr->new_error = *error;
@@ -404,7 +372,7 @@ int	*error;
 		if (data->kind == MB_DATA_DATA)
 			{
 			mb_io_ptr->new_time_i[0] = data->year + 1900;
-			if (data->year < 62)
+			if (data->year < 62) 
 			    mb_io_ptr->new_time_i[0] += 100;
 			mb_io_ptr->new_time_i[1] = data->month;
 			mb_io_ptr->new_time_i[2] = data->day;
@@ -417,7 +385,7 @@ int	*error;
 		else if (data->kind == MB_DATA_PARAMETER)
 			{
 			mb_io_ptr->new_time_i[0] = data->par_year + 1900;
-			if (data->par_year < 62)
+			if (data->par_year < 62) 
 			    mb_io_ptr->new_time_i[0] += 100;
 			mb_io_ptr->new_time_i[1] = data->par_month;
 			mb_io_ptr->new_time_i[2] = data->par_day;
@@ -430,7 +398,7 @@ int	*error;
 		else if (data->kind == MB_DATA_VELOCITY_PROFILE)
 			{
 			mb_io_ptr->new_time_i[0] = data->svp_year + 1900;
-			if (data->svp_year < 62)
+			if (data->svp_year < 62) 
 			    mb_io_ptr->new_time_i[0] += 100;
 			mb_io_ptr->new_time_i[1] = data->svp_month;
 			mb_io_ptr->new_time_i[2] = data->svp_day;
@@ -443,7 +411,7 @@ int	*error;
 		else if (data->kind == MB_DATA_NAV)
 			{
 			mb_io_ptr->new_time_i[0] = data->pos_year + 1900;
-			if (data->pos_year < 62)
+			if (data->pos_year < 62) 
 			    mb_io_ptr->new_time_i[0] += 100;
 			mb_io_ptr->new_time_i[1] = data->pos_month;
 			mb_io_ptr->new_time_i[2] = data->pos_day;
@@ -673,7 +641,7 @@ int	*error;
 		{
 		/* copy comment */
 		strncpy(mb_io_ptr->new_comment,data->comment,
-			MBF_CBAT9001_COMMENT_LENGTH-1);
+			MBF_CBAT8101_COMMENT_LENGTH-1);
 
 		/* print debug statements */
 		if (verbose >= 4)
@@ -790,7 +758,7 @@ int	*error;
 			store->bath[i] = data->bath[i];
 			store->bath_acrosstrack[i] = data->bath_acrosstrack[i];
 			store->bath_alongtrack[i] = data->bath_alongtrack[i];
-			store->tt[i] = 5 * data->tt[i];
+			store->tt[i] = data->tt[i];
 			store->angle[i] = data->angle[i];
 			store->quality[i] = data->quality[i];
 			store->amp[i] = data->amp[i];
@@ -812,16 +780,16 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_wt_cbat9001(verbose,mbio_ptr,store_ptr,error)
+int mbr_wt_cbat8101(verbose,mbio_ptr,store_ptr,error)
 int	verbose;
 char	*mbio_ptr;
 char	*store_ptr;
 int	*error;
 {
-	char	*function_name = "mbr_wt_cbat9001";
+	char	*function_name = "mbr_wt_cbat8101";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
-	struct mbf_cbat9001_struct *data;
+	struct mbf_cbat8101_struct *data;
 	char	*data_ptr;
 	struct mbsys_reson_struct *store;
 	double	scalefactor;
@@ -848,7 +816,7 @@ int	*error;
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_cbat9001_struct *) mb_io_ptr->raw_data;
+	data = (struct mbf_cbat8101_struct *) mb_io_ptr->raw_data;
 	data_ptr = (char *) data;
 	store = (struct mbsys_reson_struct *) store_ptr;
 
@@ -886,7 +854,7 @@ int	*error;
 		data->start_or_stop = store->start_or_stop;
 		data->transducer_serial_number 
 			= store->transducer_serial_number;
-		for (i=0;i<MBF_CBAT9001_COMMENT_LENGTH;i++)
+		for (i=0;i<MBF_CBAT8101_COMMENT_LENGTH;i++)
 			data->comment[i] = store->comment[i];
 
 		/* position (position telegrams) */
@@ -951,9 +919,11 @@ int	*error;
 		for (i=0;i<data->beams_bath;i++)
 			{
 			data->bath[i] = store->bath[i];
-			data->bath_acrosstrack[i] = store->bath_acrosstrack[i];
-			data->bath_alongtrack[i] = store->bath_alongtrack[i];
-			data->tt[i] = store->tt[i] / 5;
+			data->bath_acrosstrack[i] 
+			    = store->bath_acrosstrack[i];
+			data->bath_alongtrack[i] 
+			    = store->bath_alongtrack[i];
+			data->tt[i] = store->tt[i];
 			data->angle[i] = store->angle[i];
 			data->quality[i] = store->quality[i];
 			data->amp[i] = store->amp[i];
@@ -976,7 +946,8 @@ int	*error;
 		data->second = mb_io_ptr->new_time_i[5];
 		data->hundredth_sec = mb_io_ptr->new_time_i[6]/10000;
 		data->thousandth_sec = 
-			(mb_io_ptr->new_time_i[6] - 10000*data->hundredth_sec)/100;
+			(mb_io_ptr->new_time_i[6] 
+				- 10000*data->hundredth_sec)/100;
 		}
 
 	/* check for comment to be copied from mb_io_ptr */
@@ -984,7 +955,7 @@ int	*error;
 		&& mb_io_ptr->new_kind == MB_DATA_COMMENT)
 		{
 		strncpy(data->comment,mb_io_ptr->new_comment,
-			MBF_CBAT9001_COMMENT_LENGTH-1);
+			MBF_CBAT8101_COMMENT_LENGTH-1);
 		}
 
 	/* else check for ping data to be copied from mb_io_ptr */
@@ -1000,7 +971,7 @@ int	*error;
 
 		/* insert distance and depth values into storage arrays */
 		data->beams_bath = mb_io_ptr->beams_bath;
-		data->sonar = MBSYS_RESON_SEABAT9001;
+		data->sonar = MBSYS_RESON_SEABAT8101;
 		depthscale = 0.01;
 		dacrscale  = 0.01;
 		daloscale  = 0.01;
@@ -1050,7 +1021,7 @@ int	*error;
 		}
 
 	/* write next data to file */
-	status = mbr_cbat9001_wr_data(verbose,mbio_ptr,data_ptr,error);
+	status = mbr_cbat8101_wr_data(verbose,mbio_ptr,data_ptr,error);
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -1067,15 +1038,15 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_cbat9001_rd_data(verbose,mbio_ptr,error)
+int mbr_cbat8101_rd_data(verbose,mbio_ptr,error)
 int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	char	*function_name = "mbr_cbat9001_rd_data";
+	char	*function_name = "mbr_cbat8101_rd_data";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
-	struct mbf_cbat9001_struct *data;
+	struct mbf_cbat8101_struct *data;
 	char	*data_ptr;
 	FILE	*mbfp;
 	int	done;
@@ -1098,7 +1069,7 @@ int	*error;
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_cbat9001_struct *) mb_io_ptr->raw_data;
+	data = (struct mbf_cbat8101_struct *) mb_io_ptr->raw_data;
 	data_ptr = (char *) data;
 	mbfp = mb_io_ptr->mbfp;
 
@@ -1166,14 +1137,14 @@ int	*error;
 		/* reset first flag */
 		first = MB_NO;
 
-/*		fprintf(stderr,"\nstart of mbr_cbat9001_rd_data loop:\n");
+/*		fprintf(stderr,"\nstart of mbr_cbat8101_rd_data loop:\n");
 		fprintf(stderr,"done:%d\n",done);
 		fprintf(stderr,"type:%x\n",*type);
 		fprintf(stderr,"comment:   %x\n",RESON_COMMENT);
-		fprintf(stderr,"pos:       %x\n",RESON_NAV);
+		fprintf(stderr,"nav:       %x\n",RESON_NAV);
 		fprintf(stderr,"parameter: %x\n",RESON_PARAMETER);
 		fprintf(stderr,"svp:       %x\n",RESON_SVP);
-		fprintf(stderr,"bath:      %x\n",RESON_BATH_9001);
+		fprintf(stderr,"bath:      %x\n",RESON_BATH_8101);
 		fprintf(stderr,"short svp: %x\n",RESON_SHORT_SVP);
 		fprintf(stderr,"status:%d\n",status);*/
 
@@ -1184,7 +1155,7 @@ int	*error;
 			}
 		else if (*type == RESON_COMMENT)
 			{
-			status = mbr_cbat9001_rd_comment(
+			status = mbr_cbat8101_rd_comment(
 				verbose,mbfp,data,error);
 			if (status == MB_SUCCESS)
 				{
@@ -1194,7 +1165,7 @@ int	*error;
 			}
 		else if (*type == RESON_PARAMETER)
 			{
-			status = mbr_cbat9001_rd_parameter(
+			status = mbr_cbat8101_rd_parameter(
 				verbose,mbfp,data,error);
 			if (status == MB_SUCCESS)
 				{
@@ -1204,7 +1175,7 @@ int	*error;
 			}
 		else if (*type == RESON_NAV)
 			{
-			status = mbr_cbat9001_rd_nav(
+			status = mbr_cbat8101_rd_nav(
 				verbose,mbfp,data,error);
 			if (status == MB_SUCCESS)
 				{
@@ -1214,7 +1185,7 @@ int	*error;
 			}
 		else if (*type == RESON_SVP)
 			{
-			status = mbr_cbat9001_rd_svp(
+			status = mbr_cbat8101_rd_svp(
 				verbose,mbfp,data,error);
 			if (status == MB_SUCCESS)
 				{
@@ -1222,9 +1193,9 @@ int	*error;
 				data->kind = MB_DATA_VELOCITY_PROFILE;
 				}
 			}
-		else if (*type == RESON_BATH_9001)
+		else if (*type == RESON_BATH_8101)
 			{
-			status = mbr_cbat9001_rd_bath(
+			status = mbr_cbat8101_rd_bath(
 				verbose,mbfp,data,error);
 			if (status == MB_SUCCESS)
 				{
@@ -1234,7 +1205,7 @@ int	*error;
 			}
 		else if (*type == RESON_SHORT_SVP)
 			{
-			status = mbr_cbat9001_rd_short_svp(
+			status = mbr_cbat8101_rd_short_svp(
 				verbose,mbfp,data,error);
 			if (status == MB_SUCCESS)
 				{
@@ -1242,12 +1213,32 @@ int	*error;
 				data->kind = MB_DATA_VELOCITY_PROFILE;
 				}
 			}
+		else if (*type == RESON_HEADING)
+			{
+			status = mbr_cbat8101_rd_heading(
+				verbose,mbfp,data,error);
+			if (status == MB_SUCCESS)
+				{
+				done = MB_YES;
+				data->kind = MB_DATA_HEADING;
+				}
+			}
+		else if (*type == RESON_ATTITUDE)
+			{
+			status = mbr_cbat8101_rd_attitude(
+				verbose,mbfp,data,error);
+			if (status == MB_SUCCESS)
+				{
+				done = MB_YES;
+				data->kind = MB_DATA_ATTITUDE;
+				}
+			}
 
 		/* bail out if there is an error */
 		if (status == MB_FAILURE)
 			done = MB_YES;
 
-/*		fprintf(stderr,"end of mbr_cbat9001_rd_data loop:\n");
+/*		fprintf(stderr,"end of mbr_cbat8101_rd_data loop:\n");
 		fprintf(stderr,"done:%d\n",done);
 		fprintf(stderr,"type:%x\n",*type);*/
 		}
@@ -1270,13 +1261,13 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_cbat9001_rd_comment(verbose,mbfp,data,error)
+int mbr_cbat8101_rd_comment(verbose,mbfp,data,error)
 int	verbose;
 FILE	*mbfp;
-struct mbf_cbat9001_struct *data;
+struct mbf_cbat8101_struct *data;
 int	*error;
 {
-	char	*function_name = "mbr_cbat9001_rd_comment";
+	char	*function_name = "mbr_cbat8101_rd_comment";
 	int	status = MB_SUCCESS;
 	char	line[RESON_COMMENT_SIZE+3];
 	int	i;
@@ -1306,7 +1297,7 @@ int	*error;
 	if (status == MB_SUCCESS)
 		{
 		data->kind = MB_DATA_COMMENT;
-		strncpy(data->comment,line,MBF_CBAT9001_COMMENT_LENGTH-1);
+		strncpy(data->comment,line,MBF_CBAT8101_COMMENT_LENGTH-1);
 		}
 
 	/* print debug statements */
@@ -1332,13 +1323,13 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_cbat9001_rd_parameter(verbose,mbfp,data,error)
+int mbr_cbat8101_rd_parameter(verbose,mbfp,data,error)
 int	verbose;
 FILE	*mbfp;
-struct mbf_cbat9001_struct *data;
+struct mbf_cbat8101_struct *data;
 int	*error;
 {
-	char	*function_name = "mbr_cbat9001_rd_parameter";
+	char	*function_name = "mbr_cbat8101_rd_parameter";
 	int	status = MB_SUCCESS;
 	char	line[RESON_PARAMETER_SIZE+3];
 	short *short_ptr;
@@ -1503,13 +1494,13 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_cbat9001_rd_nav(verbose,mbfp,data,error)
+int mbr_cbat8101_rd_nav(verbose,mbfp,data,error)
 int	verbose;
 FILE	*mbfp;
-struct mbf_cbat9001_struct *data;
+struct mbf_cbat8101_struct *data;
 int	*error;
 {
-	char	*function_name = "mbr_cbat9001_rd_nav";
+	char	*function_name = "mbr_cbat8101_rd_nav";
 	int	status = MB_SUCCESS;
 	char	line[RESON_NAV_SIZE+3];
 	short *short_ptr;
@@ -1631,13 +1622,13 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_cbat9001_rd_svp(verbose,mbfp,data,error)
+int mbr_cbat8101_rd_svp(verbose,mbfp,data,error)
 int	verbose;
 FILE	*mbfp;
-struct mbf_cbat9001_struct *data;
+struct mbf_cbat8101_struct *data;
 int	*error;
 {
-	char	*function_name = "mbr_cbat9001_rd_svp";
+	char	*function_name = "mbr_cbat8101_rd_svp";
 	int	status = MB_SUCCESS;
 	char	line[RESON_SVP_SIZE+3];
 	short *short_ptr;
@@ -1741,13 +1732,13 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_cbat9001_rd_short_svp(verbose,mbfp,data,error)
+int mbr_cbat8101_rd_short_svp(verbose,mbfp,data,error)
 int	verbose;
 FILE	*mbfp;
-struct mbf_cbat9001_struct *data;
+struct mbf_cbat8101_struct *data;
 int	*error;
 {
-	char	*function_name = "mbr_cbat9001_rd_svp";
+	char	*function_name = "mbr_cbat8101_rd_svp";
 	int	status = MB_SUCCESS;
 	char	line[RESON_SHORT_SVP_SIZE+3];
 	short *short_ptr;
@@ -1851,15 +1842,15 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_cbat9001_rd_bath(verbose,mbfp,data,error)
+int mbr_cbat8101_rd_bath(verbose,mbfp,data,error)
 int	verbose;
 FILE	*mbfp;
-struct mbf_cbat9001_struct *data;
+struct mbf_cbat8101_struct *data;
 int	*error;
 {
-	char	*function_name = "mbr_cbat9001_rd_bath";
+	char	*function_name = "mbr_cbat8101_rd_bath";
 	int	status = MB_SUCCESS;
-	char	line[RESON_BATH_9001_SIZE+3];
+	char	line[RESON_BATH_8101_SIZE+3];
 	char	*beamarray;
 	unsigned char *char_ptr;
 	short *short_ptr;
@@ -1878,8 +1869,8 @@ int	*error;
 		}
 
 	/* read record into char array */
-	status = fread(line,1,RESON_BATH_9001_SIZE+3,mbfp);
-	if (status == RESON_BATH_9001_SIZE+3)
+	status = fread(line,1,RESON_BATH_8101_SIZE+3,mbfp);
+	if (status == RESON_BATH_8101_SIZE+3)
 		status = MB_SUCCESS;
 	else
 		{
@@ -1938,7 +1929,7 @@ int	*error;
 		data->gain1 = (int) line[29];
 		data->gain2 = (int) line[30];
 		data->gain3 = (int) line[31];
-		data->beams_bath = MBF_CBAT9001_MAXBEAMS;
+		data->beams_bath = MBF_CBAT8101_MAXBEAMS;
 #ifndef BYTESWAPPED
 		for (i=0;i<data->beams_bath;i++)
 			{
@@ -2032,16 +2023,196 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_cbat9001_wr_data(verbose,mbio_ptr,data_ptr,error)
+int mbr_cbat8101_rd_heading(verbose,mbfp,data,error)
+int	verbose;
+FILE	*mbfp;
+struct mbf_cbat8101_struct *data;
+int	*error;
+{
+	char	*function_name = "mbr_cbat8101_rd_heading";
+	int	status = MB_SUCCESS;
+	char	line[RESON_HEADING_SIZE+3];
+	short *short_ptr;
+	int	*int_ptr;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
+		fprintf(stderr,"dbg2       data:       %d\n",data);
+		}
+
+	/* read record into char array */
+	status = fread(line,1,RESON_HEADING_SIZE+3,mbfp);
+	if (status == RESON_HEADING_SIZE+3)
+		status = MB_SUCCESS;
+	else
+		{
+		status = MB_FAILURE;
+		*error = MB_ERROR_EOF;
+		}
+
+	/* get data */
+	if (status == MB_SUCCESS)
+		{
+		data->kind = MB_DATA_HEADING;
+		data->day =            (int) line[0];
+		data->month =          (int) line[1];
+		data->year =           (int) line[2];
+		data->hour =           (int) line[3];
+		data->minute =         (int) line[4];
+		data->second =         (int) line[5];
+		data->hundredth_sec =  (int) line[6];
+		data->thousandth_sec = (int) line[7];
+#ifndef BYTESWAPPED
+		short_ptr = (short *) &line[8];
+		data->heading = (int) *short_ptr;
+#else
+		short_ptr = (short *) &line[8];
+		data->heading = (int) mb_swap_short(*short_ptr);
+#endif
+		}
+
+	/* print debug statements */
+	if (verbose >= 5)
+		{
+		fprintf(stderr,"\ndbg5  Values read in MBIO function <%s>\n",
+			function_name);
+		fprintf(stderr,"dbg5       year:             %d\n",data->year);
+		fprintf(stderr,"dbg5       month:            %d\n",data->month);
+		fprintf(stderr,"dbg5       day:              %d\n",data->day);
+		fprintf(stderr,"dbg5       hour:             %d\n",data->hour);
+		fprintf(stderr,"dbg5       minute:           %d\n",data->minute);
+		fprintf(stderr,"dbg5       sec:              %d\n",data->second);
+		fprintf(stderr,"dbg5       hundredth_sec:    %d\n",data->hundredth_sec);
+		fprintf(stderr,"dbg5       thousandth_sec:   %d\n",data->thousandth_sec);
+		fprintf(stderr,"dbg5       heading:          %d\n",data->heading);
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_cbat8101_rd_attitude(verbose,mbfp,data,error)
+int	verbose;
+FILE	*mbfp;
+struct mbf_cbat8101_struct *data;
+int	*error;
+{
+	char	*function_name = "mbr_cbat8101_rd_attitude";
+	int	status = MB_SUCCESS;
+	char	line[RESON_ATTITUDE_SIZE+3];
+	short *short_ptr;
+	int	*int_ptr;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
+		fprintf(stderr,"dbg2       data:       %d\n",data);
+		}
+
+	/* read record into char array */
+	status = fread(line,1,RESON_ATTITUDE_SIZE+3,mbfp);
+	if (status == RESON_ATTITUDE_SIZE+3)
+		status = MB_SUCCESS;
+	else
+		{
+		status = MB_FAILURE;
+		*error = MB_ERROR_EOF;
+		}
+
+	/* get data */
+	if (status == MB_SUCCESS)
+		{
+		data->kind = MB_DATA_ATTITUDE;
+		data->day =            (int) line[0];
+		data->month =          (int) line[1];
+		data->year =           (int) line[2];
+		data->hour =           (int) line[3];
+		data->minute =         (int) line[4];
+		data->second =         (int) line[5];
+		data->hundredth_sec =  (int) line[6];
+		data->thousandth_sec = (int) line[7];
+#ifndef BYTESWAPPED
+		short_ptr = (short *) &line[8];
+		data->heave = (int) *short_ptr;
+		short_ptr = (short *) &line[10];
+		data->roll = (int) *short_ptr;
+		short_ptr = (short *) &line[12];
+		data->pitch = (int) *short_ptr;
+#else
+		short_ptr = (short *) &line[8];
+		data->heave = (int) mb_swap_short(*short_ptr);
+		short_ptr = (short *) &line[10];
+		data->roll = (int) mb_swap_short(*short_ptr);
+		short_ptr = (short *) &line[12];
+		data->pitch = (int) mb_swap_short(*short_ptr);
+#endif
+		}
+
+	/* print debug statements */
+	if (verbose >= 5)
+		{
+		fprintf(stderr,"\ndbg5  Values read in MBIO function <%s>\n",
+			function_name);
+		fprintf(stderr,"dbg5       year:             %d\n",data->year);
+		fprintf(stderr,"dbg5       month:            %d\n",data->month);
+		fprintf(stderr,"dbg5       day:              %d\n",data->day);
+		fprintf(stderr,"dbg5       hour:             %d\n",data->hour);
+		fprintf(stderr,"dbg5       minute:           %d\n",data->minute);
+		fprintf(stderr,"dbg5       sec:              %d\n",data->second);
+		fprintf(stderr,"dbg5       hundredth_sec:    %d\n",data->hundredth_sec);
+		fprintf(stderr,"dbg5       thousandth_sec:   %d\n",data->thousandth_sec);
+		fprintf(stderr,"dbg5       heading:          %d\n",data->heading);
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_cbat8101_wr_data(verbose,mbio_ptr,data_ptr,error)
 int	verbose;
 char	*mbio_ptr;
 char	*data_ptr;
 int	*error;
 {
-	char	*function_name = "mbr_cbat9001_wr_data";
+	char	*function_name = "mbr_cbat8101_wr_data";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
-	struct mbf_cbat9001_struct *data;
+	struct mbf_cbat8101_struct *data;
 	FILE	*mbfp;
 
 	/* print input debug statements */
@@ -2059,28 +2230,36 @@ int	*error;
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_cbat9001_struct *) data_ptr;
+	data = (struct mbf_cbat8101_struct *) data_ptr;
 	mbfp = mb_io_ptr->mbfp;
 
 	if (data->kind == MB_DATA_COMMENT)
 		{
-		status = mbr_cbat9001_wr_comment(verbose,mbfp,data,error);
+		status = mbr_cbat8101_wr_comment(verbose,mbfp,data,error);
 		}
 	else if (data->kind == MB_DATA_PARAMETER)
 		{
-		status = mbr_cbat9001_wr_parameter(verbose,mbfp,data,error);
+		status = mbr_cbat8101_wr_parameter(verbose,mbfp,data,error);
 		}
 	else if (data->kind == MB_DATA_NAV)
 		{
-		status = mbr_cbat9001_wr_nav(verbose,mbfp,data,error);
+		status = mbr_cbat8101_wr_nav(verbose,mbfp,data,error);
 		}
 	else if (data->kind == MB_DATA_VELOCITY_PROFILE)
 		{
-		status = mbr_cbat9001_wr_svp(verbose,mbfp,data,error);
+		status = mbr_cbat8101_wr_svp(verbose,mbfp,data,error);
 		}
 	else if (data->kind == MB_DATA_DATA)
 		{
-		status = mbr_cbat9001_wr_bath(verbose,mbfp,data,error);
+		status = mbr_cbat8101_wr_bath(verbose,mbfp,data,error);
+		}
+	else if (data->kind == MB_DATA_HEADING)
+		{
+		status = mbr_cbat8101_wr_heading(verbose,mbfp,data,error);
+		}
+	else if (data->kind == MB_DATA_ATTITUDE)
+		{
+		status = mbr_cbat8101_wr_attitude(verbose,mbfp,data,error);
 		}
 	else
 		{
@@ -2111,15 +2290,15 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_cbat9001_wr_comment(verbose,mbfp,data_ptr,error)
+int mbr_cbat8101_wr_comment(verbose,mbfp,data_ptr,error)
 int	verbose;
 FILE	*mbfp;
 char	*data_ptr;
 int	*error;
 {
-	char	*function_name = "mbr_cbat9001_wr_comment";
+	char	*function_name = "mbr_cbat8101_wr_comment";
 	int	status = MB_SUCCESS;
-	struct mbf_cbat9001_struct *data;
+	struct mbf_cbat8101_struct *data;
 	char	line[RESON_COMMENT_SIZE+3];
 	short label;
 	int	len;
@@ -2137,7 +2316,7 @@ int	*error;
 		}
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_cbat9001_struct *) data_ptr;
+	data = (struct mbf_cbat8101_struct *) data_ptr;
 
 	/* print debug statements */
 	if (verbose >= 5)
@@ -2166,11 +2345,11 @@ int	*error;
 		{
 		/* construct record */
 		len = strlen(data->comment);
-		if (len > MBF_CBAT9001_COMMENT_LENGTH)
-			len = MBF_CBAT9001_COMMENT_LENGTH;
+		if (len > MBF_CBAT8101_COMMENT_LENGTH)
+			len = MBF_CBAT8101_COMMENT_LENGTH;
 		for (i=0;i<len;i++)
 			line[i] = data->comment[i];
-		for (i=len;i<MBF_CBAT9001_COMMENT_LENGTH;i++)
+		for (i=len;i<MBF_CBAT8101_COMMENT_LENGTH;i++)
 			line[i] = '\0';
 		line[RESON_COMMENT_SIZE] = 0x03;
 		line[RESON_COMMENT_SIZE+1] = '\0';
@@ -2205,15 +2384,15 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_cbat9001_wr_parameter(verbose,mbfp,data_ptr,error)
+int mbr_cbat8101_wr_parameter(verbose,mbfp,data_ptr,error)
 int	verbose;
 FILE	*mbfp;
 char	*data_ptr;
 int	*error;
 {
-	char	*function_name = "mbr_cbat9001_wr_parameter";
+	char	*function_name = "mbr_cbat8101_wr_parameter";
 	int	status = MB_SUCCESS;
-	struct mbf_cbat9001_struct *data;
+	struct mbf_cbat8101_struct *data;
 	char	line[RESON_PARAMETER_SIZE+3];
 	short label;
 	short *short_ptr;
@@ -2231,7 +2410,7 @@ int	*error;
 		}
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_cbat9001_struct *) data_ptr;
+	data = (struct mbf_cbat8101_struct *) data_ptr;
 
 	/* print debug statements */
 	if (verbose >= 5)
@@ -2401,15 +2580,15 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_cbat9001_wr_nav(verbose,mbfp,data_ptr,error)
+int mbr_cbat8101_wr_nav(verbose,mbfp,data_ptr,error)
 int	verbose;
 FILE	*mbfp;
 char	*data_ptr;
 int	*error;
 {
-	char	*function_name = "mbr_cbat9001_wr_nav";
+	char	*function_name = "mbr_cbat8101_wr_nav";
 	int	status = MB_SUCCESS;
-	struct mbf_cbat9001_struct *data;
+	struct mbf_cbat8101_struct *data;
 	char	line[RESON_NAV_SIZE+3];
 	short label;
 	short *short_ptr;
@@ -2428,7 +2607,7 @@ int	*error;
 		}
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_cbat9001_struct *) data_ptr;
+	data = (struct mbf_cbat8101_struct *) data_ptr;
 
 	/* print debug statements */
 	if (verbose >= 5)
@@ -2554,15 +2733,15 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_cbat9001_wr_svp(verbose,mbfp,data_ptr,error)
+int mbr_cbat8101_wr_svp(verbose,mbfp,data_ptr,error)
 int	verbose;
 FILE	*mbfp;
 char	*data_ptr;
 int	*error;
 {
-	char	*function_name = "mbr_cbat9001_wr_svp";
+	char	*function_name = "mbr_cbat8101_wr_svp";
 	int	status = MB_SUCCESS;
-	struct mbf_cbat9001_struct *data;
+	struct mbf_cbat8101_struct *data;
 	char	line[RESON_SVP_SIZE+3];
 	short label;
 	int	size;
@@ -2584,7 +2763,7 @@ int	*error;
 		}
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_cbat9001_struct *) data_ptr;
+	data = (struct mbf_cbat8101_struct *) data_ptr;
 
 	/* print debug statements */
 	if (verbose >= 5)
@@ -2711,16 +2890,16 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_cbat9001_wr_bath(verbose,mbfp,data_ptr,error)
+int mbr_cbat8101_wr_bath(verbose,mbfp,data_ptr,error)
 int	verbose;
 FILE	*mbfp;
 char	*data_ptr;
 int	*error;
 {
-	char	*function_name = "mbr_cbat9001_wr_bath";
+	char	*function_name = "mbr_cbat8101_wr_bath";
 	int	status = MB_SUCCESS;
-	struct mbf_cbat9001_struct *data;
-	char	line[RESON_BATH_9001_SIZE+3];
+	struct mbf_cbat8101_struct *data;
+	char	line[RESON_BATH_8101_SIZE+3];
 	char	*beamarray;
 	short label;
 	unsigned char *char_ptr;
@@ -2740,7 +2919,7 @@ int	*error;
 		}
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_cbat9001_struct *) data_ptr;
+	data = (struct mbf_cbat8101_struct *) data_ptr;
 
 	/* print debug statements */
 	if (verbose >= 5)
@@ -2777,7 +2956,7 @@ int	*error;
 		}
 
 	/* write the record label */
-	label = RESON_BATH_9001;
+	label = RESON_BATH_8101;
 #ifdef BYTESWAPPED
 	label = (short) mb_swap_short(label);
 #endif
@@ -2844,7 +3023,7 @@ int	*error;
 
 
 #ifndef BYTESWAPPED
-		for (i=0;i<MBF_CBAT9001_MAXBEAMS;i++)
+		for (i=0;i<MBF_CBAT8101_MAXBEAMS;i++)
 			{
 			beamarray = line + 32 + 12*i;
 			short_ptr = (short *) beamarray; 
@@ -2863,7 +3042,7 @@ int	*error;
 			*char_ptr = (char) data->amp[i];
 			}
 #else
-		for (i=0;i<MBF_CBAT9001_MAXBEAMS;i++)
+		for (i=0;i<MBF_CBAT8101_MAXBEAMS;i++)
 			{
 			beamarray = line + 32 + 12*i;
 			short_ptr = (short *) beamarray; 
@@ -2887,13 +3066,245 @@ int	*error;
 			*char_ptr = (unsigned char) data->amp[i];
 			}
 #endif
-		line[RESON_BATH_9001_SIZE] = 0x03;
-		line[RESON_BATH_9001_SIZE+1] = '\0';
-		line[RESON_BATH_9001_SIZE+2] = '\0';
+		line[RESON_BATH_8101_SIZE] = 0x03;
+		line[RESON_BATH_8101_SIZE+1] = '\0';
+		line[RESON_BATH_8101_SIZE+2] = '\0';
 
 		/* write out data */
-		status = fwrite(line,1,RESON_BATH_9001_SIZE+3,mbfp);
-		if (status != RESON_BATH_9001_SIZE+3)
+		status = fwrite(line,1,RESON_BATH_8101_SIZE+3,mbfp);
+		if (status != RESON_BATH_8101_SIZE+3)
+			{
+			*error = MB_ERROR_WRITE_FAIL;
+			status = MB_FAILURE;
+			}
+		else
+			{
+			*error = MB_ERROR_NO_ERROR;
+			status = MB_SUCCESS;
+			}
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_cbat8101_wr_heading(verbose,mbfp,data_ptr,error)
+int	verbose;
+FILE	*mbfp;
+char	*data_ptr;
+int	*error;
+{
+	char	*function_name = "mbr_cbat8101_wr_heading";
+	int	status = MB_SUCCESS;
+	struct mbf_cbat8101_struct *data;
+	char	line[RESON_HEADING_SIZE+3];
+	short label;
+	short *short_ptr;
+	int	*int_ptr;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
+		fprintf(stderr,"dbg2       data_ptr:   %d\n",data_ptr);
+		}
+
+	/* get pointer to raw data structure */
+	data = (struct mbf_cbat8101_struct *) data_ptr;
+
+	/* print debug statements */
+	if (verbose >= 5)
+		{
+		fprintf(stderr,"\ndbg5  Values to be written in MBIO function <%s>\n",
+			function_name);
+		fprintf(stderr,"dbg5       year:             %d\n",data->year);
+		fprintf(stderr,"dbg5       month:            %d\n",data->month);
+		fprintf(stderr,"dbg5       day:              %d\n",data->day);
+		fprintf(stderr,"dbg5       hour:             %d\n",data->hour);
+		fprintf(stderr,"dbg5       minute:           %d\n",data->minute);
+		fprintf(stderr,"dbg5       sec:              %d\n",data->second);
+		fprintf(stderr,"dbg5       hundredth_sec:    %d\n",data->hundredth_sec);
+		fprintf(stderr,"dbg5       thousandth_sec:   %d\n",data->thousandth_sec);
+		fprintf(stderr,"dbg5       heading:          %d\n",data->heading);
+		}
+
+	/* write the record label */
+	label = RESON_HEADING;
+#ifdef BYTESWAPPED
+	label = (short) mb_swap_short(label);
+#endif
+	status = fwrite(&label,1,2,mbfp);
+	if (status != 2)
+		{
+		status = MB_FAILURE;
+		*error = MB_ERROR_WRITE_FAIL;
+		}
+	else
+		status = MB_SUCCESS;
+
+	/* write out the data */
+	if (status == MB_SUCCESS)
+		{
+		/* construct record */
+		line[0] = (char) data->day;
+		line[1] = (char) data->month;
+		line[2] = (char) data->year;
+		line[3] = (char) data->hour;
+		line[4] = (char) data->minute;
+		line[5] = (char) data->second;
+		line[6] = (char) data->hundredth_sec;
+		line[7] = (char) data->thousandth_sec;
+#ifndef BYTESWAPPED
+		short_ptr = (short *) &line[8];
+		*short_ptr = (short) data->heading;
+#else
+		short_ptr = (short *) &line[8];
+		*short_ptr = (short) mb_swap_short(data->heading);
+#endif
+		line[RESON_HEADING_SIZE] = 0x03;
+		line[RESON_HEADING_SIZE+1] = '\0';
+		line[RESON_HEADING_SIZE+2] = '\0';
+
+		/* write out data */
+		status = fwrite(line,1,RESON_HEADING_SIZE+3,mbfp);
+		if (status != RESON_HEADING_SIZE+3)
+			{
+			*error = MB_ERROR_WRITE_FAIL;
+			status = MB_FAILURE;
+			}
+		else
+			{
+			*error = MB_ERROR_NO_ERROR;
+			status = MB_SUCCESS;
+			}
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_cbat8101_wr_attitude(verbose,mbfp,data_ptr,error)
+int	verbose;
+FILE	*mbfp;
+char	*data_ptr;
+int	*error;
+{
+	char	*function_name = "mbr_cbat8101_wr_attitude";
+	int	status = MB_SUCCESS;
+	struct mbf_cbat8101_struct *data;
+	char	line[RESON_ATTITUDE_SIZE+3];
+	short label;
+	short *short_ptr;
+	int	*int_ptr;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
+		fprintf(stderr,"dbg2       data_ptr:   %d\n",data_ptr);
+		}
+
+	/* get pointer to raw data structure */
+	data = (struct mbf_cbat8101_struct *) data_ptr;
+
+	/* print debug statements */
+	if (verbose >= 5)
+		{
+		fprintf(stderr,"\ndbg5  Values to be written in MBIO function <%s>\n",
+			function_name);
+		fprintf(stderr,"dbg5       year:             %d\n",data->year);
+		fprintf(stderr,"dbg5       month:            %d\n",data->month);
+		fprintf(stderr,"dbg5       day:              %d\n",data->day);
+		fprintf(stderr,"dbg5       hour:             %d\n",data->hour);
+		fprintf(stderr,"dbg5       minute:           %d\n",data->minute);
+		fprintf(stderr,"dbg5       sec:              %d\n",data->second);
+		fprintf(stderr,"dbg5       hundredth_sec:    %d\n",data->hundredth_sec);
+		fprintf(stderr,"dbg5       thousandth_sec:   %d\n",data->thousandth_sec);
+		fprintf(stderr,"dbg5       heave:            %d\n",data->heave);
+		fprintf(stderr,"dbg5       roll:             %d\n",data->roll);
+		fprintf(stderr,"dbg5       pitch:            %d\n",data->pitch);
+		}
+
+	/* write the record label */
+	label = RESON_ATTITUDE;
+#ifdef BYTESWAPPED
+	label = (short) mb_swap_short(label);
+#endif
+	status = fwrite(&label,1,2,mbfp);
+	if (status != 2)
+		{
+		status = MB_FAILURE;
+		*error = MB_ERROR_WRITE_FAIL;
+		}
+	else
+		status = MB_SUCCESS;
+
+	/* write out the data */
+	if (status == MB_SUCCESS)
+		{
+		/* construct record */
+		line[0] = (char) data->day;
+		line[1] = (char) data->month;
+		line[2] = (char) data->year;
+		line[3] = (char) data->hour;
+		line[4] = (char) data->minute;
+		line[5] = (char) data->second;
+		line[6] = (char) data->hundredth_sec;
+		line[7] = (char) data->thousandth_sec;
+#ifndef BYTESWAPPED
+		short_ptr = (short *) &line[8];
+		*short_ptr = (short) data->heave;
+		short_ptr = (short *) &line[10];
+		*short_ptr = (short) data->roll;
+		short_ptr = (short *) &line[12];
+		*short_ptr = (short) data->pitch;
+#else
+		short_ptr = (short *) &line[8];
+		*short_ptr = (short) mb_swap_short(data->heave);
+		short_ptr = (short *) &line[10];
+		*short_ptr = (short) mb_swap_short(data->roll);
+		short_ptr = (short *) &line[12];
+		*short_ptr = (short) mb_swap_short(data->pitch);
+#endif
+		line[RESON_ATTITUDE_SIZE] = 0x03;
+		line[RESON_ATTITUDE_SIZE+1] = '\0';
+		line[RESON_ATTITUDE_SIZE+2] = '\0';
+
+		/* write out data */
+		status = fwrite(line,1,RESON_ATTITUDE_SIZE+3,mbfp);
+		if (status != RESON_ATTITUDE_SIZE+3)
 			{
 			*error = MB_ERROR_WRITE_FAIL;
 			status = MB_FAILURE;
