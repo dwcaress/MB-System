@@ -1,59 +1,81 @@
-MB-SYSTEM VERSION 4.2 RELEASE NOTES:
+MB-SYSTEM VERSION 4.3 RELEASE NOTES:
 -----------------------------------
 
-This directory structure contains the version 4.2 release  
+This directory structure contains the version 4.3 release  
 of the MB-System software package for processing and display of 
-multibeam data. Version 4.2 includes significant enhancements
-and bug fixes relative to version 4.1. In particular, there
-are four new utilities (mbbackangle, mbanglecorrect, mbfilter,
-and mbcut) which are useful for processing sidescan data.
-See the manual pages for these programs for information about
-these new capabilities.
+multibeam data. Version 4.3 includes significant enhancements
+and bug fixes relative to version 4.2. 
+
+Most importantly, MB-System 4.3 works with the new release 
+of the GMT software package (GMT 3.0). MB-System 4.3 IS NOT 
+COMPATIBLE with GMT 2.1.4, so users will need to update 
+their GMT installation at the same time that they install 
+the new MB-System. 
+
+In addition, there is a new interactive tool for editing 
+navigation in swath data files, and the old plotting macros 
+(mbm_plot and mbm_grdplot) have been replaced by four new, 
+completely rewritten macros (mbm_plot, mbm_grdplot, 
+mbm_grd3dplot, mbm_xyplot). See the manual pages for these 
+programs for information about these new capabilities.
+
+Finally, the realtime contour pen plotting tools are no 
+longer included in the MB-System distribution. These tools 
+require special calcomp or HPGL driving programs,
+and are of little use to the great majority of MB-System
+users. Users who wish to replicate the realtime pen
+plotting capability of the R/V Ewing can obtain the
+necessary code from us by request.
 
 RELEASE DATE:
 ------------
-February 17, 1995
+August 25, 1995
 
 Authors:
 --------
-David W. Caress (caress@ldeo.columbia.edu)
+David W. Caress* (caress@ldeo.columbia.edu)
+                 (caress@seabeam.com)
 Dale N. Chayes (dale@ldeo.columbia.edu)
 Lamont-Doherty Earth Observatory of Columbia University
 Palisades, NY 10964
 
+*Also at: 
+SeaBeam Instruments
+East Walpole, MA 02032
+
 Copyright:
 ----------
-Copyright 1993, 1994,1995 by David W. Caress and Dale N. Chayes
+Copyright 1993, 1994, 1995 by David W. Caress and Dale N. Chayes
 All Rights Reserved.
 
 Caveat:
 -------
-	The MB-System does not come with any warranties, nor is it
+The MB-System does not come with any warranties, nor is it
 guarenteed to work on your computer or to do anything useful.  The
 user assumes full responsibility for the use of this system.  In
-particular, the Lamont-Doherty Earth Observatory of Columbia
-University, David W.  Caress, Dale N. Chayes, or any other individuals
-involved in the design and maintenance of the MB-System are NOT
-responsible for any damage that may follow from correct or incorrect
-use of these programs.
+particular, David W.  Caress, Dale N. Chayes, the Lamont-Doherty 
+Earth Observatory of Columbia University, SeaBeam Instruments Inc.,  
+or any other individuals or organizations involved in the design 
+and maintenance of the MB-System software package are NOT 
+responsible for any damage that may follow from correct or 
+incorrect use of these programs.
 
 Other required software:
 ------------------------
-        You will need some other readily available code to use
-MB-System fully.  MB-System uses the GMT-2 system plus extensions
-for lots of its graphics and GMT-2 requires NetCDF. Some of the 
-MB-System utilities (macros) are written in the perl scripting
-language. Some L-DEO extensions to GMT for handling underway data 
-are also used. The source code for these required software packages
+You will need some other readily available code to use
+MB-System fully.  MB-System uses the GMT 3.0 package plus extensions
+for much of its graphics, and GMT requires NetCDF. Some of the 
+MB-System utilities (macros) are written in the Perl scripting
+language. The source code for these required software packages
 is available as follows:
 
-	MB-System v 4.2
+	MB-System v 4.3
 	- available from L-DEO via anonymous ftp to
-	  lamont.ldgo.columbia.edu
+	  lamont.ldeo.columbia.edu
 	- compressed tar file MB-System4.0.tar.Z
 	  in directory pub/swath_data
 
-	GMT v 2.1r4 or later
+	GMT v 3.0 or later
 	- available from SOEST (U. Hawaii) via anonymous ftp to
 	  kiawe.soest.hawaii.edu
 	- compressed tar files in directory pub/gmt
@@ -64,19 +86,38 @@ is available as follows:
 	- compressed tar file netcdf.tar.Z
 
 	PERL v 4.0r19 or later
-	- available on CD as part of the O'Rielly "Unix Power Tools
-	  book.
-	- available via anonymous ftp to 
-	  ftp.uu.net
+	- available via anonymous ftp to ftp.uu.net,
 	- compressed tar file perl-4.0.19.tar.Z in directory gnu
+	- also available on CD as part of the O'Rielly 
+	  "Unix Power Tools" book.
+
+MB-System Updates:
+-----------------
+We generally only announce major releases, such as 4.1, 4.2,
+4.3, etc. However, incremental bug fixes and code changes
+often occur between the major releases, and these may be
+reflected in the source code archives available via
+anonymous ftp at lamont.ldeo.columbia.edu. When changes are
+made to the distributed source code, this is reflected in
+the names of the compressed tar files in the ftp archive.
+For example, the initial MB-System 4.3 distribution will be
+available in a file called MB-System4.3.tar.Z. After the
+first incremental update, the filename will change to
+MB-System4.3a.tar.Z; subsequent incremental updates will
+be 4.3b, 4.3c, etc.  At all times, a link to the current
+MB-System distribution file called MB-System.tar.Z will be
+maintained in the ftp archive; this allows the Lamont World
+Wide Web page to always access the current distribution.
 
 Installing MB-System:
 --------------------
-	The MB-System source code is extracted by first uncompressing
+The MB-System source code is extracted by first uncompressing
 the tar file and then running tar:
-		% uncompress MB-System4.2.tar.Z
-		% tar xvf MB-System4.2.tar
-	This will create a directory structure called mbsystem. 
+
+		% uncompress MB-System4.3.tar.Z
+		% tar xvf MB-System4.3.tar
+
+This will create a directory structure called mbsystem. 
 In order to configure your installation, you must edit the
 shellscript mbsystem/install_makefiles.  This is perl script
 will read template makefiles in the MB-System source directories 
@@ -86,7 +127,9 @@ the makefiles.  Instead of editing the makefiles directly, the
 installer should edit this script so that the locations of
 important libraries and include files are accurate and so that
 the compile and link flags are correct.
+
 The important parameters to be set in install_makefiles are:
+
  	MBSYSTEM_HOME	Absolute path to the directory containing
  				this file.
  	OS		Operating system (e.g. SUN, IRIX, or LYNX).
@@ -116,40 +159,42 @@ The important parameters to be set in install_makefiles are:
  				and pslib.h
  	NETCDFDIR	Location of NetCDF library libnetcdf.a
  	LEVITUS		Path for Levitus data file annual.
- 	REALTIME	If set to 1, enables installation of realtime
- 			pen plotting programs (0 disables installation).
- 	GRPHLIBDIR	Location of L-DEO shipboard graphics 
- 				library libgraphics.a
- 	GRPHINCDIR	Location of L-DEO shipboard graphics 
- 				include file graphics.h
+
 Examples of appropriate values for several different installations
 (e.g. Sun, SGI, PC) are included in the comments in install_makefiles.
 To execute install_makefiles, do the following:
+
 		% cd mbsystem
 		% install_makefiles
-	Because install_makefiles is a perl script, the executable
+
+Because install_makefiles is a perl script, the executable
 perl must be available in the installer's path. Once install_makefiles 
 has been correctly configured and run,  give the command "make all" 
 to generate the executable programs:
+
 		% make all
-	The make command will descend recursively down through the
+
+The make command will descend recursively down through the
 directory structure, compiling source files, linking object files,
 and copying executables and manual pages to the appropriate
 directories.  The executables will be placed in mbsystem/bin, the
 libraries in mbsystem/lib, and the manual pages in mbsystem/man/man1.
-	The src/realtime directory contains source code used for
+
+The src/realtime directory contains source code used for
 running "realtime" plots on Calcomp 965A pen plotters on board
 the R/V Maurice Ewing.  This code is included in the distribution
 as an example for users who might wish to implement similar
 capabilities elsewhere.  The realtime code is not compiled during 
 general "make all" calls in the mbsystem directory because it depends
 on Calcomp related libraries not distributed with the MB-System.
-	Naturally, in order for users to use the MB-System utilities,
+
+Naturally, in order for users to use the MB-System utilities,
 the directory containing the executables must be included in their
 path (usually this is done by editing the .cshrc file in the user's
 home directory).  The executable perl must also be available in the
 user's path for most of the macros to work.
-	Most users will also wish to specify which program they
+
+Most users will also wish to specify which program they
 generally use to view Postscript plots on their screen. This
 parameter can be set either with the mbdefaults program or
 using the PS_VIEWER environment variable - the former is
@@ -161,19 +206,27 @@ ghostview.
 
 "Supported" Platforms:
 ----------------------
-        Current versions of MB-System have been successfully
+Current versions of MB-System have been successfully
 installed on Silicon Graphics (SGI) single and multiple
 processor platforms running under the IRIS operating system
 (versions 5.2, 5.3, and 6.0), on Sun workstations running
-under the SunOS 4.1 and Solaris operating systems, and on
+under the SunOS 4.1 and Solaris operating systems, on
+Hewlett Packard workstations, on IBM workstations, and on
 486 PC's running under LynxOS (a realtime Unix variant).
 Its a fair bet that if you provide us with a really cool 
 (ie. FAST) computer of your choice, we might be inclined
 to try making MB-System run on it.
 
+Levitus Database:
+--------------------------
+The program mblevitus depends on a 16 MByte data file that is not
+included in the MB-System tarfile.  It is in the 'annual.Z' file which
+is available by anonymous ftp from lamont.ldgo.columbia.edu in the
+pub/swath_data subdirectory.
+
 PORTING:
 --------
-	MB-System is not tightly coupled to any particular OS. 
+MB-System is not tightly coupled to any particular OS. 
 We hope to make future releases portable and would be quite 
 pleased to get feedback from porting efforts so that we can fold 
 that back into the package. Eventually, we expect that the code will 
@@ -182,27 +235,44 @@ the evolution of GUIs and WIMPS.
 
 Xview/Motif:
 --------------------------
-        The graphical tools mbedit and mbvelocitytool now use the
-Motif widget set rather than the XVIEW widget set used prior
-to version 4.0.  Motif libraries are required to successfully link
-and install these programs.  If users are running Sun workstations
-under SunOS 4.1.X without Motif, then they may wish to obtain copies
-of executables which have been static linked on Sun SPARC
-workstations (executables which do not require any particular
-run-time libraries). Static linked Sun executables of mbedit and
-mbvelocitytool are available via anonymous ftp in the same 
-manner as the standard MB-System distribution.
+The graphical tools mbedit and mbvelocitytool now use the Motif
+widget set rather than the XVIEW widget set used prior to
+version 4.0.  Motif libraries are required to successfully link
+and install these programs. However, we will, for now, continue to 
+make available Xview based executables of mbedit and mbvelocitytool
+which have been statically linked (executables which do not
+require any particular run-time libraries) on Sun workstations
+running under SunOs 4.1.X. These executables are available 
+via anonymous ftp in the same manner as the standard 
+MB-System distribution. Users should be aware that development
+of the Xview versions has stopped, and thus that the Xview
+versions of mbedit and mbvelocitytool do not have the complete
+functionality of the Motif versions. Also, the new Motif based 
+program mbnavedit is not available in an Xview version. 
 
-Levitus Database:
---------------------------
-	The program mblevitus depends on a 16 MByte data file that is not
-included in the MB-System tarfile.  It is in the 'annual.Z' file which
-is available by anonymous ftp from lamont.ldgo.columbia.edu in the
-pub/swath_data subdirectory.
+We STRONGLY RECOMMEND that users purchase the libraries 
+necessary to compile and link Motif based programs. 
  
+Continued Support:
+-----------------
+We are pleased to have received five years of continued 
+NSF funding for the support and development of MB-System. 
+
+SeaBeam Instruments is also actively participating in
+MB-System development, with an obvious emphasis on
+support for data from SeaBeam products. Although SeaBeam
+is also developing proprietary software tools for use
+with SeaBeam sonars, the core MB-System capabilities will
+continue to be distributed in the public domain, regardless
+of whether the work was paid for by NSF, SeaBeam, or other
+sources of support. For example, the development of the
+sidescan processing tools mbbackangle, mbanglecorrect, and
+mbfilter was sponsored by SeaBeam, and these tools are 
+included in the public domain MB-System distribution.
+
 Contributions: 
 --------------
-	We are actively soliciting contributions for inclusion in the
+We are actively soliciting contributions for inclusion in the
 MB-System. In particular support for additional data formats in the
 mbio.a library such as EM-12, HS-MD, MR-1, etc would helpful, as would
 new, clever tools for data manipulation and processing.  We thank 
@@ -210,24 +280,19 @@ those who have already contributed to MB-System.
 
 Suggestions:
 ------------
-	Our original NSF grant is just about used up, but we
-have a renewal proposal pending which will hopefully provide
-continuing support for MB-System development. Our primary efforts 
-in the future will be in the direction of enhanced usability 
-through easier user interfaces, more documentation,
-cookbook examples, etc. We are interested in your suggestions.
+We are interested in your suggestions.
 
 Bugs:
 ------------
-	There are undoubtably bugs in this software. Although we
+There are undoubtably bugs in this software. Although we
 make no promises about how rapidly problems will be fixed, we
 strongly encourage users to notify us of bugs (and fixes!!).
-We will support this software as long as we have sufficient
-support (funding) to do the job.
+We will continue to support this software for the forseeable
+future.
 
 Acknowledgments:
 ------------
-	A number of people have made contributions to the code
+A number of people have made contributions to the code
 included in MB-System.  These include:
 	Suzanne O'Hara (L-DEO)
 	David Brock (Antarctic Support Associates)
@@ -242,10 +307,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 4.7 1995-02-14 22:25:56 caress Exp $
+RCS ID: $Id: README,v 4.8 1995-08-17 16:34:39 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+# Revision 4.7  1995/02/14  22:25:56  caress
+# Version 4.2 Release
+#
 # Revision 4.6  1994/11/18  16:37:15  caress
 # *** empty log message ***
 #
