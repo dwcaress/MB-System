@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mr1prhig.c	3/3/94
- *	$Id: mbr_mr1prhig.c,v 4.6 1996-03-12 17:21:55 caress Exp $
+ *	$Id: mbr_mr1prhig.c,v 4.7 1996-04-22 11:16:30 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	July 17, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.6  1996/03/12  17:21:55  caress
+ * Added format 63, short HMR1 processing format.
+ *
  * Revision 4.5  1996/01/26  21:23:30  caress
  * Version 4.3 distribution
  *
@@ -63,16 +66,13 @@
 #include "../../include/mbsys_mr1.h"
 #include "../../include/mbf_mr1prhig.h"
 
-/* angle conversion define */
-#define RTD (180./M_PI)
-
 /*--------------------------------------------------------------------*/
 int mbr_alm_mr1prhig(verbose,mbio_ptr,error)
 int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_mr1prhig.c,v 4.6 1996-03-12 17:21:55 caress Exp $";
+	static char res_id[]="$Id: mbr_mr1prhig.c,v 4.7 1996-04-22 11:16:30 caress Exp $";
 	char	*function_name = "mbr_alm_mr1prhig";
 	int	status = MB_SUCCESS;
 	int	i;
