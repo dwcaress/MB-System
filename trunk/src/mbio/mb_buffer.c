@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_buffer.c	2/25/93
- *    $Id: mb_buffer.c,v 4.6 1995-08-17 14:42:45 caress Exp $
+ *    $Id: mb_buffer.c,v 4.7 1995-09-28 18:10:48 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -35,6 +35,9 @@
  * Date:	February 25, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.6  1995/08/17  14:42:45  caress
+ * Revision for release 4.3.
+ *
  * Revision 4.5  1995/03/06  19:38:54  caress
  * Changed include strings.h to string.h for POSIX compliance.
  *
@@ -107,7 +110,7 @@ int	verbose;
 char	**buff_ptr;
 int	*error;
 {
-  static char rcs_id[]="$Id: mb_buffer.c,v 4.6 1995-08-17 14:42:45 caress Exp $";
+  static char rcs_id[]="$Id: mb_buffer.c,v 4.7 1995-09-28 18:10:48 caress Exp $";
 	char	*function_name = "mb_buffer_init";
 	int	status = MB_SUCCESS;
 	struct mb_buffer_struct *buff;
@@ -1325,6 +1328,16 @@ int	*error;
 				ss,ssacrosstrack,ssalongtrack,
 				comment,error);
 			}
+		else if (system == MB_SYS_HSMD)
+			{
+			status = mbsys_hsmd_extract(verbose,mbio_ptr,
+				store_ptr,kind,
+				time_i,time_d,navlon,navlat,speed,heading,
+				nbath,namp,nss,
+				bath,amp,bathacrosstrack,bathalongtrack,
+				ss,ssacrosstrack,ssalongtrack,
+				comment,error);
+			}
 		else
 			{
 			status = MB_FAILURE;
@@ -1535,6 +1548,14 @@ int	*error;
 		else if (system == MB_SYS_ELAC)
 			{
 			status = mbsys_elac_extract_nav(verbose,mbio_ptr,
+				store_ptr,kind,
+				time_i,time_d,navlon,navlat,speed,heading,
+				roll,pitch,heave, 
+				error);
+			}
+		else if (system == MB_SYS_HSMD)
+			{
+			status = mbsys_hsmd_extract_nav(verbose,mbio_ptr,
 				store_ptr,kind,
 				time_i,time_d,navlon,navlat,speed,heading,
 				roll,pitch,heave, 
@@ -1772,6 +1793,15 @@ int	*error;
 			ss,ssacrosstrack,ssalongtrack,
 			comment,error);
 		}
+	else if (system == MB_SYS_HSMD)
+		{
+		status = mbsys_hsmd_insert(verbose,mbio_ptr,store_ptr,
+			time_i,time_d,navlon,navlat,speed,heading,
+			nbath,namp,nss,
+			bath,amp,bathacrosstrack,bathalongtrack,
+			ss,ssacrosstrack,ssalongtrack,
+			comment,error);
+		}
 	else
 		{
 		status = MB_FAILURE;
@@ -1939,6 +1969,14 @@ int	*error;
 			roll,pitch,heave, 
 			error);
 		}
+	else if (system == MB_SYS_HSMD)
+		{
+		status = mbsys_hsmd_insert_nav(verbose,
+			mbio_ptr,store_ptr,
+			time_i,time_d,navlon,navlat,speed,heading,
+			roll,pitch,heave, 
+			error);
+		}
 	else
 		{
 		status = MB_FAILURE;
@@ -2028,6 +2066,10 @@ int	*error;
 	else if (system == MB_SYS_ELAC)
 		{
 		status = mbsys_elac_alloc(verbose,mbio_ptr,store_ptr,error);
+		}
+	else if (system == MB_SYS_HSMD)
+		{
+		status = mbsys_hsmd_alloc(verbose,mbio_ptr,store_ptr,error);
 		}
 	else
 		{
@@ -2120,6 +2162,10 @@ int	*error;
 	else if (system == MB_SYS_ELAC)
 		{
 		status = mbsys_elac_deall(verbose,mbio_ptr,store_ptr,error);
+		}
+	else if (system == MB_SYS_HSMD)
+		{
+		status = mbsys_hsmd_deall(verbose,mbio_ptr,store_ptr,error);
 		}
 	else
 		{
@@ -2221,6 +2267,11 @@ int	*error;
 	else if (system == MB_SYS_ELAC)
 		{
 		status = mbsys_elac_copy(verbose,mbio_ptr,
+			store_ptr,copy_ptr,error);
+		}
+	else if (system == MB_SYS_HSMD)
+		{
+		status = mbsys_hsmd_copy(verbose,mbio_ptr,
 			store_ptr,copy_ptr,error);
 		}
 	else

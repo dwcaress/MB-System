@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_mr1.c	7/19/94
- *	$Id: mbsys_mr1.c,v 4.7 1995-08-17 14:41:09 caress Exp $
+ *	$Id: mbsys_mr1.c,v 4.8 1995-09-28 18:10:48 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -33,6 +33,9 @@
  * Author:	D. W. Caress
  * Date:	July 19, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.7  1995/08/17  14:41:09  caress
+ * Revision for release 4.3.
+ *
  * Revision 4.6  1995/07/13  19:13:36  caress
  * Intermediate check-in during major bug-fixing flail.
  *
@@ -77,6 +80,9 @@
 #include "../../include/mb_io.h"
 #include "../../include/mbsys_mr1.h"
 
+/* angle conversion define */
+#define RTD (180./M_PI)
+
 /*--------------------------------------------------------------------*/
 int mbsys_mr1_alloc(verbose,mbio_ptr,store_ptr,error)
 int	verbose;
@@ -84,7 +90,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_mr1.c,v 4.7 1995-08-17 14:41:09 caress Exp $";
+ static char res_id[]="$Id: mbsys_mr1.c,v 4.8 1995-09-28 18:10:48 caress Exp $";
 	char	*function_name = "mbsys_mr1_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -251,11 +257,29 @@ int	*error;
 			}
 
 		/* get heading */
-		/* *heading = store->png_compass;*/
-		*heading = store->png_course;
+		*heading = store->png_compass;
+		/* *heading = store->png_course;*/
 
 		/* set speed to zero */
 		*speed = 0.0;
+
+		/* zero data arrays */
+		for (i=0;i<mb_io_ptr->beams_bath;i++)
+			{
+			bath[i] = 0.0;
+			bathacrosstrack[i] = 0.0;
+			bathalongtrack[i] = 0.0;
+			}
+		for (i=0;i<mb_io_ptr->beams_amp;i++)
+			{
+			amp[i] = 0.0;
+			}
+		for (i=0;i<mb_io_ptr->pixels_ss;i++)
+			{
+			ss[i] = 0.0;
+			ssacrosstrack[i] = 0.0;
+			ssalongtrack[i] = 0.0;
+			}
 
 		/* read beam and pixel values into storage arrays */
 		*nbath = mb_io_ptr->beams_bath;
@@ -348,17 +372,17 @@ int	*error;
 			fprintf(stderr,"dbg4       nbath:      %d\n",
 				*nbath);
 			for (i=0;i<*nbath;i++)
-			  fprintf(stderr,"dbg4       beam:%d  bath:%f  acrosstrack:%f  alongtrack:%f\n",
+			  fprintf(stderr,"dbg4       beam:%d  bath:%6g  acrosstrack:%6g  alongtrack:%6g\n",
 				i,bath[i],bathacrosstrack[i],bathalongtrack[i]);
 			fprintf(stderr,"dbg4        namp:     %d\n",
 				*namp);
 			for (i=0;i<*namp;i++)
-			  fprintf(stderr,"dbg4        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n",
+			  fprintf(stderr,"dbg4        beam:%d   amp:%6g  acrosstrack:%6g  alongtrack:%6g\n",
 				i,amp[i],bathacrosstrack[i],bathalongtrack[i]);
 			fprintf(stderr,"dbg4        nss:      %d\n",
 				*nss);
 			for (i=0;i<*nss;i++)
-			  fprintf(stderr,"dbg4        beam:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n",
+			  fprintf(stderr,"dbg4        pixel:%d   ss:%6g  acrosstrack:%6g  alongtrack:%6g\n",
 				i,ss[i],ssacrosstrack[i],ssalongtrack[i]);
 			}
 
@@ -431,7 +455,7 @@ int	*error;
 		fprintf(stderr,"dbg2        nss:      %d\n",
 			*nss);
 		for (i=0;i<*nss;i++)
-		  fprintf(stderr,"dbg2        beam:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n",
+		  fprintf(stderr,"dbg2        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n",
 			i,ss[i],ssacrosstrack[i],ssalongtrack[i]);
 		}
 	if (verbose >= 2)
@@ -515,7 +539,7 @@ int	*error;
 		fprintf(stderr,"dbg2        nss:       %d\n",nss);
 		if (verbose >= 3) 
 		 for (i=0;i<nss;i++)
-		  fprintf(stderr,"dbg3        beam:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n",
+		  fprintf(stderr,"dbg3        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n",
 			i,ss[i],ssacrosstrack[i],ssalongtrack[i]);
 		fprintf(stderr,"dbg2       comment:    %s\n",comment);
 		}
@@ -539,8 +563,8 @@ int	*error;
 		store->png_lat = navlat;
 
 		/* get heading */
-		/*store->png_compass = heading;*/
-		store->png_course = heading;
+		store->png_compass = heading;
+		/*store->png_course = heading;*/
 
 		/* get speed */
 
@@ -621,7 +645,7 @@ int	*error;
 }
 /*--------------------------------------------------------------------*/
 int mbsys_mr1_ttimes(verbose,mbio_ptr,store_ptr,kind,nbeams,
-	ttimes,angles,angles_forward,flags,error)
+	ttimes,angles,angles_forward,flags,depthadd,error)
 int	verbose;
 char	*mbio_ptr;
 char	*store_ptr;
@@ -631,13 +655,17 @@ double	*ttimes;
 double	*angles;
 double	*angles_forward;
 int	*flags;
+double	*depthadd;
 int	*error;
 {
 	char	*function_name = "mbsys_mr1_ttimes";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_mr1_struct *store;
-	int	i;
+	double	depth;
+	double	xtrack;
+	int	beam_center;
+	int	i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -666,16 +694,78 @@ int	*error;
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA)
 		{
+		/* get depth offset (vehicle pressure depth) */
+		*depthadd = store->png_prdepth;
+
 		/* get nbeams */
 		*nbeams = mb_io_ptr->beams_bath;
+		beam_center = mb_io_ptr->beams_bath/2;
 
-		/* get travel times, angles, and flags */
-		for (i=0;i<mb_io_ptr->beams_bath;i++)
+		/* get travel times and angles assuming 
+		   bathymetry calculated using simple
+		   1500 m/s water velocity */
+		for (i=0;i<store->port_btycount;i++)
 			{
-			ttimes[i] = 0.0;
-			angles[i] = 0.0;
-			angles_forward[i] = 0.0;
-			flags[i] = MB_NO;
+			j = beam_center - i - 2;
+			depth = store->bath_port[i] - *depthadd;
+			xtrack = -store->bath_acrosstrack_port[i];
+			angles_forward[j] = 0.0;
+			flags[j] = MB_NO;
+			if (fabs(depth) > 0.0)
+				{
+				ttimes[j] = sqrt(depth*depth + xtrack*xtrack)/750.0;
+				angles[j] = RTD*atan(xtrack/fabs(depth));
+				if (depth < 0.0)
+					flags[j] = MB_YES;
+				}
+			else
+				{
+				ttimes[j] = 0.0;
+				angles[j] = 0.0;
+				}
+			}
+		for (i=0;i<3;i++)
+			{
+			j = beam_center + i - 1;
+			if (j == beam_center)
+				depth = store->png_prdepth + store->png_alt;
+			else
+				depth = 0.0;
+			xtrack = 0.0;
+			angles_forward[j] = 0.0;
+			flags[j] = MB_NO;
+			if (fabs(depth) > 0.0)
+				{
+				ttimes[j] = sqrt(depth*depth + xtrack*xtrack)/750.0;
+				angles[j] = RTD*atan(xtrack/fabs(depth));
+				if (depth < 0.0)
+					flags[j] = MB_YES;
+				}
+			else
+				{
+				ttimes[j] = 0.0;
+				angles[j] = 0.0;
+				}
+			}
+		for (i=0;i<store->stbd_btycount;i++)
+			{
+			j = beam_center + 2 + i;
+			depth = store->bath_stbd[i];
+			xtrack = store->bath_acrosstrack_stbd[i];
+			angles_forward[j] = 0.0;
+			flags[j] = MB_NO;
+			if (fabs(depth) > 0.0)
+				{
+				ttimes[j] = sqrt(depth*depth + xtrack*xtrack)/750.0;
+				angles[j] = RTD*atan(xtrack/fabs(depth));
+				if (depth < 0.0)
+					flags[j] = MB_YES;
+				}
+			else
+				{
+				ttimes[j] = 0.0;
+				angles[j] = 0.0;
+				}
 			}
 
 		/* set status */
@@ -712,6 +802,7 @@ int	*error;
 		}
 	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR)
 		{
+		fprintf(stderr,"dbg2       depthadd:   %f\n",*depthadd);
 		fprintf(stderr,"dbg2       nbeams:     %d\n",*nbeams);
 		for (i=0;i<*nbeams;i++)
 			fprintf(stderr,"dbg2       beam %d: tt:%f  angle_xtrk:%f  angle_ltrk:%f  flag:%d\n",
@@ -807,8 +898,8 @@ int	*error;
 			}
 
 		/* get heading */
-		/* *heading = store->png_compass;*/
-		*heading = store->png_course;
+		*heading = store->png_compass;
+		/* *heading = store->png_course;*/
 
 		/* set speed to zero */
 		*speed = 0.0;
@@ -988,8 +1079,8 @@ int	*error;
 		store->png_lat = navlat;
 
 		/* get heading */
-		/*store->png_compass = heading;*/
-		store->png_course = heading;
+		store->png_compass = heading;
+		/* store->png_course = heading;*/
 
 		/* get speed */
 

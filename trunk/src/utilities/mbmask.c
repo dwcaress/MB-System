@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmask.c	6/15/93
- *    $Id: mbmask.c,v 4.5 1995-05-12 17:12:32 caress Exp $
+ *    $Id: mbmask.c,v 4.6 1995-09-28 18:09:04 caress Exp $
  *
  *    Copyright (c) 1993,1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -25,6 +25,10 @@
  * Date:	June 15, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 4.5  1995/05/12  17:12:32  caress
+ * Made exit status values consistent with Unix convention.
+ * 0: ok  nonzero: error
+ *
  * Revision 4.4  1995/03/06  19:37:59  caress
  * Changed include strings.h to string.h for POSIX compliance.
  *
@@ -73,7 +77,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbmask.c,v 4.5 1995-05-12 17:12:32 caress Exp $";
+	static char rcs_id[] = "$Id: mbmask.c,v 4.6 1995-09-28 18:09:04 caress Exp $";
 	static char program_name[] = "MBMASK";
 	static char help_message[] = "MBMASK reads a flagging mask file and applies it to the input \nmultibeam data file.  Flagging mask files are created from  \nmultibeam data files using the program MBGETMASK.  If the time \ntag of a mask record matches that of a data ping, then any \nbeams marked as flagged in the mask are flagged in the data. \nThe utilities MBGETMASK and MBMASK provide a means for transferring \nediting information from one file to another, provided the files \ncontain versions of the same data. \nThe default input and output multibeam streams are stdin and stdout.";
 	static char usage_message[] = "mbmask [-Fformat -Mmaskfile -Iinfile -Ooutfile -V -H]";
@@ -135,6 +139,7 @@ char **argv;
 	int	odata = 0;
 	int	ocomment = 0;
 	int	flagged = 0;
+	int	unflagged = 0;
 	int	data_use;
 	char	comment[256];
 
@@ -612,6 +617,7 @@ char **argv;
 				&& time_d <= mask_time_d + eps)
 				{
 				for (j=0;j<beams_bath;j++)
+					{
 					if (bath_mask[j] == 0
 						&& bath[j] > 0.0)
 						{
@@ -619,7 +625,16 @@ char **argv;
 						flagged++;
 						data_use = MB_YES;
 						}
+					else if (bath_mask[j] == 1
+						&& bath[j] < 0.0)
+						{
+						bath[j] = -bath[j];
+						unflagged++;
+						data_use = MB_YES;
+						}
+					}
 				for (j=0;j<beams_amp;j++)
+					{
 					if (amp_mask[j] == 0
 						&& amp[j] > 0.0)
 						{
@@ -627,6 +642,14 @@ char **argv;
 						flagged++;
 						data_use = MB_YES;
 						}
+					else if (amp_mask[j] == 1
+						&& amp[j] < 0.0)
+						{
+						amp[j] = -amp[j];
+						unflagged++;
+						data_use = MB_YES;
+						}
+					}
 				}
 			  }
 
@@ -694,6 +717,7 @@ char **argv;
 		fprintf(stderr,"%d output data records\n",odata);
 		fprintf(stderr,"%d output comment records\n",ocomment);
 		fprintf(stderr,"%d beams flagged\n",flagged);
+		fprintf(stderr,"%d beams unflagged\n",unflagged);
 		}
 
 	/* end it all */

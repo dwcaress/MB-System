@@ -274,10 +274,9 @@ and other contour characteristics.
 Contours will be
 generated at invervals of \fIcont_int\fP meters.  Color changes
 will occur at intervals of \fIcol_int\fP meters.  Contours will have
-downhill facing tickmarks \fItic_int\fP inches long every \fItic_int\fP
+downhill facing tickmarks \fItic_len\fP inches long every \fItic_int\fP
 meters. Contours will have annotations 
-\fIlabel_len\fP inches high every \fIlab_int\fP meters.
-[Defaults: \fItic_int\fP = 0.1; \fIlab_hgt\fP = 0.05]
+\fIlab_hgt\fP inches high every \fIlab_int\fP meters.
 .TP
 .B \fB-D\fP\fI[flipcolor/flipshade]\fP
 This option flips the color and shading conventions used by
@@ -535,9 +534,9 @@ Default: \fIyr/mo/da/hr/mn/sc\fP = 2062/2/21/10/30/0.
 .TP
 \fB-MMN\fP\fInplot\fP
 Sets the number of pings to be read in before each contouring
-episode. See the description of the \fB-Z\fIalgorithm\fP option
+episode. See the description of the \fB-Z\fP\fIalgorithm\fP option
 for advice on reasonable values
-Default: \fInplot\fP = 50 unless \fB-Z\fI1\fP is specified,
+Default: \fInplot\fP = 50 unless \fB-Z\fP\fI1\fP is specified,
 in which case the default is \fInplot\fP = 5.
 .TP
 .B \fB-MMP\fP\fIpings \fP

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_get_all.c	1/26/93
- *    $Id: mb_get_all.c,v 4.3 1995-03-06 19:38:54 caress Exp $
+ *    $Id: mb_get_all.c,v 4.4 1995-09-28 18:10:48 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Date:	January 26, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1995/03/06  19:38:54  caress
+ * Changed include strings.h to string.h for POSIX compliance.
+ *
  * Revision 4.2  1994/10/21  12:11:53  caress
  * Release V4.0
  *
@@ -94,7 +97,7 @@ double	*ssalongtrack;
 char	*comment;
 int	*error;
 {
-  static char rcs_id[]="$Id: mb_get_all.c,v 4.3 1995-03-06 19:38:54 caress Exp $";
+  static char rcs_id[]="$Id: mb_get_all.c,v 4.4 1995-09-28 18:10:48 caress Exp $";
 	char	*function_name = "mb_get_all";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -301,7 +304,12 @@ int	*error;
 		}
 
 	/* check for out of location or time bounds */
-	if (status == MB_SUCCESS && *kind != MB_DATA_COMMENT)
+	if (status == MB_SUCCESS 
+		&& *kind != MB_DATA_COMMENT
+		&& *kind != MB_DATA_ANGLE
+		&& *kind != MB_DATA_START
+		&& *kind != MB_DATA_STOP
+		&& *kind != MB_DATA_EVENT)
 		{
 		if (*navlon < mb_io_ptr->bounds[0] 
 			|| *navlon > mb_io_ptr->bounds[1] 
@@ -322,6 +330,10 @@ int	*error;
 	/* check for time gap */
 	if (status == MB_SUCCESS 
 		&& *kind != MB_DATA_COMMENT 
+		&& *kind != MB_DATA_ANGLE
+		&& *kind != MB_DATA_START
+		&& *kind != MB_DATA_STOP
+		&& *kind != MB_DATA_EVENT 
 		&& mb_io_ptr->ping_count > 1)
 		{
 		if ((*time_d - mb_io_ptr->old_time_d) 
@@ -335,6 +347,11 @@ int	*error;
 	/* check for less than minimum speed */
 	if ((*error == MB_ERROR_NO_ERROR 
 		|| *error == MB_ERROR_TIME_GAP)
+		&& *kind != MB_DATA_COMMENT 
+		&& *kind != MB_DATA_ANGLE
+		&& *kind != MB_DATA_START
+		&& *kind != MB_DATA_STOP
+		&& *kind != MB_DATA_EVENT 
 		&& mb_io_ptr->ping_count > 1)
 		{
 		if (*speed < mb_io_ptr->speedmin)

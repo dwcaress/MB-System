@@ -1,10 +1,10 @@
-.TH mbswath l "6 August 1995"
+.TH mbswath l "14 August 1995"
 .SH NAME
 \fBmbswath\fP - GMT compatible utility for color fill or color shaded relief
 swath plots of multibeam data using Postscript.
 
 .SH VERSION
-Version 4.2
+Version 4.3
 
 .SH SYNOPSIS
 \fBmbswath\fP \fB-C\fIcptfile\fP \fB-J\fIparameters\fP 
@@ -14,8 +14,8 @@ Version 4.2
 \fB-E\fIyr/mo/da/hr/mn/sc\fP 
 \fB-f\fIformat\fP \fB-F\fIred/green/blue\fP 
 \fB-G\fImagnitude/azimuth\fP \fB-I\fIdatalist\fP \fB-K\fP 
-\fB-O\fP \fB-P\fP \fB-p\fIpings \fB-Q\fIdpi\fP \fB-S\fIspeed\fP 
-\fB-U\fP \fB-X\fIx-shift\fP \fB-Y\fIy-shift\fP \fB-Z\fImode\fP 
+\fB-N\fIcptfile\fP \fB-O\fP \fB-P\fP \fB-p\fIpings \fB-Q\fIdpi\fP \fB-S\fIspeed\fP 
+\fB-T\fItimegap\fP \fB-U\fP \fB-X\fIx-shift\fP \fB-Y\fIy-shift\fP \fB-Z\fImode\fP 
 \fB-0 -1 -2\fP
 \fB-V -H\fP]
 
@@ -229,6 +229,13 @@ the range from -180 to 180 degrees. If \fIlonflip\fP=1
 then the longitude values will be in
 the range from 0 to 360 degrees.
 Default: \fIlonflip\fP = 0.
+.TP
+.B \fB-N\fIcptfile\fP
+Normally, shading of bathymetry with amplitudes (\fImode\fP = 3
+as set with the \fB-Z\fP option) is accomplished
+by linearly mapping the amplitudes to shade values. This option
+specifies a grayscale cpt file used to map amplitude values
+to grayscale shade values. 
 .TP
 .B \-O
 Selects Overlay plot mode [Default initializes a new plot system].

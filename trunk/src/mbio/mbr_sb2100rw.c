@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sb2100rw.c	3/3/94
- *	$Id: mbr_sb2100rw.c,v 4.19 1995-08-17 14:42:45 caress Exp $
+ *	$Id: mbr_sb2100rw.c,v 4.20 1995-09-28 18:10:48 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	March 3, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.19  1995/08/17  14:42:45  caress
+ * Revision for release 4.3.
+ *
  * Revision 4.18  1995/07/18  15:38:29  caress
  * Added rounding to calculation of output navigation.
  *
@@ -117,7 +120,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_sb2100rw.c,v 4.19 1995-08-17 14:42:45 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2100rw.c,v 4.20 1995-09-28 18:10:48 caress Exp $";
 	char	*function_name = "mbr_alm_sb2100rw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -2768,7 +2771,7 @@ int	*error;
 		status = fprintf(mbfp,"%6.6d",data->surface_sound_velocity);
 		status = fprintf(mbfp,"%c",data->ssv_source);
 		status = fprintf(mbfp,"%c",data->depth_gate_mode);
-		if (data->frequency[0] != 'H')
+		if (data->frequency[0] == 'L')
 			{
 			status = fprintf(mbfp,"%4.4d",data->num_pixels_12khz);
 			if (data->pixel_size_12khz > 9.99)
@@ -2789,13 +2792,13 @@ int	*error;
 			status = fprintf(mbfp,"%+06d",data->roll_12khz);
 			status = fprintf(mbfp,"%6.6d",data->heading_12khz);
 			}
-		if (data->frequency[0] != 'L')
+		else /*if (data->frequency[0] == 'H')*/
 			{
 			status = fprintf(mbfp,"%4.4d",data->num_pixels_36khz);
-			if (data->pixel_size_12khz > 9.99)
+			if (data->pixel_size_36khz > 9.99)
 				status = fprintf(mbfp,"%4.1f",
 					data->pixel_size_36khz);
-			else if (data->pixel_size_12khz > 0.999)
+			else if (data->pixel_size_36khz > 0.999)
 				status = fprintf(mbfp,"%4.2f",
 					data->pixel_size_36khz);
 			else

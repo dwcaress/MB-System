@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_rollover.perl	6/18/93
-#    $Id: mbm_rollerror.perl,v 4.3 1995-08-17 14:52:53 caress Exp $
+#    $Id: mbm_rollerror.perl,v 4.4 1995-09-28 18:05:43 caress Exp $
 #
 #    Copyright (c) 1993, 1994 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -24,7 +24,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   data.
 #
 # Usage:
-#   mbm_rollover -Fformat -Ifile
+#   mbm_rollover -Fformat -Wfilterwidth -Ifile
 #
 # Author:
 #   David W. Caress
@@ -33,10 +33,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   June 13, 1993
 #
 # Version:
-#   $Id: mbm_rollerror.perl,v 4.3 1995-08-17 14:52:53 caress Exp $
+#   $Id: mbm_rollerror.perl,v 4.4 1995-09-28 18:05:43 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.3  1995/08/17  14:52:53  caress
+# Revision for release 4.3.
+#
 # Revision 4.2  1995/05/12  17:43:23  caress
 # Made exit status values consistent with Unix convention.
 # 0: ok  nonzero: error
@@ -61,14 +64,19 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #
 #
 # Deal with command line arguments
-&Getopts('I:i:F:f:');
-$file = ($opt_I || $opt_i);
-$format = ($opt_F || $opt_f);
+&Getopts('I:i:F:f:W:w:');
+$file =        ($opt_I || $opt_i);
+$format =      ($opt_F || $opt_f);
+$filterwidth = ($opt_W || $opt_w);
 
 # if needed set defaults
 if (!$format) 
 	{
 	$format = "24";
+	}
+if (!$filterwidth)
+	{
+	$filterwidth = 60;
 	}
 
 print "file: ",$file,"\n";
@@ -87,7 +95,7 @@ print "Running mblist...\n";
 
 # Filter the seafloor slope data.
 print "Running filter1d...\n";
-`filter1d $datfile -Fm5 -E -V > $fltfile`;
+`filter1d $datfile -Fc$filterwidth -E -V > $fltfile`;
 
 # Read the data and filtered data files, 
 # subtracting to get the high-passed signal.
@@ -98,11 +106,9 @@ open(FOUT,"> $corfile");
 while ($line1 = <F1>)
 	{
 	($time1, $dat) = $line1 =~ /(\S+)\s(\S+)/;
-	print "time1:",$time1," dat:",$dat,"\n";
 	$line2 = <F2>;
 	($time2, $flt) = $line2 =~ /(\S+)\s(\S+)/;
 	$res = $dat - $flt;
-	print "time1:",$time1," dat:",$dat," time2:",$time2," flt:",$flt," res:",$res,"\n";
 	print FOUT $time1,"\t",$res,"\n";
 	}
 close(F1);

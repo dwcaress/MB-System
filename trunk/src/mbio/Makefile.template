@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 4.4 1994-10-31 20:04:21 caress Exp $
+#	$Id: Makefile.template,v 4.5 1995-09-28 18:10:48 caress Exp $
 #
 #     Copyright (c) 1993, 1994 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.4  1994/10/31  20:04:21  caress
+# Change man pages from section 1 to l.
+#
 # Revision 4.3  1994/10/31  18:28:56  caress
 # Changed man pages from section 1 to section l.
 #
@@ -53,6 +56,7 @@ all:	$(LIBDIR)/libmbio.a $(MANDIR)/mbio.l \
 	$(INCDIR)/mbsys_sb2100.h $(INCDIR)/mbsys_simrad.h \
 	$(INCDIR)/mbsys_mr1.h $(INCDIR)/mbsys_ldeoih.h \
 	$(INCDIR)/mbsys_reson.h $(INCDIR)/mbsys_sb2000.h \
+	$(INCDIR)/mbsys_hsmd.h \
 	$(INCDIR)/mbf_sbsiomrg.h \
 	$(INCDIR)/mbf_sbsiocen.h $(INCDIR)/mbf_sbsiolsi.h \
 	$(INCDIR)/mbf_sburicen.h $(INCDIR)/mbf_hsatlraw.h \
@@ -62,7 +66,8 @@ all:	$(LIBDIR)/libmbio.a $(MANDIR)/mbio.l \
 	$(INCDIR)/mbf_em12darw.h $(INCDIR)/mbf_mr1prhig.h \
 	$(INCDIR)/mbf_mbldeoih.h $(INCDIR)/mbf_cbat9001.h \
 	$(INCDIR)/mbf_bchrtunb.h $(INCDIR)/mbf_sbsioswb.h \
-	$(INCDIR)/mbf_sb2000sb.h $(INCDIR)/mbf_sb2000ss.h
+	$(INCDIR)/mbf_sb2000sb.h $(INCDIR)/mbf_sb2000ss.h \
+	$(INCDIR)/mbf_hsmdaraw.h $(INCDIR)/mbf_hsmdldih.h
 
 ### make clean removes the object files
 clean:
@@ -79,6 +84,7 @@ $(LIBDIR)/libmbio.a:	mb_format_inf.o mb_format.o mb_error.o mb_swap.o \
 		mbsys_sb.o mbsys_hsds.o mbsys_sb2100.o \
 		mbsys_simrad.o mbsys_mr1.o mbsys_ldeoih.o \
 		mbsys_reson.o mbsys_elac.o mbsys_sb2000.o \
+		mbsys_hsmd.o \
 		mbr_sbsiomrg.o \
 		mbr_sbsiocen.o mbr_sbsiolsi.o mbr_sburicen.o \
 		mbr_sburivax.o mbr_hsatlraw.o mbr_hsldedmb.o \
@@ -86,7 +92,8 @@ $(LIBDIR)/libmbio.a:	mb_format_inf.o mb_format.o mb_error.o mb_swap.o \
 		mbr_hsldeoih.o mbr_sb2100rw.o mbr_em1000rw.o mbr_em12darw.o \
 		mbr_mr1prhig.o mbr_mbldeoih.o mbr_cbat9001.o \
 		mbr_bchrtunb.o mbr_sbsioswb.o \
-		mbr_sb2000sb.o mbr_sb2000ss.o
+		mbr_sb2000sb.o mbr_sb2000ss.o \
+		mbr_hsmdaraw.o mbr_hsmdldih.o
 	$(ARCHIVE) $(LIBDIR)/libmbio.a \
 		mb_format_inf.o mb_format.o mb_error.o mb_swap.o \
 		mb_read_init.o mb_write_init.o mb_close.o \
@@ -98,6 +105,7 @@ $(LIBDIR)/libmbio.a:	mb_format_inf.o mb_format.o mb_error.o mb_swap.o \
 		mbsys_sb.o mbsys_hsds.o mbsys_sb2100.o \
 		mbsys_simrad.o mbsys_mr1.o mbsys_ldeoih.o \
 		mbsys_reson.o mbsys_elac.o mbsys_sb2000.o \
+		mbsys_hsmd.o \
 		mbr_sbsiomrg.o \
 		mbr_sbsiocen.o mbr_sbsiolsi.o mbr_sburicen.o \
 		mbr_sburivax.o mbr_hsatlraw.o mbr_hsldedmb.o \
@@ -105,7 +113,8 @@ $(LIBDIR)/libmbio.a:	mb_format_inf.o mb_format.o mb_error.o mb_swap.o \
 		mbr_hsldeoih.o mbr_sb2100rw.o mbr_em1000rw.o mbr_em12darw.o \
 		mbr_mr1prhig.o mbr_mbldeoih.o mbr_cbat9001.o \
 		mbr_bchrtunb.o mbr_sbsioswb.o \
-		mbr_sb2000sb.o mbr_sb2000ss.o
+		mbr_sb2000sb.o mbr_sb2000ss.o\
+		mbr_hsmdaraw.o mbr_hsmdldih.o
 	ranlib $(LIBDIR)/libmbio.a
 
 ### compile the source files
@@ -175,6 +184,8 @@ mbsys_elac.o:	mbsys_elac.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)
 	$(CC) -c $(CFLAGS) mbsys_elac.c
 mbsys_sb2000.o:	mbsys_sb2000.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mbsys_sb2000.h
 	$(CC) -c $(CFLAGS) mbsys_sb2000.c
+mbsys_hsmd.o:	mbsys_hsmd.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mbsys_hsmd.h
+	$(CC) -c $(CFLAGS) mbsys_hsmd.c
 mbr_sbsiomrg.o:	mbr_sbsiomrg.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_swap.h $(INCDIR)/mbsys_sb.h $(INCDIR)/mbf_sbsiomrg.h
 	$(CC) -c $(CFLAGS) mbr_sbsiomrg.c
 mbr_sbsiocen.o: mbr_sbsiocen.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_swap.h $(INCDIR)/mbsys_sb.h $(INCDIR)/mbf_sbsiocen.h
@@ -215,6 +226,10 @@ mbr_sb2000sb.o: mbr_sb2000sb.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INC
 	$(CC) -c $(CFLAGS) mbr_sb2000sb.c
 mbr_sb2000ss.o: mbr_sb2000ss.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_swap.h $(INCDIR)/mbf_sb2000ss.h
 	$(CC) -c $(CFLAGS) mbr_sb2000ss.c
+mbr_hsmdaraw.o: mbr_hsmdaraw.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_swap.h $(INCDIR)/mbf_hsmdaraw.h
+	$(CC) -c $(CFLAGS) mbr_hsmdaraw.c
+mbr_hsmdldih.o: mbr_hsmdldih.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_swap.h $(INCDIR)/mbf_hsmdldih.h
+	$(CC) -c $(CFLAGS) mbr_hsmdldih.c
 
 ### copy the man page to the man page directory
 $(MANDIR)/mbio.l:	mbio.manl
@@ -261,6 +276,9 @@ $(INCDIR)/mbsys_elac.h:	mbsys_elac.h
 $(INCDIR)/mbsys_sb2000.h:	mbsys_sb2000.h
 	cp mbsys_sb2000.h $(INCDIR)/mbsys_sb2000.h
 	chmod 664 $(INCDIR)/mbsys_sb2000.h
+$(INCDIR)/mbsys_hsmd.h:	mbsys_hsmd.h
+	cp mbsys_hsmd.h $(INCDIR)/mbsys_hsmd.h
+	chmod 664 $(INCDIR)/mbsys_hsmd.h
 $(INCDIR)/mbf_sbsiomrg.h:	mbf_sbsiomrg.h
 	cp mbf_sbsiomrg.h $(INCDIR)/mbf_sbsiomrg.h
 	chmod 664 $(INCDIR)/mbf_sbsiomrg.h
@@ -315,3 +333,9 @@ $(INCDIR)/mbf_sb2000sb.h:	mbf_sb2000sb.h
 $(INCDIR)/mbf_sb2000ss.h:	mbf_sb2000ss.h
 	cp mbf_sb2000ss.h $(INCDIR)/mbf_sb2000ss.h
 	chmod 664 $(INCDIR)/mbf_sb2000ss.h
+$(INCDIR)/mbf_hsmdaraw.h:	mbf_hsmdaraw.h
+	cp mbf_hsmdaraw.h $(INCDIR)/mbf_hsmdaraw.h
+	chmod 664 $(INCDIR)/mbf_hsmdaraw.h
+$(INCDIR)/mbf_hsmdldih.h:	mbf_hsmdldih.h
+	cp mbf_hsmdldih.h $(INCDIR)/mbf_hsmdldih.h
+	chmod 664 $(INCDIR)/mbf_hsmdldih.h

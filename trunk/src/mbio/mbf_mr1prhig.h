@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_mr1prhig.h	3/3/94
- *	$Id: mbf_mr1prhig.h,v 4.0 1994-10-21 12:35:05 caress Exp $
+ *	$Id: mbf_mr1prhig.h,v 4.1 1995-09-28 18:10:48 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -17,6 +17,9 @@
  * Author:	D. W. Caress
  * Date:	July 15, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/10/21  12:35:05  caress
+ * Release V4.0
+ *
  * Revision 1.2  1994/10/21  12:20:01  caress
  * Release V4.0
  *
@@ -43,10 +46,10 @@
  */
 
 /* maximum number of bathymetry beams per side for MR1 */
-#define MBF_MR1PRHIG_BEAMS_SIDE 100
+#define MBF_MR1PRHIG_BEAMS_SIDE 200
 
 /* maximum number of sidescan pixels per side for MR1 */
-#define MBF_MR1PRHIG_PIXELS_SIDE 2000
+#define MBF_MR1PRHIG_PIXELS_SIDE 3500
 
 /* maximum number of bathymetry beams for MR1 */
 #define MBF_MR1PRHIG_BEAMS (2*MBF_MR1PRHIG_BEAMS_SIDE + 3)

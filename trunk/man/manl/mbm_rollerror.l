@@ -6,7 +6,7 @@
 Version 4.3
 
 .SH SYNOPSIS
-\fBmbm_rollerror\fP \fB-F\fIformat \fB-I\fIfile \fP[\fB-S\fIscale \fB-X\fIxaxis \fB-A\fIxmin \fB-B\fIxmax\fP]
+\fBmbm_rollerror\fP \fB-F\fIformat \fB-I\fIfile \fP[\fB-W\fIfilterwidth\fP]
 
 .SH DESCRIPTION
 \fBmbm_rollerror\fP is a macro which generates crosstrack slope
@@ -49,6 +49,9 @@ Default: \fIformat\fP = 24.
 .TP
 .B \fB-I\fIfile\fP
 Data file from which the input data will be read.
+.TP
+.B \fB-W\fIfilterwidth\fP
+Sets filter width in seconds. Default: \fIfilterwidth\fP = 60.
 
 .SH EXAMPLES
 Suppose one has obtained a Hydrosweep DS multibeam data file 

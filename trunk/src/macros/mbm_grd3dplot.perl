@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grd3dplot.perl	8/6/95
-#    $Id: mbm_grd3dplot.perl,v 4.0 1995-08-17 14:51:59 caress Exp $
+#    $Id: mbm_grd3dplot.perl,v 4.1 1995-09-28 18:05:43 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -61,10 +61,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   August 8, 1994
 #
 # Version:
-#   $Id: mbm_grd3dplot.perl,v 4.0 1995-08-17 14:51:59 caress Exp $
+#   $Id: mbm_grd3dplot.perl,v 4.1 1995-09-28 18:05:43 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.0  1995/08/17  14:51:59  caress
+# Revision for release 4.3.
+#
 #
 #
 #
@@ -1182,6 +1185,8 @@ $middle = "-K -O -V >> $psfile";
 $end = "-O -V >> $psfile";
 
 # set macro gmt default settings
+$gmt_def = "PAPER_WIDTH/$page_width_in{$pagesize}";
+push(@gmt_macro_defs, $gmt_def);
 $gmt_def = "ANOT_FONT/Helvetica";
 push(@gmt_macro_defs, $gmt_def);
 $gmt_def = "LABEL_FONT/Helvetica";

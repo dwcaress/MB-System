@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_plot.perl	6/18/93
-#    $Id: mbm_plot.perl,v 4.10 1995-08-17 14:52:53 caress Exp $
+#    $Id: mbm_plot.perl,v 4.11 1995-09-28 18:05:43 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -68,10 +68,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   June 17, 1993
 #
 # Version:
-#   $Id: mbm_plot.perl,v 4.10 1995-08-17 14:52:53 caress Exp $
+#   $Id: mbm_plot.perl,v 4.11 1995-09-28 18:05:43 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.10  1995/08/17  14:52:53  caress
+# Revision for release 4.3.
+#
 # Revision 4.9  1995/07/18  17:24:57  caress
 # Now uses -G option of mbinfo.
 #
@@ -309,7 +312,7 @@ if ($help)
 	print "capabilites not supported by this macro.\n";
 	print "\nBasic Usage: \n";
 	print "\t$program_name -Fformat -Ifile [-Amagnitude[/azimuth | zero_level]\n";
-	print "\t\t-C[cont_int/col_int/tic_int/lab_int/tic_int/lab_hgt]\n";
+	print "\t\t-C[cont_int/col_int/tic_int/lab_int/tic_len/lab_hgt]\n";
 	print "\t\t-Gcolor_mode -H\n";
 	print "\t\t-N[time_tick/time_annot/date_annot/time_tick_len]\n";
 	print "\t\t-Oroot -Ppagesize -S[color/shade] -Uorientation -V \n";
@@ -391,7 +394,7 @@ if ($misc)
 			{
 			($tx, $ty, $tsize, $tangle, $font, $just, $txt) 
 			    = $cmd
-			    =~ /^[Gg][Pp](\S+)\/(\S+)\/(\S+)\/(\S+)\/(\S+)\/(\S+)\/(.+)/;
+			    =~ /^[Gg][Tt](\S+)\/(\S+)\/(\S+)\/(\S+)\/(\S+)\/(\S+)\/(.+)/;
 			if ($txt)
 			    {
 			    ($text_info) = $cmd =~ 
@@ -589,24 +592,25 @@ else
 		$color_pallette = 1;
 		}
 	}
-if ($navigation_control)
+if ($navigation_control && $navigation_control =~ /\S+\/\S+\/\S+\/\S+/)
 	{
-	if ($navigation_control =~ /\S+\/\S+\/\S+\/\S+/)
-		{
-		($nav_time_tick, $nav_time_annot, 
-			$nav_date_annot, $nav_tick_size) 
-			= $color_control =~  /(\S+)\/(\S+)\/(\S+)\/(\S+)/;
-		}
-	elsif ($navigation_control =~ /\S+\/\S+\/\S+/)
+	$navigation_mode = 1;
+	}
+elsif ($navigation_control)
+	{
+	if ($navigation_control =~ /\S+\/\S+\/\S+/)
 		{
 		($nav_time_tick, $nav_time_annot, 
 			$nav_date_annot) 
-			= $color_control =~  /(\S+)\/(\S+)\/(\S+)/;
+			= $navigation_control =~  /(\S+)\/(\S+)\/(\S+)/;
+		$nav_tick_size = 0.15;
 		}
 	elsif ($navigation_control =~ /\S+\/\S+/)
 		{
 		($nav_time_tick, $nav_time_annot) 
-			= $color_control =~  /(\S+)\/(\S+)/;
+			= $navigation_control =~  /(\S+)\/(\S+)/;
+		$nav_date_annot = 100000;
+		$nav_tick_size = 0.15;
 		}
 	else
 		{
@@ -615,20 +619,15 @@ if ($navigation_control)
 		$nav_date_annot = 100000;
 		$nav_tick_size = 0.15;
 		}
-	}
-else
-	{
-	$nav_time_tick = 0.25;
-	$nav_time_annot = 1;
-	$nav_date_annot = 4;
-	$nav_tick_size = 0.15;
-	}
-if ($navigation_mode)
-	{
+	$navigation_mode = 1;
 	$navigation_control = "$nav_time_tick" 
 			. "/" . "$nav_time_annot"
 			. "/" . "$nav_date_annot"
 			. "/" . "$nav_tick_size";
+	}
+elsif ($navigation_mode)
+	{
+	$navigation_control = "0.25/1/4/0.15";
 	}
 if ($color_flip_control)
 	{
@@ -1162,7 +1161,26 @@ else
 	$colorscale_vh = "h";
 	}
 
-# figure out reasonable color and contour intervals
+# figure out reasonable bathymetry contour intervals
+$dmin = $zmin;
+$dmax = $zmax;
+$dd = ($dmax - $dmin); 
+$contour_int = 0.0;
+if ($dd > 0)
+	{
+	$base = int((log($dd) / log(10.)) + 0.5);
+	$contour_int = (10 ** $base) / 10.0;
+	if ($dd / $contour_int < 10)
+		{
+		$contour_int = $contour_int / 4;
+		}
+	elsif ($dd / $contour_int < 20)
+		{
+		$contour_int = $contour_int / 2;
+		}
+	}
+
+# figure out reasonable color intervals
 if ($color_mode >= 1 && $color_mode <= 3)
 	{
 	$dmin = $zmin;
@@ -1179,18 +1197,18 @@ elsif ($color_mode == 5)
 	$dmax = $smax;
 	}
 $dd = ($dmax - $dmin); 
-$contour_int = 0.0;
+$color_int = 0.0;
 if ($dd > 0)
 	{
 	$base = int((log($dd) / log(10.)) + 0.5);
-	$contour_int = (10 ** $base) / 10.0;
-	if ($dd / $contour_int < 10)
+	$color_int = (10 ** $base) / 10.0;
+	if ($dd / $color_int < 10)
 		{
-		$contour_int = $contour_int / 4;
+		$color_int = $color_int / 4;
 		}
-	elsif ($dd / $contour_int < 20)
+	elsif ($dd / $color_int < 20)
 		{
-		$contour_int = $contour_int / 2;
+		$color_int = $color_int / 2;
 		}
 	}
 if ($color_mode && $color_style == 1)
@@ -1203,7 +1221,7 @@ elsif ($color_mode)
 	}
 if ($color_mode && !$no_nice_color_int && $dd > 0)
 	{
-	$start_int = $contour_int / 2;
+	$start_int = $color_int / 2;
 	$multiplier = int($dd / ($ncolors_use - 1) / $start_int) + 1;
 	$color_int = $multiplier * $start_int;
 	if (($color_int * int($dmin / $color_int) 
@@ -1278,6 +1296,7 @@ elsif ($contour_control =~ /\S+\/\S+\/\S+\/\S+\/\S+\/\S+/)
 	($contour_int, $contour_color_int, $contour_tick_int, 
 		$contour_label_int, $contour_tick_len, 
 		$contour_label_hgt) 
+		= $contour_control
 		=~ /(\S+)\/(\S+)\/(\S+)\/(\S+)\/(\S+)\/(\S+)/;
 	$contour_label_hgt = 0.1;
 	}
@@ -1285,6 +1304,7 @@ elsif ($contour_control =~ /\S+\/\S+\/\S+\/\S+\/\S+/)
 	{
 	($contour_int, $contour_color_int, $contour_tick_int, 
 		$contour_label_int, $contour_tick_len) 
+		= $contour_control
 		=~ /(\S+)\/(\S+)\/(\S+)\/(\S+)\/(\S+)/;
 	$contour_label_hgt = 0.1;
 	}
@@ -1292,6 +1312,7 @@ elsif ($contour_control =~ /\S+\/\S+\/\S+\/\S+/)
 	{
 	($contour_int, $contour_color_int, $contour_tick_int, 
 		$contour_label_int) 
+		= $contour_control 
 		=~ /(\S+)\/(\S+)\/(\S+)\/(\S+)/;
 	$contour_tick_len = 0.01;
 	$contour_label_hgt = 0.1;
@@ -1299,7 +1320,7 @@ elsif ($contour_control =~ /\S+\/\S+\/\S+\/\S+/)
 elsif ($contour_control =~ /\S+\/\S+\/\S+/)
 	{
 	($contour_int, $contour_color_int, $contour_tick_int) 
-		=~ /(\S+)\/(\S+)\/(\S+)/;
+		= $contour_control =~ /(\S+)\/(\S+)\/(\S+)/;
 	$contour_label_int = $contour_color_int;
 	$contour_tick_len = 0.01;
 	$contour_label_hgt = 0.1;
@@ -1307,7 +1328,7 @@ elsif ($contour_control =~ /\S+\/\S+\/\S+/)
 elsif ($contour_control =~ /\S+\/\S+/)
 	{
 	($contour_int, $contour_color_int) 
-		=~ /(\S+)\/(\S+)/;
+		 = $contour_control =~ /(\S+)\/(\S+)/;
 	$contour_tick_int = $contour_color_int;
 	$contour_label_int = $contour_color_int;
 	$contour_tick_len = 0.01;
@@ -1315,7 +1336,7 @@ elsif ($contour_control =~ /\S+\/\S+/)
 	}
 elsif ($contour_control =~ /\S+/)
 	{
-	($contour_int) =~ /(\S+)/;
+	($contour_int) = $contour_control =~ /(\S+)/;
 	if ($color_mode)
 		{
 		$contour_color_int = 100000;
@@ -1358,6 +1379,8 @@ $middle = "-K -O -V >> $psfile";
 $end = "-O -V >> $psfile";
 
 # set macro gmt default settings
+$gmt_def = "PAPER_WIDTH/$page_width_in{$pagesize}";
+push(@gmt_macro_defs, $gmt_def);
 $gmt_def = "ANOT_FONT/Helvetica";
 push(@gmt_macro_defs, $gmt_def);
 $gmt_def = "LABEL_FONT/Helvetica";
@@ -1800,7 +1823,9 @@ if ($contour_mode || $navigation_mode)
 		{
 		printf FCMD "-Z$contour_algorithm \\\n\t";
 		}
-	elsif ($contour_mode && $format == 41)
+	elsif ($contour_mode && 
+		($format == 41 || $format == 101
+		|| $format == 102))
 		{
 		print FCMD "-Z1 ";
 		}
@@ -2023,6 +2048,10 @@ if ($verbose)
 		{
 		print "    Contoured Bathymetry\n";
 		}
+	if ($navigation_mode)
+		{
+		print "    Navigation\n";
+		}
 	if (@xyfiles)
 		{
 		print "    XY Plots of ", scalar(@xyfiles), " Datasets\n";
@@ -2133,6 +2162,10 @@ if ($verbose)
 	if ($contour_mode)
 		{
 		print "    Contour control:          $contour_control\n";
+		}
+	if ($navigation_mode)
+		{
+		print "    Navigation control:       $navigation_control\n";
 		}
 	if ($color_mode)
 		{
