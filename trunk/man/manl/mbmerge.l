@@ -15,6 +15,31 @@ Version 4.6
 \fBmbmerge\fP is an utility for merging navigation with swath sonar
 echosounder data.  The input navigation can be in one of several
 formats, including the L-DEO shipboard processing format. 
+
+Many data formats include the navigation information in the
+same data records as the ping or survey data. In this case,
+\fBmbmerge\fP replaces the position values in the file
+by interpolation of the values in the navigation file.
+
+Some data formats use asynchronous navigation, which means that
+the navigation is contained in data records separate from the
+data records containing sonar ping data. The time stamps and
+frequency of the navigation records are in general different
+from those of the ping data records. Examples include all
+of the Simrad vendor data formats and all of the "UNB" formats
+for Reson SeaBat and Elac Bottomchart sonars. For data formats
+with asynchronous navigation, \fBMB-System\fP programs calculate
+the positions of ping data by interpolation and/or 
+extrapolation of the navigation data. One frequently encountered
+problem is having the first ping record in a file occur
+before the first navigation record so that the position of
+that first record is unknown to \fBMB-System\fP programs. 
+In the case of asynchronous navigation, \fBmbmerge\fP replaces
+the position values in the navigation records. In the special
+case of a ping record before any navigation records, \fBmbmerge\fP
+inserts a new navigation record just before the first ping
+record to eliminate the unknown position problem.
+
 The default input and output streams are stdin and stdout.
 
 .SH AUTHORSHIP
