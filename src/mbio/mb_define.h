@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	4/21/96
- *    $Id: mb_define.h,v 5.21 2003-07-26 17:59:32 caress Exp $
+ *    $Id: mb_define.h,v 5.22 2003-09-23 20:56:00 caress Exp $
  *
  *    Copyright (c) 1996, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	April 21, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.21  2003/07/26 17:59:32  caress
+ * Changed beamflag handling code.
+ *
  * Revision 5.20  2003/05/20 18:05:32  caress
  * Added svp_source to data source parameters.
  *
@@ -169,6 +172,9 @@ typedef char	mb_s_char;
 #ifdef OTHER
 typedef signed char	mb_s_char;
 #endif
+
+/* typedef for path string */
+typedef char mb_path[MB_PATH_MAXLINE];
 
 /* declare PI if needed */
 #ifndef M_PI
