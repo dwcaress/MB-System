@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	install_makefiles	5/20/94
-#    $Id: install_makefiles,v 5.1 2001-06-08 21:25:04 caress Exp $
+#    $Id: install_makefiles,v 5.2 2002-01-24 02:12:31 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 1996, 1997, 2001 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -41,7 +41,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   May 20, 1994
 #
 # Version:
-#   $Id: install_makefiles,v 5.1 2001-06-08 21:25:04 caress Exp $
+#   $Id: install_makefiles,v 5.2 2002-01-24 02:12:31 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
@@ -296,12 +296,29 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #	$NETCDFINCDIR = "/usr/local/gmt/include";
 #	$LEVITUS = "/usr/local/levitus/annual";
 #
+# Example for installing on Apple Macintosh Computers
+# running MacOS version 10.1 or later:
+#	$MBSYSTEM_HOME = "/usr/local/mbsystem";
+#	$OS = "DARWIN";
+#	$BYTESWAPPED = "NO";
+#	$CFLAGS = "-I/usr/include/X11R6";
+#	$LFLAGS = "-lm ";
+#	$GRAPHICAL = "YES";
+#	$MOTIFINCDIR = "/usr/local/include/Xm";
+#	$MOTIFLIBS = "-L/usr/local/lib -L/usr/X11R6/lib -lXm -lXt -lX11";
+#	$GMTVERSION = "3.4";
+#	$GMTLIBDIR = "/usr/local/gmt/src";
+#	$GMTINCDIR = "/usr/local/gmt/src";
+#	$NETCDFLIBDIR = "/usr/local/gmt/lib";
+#	$NETCDFINCDIR = "/usr/local/gmt/include";
+#	$LEVITUS = "/usr/local/levitus/annual";
+#
 # **** EDIT THE PARAMETERS HERE ****
 # Set the environment parameters:
 $MBSYSTEM_HOME = "/usr/people/caress/dev/mbsystem";
 $OS = "IRIX64";
 $BYTESWAPPED = "NO";
-$CFLAGS = "-g -w";
+$CFLAGS = "-g";
 $LFLAGS = "-lm";
 $GRAPHICAL = "YES";
 $MOTIFINCDIR = "/usr/include/Xm";
@@ -503,7 +520,7 @@ while (@files)
 			{
 			print MAK "BIGFLAG = $BIGFLAG\n";
 			}
-		elsif (index($_,"ranlib",0) >= 0 && $OS ne "SUN")
+		elsif (index($_,"ranlib",0) >= 0 && $OS ne "SUN" && $OS ne "DARWIN")
 			{
 			}
 		elsif (index($_,"catman",0) >= 0 && $OS ne "SUN")
