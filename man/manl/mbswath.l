@@ -1,4 +1,4 @@
-.TH mbswath l "14 February 1995"
+.TH mbswath l "6 August 1995"
 .SH NAME
 \fBmbswath\fP - GMT compatible utility for color fill or color shaded relief
 swath plots of multibeam data using Postscript.
@@ -7,22 +7,27 @@ swath plots of multibeam data using Postscript.
 Version 4.2
 
 .SH SYNOPSIS
-\fBmbswath\fP \fB-C\fIcptfile \fB-J\fIparameters 
-\fB-R\fIwest/east/south/north \fP[\fB-A\fIfactor/mode/depth 
-\fB-B\fItickinfo \fB-b\fIyr/mo/da/hr/mn/sc 
-\fB-D\fImode/scale/min/max \fB-E\fIyr/mo/da/hr/mn/sc 
-\fB-f\fIformat \fB-F\fIred/green/blue 
-\fB-G\fImagnitude/azimuth \fB-I\fIdatalist \fB-K\fI 
-\fB-M\fI \fB-O\fI \fB-P\fI \fB-p\fIpings \fB-Q\fIdpi \fB-S\fIspeed 
-\fB-U\fI \fB-X\fIx-shift \fB-Y\fIy-shift \fB-Z\fImode 
-\fB-#\fIcopies \fB-V -H\fP]
+\fBmbswath\fP \fB-C\fIcptfile\fP \fB-J\fIparameters\fP 
+\fB-R\fIwest/east/south/north\fP [\fB-A\fIfactor/mode/depth\fP 
+\fB-B\fItickinfo\fP \fB-b\fIyr/mo/da/hr/mn/sc\fP 
+\fB-c\fIcopies\fP \fB-D\fImode/scale/min/max\fP 
+\fB-E\fIyr/mo/da/hr/mn/sc\fP 
+\fB-f\fIformat\fP \fB-F\fIred/green/blue\fP 
+\fB-G\fImagnitude/azimuth\fP \fB-I\fIdatalist\fP \fB-K\fP 
+\fB-O\fP \fB-P\fP \fB-p\fIpings \fB-Q\fIdpi\fP \fB-S\fIspeed\fP 
+\fB-U\fP \fB-X\fIx-shift\fP \fB-Y\fIy-shift\fP \fB-Z\fImode\fP 
+\fB-0 -1 -2\fP
+\fB-V -H\fP]
 
 .SH DESCRIPTION
 \fBmbswath\fP is an utility for plotting multibeam swath data in color fill
 or color shaded relief using Postscript.  Like \fBmbcontour\fP, \fBmbswath\fP
-is fully compatible with the GMT package version 2.1, including the use
-of GMT style color pallete (cpt) files to control the color table. The program
-can read data from stdin (the default) or from one or more multibeam files. 
+is fully compatible with the GMT package version 3, including the use
+of GMT style color pallete (cpt) files to control the color table. 
+A 24-bit true color \fIPostScript\fP file is output using one of 
+three methods.
+The program can read data from stdin (the default) or from one 
+or more multibeam files. 
 
 .SH AUTHORSHIP
 David W. Caress (caress@lamont.ldeo.columbia.edu)
@@ -54,7 +59,8 @@ pings multiplied by the \fIfactor\fP value.
 Default: \fIfactor\fP = 1.0, \fImode\fP = 1, \fIdepth\fP = 3000.0.
 .TP
 .B \fB-B\fItickinfo\fP
-Sets map boundary tickmark intervals. See \fBpsbasemap\fP for details.
+Sets map boundary tickmark intervals. See the \fBpsbasemap\fP
+manual page for details.
 .TP
 .B \fB-b\fIyr/mo/da/hr/mn/sc\fP
 Sets the starting time for data allowed in the input data; pings
@@ -65,6 +71,9 @@ Default: \fIyr/mo/da/hr/mn/sc\fP = 1962/2/21/10/30/0.
 Sets the color palette file which controls the color of the plot.
 See documentation of the GMT package for a complete description
 of cpt files.
+.TP
+.B \fB-c\fIcopies\fP
+Specifies the number of plot copies (the default is 1).
 .TP
 .B \fB-D\fImode/scale/min/max\fP
 Sets scaling of beam amplitude or sidescan pixel values which
@@ -136,48 +145,77 @@ format supported by \fBMBIO\fP. A list of the multibeam data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page. Default: \fIinfile\fP = "stdin".
 .TP
-.B \fB-J\fP
-Selects the map projection.  Choose one of the following:
+.B \-J
+Selects the map projection. Scale is inch/degree, 1:xxxxx. 
+or width in inches (upper case modifier).
 .br
-\fB\-Ja\fP\fIlon0/lat0/scale[r]\fP (Lambert Azimuthal Equal-Area).
+.sp
+\fBCYLINDRICAL PROJECTIONS:\fP
 .br
-\fB\-Jb\fP\fIlon0/lat0/lat1/lat2/scale[r]\fP (Albers Conic Equal-Area).
-.br
-\fB\-Jc\fP\fIlon0/lat0/scale[r]\fP (Cassini).
-.br
-\fB\-Je\fP\fIlon0/lat0/scale[r]\fP (Azimuthal Equidistant).
-.br
-\fB\-Jg\fP\fIlon0/lat0/scale[r]\fP (Orthographic).
-.br
-\fB\-Jh\fP\fIlongitude/radius\fP (Hammer Equal-Area)
-.br
-\fB\-Ji\fP\fIwidth\fP (Interrupted Sinusoidal)
-.br
-\fB\-Jl\fP\fIlon0/lat0/lat1/lat2/scale\fP (Lambert Conic Conformal)
+.sp
+\fB\-Jc\fP\fIlon0/lat0/scale\fP (Cassini)
 .br
 \fB\-Jm\fP\fIscale\fP (Mercator)
 .br
-\fB\-Joa\fP\fIorigin_x/origin_y/azimuth/scale[r]\fP (Oblique Mercator - point and azimuth)
+\fB\-Joa\fP\fIlon0/lat0/azimuth/scale\fP (Oblique Mercator - point and azimuth)
 .br
-\fB\-Job\fP\fIorigin_x/origin_y/point_x/point_y/scale[r]\fP (Oblique Mercator - two points)
+\fB\-Job\fP\fIlon0/lat0/lon1/lat1/scale\fP (Oblique Mercator - two points)
 .br
-\fB\-Joc\fP\fIorigin_x/origin_y/pole_x/pole_y/scale[r]\fP (Oblique Mercator - point and pole)
+\fB\-Joc\fP\fIlon0/lat0/lonp/latp/scale\fP (Oblique Mercator - point and pole)
 .br
-\fB\-Jr\fP\fIlongitude/radius\fP (Winkel Tripel)
+\fB\-Jq\fP\fIlon0/scale\fP (Equidistant Cylindrical Projection (Plate Carree))
 .br
-\fB\-Js\fP\fIlon0/lat0/scale[r]\fP (Stereographic)
-.br
-\fB\-Jt\fP\fIlongitude/scale\fP (TM - Transverse Mercator)
+\fB\-Jt\fP\fIlon0/scale\fP (TM - Transverse Mercator)
 .br
 \fB\-Ju\fP\fIzone/scale\fP (UTM - Universal Transverse Mercator)
 .br
-\fB\-Jw\fP\fIlongitude/radius\fP (Mollweide Equal-Area)
+\fB\-Jy\fP\fIlon0/lats/scale\fP (Basic Cylindrical Projection) 
 .br
-\fB\-Jp\fP\fIradius\fP (Linear scaling of polar (theta,r) coordinates)
+.sp
+\fBAZIMUTHAL PROJECTIONS:\fP
 .br
-\fB\-Jx\fP\fIxscale[/yscale]\fP (Linear scaling of cartesian coordinates)
+.sp
+\fB\-Ja\fP\fIlon0/lat0/scale\fP (Lambert).
 .br
-More details can be found in the \fBpsbasemap\fP man pages.
+\fB\-Je\fP\fIlon0/lat0/scale\fP (Equidistant).
+.br
+\fB\-Jg\fP\fIlon0/lat0/scale\fP (Orthographic).
+.br
+\fB\-Js\fP\fIlon0/lat0/scale\fP (General Stereographic)
+.br
+.sp
+\fBCONIC PROJECTIONS:\fP
+.br
+.sp
+\fB\-Jb\fP\fIlon0/lat0/lat1/lat2/scale\fP (Albers)
+.br
+\fB\-Jl\fP\fIlon0/lat0/lat1/lat2/scale\fP (Lambert)
+.br
+.sp
+\fBMISCELLANEOUS PROJECTIONS:\fP
+.br
+.sp
+\fB\-Jh\fP\fIlon0/scale\fP (Hammer)
+.br
+\fB\-Ji\fP\fIlon0/scale\fP (Sinusoidal)
+.br
+\fB\-Jk\fP\fIlon0/scale\fP (Eckert VI)
+.br
+\fB\-Jn\fP\fIlon0/scale\fP (Robinson)
+.br
+\fB\-Jr\fP\fIlon0/scale\fP (Winkel Tripel)
+.br
+\fB\-Jw\fP\fIlon0/scale\fP (Mollweide)
+.br
+.sp
+\fBNON-GEOGRAPHICAL PROJECTIONS:\fP
+.br
+.sp
+\fB\-Jp\fP\fIscale\fP (Linear projection for polar (theta,r) coordinates)
+.br
+\fB\-Jx\fP\fIx-scale\fP[\fBl|p\fP\fIpow\fP][\fI/y-scale\fP[\fBl|p\fP\fIpow\fP]] (Linear, log, and power scaling)
+.br
+More details can be found in the \fBpsbasemap\fP manpages.
 .TP
 .B \-K
 More \fIPostScript\fP code will be appended later [Default terminates the plot system].
@@ -191,9 +229,6 @@ the range from -180 to 180 degrees. If \fIlonflip\fP=1
 then the longitude values will be in
 the range from 0 to 360 degrees.
 Default: \fIlonflip\fP = 0.
-.TP
-.B \-M
-Force conversion to monochrome image using the [television] YIQ transformation.
 .TP
 .B \-O
 Selects Overlay plot mode [Default initializes a new plot system].
@@ -211,9 +246,9 @@ beam spacing.
 Default: \fIpings\fP = 1 (no ping averaging).
 .TP
 .B \fB-Q\fIdpi\fP
-Causes \fBmbswath\fP to generate the plot as an image rather than as
-a series of polygon color fills (the default). The resolution of the 
-image is set by \fIdpi\fP in pixels per inch.
+Sets the resolution of the color image output by \fBmbswath\fP
+in pixels per inch (except when the \fB-1\fP option is used to force individual
+polygon color fills). Default: \fIdpi\fP = 100.
 .TP
 .B \fB-R\fIwest/east/south/north\fP
 Sets the longitude and latitude bounds within which multibeam 
@@ -250,21 +285,16 @@ Sets the style of the plot.
 .br
 Default: \fImode\fP = 1;
 .TP
-.B \-#
-Specifies the number of plot copies. [Default is 1]
-.TP
 .B \-0
-Create the image using the Adobe \fIPostScript\fP colorimage operator.  This is the
-GMT-SYSTEM default (which can be modified in the .gmtdefaults file).
+Create the image using the Adobe \fIPostScript\fP colorimage operator.  
+This is the default.
 .TP
 .B \-1
-Create the image using the old Sun NeWS 1.0 image operator extension.
+Create the image by plotting individual color polygons.
 .TP
 .B \-2
-Create the image by plotting individually colored tiles.
-.TP
-.B \-3
 Create the image by color separation using three calls to image for later
+processing by \fBpsto24\fP.
 .SH EXAMPLES
 Suppose the user has a Hydrosweep data file in the L-DEO in-house
 binary format (\fBMBIO\fP format id 24) called hs_ew9302_157_mn.mb24
@@ -342,7 +372,8 @@ you have a Sun workstation):
  echo All done!
 
 .SH SEE ALSO
-\fBmbsystem\fP(l), \fBmbm_plot\fP(l), \fBmbcontour\fP(l)
+\fBmbsystem\fP(l), \fBmbm_plot\fP(l), \fBmbcontour\fP(l), 
+\fBgmtsystem\fP(l), \fBpsbasemap\fP(l), \fBpsto24\fP(l)
 
 .SH BUGS
-Yes.
+Let us know.

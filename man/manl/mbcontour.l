@@ -1,4 +1,4 @@
-.TH mbcontour l "14 February 1995"
+.TH mbcontour l "6 August 1995"
 .SH NAME
 \fBmbcontour\fP - GMT compatible utility for color fill or color shaded relief
 swath plots of multibeam data using Postscript.
@@ -10,19 +10,19 @@ Version 4.2
 \fBmbcontour\fP \fB-J\fIparameters\fP \fB-R\fIwest/east/south/north 
 \fP[\fB-A\fIcont_int/col_int/tic_int/lab_int/tic_int/lab_hgt\fP 
 \fB-B\fItickinfo\fP \fB-b\fIyr/mo/da/hr/mn/sc\fP 
-\fB-C\fIcontourfile\fP 
+\fB-C\fIcontourfile\fP \fB-c\fIcopies\fP 
 \fB-D\fItime_tick/time_annot/date_annot/time_tick_len\fP 
 \fB-E\fIyr/mo/da/hr/mn/sc\fP \fB-F\fIred/green/blue\fP 
 \fB-I\fIinfile\fP \fB-K\fP \fB-L\fIlonflip\fP \fB-M\fP 
 \fB-N\fInplot\fP \fB-N\fImode/min/max \fB-O\fP \fB-P\fP \fB-p\fIpings\fP 
 \fB-Q\fP \fB-S\fIspeed \fB-T\fItimegap\fP \fB-U\fP \fB-X\fIx-shift\fP 
 \fB-Y\fIy-shift\fP \fB-Z\fIalgorithm\fP 
-\fB-#\fIcopies\fP \fB-V -H\fP]
+\fB-V -H\fP]
 
 .SH DESCRIPTION
 \fBmbcontour\fP is an utility for swath contouring of multibeam bathymetry 
 data using Postscript.  Like \fBmbswath\fP, \fBmbcontour\fP
-is fully compatible with the GMT package version 2.1. Two contouring
+is fully compatible with the GMT package version 3. Two contouring
 algorithms are available. The first draws contours between successive
 pings; this algorithm is simple and therefore fast but produces poor
 looking contours when beams from one ping lie "behind" beams from a
@@ -137,48 +137,78 @@ format supported by \fBMBIO\fP. A list of the multibeam data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page. Default: \fIinfile\fP = "stdin".
 .TP
-.B \fB-J\fP
-Selects the map projection.  Choose one of the following:
+.B \-J
+Selects the map projection. Scale is inch/degree, 1:xxxxx. 
+or width in inches (upper case modifier).
 .br
-\fB\-Ja\fP\fIlon0/lat0/scale[r]\fP (Lambert Azimuthal Equal-Area).
+.sp
+\fBCYLINDRICAL PROJECTIONS:\fP
 .br
-\fB\-Jb\fP\fIlon0/lat0/lat1/lat2/scale[r]\fP (Albers Conic Equal-Area).
-.br
-\fB\-Jc\fP\fIlon0/lat0/scale[r]\fP (Cassini).
-.br
-\fB\-Je\fP\fIlon0/lat0/scale[r]\fP (Azimuthal Equidistant).
-.br
-\fB\-Jg\fP\fIlon0/lat0/scale[r]\fP (Orthographic).
-.br
-\fB\-Jh\fP\fIlongitude/radius\fP (Hammer Equal-Area)
-.br
-\fB\-Ji\fP\fIwidth\fP (Interrupted Sinusoidal)
-.br
-\fB\-Jl\fP\fIlon0/lat0/lat1/lat2/scale\fP (Lambert Conic Conformal)
+.sp
+\fB\-Jc\fP\fIlon0/lat0/scale\fP (Cassini)
 .br
 \fB\-Jm\fP\fIscale\fP (Mercator)
 .br
-\fB\-Joa\fP\fIorigin_x/origin_y/azimuth/scale[r]\fP (Oblique Mercator - point and azimuth)
+\fB\-Joa\fP\fIlon0/lat0/azimuth/scale\fP (Oblique Mercator - point and azimuth)
 .br
-\fB\-Job\fP\fIorigin_x/origin_y/point_x/point_y/scale[r]\fP (Oblique Mercator - two points)
+\fB\-Job\fP\fIlon0/lat0/lon1/lat1/scale\fP (Oblique Mercator - two points)
 .br
-\fB\-Joc\fP\fIorigin_x/origin_y/pole_x/pole_y/scale[r]\fP (Oblique Mercator - point and pole)
+\fB\-Joc\fP\fIlon0/lat0/lonp/latp/scale\fP (Oblique Mercator - point and pole)
 .br
-\fB\-Jr\fP\fIlongitude/radius\fP (Winkel Tripel)
+\fB\-Jq\fP\fIlon0/scale\fP (Equidistant Cylindrical Projection (Plate Carree))
 .br
-\fB\-Js\fP\fIlon0/lat0/scale[r]\fP (Stereographic)
-.br
-\fB\-Jt\fP\fIlongitude/scale\fP (TM - Transverse Mercator)
+\fB\-Jt\fP\fIlon0/scale\fP (TM - Transverse Mercator)
 .br
 \fB\-Ju\fP\fIzone/scale\fP (UTM - Universal Transverse Mercator)
 .br
-\fB\-Jw\fP\fIlongitude/radius\fP (Mollweide Equal-Area)
+\fB\-Jy\fP\fIlon0/lats/scale\fP (Basic Cylindrical Projection) 
 .br
-\fB\-Jp\fP\fIradius\fP (Linear scaling of polar (theta,r) coordinates)
+.sp
+\fBAZIMUTHAL PROJECTIONS:\fP
 .br
-\fB\-Jx\fP\fIxscale[/yscale]\fP (Linear scaling of cartesian coordinates)
+.sp
+\fB\-Ja\fP\fIlon0/lat0/scale\fP (Lambert).
 .br
-More details can be found in the \fBpsbasemap\fP man pages.
+\fB\-Je\fP\fIlon0/lat0/scale\fP (Equidistant).
+.br
+\fB\-Jg\fP\fIlon0/lat0/scale\fP (Orthographic).
+.br
+\fB\-Js\fP\fIlon0/lat0/scale\fP (General Stereographic)
+.br
+.sp
+\fBCONIC PROJECTIONS:\fP
+.br
+.sp
+\fB\-Jb\fP\fIlon0/lat0/lat1/lat2/scale\fP (Albers)
+.br
+\fB\-Jl\fP\fIlon0/lat0/lat1/lat2/scale\fP (Lambert)
+.br
+.sp
+\fBMISCELLANEOUS PROJECTIONS:\fP
+.br
+.sp
+\fB\-Jh\fP\fIlon0/scale\fP (Hammer)
+.br
+\fB\-Ji\fP\fIlon0/scale\fP (Sinusoidal)
+.br
+\fB\-Jk\fP\fIlon0/scale\fP (Eckert VI)
+.br
+\fB\-Jn\fP\fIlon0/scale\fP (Robinson)
+.br
+\fB\-Jr\fP\fIlon0/scale\fP (Winkel Tripel)
+.br
+\fB\-Jw\fP\fIlon0/scale\fP (Mollweide)
+.br
+.sp
+\fBNON-GEOGRAPHICAL PROJECTIONS:\fP
+.br
+.sp
+\fB\-Jp\fP\fIscale\fP (Linear projection for polar (theta,r) coordinates)
+.br
+\fB\-Jx\fP\fIx-scale\fP[\fBl|p\fP\fIpow\fP][\fI/y-scale\fP[\fBl|p\fP\fIpow\fP]] (Linear, log, and power scaling)
+.br
+More details can be found in the \fBpsbasemap\fP manpages.
+.br
 .TP
 .B \-K
 More \fIPostScript\fP code will be appended later [Default terminates the plot system].
@@ -291,7 +321,8 @@ annotated time marks every hour, and day annotations every four hours:
  		-p1 -P -X1 -Y1 -K -V > hs_ew9302_161_bmn.mb24.ps
 
 .SH SEE ALSO
-\fBmbsystem\fP(l), \fBmbm_plot\fP(l), \fBmbswath\fP(l)
+\fBmbsystem\fP(l), \fBmbm_plot\fP(l), \fBmbswath\fP(l), 
+\fBgmtsystem\fP(l), \fBpsbasemap\fP(l), \fBpsto24\fP(l)
 
 .SH BUGS
-Probably.
+Please let us know.

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_pslibface.c	5/15/94
- *    $Id: mb_pslibface.c,v 4.3 1995-03-06 19:39:52 caress Exp $
+ *    $Id: mb_pslibface.c,v 4.4 1995-08-07 17:31:39 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,9 @@
  * Date:	May 15, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1995/03/06  19:39:52  caress
+ * Changed include strings.h to string.h for POSIX compliance.
+ *
  * Revision 4.2  1994/07/29  19:04:31  caress
  * Changes associated with supporting byte swapped Lynx OS and
  * >> using unix second time base.
@@ -47,6 +50,8 @@
 #include "gmt.h"
 
 /* global variables */
+int	argc_save;
+char	**argv_save;
 double	inchtolon;
 int	ncolor;
 int	*red;
@@ -64,11 +69,10 @@ double	*scale;
 double	*inch2lon;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_pslibface.c,v 4.3 1995-03-06 19:39:52 caress Exp $";
+  	static char rcs_id[]="$Id: mb_pslibface.c,v 4.4 1995-08-07 17:31:39 caress Exp $";
 	char	*function_name = "plot_init";
 	int	status = MB_SUCCESS;
 	int	errflg = 0;
-	int	monochrome = MB_NO;
 	double	x1, y1, x2, y2, xx1, yy1, xx2, yy2;
 	double	clipx[4], clipy[4];
 	int	i;
@@ -88,6 +92,10 @@ int	*error;
 		fprintf(stderr,"dbg2       bounds[3]:        %f\n",bounds[3]);
 		fprintf(stderr,"dbg2       scale:            %f\n",*scale);
 		}
+
+	/* save argc and argv */
+	argc_save = argc;
+	argv_save = argv;
 
 	/* deal with gmt options */
 	gmt_begin (argc, argv);
@@ -111,7 +119,7 @@ int	*error;
 				case 'x':
 				case 'Y':
 				case 'y':
-				case '#':
+				case 'c':
 				case '\0':
 					errflg += get_common_args (argv[i], 
 						&bounds[0], &bounds[1], 
@@ -125,9 +133,6 @@ int	*error;
 						&gmtdefs.basemap_frame_rgb[0],
 						&gmtdefs.basemap_frame_rgb[1],
 						&gmtdefs.basemap_frame_rgb[2]);
-					break;
-				case 'M':
-					monochrome = MB_YES;
 					break;
 				}
 			}
@@ -150,8 +155,6 @@ int	*error;
 		gmtdefs.n_copies, gmtdefs.dpi, gmtdefs.measure_unit, 
 		gmtdefs.paper_width, gmtdefs.page_rgb, gmt_epsinfo (argv[0]));
 	echo_command (argc, argv);
-	if (gmtdefs.unix_time) 
-		timestamp (TIME_STAMP_X, TIME_STAMP_Y, argc, argv);
 
 	/* set clip path */
 	geo_to_xy(bounds[0],bounds[2],&clipx[0],&clipy[0]);
@@ -198,7 +201,7 @@ int plot_end(verbose,error)
 int	verbose;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_pslibface.c,v 4.3 1995-03-06 19:39:52 caress Exp $";
+  	static char rcs_id[]="$Id: mb_pslibface.c,v 4.4 1995-08-07 17:31:39 caress Exp $";
 	char	*function_name = "plot_end";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -224,6 +227,10 @@ int	*error;
 		map_basemap ();
 		ps_setpaint (0, 0, 0);
 		}
+
+	/* plot the unix timestamp if required */
+	if (gmtdefs.unix_time) 
+		timestamp (argc_save, argv_save);
 
 	/* end the plot */
 	ps_plotend (gmtdefs.last_page);

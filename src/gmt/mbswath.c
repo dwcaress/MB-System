@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbswath.c	5/30/93
- *    $Id: mbswath.c,v 4.12 1995-07-13 19:15:53 caress Exp $
+ *    $Id: mbswath.c,v 4.13 1995-08-07 17:31:39 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -26,6 +26,9 @@
  * Date:	May 30, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.12  1995/07/13  19:15:53  caress
+ * Fixed problems with footprints for sidescan.
+ *
  * Revision 4.11  1995/05/12  17:19:02  caress
  * Made exit status values consistent with Unix convention.
  * 0: ok  nonzero: error
@@ -184,7 +187,7 @@ struct swath
 
 /* global image variables and defines */
 #define YIQ(r,g,b)	rint(0.299*(r) + 0.587*(b) + 0.114*(b))
-int	image = MBSWATH_IMAGE_VECTOR;
+int	image = MBSWATH_IMAGE_24;
 unsigned char *bitimage;
 int	dpi = 100;
 double	x_inch, y_inch;
@@ -198,10 +201,10 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbswath.c,v 4.12 1995-07-13 19:15:53 caress Exp $";
+	static char rcs_id[] = "$Id: mbswath.c,v 4.13 1995-08-07 17:31:39 caress Exp $";
 	static char program_name[] = "MBSWATH";
 	static char help_message[] =  "MBSWATH is a GMT compatible utility which creates a color postscript \nimage of multibeam swath bathymetry or backscatter data.  The image \nmay be shaded relief as well.  Complete maps are made by using \nMBSWATH in conjunction with the usual GMT programs.";
-	static char usage_message[] = "mbswath -Ccptfile -Jparameters -Rwest/east/south/north [-Afactor -Btickinfo -byr/mon/day/hour/min/sec -Dmode/ampscale/ampmin/ampmax -Eyr/mon/day/hour/min/sec -fformat -Fred/green/blue -Gmagnitude/azimuth -Idatalist -K -M -O -P -ppings -Qdpi -U -Xx-shift -Yy-shift -Zmode -#copies -V -H]";
+	static char usage_message[] = "mbswath -Ccptfile -Jparameters -Rwest/east/south/north \n\t[-Afactor -Btickinfo -byr/mon/day/hour/min/sec \n\t-ccopies -Dmode/ampscale/ampmin/ampmax \n\t-Eyr/mon/day/hour/min/sec -fformat \n\t-Fred/green/blue -Gmagnitude/azimuth -Idatalist \n\t-K -O -P -ppings -Qdpi -U -Xx-shift -Yy-shift \n\t-Zmode -V -H]";
 
 	extern char *optarg;
 	extern int optkind;
@@ -262,7 +265,6 @@ char **argv;
 	double	ampscale = 1.0;
 	double	ampmin = 0.0;
 	double	ampmax = 1.0;
-	int	monochrome = MB_NO;
 	int	footprint_mode = MBSWATH_FOOTPRINT_REAL;
 	double	rawfactor = 1.0;
 	double	factor;
@@ -302,7 +304,7 @@ char **argv;
 	borders[3] = 0.0;
 
 	/* deal with gmt options */
-	gmt_begin (argc, argv);
+	argc = gmt_begin (argc, argv);
 	for (i = 1; i < argc; i++) 
 		{
 		if (argv[i][0] == '-') 
@@ -323,7 +325,7 @@ char **argv;
 				case 'x':
 				case 'Y':
 				case 'y':
-				case '#':
+				case 'c':
 				case '\0':
 					errflg += get_common_args (argv[i], 
 						&borders[0], &borders[1], 
@@ -332,32 +334,29 @@ char **argv;
 				
 				/* Supplemental parameters */
 			
-				case 'F':
-					sscanf (&argv[i][2], "%d/%d/%d",&gmtdefs.basemap_frame_rgb[0],
-						&gmtdefs.basemap_frame_rgb[1], &gmtdefs.basemap_frame_rgb[2]);
-					break;
 				case 'C':
 					strcpy(cptfile,&argv[i][2]);
 					break;
-				case 'M':
-					monochrome = MB_YES;
-					break;
-				case 'Q':
-					image = MBSWATH_IMAGE_24;
-					if (argv[i][2])
-					  dpi = atoi (&argv[i][2]);
-					break;
+				case 'F':
+					if (gmt_getrgb (&argv[i][2], 
+						&gmtdefs.basemap_frame_rgb[0], 
+						&gmtdefs.basemap_frame_rgb[1], 
+						&gmtdefs.basemap_frame_rgb[2])) 
+						{
+						gmt_pen_syntax ('F');
+						errflg++;
+						}
 				case '0':
 					gmtdefs.color_image = 0;
+					image = MBSWATH_IMAGE_24;
 					break;
 				case '1':
 					gmtdefs.color_image = 1;
+					image = MBSWATH_IMAGE_VECTOR;
 					break;
 				case '2':
 					gmtdefs.color_image = 2;
-					break;
-				case '3':
-					gmtdefs.color_image = 3;
+					image = MBSWATH_IMAGE_24;
 					break;
 			}
 			}
@@ -375,7 +374,7 @@ char **argv;
 		}
 
 	/* deal with mb options */
-	while ((c = getopt(argc, argv, "A:a:B:b:C:D:d:E:e:F:f:G:g:HhI:i:J:KL:l:MOPp:Q:R:S:s:T:t:UVvX:x:Y:y:Z:z:#:0123")) != -1)
+	while ((c = getopt(argc, argv, "A:a:B:b:C:c:D:d:E:e:F:f:G:g:HhI:i:J:KL:l:MOPp:Q:R:S:s:T:t:UVvX:x:Y:y:Z:z:012")) != -1)
 	  switch (c) 
 		{
 		case 'A':
@@ -428,6 +427,10 @@ char **argv;
 			sscanf (optarg,"%d", &pings);
 			flag++;
 			break;
+		case 'Q':
+		case 'q':
+			sscanf (optarg,"%d", &dpi);
+			break;
 		case 'S':
 		case 's':
 			sscanf (optarg, "%lf", &speedmin);
@@ -453,7 +456,6 @@ char **argv;
 		case 'K':
 		case 'O':
 		case 'P':
-		case 'Q':
 		case 'R':
 		case 'U':
 		case 'X':
@@ -464,7 +466,6 @@ char **argv;
 		case '0':
 		case '1':
 		case '2':
-		case '3':
 			break;
 		case '?':
 			errflg++;
@@ -568,7 +569,7 @@ char **argv;
 
 	/* get color palette file */
 	read_cpt(cptfile);
-	if (gmt_b_and_w || monochrome == MB_YES) 
+	if (gmt_gray || gmt_b_and_w == MB_YES) 
 		image = MBSWATH_IMAGE_8;
 	if (gmt_n_colors <= 0)
 		{
@@ -587,7 +588,7 @@ char **argv;
 		gmtdefs.paper_width, gmtdefs.page_rgb, gmt_epsinfo (argv[0]));
 	echo_command (argc, argv);
 	if (gmtdefs.unix_time) 
-		timestamp (TIME_STAMP_X, TIME_STAMP_Y, argc, argv);
+		timestamp (argc, argv);
 
 	/* set clip path */
 	geo_to_xy(borders[0],borders[2],&clipx[0],&clipy[0]);
@@ -2098,7 +2099,7 @@ int	*error;
 			k = nx*(ny - iyy) + ixx;
 			bitimage[k] = (unsigned char) YIQ (red, green, blue);
 			}
-		      else if (gmtdefs.color_image == 3)
+		      else if (gmtdefs.color_image == 2)
 			{
 			k = nx*(ny - iyy) + ixx;
 			bitimage[k] = red;
@@ -2125,7 +2126,7 @@ int	*error;
 			k = nx*(ny - iyy) + ixx;
 			bitimage[k] = (unsigned char) YIQ (red, green, blue);
 			}
-		    else if (gmtdefs.color_image == 3)
+		    else if (gmtdefs.color_image == 2)
 			{
 			k = nx*(ny - iyy) + ixx;
 			bitimage[k] = red;
