@@ -300,7 +300,7 @@ it will be lost when you quit.
 .SH SEE ALSO
 \fBmbsystem\fP(l), \fBmbprocess\fP(l), \fBmbset\fP, \fBmbsvplist\fP,
 \fBmbbath\fP, \fBmblevitus\fP(l), 
-\fBmbm_xbt\fP(l), \fBmbxbt\fP(l)
+\fBmbm_xbt\fP(l), \fBmbm_xbt\fP(l)
 
 .SH BUGS
 Users cannot remove display sound velocity profiles from the screen

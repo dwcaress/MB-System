@@ -160,7 +160,7 @@ of the sonar altitude, and the minimum number of sounding required for
 filtering is 10. The results look like:
 
  Program MBAREACLEAN
- Version $Id: mbareaclean.l,v 5.2 2003-11-29 05:38:59 caress Exp $
+ Version $Id: mbareaclean.l,v 5.3 2004-05-21 23:10:32 caress Exp $
  MB-system Version 5.0.beta29
  Area of interest:
       Minimum Longitude: -122.425560 Maximum Longitude: -122.419740
@@ -208,7 +208,7 @@ filtering is 10. The results look like:
  
 
 .SH SEE ALSO
-\fBmbsystem\fP(l), \fBclean\fP(l), \fBmbedit\fP(l), 
+\fBmbsystem\fP(l), \fBmbclean\fP(l), \fBmbedit\fP(l), 
 \fBmbinfo\fP(l) \fBmbprocess\fP(l),
 
 .SH BUGS

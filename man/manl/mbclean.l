@@ -366,7 +366,7 @@ is flagged. Here is an example of the nonverbose output:
  	0 total beams zeroed
 
 .SH SEE ALSO
-\fBmbsystem\fP(l), \fBcleanold\fP(l), \fBmbedit\fP(l), 
+\fBmbsystem\fP(l), \fBmbcleanold\fP(l), \fBmbedit\fP(l), 
 \fBmbinfo\fP(l) \fBmbprocess\fP(l),
 
 .SH BUGS
