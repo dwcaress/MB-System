@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbprocess.c	3/31/93
- *    $Id: mbprocess.c,v 5.6 2001-07-20 00:34:38 caress Exp $
+ *    $Id: mbprocess.c,v 5.7 2001-07-27 19:09:41 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -36,6 +36,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2001/07/20 00:34:38  caress
+ * Release 5.0.beta03
+ *
  * Revision 5.5  2001/06/08 21:45:46  caress
  * Version 5.0.beta01
  *
@@ -89,7 +92,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbprocess.c,v 5.6 2001-07-20 00:34:38 caress Exp $";
+	static char rcs_id[] = "$Id: mbprocess.c,v 5.7 2001-07-27 19:09:41 caress Exp $";
 	static char program_name[] = "mbprocess";
 	static char help_message[] =  "mbprocess is a tool for processing swath sonar bathymetry data.\n\
 This program performs a number of functions, including:\n\
@@ -282,7 +285,7 @@ and mbedit edit save files.\n";
 
 	/* ssv handling variables */
 	int	angle_mode = MBP_ANGLES_OK;
-	int	ssv_prelimpass = MB_YES;
+	int	ssv_prelimpass = MB_NO;
 	double	ssv_default;
 	double	ssv_start;
 	
@@ -995,6 +998,9 @@ and mbedit edit save files.\n";
 		    }
 		}
 	    fclose(tfp);
+
+	    /* set ssv_default */
+	    ssv_default = velocity[0];
 
 	    /* if velocity profile doesn't extend to 12000 m depth
 		    extend it to that depth */
@@ -1985,9 +1991,11 @@ and mbedit edit save files.\n";
 		is obtained, then close and reopen the file 
 		this provides the starting surface sound velocity
 		for recalculating the bathymetry */
-	ssv_start = 0.0;
-	if (ssv_prelimpass == MB_YES)
+	if (process.mbp_bathrecalc_mode == MBP_BATHRECALC_RAYTRACE
+		&& process.mbp_ssv_mode != MBP_SSV_SET)
 	    {
+	    ssv_start = 0.0;
+	    ssv_prelimpass == MB_YES;
 	    error = MB_ERROR_NO_ERROR;
 	    while (error <= MB_ERROR_NO_ERROR
 		&& ssv_start <= 0.0)
@@ -2774,8 +2782,8 @@ and mbedit edit save files.\n";
 			    beta += roll + process.mbp_rollbias;
 			    lever_heave =  r * cos(DTR * alpha) * sin(DTR * beta) - dz;
 			    }
-fprintf(stderr, "dx:%f dy:%f dz:%f alpha:%f beta:%f lever:%f\n", 
-dx, dy, dz, alpha, beta, lever_heave);
+/*fprintf(stderr, "dx:%f dy:%f dz:%f alpha:%f beta:%f lever:%f\n", 
+dx, dy, dz, alpha, beta, lever_heave);*/
 			}
 
 		/* interpolate the navigation if desired */
@@ -3013,7 +3021,7 @@ dx, dy, dz, alpha, beta, lever_heave);
 			if (process.mbp_bathrecalc_mode == MBP_BATHRECALC_RAYTRACE)
 			    {
 			    /* loop over the beams */
-			    for (i=0;i<beams_bath;i++)
+			    for (i=0;i<nbeams;i++)
 			      {
 			      if (ttimes[i] > 0.0)
 				{
