@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrid.c	5/2/94
- *    $Id: mbgrid.c,v 4.24 1995-08-17 15:04:52 caress Exp $
+ *    $Id: mbgrid.c,v 4.25 1995-11-22 22:21:36 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -31,6 +31,9 @@
  * Rerewrite:	April 25, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.24  1995/08/17  15:04:52  caress
+ * Revision for release 4.3.
+ *
  * Revision 4.23  1995/08/09  13:27:57  caress
  * Adapted to GMT version 3.
  *
@@ -194,7 +197,7 @@
 int double_compare();
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbgrid.c,v 4.24 1995-08-17 15:04:52 caress Exp $";
+static char rcs_id[] = "$Id: mbgrid.c,v 4.25 1995-11-22 22:21:36 caress Exp $";
 static char program_name[] = "MBGRID";
 static char help_message[] =  "MBGRID is an utility used to grid bathymetry, amplitude, or \nsidescan data contained in a set of multibeam data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered by multibeam swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbgrid -Ifilelist -Oroot -Rwest/east/south/north [-Adatatype\n          -Bborder  -Cclip -Dxdim/ydim -Edx/dy/units -F\n          -Ggridkind -Llonflip -M -N -Ppings -Sspeed\n          -Ttension -Utime -V -Wscale -Xextend]";
@@ -322,6 +325,7 @@ char **argv;
 	double	smin, smax;
 	double	dd, d1, d2;
 	int	nbinset, nbinzero, nbinspline;
+	int	bathy_in_feet = MB_NO;
 
 	/* output char strings */
 	char	xlabel[128];
@@ -424,7 +428,7 @@ char **argv;
 	gydim = 0;
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "A:a:B:b:C:c:D:d:E:e:F:f:G:g:HhI:i:L:l:MmNnO:o:P:p:R:r:S:s:T:t:U:u:VvW:w:X:x:")) != -1)
+	while ((c = getopt(argc, argv, "A:a:B:b:C:c:D:d:E:e:F:f:G:g:HhI:i:L:l:MmNnO:o:P:p:QqR:r:S:s:T:t:U:u:VvW:w:X:x:")) != -1)
 	  switch (c) 
 		{
 		case 'A':
@@ -498,6 +502,11 @@ char **argv;
 		case 'P':
 		case 'p':
 			sscanf (optarg,"%d", &pings);
+			flag++;
+			break;
+		case 'Q':
+		case 'q':
+			bathy_in_feet = MB_YES;
 			flag++;
 			break;
 		case 'R':
@@ -611,6 +620,7 @@ char **argv;
 		fprintf(outfp,"dbg2       extend:           %f\n",extend);
 		fprintf(outfp,"dbg2       tension:          %f\n",tension);
 		fprintf(outfp,"dbg2       psviewer:         %s\n",psviewer);
+		fprintf(outfp,"dbg2       bathy_in_feet:    %d\n",bathy_in_feet);
 		}
 
 	/* if help desired then print it and exit */
@@ -688,6 +698,8 @@ char **argv;
 		topofactor = -1.0;
 	else
 		topofactor = 1.0;
+	if (bathy_in_feet == MB_YES)
+		topofactor = 0.3048 * topofactor;
 
 	/* output info */
 	if (verbose >= 0)
@@ -697,9 +709,17 @@ char **argv;
 		fprintf(outfp,"Output fileroot:     %s\n",fileroot);
 		fprintf(outfp,"Input Data Type:     ");
 		if (datatype == MBGRID_DATA_BATHYMETRY)
+			{
 			fprintf(outfp,"Bathymetry\n");
+			if (bathy_in_feet == MB_YES)
+				fprintf(outfp,"Bathymetry gridded in feet\n");
+			}
 		else if (datatype == MBGRID_DATA_TOPOGRAPHY)
+			{
 			fprintf(outfp,"Topography\n");
+			if (bathy_in_feet == MB_YES)
+				fprintf(outfp,"Topography gridded in feet\n");
+			}
 		else if (datatype == MBGRID_DATA_AMPLITUDE)
 			fprintf(outfp,"Amplitude\n");
 		else if (datatype == MBGRID_DATA_SIDESCAN)
@@ -2091,18 +2111,30 @@ char **argv;
 		{
 		strcpy(xlabel,"Longitude");
 		strcpy(ylabel,"Latitude");
-		strcpy(zlabel,"Depth (m)");
+		if (bathy_in_feet == MB_YES)
+			strcpy(zlabel,"Depth (ft)");
+		else
+			strcpy(zlabel,"Depth (m)");
 		strcpy(nlabel,"Number of Depth Data Points");
-		strcpy(sdlabel,"Depth Standard Deviation (m)");
+		if (bathy_in_feet == MB_YES)
+			strcpy(sdlabel,"Depth Standard Deviation (ft)");
+		else
+			strcpy(sdlabel,"Depth Standard Deviation (m)");
 		strcpy(title,"Bathymetry Grid");
 		}
 	else if (datatype == MBGRID_DATA_TOPOGRAPHY)
 		{
 		strcpy(xlabel,"Longitude");
 		strcpy(ylabel,"Latitude");
-		strcpy(zlabel,"Topography (m)");
+		if (bathy_in_feet == MB_YES)
+			strcpy(zlabel,"Topography (ft)");
+		else
+			strcpy(zlabel,"Topography (m)");
 		strcpy(nlabel,"Number of Topography Data Points");
-		strcpy(sdlabel,"Topography Standard Deviation (m)");
+		if (bathy_in_feet == MB_YES)
+			strcpy(sdlabel,"Topography Standard Deviation (ft)");
+		else
+			strcpy(sdlabel,"Topography Standard Deviation (m)");
 		strcpy(title,"Topography Grid");
 		}
 	else if (datatype == MBGRID_DATA_AMPLITUDE)
