@@ -206,7 +206,7 @@ supported:
  		1050 multibeam sonars
  	Reson Seabat 9001/9002 multibeam sonars
  	Reson Seabat 8101 multibeam sonars
-	Simrad/Mesotech SM2000 multibeam sonars
+ 	Simrad/Mesotech SM2000 multibeam sonars
  	WHOI DSL AMS-120 deep tow interferometric 
  		sonar
 	AMS-60 interferometric sonar
@@ -282,7 +282,7 @@ The following swath mapping sonar data formats are supported in this version of
     Informal Description: L-DEO in-house binary Hydrosweep
     Attributes:           Hydrosweep DS, 59 beams,  
                           bathymetry and amplitude, 
-			  binary, centered, L-DEO.
+ 			  binary, centered, L-DEO.
     
     MBIO Data Format ID:  25
     Format name:          MBF_HSURIVAX
@@ -374,7 +374,7 @@ The following swath mapping sonar data formats are supported in this version of
     Format name:          MBF_EM300MBA
     Informal Description: Simrad multibeam processing format
     Attributes:           Old and new Simrad multibeams, 
-			  EM12S, EM12D, EM121, EM120,  
+ 			  EM12S, EM12D, EM121, EM120,  
                           EM300, EM100, EM1000, EM950,  
                           EM1002, EM3000, bathymetry,  
                           amplitude, and sidescan, 
@@ -527,9 +527,9 @@ The following swath mapping sonar data formats are supported in this version of
     Format name:          MBF_OICGEODA
     Informal Description: OIC swath sonar format
     Attributes:           variable beam bathymetry and
-			  amplitude, variable pixel  
+    			  amplitude, variable pixel  
                           sidescan, binary,
-			  Oceanic Imaging Consultants
+    			  Oceanic Imaging Consultants
     
     MBIO Data Format ID:  142
     Format name:          MBF_OICMBARI
@@ -577,25 +577,33 @@ The following swath mapping sonar data formats are supported in this version of
     Attributes:           45 beams bathymetry and amplitude, 
                           ascii, JAMSTEC
     
+    MBIO Data Format ID:  181
+    Format name:          MBF_SAMESURF
+    Informal Description: SAM Electronics SURF format.
+    Attributes:           variable beams,  bathymetry, 
+    			  amplitude,  and sidescan,
+                          binary, single files, SAM Electronics 
+			  (formerly Krupp-Atlas Electronik). 
+    
     MBIO Data Format ID:  182
     Format name:          MBF_HSDS2RAW
     Informal Description: STN Atlas raw multibeam format
     Attributes:           STN Atlas multibeam sonars, 
-			  Hydrosweep DS2, Hydrosweep MD, 
-			  Fansweep 10, Fansweep 20, 
+    			  Hydrosweep DS2, Hydrosweep MD, 
+    			  Fansweep 10, Fansweep 20, 
 			  bathymetry, amplitude, and sidescan,
-			  up to 1440 beams and 4096 pixels,
-			  XDR binary, STN Atlas.
+    			  up to 1440 beams and 4096 pixels,
+    			  XDR binary, STN Atlas.
     
     MBIO Data Format ID:  183
     Format name:          MBF_HSDS2LAM
     Informal Description: L-DEO HSDS2 processing format
     Attributes:           STN Atlas multibeam sonars, 
-			  Hydrosweep DS2, Hydrosweep MD, 
-			  Fansweep 10, Fansweep 20, 
-			  bathymetry, amplitude, and sidescan,
-			  up to 1440 beams and 4096 pixels,
-			  XDR binary, L-DEO.
+    			  Hydrosweep DS2, Hydrosweep MD, 
+    			  Fansweep 10, Fansweep 20, 
+    			  bathymetry, amplitude, and sidescan,
+    			  up to 1440 beams and 4096 pixels,
+    			  XDR binary, L-DEO.
 
 
 The institutional acronyms used above have the following meanings:
@@ -692,21 +700,21 @@ using \fBMBIO\fP functions should adopt the following verbosity conventions:
 int \fBmb_read_init\fP(
  		int \fIverbose\fP, 
  		char \fI*file\fP, 
-		int \fIformat\fP, 
-		int \fIpings\fP, 
-		int \fIlonflip\fP, 
+ 		int \fIformat\fP, 
+ 		int \fIpings\fP, 
+ 		int \fIlonflip\fP, 
  		double \fIbounds[4]\fP,
-		int \fIbtime_i[7]\fP, 
-		int \fIetime_i[7]\fP, 
-		double \fIspeedmin\fP, 
-		double \fItimegap\fP,
-		char \fI**mbio_ptr\fP, 
+ 		int \fIbtime_i[7]\fP, 
+ 		int \fIetime_i[7]\fP, 
+ 		double \fIspeedmin\fP, 
+ 		double \fItimegap\fP,
+ 		char \fI**mbio_ptr\fP, 
  		double \fI*btime_d\fP, 
-		double \fI*etime_d\fP,
-		int \fI*beams_bath\fP, 
-		int \fI*beams_amp\fP, 
+ 		double \fI*etime_d\fP,
+ 		int \fI*beams_bath\fP, 
+ 		int \fI*beams_amp\fP, 
  		int \fI*pixels_ss\fP,
-		int \fI*error\fP);
+ 		int \fI*error\fP);
 
 The function \fBmb_read_init\fP initializes the data file to be read 
 and the data structures required for reading the data. The \fIverbose\fP
@@ -835,13 +843,13 @@ argument passes more detailed information about initialization failures.
 .br
 int \fBmb_write_init\fP(
  		int \fIverbose\fP,
-		char \fI*file\fP,
+ 		char \fI*file\fP,
  		int \fIformat\fP,
  		char \fI**mbio_ptr\fP,
-		int \fI*beams_bath\fP,
+ 		int \fI*beams_bath\fP,
  		int \fI*beams_amp\fP,
  		int \fI*pixels_ss\fP,
-		int \fI*error\fP);
+ 		int \fI*error\fP);
 
 The function \fBmb_write_init\fP initializes the data file to be written 
 and the data structures required for writing the data. The \fIverbose\fP
@@ -852,7 +860,7 @@ The input control parameters have the following significance:
  	\fIformat\fP:		output \fBMBIO\fP data format id
 
 The returned values are:
- 	\fImbio_ptr\fP:		pointer to a structure describing 
+ 	\fImbio_ptr\fP:	pointer to a structure describing 
  					the output file
  	\fIbeams_bath\fP:	maximum number of bathymetry beams
  	\fIbeams_back\fP:	maximum number of backscatter beams
@@ -894,29 +902,29 @@ argument passes more detailed information about failures.
 int \fBmb_read\fP(
  		int \fIverbose\fP,
  		char \fI*mbio_ptr\fP,
-		int \fI*kind\fP,
+ 		int \fI*kind\fP,
  		int \fI*pings\fP,
-		int \fItime_i[7]\fP,
+ 		int \fItime_i[7]\fP,
  		double \fI*time_d\fP,
-		double \fI*navlon\fP,
+ 		double \fI*navlon\fP,
  		double \fI*navlat\fP,
-		double \fI*speed\fP,
- 		double \fI*heading\fP,
-		double \fI*distance\fP,
+ 		double \fI*speed\fP,
+  		double \fI*heading\fP,
+ 		double \fI*distance\fP,
  		double \fI*altitude\fP,
  		double \fI*sonardepth\fP,
-		int \fI*nbath\fP,
+ 		int \fI*nbath\fP,
  		int \fI*namp\fP,
  		int \fI*nss\fP,
-		char \fI*beamflag\fP,
+ 		char \fI*beamflag\fP,
  		double \fI*bath\fP,
  		double \fI*amp\fP,
-		double \fI*bathlon\fP,
+ 		double \fI*bathlon\fP,
  		double \fI*bathlat\fP,
-		double \fI*ss\fP,
+ 		double \fI*ss\fP,
  		double \fI*sslon\fP,
  		double \fI*sslat\fP,
-		char \fI*comment\fP,
+ 		char \fI*comment\fP,
  		int \fI*error\fP);
 
 The function \fBmb_read\fP reads, processes, and returns sonar
@@ -959,7 +967,7 @@ The return values are:
  	\fInbath\fP:		number of bathymetry values
  	\fInamp\fP:		number of amplitude values
  	\fInss\fP:		number of sidescan values
-	\fIbeamflag\fP:		array of bathymetry flags
+ 	\fIbeamflag\fP:		array of bathymetry flags
  	\fIbath\fP:		array of bathymetry values in meters
  	\fIamp\fP:		array of amplitude values in unknown units
  	\fIbathlon\fP:		array of of longitude values corresponding 
@@ -985,27 +993,27 @@ int \fBmb_get\fP(
  		char \fI*mbio_ptr\fP,
  		int \fI*kind\fP,
  		int \fI*pings\fP,
-		int \fItime_i[7]\fP,
+ 		int \fItime_i[7]\fP,
  		double \fI*time_d\fP,
-		double \fI*navlon\fP,
+ 		double \fI*navlon\fP,
  		double \fI*navlat\fP,
-		double \fI*speed\fP,
+ 		double \fI*speed\fP,
  		double \fI*heading\fP,
-		double \fI*distance\fP,
+ 		double \fI*distance\fP,
  		double \fI*altitude\fP,
  		double \fI*sonardepth\fP,
-		int \fI*nbath\fP,
+ 		int \fI*nbath\fP,
  		int \fI*namp\fP,
  		int \fI*nss\fP,
-		char \fI*beamflag\fP,
+ 		char \fI*beamflag\fP,
  		double \fI*bath\fP,
  		double \fI*amp\fP,
-		double \fI*bathacrosstrack\fP,
+ 		double \fI*bathacrosstrack\fP,
  		double \fI*bathalongtrack\fP,
-		double \fI*ss\fP,
+ 		double \fI*ss\fP,
  		double \fI*ssacrosstrack\fP,
  		double \fI*ssalongtrack\fP,
-		char \fI*comment\fP,
+ 		char \fI*comment\fP,
  		int \fI*error\fP);
 
 The function \fBmb_get\fP reads, processes, and returns sonar
@@ -1049,7 +1057,7 @@ The return values are:
  	\fInbath\fP:		number of bathymetry values
  	\fInamp\fP:		number of amplitude values
  	\fInss\fP:		number of sidescan values
-	\fIbeamflag\fP:		array of bathymetry flags
+ 	\fIbeamflag\fP:		array of bathymetry flags
  	\fIbath\fP:		array of bathymetry values in meters
  	\fIamp\fP:		array of amplitude values in unknown units
  	\fIbathacrosstrack\fP:	array of of acrosstrack distances  
@@ -1074,7 +1082,7 @@ int \fBmb_read_ping\fP(
  		int \fIverbose\fP,
  		char \fI*mbio_ptr\fP,
  		char \fI*store_ptr\fP,
-		int \fI*kind\fP,
+ 		int \fI*kind\fP,
  		int \fI*error\fP);
 
 The function \fBmb_read_ping\fP reads and returns sonar
@@ -1130,7 +1138,7 @@ int \fBmb_write_ping\fP(
  		int \fIverbose\fP,
  		char \fI*mbio_ptr\fP,
  		char \fI*store_ptr\fP,
-		int \fI*error\fP);
+ 		int \fI*error\fP);
 
 The function \fBmb_write_ping\fP writes sonar data to the file listed
 in the \fBMBIO\fP descriptor pointed to by \fIMBIO_ptr\fP.
@@ -1155,7 +1163,7 @@ int \fBmb_get_store\fP(
  		int \fIverbose\fP,
  		char \fI*mbio_ptr\fP,
  		char \fI**store_ptr\fP,
-		int \fI*error\fP);
+ 		int \fI*error\fP);
 
 The function \fBmb_get_store()\fP returns a pointer \fI*store_ptr\fP
 to the data storage structure associated with a particular \fBMBIO\fP 
@@ -1183,27 +1191,27 @@ int \fBmb_get_all\fP(
  		char \fI*mbio_ptr\fP,
  		char \fI**store_ptr\fP,
  		int \fI*kind\fP,
-		int \fItime_i[7]\fP,
+ 		int \fItime_i[7]\fP,
  		double \fI*time_d\fP,
-		double \fI*navlon\fP,
+ 		double \fI*navlon\fP,
  		double \fI*navlat\fP,
-		double \fI*speed\fP,
+ 		double \fI*speed\fP,
  		double \fI*heading\fP,
-		double \fI*distance\fP,
+ 		double \fI*distance\fP,
  		double \fI*altitude\fP,
  		double \fI*sonardepth\fP,
-		int \fI*nbath\fP,
+ 		int \fI*nbath\fP,
  		int \fI*namp\fP,
  		int \fI*nss\fP,
-		char \fI*beamflag\fP,
+ 		char \fI*beamflag\fP,
  		double \fI*bath\fP,
  		double \fI*amp\fP,
-		double \fI*bathacrosstrack\fP,
+ 		double \fI*bathacrosstrack\fP,
  		double \fI*bathalongtrack\fP,
-		double \fI*ss\fP,
+ 		double \fI*ss\fP,
  		double \fI*ssacrosstrack\fP,
  		double \fI*ssalongtrack\fP,
-		char \fI*comment\fP,
+ 		char \fI*comment\fP,
  		int \fI*error\fP);
 
 The function \fBmb_get_all\fP reads and returns sonar
@@ -1264,7 +1272,7 @@ The return values are:
  	\fInavlat\fP:		latitude
  	\fIspeed\fP:		ship speed in km/s
  	\fIheading\fP:		ship heading in degrees
- 	\fIdistance\fP:		distance along shiptrack since last  
+ 	\fIdistance\fP:	distance along shiptrack since last  
  			ping in km
  	\fIaltitude\fP:		altitude of sonar above seafloor  
  			in m
@@ -1272,7 +1280,7 @@ The return values are:
  	\fInbath\fP:		number of bathymetry values
  	\fInamp\fP:		number of amplitude values
  	\fInss\fP:		number of sidescan values
-	\fIbeamflag\fP:		array of bathymetry flags
+ 	\fIbeamflag\fP:		array of bathymetry flags
  	\fIbath\fP:		array of bathymetry values in meters
  	\fIamp\fP:		array of amplitude values in unknown units
  	\fIbathacrosstrack\fP:	array of of acrosstrack distances  
@@ -1297,26 +1305,26 @@ int \fBmb_put_all\fP(
  		int \fIverbose\fP,
  		char \fI*mbio_ptr\fP,
  		char \fI*store_ptr\fP,
-		int \fIusevalues\fP,
+ 		int \fIusevalues\fP,
  		int \fIkind\fP,
-		int \fItime_i[7]\fP,
+ 		int \fItime_i[7]\fP,
  		double \fItime_d\fP,
-		double \fInavlon\fP,
+ 		double \fInavlon\fP,
  		double \fInavlat\fP,
-		double \fIspeed\fP,
+ 		double \fIspeed\fP,
  		double \fIheading\fP,
-		int \fInbath\fP,
+ 		int \fInbath\fP,
  		int \fInamp\fP,
  		int \fInss\fP,
-		char \fI*beamflag\fP,
+ 		char \fI*beamflag\fP,
  		double \fI*bath\fP,
  		double \fI*amp\fP,
-		double \fI*bathacrosstrack\fP,
+ 		double \fI*bathacrosstrack\fP,
  		double \fI*bathalongtrack\fP,
-		double \fI*ss\fP,
+ 		double \fI*ss\fP,
  		double \fI*ssacrosstrack\fP,
  		double \fI*ssalongtrack\fP,
-		char \fI*comment\fP,
+ 		char \fI*comment\fP,
  		int \fI*error\fP);
 
 The function \fBmb_put_all\fP writes sonar data to the file listed
@@ -1387,7 +1395,7 @@ The values to be output are:
  	\fInbath\fP:		number of bathymetry values
  	\fInamp\fP:		number of amplitude values
  	\fInss\fP:		number of sidescan values
-	\fIbeamflag\fP:		array of bathymetry flags
+ 	\fIbeamflag\fP:		array of bathymetry flags
  	\fIbath\fP:		array of bathymetry values in meters
  	\fIamp\fP:		array of amplitude values in unknown units
  	\fIbathacrosstrack\fP:	array of of acrosstrack distances  
@@ -1414,7 +1422,7 @@ int \fBmb_put_comment\fP(
  		int \fIverbose\fP,
  		char \fI*mbio_ptr\fP,
  		char \fI*comment\fP,
-		int \fI*error\fP);
+ 		int \fI*error\fP);
 
 The function \fBmb_put_comment\fP writes a comment to the file listed
 in the \fBMBIO\fP descriptor pointed to by \fIMBIO_ptr\fP.
@@ -1440,25 +1448,25 @@ int \fBmb_extract\fP(
  		int \fIverbose\fP,
  		char \fI*mbio_ptr\fP,
  		char \fI*store_ptr\fP,
-		int \fI*kind\fP,
+ 		int \fI*kind\fP,
  		int \fItime_i[7]\fP,
  		double \fI*time_d\fP,
-		double \fI*navlon\fP,
+ 		double \fI*navlon\fP,
  		double \fI*navlat\fP,
-		double \fI*speed\fP,
+ 		double \fI*speed\fP,
  		double \fI*heading\fP,
-		int \fI*nbath\fP,
+ 		int \fI*nbath\fP,
  		int \fI*namp\fP,
  		int \fI*nss\fP,
-		char \fI*beamflag\fP,
+ 		char \fI*beamflag\fP,
  		double \fI*bath\fP,
  		double \fI*amp\fP,
-		double \fI*bathacrosstrack\fP,
+ 		double \fI*bathacrosstrack\fP,
  		double \fI*bathalongtrack\fP,
-		double \fI*ss\fP,
+ 		double \fI*ss\fP,
  		double \fI*ssacrosstrack\fP,
  		double \fI*ssalongtrack\fP,
-		char \fI*comment\fP,
+ 		char \fI*comment\fP,
  		int \fI*error\fP);
 
 The function \fBmb_extract\fP extracts sonar data from the 
@@ -1502,7 +1510,7 @@ The return values are:
  	\fInbath\fP:		number of bathymetry values
  	\fInamp\fP:		number of amplitude values
  	\fInss\fP:		number of sidescan values
-	\fIbeamflag\fP:		array of bathymetry flags
+ 	\fIbeamflag\fP:		array of bathymetry flags
  	\fIbath\fP:		array of bathymetry values in meters
  	\fIamp\fP:		array of amplitude values in unknown units
  	\fIbathacrosstrack\fP:	array of of acrosstrack distances  
@@ -1527,25 +1535,25 @@ int \fBmb_insert\fP(
  		int \fIverbose\fP,
  		char \fI*mbio_ptr\fP,
  		char \fI*store_ptr\fP,
-		int \fIkind\fP,
+ 		int \fIkind\fP,
  		int \fItime_i[7]\fP,
  		double \fItime_d\fP,
-		double \fInavlon\fP,
+ 		double \fInavlon\fP,
  		double \fInavlat\fP,
-		double \fIspeed\fP,
+ 		double \fIspeed\fP,
  		double \fIheading\fP,
-		int \fInbath\fP,
+ 		int \fInbath\fP,
  		int \fInamp\fP,
  		int \fInss\fP,
-		char \fI*beamflag\fP,
+ 		char \fI*beamflag\fP,
  		double \fI*bath\fP,
  		double \fI*amp\fP,
-		double \fI*bathacrosstrack\fP,
+ 		double \fI*bathacrosstrack\fP,
  		double \fI*bathalongtrack\fP,
-		double \fI*ss\fP,
+ 		double \fI*ss\fP,
  		double \fI*ssacrosstrack\fP,
  		double \fI*ssalongtrack\fP,
-		char \fI*comment\fP,
+ 		char \fI*comment\fP,
  		int \fI*error\fP);
 
 The function \fBmb_insert\fP inserts sonar data into the 
@@ -1588,7 +1596,7 @@ The values to be inserted are:
  	\fInbath\fP:		number of bathymetry values
  	\fInamp\fP:		number of amplitude values
  	\fInss\fP:		number of sidescan values
-	\fIbeamflag\fP:		array of bathymetry flags
+ 	\fIbeamflag\fP:		array of bathymetry flags
  	\fIbath\fP:		array of bathymetry values in meters
  	\fIamp\fP:		array of amplitude values in unknown units
  	\fIbathacrosstrack\fP:	array of of acrosstrack distances  
@@ -1616,17 +1624,17 @@ int \fBmb_extract_nav\fP(
  		char \fI*mbio_ptr\fP,
  		char \fI*store_ptr\fP,
  		int \fI*kind\fP,
-		int \fItime_i[7]\fP,
+ 		int \fItime_i[7]\fP,
  		double \fI*time_d\fP,
-		double \fI*navlon\fP,
+ 		double \fI*navlon\fP,
  		double \fI*navlat\fP,
-		double \fI*speed\fP,
+ 		double \fI*speed\fP,
  		double \fI*heading\fP,
  		double \fI*draft\fP,
-		double \fI*roll\fP,
+ 		double \fI*roll\fP,
  		double \fI*pitch\fP,
  		double \fI*heave\fP,
-		int \fI*error\fP);
+ 		int \fI*error\fP);
 
 The function \fBmb_extract_nav\fP extracts navigation data from the 
 structure pointed to by \fI*store_ptr\fP according to the 
@@ -1643,8 +1651,8 @@ bathymetry, amplitude, and sidescan) or navigation data (navigation only).
 
 The return values are:
  	\fIkind\fP:		kind of data record read
- 					1	survey data
- 					12	navigation
+ 				1	survey data
+ 				12	navigation
  	\fItime_i\fP:		time of current ping
  			\fItime_i\fP[0]: year
  			\fItime_i\fP[1]: month
@@ -1674,17 +1682,17 @@ int \fBmb_insert_nav\fP(
  		int \fIverbose\fP,
  		char \fI*mbio_ptr\fP,
  		char \fI*store_ptr\fP,
-		int \fItime_i[7]\fP,
+ 		int \fItime_i[7]\fP,
  		double \fItime_d\fP,
-		double \fInavlon\fP,
+ 		double \fInavlon\fP,
  		double \fInavlat\fP,
-		double \fIspeed\fP,
+ 		double \fIspeed\fP,
  		double \fIheading\fP,
  		double \fIdraft\fP,
-		double \fIroll\fP,
+ 		double \fIroll\fP,
  		double \fIpitch\fP,
  		double \fIheave\fP,
-		int \fI*error\fP);
+ 		int \fI*error\fP);
 
 The function \fBmb_insert_nav\fP inserts navigation data into the 
 structure pointed to by \fI*store_ptr\fP according to the 
@@ -1731,10 +1739,10 @@ int \fBmb_extract_altitude\fP(
  		int \fIverbose\fP,
  		char \fI*mbio_ptr\fP,
  		char \fI*store_ptr\fP,
-		int \fI*kind\fP,
-		double \fI*transducer_depth\fP,
- 		double \fI*altitude\fP,
-		int \fI*error\fP);
+ 		int \fI*kind\fP,
+ 		double \fI*transducer_depth\fP,
+  		double \fI*altitude\fP,
+ 		int \fI*error\fP);
 
 The function \fBmb_extract_altitude\fP extracts the sonar transducer 
 depth (\fBtransducer_depth\fP) below the sea surface
@@ -1758,7 +1766,7 @@ The return values are:
  				if not survey data):
  					1	survey data
  	\fItransducer_depth\fP:	depth of sonar in meters
-	\fIaltitude\fP:		altitude of sonar above seafloor
+ 	\fIaltitude\fP:		altitude of sonar above seafloor
  			in meters.
  	\fIerror\fP:		error value
 
@@ -1772,9 +1780,9 @@ int \fBmb_insert_altitude\fP(
  		int \fIverbose\fP,
  		char \fI*mbio_ptr\fP,
  		char \fI*store_ptr\fP,
-		double \fItransducer_depth\fP,
+ 		double \fItransducer_depth\fP,
  		double \fIaltitude\fP,
-		int \fI*error\fP);
+ 		int \fI*error\fP);
 
 The function \fBmb_insert_altitude\fP inserts 
 sonar depth and altitude data into the 
@@ -1805,11 +1813,11 @@ int \fBmb_extract_svp\fP(
  		int \fIverbose\fP,
  		char \fI*mbio_ptr\fP,
  		char \fI*store_ptr\fP,
-		int \fI*kind\fP,
-		int \fI*nsvp\fP,
-		double \fI*depth\fP,
- 		double \fI*velocity\fP,
-		int \fI*error\fP);
+ 		int \fI*kind\fP,
+ 		int \fI*nsvp\fP,
+ 		double \fI*depth\fP,
+  		double \fI*velocity\fP,
+ 		int \fI*error\fP);
 
 The function \fBmb_extract_svp\fP extracts a water sound
 velocity profile according to the 
@@ -1831,8 +1839,8 @@ The return values are:
  					6	SVP data
  	\fInsvp\fP:		number of depth and sound speed
  				data in the profile
-	\fIdepth\fP:		array of depths in meters
-	\fIvelocity\fP:		array of sound speeds in m/sec
+ 	\fIdepth\fP:		array of depths in meters
+ 	\fIvelocity\fP:		array of sound speeds in m/sec
  	\fIerror\fP:		error value
 
 A status value indicating success or failure is returned; the error value
@@ -1845,10 +1853,10 @@ int \fBmb_insert_svp\fP(
  		int \fIverbose\fP,
  		char \fI*mbio_ptr\fP,
  		char \fI*store_ptr\fP,
-		int \fInsvp\fP,
-		double \fI*depth\fP,
+ 		int \fInsvp\fP,
+ 		double \fI*depth\fP,
  		double \fI*velocity\fP,
-		int \fI*error\fP);
+ 		int \fI*error\fP);
 
 The function \fBmb_insert_svp\fP inserts a water sound
 velocity profile according to the 
@@ -1865,8 +1873,8 @@ calculating bathymetry from travel times and beam angles.
 The inserted values are:
  	\fInsvp\fP:		number of depth and sound speed
  				data in the profile
-	\fIdepth\fP:		array of depths in meters
-	\fIvelocity\fP:		array of sound speeds in m/sec
+ 	\fIdepth\fP:		array of depths in meters
+ 	\fIvelocity\fP:		array of sound speeds in m/sec
 
 The return values are:
  	\fIerror\fP:		error value
@@ -1881,15 +1889,15 @@ int \fBmb_ttimes\fP(
  		int \fIverbose\fP,
  		char \fI*mbio_ptr\fP,
  		char \fI*store_ptr\fP,
-		int \fI*kind\fP,
+ 		int \fI*kind\fP,
  		int \fI*nbeams\fP,
-		double \fI*ttimes\fP,
- 		double	*angles\fP,
-		double \fI*angles_forward\fP,
+ 		double \fI*ttimes\fP,
+ 		double	\fI*angles\fP,
+ 		double \fI*angles_forward\fP,
  		double \fI*angles_null\fP,
-		double \fI*heave\fP,
+ 		double \fI*heave\fP,
  		double \fI*alongtrack_offset\fP,
-		double \fI*draft\fP,
+ 		double \fI*draft\fP,
  		double \fI*ssv\fP,
  		int \fI*error\fP);
 
@@ -1931,7 +1939,7 @@ The return values are:
  				if not survey data):
  					1	survey data
  	\fInbeams\fP:		number of beams
-	\fIttimes\fP:		array of two-way travel times in seconds
+ 	\fIttimes\fP:		array of two-way travel times in seconds
  	\fIangles\fP:		array of angles from vertical in degrees
  	\fIangles_forward\fP:	array of angles from acrosstrack in degrees
  	\fIangles_null\fP:	array of sonar array orientation in degrees
@@ -1952,12 +1960,12 @@ int \fBmb_extract_rawss\fP(
  		int \fIverbose\fP,
  		char \fI*mbio_ptr\fP,
  		char \fI*store_ptr\fP,
-		int \fI*kind\fP,
-		int \fI*nrawss\fP,
-		double \fI*rawss\fP,
-		double \fI*rawssacrosstrack\fP,
-		double \fI*rawssalongtrack\fP,
-		int \fI*error\fP);
+ 		int \fI*kind\fP,
+ 		int \fI*nrawss\fP,
+ 		double \fI*rawss\fP,
+ 		double \fI*rawssacrosstrack\fP,
+ 		double \fI*rawssalongtrack\fP,
+ 		int \fI*error\fP);
 
 This function has not yet been implemented for any data format.
 The notion is that since some formats carry both "raw" and
@@ -1973,11 +1981,11 @@ int \fBmb_insert_rawss\fP(
  		int \fIverbose\fP,
  		char \fI*mbio_ptr\fP,
  		char \fI*store_ptr\fP,
-		int \fInrawss\fP,
-		double \fI*rawss\fP,
-		double \fI*rawssacrosstrack\fP,
-		double \fI*rawssalongtrack\fP,
-		int \fI*error\fP);
+ 		int \fInrawss\fP,
+ 		double \fI*rawss\fP,
+ 		double \fI*rawssacrosstrack\fP,
+ 		double \fI*rawssalongtrack\fP,
+ 		int \fI*error\fP);
 
 This function has not yet been implemented for any data format.
 The notion is that since some formats carry both "raw" and
@@ -1992,7 +2000,7 @@ the data will depend on the sonar source. The definition of
 int \fBmb_copyrecord\fP(
  		int \fIverbose\fP,
  		char \fI*mbio_ptr\fP,
-		char \fI*store_ptr\fP,
+ 		char \fI*store_ptr\fP,
  		char \fI*copy_ptr\fP,
  		int \fI*error\fP);
 
@@ -2035,7 +2043,7 @@ int \fBmb_buffer_close\fP(
  		int \fIverbose\fP,
  		char \fI**buff_ptr\fP,
  		char \fI*mbio_ptr\fP,
-		int \fI*error\fP);
+ 		int \fI*error\fP);
 
 The function \fBmb_buffer_close\fP releases all memory allocated
 for buffered i/0, including the structure pointed to by *\fIbuff_ptr\fP.
@@ -2054,7 +2062,7 @@ buffer deallocation failures.
 int \fBmb_buffer_load\fP(
  		int \fIverbose\fP,
  		char \fI*buff_ptr\fP,char \fI*mbio_ptr\fP,
-		int \fInwant\fP,
+ 		int \fInwant\fP,
  		int \fI*nload\fP,
  		int \fI*nbuff\fP,
  		int \fI*error\fP);
@@ -2092,7 +2100,7 @@ int \fBmb_buffer_dump\fP(
  		int \fIverbose\fP,
  		char \fI*buff_ptr\fP,
  		char \fI*mbio_ptr\fP,
-		int \fInhold\fP,
+ 		int \fInhold\fP,
  		int \fI*ndump\fP,
  		int \fI*nbuff\fP,
  		int \fI*error\fP);
@@ -2130,7 +2138,7 @@ int \fBmb_buffer_clear\fP(
  		int \fIverbose\fP,
  		char \fI*buff_ptr\fP,
  		char \fI*mbio_ptr\fP,
-		int \fInhold\fP,
+ 		int \fInhold\fP,
  		int \fI*ndump\fP,
  		int \fI*nbuff\fP,
  		int \fI*error\fP);
@@ -2170,7 +2178,7 @@ int \fBmb_buffer_info\fP(
  		int \fIverbose\fP,
  		char \fI*buff_ptr\fP,
  		char \fI*mbio_ptr\fP,
-		int \fIid\fP,
+ 		int \fIid\fP,
  		int \fI*system\fP,
  		int \fI*kind\fP,
  		int \fI*error\fP);
@@ -2210,26 +2218,26 @@ int \fBmb_buffer_get_next_data\fP(
  		int \fIverbose\fP,
  		char \fI*buff_ptr\fP,
  		char \fI*mbio_ptr\fP,
-		int \fIstart\fP,
+ 		int \fIstart\fP,
  		int \fI*id\fP,
-		int \fItime_i[7]\fP,
+ 		int \fItime_i[7]\fP,
  		double \fI*time_d\fP,
-		double \fI*navlon\fP,
+ 		double \fI*navlon\fP,
  		double \fI*navlat\fP,
-		double \fI*speed\fP,
+ 		double \fI*speed\fP,
  		double \fI*heading\fP,
-		int \fI*nbath\fP,
+ 		int \fI*nbath\fP,
  		int \fI*namp\fP,
  		int \fI*nss\fP,
-		char \fI*beamflag\fP,
+ 		char \fI*beamflag\fP,
  		double \fI*bath\fP,
  		double \fI*amp\fP,
-		double \fI*bathacrosstrack\fP,
+ 		double \fI*bathacrosstrack\fP,
  		double \fI*bathalongtrack\fP,
-		double \fI*ss\fP,
+ 		double \fI*ss\fP,
  		double \fI*ssacrosstrack\fP,
  		double \fI*ssalongtrack\fP,
-		int \fI*error\fP);
+ 		int \fI*error\fP);
 
 The function \fBmb_buffer_get_next_data\fP searches for the
 next survey data record in the buffer, beginning at buffer
@@ -2293,27 +2301,27 @@ int \fBmb_buffer_extract\fP(
  		int \fIverbose\fP,
  		char \fI*buff_ptr\fP,
  		char \fI*mbio_ptr\fP,
-		int \fIid\fP,
+ 		int \fIid\fP,
  		int \fI*kind\fP,
-		int \fItime_i[7]\fP,
+ 		int \fItime_i[7]\fP,
  		double \fI*time_d\fP,
-		double \fI*navlon\fP,
+ 		double \fI*navlon\fP,
  		double \fI*navlat\fP,
-		double \fI*speed\fP,
+ 		double \fI*speed\fP,
  		double \fI*heading\fP,
-		int \fI*nbath\fP,
+ 		int \fI*nbath\fP,
  		int \fI*namp\fP,
  		int \fI*nss\fP,
-		char \fI*beamflag\fP,
+ 		char \fI*beamflag\fP,
  		double \fI*bath\fP,
  		double \fI*amp\fP,
-		double \fI*bathacrosstrack\fP,
+ 		double \fI*bathacrosstrack\fP,
  		double \fI*bathalongtrack\fP,
-		double \fI*ss\fP,
+ 		double \fI*ss\fP,
  		double \fI*ssacrosstrack\fP,
  		double \fI*ssalongtrack\fP,
-		char \fI*comment\fP,
-		int \fI*error\fP);
+ 		char \fI*comment\fP,
+ 		int \fI*error\fP);
 
 The function \fBmb_buffer_extract\fP extracts and returns
 a subset of the data in a buffer record.
@@ -2351,7 +2359,7 @@ The returned values are:
  	\fInbath\fP:		number of bathymetry values
  	\fInamp\fP:		number of amplitude values
  	\fInss\fP:		number of sidescan values
-	\fIbeamflag\fP:		array of bathymetry flags
+ 	\fIbeamflag\fP:		array of bathymetry flags
  	\fIbath\fP:		array of bathymetry values in meters
  	\fIamp\fP:		array of amplitude values in unknown units
  	\fIbathacrosstrack\fP:	array of of acrosstrack distances  
@@ -2376,26 +2384,26 @@ int \fBmb_buffer_insert\fP(
  		int \fIverbose\fP,
  		char \fI*buff_ptr\fP,
  		char \fI*mbio_ptr\fP,
-		int \fIid\fP,
+ 		int \fIid\fP,
  		int \fItime_i[7]\fP,
  		double \fItime_d\fP,
-		double \fInavlon\fP,
+ 		double \fInavlon\fP,
  		double \fInavlat\fP,
-		double \fIspeed\fP,
+ 		double \fIspeed\fP,
  		double \fIheading\fP,
-		int \fInbath\fP,
+ 		int \fInbath\fP,
  		int \fInamp\fP,
  		int \fInss\fP,
-		char \fI*beamflag\fP,
+ 		char \fI*beamflag\fP,
  		double \fI*bath\fP,
  		double \fI*amp\fP,
-		double \fI*bathacrosstrack\fP,
+ 		double \fI*bathacrosstrack\fP,
  		double \fI*bathalongtrack\fP,
-		double \fI*ss\fP,
+ 		double \fI*ss\fP,
  		double \fI*ssacrosstrack\fP,
  		double \fI*ssalongtrack\fP,
-		char \fI*comment\fP,
-		int \fI*error\fP);
+ 		char \fI*comment\fP,
+ 		int \fI*error\fP);
 
 The function \fBmb_buffer_insert\fP inserts data into a
 buffer record, replacing a subset of the original values.
@@ -2433,7 +2441,7 @@ The returned values are:
  	\fInbath\fP:		number of bathymetry values
  	\fInamp\fP:		number of amplitude values
  	\fInss\fP:		number of sidescan values
-	\fIbeamflag\fP:		array of bathymetry flags
+ 	\fIbeamflag\fP:		array of bathymetry flags
  	\fIbath\fP:		array of bathymetry values in meters
  	\fIamp\fP:		array of amplitude values in unknown units
  	\fIbathacrosstrack\fP:	array of of acrosstrack distances  
@@ -2460,19 +2468,19 @@ int \fBmb_buffer_get_next_nav\fP(
  		int \fIverbose\fP,
  		char \fI*buff_ptr\fP,
  		char \fI*mbio_ptr\fP,
-		int \fIstart\fP,
+ 		int \fIstart\fP,
  		int \fI*id\fP,
-		int \fItime_i[7]\fP,
+ 		int \fItime_i[7]\fP,
  		double \fI*time_d\fP,
-		double \fI*navlon\fP,
+ 		double \fI*navlon\fP,
  		double \fI*navlat\fP,
-		double \fI*speed\fP,
+ 		double \fI*speed\fP,
  		double \fI*heading\fP,
  		double \fI*draft\fP,
-		double \fI*roll\fP,
+ 		double \fI*roll\fP,
  		double \fI*pitch\fP,
  		double \fI*heave\fP,
-		int \fI*error\fP);
+ 		int \fI*error\fP);
 
 The function \fBmb_buffer_get_next_nav\fP searches for the
 next survey data record in the buffer, beginning at buffer
@@ -2522,19 +2530,19 @@ int \fBmb_buffer_extract_nav\fP(
  		int \fIverbose\fP,
  		char \fI*buff_ptr\fP,
  		char \fI*mbio_ptr\fP,
-		int \fIid\fP,
+ 		int \fIid\fP,
  		int \fI*kind\fP,
-		int \fItime_i[7]\fP,
+ 		int \fItime_i[7]\fP,
  		double \fI*time_d\fP,
-		double \fI*navlon\fP,
+ 		double \fI*navlon\fP,
  		double \fI*navlat\fP,
-		double \fI*speed\fP,
+ 		double \fI*speed\fP,
  		double \fI*heading\fP,
  		double \fI*draft\fP,
-		double \fI*roll\fP,
+ 		double \fI*roll\fP,
  		double \fI*pitch\fP,
  		double \fI*heave\fP,
-		int \fI*error\fP);
+ 		int \fI*error\fP);
 
 The function \fBmb_buffer_extract_nav\fP extracts and returns
 a subset of the data in a buffer record.
@@ -2582,18 +2590,18 @@ int \fBmb_buffer_insert_nav\fP(
  		int \fIverbose\fP,
  		char \fI*buff_ptr\fP,
  		char \fI*mbio_ptr\fP,
-		int \fIid\fP,
+ 		int \fIid\fP,
  		int \fItime_i[7]\fP,
  		double \fItime_d\fP,
-		double \fInavlon\fP,
+ 		double \fInavlon\fP,
  		double \fInavlat\fP,
-		double \fIspeed\fP,
+ 		double \fIspeed\fP,
  		double \fIheading\fP,
  		double \fIdraft\fP,
-		double \fIroll\fP,
+ 		double \fIroll\fP,
  		double \fIpitch\fP,
  		double \fIheave\fP,
-		int \fI*error\fP);
+ 		int \fI*error\fP);
 
 The function \fBmb_buffer_insert_nav\fP inserts navigation
 and vertical reference sensor data into a
@@ -2641,9 +2649,9 @@ int \fBmb_buffer_get_ptr\fP(
  		int \fIverbose\fP,
  		char \fI*buff_ptr\fP,
  		char \fI*mbio_ptr\fP,
-		int \fIid\fP,
+ 		int \fIid\fP,
  		char \fI**store_ptr\fP,
-		int \fI*error\fP);
+ 		int \fI*error\fP);
 
 The function \fBmb_buffer_get_ptr\fP returns
 a pointer to the data structure in a buffer record.
@@ -2672,11 +2680,11 @@ int \fBmb_defaults\fP(
  		int \fIverbose\fP,
  		int \fI*format\fP,
  		int \fI*pings\fP,
-		int \fI*lonflip\fP,
+ 		int \fI*lonflip\fP,
  		double \fIbounds[4]\fP,
-		int \fI*btime_i\fP,
+ 		int \fI*btime_i\fP,
  		int \fI*etime_i\fP,
-		double \fI*speedmin\fP,
+ 		double \fI*speedmin\fP,
  		double \fI*timegap\fP);
 
 The function \fBmb_defaults\fP provides default values of control
@@ -2706,13 +2714,13 @@ The other values are simply set as:
  	\fIbtime_i[4]\fP = 30;
  	\fIbtime_i[5]\fP = 0;
  	\fIbtime_i[6]\fP = 0;
-	\fIetime_i[0]\fP = 2062;
-	\fIetime_i[1]\fP = 2;
-	\fIetime_i[2]\fP = 21;
-	\fIetime_i[3]\fP = 10;
-	\fIetime_i[4]\fP = 30;
-	\fIetime_i[5]\fP = 0;
-	\fIetime_i[6]\fP = 0;
+ 	\fIetime_i[0]\fP = 2062;
+ 	\fIetime_i[1]\fP = 2;
+ 	\fIetime_i[2]\fP = 21;
+ 	\fIetime_i[3]\fP = 10;
+ 	\fIetime_i[4]\fP = 30;
+ 	\fIetime_i[5]\fP = 0;
+ 	\fIetime_i[6]\fP = 0;
  	\fI*speedmin\fP = 0.0
 
 A status value is returned to 
@@ -2737,6 +2745,7 @@ defaults are read from this file.
 Otherwise, the values are set as:
  	\fIpsdisplay\fP =  "xpsview" (IRIX OS)
  	                   "pageview" (Solaris OS)
+ 	                   "gv" (other OS)
  	                   "ghostview" (other OS)
  	\fIimgdisplay\fP = "gimp" (Linux OS)
  	                   "xv" (other than Linux OS)
@@ -2767,7 +2776,7 @@ int \fBmb_format_register\fP(
  		int \fIverbose\fP,
  		int \fI*format\fP,
  		char \fI*mbio_ptr\fP,
-		int \fI*error\fP);
+ 		int \fI*error\fP);
 
 The function \fBmb_format_register\fP is called by \fBmb_read_init\fP
 and \fBmb_write_init\fP and serves to load format specific 
@@ -2778,8 +2787,8 @@ formerly valid but now obsolete format id values are mapped
 to current values.
 
 The input values are:
-	\fI*format\fP:		\fBMBIO\fP format id
-	\fI*mbio_ptr\fP:	pointer to data in specified 
+ 	\fI*format\fP:		\fBMBIO\fP format id
+ 	\fI*mbio_ptr\fP:	pointer to data in specified 
  				buffer record
 
 The return values are:
@@ -2794,23 +2803,23 @@ int \fBmb_format_info\fP(
  		int \fIverbose\fP,
  		int \fI*format\fP,
  		int \fI*system\fP,
-		int \fI*beams_bath_max\fP,
+ 		int \fI*beams_bath_max\fP,
  		int \fI*beams_amp_max\fP,
  		int \fI*pixels_ss_max\fP,
-		char \fI*format_name\fP,
+ 		char \fI*format_name\fP,
  		char \fI*system_name\fP,
  		char \fI*format_description\fP,
-		int \fI*numfile\fP,
+ 		int \fI*numfile\fP,
  		int \fI*filetype\fP,
  		int \fI*variable_beams\fP,
-		int \fI*traveltime\fP,
+ 		int \fI*traveltime\fP,
  		int \fI*beam_flagging\fP,
-		int \fI*nav_source\fP,
+ 		int \fI*nav_source\fP,
  		int \fI*heading_source\fP,
  		int \fI*vru_source\fP,
-		double \fI*beamwidth_xtrack\fP,
+ 		double \fI*beamwidth_xtrack\fP,
  		double \fI*beamwidth_ltrack\fP,
-		int \fI*error\fP);
+ 		int \fI*error\fP);
 
 The function \fBmb_format_info\fP returns a variety of
 data format specific parameters. The format id
@@ -2877,7 +2886,7 @@ argument \fIerror\fP passes more detailed information about failures.
 int \fBmb_format_description\fP(
  		int \fIverbose\fP,
  		int \fI*format\fP,
-		char \fI*description\fP,
+ 		char \fI*description\fP,
  		int \fI*error\fP);
 
 The function \fBmb_format_description\fP returns 
@@ -2901,10 +2910,10 @@ argument \fIerror\fP passes more detailed information about failures.
 int \fBmb_format_dimensions\fP(
  		int \fIverbose\fP,
  		int \fI*format\fP,
-		int \fI*beams_bath_max\fP,
+ 		int \fI*beams_bath_max\fP,
  		int \fI*beams_amp_max\fP,
  		int \fI*pixels_ss_max\fP,
-		int \fI*error\fP);
+ 		int \fI*error\fP);
 
 The function \fBmb_format_dimensions\fP returns 
 the maximum numbers of beams and pixels associated
@@ -2929,10 +2938,10 @@ argument \fIerror\fP passes more detailed information about failures.
 int \fBmb_format_flags\fP(
  		int \fIverbose\fP,
  		int \fI*format\fP,
-		int \fI*variable_beams\fP,
+ 		int \fI*variable_beams\fP,
  		int \fI*traveltime\fP,
  		int \fI*beam_flagging\fP,
-		int \fI*error\fP);
+ 		int \fI*error\fP);
 
 The function \fBmb_format_flags\fP returns 
 flags indicating certain characteristics of the
@@ -2957,10 +2966,10 @@ argument \fIerror\fP passes more detailed information about failures.
 int \fBmb_format_source\fP(
  		int \fIverbose\fP,
  		int \fI*format\fP,
-		int \fI*nav_source\fP,
+ 		int \fI*nav_source\fP,
  		int \fI*heading_source\fP,
  		int \fI*vru_source\fP,
-		int \fI*error\fP);
+ 		int \fI*error\fP);
 
 The function \fBmb_format_source\fP returns 
 flags indicating what kinds of data records contain
@@ -2989,9 +2998,9 @@ argument \fIerror\fP passes more detailed information about failures.
 int \fBmb_format_beamwidth\fP(
  		int \fIverbose\fP,
  		int \fI*format\fP,
-		double \fI*beamwidth_xtrack\fP,
+ 		double \fI*beamwidth_xtrack\fP,
  		double \fI*beamwidth_ltrack\fP,
-		int \fI*error\fP);
+ 		int \fI*error\fP);
 
 The function \fBmb_format_beamwidth\fP returns 
 typical, upper bound values for athwartships and alongtrack
@@ -3016,10 +3025,10 @@ argument \fIerror\fP passes more detailed information about failures.
 .br
 int \fBmb_datalist_open\fP(
  		int \fIverbose\fP,
-		char \fI**datalist\fP,
-		char \fI*path\fP,
-		int \fIlook_processed\fP,
-		int \fI*error\fP);
+ 		char \fI**datalist\fP,
+ 		char \fI*path\fP,
+ 		int \fIlook_processed\fP,
+ 		int \fI*error\fP);
 
 The function \fBmb_datalist_open\fP initializes reading
 from a datalist tree. The string \fI*path\fP is the
@@ -3046,11 +3055,11 @@ argument \fIerror\fP passes more detailed information about failures.
 .br
 int \fBmb_datalist_read\fP(
  		int \fIverbose\fP,
-		char \fI*datalist\fP,
-		char \fI*path\fP,
+ 		char \fI*datalist\fP,
+ 		char \fI*path\fP,
  		int \fI*format\fP,
  		double \fI*weight\fP,
-		int \fI*error\fP);
+ 		int \fI*error\fP);
 
 The function \fBmb_datalist_read\fP reads
 from a datalist tree, attempting to return the path
@@ -3076,7 +3085,7 @@ argument \fIerror\fP passes more detailed information about failures.
 .br
 int \fBmb_datalist_close\fP(
  		int \fIverbose\fP,
-		char \fI**datalist\fP,
+ 		char \fI**datalist\fP,
  		int \fI*error\fP);
 
 The function \fBmb_datalist_close\fP closes an
@@ -3096,7 +3105,7 @@ argument \fIerror\fP passes more detailed information about failures.
 int \fBmb_alloc\fP(
  		int \fIverbose\fP,
  		char \fI*mbio_ptr\fP,
-		char \fI**store_ptr\fP,
+ 		char \fI**store_ptr\fP,
  		int \fI*error\fP);
 
 The function \fBmb_alloc\fP allocates a data structure
@@ -3120,7 +3129,7 @@ argument \fIerror\fP passes more detailed information about failures.
 int \fBmb_deall\fP(
  		int \fIverbose\fP,
  		char \fI*mbio_ptr\fP,
-		char \fI**store_ptr\fP,
+ 		char \fI**store_ptr\fP,
  		int \fI*error\fP);
 
 The function \fBmb_deall\fP deallocates a format specific
@@ -3153,7 +3162,7 @@ status value signals success if \fIformat\fP is valid and failure otherwise.
 int \fBmb_navint_add\fP(
  		int \fIverbose\fP,
  		char \fI*mbio_ptr\fP,
-		double \fItime_d\fP,
+ 		double \fItime_d\fP,
  		double \fIlon\fP,
  		double \fIlat\fP,
  		int \fI*error\fP);
@@ -3182,13 +3191,13 @@ argument \fIerror\fP passes more detailed information about failures.
 int \fBmb_navint_interp\fP(
  		int \fIverbose\fP,
  		char \fI*mbio_ptr\fP,
-		double \fItime_d\fP,
+ 		double \fItime_d\fP,
  		double \fIheading\fP,
  		double \fIrawspeed\fP,
-		double \fI*lon\fP,
+ 		double \fI*lon\fP,
  		double \fI*lat\fP,
  		double \fI*speed\fP,
-		int \fI*error\fP);
+ 		int \fI*error\fP);
 
 The function \fBmb_navint_interp\fP interpolates navigation to
 the time \fItime_d\fP using 
@@ -3219,7 +3228,7 @@ argument \fIerror\fP passes more detailed information about failures.
 int \fBmb_attint_add\fP(
  		int \fIverbose\fP,
  		char \fI*mbio_ptr\fP,
-		double \fItime_d\fP,
+ 		double \fItime_d\fP,
  		double \fIheave\fP,
  		double \fIpitch\fP,
  		int \fI*error\fP);
@@ -3250,11 +3259,11 @@ argument \fIerror\fP passes more detailed information about failures.
 int \fBmb_attint_interp\fP(
  		int \fIverbose\fP,
  		char \fI*mbio_ptr\fP,
-		double \fItime_d\fP,
-		double \fI*heave\fP,
+ 		double \fItime_d\fP,
+ 		double \fI*heave\fP,
  		double \fI*roll\fP,
  		double \fI*pitch\fP,
-		int \fI*error\fP);
+ 		int \fI*error\fP);
 
 The function \fBmb_attint_interp\fP interpolates attitude 
 (heave, roll, pitch) data to
@@ -3283,7 +3292,7 @@ argument \fIerror\fP passes more detailed information about failures.
 int \fBmb_hedint_add\fP(
  		int \fIverbose\fP,
  		char \fI*mbio_ptr\fP,
-		double \fItime_d\fP,
+ 		double \fItime_d\fP,
  		double \fIheading\fP,
  		int \fI*error\fP);
 
@@ -3310,9 +3319,9 @@ argument \fIerror\fP passes more detailed information about failures.
 int \fBmb_hedint_interp\fP(
  		int \fIverbose\fP,
  		char \fI*mbio_ptr\fP,
-		double \fItime_d\fP,
+ 		double \fItime_d\fP,
  		double \fI*heading\fP,
-		int \fI*error\fP);
+ 		int \fI*error\fP);
 
 The function \fBmb_hedint_interp\fP interpolates heading to
 the time \fItime_d\fP using 
@@ -3486,10 +3495,10 @@ value.
 int \fBmb_takeoff_to_rollpitch\fP(
  		int \fIverbose\fP,
  		double \fItheta\fP,
-		double \fIphi\fP,
+ 		double \fIphi\fP,
  		double \fI*alpha\fP,
  		double \fI*beta\fP,
-		int \fI*error\fP);
+ 		int \fI*error\fP);
 
 The function \fBmb_takeoff_to_rollpitch\fP
 translates angles from the "takeoff" coordinate
@@ -3503,8 +3512,8 @@ int \fBmb_rollpitch_to_takeoff\fP(
  		double \fIalpha\fP,
  		double \fIbeta\fP,
  		double \fI*theta\fP,
-		double \fI*phi\fP,
-		int \fI*error\fP);
+ 		double \fI*phi\fP,
+ 		int \fI*error\fP);
 
 The function \fBmb_rollpitch_to_takeoff\fP
 translates angles from the "rollpitch" coordinate
@@ -3575,20 +3584,20 @@ the ray takeoff angle is just theta. However,
 applying roll or pitch corrections is complicated because
 roll and pitch have components in both theta and phi.
 
-	0 <= theta <= PI/2
-	-PI/2 <= phi <= 3*PI/2
-
-	x = rSIN(theta)COS(phi) 
-	y = rSIN(theta)SIN(phi)
-	z = rCOS(theta) 
-	
-	theta = 0    ---> vertical, along positive z-axis
-	theta = PI/2 ---> horizontal, in x-y plane
-	phi = -PI/2  ---> aft, in y-z plane with y negative
-	phi = 0      ---> port, in x-z plane with x positive
-	phi = PI/2   ---> forward, in y-z plane with y positive
-	phi = PI     ---> starboard, in x-z plane with x negative
-	phi = 3*PI/2 ---> aft, in y-z plane with y negative
+ 	0 <= theta <= PI/2
+ 	-PI/2 <= phi <= 3*PI/2
+ 
+ 	x = rSIN(theta)COS(phi) 
+ 	y = rSIN(theta)SIN(phi)
+ 	z = rCOS(theta) 
+ 	
+ 	theta = 0    ---> vertical, along positive z-axis
+ 	theta = PI/2 ---> horizontal, in x-y plane
+ 	phi = -PI/2  ---> aft, in y-z plane with y negative
+ 	phi = 0      ---> port, in x-z plane with x positive
+ 	phi = PI/2   ---> forward, in y-z plane with y positive
+ 	phi = PI     ---> starboard, in x-z plane with x negative
+ 	phi = 3*PI/2 ---> aft, in y-z plane with y negative
 
 III.2. Roll-Pitch Coordinates
 
@@ -3602,19 +3611,19 @@ and roll is just beta. However, raytracing is complicated
 because deflection from vertical has components in both 
 alpha and beta.
 
-	-PI/2 <= alpha <= PI/2
-	0 <= beta <= PI
-	
-	x = rCOS(alpha)COS(beta) 
-	y = rSIN(alpha)
-	z = rCOS(alpha)SIN(beta) 
-	
-	alpha = -PI/2 ---> horizontal, in x-y plane with y negative
-	alpha = 0     ---> ship level, zero pitch, in x-z plane
-	alpha = PI/2  ---> horizontal, in x-y plane with y positive
-	beta = 0      ---> starboard, along positive x-axis
-	beta = PI/2   ---> in y-z plane rotated by alpha
-	beta = PI     ---> port, along negative x-axis
+ 	-PI/2 <= alpha <= PI/2
+ 	0 <= beta <= PI
+ 	
+ 	x = rCOS(alpha)COS(beta) 
+ 	y = rSIN(alpha)
+ 	z = rCOS(alpha)SIN(beta) 
+ 	
+  	alpha = -PI/2 ---> horizontal, in x-y plane with y negative
+ 	alpha = 0     ---> ship level, zero pitch, in x-z plane
+ 	alpha = PI/2  ---> horizontal, in x-y plane with y positive
+ 	beta = 0      ---> starboard, along positive x-axis
+ 	beta = PI/2   ---> in y-z plane rotated by alpha
+ 	beta = PI     ---> port, along negative x-axis
 
 IV. SeaBeam Coordinates
 
@@ -3631,27 +3640,27 @@ angle-forward value. To summarize:
 
     Port:
     
-	theta = absolute value of angle-from-vertical
-	
-	-PI/2 <= phi <= PI/2  
-	is equivalent to 
-	-PI/2 <= angle-forward <= PI/2
-	
-	phi = -PI/2 ---> angle-forward = -PI/2 (aft)
-	phi = 0     ---> angle-forward = 0     (starboard)
-	phi = PI/2  ---> angle-forward = PI/2  (forward)
-
+ 	theta = absolute value of angle-from-vertical
+ 	
+ 	-PI/2 <= phi <= PI/2  
+ 	is equivalent to 
+ 	-PI/2 <= angle-forward <= PI/2
+ 	
+ 	phi = -PI/2 ---> angle-forward = -PI/2 (aft)
+ 	phi = 0     ---> angle-forward = 0     (starboard)
+ 	phi = PI/2  ---> angle-forward = PI/2  (forward)
+ 
     Starboard:
-	
-	theta = angle-from-vertical
-    
-	PI/2 <= phi <= 3*PI/2 
-	is equivalent to 
-	-PI/2 <= angle-forward <= PI/2
-	
-	phi = PI/2   ---> angle-forward = -PI/2 (forward)
-	phi = PI     ---> angle-forward = 0     (port)
-	phi = 3*PI/2 ---> angle-forward = PI/2  (aft)
+ 	
+ 	theta = angle-from-vertical
+     
+ 	PI/2 <= phi <= 3*PI/2 
+ 	is equivalent to 
+ 	-PI/2 <= angle-forward <= PI/2
+ 	
+ 	phi = PI/2   ---> angle-forward = -PI/2 (forward)
+ 	phi = PI     ---> angle-forward = 0     (port)
+ 	phi = 3*PI/2 ---> angle-forward = PI/2  (aft)
 
 V. Usage of Coordinate Systems in \fBMB-System\fP
 
@@ -3712,6 +3721,6 @@ Selection modes:
 \fBmbsystem\fP(l), \fBmbformat\fP(l)
 
 .SH BUGS
-What could go wrong in a mere 171,000 lines of code?
+What could go wrong in a mere 204,289 lines of code?
 .br
 Let us know...

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_process.c	9/11/00
- *    $Id: mb_process.c,v 5.21 2002-07-20 20:42:40 caress Exp $
+ *    $Id: mb_process.c,v 5.22 2002-07-25 19:09:04 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	September 11, 2000
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.21  2002/07/20 20:42:40  caress
+ * Release 5.0.beta20
+ *
  * Revision 5.20  2002/05/29 23:36:53  caress
  * Release 5.0.beta18
  *
@@ -113,7 +116,7 @@
 #include "../../include/mb_format.h"
 #include "../../include/mb_process.h"
 
-static char rcs_id[]="$Id: mb_process.c,v 5.21 2002-07-20 20:42:40 caress Exp $";
+static char rcs_id[]="$Id: mb_process.c,v 5.22 2002-07-25 19:09:04 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_pr_readpar(int verbose, char *file, int lookforfiles, 
@@ -242,9 +245,19 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 	process->mbp_tidefile[0] = '\0';
 	process->mbp_tide_format = 1;
 	
+	/* amplitude correction */
+	process->mbp_ampcorr_mode = MBP_AMPCORR_OFF;
+	process->mbp_ampcorrfile[0] = '\0';
+	process->mbp_ampcorr_type = MBP_AMPCORR_SUBTRACTION;
+	process->mbp_ampcorr_symmetry = MBP_AMPCORR_SYMMETRIC,
+	process->mbp_ampcorr_angle = 30.0;
+	
 	/* sidescan correction */
 	process->mbp_sscorr_mode = MBP_SSCORR_OFF;
 	process->mbp_sscorrfile[0] = '\0';
+	process->mbp_sscorr_type = MBP_SSCORR_SUBTRACTION;
+	process->mbp_sscorr_symmetry = MBP_SSCORR_SYMMETRIC,
+	process->mbp_sscorr_angle = 30.0;
 	
 	/* sidescan recalculation */
 	process->mbp_ssrecalc_mode = MBP_SSRECALC_OFF;
@@ -717,6 +730,32 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 			sscanf(buffer, "%s %d", dummy, &process->mbp_tide_format);
 			}
 	
+		    /* amplitude correction */
+		    else if (strncmp(buffer, "AMPCORRMODE", 11) == 0)
+			{
+			sscanf(buffer, "%s %d", dummy, &process->mbp_ampcorr_mode);
+			}
+		    else if (strncmp(buffer, "AMPCORRFILE", 11) == 0)
+			{
+			sscanf(buffer, "%s %s", dummy, process->mbp_ampcorrfile);
+			if (explicit == MB_NO)
+			    {
+			    process->mbp_ampcorr_mode = MBP_AMPCORR_ON;
+			    }
+			}
+		    else if (strncmp(buffer, "AMPCORRTYPE", 11) == 0)
+			{
+			sscanf(buffer, "%s %d", dummy, &process->mbp_ampcorr_type);
+			}
+		    else if (strncmp(buffer, "AMPCORRSYMMETRY", 15) == 0)
+			{
+			sscanf(buffer, "%s %d", dummy, &process->mbp_ampcorr_symmetry);
+			}
+		    else if (strncmp(buffer, "AMPCORRANGLE", 12) == 0)
+			{
+			sscanf(buffer, "%s %lf", dummy, &process->mbp_ampcorr_angle);
+			}
+	
 		    /* sidescan correction */
 		    else if (strncmp(buffer, "SSCORRMODE", 10) == 0)
 			{
@@ -729,6 +768,18 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 			    {
 			    process->mbp_sscorr_mode = MBP_SSCORR_ON;
 			    }
+			}
+		    else if (strncmp(buffer, "SSCORRTYPE", 10) == 0)
+			{
+			sscanf(buffer, "%s %d", dummy, &process->mbp_sscorr_type);
+			}
+		    else if (strncmp(buffer, "SSCORRSYMMETRY", 14) == 0)
+			{
+			sscanf(buffer, "%s %d", dummy, &process->mbp_sscorr_symmetry);
+			}
+		    else if (strncmp(buffer, "SSCORRANGLE", 11) == 0)
+			{
+			sscanf(buffer, "%s %lf", dummy, &process->mbp_sscorr_angle);
 			}
 	
 		    /* sidescan recalculation */
@@ -1036,6 +1087,17 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 	    strcat(process->mbp_tidefile, dummy);
 	    }
 
+	/* reset amplitude correction file */
+	if (len > 1
+	    && strlen(process->mbp_ampcorrfile) > 1
+	    && process->mbp_ampcorrfile[0] != '/')
+	    {
+	    strcpy(dummy, process->mbp_ampcorrfile);
+	    strncpy(process->mbp_ampcorrfile, process->mbp_ifile, len);
+	    process->mbp_ampcorrfile[len] = '\0';
+	    strcat(process->mbp_ampcorrfile, dummy);
+	    }
+
 	/* reset sidescan correction file */
 	if (len > 1
 	    && strlen(process->mbp_sscorrfile) > 1
@@ -1054,6 +1116,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 	mb_get_shortest_path(verbose, process->mbp_editfile, error);
 	mb_get_shortest_path(verbose, process->mbp_staticfile, error);
 	mb_get_shortest_path(verbose, process->mbp_tidefile, error);
+	mb_get_shortest_path(verbose, process->mbp_ampcorrfile, error);
 	mb_get_shortest_path(verbose, process->mbp_sscorrfile, error);
 	    
 	/* check for error */
@@ -1139,8 +1202,16 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 		fprintf(stderr,"dbg2       mbp_tide_mode:          %d\n",process->mbp_tide_mode);
 		fprintf(stderr,"dbg2       mbp_tidefile:           %s\n",process->mbp_tidefile);
 		fprintf(stderr,"dbg2       mbp_tide_format:        %d\n",process->mbp_tide_format);
+		fprintf(stderr,"dbg2       mbp_ampcorr_mode:       %d\n",process->mbp_ampcorr_mode);
+		fprintf(stderr,"dbg2       mbp_ampcorrfile:        %s\n",process->mbp_ampcorrfile);
+		fprintf(stderr,"dbg2       mbp_ampcorr_type:       %d\n",process->mbp_ampcorr_type);
+		fprintf(stderr,"dbg2       mbp_ampcorr_symmetry:   %d\n",process->mbp_ampcorr_symmetry);
+		fprintf(stderr,"dbg2       mbp_ampcorr_angle:      %f\n",process->mbp_ampcorr_angle);
 		fprintf(stderr,"dbg2       mbp_sscorr_mode:        %d\n",process->mbp_sscorr_mode);
 		fprintf(stderr,"dbg2       mbp_sscorrfile:         %s\n",process->mbp_sscorrfile);
+		fprintf(stderr,"dbg2       mbp_sscorr_type:        %d\n",process->mbp_sscorr_type);
+		fprintf(stderr,"dbg2       mbp_sscorr_symmetry:    %d\n",process->mbp_sscorr_symmetry);
+		fprintf(stderr,"dbg2       mbp_sscorr_angle:       %f\n",process->mbp_sscorr_angle);
 		fprintf(stderr,"dbg2       mbp_ssrecalc_mode:      %d\n",process->mbp_ssrecalc_mode);
 		fprintf(stderr,"dbg2       mbp_ssrecalc_pixelsize: %f\n",process->mbp_ssrecalc_pixelsize);
 		fprintf(stderr,"dbg2       mbp_ssrecalc_swathwidth:%f\n",process->mbp_ssrecalc_swathwidth);
@@ -1267,8 +1338,16 @@ int mb_pr_writepar(int verbose, char *file,
 		fprintf(stderr,"dbg2       mbp_tide_mode:          %d\n",process->mbp_tide_mode);
 		fprintf(stderr,"dbg2       mbp_tidefile:           %s\n",process->mbp_tidefile);
 		fprintf(stderr,"dbg2       mbp_tide_format:        %d\n",process->mbp_tide_format);
+		fprintf(stderr,"dbg2       mbp_ampcorr_mode:       %d\n",process->mbp_ampcorr_mode);
+		fprintf(stderr,"dbg2       mbp_ampcorrfile:        %s\n",process->mbp_ampcorrfile);
+		fprintf(stderr,"dbg2       mbp_ampcorr_type:       %d\n",process->mbp_ampcorr_type);
+		fprintf(stderr,"dbg2       mbp_ampcorr_symmetry:   %d\n",process->mbp_ampcorr_symmetry);
+		fprintf(stderr,"dbg2       mbp_ampcorr_angle:      %f\n",process->mbp_ampcorr_angle);
 		fprintf(stderr,"dbg2       mbp_sscorr_mode:        %d\n",process->mbp_sscorr_mode);
 		fprintf(stderr,"dbg2       mbp_sscorrfile:         %s\n",process->mbp_sscorrfile);
+		fprintf(stderr,"dbg2       mbp_sscorr_type:        %d\n",process->mbp_sscorr_type);
+		fprintf(stderr,"dbg2       mbp_sscorr_symmetry:    %d\n",process->mbp_sscorr_symmetry);
+		fprintf(stderr,"dbg2       mbp_sscorr_angle:       %f\n",process->mbp_sscorr_angle);
 		fprintf(stderr,"dbg2       mbp_ssrecalc_mode:      %d\n",process->mbp_ssrecalc_mode);
 		fprintf(stderr,"dbg2       mbp_ssrecalc_pixelsize: %f\n",process->mbp_ssrecalc_pixelsize);
 		fprintf(stderr,"dbg2       mbp_ssrecalc_swathwidth:%f\n",process->mbp_ssrecalc_swathwidth);
@@ -1329,6 +1408,7 @@ int mb_pr_writepar(int verbose, char *file,
 	status = mb_get_relative_path(verbose, process->mbp_svpfile, pwd, error);
 	status = mb_get_relative_path(verbose, process->mbp_tidefile, pwd, error);
 	status = mb_get_relative_path(verbose, process->mbp_staticfile, pwd, error);
+	status = mb_get_relative_path(verbose, process->mbp_ampcorrfile, pwd, error);
 	status = mb_get_relative_path(verbose, process->mbp_sscorrfile, pwd, error);
 
 	/* get expected process parameter file name */
@@ -1482,10 +1562,21 @@ int mb_pr_writepar(int verbose, char *file,
 	    fprintf(fp, "TIDEFILE %s\n", process->mbp_tidefile);
 	    fprintf(fp, "TIDEFORMAT %d\n", process->mbp_tide_format);
 	    
+	    /* amplitude correction */
+	    fprintf(fp, "##\n## Sidescan Correction:\n");
+	    fprintf(fp, "SSCORRMODE %d\n", process->mbp_ampcorr_mode);
+	    fprintf(fp, "SSCORRFILE %s\n", process->mbp_ampcorrfile);
+	    fprintf(fp, "SSCORRTYPE %d\n", process->mbp_ampcorr_type);
+	    fprintf(fp, "SSCORRSYMMETRY %d\n", process->mbp_ampcorr_symmetry);
+	    fprintf(fp, "SSCORRANGLE %f\n", process->mbp_ampcorr_angle);
+	    
 	    /* sidescan correction */
 	    fprintf(fp, "##\n## Sidescan Correction:\n");
 	    fprintf(fp, "SSCORRMODE %d\n", process->mbp_sscorr_mode);
 	    fprintf(fp, "SSCORRFILE %s\n", process->mbp_sscorrfile);
+	    fprintf(fp, "SSCORRTYPE %d\n", process->mbp_sscorr_type);
+	    fprintf(fp, "SSCORRSYMMETRY %d\n", process->mbp_sscorr_symmetry);
+	    fprintf(fp, "SSCORRANGLE %f\n", process->mbp_sscorr_angle);
 	    
 	    /* sidescan recalculation */
 	    fprintf(fp, "##\n## Sidescan Recalculation:\n");
@@ -2931,9 +3022,68 @@ int mb_pr_update_edit(int verbose, char *file,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+int mb_pr_update_ampcorr(int verbose, char *file, 
+			int	mbp_ampcorr_mode,
+			char	*mbp_ampcorrfile,
+			int	mbp_ampcorr_type,
+			int	mbp_ampcorr_symmetry,
+			double	mbp_ampcorr_angle,
+			int *error)
+{
+	char	*function_name = "mb_pr_update_ampcorr";
+	struct mb_process_struct process;
+	int	status = MB_SUCCESS;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:                  %d\n",verbose);
+		fprintf(stderr,"dbg2       file:                     %s\n",file);
+		fprintf(stderr,"dbg2       mbp_ampcorr_mode:          %d\n",mbp_ampcorr_mode);
+		fprintf(stderr,"dbg2       mbp_ampcorrfile:           %s\n",mbp_ampcorrfile);
+		fprintf(stderr,"dbg2       mbp_ampcorr_type:          %d\n",mbp_ampcorr_type);
+		fprintf(stderr,"dbg2       mbp_ampcorr_symmetry:      %f\n",mbp_ampcorr_symmetry);
+		fprintf(stderr,"dbg2       mbp_ampcorr_angle:         %d\n",mbp_ampcorr_angle);
+		}
+
+	/* get known process parameters */
+	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+
+	/* set ampcorr values */
+	process.mbp_ampcorr_mode = mbp_ampcorr_mode;
+	if (mbp_ampcorrfile != NULL)
+	    strcpy(process.mbp_ampcorrfile, mbp_ampcorrfile);
+	process.mbp_ampcorr_type = mbp_ampcorr_type;
+	process.mbp_ampcorr_symmetry = mbp_ampcorr_symmetry;
+	process.mbp_ampcorr_angle = mbp_ampcorr_angle;
+
+	/* write new process parameter file */
+	status = mb_pr_writepar(verbose, file, &process, error);
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       error:                    %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:                   %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
 int mb_pr_update_sscorr(int verbose, char *file, 
 			int	mbp_sscorr_mode,
 			char	*mbp_sscorrfile,
+			int	mbp_sscorr_type,
+			int	mbp_sscorr_symmetry,
+			double	mbp_sscorr_angle,
 			int *error)
 {
 	char	*function_name = "mb_pr_update_sscorr";
@@ -2950,15 +3100,21 @@ int mb_pr_update_sscorr(int verbose, char *file,
 		fprintf(stderr,"dbg2       file:                     %s\n",file);
 		fprintf(stderr,"dbg2       mbp_sscorr_mode:          %d\n",mbp_sscorr_mode);
 		fprintf(stderr,"dbg2       mbp_sscorrfile:           %s\n",mbp_sscorrfile);
+		fprintf(stderr,"dbg2       mbp_sscorr_type:          %d\n",mbp_sscorr_type);
+		fprintf(stderr,"dbg2       mbp_sscorr_symmetry:      %f\n",mbp_sscorr_symmetry);
+		fprintf(stderr,"dbg2       mbp_sscorr_angle:         %d\n",mbp_sscorr_angle);
 		}
 
 	/* get known process parameters */
 	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
 
-	/* set ssrecalc values */
+	/* set sscorr values */
 	process.mbp_sscorr_mode = mbp_sscorr_mode;
 	if (mbp_sscorrfile != NULL)
 	    strcpy(process.mbp_sscorrfile, mbp_sscorrfile);
+	process.mbp_sscorr_type = mbp_sscorr_type;
+	process.mbp_sscorr_symmetry = mbp_sscorr_symmetry;
+	process.mbp_sscorr_angle = mbp_sscorr_angle;
 
 	/* write new process parameter file */
 	status = mb_pr_writepar(verbose, file, &process, error);
@@ -4068,9 +4224,65 @@ int mb_pr_get_edit(int verbose, char *file,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+int mb_pr_get_ampcorr(int verbose, char *file, 
+			int	*mbp_ampcorr_mode,
+			char	*mbp_ampcorrfile,
+			int	*mbp_ampcorr_type,
+			int	*mbp_ampcorr_symmetry,
+			double	*mbp_ampcorr_angle,
+			int *error)
+{
+	char	*function_name = "mb_pr_get_ampcorr";
+	struct mb_process_struct process;
+	int	status = MB_SUCCESS;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
+		fprintf(stderr,"dbg2       file:              %s\n",file);
+		}
+
+	/* get known process parameters */
+	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+
+	/* set ssrecalc values */
+	*mbp_ampcorr_mode = process.mbp_ampcorr_mode;
+	if (mbp_ampcorrfile != NULL)
+	    strcpy(mbp_ampcorrfile, process.mbp_ampcorrfile);
+	*mbp_ampcorr_type = process.mbp_ampcorr_type;
+	*mbp_ampcorr_symmetry = process.mbp_ampcorr_symmetry;
+	*mbp_ampcorr_angle = process.mbp_ampcorr_angle;
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       mbp_ampcorr_mode:         %d\n",*mbp_ampcorr_mode);
+		fprintf(stderr,"dbg2       mbp_ampcorrfile:          %s\n",mbp_ampcorrfile);
+		fprintf(stderr,"dbg2       mbp_ampcorr_type:         %d\n",*mbp_ampcorr_type);
+		fprintf(stderr,"dbg2       mbp_ampcorr_symmetry:     %f\n",*mbp_ampcorr_symmetry);
+		fprintf(stderr,"dbg2       mbp_ampcorr_angle:        %d\n",*mbp_ampcorr_angle);
+		fprintf(stderr,"dbg2       error:                    %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:                   %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
 int mb_pr_get_sscorr(int verbose, char *file, 
 			int	*mbp_sscorr_mode,
 			char	*mbp_sscorrfile,
+			int	*mbp_sscorr_type,
+			int	*mbp_sscorr_symmetry,
+			double	*mbp_sscorr_angle,
 			int *error)
 {
 	char	*function_name = "mb_pr_get_sscorr";
@@ -4094,6 +4306,9 @@ int mb_pr_get_sscorr(int verbose, char *file,
 	*mbp_sscorr_mode = process.mbp_sscorr_mode;
 	if (mbp_sscorrfile != NULL)
 	    strcpy(mbp_sscorrfile, process.mbp_sscorrfile);
+	*mbp_sscorr_type = process.mbp_sscorr_type;
+	*mbp_sscorr_symmetry = process.mbp_sscorr_symmetry;
+	*mbp_sscorr_angle = process.mbp_sscorr_angle;
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -4103,6 +4318,9 @@ int mb_pr_get_sscorr(int verbose, char *file,
 		fprintf(stderr,"dbg2  Return value:\n");
 		fprintf(stderr,"dbg2       mbp_sscorr_mode:          %d\n",*mbp_sscorr_mode);
 		fprintf(stderr,"dbg2       mbp_sscorrfile:           %s\n",mbp_sscorrfile);
+		fprintf(stderr,"dbg2       mbp_sscorr_type:          %d\n",*mbp_sscorr_type);
+		fprintf(stderr,"dbg2       mbp_sscorr_symmetry:      %f\n",*mbp_sscorr_symmetry);
+		fprintf(stderr,"dbg2       mbp_sscorr_angle:         %d\n",*mbp_sscorr_angle);
 		fprintf(stderr,"dbg2       error:                    %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:                   %d\n",status);

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	1/19/93
- *    $Id: mb_io.h,v 5.10 2002-07-20 20:42:40 caress Exp $
+ *    $Id: mb_io.h,v 5.11 2002-07-25 19:09:04 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.10  2002/07/20 20:42:40  caress
+ * Release 5.0.beta20
+ *
  * Revision 5.9  2002/05/29 23:40:48  caress
  * Release 5.0.beta18
  *
@@ -439,6 +442,7 @@ struct mb_datalist_struct {
 	int	open;
 	int	recursion;
 	int	look_processed;
+	int	local_weight;
 	int	weight_set;
 	double	weight;
 	FILE	*fp;

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:    mbvelocitytool.c        6/6/93
- *    $Id: mbvelocity_prog.c,v 5.9 2002-07-20 20:46:57 caress Exp $ 
+ *    $Id: mbvelocity_prog.c,v 5.10 2002-07-25 19:06:27 caress Exp $ 
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:        June 6, 1993 
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.9  2002/07/20 20:46:57  caress
+ * Release 5.0.beta20
+ *
  * Revision 5.8  2002/04/06 02:53:15  caress
  * Release 5.0.beta16
  *
@@ -214,7 +217,7 @@ struct mbvt_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbvelocity_prog.c,v 5.9 2002-07-20 20:46:57 caress Exp $";
+static char rcs_id[] = "$Id: mbvelocity_prog.c,v 5.10 2002-07-25 19:06:27 caress Exp $";
 static char program_name[] = "MBVELOCITYTOOL";
 static char help_message[] = "MBVELOCITYTOOL is an interactive water velocity profile editor  \nused to examine multiple water velocity profiles and to create  \nnew water velocity profiles which can be used for the processing  \nof multibeam sonar data.  In general, this tool is used to  \nexamine water velocity profiles obtained from XBTs, CTDs, or  \ndatabases, and to construct new profiles consistent with these  \nvarious sources of information.";
 static char usage_message[] = "mbvelocitytool [-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ssvpfile -Wsvpfile -V -H]";
@@ -1832,8 +1835,6 @@ int mbvt_plot()
 	/* turn clipping on for residual plot box */
 	xg_setclip(mbvt_xgid,xrmin,yrmin,(xrmax-xrmin),(yrmax-yrmin));
 
-fprintf(stderr, "beams_bath:%d nbeams:%d\n", beams_bath, nbeams);
-
 	/* plot residuals */
 	if (nbuffer > 0)
 	  for (i=0;i<nbeams;i++)
@@ -1957,13 +1958,10 @@ fprintf(stderr, "beams_bath:%d nbeams:%d\n", beams_bath, nbeams);
 	/* turn clipping on for raypath plot box */
 	xg_setclip(mbvt_xgid,xpmin,ypmin,(xpmax-xpmin),(ypmax-ypmin));
 
-fprintf(stderr, "beams_bath:%d nbeams:%d\n", beams_bath, nbeams);
-
 	/* plot raypaths */
 	if (nbuffer > 0 && nraypath != NULL)
 	  for (i=0;i<nbeams;i++)
 	    {
-fprintf(stderr, "beam %d of %d : nraypath:%d\n", i, nbeams, nraypath[i]);
 	    if (nraypath[i] > 0)
 		{
 		xxo = xpmin + (raypathx[i][0] - xpminimum)*xpscale;
@@ -2633,8 +2631,6 @@ int mbvt_open_swath_file(char *file, int form, int *numload)
 			&& ping[nbuffer].allocated > 0
 			&& ping[nbuffer].allocated < ping[nbuffer].beams_bath)
 			{
-fprintf(stderr, "Freeing arrays: %d %d\n", 
-ping[nbuffer].allocated, ping[nbuffer].beams_bath);
 			ping[nbuffer].allocated = 0;
 			free(ping[nbuffer].beamflag);
 			free(ping[nbuffer].bath);
@@ -2650,8 +2646,6 @@ ping[nbuffer].allocated, ping[nbuffer].beams_bath);
 		if (status == MB_SUCCESS
 			&& ping[nbuffer].allocated < ping[nbuffer].beams_bath)
 			{
-fprintf(stderr, "Allocating arrays: %d %d\n", 
-ping[nbuffer].allocated, ping[nbuffer].beams_bath);
 			ping[nbuffer].beamflag = NULL;
 			ping[nbuffer].bath = NULL;
 			ping[nbuffer].bathacrosstrack = NULL;
@@ -3186,8 +3180,6 @@ int mbvt_process_multibeam()
 	/* end raytracing */
 	status = mb_rt_deall(verbose, &rt_svp, &error);
 
-fprintf(stderr, "beams_bath:%d nbeams:%d\n", beams_bath, nbeams);
-
 	/* calculate final residuals */
 	beam_first = nbeams;
 	beam_last = -1;
@@ -3216,8 +3208,6 @@ fprintf(stderr, "beams_bath:%d nbeams:%d\n", beams_bath, nbeams);
 			fprintf(stderr," %4d  %7.3f  %9.3f  %9.3f  %5d\n",
 				i,angle[i], residual[i], res_sd[i], nresidual[i]);
 		}
-fprintf(stderr, "beams_bath:%d nbeams:%d\n", beams_bath, nbeams);
-		
 	/* turn message off */
 	do_message_off();
 

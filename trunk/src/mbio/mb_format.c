@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.c	2/18/94
- *    $Id: mb_format.c,v 5.19 2002-07-20 20:42:40 caress Exp $
+ *    $Id: mb_format.c,v 5.20 2002-07-25 19:09:04 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	Februrary 18, 1994
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.19  2002/07/20 20:42:40  caress
+ * Release 5.0.beta20
+ *
  * Revision 5.18  2002/05/29 23:36:53  caress
  * Release 5.0.beta18
  *
@@ -159,7 +162,7 @@
 #include "../../include/mbsys_simrad.h"
 #include "../../include/mbsys_simrad2.h"
 
-static char rcs_id[]="$Id: mb_format.c,v 5.19 2002-07-20 20:42:40 caress Exp $";
+static char rcs_id[]="$Id: mb_format.c,v 5.20 2002-07-25 19:09:04 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_format_register(int verbose, 
@@ -1305,7 +1308,7 @@ int mb_format(int verbose, int *format, int *error)
 /*--------------------------------------------------------------------*/
 int mb_format_system(int verbose, int *format, int *system, int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.19 2002-07-20 20:42:40 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.20 2002-07-25 19:09:04 caress Exp $";
 	char	*function_name = "mb_format_system";
 	int	status;
 
@@ -1374,7 +1377,7 @@ int mb_format_dimensions(int verbose, int *format,
 		int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.19 2002-07-20 20:42:40 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.20 2002-07-25 19:09:04 caress Exp $";
 	char	*function_name = "mb_format_dimensions";
 	int	status;
 
@@ -1442,7 +1445,7 @@ int mb_format_dimensions(int verbose, int *format,
 /*--------------------------------------------------------------------*/
 int mb_format_description(int verbose, int *format, char *description, int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.19 2002-07-20 20:42:40 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.20 2002-07-25 19:09:04 caress Exp $";
 	char	*function_name = "mb_format_description";
 	int	status;
 
@@ -1507,7 +1510,7 @@ int mb_format_flags(int verbose, int *format,
 		int *variable_beams, int *traveltime, int *beam_flagging, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.19 2002-07-20 20:42:40 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.20 2002-07-25 19:09:04 caress Exp $";
 	char	*function_name = "mb_format_flags";
 	int	status;
 
@@ -1578,7 +1581,7 @@ int mb_format_source(int verbose, int *format,
 		int *nav_source, int *heading_source, int *vru_source, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.19 2002-07-20 20:42:40 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.20 2002-07-25 19:09:04 caress Exp $";
 	char	*function_name = "mb_format_source";
 	int	status;
 
@@ -1649,7 +1652,7 @@ int mb_format_beamwidth(int verbose, int *format,
 		double *beamwidth_xtrack, double *beamwidth_ltrack,
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.19 2002-07-20 20:42:40 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.20 2002-07-25 19:09:04 caress Exp $";
 	char	*function_name = "mb_format_beamwidth";
 	int	status;
 
@@ -2328,6 +2331,7 @@ int mb_datalist_open(int verbose,
 			datalist_ptr->open = MB_YES;
 			datalist_ptr->recursion = 0;
 			datalist_ptr->look_processed = look_processed;
+			datalist_ptr->local_weight = MB_YES;
 			datalist_ptr->weight_set = MB_NO;
 			datalist_ptr->weight = 0.0;
 			datalist_ptr->datalist = NULL;
@@ -2498,6 +2502,12 @@ int mb_datalist_read(int verbose,
 						datalist_ptr->look_processed = MB_DATALIST_LOOK_NO;
 				}
 
+			    /* look for special $NOLOCALWEIGHT command */
+			    else if (strncmp(buffer,"$NOLOCALWEIGHT",14) == 0)
+				{
+				datalist_ptr->local_weight = MB_NO;
+				}
+
 			    /* get filename */
 			    else if (buffer[0] != '#')
 				{
@@ -2578,11 +2588,13 @@ int mb_datalist_read(int verbose,
 				    }
 				    
 				/* set weight value - recursive weight from above
-				   overrides local weight */
+				   overrides local weight as long as local_weight == MB_YES */
 				if (nscan >= 2 && file_ok == MB_YES)
 				    {
-				    /* use recursive weight from above */
-				    if (datalist_ptr->weight_set == MB_YES)
+				    /* use recursive weight from above unless prohibited */
+				    if (datalist_ptr->weight_set == MB_YES
+				    	&& (datalist_ptr->local_weight == MB_NO
+						|| nscan != 3))
 					*weight = datalist_ptr->weight;
 
 				    /* else if weight not locally specified set to 1.0 */
@@ -2610,22 +2622,26 @@ int mb_datalist_read(int verbose,
 					datalist2_ptr = (struct mb_datalist_struct *) datalist_ptr->datalist;
 					datalist2_ptr->recursion =
 						datalist_ptr->recursion + 1;
+					datalist2_ptr->local_weight 
+					    		= datalist_ptr->local_weight;
 					rdone = MB_YES;
 					
 					/* set weight to recursive value if available */
-					if (datalist_ptr->weight_set == MB_YES)
+					if (nscan >= 3
+						&& (datalist_ptr->weight_set == MB_NO
+							|| datalist_ptr->local_weight == MB_YES))
+					    {
+					    datalist2_ptr->weight_set = MB_YES;
+					    datalist2_ptr->weight = *weight;
+					    }
+					
+					else if (datalist_ptr->weight_set == MB_YES)
 					    {
 					    datalist2_ptr->weight_set = MB_YES;
 					    datalist2_ptr->weight = datalist_ptr->weight;
 					    }
 					
 					/* else set weight to local value if available */
-					else if (nscan >= 3)
-					    {
-					    datalist2_ptr->weight_set = MB_YES;
-					    datalist2_ptr->weight = *weight;
-					    }
-					
 					/* else do not set weight */
 					else
 					    {

@@ -26,6 +26,7 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
+Version 5.0.beta21     July 25, 2002
 Version 5.0.beta20     July 20, 2002
 Version 5.0.beta18     May 31, 2002
 Version 5.0.beta17     May 1, 2002
@@ -67,7 +68,7 @@ David W. Caress (caress@mbari.org)
   Moss Landing, CA 95039
 Dale N. Chayes (dale@ldeo.columbia.edu)
   Lamont-Doherty Earth Observatory
-  Palisades, NY 10964
+  Palisades, NY 10964mbbackangle.manl
 All Rights Reserved
 All Wrongs Remembered
 
@@ -103,9 +104,39 @@ organizations involved in the design and maintenance of the
 MB-System software package are NOT responsible for any damage 
 that may follow from correct or incorrect use of these programs.
 
+MB-SYSTEM VERSION 5.0.BETA21 RELEASE NOTES:
+
+The version 5.0.beta21 release of MB-System includes
+some significant new features and fixes:
+  - The program mbbackangle has been altered to produce
+    multiple tables of amplitude vs. grazing angle for
+    sidescan or amplitude spaced at regular intervals
+    in the data. These tables are output to a single
+    file named using the swath filename plus a ".sga"
+    (sidescan) or ".aga" (amplitude). The program
+    mbprocess can correct the sidescan and/or amplitude
+    data by interpolating the amplitude vs. grazing 
+    function for each ping. The parameter file is altered
+    to enable sidescan or amplitude correction using
+    the ".sga" or ".aga" file.
+  - The old program mbbackangle used in the serial 
+    processing model has been renamed mbbackangleold.
+  - The behavior of grid weights in datalists has changed.
+    Previously the first grid weight encountered had
+    precedence over weights encountered further down the
+    datalist tree. Now, the default behavior is for local
+    grid weights to take precedence. This default behavior
+    may be overridden by placing a $NOLOCALWEIGHT tag in an
+    upper datalist. For all files and datalists encountered
+    recursively below the tag, the first grid weight defined
+    will be reported.
+  - A bug in mbm_plot was fixed. Previously, default lonflip 
+    settings other than 0 would cause plotting failure for 
+    data outside the implied longitude bounds.
+
 MB-SYSTEM VERSION 5.0.BETA20 RELEASE NOTES:
 
-The version 5.0.beta18 release of MB-System includes
+The version 5.0.beta20 release of MB-System includes
 some significant new features and fixes:
   - Addition of read-only support for the Atlas
     SURF data format (id 181). The ability to
@@ -455,7 +486,10 @@ Handling of old Simrad multibeam data.
     is also used for processing data from the current Simrad
     multibeam sonars.
 
-The New Version 5 Data Processing Structure.
+-------------------------------------------
+THE NEW VERSION 5 DATA PROCESSING STRUCTURE
+-------------------------------------------
+
 Previous versions of MB-System have emphasized processing
 utilities that operate serially, that is, that read in an
 input swath data file, modify it, and then output a second
@@ -467,6 +501,7 @@ serial processing has been that processing data frequently
 results in a large number of intermediate data files. For
 instance, if an EM300 data file called "mbari_1998_524.mb57"
 has spikes in the bathymetry, outliers in the navigation,
+a strong high amplitude peak in the central sidescan swath,
 and the bathymetry has been calculated using an incorrect
 model for the water sound speed structure, users of MB-
 System would previously have processed it with a sequence
@@ -500,8 +535,25 @@ something like this:
 	  Input:  good.svp
 	  Output: mbari_1998_524_cenb.mb57
 
+   6) Run mbsimradmakess to recalculate the
+      sidescan while ignoring sidescan samples
+      from beams now flagged as bad.
+	  Input:  mbari_1998_524_cenb.mb57
+	  Output: mbari_1998_524_cenbs.mb57
+
+   7) Run mbbackangle to calculate an amplitude
+      vs grazing angle table for correcting
+      sidescan.
+	  Input:  mbari_1998_524_cenbs.mb57
+	  Output: ampvsga.dat
+
+   8) Run mbanglecorrect to correct the sidescan.
+	  Input:  mbari_1998_524_cenbs.mb57
+	  Input: ampvsga.dat
+	  Output: mbari_1998_524_cenbsc.mb57
+
 The result of this processing includes the input swath data
-file, the final swath data file, and three intermediate
+file, the final swath data file, and five intermediate
 swath data files. The impact of this approach on data
 storage requirements is obvious (though some users have
 ameliorated the issue by working with scripts that
@@ -531,6 +583,8 @@ tasks in a single step:
      bias, and draft values.
    - Recalculate sidescan from raw backscatter samples
      (Simrad multibeam data only).
+   - Correct sidescan for amplitude vs grazing angle
+     patterns.
    - Apply tides to bathymetry.
 The actions of mbprocess are controlled by text parameter
 files. Each mbprocess parameter file is named by adding a
@@ -541,11 +595,24 @@ generate and/or modify parameter files in addition to
 generating parallel files used by mbprocess. The program
 mbset can also be used to create and modify mbprocess
 parameter files.
+
 The same processing steps described above as a serial
 processing scheme can be accomplished with the new parallel
 processing scheme as follows:
 
-   1) Run mbclean to identify
+   1) Run mbdatalist to create ancillary
+      data files containing statistics 
+      (".inf"), quickly read bathymetry
+      (".fbt"), and quickly read navigation
+      (".fnv"). These files are used to
+      speed common operations such as swath
+      plotting and gridding.
+	  Input:  mbari_1998_524.mb57
+	  Output: mbari_1998_524.mb57.inf
+		  mbari_1998_524.mb57.fbt
+		  mbari_1998_524.mb57.fnv
+
+   2) Run mbclean to identify
       the obvious bathymetric artifacts
       and output a list of the edit events.
       The parameter file is created and
@@ -555,7 +622,7 @@ processing scheme as follows:
 	  Output: mbari_1998_524.mb57.esf
 		  mbari_1998_524.mb57.par
 
-   2) Run mbedit to interactively
+   3) Run mbedit to interactively
       identify bathymetric artifacts
       and output a list of the edit events.
       The existing edits from mbclean
@@ -569,7 +636,7 @@ processing scheme as follows:
 	  Output: mbari_1998_524.mb57.esf
 		  mbari_1998_524.mb57.par
 
-   3) Run mbnavedit to interactively
+   4) Run mbnavedit to interactively
       clean the navigation. The edited
       navigation is output to the ".nve" file.
       The parameter file is updated and
@@ -580,29 +647,61 @@ processing scheme as follows:
 	  Output: mbari_1998_524.mb57.nve
 		  mbari_1998_524.mb57.par
 
-   4) Run mbvelocitytool to generate an
+   5) Run mbvelocitytool to generate an
       an appropriate sound velocity profile
       (SVP) for recalculating the bathymetry.
       The SVP is output to the ".svp" file.
       The parameter file is updated and
       set to recalculate the bathymetry by
-      raytracing throught SVP model from
+      raytracing through the SVP model from
       the ".svp" file.
 	  Input:  mbari_1998_524.mb57
 		  mbari_1998_524.mb57.par
 	  Output: mbari_1998_524.mb57.svp
 		  mbari_1998_524.mb57.par
 
-   5) Run mbprocess to apply the bathymetric
-      edits, merge the cleaned navigation, and
-      recalculate the bathymetry. The processed
-      swath data is written to an output file.
+   6) Run mbbackangle to generate an
+      a set of amplitude vs grazing angle
+      tables at regular intervals in the
+      data. These tables are placed into
+      a single ".sga" file. The parameter 
+      file is updated and set to correct 
+      the sidescan by interpolating the 
+      amplitude vs grazing angle table for 
+      each ping.
+	  Input:  mbari_1998_524.mb57
+		  mbari_1998_524.mb57.par
+	  Output: mbari_1998_524.mb57.sga
+		  mbari_1998_524.mb57.par
+
+   7) Run mbset to set the parameter file
+      so that mbprocess will recalculate
+      the sidescan (this is for Simrad
+      multibeam data only) while ignoring
+      sidescan samples from beams now flagged
+      as bad.
+	  Input:  mbari_1998_524.mb57.par
+	  Output: mbari_1998_524.mb57.par
+
+   8) Run mbprocess to apply the bathymetric
+      edits, merge the cleaned navigation,
+      recalculate the bathymetry, recalculate
+      the sidescan, and correct the sidescan. 
+      The processed swath data is written to 
+      an output swath data file. The usual
+      ancillary data files containing statistics,
+      quickly read bathymetry, and quickly
+      read navigation are also created.
 	  Input:  mbari_1998_524.mb57
 		  mbari_1998_524.mb57.esf
 		  mbari_1998_524.mb57.nve
 		  mbari_1998_524.mb57.svp
+		  mbari_1998_524.mb57.aga
 		  mbari_1998_524.mb57.par
-	  Output: mbari_1998_524.mb57.esf
+	  Output: mbari_1998_524p.mb57
+	          mbari_1998_524p.mb57.inf
+	          mbari_1998_524p.mb57.fbt
+	          mbari_1998_524p.mb57.fnv
 
 The result of this processing is a single output swath data
 file. Moreover, the processed output can be easily updated
@@ -617,13 +716,10 @@ editing or navigation editing components of the processing.
 All of the old, serial processing utilities are still
 distributed with MB-System. However, some of the serial
 tools have been replaced by new versions of the same name
-(e.g. mbedit, mbclean, and mbnavedit).  In these cases, the
-old versions are preserved as programs with "old" added to
-their names (e.g. mbeditold, mbcleanold, and mbnaveditold).
-At present, sidescan correction and filtering are not yet
-implemented in the new scheme, so programs such as
-mbanglecorrect and mbfilter must still be used in a serial
-fashion.
+(e.g. mbedit, mbclean, mbbackangle, and mbnavedit).  In 
+these cases, the old versions are preserved as programs 
+with "old" added to their names (e.g. mbeditold, mbcleanold, 
+mbbackangleold, and mbnaveditold). 
 
 OTHER REQUIRED AND SUGGESTED SOFTWARE AND DATA
 ----------------------------------------------
@@ -802,10 +898,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.20 2002-07-20 21:08:07 caress Exp $
+RCS ID: $Id: README,v 5.21 2002-07-25 19:11:35 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.20  2002/07/20 21:08:07  caress
+Release 5.0.beta20
+
 Revision 5.19  2002/05/31 19:58:28  caress
 Release 5.0.beta18
 

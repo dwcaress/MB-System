@@ -200,7 +200,7 @@ Suppose one wishes to obtain a histogram of the sidescan data
 in a file called mbexample.mb41 containing raw data from a SeaBeam
 2112 sonar (format 41). The following will suffice:
  mbhistogram -F41 -I sb199411211212.rec -D0.0/45000 -N25
-.break
+.br
 to yield the following histogram:
  0.000000 183814
  1875.000000 30845
@@ -227,11 +227,11 @@ to yield the following histogram:
  41250.000000 2
  43125.000000 2
  45000.000000 1
-.break
+.br
 In order to obtain 16 values breaking up the distribution into
 equal sized regions, use the \fB-M\fP option:
  mbhistogram -F41 -I sb199411211212.rec -D0.0/45000 -N45000 -M25
-.break
+.br
 giving:
   -0.500011
  110.657221

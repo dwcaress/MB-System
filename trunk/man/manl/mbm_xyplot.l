@@ -60,7 +60,7 @@ Suzanne H. O'Hara (sohara@ldeo.columbia.edu)
 .SH SIMPLE DESCRIPTION OF BASIC OPTIONS
 .TP
 .B \-G
-\fP\fIfill\fP 
+\fIfill\fP 
 .br
 Select filling of symbols for xy plotting.  
 Set the shade (0\-255) or color 

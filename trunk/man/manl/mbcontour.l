@@ -194,7 +194,7 @@ is being generated, \fBmbcontour\fP
 will attempt to read an "fbt" file in lieu of the original data.
 An "fnv" file contains only navigation information in a compact
 ASCII format (format 166), and is thus even quicker to read. 
-When \fBmbcontour is only generating a shiptrack plot, it will
+When \fBmbcontour\fP is only generating a shiptrack plot, it will
 attempt to read an "fnv" file in lieu of the original data.
 .br
 Default: \fIinfile\fP = "stdin".

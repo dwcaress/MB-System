@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbset.c	3/31/93
- *    $Id: mbset.c,v 5.16 2002-05-29 23:43:09 caress Exp $
+ *    $Id: mbset.c,v 5.17 2002-07-25 19:07:17 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -30,6 +30,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.16  2002/05/29 23:43:09  caress
+ * Release 5.0.beta18
+ *
  * Revision 5.15  2002/04/06 02:53:45  caress
  * Release 5.0.beta16
  *
@@ -105,7 +108,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbset.c,v 5.16 2002-05-29 23:43:09 caress Exp $";
+	static char rcs_id[] = "$Id: mbset.c,v 5.17 2002-07-25 19:07:17 caress Exp $";
 	static char program_name[] = "mbset";
 	static char help_message[] = "MBset is a tool for setting values in an mbprocess parameter file.\n\
 MBprocess is a tool for processing swath sonar bathymetry data  \n\
@@ -779,6 +782,32 @@ the manual pages for mbprocess and mbset. \n\n";
 		    sscanf(pargv[i], "TIDEFORMAT:%d", &process.mbp_tide_format);
 		    }
 	
+		/* amplitude correction */
+		else if (strncmp(pargv[i], "AMPCORRMODE", 11) == 0)
+		    {
+		    sscanf(pargv[i], "AMPCORRMODE:%d", &process.mbp_ampcorr_mode);
+		    }
+		else if (strncmp(pargv[i], "AMPCORRFILE", 11) == 0)
+		    {
+		    sscanf(pargv[i], "AMPCORRFILE:%s", process.mbp_ampcorrfile);
+		    if (explicit == MB_NO)
+			{
+			process.mbp_ampcorr_mode = MBP_AMPCORR_ON;
+			}
+		    }
+		else if (strncmp(pargv[i], "AMPCORRTYPE", 11) == 0)
+		    {
+		    sscanf(pargv[i], "AMPCORRTYPE:%d", &process.mbp_ampcorr_type);
+		    }
+		else if (strncmp(pargv[i], "AMPCORRSYMMETRY", 15) == 0)
+		    {
+		    sscanf(pargv[i], "AMPCORRSYMMETRY:%d", &process.mbp_ampcorr_symmetry);
+		    }
+		else if (strncmp(pargv[i], "AMPCORRANGLE", 12) == 0)
+		    {
+		    sscanf(pargv[i], "AMPCORRANGLE:%lf", &process.mbp_ampcorr_angle);
+		    }
+	
 		/* sidescan correction */
 		else if (strncmp(pargv[i], "SSCORRMODE", 10) == 0)
 		    {
@@ -791,6 +820,18 @@ the manual pages for mbprocess and mbset. \n\n";
 			{
 			process.mbp_sscorr_mode = MBP_SSCORR_ON;
 			}
+		    }
+		else if (strncmp(pargv[i], "SSCORRTYPE", 10) == 0)
+		    {
+		    sscanf(pargv[i], "SSCORRTYPE:%d", &process.mbp_sscorr_type);
+		    }
+		else if (strncmp(pargv[i], "SSCORRSYMMETRY", 14) == 0)
+		    {
+		    sscanf(pargv[i], "SSCORRSYMMETRY:%d", &process.mbp_sscorr_symmetry);
+		    }
+		else if (strncmp(pargv[i], "SSCORRANGLE", 11) == 0)
+		    {
+		    sscanf(pargv[i], "SSCORRANGLE:%lf", &process.mbp_sscorr_angle);
 		    }
 
 		/* sidescan recalculation */
@@ -1140,6 +1181,42 @@ the manual pages for mbprocess and mbset. \n\n";
 	    else if (process.mbp_heading_mode == MBP_HEADING_CALCOFFSET)
 		fprintf(stderr,"  Heading replaced by course-made-good and then offset by bias.\n");
 	    fprintf(stderr,"  Heading offset:                %f deg\n", process.mbp_headingbias);
+
+	    fprintf(stderr,"\nAmplitude Corrections:\n");
+	    if (process.mbp_ampcorr_mode == MBP_SSCORR_ON)
+		{
+		fprintf(stderr,"  Amplitude vs grazing angle corrections applied to amplitudes.\n");
+	    	fprintf(stderr,"  Amplitude correction file:      %s m\n", process.mbp_ampcorrfile);
+		if (process.mbp_ampcorr_type == MBP_AMPCORR_SUBTRACTION)
+	    		fprintf(stderr,"  Amplitude correction by subtraction (dB scale)\n");
+		else
+	    		fprintf(stderr,"  Amplitude correction by division (linear scale)\n");
+		if (process.mbp_ampcorr_symmetry == MBP_AMPCORR_SYMMETRIC)
+	    		fprintf(stderr,"  AVGA tables forced to be symmetric\n");
+		else
+	    		fprintf(stderr,"  AVGA tables allowed to be asymmetric\n");
+	    	fprintf(stderr,"  Reference grazing angle:       %f deg\n", process.mbp_ampcorr_angle);
+ 		}
+	    else
+		fprintf(stderr,"  Amplitude correction off.\n");
+
+	    fprintf(stderr,"\nSidescan Corrections:\n");
+	    if (process.mbp_sscorr_mode == MBP_SSCORR_ON)
+		{
+		fprintf(stderr,"  Amplitude vs grazing angle corrections applied to sidescan.\n");
+	    	fprintf(stderr,"  Sidescan correction file:      %s m\n", process.mbp_sscorrfile);
+		if (process.mbp_sscorr_type == MBP_SSCORR_SUBTRACTION)
+	    		fprintf(stderr,"  Sidescan correction by subtraction (dB scale)\n");
+		else
+	    		fprintf(stderr,"  Sidescan correction by division (linear scale)\n");
+		if (process.mbp_sscorr_symmetry == MBP_SSCORR_SYMMETRIC)
+	    		fprintf(stderr,"  AVGA tables forced to be symmetric\n");
+		else
+	    		fprintf(stderr,"  AVGA tables allowed to be asymmetric\n");
+	    	fprintf(stderr,"  Reference grazing angle:       %f deg\n", process.mbp_sscorr_angle);
+ 		}
+	    else
+		fprintf(stderr,"  Sidescan correction off.\n");
 
 	    fprintf(stderr,"\nSidescan Recalculation:\n");
 	    if (process.mbp_ssrecalc_mode == MBP_SSRECALC_ON)

@@ -44,7 +44,7 @@ options force \fBmbdatalist\fP to output processed file names
 when they exist (\fB-P\fP) or to only output unprocessed 
 (raw) file names (\fB-U\fP).
 
-Programs such as \fBmbgrid\fP try to check metadata or "inf" 
+Programs such as \fBmbgrid\fP try to check statistics or "inf" 
 files to see if the corresponding data files include data within
 the specified geographic bounds. Other programs look for
 "fast bathymetry" or "fast navigation" ("fbt" or "fnv") files
@@ -55,6 +55,20 @@ The \fB-O\fP option causes \fBmbdatalist\fP to
 create the "inf", "fbt", and "fnv" files 
 only when they don't already
 exist or are out of date (older than the data file).
+
+Datalists may also contain a third value, called the grid
+weight, which is used by \fBmbgrid\fP to priortize data.
+The larger the grid weight, the more importance \fBmbgrid\fP
+attaches to the related bathymetry data. Grid weights can
+be applied to datalist entries which are themselves datalist
+files, causing these weights to be associated with all of
+files referenced therein. However, the default behavior is
+for any grid weight in a particular datalist entry to override
+values derived from higher levels in the recursive structure.
+This behavior can be reversed if a $NOLOCALWEIGHT tag is placed
+in the datalist, or in a datalist higher up in the structure.
+See the \fBMB-System\fP manual page for a more complete
+description.
 
 The \fB-R\fP\fIw/e/s/n\fP option causes the program to check each
 data file with an "inf" file for overlap with 
