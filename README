@@ -133,6 +133,15 @@ MBnavadjust) have been changed to require linking with the Motif 2.0
 or later library (or compatible open source versions such as OpenMotif
 or LessTif).
 
+The MB-System distribution is now compatible with GMT 4.0b. There have 
+been minor changes to the pslib and gmtlib APIs, so it is necessary
+to specify the linked version of GMT in the mbsystem/install_makefiles
+script. Set:
+	$GMTVERSION = "4.0";
+if you are using GMT 4.0b, or set:
+	$GMTVERSION = "3.4";
+if you are still using GMT 3.4
+
 MBnavadjust has a significant new feature in which the contours
 displayed by the Nav Err window can be pre-generated. This greatly
 increases the speed with which the bathymetry crossings can be
@@ -774,10 +783,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.46 2004-04-27 00:29:25 caress Exp $
+RCS ID: $Id: README,v 5.47 2004-05-21 23:59:31 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.46  2004/04/27 00:29:25  caress
+Updated with recent changes.
+
 Revision 5.45  2004/02/27 18:12:49  caress
 Release 5.0.3
 

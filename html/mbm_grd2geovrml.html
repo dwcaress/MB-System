@@ -236,8 +236,8 @@ Specify -noview to not include a GeoViewpoint with each tile.
 
 By default an orthorectified image for the bathymetry is created by running
 <A HREF="mbm_grdtiff.html">mbm_grdtiff</A>(1) and then quadrupling the image size using ImageMagick
-<A HREF="mogrify.html">mogrify</A>(1). (The quadrupling together with the '-numpixels 16' 
-argument in the <A HREF="make_geovrml.html">make_geovrml</A>(1) command results in identical resolution
+mogrify(1). (The quadrupling together with the '-numpixels 16' 
+argument in the make_geovrml(1) command results in identical resolution
 of the highest level GeoVRML tiles and the original bathymetric
 data.)  Making this image can be a time consuming process.  By default,
 if a file with '.tif' appended to <I>bath_file</I> (without the .grd 
@@ -435,14 +435,14 @@ This macro is built upon some pretty strong shoulders.  It uses
 all of these programs which must be installed on your system.
 <P>
 GMT programs:
-<B><A HREF="grdclip.html">grdclip</A></B>(1), 
-<B><A HREF="grdsample.html">grdsample</A></B>(1), 
-<B><A HREF="grd2xyz.html">grd2xyz</A></B>(1), 
-<B><A HREF="blockmean.html">blockmean</A></B>(1), 
-<B><A HREF="surface.html">surface</A></B>(1), 
-<B><A HREF="grdedit.html">grdedit</A></B>(1), 
-<B><A HREF="grdmath.html">grdmath</A></B>(1), 
-<B><A HREF="grdclip.html">grdclip</A></B>(1), 
+<B>grdclip</B>(1), 
+<B>grdsample</B>(1), 
+<B>grd2xyz</B>(1), 
+<B>blockmean</B>(1), 
+<B>surface</B>(1), 
+<B>grdedit</B>(1), 
+<B>grdmath</B>(1), 
+<B>grdclip</B>(1), 
 <P>
 mb-system macro:
 <B><A HREF="mbm_grdtiff.html">mbm_grdtiff</A></B>(1)
@@ -451,19 +451,19 @@ mb-system utility:
 <B><A HREF="mbstripNaN.html">mbstripNaN</A></B>(1)
 <P>
 tsmApi-2.3 (<A HREF="http://www.tsmapi.com)">http://www.tsmapi.com)</A> programs:
-<B><A HREF="make_dem.html">make_dem</A></B>(1), 
-<B><A HREF="make_oi.html">make_oi</A></B>(1)
-<B><A HREF="make_geovrml.html">make_geovrml</A></B>(1)
+<B>make_dem</B>(1), 
+<B>make_oi</B>(1)
+<B>make_geovrml</B>(1)
 <P>
 Note that after you've created the TerraVision tile sets with this
-macro you may rerun <A HREF="make_geovrml.html">make_geovrml</A>(1) with different options, for
+macro you may rerun make_geovrml(1) with different options, for
 instance to make files for a different server or with a different
 vertical exaggeration or background color.  This can save a lot
 of processing time if you don't need to generate a new image
 from the bathymetric data.
 <P>
 ImageMagick (<A HREF="http://www.imagemagick.org)">http://www.imagemagick.org)</A> program:
-<B><A HREF="mogrify.html">mogrify</A></B>(1)
+<B>mogrify</B>(1)
 <P>
 <BR>
 
@@ -481,7 +481,7 @@ You need to manually clean up the leftover files that get created in $TMPDIR.
 <BR>
 
 The <B>-vrmlurl</B> option must be specified.  As of 19 March 2003 there is a 
-bug in <B><A HREF="make_geovrml.html">make_geovrml</A></B>(1) where if the <B>-vrmlurl</B> option  is not 
+bug in <B>make_geovrml</B>(1) where if the <B>-vrmlurl</B> option  is not 
 specified invalid VRML is 
 generated.  This is generally not a problem.  Because of bugs in VRML browsers
 all URLs must be absolute anyway.
