@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbprocess.c	3/31/93
- *    $Id: mbprocess.c,v 5.25 2002-10-02 23:56:06 caress Exp $
+ *    $Id: mbprocess.c,v 5.26 2003-01-15 20:52:13 caress Exp $
  *
  *    Copyright (c) 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -36,6 +36,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.25  2002/10/02 23:56:06  caress
+ * Release 5.0.beta24
+ *
  * Revision 5.24  2002/09/19 00:28:12  caress
  * Release 5.0.beta23
  *
@@ -183,7 +186,7 @@ int get_anglecorr(int verbose,
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbprocess.c,v 5.25 2002-10-02 23:56:06 caress Exp $";
+	static char rcs_id[] = "$Id: mbprocess.c,v 5.26 2003-01-15 20:52:13 caress Exp $";
 	static char program_name[] = "mbprocess";
 	static char help_message[] =  "mbprocess is a tool for processing swath sonar bathymetry data.\n\
 This program performs a number of functions, including:\n\
@@ -345,6 +348,8 @@ and mbedit edit save files.\n";
 	double	headingx, headingy;
 	double	mtodeglon, mtodeglat;
 	double	del_time, dx, dy, dz, r, dist;
+	double	lever_x = 0.0;
+	double	lever_y = 0.0;
 	double	lever_heave = 0.0;
 	double	time_d_old = 0.0;
 	double	navlon_old = 0.0;
@@ -358,12 +363,14 @@ and mbedit edit save files.\n";
 	char	*rt_svp;
 	double	ssv;
 	int	nedit = 0;
-	double	*edit_time_d;
-	int	*edit_beam;
-	int	*edit_action;
+	double	*edit_time_d = NULL;
+	int	*edit_beam = NULL;
+	int	*edit_action = NULL;
+	int	*edit_use = NULL;
 	double	stime_d;
 	int	sbeam;
 	int	saction;
+	double	last_time_d;
 	int	insert, firstedit, lastedit;
 	double	draft_org, depth_offset_use, depth_offset_change, depth_offset_org, static_shift;
 	double	ttime, range;
@@ -1195,7 +1202,9 @@ and mbedit edit save files.\n";
 		{
 		size = (nsvp+1)*sizeof(double);
 		status = mb_malloc(verbose,size,&depth,&error);
+		if (error == MB_ERROR_NO_ERROR)
 		status = mb_malloc(verbose,size,&velocity,&error);
+		if (error == MB_ERROR_NO_ERROR)
 		status = mb_malloc(verbose,size,&velocity_sum,&error);
 	
 		/* if error initializing memory then quit */
@@ -2084,10 +2093,14 @@ and mbedit edit save files.\n";
 	    /* allocate arrays for edit */
 	    if (nedit > 0)
 		{
-		size = nedit *sizeof(double);
-		status = mb_malloc(verbose,size,&edit_time_d,&error);
-		status = mb_malloc(verbose,size,&edit_beam,&error);
-		status = mb_malloc(verbose,size,&edit_action,&error);
+		status = mb_malloc(verbose, nedit *sizeof(double), &edit_time_d, &error);
+		status = mb_malloc(verbose, nedit *sizeof(int), &edit_beam, &error);
+		status = mb_malloc(verbose, nedit *sizeof(int), &edit_action, &error);
+		status = mb_malloc(verbose, nedit *sizeof(int), &edit_use, &error);
+		memset(edit_time_d, 0, nedit *sizeof(double));
+		memset(edit_beam, 0, nedit *sizeof(int));
+		memset(edit_action, 0, nedit *sizeof(int));
+		memset(edit_use, 0, nedit *sizeof(int));
 	
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR)
@@ -2143,12 +2156,12 @@ and mbedit edit save files.\n";
 		/* insert into sorted array */
 		if (i > 0)
 		    {
-		    if (stime_d < edit_time_d[insert - 1])
+		    if (insert > 0 && stime_d < edit_time_d[insert])
 			{
-			for (j = insert - 1; j >= 0 && stime_d < edit_time_d[j]; j--)
+			for (j = insert; j >= 0 && stime_d < edit_time_d[j]; j--)
 			    insert--;
 			}
-		    else if (stime_d >= edit_time_d[insert - 1])
+		    else if (stime_d >= edit_time_d[insert])
 			{
 			for (j = insert; j < i && stime_d >= edit_time_d[j]; j++)
 			    insert++;
@@ -2171,16 +2184,22 @@ and mbedit edit save files.\n";
 		edit_action[insert] = saction;
 		}
 	    fclose(tfp);
+/*
+for (i=0;i<nedit;i++)
+fprintf(stderr,"i:%d edit: %f %d %d\n",
+i,edit_time_d[i],edit_beam[i],edit_action[i]);
+*/
+		
+	    /* set some beam editing starting values */
+	    firstedit = 0;
+	    lastedit = -1;
+	    last_time_d = 0.0;
     
 	    /* give the statistics */
 	    if (verbose >= 1)
 		    {
 		    fprintf(stderr,"\n%d bathymetry edits read\n",nedit);
 		    }
-/*for (i=0;i<nedit;i++)
-fprintf(stderr, "edit %d %f %d %d\n", 
-i, edit_time_d[i], edit_beam[i], edit_action[i]);
-*/
 	    }
 
 	/*--------------------------------------------
@@ -3526,29 +3545,38 @@ i, edit_time_d[i], edit_beam[i], edit_action[i]);
 			
 		/* do lever calculation to find heave implied by roll and pitch
 		   for a sonar displaced from the vru - this will be added to the
-		   bathymetry
-		   	x = r * COS(alpha) * COS(beta) 
-		   	y = r * SIN(alpha)
-		   	z = r * COS(alpha) * SIN(beta) */
-	    	if (process.mbp_lever_mode == MBP_LEVER_ON)
+		   bathymetry */
+	    	if (error == MB_ERROR_NO_ERROR
+			&& process.mbp_lever_mode == MBP_LEVER_ON
+			&& kind == MB_DATA_DATA)
 			{
-			dx = process.mbp_sonar_offsetx - process.mbp_vru_offsetx;
-			dy = process.mbp_sonar_offsety - process.mbp_vru_offsety;
-			dz = process.mbp_sonar_offsetz - process.mbp_vru_offsetz;
-			r = sqrt(dx * dx + dy * dy + dz * dz);
-			if (r > 0.0)
-			    {
-			    alpha = RTD * asin(dy / r);
-			    if (cos(DTR * alpha) != 0.0)
-				beta = RTD * acos(dx / (r * cos(DTR * alpha)));
-			    else
-				beta = 0.0;
-			    alpha += pitch + process.mbp_pitchbias;
-			    beta += roll + process.mbp_rollbias;
-			    lever_heave =  r * cos(DTR * alpha) * sin(DTR * beta) - dz;
-			    }
-/*fprintf(stderr, "dx:%f dy:%f dz:%f alpha:%f beta:%f lever:%f\n", 
-dx, dy, dz, alpha, beta, lever_heave);*/
+			alpha = pitch;
+			beta = roll;
+			if (process.mbp_pitchbias_mode == MBP_PITCHBIAS_ON)
+			    	alpha += process.mbp_pitchbias;
+			if (process.mbp_rollbias_mode == MBP_ROLLBIAS_SINGLE)
+			    	beta += process.mbp_rollbias;
+			else if (process.mbp_rollbias_mode == MBP_ROLLBIAS_DOUBLE)
+			    	beta += 0.5 * (process.mbp_rollbias_port 
+							+ process.mbp_rollbias_stbd);
+			mb_lever(verbose, 
+			    	process.mbp_sonar_offsetx,
+			    	process.mbp_sonar_offsety,
+			    	process.mbp_sonar_offsetz,
+			    	(double) 0.0,
+			    	(double) 0.0,
+			    	(double) 0.0,
+				process.mbp_vru_offsetx,
+				process.mbp_vru_offsety,
+				process.mbp_vru_offsetz,
+				alpha,
+				beta,
+				&lever_x,
+				&lever_y,
+				&lever_heave,
+				&error);	
+/*fprintf(stderr, "alpha:%f beta:%f lever:%f\n", 
+alpha, beta, lever_heave);*/
 			}
 
 		/* interpolate the navigation if desired */
@@ -3834,16 +3862,23 @@ dx, dy, dz, alpha, beta, lever_heave);*/
 					angle coordinates to roll-pitch 
 					coordinates, apply roll and pitch
 					corrections, and translate back */
-				if (process.mbp_rollbias != 0.0 
-					|| process.mbp_pitchbias != 0.0)
+				if (process.mbp_rollbias_mode != MBP_ROLLBIAS_OFF 
+					|| process.mbp_pitchbias == MBP_PITCHBIAS_ON)
 					{
 					mb_takeoff_to_rollpitch(
 						verbose,
 						angles[i], angles_forward[i], 
 						&alpha, &beta, 
 						&error);
-					alpha += process.mbp_pitchbias;
-					beta += process.mbp_rollbias;
+					if (process.mbp_pitchbias_mode == MBP_PITCHBIAS_ON)
+			    			alpha += process.mbp_pitchbias;
+			    		if (process.mbp_rollbias_mode == MBP_ROLLBIAS_SINGLE)
+			    			beta += process.mbp_rollbias;
+			    		else if (process.mbp_rollbias_mode == MBP_ROLLBIAS_DOUBLE
+						&& angles[i] >= 0.0)
+			    			beta += process.mbp_rollbias_stbd;
+			    		else if (process.mbp_rollbias_mode == MBP_ROLLBIAS_DOUBLE)
+			    			beta += process.mbp_rollbias_port;
 					mb_rollpitch_to_takeoff(
 						verbose, 
 						alpha, beta, 
@@ -3951,8 +3986,15 @@ idata, i, bheave[i], draft, depth_offset_use, static_shift, zz);*/
 					/ range / cos(alpha));
 
 				/* apply roll pitch corrections */
-				alpha += DTR * process.mbp_pitchbias;
-				beta +=  DTR * process.mbp_rollbias;
+				if (process.mbp_pitchbias_mode == MBP_PITCHBIAS_ON)
+			    		alpha += DTR * process.mbp_pitchbias;
+			    	if (process.mbp_rollbias_mode == MBP_ROLLBIAS_SINGLE)
+			    		beta += DTR * process.mbp_rollbias;
+			    	else if (process.mbp_rollbias_mode == MBP_ROLLBIAS_DOUBLE
+					&& beta <= M_PI * 0.5)
+			    		beta += DTR * process.mbp_rollbias_stbd;
+			    	else if (process.mbp_rollbias_mode == MBP_ROLLBIAS_DOUBLE)
+			    		beta += DTR * process.mbp_rollbias_port;
 				
 				/* recalculate bathymetry */
 				bath[i] 
@@ -3992,7 +4034,8 @@ idata, i, bheave[i], draft, depth_offset_use, static_shift, zz);*/
 			    {
 			    /* get draft change */
 			    depth_offset_change = draft - draft_org + lever_heave;
-/*fprintf(stderr, "depth offset: %f %f %f %f\n", time_d, draft, draft_org, depth_offset_change);*/
+/*fprintf(stderr, "time:%f  drafts:%f %f  lever:%f  depth offset:%f\n", 
+time_d, draft, draft_org, lever_heave, depth_offset_change);*/
 
 			    /* loop over the beams */
 			    for (i=0;i<nbath;i++)
@@ -4125,7 +4168,16 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 		    && kind == MB_DATA_DATA)
 		    {			    
 		    /* find first and last edits for this ping */
-		    lastedit = firstedit - 1;
+		    if (time_d <= last_time_d)
+			{
+			if (verbose > 0)
+			    fprintf(stderr, "\tEncountered duplicate or reverse ping times: beam flag search reset.\n");
+			firstedit = 0;
+			lastedit = -1;
+			}
+		    else
+			lastedit = firstedit - 1;
+		    last_time_d = time_d;
 		    for (j = firstedit; j < nedit && time_d >= edit_time_d[j]; j++)
 			{
 			if (edit_time_d[j] == time_d)
@@ -4135,6 +4187,9 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 			    lastedit = j;
 			    }
 			}
+/*fprintf(stderr, "time_d:%f  edits: %d %d\n", 
+time_d, firstedit, lastedit);
+*/
 			
 		    /* apply edits */
 		    for (j=firstedit;j<=lastedit;j++)
@@ -4145,18 +4200,36 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 			    /* apply edit */
 			    if (edit_action[j] == MBP_EDIT_FLAG
 				&& mb_beam_ok(beamflag[edit_beam[j]]))
+				{
 				beamflag[edit_beam[j]] 
 				    = MB_FLAG_FLAG + MB_FLAG_MANUAL;
+				edit_use[j]++;
+				}
 			    else if (edit_action[j] == MBP_EDIT_FILTER
 				&& mb_beam_ok(beamflag[edit_beam[j]]))
+				{
 				beamflag[edit_beam[j]] 
 				    = MB_FLAG_FLAG + MB_FLAG_FILTER;
+				edit_use[j]++;
+				}
 			    else if (edit_action[j] == MBP_EDIT_UNFLAG
 				&& !mb_beam_ok(beamflag[edit_beam[j]]))
+				{
 				beamflag[edit_beam[j]] = MB_FLAG_NONE;
+				edit_use[j]++;
+				}
 			    else if (edit_action[j] == MBP_EDIT_ZERO)
+				{
 				beamflag[edit_beam[j]] = MB_FLAG_NULL;
-			    }			
+				edit_use[j]++;
+				}
+			    else
+				{
+				edit_use[j] += 100;
+				}
+			    }
+			else
+			    edit_use[j] += 1000;
 			}
 		    }
 
@@ -4620,6 +4693,12 @@ j, i, slopeangle, rawangle, correction, reference_amp, ss[i]);*/
 				}
 			}
 		}
+for (i=0;i<nedit;i++)
+{
+if (edit_use[i] == 0) 
+fprintf(stderr,"i:%d edit: %f %d %d   %d\n",
+i,edit_time_d[i],edit_beam[i],edit_action[i],edit_use[i]);
+}
 
 	/* close the files */
 	status = mb_close(verbose,&imbio_ptr,&error);
@@ -4645,6 +4724,38 @@ j, i, slopeangle, rawangle, correction, reference_amp, ss[i]);*/
 		status = mb_malloc(verbose,size,&sscorrtable,&error);
 		}
 
+	/* deallocate arrays for navigation */
+	if (nnav > 0)
+		{
+		mb_free(verbose,&ntime,&error);
+		mb_free(verbose,&nlon,&error);
+		mb_free(verbose,&nlat,&error);
+		mb_free(verbose,&nheading,&error);
+		mb_free(verbose,&nspeed,&error);
+		mb_free(verbose,&ndraft,&error);
+		mb_free(verbose,&nlonspl,&error);
+		mb_free(verbose,&nlatspl,&error);
+		}
+
+	/* deallocate arrays for adjusted navigation */
+	if (nanav > 0)
+		{
+		mb_free(verbose,&natime,&error);
+		mb_free(verbose,&nalon,&error);
+		mb_free(verbose,&nalat,&error);
+		mb_free(verbose,&nalonspl,&error);
+		mb_free(verbose,&nalatspl,&error);
+		}
+
+	/* deallocate arrays for beam edits */
+	if (nedit > 0)
+		{
+		mb_free(verbose,&(edit_time_d),&error);
+		mb_free(verbose,&(edit_beam),&error);
+		mb_free(verbose,&(edit_action),&error);
+		mb_free(verbose,&(edit_use),&error);
+		}
+
 	/* deallocate memory for data arrays */
 	mb_free(verbose,&depth,&error);
 	mb_free(verbose,&velocity,&error);
@@ -4663,17 +4774,6 @@ j, i, slopeangle, rawangle, correction, reference_amp, ss[i]);*/
 	mb_free(verbose,&ss,&error); 
 	mb_free(verbose,&ssacrosstrack,&error); 
 	mb_free(verbose,&ssalongtrack,&error); 
-	if (nnav > 0)
-		{
-		mb_free(verbose,&ntime,&error);
-		mb_free(verbose,&nlon,&error);
-		mb_free(verbose,&nlat,&error);
-		mb_free(verbose,&nheading,&error);
-		mb_free(verbose,&nspeed,&error);
-		mb_free(verbose,&ndraft,&error);
-		mb_free(verbose,&nlonspl,&error);
-		mb_free(verbose,&nlatspl,&error);
-		}
 
 	/* check memory */
 	if (verbose >= 4)

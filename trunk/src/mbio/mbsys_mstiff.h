@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_mstiff.h	4/10/98
- *	$Id: mbsys_mstiff.h,v 5.3 2002-09-18 23:32:59 caress Exp $
+ *	$Id: mbsys_mstiff.h,v 5.4 2003-01-15 20:51:48 caress Exp $
  *
  *    Copyright (c) 1998, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -19,6 +19,9 @@
  * Author:	D. W. Caress
  * Date:	April 10, 1988
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2002/09/18 23:32:59  caress
+ * Release 5.0.beta23
+ *
  * Revision 5.2  2001/07/20 00:32:54  caress
  * Release 5.0.beta03
  *
@@ -67,6 +70,65 @@
  *      MBIO,  including images of the data derived from a
  *      realtime display.
  *   7. Comments are not supported in this format.
+ *   8. Each of the possible data fields is identified by a 
+ *      unique tag:
+ *          Tag        Field Type                Default
+ *          ---        ----------                -------
+ *          273        Annotation
+ *          272        AnnotationCount
+ *          279        Annotation2
+ *          278        Annotation2Count
+ *          281        Annotation3
+ *          280        Annotation3Count
+ *          260        BinsPerChannel
+ *          258        BitsPerBin                8 bits per sample (2 MSB = 0)
+ *          254        Compression               1 (no compression)
+ *          255        CondensedImage
+ *          301        CreatorVersion        
+ *          256        Description        
+ *          287        Fathometer        
+ *          296        Fathometer2        
+ *          286        FathometerCount        
+ *          257        History        
+ *          263        LeftChannel        
+ *          299        LeftChannel2        
+ *          289        Magnetometer        
+ *          288        MagnetometerCount        
+ *          291        MagnetometerParms        
+ *          303        MagnetometerParms2        
+ *          269        Marker        
+ *          268        MarkerCount        
+ *          277        Marker2        
+ *          276        Marker2Count        
+ *          284        Marker3        
+ *          283        Marker3Count        
+ *          295        Marker4        
+ *          294        Marker4Count        
+ *          307        Marker5        
+ *          306        Marker5Count        
+ *          267        NavInfo        
+ *          275        NavInfo2        
+ *          282        NavInfo3        
+ *          293        NavInfo4        
+ *          297        NavInfo5        
+ *          308        NavInfo6        
+ *          266        NavInfoCount       
+ *          304        NavInterpolationTimeout        
+ *          274        PingNavInfo        
+ *          264        RightChannel        
+ *          300        RightChannel2        
+ *          261        ScrollDirection        
+ *          265        SonarDataInfo        
+ *          292        SonarDataInfo2        
+ *          298        SonarDataInfo3        
+ *          259        SonarLines        
+ *          271        SurveyPlotterImage        
+ *          270        SurveyPlotterParms        
+ *          290        SurveyPlotterParms2        
+ *          302        SurveyPlotterParms3        
+ *          305        SurveyPlotterParms4        
+ *          262        TimeCorrelation        
+ *          285        Y2KTimeCorrelation        
  */
  
 /* number of sidescan pixels for Sea Scan sidescan sonars */
@@ -83,11 +145,14 @@ struct mbsys_mstiff_struct
 
 	/* other values */
 	double	heading;	/* heading in degrees */
+	double	course;	    	/* course made good in degrees */
 	double	speed;		/* fore-aft speed in km/hr */
 	double	altitude;	/* altitude in m */
-	double	slant_range_max;    /* seconds */
-	double	range_delay;	    /* seconds */
-	double	sample_interval;    /* seconds */
+	double	slant_range_max;    /* meters */
+	double	range_delay;	    /* meters */
+	double	sample_interval;    /* meters */
+	double	sonar_depth;	    /* sonar depth in meters */
+	double	frequency;    /* sonar frequency in Hz */
 
 	/* sidescan data */
 	int	pixels_ss;	/* number of pixels */

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_time.c	10/30/2000
- *    $Id: mb_navint.c,v 5.7 2002-09-18 23:32:59 caress Exp $
+ *    $Id: mb_navint.c,v 5.8 2003-01-15 20:51:48 caress Exp $
  *
  *    Copyright (c) 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	October 30, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2002/09/18 23:32:59  caress
+ * Release 5.0.beta23
+ *
  * Revision 5.6  2002/07/20 20:42:40  caress
  * Release 5.0.beta20
  *
@@ -55,13 +58,13 @@
 #include "../../include/mb_define.h"
 #include "../../include/mb_io.h"
 
-/* 
+/*
     #define MB_NAVINT_DEBUG 1
     #define MB_ATTINT_DEBUG 1
     #define MB_HEDINT_DEBUG 1
 */
 
-static char rcs_id[]="$Id: mb_navint.c,v 5.7 2002-09-18 23:32:59 caress Exp $";
+static char rcs_id[]="$Id: mb_navint.c,v 5.8 2003-01-15 20:51:48 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 /* 	function mb_navint_add adds a nav fix to the internal
@@ -574,7 +577,7 @@ int mb_hedint_add(int verbose, void *mbio_ptr, double time_d, double heading, in
 		mb_io_ptr->heading_heading[mb_io_ptr->nheading] = heading;
 		mb_io_ptr->nheading++;
 #ifdef MB_HEDINT_DEBUG
-	fprintf(stderr, "mb_hedint_add:    Attitude fix %d added\n", mb_io_ptr->nheading);
+	fprintf(stderr, "mb_hedint_add:    Heading fix %d added\n", mb_io_ptr->nheading);
 #endif
 
 		/* print debug statements */
@@ -659,7 +662,7 @@ int mb_hedint_interp(int verbose, void *mbio_ptr,
 			+ factor*(mb_io_ptr->heading_heading[ifix] - mb_io_ptr->heading_heading[ifix-1]);
 		status = MB_SUCCESS;
 #ifdef MB_HEDINT_DEBUG
-	fprintf(stderr, "mb_hedint_interp: Attitude interpolated at fix %d of %d with factor:%f\n", 
+	fprintf(stderr, "mb_hedint_interp: Heading interpolated at fix %d of %d with factor:%f\n", 
 		ifix, mb_io_ptr->nheading, factor);
 #endif
 		}
@@ -673,7 +676,7 @@ int mb_hedint_interp(int verbose, void *mbio_ptr,
 		*heading = mb_io_ptr->heading_heading[mb_io_ptr->nheading-1];
 		status = MB_SUCCESS;
 #ifdef MB_HEDINT_DEBUG
-	fprintf(stderr, "mb_hedint_interp: Attitude extrapolated from last fix of %d\n", 
+	fprintf(stderr, "mb_hedint_interp: Heading extrapolated from last fix of %d\n", 
 		mb_io_ptr->nheading);
 #endif
 		}
@@ -684,7 +687,7 @@ int mb_hedint_interp(int verbose, void *mbio_ptr,
 		*heading = mb_io_ptr->heading_heading[0];
 		status = MB_SUCCESS;
 #ifdef MB_HEDINT_DEBUG
-	fprintf(stderr, "mb_hedint_interp: Attitude extrapolated from first fix of %d\n", 
+	fprintf(stderr, "mb_hedint_interp: Heading extrapolated from first fix of %d\n", 
 		mb_io_ptr->nheading);
 #endif
 		}
@@ -695,7 +698,7 @@ int mb_hedint_interp(int verbose, void *mbio_ptr,
 		*heading = 0.0;
 		status = MB_FAILURE;
 #ifdef MB_HEDINT_DEBUG
-	fprintf(stderr, "mb_hedint_interp: Attitude zeroed\n");
+	fprintf(stderr, "mb_hedint_interp: Heading zeroed\n");
 #endif
 		}
 

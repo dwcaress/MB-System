@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hypc8101.c	8/8/94
- *	$Id: mbr_hypc8101.c,v 5.5 2002-09-18 23:32:59 caress Exp $
+ *	$Id: mbr_hypc8101.c,v 5.6 2003-01-15 20:51:48 caress Exp $
  *
  *    Copyright (c) 1998, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	December 10, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2002/09/18 23:32:59  caress
+ * Release 5.0.beta23
+ *
  * Revision 5.4  2001/07/20 00:32:54  caress
  * Release 5.0.beta03
  *
@@ -101,7 +104,7 @@ int mbr_wt_hypc8101(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_hypc8101(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_hypc8101.c,v 5.5 2002-09-18 23:32:59 caress Exp $";
+	static char res_id[]="$Id: mbr_hypc8101.c,v 5.6 2003-01-15 20:51:48 caress Exp $";
 	char	*function_name = "mbr_register_hypc8101";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -231,7 +234,7 @@ int mbr_info_hypc8101(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_hypc8101.c,v 5.5 2002-09-18 23:32:59 caress Exp $";
+	static char res_id[]="$Id: mbr_hypc8101.c,v 5.6 2003-01-15 20:51:48 caress Exp $";
 	char	*function_name = "mbr_info_hypc8101";
 	int	status = MB_SUCCESS;
 
@@ -300,7 +303,7 @@ int mbr_info_hypc8101(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_hypc8101(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_hypc8101.c,v 5.5 2002-09-18 23:32:59 caress Exp $";
+	static char res_id[]="$Id: mbr_hypc8101.c,v 5.6 2003-01-15 20:51:48 caress Exp $";
 	char	*function_name = "mbr_alm_hypc8101";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -571,24 +574,6 @@ int mbr_rt_hypc8101(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	/* set error and kind in mb_io_ptr */
 	mb_io_ptr->new_error = *error;
 	mb_io_ptr->new_kind = data->kind;
-	
-	/* add nav records to list for interpolation */
-	if (status == MB_SUCCESS 
-		&& data->kind == MB_DATA_NAV)
-		{
-		mb_fix_y2k(verbose, data->pos_year,&time_i[0]);
-		time_i[1] = data->pos_month;
-		time_i[2] = data->pos_day;
-		time_i[3] = data->pos_hour;
-		time_i[4] = data->pos_minute;
-		time_i[5] = data->pos_second;
-		time_i[6] = 10000*data->pos_hundredth_sec
-			+ 100*data->pos_thousandth_sec;
-		mb_get_time(verbose,time_i, &time_d);
-		lon = data->pos_longitude*0.00000009;
-		lat = data->pos_latitude*0.00000009;
-		mb_navint_add(verbose, mbio_ptr, time_d, lon, lat, error);
-		}
 
 	/* interpolate navigation for survey pings if needed */
 	if (status == MB_SUCCESS 
@@ -633,7 +618,7 @@ int mbr_rt_hypc8101(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		store->pitch_offset = data->pitch_offset;
 		store->heading_offset = data->heading_offset;
 		store->time_delay = data->time_delay;
-		store->transducer_depth = data->transducer_depth;
+		store->transducer_depth = 10 * data->transducer_depth;
 		store->transducer_height = data->transducer_height;
 		store->transducer_x = data->transducer_x;
 		store->transducer_y = data->transducer_y;
@@ -807,7 +792,8 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error)
 	double	off1, off2, off3, off4, off5, off6, off7;
 	double	heave, roll, pitch, gyro, dgyro;
 	double	angle, theta, phi;
-	double	lon, lat, factor;
+	double	lon, lat, speed;
+	double	lever_x, lever_y, lever_z;
 	double	rr, xx, zz;
 	double	ddummy1, ddummy2;
 	char	sdummy[20];
@@ -873,22 +859,9 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error)
 					&hcp_pitch);
 			if (nscan == 4)
 			    {
-			    if (data->hcp_num >= MBF_HYPC8101_NHCP_MAX)
-				{
-				for (i=0;i<MBF_HYPC8101_NHCP_MAX-1;i++)
-				    {
-				    data->hcp_clock[i] = data->hcp_clock[i+1];
-				    data->hcp_heave[i] = data->hcp_heave[i+1];
-				    data->hcp_roll[i] = data->hcp_roll[i+1];
-				    data->hcp_pitch[i] = data->hcp_pitch[i+1];
-				    }
-				data->hcp_num = MBF_HYPC8101_NHCP_MAX - 1;
-				}
-			    data->hcp_clock[data->hcp_num] = hcp_clock;
-			    data->hcp_heave[data->hcp_num] = hcp_heave;
-			    data->hcp_roll[data->hcp_num] = hcp_roll;
-			    data->hcp_pitch[data->hcp_num] = hcp_pitch;
-			    data->hcp_num++;
+			    /* apply vru offsets */
+			    hcp_roll += 0.01 * data->roll_offset;
+			    hcp_pitch += 0.01 * data->pitch_offset;
 			    
 			    /* get time tag */
 			    time_d = data->start_time_d + hcp_clock;
@@ -902,6 +875,11 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error)
 			    data->hundredth_sec = time_i[6]/10000;
 			    data->thousandth_sec = 
 				(time_i[6] - 10000 * data->hundredth_sec)/100;
+			
+		    	    /* add latest attitude to list */
+		    	    mb_attint_add(verbose, mbio_ptr, 
+				    time_d, hcp_heave, hcp_roll, hcp_pitch, 
+				    error);
 				
 			    /* get attitude data */
 			    data->heave = 1000 * hcp_heave;
@@ -944,15 +922,6 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error)
 					hcp_roll);
 				fprintf(stderr,"dbg4       pitch:      %f\n",
 					hcp_pitch);
-				fprintf(stderr,"dbg4       hcp_num:    %d\n",
-					data->hcp_num);
-				fprintf(stderr,"dbg4       cnt clock heave roll pitch\n");
-				for (i=0;i<data->hcp_num;i++)
-				fprintf(stderr,"dbg4       %d  %f %f %f %f\n",
-					i, data->hcp_clock[i], 
-					data->hcp_heave[i], 
-					data->hcp_roll[i], 
-					data->hcp_pitch[i]);
 				}
 			    }
 			}
@@ -965,19 +934,9 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error)
 					&gyr_gyro);
 			if (nscan == 2)
 			    {
-			    if (data->gyr_num >= MBF_HYPC8101_NGYR_MAX)
-				{
-				for (i=0;i<MBF_HYPC8101_NGYR_MAX-1;i++)
-				    {
-				    data->gyr_clock[i] = data->gyr_clock[i+1];
-				    data->gyr_gyro[i] = data->gyr_gyro[i+1];
-				    }
-				data->gyr_num = MBF_HYPC8101_NGYR_MAX - 1;
-				}
-			    data->gyr_clock[data->gyr_num] = gyr_clock;
-			    data->gyr_gyro[data->gyr_num] = gyr_gyro;
-			    data->gyr_num++;
-			    
+			    /* apply heading offset */
+			    gyr_gyro += 0.01 * data->heading_offset;
+
 			    /* get time tag */
 			    time_d = data->start_time_d + gyr_clock;
 			    mb_get_date(verbose, time_d, time_i);
@@ -990,6 +949,10 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error)
 			    data->hundredth_sec = time_i[6]/10000;
 			    data->thousandth_sec = 
 				(time_i[6] - 10000 * data->hundredth_sec)/100;
+
+		    	    /* add latest attitude to list */
+		    	    mb_hedint_add(verbose, mbio_ptr, 
+				    time_d, gyr_gyro, error);
 				
 			    /* get gyro data */
 			    data->heading = 100 * gyr_gyro;
@@ -1026,13 +989,6 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error)
 					gyr_clock);
 				fprintf(stderr,"dbg4       heading:    %f\n",
 					gyr_gyro);
-				fprintf(stderr,"dbg4       gyr_num:    %d\n",
-					data->gyr_num);
-				fprintf(stderr,"dbg4       cnt clock heading\n");
-				for (i=0;i<data->gyr_num;i++)
-				fprintf(stderr,"dbg4       %d  %f %f\n",
-					i, data->gyr_clock[i], 
-					data->gyr_gyro[i]);
 				}
 			    }
 			}
@@ -1046,20 +1002,8 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error)
 					&pos_northing);
 			if (nscan == 3)
 			    {
-			    if (data->pos_num >= MBF_HYPC8101_NPOS_MAX)
-				{
-				for (i=0;i<MBF_HYPC8101_NPOS_MAX-1;i++)
-				    {
-				    data->pos_clock[i] = data->pos_clock[i+1];
-				    data->pos_easting[i] = data->pos_easting[i+1];
-				    data->pos_northing[i] = data->pos_northing[i+1];
-				    }
-				data->pos_num = MBF_HYPC8101_NPOS_MAX - 1;
-				}
-			    data->pos_clock[data->pos_num] = pos_clock;
-			    data->pos_easting[data->pos_num] = pos_easting;
-			    data->pos_northing[data->pos_num] = pos_northing;
-			    data->pos_num++;
+			    /* apply time delay */
+			    pos_clock += 0.001 * data->time_delay;
 			    
 			    /* get time tag */
 			    time_d = data->start_time_d + pos_clock;
@@ -1079,7 +1023,7 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error)
 			    data->utm_easting = 100 * pos_easting;
 			    
 			    /* set done and kind */
-			    done = MB_YES;
+			    done = MB_NO;
 			    data->kind = MB_DATA_NAV;
 
 			    /* print debug statements */
@@ -1112,21 +1056,13 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error)
 					pos_easting);
 				fprintf(stderr,"dbg4       northing:   %f\n",
 					pos_northing);
-				fprintf(stderr,"dbg4       pos_num:    %d\n",
-					data->pos_num);
-				fprintf(stderr,"dbg4       cnt clock easting northing\n");
-				for (i=0;i<data->pos_num;i++)
-				fprintf(stderr,"dbg4       %d  %f %f %f\n",
-					i, data->pos_clock[i], 
-					data->pos_easting[i], 
-					data->pos_northing[i]);
 				}
 			    }
 			}
 			
-		    /* deal with nav lon lat data - always followed
-		       by projected position data - return MB_DATA_NAV
-		       after both RAW and POS lines */
+		    /* deal with nav lon lat data - sometimes followed
+		       by projected position data in POS lines - return MB_DATA_NAV
+		       after RAW lines */
 		    else if (strncmp(line, "RAW", 3) == 0)
 			{
 			nscan = sscanf(line+6, "%lf %d %lf %lf %lf %lf", 
@@ -1138,22 +1074,12 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error)
 					&ddummy2);
 			if (nscan == 6)
 			    {
+			    /* rescale */
 			    raw_lat = 0.0001 * raw_lat;
 			    raw_lon = 0.0001 * raw_lon;
-			    if (data->raw_num >= MBF_HYPC8101_NRAW_MAX)
-				{
-				for (i=0;i<MBF_HYPC8101_NRAW_MAX-1;i++)
-				    {
-				    data->raw_clock[i] = data->raw_clock[i+1];
-				    data->raw_lat[i] = data->raw_lat[i+1];
-				    data->raw_lon[i] = data->raw_lon[i+1];
-				    }
-				data->raw_num = MBF_HYPC8101_NRAW_MAX - 1;
-				}
-			    data->raw_clock[data->raw_num] = raw_clock;
-			    data->raw_lat[data->raw_num] = raw_lat;
-			    data->raw_lon[data->raw_num] = raw_lon;
-			    data->raw_num++;
+
+			    /* apply time delay */
+			    pos_clock += 0.001 * data->time_delay;			    
 			    
 			    /* get time tag */
 			    time_d = data->start_time_d + raw_clock;
@@ -1167,10 +1093,28 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error)
 			    data->pos_hundredth_sec = time_i[6]/10000;
 			    data->pos_thousandth_sec = 
 				(time_i[6] - 10000 * data->pos_hundredth_sec)/100;
+
+		    	    /* add latest nav to list */
+		    	    mb_navint_add(verbose, mbio_ptr, 
+				    time_d, raw_lon, raw_lat, error);
+		
+			    /* interpolate attitude and heading if possible */
+			    mb_attint_interp(verbose, mbio_ptr, time_d,  
+				&heave, &roll, &pitch, error);
+			    data->heave = 1000 * heave;
+			    data->roll = 200 * roll;
+			    data->pitch = 200 * pitch;
+			    mb_hedint_interp(verbose, mbio_ptr, time_d,  
+				&gyro, error);
+			    data->heading = 100 * gyro;
 			    
 			    /* get position */
 			    data->pos_latitude = raw_lat / 0.00000009;
 			    data->pos_longitude = raw_lon / 0.00000009;
+			    
+			    /* set done and kind */
+			    done = MB_YES;
+			    data->kind = MB_DATA_NAV;
 
 			    /* print debug statements */
 			    if (verbose >= 4)
@@ -1206,14 +1150,6 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error)
 					raw_lon);
 				fprintf(stderr,"dbg4       latitude:    %f\n",
 					raw_lat);
-				fprintf(stderr,"dbg4       raw_num:    %d\n",
-					data->raw_num);
-				fprintf(stderr,"dbg4       cnt clock lon lat\n");
-				for (i=0;i<data->raw_num;i++)
-				fprintf(stderr,"dbg4       %d  %f %f %f\n",
-					i, data->raw_clock[i], 
-					data->raw_lon[i], 
-					data->raw_lat[i]);
 				}
 			    }
 			}
@@ -1310,110 +1246,57 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error)
 
 			/* calculate the rest of the data */
 			if (status == MB_SUCCESS)
-			    {
-			    /* get roll, pitch, and heave values */
-			    if (data->hcp_num > 1)
-				{
-				it = 0;
-				for (i=0;i<data->hcp_num-1;i++)
-				    {
-				    if (sb2_clock > data->hcp_clock[i])
-					it = i;
-				    }
-				factor = (sb2_clock - data->hcp_clock[it])
-					/ (data->hcp_clock[it+1] - data->hcp_clock[it]);
-				heave = data->hcp_heave[it]
-				    + factor * (data->hcp_heave[it+1] 
-						- data->hcp_heave[it]);
-				roll = data->hcp_roll[it]
-				    + factor * (data->hcp_roll[it+1] 
-						- data->hcp_roll[it]);
-				pitch = data->hcp_pitch[it]
-				    + factor * (data->hcp_pitch[it+1] 
-						- data->hcp_pitch[it]);
-				}
-			    else if (data->hcp_num == 1)
-				{
-				heave = data->hcp_heave[0];
-				roll = data->hcp_roll[0];
-				pitch = data->hcp_pitch[0];
-				}
-			    else
-				{
-				heave = 0.0;
-				roll = 0.0;
-				pitch = 0.0;
-				}
+			    {			    
+			    /* get time tag */
+			    time_d = data->start_time_d + sb2_clock;
+			    mb_get_date(verbose, time_d, time_i);
+			    mb_unfix_y2k(verbose, time_i[0], &data->year);
+			    data->month = time_i[1];
+			    data->day = time_i[2];
+			    data->hour = time_i[3];
+			    data->minute = time_i[4];
+			    data->second = time_i[5];
+			    data->hundredth_sec = time_i[6]/10000;
+			    data->thousandth_sec = 
+				(time_i[6] - 10000 * data->hundredth_sec)/100;
+		
+			    /* interpolate attitude, heading and nav if possible */
+			    mb_attint_interp(verbose, mbio_ptr, time_d,  
+				&heave, &roll, &pitch, error);
+			    mb_hedint_interp(verbose, mbio_ptr, time_d,  
+				&gyro, error);
+			    mb_navint_interp(verbose, mbio_ptr, time_d, 
+			        gyro, 0.0, &lon, &lat, &speed, error);
+			    
+			    /* get lever arm correction for heave */
+			    mb_lever(verbose, 
+			    		(double) (0.01 * data->transducer_x),
+			    		(double) (0.01 * data->transducer_y),
+			    		(double) (0.01 * data->transducer_depth),
+			    		(double) (0.01 * data->antenna_x),
+			    		(double) (0.01 * data->antenna_y),
+			    		(double) (0.01 * data->antenna_z),
+					(double) (0.01 * data->motion_sensor_x),
+					(double) (0.01 * data->motion_sensor_y),
+					(double) (0.01 * data->motion_sensor_z),
+					(double) (0.01 * data->pitch_offset - pitch),
+					(double) (roll - 0.01 * data->roll_offset),
+					&lever_x,
+					&lever_y,
+					&lever_z,
+					error);	
+/*fprintf(stderr,"roll:%f pitch:%f    dz:%f\n", 
+(double) (roll - 0.01 * data->roll_offset),
+(double) (0.01 * data->pitch_offset - pitch),
+lever_z);*/
+			    heave += lever_z;
 			    data->heave = 1000 * heave;
 			    data->roll = 200 * roll;
 			    data->pitch = 200 * pitch;
-
-			    /* get gyro value */
-			    if (data->gyr_num > 1)
-				{
-				it = 0;
-				for (i=0;i<data->gyr_num-1;i++)
-				    {
-				    if (sb2_clock > data->gyr_clock[i])
-					it = i;
-				    }
-				dgyro = data->gyr_gyro[it+1] 
-						- data->gyr_gyro[it];
-				if (dgyro > 180.0)
-				    dgyro = dgyro - 360.0;
-				else if (dgyro < -180.0)
-				    dgyro = dgyro + 360.0;
-				factor = (sb2_clock - data->gyr_clock[it])
-					/ (data->gyr_clock[it+1] 
-					    - data->gyr_clock[it]);
-				gyro = data->gyr_gyro[it]
-					    + factor * dgyro;
-				}
-			    else if (data->gyr_num == 1)
-				{
-				gyro = data->gyr_gyro[0];
-				}
-			    else
-				{
-				gyro = 0.0;
-				}
-			    if (gyro >= 360.0)
-				gyro -= 360.0;
-			    else if (gyro < 0.0)
-				gyro += 360.0;
 			    data->heading = 100 * gyro;
-
-			    /* get longitude and latitude values */
-			    if (data->raw_num > 1)
-				{
-				it = 0;
-				for (i=0;i<data->raw_num-1;i++)
-				    {
-				    if (sb2_clock > data->raw_clock[i])
-					it = i;
-				    }
-				factor = (sb2_clock - data->raw_clock[it])
-					/ (data->raw_clock[it+1] - data->raw_clock[it]);
-				lon = data->raw_lon[it]
-				    + factor * (data->raw_lon[it+1] 
-						- data->raw_lon[it]);
-				lat = data->raw_lat[it]
-				    + factor * (data->raw_lat[it+1] 
-						- data->raw_lat[it]);
-				}
-			    else if (data->raw_num == 1)
-				{
-				lon = data->raw_lon[0];
-				lat = data->raw_lat[0];
-				}
-			    else
-				{
-				lon = 0.0;
-				lat = 0.0;
-				}
 			    data->latitude = lat / 0.00000009;
 			    data->longitude = lon / 0.00000009;
-			    
+
 			    /* calculate bathymetry */
 			    for (i=0;i<data->beams_bath;i++)
 				{
@@ -1449,19 +1332,6 @@ data->bath[i], data->bath_acrosstrack[i], data->bath_alongtrack[i]);*/
 					data->quality[i] = 3;
 				    }
 				}
-			    
-			    /* get time tag */
-			    time_d = data->start_time_d + sb2_clock;
-			    mb_get_date(verbose, time_d, time_i);
-			    mb_unfix_y2k(verbose, time_i[0], &data->year);
-			    data->month = time_i[1];
-			    data->day = time_i[2];
-			    data->hour = time_i[3];
-			    data->minute = time_i[4];
-			    data->second = time_i[5];
-			    data->hundredth_sec = time_i[6]/10000;
-			    data->thousandth_sec = 
-				(time_i[6] - 10000 * data->hundredth_sec)/100;
 
 			    /* set kind and done */
 			    done = MB_YES;
@@ -1584,12 +1454,18 @@ data->bath[i], data->bath_acrosstrack[i], data->bath_alongtrack[i]);*/
 				data->motion_sensor_x = 100 * off1;
 				data->motion_sensor_y = 100 * off2;
 				data->motion_sensor_z = 100 * off3;
+				data->heading_offset += 100 * off4;
+				data->roll_offset += 100 * off5;
+				data->pitch_offset += 100 * off6;
 				}
 			    else if (ndevice == device_sb2)
 				{
-				data->motion_sensor_x = 100 * off1;
-				data->motion_sensor_y = 100 * off2;
-				data->motion_sensor_z = 100 * off3;
+				data->transducer_x = 100 * off1;
+				data->transducer_y = 100 * off2;
+				data->transducer_depth = 100 * off3;
+				data->heading_offset += 100 * off4;
+				data->roll_offset += 100 * off5;
+				data->pitch_offset += 100 * off6;
 				}
 			    }
 			}

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_hypc8101.h	8/21/94
- *	$Id: mbf_hypc8101.h,v 5.1 2002-09-18 23:32:59 caress Exp $
+ *	$Id: mbf_hypc8101.h,v 5.2 2003-01-15 20:51:48 caress Exp $
  *
  *    Copyright (c) 1994, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -19,6 +19,9 @@
  * Author:	D. W. Caress
  * Date:	August 21, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2002/09/18 23:32:59  caress
+ * Release 5.0.beta23
+ *
  * Revision 5.0  2000/12/01 22:48:41  caress
  * First cut at Version 5.0.
  *
@@ -564,21 +567,5 @@ struct mbf_hypc8101_struct
 	double	start_time_d;
 	double	angle0;
 	double	angle_inc;
-	int	hcp_num;
-	double	hcp_clock[MBF_HYPC8101_NHCP_MAX];
-	double	hcp_heave[MBF_HYPC8101_NHCP_MAX];
-	double	hcp_roll[MBF_HYPC8101_NHCP_MAX];
-	double	hcp_pitch[MBF_HYPC8101_NHCP_MAX];
-	int	gyr_num;
-	double	gyr_clock[MBF_HYPC8101_NGYR_MAX];
-	double	gyr_gyro[MBF_HYPC8101_NGYR_MAX];
-	int	pos_num;
-	double	pos_clock[MBF_HYPC8101_NPOS_MAX];
-	double	pos_easting[MBF_HYPC8101_NPOS_MAX];
-	double	pos_northing[MBF_HYPC8101_NPOS_MAX];
-	int	raw_num;
-	double	raw_clock[MBF_HYPC8101_NRAW_MAX];
-	double	raw_lat[MBF_HYPC8101_NRAW_MAX];
-	double	raw_lon[MBF_HYPC8101_NRAW_MAX];
 	};
 

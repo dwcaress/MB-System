@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrid.c	5/2/94
- *    $Id: mbgrid.c,v 5.16 2002-11-14 03:52:25 caress Exp $
+ *    $Id: mbgrid.c,v 5.17 2003-01-15 20:52:13 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -38,6 +38,9 @@
  * Rererewrite:	January 2, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.16  2002/11/14 03:52:25  caress
+ * Release 5.0.beta27
+ *
  * Revision 5.15  2002/11/12 07:23:58  caress
  * Added mb_memory_clear() calls.
  *
@@ -343,7 +346,7 @@ double erfcc();
 double mbgrid_erf();
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbgrid.c,v 5.16 2002-11-14 03:52:25 caress Exp $";
+static char rcs_id[] = "$Id: mbgrid.c,v 5.17 2003-01-15 20:52:13 caress Exp $";
 static char program_name[] = "mbgrid";
 static char help_message[] =  "mbgrid is an utility used to grid bathymetry, amplitude, or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbgrid -Ifilelist -Oroot \
@@ -1321,10 +1324,15 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 
 	/* allocate memory for arrays */
 	status = mb_malloc(verbose,gxdim*gydim*sizeof(double),&grid,&error);
+	if (status == MB_SUCCESS) 
 	status = mb_malloc(verbose,gxdim*gydim*sizeof(double),&sigma,&error);
+	if (status == MB_SUCCESS) 
 	status = mb_malloc(verbose,gxdim*gydim*sizeof(double),&firsttime,&error);
+	if (status == MB_SUCCESS) 
 	status = mb_malloc(verbose,gxdim*gydim*sizeof(int),&cnt,&error);
+	if (status == MB_SUCCESS) 
 	status = mb_malloc(verbose,gxdim*gydim*sizeof(int),&num,&error);
+	if (status == MB_SUCCESS) 
 	status = mb_malloc(verbose,xdim*ydim*sizeof(float),&output,&error);
 
 	/* if error initializing memory then quit */
@@ -1435,18 +1443,25 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 		    /* allocate memory for reading data arrays */
 		    status = mb_malloc(verbose,beams_bath*sizeof(char),
 				    &beamflag,&error);
+		    if (status == MB_SUCCESS)
 		    status = mb_malloc(verbose,beams_bath*sizeof(double),
 				    &bath,&error);
+		    if (status == MB_SUCCESS)
 		    status = mb_malloc(verbose,beams_bath*sizeof(double),
 				    &bathlon,&error);
+		    if (status == MB_SUCCESS)
 		    status = mb_malloc(verbose,beams_bath*sizeof(double),
 				    &bathlat,&error);
+		    if (status == MB_SUCCESS)
 		    status = mb_malloc(verbose,beams_amp*sizeof(double),
 				    &amp,&error);
+		    if (status == MB_SUCCESS)
 		    status = mb_malloc(verbose,pixels_ss*sizeof(double),
 				    &ss,&error);
+		    if (status == MB_SUCCESS)
 		    status = mb_malloc(verbose,pixels_ss*sizeof(double),
 				    &sslon,&error);
+		    if (status == MB_SUCCESS)
 		    status = mb_malloc(verbose,pixels_ss*sizeof(double),
 				    &sslat,&error);
 
@@ -1746,6 +1761,7 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 	{
 
 	/* allocate memory for additional arrays */
+	if (status == MB_SUCCESS)
 	status = mb_malloc(verbose,gxdim*gydim*sizeof(double),&norm,&error);
 
 	/* if error initializing memory then quit */
@@ -1834,18 +1850,25 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 		    /* allocate memory for reading data arrays */
 		    status = mb_malloc(verbose,beams_bath*sizeof(char),
 				    &beamflag,&error);
+		    if (status == MB_SUCCESS)
 		    status = mb_malloc(verbose,beams_bath*sizeof(double),
 				    &bath,&error);
+		    if (status == MB_SUCCESS)
 		    status = mb_malloc(verbose,beams_bath*sizeof(double),
 				    &bathlon,&error);
+		    if (status == MB_SUCCESS)
 		    status = mb_malloc(verbose,beams_bath*sizeof(double),
 				    &bathlat,&error);
+		    if (status == MB_SUCCESS)
 		    status = mb_malloc(verbose,beams_amp*sizeof(double),
 				    &amp,&error);
+		    if (status == MB_SUCCESS)
 		    status = mb_malloc(verbose,pixels_ss*sizeof(double),
 				    &ss,&error);
+		    if (status == MB_SUCCESS)
 		    status = mb_malloc(verbose,pixels_ss*sizeof(double),
 				    &sslon,&error);
+		    if (status == MB_SUCCESS)
 		    status = mb_malloc(verbose,pixels_ss*sizeof(double),
 				    &sslat,&error);
 
@@ -2524,18 +2547,25 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 		    /* allocate memory for reading data arrays */
 		    status = mb_malloc(verbose,beams_bath*sizeof(char),
 				    &beamflag,&error);
+		    if (status == MB_SUCCESS)
 		    status = mb_malloc(verbose,beams_bath*sizeof(double),
 				    &bath,&error);
+		    if (status == MB_SUCCESS)
 		    status = mb_malloc(verbose,beams_bath*sizeof(double),
 				    &bathlon,&error);
+		    if (status == MB_SUCCESS)
 		    status = mb_malloc(verbose,beams_bath*sizeof(double),
 				    &bathlat,&error);
+		    if (status == MB_SUCCESS)
 		    status = mb_malloc(verbose,beams_amp*sizeof(double),
 				    &amp,&error);
+		    if (status == MB_SUCCESS)
 		    status = mb_malloc(verbose,pixels_ss*sizeof(double),
 				    &ss,&error);
+		    if (status == MB_SUCCESS)
 		    status = mb_malloc(verbose,pixels_ss*sizeof(double),
 				    &sslon,&error);
+		    if (status == MB_SUCCESS)
 		    status = mb_malloc(verbose,pixels_ss*sizeof(double),
 				    &sslat,&error);
 
@@ -3873,6 +3903,7 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 	time_t	right_now;
 	char	date[MB_PATH_MAXLINE], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
 	int	i, j, kg, ka;
+	char	*message;
 	char	*ctime();
 	char	*getenv();
 
@@ -3953,6 +3984,16 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 
 	/* allocate memory for output array */
 	status = mb_malloc(verbose,grd.nx*grd.ny*sizeof(float),&a,error);
+	if (*error != MB_ERROR_NO_ERROR)
+		{
+		mb_error(verbose,MB_ERROR_MEMORY_FAIL,&message);
+		fprintf(stderr,"\nMBIO Error allocating output arrays.\n",
+			message);
+		fprintf(stderr,"\nProgram <%s> Terminated\n",
+			program_name);
+		mb_memory_clear(verbose, &error);
+		exit(status);
+		}
 
 	/* copy grid to new array and write it to GMT netCDF grd file */
 	if (status == MB_SUCCESS)

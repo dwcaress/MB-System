@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_check_info.c	1/25/93
- *    $Id: mb_check_info.c,v 5.8 2002-09-20 17:45:43 caress Exp $
+ *    $Id: mb_check_info.c,v 5.9 2003-01-15 20:54:46 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	September 3, 1996
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2002/09/20 17:45:43  caress
+ * Release 5.0.beta23
+ *
  * Revision 5.7  2002/05/29 23:36:53  caress
  * Release 5.0.beta18
  *
@@ -87,7 +90,7 @@ int mb_check_info(int verbose, char *file, int lonflip,
 		    double bounds[4], int *file_in_bounds,
 		    int *error)
 {
-	static char rcs_id[]="$Id: mb_check_info.c,v 5.8 2002-09-20 17:45:43 caress Exp $";
+	static char rcs_id[]="$Id: mb_check_info.c,v 5.9 2003-01-15 20:54:46 caress Exp $";
 	char	*function_name = "mb_check_info";
 	int	status;
 	char	file_inf[128];
@@ -486,8 +489,8 @@ int mb_get_fbt(int verbose,
 		fbtmodtime = file_status.st_mtime;
 		}
 		
-	/* replace file with fbt file if fbt file exists and is up to date */
-	if (datmodtime > 0 && datmodtime < fbtmodtime)
+	/* replace file with fbt file if fbt file exists */
+	if (datmodtime > 0 && fbtmodtime > 0)
 	    {
 	    strcpy(file, fbtfile);
 	    *format = 71;
@@ -545,8 +548,8 @@ int mb_get_fnv(int verbose,
 		fnvmodtime = file_status.st_mtime;
 		}
 		
-	/* replace file with fnv file if fnv file exists and is up to date */
-	if (datmodtime > 0 && datmodtime < fnvmodtime)
+	/* replace file with fnv file if fnv file exists */
+	if (datmodtime > 0 && fnvmodtime > 0)
 	    {
 	    strcpy(file, fnvfile);
 	    *format = 166;

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_xtfr8101.c	8/8/94
- *	$Id: mbr_xtfr8101.c,v 5.5 2002-09-25 20:41:04 caress Exp $
+ *	$Id: mbr_xtfr8101.c,v 5.6 2003-01-15 20:51:48 caress Exp $
  *
  *    Copyright (c) 2001, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	August 26, 2001
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2002/09/25 20:41:04  caress
+ * Fixed some problems.
+ *
  * Revision 5.4  2002/09/19 01:12:39  caress
  * Release 5.0.beta23
  *
@@ -90,7 +93,7 @@ int mbr_wt_xtfr8101(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_xtfr8101(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_xtfr8101.c,v 5.5 2002-09-25 20:41:04 caress Exp $";
+	static char res_id[]="$Id: mbr_xtfr8101.c,v 5.6 2003-01-15 20:51:48 caress Exp $";
 	char	*function_name = "mbr_register_xtfr8101";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -220,7 +223,7 @@ int mbr_info_xtfr8101(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_xtfr8101.c,v 5.5 2002-09-25 20:41:04 caress Exp $";
+	static char res_id[]="$Id: mbr_xtfr8101.c,v 5.6 2003-01-15 20:51:48 caress Exp $";
 	char	*function_name = "mbr_info_xtfr8101";
 	int	status = MB_SUCCESS;
 
@@ -289,7 +292,7 @@ int mbr_info_xtfr8101(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_xtfr8101(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_xtfr8101.c,v 5.5 2002-09-25 20:41:04 caress Exp $";
+	static char res_id[]="$Id: mbr_xtfr8101.c,v 5.6 2003-01-15 20:51:48 caress Exp $";
 	char	*function_name = "mbr_alm_xtfr8101";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -447,6 +450,7 @@ int mbr_rt_xtfr8101(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	double	angle, theta, phi;
 	double	rr, xx, zz, r, a, a2;
 	double	*pixel_size, *swath_width;
+	double	lever_x, lever_y, lever_z;
 	int	i, j, k;
 
 	/* print input debug statements */
@@ -597,7 +601,33 @@ timetag, store->png_roll);
 		/* interpolate nav if possible */
 		mb_navint_interp(verbose, mbio_ptr, store->png_time_d, store->png_heading, 0.0, 
 		    &(store->png_longitude), &(store->png_latitude), &(store->png_speed), error);
-	
+
+		/* get lever arm correction for heave */
+		mb_lever(verbose, 
+			    (double) store->MBOffsetX,
+			    (double) store->MBOffsetY,
+			    (double) store->MBOffsetZ,
+			    (double) store->NavOffsetX,
+			    (double) store->NavOffsetY,
+			    (double) store->NavOffsetZ,
+			    (double) store->MRUOffsetX,
+			    (double) store->MRUOffsetY,
+			    (double) store->MRUOffsetZ,
+			    (double) (store->png_roll - store->MRUOffsetRoll),
+			    (double) (store->MRUOffsetPitch - store->png_pitch),
+			    &lever_x,
+			    &lever_y,
+			    &lever_z,
+			    error);
+		store->png_heave += lever_z;
+/*fprintf(stderr,"offsets: %f %f %f   roll:%f pitch:%f    dz:%f\n", 
+store->MBOffsetX - store->MRUOffsetX,
+store->MBOffsetY - store->MRUOffsetY,
+store->MBOffsetZ - store->MRUOffsetZ,
+(double) (store->png_roll - store->MRUOffsetRoll),
+(double) (store->MRUOffsetPitch - store->png_pitch),
+lever_z);*/
+
 		store->packet_type = data->reson8100rit.packet_type;      		/* identifier for packet type  */
 		store->packet_subtype = data->reson8100rit.packet_subtype;   		/* identifier for packet subtype */
 											/* for dual head system, most significant bit (bit 7) */
