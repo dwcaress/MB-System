@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_arc2grd.perl	4/21/01
-#    $Id: mbm_arc2grd.perl,v 5.3 2003-08-24 23:57:14 caress Exp $
+#    $Id: mbm_arc2grd.perl,v 5.4 2003-08-28 18:39:37 caress Exp $
 #
 #    Copyright (c) 2001, 2003 by
 #    D. W. Caress (caress@mbari.org)
@@ -37,10 +37,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #    10 km off the windward side of Oahu)
 #
 # Version:
-#   $Id: mbm_arc2grd.perl,v 5.3 2003-08-24 23:57:14 caress Exp $
+#   $Id: mbm_arc2grd.perl,v 5.4 2003-08-28 18:39:37 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.3  2003/08/24 23:57:14  caress
+#   *** empty log message ***
+#
 #   Revision 5.2  2003/04/17 20:42:48  caress
 #   Release 5.0.beta30
 #
@@ -105,6 +108,7 @@ if (!open(TMP,">$tmpfile"))
 $cnt = 0;
 while (<INP>) {
 	$cnt++;
+	lc($_);
 	if ($cnt == 1) {
 		($ncols) = $_ =~ /ncols\s+(\S+)/;
 	}
