@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	make_mbhtml	8/19/97
-#    $Id: make_mbhtml,v 4.0 1997-09-15 19:13:10 caress Exp $
+#    $Id: make_mbhtml,v 4.1 1997-09-17 20:07:29 caress Exp $
 #
 #    Copyright (c) 1997 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -30,10 +30,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   August 19,  1997
 #
 # Version:
-#   $Id: make_mbhtml,v 4.0 1997-09-15 19:13:10 caress Exp $
+#   $Id: make_mbhtml,v 4.1 1997-09-17 20:07:29 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.0  1997/09/15  19:13:10  caress
+# Real Version 4.5
+#
 #
 #--------------------------------------------------------------------
 #
@@ -41,13 +44,20 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 $program_name = "make_mbhtml";
 
 # Copy necessary files
-`cp mbsystem*.html caress.gif chayes.gif mbsystem*.gif ../../html`;
+@preformatted_files = `/bin/ls -1 mbsystem*.html caress.gif chayes.gif mbsystem*.gif`;
+foreach $file (@preformatted_files) {
+    chop($file);
+    print "cp $file ../../html\n";
+    `cp $file ../../html`;
+    chmod 0664, "../../html/$file";
+    }
 
 # Get list of man page files to process
 @manual_pages = `/bin/ls -1 ../../man/manl`;
 
 # Get header and footer data
 @man_header_lines = `cat mbsystem_man_hdr.frag`;
+@man_header2_lines = `cat mbsystem_man_hdr2.frag`;
 @man_footer_lines = `cat mbsystem_man_ftr.frag`;
 
 # Loop over files
@@ -80,6 +90,10 @@ foreach $man_page (@manual_pages) {
     foreach $line (@man_header_lines) {
 	print OHTML $line;
 	}
+    print OHTML "   <TITLE>MB-System Unix Manual Page: $man_page</TITLE>\n";
+    foreach $line (@man_header2_lines) {
+	print OHTML $line;
+	}
 	
     # Read and process lines from raw html file
     $line_count = 0;
@@ -102,8 +116,9 @@ foreach $man_page (@manual_pages) {
 	print OHTML $line;
 	}
 
-    # Close the output file
+    # Close the output file and set mode
     close OHTML;
+    chmod 0664, $html_file;
     
     # End loop over man pages
     }
