@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_pslibface.c	5/15/94
- *    $Id: mb_pslibface.c,v 4.0 1994-05-16 22:14:24 caress Exp $
+ *    $Id: mb_pslibface.c,v 4.1 1994-05-25 15:08:49 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,9 @@
  * Date:	May 15, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/05/16  22:14:24  caress
+ * First cut at new contouring scheme.
+ *
  *
  */
 
@@ -54,7 +57,7 @@ double	*scale;
 double	*inch2lon;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_pslibface.c,v 4.0 1994-05-16 22:14:24 caress Exp $";
+  	static char rcs_id[]="$Id: mb_pslibface.c,v 4.1 1994-05-25 15:08:49 caress Exp $";
 	char	*function_name = "plot_init";
 	int	status = MB_SUCCESS;
 	int	errflg = 0;
@@ -185,7 +188,7 @@ int plot_end(verbose,error)
 int	verbose;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_pslibface.c,v 4.0 1994-05-16 22:14:24 caress Exp $";
+  	static char rcs_id[]="$Id: mb_pslibface.c,v 4.1 1994-05-25 15:08:49 caress Exp $";
 	char	*function_name = "plot_end";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -229,7 +232,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int plot_exit(argv,argc)
+int plot_exit(argc,argv)
 int	argc;
 char	**argv;
 {
