@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrdtiff.c	5/30/93
- *    $Id: mbgrdtiff.c,v 5.3 2001-09-19 21:51:56 caress Exp $
+ *    $Id: mbgrdtiff.c,v 5.4 2001-09-19 21:53:26 caress Exp $
  *
  *    Copyright (c) 1999, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -155,6 +155,9 @@
  *
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2001/09/19  21:51:56  caress
+ * Removed inadvertant debug messages.
+ *
  * Revision 5.2  2001/06/03  06:58:45  caress
  * Release 5.0.beta01.
  *
@@ -275,7 +278,7 @@ int              tiff_offset[] =
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbgrdtiff.c,v 5.3 2001-09-19 21:51:56 caress Exp $";
+	static char rcs_id[] = "$Id: mbgrdtiff.c,v 5.4 2001-09-19 21:53:26 caress Exp $";
 	static char program_name[] = "mbgrdtiff";
 	static char help_message[] = "mbgrdtiff generates a tiff image from a GMT grid. The \nimage generation is similar to that of the GMT program \ngrdimage. In particular, the color map is applied from \na GMT CPT file, and shading overlay grids may be applied. \nThe output TIFF file contains information allowing\nthe ArcView and ArcInfo GIS packages to import the image\nas a geographically located coverage.";
 	static char usage_message[] = "mbgrdtiff -Ccptfile -Igrdfile -Otiff_file [-H -Kintensfile -V]";
@@ -530,17 +533,13 @@ fprintf(stderr,"argc:%d\n",argc);
 		}
 	    }
 	/* Determine the wesn to be used to read the grdfile */
-fprintf(stderr,"bounds 1: %f %f %f %f\n",bounds[0], bounds[1], bounds[2], bounds[3]);
 	off = (header.node_offset) ? 0 : 1;
 #ifdef GMT3_0
 	map_setup (bounds[0], bounds[1], bounds[2], bounds[3]);
 	grd_setregion (&header, &bounds[0], &bounds[1], &bounds[2], &bounds[3]);
 #else
-fprintf(stderr,"bounds 2: %f %f %f %f\n",bounds[0], bounds[1], bounds[2], bounds[3]);
 	GMT_map_setup (bounds[0], bounds[1], bounds[2], bounds[3]);
-fprintf(stderr,"bounds 3: %f %f %f %f\n",bounds[0], bounds[1], bounds[2], bounds[3]);
 	GMT_grd_setregion (&header, &bounds[0], &bounds[1], &bounds[2], &bounds[3]);
-fprintf(stderr,"bounds 4: %f %f %f %f\n",bounds[0], bounds[1], bounds[2], bounds[3]);
 #endif	
 
 	/* allocate memory */
