@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:    mbvelocitytool.c        6/6/93
- *    $Id: mbvelocity_prog.c,v 5.2 2001-03-22 21:12:42 caress Exp $ 
+ *    $Id: mbvelocity_prog.c,v 5.3 2001-04-06 22:16:40 caress Exp $ 
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:        June 6, 1993 
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2001/03/22  21:12:42  caress
+ * Trying to make release 5.0.beta0.
+ *
  * Revision 5.1  2001/01/22  07:51:19  caress
  * Version 5.0.beta01
  *
@@ -193,7 +196,7 @@ struct mbvt_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbvelocity_prog.c,v 5.2 2001-03-22 21:12:42 caress Exp $";
+static char rcs_id[] = "$Id: mbvelocity_prog.c,v 5.3 2001-04-06 22:16:40 caress Exp $";
 static char program_name[] = "MBVELOCITYTOOL";
 static char help_message[] = "MBVELOCITYTOOL is an interactive water velocity profile editor  \nused to examine multiple water velocity profiles and to create  \nnew water velocity profiles which can be used for the processing  \nof multibeam sonar data.  In general, this tool is used to  \nexamine water velocity profiles obtained from XBTs, CTDs, or  \ndatabases, and to construct new profiles consistent with these  \nvarious sources of information.";
 static char usage_message[] = "mbvelocitytool [-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ssvpfile -Wsvpfile -V -H]";
@@ -2849,6 +2852,7 @@ int mbvt_process_multibeam()
 	status = mb_rt_init(verbose, nvel, dep, vel, &rt_svp, &error);
 	first = MB_YES;
 	nbeams = 0;
+fprintf(stderr, "anglemode:%d\n", anglemode);
 
 	/* loop over the data records */
 	for (k=0;k<nbuffer;k++)
