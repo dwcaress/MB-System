@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcontour.c	6/4/93
- *    $Id: mbcontour.c,v 4.8 1995-03-06 19:39:52 caress Exp $
+ *    $Id: mbcontour.c,v 4.9 1995-05-12 17:19:02 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Date:	June 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.8  1995/03/06  19:39:52  caress
+ * Changed include strings.h to string.h for POSIX compliance.
+ *
  * Revision 4.7  1995/01/05  23:59:20  caress
  * Made it possible to read data from a single file or
  * from datalists.
@@ -110,7 +113,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbcontour.c,v 4.8 1995-03-06 19:39:52 caress Exp $";
+	static char rcs_id[] = "$Id: mbcontour.c,v 4.9 1995-05-12 17:19:02 caress Exp $";
 #ifdef MBCONTOURFILTER
 	static char program_name[] = "MBCONTOURFILTER";
 	static char help_message[] =  "MBCONTOURFILTER is a utility which creates a pen plot \ncontour map of multibeam swath bathymetry.  \nThe primary purpose of this program is to serve as \npart of a real-time plotting system.  The contour \nlevels and colors can be controlled \ndirectly or set implicitly using contour and color change intervals. \nContours can also be set to have ticks pointing downhill.";
@@ -382,7 +385,8 @@ char **argv;
 		fprintf(stderr,"usage: %s\n", usage_message);
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
-		exit(MB_FAILURE);
+		error = MB_ERROR_BAD_USAGE;
+		exit(error);
 		}
 
 	/* set number of pings to be plotted if not set */
@@ -412,7 +416,7 @@ char **argv;
 		{
 		fprintf(stderr,"\n%s\n",help_message);
 		fprintf(stderr,"\nusage: %s\n", usage_message);
-		exit(MB_ERROR_NO_ERROR);
+		exit(error);
 		}
 
 	/* initialize plotting */
@@ -425,7 +429,8 @@ char **argv;
 		fprintf(stderr,"GMT option error\n");
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
-		exit(MB_FAILURE);
+		error = MB_ERROR_BAD_USAGE;
+		exit(error);
 		}
 
 	/* print starting debug statements */
@@ -493,7 +498,8 @@ char **argv;
 		fprintf(stderr,"\nRegion bounds not properly specified:\n\t%f %f %f %f\n",bounds[0],bounds[1],bounds[2],bounds[3]);
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
-		exit(MB_ERROR_BAD_PARAMETER);
+		error = MB_ERROR_BAD_PARAMETER;
+		exit(error);
 		}
 
 	/* scale label and tick sizes */

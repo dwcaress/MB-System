@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbbath.c	3/31/93
- *    $Id: mbbath.c,v 4.13 1995-03-22 19:52:56 caress Exp $
+ *    $Id: mbbath.c,v 4.14 1995-05-12 17:12:32 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -20,6 +20,9 @@
  * Date:	March 31, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.13  1995/03/22  19:52:56  caress
+ * Fixed some ANSI C compliance details.
+ *
  * Revision 4.12  1995/03/06  19:37:59  caress
  * Changed include strings.h to string.h for POSIX compliance.
  *
@@ -122,7 +125,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbbath.c,v 4.13 1995-03-22 19:52:56 caress Exp $";
+	static char rcs_id[] = "$Id: mbbath.c,v 4.14 1995-05-12 17:12:32 caress Exp $";
 	static char program_name[] = "MBBATH";
 	static char help_message[] =  "MBBATH calculates bathymetry from \
 the travel time data by raytracing \nthrough a layered water velocity \
@@ -368,7 +371,8 @@ and stdout.";
 		fprintf(stderr,"usage: %s\n", usage_message);
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
-		exit(MB_FAILURE);
+		error = MB_ERROR_BAD_USAGE;
+		exit(error);
 		}
 
 	/* print starting message */
@@ -427,7 +431,7 @@ and stdout.";
 		{
 		fprintf(stderr,"\n%s\n",help_message);
 		fprintf(stderr,"\nusage: %s\n", usage_message);
-		exit(MB_ERROR_NO_ERROR);
+		exit(error);
 		}
 
 	/* check for format with travel time data */
@@ -438,7 +442,8 @@ and stdout.";
 		fprintf(stderr,"Format %d is unacceptable because it does not inlude travel time data.\n",format);
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
-		exit(MB_ERROR_BAD_FORMAT);
+		error = MB_ERROR_BAD_FORMAT;
+		exit(error);
 		}
 
 	/* if a velocity profile file has been specified then
@@ -1233,7 +1238,7 @@ and stdout.";
 		}
 
 	/* end it all */
-	exit(status);
+	exit(error);
 }
 /*--------------------------------------------------------------------*/
 int setup_raytracing(verbose,mbio_ptr,store_ptr,nbeams,ttimes,

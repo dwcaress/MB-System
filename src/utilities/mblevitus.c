@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mblevitus.c	4/15/93
- *    $Id: mblevitus.c,v 4.4 1995-03-06 19:37:59 caress Exp $
+ *    $Id: mblevitus.c,v 4.5 1995-05-12 17:12:32 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,9 @@
  * Date:	April 15, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.4  1995/03/06  19:37:59  caress
+ * Changed include strings.h to string.h for POSIX compliance.
+ *
  * Revision 4.3  1994/10/21  13:02:31  caress
  * Release V4.0
  *
@@ -88,7 +91,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mblevitus.c,v 4.4 1995-03-06 19:37:59 caress Exp $";
+	static char rcs_id[] = "$Id: mblevitus.c,v 4.5 1995-05-12 17:12:32 caress Exp $";
 	static char program_name[] = "MBLEVITUS";
 	static char help_message[] = "MBLEVITUS generates an average water velocity profile for a \nspecified location from the Levitus temperature and salinity database.";
 	static char usage_message[] = "mblevitus [-Rlon/lat -Ooutfile -V -H]";
@@ -182,7 +185,8 @@ char **argv;
 	if (errflg)
 		{
 		fprintf(stderr,"usage: %s\n", usage_message);
-		exit(MB_FAILURE);
+		error = MB_ERROR_BAD_USAGE;
+		exit(error);
 		}
 
 	/* set output stream */
@@ -219,7 +223,7 @@ char **argv;
 		{
 		fprintf(outfp,"\n%s\n",help_message);
 		fprintf(outfp,"\nusage: %s\n", usage_message);
-		exit(MB_SUCCESS);
+		exit(error);
 		}
 
 	/* open the data file */
@@ -229,7 +233,7 @@ char **argv;
 		fprintf(stderr,"\nUnable to Open Levitus database file <%s> for reading\n",ifile);
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
-			exit(error);
+		exit(error);
 		}
 
 	/* check for sensible location */
@@ -392,7 +396,7 @@ char **argv;
 		fprintf(stderr,"\nUnable to Open output file <%s> for writing\n",ofile);
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
-			exit(error);
+		exit(error);
 		}
 
 	/* print it out */
@@ -463,5 +467,5 @@ char **argv;
 		}
 
 	/* end it all */
-	exit(status);
+	exit(error);
 }

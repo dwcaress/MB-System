@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbbackangle.c	1/6/95
- *    $Id: mbbackangle.c,v 4.3 1995-03-06 19:37:59 caress Exp $
+ *    $Id: mbbackangle.c,v 4.4 1995-05-12 17:12:32 caress Exp $
  *
  *    Copyright (c) 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -23,6 +23,9 @@
  * Date:	January 6, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1995/03/06  19:37:59  caress
+ * Changed include strings.h to string.h for POSIX compliance.
+ *
  * Revision 4.2  1995/03/02  13:49:21  caress
  * Fixed bug related to error messages.
  *
@@ -58,7 +61,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbbackangle.c,v 4.3 1995-03-06 19:37:59 caress Exp $";
+	static char rcs_id[] = "$Id: mbbackangle.c,v 4.4 1995-05-12 17:12:32 caress Exp $";
 	static char program_name[] = "mbbackangle";
 	static char help_message[] =  
 "mbbackangle reads a multibeam data file and generates a table\n\t\
@@ -246,7 +249,8 @@ The results are dumped to stdout.";
 		fprintf(stderr,"usage: %s\n", usage_message);
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
-		exit(MB_FAILURE);
+		error = MB_ERROR_BAD_USAGE;
+		exit(error);
 		}
 
 	/* print starting message */
@@ -302,7 +306,7 @@ The results are dumped to stdout.";
 		{
 		fprintf(stderr,"\n%s\n",help_message);
 		fprintf(stderr,"\nusage: %s\n", usage_message);
-		exit(MB_ERROR_NO_ERROR);
+		exit(error);
 		}
 
 	/* allocate memory for angle arrays */
@@ -698,7 +702,7 @@ The results are dumped to stdout.";
 	/* end it all */
 	if (verbose > 0)
 		fprintf(stderr,"\n");
-	exit(status);
+	exit(error);
 }
 /*--------------------------------------------------------------------*/
 int set_bathyslope(verbose,

@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcut.c	1/26/95
  *
- *    $Id: mbcut.c,v 4.2 1995-03-06 19:37:59 caress Exp $
+ *    $Id: mbcut.c,v 4.3 1995-05-12 17:12:32 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,9 @@
  * Date:	January 26, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1995/03/06  19:37:59  caress
+ * Changed include strings.h to string.h for POSIX compliance.
+ *
  * Revision 4.1  1995/03/02  13:49:21  caress
  * Fixed bug related to error messages.
  *
@@ -66,7 +69,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbcut.c,v 4.2 1995-03-06 19:37:59 caress Exp $";
+	static char rcs_id[] = "$Id: mbcut.c,v 4.3 1995-05-12 17:12:32 caress Exp $";
 	static char program_name[] = "mbcut";
 	static char help_message[] = 
 "MBCUT removes swath data values that lie outside ranges\n\t\
@@ -258,7 +261,8 @@ The default input and output streams are stdin and stdout.";
 		fprintf(stderr,"usage: %s\n", usage_message);
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
-		exit(MB_FAILURE);
+		error = MB_ERROR_BAD_USAGE;
+		exit(error);
 		}
 
 	/* print starting message */
@@ -314,7 +318,7 @@ The default input and output streams are stdin and stdout.";
 		{
 		fprintf(stderr,"\n%s\n",help_message);
 		fprintf(stderr,"\nusage: %s\n", usage_message);
-		exit(MB_SUCCESS);
+		exit(error);
 		}
 
 	/* get format_num */
@@ -332,7 +336,7 @@ The default input and output streams are stdin and stdout.";
 		fprintf(stderr,"\nMultibeam File <%s> not initialized for reading\n",ifile);
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
-		exit(MB_FAILURE);
+		exit(error);
 		}
 
 	/* initialize writing the output multibeam file */
@@ -345,7 +349,7 @@ The default input and output streams are stdin and stdout.";
 		fprintf(stderr,"\nMultibeam File <%s> not initialized for writing\n",ofile);
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
-		exit(MB_FAILURE);
+		exit(error);
 		}
 
 	/* allocate memory for data arrays */
@@ -374,7 +378,7 @@ The default input and output streams are stdin and stdout.";
 		fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
-		exit(MB_FAILURE);
+		exit(error);
 		}
 
 	/* write comments to beginning of output file */
@@ -751,7 +755,7 @@ The default input and output streams are stdin and stdout.";
 					time_i[6]);
 				fprintf(stderr,"\nProgram <%s> Terminated\n",
 					program_name);
-				exit(MB_FAILURE);
+				exit(error);
 				}
 			}
 		}
@@ -786,6 +790,6 @@ The default input and output streams are stdin and stdout.";
 		}
 
 	/* end it all */
-	exit(status);
+	exit(error);
 }
 /*--------------------------------------------------------------------*/

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbformat.c	1/22/93
- *    $Id: mbformat.c,v 4.4 1995-04-12 16:25:54 caress Exp $
+ *    $Id: mbformat.c,v 4.5 1995-05-12 17:12:32 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -20,6 +20,9 @@
  * Date:	January 22, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.4  1995/04/12  16:25:54  caress
+ * Added -A and -L options.
+ *
  * Revision 4.3  1995/03/06  19:37:59  caress
  * Changed include strings.h to string.h for POSIX compliance.
  *
@@ -59,7 +62,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbformat.c,v 4.4 1995-04-12 16:25:54 caress Exp $";
+	static char rcs_id[] = "$Id: mbformat.c,v 4.5 1995-05-12 17:12:32 caress Exp $";
 	static char program_name[] = "MBFORMAT";
 	static char help_message[] = "MBFORMAT is an utility which identifies the multibeam data formats \nassociated with MBIO format id's.  If no format id is specified, \nMBFORMAT lists all of the currently supported formats.";
 	static char usage_message[] = "mbformat [-A -Fformat -L -V -H]";
@@ -69,7 +72,7 @@ char **argv;
 	extern int optkind;
 	int	errflg = 0;
 	int	c;
-	int	error;
+	int	error = MB_ERROR_NO_ERROR;
 	int	status;
 	int	help;
 	int	verbose;
@@ -120,7 +123,8 @@ char **argv;
 	if (errflg)
 		{
 		fprintf(stderr,"usage: %s\n", usage_message);
-		exit(MB_FAILURE);
+		error = MB_ERROR_BAD_USAGE;
+		exit(error);
 		}
 
 	/* print starting message */
@@ -148,7 +152,7 @@ char **argv;
 		{
 		fprintf(stderr,"\n%s\n",help_message);
 		fprintf(stderr,"\nusage: %s\n", usage_message);
-		exit(MB_SUCCESS);
+		exit(error);
 		}
 
 	/* print out the info */
@@ -209,5 +213,5 @@ char **argv;
 		}
 
 	/* end it all */
-	exit(status);
+	exit(error);
 }
