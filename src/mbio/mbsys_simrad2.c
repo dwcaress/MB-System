@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad2.c	3.00	10/9/98
- *	$Id: mbsys_simrad2.c,v 5.10 2001-09-12 19:27:57 caress Exp $
+ *	$Id: mbsys_simrad2.c,v 5.11 2001-10-19 21:48:16 caress Exp $
  *
  *    Copyright (c) 1998, 2001 by
  *    David W. Caress (caress@mbari.org)
@@ -31,6 +31,9 @@
  * Date:	October 9, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.10  2001/09/12  19:27:57  caress
+ * Fixed depth scaling problem.
+ *
  * Revision 5.9  2001/08/25  00:54:13  caress
  * Adding beamwidth values to extract functions.
  *
@@ -97,7 +100,7 @@
 int mbsys_simrad2_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_simrad2.c,v 5.10 2001-09-12 19:27:57 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad2.c,v 5.11 2001-10-19 21:48:16 caress Exp $";
 	char	*function_name = "mbsys_simrad2_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -416,7 +419,7 @@ int mbsys_simrad2_survey_alloc(int verbose,
 			void *mbio_ptr, void *store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_simrad2.c,v 5.10 2001-09-12 19:27:57 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad2.c,v 5.11 2001-10-19 21:48:16 caress Exp $";
 	char	*function_name = "mbsys_simrad2_survey_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -677,7 +680,7 @@ int mbsys_simrad2_attitude_alloc(int verbose,
 			void *mbio_ptr, void *store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_simrad2.c,v 5.10 2001-09-12 19:27:57 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad2.c,v 5.11 2001-10-19 21:48:16 caress Exp $";
 	char	*function_name = "mbsys_simrad2_attitude_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -765,7 +768,7 @@ int mbsys_simrad2_heading_alloc(int verbose,
 			void *mbio_ptr, void *store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_simrad2.c,v 5.10 2001-09-12 19:27:57 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad2.c,v 5.11 2001-10-19 21:48:16 caress Exp $";
 	char	*function_name = "mbsys_simrad2_heading_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -845,7 +848,7 @@ int mbsys_simrad2_ssv_alloc(int verbose,
 			void *mbio_ptr, void *store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_simrad2.c,v 5.10 2001-09-12 19:27:57 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad2.c,v 5.11 2001-10-19 21:48:16 caress Exp $";
 	char	*function_name = "mbsys_simrad2_ssv_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -1721,7 +1724,7 @@ int mbsys_simrad2_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			    if (beamflag[i] != MB_FLAG_NULL)
 				{
 				depthmax = MAX(depthmax, fabs(bath[i] - depthoffset));
-				distancemax = MAX(depthmax, fabs(bathacrosstrack[i]));
+				distancemax = MAX(distancemax, fabs(bathacrosstrack[i]));
 				}
 			    }
 			    
