@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 4.4 1994-10-21 12:56:50 caress Exp $
+#	$Id: Makefile.template,v 4.5 1994-10-31 18:43:01 caress Exp $
 #
 #     Copyright (c) 1993, 1994 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.4  1994/10/21  12:56:50  caress
+# Release V4.0
+#
 # Revision 4.3  1994/06/13  20:18:48  caress
 # Changed make for mbcontourfilter.
 #
@@ -55,12 +58,12 @@ LFLAGS = -lm
 BINDIR = ../../bin
 LIBDIR = ../../lib
 INCDIR = ../../include
-MANDIR = ../../man/man1
+MANDIR = ../../man/manl
 
 ### make all makes the MB-system macros and man pages
-all:	$(BINDIR)/mbcontourfilter $(MANDIR)/mbcontourfilter.1 \
-	$(BINDIR)/mbplotfilter $(MANDIR)/mbplotfilter.1 \
-	$(BINDIR)/mbm_calcomp_plot $(MANDIR)/mbm_calcomp_plot.1
+all:	$(BINDIR)/mbcontourfilter $(MANDIR)/mbcontourfilter.l \
+	$(BINDIR)/mbplotfilter $(MANDIR)/mbplotfilter.l \
+	$(BINDIR)/mbm_calcomp_plot $(MANDIR)/mbm_calcomp_plot.l
 
 ### make clean removes the object files
 clean:
@@ -100,13 +103,13 @@ blocka.o: blocka.f
 	$(FC) -c $(FFLAGS) blocka.f -o blocka.o
 
 # copy the man pages to the man page directory
-$(MANDIR)/mbcontourfilter.1:	mbcontourfilter.1
-	cp mbcontourfilter.1 $(MANDIR)/mbcontourfilter.1
-	chmod 664 $(MANDIR)/mbcontourfilter.1
-$(MANDIR)/mbplotfilter.1:	mbplotfilter.1
-	cp mbplotfilter.1 $(MANDIR)/mbplotfilter.1
-	chmod 664 $(MANDIR)/mbplotfilter.1
-$(MANDIR)/mbm_calcomp_plot.1:	mbm_calcomp_plot.1
-	cp mbm_calcomp_plot.1 $(MANDIR)/mbm_calcomp_plot.1
-	chmod 664 $(MANDIR)/mbm_calcomp_plot.1
+$(MANDIR)/mbcontourfilter.l:	mbcontourfilter.l
+	cp mbcontourfilter.l $(MANDIR)/mbcontourfilter.l
+	chmod 664 $(MANDIR)/mbcontourfilter.l
+$(MANDIR)/mbplotfilter.l:	mbplotfilter.l
+	cp mbplotfilter.l $(MANDIR)/mbplotfilter.l
+	chmod 664 $(MANDIR)/mbplotfilter.l
+$(MANDIR)/mbm_calcomp_plot.l:	mbm_calcomp_plot.l
+	cp mbm_calcomp_plot.l $(MANDIR)/mbm_calcomp_plot.l
+	chmod 664 $(MANDIR)/mbm_calcomp_plot.l
 

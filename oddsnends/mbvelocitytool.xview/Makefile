@@ -4,7 +4,7 @@
 
 PROGRAM = mbvelocitytool
 EXEC = ../../bin/$(PROGRAM)
-MANPAGE = ../../man/man1/$(PROGRAM).1
+MANPAGE = ../../man/manl/$(PROGRAM).l
 SOURCES.c = mbvelocitytool.c xgraphics.c
 SOURCES.h = ../../include/mb_status.h
 
@@ -34,7 +34,7 @@ TARGETS.h = \
 TARGETS.other = \
 	$(SOURCES.G:%.G=%.info) \
 	../../bin/hsvelocitytool \
-	../../man/man1/hsvelocitytool.1
+	../../man/manl/hsvelocitytool.l
 
 TARGETS = \
 	$(TARGETS.other) \
@@ -62,16 +62,16 @@ targets: $(SOURCES) $(TARGETS)
 $(EXEC): $(PROGRAM)
 	cp $(PROGRAM) $(EXEC)
 
-$(MANPAGE): $(PROGRAM).1
-	cp $(PROGRAM).1 $(MANPAGE)
+$(MANPAGE): $(PROGRAM).l
+	cp $(PROGRAM).l $(MANPAGE)
 	chmod 664 $(MANPAGE)
 
 $(PROGRAM): $(SOURCES.c) $(TARGETS.c) $(TARGETS.h) $(OBJECTS)
 	$(LINK.c) -Bstatic -o $@ $(OBJECTS) $(LDLIBS)
 
 # link old program to new program
-../../man/man1/hsvelocitytool.1: $(MANPAGE)
-	cd ../../man/man1; rm -f hsvelocitytool.1; ln -s mbvelocitytool.1 hsvelocitytool.1
+../../man/manl/hsvelocitytool.l: $(MANPAGE)
+	cd ../../man/manl; rm -f hsvelocitytool.l; ln -s mbvelocitytool.l hsvelocitytool.l
 ../../bin/hsvelocitytool: $(EXEC)
 	cd ../../bin; rm -f hsvelocitytool; ln -s mbvelocitytool hsvelocitytool
 
