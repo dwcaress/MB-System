@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_pslibface.c	5/15/94
- *    $Id: mb_pslibface.c,v 4.10 1999-02-04 23:41:29 caress Exp $
+ *    $Id: mb_pslibface.c,v 4.11 1999-04-16 01:24:27 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,9 @@
  * Date:	May 15, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.10  1999/02/04  23:41:29  caress
+ * MB-System version 4.6beta7
+ *
  * Revision 4.9  1998/10/04  04:18:07  caress
  * MB-System version 4.6beta
  *
@@ -93,7 +96,7 @@ double	*scale;
 double	*inch2lon;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_pslibface.c,v 4.10 1999-02-04 23:41:29 caress Exp $";
+  	static char rcs_id[]="$Id: mb_pslibface.c,v 4.11 1999-04-16 01:24:27 caress Exp $";
 	char	*function_name = "plot_init";
 	int	status = MB_SUCCESS;
 	int	errflg = 0;
@@ -123,7 +126,7 @@ int	*error;
 	argv_save = argv;
 
 	/* deal with gmt options */
-#ifdef GMT_OLD
+#ifdef GMT3_0
 	gmt_begin (argc, argv);
 #else
 	GMT_begin (argc, argv);
@@ -150,7 +153,7 @@ int	*error;
 				case 'y':
 				case 'c':
 				case '\0':
-#ifdef GMT_OLD
+#ifdef GMT3_0
 					errflg += get_common_args (argv[i], 
 						&bounds[0], &bounds[1], 
 						&bounds[2], &bounds[3]);
@@ -181,7 +184,7 @@ int	*error;
 		}
 
 	/* set up map */
-#ifdef GMT_OLD
+#ifdef GMT3_0
 	map_setup(bounds[0],bounds[1],bounds[2],bounds[3]);
 #else
 	GMT_map_setup(bounds[0],bounds[1],bounds[2],bounds[3]);
@@ -193,7 +196,7 @@ int	*error;
 		gmtdefs.global_x_scale, gmtdefs.global_y_scale, 
 		gmtdefs.n_copies, gmtdefs.dpi, gmtdefs.measure_unit, 
 		gmtdefs.paper_width, gmtdefs.page_rgb, 
-#ifdef GMT_OLD
+#ifdef GMT3_0
 		gmt_epsinfo (argv[0]));
 	echo_command (argc, argv);
 #else
@@ -218,7 +221,7 @@ int	*error;
 		}
 
 	/* set clip path */
-#ifdef GMT_OLD
+#ifdef GMT3_0
 	geo_to_xy(bounds_use[0],bounds_use[2],&clipx[0],&clipy[0]);
 	geo_to_xy(bounds_use[1],bounds_use[2],&clipx[1],&clipy[1]);
 	geo_to_xy(bounds_use[1],bounds_use[3],&clipx[2],&clipy[2]);
@@ -233,7 +236,7 @@ int	*error;
 	y1 = 0.0;
 	x2 = 1.0;
 	y2 = 0.0;
-#ifdef GMT_OLD
+#ifdef GMT3_0
 	xy_to_geo(&xx1,&yy1,x1,y1);
 	xy_to_geo(&xx2,&yy2,x2,y2);
 #else
@@ -271,7 +274,7 @@ int plot_end(verbose,error)
 int	verbose;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_pslibface.c,v 4.10 1999-02-04 23:41:29 caress Exp $";
+  	static char rcs_id[]="$Id: mb_pslibface.c,v 4.11 1999-04-16 01:24:27 caress Exp $";
 	char	*function_name = "plot_end";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -291,7 +294,7 @@ int	*error;
 	/* plot basemap if required */
 	if (frame_info.plot) 
 		{
-#ifdef GMT_OLD
+#ifdef GMT3_0
 		ps_setpaint (gmtdefs.basemap_frame_rgb[0], 
 			gmtdefs.basemap_frame_rgb[1], 
 			gmtdefs.basemap_frame_rgb[2]);
@@ -309,7 +312,7 @@ int	*error;
 
 	/* plot the unix timestamp if required */
 	if (gmtdefs.unix_time) 
-#ifdef GMT_OLD
+#ifdef GMT3_0
 		timestamp (argc_save, argv_save);
 #else
 		GMT_timestamp (argc_save, argv_save);
@@ -339,7 +342,7 @@ char	**argv;
 	char	*function_name = "plot_exit";
 	int	status = MB_SUCCESS;
 
-#ifdef GMT_OLD
+#ifdef GMT3_0
 	gmt_end(argc, argv);
 #else
 	GMT_end(argc, argv);
@@ -368,7 +371,7 @@ double x,y;
 int ipen;
 {
 	double	xx, yy;
-#ifdef GMT_OLD
+#ifdef GMT3_0
 	geo_to_xy(x,y,&xx,&yy);
 #else
 	GMT_geo_to_xy(x,y,&xx,&yy);
@@ -389,7 +392,7 @@ int ipen;
 {
 	if (ipen > -1 && ipen < ncolor)
 		{
-#ifdef GMT_OLD
+#ifdef GMT3_0
 		ps_setpaint(red[ipen],green[ipen],blue[ipen]);
 #else
 		rgb[0] = red[ipen];
@@ -430,7 +433,7 @@ char	*label;
 
 	height = hgt/inchtolon;
 	point = height*72.;
-#ifdef GMT_OLD
+#ifdef GMT3_0
 	geo_to_xy(x,y,&xx,&yy);
 #else
 	GMT_geo_to_xy(x,y,&xx,&yy);
