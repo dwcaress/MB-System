@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmerge.c	2/20/93
  *
- *    $Id: mbmerge.c,v 4.5 1994-10-21 13:02:31 caress Exp $
+ *    $Id: mbmerge.c,v 4.6 1994-11-01 21:52:08 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,9 @@
  * Date:	February 20, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.5  1994/10/21  13:02:31  caress
+ * Release V4.0
+ *
  * Revision 4.4  1994/05/11  19:35:20  caress
  * Added ability to check for time repeats or reverses in
  * navigation that could mess up the spline interpolation.
@@ -63,6 +66,13 @@
 #include "../../include/mb_status.h"
 #include "../../include/mb_format.h"
 
+/* DTR define */
+#ifndef M_PI
+#define	M_PI	3.14159265358979323846
+#endif
+#define DTR	(M_PI/180.)
+#define RTD (180./M_PI)
+
 /*--------------------------------------------------------------------*/
 
 main (argc, argv)
@@ -70,7 +80,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbmerge.c,v 4.5 1994-10-21 13:02:31 caress Exp $";
+	static char rcs_id[] = "$Id: mbmerge.c,v 4.6 1994-11-01 21:52:08 caress Exp $";
 	static char program_name[] = "MBMERGE";
 	static char help_message[] =  "MBMERGE merges new navigation with multibeam data from an \ninput file and then writes the merged data to an output \nmultibeam data file. The default input \nand output streams are stdin and stdout.";
 	static char usage_message[] = "mbmerge [-Fformat -Llonflip -V -H  -Iinfile -Ooutfile -Mnavformat -Nnavfile]";
@@ -149,6 +159,7 @@ char **argv;
 	double	*nlonspl = NULL;
 	double	*nlatspl = NULL;
 	int	nav_ok;
+	int	make_heading = MB_NO;
 	int	nget;
 	int	time_j[5], hr;
 	double	sec;
@@ -158,6 +169,9 @@ char **argv;
 	double	second;
 	double	splineflag;
 	int	stime_i[7], ftime_i[7];
+	int	itime;
+	double	mtodeglon, mtodeglat;
+	double	del_time, dx, dy, dist;
 
 	char	buffer[128], tmp[128], *result;
 	int	i, j, k, l, m;
@@ -198,7 +212,7 @@ char **argv;
 	strcpy (nfile, "\0");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhF:f:L:l:I:i:O:o:M:m:N:n:")) != -1)
+	while ((c = getopt(argc, argv, "VvHhF:f:L:l:I:i:O:o:M:m:N:n:Zz")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -237,6 +251,11 @@ char **argv;
 		case 'N':
 		case 'n':
 			sscanf (optarg,"%s", nfile);
+			flag++;
+			break;
+		case 'Z':
+		case 'z':
+			make_heading = MB_YES;
 			flag++;
 			break;
 		case '?':
@@ -800,9 +819,25 @@ char **argv;
 			|| kind == MB_DATA_COMMENT)
 			{
 			status = splint(ntime-1,nlon-1,nlonspl-1,
-				nnav,time_d,&navlon);
+				nnav,time_d,&navlon,&itime);
 			status = splint(ntime-1,nlat-1,nlatspl-1,
-				nnav,time_d,&navlat);
+				nnav,time_d,&navlat,&itime);
+			}
+
+		/* make up heading and speed if required */
+		if (error == MB_ERROR_NO_ERROR
+			&& make_heading == MB_YES)
+			{
+			mb_coor_scale(verbose,nlat[itime],&mtodeglon,&mtodeglat);
+			del_time = ntime[itime+1] - ntime[itime];
+			dx = (nlon[itime+1] - nlon[itime])/mtodeglon;
+			dy = (nlat[itime+1] - nlat[itime])/mtodeglat;
+			dist = sqrt(dx*dx + dy*dy);
+			if (del_time > 0.0)
+				speed = 3.6*dist/del_time;
+			else
+				speed = 0.0;
+			heading = RTD*atan2(dx/dist,dy/dist);
 			}
 
 		/* give error message */
@@ -926,10 +961,11 @@ int n;
 	return(0);
 }
 /*--------------------------------------------------------------------*/
-int splint(xa,ya,y2a,n,x,y)
+int splint(xa,ya,y2a,n,x,y,i)
 /* From Numerical Recipies */
 double xa[],ya[],y2a[],x,*y;
 int n;
+int *i;
 {
 	int klo,khi,k;
 	double h,b,a;
@@ -951,6 +987,7 @@ int n;
 	b=(x-xa[klo])/h;
 	*y=a*ya[klo]+b*ya[khi]+((a*a*a-a)*y2a[klo]
 		+(b*b*b-b)*y2a[khi])*(h*h)/6.0;
+	*i=klo;
 	return(0);
 }
 /*--------------------------------------------------------------------*/
