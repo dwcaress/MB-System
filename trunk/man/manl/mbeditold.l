@@ -1,4 +1,4 @@
-.TH mbedit l "16 July 1999" "MB-System 4.6" "MB-System 4.6"
+.TH mbedit l "6 March 2000" "MB-System 4.6" "MB-System 4.6"
 .SH NAME
 \fBmbedit\fP - Interactive editor used to flag bad bathymetry values in swath sonar bathymetry data.
 
@@ -15,11 +15,11 @@ Version 4.6
 artifacts in swath sonar bathymetry data. Once a file has been
 read in, \fBMBedit\fP displays the bathymetry profiles
 from several pings, allowing the user to identify and flag anomalous
-beams. Flagging is handled internally by setting depth values
-negative, so that no information is lost. In extreme circumstances,
-pings may be zeroed (see "KEYBOARD ACTIONS"). 
-The edited bathymetry is usually output to a file, but the program
-can be operated in a "browse" mode where no data are output.
+beams. In extreme circumstances,
+pings may be zeroed (see "KEYBOARD ACTIONS"). In the default mode
+the edited swath data is output to a file, and a
+second file contains a listing of the edit events. The program
+can also be operated in a "browse" mode where no data are output.
 
 The display consists of several bathymetry profiles plotted within
 a box with annotation showing the scaling of the x 
@@ -36,9 +36,10 @@ Each of the displayed pings has a label giving the record number
 in the data file, the ping time, and the center beam depth. 
 
 The editing is driven by the left mouse button and 
-involves three basic modes. In pick
+involves four basic edit modes. In toggle
 mode each mouse pick toggles the nearest bathymetry point between
-flagged and unflagged states. In erase mode the left mouse button
+flagged and unflagged states. In pick mode each mouse pick flags
+the nearest bathymetry point. In erase mode the left mouse button
 is held down as the cursor is dragged over the data; all bathymetry
 points touched by the mouse are flagged. Restore mode is just like
 erase mode, except that the affected bathymetry values are unflagged.
@@ -64,8 +65,7 @@ the first and last pings in view.
 
 The middle and right mouse buttons allow the user to step forward
 and backward, respectively, through the data file. The \fBForward\fP
-and \fBReverse\fP buttons 
-provide a duplicate stepping capability. 
+and \fBReverse\fP buttons provide a duplicate stepping capability. 
 
 \fBMBedit\fP can hold up to 5000 data records at a time in memory.
 Many data formats include data
@@ -340,17 +340,31 @@ inside the slider area, but not on the slider itself.
 .TP
 .B Mode
 This toggle allows the user to specify the edit mode.  If mode
-is set to \fIPick\fP, then clicking the left mouse button will cause
+is set to \fIToggle\fP, then clicking the left mouse button will cause
 the nearest beam to toggle between flagged and unflagged.  If mode
+is set to \fIPick\fP, then clicking the left mouse button will cause
+the nearest unflagged beam to be flagged.  If mode
 is set to \fIErase\fP, then the cursor will change to an erasor and
 any beam with the cursor while the left mouse button is held down
 will be flagged.  If mode is set to \fIRestore\fP, the behavior will
 be the same as for \fIErase\fP except that the affected beams will be
 unflagged instead of flagged.  The edit mode can also be set using
 key macros (see the keyboard action section):  
- 	Pick:		'Q', 'q', 'U', 'u' 
- 	Erase:		'W', 'w', 'I', 'i' 
- 	Restore:		'E', 'e', 'O', 'o' 
+ 	Toggle:		'Q', 'q', 'U', 'u' 
+ 	Pick:		'W', 'w', 'I', 'i' 
+ 	Erase:		'E', 'e', 'O', 'o' 
+ 	Restore:	'R', 'r', 'P', 'p' 
+.TP
+.B Unflag View
+This button unflags all flagged beams among the currently
+displayed pings. Pings in the buffer before or after the current 
+display are unaffected.
+.TP
+.B Unflag Forward
+This button  unflags all flagged beams among all pings from
+the start of the current display to the end of the current
+data buffer. Pings before the start of the current display are
+unaffected.
 .TP
 .B Number of pings shown
 This slider sets the number of pings shown at a time.
@@ -418,13 +432,20 @@ should be used only for completely ridiculous values, as
 the values are not recoverable.
 .TP
 .B 'Q', 'q', 'U', or 'u'
-.B Pick Mode:
-Pressing one of these keys sets the edit mode to "pick" so that
+.B Toggle Mode:
+Pressing one of these keys sets the edit mode to "toggle" so that
 clicking the left mouse button will cause
 the nearest beam to toggle between flagged and unflagged.  
 The edit mode can also be set using the \fBMode\fP button.
 .TP
 .B 'W', 'w', 'I', or 'i'
+.B Pick Mode:
+Pressing one of these keys sets the edit mode to "pick" so that
+clicking the left mouse button will cause
+the nearest unflagged beam to be flagged.  
+The edit mode can also be set using the \fBMode\fP button.
+.TP
+.B 'E', 'e', 'O', or 'o'
 .B Erase Mode:
 Pressing one of these keys sets the edit mode to "erase" so that
 clicking the left mouse button will cause
@@ -432,7 +453,7 @@ any beam under the cursor while the left mouse button is held down
 to be flagged.
 The edit mode can also be set using the \fBMode\fP button.
 .TP
-.B 'E', 'e', 'O', or 'o'
+.B 'R', 'r', 'P', or 'p'
 .B Restore Mode:
 Pressing one of these keys sets the edit mode to "restore" so that
 clicking the left mouse button will cause any beam under the cursor 
