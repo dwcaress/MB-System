@@ -1,4 +1,4 @@
-.TH mbdatalist l "12 March 2002" "MB-System 5.0" "MB-System 5.0"
+.TH mbdatalist l "6 April 2002" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbdatalist\fP - parses recursive datalist files and outputs the
 complete list of data files, formats, and file weights.
@@ -7,7 +7,7 @@ complete list of data files, formats, and file weights.
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbdatalist\fP [\fB-F\fP\fIformat\fP \fB-I\fP\fIfilename\fP \fB-O -P -R -U -V -H\fP]
+\fBmbdatalist\fP [\fB-F\fP\fIformat\fP \fB-I\fP\fIfilename\fP \fB-N -O -P -R -U -V -H\fP]
 
 .SH DESCRIPTION
 \fBMBdatalist\fP is a utility for parsing datalist files. 
@@ -44,13 +44,20 @@ options force \fBmbdatalist\fP to output processed file names
 when they exist (\fB-P\fP) or to only output unprocessed 
 (raw) file names (\fB-U\fP).
 
-Programs such as \fBmbgrid\fP will try to check metadata or "inf" 
+Programs such as \fBmbgrid\fP try to check metadata or "inf" 
 files to see if the corresponding data files include data within
-desired areas. The \fB-O\fP option causes \fBmbdatalist\fP to
-check each data file for the existence of an "inf" file, and to
-create the "inf" files (using \fBmbinfo\fP) when they don't already
-exist. The \fB-R\fP\fIw/e/s/n\fP option causes the program to check each
-data file with an "inf" fiel for overlap with 
+the specified geographic bounds. Other programs look for
+"fast bathymetry" or "fast navigation" ("fbt" or "fnv") files
+in order to read the data more quickly. The \fB-N\fP 
+option causes \fBmbdatalist\fP to create these three types of
+ancillary files for each swath data file. 
+The \fB-O\fP option causes \fBmbdatalist\fP to
+create the "inf", "fbt", and "fnv" files 
+only when they don't already
+exist or are out of date (older than the data file).
+
+The \fB-R\fP\fIw/e/s/n\fP option causes the program to check each
+data file with an "inf" file for overlap with 
 the desired bounds, and only report those
 files with data in the desired area (or no 
 "inf" file to check). This behavior mimics that of
@@ -96,10 +103,10 @@ data files to be processed and their formats.  The program will parse
 the datalist (recursively, if necessary) and output each swath filename
 and the associated format and file weight. 
 .TP
-.B \-O
+.B \-N
 This argument causes \fBMBdatalist\fP to generate three types of ancillary 
-data files ("inf", "fbt", and "fnv") if 
-these files don't already exist or are out of date. In all cases,
+data files ("inf", "fbt", and "fnv").
+In all cases,
 the ancillary filenames are just the original filename with 
 ".inf", ".fbt", or ".fnv" appended on the end.
 \fBMB-System\fP makes use of ancillary data files in a number 
@@ -116,6 +123,11 @@ with a \fB-O\fP\fItMXYHSc\fP option. Programs such as \fBmbgrid\fP,
 \fBmbswath\fP, and \fBmbcontour\fP will try to read "fbt" and "fnv" files
 instead of the full data files whenever only bathymetry or
 navigation information are required.
+.TP
+.B \-O
+This argument causes \fBMBdatalist\fP to generate the three ancillary
+data files ("inf", "fbt", and "fnv") if
+these files don't already exist or are out of date. 
 .TP
 .B \-P
 Normally, \fBmbdatalist\fP allows $PROCESSED and $RAW tags within

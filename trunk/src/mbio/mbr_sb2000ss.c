@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sb2000ss.c	10/14/94
- *	$Id: mbr_sb2000ss.c,v 5.7 2002-02-26 07:50:41 caress Exp $
+ *	$Id: mbr_sb2000ss.c,v 5.8 2002-04-08 20:59:38 caress Exp $
  *
  *    Copyright (c) 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	October 14, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2002/02/26 07:50:41  caress
+ * Release 5.0.beta14
+ *
  * Revision 5.6  2002/02/22 09:03:43  caress
  * Release 5.0.beta13
  *
@@ -149,7 +152,7 @@ int mbr_dem_sb2000ss(int verbose, void *mbio_ptr, int *error);
 int mbr_rt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
-static char res_id[]="$Id: mbr_sb2000ss.c,v 5.7 2002-02-26 07:50:41 caress Exp $";
+static char res_id[]="$Id: mbr_sb2000ss.c,v 5.8 2002-04-08 20:59:38 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_sb2000ss(int verbose, void *mbio_ptr, int *error)
@@ -441,7 +444,7 @@ int mbr_rt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	char	buffer[2*MBSYS_SB2000_PIXELS+4];
 	unsigned short *short_ptr;
 	short	test_sensor_size, test_data_size;
-	int 	done, skip;
+	int 	found, skip;
 	int	i;
 
 	/* print input debug statements */
@@ -465,12 +468,28 @@ int mbr_rt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	/* read next header record from file */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 	skip = 0;
+	found = MB_NO;
 	if ((status = fread(buffer,1,MBSYS_SB2000_HEADER_SIZE,
 			mb_io_ptr->mbfp)) == MBSYS_SB2000_HEADER_SIZE) 
 		{
 		mb_io_ptr->file_bytes += status;
 		status = MB_SUCCESS;
 		*error = MB_ERROR_NO_ERROR;
+		
+		/* check if header is ok */
+		if (strncmp(&buffer[34],"SR",2) == 0
+		    || strncmp(&buffer[34],"RS",2) == 0
+		    || strncmp(&buffer[34],"SP",2) == 0
+		    || strncmp(&buffer[34],"TR",2) == 0
+		    || strncmp(&buffer[34],"IR",2) == 0
+		    || strncmp(&buffer[34],"AT",2) == 0
+		    || strncmp(&buffer[34],"SC",2) == 0)
+		    {
+		    mb_get_binary_short(MB_NO, &buffer[26], &test_sensor_size);
+		    mb_get_binary_short(MB_NO, &buffer[28], &test_data_size);
+		    if (test_sensor_size <= 32 && test_data_size <= 2*MBSYS_SB2000_PIXELS+4)
+			found = MB_YES;
+		    }
 		}
 	else
 		{
@@ -480,9 +499,9 @@ int mbr_rt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		}
 
 	/* if not a good header search through file to find one */
-	done = MB_NO;
-	while (status == MB_SUCCESS && done == MB_NO)
+	while (status == MB_SUCCESS && found == MB_NO)
 		{
+fprintf(stderr, "Searching skip:%d\n", skip);
 		/* shift bytes by one */
 		for (i=0;i<MBSYS_SB2000_HEADER_SIZE-1;i++)
 			buffer[i] = buffer[i+1];
@@ -508,13 +527,13 @@ int mbr_rt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			    mb_get_binary_short(MB_NO, &buffer[26], &test_sensor_size);
 			    mb_get_binary_short(MB_NO, &buffer[28], &test_data_size);
 			    if (test_sensor_size <= 32 && test_data_size <= 2*MBSYS_SB2000_PIXELS+4)
-				done = MB_YES;
+				found = MB_YES;
 			    }
 
 			}
 		else
 			{
-			done = MB_YES;
+			found = MB_YES;
 			mb_io_ptr->file_bytes += status;
 			status = MB_FAILURE;
 			*error = MB_ERROR_EOF;

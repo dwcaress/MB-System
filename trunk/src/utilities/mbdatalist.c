@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbdatalist.c	10/10/2001
- *    $Id: mbdatalist.c,v 5.4 2002-04-06 02:53:45 caress Exp $
+ *    $Id: mbdatalist.c,v 5.5 2002-04-08 21:01:04 caress Exp $
  *
  *    Copyright (c) 2001, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	October 10, 2001
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2002/04/06 02:53:45  caress
+ * Release 5.0.beta16
+ *
  * Revision 5.3  2002/03/26 07:45:14  caress
  * Release 5.0.beta15
  *
@@ -52,10 +55,10 @@
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbdatalist.c,v 5.4 2002-04-06 02:53:45 caress Exp $";
+	static char rcs_id[] = "$Id: mbdatalist.c,v 5.5 2002-04-08 21:01:04 caress Exp $";
 	static char program_name[] = "mbdatalist";
 	static char help_message[] =  "mbdatalist parses recursive datalist files and outputs the\ncomplete list of data files and formats. \nThe results are dumped to stdout.";
-	static char usage_message[] = "mbdatalist [-Fformat -Ifile -O -P -Rw/e/s/n -U -V -H]";
+	static char usage_message[] = "mbdatalist [-Fformat -Ifile -N -O -P -Rw/e/s/n -U -V -H]";
 	extern char *optarg;
 	extern int optkind;
 	int	errflg = 0;
@@ -87,6 +90,7 @@ main (int argc, char **argv)
 	char	pwd[MB_PATH_MAXLINE];
 	char	command[MB_PATH_MAXLINE];
 	int	make_inf = MB_NO;
+	int	force_update = MB_NO;
 	
 	/* output stream for basic stuff (stdout if verbose <= 1,
 		output if verbose > 1) */
@@ -97,10 +101,10 @@ main (int argc, char **argv)
 		btime_i,etime_i,&speedmin,&timegap);
 
 	/* set default input to stdin */
-	strcpy (read_file, "stdin");
+	strcpy (read_file, "datalist.mb-1");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhF:f:I:i:OoPpR:r:Uu")) != -1)
+	while ((c = getopt(argc, argv, "VvHhF:f:I:i:NnOoPpR:r:Uu")) != -1)
 	  switch (c) 
 		{
 		case 'F':
@@ -115,6 +119,12 @@ main (int argc, char **argv)
 		case 'I':
 		case 'i':
 			sscanf (optarg,"%s", read_file);
+			flag++;
+			break;
+		case 'N':
+		case 'n':
+			force_update = MB_YES;
+			make_inf = MB_YES;
 			flag++;
 			break;
 		case 'O':
@@ -183,6 +193,7 @@ main (int argc, char **argv)
 		fprintf(output,"dbg2       format:         %d\n",format);
 		fprintf(output,"dbg2       look_processed: %d\n",look_processed);
 		fprintf(output,"dbg2       make_inf:       %d\n",make_inf);
+		fprintf(output,"dbg2       force_update:   %d\n",force_update);
 		fprintf(output,"dbg2       pings:          %d\n",pings);
 		fprintf(output,"dbg2       lonflip:        %d\n",lonflip);
 		fprintf(output,"dbg2       bounds[0]:      %f\n",bounds[0]);
@@ -224,7 +235,8 @@ main (int argc, char **argv)
 		{
 		if (make_inf == MB_YES)
 		    {
-		    status = mb_make_info(verbose, file, format, &error);
+		    status = mb_make_info(verbose, force_update, 
+						file, format, &error);
 		    }
 		else
 		    {
@@ -268,7 +280,8 @@ main (int argc, char **argv)
 			mb_get_relative_path(verbose, file, pwd, &error);
 			if (make_inf == MB_YES)
 			    {
-			    status = mb_make_info(verbose, file, format, &error);
+			    status = mb_make_info(verbose, force_update,
+							file, format, &error);
 			    }
 			else
 			    {

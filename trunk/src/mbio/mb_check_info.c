@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_check_info.c	1/25/93
- *    $Id: mb_check_info.c,v 5.4 2002-04-06 02:43:39 caress Exp $
+ *    $Id: mb_check_info.c,v 5.5 2002-04-08 20:59:38 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	September 3, 1996
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2002/04/06 02:43:39  caress
+ * Release 5.0.beta16
+ *
  * Revision 5.3  2002/03/18 18:28:46  caress
  * Fixed handling of data bounds that cross the current lonflip setting.
  *
@@ -75,7 +78,7 @@ int mb_check_info(int verbose, char *file, int lonflip,
 		    double bounds[4], int *file_in_bounds,
 		    int *error)
 {
-	static char rcs_id[]="$Id: mb_check_info.c,v 5.4 2002-04-06 02:43:39 caress Exp $";
+	static char rcs_id[]="$Id: mb_check_info.c,v 5.5 2002-04-08 20:59:38 caress Exp $";
 	char	*function_name = "mb_check_info";
 	int	status;
 	char	file_inf[128];
@@ -293,7 +296,7 @@ int mb_check_info(int verbose, char *file, int lonflip,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_make_info(int verbose, 
+int mb_make_info(int verbose, int force,
 		    char *file, int format, int *error)
 {
 	char	*function_name = "mb_make_info";
@@ -316,6 +319,7 @@ int mb_make_info(int verbose,
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       force:      %d\n",force);
 		fprintf(stderr,"dbg2       file:       %s\n",file);
 		fprintf(stderr,"dbg2       format:     %d\n",format);
 		}
@@ -346,7 +350,8 @@ int mb_make_info(int verbose,
 		}
 		
 	/* make new inf file if not there or out of date */
-	if (datmodtime > 0 && datmodtime > infmodtime)
+	if (force == MB_YES
+		|| (datmodtime > 0 && datmodtime > infmodtime))
 		{
 		if (verbose >= 1)
 			fprintf(stderr,"\nGenerating inf file for %s\n",file);
@@ -356,8 +361,9 @@ int mb_make_info(int verbose,
 		}
 		
 	/* make new fbt file if not there or out of date */
-	if (datmodtime > 0 
-	    && datmodtime > fbtmodtime
+	if ((force 
+		|| (datmodtime > 0 
+	    	&& datmodtime > fbtmodtime))
 	    && format != MBF_SBSIOMRG
 	    && format != MBF_SBSIOCEN
 	    && format != MBF_SBSIOLSI
@@ -382,8 +388,9 @@ int mb_make_info(int verbose,
 		}
 		
 	/* make new nv file if not there or out of date */
-	if (datmodtime > 0 
-	    && datmodtime > fnvmodtime
+	if ((force
+		|| (datmodtime > 0 
+	    		&& datmodtime > fnvmodtime))
 	    && format != MBF_MGD77DAT
 	    && format != MBF_MBARIROV
 	    && format != MBF_MBPRONAV)

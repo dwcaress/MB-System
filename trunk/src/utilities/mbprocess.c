@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbprocess.c	3/31/93
- *    $Id: mbprocess.c,v 5.18 2002-04-06 02:53:45 caress Exp $
+ *    $Id: mbprocess.c,v 5.19 2002-04-08 21:01:04 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -36,6 +36,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.18  2002/04/06 02:53:45  caress
+ * Release 5.0.beta16
+ *
  * Revision 5.17  2002/03/26 07:45:14  caress
  * Release 5.0.beta15
  *
@@ -126,7 +129,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbprocess.c,v 5.18 2002-04-06 02:53:45 caress Exp $";
+	static char rcs_id[] = "$Id: mbprocess.c,v 5.19 2002-04-08 21:01:04 caress Exp $";
 	static char program_name[] = "mbprocess";
 	static char help_message[] =  "mbprocess is a tool for processing swath sonar bathymetry data.\n\
 This program performs a number of functions, including:\n\
@@ -4035,7 +4038,10 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 	/* generate inf file */
 	if (status == MB_SUCCESS)
 		{
-		status = mb_make_info(verbose, process.mbp_ofile, process.mbp_format, &error);
+		status = mb_make_info(verbose, MB_YES, 
+					process.mbp_ofile, 
+					process.mbp_format, 
+					&error);
 		}
 		
 	} /* end processing file */
