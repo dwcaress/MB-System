@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 4.2 1994-10-21 11:34:20 caress Exp $
+#	$Id: Makefile.template,v 4.3 1994-10-31 14:59:51 caress Exp $
 #
 #     Copyright (c) 1993, 1994 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.2  1994/10/21  11:34:20  caress
+# Release V4.0
+#
 # Revision 4.1  1994/06/13  20:18:05  caress
 # Added make mbcontourfilter.o
 #
@@ -43,11 +46,11 @@ LFLAGS = -lm
 BINDIR = ../../bin
 LIBDIR = ../../lib
 INCDIR = ../../include
-MANDIR = ../../man/man1
+MANDIR = ../../man/manl
 
 ### make all makes the MB-system macros and man pages
-all:	$(BINDIR)/mbcontour $(MANDIR)/mbcontour.1 \
-	$(BINDIR)/mbswath $(MANDIR)/mbswath.1
+all:	$(BINDIR)/mbcontour $(MANDIR)/mbcontour.l \
+	$(BINDIR)/mbswath $(MANDIR)/mbswath.l
 
 ### make clean removes the object files
 clean:
@@ -80,10 +83,10 @@ mbswath.o:	mbswath.c  $(INCDIR)/mb_status.h
 	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) ../../lib/libmbio.a  mbswath.c
 
 ### copy the man pages to the man page directory
-$(MANDIR)/mbcontour.1:	mbcontour.1
-	cp mbcontour.1 $(MANDIR)/mbcontour.1
-	chmod 664 $(MANDIR)/mbcontour.1
-$(MANDIR)/mbswath.1:	mbswath.1
-	cp mbswath.1 $(MANDIR)/mbswath.1
-	chmod 664 $(MANDIR)/mbswath.1
+$(MANDIR)/mbcontour.l:	mbcontour.l
+	cp mbcontour.l $(MANDIR)/mbcontour.l
+	chmod 664 $(MANDIR)/mbcontour.l
+$(MANDIR)/mbswath.l:	mbswath.l
+	cp mbswath.l $(MANDIR)/mbswath.l
+	chmod 664 $(MANDIR)/mbswath.l
 
