@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em1000rw.c	8/8/94
- *	$Id: mbr_em1000rw.c,v 4.6 1996-08-26 18:33:50 caress Exp $
+ *	$Id: mbr_em1000rw.c,v 4.7 1996-09-19 20:22:47 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	August 8, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.6  1996/08/26  18:33:50  caress
+ * Changed "signed char" to "char" for SunOs 4.1 compiler compatibility.
+ *
  * Revision 4.5  1996/08/05  15:21:58  caress
  * Just redid i/o for Simrad sonars, including adding EM12S and EM121 support.
  *
@@ -69,7 +72,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_em1000rw.c,v 4.6 1996-08-26 18:33:50 caress Exp $";
+	static char res_id[]="$Id: mbr_em1000rw.c,v 4.7 1996-09-19 20:22:47 caress Exp $";
 	char	*function_name = "mbr_alm_em1000rw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -597,8 +600,8 @@ int	*error;
 			}
 		else
 			{
-			status = MB_FAILURE;
-			*error = MB_ERROR_UNINTELLIGIBLE;
+			mb_io_ptr->new_lon = 0.0;
+			mb_io_ptr->new_lat = 0.0;
 			}
 		if (mb_io_ptr->lonflip < 0)
 			{
@@ -1146,6 +1149,38 @@ int	*error;
 				data->ss[i] = (mb_io_ptr->new_ss[i] -64) / reflscale;
 				}
 			}
+		}
+
+	/* else check for nav data to be copied from mb_io_ptr */
+	else if (mb_io_ptr->new_error == MB_ERROR_NO_ERROR
+		&& mb_io_ptr->new_kind == MB_DATA_NAV)
+		{
+		/* get time */
+		data->pos_year = mb_io_ptr->new_time_i[0] - 1900;
+		data->pos_month = mb_io_ptr->new_time_i[1];
+		data->pos_day = mb_io_ptr->new_time_i[2];
+		data->pos_hour = mb_io_ptr->new_time_i[3];
+		data->pos_minute = mb_io_ptr->new_time_i[4];
+		data->pos_second = mb_io_ptr->new_time_i[5];
+		data->pos_centisecond = mb_io_ptr->new_time_i[6]/10000;
+
+		/* get position */
+		data->longitude = mb_io_ptr->new_lon;
+		data->latitude = mb_io_ptr->new_lat;
+
+		/* get heading */
+		data->line_heading = (int) (mb_io_ptr->new_heading * 10);
+
+		/* get speed  */
+		data->speed = mb_io_ptr->new_speed/3.6;
+		
+		/* zero the rest */
+		data->utm_northing = 0.0;
+		data->utm_easting = 0.0;
+		data->utm_zone = 0;
+		data->utm_zone_lon = 0.0;
+		data->utm_system = 0;
+		data->pos_quality = 0;
 		}
 
 	/* write next data to file */
