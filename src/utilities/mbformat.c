@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbformat.c	1/22/93
- *    $Id: mbformat.c,v 4.0 1994-03-06 00:13:22 caress Exp $
+ *    $Id: mbformat.c,v 4.1 1994-03-12 01:44:37 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -20,6 +20,9 @@
  * Date:	January 22, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/03/06  00:13:22  caress
+ * First cut at version 4.0
+ *
  * Revision 4.0  1994/03/01  18:59:27  caress
  * First cut at new version. Any changes are associated with
  * support of three data types (beam bathymetry, beam amplitude,
@@ -46,7 +49,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbformat.c,v 4.0 1994-03-06 00:13:22 caress Exp $";
+	static char rcs_id[] = "$Id: mbformat.c,v 4.1 1994-03-12 01:44:37 caress Exp $";
 	static char program_name[] = "MBFORMAT";
 	static char help_message[] = "MBFORMAT is an utility which identifies the multibeam data formats \nassociated with MBIO format id's.  If no format id is specified, \nMBFORMAT lists all of the currently supported formats.";
 	static char usage_message[] = "mbformat [-Fformat -V -H]";
@@ -64,6 +67,8 @@ char **argv;
 	int	format_num;
 	char	*message;
 	int	i;
+
+	char	*getenv();
 
 	help = 0;
 	verbose = 0;

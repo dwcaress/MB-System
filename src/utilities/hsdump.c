@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	hsdump.c	6/16/93
- *    $Id: hsdump.c,v 4.0 1994-03-06 00:13:22 caress Exp $
+ *    $Id: hsdump.c,v 4.1 1994-03-12 01:44:37 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,9 @@
  * Date:	June 16, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/03/06  00:13:22  caress
+ * First cut at version 4.0
+ *
  * Revision 4.0  1994/03/01  18:59:27  caress
  * First cut at new version. Any changes are associated with
  * support of three data types (beam bathymetry, beam amplitude,
@@ -50,7 +53,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: hsdump.c,v 4.0 1994-03-06 00:13:22 caress Exp $";
+	static char rcs_id[] = "$Id: hsdump.c,v 4.1 1994-03-12 01:44:37 caress Exp $";
 	static char program_name[] = "HSDUMP";
 	static char help_message[] =  "HSDUMP lists the information contained in data records on\n\tHydrosweep DS data files, including survey, calibrate, water \n\tvelocity and comment records. The default input stream is stdin.";
 	static char usage_message[] = "hsdump [-Fformat -V -H -Iinfile -Okind]";
@@ -134,6 +137,8 @@ char **argv;
 	FILE	*output;
 
 	int	i, j, k, l, m;
+
+	char	*getenv();
 
 	/* get current default values */
 	status = mb_defaults(verbose,&format,&pings,&lonflip,bounds,

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	4/8/93
- *    $Id: mbedit.c,v 4.0 1994-03-05 23:54:35 caress Exp $
+ *    $Id: mbedit.c,v 4.1 1994-03-12 01:49:07 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -24,6 +24,9 @@
  * Date:	April 8, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/03/05  23:54:35  caress
+ * First cut at version 4.0
+ *
  * Revision 4.1  1994/03/03  03:51:47  caress
  * Fixed copyright message.
  *
@@ -95,7 +98,7 @@ struct mbedit_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbedit.c,v 4.0 1994-03-05 23:54:35 caress Exp $";
+static char rcs_id[] = "$Id: mbedit.c,v 4.1 1994-03-12 01:49:07 caress Exp $";
 static char program_name[] = "MBEDIT";
 static char help_message[] =  "MBEDIT is an interactive beam editor for multibeam bathymetry data.\n\tIt can work with any data format supported by the MBIO library.\n\tThis version uses the XVIEW toolkit and has been developed using\n\tthe DEVGUIDE package.  A future version will employ the MOTIF\n\ttoolkit for greater portability.  This file contains the code \n\tthat does not directly depend on the XVIEW interface - the companion \n\tfile mbedit_stubs.c contains the user interface related code.";
 static char usage_message[] = "mbedit [-Fformat -Ifile -Ooutfile -V -H]";
@@ -207,6 +210,9 @@ int	*startup_file;
 	int	c;
 	int	help = 0;
 	int	flag = 0;
+
+	char	*ctime();
+	char	*getenv();
 
 	/* set default values */
 	status = mb_defaults(verbose,&format,&pings,&lonflip,bounds,

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mblevitus.c	4/15/93
- *    $Id: mblevitus.c,v 4.0 1994-03-06 00:13:22 caress Exp $
+ *    $Id: mblevitus.c,v 4.1 1994-03-12 01:44:37 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,9 @@
  * Date:	April 15, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/03/06  00:13:22  caress
+ * First cut at version 4.0
+ *
  * Revision 4.0  1994/03/01  18:59:27  caress
  * First cut at new version. Any changes are associated with
  * support of three data types (beam bathymetry, beam amplitude,
@@ -69,7 +72,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mblevitus.c,v 4.0 1994-03-06 00:13:22 caress Exp $";
+	static char rcs_id[] = "$Id: mblevitus.c,v 4.1 1994-03-12 01:44:37 caress Exp $";
 	static char program_name[] = "MBLEVITUS";
 	static char help_message[] = "MBLEVITUS generates an average water velocity profile for a \nspecified location from the Levitus temperature and salinity database.";
 	static char usage_message[] = "mblevitus [-Rlon/lat -Ooutfile -V -H]";
@@ -126,6 +129,9 @@ char **argv;
 	char	date[25], user[128], host[128];
 
 	int	i, j, k;
+
+	char	*ctime();
+	char	*getenv();
 
 	/* set default output */
 	strcpy(ofile,"velocity");

@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmerge.c	2/20/93
  *
- *    $Id: mbmerge.c,v 4.0 1994-03-06 00:13:22 caress Exp $
+ *    $Id: mbmerge.c,v 4.1 1994-03-12 01:44:37 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,9 @@
  * Date:	February 20, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/03/06  00:13:22  caress
+ * First cut at version 4.0
+ *
  * Revision 4.0  1994/03/01  18:59:27  caress
  * First cut at new version. Any changes are associated with
  * support of three data types (beam bathymetry, beam amplitude,
@@ -52,7 +55,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbmerge.c,v 4.0 1994-03-06 00:13:22 caress Exp $";
+	static char rcs_id[] = "$Id: mbmerge.c,v 4.1 1994-03-12 01:44:37 caress Exp $";
 	static char program_name[] = "MBMERGE";
 	static char help_message[] =  "MBMERGE merges new navigation with multibeam data from an \ninput file and then writes the merged data to an output \nmultibeam data file. The default input \nand output streams are stdin and stdout.";
 	static char usage_message[] = "mbmerge [-Fformat -Llonflip -V -H  -Iinfile -Ooutfile -Nnavfile]";
@@ -132,6 +135,9 @@ char **argv;
 
 	char	buffer[128], tmp[128], *result;
 	int	i, j, k, l, m;
+
+	char	*ctime();
+	char	*getenv();
 
 	/* get current default values */
 	status = mb_defaults(verbose,&format,&pings,&lonflip,bounds,

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbunclean.c	3/10/93
- *    $Id: mbunclean.c,v 4.0 1994-03-06 00:13:22 caress Exp $
+ *    $Id: mbunclean.c,v 4.1 1994-03-12 01:44:37 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,9 @@
  * Date:	March 10, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/03/06  00:13:22  caress
+ * First cut at version 4.0
+ *
  * Revision 4.0  1994/03/01  18:59:27  caress
  * First cut at new version. Any changes are associated with
  * support of three data types (beam bathymetry, beam amplitude,
@@ -26,6 +29,9 @@
  *
  * Revision 3.1  1993/05/14  23:49:32  sohara
  * fixed $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/03/06  00:13:22  caress
+ * First cut at version 4.0
+ *
  * Revision 4.0  1994/03/01  18:59:27  caress
  * First cut at new version. Any changes are associated with
  * support of three data types (beam bathymetry, beam amplitude,
@@ -51,7 +57,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbunclean.c,v 4.0 1994-03-06 00:13:22 caress Exp $";
+	static char rcs_id[] = "$Id: mbunclean.c,v 4.1 1994-03-12 01:44:37 caress Exp $";
 	static char program_name[] = "MBUNCLEAN";
 	static char help_message[] =  "MBUNCLEAN unflags multibeam bathymetry and amplitude data \nwhich has been flagged as bad by being set negative. \nThe default input and output streams are stdin and stdout.";
 	static char usage_message[] = "mbunclean [-Fformat -Llonflip -V -H  -Iinfile -Ooutfile]";
@@ -121,6 +127,9 @@ char **argv;
 	char	date[25], user[128], host[128];
 
 	int	i, j, k, l, m;
+
+	char	*ctime();
+	char	*getenv();
 
 	/* get current default values */
 	status = mb_defaults(verbose,&format,&pings,&lonflip,bounds,
