@@ -122,9 +122,9 @@ value to force the results to be positive; this value should be
 chosen according to the range of values allowed in the
 data type and data formats being used (e.g. for SeaBeam 2100
 sidescan as represented in format 41, the sidescan values
-can range from 1 to 65535, so an \fIoffset\fP = 10000 is appropriate).
+can range from 1 to 65535, so an \fIoffset\fP = 1000 is appropriate).
 Default: \fImode\fP = 1, \fIxdim\fP = 3, \fIldim\fP = 10, 
-\fIiteration\fP = 1, \fIoffset\fP = 10000.
+\fIiteration\fP = 1, \fIoffset\fP = 1000.
 .TP
 .B \-E
 \fIyr/mo/da/hr/mn/sc\fP
