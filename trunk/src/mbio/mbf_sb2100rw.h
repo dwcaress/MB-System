@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	MBF_SB2100RW.h	3/3/94
- *	$Id: mbf_sb2100rw.h,v 4.2 1994-04-09 15:49:21 caress Exp $
+ *	$Id: mbf_sb2100rw.h,v 4.3 1994-06-21 22:54:21 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -17,6 +17,9 @@
  * Author:	D. W. Caress
  * Date:	March 3, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1994/04/09  15:49:21  caress
+ * Altered to fit latest iteration of SeaBeam 2100 vendor format.
+ *
  * Revision 4.1  1994/03/25  14:02:38  caress
  * Made changes in accordance with latest iteration of
  * SeaBeam 2100 vendor format.
@@ -113,7 +116,7 @@ struct mbf_sb2100rw_struct
 	/* DR and SS header info */
 	double	longitude;
 	double	latitude;
-	int	speed;			/* 0.001 km/hr */
+	int	speed;			/* 0.001 m/sec */
 	int	surface_sound_velocity;	/* 0.01 m/sec */
 	char	ssv_source;		/* V=Velocimeter, M=Manual, 
 						T=Temperature */

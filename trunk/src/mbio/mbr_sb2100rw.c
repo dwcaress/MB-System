@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sb2100rw.c	3/3/94
- *	$Id: mbr_sb2100rw.c,v 4.3 1994-04-09 15:49:21 caress Exp $
+ *	$Id: mbr_sb2100rw.c,v 4.4 1994-06-21 22:54:21 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	March 3, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1994/04/09  15:49:21  caress
+ * Altered to fit latest iteration of SeaBeam 2100 vendor format.
+ *
  * Revision 4.2  1994/03/25  14:02:38  caress
  * Made changes in accordance with latest iteration of
  * SeaBeam 2100 vendor format.
@@ -46,6 +49,11 @@
 #include <math.h>
 #include <strings.h>
 
+/* include for byte swapping on little-endian machines */
+#ifdef BYTESWAPPED
+#include "../../include/mb_swap.h"
+#endif
+
 /* mbio include files */
 #include "../../include/mb_status.h"
 #include "../../include/mb_format.h"
@@ -59,7 +67,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_sb2100rw.c,v 4.3 1994-04-09 15:49:21 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2100rw.c,v 4.4 1994-06-21 22:54:21 caress Exp $";
 	char	*function_name = "mbr_alm_sb2100rw";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -435,7 +443,7 @@ int	*error;
 			mb_io_ptr->new_heading = 0.01*data->heading_36khz;
 
 		/* get speed */
-		mb_io_ptr->new_speed = 360.0*data->speed;
+		mb_io_ptr->new_speed = 0.0036*data->speed;
 
 		/* read beam and pixel values into storage arrays */
 		mb_io_ptr->beams_bath = data->num_beams;
@@ -817,7 +825,7 @@ int	*error;
 			data->heading_36khz = data->heading_36khz + 36000;
 
 		/* get speed */
-		data->speed = mb_io_ptr->new_speed/360.0;
+		data->speed = mb_io_ptr->new_speed/0.0036;
 
 		/* read beam and pixel values into storage arrays */
 		if (data->range_scale == 'S')
@@ -1521,7 +1529,7 @@ int	*error;
 	char	line[MBF_SB2100RW_MAXLINE];
 	int	shift;
 	char	ew, ns;
-	short int	read_ss[2*MBF_SB2100RW_PIXELS+2];
+	unsigned short	read_ss[2*MBF_SB2100RW_PIXELS+2];
 	int	degrees, minutes;
 	int	i;
 
@@ -1700,8 +1708,16 @@ int	*error;
 		{
 		for (i=0;i<data->num_pixels;i++)
 			{
-			data->amplitude_ss[i] = (int) read_ss[2*i];
-			data->alongtrack_ss[i] = (int) read_ss[2*i+1];
+			/* deal with byte swapping if necessary */
+#ifdef BYTESWAPPED
+                        tmp = read_ss[2*i];
+                        data->amplitude_ss[i] = (int) swap_2byte(tmp);
+                        tmp = (short) read_ss[2*i+1];
+                        data->alongtrack_ss[i] = (int) swap_2byte(tmp);
+#else
+			data->amplitude_ss[i] = read_ss[2*i];
+			data->alongtrack_ss[i] = (short) read_ss[2*i+1];
+#endif
 	  		}
 		}
 
@@ -2377,7 +2393,7 @@ int	*error;
 	char	*function_name = "mbr_sb2100rw_wr_ss";
 	int	status = MB_SUCCESS;
 	struct mbf_sb2100rw_struct *data;
-	short int	write_ss[2*MBF_SB2100RW_PIXELS];
+	unsigned short	write_ss[2*MBF_SB2100RW_PIXELS];
 	double	degrees;
 	int	idegrees, minutes;
 	int	i;
@@ -2562,9 +2578,16 @@ int	*error;
 		/* construct and write out sidescan data */
 		for (i=0;i<data->num_pixels;i++)
 			{
-			write_ss[2*i] = (short int) data->amplitude_ss[i];
-			write_ss[2*i+1] 
-				= (short int) data->alongtrack_ss[i];
+			/* deal with byte swapping if necessary */
+#ifdef BYTESWAPPED
+			write_ss[2*i] = swap_2bytes((unsigned short) 
+				data->amplitude_ss[i]);
+			write_ss[2*i+1] = swap_2bytes((short) 
+				data->alongtrack_ss[i]);
+#else
+			write_ss[2*i] = (unsigned short) data->amplitude_ss[i];
+			write_ss[2*i+1] = (short) data->alongtrack_ss[i];
+#endif
 	  		}
 		if ((status = fwrite(write_ss,1,data->ss_data_length,mbfp))
 			!= data->ss_data_length)
