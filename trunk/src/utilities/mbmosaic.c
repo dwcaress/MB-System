@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmosaic.c	2/10/97
- *    $Id: mbmosaic.c,v 5.2 2001-06-03 07:07:34 caress Exp $
+ *    $Id: mbmosaic.c,v 5.3 2001-06-29 22:50:23 caress Exp $
  *
  *    Copyright (c) 1997, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	February 10, 1997
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2001/06/03  07:07:34  caress
+ * Release 5.0.beta01.
+ *
  * Revision 5.1  2001/03/22 21:15:49  caress
  * Trying to make release 5.0.beta0.
  *
@@ -120,7 +123,7 @@
 #define	NO_DATA_FLAG	99999
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbmosaic.c,v 5.2 2001-06-03 07:07:34 caress Exp $";
+static char rcs_id[] = "$Id: mbmosaic.c,v 5.3 2001-06-29 22:50:23 caress Exp $";
 static char program_name[] = "mbmosaic";
 static char help_message[] =  "mbmosaic is an utility used to mosaic amplitude or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered by multibeam swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbmosaic -Ifilelist -Oroot \
@@ -1407,7 +1410,7 @@ main (int argc, char **argv)
 		    }
 		if (verbose >= 2) 
 			fprintf(outfp,"\n");
-		if (verbose > 0)
+		if (verbose > 0 || file_in_bounds == MB_YES)
 			fprintf(outfp,"%d data points processed in %s\n",
 				ndatafile,file);
 		} /* end if (format > 0) */
@@ -1759,7 +1762,7 @@ main (int argc, char **argv)
 		    }
 		if (verbose >= 2) 
 			fprintf(outfp,"\n");
-		if (verbose > 0)
+		if (verbose > 0 || file_in_bounds == MB_YES)
 			fprintf(outfp,"%d data points processed in %s\n",
 				ndatafile,file);
 		} /* end if (format > 0) */

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mblist.c	2/1/93
- *    $Id: mblist.c,v 5.2 2001-06-08 21:45:46 caress Exp $
+ *    $Id: mblist.c,v 5.3 2001-06-29 22:50:23 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -28,6 +28,9 @@
  *		in 1990.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2001/06/08  21:45:46  caress
+ * Version 5.0.beta01
+ *
  * Revision 5.1  2001/03/22  21:15:49  caress
  * Trying to make release 5.0.beta0.
  *
@@ -231,8 +234,8 @@ int get_bathyslope(int verbose,
 	int *error);
 int printsimplevalue(int verbose, 
 	double value, int width, int precision, 
-	int ascii, int *invert, int *error);
-int printNaN(int verbose, int ascii, int *invert, int *error);
+	int ascii, int *invert, int *flipsign, int *error);
+int printNaN(int verbose, int ascii, int *invert, int *flipsign, int *error);
 
 /* NaN value */
 double	NaN;
@@ -241,7 +244,7 @@ double	NaN;
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mblist.c,v 5.2 2001-06-08 21:45:46 caress Exp $";
+	static char rcs_id[] = "$Id: mblist.c,v 5.3 2001-06-29 22:50:23 caress Exp $";
 	static char program_name[] = "MBLIST";
 	static char help_message[] =  "MBLIST prints the specified contents of a swath data \nfile to stdout. The form of the output is quite flexible; \nMBLIST is tailored to produce ascii files in spreadsheet \nstyle with data columns separated by tabs.";
 	static char usage_message[] = "mblist [-Byr/mo/da/hr/mn/sc -Ddump_mode -Eyr/mo/da/hr/mn/sc \n-Fformat -H -Ifile -Llonflip -Mbeam_start/beam_end -Npixel_start/pixel_end \n-Ooptions -Ppings -Rw/e/s/n -Sspeed -Ttimegap -Ucheck -V -W]";
@@ -306,6 +309,7 @@ main (int argc, char **argv)
 	int	check_amp = MB_NO;
 	int	check_ss = MB_NO;
 	int	invert_next_value = MB_NO;
+	int	signflip_next_value = MB_NO;
 	int	first = MB_YES;
 	int	ascii = MB_YES;
 
@@ -819,29 +823,11 @@ main (int argc, char **argv)
 		/* set output beams and pixels */
 		if (error == MB_ERROR_NO_ERROR)
 			{
-			/* find vertical-most beam */
+			/* find vertical-most non-null beam */
 			if (beams_bath > 0)
 			    {
 			    found = MB_NO;
 			    beam_vertical = beams_bath / 2;			
-			    for (i=0;i<beams_bath;i++)
-				{
-				if (mb_beam_ok(beamflag[i]))
-				    {
-				    if (found == MB_NO)
-					{
-					distmin = fabs(bathacrosstrack[i]);
-					beam_vertical = i;
-					found = MB_YES;
-					}
-				    else if (fabs(bathacrosstrack[i]) < distmin)
-					{
-					distmin = fabs(bathacrosstrack[i]);
-					beam_vertical = i;
-					}
-				    }
-				}
-			    if (found == MB_NO)
 			    for (i=0;i<beams_bath;i++)
 				{
 				if (beamflag[i] != MB_FLAG_NULL)
@@ -1081,21 +1067,27 @@ main (int argc, char **argv)
 				case '/': /* Inverts next simple value */
 					invert_next_value = MB_YES;
 					break;
+				case '-': /* Flip sign on next simple value */
+					signflip_next_value = MB_YES;
+					break;
 				case 'A': /* Average seafloor crosstrack slope */
 					printsimplevalue(verbose, avgslope, 0, 4, ascii, 
-							    &invert_next_value, &error);
+							    &invert_next_value, 
+							    &signflip_next_value, &error);
 					break;
 				case 'a': /* Per-beam seafloor crosstrack slope */
 					if (beamflag[j] == MB_FLAG_NULL
 					    && (check_values == MBLIST_CHECK_OFF_NAN
 						|| check_values == MBLIST_CHECK_OFF_FLAGNAN))
 					    {
-					    printNaN(verbose, ascii, &invert_next_value, &error);
+					    printNaN(verbose, ascii, &invert_next_value, 
+							    &signflip_next_value, &error);
 					    }
 					else if (!mb_beam_ok(beamflag[j])
 					    && check_values == MBLIST_CHECK_OFF_FLAGNAN)
 					    {
-					    printNaN(verbose, ascii, &invert_next_value, &error);
+					    printNaN(verbose, ascii, &invert_next_value, 
+							    &signflip_next_value, &error);
 					    }
 					else
 					    {
@@ -1105,7 +1097,8 @@ main (int argc, char **argv)
 						bathacrosstrack[j],
 						&depth,&slope,&error);
 					    printsimplevalue(verbose, slope, 0, 4, ascii, 
-							    &invert_next_value, &error);
+							    &invert_next_value, 
+							    &signflip_next_value, &error);
 					    }
 					break;
 				case 'B': /* amplitude */
@@ -1113,30 +1106,36 @@ main (int argc, char **argv)
 					    && (check_values == MBLIST_CHECK_OFF_NAN
 						|| check_values == MBLIST_CHECK_OFF_FLAGNAN))
 					    {
-					    printNaN(verbose, ascii, &invert_next_value, &error);
+					    printNaN(verbose, ascii, &invert_next_value, 
+							    &signflip_next_value, &error);
 					    }
 					else if (!mb_beam_ok(beamflag[j])
 					    && check_values == MBLIST_CHECK_OFF_FLAGNAN)
 					    {
-					    printNaN(verbose, ascii, &invert_next_value, &error);
+					    printNaN(verbose, ascii, &invert_next_value, 
+							    &signflip_next_value, &error);
 					    }
 					else
 					    {
 					    printsimplevalue(verbose, amp[j], 0, 3, ascii, 
-							    &invert_next_value, &error);
+							    &invert_next_value, 
+							    &signflip_next_value, &error);
 					    }
 					break;
 				case 'b': /* sidescan */
 					printsimplevalue(verbose, ss[pixel_vertical], 0, 3, ascii, 
-							    &invert_next_value, &error);
+							    &invert_next_value, 
+							    &signflip_next_value, &error);
 					break;
 				case 'C': /* Sonar altitude (m) */
 					printsimplevalue(verbose, altitude, 0, 3, ascii, 
-							    &invert_next_value, &error);
+							    &invert_next_value, 
+							    &signflip_next_value, &error);
 					break;
 				case 'c': /* Sonar transducer depth (m) */
 					printsimplevalue(verbose, sonardepth, 0, 3, ascii, 
-							    &invert_next_value, &error);
+							    &invert_next_value, 
+							    &signflip_next_value, &error);
 					break;
 				case 'D': /* acrosstrack dist. */
 				case 'd':
@@ -1144,18 +1143,21 @@ main (int argc, char **argv)
 					    && (check_values == MBLIST_CHECK_OFF_NAN
 						|| check_values == MBLIST_CHECK_OFF_FLAGNAN))
 					    {
-					    printNaN(verbose, ascii, &invert_next_value, &error);
+					    printNaN(verbose, ascii, &invert_next_value, 
+							    &signflip_next_value, &error);
 					    }
 					else if (!mb_beam_ok(beamflag[j])
 					    && check_values == MBLIST_CHECK_OFF_FLAGNAN)
 					    {
-					    printNaN(verbose, ascii, &invert_next_value, &error);
+					    printNaN(verbose, ascii, &invert_next_value, 
+							    &signflip_next_value, &error);
 					    }
 					else
 					    {
 					    b = bathy_scale * bathacrosstrack[j];
 					    printsimplevalue(verbose, b, 0, 3, ascii, 
-							    &invert_next_value, &error);
+							    &invert_next_value, 
+							    &signflip_next_value, &error);
 					    }
 					break;
 				case 'E': /* alongtrack dist. */
@@ -1164,18 +1166,21 @@ main (int argc, char **argv)
 					    && (check_values == MBLIST_CHECK_OFF_NAN
 						|| check_values == MBLIST_CHECK_OFF_FLAGNAN))
 					    {
-					    printNaN(verbose, ascii, &invert_next_value, &error);
+					    printNaN(verbose, ascii, &invert_next_value, 
+							    &signflip_next_value, &error);
 					    }
 					else if (!mb_beam_ok(beamflag[j])
 					    && check_values == MBLIST_CHECK_OFF_FLAGNAN)
 					    {
-					    printNaN(verbose, ascii, &invert_next_value, &error);
+					    printNaN(verbose, ascii, &invert_next_value, 
+							    &signflip_next_value, &error);
 					    }
 					else
 					    {
 					    b = bathy_scale * bathalongtrack[j];
 					    printsimplevalue(verbose, b, 0, 3, ascii, 
-							    &invert_next_value, &error);
+							    &invert_next_value, 
+							    &signflip_next_value, &error);
 					    }
 					break;
 				case 'G': /* flat bottom grazing angle */
@@ -1183,18 +1188,21 @@ main (int argc, char **argv)
 					    && (check_values == MBLIST_CHECK_OFF_NAN
 						|| check_values == MBLIST_CHECK_OFF_FLAGNAN))
 					    {
-					    printNaN(verbose, ascii, &invert_next_value, &error);
+					    printNaN(verbose, ascii, &invert_next_value, 
+							    &signflip_next_value, &error);
 					    }
 					else if (!mb_beam_ok(beamflag[j])
 					    && check_values == MBLIST_CHECK_OFF_FLAGNAN)
 					    {
-					    printNaN(verbose, ascii, &invert_next_value, &error);
+					    printNaN(verbose, ascii, &invert_next_value, 
+							    &signflip_next_value, &error);
 					    }
 					else
 					    {
 					    angle = RTD*(atan(bathacrosstrack[j] / bath[j]));
 					    printsimplevalue(verbose, angle, 0, 2, ascii, 
-							    &invert_next_value, &error);
+							    &invert_next_value, 
+							    &signflip_next_value, &error);
 					    }
 					break;
 				case 'g': /* grazing angle using slope */
@@ -1202,12 +1210,14 @@ main (int argc, char **argv)
 					    && (check_values == MBLIST_CHECK_OFF_NAN
 						|| check_values == MBLIST_CHECK_OFF_FLAGNAN))
 					    {
-					    printNaN(verbose, ascii, &invert_next_value, &error);
+					    printNaN(verbose, ascii, &invert_next_value, 
+							    &signflip_next_value, &error);
 					    }
 					else if (!mb_beam_ok(beamflag[j])
 					    && check_values == MBLIST_CHECK_OFF_FLAGNAN)
 					    {
-					    printNaN(verbose, ascii, &invert_next_value, &error);
+					    printNaN(verbose, ascii, &invert_next_value, 
+							    &signflip_next_value, &error);
 					    }
 					else
 					    {
@@ -1219,16 +1229,19 @@ main (int argc, char **argv)
 					    angle = RTD * (atan(bathacrosstrack[j] / bath[j]))
 						+ slope;
 					    printsimplevalue(verbose, angle, 0, 2, ascii, 
-							    &invert_next_value, &error);
+							    &invert_next_value, 
+							    &signflip_next_value, &error);
 					    }
 					break;
 				case 'H': /* heading */
-					printsimplevalue(verbose, heading, 5, 1, ascii, 
-							    &invert_next_value, &error);
+					printsimplevalue(verbose, heading, 6, 2, ascii, 
+							    &invert_next_value, 
+							    &signflip_next_value, &error);
 					break;
 				case 'h': /* course */
-					printsimplevalue(verbose, course, 5, 1, ascii, 
-							    &invert_next_value, &error);
+					printsimplevalue(verbose, course, 6, 2, ascii, 
+							    &invert_next_value, 
+							    &signflip_next_value, &error);
 					break;
 				case 'J': /* time string */
 					mb_get_jtime(verbose,time_i,time_j);
@@ -1279,12 +1292,14 @@ main (int argc, char **argv)
 					break;
 				case 'L': /* along-track dist. */
 					printsimplevalue(verbose, distance_total, 7, 3, ascii, 
-							    &invert_next_value, &error);
+							    &invert_next_value, 
+							    &signflip_next_value, &error);
 					break;
 				case 'M': /* Decimal unix seconds since 
 						1/1/70 00:00:00 */
 					printsimplevalue(verbose, time_d, 0, 6, ascii, 
-							    &invert_next_value, &error);
+							    &invert_next_value, 
+							    &signflip_next_value, &error);
 					break;
 				case 'm': /* time in decimal seconds since 
 						first record */
@@ -1295,7 +1310,8 @@ main (int argc, char **argv)
 						}
 					b = time_d - time_d_ref;
 					printsimplevalue(verbose, b, 0, 6, ascii, 
-							    &invert_next_value, &error);
+							    &invert_next_value, 
+							    &signflip_next_value, &error);
 					break;
 				case 'N': /* ping counter */
 					if (ascii == MB_YES)
@@ -1308,27 +1324,33 @@ main (int argc, char **argv)
 					break;
 				case 'P': /* pitch */
 					printsimplevalue(verbose, pitch, 5, 2, ascii, 
-							    &invert_next_value, &error);
+							    &invert_next_value, 
+							    &signflip_next_value, &error);
 					break;
 				case 'p': /* draft */
 					printsimplevalue(verbose, draft, 5, 2, ascii, 
-							    &invert_next_value, &error);
+							    &invert_next_value, 
+							    &signflip_next_value, &error);
 					break;
 				case 'R': /* roll */
 					printsimplevalue(verbose, roll, 5, 2, ascii, 
-							    &invert_next_value, &error);
+							    &invert_next_value, 
+							    &signflip_next_value, &error);
 					break;
 				case 'r': /* heave */
 					printsimplevalue(verbose, heave, 5, 2, ascii, 
-							    &invert_next_value, &error);
+							    &invert_next_value, 
+							    &signflip_next_value, &error);
 					break;
 				case 'S': /* speed */
 					printsimplevalue(verbose, speed, 5, 2, ascii, 
-							    &invert_next_value, &error);
+							    &invert_next_value, 
+							    &signflip_next_value, &error);
 					break;
 				case 's': /* speed made good */
 					printsimplevalue(verbose, speed_made_good, 5, 2, ascii, 
-							    &invert_next_value, &error);
+							    &invert_next_value, 
+							    &signflip_next_value, &error);
 					break;
 				case 'T': /* yyyy/mm/dd/hh/mm/ss time string */
 					if (ascii == MB_YES)
@@ -1421,7 +1443,8 @@ main (int argc, char **argv)
 						    + headingx*mtodeglon
 							*bathalongtrack[j];
 					printsimplevalue(verbose, dlon, 11, 6, ascii, 
-							    &invert_next_value, &error);
+							    &invert_next_value, 
+							    &signflip_next_value, &error);
 					break;
 				case 'x': /* longitude degress + decimal minutes */
 					dlon = navlon;
@@ -1461,7 +1484,8 @@ main (int argc, char **argv)
 						    + headingy*mtodeglat
 							*bathalongtrack[j];
 					printsimplevalue(verbose, dlat, 11, 6, ascii, 
-							    &invert_next_value, &error);
+							    &invert_next_value, 
+							    &signflip_next_value, &error);
 					break;
 				case 'y': /* latitude degrees + decimal minutes */
 					dlat = navlat;
@@ -1498,18 +1522,21 @@ main (int argc, char **argv)
 					    && (check_values == MBLIST_CHECK_OFF_NAN
 						|| check_values == MBLIST_CHECK_OFF_FLAGNAN))
 					    {
-					    printNaN(verbose, ascii, &invert_next_value, &error);
+					    printNaN(verbose, ascii, &invert_next_value, 
+							    &signflip_next_value, &error);
 					    }
 					else if (!mb_beam_ok(beamflag[j])
 					    && check_values == MBLIST_CHECK_OFF_FLAGNAN)
 					    {
-					    printNaN(verbose, ascii, &invert_next_value, &error);
+					    printNaN(verbose, ascii, &invert_next_value, 
+							    &signflip_next_value, &error);
 					    }
 					else
 					    {
 					    b = -bathy_scale * bath[j];
 					    printsimplevalue(verbose, b, 0, 3, ascii, 
-							    &invert_next_value, &error);
+							    &invert_next_value, 
+							    &signflip_next_value, &error);
 					    }
 					break;
 				case 'z': /* depth */
@@ -1517,18 +1544,21 @@ main (int argc, char **argv)
 					    && (check_values == MBLIST_CHECK_OFF_NAN
 						|| check_values == MBLIST_CHECK_OFF_FLAGNAN))
 					    {
-					    printNaN(verbose, ascii, &invert_next_value, &error);
+					    printNaN(verbose, ascii, &invert_next_value, 
+							    &signflip_next_value, &error);
 					    }
 					else if (!mb_beam_ok(beamflag[j])
 					    && check_values == MBLIST_CHECK_OFF_FLAGNAN)
 					    {
-					    printNaN(verbose, ascii, &invert_next_value, &error);
+					    printNaN(verbose, ascii, &invert_next_value, 
+							    &signflip_next_value, &error);
 					    }
 					else
 					    {
 					    b = bathy_scale * bath[j];
 					    printsimplevalue(verbose, b, 0, 3, ascii, 
-							    &invert_next_value, &error);
+							    &invert_next_value, 
+							    &signflip_next_value, &error);
 					    }
 					break;
 				case '#': /* beam number */
@@ -1598,9 +1628,13 @@ main (int argc, char **argv)
 				case '/': /* Inverts next simple value */
 					invert_next_value = MB_YES;
 					break;
+				case '-': /* Flip sign on next simple value */
+					signflip_next_value = MB_YES;
+					break;
 				case 'A': /* Average seafloor crosstrack slope */
 					printsimplevalue(verbose, avgslope, 0, 4, ascii, 
-							    &invert_next_value, &error);
+							    &invert_next_value, 
+							    &signflip_next_value, &error);
 					break;
 				case 'a': /* Per-pixel seafloor crosstrack slope */
 					status = get_bathyslope(verbose,
@@ -1609,35 +1643,42 @@ main (int argc, char **argv)
 						ssacrosstrack[j],
 						&depth,&slope,&error);
 					printsimplevalue(verbose, slope, 0, 4, ascii, 
-							    &invert_next_value, &error);
+							    &invert_next_value, 
+							    &signflip_next_value, &error);
 					break;
 				case 'B': /* amplitude */
 					printsimplevalue(verbose, amp[beam_vertical], 0, 3, ascii, 
-							    &invert_next_value, &error);
+							    &invert_next_value, 
+							    &signflip_next_value, &error);
 					break;
 				case 'b': /* sidescan */
 					printsimplevalue(verbose, ss[j], 0, 3, ascii, 
-							    &invert_next_value, &error);
+							    &invert_next_value, 
+							    &signflip_next_value, &error);
 					break;
 				case 'C': /* Sonar altitude (m) */
 					printsimplevalue(verbose, altitude, 0, 3, ascii, 
-							    &invert_next_value, &error);
+							    &invert_next_value, 
+							    &signflip_next_value, &error);
 					break;
 				case 'c': /* Sonar transducer depth (m) */
 					printsimplevalue(verbose, sonardepth, 0, 3, ascii, 
-							    &invert_next_value, &error);
+							    &invert_next_value, 
+							    &signflip_next_value, &error);
 					break;
 				case 'D': /* acrosstrack dist. */
 				case 'd':
 					b = bathy_scale * ssacrosstrack[j];
 					printsimplevalue(verbose, b, 0, 3, ascii, 
-							&invert_next_value, &error);
+							&invert_next_value, 
+							    &signflip_next_value, &error);
 					break;
 				case 'E': /* alongtrack dist. */
 				case 'e':
 					b = bathy_scale * ssalongtrack[j];
 					printsimplevalue(verbose, b, 0, 3, ascii, 
-							&invert_next_value, &error);
+							&invert_next_value, 
+							    &signflip_next_value, &error);
 					break;
 				case 'G': /* flat bottom grazing angle */
 					status = get_bathyslope(verbose,
@@ -1647,7 +1688,8 @@ main (int argc, char **argv)
 					    &depth,&slope,&error);
 					angle = RTD*(atan(ssacrosstrack[j] / depth));
 					printsimplevalue(verbose, angle, 0, 2, ascii, 
-							    &invert_next_value, &error);
+							    &invert_next_value, 
+							    &signflip_next_value, &error);
 					break;
 				case 'g': /* grazing angle using slope */
 					status = get_bathyslope(verbose,
@@ -1658,15 +1700,18 @@ main (int argc, char **argv)
 					angle = RTD * (atan(bathacrosstrack[j] / depth))
 					    + slope;
 					printsimplevalue(verbose, angle, 0, 2, ascii, 
-							    &invert_next_value, &error);
+							    &invert_next_value, 
+							    &signflip_next_value, &error);
 					break;
 				case 'H': /* heading */
-					printsimplevalue(verbose, heading, 5, 1, ascii, 
-							    &invert_next_value, &error);
+					printsimplevalue(verbose, heading, 6, 2, ascii, 
+							    &invert_next_value, 
+							    &signflip_next_value, &error);
 					break;
 				case 'h': /* course */
-					printsimplevalue(verbose, course, 5, 1, ascii, 
-							    &invert_next_value, &error);
+					printsimplevalue(verbose, course, 6, 2, ascii, 
+							    &invert_next_value, 
+							    &signflip_next_value, &error);
 					break;
 				case 'J': /* time string */
 					mb_get_jtime(verbose,time_i,time_j);
@@ -1717,12 +1762,14 @@ main (int argc, char **argv)
 					break;
 				case 'L': /* along-track dist. */
 					printsimplevalue(verbose, distance_total, 7, 3, ascii, 
-							    &invert_next_value, &error);
+							    &invert_next_value, 
+							    &signflip_next_value, &error);
 					break;
 				case 'M': /* Decimal unix seconds since 
 						1/1/70 00:00:00 */
 					printsimplevalue(verbose, time_d, 0, 6, ascii, 
-							    &invert_next_value, &error);
+							    &invert_next_value, 
+							    &signflip_next_value, &error);
 					break;
 				case 'm': /* time in decimal seconds since 
 						first record */
@@ -1733,7 +1780,8 @@ main (int argc, char **argv)
 						}
 					b = time_d - time_d_ref;
 					printsimplevalue(verbose, b, 0, 6, ascii, 
-							    &invert_next_value, &error);
+							    &invert_next_value, 
+							    &signflip_next_value, &error);
 					break;
 				case 'N': /* ping counter */
 					if (ascii == MB_YES)
@@ -1746,27 +1794,33 @@ main (int argc, char **argv)
 					break;
 				case 'P': /* pitch */
 					printsimplevalue(verbose, pitch, 5, 2, ascii, 
-							    &invert_next_value, &error);
+							    &invert_next_value, 
+							    &signflip_next_value, &error);
 					break;
 				case 'p': /* draft */
 					printsimplevalue(verbose, draft, 5, 2, ascii, 
-							    &invert_next_value, &error);
+							    &invert_next_value, 
+							    &signflip_next_value, &error);
 					break;
 				case 'R': /* roll */
 					printsimplevalue(verbose, roll, 5, 2, ascii, 
-							    &invert_next_value, &error);
+							    &invert_next_value, 
+							    &signflip_next_value, &error);
 					break;
 				case 'r': /* heave */
 					printsimplevalue(verbose, heave, 5, 2, ascii, 
-							    &invert_next_value, &error);
+							    &invert_next_value, 
+							    &signflip_next_value, &error);
 					break;
 				case 'S': /* speed */
 					printsimplevalue(verbose, speed, 5, 2, ascii, 
-							    &invert_next_value, &error);
+							    &invert_next_value, 
+							    &signflip_next_value, &error);
 					break;
 				case 's': /* speed made good */
 					printsimplevalue(verbose, speed_made_good, 5, 2, ascii, 
-							    &invert_next_value, &error);
+							    &invert_next_value, 
+							    &signflip_next_value, &error);
 					break;
 				case 'T': /* yyyy/mm/dd/hh/mm/ss time string */
 					if (ascii == MB_YES)
@@ -1859,7 +1913,8 @@ main (int argc, char **argv)
 						    + headingx*mtodeglon
 							*ssalongtrack[j];
 					printsimplevalue(verbose, dlon, 11, 6, ascii, 
-							    &invert_next_value, &error);
+							    &invert_next_value, 
+							    &signflip_next_value, &error);
 					break;
 				case 'x': /* longitude degress + decimal minutes */
 					dlon = navlon;
@@ -1899,7 +1954,8 @@ main (int argc, char **argv)
 						    + headingy*mtodeglat
 							*ssalongtrack[j];
 					printsimplevalue(verbose, dlat, 11, 6, ascii, 
-							    &invert_next_value, &error);
+							    &invert_next_value, 
+							    &signflip_next_value, &error);
 					break;
 				case 'y': /* latitude degrees + decimal minutes */
 					dlat = navlat 
@@ -1935,18 +1991,21 @@ main (int argc, char **argv)
 					    && (check_values == MBLIST_CHECK_OFF_NAN
 						|| check_values == MBLIST_CHECK_OFF_FLAGNAN))
 					    {
-					    printNaN(verbose, ascii, &invert_next_value, &error);
+					    printNaN(verbose, ascii, &invert_next_value, 
+							    &signflip_next_value, &error);
 					    }
 					else if (!mb_beam_ok(beamflag[beam_vertical])
 					    && check_values == MBLIST_CHECK_OFF_FLAGNAN)
 					    {
-					    printNaN(verbose, ascii, &invert_next_value, &error);
+					    printNaN(verbose, ascii, &invert_next_value, 
+							    &signflip_next_value, &error);
 					    }
 					else
 					    {
 					    b = -bathy_scale * bath[beam_vertical];
 					    printsimplevalue(verbose, b, 0, 3, ascii, 
-							    &invert_next_value, &error);
+							    &invert_next_value, 
+							    &signflip_next_value, &error);
 					    }
 					break;
 				case 'z': /* depth */
@@ -1954,18 +2013,21 @@ main (int argc, char **argv)
 					    && (check_values == MBLIST_CHECK_OFF_NAN
 						|| check_values == MBLIST_CHECK_OFF_FLAGNAN))
 					    {
-					    printNaN(verbose, ascii, &invert_next_value, &error);
+					    printNaN(verbose, ascii, &invert_next_value, 
+							    &signflip_next_value, &error);
 					    }
 					else if (!mb_beam_ok(beamflag[beam_vertical])
 					    && check_values == MBLIST_CHECK_OFF_FLAGNAN)
 					    {
-					    printNaN(verbose, ascii, &invert_next_value, &error);
+					    printNaN(verbose, ascii, &invert_next_value, 
+							    &signflip_next_value, &error);
 					    }
 					else
 					    {
 					    b = bathy_scale * bath[beam_vertical];
 					    printsimplevalue(verbose, b, 0, 3, ascii, 
-							    &invert_next_value, &error);
+							    &invert_next_value, 
+							    &signflip_next_value, &error);
 					    }
 					break;
 				case '#': /* pixel number */
@@ -2441,7 +2503,7 @@ int get_bathyslope(int verbose,
 /*--------------------------------------------------------------------*/
 int printsimplevalue(int verbose, 
 	double value, int width, int precision, 
-	int ascii, int *invert, int *error)
+	int ascii, int *invert, int *flipsign, int *error)
 {
 	char	*function_name = "printsimplevalue";
 	int	status = MB_SUCCESS;
@@ -2461,6 +2523,7 @@ int printsimplevalue(int verbose,
 		fprintf(stderr,"dbg2       precision:       %d\n",precision);
 		fprintf(stderr,"dbg2       ascii:           %d\n",ascii);
 		fprintf(stderr,"dbg2       invert:          %d\n",*invert);
+		fprintf(stderr,"dbg2       flipsign:        %d\n",*flipsign);
 		}
 		
 	/* make print format */
@@ -2478,6 +2541,13 @@ int printsimplevalue(int verbose,
 	    *invert = MB_NO;
 	    if (value != 0.0)
 		value = 1.0 / value;
+	    }
+	
+	/* flip sign value if desired */
+	if (*flipsign == MB_YES)
+	    {
+	    *flipsign = MB_NO;
+	    value = -value;
 	    }
 	    
 	/* print value */
@@ -2502,7 +2572,7 @@ int printsimplevalue(int verbose,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int printNaN(int verbose, int ascii, int *invert, int *error)
+int printNaN(int verbose, int ascii, int *invert, int *flipsign, int *error)
 {
 	char	*function_name = "printNaN";
 	int	status = MB_SUCCESS;
@@ -2518,11 +2588,16 @@ int printNaN(int verbose, int ascii, int *invert, int *error)
 		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
 		fprintf(stderr,"dbg2       ascii:           %d\n",ascii);
 		fprintf(stderr,"dbg2       invert:          %d\n",*invert);
+		fprintf(stderr,"dbg2       flipsign:        %d\n",*flipsign);
 		}
 		
 	/* reset invert flag */
 	if (*invert == MB_YES)
 	    *invert = MB_NO;
+		
+	/* reset flipsign flag */
+	if (*flipsign == MB_YES)
+	    *flipsign = MB_NO;
 	    
 	/* print value */
 	if (ascii == MB_YES)

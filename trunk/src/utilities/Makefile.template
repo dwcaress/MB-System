@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 5.1 2001-03-22 21:14:16 caress Exp $
+#	$Id: Makefile.template,v 5.2 2001-06-29 22:50:23 caress Exp $
 #
 #     Copyright (c) 1993, 1994, 2000 by
 #     David W. Caress (caress@mbari.org)
@@ -16,6 +16,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.1  2001/03/22  21:14:16  caress
+# Trying to make release 5.0.beta0.
+#
 # Revision 5.0  2001/01/22  08:07:07  caress
 # Version 5.0.beta01
 #
@@ -104,7 +107,6 @@ LEVITUS = /ocean/mgg/levitus/annual
 # 
 # Compilers 
 CC = cc 
-FC = f77 
 #
 # Compile and load flags:
 CFLAGS = -O2
