@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad2.c	3.00	10/9/98
- *	$Id: mbsys_simrad2.c,v 5.4 2001-05-30 17:57:26 caress Exp $
+ *	$Id: mbsys_simrad2.c,v 5.5 2001-06-01 00:14:06 caress Exp $
  *
  *    Copyright (c) 1998, 2001 by
  *    David W. Caress (caress@mbari.org)
@@ -31,6 +31,11 @@
  * Date:	October 9, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2001/05/30  17:57:26  caress
+ * Fixed New Simrad data handling, plus removed use of
+ * intermediate data structure. Still need to reduce use
+ * of #ifdefs related to byteswapping.
+ *
  * Revision 5.3  2001/05/24  23:18:07  caress
  * Fixed handling of Revelle EM120 data (first cut).
  *
@@ -77,7 +82,7 @@
 int mbsys_simrad2_alloc(int verbose, char *mbio_ptr, char **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_simrad2.c,v 5.4 2001-05-30 17:57:26 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad2.c,v 5.5 2001-06-01 00:14:06 caress Exp $";
 	char	*function_name = "mbsys_simrad2_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -395,7 +400,7 @@ int mbsys_simrad2_survey_alloc(int verbose,
 			char *mbio_ptr, char *store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_simrad2.c,v 5.4 2001-05-30 17:57:26 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad2.c,v 5.5 2001-06-01 00:14:06 caress Exp $";
 	char	*function_name = "mbsys_simrad2_survey_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -656,7 +661,7 @@ int mbsys_simrad2_attitude_alloc(int verbose,
 			char *mbio_ptr, char *store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_simrad2.c,v 5.4 2001-05-30 17:57:26 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad2.c,v 5.5 2001-06-01 00:14:06 caress Exp $";
 	char	*function_name = "mbsys_simrad2_attitude_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -744,7 +749,7 @@ int mbsys_simrad2_heading_alloc(int verbose,
 			char *mbio_ptr, char *store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_simrad2.c,v 5.4 2001-05-30 17:57:26 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad2.c,v 5.5 2001-06-01 00:14:06 caress Exp $";
 	char	*function_name = "mbsys_simrad2_heading_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -824,7 +829,7 @@ int mbsys_simrad2_ssv_alloc(int verbose,
 			char *mbio_ptr, char *store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_simrad2.c,v 5.4 2001-05-30 17:57:26 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad2.c,v 5.5 2001-06-01 00:14:06 caress Exp $";
 	char	*function_name = "mbsys_simrad2_ssv_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -948,6 +953,112 @@ int mbsys_simrad2_deall(int verbose, char *mbio_ptr, char **store_ptr,
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbsys_simrad2_zero_ss(int verbose, char *store_ptr, int *error)
+{
+	char	*function_name = "mbsys_simrad2_zero_ss";
+	int	status = MB_SUCCESS;
+	struct mbsys_simrad2_struct *store;
+	struct mbsys_simrad2_ping_struct *ping;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		}
+
+	/* get pointer to data descriptor */
+	store = (struct mbsys_simrad2_struct *) store_ptr;
+	if (store != NULL)
+	    ping = (struct mbsys_simrad2_ping_struct *) store->ping;
+
+	/* initialize all sidescan stuff to zeros */
+	if (store->ping != NULL)
+		{
+		ping->png_ss_date = 0;	
+				/* date = year*10000 + month*100 + day
+				    Feb 26, 1995 = 19950226 */
+		ping->png_ss_msec = 0;	
+				/* time since midnight in msec
+				    08:12:51.234 = 29570234 */
+		ping->png_max_range = 0;  
+				/* max range of ping in number of samples */
+		ping->png_r_zero = 0;	
+				/* range to normal incidence used in TVG
+				    (R0 predicted) in samples */
+		ping->png_r_zero_corr = 0;
+				/* range to normal incidence used to correct
+				    sample amplitudes in number of samples */
+		ping->png_tvg_start = 0;	
+				/* start sample of TVG ramp if not enough 
+				    dynamic range (0 otherwise) */
+		ping->png_tvg_stop = 0;	\
+				/* stop sample of TVG ramp if not enough 
+				    dynamic range (0 otherwise) */
+		ping->png_bsn = 0;	
+				/* normal incidence backscatter (BSN) in dB */
+		ping->png_bso = 0;	
+				/* oblique incidence backscatter (BSO) in dB */
+		ping->png_tx = 0;	
+				/* Tx beamwidth in 0.1 degree */
+		ping->png_tvg_crossover = 0;	
+				/* TVG law crossover angle in degrees */
+		ping->png_nbeams_ss = 0;	
+				/* number of beams with sidescan */
+		ping->png_npixels = 0;	
+				/* number of pixels of sidescan */
+		for (i=0;i<MBSYS_SIMRAD2_MAXBEAMS;i++)
+		    {
+		    ping->png_beam_index[i] = 0;	
+				/* beam index number */
+		    ping->png_sort_direction[i] = 0;	
+				/* sorting direction - first sample in beam has lowest
+				    range if 1, highest if -1. */
+		    ping->png_beam_samples[i] = 0;	
+				/* number of sidescan samples derived from
+					each beam */
+		    ping->png_start_sample[i] = 0;	
+				/* start sample number */
+		    ping->png_center_sample[i] = 0;	
+				/* center sample number */
+		    }
+		for (i=0;i<MBSYS_SIMRAD2_MAXRAWPIXELS;i++)
+		    {
+		    ping->png_ssraw[i] = EM2_INVALID_AMP;
+				/* the sidescan ordered port to starboard */
+		    }
+		for (i=0;i<MBSYS_SIMRAD2_MAXPIXELS;i++)
+		    {
+		    ping->png_ss[i] = 0;
+				/* the sidescan ordered port to starboard */
+		    ping->png_ssalongtrack[i] = 0;
+				/* the sidescan ordered port to starboard */
+		    }
+		}
+
+	/* assume success */
+	status = MB_SUCCESS;
+	*error = MB_ERROR_NO_ERROR;
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
 		}
 
 	/* return status */
