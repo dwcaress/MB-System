@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.c	2/18/94
- *    $Id: mb_format.c,v 4.8 2000-04-19 20:51:58 caress Exp $
+ *    $Id: mb_format.c,v 4.9 2000-04-19 21:06:32 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by 
  *    D. W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	Februrary 18, 1994
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 4.8  2000/04/19  20:51:58  caress
+ * Added datalist parsing code.
+ *
  * Revision 4.7  2000/01/25  01:45:10  caress
  * Null terminate fileroot strings.
  *
@@ -90,8 +93,9 @@
 /* mbio include files */
 #include "../../include/mb_format.h"
 #include "../../include/mb_status.h"
+#include "../../include/mb_io.h"
 
-static char rcs_id[]="$Id: mb_format.c,v 4.8 2000-04-19 20:51:58 caress Exp $";
+static char rcs_id[]="$Id: mb_format.c,v 4.9 2000-04-19 21:06:32 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_format(int verbose, int *format, int *format_num, int *error)
