@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_plot.perl	6/18/93
-#    $Id: mbm_plot.perl,v 4.6 1995-05-03 17:30:42 caress Exp $
+#    $Id: mbm_plot.perl,v 4.7 1995-05-05 17:00:23 caress Exp $
 #
 #    Copyright (c) 1993, 1994 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -39,10 +39,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   June 17, 1993
 #
 # Version:
-#   $Id: mbm_plot.perl,v 4.6 1995-05-03 17:30:42 caress Exp $
+#   $Id: mbm_plot.perl,v 4.7 1995-05-05 17:00:23 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.6  1995/05/03  17:30:42  caress
+# Fixed some typos noted by Mike Realander <miker@ocean.washington.edu>
+#
 # Revision 4.5  1995/03/20  16:42:45  caress
 # Fixed synopsis.
 #
@@ -504,7 +507,7 @@ if ($color == 1 || $color == 2 || $color == 3)
 			print FCMD " >>";
 			}
 		print FCMD " $cptfile\n";
-		$d1 = $d2:
+		$d1 = $d2;
 		}
 	}
 
