@@ -271,5 +271,8 @@ annotated time marks every hour, and day annotations every four hours:
  		-D0.25/1/4/0.1 -A50.0000/250.0000/250.0000/250.0000/0.01/0.1 
  		-p1 -P -X1 -Y1 -K -V > hs_ew9302_161_bmn.mb24.ps
 
+.SH SEE ALSO
+\fBmbsystem\fP(l), \fBmbm_plot\fP(l), \fBmbswath\fP(l)
+
 .SH BUGS
 Probably.

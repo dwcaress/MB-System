@@ -322,7 +322,7 @@ you have a Sun workstation):
  echo All done!
 
 .SH SEE ALSO
-\fBmbm_plot\fP(l), \fBmb_contour\fP(l)
+\fBmbsystem\fP(l), \fBmbm_plot\fP(l), \fBmbcontour\fP(l)
 
 .SH BUGS
 Yes.
