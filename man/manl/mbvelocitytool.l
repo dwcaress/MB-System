@@ -1,4 +1,4 @@
-.TH mbvelocitytool l "16 April 1997" "MB-System 4.5" "MB-System 4.5"
+.TH mbvelocitytool l "16 September 1997" "MB-System 4.5" "MB-System 4.5"
 .SH NAME
 \fBmbvelocitytool\fP - Interactive water sound velocity profile editor.
 
@@ -7,7 +7,7 @@ Version 4.5
 
 .SH SYNOPSIS
 \fBmbvelocitytool\fP [\fB-B\fIyr/mo/da/hr/mn/sc\fP 
-\fB-D\fIdraft\fP \fB-E\fIyr/mo/da/hr/mn/sc\fP 
+\fB-E\fIyr/mo/da/hr/mn/sc\fP 
 \fB-F\fIformat \fB-I\fIfile \fB-S\fIsvpfile \fB-W\fIsvpfile \fB-V -H\fP]
 
 .SH DESCRIPTION
@@ -39,25 +39,23 @@ Palisades, NY 10964
 
 .SH OPTIONS
 .TP
-.B \fB-B\fIyr/mo/da/hr/mn/sc\fP
+.B \-B
+\fIyr/mo/da/hr/mn/sc\fP
+.br
 Sets the starting time for data allowed in the input data; pings
 with times before the starting time will be ignored. 
 Default: \fIyr/mo/da/hr/mn/sc\fP = 1962/2/21/10/30/0.
-.B \fB-D\fIdraft\fP
-This option allows the user to specify the ship's draft in
-meters. This value will be added to the depths calculated
-by raytracing. This option is required in the circumstances
-where heave values are reported in the data stream but the
-ship's draft is missing (set to zero) or inaccurate. If the
-ship's draft is zero and upward heave is reported, then the
-raytracing will fail because the ray begins above sea level!
 .TP
-.B \fB-E\fIyr/mo/da/hr/mn/sc\fP
+.B \-E
+\fIyr/mo/da/hr/mn/sc\fP
+.br
 Sets the ending time for data allowed in the input data; pings
 with times after the ending time will be ignored. 
 Default: \fIyr/mo/da/hr/mn/sc\fP = 2062/2/21/10/30/0.
 .TP
-.B \fB-F\fIformat\fP
+.B \-F
+\fIformat\fP
+.br
 Sets the format at startup for the input and output swath sonar data using 
 \fBMBIO\fP integer format identifiers. This value can also be set
 interactively when specifying the input file.
@@ -67,25 +65,31 @@ currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page.
 Default: \fIformat\fP = 11.
 .TP
-.B \fB-H\fP
+.B \-H
 This "help" flag cause the program to print out a description
 of its operation and then exit immediately.
 .TP
-.B \fB-I\fIfile\fP
+.B \-I
+\fIfile\fP
+.br
 Sets the data file from which the input swath data will be read at startup.
 This value can also be set interactively. See below.
 .TP
-.B \fB-S\fIsvpfile\fP
+.B \-S
+\fIsvpfile\fP
+.br
 Sets the data file from which an input display sound velocity
 profile will be read at startup. See below.
 This value can also be set interactively.
 .TP
-.B \fB-W\fIsvpfile\fP
+.B \-W
+\fIsvpfile\fP
+.br
 Sets the data file from which an input editable sound velocity
 profile will be read at startup.
 This value can also be set interactively. See below.
 .TP
-.B \fB-V\fP
+.B \-V
 Normally, \fBmbvelocitytool\fP works "silently" without outputting
 anything to the stderr stream.  If the
 \fB-V\fP flag is given, then \fBmbvelocitytool\fP works in a "verbose" mode and
@@ -94,10 +98,10 @@ and a large amount of other information.
 
 .SH INTERACTIVE CONTROLS
 .TP
-.B \fBFile\fP
+.B File
 This button brings up a menu containing the commands listed below:
 .TP
-.B \fBFile->Open Display Profile\fP
+.B File->Open Display Profile
 Selecting this menu item brings up a popup window which allows the 
 user to select an input water velocity profile file. The profile
 will be displayed in a depth vs velocity plot along with other
@@ -106,7 +110,7 @@ opened.  Up to ten display velocity profiles may be loaded; the
 color of the display profiles cycles through red, green, blue, and
 black in the order that they are loaded.
 .TP
-.B \fBFile->Open Editable Profile\fP
+.B File->Open Editable Profile
 Selecting this menu item brings up a popup window which allows the 
 user to select an input water velocity profile file to be edited. 
 The profile
@@ -116,7 +120,7 @@ as black lines with small black squares at the velocity depth points.
 The velocity depth points may be selected and dragged using the mouse
 to change the editable velocity profile.
 .TP
-.B \fBFile->New Editable Profile\fP
+.B File->New Editable Profile
 Selecting this menu item creates a default editable velocity profile
 consisting of 14 velocity-depth points with a velocity of 1500 m/s. 
 Any previously defined editable velocity profile will disappear. The profile
@@ -126,11 +130,11 @@ as black lines with small black squares at the velocity depth points.
 The velocity depth points may be selected and dragged using the mouse
 to change the editable velocity profile.  
 .TP
-.B \fBFile->Save Editable Profile\fP
+.B File->Save Editable Profile
 Selecting this menu item brings up a popup window which allows the 
 user to save the current editable velocity profile as a file.
 .TP
-.B \fBFile->Open Swath Sonar Data\fP
+.B File->Open Swath Sonar Data
 Selecting this menu item brings up a popup window which allows the 
 user to select an input swath sonar data file to be processed
 in conjunction with the current editable velocity profile.
@@ -158,7 +162,7 @@ swath data being analyzed. The travel time
 data will then be processed and displayed in the manner described
 below for the \fBReprocess\fP button.
 .TP
-.B \fBReprocess\fP
+.B Reprocess
 Selecting this button causes the swath sonar travel time data to be
 processed into bathymetry using the current editable velocity profile.
 The processing involves full raytracing throught the water velocity model.
@@ -186,24 +190,24 @@ residual pattern is achieved; reference velocity profiles obtained from
 CTD casts, XBT's, or data bases (see manual page for program \fBmblevitus\fP)
 may be read in as display profiles to guide the editing process.
 .TP
-.B \fBQuit\fP
+.B Quit
 This button causes the program to exit gracefully, but without asking
 any questions.  If you haven't already saved your edited velocity profile
 it will be lost when you quit.
 .TP
-.B \fBMaximum Depth\fP
+.B Maximum Depth
 This slider sets the maximum depth in meters of both the velocity profile 
 display and the raypath display. The minimum depths of these
 displays are always zero. The acrosstrack distance axis of the raypath
 display automatically adjusts so that the rays are plotted with
 no vertical exageration.
 .TP
-.B \fBVelocity Range\fP
+.B Velocity Range
 This slider sets the minimum and maximum velocity values of the velocity
 profile display.  The minimum value is 1490 m/s minus the velocity range;
 the maximum value is 1490 m/s plus the velocity range.
 .TP
-.B \fBResidual Range\fP
+.B Residual Range
 This slider sets the minimum and maximum bathymetry residual values 
 of the bathymetry residual display.  The residual plot has a minimum
 value of -range and a maximum value of +range. 
