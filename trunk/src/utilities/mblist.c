@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mblist.c	2/1/93
- *    $Id: mblist.c,v 5.13 2003-08-18 19:07:52 vschmidt Exp $
+ *    $Id: mblist.c,v 5.14 2004-06-18 04:11:57 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -13,9 +13,9 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- * MBLIST prints the specified contents of a swath sonar data  
+ * MBlist prints the specified contents of a swath sonar data  
  * file to stdout. The form of the output is quite flexible; 
- * MBLIST is tailored to produce ascii files in spreadsheet  
+ * MBlist is tailored to produce ascii files in spreadsheet  
  * style with data columns separated by tabs.
  *
  * Author:	D. W. Caress
@@ -28,6 +28,9 @@
  *		in 1990.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.13  2003/08/18 19:07:52  vschmidt
+ * Fixed bug such that 'along track distance' now reports a cumulative distance for a list of files, rather than resetting with each file.
+ *
  * Revision 5.12  2003/07/30 16:41:06  caress
  * Fixed handling of time gap errors in data .
  *
@@ -271,7 +274,7 @@ int printNaN(int verbose, int ascii, int *invert, int *flipsign, int *error);
 /* NaN value */
 double	NaN;
 
-static char rcs_id[] = "$Id: mblist.c,v 5.13 2003-08-18 19:07:52 vschmidt Exp $";
+static char rcs_id[] = "$Id: mblist.c,v 5.14 2004-06-18 04:11:57 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
