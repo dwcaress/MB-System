@@ -1,9 +1,9 @@
-MB-SYSTEM VERSION 5.0.BETA12 README FILE:
+MB-SYSTEM VERSION 5.0.BETA14 README FILE:
 ----------------------------------------
 
 This file is located at the top of the MB-System directory
 structure. This directory structure contains the version 
-5.0.beta10 release of the MB-System software package for 
+5.0.beta14 release of the MB-System software package for 
 processing and display of swath sonar data.  
 
 MB-SYSTEM VERSION 5 DESCRIPTION:
@@ -26,7 +26,9 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
-Version 5.0.beta12     January 2, 2001
+Version 5.0.beta14     February 25, 2002
+Version 5.0.beta13     February 22, 2002
+Version 5.0.beta12     January 2, 2002
 Version 5.0.beta11     December 20, 2001
 Version 5.0.beta10     November 20, 2001
 Version 5.0.beta09     November 6, 2001
@@ -95,6 +97,18 @@ Aquarium Research Institute, or any other individuals or
 organizations involved in the design and maintenance of the 
 MB-System software package are NOT responsible for any damage 
 that may follow from correct or incorrect use of these programs.
+
+MB-SYSTEM VERSION 5.0.BETA14 RELEASE NOTES:
+------------------------------------------
+
+The version 5.0.beta14 release of MB-System includes 
+fixes to handling of format 33 data (SeaBeam 2000
+sidescan). Some format 33 files contain junk between
+valid records, and the i/o module has to gracefully
+skip the useless bytes. This release also contains
+fixes to handling of comment records for a number
+of data formats, particularly old SeaBeam Classic
+formats.
 
 MB-SYSTEM VERSION 5.0.BETA12 RELEASE NOTES:
 ------------------------------------------
@@ -668,10 +682,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.14 2002-01-02 20:33:36 caress Exp $
+RCS ID: $Id: README,v 5.15 2002-02-26 07:59:33 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.14  2002/01/02 20:33:36  caress
+Set real data of 5.0.beta12
+
 # Revision 5.13  2001/12/30  20:31:31  caress
 # Release 5.0.beta12
 #
