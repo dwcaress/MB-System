@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmerge.c	2/20/93
  *
- *    $Id: mbmerge.c,v 4.14 1996-04-22 13:23:05 caress Exp $
+ *    $Id: mbmerge.c,v 4.15 1996-09-19 20:22:08 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,9 @@
  * Date:	February 20, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.14  1996/04/22  13:23:05  caress
+ * Now have DTR and MIN/MAX defines in mb_define.h
+ *
  * Revision 4.13  1995/07/13  21:42:47  caress
  * Fixed core dump.
  *
@@ -100,7 +103,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbmerge.c,v 4.14 1996-04-22 13:23:05 caress Exp $";
+	static char rcs_id[] = "$Id: mbmerge.c,v 4.15 1996-09-19 20:22:08 caress Exp $";
 	static char program_name[] = "MBMERGE";
 	static char help_message[] =  "MBMERGE merges new navigation with multibeam data from an \ninput file and then writes the merged data to an output \nmultibeam data file. The default input \nand output streams are stdin and stdout.";
 	static char usage_message[] = "mbmerge [-Fformat -Llonflip -V -H  -Iinfile -Ooutfile -Mnavformat -Nnavfile]";
@@ -197,6 +200,7 @@ char **argv;
 	double	mtodeglon, mtodeglat;
 	double	del_time, dx, dy, dist;
 
+	int	nchar;
 	char	buffer[128], tmp[128], *result, *bufftmp;
 	int	len;
 	int	i, j, k, l, m;
@@ -350,6 +354,12 @@ char **argv;
 		fprintf(stderr,"\nusage: %s\n", usage_message);
 		exit(error);
 		}
+		
+	/* set max number of characters to be read at a time */
+	if (nformat == 8)
+		nchar = 96;
+	else
+		nchar = 128;
 
 	/* count the nav points */
 	nnav = 0;
@@ -361,7 +371,7 @@ char **argv;
 			program_name);
 		exit(error);
 		}
-	while ((result = fgets(buffer,128,nfp)) == buffer)
+	while ((result = fgets(buffer,nchar,nfp)) == buffer)
 		nnav++;
 	fclose(nfp);
 
@@ -395,7 +405,7 @@ char **argv;
 		exit(error);
 		}
 	strncpy(buffer,"\0",sizeof(buffer));
-	while ((result = fgets(buffer,128,nfp)) == buffer)
+	while ((result = fgets(buffer,nchar,nfp)) == buffer)
 		{
 		/* deal with nav in form: time_d lon lat */
 		nav_ok = MB_NO;
@@ -580,6 +590,36 @@ char **argv;
 				    }
 				}
 			    }
+			}
+
+		/* deal with nav in Simrad 90 format */
+		else if (nformat == 8)
+			{
+			mb_get_int(&(time_i[2]), buffer+2,  2);
+			mb_get_int(&(time_i[1]), buffer+4,  2);
+			mb_get_int(&(time_i[0]), buffer+6,  2);
+			time_i[0] += 1900;
+			mb_get_int(&(time_i[3]), buffer+9,  2);
+			mb_get_int(&(time_i[4]), buffer+11, 2);
+			mb_get_int(&(time_i[5]), buffer+13, 2);
+			mb_get_int(&(time_i[6]), buffer+15, 2);
+			time_i[6] = 10000 * time_i[6];
+			mb_get_time(verbose,time_i,&time_d);
+			ntime[nnav] = time_d;
+
+			mb_get_double(&mlat,    buffer+18,   2);
+			mb_get_double(&llat, buffer+20,   7);
+			NorS[0] = buffer[27];
+			nlat[nnav] = mlat + llat/60.0;
+			if (NorS[0] == 'S' || NorS[0] == 's')
+				nlat[nnav] = -nlat[nnav];
+			mb_get_double(&mlon,    buffer+29,   3);
+			mb_get_double(&llon, buffer+32,   7);
+			EorW[0] = buffer[39];
+			nlon[nnav] = mlon + llon/60.0;
+			if (EorW[0] == 'W' || EorW[0] == 'w')
+				nlon[nnav] = -nlon[nnav];
+			nav_ok = MB_YES;
 			}
 
 		/* make sure longitude is defined according to lonflip */
@@ -940,7 +980,47 @@ char **argv;
 			&& (time_d >= ntime[0] && time_d <= ntime[nnav-1]))
 			|| kind == MB_DATA_COMMENT)
 			{
-			status = mb_put_all(verbose,ombio_ptr,
+			/* handle merging of Simrad data
+			   - must put new position datagrams into
+			   data stream while ignoring old position
+			   datagrams */
+			if (format > 50 && format < 60 && format != 54)
+			    {
+			    if (kind == MB_DATA_DATA)
+				{
+				status = mb_put_all(verbose,ombio_ptr,
+					store_ptr,MB_YES,MB_DATA_NAV,
+					time_i,time_d,
+					navlon,navlat,speed,heading,
+					beams_bath,beams_amp,pixels_ss,
+					bath,amp,bathacrosstrack,bathalongtrack,
+					ss,ssacrosstrack,ssalongtrack,
+					comment,&error);
+				status = mb_put_all(verbose,ombio_ptr,
+					store_ptr,MB_YES,kind,
+					time_i,time_d,
+					navlon,navlat,speed,heading,
+					beams_bath,beams_amp,pixels_ss,
+					bath,amp,bathacrosstrack,bathalongtrack,
+					ss,ssacrosstrack,ssalongtrack,
+					comment,&error);
+				}
+			    else if (kind != MB_DATA_NAV)
+				{
+				status = mb_put_all(verbose,ombio_ptr,
+					store_ptr,MB_YES,kind,
+					time_i,time_d,
+					navlon,navlat,speed,heading,
+					beams_bath,beams_amp,pixels_ss,
+					bath,amp,bathacrosstrack,bathalongtrack,
+					ss,ssacrosstrack,ssalongtrack,
+					comment,&error);
+				}
+			    }
+			    
+			/* if not Simrad data just write it out */
+			else
+			    status = mb_put_all(verbose,ombio_ptr,
 					store_ptr,MB_YES,kind,
 					time_i,time_d,
 					navlon,navlat,speed,heading,
