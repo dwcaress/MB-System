@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcontour.c	6/4/93
- *    $Id: mbcontour.c,v 4.11 1995-08-07 17:31:39 caress Exp $
+ *    $Id: mbcontour.c,v 4.12 1995-09-29 18:09:17 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Date:	June 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.11  1995/08/07  17:31:39  caress
+ * Moved to GMT V3.
+ *
  * Revision 4.10  1995/06/05  12:41:03  caress
  * Now checks navlon != navlon_old || navlat != navlat_old instead
  * of doing &
@@ -121,7 +124,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbcontour.c,v 4.11 1995-08-07 17:31:39 caress Exp $";
+	static char rcs_id[] = "$Id: mbcontour.c,v 4.12 1995-09-29 18:09:17 caress Exp $";
 #ifdef MBCONTOURFILTER
 	static char program_name[] = "MBCONTOURFILTER";
 	static char help_message[] =  "MBCONTOURFILTER is a utility which creates a pen plot \ncontour map of multibeam swath bathymetry.  \nThe primary purpose of this program is to serve as \npart of a real-time plotting system.  The contour \nlevels and colors can be controlled \ndirectly or set implicitly using contour and color change intervals. \nContours can also be set to have ticks pointing downhill.";
@@ -154,6 +157,7 @@ char **argv;
 	int	pings;
 	int	lonflip;
 	double	bounds[4];
+	double	mb_bounds[4];
 	int	btime_i[7];
 	int	etime_i[7];
 	double	btime_d;
@@ -615,6 +619,13 @@ char **argv;
 	/* set colors */
 	set_colors(ncolor,red,green,blue);
 
+	/* set bounds for multibeam reading larger than
+		map borders */
+	mb_bounds[0] = bounds[0] - 0.25*(bounds[1] - bounds[0]);
+	mb_bounds[1] = bounds[1] + 0.25*(bounds[1] - bounds[0]);
+	mb_bounds[2] = bounds[2] - 0.25*(bounds[3] - bounds[2]);
+	mb_bounds[3] = bounds[3] + 0.25*(bounds[3] - bounds[2]);
+
 	/* determine whether to read one file or a list of files */
 	if (format < 0)
 		read_datalist = MB_YES;
@@ -652,7 +663,7 @@ char **argv;
 
 	/* initialize reading the multibeam file */
 	if ((status = mb_read_init(
-		verbose,file,format,pings,lonflip,bounds,
+		verbose,file,format,pings,lonflip,mb_bounds,
 		btime_i,etime_i,speedmin,timegap,
 		&mbio_ptr,&btime_d,&etime_d,
 		&beams_bath,&beams_amp,&pixels_ss,&error)) != MB_SUCCESS)
