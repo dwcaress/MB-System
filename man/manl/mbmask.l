@@ -31,7 +31,7 @@ to another file containing a different version of the same data.
 The first utility, \fBmbgetmask\fP, is used to extract the mask from
 the edited multibeam file; the output is written to stdout.  The
 second utility, \fBmbmask\fP, reads in the mask file and the unedited
-multibeam data file and flags all beams indicated by the mask.
+multibeam data file and flags or unflags all beams indicated by the mask.
 The mask is keyed to the times of the individual pings; only exactly
 corresponding pings will be affected by the mask.
 

@@ -1,13 +1,13 @@
-.TH mbm_grdplot l "14 August 1995"
+.TH mbm_grd3dplot l "14 August 1995"
 .SH NAME
-\fBmbm_grdplot\fP - Create an executable shellscript which will generate
+\fBmbm_grd3dplot\fP - Create an executable shellscript which will generate
 a GMT 3D perspective plot of gridded data in a GMT grd file.
 
 .SH VERSION
 Version 4.3
 
 .SH SYNOPSIS
-\fBmbm_grdplot\fP \fB-I\fP\fIfile\fP 
+\fBmbm_grd3dplot\fP \fB-I\fP\fIfile\fP 
 [\fB-A\fP[\fImagnitude\fP[\fI/azimuth\fP] 
 \fB-D\fP[\fIflipcolor/flipshade\fP]
 \fB-E\fP[\fIview_az/view_el\fP] 
@@ -32,11 +32,11 @@ Miscellaneous Options:
 \fB-MGQ\fP\fIdpi\fP \fB-MGS\fP\fIscalefactor\fP
 \fB-MGT\fP\fIx/y/size/angle/font/just/text\fP
 \fB-MGU\fP\fP[\fI/dx/dy/\fP][\fIlabel\fP] 
-\fB-MVM\fP\fImesh_pen\fP \fB-MVN\fP\fInull[/r/g/b]\fP ]
+\fB-MVM\fP\fImesh_pen\fP \fB-MVN\fP[\fInull[/r/g/b]\fP] ]
 
 
 .SH DESCRIPTION
-Macro to generate a shellscript of GMT commands which, when 
+\fBmbm_grd3dplot\fP is a macro to generate a shellscript of GMT commands which, when 
 executed, will generate a 3D perspective Postscript plot of  
 gridded data.  Several styles of plots can be generated, 
 including color fill views, color shaded relief views, mesh  
@@ -172,7 +172,7 @@ The \fB-U\fP option allows the user to set the plot orientation. If
 \fIorientation\fP = 2, a landscape plot will be produced.
 .TP
 .B \fB-V\fP
-Causes \fBmbm_grdplot\fP to operate in "verbose" mode 
+Causes \fBmbm_grd3dplot\fP to operate in "verbose" mode 
 so that it outputs
 more information than usual.
 .TP
@@ -433,14 +433,15 @@ Set pen attributes for mesh plot.  The mesh plot must be specified
 with the \fB-G\fP option. [Defaults: width = 1, color = 0/0/0, 
 texture = solid]. 
 .TP
-.B \fB-MVN\fP\fInull[/r/g/b]\fP
+.B \fB-MVN\fP[\fInull[/r/g/b]\fP]
 Draws a plane at the level of the \fInull\fP value (with
 respect to the data in the grid file specified with the \fB-I\fP
 option. If the optional r/g/b is provided,
 the frontal facade between the plane and the data perimeter is
 filled with this color. By default, \fBmbm_grd3dplot\fP causes
 the null plane to be drawn at the minimum z-level and the facade
-to be colored a light gray (r=g=b=200).
+to be colored a light gray (r=g=b=200). If \fB-MVN\fP is given by
+itself, then no null plane or facade is drawn.
 .TP
 .B \fB-O\fIroot\fP
 Sets the root used to construct the filename of the output shellscript
@@ -610,17 +611,17 @@ represented in a continuous color scale or a
 stepped, discrete color scale [default is 11].
 .TP
 .B \fB-V\fP
-Causes \fBmbm_grdplot\fP to operate in "verbose" mode 
+Causes \fBmbm_grd3dplot\fP to operate in "verbose" mode 
 so that it outputs
 more information than usual.
 .TP
 .B \fB-X\fP
-Normally, \fBmbm_grdplot\fP creates an executable shellscript and
+Normally, \fBmbm_grd3dplot\fP creates an executable shellscript and
 then exits.  This option will cause the shellscript to be executed
-in the background before \fBmbm_grdplot\fP exits.
+in the background before \fBmbm_grd3dplot\fP exits.
 .TP
 .B \fB-Y\fP
-Normally, \fBmbm_grdplot\fP generates nicely rounded numbers
+Normally, \fBmbm_grd3dplot\fP generates nicely rounded numbers
 for the boundaries of the color pallette. Often, the resulting
 color bounds extend well outside the range of the gridded data.
 This option causes

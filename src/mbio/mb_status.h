@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbio_status.h	2/1/93
- *    $Id: mb_status.h,v 4.4 1995-08-17 14:43:23 caress Exp $
+ *    $Id: mb_status.h,v 4.5 1995-09-28 18:10:48 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -18,6 +18,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.4  1995/08/17  14:43:23  caress
+ * Revision for release 4.3.
+ *
  * Revision 4.3  1995/08/14  12:38:44  caress
  * Changed version to 4.3.
  *
@@ -57,7 +60,7 @@
 #define	MB_NO	0
 
 /* MBIO data type ("kind") convention */
-#define	MB_DATA_KINDS			10
+#define	MB_DATA_KINDS			14
 #define	MB_DATA_NONE			0
 #define	MB_DATA_DATA			1	/* general survey data */
 #define	MB_DATA_COMMENT			2	/* general comment */
@@ -70,7 +73,9 @@
 #define	MB_DATA_START			9	/* Simrad */
 #define	MB_DATA_STOP			10	/* Simrad */
 #define	MB_DATA_NAV			11	/* Simrad */
-#define	MB_DATA_RAW_LINE		12	/* uninterpretable line
+#define	MB_DATA_ANGLE			12	/* HSMD */
+#define	MB_DATA_EVENT			13	/* HSMD */
+#define	MB_DATA_RAW_LINE		14	/* uninterpretable line
 							for ascii formats */
 
 /* MBIO function status convention */

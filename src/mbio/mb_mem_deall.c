@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_mem_deall.c	2/3/93
- *    $Id: mb_mem_deall.c,v 4.3 1995-03-06 19:38:54 caress Exp $
+ *    $Id: mb_mem_deall.c,v 4.4 1995-09-28 18:10:48 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -18,6 +18,9 @@
  * Date:	February 3, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1995/03/06  19:38:54  caress
+ * Changed include strings.h to string.h for POSIX compliance.
+ *
  * Revision 4.2  1994/10/21  12:11:53  caress
  * Release V4.0
  *
@@ -66,7 +69,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-  static char rcs_id[]="$Id: mb_mem_deall.c,v 4.3 1995-03-06 19:38:54 caress Exp $";
+  static char rcs_id[]="$Id: mb_mem_deall.c,v 4.4 1995-09-28 18:10:48 caress Exp $";
 	char	*function_name = "mb_mem_deall";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
@@ -164,6 +167,14 @@ int	*error;
 	else if (mb_io_ptr->format == MBF_BCHRTUNB)
 		{
 		status = mbr_dem_bchrtunb(verbose,mbio_ptr,error);
+		}
+	else if (mb_io_ptr->format == MBF_HSMDARAW)
+		{
+		status = mbr_dem_hsmdaraw(verbose,mbio_ptr,error);
+		}
+	else if (mb_io_ptr->format == MBF_HSMDLDIH)
+		{
+		status = mbr_dem_hsmdldih(verbose,mbio_ptr,error);
 		}
 	else
 		{

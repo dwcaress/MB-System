@@ -1,6 +1,6 @@
-.TH mbm_plot l "14 August 1995"
+.TH mbm_xyplot l "14 August 1995"
 .SH NAME
-\fBmbm_plot\fP - Create an executable shellscript which will generate
+\fBmbm_xyplot\fP - Create an executable shellscript which will generate
 a GMT plot of xy data.
 
 .SH VERSION
@@ -29,7 +29,7 @@ Miscellaneous Options:
 \fB-MGU\fP\fP[\fI/dx/dy/\fP][\fIlabel\fP] ]
 
 .SH DESCRIPTION
-\fBMacro\fP to generate a shellscript of GMT commands which, 
+\fBmbm_xyplot\fP is a macro to generate a shellscript of GMT commands which, 
 when executed, will generate a Postscript plot of xy data.
 Axes may be linear, log,  or any of several geographic 
 projections. Data may be plotted as symbols or lines.

@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_xyplot.perl	8/6/95
-#    $Id: mbm_xyplot.perl,v 4.0 1995-08-17 14:53:25 caress Exp $
+#    $Id: mbm_xyplot.perl,v 4.1 1995-09-28 18:05:43 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -54,10 +54,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   August 9, 1995
 #
 # Version:
-#   $Id: mbm_xyplot.perl,v 4.0 1995-08-17 14:53:25 caress Exp $
+#   $Id: mbm_xyplot.perl,v 4.1 1995-09-28 18:05:43 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.0  1995/08/17  14:53:25  caress
+# Revision for release 4.3.
+#
 #
 #
 #
@@ -310,7 +313,7 @@ foreach $xyfile_raw (@data_file_list) {
 	if ($xyfile_raw =~ /\S+:\S+:\S+:\S+:\S+/)
 		{
 		($xysymbol_f, $xypen_f, $xyfill_f, 
-			$xysegment_f, $xyfile)
+			$xysegment_f, $xyfile_f)
 			= $xyfile_raw
 			=~ /(\S+):(\S+):(\S+):(\S+):(\S+)/;
 		push(@xysymbols, $xysymbol_f);
@@ -321,7 +324,7 @@ foreach $xyfile_raw (@data_file_list) {
 		}
 	elsif ($xyfile_raw =~ /\S+:\S+:\S+:\S+/)
 		{
-		($xysymbol_f, $xypen_f, $xyfill_f, $xyfile)
+		($xysymbol_f, $xypen_f, $xyfill_f, $xyfile_f)
 			= $xyfile_raw
 			=~ /(\S+):(\S+):(\S+):(\S+)/;
 		push(@xysymbols, $xysymbol_f);
@@ -332,7 +335,7 @@ foreach $xyfile_raw (@data_file_list) {
 		}
 	elsif ($xyfile_raw =~ /\S+:\S+:\S+/)
 		{
-		($xysymbol_f, $xypen_f, $xyfile)
+		($xysymbol_f, $xypen_f, $xyfile_f)
 			= $xyfile_raw
 			=~ /(\S+):(\S+):(\S+)/;
 		push(@xysymbols, $xysymbol_f);
@@ -343,7 +346,7 @@ foreach $xyfile_raw (@data_file_list) {
 		}
 	elsif ($xyfile_raw =~ /\S+:\S+/)
 		{
-		($xysymbol_f, $xyfile)
+		($xysymbol_f, $xyfile_f)
 			= $xyfile_raw
 			=~ /(\S+):(\S+)/;
 		push(@xysymbols, $xysymbol_f);
@@ -822,6 +825,8 @@ $middle = "-K -O -V >> $psfile";
 $end = "-O -V >> $psfile";
 
 # set macro gmt default settings
+$gmt_def = "PAPER_WIDTH/$page_width_in{$pagesize}";
+push(@gmt_macro_defs, $gmt_def);
 $gmt_def = "ANOT_FONT/Helvetica";
 push(@gmt_macro_defs, $gmt_def);
 $gmt_def = "LABEL_FONT/Helvetica";

@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grdplot.perl	8/6/95
-#    $Id: mbm_grdplot.perl,v 4.3 1995-08-17 14:52:53 caress Exp $
+#    $Id: mbm_grdplot.perl,v 4.4 1995-09-28 18:05:43 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -61,10 +61,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   October 19, 1994
 #
 # Version:
-#   $Id: mbm_grdplot.perl,v 4.3 1995-08-17 14:52:53 caress Exp $
+#   $Id: mbm_grdplot.perl,v 4.4 1995-09-28 18:05:43 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.3  1995/08/17  14:52:53  caress
+# Revision for release 4.3.
+#
 # Revision 4.2  1995/05/12  17:43:23  caress
 # Made exit status values consistent with Unix convention.
 # 0: ok  nonzero: error
@@ -327,7 +330,7 @@ if ($misc)
 			{
 			($tx, $ty, $tsize, $tangle, $font, $just, $txt) 
 			    = $cmd
-			    =~ /^[Gg][Pp](\S+)\/(\S+)\/(\S+)\/(\S+)\/(\S+)\/(\S+)\/(.+)/;
+			    =~ /^[Gg][Tt](\S+)\/(\S+)\/(\S+)\/(\S+)\/(\S+)\/(\S+)\/(.+)/;
 			if ($txt)
 			    {
 			    ($text_info) = $cmd =~ 
@@ -1232,6 +1235,8 @@ $middle = "-K -O -V >> $psfile";
 $end = "-O -V >> $psfile";
 
 # set macro gmt default settings
+$gmt_def = "PAPER_WIDTH/$page_width_in{$pagesize}";
+push(@gmt_macro_defs, $gmt_def);
 $gmt_def = "ANOT_FONT/Helvetica";
 push(@gmt_macro_defs, $gmt_def);
 $gmt_def = "LABEL_FONT/Helvetica";

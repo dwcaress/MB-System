@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_reson.c	3.00	8/20/94
- *	$Id: mbsys_reson.c,v 4.4 1995-08-17 14:41:09 caress Exp $
+ *	$Id: mbsys_reson.c,v 4.5 1995-09-28 18:10:48 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -37,6 +37,9 @@
  * Date:	August 20, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.4  1995/08/17  14:41:09  caress
+ * Revision for release 4.3.
+ *
  * Revision 4.3  1995/07/13  21:41:13  caress
  * Check in in midst of general bug fixing flail.
  *
@@ -80,7 +83,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_reson.c,v 4.4 1995-08-17 14:41:09 caress Exp $";
+ static char res_id[]="$Id: mbsys_reson.c,v 4.5 1995-09-28 18:10:48 caress Exp $";
 	char	*function_name = "mbsys_reson_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -655,7 +658,7 @@ int	*error;
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson_ttimes(verbose,mbio_ptr,store_ptr,kind,nbeams,
-	ttimes,angles,angles_forward,flags,error)
+	ttimes,angles,angles_forward,flags,depthadd,error)
 int	verbose;
 char	*mbio_ptr;
 char	*store_ptr;
@@ -665,6 +668,7 @@ double	*ttimes;
 double	*angles;
 double	*angles_forward;
 int	*flags;
+double	*depthadd;
 int	*error;
 {
 	char	*function_name = "mbsys_reson_ttimes";
@@ -718,6 +722,9 @@ int	*error;
 				flags[i] = MB_NO;
 			}
 
+		/* get depth offset (heave + transducer_depth) */
+		*depthadd = 1000.0*(store->heave + store->transducer_depth);
+
 		/* set status */
 		*error = MB_ERROR_NO_ERROR;
 		status = MB_SUCCESS;
@@ -752,6 +759,7 @@ int	*error;
 		}
 	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR)
 		{
+		fprintf(stderr,"dbg2       depthadd:   %f\n",*depthadd);
 		fprintf(stderr,"dbg2       nbeams:     %d\n",*nbeams);
 		for (i=0;i<*nbeams;i++)
 			fprintf(stderr,"dbg2       beam %d: tt:%f  angle_xtrk:%f  angle_ltrk:%f  flag:%d\n",

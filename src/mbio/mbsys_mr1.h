@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_mr1.h	7/19/94
- *	$Id: mbsys_mr1.h,v 4.0 1994-10-21 12:35:08 caress Exp $
+ *	$Id: mbsys_mr1.h,v 4.1 1995-09-28 18:10:48 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -20,6 +20,9 @@
  * Author:	D. W. Caress
  * Date:	July 19, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/10/21  12:35:08  caress
+ * Release V4.0
+ *
  * Revision 1.2  1994/10/21  12:20:01  caress
  * Release V4.0
  *
@@ -46,10 +49,10 @@
  */
 
 /* maximum number of bathymetry beams per side for MR1 */
-#define MBSYS_MR1_BEAMS_SIDE 100
+#define MBSYS_MR1_BEAMS_SIDE 200
 
 /* maximum number of sidescan pixels per side for MR1 */
-#define MBSYS_MR1_PIXELS_SIDE 2000
+#define MBSYS_MR1_PIXELS_SIDE 3500
 
 /* maximum number of bathymetry beams for MR1 */
 #define MBSYS_MR1_BEAMS (2*MBSYS_MR1_BEAMS_SIDE + 3)

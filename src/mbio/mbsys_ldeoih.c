@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_ldeoih.c	2/26/93
- *	$Id: mbsys_ldeoih.c,v 4.7 1995-08-17 14:41:09 caress Exp $
+ *	$Id: mbsys_ldeoih.c,v 4.8 1995-09-28 18:10:48 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -38,6 +38,9 @@
  * Author:	D. W. Caress
  * Date:	February 26, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.7  1995/08/17  14:41:09  caress
+ * Revision for release 4.3.
+ *
  * Revision 4.6  1995/07/13  19:13:36  caress
  * Intermediate check-in during major bug-fixing flail.
  *
@@ -96,7 +99,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_ldeoih.c,v 4.7 1995-08-17 14:41:09 caress Exp $";
+ static char res_id[]="$Id: mbsys_ldeoih.c,v 4.8 1995-09-28 18:10:48 caress Exp $";
 	char	*function_name = "mbsys_ldeoih_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -625,7 +628,7 @@ int	*error;
 }
 /*--------------------------------------------------------------------*/
 int mbsys_ldeoih_ttimes(verbose,mbio_ptr,store_ptr,kind,nbeams,
-	ttimes,angles,angles_forward,flags,error)
+	ttimes,angles,angles_forward,flags,depthadd,error)
 int	verbose;
 char	*mbio_ptr;
 char	*store_ptr;
@@ -635,6 +638,7 @@ double	*ttimes;
 double	*angles;
 double	*angles_forward;
 int	*flags;
+double	*depthadd;
 int	*error;
 {
 	char	*function_name = "mbsys_ldeoih_ttimes";
@@ -682,6 +686,9 @@ int	*error;
 			flags[i] = MB_NO;
 			}
 
+		/* get depth offset (zero) */
+		*depthadd = 0.0;
+
 		/* set status */
 		*error = MB_ERROR_NO_ERROR;
 		status = MB_SUCCESS;
@@ -716,6 +723,7 @@ int	*error;
 		}
 	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR)
 		{
+		fprintf(stderr,"dbg2       depthadd:   %f\n",*depthadd);
 		fprintf(stderr,"dbg2       nbeams:     %d\n",*nbeams);
 		for (i=0;i<*nbeams;i++)
 			fprintf(stderr,"dbg2       beam %d: tt:%f  angle_xtrk:%f  angle_ltrk:%f  flag:%d\n",

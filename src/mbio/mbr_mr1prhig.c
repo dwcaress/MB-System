@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mr1prhig.c	3/3/94
- *	$Id: mbr_mr1prhig.c,v 4.3 1995-03-06 19:38:54 caress Exp $
+ *	$Id: mbr_mr1prhig.c,v 4.4 1995-09-28 18:10:48 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	July 17, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1995/03/06  19:38:54  caress
+ * Changed include strings.h to string.h for POSIX compliance.
+ *
  * Revision 4.2  1994/11/23  23:16:34  caress
  * Now uses png_course instead of png_heading for heading
  * value because png_heading has large errors. Will
@@ -60,7 +63,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_mr1prhig.c,v 4.3 1995-03-06 19:38:54 caress Exp $";
+	static char res_id[]="$Id: mbr_mr1prhig.c,v 4.4 1995-09-28 18:10:48 caress Exp $";
 	char	*function_name = "mbr_alm_mr1prhig";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -401,8 +404,8 @@ int	*error;
 			}
 
 		/* get heading */
-		/*mb_io_ptr->new_heading = data->png_compass;*/
-		mb_io_ptr->new_heading = data->png_course;
+		mb_io_ptr->new_heading = data->png_compass;
+		/*mb_io_ptr->new_heading = data->png_course;*/
 
 		/* get speed */
 		mb_io_ptr->new_speed = 0.0;
@@ -488,7 +491,7 @@ int	*error;
 			fprintf(stderr,"dbg4       pixels_ss:  %d\n",
 				mb_io_ptr->pixels_ss);
 			for (i=0;i<mb_io_ptr->pixels_ss;i++)
-			  fprintf(stderr,"dbg4       beam:%d  ss:%f  acrosstrack:%f  alongtrack:%f\n",
+			  fprintf(stderr,"dbg4       pixel:%d  ss:%f  acrosstrack:%f  alongtrack:%f\n",
 				i,mb_io_ptr->new_ss[i],
 				mb_io_ptr->new_ss_acrosstrack[i],
 				mb_io_ptr->new_ss_alongtrack[i]);
@@ -746,8 +749,8 @@ int	*error;
 		data->png_lat = mb_io_ptr->new_lat;
 
 		/* get heading */
-		/*data->png_compass = mb_io_ptr->new_heading;*/
-		data->png_course = mb_io_ptr->new_heading;
+		data->png_compass = mb_io_ptr->new_heading;
+		/*data->png_course = mb_io_ptr->new_heading;*/
 
 		/* get port bathymetry */
 		beam_center = mb_io_ptr->beams_bath/2;
