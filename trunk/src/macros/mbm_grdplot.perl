@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grdplot.perl	8/6/95
-#    $Id: mbm_grdplot.perl,v 4.10 1999-04-15 19:28:52 caress Exp $
+#    $Id: mbm_grdplot.perl,v 4.11 1999-04-16 01:25:51 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -61,10 +61,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   October 19, 1994
 #
 # Version:
-#   $Id: mbm_grdplot.perl,v 4.10 1999-04-15 19:28:52 caress Exp $
+#   $Id: mbm_grdplot.perl,v 4.11 1999-04-16 01:25:51 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.10  1999/04/15  19:28:52  caress
+# Fixed sprintf statements.
+#
 # Revision 4.9  1999/02/04  23:39:54  caress
 # MB-System version 4.6beta7
 #
@@ -159,6 +162,17 @@ $DTR = 3.1415926 / 180.0;
 	"b10",   5,   "c0",   40,   "c1",   30,   "c2",   20,
 	"c3",   15,   "c4",   10,   "c5",    8,   "c6",    8,
 	"c7",    8);
+%page_gmt_name =     (
+	"a",     "archA",   "b",     "archB",   "c",     "archC",   "d",     "archD", 
+	"e",     "archE",   "f",     "archE",   "e1",    "archE",   "a0",    "A0",
+	"a1",    "A1",      "a2",    "A2",      "a3",    "A3",      "a4",    "A4",
+	"a5",    "A5",      "a6",    "A6",      "a7",    "A7",      "a8",    "A8",
+	"a9",    "A9",      "a10",   "A10",     "b0",    "B0",      "b1",    "B1",
+	"b2",    "B2",      "b3",    "B3",      "b4",    "B4",      "b5",    "B5",
+	"b6",    "A6",      "b7",    "A7",      "b8",    "A8",      "b9",    "A9",
+	"b10",   "A10",     "c0",    "B0",      "c1",    "B1",      "c2",    "B2",
+	"c3",    "B3",      "c4",    "B4",      "c5",    "B5",      "c6",    "B6",
+	"c7",    "B7");
 %xpsview_mem =     (
 	"a",     "4m",   "b",     "6m",   "c",     "8m",   "d",    "12m", 
 	"e",    "16m",   "f",    "16m",   "e1",   "16m",   "a0",   "16m",
@@ -228,12 +242,15 @@ $ncpt = 11;
 
 # Determine the GMT version
 @grdinfo = `grdinfo 2>&1`;
-$line = shift @grdinfo;
-if ($line =~ 
-	/grdinfo\s+(\S+)\s+\S+/)
+while (@grdinfo)
 	{
-	($gmt_version) = $line =~ 
-		/grdinfo\s+(\S+)\s+\S+/;
+	$line = shift @grdinfo;
+	if ($line =~ 
+		/grdinfo\s+(\S+)\s+\S+/)
+		{
+		($gmt_version) = $line =~ 
+			/grdinfo\s+(\S+)\s+\S+/;
+		}
 	}
 
 # Deal with command line arguments
@@ -1286,8 +1303,17 @@ $end = "-O -V >> \$PS_FILE";
 # set macro gmt default settings
 $gmt_def = "MEASURE_UNIT/inch";
 push(@gmt_macro_defs, $gmt_def);
-$gmt_def = "PAPER_WIDTH/$page_width_in{$pagesize}";
-push(@gmt_macro_defs, $gmt_def);
+if ($gmt_version eq "3.0"
+	|| $gmt_version eq "3.1")
+	{
+	$gmt_def = "PAPER_WIDTH/$page_width_in{$pagesize}";
+	push(@gmt_macro_defs, $gmt_def);
+	}
+else
+	{
+	$gmt_def = "PAPER_MEDIA/$page_gmt_name{$pagesize}";
+	push(@gmt_macro_defs, $gmt_def);
+	}
 $gmt_def = "ANOT_FONT/Helvetica";
 push(@gmt_macro_defs, $gmt_def);
 $gmt_def = "LABEL_FONT/Helvetica";

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbps.c	11/4/93
- *    $Id: mbps.c,v 4.13 1999-03-31 18:33:06 caress Exp $
+ *    $Id: mbps.c,v 4.14 1999-04-16 01:29:39 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,9 @@
  * Date:	August 31, 1991 (original version)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.13  1999/03/31  18:33:06  caress
+ * MB-System 4.6beta7
+ *
  * Revision 4.12  1999/02/04  23:55:08  caress
  * MB-System version 4.6beta7
  *
@@ -126,7 +129,7 @@ int argc;
 char **argv; 
 {
 
-	static char rcs_id[] = "$Id: mbps.c,v 4.13 1999-03-31 18:33:06 caress Exp $";
+	static char rcs_id[] = "$Id: mbps.c,v 4.14 1999-04-16 01:29:39 caress Exp $";
 	static char program_name[] = "MBPS";
 	static char help_message[] =  "MBPS reads a swath bathymetry data file and creates a postscript 3-d mesh plot";
 	static char usage_message[] = "mbps [-Iinfile -Fformat -Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc -Aalpha -Keta -Dviewdir -Xvertexag -T\"title\" -Wmetersperinch -Sspeedmin -Ggap -Ydisplay_stats -Zdisplay_scales -V -H]";
@@ -772,7 +775,7 @@ char **argv;
 				yl[2] = scaling * data[i+1].yp[jj+1];
 				xl[3] = scaling * data[i].xp[jj+1];
 				yl[3] = scaling * data[i].yp[jj+1];
-#ifdef GMT_OLD
+#ifdef GMT3_0
 				ps_polygon(xl,yl,4,255,255,255,1);
 #else
 				ps_polygon(xl,yl,4,rgb_white,1);
@@ -832,7 +835,7 @@ char **argv;
 		yl[1]=yl[2]= min_yp*scaling-1.;
 		yl[0]=yl[3]= yl[1]+0.1;
 	
-#ifdef GMT_OLD
+#ifdef GMT3_0
 		ps_line(xl,yl,4,3,0);
 #else
 		ps_line(xl,yl,4,3,0,0);
@@ -855,7 +858,7 @@ char **argv;
 		yl[0]=yl[1]= min_yp*scaling-1.;
 		yl[2]=yl[3]= yl[0]+zscale_inch;
 
-#ifdef GMT_OLD
+#ifdef GMT3_0
 		ps_line(xl,yl,4,3,0);
 #else
 		ps_line(xl,yl,4,3,0,0);
@@ -878,7 +881,7 @@ char **argv;
 		yl[1] = ((yl[1]-yl[0])/distot/2) + min_yp*scaling-1.;
 		xl[0] = 0.+.6; 
 		yl[0] = 0.+min_yp*scaling-0.85;
-#ifdef GMT_OLD
+#ifdef GMT3_0
 		ps_vector(xl[0],yl[0],xl[1],yl[1],
 		    0.01,0.25,0.1,1.0,
 		    0,0,0,0);
@@ -947,7 +950,7 @@ char **argv;
 			xl[1]=xl[0]+xl[1];
 			yl[1]=yl[0]+yl[1];
 
-#ifdef GMT_OLD
+#ifdef GMT3_0
 			ps_vector(xl[0],yl[0],xl[1],yl[1],
 				0.01,0.25,0.1,1.0,0,0,0,0);
 #else

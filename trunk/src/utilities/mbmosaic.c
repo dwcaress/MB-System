@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmosaic.c	2/10/97
- *    $Id: mbmosaic.c,v 4.4 1999-02-04 23:55:08 caress Exp $
+ *    $Id: mbmosaic.c,v 4.5 1999-04-16 01:29:39 caress Exp $
  *
  *    Copyright (c) 1997 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -23,6 +23,9 @@
  * Date:	February 10, 1997
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.4  1999/02/04  23:55:08  caress
+ * MB-System version 4.6beta7
+ *
  * Revision 4.3  1998/10/07  19:33:56  caress
  * Removed ddmmss_to_degree function as it is included in gmt_init.c
  *
@@ -83,7 +86,7 @@
 #define	NO_DATA_FLAG	99999.9
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbmosaic.c,v 4.4 1999-02-04 23:55:08 caress Exp $";
+static char rcs_id[] = "$Id: mbmosaic.c,v 4.5 1999-04-16 01:29:39 caress Exp $";
 static char program_name[] = "mbmosaic";
 static char help_message[] =  "mbmosaic is an utility used to mosaic amplitude or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered by multibeam swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbmosaic -Ifilelist -Oroot \
@@ -440,7 +443,7 @@ char **argv;
 			i = 0;
 			while (result)
 			    {
-#ifdef GMT_OLD
+#ifdef GMT3_0
 			    gbnd[i] = ddmmss_to_degree (result);
 #else
 			    gbnd[i] = GMT_ddmmss_to_degree (result);
@@ -624,7 +627,7 @@ char **argv;
 		use_projection = MB_YES;
 
 		/* get ellipsoid */
-#ifdef GMT_OLD
+#ifdef GMT3_0
 		gmtdefs.ellipsoid = get_ellipse (ellipsoid);
 #else
 		gmtdefs.ellipsoid = GMT_get_ellipse (ellipsoid);
@@ -636,7 +639,7 @@ char **argv;
 			p_lon_o, p_lon_o + 1.0, 
 			p_lat_o, p_lat_o + 1.0);
 		strcat(gmt_arg, projection_pars);
-#ifdef GMT_OLD
+#ifdef GMT3_0
 		gmterror += get_common_args (gmt_arg, 
 			&p_lon_1, &p_lon_2, 
 			&p_lat_1, &p_lat_2);
@@ -646,7 +649,7 @@ char **argv;
 			&p_lat_1, &p_lat_2);
 #endif
 		sprintf(gmt_arg, "-J%s", projection_pars);
-#ifdef GMT_OLD
+#ifdef GMT3_0
 		gmterror += get_common_args (gmt_arg, 
 			&p_lon_1, &p_lon_2, 
 			&p_lat_1, &p_lat_2);
@@ -753,7 +756,7 @@ char **argv;
 		/* do first point */
 		xx = wbnd[0] - (wbnd[1] - wbnd[0]);
 		yy = wbnd[2] - (wbnd[3] - wbnd[2]);
-#ifdef GMT_OLD
+#ifdef GMT3_0
 		xy_to_geo(xx, yy, &xlon, &ylat);
 #else
 		GMT_xy_to_geo(&xlon, &ylat, xx, yy);
@@ -766,7 +769,7 @@ char **argv;
 		/* do second point */
 		xx = wbnd[0] + (wbnd[1] - wbnd[0]);
 		yy = wbnd[2] - (wbnd[3] - wbnd[2]);
-#ifdef GMT_OLD
+#ifdef GMT3_0
 		xy_to_geo(xx, yy, &xlon, &ylat);
 #else
 		GMT_xy_to_geo(&xlon, &ylat, xx, yy);
@@ -779,7 +782,7 @@ char **argv;
 		/* do third point */
 		xx = wbnd[0] - (wbnd[1] - wbnd[0]);
 		yy = wbnd[2] + (wbnd[3] - wbnd[2]);
-#ifdef GMT_OLD
+#ifdef GMT3_0
 		xy_to_geo(xx, yy, &xlon, &ylat);
 #else
 		GMT_xy_to_geo(&xlon, &ylat, xx, yy);
@@ -792,7 +795,7 @@ char **argv;
 		/* do fourth point */
 		xx = wbnd[0] + (wbnd[1] - wbnd[0]);
 		yy = wbnd[2] + (wbnd[3] - wbnd[2]);
-#ifdef GMT_OLD
+#ifdef GMT3_0
 		xy_to_geo(xx, yy, &xlon, &ylat);
 #else
 		GMT_xy_to_geo(&xlon, &ylat, xx, yy);
@@ -2394,7 +2397,7 @@ int	*error;
 		}
 
 	/* inititialize grd header */
-#ifdef GMT_OLD
+#ifdef GMT3_0
 	grdio_init();
 	grd_init (&grd, argc, argv, MB_NO);
 #else
@@ -2459,7 +2462,7 @@ int	*error;
 				}
 
 		/* write the GMT netCDF grd file */
-#ifdef GMT_OLD
+#ifdef GMT3_0
 		write_grd(outfile, &grd, a, w, e, s, n, pad, complex);
 #else
 		GMT_write_grd(outfile, &grd, a, w, e, s, n, pad, complex);
@@ -2511,7 +2514,7 @@ int	*error;
 		}
 
 	/* deal with projection to eastings and northings */
-#ifdef GMT_OLD
+#ifdef GMT3_0
 	geo_to_xy(lon, lat, x, y);
 #else
 	GMT_geo_to_xy(lon, lat, x, y);

@@ -1,4 +1,4 @@
-.TH mbnavedit l "17 December 1998" "MB-System 4.6" "MB-System 4.6"
+.TH mbnavedit l "9 April 1999" "MB-System 4.6" "MB-System 4.6"
 .SH NAME
 \fBmbnavedit\fP - Interactive navigation editor for swath sonar data.
 
@@ -8,22 +8,80 @@ Version 4.6
 .SH SYNOPSIS
 \fBmbnavedit\fP [\fB-B\fIyr/mo/da/hr/mn/sc\fP 
 \fB-D\fP \fB-E\fIyr/mo/da/hr/mn/sc\fP 
-\fB-F\fIformat \fB-I\fIinfile \fB-V -H\fP]
+\fB-F\fIformat \fB-I\fIinfile \fB-P -V -H\fP]
 
 .SH DESCRIPTION
 \fBmbnavedit\fP is an interactive editor used to identify and fix 
 problems with the navigation of swath sonar data. Once a file has been
 read in, \fBmbnavedit\fP displays autoscaled plots of the longitude,
-latitude, speed, and heading time series. The user may select
+latitude, speed, and heading time series, along with a plot of
+the time interval between navigation values. 
+The user may select
 outliers and interpolate over them or, in the case of heading or
 speed data, replace the erroneous values with estimates derived 
 from "course-made-good" or "speed-made-good", respectively.
 Data can only be selected and altered in a single 
 plot at a time (this avoids
 confusion and prevents mistakes).
-The user can also inspect plots of roll, pitch, and heaved
+
+The nature of the navigation data being edited depends upon the
+data format. Some data formats include the navigation in the
+same data records as the ping or survey data. This synchronous
+navigation implies that either in the sonar or in later processing,
+the raw navigation has been interpolated to yield values at the
+same time stamps as the sonar pings. Other data formats do not
+hold navigation values in the survey data records, and instead use
+separate navigation records with different time stamps. This
+asynchronous navigation requires that MBIO interpolate or 
+extrapolate the navigation as the survey data records are read.
+For data formats with synchronous navigation, the navigation
+values edited using \fBmbnavedit\fP are those in the survey data
+records. For data formats with only asynchronous navigation, 
+\fBmbnavedit\fP displays and operates on the values from the
+navigation records. The \fBMBIO\fP manual page includes a listing
+of which type of navigation is used by the supported data formats.
+
+The time interval plot allows
+users to spot problems with time stamps and to change the
+time stamps, if necessary. If the navigation is 
+asynchronous, that generally means the time interval should be
+constant since navigation systems are set to output values at
+a uniform rate. A problem with the time stamps of asynchronous
+navigation should produce spikes in both the time interval plot
+and the speed-made-good plot, and can be solved by selecting
+the offending point in the time interval plot and interpolating
+to reset the time stamp.
+
+If the navigation is synchronous with the sonar
+pings, then the time interval will vary because the ping
+rate for many sonars varies with the sonars altitude above the
+seafloor. In this case, time stamp problems will 
+not produce spikes in the speed-made-good plot 
+because the navigation has been interpolated
+using the existing time stamps. Time interval spikes may also
+reflect problems with the sonar (e.g. occasional failure to ping
+at the appropriate time) rather than erroneous time stamps. 
+However, one can reasonably infer a time stamp problem when
+two or more pings have the same time stamp, and the facility
+to select and interpolate the time interval values can be 
+used to fix this problem.
+
+For some data formats, the user can also 
+inspect plots of roll, pitch, and heaved
 data to determine if the ship's vertical reference sensors
 were working properly.
+
+One special case which has been encountered is a problem with
+the time stamps of survey records in data using a format with
+asynchronous navigation. In order to use \fBmbnavedit\fP to
+fix the time stamps of the survey data, one may invoke 
+the \fB-P\fP option at the command line. This forces 
+\fBmbnavedit\fP to work with interpolated synchronous navigation
+rather than the asynchronous navigation records.
+In this case, any changes made to the navigation values  will be
+lost, but changes made to the time stamps will be applied to
+the survey data records.
+
 The edited data is usually output to a file, but the program
 can be operated in a "browse" mode where no data is output.
 
@@ -88,6 +146,13 @@ be \fIinfile\fP with ".ed" appended.
 .br
 Sets the output data file, overriding the file naming conventions
 discussed above in the \fB-I\fP option.
+.TP
+.B \-P
+Causes \fBmbnavedit\fP to load and work with navigation from 
+survey data records even if the data format uses asynchronous
+navigation records. In this case, the only edits which will
+actually be applied to the output data are changes to the
+time stamps of the survey records.
 .TP
 .B \-V
 Normally, \fBmbnavedit\fP outputs information to the stderr stream
@@ -205,6 +270,13 @@ satisfaction, pressing the right mouse button will cause the
 plots to be redrawn with the selected beginning and ending
 times.
 .TP
+.B Time Interval Plot
+This toggle button turns the time interval plot on and off.
+.TP
+.B Show Original Data (Time Interval Plot)
+When this toggle button is on, the time interval plot includes a
+green line representing the original time interval values.
+.TP
 .B Longitude Plot
 This toggle button turns the longitude plot on and off.
 .TP
@@ -284,8 +356,9 @@ The control button \fBForward\fP causes
 the same action.
 
 .SH SEE ALSO
-\fBmbsystem\fP(l), \fBmbmerge\fP(l), 
+\fBmbsystem\fP(l), \fBmbio\fP(l), \fBmbmerge\fP(l), 
 \fBmbedit\fP(l), \fBmbinfo\fP(l)
 
 .SH BUGS
-Please let us know.
+This program doesn't handle the roll, pitch, and
+heave data in a general way.
