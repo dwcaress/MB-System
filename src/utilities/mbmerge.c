@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmerge.c	2/20/93
  *
- *    $Id: mbmerge.c,v 4.22 1999-03-31 18:33:06 caress Exp $
+ *    $Id: mbmerge.c,v 4.23 1999-04-02 19:52:50 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,9 @@
  * Date:	February 20, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.22  1999/03/31  18:33:06  caress
+ * MB-System 4.6beta7
+ *
  * Revision 4.21  1999/02/04  23:55:08  caress
  * MB-System version 4.6beta7
  *
@@ -133,7 +136,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbmerge.c,v 4.22 1999-03-31 18:33:06 caress Exp $";
+	static char rcs_id[] = "$Id: mbmerge.c,v 4.23 1999-04-02 19:52:50 caress Exp $";
 	static char program_name[] = "MBMERGE";
 	static char help_message[] =  "MBMERGE merges new navigation with swath sonar data from an \ninput file and then writes the merged data to an output \nswath sonar data file. The default input \nand output streams are stdin and stdout.";
 	static char usage_message[] = "mbmerge [-Aheading_offset -B -Fformat -Llonflip -V -H  -Iinfile -Ooutfile -Mnavformat -Nnavfile -Z]";
@@ -154,6 +157,7 @@ char **argv;
 
 	/* MBIO read and write control parameters */
 	int	format = 0;
+	int	format_num;
 	int	pings;
 	int	lonflip;
 	double	bounds[4];
@@ -198,6 +202,7 @@ char **argv;
 	int	idata = 0;
 	int	icomment = 0;
 	int	odata = 0;
+	int	onav = 0;
 	int	ocomment = 0;
 	char	comment[256];
 
@@ -398,6 +403,9 @@ char **argv;
 		fprintf(stderr,"\nusage: %s\n", usage_message);
 		exit(error);
 		}
+		
+	/* check format */
+	status = mb_format(verbose,&format,&format_num,&error);
 		
 	/* set max number of characters to be read at a time */
 	if (nformat == 8)
@@ -988,7 +996,41 @@ char **argv;
 			fprintf(stderr,"Data time: %4.4d %2.2d %2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
 				time_i[0],time_i[1],time_i[2],time_i[3],
 				time_i[4],time_i[5],time_i[6]);
-			}			    
+			}
+			
+		/* if format used asynchronous nav and first record
+		   is ping data then force output of nav record first */
+		if (error == MB_ERROR_NO_ERROR
+			&& mb_nav_source[format_num] 
+				== MB_DATA_NAV
+			&& kind == MB_DATA_DATA
+			&& onav == 0)
+			{
+			status = mb_put_all(verbose,ombio_ptr,
+					store_ptr,MB_YES,MB_DATA_NAV,
+					time_i,time_d,
+					navlon,navlat,speed,heading,
+					beams_bath,beams_amp,pixels_ss,
+					beamflag,bath,amp,bathacrosstrack,bathalongtrack,
+					ss,ssacrosstrack,ssalongtrack,
+					comment,&error);
+			if (status == MB_SUCCESS)
+				onav++;
+			else if (error != MB_ERROR_NO_ERROR)
+				{
+				mb_error(verbose,error,&message);
+				fprintf(stderr,"\nMBIO Error returned from function <mb_put_all>:\n%s\n",message);
+				fprintf(stderr,"\nSwath Sonar Data Not Written To File <%s>\n",ofile);
+				fprintf(stderr,"Output Record: %d\n",odata+1);
+				fprintf(stderr,"Time: %d %d %d %d %d %d %d\n",
+					time_i[0],time_i[1],time_i[2],
+					time_i[3],time_i[4],time_i[5],
+					time_i[6]);
+				fprintf(stderr,"\nProgram <%s> Terminated\n",
+					program_name);
+				exit(error);
+				}
+			}
 
 		/* write some data */
 		if (error == MB_ERROR_NO_ERROR)
@@ -1005,6 +1047,8 @@ char **argv;
 				{
 				if (kind == MB_DATA_DATA)
 					odata++;
+				else if (kind == MB_DATA_NAV)
+					onav++;
 				else if (kind == MB_DATA_COMMENT)
 					ocomment++;
 				}
@@ -1054,7 +1098,8 @@ char **argv;
 		fprintf(stderr,"\n%d input navigation records\n",nnav);
 		fprintf(stderr,"%d input data records\n",idata);
 		fprintf(stderr,"%d input comment records\n",icomment);
-		fprintf(stderr,"%d output data records\n",odata);
+		fprintf(stderr,"%d output ping records\n",odata);
+		fprintf(stderr,"%d output nav records\n",onav);
 		fprintf(stderr,"%d output comment records\n",ocomment);
 		}
 
