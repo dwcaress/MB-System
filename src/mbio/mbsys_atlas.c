@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_surf.c	3.00	6/25/01
- *	$Id: mbsys_atlas.c,v 5.3 2001-07-26 03:40:56 caress Exp $
+ *	$Id: mbsys_atlas.c,v 5.4 2001-07-31 00:40:52 caress Exp $
  *
  *    Copyright (c) 2001 by
  *    David W. Caress (caress@mbari.org)
@@ -29,6 +29,9 @@
  * Date:	June 25, 2001
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2001/07/26  03:40:56  caress
+ * Fixed handling of sidescan.
+ *
  * Revision 5.2  2001/07/20 00:32:54  caress
  * Release 5.0.beta03
  *
@@ -59,7 +62,7 @@
 int mbsys_surf_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_atlas.c,v 5.3 2001-07-26 03:40:56 caress Exp $";
+ static char res_id[]="$Id: mbsys_atlas.c,v 5.4 2001-07-31 00:40:52 caress Exp $";
 	char	*function_name = "mbsys_surf_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -455,25 +458,12 @@ int mbsys_surf_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		*nss = store->ss_max_side_bb_cnt 
 			+ store->ss_max_side_sb_cnt;
 		pixel_size = store->start_cmean * store->ss_timespacing;
-/*		for (i=0;i<store->ss_max_side_bb_cnt;i++)
-			{
-			j = store->ss_max_side_bb_cnt - i;
-			ss[j] = store->ss_sidescan[i];
-			ssacrosstrack[j] = -pixel_size * i;
-			ssalongtrack[j] = 0.0;
-			}
-		for (i=store->ss_max_side_bb_cnt;i<*nss;i++)
-			{
-			ss[i] = store->ss_sidescan[i];
-			ssacrosstrack[i] = pixel_size * (i - store->ss_max_side_bb_cnt);
-			ssalongtrack[i] = 0.0;
-			}*/
 		ssdepth = store->start_cmean * ttmin / 2.0;
 		for (i=0;i<*nss;i++)
 			{
-			ss[i]= 0.0;
-			ssacrosstrack[i];
-			ssalongtrack[i];
+			ss[i] = 0.0;
+			ssacrosstrack[i] = 0.0;
+			ssalongtrack[i] = 0.0;
 			}
 		for (i=0;i<store->ss_max_side_bb_cnt;i++)
 			{
