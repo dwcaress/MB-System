@@ -12,7 +12,7 @@
 /*                                                          */
 /************************************************************/
 /*    The MB-system:	mbvelocitytool_stubs.c	6/6/93
- *    $Id: mbvelocity.c,v 4.4 1995-04-04 22:19:27 caress Exp $
+ *    $Id: mbvelocity.c,v 4.5 1995-06-05 19:59:16 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -35,6 +35,10 @@
  * Date:	June 6, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.4  1995/04/04  22:19:27  caress
+ * Resized widgets and window to fit 1024 X 768 screen.
+ * This now works on an Indy presenter screen.
+ *
  * Revision 4.3  1995/02/14  18:26:46  caress
  * Moved the widgets around, made the format defaults work, and made
  * the program recognize the MB-System file suffix convention.
@@ -179,8 +183,6 @@ int	format_gui;
 
 /* file opening parameters */
 int	startup_file = 0;
-int	open_files_count = 0;
-struct direct **open_files;
 int	open_type;
 #define	OPEN_NONE		0
 #define	OPEN_DISPLAY_PROFILE	1
@@ -861,21 +863,6 @@ static void mbvelocity_set_controls()
 	XmTextFieldSetString(widget_array[k_mbio_format], value_text);
 }
 
-/********************************************************************/
-/* File selector routine called by scandir().                       */
-/* Return TRUE if filename is not "." or "..".                      */
-/********************************************************************/
-
- int open_files_select(entry)
-	struct direct	*entry;
-{
-	if ((strcmp(entry->d_name, ".") == 0) ||
-	    (strcmp(entry->d_name, "..") == 0))
-		return (FALSE);
-	else
-		return(TRUE);
-}
-
 
 /************************************************************/
 /*
@@ -888,22 +875,8 @@ static void controls_open_file(w, tag, list)
 	int *tag;
 	XmListCallbackStruct *list;
 {
-	/* local variables */
-	int	alphasort();
-	
-		/* delete old scrolling list */
-		if (open_files_count > 0)
-			{
-			open_files_count = 0;
-			}
-
-		/* load filenames into scrolling list */
-		open_files_count = scandir(".",&open_files,
-			open_files_select, alphasort);
-
-		/* set file type flag */
-		open_type = OPEN_DISPLAY_PROFILE;
-
+	/* set file type flag */
+	open_type = OPEN_DISPLAY_PROFILE;
 }
 
 /************************************************************/
@@ -917,24 +890,8 @@ static void controls_open_ed_file(w, tag, list)
 	int *tag;
 	XmListCallbackStruct *list;
 {
-	/* local variables */
-	int	alphasort();
-
-
-		/* delete old scrolling list */
-		if (open_files_count > 0)
-			{
-			open_files_count = 0;
-			}
-
-		/* load filenames into scrolling list */
-		open_files_count = scandir(".",&open_files,
-			open_files_select, alphasort);
-
-		/* set file type flag */
-		open_type = OPEN_EDIT_PROFILE;
-		
-
+	/* set file type flag */
+	open_type = OPEN_EDIT_PROFILE;
 }
 
 /************************************************************/
@@ -1300,14 +1257,8 @@ static void open_mb_data(w, tag, list)
 	int *tag;
 	XmListCallbackStruct *list;
 {
-
 	/* set file type flag */
 	open_type = OPEN_MULTIBEAM;
-
-	/* load filenames into scrolling list */
-	open_files_count = scandir(".",&open_files,
-		open_files_select, alphasort);
-
 }
 
 /************************************************************/
