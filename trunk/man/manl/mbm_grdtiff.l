@@ -11,7 +11,9 @@ Version 5.0
 [\fB-A\fP\fImagnitude[/azimuth/elevation]\fP 
 \fB-G\fP\fIcolor_mode\fP \fB-H\fP \fB-K\fP\fIintensity_file\fP 
 \fB-O\fP\fIroot\fP \fB-S\fP\fI[color/shade]\fP
-\fB-V\fP \fB-W\fP\fIcolor_style[/pallette[/ncolors]]\fP ]
+\fB-V\fP 
+\fB-W\fP\fI[color_style\fP[\fI/pallette\fP[\fIncolors\fP]] | \fIcptfile]\fP ]
+
 
 Additional Options:
 .br
@@ -180,10 +182,12 @@ so that it outputs
 more information than usual.
 .TP
 .B \-W
-\fIcolor_style\fP[\fI/pallette\fP[\fIncolors\fP]]
+\fI[color_style\fP[\fI/pallette\fP[\fIncolors\fP]] | cptfile]
 .br
 This option controls the color scheme used for color
-fill plots. If \fIcolor_style\fP = 1 [default], then
+fill plots. 
+
+If \fIcolor_style\fP = 1 [default], then
 the color scheme used will be a continuous grading
 of colors. If \fIcolor_style\fP = 2, the color scheme
 will be a set of discrete color intervals. The color
@@ -202,6 +206,10 @@ The \fIncolors\fP parameter sets the number of color
 values used in plotting, whether the colors are 
 represented in a continuous color scale or a
 stepped, discrete color scale [default is 11].
+
+If the option argument is the path to an existing \fBGMT\fP 
+color pallette (CPT) file, then that CPT file and its
+color scheme will be used for the plot
 
 .SH COMPLETE DESCRIPTION OF OPTIONS
 .TP
@@ -355,10 +363,12 @@ so that it outputs
 more information than usual.
 .TP
 .B \-W
-\fIcolor_style\fP[\fI/pallette\fP[\fIncolors\fP]]
+\fI[color_style\fP[\fI/pallette\fP[\fIncolors\fP]] | cptfile]
 .br
 This option controls the color scheme used for color
-fill plots. If \fIcolor_style\fP = 1 [default], then
+fill plots. 
+
+If \fIcolor_style\fP = 1 [default], then
 the color scheme used will be a continuous grading
 of colors. If \fIcolor_style\fP = 2, the color scheme
 will be a set of discrete color intervals. The color
@@ -427,6 +437,10 @@ The \fIncolors\fP parameter sets the number of color
 values used in plotting, whether the colors are 
 represented in a continuous color scale or a
 stepped, discrete color scale [default is 11].
+
+If the option argument is the path to an existing \fBGMT\fP 
+color pallette (CPT) file, then that CPT file and its
+color scheme will be used for the plot
 .TP
 .B \-X
 Normally, \fBmbm_grdtiff\fP creates an executable shellscript and
