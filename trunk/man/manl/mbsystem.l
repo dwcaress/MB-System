@@ -10,7 +10,9 @@ Version 4.6
 The \fBMB-System\fP is a software package consisting of programs which 
 manipulate, process, list, or display swath sonar bathymetry, amplitude, 
 and sidescan data which has been developed at the Lamont-Doherty 
-Earth Observatory (L-DEO). The heart of the system is an input/output library 
+Earth Observatory (L-DEO) (and, as of late 1998, the Monterey Bay
+Aquarium Research Institute (MBARI)). The heart of 
+the system is an input/output library 
 called \fBMBIO\fP which allows programs to transparently
 work with any of a number of supported swath sonar data formats.  This
 approach has allowed the creation of "generic" utilities which can
@@ -33,8 +35,8 @@ related to the new SeaBeam 2100 series of sonars.
 The National Science Foundation funded a five year effort
 begun in 1995 to maintain and further 
 develop \fBMB-System\fP; this funding
-is being augmented by additional efforts at SeaBeam Instruments
-which relate to SeaBeam products but are nonetheless released
+has been augmented by additional efforts at SeaBeam Instruments
+which related to SeaBeam products but were nonetheless released
 to public domain distribution.
 
 The source code for \fBMB-System\fP is written in C and should be portable
