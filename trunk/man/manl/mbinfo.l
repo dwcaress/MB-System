@@ -109,107 +109,107 @@ of its operation and then exit immediately.
 
 .SH EXAMPLES
 Suppose one wishes to know something about the contents of 
-a Hydrosweep file (format 24) called hstest. 
+a Hydrosweep file (format 24) called example_hs.mb24. 
 The following will suffice:
- 	mbinfo -F24 -Ihstst
+ 	mbinfo -F24 -Iexample_hs.mb24
 
 The following output is produced: 
 
- Multibeam Data File:  hstst
+ Multibeam Data File:  example_hs.mb24
  MBIO Data Format ID:  24
  Format name:          MBF_HSLDEOIH
  Informal Description: L-DEO in-house binary Hydrosweep
  Attributes:           Hydrosweep DS, 59 beams, bathymetry and amplitude, 
                        binary, centered, L-DEO.
-
+ 
  Data Totals:
- Number of Records:             3052
- Bathymetry Data:
-   Number of Beams:           180068
-   Number of Good Beams:      163352
-   Number of Zero Beams:       16440
-   Number of Flagged Beams:      276
- Amplitude Data:
-   Number of Beams:           180068
-   Number of Good Beams:           0
-   Number of Zero Beams:      180068
-   Number of Flagged Beams:        0
- Sidescan Data:
+ Number of Records:              263
+ Bathymetry Data (59 beams):
+   Number of Beams:            15517
+   Number of Good Beams:       13661     88.04%
+   Number of Zero Beams:         868      5.59%
+   Number of Flagged Beams:      988      6.37%
+ Amplitude Data (59 beams):
+   Number of Beams:            15517
+   Number of Good Beams:           0      0.00%
+   Number of Zero Beams:       15517     100.00%
+   Number of Flagged Beams:        0      0.00%
+ Sidescan Data (0 pixels):
    Number of Pixels:               0
-   Number of Good Pixels:          0
-   Number of Zero Pixels:          0
-   Number of Flagged Pixels:       0
-
+   Number of Good Pixels:          0      0.00%
+   Number of Zero Pixels:          0      0.00%
+   Number of Flagged Pixels:       0      0.00%
+ 
  Navigation Totals:
- Total Time:            10.1903 hours
- Total Track Length:   183.5527 km
- Average Speed:         18.0125 km/hr
-
+ Total Time:             1.2425 hours
+ Total Track Length:    20.9421 km
+ Average Speed:         16.8548 km/hr
+ 
  Start of Data:
- Time:  06 06 1993 13:48:22  JD157
- Lon:  -29.0000     Lat:   55.7848   Depth: 2980.00
- Speed: 16.2000  Heading:  61.4000
-
+ Time:  08 14 1993 18:00:25.000000  JD226
+ Lon:  -49.3011     Lat:   12.1444   Depth: 4920.00
+ Speed: 18.3600  Heading:  97.2000
+ 
  End of Data:
- Time:  06 06 1993 23:59:47  JD157
- Lon:  -26.6236     Lat:   56.7536   Depth: 2675.00
- Speed: 19.0800  Heading:  45.3000
-
+ Time:  08 14 1993 19:14:58.000000  JD226
+ Lon:  -49.1111     Lat:   12.1149   Depth: 5021.00
+ Speed: 17.2800  Heading:  97.0000
+ 
  Limits:
- Minimum Longitude:   -29.0000   Maximum Longitude:   -26.6236
- Minimum Latitude:     55.7848   Maximum Latitude:     56.7536
- Minimum Depth:      2604.0000   Maximum Depth:      3023.0000
+ Minimum Longitude:   -49.3061   Maximum Longitude:   -49.1064
+ Minimum Latitude:     12.0750   Maximum Latitude:     12.1806
+ Minimum Depth:      3726.0000   Maximum Depth:      5190.0000
 
 Suppose we wanted to know how noisy the outer beams are relative
 to the inner beams.  We might try:
- 	mbinfo -F24 -P5 hstst
+ 	mbinfo -F24 -P5 -Iexample_hs.mb24
 
 obtaining:
 
- Multibeam Data File:  hstst
+ Multibeam Data File:  example_hs.mb24
  MBIO Data Format ID:  24
  Format name:          MBF_HSLDEOIH
  Informal Description: L-DEO in-house binary Hydrosweep
  Attributes:           Hydrosweep DS, 59 beams, bathymetry and amplitude, 
                        binary, centered, L-DEO.
-
+ 
  Data Totals:
- Number of Records:             3052
- Bathymetry Data:
-   Number of Beams:           180068
-   Number of Good Beams:      163352
-   Number of Zero Beams:       16440
-   Number of Flagged Beams:      276
- Amplitude Data:
-   Number of Beams:           180068
-   Number of Good Beams:           0
-   Number of Zero Beams:      180068
-   Number of Flagged Beams:        0
- Sidescan Data:
+ Number of Records:              263
+ Bathymetry Data (59 beams):
+   Number of Beams:            15517
+   Number of Good Beams:       13661     88.04%
+   Number of Zero Beams:         868      5.59%
+   Number of Flagged Beams:      988      6.37%
+ Amplitude Data (59 beams):
+   Number of Beams:            15517
+   Number of Good Beams:           0      0.00%
+   Number of Zero Beams:       15517     100.00%
+   Number of Flagged Beams:        0      0.00%
+ Sidescan Data (0 pixels):
    Number of Pixels:               0
-   Number of Good Pixels:          0
-   Number of Zero Pixels:          0
-   Number of Flagged Pixels:       0
-
+   Number of Good Pixels:          0      0.00%
+   Number of Zero Pixels:          0      0.00%
+   Number of Flagged Pixels:       0      0.00%
+ 
  Navigation Totals:
- Total Time:            10.1903 hours
- Total Track Length:   183.5527 km
- Average Speed:         18.0125 km/hr
-
+ Total Time:             1.2425 hours
+ Total Track Length:    20.9421 km
+ Average Speed:         16.8548 km/hr
+ 
  Start of Data:
- Time:  06 06 1993 13:48:22  JD157
- Lon:  -29.0000     Lat:   55.7848   Depth: 2980.00
- Speed: 16.2000  Heading:  61.4000
-
+ Time:  08 14 1993 18:00:25.000000  JD226
+ Lon:  -49.3011     Lat:   12.1444   Depth: 4920.00
+ Speed: 18.3600  Heading:  97.2000
+ 
  End of Data:
- Time:  06 06 1993 23:59:47  JD157
- Lon:  -26.6236     Lat:   56.7536   Depth: 2675.00
- Speed: 19.0800  Heading:  45.3000
-
+ Time:  08 14 1993 19:14:58.000000  JD226
+ Lon:  -49.1111     Lat:   12.1149   Depth: 5021.00
+ Speed: 17.2800  Heading:  97.0000
+ 
  Limits:
- Minimum Longitude:   -29.0000   Maximum Longitude:   -26.6236
- Minimum Latitude:     55.7848   Maximum Latitude:     56.7536
- Minimum Depth:      2604.0000   Maximum Depth:      3023.0000
+ Minimum Longitude:   -49.3061   Maximum Longitude:   -49.1064
+ Minimum Latitude:     12.0750   Maximum Latitude:     12.1806
+ Minimum Depth:      3726.0000   Maximum Depth:      5190.0000
 
  Beam Bathymetry Variances:
  Pings Averaged: 5
@@ -217,62 +217,62 @@ obtaining:
   ----     -      ----     --------    -----
     0      0       0.00       0.00      0.00
     1      0       0.00       0.00      0.00
-    2     65    2738.68      68.59      8.28
-    3    375    2745.22      82.75      9.10
-    4   1130    2755.22      71.21      8.44
-    5   1875    2762.57      78.69      8.87
-    6   2040    2765.62      77.00      8.77
-    7   2690    2765.38      73.46      8.57
-    8   2880    2766.23      60.10      7.75
-    9   2990    2765.78      58.77      7.67
-   10   3050    2766.01      52.71      7.26
-   11   3050    2764.12      44.35      6.66
-   12   3050    2764.52      40.27      6.35
-   13   3050    2763.54      36.75      6.06
-   14   3040    2762.47      34.58      5.88
-   15   3040    2765.12      32.07      5.66
-   16   3045    2764.02      28.08      5.30
-   17   3045    2766.51      25.42      5.04
-   18   3045    2762.24      21.18      4.60
-   19   3045    2762.13      18.31      4.28
-   20   3045    2761.27      15.48      3.93
-   21   3045    2761.22      13.25      3.64
-   22   3050    2760.35      13.27      3.64
-   23   3050    2759.73      10.88      3.30
-   24   3050    2759.22       8.74      2.96
-   25   3050    2758.53       7.34      2.71
-   26   3050    2757.69       5.54      2.35
-   27   3050    2757.39       5.09      2.26
-   28   3050    2755.59       4.41      2.10
-   29   3050    2754.57       2.65      1.63
-   30   3050    2754.41       2.34      1.53
-   31   3050    2752.83       3.58      1.89
-   32   3045    2752.97       4.85      2.20
-   33   3050    2752.93       5.64      2.38
-   34   3050    2753.11       5.62      2.37
-   35   3050    2752.31       6.92      2.63
-   36   3045    2752.51       9.24      3.04
-   37   3050    2752.17      10.31      3.21
-   38   3050    2751.34      10.17      3.19
-   39   3050    2750.61      11.64      3.41
-   40   3050    2750.11      15.57      3.95
-   41   3045    2753.24      17.65      4.20
-   42   3045    2750.49      21.48      4.63
-   43   3045    2749.09      25.17      5.02
-   44   3035    2746.72      26.82      5.18
-   45   3025    2746.76      33.52      5.79
-   46   3040    2745.77      32.09      5.66
-   47   3040    2745.46      36.80      6.07
-   48   3045    2744.89      37.94      6.16
-   49   3040    2744.80      48.66      6.98
-   50   3015    2744.34      51.85      7.20
-   51   2975    2743.04      56.28      7.50
-   52   2790    2742.27      61.90      7.87
-   53   2010    2742.49      71.17      8.44
-   54   2335    2739.53      71.38      8.45
-   55   1610    2737.56      74.31      8.62
-   56    745    2733.07      80.96      9.00
-   57    155    2745.39      82.94      9.11
+    2    110    4719.59     342.69     18.51
+    3    105    4779.49     399.15     19.98
+    4    155    4748.81     280.18     16.74
+    5    155    4817.12     194.62     13.95
+    6    150    4826.44     197.76     14.06
+    7    160    4863.82     155.50     12.47
+    8    215    4806.08     229.11     15.14
+    9    235    4807.09     220.23     14.84
+   10    240    4766.29     158.83     12.60
+   11    250    4764.34     221.09     14.87
+   12    245    4765.35     146.24     12.09
+   13    250    4782.02     167.34     12.94
+   14    240    4798.38      92.98      9.64
+   15    245    4775.16      98.27      9.91
+   16    225    4782.35     136.30     11.67
+   17    210    4820.37      80.70      8.98
+   18    215    4821.15      80.97      9.00
+   19    215    4827.71      76.20      8.73
+   20    195    4842.65      84.22      9.18
+   21    190    4843.02     155.87     12.48
+   22    185    4884.28      73.69      8.58
+   23    175    4885.21      69.88      8.36
+   24    175    4871.47      52.01      7.21
+   25    180    4871.92      34.71      5.89
+   26    200    4830.80      36.83      6.07
+   27    205    4835.16      33.47      5.79
+   28    210    4809.96      43.07      6.56
+   29    190    4850.77      40.97      6.40
+   30    240    4768.69      64.23      8.01
+   31    240    4772.90      74.44      8.63
+   32    245    4760.11      57.97      7.61
+   33    255    4734.01      81.72      9.04
+   34    255    4728.19      82.21      9.07
+   35    260    4722.94      83.45      9.14
+   36    260    4721.95     102.02     10.10
+   37    260    4713.48      83.85      9.16
+   38    250    4715.40     101.33     10.07
+   39    255    4722.56     118.20     10.87
+   40    250    4727.48     109.13     10.45
+   41    255    4734.96     127.97     11.31
+   42    255    4724.53     124.06     11.14
+   43    230    4744.74     122.96     11.09
+   44    225    4752.16      98.22      9.91
+   45    230    4692.27     107.96     10.39
+   46    240    4696.93      95.93      9.79
+   47    230    4699.80     129.08     11.36
+   48    225    4696.32     145.20     12.05
+   49    220    4681.50     140.29     11.84
+   50    210    4676.16     103.35     10.17
+   51    180    4627.31     105.22     10.26
+   52    200    4654.55     207.85     14.42
+   53    130    4665.82     250.97     15.84
+   54    185    4704.29     300.80     17.34
+   55    135    4731.13     218.16     14.77
+   56    150    4736.29     178.16     13.35
+   57    115    4691.45     217.31     14.74
    58      0       0.00       0.00      0.00
 
 .SH SEE ALSO
