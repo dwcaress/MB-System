@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grdplot.perl	8/6/95
-#    $Id: mbm_grdplot.perl,v 4.7 1998-10-05 17:00:15 caress Exp $
+#    $Id: mbm_grdplot.perl,v 4.8 1999-01-26 19:46:58 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -61,10 +61,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   October 19, 1994
 #
 # Version:
-#   $Id: mbm_grdplot.perl,v 4.7 1998-10-05 17:00:15 caress Exp $
+#   $Id: mbm_grdplot.perl,v 4.8 1999-01-26 19:46:58 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.7  1998/10/05  17:00:15  caress
+# MB-System version 4.6beta
+#
 # Revision 4.6  1997/04/21  16:54:41  caress
 # MB-System 4.5 Beta Release.
 #
@@ -734,6 +737,11 @@ if (!$bounds || !$zbounds)
 			{
 			($zmin_f,$zmax_f) = $line =~ 
 				/\S+\s+zmin:\s+(\S+)\s+zmax:\s+(\S+)\s+units:/;
+			}
+		if ($line =~ /\S+\s+z_min:\s+(\S+)\s+z_max:\s+(\S+)\s+units:/)
+			{
+			($zmin_f,$zmax_f) = $line =~ 
+				/\S+\s+z_min:\s+(\S+)\s+z_max:\s+(\S+)\s+units:/;
 			}
 		}
 

@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grd3dplot.perl	8/6/95
-#    $Id: mbm_grd3dplot.perl,v 4.6 1998-10-05 17:00:15 caress Exp $
+#    $Id: mbm_grd3dplot.perl,v 4.7 1999-01-26 19:46:58 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -61,10 +61,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   August 8, 1994
 #
 # Version:
-#   $Id: mbm_grd3dplot.perl,v 4.6 1998-10-05 17:00:15 caress Exp $
+#   $Id: mbm_grd3dplot.perl,v 4.7 1999-01-26 19:46:58 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.6  1998/10/05  17:00:15  caress
+# MB-System version 4.6beta
+#
 # Revision 4.5  1997/09/15  19:05:23  caress
 # Real Version 4.5
 #
@@ -641,6 +644,11 @@ if (!$bounds || !$zbounds)
 			($zmin,$zmax) = $line =~ 
 				/\S+\s+zmin:\s+(\S+)\s+zmax:\s+(\S+)\s+units:/;
 			}
+		if ($line =~ /\S+\s+z_min:\s+(\S+)\s+z_max:\s+(\S+)\s+units:/)
+			{
+			($zmin,$zmax) = $line =~ 
+				/\S+\s+z_min:\s+(\S+)\s+z_max:\s+(\S+)\s+units:/;
+			}
 		}
 
 	# check that there is data
@@ -662,6 +670,11 @@ if ($file_drape && !$zbounds)
 			{
 			($zmin,$zmax) = $line =~ 
 				/\S+\s+zmin:\s+(\S+)\s+zmax:\s+(\S+)\s+units:/;
+			}
+		if ($line =~ /\S+\s+z_min:\s+(\S+)\s+z_max:\s+(\S+)\s+units:/)
+			{
+			($zmin,$zmax) = $line =~ 
+				/\S+\s+z_min:\s+(\S+)\s+z_max:\s+(\S+)\s+units:/;
 			}
 		}
 
