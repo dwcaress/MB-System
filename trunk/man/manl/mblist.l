@@ -94,11 +94,16 @@ gridding programs (e.g. the \fBGMT\fP program \fBsurface\fP) or
 other utilities. All valid (positive) values will be output, unless
 the \fB-Q\fP option is used to disable value checking.
 The \fIdumpmode\fP options are:
-        \fIdumpmode\fP = 1:  format controlled by \fB-O\fP option
-        \fIdumpmode\fP = 2:  longitude latitude depth
-        \fIdumpmode\fP = 3:  longitude latitude topography
-        \fIdumpmode\fP = 4:  longitude latitude amplitude
-        \fIdumpmode\fP = 5:  longitude latitude sidescan
+.IP
+\fIdumpmode\fP = 1:  format controlled by \fB-O\fP option
+.IP
+\fIdumpmode\fP = 2:  longitude latitude depth
+.IP
+\fIdumpmode\fP = 3:  longitude latitude topography
+.IP
+\fIdumpmode\fP = 4:  longitude latitude amplitude
+.IP
+\fIdumpmode\fP = 5:  longitude latitude sidescan
 .br
 Use of the \fB-D\fP option supercedes the \fB-O\fP, \fB-M\fP,
 and \fB-N\fP options.
@@ -202,70 +207,133 @@ will be output for all sidescan pixels.
 .br
 Determines the form of the output. \fIOutput_format\fP is a string composed
 of one or more of the following characters:
-
- 	\fB/\fP  special character - this causes the value
-                 indicated by the next character to be
-                 inverted - this applies only to simple
-                 numeric values such as depth and 
-                 heading and not to values like time  
-                 strings orpositions with hemisphere 
-                 characters.
- 	\fB-\fP  special character - this causes the value 
-                 indicated by the next character to be 
-                 multiplied by -1 - this applies only 
-                 to simple numeric values such as  
-                 depth and heading and not to values   
-                 like time strings or positions with 
-                 hemisphere characters.
- 	\fBA\fP  for apparent seafloor crosstrack slope 
-  		 (degrees from horizontal with positive
- 		 slopes dipping toward port) - calculated 
- 		 by fitting a line to the the
- 		 bathymetry data of each ping.
- 	\fBa\fP  for apparent seafloor crosstrack slope 
-  		 (degrees from horizontal with positive
- 		 slopes dipping toward port) - calculated 
- 		 by interpolation for each beam or pixel.
- 	\fBB\fP  for amplitude
- 	\fBb\fP  for sidescan
- 	\fBC\fP  for sonar altitude above the bottom (m)
- 	\fBc\fP  for sonar tranducer depth (m)
- 	\fBD\fP  for bathymetry acrosstrack distance (m)
- 	\fBd\fP  for sidescan acrosstrack distance (m)
- 	\fBE\fP  for bathymetry alongtrack distance (m)
- 	\fBe\fP  for sidescan alongtrack distance (m)
- 	\fBG\fP  for flat bottom grazing angle (degrees)
- 	\fBg\fP  for grazing angle using seafloor slope (degrees)
- 	\fBH\fP  for heading (degrees)
- 	\fBh\fP  for course made good (degrees)
-  	\fBJ\fP  for a time string (yyyy jd hh mm ss.ssssss) 
-                 where jd is the julian day of the year
-  	\fBj\fP  for a time string (yyyy jd dm ss.ssssss) 
-                 where jd is the julian day of the year
-                 and dm is the minute of the day
- 	\fBL\fP  for cumulative along-track distance (km)
- 	\fBl\fP  for cumulative along-track distance (m)
- 	\fBM\fP  for unix time in decimal seconds since 1/1/70 00:00:00
- 	\fBm\fP  for time in decimal seconds since first record
- 	\fBN\fP  for ping count
- 	\fBP\fP  for pitch in degrees
- 	\fBp\fP  for draft in meters
- 	\fBR\fP  for roll in degrees
- 	\fBr\fP  for heave in meters
-  	\fBS\fP  for speed (km/hr)
-  	\fBs\fP  for speed made good (km/hr)
-  	\fBT\fP  for a time string (yyyy/mm/dd/hh/mm/ss)
- 	\fBt\fP  for a time string (yyyy mm dd hh mm ss)
- 	\fBU\fP  for unix time in integer seconds since 1/1/70 00:00:00
- 	\fBu\fP  for time in integer seconds since first record
- 	\fBV\fP  for ping interval (decimal seconds)
- 	\fBX\fP  for longitude (decimal degrees)
- 	\fBx\fP  for longitude (degrees + decimal minutes + E/W)
- 	\fBY\fP  for latitude (decimal degrees)
- 	\fBy\fP  for latitude (degrees + decimal minutes + N/S)
- 	\fBZ\fP  for topography (positive upwards) (m)
- 	\fBz\fP  for depth (positive downwards) (m)
- 	\fB#\fP  for beam or pixel number
+.IP
+\fB/\fP 
+special character: this causes the value 
+indicated by the next character to be  inverted. This applies only to simple
+numeric values such as depth and 
+heading and not to values like time  
+strings orpositions with hemisphere 
+characters.
+.IP
+\fB-\fP  
+special character: this causes the value 
+indicated by the next character to be 
+multiplied by -1. This applies only 
+to simple numeric values such as  
+depth and heading and not to values   
+like time strings or positions with 
+hemisphere characters.
+.IP
+\fBA\fP 
+for apparent seafloor crosstrack slope 
+(degrees from horizontal with positive
+slopes dipping toward port.) Calculated 
+by fitting a line to the the
+bathymetry data of each ping.
+.IP
+\fBa\fP 
+for apparent seafloor crosstrack slope 
+(degrees from horizontal with positive
+slopes dipping toward port.) Calculated 
+by interpolation for each beam or pixel.
+.IP
+\fBB\fP
+for amplitude
+.IP
+\fBb\fP 
+for sidescan
+.IP
+\fBC\fP
+for sonar altitude above the bottom (m)
+.IP
+\fBc\fP 
+for sonar tranducer depth (m)
+.IP
+\fBD\fP
+for bathymetry acrosstrack distance (m)
+.IP
+\fBd\fP
+for sidescan acrosstrack distance (m)
+.IP
+\fBE\fP
+for bathymetry alongtrack distance (m)
+.IP
+\fBe\fP
+for sidescan alongtrack distance (m)
+.IP
+\fBG\fP
+for flat bottom grazing angle (degrees)
+.IP
+\fBg\fP
+for grazing angle using seafloor slope (degrees)
+.IP
+\fBH\fP
+for heading (degrees)
+.IP
+\fBh\fP
+for course made good (degrees)
+.IP
+\fBJ\fP
+for a time string (yyyy jd hh mm ss.ssssss) 
+where jd is the day of the year
+.IP
+\fBj\fP 
+for a time string (yyyy jd dm ss.ssssss) 
+where jd is the day of the year
+and dm is the minute of the day
+.IP
+\fBL\fP 
+for cumulative along-track distance (km)
+.IP
+\fBl\fP 
+for cumulative along-track distance (m)
+.IP
+\fBM\fP 
+for unix (epoch) time in decimal seconds since 1/1/70 00:00:00
+.IP
+\fBm\fP 
+for time in decimal seconds since first record
+.IP
+\fBN\fP 
+for ping count
+.IP
+\fBP\fP  for pitch in degrees
+.IP
+\fBp\fP  for draft in meters
+.IP
+\fBR\fP  for roll in degrees
+.IP
+\fBr\fP  for heave in meters
+.IP
+\fBS\fP  for speed (km/hr)
+.IP
+\fBs\fP  for speed made good (km/hr)
+.IP
+\fBT\fP  for a time string (yyyy/mm/dd/hh/mm/ss)
+.IP
+\fBt\fP  for a time string (yyyy mm dd hh mm ss)
+.IP
+\fBU\fP  for unix time in integer seconds since 1/1/70 00:00:00
+.IP
+\fBu\fP  for time in integer seconds since first record
+.IP
+\fBV\fP  for ping interval (decimal seconds)
+.IP
+\fBX\fP  for longitude (decimal degrees)
+.IP
+\fBx\fP  for longitude (degrees + decimal minutes + E/W)
+.IP
+\fBY\fP  for latitude (decimal degrees)
+.IP
+\fBy\fP  for latitude (degrees + decimal minutes + N/S)
+.IP
+\fBZ\fP  for topography (positive upwards) (m)
+.IP
+.\fBz\fP  for depth (positive downwards) (m)
+.IP
+\fB#\fP  for beam or pixel number
+.br
 
 Default \fIoutput_format\fP = \fBYXLZ\fP (latitude, longitude, cumulative
 along-track distance, and depth).
@@ -273,6 +341,7 @@ along-track distance, and depth).
 .B \-P
 \fIpings\fP
 .br
+.p
 Sets the ping averaging of the input data. If \fIpings\fP = 1, then
 no ping averaging is performed. If \fIpings\fP > 0, then
 that number of input pings will be averaged to produce one output
