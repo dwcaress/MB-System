@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 4.19 1999-08-08 04:26:33 caress Exp $
+#	$Id: Makefile.template,v 4.20 1999-10-21 22:38:36 caress Exp $
 #
 #     Copyright (c) 1993, 1994 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.19  1999/08/08  04:26:33  caress
+# Added MBF_ELMK2XSE format.
+#
 # Revision 4.17  1999/07/16 19:24:15  caress
 # Yet another version.
 #
@@ -127,7 +130,8 @@ all:	$(LIBDIR)/libmbio.a $(MANDIR)/mbio.l \
 	$(INCDIR)/mbf_gsfgenmb.h $(INCDIR)/mbf_mstiffss.h \
 	$(INCDIR)/mbf_oicgeoda.h $(INCDIR)/mbf_oicmbari.h \
 	$(INCDIR)/mbf_omghdcsj.h \
-	$(INCDIR)/mbf_mgd77dat.h $(INCDIR)/mbf_mbarirov.h 
+	$(INCDIR)/mbf_mgd77dat.h $(INCDIR)/mbf_mbarirov.h \
+	$(INCDIR)/mbf_mbpronav.h 
 
 ### make clean removes the object files
 clean:
@@ -180,7 +184,8 @@ $(LIBDIR)/libmbio.a:	mb_format_inf.o mb_format.o mb_error.o \
 		mbr_gsfgenmb.o mbr_mstiffss.o \
 		mbr_oicgeoda.o mbr_oicmbari.o \
 		mbr_omghdcsj.o \
-		mbr_mgd77dat.o mbr_mbarirov.o
+		mbr_mgd77dat.o mbr_mbarirov.o \
+		mbr_mbpronav.o
 	$(ARCHIVE) $(LIBDIR)/libmbio.a \
 		mb_format_inf.o mb_format.o mb_error.o \
 		mb_swap.o mb_compare.o \
@@ -227,7 +232,8 @@ $(LIBDIR)/libmbio.a:	mb_format_inf.o mb_format.o mb_error.o \
 		mbr_gsfgenmb.o mbr_mstiffss.o \
 		mbr_oicgeoda.o mbr_oicmbari.o \
 		mbr_omghdcsj.o \
-		mbr_mgd77dat.o mbr_mbarirov.o
+		mbr_mgd77dat.o mbr_mbarirov.o \
+		mbr_mbpronav.o
 	ranlib $(LIBDIR)/libmbio.a
 
 ### compile the source files
@@ -421,6 +427,8 @@ mbr_mgd77dat.o: mbr_mgd77dat.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INC
 	$(CC) -c $(CFLAGS) mbr_mgd77dat.c
 mbr_mbarirov.o: mbr_mbarirov.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbf_mbarirov.h
 	$(CC) -c $(CFLAGS) mbr_mbarirov.c
+mbr_mbpronav.o: mbr_mbpronav.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbf_mbpronav.h
+	$(CC) -c $(CFLAGS) mbr_mbpronav.c
 
 ### copy the man page to the man page directory
 $(MANDIR)/mbio.l:	mbio.manl
@@ -635,4 +643,7 @@ $(INCDIR)/mbf_mgd77dat.h:	mbf_mgd77dat.h
 $(INCDIR)/mbf_mbarirov.h:	mbf_mbarirov.h
 	cp mbf_mbarirov.h $(INCDIR)/mbf_mbarirov.h
 	chmod 664 $(INCDIR)/mbf_mbarirov.h
+$(INCDIR)/mbf_mbpronav.h:	mbf_mbpronav.h
+	cp mbf_mbpronav.h $(INCDIR)/mbf_mbpronav.h
+	chmod 664 $(INCDIR)/mbf_mbpronav.h
 
