@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_reson.h	8/20/94
- *	$Id: mbsys_reson.h,v 4.4 1999-01-01 23:41:06 caress Exp $
+ *	$Id: mbsys_reson.h,v 4.5 1999-08-16 23:14:41 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Date:	August 20, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.4  1999/01/01  23:41:06  caress
+ * MB-System version 4.6beta6
+ *
  * Revision 4.3  1998/10/05 17:46:15  caress
  * MB-System version 4.6beta
  *
@@ -435,9 +438,10 @@
  */
 
 /* sonar types */
-#define	MBSYS_RESON_UNKNOWN	0
-#define	MBSYS_RESON_SEABAT9001	1
-#define	MBSYS_RESON_SEABAT8101	2
+#define	MBSYS_RESON_UNKNOWN		0
+#define	MBSYS_RESON_SEABAT9001		1
+#define	MBSYS_RESON_SEABAT8101		2
+#define	MBSYS_RESON_MESOTECHSM2000	3
 
 /* maximum number of beams and pixels */
 #define	MBSYS_RESON_MAXBEAMS	101
