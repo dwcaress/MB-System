@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_elmk2xse.c	3/27/99
- *	$Id: mbr_elmk2xse.c,v 5.2 2001-03-22 20:45:56 caress Exp $
+ *	$Id: mbr_elmk2xse.c,v 5.3 2004-04-27 01:46:12 caress Exp $
  *
  *    Copyright (c) 1999, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	March 27, 1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2001/03/22 20:45:56  caress
+ * Trying to make 5.0.beta0...
+ *
  * Revision 5.1  2001/01/22  07:43:34  caress
  * Version 5.0.beta01
  *
@@ -108,7 +111,7 @@ int mbr_wt_elmk2xse(int verbose, char *mbio_ptr, char *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_elmk2xse(int verbose, char *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_elmk2xse.c,v 5.2 2001-03-22 20:45:56 caress Exp $";
+	static char res_id[]="$Id: mbr_elmk2xse.c,v 5.3 2004-04-27 01:46:12 caress Exp $";
 	char	*function_name = "mbr_register_elmk2xse";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -238,7 +241,7 @@ int mbr_info_elmk2xse(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_elmk2xse.c,v 5.2 2001-03-22 20:45:56 caress Exp $";
+	static char res_id[]="$Id: mbr_elmk2xse.c,v 5.3 2004-04-27 01:46:12 caress Exp $";
 	char	*function_name = "mbr_info_elmk2xse";
 	int	status = MB_SUCCESS;
 
@@ -307,7 +310,7 @@ int mbr_info_elmk2xse(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_elmk2xse(int verbose, char *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_elmk2xse.c,v 5.2 2001-03-22 20:45:56 caress Exp $";
+	static char res_id[]="$Id: mbr_elmk2xse.c,v 5.3 2004-04-27 01:46:12 caress Exp $";
 	char	*function_name = "mbr_alm_elmk2xse";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -622,7 +625,7 @@ data->mul_frame, data->sid_frame);*/
 			    - MBSYS_XSE_TIME_OFFSET
 			    + 0.000001 * data->nav_usec;
 		heading = RTD * data->nav_course_ground;
-		mb_navint_interp(verbose, mbio_ptr, time_d, heading, 
+		mb_navint_interp(verbose, mbio_ptr, time_d, heading, 0.0,
 				    &lon, &lat, &speed, error);
 		data->mul_x = lon;
 		data->mul_y = lat;

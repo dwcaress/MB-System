@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_esf.c	4/10/2003
- *    $Id: mb_esf.c,v 5.4 2004-02-24 22:29:02 caress Exp $
+ *    $Id: mb_esf.c,v 5.5 2004-04-27 01:46:12 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	April 10, 2003
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2004/02/24 22:29:02  caress
+ * Fixed errors in handling Simrad datagrams and edit save files on byteswapped machines (e.g. Intel or AMD processors).
+ *
  * Revision 5.3  2003/07/30 16:19:20  caress
  * Changes during iSSP meeting July 2003.
  *
@@ -49,7 +52,7 @@
 #include "../../include/mb_process.h"
 #include "../../include/mb_swap.h"
 
-static char rcs_id[]="$Id: mb_esf.c,v 5.4 2004-02-24 22:29:02 caress Exp $";
+static char rcs_id[]="$Id: mb_esf.c,v 5.5 2004-04-27 01:46:12 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 /* 	function mb_esf_check checks for an existing esf file. */
@@ -259,7 +262,7 @@ int mb_esf_open(int verbose, char *esffile,
 		    /* open and read the old edit file */
 		    if (status == MB_SUCCESS
 	    		&& esf->nedit > 0
-			&& (esffp = fopen(esffile,"r")) == NULL)
+			&& (esffp = fopen(esffile,"rw")) == NULL)
 			{
 			fprintf(stderr, "\nnedit:%d\n",
 			    esf->nedit);
@@ -335,9 +338,9 @@ esf->edit[i].action,esf->edit[i].use);*/
 		
 		/* open the edit save file */
 		if (output == MBP_ESF_WRITE)
-			strcpy(fmode,"w");
+			strcpy(fmode,"wb");
 		else if (output == MBP_ESF_APPEND)
-			strcpy(fmode,"a");
+			strcpy(fmode,"ab");
 		if ((esf->esffp = fopen(esf->esffile,fmode)) == NULL)
 		    {
 		    status = MB_FAILURE;

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mbarirov.c	5/20/99
- *	$Id: mbr_mbarirov.c,v 5.8 2003-05-20 18:05:32 caress Exp $
+ *	$Id: mbr_mbarirov.c,v 5.9 2004-04-27 01:46:12 caress Exp $
  *
  *    Copyright (c) 1999, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	May 20, 1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2003/05/20 18:05:32  caress
+ * Added svp_source to data source parameters.
+ *
  * Revision 5.7  2003/04/17 21:05:23  caress
  * Release 5.0.beta30
  *
@@ -113,7 +116,7 @@ static char header[] = "Year,Day,Time,Usec,Lat,Lon,East,North,Pres,Head,Alti,Pit
 /*--------------------------------------------------------------------*/
 int mbr_register_mbarirov(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_mbarirov.c,v 5.8 2003-05-20 18:05:32 caress Exp $";
+	static char res_id[]="$Id: mbr_mbarirov.c,v 5.9 2004-04-27 01:46:12 caress Exp $";
 	char	*function_name = "mbr_register_mbarirov";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -245,7 +248,7 @@ int mbr_info_mbarirov(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_mbarirov.c,v 5.8 2003-05-20 18:05:32 caress Exp $";
+	static char res_id[]="$Id: mbr_mbarirov.c,v 5.9 2004-04-27 01:46:12 caress Exp $";
 	char	*function_name = "mbr_info_mbarirov";
 	int	status = MB_SUCCESS;
 
@@ -315,7 +318,7 @@ int mbr_info_mbarirov(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_mbarirov(int verbose, void *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_mbarirov.c,v 5.8 2003-05-20 18:05:32 caress Exp $";
+ static char res_id[]="$Id: mbr_mbarirov.c,v 5.9 2004-04-27 01:46:12 caress Exp $";
 	char	*function_name = "mbr_alm_mbarirov";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -754,7 +757,12 @@ int mbr_mbarirov_rd_data(int verbose, void *mbio_ptr, int *error)
 		}
 
 	    /* catch erroneous records with wrong number of columns */
-	    if (nread != 13 && nread != 18)
+	    if (nread == 8)
+	    	{
+		data->easting = 0.0;
+		data->northing = 0.0;
+		}
+	    else if (nread != 13 && nread != 18)
 	    	{
 	    	status = MB_FAILURE;
 	   	*error = MB_ERROR_UNINTELLIGIBLE;

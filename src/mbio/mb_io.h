@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	1/19/93
- *    $Id: mb_io.h,v 5.15 2003-05-20 18:05:32 caress Exp $
+ *    $Id: mb_io.h,v 5.16 2004-04-27 01:46:12 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.15  2003/05/20 18:05:32  caress
+ * Added svp_source to data source parameters.
+ *
  * Revision 5.14  2003/04/17 21:05:23  caress
  * Release 5.0.beta30
  *
@@ -433,6 +436,20 @@ struct mb_io_struct
 		double *rawss, 
 		double *rawssacrosstrack, 
 		double *rawssalongtrack, 
+		int *error);
+	int (*mb_io_extract_segyheader)(int verbose, void *mbio_ptr, void *store_ptr,
+		int *kind,
+		void *segyheader_ptr, 
+		int *error);
+	int (*mb_io_extract_segy)(int verbose, void *mbio_ptr, void *store_ptr,
+		int *kind,
+		void *segyheader_ptr, 
+		float *segydata, 
+		int *error);
+	int (*mb_io_insert_segy)(int verbose, void *mbio_ptr, void *store_ptr,
+		int kind,
+		void *segyheader_ptr, 
+		float *segydata, 
 		int *error);
 	int (*mb_io_copyrecord)(int verbose, void *mbio_ptr,
 		void *store_ptr, void *copy_ptr, int *error);

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_write_init.c	1/25/93
- *    $Id: mb_write_init.c,v 5.14 2003-04-17 21:05:23 caress Exp $
+ *    $Id: mb_write_init.c,v 5.15 2004-04-27 01:46:11 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	January 25, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.14  2003/04/17 21:05:23  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.13  2003/02/27 04:33:33  caress
  * Fixed handling of SURF format data.
  *
@@ -190,7 +193,7 @@ int mb_write_init(int verbose,
 		int *beams_bath, int *beams_amp, int *pixels_ss,
 		int *error)
 {
-	static char rcs_id[]="$Id: mb_write_init.c,v 5.14 2003-04-17 21:05:23 caress Exp $";
+	static char rcs_id[]="$Id: mb_write_init.c,v 5.15 2004-04-27 01:46:11 caress Exp $";
 	char	*function_name = "mb_write_init";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -449,7 +452,7 @@ int mb_write_init(int verbose,
 	    if (strncmp(file,stdout_string,6) == 0)
 		mb_io_ptr->mbfp = stdout;
 	    else
-		if ((mb_io_ptr->mbfp = fopen(mb_io_ptr->file, "w")) == NULL) 
+		if ((mb_io_ptr->mbfp = fopen(mb_io_ptr->file, "wb")) == NULL) 
 		    {
 		    *error = MB_ERROR_OPEN_FAIL;
 		    status = MB_FAILURE;
@@ -459,7 +462,7 @@ int mb_write_init(int verbose,
 	    if (status == MB_SUCCESS 
 		&& mb_io_ptr->numfile >= 2)
 		{
-		if ((mb_io_ptr->mbfp2 = fopen(mb_io_ptr->file2, "w")) == NULL) 
+		if ((mb_io_ptr->mbfp2 = fopen(mb_io_ptr->file2, "wb")) == NULL) 
 		    {
 		    *error = MB_ERROR_OPEN_FAIL;
 		    status = MB_FAILURE;
@@ -469,13 +472,13 @@ int mb_write_init(int verbose,
 	    /* or open the second file if desired and possible */
 	    else if (status == MB_SUCCESS 
 		&& mb_io_ptr->numfile <= -2)
-		mb_io_ptr->mbfp2 = fopen(mb_io_ptr->file2, "w");
+		mb_io_ptr->mbfp2 = fopen(mb_io_ptr->file2, "wb");
  
 	    /* open the third file if required */
 	    if (status == MB_SUCCESS 
 		&& mb_io_ptr->numfile >= 3)
 		{
-		if ((mb_io_ptr->mbfp3 = fopen(mb_io_ptr->file3, "w")) == NULL) 
+		if ((mb_io_ptr->mbfp3 = fopen(mb_io_ptr->file3, "wb")) == NULL) 
 		    {
 		    *error = MB_ERROR_OPEN_FAIL;
 		    status = MB_FAILURE;
@@ -485,7 +488,7 @@ int mb_write_init(int verbose,
 	    /* or open the third file if desired and possible */
 	    else if (status == MB_SUCCESS 
 		&& mb_io_ptr->numfile <= -3)
-		mb_io_ptr->mbfp3 = fopen(mb_io_ptr->file3, "w");
+		mb_io_ptr->mbfp3 = fopen(mb_io_ptr->file3, "wb");
     
 	    /* if needed, initialize XDR stream */
 	    if (status == MB_SUCCESS && mb_io_ptr->filetype == MB_FILETYPE_XDR)

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_hdcs.c	3/1/99
- *	$Id: mbsys_hdcs.c,v 5.5 2003-04-17 21:05:23 caress Exp $
+ *	$Id: mbsys_hdcs.c,v 5.6 2004-04-27 01:46:14 caress Exp $
  *
  *    Copyright (c) 1999, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	March 16, 1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2003/04/17 21:05:23  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.4  2002/09/18 23:32:59  caress
  * Release 5.0.beta23
  *
@@ -71,7 +74,7 @@
 int mbsys_hdcs_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_hdcs.c,v 5.5 2003-04-17 21:05:23 caress Exp $";
+ static char res_id[]="$Id: mbsys_hdcs.c,v 5.6 2004-04-27 01:46:14 caress Exp $";
 	char	*function_name = "mbsys_hdcs_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -686,7 +689,7 @@ int mbsys_hdcs_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		{
 		status = mb_malloc(verbose,
 			    store->num_beam * sizeof(struct mbsys_hdcs_beam_struct), 
-			    store->beams,error);
+			    &store->beams,error);
 		}
 
 	    /* get bath and sidescan */
