@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  6/1/2002
-#	$Id: Makefile.template,v 5.0 2002-06-02 01:35:51 caress Exp $
+#	$Id: Makefile.template,v 5.1 2002-07-20 20:56:37 caress Exp $
 #
 #     Copyright (c) 2002 by
 #     David W. Caress (caress@mbari.org)
@@ -16,6 +16,9 @@
 # Date:		June 1, 2002
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.0  2002/06/02 01:35:51  caress
+# Initial revision.
+#
 #
 #
 
@@ -36,7 +39,7 @@ MANDIR = ../../man/manl
 
 ### make all makes the sapi library, man page, and associated include files
 all:	$(LIBDIR)/libsapi.a \
-	$(INCDIR)/sapi.h $(INCDIR)/surf.h 
+	$(INCDIR)/sapi.h
 
 ### make clean removes the object files
 clean:
@@ -95,7 +98,3 @@ xdr_surf.o:      xdr_surf.c  \
 $(INCDIR)/sapi.h:	sapi.h
 	cp sapi.h $(INCDIR)/sapi.h
 	chmod 664 $(INCDIR)/sapi.h
-$(INCDIR)/surf.h:	surf.h
-	cp surf.h $(INCDIR)/surf.h
-	chmod 664 $(INCDIR)/surf.h
-

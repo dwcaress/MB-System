@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcopy.c	2/4/93
- *    $Id: mbcopy.c,v 5.10 2002-05-29 23:43:09 caress Exp $
+ *    $Id: mbcopy.c,v 5.11 2002-07-20 20:56:55 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	February 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.10  2002/05/29 23:43:09  caress
+ * Release 5.0.beta18
+ *
  * Revision 5.9  2002/05/02 04:01:37  caress
  * Release 5.0.beta17
  *
@@ -199,7 +202,7 @@ int mbcopy_any_to_mbldeoih(int verbose,
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbcopy.c,v 5.10 2002-05-29 23:43:09 caress Exp $";
+	static char rcs_id[] = "$Id: mbcopy.c,v 5.11 2002-07-20 20:56:55 caress Exp $";
 	static char program_name[] = "MBcopy";
 	static char help_message[] =  "MBcopy copies an input swath sonar data file to an output \nswath sonar data file with the specified conversions.  Options include \nwindowing in time and space and ping averaging.  The input and \noutput data formats may differ, though not all possible combinations \nmake sense.  The default input and output streams are stdin and stdout.";
 	static char usage_message[] = "mbcopy [-Byr/mo/da/hr/mn/sc -Ccommentfile -D -Eyr/mo/da/hr/mn/sc \n\t-Fiformat/oformat -H  -Iinfile -Llonflip -N -Ooutfile \n\t-Ppings -Qsleep_factor -Rw/e/s/n -Sspeed -V]";
@@ -1653,7 +1656,8 @@ int mbcopy_simrad_to_simrad2(int verbose,
 	double	*angles_simrad;
 	double	bath_offset;
 	double	alpha, beta, theta, phi;
-	int	istep, interleave;
+	int	istep = 0;
+	int	interleave = 0;
 	int	i;
 
 	/* print input debug statements */
@@ -2313,7 +2317,7 @@ int mbcopy_simrad_to_simrad2(int verbose,
 				}
 			    else if (istore->sonar == MBSYS_SIMRAD_EM1000)
 				{
-				beta = 90.0 + angles_simrad[2*i+istep];
+				beta = 90.0 + angles_simrad[i];
 				}
 			    else
 				{
@@ -2350,8 +2354,9 @@ int mbcopy_simrad_to_simrad2(int verbose,
 			    }
 					   
 			/* raw travel time and angle data */
-			oping->png_raw_read = MB_NO;	/* flag indicating actual reading of rawbeam record */
-			oping->png_nrawbeams = 0;	/* number of raw travel times and angles
+			oping->png_raw1_read = MB_NO;	/* flag indicating actual reading of rawbeam1 record */
+			oping->png_raw2_read = MB_NO;	/* flag indicating actual reading of rawbeam2 record */
+			oping->png_raw_nbeams = 0;	/* number of raw travel times and angles
 				    - nonzero only if raw beam record read */
 					/* number of valid beams */
 	

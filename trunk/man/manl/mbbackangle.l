@@ -1,6 +1,6 @@
-.TH mbbackangle l "9 August 2001" "MB-System 5.0" "MB-System 5.0"
+.TH mbbackangle l "20 July 2002" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
-\fBmbbackangle\fP - Generates a table of the average amplitude or 
+\fBmbbackangle\fP - Generates tables of the average amplitude or 
 sidescan values in swath sonar data as a function of 
 the grazing angle with the seafloor.
 
@@ -8,28 +8,30 @@ the grazing angle with the seafloor.
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbbackangle\fP [\fB-A\fIkind\fP \fB-B\fIyr/mo/da/hr/mn/sc 
-\fB-C\fP \fB-E\fIyr/mo/da/hr/mn/sc 
-\fB-F\fIformat\fP \fB-I\fIfile\fP  \fB-N\fInangle/anglemax\fP
-\fB-R\fIwest/east/south/north\fP \fB-S\fIspeed 
-\fB-Z\fIdepth\fP \fB-V -H\fP]
+\fBmbbackangle\fP [\fB-A\fIkind\fP 
+\fB-C\fP  \fB-F\fIformat\fP \fB-I\fIfile\fP  
+\fB-N\fInangle/anglemax\fP \fB-P\fIpings\fP
+\fB-Z\fIaltitude\fP \fB-V -H\fP]
 
 .SH DESCRIPTION
 The program \fBmbbackangle\fP reads a swath sonar data file 
 containing beam amplitude and/or sidescan data and generates a table
 of the average amplitude or sidescan values as a function of
 the grazing angle with the seafloor. This table can be used
-by the program \fBmbanglecorrect\fP to correct the amplitude or
+by the program \fBmbprocess\fP to correct the amplitude or
 sidescan data for the variation with grazing angle. No assumption
 is made about the nature of the data or the sonar used to
 collect it. If bathymetry is
-not available, the seafloor is assumed to be flat with a depth
+not available, the seafloor is assumed to be flat with a sonar altitude
 specified by the \fB-Z\fP option. The takeoff
 angle for each beam or pixel arrival is projected to the seafloor;
 no raytracing is done. The user specifies the angular width 
 of the swath considered and the number of angular bins in that
 swath; the average amplitude or sidescan value within each bin
-form the output data. The results are dumped to stdout.
+form the output data. The results are written to a file named by 
+adding a ".sga" suffix to the swath filename. The swath file's 
+\fBmbprocess\fP parameter file is also modified (or created if necessary)
+so that sidescan correction is enabled.
 
 .SH AUTHORSHIP
 David W. Caress (caress@mbari.org)
@@ -49,49 +51,20 @@ Determines whether beam amplitude (\fIkind\fP = 1)
 or sidescan (\fIkind\fP = 2) data will be processed. 
 Default: \fIkind\fP = 2.
 .TP
-.B \-B
-\fIyr/mo/da/hr/mn/sc\fP
-.br
-This option sets the starting time for data allowed in the input data.
-The \fB-E\fP option sets the ending time for data. If the 
-starting time is before the ending time, then any data
-with a time stamp before the starting time or after the
-ending time is ignored. If instead the starting time is
-after the ending time, then any data between the ending
-and starting time will be ignored. This scheme allows time
-windowing both inside and outside a specified interval.
-Default: \fIyr/mo/da/hr/mn/sc\fP = 1962/2/21/10/30/0.
-.TP
 .B \-C
 Normally, \fBmbbackangle\fP produces a table of amplitude vs
 grazing angle values which is symmetric about the vertical
 (zero angle) axis. If \fB-C\fP is specified, the amplitude
 vs grazing angle function will not be forced to be symmetric.
 .TP
-.B \-E
-\fIyr/mo/da/hr/mn/sc\fP
-.br
-This option sets the ending time for data allowed in the input data.
-The \fB-B\fP option sets the starting time for data. If the 
-starting time is before the ending time, then any data
-with a time stamp before the starting time or after the
-ending time is ignored. If instead the starting time is
-after the ending time, then any data between the ending
-and starting time will be ignored. This scheme allows time
-windowing both inside and outside a specified interval.
-Default: \fIyr/mo/da/hr/mn/sc\fP = 2062/2/21/10/30/0.
-.TP
 .B \-F
 \fIformat\fP
 .br
-Sets the data format used if the input is read from stdin
-or from a file. If \fIformat\fP < 0, then the input file specified
-with the \fB-I\fP option will actually contain a list of input swath sonar
-data files. This program uses the \fBMBIO\fP library 
-and will read or write any swath sonar
-format supported by \fBMBIO\fP. A list of the swath sonar data formats
-currently supported by \fBMBIO\fP and their identifier values
-is given in the \fBMBIO\fP manual page. Default: \fIformat\fP = 11.
+Sets the \fBMBIO\fP integer format identifier 
+for the input file specified with the
+\fB-I\fP option. By default, \fBmbbackangle\fP
+infers the format from the "*.mbXX" \fBMB-System\fP suffix
+convention. 
 .TP
 .B \-H
 This "help" flag causes the program to print out a description
@@ -129,20 +102,14 @@ grazing angle bins (\fInangle\fP) and the maximum angle considered
 so that the middle bin is centered on the angle 0.0.
 Default: \fInangle\fP = 161, \fIangle\fP = 80.0.
 .TP
-.B \-R
-\fIwest/east/south/north\fP
+.B \-P
+\fIpings\fP
 .br
-Sets the longitude and latitude bounds within which swath sonar 
-data will be read. Only the data which lies within these bounds will
-be copied. 
-Default: \fIwest\fP=-360, east\fI=360\fP, \fIsouth\fP=-90, \fInorth\fP=90.
-.TP
-.B \-S
-\fIspeed\fP
-.br
-Sets the minimum speed in km/hr (5.5 kts ~ 10 km/hr) allowed in 
-the input data; pings associated with a smaller ship speed will not be
-copied. Default: \fIspeed\fP = 0.
+Sets the number of pings to be read and averaged for each
+amplitude vs grazing angle table. The output *.sga table
+will generally contain many tables, each with a timestamp
+corresponding to the average of the ping times used for
+each table. Default: \fIspeed\fP = 25.
 .TP
 .B \-V
 Normally, \fBmbbackangle\fP works "silently" without outputting
@@ -153,7 +120,7 @@ outputs the program version being used and all error status messages.
 .B \-Z
 \fIdepth\fP
 .br
-This option specifies a default depth value in meters to be
+This option specifies a default sonar altitude value in meters to be
 used whenever bathymetry values are unavailable. A flat seafloor
 (zero slope) will be assumed wherever the default depth needs
 to be used (e.g. data files with sidescan but no bathymetry, or
