@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbbackangle.c	1/6/95
- *    $Id: mbbackangle.c,v 5.2 2001-07-20 00:34:38 caress Exp $
+ *    $Id: mbbackangle.c,v 5.3 2002-07-20 20:56:55 caress Exp $
  *
  *    Copyright (c) 1995, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	January 6, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2001/07/20 00:34:38  caress
+ * Release 5.0.beta03
+ *
  * Revision 5.1  2001/03/22 21:14:16  caress
  * Trying to make release 5.0.beta0.
  *
@@ -81,6 +84,8 @@
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <time.h>
 
 /* MBIO include files */
 #include "../../include/mb_status.h"
@@ -90,21 +95,39 @@
 #define	MBBACKANGLE_AMP	1
 #define	MBBACKANGLE_SS	2
 
+int get_bathyslope(int verbose,
+	int ndepths, double *depths, double *depthacrosstrack, 
+	int nslopes, double *slopes, double *slopeacrosstrack, 
+	double acrosstrack, double *depth,  double *slope, 
+	int *error);
+int set_bathyslope(int verbose,
+	int nbath, char *beamflag, double *bath, double *bathacrosstrack,
+	int *ndepths, double *depths, double *depthacrosstrack, 
+	int *nslopes, double *slopes, double *slopeacrosstrack, 
+	int *error);
+int output_table(int verbose, FILE *tfp, int ntable, int nping, double time_d,
+	int nangles, double angle_max, double dangle, int asymmetry,
+	int *nmean, double *mean, double *sigma, 
+	int *error);
+
+static char rcs_id[] = "$Id: mbbackangle.c,v 5.3 2002-07-20 20:56:55 caress Exp $";
+
 /*--------------------------------------------------------------------*/
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbbackangle.c,v 5.2 2001-07-20 00:34:38 caress Exp $";
 	static char program_name[] = "mbbackangle";
 	static char help_message[] =  
-"mbbackangle reads a swath sonar data file and generates a table\n\t\
-of the average amplitude or sidescan values as a function of\n\t\
-the angle of interaction with the seafloor. If bathymetry is\n\t\
-not available,  the seafloor is assumed to be flat.\n\t\
-The results are dumped to stdout.";
-	static char usage_message[] = "mbbackangle [-Akind \
--Byr/mo/da/hr/mn/sc -C -Dmax_angle -Eyr/mo/da/hr/mn/sc -Fformat \
--Ifile -Llonflip -Nnangles -Ppings -Rw/e/s/n -Sspeed -Zdepth -V -H]";
+"MBbackangle reads a swath sonar data file and generates \n\t\
+a set of tables containing the average sidescan values\n\t\
+as a function of the angle of interaction (grazing angle) \n\t\
+with the seafloor. Each table represents the symmetrical \n\t\
+average function for a user defined number of pings. The \n\t\
+tables are output to an \".aga\" file which can be applied \n\t\
+by MBprocess.";
+	static char usage_message[] = "mbbackangle -Ifile \
+[-Akind \
+-Fformat -Nnangles/angle_max -Ppings -Zaltitude -V -H]";
 	extern char *optarg;
 	extern int optkind;
 	int	errflg = 0;
@@ -120,7 +143,7 @@ The results are dumped to stdout.";
 
 	/* MBIO read control parameters */
 	int	read_datalist = MB_NO;
-	char	read_file[128];
+	char	read_file[MB_PATH_MAXLINE];
 	void	*datalist;
 	int	look_processed = MB_DATALIST_LOOK_UNSET;
 	double	file_weight;
@@ -134,7 +157,9 @@ The results are dumped to stdout.";
 	double	etime_d;
 	double	speedmin;
 	double	timegap;
-	char	file[128];
+	char	swathfile[MB_PATH_MAXLINE];
+	char	tablefile[MB_PATH_MAXLINE];
+	FILE	*tfp;
 	int	beams_bath;
 	int	beams_amp;
 	int	pixels_ss;
@@ -172,17 +197,18 @@ The results are dumped to stdout.";
 
 	/* angle function variables */
 	int	ampkind = MBBACKANGLE_SS;
-	int	symmetry = MB_YES;
+	int	asymmetry = MB_NO;
 	int	nangles = 161;
-	double	angle_min = -80.0;
 	double	angle_max = 80.0;
-	double	angle_start;
 	double	dangle;
+	double	angle_start;
+	int	pings_avg = 25;
+	int	navg = 0;
 	int	*nmean = NULL;
 	double	*mean = NULL;
-	double	*angles = NULL;
 	double	*sigma = NULL;
-	double	depth_default = 0.0;
+	double	altitude_default = 0.0;
+	double	time_d_avg;
 
 	int	read_data;
 	char	line[128];
@@ -190,10 +216,19 @@ The results are dumped to stdout.";
 	double	slope;
 	double	angle;
 	double	slopeangle;
-	int	nrec, nvalue;
+	int	nrec, nvalue, ntable;
 	int	nrectot = 0;
 	int	nvaluetot = 0;
+	int	ntabletot = 0;
+
+	/* time, user, host variables */
+	time_t	right_now;
+	char	date[25], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
+
 	int	i, j, k, l, m;
+	
+	char	*ctime();
+	char	*getenv();
 
 	/* get current default values */
 	status = mb_defaults(verbose,&format,&pings,&lonflip,bounds,
@@ -207,7 +242,7 @@ The results are dumped to stdout.";
 	strcpy (read_file, "stdin");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "A:a:B:b:CcE:e:F:f:HhI:i:N:n:R:r:S:s:VvZ:z:")) != -1)
+	while ((c = getopt(argc, argv, "A:a:CcF:f:HhI:i:N:n:P:p:VvZ:z:")) != -1)
 	  switch (c) 
 		{
 		case 'A':
@@ -215,25 +250,9 @@ The results are dumped to stdout.";
 			sscanf (optarg,"%d", &ampkind);
 			flag++;
 			break;
-		case 'B':
-		case 'b':
-			sscanf (optarg,"%d/%d/%d/%d/%d/%d",
-				&btime_i[0],&btime_i[1],&btime_i[2],
-				&btime_i[3],&btime_i[4],&btime_i[5]);
-			btime_i[6] = 0;
-			flag++;
-			break;
 		case 'C':
 		case 'c':
-			symmetry = MB_NO;
-			flag++;
-			break;
-		case 'E':
-		case 'e':
-			sscanf (optarg,"%d/%d/%d/%d/%d/%d",
-				&etime_i[0],&etime_i[1],&etime_i[2],
-				&etime_i[3],&etime_i[4],&etime_i[5]);
-			etime_i[6] = 0;
+			asymmetry = MB_YES;
 			flag++;
 			break;
 		case 'F':
@@ -253,17 +272,13 @@ The results are dumped to stdout.";
 		case 'N':
 		case 'n':
 			sscanf (optarg,"%d/%lf", &nangles, &angle_max);
-			angle_min = -angle_max;
+			angle_max;
 			flag++;
 			break;
-		case 'R':
-		case 'r':
-			mb_get_bounds(optarg, bounds);
-			flag++;
-			break;
-		case 'S':
-		case 's':
-			sscanf (optarg,"%lf", &speedmin);
+		case 'P':
+		case 'p':
+			sscanf (optarg,"%d", &pings_avg);
+			angle_max;
 			flag++;
 			break;
 		case 'V':
@@ -272,7 +287,7 @@ The results are dumped to stdout.";
 			break;
 		case 'Z':
 		case 'z':
-			sscanf (optarg,"%lf", &depth_default);
+			sscanf (optarg,"%lf", &altitude_default);
 			flag++;
 			break;
 		case '?':
@@ -329,12 +344,13 @@ The results are dumped to stdout.";
 		fprintf(stderr,"dbg2       etime_i[6]: %d\n",etime_i[6]);
 		fprintf(stderr,"dbg2       speedmin:   %f\n",speedmin);
 		fprintf(stderr,"dbg2       timegap:    %f\n",timegap);
-		fprintf(stderr,"dbg2       file:       %s\n",read_file);
+		fprintf(stderr,"dbg2       read_file:  %s\n",read_file);
 		fprintf(stderr,"dbg2       ampkind:    %d\n",ampkind);
 		fprintf(stderr,"dbg2       nangles:    %d\n",nangles);
-		fprintf(stderr,"dbg2       angle_min:  %f\n",angle_min);
+		fprintf(stderr,"dbg2       dangle:     %f\n",dangle);
+		fprintf(stderr,"dbg2       pings_avg:  %d\n",pings_avg);
 		fprintf(stderr,"dbg2       angle_max:  %f\n",angle_max);
-		fprintf(stderr,"dbg2       depth_def:  %f\n",depth_default);
+		fprintf(stderr,"dbg2       altitude:   %f\n",altitude_default);
 		}
 
 	/* if help desired then print it and exit */
@@ -354,9 +370,6 @@ The results are dumped to stdout.";
 				&mean,&error);
 	if (error == MB_ERROR_NO_ERROR)
 		status = mb_malloc(verbose,nangles*sizeof(double),
-				&angles,&error);
-	if (error == MB_ERROR_NO_ERROR)
-		status = mb_malloc(verbose,nangles*sizeof(double),
 				&sigma,&error);
 
 	/* if error initializing memory then quit */
@@ -372,10 +385,10 @@ The results are dumped to stdout.";
 	/* output some information */
 	if (verbose > 0)
 		{
-		fprintf(stderr, "\nNumber of angle bins: %d\n", nangles);
-		fprintf(stderr, "Minimum angle:         %f\n", angle_min);
+		fprintf(stderr, "\nPings to average:    %d\n", pings_avg);
+		fprintf(stderr, "Number of angle bins: %d\n", nangles);
 		fprintf(stderr, "Maximum angle:         %f\n", angle_max);
-		fprintf(stderr, "Default depth:         %f\n", depth_default);
+		fprintf(stderr, "Default altitude:      %f\n", altitude_default);
 		if (ampkind == MBBACKANGLE_AMP)
 			fprintf(stderr, "Working on beam amplitude data...\n");
 		else
@@ -383,15 +396,14 @@ The results are dumped to stdout.";
 		}
 
 	/* get size of bins */
-	dangle = (angle_max - angle_min)/(nangles-1);
-	angle_start = angle_min - 0.5*dangle;
+	dangle = 2 * angle_max / (nangles-1);
+	angle_start = -angle_max - 0.5*dangle;
 
 	/* initialize histogram */
 	for (i=0;i<nangles;i++)
 		{
 		nmean[i] = 0;
 		mean[i] = 0.0;
-		angles[i] = angle_min + i*dangle;
 		sigma[i] = 0.0;
 		}
 
@@ -417,7 +429,7 @@ The results are dumped to stdout.";
 		exit(error);
 		}
 	    if (status = mb_datalist_read(verbose,datalist,
-			    file,&format,&file_weight,&error)
+			    swathfile,&format,&file_weight,&error)
 			    == MB_SUCCESS)
 		read_data = MB_YES;
 	    else
@@ -426,7 +438,7 @@ The results are dumped to stdout.";
 	/* else copy single filename to be read */
 	else
 	    {
-	    strcpy(file, read_file);
+	    strcpy(swathfile, read_file);
 	    read_data = MB_YES;
 	    }
 
@@ -440,14 +452,14 @@ The results are dumped to stdout.";
 
 	/* initialize reading the swath sonar file */
 	if ((status = mb_read_init(
-		verbose,file,format,pings,lonflip,bounds,
+		verbose,swathfile,format,1,lonflip,bounds,
 		btime_i,etime_i,speedmin,timegap,
 		&mbio_ptr,&btime_d,&etime_d,
 		&beams_bath,&beams_amp,&pixels_ss,&error)) != MB_SUCCESS)
 		{
 		mb_error(verbose,error,&message);
 		fprintf(stderr,"\nMBIO Error returned from function <mb_read_init>:\n%s\n",message);
-		fprintf(stderr,"\nMultibeam File <%s> not initialized for reading\n",file);
+		fprintf(stderr,"\nMultibeam File <%s> not initialized for reading\n",swathfile);
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
 		exit(error);
@@ -504,12 +516,60 @@ The results are dumped to stdout.";
 	/* output information */
 	if (error == MB_ERROR_NO_ERROR && verbose > 0)
 	    {
-	    fprintf(stderr, "\nprocessing file: %s %d\n", file, format);
+	    fprintf(stderr, "\nprocessing swath file: %s %d\n", swathfile, format);
+	    }
+
+	/* open output file */
+	if (error == MB_ERROR_NO_ERROR && verbose > 0)
+	    {
+	    strcpy(tablefile,swathfile);
+ 	    if (ampkind == MBBACKANGLE_SS)
+	    	strcat(tablefile,".sga");
+ 	    else
+	    	strcat(tablefile,".aga");
+	    if ((tfp = fopen(tablefile,"w")) == NULL)
+		    {
+		    error = MB_ERROR_OPEN_FAIL;
+		    mb_error(verbose,error,&message);
+		    fprintf(stderr, "\nUnable to open output table file %s\n", tablefile);
+		    fprintf(stderr, "Program %s aborted!\n", program_name);
+		    exit(error);
+		    }
+		    
+	    /* set comments in table file */
+	    fprintf(tfp,"## Sidescan correction table files generated by program %s\n",program_name);
+	    fprintf(tfp,"## Version %s\n",rcs_id);
+	    fprintf(tfp,"## MB-system Version %s\n",MB_VERSION);
+	    fprintf(tfp,"## Table file format: 1.0.0\n");
+	    right_now = time((time_t *)0);
+	    strncpy(date,ctime(&right_now),24);
+	    if ((user_ptr = getenv("USER")) == NULL)
+		user_ptr = getenv("LOGNAME");
+	    if (user_ptr != NULL)
+		strcpy(user,user_ptr);
+	    else
+		strcpy(user, "unknown");
+	    gethostname(host,MB_PATH_MAXLINE);
+	    fprintf(tfp,"## Run by user <%s> on cpu <%s> at <%s>\n",
+			user,host,date);
+	    fprintf(tfp, "## Input swath file:      %s\n", swathfile);
+	    fprintf(tfp, "## Input swath format:    %d\n", format);
+	    fprintf(tfp, "## Output table file:     %s\n", tablefile);
+	    fprintf(tfp, "## Pings to average:      %d\n", pings_avg);
+	    fprintf(tfp, "## Number of angle bins:  %d\n", nangles);
+	    fprintf(tfp, "## Maximum angle:         %f\n", angle_max);
+	    fprintf(tfp, "## Default altitude:      %f\n", altitude_default);
+	    if (ampkind == MBBACKANGLE_AMP)
+		fprintf(tfp, "## Data type:             beam amplitude\n");
+	    else
+		fprintf(tfp, "## Data type:             sidescan\n");
 	    }
 
 	/* initialize counting variables */
 	nrec = 0;
 	nvalue = 0;
+	navg = 0;
+	ntable = 0;
 
 	/* read and process data */
 	while (error <= MB_ERROR_NO_ERROR)
@@ -526,12 +586,40 @@ The results are dumped to stdout.";
 				ss,ssacrosstrack,ssalongtrack,
 				comment,&error);
 
+		if ((navg > 0
+			&& (error == MB_ERROR_TIME_GAP
+				|| error == MB_ERROR_EOF))
+			|| (navg >= pings_avg))
+			{
+			/* write out table */
+			time_d_avg /= navg;
+			output_table(verbose, tfp, ntable, navg, time_d_avg, 
+					nangles, angle_max, dangle, asymmetry,
+					nmean, mean, sigma, &error);
+			ntable++;
+					
+			/* reinitialize arrays */
+			navg = 0;
+			time_d_avg = 0.0;
+			for (i=0;i<nangles;i++)
+				{
+				nmean[i] = 0;
+				mean[i] = 0.0;
+				sigma[i] = 0.0;
+				}
+			}
+
+
 		/* process the pings */
 		if (error == MB_ERROR_NO_ERROR 
 		    || error == MB_ERROR_TIME_GAP)
 		    {
 		    /* increment record counter */
 		    nrec++;
+		    navg++;
+		    
+		    /* increment time */
+		    time_d_avg += time_d;
 
 		    /* get the seafloor slopes */
 		    if (beams_bath > 0)
@@ -550,7 +638,7 @@ The results are dumped to stdout.";
 			    nvalue++;
 			    if (beams_bath != beams_amp)
 				{
-				bathy = depth_default;
+				bathy = altitude_default;
 				slope = 0.0;
 				}
 			    else
@@ -562,7 +650,7 @@ The results are dumped to stdout.";
 				    &bathy,&slope,&error);
 				if (status != MB_SUCCESS)
 				    {
-				    bathy = depth_default;
+				    bathy = altitude_default;
 				    slope = 0.0;
 				    status = MB_SUCCESS;
 				    error = MB_ERROR_NO_ERROR;
@@ -573,6 +661,7 @@ The results are dumped to stdout.";
 				angle = RTD*(atan(bathacrosstrack[i]/bathy)
 				    + atan(slope));
 				j = (angle - angle_start)/dangle;
+				/*j = (int)((fabs(angle) + 0.5 * dangle)/dangle);*/
 				if (j >= 0 && j < nangles)
 				    {
 				    mean[j] += amp[i];
@@ -606,7 +695,7 @@ The results are dumped to stdout.";
 				    &bathy,&slope,&error);
 				if (status != MB_SUCCESS)
 				    {
-				    bathy = depth_default;
+				    bathy = altitude_default;
 				    slope = 0.0;
 				    status = MB_SUCCESS;
 				    error = MB_ERROR_NO_ERROR;
@@ -614,7 +703,7 @@ The results are dumped to stdout.";
 				}
 			    else
 				{
-				bathy = depth_default;
+				bathy = altitude_default;
 				slope = 0.0;
 				}
 			    if (bathy > 0.0)
@@ -622,6 +711,7 @@ The results are dumped to stdout.";
 				angle = RTD*(atan(ssacrosstrack[i]/bathy) 
 				    + atan(slope));
 				j = (angle - angle_start)/dangle;
+				/*j = (int)((fabs(angle) + 0.5 * dangle)/dangle);*/
 				if (j >= 0 && j < nangles)
 				    {
 				    mean[j] += ss[i];
@@ -644,12 +734,19 @@ The results are dumped to stdout.";
 
 	/* close the swath sonar file */
 	status = mb_close(verbose,&mbio_ptr,&error);
+	fclose(tfp);
+	ntabletot += ntable;
 	nrectot += nrec;
 	nvaluetot += nvalue;
+	
+	/* set sidescan correction in parameter file */
+	status = mb_pr_update_sscorr(verbose, swathfile, 
+			MB_YES, tablefile, &error);
 
 	/* output information */
 	if (error == MB_ERROR_NO_ERROR && verbose > 0)
 	    {
+	    fprintf(stderr, "%d tables written to %s\n", ntable, tablefile);
 	    fprintf(stderr, "%d records processed\n%d data processed\n", 
 		    nrec, nvalue);
 	    }
@@ -672,7 +769,7 @@ The results are dumped to stdout.";
         if (read_datalist == MB_YES)
                 {
 		if (status = mb_datalist_read(verbose,datalist,
-			    file,&format,&file_weight,&error)
+			    swathfile,&format,&file_weight,&error)
 			    == MB_SUCCESS)
                         read_data = MB_YES;
                 else
@@ -691,60 +788,14 @@ The results are dumped to stdout.";
 	/* output information */
 	if (error == MB_ERROR_NO_ERROR && verbose > 0)
 	    {
-	    fprintf(stderr, "\n%d total records processed\n", nrectot);
+	    fprintf(stderr, "\n%d total tables written\n", ntabletot);
+	    fprintf(stderr, "%d total records processed\n", nrectot);
 	    fprintf(stderr, "%d total data processed\n\n", nvaluetot);
 	    }
-
-	/* process sums */
-	if (symmetry == MB_NO)
-	{
-	for (i=0;i<nangles;i++)
-		{
-		if (nmean[i] > 0)
-			{
-			mean[i] = mean[i]/nmean[i];
-			sigma[i] = sqrt(sigma[i]/nmean[i] 
-				- mean[i]*mean[i]);
-			}
-		}
-	}
-	else
-	{
-	k = nangles/2;
-	if (fmod((double)nangles, 2) > 0.0)
-		k++;
-	for (i=0;i<k;i++)
-		{
-		j = nangles - i - 1;
-		if (nmean[i] + nmean[j] > 0)
-			{
-			mean[i] = mean[i] + mean[j];
-			nmean[i] = nmean[i] + nmean[j];
-			sigma[i] = sigma[i] + sigma[j];
-			mean[i] = mean[i]/nmean[i];
-			sigma[i] = sqrt(sigma[i]/nmean[i] 
-				- mean[i]*mean[i]);
-			mean[j] = mean[i];
-			nmean[j] = nmean[i];
-			sigma[j] = sigma[i];
-			}
-		}
-	}
-
-	/* print out the results */
-	for (i=0;i<nangles;i++)
-		{
-		if (nmean[i] > 0)
-			{
-			fprintf(stdout,"%f %f\n",
-				angles[i],mean[i]);
-			}
-		}
 
 	/* deallocate memory used for data arrays */
 	mb_free(verbose,&nmean,&error);
 	mb_free(verbose,&mean,&error);
-	mb_free(verbose,&angles,&error);
 	mb_free(verbose,&sigma,&error);
 
 	/* set program status */
@@ -960,3 +1011,92 @@ int get_bathyslope(int verbose,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+int output_table(int verbose, FILE *tfp, int ntable, int nping, double time_d,
+	int nangles, double angle_max, double dangle, int asymmetry, 
+	int *nmean, double *mean, double *sigma, 
+	int *error)
+{
+	char	*function_name = "get_bathyslope";
+	int	status = MB_SUCCESS;
+	double	angle, amean, asigma;
+	int	time_i[7];
+	int	i, j;
+	
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBBACKANGLE function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:         %d\n", verbose);
+		fprintf(stderr,"dbg2       tfp:             %d\n", tfp);
+		fprintf(stderr,"dbg2       ntable:          %d\n", ntable);
+		fprintf(stderr,"dbg2       nping:           %d\n", nping);
+		fprintf(stderr,"dbg2       time_d:          %f\n", time_d);
+		fprintf(stderr,"dbg2       nangles:         %d\n", nangles);
+		fprintf(stderr,"dbg2       angle_max:       %f\n", angle_max);
+		fprintf(stderr,"dbg2       dangle:          %f\n", dangle);
+		fprintf(stderr,"dbg2       asymmetry:       %d\n", asymmetry);
+		fprintf(stderr,"dbg2       mean and sigma:\n");
+		for (i=0;i<nangles;i++)
+			fprintf(stderr,"dbg2         %d %f %d %f %f\n", 
+				i, (i * dangle), nmean[i], mean[i], sigma[i]);
+		}
+
+	/* process sums and print out results */
+	mb_get_date(verbose, time_d, time_i, error);
+	fprintf(tfp,"# table: %d\n", ntable);
+	fprintf(tfp,"# nping: %d\n", nping);
+	fprintf(tfp,"# time:  %4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d    %16.6f\n",
+		time_i[0],time_i[1],time_i[2],
+		time_i[3],time_i[4],time_i[5],
+		time_i[6],time_d);
+	fprintf(tfp,"# nangles: %d\n", nangles);
+	for (i=0;i<nangles;i++)
+		{
+		j = nangles - i - 1;
+		angle = -angle_max + i * dangle;
+		if (asymmetry == MB_NO)
+			{
+			amean = asigma = 0.0;
+			if ((nmean[i] + nmean[j]) > nping / 2)
+				{
+				amean = (mean[i] + mean[j]) 
+					/ (nmean[i] + nmean[j]);
+				asigma = sqrt((sigma[i] + sigma[j]) 
+						/ (nmean[i] + nmean[j]) 
+						- amean * amean);
+				}
+			fprintf(tfp,"%7.4f %12.4f %12.4f\n", angle, amean, asigma);
+			}
+		else
+			{
+			amean = asigma = 0.0;
+			if (nmean[i] > nping / 2)
+				{
+				amean = mean[i] / nmean[i];
+				asigma = sqrt(sigma[i] / nmean[i] - amean * amean);
+				}
+			fprintf(tfp,"%7.4f %12.4f %12.4f\n", angle, amean, asigma);
+			}
+		}
+	fprintf(tfp,"#\n");
+	fprintf(tfp,"#\n");
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBBACKANGLE function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:           %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:          %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+

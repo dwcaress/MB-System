@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbinfo.c	2/1/93
- *    $Id: mbinfo.c,v 5.10 2002-05-29 23:43:09 caress Exp $
+ *    $Id: mbinfo.c,v 5.11 2002-07-20 20:56:55 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -26,6 +26,9 @@
  * Date:	February 1, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.10  2002/05/29 23:43:09  caress
+ * Release 5.0.beta18
+ *
  * Revision 5.9  2002/02/22 09:07:08  caress
  * Release 5.0.beta13
  *
@@ -184,7 +187,7 @@ struct ping
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbinfo.c,v 5.10 2002-05-29 23:43:09 caress Exp $";
+	static char rcs_id[] = "$Id: mbinfo.c,v 5.11 2002-07-20 20:56:55 caress Exp $";
 	static char program_name[] = "MBINFO";
 	static char help_message[] =  "MBINFO reads a swath sonar data file and outputs \nsome basic statistics.  If pings are averaged (pings > 2) \nMBINFO estimates the variance for each of the swath \nbeams by reading a set number of pings (>2) and then finding \nthe variance of the detrended values for each beam. \nThe results are dumped to stdout.";
 	static char usage_message[] = "mbinfo [-Byr/mo/da/hr/mn/sc -C -Eyr/mo/da/hr/mn/sc -Fformat -Ifile -Llonflip -Mnx/ny -N -Ppings -Rw/e/s/n -Sspeed -V -H]";
@@ -1726,7 +1729,7 @@ main (int argc, char **argv)
 				}
 			}
 		fprintf(output,"\nNonfatal Error Notices:\n");
-		for (i=MB_DATA_KINDS+1;i<=MB_DATA_KINDS-MB_ERROR_MIN;i++)
+		for (i=MB_DATA_KINDS+1;i<=MB_DATA_KINDS-(MB_ERROR_MIN);i++)
 			{
 			if (notice_list_tot[i] > 0)
 				{
@@ -1736,7 +1739,7 @@ main (int argc, char **argv)
 				}
 			}
 		fprintf(output,"\nProblem Notices:\n");
-		for (i=MB_DATA_KINDS-MB_ERROR_MIN+1;i<MB_NOTICE_MAX;i++)
+		for (i=MB_DATA_KINDS-(MB_ERROR_MIN)+1;i<MB_NOTICE_MAX;i++)
 			{
 			if (notice_list_tot[i] > 0)
 				{
