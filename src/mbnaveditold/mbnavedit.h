@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit.h	6/24/95
- *    $Id: mbnavedit.h,v 4.4 1997-04-21 17:07:38 caress Exp $
+ *    $Id: mbnavedit.h,v 4.5 1999-04-09 22:34:08 caress Exp $
  *
  *    Copyright (c) 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -20,6 +20,9 @@
  * Date:	June 24,  1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.4  1997/04/21  17:07:38  caress
+ * MB-System 4.5 Beta Release.
+ *
  * Revision 4.3  1996/08/26  17:33:29  caress
  * Release 4.4 revision.
  *
@@ -61,6 +64,8 @@ EXTERNAL int	data_step_max;
 EXTERNAL int	data_step_size;
 EXTERNAL int	mode_pick;
 EXTERNAL int	mode_set_interval;
+EXTERNAL int	plot_tint;
+EXTERNAL int	plot_tint_org;
 EXTERNAL int	plot_lon;
 EXTERNAL int	plot_lon_org;
 EXTERNAL int	plot_lat;
@@ -75,6 +80,7 @@ EXTERNAL int	plot_roll;
 EXTERNAL int	plot_pitch;
 EXTERNAL int	plot_heave;
 EXTERNAL int	time_fix;
+EXTERNAL int	use_ping_data;
 EXTERNAL int	format;
 EXTERNAL char	ifile[128];
 EXTERNAL char	ofile[128];
@@ -93,11 +99,12 @@ EXTERNAL int	number_plots;
 #define	PICK_MODE_DESELECTALL	4
 #define	OUTPUT_MODE_OUTPUT	0
 #define	OUTPUT_MODE_BROWSE	1
-#define	PLOT_LONGITUDE	0
-#define	PLOT_LATITUDE	1
-#define	PLOT_SPEED	2
-#define	PLOT_HEADING	3
-#define	PLOT_ROLL	4
-#define	PLOT_PITCH	5
-#define	PLOT_HEAVE	6
+#define	PLOT_TINT	0
+#define	PLOT_LONGITUDE	1
+#define	PLOT_LATITUDE	2
+#define	PLOT_SPEED	3
+#define	PLOT_HEADING	4
+#define	PLOT_ROLL	5
+#define	PLOT_PITCH	6
+#define	PLOT_HEAVE	7
 /*--------------------------------------------------------------------*/
