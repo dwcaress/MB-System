@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  9/8/00
-#	$Id: Makefile.template,v 5.2 2001-06-30 17:39:13 caress Exp $
+#	$Id: Makefile.template,v 5.3 2002-02-22 09:06:20 caress Exp $
 #
 #     Copyright (c) 2000 by
 #     David W. Caress (caress@mbari.org)
@@ -16,6 +16,9 @@
 # Date:		September 8, 2000
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.2  2001/06/30 17:39:13  caress
+# Release 5.0.beta02
+#
 # Revision 5.1  2001/03/22  21:06:19  caress
 # Trying to make release 5.0.beta0
 #
@@ -34,10 +37,8 @@
 
 # *** CHANGE THESE TO FIT YOUR LOCAL ENVIRONMENT ***
 #
-# Locations of GMT libraries, binaries, and include files:
-GMTLIBDIR = /ocean/mgg/gmt2/sun4/lib
+# Locations of GMT and netcdf include files:
 GMTINCDIR = /ocean/mgg/gmt2/src
-NETCDFLIBDIR = /ocean/mgg/netcdf/sun4/lib
 NETCDFINCDIR = /ocean/mgg/netcdf/include
 # 
 # Compilers 

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.c	2/18/94
- *    $Id: mb_format.c,v 5.13 2001-12-20 20:48:51 caress Exp $
+ *    $Id: mb_format.c,v 5.14 2002-02-22 09:03:43 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	Februrary 18, 1994
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.13  2001/12/20  20:48:51  caress
+ * Release 5.0.beta11
+ *
  * Revision 5.12  2001/12/18  04:27:45  caress
  * Release 5.0.beta11.
  *
@@ -141,7 +144,7 @@
 #include "../../include/mbsys_simrad.h"
 #include "../../include/mbsys_simrad2.h"
 
-static char rcs_id[]="$Id: mb_format.c,v 5.13 2001-12-20 20:48:51 caress Exp $";
+static char rcs_id[]="$Id: mb_format.c,v 5.14 2002-02-22 09:03:43 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_format_register(int verbose, 
@@ -160,6 +163,7 @@ int mb_format_register(int verbose,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       rcs_id:    %s\n",rcs_id);
 		fprintf(stderr,"dbg2       verbose:   %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:  %d\n",mbio_ptr);
 		fprintf(stderr,"dbg2       format:    %d\n",*format);
@@ -487,6 +491,7 @@ int mb_format_info(int verbose,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       rcs_id:    %s\n",rcs_id);
 		fprintf(stderr,"dbg2       verbose:   %d\n",verbose);
 		fprintf(stderr,"dbg2       format:    %d\n",*format);
 		}
@@ -1176,6 +1181,7 @@ int mb_format(int verbose, int *format, int *error)
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       rcs_id:     %s\n",rcs_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       format:     %d\n",*format);
 		}
@@ -1208,7 +1214,7 @@ int mb_format(int verbose, int *format, int *error)
 /*--------------------------------------------------------------------*/
 int mb_format_system(int verbose, int *format, int *system, int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.13 2001-12-20 20:48:51 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.14 2002-02-22 09:03:43 caress Exp $";
 	char	*function_name = "mb_format_system";
 	int	status;
 
@@ -1237,6 +1243,7 @@ int mb_format_system(int verbose, int *format, int *system, int *error)
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       rcs_id:     %s\n",rcs_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       format:     %d\n",*format);
 		}
@@ -1276,7 +1283,7 @@ int mb_format_dimensions(int verbose, int *format,
 		int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.13 2001-12-20 20:48:51 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.14 2002-02-22 09:03:43 caress Exp $";
 	char	*function_name = "mb_format_dimensions";
 	int	status;
 
@@ -1302,6 +1309,7 @@ int mb_format_dimensions(int verbose, int *format,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       rcs_id:     %s\n",rcs_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       format:     %d\n",*format);
 		}
@@ -1343,7 +1351,7 @@ int mb_format_dimensions(int verbose, int *format,
 /*--------------------------------------------------------------------*/
 int mb_format_description(int verbose, int *format, char *description, int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.13 2001-12-20 20:48:51 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.14 2002-02-22 09:03:43 caress Exp $";
 	char	*function_name = "mb_format_description";
 	int	status;
 
@@ -1372,6 +1380,7 @@ int mb_format_description(int verbose, int *format, char *description, int *erro
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       rcs_id:     %s\n",rcs_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       format:     %d\n",*format);
 		}
@@ -1407,7 +1416,7 @@ int mb_format_flags(int verbose, int *format,
 		int *variable_beams, int *traveltime, int *beam_flagging, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.13 2001-12-20 20:48:51 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.14 2002-02-22 09:03:43 caress Exp $";
 	char	*function_name = "mb_format_flags";
 	int	status;
 
@@ -1434,6 +1443,7 @@ int mb_format_flags(int verbose, int *format,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       rcs_id:     %s\n",rcs_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       format:     %d\n",*format);
 		}
@@ -1477,7 +1487,7 @@ int mb_format_source(int verbose, int *format,
 		int *nav_source, int *heading_source, int *vru_source, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.13 2001-12-20 20:48:51 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.14 2002-02-22 09:03:43 caress Exp $";
 	char	*function_name = "mb_format_source";
 	int	status;
 
@@ -1504,6 +1514,7 @@ int mb_format_source(int verbose, int *format,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       rcs_id:     %s\n",rcs_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       format:     %d\n",*format);
 		}
@@ -1547,7 +1558,7 @@ int mb_format_beamwidth(int verbose, int *format,
 		double *beamwidth_xtrack, double *beamwidth_ltrack,
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.13 2001-12-20 20:48:51 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.14 2002-02-22 09:03:43 caress Exp $";
 	char	*function_name = "mb_format_beamwidth";
 	int	status;
 
@@ -1575,6 +1586,7 @@ int mb_format_beamwidth(int verbose, int *format,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       rcs_id:     %s\n",rcs_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       format:     %d\n",*format);
 		}
@@ -1631,6 +1643,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       rcs_id:    %s\n",rcs_id);
 		fprintf(stderr,"dbg2       verbose:   %d\n",verbose);
 		fprintf(stderr,"dbg2       filename:  %s\n",filename);
 		}
@@ -1914,6 +1927,31 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 		}
 	    }
 
+	/* look for MGD77 suffix convention */
+	if (found == MB_NO)
+	    {
+	    if (strlen(filename) >= 7)
+		i = strlen(filename) - 6;
+	    else
+		i = 0;
+	    if ((suffix = strstr(&filename[i],".mgd77")) != NULL)
+		suffix_len = 6;
+	    else if ((suffix = strstr(&filename[i],".MGD77")) != NULL)
+		suffix_len = 6;
+	    else
+		suffix_len = 0;
+	    if (suffix_len == 6)
+		{
+		if (fileroot != NULL)
+		    {
+		    strncpy(fileroot, filename, strlen(filename)-suffix_len);
+		    fileroot[strlen(filename)-suffix_len] = '\0';
+		    }
+		*format = MBF_MGD77DAT;
+		found = MB_YES;
+		}
+	    }
+
 	/* check for old format id and provide alias if needed */
 	if (found == MB_YES && *format > 0 
 	    && (*format < 10 || *format == 44 
@@ -1989,6 +2027,7 @@ int mb_datalist_open(int verbose,
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
+		fprintf(stderr,"dbg2       rcs_id:        %s\n",rcs_id);
 		fprintf(stderr,"dbg2       verbose:       %d\n",verbose);
 		fprintf(stderr,"dbg2       datalist:      %d\n",*datalist);
 		fprintf(stderr,"dbg2       path:          %s\n",path);
@@ -2058,6 +2097,7 @@ int mb_datalist_close(int verbose,
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
+		fprintf(stderr,"dbg2       rcs_id:        %s\n",rcs_id);
 		fprintf(stderr,"dbg2       verbose:       %d\n",verbose);
 		fprintf(stderr,"dbg2       datalist:      %d\n",*datalist);
 		}
@@ -2109,7 +2149,6 @@ int mb_datalist_read(int verbose,
 	struct mb_datalist_struct *datalist2_ptr;
 	char	buffer[MB_PATH_MAXLINE];
 	char	root[MB_PATH_MAXLINE];
-	char	pwd[MB_PATH_MAXLINE];
 	char	tmpstr[MB_PATH_MAXLINE];
 	char	pfile[MB_PATH_MAXLINE];
 	int	pfile_specified;
@@ -2125,6 +2164,7 @@ int mb_datalist_read(int verbose,
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
+		fprintf(stderr,"dbg2       rcs_id:        %s\n",rcs_id);
 		fprintf(stderr,"dbg2       verbose:       %d\n",verbose);
 		fprintf(stderr,"dbg2       datalist:      %d\n",datalist);
 		}
@@ -2386,8 +2426,8 @@ int mb_get_relative_path(int verbose,
 	char	*function_name = "mb_get_relative_path";
 	int	status = MB_SUCCESS;
 	char	relativepath[MB_PATH_MAXLINE];
-	int	pathlen, nslashpath;
-	int	pwdlen, nslashpwd;
+	int	pathlen;
+	int	pwdlen;
 	int	same, isame, ndiff;
 	int	i;
 
@@ -2396,6 +2436,7 @@ int mb_get_relative_path(int verbose,
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
+		fprintf(stderr,"dbg2       rcs_id:        %s\n",rcs_id);
 		fprintf(stderr,"dbg2       verbose:       %d\n",verbose);
 		fprintf(stderr,"dbg2       path:          %s\n",path);
 		fprintf(stderr,"dbg2       pwd:           %s\n",pwd);
@@ -2504,15 +2545,14 @@ int mb_get_shortest_path(int verbose,
 	char	lasttoken[MB_PATH_MAXLINE];
 	char	*result;
 	int	lasttokenordinary;
-	int	pathlen;
 	int	done, change;
-	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
+		fprintf(stderr,"dbg2       rcs_id:        %s\n",rcs_id);
 		fprintf(stderr,"dbg2       verbose:       %d\n",verbose);
 		fprintf(stderr,"dbg2       path:          %s\n",path);
 		}
@@ -2523,9 +2563,6 @@ int mb_get_shortest_path(int verbose,
 	    {
 	    /* set no change made */
 	    change = MB_NO;
-	    
-	    /* get starting string length */
-	    pathlen = strlen(path);
 	    
 	    /* copy the path */
 	    strncpy(tmppath, path, MB_PATH_MAXLINE);

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em12ifrm.c	12/4/00
- *	$Id: mbr_em12ifrm.c,v 5.5 2001-12-18 04:27:45 caress Exp $
+ *	$Id: mbr_em12ifrm.c,v 5.6 2002-02-22 09:03:43 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	December 4, 2000
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2001/12/18  04:27:45  caress
+ * Release 5.0.beta11.
+ *
  * Revision 5.4  2001/08/10  22:41:19  dcaress
  * Release 5.0.beta07
  *
@@ -97,7 +100,7 @@ int mbr_wt_em12ifrm(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_em12ifrm(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_em12ifrm.c,v 5.5 2001-12-18 04:27:45 caress Exp $";
+	static char res_id[]="$Id: mbr_em12ifrm.c,v 5.6 2002-02-22 09:03:43 caress Exp $";
 	char	*function_name = "mbr_register_em12ifrm";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -227,7 +230,7 @@ int mbr_info_em12ifrm(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_em12ifrm.c,v 5.5 2001-12-18 04:27:45 caress Exp $";
+	static char res_id[]="$Id: mbr_em12ifrm.c,v 5.6 2002-02-22 09:03:43 caress Exp $";
 	char	*function_name = "mbr_info_em12ifrm";
 	int	status = MB_SUCCESS;
 
@@ -296,7 +299,7 @@ int mbr_info_em12ifrm(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_em12ifrm(int verbose, void *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_em12ifrm.c,v 5.5 2001-12-18 04:27:45 caress Exp $";
+ static char res_id[]="$Id: mbr_em12ifrm.c,v 5.6 2002-02-22 09:03:43 caress Exp $";
 	char	*function_name = "mbr_alm_em12ifrm";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -347,33 +350,25 @@ int mbr_alm_em12ifrm(int verbose, void *mbio_ptr, int *error)
 	   - works only if main input is *.SO
 	   - nav file is then *.NA
 	   - imagery file is then *.IM */
+	   
+	/* first look for imagery file */
 	if ((tag_ptr = strstr(mb_io_ptr->file, ".SO")) != NULL)
 		{
-		/* get the corresponding nav file name */
+		/* get the corresponding imagery file name */
 		strcpy(imgtest, mb_io_ptr->file);
 		tag_ptr = strstr(imgtest, ".SO");
 		tag_ptr[0] = '.';
 		tag_ptr[1] = 'I';
 		tag_ptr[2] = 'M';
-
-		/* get the corresponding imagery file name */
-		strcpy(navtest, mb_io_ptr->file);
-		tag_ptr = strstr(navtest, ".SO");
-		tag_ptr[0] = '.';
-		tag_ptr[1] = 'N';
-		tag_ptr[2] = 'A';
 		
-		/* check if nav and imagery files are in same directory */
+		/* check if imagery files are in same directory */
 		imgfile_stat = stat(imgtest, &imgfile_status);
-		navfile_stat = stat(navtest, &navfile_status);
-		if (imgfile_stat == 0 && navfile_stat == 0
-		    && (imgfile_status.st_mode & S_IFMT) != S_IFDIR
-		    && (navfile_status.st_mode & S_IFMT) != S_IFDIR)
+		if (imgfile_stat == 0 
+		    && (imgfile_status.st_mode & S_IFMT) != S_IFDIR)
 		    {
 		    strcpy(mb_io_ptr->file2, imgtest);
-		    strcpy(mb_io_ptr->file3, navtest);
 		    }
-		/* if nav and imagery files don't exist then check if
+		/* if imagery files don't exist then check if
 		   files in IFREMER TRISMUS archive directories */
 		else
 		    {
@@ -383,30 +378,68 @@ int mbr_alm_em12ifrm(int verbose, void *mbio_ptr, int *error)
 			strcpy(path, mb_io_ptr->file);
 			path[strlen(path) - strlen(name)] = '\0';
 			sprintf(imgtest, "%s/../imag%s", path, name);
-			sprintf(navtest, "%s/../nav%s", path, name);
 			}
 		    else
 			{
 			sprintf(imgtest, "../imag/%s", mb_io_ptr->file);
-			sprintf(navtest, "../nav/%s", mb_io_ptr->file);
 			}
 		    tag_ptr = strstr(imgtest, ".SO");
 		    tag_ptr[0] = '.';
 		    tag_ptr[1] = 'I';
 		    tag_ptr[2] = 'M';
+		    
+		    /* check if files exist */
+		    imgfile_stat = stat(imgtest, &imgfile_status);
+		    if (imgfile_stat == 0
+			&& (imgfile_status.st_mode & S_IFMT) != S_IFDIR)
+			{
+			strcpy(mb_io_ptr->file2, imgtest);
+			}
+		    }
+		}
+	   
+	/* now look for nav file */
+	if ((tag_ptr = strstr(mb_io_ptr->file, ".SO")) != NULL)
+		{
+		/* get the corresponding nav file name */
+		strcpy(navtest, mb_io_ptr->file);
+		tag_ptr = strstr(navtest, ".SO");
+		tag_ptr[0] = '.';
+		tag_ptr[1] = 'N';
+		tag_ptr[2] = 'A';
+		
+		/* check if nav files are in same directory */
+		navfile_stat = stat(navtest, &navfile_status);
+		if (navfile_stat == 0
+		    && (navfile_status.st_mode & S_IFMT) != S_IFDIR)
+		    {
+		    strcpy(mb_io_ptr->file3, navtest);
+		    }
+		/* if nav files don't exist then check if
+		   files in IFREMER TRISMUS archive directories */
+		else
+		    {
+		    /* get path */
+		    if ((name = strrchr(mb_io_ptr->file, '/')) != NULL)
+			{
+			strcpy(path, mb_io_ptr->file);
+			path[strlen(path) - strlen(name)] = '\0';
+			sprintf(navtest, "%s/../nav%s", path, name);
+			}
+		    else
+			{
+			sprintf(navtest, "../nav/%s", mb_io_ptr->file);
+			}
 		    tag_ptr = strstr(navtest, ".SO");
 		    tag_ptr[0] = '.';
 		    tag_ptr[1] = 'N';
 		    tag_ptr[2] = 'A';
 		    
 		    /* check if files exist */
-		    imgfile_stat = stat(imgtest, &imgfile_status);
 		    navfile_stat = stat(navtest, &navfile_status);
-		    if (imgfile_stat == 0 && navfile_stat == 0
-			&& (imgfile_status.st_mode & S_IFMT) != S_IFDIR
+		    if (navfile_stat == 0
 			&& (navfile_status.st_mode & S_IFMT) != S_IFDIR)
 			{
-			strcpy(mb_io_ptr->file2, imgtest);
 			strcpy(mb_io_ptr->file3, navtest);
 			}
 		    }
@@ -1356,8 +1389,8 @@ int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error)
 	/* if not done and no data saved and good bathy record read
 	    then read next sidescan record if available */
 	if (status == MB_SUCCESS 
-		&& done == MB_NO && *save_data == MB_DATA_NONE
-		&& mb_io_ptr->mbfp2 != NULL)
+		&& mb_io_ptr->mbfp2 != NULL
+		&& done == MB_NO && *save_data == MB_DATA_NONE)
 		{
 		/* read sidescan until it matches ping number and side */
 		*ss_ping_number = 0;
@@ -1499,7 +1532,8 @@ int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error)
 		
 	/* now check if nav needed */
 	if (status == MB_SUCCESS 
-		&& done == MB_YES && data->kind == MB_DATA_DATA
+		&& data->kind == MB_DATA_DATA
+		&& (mb_io_ptr->mbfp2 == NULL || done == MB_YES)
 		&& mb_io_ptr->mbfp3 != NULL)
 		{
 		/* get ping time */

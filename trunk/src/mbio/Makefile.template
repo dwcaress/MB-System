@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 5.7 2001-09-17 23:25:13 caress Exp $
+#	$Id: Makefile.template,v 5.8 2002-02-22 09:03:43 caress Exp $
 #
 #     Copyright (c) 1993, 1994, 2000 by
 #     David W. Caress (caress@mbari.org)
@@ -16,6 +16,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.7  2001/09/17 23:25:13  caress
+# Added XTF format.
+#
 # Revision 5.6  2001/07/20 00:32:54  caress
 # Release 5.0.beta03
 #
@@ -110,6 +113,9 @@
 #
 
 # *** CHANGE THESE TO FIT YOUR LOCAL ENVIRONMENT ***
+# 
+# Netcdf include directory 
+NETCDFINCDIR = /ocean/mgg/netcdf/include
 # 
 # Compilers 
 CC = cc 
@@ -290,11 +296,11 @@ mb_compare.o:	mb_compare.c $(INCDIR)/mb_define.h
 mb_navint.o:	mb_navint.c $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mb_navint.c
 mb_read_init.o:	mb_read_init.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h
-	$(CC) -c $(CFLAGS) mb_read_init.c
+	$(CC) -c $(CFLAGS) -I$(NETCDFINCDIR) mb_read_init.c
 mb_write_init.o:	mb_write_init.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h
-	$(CC) -c $(CFLAGS) mb_write_init.c
+	$(CC) -c $(CFLAGS) -I$(NETCDFINCDIR) mb_write_init.c
 mb_close.o:	mb_close.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h
-	$(CC) -c $(CFLAGS) mb_close.c
+	$(CC) -c $(CFLAGS) -I$(NETCDFINCDIR) mb_close.c
 mb_mem.o:	mb_mem.c $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mb_mem.c
 mb_coor_scale.o:	mb_coor_scale.c $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h

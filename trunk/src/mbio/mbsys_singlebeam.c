@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_singlebeam.c	4/13/99
- *	$Id: mbsys_singlebeam.c,v 5.4 2001-08-25 00:54:13 caress Exp $
+ *	$Id: mbsys_singlebeam.c,v 5.5 2002-02-22 09:03:43 caress Exp $
  *
  *    Copyright (c) 1999, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -28,6 +28,9 @@
  * Date:	April 13,  1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2001/08/25 00:54:13  caress
+ * Adding beamwidth values to extract functions.
+ *
  * Revision 5.3  2001/07/20  00:32:54  caress
  * Release 5.0.beta03
  *
@@ -68,14 +71,14 @@
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_singlebeam.h"
 
+static char res_id[]="$Id: mbsys_singlebeam.c,v 5.5 2002-02-22 09:03:43 caress Exp $";
+
 /*--------------------------------------------------------------------*/
 int mbsys_singlebeam_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_singlebeam.c,v 5.4 2001-08-25 00:54:13 caress Exp $";
 	char	*function_name = "mbsys_singlebeam_alloc";
 	int	status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_singlebeam_struct *store;
 	int	i;
 
@@ -85,12 +88,10 @@ int mbsys_singlebeam_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
 		}
-
-	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* allocate memory for data structure */
 	status = mb_malloc(verbose,sizeof(struct mbsys_singlebeam_struct),
@@ -166,8 +167,6 @@ int mbsys_singlebeam_deall(int verbose, void *mbio_ptr, void **store_ptr,
 {
 	char	*function_name = "mbsys_singlebeam_deall";
 	int	status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
-	struct mbsys_singlebeam_struct *store;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -175,6 +174,7 @@ int mbsys_singlebeam_deall(int verbose, void *mbio_ptr, void **store_ptr,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
 		fprintf(stderr,"dbg2       store_ptr:  %d\n",*store_ptr);
@@ -220,6 +220,7 @@ int mbsys_singlebeam_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mb_ptr:     %d\n",mbio_ptr);
 		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
@@ -282,10 +283,7 @@ int mbsys_singlebeam_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		*namp = 0;
 		*nss = 0;
 		bath[0] = store->bath;
-		if (bath[0] > 0.0)
-			beamflag[0] = MB_FLAG_NONE;
-		else
-			beamflag[0] = MB_FLAG_NULL;
+		beamflag[0] = store->flag;
 		bathacrosstrack[0] = 0.0;
 		bathalongtrack[0] = 0.0;
 
@@ -414,7 +412,6 @@ int mbsys_singlebeam_insert(int verbose, void *mbio_ptr, void *store_ptr,
 {
 	char	*function_name = "mbsys_singlebeam_insert";
 	int	status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_singlebeam_struct *store;
 	int	i;
 
@@ -424,6 +421,7 @@ int mbsys_singlebeam_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
 		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
@@ -464,9 +462,6 @@ int mbsys_singlebeam_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2       comment:     \ndbg2       %s\n",
 			comment);
 		}
-
-	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_singlebeam_struct *) store_ptr;
@@ -533,7 +528,6 @@ int mbsys_singlebeam_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 {
 	char	*function_name = "mbsys_singlebeam_ttimes";
 	int	status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_singlebeam_struct *store;
 	int	i;
 
@@ -543,6 +537,7 @@ int mbsys_singlebeam_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mb_ptr:     %d\n",mbio_ptr);
 		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
@@ -553,9 +548,6 @@ int mbsys_singlebeam_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2       heave:      %d\n",heave);
 		fprintf(stderr,"dbg2       ltrk_off:   %d\n",alongtrack_offset);
 		}
-
-	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_singlebeam_struct *) store_ptr;
@@ -650,9 +642,7 @@ int mbsys_singlebeam_extract_altitude(int verbose, void *mbio_ptr, void *store_p
 {
 	char	*function_name = "mbsys_singlebeam_extract_altitude";
 	int	status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_singlebeam_struct *store;
-	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -660,13 +650,11 @@ int mbsys_singlebeam_extract_altitude(int verbose, void *mbio_ptr, void *store_p
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mb_ptr:     %d\n",mbio_ptr);
 		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
 		}
-
-	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_singlebeam_struct *) store_ptr;
@@ -700,7 +688,7 @@ int mbsys_singlebeam_extract_altitude(int verbose, void *mbio_ptr, void *store_p
 		    if (store->bath > 0.0)
 			*altitude = store->bath - store->sonar_depth;
 		    }
-		else if (store->bath > 0.0)
+		else if (store->bath > 0.0 && store->flag != MB_FLAG_NULL)
 		    {
 		    *altitude = store->bath - store->heave;
 		    *transducer_depth = store->heave;
@@ -764,8 +752,6 @@ int mbsys_singlebeam_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_singlebeam_struct *store;
-	int	time_j[5];
-	int	id;
 	int	i;
 
 	/* print input debug statements */
@@ -774,6 +760,7 @@ int mbsys_singlebeam_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mb_ptr:     %d\n",mbio_ptr);
 		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
@@ -952,11 +939,7 @@ int mbsys_singlebeam_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 {
 	char	*function_name = "mbsys_singlebeam_insert_nav";
 	int	status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_singlebeam_struct *store;
-	int	kind;
-	int	time_j[5];
-	int	id;
 	int	i;
 
 	/* print input debug statements */
@@ -965,6 +948,7 @@ int mbsys_singlebeam_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
 		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
@@ -985,9 +969,6 @@ int mbsys_singlebeam_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2       pitch:      %f\n",pitch);
 		fprintf(stderr,"dbg2       heave:      %f\n",heave);
 		}
-
-	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* get data structure pointer */
 	store = (struct mbsys_singlebeam_struct *) store_ptr;
@@ -1046,7 +1027,6 @@ int mbsys_singlebeam_copy(int verbose, void *mbio_ptr,
 {
 	char	*function_name = "mbsys_singlebeam_copy";
 	int	status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_singlebeam_struct *store;
 	struct mbsys_singlebeam_struct *copy;
 
@@ -1056,14 +1036,12 @@ int mbsys_singlebeam_copy(int verbose, void *mbio_ptr,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
 		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
 		fprintf(stderr,"dbg2       copy_ptr:   %d\n",copy_ptr);
 		}
-
-	/* get mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* get data structure pointers */
 	store = (struct mbsys_singlebeam_struct *) store_ptr;
@@ -1109,6 +1087,7 @@ int mbsys_singlebeam_pressuredepth(int verbose,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       pressure:   %f\n",pressure);
 		fprintf(stderr,"dbg2       latitude:   %f\n",latitude);

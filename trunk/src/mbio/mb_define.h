@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	4/21/96
- *    $Id: mb_define.h,v 5.12 2002-01-24 02:28:29 caress Exp $
+ *    $Id: mb_define.h,v 5.13 2002-02-22 09:03:43 caress Exp $
  *
  *    Copyright (c) 1996, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	April 21, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.12  2002/01/24 02:28:29  caress
+ * Added DARWIN.
+ *
  * Revision 5.11  2001/12/18 04:27:45  caress
  * Release 5.0.beta11.
  *
@@ -101,6 +104,7 @@
 #define	MB_FILETYPE_NORMAL	1
 #define	MB_FILETYPE_XDR		2
 #define	MB_FILETYPE_GSF		3
+#define	MB_FILETYPE_NETCDF	4
 
 /* settings for recursive datalist reading functions */
 #define MB_DATALIST_LOOK_UNSET		0

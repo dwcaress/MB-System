@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_time.c	10/30/2000
- *    $Id: mb_navint.c,v 5.4 2001-10-12 21:08:37 caress Exp $
+ *    $Id: mb_navint.c,v 5.5 2002-02-22 09:03:43 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	October 30, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2001/10/12 21:08:37  caress
+ * Added interpolation of attitude data.
+ *
  * Revision 5.3  2001/08/10 22:41:19  dcaress
  * Release 5.0.beta07
  *
@@ -48,6 +51,8 @@
 
 /* #define MB_NAVINT_DEBUG 1 */
 
+static char rcs_id[]="$Id: mb_navint.c,v 5.5 2002-02-22 09:03:43 caress Exp $";
+
 /*--------------------------------------------------------------------*/
 /* 	function mb_navint_add adds a nav fix to the internal
 		list used for interpolation/extrapolation. */
@@ -56,7 +61,7 @@ int mb_navint_add(int verbose, void *mbio_ptr, double time_d, double lon, double
 	char	*function_name = "mb_navint_add";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
-	int	i, j, k;
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -64,6 +69,7 @@ int mb_navint_add(int verbose, void *mbio_ptr, double time_d, double lon, double
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       rcs_id:     %s\n",rcs_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
 		fprintf(stderr,"dbg2       time_d:     %f\n",time_d);
@@ -150,7 +156,7 @@ int mb_navint_interp(int verbose, void *mbio_ptr,
 	double	factor, headingx, headingy;
 	double  speed_mps;
 	int	ifix;
-	int	i, j, k;
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -158,6 +164,7 @@ int mb_navint_interp(int verbose, void *mbio_ptr,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       rcs_id:     %s\n",rcs_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
 		fprintf(stderr,"dbg2       time_d:     %f\n",time_d);
@@ -308,7 +315,7 @@ int mb_attint_add(int verbose, void *mbio_ptr,
 	char	*function_name = "mb_attint_add";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
-	int	i, j, k;
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -316,6 +323,7 @@ int mb_attint_add(int verbose, void *mbio_ptr,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       rcs_id:     %s\n",rcs_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
 		fprintf(stderr,"dbg2       time_d:     %f\n",time_d);
@@ -402,10 +410,9 @@ int mb_attint_interp(int verbose, void *mbio_ptr,
 	char	*function_name = "mb_attint_interp";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
-	double	dx, dy, dt, dd;
-	double	factor, headingx, headingy;
+	double	factor;
 	int	ifix;
-	int	i, j, k;
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -413,6 +420,7 @@ int mb_attint_interp(int verbose, void *mbio_ptr,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       rcs_id:     %s\n",rcs_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
 		fprintf(stderr,"dbg2       time_d:     %f\n",time_d);
@@ -517,7 +525,7 @@ int mb_hedint_add(int verbose, void *mbio_ptr, double time_d, double heading, in
 	char	*function_name = "mb_hedint_add";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
-	int	i, j, k;
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -525,6 +533,7 @@ int mb_hedint_add(int verbose, void *mbio_ptr, double time_d, double heading, in
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       rcs_id:     %s\n",rcs_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
 		fprintf(stderr,"dbg2       time_d:     %f\n",time_d);
@@ -600,10 +609,9 @@ int mb_hedint_interp(int verbose, void *mbio_ptr,
 	char	*function_name = "mb_hedint_interp";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
-	double	dx, dy, dt, dd;
-	double	factor, headingx, headingy;
+	double	factor;
 	int	ifix;
-	int	i, j, k;
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -611,6 +619,7 @@ int mb_hedint_interp(int verbose, void *mbio_ptr,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       rcs_id:     %s\n",rcs_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
 		fprintf(stderr,"dbg2       time_d:     %f\n",time_d);

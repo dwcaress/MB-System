@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_write_init.c	1/25/93
- *    $Id: mb_write_init.c,v 5.7 2002-01-24 02:30:58 caress Exp $
+ *    $Id: mb_write_init.c,v 5.8 2002-02-22 09:03:43 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	January 25, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2002/01/24 02:30:58  caress
+ * Added DARWIN.
+ *
  * Revision 5.6  2001/10/12 21:08:37  caress
  * Added interpolation of attitude data.
  *
@@ -160,6 +163,7 @@
 #include "../../include/mb_io.h"
 #include "../../include/mb_define.h"
 #include "../../include/gsf.h"
+#include "netcdf.h"
 
 /*--------------------------------------------------------------------*/
 int mb_write_init(int verbose, 
@@ -167,7 +171,7 @@ int mb_write_init(int verbose,
 		int *beams_bath, int *beams_amp, int *pixels_ss,
 		int *error)
 {
-	static char rcs_id[]="$Id: mb_write_init.c,v 5.7 2002-01-24 02:30:58 caress Exp $";
+	static char rcs_id[]="$Id: mb_write_init.c,v 5.8 2002-02-22 09:03:43 caress Exp $";
 	char	*function_name = "mb_write_init";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -499,6 +503,24 @@ int mb_write_init(int verbose,
 	    {
 	    status = gsfOpen(mb_io_ptr->file, 
 				GSF_CREATE, 
+				(int *) &(mb_io_ptr->mbfp));
+	    if (status == 0)
+		{
+		status = MB_SUCCESS;
+		*error = MB_ERROR_NO_ERROR;
+		}
+	    else
+		{
+		status = MB_FAILURE;
+		*error = MB_ERROR_OPEN_FAIL;
+		}
+	    }
+	    
+	/* else handle netcdf files to be opened with libnetcdf */
+	else if (mb_io_ptr->filetype == MB_FILETYPE_NETCDF)
+	    {
+	    status = nc_create(mb_io_ptr->file, 
+				NC_CLOBBER, 
 				(int *) &(mb_io_ptr->mbfp));
 	    if (status == 0)
 		{
