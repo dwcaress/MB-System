@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_prog.c	6/23/95
- *    $Id: mbnavedit_prog.c,v 4.4 1995-11-02 19:22:45 caress Exp $
+ *    $Id: mbnavedit_prog.c,v 4.5 1996-04-05 20:07:02 caress Exp $
  *
  *    Copyright (c) 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,9 @@
  * Date:	June 23,  1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.4  1995/11/02  19:22:45  caress
+ *  Fixed mb_error calls.
+ *
  * Revision 4.3  1995/09/28  18:01:01  caress
  * Improved handling of .mbxxx file suffix convention.
  *
@@ -109,10 +112,10 @@ struct mbnavedit_plot_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbnavedit_prog.c,v 4.4 1995-11-02 19:22:45 caress Exp $";
+static char rcs_id[] = "$Id: mbnavedit_prog.c,v 4.5 1996-04-05 20:07:02 caress Exp $";
 static char program_name[] = "MBNAVEDIT";
 static char help_message[] =  "MBNAVEDIT is an interactive navigation editor for swath sonar data.\n\tIt can work with any data format supported by the MBIO library.\n";
-static char usage_message[] = "mbnavedit [-Fformat -Ifile -Ooutfile -V -H]";
+static char usage_message[] = "mbnavedit [-Byr/mo/da/hr/mn/sc -D  -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ooutfile -V -H]";
 
 /* status variables */
 int	error = MB_ERROR_NO_ERROR;
@@ -225,6 +228,7 @@ int mbnavedit_init_globals()
 
 	/* set default global control parameters */
 	output_mode = OUTPUT_MODE_OUTPUT;
+	gui_mode = MB_NO;
 	data_show_max = 2000;
 	data_show_size = 1000;
 	data_step_max = 2000;
@@ -317,7 +321,7 @@ int	*startup_file;
 	strcpy(ofile,"\0");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhBbF:f:I:i:O:o:")) != -1)
+	while ((c = getopt(argc, argv, "VvHhB:b:DdE:e:F:f:GgI:i:O:o:")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -330,12 +334,33 @@ int	*startup_file;
 			break;
 		case 'B':
 		case 'b':
+			sscanf (optarg,"%d/%d/%d/%d/%d/%d",
+				&btime_i[0],&btime_i[1],&btime_i[2],
+				&btime_i[3],&btime_i[4],&btime_i[5]);
+			btime_i[6] = 0;
+			flag++;
+			break;
+		case 'D':
+		case 'd':
 			output_mode = OUTPUT_MODE_BROWSE;
+			flag++;
+			break;
+		case 'E':
+		case 'e':
+			sscanf (optarg,"%d/%d/%d/%d/%d/%d",
+				&etime_i[0],&etime_i[1],&etime_i[2],
+				&etime_i[3],&etime_i[4],&etime_i[5]);
+			etime_i[6] = 0;
 			flag++;
 			break;
 		case 'F':
 		case 'f':
 			sscanf (optarg,"%d", &format);
+			flag++;
+			break;
+		case 'G':
+		case 'g':
+			gui_mode = MB_YES;
 			flag++;
 			break;
 		case 'I':
@@ -1216,10 +1241,10 @@ int mbnavedit_action_next_buffer()
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbnavedit_action_done()
+int mbnavedit_action_close()
 {
 	/* local variables */
-	char	*function_name = "mbnavedit_action_done";
+	char	*function_name = "mbnavedit_action_close";
 	int	status = MB_SUCCESS;
 	int	save_nloaded = 0;
 	int	save_ndumped = 0;
@@ -1234,8 +1259,22 @@ int mbnavedit_action_done()
 	/* clear the screen */
 	status = mbnavedit_clear_screen();
 
+	/* if file has been opened and browse mode 
+		just dump the current buffer and close the file */
+	if (file_open == MB_YES 
+		&& output_mode == OUTPUT_MODE_BROWSE)
+		{
+		/* dump the buffer */
+		status = mbnavedit_dump_data(0);
+		save_ndumped = save_ndumped + ndump;
+		ndump = save_ndumped;
+		nload = save_nloaded;
+
+		/* now close the file */
+		status = mbnavedit_close_file();
+		}
 	/* if file has been opened deal with it */
-	if (file_open == MB_YES)
+	else if (file_open == MB_YES)
 		{
 
 		/* dump and load until the end of the file is reached */
@@ -1285,6 +1324,57 @@ int mbnavedit_action_done()
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+int mbnavedit_action_done(quit)
+int	*quit;
+{
+	/* local variables */
+	char	*function_name = "mbnavedit_action_done";
+	int	status = MB_SUCCESS;
+	int	save_nloaded = 0;
+	int	save_ndumped = 0;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		}
+		
+	/* if in normal mode done does not mean quit,
+		if in gui mode done does mean quit */
+	if (gui_mode == MB_YES)
+		*quit = MB_YES;
+	else
+		*quit = MB_NO;
+
+	/* if quitting let the world know... */
+	if (*quit == MB_YES && verbose >= 1)
+		fprintf(stderr,"\nShutting MBNAVEDIT down without further ado...\n");
+
+	/* call routine to deal with saving the current file, if any */
+	if (file_open == MB_YES)
+		status = mbnavedit_action_close();
+
+	/* if quitting let the world know... */
+	if (*quit == MB_YES && verbose >= 1)
+		fprintf(stderr,"\nQuitting MBNAVEDIT\nBye Bye...\n");
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       quit:        %d\n",*quit);
+		fprintf(stderr,"dbg2       error:       %d\n",error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:      %d\n",status);
+		}
+
+	/* return */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
 int mbnavedit_action_quit()
 {
 	/* local variables */
@@ -1300,19 +1390,13 @@ int mbnavedit_action_quit()
 			function_name);
 		}
 
-	/* clear the screen */
-	status = mbnavedit_clear_screen();
-
 	/* let the world know... */
 	if (verbose >= 1)
 		fprintf(stderr,"\nShutting MBNAVEDIT down without further ado...\n");
 
 	/* call routine to deal with saving the current file, if any */
 	if (file_open == MB_YES)
-		status = mbnavedit_action_done();
-
-	/* reset data_save */
-	data_save = MB_NO;
+		status = mbnavedit_action_close();
 
 	/* let the world know... */
 	if (verbose >= 1)

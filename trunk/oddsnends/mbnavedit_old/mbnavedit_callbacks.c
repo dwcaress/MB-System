@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_callbacks.c	6/24/95
- *    $Id: mbnavedit_callbacks.c,v 4.2 1995-09-28 18:01:01 caress Exp $
+ *    $Id: mbnavedit_callbacks.c,v 4.3 1996-04-05 20:07:02 caress Exp $
  *
  *    Copyright (c) 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,9 @@
  * Date:	June 24,  1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1995/09/28  18:01:01  caress
+ * Improved handling of .mbxxx file suffix convention.
+ *
  * Revision 4.1  1995/08/17  14:58:12  caress
  * Revision for release 4.3.
  *
@@ -449,14 +452,19 @@ Widget w;
 XtPointer client;
 XtPointer call;
 {
+	int	quit;
 	int	status;
 	
 	/*SUPPRESS 594*/XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call;
 
 	/* finish with the current file */
-	status = mbnavedit_action_done();
+	status = mbnavedit_action_done(&quit);
 	if (status == 0) mbnavedit_bell(100);
 	do_unset_interval();
+	
+	/* quit if required */
+	if (quit)
+		(void) BxExitCB(w, client, call);
 }
 
 /*--------------------------------------------------------------------*/
