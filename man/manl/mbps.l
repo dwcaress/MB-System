@@ -1,4 +1,4 @@
-.TH MBPS l "5 October 1998" "MB-System 4.6" "MB-System 4.6"
+.TH MBPS l "17 December 1998" "MB-System 4.6" "MB-System 4.6"
 .SH NAME
 \fBmbps\fP - Generates a PostScript perspective plot of a piece of swath sonar data.
 
@@ -35,15 +35,11 @@ Now change some of the options, and things should get clearer.
 .SH AUTHORSHIP
 Russ T. Alexander
 .br
-Formerly at University of California at Santa Barbara
-.br
-Santa Barbara, Ca 93106
+  Formerly at University of California at Santa Barbara
 .br
 Alberto Malinverno (now at Schlumberger)
 .br
-Lamont-Doherty Earth Observatory
-.br
-Palisades, NY 10964
+  Lamont-Doherty Earth Observatory
 
 .SH OPTIONS
 .TP

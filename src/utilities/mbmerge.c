@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmerge.c	2/20/93
  *
- *    $Id: mbmerge.c,v 4.19 1998-10-05 19:19:24 caress Exp $
+ *    $Id: mbmerge.c,v 4.20 1998-12-17 22:50:20 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,9 @@
  * Date:	February 20, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.19  1998/10/05  19:19:24  caress
+ * MB-System version 4.6beta
+ *
  * Revision 4.18  1997/09/15  19:11:06  caress
  * Real Version 4.5
  *
@@ -124,7 +127,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbmerge.c,v 4.19 1998-10-05 19:19:24 caress Exp $";
+	static char rcs_id[] = "$Id: mbmerge.c,v 4.20 1998-12-17 22:50:20 caress Exp $";
 	static char program_name[] = "MBMERGE";
 	static char help_message[] =  "MBMERGE merges new navigation with swath sonar data from an \ninput file and then writes the merged data to an output \nswath sonar data file. The default input \nand output streams are stdin and stdout.";
 	static char usage_message[] = "mbmerge [-Aheading_offset -B -Fformat -Llonflip -V -H  -Iinfile -Ooutfile -Mnavformat -Nnavfile -Z]";
@@ -223,6 +226,7 @@ char **argv;
 	int	itime;
 	double	mtodeglon, mtodeglat;
 	double	del_time, dx, dy, dist;
+	int	intstat;
 
 	int	nchar;
 	char	buffer[128], tmp[128], *result, *bufftmp;
@@ -911,26 +915,31 @@ char **argv;
 
 		/* interpolate the navigation */
 		if (error == MB_ERROR_NO_ERROR
-			|| kind == MB_DATA_COMMENT)
+			&& (kind == MB_DATA_DATA
+			    || kind == MB_DATA_NAV))
 			{
-			if (interp_mode == INTERP_SPLINE)
+			if (interp_mode == INTERP_SPLINE
+			    && time_d >= ntime[0] 
+			    && time_d <= ntime[nnav-1])
 			    {
-			    status = splint(ntime-1,nlon-1,nlonspl-1,
+			    intstat = splint(ntime-1,nlon-1,nlonspl-1,
 				    nnav,time_d,&navlon,&itime);
-			    status = splint(ntime-1,nlat-1,nlatspl-1,
+			    intstat = splint(ntime-1,nlat-1,nlatspl-1,
 				    nnav,time_d,&navlat,&itime);
 			    }
 			else
 			    {
-			    status = linint(ntime-1,nlon-1,
+			    intstat = linint(ntime-1,nlon-1,
 				    nnav,time_d,&navlon,&itime);
-			    status = linint(ntime-1,nlat-1,
+			    intstat = linint(ntime-1,nlat-1,
 				    nnav,time_d,&navlat,&itime);
 			    }
 			}
 
 		/* make up heading and speed if required */
 		if (error == MB_ERROR_NO_ERROR
+			&& (kind == MB_DATA_DATA
+			    || kind == MB_DATA_NAV)
 			&& make_heading_now == MB_YES)
 			{
 			mb_coor_scale(verbose,nlat[itime],&mtodeglon,&mtodeglat);
@@ -953,6 +962,8 @@ char **argv;
 
 		/* else adjust heading if required */
 		else if (error == MB_ERROR_NO_ERROR
+			&& (kind == MB_DATA_DATA
+			    || kind == MB_DATA_NAV)
 			&& heading_offset != 0.0)
 			{
 			heading += heading_offset;
@@ -960,66 +971,22 @@ char **argv;
 
 		/* give error message */
 		if ((verbose >= 1 && error == MB_ERROR_NO_ERROR 
-			&& (time_d < ntime[0] || time_d > ntime[nnav-1]))
-			&& kind != MB_DATA_COMMENT)
+			&& (kind == MB_DATA_DATA
+			    || kind == MB_DATA_NAV)
+			&& (time_d < ntime[0] 
+			    || time_d > ntime[nnav-1])))
 			{
-			fprintf(stderr,"\nData record not written!\n");
+			fprintf(stderr,"\nNavigation extrapolated!\n");
 			fprintf(stderr,"Data time lies outside the bounds of the input navigation...\n");
 			fprintf(stderr,"Data time: %4.4d %2.2d %2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
 				time_i[0],time_i[1],time_i[2],time_i[3],
 				time_i[4],time_i[5],time_i[6]);
-			}
+			}			    
 
 		/* write some data */
-		if ((error == MB_ERROR_NO_ERROR 
-			&& (time_d >= ntime[0] && time_d <= ntime[nnav-1]))
-			|| kind == MB_DATA_COMMENT)
+		if (error == MB_ERROR_NO_ERROR)
 			{
-			/* handle merging of Simrad data
-			   - must put new position datagrams into
-			   data stream while ignoring old position
-			   datagrams */
-			if (format == 51
-			    || format == 52
-			    || format == 53
-			    || format == 55
-			    || format == 92)
-			    {
-			    if (kind == MB_DATA_DATA)
-				{
-				status = mb_put_all(verbose,ombio_ptr,
-					store_ptr,MB_YES,MB_DATA_NAV,
-					time_i,time_d,
-					navlon,navlat,speed,heading,
-					beams_bath,beams_amp,pixels_ss,
-					beamflag,bath,amp,bathacrosstrack,bathalongtrack,
-					ss,ssacrosstrack,ssalongtrack,
-					comment,&error);
-				status = mb_put_all(verbose,ombio_ptr,
-					store_ptr,MB_YES,kind,
-					time_i,time_d,
-					navlon,navlat,speed,heading,
-					beams_bath,beams_amp,pixels_ss,
-					beamflag,bath,amp,bathacrosstrack,bathalongtrack,
-					ss,ssacrosstrack,ssalongtrack,
-					comment,&error);
-				}
-			    else if (kind != MB_DATA_NAV)
-				{
-				status = mb_put_all(verbose,ombio_ptr,
-					store_ptr,MB_YES,kind,
-					time_i,time_d,
-					navlon,navlat,speed,heading,
-					beams_bath,beams_amp,pixels_ss,
-					beamflag,bath,amp,bathacrosstrack,bathalongtrack,
-					ss,ssacrosstrack,ssalongtrack,
-					comment,&error);
-				}
-			    }
-			    
-			/* if not Simrad data just write it out */
-			else
-			    status = mb_put_all(verbose,ombio_ptr,
+			status = mb_put_all(verbose,ombio_ptr,
 					store_ptr,MB_YES,kind,
 					time_i,time_d,
 					navlon,navlat,speed,heading,
@@ -1140,12 +1107,15 @@ int *i;
 		if (xa[k] > x) khi=k;
 		else klo=k;
 	}
+	if (khi == 1) khi = 2;
+	if (klo == n) klo = n - 1;
 	h=xa[khi]-xa[klo];
-	if (h == 0.0) 
+/*	if (h == 0.0) 
 		{
 		fprintf(stderr,"ERROR: interpolation time out of nav bounds\n");
 		return(-1);
 		}
+*/
 	a=(xa[khi]-x)/h;
 	b=(x-xa[klo])/h;
 	*y=a*ya[klo]+b*ya[khi]+((a*a*a-a)*y2a[klo]
@@ -1169,12 +1139,15 @@ int *i;
 		if (xa[k] > x) khi=k;
 		else klo=k;
 	}
+	if (khi == 1) khi = 2;
+	if (klo == n) klo = n - 1;
 	h=xa[khi]-xa[klo];
-	if (h == 0.0) 
+/*	if (h == 0.0) 
 		{
 		fprintf(stderr,"ERROR: interpolation time out of nav bounds\n");
 		return(-1);
 		}
+*/
 	b = (ya[khi] - ya[klo]) / h;
 	*y = ya[klo] + b * (x - xa[klo]);
 	*i=klo;

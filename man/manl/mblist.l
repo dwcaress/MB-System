@@ -1,4 +1,4 @@
-.TH mblist l "5 October 1998" "MB-System 4.6" "MB-System 4.6"
+.TH mblist l "17 December 1998" "MB-System 4.6" "MB-System 4.6"
 .SH NAME
 \fBmblist\fP - List data in multibeam bathymetry data files.
 
@@ -24,15 +24,17 @@ and space before it is listed.  Complete dumps of bathymetry,
 amplitude, or sidescan data are possible as well.
 
 .SH AUTHORSHIP
-David W. Caress (caress@lamont.ldeo.columbia.edu)
+David W. Caress (caress@mbari.org)
 .br
-Dale N. Chayes (dale@lamont.ldeo.columbia.edu)
+  Monterey Bay Aquarium Research Institute
 .br
-Alberto Malinverno (now at Schlumberger)
+Dale N. Chayes (dale@ldeo.columbia.edu)
 .br
-Lamont-Doherty Earth Observatory
+  Lamont-Doherty Earth Observatory
 .br
-Palisades, NY 10964
+Alberto Malinverno
+.br
+  Schlumberger-Doll
 
 .SH OPTIONS
 .TP

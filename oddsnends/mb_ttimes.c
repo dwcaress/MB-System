@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_ttimes.c	4/9/94
- *    $Id: mb_ttimes.c,v 4.13 1998-10-05 17:46:15 caress Exp $
+ *    $Id: mb_ttimes.c,v 4.14 1998-12-17 23:01:15 caress Exp $
 
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -181,6 +181,9 @@
  * Date:	April 9, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.13  1998/10/05  17:46:15  caress
+ * MB-System version 4.6beta
+ *
  * Revision 4.12  1997/07/25  14:19:53  caress
  * Version 4.5beta2.
  * Much mucking, particularly with Simrad formats.
@@ -263,7 +266,7 @@ double	*draft;
 double	*ssv;
 int	*error;
 {
-  static char rcs_id[]="$Id: mb_ttimes.c,v 4.13 1998-10-05 17:46:15 caress Exp $";
+  static char rcs_id[]="$Id: mb_ttimes.c,v 4.14 1998-12-17 23:01:15 caress Exp $";
 	char	*function_name = "mb_ttimes";
 	int	status;
 	int	system;
@@ -402,6 +405,14 @@ int	*error;
 	else if (system == MB_SYS_MSTIFF)
 		{
 		status = mbsys_mstiff_ttimes(verbose,mbio_ptr,store_ptr,
+				kind,nbeams,ttimes,
+				angles,angles_forward,angles_null,
+				heave,alongtrack_offset,
+				draft,ssv,error);
+		}
+	else if (system == MB_SYS_SIMRAD2)
+		{
+		status = mbsys_simrad2_ttimes(verbose,mbio_ptr,store_ptr,
 				kind,nbeams,ttimes,
 				angles,angles_forward,angles_null,
 				heave,alongtrack_offset,

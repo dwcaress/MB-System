@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrid.c	5/2/94
- *    $Id: mbgrid.c,v 4.37 1998-10-07 19:33:56 caress Exp $
+ *    $Id: mbgrid.c,v 4.38 1998-12-17 22:50:20 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -38,6 +38,9 @@
  * Rererewrite:	January 2, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.37  1998/10/07  19:33:56  caress
+ * Removed ddmmss_to_degree function as it is included in gmt_init.c
+ *
  * Revision 4.36  1998/10/05  19:19:24  caress
  * MB-System version 4.6beta
  *
@@ -239,10 +242,10 @@
 #define	REALLOC_STEP_SIZE	25
 
 /* compare function for qsort */
-int double_compare();
+int mb_double_compare();
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbgrid.c,v 4.37 1998-10-07 19:33:56 caress Exp $";
+static char rcs_id[] = "$Id: mbgrid.c,v 4.38 1998-12-17 22:50:20 caress Exp $";
 static char program_name[] = "MBGRID";
 static char help_message[] =  "MBGRID is an utility used to grid bathymetry, amplitude, or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbgrid -Ifilelist -Oroot -Rwest/east/south/north [-Adatatype\n          -Bborder  -Cclip -Dxdim/ydim -Edx/dy/units -F\n          -Ggridkind -Llonflip -M -N -Ppings -Sspeed\n          -Ttension -Utime -V -Wscale -Xextend]";
@@ -590,6 +593,7 @@ char **argv;
 			i = 0;
 			while (result)
 			    {
+fprintf(stderr, "result:%s\n", result);
 			    gbnd[i] = ddmmss_to_degree (result);
 			    i++;
 			    result = strtok (NULL, "/");
@@ -2245,7 +2249,7 @@ char **argv;
 				{
 				value = data[kgrid];
 				qsort((char *)value,cnt[kgrid],sizeof(double),
-					double_compare);
+					mb_double_compare);
 				if (grid_mode == MBGRID_MEDIAN_FILTER)
 					{
 					grid[kgrid] = value[cnt[kgrid]/2];
@@ -3115,15 +3119,5 @@ int	*error;
 
 	/* return status */
 	return(status);
-}
-/*--------------------------------------------------------------------*/
-int double_compare(a,b)
-double	*a;
-double	*b;
-{
-	if (*a > *b)
-		return(1);
-	else
-		return(-1);
 }
 /*--------------------------------------------------------------------*/

@@ -1,4 +1,4 @@
-.TH mbmerge l "5 October 1998" "MB-System 4.6" "MB-System 4.6"
+.TH mbmerge l "17 December 1998" "MB-System 4.6" "MB-System 4.6"
 .SH NAME
 \fBmbmerge\fP - Merges swath sonar data with new navigation.
 
@@ -18,13 +18,13 @@ formats, including the L-DEO shipboard processing format.
 The default input and output streams are stdin and stdout.
 
 .SH AUTHORSHIP
-David W. Caress (caress@lamont.ldeo.columbia.edu)
+David W. Caress (caress@mbari.org)
 .br
-Dale N. Chayes (dale@lamont.ldeo.columbia.edu)
+  Monterey Bay Aquarium Research Institute
 .br
-Lamont-Doherty Earth Observatory
+Dale N. Chayes (dale@ldeo.columbia.edu)
 .br
-Palisades, NY 10964
+  Lamont-Doherty Earth Observatory
 
 .SH OPTIONS
 .TP

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	1/19/93
- *    $Id: mb_io.h,v 4.8 1998-10-05 17:46:15 caress Exp $
+ *    $Id: mb_io.h,v 4.9 1998-12-17 23:01:15 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.8  1998/10/05 17:46:15  caress
+ * MB-System version 4.6beta
+ *
  * Revision 4.7  1997/07/25  14:19:53  caress
  * Version 4.5beta2.
  * Much mucking, particularly with Simrad formats.
@@ -81,6 +84,10 @@
  * Initial version
  *
  */
+
+/* include this code only once */
+#ifndef MB_IO_DEF
+#define MB_IO_DEF
  
 /* declare buffer maximum */
 #define	MB_BUFFER_MAX	5000
@@ -242,3 +249,6 @@ struct mb_buffer_struct
 	int buffer_kind[MB_BUFFER_MAX];
 	int nbuffer;
 	};
+
+/* end conditional include */
+#endif

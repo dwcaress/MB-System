@@ -1,4 +1,4 @@
-.TH mbhistogram l "5 October 1998" "MB-System 4.6" "MB-System 4.6"
+.TH mbhistogram l "17 December 1998" "MB-System 4.6" "MB-System 4.6"
 .SH NAME
 \fBmbhistogram\fP - Generate a histogram of bathymetry, amplitude, or sidescan values
 from swath sonar data files.
@@ -33,13 +33,13 @@ amplitude data.
 The results are dumped to stdout.
 
 .SH AUTHORSHIP
-David W. Caress (caress@lamont.ldeo.columbia.edu)
+David W. Caress (caress@mbari.org)
 .br
-Dale N. Chayes (dale@lamont.ldeo.columbia.edu)
+  Monterey Bay Aquarium Research Institute
 .br
-Lamont-Doherty Earth Observatory
+Dale N. Chayes (dale@ldeo.columbia.edu)
 .br
-Palisades, NY 10964
+  Lamont-Doherty Earth Observatory
 
 .SH OPTIONS
 .TP

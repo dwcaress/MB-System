@@ -1,4 +1,4 @@
-.TH mbedit l "5 October 1998" "MB-System 4.6" "MB-System 4.6"
+.TH mbedit l "17 December 1998" "MB-System 4.6" "MB-System 4.6"
 .SH NAME
 \fBmbedit\fP - Interactive editor used to flag bad bathymetry values in swath sonar bathymetry data.
 
@@ -113,13 +113,13 @@ If the user chooses not to apply the saved edits, those edits will
 be lost as a new edit save file is created.
 
 .SH AUTHORSHIP
-David W. Caress (caress@lamont.ldeo.columbia.edu)
+David W. Caress (caress@mbari.org)
 .br
-Dale N. Chayes (dale@lamont.ldeo.columbia.edu)
+  Monterey Bay Aquarium Research Institute
 .br
-Lamont-Doherty Earth Observatory
+Dale N. Chayes (dale@ldeo.columbia.edu)
 .br
-Palisades, NY 10964
+  Lamont-Doherty Earth Observatory
 
 .SH OPTIONS
 .TP

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbswath.c	5/30/93
- *    $Id: mbswath.c,v 4.27 1998-10-28 21:32:29 caress Exp $
+ *    $Id: mbswath.c,v 4.28 1998-12-17 22:53:13 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -27,6 +27,9 @@
  * Date:	May 30, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.27  1998/10/28  21:32:29  caress
+ * Fixed handling of data with variable numbers of beams.
+ *
  * Revision 4.26  1998/10/04  04:18:07  caress
  * MB-System version 4.6beta
  *
@@ -245,7 +248,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbswath.c,v 4.27 1998-10-28 21:32:29 caress Exp $";
+	static char rcs_id[] = "$Id: mbswath.c,v 4.28 1998-12-17 22:53:13 caress Exp $";
 	static char program_name[] = "MBSWATH";
 	static char help_message[] =  "MBSWATH is a GMT compatible utility which creates a color postscript \nimage of multibeam swath bathymetry or backscatter data.  The image \nmay be shaded relief as well.  Complete maps are made by using \nMBSWATH in conjunction with the usual GMT programs.";
 	static char usage_message[] = "mbswath -Ccptfile -Jparameters -Rwest/east/south/north \n\t[-Afactor -Btickinfo -byr/mon/day/hour/min/sec \n\t-ccopies -Dmode/ampscale/ampmin/ampmax \n\t-Eyr/mon/day/hour/min/sec -fformat \n\t-Fred/green/blue -Gmagnitude/azimuth -Idatalist \n\t-K -Ncptfile -O -P -ppings -Qdpi -Ttimegap -U -W -Xx-shift -Yy-shift \n\t-Zmode -V -H]";
@@ -2712,6 +2715,9 @@ int	*error;
 	ping1->heading = ping2->heading;
 	ping1->distance = ping2->distance;
 	strcpy(ping1->comment,ping2->comment);
+	ping1->beams_bath = ping2->beams_bath;
+	ping1->beams_amp = ping2->beams_amp;
+	ping1->pixels_ss = ping2->pixels_ss;
 	for (i=0;i<ping1->beams_bath;i++)
 		{
 		ping1->beamflag[i] = ping2->beamflag[i];

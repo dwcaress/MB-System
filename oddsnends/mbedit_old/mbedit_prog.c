@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	4/8/93
- *    $Id: mbedit_prog.c,v 4.21 1998-10-28 21:31:56 caress Exp $
+ *    $Id: mbedit_prog.c,v 4.22 1998-12-17 22:56:00 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -24,6 +24,9 @@
  * Date:	March 28, 1997  GUI recast
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.21  1998/10/28  21:31:56  caress
+ * Fixed handling of data with variable numbers of beams.
+ *
  * Revision 4.20  1998/10/05  17:45:32  caress
  * MB-System version 4.6beta
  *
@@ -209,7 +212,7 @@ struct mbedit_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbedit_prog.c,v 4.21 1998-10-28 21:31:56 caress Exp $";
+static char rcs_id[] = "$Id: mbedit_prog.c,v 4.22 1998-12-17 22:56:00 caress Exp $";
 static char program_name[] = "MBedit";
 static char help_message[] =  
 "MBedit is an interactive editor used to identify and flag\n\
@@ -342,6 +345,9 @@ int	pixel_values[256];
 char	*ctime();
 char	*getenv();
 char	*strstr();
+
+/* compare function for qsort */
+int mb_double_compare();
 
 /*--------------------------------------------------------------------*/
 int mbedit_init(argc,argv,startup_file)
@@ -3395,27 +3401,28 @@ int	*icurrent;
 		/* reset message */
 		do_message_on("MBedit is applying saved edits...");
 		
-		/* rewinds saved edit file */
-		rewind(sifp);
-		
-		/* loop over reading saved edits */
-		while (mbedit_retrieve_edit(&stime_d, &sbeam, &saction) 
-		    == MB_SUCCESS)
+		/* loop over each data record, checking each edit */
+		for (i = 0; i < nlist; i++)
 		    {
-		    /* find ping of interest if possible */
 		    found = MB_NO;
-		    for (i = 0; i < nlist && found == MB_NO ; i++)
+		    status = mb_buffer_get_next_data(verbose,
+			    buff_ptr,imbio_ptr,list[i],&id,
+			    time_i,&time_d,
+			    &navlon,&navlat,
+			    &speed,&heading,
+			    &nbath,&namp,&nss,
+			    beamflag,bath,amp,
+			    bathacrosstrack,bathalongtrack,
+			    ss,ssacrosstrack,ssalongtrack,
+			    &error);
+		
+		    /* rewinds saved edit file */
+		    rewind(sifp);
+		
+		    /* loop over reading saved edits */
+		    while (mbedit_retrieve_edit(&stime_d, &sbeam, &saction) 
+			== MB_SUCCESS)
 			{
-			status = mb_buffer_get_next_data(verbose,
-				buff_ptr,imbio_ptr,list[i],&id,
-				time_i,&time_d,
-				&navlon,&navlat,
-				&speed,&heading,
-				&nbath,&namp,&nss,
-				beamflag,bath,amp,
-				bathacrosstrack,bathalongtrack,
-				ss,ssacrosstrack,ssalongtrack,
-				&error);
 			if (time_d == stime_d && sbeam >= 0 
 			    && sbeam < nbath)
 			    {
@@ -3434,9 +3441,12 @@ int	*icurrent;
 			    /* write saved edit to current edit save file */
 			    if (sofile_open == MB_YES)
 				mbedit_save_edit(stime_d, sbeam, saction);
+			    }
+			}
 				
-			    /* reinsert data */
-			    status = mb_buffer_insert(verbose,
+		     /* reinsert data if edit found */
+		    if (found == MB_YES)
+			status = mb_buffer_insert(verbose,
 				    buff_ptr, imbio_ptr, id,
 				    time_i, time_d,
 				    navlon, navlat, speed, heading,
@@ -3446,8 +3456,6 @@ int	*icurrent;
 				    ss, ssacrosstrack, ssalongtrack,
 				    comment,
 				    &error);
-			    }
-			}
 		    }
 		}
 		
@@ -3648,7 +3656,7 @@ int	autoscale;
 		bathmean = bathsum/nbathsum;
 	if (nbathlist > 0)
 		{
-		sort(nbathlist, bathlist-1);
+		qsort((char *)bathlist,nbathlist,sizeof(double),mb_double_compare);
 		bathmedian = bathlist[nbathlist/2];
 		}
 		
@@ -3915,7 +3923,7 @@ int	iping;
 	for (j=0;j<ping[iping].beams_bath;j++)
 		{
 		if (show_flagged == MB_YES 
-			&& mb_beam_ok(ping[iping].beamflag[j]) 
+			&& !mb_beam_ok(ping[iping].beamflag[j]) 
 			&& ping[iping].beamflag[j] != MB_FLAG_NULL
 			&& first == MB_YES)
 			{
@@ -3957,6 +3965,7 @@ int	iping;
 			&& !mb_beam_ok(ping[iping].beamflag[j])
 			&& ping[iping].beamflag[j] != MB_FLAG_NULL)
 			{
+			if (j > 0)
 			xg_drawline(mbedit_xgid,xold,yold,
 					ping[iping].bath_x[j],
 					ping[iping].bath_y[j],
@@ -4433,9 +4442,7 @@ int	*buffer_size_max;
 	
 	/* set buffer size lower if format supports sidescan */
 	if (pixels_ss_table[format_num] > 0)
-		*buffer_size_max = MBEDIT_BUFFER_SIZE / 5;
-	else
-		*buffer_size_max = MBEDIT_BUFFER_SIZE;
+		*buffer_size_max = MBEDIT_BUFFER_SIZE / 2;
 	if (*buffer_size > *buffer_size_max)
 		*buffer_size = *buffer_size_max;
 
@@ -4569,44 +4576,3 @@ int	*action;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-/* 	function sort sorts the data.  
- *	Uses the shell method from Numerical Recipes.
- */
-#define ALN2I 1.442695022
-#define TINY 1.0e-5
-int sort(n,r)
-int	n;
-double *r;
-{
-	int	status = MB_SUCCESS;
-	int	nn, m, j, i, lognb2;
-	double	tr;
-
-	if (n <= 0) 
-		{
-		status = MB_FAILURE;
-		return(status);
-		}
-		
-	lognb2 = (log((double) n)*ALN2I + TINY);
-	m = n;
-	for (nn=1;nn<=lognb2;nn++)
-		{
-		m >>= 1;
-		for (j=m+1;j<=n;j++)
-			{
-			i = j - m;
-			tr = r[j];
-			while (i >= 1 && r[i] > tr)
-				{
-				r[i+m] = r[i];
-				i -= m;
-				}
-			r[i+m] = tr;
-			}
-		}
-		
-	return(status);
-}
-/*--------------------------------------------------------------------*/
-

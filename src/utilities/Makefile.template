@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 4.16 1998-10-05 19:19:24 caress Exp $
+#	$Id: Makefile.template,v 4.17 1998-12-17 22:52:10 caress Exp $
 #
 #     Copyright (c) 1993, 1994 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.16  1998/10/05 19:19:24  caress
+# MB-System version 4.6beta
+#
 # Revision 4.15  1997/09/17  19:21:33  caress
 # Removed hsbath.
 #
@@ -121,7 +124,8 @@ all:	$(MANDIR)/mbsystem.l \
 	$(BINDIR)/mbanglecorrect $(MANDIR)/mbanglecorrect.l \
 	$(BINDIR)/mbfilter $(MANDIR)/mbfilter.l \
 	$(BINDIR)/mbcut $(MANDIR)/mbcut.l \
-	$(BINDIR)/mbtide $(MANDIR)/mbtide.l
+	$(BINDIR)/mbtide $(MANDIR)/mbtide.l \
+	$(BINDIR)/mbsimradmakess $(MANDIR)/mbsimradmakess.l
 
 ### make clean removes the object files
 clean:
@@ -203,6 +207,9 @@ $(BINDIR)/mbcut:	mbcut.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a
 $(BINDIR)/mbtide:	mbtide.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a
 	$(CC) $(CFLAGS) mbtide.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a \
 		$(LFLAGS) -o $(BINDIR)/mbtide
+$(BINDIR)/mbsimradmakess:	mbsimradmakess.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a
+	$(CC) $(CFLAGS) mbsimradmakess.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a \
+		$(LFLAGS) -o $(BINDIR)/mbsimradmakess
 
 ### compile the source files
 mbformat.o:	mbformat.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
@@ -256,6 +263,8 @@ mbcut.o:	mbcut.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_defin
 	$(CC) -c $(CFLAGS) mbcut.c
 mbtide.o:	mbtide.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbtide.c
+mbsimradmakess.o:	mbsimradmakess.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
+	$(CC) -c $(CFLAGS) mbsimradmakess.c
 
 ### copy the man pages to the man page directory
 $(MANDIR)/mbsystem.l:	mbsystem.manl
@@ -333,3 +342,6 @@ $(MANDIR)/mbcut.l:	mbcut.manl
 $(MANDIR)/mbtide.l:	mbtide.manl
 	cp mbtide.manl $(MANDIR)/mbtide.l
 	chmod 664 $(MANDIR)/mbtide.l
+$(MANDIR)/mbsimradmakess.l:	mbsimradmakess.manl
+	cp mbsimradmakess.manl $(MANDIR)/mbsimradmakess.l
+	chmod 664 $(MANDIR)/mbsimradmakess.l

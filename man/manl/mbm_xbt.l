@@ -1,4 +1,4 @@
-.TH mbm_xbt l "5 October 1998" "MB-System 4.6" "MB-System 4.6"
+.TH mbm_xbt l "17 December 1998" "MB-System 4.6" "MB-System 4.6"
 .SH NAME
 \fBmbm_xbt\fP - Calculate sound velocity from XBT data.
 
@@ -18,16 +18,17 @@ The conversion is done using the DelGrosso equation as referenced
 in Dusha et al. [1993] (reference below).
 
 .SH AUTHORSHIP
-David W. Caress (caress@lamont.ldeo.columbia.edu)
+David W. Caress (caress@mbari.org)
 .br
-Dale N. Chayes (dale@lamont.ldeo.columbia.edu)
+  Monterey Bay Aquarium Research Institute
 .br
-Suzanne H. O'Hara (sohara@lamont.ldeo.columbia.edu)
+Dale N. Chayes (dale@ldeo.columbia.edu)
 .br
- Lamont-Doherty Earth Observatory
+  Lamont-Doherty Earth Observatory
 .br
-Palisades, NY 10964
+Suzanne H. O'Hara (sohara@ldeo.columbia.edu)
 .br
+  Lamont-Doherty Earth Observatory
 
 .SH OPTIONS
 .TP

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad.h	8/5/94
- *	$Id: mbsys_simrad.h,v 4.8 1998-10-05 18:32:27 caress Exp $
+ *	$Id: mbsys_simrad.h,v 4.9 1998-12-17 23:01:15 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -27,6 +27,9 @@
  * Date:	August 5, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.8  1998/10/05  18:32:27  caress
+ * MB-System version 4.6beta
+ *
  * Revision 4.7  1997/09/15  19:06:40  caress
  * Real Version 4.5
  *
@@ -85,10 +88,6 @@
  *         EM-121:   Single array deep water system with up to 121
  *                   beams of bathymetry and up to 523 sidescan
  *                   samples per bathymetry beam.
- *         EM-3000:  Single array shallow water system with up to 81
- *                   beams of bathymetry and up to 523 sidescan
- *                   samples per bathymetry beam.
- *                   *** At present, the EM-3000 is not supported! **
  *   4. Each telegram is preceded by a two byte start code and
  *      followed by a three byte end code consisting of 0x03
  *      followed by two bytes representing the checksum for
@@ -98,7 +97,7 @@
  *         0x0285: Start                                  421 data bytes
  *         0x0286: Stop                                   421 data bytes
  *         0x0287: Parameter                              421 data bytes
- *         0x029A: Position                                90 data bytes
+ *         0x0293: Position                                90 data bytes
  *         0x029A: Sound velocity profile                 416 data bytes
  *         0x0294: EM-12D starboard bathymetry            923 data bytes
  *         0x0295: EM-12D port bathymetry                 923 data bytes

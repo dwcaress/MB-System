@@ -1,4 +1,4 @@
-.TH mbm_grd3dplot l "5 October 1998" "MB-System 4.6" "MB-System 4.6"
+.TH mbm_grd3dplot l "17 December 1998" "MB-System 4.6" "MB-System 4.6"
 .SH NAME
 \fBmbm_grd3dplot\fP - Create an executable shellscript which will generate
 a GMT 3D perspective plot of gridded data in a GMT grd file.
@@ -53,13 +53,13 @@ to take advantage of GMT capabilites not supported by this
 macro.
 
 .SH AUTHORSHIP
-David W. Caress (caress@lamont.ldeo.columbia.edu)
+David W. Caress (caress@mbari.org)
 .br
-Dale N. Chayes (dale@lamont.ldeo.columbia.edu)
+  Monterey Bay Aquarium Research Institute
 .br
-Lamont-Doherty Earth Observatory
+Dale N. Chayes (dale@ldeo.columbia.edu)
 .br
-Palisades, NY 10964
+  Lamont-Doherty Earth Observatory
 
 .SH SIMPLE DESCRIPTION OF BASIC OPTIONS
 .TP

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_swap.h	6/21/94
- *    $Id: mb_swap.h,v 4.4 1998-10-05 17:46:15 caress Exp $
+ *    $Id: mb_swap.h,v 4.5 1998-12-17 23:01:15 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,9 @@
  * Date:	June 21, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.4  1998/10/05 17:46:15  caress
+ * MB-System version 4.6beta
+ *
  * Revision 4.3  1997/04/21  17:02:07  caress
  * MB-System 4.5 Beta Release.
  *
@@ -43,6 +46,10 @@
 
 /*--------------------------------------------------------------------*/
 
+/* include this code only once */
+#ifndef MB_SWAP_DEF
+#define MB_SWAP_DEF
+
 #define mb_swap_short(a) ( ((a & 0xff) << 8) | ((unsigned short)(a) >> 8) )
 
 #define mb_swap_int(a) ( ((a) << 24) | \
@@ -59,5 +66,7 @@
                        (((a) >> 40) & 0x000000000000ff00) | \
                         ((unsigned long)(a) >> 56)) 
 
+/* end conditional include */
+#endif
 
 /*--------------------------------------------------------------------*/

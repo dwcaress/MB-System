@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_buffer.c	2/25/93
- *    $Id: mb_buffer.c,v 4.15 1998-10-05 17:46:15 caress Exp $
+ *    $Id: mb_buffer.c,v 4.16 1998-12-17 22:56:15 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,11 +21,17 @@
  *   mb_buffer_clear	- clear data from buffer
  *   mb_buffer_info	- get system and kind of specified record 
  *   				in buffer
- *   mb_buffer_extract	- extract navigation and bathymetry/backscatter 
+ *   mb_buffer_get_next_data	- extract navigation and bathymetry/backscatter 
  *   				from next suitable record in buffer
+ *   mb_buffer_get_next_nav	- extract navigation and vru 
+ *   				from next suitable record in buffer
+ *   mb_buffer_extract	- extract navigation and bathymetry/backscatter 
+ *   				from specified record in buffer
  *   mb_buffer_insert	- insert altered navigation and 
  *   				bathymetry/backscatter data into 
  *   				record in buffer
+ *   mb_buffer_extract_nav - extract navigation and vru 
+ *   				from specified record in buffer
  *   mb_buffer_insert_nav - insert altered navigation into 
  *   				record in buffer
  *   mb_buffer_alloc	- allocate memory in buffer
@@ -35,6 +41,9 @@
  * Date:	February 25, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.15  1998/10/05  17:46:15  caress
+ * MB-System version 4.6beta
+ *
  * Revision 4.14  1997/07/28  15:10:28  caress
  * Fixed typos.
  *
@@ -139,7 +148,7 @@ int	verbose;
 char	**buff_ptr;
 int	*error;
 {
-  static char rcs_id[]="$Id: mb_buffer.c,v 4.15 1998-10-05 17:46:15 caress Exp $";
+  static char rcs_id[]="$Id: mb_buffer.c,v 4.16 1998-12-17 22:56:15 caress Exp $";
 	char	*function_name = "mb_buffer_init";
 	int	status = MB_SUCCESS;
 	struct mb_buffer_struct *buff;
@@ -1091,6 +1100,7 @@ int	*error;
 	struct mb_io_struct *mb_io_ptr;
 	char	*store_ptr;
 	int	system;
+	int	nav_record_type;
 	int	kind;
 	char	comment[200];
 	int	found;
@@ -1113,13 +1123,16 @@ int	*error;
 
 	/* get mbio descriptor */
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+	
+	/* get type of data record required for this format */
+	nav_record_type = mb_nav_source[mb_io_ptr->format_num];
 
-	/* look for next survey data */
+	/* look for next data of the appropriate type */
 	found = MB_NO;
 	for (i=start;i<buff->nbuffer;i++)
 		{
 		if (found == MB_NO 
-			&& buff->buffer_kind[i] == MB_DATA_DATA)
+			&& buff->buffer_kind[i] == nav_record_type)
 			{
 			*id = i;
 			found = MB_YES;
@@ -1301,6 +1314,17 @@ int	*error;
 		else if (system == MB_SYS_SIMRAD)
 			{
 			status = mbsys_simrad_extract(verbose,mbio_ptr,
+				store_ptr,kind,
+				time_i,time_d,navlon,navlat,speed,heading,
+				nbath,namp,nss,
+				beamflag,bath,amp,
+				bathacrosstrack,bathalongtrack,
+				ss,ssacrosstrack,ssalongtrack,
+				comment,error);
+			}
+		else if (system == MB_SYS_SIMRAD2)
+			{
+			status = mbsys_simrad2_extract(verbose,mbio_ptr,
 				store_ptr,kind,
 				time_i,time_d,navlon,navlat,speed,heading,
 				nbath,namp,nss,
@@ -1603,6 +1627,14 @@ int	*error;
 				roll,pitch,heave, 
 				error);
 			}
+		else if (system == MB_SYS_SIMRAD2)
+			{
+			status = mbsys_simrad2_extract_nav(verbose,mbio_ptr,
+				store_ptr,kind,
+				time_i,time_d,navlon,navlat,speed,heading,
+				roll,pitch,heave, 
+				error);
+			}
 		else if (system == MB_SYS_MR1)
 			{
 			status = mbsys_mr1_extract_nav(verbose,mbio_ptr,
@@ -1887,6 +1919,16 @@ int	*error;
 			ss,ssacrosstrack,ssalongtrack,
 			comment,error);
 		}
+	else if (system == MB_SYS_SIMRAD2)
+		{
+		status = mbsys_simrad2_insert(verbose,mbio_ptr,store_ptr,
+			time_i,time_d,navlon,navlat,speed,heading,
+			nbath,namp,nss,
+			beamflag,bath,amp,
+			bathacrosstrack,bathalongtrack,
+			ss,ssacrosstrack,ssalongtrack,
+			comment,error);
+		}
 	else if (system == MB_SYS_MR1)
 		{
 		status = mbsys_mr1_insert(verbose,mbio_ptr,store_ptr,
@@ -2027,7 +2069,7 @@ double	pitch;
 double	heave;
 int	*error;
 {
-	char	*function_name = "mb_buffer_insert";
+	char	*function_name = "mb_buffer_insert_nav";
 	int	status = MB_SUCCESS;
 	struct mb_buffer_struct *buff;
 	struct mb_io_struct *mb_io_ptr;
@@ -2117,6 +2159,14 @@ int	*error;
 	else if (system == MB_SYS_SIMRAD)
 		{
 		status = mbsys_simrad_insert_nav(verbose,
+			mbio_ptr,store_ptr,
+			time_i,time_d,navlon,navlat,speed,heading,
+			roll,pitch,heave, 
+			error);
+		}
+	else if (system == MB_SYS_SIMRAD2)
+		{
+		status = mbsys_simrad2_insert_nav(verbose,
 			mbio_ptr,store_ptr,
 			time_i,time_d,navlon,navlat,speed,heading,
 			roll,pitch,heave, 
@@ -2334,6 +2384,10 @@ int	*error;
 		{
 		status = mbsys_simrad_alloc(verbose,mbio_ptr,store_ptr,error);
 		}
+	else if (system == MB_SYS_SIMRAD2)
+		{
+		status = mbsys_simrad2_alloc(verbose,mbio_ptr,store_ptr,error);
+		}
 	else if (system == MB_SYS_MR1)
 		{
 		status = mbsys_mr1_alloc(verbose,mbio_ptr,store_ptr,error);
@@ -2449,6 +2503,10 @@ int	*error;
 	else if (system == MB_SYS_SIMRAD)
 		{
 		status = mbsys_simrad_deall(verbose,mbio_ptr,store_ptr,error);
+		}
+	else if (system == MB_SYS_SIMRAD2)
+		{
+		status = mbsys_simrad2_deall(verbose,mbio_ptr,store_ptr,error);
 		}
 	else if (system == MB_SYS_MR1)
 		{
@@ -2570,6 +2628,11 @@ int	*error;
 	else if (system == MB_SYS_SIMRAD)
 		{
 		status = mbsys_simrad_copy(verbose,mbio_ptr,
+			store_ptr,copy_ptr,error);
+		}
+	else if (system == MB_SYS_SIMRAD2)
+		{
+		status = mbsys_simrad2_copy(verbose,mbio_ptr,
 			store_ptr,copy_ptr,error);
 		}
 	else if (system == MB_SYS_MR1)

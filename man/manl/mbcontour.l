@@ -1,4 +1,4 @@
-.TH mbcontour l "5 October 1998" "MB-System 4.6" "MB-System 4.6"
+.TH mbcontour l "17 December 1998" "MB-System 4.6" "MB-System 4.6"
 .SH NAME
 \fBmbcontour\fP - GMT compatible utility for color fill or color shaded relief
 swath plots of swath sonar data using Postscript.
@@ -54,13 +54,13 @@ programs \fBmbswath\fP and \fBmbgrid\fP also use ".inf" files
 in the same fashion.
 
 .SH AUTHORSHIP
-David W. Caress (caress@lamont.ldeo.columbia.edu)
+David W. Caress (caress@mbari.org)
 .br
-Dale N. Chayes (dale@lamont.ldeo.columbia.edu)
+  Monterey Bay Aquarium Research Institute
 .br
-Lamont-Doherty Earth Observatory
+Dale N. Chayes (dale@ldeo.columbia.edu)
 .br
-Palisades, NY 10964
+  Lamont-Doherty Earth Observatory
 
 .SH OPTIONS
 .TP
