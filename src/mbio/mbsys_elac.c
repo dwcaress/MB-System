@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_elac.c	3.00	8/20/94
- *	$Id: mbsys_elac.c,v 4.0 1994-10-21 12:34:59 caress Exp $
+ *	$Id: mbsys_elac.c,v 4.1 1994-11-09 21:40:34 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -33,6 +33,9 @@
  * Date:	August 20, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/10/21  12:34:59  caress
+ * Release V4.0
+ *
  * Revision 1.1  1994/10/21  12:20:01  caress
  * Initial revision
  *
@@ -63,7 +66,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_elac.c,v 4.0 1994-10-21 12:34:59 caress Exp $";
+ static char res_id[]="$Id: mbsys_elac.c,v 4.1 1994-11-09 21:40:34 caress Exp $";
 	char	*function_name = "mbsys_elac_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -647,8 +650,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_elac_ttimes(verbose,mbio_ptr,store_ptr,kind,
-		nbeams,ttimes,angles,flags,error)
+int mbsys_elac_ttimes(verbose,mbio_ptr,store_ptr,kind,nbeams,
+	ttimes,angles,angles_forward,flags,error)
 int	verbose;
 char	*mbio_ptr;
 char	*store_ptr;
@@ -656,6 +659,7 @@ int	*kind;
 int	*nbeams;
 double	*ttimes;
 double	*angles;
+double	*angles_forward;
 int	*flags;
 int	*error;
 {
@@ -677,7 +681,8 @@ int	*error;
 		fprintf(stderr,"dbg2       mb_ptr:     %d\n",mbio_ptr);
 		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
 		fprintf(stderr,"dbg2       ttimes:     %d\n",ttimes);
-		fprintf(stderr,"dbg2       angles:     %d\n",angles);
+		fprintf(stderr,"dbg2       angles_xtrk:%d\n",angles);
+		fprintf(stderr,"dbg2       angles_ltrk:%d\n",angles_forward);
 		fprintf(stderr,"dbg2       flags:      %d\n",flags);
 		}
 
@@ -705,6 +710,7 @@ int	*error;
 			{
 			ttimes[ibath] = ttscale*store->profile[i].tt[i];
 			angles[ibath] = angscale*store->profile[i].angle[i];
+			angles_forward[i] = 0.0;
 			ibath++;
 			if (store->profile[i].bath[i] < 0)
 				flags[i] = MB_YES;
@@ -748,8 +754,9 @@ int	*error;
 		{
 		fprintf(stderr,"dbg2       nbeams:     %d\n",*nbeams);
 		for (i=0;i<*nbeams;i++)
-			fprintf(stderr,"dbg2       beam %d: tt:%f  angle:%f  flag:%d\n",
-				i,ttimes[i],angles[i],flags[i]);
+			fprintf(stderr,"dbg2       beam %d: tt:%f  angle_xtrk:%f  angle_ltrk:%f  flag:%d\n",
+				i,ttimes[i],angles[i],
+				angles_forward[i],flags[i]);
 		}
 	if (verbose >= 2)
 		{

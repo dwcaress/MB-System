@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_ttimes.c	4/9/94
- *    $Id: mb_ttimes.c,v 4.2 1994-10-21 12:11:53 caress Exp $
+ *    $Id: mb_ttimes.c,v 4.3 1994-11-09 21:40:34 caress Exp $
 
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,9 @@
  * Date:	April 9, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1994/10/21  12:11:53  caress
+ * Release V4.0
+ *
  * Revision 4.1  1994/07/29  18:46:51  caress
  * Changes associated with supporting Lynx OS (byte swapped) and
  * using unix second time base (for time_d values).
@@ -44,8 +47,8 @@
 #include "../../include/mb_io.h"
 
 /*--------------------------------------------------------------------*/
-int mb_ttimes(verbose,mbio_ptr,store_ptr,kind,
-			nbeams,ttimes,angles,flags,error)
+int mb_ttimes(verbose,mbio_ptr,store_ptr,kind,nbeams,ttimes,
+	angles,angles_forward,flags,error)
 int	verbose;
 char	*mbio_ptr;
 char	*store_ptr;
@@ -53,10 +56,11 @@ int	*kind;
 int	*nbeams;
 double	*ttimes;
 double	*angles;
+double	*angles_forward;
 int	*flags;
 int	*error;
 {
-  static char rcs_id[]="$Id: mb_ttimes.c,v 4.2 1994-10-21 12:11:53 caress Exp $";
+  static char rcs_id[]="$Id: mb_ttimes.c,v 4.3 1994-11-09 21:40:34 caress Exp $";
 	char	*function_name = "mb_ttimes";
 	int	status;
 	int	system;
@@ -83,47 +87,65 @@ int	*error;
 	if (system == MB_SYS_SB)
 		{
 		status = mbsys_sb_ttimes(verbose,mbio_ptr,store_ptr,
-				kind,nbeams,ttimes,angles,flags,error);
+				kind,nbeams,ttimes,
+				angles,angles_forward,
+				flags,error);
 		}
 	else if (system == MB_SYS_HSDS)
 		{
 		status = mbsys_hsds_ttimes(verbose,mbio_ptr,store_ptr,
-				kind,nbeams,ttimes,angles,flags,error);
+				kind,nbeams,ttimes,
+				angles,angles_forward,
+				flags,error);
 		}
 	else if (system == MB_SYS_SB2000)
 		{
 		status = mbsys_sb2000_ttimes(verbose,mbio_ptr,store_ptr,
-				kind,nbeams,ttimes,angles,flags,error);
+				kind,nbeams,ttimes,
+				angles,angles_forward,
+				flags,error);
 		}
 	else if (system == MB_SYS_SB2100)
 		{
 		status = mbsys_sb2100_ttimes(verbose,mbio_ptr,store_ptr,
-				kind,nbeams,ttimes,angles,flags,error);
+				kind,nbeams,ttimes,
+				angles,angles_forward,
+				flags,error);
 		}
 	else if (system == MB_SYS_SIMRAD)
 		{
 		status = mbsys_simrad_ttimes(verbose,mbio_ptr,store_ptr,
-				kind,nbeams,ttimes,angles,flags,error);
+				kind,nbeams,ttimes,
+				angles,angles_forward,
+				flags,error);
 		}
 	else if (system == MB_SYS_MR1)
 		{
 		status = mbsys_mr1_ttimes(verbose,mbio_ptr,store_ptr,
-				kind,nbeams,ttimes,angles,flags,error);
+				kind,nbeams,ttimes,
+				angles,angles_forward,
+				flags,error);
 		}
 	else if (system == MB_SYS_LDEOIH)
 		{
 		status = mbsys_ldeoih_ttimes(verbose,mbio_ptr,store_ptr,
-				kind,nbeams,ttimes,angles,flags,error);
+				kind,nbeams,ttimes,
+				angles,angles_forward,
+				flags,error);
 		}
 	else if (system == MB_SYS_RESON)
 		{
 		status = mbsys_reson_ttimes(verbose,mbio_ptr,store_ptr,
-				kind,nbeams,ttimes,angles,flags,error);
+				kind,nbeams,ttimes,
+				angles,angles_forward,
+				flags,error);
 		}
 	else if (system == MB_SYS_ELAC)
 		{
 		status = mbsys_elac_ttimes(verbose,mbio_ptr,store_ptr,
-				kind,nbeams,ttimes,angles,flags,error);
+				kind,nbeams,ttimes,
+				angles,angles_forward,
+				flags,error);
 		}
 	else
 		{
