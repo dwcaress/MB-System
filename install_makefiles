@@ -1,7 +1,7 @@
 #! /usr/local/bin/perl 
 #--------------------------------------------------------------------
 #    The MB-system:	install_makefiles	5/20/94
-#    $Id: install_makefiles,v 4.1 1994-06-21 22:52:01 caress Exp $
+#    $Id: install_makefiles,v 4.2 1994-06-22 19:30:38 caress Exp $
 #
 #    Copyright (c) 1993, 1994 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -39,10 +39,13 @@
 #   May 20, 1994
 #
 # Version:
-#   $Id: install_makefiles,v 4.1 1994-06-21 22:52:01 caress Exp $
+#   $Id: install_makefiles,v 4.2 1994-06-22 19:30:38 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.1  1994/06/21  22:52:01  caress
+# Changes to support PCs running Lynx OS.
+#
 # Revision 4.0  1994/05/24  20:40:50  caress
 # First cut.
 #
@@ -163,6 +166,16 @@ if ($BYTESWAPPED eq "YES")
 	$CFLAGS = "$CFLAGS -DBYTESWAPPED";
 	}
 
+# set archiver 
+if ($OS eq "LYNX")
+	{
+	$ARCHIVE = "libr rcv";
+	}
+else
+	{
+	$ARCHIVE = "ar rcv";
+	}
+
 # outputting attributes:
 print "\nParameters defined for Makefiles:\n";
 print "Operating System:          $OS\n";
@@ -178,6 +191,7 @@ print "C Compile Flags:           $CFLAGS\n";
 print "F77 Compile Flags:         $FFLAGS\n";
 print "Load Flags:                $LFLAGS\n";
 print "F77 with C Load Flags:     $FWITHCFLAGS\n";
+print "Library Archiver:          $ARCHIVE\n";
 print "GMT Library Location:      $GMTLIBDIR\n";
 print "GMT Include Location:      $GMTINCDIR\n";
 print "NetCDF Library Location:   $NETCDFDIR\n";
@@ -258,6 +272,10 @@ while (@files)
 		elsif (index($_,"LEVITUS",0) == 0)
 			{
 			print MAK "LEVITUS = $LEVITUS\n";
+			}
+		elsif (index($_,"ARCHIVE",0) == 0)
+			{
+			print MAK "ARCHIVE = $ARCHIVE\n";
 			}
 		elsif (index($_,"ranlib",0) >= 0 && $OS ne "SUN")
 			{
