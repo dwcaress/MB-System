@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_read.c	3.00	2/20/93
- *    $Id: mb_read.c,v 3.1 1993-05-14 22:38:14 sohara Exp $
+ *    $Id: mb_read.c,v 3.2 1993-06-02 11:11:07 caress Exp $
  *
  *    Copyright (c) 1993 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,9 @@
  * Date:	February 20, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 3.1  1993/05/14  22:38:14  sohara
+ * fixed rcs_id message
+ *
  * Revision 3.0  1993/04/23  18:44:02  dale
  * Initial version
  *
@@ -67,7 +70,7 @@ char	*comment;
 int	*error;
 {
 
-  static char rcs_id[]="$Id: mb_read.c,v 3.1 1993-05-14 22:38:14 sohara Exp $";
+  static char rcs_id[]="$Id: mb_read.c,v 3.2 1993-06-02 11:11:07 caress Exp $";
 	char	*function_name = "mb_read";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
@@ -614,6 +617,12 @@ int	*error;
 				bathlat[i] = *navlat - headingx
 					*mtodeglat*mb_io_ptr->bathdist[i];
 				}
+			else
+				{
+				bath[i] = 0.0;
+				bathlon[i] = 0.0;
+				bathlat[i] = 0.0;
+				}
 			}
 		for (i=0;i<*nback;i++)
 			{
@@ -628,6 +637,12 @@ int	*error;
 					*mtodeglon*mb_io_ptr->backdist[i];
 				backlat[i] = *navlat - headingx
 					*mtodeglat*mb_io_ptr->backdist[i];
+				}
+			else
+				{
+				back[i] = 0.0;
+				backlon[i] = 0.0;
+				backlat[i] = 0.0;
 				}
 			}
 		}
