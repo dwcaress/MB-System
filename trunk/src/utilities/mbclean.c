@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbclean.c	2/26/93
- *    $Id: mbclean.c,v 4.1 1994-03-12 01:44:37 caress Exp $
+ *    $Id: mbclean.c,v 4.2 1994-03-25 14:01:31 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -26,6 +26,10 @@
  * by David Caress.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1994/03/12  01:44:37  caress
+ * Added declarations of ctime and/or getenv for compatability
+ * with SGI compilers.
+ *
  * Revision 4.0  1994/03/06  00:13:22  caress
  * First cut at version 4.0
  *
@@ -97,10 +101,10 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbclean.c,v 4.1 1994-03-12 01:44:37 caress Exp $";
+	static char rcs_id[] = "$Id: mbclean.c,v 4.2 1994-03-25 14:01:31 caress Exp $";
 	static char program_name[] = "MBCLEAN";
 	static char help_message[] =  "MBCLEAN identifies and flags artifacts in multibeam bathymetry data\nBad beams  are  indentified  based  on  one simple criterion only: \nexcessive bathymetric slopes.   The default input and output streams \nare stdin and stdout.";
-	static char usage_message[] = "mbclean [-Cslope -Ddistance -Fformat -Iinfile -Llonflip -Mmode -Ooutfile -Q -Xzap_beams \n\t-V -H]";
+	static char usage_message[] = "mbclean [-Blow/high -Cslope -Ddistance -Fformat -Iinfile -Llonflip -Mmode -Ooutfile -Q -Xzap_beams \n\t-V -H]";
 	extern char *optarg;
 	extern int optkind;
 	int	errflg = 0;
@@ -153,6 +157,7 @@ char **argv;
 	struct bad_struct bad[2];
 	int	find_bad;
 	int	ndata = 0;
+	int	nrange = 0;
 	int	nouter = 0;
 	int	nrail = 0;
 	int	nbad = 0;
@@ -164,6 +169,9 @@ char **argv;
 	int	mode = MBCLEAN_FLAG_ONE;
 	int	zap_beams = 0;
 	int	zap_rails = MB_NO;
+	int	check_range = MB_NO;
+	int	depth_low;
+	int	depth_high;
 
 	/* rail processing variables */
 	int	center;
@@ -233,7 +241,7 @@ char **argv;
 	strcpy (ofile, "stdout");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhF:f:L:l:I:i:O:o:C:c:D:d:M:m:QqX:x:")) != -1)
+	while ((c = getopt(argc, argv, "VvHhB:b:F:f:L:l:I:i:O:o:C:c:D:d:M:m:QqX:x:")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -243,6 +251,12 @@ char **argv;
 		case 'V':
 		case 'v':
 			verbose++;
+			break;
+		case 'B':
+		case 'b':
+			sscanf (optarg,"%d/%d", &depth_low,&depth_high);
+			check_range = MB_YES;
+			flag++;
 			break;
 		case 'F':
 		case 'f':
@@ -347,6 +361,9 @@ char **argv;
 		fprintf(stderr,"dbg2       minimum dist:   %f\n",distancemin);
 		fprintf(stderr,"dbg2       zap_beams:      %d\n",zap_beams);
 		fprintf(stderr,"dbg2       zap_rails:      %d\n",zap_rails);
+		fprintf(stderr,"dbg2       check_range:    %d\n",check_range);
+		fprintf(stderr,"dbg2       depth_low:      %d\n",depth_low);
+		fprintf(stderr,"dbg2       depth_high:     %d\n",depth_high);
 		}
 
 	/* if help desired then print it and exit */
@@ -611,6 +628,60 @@ char **argv;
 			ping[0].ss,
 			ping[0].ssacrosstrack,ping[0].ssalongtrack,
 			comment,&error);
+	if (check_range == MB_YES)
+		{
+		strncpy(comment,"\0",256);
+		sprintf(comment,"  Depth range checking on:");
+		status = mb_put(verbose,ombio_ptr,kind,
+			ping[0].time_i,ping[0].time_d,
+			ping[0].navlon,ping[0].navlat,
+			ping[0].speed,ping[0].heading,
+			beams_bath,beams_amp,pixels_ss,
+			ping[0].bath,ping[0].amp,
+			ping[0].bathacrosstrack,ping[0].bathalongtrack,
+			ping[0].ss,
+			ping[0].ssacrosstrack,ping[0].ssalongtrack,
+			comment,&error);
+		strncpy(comment,"\0",256);
+		sprintf(comment,"    Minimum acceptable depth: %d",depth_low);
+		status = mb_put(verbose,ombio_ptr,kind,
+			ping[0].time_i,ping[0].time_d,
+			ping[0].navlon,ping[0].navlat,
+			ping[0].speed,ping[0].heading,
+			beams_bath,beams_amp,pixels_ss,
+			ping[0].bath,ping[0].amp,
+			ping[0].bathacrosstrack,ping[0].bathalongtrack,
+			ping[0].ss,
+			ping[0].ssacrosstrack,ping[0].ssalongtrack,
+			comment,&error);
+		strncpy(comment,"\0",256);
+		sprintf(comment,"    Maximum acceptable depth: %d",depth_high);
+		status = mb_put(verbose,ombio_ptr,kind,
+			ping[0].time_i,ping[0].time_d,
+			ping[0].navlon,ping[0].navlat,
+			ping[0].speed,ping[0].heading,
+			beams_bath,beams_amp,pixels_ss,
+			ping[0].bath,ping[0].amp,
+			ping[0].bathacrosstrack,ping[0].bathalongtrack,
+			ping[0].ss,
+			ping[0].ssacrosstrack,ping[0].ssalongtrack,
+			comment,&error);
+		}
+	else
+		{
+		strncpy(comment,"\0",256);
+		sprintf(comment,"  Depth range checking off");
+		status = mb_put(verbose,ombio_ptr,kind,
+			ping[0].time_i,ping[0].time_d,
+			ping[0].navlon,ping[0].navlat,
+			ping[0].speed,ping[0].heading,
+			beams_bath,beams_amp,pixels_ss,
+			ping[0].bath,ping[0].amp,
+			ping[0].bathacrosstrack,ping[0].bathalongtrack,
+			ping[0].ss,
+			ping[0].ssacrosstrack,ping[0].ssalongtrack,
+			comment,&error);
+		}
 	strncpy(comment,"\0",256);
 	sprintf(comment," ");
 	status = mb_put(verbose,ombio_ptr,kind,
@@ -735,6 +806,32 @@ char **argv;
 						{
 						ping[1].bath[j] = 0;
 						nouter++;
+						nzero++;
+						}
+					}
+					}
+				}
+
+			/* check depths for acceptable range if requested */
+			if (check_range == MB_YES && ping[1].id >= 0)
+				{
+				for (i=0;i<beams_bath;i++)
+					{
+					if (ping[1].bath[i] > 0
+					&& (ping[1].bath[i] < depth_low
+					|| ping[1].bath[i] > depth_high))
+					{
+					find_bad = MB_YES;
+					if (mode <= 2)
+						{
+						ping[1].bath[i] = -ping[1].bath[i];
+						nrange++;
+						nflag++;
+						}
+					else
+						{
+						ping[1].bath[i] = 0;
+						nrange++;
 						nzero++;
 						}
 					}
@@ -1157,6 +1254,7 @@ char **argv;
 		{
 		fprintf(stderr,"\n%d bathymetry data records processed\n",ndata);
 		fprintf(stderr,"%d outer beams zapped\n",nouter);
+		fprintf(stderr,"%d beams out of acceptable depth range\n",nrange);
 		fprintf(stderr,"%d bad rail beams identified\n",nrail);
 		fprintf(stderr,"%d excessive slopes identified\n",nbad);
 		fprintf(stderr,"%d beams flagged\n",nflag);

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbunclean.c	3/10/93
- *    $Id: mbunclean.c,v 4.1 1994-03-12 01:44:37 caress Exp $
+ *    $Id: mbunclean.c,v 4.2 1994-03-25 14:01:31 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,10 @@
  * Date:	March 10, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1994/03/12  01:44:37  caress
+ * Added declarations of ctime and/or getenv for compatability
+ * with SGI compilers.
+ *
  * Revision 4.0  1994/03/06  00:13:22  caress
  * First cut at version 4.0
  *
@@ -29,6 +33,10 @@
  *
  * Revision 3.1  1993/05/14  23:49:32  sohara
  * fixed $Log: not supported by cvs2svn $
+ * Revision 4.1  1994/03/12  01:44:37  caress
+ * Added declarations of ctime and/or getenv for compatability
+ * with SGI compilers.
+ *
  * Revision 4.0  1994/03/06  00:13:22  caress
  * First cut at version 4.0
  *
@@ -57,10 +65,10 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbunclean.c,v 4.1 1994-03-12 01:44:37 caress Exp $";
+	static char rcs_id[] = "$Id: mbunclean.c,v 4.2 1994-03-25 14:01:31 caress Exp $";
 	static char program_name[] = "MBUNCLEAN";
 	static char help_message[] =  "MBUNCLEAN unflags multibeam bathymetry and amplitude data \nwhich has been flagged as bad by being set negative. \nThe default input and output streams are stdin and stdout.";
-	static char usage_message[] = "mbunclean [-Fformat -Llonflip -V -H  -Iinfile -Ooutfile]";
+	static char usage_message[] = "mbunclean [-Blow/high -Fformat -Llonflip -V -H  -Iinfile -Ooutfile]";
 
 	/* parsing variables */
 	extern char *optarg;
@@ -121,6 +129,9 @@ char **argv;
 	int	unflag = 0;
 	int	data_use;
 	char	comment[256];
+	int	check_range = MB_NO;
+	int	depth_low;
+	int	depth_high;
 
 	/* time, user, host variables */
 	long int	right_now;
@@ -161,7 +172,7 @@ char **argv;
 	strcpy (ofile, "stdout");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhF:f:L:l:I:i:O:o:")) != -1)
+	while ((c = getopt(argc, argv, "VvHhB:b:F:f:L:l:I:i:O:o:")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -171,6 +182,12 @@ char **argv;
 		case 'V':
 		case 'v':
 			verbose++;
+			break;
+		case 'B':
+		case 'b':
+			sscanf (optarg,"%d/%d", &depth_low,&depth_high);
+			check_range = MB_YES;
+			flag++;
 			break;
 		case 'F':
 		case 'f':
@@ -245,6 +262,9 @@ char **argv;
 		fprintf(stderr,"dbg2       timegap:        %f\n",timegap);
 		fprintf(stderr,"dbg2       input file:     %s\n",ifile);
 		fprintf(stderr,"dbg2       output file:    %s\n",ofile);
+		fprintf(stderr,"dbg2       check_range:    %d\n",check_range);
+		fprintf(stderr,"dbg2       depth_low:      %d\n",depth_low);
+		fprintf(stderr,"dbg2       depth_high:     %d\n",depth_high);
 		}
 
 	/* if help desired then print it and exit */
@@ -396,6 +416,48 @@ char **argv;
 			ss,ssacrosstrack,ssalongtrack,
 			comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
+	if (check_range == MB_YES)
+		{
+		strncpy(comment,"\0",256);
+		sprintf(comment,"  Depth range checking on:");
+		status = mb_put(verbose,ombio_ptr,kind,
+			time_i,time_d,
+			navlon,navlat,speed,heading,
+			beams_bath,beams_amp,pixels_ss,
+			bath,amp,bathacrosstrack,bathalongtrack,
+			ss,ssacrosstrack,ssalongtrack,
+			comment,&error);
+		strncpy(comment,"\0",256);
+		sprintf(comment,"    Minimum acceptable depth: %d",depth_low);
+		status = mb_put(verbose,ombio_ptr,kind,
+			time_i,time_d,
+			navlon,navlat,speed,heading,
+			beams_bath,beams_amp,pixels_ss,
+			bath,amp,bathacrosstrack,bathalongtrack,
+			ss,ssacrosstrack,ssalongtrack,
+			comment,&error);
+		strncpy(comment,"\0",256);
+		sprintf(comment,"    Maximum acceptable depth: %d",depth_high);
+		status = mb_put(verbose,ombio_ptr,kind,
+			time_i,time_d,
+			navlon,navlat,speed,heading,
+			beams_bath,beams_amp,pixels_ss,
+			bath,amp,bathacrosstrack,bathalongtrack,
+			ss,ssacrosstrack,ssalongtrack,
+			comment,&error);
+		}
+	else
+		{
+		strncpy(comment,"\0",256);
+		sprintf(comment,"  Depth range checking off");
+		status = mb_put(verbose,ombio_ptr,kind,
+			time_i,time_d,
+			navlon,navlat,speed,heading,
+			beams_bath,beams_amp,pixels_ss,
+			bath,amp,bathacrosstrack,bathalongtrack,
+			ss,ssacrosstrack,ssalongtrack,
+			comment,&error);
+		}
 	strncpy(comment,"\0",256);
 	sprintf(comment," ");
 	status = mb_put(verbose,ombio_ptr,kind,
@@ -475,14 +537,24 @@ char **argv;
 			&& error == MB_ERROR_NO_ERROR)
 			{
 			for (i=0;i<beams_bath;i++)
-				if (bath[i] < 0)
+				{
+				if (check_range == MB_NO && bath[i] < 0)
 					{
 					bath[i] = -bath[i];
 					data_use = MB_YES;
 					unflag++;
 					}
+				else if (check_range == MB_YES && bath[i] < 0
+					&& (-bath[i] >= depth_low
+						&& -bath[i] <= depth_high))
+					{
+					bath[i] = -bath[i];
+					data_use = MB_YES;
+					unflag++;
+					}
+				}
 			for (i=0;i<beams_amp;i++)
-				if (amp[i] < 0)
+				if (amp[i] < 0 && bath[i] > 0)
 					{
 					amp[i] = -amp[i];
 					data_use = MB_YES;
