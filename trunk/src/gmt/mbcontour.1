@@ -1,4 +1,4 @@
-.TH MBCONTOUR 1 "26 February 1994"
+.TH MBCONTOUR 1 "17 May 1994"
 .SH NAME
 \fBmbcontour\fP - GMT compatible utility for color fill or color shaded relief
 swath plots of multibeam data using Postscript.
@@ -7,11 +7,11 @@ swath plots of multibeam data using Postscript.
 Version 4.00
 
 .SH SYNOPSIS
-\fBmbcontour\fP \fB-I\fIdatalist \fB-J\fIparameters \fB-R\fIwest/east/south/north \fP[\fB-A\fIcontour_int/color_int/tick_int/label_int/tick_len/label_hgt \fB-B\fItickinfo \fB-C\fIcontourfile \fB-F\fIred/green/blue \fB-K\fI \fB-L\fIlonflip \fB-M\fI \fB-O\fI \fB-P\fI \fB-p\fIpings \fB-U\fI \fB-X\fIx-shift \fB-Y\fIy-shift \fB-#\fIcopies \fB-V -H\fP]
+\fBmbcontour\fP \fB-I\fIdatalist \fB-J\fIparameters \fB-R\fIwest/east/south/north \fP[\fB-A\fIcont_int/col_int/tic_int/lab_int/tic_int/lab_hgt \fB-B\fItickinfo \fB-C\fIcontourfile \fB-D\fItime_tick/time_annot/date_annot/time_tick_len\fP \fB-F\fIred/green/blue \fB-K\fI \fB-L\fIlonflip \fB-M\fI \fB-O\fI \fB-P\fI \fB-p\fIpings \fB-U\fI \fB-X\fIx-shift \fB-Y\fIy-shift \fB-#\fIcopies \fB-V -H\fP]
 
 .SH DESCRIPTION
-\fBmbcontour\fP is an utility for plotting multibeam swath data in color fill
-or color shaded relief using Postscript.  Like \fBmbswath\fP, \fBmbcontour\fP
+\fBmbcontour\fP is an utility for swath contouring of multibeam bathymetry 
+data using Postscript.  Like \fBmbswath\fP, \fBmbcontour\fP
 is fully compatible with the GMT package version 2.1.  The contour levels 
 and colors can be controlled directly or set implicitly using contour 
 and color change intervals. Contours can also be set to have ticks 
@@ -28,19 +28,19 @@ Palisades, NY 10964
 
 .SH OPTIONS
 .TP
-.B \fB-A\fIcontour_int/color_int/tick_int/label_int/tick_len/label_hgt\fP
+.B \fB-A\fIcont_int/col_int/tic_int/lab_int/tic_len/lab_hgt\fP
 If specific contour levels are not specified with the \fI-C\fP option,
 then contours will be
 generated in four colors (black, red, green, and blue) with intervals,
 annotations, and tickmarks controlled by these parameters.  Contours will be
-generated at invervals of \fIcontour_int\fP meters.  Color changes
-will occur at intervals of \fIcolor_int\fP meters.  Contours will have
-downhill facing tickmarks \fItick_len\fP inches long every \fItick_int\fP
+generated at invervals of \fIcont_int\fP meters.  Color changes
+will occur at intervals of \fIcol_int\fP meters.  Contours will have
+downhill facing tickmarks \fItic_int\fP inches long every \fItic_int\fP
 meters. Contours will have annotations 
-\fIlabel_len\fP inches high every \fIlabel_int\fP meters.
-Defaults: \fIcontour_int\fP = 25; \fIcolor_int\fP = 100; 
-\fItick_int\fP = 100; \fIlabel_int\fP = 100; \fItick_len\fP = 0.1; 
-\fIlabel_len\fP = 0.05.
+\fIlabel_len\fP inches high every \fIlab_int\fP meters.
+Defaults: \fIcont_int\fP = 25; \fIcol_int\fP = 100; 
+\fItic_int\fP = 100; \fIlab_int\fP = 100; \fItic_int\fP = 0.1; 
+\fIlab_hgt\fP = 0.05.
 .TP
 .B \fB-B\fItickinfo\fP
 Sets map boundary tickmark intervals. See \fBpsbasemap\fP for details.
@@ -60,6 +60,20 @@ contour levels to be plotted with unannotated, unticked, black contours.
 If contours are specified using the \fB-C\fP option, then any use
 of the \fB-A\fP option will be ignored.
 .TP
+.B \fB-D\fItime_tick/time_annot/date_annot/time_tick_len\fP
+Sets the parameters governing the annotation of the shiptrack.  
+Time marks are made with "X" marks along the shiptrack; annotated
+time marks show the time in HH:MM format next to the time mark
+and annotated date marks show the time and julian day in
+HH:MM/DDD format.  The "X" marks are
+\fItime_tick_len\fP inches high for normal time marks and 
+1.5 times \fItime_tick_len\fP inches high for annotated time or date
+marks.  The interval of time ticks, annotated time ticks, and 
+annotated date ticks are given in hours by 
+\fItime_tick\fP, \fItime_annot\fP, and \fIdate_annot\fP, respectively.
+Defaults: \fItime_tick\fP = 0.25; \fItime_annot\fP = 1.0; 
+\fIdate_annot\fP = 4.0; \fItime_tick_len\fP = 0.1.
+.TP
 .B \fB-F\fIred/green/blue\fP
 Sets the color used for Frame and annotation. [Default is black]
 .TP
@@ -77,9 +91,7 @@ data file should be followed by a data format identifier, e.g.:
 This program uses the \fBMBIO\fP library and will read or write any multibeam
 format supported by \fBMBIO\fP. A list of the multibeam data formats
 currently supported by \fBMBIO\fP and their identifier values
-is given in the \fBMBIO\fP manual page.  A format identifier of 0 indicates
-that the file contains lines of (lon, lat, depth) triples which can be read
-in free format.
+is given in the \fBMBIO\fP manual page.
 .TP
 .B \fB-J\fP
 Selects the map projection.  Choose one of the following:
@@ -189,47 +201,14 @@ The following will suffice to generate a traditional four-color contour plot:
 where the file datalist contains:
  	hs_ew9302_161_mn.mb24 24
 .br
-A more complicated plot including a navigation track
-can be created using \fBmbcontour\fP in conjunction with other GMT
-and GMT-compatible utilities.  The following is an example of a shellscript
-which generates such a plot and then displays it on the screen (assuming
-you have a Sun workstation):
-
- #
- # Shellscript to create Postscript plot of multibeam data
- # Created by macro mbm_plot
- #
- # Make datalist file 
- echo Making datalist file...
- echo hs_ew9302_161_bmn.mb24 24 > datalist
- #
- # Run mbcontour
- echo Running mbcontour...
- mbcontour -Idatalist -Jm2.44652 -R-25.7252/-23.0683/59.7415/61.0699 \
- 	-Ba0.5314g0.5314":.Data File hs_ew9302_161_bmn.mb24:" \
- 	-A50.0000/250.0000/250.0000/250.0000/0.01/0.1 -p1 -P -X1 \
- 	-Y1 -K -V > hs_ew9302_161_bmn.mb24.ps
- #
- # Run mblist
- echo Running mblist...
- mblist -F24 -Ihs_ew9302_161_bmn.mb24 -OXYU > hs_ew9302_161_bmn.mb24.nav
- #
- # Run pstrack
- echo Running pstrack...
- pstrack hs_ew9302_161_bmn.mb24.nav -Jm2.44652 -R-25.7252/-23.0683/59.7415/61.0699 \
- 	-Ba0.5314g0.5314":.Data File hs_ew9302_161_bmn.mb24:" -W2 \
- 	-Mt15ma1h -P -O >> hs_ew9302_161_bmn.mb24.ps
- #
- # Delete surplus files
- echo Deleting surplus files...
- rm -f hs_ew9302_161_bmn.mb24.cpt datalist hs_ew9302_161_bmn.mb24.nav
- #
- # Run pageview
- echo Running pageview in background...
- pageview hs_ew9302_161_bmn.mb24.ps &
- #
- # All done!
- echo All done!
+A plot including a navigation track can also be created using 
+\fBmbcontour\fP.  Here the \fB-D\fP flag is used to add a plot
+of the ship track annotated with time marks every 0.25 minutes,
+annotated time marks every hour, and day annotations every four days:
+ 	mbcontour -Idatalist -Jm2.44652 -R-25.7252/-23.0683/59.7415/61.0699 
+ 		-Ba0.5314g0.5314":.Data File hs_ew9302_161_bmn.mb24:" 
+ 		-D0.25/1/4/0.1 -A50.0000/250.0000/250.0000/250.0000/0.01/0.1 
+ 		-p1 -P -X1 -Y1 -K -V > hs_ew9302_161_bmn.mb24.ps
 
 .SH BUGS
 Of course.  What do you expect for free software?
