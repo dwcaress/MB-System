@@ -1,12 +1,17 @@
 /**********************************************************************
  *	XGRAPHICS
- * $Id: xgraphics.c,v 4.2 1994-04-12 01:13:24 caress Exp $
+ * $Id: xgraphics.c,v 4.3 1994-10-21 12:51:20 caress Exp $
  *	- subroutines for handling 8-bit color in Xwindows applications.
  *	- version 1.0 September 1992
  *	David W. Caress
  *	Lamont-Doherty Geological Observatory
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1994/04/12  01:13:24  caress
+ * First cut at translation from hsvelocitytool. The new program
+ * mbvelocitytool will deal with all supported multibeam data
+ * including travel time observations.
+ *
  * Revision 4.0  1994/03/05  23:50:33  caress
  * First cut at version 4.0
  *
@@ -79,7 +84,7 @@ int	*colors;
 int	ncolors;
 char	*fontname;
 {
-static char rcs_id[]="$Id: xgraphics.c,v 4.2 1994-04-12 01:13:24 caress Exp $";
+static char rcs_id[]="$Id: xgraphics.c,v 4.3 1994-10-21 12:51:20 caress Exp $";
 	/* local variables */
 	struct xg_graphic *graphic;
 	void xg_setclip();
