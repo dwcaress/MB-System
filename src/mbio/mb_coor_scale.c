@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_coor_scale.c	3.00	1/21/93
- *    $Id: mb_coor_scale.c,v 3.0 1993-04-23 15:45:07 dale Exp $
+ *    $Id: mb_coor_scale.c,v 3.1 1993-05-14 22:32:39 sohara Exp $
  *
  *    Copyright (c) 1993 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -20,6 +20,9 @@
  * Date:	January 21, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 3.0  1993/04/23  15:45:07  dale
+ * Initial version
+ *
  */
 
 /* standard include files */
@@ -50,7 +53,7 @@ double	latitude;
 double	*mtodeglon;
 double	*mtodeglat;
 {
-  char rcs_id[]="$Id: mb_coor_scale.c,v 3.0 1993-04-23 15:45:07 dale Exp $";
+  static char rcs_id[]="$Id: mb_coor_scale.c,v 3.1 1993-05-14 22:32:39 sohara Exp $";
 	char	*function_name = "mb_coor_scale";
 	int	status;
 	double	radlat;

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_get_all.c	3.00	1/26/93
- *    $Id: mb_get_all.c,v 3.0 1993-04-23 15:57:18 dale Exp $
+ *    $Id: mb_get_all.c,v 3.1 1993-05-14 22:35:26 sohara Exp $
  *
  *    Copyright (c) 1993 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Date:	January 26, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 3.0  1993/04/23  15:57:18  dale
+ * Initial version
+ *
  */
 
 /* standard include files */
@@ -59,7 +62,7 @@ int	*backdist;
 char	*comment;
 int	*error;
 {
-  char rcs_id[]="$Id: mb_get_all.c,v 3.0 1993-04-23 15:57:18 dale Exp $";
+  static char rcs_id[]="$Id: mb_get_all.c,v 3.1 1993-05-14 22:35:26 sohara Exp $";
 	char	*function_name = "mb_get_all";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

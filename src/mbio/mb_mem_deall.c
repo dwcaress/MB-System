@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_mem_deall.c	3.00	2/3/93
- *    $Id: mb_mem_deall.c,v 3.0 1993-04-23 18:16:41 dale Exp $
+ *    $Id: mb_mem_deall.c,v 3.1 1993-05-14 22:36:38 sohara Exp $
  *
  *    Copyright (c) 1993 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -18,6 +18,9 @@
  * Date:	February 3, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 3.0  1993/04/23  18:16:41  dale
+ * Initial version
+ *
  *
  */
 
@@ -37,7 +40,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-  char rcs_id[]="$Id: mb_mem_deall.c,v 3.0 1993-04-23 18:16:41 dale Exp $";
+  static char rcs_id[]="$Id: mb_mem_deall.c,v 3.1 1993-05-14 22:36:38 sohara Exp $";
 	char	*function_name = "mb_mem_deall";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;

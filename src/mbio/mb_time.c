@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_time.c	3.00	1/21/93
- *    $Id: mb_time.c,v 3.0 1993-04-23 19:00:00 dale Exp $
+ *    $Id: mb_time.c,v 3.1 1993-05-14 22:43:31 sohara Exp $
  *
  *    Copyright (c) 1993 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -18,6 +18,9 @@
  * Date:	January 21, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 3.0  1993/04/23  19:00:00  dale
+ * Initial version
+ *
  *
  */
 
@@ -46,7 +49,7 @@ int verbose;
 int time_i[6];
 double *time_d;
 {
-  char rcs_id[]="$Id";
+  static char rcs_id[]="$Id: mb_time.c,v 3.1 1993-05-14 22:43:31 sohara Exp $";
   char	*function_name = "mb_get_time";
 	int	status;
 	int	julday;
