@@ -355,6 +355,18 @@ The following swath mapping sonar data formats are supported in this version of
     Attributes:           60 beam bathymetry and amplitude,
                           binary, UNB.
 
+    MBIO Data Format ID:  82
+    Format name:          MBF_CBAT8101
+    Informal Description: Reson SeaBat 8101 shallow water multibeam
+    Attributes:           101 beam bathymetry and amplitude,
+                          binary, SeaBeam Instruments.
+
+    MBIO Data Format ID:  83
+    Format name:          MBF_HYPC8101
+    Informal Description: Reson SeaBat 8101 shallow water multibeam
+    Attributes:           101 beam bathymetry,
+                          ASCII, read-only, Coastal Oceanographics.
+
     MBIO Data Format ID:  91
     Format name:          MBF_BCHRTUNB
     Informal Description: Elac BottomChart multibeam
