@@ -33,10 +33,13 @@
 #   June 17, 1993
 #
 # Version:
-#   $Id: mbm_plot.perl,v 3.5 1993-08-17 16:58:36 caress Exp $
+#   $Id: mbm_plot.perl,v 3.6 1993-11-27 18:24:07 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 3.5  1993/08/17  16:58:36  caress
+# Set location of perl to /usr/local/bin/perl
+#
 # Revision 3.4  1993/08/16  23:03:59  caress
 # I'm not sure what the changes are - I'm just checking in the
 # current version.
@@ -266,10 +269,43 @@ $colorscale_offy = -0.5;
 
 # figure out some reasonable tick intervals for the basemap
 $base_tick = $dxx/5;
-if ($base_tick < 0.017)
+if ($base_tick < 0.01667)
 	{
-	$base_tick = 0.017;
+	$base_tick = 0.01667;
 	}
+else if ($base_tick < 0.03333)
+	{
+	$base_tick = 0.03333;
+	}
+else if ($base_tick < 0.08333)
+	{
+	$base_tick = 0.08333;
+	}
+else if ($base_tick < 0.16667)
+	{
+	$base_tick = 0.16667;
+	}
+else if ($base_tick < 0.25)
+	{
+	$base_tick = 0.25;
+	}
+else if ($base_tick < 0.5)
+	{
+	$base_tick = 0.5;
+	}
+else if ($base_tick < 1.0)
+	{
+	$base_tick = 1.0;
+	}
+else if ($base_tick < 2.0)
+	{
+	$base_tick = 2.0;
+	}
+else if ($base_tick < 5.0)
+	{
+	$base_tick = 5.0;
+	}
+
 
 # figure out some reasonable contour intervals for swath contouring
 $contour_int = 50;
