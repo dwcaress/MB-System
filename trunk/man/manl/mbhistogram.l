@@ -8,7 +8,7 @@ Version 4.2
 .SH SYNOPSIS
 \fBmbhistogram\fP [\fB-A\fIkind\fP \fB-B\fIyr/mo/da/hr/mn/sc\fP 
 \fB-C\fP \fB-D\fImin/max\fP \fB-E\fIyr/mo/da/hr/mn/sc\fP 
-\fB-F\fIformat\fP \fB-I\fIfilename\fP \fB-L\fIlonflip\fP 
+\fB-F\fIformat\fP \fB-G\fP \fB-I\fIfilename\fP \fB-L\fIlonflip\fP 
 \fB-M\fInintervals\fP \fB-N\fInbins\fP \fB-P\fIping\fP 
 \fB-R\fIwest/east/south/north\fP \fB-S\fIspeed\fP \fB-V -H\fP]
 
@@ -16,7 +16,19 @@ Version 4.2
 \fBmbhistogram\fP reads a multibeam data file and generates a histogram
 of the bathymetry,  amplitude,  or sidescan values. Alternatively, 
 mbhistogram can output a list of values which break up the
-distribution into equal sized regions. 
+distribution into equal sized regions. These values can be
+used to construct a color table, producing an image which
+is histogram equalized. If desired, the histogram
+can be recast into a Gaussian distribution before output or
+the calculation of the histrogram equalization This feature
+is similar to the Gaussian option of \fBgrdhisteq\fP. The linear
+histogram equalization is most appropriate for use with 
+grayscale images, such as those produced from amplitude
+or sidescan data, and is used by the macro \fBmbm_plot 
+for that purpose. The Gaussian histogram equalization is
+well suited for shading of images, and is used by
+\fBmbm_plot\fP for shading of color bathymetry with
+amplitude data.
 The results are dumped to stdout.
 
 .SH AUTHORSHIP
@@ -66,6 +78,10 @@ and will read or write any multibeam
 format supported by \fBMBIO\fP. A list of the multibeam data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page. Default: \fIformat\fP = 11.
+.TP
+.B \fB-G\fP
+This option causes the data histogram to be recast into a
+Gaussian distribution.
 .TP
 .B \fB-I\fIfilename\fP
 Sets the input filename. If \fIformat\fP > 0 (set with the 
@@ -195,7 +211,7 @@ giving:
  44803.495633
 
 .SH SEE ALSO
-\fBmbsystem\fP(l), \fBmbm_plot\fP(l)
+\fBmbsystem\fP(l), \fBmbm_plot\fP(l), grdhisteq(l)
 
 .SH BUGS
 You find em, we fix 'em...

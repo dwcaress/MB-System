@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbhistogram.c	12/28/94
- *    $Id: mbhistogram.c,v 4.5 1995-05-12 17:12:32 caress Exp $
+ *    $Id: mbhistogram.c,v 4.6 1995-08-11 18:51:37 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,10 @@
  * Date:	December 28, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.5  1995/05/12  17:12:32  caress
+ * Made exit status values consistent with Unix convention.
+ * 0: ok  nonzero: error
+ *
  * Revision 4.4  1995/03/06  19:37:59  caress
  * Changed include strings.h to string.h for POSIX compliance.
  *
@@ -60,10 +64,10 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbhistogram.c,v 4.5 1995-05-12 17:12:32 caress Exp $";
+	static char rcs_id[] = "$Id: mbhistogram.c,v 4.6 1995-08-11 18:51:37 caress Exp $";
 	static char program_name[] = "MBHISTOGRAM";
 	static char help_message[] =  "MBHISTOGRAM reads a multibeam data file and generates a histogram\n\tof the bathymetry,  amplitude,  or sidescan values. Alternatively, \n\tmbhistogram can output a list of values which break up the\n\tdistribution into equal sized regions.\n\tThe results are dumped to stdout.";
-	static char usage_message[] = "mbhistogram [-Akind -Byr/mo/da/hr/mn/sc -Dmin/max -Eyr/mo/da/hr/mn/sc -Fformat -Ifile -Llonflip -Mnintervals -Nnbins -Ppings -Rw/e/s/n -Sspeed -V -H]";
+	static char usage_message[] = "mbhistogram [-Akind -Byr/mo/da/hr/mn/sc -Dmin/max -Eyr/mo/da/hr/mn/sc -Fformat -G -Ifile -Llonflip -Mnintervals -Nnbins -Ppings -Rw/e/s/n -Sspeed -V -H]";
 	extern char *optarg;
 	extern int optkind;
 	int	errflg = 0;
@@ -119,15 +123,24 @@ char **argv;
 
 	/* histogram variables */
 	int	mode = MBHISTOGRAM_SS;
+	int	gaussian = MB_NO;
 	int	nbins = 0;
 	int	nintervals = 0;
 	double	value_min;
 	double	value_max;
 	double	dvalue_bin;
 	double	value_bin_min;
-	int	*histogram = NULL;
+	double	value_bin_max;
+	double	data_min;
+	double	data_max;
+	int	data_first = MB_YES;
+	double	target_min;
+	double	target_max;
+	double	*histogram = NULL;
 	double	*intervals = NULL;
 	double	total;
+	double	sum;
+	double	p;
 	double	target;
 	double	dinterval;
 	double	bin_fraction;
@@ -140,6 +153,7 @@ char **argv;
 	int	read_data;
 	char	line[128];
 	int	i, j, k, l, m;
+	double	qsnorm();
 
 	/* get current default values */
 	status = mb_defaults(verbose,&format,&pings,&lonflip,bounds,
@@ -149,7 +163,7 @@ char **argv;
 	strcpy (read_file, "stdin");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "A:a:B:b:D:d:E:e:F:f:HhI:i:L:l:M:m:N:n:P:p:R:r:S:s:T:t:Vv")) != -1)
+	while ((c = getopt(argc, argv, "A:a:B:b:D:d:E:e:F:f:GgHhI:i:L:l:M:m:N:n:P:p:R:r:S:s:T:t:Vv")) != -1)
 	  switch (c) 
 		{
 		case 'A':
@@ -182,6 +196,10 @@ char **argv;
 		case 'f':
 			sscanf (optarg,"%d", &format);
 			flag++;
+			break;
+		case 'G':
+		case 'g':
+			gaussian = MB_YES;
 			break;
 		case 'H':
 		case 'h':
@@ -300,6 +318,7 @@ char **argv;
 		fprintf(output,"dbg2       timegap:    %f\n",timegap);
 		fprintf(output,"dbg2       file:       %s\n",read_file);
 		fprintf(output,"dbg2       mode:       %d\n",mode);
+		fprintf(output,"dbg2       gaussian:   %d\n",gaussian);
 		fprintf(output,"dbg2       nbins:      %d\n",nbins);
 		fprintf(output,"dbg2       nintervals: %d\n",nintervals);
 		fprintf(output,"dbg2       value_min:  %f\n",value_min);
@@ -316,7 +335,7 @@ char **argv;
 
 	/* allocate memory for histogram arrays */
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_malloc(verbose,nbins*sizeof(int),
+		status = mb_malloc(verbose,nbins*sizeof(double),
 				&histogram,&error);
 	if (error == MB_ERROR_NO_ERROR)
 		status = mb_malloc(verbose,nintervals*sizeof(double),
@@ -335,12 +354,11 @@ char **argv;
 	/* get size of bins */
 	dvalue_bin = (value_max - value_min)/(nbins-1);
 	value_bin_min = value_min - 0.5*dvalue_bin;
+	value_bin_max = value_max + 0.5*dvalue_bin;
 
 	/* initialize histogram */
 	for (i=0;i<nbins;i++)
-		{
 		histogram[i] = 0;
-		}
 
 	/* determine whether to read one file or a list of files */
 	if (format < 0)
@@ -455,6 +473,17 @@ char **argv;
 						/dvalue_bin;
 					if (j >= 0 && j < nbins)
 						histogram[j]++;
+					if (data_first == MB_YES)
+						{
+						data_min = bath[i];
+						data_max = bath[i];
+						data_first = MB_NO;
+						}
+					else
+						{
+						data_min = min(bath[i], data_min);
+						data_max = max(bath[i], data_max);
+						}
 					}
 				}
 
@@ -468,6 +497,17 @@ char **argv;
 						/dvalue_bin;
 					if (j >= 0 && j < nbins)
 						histogram[j]++;
+					if (data_first == MB_YES)
+						{
+						data_min = amp[i];
+						data_max = amp[i];
+						data_first = MB_NO;
+						}
+					else
+						{
+						data_min = min(amp[i], data_min);
+						data_max = max(amp[i], data_max);
+						}
 					}
 				}
 
@@ -481,6 +521,17 @@ char **argv;
 						/dvalue_bin;
 					if (j >= 0 && j < nbins)
 						histogram[j]++;
+					if (data_first == MB_YES)
+						{
+						data_min = ss[i];
+						data_max = ss[i];
+						data_first = MB_NO;
+						}
+					else
+						{
+						data_min = min(ss[i], data_min);
+						data_max = max(ss[i], data_max);
+						}
 					}
 				}
 
@@ -518,8 +569,54 @@ char **argv;
 	if (read_datalist == MB_YES)
 		fclose (fp);
 
-	/* calculate intervals if required */
-	if (nintervals > 0)
+	/* recast histogram as gaussian */
+	if (gaussian == MB_YES)
+		{
+		/* get total number of good values */
+		total = 0.0;
+		for (i=0;i<nbins;i++)
+			total = total + histogram[i];
+
+		/* recast histogram */
+		sum = 0.0;
+		for (i=0;i<nbins;i++)
+			{
+			p = (histogram[i]/2 + sum)/(total + 1);
+			sum = sum + histogram[i];
+			histogram[i] = qsnorm(p);
+			}
+		}
+
+	/* calculate gaussian intervals if required */
+	if (nintervals > 0 && gaussian == MB_YES)
+		{
+		/* get interval spacing */
+		target_min = -2.0;
+		target_max = 2.0;
+		dinterval = (target_max - target_min)/(nintervals-1);
+
+		/* get intervals */
+		intervals[0] = max(data_min, value_min);
+		intervals[nintervals-1] = min(data_max, value_max);
+		ibin = 0;
+		for (j=1;j<nintervals-1;j++)
+			{
+			target = target_min + j*dinterval;
+			while (histogram[ibin] < target && ibin < nbins-1)
+				ibin++;
+			if (ibin > 0)
+				bin_fraction = 1.0 - (histogram[ibin] - target)
+					/(histogram[ibin] - histogram[ibin-1]);
+			else
+				bin_fraction = 0.0;
+			intervals[j] = value_bin_min 
+					+ dvalue_bin*ibin
+					+ bin_fraction*dvalue_bin;
+			}
+		}
+
+	/* calculate linear intervals if required */
+	else if (nintervals > 0)
 		{
 		/* get total number of good values */
 		total = 0.0;
@@ -536,13 +633,13 @@ char **argv;
 		for (j=1;j<nintervals;j++)
 			{
 			target = j*dinterval;
-			if (total < target)
+			while (total < target && ibin < nbins-1)
 				{
-				while (total < target && ibin < nbins-1)
-					{
-					ibin++;
-					total = total + histogram[ibin];
-					}
+				ibin++;
+				total = total + histogram[ibin];
+				if (total <= 0.0)
+					intervals[0] = value_bin_min
+						+ dvalue_bin*ibin;
 				}
 			bin_fraction = 1.0 - (total - target)/histogram[ibin];
 			intervals[j] = value_bin_min 
@@ -552,12 +649,20 @@ char **argv;
 		}
 
 	/* print out the results */
-	if (nintervals <= 0)
+	if (nintervals <= 0 && gaussian == MB_YES)
+		{
+		for (i=0;i<nbins;i++)
+			{
+			fprintf(output,"%f %f\n",
+				value_min+i*dvalue_bin,histogram[i]);
+			}
+		}
+	else if (nintervals <= 0)
 		{
 		for (i=0;i<nbins;i++)
 			{
 			fprintf(output,"%f %d\n",
-				value_min+i*dvalue_bin,histogram[i]);
+				value_min+i*dvalue_bin,(int)histogram[i]);
 			}
 		}
 	else
@@ -590,3 +695,58 @@ char **argv;
 	fprintf(output,"\n");
 	exit(error);
 }
+/*--------------------------------------------------------------------*/
+
+/* double qsnorm(p)
+ * double	p;
+ *
+ * Function to invert the cumulative normal probability
+ * function.  If z is a standardized normal random deviate,
+ * and Q(z) = p is the cumulative Gaussian probability 
+ * function, then z = qsnorm(p).
+ *
+ * Note that 0.0 < p < 1.0.  Data values outside this range
+ * will return +/- a large number (1.0e6).
+ * To compute p from a sample of data to test for Normalcy,
+ * sort the N samples into non-decreasing order, label them
+ * i=[1, N], and then compute p = i/(N+1).
+ *
+ * Author:	Walter H. F. Smith
+ * Date:	19 February, 1991-1995.
+ *
+ * Based on a Fortran subroutine by R. L. Parker.  I had been
+ * using IMSL library routine DNORIN(DX) to do what qsnorm(p)
+ * does, when I was at the Lamont-Doherty Geological Observatory
+ * which had a site license for IMSL.  I now need to invert the
+ * gaussian CDF without calling IMSL; hence, this routine.
+ *
+ */
+
+double	qsnorm(p)
+double	p;
+{
+	double	t, z;
+	
+	if (p <= 0.0) {
+		return(-1.0e6);
+	}
+	else if (p >= 1.0) {
+		return(1.0e6);
+	}
+	else if (p == 0.5) {
+		return(0.0);
+	}
+	else if (p > 0.5) {
+		t = sqrt(-2.0 * log(1.0 - p) );
+		z = t - (2.515517 +t*(0.802853 +t*0.010328))/
+			(1.0 + t*(1.432788 + t*(0.189269+ t*0.001308)));
+		return(z);
+	}
+	else {
+		t = sqrt(-2.0 * log(p) );
+		z = t - (2.515517 +t*(0.802853 +t*0.010328))/
+			(1.0 + t*(1.432788 + t*(0.189269+ t*0.001308)));
+		return(-z);
+	}
+}
+/*--------------------------------------------------------------------*/
