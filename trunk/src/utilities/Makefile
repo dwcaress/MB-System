@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile	3.00  1/21/93
-#	$Id: Makefile,v 1.4 1993-05-25 20:01:39 caress Exp $
+#	$Id: Makefile,v 1.5 1993-05-25 20:13:53 caress Exp $
 #
 #     Copyright (c) 1993 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,9 @@
 # Date:		January 21, 1993
 #
 # $Log: not supported by cvs2svn $
+# Revision 1.4  1993/05/25  20:01:39  caress
+# Fixed chmod commands.
+#
 # Revision 1.3  1993/05/25  19:26:27  caress
 # Added chmod command to cp lines so that later makes can
 # overwrite the copied man pages.
@@ -121,44 +124,44 @@ mbsynth.o:	mbsynth.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
 ### copy the man pages to the man page directory
 $(MANDIR)/mbsystem.1:	mbsystem.1
 	cp mbsystem.1 $(MANDIR)/mbsystem.1
-	chmod 664 $(BINDIR)/mbsystem.1
+	chmod 664 $(MANDIR)/mbsystem.1
 $(MANDIR)/mbformat.1:	mbformat.1
 	cp mbformat.1 $(MANDIR)/mbformat.1
-	chmod 664 $(BINDIR)/mbformat.1
+	chmod 664 $(MANDIR)/mbformat.1
 $(MANDIR)/mbdefaults.1:	mbdefaults.1
 	cp mbdefaults.1 $(MANDIR)/mbdefaults.1
-	chmod 664 $(BINDIR)/mbdefaults.1
+	chmod 664 $(MANDIR)/mbdefaults.1
 $(MANDIR)/mbinfo.1:	mbinfo.1
 	cp mbinfo.1 $(MANDIR)/mbinfo.1
-	chmod 664 $(BINDIR)/mbinfo.1
+	chmod 664 $(MANDIR)/mbinfo.1
 $(MANDIR)/mbcopy.1:	mbcopy.1
 	cp mbcopy.1 $(MANDIR)/mbcopy.1
-	chmod 664 $(BINDIR)/mbcopy.1
+	chmod 664 $(MANDIR)/mbcopy.1
 $(MANDIR)/mblist.1:	mblist.1
 	cp mblist.1 $(MANDIR)/mblist.1
-	chmod 664 $(BINDIR)/mblist.1
+	chmod 664 $(MANDIR)/mblist.1
 $(MANDIR)/mbmerge.1:	mbmerge.1
 	cp mbmerge.1 $(MANDIR)/mbmerge.1
-	chmod 664 $(BINDIR)/mbmerge.1
+	chmod 664 $(MANDIR)/mbmerge.1
 $(MANDIR)/mbclean.1:	mbclean.1
 	cp mbclean.1 $(MANDIR)/mbclean.1
-	chmod 664 $(BINDIR)/mbclean.1
+	chmod 664 $(MANDIR)/mbclean.1
 $(MANDIR)/mbunclean.1:	mbunclean.1
 	cp mbunclean.1 $(MANDIR)/mbunclean.1
-	chmod 664 $(BINDIR)/mbunclean.1
+	chmod 664 $(MANDIR)/mbunclean.1
 $(MANDIR)/mbgrid.1:	mbgrid.1
 	cp mbgrid.1 $(MANDIR)/mbgrid.1
-	chmod 664 $(BINDIR)/mbgrid.1
+	chmod 664 $(MANDIR)/mbgrid.1
 $(MANDIR)/mblevitus.1:	mblevitus.1
 	cp mblevitus.1 $(MANDIR)/mblevitus.1
-	chmod 664 $(BINDIR)/mblevitus.1
+	chmod 664 $(MANDIR)/mblevitus.1
 $(MANDIR)/hsbath.1:	hsbath.1
 	cp hsbath.1 $(MANDIR)/hsbath.1
-	chmod 664 $(BINDIR)/hsbath.1
+	chmod 664 $(MANDIR)/hsbath.1
 $(MANDIR)/hsveldump.1:	hsveldump.1
 	cp hsveldump.1 $(MANDIR)/hsveldump.1
-	chmod 664 $(BINDIR)/hsveldump.1
+	chmod 664 $(MANDIR)/hsveldump.1
 $(MANDIR)/mbrollbias.1:	mbrollbias.1
 	cp mbrollbias.1 $(MANDIR)/mbrollbias.1
-	chmod 664 $(BINDIR)/mbrollbias.1
+	chmod 664 $(MANDIR)/mbrollbias.1
 
