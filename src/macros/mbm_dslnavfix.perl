@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_dslnavfix.perl	8/9/96
-#    $Id: mbm_dslnavfix.perl,v 4.3 1999-03-31 18:09:36 caress Exp $
+#    $Id: mbm_dslnavfix.perl,v 4.4 1999-10-21 20:42:32 caress Exp $
 #
 #    Copyright (c) 1996 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -34,10 +34,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   August 9, 1996
 #
 # Version:
-#   $Id: mbm_dslnavfix.perl,v 4.3 1999-03-31 18:09:36 caress Exp $
+#   $Id: mbm_dslnavfix.perl,v 4.4 1999-10-21 20:42:32 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.3  1999/03/31  18:09:36  caress
+# MB-System 4.6beta7
+#
 # Revision 4.2  1997/07/25  13:50:21  caress
 # Added ellipsoid option.
 #
@@ -316,6 +319,43 @@ while ($line = <INP>)
 				{
 				$year = $year + 2000;
 				}
+			$daysec = $second + 60 * ($minute + 60 * $hour);
+			if ($daysec != $daysec_old)
+				{
+				push(@nyear, $year);
+				push(@nmonth, $month);
+				push(@nday, $day);
+				push(@nhour, $hour);
+				push(@nminute, $minute);
+				push(@nsecond, $second);
+		
+				# get projected values in desired units 
+				if ($units_feet)
+					{
+					$xx = 12.0 / 1000000 *($easting - $org_x_ft);
+					$yy = 12.0 / 1000000 *($northing - $org_y_ft);
+					}
+				elsif ($units_meters)
+					{
+					$xx = ($easting - $org_x_m) / (0.0254 * 1000000);
+					$yy = ($northing - $org_y_m) / (0.0254 * 1000000);
+					}
+					
+				#print "$year $month $day $hour:$minute:$second $easting $northing\n";
+				print OTMP "$xx $yy\n";
+				}
+			$daysec_old = $daysec;
+			}
+		else
+			{
+			print "Unable to parse navigation from line:\n$line\n";
+			}
+		}
+	elsif ($format == 4)
+		{
+		if (($year, $month, $day, $hour, $minute, $second, $easting, $northing) 
+			= $line =~ /^(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)/)
+			{
 			$daysec = $second + 60 * ($minute + 60 * $hour);
 			if ($daysec != $daysec_old)
 				{
