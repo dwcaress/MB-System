@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_nav.c	10/28/2003
- *    $Id: mbview_nav.c,v 5.6 2005-02-17 07:35:08 caress Exp $
+ *    $Id: mbview_nav.c,v 5.7 2005-02-18 07:32:56 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -18,6 +18,9 @@
  * Date:	October 28, 2003
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2005/02/17 07:35:08  caress
+ * Moving towards 5.0.6 release.
+ *
  * Revision 5.5  2005/02/08 22:37:41  caress
  * Heading towards 5.0.6 release.
  *
@@ -86,7 +89,7 @@ Arg      	args[256];
 char		value_text[MB_PATH_MAXLINE];
 char		value_string[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_nav.c,v 5.6 2005-02-17 07:35:08 caress Exp $";
+static char rcs_id[]="$Id: mbview_nav.c,v 5.7 2005-02-18 07:32:56 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_getnavcount(int verbose, int instance,
@@ -98,8 +101,6 @@ int mbview_getnavcount(int verbose, int instance,
 	int	status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
-
-fprintf(stderr,"Called mbview_getnavcount:%d\n",instance);
 
 	/* print starting debug statements */
 	if (verbose >= 2)
@@ -149,8 +150,6 @@ int mbview_getnavpointcount(int verbose, int instance,
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 	int	i;
-
-fprintf(stderr,"Called mbview_getnavpointcount:%d\n",instance);
 
 	/* print starting debug statements */
 	if (verbose >= 2)
@@ -220,8 +219,6 @@ int mbview_allocnavarrays(int verbose,
 	/* local variables */
 	char	*function_name = "mbview_allocnavarrays";
 	int	status = MB_SUCCESS;
-
-fprintf(stderr,"Called mbview_allocnavarrays: npointtotal:%d\n", npointtotal);
 
 	/* print starting debug statements */
 	if (verbose >= 2)
@@ -331,8 +328,6 @@ int mbview_freenavarrays(int verbose,
 	/* local variables */
 	char	*function_name = "mbview_freenavarrays";
 	int	status = MB_SUCCESS;
-
-fprintf(stderr,"Called mbview_freenavarrays:\n");
 
 	/* print starting debug statements */
 	if (verbose >= 2)
@@ -808,8 +803,6 @@ int mbview_enableviewnavs(int verbose, int instance,
 	int	status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
-
-fprintf(stderr,"Called mbview_enableviewnavs:%d\n",instance);
 
 	/* print starting debug statements */
 	if (verbose >= 2)

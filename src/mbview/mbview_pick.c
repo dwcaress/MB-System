@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_pick.c	9/29/2003
- *    $Id: mbview_pick.c,v 5.6 2005-02-08 22:37:42 caress Exp $
+ *    $Id: mbview_pick.c,v 5.7 2005-02-18 07:32:55 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  *		begun on October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2005/02/08 22:37:42  caress
+ * Heading towards 5.0.6 release.
+ *
  * Revision 5.4  2004/07/27 19:50:28  caress
  * Improving route planning capability.
  *
@@ -89,7 +92,7 @@ Arg      	args[256];
 char		value_text[MB_PATH_MAXLINE];
 char		value_list[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_pick.c,v 5.6 2005-02-08 22:37:42 caress Exp $";
+static char rcs_id[]="$Id: mbview_pick.c,v 5.7 2005-02-18 07:32:55 caress Exp $";
 	
 
 /*------------------------------------------------------------------------------*/
@@ -575,11 +578,11 @@ int mbview_pick_text(int instance)
 			shared.shareddata.navs[shared.shareddata.nav_selected[0]].name, date0, lonstr0, latstr0,
 			shared.shareddata.navs[shared.shareddata.nav_selected[1]].name, date1, lonstr1, latstr1);
 		}
-	else
+/*	else
 		{
 		sprintf(value_text, ":::t\"Pick Info:\":t\"No Pick\"");
 		sprintf(value_list, "Pick Info: No Pick\n");
-		}
+		}*/
 	set_mbview_label_multiline_string(view->mb3dview.mbview_label_pickinfo, value_text);
 	fprintf(stderr,"%s\n", value_list);
 	

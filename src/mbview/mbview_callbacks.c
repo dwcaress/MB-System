@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbview_callbacks.c	10/7/2002
- *    $Id: mbview_callbacks.c,v 5.7 2005-02-17 07:35:08 caress Exp $
+ *    $Id: mbview_callbacks.c,v 5.8 2005-02-18 07:32:55 caress Exp $
  *
  *    Copyright (c) 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -18,6 +18,9 @@
  * Date:	October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2005/02/17 07:35:08  caress
+ * Moving towards 5.0.6 release.
+ *
  * Revision 5.6  2005/02/08 22:37:40  caress
  * Heading towards 5.0.6 release.
  *
@@ -111,7 +114,7 @@ Cardinal 	ac;
 Arg      	args[256];
 char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_callbacks.c,v 5.7 2005-02-17 07:35:08 caress Exp $";
+static char rcs_id[]="$Id: mbview_callbacks.c,v 5.8 2005-02-18 07:32:55 caress Exp $";
 
 /* function prototypes */
 
@@ -914,7 +917,6 @@ int mbview_init(int verbose, int *instance, int *error)
 	    status = MB_FAILURE;
 	    return(status);
 	    }
-fprintf(stderr,"Initializing mbview instance:%d\n",*instance);
 	    
 	/* get view */
 	view = &(mbviews[*instance]);
@@ -1203,8 +1205,6 @@ int mbview_setwindowparms(int verbose, int instance,
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 
-fprintf(stderr,"Called mbview_setwindowparms:%d\n",instance);
-
 	/* print starting debug statements */
 	if (verbose >= 2)
 		{
@@ -1295,10 +1295,8 @@ int mbview_setviewcontrols(int verbose, int instance,
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 
-fprintf(stderr,"Called mbview_setviewcontrols:%d\n",instance);
-
 	/* print starting debug statements */
-	if (verbose >= 0)
+	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
@@ -1409,8 +1407,6 @@ int mbview_open(int verbose, int instance, int *error)
 	struct mbview_struct *data;
 	int	i,  j;
 
-fprintf(stderr,"Opening mbview window instance:%d\n",instance);
-	    
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
@@ -1989,7 +1985,8 @@ fprintf(stderr,"Opening mbview window instance:%d\n",instance);
 		
 	/* set widget sensitivity */
 	mbview_update_sensitivity(verbose, instance, error);
-	
+	mbview_action_sensitivityall();
+
 	/* create glx context */
 	mbview_reset_glx(instance);
 		
@@ -2018,8 +2015,6 @@ int mbview_update(int verbose, int instance, int *error)
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 	int	i;
-
-fprintf(stderr,"Updating mbview window instance:%d\n",instance);
 
 	/* print starting debug statements */
 	if (verbose >= 2)
@@ -2300,6 +2295,32 @@ int mbview_update_sensitivity(int verbose, int instance, int *error)
 }
 
 /*------------------------------------------------------------------------------*/
+int mbview_action_sensitivityall()
+{
+	/* local variables */
+	char	*function_name = "mbview_action_sensitivityall";
+	int	status = MB_SUCCESS;
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
+	int	instance;
+	
+	/* set action sensitivity on all active instances */
+	for (instance=0;instance<MBV_MAX_WINDOWS;instance++)
+		{
+		/* get view */
+		view = &(mbviews[instance]);
+		data = &(view->data);
+		
+		/* if instance active reset action sensitivity */
+		if (data->active == MB_YES)
+			mbview_action_sensitivity(instance);
+		}
+
+	/* return */
+	return(status);
+}
+
+/*------------------------------------------------------------------------------*/
 int mbview_action_sensitivity(int instance)
 {
 	/* local variables */
@@ -2307,8 +2328,17 @@ int mbview_action_sensitivity(int instance)
 	int	status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
+	int	mbview_allactive;
 	int	i, j;
-	    
+	
+	/* check if all available instances are active */
+	mbview_allactive = MB_YES;
+	for (i=0;i<MBV_MAX_WINDOWS;i++)
+		{
+		if (mbviews[i].data.active == MB_NO)
+			mbview_allactive = MB_NO;
+		}
+
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
@@ -2371,6 +2401,11 @@ int mbview_action_sensitivity(int instance)
 					if (shared.shareddata.navs[j].nselected > 0)
 						XtSetArg(args[ac], XmNsensitive, True);
 					}
+				}
+			if (view->actionsensitive[i] & MBV_PICKMASK_NEWINSTANCE
+				&& mbview_allactive == MB_YES)
+				{
+				XtSetArg(args[ac], XmNsensitive, False);
 				}
 			ac++;
 			XtSetValues(view->pushButton_action[i], args, ac);
@@ -2684,8 +2719,6 @@ do_mbview_set_projection_label(int instance)
 	int	projectionid;
 	mb_path	tmptext;
 
-fprintf(stderr,"do_mbview_set_projection_label: instance:%d\n", instance);
-	    
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
@@ -4306,12 +4339,12 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 	  view->button2down = MB_NO;
 	  view->button3down = MB_NO;
 	  
+	  /* update action buttons according to pick state */
+	  mbview_action_sensitivity(instance);
+		
 	  /* replot in high rez if last draw was low rez */
 	  if (view->lastdrawrez == MBV_REZ_LOW)
 	  	{
-		/* update action buttons according to pick state */
-		mbview_action_sensitivity(instance);
-		
 		/* replot the current instance */
 		mbview_plothigh(instance);
 		}
@@ -4370,7 +4403,6 @@ do_mbview_dismiss( Widget w, XtPointer client_data, XtPointer call_data)
     	ac = 0;
 	XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
 	XtGetValues(w, args, ac);
-fprintf(stderr,"\ndo_mbview_dismiss instance:%d\n", instance);
 	
 	/* get view */
 	view = &(mbviews[instance]);
@@ -4379,7 +4411,6 @@ fprintf(stderr,"\ndo_mbview_dismiss instance:%d\n", instance);
 	/* destroy the widgets for this instance  */
 	if (data->active == MB_YES)
 		mbview_destroy(mbv_verbose, instance, MB_YES, &error);
-fprintf(stderr,"done with do_mbview_dismiss instance:%d\n", instance);
 }
 
 /*------------------------------------------------------------------------------*/
@@ -4398,7 +4429,6 @@ do_mbview_goaway( Widget w, XtPointer client_data, XtPointer call_data)
     	ac = 0;
 	XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
 	XtGetValues(w, args, ac);
-fprintf(stderr,"\ndo_mbview_goaway instance:%d\n", instance);
 	
 	/* get view */
 	view = &(mbviews[instance]);
@@ -4407,7 +4437,6 @@ fprintf(stderr,"\ndo_mbview_goaway instance:%d\n", instance);
 	/* destroy the widgets for this instance  */
 	if (data->active == MB_YES)
 		mbview_destroy(mbv_verbose, instance, MB_NO, &error);
-fprintf(stderr,"done with do_mbview_goaway instance:%d\n", instance);
 }
 /*------------------------------------------------------------------------------*/
 
@@ -4462,7 +4491,6 @@ int mbview_destroy(int verbose, int instance, int destroywidgets, int *error)
 	    mbv_ninstance--;
 	
 	    /* deallocate memory */
-fprintf(stderr, "Freeing arrays for mbview instance:%d\n", instance);
     	    if (status == MB_SUCCESS 
 		    && data->primary_data != NULL)
     	    status = mb_free(mbv_verbose, &data->primary_data, error);
@@ -4594,12 +4622,12 @@ fprintf(stderr, "Freeing arrays for mbview instance:%d\n", instance);
 	    	mbview_reset_shared(MB_NO);
 
 	    /* initialize view for next use */
-fprintf(stderr, "Calling mbview_reset() for mbview instance:%d\n", instance);
 	    mbview_reset(instance);
+	    
+	    /* reset action button sensitivity for all instances */
+	    mbview_action_sensitivityall();
 
 	    /* let the calling program know */
-fprintf(stderr, "Calling mbview_dismiss_notify function (%d) for mbview instance:%d\n",
-data->mbview_dismiss_notify, instance);
 	    (data->mbview_dismiss_notify)(instance);
 	    }
 	
@@ -7884,6 +7912,7 @@ void
 do_mbview_clearpicks( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    	int	error;
 	int	instance;
 	int	replotinstance;
 	int	replotall;
@@ -7955,7 +7984,14 @@ fprintf(stderr,"do_mbview_clearpicks\n");
 		shared.shareddata.route_point_selected = MBV_SELECT_NONE;
 		replotall = MB_YES;
 		}
-    
+ 		
+	/* set widget sensitivity */
+	if (data->active == MB_YES)
+		mbview_update_sensitivity(mbv_verbose, instance, &error);
+		
+	/* set pick annotation */
+	mbview_pick_text(instance);
+   
     /* draw */
     if (replotinstance == MB_YES || replotall == MB_YES)
     	{

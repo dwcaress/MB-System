@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbviewprivate.h	9/24/2003
- *    $Id: mbviewprivate.h,v 5.6 2005-02-08 22:37:43 caress Exp $
+ *    $Id: mbviewprivate.h,v 5.7 2005-02-18 07:32:57 caress Exp $
  *
  *    Copyright (c) 2003, 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -18,6 +18,9 @@
  * Date:	September 24,  2003
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2005/02/08 22:37:43  caress
+ * Heading towards 5.0.6 release.
+ *
  * Revision 5.4  2004/07/15 19:26:45  caress
  * Improvements to survey planning.
  *
@@ -508,6 +511,7 @@ int do_mbview_workfunction(XtPointer client_data);
 int mbview_setcolorparms(int instance);
 int mbview_update_sensitivity(int verbose, int instance, int *error);
 int mbview_action_sensitivity(int instance);
+int mbview_action_sensitivityall();
 /*--------------------------------------------------------------------*/
 int mbview_projectdata(int instance);
 int mbview_projectglobaldata(int instance);

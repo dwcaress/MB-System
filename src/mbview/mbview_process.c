@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_process.c	9/25/2003
- *    $Id: mbview_process.c,v 5.7 2005-02-08 22:37:42 caress Exp $
+ *    $Id: mbview_process.c,v 5.8 2005-02-18 07:32:56 caress Exp $
  *
  *    Copyright (c) 2003, 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  *		begun on October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2005/02/08 22:37:42  caress
+ * Heading towards 5.0.6 release.
+ *
  * Revision 5.5  2004/09/16 21:44:40  caress
  * Many changes over the summer.
  *
@@ -94,7 +97,7 @@ Cardinal 	ac;
 Arg      	args[256];
 char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_process.c,v 5.7 2005-02-08 22:37:42 caress Exp $";
+static char rcs_id[]="$Id: mbview_process.c,v 5.8 2005-02-18 07:32:56 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_projectdata(int instance)
@@ -355,7 +358,7 @@ fprintf(stderr,"mbview_projectdata: %d\n", instance);
 					/ (view->ymax - view->ymin)));
 	view->size2d = 1.0;
 
-fprintf(stderr,"Projections:\n");
+/*fprintf(stderr,"Projections:\n");
 fprintf(stderr,"  Grid: mode:%d id:%s\n", 
 data->primary_grid_projection_mode, data->primary_grid_projection_id);
 fprintf(stderr,"  Display: mode:%d id:%s\n", 
@@ -363,7 +366,7 @@ data->display_projection_mode, data->display_projection_id);
 fprintf(stderr,"  Display min max: %f %f %f %f\n",
 view->xmin, view->xmax, view->ymin, view->ymax);
 fprintf(stderr,"  Display origin: %f %f %f\n", view->xorigin, view->yorigin, view->zorigin);
-fprintf(stderr,"  Display scale: %f\n", view->scale);
+fprintf(stderr,"  Display scale: %f\n", view->scale);*/
 
 	/* set x and y arrays */
 	for (i=0;i<data->primary_nx;i++)
