@@ -1,9 +1,23 @@
-MB-SYSTEM VERSION 4.6.6 RELEASE NOTES:
+MB-SYSTEM VERSION 4.6.10 RELEASE NOTES:
 --------------------------------------
 
-This directory structure contains the version 4.6.6 release  
+This directory structure contains the version 4.6.10 release  
 of the MB-System software package for processing and display of 
 swath sonar data.  
+
+Release 4.6.10 Notes:
+--------------------
+
+Version 4.6.10 incorporates fixes to several significant 
+bugs found in the version 4.6.6 release. The fixed problems 
+involve the handling of time (specifically the February 29, 
+2000 leap day) and the handling of Y2K problems with the 
+Atlas Hydrosweep DS sonar. This release also provides a new 
+capability to generate georeferenced TIFF images of gridded 
+and mosaiced data through the program mbgrdtiff and the macro 
+mbm_grdtiff. These images may be directly imported into GIS
+packages such as ArcView. Some new features have also been
+added to the graphical bathymetry editor mbedit.
 
 Release 4.6.6 Notes:
 --------------------
@@ -138,6 +152,7 @@ RELEASE DATE:
 April 14, 1999 		(Original release of version 4.6)
 May 6, 1999		(Release of version 4.6a)
 September 15, 1999	(Release of version 4.6.6)
+March 8, 2000		(Release of version 4.6.10)
 
 Authors:
 --------
@@ -153,7 +168,7 @@ Palisades, NY 10964
 
 Copyright:
 ----------
-MB-System Copyright 1993-1999
+MB-System Copyright 1993-2000
 by David W. Caress and Dale N. Chayes
 All Rights Reserved.
 
@@ -182,7 +197,7 @@ is available as follows:
 	MB-System v 4.6
 	- available from L-DEO via anonymous ftp to
 	  lamont.ldeo.columbia.edu
-	- compressed tar file MB-System4.6.tar.Z
+	- compressed tar file MB-System4.6.10.tar.Z
 	  in directory pub/swath_data
 
 	GMT v 3.0 or later (v 3.2 strongly recommended)
@@ -224,8 +239,8 @@ Installing MB-System:
 The MB-System source code is extracted by first uncompressing
 the tar file and then running tar:
 
-		% uncompress MB-System4.6.6.tar.Z
-		% tar xvf MB-System4.6.6.tar
+		% uncompress MB-System4.6.10.tar.Z
+		% tar xvf MB-System4.6.10.tar
 
 This will create a directory structure called mbsystem. 
 In order to configure your installation, you must edit the
@@ -408,10 +423,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 4.20 1999-09-16 23:09:54 caress Exp $
+RCS ID: $Id: README,v 4.21 2000-03-08 01:19:08 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+# Revision 4.20  1999/09/16  23:09:54  caress
+# Real version 4.6.6 release notes
+#
 # Revision 4.19  1999/09/15  21:29:37  caress
 # Version 4.6.6 Release Notes
 #
