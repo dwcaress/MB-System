@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbbath.c	3/31/93
- *    $Id: mbbath.c,v 4.12 1995-03-06 19:37:59 caress Exp $
+ *    $Id: mbbath.c,v 4.13 1995-03-22 19:52:56 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -20,6 +20,9 @@
  * Date:	March 31, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.12  1995/03/06  19:37:59  caress
+ * Changed include strings.h to string.h for POSIX compliance.
+ *
  * Revision 4.11  1995/03/02  13:49:21  caress
  * Fixed bug related to error messages.
  *
@@ -119,7 +122,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbbath.c,v 4.12 1995-03-06 19:37:59 caress Exp $";
+	static char rcs_id[] = "$Id: mbbath.c,v 4.13 1995-03-22 19:52:56 caress Exp $";
 	static char program_name[] = "MBBATH";
 	static char help_message[] =  "MBBATH calculates bathymetry from \
 the travel time data by raytracing \nthrough a layered water velocity \
@@ -440,7 +443,7 @@ and stdout.";
 
 	/* if a velocity profile file has been specified then
 		count the velocity points */
-	if (strlen(vfile) > 0)
+	if (((int) strlen(vfile)) > 0)
 		{
 		nvel = 0;
 		if ((vfp = fopen(vfile, "r")) == NULL) 
@@ -478,7 +481,7 @@ and stdout.";
 
 	/* if a velocity profile file has been specified then
 		read in velocity profile data */
-	if (strlen(vfile) > 0)
+	if (((int)strlen(vfile)) > 0)
 		{
 		nvel = 0;
 		if ((vfp = fopen(vfile, "r")) == NULL) 
@@ -540,7 +543,7 @@ and stdout.";
 
 	/* if a roll correction file has been specified then
 		count the roll correction points */
-	if (strlen(rfile) > 0)
+	if (((int) strlen(rfile)) > 0)
 		{
 		nroll = 0;
 		if ((vfp = fopen(rfile, "r")) == NULL) 
@@ -565,7 +568,7 @@ and stdout.";
 
 	/* if a roll correction file has been specified then
 		read in roll correction data */
-	if (strlen(rfile) > 0)
+	if (((int) strlen(rfile)) > 0)
 		{
 		nroll = 0;
 		if ((vfp = fopen(rfile, "r")) == NULL) 
@@ -655,7 +658,7 @@ and stdout.";
 		}
 
 	/* if specified get static beam depth corrections */
-	if (strlen(sfile) > 0)
+	if (((int) strlen(sfile)) > 0)
 		{
 		if ((vfp = fopen(sfile, "r")) == NULL) 
 			{
