@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_singlebeam.c	4/13/99
- *	$Id: mbsys_singlebeam.c,v 5.7 2003-04-17 21:05:23 caress Exp $
+ *	$Id: mbsys_singlebeam.c,v 5.8 2005-03-25 04:29:56 caress Exp $
  *
  *    Copyright (c) 1999, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -28,6 +28,9 @@
  * Date:	April 13,  1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2003/04/17 21:05:23  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.6  2002/09/18 23:32:59  caress
  * Release 5.0.beta23
  *
@@ -77,7 +80,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_singlebeam.h"
 
-static char res_id[]="$Id: mbsys_singlebeam.c,v 5.7 2003-04-17 21:05:23 caress Exp $";
+static char res_id[]="$Id: mbsys_singlebeam.c,v 5.8 2005-03-25 04:29:56 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_singlebeam_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
@@ -1058,15 +1061,20 @@ int mbsys_singlebeam_pressuredepth(int verbose,
 		}
 
 	/* calculate depth in m from pressure in dBars */
-	phi = DTR * latitude; 
-	sinphi  = sin(phi); 
-	sinphi2= sinphi * sinphi;
- 	denom = 9.780318 * (1.0 + (5.2788e-3 
-			    + 2.36e-5 * sinphi2) * sinphi2) 
-				+ 1.092e-6 * pressure; 
-	numer = (((-1.82e-15 * pressure + 2.279e-10) * pressure 
-		    - 2.2512e-5) * pressure + 9.72659) * pressure; 
-	*depth = denom / numer; 
+	if (pressure > 0.0)
+		{
+		phi = DTR * latitude; 
+		sinphi  = sin(phi); 
+		sinphi2= sinphi * sinphi;
+ 		denom = 9.780318 * (1.0 + (5.2788e-3 
+				    + 2.36e-5 * sinphi2) * sinphi2) 
+					+ 1.092e-6 * pressure; 
+		numer = (((-1.82e-15 * pressure + 2.279e-10) * pressure 
+			    - 2.2512e-5) * pressure + 9.72659) * pressure; 
+		*depth = denom / numer; 
+		}
+	else
+		*depth = 0.0;
 
 	/* print output debug statements */
 	if (verbose >= 2)
