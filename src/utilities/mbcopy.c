@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcopy.c	2/4/93
- *    $Id: mbcopy.c,v 5.5 2001-06-30 17:42:04 caress Exp $
+ *    $Id: mbcopy.c,v 5.6 2001-07-20 00:34:38 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	February 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2001/06/30  17:42:04  caress
+ * Release 5.0.beta02
+ *
  * Revision 5.4  2001/06/29  22:50:23  caress
  * Atlas Hydrosweep DS2 raw data and SURF data formats.
  *
@@ -132,6 +135,8 @@
 #include "../../include/mbsys_simrad.h"
 #include "../../include/mbsys_simrad2.h"
 #include "../../include/mbsys_ldeoih.h"
+#include "../../include/mbsys_gsf.h"
+#include "../../include/mbsys_hsds.h"
 
 /* defines for special copying routines */
 #define	MBCOPY_PARTIAL			0
@@ -140,7 +145,7 @@
 #define	MBCOPY_XSE_TO_ELACMK2		3
 #define	MBCOPY_SIMRAD_TO_SIMRAD2	4
 #define	MBCOPY_ANY_TO_MBLDEOIH		5
-#define	MBCOPY_ANY_TO_GSF		6
+#define	MBCOPY_HDSD_TO_GSF		6
 
 /* function prototypes */
 int setup_transfer_rules(int verbose, int ibeams, int obeams,
@@ -181,7 +186,7 @@ int mbcopy_any_to_mbldeoih(int verbose,
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbcopy.c,v 5.5 2001-06-30 17:42:04 caress Exp $";
+	static char rcs_id[] = "$Id: mbcopy.c,v 5.6 2001-07-20 00:34:38 caress Exp $";
 	static char program_name[] = "MBcopy";
 	static char help_message[] =  "MBcopy copies an input swath sonar data file to an output \nswath sonar data file with the specified conversions.  Options include \nwindowing in time and space and ping averaging.  The input and \noutput data formats may differ, though not all possible combinations \nmake sense.  The default input and output streams are stdin and stdout.";
 	static char usage_message[] = "mbcopy [-Byr/mo/da/hr/mn/sc -Ccommentfile -Eyr/mo/da/hr/mn/sc \n\t-Fiformat/oformat -H  -Iinfile -Llonflip -N -Ooutfile \n\t-Ppings -Qsleep_factor -Rw/e/s/n -Sspeed -V]";
@@ -215,7 +220,7 @@ main (int argc, char **argv)
 	int	ibeams_bath;
 	int	ibeams_amp;
 	int	ipixels_ss;
-	char	*imbio_ptr = NULL;
+	void	*imbio_ptr = NULL;
 
 	/* MBIO write control parameters */
 	int	oformat = 0;
@@ -223,13 +228,13 @@ main (int argc, char **argv)
 	int	obeams_bath;
 	int	obeams_amp;
 	int	opixels_ss;
-	char	*ombio_ptr = NULL;
+	void	*ombio_ptr = NULL;
 
 	/* MBIO read and write values */
 	struct mb_io_struct *omb_io_ptr;
 	struct mb_io_struct *imb_io_ptr;
-	char	*istore_ptr;
-	char	*ostore_ptr;
+	void	*istore_ptr;
+	void	*ostore_ptr;
 	int	kind;
 	int	time_i[7];
 	double	time_d;
@@ -1959,7 +1964,7 @@ int mbcopy_simrad_to_simrad2(int verbose,
 			&& ostore->ping != NULL)
 			{
 			/* get data structure pointer */
-			iping = (struct mbsys_simrad_ping_struct *) istore->ping;
+			iping = (struct mbsys_simrad_survey_struct *) istore->ping;
 			oping = (struct mbsys_simrad2_ping_struct *) ostore->ping;
 
 			/* initialize everything */
@@ -2660,19 +2665,19 @@ int mbcopy_any_to_mbldeoih(int verbose,
 		/* insert data */
 		if (kind == MB_DATA_DATA
 		    || kind == MB_DATA_NAV)
-			mb_insert_nav(verbose, ombio_ptr, (char *)ostore, 
+			mb_insert_nav(verbose, ombio_ptr, (void *)ostore, 
 					time_i, time_d, 
 					navlon, navlat, speed, heading, draft, 
 					roll, pitch, heave, 
-					&error);
-		status = mb_insert(verbose, ombio_ptr, (char *)ostore,
+					error);
+		status = mb_insert(verbose, ombio_ptr, (void *)ostore,
 				kind, time_i, time_d, 
 				navlon, navlat, speed, heading, 
 				nbath,namp,nss,
 				beamflag,bath,amp,bathacrosstrack,
 				bathalongtrack,
 				ss,ssacrosstrack,ssalongtrack,
-				comment, &error);
+				comment, error);
 		  
 		}
 

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mbarirov.c	5/20/99
- *	$Id: mbr_mbarirov.c,v 5.4 2001-04-09 21:22:48 caress Exp $
+ *	$Id: mbr_mbarirov.c,v 5.5 2001-07-20 00:32:54 caress Exp $
  *
  *    Copyright (c) 1999, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	May 20, 1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2001/04/09  21:22:48  caress
+ * Added ability to ignore records with zero time tags.
+ *
  * Revision 5.3  2001/03/22  20:50:02  caress
  * Trying to make version 5.0.beta0
  *
@@ -69,7 +72,7 @@
 #include "../../include/mbf_mbarirov.h"
 
 /* essential function prototypes */
-int mbr_register_mbarirov(int verbose, char *mbio_ptr, 
+int mbr_register_mbarirov(int verbose, void *mbio_ptr, 
 		int *error);
 int mbr_info_mbarirov(int verbose, 
 			int *system, 
@@ -90,17 +93,17 @@ int mbr_info_mbarirov(int verbose,
 			double *beamwidth_xtrack, 
 			double *beamwidth_ltrack, 
 			int *error);
-int mbr_alm_mbarirov(int verbose, char *mbio_ptr, int *error);
-int mbr_dem_mbarirov(int verbose, char *mbio_ptr, int *error);
-int mbr_rt_mbarirov(int verbose, char *mbio_ptr, char *store_ptr, int *error);
-int mbr_wt_mbarirov(int verbose, char *mbio_ptr, char *store_ptr, int *error);
+int mbr_alm_mbarirov(int verbose, void *mbio_ptr, int *error);
+int mbr_dem_mbarirov(int verbose, void *mbio_ptr, int *error);
+int mbr_rt_mbarirov(int verbose, void *mbio_ptr, void *store_ptr, int *error);
+int mbr_wt_mbarirov(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
 static char header[] = "Year,Day,Time,Usec,Lat,Lon,East,North,Pres,Head,Alti,Pitch,Roll,PosFlag,PresFlag,HeadFlag,AltiFlag,AttitFlag\n";
 
 /*--------------------------------------------------------------------*/
-int mbr_register_mbarirov(int verbose, char *mbio_ptr, int *error)
+int mbr_register_mbarirov(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_mbarirov.c,v 5.4 2001-04-09 21:22:48 caress Exp $";
+	static char res_id[]="$Id: mbr_mbarirov.c,v 5.5 2001-07-20 00:32:54 caress Exp $";
 	char	*function_name = "mbr_register_mbarirov";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -123,9 +126,9 @@ int mbr_register_mbarirov(int verbose, char *mbio_ptr, int *error)
 			&mb_io_ptr->beams_bath_max, 
 			&mb_io_ptr->beams_amp_max, 
 			&mb_io_ptr->pixels_ss_max, 
-			&mb_io_ptr->format_name, 
-			&mb_io_ptr->system_name, 
-			&mb_io_ptr->format_description, 
+			mb_io_ptr->format_name, 
+			mb_io_ptr->system_name, 
+			mb_io_ptr->format_description, 
 			&mb_io_ptr->numfile, 
 			&mb_io_ptr->filetype, 
 			&mb_io_ptr->variable_beams, 
@@ -230,7 +233,7 @@ int mbr_info_mbarirov(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_mbarirov.c,v 5.4 2001-04-09 21:22:48 caress Exp $";
+	static char res_id[]="$Id: mbr_mbarirov.c,v 5.5 2001-07-20 00:32:54 caress Exp $";
 	char	*function_name = "mbr_info_mbarirov";
 	int	status = MB_SUCCESS;
 
@@ -297,9 +300,9 @@ int mbr_info_mbarirov(int verbose,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_alm_mbarirov(int verbose, char *mbio_ptr, int *error)
+int mbr_alm_mbarirov(int verbose, void *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_mbarirov.c,v 5.4 2001-04-09 21:22:48 caress Exp $";
+ static char res_id[]="$Id: mbr_mbarirov.c,v 5.5 2001-07-20 00:32:54 caress Exp $";
 	char	*function_name = "mbr_alm_mbarirov";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -357,7 +360,7 @@ int mbr_alm_mbarirov(int verbose, char *mbio_ptr, int *error)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_dem_mbarirov(int verbose, char *mbio_ptr, int *error)
+int mbr_dem_mbarirov(int verbose, void *mbio_ptr, int *error)
 {
 	char	*function_name = "mbr_dem_mbarirov";
 	int	status = MB_SUCCESS;
@@ -460,7 +463,7 @@ int mbr_zero_mbarirov(int verbose, char *data_ptr, int *error)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_rt_mbarirov(int verbose, char *mbio_ptr, char *store_ptr, int *error)
+int mbr_rt_mbarirov(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 {
 	char	*function_name = "mbr_rt_mbarirov";
 	int	status = MB_SUCCESS;
@@ -534,7 +537,7 @@ int mbr_rt_mbarirov(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_wt_mbarirov(int verbose, char *mbio_ptr, char *store_ptr, int *error)
+int mbr_wt_mbarirov(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 {
 	char	*function_name = "mbr_wt_mbarirov";
 	int	status = MB_SUCCESS;
@@ -605,7 +608,7 @@ int mbr_wt_mbarirov(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_mbarirov_rd_data(int verbose, char *mbio_ptr, int *error)
+int mbr_mbarirov_rd_data(int verbose, void *mbio_ptr, int *error)
 {
 	char	*function_name = "mbr_mbarirov_rd_data";
 	int	status = MB_SUCCESS;
@@ -782,11 +785,11 @@ int mbr_mbarirov_rd_data(int verbose, char *mbio_ptr, int *error)
 			fprintf(stderr,"dbg4       rov_altitude: %f\n",data->rov_altitude);
 			fprintf(stderr,"dbg4       rov_pitch:    %f\n",data->rov_pitch);
 			fprintf(stderr,"dbg4       rov_roll:     %f\n",data->rov_roll);
-			fprintf(stderr,"dbg4       position_flag:%f\n",data->position_flag);
-			fprintf(stderr,"dbg4       pressure_flag:%f\n",data->pressure_flag);
-			fprintf(stderr,"dbg4       heading_flag: %f\n",data->heading_flag);
-			fprintf(stderr,"dbg4       altitude_flag:%f\n",data->altitude_flag);
-			fprintf(stderr,"dbg4       attitude_flag:%f\n",data->attitude_flag);
+			fprintf(stderr,"dbg4       position_flag:%d\n",data->position_flag);
+			fprintf(stderr,"dbg4       pressure_flag:%d\n",data->pressure_flag);
+			fprintf(stderr,"dbg4       heading_flag: %d\n",data->heading_flag);
+			fprintf(stderr,"dbg4       altitude_flag:%d\n",data->altitude_flag);
+			fprintf(stderr,"dbg4       attitude_flag:%d\n",data->attitude_flag);
 			fprintf(stderr,"dbg4       error:        %d\n",*error);
 			fprintf(stderr,"dbg4       status:       %d\n",status);
 			}
@@ -815,7 +818,7 @@ int mbr_mbarirov_rd_data(int verbose, char *mbio_ptr, int *error)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_mbarirov_wr_data(int verbose, char *mbio_ptr, char *data_ptr, int *error)
+int mbr_mbarirov_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_mbarirov_wr_data";
 	int	status = MB_SUCCESS;
@@ -885,11 +888,11 @@ int mbr_mbarirov_wr_data(int verbose, char *mbio_ptr, char *data_ptr, int *error
 		    fprintf(stderr,"dbg4       rov_altitude: %f\n",data->rov_altitude);
 		    fprintf(stderr,"dbg4       rov_pitch:    %f\n",data->rov_pitch);
 		    fprintf(stderr,"dbg4       rov_roll:     %f\n",data->rov_roll);
-		    fprintf(stderr,"dbg4       position_flag:%f\n",data->position_flag);
-		    fprintf(stderr,"dbg4       pressure_flag:%f\n",data->pressure_flag);
-		    fprintf(stderr,"dbg4       heading_flag: %f\n",data->heading_flag);
-		    fprintf(stderr,"dbg4       altitude_flag:%f\n",data->altitude_flag);
-		    fprintf(stderr,"dbg4       attitude_flag:%f\n",data->attitude_flag);
+		    fprintf(stderr,"dbg4       position_flag:%d\n",data->position_flag);
+		    fprintf(stderr,"dbg4       pressure_flag:%d\n",data->pressure_flag);
+		    fprintf(stderr,"dbg4       heading_flag: %d\n",data->heading_flag);
+		    fprintf(stderr,"dbg4       altitude_flag:%d\n",data->altitude_flag);
+		    fprintf(stderr,"dbg4       attitude_flag:%d\n",data->attitude_flag);
 		    fprintf(stderr,"dbg4       error:        %d\n",*error);
 		    fprintf(stderr,"dbg4       status:       %d\n",status);
 		    }

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbclean.c	2/26/93
- *    $Id: mbcleanold.c,v 5.1 2001-03-22 21:14:16 caress Exp $
+ *    $Id: mbcleanold.c,v 5.2 2001-07-20 00:34:38 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -28,6 +28,9 @@
  * by David Caress.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2001/03/22 21:14:16  caress
+ * Trying to make release 5.0.beta0.
+ *
  * Revision 5.0  2001/01/22  07:56:11  caress
  * Version 5.0.beta01
  *
@@ -181,14 +184,11 @@ struct bad_struct
 	double	bath;
 	};
 
-/* compare function for qsort */
-int mb_double_compare();
-
 /*--------------------------------------------------------------------*/
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbcleanold.c,v 5.1 2001-03-22 21:14:16 caress Exp $";
+	static char rcs_id[] = "$Id: mbcleanold.c,v 5.2 2001-07-20 00:34:38 caress Exp $";
 	static char program_name[] = "MBCLEAN";
 	static char help_message[] =  "MBCLEAN identifies and flags artifacts in swath sonar bathymetry data\nBad beams  are  indentified  based  on  one simple criterion only: \nexcessive bathymetric slopes.   The default input and output streams \nare stdin and stdout.";
 	static char usage_message[] = "mbclean [-Amax -Blow/high -Cslope -Dmin/max \n\t-Fformat -Gfraction_low/fraction_high \n\t-Iinfile -Llonflip -Mmode -Nbuffersize -Ooutfile -Q -Xzap_beams \n\t-V -H]";
@@ -223,14 +223,14 @@ main (int argc, char **argv)
 	int	beams_amp;
 	int	pixels_ss;
 	char	ifile[128];
-	char	*imbio_ptr = NULL;
+	void	*imbio_ptr = NULL;
 
 	/* MBIO write control parameters */
 	char	ofile[128];
-	char	*ombio_ptr = NULL;
+	void	*ombio_ptr = NULL;
 
 	/* MBIO buffer structure pointer */
-	char	*buff_ptr = NULL;
+	void	*buff_ptr = NULL;
 	int	n_buffer_max = MBCLEAN_BUFFER_DEFAULT;
 	int	nwant = MBCLEAN_BUFFER_DEFAULT;
 	int	nhold = 1;

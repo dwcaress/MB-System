@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	4/8/93
- *    $Id: mbedit_prog.c,v 5.5 2001-06-30 17:39:31 caress Exp $
+ *    $Id: mbedit_prog.c,v 5.6 2001-07-20 00:30:32 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -27,6 +27,9 @@
  * Date:	September 19, 2000 (New version - no buffered i/o)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2001/06/30 17:39:31  caress
+ * Release 5.0.beta02
+ *
  * Revision 5.4  2001/03/22  21:06:55  caress
  * Trying to make release 5.0.beta0
  *
@@ -263,7 +266,7 @@ struct mbedit_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbedit_prog.c,v 5.5 2001-06-30 17:39:31 caress Exp $";
+static char rcs_id[] = "$Id: mbedit_prog.c,v 5.6 2001-07-20 00:30:32 caress Exp $";
 static char program_name[] = "MBedit";
 static char help_message[] =  
 "MBedit is an interactive editor used to identify and flag\n\
@@ -294,15 +297,15 @@ int	beams_bath;
 int	beams_amp;
 int	pixels_ss;
 char	ifile[MB_PATH_MAXLINE];
-char	*imbio_ptr = NULL;
-char	*ombio_ptr = NULL;
+void	*imbio_ptr = NULL;
+void	*ombio_ptr = NULL;
 int	output_mode = MBEDIT_OUTPUT_EDIT;
 int	run_mbprocess = MB_NO;
 int	gui_mode = MB_NO;
 int	startup_save_mode = MB_NO;
 
 /* mbio read and write values */
-char	*store_ptr = NULL;
+void	*store_ptr = NULL;
 int	kind;
 int	id;
 int	time_i[7];
@@ -672,7 +675,7 @@ int mbedit_set_filters(int f_m, int f_m_t, int f_w, int f_w_t)
  	filter_medianspike = f_m;
  	filter_medianspike_threshold = f_m_t;
  	filter_wrongside = f_w;
- 	filter_wrongside_threshold - f_w_t;
+ 	filter_wrongside_threshold = f_w_t;
 
 	/* print output debug statements */
 	if (verbose >= 2)

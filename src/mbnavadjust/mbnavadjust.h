@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavadjust.h	6/24/95
- *    $Id: mbnavadjust.h,v 5.0 2000-12-01 22:55:48 caress Exp $
+ *    $Id: mbnavadjust.h,v 5.1 2001-07-20 00:33:43 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	March 22, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01  22:55:48  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.0  2000/09/30  07:00:06  caress
  * Snapshot for Dale.
  *
@@ -256,12 +259,12 @@ EXTERNAL struct	mbna_project project;
 /* function prototype definitions */
 void	do_mbnavadjust_init(int argc, char **argv);
 void	do_set_controls();
-int	do_update_status();
+void	do_update_status();
 void	do_naverr_init();
 void	do_update_naverr();
 void	do_naverr_offsetlabel();
 void	do_naverr_test_graphics();
-void	do_naverr_plot();
+void	do_naverr_plot(int plotmode);
 int	do_message_on(char *message);
 int	do_message_off();
 int	do_error_dialog(char *s1, char *s2, char *s3);

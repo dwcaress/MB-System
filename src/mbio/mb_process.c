@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_process.c	9/11/00
- *    $Id: mb_process.c,v 5.5 2001-06-08 21:44:01 caress Exp $
+ *    $Id: mb_process.c,v 5.6 2001-07-20 00:31:11 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	September 11, 2000
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2001/06/08  21:44:01  caress
+ * Version 5.0.beta01
+ *
  * Revision 5.4  2001/06/03  06:54:56  caress
  * Improved handling of lever calculation.
  *
@@ -65,7 +68,7 @@
 #include "../../include/mb_format.h"
 #include "../../include/mb_process.h"
 
-static char rcs_id[]="$Id: mb_process.c,v 5.5 2001-06-08 21:44:01 caress Exp $";
+static char rcs_id[]="$Id: mb_process.c,v 5.6 2001-07-20 00:31:11 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_pr_readpar(int verbose, char *file, int lookforfiles, 
@@ -580,7 +583,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 		    /* use .txt suffix if MBARI ROV navigation */
 		    if (process->mbp_format == MBF_MBARIROV)
 			sprintf(process->mbp_ofile, "%sedited.txt", 
-				fileroot, process->mbp_format);
+				fileroot);
 		    /* else use standard .mbXXX suffix */
 		    else
 			sprintf(process->mbp_ofile, "%sp.mb%d", 
@@ -917,7 +920,7 @@ int mb_pr_writepar(int verbose, char *file,
 	    
 	    /* heave correction */
 	    fprintf(fp, "##\n## Heave Correction:\n");
-	    fprintf(fp, "HEAVEMODE %f\n", process->mbp_heave_mode);
+	    fprintf(fp, "HEAVEMODE %d\n", process->mbp_heave_mode);
 	    fprintf(fp, "HEAVEOFFSET %f\n", process->mbp_heave);
 	    fprintf(fp, "HEAVEMULTIPLY %f\n", process->mbp_heave_mult);
 	    
@@ -959,7 +962,7 @@ int mb_pr_writepar(int verbose, char *file,
 	    fprintf(fp, "SSRECALCMODE %d\n", process->mbp_ssrecalc_mode);
 	    fprintf(fp, "SSPIXELSIZE %f\n", process->mbp_ssrecalc_pixelsize);
 	    fprintf(fp, "SSSWATHWIDTH %f\n", process->mbp_ssrecalc_swathwidth);
-	    fprintf(fp, "SSINTERPOLATE %f\n", process->mbp_ssrecalc_interpolate);
+	    fprintf(fp, "SSINTERPOLATE %d\n", process->mbp_ssrecalc_interpolate);
 	    
 	    /* metadata insertion */
 	    fprintf(fp, "##\n## Metadata Insertion:\n");
@@ -1060,7 +1063,7 @@ int mb_pr_update_ofile(int verbose, char *file,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:             %d\n",verbose);
 		fprintf(stderr,"dbg2       file:                %s\n",file);
-		fprintf(stderr,"dbg2       mbp_ofile_specified: %s\n",mbp_ofile_specified);
+		fprintf(stderr,"dbg2       mbp_ofile_specified: %d\n",mbp_ofile_specified);
 		fprintf(stderr,"dbg2       ofile:               %s\n",mbp_ofile);
 		}
 
@@ -1705,7 +1708,7 @@ int mb_pr_update_nav(int verbose, char *file,
 		fprintf(stderr,"dbg2       mbp_nav_speed:     %d\n",mbp_nav_speed);
 		fprintf(stderr,"dbg2       mbp_nav_draft:     %d\n",mbp_nav_draft);
 		fprintf(stderr,"dbg2       mbp_nav_algorithm: %d\n",mbp_nav_algorithm);
-		fprintf(stderr,"dbg2       mbp_nav_timeshift: %d\n",mbp_nav_timeshift);
+		fprintf(stderr,"dbg2       mbp_nav_timeshift: %f\n",mbp_nav_timeshift);
 		}
 
 	/* get known process parameters */
@@ -2051,7 +2054,7 @@ int mb_pr_get_ofile(int verbose, char *file,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return value:\n");
-		fprintf(stderr,"dbg2       mbp_ofile_specified: %s\n",*mbp_ofile_specified);
+		fprintf(stderr,"dbg2       mbp_ofile_specified: %d\n",*mbp_ofile_specified);
 		fprintf(stderr,"dbg2       ofile:               %s\n",mbp_ofile);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -2386,7 +2389,7 @@ int mb_pr_get_tide(int verbose, char *file,
 			function_name);
 		fprintf(stderr,"dbg2  Return value:\n");
 		fprintf(stderr,"dbg2       mbp_tide_mode:     %d\n",*mbp_tide_mode);
-		fprintf(stderr,"dbg2       mbp_tidefile:      %s\n",*mbp_tidefile);
+		fprintf(stderr,"dbg2       mbp_tidefile:      %s\n",mbp_tidefile);
 		fprintf(stderr,"dbg2       mbp_tide_format:   %d\n",*mbp_tide_format);
 		fprintf(stderr,"dbg2       error:             %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -2635,7 +2638,7 @@ int mb_pr_get_nav(int verbose, char *file,
 		fprintf(stderr,"dbg2       mbp_nav_speed:     %d\n",*mbp_nav_speed);
 		fprintf(stderr,"dbg2       mbp_nav_draft:     %d\n",*mbp_nav_draft);
 		fprintf(stderr,"dbg2       mbp_nav_algorithm: %d\n",*mbp_nav_algorithm);
-		fprintf(stderr,"dbg2       mbp_nav_timeshift: %d\n",*mbp_nav_timeshift);
+		fprintf(stderr,"dbg2       mbp_nav_timeshift: %f\n",*mbp_nav_timeshift);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:     %d\n",status);

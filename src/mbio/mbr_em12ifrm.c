@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em12ifrm.c	12/4/00
- *	$Id: mbr_em12ifrm.c,v 5.2 2001-03-22 20:45:56 caress Exp $
+ *	$Id: mbr_em12ifrm.c,v 5.3 2001-07-20 00:31:11 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	December 4, 2000
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2001/03/22  20:45:56  caress
+ * Trying to make 5.0.beta0...
+ *
  * Revision 5.1  2001/01/22  07:43:34  caress
  * Version 5.0.beta01
  *
@@ -59,7 +62,7 @@
 #define MBF_EM12IFRM_SSBEAMHEADER_SIZE   6
 
 /* essential function prototypes */
-int mbr_register_em12ifrm(int verbose, char *mbio_ptr, 
+int mbr_register_em12ifrm(int verbose, void *mbio_ptr, 
 		int *error);
 int mbr_info_em12ifrm(int verbose, 
 			int *system, 
@@ -80,15 +83,15 @@ int mbr_info_em12ifrm(int verbose,
 			double *beamwidth_xtrack, 
 			double *beamwidth_ltrack, 
 			int *error);
-int mbr_alm_em12ifrm(int verbose, char *mbio_ptr, int *error);
-int mbr_dem_em12ifrm(int verbose, char *mbio_ptr, int *error);
-int mbr_rt_em12ifrm(int verbose, char *mbio_ptr, char *store_ptr, int *error);
-int mbr_wt_em12ifrm(int verbose, char *mbio_ptr, char *store_ptr, int *error);
+int mbr_alm_em12ifrm(int verbose, void *mbio_ptr, int *error);
+int mbr_dem_em12ifrm(int verbose, void *mbio_ptr, int *error);
+int mbr_rt_em12ifrm(int verbose, void *mbio_ptr, void *store_ptr, int *error);
+int mbr_wt_em12ifrm(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
 /*--------------------------------------------------------------------*/
-int mbr_register_em12ifrm(int verbose, char *mbio_ptr, int *error)
+int mbr_register_em12ifrm(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_em12ifrm.c,v 5.2 2001-03-22 20:45:56 caress Exp $";
+	static char res_id[]="$Id: mbr_em12ifrm.c,v 5.3 2001-07-20 00:31:11 caress Exp $";
 	char	*function_name = "mbr_register_em12ifrm";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -111,9 +114,9 @@ int mbr_register_em12ifrm(int verbose, char *mbio_ptr, int *error)
 			&mb_io_ptr->beams_bath_max, 
 			&mb_io_ptr->beams_amp_max, 
 			&mb_io_ptr->pixels_ss_max, 
-			&mb_io_ptr->format_name, 
-			&mb_io_ptr->system_name, 
-			&mb_io_ptr->format_description, 
+			mb_io_ptr->format_name, 
+			mb_io_ptr->system_name, 
+			mb_io_ptr->format_description, 
 			&mb_io_ptr->numfile, 
 			&mb_io_ptr->filetype, 
 			&mb_io_ptr->variable_beams, 
@@ -218,7 +221,7 @@ int mbr_info_em12ifrm(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_em12ifrm.c,v 5.2 2001-03-22 20:45:56 caress Exp $";
+	static char res_id[]="$Id: mbr_em12ifrm.c,v 5.3 2001-07-20 00:31:11 caress Exp $";
 	char	*function_name = "mbr_info_em12ifrm";
 	int	status = MB_SUCCESS;
 
@@ -285,9 +288,9 @@ int mbr_info_em12ifrm(int verbose,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_alm_em12ifrm(int verbose, char *mbio_ptr, int *error)
+int mbr_alm_em12ifrm(int verbose, void *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_em12ifrm.c,v 5.2 2001-03-22 20:45:56 caress Exp $";
+ static char res_id[]="$Id: mbr_em12ifrm.c,v 5.3 2001-07-20 00:31:11 caress Exp $";
 	char	*function_name = "mbr_alm_em12ifrm";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -418,7 +421,7 @@ int mbr_alm_em12ifrm(int verbose, char *mbio_ptr, int *error)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_dem_em12ifrm(int verbose, char *mbio_ptr, int *error)
+int mbr_dem_em12ifrm(int verbose, void *mbio_ptr, int *error)
 {
 	char	*function_name = "mbr_dem_em12ifrm";
 	int	status = MB_SUCCESS;
@@ -623,7 +626,7 @@ int mbr_zero_em12ifrm(int verbose, char *data_ptr, int *error)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_rt_em12ifrm(int verbose, char *mbio_ptr, char *store_ptr, int *error)
+int mbr_rt_em12ifrm(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 {
 	char	*function_name = "mbr_rt_em12ifrm";
 	int	status = MB_SUCCESS;
@@ -677,21 +680,6 @@ int mbr_rt_em12ifrm(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 	if (status == MB_SUCCESS
 		&& data->kind == MB_DATA_NAV)
 		{				
-		/* make room for latest fix */
-		if (mb_io_ptr->nfix >= MB_NAV_SAVE_MAX)
-			{
-			for (i=0;i<mb_io_ptr->nfix-1;i++)
-				{
-				mb_io_ptr->fix_time_d[i]
-				    = mb_io_ptr->fix_time_d[i+1];
-				mb_io_ptr->fix_lon[i]
-				    = mb_io_ptr->fix_lon[i+1];
-				mb_io_ptr->fix_lat[i]
-				    = mb_io_ptr->fix_lat[i+1];
-				}
-			mb_io_ptr->nfix--;
-			}
-			
 		/* get nav time */
 		mb_fix_y2k(verbose, data->pos_year, 
 			    &ntime_i[0]);
@@ -704,13 +692,11 @@ int mbr_rt_em12ifrm(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 		mb_get_time(verbose, ntime_i, &ntime_d);
 		
 		/* add latest fix */
-		mb_io_ptr->fix_time_d[mb_io_ptr->nfix] 
-			= ntime_d;
-		mb_io_ptr->fix_lon[mb_io_ptr->nfix] 
-			= data->longitude;
-		mb_io_ptr->fix_lat[mb_io_ptr->nfix] 
-			= data->latitude;
-		mb_io_ptr->nfix++;
+		mb_navint_add(verbose, mbio_ptr, 
+				ntime_d, 
+				(double)(data->longitude), 
+				(double)(data->latitude), 
+				error);
 		}
 
 	/* handle navigation interpolation */
@@ -728,128 +714,11 @@ int mbr_rt_em12ifrm(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 		ptime_i[6] = 10000*data->centisecond;
 		mb_get_time(verbose, ptime_i, &ptime_d);
 
-		/* interpolate from saved nav if possible */
-		if (mb_io_ptr->nfix > 1)
-			{
-			/* get speed if necessary */
-			if (data->speed <= 0.0)
-			    {
-                            mb_coor_scale(verbose,
-                                mb_io_ptr->fix_lat[mb_io_ptr->nfix-1],
-                                &mtodeglon,&mtodeglat);
-                            dx = (mb_io_ptr->fix_lon[mb_io_ptr->nfix-1]
-                                - mb_io_ptr->fix_lon[0])/mtodeglon;
-                            dy = (mb_io_ptr->fix_lat[mb_io_ptr->nfix-1]
-                                - mb_io_ptr->fix_lat[0])/mtodeglat;
-                            dt = mb_io_ptr->fix_time_d[mb_io_ptr->nfix-1]
-                                - mb_io_ptr->fix_time_d[0];
-                            pspeed = 3.6 * sqrt(dx*dx + dy*dy)/dt; /* km/hr */
-			    data->speed = pspeed / 3.6;
-			    }
-			else
-			    {
-			    pspeed = 3.6 * data->speed;
-			    }
-			if (pspeed > 100.0)
-			    pspeed = 0.0;
-
-			/* interpolation possible */
-			if (ptime_d >= mb_io_ptr->fix_time_d[0]
-			    && ptime_d <= mb_io_ptr->fix_time_d[mb_io_ptr->nfix-1])
-			    {
-			    ifix = 0;
-			    while (ptime_d > mb_io_ptr->fix_time_d[ifix+1])
-				ifix++;
-			    plon = mb_io_ptr->fix_lon[ifix]
-				+ (mb_io_ptr->fix_lon[ifix+1] 
-				    - mb_io_ptr->fix_lon[ifix])
-				* (ptime_d
-				    - mb_io_ptr->fix_time_d[ifix])
-				/ (mb_io_ptr->fix_time_d[ifix+1]
-				    - mb_io_ptr->fix_time_d[ifix]);
-			    plat = mb_io_ptr->fix_lat[ifix]
-				+ (mb_io_ptr->fix_lat[ifix+1] 
-				    - mb_io_ptr->fix_lat[ifix])
-				* (ptime_d
-				    - mb_io_ptr->fix_time_d[ifix])
-				/ (mb_io_ptr->fix_time_d[ifix+1]
-				    - mb_io_ptr->fix_time_d[ifix]);
-			    }
-			
-			/* extrapolate from first fix */
-			else if (ptime_d 
-				< mb_io_ptr->fix_time_d[0]
-				&& pspeed > 0.0)
-			    {
-			    dd = (ptime_d 
-				- mb_io_ptr->fix_time_d[0])
-				* pspeed / 3.6;
-			    mb_coor_scale(verbose,mb_io_ptr->fix_lat[0],
-				&mtodeglon,&mtodeglat);
-			    headingx = sin(DTR*(data->line_heading));
-			    headingy = cos(DTR*(data->line_heading));
-			    plon = mb_io_ptr->fix_lon[0] 
-				+ headingx*mtodeglon*dd;
-			    plat = mb_io_ptr->fix_lat[0] 
-				+ headingy*mtodeglat*dd;
-			    }
-			
-			/* extrapolate from last fix */
-			else if (ptime_d 
-				> mb_io_ptr->fix_time_d[mb_io_ptr->nfix-1]
-				&& pspeed > 0.0)
-			    {
-			    dd = (ptime_d 
-				- mb_io_ptr->fix_time_d[mb_io_ptr->nfix-1])
-				* pspeed / 3.6;
-			    mb_coor_scale(verbose,mb_io_ptr->fix_lat[mb_io_ptr->nfix-1],
-				&mtodeglon,&mtodeglat);
-			    headingx = sin(DTR*(data->line_heading));
-			    headingy = cos(DTR*(data->line_heading));
-			    plon = mb_io_ptr->fix_lon[mb_io_ptr->nfix-1] 
-				+ headingx*mtodeglon*dd;
-			    plat = mb_io_ptr->fix_lat[mb_io_ptr->nfix-1] 
-				+ headingy*mtodeglat*dd;
-			    }
-			
-			/* use last fix */
-			else
-			    {
-			    plon = mb_io_ptr->fix_lon[mb_io_ptr->nfix-1];
-			    plat = mb_io_ptr->fix_lat[mb_io_ptr->nfix-1];
-			    }
-			}
-			
-		/* else extrapolate from only fix */
-		else if (mb_io_ptr->nfix == 1
-			&& data->speed > 0.0)
-			{
-			pspeed = 3.6 * data->speed;
-			dd = (ptime_d - mb_io_ptr->fix_time_d[mb_io_ptr->nfix-1])
-				* pspeed / 3.6;
-			mb_coor_scale(verbose,mb_io_ptr->fix_lat[mb_io_ptr->nfix-1],
-				&mtodeglon,&mtodeglat);
-			headingx = sin(DTR*(data->line_heading));
-			headingy = cos(DTR*(data->line_heading));
-			plon = mb_io_ptr->fix_lon[mb_io_ptr->nfix-1] 
-				+ headingx*mtodeglon*dd;
-			plat = mb_io_ptr->fix_lat[mb_io_ptr->nfix-1] 
-				+ headingy*mtodeglat*dd;
-			}
-
-		/* else just take last position */
-		else if (mb_io_ptr->nfix == 1)
-			{
-			plon = mb_io_ptr->fix_lon[mb_io_ptr->nfix-1];
-			plat = mb_io_ptr->fix_lat[mb_io_ptr->nfix-1];
-			pspeed = 0.0;
-			}
-		else
-			{
-			plon = 0.0;
-			plat = 0.0;
-			pspeed = 0.0;
-			}
+		/* interpolate from saved nav */
+		mb_navint_interp(verbose, mbio_ptr, ptime_d, 
+				    (double)data->line_heading, 
+				    (double)data->speed, 
+				    &plon, &plat, &pspeed, error);
 		if (mb_io_ptr->lonflip < 0)
 			{
 			if (plon > 0.) 
@@ -875,14 +744,10 @@ int mbr_rt_em12ifrm(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 		/* print debug statements */
 		if (verbose >= 4)
 			{
-			fprintf(stderr,"dbg4       Interpolated Navigation:\n",
-				plon);
-			fprintf(stderr,"dbg4       longitude:  %f\n",
-				plon);
-			fprintf(stderr,"dbg4       latitude:   %f\n",
-				plat);
-			fprintf(stderr,"dbg4       speed:      %f\n",
-				pspeed);
+			fprintf(stderr,"dbg4     Interpolated Navigation:\n");
+			fprintf(stderr,"dbg4       longitude:  %f\n", plon);
+			fprintf(stderr,"dbg4       latitude:   %f\n", plat);
+			fprintf(stderr,"dbg4       speed:      %f\n", pspeed);
 			}
 		}
 
@@ -1062,7 +927,7 @@ int mbr_rt_em12ifrm(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_wt_em12ifrm(int verbose, char *mbio_ptr, char *store_ptr, int *error)
+int mbr_wt_em12ifrm(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 {
 	char	*function_name = "mbr_wt_em12ifrm";
 	int	status = MB_SUCCESS;
@@ -1240,7 +1105,7 @@ int mbr_wt_em12ifrm(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 }
 /*--------------------------------------------------------------------*/
 
-int mbr_em12ifrm_rd_data(int verbose, char *mbio_ptr, int *error)
+int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error)
 {
 	char	*function_name = "mbr_em12ifrm_rd_data";
 	int	status = MB_SUCCESS;
@@ -1793,7 +1658,7 @@ NorS, latdeg, latmin, EorW, londeg, lonmin);*/
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em12ifrm_wr_data(int verbose, char *mbio_ptr, char *data_ptr, int *error)
+int mbr_em12ifrm_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_em12ifrm_wr_data";
 	int	status = MB_SUCCESS;

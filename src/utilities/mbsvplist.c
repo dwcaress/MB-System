@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsvplist.c	1/3/2001
- *    $Id: mbsvplist.c,v 5.1 2001-03-22 21:15:49 caress Exp $
+ *    $Id: mbsvplist.c,v 5.2 2001-07-20 00:34:38 caress Exp $
  *
  *    Copyright (c) 2001 by
  *    David W. Caress (caress@mbari.org)
@@ -29,6 +29,9 @@
  * Date:	January 3,  2001
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2001/03/22 21:15:49  caress
+ * Trying to make release 5.0.beta0.
+ *
  * Revision 5.0  2001/01/04  21:43:50  caress
  * Initial revision.
  *
@@ -54,7 +57,7 @@ char	*getenv();
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbsvplist.c,v 5.1 2001-03-22 21:15:49 caress Exp $";
+	static char rcs_id[] = "$Id: mbsvplist.c,v 5.2 2001-07-20 00:34:38 caress Exp $";
 	static char program_name[] = "mbsvplist";
 	static char help_message[] =  "mbsvplist lists all water sound velocity\nprofiles (SVPs) within swath data files. Swath bathymetry is\ncalculated from raw angles and travel times by raytracing\nthrough a model of the speed of sound in water. Many swath\ndata formats allow SVPs to be embedded in the data, and\noften the SVPs used to calculate the data will be included.\nBy default, all unique SVPs encountered are listed to\nstdout. The SVPs may instead be written to individual files\nwith names FILE_XXX.svp, where FILE is the swath data\nfilename and XXX is the SVP count within the file.  The -D\noption causes duplicate SVPs to be output.";
 	static char usage_message[] = "mbsvplist [-D -Fformat -H -Ifile -O -V]";
@@ -74,7 +77,7 @@ main (int argc, char **argv)
 	/* MBIO read control parameters */
 	int	read_datalist = MB_NO;
 	char	read_file[MB_PATH_MAXLINE];
-	char	*datalist;
+	void	*datalist;
 	int	look_processed = MB_DATALIST_LOOK_UNSET;
 	double	file_weight;
 	int	format;
@@ -93,8 +96,8 @@ main (int argc, char **argv)
 	int	pixels_ss;
 
 	/* MBIO read values */
-	char	*mbio_ptr = NULL;
-	char	*store_ptr;
+	void	*mbio_ptr = NULL;
+	void	*store_ptr;
 	int	kind;
 	int	time_i[7];
 	double	time_d;

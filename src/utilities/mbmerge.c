@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmerge.c	2/20/93
  *
- *    $Id: mbmerge.c,v 5.2 2001-03-22 21:15:49 caress Exp $
+ *    $Id: mbmerge.c,v 5.3 2001-07-20 00:34:38 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	February 20, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2001/03/22 21:15:49  caress
+ * Trying to make release 5.0.beta0.
+ *
  * Revision 5.1  2000/12/10  20:30:44  caress
  * Version 5.0.alpha02
  *
@@ -157,7 +160,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbmerge.c,v 5.2 2001-03-22 21:15:49 caress Exp $";
+	static char rcs_id[] = "$Id: mbmerge.c,v 5.3 2001-07-20 00:34:38 caress Exp $";
 	static char program_name[] = "MBMERGE";
 	static char help_message[] =  "MBMERGE merges new navigation with swath sonar data from an \ninput file and then writes the merged data to an output \nswath sonar data file. The default input \nand output streams are stdin and stdout.";
 	static char usage_message[] = "mbmerge [-Aheading_offset -B -Fformat -Llonflip -V -H  -Iinfile -Ooutfile -Mnavformat -Nnavfile -Z]";
@@ -191,15 +194,15 @@ main (int argc, char **argv)
 	int	beams_amp;
 	int	pixels_ss;
 	char	ifile[128];
-	char	*imbio_ptr = NULL;
+	void	*imbio_ptr = NULL;
 	char	ofile[128];
-	char	*ombio_ptr = NULL;
+	void	*ombio_ptr = NULL;
 	char	nfile[128];
 	int	nformat = 5;
 	FILE	*nfp;
 
 	/* mbio read and write values */
-	char	*store_ptr;
+	void	*store_ptr;
 	int	kind;
 	int	time_i[7];
 	double	time_d;

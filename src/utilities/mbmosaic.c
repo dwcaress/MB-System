@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmosaic.c	2/10/97
- *    $Id: mbmosaic.c,v 5.3 2001-06-29 22:50:23 caress Exp $
+ *    $Id: mbmosaic.c,v 5.4 2001-07-20 00:34:38 caress Exp $
  *
  *    Copyright (c) 1997, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	February 10, 1997
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2001/06/29 22:50:23  caress
+ * Atlas Hydrosweep DS2 raw data and SURF data formats.
+ *
  * Revision 5.2  2001/06/03  07:07:34  caress
  * Release 5.0.beta01.
  *
@@ -123,7 +126,7 @@
 #define	NO_DATA_FLAG	99999
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbmosaic.c,v 5.3 2001-06-29 22:50:23 caress Exp $";
+static char rcs_id[] = "$Id: mbmosaic.c,v 5.4 2001-07-20 00:34:38 caress Exp $";
 static char program_name[] = "mbmosaic";
 static char help_message[] =  "mbmosaic is an utility used to mosaic amplitude or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered by multibeam swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbmosaic -Ifilelist -Oroot \
@@ -166,12 +169,12 @@ main (int argc, char **argv)
 	int	pixels_ss;
 	char	file[128];
 	int	file_in_bounds;
-	char	*mbio_ptr = NULL;
+	void	*mbio_ptr = NULL;
 
 	/* mbmosaic control variables */
 	char	filelist[128];
 	char	fileroot[128];
-	char	*datalist;
+	void	*datalist;
 	int	look_processed = MB_DATALIST_LOOK_UNSET;
 	double	file_weight;
 	int	xdim = 0;
@@ -1069,7 +1072,7 @@ main (int argc, char **argv)
 			fprintf(outfp,"NaN values used to flag regions with no data\n");
 		else
 			fprintf(outfp,"Real value of %f used to flag regions with no data\n",
-				NO_DATA_FLAG);
+				outclipvalue);
 		if (more == MB_YES) 
 			fprintf(outfp,"Data density and sigma grids also created\n");
 		fprintf(outfp,"MBIO parameters:\n");

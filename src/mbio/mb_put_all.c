@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_put_all.c	2/4/93
- *    $Id: mb_put_all.c,v 5.0 2000-12-01 22:48:41 caress Exp $
+ *    $Id: mb_put_all.c,v 5.1 2001-07-20 00:31:11 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	February 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01 22:48:41  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.8  2000/10/11  01:02:30  caress
  * Convert to ANSI C
  *
@@ -102,7 +105,7 @@
 #include "../../include/mb_define.h"
 
 /*--------------------------------------------------------------------*/
-int mb_put_all(int verbose, char *mbio_ptr, char *store_ptr,
+int mb_put_all(int verbose, void *mbio_ptr, void *store_ptr,
 		int usevalues, int kind, 
 		int time_i[7], double time_d,
 		double navlon, double navlat, 
@@ -113,7 +116,7 @@ int mb_put_all(int verbose, char *mbio_ptr, char *store_ptr,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
 		char *comment, int *error)
 {
-  static char rcs_id[]="$Id: mb_put_all.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
+  static char rcs_id[]="$Id: mb_put_all.c,v 5.1 2001-07-20 00:31:11 caress Exp $";
 	char	*function_name = "mb_put_all";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

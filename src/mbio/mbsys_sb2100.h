@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_sb2100.h	2/4/94
- *	$Id: mbsys_sb2100.h,v 5.1 2001-01-22 07:43:34 caress Exp $
+ *	$Id: mbsys_sb2100.h,v 5.2 2001-07-20 00:32:54 caress Exp $
  *
  *    Copyright (c) 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Author:	D. W. Caress
  * Date:	February 4, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2001/01/22  07:43:34  caress
+ * Version 5.0.beta01
+ *
  * Revision 5.0  2000/12/01  22:48:41  caress
  * First cut at Version 5.0.
  *
@@ -229,11 +232,11 @@ struct mbsys_sb2100_struct
 
 	
 /* system specific function prototypes */
-int mbsys_sb2100_alloc(int verbose, char *mbio_ptr, char **store_ptr, 
+int mbsys_sb2100_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error);
-int mbsys_sb2100_deall(int verbose, char *mbio_ptr, char **store_ptr, 
+int mbsys_sb2100_deall(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error);
-int mbsys_sb2100_extract(int verbose, char *mbio_ptr, char *store_ptr, 
+int mbsys_sb2100_extract(int verbose, void *mbio_ptr, void *store_ptr, 
 			int *kind, int time_i[7], double *time_d,
 			double *navlon, double *navlat,
 			double *speed, double *heading,
@@ -242,7 +245,7 @@ int mbsys_sb2100_extract(int verbose, char *mbio_ptr, char *store_ptr,
 			double *bathacrosstrack, double *bathalongtrack,
 			double *ss, double *ssacrosstrack, double *ssalongtrack,
 			char *comment, int *error);
-int mbsys_sb2100_insert(int verbose, char *mbio_ptr, char *store_ptr, 
+int mbsys_sb2100_insert(int verbose, void *mbio_ptr, void *store_ptr, 
 			int kind, int time_i[7], double time_d,
 			double navlon, double navlat,
 			double speed, double heading,
@@ -251,37 +254,37 @@ int mbsys_sb2100_insert(int verbose, char *mbio_ptr, char *store_ptr,
 			double *bathacrosstrack, double *bathalongtrack,
 			double *ss, double *ssacrosstrack, double *ssalongtrack,
 			char *comment, int *error);
-int mbsys_sb2100_ttimes(int verbose, char *mbio_ptr, char *store_ptr,
+int mbsys_sb2100_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbeams,
 			double *ttimes, double *angles, 
 			double *angles_forward, double *angles_null,
 			double *heave, double *alongtrack_offset, 
 			double *draft, double *ssv, int *error);
-int mbsys_sb2100_extract_altitude(int verbose, char *mbio_ptr, char *store_ptr,
+int mbsys_sb2100_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, double *transducer_depth, double *altitude, 
 			int *error);
-int mbsys_sb2100_extract_nav(int verbose, char *mbio_ptr, char *store_ptr,
+int mbsys_sb2100_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int time_i[7], double *time_d,
 			double *navlon, double *navlat,
 			double *speed, double *heading, double *draft, 
 			double *roll, double *pitch, double *heave, 
 			int *error);
-int mbsys_sb2100_insert_nav(int verbose, char *mbio_ptr, char *store_ptr,
+int mbsys_sb2100_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 			int time_i[7], double time_d,
 			double navlon, double navlat,
 			double speed, double heading, double draft, 
 			double roll, double pitch, double heave,
 			int *error);
-int mbsys_sb2100_extract_svp(int verbose, char *mbio_ptr, char *store_ptr,
+int mbsys_sb2100_extract_svp(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, 
 			int *nsvp, 
 			double *depth, double *velocity,
 			int *error);
-int mbsys_sb2100_insert_svp(int verbose, char *mbio_ptr, char *store_ptr,
+int mbsys_sb2100_insert_svp(int verbose, void *mbio_ptr, void *store_ptr,
 			int nsvp, 
 			double *depth, double *velocity,
 			int *error);
-int mbsys_sb2100_copy(int verbose, char *mbio_ptr, 
-			char *store_ptr, char *copy_ptr,
+int mbsys_sb2100_copy(int verbose, void *mbio_ptr, 
+			void *store_ptr, void *copy_ptr,
 			int *error);
 

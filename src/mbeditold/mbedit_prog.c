@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	4/8/93
- *    $Id: mbedit_prog.c,v 5.1 2001-01-22 07:42:13 caress Exp $
+ *    $Id: mbedit_prog.c,v 5.2 2001-07-20 00:30:51 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -26,6 +26,9 @@
  * Date:	March 28, 1997  GUI recast
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2001/01/22 07:42:13  caress
+ * Version 5.0.beta01
+ *
  * Revision 5.0  2000/12/01  22:54:58  caress
  * First cut at Version 5.0.
  *
@@ -251,7 +254,7 @@ struct mbedit_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbedit_prog.c,v 5.1 2001-01-22 07:42:13 caress Exp $";
+static char rcs_id[] = "$Id: mbedit_prog.c,v 5.2 2001-07-20 00:30:51 caress Exp $";
 static char program_name[] = "MBeditold";
 static char help_message[] =  
 "MBeditold is an interactive editor used to identify and flag\n\
@@ -284,14 +287,14 @@ int	pixels_ss;
 char	ifile[128];
 char	ofile[128];
 int	ofile_defined = MB_NO;
-char	*imbio_ptr = NULL;
-char	*ombio_ptr = NULL;
+void	*imbio_ptr = NULL;
+void	*ombio_ptr = NULL;
 int	output_mode = MBEDIT_OUTPUT_OUTPUT;
 int	gui_mode = MB_NO;
 int	startup_save_mode = MB_NO;
 
 /* mbio read and write values */
-char	*store_ptr = NULL;
+void	*store_ptr = NULL;
 int	kind;
 int	id;
 int	time_i[7];
@@ -322,7 +325,7 @@ char	comment[MB_COMMENT_MAXLINE];
 /* buffer control variables */
 #define	MBEDIT_BUFFER_SIZE	MB_BUFFER_MAX
 int	file_open = MB_NO;
-char	*buff_ptr = NULL;
+void	*buff_ptr = NULL;
 int	buff_size = MBEDIT_BUFFER_SIZE / 5;
 int	buff_size_max = MBEDIT_BUFFER_SIZE;
 int	holdd_size = MBEDIT_BUFFER_SIZE / 200;
@@ -703,7 +706,7 @@ int mbedit_set_filters(int f_m, int f_m_t, int f_w, int f_w_t)
  	filter_medianspike = f_m;
  	filter_medianspike_threshold = f_m_t;
  	filter_wrongside = f_w;
- 	filter_wrongside_threshold - f_w_t;
+ 	filter_wrongside_threshold = f_w_t;
 
 	/* print output debug statements */
 	if (verbose >= 2)

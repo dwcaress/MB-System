@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbunclean.c	3/10/93
- *    $Id: mbunclean.c,v 5.1 2001-03-22 21:15:49 caress Exp $
+ *    $Id: mbunclean.c,v 5.2 2001-07-20 00:34:38 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	March 10, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2001/03/22 21:15:49  caress
+ * Trying to make release 5.0.beta0.
+ *
  * Revision 5.0  2000/12/01  22:57:08  caress
  * First cut at Version 5.0.
  *
@@ -76,6 +79,9 @@
  *
  * Revision 3.1  1993/05/14  23:49:32  sohara
  * fixed $Log: not supported by cvs2svn $
+ * fixed Revision 5.1  2001/03/22 21:15:49  caress
+ * fixed Trying to make release 5.0.beta0.
+ * fixed
  * Revision 5.0  2000/12/01  22:57:08  caress
  * First cut at Version 5.0.
  *
@@ -149,7 +155,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbunclean.c,v 5.1 2001-03-22 21:15:49 caress Exp $";
+	static char rcs_id[] = "$Id: mbunclean.c,v 5.2 2001-07-20 00:34:38 caress Exp $";
 	static char program_name[] = "MBUNCLEAN";
 	static char help_message[] =  "MBUNCLEAN unflags swath bathymetry and amplitude data \nwhich has been flagged as bad by being set negative. \nThe default input and output streams are stdin and stdout.";
 	static char usage_message[] = "mbunclean [-Blow/high -Fformat -Llonflip -V -H  -Iinfile -Ooutfile]";
@@ -183,14 +189,14 @@ main (int argc, char **argv)
 	int	beams_bath;
 	int	beams_amp;
 	int	pixels_ss;
-	char	*imbio_ptr = NULL;
+	void	*imbio_ptr = NULL;
 
 	/* MBIO write control parameters */
 	char	ofile[128];
-	char	*ombio_ptr = NULL;
+	void	*ombio_ptr = NULL;
 
 	/* mbio read and write values */
-	char	*store_ptr;
+	void	*store_ptr;
 	int	kind;
 	int	time_i[7];
 	double	time_d;

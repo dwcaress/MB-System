@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbbackangle.c	1/6/95
- *    $Id: mbbackangleold.c,v 5.1 2001-03-22 21:14:16 caress Exp $
+ *    $Id: mbbackangleold.c,v 5.2 2001-07-20 00:34:38 caress Exp $
  *
  *    Copyright (c) 1995, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	January 6, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2001/03/22 21:14:16  caress
+ * Trying to make release 5.0.beta0.
+ *
  * Revision 5.0  2000/12/01  22:57:08  caress
  * First cut at Version 5.0.
  *
@@ -91,7 +94,7 @@
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbbackangleold.c,v 5.1 2001-03-22 21:14:16 caress Exp $";
+	static char rcs_id[] = "$Id: mbbackangleold.c,v 5.2 2001-07-20 00:34:38 caress Exp $";
 	static char program_name[] = "mbbackangle";
 	static char help_message[] =  
 "mbbackangle reads a swath sonar data file and generates a table\n\t\
@@ -118,7 +121,7 @@ The results are dumped to stdout.";
 	/* MBIO read control parameters */
 	int	read_datalist = MB_NO;
 	char	read_file[128];
-	char	*datalist;
+	void	*datalist;
 	int	look_processed = MB_DATALIST_LOOK_UNSET;
 	double	file_weight;
 	int	format;
@@ -137,7 +140,7 @@ The results are dumped to stdout.";
 	int	pixels_ss;
 
 	/* MBIO read values */
-	char	*mbio_ptr = NULL;
+	void	*mbio_ptr = NULL;
 	int	kind;
 	int	time_i[7];
 	double	time_d;

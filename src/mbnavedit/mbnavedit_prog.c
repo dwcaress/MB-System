@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_prog.c	6/23/95
- *    $Id: mbnavedit_prog.c,v 5.6 2001-06-30 17:41:04 caress Exp $
+ *    $Id: mbnavedit_prog.c,v 5.7 2001-07-20 00:34:00 caress Exp $
  *
  *    Copyright (c) 1995, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	August 28, 2000 (New version - no buffered i/o)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2001/06/30 17:41:04  caress
+ * Release 5.0.beta01
+ *
  * Revision 5.5  2001/06/03  07:06:25  caress
  * Release 5.0.beta01
  *
@@ -211,7 +214,7 @@ struct mbnavedit_plot_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbnavedit_prog.c,v 5.6 2001-06-30 17:41:04 caress Exp $";
+static char rcs_id[] = "$Id: mbnavedit_prog.c,v 5.7 2001-07-20 00:34:00 caress Exp $";
 static char program_name[] = "MBNAVEDIT";
 static char help_message[] =  "MBNAVEDIT is an interactive navigation editor for swath sonar data.\n\tIt can work with any data format supported by the MBIO library.\n";
 static char usage_message[] = "mbnavedit [-Byr/mo/da/hr/mn/sc -D  -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ooutfile -X -V -H]";
@@ -237,10 +240,10 @@ double	timegap;
 int	beams_bath;
 int	beams_amp;
 int	pixels_ss;
-char	*imbio_ptr = NULL;
+void	*imbio_ptr = NULL;
 
 /* mbio read and write values */
-char	*store_ptr = NULL;
+void	*store_ptr = NULL;
 int	kind;
 int	time_i[7];
 double	time_d;
@@ -273,8 +276,6 @@ char	comment[256];
 int	file_open = MB_NO;
 int	nfile_open = MB_NO;
 FILE	*nfp;
-char	*buff_ptr = NULL;
-int	buffer_size = MBNAVEDIT_BUFFER_SIZE;
 int	hold_size = 100;
 int	nload = 0;
 int	ndump = 0;

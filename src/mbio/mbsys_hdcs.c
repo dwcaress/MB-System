@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_hdcs.c	3/1/99
- *	$Id: mbsys_hdcs.c,v 5.1 2001-01-22 07:43:34 caress Exp $
+ *	$Id: mbsys_hdcs.c,v 5.2 2001-07-20 00:32:54 caress Exp $
  *
  *    Copyright (c) 1999, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	March 16, 1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2001/01/22  07:43:34  caress
+ * Version 5.0.beta01
+ *
  * Revision 5.0  2000/12/01  22:48:41  caress
  * First cut at Version 5.0.
  *
@@ -56,10 +59,10 @@
 #include "../../include/mbsys_hdcs.h"
 
 /*--------------------------------------------------------------------*/
-int mbsys_hdcs_alloc(int verbose, char *mbio_ptr, char **store_ptr, 
+int mbsys_hdcs_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_hdcs.c,v 5.1 2001-01-22 07:43:34 caress Exp $";
+ static char res_id[]="$Id: mbsys_hdcs.c,v 5.2 2001-07-20 00:32:54 caress Exp $";
 	char	*function_name = "mbsys_hdcs_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -186,7 +189,7 @@ int mbsys_hdcs_alloc(int verbose, char *mbio_ptr, char **store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_hdcs_deall(int verbose, char *mbio_ptr, char **store_ptr, 
+int mbsys_hdcs_deall(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
 	char	*function_name = "mbsys_hdcs_deall";
@@ -233,7 +236,7 @@ int mbsys_hdcs_deall(int verbose, char *mbio_ptr, char **store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_hdcs_extract(int verbose, char *mbio_ptr, char *store_ptr, 
+int mbsys_hdcs_extract(int verbose, void *mbio_ptr, void *store_ptr, 
 		int *kind, int time_i[7], double *time_d,
 		double *navlon, double *navlat,
 		double *speed, double *heading,
@@ -497,7 +500,7 @@ int mbsys_hdcs_extract(int verbose, char *mbio_ptr, char *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_hdcs_insert(int verbose, char *mbio_ptr, char *store_ptr, 
+int mbsys_hdcs_insert(int verbose, void *mbio_ptr, void *store_ptr, 
 		int kind, int time_i[7], double time_d,
 		double navlon, double navlat,
 		double speed, double heading,
@@ -665,7 +668,7 @@ int mbsys_hdcs_insert(int verbose, char *mbio_ptr, char *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_hdcs_ttimes(int verbose, char *mbio_ptr, char *store_ptr,
+int mbsys_hdcs_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 	int *kind, int *nbeams,
 	double *ttimes, double *angles, 
 	double *angles_forward, double *angles_null,
@@ -780,7 +783,7 @@ int mbsys_hdcs_ttimes(int verbose, char *mbio_ptr, char *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_hdcs_extract_altitude(int verbose, char *mbio_ptr, char *store_ptr,
+int mbsys_hdcs_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 	int *kind, double *transducer_depth, double *altitude, 
 	int *error)
 {
@@ -851,7 +854,7 @@ int mbsys_hdcs_extract_altitude(int verbose, char *mbio_ptr, char *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_hdcs_insert_altitude(int verbose, char *mbio_ptr, char *store_ptr,
+int mbsys_hdcs_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 	double transducer_depth, double altitude, 
 	int *error)
 {
@@ -917,7 +920,7 @@ int mbsys_hdcs_insert_altitude(int verbose, char *mbio_ptr, char *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_hdcs_extract_nav(int verbose, char *mbio_ptr, char *store_ptr,
+int mbsys_hdcs_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int time_i[7], double *time_d,
 		double *navlon, double *navlat,
 		double *speed, double *heading, double *draft, 
@@ -1117,7 +1120,7 @@ int mbsys_hdcs_extract_nav(int verbose, char *mbio_ptr, char *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_hdcs_insert_nav(int verbose, char *mbio_ptr, char *store_ptr,
+int mbsys_hdcs_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		int time_i[7], double time_d,
 		double navlon, double navlat,
 		double speed, double heading, double draft, 
@@ -1214,8 +1217,8 @@ int mbsys_hdcs_insert_nav(int verbose, char *mbio_ptr, char *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_hdcs_copy(int verbose, char *mbio_ptr, 
-			char *store_ptr, char *copy_ptr,
+int mbsys_hdcs_copy(int verbose, void *mbio_ptr, 
+			void *store_ptr, void *copy_ptr,
 			int *error)
 {
 	char	*function_name = "mbsys_hdcs_copy";

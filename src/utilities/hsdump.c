@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	hsdump.c	6/16/93
- *    $Id: hsdump.c,v 5.1 2001-03-22 21:14:16 caress Exp $
+ *    $Id: hsdump.c,v 5.2 2001-07-20 00:34:38 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	June 16, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2001/03/22 21:14:16  caress
+ * Trying to make release 5.0.beta0.
+ *
  * Revision 5.0  2000/12/01  22:57:08  caress
  * First cut at Version 5.0.
  *
@@ -95,7 +98,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: hsdump.c,v 5.1 2001-03-22 21:14:16 caress Exp $";
+	static char rcs_id[] = "$Id: hsdump.c,v 5.2 2001-07-20 00:34:38 caress Exp $";
 	static char program_name[] = "HSDUMP";
 	static char help_message[] =  "HSDUMP lists the information contained in data records on\n\tHydrosweep DS data files, including survey, calibrate, water \n\tvelocity and comment records. The default input stream is stdin.";
 	static char usage_message[] = "hsdump [-Fformat -V -H -Iinfile -Okind]";
@@ -130,10 +133,10 @@ main (int argc, char **argv)
 	int	beams_amp;
 	int	pixels_ss;
 	char	file[128];
-	char	*mbio_ptr = NULL;
+	void	*mbio_ptr = NULL;
 
 	/* mbio read and write values */
-	char	*store_ptr;
+	void	*store_ptr;
 	struct mbsys_hsds_struct *store;
 	int	kind;
 	int	time_i[7];

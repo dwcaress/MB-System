@@ -1,4 +1,4 @@
-.TH mblist l "12 July 2001" "MB-System 5.0" "MB-System 5.0"
+.TH mblist l "16 July 2001" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmblist\fP - List data in swath data files.
 
@@ -230,6 +230,7 @@ of one or more of the following characters:
                  where jd is the julian day of the year
                  and dm is the minute of the day
  	\fBL\fP  for cumulative along-track distance (km)
+ 	\fBl\fP  for cumulative along-track distance (m)
  	\fBM\fP  for unix time in decimal seconds since 1/1/70 00:00:00
  	\fBm\fP  for time in decimal seconds since first record
  	\fBN\fP  for ping count

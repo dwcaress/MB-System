@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgetesf.c	6/15/93
- *    $Id: mbgetesf.c,v 5.0 2001-03-22 21:14:47 caress Exp $
+ *    $Id: mbgetesf.c,v 5.1 2001-07-20 00:34:38 caress Exp $
  *
  *    Copyright (c) 2001 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	January 24, 2001
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2001/03/22 21:14:47  caress
+ * Trying to make release 5.0.beta0.
+ *
  *
  */
 
@@ -49,7 +52,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbgetesf.c,v 5.0 2001-03-22 21:14:47 caress Exp $";
+	static char rcs_id[] = "$Id: mbgetesf.c,v 5.1 2001-07-20 00:34:38 caress Exp $";
 	static char program_name[] = "mbgetest";
 	static char help_message[] =  "mbgetesf reads a multibeam data file and writes out\nan edit save file which can be applied to other data files\ncontaining the same data (but presumably in a different\nstate of processing).  This allows editing of one data file to\nbe transferred to another with ease.  The programs mbedit and\nmbprocess can be used to apply the edit events to another file.";
 	static char usage_message[] = "mbgetesf [-Fformat -Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc -Sspeed -Iinfile -Oesffile -V -H]";
@@ -83,10 +86,10 @@ main (int argc, char **argv)
 	int	beams_bath;
 	int	beams_amp;
 	int	pixels_ss;
-	char	*imbio_ptr = NULL;
+	void	*imbio_ptr = NULL;
 
 	/* mbio read and write values */
-	char	*store_ptr;
+	void	*store_ptr;
 	int	kind;
 	int	time_i[7];
 	double	time_d;

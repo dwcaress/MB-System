@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbrollbias.c	5/16/93
- *    $Id: mbrollbias.c,v 5.1 2001-03-22 21:15:49 caress Exp $
+ *    $Id: mbrollbias.c,v 5.2 2001-07-20 00:34:38 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -34,6 +34,9 @@
  * Date:	May 16, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2001/03/22 21:15:49  caress
+ * Trying to make release 5.0.beta0.
+ *
  * Revision 5.0  2000/12/01  22:57:08  caress
  * First cut at Version 5.0.
  *
@@ -116,7 +119,7 @@ struct bathptr
 	};
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbrollbias.c,v 5.1 2001-03-22 21:15:49 caress Exp $";
+static char rcs_id[] = "$Id: mbrollbias.c,v 5.2 2001-07-20 00:34:38 caress Exp $";
 static char program_name[] = "MBROLLBIAS";
 static char help_message[] =  "MBROLLBIAS is an utility used to assess roll bias of swath \nsonar systems using bathymetry data from two swaths covering the \nsame seafloor in opposite directions. The program takes two input  \nfiles and calculates best fitting planes for each dataset.   \nThe roll bias is calculated by solving for a common roll bias\nfactor which explains the difference between the seafloor\nslopes observed on the two swaths.  This approach assumes that \npitch bias is not a factor; this assumption is most correct when\nthe heading of the two shiptracks are exactly opposite. The area is\ndivided into a number of rectangular regions and calculations are done  \nin each region containing a sufficient number of data from both \nswaths.  A positive roll bias value means that the the vertical \nreference used by the swath system is biased to starboard, \ngiving rise to shallow bathymetry to port and deep bathymetry \nto starboard.";
 static char usage_message[] = "mbrollbias -Dxdim/ydim -Fformat1/format2 -Ifile1 -Jfile2 -Llonflip -Rw/e/s/n -V -H]";
@@ -153,7 +156,7 @@ main (int argc, char **argv)
 	int	beams_amp;
 	int	pixels_ss;
 	char	file[128];
-	char	*mbio_ptr = NULL;
+	void	*mbio_ptr = NULL;
 
 	/* mbrollbias control variables */
 	int	iformat;

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbfilter.c	1/16/95
- *    $Id: mbfilter.c,v 5.1 2001-03-22 21:14:16 caress Exp $
+ *    $Id: mbfilter.c,v 5.2 2001-07-20 00:34:38 caress Exp $
  *
  *    Copyright (c) 1995, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -32,6 +32,9 @@
  * Date:	January 16, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2001/03/22 21:14:16  caress
+ * Trying to make release 5.0.beta0.
+ *
  * Revision 5.0  2000/12/01  22:57:08  caress
  * First cut at Version 5.0.
  *
@@ -162,14 +165,11 @@ struct mbfilter_ping_struct
 	char	*flag_ptr;
 	};
 
-/* compare function for qsort */
-int mb_double_compare();
-
 /*--------------------------------------------------------------------*/
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbfilter.c,v 5.1 2001-03-22 21:14:16 caress Exp $";
+	static char rcs_id[] = "$Id: mbfilter.c,v 5.2 2001-07-20 00:34:38 caress Exp $";
 	static char program_name[] = "MBFILTER";
 	static char help_message[] =  
 "mbfilter applies one or more simple filters to the specified\n\t\
@@ -226,14 +226,14 @@ The default input and output streams are stdin and stdout.\n";
 	int	beams_amp;
 	int	pixels_ss;
 	char	ifile[128];
-	char	*imbio_ptr = NULL;
+	void	*imbio_ptr = NULL;
 
 	/* MBIO write control parameters */
 	char	ofile[128];
-	char	*ombio_ptr = NULL;
+	void	*ombio_ptr = NULL;
 
 	/* mbio read and write values */
-	char	*store_ptr;
+	void	*store_ptr;
 	int	kind;
 	int	nrecord = 0;
 	int	nbathdata = 0;
@@ -241,7 +241,7 @@ The default input and output streams are stdin and stdout.\n";
 	char	comment[256];
 
 	/* buffer handling parameters */
-	char	*buff_ptr;
+	void	*buff_ptr;
 	int	n_buffer_max = MBFILTER_BUFFER_DEFAULT;
 	int	nwant = MBFILTER_BUFFER_DEFAULT;
 	int	nhold = 0;

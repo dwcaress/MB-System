@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	1/19/93
- *    $Id: mb_io.h,v 5.5 2001-06-30 17:40:14 caress Exp $
+ *    $Id: mb_io.h,v 5.6 2001-07-20 00:32:54 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2001/06/30  17:40:14  caress
+ * Release 5.0.beta02
+ *
  * Revision 5.4  2001/06/08  21:44:01  caress
  * Version 5.0.beta01
  *
@@ -177,8 +180,8 @@ struct mb_io_struct
 	long	file3_pos;	/* file position #3 at start of
 				    last record read */
 	long	file3_bytes;	/* number of bytes read from file */
-	char	*xdrs;		/* XDR stream handle */
-	char	*xdrs2;		/* XDR stream handle #2 */
+	void	*xdrs;		/* XDR stream handle */
+	void	*xdrs2;		/* XDR stream handle #2 */
 
 	/* read or write history */
 	int	fileheader;	/* indicates whether file header has
@@ -201,8 +204,8 @@ struct mb_io_struct
 	int	structure_size;
 	int	data_structure_size;
 	int	header_structure_size;
-	char	*raw_data;
-	char	*store_data;
+	void	*raw_data;
+	void	*store_data;
 
 	/* working variables */
 	int	ping_count;	/* number of pings read or written so far */
@@ -295,12 +298,12 @@ struct mb_io_struct
 
 	/* function pointers for allocating and deallocating format
 		specific structures */
-	int (*mb_io_format_alloc)(int verbose, char *mbio_ptr, int *error);
-	int (*mb_io_format_free)(int verbose, char *mbio_ptr, int *error);
-	int (*mb_io_store_alloc)(int verbose, char *mbio_ptr,
-		char **store_ptr, int *error);
-	int (*mb_io_store_free)(int verbose, char *mbio_ptr,
-		char **store_ptr, int *error);
+	int (*mb_io_format_alloc)(int verbose, void *mbio_ptr, int *error);
+	int (*mb_io_format_free)(int verbose, void *mbio_ptr, int *error);
+	int (*mb_io_store_alloc)(int verbose, void *mbio_ptr,
+		void **store_ptr, int *error);
+	int (*mb_io_store_free)(int verbose, void *mbio_ptr,
+		void **store_ptr, int *error);
 	
 	/* function pointers for reading and writing records */
 	int (*mb_io_read_ping)(int verbose, void *mbio_ptr, 
@@ -309,7 +312,7 @@ struct mb_io_struct
 		void *store_ptr, int *error);
 		
 	/* function pointers for extracting and inserting data */
-	int (*mb_io_extract)(int verbose, char *mbio_ptr, char *store_ptr, 
+	int (*mb_io_extract)(int verbose, void *mbio_ptr, void *store_ptr, 
 		int *kind, int time_i[7], double *time_d,
 		double *navlon, double *navlat,
 		double *speed, double *heading,
@@ -318,7 +321,7 @@ struct mb_io_struct
 		double *bathacrosstrack, double *bathalongtrack,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
 		char *comment, int *error);
-	int (*mb_io_insert)(int verbose, char *mbio_ptr, char *store_ptr, 
+	int (*mb_io_insert)(int verbose, void *mbio_ptr, void *store_ptr, 
 		int kind, int time_i[7], double time_d,
 		double navlon, double navlat,
 		double speed, double heading,
@@ -327,61 +330,61 @@ struct mb_io_struct
 		double *bathacrosstrack, double *bathalongtrack,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
 		char *comment, int *error);
-	int (*mb_io_extract_nav)(int verbose, char *mbio_ptr, char *store_ptr, int *kind,
+	int (*mb_io_extract_nav)(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 		int time_i[7], double *time_d, 
 		double *navlon, double *navlat,
 		double *speed, double *heading, double *draft, 
 		double *roll, double *pitch, double *heave, 
 		int *error);
-	int (*mb_io_insert_nav)(int verbose, char *mbio_ptr, char *store_ptr,
+	int (*mb_io_insert_nav)(int verbose, void *mbio_ptr, void *store_ptr,
 		int time_i[7], double time_d, 
 		double navlon, double navlat,
 		double speed, double heading, double draft, 
 		double roll, double pitch, double heave, 
 		int *error);
-	int (*mb_io_extract_altitude)(int verbose, char *mbio_ptr, char *store_ptr,
+	int (*mb_io_extract_altitude)(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind,
 		double *transducer_depth, double *altitude,
 		int *error);
-	int (*mb_io_insert_altitude)(int verbose, char *mbio_ptr, char *store_ptr,
+	int (*mb_io_insert_altitude)(int verbose, void *mbio_ptr, void *store_ptr,
 		double transducer_depth, double altitude,
 		int *error);
-	int (*mb_io_extract_svp)(int verbose, char *mbio_ptr, char *store_ptr,
+	int (*mb_io_extract_svp)(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind,
 		int *nsvp,
 		double *depth, double *velocity,
 		int *error);
-	int (*mb_io_insert_svp)(int verbose, char *mbio_ptr, char *store_ptr,
+	int (*mb_io_insert_svp)(int verbose, void *mbio_ptr, void *store_ptr,
 		int nsvp,
 		double *depth, double *velocity,
 		int *error);
-	int (*mb_io_ttimes)(int verbose, char *mbio_ptr, char *store_ptr,
+	int (*mb_io_ttimes)(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int *nbeams,
 		double *ttimes, double	*angles, 
 		double *angles_forward, double *angles_null,
 		double *heave, double *alongtrack_offset, 
 		double *draft, double *ssv, int *error);
-	int (*mb_io_extract_rawss)(int verbose, char *mbio_ptr, char *store_ptr,
+	int (*mb_io_extract_rawss)(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int *nrawss,
 		double *rawss, 
 		double *rawssacrosstrack, 
 		double *rawssalongtrack, 
 		int *error);
-	int (*mb_io_insert_rawss)(int verbose, char *mbio_ptr, char *store_ptr,
+	int (*mb_io_insert_rawss)(int verbose, void *mbio_ptr, void *store_ptr,
 		int nrawss,
 		double *rawss, 
 		double *rawssacrosstrack, 
 		double *rawssalongtrack, 
 		int *error);
-	int (*mb_io_copyrecord)(int verbose, char *mbio_ptr,
-		char *store_ptr, char *copy_ptr, int *error);
+	int (*mb_io_copyrecord)(int verbose, void *mbio_ptr,
+		void *store_ptr, void *copy_ptr, int *error);
 
 	};
 
 /* MBIO buffer control structure */
 struct mb_buffer_struct
 	{
-	char *buffer[MB_BUFFER_MAX];
+	void *buffer[MB_BUFFER_MAX];
 	int buffer_kind[MB_BUFFER_MAX];
 	int nbuffer;
 	};

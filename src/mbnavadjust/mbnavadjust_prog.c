@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavadjust_prog.c	3/23/00
- *    $Id: mbnavadjust_prog.c,v 5.5 2001-06-03 07:05:54 caress Exp $
+ *    $Id: mbnavadjust_prog.c,v 5.6 2001-07-20 00:33:43 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	March 23, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2001/06/03 07:05:54  caress
+ * Release 5.0.beta01.
+ *
  * Revision 5.4  2001/03/22 21:09:11  caress
  * Trying to make release 5.0.beta0.
  *
@@ -95,7 +98,7 @@ struct swathraw
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbnavadjust_prog.c,v 5.5 2001-06-03 07:05:54 caress Exp $";
+static char rcs_id[] = "$Id: mbnavadjust_prog.c,v 5.6 2001-07-20 00:33:43 caress Exp $";
 static char program_name[] = "mbnavadjust";
 static char help_message[] =  "mbnavadjust is an interactive navigation adjustment package for swath sonar data.\n";
 static char usage_message[] = "mbnavadjust [-Iproject -V -H]";
@@ -109,8 +112,7 @@ char	error2[STRING_MAX];
 char	error3[STRING_MAX];
 
 /* data file parameters */
-char	*datalist;
-int	format;
+void	*datalist;
 
 /* MBIO control parameters */
 int	pings;
@@ -125,12 +127,12 @@ double	timegap;
 int	beams_bath;
 int	beams_amp;
 int	pixels_ss;
-char	*imbio_ptr = NULL;
-char	*ombio_ptr = NULL;
+void	*imbio_ptr = NULL;
+void	*ombio_ptr = NULL;
 
 /* mbio read and write values */
-char	*istore_ptr = NULL;
-char	*ostore_ptr = NULL;
+void	*istore_ptr = NULL;
+void	*ostore_ptr = NULL;
 int	kind;
 int	time_i[7];
 double	time_d;
@@ -171,8 +173,8 @@ char	comment[256];
 #define CORAL	5
 #define	XG_SOLIDLINE	0
 #define	XG_DASHLINE	1
-int	cont_xgid;
-int	corr_xgid;
+int	pcont_xgid;
+int	pcorr_xgid;
 int	ncolors;
 int	pixel_values[256];
 
@@ -216,6 +218,7 @@ int mbnavadjust_init_globals()
 {
 	/* local variables */
 	char	*function_name = "mbnavadjust_init_globals";
+	int	iformat;
 	int	status = MB_SUCCESS;
 
 	/* set default global control parameters */
@@ -262,7 +265,7 @@ int mbnavadjust_init_globals()
 	mbna_bias_mode = MBNA_BIAS_SAME;
 
 	/* set mbio default values */
-	status = mb_defaults(mbna_verbose,&format,&pings,&lonflip,bounds,
+	status = mb_defaults(mbna_verbose,&iformat,&pings,&lonflip,bounds,
 		btime_i,etime_i,&speedmin,&timegap);
 	pings = 1;
 	lonflip = 0;
@@ -370,7 +373,6 @@ int mbnavadjust_init(int argc,char **argv,int *startup_file)
 		fprintf(stderr,"dbg2  Control Parameters:\n");
 		fprintf(stderr,"dbg2       mbna_verbose:         %d\n",mbna_verbose);
 		fprintf(stderr,"dbg2       help:            %d\n",help);
-		fprintf(stderr,"dbg2       format:          %d\n",format);
 		fprintf(stderr,"dbg2       input file:      %s\n",ifile);
 		}
 
@@ -448,8 +450,8 @@ int mbnavadjust_set_graphics(int cn_xgid, int cr_xgid,
 		}
 
 	/* set graphics id */
-	cont_xgid = cn_xgid;
-	corr_xgid = cr_xgid;
+	pcont_xgid = cn_xgid;
+	pcorr_xgid = cr_xgid;
 	
 	/* set borders */
 	for (i=0;i<4;i++)
@@ -1428,15 +1430,15 @@ fprintf(stderr,"Reset tie snav_2 on read:%d\n",tie->snav_2);
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbnavadjust_import_data(char *path, int format)
+int mbnavadjust_import_data(char *path, int iformat)
 {
 	/* local variables */
 	char	*function_name = "mbnavadjust_import_data";
 	int	status = MB_SUCCESS;
 	int	done;
 	char	file[STRING_MAX];
-	int	form;
 	double	weight;
+	int	form;
  	int	i, j;
 
  	/* print input debug statements */
@@ -1445,19 +1447,19 @@ int mbnavadjust_import_data(char *path, int format)
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2               path:     %s\n",path);
-		fprintf(stderr,"dbg2               format:   %d\n",format);
+		fprintf(stderr,"dbg2               format:   %d\n",iformat);
 		}
 	
 	/* loop until all files read */
 	done = MB_NO;
 	while (done == MB_NO)
 		{
-		if (format > 0)
+		if (form > 0)
 			{
-			status = mbnavadjust_import_file(path,format);
+			status = mbnavadjust_import_file(path,iformat);
 			done = MB_YES;
 			}
-		else if (format == -1)
+		else if (form == -1)
 			{
 			if (status = mb_datalist_open(mbna_verbose,&datalist,
 							path,MB_DATALIST_LOOK_NO,&error) == MB_SUCCESS)
@@ -1497,7 +1499,7 @@ int mbnavadjust_import_data(char *path, int format)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbnavadjust_import_file(char *path, int format)
+int mbnavadjust_import_file(char *path, int iformat)
 {
 	/* local variables */
 	char	*function_name = "mbnavadjust_import_file";
@@ -1548,17 +1550,17 @@ int mbnavadjust_import_file(char *path, int format)
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2               path:     %s\n",path);
-		fprintf(stderr,"dbg2               format:   %d\n",format);
+		fprintf(stderr,"dbg2               format:   %d\n",iformat);
 		}
 		
 	/* get potential processed file name */
 	if ((status = mb_get_format(mbna_verbose, path, ipath, 
 				    &iform, &error))
 				    == MB_SUCCESS
-	    && iform == format)
+	    && iform == iformat)
 	    {
 	    strcat(ipath,"p");
-	    sprintf(mb_suffix, ".mb%d", format);
+	    sprintf(mb_suffix, ".mb%d", iformat);
 	    strcat(ipath,mb_suffix);
 	    }
 
@@ -1566,7 +1568,7 @@ int mbnavadjust_import_file(char *path, int format)
 	else
 		{
 		strcat(ipath,"p");
-		sprintf(mb_suffix, ".mb%d", format);
+		sprintf(mb_suffix, ".mb%d", iformat);
 		strcat(ipath,mb_suffix);
 		status = MB_SUCCESS;
 		error = MB_ERROR_NO_ERROR;
@@ -1600,7 +1602,7 @@ int mbnavadjust_import_file(char *path, int format)
 	    }
 		
 	/* turn on message */
-	sprintf(message,"Importing data in format %d from %s",format,ipath);
+	sprintf(message,"Importing data in format %d from %s",iformat,ipath);
 	do_message_on(message);
 	output_open = MB_NO;
 	project.inversion = MBNA_INVERSION_NONE;
@@ -1621,11 +1623,11 @@ int mbnavadjust_import_file(char *path, int format)
 			}
 		}
 	
-	if (status = MB_SUCCESS)
+	if (status == MB_SUCCESS)
 		{
 		/* initialize reading the swath file */
 		if ((status = mb_read_init(
-			mbna_verbose,ipath,format,pings,lonflip,bounds,
+			mbna_verbose,ipath,iformat,pings,lonflip,bounds,
 			btime_i,etime_i,speedmin,timegap,
 			&imbio_ptr,&btime_d,&etime_d,
 			&beams_bath,&beams_amp,&pixels_ss,&error)) != MB_SUCCESS)
@@ -1735,7 +1737,7 @@ int mbnavadjust_import_file(char *path, int format)
 				file->id = project.num_files;
 				file->output_id = output_id;
 				strcpy(file->file,path);
-				file->format = format;
+				file->format = iformat;
 				file->heading_bias = 0.0;
 				file->roll_bias = 0.0;
 				file->num_sections = 0;
@@ -2378,13 +2380,13 @@ crossing->file_id_2,crossing->section_2);*/
 	if (status == MB_SUCCESS && new_pings > 0)
 		{
 		sprintf(message, "Imported format %d file: %s\n > Read %d pings\n > Added %d sections %d crossings\n", 
-			format, path, new_pings, file->num_sections, new_crossings);
+			iformat, path, new_pings, file->num_sections, new_crossings);
 		do_info_add(message, MB_YES);
 		}
 	else
 		{
 		sprintf(message, "Unable to import format %d file: %s\n", 
-			format, path);
+			iformat, path);
 		do_info_add(message, MB_YES);
 		}
 	
@@ -3533,8 +3535,8 @@ int mbnavadjust_crossing_load()
 				&mbna_mtodeglon,&mbna_mtodeglat);
 			
 		/* load sections */
-		status = mbnavadjust_section_load(path1, (void **) &swathraw1, &swath1, section1->num_pings);
-		status = mbnavadjust_section_load(path2, (void **) &swathraw2, &swath2, section2->num_pings);
+		status = mbnavadjust_section_load(path1, (void **) &swathraw1, (void **) &swath1, section1->num_pings);
+		status = mbnavadjust_section_load(path2, (void **) &swathraw2, (void **) &swath2, section2->num_pings);
 			
 		/* get lon lat positions for soundings */
 		status = mbnavadjust_section_translate(mbna_file_id_1, swathraw1, swath1);
@@ -3767,6 +3769,7 @@ int mbnavadjust_section_load(char *path, void **swathraw_ptr, void **swath_ptr, 
 	struct swathraw *swathraw;
 	struct pingraw *pingraw;
 	struct swath *swath;
+	int	iformat;
 	double	tick_len_map, label_hgt_map;
 	int	done, pings_read;
 	double	mtodeglon, mtodeglat, headingx, headingy;
@@ -3790,11 +3793,11 @@ int mbnavadjust_section_load(char *path, void **swathraw_ptr, void **swath_ptr, 
     		&& mbna_current_crossing >= 0)
     		{		
 		/* set section format */
-		format = 71;
+		iformat = 71;
 
 		/* initialize section for reading */
 		if ((status = mb_read_init(
-			mbna_verbose,path,format,pings,lonflip,bounds,
+			mbna_verbose,path,iformat,pings,lonflip,bounds,
 			btime_i,etime_i,speedmin,timegap,
 			&imbio_ptr,&btime_d,&etime_d,
 			&beams_bath,&beams_amp,&pixels_ss,&error)) != MB_SUCCESS)
@@ -4582,10 +4585,10 @@ mbnavadjust_naverr_plot(int plotmode)
 	    /* clear screens for first plot */
 	    if (plotmode == MBNA_PLOT_MODE_FIRST)
 		{
-		xg_fillrectangle(cont_xgid, 0, 0,
+		xg_fillrectangle(pcont_xgid, 0, 0,
 			    cont_borders[1], cont_borders[3],
 			    pixel_values[0], XG_SOLIDLINE);
-		xg_fillrectangle(corr_xgid, 0, 0,
+		xg_fillrectangle(pcorr_xgid, 0, 0,
 			    corr_borders[1], corr_borders[3],
 			    pixel_values[0], XG_SOLIDLINE);
 		}
@@ -4637,7 +4640,7 @@ mbnavadjust_naverr_plot(int plotmode)
 		    {
 		    ix = (int)(mbna_plotx_scale * (v->x + mbna_offset_x_old - mbna_plot_lon_min));
 		    iy = (int)(cont_borders[3] - mbna_ploty_scale * (v->y + mbna_offset_y_old - mbna_plot_lat_min));
-		    xg_drawline(cont_xgid, ixo, iyo, ix, iy, pixel_values[0], XG_SOLIDLINE);
+		    xg_drawline(pcont_xgid, ixo, iyo, ix, iy, pixel_values[0], XG_SOLIDLINE);
 		    ixo = ix;
 		    iyo = iy;
 		    }	
@@ -4648,7 +4651,7 @@ mbnavadjust_naverr_plot(int plotmode)
 		{
 		ix = (int)(mbna_plotx_scale * (swathraw1->pingraws[i].navlon + mbna_offset_x_old - mbna_plot_lon_min));
 		iy = (int)(cont_borders[3] - mbna_ploty_scale * (swathraw1->pingraws[i].navlat + mbna_offset_y_old - mbna_plot_lat_min));
-		xg_drawline(cont_xgid, ixo, iyo, ix, iy, pixel_values[0], XG_SOLIDLINE);
+		xg_drawline(pcont_xgid, ixo, iyo, ix, iy, pixel_values[0], XG_SOLIDLINE);
 		ixo = ix;
 		iyo = iy;
 		}
@@ -4675,15 +4678,15 @@ mbnavadjust_naverr_plot(int plotmode)
 			}
 		    ix = (int)(mbna_plotx_scale * (section1->snav_lon[snav_1] + mbna_offset_x_old - mbna_plot_lon_min));
 		    iy = (int)(cont_borders[3] - mbna_ploty_scale * (section1->snav_lat[snav_1] + mbna_offset_y_old - mbna_plot_lat_min));
-		    xg_fillrectangle(cont_xgid, ix-boxoff, iy-boxoff, boxwid, boxwid, pixel_values[0], XG_SOLIDLINE);
-		    xg_drawrectangle(cont_xgid, ix-boxoff, iy-boxoff, boxwid, boxwid, pixel_values[0], XG_SOLIDLINE);
+		    xg_fillrectangle(pcont_xgid, ix-boxoff, iy-boxoff, boxwid, boxwid, pixel_values[0], XG_SOLIDLINE);
+		    xg_drawrectangle(pcont_xgid, ix-boxoff, iy-boxoff, boxwid, boxwid, pixel_values[0], XG_SOLIDLINE);
 		    ixo = ix;
 		    iyo = iy;
 		    ix = (int)(mbna_plotx_scale * (section2->snav_lon[snav_2] - mbna_plot_lon_min));
 		    iy = (int)(cont_borders[3] - mbna_ploty_scale * (section2->snav_lat[snav_2] - mbna_plot_lat_min));
-		    xg_fillrectangle(cont_xgid, ix-boxoff, iy-boxoff, boxwid, boxwid, pixel_values[0], XG_SOLIDLINE);
-		    xg_drawrectangle(cont_xgid, ix-boxoff, iy-boxoff, boxwid, boxwid, pixel_values[0], XG_SOLIDLINE);
-		    xg_drawline(cont_xgid, ixo, iyo, ix, iy, pixel_values[0], XG_SOLIDLINE);
+		    xg_fillrectangle(pcont_xgid, ix-boxoff, iy-boxoff, boxwid, boxwid, pixel_values[0], XG_SOLIDLINE);
+		    xg_drawrectangle(pcont_xgid, ix-boxoff, iy-boxoff, boxwid, boxwid, pixel_values[0], XG_SOLIDLINE);
+		    xg_drawline(pcont_xgid, ixo, iyo, ix, iy, pixel_values[0], XG_SOLIDLINE);
 		    }
 		}
 
@@ -4694,7 +4697,7 @@ mbnavadjust_naverr_plot(int plotmode)
 	    /* replot zoom box in white if moving that box */
 	    if (plotmode == MBNA_PLOT_MODE_ZOOM)
 		{
-		xg_drawrectangle(cont_xgid,
+		xg_drawrectangle(pcont_xgid,
 				    MIN(izx1, izx2),
 				    MIN(izy1, izy2),
 				    MAX(izx1, izx2) - MIN(izx1, izx2),
@@ -4720,7 +4723,7 @@ mbnavadjust_naverr_plot(int plotmode)
 		    {
 		    ix = (int)(mbna_plotx_scale * (v->x + mbna_offset_x - mbna_plot_lon_min));
 		    iy = (int)(cont_borders[3] - mbna_ploty_scale * (v->y + mbna_offset_y - mbna_plot_lat_min));
-		    xg_drawline(cont_xgid, ixo, iyo, ix, iy, pixel, XG_SOLIDLINE);
+		    xg_drawline(pcont_xgid, ixo, iyo, ix, iy, pixel, XG_SOLIDLINE);
 		    ixo = ix;
 		    iyo = iy;
 		    }	
@@ -4731,7 +4734,7 @@ mbnavadjust_naverr_plot(int plotmode)
 		{
 		ix = (int)(mbna_plotx_scale * (swathraw1->pingraws[i].navlon + mbna_offset_x - mbna_plot_lon_min));
 		iy = (int)(cont_borders[3] - mbna_ploty_scale * (swathraw1->pingraws[i].navlat + mbna_offset_y - mbna_plot_lat_min));
-		xg_drawline(cont_xgid, ixo, iyo, ix, iy, pixel_values[1], XG_SOLIDLINE);
+		xg_drawline(pcont_xgid, ixo, iyo, ix, iy, pixel_values[1], XG_SOLIDLINE);
 		ixo = ix;
 		iyo = iy;
 		}
@@ -4754,7 +4757,7 @@ mbnavadjust_naverr_plot(int plotmode)
 		    {
 		    ix = (int)(mbna_plotx_scale * (v->x - mbna_plot_lon_min));
 		    iy = (int)(cont_borders[3] - mbna_ploty_scale * (v->y - mbna_plot_lat_min));
-		    xg_drawline(cont_xgid, ixo, iyo, ix, iy, pixel, XG_SOLIDLINE);
+		    xg_drawline(pcont_xgid, ixo, iyo, ix, iy, pixel, XG_SOLIDLINE);
 		    ixo = ix;
 		    iyo = iy;
 		    }	
@@ -4765,7 +4768,7 @@ mbnavadjust_naverr_plot(int plotmode)
 		{
 		ix = (int)(mbna_plotx_scale * (swathraw2->pingraws[i].navlon - mbna_plot_lon_min));
 		iy = (int)(cont_borders[3] - mbna_ploty_scale * (swathraw2->pingraws[i].navlat - mbna_plot_lat_min));
-		xg_drawline(cont_xgid, ixo, iyo, ix, iy, pixel_values[1], XG_SOLIDLINE);
+		xg_drawline(pcont_xgid, ixo, iyo, ix, iy, pixel_values[1], XG_SOLIDLINE);
 		ixo = ix;
 		iyo = iy;
 		}
@@ -4793,22 +4796,22 @@ mbnavadjust_naverr_plot(int plotmode)
 			}
 		    ix = (int)(mbna_plotx_scale * (section1->snav_lon[snav_1] + mbna_offset_x - mbna_plot_lon_min));
 		    iy = (int)(cont_borders[3] - mbna_ploty_scale * (section1->snav_lat[snav_1] + mbna_offset_y - mbna_plot_lat_min));
-		    xg_fillrectangle(cont_xgid, ix-boxoff, iy-boxoff, boxwid, boxwid, pixel_values[2], XG_SOLIDLINE);
-		    xg_drawrectangle(cont_xgid, ix-boxoff, iy-boxoff, boxwid, boxwid, pixel_values[1], XG_SOLIDLINE);
+		    xg_fillrectangle(pcont_xgid, ix-boxoff, iy-boxoff, boxwid, boxwid, pixel_values[2], XG_SOLIDLINE);
+		    xg_drawrectangle(pcont_xgid, ix-boxoff, iy-boxoff, boxwid, boxwid, pixel_values[1], XG_SOLIDLINE);
 		    ixo = ix;
 		    iyo = iy;
 		    ix = (int)(mbna_plotx_scale * (section2->snav_lon[snav_2] - mbna_plot_lon_min));
 		    iy = (int)(cont_borders[3] - mbna_ploty_scale * (section2->snav_lat[snav_2] - mbna_plot_lat_min));
-		    xg_fillrectangle(cont_xgid, ix-boxoff, iy-boxoff, boxwid, boxwid, pixel_values[2], XG_SOLIDLINE);
-		    xg_drawrectangle(cont_xgid, ix-boxoff, iy-boxoff, boxwid, boxwid, pixel_values[1], XG_SOLIDLINE);
-		    xg_drawline(cont_xgid, ixo, iyo, ix, iy, pixel_values[1], XG_SOLIDLINE);
+		    xg_fillrectangle(pcont_xgid, ix-boxoff, iy-boxoff, boxwid, boxwid, pixel_values[2], XG_SOLIDLINE);
+		    xg_drawrectangle(pcont_xgid, ix-boxoff, iy-boxoff, boxwid, boxwid, pixel_values[1], XG_SOLIDLINE);
+		    xg_drawline(pcont_xgid, ixo, iyo, ix, iy, pixel_values[1], XG_SOLIDLINE);
 		    }
 		}
 	
 	    /* plot zoom box if in zoom mode */
 	    if (plotmode == MBNA_PLOT_MODE_ZOOMFIRST || plotmode == MBNA_PLOT_MODE_ZOOM)
 		{
-		xg_drawrectangle(cont_xgid,
+		xg_drawrectangle(pcont_xgid,
 				    MIN(mbna_zoom_x1, mbna_zoom_x2),
 				    MIN(mbna_zoom_y1, mbna_zoom_y2),
 				    MAX(mbna_zoom_x1, mbna_zoom_x2) - MIN(mbna_zoom_x1, mbna_zoom_x2),
@@ -4845,20 +4848,20 @@ mbnavadjust_naverr_plot(int plotmode)
 			else if (ipixel > 85) ipixel = 85;
     /*fprintf(stderr, "%d %d %f %f %f   %f %d\n",
     i, j, misfit_min, misfit_max, dmisfit, gridm[k], ipixel);  */
-			xg_fillrectangle(corr_xgid,
+			xg_fillrectangle(pcorr_xgid,
 				    ix, iy, idx, idy,
 				    pixel_values[ipixel], XG_SOLIDLINE);
 			}
 		    }
 		
 	    /* draw boundary and crosshair */
-	    xg_drawline(corr_xgid,
+	    xg_drawline(pcorr_xgid,
 			    ixo - (int)(mbna_misfit_scale * mbna_misfit_offset_x), 
 			    corr_borders[2],
 			    ixo - (int)(mbna_misfit_scale * mbna_misfit_offset_x), 
 			    corr_borders[3],
 			    pixel_values[1], XG_SOLIDLINE);
-	    xg_drawline(corr_xgid,
+	    xg_drawline(pcorr_xgid,
 			    corr_borders[0], 
 			    iyo + (int)(mbna_misfit_scale * mbna_misfit_offset_y),
 			    corr_borders[1], 
@@ -4868,17 +4871,17 @@ mbnavadjust_naverr_plot(int plotmode)
 	    /* draw working offset */
 	    ix = ixo + (int)(mbna_misfit_scale * (mbna_offset_x - mbna_misfit_offset_x));
 	    iy = iyo - (int)(mbna_misfit_scale * (mbna_offset_y - mbna_misfit_offset_y));
-	    xg_fillrectangle(corr_xgid, ix-3, iy-3, 7, 7, pixel_values[2], XG_SOLIDLINE);
-	    xg_drawrectangle(corr_xgid, ix-3, iy-3, 7, 7, pixel_values[1], XG_SOLIDLINE);
+	    xg_fillrectangle(pcorr_xgid, ix-3, iy-3, 7, 7, pixel_values[2], XG_SOLIDLINE);
+	    xg_drawrectangle(pcorr_xgid, ix-3, iy-3, 7, 7, pixel_values[1], XG_SOLIDLINE);
 	
 	    /* draw x at minimum misfit */
 	    ix = ixo + (int)(mbna_misfit_scale * mbna_minmisfit_offset_x);
 	    iy = iyo - (int)(mbna_misfit_scale * mbna_minmisfit_offset_y);
-	    xg_drawline(corr_xgid,
+	    xg_drawline(pcorr_xgid,
 			    ix - 10, iy + 10,
 			    ix + 10, iy - 10,
 			    pixel_values[1], XG_SOLIDLINE);
-	    xg_drawline(corr_xgid,
+	    xg_drawline(pcorr_xgid,
 			    ix + 10, iy + 10,
 			    ix - 10, iy - 10,
 			    pixel_values[1], XG_SOLIDLINE);
@@ -4888,19 +4891,19 @@ mbnavadjust_naverr_plot(int plotmode)
 	    	{
 	    	ix = ixo + (int)(mbna_misfit_scale * (mbna_invert_offset_x - mbna_misfit_offset_x));
 	    	iy = iyo - (int)(mbna_misfit_scale * (mbna_invert_offset_y - mbna_misfit_offset_y));
-	    	xg_drawline(corr_xgid,
+	    	xg_drawline(pcorr_xgid,
 			    ix - 10, iy,
 			    ix + 10, iy,
 			    pixel_values[3], XG_SOLIDLINE);
-	    	xg_drawline(corr_xgid,
+	    	xg_drawline(pcorr_xgid,
 			    ix, iy + 10,
 			    ix, iy - 10,
 			    pixel_values[3], XG_SOLIDLINE);
-	    	xg_drawline(corr_xgid,
+	    	xg_drawline(pcorr_xgid,
 			    ix - 10, iy,
 			    ix + 10, iy,
 			    pixel_values[1], XG_SOLIDLINE);
-	    	xg_drawline(corr_xgid,
+	    	xg_drawline(pcorr_xgid,
 			    ix, iy + 10,
 			    ix, iy - 10,
 			    pixel_values[1], XG_SOLIDLINE);

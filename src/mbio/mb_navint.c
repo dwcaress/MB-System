@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_time.c	10/30/2000
- *    $Id: mb_navint.c,v 5.1 2001-06-08 21:44:01 caress Exp $
+ *    $Id: mb_navint.c,v 5.2 2001-07-20 00:31:11 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	October 30, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2001/06/08 21:44:01  caress
+ * Version 5.0.beta01
+ *
  * Revision 5.0  2000/12/01  22:48:41  caress
  * First cut at Version 5.0.
  *
@@ -42,7 +45,7 @@
 /*--------------------------------------------------------------------*/
 /* 	function mb_navint_add adds a nav fix to the internal
 		list used for interpolation/extrapolation. */
-int mb_navint_add(int verbose, char *mbio_ptr, double time_d, double lon, double lat, int *error)
+int mb_navint_add(int verbose, void *mbio_ptr, double time_d, double lon, double lat, int *error)
 {
 	char	*function_name = "mb_navint_add";
 	int	status = MB_SUCCESS;
@@ -128,7 +131,7 @@ int mb_navint_add(int verbose, char *mbio_ptr, double time_d, double lon, double
 /*--------------------------------------------------------------------*/
 /* 	function mb_navint_interp interpolates or extrapolates a
 		nav fix from the internal list. */
-int mb_navint_interp(int verbose, char *mbio_ptr, 
+int mb_navint_interp(int verbose, void *mbio_ptr, 
 		double time_d, double heading, double rawspeed, 
 		double *lon, double *lat, double *speed, 
 		int *error)

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mblist.c	2/1/93
- *    $Id: mblist.c,v 5.3 2001-06-29 22:50:23 caress Exp $
+ *    $Id: mblist.c,v 5.4 2001-07-20 00:34:38 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -28,6 +28,9 @@
  *		in 1990.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2001/06/29  22:50:23  caress
+ * Atlas Hydrosweep DS2 raw data and SURF data formats.
+ *
  * Revision 5.2  2001/06/08  21:45:46  caress
  * Version 5.0.beta01
  *
@@ -244,10 +247,10 @@ double	NaN;
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mblist.c,v 5.3 2001-06-29 22:50:23 caress Exp $";
+	static char rcs_id[] = "$Id: mblist.c,v 5.4 2001-07-20 00:34:38 caress Exp $";
 	static char program_name[] = "MBLIST";
 	static char help_message[] =  "MBLIST prints the specified contents of a swath data \nfile to stdout. The form of the output is quite flexible; \nMBLIST is tailored to produce ascii files in spreadsheet \nstyle with data columns separated by tabs.";
-	static char usage_message[] = "mblist [-Byr/mo/da/hr/mn/sc -Ddump_mode -Eyr/mo/da/hr/mn/sc \n-Fformat -H -Ifile -Llonflip -Mbeam_start/beam_end -Npixel_start/pixel_end \n-Ooptions -Ppings -Rw/e/s/n -Sspeed -Ttimegap -Ucheck -V -W]";
+	static char usage_message[] = "mblist [-Byr/mo/da/hr/mn/sc -Ddump_mode -Eyr/mo/da/hr/mn/sc \n-Fformat -H -Ifile -Llonflip -Mbeam_start/beam_end -Npixel_start/pixel_end \n-Ooptions -Ppings -Rw/e/s/n -Sspeed -Ttimegap -Ucheck -V -W -Zsegment]";
 	extern char *optarg;
 	extern int optkind;
 	int	errflg = 0;
@@ -264,7 +267,7 @@ main (int argc, char **argv)
 	/* MBIO read control parameters */
 	int	read_datalist = MB_NO;
 	char	read_file[MB_PATH_MAXLINE];
-	char	*datalist;
+	void	*datalist;
 	int	look_processed = MB_DATALIST_LOOK_UNSET;
 	double	file_weight;
 	int	format;
@@ -278,7 +281,7 @@ main (int argc, char **argv)
 	double	etime_d;
 	double	speedmin;
 	double	timegap;
-	char	file[128];
+	char	file[MB_PATH_MAXLINE];
 	int	beams_bath;
 	int	beams_amp;
 	int	pixels_ss;
@@ -312,10 +315,12 @@ main (int argc, char **argv)
 	int	signflip_next_value = MB_NO;
 	int	first = MB_YES;
 	int	ascii = MB_YES;
+	int	segment = MB_NO;
+	char	segment_tag[MB_PATH_MAXLINE];
 
 	/* MBIO read values */
-	char	*mbio_ptr = NULL;
-	char	*store_ptr = NULL;
+	void	*mbio_ptr = NULL;
+	void	*store_ptr = NULL;
 	int	kind;
 	int	time_i[7];
 	double	time_d;
@@ -338,7 +343,7 @@ main (int argc, char **argv)
 	double	*ss = NULL;
 	double	*ssacrosstrack = NULL;
 	double	*ssalongtrack = NULL;
-	char	comment[256];
+	char	comment[MB_COMMENT_MAXLINE];
 	int	icomment = 0;
 
 	/* additional time variables */
@@ -353,11 +358,6 @@ main (int argc, char **argv)
 	double	avgslope;
 	double	sx, sy, sxx, sxy;
 	int	ns;
-	double	delta, a, b, theta;
-	double	dlon, dlat, minutes;
-	int	degrees;
-	char	hemi;
-	double	headingx, headingy, mtodeglon, mtodeglat;
 	double	angle, depth, slope;
 	int	ndepths;
 	double	*depths;
@@ -375,13 +375,17 @@ main (int argc, char **argv)
 	double	speed_made_good, speed_made_good_old;
 	double	navlon_old, navlat_old;
 	double	dx, dy, dist;
+	double	delta, a, b, theta;
+	double	dlon, dlat, minutes;
+	int	degrees;
+	char	hemi;
+	double	headingx, headingy, mtodeglon, mtodeglat;
 
 	/* bathymetry feet flag */
 	int	bathy_in_feet = MB_NO;
 	double	bathy_scale;
 
 	int	read_data;
-	char	line[128];
 	double	distmin;
 	int	found;
 	int	i, j, k;
@@ -415,7 +419,7 @@ main (int argc, char **argv)
 #endif
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "AaB:b:D:d:E:e:F:f:I:i:L:l:M:m:N:n:O:o:P:p:QqR:r:S:s:T:t:U:u:VvWwHh")) != -1)
+	while ((c = getopt(argc, argv, "AaB:b:D:d:E:e:F:f:I:i:L:l:M:m:N:n:O:o:P:p:QqR:r:S:s:T:t:U:u:Z:z:VvWwHh")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -537,6 +541,12 @@ main (int argc, char **argv)
 		case 'w':
 			bathy_in_feet = MB_YES;
 			break;
+		case 'Z':
+		case 'z':
+			segment = MB_YES;
+			sscanf (optarg,"%s", segment_tag);
+			flag++;
+			break;
 		case '?':
 			errflg++;
 		}
@@ -593,6 +603,8 @@ main (int argc, char **argv)
 		fprintf(stderr,"dbg2       timegap:        %f\n",timegap);
 		fprintf(stderr,"dbg2       file:           %s\n",file);
 		fprintf(stderr,"dbg2       ascii:          %d\n",ascii);
+		fprintf(stderr,"dbg2       segment:        %d\n",segment);
+		fprintf(stderr,"dbg2       segment_tag:    %s\n",segment_tag);
 		fprintf(stderr,"dbg2       beam_set:       %d\n",beam_set);
 		fprintf(stderr,"dbg2       beam_start:     %d\n",beam_start);
 		fprintf(stderr,"dbg2       beam_end:       %d\n",beam_end);
@@ -742,6 +754,12 @@ main (int argc, char **argv)
 			program_name);
 		exit(error);
 		}
+		
+	/* output separator for GMT style segment file output */
+	if (segment == MB_YES && ascii == MB_YES)
+		{
+		printf("%s\n", segment_tag);
+		}
 
 	/* read and print data */
 	distance_total = 0.0;
@@ -793,7 +811,7 @@ main (int argc, char **argv)
 
 		/* increment counter and set cumulative distance */
 		if (error <= MB_ERROR_NO_ERROR 
-			&& error != MB_ERROR_COMMENT)
+			&& kind == MB_DATA_DATA)
 			{
 			nread++;
 			distance_total += distance;
@@ -1290,8 +1308,13 @@ main (int argc, char **argv)
 					    fwrite(&b, sizeof(double), 1, stdout);
 					    }
 					break;
-				case 'L': /* along-track dist. */
+				case 'L': /* along-track distance (km) */
 					printsimplevalue(verbose, distance_total, 7, 3, ascii, 
+							    &invert_next_value, 
+							    &signflip_next_value, &error);
+					break;
+				case 'l': /* along-track distance (m) */
+					printsimplevalue(verbose, 1000.0 * distance_total, 7, 3, ascii, 
 							    &invert_next_value, 
 							    &signflip_next_value, &error);
 					break;
@@ -1760,8 +1783,13 @@ main (int argc, char **argv)
 					    fwrite(&b, sizeof(double), 1, stdout);
 					    }
 					break;
-				case 'L': /* along-track dist. */
+				case 'L': /* along-track distance (km) */
 					printsimplevalue(verbose, distance_total, 7, 3, ascii, 
+							    &invert_next_value, 
+							    &signflip_next_value, &error);
+					break;
+				case 'l': /* along-track distance (m) */
+					printsimplevalue(verbose, 1000.0 * distance_total, 7, 3, ascii, 
 							    &invert_next_value, 
 							    &signflip_next_value, &error);
 					break;
