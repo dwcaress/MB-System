@@ -6,11 +6,12 @@
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbclean\fP [\fB-A\fImax\fP \fB-B\fIlow/high\fP \fB-C\fIslope\fP 
+\fBmbclean\fP [\fB-A\fImax\fP \fB-B\fIlow/high\fP \fB-C\fIslope/units\fP 
 \fB-D\fImin/max\fP \fB-F\fIformat\fP 
 \fB-G\fIfraction_low/fraction_high\fP 
 \fB-I\fIinfile\fP \fB-L\fIlonflip\fP \fB-O\fIoutfile\fP 
-\fB-M\fImode\fP \fB-Q\fP \fB-U\fInmin\fP \fB-X\fIzap_beams\fP \fB-V -H\fP]
+\fB-M\fImode\fP \fB-Q\fP \fB-S\fIslope/mode/units\fP
+\fB-U\fInmin\fP \fB-X\fIzap_beams\fP \fB-V -H\fP]
 
 .SH DESCRIPTION
 \fBmbclean\fP identifies and flags artifacts in swath sonar bathymetry data.
@@ -18,6 +19,8 @@ Several algorithms are available for identifying artifacts; multiple
 algorithms can be applied in a single pass.
 The most commonly used approach is to identify artifacts  
 based on excessive bathymetric slopes. 
+Spikes where an excessive slope occurs before and reverses after a beam
+can also be removed.
 If desired, \fBmbclean\fP will also flag beams 
 associated with "rails" where
 outer beams have smaller acrosstrack distances 
@@ -42,10 +45,11 @@ as follows:
  	4. Flag soundings outside acceptable depth range 
  		using deviation from local median depth 
  		(\fB-A\fP option).
- 	5. Flag soundings associated with excessive slopes 
+ 	5. Flag soundings associated with spikes (\fB-S\fP option).
+ 	6. Flag soundings associated with excessive slopes 
  		(\fB-C\fP option or default).
- 	6. Zap "rails" (\fB-Q\fP option).
- 	7. Flag all soundings in pings with too few 
+ 	7. Zap "rails" (\fB-Q\fP option).
+ 	8. Flag all soundings in pings with too few 
  		good soundings (\fB-U\fP option).
 
 This program flags beams by outputting the flags as 
@@ -102,13 +106,16 @@ will be flagged. No depth range checking is done if the \fB-B\fP option
 is not used.
 .TP
 .B \-C
-\fIslope\fP
+\fIslope/unit\fP
 .br
 The value \fIslope\fP is the maximum acceptable slope. Beams associated
 with excessive slopes will be flagged or removed according to the
 operational mode specified using the \fB-M\fP option. This method will
 be used if no other algorithms are specified; if other algorithms are
 specified but \fB-C\fP is not used then no slope checking will occur.
+\fIunit\fP is optional and specifies the unit of \fIslope\fP,
+0 (default) indicates the slope is in tangents, 1 slope is in radians,
+2 slope is in degrees.
 Default: \fIslope\fP = 1.0
 .TP
 .B \-D
@@ -221,6 +228,33 @@ have.  These are identified when one or more outer beams lies
 inboard of a more inner beam; all beams outboard of the first
 offending beam are flagged.
 .TP
+.B \-S
+\fIslope/mode/unit\fP
+.br
+The value \fIslope\fP is the maximum acceptable spike slope. 
+If the slope from the preceding beam to this beam exceeds this value,
+and the slope from this beam to subsequent beam exceeds this value but
+with an opposite sign this beam is considered a spike and
+will be flagged or removed according to the
+operational mode specified using the \fB-M\fP option. 
+Acrosstrack slopes are determined by the preceding and subsequent beams 
+in the same ping. Alongtrack slopes are
+determined from the same beam in the previous and subsequent pings. 
+Alongtrack are fairly sensitive to the minimum distance \fB-D\fP option, 
+which will normally need to be set less to a very small value for alongtrack slopes
+to be detected. There is no test that alongtrack distances are all in the same direction.
+
+If \fImode\fP is 1 (default) only acrosstrack spikes are detected.
+If \fImode\fP is 2 only alongtrack spikes are detected.
+If \fImode\fP is 3 both along track and across track slopes are checked.
+
+\fIunit\fP is optional and specifies the unit of \fIslope\fP,
+0 (default) indicates the slope is in tangents, 1 slope is in radians,
+2 slope is in degrees.
+A beam is not considered a spike if either the preceding or subsequent beam
+has already been flagged.
+Default: \fIslope\fP = 1.0
+.TP
 .B \-U
 \fInmin\fP
 .br
@@ -278,6 +312,7 @@ is flagged. Here is an example of the nonverbose output:
  	0 beams exceed acceptable deviation from median depth
  	0 bad rail beams identified
  	1601 excessive slopes identified
+	0 excessive spikes identified
  	1665 beams flagged
  	0 beams unflagged
  	0 beams zeroed
@@ -291,6 +326,7 @@ is flagged. Here is an example of the nonverbose output:
  	0 beams exceed acceptable deviation from median depth
  	0 bad rail beams identified
  	242 excessive slopes identified
+	0 excessive spikes identified
  	242 beams flagged
  	0 beams unflagged
  	0 beams zeroed
@@ -304,6 +340,7 @@ is flagged. Here is an example of the nonverbose output:
  	0 beams exceed acceptable deviation from median depth
  	0 bad rail beams identified
  	497 excessive slopes identified
+	0 excessive spikes identified
  	506 beams flagged
  	0 beams unflagged
  	0 beams zeroed
@@ -317,6 +354,7 @@ is flagged. Here is an example of the nonverbose output:
  	0 beams exceed acceptable deviation from median depth
  	0 bad rail beams identified
  	148 excessive slopes identified
+	0 excessive spikes identified
  	148 beams flagged
  	0 beams unflagged
  	0 beams zeroed
@@ -330,6 +368,7 @@ is flagged. Here is an example of the nonverbose output:
  	0 beams exceed acceptable deviation from median depth
  	0 bad rail beams identified
  	100 excessive slopes identified
+	0 excessive spikes identified
  	100 beams flagged
  	0 beams unflagged
  	0 beams zeroed
@@ -343,6 +382,7 @@ is flagged. Here is an example of the nonverbose output:
  	0 beams exceed acceptable deviation from median depth
  	0 bad rail beams identified
  	41 excessive slopes identified
+	0 excessive spikes identified
  	41 beams flagged
  	0 beams unflagged
  	0 beams zeroed
@@ -361,6 +401,7 @@ is flagged. Here is an example of the nonverbose output:
  	0 total beams exceed acceptable deviation from median depth
  	0 total bad rail beams identified
  	2629 total excessive slopes identified
+	0 total excessive spikes identified
  	2702 total beams flagged
  	0 total beams unflagged
  	0 total beams zeroed

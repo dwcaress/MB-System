@@ -1,4 +1,4 @@
-.TH mbcontour l "11 October 2004" "MB-System 5.0" "MB-System 5.0"
+.TH mbcontour l "15 December 2004" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbcontour\fP - GMT compatible utility for color fill or color shaded relief
 swath plots of swath sonar data using Postscript.
@@ -13,7 +13,7 @@ Version 5.0
 \fB-C\fIcontourfile\fP \fB-c\fIcopies\fP 
 \fB-D\fItime_tick/time_annot/date_annot/time_tick_len\fP 
 \fB-E\fIyr/mo/da/hr/mn/sc\fP 
-\fB-f\fIformat\fP \fB-F\fIred/green/blue\fP  
+\fB-f\fIformat\fP \fB-F\fIred/green/blue\fP \fB-G\fIname_hgt\fP  
 \fB-I\fIinfile\fP \fB-K\fP \fB-L\fIlonflip\fP \fB-M\fP 
 \fB-N\fInplot\fP \fB-O\fP \fB-P\fP \fB-p\fIpings\fP 
 \fB-Q\fP \fB-S\fIspeed \fB-T\fItimegap\fP \fB-U\fP \fB-W\fP \fB-X\fIx-shift\fP 
@@ -23,7 +23,7 @@ Version 5.0
 .SH DESCRIPTION
 \fBmbcontour\fP is a utility for swath contouring of swath bathymetry 
 data using Postscript.  Like \fBmbswath\fP, \fBmbcontour\fP
-is fully compatible with the GMT package version 3. Two contouring
+is fully compatible with the GMT package version 4. Two contouring
 algorithms are available; the \fB-Z\fP option specifies which is used. 
 The first, default approach draws contours between successive pings; 
 this algorithm is simple and therefore fast but produces poor
@@ -36,6 +36,10 @@ and therefore slow but produces good looking contours under most
 conditions. The contour levels  and colors can be controlled 
 directly or set implicitly using contour and color change intervals. 
 Contours can also be set to have ticks pointing downhill.
+
+Shiptracks can also be plotted using the \fB-D\fP option. The \fB-G\fP 
+option causes the start of each swath data file to be annotated with
+the filename.
 
 Before opening an input swath data file, \fBmbcontour\fP checks for
 an ascii file in the same directory having the same name except
@@ -157,6 +161,15 @@ is given in the \fBMBIO\fP manual page. Default: \fIformat\fP = -1.
 \fIred/green/blue\fP
 .br
 Sets the color used for Frame and annotation. [Default is black]
+.TP
+.B \-G
+\fIname_hgt\fP
+.br
+Turns on swath file name annotation. The \fIname_hgt\fP parameter
+sets the height of the lettering in inches. The \fB-G\fP option implies 
+track plotting, so if the \fB-D\fP option is not also specified, then
+track plotting will be turned on with default parameters.
+Default: \fIname_hgt\fP = 0.1.
 .TP
 .B \-H
 This "help" flag cause the program to print out a description
