@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_xtfr8101.c	8/8/94
- *	$Id: mbr_xtfr8101.c,v 5.3 2002-09-18 23:32:59 caress Exp $
+ *	$Id: mbr_xtfr8101.c,v 5.4 2002-09-19 01:12:39 caress Exp $
  *
  *    Copyright (c) 2001, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	August 26, 2001
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2002/09/18 23:32:59  caress
+ * Release 5.0.beta23
+ *
  * Revision 5.2  2001/11/16 01:32:31  caress
  * Working on it...
  *
@@ -50,6 +53,9 @@
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_reson8k.h"
 #include "../../include/mbf_xtfr8101.h"
+	
+/* turn on debug statements here */
+/* #define MBR_XTFR8101_DEBUG 1 */
 
 /* essential function prototypes */
 int mbr_register_xtfr8101(int verbose, void *mbio_ptr, 
@@ -81,7 +87,7 @@ int mbr_wt_xtfr8101(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_xtfr8101(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_xtfr8101.c,v 5.3 2002-09-18 23:32:59 caress Exp $";
+	static char res_id[]="$Id: mbr_xtfr8101.c,v 5.4 2002-09-19 01:12:39 caress Exp $";
 	char	*function_name = "mbr_register_xtfr8101";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -211,7 +217,7 @@ int mbr_info_xtfr8101(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_xtfr8101.c,v 5.3 2002-09-18 23:32:59 caress Exp $";
+	static char res_id[]="$Id: mbr_xtfr8101.c,v 5.4 2002-09-19 01:12:39 caress Exp $";
 	char	*function_name = "mbr_info_xtfr8101";
 	int	status = MB_SUCCESS;
 
@@ -280,7 +286,7 @@ int mbr_info_xtfr8101(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_xtfr8101(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_xtfr8101.c,v 5.3 2002-09-18 23:32:59 caress Exp $";
+	static char res_id[]="$Id: mbr_xtfr8101.c,v 5.4 2002-09-19 01:12:39 caress Exp $";
 	char	*function_name = "mbr_alm_xtfr8101";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -566,6 +572,7 @@ int mbr_rt_xtfr8101(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			    &(store->png_pitch), error);
 		    mb_hedint_interp(verbose, mbio_ptr, timetag,  
 			    &(store->png_heading), error);
+#ifdef MBR_XTFR8101_DEBUG
 fprintf(stderr, "roll: %d %f %f %f %f   latency:%f time:%f %f roll:%f\n", 
 mb_io_ptr->nattitude, 
 mb_io_ptr->attitude_time_d[0], 
@@ -574,6 +581,7 @@ mb_io_ptr->attitude_roll[0],
 mb_io_ptr->attitude_roll[mb_io_ptr->nattitude-1], 
 store->png_latency, (double)(0.001 * data->bathheader.AttitudeTimeTag), 
 timetag, store->png_roll);
+#endif
 		    }
 		else
 		    {
