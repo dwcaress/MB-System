@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile  1/21/93
-#	$Id: Makefile,v 4.1 1994-04-12 17:03:51 caress Exp $
+#	$Id: Makefile,v 4.2 1994-04-12 20:58:30 caress Exp $
 #
 #     Copyright (c) 1993 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,9 @@
 # Date:		January 21, 1993
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.1  1994/04/12  17:03:51  caress
+# Added mbbath.
+#
 # Revision 4.0  1994/03/06  00:13:22  caress
 # First cut at version 4.0
 #
@@ -61,22 +64,58 @@
 #
 
 # *** CHANGE THESE TO FIT YOUR LOCAL ENVIRONMENT ***
-#     - locations of GMT libraries and include files
+#
+# Locations of GMT libraries, binaries, and include files:
+#
+# - For L-DEO installation:
 GMTLIBDIR = /ocean/mgg/gmt2/sun4/lib
 GMTINCDIR = /ocean/mgg/gmt2/src
-#     - location of Levitus annual database file
+GMTBINDIR = /ocean/mgg/gmt2/sun4
+#
+# - For Ewing installation:
+#GMTLIBDIR = /net/heezen/packages/gmt2/bin
+#GMTINCDIR = /net/heezen/packages/gmt2/src
+#GMTBINDIR = /net/heezen/packages/gmt2/bin
+#
+# - For generic installation:
+#GMTLIBDIR = /usr/local/lib
+#GMTINCDIR = /usr/local/include
+#GMTBINDIR = /usr/local/bin
+#
+#
+# Location of Levitus annual database file
+#
+# - For L-DEO installation:
 LEVITUS = /ocean/mgg/multibeam/levitus/annual
-# *** LEAVE EVERYTHING ELSE BELOW ALONE ***
-
-BINDIR = ../../bin
-LIBDIR = ../../lib
-INCDIR = ../../include
-MANDIR = ../../man/man1
-
+#
+# - For Ewing installation:
+#LEVITUS = /net/heezen/packages/levitus/annual
+#
+# - For generic installation:
+#LEVITUS = ../../../levitus/annual
+#
+#
+# Compile and load flags:
+#
+# - For installations under SunOs:
 CFLAGS = -O2
 FFLAGS = -O2
 FWITHCFLAGS = -lF77
 LFLAGS = -lm
+#
+# - For installations under IRIX:
+#CFLAGS = -O2
+#FFLAGS = -O2
+#FWITHCFLAGS = -lF77
+#LFLAGS = -lm -lsun
+#
+# *** LEAVE EVERYTHING ELSE BELOW ALONE ***
+
+### sets locations of vital objects
+BINDIR = ../../bin
+LIBDIR = ../../lib
+INCDIR = ../../include
+MANDIR = ../../man/man1
 
 ### make all makes the MB-system utilites and man pages
 all:	$(MANDIR)/mbsystem.1 \
