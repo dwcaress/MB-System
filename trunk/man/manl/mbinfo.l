@@ -143,17 +143,17 @@ The following output is produced:
  Navigation Totals:
  Total Time:             1.2425 hours
  Total Track Length:    20.9421 km
- Average Speed:         16.8548 km/hr
+ Average Speed:         16.8548 km/hr ( 9.1107 knots)
  
  Start of Data:
  Time:  08 14 1993 18:00:25.000000  JD226
- Lon:  -49.3011     Lat:   12.1444   Depth: 4920.00
- Speed: 18.3600  Heading:  97.2000
+ Lon:  -49.3011     Lat:   12.1444     Depth:  4920.0000 meters
+ Speed: 18.3600 km/hr ( 9.9243 knots)  Heading:  97.2000 degrees
  
  End of Data:
  Time:  08 14 1993 19:14:58.000000  JD226
- Lon:  -49.1111     Lat:   12.1149   Depth: 5021.00
- Speed: 17.2800  Heading:  97.0000
+ Lon:  -49.1111     Lat:   12.1149     Depth:  5021.0000 meters
+ Speed: 17.2800 km/hr ( 9.3405 knots)  Heading:  97.0000 degrees
  
  Limits:
  Minimum Longitude:   -49.3061   Maximum Longitude:   -49.1064
@@ -194,17 +194,17 @@ obtaining:
  Navigation Totals:
  Total Time:             1.2425 hours
  Total Track Length:    20.9421 km
- Average Speed:         16.8548 km/hr
+ Average Speed:         16.8548 km/hr ( 9.1107 knots)
  
  Start of Data:
  Time:  08 14 1993 18:00:25.000000  JD226
- Lon:  -49.3011     Lat:   12.1444   Depth: 4920.00
- Speed: 18.3600  Heading:  97.2000
+ Lon:  -49.3011     Lat:   12.1444     Depth:  4920.0000 meters
+ Speed: 18.3600 km/hr ( 9.9243 knots)  Heading:  97.2000 degrees
  
  End of Data:
  Time:  08 14 1993 19:14:58.000000  JD226
- Lon:  -49.1111     Lat:   12.1149   Depth: 5021.00
- Speed: 17.2800  Heading:  97.0000
+ Lon:  -49.1111     Lat:   12.1149     Depth:  5021.0000 meters
+ Speed: 17.2800 km/hr ( 9.3405 knots)  Heading:  97.0000 degrees
  
  Limits:
  Minimum Longitude:   -49.3061   Maximum Longitude:   -49.1064
