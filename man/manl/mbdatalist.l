@@ -1,4 +1,4 @@
-.TH mbdatalist l "12 October 2001" "MB-System 5.0" "MB-System 5.0"
+.TH mbdatalist l "12 March 2002" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbdatalist\fP - parses recursive datalist files and outputs the
 complete list of data files, formats, and file weights.
@@ -7,7 +7,7 @@ complete list of data files, formats, and file weights.
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbdatalist\fP [\fB-F\fP\fIformat\fP \fB-I\fP\fIfilename\fP \fB-P -R -V -H\fP]
+\fBmbdatalist\fP [\fB-F\fP\fIformat\fP \fB-I\fP\fIfilename\fP \fB-O -P -R -U -V -H\fP]
 
 .SH DESCRIPTION
 \fBMBdatalist\fP is a utility for parsing datalist files. 
@@ -39,9 +39,23 @@ or it may be set first by the calling program. The flag may also
 be set to preclude reporting "processed" file names (embedding "$RAW"
 in a datalist accomplishes this). When setting this flag within
 datalists, the first encounter of a $PROCESSED or $RAW tag will
-prevail over later instances of either tag. The \fB-P\fP and \fB-R\fP 
+prevail over later instances of either tag. The \fB-P\fP and \fB-U\fP 
 options force \fBmbdatalist\fP to output processed file names 
-when they exist (\fB-P\fP) or to only output raw file names (\fB-R\fP).
+when they exist (\fB-P\fP) or to only output unprocessed 
+(raw) file names (\fB-U\fP).
+
+Programs such as \fBmbgrid\fP will try to check metadata or "inf" 
+files to see if the corresponding data files include data within
+desired areas. The \fB-O\fP option causes \fBmbdatalist\fP to
+check each data file for the existence of an "inf" file, and to
+create the "inf" files (using \fBmbinfo\fP) when they don't already
+exist. The \fB-R\fP\fIw/e/s/n\fP option causes the program to check each
+data file with an "inf" fiel for overlap with 
+the desired bounds, and only report those
+files with data in the desired area (or no 
+"inf" file to check). This behavior mimics that of
+\fBmbgrid\fP, allowing users to check what data files will 
+contribute to gridding some particular area.
 
 All output is to stdout.
 
@@ -82,6 +96,14 @@ data files to be processed and their formats.  The program will parse
 the datalist (recursively, if necessary) and output each swath filename
 and the associated format and file weight. 
 .TP
+.B \-O
+Programs such as \fBmbgrid\fP will try to check metadata or "inf" 
+files to see if the corresponding data files include data within
+desired areas. The \fB-O\fP option causes \fBmbdatalist\fP to
+check each data file for the existence of an "inf" file, and to
+create the "inf" files (using \fBmbinfo\fP) when they don't already
+exist. 
+.TP
 .B \-P
 Normally, \fBmbdatalist\fP allows $PROCESSED and $RAW tags within
 the datalist files to determine whether processed file names are
@@ -90,10 +112,24 @@ reported ($RAW). The \fB-P\fP option forces \fBmbdatalist\fP
 to output processed file names when they exist.
 .TP
 .B \-R
+\fIw/e/s/n\fP
+.br
+The bounds of the desired area are set in longitude
+and latitude using w=west, e=east, s=south, and n=north.
+This option causes the program to check each
+data file with an "inf" file for overlap with 
+the desired bounds, and only report those
+files with data in the desired area (or no 
+"inf" file to check). This behavior mimics that of
+\fBmbgrid\fP, allowing users to check what data files will 
+contribute to gridding some particular area.
+.TP
+.B \-U
 Normally, \fBmbdatalist\fP allows $PROCESSED and $RAW tags within
 the datalist files to determine whether processed file names are
-reported when available ($PROCESSED) or only raw file names are
-reported ($RAW). The \fB-R\fP option forces \fBmbdatalist\fP 
+reported when available ($PROCESSED) or 
+only (raw) unprocessed file names are
+reported ($RAW). The \fB-U\fP option forces \fBmbdatalist\fP 
 to only output raw file names.
 .TP
 .B \-V

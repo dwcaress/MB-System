@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavadjust_callbacks.c	2/22/2000
- *    $Id: mbnavadjust_callbacks.c,v 5.2 2001-07-20 00:33:43 caress Exp $
+ *    $Id: mbnavadjust_callbacks.c,v 5.3 2002-03-26 07:43:57 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	March 22, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2001/07/20 00:33:43  caress
+ * Release 5.0.beta03
+ *
  * Revision 5.1  2001/01/22 07:45:59  caress
  * Version 5.0.beta01
  *
@@ -126,8 +129,6 @@ int	file_mode = FILE_MODE_NONE;
 int	format = 0;
 int	startup_file = 0;
 int	expose_plot_ok = True;
-static char	*input_file;
-static char	output_file[STRING_MAX];
 int selected = 0; /* indicates an input file is selected */
 
 /* button parameters */
@@ -153,6 +154,8 @@ void	do_naverr_nextunset( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_naverr_addtie( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_naverr_deletetie( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_naverr_selecttie( Widget w, XtPointer client_data, XtPointer call_data);
+void	do_naverr_settie( Widget w, XtPointer client_data, XtPointer call_data);
+void	do_naverr_resettie( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_naverr_setnone( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_dismiss_naverr( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_naverr_minmisfit( Widget w, XtPointer client_data, XtPointer call_data);
@@ -1029,6 +1032,12 @@ void do_update_status()
 			XmNvalue, ivalue, 
 			NULL);
 
+	/* set values of section soundings slider */
+	ivalue = project.section_soundings;
+	XtVaSetValues(scale_controls_sectionsoundings, 
+			XmNvalue, ivalue, 
+			NULL);
+
 	/* set values of contour interval slider */
 	ivalue = (int) (100 * project.cont_int);
 	if (project.cont_int >= 10.0)
@@ -1085,9 +1094,6 @@ void do_update_status()
 void
 do_naverr_init()
 {
-    struct mbna_crossing *crossing;
-    int	    	i, j;
-
     /* Setup just the "canvas" part of the screen. */
     cont_xid = XtWindow(drawingArea_naverr_cont);
     corr_xid = XtWindow(drawingArea_naverr_corr);
@@ -1148,7 +1154,6 @@ do_update_naverr()
     struct mbna_tie *tie;
     double	plot_width, misfit_width;
     double	zoom_factor;
-    int	    	i, j;
 
     if (mbna_current_crossing >= 0)
     	{
@@ -1220,6 +1225,20 @@ do_update_naverr()
               	 	plot_width, misfit_width, zoom_factor);
                 }
 	set_label_multiline_string(label_naverr_status, string);
+
+	/* set some button sensitivities */
+	XtVaSetValues(pushButton_naverr_deletetie,
+		XmNsensitive, (mbna_current_tie >= 0),
+		NULL);
+	XtVaSetValues(pushButton_naverr_selecttie,
+		XmNsensitive, (crossing->num_ties > 0),
+		NULL);
+	XtVaSetValues(pushButton_naverr_fullsize,
+		XmNsensitive, (mbna_plot_lon_min != mbna_lon_min
+				|| mbna_plot_lon_max != mbna_lon_max
+				|| mbna_plot_lat_min != mbna_lat_min
+				|| mbna_plot_lat_max != mbna_lat_max),
+		NULL);
     	
     	do_naverr_offsetlabel();
     	}
@@ -1231,8 +1250,13 @@ void
 do_naverr_offsetlabel()
 {
     struct mbna_crossing *crossing;
-    int	    	i, j;
-
+    struct mbna_tie *tie;
+    int	    allow_set;
+    
+    /* assume offset is not ready to be set or reset, change if otherwise */
+    allow_set = False;
+    
+    /* look at current crossing */
     if (mbna_current_crossing >= 0)
     	{
     	/* set main naverr status label */
@@ -1241,6 +1265,19 @@ do_naverr_offsetlabel()
         		mbna_offset_x / mbna_mtodeglon,
 			mbna_offset_y / mbna_mtodeglat,
 			mbna_snav_1, mbna_snav_2);
+			
+	/* check for changed offsets */
+    	if (mbna_current_tie >= 0)
+	    {
+	    tie = &crossing->ties[mbna_current_tie];
+	    if (tie->snav_1 != mbna_snav_1
+		|| tie->snav_2 != mbna_snav_2
+		|| tie->offset_x != mbna_offset_x
+		|| tie->offset_y != mbna_offset_y)
+		{
+		allow_set = True;
+		}
+	    }
     	}
 
     else
@@ -1250,6 +1287,14 @@ do_naverr_offsetlabel()
         		0.0, 0.0, 0, 0);
     	}
     set_label_multiline_string(label_naverr_offsets, string);
+
+    /* set button sensitivity for setting or resetting offsets */
+    XtVaSetValues(pushButton_naverr_settie,
+	    XmNsensitive, allow_set,
+	    NULL);
+    XtVaSetValues(pushButton_naverr_resettie,
+	    XmNsensitive, allow_set,
+	    NULL);
 
 }
 
@@ -1694,12 +1739,23 @@ do_naverr_setnone( Widget w, XtPointer client_data, XtPointer call_data)
 /*--------------------------------------------------------------------*/
 
 void
+do_naverr_setoffset( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+
+    mbnavadjust_naverr_save();
+    do_update_naverr();
+    do_update_status();
+}
+
+/*--------------------------------------------------------------------*/
+
+void
 do_naverr_resettie( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
 
     mbnavadjust_naverr_resettie();
-    mbnavadjust_get_misfit();
     mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
     do_update_naverr();
     do_update_status();
@@ -1715,7 +1771,6 @@ do_dismiss_naverr( Widget w, XtPointer client_data, XtPointer call_data)
     /* unload loaded crossing */
     if (mbna_naverr_load == MB_YES)
 	    {
-	    mbnavadjust_naverr_save();
 	    status = mbnavadjust_crossing_unload();
 	    }
 
@@ -2052,6 +2107,12 @@ do_controls_apply( Widget w, XtPointer client_data, XtPointer call_data)
 		NULL);
     project.section_length = ((double) ivalue) / 100.0;
 
+    /* get values of section soundings slider */
+    XtVaGetValues(scale_controls_sectionsoundings, 
+		XmNvalue, &ivalue, 
+		NULL);
+    project.section_soundings = ivalue;
+
     /* get values of contour interval slider */
     XtVaGetValues(scale_controls_contourinterval, 
 		XmNvalue, &ivalue, 
@@ -2083,8 +2144,39 @@ void
 do_scale_controls_sectionlength( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
-    int	    ivalue;
  }
+
+/*--------------------------------------------------------------------*/
+void
+do_scale_controls_sectionsoundings( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    int	    ivalue;
+    int	    imin, imax;
+
+	/* get values of section soundings slider */
+	XtVaGetValues(scale_controls_sectionsoundings, 
+		    XmNvalue, &ivalue, 
+		    XmNminimum, &imin, 
+		    XmNmaximum, &imax, 
+		    NULL);
+		    
+	/* recalculate max value if needed */
+	if (ivalue == imin)
+	    {
+	    imax = MAX(imax / 2, 2 * imin);
+	    }
+	if (ivalue == imax)
+	    {
+	    imax = 2 * imax;
+	    }
+    
+	/* reset values of section soundings slider */
+	XtVaSetValues(scale_controls_sectionsoundings, 
+			XmNmaximum, imax, 
+			XmNvalue, ivalue, 
+			NULL);
+}
 
 /*--------------------------------------------------------------------*/
 void
@@ -2251,7 +2343,6 @@ do_quit( Widget w, XtPointer client_data, XtPointer call_data)
     /* unload loaded crossing */
     if (mbna_naverr_load == MB_YES)
 	    {
-	    mbnavadjust_naverr_save();
 	    status = mbnavadjust_crossing_unload();
 	
 	    /* deallocate graphics */

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsldedmb.c	2/2/93
- *	$Id: mbr_hsldedmb.c,v 5.4 2002-02-26 07:50:41 caress Exp $
+ *	$Id: mbr_hsldedmb.c,v 5.5 2002-03-26 07:43:25 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	February 2, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2002/02/26 07:50:41  caress
+ * Release 5.0.beta14
+ *
  * Revision 5.3  2001/07/20 00:32:54  caress
  * Release 5.0.beta03
  *
@@ -139,7 +142,7 @@ int mbr_wt_hsldedmb(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_hsldedmb(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_hsldedmb.c,v 5.4 2002-02-26 07:50:41 caress Exp $";
+	static char res_id[]="$Id: mbr_hsldedmb.c,v 5.5 2002-03-26 07:43:25 caress Exp $";
 	char	*function_name = "mbr_register_hsldedmb";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -269,7 +272,7 @@ int mbr_info_hsldedmb(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_hsldedmb.c,v 5.4 2002-02-26 07:50:41 caress Exp $";
+	static char res_id[]="$Id: mbr_hsldedmb.c,v 5.5 2002-03-26 07:43:25 caress Exp $";
 	char	*function_name = "mbr_info_hsldedmb";
 	int	status = MB_SUCCESS;
 
@@ -338,7 +341,7 @@ int mbr_info_hsldedmb(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_hsldedmb(int verbose, void *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_hsldedmb.c,v 5.4 2002-02-26 07:50:41 caress Exp $";
+ static char res_id[]="$Id: mbr_hsldedmb.c,v 5.5 2002-03-26 07:43:25 caress Exp $";
 	char	*function_name = "mbr_alm_hsldedmb";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
@@ -464,6 +467,7 @@ int mbr_rt_hsldedmb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		mb_io_ptr->file_bytes += status;
 		status = MB_SUCCESS;
 		*error = MB_ERROR_NO_ERROR;
+fprintf(stderr, "RAWTIME: %d\n", data->seconds);
 		}
 	else
 		{

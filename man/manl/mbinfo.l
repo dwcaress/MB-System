@@ -1,4 +1,4 @@
-.TH mbinfo l "9 August 2001" "MB-System 5.0" "MB-System 5.0"
+.TH mbinfo l "17 January 2002" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbinfo\fP - Output some basic statistics of swath sonar data files.
 
@@ -8,7 +8,7 @@ Version 5.0
 .SH SYNOPSIS
 \fBmbinfo\fP [\fB-B\fIyr/mo/da/hr/mn/sc\fP \fB-C -E\fIyr/mo/da/hr/mn/sc\fP 
 \fB-F\fIformat\fP \fB-G\fP \fB-I\fIfilename\fP 
-\fB-L\fIlonflip\fP \fB-M\fIlondim/latdim\fP \fB-P\fIping\fP 
+\fB-L\fIlonflip\fP \fB-M\fIlondim/latdim\fP \fB-OfP \fB-P\fIping\fP 
 \fB-R\fIwest/east/south/norths\fP \fB-S\fIspeed\fP \fB-W -V -H\fP]
 
 .SH DESCRIPTION
@@ -173,7 +173,8 @@ then the longitude values will be in
 the range from -180 to 180 degrees. If \fIlonflip\fP=1 
 then the longitude values will be in
 the range from 0 to 360 degrees.
-Default: \fIlonflip\fP = 0.
+Default: \fBmbinfo selects the bext longitude range based 
+on the first data.
 .TP
 .B \-M
 \fIlondim/latdim\fP
@@ -183,6 +184,12 @@ mask representing where data lies within the file's bounding
 box. This mask is shown as a table of 0's and 1's, where
 the 1's indicate bins with data. The dimensions of the mask
 are specified with the \fB-M\fP\fIlondim/latdim\fP option.
+.TP
+.B \-O
+.br
+This option causes the program output to be directed to
+"inf" files rather than to stdout. Each "inf" file is named
+using the original data file path with an ".inf" suffix appended.
 .TP
 .B \-P
 \fIpings\fP
