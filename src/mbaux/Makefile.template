@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  9/8/00
-#	$Id: Makefile.template,v 5.3 2002-02-22 09:06:20 caress Exp $
+#	$Id: Makefile.template,v 5.4 2003-03-22 03:09:45 caress Exp $
 #
 #     Copyright (c) 2000 by
 #     David W. Caress (caress@mbari.org)
@@ -16,6 +16,9 @@
 # Date:		September 8, 2000
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.3  2002/02/22 09:06:20  caress
+# Release 5.0.beta13
+#
 # Revision 5.2  2001/06/30 17:39:13  caress
 # Release 5.0.beta02
 #
@@ -68,6 +71,7 @@ clean:
 $(LIBDIR)/libmbaux.a:	\
 		mb_spline.o \
 		mb_zgrid.o \
+		mb_surface.o \
 		mb_cheb.o \
 		mb_delaun.o \
 		mb_rt.o \
@@ -76,6 +80,7 @@ $(LIBDIR)/libmbaux.a:	\
 	$(ARCHIVE) $(LIBDIR)/libmbaux.a \
 		mb_spline.o \
 		mb_zgrid.o \
+		mb_surface.o \
 		mb_cheb.o \
 		mb_delaun.o \
 		mb_rt.o \
@@ -98,6 +103,8 @@ mb_spline.o:	mb_spline.c $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mb_spline.c
 mb_zgrid.o:	mb_zgrid.c $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mb_zgrid.c
+mb_surface.o:	mb_surface.c
+	$(CC) -c $(CFLAGS) mb_surface.c
 mb_cheb.o:	mb_cheb.c $(INCDIR)/mb_status.h
 	$(CC) -c $(CFLAGS) mb_cheb.c
 mb_delaun.o:	mb_delaun.c $(INCDIR)/mb_status.h
