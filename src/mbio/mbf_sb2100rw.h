@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	MBF_SB2100RW.h	3/3/94
- *	$Id: mbf_sb2100rw.h,v 4.0 1994-03-06 00:01:56 caress Exp $
+ *	$Id: mbf_sb2100rw.h,v 4.1 1994-03-25 14:02:38 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -17,6 +17,12 @@
  * Author:	D. W. Caress
  * Date:	March 3, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/03/06  00:01:56  caress
+ * First cut at version 4.0
+ *
+ * Revision 4.0  1994/03/06  00:01:56  caress
+ * First cut at version 4.0
+ *
  * Revision 4.0  1994/03/05  02:12:07  caress
  * First cut for SeaBeam 2100 i/o.
  *
@@ -27,9 +33,9 @@
  *   1. SeaBeam 1000/2100 multibeam systems output raw data in an
  *      ascii format.  The data consists of a number of different
  *      multi-line ascii records.
- *   2. The 2100/2100 systems output 59 beams of bathymetry and 151 pixels
- *      of sidescan measurements, along with a plethora of other
- *      information.
+ *   2. The 2100/2100 systems output up to 151 beams of bathymetry 
+ *      and 151 pixels of sidescan measurements, along with a plethora 
+ *      of other information.
  *   3. The records all include navigation and time stamp information.
  *      The record types are:
  *        PR:  sonar parameter record (roll bias, pitch bias, sound velocity profile)
@@ -57,7 +63,7 @@
 #define MBF_SB2100RW_MAXLINE 1944
 
 /* maximum number of formed beams for SeaBeam 1000/2100 */
-#define MBF_SB2100RW_BEAMS 59
+#define MBF_SB2100RW_BEAMS 151
 
 /* maximum number of sidescan pixels for SeaBeam 1000/2100 */
 #define MBF_SB2100RW_PIXELS 151
