@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit_callbacks.c	3/28/97
- *    $Id: mbedit_callbacks.c,v 4.6 2000-01-20 00:05:38 caress Exp $
+ *    $Id: mbedit_callbacks.c,v 4.7 2000-01-25 01:46:20 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Date:	March 28, 1997  GUI recast
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.6  2000/01/20  00:05:38  caress
+ * Added pick mode and two unflag buttons.
+ *
  * Revision 4.5  1999/09/15  21:02:07  caress
  * Version label now set from mb_format.h
  *
@@ -756,11 +759,6 @@ do_fileselection_list(w, client_data, call_data)
     XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call_data;
 
     static char selection_text[128];
-    char	*mb_suffix;
-    char	*sb_suffix;
-    char	*file_root;
-    int	mb_len;
-    int	sb_len;
     int	form;
     char	value_text[10];
 
@@ -771,78 +769,23 @@ do_fileselection_list(w, client_data, call_data)
     if((int)strlen(selection_text) > 0)
 	    {
 	    /* look for MB suffix convention */
-	    if ((mb_suffix = strstr(selection_text,".mb")) != NULL)
-		    mb_len = strlen(mb_suffix);
-
-	    /* look for SeaBeam suffix convention */
-	    if ((sb_suffix = strstr(selection_text,".rec")) != NULL)
-		    sb_len = strlen(sb_suffix);
-
-	    /* if MB suffix convention used keep it */
-	    if (mb_len >= 4 && mb_len <= 6)
-		    {
-		    /* get the output filename */
-		    strncpy(output_file,"\0",128);
-		    strncpy(output_file,selection_text,
-			    strlen(selection_text)-mb_len);
-		    file_root = strrchr(output_file, '/');
-		    if (file_root != NULL)
-			{
-			if (strstr(file_root, "_") != NULL)
-				strcat(output_file, "e");
-			else
-				strcat(output_file,"_e");
-			}
-		    else
-			{
-			if (strstr(output_file, "_") != NULL)
-				strcat(output_file, "e");
-			else
-				strcat(output_file,"_e");
-			}
-		    strcat(output_file,mb_suffix);
-
-		    /* get the file format and set the widget */
-		    if (sscanf(&mb_suffix[3], "%d", &form) == 1)
-			    {
-			    mformat = form;
-			    sprintf(value_text,"%d",mformat);
-			    XmTextFieldSetString(
-				textfield_format, 
-				value_text);
-			    }
-		    }
-		    
-	    /* else look for ".rec" format 41 file */
-	    else if (sb_len == 4)
-		    {
-		    /* get the output filename */
-		    strncpy(output_file,"\0",128);
-		    strncpy(output_file,selection_text,
-			    strlen(selection_text)-sb_len);
-		    strcat(output_file,"_e.mb41");
-
-		    /* get the file format and set the widget */
-		    mformat = 41;
-		    sprintf(value_text,"%d",mformat);
-		    XmTextFieldSetString(
-			    textfield_format, 
-			    value_text);
-		    }
-
-	    /* else just at ".ed" to file name */
-	    else
-		    {
-		    strcpy(output_file,selection_text);
-		    strcat(output_file,".ed");
-		    }
-
-	    /* now set the output filename text widget */
-	    XmTextFieldSetString(output_file_text, 
-		    output_file);
-	    XmTextFieldSetCursorPosition(output_file_text, 
-		    strlen(output_file));
-    }
+	    form = mformat;
+	    if ((status = mbedit_get_output_file(selection_text, 
+			    output_file, &form)) == MB_SUCCESS)
+		{
+		mformat = form;
+		sprintf(value_text,"%d",mformat);
+		XmTextFieldSetString(
+		    textfield_format, 
+		    value_text);
+		
+		/* now set the output filename text widget */
+		XmTextFieldSetString(output_file_text, 
+			output_file);
+		XmTextFieldSetCursorPosition(output_file_text, 
+			strlen(output_file));
+		}
+	    }
 }
 
 /*--------------------------------------------------------------------*/
