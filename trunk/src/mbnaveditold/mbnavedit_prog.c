@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_prog.c	6/23/95
- *    $Id: mbnavedit_prog.c,v 4.2 1995-09-18 22:40:44 caress Exp $
+ *    $Id: mbnavedit_prog.c,v 4.3 1995-09-28 18:01:01 caress Exp $
  *
  *    Copyright (c) 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,10 @@
  * Date:	June 23,  1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1995/09/18  22:40:44  caress
+ * Fixed bug that caused "select all" function to miss last data
+ * point on plots of entire data set.
+ *
  * Revision 4.1  1995/08/17  14:58:12  caress
  * Revision for release 4.3.
  *
@@ -102,7 +106,7 @@ struct mbnavedit_plot_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbnavedit_prog.c,v 4.2 1995-09-18 22:40:44 caress Exp $";
+static char rcs_id[] = "$Id: mbnavedit_prog.c,v 4.3 1995-09-28 18:01:01 caress Exp $";
 static char program_name[] = "MBNAVEDIT";
 static char help_message[] =  "MBNAVEDIT is an interactive navigation editor for swath sonar data.\n\tIt can work with any data format supported by the MBIO library.\n";
 static char usage_message[] = "mbnavedit [-Fformat -Ifile -Ooutfile -V -H]";
@@ -551,8 +555,10 @@ int mbnavedit_open_file()
 	/* local variables */
 	char	*function_name = "mbnavedit_open_file";
 	int	status = MB_SUCCESS;
-	char	*suffix;
-	int	len;
+	char	*mb_suffix;
+	char	*sb_suffix;
+	int	mb_len;
+	int	sb_len;
 	int	i;
 
 	/* time, user, host variables */
@@ -573,20 +579,43 @@ int mbnavedit_open_file()
 	if (ofile_defined == MB_NO 
 		&& output_mode == OUTPUT_MODE_OUTPUT)
 		{
-		len = 0;
-		if ((suffix = strstr(ifile,".mb")) != NULL)
-			len = strlen(suffix);
-		if (len >= 4 && len <= 5)
+		/* look for MB suffix convention */
+		if ((mb_suffix = strstr(ifile,".mb")) != NULL)
+			mb_len = strlen(mb_suffix);
+
+		/* look for SeaBeam suffix convention */
+		if ((sb_suffix = strstr(ifile,".rec")) != NULL)
+			sb_len = strlen(sb_suffix);
+
+		/* if MB suffix convention used keep it */
+		if (mb_len >= 4 && mb_len <= 6)
 			{
-			strncpy(ofile,"\0",126);
-			strncpy(ofile,ifile,strlen(ifile)-len);
-			strcat(ofile,"n");
-			strcat(ofile,suffix);
+			/* get the output filename */
+			strncpy(ofile,"\0",128);
+			strncpy(ofile,ifile,
+				strlen(ifile)-mb_len);
+			if (strstr(ofile, "_") != NULL)
+				strcat(ofile, "n");
+			else
+				strcat(ofile,"_n");
+			strcat(ofile,mb_suffix);
 			}
+			
+		/* else look for ".rec" format 41 file */
+		else if (sb_len == 4 && format == 41)
+			{
+			/* get the output filename */
+			strncpy(ofile,"\0",128);
+			strncpy(ofile,ifile,
+				strlen(ifile)-sb_len);
+			strcat(ofile,"_n.mb41");
+			}
+
+		/* else just at ".ned" to file name */
 		else
 			{
 			strcpy(ofile,ifile);
-			strcat(ofile,".ned");
+			strcat(ofile,".ed");
 			}
 		}
 

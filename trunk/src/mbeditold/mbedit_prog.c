@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	4/8/93
- *    $Id: mbedit_prog.c,v 4.6 1995-09-18 22:42:44 caress Exp $
+ *    $Id: mbedit_prog.c,v 4.7 1995-09-28 18:03:05 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -23,6 +23,9 @@
  * Date:	April 8, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.6  1995/09/18  22:42:44  caress
+ * I must have changed something!?
+ *
  * Revision 4.5  1995/05/12  17:29:16  caress
  * Made exit status values consistent with Unix convention.
  * 0: ok  nonzero: error
@@ -128,7 +131,7 @@ struct mbedit_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbedit_prog.c,v 4.6 1995-09-18 22:42:44 caress Exp $";
+static char rcs_id[] = "$Id: mbedit_prog.c,v 4.7 1995-09-28 18:03:05 caress Exp $";
 static char program_name[] = "MBEDIT";
 static char help_message[] =  "MBEDIT is an interactive beam editor for multibeam bathymetry data.\n\tIt can work with any data format supported by the MBIO library.\n\tThis version uses the XVIEW toolkit and has been developed using\n\tthe DEVGUIDE package.  A future version will employ the MOTIF\n\ttoolkit for greater portability.  This file contains the code \n\tthat does not directly depend on the XVIEW interface - the companion \n\tfile mbedit_stubs.c contains the user interface related code.";
 static char usage_message[] = "mbedit [-Fformat -Ifile -Ooutfile -V -H]";
@@ -2147,8 +2150,10 @@ int	form;
 	/* local variables */
 	char	*function_name = "mbedit_open_file";
 	int	status = MB_SUCCESS;
-	char	*suffix;
-	int	len;
+	char	*mb_suffix;
+	char	*sb_suffix;
+	int	mb_len;
+	int	sb_len;
 	int	i;
 
 	/* time, user, host variables */
@@ -2170,16 +2175,39 @@ int	form;
 	if (ofile_defined == MB_NO 
 		&& output_mode == MBEDIT_OUTPUT_OUTPUT)
 		{
-		len = 0;
-		if ((suffix = strstr(ifile,".mb")) != NULL)
-			len = strlen(suffix);
-		if (len >= 4 && len <= 5)
+		/* look for MB suffix convention */
+		if ((mb_suffix = strstr(ifile,".mb")) != NULL)
+			mb_len = strlen(mb_suffix);
+
+		/* look for SeaBeam suffix convention */
+		if ((sb_suffix = strstr(ifile,".rec")) != NULL)
+			sb_len = strlen(sb_suffix);
+
+		/* if MB suffix convention used keep it */
+		if (mb_len >= 4 && mb_len <= 6)
 			{
-			strncpy(ofile,"\0",126);
-			strncpy(ofile,ifile,strlen(ifile)-len);
-			strcat(ofile,"e");
-			strcat(ofile,suffix);
+			/* get the output filename */
+			strncpy(ofile,"\0",128);
+			strncpy(ofile,ifile,
+				strlen(ifile)-mb_len);
+			if (strstr(ofile, "_") != NULL)
+				strcat(ofile, "e");
+			else
+				strcat(ofile,"_e");
+			strcat(ofile,mb_suffix);
 			}
+			
+		/* else look for ".rec" format 41 file */
+		else if (sb_len == 4 && form == 41)
+			{
+			/* get the output filename */
+			strncpy(ofile,"\0",128);
+			strncpy(ofile,ifile,
+				strlen(ifile)-sb_len);
+			strcat(ofile,"_e.mb41");
+			}
+
+		/* else just at ".ed" to file name */
 		else
 			{
 			strcpy(ofile,ifile);

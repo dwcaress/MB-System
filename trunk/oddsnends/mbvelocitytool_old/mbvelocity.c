@@ -12,7 +12,7 @@
 /*                                                          */
 /************************************************************/
 /*    The MB-system:	mbvelocitytool_stubs.c	6/6/93
- *    $Id: mbvelocity.c,v 4.6 1995-06-06 13:34:20 caress Exp $
+ *    $Id: mbvelocity.c,v 4.7 1995-09-28 18:03:58 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -35,6 +35,9 @@
  * Date:	June 6, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.6  1995/06/06  13:34:20  caress
+ * Fixed warnings under Solaris by explicit casting of strlen result.
+ *
  * Revision 4.5  1995/06/05  19:59:16  caress
  * Removed all references to scandir
  *
@@ -1321,8 +1324,10 @@ static void get_file_selection(w, tag, list)
 	XmListCallbackStruct *list;
 {
 	static char *selection_text;
-	char	*suffix;
-	int	len;
+	char	*mb_suffix;
+	char	*sb_suffix;
+	int	mb_len;
+	int	sb_len;
 	int	form;
 	char	value_text[10];
 
@@ -1333,21 +1338,36 @@ static void get_file_selection(w, tag, list)
 	if((int)strlen(selection_text) > 0)
 		{
 		/* look for MB suffix convention */
-		if ((suffix = strstr(selection_text,".mb")) != NULL)
-			len = strlen(suffix);
+		if ((mb_suffix = strstr(selection_text,".mb")) != NULL)
+			mb_len = strlen(mb_suffix);
 
-		/* if MB suffix convention used set format */
-		if (len >= 4 && len <= 5)
+		/* look for SeaBeam suffix convention */
+		if ((sb_suffix = strstr(selection_text,".rec")) != NULL)
+			sb_len = strlen(sb_suffix);
+
+		/* if MB suffix convention used keep it */
+		if (mb_len >= 4 && mb_len <= 6)
 			{
 			/* get the file format and set the widget */
-			if (sscanf(&suffix[3], "%d", &form) == 1)
+			if (sscanf(&mb_suffix[3], "%d", &form) == 1)
 				{
 				format_gui = form;
-				sprintf(value_text,"%2.2d",format_gui);
+				sprintf(value_text,"%d",format_gui);
 				XmTextFieldSetString(
 				    widget_array[k_mbio_format], 
 				    value_text);
 				}
+			}
+			
+		/* else look for ".rec" format 41 file */
+		else if (sb_len == 4)
+			{
+			/* get the file format and set the widget */
+			format_gui = 41;
+			sprintf(value_text,"%d",format_gui);
+			XmTextFieldSetString(
+				widget_array[format_gui], 
+				value_text);
 			}
 		}
 }

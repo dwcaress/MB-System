@@ -214,9 +214,9 @@ object textfield_format : XmTextField widget
     {
         XmNx = 140;
         XmNy = 500;
-        XmNvalue = '21';
-        XmNcolumns = 2;
-        XmNmaxLength = 2;
+        XmNvalue = '41';
+        XmNcolumns = 3;
+        XmNmaxLength = 3;
     };
     callbacks
     {

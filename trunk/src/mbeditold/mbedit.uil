@@ -1,6 +1,6 @@
 /*********************************************************
 *                                                        *
-* $Id: mbedit.uil,v 4.2 1995-04-04 21:06:47 caress Exp $                                                   *
+* $Id: mbedit.uil,v 4.3 1995-09-28 18:05:02 caress Exp $                                                   *
 *                                                        *
 * WRITTEN FOR ANTARCTIC SUPPORT ASSOCIATES BY Rod McCabe *
 *                                                        *
@@ -15,6 +15,10 @@
 * Operating system : UNIX                                *
 *                                                        *
 * $Log: not supported by cvs2svn $
+# Revision 4.2  1995/04/04  21:06:47  caress
+# Resized widgets and window to fit 1024 X 768 screen.
+# This now works on an Indy presenter screen.
+#
 # Revision 4.1  1995/02/14  19:16:04  caress
 # Improved widget handling, uses swath width rather than plot scale,
 # now handles default values properly.
@@ -1295,8 +1299,8 @@ object textfield_format : XmTextField widget
         XmNx = 140;
         XmNy = 430;
         XmNvalue = '41';
-        XmNcolumns = 2;
-        XmNmaxLength = 2;
+        XmNcolumns = 3;
+        XmNmaxLength = 3;
     };
     callbacks 
     {
