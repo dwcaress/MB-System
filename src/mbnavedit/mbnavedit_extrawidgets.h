@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_extrawidgets.h	8/7/95
- *    $Id: mbnavedit_extrawidgets.h,v 4.0 1995-08-07 18:33:22 caress Exp $
+ *    $Id: mbnavedit_extrawidgets.h,v 4.1 1997-04-21 17:07:38 caress Exp $
  *
  *    Copyright (c) 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -20,6 +20,12 @@
  * Date:	June 24,  1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1995/08/07  18:33:22  caress
+ * First cut.
+ *
+ * Revision 4.0  1995/08/07  18:33:22  caress
+ * First cut.
+ *
  *
  */
 

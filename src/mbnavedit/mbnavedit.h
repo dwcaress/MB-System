@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit.h	6/24/95
- *    $Id: mbnavedit.h,v 4.3 1996-08-26 17:33:29 caress Exp $
+ *    $Id: mbnavedit.h,v 4.4 1997-04-21 17:07:38 caress Exp $
  *
  *    Copyright (c) 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -20,6 +20,12 @@
  * Date:	June 24,  1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1996/08/26  17:33:29  caress
+ * Release 4.4 revision.
+ *
+ * Revision 4.3  1996/08/26  17:33:29  caress
+ * Release 4.4 revision.
+ *
  * Revision 4.2  1996/04/05  20:07:02  caress
  * Added GUI mode so done means quit for real. Also changed done and
  * quit handling in browse mode so that the program doesn't read the

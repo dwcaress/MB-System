@@ -1,9 +1,9 @@
-.TH mbnavedit l "20 August 1996" "MB-System 4.4" "MB-System 4.4"
+.TH mbnavedit l "11 April 1997" "MB-System 4.5" "MB-System 4.5"
 .SH NAME
-\fBmbnavedit\fP - Interactive navigation editor for multibeam swath data.
+\fBmbnavedit\fP - Interactive navigation editor for swath sonar data.
 
 .SH VERSION
-Version 4.4
+Version 4.5
 
 .SH SYNOPSIS
 \fBmbnavedit\fP [\fB-B\fIyr/mo/da/hr/mn/sc\fP 
@@ -12,7 +12,7 @@ Version 4.4
 
 .SH DESCRIPTION
 \fBmbnavedit\fP is an interactive editor used to identify and fix 
-problems with the navigation of multibeam swath data. Once a file has been
+problems with the navigation of swath sonar data. Once a file has been
 read in, \fBmbnavedit\fP displays autoscaled plots of the longitude,
 latitude, speed, and heading time series. The user may select
 outliers and interpolate over them or, in the case of heading or
@@ -54,11 +54,11 @@ with times after the ending time will be ignored.
 Default: \fIyr/mo/da/hr/mn/sc\fP = 2062/2/21/10/30/0.
 .TP
 .B \fB-F\fIformat\fP
-Sets the format at startup for the input and output multibeam data using 
+Sets the format at startup for the input and output swath sonar data using 
 \fBMBIO\fP integer format identifiers. This value can also be set
 interactively when specifying the input file.
-This program uses the \fBMBIO\fP library and will read or write any multibeam
-format supported by \fBMBIO\fP. A list of the multibeam data formats
+This program uses the \fBMBIO\fP library and will read or write any swath sonar
+format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page.
 Default: \fIformat\fP = 11.
@@ -91,14 +91,14 @@ beams flagged or zeroed.
 .TP
 .B \fBFile\fP
 This menu brings up a popup window which allows the user to
-specify the input multibeam bathymetry data file, its \fBMBIO\fP
+specify the input swath sonar data file, its \fBMBIO\fP
 format id, the output mode, and the output filename. 
 This program uses the \fBMBIO\fP library and 
-will read or write any multibeam
-format supported by \fBMBIO\fP. A list of the multibeam data
+will read or write any swath sonar 
+format supported by \fBMBIO\fP. A list of the swath sonar data
 formats currently supported by \fBMBIO\fP and their
 identifier values is given in the \fBMBIO\fP manual page. 
-If the multibeam data file is named using the \fBMB-System\fP
+If the swath sonar data file is named using the \fBMB-System\fP
 suffix convention (format 11 files end with ".mb11", format
 41 files end with ".mb41", etc.), then the program will
 automatically use the appropriate format id and the default
