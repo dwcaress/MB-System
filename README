@@ -1,9 +1,9 @@
-MB-SYSTEM VERSION 5.0.BETA16 README FILE:
+MB-SYSTEM VERSION 5.0.BETA18 README FILE:
 ----------------------------------------
 
 This file is located at the top of the MB-System directory
 structure. This directory structure contains the version 
-5.0.beta16 release of the MB-System software package for 
+5.0.beta18 release of the MB-System software package for 
 processing and display of swath sonar data.  
 
 MB-SYSTEM VERSION 5 DESCRIPTION:
@@ -26,6 +26,8 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
+Version 5.0.beta18     May 29, 2002
+Version 5.0.beta17     May 1, 2002
 Version 5.0.beta16     April 5, 2002
 Version 5.0.beta15     March 26, 2002
 Version 5.0.beta14     February 25, 2002
@@ -99,6 +101,49 @@ Aquarium Research Institute, or any other individuals or
 organizations involved in the design and maintenance of the 
 MB-System software package are NOT responsible for any damage 
 that may follow from correct or incorrect use of these programs.
+
+MB-SYSTEM VERSION 5.0.BETA18 RELEASE NOTES:
+
+The version 5.0.beta18 release of MB-System includes
+some significant new features and fixes:
+  - Addition of support for the French IFREMER
+    MBB data format (id: 75). This is the current
+    IFREMER multibeam archive format.
+  - Fix for handling old Simrad multibeam data 
+    (format 51). For eight years we have been 
+    using the highest bit in the depth values 
+    of old Simrad vendor format data for beam
+    flagging. We have now been provided with a
+    data sample in which the original depth values
+    use that bit. Consequently, beam flagging is
+    no longer supported in format 51 (EM100, EM1000,
+    EM12 vendor format) data. Instead, beams
+    flagged using mbedit or mbclean will be nulled.
+    We recommend that any format 51 data be
+    translated to the processing format 57 using
+    mbcopy before editing or other processing is
+    done.
+  - MBinfo now has an option (-N) that will cause 
+    it to generate "notices" in addition to the
+    usual statistics. These notices include counts
+    for all data record types in a file, counts of
+    all nonfatal error messages generated reading 
+    the file, and counts of data problems (e.g.
+    obviously bad navigation or depth values)
+    found in a file.
+  - MB-System now allows identification and use of
+    secondary navigation channels. Sometimes data
+    loggers record more than one navigation stream,
+    with one designated as the active or primary
+    navigation. Normally all secondary navigation 
+    channels are ignored. However, the -N option of
+    mbinfo will now show when these navigation records
+    (MB_DATA_NAV1, MB_DATA_NAV2, and/or MB_DATA_NAV3) 
+    are present. MBnavlist can now be set to read from
+    and output navigation from secondary channels using
+    its -Nchannel option.
+  - A variety of small fixes to the datalist parsing
+    functions.
 
 MB-SYSTEM VERSION 5.0.BETA16 RELEASE NOTES:
 
@@ -735,10 +780,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.17 2002-04-06 03:10:12 caress Exp $
+RCS ID: $Id: README,v 5.18 2002-05-29 20:43:56 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.17  2002/04/06 03:10:12  caress
+Release 5.0.beta16
+
 Revision 5.16  2002/03/26 07:40:25  caress
 Release 5.0.beta15
 
