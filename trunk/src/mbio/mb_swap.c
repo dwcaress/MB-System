@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_swap.c	7/6/94
- *    $Id: mb_swap.c,v 4.0 1994-07-29 18:58:22 caress Exp $
+ *    $Id: mb_swap.c,v 4.1 1994-10-21 12:11:53 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -26,6 +26,9 @@
  * Date:	July 6, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/07/29  18:58:22  caress
+ * Initial Revision
+ *
  * Revision 1.1  1994/07/29  18:46:51  caress
  * Initial revision
  *

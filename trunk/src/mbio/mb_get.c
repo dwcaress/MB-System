@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_get.c	1/26/93
- *    $Id: mb_get.c,v 4.1 1994-07-29 18:46:51 caress Exp $
+ *    $Id: mb_get.c,v 4.2 1994-10-21 12:11:53 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,10 @@
  * Date:	January 26, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1994/07/29  18:46:51  caress
+ * Changes associated with supporting Lynx OS (byte swapped) and
+ * using unix second time base (for time_d values).
+ *
  * Revision 4.0  1994/03/06  00:01:56  caress
  * First cut at version 4.0
  *
@@ -80,7 +84,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*kind;
 int	*pings;
-int	time_i[6];
+int	time_i[7];
 double	*time_d;
 double	*navlon;
 double	*navlat;
@@ -90,17 +94,17 @@ double	*distance;
 int	*nbath;
 int	*namp;
 int	*nss;
-int	*bath;
-int	*amp;
-int	*bathacrosstrack;
-int	*bathalongtrack;
-int	*ss;
-int	*ssacrosstrack;
-int	*ssalongtrack;
+double	*bath;
+double	*amp;
+double	*bathacrosstrack;
+double	*bathalongtrack;
+double	*ss;
+double	*ssacrosstrack;
+double	*ssalongtrack;
 char	*comment;
 int	*error;
 {
-  static char rcs_id[]="$Id: mb_get.c,v 4.1 1994-07-29 18:46:51 caress Exp $";
+  static char rcs_id[]="$Id: mb_get.c,v 4.2 1994-10-21 12:11:53 caress Exp $";
 	char	*function_name = "mb_get";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
@@ -138,21 +142,21 @@ int	*error;
 	headingy = 0.0;
 	for (i=0;i<mb_io_ptr->beams_bath;i++)
 		{
-		mb_io_ptr->bath[i] = 0;
-		mb_io_ptr->bath_acrosstrack[i] = 0;
-		mb_io_ptr->bath_alongtrack[i] = 0;
+		mb_io_ptr->bath[i] = 0.0;
+		mb_io_ptr->bath_acrosstrack[i] = 0.0;
+		mb_io_ptr->bath_alongtrack[i] = 0.0;
 		mb_io_ptr->bath_num[i] = 0;
 		}
 	for (i=0;i<mb_io_ptr->beams_amp;i++)
 		{
-		mb_io_ptr->amp[i] = 0;
+		mb_io_ptr->amp[i] = 0.0;
 		mb_io_ptr->amp_num[i] = 0;
 		}
 	for (i=0;i<mb_io_ptr->pixels_ss;i++)
 		{
-		mb_io_ptr->ss[i] = 0;
-		mb_io_ptr->ss_acrosstrack[i] = 0;
-		mb_io_ptr->ss_alongtrack[i] = 0;
+		mb_io_ptr->ss[i] = 0.0;
+		mb_io_ptr->ss_acrosstrack[i] = 0.0;
+		mb_io_ptr->ss_alongtrack[i] = 0.0;
 		mb_io_ptr->ss_num[i] = 0;
 		}
 
@@ -322,6 +326,8 @@ int	*error;
 				mb_io_ptr->new_time_i[4]);
 			fprintf(stderr,"dbg4       time_i[5]:     %d\n",
 				mb_io_ptr->new_time_i[5]);
+			fprintf(stderr,"dbg4       time_i[6]:     %d\n",
+				mb_io_ptr->new_time_i[6]);
 			fprintf(stderr,"dbg4       time_d:        %f\n",
 				mb_io_ptr->new_time_d);
 			fprintf(stderr,"dbg4       longitude:     %f\n",
@@ -338,7 +344,7 @@ int	*error;
 			  {
 			  fprintf(stderr,"dbg4       beam   bath  crosstrack alongtrack\n");
 			  for (i=0;i<mb_io_ptr->beams_bath;i++)
-			    fprintf(stderr,"dbg4       %4d   %5d    %5d     %5d\n",
+			    fprintf(stderr,"dbg4       %4d   %f    %f     %f\n",
 				i,mb_io_ptr->new_bath[i],
 				mb_io_ptr->new_bath_acrosstrack[i],
 				mb_io_ptr->new_bath_alongtrack[i]);
@@ -349,7 +355,7 @@ int	*error;
 			  {
 			  fprintf(stderr,"dbg4       beam    amp  crosstrack alongtrack\n");
 			  for (i=0;i<mb_io_ptr->beams_bath;i++)
-			    fprintf(stderr,"dbg4       %4d   %5d    %5d     %5d\n",
+			    fprintf(stderr,"dbg4       %4d   %f    %f     %f\n",
 				i,mb_io_ptr->new_amp[i],
 				mb_io_ptr->new_bath_acrosstrack[i],
 				mb_io_ptr->new_bath_alongtrack[i]);
@@ -360,7 +366,7 @@ int	*error;
 			  {
 			  fprintf(stderr,"dbg4       pixel sidescan crosstrack alongtrack\n");
 			  for (i=0;i<mb_io_ptr->pixels_ss;i++)
-			    fprintf(stderr,"dbg4       %4d   %5d    %5d     %5d\n",
+			    fprintf(stderr,"dbg4       %4d   %f    %f     %f\n",
 				i,mb_io_ptr->new_ss[i],
 				mb_io_ptr->new_ss_acrosstrack[i],mb_io_ptr->new_ss_alongtrack[i]);
 			  }
@@ -463,7 +469,7 @@ int	*error;
 			  {
 			  fprintf(stderr,"dbg4       beam   nbath bath  crosstrack alongtrack\n");
 			  for (i=0;i<mb_io_ptr->beams_bath;i++)
-			    fprintf(stderr,"dbg4       %4d   %4d  %5d    %5d     %5d\n",
+			    fprintf(stderr,"dbg4       %4d   %4d  %f    %f     %f\n",
 				i,mb_io_ptr->bath_num[i],mb_io_ptr->bath[i],
 				mb_io_ptr->bath_acrosstrack[i],
 				mb_io_ptr->bath_alongtrack[i]);
@@ -474,7 +480,7 @@ int	*error;
 			  {
 			  fprintf(stderr,"dbg4       beam    namp  amp  crosstrack alongtrack\n");
 			  for (i=0;i<mb_io_ptr->beams_amp;i++)
-			    fprintf(stderr,"dbg4       %4d   %4d  %5d    %5d     %5d\n",
+			    fprintf(stderr,"dbg4       %4d   %4d  %f    %f     %f\n",
 				i,mb_io_ptr->amp_num[i],mb_io_ptr->amp[i],
 				mb_io_ptr->bath_acrosstrack[i],
 				mb_io_ptr->bath_alongtrack[i]);
@@ -485,7 +491,7 @@ int	*error;
 			  {
 			  fprintf(stderr,"dbg4       pixel nss  sidescan crosstrack alongtrack\n");
 			  for (i=0;i<mb_io_ptr->pixels_ss;i++)
-			    fprintf(stderr,"dbg4       %4d   %4d   %5d    %5d     %5d\n",
+			    fprintf(stderr,"dbg4       %4d   %4d   %f    %f     %f\n",
 				i,mb_io_ptr->ss_num[i],mb_io_ptr->ss[i],
 				mb_io_ptr->ss_acrosstrack[i],
 				mb_io_ptr->ss_alongtrack[i]);
@@ -546,7 +552,11 @@ int	*error;
 			{
 			done = MB_YES;
 			mb_io_ptr->need_new_ping = MB_YES;
-			reset_last = MB_NO;
+			if (*error == MB_ERROR_TIME_GAP
+				|| *error == MB_ERROR_OUT_BOUNDS)
+				reset_last = MB_YES;
+			else
+				reset_last = MB_NO;
 			}
 
 		/* if error and more than one ping read, 
@@ -600,7 +610,7 @@ int	*error;
 		{
 		if (mb_io_ptr->pings_binned == 1)
 			{
-			for (i=0;i<6;i++)
+			for (i=0;i<7;i++)
 				time_i[i] = mb_io_ptr->new_time_i[i];
 			*time_d = mb_io_ptr->new_time_d;
 			}
@@ -657,7 +667,7 @@ int	*error;
 			}
 		else if (mb_io_ptr->old_time_d > 0.0)
 			{
-			delta_time = 0.0166667*
+			delta_time = 0.000277778*
 				(*time_d - mb_io_ptr->old_time_d); /* hours */
 			if (delta_time > 0.0)
 				*speed = *distance/delta_time; /* km/hr */
@@ -791,6 +801,7 @@ int	*error;
 		fprintf(stderr,"dbg2       time_i[3]:  %d\n",time_i[3]);
 		fprintf(stderr,"dbg2       time_i[4]:  %d\n",time_i[4]);
 		fprintf(stderr,"dbg2       time_i[5]:  %d\n",time_i[5]);
+		fprintf(stderr,"dbg2       time_i[6]:  %d\n",time_i[6]);
 		fprintf(stderr,"dbg2       navlon:     %f\n",*navlon);
 		fprintf(stderr,"dbg2       navlat:     %f\n",*navlat);
 		fprintf(stderr,"dbg2       speed:      %f\n",*speed);
@@ -801,7 +812,7 @@ int	*error;
 		  {
 		  fprintf(stderr,"dbg3       beam   nbath bath  crosstrack alongtrack\n");
 		  for (i=0;i<mb_io_ptr->beams_bath;i++)
-		    fprintf(stderr,"dbg3       %4d   %4d  %5d    %5d     %5d\n",
+		    fprintf(stderr,"dbg3       %4d   %4d  %f    %f     %f\n",
 			i,mb_io_ptr->bath_num[i],bath[i],
 			bathacrosstrack[i],bathalongtrack[i]);
 		  }
@@ -810,7 +821,7 @@ int	*error;
 		  {
 		  fprintf(stderr,"dbg3       beam    namp  amp  crosstrack alongtrack\n");
 		  for (i=0;i<mb_io_ptr->beams_amp;i++)
-		    fprintf(stderr,"dbg3       %4d   %4d  %5d    %5d     %5d\n",
+		    fprintf(stderr,"dbg3       %4d   %4d  %f    %f     %f\n",
 			i,mb_io_ptr->amp_num[i],amp[i],
 			bathacrosstrack[i],bathalongtrack[i]);
 		  }
@@ -819,7 +830,7 @@ int	*error;
 		  {
 		  fprintf(stderr,"dbg3       pixel nss  sidescan crosstrack alongtrack\n");
 		  for (i=0;i<mb_io_ptr->pixels_ss;i++)
-		    fprintf(stderr,"dbg3       %4d   %4d   %5d    %5d     %5d\n",
+		    fprintf(stderr,"dbg3       %4d   %4d   %f    %f     %f\n",
 			i,mb_io_ptr->ss_num[i],ss[i],
 			ssacrosstrack[i],ssalongtrack[i]);
 		  }

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbio_status.h	2/1/93
- *    $Id: mb_status.h,v 4.0 1994-03-06 00:01:56 caress Exp $
+ *    $Id: mb_status.h,v 4.1 1994-10-21 12:11:53 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -18,6 +18,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/03/06  00:01:56  caress
+ * First cut at version 4.0
+ *
  * Revision 4.3  1994/03/05  02:14:41  caress
  * Altered to accomodate MBF_SB2100RW format.
  *
@@ -51,11 +54,14 @@
 #define	MB_DATA_COMMENT			2	/* general comment */
 #define	MB_DATA_CALIBRATE		3	/* Hydrosweep DS */
 #define	MB_DATA_MEAN_VELOCITY		4	/* Hydrosweep DS */
-#define	MB_DATA_VELOCITY_PROFILE	5	/* Hydrosweep DS */
+#define	MB_DATA_VELOCITY_PROFILE	5	/* general */
 #define	MB_DATA_STANDBY			6	/* Hydrosweep DS */
 #define	MB_DATA_NAV_SOURCE		7	/* Hydrosweep DS */
 #define	MB_DATA_PARAMETER		8	/* SeaBeam 2100 */
-#define	MB_DATA_RAW_LINE		9	/* uninterpretable line
+#define	MB_DATA_START			9	/* Simrad */
+#define	MB_DATA_STOP			10	/* Simrad */
+#define	MB_DATA_NAV			11	/* Simrad */
+#define	MB_DATA_RAW_LINE		12	/* uninterpretable line
 							for ascii formats */
 
 /* MBIO function status convention */
@@ -63,7 +69,7 @@
 #define	MB_FAILURE			0
 
 /* MBIO minimum and maximum error values */
-#define	MB_ERROR_MIN			-14
+#define	MB_ERROR_MIN			-15
 #define	MB_ERROR_MAX			14
 
 /* MBIO function fatal error values */
@@ -98,6 +104,7 @@
 #define	MB_ERROR_BUFFER_EMPTY		-12
 #define	MB_ERROR_NO_DATA_DUMPED		-13
 #define	MB_ERROR_NO_MORE_DATA		-14
+#define	MB_ERROR_DATA_NOT_INSERTED	-15
 
 /* MBIO function error messages */
 static char *fatal_error_msg[] = 
@@ -133,7 +140,8 @@ static char *nonfatal_error_msg[] =
 	"Data buffer is full",
 	"No data was loaded into the buffer",
 	"Data buffer is empty",
-	"No data was dumped from the buffer"
+	"No data was dumped from the buffer",
+	"Data inconsistencies prevented inserting data into storage structure"
 	};
 static char *unknown_error_msg[] =
 	{

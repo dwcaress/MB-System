@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.h	1/19/93
- *    $Id: mb_format.h,v 4.3 1994-07-29 18:46:51 caress Exp $
+ *    $Id: mb_format.h,v 4.4 1994-10-21 12:11:53 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -17,6 +17,10 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1994/07/29  18:46:51  caress
+ * Changes associated with supporting Lynx OS (byte swapped) and
+ * using unix second time base (for time_d values).
+ *
  * Revision 4.2  1994/04/11  23:22:28  caress
  * Added table of which formats have travel time data. This
  * table is called: mb_traveltime_table
@@ -70,12 +74,14 @@
 #define	MB_SYS_HSDS	2
 #define	MB_SYS_SB2000	3
 #define	MB_SYS_SB2100	4
-#define	MB_SYS_EM12	5
+#define	MB_SYS_SIMRAD	5
 #define	MB_SYS_MR1	6
 #define	MB_SYS_LDEOIH	7
+#define	MB_SYS_RESON	8
+#define	MB_SYS_ELAC	9
 
 /* Number of supported MBIO data formats */
-#define	MB_FORMATS	20
+#define	MB_FORMATS	25
 
 /* Data formats supported by MBIO */
 #define	MBF_SBSIOMRG	11	/* SeaBeam, 16 beam, bathymetry, 
@@ -111,10 +117,10 @@
 					151 beam bathymetry and amplitude,
 					2000 pixel sidescan, ascii + binary, 
  					SeaBeam Instruments. */
-#define	MBF_SB2000SB	32	/* SeaBeam 2000, 151 beam bathymetry 
-					and amplitude,
-					2000 pixel sidescan, binary, 
- 					swath-bathy, SIO. */
+#define	MBF_SB2000SB	32	/* SeaBeam 2000, 121 beam bathymetry, 
+					binary, swath-bathy, SIO. */
+#define	MBF_SB2000SS	33	/* SeaBeam 2000, 1000 pixel sidescan, 
+					binary, swath-bathy, SIO. */
 #define	MBF_SB2100RW	41	/* SeaBeam 2100/1000 series vender format, 
 					151 beam bathymetry and amplitude,
 					2000 pixel sidescan, ascii + binary, 
@@ -123,18 +129,33 @@
 					151 beam bathymetry and amplitude,
 					2000 pixel sidescan, binary, centered,
 					SeaBeam Instruments and L-DEO */ 
-#define	MBF_EM12DARW	51	/* Simrad EM12 RRS Darwin processed format, 
+#define	MBF_EM1000RW	51	/* Simrad EM1000 series vendor format, 
+					60 beam bathymetry and 
+					amplitude, variable pixel sidescan, 
+					ascii + binary, Simrad */ 
+#define	MBF_EM12SRAW	52	/* Simrad EM12S series vendor format, 
+					81 beam bathymetry and 
+					amplitude, variable pixel sidescan, 
+					ascii + binary, Simrad */ 
+#define	MBF_EM12DRAW	53	/* Simrad EM12D series vendor format, 
+					162 beam bathymetry and 
+					amplitude, variable pixel sidescan, 
+					ascii + binary, Simrad */ 
+#define	MBF_EM12DARW	54	/* Simrad EM12 RRS Darwin processed format, 
 					81 beam, bathymetry and amplitude,
 					binary, centered, Oxford University */ 
-#define	MBF_EMSIMRAD	52	/* Simrad EM series vendor format, 
-					variable beam, bathymetry and 
-					amplitude, binary, Simrad */ 
 #define	MBF_MR1PRHIG	61	/* MR1 post processed format, 
 					variable beam bathymetry, variable
 					pixel sidescan, xdr binary, SOEST */ 
 #define	MBF_MBLDEOIH	71	/* Generic in-house multibeam, variable beam, 
  					bathymetry, amplitude, and sidescan
  					binary, centered, L-DEO. */
+#define	MBF_CBAT9001	81	/* Reson SeaBat 9001 multibeam, 60 beams
+ 					bathymetry and amplitude,
+ 					binary, University of New Brunswick. */
+#define	MBF_BCHRTUNB	91	/* Elac BottomChart multibeam, 56 beams
+ 					bathymetry and amplitude,
+ 					binary, University of New Brunswick. */
 
 /* Translation table of the format id's */
 static int format_table[] = 
@@ -154,12 +175,48 @@ static int format_table[] =
 	26,	/* MBF_HSSIOSWB */
 	31,	/* MBF_SB2000RW */
 	32,	/* MBF_SB2000SB */
+	33,	/* MBF_SB2000SS */
 	41,	/* MBF_SB2100RW */
 	42,	/* MBF_SB2100IH */
-	51,	/* MBF_EM12DARW */
-	52,	/* MBF_EMSIMRAD */
+	51,	/* MBF_EM1000RW */
+	52,	/* MBF_EM12SRAW */
+	53,	/* MBF_EM12DRAW */
+	54,	/* MBF_EM12DARW */
 	61,	/* MBF_MR1PRHIG */
 	71,	/* MBF_MBLDEOIH */
+	81,	/* MBF_CBAT9001 */
+	91,	/* MBF_BCHRTUNB */
+	};
+
+/* Table of which formats are really supported */
+static int supported_format_table[] = 
+	{
+	0,	/* NULL */
+	1,	/* MBF_SBSIOMRG */
+	1,	/* MBF_SBSIOCEN */
+	1,	/* MBF_SBSIOLSI */
+	1,	/* MBF_SBURICEN */
+	1,	/* MBF_SBURIVAX */
+	1,	/* MBF_SBSIOSWB */
+	1,	/* MBF_HSATLRAW */
+	1,	/* MBF_HSLDEDMB */
+	1,	/* MBF_HSURICEN */
+	1,	/* MBF_HSLDEOIH */
+	1,	/* MBF_HSURIVAX */
+	0,	/* MBF_HSSIOSWB */
+	0,	/* MBF_SB2000RW */
+	1,	/* MBF_SB2000SB */
+	1,	/* MBF_SB2000SS */
+	1,	/* MBF_SB2100RW */
+	0,	/* MBF_SB2100IH */
+	1,	/* MBF_EM1000RW */
+	0,	/* MBF_EM12SRAW */
+	0,	/* MBF_EM12DRAW */
+	1,	/* MBF_EM12DARW */
+	1,	/* MBF_MR1PRHIG */
+	1,	/* MBF_MBLDEOIH */
+	1,	/* MBF_CBAT9001 */
+	1,	/* MBF_BCHRTUNB */
 	};
 
 /* Alias table for old (pre-version 4.0) format id's */
@@ -193,14 +250,19 @@ static char *format_description[] =
 	"Format name:          MBF_HSLDEOIH\nInformal Description: L-DEO in-house binary Hydrosweep\nAttributes:           Hydrosweep DS, 59 beams, bathymetry and amplitude, \n                      binary, centered, L-DEO.\n",
 	"Format name:          MBF_HSURIVAX\nInformal Description: URI Hydrosweep from VAX\nAttributes:           Hydrosweep DS, 59 beams, bathymetry, binary,\n                      VAX byte order, URI.\n",
 	"Format name:          MBF_HSSIOSWB\nInformal Description: SIO Swath-bathy Hydrosweep DS\nAttributes:           Hydrosweep DS, 59 beams, bathymetry, binary,\n                      SIO.\n",
-	"Format name:          MBF_SB2000RW\nInformal Description: SeaBeam 2000 vender format\nAttributes:           SeaBeam 2000, bathymetry, amplitude \n                      and sidescan, 151 beams and 2000 pixels, ascii \n                      with binary sidescan, SeaBeam Instruments.\n",
-	"Format name:          MBF_SB2000SB\nInformal Description: SIO Swath-bathy SeaBeam 2000 format\nAttributes:           SeaBeam 2000, bathymetry, amplitude \n                      and sidescan, 151 beams and 2000 pixels, binary\n                      SIO.\n",
+	"Format name:          MBF_SB2000RW\nInformal Description: SeaBeam 2000 vender format\nAttributes:           SeaBeam 2000, bathymetry, amplitude \n                      and sidescan, 121 beams and 2000 pixels, ascii \n                      with binary sidescan, SeaBeam Instruments.\n",
+	"Format name:          MBF_SB2000SB\nInformal Description: SIO Swath-bathy SeaBeam 2000 format\nAttributes:           SeaBeam 2000, bathymetry, 121 beams, \n                      binary,  SIO.\n",
+	"Format name:          MBF_SB2000SS\nInformal Description: SIO Swath-bathy SeaBeam 2000 format\nAttributes:           SeaBeam 2000, sidescan, 1000 pixels,\n                      binary,  SIO.\n",
 	"Format name:          MBF_SB2100RW\nInformal Description: SeaBeam 2100/1000 series vender format\nAttributes:           SeaBeam 2100/1000, bathymetry, amplitude \n                      and sidescan, 151 beams and 2000 pixels, ascii \n                      with binary sidescan, SeaBeam Instruments.\n",
 	"Format name:          MBF_SB2100IH\nInformal Description: SeaBeam 2100/1000 series processing format\nAttributes:           SeaBeam 2100/1000, bathymetry, amplitude \n                      and sidescan, 151 beams bathymetry,\n                      2000 pixels sidescan, binary,\n                      L-DEO and SeaBeam Instruments.\n",
-	"Format name:          MBF_EM12DARW\nInformal Description: Simrad EM12 RRS Darwin processed format\nAttributes:           Simrad EM12, bathymetry and amplitude,\n                      81 beams, binary, Oxford University.\n",
-	"Format name:          MBF_EMSIMRAD\nInformal Description: Simrad EM series vendor format\nAttributes:           Simrad EM series, bathymetry and amplitude,\n                      variable beams, binary, Simrad.\n",
+	"Format name:          MBF_EM1000RW\nInformal Description: Simrad EM1000 vendor format\nAttributes:           Simrad EM1000, bathymetry, amplitude, and sidescan,\n                      60 beams, variable pixels, ascii + binary, Simrad.\n",
+	"Format name:          MBF_EM12SRAW\nInformal Description: Simrad EM12S vendor format\nAttributes:           Simrad EM12S, bathymetry, amplitude, and sidescan,\n                      81 beams, variable pixels, ascii + binary, Simrad.\n",
+	"Format name:          MBF_EM12DRAW\nInformal Description: Simrad EM12D vendor format\nAttributes:           Simrad EM12D, bathymetry, amplitude, and sidescan,\n                      162 beams, variable pixels, ascii + binary, Simrad.\n",
+	"Format name:          MBF_EM12DARW\nInformal Description: Simrad EM12S RRS Darwin processed format\nAttributes:           Simrad EM12S, bathymetry and amplitude,\n                      81 beams, binary, Oxford University.\n",
 	"Format name:          MBF_MR1PRHIG\nInformal Description: SOEST MR1 post processed format\nAttributes:           SOEST MR1, bathymetry and sidescan,\n                      variable beams and pixels, xdr binary, \n                      SOEST, University of Hawaii.\n",
-	"Format name:          MBF_MBLDEOIH\nInformal Description: L-DEO in-house generic multibeam\nAttributes:           Data from all sonar systems, bathymetry, \n                      amplitude and sidescan, variable beams and pixels, \n                      binary, centered, L-DEO.\n"
+	"Format name:          MBF_MBLDEOIH\nInformal Description: L-DEO in-house generic multibeam\nAttributes:           Data from all sonar systems, bathymetry, \n                      amplitude and sidescan, variable beams and pixels, \n                      binary, centered, L-DEO.\n",
+	"Format name:          MBF_CBAT9001\nInformal Description: Reson SeaBat 9001 shallow water multibeam\nAttributes:           60 beam bathymetry and amplitude,\n                      binary, University of New Brunswick.\n",
+	"Format name:          MBF_BCHRTUNB\nInformal Description: Elac BottomChart shallow water multibeam\nAttributes:           56 beam bathymetry and amplitude,\n                      binary, University of New Brunswick.\n"
 	};
 
 /* Table of which multibeam system each data format 
@@ -222,12 +284,17 @@ static int mb_system_table[] =
 	MB_SYS_HSDS,	/* MBF_HSSIOSWB */
 	MB_SYS_SB2000,	/* MBF_SB2000RW */
 	MB_SYS_SB2000,	/* MBF_SB2000SB */
+	MB_SYS_SB2000,	/* MBF_SB2000SS */
 	MB_SYS_SB2100,	/* MBF_SB2100RW */
 	MB_SYS_SB2100,	/* MBF_SB2100IH */
-	MB_SYS_EM12,	/* MBF_EM12DARW */
-	MB_SYS_EM12,	/* MBF_EMSIMRAD */
+	MB_SYS_SIMRAD,	/* MBF_EM1000RW */
+	MB_SYS_SIMRAD,	/* MBF_EM12SRAW */
+	MB_SYS_SIMRAD,	/* MBF_EM12DRAW */
+	MB_SYS_SIMRAD,	/* MBF_EM12DARW */
 	MB_SYS_MR1,	/* MBF_MR1PRHIG */
 	MB_SYS_LDEOIH,	/* MBF_MBLDEOIH */
+	MB_SYS_RESON,	/* MBF_CBAT9001 */
+	MB_SYS_ELAC,	/* MBF_BCHRTUNB */
 	};
 
 /* Table of which multibeam data formats require the XDR
@@ -249,12 +316,17 @@ static int mb_xdr_table[] =
 	0,		/* MBF_HSSIOSWB */
 	0,		/* MBF_SB2000RW */
 	0,		/* MBF_SB2000SB */
+	0,		/* MBF_SB2000SS */
 	0,		/* MBF_SB2100RW */
 	0,		/* MBF_SB2100IH */
+	0,		/* MBF_EM1000RW */
+	0,		/* MBF_EM12SRAW */
+	0,		/* MBF_EM12DRAW */
 	0,		/* MBF_EM12DARW */
-	0,		/* MBF_EMSIMRAD */
 	1,		/* MBF_MR1PRHIG */
 	0,		/* MBF_MBLDEOIH */
+	0,		/* MBF_CBAT9001 */
+	0,		/* MBF_BCHRTUNB */
 	};
 
 /* Table of the maximum number of bathymetry beams for each format */
@@ -273,14 +345,19 @@ static int beams_bath_table[] =
 	59,	/* MBF_HSLDEOIH */
 	59,	/* MBF_HSURIVAX */
 	59,	/* MBF_HSSIOSWB */
-	59,	/* MBF_SB2000RW */
-	59,	/* MBF_SB2000SB */
+	121,	/* MBF_SB2000RW */
+	121,	/* MBF_SB2000SB */
+	0,	/* MBF_SB2000SS */
 	151,	/* MBF_SB2100RW */
 	151,	/* MBF_SB2100IH */
+	60,	/* MBF_EM1000RW */
+	81,	/* MBF_EM12SRAW */
+	162,	/* MBF_EM12DRAW */
 	81,	/* MBF_EM12DARW */
-	81,	/* MBF_EMSIMRAD */
 	203,	/* MBF_MR1PRHIG */
 	200,	/* MBF_MBLDEOIH */
+	60,	/* MBF_CBAT9001 */
+	56,	/* MBF_BCHRTUNB */
 	};
 
 /* Table of the maximum number of amplitude beams for each format */
@@ -301,16 +378,21 @@ static int beams_amp_table[] =
 	0,	/* MBF_HSSIOSWB */
 	0,	/* MBF_SB2000RW */
 	0,	/* MBF_SB2000SB */
+	0,	/* MBF_SB2000SS */
 	151,	/* MBF_SB2100RW */
 	151,	/* MBF_SB2100IH */
+	60,	/* MBF_EM1000RW */
+	81,	/* MBF_EM12SRAW */
+	162,	/* MBF_EM12DRAW */
 	81,	/* MBF_EM12DARW */
-	81,	/* MBF_EMSIMRAD */
 	0,	/* MBF_MR1PRHIG */
 	200,	/* MBF_MBLDEOIH */
+	60,	/* MBF_CBAT9001 */
+	56,	/* MBF_BCHRTUNB */
 	};
 
-/* Table of the maximum number of sidescan beams for each format */
-static int beams_ss_table[] = 
+/* Table of the maximum number of sidescan pixels for each format */
+static int pixels_ss_table[] = 
 	{
 	0,	/* NULL */
 	0,	/* MBF_SBSIOMRG */
@@ -325,14 +407,19 @@ static int beams_ss_table[] =
 	0,	/* MBF_HSLDEOIH */
 	0,	/* MBF_HSURIVAX */
 	0,	/* MBF_HSSIOSWB */
-	0,	/* MBF_SB2000RW */
+	2000,	/* MBF_SB2000RW */
 	0,	/* MBF_SB2000SB */
+	1000,	/* MBF_SB2000SS */
 	2000,	/* MBF_SB2100RW */
 	2000,	/* MBF_SB2100IH */
+	3000,	/* MBF_EM1000RW */
+	4050,	/* MBF_EM12SRAW */
+	8100,	/* MBF_EM12DRAW */
 	0,	/* MBF_EM12DARW */
-	0,	/* MBF_EMSIMRAD */
 	2000,	/* MBF_MR1PRHIG */
 	10000,	/* MBF_MBLDEOIH */
+	0,	/* MBF_CBAT9001 */
+	0,	/* MBF_BCHRTUNB */
 	};
 
 /* Table of which data formats have variable numbers of beams */
@@ -353,12 +440,17 @@ static int variable_beams_table[] =
 	0,	/* MBF_HSSIOSWB */
 	0,	/* MBF_SB2000RW */
 	0,	/* MBF_SB2000SB */
+	0,	/* MBF_SB2000SS */
 	1,	/* MBF_SB2100RW */
 	1,	/* MBF_SB2100IH */
+	0,	/* MBF_EM1000RW */
+	0,	/* MBF_EM12SRAW */
+	0,	/* MBF_EM12DRAW */
 	0,	/* MBF_EM12DARW */
-	0,	/* MBF_EMSIMRAD */
 	0,	/* MBF_MR1PRHIG */
 	1,	/* MBF_MBLDEOIH */
+	0,	/* MBF_CBAT9001 */
+	1,	/* MBF_BCHRTUNB */
 	};
 
 /* Table of which multibeam data formats include 
@@ -380,12 +472,17 @@ static int mb_traveltime_table[] =
 	0,	/* MBF_HSSIOSWB */
 	0,	/* MBF_SB2000RW */
 	0,	/* MBF_SB2000SB */
+	0,	/* MBF_SB2000SS */
 	1,	/* MBF_SB2100RW */
 	1,	/* MBF_SB2100IH */
+	1,	/* MBF_EM1000RW */
+	1,	/* MBF_EM12SRAW */
+	1,	/* MBF_EM12DRAW */
 	1,	/* MBF_EM12DARW */
-	1,	/* MBF_EMSIMRAD */
 	0,	/* MBF_MR1PRHIG */
 	0,	/* MBF_MBLDEOIH */
+	1,	/* MBF_CBAT9001 */
+	1,	/* MBF_BCHRTUNB */
 	};
 
 /* Table of which multibeam data formats support 
@@ -407,12 +504,17 @@ static int mb_bath_flag_table[] =
 	1,	/* MBF_HSSIOSWB */
 	1,	/* MBF_SB2000RW */
 	1,	/* MBF_SB2000SB */
+	0,	/* MBF_SB2000SS */
 	1,	/* MBF_SB2100RW */
 	1,	/* MBF_SB2100IH */
+	1,	/* MBF_EM1000RW */
+	1,	/* MBF_EM12SRAW */
+	1,	/* MBF_EM12DRAW */
 	1,	/* MBF_EM12DARW */
-	1,	/* MBF_EMSIMRAD */
 	1,	/* MBF_MR1PRHIG */
 	1,	/* MBF_MBLDEOIH */
+	1,	/* MBF_CBAT9001 */
+	1,	/* MBF_BCHRTUNB */
 	};
 
 /* Table of which multibeam data formats support 
@@ -434,12 +536,17 @@ static int mb_amp_flag_table[] =
 	0,	/* MBF_HSSIOSWB */
 	0,	/* MBF_SB2000RW */
 	0,	/* MBF_SB2000SB */
+	0,	/* MBF_SB2000SS */
 	0,	/* MBF_SB2100RW */
 	0,	/* MBF_SB2100IH */
+	1,	/* MBF_EM1000RW */
+	1,	/* MBF_EM12SRAW */
+	1,	/* MBF_EM12DRAW */
 	1,	/* MBF_EM12DARW */
-	1,	/* MBF_EMSIMRAD */
 	0,	/* MBF_MR1PRHIG */
 	1,	/* MBF_MBLDEOIH */
+	0,	/* MBF_CBAT9001 */
+	0,	/* MBF_BCHRTUNB */
 	};
 
 /* Table of which multibeam data formats support 
@@ -461,12 +568,17 @@ static int mb_ss_flag_table[] =
 	0,	/* MBF_HSSIOSWB */
 	0,	/* MBF_SB2000RW */
 	0,	/* MBF_SB2000SB */
+	0,	/* MBF_SB2000SS */
 	0,	/* MBF_SB2100RW */
 	0,	/* MBF_SB2100IH */
-	0,	/* MBF_EM12DARW */
-	0,	/* MBF_EMSIMRAD */
+	1,	/* MBF_EM1000RW */
+	1,	/* MBF_EM12SRAW */
+	1,	/* MBF_EM12DRAW */
+	1,	/* MBF_EM12DARW */
 	1,	/* MBF_MR1PRHIG */
 	0,	/* MBF_MBLDEOIH */
+	0,	/* MBF_CBAT9001 */
+	0,	/* MBF_BCHRTUNB */
 	};
 
 /* names of formats for use in button or label names */
@@ -487,10 +599,15 @@ static char *mb_button_name[] =
         " HSSIOSWB ",
         " SB2000RW ",
         " SB2000SB ",
+        " SB2000SS ",
         " SB2100RW ",
         " SB2100IH ",
+        " EM1000RW ",
+        " EM12SRAW ",
+        " EM12DRAW ",
         " EM12DARW ",
-        " EMSIMRAD ",
         " MR1PRHIG ",
-        " MBLDEOIH "
+        " MBLDEOIH ",
+        " CBAT9001 ",
+        " BCHRTUNB ",
         };

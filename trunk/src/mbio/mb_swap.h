@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_swap.h	6/21/94
- *    $Id: mb_swap.h,v 4.1 1994-07-29 18:46:51 caress Exp $
+ *    $Id: mb_swap.h,v 4.2 1994-10-21 12:11:53 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,10 @@
  * Date:	June 21, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1994/07/29  18:46:51  caress
+ * Changes associated with supporting Lynx OS (byte swapped) and
+ * using unix second time base (for time_d values).
+ *
  * Revision 4.0  1994/06/21  23:22:59  caress
  * First cut.
  *

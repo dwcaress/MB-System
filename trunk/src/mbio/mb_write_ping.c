@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_write_ping.c	2/3/93
- *	$Id: mb_write_ping.c,v 4.1 1994-07-29 18:46:51 caress Exp $
+ *	$Id: mb_write_ping.c,v 4.2 1994-10-21 12:11:53 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,10 @@
  * Author:	D. W. Caress
  * Date:	Febrary 3, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1994/07/29  18:46:51  caress
+ * Changes associated with supporting Lynx OS (byte swapped) and
+ * using unix second time base (for time_d values).
+ *
  * Revision 4.0  1994/03/06  00:01:56  caress
  * First cut at version 4.0
  *
@@ -57,7 +61,7 @@ char	*mbio_ptr;
 char	*store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mb_write_ping.c,v 4.1 1994-07-29 18:46:51 caress Exp $";
+ static char res_id[]="$Id: mb_write_ping.c,v 4.2 1994-10-21 12:11:53 caress Exp $";
 	char	*function_name = "mb_write_ping";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
@@ -97,6 +101,10 @@ int	*error;
 		{
 		status = mbr_wt_sburivax(verbose,mbio_ptr,store_ptr,error);
 		}
+	else if (mb_io_ptr->format == MBF_SBSIOSWB)
+		{
+		status = mbr_wt_sbsioswb(verbose,mbio_ptr,store_ptr,error);
+		}
 	else if (mb_io_ptr->format == MBF_HSLDEDMB)
 		{
 		status = mbr_wt_hsldedmb(verbose,mbio_ptr,store_ptr,error);
@@ -117,9 +125,21 @@ int	*error;
 		{
 		status = mbr_wt_hsurivax(verbose,mbio_ptr,store_ptr,error);
 		}
+	else if (mb_io_ptr->format == MBF_SB2000SB)
+		{
+		status = mbr_wt_sb2000sb(verbose,mbio_ptr,store_ptr,error);
+		}
+	else if (mb_io_ptr->format == MBF_SB2000SS)
+		{
+		status = mbr_wt_sb2000ss(verbose,mbio_ptr,store_ptr,error);
+		}
 	else if (mb_io_ptr->format == MBF_SB2100RW)
 		{
 		status = mbr_wt_sb2100rw(verbose,mbio_ptr,store_ptr,error);
+		}
+	else if (mb_io_ptr->format == MBF_EM1000RW)
+		{
+		status = mbr_wt_em1000rw(verbose,mbio_ptr,store_ptr,error);
 		}
 	else if (mb_io_ptr->format == MBF_EM12DARW)
 		{
@@ -132,6 +152,14 @@ int	*error;
 	else if (mb_io_ptr->format == MBF_MBLDEOIH)
 		{
 		status = mbr_wt_mbldeoih(verbose,mbio_ptr,store_ptr,error);
+		}
+	else if (mb_io_ptr->format == MBF_CBAT9001)
+		{
+		status = mbr_wt_cbat9001(verbose,mbio_ptr,store_ptr,error);
+		}
+	else if (mb_io_ptr->format == MBF_BCHRTUNB)
+		{
+		status = mbr_wt_bchrtunb(verbose,mbio_ptr,store_ptr,error);
 		}
 	else
 		{

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	1/19/93
- *    $Id: mb_io.h,v 4.1 1994-07-29 18:46:51 caress Exp $
+ *    $Id: mb_io.h,v 4.2 1994-10-21 12:11:53 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,10 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1994/07/29  18:46:51  caress
+ * Changes associated with supporting Lynx OS (byte swapped) and
+ * using unix second time base (for time_d values).
+ *
  * Revision 4.0  1994/03/06  00:01:56  caress
  * First cut at version 4.0
  *
@@ -95,12 +99,12 @@ struct mb_io_struct
 	int	pings;		/* controls ping averaging */
 	int	lonflip;	/* controls longitude range */
 	double	bounds[4];	/* locations bounds of acceptable data */
-	int	btime_i[6];	/* beginning time of acceptable data */
-	int	etime_i[6];	/* ending time of acceptable data */
+	int	btime_i[7];	/* beginning time of acceptable data */
+	int	etime_i[7];	/* ending time of acceptable data */
 	double	btime_d;	/* beginning time of acceptable data 
-					in "_d" format */
+					in "_d" format (unix seconds) */
 	double	etime_d;	/* ending time of acceptable data 
-					in "_d" format */
+					in "_d" format (unix seconds) */
 	double	speedmin;	/* minimum ship speed of acceptable data
 					in km/hr */
 	double	timegap;	/* maximum time between pings without
@@ -126,15 +130,15 @@ struct mb_io_struct
 	double	lat;
 	double	speed;
 	double	heading;
-	int	*bath;
-	int	*amp;
-	int	*bath_acrosstrack;
-	int	*bath_alongtrack;
+	double	*bath;
+	double	*amp;
+	double	*bath_acrosstrack;
+	double	*bath_alongtrack;
 	int	*bath_num;
 	int	*amp_num;
-	int	*ss;
-	int	*ss_acrosstrack;
-	int	*ss_alongtrack;
+	double	*ss;
+	double	*ss_acrosstrack;
+	double	*ss_alongtrack;
 	int	*ss_num;
 
 	/* current ping variables */
@@ -142,20 +146,26 @@ struct mb_io_struct
 	int	new_kind;
 	int	new_error;
 	char	new_comment[MB_COMMENT_MAXLINE];
-	int	new_time_i[6];
+	int	new_time_i[7];
 	double	new_time_d;
 	double	new_lon;
 	double	new_lat;
 	double	new_speed;
 	double	new_heading;
-	int	*new_bath;
-	int	*new_amp;
-	int	*new_bath_acrosstrack;
-	int	*new_bath_alongtrack;
-	int	*new_ss;
-	int	*new_ss_acrosstrack;
-	int	*new_ss_alongtrack;
+	double	*new_bath;
+	double	*new_amp;
+	double	*new_bath_acrosstrack;
+	double	*new_bath_alongtrack;
+	double	*new_ss;
+	double	*new_ss_acrosstrack;
+	double	*new_ss_alongtrack;
 
+	/* variables for extrapolating navigation 
+		for certain troublesome formats */
+	int nfix;
+	double fix_time_d[5];
+	double fix_lon[5];
+	double fix_lat[5];
 	};
 
 /* MBIO buffer control structure */

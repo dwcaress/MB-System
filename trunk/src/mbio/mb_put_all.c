@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_put_all.c	2/4/93
- *    $Id: mb_put_all.c,v 4.1 1994-05-11 18:43:58 caress Exp $
+ *    $Id: mb_put_all.c,v 4.2 1994-10-21 12:11:53 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,12 @@
  * Date:	February 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1994/05/11  18:43:58  caress
+ * Fixed debug statement for time_d value.
+ *
+ * Revision 4.1  1994/05/11  18:43:58  caress
+ * Fixed debug statement for time_d value.
+ *
  * Revision 4.0  1994/03/06  00:01:56  caress
  * First cut at version 4.0
  *
@@ -80,7 +86,7 @@ char	*mbio_ptr;
 char	*store_ptr;
 int	usevalues;
 int	kind;
-int	time_i[6];
+int	time_i[7];
 double	time_d;
 double	navlon;
 double	navlat;
@@ -89,17 +95,17 @@ double	heading;
 int	nbath;
 int	namp;
 int	nss;
-int	*bath;
-int	*amp;
-int	*bathacrosstrack;
-int	*bathalongtrack;
-int	*ss;
-int	*ssacrosstrack;
-int	*ssalongtrack;
+double	*bath;
+double	*amp;
+double	*bathacrosstrack;
+double	*bathalongtrack;
+double	*ss;
+double	*ssacrosstrack;
+double	*ssalongtrack;
 char	*comment;
 int	*error;
 {
-  static char rcs_id[]="$Id: mb_put_all.c,v 4.1 1994-05-11 18:43:58 caress Exp $";
+  static char rcs_id[]="$Id: mb_put_all.c,v 4.2 1994-10-21 12:11:53 caress Exp $";
 	char	*function_name = "mb_put_all";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -129,6 +135,7 @@ int	*error;
 		fprintf(stderr,"dbg2       time_i[3]:  %d\n",time_i[3]);
 		fprintf(stderr,"dbg2       time_i[4]:  %d\n",time_i[4]);
 		fprintf(stderr,"dbg2       time_i[5]:  %d\n",time_i[5]);
+		fprintf(stderr,"dbg2       time_i[6]:  %d\n",time_i[6]);
 		fprintf(stderr,"dbg2       time_d:     %f\n",time_d);
 		fprintf(stderr,"dbg2       navlon:     %f\n",navlon);
 		fprintf(stderr,"dbg2       navlat:     %f\n",navlat);
@@ -142,7 +149,7 @@ int	*error;
 		  {
 		  fprintf(stderr,"dbg3       beam   bath  crosstrack alongtrack\n");
 		  for (i=0;i<nbath;i++)
-		    fprintf(stderr,"dbg3       %4d   %5d    %5d     %5d\n",
+		    fprintf(stderr,"dbg3       %4d   %f    %f     %f\n",
 			i,bath[i],
 			bathacrosstrack[i],bathalongtrack[i]);
 		  }
@@ -151,7 +158,7 @@ int	*error;
 		  {
 		  fprintf(stderr,"dbg3       beam    amp  crosstrack alongtrack\n");
 		  for (i=0;i<namp;i++)
-		    fprintf(stderr,"dbg3       %4d   %5d    %5d     %5d\n",
+		    fprintf(stderr,"dbg3       %4d   %f    %f     %f\n",
 			i,amp[i],
 			bathacrosstrack[i],bathalongtrack[i]);
 		  }
@@ -160,7 +167,7 @@ int	*error;
 		  {
 		  fprintf(stderr,"dbg3       pixel sidescan crosstrack alongtrack\n");
 		  for (i=0;i<nss;i++)
-		    fprintf(stderr,"dbg3       %4d   %5d    %5d     %5d\n",
+		    fprintf(stderr,"dbg3       %4d   %f    %f     %f\n",
 			i,ss[i],
 			ssacrosstrack[i],ssalongtrack[i]);
 		  }
@@ -195,7 +202,7 @@ int	*error;
 		if (time_i[0] == 0)
 			mb_get_time(verbose,time_d,mb_io_ptr->new_time_i);
 		else
-			for (i=0;i<6;i++)
+			for (i=0;i<7;i++)
 				mb_io_ptr->new_time_i[i] = time_i[i];
 		mb_io_ptr->new_time_d = time_d;
 		mb_io_ptr->new_lon = navlon;
