@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_buffer.c	2/25/93
- *    $Id: mb_buffer.c,v 4.5 1995-03-06 19:38:54 caress Exp $
+ *    $Id: mb_buffer.c,v 4.6 1995-08-17 14:42:45 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -26,6 +26,8 @@
  *   mb_buffer_insert	- insert altered navigation and 
  *   				bathymetry/backscatter data into 
  *   				record in buffer
+ *   mb_buffer_insert_nav - insert altered navigation into 
+ *   				record in buffer
  *   mb_buffer_alloc	- allocate memory in buffer
  *   mb_buffer_deall	- deallocate memory in buffer
  *
@@ -33,6 +35,9 @@
  * Date:	February 25, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.5  1995/03/06  19:38:54  caress
+ * Changed include strings.h to string.h for POSIX compliance.
+ *
  * Revision 4.4  1995/02/10  22:10:46  caress
  * Added mb_buffer_clear() function to allow data to be cleared
  * without being dumped to a file.
@@ -102,7 +107,7 @@ int	verbose;
 char	**buff_ptr;
 int	*error;
 {
-  static char rcs_id[]="$Id: mb_buffer.c,v 4.5 1995-03-06 19:38:54 caress Exp $";
+  static char rcs_id[]="$Id: mb_buffer.c,v 4.6 1995-08-17 14:42:45 caress Exp $";
 	char	*function_name = "mb_buffer_init";
 	int	status = MB_SUCCESS;
 	struct mb_buffer_struct *buff;
@@ -1043,6 +1048,116 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+int mb_buffer_get_next_nav(verbose,buff_ptr,mbio_ptr,start,id,
+		time_i,time_d,navlon,navlat,speed,heading,
+		roll,pitch,heave,error)
+int	verbose;
+char	*buff_ptr;
+char	*mbio_ptr;
+int	start;
+int	*id;
+int	time_i[7];
+double	*time_d;
+double	*navlon;
+double	*navlat;
+double	*speed;
+double	*heading;
+double	*roll;
+double	*pitch;
+double	*heave;
+int	*error;
+{
+	char	*function_name = "mb_buffer_get_next_data";
+	int	status = MB_SUCCESS;
+	struct mb_buffer_struct *buff;
+	struct mb_io_struct *mb_io_ptr;
+	char	*store_ptr;
+	int	system;
+	int	kind;
+	char	comment[200];
+	int	found;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       buff_ptr:   %d\n",buff_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       start:      %d\n",start);
+		}
+
+	/* get buffer structure */
+	buff = (struct mb_buffer_struct *) buff_ptr;
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* look for next survey data */
+	found = MB_NO;
+	for (i=start;i<buff->nbuffer;i++)
+		{
+		if (found == MB_NO 
+			&& buff->buffer_kind[i] == MB_DATA_DATA)
+			{
+			*id = i;
+			found = MB_YES;
+			}
+		}
+	if (found == MB_NO)
+		{
+		status = MB_FAILURE;
+		*error = MB_ERROR_NO_MORE_DATA;
+		*id = -1;
+		}
+
+	/* extract the data */
+	if (found == MB_YES)
+		status = mb_buffer_extract_nav(verbose,
+			buff_ptr,mbio_ptr,*id,&kind,
+			time_i,time_d,navlon,navlat,speed,heading,
+			roll,pitch,heave,error);
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       id:         %d\n",*id);
+		}
+	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR)
+		{
+		fprintf(stderr,"dbg2       time_i[0]:     %d\n",time_i[0]);
+		fprintf(stderr,"dbg2       time_i[1]:     %d\n",time_i[1]);
+		fprintf(stderr,"dbg2       time_i[2]:     %d\n",time_i[2]);
+		fprintf(stderr,"dbg2       time_i[3]:     %d\n",time_i[3]);
+		fprintf(stderr,"dbg2       time_i[4]:     %d\n",time_i[4]);
+		fprintf(stderr,"dbg2       time_i[5]:     %d\n",time_i[5]);
+		fprintf(stderr,"dbg2       time_i[6]:     %d\n",time_i[6]);
+		fprintf(stderr,"dbg2       time_d:        %f\n",*time_d);
+		fprintf(stderr,"dbg2       longitude:     %f\n",*navlon);
+		fprintf(stderr,"dbg2       latitude:      %f\n",*navlat);
+		fprintf(stderr,"dbg2       speed:         %f\n",*speed);
+		fprintf(stderr,"dbg2       heading:       %f\n",*heading);
+		fprintf(stderr,"dbg2       roll:          %f\n",*roll);
+		fprintf(stderr,"dbg2       pitch:         %f\n",*pitch);
+		fprintf(stderr,"dbg2       heave:         %f\n",*heave);
+		}
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
 int mb_buffer_extract(verbose,buff_ptr,mbio_ptr,id,kind,
 		time_i,time_d,navlon,navlat,speed,heading,
 		nbath,namp,nss,
@@ -1286,6 +1401,190 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+int mb_buffer_extract_nav(verbose,buff_ptr,mbio_ptr,id,kind,
+		time_i,time_d,navlon,navlat,speed,heading,
+		roll,pitch,heave, 
+		error)
+int	verbose;
+char	*buff_ptr;
+char	*mbio_ptr;
+int	id;
+int	*kind;
+int	time_i[7];
+double	*time_d;
+double	*navlon;
+double	*navlat;
+double	*speed;
+double	*heading;
+double	*roll;
+double	*pitch;
+double	*heave;
+int	*error;
+{
+	char	*function_name = "mb_buffer_extract_nav";
+	int	status = MB_SUCCESS;
+	struct mb_buffer_struct *buff;
+	struct mb_io_struct *mb_io_ptr;
+	char	*store_ptr;
+	int	system;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       buff_ptr:   %d\n",buff_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       id:         %d\n",id);
+		}
+
+	/* get buffer structure */
+	buff = (struct mb_buffer_struct *) buff_ptr;
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* get store_ptr and kind for desired record */
+	if (id < 0 || id >= buff->nbuffer)
+		{
+		status = MB_FAILURE;
+		*error = MB_ERROR_BAD_BUFFER_ID;
+		}
+	else
+		{
+		store_ptr = buff->buffer[id];
+		*kind = buff->buffer_kind[id];
+		*error = MB_ERROR_NO_ERROR;
+		}
+
+	/* if no error then proceed */
+	if (status == MB_SUCCESS)
+		{
+
+		/* get multibeam system id */
+		system = mb_system_table[mb_io_ptr->format_num];
+
+		/* call appropriate extraction routine */
+		if (system == MB_SYS_SB)
+			{
+			status = mbsys_sb_extract_nav(verbose,mbio_ptr,
+				store_ptr,kind,
+				time_i,time_d,navlon,navlat,speed,heading,
+				roll,pitch,heave, 
+				error);
+			}
+		else if (system == MB_SYS_HSDS)
+			{
+			status = mbsys_hsds_extract_nav(verbose,mbio_ptr,
+				store_ptr,kind,
+				time_i,time_d,navlon,navlat,speed,heading,
+				roll,pitch,heave, 
+				error);
+			}
+		else if (system == MB_SYS_SB2000)
+			{
+			status = mbsys_sb2000_extract_nav(verbose,mbio_ptr,
+				store_ptr,kind,
+				time_i,time_d,navlon,navlat,speed,heading,
+				roll,pitch,heave, 
+				error);
+			}
+		else if (system == MB_SYS_SB2100)
+			{
+			status = mbsys_sb2100_extract_nav(verbose,mbio_ptr,
+				store_ptr,kind,
+				time_i,time_d,navlon,navlat,speed,heading,
+				roll,pitch,heave, 
+				error);
+			}
+		else if (system == MB_SYS_SIMRAD)
+			{
+			status = mbsys_simrad_extract_nav(verbose,mbio_ptr,
+				store_ptr,kind,
+				time_i,time_d,navlon,navlat,speed,heading,
+				roll,pitch,heave, 
+				error);
+			}
+		else if (system == MB_SYS_MR1)
+			{
+			status = mbsys_mr1_extract_nav(verbose,mbio_ptr,
+				store_ptr,kind,
+				time_i,time_d,navlon,navlat,speed,heading,
+				roll,pitch,heave, 
+				error);
+			}
+		else if (system == MB_SYS_LDEOIH)
+			{
+			status = mbsys_ldeoih_extract_nav(verbose,mbio_ptr,
+				store_ptr,kind,
+				time_i,time_d,navlon,navlat,speed,heading,
+				roll,pitch,heave, 
+				error);
+			}
+		else if (system == MB_SYS_RESON)
+			{
+			status = mbsys_reson_extract_nav(verbose,mbio_ptr,
+				store_ptr,kind,
+				time_i,time_d,navlon,navlat,speed,heading,
+				roll,pitch,heave, 
+				error);
+			}
+		else if (system == MB_SYS_ELAC)
+			{
+			status = mbsys_elac_extract_nav(verbose,mbio_ptr,
+				store_ptr,kind,
+				time_i,time_d,navlon,navlat,speed,heading,
+				roll,pitch,heave, 
+				error);
+			}
+		else
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_BAD_SYSTEM;
+			}
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
+		}
+	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+		&& *kind != MB_DATA_COMMENT)
+		{
+		fprintf(stderr,"dbg2       time_i[0]:     %d\n",time_i[0]);
+		fprintf(stderr,"dbg2       time_i[1]:     %d\n",time_i[1]);
+		fprintf(stderr,"dbg2       time_i[2]:     %d\n",time_i[2]);
+		fprintf(stderr,"dbg2       time_i[3]:     %d\n",time_i[3]);
+		fprintf(stderr,"dbg2       time_i[4]:     %d\n",time_i[4]);
+		fprintf(stderr,"dbg2       time_i[5]:     %d\n",time_i[5]);
+		fprintf(stderr,"dbg2       time_i[6]:     %d\n",time_i[6]);
+		fprintf(stderr,"dbg2       time_d:        %f\n",*time_d);
+		fprintf(stderr,"dbg2       longitude:     %f\n",*navlon);
+		fprintf(stderr,"dbg2       latitude:      %f\n",*navlat);
+		fprintf(stderr,"dbg2       speed:         %f\n",*speed);
+		fprintf(stderr,"dbg2       heading:       %f\n",*heading);
+		fprintf(stderr,"dbg2       roll:          %f\n",*roll);
+		fprintf(stderr,"dbg2       pitch:         %f\n",*pitch);
+		fprintf(stderr,"dbg2       heave:         %f\n",*heave);
+		}
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
 int mb_buffer_insert(verbose,buff_ptr,mbio_ptr,id,
 		time_i,time_d,navlon,navlat,speed,heading,
 		nbath,namp,nss,
@@ -1472,6 +1771,173 @@ int	*error;
 			bath,amp,bathacrosstrack,bathalongtrack,
 			ss,ssacrosstrack,ssalongtrack,
 			comment,error);
+		}
+	else
+		{
+		status = MB_FAILURE;
+		*error = MB_ERROR_BAD_SYSTEM;
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_buffer_insert_nav(verbose,buff_ptr,mbio_ptr,id,
+		time_i,time_d,navlon,navlat,speed,heading,
+		roll,pitch,heave, 
+		error)
+int	verbose;
+char	*buff_ptr;
+char	*mbio_ptr;
+int	id;
+int	time_i[7];
+double	time_d;
+double	navlon;
+double	navlat;
+double	speed;
+double	heading;
+double	roll;
+double	pitch;
+double	heave;
+int	*error;
+{
+	char	*function_name = "mb_buffer_insert";
+	int	status = MB_SUCCESS;
+	struct mb_buffer_struct *buff;
+	struct mb_io_struct *mb_io_ptr;
+	char	*store_ptr;
+	int	system;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       id:         %d\n",id);
+		fprintf(stderr,"dbg2       time_i[0]:  %d\n",time_i[0]);
+		fprintf(stderr,"dbg2       time_i[1]:  %d\n",time_i[1]);
+		fprintf(stderr,"dbg2       time_i[2]:  %d\n",time_i[2]);
+		fprintf(stderr,"dbg2       time_i[3]:  %d\n",time_i[3]);
+		fprintf(stderr,"dbg2       time_i[4]:  %d\n",time_i[4]);
+		fprintf(stderr,"dbg2       time_i[5]:  %d\n",time_i[5]);
+		fprintf(stderr,"dbg2       time_i[6]:  %d\n",time_i[6]);
+		fprintf(stderr,"dbg2       time_d:     %f\n",time_d);
+		fprintf(stderr,"dbg2       navlon:     %f\n",navlon);
+		fprintf(stderr,"dbg2       navlat:     %f\n",navlat);
+		fprintf(stderr,"dbg2       speed:      %f\n",speed);
+		fprintf(stderr,"dbg2       heading:    %f\n",heading);
+		fprintf(stderr,"dbg2       heading:    %f\n",roll);
+		fprintf(stderr,"dbg2       heading:    %f\n",pitch);
+		fprintf(stderr,"dbg2       heading:    %f\n",heave);
+		}
+
+	/* get buffer structure */
+	buff = (struct mb_buffer_struct *) buff_ptr;
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* get store_ptr for specified record */
+	if (id < 0 || id >= buff->nbuffer)
+		{
+		status = MB_FAILURE;
+		*error = MB_ERROR_BAD_BUFFER_ID;
+		}
+	else
+		{
+		store_ptr = buff->buffer[id];
+		}
+
+	/* get multibeam system id */
+	system = mb_system_table[mb_io_ptr->format_num];
+
+	/* call appropriate insertion routine */
+	if (system == MB_SYS_SB)
+		{
+		status = mbsys_sb_insert_nav(verbose,
+			mbio_ptr,store_ptr,
+			time_i,time_d,navlon,navlat,speed,heading,
+			roll,pitch,heave, 
+			error);
+		}
+	else if (system == MB_SYS_HSDS)
+		{
+		status = mbsys_hsds_insert_nav(verbose,
+			mbio_ptr,store_ptr,
+			time_i,time_d,navlon,navlat,speed,heading,
+			roll,pitch,heave, 
+			error);
+		}
+	else if (system == MB_SYS_SB2000)
+		{
+		status = mbsys_sb2000_insert_nav(verbose,
+			mbio_ptr,store_ptr,
+			time_i,time_d,navlon,navlat,speed,heading,
+			roll,pitch,heave, 
+			error);
+		}
+	else if (system == MB_SYS_SB2100)
+		{
+		status = mbsys_sb2100_insert_nav(verbose,
+			mbio_ptr,store_ptr,
+			time_i,time_d,navlon,navlat,speed,heading,
+			roll,pitch,heave, 
+			error);
+		}
+	else if (system == MB_SYS_SIMRAD)
+		{
+		status = mbsys_simrad_insert_nav(verbose,
+			mbio_ptr,store_ptr,
+			time_i,time_d,navlon,navlat,speed,heading,
+			roll,pitch,heave, 
+			error);
+		}
+	else if (system == MB_SYS_MR1)
+		{
+		status = mbsys_mr1_insert_nav(verbose,
+			mbio_ptr,store_ptr,
+			time_i,time_d,navlon,navlat,speed,heading,
+			roll,pitch,heave, 
+			error);
+		}
+	else if (system == MB_SYS_LDEOIH)
+		{
+		status = mbsys_ldeoih_insert_nav(verbose,
+			mbio_ptr,store_ptr,
+			time_i,time_d,navlon,navlat,speed,heading,
+			roll,pitch,heave, 
+			error);
+		}
+	else if (system == MB_SYS_RESON)
+		{
+		status = mbsys_reson_insert_nav(verbose,
+			mbio_ptr,store_ptr,
+			time_i,time_d,navlon,navlat,speed,heading,
+			roll,pitch,heave, 
+			error);
+		}
+	else if (system == MB_SYS_ELAC)
+		{
+		status = mbsys_elac_insert_nav(verbose,
+			mbio_ptr,store_ptr,
+			time_i,time_d,navlon,navlat,speed,heading,
+			roll,pitch,heave, 
+			error);
 		}
 	else
 		{

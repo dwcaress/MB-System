@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbio_status.h	2/1/93
- *    $Id: mb_status.h,v 4.3 1995-08-14 12:38:44 caress Exp $
+ *    $Id: mb_status.h,v 4.4 1995-08-17 14:43:23 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -18,6 +18,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1995/08/14  12:38:44  caress
+ * Changed version to 4.3.
+ *
  * Revision 4.2  1995/01/25  17:16:56  caress
  * Changed MB_VERSION to 4.2
  *
@@ -147,6 +150,7 @@ static char *nonfatal_error_msg[] =
 	"No data was loaded into the buffer",
 	"Data buffer is empty",
 	"No data was dumped from the buffer",
+	"No more survey data records in buffer", 
 	"Data inconsistencies prevented inserting data into storage structure"
 	};
 static char *unknown_error_msg[] =

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_mr1.c	7/19/94
- *	$Id: mbsys_mr1.c,v 4.6 1995-07-13 19:13:36 caress Exp $
+ *	$Id: mbsys_mr1.c,v 4.7 1995-08-17 14:41:09 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -23,11 +23,9 @@
  *   mbsys_mr1_insert  - insert basic data into mbsys_mr1_struct structure
  *   mbsys_mr1_ttimes  - extract travel time and beam angle data from
  *                          mbsys_mr1_struct structure
- *   mbsys_mr1_nav_get - extract navigation and attitude 
- *			    sensor data from
+ *   mbsys_mr1_extract_nav - extract navigation data from
  *                          mbsys_mr1_struct structure
- *   mbsys_mr1_nav_put - insert navigation and attitude 
- *			    sensor data into
+ *   mbsys_mr1_insert_nav - insert navigation data into
  *                          mbsys_mr1_struct structure
  *   mbsys_mr1_copy	  - copy data in one mbsys_mr1_struct structure
  *   				into another mbsys_mr1_struct structure
@@ -35,6 +33,9 @@
  * Author:	D. W. Caress
  * Date:	July 19, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.6  1995/07/13  19:13:36  caress
+ * Intermediate check-in during major bug-fixing flail.
+ *
  * Revision 4.5  1995/03/06  19:38:54  caress
  * Changed include strings.h to string.h for POSIX compliance.
  *
@@ -83,7 +84,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_mr1.c,v 4.6 1995-07-13 19:13:36 caress Exp $";
+ static char res_id[]="$Id: mbsys_mr1.c,v 4.7 1995-08-17 14:41:09 caress Exp $";
 	char	*function_name = "mbsys_mr1_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -728,7 +729,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_mr1_nav_get(verbose,mbio_ptr,store_ptr,kind,
+int mbsys_mr1_extract_nav(verbose,mbio_ptr,store_ptr,kind,
 		time_i,time_d,navlon,navlat,speed,heading,
 		roll,pitch,heave,error)
 int	verbose;
@@ -746,7 +747,7 @@ double	*pitch;
 double	*heave;
 int	*error;
 {
-	char	*function_name = "mbsys_mr1_nav_get";
+	char	*function_name = "mbsys_mr1_extract_nav";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_mr1_struct *store;
@@ -917,7 +918,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_mr1_nav_put(verbose,mbio_ptr,store_ptr,
+int mbsys_mr1_insert_nav(verbose,mbio_ptr,store_ptr,
 		time_i,time_d,navlon,navlat,speed,heading,
 		roll,pitch,heave,error)
 int	verbose;
@@ -934,7 +935,7 @@ double	pitch;
 double	heave;
 int	*error;
 {
-	char	*function_name = "mbsys_mr1_nav_put";
+	char	*function_name = "mbsys_mr1_insert_nav";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_mr1_struct *store;
