@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mblevitus.c	4/15/93
- *    $Id: mblevitus.c,v 5.0 2000-12-01 22:57:08 caress Exp $
+ *    $Id: mblevitus.c,v 5.1 2001-03-22 21:15:49 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -34,6 +34,9 @@
  * Rewrite:	March 26, 1997
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01  22:57:08  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.10  2000/10/11  01:06:15  caress
  * Convert to ANSI C
  *
@@ -123,7 +126,7 @@
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mblevitus.c,v 5.0 2000-12-01 22:57:08 caress Exp $";
+	static char rcs_id[] = "$Id: mblevitus.c,v 5.1 2001-03-22 21:15:49 caress Exp $";
 	static char program_name[] = "MBLEVITUS";
 	static char help_message[] = "MBLEVITUS generates an average water velocity profile for a \nspecified location from the Levitus temperature and salinity database.";
 	static char usage_message[] = "mblevitus [-Rlon/lat -Ooutfile -V -H]";
@@ -175,6 +178,7 @@ main (int argc, char **argv)
 	time_t	right_now;
 	char	date[25], user[128], *user_ptr, host[128];
 
+	char	*lonptr, *latptr;
 	int	last_good;
 	int	i, j, k;
 
@@ -198,7 +202,13 @@ main (int argc, char **argv)
 			break;
 		case 'R':
 		case 'r':
-			sscanf (optarg,"%lf/%lf", &longitude,&latitude);
+			lonptr = strtok(optarg, "/");
+			latptr = strtok(NULL, "/");
+			if (lonptr != NULL && latptr != NULL)
+			    {
+			    longitude = mb_ddmmss_to_degree(lonptr);
+			    latitude = mb_ddmmss_to_degree(latptr);
+			    }
 			flag++;
 			break;
 		case 'O':

@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
- *    The MB-system:	mbgetmask.c	6/15/93
- *    $Id: mbgetmask.c,v 5.1 2001-03-22 21:15:49 caress Exp $
+ *    The MB-system:	mbgetesf.c	6/15/93
+ *    $Id: mbgetesf.c,v 5.0 2001-03-22 21:14:47 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000 by
+ *    Copyright (c) 2001 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -13,78 +13,17 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- * MBGETMASK reads a multibeam data file and writes out
- * a data flag mask to stdout which can be applied to other data files
+ * mbgetesf reads a multibeam data file and writes out
+ * an edit save file which can be applied to other data files
  * containing the same data (but presumably in a different
  * state of processing).  This allows editing of one data file to
- * be transferred to another with ease.  The program MBMASK is
- * used to apply the flag mask to another file.
- * The default input streams is stdin.
+ * be transferred to another with ease.  The programs mbedit and
+ * mbprocess can be used to apply the edit events to another file.
  *
  * Author:	D. W. Caress
- * Date:	June 15, 1993
+ * Date:	January 24, 2001
  * 
  * $Log: not supported by cvs2svn $
- * Revision 5.0  2000/12/01  22:57:08  caress
- * First cut at Version 5.0.
- *
- * Revision 4.13  2000/10/11  01:06:15  caress
- * Convert to ANSI C
- *
- * Revision 4.12  2000/09/30  07:06:28  caress
- * Snapshot for Dale.
- *
- * Revision 4.11  1999/08/08  04:17:40  caress
- * Unknown changes.
- *
- * Revision 4.10  1999/03/31  18:33:06  caress
- * MB-System 4.6beta7
- *
- * Revision 4.9  1998/10/05  19:19:24  caress
- * MB-System version 4.6beta
- *
- * Revision 4.8  1997/04/21  17:19:14  caress
- * MB-System 4.5 Beta Release.
- *
- * Revision 4.8  1997/04/17  15:14:38  caress
- * MB-System 4.5 Beta Release
- *
- * Revision 4.7  1996/04/22  13:23:05  caress
- * Now have DTR and MIN/MAX defines in mb_define.h
- *
- * Revision 4.6  1996/03/11  15:31:18  caress
- * Changed so that flag mask set for zero as well as negative
- * depths.
- *
- * Revision 4.5  1995/05/12  17:12:32  caress
- * Made exit status values consistent with Unix convention.
- * 0: ok  nonzero: error
- *
- * Revision 4.4  1995/03/06  19:37:59  caress
- * Changed include strings.h to string.h for POSIX compliance.
- *
- * Revision 4.3  1995/03/02  13:49:21  caress
- * Fixed bug related to error messages.
- *
- * Revision 4.2  1994/10/21  13:02:31  caress
- * Release V4.0
- *
- * Revision 4.1  1994/03/12  01:44:37  caress
- * Added declarations of ctime and/or getenv for compatability
- * with SGI compilers.
- *
- * Revision 4.0  1994/03/06  00:13:22  caress
- * First cut at version 4.0
- *
- * Revision 4.0  1994/03/01  18:59:27  caress
- * First cut at new version. Any changes are associated with
- * support of three data types (beam bathymetry, beam amplitude,
- * and sidescan) instead of two (bathymetry and backscatter).
- *
- * Revision 3.0  1993/06/21  01:21:00  caress
- * Initial revision.
- *
- *
  *
  */
 
@@ -98,16 +37,22 @@
 #include "../../include/mb_status.h"
 #include "../../include/mb_format.h"
 #include "../../include/mb_define.h"
+#include "../../include/mb_process.h"
+#include "../../include/mb_swap.h"
+
+#define MBGETESF_FLAGONLY   1
+#define MBGETESF_FLAGNULL   2
+#define MBGETESF_ALL	    3
 
 /*--------------------------------------------------------------------*/
 
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbgetmask.c,v 5.1 2001-03-22 21:15:49 caress Exp $";
-	static char program_name[] = "MBGETMASK";
-	static char help_message[] =  "MBGETMASK reads a multibeam data file and writes out \na data flag mask to stdout which can be applied to other data files \ncontaining the same data (but presumably in a different \nstate of processing).  This allows editing of one data file to \nbe transferred to another with ease.  The program MBMASK is \nused to apply the flag mask to another file. \nThe default input stream is stdin.";
-	static char usage_message[] = "mbgetmask [-Fformat -Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc -Sspeed -Iinfile -V -H]";
+	static char rcs_id[] = "$Id: mbgetesf.c,v 5.0 2001-03-22 21:14:47 caress Exp $";
+	static char program_name[] = "mbgetest";
+	static char help_message[] =  "mbgetesf reads a multibeam data file and writes out\nan edit save file which can be applied to other data files\ncontaining the same data (but presumably in a different\nstate of processing).  This allows editing of one data file to\nbe transferred to another with ease.  The programs mbedit and\nmbprocess can be used to apply the edit events to another file.";
+	static char usage_message[] = "mbgetesf [-Fformat -Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc -Sspeed -Iinfile -Oesffile -V -H]";
 
 	/* parsing variables */
 	extern char *optarg;
@@ -164,15 +109,22 @@ main (int argc, char **argv)
 	double	*ssacrosstrack = NULL;
 	double	*ssalongtrack = NULL;
 	int	idata = 0;
-	int	omask = 0;
 	int	beam_ok = 0;
 	int	beam_null = 0;
+	int	beam_ok_write = 0;
+	int	beam_null_write = 0;
 	int	beam_flag = 0;
 	int	beam_flag_manual = 0;
 	int	beam_flag_filter = 0;
 	int	beam_flag_sonar = 0;
 	char	comment[256];
+	int	mode;
 	int	kluge = 0;
+
+	/* save file control variables */
+	int	sofile_set = MB_NO;
+	char	sofile[MB_PATH_MAXLINE];
+	FILE	*sofp;
 
 	/* time, user, host variables */
 	time_t	right_now;
@@ -209,12 +161,13 @@ main (int argc, char **argv)
 	etime_i[6] = 0;
 	speedmin = 0.0;
 	timegap = 1000000000.0;
+	mode = MBGETESF_FLAGONLY;
 
 	/* set default input and output */
 	strcpy (ifile, "stdin");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhB:b:E:F:f:I:i:K:k:S:s:")) != -1)
+	while ((c = getopt(argc, argv, "VvHhB:b:E:F:f:I:i:K:k:M:m:O:o:S:s:")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -254,6 +207,17 @@ main (int argc, char **argv)
 		case 'K':
 		case 'k':
 			sscanf (optarg,"%d", &kluge);
+			flag++;
+			break;
+		case 'M':
+		case 'm':
+			sscanf (optarg,"%d", &mode);
+			flag++;
+			break;
+		case 'O':
+		case 'o':
+			sscanf (optarg,"%s", sofile);
+			sofile_set = MB_YES;
 			flag++;
 			break;
 		case 'S':
@@ -316,6 +280,7 @@ main (int argc, char **argv)
 		fprintf(stderr,"dbg2       speedmin:       %f\n",speedmin);
 		fprintf(stderr,"dbg2       timegap:        %f\n",timegap);
 		fprintf(stderr,"dbg2       input file:     %s\n",ifile);
+		fprintf(stderr,"dbg2       mode:	   %d\n",mode);
 		fprintf(stderr,"dbg2       kluge:	   %d\n",kluge);
 		}
 
@@ -369,66 +334,27 @@ main (int argc, char **argv)
 			program_name);
 		exit(error);
 		}
-
-	/* write comments to beginning of output mask */
-	printf("# Multibeam Data Flagging Mask\n");
-	printf("# Created by program %s\n# Version: %s\n",program_name,rcs_id);
-	printf("# MB-System Version: %s\n",MB_VERSION);
-	strncpy(date,"\0",25);
-	right_now = time((time_t *)0);
-	strncpy(date,ctime(&right_now),24);
-	if ((user_ptr = getenv("USER")) == NULL)
-		user_ptr = getenv("LOGNAME");
-	if (user_ptr != NULL)
-		strcpy(user,user_ptr);
-	else
-		strcpy(user, "unknown");
-	gethostname(host,128);
-	printf("# Run by user <%s> on cpu <%s> at <%s>\n",user,host,date);
-	printf("# These ASCII lines at the beginning of the mask file\n");
-	printf("#   are comments. One additional line of text follows\n");
-	printf("#   the comments; this gives the maximum number of\n");
-	printf("#   beams and the mask version:\n");
-	printf("#       beams_max dummy version\n");
-	printf("#   The mask data is binary. For each ping,  the initial\n");
-	printf("#   32 bytes consist of eight four int values:\n");
-	printf("#       int time_i[0] = year\n");
-	printf("#       int time_i[1] = month\n");
-	printf("#       int time_i[2] = day\n");
-	printf("#       int time_i[3] = hour\n");
-	printf("#       int time_i[4] = minute\n");
-	printf("#       int time_i[5] = second\n");
-	printf("#       int time_i[6] = usecond\n");
-	printf("#       int beams_bath = number of beams\n");
-	printf("#   These values are followed by an array of mask values\n");
-	printf("#   (one byte each) beams_bath long. The mask values \n");
-	printf("#   are as follows:\n");
-	printf("#       0: good beam\n");
-	printf("#       1: null beam\n");
-	printf("#       3: beam flagged, manual editing\n");
-	printf("#       4: beam flagged, filter\n");
-	printf("#       5: beam flagged, > 1X IHO accuracy\n");
-	printf("#       6: beam flagged, > 2X IHO accuracy\n");
-	printf("#       7: beam flagged, footprint too large\n");
-	printf("#       8: beam flagged, by sonar\n");
-	printf("# Max number of bathymetry beams:   %d\n",beams_bath);
-	printf("# Control Parameters:\n");
-	printf("#   MBIO data format:   %d\n",format);
-	printf("#   Input file:         %s\n",ifile);
-	printf("#   Longitude flip:     %d\n",lonflip);
-	printf("#   Longitude bounds:   %f %f\n",bounds[0],bounds[1]);
-	printf("#   Latitude bounds:    %f %f\n",bounds[2],bounds[3]);
-	printf("#   Begin time:         %d %d %d %d %d %d.%6.6d\n",
-			btime_i[0],btime_i[1],btime_i[2],
-			btime_i[3],btime_i[4],btime_i[5],btime_i[6]);
-	printf("#   End time:           %d %d %d %d %d %d.%6.6d\n",
-			etime_i[0],etime_i[1],etime_i[2],
-			etime_i[3],etime_i[4],etime_i[5],etime_i[6]);
-	printf("#   Minimum speed:      %f\n",speedmin);
-	printf("# \n");
-	
-	/* set version 3 in header */
-	printf("%4d %4d 3\n",beams_bath,0);
+		
+	/* now deal with new edit save file */
+	if (status == MB_SUCCESS)
+	    {
+	    /* get edit save file */
+	    if (sofile_set == MB_NO)
+		{
+		sofp = stdout;
+		}
+		
+	    /* open the edit save file */
+	    else if ((sofp = fopen(sofile,"w")) == NULL)
+		{
+		error = MB_ERROR_OPEN_FAIL;
+		mb_error(verbose,error,&message);
+		fprintf(stderr,"\nEdit Save File <%s> not initialized for writing\n",sofile);
+		fprintf(stderr,"\nProgram <%s> Terminated\n",
+			program_name);
+		exit(error);
+		}
+	    }
 
 	/* read and write */
 	while (error <= MB_ERROR_NO_ERROR)
@@ -450,21 +376,21 @@ main (int argc, char **argv)
 			&& kind == MB_DATA_DATA)
 			idata = idata + pings;
 
-		/* time gaps do not matter to mbgetmask */
+		/* time gaps do not matter to mbgetesf */
 		if (error == MB_ERROR_TIME_GAP)
 			{
 			status = MB_SUCCESS;
 			error = MB_ERROR_NO_ERROR;
 			}
 
-		/* time bounds do not matter to mbgetmask */
+		/* time bounds do not matter to mbgetesf */
 		if (error == MB_ERROR_OUT_TIME)
 			{
 			status = MB_SUCCESS;
 			error = MB_ERROR_NO_ERROR;
 			}
 
-		/* space bounds do not matter to mbgetmask */
+		/* space bounds do not matter to mbgetesf */
 		if (error == MB_ERROR_OUT_BOUNDS)
 			{
 			status = MB_SUCCESS;
@@ -507,38 +433,52 @@ main (int argc, char **argv)
 		    beamflag[nbath-1] = MB_FLAG_FLAG;
 		    }
 		    
-		/* count the flags */
+		/* count and write the flags */
 		for (i=0;i<nbath;i++)
 		    {
 		    if (mb_beam_ok(beamflag[i]))
 			{
 			beam_ok++;
+			if (mode == MBGETESF_ALL)
+			    {
+			    mbgetesf_save_edit(verbose, sofp, time_d, i, 
+						MBP_EDIT_UNFLAG, &error);
+			    beam_ok_write++;
+			    }
 			}
 		    else if (mb_beam_check_flag_null(beamflag[i]))
 			{
 			beam_null++;
+			if (mode == MBGETESF_FLAGNULL)
+			    {
+			    mbgetesf_save_edit(verbose, sofp, time_d, i, 
+						MBP_EDIT_ZERO, &error);
+			    beam_null_write++;
+			    }
 			}
 		    else
 			{
 			beam_flag++;
 			if (mb_beam_check_flag_manual(beamflag[i]))
+			    {
 			    beam_flag_manual++;
+			    mbgetesf_save_edit(verbose, sofp, time_d, i, 
+						MBP_EDIT_FLAG, &error);
+			    }
 			if (mb_beam_check_flag_filter(beamflag[i]))
+			    {
 			    beam_flag_filter++;
+			    mbgetesf_save_edit(verbose, sofp, time_d, i, 
+						MBP_EDIT_FILTER, &error);
+			    }
 			if (mb_beam_check_flag_sonar(beamflag[i]))
+			    {
 			    beam_flag_sonar++;
+			    mbgetesf_save_edit(verbose, sofp, time_d, i, 
+						MBP_EDIT_FLAG, &error);
+			    }
 			}
 		    }
-
-		/* write some flags */
-		if (kind == MB_DATA_DATA
-			&& error == MB_ERROR_NO_ERROR)
-			{
-			omask++;
-			fwrite(time_i, sizeof(int), 7, stdout);
-			fwrite(&nbath, sizeof(int), 1, stdout);
-			fwrite(beamflag, 1, nbath, stdout);
-			}
 		}
 
 	/* close the file */
@@ -554,6 +494,9 @@ main (int argc, char **argv)
 	mb_free(verbose,&ssacrosstrack,&error); 
 	mb_free(verbose,&ssalongtrack,&error); 
 
+	/* close edit save file */
+	fclose(sofp);
+
 	/* check memory */
 	if (verbose >= 4)
 		status = mb_memory_list(verbose,&error);
@@ -563,10 +506,16 @@ main (int argc, char **argv)
 		{
 		fprintf(stderr,"\nData records:\n");
 		fprintf(stderr,"\t%d input data records\n",idata);
-		fprintf(stderr,"\t%d output mask records\n",omask);
-		fprintf(stderr,"\nBeam flag totals:\n");
+		fprintf(stderr,"\nBeam flag read totals:\n");
 		fprintf(stderr,"\t%d beams ok\n",beam_ok);
 		fprintf(stderr,"\t%d beams null\n",beam_null);
+		fprintf(stderr,"\t%d beams flagged\n",beam_flag);
+		fprintf(stderr,"\t%d beams flagged manually\n",beam_flag_manual);
+		fprintf(stderr,"\t%d beams flagged by filter\n",beam_flag_filter);
+		fprintf(stderr,"\t%d beams flagged by sonar\n",beam_flag_sonar);
+		fprintf(stderr,"\nBeam flag write totals:\n");
+		fprintf(stderr,"\t%d beams ok\n",beam_ok_write);
+		fprintf(stderr,"\t%d beams null\n",beam_null_write);
 		fprintf(stderr,"\t%d beams flagged\n",beam_flag);
 		fprintf(stderr,"\t%d beams flagged manually\n",beam_flag_manual);
 		fprintf(stderr,"\t%d beams flagged by filter\n",beam_flag_filter);
@@ -575,5 +524,66 @@ main (int argc, char **argv)
 
 	/* end it all */
 	exit(error);
+}
+/*--------------------------------------------------------------------*/
+int mbgetesf_save_edit(int verbose, FILE *sofp, double time_d, int beam, int action, int *error)
+{
+	/* local variables */
+	char	*function_name = "mbgetesf_save_edit";
+	int	status = MB_SUCCESS;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+	
+		fprintf(stderr,"dbg2       sofp:            %d\n",sofp);
+		fprintf(stderr,"dbg2       time_d:          %f\n",time_d);
+		fprintf(stderr,"dbg2       beam:            %d\n",beam);
+		fprintf(stderr,"dbg2       action:          %d\n",action);
+		}
+		
+	/* write out the edit */
+	if (sofp != NULL)
+	    {		
+#ifdef BYTESWAPPED
+	    mb_swap_double(&time_d);
+	    beam = mb_swap_int(beam);
+	    action = mb_swap_int(action);
+#endif
+	    if (fwrite(&time_d, sizeof(double), 1, sofp) != 1)
+		{
+		status = MB_FAILURE;
+		*error = MB_ERROR_WRITE_FAIL;
+		}
+	    if (status == MB_SUCCESS
+		&& fwrite(&beam, sizeof(int), 1, sofp) != 1)
+		{
+		status = MB_FAILURE;
+		*error = MB_ERROR_WRITE_FAIL;
+		}
+	    if (status == MB_SUCCESS
+		&& fwrite(&action, sizeof(int), 1, sofp) != 1)
+		{
+		status = MB_FAILURE;
+		*error = MB_ERROR_WRITE_FAIL;
+		}
+	    }
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:       %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:      %d\n",status);
+		}
+
+	/* return */
+	return(status);
 }
 /*--------------------------------------------------------------------*/

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbbackangle.c	1/6/95
- *    $Id: mbbackangle.c,v 5.0 2000-12-01 22:57:08 caress Exp $
+ *    $Id: mbbackangle.c,v 5.1 2001-03-22 21:14:16 caress Exp $
  *
  *    Copyright (c) 1995, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	January 6, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01  22:57:08  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.12  2000/10/11  01:06:15  caress
  * Convert to ANSI C
  *
@@ -88,7 +91,7 @@
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbbackangle.c,v 5.0 2000-12-01 22:57:08 caress Exp $";
+	static char rcs_id[] = "$Id: mbbackangle.c,v 5.1 2001-03-22 21:14:16 caress Exp $";
 	static char program_name[] = "mbbackangle";
 	static char help_message[] =  
 "mbbackangle reads a swath sonar data file and generates a table\n\t\
@@ -116,6 +119,7 @@ The results are dumped to stdout.";
 	int	read_datalist = MB_NO;
 	char	read_file[128];
 	char	*datalist;
+	int	look_processed = MB_DATALIST_LOOK_UNSET;
 	double	file_weight;
 	int	format;
 	int	pings;
@@ -142,6 +146,8 @@ The results are dumped to stdout.";
 	double	speed;
 	double	heading;
 	double	distance;
+	double	altitude;
+	double	sonardepth;
 	char	*beamflag = NULL;
 	double	*bath = NULL;
 	double	*bathacrosstrack = NULL;
@@ -249,8 +255,7 @@ The results are dumped to stdout.";
 			break;
 		case 'R':
 		case 'r':
-			sscanf (optarg,"%lf/%lf/%lf/%lf", 
-				&bounds[0],&bounds[1],&bounds[2],&bounds[3]);
+			mb_get_bounds(optarg, bounds);
 			flag++;
 			break;
 		case 'S':
@@ -387,6 +392,10 @@ The results are dumped to stdout.";
 		sigma[i] = 0.0;
 		}
 
+	/* get format if required */
+	if (format == 0)
+		mb_get_format(verbose,read_file,NULL,&format,&error);
+
 	/* determine whether to read one file or a list of files */
 	if (format < 0)
 		read_datalist = MB_YES;
@@ -395,7 +404,7 @@ The results are dumped to stdout.";
 	if (read_datalist == MB_YES)
 	    {
 	    if ((status = mb_datalist_open(verbose,&datalist,
-					    read_file,&error)) != MB_SUCCESS)
+					    read_file,look_processed,&error)) != MB_SUCCESS)
 		{
 		error = MB_ERROR_OPEN_FAIL;
 		fprintf(stderr,"\nUnable to open data list file: %s\n",
@@ -506,7 +515,9 @@ The results are dumped to stdout.";
 		/* read a ping of data */
 		status = mb_get(verbose,mbio_ptr,&kind,&pings,
 				time_i,&time_d,
-				&navlon,&navlat,&speed,&heading,&distance,
+				&navlon,&navlat,
+				&speed,&heading,
+				&distance,&altitude,&sonardepth,
 				&beams_bath,&beams_amp,&pixels_ss,
 				beamflag,bath,amp,bathacrosstrack,bathalongtrack,
 				ss,ssacrosstrack,ssalongtrack,

@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 4.12 2000-09-30 07:19:12 caress Exp $
+#	$Id: Makefile.template,v 4.13 2001-03-22 21:03:31 caress Exp $
 #
 #     Copyright (c) 1993, 1994, 2000 by 
 #     David W. Caress (caress@mbari.org)
@@ -16,6 +16,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.12  2000/09/30  07:19:12  caress
+# Snapshot for Dale.
+#
 # Revision 4.11  2000/03/08  00:06:53  caress
 # Release 4.6.10
 #
@@ -92,11 +95,13 @@ clean:
 $(BINDIR)/mbcontour: mbcontour.o \
 		$(LIBDIR)/libmbio.a  \
 		$(LIBDIR)/libgsf.a  \
-		$(LIBDIR)/libmbaux.a
+		$(LIBDIR)/libmbaux.a \
+		$(LIBDIR)/libmbps.a
 	$(CC) $(CFLAGS) mbcontour.o \
 		$(LIBDIR)/libmbio.a \
 		$(LIBDIR)/libgsf.a \
 		$(LIBDIR)/libmbaux.a \
+		$(LIBDIR)/libmbps.a \
 		$(GMTLIBDIR)/libpsl.a \
 		$(GMTLIBDIR)/libgmt.a \
 		$(NETCDFLIBDIR)/libnetcdf.a \

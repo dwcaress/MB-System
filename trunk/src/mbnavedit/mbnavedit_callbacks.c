@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_callbacks.c	6/24/95
- *    $Id: mbnavedit_callbacks.c,v 5.2 2001-01-22 07:47:40 caress Exp $
+ *    $Id: mbnavedit_callbacks.c,v 5.3 2001-03-22 21:10:37 caress Exp $
  *
  *    Copyright (c) 1995, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	August 28, 2000 (New version - no buffered i/o)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2001/01/22  07:47:40  caress
+ * Version 5.0.beta01
+ *
  * Revision 5.1  2000/12/10  20:30:08  caress
  * Version 5.0.alpha02
  *
@@ -163,7 +166,7 @@ XColor closest[2];
 XColor exact[2];
 
 /* Set the colors used for this program here. */
-#define NCOLORS 7
+#define NCOLORS 9
 XColor colors[NCOLORS];
 unsigned int mpixel_values[NCOLORS];
 XColor db_color;
@@ -602,11 +605,17 @@ do_mbnavedit_init(int argc, char **argv)
     status = XLookupColor(display,colormap, "blue",&db_color,&colors[4]);
     if ((status = XAllocColor(display,colormap,&colors[4])) == 0)
 	    fprintf(stderr,"Failure to allocate color: blue\n");
-    status = XLookupColor(display,colormap, "coral",&db_color,&colors[5]);
+    status = XLookupColor(display,colormap, "orange",&db_color,&colors[5]);
     if ((status = XAllocColor(display,colormap,&colors[5])) == 0)
-	    fprintf(stderr,"Failure to allocate color: coral\n");
-    status = XLookupColor(display,colormap, "lightgrey",&db_color,&colors[6]);
+	    fprintf(stderr,"Failure to allocate color: orange\n");
+    status = XLookupColor(display,colormap, "purple",&db_color,&colors[6]);
     if ((status = XAllocColor(display,colormap,&colors[6])) == 0)
+	    fprintf(stderr,"Failure to allocate color: purple\n");
+    status = XLookupColor(display,colormap, "coral",&db_color,&colors[7]);
+    if ((status = XAllocColor(display,colormap,&colors[7])) == 0)
+	    fprintf(stderr,"Failure to allocate color: coral\n");
+    status = XLookupColor(display,colormap, "lightgrey",&db_color,&colors[8]);
+    if ((status = XAllocColor(display,colormap,&colors[8])) == 0)
 	    fprintf(stderr,"Failure to allocate color: lightgrey\n");
     for (i=0;i<NCOLORS;i++)
 	    {
@@ -851,21 +860,31 @@ void do_set_controls()
 			XmNheight, number_plots*plot_height, 
 			NULL);	
 			
-	/* set modeling controls */
+	/* set modeling controls and hide or display buttons */
 	if (model_mode == MODEL_MODE_OFF)
 		{
 		XmToggleButtonSetState(toggleButton_modeling_off, 
 			TRUE, FALSE);
+		XtUnmanageChild(pushButton_solution);
+		XtUnmanageChild(pushButton_flag);
+		XtUnmanageChild(pushButton_unflag);
+
 		}
 	else if (model_mode == MODEL_MODE_DR)
 		{
 		XmToggleButtonSetState(toggleButton_modeling_dr, 
 			TRUE, FALSE);
+		XtManageChild(pushButton_solution);
+		XtUnmanageChild(pushButton_flag);
+		XtUnmanageChild(pushButton_unflag);
 		}
 	if (model_mode == MODEL_MODE_INVERT)
 		{
 		XmToggleButtonSetState(toggleButton_modeling_inversion, 
 			TRUE, FALSE);
+		XtManageChild(pushButton_solution);
+		XtManageChild(pushButton_flag);
+		XtManageChild(pushButton_unflag);
 		}
 	XtVaSetValues(scale_driftlon, 
 			XmNvalue, drift_lon, 
@@ -1703,6 +1722,23 @@ do_toggle_dr_lon( Widget w, XtPointer client_data, XtPointer call_data)
 
 	/* replot */
 	mbnavedit_plot_all();
+}
+
+/*--------------------------------------------------------------------*/
+
+void
+do_flag( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+	
+	/* interpolate time stamps */
+	mbnavedit_action_flag();
+	
+	/* replot */
+	mbnavedit_plot_all();
+		
+	/* update controls */
+	do_set_controls();
 }
 
 /*--------------------------------------------------------------------*/
@@ -2576,3 +2612,9 @@ void get_text_string(Widget w, String str)
     XtFree(str_tmp);
 }
 /*--------------------------------------------------------------------*/
+
+void
+do_unflag( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+}

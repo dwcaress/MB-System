@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbformat.c	1/22/93
- *    $Id: mbformat.c,v 5.0 2000-12-01 22:57:08 caress Exp $
+ *    $Id: mbformat.c,v 5.1 2001-03-22 21:14:16 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	January 22, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01  22:57:08  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.10  2000/10/11  01:06:15  caress
  * Convert to ANSI C
  *
@@ -85,10 +88,10 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbformat.c,v 5.0 2000-12-01 22:57:08 caress Exp $";
+	static char rcs_id[] = "$Id: mbformat.c,v 5.1 2001-03-22 21:14:16 caress Exp $";
 	static char program_name[] = "MBFORMAT";
 	static char help_message[] = "MBFORMAT is an utility which identifies the swath data formats \nassociated with MBIO format id's.  If no format id is specified, \nMBFORMAT lists all of the currently supported formats.";
-	static char usage_message[] = "mbformat [-Fformat -L -V -H]";
+	static char usage_message[] = "mbformat [-Fformat -Ifile -L -V -H]";
 
 	/* parsing variables */
 	extern char *optarg;
@@ -98,9 +101,20 @@ main (int argc, char **argv)
 	int	error = MB_ERROR_NO_ERROR;
 	int	status;
 	int	help;
+	int	html;
 	int	verbose;
+	char	file[MB_PATH_MAXLINE];
+	int	file_specified;
 	int	format;
-	char	*message;
+	int	format_save;
+	int	format_specified;
+	char	format_description[MB_DESCRIPTION_LENGTH];
+	char	*format_name_ptr;
+	char	*format_informal_ptr;
+	char	*format_attributes_ptr;
+	char	format_name[MB_DESCRIPTION_LENGTH];
+	char	format_informal[MB_DESCRIPTION_LENGTH];
+	char	format_attributes[MB_DESCRIPTION_LENGTH];
 	int	list_simple;
 	int	i;
 
@@ -108,16 +122,20 @@ main (int argc, char **argv)
 
 	help = 0;
 	verbose = 0;
+	file_specified = MB_NO;
 	format = 0;
+	format_specified = MB_NO;
+	html = MB_NO;
 	list_simple = MB_NO;
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "F:f:HhLlVv")) != -1)
+	while ((c = getopt(argc, argv, "F:f:HhI:i:LlVvWw")) != -1)
 	  switch (c) 
 		{
 		case 'F':
 		case 'f':
 			sscanf (optarg,"%d", &format);
+			format_specified = MB_YES;
 			break;
 		case 'L':
 		case 'l':
@@ -127,9 +145,18 @@ main (int argc, char **argv)
 		case 'h':
 			help++;
 			break;
+		case 'I':
+		case 'i':
+			sscanf (optarg,"%s", file);
+			file_specified = MB_YES;
+			break;
 		case 'V':
 		case 'v':
 			verbose++;
+			break;
+		case 'W':
+		case 'w':
+			html = MB_YES;
 			break;
 		case '?':
 			errflg++;
@@ -160,7 +187,10 @@ main (int argc, char **argv)
 		fprintf(stderr,"dbg2  Control Parameters:\n");
 		fprintf(stderr,"dbg2       verbose: %d\n",verbose);
 		fprintf(stderr,"dbg2       help:    %d\n",help);
-		fprintf(stderr,"dbg2       format:  %d\n",format);
+		if (format_specified == MB_YES)
+		    fprintf(stderr,"dbg2       format:  %d\n",format);
+		if (file_specified == MB_YES)
+		    fprintf(stderr,"dbg2       file:    %s\n",file);
 		}
 
 	/* if help desired then print it and exit */
@@ -170,36 +200,141 @@ main (int argc, char **argv)
 		fprintf(stderr,"\nusage: %s\n", usage_message);
 		exit(error);
 		}
-
+		
 	/* print out the info */
-	if (format != 0)
+	if (file_specified == MB_YES)
 		{
-		status = mb_format(verbose,&format,&error);
-		status = mb_format_description(verbose,&format,&message,&error);
-		printf("\nMBIO data format id: %d\n",format);
-		printf("%s",message);
+		status = mb_get_format(verbose,file,NULL,&format,&error);
 		}
-	else if (list_simple == MB_NO)
+	else if (format_specified == MB_YES)
 		{
-		printf("\nSupported MBIO Formats:\n");
-		for (i=10;i<=1000;i++)
+		format_save = format;
+		status = mb_format(verbose,&format,&error);
+		}
+	if (file_specified == MB_YES
+		&& format == 0)
+		{
+		if (list_simple == MB_YES)
+			printf("%d\n",format);
+		else
+			printf("Program %s unable to infer format from filename %s\n",program_name,file);
+		}
+	else if (format_specified == MB_YES
+		&& format == 0)
+		{
+		if (list_simple == MB_YES)
+			printf("%d\n",format);
+		else
+			printf("Specified format %d invalid for MB-System\n",format_save);
+		}
+	else if (format != 0
+		&& list_simple == MB_YES)
+		{
+		printf("%d\n",format);
+		}
+	else if (format != 0)
+		{
+		status = mb_format_description(verbose,&format,format_description,&error);
+		printf("\nMBIO data format id: %d\n",format);
+		printf("%s",format_description);
+		}
+	else if (html == MB_YES)
+		{
+		printf("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 3.2//EN\">\n");
+		printf("<HTML>\n<HEAD>\n   <TITLE>MB-System Supported Data Formats</TITLE>\n");
+		printf("</HEAD>\n<BODY>\n\n");
+		printf("<CENTER><P><B><FONT SIZE=+2>MB-System Supported Swath Data Formats</FONT></B></P></CENTER>\n\n");
+		printf("<P>Each swath mapping sonar system outputs a data stream which includes\n");
+		printf("some values or parameters unique to that system. In general, a number of\n");
+		printf("different data formats have come into use for data from each of the sonar\n");
+		printf("systems; many of these formats include only a subset of the original data\n");
+		printf("stream. Internally, MBIO recognizes which sonar system each data format\n");
+		printf("is associated with and uses a data structure including the complete data\n");
+		printf("stream for that sonar. At present, formats associated with the following\n");
+		printf("sonars are supported: </P>\n\n");
+		printf("<UL>\n<LI>Sea Beam &quot;classic&quot; 16 beam multibeam sonar </LI>\n\n");
+		printf("<LI>Hydrosweep DS 59 beam multibeam sonar </LI>\n\n");
+		printf("<LI>Hydrosweep MD 40 beam mid-depth multibeam sonar </LI>\n\n");
+		printf("<LI>Sea Beam 2000 multibeam sonar </LI>\n\n");
+		printf("<LI>Sea Beam 2112 and 2136 multibeam sonars </LI>\n\n");
+		printf("<LI>Sea Beam 2120 multibeam sonars </LI>\n\n");
+		printf("<LI>Simrad EM12, EM121, EM950, and EM1000 multibeam sonars </LI>\n\n");
+		printf("<LI>Simrad EM120, EM300, and EM3000 multibeam sonars</LI>\n\n");
+		printf("<LI>Simrad Mesotech SM2000 multibeam sonar</LI>\n\n");
+		printf("<LI>Hawaii MR-1 shallow tow interferometric sonar </LI>\n\n");
+		printf("<LI>ELAC Bottomchart and Bottomchart MkII shallow water multibeam sonars</LI>\n\n");
+		printf("<LI>Reson Seabat 9001/9002/8081 shallow water multibeam sonars </LI>\n\n");
+		printf("<LI>WHOI DSL AMS-120 deep tow interferometric sonar </LI>\n\n");
+		printf("<LI>Sea Scan sidescan sonar</LI>\n\n");
+		printf("<LI>Furuno HS-1 multibeam sonar</LI>\n\n");
+		printf("</UL>\n\n");
+		printf("<P>The following swath mapping sonar data formats are currently supported by MB-System:</P>\n\n");
+
+		for (i=0;i<=1000;i++)
 			{
-			if ((status = mb_format_description(verbose,&i,&message,&error)) == MB_SUCCESS)
+			format = i;
+			if ((status = mb_format_description(verbose,&format,format_description,&error)) == MB_SUCCESS
+				&& format == i)
 				{
-				printf("\nMBIO Data Format ID:  %d\n",i);
-				printf("%s",message);
+				format_informal_ptr = (char *) 
+				    strstr(format_description, "Informal Description:");
+				format_attributes_ptr = (char *) 
+				    strstr(format_description, "Attributes:");
+				strncpy(format_name, format_description, 
+					strlen(format_description) 
+					    - strlen(format_informal_ptr));
+				format_name[strlen(format_description) 
+					    - strlen(format_informal_ptr) - 1] = '\0';
+				strncpy(format_informal, format_informal_ptr, 
+					strlen(format_informal_ptr) 
+					    - strlen(format_attributes_ptr));
+				format_informal[strlen(format_informal_ptr) 
+					    - strlen(format_attributes_ptr) - 1] = '\0';
+				strcpy(format_attributes, format_attributes_ptr);
+				format_attributes[strlen(format_attributes_ptr)-1] = '\0';
+				printf("\n<UL>\n<LI>MBIO Data Format ID:  %d </LI>\n",format);
+				printf("\n<UL>\n<LI>%s</LI>\n",format_name);
+				printf("\n<LI>%s</LI>\n",format_informal);
+				printf("\n<LI>%s</LI>\n",format_attributes);
+				printf("</UL>\n</UL>\n");
+				}
+			}
+
+		printf("\n<CENTER><P><BR>\n");
+		printf("Last Updated: $Date: 2001-03-22 21:14:16 $ $Revision: 5.1 $</P></CENTER>\n");
+		printf("\n<P>\n<HR WIDTH=\"100%%\"></P>\n\n");
+		printf("<P><IMG SRC=\"mbsystem_logo_small.gif\" HEIGHT=55 WIDTH=158><A HREF=\"mbsystem_home.html\">Back\n");
+		printf("to MB-System Home Page...</A></P>\n");
+		printf("\n</BODY>\n</HTML>\n");
+
+		status = MB_SUCCESS;
+		error = MB_ERROR_NO_ERROR;
+		}
+	else if (list_simple == MB_YES)
+		{
+		for (i=0;i<=1000;i++)
+			{
+			format = i;
+			if ((status = mb_format(verbose,&format,&error)) == MB_SUCCESS
+				&& format == i)
+				{
+				printf("%d\n",format);
 				}
 			}
 		status = MB_SUCCESS;
 		error = MB_ERROR_NO_ERROR;
 		}
-	else 
+	else
 		{
-		for (i=10;i<=1000;i++)
+		printf("\nSupported MBIO Formats:\n");
+		for (i=0;i<=1000;i++)
 			{
-			if ((status = mb_format(verbose,&i,&error)) == MB_SUCCESS)
+			format = i;
+			if ((status = mb_format_description(verbose,&format,format_description,&error)) == MB_SUCCESS
+				&& format == i)
 				{
-				printf("%d\n",i);
+				printf("\nMBIO Data Format ID:  %d\n",format);
+				printf("%s",format_description);
 				}
 			}
 		status = MB_SUCCESS;

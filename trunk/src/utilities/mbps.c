@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbps.c	11/4/93
- *    $Id: mbps.c,v 5.1 2001-01-22 07:54:22 caress Exp $
+ *    $Id: mbps.c,v 5.2 2001-03-22 21:15:49 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	August 31, 1991 (original version)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2001/01/22  07:54:22  caress
+ * Version 5.0.beta01
+ *
  * Revision 5.0  2000/12/01  22:57:08  caress
  * First cut at Version 5.0.
  *
@@ -144,7 +147,7 @@ int rgb_white[] = {255, 255, 255};
 main (int argc, char **argv)
 {
 
-	static char rcs_id[] = "$Id: mbps.c,v 5.1 2001-01-22 07:54:22 caress Exp $";
+	static char rcs_id[] = "$Id: mbps.c,v 5.2 2001-03-22 21:15:49 caress Exp $";
 	static char program_name[] = "MBPS";
 	static char help_message[] =  "MBPS reads a swath bathymetry data file and creates a postscript 3-d mesh plot";
 	static char usage_message[] = "mbps [-Iinfile -Fformat -Nnpings -Ppings\n\t-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc  \n\t-Aalpha -Keta -Dviewdir -Xvertexag \n\t-T\"title\" -Wmetersperinch \n\t-Sspeedmin -Ggap -Ydisplay_stats \n\t-Zdisplay_scales -V -H]";
@@ -217,6 +220,8 @@ main (int argc, char **argv)
 	double	speed;
 	double	heading;
 	double	distance;
+	double	altitude;
+	double	sonardepth;
 	char	*beamflag;
 	double	*bath = NULL;
 	double	*bathacrosstrack = NULL;
@@ -433,6 +438,10 @@ main (int argc, char **argv)
 		exit(error);
 		}
 
+	/* get format if required */
+	if (format == 0)
+		mb_get_format(verbose,file,NULL,&format,&error);
+
 	/* initialize reading the swath file */
 	if ((status = mb_read_init(
 		verbose,file,format,pings,lonflip,bounds,
@@ -523,7 +532,9 @@ main (int argc, char **argv)
 		yp = data[nread].yp;
 		status = mb_get(verbose,mbio_ptr,&kind,&pings,
 			time_i,&time_d,
-			&navlon,&navlat,&speed,&heading,&distance,
+			&navlon,&navlat,
+			&speed,&heading,
+			&distance,&altitude,&sonardepth,
 			&data[nread].beams_bath,&beams_amp,&pixels_ss,
 			beamflag,bath,amp,bathacrosstrack,
 			bathalongtrack,

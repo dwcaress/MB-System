@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmask.c	6/15/93
- *    $Id: mbmask.c,v 5.0 2000-12-01 22:57:08 caress Exp $
+ *    $Id: mbmask.c,v 5.1 2001-03-22 21:15:49 caress Exp $
  *
  *    Copyright (c) 1993,1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -27,6 +27,9 @@
  * Date:	June 15, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01  22:57:08  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.15  2000/10/11  01:06:15  caress
  * Convert to ANSI C
  *
@@ -112,7 +115,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbmask.c,v 5.0 2000-12-01 22:57:08 caress Exp $";
+	static char rcs_id[] = "$Id: mbmask.c,v 5.1 2001-03-22 21:15:49 caress Exp $";
 	static char program_name[] = "MBMASK";
 	static char help_message[] = "MBMASK reads a flagging mask file and applies it to the input \nmultibeam data file.  Flagging mask files are created from  \nmultibeam data files using the program MBGETMASK.  If the time \ntag of a mask record matches that of a data ping, then any \nbeams marked as flagged in the mask are flagged in the data. \nThe utilities MBGETMASK and MBMASK provide a means for transferring \nediting information from one file to another, provided the files \ncontain versions of the same data. \nThe default input and output multibeam streams are stdin and stdout.";
 	static char usage_message[] = "mbmask [-Fformat -Mmaskfile -Iinfile -Ooutfile -V -H]";
@@ -162,6 +165,8 @@ main (int argc, char **argv)
 	double	speed;
 	double	heading;
 	double	distance;
+	double	altitude;
+	double	sonardepth;
 	char	*beamflag = NULL;
 	double	*bath = NULL;
 	double	*bathacrosstrack = NULL;
@@ -351,6 +356,10 @@ main (int argc, char **argv)
 		exit(error);
 		}
 
+	/* get format if required */
+	if (format == 0)
+		mb_get_format(verbose,ifile,NULL,&format,&error);
+
 	/* open the flagging mask file and read through the comment records */
 	nmask = 0;
 	start = 1;
@@ -523,8 +532,9 @@ main (int argc, char **argv)
 		error = MB_ERROR_NO_ERROR;
 		status = MB_SUCCESS;
 		status = mb_get_all(verbose,imbio_ptr,&store_ptr,&kind,
-				time_i,&time_d,&navlon,&navlat,&speed,
-				&heading,&distance,
+				time_i,&time_d,&navlon,&navlat,
+				&speed,&heading,
+				&distance,&altitude,&sonardepth,
 				&beams_bath,&beams_amp,&pixels_ss,
 				beamflag,bath,amp,bathacrosstrack,bathalongtrack,
 				ss,ssacrosstrack,ssalongtrack,

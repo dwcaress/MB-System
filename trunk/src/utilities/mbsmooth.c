@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsmooth.c	6/12/93
- *    $Id: mbsmooth.c,v 5.0 2000-12-01 22:57:08 caress Exp $
+ *    $Id: mbsmooth.c,v 5.1 2001-03-22 21:15:49 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -31,6 +31,9 @@
  * in the current version.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01  22:57:08  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.16  2000/10/11  01:06:15  caress
  * Convert to ANSI C
  *
@@ -166,7 +169,7 @@ double	width_def = 250.0;
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbsmooth.c,v 5.0 2000-12-01 22:57:08 caress Exp $";
+	static char rcs_id[] = "$Id: mbsmooth.c,v 5.1 2001-03-22 21:15:49 caress Exp $";
 	static char program_name[] = "MBSMOOTH";
 	static char help_message[] =  "MBSMOOTH applies a spatial \
 domain gaussian filter to swath \nbathymetry data in order to \
@@ -389,6 +392,10 @@ smooth out noise in the data.";
 		fprintf(stderr,"\nusage: %s\n", usage_message);
 		exit(error);
 		}
+
+	/* get format if required */
+	if (format == 0)
+		mb_get_format(verbose,ifile,NULL,&format,&error);
 
 	/* initialize reading the input multibeam file */
 	if ((status = mb_read_init(

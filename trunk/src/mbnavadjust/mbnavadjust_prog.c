@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavadjust_prog.c	3/23/00
- *    $Id: mbnavadjust_prog.c,v 5.3 2001-01-22 07:45:59 caress Exp $
+ *    $Id: mbnavadjust_prog.c,v 5.4 2001-03-22 21:09:11 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	March 23, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2001/01/22  07:45:59  caress
+ * Version 5.0.beta01
+ *
  * Revision 5.2  2000/12/21  00:44:15  caress
  * Changed decimation from import parameter to contouring/gridding parameter.
  *
@@ -89,7 +92,7 @@ struct swathraw
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbnavadjust_prog.c,v 5.3 2001-01-22 07:45:59 caress Exp $";
+static char rcs_id[] = "$Id: mbnavadjust_prog.c,v 5.4 2001-03-22 21:09:11 caress Exp $";
 static char program_name[] = "mbnavadjust";
 static char help_message[] =  "mbnavadjust is an interactive navigation adjustment package for swath sonar data.\n";
 static char usage_message[] = "mbnavadjust [-Iproject -V -H]";
@@ -133,6 +136,8 @@ double	navlat;
 double	speed;
 double	heading;
 double	distance;
+double	altitude;
+double	sonardepth;
 double	draft;
 double	roll;
 double	pitch;
@@ -636,7 +641,7 @@ int mbnavadjust_file_open(char *projectname)
 	int	i;
 
 	/* print input debug statements */
-	if (mbna_verbose >= 2)
+	if (mbna_verbose >= 0)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
@@ -1452,7 +1457,7 @@ int mbnavadjust_import_data(char *path, int format)
 		else if (format == -1)
 			{
 			if (status = mb_datalist_open(mbna_verbose,&datalist,
-							path,&error) == MB_SUCCESS)
+							path,MB_DATALIST_LOOK_NO,&error) == MB_SUCCESS)
 				{
 				while (done == MB_NO)
 					{
@@ -1675,7 +1680,7 @@ int mbnavadjust_import_file(char *path, int format)
 			/* read a ping of data */
 			status = mb_get_all(mbna_verbose,imbio_ptr,&istore_ptr,&kind,
 				time_i,&time_d,&navlon,&navlat,&speed,
-				&heading,&distance,
+				&heading,&distance,&altitude,&sonardepth,
 				&beams_bath,&beams_amp,&pixels_ss,
 				beamflag,bath,amp,bathacrosstrack,bathalongtrack,
 				ss,ssacrosstrack,ssalongtrack,
@@ -2193,7 +2198,7 @@ beams_bath,beams_amp,pixels_ss);*/
 				    /* read a ping of data */
 				    status = mb_get_all(mbna_verbose,ombio_ptr,&ostore_ptr,&kind,
 					    time_i,&time_d,&navlon,&navlat,&speed,
-					    &heading,&distance,
+					    &heading,&distance,&altitude,&sonardepth,
 					    &beams_bath,&beams_amp,&pixels_ss,
 					    beamflag,bath,amp,bathacrosstrack,bathalongtrack,
 					    ss,ssacrosstrack,ssalongtrack,
@@ -3840,7 +3845,7 @@ int mbnavadjust_section_load(char *path, void **swathraw_ptr, void **swath_ptr, 
 					    MB_YES,MB_NO,MB_NO,
 					    project.cont_int, project.col_int,
 					    project.tick_int, 1000000.,
-					    tick_len_map, label_hgt_map,
+					    tick_len_map, label_hgt_map, 0.0, 
 					    mbna_ncolor, 0, NULL, NULL, NULL,
 					    0.0, 0.0, 0.0, 0.0,
 					    &error);
@@ -3872,6 +3877,7 @@ int mbnavadjust_section_load(char *path, void **swathraw_ptr, void **swath_ptr, 
 				    pingraw->time_i, &pingraw->time_d,
 				    &pingraw->navlon, &pingraw->navlat, &speed,
 				    &pingraw->heading, &distance,
+				    &altitude, &sonardepth,
 				    &beams_bath, &beams_amp, &pixels_ss,
 				    pingraw->beamflag, pingraw->bath, 
 				    imb_io_ptr->amp,

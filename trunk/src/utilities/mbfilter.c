@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbfilter.c	1/16/95
- *    $Id: mbfilter.c,v 5.0 2000-12-01 22:57:08 caress Exp $
+ *    $Id: mbfilter.c,v 5.1 2001-03-22 21:14:16 caress Exp $
  *
  *    Copyright (c) 1995, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -32,6 +32,9 @@
  * Date:	January 16, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01  22:57:08  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.18  2000/10/28  00:40:19  caress
  * Applied fix from Gordon Keith to calculation of pings to be
  * updated and dumped.
@@ -166,7 +169,7 @@ int mb_double_compare();
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbfilter.c,v 5.0 2000-12-01 22:57:08 caress Exp $";
+	static char rcs_id[] = "$Id: mbfilter.c,v 5.1 2001-03-22 21:14:16 caress Exp $";
 	static char program_name[] = "MBFILTER";
 	static char help_message[] =  
 "mbfilter applies one or more simple filters to the specified\n\t\
@@ -409,8 +412,7 @@ The default input and output streams are stdin and stdout.\n";
 			break;
 		case 'R':
 		case 'r':
-			sscanf (optarg,"%lf/%lf/%lf/%lf", 
-				&bounds[0],&bounds[1],&bounds[2],&bounds[3]);
+			mb_get_bounds(optarg, bounds);
 			flag++;
 			break;
 		case 'S':
@@ -531,6 +533,10 @@ The default input and output streams are stdin and stdout.\n";
 		fprintf(stderr,"\nusage: %s\n", usage_message);
 		exit(error);
 		}
+
+	/* get format if required */
+	if (format == 0)
+		mb_get_format(verbose,ifile,NULL,&format,&error);
 
 	/* check for format with amplitude or sidescan data */
 	status = mb_format_dimensions(verbose,&format,

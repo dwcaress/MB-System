@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbinfo.c	2/1/93
- *    $Id: mbinfo.c,v 5.0 2000-12-01 22:57:08 caress Exp $
+ *    $Id: mbinfo.c,v 5.1 2001-03-22 21:15:49 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -26,6 +26,9 @@
  * Date:	February 1, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01  22:57:08  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.21  2000/10/11  01:06:15  caress
  * Convert to ANSI C
  *
@@ -154,7 +157,7 @@ struct ping
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbinfo.c,v 5.0 2000-12-01 22:57:08 caress Exp $";
+	static char rcs_id[] = "$Id: mbinfo.c,v 5.1 2001-03-22 21:15:49 caress Exp $";
 	static char program_name[] = "MBINFO";
 	static char help_message[] =  "MBINFO reads a swath sonar data file and outputs \nsome basic statistics.  If pings are averaged (pings > 2) \nMBINFO estimates the variance for each of the swath \nbeams by reading a set number of pings (>2) and then finding \nthe variance of the detrended values for each beam. \nThe results are dumped to stdout.";
 	static char usage_message[] = "mbinfo [-Byr/mo/da/hr/mn/sc -C -Eyr/mo/da/hr/mn/sc -Fformat -Ifile -Llonflip -Ppings -Rw/e/s/n -Sspeed -V -H]";
@@ -170,11 +173,14 @@ main (int argc, char **argv)
 	int	verbose = 0;
 	int	error = MB_ERROR_NO_ERROR;
 	char	*message;
+	char	format_description[MB_DESCRIPTION_LENGTH];
 
 	/* MBIO read control parameters */
 	int	read_datalist = MB_NO;
 	char	read_file[128];
-	FILE	*fp;
+	char	*datalist;
+	int	look_processed = MB_DATALIST_LOOK_UNSET;
+	double	file_weight;
 	int	format;
 	int	pings;
 	int	lonflip;
@@ -210,6 +216,8 @@ main (int argc, char **argv)
 	double	speed;
 	double	heading;
 	double	distance;
+	double	altitude;
+	double	sonardepth;
 	char	*beamflag = NULL;
 	double	*bath = NULL;
 	double	*bathlon = NULL;
@@ -234,6 +242,10 @@ main (int argc, char **argv)
 	double	lonmax = 0.0;
 	double	latmin = 0.0;
 	double	latmax = 0.0;
+	double	sdpmin = 0.0;
+	double	sdpmax = 0.0;
+	double	altmin = 0.0;
+	double	altmax = 0.0;
 	double	bathmin = 0.0;
 	double	bathmax = 0.0;
 	double	ampmin = 0.0;
@@ -241,15 +253,19 @@ main (int argc, char **argv)
 	double	ssmin = 0.0;
 	double	ssmax = 0.0;
 	double	bathbeg = 0.0;
+	double	bathend = 0.0;
 	double	lonbeg = 0.0;
 	double	latbeg = 0.0;
-	double	bathend = 0.0;
 	double	lonend = 0.0;
 	double	latend = 0.0;
 	double	spdbeg = 0.0;
 	double	hdgbeg = 0.0;
+	double	sdpbeg = 0.0;
+	double	altbeg = 0.0;
 	double	spdend = 0.0;
 	double	hdgend = 0.0;
+	double	sdpend = 0.0;
+	double	altend = 0.0;
 	double	timbeg = 0.0;
 	double	timend = 0.0;
 	int	timbeg_i[7];
@@ -404,8 +420,7 @@ main (int argc, char **argv)
 			break;
 		case 'R':
 		case 'r':
-			sscanf (optarg,"%lf/%lf/%lf/%lf", 
-				&bounds[0],&bounds[1],&bounds[2],&bounds[3]);
+			mb_get_bounds(optarg, bounds);
 			flag++;
 			break;
 		case 'S':
@@ -505,7 +520,11 @@ main (int argc, char **argv)
 		fprintf(output,"\nusage: %s\n", usage_message);
 		exit(error);
 		}
-		
+
+	/* get format if required */
+	if (format == 0)
+		mb_get_format(verbose,read_file,NULL,&format,&error);
+
 	/* set bathymetry scaling */
 	if (bathy_in_feet == MB_YES)
 		bathy_scale = 1.0 / 0.3048;
@@ -530,7 +549,8 @@ main (int argc, char **argv)
 	/* open file list */
 	if (read_datalist == MB_YES)
 	    {
-	    if ((fp = fopen(read_file,"r")) == NULL)
+	    if ((status = mb_datalist_open(verbose,&datalist,
+					    read_file,look_processed,&error)) != MB_SUCCESS)
 		{
 		error = MB_ERROR_OPEN_FAIL;
 		fprintf(stderr,"\nUnable to open data list file: %s\n",
@@ -539,8 +559,9 @@ main (int argc, char **argv)
 			program_name);
 		exit(error);
 		}
-	    if (fgets(line,128,fp) != NULL
-		&& sscanf(line,"%s %d",file,&format) == 2)
+	    if (status = mb_datalist_read(verbose,datalist,
+			    file,&format,&file_weight,&error)
+			    == MB_SUCCESS)
 		read_data = MB_YES;
 	    else
 		read_data = MB_NO;
@@ -568,7 +589,7 @@ main (int argc, char **argv)
 		{
 		mb_error(verbose,error,&message);
 		fprintf(output,"\nMBIO Error returned from function <mb_read_init>:\n%s\n",message);
-		fprintf(output,"\nMultibeam File <%s> not initialized for reading\n",file);
+		fprintf(output,"\nSwath File <%s> not initialized for reading\n",file);
 		fprintf(output,"\nProgram <%s> Terminated\n",
 			program_name);
 		exit(error);
@@ -718,10 +739,10 @@ main (int argc, char **argv)
 	/* printf out file and format */
 	if (pass == 0)
 		{
-		mb_format_description(verbose,&format,&message,&error);
-		fprintf(output,"\nMultibeam Data File:  %s\n",file);
+		mb_format_description(verbose,&format,format_description,&error);
+		fprintf(output,"\nSwath Data File:      %s\n",file);
 		fprintf(output,"MBIO Data Format ID:  %d\n",format);
-		fprintf(output,"%s",message);
+		fprintf(output,"%s",format_description);
 		}
 
 	/* read and process data */
@@ -744,7 +765,9 @@ main (int argc, char **argv)
 			sslat = datacur->sslat;
 			status = mb_read(verbose,mbio_ptr,&kind,&pings,
 				time_i,&time_d,
-				&navlon,&navlat,&speed,&heading,&distance,
+				&navlon,&navlat,
+				&speed,&heading,
+				&distance,&altitude,&sonardepth,
 				&beams_bath,&beams_amp,&pixels_ss,
 				beamflag,bath,amp,bathlon,bathlat,
 				ss,sslon,sslat,
@@ -835,6 +858,8 @@ main (int argc, char **argv)
 						timbeg_i[i] = time_i[i];
 					spdbeg = speed;
 					hdgbeg = heading;
+					sdpbeg = sonardepth;
+					altbeg = altitude;
 					}
 				if (irec == 2 && spdbeg <= 0.0)
 					spdbeg = speed;
@@ -846,6 +871,8 @@ main (int argc, char **argv)
 				latend = navlat;
 				spdend = speed;
 				hdgend = heading;
+				sdpend = sonardepth;
+				altend = altitude;
 				timend = time_d;
 				for (i=0;i<7;i++)
 					timend_i[i] = time_i[i];
@@ -879,6 +906,10 @@ main (int argc, char **argv)
 					lonmax = navlon;
 					latmin = navlat;
 					latmax = navlat;
+					sdpmin = sonardepth;
+					sdpmax = sonardepth;
+					altmin = altitude;
+					altmax = altitude;
 					beginnav = MB_YES;
 					}
 				if (beginbath == MB_NO && beams_bath > 0)
@@ -913,6 +944,10 @@ main (int argc, char **argv)
 					lonmax = MAX(lonmax, navlon);
 					latmin = MIN(latmin, navlat);
 					latmax = MAX(latmax, navlat);
+					sdpmin = MIN(sdpmin, sonardepth);
+					sdpmax = MAX(sdpmax, sonardepth);
+					altmin = MIN(altmin, altitude);
+					altmax = MAX(altmax, altitude);
 					}
 				for (i=0;i<beams_bath;i++)
 					{
@@ -1038,6 +1073,7 @@ main (int argc, char **argv)
 					{
 					datacur = data[j];
 					bath = datacur->bath;
+					beamflag = datacur->beamflag;
 					if (mb_beam_ok(beamflag[i]))
 					  {
 					  nbath++;
@@ -1056,6 +1092,7 @@ main (int argc, char **argv)
 					  {
 					  datacur = data[j];
 					  bath = datacur->bath;
+					  beamflag = datacur->beamflag;
 					  if (mb_beam_ok(beamflag[i]))
 					    {
 					    dev = bath[i] - a - b*j;
@@ -1072,7 +1109,7 @@ main (int argc, char **argv)
 			for (i=0;i<beams_amp;i++)
 				{
 
-				/* get mean sidescan */
+				/* get mean amplitude */
 				namp  = 0;
 				mean  = 0.0;
 				variance = 0.0;
@@ -1080,6 +1117,7 @@ main (int argc, char **argv)
 					{
 					datacur = data[j];
 					amp = datacur->amp;
+					beamflag = datacur->beamflag;
 					if (mb_beam_ok(beamflag[i]))
 					  {
 					  namp++;
@@ -1176,8 +1214,9 @@ main (int argc, char **argv)
 	/* figure out whether and what to read next */
         if (read_datalist == MB_YES)
                 {
-                if (fgets(line,128,fp) != NULL
-                        && sscanf(line,"%s %d",file,&format) == 2)
+		if (status = mb_datalist_read(verbose,datalist,
+			    file,&format,&file_weight,&error)
+			    == MB_SUCCESS)
                         read_data = MB_YES;
                 else
                         read_data = MB_NO;
@@ -1190,7 +1229,7 @@ main (int argc, char **argv)
 	/* end loop over files in list */
 	}
 	if (read_datalist == MB_YES)
-		fclose (fp);
+		mb_datalist_close(verbose,&datalist,&error);
 		
 	/* figure out if done */
 	if (pass > 0 || coverage_mask == MB_NO)
@@ -1313,6 +1352,8 @@ main (int argc, char **argv)
 			lonbeg,latbeg,bathy_scale*bathbeg);
 	fprintf(output,"Speed: %7.4f km/hr (%7.4f knots)  Heading:%9.4f degrees\n",
 		spdbeg,spdbeg/1.85,hdgbeg);
+	fprintf(output,"Sonar Depth:%10.4f m  Sonar Altitude:%10.4f m\n",
+		sdpbeg,altbeg);
 	fprintf(output,"\nEnd of Data:\n");
 	fprintf(output,"Time:  %2.2d %2.2d %4.4d %2.2d:%2.2d:%2.2d.%6.6d  JD%d\n",
 		timend_i[1],timend_i[2],timend_i[0],timend_i[3],
@@ -1325,17 +1366,21 @@ main (int argc, char **argv)
 			lonend,latend,bathy_scale*bathend);
 	fprintf(output,"Speed: %7.4f km/hr (%7.4f knots)  Heading:%9.4f degrees\n",
 		spdend,spdend/1.85,hdgend);
+	fprintf(output,"Sonar Depth:%10.4f m  Sonar Altitude:%10.4f m\n",
+		sdpend,altend);
 	fprintf(output,"\nLimits:\n");
-	fprintf(output,"Minimum Longitude: %10.4f   Maximum Longitude: %10.4f\n",lonmin,lonmax);
-	fprintf(output,"Minimum Latitude:  %10.4f   Maximum Latitude:  %10.4f\n",latmin,latmax);
+	fprintf(output,"Minimum Longitude:   %10.4f   Maximum Longitude:   %10.4f\n",lonmin,lonmax);
+	fprintf(output,"Minimum Latitude:    %10.4f   Maximum Latitude:    %10.4f\n",latmin,latmax);
+	fprintf(output,"Minimum Sonar Depth: %10.4f   Maximum Sonar Depth: %10.4f\n",sdpmin,sdpmax);
+	fprintf(output,"Minimum Altitude:    %10.4f   Maximum Altitude:    %10.4f\n",altmin,altmax);
 	if (ngdbeams > 0 || verbose >= 1)
-		fprintf(output,"Minimum Depth:     %10.4f   Maximum Depth:     %10.4f\n",
+		fprintf(output,"Minimum Depth:       %10.4f   Maximum Depth:       %10.4f\n",
 			bathy_scale*bathmin,bathy_scale*bathmax);
 	if (ngabeams > 0 || verbose >= 1)
-		fprintf(output,"Minimum Amplitude: %10.4f   Maximum Amplitude: %10.4f\n",
+		fprintf(output,"Minimum Amplitude:   %10.4f   Maximum Amplitude:   %10.4f\n",
 			ampmin,ampmax);
 	if (ngsbeams > 0 || verbose >= 1)
-		fprintf(output,"Minimum Sidescan:  %10.4f   Maximum Sidescan:  %10.4f\n",
+		fprintf(output,"Minimum Sidescan:    %10.4f   Maximum Sidescan:    %10.4f\n",
 			ssmin,ssmax);
 	if (pings_read > 2 && beams_bath_max > 0 
 		&& (ngdbeams > 0 || verbose >= 1))

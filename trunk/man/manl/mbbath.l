@@ -238,7 +238,7 @@ bathymetry. This option allows users to rescale travel times when
 data files have erroneous values (or when the MB-System code
 interprets the values incorrectly). Most often the errors are
 due to confusion about one way versus two way
-travel times, and so \fIttscale\fP is usually either 0.5 or 1.0.
+travel times, and so \fIttscale\fP is usually either 0.5 or 2.0.
 By default, no travel time scaling is performed.
 .TP
 .B \-U

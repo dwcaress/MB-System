@@ -1,6 +1,6 @@
-.TH mbmask l "4 January 2001" "MB-System 5.0" "MB-System 5.0"
+.TH mbmask l "25 January 2001" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
-\fBmbmask\fP, \fBmbgetmask\fP - Extract multibeam data flags from one
+\fBmbmask\fP, \fBmbgetmask\fP - Extract swath bathymetry data flags from one
 file and apply to another.
 
 .SH VERSION
@@ -12,10 +12,10 @@ Version 5.0
 \fBmbmask\fP [\fB-F\fIformat \fB-M\fPmaskfile\fP \fB-I\fIinfile \fB-O\fIoutfile \fB-V -H\fP]
 
 .SH DESCRIPTION
-Multibeam bathymetry data is typically edited either with interactive
+Swath bathymetry data is typically edited either with interactive
 tools such as \fBmbedit\fP or automatic filters such as \fBmbclean\fP.
-The beams which are deemed "bad" are flagged by having the bathymetry
-value set negative.  Occasionally, the need arises to translate data
+The beams which are deemed "bad" are flagged.  
+Occasionally, the need arises to translate data
 flagging information from one file to another which represents a
 different version of the same dataset.  In particular, it may happen
 that editing has been done on a data format which does not support
@@ -29,9 +29,9 @@ allow the user to extract the flagging information in the form of a
 "mask" file from the edited file and then to apply the flagging mask
 to another file containing a different version of the same data.
 The first utility, \fBmbgetmask\fP, is used to extract the mask from
-the edited multibeam file; the output is written to stdout.  The
+the edited swath bathymetry file; the output is written to stdout.  The
 second utility, \fBmbmask\fP, reads in the mask file and the unedited
-multibeam data file and flags or unflags all beams indicated by the mask.
+swath data file and flags or unflags all beams indicated by the mask.
 The mask is keyed to the times of the individual pings; only exactly
 corresponding pings will be affected by the mask.
 
@@ -63,10 +63,10 @@ Default: \fIyr/mo/da/hr/mn/sc\fP = 2062/2/21/10/30/0.
 .B \-F
 \fIformat\fP
 .br
-Sets the format for the input and output multibeam data using 
+Sets the format for the input and output swath data using 
 \fBMBIO\fP integer format identifiers. 
-These utilities uses the \fBMBIO\fP library and will read any multibeam
-format supported by \fBMBIO\fP. A list of the multibeam data formats
+These utilities uses the \fBMBIO\fP library and will read any swath data
+format supported by \fBMBIO\fP. A list of the swath data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page.
 .TP
@@ -103,10 +103,10 @@ of its operation and then exit immediately.
 .B \-F
 \fIformat\fP
 .br
-Sets the format for the input and output multibeam data using 
+Sets the format for the input and output swath data using 
 \fBMBIO\fP integer format identifiers. 
-These utilities uses the \fBMBIO\fP library and will read any multibeam
-format supported by \fBMBIO\fP. A list of the multibeam data formats
+These utilities uses the \fBMBIO\fP library and will read any swath data
+format supported by \fBMBIO\fP. A list of the swath data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page.
 .TP

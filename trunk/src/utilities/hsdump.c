@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	hsdump.c	6/16/93
- *    $Id: hsdump.c,v 5.0 2000-12-01 22:57:08 caress Exp $
+ *    $Id: hsdump.c,v 5.1 2001-03-22 21:14:16 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	June 16, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01  22:57:08  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.11  2000/10/11  01:06:15  caress
  * Convert to ANSI C
  *
@@ -92,7 +95,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: hsdump.c,v 5.0 2000-12-01 22:57:08 caress Exp $";
+	static char rcs_id[] = "$Id: hsdump.c,v 5.1 2001-03-22 21:14:16 caress Exp $";
 	static char program_name[] = "HSDUMP";
 	static char help_message[] =  "HSDUMP lists the information contained in data records on\n\tHydrosweep DS data files, including survey, calibrate, water \n\tvelocity and comment records. The default input stream is stdin.";
 	static char usage_message[] = "hsdump [-Fformat -V -H -Iinfile -Okind]";
@@ -109,6 +112,7 @@ main (int argc, char **argv)
 	int	status = MB_SUCCESS;
 	int	verbose = 0;
 	int	error = MB_ERROR_NO_ERROR;
+	char	format_description[MB_DESCRIPTION_LENGTH];
 	char	*message = NULL;
 
 	/* MBIO read and write control parameters */
@@ -139,6 +143,8 @@ main (int argc, char **argv)
 	double	speed;
 	double	heading;
 	double	distance;
+	double	altitude;
+	double	sonardepth;
 	int	nbath;
 	int	namp;
 	int	nss;
@@ -386,10 +392,10 @@ main (int argc, char **argv)
 		}
 
 	/* printf out file and format */
-	mb_format_description(verbose, &format, &message, &error);
+	mb_format_description(verbose, &format, format_description, &error);
 	fprintf(output,"\nHydrosweep DS Data File:  %s\n",file);
 	fprintf(output,"MBIO Data Format ID:  %d\n",format);
-	fprintf(output,"%s",message);
+	fprintf(output,"%s",format_description);
 
 	/* read and list */
 	while (error <= MB_ERROR_NO_ERROR)
@@ -398,8 +404,9 @@ main (int argc, char **argv)
 		error = MB_ERROR_NO_ERROR;
 		status = MB_SUCCESS;
 		status = mb_get_all(verbose,mbio_ptr,&store_ptr,&kind,
-				time_i,&time_d,&navlon,&navlat,&speed,
-				&heading,&distance,
+				time_i,&time_d,&navlon,&navlat,
+				&speed,&heading,
+				&distance,&altitude,&sonardepth,
 				&nbath,&namp,&nss,
 				beamflag,bath,amp,bathacrosstrack,bathalongtrack,
 				ss,ssacrosstrack,ssalongtrack,

@@ -38,6 +38,7 @@ names = case_sensitive
 !(BX) bx_info("c_dirpath", "")
 !(BX) bx_info("include_path", ".", false)
 !(BX) bx_info("xrunner_command", "$(M_ROOT)/arch/X11.5/Xm1.2/mic_xm.o", false)
+!(BX) bx_info("purify_command", "purify", false)
 !(BX) bx_info("system_directory", "/usr/bx50")
 !(BX) bx_info("builder_version", "Builder Xcessory Version 5.0.3")
 !(BX) bx_info("build_lang", "C")
@@ -72,6 +73,9 @@ identifier BXG_label_vel_range_max;
 identifier BXG_slider_velrange;
 identifier BXG_label_max_depth_max;
 identifier BXG_slider_maxdepth;
+identifier BXG_toggleButton_mode_null;
+identifier BXG_toggleButton_mode_snell;
+identifier BXG_toggleButton_mode_ok;
 procedure BxManageCB(string);
 procedure BxUnmanageCB;
 procedure BxSetValuesCB;
@@ -89,6 +93,9 @@ procedure do_io_mode_save_svp();
 procedure do_io_mode_open_svp_edit();
 procedure do_io_mode_open_svp_display();
 procedure do_save_swath_svp();
+procedure do_anglemode();
+!(BX) "Widget" "bulletinBoard_mode"
+identifier bulletinBoard_mode;
 
 list BaseStyle : arguments {
 };
@@ -113,6 +120,147 @@ list Style_useReasons : callbacks {
 !(BX)    handlers BaseStyleHandlers;
 !(BX)};
 
+
+object pushButton_mode_dismiss : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Dismiss");
+        XmNx = 120;
+        XmNy = 120;
+        XmNwidth = 100;
+        XmNheight = 40;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        XmNactivateCallback = procedure BxUnmanageCB("bulletinBoard_mode");
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object toggleButton_mode_ok : XmToggleButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Do Not Change Beam Angles");
+        XmNwidth = 287;
+        XmNheight = 28;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_toggleButton_mode_ok);
+        XmNvalueChangedCallback = procedure do_anglemode();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object toggleButton_mode_snell : XmToggleButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Adjust Angles Using Snell\'s Law" &
+ "");
+        XmNwidth = 287;
+        XmNheight = 28;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_toggleButton_mode_snell);
+        XmNvalueChangedCallback = procedure do_anglemode();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object toggleButton_mode_null : XmToggleButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Adjust Angles Using Sonar Geomet" &
+ "ry");
+        XmNwidth = 287;
+        XmNheight = 28;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_toggleButton_mode_null);
+        XmNvalueChangedCallback = procedure do_anglemode();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object radioBox_mode : XmRadioBox widget {
+    arguments {
+        arguments Style_use;
+        XmNx = 20;
+        XmNy = 10;
+        XmNwidth = 293;
+        XmNheight = 96;
+    };
+    controls {
+         managed XmToggleButton toggleButton_mode_ok;
+         managed XmToggleButton toggleButton_mode_snell;
+         managed XmToggleButton toggleButton_mode_null;
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object bulletinBoard_mode : XmBulletinBoardDialog widget {
+    arguments {
+        arguments Style_use;
+        XmNdialogTitle = compound_string("Beam Angle Mode");
+        XmNautoUnmanage = false;
+        XmNresizePolicy = XmRESIZE_GROW;
+        XmNx = 268;
+        XmNy = 461;
+        XmNwidth = 348;
+        XmNheight = 172;
+    };
+    controls {
+         managed XmRadioBox radioBox_mode;
+         managed XmPushButton pushButton_mode_dismiss;
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+!(BX)object dialogShell_mode : XmDialogShell widget {
+!(BX)    arguments {
+!(BX)        arguments Style_use;
+!(BX)        XmNtitle = "Beam Angle Mode";
+!(BX)        XmNwidth = 348;
+!(BX)        XmNheight = 172;
+!(BX)    };
+!(BX)    controls {
+!(BX)         managed XmBulletinBoardDialog bulletinBoard_mode;
+!(BX)    };
+!(BX)    callbacks {
+!(BX)        callbacks Style_useReasons;
+!(BX)    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+!(BX)};
 
 object label_max_depth : XmLabel widget {
     arguments {
@@ -371,8 +519,8 @@ object bulletinBoard_scaling : XmBulletinBoardDialog widget {
     arguments {
         arguments Style_use;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 8;
-        XmNy = 278;
+        XmNx = 176;
+        XmNy = 465;
         XmNwidth = 532;
         XmNheight = 164;
     };
@@ -501,8 +649,8 @@ object bulletinBoard_error : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNdialogStyle = XmDIALOG_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 351;
-        XmNy = 279;
+        XmNx = 286;
+        XmNy = 466;
         XmNwidth = 311;
         XmNheight = 161;
     };
@@ -762,8 +910,8 @@ object bulletinBoard_fileselect : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 211;
-        XmNy = 91;
+        XmNx = 146;
+        XmNy = 278;
         XmNwidth = 591;
         XmNheight = 537;
     };
@@ -847,10 +995,10 @@ object bulletinBoard_message : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNdialogStyle = XmDIALOG_FULL_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_NONE;
-        XmNx = 317;
-        XmNy = 317;
+        XmNx = 252;
+        XmNy = 503;
         XmNwidth = 379;
-        XmNheight = 86;
+        XmNheight = 88;
     };
     controls {
          managed XmLabel label_pleasewait;
@@ -872,7 +1020,7 @@ object bulletinBoard_message : XmBulletinBoardDialog widget {
 !(BX)        XmNmwmInputMode = MWM_INPUT_MODELESS;
 !(BX)        XmNdeleteResponse = XmUNMAP;
 !(BX)        XmNwidth = 379;
-!(BX)        XmNheight = 86;
+!(BX)        XmNheight = 88;
 !(BX)    };
 !(BX)    controls {
 !(BX)         managed XmBulletinBoardDialog bulletinBoard_message;
@@ -1167,8 +1315,8 @@ object bulletinBoard_about : XmBulletinBoardDialog widget {
     arguments {
         arguments Style_use;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 266;
-        XmNy = 135;
+        XmNx = 201;
+        XmNy = 322;
         XmNwidth = 481;
         XmNheight = 449;
     };
@@ -1303,7 +1451,7 @@ object pushButton_process : XmPushButton widget {
     arguments {
         arguments Style_use;
         XmNlabelString = compound_string("Reprocess");
-        XmNx = 430;
+        XmNx = 520;
         XmNy = 0;
         XmNwidth = 90;
         XmNheight = 30;
@@ -1323,7 +1471,7 @@ object pushButton_quit : XmPushButton widget {
     arguments {
         arguments Style_use;
         XmNlabelString = compound_string("Quit");
-        XmNx = 680;
+        XmNx = 700;
         XmNy = 0;
         XmNwidth = 80;
         XmNheight = 30;
@@ -1502,8 +1650,8 @@ object pushButton_save_svpfile : XmPushButton widget {
 object pulldownMenu_file : XmPulldownMenu widget {
     arguments {
         arguments Style_use;
-        XmNx = 13;
-        XmNy = 61;
+        XmNx = 0;
+        XmNy = 0;
         XmNwidth = 172;
         XmNheight = 150;
     };
@@ -1582,11 +1730,11 @@ object rowColumn : XmRowColumn widget {
 !(BX)    };
 };
 
-object pushButton : XmPushButton widget {
+object pushButton_plotscaling : XmPushButton widget {
     arguments {
         arguments Style_use;
         XmNlabelString = compound_string("Plot Scaling");
-        XmNx = 210;
+        XmNx = 160;
         XmNy = 0;
         XmNwidth = 90;
         XmNheight = 30;
@@ -1596,6 +1744,26 @@ object pushButton : XmPushButton widget {
     callbacks {
         callbacks Style_useReasons;
         XmNactivateCallback = procedure BxManageCB("bulletinBoard_scaling");
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object pushButton_mode : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Angle Mode");
+        XmNx = 330;
+        XmNy = 0;
+        XmNwidth = 90;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        XmNactivateCallback = procedure BxManageCB("bulletinBoard_mode");
     };
 !(BX)    handlers {
 !(BX)        handlers Style_useHandlers;
@@ -1612,7 +1780,8 @@ object input_screen : XmBulletinBoard widget {
         XmNheight = 668;
     };
     controls {
-         managed XmPushButton pushButton;
+         managed XmPushButton pushButton_mode;
+         managed XmPushButton pushButton_plotscaling;
          managed XmRowColumn rowColumn;
          managed XmPushButton pushButton_about;
          managed XmPushButton pushButton_quit;
@@ -1634,7 +1803,7 @@ object window_mbvelocity : XmMainWindow widget {
     arguments {
         arguments Style_use;
         XmNx = 8;
-        XmNy = 32;
+        XmNy = 213;
         XmNwidth = 1016;
         XmNheight = 668;
     };
@@ -1672,6 +1841,7 @@ object window_mbvelocity : XmMainWindow widget {
 !(BX)                handlers Style_useHandlers;
 !(BX)            };
         };
+!(BX)         unmanaged XmDialogShell dialogShell_mode;
 !(BX)         unmanaged XmDialogShell xmDialogShell_scaling;
 !(BX)         unmanaged XmDialogShell xmDialogShell_error;
 !(BX)         unmanaged XmDialogShell xmDialogShell_fileselect;
@@ -1692,8 +1862,8 @@ object window_mbvelocity : XmMainWindow widget {
 !(BX)        arguments Style_use;
 !(BX)        XmNtitle = "MBvelocityTool";
 !(BX)        XmNiconName = "MBvelocitytool";
-!(BX)        XmNx = -1;
-!(BX)        XmNy = 26;
+!(BX)        XmNx = -66;
+!(BX)        XmNy = 213;
 !(BX)        XmNwidth = 1016;
 !(BX)        XmNheight = 668;
 !(BX)    };

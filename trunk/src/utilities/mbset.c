@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbset.c	3/31/93
- *    $Id: mbset.c,v 5.0 2001-01-22 07:55:22 caress Exp $
+ *    $Id: mbset.c,v 5.1 2001-03-22 21:15:49 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -30,6 +30,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2001/01/22  07:55:22  caress
+ * Version 5.0.beta01
+ *
  * Revision 1.1  2001/01/22  07:54:22  caress
  * Initial revision
  *
@@ -57,7 +60,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbset.c,v 5.0 2001-01-22 07:55:22 caress Exp $";
+	static char rcs_id[] = "$Id: mbset.c,v 5.1 2001-03-22 21:15:49 caress Exp $";
 	static char program_name[] = "mbset";
 	static char help_message[] = "MBset is a tool for setting values in an mbprocess parameter file.\n\
 MBprocess is a tool for processing swath sonar bathymetry data  \n\
@@ -284,7 +287,7 @@ the manual pages for mbprocess and mbset. \n\n";
 		/* bathymetry recalculation */
 		else if (strncmp(pargv[i], "RAYTRACE", 8) == 0)
 		    {
-		    sscanf(pargv[i], "RAYTRACE:%s", process.mbp_svp_mode);
+		    sscanf(pargv[i], "RAYTRACE:%d", &process.mbp_svp_mode);
 		    }
 		else if (strncmp(pargv[i], "SVPFILE", 7) == 0)
 		    {
@@ -458,15 +461,15 @@ the manual pages for mbprocess and mbset. \n\n";
 		    }
 		else if (strncmp(pargv[i], "SSPIXELSIZE", 11) == 0)
 		    {
-		    sscanf(pargv[i], "SSPIXELSIZE:%lf", process.mbp_ssrecalc_pixelsize);
+		    sscanf(pargv[i], "SSPIXELSIZE:%lf", &process.mbp_ssrecalc_pixelsize);
 		    }
 		else if (strncmp(pargv[i], "SSSWATHWIDTH", 11) == 0)
 		    {
-		    sscanf(pargv[i], "SSSWATHWIDTH:%lf", process.mbp_ssrecalc_swathwidth);
+		    sscanf(pargv[i], "SSSWATHWIDTH:%lf", &process.mbp_ssrecalc_swathwidth);
 		    }
 		else if (strncmp(pargv[i], "SSINTERPOLATE", 11) == 0)
 		    {
-		    sscanf(pargv[i], "SSINTERPOLATE:%d", process.mbp_ssrecalc_interpolate);
+		    sscanf(pargv[i], "SSINTERPOLATE:%d", &process.mbp_ssrecalc_interpolate);
 		    }
 		}
 		

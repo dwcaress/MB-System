@@ -1,4 +1,4 @@
-.TH mbclean l "4 January 2001" "MB-System 5.0" "MB-System 5.0"
+.TH mbclean l "12 March 2001" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbcleanold\fP - Old tool to automatically flag bad beams in swath sonar bathymetry data.
 
@@ -6,19 +6,28 @@
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbclean\fP [\fB-A\fImax\fP \fB-B\fIlow/high\fP \fB-C\fIslope\fP 
+\fBmbcleanold\fP [\fB-A\fImax\fP \fB-B\fIlow/high\fP \fB-C\fIslope\fP 
 \fB-D\fImin/max\fP \fB-F\fIformat\fP 
 \fB-G\fIfraction_low/fraction_high\fP 
 \fB-I\fIinfile\fP \fB-L\fIlonflip\fP \fB-N\fIbuffersize\fP \fB-O\fIoutfile\fP 
 \fB-M\fImode\fP \fB-Q\fP \fB-U\fInmin\fP \fB-X\fIzap_beams\fP \fB-V -H\fP]
 
 .SH DESCRIPTION
-\fBmbclean\fP identifies and flags artifacts in swath sonar bathymetry data.
+\fBmbcleanold\fP identifies and flags artifacts in 
+swath sonar bathymetry data. This program replicates the
+functionality of the \fBmbclean\fP program included
+in \fBMB-System\fP version 4 distributions. The input swath data is read
+into a buffer, processed, and then written directly into
+an output swath data file. The current version of \fBmbclean\fP
+generates an "edit save file" like that of \fBmbedit\fP rather
+than directly outputting a swath file. See the \fBmbclean\fP
+manual page for details.
+
 Several algorithms are available for identifying artifacts; multiple
 algorithms can be applied in a single pass.
 The most commonly used approach is to identify artifacts  
 based on excessive bathymetric slopes. 
-If desired, \fBmbclean\fP will also flag beams 
+If desired, \fBmbcleanold\fP will also flag beams 
 associated with "rails" where
 outer beams have smaller acrosstrack distances 
 than more inner beams (\fB-Q\fP option).
@@ -206,7 +215,7 @@ no output file is specified, the output will be written to
 stdout. Default: \fIoutfile\fP = stdout.
 .TP
 .B \-Q
-This flag causes \fBmbclean\fP to search for bad "rails" in the
+This flag causes \fBmbcleanold\fP to search for bad "rails" in the
 swath sonar swath; the "rails" refer to groups of outer beams which
 have crosstrack distances (and depths) much less than they should 
 have.  These are identified when one or more outer beams lies
@@ -216,7 +225,7 @@ offending beam are flagged.
 .B \-U
 \fInmin\fP
 .br
-This flag causes \fBmbclean\fP to search for port or starboard
+This flag causes \fBmbcleanold\fP to search for port or starboard
 halves of pings which contain fewer than \fInmin\fP good bathymetry
 values. All bathymetry values in the affected half-pings are
 flagged.
@@ -229,9 +238,9 @@ of the swath are flagged as bad; this is useful if the outer beams
 are known to be unreliable. Default: \fIzap_beams\fP = 0.
 .TP
 .B \-V
-Normally, \fBmbclean\fP works "silently" without outputting
+Normally, \fBmbcleanold\fP works "silently" without outputting
 anything to the stderr stream.  If the
-\fB-V\fP flag is given, then \fBmbclean\fP works in a "verbose" mode and
+\fB-V\fP flag is given, then \fBmbcleanold\fP works in a "verbose" mode and
 outputs the program version being used, all error status messages, 
 and the number of beams flagged as bad.
 
@@ -242,7 +251,7 @@ the vendor format (format 41). Use the following to flag any
 beams which deviate by more than 1% from the local median
 depth or which produce a slope greater than 3.5 (74 degrees):
 
- 	mbclean -F41 -M1 -C3.5 -D0.01/0.20 \
+ 	mbcleanold -F41 -M1 -C3.5 -D0.01/0.20 \
  		-G0.99/1.01 \
  		-I sb199507130318.rec \
  		-O sb199507130318_c.mb41
@@ -251,7 +260,7 @@ The program will output some information because of the
 \fB-V\fP option:
 .br
  	Program MBCLEAN
- 	Version $Id: mbcleanold.l,v 5.0 2001-01-22 07:51:57 caress Exp $
+ 	Version $Id: mbcleanold.l,v 5.1 2001-03-22 21:15:49 caress Exp $
  	MB-system Version 4.3
 .br
  	132 records loaded into buffer
@@ -281,14 +290,14 @@ The program will output some information because of the
  	0 beams zeroed
 
 .SH SEE ALSO
-\fBmbsystem\fP(l), \fBmbunclean\fP(l), \fBmbedit\fP(l), 
+\fBmbsystem\fP(l), \fBmbclean\fP(l), \fBmbunclean\fP(l), \fBmbedit\fP(l), 
 \fBmbinfo\fP(l)
 
 .SH BUGS
-The algorithms implemented in \fBmbclean\fP simply 
+The algorithms implemented in \fBmbcleanold\fP simply 
 don't detect all bathymetric artifacts that
 are obvious to the eye on contour charts.  Although
-\fBmbclean\fP often does a credible first pass at
+\fBmbcleanold\fP often does a credible first pass at
 flagging obvious artifacts, we strongly recommend that
 any swath bathymetry processing stream include 
 interactive editing of the

@@ -1,25 +1,42 @@
-.TH mblist l "4 January 2001" "MB-System 5.0" "MB-System 5.0"
+.TH mblist l "24 January 2001" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
-\fBmblist\fP - List data in multibeam bathymetry data files.
+\fBmblist\fP - List data in swath data files.
 
 .SH VERSION
 Version 5.0
 
 .SH SYNOPSIS
-\fBmblist\fP [\fB-B\fIyr/mo/da/hr/mn/sc \fB-D\fIdumpmode 
-\fB-E\fIyr/mo/da/hr/mn/sc \fB-F\fIformat \fB-H \fB-I\fIinfilename 
-\fB-L\fIlonflip \fB-M\fIstart_beam/end_beam \fB-N\fIstart_pixel/end_pixel 
-\fB-O\fIoutput_format \fB-P\fIpings \fB-Q\fP \fB-R\fIwest/east/south/north 
-\fB-S\fIspeed \fB-T\fItimegap \fB-V\fP \fB-W\fP]
+\fBmblist\fP [\fB-A\fP \fB-B\fP\fIyr/mo/da/hr/mn/sc\fP 
+\fB-D\fP\fIdumpmode\fP 
+\fB-E\fP\fIyr/mo/da/hr/mn/sc\fP \fB-F\fP\fIformat\fP 
+\fB-H\fP \fB-I\fP\fIinfilename\fP 
+\fB-L\fP\fIlonflip\fP \fB-M\fP\fIstart_beam/end_beam\fP 
+\fB-N\fP\fIstart_pixel/end_pixel\fP 
+\fB-O\fP\fIoutput_format\fP \fB-P\fP\fIpings\fP \fB-Q\fP 
+\fB-R\fP\fIwest/east/south/north\fP 
+\fB-S\fP\fIspeed\fP \fB-T\fP\fItimegap\fP 
+\fB-U\fP\fIcheck\fP \fB-V\fP \fB-W\fP]
 
 .SH DESCRIPTION
-\fBmblist\fP is a utility to list the contents of a multibeam 
-data file or files to stdout. \fBmblist\fP is tailored to 
-produce ASCII files in
-spreadsheet style, with data columns separated by tabs. The output of
+\fBmblist\fP is a utility to list the contents of a swath 
+data file or files to stdout. By default, \fBmblist\fP 
+produces ASCII files in
+spreadsheet style, with data columns separated by tabs. Alternatively,
+the output can be binary, with each field represented 
+as a double precision float (\fB-A\fP option). The output of
 \fBmblist\fP can be piped to plotting and data analysis programs. The
 option \fB-O\fP\fIoutput_format\fP can be used to control the data types that
-are sent to stdout. The data input may be averaged or windowed in time
+are sent to stdout. The default is to output a single record for
+each survey ping, and for any output navigation values to reflect
+the sonar or ship navigation. In this mode, any output depth,
+amplitude, or sidescan values are derived from the beam and pixel
+located closest to the navigation (the most vertical position under
+the sonar). If the \fB-M\fP or \fB-N\fP options
+are used to set specific ranges of beams or pixels to be used,
+then records are output for each of the specified beams or
+pixels and any navigation, depth or sidescan values output reflect
+the positions and values of the specified beams or pixels.
+The data input may be averaged or windowed in time
 and space before it is listed.  Complete dumps of bathymetry,
 amplitude, or sidescan data are possible as well.
 
@@ -37,6 +54,16 @@ Alberto Malinverno
   Schlumberger-Doll
 
 .SH OPTIONS
+.TP
+.B \-A
+.br
+Causes the output to be binary (native double precision floating
+point) rather than ASCII. Some
+output options cannot be represented as single binary floats (e.g.
+time strings and longitude or latitude broken into degrees
+and minutes. These values are output as multiple fields as
+appropriate.
+Default: ASCII output with fields separated by tabs.
 .TP
 .B \-B
 \fIyr/mo/da/hr/mn/sc\fP
@@ -79,10 +106,10 @@ Default: \fIyr/mo/da/hr/mn/sc\fP = 2062/2/21/10/30/0.
 .B \-F
 \fIformat\fP
 .br
-Sets the format for the input multibeam data using 
+Sets the format for the input swath data using 
 \fBMBIO\fP integer format identifiers. 
-This program uses the \fBMBIO\fP library and will read any multibeam
-format supported by \fBMBIO\fP. A list of the multibeam data formats
+This program uses the \fBMBIO\fP library and will read any swath
+format supported by \fBMBIO\fP. A list of the swath data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page. Default: \fIformat\fP = 11.
 .TP
@@ -94,9 +121,9 @@ of its operation and then exit immediately.
 \fIfilename\fP
 .br
 Sets the input filename. If \fIformat\fP > 0 (set with the 
-\fB-F\fP option) then the multibeam data contained in \fIinfile\fP 
+\fB-F\fP option) then the swath data contained in \fIinfile\fP 
 is read and processed. If \fIformat\fP < 0, then \fIinfile\fP
-is assumed to be an ascii file containing a list of the input multibeam
+is assumed to be an ascii file containing a list of the input swath
 data files to be processed and their formats.  The program will read 
 the data in each one of these files.
 In the \fIinfile\fP file, each
@@ -104,8 +131,8 @@ data file should be followed by a data format identifier, e.g.:
  	datafile1 11
  	datafile2 24
 .br
-This program uses the \fBMBIO\fP library and will read or write any multibeam
-format supported by \fBMBIO\fP. A list of the multibeam data formats
+This program uses the \fBMBIO\fP library and will read any swath
+format supported by \fBMBIO\fP. A list of the swath data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page. Default: \fIinfile\fP = "stdin".
 .TP
@@ -122,21 +149,38 @@ the range from 0 to 360 degrees.
 Default: \fIlonflip\fP = 0.
 .TP
 .B \-M
-\fIstart_beam/end_beam\fP
+\fIstart_beam/end_beam\fP or \fIA\fP
 .br
 Determines the range of bathymetry beams for which records will be output.
-Beam numbers start with zero on the port side. The default is 
-to output a single record for each ping corresponding to the
-center beam.
+If \fB-N\fP\fIA\fP is given, then a record
+will be output for each valid beam. If \fIstart_beam/end_beam\fP
+is specified, then records will be output only for beams in this
+range. Beam numbers start with zero on the port side. 
+If this option is used,
+then any longitude and latitude values output will reflect the
+positions of individual beams on the seafloor. 
+The default is to output a single record for each ping 
+in which longitude and latitude values reflect 
+the sonar navigation, the depth,
+topography, and amplitude values reflect the valid beam 
+nearest to vertical, and the sidescan value reflects the pixel
+nearest to vertical. 
 .TP
 .B \-N
-\fIstart_pixel/end_pixel\fP
+\fIstart_pixel/end_pixel\fP or \fIA\fP
 .br
 Determines the range of sidescan pixels for which records will be output.
-Pixel numbers start with zero on the port side. The default is 
-to not output records associated with sidescan pixels. Instead, by
-default a single record is outputted for each ping corresponding to the
-center bathymetry beam; 
+If \fIstart_pixel/end_pixel\fP
+is specified, then records will be output only for pixels in this
+range. Pixel numbers start with zero on the port side. The default is 
+to not output records associated with sidescan pixels. Instead, 
+the default is to output a single record for each ping 
+in which longitude and latitude values reflect 
+the sonar navigation, the depth,
+topography, and amplitude values reflect the valid beam 
+nearest to vertical, and the sidescan value reflects the pixel
+nearest to vertical. If \fB-N\fP\fIA\fP is given, then a record
+will be output for all sidescan pixels.
 .TP
 .B \-O
 \fIoutput_format\fP
@@ -144,17 +188,31 @@ center bathymetry beam;
 Determines the form of the output. \fIOutput_format\fP is a string composed
 of one or more of the following characters:
 
+ 	\fB/\fP  special character - this causes the value
+                 indicated by the next character to be
+                 inverted - this applies only to simple
+                 numeric values such as depth and heading
+                 and not to values like time strings or 
+                 positions with hemisphere characters.
  	\fBA\fP  for apparent seafloor crosstrack slope 
   		 (degrees from horizontal with positive
  		 slopes dipping toward port) - calculated 
  		 by fitting a line to the the
  		 bathymetry data of each ping.
+ 	\fBa\fP  for apparent seafloor crosstrack slope 
+  		 (degrees from horizontal with positive
+ 		 slopes dipping toward port) - calculated 
+ 		 by interpolation for each beam or pixel.
  	\fBB\fP  for amplitude
  	\fBb\fP  for sidescan
+ 	\fBC\fP  for sonar altitude above the bottom (m)
+ 	\fBc\fP  for sonar tranducer depth (m)
  	\fBD\fP  for bathymetry acrosstrack distance (m)
  	\fBd\fP  for sidescan acrosstrack distance (m)
  	\fBE\fP  for bathymetry alongtrack distance (m)
  	\fBe\fP  for sidescan alongtrack distance (m)
+ 	\fBG\fP  for flat bottom grazing angle (degrees)
+ 	\fBg\fP  for grazing angle using seafloor slope (degrees)
  	\fBH\fP  for heading (degrees)
  	\fBh\fP  for course made good (degrees)
   	\fBJ\fP  for a time string (yyyy jd hh mm ss.ssssss) 
@@ -198,12 +256,14 @@ Default: \fIpings\fP = 1 (no ping averaging).
 .B \-Q
 Disables value checking for validity (only positive bathymetry,
 amplitude, and sidescan values are valid).  This allows dumps
-of all of the data, including zero or flagged beams and pixels.
+of all of the data, including null or flagged beams and pixels.
+The flagged values are output without change. Null values are
+output as zero. This option is equivalent to \fB-U\fP\fI2\fP.
 .TP
 .B \-R
 \fIwest/east/south/north\fP
 .br
-Sets the longitude and latitude bounds within which multibeam 
+Sets the longitude and latitude bounds within which swath 
 data will be read. Only the data which lies within these bounds will
 be read. 
 Default: \fIwest\fP=-360, east\fI=360\fP, \fIsouth\fP=-90, \fInorth\fP=90.
@@ -221,6 +281,23 @@ copied. Default: \fIspeed\fP = 0.
 Sets the maximum time gap in minutes between adjacent pings allowed before
 the data is considered to have a gap. Default: \fItimegap\fP = 1.
 .TP
+.B \-U
+\fIcheck\fP
+.br
+Sets the manner in which \fBmblist\fP handles flagged and null
+bathymetry, amplitude, and sidescan values. By default, \fBmblist\fP
+omits lines of output if they contain flagged or null values. This
+default corresponds to \fIcheck\fP = 0. 
+If fIcheck\fP = 1, then flagged values will be output 
+unchanged and null values will be ignored.
+If fIcheck\fP = 2,
+then flagged values will be output unchanged and null values
+will be output as zero (This corresponds to the \fB-Q\fP option).
+If fIcheck\fP = 3, then flagged values will be output unchanged
+and null values will be output as "NaN".
+If fIcheck\fP = 4, then flagged values and null values 
+will be output as "NaN".
+.TP
 .B \-V
 Normally, \fBmblist\fP works "silently" without outputting
 anything to the stderr stream.  If the
@@ -234,11 +311,12 @@ track distances in meters.  If the
 in feet.
 
 .SH EXAMPLES
-Suppose one wishes to obtain a centerbeam profile from a raw Hydrosweep file
+Suppose one wishes to obtain a centerbeam profile 
+from a raw Hydrosweep file
 (format 21) in a region between 105W and 103W 
 longitude and between 10S and 8S latitude. The following will suffice:
 
-	mblist -Iinfile -F21 -R-105/-103/-10/-8 -OLz
+	mblist -Iinfile.mb21 -F21 -R-105/-103/-10/-8 -OLz
 
 The output will be as follows:
 
@@ -254,11 +332,14 @@ The output will be as follows:
  	0.737  4307
  	.....
 
+Here the depth values will correspond to the beam in each
+ping which is located closest to vertical under the ship.
+
 Suppose one wishes instead to obtain time, heading and speed data
 in the same file from 8AM to 9AM on August 10 1991. The following
 is appropriate:
 
- 	mblist -Iinfile -F21 -B1991/8/10/8/0/0
+ 	mblist -Iinfile.mb21 -F21 -B1991/8/10/8/0/0
  	-E1991/8/10/9/0/0 -OTHS
 
 The output will be as follows:
@@ -279,7 +360,7 @@ Suppose one wishes a data series with along-track distance,
 topography and across-track distance of beam number 15 for the same file
 and time limits as above:
 
- 	mblist -Iinfile -F21 -B1991/8/10/7/0/0
+ 	mblist -Iinfile.mb21 -F21 -B1991/8/10/7/0/0
  	-E1991/8/10/9/0/0 -OLZD -M15/15
 
 The output will be as follows:
@@ -300,7 +381,7 @@ Supppose one wishes to obtain longitude, latitude, and
 depth at the centerbeam as x-y-z data for the same region as in the
 first example:
 
- 	mblist -Iinfile -F21 -R-105/-103/-10/-8 -OXYz
+ 	mblist -Iinfile.mb21 -F21 -R-105/-103/-10/-8 -OXYz
 
 The output will be as follows:
 
@@ -321,11 +402,11 @@ depth for all good beams in a Hydrosweep data file. There are two ways to
 obtain this output. One can explicitly specify the output format as
 \fB-O\fP\fIXYz\fP and the output beams as \fB-M\fP\fI0/58\fP:
 
- 	mblist -Iinfile -F21 -OXYz -M0/58
+ 	mblist -Iinfile.mb21 -F21 -OXYz -M0/58
 
 or one can use the equivalent \fB-D\fP\fI2\fP shortcut:
 
-	mblist -Iinfile -F21 -D2
+	mblist -Iinfile.mb21 -F21 -D2
 
 Either way, the output is as follows:
 
@@ -350,11 +431,11 @@ the \fB-Q\fP option is used to disable validity checking of
 beam values. One can explicitly specify the output format as
 \fB-O\fP\fIXYz\fP and the output beams as \fB-M\fP\fI0/58\fP:
 
- 	mblist -Iinfile -F21 -OXYz -M0/58 -Q
+ 	mblist -Iinfile.mb21 -F21 -OXYz -M0/58 -Q
 
 or one can use the equivalent \fB-D\fP\fI2\fP shortcut:
 
-	mblist -Iinfile -F21 -D2 -Q
+	mblist -Iinfile.mb21 -F21 -D2 -Q
 
 Either way, the output includes both zero beams (no data) and
 beams with negative depths (flagged as bad data):
@@ -381,11 +462,11 @@ amplitude for all good beams in a Hydrosweep data file. There are two ways to
 obtain this output. One can explicitly specify the output format as
 \fB-O\fP\fIXYB\fP and the output beams as \fB-M\fP\fI0/58\fP:
 
- 	mblist -Iinfile -F21 -OXYB -M0/58
+ 	mblist -Iinfile.mb21 -F21 -OXYB -M0/58
 
 or one can use the equivalent \fB-D\fP\fI4\fP shortcut:
 
-	mblist -Iinfile -F21 -D4
+	mblist -Iinfile.mb21 -F21 -D4
 
 Either way, the output is as follows:
 
@@ -408,4 +489,4 @@ Either way, the output is as follows:
 
 .SH BUGS
 \fBmblist\fP is not able to list all of the information available in some
-multibeam formats.
+swath data formats.

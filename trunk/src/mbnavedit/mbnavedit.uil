@@ -38,6 +38,7 @@ names = case_sensitive
 !(BX) bx_info("c_dirpath", "")
 !(BX) bx_info("include_path", ".", false)
 !(BX) bx_info("xrunner_command", "$(M_ROOT)/arch/X11.5/Xm1.2/mic_xm.o", false)
+!(BX) bx_info("purify_command", "purify", false)
 !(BX) bx_info("system_directory", "/usr/bx50")
 !(BX) bx_info("builder_version", "Builder Xcessory Version 5.0.3")
 !(BX) bx_info("build_lang", "C")
@@ -50,9 +51,12 @@ names = case_sensitive
 !(BX) bx_info("integrate_xrunner", "false")
 
 procedure BxGlobalWidgetId;
+identifier BXG_pushButton_unflag;
+identifier BXG_pushButton_flag;
 identifier BXG_pushButton_controls_timeinterpolation;
 identifier BXG_toggleButton_org_sonardepth;
 identifier BXG_toggleButton_sonardepth;
+identifier BXG_pushButton_solution;
 identifier BXG_toggleButton_dr_lat;
 identifier BXG_toggleButton_dr_lon;
 identifier BXG_toggleButton_org_time;
@@ -168,6 +172,8 @@ procedure do_modeling_apply();
 procedure do_useprevious_yes();
 procedure do_useprevious_no();
 procedure do_timeinterpolation_apply();
+procedure do_flag();
+procedure do_unflag();
 
 list BaseStyle : arguments {
 };
@@ -208,7 +214,8 @@ object pushButton_timeinterpolation_apply : XmPushButton widget {
         callbacks Style_useReasons;
        XmNactivateCallback = procedures {
                  do_timeinterpolation_apply();
-                 BxUnmanageCB("bulletinBoard_timeinterpolation");
+                 BxUnmanageCB("bulletinBoard_timeinterpolation" &
+ "");
         };
     };
 !(BX)    handlers {
@@ -229,7 +236,8 @@ object pushButton_timeinterpolation_dismiss : XmPushButton widget {
     };
     callbacks {
         callbacks Style_useReasons;
-        XmNactivateCallback = procedure BxUnmanageCB("bulletinBoard_timeinterpolation");
+        XmNactivateCallback = procedure BxUnmanageCB("bulletinBoard_timeinterpolation" &
+ "");
     };
 !(BX)    handlers {
 !(BX)        handlers Style_useHandlers;
@@ -263,8 +271,8 @@ object bulletinBoard_timeinterpolation : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 8;
-        XmNy = 32;
+        XmNx = 303;
+        XmNy = 381;
         XmNwidth = 307;
         XmNheight = 149;
     };
@@ -367,8 +375,8 @@ object bulletinBoard_useprevious : XmBulletinBoardDialog widget {
  "?");
         XmNautoUnmanage = true;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 8;
-        XmNy = 32;
+        XmNx = 234;
+        XmNy = 356;
         XmNwidth = 503;
         XmNheight = 126;
     };
@@ -739,8 +747,8 @@ object bulletinBoard_modeling : XmBulletinBoardDialog widget {
         XmNdialogTitle = compound_string("Navigation Modeling");
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 8;
-        XmNy = 32;
+        XmNx = 252;
+        XmNy = 362;
         XmNwidth = 496;
         XmNheight = 451;
     };
@@ -980,8 +988,8 @@ object bulletinBoard_timestepping : XmBulletinBoardDialog widget {
         XmNdialogTitle = compound_string("Time Stepping");
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 8;
-        XmNy = 32;
+        XmNx = 254;
+        XmNy = 270;
         XmNwidth = 491;
         XmNheight = 195;
     };
@@ -1195,8 +1203,8 @@ object textField_output_file : XmTextField widget {
 object bulletinBoard_fileselection : XmBulletinBoardDialog widget {
     arguments {
         XmNresizePolicy = XmRESIZE_NONE;
-        XmNx = 8;
-        XmNy = 32;
+        XmNx = 199;
+        XmNy = 308;
         XmNwidth = 614;
         XmNheight = 606;
     };
@@ -1316,8 +1324,8 @@ object bulletinBoard_error : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNdialogStyle = XmDIALOG_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 8;
-        XmNy = 32;
+        XmNx = 272;
+        XmNy = 353;
         XmNwidth = 311;
         XmNheight = 161;
     };
@@ -1397,8 +1405,8 @@ object bulletinBoard_message : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNdialogStyle = XmDIALOG_FULL_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_NONE;
-        XmNx = 8;
-        XmNy = 32;
+        XmNx = 316;
+        XmNy = 344;
         XmNwidth = 379;
         XmNheight = 86;
     };
@@ -1651,8 +1659,8 @@ object separator1 : XmSeparator widget {
 object bulletinBoard_about : XmBulletinBoardDialog widget {
     arguments {
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 8;
-        XmNy = 32;
+        XmNx = 259;
+        XmNy = 316;
         XmNwidth = 481;
         XmNheight = 463;
     };
@@ -2147,7 +2155,7 @@ object radioBox : XmRadioBox widget {
         XmNpacking = XmPACK_TIGHT;
         XmNlabelString = compound_string("");
         XmNorientation = XmHORIZONTAL;
-        XmNx = 580;
+        XmNx = 600;
         XmNy = 40;
         XmNwidth = 414;
         XmNheight = 40;
@@ -2175,7 +2183,7 @@ object pushButton_interpolate : XmPushButton widget {
 		font('-adobe-helvetica-bold-r-normal--14-140-75-75-p-82-iso8859-1'));
         XmNlabelString = compound_string("Interpolate");
         XmNrecomputeSize = false;
-        XmNx = 400;
+        XmNx = 180;
         XmNy = 50;
         XmNwidth = 90;
         XmNheight = 30;
@@ -2199,9 +2207,9 @@ object pushButton_revert : XmPushButton widget {
 		font('-adobe-helvetica-bold-r-normal--14-140-75-75-p-82-iso8859-1'));
         XmNlabelString = compound_string("Revert");
         XmNrecomputeSize = false;
-        XmNx = 490;
+        XmNx = 270;
         XmNy = 50;
-        XmNwidth = 90;
+        XmNwidth = 80;
         XmNheight = 30;
     };
     controls {
@@ -2221,11 +2229,11 @@ object pushButton_showall : XmPushButton widget {
         arguments Style_use;
         XmNfontList = font_table(
 		font('-adobe-helvetica-bold-r-normal--14-140-75-75-p-82-iso8859-1'));
-        XmNlabelString = compound_string("Show Entire Buffer");
+        XmNlabelString = compound_string("Show All");
         XmNrecomputeSize = false;
         XmNx = 10;
         XmNy = 50;
-        XmNwidth = 140;
+        XmNwidth = 80;
         XmNheight = 30;
     };
     controls {
@@ -2244,11 +2252,11 @@ object pushButton_set_interval : XmPushButton widget {
         arguments Style_use;
         XmNfontList = font_table(
 		font('-adobe-helvetica-bold-r-normal--14-140-75-75-p-82-iso8859-1'));
-        XmNlabelString = compound_string("Pick Time Interval");
+        XmNlabelString = compound_string("Pick Zoom");
         XmNrecomputeSize = false;
-        XmNx = 150;
+        XmNx = 90;
         XmNy = 50;
-        XmNwidth = 140;
+        XmNwidth = 80;
         XmNheight = 30;
     };
     controls {
@@ -2543,22 +2551,23 @@ object toggleButton_dr_lat : XmToggleButton widget {
 !(BX)    };
 };
 
-object pushButton_lonlat_dr : XmPushButton widget {
+object pushButton_solution : XmPushButton widget {
     arguments {
         arguments Style_use;
         XmNalignment = XmALIGNMENT_BEGINNING;
         XmNfontList = font_table(
 		font('-*-helvetica-bold-r-*-*-*-140-75-75-p-*-iso8859-1'));
         XmNlabelString = compound_string("Use Solution");
-        XmNx = 290;
+        XmNx = 360;
         XmNy = 50;
-        XmNwidth = 110;
+        XmNwidth = 100;
         XmNheight = 30;
     };
     controls {
     };
     callbacks {
         callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_solution);
         XmNactivateCallback = procedure do_button_use_dr();
     };
 !(BX)    handlers {
@@ -2669,8 +2678,8 @@ object pushButton_controls_timeinterpolation : XmPushButton widget {
 object pulldownMenu_controls : XmPulldownMenu widget {
     arguments {
         arguments Style_use;
-        XmNx = 0;
-        XmNy = 0;
+        XmNx = 153;
+        XmNy = 71;
         XmNwidth = 137;
         XmNheight = 76;
     };
@@ -2726,18 +2735,62 @@ object menuBar_controls : XmMenuBar widget {
 !(BX)    };
 };
 
+object pushButton_flag : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Flag");
+        XmNx = 460;
+        XmNy = 50;
+        XmNwidth = 70;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_flag);
+        XmNactivateCallback = procedure do_flag();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object pushButton_unflag : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Unflag");
+        XmNx = 530;
+        XmNy = 50;
+        XmNwidth = 70;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_unflag);
+        XmNactivateCallback = procedure do_unflag();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
 object bulletinBoard : XmBulletinBoard widget {
     arguments {
         arguments Style_use;
         XmNresizePolicy = XmRESIZE_ANY;
-        XmNwidth = 1020;
+        XmNwidth = 1024;
         XmNheight = 680;
     };
     controls {
+         managed XmPushButton pushButton_unflag;
+         managed XmPushButton pushButton_flag;
          managed XmMenuBar menuBar_controls;
          managed XmToggleButton toggleButton_org_sonardepth;
          managed XmToggleButton toggleButton_sonardepth;
-         managed XmPushButton pushButton_lonlat_dr;
+         managed XmPushButton pushButton_solution;
          managed XmToggleButton toggleButton_dr_lat;
          managed XmToggleButton toggleButton_dr_lon;
          managed XmToggleButton toggleButton_org_time;
@@ -2781,7 +2834,7 @@ object mainWindow : XmMainWindow widget {
     arguments {
         XmNx = 8;
         XmNy = 32;
-        XmNwidth = 1020;
+        XmNwidth = 1024;
         XmNheight = 680;
     };
     controls {
@@ -2805,7 +2858,7 @@ object mainWindow : XmMainWindow widget {
 !(BX)        XmNiconName = "MBnavedit";
 !(BX)        XmNx = -10;
 !(BX)        XmNy = 28;
-!(BX)        XmNwidth = 1020;
+!(BX)        XmNwidth = 1024;
 !(BX)        XmNheight = 680;
 !(BX)    };
 !(BX)    controls {

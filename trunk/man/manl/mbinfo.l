@@ -7,7 +7,8 @@ Version 5.0
 
 .SH SYNOPSIS
 \fBmbinfo\fP [\fB-B\fIyr/mo/da/hr/mn/sc\fP \fB-C -E\fIyr/mo/da/hr/mn/sc\fP 
-\fB-F\fIformat\fP \fB-G\fP \fB-I\fIfilename\fP \fB-L\fIlonflip\fP \fB-P\fIping\fP 
+\fB-F\fIformat\fP \fB-G\fP \fB-I\fIfilename\fP 
+\fB-L\fIlonflip\fP \fB-M\fIlondim/latdim\fP \fB-P\fIping\fP 
 \fB-R\fIwest/east/south/norths\fP \fB-S\fIspeed\fP \fB-W -V -H\fP]
 
 .SH DESCRIPTION
@@ -15,8 +16,9 @@ Version 5.0
 or files and outputting some basic statistics.  The table generated
 shows the filename, the data format id, a brief description of
 the format, data counts, navigation totals, time and navigation
-of the first and last data records, and minimum and maximum
-data values. The data counts include the total number of bathymetry,
+of the first and last data records, minimum and maximum
+data values, and the geographic bounding box of the data. 
+The data counts include the total number of bathymetry,
 amplitude, and sidescan values read. These totals may be less
 than the maximum possible (number of data records times the
 maximum number of data supported for the particular data format)
@@ -24,6 +26,22 @@ for formats supporting variable numbers of beams or pixels.
 Also reported are the numbers and percentages of good, zero,
 and flagged data values (good values are those which are neither
 zero nor flagged as bad).
+
+An important function  of \fBmbinfo\fP is to generate ".inf"
+files that may be parsed by other \fBMB-System\fP programs
+and macros. To create an ".inf" file, simply direct the 
+output of \fBmbinfo\fP to a file named by adding the 
+suffix ".inf" to the input swath
+data filename. Programs such as \fBmbgrid\fP and \fBmbmosaic\fP,
+read ".inf" files, when available, to
+determine whether input swath data files actually contain 
+any data in the area of interest. The efficiency of these
+programs is enhanced by their ability to avoid reading files
+with no data in the area to be gridded or mosaiced. Programs
+such as \fBmbm_plot\fP and \fBmbm_grid\fP run \fBmbinfo\fP on
+input files to determine the data bounds. The availability
+of ".inf" files allows this information to be determined without
+having to read through each swath file.
 
 The data input may be averaged over several pings
 and/or windowed in time and space.  Comments in the data 
@@ -36,6 +54,21 @@ and sidescan pixels
 by reading a set number of pings and then finding the 
 variance of the values for each beam.  The bathymetry values are
 detrended before variances are calculated. 
+
+The program output can also be extended to include a coarse
+mask representing where data lies within the file's bounding
+box. This mask is shown as a table of 0's and 1's, where
+the 1's indicate bins with data. The dimensions of the mask
+are specified with the \fB-M\fP\fIlondim/latdim\fP option.
+For instance, if the user specifies \fB-M\fP\fI10/10\fP, then
+\fBmbinfo\fP will read through the data once to establish the
+usual statistics, including the data bounding box. Then, the
+program will initialize a 10 X 10 grid with the minimum and
+maximum longitude and latitude of the bounding box, and 
+read the data a second time. Each bin in which a sounding or
+pixel falls will be set to 1. After the second reading pass,
+the data location mask will be output at the end of the
+\fBmbinfo\fP output.
 
 .SH AUTHORSHIP
 David W. Caress (caress@mbari.org)
@@ -123,6 +156,15 @@ then the longitude values will be in
 the range from 0 to 360 degrees.
 Default: \fIlonflip\fP = 0.
 .TP
+.B \-M
+\fIlondim/latdim\fP
+.br
+The program output can be extended to include a coarse
+mask representing where data lies within the file's bounding
+box. This mask is shown as a table of 0's and 1's, where
+the 1's indicate bins with data. The dimensions of the mask
+are specified with the \fB-M\fP\fIlondim/latdim\fP option.
+.TP
 .B \-P
 \fIpings\fP
 .br
@@ -177,11 +219,12 @@ The following will suffice:
 
 The following output is produced: 
 
- Multibeam Data File:  example_hs.mb24
+
+ Swath Data File:      example_hs.mb24
  MBIO Data Format ID:  24
  Format name:          MBF_HSLDEOIH
  Informal Description: L-DEO in-house binary Hydrosweep
- Attributes:           Hydrosweep DS, 59 beams, bathymetry and amplitude, 
+ Attributes:           Hydrosweep DS, 59 beams, bathymetry and amplitude,
                        binary, centered, L-DEO.
  
  Data Totals:
@@ -193,9 +236,9 @@ The following output is produced:
    Number of Flagged Beams:      988      6.37%
  Amplitude Data (59 beams):
    Number of Beams:            15517
-   Number of Good Beams:           0      0.00%
-   Number of Zero Beams:       15517     100.00%
-   Number of Flagged Beams:        0      0.00%
+   Number of Good Beams:       13661     88.04%
+   Number of Zero Beams:         868      5.59%
+   Number of Flagged Beams:      988      6.37%
  Sidescan Data (0 pixels):
    Number of Pixels:               0
    Number of Good Pixels:          0      0.00%
@@ -211,16 +254,22 @@ The following output is produced:
  Time:  08 14 1993 18:00:25.000000  JD226
  Lon:  -49.3011     Lat:   12.1444     Depth:  4920.0000 meters
  Speed: 18.3600 km/hr ( 9.9243 knots)  Heading:  97.2000 degrees
+ Sonar Depth:    0.0000 m  Sonar Altitude: 4920.0000 m
  
  End of Data:
  Time:  08 14 1993 19:14:58.000000  JD226
  Lon:  -49.1111     Lat:   12.1149     Depth:  5021.0000 meters
  Speed: 17.2800 km/hr ( 9.3405 knots)  Heading:  97.0000 degrees
+ Sonar Depth:    0.0000 m  Sonar Altitude: 5021.0000 m
  
  Limits:
- Minimum Longitude:   -49.3061   Maximum Longitude:   -49.1064
- Minimum Latitude:     12.0750   Maximum Latitude:     12.1806
- Minimum Depth:      3726.0000   Maximum Depth:      5190.0000
+ Minimum Longitude:     -49.3061   Maximum Longitude:     -49.1064
+ Minimum Latitude:       12.0750   Maximum Latitude:       12.1806
+ Minimum Sonar Depth:     0.0000   Maximum Sonar Depth:     0.0000
+ Minimum Altitude:     4087.0000   Maximum Altitude:     5034.0000
+ Minimum Depth:        3726.0000   Maximum Depth:        5190.0000
+ Minimum Amplitude:     100.0000   Maximum Amplitude:    6380.0000
+
 
 Suppose we wanted to know how noisy the outer beams are relative
 to the inner beams.  We might try:
@@ -228,13 +277,13 @@ to the inner beams.  We might try:
 
 obtaining:
 
- Multibeam Data File:  example_hs.mb24
+ Swath Data File:      example_hs.mb24
  MBIO Data Format ID:  24
  Format name:          MBF_HSLDEOIH
  Informal Description: L-DEO in-house binary Hydrosweep
- Attributes:           Hydrosweep DS, 59 beams, bathymetry and amplitude, 
+ Attributes:           Hydrosweep DS, 59 beams, bathymetry and amplitude,
                        binary, centered, L-DEO.
- 
+
  Data Totals:
  Number of Records:              263
  Bathymetry Data (59 beams):
@@ -244,34 +293,39 @@ obtaining:
    Number of Flagged Beams:      988      6.37%
  Amplitude Data (59 beams):
    Number of Beams:            15517
-   Number of Good Beams:           0      0.00%
-   Number of Zero Beams:       15517     100.00%
-   Number of Flagged Beams:        0      0.00%
+   Number of Good Beams:       13661     88.04%
+   Number of Zero Beams:         868      5.59%
+   Number of Flagged Beams:      988      6.37%
  Sidescan Data (0 pixels):
    Number of Pixels:               0
    Number of Good Pixels:          0      0.00%
    Number of Zero Pixels:          0      0.00%
    Number of Flagged Pixels:       0      0.00%
- 
+
  Navigation Totals:
  Total Time:             1.2425 hours
  Total Track Length:    20.9421 km
  Average Speed:         16.8548 km/hr ( 9.1107 knots)
- 
+
  Start of Data:
  Time:  08 14 1993 18:00:25.000000  JD226
  Lon:  -49.3011     Lat:   12.1444     Depth:  4920.0000 meters
  Speed: 18.3600 km/hr ( 9.9243 knots)  Heading:  97.2000 degrees
- 
+ Sonar Depth:    0.0000 m  Sonar Altitude: 4920.0000 m
+
  End of Data:
  Time:  08 14 1993 19:14:58.000000  JD226
  Lon:  -49.1111     Lat:   12.1149     Depth:  5021.0000 meters
  Speed: 17.2800 km/hr ( 9.3405 knots)  Heading:  97.0000 degrees
+ Sonar Depth:    0.0000 m  Sonar Altitude: 5021.0000 m
  
  Limits:
- Minimum Longitude:   -49.3061   Maximum Longitude:   -49.1064
- Minimum Latitude:     12.0750   Maximum Latitude:     12.1806
- Minimum Depth:      3726.0000   Maximum Depth:      5190.0000
+ Minimum Longitude:     -49.3061   Maximum Longitude:     -49.1064
+ Minimum Latitude:       12.0750   Maximum Latitude:       12.1806
+ Minimum Sonar Depth:     0.0000   Maximum Sonar Depth:     0.0000
+ Minimum Altitude:     4087.0000   Maximum Altitude:     5034.0000
+ Minimum Depth:        3726.0000   Maximum Depth:        5190.0000
+ Minimum Amplitude:     100.0000   Maximum Amplitude:    6380.0000
 
  Beam Bathymetry Variances:
  Pings Averaged: 5

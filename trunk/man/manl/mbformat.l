@@ -1,4 +1,4 @@
-.TH mbformat l "4 January 2001" "MB-System 5.0" "MB-System 5.0"
+.TH mbformat l "16 March 2001" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbformat\fP -  List information about swath sonar data formats
 supported by the \fBMBIO\fP library.
@@ -6,14 +6,20 @@ supported by the \fBMBIO\fP library.
 .SH VERSION
 Version 5.0
 
-.SH SYNOPSIS
-\fBmbformat\fP [\fB -F\fIformat \fB -L -V -H\fP]
+.SH SYNOPSIS\fBmbformat\fP [\fB -F\fP\fIformat\fP \fB-I\fP\fIfile\fP \fB-L -V -H\fP]
 
 .SH DESCRIPTION
 \fBmbformat\fP is an utility which identifies the swath sonar data formats
-associated with \fBmbio\fP format id's.  If no format id is specified,
-\fBmbformat\fP lists all of the currently supported formats.
-By default, the listing includes a brief description of each format.
+associated with \fBmbio\fP format id's.  If no format id or input filename
+is specified,
+\fBmbformat\fP lists all of the currently supported formats. If a format id
+is specified using the \fB-F\fP option, then \fBmbformat\fP If a filename
+is specified using the \fB-I\fP option, then \fBmbformat\fP attempts to
+identify a valid format id for that file using swath data filename prefix
+and suffix conventions embedded in \fBMB-System\fP. Normally, \fBmbformat\fP
+prints out a brief description of each identified format. If the \fB-L\fP
+option is used, \fBmbformat\fP simply prints out the valid format id number,
+or 0 if a file or format has been specified but no valid id can be identified.
 
 .SH AUTHORSHIP
 David W. Caress (caress@mbari.org)
@@ -38,6 +44,12 @@ is given in the \fBMBIO\fP manual page.
 This "help" flag cause the program to print out a description
 of its operation and then exit immediately.
 .TP
+.B \-I
+\fIfile\fP
+.br
+Sets the filename to be tested against known filename prefix and
+suffix conventions in order to identify the format id.
+.TP
 .B \-L
 Causes the format descriptions to be omitted 
 so that only the \fBMBIO\fP format id numbers are listed.
@@ -51,10 +63,32 @@ also outputs the program version being used.
 Suppose one wishes to identify the swath sonar data format associated
 with a format id of 11.  The following will suffice:
 	mbformat -F11
+.br
+and the result will be this output:
+  MBIO data format id: 11
+  Format name:          MBF_SBSIOMRG
+  Informal Description: SIO merge Sea Beam
+  Attributes:           Sea Beam, bathymetry, 16 beams, binary, uncentered,
+                        SIO.
 
 Suppose one wishes to list all of the currently supported data formats:
 The following will suffice:
-	mbformat
+.br
+  mbformat
+
+Suppose one wants to find out what format is associated with a raw
+SeaBeam 2112 file named sb199811231045.rec:
+.br
+  mbformat -I sb199811231045.rec
+.br
+This results in the output:
+  MBIO data format id: 41
+  Format name:          MBF_SB2100RW
+  Informal Description: SeaBeam 2100 series vender format
+  Attributes:           SeaBeam 2100, bathymetry, amplitude 
+                        and sidescan, 151 beams and 2000 pixels, ascii 
+                        with binary sidescan, SeaBeam Instruments.
+
 
 .SH SEE ALSO
 \fBmbsystem\fP(l), \fBmbio\fP(l)

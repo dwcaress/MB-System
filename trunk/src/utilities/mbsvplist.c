@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsvplist.c	1/3/2001
- *    $Id: mbsvplist.c,v 5.0 2001-01-04 21:43:50 caress Exp $
+ *    $Id: mbsvplist.c,v 5.1 2001-03-22 21:15:49 caress Exp $
  *
  *    Copyright (c) 2001 by
  *    David W. Caress (caress@mbari.org)
@@ -29,6 +29,9 @@
  * Date:	January 3,  2001
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2001/01/04  21:43:50  caress
+ * Initial revision.
+ *
  *
  */
 
@@ -51,7 +54,7 @@ char	*getenv();
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbsvplist.c,v 5.0 2001-01-04 21:43:50 caress Exp $";
+	static char rcs_id[] = "$Id: mbsvplist.c,v 5.1 2001-03-22 21:15:49 caress Exp $";
 	static char program_name[] = "mbsvplist";
 	static char help_message[] =  "mbsvplist lists all water sound velocity\nprofiles (SVPs) within swath data files. Swath bathymetry is\ncalculated from raw angles and travel times by raytracing\nthrough a model of the speed of sound in water. Many swath\ndata formats allow SVPs to be embedded in the data, and\noften the SVPs used to calculate the data will be included.\nBy default, all unique SVPs encountered are listed to\nstdout. The SVPs may instead be written to individual files\nwith names FILE_XXX.svp, where FILE is the swath data\nfilename and XXX is the SVP count within the file.  The -D\noption causes duplicate SVPs to be output.";
 	static char usage_message[] = "mbsvplist [-D -Fformat -H -Ifile -O -V]";
@@ -72,6 +75,7 @@ main (int argc, char **argv)
 	int	read_datalist = MB_NO;
 	char	read_file[MB_PATH_MAXLINE];
 	char	*datalist;
+	int	look_processed = MB_DATALIST_LOOK_UNSET;
 	double	file_weight;
 	int	format;
 	int	pings;
@@ -99,6 +103,8 @@ main (int argc, char **argv)
 	double	speed;
 	double	heading;
 	double	distance;
+	double	altitude;
+	double	sonardepth;
 	char	*beamflag = NULL;
 	double	*bath = NULL;
 	double	*bathacrosstrack = NULL;
@@ -249,6 +255,10 @@ main (int argc, char **argv)
 		exit(error);
 		}
 
+	/* get format if required */
+	if (format == 0)
+		mb_get_format(verbose,read_file,NULL,&format,&error);
+
 	/* determine whether to read one file or a list of files */
 	if (format < 0)
 		read_datalist = MB_YES;
@@ -257,7 +267,7 @@ main (int argc, char **argv)
 	if (read_datalist == MB_YES)
 	    {
 	    if ((status = mb_datalist_open(verbose,&datalist,
-					    read_file,&error)) != MB_SUCCESS)
+					    read_file,look_processed,&error)) != MB_SUCCESS)
 		{
 		error = MB_ERROR_OPEN_FAIL;
 		fprintf(stderr,"\nUnable to open data list file: %s\n",
@@ -339,8 +349,9 @@ main (int argc, char **argv)
 		{
 		/* read a data record */
 		status = mb_get_all(verbose,mbio_ptr,&store_ptr,&kind,
-			time_i,&time_d,&navlon,&navlat,&speed,
-			&heading,&distance,
+			time_i,&time_d,&navlon,&navlat,
+			&speed,&heading,
+			&distance,&altitude,&sonardepth,
 			&beams_bath,&beams_amp,&pixels_ss,
 			beamflag,bath,amp,bathacrosstrack,bathalongtrack,
 			ss,ssacrosstrack,ssalongtrack,

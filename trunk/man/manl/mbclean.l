@@ -1,4 +1,4 @@
-.TH mbclean l "4 January 2001" "MB-System 5.0" "MB-System 5.0"
+.TH mbclean l "12 March 2001" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbclean\fP - Tool to automatically flag bad beams in swath sonar bathymetry data.
 
@@ -45,8 +45,23 @@ as follows:
  	7. Flag all soundings in pings with too few 
  		good soundings (\fB-U\fP option).
 
-The default input and output streams 
-are stdin and stdout.
+This program flags beams by outputting the flags as 
+edit events to an "edit save file", like that produced
+by \fBmbedit\fP. If an "edit save file" (named by adding
+a ".esf" suffix to the input swath filename) already
+exists, the edits are read in and applied before the
+\fBmbclean\fP flagging algorithms are used.
+Once generated, the edit events can be applied 
+to the data using the program \fBmbprocess\fP, which
+outputs a processed swath data file. 
+The \fBmbprocess\fP program is also used to merge
+edited navigation, recalculate bathymetry, and apply
+other corrections to swath bathymetry data. 
+
+The program \fBmbclean\fP that was included in \fBMB-System\fP
+version 4 distributions directly output a "cleaned"
+swath file. This functionality is currently preserved
+in the program \fBmbcleanold\fP.
 
 .SH AUTHORSHIP
 David W. Caress (caress@mbari.org)
@@ -181,30 +196,6 @@ If the data format of the input file
 prohibits storage of negative depths, an error message will be output
 and the program will exit. Default: \fImode\fP = 1.
 .TP
-.B \-N
-\fIbuffersize\fP
-.br
-Sets the maximum number of data records which can be
-read into the buffer. In general, data records may be
-of several different types (e.g. parameter, position, 
-comment) in addition to survey data records. Many data 
-formats include many more position data records than
-survey data records. Thus, a large buffer may be required
-to access a reasonable number of survey data records. 
-However, on memory limited machines large buffer sizes
-can lead to poor performance due to memory swapping. 
-The default value of \fIbuffersize\fP = 500 is appropriate 
-for most cases, but users can set the buffer size as required.
-The absolute maximum buffer size is 5000. 
-Default: \fIbuffersize\fP = 500.
-.TP
-.B \-O
-\fIoutfile\fP
-.br
-Data file to which the output data will be written. If
-no output file is specified, the output will be written to
-stdout. Default: \fIoutfile\fP = stdout.
-.TP
 .B \-Q
 This flag causes \fBmbclean\fP to search for bad "rails" in the
 swath sonar swath; the "rails" refer to groups of outer beams which
@@ -251,7 +242,7 @@ The program will output some information because of the
 \fB-V\fP option:
 .br
  	Program MBCLEAN
- 	Version $Id: mbclean.l,v 5.0 2001-01-22 07:51:57 caress Exp $
+ 	Version $Id: mbclean.l,v 5.1 2001-03-22 21:15:49 caress Exp $
  	MB-system Version 4.3
 .br
  	132 records loaded into buffer
@@ -281,8 +272,8 @@ The program will output some information because of the
  	0 beams zeroed
 
 .SH SEE ALSO
-\fBmbsystem\fP(l), \fBmbunclean\fP(l), \fBmbedit\fP(l), 
-\fBmbinfo\fP(l)
+\fBmbsystem\fP(l), \fBcleanold\fP(l), \fBmbedit\fP(l), 
+\fBmbinfo\fP(l) \fBmbprocess\fP(l),
 
 .SH BUGS
 The algorithms implemented in \fBmbclean\fP simply 

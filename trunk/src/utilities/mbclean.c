@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbclean.c	2/26/93
- *    $Id: mbclean.c,v 5.1 2001-01-23 01:16:25 caress Exp $
+ *    $Id: mbclean.c,v 5.2 2001-03-22 21:14:16 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2001 by
  *    David W. Caress (caress@mbari.org)
@@ -54,6 +54,9 @@
  * by David Caress.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2001/01/23  01:16:25  caress
+ * Working esf version.
+ *
  * Revision 5.0  2000/12/01  22:57:08  caress
  * First cut at Version 5.0.
  *
@@ -212,7 +215,7 @@ int mbclean_save_edit(int verbose, FILE *sofp, double time_d, int beam,
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbclean.c,v 5.1 2001-01-23 01:16:25 caress Exp $";
+	static char rcs_id[] = "$Id: mbclean.c,v 5.2 2001-03-22 21:14:16 caress Exp $";
 	static char program_name[] = "MBCLEAN";
 	static char help_message[] =  "MBCLEAN identifies and flags artifacts in swath sonar bathymetry data\nBad beams  are  indentified  based  on  one simple criterion only: \nexcessive bathymetric slopes.   The default input and output streams \nare stdin and stdout.";
 	static char usage_message[] = "mbclean [-Amax -Blow/high -Cslope -Dmin/max \n\t-Fformat -Gfraction_low/fraction_high \n\t-Iinfile -Llonflip -Mmode -Nbuffersize -Ooutfile -Q -Xzap_beams \n\t-V -H]";
@@ -244,6 +247,8 @@ main (int argc, char **argv)
 	double	speedmin;
 	double	timegap;
 	double	distance;
+	double	altitude;
+	double	sonardepth;
 	int	beams_bath;
 	int	beams_amp;
 	int	pixels_ss;
@@ -316,7 +321,6 @@ main (int argc, char **argv)
 	double	median = 0.0;
 	double	dd;
 	double	slope;
-	
 
 	/* save file control variables */
 	int	sofile_open = MB_NO;
@@ -461,6 +465,10 @@ main (int argc, char **argv)
 		error = MB_ERROR_BAD_USAGE;
 		exit(error);
 		}
+
+	/* get format if required */
+	if (format == 0)
+		mb_get_format(verbose,ifile,NULL,&format,&error);
 
 	/* turn on slope checking if nothing else is to be used */
 	if (check_slope == MB_NO
@@ -761,7 +769,6 @@ main (int argc, char **argv)
 		}
 	    }
 
-
 	/* read */
 	done = MB_NO;
 	start = 0;
@@ -778,7 +785,8 @@ main (int argc, char **argv)
 			    imbio_ptr,&kind,&pings,
 			    ping[nrec].time_i,&ping[nrec].time_d,
 			    &ping[nrec].navlon,&ping[nrec].navlat,
-			    &ping[nrec].speed,&ping[nrec].heading,&distance,
+			    &ping[nrec].speed,&ping[nrec].heading,
+			    &distance,&altitude,&sonardepth,
 			    &ping[nrec].beams_bath,&beams_amp,&pixels_ss,
 			    ping[nrec].beamflag,ping[nrec].bath,amp,
 			    ping[nrec].bathacrosstrack,ping[nrec].bathalongtrack,

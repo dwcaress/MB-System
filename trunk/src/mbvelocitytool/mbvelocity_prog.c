@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:    mbvelocitytool.c        6/6/93
- *    $Id: mbvelocity_prog.c,v 5.1 2001-01-22 07:51:19 caress Exp $ 
+ *    $Id: mbvelocity_prog.c,v 5.2 2001-03-22 21:12:42 caress Exp $ 
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:        June 6, 1993 
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2001/01/22  07:51:19  caress
+ * Version 5.0.beta01
+ *
  * Revision 5.0  2000/12/01  22:56:47  caress
  * First cut at Version 5.0.
  *
@@ -158,9 +161,11 @@ struct profile
 	double	*depth;
 	double	*velocity;
 	};
-#define	MB_SSV_NO_USE	    0
-#define	MB_SSV_CORRECT	    1
-#define	MB_SSV_INCORRECT    2
+	
+/* angle correction mode defines */
+#define	MB_ANGLEMODE_ANGLES_OK		0
+#define	MB_ANGLEMODE_ANGLES_SNELL	1
+#define	MB_ANGLEMODE_ANGLES_SNELLNULL	2
 
 /* ping structure definition */
 struct mbvt_ping_struct 
@@ -188,7 +193,7 @@ struct mbvt_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbvelocity_prog.c,v 5.1 2001-01-22 07:51:19 caress Exp $";
+static char rcs_id[] = "$Id: mbvelocity_prog.c,v 5.2 2001-03-22 21:12:42 caress Exp $";
 static char program_name[] = "MBVELOCITYTOOL";
 static char help_message[] = "MBVELOCITYTOOL is an interactive water velocity profile editor  \nused to examine multiple water velocity profiles and to create  \nnew water velocity profiles which can be used for the processing  \nof multibeam sonar data.  In general, this tool is used to  \nexamine water velocity profiles obtained from XBTs, CTDs, or  \ndatabases, and to construct new profiles consistent with these  \nvarious sources of information.";
 static char usage_message[] = "mbvelocitytool [-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ssvpfile -Wsvpfile -V -H]";
@@ -214,6 +219,7 @@ double	maxdepth = 3000.0;
 double	velrange = 500.0;
 double	resrange = 200.0;
 double	ssv_start = 0.0;
+int	anglemode = MB_ANGLEMODE_ANGLES_OK;
 
 /* plotting variables */
 int	xmin, xmax, ymin, ymax;
@@ -493,7 +499,7 @@ int mbvt_init(int argc, char **argv)
 		}
 	if (strlen(ifile) > 0)
 		{
-		status = mbvt_open_swath_file(ifile,format, &n);
+		do_open_commandline(ifile, format);
 		}
 
 	/* print output debug statements */
@@ -624,7 +630,8 @@ int mbvt_set_graphics(int xgid, int *brdr, int ncol, int *pixels)
 /*                  int status                                        */
 /*--------------------------------------------------------------------*/
 int mbvt_get_values(int *s_edit, int *s_ndisplay, double *s_maxdepth,
-	double *s_velrange, double *s_resrange, int *s_format)
+	double *s_velrange, double *s_resrange, 
+	int *s_anglemode, int *s_format)
 {
 	/* local variables */
 	char	*function_name = "mbvt_get_values";
@@ -643,6 +650,7 @@ int mbvt_get_values(int *s_edit, int *s_ndisplay, double *s_maxdepth,
 	*s_maxdepth = maxdepth;
 	*s_velrange = velrange;
 	*s_resrange = resrange;
+	*s_anglemode = anglemode;
 	*s_format = format;
 
 	/* print output debug statements */
@@ -656,6 +664,7 @@ int mbvt_get_values(int *s_edit, int *s_ndisplay, double *s_maxdepth,
 		fprintf(stderr,"dbg2       s_maxdepth:  %f\n",*s_maxdepth);
 		fprintf(stderr,"dbg2       s_velrange:  %f\n",*s_velrange);
 		fprintf(stderr,"dbg2       s_resrange:  %f\n",*s_resrange);
+		fprintf(stderr,"dbg2       s_anglemode: %d\n",*s_anglemode);
 		fprintf(stderr,"dbg2       s_format:    %d\n",*s_format);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:      %d\n",status);
@@ -676,7 +685,8 @@ int mbvt_get_values(int *s_edit, int *s_ndisplay, double *s_maxdepth,
 /*                  status                                            */
 /*--------------------------------------------------------------------*/
 int mbvt_set_values(int s_edit, int s_ndisplay, 
-		double s_maxdepth, double s_velrange, double s_resrange)
+		double s_maxdepth, double s_velrange, 
+		double s_resrange, int s_anglemode)
 {
 	/* local variables */
 	char	*function_name = "mbvt_set_values";
@@ -693,6 +703,7 @@ int mbvt_set_values(int s_edit, int s_ndisplay,
 		fprintf(stderr,"dbg2       s_maxdepth:  %f\n",s_maxdepth);
 		fprintf(stderr,"dbg2       s_velrange:  %f\n",s_velrange);
 		fprintf(stderr,"dbg2       s_resrange:  %f\n",s_resrange);
+		fprintf(stderr,"dbg2       s_anglemode: %d\n",s_anglemode);
 		}
 
 	/* set values */
@@ -701,6 +712,7 @@ int mbvt_set_values(int s_edit, int s_ndisplay,
 	maxdepth = s_maxdepth;
 	velrange = s_velrange;
 	resrange = s_resrange;
+	anglemode = s_anglemode;
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -1058,6 +1070,8 @@ int mbvt_save_swath_profile(char *file)
 	int	status = MB_SUCCESS;
 	struct profile *profile;
 	FILE	*fp;
+	int	oldmode, oldanglemode, corrected;
+	char	oldfile[MB_PATH_MAXLINE];
 	int	i;
 
 	/* time, user, host variables */
@@ -1119,8 +1133,11 @@ int mbvt_save_swath_profile(char *file)
 	    fclose(fp);
 	    
 	    /* set par file for use with mbprocess */
+	    status = mb_pr_get_svp(verbose, swathfile, 
+			&oldmode, oldfile, 
+			&oldanglemode, &corrected, &error);
 	    status = mb_pr_update_svp(verbose, swathfile, 
-			MB_YES, file, MB_NO, error);
+			MB_YES, file, anglemode, corrected, &error);
     
 	    /* check success */
 	    if (status == MB_SUCCESS)
@@ -1395,7 +1412,7 @@ int mbvt_delete_display_profile(int select)
 /*                  action_canvas_event                               */
 /*                  action_residual_range                             */
 /*                  action_process_mb                                 */
-/*                  mbvt_open_swath_file                         */
+/*                  mbvt_open_swath_file                             */
 /* Functions called:                                                  */
 /*                  xg_setclip                                        */
 /*                  xg_fillrectangle                                  */
@@ -2283,6 +2300,8 @@ int mbvt_open_swath_file(char *file, int form, int *numload)
 	int	kind;
 	double	navlon_levitus, navlat_levitus;
 	double	distance;
+	double	altitude;
+	double	sonardepth;
 	int	variable_beams;
 	int	traveltime;
 	int	beam_flagging; 
@@ -2415,7 +2434,7 @@ int mbvt_open_swath_file(char *file, int form, int *numload)
 				&ping[nbuffer].navlat,
 				&ping[nbuffer].speed,
 				&ping[nbuffer].heading,
-				&distance,
+				&distance,&altitude,&sonardepth,
 				&ping[nbuffer].beams_bath,&namp,&nss,
 				beamflag,bath,amp, 
 				bathacrosstrack,bathalongtrack,
@@ -2606,7 +2625,6 @@ int mbvt_open_swath_file(char *file, int form, int *numload)
 	while (done == MB_NO)
 		{
 		sprintf(svp_file, "%s_%3.3d.svp", swathfile, count);
-fprintf(stderr, "checking for %s\n", svp_file);
 		if ((fstat = stat(svp_file, &file_status)) == 0
 		    && (file_status.st_mode & S_IFMT) != S_IFDIR)
 		    {
@@ -2614,7 +2632,6 @@ fprintf(stderr, "checking for %s\n", svp_file);
 		    }
 		else if (count > 0)
 		    done = MB_YES;
-fprintf(stderr, "done:%d fstat:%d\n", done, fstat);
 		count++;
 		}
 
@@ -2777,7 +2794,6 @@ int mbvt_process_multibeam()
 	int	first;
 	double	ttime;
 	int	ray_stat;
-	int	ssv_mode = MB_SSV_CORRECT;
 	double	ssv;
 	double	factor;
 	double	sx, sy, sxx, sxy;
@@ -2873,7 +2889,7 @@ int mbvt_process_multibeam()
 			    status = mb_rt(verbose, 
 				    rt_svp, 0.0, 
 				    ping[k].angles[i], 0.5*ping[k].ttimes[i],
-				    ssv_mode, ping[k].ssv, ping[k].angles_null[i], 
+				    anglemode, ping[k].ssv, ping[k].angles_null[i], 
 				    0, NULL, NULL, NULL, 
 				    &acrosstrack[i], &depth[i], 
 				    &ttime, &ray_stat, &error);
@@ -2885,7 +2901,7 @@ int mbvt_process_multibeam()
 			    status = mb_rt(verbose, 
 				    rt_svp, 0.0, 
 				    ping[k].angles[i], 0.5*ping[k].ttimes[i],
-				    ssv_mode, ping[k].ssv, ping[k].angles_null[i], 
+				    anglemode, ping[k].ssv, ping[k].angles_null[i], 
 				    nraypathmax, &nraypath[i], 
 				    raypathx[i], raypathy[i], 
 				    &acrosstrack[i], &depth[i], 

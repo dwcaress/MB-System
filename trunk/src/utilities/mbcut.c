@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcut.c	1/26/95
  *
- *    $Id: mbcut.c,v 5.0 2000-12-01 22:57:08 caress Exp $
+ *    $Id: mbcut.c,v 5.1 2001-03-22 21:14:16 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	January 26, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01  22:57:08  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.11  2000/10/11  01:06:15  caress
  * Convert to ANSI C
  *
@@ -91,7 +94,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbcut.c,v 5.0 2000-12-01 22:57:08 caress Exp $";
+	static char rcs_id[] = "$Id: mbcut.c,v 5.1 2001-03-22 21:14:16 caress Exp $";
 	static char program_name[] = "mbcut";
 	static char help_message[] = 
 "MBCUT removes swath data values that lie outside ranges\n\t\
@@ -150,6 +153,8 @@ The default input and output streams are stdin and stdout.";
 	double	speed;
 	double	heading;
 	double	distance;
+	double	altitude;
+	double	sonardepth;
 	int	nbath;
 	int	namp;
 	int	nss;
@@ -263,8 +268,7 @@ The default input and output streams are stdin and stdout.";
 			break;
 		case 'R':
 		case 'r':
-			sscanf (optarg,"%lf/%lf/%lf/%lf", 
-				&bounds[0],&bounds[1],&bounds[2],&bounds[3]);
+			mb_get_bounds(optarg, bounds);
 			flag++;
 			break;
 		case 'S':
@@ -345,6 +349,10 @@ The default input and output streams are stdin and stdout.";
 		fprintf(stderr,"\nusage: %s\n", usage_message);
 		exit(error);
 		}
+
+	/* get format if required */
+	if (format == 0)
+		mb_get_format(verbose,ifile,NULL,&format,&error);
 
 	/* check format and get format flags */
 	if ((status = mb_format_flags(verbose,&format,
@@ -476,8 +484,9 @@ The default input and output streams are stdin and stdout.";
 		error = MB_ERROR_NO_ERROR;
 		status = MB_SUCCESS;
 		status = mb_get_all(verbose,imbio_ptr,&store_ptr,&kind,
-				time_i,&time_d,&navlon,&navlat,&speed,
-				&heading,&distance,
+				time_i,&time_d,&navlon,&navlat,
+				&speed,&heading,
+				&distance,&altitude,&sonardepth,
 				&beams_bath,&beams_amp,&pixels_ss,
 				beamflag,bath,amp,bathacrosstrack,bathalongtrack,
 				ss,ssacrosstrack,ssalongtrack,
