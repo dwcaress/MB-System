@@ -1,0 +1,229 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML VERSION="2.0">
+<HEAD>
+   <TITLE>MB-System Unix Manual Page: mbrollbias</TITLE>
+<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
+<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
+<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<BODY>
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<PRE>
+<H1>mbrollbias</H1>
+Section: MB-System 5.0 (l)<BR>Updated: 13 July 2001<BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<B>mbrollbias</B> - Assess roll bias of swath sonar sonar systems.
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>VERSION</H2>
+
+Version 5.0
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<B>mbrollbias</B> <B>-F</B><I>format1/format2 </I><B>-L</B><I>lonflip </I><B>-I</B><I>file1 </I><B>-J</B><I>file2 </I><B>-R</B><I>west/east/south/north [</I><B>-D</B><I>xdim/ydim </I><B>-H -V</B><I>]
+<P>
+</I><A NAME="lbAE">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+<B>mbrollbias</B> is a utility used to assess roll bias of swath sonar 
+sonar systems using bathymetry data from two swaths covering the same  
+seafloor in opposite directions. The program takes two input  
+files and calculates best fitting planes for each dataset.   
+The roll bias is calculated by solving for a common roll bias
+factor which explains the difference between the seafloor
+slopes observed on the two swaths.  This approach assumes that 
+pitch bias is not a factor; this assumption is most correct when
+the heading of the two shiptracks are exactly opposite. The area is
+divided into a number of rectangular regions and calculations are done  
+in each region containing a sufficient number of data from both 
+swaths.  The data contained in the two datafiles should be processed to
+ensure that no artifacts will bias the roll bias calculations.
+Typically, this means using <B>mbclean</B> and or <B>mbedit</B> to
+remove noisy outer beams.
+A positive roll bias value means that the the vertical reference 
+used by the swath sonar system is biased to starboard, 
+giving rise to shallow bathymetry to port and deep bathymetry 
+to starboard.  Results are written to stdout.
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H2>AUTHORSHIP</H2>
+
+David W. Caress (<A HREF="mailto:caress@mbari.org">caress@mbari.org</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
+<BR>
+
+Dale N. Chayes (<A HREF="mailto:dale@ldeo.columbia.edu">dale@ldeo.columbia.edu</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Lamont-Doherty&nbsp;Earth&nbsp;Observatory
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>-F</B>
+
+<DD>
+<I>format1/format2</I>
+<BR>
+
+Sets the <B>MBIO</B> format identifiers for the first and
+second data files, respectively.
+This program uses the <B>MBIO</B> library and will read or write any swath sonar
+format supported by <B>MBIO</B>. A list of the swath sonar data formats
+currently supported by <B>MBIO</B> and their identifier values
+is given in the <B>MBIO</B> manual page.
+<DT><B>-D</B>
+
+<DD>
+<I>xdim/ydim</I>
+<BR>
+
+The area specified using the <B>-R</B> option is divided up into
+a grid of rectangular regions; roll bias calculations are done
+in each of these regions providing sufficient data is available
+from both data files.  This option sets the dimensions of the
+region grid.  Use <I>xdim</I> = <I>ydim</I> = 1 to make one
+calculation for the entire area.
+Default:  <I>xdim</I> = <I>ydim</I> = 1.
+<DT><B>-H</B>
+
+<DD>
+This &quot;help&quot; flag cause the program to print out a description
+of its operation and then exit immediately.
+<DT><B>-I</B>
+
+<DD>
+<I>file1</I>
+<BR>
+
+Sets the filename of the first data file to be analyzed.
+<DT><B>-J</B>
+
+<DD>
+<I>file2</I>
+<BR>
+
+Sets the filename of the second data file to be analyzed.
+<DT><B>-L</B>
+
+<DD>
+<I>lonflip</I>
+<BR>
+
+Sets the range of the longitude values returned.
+If <I>lonflip</I>=-1 then the longitude values will be in
+the range from -360 to 0 degrees. If <I>lonflip</I>=0 
+then the longitude values will be in
+the range from -180 to 180 degrees. If <I>lonflip</I>=1 
+then the longitude values will be in
+the range from 0 to 360 degrees.
+Default: <I>lonflip</I> = 0.
+<DT><B>-R</B>
+
+<DD>
+<I>west/east/south/north</I>
+<BR>
+
+Sets the longitude and latitude bounds of the area of the roll bias test.
+<DT><B>-V</B>
+
+<DD>
+The <B>-V</B> option causes the program to print out the program name
+and version during execution.
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>EXAMPLE</H2>
+
+Suppose you want to calculate roll bias using two coincident swaths
+of Hydrosweep DS data collected in nearly opposite directions.
+Run <B>mbrollbias</B> as follows:
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbrollbias&nbsp;-R-51.07/-50.98/9.0166/9.117&nbsp;-D1/1&nbsp;-F22/22&nbsp;<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-Ihs_leg1_z.mb22&nbsp;-Jhs_leg2_z.mb22&nbsp;-V<BR>
+<P>
+The output looks like:
+<P>
+<BR>&nbsp;Program&nbsp;mbrollbias
+<BR>&nbsp;Version&nbsp;$Id: mbrollbias.html,v 5.0 2003-12-02 16:12:17 caress Exp $
+<BR>&nbsp;MB-system&nbsp;Version&nbsp;4.00
+<P>
+<BR>&nbsp;mbrollbias&nbsp;Parameters:
+<BR>&nbsp;Input&nbsp;file&nbsp;1:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;hs_leg1_z.mb22
+<BR>&nbsp;Input&nbsp;file&nbsp;2:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;hs_leg2_z.mb22
+<BR>&nbsp;Region&nbsp;grid&nbsp;bounds:
+<BR>&nbsp;&nbsp;&nbsp;Longitude:&nbsp;&nbsp;-51.0700&nbsp;&nbsp;-50.9800
+<BR>&nbsp;&nbsp;&nbsp;Latitude:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;9.0166&nbsp;&nbsp;&nbsp;&nbsp;9.1170
+<BR>&nbsp;Region&nbsp;grid&nbsp;dimensions:&nbsp;1&nbsp;1
+<BR>&nbsp;Longitude&nbsp;interval:&nbsp;0.090000&nbsp;degrees&nbsp;or&nbsp;9.894392&nbsp;km
+<BR>&nbsp;Latitude&nbsp;interval:&nbsp;&nbsp;0.100400&nbsp;degrees&nbsp;or&nbsp;11.104426&nbsp;km
+<BR>&nbsp;Longitude&nbsp;flipping:&nbsp;&nbsp;&nbsp;0
+<BR>&nbsp;
+<BR>&nbsp;4840&nbsp;depth&nbsp;points&nbsp;counted&nbsp;in&nbsp;hs_leg1_z.mb22
+<BR>&nbsp;1733&nbsp;depth&nbsp;points&nbsp;counted&nbsp;in&nbsp;hs_leg2_z.mb22
+<BR>&nbsp;4840&nbsp;depth&nbsp;points&nbsp;read&nbsp;from&nbsp;hs_leg1_z.mb22
+<BR>&nbsp;1733&nbsp;depth&nbsp;points&nbsp;read&nbsp;from&nbsp;hs_leg2_z.mb22
+<BR>&nbsp;
+<BR>&nbsp;Region&nbsp;0&nbsp;(0&nbsp;0)&nbsp;bounds:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Longitude:&nbsp;&nbsp;-51.0700&nbsp;&nbsp;-50.9800
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Latitude:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;9.0166&nbsp;&nbsp;&nbsp;&nbsp;9.1170
+<BR>&nbsp;First&nbsp;data&nbsp;file:&nbsp;&nbsp;&nbsp;&nbsp;hs_leg1_z.mb22
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Number&nbsp;of&nbsp;data:&nbsp;4840
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Mean&nbsp;heading:&nbsp;&nbsp;&nbsp;107.845062
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Plane&nbsp;fit:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.759709&nbsp;-0.002327&nbsp;-0.004623
+<BR>&nbsp;Second&nbsp;data&nbsp;file:&nbsp;&nbsp;&nbsp;hs_leg2_z.mb22
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Number&nbsp;of&nbsp;data:&nbsp;1733
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Mean&nbsp;heading:&nbsp;&nbsp;&nbsp;302.022793
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Plane&nbsp;fit:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.640304&nbsp;0.008438&nbsp;0.008494
+<BR>&nbsp;Roll&nbsp;bias:&nbsp;&nbsp;&nbsp;-0.007288&nbsp;(-0.417598&nbsp;degrees)
+<BR>&nbsp;Roll&nbsp;bias&nbsp;is&nbsp;positive&nbsp;to&nbsp;port,&nbsp;negative&nbsp;to&nbsp;starboard.
+<BR>&nbsp;A&nbsp;postive&nbsp;roll&nbsp;bias&nbsp;means&nbsp;the&nbsp;ship&nbsp;rolls&nbsp;to&nbsp;port,&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;giving&nbsp;rise&nbsp;to&nbsp;shallow&nbsp;bathymetry&nbsp;to&nbsp;port&nbsp;and&nbsp;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;deep&nbsp;bathymetry&nbsp;to&nbsp;starboard.
+<P>
+<A NAME="lbAI">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="mbsystem.html">mbsystem</A></B>(l)
+<P>
+<A NAME="lbAJ">&nbsp;</A>
+<H2>BUGS</H2>
+
+Probably.
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">VERSION</A><DD>
+<DT><A HREF="#lbAD">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAE">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAF">AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAG">OPTIONS</A><DD>
+<DT><A HREF="#lbAH">EXAMPLE</A><DD>
+<DT><A HREF="#lbAI">SEE ALSO</A><DD>
+<DT><A HREF="#lbAJ">BUGS</A><DD>
+</DL>
+<HR>
+</PRE>
+
+<CENTER><P><BR>
+Last Updated: 13 July 2001</P></CENTER>
+
+<HR>
+<P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>
+<P><A HREF="mbsystem_home.html"><IMG SRC="mbsystem_logo_small.gif" BORDER=0 HEIGHT=55 WIDTH=158 ALIGN=BOTTOM></A><A HREF="mbsystem_home.html">Back
+to MB-System Home Page...</A></P>
+
+</BODY>
+</HTML>

@@ -1,0 +1,136 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML VERSION="2.0">
+<HEAD>
+   <TITLE>MB-System Unix Manual Page: xbt</TITLE>
+<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
+<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
+<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<BODY>
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<PRE>
+<H1>xbt</H1>
+Section: MB-System 5.0 (l)<BR>Updated: 4 January 2001<BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<B>xbt</B> - Overview of <B>xbt</B> proceedures on the R/V Ewing.
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>VERSION</H2>
+
+Version 5.0
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+On the R/V Ewing, <I>xbt</I> (eXpendable BathyThermograph) probes are used
+to measure the temperature as a function of depth. This temperature is
+used to estimate the sound velocity as a function of depth in the
+upper (0 to 800 meters) of the water column.
+<P>
+
+Probes are launched over the stern or from the quarter out of a hand
+held launcher which is stored in the space above the wet staging
+(&quot;high bay&quot;) lab.
+<P>
+
+A Sparton BT/SV processor card Model 101 is intalled in a JDR-386/20 PC
+clone in the main lab at the aft end of the row of graphic recorders.
+Software running in this PC acquires and processes the <I>XBT</I> data.
+During a drop, the temperature profile is displayed on the screen. At
+the end of the drop, a data file is written on to the internal hard
+disk.
+<P>
+
+After exiting the <I>XBT</I> application program, the new <I>XBT</I>
+file is copied to a floppy disk for backup and to an NFS mounted file
+system on the logging computer. The file naming convention is:
+<DL COMPACT>
+<DT><DD>
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>EWYYLLNN.xtD<BR>
+</DL>
+<P>
+
+Where:
+<DL COMPACT>
+<DT><DD>
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>EW signifies the data came from the Ewing<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>YY is the last two digits of the year<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>LL is the current Ewing leg number<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>NN is the sequential number of the <I>XBT</I> during the <BR>
+<BR>
+
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;current&nbsp;leg
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>xt signifies that this is <I>xbt</I> data (vs. xsv data)<BR>
+<BR>
+
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT> D is the probe type designator<BR>
+</DL>
+<P>
+
+We do not use the Sparton software to convert the temperature
+measurements into sound velocity. After the raw temperature data has
+been moved to the logging computer it is converted to sound velocity
+with <I>mbm_xbt</I> and then merged with historical data from the
+Levitus database produced with <I>mblevitus</I> and entered into
+Hydrosweep as sound velocity profile.
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>AUTHORSHIP</H2>
+
+Dale N. Chayes (<A HREF="mailto:dale@ldeo.columbia.edu">dale@ldeo.columbia.edu</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Lamont-Doherty&nbsp;Earth&nbsp;Observatory
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="mbsystem.html">mbsystem</A></B>(l), <B><A HREF="mbm_xbt.html">mbm_xbt</A></B>(l), 
+<B><A HREF="mbvelocitytool.html">mbvelocitytool</A></B>(l), <B><A HREF="mblevitus.html">mblevitus</A></B>(l)
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>BUGS</H2>
+
+This documentation is virtually guaranteed to be out of date, and/or
+just plain wrong, but at least we are trying. Suggestions are welcome.
+<P>
+<P>
+<P>
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">VERSION</A><DD>
+<DT><A HREF="#lbAD">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAE">AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAF">SEE ALSO</A><DD>
+<DT><A HREF="#lbAG">BUGS</A><DD>
+</DL>
+<HR>
+</PRE>
+
+<CENTER><P><BR>
+Last Updated: 4 January 2001</P></CENTER>
+
+<HR>
+<P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>
+<P><A HREF="mbsystem_home.html"><IMG SRC="mbsystem_logo_small.gif" BORDER=0 HEIGHT=55 WIDTH=158 ALIGN=BOTTOM></A><A HREF="mbsystem_home.html">Back
+to MB-System Home Page...</A></P>
+
+</BODY>
+</HTML>
