@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_hsmd.c	Aug 10, 1995
- *	$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbsys_hsmd.c,v 4.6 1998-10-05 17:46:15 caress Exp $
+ *	$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbsys_hsmd.c,v 4.7 1999-09-14 20:39:11 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -39,6 +39,9 @@
  * Date:	August 10, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.6  1998/10/05  17:46:15  caress
+ * MB-System version 4.6beta
+ *
  * Revision 4.5  1997/07/25  14:19:53  caress
  * Version 4.5beta2.
  * Much mucking, particularly with Simrad formats.
@@ -102,7 +105,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbsys_hsmd.c,v 4.6 1998-10-05 17:46:15 caress Exp $";
+	static char res_id[]="$Id: mbsys_hsmd.c,v 4.7 1999-09-14 20:39:11 caress Exp $";
 	char	*function_name = "mbsys_hsmd_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -183,7 +186,7 @@ int	*error;
 int mbsys_hsmd_extract(verbose,mbio_ptr,store_ptr,kind,
 		       time_i,time_d,navlon,navlat,speed,heading,
 		       nbath,namp,nss,
-		       bath,amp,bathacrosstrack,bathalongtrack,
+		       beamflag,bath,amp,bathacrosstrack,bathalongtrack,
 		       ss,ssacrosstrack,ssalongtrack,
 		       comment,error)
 int	verbose;
@@ -199,6 +202,7 @@ double	*heading;
 int	*nbath;
 int	*namp;
 int	*nss;
+char	*beamflag;
 double	*bath;
 double	*amp;
 double	*bathacrosstrack;
@@ -281,13 +285,14 @@ int	*error;
 		*speed = store->speed;
 
 		/* zero bathymetry and sidescan */
-		for (i=0;i<*nbath;i++)
+		for (i=0;i<MBSYS_HSMD_BEAMS;i++)
 			{
+			beamflag[i] = MB_FLAG_NULL;
 			bath[i] = 0.0;
 			bathacrosstrack[i] = 0.0;
 			bathalongtrack[i] = 0.0;
 			}
-		for (i=0;i<*nss;i++)
+		for (i=0;i<MBSYS_HSMD_PIXELS;i++)
 			{
 			ss[i] = 0.0;
 			ssacrosstrack[i] = 0.0;
@@ -295,6 +300,7 @@ int	*error;
 			}
 
 		/* get bathymetry */
+		*nbath = MBSYS_HSMD_BEAMS;
 
 		/* deal with a ping to port */
 		if (store->Port == -1) 
@@ -302,9 +308,23 @@ int	*error;
 			for (i=0;i<MBSYS_HSMD_BEAMS_PING;i++) 
 				{
 				j = MBSYS_HSMD_BEAMS_PING - i - 1;
-	 			bath[j] = store->depth[i];
-	 			bathacrosstrack[j] = 
-	    					store->distance[i]; 
+				if (store->depth[i] > 0.0)
+				    {
+				    beamflag[j] = MB_FLAG_NONE;
+				    bath[j] = store->depth[i];
+				    }
+				else if (store->depth[i] < 0.0)
+				    {
+				    beamflag[j] = 
+					MB_FLAG_MANUAL + MB_FLAG_FLAG;
+				    bath[j] = -store->depth[i];
+				    }
+				else
+				    {
+				    beamflag[j] = MB_FLAG_NULL;
+				    bath[j] = store->depth[i];
+				    }
+				bathacrosstrack[j] = store->distance[i]; 
 	 			bathalongtrack[j] = 0.0;
      	 			}
     			}
@@ -315,7 +335,22 @@ int	*error;
 			for (i=0;i<MBSYS_HSMD_BEAMS_PING;i++) 
 				{
 				j = i + MBSYS_HSMD_BEAMS_PING - 1;
-	 			bath[j] = store->depth[i];
+				if (store->depth[i] > 0.0)
+				    {
+				    beamflag[j] = MB_FLAG_NONE;
+				    bath[j] = store->depth[i];
+				    }
+				else if (store->depth[i] < 0.0)
+				    {
+				    beamflag[j] = 
+					MB_FLAG_MANUAL + MB_FLAG_FLAG;
+				    bath[j] = -store->depth[i];
+				    }
+				else
+				    {
+				    beamflag[j] = MB_FLAG_NULL;
+				    bath[j] = store->depth[i];
+				    }
 	 			bathacrosstrack[j] = 
 	    					store->distance[i]; 
 	 			bathalongtrack[j] = 0.0;
@@ -323,6 +358,7 @@ int	*error;
     			}
 
 		/* Deal with the sidescan */
+		*nss = MBSYS_HSMD_PIXELS;
 
 		/* deal with a ping to port */
 		if (store->Port == -1) 
@@ -389,9 +425,9 @@ int	*error;
 			fprintf(stderr,"dbg4       nbath:      %d\n",
 				*nbath);
 			for (i=0;i<*nbath;i++)
-			  fprintf(stderr,"dbg4       bath[%d]: %f  bathdist[%d]: %f\n",
-				i,bath[i],
-				i,bathacrosstrack[i]);
+			  fprintf(stderr,"dbg4       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n",
+				i,beamflag[i],bath[i],
+				bathacrosstrack[i],bathalongtrack[i]);
 			fprintf(stderr,"dbg4        namp:      %d\n",
 				*namp);
 			for (i=0;i<*nss;i++)
@@ -457,8 +493,9 @@ int	*error;
 		{
 		fprintf(stderr,"dbg2         nbath:         %d\n",*nbath);
 		for (i=0;i<*nbath;i++)
-		  fprintf(stderr,"dbg2       bath[%d]: %f  bathdist[%d]: %f\n",
-			i,bath[i],i,bathacrosstrack[i]);
+		  fprintf(stderr,"dbg2       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n",
+			i,beamflag[i],bath[i],
+			bathacrosstrack[i],bathalongtrack[i]);
 		fprintf(stderr,"dbg2         nss:           %d\n",*nss);
 		for (i=0;i<*nss;i++)
 		  fprintf(stderr,"dbg2       ss[%d]:   %f  ssdist[%d]:   %f\n",
@@ -478,7 +515,7 @@ int	*error;
 int mbsys_hsmd_insert(verbose,mbio_ptr,store_ptr,
 		      time_i,time_d,navlon,navlat,speed,heading,
 		      nbath,namp,nss,
-		      bath,amp,bathacrosstrack,bathalongtrack,
+		      beamflag,bath,amp,bathacrosstrack,bathalongtrack,
 		      ss,ssacrosstrack,ssalongtrack,
 		      comment,error)
 int	verbose;
@@ -493,6 +530,7 @@ double	heading;
 int	nbath;
 int	namp;
 int	nss;
+char	*beamflag;
 double	*bath;
 double	*amp;
 double	*bathacrosstrack;
@@ -535,8 +573,9 @@ int	*error;
 		fprintf(stderr,"dbg2       nbath:      %d\n",nbath);
 		if (verbose >= 3) 
 		 for (i=0;i<nbath;i++)
-		  fprintf(stderr,"dbg3       bath[%d]: %f  bathdist[%d]: %f\n",
-			i,bath[i],i,bathacrosstrack[i]);
+		  fprintf(stderr,"dbg3       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n",
+			i,beamflag[i],bath[i],
+			bathacrosstrack[i],bathalongtrack[i]);
 		fprintf(stderr,"dbg2       namp:       %d\n",namp);
 		if (verbose >= 3) 
 		 for (i=0;i<namp;i++)
@@ -595,7 +634,12 @@ int	*error;
 			for (i=0;i<MBSYS_HSMD_BEAMS_PING;i++) 
 				{
 				j = MBSYS_HSMD_BEAMS_PING - i - 1;
-	 			store->depth[i] = bath[j];
+				if (mb_beam_check_flag_null(beamflag[j]))
+				    store->depth[i] = 0.0;
+				else if (mb_beam_check_flag(beamflag[j]))
+				    store->depth[i] = -bath[j];
+				else
+				    store->depth[i] = bath[j];
 	 			store->distance[i] = 
 	    					bathacrosstrack[j]; 
      	 			}
@@ -607,7 +651,12 @@ int	*error;
 			for (i=0;i<MBSYS_HSMD_BEAMS_PING;i++) 
 				{
 				j = i + MBSYS_HSMD_BEAMS_PING - 1;
-	 			store->depth[i] = bath[j];
+				if (mb_beam_check_flag_null(beamflag[j]))
+				    store->depth[i] = 0.0;
+				else if (mb_beam_check_flag(beamflag[j]))
+				    store->depth[i] = -bath[j];
+				else
+				    store->depth[i] = bath[j];
 	 			store->distance[i] = 
 	    					bathacrosstrack[j]; 
       				}
@@ -997,7 +1046,8 @@ int	*error;
 	*kind = store->kind;
 
 	/* extract data from structure */
-	if (*kind == MB_DATA_DATA)
+	if (*kind == MB_DATA_DATA
+		|| *kind == MB_DATA_NAV)
 		{
 		/* get time */
 		time_i[0] = store->year;
@@ -1110,7 +1160,8 @@ int	*error;
 		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
 		}
 	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
-		&& *kind == MB_DATA_DATA)
+		&& (*kind == MB_DATA_DATA
+		    || *kind == MB_DATA_NAV))
 		{
 		fprintf(stderr,"dbg2       time_i[0]:     %d\n",time_i[0]);
 		fprintf(stderr,"dbg2       time_i[1]:     %d\n",time_i[1]);

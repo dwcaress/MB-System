@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sb2100rw.c	3/3/94
- *	$Id: mbr_sb2100rw.c,v 4.26 1998-10-05 17:46:15 caress Exp $
+ *	$Id: mbr_sb2100rw.c,v 4.27 1999-09-14 20:39:11 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	March 3, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.26  1998/10/05  17:46:15  caress
+ * MB-System version 4.6beta
+ *
  * Revision 4.25  1997/07/25  14:19:53  caress
  * Version 4.5beta2.
  * Much mucking, particularly with Simrad formats.
@@ -145,7 +148,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_sb2100rw.c,v 4.26 1998-10-05 17:46:15 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2100rw.c,v 4.27 1999-09-14 20:39:11 caress Exp $";
 	char	*function_name = "mbr_alm_sb2100rw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -528,6 +531,7 @@ int	*error;
 		/* get heading */
 		if (data->frequency[0] != 'H')
 			mb_io_ptr->new_heading = 0.001*data->heading_12khz;
+
 		else
 			mb_io_ptr->new_heading = 0.001*data->heading_36khz;
 
@@ -550,7 +554,7 @@ int	*error;
 			pixel_scale = 0.1;
 		else
 			pixel_scale = 1.0;
-		if (data->frequency[0] == 'L')
+		if (data->frequency[0] != 'H')
 			{
 			pixel_size = data->pixel_size_12khz;
 			gain_db = data->ping_gain_12khz 
@@ -721,7 +725,7 @@ int	*error;
      
 		    /* transmit parameters and navigation (DR and SS) */
 		    store->frequency = data->frequency[0];
-		    if (data->frequency[0] == 'L')
+		    if (data->frequency[0] != 'H')
 			{
 			store->ping_gain = data->ping_gain_12khz;
 			store->ping_pulse_width = data->ping_pulse_width_12khz;
@@ -764,7 +768,7 @@ int	*error;
 		    store->pixel_algorithm = data->pixel_algorithm;
 		    store->pixel_size_scale = data->pixel_size_scale;
 		    store->svp_corr_ss = data->svp_corr_ss;
-		    if (data->frequency[0] == 'L')
+		    if (data->frequency[0] != 'H')
 			store->pixel_size = data->pixel_size_12khz;
 		    else
 			store->pixel_size = data->pixel_size_36khz;
@@ -896,8 +900,18 @@ int	*error;
 		    /* transmit parameters and navigation (DR and SS) */
 		    data->frequency[0] = store->frequency;
 		    data->frequency[1] = store->frequency;
-		    if (data->frequency[0] == 'L')
+		    if (store->frequency != 'H')
 			{
+			if (store->frequency == 'L')
+				{
+				data->frequency[0] = 'L';
+				data->frequency[1] = 'L';
+				}
+			else if (store->frequency == '2')
+				{
+				data->frequency[0] = '2';
+                                data->frequency[1] = '0';
+                                }
 			data->ping_gain_12khz = store->ping_gain;
 			data->ping_pulse_width_12khz 
 				= store->ping_pulse_width;
@@ -915,6 +929,8 @@ int	*error;
 			}
 		    else
 			{
+                        data->frequency[0] = 'H';
+                        data->frequency[1] = 'H';
 			data->ping_gain_12khz = 0;
 			data->ping_pulse_width_12khz = 0;
 			data->transmitter_attenuation_12khz = 0;
@@ -995,7 +1011,7 @@ int	*error;
 		    data->pixel_algorithm = store->pixel_algorithm;
 		    data->pixel_size_scale = 'D';
 		    data->svp_corr_ss = store->svp_corr_ss;
-		    if (data->frequency[0] == 'L')
+		    if (data->frequency[0] != 'H')
 			{
 			data->pixel_size_12khz = store->pixel_size;
 			data->pixel_size_36khz = 0.0;
@@ -1081,7 +1097,7 @@ int	*error;
 			scale = 1.0;
 			data->range_scale = 'D';
 			}
-		if (data->frequency[0] == 'L')
+		if (data->frequency[0] != 'H')
 			gain_db = data->ping_gain_12khz 
 				- data->transmitter_attenuation_12khz
 				+ 10.0 * log10( data->ping_pulse_width_12khz / 5.0)
@@ -1145,10 +1161,10 @@ int	*error;
 					pixel_size = 10 * pixel_size;
 				else 
 					data->pixel_size_scale = 'D';
-				if (data->frequency[0] == 'H')
-					data->pixel_size_36khz = pixel_size;
-				else
+				if (data->frequency[0] != 'H')
 					data->pixel_size_12khz = pixel_size;
+				else
+					data->pixel_size_36khz = pixel_size;
 				set_pixel_size = MB_NO;
 				}
 			}
@@ -1741,7 +1757,7 @@ int	*error;
 
 		/* handle 36 kHz parameters if if in 36 kHz 
 			or dual frequency mode */
-		if (data->frequency[0] != 'L')
+		else
 		  {
 		  mb_get_int(&(data->ping_gain_36khz),    line+shift,    2);
 		  mb_get_int(&(data->ping_pulse_width_36khz),
@@ -1975,7 +1991,7 @@ int	*error;
 
 		/* handle 36 kHz parameters if if in 36 kHz 
 			or dual frequency mode */
-		if (data->frequency[0] != 'L')
+		else
 		  {
 		  mb_get_int(&(data->num_pixels_36khz),   line+shift,  4);
 		  mb_get_double(&(data->pixel_size_36khz),line+4+shift,  4);
@@ -2719,7 +2735,7 @@ int	*error;
 			status = fprintf(mbfp,"%+06d",data->roll_12khz);
 			status = fprintf(mbfp,"%6.6d",data->heading_12khz);
 			}
-		if (data->frequency[0] != 'L')
+		else
 			{
 			status = fprintf(mbfp,"%2.2d",data->ping_gain_36khz);
 			status = fprintf(mbfp,"%2.2d",data->
@@ -2955,7 +2971,7 @@ int	*error;
 		status = fprintf(mbfp,"%6.6d",data->surface_sound_velocity);
 		status = fprintf(mbfp,"%c",data->ssv_source);
 		status = fprintf(mbfp,"%c",data->depth_gate_mode);
-		if (data->frequency[0] == 'L')
+		if (data->frequency[0] != 'H')
 			{
 			status = fprintf(mbfp,"%4.4d",data->num_pixels_12khz);
 			if (data->pixel_size_12khz > 9.99)
@@ -2976,7 +2992,7 @@ int	*error;
 			status = fprintf(mbfp,"%+06d",data->roll_12khz);
 			status = fprintf(mbfp,"%6.6d",data->heading_12khz);
 			}
-		else /*if (data->frequency[0] == 'H')*/
+		else 
 			{
 			status = fprintf(mbfp,"%4.4d",data->num_pixels_36khz);
 			if (data->pixel_size_36khz > 9.99)
