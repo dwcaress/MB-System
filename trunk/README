@@ -191,6 +191,11 @@ most significant changes include:
         sidescan. Format 57 is also used for processing data
         from the current Simrad multibeam sonars. 
 
+- New Data Formats.
+    Furuno HS10 multibeam bathymetry is supported as format 171. 
+    SeaBeam 2120 multibeam data in the L3 Communications 
+        XSE format are supported.
+
 HOW TO GET MB-SYSTEM:
 --------------------
 The source code for MB-System is available as a compressed tar 
@@ -442,10 +447,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.1 2001-04-09 20:36:05 caress Exp $
+RCS ID: $Id: README,v 5.2 2001-04-11 19:09:41 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+# Revision 5.1  2001/04/09  20:36:05  caress
+# Real text for 5.0.beta00
+#
 # Revision 5.0  2001/04/06  22:17:58  caress
 # First cut at version 5.0.beta00
 #
