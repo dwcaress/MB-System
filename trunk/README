@@ -175,6 +175,8 @@ the different directories associated with recursive
 datalists has been fixed. The nature of and fix to this
 bug were determined by Gordon Keith.
 
+Implemented latest GSF release (2.0.3).
+
 MB-SYSTEM VERSION 5.0.5 RELEASE NOTES:
 ------------------------------------------
 
@@ -924,10 +926,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.53 2004-12-18 01:23:24 caress Exp $
+RCS ID: $Id: README,v 5.54 2005-01-04 18:36:59 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.53  2004/12/18 01:23:24  caress
+Working towards 5.0.6 release.
+
 Revision 5.52  2004/10/06 21:30:50  caress
 Release 5.0.5
 
