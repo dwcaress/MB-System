@@ -37,6 +37,23 @@ data points that the spline
 interpolation is used (\fB-C\fP), the format of the output files, and
 other parameters.
 
+Before opening an input swath data file, \fBmbgrid\fP checks for
+an ascii file in the same directory having the same name except
+that ".inf" is appended to the end. The program assumes that this
+ascii file contains the output of the program \fBmbinfo\fP run on
+the input data file. If the ".inf" file exists, \fBmbgrid\fP reads
+the minimum and maximum longitude and latitude bounds from the 
+\fBmbinfo\fP output and compares those to the working bounds
+for the grid. If the ".inf" file indicates that none of the data
+in the input file lies inside the working grid bounds, that input
+file is skipped. This allows users to maintain a single master list
+of data files for use in all gridding without the performance penalty
+of \fBmbgrid\fP reading through all the data files, even those
+with no relevent data. We recommend that users maintain a ".inf"
+file for each swath data file used for gridding or plotting. The
+programs \fBmbswath\fP and \fBmbcontour\fP also use ".inf" files
+in the same fashion.
+
 Usually, the internal working grid has the same boundaries as the
 output grid. However, the \fB-X\fP option
 allows the size of the internal grid to be increased so that data outside
@@ -363,7 +380,7 @@ will be filled in through spine interpolation even in the areas
 not covered by data. The output looks like:
  
  Program MBGRID
- Version $Id: mbgrid.l,v 4.12 1996-08-20 20:01:44 caress Exp $
+ Version $Id: mbgrid.l,v 4.13 1996-09-05 13:07:47 caress Exp $
  MB-system Version 4.4
  
  MBGRID Parameters:
@@ -506,7 +523,7 @@ standard deviation values. The following will suffice:
  		-Idatalist -Ourville_int -F2 -M -V
 
 .SH SEE ALSO
-\fBmbsystem\fP(l)
+\fBmbsystem\fP(l), \fBmbcontour\fP(l), \fBmbswath\fP(l)
 
 .SH BUGS
 Please let us know.
