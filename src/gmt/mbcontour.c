@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcontour.c	6/4/93
- *    $Id: mbcontour.c,v 4.20 1998-10-04 04:18:07 caress Exp $
+ *    $Id: mbcontour.c,v 4.21 1998-10-28 21:32:29 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Date:	June 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.20  1998/10/04  04:18:07  caress
+ * MB-System version 4.6beta
+ *
  * Revision 4.19  1997/10/07  20:10:51  caress
  * Fixed tick flag for contours read from file.
  *
@@ -146,7 +149,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbcontour.c,v 4.20 1998-10-04 04:18:07 caress Exp $";
+	static char rcs_id[] = "$Id: mbcontour.c,v 4.21 1998-10-28 21:32:29 caress Exp $";
 #ifdef MBCONTOURFILTER
 	static char program_name[] = "MBCONTOURFILTER";
 	static char help_message[] =  "MBCONTOURFILTER is a utility which creates a pen plot \ncontour map of multibeam swath bathymetry.  \nThe primary purpose of this program is to serve as \npart of a real-time plotting system.  The contour \nlevels and colors can be controlled \ndirectly or set implicitly using contour and color change intervals. \nContours can also be set to have ticks pointing downhill.";
@@ -746,6 +749,7 @@ char **argv;
 				    time_tick_int,time_annot_int,
 				    date_annot_int,time_tick_len_map,
 				    &error);
+		swath_plot->beams_bath = beams_bath;
     
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR)
@@ -769,6 +773,7 @@ char **argv;
 		done = MB_NO;
 		while (done == MB_NO)
 		    {
+		    /* read the next ping */
 		    pingcur = &swath_plot->pings[*npings];
 		    time_i = &pingcur->time_i[0];
 		    time_d = &pingcur->time_d;
@@ -787,7 +792,11 @@ char **argv;
 			    beamflag,bath,amp,bathlon,bathlat,
 			    ss,sslon,sslat,
 			    comment,&error);
-		    swath_plot->beams_bath = beams_bath;
+
+		    /* null out any unused beams for formats with
+			variable numbers of beams */
+		    for (i=beams_bath;i<swath_plot->beams_bath;i++)
+			    beamflag[i] = MB_FLAG_NULL;
     
 		    /* print debug statements */
 		    if (verbose >= 2)

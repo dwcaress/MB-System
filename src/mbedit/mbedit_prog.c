@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	4/8/93
- *    $Id: mbedit_prog.c,v 4.20 1998-10-05 17:45:32 caress Exp $
+ *    $Id: mbedit_prog.c,v 4.21 1998-10-28 21:31:56 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -24,6 +24,9 @@
  * Date:	March 28, 1997  GUI recast
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.20  1998/10/05  17:45:32  caress
+ * MB-System version 4.6beta
+ *
  * Revision 4.19  1997/10/03  18:32:07  caress
  * Fixed problem with sort call.
  *
@@ -184,6 +187,9 @@ struct mbedit_ping_struct
 	double	navlat;
 	double	speed;
 	double	heading;
+	int	beams_bath;
+	int	beams_amp;
+	int	pixels_ss;
 	char	*beamflag;
 	double	*bath;
 	double	*bathacrosstrack;
@@ -203,7 +209,7 @@ struct mbedit_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbedit_prog.c,v 4.20 1998-10-05 17:45:32 caress Exp $";
+static char rcs_id[] = "$Id: mbedit_prog.c,v 4.21 1998-10-28 21:31:56 caress Exp $";
 static char program_name[] = "MBedit";
 static char help_message[] =  
 "MBedit is an interactive editor used to identify and flag\n\
@@ -647,6 +653,7 @@ int	*outmode;
 	/* local variables */
 	char	*function_name = "mbedit_get_defaults";
 	int	status = MB_SUCCESS;
+	int	nbath, namp, nss;
 	int	i;
 
 	/* print input debug statements */
@@ -689,7 +696,7 @@ int	*outmode;
 			time_i,&time_d,
 			&navlon,&navlat,
 			&speed,&heading,
-			&beams_bath,&beams_amp,&pixels_ss,
+			&nbath,&namp,&nss,
 			beamflag,bath,amp,bathacrosstrack,bathalongtrack,
 			ss,ssacrosstrack,ssalongtrack,
 			&error);
@@ -1483,7 +1490,7 @@ int	*nplt;
 		range_min = 100000;
 		for (i=0;i<nplot;i++)
 			{
-			for (j=0;j<beams_bath;j++)
+			for (j=0;j<ping[i].beams_bath;j++)
 				{
 				if (ping[i].beamflag[j] != MB_FLAG_NULL)
 					{
@@ -1545,7 +1552,9 @@ int	*nplt;
 				ping[iping].time_i,ping[iping].time_d,
 				ping[iping].navlon,ping[iping].navlat,
 				ping[iping].speed,ping[iping].heading,
-				beams_bath,beams_amp,pixels_ss,
+				ping[iping].beams_bath,
+				ping[iping].beams_amp,
+				ping[iping].pixels_ss,
 				ping[iping].beamflag,
 				ping[iping].bath,
 				ping[iping].amp,
@@ -1697,7 +1706,7 @@ int	*nplt;
 	    {
 	    found = MB_NO;
 	    replot_label = MB_NO;
-	    for (j=0;j<beams_bath;j++)
+	    for (j=0;j<ping[i].beams_bath;j++)
 	      {
 	      if (mb_beam_ok(ping[i].beamflag[j]))
 		{
@@ -1727,7 +1736,9 @@ int	*nplt;
 				ping[i].time_i,ping[i].time_d,
 				ping[i].navlon,ping[i].navlat,
 				ping[i].speed,ping[i].heading,
-				beams_bath,beams_amp,pixels_ss,
+				ping[i].beams_bath,
+				ping[i].beams_amp,
+				ping[i].pixels_ss,
 				ping[i].beamflag,
 				ping[i].bath,
 				ping[i].amp,
@@ -1888,7 +1899,7 @@ int	*nplt;
 	    {
 	    found = MB_NO;
 	    replot_label = MB_NO;
-	    for (j=0;j<beams_bath;j++)
+	    for (j=0;j<ping[i].beams_bath;j++)
 	      {
 	      if (!mb_beam_ok(ping[i].beamflag[j]))
 		{
@@ -1919,7 +1930,9 @@ int	*nplt;
 				ping[i].time_i,ping[i].time_d,
 				ping[i].navlon,ping[i].navlat,
 				ping[i].speed,ping[i].heading,
-				beams_bath,beams_amp,pixels_ss,
+				ping[i].beams_bath,
+				ping[i].beams_amp,
+				ping[i].pixels_ss,
 				ping[i].beamflag,
 				ping[i].bath,
 				ping[i].amp,
@@ -2044,7 +2057,7 @@ int	*nplt;
 
 	    /* look for beams to be erased */
 	    found = MB_NO;
-	    for (j=0;j<beams_bath;j++)
+	    for (j=0;j<ping[iping].beams_bath;j++)
 	      {
 	      if (mb_beam_ok(ping[iping].beamflag[j])
 		    && (ping[iping].bath_x[j] < xmin
@@ -2073,7 +2086,9 @@ int	*nplt;
 			    ping[iping].time_i,ping[iping].time_d,
 			    ping[iping].navlon,ping[iping].navlat,
 			    ping[iping].speed,ping[iping].heading,
-			    beams_bath,beams_amp,pixels_ss,
+			    ping[iping].beams_bath,
+			    ping[iping].beams_amp,
+			    ping[iping].pixels_ss,
 			    ping[iping].beamflag,
 			    ping[iping].bath,
 			    ping[iping].amp,
@@ -2188,7 +2203,7 @@ int	*nplt;
 		/* write edits to save file */
 		if (sofile_open == MB_YES)
 		    {
-		    for (j=0;j<beams_bath;j++)
+		    for (j=0;j<ping[iping_save].beams_bath;j++)
 			if (mb_beam_ok(ping[iping_save].beamflag[j]))
 			    mbedit_save_edit(
 				ping[iping_save].time_d, 
@@ -2197,11 +2212,11 @@ int	*nplt;
 
 		/* unplot the affected beam and ping */
 		status = mbedit_unplot_ping(iping_save);
-		for (j=0;j<beams_bath;j++)
+		for (j=0;j<ping[iping_save].beams_bath;j++)
 			status = mbedit_unplot_beam(iping_save,j);
 
 		/* flag beams in bad ping */
-		for (j=0;j<beams_bath;j++)
+		for (j=0;j<ping[iping_save].beams_bath;j++)
 			if (mb_beam_ok(ping[iping_save].beamflag[j]))
 				ping[iping_save].beamflag[j] = 
 					MB_FLAG_FLAG + MB_FLAG_MANUAL;
@@ -2210,7 +2225,9 @@ int	*nplt;
 				ping[iping_save].time_i,ping[iping_save].time_d,
 				ping[iping_save].navlon,ping[iping_save].navlat,
 				ping[iping_save].speed,ping[iping_save].heading,
-				beams_bath,beams_amp,pixels_ss,
+				ping[iping_save].beams_bath,
+				ping[iping_save].beams_amp,
+				ping[iping_save].pixels_ss,
 				ping[iping_save].beamflag,
 				ping[iping_save].bath,
 				ping[iping_save].amp,
@@ -2233,7 +2250,7 @@ int	*nplt;
 
 		/* replot the affected beam and ping */
 		status = mbedit_plot_ping(iping_save);
-		for (j=0;j<beams_bath;j++)
+		for (j=0;j<ping[iping_save].beams_bath;j++)
 			status = mbedit_plot_beam(iping_save,j);
 			
 		/* if ping has outbounds flag replot label */
@@ -2307,7 +2324,7 @@ int	*nplt;
 		/* write edits to save file */
 		if (sofile_open == MB_YES)
 		    {
-		    for (j=0;j<beams_bath;j++)
+		    for (j=0;j<ping[iping_save].beams_bath;j++)
 			if (!mb_beam_ok(ping[iping_save].beamflag[j]))
 			    mbedit_save_edit(
 				ping[iping_save].time_d, 
@@ -2316,11 +2333,11 @@ int	*nplt;
 
 		/* unplot the affected beam and ping */
 		status = mbedit_unplot_ping(iping_save);
-		for (j=0;j<beams_bath;j++)
+		for (j=0;j<ping[iping_save].beams_bath;j++)
 			status = mbedit_unplot_beam(iping_save,j);
 
 		/* flag beams in good ping */
-		for (j=0;j<beams_bath;j++)
+		for (j=0;j<ping[iping_save].beams_bath;j++)
 			if (!mb_beam_ok(ping[iping_save].beamflag[j]))
 				ping[iping_save].beamflag[j] = 
 					MB_FLAG_NONE;
@@ -2329,7 +2346,9 @@ int	*nplt;
 				ping[iping_save].time_i,ping[iping_save].time_d,
 				ping[iping_save].navlon,ping[iping_save].navlat,
 				ping[iping_save].speed,ping[iping_save].heading,
-				beams_bath,beams_amp,pixels_ss,
+				ping[iping_save].beams_bath,
+				ping[iping_save].beams_amp,
+				ping[iping_save].pixels_ss,
 				ping[iping_save].beamflag,
 				ping[iping_save].bath,
 				ping[iping_save].amp,
@@ -2352,7 +2371,7 @@ int	*nplt;
 
 		/* replot the affected beam and ping */
 		status = mbedit_plot_ping(iping_save);
-		for (j=0;j<beams_bath;j++)
+		for (j=0;j<ping[iping_save].beams_bath;j++)
 			status = mbedit_plot_beam(iping_save,j);
 			
 		/* if ping has outbounds flag replot label */
@@ -2435,7 +2454,7 @@ int	*nplt;
 
 		/* unplot the affected beam and ping */
 		status = mbedit_unplot_ping(iping_save);
-		for (j=0;j<beams_bath;j++)
+		for (j=0;j<ping[iping_save].beams_bath;j++)
 			status = mbedit_unplot_beam(iping_save,j);
 
 		/* flag beams to left of picked beam */
@@ -2448,7 +2467,9 @@ int	*nplt;
 				ping[iping_save].time_i,ping[iping_save].time_d,
 				ping[iping_save].navlon,ping[iping_save].navlat,
 				ping[iping_save].speed,ping[iping_save].heading,
-				beams_bath,beams_amp,pixels_ss,
+				ping[iping_save].beams_bath,
+				ping[iping_save].beams_amp,
+				ping[iping_save].pixels_ss,
 				ping[iping_save].beamflag,
 				ping[iping_save].bath,
 				ping[iping_save].amp,
@@ -2471,7 +2492,7 @@ int	*nplt;
 
 		/* replot the affected beam and ping */
 		status = mbedit_plot_ping(iping_save);
-		for (j=0;j<beams_bath;j++)
+		for (j=0;j<ping[iping_save].beams_bath;j++)
 			status = mbedit_plot_beam(iping_save,j);
 			
 		/* if ping has outbounds flag replot label */
@@ -2545,7 +2566,7 @@ int	*nplt;
 		/* write edits to save file */
 		if (sofile_open == MB_YES)
 		    {
-		    for (j=jbeam_save;j<beams_bath;j++)
+		    for (j=jbeam_save;j<ping[iping_save].beams_bath;j++)
 			if (mb_beam_ok(ping[iping_save].beamflag[j]))
 			    mbedit_save_edit(
 				ping[iping_save].time_d, 
@@ -2554,11 +2575,11 @@ int	*nplt;
 
 		/* unplot the affected beam and ping */
 		status = mbedit_unplot_ping(iping_save);
-		for (j=0;j<beams_bath;j++)
+		for (j=0;j<ping[iping_save].beams_bath;j++)
 			status = mbedit_unplot_beam(iping_save,j);
 
 		/* flag beams to right of picked beam */
-		for (j=jbeam_save;j<beams_bath;j++)
+		for (j=jbeam_save;j<ping[iping_save].beams_bath;j++)
 			if (mb_beam_ok(ping[iping_save].beamflag[j]))
 				ping[iping_save].beamflag[j] = 
 					MB_FLAG_FLAG + MB_FLAG_MANUAL;
@@ -2567,7 +2588,9 @@ int	*nplt;
 				ping[iping_save].time_i,ping[iping_save].time_d,
 				ping[iping_save].navlon,ping[iping_save].navlat,
 				ping[iping_save].speed,ping[iping_save].heading,
-				beams_bath,beams_amp,pixels_ss,
+				ping[iping_save].beams_bath,
+				ping[iping_save].beams_amp,
+				ping[iping_save].pixels_ss,
 				ping[iping_save].beamflag,
 				ping[iping_save].bath,
 				ping[iping_save].amp,
@@ -2590,7 +2613,7 @@ int	*nplt;
 
 		/* replot the affected beam and ping */
 		status = mbedit_plot_ping(iping_save);
-		for (j=0;j<beams_bath;j++)
+		for (j=0;j<ping[iping_save].beams_bath;j++)
 			status = mbedit_plot_beam(iping_save,j);
 			
 		/* if ping has outbounds flag replot label */
@@ -2664,7 +2687,7 @@ int	*nplt;
 		/* write edits to save file */
 		if (sofile_open == MB_YES)
 		    {
-		    for (j=0;j<beams_bath;j++)
+		    for (j=0;j<ping[iping_save].beams_bath;j++)
 			if (ping[iping_save].beamflag[j] != MB_FLAG_NULL)
 			    mbedit_save_edit(
 				ping[iping_save].time_d, 
@@ -2673,11 +2696,11 @@ int	*nplt;
 
 		/* unplot the affected beam and ping */
 		status = mbedit_unplot_ping(iping_save);
-		for (j=0;j<beams_bath;j++)
+		for (j=0;j<ping[iping_save].beams_bath;j++)
 			status = mbedit_unplot_beam(iping_save,j);
 
 		/* zero beams in bad ping */
-		for (j=0;j<beams_bath;j++)
+		for (j=0;j<ping[iping_save].beams_bath;j++)
 			{
 			ping[iping_save].beamflag[j] = MB_FLAG_NULL;
 			}
@@ -2686,7 +2709,9 @@ int	*nplt;
 				ping[iping_save].time_i,ping[iping_save].time_d,
 				ping[iping_save].navlon,ping[iping_save].navlat,
 				ping[iping_save].speed,ping[iping_save].heading,
-				beams_bath,beams_amp,pixels_ss,
+				ping[iping_save].beams_bath,
+				ping[iping_save].beams_amp,
+				ping[iping_save].pixels_ss,
 				ping[iping_save].beamflag,
 				ping[iping_save].bath,
 				ping[iping_save].amp,
@@ -2709,7 +2734,7 @@ int	*nplt;
 
 		/* replot the affected beam and ping */
 		status = mbedit_plot_ping(iping_save);
-		for (j=0;j<beams_bath;j++)
+		for (j=0;j<ping[iping_save].beams_bath;j++)
 			status = mbedit_plot_beam(iping_save,j);
 			
 		/* if ping has outbounds flag replot label */
@@ -3288,6 +3313,7 @@ int	*icurrent;
 	double	stime_d;
 	int	sbeam;
 	int	saction;
+	int	nbath, namp, nss;
 	int	i;
 	int	start;
 
@@ -3322,7 +3348,7 @@ int	*icurrent;
 			time_i,&time_d,
 			&navlon,&navlat,
 			&speed,&heading,
-			&beams_bath,&beams_amp,&pixels_ss,
+			&nbath,&namp,&nss,
 			beamflag,bath,amp,bathacrosstrack,bathalongtrack,
 			ss,ssacrosstrack,ssalongtrack,
 			&error);
@@ -3385,12 +3411,13 @@ int	*icurrent;
 				time_i,&time_d,
 				&navlon,&navlat,
 				&speed,&heading,
-				&beams_bath,&beams_amp,&pixels_ss,
-				beamflag,bath,amp,bathacrosstrack,bathalongtrack,
+				&nbath,&namp,&nss,
+				beamflag,bath,amp,
+				bathacrosstrack,bathalongtrack,
 				ss,ssacrosstrack,ssalongtrack,
 				&error);
 			if (time_d == stime_d && sbeam >= 0 
-			    && sbeam < beams_bath)
+			    && sbeam < nbath)
 			    {
 			    /* apply edit */
 			    found = MB_YES;
@@ -3413,8 +3440,9 @@ int	*icurrent;
 				    buff_ptr, imbio_ptr, id,
 				    time_i, time_d,
 				    navlon, navlat, speed, heading,
-				    beams_bath, beams_amp, pixels_ss,
-				    beamflag,bath, amp, bathacrosstrack, bathalongtrack,
+				    nbath, namp, nss,
+				    beamflag, bath, amp, 
+				    bathacrosstrack, bathalongtrack,
 				    ss, ssacrosstrack, ssalongtrack,
 				    comment,
 				    &error);
@@ -3508,7 +3536,6 @@ int	autoscale;
 	char	*function_name = "mbedit_plot_all";
 	int	status = MB_SUCCESS;
 	int	i, j, k, ii;
-	int	jbeam_cen;
 	int	nbathsum,  nbathlist;
 	double	bathsum, bathmean, bathmedian;
 	double	xtrack_max;
@@ -3569,7 +3596,9 @@ int	autoscale;
 			ping[i].time_i,&ping[i].time_d,
 			&ping[i].navlon,&ping[i].navlat,
 			&ping[i].speed,&ping[i].heading,
-			&beams_bath,&beams_amp,&pixels_ss,
+			&ping[i].beams_bath,
+			&ping[i].beams_amp,
+			&ping[i].pixels_ss,
 			ping[i].beamflag,ping[i].bath,ping[i].amp,
 			ping[i].bathacrosstrack,ping[i].bathalongtrack,
 			ping[i].ss,ping[i].ssacrosstrack,ping[i].ssalongtrack,
@@ -3578,7 +3607,7 @@ int	autoscale;
 			{
 			ping[i].record = ping[i].id + ndump_total;
 			ping[i].outbounds = MBEDIT_OUTBOUNDS_NONE;
-			for (j=0;j<beams_bath;j++)
+			for (j=0;j<ping[i].beams_bath;j++)
 				{
 				if (mb_beam_ok(ping[i].beamflag[j]))
 					{
@@ -3600,7 +3629,7 @@ int	autoscale;
 		{
 		for (i=0;i<nplot;i++)
 			{
-			for (j=0;j<beams_bath;j++)
+			for (j=0;j<ping[i].beams_bath;j++)
 				{
 				if (!mb_beam_ok(ping[i].beamflag[j])
 				    && ping[i].beamflag[j] != MB_FLAG_NULL)
@@ -3649,7 +3678,6 @@ int	autoscale;
 		}
 
 	/* print out information */
-	jbeam_cen = beams_bath/2;    
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2       %d data records set for plotting (%d desired)\n",
@@ -3662,7 +3690,7 @@ int	autoscale;
 				ping[i].time_i[0],ping[i].time_i[3],
 				ping[i].time_i[4],ping[i].time_i[5],
 				ping[i].time_i[6],
-				ping[i].bath[jbeam_cen]);
+				ping[i].bath[ping[i].beams_bath/2]);
 			}
 		}
 
@@ -3763,7 +3791,7 @@ int	autoscale;
 		y = ymax - dy / 2 - i * dy;
 		ping[i].label_x = 5 * margin - 5;
 		ping[i].label_y = y;
-		for (j=0;j<beams_bath;j++)
+		for (j=0;j<ping[i].beams_bath;j++)
 			{
 			if (ping[i].beamflag[j] != MB_FLAG_NULL)
 				{
@@ -3781,7 +3809,7 @@ int	autoscale;
 			}
 
 		/* plot the beams */
-		for (j=0;j<beams_bath;j++)
+		for (j=0;j<ping[i].beams_bath;j++)
 			status = mbedit_plot_beam(i,j);
 
 		/* plot the ping profile */
@@ -3833,7 +3861,7 @@ int	jbeam;
 		}
 
 	/* plot the beam */
-	if (jbeam >= 0 && jbeam < beams_bath)
+	if (jbeam >= 0 && jbeam < ping[iping].beams_bath)
 		{
 		if (mb_beam_ok(ping[iping].beamflag[jbeam]))
 			xg_fillrectangle(mbedit_xgid, 
@@ -3884,7 +3912,7 @@ int	iping;
 	/* plot the ping profile */
 	first = MB_YES;
 	last_flagged = MB_NO;
-	for (j=0;j<beams_bath;j++)
+	for (j=0;j<ping[iping].beams_bath;j++)
 		{
 		if (show_flagged == MB_YES 
 			&& mb_beam_ok(ping[iping].beamflag[j]) 
@@ -3977,7 +4005,7 @@ int	save;
 
 	/* get the ping outbounds value */
 	ping[iping].outbounds = MBEDIT_OUTBOUNDS_NONE;
-	for (j=0;j<beams_bath;j++)
+	for (j=0;j<ping[iping].beams_bath;j++)
 		{
 		if (ping[iping].beamflag[j] != MB_FLAG_NULL
 		    && (ping[iping].bath_x[j] < xmin
@@ -4002,7 +4030,7 @@ int	save;
 		ping[iping].time_i[0],ping[iping].time_i[3],
 		ping[iping].time_i[4],ping[iping].time_i[5],
 		(int)(0.001 * ping[iping].time_i[6]),
-		ping[iping].bath[beams_bath/2]);
+		ping[iping].bath[ping[iping].beams_bath/2]);
 	xg_justify(mbedit_xgid,string,&swidth,&sascent,&sdescent);
 
 	/* save string to show last ping seen at end of program */
@@ -4085,7 +4113,7 @@ int	jbeam;
 		}
 
 	/* unplot the beam */
-	if (jbeam >= 0 && jbeam < beams_bath)
+	if (jbeam >= 0 && jbeam < ping[iping].beams_bath)
 		{
 		if (mb_beam_ok(ping[iping].beamflag[jbeam]))
 			xg_fillrectangle(mbedit_xgid, 
@@ -4134,7 +4162,7 @@ int	iping;
 
 	/* unplot the ping profile */
 	first = MB_YES;
-	for (j=0;j<beams_bath;j++)
+	for (j=0;j<ping[iping].beams_bath;j++)
 		{
 		if (mb_beam_ok(ping[iping].beamflag[j]) && first == MB_YES)
 			{
@@ -4192,6 +4220,7 @@ int	*nplt;
 	int	status = MB_SUCCESS;
 	double	ttime_d;
 	int	found;
+	int	nbath, namp, nss;
 	int	i, j;
 
 	/* print input debug statements */
@@ -4256,7 +4285,7 @@ int	*nplt;
 			time_i,&time_d,
 			&navlon,&navlat,
 			&speed,&heading,
-			&beams_bath,&beams_amp,&pixels_ss,
+			&nbath,&namp,&nss,
 			beamflag,bath,amp,bathacrosstrack,bathalongtrack,
 			ss,ssacrosstrack,ssalongtrack,
 			&error);
@@ -4286,7 +4315,7 @@ int	*nplt;
 				time_i,&time_d,
 				&navlon,&navlat,
 				&speed,&heading,
-				&beams_bath,&beams_amp,&pixels_ss,
+				&nbath,&namp,&nss,
 				beamflag,bath,amp,bathacrosstrack,bathalongtrack,
 				ss,ssacrosstrack,ssalongtrack,
 				&error);

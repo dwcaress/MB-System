@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbswath.c	5/30/93
- *    $Id: mbswath.c,v 4.26 1998-10-04 04:18:07 caress Exp $
+ *    $Id: mbswath.c,v 4.27 1998-10-28 21:32:29 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -27,6 +27,9 @@
  * Date:	May 30, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.26  1998/10/04  04:18:07  caress
+ * MB-System version 4.6beta
+ *
  * Revision 4.25  1997/09/15  19:03:27  caress
  * Real Version 4.5
  *
@@ -242,7 +245,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbswath.c,v 4.26 1998-10-04 04:18:07 caress Exp $";
+	static char rcs_id[] = "$Id: mbswath.c,v 4.27 1998-10-28 21:32:29 caress Exp $";
 	static char program_name[] = "MBSWATH";
 	static char help_message[] =  "MBSWATH is a GMT compatible utility which creates a color postscript \nimage of multibeam swath bathymetry or backscatter data.  The image \nmay be shaded relief as well.  Complete maps are made by using \nMBSWATH in conjunction with the usual GMT programs.";
 	static char usage_message[] = "mbswath -Ccptfile -Jparameters -Rwest/east/south/north \n\t[-Afactor -Btickinfo -byr/mon/day/hour/min/sec \n\t-ccopies -Dmode/ampscale/ampmin/ampmax \n\t-Eyr/mon/day/hour/min/sec -fformat \n\t-Fred/green/blue -Gmagnitude/azimuth -Idatalist \n\t-K -Ncptfile -O -P -ppings -Qdpi -Ttimegap -U -W -Xx-shift -Yy-shift \n\t-Zmode -V -H]";
@@ -1690,8 +1693,8 @@ int	*error;
 				- pingcur->bathlon[j];
 			dlat1 = pingcur->bathlat[j-1] 
 				- pingcur->bathlat[j];
-			dlon2 = -dlon2;
-			dlat2 = -dlat2;
+			dlon2 = -dlon1;
+			dlat2 = -dlat1;
 			print = &pingcur->bathfoot[j];
 			pingcur->bathflag[j] = MB_YES;
 
@@ -1782,8 +1785,8 @@ int	*error;
 				- pingcur->sslon[j];
 			dlat1 = pingcur->sslat[j-1] 
 				- pingcur->sslat[j];
-			dlon2 = -dlon2;
-			dlat2 = -dlat2;
+			dlon2 = -dlon1;
+			dlat2 = -dlat1;
 			print = &pingcur->ssfoot[j];
 			pingcur->ssflag[j] = MB_YES;
 
@@ -2711,6 +2714,7 @@ int	*error;
 	strcpy(ping1->comment,ping2->comment);
 	for (i=0;i<ping1->beams_bath;i++)
 		{
+		ping1->beamflag[i] = ping2->beamflag[i];
 		ping1->bath[i] = ping2->bath[i];
 		ping1->bathlon[i] = ping2->bathlon[i];
 		ping1->bathlat[i] = ping2->bathlat[i];
