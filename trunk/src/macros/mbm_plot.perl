@@ -3,13 +3,15 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_plot.perl	6/18/93
-#    $Id: mbm_plot.perl,v 4.27 2000-09-11 21:54:49 caress Exp $
+#    $Id: mbm_plot.perl,v 4.28 2000-10-03 21:42:17 caress Exp $
 #
-#    Copyright (c) 1993, 1994, 1995 by 
-#    D. W. Caress (caress@lamont.ldgo.columbia.edu)
+#    Copyright (c) 1993, 1994, 1995, 2000 by 
+#    D. W. Caress (caress@mbari.org)
+#      Monterey Bay Aquarium Research Institute
+#      Moss Landing, CA
 #    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
-#    Lamont-Doherty Earth Observatory
-#    Palisades, NY  10964
+#      Lamont-Doherty Earth Observatory
+#      Palisades, NY  10964
 #
 #    See README file for copying and redistribution conditions.
 #--------------------------------------------------------------------
@@ -70,10 +72,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   June 17, 1993
 #
 # Version:
-#   $Id: mbm_plot.perl,v 4.27 2000-09-11 21:54:49 caress Exp $
+#   $Id: mbm_plot.perl,v 4.28 2000-10-03 21:42:17 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.27  2000/09/11  21:54:49  caress
+# Added support for recursive and commented datalists.
+#
 # Revision 4.26  2000/01/13  22:48:11  caress
 # Fixed usage of .inf files
 #

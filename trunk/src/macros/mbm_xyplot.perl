@@ -3,13 +3,15 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_xyplot.perl	8/6/95
-#    $Id: mbm_xyplot.perl,v 4.9 1999-06-25 17:55:47 caress Exp $
+#    $Id: mbm_xyplot.perl,v 4.10 2000-10-03 21:42:17 caress Exp $
 #
-#    Copyright (c) 1993, 1994, 1995 by 
-#    D. W. Caress (caress@lamont.ldgo.columbia.edu)
+#    Copyright (c) 1993, 1994, 1995, 2000 by 
+#    D. W. Caress (caress@mbari.org)
+#      Monterey Bay Aquarium Research Institute
+#      Moss Landing, CA
 #    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
-#    Lamont-Doherty Earth Observatory
-#    Palisades, NY  10964
+#      Lamont-Doherty Earth Observatory
+#      Palisades, NY  10964
 #
 #    See README file for copying and redistribution conditions.
 #--------------------------------------------------------------------
@@ -54,10 +56,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   August 9, 1995
 #
 # Version:
-#   $Id: mbm_xyplot.perl,v 4.9 1999-06-25 17:55:47 caress Exp $
+#   $Id: mbm_xyplot.perl,v 4.10 2000-10-03 21:42:17 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.9  1999/06/25  17:55:47  caress
+# I must have changed something!
+#
 # Revision 4.8  1999/05/06  23:46:32  caress
 # Release 4.6a
 #

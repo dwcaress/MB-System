@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_process.c	9/11/00
- *    $Id: mb_process.c,v 4.0 2000-09-30 06:28:42 caress Exp $
+ *    $Id: mb_process.c,v 4.1 2000-10-03 21:46:59 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	September 11, 2000
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  2000/09/30  06:28:42  caress
+ * Snapshot for Dale.
+ *
  *
  *
  */
@@ -38,7 +41,7 @@
 #include "../../include/mb_status.h"
 #include "../../include/mb_process.h"
 
-static char rcs_id[]="$Id: mb_process.c,v 4.0 2000-09-30 06:28:42 caress Exp $";
+static char rcs_id[]="$Id: mb_process.c,v 4.1 2000-10-03 21:46:59 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_pr_readpar(int verbose, char *file, int lookforfiles, 
@@ -282,7 +285,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 	    || process->mbp_ofile_specified == MB_NO)
 	    {
 	    status = mb_get_format(verbose, process->mbp_ifile, 
-				    fileroot, &format, &error);
+				    fileroot, &format, error);
 	    if (status == MB_SUCCESS && format > 0)
 		{
 		if (process->mbp_format_specified == MB_NO)

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_mr1.c	7/19/94
- *	$Id: mbsys_mr1.c,v 4.17 2000-09-30 06:32:52 caress Exp $
+ *	$Id: mbsys_mr1.c,v 4.18 2000-10-03 21:48:03 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -35,6 +35,9 @@
  * Author:	D. W. Caress
  * Date:	July 19, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.17  2000/09/30  06:32:52  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.16  1998/10/05  17:46:15  caress
  * MB-System version 4.6beta
  *
@@ -121,7 +124,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_mr1.c,v 4.17 2000-09-30 06:32:52 caress Exp $";
+ static char res_id[]="$Id: mbsys_mr1.c,v 4.18 2000-10-03 21:48:03 caress Exp $";
 	char	*function_name = "mbsys_mr1_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -296,18 +299,14 @@ int	*error;
 		*speed = 0.0;
 
 		/* zero data arrays */
-		for (i=0;i<mb_io_ptr->beams_bath;i++)
+		for (i=0;i<MBSYS_MR1_BEAMS;i++)
 			{
 			beamflag[i] = MB_FLAG_NULL;
 			bath[i] = 0.0;
 			bathacrosstrack[i] = 0.0;
 			bathalongtrack[i] = 0.0;
 			}
-		for (i=0;i<mb_io_ptr->beams_amp;i++)
-			{
-			amp[i] = 0.0;
-			}
-		for (i=0;i<mb_io_ptr->pixels_ss;i++)
+		for (i=0;i<MBSYS_MR1_PIXELS;i++)
 			{
 			ss[i] = 0.0;
 			ssacrosstrack[i] = 0.0;
@@ -315,11 +314,12 @@ int	*error;
 			}
 
 		/* read beam and pixel values into storage arrays */
-		*nbath = mb_io_ptr->beams_bath;
-		*namp = mb_io_ptr->beams_amp;
-		*nss = mb_io_ptr->pixels_ss;
-		beam_center = mb_io_ptr->beams_bath/2;
-		pixel_center = mb_io_ptr->pixels_ss/2;
+		*nbath = 2 * MAX(store->port_btycount, store->stbd_btycount) + 3;
+		*namp = 0;
+		*nss = 2 * MAX(store->port_sscount, store->stbd_sscount);
+		if (*nss > 0) *nss += 3;
+		beam_center = *nbath/2;
+		pixel_center = *nss/2;
 		for (i=0;i<store->port_btycount;i++)
 			{
 			j = beam_center - i - 2;
@@ -816,11 +816,11 @@ int	*error;
 		*draft = store->png_prdepth;
 
 		/* get nbeams */
-		*nbeams = mb_io_ptr->beams_bath;
-		beam_center = mb_io_ptr->beams_bath/2;
+		*nbeams = 2 * MAX(store->port_btycount, store->stbd_btycount) + 3;
+		beam_center = *nbeams/2;
 
 		/* zero data arrays */
-		for (i=0;i<mb_io_ptr->beams_bath;i++)
+		for (i=0;i<*nbeams;i++)
 			{
 			ttimes[i] = 0.0;
 			angles[i] = 0.0;

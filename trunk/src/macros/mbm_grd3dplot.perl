@@ -3,13 +3,15 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grd3dplot.perl	8/6/95
-#    $Id: mbm_grd3dplot.perl,v 4.13 1999-12-29 00:17:55 caress Exp $
+#    $Id: mbm_grd3dplot.perl,v 4.14 2000-10-03 21:42:17 caress Exp $
 #
-#    Copyright (c) 1993, 1994, 1995 by 
-#    D. W. Caress (caress@lamont.ldgo.columbia.edu)
+#    Copyright (c) 1993, 1994, 1995, 2000 by 
+#    D. W. Caress (caress@mbari.org)
+#      Monterey Bay Aquarium Research Institute
+#      Moss Landing, CA
 #    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
-#    Lamont-Doherty Earth Observatory
-#    Palisades, NY  10964
+#      Lamont-Doherty Earth Observatory
+#      Palisades, NY  10964
 #
 #    See README file for copying and redistribution conditions.
 #--------------------------------------------------------------------
@@ -61,10 +63,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   August 8, 1994
 #
 # Version:
-#   $Id: mbm_grd3dplot.perl,v 4.13 1999-12-29 00:17:55 caress Exp $
+#   $Id: mbm_grd3dplot.perl,v 4.14 2000-10-03 21:42:17 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.13  1999/12/29  00:17:55  caress
+# Release 4.6.8
+#
 # Revision 4.12  1999/06/25  17:55:47  caress
 # I must have changed something!
 #
