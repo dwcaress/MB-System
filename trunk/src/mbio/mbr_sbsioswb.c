@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sbsioswb.c	9/18/93
- *	$Id: mbr_sbsioswb.c,v 4.9 1999-02-04 23:52:54 caress Exp $
+ *	$Id: mbr_sbsioswb.c,v 4.10 1999-08-06 00:47:44 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	February 2, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.9  1999/02/04  23:52:54  caress
+ * MB-System version 4.6beta7
+ *
  * Revision 4.8  1998/10/05  17:46:15  caress
  * MB-System version 4.6beta
  *
@@ -87,7 +90,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_sbsioswb.c,v 4.9 1999-02-04 23:52:54 caress Exp $";
+ static char res_id[]="$Id: mbr_sbsioswb.c,v 4.10 1999-08-06 00:47:44 caress Exp $";
 	char	*function_name = "mbr_alm_sbsioswb";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -509,6 +512,18 @@ int	*error;
 			}
 		}
 #endif
+		
+	/* check for fewer than expected beams */
+	if (status == MB_SUCCESS
+		&& (data->data_size / 4) - 1 < data->beams_bath)
+		{
+		k = (data->data_size / 4) - 2;
+		for (i=k;i<data->beams_bath;i++)
+		    {
+		    data->bath_struct[i].bath = 0;
+		    data->bath_struct[i].bath_acrosstrack = 0;
+		    }
+		}
 
 	/* print debug statements */
 	if (status == MB_SUCCESS && verbose >= 5 
