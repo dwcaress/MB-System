@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mblist.c	2/1/93
- *    $Id: mblist.c,v 4.2 1994-04-29 18:01:20 caress Exp $
+ *    $Id: mblist.c,v 4.3 1994-06-01 21:00:55 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -26,6 +26,9 @@
  *		in 1990.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1994/04/29  18:01:20  caress
+ * Added output option "j" for time string in form: year jday daymin sec
+ *
  * Revision 4.1  1994/04/12  18:50:33  caress
  * Added #ifdef IRIX statements for compatibility with
  * SGI machines.  The system routine timegm does not exist
@@ -92,9 +95,14 @@
 /* local options */
 #define	MAX_OPTIONS			25
 #define	MBLIST_MODE_LIST		1
-#define	MBLIST_MODE_DUMP_BATHYMETRY	2
-#define	MBLIST_MODE_DUMP_AMPLITUDE	3
-#define	MBLIST_MODE_DUMP_SIDESCAN	3
+#define	MBLIST_MODE_DUMP_LL_BATHYMETRY	2
+#define	MBLIST_MODE_DUMP_LL_TOPOGRAPHY	3
+#define	MBLIST_MODE_DUMP_LL_AMPLITUDE	4
+#define	MBLIST_MODE_DUMP_LL_SIDESCAN	5
+#define	MBLIST_MODE_DUMP_CT_BATHYMETRY	-2
+#define	MBLIST_MODE_DUMP_CT_TOPOGRAPHY	-3
+#define	MBLIST_MODE_DUMP_CT_AMPLITUDE	-4
+#define	MBLIST_MODE_DUMP_CT_SIDESCAN	-5
 
 /*--------------------------------------------------------------------*/
 
@@ -102,7 +110,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mblist.c,v 4.2 1994-04-29 18:01:20 caress Exp $";
+	static char rcs_id[] = "$Id: mblist.c,v 4.3 1994-06-01 21:00:55 caress Exp $";
 	static char program_name[] = "MBLIST";
 	static char help_message[] =  "MBLIST prints the specified contents of a multibeam data \nfile to stdout. The form of the output is quite flexible; \nMBLIST is tailored to produce ascii files in spreadsheet \nstyle with data columns separated by tabs.";
 	static char usage_message[] = "mblist [-Fformat -Rw/e/s/n -Ppings -Sspeed -Llonflip\n	-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc -V -H -Ifile\n	-Lbath_beam -Mamp_beam -Nss_pixel -Ooptions -Ddumpmode]";
@@ -454,28 +462,61 @@ char **argv;
 		}
 
 	/* print debug statements */
-	if (verbose >= 2 && dumpmode == MBLIST_MODE_DUMP_BATHYMETRY)
+	if (verbose >= 2 && dumpmode == MBLIST_MODE_DUMP_LL_BATHYMETRY)
 		{
 		fprintf(stderr,"\ndbg2  All nonzero bathymetry beams will be output as \n(lon lat depth) triples in <%s>\n",
 			program_name);
 		}
+	/* print debug statements */
+	if (verbose >= 2 && dumpmode == MBLIST_MODE_DUMP_LL_TOPOGRAPHY)
+		{
+		fprintf(stderr,"\ndbg2  All nonzero bathymetry beams will be output as \n(lon lat topography) triples in <%s>\n",
+			program_name);
+		}
 
 	/* print debug statements */
-	if (verbose >= 2 && dumpmode == MBLIST_MODE_DUMP_AMPLITUDE)
+	if (verbose >= 2 && dumpmode == MBLIST_MODE_DUMP_LL_AMPLITUDE)
 		{
 		fprintf(stderr,"\ndbg2  All nonzero amplitude beams will be output as \n(lon lat amplitude) triples in <%s>\n",
 			program_name);
 		}
 
 	/* print debug statements */
-	if (verbose >= 2 && dumpmode == MBLIST_MODE_DUMP_SIDESCAN)
+	if (verbose >= 2 && dumpmode == MBLIST_MODE_DUMP_LL_SIDESCAN)
 		{
 		fprintf(stderr,"\ndbg2  All nonzero sidescan pixels will be output as \n(lon lat sidescan) triples in <%s>\n",
 			program_name);
 		}
 
+	/* print debug statements */
+	if (verbose >= 2 && dumpmode == MBLIST_MODE_DUMP_CT_BATHYMETRY)
+		{
+		fprintf(stderr,"\ndbg2  All nonzero bathymetry beams will be output as \n(acrosstrack alongtrackdepth) triples in <%s>\n",
+			program_name);
+		}
+	/* print debug statements */
+	if (verbose >= 2 && dumpmode == MBLIST_MODE_DUMP_CT_TOPOGRAPHY)
+		{
+		fprintf(stderr,"\ndbg2  All nonzero bathymetry beams will be output as \n(acrosstrack alongtrack topography) triples in <%s>\n",
+			program_name);
+		}
+
+	/* print debug statements */
+	if (verbose >= 2 && dumpmode == MBLIST_MODE_DUMP_CT_AMPLITUDE)
+		{
+		fprintf(stderr,"\ndbg2  All nonzero amplitude beams will be output as \n(acrosstrack alongtrack amplitude) triples in <%s>\n",
+			program_name);
+		}
+
+	/* print debug statements */
+	if (verbose >= 2 && dumpmode == MBLIST_MODE_DUMP_CT_SIDESCAN)
+		{
+		fprintf(stderr,"\ndbg2  All nonzero sidescan pixels will be output as \n(acrosstrack alongtrack sidescan) triples in <%s>\n",
+			program_name);
+		}
+
 	/* allocate memory for data arrays */
-	if (dumpmode == MBLIST_MODE_LIST)
+	if (dumpmode <= MBLIST_MODE_LIST)
 		{
 		status = mb_malloc(verbose,beams_bath*sizeof(int),&bath,&error);
 		status = mb_malloc(verbose,beams_bath*sizeof(int),
@@ -794,7 +835,7 @@ char **argv;
 	}
 
 	/* read and print data in dump lon lat depth mode */
-	else
+	else if (dumpmode > MBLIST_MODE_LIST)
 	{
 	distance_total = 0.0;
 	nread = 0;
@@ -854,7 +895,7 @@ char **argv;
 
 		/* print out good pings */
 		if (error == MB_ERROR_NO_ERROR 
-			&& dumpmode == MBLIST_MODE_DUMP_BATHYMETRY)
+			&& dumpmode == MBLIST_MODE_DUMP_LL_BATHYMETRY)
 			{
 			for (i=0;i<beams_bath;i++)
 				if (dbath[i] > 0.0)
@@ -864,7 +905,17 @@ char **argv;
 						dbath[i]);
 			}
 		if (error == MB_ERROR_NO_ERROR 
-			&& dumpmode == MBLIST_MODE_DUMP_AMPLITUDE)
+			&& dumpmode == MBLIST_MODE_DUMP_LL_TOPOGRAPHY)
+			{
+			for (i=0;i<beams_bath;i++)
+				if (dbath[i] > 0.0)
+					printf("%f\t%f\t%f\n",
+						dbathlon[i],
+						dbathlat[i],
+						-dbath[i]);
+			}
+		if (error == MB_ERROR_NO_ERROR 
+			&& dumpmode == MBLIST_MODE_DUMP_LL_AMPLITUDE)
 			{
 			for (i=0;i<beams_amp;i++)
 				if (damp[i] > 0.0)
@@ -874,7 +925,7 @@ char **argv;
 						damp[i]);
 			}
 		if (error == MB_ERROR_NO_ERROR 
-			&& dumpmode == MBLIST_MODE_DUMP_SIDESCAN)
+			&& dumpmode == MBLIST_MODE_DUMP_LL_SIDESCAN)
 			{
 			for (i=0;i<pixels_ss;i++)
 				if (dss[i] > 0.0)
@@ -882,6 +933,109 @@ char **argv;
 						dsslon[i],
 						dsslat[i],
 						dss[i]);
+			}
+		}
+	}
+
+	/* read and print data in dump acrosstrack alongtrack depth mode */
+	else
+	{
+	distance_total = 0.0;
+	nread = 0;
+	while (error <= MB_ERROR_NO_ERROR)
+		{
+		/* read a ping of data */
+		status = mb_get(verbose,mbio_ptr,&kind,&pings,time_i,&time_d,
+			&navlon,&navlat,&speed,&heading,&distance,
+			&beams_bath,&beams_amp,&pixels_ss,
+			bath,amp,bathacrosstrack,bathalongtrack,
+			ss,ssacrosstrack,ssalongtrack,
+			comment,&error);
+
+		/* time gaps are not a problem here */
+		if (error == MB_ERROR_TIME_GAP)
+			{
+			error = MB_ERROR_NO_ERROR;
+			status = MB_SUCCESS;
+			}
+
+		/* increment counter and set cumulative distance */
+		if (error <= MB_ERROR_NO_ERROR 
+			&& error != MB_ERROR_COMMENT)
+			{
+			nread++;
+			distance_total += distance;
+			}
+
+		/* print debug statements */
+		if (verbose >= 2)
+			{
+			fprintf(stderr,"\ndbg2  Ping read in program <%s>\n",
+				program_name);
+			fprintf(stderr,"dbg2       kind:           %d\n",kind);
+			fprintf(stderr,"dbg2       beams_bath:     %d\n",
+					beams_bath);
+			fprintf(stderr,"dbg2       beams_amp:      %d\n",
+					beams_amp);
+			fprintf(stderr,"dbg2       pixels_ss:      %d\n",
+					pixels_ss);
+			fprintf(stderr,"dbg2       kind:           %d\n",kind);
+			fprintf(stderr,"dbg2       error:          %d\n",error);
+			fprintf(stderr,"dbg2       beam status:    %d\n",						beam_status);
+			fprintf(stderr,"dbg2       status:         %d\n",status);
+			}
+
+		/* print comments */
+		if (verbose >= 1 && kind == MB_DATA_COMMENT)
+			{
+			if (icomment == 0)
+				{
+				fprintf(stderr,"\nComments:\n");
+				icomment++;
+				}
+			fprintf(stderr,"%s\n",comment);
+			}
+
+		/* print out good pings */
+		if (error == MB_ERROR_NO_ERROR 
+			&& dumpmode == MBLIST_MODE_DUMP_CT_BATHYMETRY)
+			{
+			for (i=0;i<beams_bath;i++)
+				if (bath[i] > 0)
+					printf("%d\t%d\t%d\n",
+						bathacrosstrack[i],
+						bathalongtrack[i],
+						bath[i]);
+			}
+		if (error == MB_ERROR_NO_ERROR 
+			&& dumpmode == MBLIST_MODE_DUMP_CT_TOPOGRAPHY)
+			{
+			for (i=0;i<beams_bath;i++)
+				if (bath[i] > 0)
+					printf("%d\t%d\t%d\n",
+						bathacrosstrack[i],
+						bathalongtrack[i],
+						-bath[i]);
+			}
+		if (error == MB_ERROR_NO_ERROR 
+			&& dumpmode == MBLIST_MODE_DUMP_CT_AMPLITUDE)
+			{
+			for (i=0;i<beams_amp;i++)
+				if (amp[i] > 0)
+					printf("%d\t%d\t%d\n",
+						bathacrosstrack[i],
+						bathalongtrack[i],
+						amp[i]);
+			}
+		if (error == MB_ERROR_NO_ERROR 
+			&& dumpmode == MBLIST_MODE_DUMP_CT_SIDESCAN)
+			{
+			for (i=0;i<pixels_ss;i++)
+				if (ss[i] > 0)
+					printf("%d\t%d\t%d\n",
+						ssacrosstrack[i],
+						ssalongtrack[i],
+						ss[i]);
 			}
 		}
 	}
