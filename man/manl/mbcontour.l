@@ -64,7 +64,7 @@ Palisades, NY 10964
 
 .SH OPTIONS
 .TP
-.B -A
+.B \-A
 \fIcont_int/col_int/tic_int/lab_int/tic_len/lab_hgt\fP
 .br
 If specific contour levels are not specified with the \fI-C\fP option,
@@ -80,19 +80,19 @@ Defaults: \fIcont_int\fP = 25; \fIcol_int\fP = 100;
 \fItic_int\fP = 100; \fIlab_int\fP = 100; \fItic_int\fP = 0.1; 
 \fIlab_hgt\fP = 0.05.
 .TP
-.B -B
+.B \-B
 \fItickinfo\fP
 .br
 Sets map boundary tickmark intervals. See \fBpsbasemap\fP for details.
 .TP
-.B -b
+.B \-b
 \fIyr/mo/da/hr/mn/sc\fP
 .br
 Sets the starting time for data allowed in the input data; pings
 with times before the starting time will be ignored. 
 Default: \fIyr/mo/da/hr/mn/sc\fP = 1962/2/21/10/30/0.
 .TP
-.B -C
+.B \-C
 \fIcontourfile\fP
 .br
 Sets the file from which the contour levels and their 
@@ -112,7 +112,7 @@ contour levels to be plotted with unannotated, unticked, black contours.
 If contours are specified using the \fB-C\fP option, then any use
 of the \fB-A\fP option will be ignored.
 .TP
-.B -D
+.B \-D
 \fItime_tick/time_annot/date_annot/time_tick_len\fP
 .br
 Sets the parameters governing the annotation of the shiptrack.  
@@ -128,14 +128,14 @@ annotated date ticks are given in hours by
 Defaults: \fItime_tick\fP = 0.25; \fItime_annot\fP = 1.0; 
 \fIdate_annot\fP = 4.0; \fItime_tick_len\fP = 0.1.
 .TP
-.B -E
+.B \-E
 \fIyr/mo/da/hr/mn/sc\fP
 .br
 Sets the ending time for data allowed in the input data; pings
 with times after the ending time will be ignored. 
 Default: \fIyr/mo/da/hr/mn/sc\fP = 2062/2/21/10/30/0.
 .TP
-.B -f
+.B \-f
 \fIformat\fP
 .br
 Sets the data format used if the input is read from stdin
@@ -147,16 +147,16 @@ format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page. Default: \fIformat\fP = -1.
 .TP
-.B -F
+.B \-F
 \fIred/green/blue\fP
 .br
 Sets the color used for Frame and annotation. [Default is black]
 .TP
-.B -H
+.B \-H
 This "help" flag cause the program to print out a description
 of its operation and then exit immediately.
 .TP
-.B -I
+.B \-I
 \fIinfile\fP
 .br
 Sets the input filename. If \fIformat\fP > 0 (set with the 
@@ -251,7 +251,7 @@ More details can be found in the \fBpsbasemap\fP manpages.
 .B \-K
 More \fIPostScript\fP code will be appended later [Default terminates the plot system].
 .TP
-.B -L
+.B \-L
 \fIlonflip\fP
 .br
 Sets the range of the longitude values returned by the swath sonar i/o routines.
@@ -266,7 +266,7 @@ Default: \fIlonflip\fP = 0.
 .B \-M
 Force conversion to monochrome image using the [television] YIQ transformation.
 .TP
-.B -N
+.B \-N
 \fInplot\fP
 Sets the number of pings to be read in before each contouring
 episode. See the description of the \fB-Z\fIalgorithm\fP option
@@ -280,7 +280,7 @@ Selects Overlay plot mode [Default initializes a new plot system].
 .B \-P
 Selects Portrait plotting mode [GMT Default is Landscape, see gmtdefaults to change this].
 .TP
-.B -p
+.B \-p
 \fIpings\fP
 .br
 Sets the ping averaging of the input data. If \fIpings\fP = 1, then
@@ -291,13 +291,13 @@ be done so that the along-track ping spacing is equal to the across-track
 beam spacing.
 Default: \fIpings\fP = 1 (no ping averaging).
 .TP
-.B -Q
+.B \-Q
 Causes the program to plot the triangles constructed as part of the
 contouring if the "triangle algorithm" is specified using the
 \fB-Z\fI1\fP option. This allows the data distribution to be 
 directly viewed.
 .TP
-.B -R
+.B \-R
 \fIwest/east/south/north\fP
 .br
 Sets the longitude and latitude bounds within which swath sonar 
@@ -305,14 +305,14 @@ data will be read and plotted. Only the data which lies within
 these bounds will be read. 
 Default: \fIwest\fP=-360, east\fI=360\fP, \fIsouth\fP=-90, \fInorth\fP=90.
 .TP
-.B -S
+.B \-S
 \fIspeed\fP
 .br
 Sets the minimum speed in km/hr (5.5 kts ~ 10 km/hr) allowed in 
 the input data; pings associated with a smaller ship speed will not be
 processed. Default: \fIspeed\fP = 0.
 .TP
-.B -T
+.B \-T
 \fItimegap\fP
 .br
 Sets the maximum time gap in minutes between adjacent pings allowed before
@@ -325,7 +325,7 @@ the command string.
 .B \-V
 Selects verbose mode, which will send progress reports to stderr [Default runs "silently"].
 .TP
-.B -W
+.B \-W
 Normally, \fBmbcontour\fP works with bathymetry values in meters.  If the
 \fB-W\fP flag is given, then \fBmbcontour\fP will contour the bathymetry
 values in feet.
@@ -333,7 +333,7 @@ values in feet.
 .B \-X \-Y
 Shift origin of plot by (\fIx-shift,y-shift\fP) inches  [Default is (1,1) for new plots, (0,0) for overlays].
 .TP
-.B -Z
+.B \-Z
 \fIalgorithm\fP
 .br
 Sets the contouring algorithm to be used. If \fIalgorithm\fP=0,

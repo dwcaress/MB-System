@@ -1,4 +1,4 @@
-.TH mbedit l "April 3, 1997" "MB-System 4.5" "MB-System 4.5"
+.TH mbedit l "September 16, 1997" "MB-System 4.5" "MB-System 4.5"
 .SH NAME
 \fBmbedit\fP - Interactive editor used to flag bad bathymetry values in swath sonar bathymetry data.
 
@@ -123,23 +123,29 @@ Palisades, NY 10964
 
 .SH OPTIONS
 .TP
-.B \fB-B\fIyr/mo/da/hr/mn/sc\fP
+.B \-B
+\fIyr/mo/da/hr/mn/sc\fP
+.br
 Sets the starting time for data allowed in the input data; pings
 with times before the starting time will be ignored. 
 Default: \fIyr/mo/da/hr/mn/sc\fP = 1962/2/21/10/30/0.
 .TP
-.B \fB-D\fP
+.B \-D
 Starts up the program in "browse" mode. If a file is opened
 in browse mode (either at startup or later), none
 of the edited data will be output to a file. The default
 is to output the edited data to a file.
 .TP
-.B \fB-E\fIyr/mo/da/hr/mn/sc\fP
+.B \-E
+\fIyr/mo/da/hr/mn/sc\fP
+.br
 Sets the ending time for data allowed in the input data; pings
 with times after the ending time will be ignored. 
 Default: \fIyr/mo/da/hr/mn/sc\fP = 2062/2/21/10/30/0.
 .TP
-.B \fB-F\fIformat\fP
+.B \-F
+\fIformat\fP
+.br
 Sets the format at startup for the input and output swath sonar data using 
 \fBMBIO\fP integer format identifiers. This value can also be set
 interactively when specifying the input file.
@@ -149,17 +155,19 @@ currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page.
 Default: \fIformat\fP = 11.
 .TP
-.B \fB-G\fP
+.B \-G
 This flag causes the program to treat the \fBDone\fP button as
 equivalent to the \fBQuit\fP button. This option is used when
 \fBMBedit\fP is started automatically by some other process and
 only a single file is to edited.
 .TP
-.B \fB-H\fP
+.B \-H
 This "help" flag cause the program to print out a description
 of its operation and then exit immediately.
 .TP
-.B \fB-I\fIinfile\fP
+.B \-I
+\fIinfile\fP
+.br
 Sets the data file from which the input data will be read at startup.
 This option is usually used only when \fBMBedit\fP is started
 automatically from some other process. The \fB-F\fP option should
@@ -172,19 +180,21 @@ corresponds to the \fBMBIO\fP format id), then the output file name
 will have an "e.mbXX" suffix. Otherwise, the output file will
 be \fIinfile\fP with ".ed" appended.
 .TP
-.B \fB-O\fIoutfile\fP
+.B \-O
+\fIoutfile\fP
+.br
 Sets the output data file to be used at startup. 
 This option is usually used only when \fBMBedit\fP is started
 automatically from some other process and the \fB-I\fP option is
 used to specify a startup input data file.
 .TP
-.B \fB-S\fP
+.B \-S
 This flag modifies how the program handles an input data file
 read at startup, as specified with the \fB-I\fP option. If the
 \fB-S\fP flag is given and an edit save file exists for the
 startup input data file, the edit save file will be used. 
 .TP
-.B \fB-V\fP
+.B \-V
 Normally, \fBMBedit\fP outputs information to the stderr stream
 regarding the number of records loaded and dumped.  If the
 \fB-V\fP flag is given, then \fBMBedit\fP works in a "verbose" mode and
@@ -194,7 +204,7 @@ beams flagged or zeroed.
 
 .SH INTERACTIVE CONTROLS
 .TP
-.B \fBFile\fP
+.B File
 This button brings up a popup window which allows the user to
 specify the input swath sonar bathymetry data file, its \fBMBIO\fP
 format id, the output mode, and the output filename. 
@@ -217,32 +227,32 @@ is clicked, as much data as will fit
 into the data buffer is read and several pings are displayed as 
 stacked bathymetry profiles.
 .TP
-.B \fBQuit\fP
+.B Quit
 This button causes the program to exit gracefully.  If a data file
 has been read, all of the data will be written to the output file
 before exiting.
 .TP
-.B \fBNext Buffer\fP
+.B Next Buffer
 This button causes the program to write out the data from the
 current buffer and then read in and display the next buffer.
 If there is no more data to be read in after the current buffer
 has been written out, then the input and output files are closed.
 .TP
-.B \fBDone\fP
+.B Done
 This button causes the program to write out all of the data from the
 input file and then close the input and output files.
 .TP
-.B \fBForward\fP
+.B Forward
 This button causes the set of displayed pings to step \fInstep\fP 
 pings forward in the current buffer.  The right mouse button causes
 the same action.
 .TP
-.B \fBReverse\fP
+.B Reverse
 This button causes the set of displayed pings to step \fInstep\fP 
 pings backward in the current buffer.  The middle mouse button causes
 the same action.
 .TP
-.B \fBMode\fP
+.B Mode
 This toggle allows the user to specify the edit mode.  If mode
 is set to \fIPick\fP, then clicking the left mouse button will cause
 the nearest beam to toggle between flagged and unflagged.  If mode
@@ -256,7 +266,7 @@ key macros (see the keyboard action section):
  	Erase:		'W', 'w', 'I', 'i' 
  	Restore:		'E', 'e', 'O', 'o' 
 .TP
-.B \fBX Scale\fP
+.B X Scale
 This slider sets the width of the plot in meters; in general this
 value should be slightly larger than the swath width of the data
 being edited. If a particular value is desired which cannot be
@@ -265,7 +275,7 @@ width of 10 meters but the slider jumps from 1 to 47), the slider
 can be changed by increments of 1 by clicking with the left button
 inside the slider area, but not on the slider itself.
  .TP
-.B \fBVertical Exageration\fP
+.B Vertical Exageration
 This slider sets the depth scale in terms of vertical exageration.
 The depth scale will change as the cross track distance scale is
 changed to maintain the same vertical exageration.
@@ -274,14 +284,14 @@ obtained by dragging the slider, the slider
 can be changed by increments of 0.01 by clicking with the left button
 inside the slider area, but not on the slider itself.
 .TP
-.B \fBNumber of pings shown\fP
+.B Number of pings shown
 This slider sets the number of pings shown at a time.
 .TP
-.B \fBNumber of pings to step\fP
+.B Number of pings to step
 This slider sets the number of pings to step when the \fBForward\fP
 or \fBReverse\fP buttons are pushed.
 .TP
-.B \fBGo To\fP
+.B Go To
 This button brings up a popup window which allows the user to
 specify the time of a particular ping to be displayed.  Once the
 year, month, day, hour, minute, and second values are entered, clicking
@@ -293,7 +303,7 @@ load buffers until the target time is reached or the data file ends.
 If the end of the file is reached during the search, the file will
 be closed.
 .TP
-.B \fBX Axis Tick Interval\fP
+.B X Axis Tick Interval
 This slider sets the tick interval in m for the cross track 
 distance axis.
 If a particular value is desired which cannot be
@@ -301,23 +311,23 @@ obtained by dragging the slider, the slider
 can be changed by increments of 1 by clicking with the left button
 inside the slider area, but not on the slider itself.
 .TP
-.B \fBY Axis Tick Interval\fP
+.B Y Axis Tick Interval
 This slider sets the tick interval in m for the depth axis.
 If a particular value is desired which cannot be
 obtained by dragging the slider, the slider
 can be changed by increments of 1 by clicking with the left button
 inside the slider area, but not on the slider itself.
 .TP
-.B \fBData Buffer Size\fP
+.B Data Buffer Size
 This slider sets the number of data records which can be held 
 in the data buffer.  Any change becomes effective the next time
 that a data file is read in.
 .TP
-.B \fBBuffer Retain Size\fP
+.B Buffer Retain Size
 This slider sets the number of data records which are held over in
 the buffer each time the old buffer is written out.
 .TP
-.B \fBShow Flagged Profile\fP
+.B Show Flagged Profile
 This toggle allows the user to specify whether the acrosstrack
 bathymetry profile includes only the unflagged or "good" bathymetry
 (toggle set to "On") or
@@ -328,7 +338,7 @@ associated with the flagged depth points.
 
 .SH MOUSE ACTIONS
 .TP
-.B \fBLeft Mouse Button\fP
+.B Left Mouse Button
 The left mouse button is used to pick beams.  Good beams are
 shown as filled squares and bad (flagged) beams as empty squares.  The 
 result of picking a particular beam depends on the current edit mode,
@@ -336,12 +346,12 @@ as set by the \fBMode\fP button or keyboard macros defined below. The
 last picked beam (and ping) is remembered for use with 
 some of the keyboard actions described below.
 .TP
-.B \fBMiddle Mouse Button\fP
+.B Middle Mouse Button
 The middle mouse button causes the set of displayed pings to step \fInstep\fP 
 pings backward in the current buffer.  The control button \fBReverse\fP causes
 the same action.
 .TP
-.B \fBRight Mouse Button\fP
+.B Right Mouse Button
 The right mouse button causes the set of displayed pings to step \fInstep\fP 
 pings forward in the current buffer.  The control button \fBForward\fP causes
 the same action.

@@ -1,4 +1,4 @@
-.TH mbhistogram l "25 March 1997" "MB-System 4.5" "MB-System 4.5"
+.TH mbhistogram l "17 September 1997" "MB-System 4.5" "MB-System 4.5"
 .SH NAME
 \fBmbhistogram\fP - Generate a histogram of bathymetry, amplitude, or sidescan values
 from swath sonar data files.
@@ -43,19 +43,25 @@ Palisades, NY 10964
 
 .SH OPTIONS
 .TP
-.B \fB-A\fIkind\fP
+.B \-A
+\fIkind\fP
+.br
 Sets the kind of data to be processed, where 
  	\fIkind\fP = 0 : histogram of bathymetry data
  	\fIkind\fP = 1 : histogram of beam amplitude data
  	\fIkind\fP = 2 : histogram of sidescan data
 Default: \fIkind\fP = 2.
 .TP
-.B \fB-B\fIyr/mo/da/hr/mn/sc\fP
+.B \-B
+\fIyr/mo/da/hr/mn/sc\fP
+.br
 Sets the starting time for data allowed in the input data; pings
 with times before the starting time will be ignored. 
 Default: \fIyr/mo/da/hr/mn/sc\fP = 1962/2/21/10/30/0.
 .TP
-.B \fB-D\fImin/max\fP
+.B \-D
+\fImin/max\fP
+.br
 Specifies the minimum and maximum data values used for
 constructing the histogram. 
 The width of the bins is determined by (\fImax\fP - \fImin\fP)
@@ -65,12 +71,16 @@ center of the first histogram bin, and the \fImax\fP value is the
 center of the last histogram bin.
 Data values falling outside the range of the bins are ignored.
 .TP
-.B \fB-E\fIyr/mo/da/hr/mn/sc\fP
+.B \-E
+\fIyr/mo/da/hr/mn/sc\fP
+.br
 Sets the ending time for data allowed in the input data; pings
 with times after the ending time will be ignored. 
 Default: \fIyr/mo/da/hr/mn/sc\fP = 2062/2/21/10/30/0.
 .TP
-.B \fB-F\fIformat\fP
+.B \-F
+\fIformat\fP
+.br
 Sets the data format used if the input is read from stdin
 or from a file. If \fIformat\fP < 0, then the input file specified
 with the \fB-I\fP option will actually contain a list of input swath sonar
@@ -80,11 +90,13 @@ format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page. Default: \fIformat\fP = 11.
 .TP
-.B \fB-G\fP
+.B \-G
 This option causes the data histogram to be recast into a
 Gaussian distribution.
 .TP
-.B \fB-I\fIfilename\fP
+.B \-I
+\fIfilename\fP
+.br
 Sets the input filename. If \fIformat\fP > 0 (set with the 
 \fB-f\fP option) then the swath sonar data contained in \fIinfile\fP 
 is read and processed. If \fIformat\fP < 0, then \fIinfile\fP
@@ -101,7 +113,9 @@ format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page. Default: \fIinfile\fP = "stdin".
 .TP
-.B \fB-L\fIlonflip\fP
+.B \-L
+\fIlonflip\fP
+.br
 Sets the range of the longitude values returned.
 If \fIlonflip\fP=-1 then the longitude values will be in
 the range from -360 to 0 degrees. If \fIlonflip\fP=0 
@@ -111,7 +125,9 @@ then the longitude values will be in
 the range from 0 to 360 degrees.
 Default: \fIlonflip\fP = 0.
 .TP
-.B \fB-M\fInintervals\fP
+.B \-M
+\fInintervals\fP
+.br
 If \fInintervals\fP > 0 then \fBmbhistogram\fP will 
 calculate and output a list of values which break up
 the data distribution into equal sized regions.  This can
@@ -120,10 +136,14 @@ features in amplitude and sidescan data (the macro \fBmbm_plot\fP
 makes use of this feature). If this option is enabled, then the
 raw histogram is not output.
 .TP
-.B \fB-N\fInbins\fP
+.B \-N
+\fInbins\fP
+.br
 Sets the number of bins used to calculate the histogram.
 .TP
-.B \fB-P\fIpings\fP
+.B \-P
+\fIpings\fP
+.br
 Sets the ping averaging of the input data. If \fIpings\fP = 1, then
 no ping averaging is performed. If \fIpings\fP > 0, then
 that number of input pings will be averaged to produce one output
@@ -132,28 +152,34 @@ be done so that the along-track ping spacing is equal to the across-track
 beam spacing.
 Default: \fIpings\fP = 1 (no ping averaging).
 .TP
-.B \fB-R\fIwest/east/south/north\fP
+.B \-R
+\fIwest/east/south/north\fP
+.br
 Sets the longitude and latitude bounds within which swath sonar 
 data will be read. Only the data which lies within these bounds will
 be read. 
 Default: \fIwest\fP=-360, east\fI=360\fP, \fIsouth\fP=-90, \fInorth\fP=90.
 .TP
-.B \fB-S\fIspeed\fP
+.B \-S
+\fIspeed\fP
+.br
 Sets the minimum speed in km/hr (5.5 kts ~ 10 km/hr) allowed in 
 the input data; pings associated with a smaller ship speed will not be
 copied. Default: \fIspeed\fP = 0.
 .TP
-.B \fB-T\fItimegap\fP
+.B \-T
+\fItimegap\fP
+.br
 Sets the maximum time gap in minutes between adjacent pings allowed before
 the data is considered to have a gap. Default: \fItimegap\fP = 1.
 .TP
-.B \fB-V\fP
+.B \-V
 Normally, \fBmbhistogram\fP only prints out the statistics obtained
 by reading all of the data.  If the
 \fB-V\fP flag is given, then \fBMBCOPY\fP works in a "verbose" mode and
 outputs the program version being used and all read error status messages.
 .TP
-.B \fB-H\fP
+.B \-H
 This "help" flag cause the program to print out a description
 of its operation and then exit immediately.
 

@@ -1,4 +1,4 @@
-.TH mbm_vrefcheck l "25 March 1997" "MB-System 4.5" "MB-System 4.5"
+.TH mbm_vrefcheck l "16 September 1997" "MB-System 4.5" "MB-System 4.5"
 .SH NAME
 \fBmbm_vrefcheck\fP - Macro to generate plot of crosstrack seafloor slope
 from a swath sonar file.  The noise in this time series largely reflects
@@ -41,17 +41,23 @@ Palisades, NY 10964
 
 .SH OPTIONS
 .TP
-.B \fB-A\fIxmin\fP
+.B \-A
+\fIxmin\fP
+.br
 Sets the start time of the plot in hours from the beginning of the
 input file. If not specified, the beginning of the input file
 will be used as \fIxmin\fP.
 .TP
-.B \fB-B\fIxmax\fP
+.B \-B
+\fIxmax\fP
+.br
 Sets the end time of the plot in hours from the beginning of the
 input file. If not specified, the end of the input file
 will be used as \fIxmax\fP.
 .TP
-.B \fB-F\fIformat\fP
+.B \-F
+\fIformat\fP
+.br
 Sets the format for the input swath sonar data using 
 \fBMBIO\fP integer format identifiers. 
 This macro uses the \fBMBIO\fP library and will read any swath sonar
@@ -60,14 +66,20 @@ currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page.
 Default: \fIformat\fP = 24.
 .TP
-.B \fB-I\fIfile\fP
+.B \-I
+\fIfile\fP
+.br
 Data file from which the input data will be read.
 .TP
-.B \fB-S\fIxscale\fP
+.B \-S
+\fIxscale\fP
+.br
 Sets the x-axis scale of the plot in inches/hour.  
 Default: \fIxscale\fP = 1.2.
 .TP
-.B \fB-X\fIxaxis\fP
+.B \-X
+\fIxaxis\fP
+.br
 Sets the length of the x-axis in inches.  
 
 .SH EXAMPLES

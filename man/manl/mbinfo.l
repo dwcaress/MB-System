@@ -1,4 +1,4 @@
-.TH mbinfo l "16 April 1997" "MB-System 4.5" "MB-System 4.5"
+.TH mbinfo l "17 September 1997" "MB-System 4.5" "MB-System 4.5"
 .SH NAME
 \fBmbinfo\fP - Output some basic statistics of swath sonar data files.
 
@@ -48,22 +48,28 @@ Palisades, NY 10964
 
 .SH OPTIONS
 .TP
-.B \fB-B\fIyr/mo/da/hr/mn/sc\fP
+.B \-B
+\fIyr/mo/da/hr/mn/sc\fP
+.br
 Sets the starting time for data allowed in the input data; pings
 with times before the starting time will be ignored. 
 Default: \fIyr/mo/da/hr/mn/sc\fP = 1962/2/21/10/30/0.
 .TP
-.B \fB-C\fP
+.B \-C
 Normally, \fBmbinfo\fP ignores comments encountered in the
 data file.  If the \fB-C\fP flag is given, all of the comments will be 
 printed out.
 .TP
-.B \fB-E\fIyr/mo/da/hr/mn/sc\fP
+.B \-E
+\fIyr/mo/da/hr/mn/sc\fP
+.br
 Sets the ending time for data allowed in the input data; pings
 with times after the ending time will be ignored. 
 Default: \fIyr/mo/da/hr/mn/sc\fP = 2062/2/21/10/30/0.
 .TP
-.B \fB-F\fIformat\fP
+.B \-F
+\fIformat\fP
+.br
 Sets the data format used if the input is read from stdin
 or from a file. If \fIformat\fP < 0, then the input file specified
 with the \fB-I\fP option will actually contain a list of input swath sonar
@@ -73,7 +79,7 @@ format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page. Default: \fIformat\fP = 11.
 .TP
-.B \fB-G\fP
+.B \-G
 Enables checking for reasonable navigation to be used in
 calculating the minimum and maximum longitude and latitude values.
 This mode excludes longitude and latitude values of 0.0 or
@@ -82,11 +88,13 @@ between pings (calculated using distance and time differences
 between adjacent pings). This option is particularly useful 
 when one is trying to obtain reasonable bounds for a plot.
 .TP
-.B \fB-H\fP
+.B \-H
 This "help" flag cause the program to print out a description
 of its operation and then exit immediately.
 .TP
-.B \fB-I\fIfilename\fP
+.B \-I
+\fIfilename\fP
+.br
 Sets the input filename. If \fIformat\fP > 0 (set with the 
 \fB-f\fP option) then the swath sonar data contained in \fIinfile\fP 
 is read and processed. If \fIformat\fP < 0, then \fIinfile\fP
@@ -103,7 +111,9 @@ format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page. Default: \fIinfile\fP = "stdin".
 .TP
-.B \fB-L\fIlonflip\fP
+.B \-L
+\fIlonflip\fP
+.br
 Sets the range of the longitude values returned.
 If \fIlonflip\fP=-1 then the longitude values will be in
 the range from -360 to 0 degrees. If \fIlonflip\fP=0 
@@ -113,7 +123,9 @@ then the longitude values will be in
 the range from 0 to 360 degrees.
 Default: \fIlonflip\fP = 0.
 .TP
-.B \fB-P\fIpings\fP
+.B \-P
+\fIpings\fP
+.br
 Turns on variance calculations for the bathymetry, amplitude,
 and sidescan data (as available in the data stream).  If 
 \fIpings\fP = 1, then no variance calculations are made.  If
@@ -125,28 +137,34 @@ variance calculations can provide crude measures of noise
 and/or signal as a function of beam and pixel number.
 Default: \fIpings\fP = 1 (no variance calculations).
 .TP
-.B \fB-R\fIwest/east/south/north\fP
+.B \-R
+\fIwest/east/south/north\fP
+.br
 Sets the longitude and latitude bounds within which swath sonar 
 data will be read. Only the data which lies within these bounds will
 be read. 
 Default: \fIwest\fP=-360, east\fI=360\fP, \fIsouth\fP=-90, \fInorth\fP=90.
 .TP
-.B \fB-S\fIspeed\fP
+.B \-S
+\fIspeed\fP
+.br
 Sets the minimum speed in km/hr (5.5 kts ~ 10 km/hr) allowed in 
 the input data; pings associated with a smaller ship speed will not be
 copied. Default: \fIspeed\fP = 0.
 .TP
-.B \fB-T\fItimegap\fP
+.B \-T
+\fItimegap\fP
+.br
 Sets the maximum time gap in minutes between adjacent pings allowed before
 the data is considered to have a gap. Default: \fItimegap\fP = 1.
 .TP
-.B \fB-V\fP
+.B \-V
 Normally, \fBmbinfo\fP only prints out the statistics obtained
 by reading all of the data.  If the
 \fB-V\fP flag is given, then \fBmbinfo\fP works in a "verbose" mode and
 outputs the program version being used and all read error status messages.
 .TP
-.B \fB-W\fP
+.B \-W
 Normally, \fBmbinfo\fP reports depth values in meters. If the
 \fB-W\fP flag is given, then \fBmbinfo\fP reports these values
 in feet.

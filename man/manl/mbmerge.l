@@ -1,4 +1,4 @@
-.TH mbmerge l "24 July 1997" "MB-System 4.5" "MB-System 4.5"
+.TH mbmerge l "17 September 1997" "MB-System 4.5" "MB-System 4.5"
 .SH NAME
 \fBmbmerge\fP - Merges swath sonar data with new navigation.
 
@@ -28,12 +28,14 @@ Palisades, NY 10964
 
 .SH OPTIONS
 .TP
-.B \fB-A\fIheading_offset\fP
+.B \-A
+\fIheading_offset\fP
+.br
 Adds this value to all heading values. This option
 is useful for correcting simple, constant deviations
 in heading values.
 .TP
-.B \fB-B\fP
+.B \-B
 This option causes the navigation to be interpolated using a simple
 linear interpolation. Normally, a spline interpolation is
 used. Linear interpolation may provide better results when
@@ -41,7 +43,9 @@ the navigation is sparse relative to the swath data or when
 the navigation contains significant gaps.
 Default: spline interpolation.
 .TP
-.B \fB-F\fIformat\fP
+.B \-F
+\fIformat\fP
+.br
 Sets the format for the input and output swath sonar data using 
 \fBMBIO\fP integer format identifiers. 
 This program uses the \fBMBIO\fP library and will read or write any swath sonar
@@ -50,16 +54,20 @@ currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page.
 Default: \fIformat\fP = 11.
 .TP
-.B \fB-H\fP
+.B \-H
 This "help" flag causes the program to print out a description
 of its operation and then exit immediately.
 .TP
-.B \fB-I\fIinfile\fP
+.B \-I
+\fIinfile\fP
+.br
 Data file from which the input data will be read. If
 no input file is specified, the input will be read
 from stdin. Default: \fIinfile\fP = stdin.
 .TP
-.B \fB-L\fIlonflip\fP
+.B \-L
+\fIlonflip\fP
+.br
 Sets the range of the longitude values used.
 If \fIlonflip\fP=-1 then the longitude values will be in
 the range from -360 to 0 degrees. If \fIlonflip\fP=0 
@@ -69,7 +77,9 @@ then the longitude values will be in
 the range from 0 to 360 degrees.
 Default: \fIlonflip\fP = 0.
 .TP
-.B \fB-M\fInavformat\fP
+.B \-M
+\fInavformat\fP
+.br
 Defines the format of the navigation data to be read.  Currently,
 eight formats are allowed:
 
@@ -216,21 +226,25 @@ logging packages (when run in the parallel file mode).
  
  Default: \fInavformat\fP = 5.
 .TP
-.B \fB-N\fInavfile\fP
+.B \-N
+\fInavfile\fP
+.br
 Data file from which the navigation data will be read.
 .TP
-.B \fB-O\fIoutfile\fP
+.B \-O
+\fIoutfile\fP
+.br
 Data file to which the output data will be written. If
 no output file is specified, the output will be written to
 stdout. Default: \fIoutfile\fP = stdout.
 .TP
-.B \fB-V\fP
+.B \-V
 Normally, \fBmbmerge\fP works "silently" without outputting
 anything to the stderr stream.  If the
 \fB-V\fP flag is given, then \fBmbmerge\fP works in a "verbose" mode and
 outputs the program version being used and all error status messages.
 .TP
-.B \fB-Z\fP
+.B \-Z
 This option causes the heading values to be set to 
 "course-made-good" as calculated from the navigation. This
 option is useful when the original heading values are

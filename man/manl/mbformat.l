@@ -1,4 +1,4 @@
-.TH mbformat l "25 March 1997" "MB-System 4.5" "MB-System 4.5"
+.TH mbformat l "17 September 1997" "MB-System 4.5" "MB-System 4.5"
 .SH NAME
 \fBmbformat\fP -  List information about swath sonar data formats
 supported by the \fBMBIO\fP library.
@@ -26,26 +26,28 @@ Palisades, NY 10964
 
 .SH OPTIONS
 .TP
-.B \fB-A\fP
+.B \-A
 Causes formats which are expected to be supported
 in the future to be
 listed in addition to the formats which are fully supported.
 .TP
-.B \fB-F\fIformat\fP
+.B \-F
+\fIformat\fP
+.br
 Sets the format id to be listed.  If no format is given, all of the 
 currently supported formats will be listed. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page.
 .TP
-.B \fB-H\fP
+.B \-H
 This "help" flag cause the program to print out a description
 of its operation and then exit immediately.
 .TP
-.B \fB-L\fP
+.B \-L
 Causes the format descriptions to be omitted 
 so that only the \fBMBIO\fP format id numbers are listed.
 .TP
-.B \fB-V\fP
+.B \-V
 Normally, \fBmbformat\fP only prints out format descriptions.  If the
 \fB-V\fP flag is given, then \fBmbformat\fP works in a "verbose" mode and
 also outputs the program version being used.

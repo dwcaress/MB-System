@@ -1,4 +1,4 @@
-.TH mblevitus l "25 March 1997" "MB-System 4.5" "MB-System 4.5"
+.TH mblevitus l "--17 September 1997" "MB-System 4.5" "MB-System 4.5"
 .SH NAME
 \fBmblevitus\fP - Create a water velocity profile which is representative
 of the mean annual water column for a specified 1 degree by 1 degree
@@ -48,21 +48,25 @@ Palisades, NY 10964
 
 .SH OPTIONS
 .TP
-.B \fB-H\fP
+.B \-H
 This "help" flag cause the program to print out a description
 of its operation and then exit immediately.
 .TP
-.B \fB-O\fIoutfile\fP
+.B \-O
+\fIoutfile\fP
+.br
 Sets the output file for the water velocity profile. 
 Default: \fIoutfile\fP = "velocity".
 .TP
-.B \fB-R\fIlon/lat\fP
+.B \-R
+\fIlon/lat\fP
+.br
 Sets the longitude and latitude of the location of the water
 velocity profile.  Whole degrees should be used, as the database
 has a 1 degree by 1 degree resolution.
 Default: \fIlon\fP=0, \fIlat\fP=0.
 .TP
-.B \fB-V\fP
+.B \-V
 Normally, \fBmblevitus\fP outputs only a minor bit of information 
 to the stdout stream.  If the
 \fB-V\fP flag is given, then \fBmblevitus\fP works in a "verbose" mode and

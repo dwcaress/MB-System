@@ -1,4 +1,4 @@
-.TH mbm_rollerror l "25 March 1997" "MB-System 4.5" "MB-System 4.5"
+.TH mbm_rollerror l "16 September 1997" "MB-System 4.5" "MB-System 4.5"
 .SH NAME
 \fBmbm_rollerror\fP - Macro to read a swath sonar bathymetry file, calculate the noise in the vertical reference used by the sonar, and generate a file containing roll corrections which can be applied to the data.
 
@@ -38,7 +38,9 @@ Palisades, NY 10964
 
 .SH OPTIONS
 .TP
-.B \fB-F\fIformat\fP
+.B \-F
+\fIformat\fP
+.br
 Sets the format for the input swath sonar data using 
 \fBMBIO\fP integer format identifiers. 
 This macro uses the \fBMBIO\fP library and will read any swath sonar
@@ -47,10 +49,14 @@ currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page.
 Default: \fIformat\fP = 24.
 .TP
-.B \fB-I\fIfile\fP
+.B \-I
+\fIfile\fP
+.br
 Data file from which the input data will be read.
 .TP
-.B \fB-W\fIfilterwidth\fP
+.B \-W
+\fIfilterwidth\fP
+.br
 Sets filter width in seconds. Default: \fIfilterwidth\fP = 60.
 
 .SH EXAMPLES

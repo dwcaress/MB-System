@@ -1,4 +1,4 @@
-.TH mbm_xyplot l "25 March 1997" "MB-System 4.5" "MB-System 4.5"
+.TH mbm_xyplot l "16 September 1997" "MB-System 4.5" "MB-System 4.5"
 .SH NAME
 \fBmbm_xyplot\fP - Create an executable shellscript which will generate
 a GMT plot of xy data.
@@ -7,7 +7,7 @@ a GMT plot of xy data.
 Version 4.5
 
 .SH SYNOPSIS
-\fBmbm_grdplot\fP \fB-I\fP\fI[filepars:]file\fP 
+\fBmbm_xyplot\fP \fB-I\fP\fI[filepars:]file\fP 
 [\fB-G\fP\fIfill\fP \fB-H\fP 
 \fB-O\fP\fIroot\fP \fB-P\fP\fIpagesize\fP
 \fB-S\fP\fIsymbol/size\fP
@@ -57,7 +57,9 @@ Palisades, NY 10964
 
 .SH SIMPLE DESCRIPTION OF BASIC OPTIONS
 .TP
-.B \fB-G\fP\fIfill\fP 
+.B \-G
+\fP\fIfill\fP 
+.br
 Select filling of symbols for xy plotting.  
 Set the shade (0\-255) or color 
 (r/g/b) [Default is no fill]. To reset no fill,
@@ -73,11 +75,13 @@ To invert black and white pixels, use
 \fBGMTs\fP Cookbook & Technical Reference
 Appendix E for information on individual patterns.
 .TP
-.B \fB-H\fP
+.B \-H
 This "help" flag cause the program to print out a description
 of its operation and then exit immediately.
 .TP
-.B \fB-I\fP\fI[filepars:]xy_file \fP
+.B \-I
+\fI[filepars:]xy_file \fP
+.br
 Specifies a file containing (x,y) pairs to be plotted
 as lines or symbols. The line and symbol characteristics
 are set using the last \fB-G\fP, \fB-S\fP, and \fB-W\fP
@@ -87,19 +91,23 @@ using different line or symbol characteristics,
 strung together in front of \fIxy_file\fP; the "-"
 is omitted and the commands are separated by ":".
 For example, the command 
-\fB-IG\fp\fI255/0/0:\fP\fBS\fP\fIa/0.1:xy.dat\fP
+\fB-IG\fP\fI255/0/0:\fP\fBS\fP\fIa/0.1:xy.dat\fP
 will plot the (x,y) data pairs in the file xy.dat
 as 0.1 inch diameter red stars.
 [Default is a solid black line].
 .TP
-.B \fB-O\fP\fIroot\fP
+.B \-O
+\fIroot\fP
+.br
 Sets the root used to construct the filename of the output shellscript
 (\fIroot\fP.cmd) and names of files created when the shellscript is 
 run.  Normally the 
 name of the input grid file or grid file list is 
 used as the \fIroot\fP. 
 .TP
-.B \fB-P\fP\fIpagesize\fP
+.B \-P
+\fIpagesize\fP
+.br
 This option sets the size of the page the plot will be centered
 on. If the user does not set the plot scale, the plot will be
 sized as large as will fit on the designated page. If the user
@@ -111,36 +119,48 @@ COMPLETE DESCRIPTION OF OPTIONS section
 below for a complete list of 
 the supported page sizes. The default page size is A.
 .TP
-.B \fB-S\fP\fIsymbol/size\fP 
+.B \-S
+\fIsymbol/size\fP 
+.br
 Selects symbol to be used for plotting the next xy data
 file. Setting \fIsymbol\fP = "N" causes line plotting.
 The list of available symbols is given in the
 COMPLETE DESCRIPTION OF OPTIONS section below.
 .TP
-.B \fB-U\fIorientation\fP
+.B \-U
+\fIorientation\fP
+.br
 Normally the orientation of the plot (portrait or landscape)
 is selected automatically so as to maximize the plot scale.
 The \fB-U\fP option allows the user to set the plot orientation. If
 \fIorientation\fP = 1, a portrait plot will be produced; if
 \fIorientation\fP = 2, a landscape plot will be produced.
 .TP
-.B \fB-V\fP
+.B \-V
 Causes \fBmbm_grdplot\fP to operate in "verbose" mode 
 so that it outputs
 more information than usual.
 .TP
-.B \fB-W\fP\fIpen\fP]
-Set pen attributes for xy plotting.  [Defaults: width = 1, color = 0/0/0, 
+.B \-W
+\fIpen\fP
+.br
+Set pen attributes for xy plotting. See chapter 4.12 in the
+GMT Technical reference for a discussion of GMT pen values.  
+[Defaults: width = 1, color = 0/0/0, 
 texture = solid]. 
 
 .SH COMPLETE DESCRIPTION OF OPTIONS
 .TP
-.B \fB-B\fItickinfo\fP
+.B \-B
+\fItickinfo\fP
+.br
 Sets map boundary tickmark intervals. See the \fBpsbasemap\fP
 manual page for details. By default the program chooses
 basemap annotations based on the map boundaries.
 .TP
-.B \fB-G\fP\fIfill\fP 
+.B \-G
+\fIfill\fP 
+.br
 Select filling of symbols for xy plotting.  
 Set the shade (0\-255) or color 
 (r/g/b) [Default is no fill]. To reset no fill,
@@ -156,11 +176,13 @@ To invert black and white pixels, use
 \fBGMTs\fP Cookbook & Technical Reference
 Appendix E for information on individual patterns.
 .TP
-.B \fB-H\fP
+.B \-H
 This "help" flag cause the program to print out a description
 of its operation and then exit immediately.
 .TP
-.B \fB-I\fP\fI[filepars:]xy_file \fP
+.B \-I
+\fI[filepars:]xy_file \fP
+.br
 Specifies a file containing (x,y) pairs to be plotted
 as lines or symbols. The line and symbol characteristics
 are set using the last \fB-G\fP, \fB-S\fP, and \fB-W\fP
@@ -170,12 +192,14 @@ using different line or symbol characteristics,
 strung together in front of \fIxy_file\fP; the "-"
 is omitted and the commands are separated by ":".
 For example, the command 
-\fB-IG\fp\fI255/0/0:\fP\fBS\fP\fIa/0.1:xy.dat\fP
+\fB-IG\fP\fI255/0/0:\fP\fBS\fP\fIa/0.1:xy.dat\fP
 will plot the (x,y) data pairs in the file xy.dat
 as 0.1 inch diameter red stars.
 [Default is a solid black line].
 .TP
-.B \fB-J\fIprojection\fP[\fI/scale | /width\fP]
+.B \-J
+\fIprojection\fP[\fI/scale | /width\fP]
+.br
 Selects the map projection. By default the map projection is
 Mercator and the plot scale is chosen to fit on the selected
 page size (see \fB-P\fP option). The user may specify a
@@ -258,7 +282,9 @@ size will be chosen.
 .br
 More details can be found in the \fBpsbasemap\fP manpages.
 .TP
-.B \fB-L\fItitle[:xlabel[:ylabel]]\fP
+.B \-L
+\fItitle[:xlabel[:ylabel]]\fP
+.br
 Sets the title and the labels for the x and y axes of
 the plot. Note that a colon (:) rather than a slash (/) is
 used to separate the labels. Colons cannot be used in the
@@ -266,7 +292,7 @@ labels themselves. If this option is not used, then a default title
 and colorscale label are provided. If the title is supplied
 alone, no x or y-axis labels will be provided.
 .TP
-.B \fB-M\fP
+.B \-M
 A series of "miscellaneous" options are provided which are
 given as \fB-M\fP followed by a two character identifier, followed
 by any other parameters associated with that option.
@@ -274,28 +300,36 @@ The \fB-M\fP options may be strung together separated by
 colons, e.g. "-MGQ100:GU:CA200/10", which is equivalent to
 "-MGQ -MGU -MCA200/10". 
 .TP
-.B \fB-MGD\fIgmtdef/value\fP
+.B \-MGD
+\fIgmtdef/value\fP
+.br
 Allows the user to set the \fBGMT\fP default values used as
 the plot is constructed. This command may be given repeatedly
 to set as many \fBGMT\fP defaults as required. For example, to
 set the basemap annotation font to Courier, use 
 "-MGDANOT_FONT/Courier".
 .TP
-.B \fB-MCT\fP[\fI+|-\fP][\fIgap/length\fP][\fI:LH\fP] 
+.B \-MCT
+[\fI+|-\fP][\fIgap/length\fP][\fI:LH\fP] 
+.br
 Will draw tickmarks pointing in the downward direction every \fIgap\fP along the innermost closed contours.  Append \fIgap\fP and tickmark length (in inch) or use defaults [0.2/0.05].
 User may choose to tick only local highs or local lows by specifying \fB\-T+\fP or \fB\-T-\fP, respectively.  Appending :LH will plot the characters L and H at the center of closed
 innermost contours (local lows and highs).  L and H can be any single character (e.g., LH, -+, etc.)
 If a file is given by \fB\-C\fP and \fB\-T\fP is set, 
 then only contours marked with upper case C or A will have tickmarks [and anotation].
 .TP
-.B \fB-O\fIroot\fP
+.B \-O
+\fIroot\fP
+.br
 Sets the root used to construct the filename of the output shellscript
 (\fIroot\fP.cmd) and names of files created when the shellscript is 
 run.  Normally the 
 name of the input grid file or grid file list is 
 used as the \fIroot\fP. 
 .TP
-.B \fB-P\fIpagesize\fP
+.B \-P
+\fIpagesize\fP
+.br
 This option sets the size of the page the plot will be centered
 on. If the user does not set the plot scale, the plot will be
 sized as large as will fit on the designated page. If the user
@@ -350,7 +384,7 @@ The supported page sizes are:
 
 The default page size is A.
 .TP
-.B \fB-Q\fP
+.B \-Q
 Normally, the output plot generation shellscript 
 includes lines which execute
 a program to display the Postscript image on the screen.  
@@ -363,7 +397,9 @@ using \fBmbdefaults\fP;
 the default value can be overridden by setting the environment
 variable $MB_PS_VIEWER. 
 .TP
-.B \fB-R\fIwest/east/south/north\fP
+.B \-R
+\fIwest/east/south/north\fP
+.br
 \fIwest, east, south,\fP and \fInorth\fP specify the Region of interest.  To specify boundaries
 in degrees and minutes [and seconds], use the dd:mm[:ss] format.  Append \fBr\fP if lower left and upper right
 map coordinates are given instead of wesn.
@@ -371,7 +407,9 @@ You may ask for a larger \fIw/e/s/n\fP region to have more room between the imag
 A smaller region than specified in the grdfile will result in a subset of the grid [Default is
 region given by the grdfile].
 .TP
-.B \fB-S\fP\fIsymbol/size\fP 
+.B \-S
+\fIsymbol/size\fP 
+.br
 Selects symbol to be used for plotting the next xy data
 file. Setting \fIsymbol\fP = "N" causes line plotting.
 Choose between:
@@ -434,23 +472,29 @@ unchanged.)
 .B \-Sx
 cross.  Give length in inch.
 .TP
-.B \fB-U\fIorientation\fP
+.B \-U
+\fIorientation\fP
+.br
 Normally the orientation of the plot (portrait or landscape)
 is selected automatically so as to maximize the plot scale.
 The \fB-U\fP option allows the user to set the plot orientation. If
 \fIorientation\fP = 1, a portrait plot will be produced; if
 \fIorientation\fP = 2, a landscape plot will be produced.
 .TP
-.B \fB-V\fP
+.B \-V
 Causes \fBmbm_xyplot\fP to operate in "verbose" mode 
 so that it outputs
 more information than usual.
 .TP
-.B \fB-W\fP\fIpen\fP]
-Set pen attributes for xy plotting.  [Defaults: width = 1, color = 0/0/0, 
+.B \-W
+\fIpen\fP
+.br
+Set pen attributes for xy plotting. See chapter 4.12 in the
+GMT Technical reference for a discussion of GMT pen values.  
+[Defaults: width = 1, color = 0/0/0, 
 texture = solid]. 
 .TP
-.B \fB-X\fP
+.B \-X
 Normally, \fBmbm_xyplot\fP creates an executable shellscript and
 then exits.  This option will cause the shellscript to be executed
 in the background before \fBmbm_xyplot\fP exits.

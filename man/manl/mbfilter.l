@@ -1,4 +1,4 @@
-.TH mbfilter l "25 March 1997" "MB-System 4.5" "MB-System 4.5"
+.TH mbfilter l "17 September 1997" "MB-System 4.5" "MB-System 4.5"
 .SH NAME
 \fBmbfilter\fP - Apply some simple filter functions to sidescan, beam
 amplitude, or bathymetry data from swath sonar data files.
@@ -87,18 +87,24 @@ Palisades, NY 10964
  
 .SH OPTIONS
 .TP
-.B \fB-A\fIkind\fP
+.B \-A
+\fIkind\fP
+.br
 Determines whether bathymetry (\fIkind\fP = 0),
 beam amplitude (\fIkind\fP = 1), 
 or sidescan (\fIkind\fP = 2) data will be processed. 
 Default: \fIkind\fP = 2.
 .TP
-.B \fB-B\fIyr/mo/da/hr/mn/sc\fP
+.B \-B
+\fIyr/mo/da/hr/mn/sc\fP
+.br
 Sets the starting time for data allowed in the input data; pings
 with times before the starting time will be ignored. 
 Default: \fIyr/mo/da/hr/mn/sc\fP = 1962/2/21/10/30/0.
 .TP
-.B \fB-D\fImode/xdim/ldim/iteration/offset\fP
+.B \-D
+\fImode/xdim/ldim/iteration/offset\fP
+.br
 Turns on hi-pass filtering and sets the filter parameters to be 
 used. Here \fImode\fP specifies the filter type:
  	\fImode\fP = 1 : Boxcar Mean Subtraction Filter
@@ -120,12 +126,16 @@ can range from 1 to 65535, so an \fIoffset\fP = 10000 is appropriate).
 Default: \fImode\fP = 1, \fIxdim\fP = 3, \fIldim\fP = 10, 
 \fIiteration\fP = 1, \fIoffset\fP = 10000.
 .TP
-.B \fB-E\fIyr/mo/da/hr/mn/sc\fP
+.B \-E
+\fIyr/mo/da/hr/mn/sc\fP
+.br
 Sets the ending time for data allowed in the input data; pings
 with times after the ending time will be ignored. 
 Default: \fIyr/mo/da/hr/mn/sc\fP = 2062/2/21/10/30/0.
 .TP
-.B \fB-F\fIformat\fP
+.B \-F
+\fIformat\fP
+.br
 Sets the data format used in reading the input from stdin
 or from a file. This program uses the \fBMBIO\fP library 
 and will read or write any swath sonar
@@ -133,18 +143,22 @@ format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page. Default: \fIformat\fP = 11.
 .TP
-.B \fB-H\fP
+.B \-H
 This "help" flag causes the program to print out a description
 of its operation and then exit immediately.
 .TP
-.B \fB-I\fIinfile\fP
+.B \-I
+\fIinfile\fP
+.br
 Sets the input swath sonar data filename. 
 This program uses the \fBMBIO\fP library and will read or write any swath sonar
 format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page. Default: \fIinfile\fP = "stdin".
 .TP
-.B \fB-N\fIbuffersize\fP
+.B \-N
+\fIbuffersize\fP
+.br
 Sets the maximum number of data records which can be
 read into the buffer. In general, data records may be
 of several different types (e.g. parameter, position, 
@@ -159,19 +173,25 @@ for most cases, but users can set the buffer size as required.
 The absolute maximum buffer size is 5000. 
 Default: \fIbuffersize\fP = 500.
 .TP
-.B \fB-O\fIoutfile\fP
+.B \-O
+\fIoutfile\fP
+.br
 Data file to which the output data will be written. The \fBMBIO\fP
 format id used is the same as for the input data. If
 no output file is specified, the output will be written to
 stdout. Default: \fIoutfile\fP = stdout.
 .TP
-.B \fB-R\fIwest/east/south/north\fP
+.B \-R
+\fIwest/east/south/north\fP
+.br
 Sets the longitude and latitude bounds within which swath sonar 
 data will be read. Only the data which lies within these bounds will
 be copied. 
 Default: \fIwest\fP=-360, east\fI=360\fP, \fIsouth\fP=-90, \fInorth\fP=90.
 .TP
-.B \fB-S\fImode/xdim/ldim/iteration\fP
+.B \-S
+\fImode/xdim/ldim/iteration\fP
+.br
 Turns on lo-pass smoothing filtering and sets the filter 
 parameters to be used to 
 smooth the data. Here \fImode\fP specifies the filter type:
@@ -189,7 +209,9 @@ this value.
 Default: \fImode\fP = 1, \fIxdim\fP = 3, \fIldim\fP = 3, 
 \fIiteration\fP = 1.
 .TP
-.B \fB-T\fIthreshold_lo/threshold_hi\fP
+.B \-T
+\fIthreshold_lo/threshold_hi\fP
+.br
 This option causes the boxcar median smoothing filter to
 operate with low and high
 ratio thresholds (the value is changed only if the original
@@ -201,7 +223,7 @@ pings which have amplitude or sidescan values differing significantly
 from surrounding pings. This option only works with the median
 smoothing filter.
 .TP
-.B \fB-V\fP
+.B \-V
 Normally, \fBmbfilter\fP works "silently" without outputting
 anything to the stderr stream.  If the
 \fB-V\fP flag is given, then \fBmbfilter\fP works in a "verbose" 

@@ -1,4 +1,4 @@
-.TH hsdump l "25 March 1997" "MB-System 4.5" "MB-System 4.5"
+.TH hsdump l "17 September 1997" "MB-System 4.5" "MB-System 4.5"
 .SH NAME
 \fBhsdump\fP - hsdump lists the information contained in Hydrosweep DS data files.
 
@@ -24,7 +24,9 @@ Palisades, NY 10964
 
 .SH OPTIONS
 .TP
-.B \fB-F\fIformat\fP
+.B \-F
+\fIformat\fP
+.br
 Sets the format for the input and output swath sonar data using 
 \fBMBIO\fP integer format identifiers. 
 This program is specific to Hydrosweep DS data, and cannot be used 
@@ -34,16 +36,20 @@ which can be used are the raw Hydrosweep DS format (\fBMBIO\fP id 21)
 and the L-DEO in-house binary Hydrosweep format (\fBMBIO\fP id 24).
 Default: \fIformat\fP = 5.
 .TP
-.B \fB-H\fP
+.B \-H
 This "help" flag causes the program to print out a description
 of its operation and then exit immediately.
 .TP
-.B \fB-I\fIinfile\fP
+.B \-I
+\fIinfile\fP
+.br
 Data file from which the input data will be read. If
 no input file is specified, the input will be read
 from stdin. Default: \fIinfile\fP = stdin.
 .TP
-.B \fB-O\fIkind\fP
+.B \-O
+\fIkind\fP
+.br
 Sets the kind of data record which will be listed, where the choices
 for kind include:
  	1:	Survey data record
@@ -57,7 +63,7 @@ for kind include:
 This option can be given multiple times to set more than one
 kind of data record for listing.
 .TP
-.B \fB-V\fP
+.B \-V
 Normally, \fBhsdump\fP lists only the contents of the data records 
 which are specified with the \fB-O\fP option.  If the
 \fB-V\fP flag is given, then \fBhsdump\fP works in a "verbose" mode and

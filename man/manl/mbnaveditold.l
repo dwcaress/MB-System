@@ -1,4 +1,4 @@
-.TH mbnavedit l "11 April 1997" "MB-System 4.5" "MB-System 4.5"
+.TH mbnavedit l "16 September 1997" "MB-System 4.5" "MB-System 4.5"
 .SH NAME
 \fBmbnavedit\fP - Interactive navigation editor for swath sonar data.
 
@@ -37,23 +37,29 @@ Lamont-Doherty Earth Observatory
 Palisades, NY 10964
 
 .SH OPTIONS
-.B \fB-B\fIyr/mo/da/hr/mn/sc\fP
+.B \-B
+\fIyr/mo/da/hr/mn/sc\fP
+.br
 Sets the starting time for data allowed in the input data; pings
 with times before the starting time will be ignored. 
 Default: \fIyr/mo/da/hr/mn/sc\fP = 1962/2/21/10/30/0.
 .TP
-.B \fB-D\fP
+.B \-D
 Starts up the program in "browse" mode. If a file is opened
 in browse mode (either at startup or later), none
 of the edited data will be output to a file. The default
 is to output the edited data to a file.
 .TP
-.B \fB-E\fIyr/mo/da/hr/mn/sc\fP
+.B \-E
+\fIyr/mo/da/hr/mn/sc\fP
+.br
 Sets the ending time for data allowed in the input data; pings
 with times after the ending time will be ignored. 
 Default: \fIyr/mo/da/hr/mn/sc\fP = 2062/2/21/10/30/0.
 .TP
-.B \fB-F\fIformat\fP
+.B \-F
+\fIformat\fP
+.br
 Sets the format at startup for the input and output swath sonar data using 
 \fBMBIO\fP integer format identifiers. This value can also be set
 interactively when specifying the input file.
@@ -63,11 +69,13 @@ currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page.
 Default: \fIformat\fP = 11.
 .TP
-.B \fB-H\fP
+.B \-H
 This "help" flag cause the program to print out a description
 of its operation and then exit immediately.
 .TP
-.B \fB-I\fIinfile\fP
+.B \-I
+\fIinfile\fP
+.br
 Sets the data file from which the input data will be read at startup.
 This value can also be set interactively.  If the input file is named
 using the \fBMB-System\fP convention of an ".mbXX" suffix (the XX
@@ -75,11 +83,13 @@ corresponds to the \fBMBIO\fP format id), then the output file name
 will have an "e.mbXX" suffix. Otherwise, the output file will
 be \fIinfile\fP with ".ed" appended.
 .TP
-.B \fB-I\fIoutfile\fP
+.B \-I
+\fIoutfile\fP
+.br
 Sets the output data file, overriding the file naming conventions
 discussed above in the \fB-I\fP option.
 .TP
-.B \fB-V\fP
+.B \-V
 Normally, \fBmbnavedit\fP outputs information to the stderr stream
 regarding the number of records loaded and dumped.  If the
 \fB-V\fP flag is given, then \fBmbnavedit\fP works in a "verbose" mode and
@@ -89,7 +99,7 @@ beams flagged or zeroed.
 
 .SH INTERACTIVE CONTROLS
 .TP
-.B \fBFile\fP
+.B File
 This menu brings up a popup window which allows the user to
 specify the input swath sonar data file, its \fBMBIO\fP
 format id, the output mode, and the output filename. 
@@ -112,79 +122,79 @@ is clicked, as much data as will fit
 into the data buffer is read and the navigition times series
 plots are displayed.
 .TP
-.B \fBNext Buffer\fP
+.B Next Buffer
 This button causes the program to write out the data from the
 current buffer and then read in and display the next buffer.
 If there is no more data to be read in after the current buffer
 has been written out, then the input and output files are closed.
 .TP
-.B \fBForward\fP
+.B Forward
 This button causes the set of displayed pings to step \fInstep\fP 
 pings forward in the current buffer.  The right mouse button causes
 the same action.
 .TP
-.B \fBReverse\fP
+.B Reverse
 This button causes the set of displayed pings to step \fInstep\fP 
 pings backward in the current buffer.  The middle mouse button causes
 the same action.
 .TP
-.B \fBDone\fP
+.B Done
 This button causes the program to write out all of the data from the
 input file and then close the input and output files.
 .TP
-.B \fBQuit\fP
+.B Quit
 This button causes the program to exit gracefully.  If a data file
 has been read, all of the data will be written to the output file
 before exiting.
 .TP
-.B \fBPick\fP
+.B Pick
 Clicking on this toggle button sets the edit mode to "pick". In
 this case, clicking the left mouse button will cause the
 nearest data value to toggle between selected (red) and
 unselected. 
 .TP
-.B \fBSelect\fP
+.B Select
 Clicking on this toggle button sets the edit mode to "select". In
 this case, clicking and dragging the left mouse button will 
 cause any data value touched by the cursor to become selected. 
 .TP
-.B \fBDeselect\fP
+.B Deselect
 Clicking on this toggle button sets the edit mode to "deselect". In
 this case, clicking and dragging the left mouse button will 
 cause any data value touched by the cursor to become unselected. 
 .TP
-.B \fBSelect All\fP
+.B Select All
 Clicking on this toggle button sets the edit mode to "select all". In
 this case, clicking in any of the editable plots will cause all
 of the data in that plot to be selected. 
 .TP
-.B \fBDeselect All\fP
+.B Deselect All
 Clicking on this toggle button sets the edit mode to "select all". In
 this case, clicking in any of the editable plots will cause all
 of the data in that plot to be unselected. 
 .TP
-.B \fBTime Span Shown\fP
+.B Time Span Shown
 This slider sets the number of seconds shown at a time.
 .TP
-.B \fBTime Step\fP
+.B Time Step
 This slider sets the number of seconds to step when the \fBForward\fP
 or \fBReverse\fP buttons are pushed.
 .TP
-.B \fBInterpolate Selection\fP
+.B Interpolate Selection
 This button causes the selected data to be replaced by linear interpolation
 of the surrounding unselected data. If the selection extends to the
 edge of the data, the selected data will be replaced by the first
 unselected datum on the other side.
 .TP
-.B \fBRevert Selection\fP
+.B Revert Selection
 This button causes the selected data to revert to their
 original values.
 .TP
-.B \fBShow Entire Buffer\fP
+.B Show Entire Buffer
 This button causes the plots to expand to show all of the data
 in the current buffer.
 .TP
-.B \fBPick Time Interval\fP
+.B Pick Time Interval
 This button allows users to focus the plots on a particular
 time interval. Once the button is pushed, the left mouse button
 is used to select the left edge of the time selection. Similarly,
@@ -195,53 +205,53 @@ satisfaction, pressing the right mouse button will cause the
 plots to be redrawn with the selected beginning and ending
 times.
 .TP
-.B \fBLongitude Plot\fP
+.B Longitude Plot
 This toggle button turns the longitude plot on and off.
 .TP
-.B \fBShow Original Data (Longitude Plot)\fP
+.B Show Original Data (Longitude Plot)
 When this toggle button is on, the longitude plot includes a
 green line representing the original longitude values.
 .TP
-.B \fBLatitude Plot\fP
+.B Latitude Plot
 This toggle button turns the latitude plot on and off.
 .TP
-.B \fBShow Original Data (Latitude Plot)\fP
+.B Show Original Data (Latitude Plot)
 When this toggle button is on, the latitude plot includes a
 green line representing the original latitude values.
 .TP
-.B \fBSpeed Plot\fP
+.B Speed Plot
 This toggle button turns the speed plot on and off.
 .TP
-.B \fBShow Original Data (Speed Plot)\fP
+.B Show Original Data (Speed Plot)
 When this toggle button is on, the speed plot includes a
 green line representing the original speed values.
 .TP
-.B \fBShow Speed-Made-Good (Speed Plot)\fP
+.B Show Speed-Made-Good (Speed Plot)
 When this toggle button is on, the speed plot includes a
 blue line representing the speed-made-good values derived
 from the longitude and latitude time series.
 .TP
-.B \fBUse Speed-Made-Good (Speed Plot)\fP
+.B Use Speed-Made-Good (Speed Plot)
 When this button is pushed, any selected data in the speed
 plot will be replaced by the current estimates of speed-made-good.
 .TP
-.B \fBHeading Plot\fP
+.B Heading Plot
 This toggle button turns the heading plot on and off.
 .TP
-.B \fBShow Original Data (Heading Plot)\fP
+.B Show Original Data (Heading Plot)
 When this toggle button is on, the speed plot includes a
 green line representing the original speed values.
 .TP
-.B \fBShow Course-Made-Good (Heading Plot)\fP
+.B Show Course-Made-Good (Heading Plot)
 When this toggle button is on, the heading plot includes a
 blue line representing the course-made-good values derived
 from the longitude and latitude time series.
 .TP
-.B \fBUse Course-Made-Good (Heading Plot)\fP
+.B Use Course-Made-Good (Heading Plot)
 When this button is pushed, any selected data in the heading
 plot will be replaced by the current estimates of course-made-good.
 .TP
-.B \fBRoll, Pitch, and Heave Plots\fP
+.B Roll, Pitch, and Heave Plots
 This toggle button turns the roll, pitch, and heave plots on and off.
 Unlike the other plots, the data in these plots is not editable.
 These data are shown purely to allow users to determine if the
@@ -251,7 +261,7 @@ pitch, and heave data).
 
 .SH MOUSE ACTIONS
 .TP
-.B \fBLeft Mouse Button\fP
+.B Left Mouse Button
 The left mouse button is used to pick data values.  Unselected data
 values are shown as filled black squares and selected values 
 as empty red squares.  The manner in which data are selected or
@@ -259,14 +269,14 @@ unselected is controlled by the edit mode, as set by the
 \fBPick\fP, \fBSelect\fP, \fBDeselect\fP, \fBSelect All\fP, and
 \fBDeselect All\fP buttons.
 .TP
-.B \fBMiddle Mouse Button\fP
+.B Middle Mouse Button
 The middle mouse button causes the set of displayed data to 
 step backward in the current buffer by the amount of time
 set on the \fBTime Step\fP slider.  
 The control button \fBReverse\fP causes
 the same action.
 .TP
-.B \fBRight Mouse Button\fP
+.B Right Mouse Button
 The right mouse button causes the set of displayed data to 
 step forward in the current buffer by the amount of time
 set on the \fBTime Step\fP slider.  
