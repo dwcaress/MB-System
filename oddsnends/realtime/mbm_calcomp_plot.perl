@@ -51,14 +51,19 @@
 #   in Perl (this script).
 #
 # Version:
-#   $Id: mbm_calcomp_plot.perl,v 3.0 1993-08-26 01:09:11 caress Exp $
+#   $Id: mbm_calcomp_plot.perl,v 3.1 1993-08-27 22:04:49 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 3.0  1993/08/26  01:09:11  caress
+# Initial version.
+#
 #
 # Deal with command line arguments
-&Getopts('B:b:E:e:F:f:I:i:NnP:p:QqR:r:S:s:T:t:Hh');
+&Getopts('A:a:B:b:C:c:E:e:F:f:I:i:NnP:p:QqR:r:S:s:T:t:Hh');
+$annotate = ($opt_A || $opt_a || "0.25/1.0/4.0");
 $begin_time = ($opt_B || $opt_b || "1962/2/21/0/0/0");
+$contour = ($opt_C || $opt_c || "50/200/200/200/.02/.07");
 $end_time = ($opt_E || $opt_e || "2062/2/21/0/0/0");
 $format = ($opt_F || $opt_f || 5);
 $help = ($opt_H || $opt_h);
@@ -284,8 +289,9 @@ if (!$restart)
 	print "this script to restart plot if necessary.\n\n";
 	$restartfile = "restart_calcomp_plot.cmd";
 	open(FILE,"> $restartfile");
-	$command = sprintf("/net/heezen/packages/MB-System3/src/realtime/mbm_calcomp_plot.perl -F%s -I%s -R%s -B%s -E%s -S%s -P%s -N",
-		$format,$file,$bounds,$begin_time,$end_time,$scale,$port);
+	$command = sprintf("/net/heezen/packages/MB-System3/src/realtime/mbm_calcomp_plot.perl -F%s -I%s -R%s -B%s -E%s -S%s -C%s -A%s -P%s -N",
+		$format,$file,$bounds,$begin_time,$end_time,$scale,
+		$contour,$annotate,$port);
 
 	print FILE "#\n";
 	print FILE "#\n# Name: restart_calcomp_plot.cmd\n";
@@ -318,9 +324,9 @@ if (!$restart)
 
 # Now, finally, plot the contours...
 print "\nDrawing contours...\n";
-$command = sprintf("%s %s | /net/heezen/packages/MB-System3/bin/mbcontourfilter -L0 -F%s -R%s -B%s -E%s -V -J%s -C50/200/200/200/.02/.07 -A0.25/1.0/4.0 | /net/heezen/packages/MB-System3/bin/mbplotfilter -R%s -V -W%s | ccgr -d %s",
+$command = sprintf("%s %s | mbcontourfilter -L0 -F%s -R%s -B%s -E%s -V -J%s -C%s -A%s | mbplotfilter -R%s -V -W%s | ccgr -d %s",
 	$source, $file, $format, $bounds, $begin_time, $end_time,
-	$scale, $bounds, $width, $port);
+	$scale, $contour, $annotate, $bounds, $width, $port);
 	print "$command\n";
 	`$command`;
 
