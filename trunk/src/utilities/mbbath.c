@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbbath.c	3/31/93
- *    $Id: mbbath.c,v 4.2 1994-04-12 17:01:29 caress Exp $
+ *    $Id: mbbath.c,v 4.3 1994-04-12 18:58:00 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -20,6 +20,10 @@
  * Date:	March 31, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1994/04/12  17:01:29  caress
+ * First cut at mbbath.  Will need to deal with alongtrack angles
+ * as well as acrosstrack angles.
+ *
  * Revision 4.1  1994/03/12  01:44:37  caress
  * Added declarations of ctime and/or getenv for compatability
  * with SGI compilers.
@@ -84,7 +88,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbbath.c,v 4.2 1994-04-12 17:01:29 caress Exp $";
+	static char rcs_id[] = "$Id: mbbath.c,v 4.3 1994-04-12 18:58:00 caress Exp $";
 	static char program_name[] = "MBBATH";
 	static char help_message[] =  "MBBATH calculates bathymetry from \
 the travel time data by raytracing \nthrough a layered water velocity \
@@ -682,9 +686,9 @@ and stdout.";
 			}
 		if (nbath_corr != beams_bath)
 			{
-			fprintf("\nRequire %d static beam depth corrections but only read %d from <%s>\n",
+			fprintf(stderr,"\nRequire %d static beam depth corrections but only read %d from <%s>\n",
 				beams_bath,nbath_corr,sfile);
-			fprintf("No static beam depth corrections applied to data\n");
+			fprintf(stderr,"No static beam depth corrections applied to data\n");
 			nbath_corr = 0;
 			}
 		fclose(vfp);
