@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbswath.c	5/30/93
- *    $Id: mbswath.c,v 4.0 1994-03-05 23:46:48 caress Exp $
+ *    $Id: mbswath.c,v 4.1 1994-06-13 18:39:15 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -26,6 +26,9 @@
  * Date:	May 30, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/03/05  23:46:48  caress
+ * First cut at version 4.0
+ *
  * Revision 4.2  1994/03/03  03:48:58  caress
  * Fixed copyright message.
  *
@@ -145,10 +148,10 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbswath.c,v 4.0 1994-03-05 23:46:48 caress Exp $";
+	static char rcs_id[] = "$Id: mbswath.c,v 4.1 1994-06-13 18:39:15 caress Exp $";
 	static char program_name[] = "MBSWATH";
 	static char help_message[] =  "MBSWATH is a GMT compatible utility which creates a color postscript \nimage of multibeam swath bathymetry or backscatter data.  The image \nmay be shaded relief as well.  Complete maps are made by using \nMBSWATH in conjunction with the usual GMT programs.";
-	static char usage_message[] = "mbswath -Ccptfile -Idatalist -Jparameters -Rwest/east/south/north [-Afactor -Btickinfo -Fred/green/blue -Gmagnitude/azimuth -K -M -O -P -ppings -Qdpi -U -Xx-shift -Yy-shift -Zmode -#copies -V -H]";
+	static char usage_message[] = "mbswath -Ccptfile -Jparameters -Rwest/east/south/north [-Afactor -Btickinfo -fformat -Fred/green/blue -Gmagnitude/azimuth -Idatalist -K -M -O -P -ppings -Qdpi -U -Xx-shift -Yy-shift -Zmode -#copies -V -H]";
 
 	extern char *optarg;
 	extern int optkind;
@@ -165,6 +168,8 @@ char **argv;
 
 	/* MBIO read control parameters */
 	char	filelist[128];
+        int     use_stdin;
+	int	read_data;
 	FILE	*fp;
 	int	format;
 	int	pings;
@@ -227,6 +232,7 @@ char **argv;
 
 	/* initialize some values */
 	strcpy (file, "stdin");
+        use_stdin = MB_YES;
 	strcpy (cptfile,"cpt");
 	borders[0] = 0.0;
 	borders[1] = 0.0;
@@ -306,24 +312,12 @@ char **argv;
 		}
 
 	/* deal with mb options */
-	while ((c = getopt(argc, argv, "VvHhp:L:l:b:E:e:S:s:T:t:G:g:A:a:I:i:Z:z:F:B:C:MJ:KOPR:Q:UX:x:Y:y:#:0123")) != -1)
+	while ((c = getopt(argc, argv, "VvHhp:L:l:b:E:e:f:S:s:T:t:G:g:A:a:I:i:Z:z:B:C:F:MJ:KOPR:Q:UX:x:Y:y:#:0123")) != -1)
 	  switch (c) 
 		{
-		case 'H':
-		case 'h':
-			help++;
-			break;
-		case 'V':
-		case 'v':
-			verbose++;
-			break;
-		case 'p':
-			sscanf (optarg,"%d", &pings);
-			flag++;
-			break;
-		case 'L':
-		case 'l':
-			sscanf (optarg,"%d", &lonflip);
+		case 'A':
+		case 'a':
+			sscanf (optarg,"%lf", &factor);
 			flag++;
 			break;
 		case 'b':
@@ -337,6 +331,33 @@ char **argv;
 				&etime_i[0],&etime_i[1],&etime_i[2],
 				&etime_i[3],&etime_i[4],&etime_i[5]);
 			break;
+                case 'f':
+                        sscanf (optarg, "%d",&format);
+                        break;
+		case 'G':
+		case 'g':
+			sscanf (optarg,"%lf/%lf", &magnitude,&azimuth);
+			flag++;
+			break;
+		case 'H':
+		case 'h':
+			help++;
+			break;
+		case 'I':
+		case 'i':
+			sscanf (optarg,"%s", filelist);
+			use_stdin = MB_NO;
+			flag++;
+			break;
+		case 'L':
+		case 'l':
+			sscanf (optarg,"%d", &lonflip);
+			flag++;
+			break;
+		case 'p':
+			sscanf (optarg,"%d", &pings);
+			flag++;
+			break;
 		case 'S':
 		case 's':
 			sscanf (optarg, "%lf", &speedmin);
@@ -346,20 +367,9 @@ char **argv;
 			sscanf (optarg,"%lf", &timegap);
 			flag++;
 			break;
-		case 'G':
-		case 'g':
-			sscanf (optarg,"%lf/%lf", &magnitude,&azimuth);
-			flag++;
-			break;
-		case 'I':
-		case 'i':
-			sscanf (optarg,"%s", filelist);
-			flag++;
-			break;
-		case 'A':
-		case 'a':
-			sscanf (optarg,"%lf", &factor);
-			flag++;
+		case 'V':
+		case 'v':
+			verbose++;
 			break;
 		case 'Z':
 		case 'z':
@@ -367,6 +377,8 @@ char **argv;
 			flag++;
 			break;
 		case 'B':
+		case 'C':
+		case 'F':
 		case 'J':
 		case 'K':
 		case 'O':
@@ -414,6 +426,7 @@ char **argv;
 		fprintf(stderr,"dbg2  Control Parameters:\n");
 		fprintf(stderr,"dbg2       verbose:          %d\n",verbose);
 		fprintf(stderr,"dbg2       help:             %d\n",help);
+		fprintf(stderr,"dbg2       format:           %d\n",format);
 		fprintf(stderr,"dbg2       pings:            %d\n",pings);
 		fprintf(stderr,"dbg2       lonflip:          %d\n",lonflip);
 		fprintf(stderr,"dbg2       btime_i[0]:       %d\n",btime_i[0]);
@@ -431,6 +444,7 @@ char **argv;
 		fprintf(stderr,"dbg2       speedmin:         %f\n",speedmin);
 		fprintf(stderr,"dbg2       timegap:          %f\n",timegap);
 		fprintf(stderr,"dbg2       file list:        %s\n",filelist);
+		fprintf(stderr,"dbg2       use_stdin:        %d\n",use_stdin);
 		fprintf(stderr,"dbg2       borders[0]:       %f\n",borders[0]);
 		fprintf(stderr,"dbg2       borders[1]:       %f\n",borders[1]);
 		fprintf(stderr,"dbg2       borders[2]:       %f\n",borders[2]);
@@ -546,6 +560,7 @@ char **argv;
 		}
 
 	/* open file list */
+	if (use_stdin == MB_NO)
 	if ((fp = fopen(filelist,"r")) == NULL)
 		{
 		error = MB_ERROR_OPEN_FAIL;
@@ -556,11 +571,25 @@ char **argv;
 		exit(error);
 		}
 
+	/* read first file */
+	if (use_stdin == MB_NO)
+		{
+		if (fgets(line,128,fp) != NULL
+			&& sscanf(line,"%s %d",file,&format) == 2)
+			read_data = MB_YES;
+		else
+			read_data = MB_NO;
+		}
+	else
+		{
+		strcpy(file,"stdin");
+		read_data = MB_YES;
+		}
+
 	/* loop over files in file list */
 	if (verbose == 1) 
 		fprintf(stderr,"\n");
-	while (fgets(line,128,fp) != NULL
-		&& sscanf(line,"%s %d",file,&format) == 2)
+	while (read_data == MB_YES)
 	{
 	/* initialize reading the multibeam file */
 	if ((status = mb_read_init(
@@ -775,6 +804,20 @@ char **argv;
 		mb_free(verbose,pingcur->bathshade,&error);
 		}
 	mb_free(verbose,swath_plot,&error);
+
+	/* figure out whether and what to read next */
+        if (use_stdin == MB_NO)
+                {
+                if (fgets(line,128,fp) != NULL
+                        && sscanf(line,"%s %d",file,&format) == 2)
+                        read_data = MB_YES;
+                else
+                        read_data = MB_NO;
+                }
+        else
+                {
+                read_data = MB_NO;
+                }
 
 	/* end loop over files in list */
 	}

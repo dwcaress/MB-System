@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcontour.c	6/4/93
- *    $Id: mbcontour.c,v 4.1 1994-05-16 22:15:16 caress Exp $
+ *    $Id: mbcontour.c,v 4.2 1994-06-13 18:39:15 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,16 @@
  * Date:	June 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1994/05/16  22:15:16  caress
+ * First cut at new contouring scheme.  Additional major changes
+ * include adding annotated ship track plot and isolation
+ * of plot initialization.
+ *
+ * Revision 4.1  1994/05/16  22:15:16  caress
+ * First cut at new contouring scheme.  Additional major changes
+ * include adding annotated ship track plot and isolation
+ * of plot initialization.
+ *
  * Revision 4.0  1994/03/05  23:46:48  caress
  * First cut at version 4.0
  *
@@ -73,10 +83,16 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbcontour.c,v 4.1 1994-05-16 22:15:16 caress Exp $";
+	static char rcs_id[] = "$Id: mbcontour.c,v 4.2 1994-06-13 18:39:15 caress Exp $";
+#ifdef MBCONTOURFILTER
+	static char program_name[] = "MBCONTOURFILTER";
+	static char help_message[] =  "MBCONTOURFILTER is a utility which creates a pen plot \ncontour map of multibeam swath bathymetry.  \nThe primary purpose of this program is to serve as \npart of a real-time plotting system.  The contour levels and colors can be controlled \ndirectly or set implicitly using contour and color change intervals. \nContours can also be set to have ticks pointing downhill.";
+	static char usage_message[] = "mbcontourfilter -Jparameters -Rwest/east/south/north \n\t[-Acontour_int/color_int/tick_int/label_int/tick_len/label_hgt \n\t-Btickinfo -Ccontourfile \n\t-Dtime_tick/time_annot/date_annot/time_tick_len \n\t-fformat -Fred/green/blue -Idatalist -K -Llonflip -M -O -P -ppings -U \n\t-Xx-shift -Yy-shift -#copies -V -H]";
+#else
 	static char program_name[] = "MBCONTOUR";
 	static char help_message[] =  "MBCONTOUR is a GMT compatible utility which creates a color postscript \ncontour map of multibeam swath bathymetry.  \nComplete maps are made by using MBCONTOUR in conjunction with the  \nusual GMT programs.  The contour levels and colors can be controlled \ndirectly or set implicitly using contour and color change intervals. \nContours can also be set to have ticks pointing downhill.";
-	static char usage_message[] = "mbcontour -Idatalist -Jparameters -Rwest/east/south/north \n\t[-Acontour_int/color_int/tick_int/label_int/tick_len/label_hgt \n\t-Btickinfo -Ccontourfile \n\t-Dtime_tick/time_annot/date_annot/time_tick_len \n\t-Fred/green/blue -K -Llonflip -M -O -P -ppings -U \n\t-Xx-shift -Yy-shift -#copies -V -H]";
+	static char usage_message[] = "mbcontour -Jparameters -Rwest/east/south/north \n\t[-Acontour_int/color_int/tick_int/label_int/tick_len/label_hgt \n\t-Btickinfo -Ccontourfile \n\t-Dtime_tick/time_annot/date_annot/time_tick_len \n\t-fformat -Fred/green/blue -Idatalist -K -Llonflip -M -O -P -ppings -U \n\t-Xx-shift -Yy-shift -#copies -V -H]";
+#endif
 
 	extern char *optarg;
 	extern int optkind;
@@ -178,6 +194,8 @@ char **argv;
 	char	labelstr[128], tickstr[128];
 	int	count;
 	int	setcolors;
+        int     use_stdin;
+	int	read_data;
 	int	i;
 
 	/* get current mb default values */
@@ -209,19 +227,12 @@ char **argv;
 	nlevel = 0;
 	plot_contours = MB_NO;
 	plot_triangles = MB_NO;
+        use_stdin = MB_YES;
 
 	/* deal with mb options */
-	while ((c = getopt(argc, argv, "VvHhA:a:b:C:c:D:d:E:e:I:i:L:l:N:n:p:QqS:s:T:t:B:MJ:KOPR:UX:x:Y:y:#:")) != -1)
+	while ((c = getopt(argc, argv, "VvHhA:a:b:C:c:D:d:E:e:f:I:i:L:l:N:n:p:QqS:s:T:t:B:F:MJ:KOPR:UX:x:Y:y:#:")) != -1)
 	  switch (c) 
 		{
-		case 'H':
-		case 'h':
-			help++;
-			break;
-		case 'V':
-		case 'v':
-			verbose++;
-			break;
 		case 'A':
 		case 'a':
 			sscanf (optarg, "%lf/%lf/%lf/%lf/%lf/%lf",
@@ -254,9 +265,17 @@ char **argv;
 				&etime_i[0],&etime_i[1],&etime_i[2],
 				&etime_i[3],&etime_i[4],&etime_i[5]);
 			break;
+                case 'f':
+                        sscanf (optarg, "%d",&format);
+                        break;
+		case 'H':
+		case 'h':
+			help++;
+			break;
 		case 'I':
 		case 'i':
 			sscanf (optarg,"%s", filelist);
+			use_stdin = MB_NO;
 			flag++;
 			break;
 		case 'J':
@@ -297,7 +316,12 @@ char **argv;
 			sscanf (optarg,"%lf", &timegap);
 			flag++;
 			break;
+		case 'V':
+		case 'v':
+			verbose++;
+			break;
 		case 'B':
+		case 'F':
 		case 'K':
 		case 'O':
 		case 'P':
@@ -367,6 +391,7 @@ char **argv;
 		fprintf(stderr,"dbg2  Control Parameters:\n");
 		fprintf(stderr,"dbg2       verbose:          %d\n",verbose);
 		fprintf(stderr,"dbg2       help:             %d\n",help);
+		fprintf(stderr,"dbg2       format:           %d\n",format);
 		fprintf(stderr,"dbg2       pings:            %d\n",pings);
 		fprintf(stderr,"dbg2       lonflip:          %d\n",lonflip);
 		fprintf(stderr,"dbg2       btime_i[0]:       %d\n",btime_i[0]);
@@ -384,6 +409,7 @@ char **argv;
 		fprintf(stderr,"dbg2       speedmin:         %f\n",speedmin);
 		fprintf(stderr,"dbg2       timegap:          %f\n",timegap);
 		fprintf(stderr,"dbg2       file list:        %s\n",filelist);
+		fprintf(stderr,"dbg2       use_stdin:        %d\n",use_stdin);
 		fprintf(stderr,"dbg2       bounds[0]:        %f\n",bounds[0]);
 		fprintf(stderr,"dbg2       bounds[1]:        %f\n",bounds[1]);
 		fprintf(stderr,"dbg2       bounds[2]:        %f\n",bounds[2]);
@@ -529,6 +555,7 @@ char **argv;
 
 	/* open file list */
 	nping_read = 0;
+	if (use_stdin == MB_NO)
 	if ((fp = fopen(filelist,"r")) == NULL)
 		{
 		error = MB_ERROR_OPEN_FAIL;
@@ -539,11 +566,25 @@ char **argv;
 		exit(error);
 		}
 
+	/* read first file */
+	if (use_stdin == MB_NO)
+		{
+		if (fgets(line,128,fp) != NULL
+			&& sscanf(line,"%s %d",file,&format) == 2)
+			read_data = MB_YES;
+		else
+			read_data = MB_NO;
+		}
+	else
+		{
+		strcpy(file,"stdin");
+		read_data = MB_YES;
+		}
+
 	/* loop over files in file list */
 	if (verbose == 1) 
 		fprintf(stderr,"\n");
-	while (fgets(line,128,fp) != NULL
-		&& sscanf(line,"%s %d",file,&format) == 2)
+	while (read_data == MB_YES)
 	{
 
 	/* initialize reading the multibeam file */
@@ -732,6 +773,20 @@ char **argv;
 	mb_free(verbose,sslon,&error);
 	mb_free(verbose,sslat,&error);
 	status = mb_contour_deall(verbose,swath_plot,&error);
+
+	/* figure out whether and what to read next */
+        if (use_stdin == MB_NO)
+                {
+                if (fgets(line,128,fp) != NULL
+                        && sscanf(line,"%s %d",file,&format) == 2)
+                        read_data = MB_YES;
+                else
+                        read_data = MB_NO;
+                }
+        else
+                {
+                read_data = MB_NO;
+                }
 
 	/* end loop over files in list */
 	}

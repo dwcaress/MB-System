@@ -7,13 +7,14 @@ swath plots of multibeam data using Postscript.
 Version 4.00
 
 .SH SYNOPSIS
-\fBmbswath\fP \fB-C\fIcptfile \fB-I\fIdatalist \fB-J\fIparameters \fB-R\fIwest/east/south/north \fP[\fB-A\fIfactor \fB-B\fItickinfo \fB-F\fIred/green/blue \fB-G\fImagnitude/azimuth \fB-K\fI \fB-M\fI \fB-O\fI \fB-P\fI \fB-p\fIpings \fB-Q\fIdpi \fB-U\fI \fB-X\fIx-shift \fB-Y\fIy-shift \fB-Z\fImode \fB-#\fIcopies \fB-V -H\fP]
+\fBmbswath\fP \fB-C\fIcptfile \fB-J\fIparameters \fB-R\fIwest/east/south/north \fP[\fB-A\fIfactor \fB-B\fItickinfo \fB-f\fIformat \fB-F\fIred/green/blue \fB-G\fImagnitude/azimuth \fB-I\fIdatalist \fB-K\fI \fB-M\fI \fB-O\fI \fB-P\fI \fB-p\fIpings \fB-Q\fIdpi \fB-U\fI \fB-X\fIx-shift \fB-Y\fIy-shift \fB-Z\fImode \fB-#\fIcopies \fB-V -H\fP]
 
 .SH DESCRIPTION
 \fBmbswath\fP is an utility for plotting multibeam swath data in color fill
 or color shaded relief using Postscript.  Like \fBmbcontour\fP, \fBmbswath\fP
 is fully compatible with the GMT package version 2.1, including the use
-of GMT style color pallete (cpt) files to control the color table.
+of GMT style color pallete (cpt) files to control the color table. The program
+can read data from stdin (the default) or from one or more multibeam files. 
 
 .SH AUTHORSHIP
 David W. Caress (caress@lamont.ldeo.columbia.edu)
@@ -49,6 +50,14 @@ Sets the color palette file which controls the color of the plot.
 See documentation of the GMT package for a complete description
 of cpt files.
 .TP
+.B \fB-f\fIformat\fP
+Sets the data format used if the input is read from stdin
+(the default, which can be overridden with the \fB-I\fP option).
+This program uses the \fBMBIO\fP library and will read or write any multibeam
+format supported by \fBMBIO\fP. A list of the multibeam data formats
+currently supported by \fBMBIO\fP and their identifier values
+is given in the \fBMBIO\fP manual page.
+.TP
 .B \fB-F\fIred/green/blue\fP
 Sets the color used for Frame and annotation. [Default is black]
 .TP
@@ -73,7 +82,10 @@ of its operation and then exit immediately.
 .TP
 .B \fB-I\fIdatalist\fP
 Sets the filename of the file containing a list of the input multibeam
-data files and their formats.  In the \fIdatalist\fP file, each
+data files and their formats.  The program will read and plot the
+data in each one of these files instead of the default, which is
+to read and plot a single data stream from stdin.
+In the \fIdatalist\fP file, each
 data file should be followed by a data format identifier, e.g.:
  	datafile1 11
  	datafile2 24
@@ -81,9 +93,7 @@ data file should be followed by a data format identifier, e.g.:
 This program uses the \fBMBIO\fP library and will read or write any multibeam
 format supported by \fBMBIO\fP. A list of the multibeam data formats
 currently supported by \fBMBIO\fP and their identifier values
-is given in the \fBMBIO\fP manual page.  A format identifier of 0 indicates
-that the file contains lines of (lon, lat, depth) triples which can be read
-in free format.
+is given in the \fBMBIO\fP manual page.
 .TP
 .B \fB-J\fP
 Selects the map projection.  Choose one of the following:
