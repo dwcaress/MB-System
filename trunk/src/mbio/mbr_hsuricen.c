@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsuricen.c	2/2/93
- *	$Id: mbr_hsuricen.c,v 4.4 1995-03-06 19:38:54 caress Exp $
+ *	$Id: mbr_hsuricen.c,v 4.5 1995-03-09 12:41:58 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	February 2, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.4  1995/03/06  19:38:54  caress
+ * Changed include strings.h to string.h for POSIX compliance.
+ *
  * Revision 4.3  1994/10/21  12:20:01  caress
  * Release V4.0
  *
@@ -71,7 +74,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_hsuricen.c,v 4.4 1995-03-06 19:38:54 caress Exp $";
+ static char res_id[]="$Id: mbr_hsuricen.c,v 4.5 1995-03-09 12:41:58 caress Exp $";
 	char	*function_name = "mbr_alm_hsuricen";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -304,7 +307,7 @@ int	*error;
 		/* read distance and depth values into storage arrays */
 		/* switch order of data as it is read into the global arrays */
 		id = mb_io_ptr->beams_bath - 1;
-		if (data->scale != 100 && data->scale < 0)
+		if (data->scale != 100 && data->scale > 0)
 			{
 			scale = 0.01*data->scale;
 			for (i=0;i<mb_io_ptr->beams_bath;i++)
@@ -534,6 +537,7 @@ int	*error;
 	int	time_i[7];
 	int	time_j[5];
 	double	lon, lat;
+	double	scalefactor;
 	int	i, j;
 	int	id;
 
@@ -675,10 +679,14 @@ int	*error;
 		/* switch order of data as it is read 
 			into the output arrays */
 		id = mb_io_ptr->beams_bath - 1;
+		if (data->scale > 0)
+			scalefactor = 100.0/data->scale;
+		else
+			scalefactor = 1.0;
 		for (i=0;i<mb_io_ptr->beams_bath;i++)
 			{
-			data->deph[i] = mb_io_ptr->new_bath[id-i];
-			data->dist[i] = mb_io_ptr->new_bath_acrosstrack[id-i];
+			data->deph[i] = scalefactor*mb_io_ptr->new_bath[id-i];
+			data->dist[i] = scalefactor*mb_io_ptr->new_bath_acrosstrack[id-i];
 			}
 		}
 
