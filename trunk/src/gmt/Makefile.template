@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 4.7 1996-04-22 13:18:44 caress Exp $
+#	$Id: Makefile.template,v 4.8 1997-09-16 13:23:50 caress Exp $
 #
 #     Copyright (c) 1993, 1994 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.7  1996/04/22  13:18:44  caress
+# Now have DTR and MIN/MAX defines in mb_define.h
+#
 # Revision 4.6  1995/08/07  17:31:39  caress
 # Moved to GMT V3.
 #
@@ -86,10 +89,6 @@ $(BINDIR)/mbswath: mbswath.o ../../lib/libmbio.a
 ### compile the source files
 mbcontour.o:	mbcontour.c $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h $(INCDIR)/mb_contour.h
 	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) mbcontour.c
-mbcontourfilter.o:	mbcontourfilter.c $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h $(INCDIR)/mb_contour.h
-	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) -DMBCONTOURFILTER mbcontourfilter.c -o mbcontourfilter.o
-mbcontourfilter.c:	mbcontour.c
-	cp mbcontour.c mbcontourfilter.c
 mb_truecont.o:	mb_truecont.c  $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h $(INCDIR)/mb_contour.h
 	$(CC) -c $(CFLAGS) mb_truecont.c
 mb_delaun.o:	mb_delaun.c  $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
@@ -101,7 +100,7 @@ mb_pslibface.o:	mb_pslibface.c  $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 $(INCDIR)/mb_contour.h:	 mb_contour.h
 	cp mb_contour.h $(INCDIR)/mb_contour.h
 mbswath.o:	mbswath.c $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h $(INCDIR)/mb_format.h
-	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) -I$(NETCDFINCDIR) ../../lib/libmbio.a  mbswath.c
+	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) -I$(NETCDFINCDIR) mbswath.c
 
 ### copy the man pages to the man page directory
 $(MANDIR)/mbcontour.l:	mbcontour.manl
