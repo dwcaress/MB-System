@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sb2000sb.c	10/11/94
- *	$Id: mbr_sb2000sb.c,v 5.8 2003-05-20 18:05:32 caress Exp $
+ *	$Id: mbr_sb2000sb.c,v 5.9 2003-08-07 22:32:59 caress Exp $
  *
  *    Copyright (c) 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	October 11, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2003/05/20 18:05:32  caress
+ * Added svp_source to data source parameters.
+ *
  * Revision 5.7  2003/04/17 21:05:23  caress
  * Release 5.0.beta30
  *
@@ -153,7 +156,7 @@ int mbr_dem_sb2000sb(int verbose, void *mbio_ptr, int *error);
 int mbr_rt_sb2000sb(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_sb2000sb(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
-static char res_id[]="$Id: mbr_sb2000sb.c,v 5.8 2003-05-20 18:05:32 caress Exp $";
+static char res_id[]="$Id: mbr_sb2000sb.c,v 5.9 2003-08-07 22:32:59 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_sb2000sb(int verbose, void *mbio_ptr, int *error)
@@ -360,7 +363,7 @@ int mbr_info_sb2000sb(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_sb2000sb(int verbose, void *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_sb2000sb.c,v 5.8 2003-05-20 18:05:32 caress Exp $";
+ static char res_id[]="$Id: mbr_sb2000sb.c,v 5.9 2003-08-07 22:32:59 caress Exp $";
 	char	*function_name = "mbr_alm_sb2000sb";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -741,9 +744,17 @@ int mbr_rt_sb2000sb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	/* extract survey data */
 	if (status == MB_SUCCESS && store->kind == MB_DATA_DATA)
 		{
-		/* extract the values */
+		/* extract the beams_bath and scale_factor values */
 		mb_get_binary_short(MB_NO, &buffer[0], &store->beams_bath);
 		mb_get_binary_short(MB_NO, &buffer[2], &store->scale_factor);
+		
+		/* check for unreasonable beams_bath */
+		if (store->beams_bath > (store->data_size - 4) / 4)
+			{
+			store->beams_bath = (store->data_size - 4) / 4;
+			}
+		
+		/* extract the values */
 		for (i=0;i<store->beams_bath;i++)
 			{
 			mb_get_binary_short(MB_NO, &buffer[4+i*4], &store->bath[i]);

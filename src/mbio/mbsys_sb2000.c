@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_sb2000.c	10/4/94
- *	$Id: mbsys_sb2000.c,v 5.8 2003-07-30 16:26:23 caress Exp $
+ *	$Id: mbsys_sb2000.c,v 5.9 2003-08-07 22:32:59 caress Exp $
  *
  *    Copyright (c) 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	October 4, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2003/07/30 16:26:23  caress
+ * Changes during iSSP meeting July 2003.
+ *
  * Revision 5.7  2003/04/17 21:05:23  caress
  * Release 5.0.beta30
  *
@@ -121,7 +124,7 @@
 int mbsys_sb2000_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_sb2000.c,v 5.8 2003-07-30 16:26:23 caress Exp $";
+ static char res_id[]="$Id: mbsys_sb2000.c,v 5.9 2003-08-07 22:32:59 caress Exp $";
 	char	*function_name = "mbsys_sb2000_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -266,15 +269,6 @@ int mbsys_sb2000_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		*namp = 0;
 		for (i=0;i<*nbath;i++)
 			{
-			/* null unreasonable depths */
-			if (store->bath[i] > 12000 || store->bath[i] < -12000
-				|| store->bath_acrosstrack[i] > 12000 
-				|| store->bath_acrosstrack[i] < -12000)
-			    {
-			    store->bath[i] = 0;
-			    store->bath_acrosstrack[i] = 0;
-			    }
-
 			/* read distance and depth values into storage arrays */
 			if (store->bath[i] > 0)
 			    {
@@ -567,15 +561,6 @@ int mbsys_sb2000_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			    {
 			    store->bath[i] = bath[i];
 			    store->bath_acrosstrack[i] = bathacrosstrack[i];
-			    }
-
-			/* null unreasonable depths */
-			if (store->bath[i] > 12000 || store->bath[i] < -12000
-				|| store->bath_acrosstrack[i] > 12000 
-				|| store->bath_acrosstrack[i] < -12000)
-			    {
-			    store->bath[i] = 0;
-			    store->bath_acrosstrack[i] = 0;
 			    }
 			}
 
