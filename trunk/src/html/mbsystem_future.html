@@ -1,0 +1,68 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+<HEAD>
+   <TITLE>MB-System Future Development</TITLE>
+   <META NAME="GENERATOR" CONTENT="Mozilla/3.01SGoldC-SGI (X11; I; IRIX64 6.4 IP30) [Netscape]">
+</HEAD>
+<BODY>
+
+<CENTER><P><!-- WEBMAGIC VERSION NUMBER="2.0.2" --><!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" --><!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" --></P></CENTER>
+
+<H1 ALIGN=CENTER>Plans for Future MB-System Development</H1>
+
+<P>Listed below are some notions for the future development of MB-System.
+We include these here not as a promise of what we will do, but rather to
+encourage discussion with MB-System users regarding what we might do.</P>
+
+<UL>
+<LI>Data formats we would like to support:</LI>
+
+<UL>
+<LI>Atlas SURF format (Fansweep and Odom sonars) - this is a proprietary
+format, so we can't support it until Atlas releases the format specification
+to us. A large amount of German and Australian government mapping data
+are in the SURF format.</LI>
+
+<LI>Caris HDCS format (the result of processing swath bathymetry data with
+the Caris HIPS software package) - this is another propritary format. A
+large amount of multibeam data collected by and for NOAA's hydrographic
+groups are in this format. These data will not be available to the general
+public until the format is known or the data is translated to an open format.</LI>
+
+<LI>Triton-Elics XTF format (produced by the Triton-Elics Isis datalogging
+systems). This is an open, widely used mapping data collection format.
+We will support this sooner or later...</LI>
+</UL>
+
+<LI>Capabilities we would like to add to MB-System:</LI>
+
+<UL>
+<LI>Patch test tool. We need an interactive tool for determining roll,
+pitch, and heading bias from arbitrary parts of a survey.</LI>
+
+<LI>Improved mblevitus. We need an updated tool to deliver water sound
+speed models based on more complete and recent databases than the 1982
+Levitus database used now.</LI>
+
+<LI>Graphical project management tool. With the release of version 5.0,
+MB-System now has most of the low-level elements in place to enable efficient
+processing project management. Now we need to make a tool that uses the
+underlying structure provided by mbprocess and the related programs.</LI>
+
+<LI>Improved sidescan processing. We need to incorporate sidescan correction
+and filtering into the new mbprocess scheme. We also need an interactive
+tool for developing sidescan correction parameters.</LI>
+</UL>
+</UL>
+
+<CENTER><P><BR>
+Last Updated: $Date: 2001-03-14 21:15:24 $ $Revision: 5.0 $</P></CENTER>
+
+<P>
+<HR WIDTH="100%"></P>
+
+<P><A HREF="mbsystem_home.html"><IMG SRC="mbsystem_logo_small.gif" BORDER=0 HEIGHT=55 WIDTH=158 ALIGN=BOTTOM></A><A HREF="mbsystem_home.html">Back
+to MB-System Home Page...</A></P>
+
+</BODY>
+</HTML>
