@@ -183,6 +183,21 @@ it is recommended that the data be copied to an extended format (57) that stores
 bathymetry beam flags and processed sidescan. Format 57 is also used for processing
 data from the current Simrad multibeam sonars. 
 
+\fBStreamlining of MB-System Default Parameters.\fP
+.br
+- Prior to version 5.0, the \fBMB-System\fP defaults
+set by \fBmbdefaults\fP included the format id, a control for
+ping averaging, longitude and latitude bounds for windowing
+by area, and begin and end times for windowing in time. These
+values are no longer set in the .mbio_defaults file or controlled
+by \fBmbdefaults\fP. As noted above, the format id is automatically
+identified from the filename when possible. When filenames do not
+match one of the recognized structures, users must specify the
+format using the relevant programs \fB-F\fP\fIformat\fP option.
+The controls for ping averaging and windowing in time and space
+are rarely used, and must now be explicitly set in command
+line arguments.
+
 .SH THE NEW VERSION 5 DATA PROCESSING STRUCTURE
 Previous versions of \fBMB-System\fP have emphasized
 processing utilities that operate serially, that is, that

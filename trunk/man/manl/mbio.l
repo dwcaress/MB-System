@@ -2042,6 +2042,7 @@ int \fBmb_buffer_get_ptr\fP(
 		int \fIid\fP,
  		char \fI**store_ptr\fP,
 		int \fI*error\fP);
+
 .SH MISCELLANEOUS FUNCTIONS
 
 int \fBmb_defaults\fP(
@@ -2063,7 +2064,35 @@ are set by the function; the meaning of these parameters is discussed
 in the listings of the functions  
 \fBmb_read_init\fP and \fBmb_write_init\fP.
 If an .mbio_defaults file exists in the user's home directory, 
-the defaults are read from this file. A status value is returned to 
+the lonflip and timegap defaults are read from this file. 
+Otherwise, the values are set as:
+ 	\fI*lonflip\fP = 0
+ 	\fI*timegap\fP = 1
+.br
+The other values are simply set as:
+ 	\fI*format\fP = 0
+ 	\fI*pings\fP = 1
+ 	\fIbounds[0]\fP = -360.
+ 	\fIbounds[1]\fP = 360.
+ 	\fIbounds[2]\fP = -90.
+ 	\fIbounds[3]\fP = 90.
+ 	\fIbtime_i[0]\fP = 1962;
+ 	\fIbtime_i[1]\fP = 2;
+ 	\fIbtime_i[2]\fP = 21;
+ 	\fIbtime_i[3]\fP = 10;
+ 	\fIbtime_i[4]\fP = 30;
+ 	\fIbtime_i[5]\fP = 0;
+ 	\fIbtime_i[6]\fP = 0;
+	\fIetime_i[0]\fP = 2062;
+	\fIetime_i[1]\fP = 2;
+	\fIetime_i[2]\fP = 21;
+	\fIetime_i[3]\fP = 10;
+	\fIetime_i[4]\fP = 30;
+	\fIetime_i[5]\fP = 0;
+	\fIetime_i[6]\fP = 0;
+ 	\fI*speedmin\fP = 0.0
+.br
+A status value is returned to 
 indicate success or failure.
 
 int \fBmb_env\fP(
@@ -2071,6 +2100,22 @@ int \fBmb_env\fP(
  		char \fI*psdisplay\fP,
  		char \fI*imgdisplay\fP,
  		char \fI*mbproject\fP);
+
+The function \fBmb_env\fP provides default values of Postscript
+and image display programs invoked by some \fBMB-System\fP
+programs and macros, and a default value for a working project
+name that will be used by future applications. The \fIverbose\fP
+value controls the standard error output verbosity of the function.  
+If an .mbio_defaults file exists in the user's home directory, 
+the \fI*psdisplay\fP, \fI*imgdisplay\fP, \fI*mbproject\fP 
+defaults are read from this file. 
+Otherwise, the values are set as:
+ 	\fIpsdisplay\fP =  "xpsview" (IRIX OS)
+ 	                   "pageview" (Solaris OS)
+ 	                   "ghostview" (other OS)
+ 	\fIimgdisplay\fP = "gimp" (Linux OS)
+ 	                   "xv" (other than Linux OS)
+ 	\fImbproject\fP =  "none"
 
 int \fBmb_format\fP(
  		int \fIverbose\fP,
