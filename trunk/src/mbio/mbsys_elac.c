@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_elac.c	3.00	8/20/94
- *	$Id: mbsys_elac.c,v 4.5 1995-09-28 18:10:48 caress Exp $
+ *	$Id: mbsys_elac.c,v 4.6 1995-11-27 21:50:06 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -37,6 +37,9 @@
  * Date:	August 20, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.5  1995/09/28  18:10:48  caress
+ * Various bug fixes working toward release 4.3.
+ *
  * Revision 4.4  1995/08/17  14:41:09  caress
  * Revision for release 4.3.
  *
@@ -84,7 +87,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_elac.c,v 4.5 1995-09-28 18:10:48 caress Exp $";
+ static char res_id[]="$Id: mbsys_elac.c,v 4.6 1995-11-27 21:50:06 caress Exp $";
 	char	*function_name = "mbsys_elac_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -669,7 +672,8 @@ int	*error;
 }
 /*--------------------------------------------------------------------*/
 int mbsys_elac_ttimes(verbose,mbio_ptr,store_ptr,kind,nbeams,
-	ttimes,angles,angles_forward,flags,depthadd,error)
+	ttimes,angles,angles_forward,angles_null,flags,
+	depthadd,ssv,error)
 int	verbose;
 char	*mbio_ptr;
 char	*store_ptr;
@@ -678,8 +682,10 @@ int	*nbeams;
 double	*ttimes;
 double	*angles;
 double	*angles_forward;
+double	*angles_null;
 int	*flags;
 double	*depthadd;
+double	*ssv;
 int	*error;
 {
 	char	*function_name = "mbsys_elac_ttimes";
@@ -702,6 +708,7 @@ int	*error;
 		fprintf(stderr,"dbg2       ttimes:     %d\n",ttimes);
 		fprintf(stderr,"dbg2       angles_xtrk:%d\n",angles);
 		fprintf(stderr,"dbg2       angles_ltrk:%d\n",angles_forward);
+		fprintf(stderr,"dbg2       angles_null:%d\n",angles_null);
 		fprintf(stderr,"dbg2       flags:      %d\n",flags);
 		}
 
@@ -731,6 +738,10 @@ int	*error;
 			ttimes[ibeam] = ttscale*store->profile[i].tt[j];
 			angles[ibeam] = angscale*store->profile[i].angle[j];
 			angles_forward[ibeam] = 0.0;
+			if (angles[ibeam] < 0.0)
+				angles_null[ibeam] = -45.0;
+			else
+				angles_null[ibeam] = 45.0;
 			if (store->profile[i].bath[i] < 0)
 				flags[ibeam] = MB_YES;
 			else
@@ -739,6 +750,7 @@ int	*error;
 
 		/* get depth offset (heave + heave offset) */
 		*depthadd = 1000.0*(store->profile[0].heave + store->heave_offset);
+		*ssv = 0.1 *store->sound_vel;
 
 		/* set status */
 		*error = MB_ERROR_NO_ERROR;
@@ -775,11 +787,12 @@ int	*error;
 	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR)
 		{
 		fprintf(stderr,"dbg2       depthadd:   %f\n",*depthadd);
+		fprintf(stderr,"dbg2       ssv:        %f\n",*ssv);
 		fprintf(stderr,"dbg2       nbeams:     %d\n",*nbeams);
 		for (i=0;i<*nbeams;i++)
-			fprintf(stderr,"dbg2       beam %d: tt:%f  angle_xtrk:%f  angle_ltrk:%f  flag:%d\n",
+			fprintf(stderr,"dbg2       beam %d: tt:%f  angle_xtrk:%f  angle_ltrk:%f  angle_null:%f  flag:%d\n",
 				i,ttimes[i],angles[i],
-				angles_forward[i],flags[i]);
+				angles_forward[i],angles_null[i],flags[i]);
 		}
 	if (verbose >= 2)
 		{
