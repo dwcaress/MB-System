@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_prog.c	6/23/95
- *    $Id: mbnavedit_prog.c,v 4.3 1995-09-28 18:01:01 caress Exp $
+ *    $Id: mbnavedit_prog.c,v 4.4 1995-11-02 19:22:45 caress Exp $
  *
  *    Copyright (c) 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,9 @@
  * Date:	June 23,  1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1995/09/28  18:01:01  caress
+ * Improved handling of .mbxxx file suffix convention.
+ *
  * Revision 4.2  1995/09/18  22:40:44  caress
  * Fixed bug that caused "select all" function to miss last data
  * point on plots of entire data set.
@@ -106,7 +109,7 @@ struct mbnavedit_plot_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbnavedit_prog.c,v 4.3 1995-09-28 18:01:01 caress Exp $";
+static char rcs_id[] = "$Id: mbnavedit_prog.c,v 4.4 1995-11-02 19:22:45 caress Exp $";
 static char program_name[] = "MBNAVEDIT";
 static char help_message[] =  "MBNAVEDIT is an interactive navigation editor for swath sonar data.\n\tIt can work with any data format supported by the MBIO library.\n";
 static char usage_message[] = "mbnavedit [-Fformat -Ifile -Ooutfile -V -H]";
@@ -667,7 +670,7 @@ int mbnavedit_open_file()
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
 		{
-		mb_error(verbose,error,message);
+		mb_error(verbose,error,&message);
 		fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
