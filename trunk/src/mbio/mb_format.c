@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.c	2/18/94
- *    $Id: mb_format.c,v 5.10 2001-10-24 21:15:30 caress Exp $
+ *    $Id: mb_format.c,v 5.11 2001-11-16 01:30:02 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	Februrary 18, 1994
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.10  2001/10/24  21:15:30  caress
+ * Fixed problem finding processed files in mb_datalist_read()
+ *
  * Revision 5.9  2001/10/19  00:54:37  caress
  * Added mb_get_relative_path().
  *
@@ -132,7 +135,7 @@
 #include "../../include/mbsys_simrad.h"
 #include "../../include/mbsys_simrad2.h"
 
-static char rcs_id[]="$Id: mb_format.c,v 5.10 2001-10-24 21:15:30 caress Exp $";
+static char rcs_id[]="$Id: mb_format.c,v 5.11 2001-11-16 01:30:02 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_format_register(int verbose, 
@@ -1184,7 +1187,7 @@ int mb_format(int verbose, int *format, int *error)
 /*--------------------------------------------------------------------*/
 int mb_format_system(int verbose, int *format, int *system, int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.10 2001-10-24 21:15:30 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.11 2001-11-16 01:30:02 caress Exp $";
 	char	*function_name = "mb_format_system";
 	int	status;
 
@@ -1252,7 +1255,7 @@ int mb_format_dimensions(int verbose, int *format,
 		int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.10 2001-10-24 21:15:30 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.11 2001-11-16 01:30:02 caress Exp $";
 	char	*function_name = "mb_format_dimensions";
 	int	status;
 
@@ -1319,7 +1322,7 @@ int mb_format_dimensions(int verbose, int *format,
 /*--------------------------------------------------------------------*/
 int mb_format_description(int verbose, int *format, char *description, int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.10 2001-10-24 21:15:30 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.11 2001-11-16 01:30:02 caress Exp $";
 	char	*function_name = "mb_format_description";
 	int	status;
 
@@ -1383,7 +1386,7 @@ int mb_format_flags(int verbose, int *format,
 		int *variable_beams, int *traveltime, int *beam_flagging, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.10 2001-10-24 21:15:30 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.11 2001-11-16 01:30:02 caress Exp $";
 	char	*function_name = "mb_format_flags";
 	int	status;
 
@@ -1453,7 +1456,7 @@ int mb_format_source(int verbose, int *format,
 		int *nav_source, int *heading_source, int *vru_source, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.10 2001-10-24 21:15:30 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.11 2001-11-16 01:30:02 caress Exp $";
 	char	*function_name = "mb_format_source";
 	int	status;
 
@@ -1523,7 +1526,7 @@ int mb_format_beamwidth(int verbose, int *format,
 		double *beamwidth_xtrack, double *beamwidth_ltrack,
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.10 2001-10-24 21:15:30 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.11 2001-11-16 01:30:02 caress Exp $";
 	char	*function_name = "mb_format_beamwidth";
 	int	status;
 
@@ -2430,6 +2433,103 @@ int mb_get_relative_path(int verbose,
 	    status = MB_SUCCESS;
 	    *error = MB_ERROR_NO_ERROR;
 	    }
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       path:          %s\n",path);
+		fprintf(stderr,"dbg2       error:         %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:      %d\n",status);
+		}
+
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_get_shortest_path(int verbose,
+		char *path,
+		int *error)
+{
+	/* local variables */
+	char	*function_name = "mb_get_shortest_path";
+	int	status = MB_SUCCESS;
+	char	tmppath[MB_PATH_MAXLINE];
+	char	lasttoken[MB_PATH_MAXLINE];
+	char	*result;
+	int	lasttokenordinary;
+	int	pathlen;
+	int	done, change;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2       verbose:       %d\n",verbose);
+		fprintf(stderr,"dbg2       path:          %s\n",path);
+		}
+		
+	/* loop until no changes are made */
+	done = MB_NO;
+	while (done == MB_NO)
+	    {
+	    /* set no change made */
+	    change = MB_NO;
+	    
+	    /* get starting string length */
+	    pathlen = strlen(path);
+	    
+	    /* copy the path */
+	    strncpy(tmppath, path, MB_PATH_MAXLINE);
+	    
+	    /* step through path */
+	    path[0] = '\0';
+	    if (tmppath[0] == '/')
+		strcpy(path, "/");
+	    result = strtok(tmppath, "/");
+	    lasttokenordinary = MB_NO;
+	    while (result != NULL)
+		{
+		if (strcmp("..", result) == 0)
+		    {
+		    if (lasttokenordinary == MB_NO)
+			{
+			strcat(path, "../");
+			}
+		    else
+			{
+			change = MB_YES;
+			}
+		    lasttokenordinary = MB_NO;
+		    }
+		else
+		    {
+		    if (lasttokenordinary == MB_YES)
+			{
+			strcat(path, lasttoken);
+			strcat(path, "/");
+			}
+		    lasttokenordinary = MB_YES;
+		    strcpy(lasttoken, result);
+		    }
+		result = strtok(NULL, "/");
+		}
+	    if (lasttokenordinary == MB_YES)
+		strcat(path, lasttoken);
+		
+	    /* if change not made set done = MB_YES */
+	    if (change == MB_NO)
+		done = MB_YES;
+		
+	    }
+	
+	/* no error even if no path */
+	status = MB_SUCCESS;
+	*error = MB_ERROR_NO_ERROR;
 
 	/* print output debug statements */
 	if (verbose >= 2)
