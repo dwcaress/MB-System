@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 4.4 1995-08-17 15:08:03 caress Exp $
+#	$Id: Makefile.template,v 4.5 1995-08-17 16:43:48 caress Exp $
 #
 #     Copyright (c) 1993, 1994 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.4  1995/08/17  15:08:03  caress
+# Revision for release 4.3.
+#
 # Revision 4.3  1995/07/27  20:38:17  caress
 # Added mbm_xyplot.
 #
@@ -50,9 +53,8 @@ all:	$(MANDIR)/xbt.l \
 	$(BINDIR)/mbm_xyplot $(MANDIR)/mbm_xyplot.l \
 	$(BINDIR)/mbm_stat $(MANDIR)/mbm_stat.l
 
-### make clean removes the object files
+### make clean does nothing
 clean:
-	rm -f *.o
 
 ### link or copy the executables
 $(BINDIR)/mbm_xbt:	mbm_xbt.perl
