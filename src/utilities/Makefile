@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile	3.00  1/21/93
-#	$Id: Makefile,v 1.5 1993-05-25 20:13:53 caress Exp $
+#	$Id: Makefile,v 1.6 1993-06-16 23:09:17 caress Exp $
 #
 #     Copyright (c) 1993 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,9 @@
 # Date:		January 21, 1993
 #
 # $Log: not supported by cvs2svn $
+# Revision 1.5  1993/05/25  20:13:53  caress
+# Fixed chmod commands again.
+#
 # Revision 1.4  1993/05/25  20:01:39  caress
 # Fixed chmod commands.
 #
@@ -51,9 +54,11 @@ all:	$(MANDIR)/mbsystem.1 \
 	$(BINDIR)/mbgrid $(MANDIR)/mbgrid.1 \
 	$(BINDIR)/mblevitus $(MANDIR)/mblevitus.1 \
 	$(BINDIR)/hsbath $(MANDIR)/hsbath.1 \
-	$(BINDIR)/hsveldump $(MANDIR)/hsveldump.1 \
+	$(BINDIR)/hsdump $(MANDIR)/hsdump.1 \
 	$(BINDIR)/mbrollbias $(MANDIR)/mbrollbias.1 \
-	$(BINDIR)/mbsynth
+	$(BINDIR)/mbsynth \
+	$(BINDIR)/mbgetmask \
+	$(BINDIR)/mbmask
 
 ### make clean removes the object files
 clean:
@@ -82,12 +87,16 @@ $(BINDIR)/mblevitus:	mblevitus.o
 	$(CC) $(CFLAGS) mblevitus.o $(LFLAGS) -o $(BINDIR)/mblevitus
 $(BINDIR)/hsbath:	hsbath.o $(LIBDIR)/libmbio.a
 	$(CC) $(CFLAGS) hsbath.o $(LIBDIR)/libmbio.a $(LFLAGS) -o $(BINDIR)/hsbath
-$(BINDIR)/hsveldump:	hsveldump.o $(LIBDIR)/libmbio.a
-	$(CC) $(CFLAGS) hsveldump.o $(LIBDIR)/libmbio.a $(LFLAGS) -o $(BINDIR)/hsveldump
+$(BINDIR)/hsdump:	hsdump.o $(LIBDIR)/libmbio.a
+	$(CC) $(CFLAGS) hsdump.o $(LIBDIR)/libmbio.a $(LFLAGS) -o $(BINDIR)/hsdump
 $(BINDIR)/mbrollbias:	mbrollbias.o $(LIBDIR)/libmbio.a
 	$(CC) $(CFLAGS) mbrollbias.o $(LIBDIR)/libmbio.a $(LFLAGS) -o $(BINDIR)/mbrollbias
 $(BINDIR)/mbsynth:	mbsynth.o $(LIBDIR)/libmbio.a
 	$(CC) $(CFLAGS) mbsynth.o $(LIBDIR)/libmbio.a $(LFLAGS) -o $(BINDIR)/mbsynth
+$(BINDIR)/mbgetmask:	mbgetmask.o $(LIBDIR)/libmbio.a
+	$(CC) $(CFLAGS) mbgetmask.o $(LIBDIR)/libmbio.a $(LFLAGS) -o $(BINDIR)/mbgetmask
+$(BINDIR)/mbmask:	mbmask.o $(LIBDIR)/libmbio.a
+	$(CC) $(CFLAGS) mbmask.o $(LIBDIR)/libmbio.a $(LFLAGS) -o $(BINDIR)/mbmask
 
 ### compile the source files
 mbformat.o:	mbformat.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
@@ -114,12 +123,16 @@ zgrid.o:	zgrid.f
 	$(FC) -c $(FFLAGS) zgrid.f
 hsbath.o:	hsbath.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mbsys_hsds.h
 	$(CC) -c $(CFLAGS) hsbath.c
-hsveldump.o:	hsveldump.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mbsys_hsds.h
-	$(CC) -c $(CFLAGS) hsveldump.c
+hsdump.o:	hsdump.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mbsys_hsds.h
+	$(CC) -c $(CFLAGS) hsdump.c
 mbrollbias.o:	mbrollbias.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
 	$(CC) -c $(CFLAGS) mbrollbias.c
 mbsynth.o:	mbsynth.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
 	$(CC) -c $(CFLAGS) mbsynth.c
+mbgetmask.o:	mbgetmask.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
+	$(CC) -c $(CFLAGS) mbgetmask.c
+mbmask.o:	mbmask.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
+	$(CC) -c $(CFLAGS) mbmask.c
 
 ### copy the man pages to the man page directory
 $(MANDIR)/mbsystem.1:	mbsystem.1
@@ -158,9 +171,9 @@ $(MANDIR)/mblevitus.1:	mblevitus.1
 $(MANDIR)/hsbath.1:	hsbath.1
 	cp hsbath.1 $(MANDIR)/hsbath.1
 	chmod 664 $(MANDIR)/hsbath.1
-$(MANDIR)/hsveldump.1:	hsveldump.1
-	cp hsveldump.1 $(MANDIR)/hsveldump.1
-	chmod 664 $(MANDIR)/hsveldump.1
+$(MANDIR)/hsdump.1:	hsdump.1
+	cp hsdump.1 $(MANDIR)/hsdump.1
+	chmod 664 $(MANDIR)/hsdump.1
 $(MANDIR)/mbrollbias.1:	mbrollbias.1
 	cp mbrollbias.1 $(MANDIR)/mbrollbias.1
 	chmod 664 $(MANDIR)/mbrollbias.1
