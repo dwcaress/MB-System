@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbinfo.c	2/1/93
- *    $Id: mbinfo.c,v 4.5 1994-11-03 18:33:41 caress Exp $
+ *    $Id: mbinfo.c,v 4.6 1995-01-06 00:06:41 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -24,6 +24,10 @@
  * Date:	February 1, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.5  1994/11/03  18:33:41  caress
+ * Embellished the output a bit, with speed in knots for
+ * the "units impaired".
+ *
  * Revision 4.4  1994/11/03  13:28:44  caress
  * Added percentages to data quality statistics.
  *
@@ -98,7 +102,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbinfo.c,v 4.5 1994-11-03 18:33:41 caress Exp $";
+	static char rcs_id[] = "$Id: mbinfo.c,v 4.6 1995-01-06 00:06:41 caress Exp $";
 	static char program_name[] = "MBINFO";
 	static char help_message[] =  "MBINFO reads a multibeam data file and outputs \nsome basic statistics.  If pings are averaged (pings > 2) \nMBINFO estimates the variance for each of the multibeam \nbeams by reading a set number of pings (>2) and then finding \nthe variance of the detrended values for each beam. \nThe results are dumped to stdout.";
 	static char usage_message[] = "mbinfo [-Byr/mo/da/hr/mn/sc -C -Eyr/mo/da/hr/mn/sc -Fformat -Ifile -Llonflip -Ppings -Rw/e/s/n -Sspeed -V -H]";
@@ -116,6 +120,9 @@ char **argv;
 	char	*message;
 
 	/* MBIO read control parameters */
+	int	read_datalist = MB_NO;
+	char	read_file[128];
+	FILE	*fp;
 	int	format;
 	int	format_num;
 	int	pings;
@@ -231,6 +238,8 @@ char **argv;
 		output if verbose > 1) */
 	FILE	*output;
 
+	int	read_data;
+	char	line[128];
 	int i, j, k, l, m;
 
 	char	*getenv();
@@ -252,17 +261,44 @@ char **argv;
 	while ((c = getopt(argc, argv, "VvHhF:f:P:p:L:l:R:r:B:b:E:e:S:s:T:t:I:i:Cc")) != -1)
 	  switch (c) 
 		{
-		case 'H':
-		case 'h':
-			help++;
+		case 'B':
+		case 'b':
+			sscanf (optarg,"%d/%d/%d/%d/%d/%d",
+				&btime_i[0],&btime_i[1],&btime_i[2],
+				&btime_i[3],&btime_i[4],&btime_i[5]);
+			btime_i[6] = 0;
+			flag++;
 			break;
-		case 'V':
-		case 'v':
-			verbose++;
+		case 'C':
+		case 'c':
+			comments = MB_YES;
+			flag++;
+			break;
+		case 'E':
+		case 'e':
+			sscanf (optarg,"%d/%d/%d/%d/%d/%d",
+				&etime_i[0],&etime_i[1],&etime_i[2],
+				&etime_i[3],&etime_i[4],&etime_i[5]);
+			etime_i[6] = 0;
+			flag++;
 			break;
 		case 'F':
 		case 'f':
 			sscanf (optarg,"%d", &format);
+			flag++;
+			break;
+		case 'H':
+		case 'h':
+			help++;
+			break;
+		case 'I':
+		case 'i':
+			sscanf (optarg,"%s", read_file);
+			flag++;
+			break;
+		case 'L':
+		case 'l':
+			sscanf (optarg,"%d", &lonflip);
 			flag++;
 			break;
 		case 'P':
@@ -274,31 +310,10 @@ char **argv;
 				pings_read = MBINFO_MAXPINGS;
 			flag++;
 			break;
-		case 'L':
-		case 'l':
-			sscanf (optarg,"%d", &lonflip);
-			flag++;
-			break;
 		case 'R':
 		case 'r':
 			sscanf (optarg,"%lf/%lf/%lf/%lf", 
 				&bounds[0],&bounds[1],&bounds[2],&bounds[3]);
-			flag++;
-			break;
-		case 'B':
-		case 'b':
-			sscanf (optarg,"%d/%d/%d/%d/%d/%d",
-				&btime_i[0],&btime_i[1],&btime_i[2],
-				&btime_i[3],&btime_i[4],&btime_i[5]);
-			btime_i[6] = 0;
-			flag++;
-			break;
-		case 'E':
-		case 'e':
-			sscanf (optarg,"%d/%d/%d/%d/%d/%d",
-				&etime_i[0],&etime_i[1],&etime_i[2],
-				&etime_i[3],&etime_i[4],&etime_i[5]);
-			etime_i[6] = 0;
 			flag++;
 			break;
 		case 'S':
@@ -311,15 +326,9 @@ char **argv;
 			sscanf (optarg,"%lf", &timegap);
 			flag++;
 			break;
-		case 'I':
-		case 'i':
-			sscanf (optarg,"%s", file);
-			flag++;
-			break;
-		case 'C':
-		case 'c':
-			comments = MB_YES;
-			flag++;
+		case 'V':
+		case 'v':
+			verbose++;
 			break;
 		case '?':
 			errflg++;
@@ -381,7 +390,7 @@ char **argv;
 		fprintf(output,"dbg2       speedmin:   %f\n",speedmin);
 		fprintf(output,"dbg2       timegap:    %f\n",timegap);
 		fprintf(output,"dbg2       comments:   %d\n",comments);
-		fprintf(output,"dbg2       file:       %s\n",file);
+		fprintf(output,"dbg2       file:       %s\n",read_file);
 		}
 
 	/* if help desired then print it and exit */
@@ -391,6 +400,44 @@ char **argv;
 		fprintf(output,"\nusage: %s\n", usage_message);
 		exit(MB_ERROR_NO_ERROR);
 		}
+
+	/* determine whether to read one file or a list of files */
+	if (format < 0)
+		read_datalist = MB_YES;
+
+	/* if reading from datalist then variance calculations
+		are disabled */
+	if (read_datalist == MB_YES)
+		pings_read = 1;
+
+	/* open file list */
+	if (read_datalist == MB_YES)
+	    {
+	    if ((fp = fopen(read_file,"r")) == NULL)
+		{
+		error = MB_ERROR_OPEN_FAIL;
+		fprintf(stderr,"\nUnable to open data list file: %s\n",
+			read_file);
+		fprintf(stderr,"\nProgram <%s> Terminated\n",
+			program_name);
+		exit(error);
+		}
+	    if (fgets(line,128,fp) != NULL
+		&& sscanf(line,"%s %d",file,&format) == 2)
+		read_data = MB_YES;
+	    else
+		read_data = MB_NO;
+	    }
+	/* else copy single filename to be read */
+	else
+	    {
+	    strcpy(file, read_file);
+	    read_data = MB_YES;
+	    }
+
+	/* loop over all files to be read */
+	while (read_data == MB_YES)
+	{
 
 	/* obtain format array location - format id will 
 		be aliased to current id if old format id given */
@@ -450,33 +497,36 @@ char **argv;
 			status = mb_malloc(verbose,pixels_ss*sizeof(double),
 					&datacur->sslat,&error);
 		}
-	if (error == MB_ERROR_NO_ERROR)
-		status = mb_malloc(verbose,beams_bath*sizeof(double),
+	if (pings_read > 1)
+		{
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_malloc(verbose,beams_bath*sizeof(double),
 				&bathmean,&error);
-	if (error == MB_ERROR_NO_ERROR)
-		status = mb_malloc(verbose,beams_bath*sizeof(double),
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_malloc(verbose,beams_bath*sizeof(double),
 				&bathvar,&error);
-	if (error == MB_ERROR_NO_ERROR)
-		status = mb_malloc(verbose,beams_bath*sizeof(int),
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_malloc(verbose,beams_bath*sizeof(int),
 				&nbathvar,&error);
-	if (error == MB_ERROR_NO_ERROR)
-		status = mb_malloc(verbose,beams_amp*sizeof(double),
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_malloc(verbose,beams_amp*sizeof(double),
 				&ampmean,&error);
-	if (error == MB_ERROR_NO_ERROR)
-		status = mb_malloc(verbose,beams_amp*sizeof(double),
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_malloc(verbose,beams_amp*sizeof(double),
 				&ampvar,&error);
-	if (error == MB_ERROR_NO_ERROR)
-		status = mb_malloc(verbose,beams_amp*sizeof(int),
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_malloc(verbose,beams_amp*sizeof(int),
 				&nampvar,&error);
-	if (error == MB_ERROR_NO_ERROR)
-		status = mb_malloc(verbose,pixels_ss*sizeof(double),
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_malloc(verbose,pixels_ss*sizeof(double),
 				&ssmean,&error);
-	if (error == MB_ERROR_NO_ERROR)
-		status = mb_malloc(verbose,pixels_ss*sizeof(double),
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_malloc(verbose,pixels_ss*sizeof(double),
 				&ssvar,&error);
-	if (error == MB_ERROR_NO_ERROR)
-		status = mb_malloc(verbose,pixels_ss*sizeof(int),
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_malloc(verbose,pixels_ss*sizeof(int),
 				&nssvar,&error);
+		}
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
@@ -488,31 +538,34 @@ char **argv;
 		exit(error);
 		}
 
+	/* initialize data arrays */
+	if (pings_read > 1)
+		{
+		for (i=0;i<beams_bath;i++)
+			{
+			bathmean[i] = 0.0;
+			bathvar[i] = 0.0;
+			nbathvar[i] = 0;
+			}
+		for (i=0;i<beams_amp;i++)
+			{
+			ampmean[i] = 0.0;
+			ampvar[i] = 0.0;
+			nampvar[i] = 0;
+			}
+		for (i=0;i<pixels_ss;i++)
+			{
+			ssmean[i] = 0.0;
+			ssvar[i] = 0.0;
+			nssvar[i] = 0;
+			}
+		}
+
 	/* printf out file and format */
 	mb_format_inf(verbose,format_num,&message);
 	fprintf(output,"\nMultibeam Data File:  %s\n",file);
 	fprintf(output,"MBIO Data Format ID:  %d\n",format);
 	fprintf(output,"%s",message);
-
-	/* initialize data arrays */
-	for (i=0;i<beams_bath;i++)
-		{
-		bathmean[i] = 0.0;
-		bathvar[i] = 0.0;
-		nbathvar[i] = 0;
-		}
-	for (i=0;i<beams_amp;i++)
-		{
-		ampmean[i] = 0.0;
-		ampvar[i] = 0.0;
-		nampvar[i] = 0;
-		}
-	for (i=0;i<pixels_ss;i++)
-		{
-		ssmean[i] = 0.0;
-		ssvar[i] = 0.0;
-		nssvar[i] = 0;
-		}
 
 	/* read and process data */
 	while (error <= MB_ERROR_NO_ERROR)
@@ -857,6 +910,37 @@ char **argv;
 	/* close the multibeam file */
 	status = mb_close(verbose,&mbio_ptr,&error);
 
+	/* deallocate memory used for data arrays */
+	for (i=0;i<pings_read;i++)
+		{
+		mb_free(verbose,&data[i]->bath,&error);
+		mb_free(verbose,&data[i]->amp,&error);
+		mb_free(verbose,&data[i]->bathlon,&error);
+		mb_free(verbose,&data[i]->bathlat,&error);
+		mb_free(verbose,&data[i]->ss,&error);
+		mb_free(verbose,&data[i]->sslon,&error);
+		mb_free(verbose,&data[i]->sslat,&error);
+		mb_free(verbose,&data[i],&error);
+		}
+
+	/* figure out whether and what to read next */
+        if (read_datalist == MB_YES)
+                {
+                if (fgets(line,128,fp) != NULL
+                        && sscanf(line,"%s %d",file,&format) == 2)
+                        read_data = MB_YES;
+                else
+                        read_data = MB_NO;
+                }
+        else
+                {
+                read_data = MB_NO;
+                }
+
+	/* end loop over files in list */
+	}
+	fclose (fp);
+
 	/* calculate final variances */
 	if (pings_read > 2)
 		{
@@ -1026,17 +1110,6 @@ char **argv;
 		}
 
 	/* deallocate memory used for data arrays */
-	for (i=0;i<pings_read;i++)
-		{
-		mb_free(verbose,&data[i]->bath,&error);
-		mb_free(verbose,&data[i]->amp,&error);
-		mb_free(verbose,&data[i]->bathlon,&error);
-		mb_free(verbose,&data[i]->bathlat,&error);
-		mb_free(verbose,&data[i]->ss,&error);
-		mb_free(verbose,&data[i]->sslon,&error);
-		mb_free(verbose,&data[i]->sslat,&error);
-		mb_free(verbose,&data[i],&error);
-		}
 	mb_free(verbose,&bathmean,&error);
 	mb_free(verbose,&bathvar,&error);
 	mb_free(verbose,&nbathvar,&error);

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbhistogram.c	12/28/94
- *    $Id: mbhistogram.c,v 4.0 1995-01-04 17:06:33 caress Exp $
+ *    $Id: mbhistogram.c,v 4.1 1995-01-06 00:06:41 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -47,7 +47,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbhistogram.c,v 4.0 1995-01-04 17:06:33 caress Exp $";
+	static char rcs_id[] = "$Id: mbhistogram.c,v 4.1 1995-01-06 00:06:41 caress Exp $";
 	static char program_name[] = "MBHISTOGRAM";
 	static char help_message[] =  "MBHISTOGRAM reads a multibeam data file and generates a histogram\n\tof the bathymetry,  amplitude,  or sidescan values. Alternatively, \n\tmbhistogram can output a list of values which break up the\n\tdistribution into equal sized regions.\n\tThe results are dumped to stdout.";
 	static char usage_message[] = "mbhistogram [-Akind -Byr/mo/da/hr/mn/sc -Dmin/max -Eyr/mo/da/hr/mn/sc -Fformat -Ifile -Llonflip -Mnintervals -Nnbins -Ppings -Rw/e/s/n -Sspeed -V -H]";
@@ -65,6 +65,9 @@ char **argv;
 	char	*message;
 
 	/* MBIO read control parameters */
+	int	read_datalist = MB_NO;
+	char	read_file[128];
+	FILE	*fp;
 	int	format;
 	int	format_num;
 	int	pings;
@@ -121,14 +124,16 @@ char **argv;
 		stderr if verbose > 1) */
 	FILE	*output;
 
-	int i, j, k, l, m;
+	int	read_data;
+	char	line[128];
+	int	i, j, k, l, m;
 
 	/* get current default values */
 	status = mb_defaults(verbose,&format,&pings,&lonflip,bounds,
 		btime_i,etime_i,&speedmin,&timegap);
 
 	/* set default input to stdin */
-	strcpy (file, "stdin");
+	strcpy (read_file, "stdin");
 
 	/* process argument list */
 	while ((c = getopt(argc, argv, "A:a:B:b:D:d:E:e:F:f:HhI:i:L:l:M:m:N:n:P:p:R:r:S:s:T:t:Vv")) != -1)
@@ -171,7 +176,7 @@ char **argv;
 			break;
 		case 'I':
 		case 'i':
-			sscanf (optarg,"%s", file);
+			sscanf (optarg,"%s", read_file);
 			flag++;
 			break;
 		case 'L':
@@ -279,7 +284,7 @@ char **argv;
 		fprintf(output,"dbg2       etime_i[6]: %d\n",etime_i[6]);
 		fprintf(output,"dbg2       speedmin:   %f\n",speedmin);
 		fprintf(output,"dbg2       timegap:    %f\n",timegap);
-		fprintf(output,"dbg2       file:       %s\n",file);
+		fprintf(output,"dbg2       file:       %s\n",read_file);
 		fprintf(output,"dbg2       mode:       %d\n",mode);
 		fprintf(output,"dbg2       nbins:      %d\n",nbins);
 		fprintf(output,"dbg2       nintervals: %d\n",nintervals);
@@ -316,6 +321,45 @@ char **argv;
 	/* get size of bins */
 	dvalue_bin = (value_max - value_min)/(nbins-1);
 	value_bin_min = value_min - 0.5*dvalue_bin;
+
+	/* initialize histogram */
+	for (i=0;i<nbins;i++)
+		{
+		histogram[i] = 0;
+		}
+
+	/* determine whether to read one file or a list of files */
+	if (format < 0)
+		read_datalist = MB_YES;
+
+	/* open file list */
+	if (read_datalist == MB_YES)
+	    {
+	    if ((fp = fopen(read_file,"r")) == NULL)
+		{
+		error = MB_ERROR_OPEN_FAIL;
+		fprintf(stderr,"\nUnable to open data list file: %s\n",
+			read_file);
+		fprintf(stderr,"\nProgram <%s> Terminated\n",
+			program_name);
+		exit(error);
+		}
+	    if (fgets(line,128,fp) != NULL
+		&& sscanf(line,"%s %d",file,&format) == 2)
+		read_data = MB_YES;
+	    else
+		read_data = MB_NO;
+	    }
+	/* else copy single filename to be read */
+	else
+	    {
+	    strcpy(file, read_file);
+	    read_data = MB_YES;
+	    }
+
+	/* loop over all files to be read */
+	while (read_data == MB_YES)
+	{
 
 	/* obtain format array location - format id will 
 		be aliased to current id if old format id given */
@@ -367,12 +411,6 @@ char **argv;
 		fprintf(output,"\nProgram <%s> Terminated\n",
 			program_name);
 		exit(error);
-		}
-
-	/* initialize histogram */
-	for (i=0;i<nbins;i++)
-		{
-		histogram[i] = 0;
 		}
 
 	/* read and process data */
@@ -438,6 +476,33 @@ char **argv;
 	/* close the multibeam file */
 	status = mb_close(verbose,&mbio_ptr,&error);
 
+	/* deallocate memory used for data arrays */
+	mb_free(verbose,&bath,&error);
+	mb_free(verbose,&amp,&error);
+	mb_free(verbose,&bathacrosstrack,&error);
+	mb_free(verbose,&bathalongtrack,&error);
+	mb_free(verbose,&ss,&error);
+	mb_free(verbose,&ssacrosstrack,&error);
+	mb_free(verbose,&ssalongtrack,&error);
+
+	/* figure out whether and what to read next */
+        if (read_datalist == MB_YES)
+                {
+                if (fgets(line,128,fp) != NULL
+                        && sscanf(line,"%s %d",file,&format) == 2)
+                        read_data = MB_YES;
+                else
+                        read_data = MB_NO;
+                }
+        else
+                {
+                read_data = MB_NO;
+                }
+
+	/* end loop over files in list */
+	}
+	fclose (fp);
+
 	/* calculate intervals if required */
 	if (nintervals > 0)
 		{
@@ -487,13 +552,6 @@ char **argv;
 		}
 
 	/* deallocate memory used for data arrays */
-	mb_free(verbose,&bath,&error);
-	mb_free(verbose,&amp,&error);
-	mb_free(verbose,&bathacrosstrack,&error);
-	mb_free(verbose,&bathalongtrack,&error);
-	mb_free(verbose,&ss,&error);
-	mb_free(verbose,&ssacrosstrack,&error);
-	mb_free(verbose,&ssalongtrack,&error);
 	mb_free(verbose,&histogram,&error);
 	mb_free(verbose,&intervals,&error);
 

@@ -1,4 +1,4 @@
-.TH mbhistogram l "3 January 1995"
+.TH mbhistogram l "5 January 1995"
 .SH NAME
 \fBmbhistogram\fP - Generate a histogram of bathymetry, amplitude, or sidescan values.
 
@@ -58,17 +58,31 @@ with times after the ending time will be ignored.
 Default: \fIyr/mo/da/hr/mn/sc\fP = 2062/2/21/10/30/0.
 .TP
 .B \fB-F\fIformat\fP
-Sets the format for the input multibeam data using 
-\fBMBIO\fP integer format identifiers. 
-This program uses the \fBMBIO\fP library and will read any multibeam
+Sets the data format used if the input is read from stdin
+or from a file. If \fIformat\fP < 0, then the input file specified
+with the \fB-I\fP option will actually contain a list of input multibeam
+data files. This program uses the \fBMBIO\fP library 
+and will read or write any multibeam
 format supported by \fBMBIO\fP. A list of the multibeam data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page. Default: \fIformat\fP = 11.
 .TP
 .B \fB-I\fIfilename\fP
-Data file from which the input data will be read. If
-no input file is specified, the input will be read
-from stdin. Default: \fIfilename\fP = stdin.
+Sets the input filename. If \fIformat\fP > 0 (set with the 
+\fB-f\fP option) then the multibeam data contained in \fIinfile\fP 
+is read and processed. If \fIformat\fP < 0, then \fIinfile\fP
+is assumed to be an ascii file containing a list of the input multibeam
+data files to be processed and their formats.  The program will read 
+the data in each one of these files.
+In the \fIinfile\fP file, each
+data file should be followed by a data format identifier, e.g.:
+ 	datafile1 11
+ 	datafile2 24
+.br
+This program uses the \fBMBIO\fP library and will read or write any multibeam
+format supported by \fBMBIO\fP. A list of the multibeam data formats
+currently supported by \fBMBIO\fP and their identifier values
+is given in the \fBMBIO\fP manual page. Default: \fIinfile\fP = "stdin".
 .TP
 .B \fB-L\fIlonflip\fP
 Sets the range of the longitude values returned.
