@@ -1,13 +1,13 @@
-.TH mbm_grd2arc l "22 April 2001" "MB-System 5.0" "MB-System 5.0"
+.TH mbm_arc2grd l "15 October 2002" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
-\fBmbm_grd2arc\fP - Macro to convert an ArcView ASCII grid 
+\fBmbm_arc2grd\fP - Macro to convert an ArcView ASCII grid 
 to a GMT  grid file in the GMT NetCDF grid format. 
 
 .SH VERSION
 Version 5.0
 
 .SH SYNOPSIS
-mbm_grd2arc \fB-I\fP\fIarcfile\fP \fB-O\fP\fIgrdfile\fP [\fB-H -V\fP]
+mbm_arc2grd \fB-I\fP\fIarcfile\fP \fB-O\fP\fIgrdfile\fP [\fB-H -V\fP]
 
 .SH DESCRIPTION
 \fBmbm_arc2grd\fP is a macro to convert a ArcView 
@@ -73,8 +73,6 @@ Running the example above produced the following output:
 \fBmbm_grid\fP(l)
 
 .SH BUGS
-This macro is new and hasn't been tested in serious
-usage yet - let us know what to fix, add, or
-change!.
+Perhaps.
 
 

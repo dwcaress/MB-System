@@ -1,4 +1,4 @@
-.TH mbm_grd2arc l "4 January 2001" "MB-System 5.0" "MB-System 5.0"
+.TH mbm_grd2arc l "15 October 2002" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbm_grd2arc\fP - Macro to convert a GMT 
 grid file in the GMT NetCDF grid format 
@@ -113,11 +113,9 @@ Running the example above produced the following output:
 
 .SH SEE ALSO
 \fBmbsystem\fP(l), \fBmbgrid\fP(l),
-\fBmbmosaic\fP(l), \fBmbm_grid\fP(l)
+\fBmbmosaic\fP(l), \fBmbm_arc2grd\fP(l), \fBmbm_grid\fP(l)
 
 .SH BUGS
-This macro is new and hasn't been tested in serious
-usage yet - let us know what to fix, add, or
-change!.
+Maybe. Maybe not.
 
 
