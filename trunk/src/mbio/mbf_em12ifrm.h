@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_em12ifrm.h	12/5/00
- *	$Id: mbf_em12ifrm.h,v 5.3 2003-04-17 21:05:23 caress Exp $
+ *	$Id: mbf_em12ifrm.h,v 5.4 2004-10-18 04:15:46 caress Exp $
  *
- *    Copyright (c) 2000, 2002, 2003 by
+ *    Copyright (c) 2000, 2002, 2003, 2004 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -19,6 +19,9 @@
  * Author:	D. W. Caress
  * Date:	December 5, 2000
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2003/04/17 21:05:23  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.2  2002/09/18 23:32:59  caress
  * Release 5.0.beta23
  *
@@ -33,15 +36,19 @@
  */
 /*
  * Notes on the MBF_EM12IFRM data format:
- *   1. IFREMER uses their own software called TRISMUS
- *      to process multibeam data. This package recasts
- *      the data as parallel files for bathymetry (.SO suffix), 
- *      imagery (.IM suffix), and asynchronous navigation 
- *      (.NA suffix). This format supports IFREMER EM12S and EM12D
- *      data in the TRISMUS format. We recommend that users
- *      translate the TRISMUS data to the Simrad vendor format
- *      before processing.
- *   2. The systems of interest:
+ *   1. IFREMER uses their own software to process swath data.
+ *      Currently (2004) the software is called CARAIBES, but
+ *      during the 1990's they used an earlier package called 
+ *      TRISMUS to process multibeam data. This format was used 
+ *      and generated as part of TRISMUS processing of EM12S and
+ *      EM12D multibeam data. TRISMUS recast the data as parallel 
+ *      files for bathymetry (.SO suffix), imagery (.IM suffix), 
+ *      and asynchronous navigation (.NA suffix). We recommend 
+ *      that users translate the TRISMUS data to the current 
+ *      mbsystem format for processing Simrad multibeam data
+ *      (EM300MBA - format 57) before processing.
+ *   2. This format is supported read-only in MB-System.
+ *   3. The systems of interest:
  *         EM-12S:   Deep water 12kHz multibeam sonar with up to 
  *                   81 beams of bathymetry and up to 523 sidescan 
  *                   samples per bathymetry beam.
@@ -50,11 +57,11 @@
  *                   samples per bathymetry beam. This is a dual
  *                   system which produces alternating port and
  *                   starboard pings to provide a 150 degree swath.
- *   3. The navigation data contain NMEA type ascii strings
+ *   4. The navigation data contain NMEA type ascii strings
  *      beginning with "$CASTM". The sources of these strings
  *      include "NACOU", "NAGP1",  and "NAGP2".
  *      MB-System uses only the "NACOU" strings.
- *   4. Each bathymetry record is 1032 bytes long and begins 
+ *   5. Each bathymetry record is 1032 bytes long and begins 
  *      with a 35 character string containing the identifier 
  *      and time stamp. The first six characters are one of
  *      the following:
@@ -62,7 +69,7 @@
  *           "$12SOB": EM12D port ping
  *           "$12SOT": EM12S starboard ping
  *           "$COMM:": Comment (MB-System only)
- *   5. The imagery records are of variable length and begin 
+ *   6. The imagery records are of variable length and begin 
  *      with a 35 character string containing the identifier 
  *      and time stamp. The first six characters are one of
  *      the following:
