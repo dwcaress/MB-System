@@ -1,12 +1,14 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit_callbacks.c	3/28/97
- *    $Id: mbedit_callbacks.c,v 4.9 2000-09-08 00:29:20 caress Exp $
+ *    $Id: mbedit_callbacks.c,v 4.10 2000-09-30 06:56:36 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 1995, 1997 by 
- *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
- *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
- *    Lamont-Doherty Earth Observatory
- *    Palisades, NY  10964
+ *    Copyright (c) 1993, 1994, 1995, 1997, 2000 by
+ *    David W. Caress (caress@mbari.org)
+ *      Monterey Bay Aquarium Research Institute
+ *      Moss Landing, CA 95039
+ *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Lamont-Doherty Earth Observatory
+ *      Palisades, NY 10964
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
@@ -22,6 +24,9 @@
  * Date:	March 28, 1997  GUI recast
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.9  2000/09/08  00:29:20  caress
+ * Revision of 7 September 2000.
+ *
  * Revision 4.8  2000/03/16  00:35:40  caress
  * Added mode to output edit save file only.
  *
@@ -188,7 +193,6 @@ int	startup_file = 0;
 int	use_save_file = False;
 
 static char	input_file[128];
-static char	output_file[128];
 int selected = 0; /* indicates an input file is selected */
 
 int	can_xgid;		/* XG graphics id */
@@ -202,7 +206,7 @@ int key_a_down = 0;
 int key_d_down = 0;
 
 /* Set the colors used for this program here. */
-#define NCOLORS 6
+#define NCOLORS 7
 XColor colors[NCOLORS];
 unsigned int mpixel_values[NCOLORS];
 XColor db_color;
@@ -299,6 +303,60 @@ GRAU( XtPointer, call)
     while( widgets && widgets[i] != NULL )
     {
 	XtManageChild(widgets[i]);
+	i++;
+    }
+    XtFree((char *)widgets);
+}
+/*--------------------------------------------------------------------*/
+/*      Function Name:	BxPopupCB
+ *
+ *      Description:   	This function accepts a string of the form:
+ *			"(WL)[widgetName, widgetName, ...]"
+ *			It attempts to convert the widget names to Widget IDs
+ *			and then popup the widgets WITHOUT any grab.
+ *
+ *      Arguments:      Widget		w:	the activating widget.
+ *			XtPointer	client:	the string of widget names to
+ *						popup.
+ *			XtPointer	call:	the call data (unused).
+ *
+ *      Notes:        * This function expects that there is an application
+ *                      shell from which all other widgets are descended.
+ *		      * BxPopupCB can only work on Shell widgets.  It will not
+ *			work on other object types.  This is because popping up
+ *			can only be done to a shell.  A check is made using
+ *			XtIsShell() and an appropriate error is output if the
+ *			passed object is not a Shell.
+ */
+
+/* ARGSUSED */
+void
+BxPopupCB ARGLIST((w, client, call))
+ARG( Widget, w)
+ARG( XtPointer, client)
+GRAU( XtPointer, call)
+{
+    WidgetList		widgets;
+    int			i;
+
+    /*
+     * This function returns a NULL terminated WidgetList.  The memory for
+     * the list needs to be freed when it is no longer needed.
+     */
+    widgets = BxWidgetIdsFromNames(w, "BxPopupCB", (String)client);
+
+    i = 0;
+    while( widgets && widgets[i] != NULL )
+    {
+	if ( XtIsShell(widgets[i]) )
+	{
+	    XtPopup(widgets[i], XtGrabNone);
+	}
+	else
+	{
+	    printf("Callback Error (BxPopupCB):\n\t\
+Object %s is not a Shell\n", XtName(widgets[i]));
+	}
 	i++;
     }
     XtFree((char *)widgets);
@@ -409,6 +467,15 @@ do_mbedit_init(argc, argv)
     if (status == 0)
 	    {
 	    fprintf(stderr,"Failure to allocate color: coral\n");
+	    exit(-1);
+	    }
+    status = XLookupColor(theDisplay,colormap,
+	    "lightgrey",&db_color,&colors[6]);
+    if(status != 0)
+	    status = XAllocColor(theDisplay,colormap,&colors[6]);
+    if (status == 0)
+	    {
+	    fprintf(stderr,"Failure to allocate color: lightgrey\n");
 	    exit(-1);
 	    }
     for (i=0;i<NCOLORS;i++)
@@ -543,31 +610,17 @@ int do_setup_data()
 	/* set value of format text item */
 	sprintf(value_text,"%2.2d",mformat);
 	XmTextFieldSetString(textfield_format, value_text);
-	
-	/* set the output file text */
-	XmTextFieldSetString(output_file_text, "");
 
 	/* set the output mode */
-	if (mode_output == OUTPUT_MODE_OUTPUT)
-	    {
-	    XmToggleButtonSetState(setting_output_toggle_output, 
-			TRUE, TRUE);
-	    XtManageChild(output_file_text);
-	    XtManageChild(output_file_label);
-	    }
-	else if (mode_output == OUTPUT_MODE_EDIT)
+	if (mode_output == OUTPUT_MODE_EDIT)
 	    {
 	    XmToggleButtonSetState(setting_output_toggle_edit, 
 			TRUE, TRUE);
-	    XtUnmanageChild(output_file_text);
-	    XtUnmanageChild(output_file_label);
 	    }
 	else
 	    {
 	    XmToggleButtonSetState(setting_output_toggle_browse,  
 			TRUE, TRUE);
-	    XtUnmanageChild(output_file_text);
-	    XtUnmanageChild(output_file_label);
 	    }
 	    
 	/* set the mode toggles */
@@ -812,20 +865,14 @@ do_fileselection_list(w, client_data, call_data)
 	    {
 	    /* look for MB suffix convention */
 	    form = mformat;
-	    if ((status = mbedit_get_output_file(selection_text, 
-			    output_file, &form)) == MB_SUCCESS)
+	    if ((status = mbedit_get_format(selection_text, 
+			    &form)) == MB_SUCCESS)
 		{
 		mformat = form;
 		sprintf(value_text,"%d",mformat);
 		XmTextFieldSetString(
 		    textfield_format, 
 		    value_text);
-		
-		/* now set the output filename text widget */
-		XmTextFieldSetString(output_file_text, 
-			output_file);
-		XmTextFieldSetCursorPosition(output_file_text, 
-			strlen(output_file));
 		}
 	    }
 }
@@ -909,25 +956,6 @@ int do_reset_scale_x(pwidth, maxx)
 /*--------------------------------------------------------------------*/
 
 void
-do_output_output(w, client_data, call_data)
- Widget w;
- XtPointer client_data;
- XtPointer call_data;
-{
-    XmToggleButtonCallbackStruct *acs=(XmToggleButtonCallbackStruct*)call_data;
-
-    /* set values if needed */
-    if (acs->reason == XmCR_VALUE_CHANGED && acs->set)
-	    {
-	    mode_output = OUTPUT_MODE_OUTPUT;
-	    XtManageChild(output_file_text);
-	    XtManageChild(output_file_label);
-	    }
-}
-
-/*--------------------------------------------------------------------*/
-
-void
 do_output_edit(w, client_data, call_data)
  Widget w;
  XtPointer client_data;
@@ -939,8 +967,6 @@ do_output_edit(w, client_data, call_data)
     if (acs->reason == XmCR_VALUE_CHANGED && acs->set)
 	    {
 	    mode_output = OUTPUT_MODE_EDIT;
-	    XtUnmanageChild(output_file_text);
-	    XtUnmanageChild(output_file_label);
 	    }
 }
 
@@ -958,8 +984,6 @@ do_output_browse(w, client_data, call_data)
     if (acs->reason == XmCR_VALUE_CHANGED && acs->set)
 	    {
 	    mode_output = OUTPUT_MODE_BROWSE;
-	    XtUnmanageChild(output_file_text);
-	    XtUnmanageChild(output_file_label);
 	    }
 }
 
@@ -1068,12 +1092,6 @@ do_load_ok(w, client_data, call_data)
 	    /* read the mbio format number from the screen */
 	    get_text_string(textfield_format, format_text);
 	    sscanf(format_text, "%d", &mformat);
-
-	    /* read the output file name */
-	    get_text_string(output_file_text, output_file);
-
-	    /* process the output file name */
-	    status = mbedit_set_output_file(output_file);
 	    
 	    /* turn off expose plots */
 	    expose_plot_ok = False;
@@ -2122,58 +2140,4 @@ void get_text_string(Widget w, String str)
     str_tmp = (char *) XmTextGetString(w);
     strcpy(str, str_tmp);
     XtFree(str_tmp);
-}
-/*--------------------------------------------------------------------*/
-/*      Function Name:	BxPopupCB
- *
- *      Description:   	This function accepts a string of the form:
- *			"(WL)[widgetName, widgetName, ...]"
- *			It attempts to convert the widget names to Widget IDs
- *			and then popup the widgets WITHOUT any grab.
- *
- *      Arguments:      Widget		w:	the activating widget.
- *			XtPointer	client:	the string of widget names to
- *						popup.
- *			XtPointer	call:	the call data (unused).
- *
- *      Notes:        * This function expects that there is an application
- *                      shell from which all other widgets are descended.
- *		      * BxPopupCB can only work on Shell widgets.  It will not
- *			work on other object types.  This is because popping up
- *			can only be done to a shell.  A check is made using
- *			XtIsShell() and an appropriate error is output if the
- *			passed object is not a Shell.
- */
-
-/* ARGSUSED */
-void
-BxPopupCB ARGLIST((w, client, call))
-ARG( Widget, w)
-ARG( XtPointer, client)
-GRAU( XtPointer, call)
-{
-    WidgetList		widgets;
-    int			i;
-
-    /*
-     * This function returns a NULL terminated WidgetList.  The memory for
-     * the list needs to be freed when it is no longer needed.
-     */
-    widgets = BxWidgetIdsFromNames(w, "BxPopupCB", (String)client);
-
-    i = 0;
-    while( widgets && widgets[i] != NULL )
-    {
-	if ( XtIsShell(widgets[i]) )
-	{
-	    XtPopup(widgets[i], XtGrabNone);
-	}
-	else
-	{
-	    printf("Callback Error (BxPopupCB):\n\t\
-Object %s is not a Shell\n", XtName(widgets[i]));
-	}
-	i++;
-    }
-    XtFree((char *)widgets);
 }
