@@ -1,4 +1,4 @@
-.TH mbm_plot l "10 March 2003" "MB-System 5.0" "MB-System 5.0"
+.TH mbm_copy l "10 March 2003" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbm_copy\fP - Apply mbcopy to all files referenced through
 a datalist, using the MB-System file suffix convention
