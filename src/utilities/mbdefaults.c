@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbdefaults.c	1/23/93
- *	$Id: mbdefaults.c,v 5.2 2001-06-03 07:07:34 caress Exp $
+ *	$Id: mbdefaults.c,v 5.3 2001-11-20 21:50:38 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Author:	D. W. Caress
  * Date:	January 23, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2001/06/03  07:07:34  caress
+ * Release 5.0.beta01.
+ *
  * Revision 5.1  2001/03/22 21:14:16  caress
  * Trying to make release 5.0.beta0.
  *
@@ -85,7 +88,7 @@
 
 main (int argc, char **argv)
 {
-static char rcs_id[]="$Id: mbdefaults.c,v 5.2 2001-06-03 07:07:34 caress Exp $";
+static char rcs_id[]="$Id: mbdefaults.c,v 5.3 2001-11-20 21:50:38 caress Exp $";
 	static char program_name[] = "MBDEFAULTS";
 	static char help_message[] = "MBDEFAULTS sets and retrieves the /default MBIO control \nparameters stored in the file ~/.mbio_defaults. \nOnly the parameters specified by command line \narguments will be changed; if no ~/.mbio_defaults \nfile exists one will be created.";
 	static char usage_message[] = "mbdefaults [-Dpsdisplay -Fformat -Iimagedisplay\n\t-Rw/e/s/n -Ppings -Sspeed -Llonflip\n\t-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc -Wproject -V -H]";
@@ -125,33 +128,12 @@ static char rcs_id[]="$Id: mbdefaults.c,v 5.2 2001-06-03 07:07:34 caress Exp $";
 	status = mb_env(verbose,psdisplay,imgdisplay,mbproject);
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "B:b:D:d:E:e:F:f:HhI:i:L:l:P:p:R:r:S:s:T:t:VvW:w:")) != -1)
+	while ((c = getopt(argc, argv, "D:d:HhI:i:L:l:T:t:VvW:w:")) != -1)
 	  switch (c) 
 		{
-		case 'B':
-		case 'b':
-			sscanf (optarg,"%d/%d/%d/%d/%d/%d",
-				&btime_i[0],&btime_i[1],&btime_i[2],
-				&btime_i[3],&btime_i[4],&btime_i[5]);
-			btime_i[6] = 0;
-			flag++;
-			break;
 		case 'D':
 		case 'd':
 			sscanf (optarg,"%s",psdisplay);
-			flag++;
-			break;
-		case 'E':
-		case 'e':
-			sscanf (optarg,"%d/%d/%d/%d/%d/%d",
-				&etime_i[0],&etime_i[1],&etime_i[2],
-				&etime_i[3],&etime_i[4],&etime_i[5]);
-			etime_i[6] = 0;
-			flag++;
-			break;
-		case 'F':
-		case 'f':
-			sscanf (optarg,"%d", &format);
 			flag++;
 			break;
 		case 'I':
@@ -166,21 +148,6 @@ static char rcs_id[]="$Id: mbdefaults.c,v 5.2 2001-06-03 07:07:34 caress Exp $";
 		case 'L':
 		case 'l':
 			sscanf (optarg,"%d", &lonflip);
-			flag++;
-			break;
-		case 'P':
-		case 'p':
-			sscanf (optarg,"%d", &pings);
-			flag++;
-			break;
-		case 'R':
-		case 'r':
-			mb_get_bounds(optarg, bounds);
-			flag++;
-			break;
-		case 'S':
-		case 's':
-			sscanf (optarg,"%lf", &speedmin);
 			flag++;
 			break;
 		case 'T':
@@ -274,38 +241,16 @@ static char rcs_id[]="$Id: mbdefaults.c,v 5.2 2001-06-03 07:07:34 caress Exp $";
 			exit(error);
 			}
 		fprintf(fp,"MBIO Default Control Parameters\n");
-		fprintf(fp,"format:     %d\n",format);
-		fprintf(fp,"pings:      %d\n",pings);
 		fprintf(fp,"lonflip:    %d\n",lonflip);
-		fprintf(fp,"speed:      %f\n",speedmin);
 		fprintf(fp,"timegap:    %f\n",timegap);
-		fprintf(fp,"bounds:     %f %f %f %f\n",
-			bounds[0],bounds[1],bounds[2],bounds[3]);
-		fprintf(fp,"begin time: %d %d %d %d %d %d %d\n",
-			btime_i[0],btime_i[1],btime_i[2],
-			btime_i[3],btime_i[4],btime_i[5],btime_i[6]);
-		fprintf(fp,"end time:   %d %d %d %d %d %d %d\n",
-			etime_i[0],etime_i[1],etime_i[2],
-			etime_i[3],etime_i[4],etime_i[5],etime_i[6]);
 		fprintf(fp,"ps viewer:  %s\n",psdisplay);
 		fprintf(fp,"img viewer: %s\n",imgdisplay);
 		fprintf(fp,"project:    %s\n",mbproject);
 		fclose(fp);
 
 		printf("\nNew MBIO Default Control Parameters:\n");
-		printf("format:   %d\n",format);
-		printf("pings:    %d\n",pings);
 		printf("lonflip:  %d\n",lonflip);
-		printf("speed:    %f\n",speedmin);
 		printf("timegap:  %f\n",timegap);
-		printf("bounds: %f %f %f %f\n",
-			bounds[0],bounds[1],bounds[2],bounds[3]);
-		printf("begin time: %d %d %d %d %d %d %d\n",
-			btime_i[0],btime_i[1],btime_i[2],
-			btime_i[3],btime_i[4],btime_i[5],btime_i[6]);
-		printf("end time:   %d %d %d %d %d %d %d\n",
-			etime_i[0],etime_i[1],etime_i[2],
-			etime_i[3],etime_i[4],etime_i[5],etime_i[6]);
 		printf("ps viewer:  %s\n",psdisplay);
 		printf("img viewer: %s\n",imgdisplay);
 		printf("project:    %s\n",mbproject);
@@ -315,19 +260,8 @@ static char rcs_id[]="$Id: mbdefaults.c,v 5.2 2001-06-03 07:07:34 caress Exp $";
 	else
 		{
 		printf("\nCurrent MBIO Default Control Parameters:\n");
-		printf("format:   %d\n",format);
-		printf("pings:    %d\n",pings);
 		printf("lonflip:  %d\n",lonflip);
-		printf("speed:    %f\n",speedmin);
 		printf("timegap:  %f\n",timegap);
-		printf("bounds: %f %f %f %f\n",
-			bounds[0],bounds[1],bounds[2],bounds[3]);
-		printf("begin time: %d %d %d %d %d %d %d\n",
-			btime_i[0],btime_i[1],btime_i[2],
-			btime_i[3],btime_i[4],btime_i[5],btime_i[6]);
-		printf("end time:   %d %d %d %d %d %d %d\n",
-			etime_i[0],etime_i[1],etime_i[2],
-			etime_i[3],etime_i[4],etime_i[5],etime_i[6]);
 		printf("ps viewer:  %s\n",psdisplay);
 		printf("img viewer: %s\n",imgdisplay);
 		printf("project:    %s\n",mbproject);

@@ -1,14 +1,14 @@
-.TH mbdefaults l "9 August 2001" "MB-System 5.0" "MB-System 5.0"
+.TH mbdefaults l "20 November 2001" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
-\fBmbdefaults\fP - Set or list default mbio parameters for reading and writing swath sonar data
+\fBmbdefaults\fP - Set or list default mbio parameters for 
+reading and writing swath sonar data
 
 .SH VERSION
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbdefaults\fP [\fB-B\fIyr/mo/da/hr/mn/sc \fB-D\fIpsdisplay \fB-E\fIyr/mo/da/hr/mn/sc 
-\fB-F\fIformat \fB-L\fIlonflip \fB-P\fIpings \fB-R\fIwest/east/south/north 
-\fB-S\fIspeed \fB-T\fItimegap \fB-W\fIproject \fB-V -H\fP]
+\fBmbdefaults\fP [\fB-D\fP\fIpsdisplay\fP \fB-I\fP\fIimagedisplay\fP 
+\fB-L\fP\fIlonflip\fP \fB-T\fP\fItimegap\fP \fB-W\fP\fIproject\fP \fB-V -H\fP]
 
 .SH DESCRIPTION
 \fBmbdefaults\fP is a utility for setting or listing the default read
@@ -23,6 +23,14 @@ any old parameters which have not been reset. If no option flag
 is given, then \fBmbdefaults\fP will list the current default values
 (set by \fBmbio\fP if no .mbio_defaults file exists).
 
+.SH CHANGES FROM VERSION 4.6
+Note that prior to version 5.0, the \fBMB-System\fP defaults
+set by \fBmbdefaults\fP included the format id, a control for
+ping averaging, longitude and latitude bounds for windowing
+by area, and begin and end times for windowing in time. These
+values are no longer set in the .mbio_defaults file or controlled
+by \fBmbdefaults\fP.
+
 .SH AUTHORSHIP
 David W. Caress (caress@mbari.org)
 .br
@@ -34,19 +42,6 @@ Dale N. Chayes (dale@ldeo.columbia.edu)
 
 .SH OPTIONS
 .TP
-.B \-B
-\fIyr/mo/da/hr/mn/sc\fP
-.br
-This option sets the default starting time for data allowed in the input data.
-The \fB-E\fP option sets the ending time for data. If the 
-starting time is before the ending time, then any data
-with a time stamp before the starting time or after the
-ending time is ignored. If instead the starting time is
-after the ending time, then any data between the ending
-and starting time will be ignored. This scheme allows time
-windowing both inside and outside a specified interval.
-Default: \fIyr/mo/da/hr/mn/sc\fP = 1962/2/21/10/30/0.
-.TP
 .B \-D
 \fIpsdisplay\fP
 .br
@@ -56,33 +51,6 @@ macros like \fBmbm_plot\fP. The default Postscript display
 utility is \fBghostview\fP. Other common Postscript display utilities
 are \fBpageview\fP (for Sun workstations) and \fBxpsview\fP 
 (for Silicon Graphics workstations.
-.TP
-.B \-E
-\fIyr/mo/da/hr/mn/sc\fP
-.br
-This option sets the default ending time for 
-data allowed in the input data.
-The \fB-B\fP option sets the default starting time for data. If the 
-starting time is before the ending time, then any data
-with a time stamp before the starting time or after the
-ending time is ignored. If instead the starting time is
-after the ending time, then any data between the ending
-and starting time will be ignored. This scheme allows time
-windowing both inside and outside a specified interval.
-Default: \fIyr/mo/da/hr/mn/sc\fP = 2062/2/21/10/30/0.
-.TP
-.B \-F
-\fIformat\fP
-.br
-Sets the default format for reading swath sonar data using the 
-\fBMBIO\fP integer format identifiers.  A list of the swath sonar data formats
-currently supported by \fBMBIO\fP and their identifier values
-is given in the \fBMBIO\fP manual page. If the default format is 0,
-then \fBMB-System\fP programs will attempt to automatically 
-determine a file's format based on the filename 
-(unless the format is explicitly set using that program's
-\fB-F\fP option).
-Default = 11.
 .TP
 .B \-H
 This "help" flag cause the program to print out a description
@@ -109,33 +77,6 @@ then the longitude values will be in
 the range from 0 to 360 degrees.
 Default: \fIlonflip\fP = 0.
 .TP
-.B \-P
-\fIpings\fP
-.br
-Sets the ping averaging of the input data. If \fIpings\fP = 1, then
-no ping averaging is performed. If \fIpings\fP > 0, then
-that number of input pings will be averaged to produce one output
-ping.  If \fIpings\fP = 0, then the ping averaging will automatically
-be done so that the along-track ping spacing is equal to the across-track
-beam spacing. If ping averaging is used (\fIpings\fP != 1), then
-only a partial data stream can be copied (see the \fB-F\fP option).
-Default: \fIpings\fP = 1 (no ping averaging).
-.TP
-.B \-R
-\fIwest/east/south/north\fP
-.br
-Sets the longitude and latitude bounds within which swath sonar 
-data will be read. If no data within the input satisfies the bounds 
-then an initialization error will be returned. 
-Default: west=-360, east=360, south=-90, north=90.
-.TP
-.B \-S
-\fIspeed\fP
-.br
-Sets the minimum speed in km/hr (5.5 kts ~ 10 km/hr) allowed in 
-the input data; pings associated with a smaller ship speed will not be
-read. Default: \fIspeed\fP = 0.
-.TP
 .B \-T
 \fItimegap\fP
 .br
@@ -156,24 +97,18 @@ MB-System database management utilities yet to be created.
 Default: \fIproject\fP = "none".
 
 .SH EXAMPLES
-Suppose that one wishes the default \fBMBFORMAT\fP data format to
-be 8 rather than 1. The following will suffice to create (or rewrite)
-a .mbio_defaults file in the users home directory including a 
-default data format of 41:
-	mbdefaults -F41
+Suppose that one wishes the default Postscript viewer to
+be xpsview rather than ghostview. 
+The following will suffice to create (or rewrite)
+a .mbio_defaults file in the users home directory:
+	mbdefaults -Dxpsview
 
 The output will be:
 
  New MBIO Default Control Parameters:
- format:   41
- pings:    1
  lonflip:  0
- speed:    0.000000
  timegap:  1.000000
- bounds: -360.000000 360.000000 -90.000000 90.000000
- begin time: 1962 2 21 10 30 0
- end time:   2062 2 21 10 30 0
- ps viewer:  ghostview
+ ps viewer:  xspsview
  img viewer: xv
  project:    none
 
@@ -184,22 +119,17 @@ parameters are.  The following will suffice:
 The output will be
 
  Current MBIO Default Control Parameters:
- format:   5
- pings:    1
  lonflip:  0
- speed:    0.000000
  timegap:  1.000000
- bounds: -360.000000 360.000000 -90.000000 90.000000
- begin time: 1962 2 21 10 30 0
- end time:   2062 2 21 10 30 0
  ps viewer:  ghostview
  img viewer: xv
  project:    none
 
 .SH SEE ALSO
 \fBmbsystem\fP(l), \fBmbio\fP(l), \fBmbcontour\fP(l), 
-\fBmbswath\fP(l), \fBmbm_plot\fP(l), \fBmbm_grdplot\fP(l), 
-\fBmbm_grd3dplot\fP(l), \fBmbm_grdtiff\fP(l)
+\fBmbswath\fP(l), \fBmbgrdtiff\fP(l), 
+\fBmbm_plot\fP(l), \fBmbm_grdplot\fP(l), 
+\fBmbm_grd3dplot\fP(l), \fBmbm_xyplot\fP(l), \fBmbm_grdtiff\fP(l)
 
 .SH BUGS
 Too simple to have any really interesting bugs.
