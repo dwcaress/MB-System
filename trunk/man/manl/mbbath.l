@@ -11,7 +11,7 @@ Version 4.6
 \fB-C\fP \fB-D\fIdraft\fP 
 \fB-F\fIformat\fP \fB-I\fIinfile\fP \fB-K\fIssv\fP 
 \fB-O\fIoutfile \fB-P\fIpitch_bias\fP 
-\fB-R\fIrollfile\fP \fB-S\fIstaticfile\fP 
+\fB-R\fIrollfile\fP \fB-S\fIstaticfile\fP \fB-T\fIttscale\fP 
 \fB-U\fP \fB-W\fIvelfile\fP \fB-Z -V -H\fP]
 
 .SH DESCRIPTION
@@ -229,6 +229,17 @@ beam number are read.  The depth corrections should be in the form
 .br
 where the beam number starts at 0 and the correction value should
 be in meters.
+.TP
+.B \-T
+\fIttscale\fP
+.br
+Multiplies beam travel times by \fIttscale\fP before recalculating
+bathymetry. This option allows users to rescale travel times when
+data files have erroneous values (or when the MB-System code
+interprets the values incorrectly). Most often the errors are
+due to confusion about one way versus two way
+travel times, and so \fIttscale\fP is usually either 0.5 or 1.0.
+By default, no travel time scaling is performed.
 .TP
 .B \-U
 This flag causes the program to adjust the depth values to correspond
