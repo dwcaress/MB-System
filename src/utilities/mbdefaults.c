@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbdefaults.c	3.00	1/23/93
- *	$Id: mbdefaults.c,v 3.2 1993-05-15 14:48:54 caress Exp $
+ *	$Id: mbdefaults.c,v 3.3 1993-05-27 23:37:16 caress Exp $
  *
  *    Copyright (c) 1993 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,9 @@
  * Author:	D. W. Caress
  * Date:	January 23, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 3.2  1993/05/15  14:48:54  caress
+ * removed excess rcs_id message
+ *
  * Revision 3.1  1993/05/14  23:48:05  sohara
  * *** empty log message ***
  *
@@ -38,7 +41,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-static char rcs_id[]="$Id: mbdefaults.c,v 3.2 1993-05-15 14:48:54 caress Exp $";
+static char rcs_id[]="$Id: mbdefaults.c,v 3.3 1993-05-27 23:37:16 caress Exp $";
 	static char program_name[] = "MBDEFAULTS";
 	static char help_message[] = "MBDEFAULTS sets and retrieves the default MBIO control \nparameters stored in the file ~/.mbio_defaults. \nOnly the parameters specified by command line \narguments will be changed; if no ~/.mbio_defaults \nfile exists one will be created.";
 	static char usage_message[] = "mbdefaults [-Fformat -Rw/e/s/n -Ppings -Sspeed -Llonflip\n	-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc -V -H]";
@@ -71,7 +74,7 @@ static char rcs_id[]="$Id: mbdefaults.c,v 3.2 1993-05-15 14:48:54 caress Exp $";
 		btime_i,etime_i,&speedmin,&timegap);
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhFf:P:p:L:l:R:r:B:b:E:e:S:s:T:t:")) != -1)
+	while ((c = getopt(argc, argv, "VvHhF:f:P:p:L:l:R:r:B:b:E:e:S:s:T:t:")) != -1)
 	  switch (c) 
 		{
 		case 'H':
