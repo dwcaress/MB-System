@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mbpronav.c	5/20/99
- *	$Id: mbr_mbpronav.c,v 5.7 2003-05-20 18:05:32 caress Exp $
+ *	$Id: mbr_mbpronav.c,v 5.8 2004-06-18 03:15:51 caress Exp $
  *
  *    Copyright (c) 1999, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	October 18, 1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2003/05/20 18:05:32  caress
+ * Added svp_source to data source parameters.
+ *
  * Revision 5.6  2003/04/17 21:05:23  caress
  * Release 5.0.beta30
  *
@@ -105,7 +108,7 @@ int mbr_wt_mbpronav(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_mbpronav(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_mbpronav.c,v 5.7 2003-05-20 18:05:32 caress Exp $";
+	static char res_id[]="$Id: mbr_mbpronav.c,v 5.8 2004-06-18 03:15:51 caress Exp $";
 	char	*function_name = "mbr_register_mbpronav";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -237,7 +240,7 @@ int mbr_info_mbpronav(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_mbpronav.c,v 5.7 2003-05-20 18:05:32 caress Exp $";
+	static char res_id[]="$Id: mbr_mbpronav.c,v 5.8 2004-06-18 03:15:51 caress Exp $";
 	char	*function_name = "mbr_info_mbpronav";
 	int	status = MB_SUCCESS;
 
@@ -307,7 +310,7 @@ int mbr_info_mbpronav(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_mbpronav(int verbose, void *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_mbpronav.c,v 5.7 2003-05-20 18:05:32 caress Exp $";
+ static char res_id[]="$Id: mbr_mbpronav.c,v 5.8 2004-06-18 03:15:51 caress Exp $";
 	char	*function_name = "mbr_alm_mbpronav";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -766,6 +769,12 @@ int mbr_mbpronav_rd_data(int verbose, void *mbio_ptr, int *error)
 	    	status = MB_SUCCESS;
 	   	*error = MB_ERROR_NO_ERROR;
 		}
+		
+	    /* get time set if only one of two variables is defined */
+	    if (data->time_i[0] == 0 && data->time_d > 0.0)
+	    	mb_get_date(verbose,data->time_d,data->time_i);
+	    else if (data->time_i[0] > 0 && data->time_d == 0.0)
+	    	mb_get_time(verbose,data->time_i,&(data->time_d));
 
 	    if (status == MB_SUCCESS)
 	        {
