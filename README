@@ -1,9 +1,9 @@
-MB-SYSTEM VERSION 5.0.BETA18 README FILE:
+MB-SYSTEM VERSION 5.0.BETA20 README FILE:
 ----------------------------------------
 
 This file is located at the top of the MB-System directory
 structure. This directory structure contains the version 
-5.0.beta18 release of the MB-System software package for 
+5.0.beta20 release of the MB-System software package for 
 processing and display of swath sonar data.  
 
 MB-SYSTEM VERSION 5 DESCRIPTION:
@@ -26,6 +26,7 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
+Version 5.0.beta20     July 20, 2002
 Version 5.0.beta18     May 31, 2002
 Version 5.0.beta17     May 1, 2002
 Version 5.0.beta16     April 5, 2002
@@ -101,6 +102,27 @@ Aquarium Research Institute, or any other individuals or
 organizations involved in the design and maintenance of the 
 MB-System software package are NOT responsible for any damage 
 that may follow from correct or incorrect use of these programs.
+
+MB-SYSTEM VERSION 5.0.BETA20 RELEASE NOTES:
+
+The version 5.0.beta18 release of MB-System includes
+some significant new features and fixes:
+  - Addition of read-only support for the Atlas
+    SURF data format (id 181). The ability to
+    write data read in SURF format will be added
+    later (perhaps directly to SURF format, perhaps
+    to another format).
+  - The code for the SURF library is now part of
+    the MB-System release.
+  - The code for the PROJ library for geographic
+    projections is now part of the MB-System release.
+  - Sidescan correction for amplitude vs grazing 
+    angle has been added to mbprocess.
+  - The program mbbackangle now generates ".sga"
+    files containing multiple tables of amplitude
+    vs grazing angle for sidescan data. These files
+    are used by mbprocess.
+  - The old mbbackangle is now mbbackangleold.
 
 MB-SYSTEM VERSION 5.0.BETA18 RELEASE NOTES:
 
@@ -780,10 +802,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.19 2002-05-31 19:58:28 caress Exp $
+RCS ID: $Id: README,v 5.20 2002-07-20 21:08:07 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.19  2002/05/31 19:58:28  caress
+Release 5.0.beta18
+
 Revision 5.18  2002/05/29 20:43:56  caress
 Release 5.0.beta18
 
