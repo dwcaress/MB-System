@@ -9,7 +9,7 @@ Version 4.5
 \fBmbclean\fP [\fB-A\fImax\fP \fB-B\fIlow/high\fP \fB-C\fIslope\fP 
 \fB-D\fImin/max\fP \fB-F\fIformat\fP 
 \fB-G\fIfraction_low/fraction_high\fP 
-\fB-I\fIinfile\fP \fB-L\fIlonflip\fP \fB-O\fIoutfile\fP 
+\fB-I\fIinfile\fP \fB-L\fIlonflip\fP \fB-N\fIbuffersize\fP \fB-O\fIoutfile\fP 
 \fB-M\fImode\fP \fB-Q\fP \fB-U\fInmin\fP \fB-X\fIzap_beams\fP \fB-V -H\fP]
 
 .SH DESCRIPTION
@@ -142,6 +142,21 @@ If the data format of the input file
 prohibits storage of negative depths, an error message will be output
 and the program will exit. Default: \fImode\fP = 1.
 .TP
+.B \fB-N\fIbuffersize\fP
+Sets the maximum number of data records which can be
+read into the buffer. In general, data records may be
+of several different types (e.g. parameter, position, 
+comment) in addition to survey data records. Many data 
+formats include many more position data records than
+survey data records. Thus, a large buffer may be required
+to access a reasonable number of survey data records. 
+However, on memory limited machines large buffer sizes
+can lead to poor performance due to memory swapping. 
+The default value of \fIbuffersize\fP = 500 is appropriate 
+for most cases, but users can set the buffer size as required.
+The absolute maximum buffer size is 5000. 
+Default: \fIbuffersize\fP = 500.
+.TP
 .B \fB-O\fIoutfile\fP
 Data file to which the output data will be written. If
 no output file is specified, the output will be written to
@@ -189,7 +204,7 @@ The program will output some information because of the
 \fB-V\fP option:
 .br
  	Program MBCLEAN
- 	Version $Id: mbclean.l,v 4.9 1997-04-21 17:19:14 caress Exp $
+ 	Version $Id: mbclean.l,v 4.10 1997-09-15 19:11:06 caress Exp $
  	MB-system Version 4.3
 .br
  	132 records loaded into buffer

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit_callbacks.c	3/28/97
- *    $Id: mbedit_callbacks.c,v 4.1 1997-04-22 19:26:36 caress Exp $
+ *    $Id: mbedit_callbacks.c,v 4.2 1997-09-15 19:06:10 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Date:	March 28, 1997  GUI recast
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1997/04/22  19:26:36  caress
+ * Fixed startup mode.
+ *
  * Revision 4.0  1997/04/21  16:57:14  caress
  * MB-System 4.5 Beta Release.
  *
@@ -549,6 +552,7 @@ int do_setup_data()
 	    XmToggleButtonSetState(toggleButton_show_flagged_off, 1, FALSE);
 	    }
 	
+	return(1);
 }
 
 /*--------------------------------------------------------------------*/
@@ -831,7 +835,9 @@ int do_reset_scale_x(pwidth, maxx)
 			NULL);
 	sprintf(label, "%d", maxx);
 	set_label_string(slider_scale_x_max_label, 
-			label);
+			label);	
+
+	return(1);
 	
 }
 
@@ -1819,6 +1825,9 @@ XtAppContext app;
 	}
 	
     XmUpdateDisplay(topshell);
+	
+    return(1);
+    
 }
 
 /*--------------------------------------------------------------------*/
@@ -1863,6 +1872,8 @@ char	*message;
 	}
 	
     XmUpdateDisplay(topshell);
+	
+    return(1);
 }
 
 /*--------------------------------------------------------------------*/
@@ -1873,6 +1884,8 @@ do_message_off()
     XtUnmanageChild(bulletinBoard_message);
     XSync(XtDisplay(bulletinBoard_message), 0);
     XmUpdateDisplay(window_mbedit);
+	
+    return(1);
 }
 
 /*--------------------------------------------------------------------*/
@@ -1888,6 +1901,8 @@ char	*s3;
     set_label_string(label_error_three, s3);
     XtManageChild(bulletinBoard_error);
     XBell(theDisplay,100);
+	
+    return(1);
 }
 
 /*--------------------------------------------------------------------*/

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrid.c	5/2/94
- *    $Id: mbgrid.c,v 4.34 1997-04-21 17:19:14 caress Exp $
+ *    $Id: mbgrid.c,v 4.35 1997-09-15 19:11:06 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -38,6 +38,9 @@
  * Rererewrite:	January 2, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.34  1997/04/21  17:19:14  caress
+ * MB-System 4.5 Beta Release.
+ *
  * Revision 4.34  1997/04/17  15:14:38  caress
  * MB-System 4.5 Beta Release
  *
@@ -233,7 +236,7 @@
 int double_compare();
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbgrid.c,v 4.34 1997-04-21 17:19:14 caress Exp $";
+static char rcs_id[] = "$Id: mbgrid.c,v 4.35 1997-09-15 19:11:06 caress Exp $";
 static char program_name[] = "MBGRID";
 static char help_message[] =  "MBGRID is an utility used to grid bathymetry, amplitude, or \nsidescan data contained in a set of multibeam data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered by multibeam swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbgrid -Ifilelist -Oroot -Rwest/east/south/north [-Adatatype\n          -Bborder  -Cclip -Dxdim/ydim -Edx/dy/units -F\n          -Ggridkind -Llonflip -M -N -Ppings -Sspeed\n          -Ttension -Utime -V -Wscale -Xextend]";
@@ -722,7 +725,7 @@ char **argv;
 	if (more == MB_YES 
 		&& (grid_mode == MBGRID_MINIMUM_FILTER
 		    || grid_mode == MBGRID_MAXIMUM_FILTER))
-		more == MB_NO;
+		more = MB_NO;
 
 	/* define NaN in case it's needed */
 	if (use_NaN == MB_YES)

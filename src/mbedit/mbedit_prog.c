@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	4/8/93
- *    $Id: mbedit_prog.c,v 4.17 1997-07-25 14:42:55 caress Exp $
+ *    $Id: mbedit_prog.c,v 4.18 1997-09-15 19:06:10 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -24,6 +24,9 @@
  * Date:	March 28, 1997  GUI recast
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.17  1997/07/25  14:42:55  caress
+ * Version 4.5beta2
+ *
  * Revision 4.16  1997/04/29  15:50:50  caress
  * Fixed autoscaling in case of no good data.
  *
@@ -192,7 +195,7 @@ struct mbedit_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbedit_prog.c,v 4.17 1997-07-25 14:42:55 caress Exp $";
+static char rcs_id[] = "$Id: mbedit_prog.c,v 4.18 1997-09-15 19:06:10 caress Exp $";
 static char program_name[] = "MBedit";
 static char help_message[] =  
 "MBedit is an interactive editor used to identify and flag\n\
@@ -2944,26 +2947,12 @@ int	savemode;
 	if (output_mode == MBEDIT_OUTPUT_OUTPUT)
 		{
 		kind = MB_DATA_COMMENT;
-		strncpy(comment,"\0",256);
 		sprintf(comment,"Bathymetry data edited interactively using program %s version %s",
 			program_name,rcs_id);
-		status = mb_put(verbose,ombio_ptr,kind,
-			time_i,time_d,
-			navlon,navlat,speed,heading,
-			beams_bath,beams_amp,pixels_ss,
-			bath,amp,bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,&error);
+		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		if (error == MB_ERROR_NO_ERROR) ocomment++;
-		strncpy(comment,"\0",256);
 		sprintf(comment,"MB-system Version %s",MB_VERSION);
-		status = mb_put(verbose,ombio_ptr,kind,
-			time_i,time_d,
-			navlon,navlat,speed,heading,
-			beams_bath,beams_amp,pixels_ss,
-			bath,amp,bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,&error);
+		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		if (error == MB_ERROR_NO_ERROR) ocomment++;
 		right_now = time((long *)0);
 		strncpy(date,"\0",25);
@@ -2976,66 +2965,24 @@ int	savemode;
 		else
 			strcpy(user, "unknown");
 		gethostname(host,128);
-		strncpy(comment,"\0",256);
 		sprintf(comment,"Run by user <%s> on cpu <%s> at <%s>",
 			user,host,date);
-		status = mb_put(verbose,ombio_ptr,kind,
-			time_i,time_d,
-			navlon,navlat,speed,heading,
-			beams_bath,beams_amp,pixels_ss,
-			bath,amp,bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,&error);
+		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		if (error == MB_ERROR_NO_ERROR) ocomment++;
-		strncpy(comment,"\0",256);
 		sprintf(comment,"Control Parameters:");
-		status = mb_put(verbose,ombio_ptr,kind,
-			time_i,time_d,
-			navlon,navlat,speed,heading,
-			beams_bath,beams_amp,pixels_ss,
-			bath,amp,bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,&error);
+		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		if (error == MB_ERROR_NO_ERROR) ocomment++;
-		strncpy(comment,"\0",256);
 		sprintf(comment,"  MBIO data format:   %d",format);
-		status = mb_put(verbose,ombio_ptr,kind,
-			time_i,time_d,
-			navlon,navlat,speed,heading,
-			beams_bath,beams_amp,pixels_ss,
-			bath,amp,bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,&error);
+		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		if (error == MB_ERROR_NO_ERROR) ocomment++;
-		strncpy(comment,"\0",256);
 		sprintf(comment,"  Input file:         %s",ifile);
-		status = mb_put(verbose,ombio_ptr,kind,
-			time_i,time_d,
-			navlon,navlat,speed,heading,
-			beams_bath,beams_amp,pixels_ss,
-			bath,amp,bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,&error);
+		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		if (error == MB_ERROR_NO_ERROR) ocomment++;
-		strncpy(comment,"\0",256);
 		sprintf(comment,"  Output file:        %s",ofile);
-		status = mb_put(verbose,ombio_ptr,kind,
-			time_i,time_d,
-			navlon,navlat,speed,heading,
-			beams_bath,beams_amp,pixels_ss,
-			bath,amp,bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,&error);
+		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		if (error == MB_ERROR_NO_ERROR) ocomment++;
-		strncpy(comment,"\0",256);
 		sprintf(comment," ");
-		status = mb_put(verbose,ombio_ptr,kind,
-			time_i,time_d,
-			navlon,navlat,speed,heading,
-			beams_bath,beams_amp,pixels_ss,
-			bath,amp,bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,&error);
+		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		if (error == MB_ERROR_NO_ERROR) ocomment++;
 		}
 		
@@ -3267,9 +3214,9 @@ int	*nbuffer;
 	if (ndump > 0)
 		current = current - ndump;
 	if (current < 0)
-		current == 0;
+		current = 0;
 	if (current > nbuff - 1)
-		current == nbuff - 1;
+		current = nbuff - 1;
 	*nbuffer = nbuff;
 
 	/* flag lack of indexing */
@@ -3550,6 +3497,7 @@ int	autoscale;
 	int	y, dy, first, xold, yold;
 	char	string[128];
 	char	*string_ptr;
+	int	format_num, frequency;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -3646,6 +3594,19 @@ int	autoscale;
 		{
 		sort(nbathlist, bathlist);
 		bathmedian = bathlist[nbathlist/2];
+		}
+		
+	/* reset xtrack_max if required */
+	if (autoscale && xtrack_max < 0.5)
+		{
+		status = mb_format(verbose,&format,&format_num,&error);
+		frequency = frequency_table[mb_system_table[format_num]];
+		if (frequency < 20)
+			xtrack_max = 1000.0;
+		else if (frequency < 60)
+			xtrack_max = 100.0;
+		else
+			xtrack_max = 10.0;
 		}
 		
 	/* if autoscale on reset plot width */

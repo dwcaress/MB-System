@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_em12sraw.h	7/8/96
- *	$Id: mbf_em12sraw.h,v 4.4 1997-04-21 17:02:07 caress Exp $
+ *	$Id: mbf_em12sraw.h,v 4.5 1997-09-15 19:06:40 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -17,6 +17,9 @@
  * Author:	D. W. Caress
  * Date:	August 8, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.4  1997/04/21  17:02:07  caress
+ * MB-System 4.5 Beta Release.
+ *
  * Revision 4.3  1996/08/26  19:03:38  caress
  * REALLY changed "signed char" to "char".
  *
@@ -206,9 +209,9 @@ struct mbf_em12sraw_struct
 					EM-1000:         0.05 msec 
 					EM-12 high res:  0.20 msec 
 					EM-12 low res:   0.80 msec */
-	char	amp[MBF_EM12SRAW_MAXBEAMS];	    /* 0.5 dB */
-	unsigned char	quality[MBF_EM12SRAW_MAXBEAMS];	    /* meters */
-	char	heave[MBF_EM12SRAW_MAXBEAMS];	    /* 0.1 meters */
+	mb_s_char	amp[MBF_EM12SRAW_MAXBEAMS];	    /* 0.5 dB */
+	mb_u_char	quality[MBF_EM12SRAW_MAXBEAMS];	    /* meters */
+	mb_s_char	heave[MBF_EM12SRAW_MAXBEAMS];	    /* 0.1 meters */
 	
 	/* sidescan */
 	int	pixels_ss;	/* total number of samples for this ping */
@@ -231,7 +234,7 @@ struct mbf_em12sraw_struct
 	short int beam_start_sample[MBF_EM12SRAW_MAXBEAMS];
 				/* start beam sample number among samples
 					from entire ping */
-	char	ss[MBF_EM12SRAW_MAXPIXELS];
+	mb_s_char ss[MBF_EM12SRAW_MAXPIXELS];
 	short int ssp[MBF_EM12SRAW_MAXPIXELS];
 
 };

@@ -202,7 +202,7 @@ for color or gray fill plots,  shaded or unshaded. If the plot
 is to be shaded,  either by synthetic illumination (\fB-G\fP\fI2\fP) 
 or by overlaying amplitude data (\fB-G\fP\fI3\fP option), then
 setting \fIshade\fP = 1 will cause the shading to be equalized.
-Using \fB-D\fP\fI0/1\fP will equalize the shading without
+Using \fB-S\fP\fI0/1\fP will equalize the shading without
 equalizing the color table.
 .TP
 .B \fB-U\fP\fIorientation\fP
@@ -784,7 +784,7 @@ for color or gray fill plots,  shaded or unshaded. If the plot
 is to be shaded,  either by synthetic illumination (\fB-G\fP\fI2\fP) 
 or by overlaying amplitude data (\fB-G\fP\fI3\fP option), then
 setting \fIshade\fP = 1 will cause the shading to be equalized.
-Using \fB-D\fP\fI0/1\fP will equalize the shading without
+Using \fB-S\fP\fI0/1\fP will equalize the shading without
 equalizing the color table.
 .TP
 .B \fB-U\fIorientation\fP

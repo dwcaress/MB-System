@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbps.c	11/4/93
- *    $Id: mbps.c,v 4.9 1997-04-21 17:19:14 caress Exp $
+ *    $Id: mbps.c,v 4.10 1997-09-15 19:11:06 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,9 @@
  * Date:	August 31, 1991 (original version)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.9  1997/04/21  17:19:14  caress
+ * MB-System 4.5 Beta Release.
+ *
  * Revision 4.8  1996/04/22  13:23:05  caress
  * Now have DTR and MIN/MAX defines in mb_define.h
  *
@@ -115,7 +118,7 @@ int argc;
 char **argv; 
 {
 
-	static char rcs_id[] = "$Id: mbps.c,v 4.9 1997-04-21 17:19:14 caress Exp $";
+	static char rcs_id[] = "$Id: mbps.c,v 4.10 1997-09-15 19:11:06 caress Exp $";
 	static char program_name[] = "MBPS";
 	static char help_message[] =  "MBPS reads a multibeam bathymetry data file and creates a postscript 3-d mesh plot";
 	static char usage_message[] = "mbps [-Iinfile -Fformat -Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc -Aalpha -Keta -Dviewdir -Xvertexag -T\"title\" -Wmetersperinch -Sspeedmin -Ggap -Ydisplay_stats -Zdisplay_scales -V -H]";
@@ -233,10 +236,12 @@ char **argv;
 	int	begin = 0;
 	int	nread = 0;
 
-	struct EPS *eps;
 	char title[128];
 	FILE	*output;
 	int i, j, k, l, m;
+	
+	void Polygon_Fill();
+	void Good_Polygon();
 
 	/* initialize some time variables */
 	for (i=0;i<7;i++)
@@ -712,7 +717,7 @@ char **argv;
 */
 
 	ps_plotinit(NULL,0,orient,x_off,y_off,1.0,1.0,1,300,1,
-		gmtdefs.paper_width, gmtdefs.page_rgb, eps);
+		gmtdefs.paper_width, gmtdefs.page_rgb, NULL);
 
 
 
@@ -933,7 +938,7 @@ char **argv;
 
 
 
-Polygon_Fill(xl,yl,xp,yp,irec,beams_bath,cnt,scaling)
+void Polygon_Fill(xl,yl,xp,yp,irec,beams_bath,cnt,scaling)
 	/* Plots a black background upon which the good polygons will be drawn */
 	/* Data gaps will show through to this polygon fill */
 double xl[PINGS_MAX*BEAMS_MAX], yl[PINGS_MAX*BEAMS_MAX];
@@ -1025,14 +1030,13 @@ double scaling;
   ps_polygon(xl,yl,*cnt,0,0,0,1);
 
   }  /* for loop */
-
 		
-} /* Poloygon_Fill */
+} /* Polygon_Fill */
 
 
 
 
-Good_Polygon(xl,yl,xp,yp,i,jb,irec,beams_bath,scaling)
+void Good_Polygon(xl,yl,xp,yp,i,jb,irec,beams_bath,scaling)
 	/* DRAW THE 8 TRIANGULAR POLYGONS AROUND THE POINT IF 3 VERTICES ARE GOOD */
 int xp[PINGS_MAX][BEAMS_MAX],yp[PINGS_MAX][BEAMS_MAX];
 double xl[PINGS_MAX*BEAMS_MAX], yl[PINGS_MAX*BEAMS_MAX];

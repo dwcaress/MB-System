@@ -6,7 +6,7 @@
 Version 4.5
 
 .SH SYNOPSIS
-\fBmbsmooth\fP [\fB-F\fIformat\fP \fB-G\fIwidth\fP \fB-I\fIinfile\fP \fB-L\fIlonflip\fP \fB-O\fIoutfile\fP \fB-W\fIfilterfile\fP \fB-V -H\fP]
+\fBmbsmooth\fP [\fB-F\fIformat\fP \fB-G\fIwidth\fP \fB-I\fIinfile\fP \fB-L\fIlonflip\fP \fB-N\fIbuffersize\fP \fB-O\fIoutfile\fP \fB-W\fIfilterfile\fP \fB-V -H\fP]
 
 .SH DESCRIPTION
 \fBmbsmooth\fP applies a spatial domain gaussian filter 
@@ -68,6 +68,21 @@ the range from -180 to 180 degrees. If \fIlonflip\fP=1
 then the longitude values will be in
 the range from 0 to 360 degrees.
 Default: \fIlonflip\fP = 0.
+.TP
+.B \fB-N\fIbuffersize\fP
+Sets the maximum number of data records which can be
+read into the buffer. In general, data records may be
+of several different types (e.g. parameter, position, 
+comment) in addition to survey data records. Many data 
+formats include many more position data records than
+survey data records. Thus, a large buffer may be required
+to access a reasonable number of survey data records. 
+However, on memory limited machines large buffer sizes
+can lead to poor performance due to memory swapping. 
+The default value of \fIbuffersize\fP = 500 is appropriate 
+for most cases, but users can set the buffer size as required.
+The absolute maximum buffer size is 5000. 
+Default: \fIbuffersize\fP = 500.
 .TP
 .B \fB-O\fIoutfile\fP
 Data file to which the output data will be written. If

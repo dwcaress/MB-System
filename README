@@ -9,8 +9,9 @@ and bug fixes relative to version 4.5.
 The primary enhancements for version 4.5 include a new
 program, called mbmosaic, for mosaicing of sidescan
 and amplitude data, improvements to the graphical tools
-mbedit, mbnavedit, and mbvelocitytool, and support for
-two new fully binary SeaBeam 2100 data formats.
+mbedit, mbnavedit, and mbvelocitytool, support for
+two new fully binary SeaBeam 2100 data formats, and an
+initial version of html-based MB-System documentation.
 
 MBmosaic allows users to prioritize sidescan data according to
 the associated grazing angle and according to look azimuth.
@@ -40,6 +41,21 @@ The second binary format stores bathymetry only,
 allowing users to substantially reduce file size
 when sidescan data are not required.
 
+The html documentation consists of a number of html
+documents and images in the directory mbsystem/html.
+This documentation will also comprise the MB-System
+web page available from the Lamont home page at:
+	http://www.ldeo.columbia.edu
+Users can access the documentation in their own MB-System
+installation by using a web browser and accessing the file:
+	file:/usr/local/mbsystem/html/mbsystem_home.html
+(here it is assumed that MB-System has been installed
+in /usr/local). Currently, the documentation includes some
+general information about MB-System (e.g. who wrote, how to
+get it, how to install it) and a complete set of manual
+pages. In the future we will add increasing amounts of 
+information including examples of using MB-System.
+
 Of course, a number of bug fixes are also incorporated
 in the new release. In particular, problems with 
 mbfilter and with handling of DSL AMS-120 data 
@@ -54,7 +70,7 @@ of MB-System.
 
 RELEASE DATE:
 ------------
-May 1, 1997
+September 18, 1997
 
 Authors:
 --------
@@ -72,7 +88,7 @@ East Walpole, MA 02032
 
 Copyright:
 ----------
-MB-System Copyright 1993, 1994, 1995, 1996, 1997
+MB-System Copyright 1993-1997
 by David W. Caress and Dale N. Chayes
 All Rights Reserved.
 
@@ -298,11 +314,15 @@ Acknowledgments:
 ------------
 A number of people have made contributions to the code
 included in MB-System.  These include:
-	Suzanne O'Hara (L-DEO)
-	David Brock (Antarctic Support Associates)
-	Rod McCabe (Antarctic Support Associates)
-	Alberto Malinverno (Schlumberger-Doll)
-	Russ Alexander (UCSB)
+	Suzanne O'Hara (Lamont-Doherty Earth Observatory) 
+	Daniel Scheirer (Brown University) 
+	Peter Lemmond (Woods Hole Oceanographic Institution) 
+	David Brock (formerly with Antarctic Support Associates) 
+	Alberto Malinverno (Schlumberger-Doll) 
+	Russ Alexander (formerly with UCSB) 
+
+Numerous users and vendors have provided information regarding 
+data file formats and sonar system specific characteristics.
 
 Good Luck!!
 
@@ -311,10 +331,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 4.12 1997-04-21 16:51:19 caress Exp $
+RCS ID: $Id: README,v 4.13 1997-09-15 19:02:15 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+# Revision 4.12  1997/04/21  16:51:19  caress
+# MB-System 4.5 Beta Release.
+#
 # Revision 4.12  1997/04/17  17:37:59  caress
 # MB-System 4.5 Beta Release.
 #

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_hsldedmb.h	1/20/93
- *	$Id: mbf_hsldedmb.h,v 4.3 1997-04-21 17:02:07 caress Exp $
+ *	$Id: mbf_hsldedmb.h,v 4.4 1997-09-15 19:06:40 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -17,6 +17,9 @@
  * Author:	D. W. Caress
  * Date:	January 20, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1997/04/21  17:02:07  caress
+ * MB-System 4.5 Beta Release.
+ *
  * Revision 4.2  1994/10/21  12:20:01  caress
  * Release V4.0
  *
@@ -86,9 +89,9 @@ struct mbf_hsldedmb_data_struct
 	short	depth[59];	/* depths in scaled meters assuming 
 					1500 m/s water velocity */
 	short	range[59];	/* cross track distances in meters */
-	unsigned char	speed_ref;	/* speed reference 
+	mb_u_char	speed_ref;	/* speed reference 
 					("B": bottom track) */
-	unsigned char	quality;	/* quality flag */
+	mb_u_char	quality;	/* quality flag */
 	unsigned long	flag[4];
 	};
 

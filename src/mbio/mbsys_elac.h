@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_elac.h	8/20/94
- *	$Id: mbsys_elac.h,v 4.3 1997-07-25 14:19:53 caress Exp $
+ *	$Id: mbsys_elac.h,v 4.4 1997-09-15 19:06:40 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,10 @@
  * Date:	August 20, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1997/07/25  14:19:53  caress
+ * Version 4.5beta2.
+ * Much mucking, particularly with Simrad formats.
+ *
  * Revision 4.2  1997/04/21  17:02:07  caress
  * MB-System 4.5 Beta Release.
  *
@@ -55,7 +59,7 @@
  *   5. The relevent telegram start codes, types, and sizes are:
  *         0x0250: Comment (Defined only for MB-System)   200 data bytes
  *         0x0251: Position                                36 data bytes
- *         0x0252: Parameter                               56 data bytes
+ *         0x0252: Parameter                            56/54 data bytes
  *         0x0253: Sound velocity profile                2016 data bytes
  *         0x0254: BottomChart 56 beam bathymetry         848 data bytes
  *         0x0255: BottomChart 40 beam bathymetry         608 data bytes
@@ -87,6 +91,9 @@
 #define	ELAC_BATH56		0x0254
 #define	ELAC_BATH40		0x0255
 #define	ELAC_BATH32		0x0256
+#define	ELAC_XBATH56		0x0260
+#define	ELAC_XBATH40		0x0261
+#define	ELAC_XBATH32		0x0262
 
 /* telegram sizes */
 #define	ELAC_COMMENT_SIZE	200
@@ -96,6 +103,10 @@
 #define	ELAC_BATH56_SIZE	848
 #define	ELAC_BATH40_SIZE	608
 #define	ELAC_BATH32_SIZE	488
+#define	ELAC_XPARAMETER_SIZE	54
+#define	ELAC_XBATH56_SIZE	1072
+#define	ELAC_XBATH40_SIZE	768
+#define	ELAC_XBATH32_SIZE	616
 
 /* internal data structure */
 
@@ -115,8 +126,8 @@ struct mbsys_elac_profile_struct
 	int	pitch;			/* 0.005 degrees */
 	int	heading;		/* PI/180 degrees */
 	int	heave;			/* 0.001 meters */
-	short bath[8];		/* depths:  0.01 meters */	
-	short int bath_acrosstrack[8];
+	int	bath[8];		/* depths:  0.01 meters */	
+	int	bath_acrosstrack[8];
 				/* acrosstrack distances: 0.01 meters */
 	short int bath_alongtrack[8];
 				/* alongtrack distances: 0.01 meters */

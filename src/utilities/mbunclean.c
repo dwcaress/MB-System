@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbunclean.c	3/10/93
- *    $Id: mbunclean.c,v 4.8 1997-04-21 17:19:14 caress Exp $
+ *    $Id: mbunclean.c,v 4.9 1997-09-15 19:11:06 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,9 @@
  * Date:	March 10, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 4.8  1997/04/21  17:19:14  caress
+ * MB-System 4.5 Beta Release.
+ *
  * Revision 4.8  1997/04/17  15:14:38  caress
  * MB-System 4.5 Beta Release
  *
@@ -56,6 +59,9 @@
  *
  * Revision 3.1  1993/05/14  23:49:32  sohara
  * fixed $Log: not supported by cvs2svn $
+ * Revision 4.8  1997/04/21  17:19:14  caress
+ * MB-System 4.5 Beta Release.
+ *
  * Revision 4.8  1997/04/17  15:14:38  caress
  * MB-System 4.5 Beta Release
  *
@@ -112,7 +118,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbunclean.c,v 4.8 1997-04-21 17:19:14 caress Exp $";
+	static char rcs_id[] = "$Id: mbunclean.c,v 4.9 1997-09-15 19:11:06 caress Exp $";
 	static char program_name[] = "MBUNCLEAN";
 	static char help_message[] =  "MBUNCLEAN unflags multibeam bathymetry and amplitude data \nwhich has been flagged as bad by being set negative. \nThe default input and output streams are stdin and stdout.";
 	static char usage_message[] = "mbunclean [-Blow/high -Fformat -Llonflip -V -H  -Iinfile -Ooutfile]";
@@ -380,26 +386,12 @@ char **argv;
 
 	/* write comments to beginning of output file */
 	kind = MB_DATA_COMMENT;
-	strncpy(comment,"\0",256);
 	sprintf(comment,"This data unflagged by program %s version %s",
 		program_name,rcs_id);
-	status = mb_put(verbose,ombio_ptr,kind,
-			time_i,time_d,
-			navlon,navlat,speed,heading,
-			beams_bath,beams_amp,pixels_ss,
-			bath,amp,bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,&error);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
-	strncpy(comment,"\0",256);
 	sprintf(comment,"MB-system Version %s",MB_VERSION);
-	status = mb_put(verbose,ombio_ptr,kind,
-			time_i,time_d,
-			navlon,navlat,speed,heading,
-			beams_bath,beams_amp,pixels_ss,
-			bath,amp,bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,&error);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
 	right_now = time((long *)0);
 	strncpy(date,"\0",25);
@@ -412,118 +404,41 @@ char **argv;
 	else
 		strcpy(user, "unknown");
 	gethostname(host,128);
-	strncpy(comment,"\0",256);
 	sprintf(comment,"Run by user <%s> on cpu <%s> at <%s>",
 		user,host,date);
-	status = mb_put(verbose,ombio_ptr,kind,
-			time_i,time_d,
-			navlon,navlat,speed,heading,
-			beams_bath,beams_amp,pixels_ss,
-			bath,amp,bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,&error);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
-	strncpy(comment,"\0",256);
 	sprintf(comment,"Control Parameters:");
-	status = mb_put(verbose,ombio_ptr,kind,
-			time_i,time_d,
-			navlon,navlat,speed,heading,
-			beams_bath,beams_amp,pixels_ss,
-			bath,amp,bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,&error);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
-	strncpy(comment,"\0",256);
 	sprintf(comment,"  MBIO data format:   %d",format);
-	status = mb_put(verbose,ombio_ptr,kind,
-			time_i,time_d,
-			navlon,navlat,speed,heading,
-			beams_bath,beams_amp,pixels_ss,
-			bath,amp,bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,&error);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
-	strncpy(comment,"\0",256);
 	sprintf(comment,"  Input file:         %s",ifile);
-	status = mb_put(verbose,ombio_ptr,kind,
-			time_i,time_d,
-			navlon,navlat,speed,heading,
-			beams_bath,beams_amp,pixels_ss,
-			bath,amp,bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,&error);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
-	strncpy(comment,"\0",256);
 	sprintf(comment,"  Output file:        %s",ofile);
-	status = mb_put(verbose,ombio_ptr,kind,
-			time_i,time_d,
-			navlon,navlat,speed,heading,
-			beams_bath,beams_amp,pixels_ss,
-			bath,amp,bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,&error);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
-	strncpy(comment,"\0",256);
 	sprintf(comment,"  Longitude flip:     %d",lonflip);
-	status = mb_put(verbose,ombio_ptr,kind,
-			time_i,time_d,
-			navlon,navlat,speed,heading,
-			beams_bath,beams_amp,pixels_ss,
-			bath,amp,bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,&error);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
 	if (check_range == MB_YES)
 		{
-		strncpy(comment,"\0",256);
 		sprintf(comment,"  Depth range checking on:");
-		status = mb_put(verbose,ombio_ptr,kind,
-			time_i,time_d,
-			navlon,navlat,speed,heading,
-			beams_bath,beams_amp,pixels_ss,
-			bath,amp,bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,&error);
-		strncpy(comment,"\0",256);
+		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		sprintf(comment,"    Minimum acceptable depth: %f",depth_low);
-		status = mb_put(verbose,ombio_ptr,kind,
-			time_i,time_d,
-			navlon,navlat,speed,heading,
-			beams_bath,beams_amp,pixels_ss,
-			bath,amp,bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,&error);
-		strncpy(comment,"\0",256);
+		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		sprintf(comment,"    Maximum acceptable depth: %f",depth_high);
-		status = mb_put(verbose,ombio_ptr,kind,
-			time_i,time_d,
-			navlon,navlat,speed,heading,
-			beams_bath,beams_amp,pixels_ss,
-			bath,amp,bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,&error);
+		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		}
 	else
 		{
-		strncpy(comment,"\0",256);
 		sprintf(comment,"  Depth range checking off");
-		status = mb_put(verbose,ombio_ptr,kind,
-			time_i,time_d,
-			navlon,navlat,speed,heading,
-			beams_bath,beams_amp,pixels_ss,
-			bath,amp,bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,&error);
+		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		}
-	strncpy(comment,"\0",256);
 	sprintf(comment," ");
-	status = mb_put(verbose,ombio_ptr,kind,
-			time_i,time_d,
-			navlon,navlat,speed,heading,
-			beams_bath,beams_amp,pixels_ss,
-			bath,amp,bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,&error);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
 
 	/* read and write */

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sb2100b2.c	3/3/94
- *	$Id: mbr_sb2100b2.c,v 4.0 1997-04-21 17:01:19 caress Exp $
+ *	$Id: mbr_sb2100b2.c,v 4.1 1997-09-15 19:06:40 caress Exp $
  *
  *    Copyright (c) 1997 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	March 3, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1997/04/21  17:01:19  caress
+ * MB-System 4.5 Beta Release.
+ *
  * Revision 4.0  1997/04/17  15:11:34  caress
  * MB-System 4.5 Beta Release
  *
@@ -56,7 +59,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_sb2100b2.c,v 4.0 1997-04-21 17:01:19 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2100b2.c,v 4.1 1997-09-15 19:06:40 caress Exp $";
 	char	*function_name = "mbr_alm_sb2100b2";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -1933,8 +1936,9 @@ int	*error;
 		{
 		fprintf(stderr,"\ndbg5  Values to be written in MBIO function <%s>\n",
 			function_name);
-		fprintf(stderr,"dbg5       file_header_text: \n%s\n", 
-			mbf_sb2100b2_file_header_text);
+		fprintf(stderr,"dbg5       file_header_text: \n%s%s\n", 
+			mbf_sb2100b2_file_header_text_1, 
+			mbf_sb2100b2_file_header_text_2);
 		}
 
 	/* write the record label */
@@ -1953,7 +1957,8 @@ int	*error;
 	/* write the record length */
 	if (status == MB_SUCCESS)
 		{
-		record_length = strlen(mbf_sb2100b2_file_header_text);
+		record_length = strlen(mbf_sb2100b2_file_header_text_1)
+		    + strlen(mbf_sb2100b2_file_header_text_2);
 		sprintf(record_length_str, "%6d", record_length);
 		if (fwrite(record_length_str, 6, 1, mbfp) != 1)
 			{
@@ -1971,7 +1976,20 @@ int	*error;
 	if (status == MB_SUCCESS)
 		{			
 		/* write the data */
-		if (fwrite(mbf_sb2100b2_file_header_text, record_length, 
+		if (fwrite(mbf_sb2100b2_file_header_text_1, 
+			strlen(mbf_sb2100b2_file_header_text_1), 
+			1, mbfp) != 1)
+			{
+			*error = MB_ERROR_WRITE_FAIL;
+			status = MB_FAILURE;
+			}
+		else
+			{
+			*error = MB_ERROR_NO_ERROR;
+			status = MB_SUCCESS;
+			}
+		if (fwrite(mbf_sb2100b2_file_header_text_2, 
+			strlen(mbf_sb2100b2_file_header_text_2), 
 			1, mbfp) != 1)
 			{
 			*error = MB_ERROR_WRITE_FAIL;

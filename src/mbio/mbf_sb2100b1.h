@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	MBF_SB2100B1.h	1/16/94
- *	$Id: mbf_sb2100b1.h,v 4.0 1997-04-21 16:59:50 caress Exp $
+ *	$Id: mbf_sb2100b1.h,v 4.1 1997-09-15 19:06:40 caress Exp $
  *
  *    Copyright (c) 1997 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -17,6 +17,9 @@
  * Author:	D. W. Caress
  * Date:	January 16, 1997
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1997/04/21  16:59:50  caress
+ * MB-System 4.5 Beta Release.
+ *
  * Revision 4.0  1997/04/17  15:11:34  caress
  * MB-System 4.5 Beta Release
  *
@@ -215,7 +218,7 @@ struct mbf_sb2100b1_struct
 };
 
 /* text for ascii file header */
-char	*mbf_sb2100b1_file_header_text = 
+char	*mbf_sb2100b1_file_header_text_1 = 
 {"\
 \nSeaBeam 2100 multibeam sonar binary data format\n\
 MB-System format 42\n\
@@ -355,6 +358,10 @@ Record End                      03338           2       298     unsigned short\n
   >>Note: ASCII equivalent: \"[CR][LF]\"\n\
 ----------------------------------------------------------------------------\n\
 \n\
+"};
+
+char	*mbf_sb2100b1_file_header_text_2 = 
+{"\
 Sonar Data Header Record (96 bytes - navigation and sonar parameters):\n\
 ----------------------------------------------------------------------------\n\
 Item            Units           Valid           # of    Byte    Coding\n\

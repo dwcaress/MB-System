@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbclean.c	2/26/93
- *    $Id: mbclean.c,v 4.15 1997-07-25 14:28:10 caress Exp $
+ *    $Id: mbclean.c,v 4.16 1997-09-15 19:11:06 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -26,6 +26,9 @@
  * by David Caress.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.15  1997/07/25  14:28:10  caress
+ * Version 4.5beta2
+ *
  * Revision 4.14  1997/04/21  17:19:14  caress
  * MB-System 4.5 Beta Release.
  *
@@ -154,7 +157,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbclean.c,v 4.15 1997-07-25 14:28:10 caress Exp $";
+	static char rcs_id[] = "$Id: mbclean.c,v 4.16 1997-09-15 19:11:06 caress Exp $";
 	static char program_name[] = "MBCLEAN";
 	static char help_message[] =  "MBCLEAN identifies and flags artifacts in multibeam bathymetry data\nBad beams  are  indentified  based  on  one simple criterion only: \nexcessive bathymetric slopes.   The default input and output streams \nare stdin and stdout.";
 	static char usage_message[] = "mbclean [-Amax -Blow/high -Cslope -Dmin/max \n\t-Fformat -Gfraction_low/fraction_high \n\t-Iinfile -Llonflip -Mmode -Nbuffersize -Ooutfile -Q -Xzap_beams \n\t-V -H]";
@@ -726,7 +729,7 @@ char **argv;
 				ping[1].ss,
 				ping[1].ssacrosstrack,ping[1].ssalongtrack,
 				&error);
-			if (status = MB_SUCCESS)
+			if (status == MB_SUCCESS)
 				ndata++;
 			}
 
@@ -775,6 +778,7 @@ char **argv;
 					}
 				if (num_good < num_good_min)
 					{
+					find_bad = MB_YES;
 					for (i=0;i<center;i++)
 						{
 						if (ping[1].bath[i] > 0.0 && mode <= 2)
@@ -823,6 +827,7 @@ char **argv;
 					}
 				if (num_good < num_good_min)
 					{
+					find_bad = MB_YES;
 					for (i=center+1;i<beams_bath;i++)
 						{
 						if (ping[1].bath[i] > 0.0 && mode <= 2)

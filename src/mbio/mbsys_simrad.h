@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad.h	8/5/94
- *	$Id: mbsys_simrad.h,v 4.6 1997-07-25 14:19:53 caress Exp $
+ *	$Id: mbsys_simrad.h,v 4.7 1997-09-15 19:06:40 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -27,6 +27,10 @@
  * Date:	August 5, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.6  1997/07/25  14:19:53  caress
+ * Version 4.5beta2.
+ * Much mucking, particularly with Simrad formats.
+ *
  * Revision 4.5  1997/04/21  17:02:07  caress
  * MB-System 4.5 Beta Release.
  *
@@ -250,9 +254,9 @@ struct mbsys_simrad_survey_struct
 					EM-12 high res:  0.20 msec 
 					EM-12 low res:   0.80 msec
 					EM-121:          0.1 * range_res msec */
-	signed char	amp[MBSYS_SIMRAD_MAXBEAMS];	/* 0.5 dB */
-	unsigned char	quality[MBSYS_SIMRAD_MAXBEAMS];	/* meters */
-	signed char	heave[MBSYS_SIMRAD_MAXBEAMS];	/* 0.1 meters */
+	mb_s_char	amp[MBSYS_SIMRAD_MAXBEAMS];	/* 0.5 dB */
+	mb_u_char	quality[MBSYS_SIMRAD_MAXBEAMS];	/* meters */
+	mb_s_char	heave[MBSYS_SIMRAD_MAXBEAMS];	/* 0.1 meters */
 	
 	/* sidescan */
 	int	pixels_ss;	/* total number of samples for this ping */
@@ -275,7 +279,7 @@ struct mbsys_simrad_survey_struct
 	short int beam_start_sample[MBSYS_SIMRAD_MAXBEAMS];
 				/* start beam sample number among samples
 					from entire ping */
-	signed char	ss[MBSYS_SIMRAD_MAXPIXELS];
+	mb_s_char	ss[MBSYS_SIMRAD_MAXPIXELS];
 	short int ssp[MBSYS_SIMRAD_MAXPIXELS];
 	};
 

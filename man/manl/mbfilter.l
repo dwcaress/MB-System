@@ -10,7 +10,7 @@ Version 4.5
 \fBmbfilter\fP [\fB-A\fIkind\fP \fB-B\fIyr/mo/da/hr/mn/sc 
 \fB-D\fImode/xdim/ldim/iteration/offset\fP 
 \fB-E\fIyr/mo/da/hr/mn/sc 
-\fB-F\fIformat\fP \fB-I\fIinfile\fP
+\fB-F\fIformat\fP \fB-I\fIinfile\fP \fB-N\fIbuffersize\fP
 \fB-O\fIoutfile\fP \fB-R\fIwest/east/south/north\fP 
 \fB-S\fImode/xdim/ldim/iteration\fP 
 \fB-T\fIthreshold_lo/threshold_hi\fP
@@ -143,6 +143,21 @@ This program uses the \fBMBIO\fP library and will read or write any swath sonar
 format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page. Default: \fIinfile\fP = "stdin".
+.TP
+.B \fB-N\fIbuffersize\fP
+Sets the maximum number of data records which can be
+read into the buffer. In general, data records may be
+of several different types (e.g. parameter, position, 
+comment) in addition to survey data records. Many data 
+formats include many more position data records than
+survey data records. Thus, a large buffer may be required
+to access a reasonable number of survey data records. 
+However, on memory limited machines large buffer sizes
+can lead to poor performance due to memory swapping. 
+The default value of \fIbuffersize\fP = 500 is appropriate 
+for most cases, but users can set the buffer size as required.
+The absolute maximum buffer size is 5000. 
+Default: \fIbuffersize\fP = 500.
 .TP
 .B \fB-O\fIoutfile\fP
 Data file to which the output data will be written. The \fBMBIO\fP

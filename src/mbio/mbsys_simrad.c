@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad.c	3.00	8/5/94
- *	$Id: mbsys_simrad.c,v 4.13 1997-07-25 14:19:53 caress Exp $
+ *	$Id: mbsys_simrad.c,v 4.14 1997-09-15 19:06:40 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -42,6 +42,10 @@
  * Date:	August 5, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.13  1997/07/25  14:19:53  caress
+ * Version 4.5beta2.
+ * Much mucking, particularly with Simrad formats.
+ *
  * Revision 4.12  1997/04/21  17:02:07  caress
  * MB-System 4.5 Beta Release.
  *
@@ -961,7 +965,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_simrad.c,v 4.13 1997-07-25 14:19:53 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad.c,v 4.14 1997-09-15 19:06:40 caress Exp $";
 	char	*function_name = "mbsys_simrad_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -1095,7 +1099,7 @@ char	*mbio_ptr;
 char	*store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_simrad.c,v 4.13 1997-07-25 14:19:53 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad.c,v 4.14 1997-09-15 19:06:40 caress Exp $";
 	char	*function_name = "mbsys_simrad_survey_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -1277,7 +1281,7 @@ int	*error;
 	struct mbsys_simrad_survey_struct *ping;
 	int	ntime_i[7];
 	double	ntime_d;
-	signed char	*beam_ss;
+	mb_s_char	*beam_ss;
 	double	ss_spacing;
 	double	dd;
 	double	mtodeglon, mtodeglat;
@@ -2070,7 +2074,7 @@ int	*error;
 	struct mbsys_simrad_survey_struct *ping;
 	int	ntime_i[7];
 	double	ntime_d;
-	signed char	*beam_ss;
+	mb_s_char	*beam_ss;
 	double	ss_spacing;
 	double	dd;
 	double	mtodeglon, mtodeglat;

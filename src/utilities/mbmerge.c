@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmerge.c	2/20/93
  *
- *    $Id: mbmerge.c,v 4.17 1997-07-25 14:28:10 caress Exp $
+ *    $Id: mbmerge.c,v 4.18 1997-09-15 19:11:06 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,9 @@
  * Date:	February 20, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.17  1997/07/25  14:28:10  caress
+ * Version 4.5beta2
+ *
  * Revision 4.16  1997/04/21  17:19:14  caress
  * MB-System 4.5 Beta Release.
  *
@@ -117,7 +120,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbmerge.c,v 4.17 1997-07-25 14:28:10 caress Exp $";
+	static char rcs_id[] = "$Id: mbmerge.c,v 4.18 1997-09-15 19:11:06 caress Exp $";
 	static char program_name[] = "MBMERGE";
 	static char help_message[] =  "MBMERGE merges new navigation with swath sonar data from an \ninput file and then writes the merged data to an output \nswath sonar data file. The default input \nand output streams are stdin and stdout.";
 	static char usage_message[] = "mbmerge [-Aheading_offset -B -Fformat -Llonflip -V -H  -Iinfile -Ooutfile -Mnavformat -Nnavfile -Z]";
@@ -779,26 +782,12 @@ char **argv;
 
 	/* write comments to beginning of output file */
 	kind = MB_DATA_COMMENT;
-	strncpy(comment,"\0",256);
 	sprintf(comment,"This data merged with navigation by program %s version %s",
 		program_name,rcs_id);
-	status = mb_put(verbose,ombio_ptr,kind,
-			time_i,time_d,
-			navlon,navlat,speed,heading,
-			beams_bath,beams_amp,pixels_ss,
-			bath,amp,bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,&error);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
-	strncpy(comment,"\0",256);
 	sprintf(comment,"MB-system Version %s",MB_VERSION);
-	status = mb_put(verbose,ombio_ptr,kind,
-			time_i,time_d,
-			navlon,navlat,speed,heading,
-			beams_bath,beams_amp,pixels_ss,
-			bath,amp,bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,&error);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
 	right_now = time((long *)0);
 	strncpy(date,"\0",25);
@@ -811,86 +800,30 @@ char **argv;
 	else
 		strcpy(user, "unknown");
 	gethostname(host,128);
-	strncpy(comment,"\0",256);
 	sprintf(comment,"Run by user <%s> on cpu <%s> at <%s>",
 		user,host,date);
-	status = mb_put(verbose,ombio_ptr,kind,
-			time_i,time_d,
-			navlon,navlat,speed,heading,
-			beams_bath,beams_amp,pixels_ss,
-			bath,amp,bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,&error);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
-	strncpy(comment,"\0",256);
 	sprintf(comment,"Control Parameters:");
-	status = mb_put(verbose,ombio_ptr,kind,
-			time_i,time_d,
-			navlon,navlat,speed,heading,
-			beams_bath,beams_amp,pixels_ss,
-			bath,amp,bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,&error);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
-	strncpy(comment,"\0",256);
 	sprintf(comment,"  MBIO data format:   %d",format);
-	status = mb_put(verbose,ombio_ptr,kind,
-			time_i,time_d,
-			navlon,navlat,speed,heading,
-			beams_bath,beams_amp,pixels_ss,
-			bath,amp,bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,&error);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
-	strncpy(comment,"\0",256);
 	sprintf(comment,"  Input file:         %s",ifile);
-	status = mb_put(verbose,ombio_ptr,kind,
-			time_i,time_d,
-			navlon,navlat,speed,heading,
-			beams_bath,beams_amp,pixels_ss,
-			bath,amp,bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,&error);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
-	strncpy(comment,"\0",256);
 	sprintf(comment,"  Output file:        %s",ofile);
-	status = mb_put(verbose,ombio_ptr,kind,
-			time_i,time_d,
-			navlon,navlat,speed,heading,
-			beams_bath,beams_amp,pixels_ss,
-			bath,amp,bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,&error);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
-	strncpy(comment,"\0",256);
 	sprintf(comment,"  Navigation file:    %s",nfile);
-	status = mb_put(verbose,ombio_ptr,kind,
-			time_i,time_d,
-			navlon,navlat,speed,heading,
-			beams_bath,beams_amp,pixels_ss,
-			bath,amp,bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,&error);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
-	strncpy(comment,"\0",256);
 	sprintf(comment,"  Longitude flip:     %d",lonflip);
-	status = mb_put(verbose,ombio_ptr,kind,
-			time_i,time_d,
-			navlon,navlat,speed,heading,
-			beams_bath,beams_amp,pixels_ss,
-			bath,amp,bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,&error);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
-	strncpy(comment,"\0",256);
 	sprintf(comment," ");
-	status = mb_put(verbose,ombio_ptr,kind,
-			time_i,time_d,
-			navlon,navlat,speed,heading,
-			beams_bath,beams_amp,pixels_ss,
-			bath,amp,bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,&error);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
 
 	/* read and write */

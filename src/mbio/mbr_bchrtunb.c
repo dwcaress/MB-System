@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_bchrtunb.c	8/8/94
- *	$Id: mbr_bchrtunb.c,v 4.8 1997-07-28 14:58:19 caress Exp $
+ *	$Id: mbr_bchrtunb.c,v 4.9 1997-09-15 19:06:40 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	August 8, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.8  1997/07/28  14:58:19  caress
+ * Fixed typos.
+ *
  * Revision 4.7  1997/07/25  14:19:53  caress
  * Version 4.5beta2.
  * Much mucking, particularly with Simrad formats.
@@ -79,7 +82,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_bchrtunb.c,v 4.8 1997-07-28 14:58:19 caress Exp $";
+	static char res_id[]="$Id: mbr_bchrtunb.c,v 4.9 1997-09-15 19:06:40 caress Exp $";
 	char	*function_name = "mbr_alm_bchrtunb";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -863,7 +866,7 @@ int	*error;
 				store->profile[i].bath[j] 
 					= data->profile[i].bath[j];
 				store->profile[i].bath_acrosstrack[j] 
-					= data->profile[i].bath_acrosstrack[j];
+					= 2 * data->profile[i].bath_acrosstrack[j];
 				store->profile[i].bath_alongtrack[j] 
 					= data->profile[i].bath_alongtrack[j];
 				store->profile[i].tt[j] 
@@ -1043,7 +1046,8 @@ int	*error;
 				data->profile[i].bath[j] 
 					= store->profile[i].bath[j];
 				data->profile[i].bath_acrosstrack[j] 
-					= store->profile[i].bath_acrosstrack[j];
+					= store->profile[i].bath_acrosstrack[j] 
+					    / 2;
 				data->profile[i].bath_alongtrack[j] 
 					= store->profile[i].bath_alongtrack[j];
 				data->profile[i].tt[j] 
@@ -1778,7 +1782,6 @@ int	*error;
 	int	*int_ptr;
 	int	i;
 
-verbose = 5;
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
@@ -1886,7 +1889,6 @@ int	*error;
 	char	line[ELAC_BATH56_SIZE+3];
 	char	*profile;
 	char	*beam;
-	unsigned char *char_ptr;
 	short int *short_ptr;
 	int	*int_ptr;
 	int	i, j;
@@ -2115,7 +2117,6 @@ int	*error;
 	char	line[ELAC_BATH40_SIZE+3];
 	char	*profile;
 	char	*beam;
-	unsigned char *char_ptr;
 	short int *short_ptr;
 	int	*int_ptr;
 	int	i, j;
@@ -2344,7 +2345,6 @@ int	*error;
 	char	line[ELAC_BATH32_SIZE+3];
 	char	*profile;
 	char	*beam;
-	unsigned char *char_ptr;
 	short int *short_ptr;
 	int	*int_ptr;
 	int	i, j;
@@ -3294,7 +3294,6 @@ int	*error;
 	char	*profile;
 	char	*beam;
 	short int label;
-	unsigned char *char_ptr;
 	short int *short_ptr;
 	int	*int_ptr;
 	int	i, j;
@@ -3548,7 +3547,6 @@ int	*error;
 	char	*profile;
 	char	*beam;
 	short int label;
-	unsigned char *char_ptr;
 	short int *short_ptr;
 	int	*int_ptr;
 	int	i, j;
@@ -3802,7 +3800,6 @@ int	*error;
 	char	*profile;
 	char	*beam;
 	short int label;
-	unsigned char *char_ptr;
 	short int *short_ptr;
 	int	*int_ptr;
 	int	i, j;

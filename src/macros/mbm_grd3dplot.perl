@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grd3dplot.perl	8/6/95
-#    $Id: mbm_grd3dplot.perl,v 4.4 1997-04-21 16:54:41 caress Exp $
+#    $Id: mbm_grd3dplot.perl,v 4.5 1997-09-15 19:05:23 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -61,10 +61,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   August 8, 1994
 #
 # Version:
-#   $Id: mbm_grd3dplot.perl,v 4.4 1997-04-21 16:54:41 caress Exp $
+#   $Id: mbm_grd3dplot.perl,v 4.5 1997-09-15 19:05:23 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.4  1997/04/21  16:54:41  caress
+# MB-System 4.5 Beta Release.
+#
 # Revision 4.4  1997/04/17  15:06:49  caress
 # MB-System 4.5 Beta Release
 #
@@ -1521,19 +1524,19 @@ else
 	&GetBaseTick;
 	if ($view_azimuth >= 0.0 && $view_azimuth < 90.0)
 		{
-		$axes = "$base_tick/$base_tick:.\"$tlabel\":NEZ";
+		$axes = "$base_tick/$base_tick/$base_tick_z:.\"$tlabel\":NEZ";
 		}
 	elsif ($view_azimuth >= 90.0 && $view_azimuth < 180.0)
 		{
-		$axes = "$base_tick/$base_tick:.\"$tlabel\":SEZ";
+		$axes = "$base_tick/$base_tick/$base_tick_z:.\"$tlabel\":SEZ";
 		}
 	elsif ($view_azimuth >= 180.0 && $view_azimuth < 270.0)
 		{
-		$axes = "$base_tick/$base_tick:.\"$tlabel\":WSZ";
+		$axes = "$base_tick/$base_tick/$base_tick_z:.\"$tlabel\":WSZ";
 		}
 	elsif ($view_azimuth >= 270.0 && $view_azimuth < 360.0)
 		{
-		$axes = "$base_tick/$base_tick:.\"$tlabel\":WNZ";
+		$axes = "$base_tick/$base_tick/$base_tick_z:.\"$tlabel\":WNZ";
 		}
 	}
 
@@ -2466,6 +2469,8 @@ sub GetBaseTick {
 		$base_tick = "60";
 		}
 
+	# figure out some reasonable tick intervals for the basemap z axis
+	$base_tick_z = ($zmax - $zmin) / 5;
 }
 #-----------------------------------------------------------------------
 # This version of Getopts has been augmented to support multiple

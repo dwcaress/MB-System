@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_mr1b.c	7/19/94
- *	$Id: mbsys_mr1b.c,v 4.5 1997-07-25 14:19:53 caress Exp $
+ *	$Id: mbsys_mr1b.c,v 4.6 1997-09-15 19:06:40 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -34,6 +34,10 @@
  * Date:	July 19, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.5  1997/07/25  14:19:53  caress
+ * Version 4.5beta2.
+ * Much mucking, particularly with Simrad formats.
+ *
  * Revision 4.4  1997/04/21  17:02:07  caress
  * MB-System 4.5 Beta Release.
  *
@@ -80,7 +84,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_mr1b.c,v 4.5 1997-07-25 14:19:53 caress Exp $";
+ static char res_id[]="$Id: mbsys_mr1b.c,v 4.6 1997-09-15 19:06:40 caress Exp $";
 	char	*function_name = "mbsys_mr1b_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -724,7 +728,7 @@ int	*error;
 			if (fabs(store->bath_port[i]) > 0.0)
 				{
 				ttimes[j] = store->tt_port[i];
-				angles[j] = store->angle_port[i];
+				angles[j] = fabs(store->angle_port[i]);
 				depth_offset[j] = store->png_prdepth;
 				if (store->bath_port[i] < 0.0)
 					flags[j] = MB_YES;
@@ -764,7 +768,7 @@ int	*error;
 			if (fabs(store->bath_stbd[i]) > 0.0)
 				{
 				ttimes[j] = store->tt_stbd[i];
-				angles[j] = store->angle_stbd[i];
+				angles[j] = fabs(store->angle_stbd[i]);
 				depth_offset[j] = store->png_prdepth;
 				if (store->bath_stbd[i] < 0.0)
 					flags[j] = MB_YES;

@@ -50,20 +50,23 @@ at any given time in a program.  Data files are closed using the
 function \fBmb_close\fP.
 
 \fBMBIO\fP has three levels of i/o functionality:
- 	1	Simple reading and writing with the positions
- 		of individual beams given in longitude and 
- 		latitude (\fBmb_read\fP and \fBmb_write\fP) or 
- 		crosstrack distances (\fBmb_get\fP and 
+ 	1	Simple reading and writing with the positions of
+ 		individual beams and pixels given in longitude 
+ 		and latitude (\fBmb_read\fP and \fBmb_write\fP) 
+ 		or acrosstrack distances (\fBmb_get\fP and 
  		\fBmb_put\fP). Only a limited set of navigation 
  		information is passed. These functions can be 
  		used without any special include files or any 
  		knowledge of the actual data structures used
- 		by the data formats or \fBMBIO\fP. The primary 
+ 		by the data formats or \fBMBIO\fP. A function 
+		for writing comments (\fBmb_put_comment\fP)
+		is also included. The primary 
  		functions are:
  			\fBmb_read\fP
  			\fBmb_write\fP
  			\fBmb_get\fP
  			\fBmb_put\fP
+ 			\fBmb_put_comment\fP
  	2	Complete reading and writing of data structures 
  		containing all of the available information.   
  		Special include files are required to make 
@@ -1076,6 +1079,34 @@ The values to be output are:
  			corresponding to sidescan
  	\fIssacrosstrack\fP:	array of of alongtrack distances in meters
  			corresponding to sidescan
+ 	\fIcomment\fP:		comment string
+ 	\fIerror\fP:		error value
+.br
+A status value indicating success or failure is returned; the error value
+argument \fIerror\fP passes more detailed information about 
+write failures. 
+.RE
+.IP
+int \fBmb_put_comment\fP(\fIverbose\fP, \fImbio_ptr\fP, 
+\fIcomment\fP, \fIerror\fP)
+.br
+int \fIverbose\fP;
+.br
+char *\fImbio_ptr\fP;
+.br
+char \fIcomment\fP[256];
+.br
+int *\fIerror\fP;
+.RS 10
+The function \fBmb_put_comment\fP writes a comment to the file listed
+in the \fBMBIO\fP descriptor pointed to by \fIMBIO_ptr\fP.
+The \fIverbose\fP
+value controls the standard error output verbosity of the function.
+The data is in the form of a null terminated string. The maximum
+length of comments varies with different data formats. In
+general individual comments should be less than 80 characters
+long to insure compatibility with all formats.
+The values to be output are:
  	\fIcomment\fP:		comment string
  	\fIerror\fP:		error value
 .br

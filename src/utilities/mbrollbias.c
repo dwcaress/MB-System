@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbrollbias.c	5/16/93
- *    $Id: mbrollbias.c,v 4.7 1997-04-21 17:19:14 caress Exp $
+ *    $Id: mbrollbias.c,v 4.8 1997-09-15 19:11:06 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -31,6 +31,9 @@
  * Date:	May 16, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.7  1997/04/21  17:19:14  caress
+ * MB-System 4.5 Beta Release.
+ *
  * Revision 4.6  1996/04/22  13:23:05  caress
  * Now have DTR and MIN/MAX defines in mb_define.h
  *
@@ -95,7 +98,7 @@ struct bathptr
 	};
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbrollbias.c,v 4.7 1997-04-21 17:19:14 caress Exp $";
+static char rcs_id[] = "$Id: mbrollbias.c,v 4.8 1997-09-15 19:11:06 caress Exp $";
 static char program_name[] = "MBROLLBIAS";
 static char help_message[] =  "MBROLLBIAS is an utility used to assess roll bias of multibeam \nsonar systems using bathymetry data from two swaths covering the \nsame seafloor in opposite directions. The program takes two input  \nfiles and calculates best fitting planes for each dataset.   \nThe roll bias is calculated by solving for a common roll bias\nfactor which explains the difference between the seafloor\nslopes observed on the two swaths.  This approach assumes that \npitch bias is not a factor; this assumption is most correct when\nthe heading of the two shiptracks are exactly opposite. The area is\ndivided into a number of rectangular regions and calculations are done  \nin each region containing a sufficient number of data from both \nswaths.  A positive roll bias value means that the the vertical \nreference used by the multibeam system is biased to starboard, \ngiving rise to shallow bathymetry to port and deep bathymetry \nto starboard.";
 static char usage_message[] = "mbrollbias -Dxdim/ydim -Fformat1/format2 -Ifile1 -Jfile2 -Llonflip -Rw/e/s/n -V -H]";
@@ -204,6 +207,7 @@ char **argv;
 	int	i, j, k, m;
 	int	ii, jj, kk;
 	int	ib, ix, iy, indx;
+	void	gauss();
 
 	/* get current default values */
 	status = mb_defaults(verbose,&format,&pings,&lonflip,bounds,
@@ -1080,7 +1084,7 @@ char **argv;
 	exit(error);
 }
 /*--------------------------------------------------------------------*/
-gauss(a,vec,n,nstore,test,ierror,itriag)
+void gauss(a,vec,n,nstore,test,ierror,itriag)
 double *a, vec[], test;
 int n, nstore, *ierror, itriag;
 {

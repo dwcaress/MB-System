@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_prog.c	6/23/95
- *    $Id: mbnavedit_prog.c,v 4.9 1997-04-22 19:25:57 caress Exp $
+ *    $Id: mbnavedit_prog.c,v 4.10 1997-09-15 19:10:20 caress Exp $
  *
  *    Copyright (c) 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,9 @@
  * Date:	June 23,  1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.9  1997/04/22  19:25:57  caress
+ * Fixed startup mode.
+ *
  * Revision 4.8  1997/04/21  17:07:38  caress
  * MB-System 4.5 Beta Release.
  *
@@ -130,7 +133,7 @@ struct mbnavedit_plot_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbnavedit_prog.c,v 4.9 1997-04-22 19:25:57 caress Exp $";
+static char rcs_id[] = "$Id: mbnavedit_prog.c,v 4.10 1997-09-15 19:10:20 caress Exp $";
 static char program_name[] = "MBNAVEDIT";
 static char help_message[] =  "MBNAVEDIT is an interactive navigation editor for swath sonar data.\n\tIt can work with any data format supported by the MBIO library.\n";
 static char usage_message[] = "mbnavedit [-Byr/mo/da/hr/mn/sc -D  -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ooutfile -V -H]";
@@ -452,7 +455,7 @@ int	*startup_file;
 	if (fileflag > 0)
 		{
 		status = mbnavedit_action_open();
-		if (status = MB_SUCCESS)
+		if (status == MB_SUCCESS)
 			*startup_file = MB_YES;
 		}
 	else
@@ -1005,9 +1008,9 @@ int	hold;
 	if (ndump > 0)
 		current = current - ndump;
 	if (current < 0)
-		current == 0;
+		current = 0;
 	if (current > nbuff - 1)
-		current == nbuff - 1;
+		current = nbuff - 1;
 
 	/* flag lack of indexing */
 	nlist = 0;

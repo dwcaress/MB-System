@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_hsuricen.h	1/20/93
- *	$Id: mbf_hsuricen.h,v 4.2 1997-04-21 17:02:07 caress Exp $
+ *	$Id: mbf_hsuricen.h,v 4.3 1997-09-15 19:06:40 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -17,6 +17,9 @@
  * Author:	D. W. Caress
  * Date:	January 20, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1997/04/21  17:02:07  caress
+ * MB-System 4.5 Beta Release.
+ *
  * Revision 4.1  1994/10/21  12:20:01  caress
  * Release V4.0
  *
@@ -76,8 +79,8 @@ struct mbf_hsuricen_data_struct
 	short	speed;		/* speed in knots x 100 */
 	short	pitch;		/* pitch in degrees x 10 */
 	short	scale;		/* scale factor x 100 */
-	unsigned char	speed_ref;	/* 'B' or 'W' */
-	unsigned char	quality;	
+	mb_u_char	speed_ref;	/* 'B' or 'W' */
+	mb_u_char	quality;	
 	short	deph[59];	/* scaled depths in meters
 					portmost to stbdmost */
 	short	dist[59];	/* scaled cross track distances,

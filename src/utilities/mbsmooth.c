@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsmooth.c	6/12/93
- *    $Id: mbsmooth.c,v 4.11 1997-07-25 14:28:10 caress Exp $
+ *    $Id: mbsmooth.c,v 4.12 1997-09-15 19:11:06 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -29,6 +29,9 @@
  * in the current version.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.11  1997/07/25  14:28:10  caress
+ * Version 4.5beta2
+ *
  * Revision 4.10  1997/04/21  17:19:14  caress
  * MB-System 4.5 Beta Release.
  *
@@ -147,7 +150,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbsmooth.c,v 4.11 1997-07-25 14:28:10 caress Exp $";
+	static char rcs_id[] = "$Id: mbsmooth.c,v 4.12 1997-09-15 19:11:06 caress Exp $";
 	static char program_name[] = "MBSMOOTH";
 	static char help_message[] =  "MBSMOOTH applies a spatial \
 domain gaussian filter to multibeam \nbathymetry data in order to \
@@ -485,43 +488,13 @@ smooth out noise in multibeam \nbathymetry data.";
 
 	/* write comments to beginning of output file */
 	kind = MB_DATA_COMMENT;
-	strncpy(comment,"\0",256);
 	sprintf(comment,"This bathymetry data smoothed by program %s",
 		program_name);
-	status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,ping[0].ssacrosstrack,
-			ping[0].ssalongtrack,
-			comment,&error);
-	strncpy(comment,"\0",256);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	sprintf(comment,"Version %s",rcs_id);
-	status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,ping[0].ssacrosstrack,
-			ping[0].ssalongtrack,
-			comment,&error);
-	strncpy(comment,"\0",256);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	sprintf(comment,"MB-system Version %s",MB_VERSION);
-	status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,ping[0].ssacrosstrack,
-			ping[0].ssalongtrack,
-			comment,&error);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	right_now = time((long *)0);
 	strncpy(date,"\0",25);
 	right_now = time((long *)0);
@@ -533,130 +506,30 @@ smooth out noise in multibeam \nbathymetry data.";
 	else
 		strcpy(user, "unknown");
 	gethostname(host,128);
-	strncpy(comment,"\0",256);
 	sprintf(comment,"Run by user <%s> on cpu <%s> at <%s>",
 		user,host,date);
-	status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,ping[0].ssacrosstrack,
-			ping[0].ssalongtrack,
-			comment,&error);
-	strncpy(comment,"\0",256);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	sprintf(comment,"Control Parameters:");
-	status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,ping[0].ssacrosstrack,
-			ping[0].ssalongtrack,
-			comment,&error);
-	strncpy(comment,"\0",256);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	sprintf(comment,"  MBIO data format:   %d",format);
-	status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,ping[0].ssacrosstrack,
-			ping[0].ssalongtrack,
-			comment,&error);
-	strncpy(comment,"\0",256);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	sprintf(comment,"  Input file:         %s",ifile);
-	status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,ping[0].ssacrosstrack,
-			ping[0].ssalongtrack,
-			comment,&error);
-	strncpy(comment,"\0",256);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	sprintf(comment,"  Output file:        %s",ofile);
-	status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,ping[0].ssacrosstrack,
-			ping[0].ssalongtrack,
-			comment,&error);
-	strncpy(comment,"\0",256);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	sprintf(comment,"  Longitude flip:     %d",lonflip);
-	status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,ping[0].ssacrosstrack,
-			ping[0].ssalongtrack,
-			comment,&error);
-	strncpy(comment,"\0",256);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	sprintf(comment,"  Filter widths file:   %s",wfile);
-	status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,ping[0].ssacrosstrack,
-			ping[0].ssalongtrack,
-			comment,&error);
-	strncpy(comment,"\0",256);
-	strncpy(comment,"\0",256);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	sprintf(comment,"  Filter widths:");
-	status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,ping[0].ssacrosstrack,
-			ping[0].ssalongtrack,
-			comment,&error);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	for (i=0;i<beams_bath;i++)
 		{
-		strncpy(comment,"\0",256);
 		sprintf(comment,"    %2d  %10.2f",i,width[i]);
-		status = mb_put(verbose,ombio_ptr,kind,
-				ping[0].time_i,ping[0].time_d,
-				ping[0].navlon,ping[0].navlat,
-				ping[0].speed,ping[0].heading,
-				beams_bath,beams_amp,pixels_ss,
-				ping[0].bath,ping[0].amp,
-				ping[0].bathacrosstrack,ping[0].bathalongtrack,
-				ping[0].ss,ping[0].ssacrosstrack,
-				ping[0].ssalongtrack,
-				comment,&error);
+		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		}
 	sprintf(comment," ");
-	status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,ping[0].ssacrosstrack,
-			ping[0].ssalongtrack,
-			comment,&error);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 
 	/* initialize the buffer */
 	status = mb_buffer_init(verbose,&buff_ptr,&error);
