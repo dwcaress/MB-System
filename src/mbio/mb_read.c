@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_read.c	3.00	2/20/93
- *    $Id: mb_read.c,v 3.2 1993-06-02 11:11:07 caress Exp $
+ *    $Id: mb_read.c,v 3.3 1993-06-05 07:19:31 caress Exp $
  *
  *    Copyright (c) 1993 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,10 @@
  * Date:	February 20, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 3.2  1993/06/02  11:11:07  caress
+ * Forced mb_read to overwrite undefined beams with zero
+ * depth and position values.
+ *
  * Revision 3.1  1993/05/14  22:38:14  sohara
  * fixed rcs_id message
  *
@@ -40,6 +44,7 @@
 
 /* local define */
 #define DTR (M_PI/180.)
+#define RTD (180./M_PI)
 
 /*--------------------------------------------------------------------*/
 int mb_read(verbose,mbio_ptr,kind,pings,time_i,time_d,
@@ -70,7 +75,7 @@ char	*comment;
 int	*error;
 {
 
-  static char rcs_id[]="$Id: mb_read.c,v 3.2 1993-06-02 11:11:07 caress Exp $";
+  static char rcs_id[]="$Id: mb_read.c,v 3.3 1993-06-05 07:19:31 caress Exp $";
 	char	*function_name = "mb_read";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
@@ -80,6 +85,7 @@ int	*error;
 	double	headingx, headingy;
 	double	dx, dy;
 	double	delta_time;
+	double	denom;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -102,6 +108,8 @@ int	*error;
 	mb_io_ptr->lat = 0.0;
 	mb_io_ptr->speed = 0.0;
 	mb_io_ptr->heading = 0.0;
+	headingx = 0.0;
+	headingy = 0.0;
 	for (i=0;i<mb_io_ptr->beams_bath;i++)
 		{
 		mb_io_ptr->bath[i] = 0;
@@ -331,6 +339,8 @@ int	*error;
 				+ mb_io_ptr->new_speed;
 			mb_io_ptr->heading = mb_io_ptr->heading 
 				+ mb_io_ptr->new_heading;
+			headingx = headingx + sin(DTR*mb_io_ptr->new_heading);
+			headingy = headingy + cos(DTR*mb_io_ptr->new_heading);
 			for (i=0;i<mb_io_ptr->beams_bath;i++)
 			  {
 			  if (mb_io_ptr->new_bath[i] > 0 
@@ -522,9 +532,21 @@ int	*error;
 		/* get navigation values */
 		*navlon = mb_io_ptr->lon/mb_io_ptr->pings_binned;
 		*navlat = mb_io_ptr->lat/mb_io_ptr->pings_binned;
-		*heading = mb_io_ptr->heading/mb_io_ptr->pings_binned;
-		headingx = sin(*heading*DTR);
-		headingy = cos(*heading*DTR);
+		headingx = headingx/mb_io_ptr->pings_binned;
+		headingy = headingy/mb_io_ptr->pings_binned;
+		denom = sqrt(headingx*headingx + headingy*headingy);
+		if (denom > 0.0)
+			{
+			headingx = headingx/denom;
+			headingy = headingy/denom;
+			*heading = RTD*atan2(headingx,headingy);
+			}
+		else
+			{
+			*heading = mb_io_ptr->heading/mb_io_ptr->pings_binned;
+			headingx = sin(*heading*DTR);
+			headingy = cos(*heading*DTR);
+			}
 
 		/* get coordinate scaling */
 		mb_coor_scale(verbose,*navlat,&mtodeglon,&mtodeglat);
