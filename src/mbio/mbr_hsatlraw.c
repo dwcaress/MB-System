@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsatlraw.c	2/11/93
- *	$Id: mbr_hsatlraw.c,v 4.1 1994-05-21 02:23:29 caress Exp $
+ *	$Id: mbr_hsatlraw.c,v 4.2 1994-10-21 12:20:01 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,12 @@
  * Author:	D. W. Caress
  * Date:	February 11, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1994/05/21  02:23:29  caress
+ * Made sure that mb_io_ptr->new_bath_alongtrack is set to zero on reading.
+ *
+ * Revision 4.1  1994/05/21  02:23:29  caress
+ * Made sure that mb_io_ptr->new_bath_alongtrack is set to zero on reading.
+ *
  * Revision 4.0  1994/03/06  00:01:56  caress
  * First cut at version 4.0
  *
@@ -73,7 +79,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_hsatlraw.c,v 4.1 1994-05-21 02:23:29 caress Exp $";
+ static char res_id[]="$Id: mbr_hsatlraw.c,v 4.2 1994-10-21 12:20:01 caress Exp $";
 	char	*function_name = "mbr_alm_hsatlraw";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -151,8 +157,8 @@ int	*error;
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* deallocate memory for data descriptor */
-	status = mb_free(verbose,mb_io_ptr->raw_data,error);
-	status = mb_free(verbose,mb_io_ptr->store_data,error);
+	status = mb_free(verbose,&mb_io_ptr->raw_data,error);
+	status = mb_free(verbose,&mb_io_ptr->store_data,error);
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -353,6 +359,7 @@ int	*error;
 	mb_io_ptr->new_time_i[3] = 0;
 	mb_io_ptr->new_time_i[4] = 0;
 	mb_io_ptr->new_time_i[5] = 0;
+	mb_io_ptr->new_time_i[6] = 0;
 	mb_io_ptr->new_time_d = 0.0;
 	mb_io_ptr->new_lon = 0.0;
 	mb_io_ptr->new_lat = 0.0;
@@ -360,13 +367,13 @@ int	*error;
 	mb_io_ptr->new_speed = 0.0;
 	for (i=0;i<mb_io_ptr->beams_bath;i++)
 		{
-		mb_io_ptr->new_bath[i] = 0;
-		mb_io_ptr->new_bath_acrosstrack[i] = 0;
-		mb_io_ptr->new_bath_alongtrack[i] = 0;
+		mb_io_ptr->new_bath[i] = 0.0;
+		mb_io_ptr->new_bath_acrosstrack[i] = 0.0;
+		mb_io_ptr->new_bath_alongtrack[i] = 0.0;
 		}
 	for (i=0;i<mb_io_ptr->beams_amp;i++)
 		{
-		mb_io_ptr->new_amp[i] = 0;
+		mb_io_ptr->new_amp[i] = 0.0;
 		}
 
 	/* read next data from file */
@@ -388,6 +395,7 @@ int	*error;
 		mb_io_ptr->new_time_i[3] = data->hour;
 		mb_io_ptr->new_time_i[4] = data->minute;
 		mb_io_ptr->new_time_i[5] = data->second;
+		mb_io_ptr->new_time_i[6] = 0;
 		mb_get_time(verbose,mb_io_ptr->new_time_i,
 			&mb_io_ptr->new_time_d);
 
@@ -438,6 +446,8 @@ int	*error;
 				mb_io_ptr->new_time_i[4]);
 			fprintf(stderr,"dbg4       time_i[5]:  %d\n",
 				mb_io_ptr->new_time_i[5]);
+			fprintf(stderr,"dbg4       time_i[6]:  %d\n",
+				mb_io_ptr->new_time_i[6]);
 			fprintf(stderr,"dbg4       time_d:     %f\n",
 				mb_io_ptr->new_time_d);
 			fprintf(stderr,"dbg4       longitude:  %f\n",
@@ -482,7 +492,7 @@ int	*error;
 				= data->depth_scale*data->depth[i];
 			mb_io_ptr->new_bath_acrosstrack[i] 
 				= data->depth_scale*data->distance[i];
-			mb_io_ptr->new_bath_alongtrack[i] = 0;
+			mb_io_ptr->new_bath_alongtrack[i] = 0.0;
 			}
 
 		/* process beam amplitudes */
@@ -512,7 +522,7 @@ int	*error;
 			fprintf(stderr,"dbg4       beams_amp: %d\n",
 				mb_io_ptr->beams_amp);
 			for (i=0;i<mb_io_ptr->beams_bath;i++)
-			  fprintf(stderr,"dbg4       bath[%d]: %d  amp[%d]: %d  bathdist[%d]: %d\n",
+			  fprintf(stderr,"dbg4       bath[%d]: %f  amp[%d]: %f  bathdist[%d]: %f\n",
 				i,mb_io_ptr->new_bath[i],
 				i,mb_io_ptr->new_amp[i],
 				i,mb_io_ptr->new_bath_acrosstrack[i]);

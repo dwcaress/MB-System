@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_sb2100.c	3/2/94
- *	$Id: mbsys_sb2100.c,v 4.2 1994-04-11 23:34:41 caress Exp $
+ *	$Id: mbsys_sb2100.c,v 4.3 1994-10-21 12:20:01 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -31,6 +31,14 @@
  * Author:	D. W. Caress
  * Date:	March 2, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1994/04/11  23:34:41  caress
+ * Added function to extract travel time and beam angle data
+ * from multibeam data in an internal data structure.
+ *
+ * Revision 4.2  1994/04/11  23:34:41  caress
+ * Added function to extract travel time and beam angle data
+ * from multibeam data in an internal data structure.
+ *
  * Revision 4.1  1994/04/09  15:49:21  caress
  * Altered to fit latest iteration of SeaBeam 2100 vendor format.
  *
@@ -61,7 +69,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_sb2100.c,v 4.2 1994-04-11 23:34:41 caress Exp $";
+ static char res_id[]="$Id: mbsys_sb2100.c,v 4.3 1994-10-21 12:20:01 caress Exp $";
 	char	*function_name = "mbsys_sb2100_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -149,7 +157,7 @@ int	verbose;
 char	*mbio_ptr;
 char	*store_ptr;
 int	*kind;
-int	time_i[6];
+int	time_i[7];
 double	*time_d;
 double	*navlon;
 double	*navlat;
@@ -158,13 +166,13 @@ double	*heading;
 int	*nbath;
 int	*namp;
 int	*nss;
-int	*bath;
-int	*amp;
-int	*bathacrosstrack;
-int	*bathalongtrack;
-int	*ss;
-int	*ssacrosstrack;
-int	*ssalongtrack;
+double	*bath;
+double	*amp;
+double	*bathacrosstrack;
+double	*bathalongtrack;
+double	*ss;
+double	*ssacrosstrack;
+double	*ssalongtrack;
 char	*comment;
 int	*error;
 {
@@ -172,7 +180,8 @@ int	*error;
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_sb2100_struct *store;
-	int	time_j[4];
+	int	time_j[5];
+	double	scale;
 	int	i;
 
 	/* print input debug statements */
@@ -203,6 +212,7 @@ int	*error;
 		time_j[1] = store->jday;
 		time_j[2] = 60*store->hour + store->minute;
 		time_j[3] = 0.001*store->msec;
+		time_j[4] = 1000*(store->msec - 1000*time_j[3]);
 		mb_get_itime(verbose,time_j,time_i);
 		mb_get_time(verbose,time_i,time_d);
 
@@ -232,7 +242,10 @@ int	*error;
 			}
 
 		/* get heading */
-		*heading = 0.01*store->heading_12khz;
+		if (store->frequency[0] != 'H')
+			*heading = 0.001*store->heading_12khz;
+		else
+			*heading = 0.001*store->heading_36khz;
 
 		/* set speed to zero */
 		*speed = 0.001*store->speed;
@@ -241,11 +254,15 @@ int	*error;
 		*nbath = mb_io_ptr->beams_bath;
 		*namp = mb_io_ptr->beams_amp;
 		*nss = mb_io_ptr->pixels_ss;
+		if (store->range_scale == 'S')
+			scale = 0.01;
+		else
+			scale = 1.0;
 		for (i=0;i<*nbath;i++)
 			{
-			bath[i] = store->depth[i];
-			bathacrosstrack[i] = store->acrosstrack_beam[i];
-			bathalongtrack[i] = store->alongtrack_beam[i];
+			bath[i] = scale*store->depth[i];
+			bathacrosstrack[i] = scale*store->acrosstrack_beam[i];
+			bathalongtrack[i] = scale*store->alongtrack_beam[i];
 			}
 		for (i=0;i<*namp;i++)
 			{
@@ -254,9 +271,9 @@ int	*error;
 		for (i=0;i<*nss;i++)
 			{
 			ss[i] = store->amplitude_ss[i];
-			ssacrosstrack[i] = (i - MBSYS_SB2100_CENTER_PIXEL)
+			ssacrosstrack[i] = scale*(i - MBSYS_SB2100_CENTER_PIXEL)
 				*store->pixel_size_12khz;
-			ssalongtrack[i] = store->alongtrack_ss[i];
+			ssalongtrack[i] = scale*store->alongtrack_ss[i];
 			}
 
 		/* print debug statements */
@@ -281,6 +298,8 @@ int	*error;
 				time_i[4]);
 			fprintf(stderr,"dbg4       time_i[5]:  %d\n",
 				time_i[5]);
+			fprintf(stderr,"dbg4       time_i[6]:  %d\n",
+				time_i[6]);
 			fprintf(stderr,"dbg4       time_d:     %f\n",
 				*time_d);
 			fprintf(stderr,"dbg4       longitude:  %f\n",
@@ -294,17 +313,17 @@ int	*error;
 			fprintf(stderr,"dbg4       nbath:      %d\n",
 				*nbath);
 			for (i=0;i<*nbath;i++)
-			  fprintf(stderr,"dbg4       beam:%d  bath:%d  acrosstrack:%d  alongtrack:%d\n",
+			  fprintf(stderr,"dbg4       beam:%d  bath:%f  acrosstrack:%f  alongtrack:%f\n",
 				i,bath[i],bathacrosstrack[i],bathalongtrack[i]);
 			fprintf(stderr,"dbg4        namp:     %d\n",
 				*namp);
 			for (i=0;i<*namp;i++)
-			  fprintf(stderr,"dbg4        beam:%d   amp:%d  acrosstrack:%d  alongtrack:%d\n",
+			  fprintf(stderr,"dbg4        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n",
 				i,amp[i],bathacrosstrack[i],bathalongtrack[i]);
 			fprintf(stderr,"dbg4        nss:      %d\n",
 				*nss);
 			for (i=0;i<*nss;i++)
-			  fprintf(stderr,"dbg4        beam:%d   ss:%d  acrosstrack:%d  alongtrack:%d\n",
+			  fprintf(stderr,"dbg4        beam:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n",
 				i,ss[i],ssacrosstrack[i],ssalongtrack[i]);
 			}
 
@@ -354,6 +373,7 @@ int	*error;
 		fprintf(stderr,"dbg2       time_i[3]:     %d\n",time_i[3]);
 		fprintf(stderr,"dbg2       time_i[4]:     %d\n",time_i[4]);
 		fprintf(stderr,"dbg2       time_i[5]:     %d\n",time_i[5]);
+		fprintf(stderr,"dbg2       time_i[6]:     %d\n",time_i[6]);
 		fprintf(stderr,"dbg2       time_d:        %f\n",*time_d);
 		fprintf(stderr,"dbg2       longitude:     %f\n",*navlon);
 		fprintf(stderr,"dbg2       latitude:      %f\n",*navlat);
@@ -366,17 +386,17 @@ int	*error;
 		fprintf(stderr,"dbg2       nbath:      %d\n",
 			*nbath);
 		for (i=0;i<*nbath;i++)
-		  fprintf(stderr,"dbg2       beam:%d  bath:%d  acrosstrack:%d  alongtrack:%d\n",
+		  fprintf(stderr,"dbg2       beam:%d  bath:%f  acrosstrack:%f  alongtrack:%f\n",
 			i,bath[i],bathacrosstrack[i],bathalongtrack[i]);
 		fprintf(stderr,"dbg2        namp:     %d\n",
 			*namp);
 		for (i=0;i<*namp;i++)
-		  fprintf(stderr,"dbg2       beam:%d   amp:%d  acrosstrack:%d  alongtrack:%d\n",
+		  fprintf(stderr,"dbg2       beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n",
 			i,amp[i],bathacrosstrack[i],bathalongtrack[i]);
 		fprintf(stderr,"dbg2        nss:      %d\n",
 			*nss);
 		for (i=0;i<*nss;i++)
-		  fprintf(stderr,"dbg2        beam:%d   ss:%d  acrosstrack:%d  alongtrack:%d\n",
+		  fprintf(stderr,"dbg2        beam:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n",
 			i,ss[i],ssacrosstrack[i],ssalongtrack[i]);
 		}
 	if (verbose >= 2)
@@ -399,7 +419,7 @@ int mbsys_sb2100_insert(verbose,mbio_ptr,store_ptr,
 int	verbose;
 char	*mbio_ptr;
 char	*store_ptr;
-int	time_i[6];
+int	time_i[7];
 double	time_d;
 double	navlon;
 double	navlat;
@@ -408,13 +428,13 @@ double	heading;
 int	nbath;
 int	namp;
 int	nss;
-int	*bath;
-int	*amp;
-int	*bathacrosstrack;
-int	*bathalongtrack;
-int	*ss;
-int	*ssacrosstrack;
-int	*ssalongtrack;
+double	*bath;
+double	*amp;
+double	*bathacrosstrack;
+double	*bathalongtrack;
+double	*ss;
+double	*ssacrosstrack;
+double	*ssalongtrack;
 char	*comment;
 int	*error;
 {
@@ -423,7 +443,8 @@ int	*error;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_sb2100_struct *store;
 	int	kind;
-	int	time_j[4];
+	int	time_j[5];
+	double	scale;
 	int	set_pixel_size;
 	int	i;
 
@@ -442,6 +463,7 @@ int	*error;
 		fprintf(stderr,"dbg2       time_i[3]:  %d\n",time_i[3]);
 		fprintf(stderr,"dbg2       time_i[4]:  %d\n",time_i[4]);
 		fprintf(stderr,"dbg2       time_i[5]:  %d\n",time_i[5]);
+		fprintf(stderr,"dbg2       time_i[6]:  %d\n",time_i[6]);
 		fprintf(stderr,"dbg2       time_d:     %f\n",time_d);
 		fprintf(stderr,"dbg2       navlon:     %f\n",navlon);
 		fprintf(stderr,"dbg2       navlat:     %f\n",navlat);
@@ -450,17 +472,17 @@ int	*error;
 		fprintf(stderr,"dbg2       nbath:      %d\n",nbath);
 		if (verbose >= 3) 
 		 for (i=0;i<nbath;i++)
-		  fprintf(stderr,"dbg3       beam:%d  bath:%d  acrosstrack:%d  alongtrack:%d\n",
+		  fprintf(stderr,"dbg3       beam:%d  bath:%f  acrosstrack:%f  alongtrack:%f\n",
 			i,bath[i],bathacrosstrack[i],bathalongtrack[i]);
 		fprintf(stderr,"dbg2       namp:       %d\n",namp);
 		if (verbose >= 3) 
 		 for (i=0;i<namp;i++)
-		  fprintf(stderr,"dbg3        beam:%d   amp:%d  acrosstrack:%d  alongtrack:%d\n",
+		  fprintf(stderr,"dbg3        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n",
 			i,amp[i],bathacrosstrack[i],bathalongtrack[i]);
 		fprintf(stderr,"dbg2        nss:       %d\n",nss);
 		if (verbose >= 3) 
 		 for (i=0;i<nss;i++)
-		  fprintf(stderr,"dbg3        beam:%d   ss:%d  acrosstrack:%d  alongtrack:%d\n",
+		  fprintf(stderr,"dbg3        beam:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n",
 			i,ss[i],ssacrosstrack[i],ssalongtrack[i]);
 		fprintf(stderr,"dbg2       comment:    %s\n",comment);
 		}
@@ -479,8 +501,8 @@ int	*error;
 		store->year = time_j[0];
 		store->jday = time_j[1];
 		store->hour = time_j[2]/60;
-		store->minute = time_j[2] - store->hour;
-		store->msec = 1000*time_j[3];
+		store->minute = time_j[2] - 60*store->hour;
+		store->msec = 1000*time_j[3] + (int) (0.001*time_j[4]);
 
 		/* get navigation */
 		if (navlon < 0.0) navlon = navlon + 360.0;
@@ -488,18 +510,29 @@ int	*error;
 		store->latitude = navlat;
 
 		/* get heading */
-		store->heading_12khz = 100*heading;
+		store->heading_12khz = 1000*heading;
+		if (store->frequency[0] != 'H')
+			store->heading_12khz = 1000*heading;
+		else
+			store->heading_36khz = 1000*heading;
 
 		/* get speed */
 		store->speed = 1000.0*speed;
 
 		/* put beam and pixel values 
 			into data structure */
+		if (store->range_scale == 'S')
+			scale = 100.0;
+		else
+			{
+			scale = 1.0;
+			store->range_scale = 'D';
+			}
 		for (i=0;i<nbath;i++)
 			{
-			store->depth[i] = bath[i];
-			store->acrosstrack_beam[i] = bathacrosstrack[i];
-			store->alongtrack_beam[i] = bathalongtrack[i];
+			store->depth[i] = scale*bath[i];
+			store->acrosstrack_beam[i] = scale*bathacrosstrack[i];
+			store->alongtrack_beam[i] = scale*bathalongtrack[i];
 			}
 		for (i=0;i<namp;i++)
 			store->amplitude_beam[i] = amp[i];
@@ -507,12 +540,24 @@ int	*error;
 		for (i=0;i<nss;i++)
 			{
 			store->amplitude_ss[i] = ss[i];
-			store->alongtrack_ss[i] = ssalongtrack[i];
-			if (store->pixel_size_12khz == 0 
-				&& set_pixel_size == MB_YES && ss[i] > 0 
-				&& i != MBSYS_SB2100_CENTER_PIXEL)
+			store->alongtrack_ss[i] = scale*ssalongtrack[i];
+			if (set_pixel_size == MB_YES
+			    && (store->frequency[0] == 'H' 
+			    && store->pixel_size_36khz <= 0)
+				&& ssacrosstrack[i] > 0)
 				{
-				store->pixel_size_12khz = ssacrosstrack[i]/
+				store->pixel_size_36khz = 
+					ssacrosstrack[i]/
+					(i - MBSYS_SB2100_CENTER_PIXEL);
+				set_pixel_size = MB_NO;
+				}
+			else if (set_pixel_size == MB_YES
+			    && (store->frequency[0] != 'H' 
+			    && store->pixel_size_12khz <= 0)
+				&& ssacrosstrack[i] > 0)
+				{
+				store->pixel_size_12khz = 
+					ssacrosstrack[i]/
 					(i - MBSYS_SB2100_CENTER_PIXEL);
 				set_pixel_size = MB_NO;
 				}
@@ -590,9 +635,9 @@ int	*error;
 		/* get travel times, angles, and flags */
 		for (i=0;i<mb_io_ptr->beams_bath;i++)
 			{
-			ttimes[i] = 1000*store->travel_time[i];
-			angles[i] = 100*store->angle_across[i];
-			if (store->depth[i] < 0)
+			ttimes[i] = 0.001*store->travel_time[i];
+			angles[i] = 0.001*store->angle_across[i];
+			if (store->quality[i] != ' ')
 				flags[i] = MB_YES;
 			else
 				flags[i] = MB_NO;

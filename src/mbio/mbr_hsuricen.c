@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsuricen.c	2/2/93
- *	$Id: mbr_hsuricen.c,v 4.2 1994-07-29 18:46:51 caress Exp $
+ *	$Id: mbr_hsuricen.c,v 4.3 1994-10-21 12:20:01 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,10 @@
  * Author:	D. W. Caress
  * Date:	February 2, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1994/07/29  18:46:51  caress
+ * Changes associated with supporting Lynx OS (byte swapped) and
+ * using unix second time base (for time_d values).
+ *
  * Revision 4.1  1994/05/21  02:23:29  caress
  * Made sure that mb_io_ptr->new_bath_alongtrack is set to zero on reading.
  *
@@ -64,7 +68,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_hsuricen.c,v 4.2 1994-07-29 18:46:51 caress Exp $";
+ static char res_id[]="$Id: mbr_hsuricen.c,v 4.3 1994-10-21 12:20:01 caress Exp $";
 	char	*function_name = "mbr_alm_hsuricen";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -132,8 +136,8 @@ int	*error;
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* deallocate memory for data descriptor */
-	status = mb_free(verbose,mb_io_ptr->raw_data,error);
-	status = mb_free(verbose,mb_io_ptr->store_data,error);
+	status = mb_free(verbose,&mb_io_ptr->raw_data,error);
+	status = mb_free(verbose,&mb_io_ptr->store_data,error);
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -163,7 +167,7 @@ int	*error;
 	struct mbf_hsuricen_data_struct *data;
 	struct mbsys_hsds_struct *store;
 	char	*datacomment;
-	int	time_j[4];
+	int	time_j[5];
 	int	i, j, k;
 	int	id;
 	double	scale;
@@ -258,6 +262,7 @@ int	*error;
 		time_j[1] = data->day;
 		time_j[2] = data->min;
 		time_j[3] = data->sec/100;
+		time_j[4] = 10000*(data->sec - 100*time_j[3]);
 		mb_get_itime(verbose,time_j,mb_io_ptr->new_time_i);
 		mb_get_time(verbose,mb_io_ptr->new_time_i,
 			&(mb_io_ptr->new_time_d));
@@ -305,7 +310,7 @@ int	*error;
 					= scale*data->deph[i];
 				mb_io_ptr->new_bath_acrosstrack[id-i] 
 					= scale*data->dist[i];
-				mb_io_ptr->new_bath_alongtrack[id-i] = 0;
+				mb_io_ptr->new_bath_alongtrack[id-i] = 0.0;
 				}
 			}
 		else
@@ -315,7 +320,7 @@ int	*error;
 				mb_io_ptr->new_bath[id-i] = data->deph[i];
 				mb_io_ptr->new_bath_acrosstrack[id-i] 
 					= data->dist[i];
-				mb_io_ptr->new_bath_alongtrack[id-i] = 0;
+				mb_io_ptr->new_bath_alongtrack[id-i] = 0.0;
 				}
 			}
 
@@ -339,6 +344,8 @@ int	*error;
 				mb_io_ptr->new_time_i[4]);
 			fprintf(stderr,"dbg4       time_i[5]:  %d\n",
 				mb_io_ptr->new_time_i[5]);
+			fprintf(stderr,"dbg4       time_i[6]:  %d\n",
+				mb_io_ptr->new_time_i[6]);
 			fprintf(stderr,"dbg4       time_d:     %f\n",
 				mb_io_ptr->new_time_d);
 			fprintf(stderr,"dbg4       longitude:  %f\n",
@@ -354,7 +361,7 @@ int	*error;
 			fprintf(stderr,"dbg4       beams_amp: %d\n",
 				mb_io_ptr->beams_amp);
 			for (i=0;i<mb_io_ptr->beams_bath;i++)
-			  fprintf(stderr,"dbg4       bath[%d]: %d  amp[%d]: %d  bathdist[%d]: %d\n",
+			  fprintf(stderr,"dbg4       bath[%d]: %f  amp[%d]: %f  bathdist[%d]: %f\n",
 				i,mb_io_ptr->new_bath[i],
 				i,mb_io_ptr->new_amp[i],
 				i,mb_io_ptr->new_bath_acrosstrack[i]);
@@ -521,8 +528,8 @@ int	*error;
 	struct mbf_hsuricen_data_struct *data;
 	struct mbsys_hsds_struct *store;
 	char	*datacomment;
-	int	time_i[6];
-	int	time_j[4];
+	int	time_i[7];
+	int	time_j[5];
 	double	lon, lat;
 	int	i, j;
 	int	id;
@@ -592,11 +599,12 @@ int	*error;
 			time_i[3] = store->hour;
 			time_i[4] = store->minute;
 			time_i[5] = store->second;
+			time_i[6] = 0;
 			mb_get_jtime(verbose,time_i,time_j);
 			data->year = time_j[0];
 			data->day = time_j[1];
 			data->min = time_j[2];
-			data->sec = 100*time_j[3];
+			data->sec = 100*time_j[3] + 0.0001*time_j[4];
 
 			/* additional navigation and depths */
 			data->hdg = 10.0*store->course_true;
@@ -643,7 +651,7 @@ int	*error;
 		data->year = time_j[0];
 		data->day = time_j[1];
 		data->min = time_j[2];
-		data->sec = 100*time_j[3];
+		data->sec = 100*time_j[3] + 0.0001*time_j[4];
 
 		/* get navigation */
 		if (mb_io_ptr->new_lon < -180.0)

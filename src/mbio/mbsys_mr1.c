@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_mr1.c	7/19/94
- *	$Id: mbsys_mr1.c,v 4.0 1994-07-29 18:59:33 caress Exp $
+ *	$Id: mbsys_mr1.c,v 4.1 1994-10-21 12:20:01 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -29,6 +29,9 @@
  * Author:	D. W. Caress
  * Date:	July 19, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/07/29  18:59:33  caress
+ * Initial Revision.
+ *
  * Revision 1.1  1994/07/29  18:46:51  caress
  * Initial revision
  *
@@ -55,7 +58,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_mr1.c,v 4.0 1994-07-29 18:59:33 caress Exp $";
+ static char res_id[]="$Id: mbsys_mr1.c,v 4.1 1994-10-21 12:20:01 caress Exp $";
 	char	*function_name = "mbsys_mr1_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -96,7 +99,7 @@ int	*error;
 int mbsys_mr1_deall(verbose,mbio_ptr,store_ptr,error)
 int	verbose;
 char	*mbio_ptr;
-char	*store_ptr;
+char	**store_ptr;
 int	*error;
 {
 	char	*function_name = "mbsys_mr1_deall";
@@ -112,7 +115,7 @@ int	*error;
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %d\n",*store_ptr);
 		}
 
 	/* deallocate memory for data structure */
@@ -143,7 +146,7 @@ int	verbose;
 char	*mbio_ptr;
 char	*store_ptr;
 int	*kind;
-int	time_i[6];
+int	time_i[7];
 double	*time_d;
 double	*navlon;
 double	*navlat;
@@ -152,13 +155,13 @@ double	*heading;
 int	*nbath;
 int	*namp;
 int	*nss;
-int	*bath;
-int	*amp;
-int	*bathacrosstrack;
-int	*bathalongtrack;
-int	*ss;
-int	*ssacrosstrack;
-int	*ssalongtrack;
+double	*bath;
+double	*amp;
+double	*bathacrosstrack;
+double	*bathalongtrack;
+double	*ss;
+double	*ssacrosstrack;
+double	*ssalongtrack;
 char	*comment;
 int	*error;
 {
@@ -238,21 +241,21 @@ int	*error;
 			j = beam_center - i - 2;
 			bath[j] = store->bath_port[i];
 			bathacrosstrack[j] = -store->bath_acrosstrack_port[i];
-			bathalongtrack[j] = 0;
+			bathalongtrack[j] = 0.0;
 			}
 		for (i=0;i<3;i++)
 			{
 			j = beam_center + i - 1;
-			bath[j] = 0;
-			bathacrosstrack[j] = 0;
-			bathalongtrack[j] = 0;
+			bath[j] = 0.0;
+			bathacrosstrack[j] = 0.0;
+			bathalongtrack[j] = 0.0;
 			}
 		for (i=0;i<store->stbd_btycount;i++)
 			{
 			j = beam_center + 2 + i;
 			bath[j] = store->bath_stbd[i];
 			bathacrosstrack[j] = store->bath_acrosstrack_stbd[i];
-			bathalongtrack[j] = 0;
+			bathalongtrack[j] = 0.0;
 			}
 		for (i=0;i<store->port_sscount;i++)
 			{
@@ -260,14 +263,14 @@ int	*error;
 			ss[j] = store->ss_port[i];
 			ssacrosstrack[j] = -store->port_ssoffset 
 				- i*store->png_atssincr;
-			ssalongtrack[j] = 0;
+			ssalongtrack[j] = 0.0;
 			}
 		for (i=0;i<3;i++)
 			{
 			j = pixel_center + i - 1;
-			ss[j] = 0;
-			ssacrosstrack[j] = 0;
-			ssalongtrack[j] = 0;
+			ss[j] = 0.0;
+			ssacrosstrack[j] = 0.0;
+			ssalongtrack[j] = 0.0;
 			}
 		for (i=0;i<store->stbd_sscount;i++)
 			{
@@ -275,7 +278,7 @@ int	*error;
 			ss[j] = store->ss_port[i];
 			ssacrosstrack[j] = store->stbd_ssoffset 
 				+ i*store->png_atssincr;
-			ssalongtrack[j] = 0;
+			ssalongtrack[j] = 0.0;
 			}
 
 		/* print debug statements */
@@ -300,6 +303,8 @@ int	*error;
 				time_i[4]);
 			fprintf(stderr,"dbg4       time_i[5]:  %d\n",
 				time_i[5]);
+			fprintf(stderr,"dbg4       time_i[6]:  %d\n",
+				time_i[6]);
 			fprintf(stderr,"dbg4       time_d:     %f\n",
 				*time_d);
 			fprintf(stderr,"dbg4       longitude:  %f\n",
@@ -313,17 +318,17 @@ int	*error;
 			fprintf(stderr,"dbg4       nbath:      %d\n",
 				*nbath);
 			for (i=0;i<*nbath;i++)
-			  fprintf(stderr,"dbg4       beam:%d  bath:%d  acrosstrack:%d  alongtrack:%d\n",
+			  fprintf(stderr,"dbg4       beam:%d  bath:%f  acrosstrack:%f  alongtrack:%f\n",
 				i,bath[i],bathacrosstrack[i],bathalongtrack[i]);
 			fprintf(stderr,"dbg4        namp:     %d\n",
 				*namp);
 			for (i=0;i<*namp;i++)
-			  fprintf(stderr,"dbg4        beam:%d   amp:%d  acrosstrack:%d  alongtrack:%d\n",
+			  fprintf(stderr,"dbg4        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n",
 				i,amp[i],bathacrosstrack[i],bathalongtrack[i]);
 			fprintf(stderr,"dbg4        nss:      %d\n",
 				*nss);
 			for (i=0;i<*nss;i++)
-			  fprintf(stderr,"dbg4        beam:%d   ss:%d  acrosstrack:%d  alongtrack:%d\n",
+			  fprintf(stderr,"dbg4        beam:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n",
 				i,ss[i],ssacrosstrack[i],ssalongtrack[i]);
 			}
 
@@ -373,6 +378,7 @@ int	*error;
 		fprintf(stderr,"dbg2       time_i[3]:     %d\n",time_i[3]);
 		fprintf(stderr,"dbg2       time_i[4]:     %d\n",time_i[4]);
 		fprintf(stderr,"dbg2       time_i[5]:     %d\n",time_i[5]);
+		fprintf(stderr,"dbg2       time_i[6]:     %d\n",time_i[6]);
 		fprintf(stderr,"dbg2       time_d:        %f\n",*time_d);
 		fprintf(stderr,"dbg2       longitude:     %f\n",*navlon);
 		fprintf(stderr,"dbg2       latitude:      %f\n",*navlat);
@@ -385,17 +391,17 @@ int	*error;
 		fprintf(stderr,"dbg2       nbath:      %d\n",
 			*nbath);
 		for (i=0;i<*nbath;i++)
-		  fprintf(stderr,"dbg2       beam:%d  bath:%d  acrosstrack:%d  alongtrack:%d\n",
+		  fprintf(stderr,"dbg2       beam:%d  bath:%f  acrosstrack:%f  alongtrack:%f\n",
 			i,bath[i],bathacrosstrack[i],bathalongtrack[i]);
 		fprintf(stderr,"dbg2        namp:     %d\n",
 			*namp);
 		for (i=0;i<*namp;i++)
-		  fprintf(stderr,"dbg2       beam:%d   amp:%d  acrosstrack:%d  alongtrack:%d\n",
+		  fprintf(stderr,"dbg2       beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n",
 			i,amp[i],bathacrosstrack[i],bathalongtrack[i]);
 		fprintf(stderr,"dbg2        nss:      %d\n",
 			*nss);
 		for (i=0;i<*nss;i++)
-		  fprintf(stderr,"dbg2        beam:%d   ss:%d  acrosstrack:%d  alongtrack:%d\n",
+		  fprintf(stderr,"dbg2        beam:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n",
 			i,ss[i],ssacrosstrack[i],ssalongtrack[i]);
 		}
 	if (verbose >= 2)
@@ -418,7 +424,7 @@ int mbsys_mr1_insert(verbose,mbio_ptr,store_ptr,
 int	verbose;
 char	*mbio_ptr;
 char	*store_ptr;
-int	time_i[6];
+int	time_i[7];
 double	time_d;
 double	navlon;
 double	navlat;
@@ -427,13 +433,13 @@ double	heading;
 int	nbath;
 int	namp;
 int	nss;
-int	*bath;
-int	*amp;
-int	*bathacrosstrack;
-int	*bathalongtrack;
-int	*ss;
-int	*ssacrosstrack;
-int	*ssalongtrack;
+double	*bath;
+double	*amp;
+double	*bathacrosstrack;
+double	*bathalongtrack;
+double	*ss;
+double	*ssacrosstrack;
+double	*ssalongtrack;
 char	*comment;
 int	*error;
 {
@@ -460,6 +466,7 @@ int	*error;
 		fprintf(stderr,"dbg2       time_i[3]:  %d\n",time_i[3]);
 		fprintf(stderr,"dbg2       time_i[4]:  %d\n",time_i[4]);
 		fprintf(stderr,"dbg2       time_i[5]:  %d\n",time_i[5]);
+		fprintf(stderr,"dbg2       time_i[6]:  %d\n",time_i[6]);
 		fprintf(stderr,"dbg2       time_d:     %f\n",time_d);
 		fprintf(stderr,"dbg2       navlon:     %f\n",navlon);
 		fprintf(stderr,"dbg2       navlat:     %f\n",navlat);
@@ -468,17 +475,17 @@ int	*error;
 		fprintf(stderr,"dbg2       nbath:      %d\n",nbath);
 		if (verbose >= 3) 
 		 for (i=0;i<nbath;i++)
-		  fprintf(stderr,"dbg3       beam:%d  bath:%d  acrosstrack:%d  alongtrack:%d\n",
+		  fprintf(stderr,"dbg3       beam:%d  bath:%f  acrosstrack:%f  alongtrack:%f\n",
 			i,bath[i],bathacrosstrack[i],bathalongtrack[i]);
 		fprintf(stderr,"dbg2       namp:       %d\n",namp);
 		if (verbose >= 3) 
 		 for (i=0;i<namp;i++)
-		  fprintf(stderr,"dbg3        beam:%d   amp:%d  acrosstrack:%d  alongtrack:%d\n",
+		  fprintf(stderr,"dbg3        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n",
 			i,amp[i],bathacrosstrack[i],bathalongtrack[i]);
 		fprintf(stderr,"dbg2        nss:       %d\n",nss);
 		if (verbose >= 3) 
 		 for (i=0;i<nss;i++)
-		  fprintf(stderr,"dbg3        beam:%d   ss:%d  acrosstrack:%d  alongtrack:%d\n",
+		  fprintf(stderr,"dbg3        beam:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n",
 			i,ss[i],ssacrosstrack[i],ssalongtrack[i]);
 		fprintf(stderr,"dbg2       comment:    %s\n",comment);
 		}
@@ -511,7 +518,7 @@ int	*error;
 		store->port_btycount = 0;
 		for (i=beam_center-1;i>-1;i--)
 			{
-			if (bath[i] != 0)
+			if (bath[i] != 0.0)
 				{
 				store->bath_port[store->port_btycount] 
 					= bath[i];
@@ -525,7 +532,7 @@ int	*error;
 		store->stbd_btycount = 0;
 		for (i=beam_center+1;i<mb_io_ptr->beams_bath;i++)
 			{
-			if (bath[i] != 0)
+			if (bath[i] != 0.0)
 				{
 				store->bath_stbd[store->stbd_btycount] 
 					= bath[i];
@@ -540,7 +547,7 @@ int	*error;
 		store->port_sscount = 0;
 		for (i=pixel_center-1;i>-1;i--)
 			{
-			if (ss[i] != 0)
+			if (ss[i] != 0.0)
 				{
 				store->ss_port[store->port_sscount] 
 					= ss[i];
@@ -552,7 +559,7 @@ int	*error;
 		store->stbd_sscount = 0;
 		for (i=pixel_center+1;i<mb_io_ptr->pixels_ss;i++)
 			{
-			if (ss[i] != 0)
+			if (ss[i] != 0.0)
 				{
 				store->ss_stbd[store->stbd_sscount] 
 					= ss[i];
