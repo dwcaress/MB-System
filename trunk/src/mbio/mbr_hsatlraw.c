@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsatlraw.c	2/11/93
- *	$Id: mbr_hsatlraw.c,v 4.6 1995-03-17 15:12:59 caress Exp $
+ *	$Id: mbr_hsatlraw.c,v 4.7 1995-07-13 21:40:28 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,10 @@
  * Author:	D. W. Caress
  * Date:	February 11, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.6  1995/03/17  15:12:59  caress
+ * Changes related to handling early, problematic
+ * Ewing Hydrosweep data.
+ *
  * Revision 4.5  1995/03/08  13:31:09  caress
  * Fixed bug related to handling of shallow water data and the depth scale.
  *
@@ -83,7 +87,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_hsatlraw.c,v 4.6 1995-03-17 15:12:59 caress Exp $";
+ static char res_id[]="$Id: mbr_hsatlraw.c,v 4.7 1995-07-13 21:40:28 caress Exp $";
 	char	*function_name = "mbr_alm_hsatlraw";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -865,7 +869,6 @@ int	*error;
 		/* add some plausible amounts for some of the 
 			variables in the HSATLRAW record */
 		data->speed_reference[0] = 'B';	/* assume speed over ground */
-		data->depth_center = data->depth[mb_io_ptr->beams_bath/2];
 		if (data->depth_scale <= 0.0)
 			data->depth_scale = 1.0;	/* this is a unit scale factor */
 		data->spare = 1;
