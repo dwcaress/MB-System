@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_arc2grd.perl	4/21/01
-#    $Id: mbm_arc2grd.perl,v 5.2 2003-04-17 20:42:48 caress Exp $
+#    $Id: mbm_arc2grd.perl,v 5.3 2003-08-24 23:57:14 caress Exp $
 #
 #    Copyright (c) 2001, 2003 by
 #    D. W. Caress (caress@mbari.org)
@@ -37,10 +37,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #    10 km off the windward side of Oahu)
 #
 # Version:
-#   $Id: mbm_arc2grd.perl,v 5.2 2003-04-17 20:42:48 caress Exp $
+#   $Id: mbm_arc2grd.perl,v 5.3 2003-08-24 23:57:14 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.2  2003/04/17 20:42:48  caress
+#   Release 5.0.beta30
+#
 #   Revision 5.1  2001/06/03 06:59:24  caress
 #   Release 5.0.beta01
 #
@@ -86,16 +89,16 @@ elsif (!open(INP,"<$ifile"))
 	print "\a";
 	die "Specified input file $ifile cannot be opened\nMacro $program_name aborted\n";
 	}
+if (!$ofile)
+	{
+	print "\a";
+	die "No output file specified\nMacro $program_name aborted\n";
+	}
 $tmpfile = $program_name . "_tmp_" . "$PID";
 if (!open(TMP,">$tmpfile"))
 	{
 	print "\a";
 	die "Cannot open temporary file $tmpfile\nMacro $program_name aborted.\n";
-	}
-if (!$ofile)
-	{
-	print "\a";
-	die "No output file specified\nMacro $program_name aborted\n";
 	}
 
 # read header of ascii Arc grid file
@@ -148,13 +151,13 @@ if ($verbose)
 	}
 
 # run xyz2grd
-$cmd = "xyz2grd $tmpfile -G$ofile -H6  -I$cellsize/$cellsize -R$xmin_f/$xmax_f/$ymin_f/$ymax_f -N$nodata -ZTLa -V";
+$cmd = "xyz2grd $tmpfile -G$ofile -H0 -I$cellsize/$cellsize -R$xmin_f/$xmax_f/$ymin_f/$ymax_f -N$nodata -ZTLa -V";
 if ($verbose)
 	{
 	print "\nRunning xyz2grd...\n$cmd\n";
 	}
 `$cmd`;
-`rm -f $tmpfile`;
+#`rm -f $tmpfile`;
 
 exit 0;
 
