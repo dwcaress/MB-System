@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sb2100rw.c	3/3/94
- *	$Id: mbr_sb2100rw.c,v 4.10 1995-01-17 23:19:57 caress Exp $
+ *	$Id: mbr_sb2100rw.c,v 4.11 1995-02-14 21:59:53 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,10 @@
  * Author:	D. W. Caress
  * Date:	March 3, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.10  1995/01/17  23:19:57  caress
+ * Fixed bug where fractional seconds were set to zero
+ * when writing data.
+ *
  * Revision 4.9  1995/01/16  12:32:15  caress
  * Changed output of transmit_attenuation values so they
  * are not prepended with a "+", as Dale Chayes found
@@ -88,7 +92,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_sb2100rw.c,v 4.10 1995-01-17 23:19:57 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2100rw.c,v 4.11 1995-02-14 21:59:53 caress Exp $";
 	char	*function_name = "mbr_alm_sb2100rw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -242,6 +246,7 @@ int	*error;
 			data->algorithm_order[i] = ' ';
 
 		/* SS header info */
+		data->num_pixels = 0;
 		data->ss_data_length = 0;
 		data->pixel_algorithm = 'D';
 		data->svp_corr_ss = '0';
@@ -895,6 +900,29 @@ int	*error;
 				}
 			data->alongtrack_ss[i]
 				= scale*mb_io_ptr->new_ss_alongtrack[i];
+			}
+		}
+
+	/* make sure that sidescan and amplitude data are
+		not out of the allowed bounds */
+	if (mb_io_ptr->new_error == MB_ERROR_NO_ERROR
+		&& mb_io_ptr->new_kind == MB_DATA_DATA)
+		{
+		for (i=0;i<MBF_SB2100RW_BEAMS;i++)
+			{
+			if (data->amplitude_beam[i] > MBF_SB2100RW_AMP_MAX)
+				data->amplitude_beam[i] 
+					= MBF_SB2100RW_AMP_MAX;
+			if (data->amplitude_beam[i] < 0)
+				data->amplitude_beam[i] = 0;
+			}
+		for (i=0;i<MBF_SB2100RW_PIXELS;i++)
+			{
+			if (data->amplitude_ss[i] > MBF_SB2100RW_SS_MAX)
+				data->amplitude_ss[i] 
+					= MBF_SB2100RW_SS_MAX;
+			if (data->amplitude_ss[i] < 0)
+				data->amplitude_ss[i] = 0;
 			}
 		}
 
@@ -2465,6 +2493,7 @@ int	*error;
 	struct mbf_sb2100rw_struct *data;
 	unsigned short	write_ss[2*MBF_SB2100RW_PIXELS];
 	signed short	*write_ss_ptr;
+	char	*char_ptr;
 	double	degrees;
 	int	idegrees, minutes;
 	int	i;
@@ -2673,6 +2702,7 @@ int	*error;
 			*error = MB_ERROR_NO_ERROR;
 			status = fprintf(mbfp,"\r\n");
 			}
+
 
 		/* check for an error */
 		if (status > 0)
