@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit_callbacks.c	3/28/97
- *    $Id: mbedit_callbacks.c,v 5.9 2003-04-17 20:45:42 caress Exp $
+ *    $Id: mbedit_callbacks.c,v 5.10 2003-04-17 20:50:01 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 1995, 1997, 2000 by
+ *    Copyright (c) 1993, 1994, 1995, 1997, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -24,6 +24,9 @@
  * Date:	March 28, 1997  GUI recast
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.9  2003/04/17 20:45:42  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.8  2002/08/30 19:28:21  caress
  * Added time series style plots.
  *

@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	4/8/93
- *    $Id: mbedit_prog.c,v 5.19 2003-04-17 20:45:42 caress Exp $
+ *    $Id: mbedit_prog.c,v 5.20 2003-04-17 20:50:01 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 1995, 1997, 2000 by
+ *    Copyright (c) 1993, 1994, 1995, 1997, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -27,6 +27,9 @@
  * Date:	September 19, 2000 (New version - no buffered i/o)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.19  2003/04/17 20:45:42  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.18  2003/03/10 19:57:07  caress
  * Added mr1pr library.
  *
@@ -328,7 +331,7 @@ struct mbedit_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbedit_prog.c,v 5.19 2003-04-17 20:45:42 caress Exp $";
+static char rcs_id[] = "$Id: mbedit_prog.c,v 5.20 2003-04-17 20:50:01 caress Exp $";
 static char program_name[] = "MBedit";
 static char help_message[] =  
 "MBedit is an interactive editor used to identify and flag\n\

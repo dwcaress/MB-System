@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	4/8/93
- *    $Id: mbedit_prog.c,v 5.2 2001-07-20 00:30:51 caress Exp $
+ *    $Id: mbedit_prog.c,v 5.3 2003-04-17 20:50:51 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 1995, 1997, 2000 by
+ *    Copyright (c) 1993, 1994, 1995, 1997, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -26,6 +26,9 @@
  * Date:	March 28, 1997  GUI recast
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2001/07/20 00:30:51  caress
+ * Release 5.0.beta03
+ *
  * Revision 5.1  2001/01/22 07:42:13  caress
  * Version 5.0.beta01
  *
@@ -254,7 +257,7 @@ struct mbedit_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbedit_prog.c,v 5.2 2001-07-20 00:30:51 caress Exp $";
+static char rcs_id[] = "$Id: mbedit_prog.c,v 5.3 2003-04-17 20:50:51 caress Exp $";
 static char program_name[] = "MBeditold";
 static char help_message[] =  
 "MBeditold is an interactive editor used to identify and flag\n\
