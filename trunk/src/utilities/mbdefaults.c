@@ -1,5 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbdefaults.c	3.00	1/23/93
+ *	$Id: mbdefaults.c,v 3.1 1993-05-14 23:48:05 sohara Exp $
  *
  *    Copyright (c) 1993 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -17,6 +18,7 @@
  *
  * Author:	D. W. Caress
  * Date:	January 23, 1993
+ * $Log: not supported by cvs2svn $
  */
 
 /* standard include files */
@@ -33,6 +35,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
+static char rcs_id[]="$Id: mbdefaults.c,v 3.1 1993-05-14 23:48:05 sohara Exp $";
 	static char rcs_id[] = "3.00";
 	static char program_name[] = "MBDEFAULTS";
 	static char help_message[] = "MBDEFAULTS sets and retrieves the default MBIO control \nparameters stored in the file ~/.mbio_defaults. \nOnly the parameters specified by command line \narguments will be changed; if no ~/.mbio_defaults \nfile exists one will be created.";
