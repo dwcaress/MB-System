@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbvelocitytool.c	6/6/93
- *    $Id: mbvelocity_prog.c,v 4.10 1995-10-02 22:25:20 caress Exp $
+ *    $Id: mbvelocity_prog.c,v 4.11 1996-01-26 21:25:34 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -23,6 +23,9 @@
  * Date:	June 6, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.10  1995/10/02  22:25:20  caress
+ * Added -D option.
+ *
  * Revision 4.9  1995/09/28  18:03:58  caress
  * Improved handling of .mbxxx file suffix convention.
  *
@@ -109,10 +112,10 @@ struct profile
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbvelocity_prog.c,v 4.10 1995-10-02 22:25:20 caress Exp $";
+static char rcs_id[] = "$Id: mbvelocity_prog.c,v 4.11 1996-01-26 21:25:34 caress Exp $";
 static char program_name[] = "MBVELOCITYTOOL";
 static char help_message[] = "MBVELOCITYTOOL is an interactive water velocity profile editor  \nused to examine multiple water velocity profiles and to create  \nnew water velocity profiles which can be used for the processing  \nof multibeam sonar data.  In general, this tool is used to  \nexamine water velocity profiles obtained from XBTs, CTDs, or  \ndatabases, and to construct new profiles consistent with these  \nvarious sources of information.";
-static char usage_message[] = "mbvelocitytool [-Adangle -V -H]";
+static char usage_message[] = "mbvelocitytool [-V -H]";
 
 /* status variables */
 int	error = MB_ERROR_NO_ERROR;
@@ -207,6 +210,7 @@ int	nload;
 double	*ttimes = NULL;
 double	*angles = NULL;
 double	*angles_forward = NULL;
+double	*angles_null = NULL;
 int	*flags = NULL;
 double	*p = NULL;
 int	nraypathmax;
@@ -215,13 +219,13 @@ double	**raypathx;
 double	**raypathy;
 double	*depth = NULL;
 double	*acrosstrack = NULL;
-double	dangle = 0.0;
 
 /* depth range variables */
 double	bath_min;
 double	bath_max;
 
 /* residual variables */
+double	*angle;
 double	*residual;
 int	*nresidual;
 
@@ -297,7 +301,7 @@ char	**argv;
 	nbeams = 16;
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "A:a:D:d:VvHh")) != -1)
+	while ((c = getopt(argc, argv, "D:d:VvHh")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -307,11 +311,6 @@ char	**argv;
 		case 'V':
 		case 'v':
 			verbose++;
-			break;
-		case 'A':
-		case 'a':
-			sscanf (optarg,"%lf", &dangle);
-			flag++;
 			break;
 		case 'D':
 		case 'd':
@@ -349,7 +348,6 @@ char	**argv;
 		fprintf(stderr,"dbg2  Control Parameters:\n");
 		fprintf(stderr,"dbg2       verbose:            %d\n",verbose);
 		fprintf(stderr,"dbg2       help:               %d\n",help);
-		fprintf(stderr,"dbg2       dangle:             %f\n",dangle);
 		fprintf(stderr,"dbg2       draft:              %f\n",draft);
 		}
 
@@ -420,7 +418,7 @@ int mbvt_quit()
 		mb_free(verbose,&ttimes,&error);
 		mb_free(verbose,&angles,&error);
 		mb_free(verbose,&angles_forward,&error);
-		mb_free(verbose,&p,&error);
+		mb_free(verbose,&angles_null,&error);
 		mb_free(verbose,&nraypath,&error);
 		for (i=0;i<beams_bath;i++)
 			{
@@ -431,6 +429,7 @@ int mbvt_quit()
 		mb_free(verbose,&raypathy,&error);
 		mb_free(verbose,&depth,&error);
 		mb_free(verbose,&acrosstrack,&error);
+		mb_free(verbose,&angle,&error);
 		mb_free(verbose,&residual,&error);
 		mb_free(verbose,&nresidual,&error);
 		}
@@ -696,7 +695,7 @@ char	*file;
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
 		{
-		mb_error(verbose,error,message);
+		mb_error(verbose,error,&message);
 		fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
@@ -811,7 +810,7 @@ int mbvt_new_edit_profile()
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
 		{
-		mb_error(verbose,error,message);
+		mb_error(verbose,error,&message);
 		fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
@@ -986,7 +985,7 @@ char	*file;
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
 		{
-		mb_error(verbose,error,message);
+		mb_error(verbose,error,&message);
 		fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
@@ -1895,12 +1894,12 @@ int	form;
 	    mbvt_new_edit_profile();
 
 	/* check for format with travel time data */
-	status = mb_format(verbose,&format,&format_num,&error);
 	format = form;
+	status = mb_format(verbose,&format,&format_num,&error);
 	if (mb_traveltime_table[format_num] != MB_YES)
 		{
 		fprintf(stderr,"\nProgram <%s> requires travel time data.\n",program_name);
-		fprintf(stderr,"Format %d is unacceptable because it does not inlude travel time data.\n",format);
+		fprintf(stderr,"Format %d is unacceptable because it does not include travel time data.\n",format);
 		fprintf(stderr,"\nMultibeam File <%s> not initialized for reading\n",file);
 		status = MB_FAILURE;
 		return(status);
@@ -1914,7 +1913,7 @@ int	form;
 		mb_free(verbose,&ttimes,&error);
 		mb_free(verbose,&angles,&error);
 		mb_free(verbose,&angles_forward,&error);
-		mb_free(verbose,&p,&error);
+		mb_free(verbose,&angles_null,&error);
 		mb_free(verbose,&nraypath,&error);
 		for (i=0;i<beams_bath;i++)
 			{
@@ -1925,6 +1924,7 @@ int	form;
 		mb_free(verbose,&raypathy,&error);
 		mb_free(verbose,&depth,&error);
 		mb_free(verbose,&acrosstrack,&error);
+		mb_free(verbose,&angle,&error);
 		mb_free(verbose,&residual,&error);
 		mb_free(verbose,&nresidual,&error);
 		}
@@ -1952,8 +1952,8 @@ int	form;
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&ttimes,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&angles,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&angles_forward,&error);
+	status = mb_malloc(verbose,beams_bath*sizeof(double),&angles_null,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(int),&flags,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),&p,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(int),&nraypath,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double *),
 				&raypathx,&error);
@@ -1969,13 +1969,14 @@ int	form;
 		}
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&depth,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&acrosstrack,&error);
+	status = mb_malloc(verbose,beams_bath*sizeof(double),&angle,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&residual,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(int),&nresidual,&error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
 		{
-		mb_error(verbose,error,message);
+		mb_error(verbose,error,&message);
 		fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
@@ -2043,9 +2044,12 @@ int mbvt_process_multibeam()
 	double	*vel;
 	int	nvel;
 	char	*rt_svp = NULL;
+	int	first;
 	double	ttime;
 	int	ray_stat;
 	double	depth_offset;
+	double	depth_add;
+	double	ssv;
 	double	sx, sy, sxx, sxy;
 	double	delta, a, b;
 	int	ns;
@@ -2078,6 +2082,7 @@ int mbvt_process_multibeam()
 	/* initialize residuals and raypaths */
 	for (i=0;i<beams_bath;i++)
 		{
+		angle[i] = 0.0;
 		residual[i] = 0.0;
 		nresidual[i] = 0;
 		nraypath[i] = 0;
@@ -2095,6 +2100,7 @@ int mbvt_process_multibeam()
 	vel = profile_edit.velocity;
 	dep = profile_edit.depth;
 	status = mb_rt_init(verbose, nvel, dep, vel, &rt_svp, &error);
+	first = MB_YES;
 
 	/* loop over the data records */
 	for (k=0;k<nbuffer;k++)
@@ -2122,20 +2128,20 @@ int mbvt_process_multibeam()
 			status = mb_ttimes(verbose,mbio_ptr,
 				buff->buffer[k],&kind,&nbeams,
 				ttimes,angles,
-				angles_forward,flags,
-				&depth_offset,&error);
-
-			/* if angle separation specified, 
-				recalculate beam angles */
-			if (dangle > 0.0)
-			    {
-			    icenter = nbeams/2;
-			    for (i=0;i<nbeams;i++)
-				angles[i] = (i - icenter)*dangle;
-			    }
+				angles_forward,angles_null,flags,
+				&depth_offset,&ssv,&error);
 
 			/* add user specified ship draft */
 			depth_offset = depth_offset + draft;
+
+			/* check depth_offset */
+			if (depth_offset < 0.0)
+				{
+				depth_add = depth_offset;
+				depth_offset = 0.0;
+				}
+			else
+				depth_add = 0.0;
 			}
 
 		/* loop over the beams */
@@ -2144,13 +2150,15 @@ int mbvt_process_multibeam()
 		    {
 		    if (ttimes[i] <= 0.0)
 			flags[i] = 1;
+
 		    /* trace the ray */
 		    if (flags[i] == 0)
 			{
-			if (nraypath[i] > 0)
+			if (first == MB_NO)
 			status = mb_rt(verbose, 
 				    rt_svp, depth_offset, 
 				    angles[i], 0.5*ttimes[i],
+				    ssv, angles_null[i], 
 				    0, NULL, NULL, NULL, 
 				    &acrosstrack[i], &depth[i], 
 				    &ttime, &ray_stat, &error);
@@ -2158,6 +2166,7 @@ int mbvt_process_multibeam()
 			status = mb_rt(verbose, 
 				    rt_svp, depth_offset, 
 				    angles[i], 0.5*ttimes[i],
+				    ssv, angles_null[i], 
 				    nraypathmax, &nraypath[i], 
 				    raypathx[i], raypathy[i], 
 				    &acrosstrack[i], &depth[i], 
@@ -2167,6 +2176,9 @@ int mbvt_process_multibeam()
 			if (angles[i] < 0.0)
 			    acrosstrack[i] = -acrosstrack[i];
 
+			/* add to depth if needed */
+			depth[i] = depth[i] + depth_add;
+
 			/* get min max depths */
 			if (depth[i] < bath_min)
 			    bath_min = depth[i];
@@ -2175,8 +2187,8 @@ int mbvt_process_multibeam()
 
 			/* output some debug values */
 			if (verbose >= 5)
-			    fprintf(stderr,"dbg5       %d %5.0f %5.0f\n",
-				i, acrosstrack[i],depth[i]);
+			    fprintf(stderr,"dbg5       %3d %3d %6.3f %6.3f %8.2f %8.2f\n",
+				k, i, 0.5*ttimes[i], angles[i], acrosstrack[i],depth[i]);
 
 			/* get sums for linear fit */
 			sx += acrosstrack[i];
@@ -2186,6 +2198,10 @@ int mbvt_process_multibeam()
 			ns++;
 			}
 		    }
+
+		/* reset first flag */
+		if (buff->buffer_kind[k] == MB_DATA_DATA)
+		    first = MB_NO;
 
 		/* get linear fit to ping */
 		if (ns > 0)
@@ -2202,6 +2218,7 @@ int mbvt_process_multibeam()
 			{
 			depth_predict = a + b*acrosstrack[i];
 			res = depth[i] - depth_predict;
+			angle[i] += angles[i];
 			residual[i] += res;
 			nresidual[i]++;
 
@@ -2222,6 +2239,7 @@ int mbvt_process_multibeam()
 	for (i=0;i<nbeams;i++)
 		if (nresidual[i] > 0)
 			{
+			angle[i] = angle[i]/nresidual[i];
 			residual[i] = residual[i]/nresidual[i];
 			if (i < beam_first)
 				beam_first = i;
@@ -2237,8 +2255,8 @@ int mbvt_process_multibeam()
 		fprintf(stderr,"\tmaximum depth: %f\n",bath_max);
 		fprintf(stderr,"\nMultibeam Bathymetry Beam Residuals:\n");
 		for (i=0;i<nbeams;i++)
-			fprintf(stderr,"beam: %2d   residual: %f  calculations: %d\n",
-				i,residual[i],nresidual[i]);
+			fprintf(stderr,"beam: %2d   angle: %f   residual: %f  calculations: %d\n",
+				i,angle[i], residual[i],nresidual[i]);
 		}
 
 	/* print output debug statements */

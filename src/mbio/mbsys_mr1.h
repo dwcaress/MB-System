@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_mr1.h	7/19/94
- *	$Id: mbsys_mr1.h,v 4.1 1995-09-28 18:10:48 caress Exp $
+ *	$Id: mbsys_mr1.h,v 4.2 1996-01-26 21:27:27 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -20,6 +20,9 @@
  * Author:	D. W. Caress
  * Date:	July 19, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1995/09/28  18:10:48  caress
+ * Various bug fixes working toward release 4.3.
+ *
  * Revision 4.0  1994/10/21  12:35:08  caress
  * Release V4.0
  *
@@ -46,10 +49,13 @@
  *      sidescan data.
  *   6. The data structure defined below includes all of the values
  *      which are passed in the MR1 post processing format.
+ *   7. The data structure defined below also includes travel
+ *      time values for each bathymetry beam - this is an
+ *      addition to the HIG MR1 post processing format.
  */
 
 /* maximum number of bathymetry beams per side for MR1 */
-#define MBSYS_MR1_BEAMS_SIDE 200
+#define MBSYS_MR1_BEAMS_SIDE 1500
 
 /* maximum number of sidescan pixels per side for MR1 */
 #define MBSYS_MR1_PIXELS_SIDE 3500
@@ -62,6 +68,9 @@
 
 /* maximum length of comment */
 #define	MBSYS_MR1_MAXLINE 200
+
+/* angle from vertical of MR1 transducers */
+#define	MBSYS_MR1_XDUCER_ANGLE 50.0
 
 struct mbsys_mr1_struct
 	{
@@ -87,6 +96,7 @@ struct mbsys_mr1_struct
 	float png_roll;		/* vehicle roll (deg) */
 	float png_temp;		/* water temperature (deg) */
 	float png_atssincr;	/* across-track sidescan increment (m) */
+	float png_tt;		/* nadir travel time (s) */
 
 	/* port settings */
 	float port_trans[2];	/* transmitter settings (units?) */
@@ -113,8 +123,12 @@ struct mbsys_mr1_struct
 	/* bathymetry */
 	float	bath_acrosstrack_port[MBSYS_MR1_BEAMS_SIDE];
 	float	bath_port[MBSYS_MR1_BEAMS_SIDE];
+	float	tt_port[MBSYS_MR1_BEAMS_SIDE];
+	float	angle_port[MBSYS_MR1_BEAMS_SIDE];
 	float	bath_acrosstrack_stbd[MBSYS_MR1_BEAMS_SIDE];
 	float	bath_stbd[MBSYS_MR1_BEAMS_SIDE];
+	float	tt_stbd[MBSYS_MR1_BEAMS_SIDE];
+	float	angle_stbd[MBSYS_MR1_BEAMS_SIDE];
 
 	/* sidescan */
 	float	ss_port[MBSYS_MR1_PIXELS_SIDE];
