@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 5.3 2001-04-06 22:05:06 caress Exp $
+#	$Id: Makefile.template,v 5.4 2001-06-03 06:57:42 caress Exp $
 #
 #     Copyright (c) 1993, 1994, 2000 by
 #     David W. Caress (caress@mbari.org)
@@ -16,6 +16,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.3  2001/04/06  22:05:06  caress
+# Changed i/o modules for xse data.
+#
 # Revision 5.2  2001/03/22  20:45:56  caress
 # Trying to make 5.0.beta0...
 #
@@ -135,7 +138,6 @@ all:	$(INCDIR)/mb_format.h $(INCDIR)/mb_status.h \
 	$(INCDIR)/mbf_sb2100rw.h $(INCDIR)/mbf_sb2100b1.h \
 	$(INCDIR)/mbf_sb2100b2.h \
 	$(INCDIR)/mbf_em12darw.h $(INCDIR)/mbf_em12ifrm.h \
-	$(INCDIR)/mbf_em300raw.h $(INCDIR)/mbf_em300mba.h \
 	$(INCDIR)/mbf_mr1prhig.h $(INCDIR)/mbf_mr1aldeo.h \
 	$(INCDIR)/mbf_mr1bldeo.h \
 	$(INCDIR)/mbf_mbldeoih.h $(INCDIR)/mbf_cbat9001.h \
@@ -387,9 +389,9 @@ mbr_em12darw.o: mbr_em12darw.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INC
 	$(CC) -c $(CFLAGS) mbr_em12darw.c
 mbr_em12ifrm.o: mbr_em12ifrm.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbf_em12ifrm.h $(INCDIR)/mbsys_simrad.h
 	$(CC) -c $(CFLAGS) mbr_em12ifrm.c
-mbr_em300raw.o: mbr_em300raw.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h  $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbf_em300raw.h $(INCDIR)/mbsys_simrad2.h
+mbr_em300raw.o: mbr_em300raw.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h  $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbsys_simrad2.h
 	$(CC) -c $(CFLAGS) mbr_em300raw.c
-mbr_em300mba.o: mbr_em300mba.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h  $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbf_em300mba.h $(INCDIR)/mbsys_simrad2.h
+mbr_em300mba.o: mbr_em300mba.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h  $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbsys_simrad2.h
 	$(CC) -c $(CFLAGS) mbr_em300mba.c
 mbr_mr1prhig.o: mbr_mr1prhig.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbf_mr1prhig.h $(INCDIR)/mbsys_mr1.h
 	$(CC) -c $(CFLAGS) mbr_mr1prhig.c
@@ -575,12 +577,6 @@ $(INCDIR)/mbf_em12darw.h:	mbf_em12darw.h
 $(INCDIR)/mbf_em12ifrm.h:	mbf_em12ifrm.h
 	cp mbf_em12ifrm.h $(INCDIR)/mbf_em12ifrm.h
 	chmod 664 $(INCDIR)/mbf_em12ifrm.h
-$(INCDIR)/mbf_em300raw.h:	mbf_em300raw.h
-	cp mbf_em300raw.h $(INCDIR)/mbf_em300raw.h
-	chmod 664 $(INCDIR)/mbf_em300raw.h
-$(INCDIR)/mbf_em300mba.h:	mbf_em300mba.h
-	cp mbf_em300mba.h $(INCDIR)/mbf_em300mba.h
-	chmod 664 $(INCDIR)/mbf_em300mba.h
 $(INCDIR)/mbf_mr1prhig.h:	mbf_mr1prhig.h
 	cp mbf_mr1prhig.h $(INCDIR)/mbf_mr1prhig.h
 	chmod 664 $(INCDIR)/mbf_mr1prhig.h
