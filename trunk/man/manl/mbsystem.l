@@ -1,4 +1,4 @@
-.TH mbsystem l "12 November 2002" "MB-System 5.0" "MB-System 5.0"
+.TH mbsystem l "22 March 2002" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbsystem\fP - A set of utilities for manipulating and 
 processing swath sonar bathymetry, amplitude, and sidescan data.
