@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sbsiomrg.c	2/2/93
- *	$Id: mbr_sbsiomrg.c,v 4.6 1995-03-06 19:38:54 caress Exp $
+ *	$Id: mbr_sbsiomrg.c,v 4.7 1996-04-22 13:21:19 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	February 2, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.6  1995/03/06  19:38:54  caress
+ * Changed include strings.h to string.h for POSIX compliance.
+ *
  * Revision 4.5  1995/02/14  15:10:38  caress
  * Fixed typo that set all acrosstrack distances to zero!!!
  *
@@ -68,6 +71,7 @@
 #include "../../include/mb_status.h"
 #include "../../include/mb_format.h"
 #include "../../include/mb_io.h"
+#include "../../include/mb_define.h"
 #include "../../include/mbsys_sb.h"
 #include "../../include/mbf_sbsiomrg.h"
 
@@ -82,7 +86,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_sbsiomrg.c,v 4.6 1995-03-06 19:38:54 caress Exp $";
+ static char res_id[]="$Id: mbr_sbsiomrg.c,v 4.7 1996-04-22 13:21:19 caress Exp $";
 	char	*function_name = "mbr_alm_sbsiomrg";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcut.c	1/26/95
  *
- *    $Id: mbcut.c,v 4.5 1996-03-11 15:29:02 caress Exp $
+ *    $Id: mbcut.c,v 4.6 1996-04-22 13:23:05 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,9 @@
  * Date:	January 26, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.5  1996/03/11  15:29:02  caress
+ * Fixed typo causing beams to be zero'd rather than flagged.
+ *
  * Revision 4.4  1996/01/26  21:25:58  caress
  * Version 4.3 distribution
  *
@@ -48,6 +51,7 @@
 /* mbio include files */
 #include "../../include/mb_status.h"
 #include "../../include/mb_format.h"
+#include "../../include/mb_define.h"
 
 /* mbcut defines */
 #define	MBCUT_DATA_BATH	    0
@@ -58,17 +62,6 @@
 #define	MBCUT_MODE_DISTANCE 2
 #define	MBCUT_RANGE_MAX	    20
 
-/* min max defines */
-#define min(A, B)       ((A) < (B) ? (A) : (B))
-#define max(A, B)       ((A) > (B) ? (A) : (B))
-
-/* DTR define */
-#ifndef M_PI
-#define	M_PI	3.14159265358979323846
-#endif
-#define DTR	(M_PI/180.)
-#define RTD (180./M_PI)
-
 /*--------------------------------------------------------------------*/
 
 main (argc, argv)
@@ -76,7 +69,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbcut.c,v 4.5 1996-03-11 15:29:02 caress Exp $";
+	static char rcs_id[] = "$Id: mbcut.c,v 4.6 1996-04-22 13:23:05 caress Exp $";
 	static char program_name[] = "mbcut";
 	static char help_message[] = 
 "MBCUT removes swath data values that lie outside ranges\n\t\
@@ -597,8 +590,8 @@ The default input and output streams are stdin and stdout.";
 			if (gkind[icut] == MBCUT_DATA_BATH
 			    && gmode[icut] == MBCUT_MODE_NUMBER)
 			    {
-			    istart = max((int)gmin[icut], 0);
-			    iend = min((int)gmax[icut], beams_bath - 1);
+			    istart = MAX((int)gmin[icut], 0);
+			    iend = MIN((int)gmax[icut], beams_bath - 1);
 			    for (i=istart;i<=iend;i++)
 				{
 				bathflag[i] = MB_NO;
@@ -647,8 +640,8 @@ The default input and output streams are stdin and stdout.";
 			if (gkind[icut] == MBCUT_DATA_AMP
 			    && gmode[icut] == MBCUT_MODE_NUMBER)
 			    {
-			    istart = max((int)gmin[icut], 0);
-			    iend = min((int)gmax[icut], beams_amp - 1);
+			    istart = MAX((int)gmin[icut], 0);
+			    iend = MIN((int)gmax[icut], beams_amp - 1);
 			    for (i=istart;i<=iend;i++)
 				{
 				ampflag[i] = MB_NO;
@@ -697,8 +690,8 @@ The default input and output streams are stdin and stdout.";
 			if (gkind[icut] == MBCUT_DATA_SS
 			    && gmode[icut] == MBCUT_MODE_NUMBER)
 			    {
-			    istart = max((int)gmin[icut], 0);
-			    iend = min((int)gmax[icut], pixels_ss - 1);
+			    istart = MAX((int)gmin[icut], 0);
+			    iend = MIN((int)gmax[icut], pixels_ss - 1);
 			    for (i=istart;i<=iend;i++)
 				{
 				ssflag[i] = MB_NO;

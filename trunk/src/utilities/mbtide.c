@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbtide.c	8/24/93
  *
- *    $Id: mbtide.c,v 4.1 1995-11-02 19:19:56 caress Exp $
+ *    $Id: mbtide.c,v 4.2 1996-04-22 13:23:05 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,9 @@
  * Date:	August 24, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1995/11/02  19:19:56  caress
+ * Fixed mb_error calls.
+ *
  * Revision 4.0  1995/07/13  20:15:56  caress
  * Program to correct bathymetry for tides.
  *
@@ -37,6 +40,7 @@
 /* mbio include files */
 #include "../../include/mb_status.h"
 #include "../../include/mb_format.h"
+#include "../../include/mb_define.h"
 
 /*--------------------------------------------------------------------*/
 
@@ -45,7 +49,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbtide.c,v 4.1 1995-11-02 19:19:56 caress Exp $";
+	static char rcs_id[] = "$Id: mbtide.c,v 4.2 1996-04-22 13:23:05 caress Exp $";
 	static char program_name[] = "MBTIDE";
 	static char help_message[] =  "MBTIDE corrects multibeam bathymetry data for tides. \nThe default input and output streams are stdin and stdout.";
 	static char usage_message[] = "mbtide [-Fformat -V -H  -Iinfile -Mtide_format -Ooutfile -Ttidefile]";

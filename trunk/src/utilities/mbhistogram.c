@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbhistogram.c	12/28/94
- *    $Id: mbhistogram.c,v 4.6 1995-08-11 18:51:37 caress Exp $
+ *    $Id: mbhistogram.c,v 4.7 1996-04-22 13:23:05 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,9 @@
  * Date:	December 28, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.6  1995/08/11  18:51:37  caress
+ * Added Gaussian distribution option.
+ *
  * Revision 4.5  1995/05/12  17:12:32  caress
  * Made exit status values consistent with Unix convention.
  * 0: ok  nonzero: error
@@ -48,15 +51,12 @@
 
 /* MBIO include files */
 #include "../../include/mb_status.h"
+#include "../../include/mb_define.h"
 
 /* mode defines */
 #define	MBHISTOGRAM_BATH	0
 #define	MBHISTOGRAM_AMP		1
 #define	MBHISTOGRAM_SS		2
-
-/* min max defines */
-#define	min(A, B)	((A) < (B) ? (A) : (B))
-#define	max(A, B)	((A) > (B) ? (A) : (B))
 
 /*--------------------------------------------------------------------*/
 
@@ -64,7 +64,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbhistogram.c,v 4.6 1995-08-11 18:51:37 caress Exp $";
+	static char rcs_id[] = "$Id: mbhistogram.c,v 4.7 1996-04-22 13:23:05 caress Exp $";
 	static char program_name[] = "MBHISTOGRAM";
 	static char help_message[] =  "MBHISTOGRAM reads a multibeam data file and generates a histogram\n\tof the bathymetry,  amplitude,  or sidescan values. Alternatively, \n\tmbhistogram can output a list of values which break up the\n\tdistribution into equal sized regions.\n\tThe results are dumped to stdout.";
 	static char usage_message[] = "mbhistogram [-Akind -Byr/mo/da/hr/mn/sc -Dmin/max -Eyr/mo/da/hr/mn/sc -Fformat -G -Ifile -Llonflip -Mnintervals -Nnbins -Ppings -Rw/e/s/n -Sspeed -V -H]";
@@ -481,8 +481,8 @@ char **argv;
 						}
 					else
 						{
-						data_min = min(bath[i], data_min);
-						data_max = max(bath[i], data_max);
+						data_min = MIN(bath[i], data_min);
+						data_max = MAX(bath[i], data_max);
 						}
 					}
 				}
@@ -505,8 +505,8 @@ char **argv;
 						}
 					else
 						{
-						data_min = min(amp[i], data_min);
-						data_max = max(amp[i], data_max);
+						data_min = MIN(amp[i], data_min);
+						data_max = MAX(amp[i], data_max);
 						}
 					}
 				}
@@ -529,8 +529,8 @@ char **argv;
 						}
 					else
 						{
-						data_min = min(ss[i], data_min);
-						data_max = max(ss[i], data_max);
+						data_min = MIN(ss[i], data_min);
+						data_max = MAX(ss[i], data_max);
 						}
 					}
 				}
@@ -596,8 +596,8 @@ char **argv;
 		dinterval = (target_max - target_min)/(nintervals-1);
 
 		/* get intervals */
-		intervals[0] = max(data_min, value_min);
-		intervals[nintervals-1] = min(data_max, value_max);
+		intervals[0] = MAX(data_min, value_min);
+		intervals[nintervals-1] = MIN(data_max, value_max);
 		ibin = 0;
 		for (j=1;j<nintervals-1;j++)
 			{

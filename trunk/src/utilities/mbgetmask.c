@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgetmask.c	6/15/93
- *    $Id: mbgetmask.c,v 4.6 1996-03-11 15:31:18 caress Exp $
+ *    $Id: mbgetmask.c,v 4.7 1996-04-22 13:23:05 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -23,6 +23,10 @@
  * Date:	June 15, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 4.6  1996/03/11  15:31:18  caress
+ * Changed so that flag mask set for zero as well as negative
+ * depths.
+ *
  * Revision 4.5  1995/05/12  17:12:32  caress
  * Made exit status values consistent with Unix convention.
  * 0: ok  nonzero: error
@@ -63,6 +67,7 @@
 /* mbio include files */
 #include "../../include/mb_status.h"
 #include "../../include/mb_format.h"
+#include "../../include/mb_define.h"
 
 /*--------------------------------------------------------------------*/
 
@@ -71,7 +76,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbgetmask.c,v 4.6 1996-03-11 15:31:18 caress Exp $";
+	static char rcs_id[] = "$Id: mbgetmask.c,v 4.7 1996-04-22 13:23:05 caress Exp $";
 	static char program_name[] = "MBGETMASK";
 	static char help_message[] =  "MBGETMASK reads a multibeam data file and writes out \na data flag mask to stdout which can be applied to other data files \ncontaining the same data (but presumably in a different \nstate of processing).  This allows editing of one data file to \nbe transferred to another with ease.  The program MBMASK is \nused to apply the flag mask to another file. \nThe default input stream is stdin.";
 	static char usage_message[] = "mbgetmask [-Fformat -Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc -Sspeed -Iinfile -V -H]";

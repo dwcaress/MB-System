@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcontour.c	6/4/93
- *    $Id: mbcontour.c,v 4.15 1995-11-28 21:06:16 caress Exp $
+ *    $Id: mbcontour.c,v 4.16 1996-04-22 13:18:44 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Date:	June 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.15  1995/11/28  21:06:16  caress
+ * Fixed scaling for meters to feet.
+ *
  * Revision 4.14  1995/11/22  22:13:02  caress
  * Now handles bathymetry in feet with -W option.
  *
@@ -119,13 +122,8 @@
 /* MBIO include files */
 #include "../../include/mb_status.h"
 #include "../../include/mb_format.h"
+#include "../../include/mb_define.h"
 #include "../../include/mb_contour.h"
-
-/* DTR define */
-#ifndef M_PI
-#define	M_PI	3.14159265358979323846
-#endif
-#define DTR	(M_PI/180.)
 
 /*--------------------------------------------------------------------*/
 
@@ -133,7 +131,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbcontour.c,v 4.15 1995-11-28 21:06:16 caress Exp $";
+	static char rcs_id[] = "$Id: mbcontour.c,v 4.16 1996-04-22 13:18:44 caress Exp $";
 #ifdef MBCONTOURFILTER
 	static char program_name[] = "MBCONTOURFILTER";
 	static char help_message[] =  "MBCONTOURFILTER is a utility which creates a pen plot \ncontour map of multibeam swath bathymetry.  \nThe primary purpose of this program is to serve as \npart of a real-time plotting system.  The contour \nlevels and colors can be controlled \ndirectly or set implicitly using contour and color change intervals. \nContours can also be set to have ticks pointing downhill.";

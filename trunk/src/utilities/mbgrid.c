@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrid.c	5/2/94
- *    $Id: mbgrid.c,v 4.29 1996-04-15 19:34:32 caress Exp $
+ *    $Id: mbgrid.c,v 4.30 1996-04-22 13:23:05 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -38,6 +38,9 @@
  * Rererewrite:	January 2, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.29  1996/04/15  19:34:32  caress
+ * Now mbgrid does not attempt to spline interpolate an empty grid.
+ *
  * Revision 4.28  1996/01/26  21:25:58  caress
  * Version 4.3 distribution
  *
@@ -183,6 +186,7 @@
 /* mbio include files */
 #include "../../include/mb_status.h"
 #include "../../include/mb_format.h"
+#include "../../include/mb_define.h"
 
 /* GMT include files */
 #include "gmt.h"
@@ -210,15 +214,11 @@
 /* number of data to be allocated at a time */
 #define	REALLOC_STEP_SIZE	25
 
-/* min max macros */
-#define	min(A, B)	((A) < (B) ? (A) : (B))
-#define	max(A, B)	((A) > (B) ? (A) : (B))
-
 /* compare function for qsort */
 int double_compare();
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbgrid.c,v 4.29 1996-04-15 19:34:32 caress Exp $";
+static char rcs_id[] = "$Id: mbgrid.c,v 4.30 1996-04-22 13:23:05 caress Exp $";
 static char program_name[] = "MBGRID";
 static char help_message[] =  "MBGRID is an utility used to grid bathymetry, amplitude, or \nsidescan data contained in a set of multibeam data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered by multibeam swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbgrid -Ifilelist -Oroot -Rwest/east/south/north [-Adatatype\n          -Bborder  -Cclip -Dxdim/ydim -Edx/dy/units -F\n          -Ggridkind -Llonflip -M -N -Ppings -Sspeed\n          -Ttension -Utime -V -Wscale -Xextend]";
@@ -858,28 +858,28 @@ char **argv;
 		xx = wbnd[0] + (wbnd[1] - wbnd[0]);
 		yy = wbnd[2] - (wbnd[3] - wbnd[2]);
 		xy_to_geo(xx, yy, &xlon, &ylat);
-		bounds[0] = min(bounds[0], xlon);
-		bounds[1] = max(bounds[1], xlon);
-		bounds[2] = min(bounds[2], ylat);
-		bounds[3] = max(bounds[3], ylat);
+		bounds[0] = MIN(bounds[0], xlon);
+		bounds[1] = MAX(bounds[1], xlon);
+		bounds[2] = MIN(bounds[2], ylat);
+		bounds[3] = MAX(bounds[3], ylat);
 		
 		/* do third point */
 		xx = wbnd[0] - (wbnd[1] - wbnd[0]);
 		yy = wbnd[2] + (wbnd[3] - wbnd[2]);
 		xy_to_geo(xx, yy, &xlon, &ylat);
-		bounds[0] = min(bounds[0], xlon);
-		bounds[1] = max(bounds[1], xlon);
-		bounds[2] = min(bounds[2], ylat);
-		bounds[3] = max(bounds[3], ylat);
+		bounds[0] = MIN(bounds[0], xlon);
+		bounds[1] = MAX(bounds[1], xlon);
+		bounds[2] = MIN(bounds[2], ylat);
+		bounds[3] = MAX(bounds[3], ylat);
 		
 		/* do fourth point */
 		xx = wbnd[0] + (wbnd[1] - wbnd[0]);
 		yy = wbnd[2] + (wbnd[3] - wbnd[2]);
 		xy_to_geo(xx, yy, &xlon, &ylat);
-		bounds[0] = min(bounds[0], xlon);
-		bounds[1] = max(bounds[1], xlon);
-		bounds[2] = min(bounds[2], ylat);
-		bounds[3] = max(bounds[3], ylat);
+		bounds[0] = MIN(bounds[0], xlon);
+		bounds[1] = MAX(bounds[1], xlon);
+		bounds[2] = MIN(bounds[2], ylat);
+		bounds[3] = MAX(bounds[3], ylat);
 		}
 
 	/* output info */
@@ -1227,10 +1227,10 @@ char **argv;
 				&& iy < gydim + xtradim 
 				&& time_ok == MB_YES)
 			        {
-			        ix1 = max(ix - xtradim, 0);
-			        ix2 = min(ix + xtradim, gxdim - 1);
-			        iy1 = max(iy - xtradim, 0);
-			        iy2 = min(iy + xtradim, gydim - 1);
+			        ix1 = MAX(ix - xtradim, 0);
+			        ix2 = MIN(ix + xtradim, gxdim - 1);
+			        iy1 = MAX(iy - xtradim, 0);
+			        iy2 = MIN(iy + xtradim, gydim - 1);
 			        for (ii=ix1;ii<=ix2;ii++)
 			         for (jj=iy1;jj<=iy2;jj++)
 				   {
@@ -1348,10 +1348,10 @@ char **argv;
 				&& iy < gydim + xtradim 
 				&& time_ok == MB_YES)
 			        {
-			        ix1 = max(ix - xtradim, 0);
-			        ix2 = min(ix + xtradim, gxdim - 1);
-			        iy1 = max(iy - xtradim, 0);
-			        iy2 = min(iy + xtradim, gydim - 1);
+			        ix1 = MAX(ix - xtradim, 0);
+			        ix2 = MIN(ix + xtradim, gxdim - 1);
+			        iy1 = MAX(iy - xtradim, 0);
+			        iy2 = MIN(iy + xtradim, gydim - 1);
 			        for (ii=ix1;ii<=ix2;ii++)
 			         for (jj=iy1;jj<=iy2;jj++)
 				   {
@@ -1466,10 +1466,10 @@ char **argv;
 				&& iy < gydim + xtradim 
 				&& time_ok == MB_YES)
 			        {
-			        ix1 = max(ix - xtradim, 0);
-			        ix2 = min(ix + xtradim, gxdim - 1);
-			        iy1 = max(iy - xtradim, 0);
-			        iy2 = min(iy + xtradim, gydim - 1);
+			        ix1 = MAX(ix - xtradim, 0);
+			        ix2 = MIN(ix + xtradim, gxdim - 1);
+			        iy1 = MAX(iy - xtradim, 0);
+			        iy2 = MIN(iy + xtradim, gydim - 1);
 			        for (ii=ix1;ii<=ix2;ii++)
 			         for (jj=iy1;jj<=iy2;jj++)
 				   {
@@ -1589,10 +1589,10 @@ char **argv;
 				&& iy < gydim + xtradim
 				&& time_ok == MB_YES)
 			        {
-			        ix1 = max(ix - xtradim, 0);
-			        ix2 = min(ix + xtradim, gxdim - 1);
-			        iy1 = max(iy - xtradim, 0);
-			        iy2 = min(iy + xtradim, gydim - 1);
+			        ix1 = MAX(ix - xtradim, 0);
+			        ix2 = MIN(ix + xtradim, gxdim - 1);
+			        iy1 = MAX(iy - xtradim, 0);
+			        iy2 = MIN(iy + xtradim, gydim - 1);
 			        for (ii=ix1;ii<=ix2;ii++)
 			         for (jj=iy1;jj<=iy2;jj++)
 				   {

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	4/8/93
- *    $Id: mbedit_prog.c,v 4.11 1996-04-17 23:11:09 caress Exp $
+ *    $Id: mbedit_prog.c,v 4.12 1996-04-22 13:20:55 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -23,6 +23,10 @@
  * Date:	April 8, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.11  1996/04/17  23:11:09  caress
+ * Fixed bug that caused display to reset to beginning of buffer
+ * at inconvenient times.
+ *
  * Revision 4.10  1996/04/05  15:25:11  caress
  * Fixed GUI mode so done means quit for real. Also changed done and
  * quit handling in browse mode so that the program doesn't read the
@@ -119,15 +123,12 @@
 /* MBIO include files */
 #include "mb_format.h"
 #include "mb_status.h"
+#include "mb_define.h"
 #include "mb_io.h"
 
 /* output mode defines */
 #define	MBEDIT_OUTPUT_OUTPUT 0
 #define	MBEDIT_OUTPUT_BROWSE 1
-
-/* min max define */
-#define	min(A, B)	((A) < (B) ? (A) : (B))
-#define	max(A, B)	((A) > (B) ? (A) : (B))
 
 /* ping structure definition */
 struct mbedit_ping_struct 
@@ -152,7 +153,7 @@ struct mbedit_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbedit_prog.c,v 4.11 1996-04-17 23:11:09 caress Exp $";
+static char rcs_id[] = "$Id: mbedit_prog.c,v 4.12 1996-04-22 13:20:55 caress Exp $";
 static char program_name[] = "MBEDIT";
 static char help_message[] =  "MBEDIT is an interactive beam editor for multibeam bathymetry data.\n\tIt can work with any data format supported by the MBIO library.\n\tThis version uses the XVIEW toolkit and has been developed using\n\tthe DEVGUIDE package.  A future version will employ the MOTIF\n\ttoolkit for greater portability.  This file contains the code \n\tthat does not directly depend on the XVIEW interface - the companion \n\tfile mbedit_stubs.c contains the user interface related code.";
 static char usage_message[] = "mbedit [-Byr/mo/da/hr/mn/sc -D  -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ooutfile -V -H]";
@@ -2906,7 +2907,7 @@ int	autoscale;
 					nbathsum++;
 					bathlist[nbathlist] = ping[i].bath[j];
 					nbathlist++;
-					xtrack_max = max(xtrack_max, 
+					xtrack_max = MAX(xtrack_max, 
 						fabs(ping[i].bathacrosstrack[j]));
 					}
 				}
@@ -2925,7 +2926,7 @@ int	autoscale;
 	if (autoscale == MB_YES)
 		{
 		plot_width = 2.4 * xtrack_max;
-		ndec = max(1, (int) log10((double) plot_width));
+		ndec = MAX(1, (int) log10((double) plot_width));
 		maxx = 1;
 		for (i=0;i<ndec;i++)
 			maxx = maxx * 10;

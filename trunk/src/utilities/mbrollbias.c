@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbrollbias.c	5/16/93
- *    $Id: mbrollbias.c,v 4.5 1996-01-17 23:02:17 caress Exp $
+ *    $Id: mbrollbias.c,v 4.6 1996-04-22 13:23:05 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -31,6 +31,9 @@
  * Date:	May 16, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.5  1996/01/17  23:02:17  caress
+ * Fixed heading averaging problem.
+ *
  * Revision 4.4  1995/05/12  17:12:32  caress
  * Made exit status values consistent with Unix convention.
  * 0: ok  nonzero: error
@@ -67,16 +70,10 @@
 /* mbio include files */
 #include "../../include/mb_status.h"
 #include "../../include/mb_format.h"
+#include "../../include/mb_define.h"
 
 /* define minimum number of data to fit plane */
 #define	MINIMUM_NUMBER_DATA	100
-
-/* DTR define */
-#ifndef M_PI
-#define	M_PI	3.14159265358979323846
-#endif
-#define DTR	(M_PI/180.)
-#define RTD	(180./M_PI)
 
 /* structure definitions */
 struct bath
@@ -92,7 +89,7 @@ struct bathptr
 	};
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbrollbias.c,v 4.5 1996-01-17 23:02:17 caress Exp $";
+static char rcs_id[] = "$Id: mbrollbias.c,v 4.6 1996-04-22 13:23:05 caress Exp $";
 static char program_name[] = "MBROLLBIAS";
 static char help_message[] =  "MBROLLBIAS is an utility used to assess roll bias of multibeam \nsonar systems using bathymetry data from two swaths covering the \nsame seafloor in opposite directions. The program takes two input  \nfiles and calculates best fitting planes for each dataset.   \nThe roll bias is calculated by solving for a common roll bias\nfactor which explains the difference between the seafloor\nslopes observed on the two swaths.  This approach assumes that \npitch bias is not a factor; this assumption is most correct when\nthe heading of the two shiptracks are exactly opposite. The area is\ndivided into a number of rectangular regions and calculations are done  \nin each region containing a sufficient number of data from both \nswaths.  A positive roll bias value means that the the vertical \nreference used by the multibeam system is biased to starboard, \ngiving rise to shallow bathymetry to port and deep bathymetry \nto starboard.";
 static char usage_message[] = "mbrollbias -Dxdim/ydim -Fformat1/format2 -Ifile1 -Jfile2 -Llonflip -Rw/e/s/n -V -H]";

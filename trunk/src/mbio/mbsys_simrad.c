@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad.c	3.00	8/5/94
- *	$Id: mbsys_simrad.c,v 4.7 1996-04-22 10:57:09 caress Exp $
+ *	$Id: mbsys_simrad.c,v 4.8 1996-04-22 13:21:19 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -40,6 +40,9 @@
  * Date:	August 5, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.7  1996/04/22  10:57:09  caress
+ * DTR define now in mb_io.h
+ *
  * Revision 4.6  1995/11/27  21:53:53  caress
  * New version of mb_ttimes with ssv and angles_null.
  *
@@ -78,6 +81,7 @@
 #include "../../include/mb_status.h"
 #include "../../include/mb_format.h"
 #include "../../include/mb_io.h"
+#include "../../include/mb_define.h"
 #include "../../include/mbsys_simrad.h"
 
 /*--------------------------------------------------------------------*/
@@ -87,7 +91,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_simrad.c,v 4.7 1996-04-22 10:57:09 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad.c,v 4.8 1996-04-22 13:21:19 caress Exp $";
 	char	*function_name = "mbsys_simrad_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

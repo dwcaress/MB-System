@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsuricen.c	2/2/93
- *	$Id: mbr_hsuricen.c,v 4.6 1995-03-17 15:12:59 caress Exp $
+ *	$Id: mbr_hsuricen.c,v 4.7 1996-04-22 13:21:19 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,10 @@
  * Author:	D. W. Caress
  * Date:	February 2, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.6  1995/03/17  15:12:59  caress
+ * Changes related to handling early, problematic
+ * Ewing Hydrosweep data.
+ *
  * Revision 4.5  1995/03/09  12:41:58  caress
  * Fixed bug related to handling shallow water data.
  *
@@ -63,6 +67,7 @@
 #include "../../include/mb_status.h"
 #include "../../include/mb_format.h"
 #include "../../include/mb_io.h"
+#include "../../include/mb_define.h"
 #include "../../include/mbsys_hsds.h"
 #include "../../include/mbf_hsuricen.h"
 
@@ -77,7 +82,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_hsuricen.c,v 4.6 1995-03-17 15:12:59 caress Exp $";
+ static char res_id[]="$Id: mbr_hsuricen.c,v 4.7 1996-04-22 13:21:19 caress Exp $";
 	char	*function_name = "mbr_alm_hsuricen";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

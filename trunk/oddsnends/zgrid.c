@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	zgrid.c	    4/25/95
- *    $Id: zgrid.c,v 4.0 1995-04-25 19:07:29 caress Exp $
+ *    $Id: zgrid.c,v 4.1 1996-04-22 13:23:05 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -40,7 +40,7 @@
  *     n = length of xyz series. 
  *     zpij[n] = float work array
  *     knxt[n] = int work array
- *     imnew[max(nx, ny)+1] = int work array
+ *     imnew[MAX(nx, ny)+1] = int work array
  *     cay = k = amount of spline eqn (between 0 and inf.) 
  *     nrng...grid points more than nrng grid spaces from the nearest 
  *            data point are set to undefined. 
@@ -51,6 +51,9 @@
  * Date:	April 25, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1995/04/25  19:07:29  caress
+ * First cut at C version of zgrid.
+ *
  * 
  *     The following are the original comments from the Fortran code:
  *
@@ -89,17 +92,18 @@
  *     David W. Caress
  *
  *     zgrid.c -- translated by f2c (version 19950314) from zgrid.f.
- *     Work arrays zpij[n], knxt[n], imnew[max(nx, ny)+1] are now
+ *     Work arrays zpij[n], knxt[n], imnew[MAX(nx, ny)+1] are now
  *     passed into the function.
  *     David W. Caress
  *     April 25,  1995
  *--------------------------------------------------------------------*/
 
+/* standard include files */
 #include <stdio.h>
 #include <math.h>
 
-#define	min(A, B)	((A) < (B) ? (A) : (B))
-#define	max(A, B)	((A) > (B) ? (A) : (B))
+/* MBIO include files */
+#include "../../include/mb_define.h"
 
 /* ----------------------------------------------------------------------- */
 int zgrid(z, nx, ny, x1, y1, dx, dy, xyz, n, zpij, knxt, imnew, cay, nrng)
@@ -176,7 +180,7 @@ L20:
     }
     zrange = zmax - zmin;
     zbase = zrange * (float)20. - zmin;
-    hrange = min(*dx * (*nx - 1), *dy * (*ny - 1));
+    hrange = MIN(*dx * (*nx - 1), *dy * (*ny - 1));
     derzm = zrange * (float)2. / hrange;
 
 /*     set pointer array knxt */
@@ -575,7 +579,7 @@ L1700:
 		dz = zsum / wgt - z00;
 		++npg;
 		dzrms += dz * dz;
-		dzmax = max((float)fabs((double)dz), dzmax);
+		dzmax = MAX((float)fabs((double)dz), dzmax);
 		z[i + j * z_dim1] = z00 + dz * relax;
 L2000:
 		;
@@ -829,7 +833,7 @@ L3760:
 L3780:
 	relaxn -= ((float)2. - relaxn) * (float).25;
 L3785:
-	relax = max(relax,relaxn);
+	relax = MAX(relax,relaxn);
 L4000:
 	;
     }

@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 4.11 1995-08-07 17:39:23 caress Exp $
+#	$Id: Makefile.template,v 4.12 1996-04-22 13:23:05 caress Exp $
 #
 #     Copyright (c) 1993, 1994 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.11  1995/08/07  17:39:23  caress
+# Moved to GMT 3
+#
 # Revision 4.10  1995/04/25  20:03:07  caress
 # Replaced surfunc.c with zgrid.c
 #
@@ -184,56 +187,56 @@ $(BINDIR)/mbtide:	mbtide.o $(LIBDIR)/libmbio.a
 		$(LFLAGS) -o $(BINDIR)/mbtide
 
 ### compile the source files
-mbformat.o:	mbformat.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
+mbformat.o:	mbformat.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbformat.c
-mbdefaults.o:	mbdefaults.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
+mbdefaults.o:	mbdefaults.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbdefaults.c
-mbinfo.o:	mbinfo.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
+mbinfo.o:	mbinfo.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbinfo.c
-mbcopy.o:	mbcopy.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
+mbcopy.o:	mbcopy.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbcopy.c
-mblist.o:	mblist.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
+mblist.o:	mblist.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mblist.c
-mbmerge.o:	mbmerge.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
+mbmerge.o:	mbmerge.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbmerge.c
-mbclean.o:	mbclean.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
+mbclean.o:	mbclean.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbclean.c
-mbunclean.o:	mbunclean.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
+mbunclean.o:	mbunclean.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbunclean.c
-mbgrid.o:	mbgrid.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
+mbgrid.o:	mbgrid.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) $(BIGFLAG) -I$(GMTINCDIR) -I$(NETCDFINCDIR) mbgrid.c
-mblevitus.o:	mblevitus.c $(INCDIR)/mb_status.h Makefile
+mblevitus.o:	mblevitus.c $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h Makefile
 	echo "	char *ifile = "'"$(LEVITUS)"'";" > levitus.h
 	$(CC) -c $(CFLAGS) mblevitus.c
 zgrid.o:	zgrid.c
 	$(CC) -c $(CFLAGS) zgrid.c
-mbbath.o:	mbbath.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
+mbbath.o:	mbbath.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbbath.c
 mb_rt.o:	mb_rt.c
 	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) mb_rt.c
-hsdump.o:	hsdump.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mbsys_hsds.h
+hsdump.o:	hsdump.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h $(INCDIR)/mbsys_hsds.h
 	$(CC) -c $(CFLAGS) hsdump.c
-mbrollbias.o:	mbrollbias.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
+mbrollbias.o:	mbrollbias.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbrollbias.c
-mbgetmask.o:	mbgetmask.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
+mbgetmask.o:	mbgetmask.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbgetmask.c
-mbmask.o:	mbmask.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
+mbmask.o:	mbmask.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbmask.c
-mbsmooth.o:	mbsmooth.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
+mbsmooth.o:	mbsmooth.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbsmooth.c
-mbps.o:	mbps.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
+mbps.o:	mbps.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) -I$(NETCDFINCDIR) mbps.c
-mbhistogram.o:	mbhistogram.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
+mbhistogram.o:	mbhistogram.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) mbhistogram.c
-mbbackangle.o:	mbbackangle.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
+mbbackangle.o:	mbbackangle.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbbackangle.c
-mbanglecorrect.o:	mbanglecorrect.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
+mbanglecorrect.o:	mbanglecorrect.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbanglecorrect.c
-mbfilter.o:	mbfilter.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
+mbfilter.o:	mbfilter.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbfilter.c
-mbcut.o:	mbcut.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
+mbcut.o:	mbcut.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbcut.c
-mbtide.o:	mbtide.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
+mbtide.o:	mbtide.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbtide.c
 
 ### copy the man pages to the man page directory

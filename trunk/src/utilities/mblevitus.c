@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mblevitus.c	4/15/93
- *    $Id: mblevitus.c,v 4.5 1995-05-12 17:12:32 caress Exp $
+ *    $Id: mblevitus.c,v 4.6 1996-04-22 13:23:05 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,10 @@
  * Date:	April 15, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.5  1995/05/12  17:12:32  caress
+ * Made exit status values consistent with Unix convention.
+ * 0: ok  nonzero: error
+ *
  * Revision 4.4  1995/03/06  19:37:59  caress
  * Changed include strings.h to string.h for POSIX compliance.
  *
@@ -74,12 +78,7 @@
 
 /* mbio include files */
 #include "../../include/mb_status.h"
-
-/* DTR define */
-#ifndef M_PI
-#define	M_PI	3.14159265358979323846
-#endif
-#define DTR	(M_PI/180.)
+#include "../../include/mb_define.h"
 
 /* global defines */
 #define	NO_DATA	-1000000000.0
@@ -91,7 +90,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mblevitus.c,v 4.5 1995-05-12 17:12:32 caress Exp $";
+	static char rcs_id[] = "$Id: mblevitus.c,v 4.6 1996-04-22 13:23:05 caress Exp $";
 	static char program_name[] = "MBLEVITUS";
 	static char help_message[] = "MBLEVITUS generates an average water velocity profile for a \nspecified location from the Levitus temperature and salinity database.";
 	static char usage_message[] = "mblevitus [-Rlon/lat -Ooutfile -V -H]";

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsmooth.c	6/12/93
- *    $Id: mbsmooth.c,v 4.8 1995-06-06 13:31:48 caress Exp $
+ *    $Id: mbsmooth.c,v 4.9 1996-04-22 13:23:05 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -29,6 +29,9 @@
  * in the current version.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.8  1995/06/06  13:31:48  caress
+ * Fixed warnings under Solaris by explicit casting of strlen result.
+ *
  * Revision 4.7  1995/05/12  17:12:32  caress
  * Made exit status values consistent with Unix convention.
  * 0: ok  nonzero: error
@@ -80,12 +83,7 @@
 /* mbio include files */
 #include "../../include/mb_status.h"
 #include "../../include/mb_format.h"
-
-/* DTR define */
-#ifndef M_PI
-#define	M_PI	3.14159265358979323846
-#endif
-#define DTR (M_PI/180.)
+#include "../../include/mb_define.h"
 
 /* MBIO buffer structure pointer */
 #define	MBSMOOTH_BUFFER	500
@@ -136,7 +134,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbsmooth.c,v 4.8 1995-06-06 13:31:48 caress Exp $";
+	static char rcs_id[] = "$Id: mbsmooth.c,v 4.9 1996-04-22 13:23:05 caress Exp $";
 	static char program_name[] = "MBSMOOTH";
 	static char help_message[] =  "MBSMOOTH applies a spatial \
 domain gaussian filter to multibeam \nbathymetry data in order to \

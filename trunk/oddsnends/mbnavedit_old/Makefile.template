@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  6/23/95
-#	$Id: Makefile.template,v 4.0 1995-08-07 18:33:22 caress Exp $
+#	$Id: Makefile.template,v 4.1 1996-04-22 13:22:24 caress Exp $
 #
 #     Copyright (c) 1995 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,9 @@
 # Date:		June 23, 1995
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.0  1995/08/07  18:33:22  caress
+# First cut.
+#
 #
 #
 #
@@ -61,7 +64,7 @@ mbnavedit_callbacks.o: mbnavedit_callbacks.c mbnavedit_creation.h \
 mbnavedit_util.o: mbnavedit_util.c mbnavedit_creation.h
 	$(CC) $(CFLAGS) -I$(INCDIR) -I$(MOTIFINCDIR) -c mbnavedit_util.c
 mbnavedit_prog.o: mbnavedit_prog.c mbnavedit.h  $(INCDIR)/mb_format.h \
-		$(INCDIR)/mb_io.h $(INCDIR)/mb_status.h
+		$(INCDIR)/mb_io.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) $(CFLAGS) -I$(INCDIR) -c mbnavedit_prog.c
 xgraphics.o: xgraphics.c
 	$(CC) $(CFLAGS) -c xgraphics.c 

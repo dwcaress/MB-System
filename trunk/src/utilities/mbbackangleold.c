@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbbackangle.c	1/6/95
- *    $Id: mbbackangleold.c,v 4.4 1995-05-12 17:12:32 caress Exp $
+ *    $Id: mbbackangleold.c,v 4.5 1996-04-22 13:23:05 caress Exp $
  *
  *    Copyright (c) 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -23,6 +23,10 @@
  * Date:	January 6, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.4  1995/05/12  17:12:32  caress
+ * Made exit status values consistent with Unix convention.
+ * 0: ok  nonzero: error
+ *
  * Revision 4.3  1995/03/06  19:37:59  caress
  * Changed include strings.h to string.h for POSIX compliance.
  *
@@ -44,16 +48,11 @@
 
 /* MBIO include files */
 #include "../../include/mb_status.h"
+#include "../../include/mb_define.h"
 
 /* mode defines */
 #define	MBBACKANGLE_AMP	1
 #define	MBBACKANGLE_SS	2
-
-/* RTD define */
-#ifndef M_PI
-#define M_PI    3.14159265358979323846
-#endif
-#define RTD     (180./M_PI)
 
 /*--------------------------------------------------------------------*/
 
@@ -61,7 +60,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbbackangleold.c,v 4.4 1995-05-12 17:12:32 caress Exp $";
+	static char rcs_id[] = "$Id: mbbackangleold.c,v 4.5 1996-04-22 13:23:05 caress Exp $";
 	static char program_name[] = "mbbackangle";
 	static char help_message[] =  
 "mbbackangle reads a multibeam data file and generates a table\n\t\

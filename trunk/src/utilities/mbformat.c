@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbformat.c	1/22/93
- *    $Id: mbformat.c,v 4.5 1995-05-12 17:12:32 caress Exp $
+ *    $Id: mbformat.c,v 4.6 1996-04-22 13:23:05 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -20,6 +20,10 @@
  * Date:	January 22, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.5  1995/05/12  17:12:32  caress
+ * Made exit status values consistent with Unix convention.
+ * 0: ok  nonzero: error
+ *
  * Revision 4.4  1995/04/12  16:25:54  caress
  * Added -A and -L options.
  *
@@ -54,6 +58,7 @@
 /* mbio include files */
 #include "../../include/mb_format.h"
 #include "../../include/mb_status.h"
+#include "../../include/mb_define.h"
 
 /*--------------------------------------------------------------------*/
 
@@ -62,7 +67,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbformat.c,v 4.5 1995-05-12 17:12:32 caress Exp $";
+	static char rcs_id[] = "$Id: mbformat.c,v 4.6 1996-04-22 13:23:05 caress Exp $";
 	static char program_name[] = "MBFORMAT";
 	static char help_message[] = "MBFORMAT is an utility which identifies the multibeam data formats \nassociated with MBIO format id's.  If no format id is specified, \nMBFORMAT lists all of the currently supported formats.";
 	static char usage_message[] = "mbformat [-A -Fformat -L -V -H]";

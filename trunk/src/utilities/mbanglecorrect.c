@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbanglecorrect.c	8/13/95
- *    $Id: mbanglecorrect.c,v 4.7 1996-03-12 17:27:01 caress Exp $
+ *    $Id: mbanglecorrect.c,v 4.8 1996-04-22 13:23:05 caress Exp $
  *
  *    Copyright (c) 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -45,6 +45,9 @@ The default input and output streams are stdin and stdout.\n";
  * Date:	January 12, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.7  1996/03/12  17:27:01  caress
+ * Check-in after flail with format 63.
+ *
  * Revision 4.6  1995/10/03  13:28:50  caress
  * Fixed major bugs relating to amplitude data.
  *
@@ -78,13 +81,7 @@ The default input and output streams are stdin and stdout.\n";
 /* mbio include files */
 #include "../../include/mb_status.h"
 #include "../../include/mb_format.h"
-
-/* DTR define */
-#ifndef M_PI
-#define	M_PI	3.14159265358979323846
-#endif
-#define DTR (M_PI/180.)
-#define RTD (180./M_PI)
+#include "../../include/mb_define.h"
 
 /* mode defines */
 #define	MBANGLECORRECT_AMP		1
@@ -129,7 +126,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbanglecorrect.c,v 4.7 1996-03-12 17:27:01 caress Exp $";
+	static char rcs_id[] = "$Id: mbanglecorrect.c,v 4.8 1996-04-22 13:23:05 caress Exp $";
 	static char program_name[] = "MBANGLECORRECT";
 	static char help_message[] =  
 "mbanglecorrect is a tool for processing sidescan data.  This program\n\t\

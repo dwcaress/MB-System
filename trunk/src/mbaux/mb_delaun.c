@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_delaun.c	4/19/94
- *    $Id: mb_delaun.c,v 4.3 1995-03-06 19:39:52 caress Exp $
+ *    $Id: mb_delaun.c,v 4.4 1996-04-22 13:18:44 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -95,6 +95,9 @@
  * Date:	April, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1995/03/06  19:39:52  caress
+ * Changed include strings.h to string.h for POSIX compliance.
+ *
  * Revision 4.2  1994/10/21  11:34:20  caress
  * Release V4.0
  *
@@ -114,11 +117,10 @@
 
 /* mbio include files */
 #include "../../include/mb_status.h"
+#include "../../include/mb_define.h"
 
 /* some defines */
 #define	LARGE	1.0e10
-#define	min(A, B)	((A) < (B) ? (A) : (B))
-#define	max(A, B)	((A) > (B) ? (A) : (B))
 
 /*--------------------------------------------------------------------------*/
 /* 	function mb_delaun creates a network of triangles connecting an
@@ -150,7 +152,7 @@ int	*kv1;
 int	*kv2;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_delaun.c,v 4.3 1995-03-06 19:39:52 caress Exp $";
+  	static char rcs_id[]="$Id: mb_delaun.c,v 4.4 1996-04-22 13:18:44 caress Exp $";
 	char	*function_name = "mb_delaun";
 	int	status = MB_SUCCESS;
 	int	itemp[2][3];
@@ -224,10 +226,10 @@ int	*error;
 	ymax = p2[0];
 	for (i=0;i<npts;i++)
 		{
-		xmin = min(xmin,p1[i]);
-		xmax = max(xmax,p1[i]);
-		ymin = min(ymin,p2[i]);
-		ymax = max(ymax,p2[i]);
+		xmin = MIN(xmin,p1[i]);
+		xmax = MAX(xmax,p1[i]);
+		ymin = MIN(ymin,p2[i]);
+		ymax = MAX(ymax,p2[i]);
 		}
 
 	/* enclose the data region in an equilateral triangle

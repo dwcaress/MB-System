@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_sb2100.c	3/2/94
- *	$Id: mbsys_sb2100.c,v 4.11 1996-01-26 21:23:30 caress Exp $
+ *	$Id: mbsys_sb2100.c,v 4.12 1996-04-22 13:21:19 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -35,6 +35,9 @@
  * Author:	D. W. Caress
  * Date:	March 2, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.11  1996/01/26  21:23:30  caress
+ * Version 4.3 distribution
+ *
  * Revision 4.10  1995/09/28  18:10:48  caress
  * Various bug fixes working toward release 4.3.
  *
@@ -89,6 +92,7 @@
 #include "../../include/mb_status.h"
 #include "../../include/mb_format.h"
 #include "../../include/mb_io.h"
+#include "../../include/mb_define.h"
 #include "../../include/mbsys_sb2100.h"
 
 /*--------------------------------------------------------------------*/
@@ -98,7 +102,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_sb2100.c,v 4.11 1996-01-26 21:23:30 caress Exp $";
+ static char res_id[]="$Id: mbsys_sb2100.c,v 4.12 1996-04-22 13:21:19 caress Exp $";
 	char	*function_name = "mbsys_sb2100_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbps.c	11/4/93
- *    $Id: mbps.c,v 4.7 1995-05-12 17:12:32 caress Exp $
+ *    $Id: mbps.c,v 4.8 1996-04-22 13:23:05 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,10 @@
  * Date:	August 31, 1991 (original version)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.7  1995/05/12  17:12:32  caress
+ * Made exit status values consistent with Unix convention.
+ * 0: ok  nonzero: error
+ *
  * Revision 4.6  1995/03/06  19:37:59  caress
  * Changed include strings.h to string.h for POSIX compliance.
  *
@@ -67,15 +71,10 @@
 
 /* MBIO include files */
 #include "../../include/mb_status.h"
+#include "../../include/mb_define.h"
 
 /* GMT include files */
 #include "gmt.h"
-
-/* DTR define */
-#ifndef M_PI
-#define	M_PI	3.14159265358979323846
-#endif
-#define DTR	(M_PI/180.)
 
 /*--------------------------------------------------------------------*/
 
@@ -110,7 +109,7 @@ int argc;
 char **argv; 
 {
 
-	static char rcs_id[] = "$Id: mbps.c,v 4.7 1995-05-12 17:12:32 caress Exp $";
+	static char rcs_id[] = "$Id: mbps.c,v 4.8 1996-04-22 13:23:05 caress Exp $";
 	static char program_name[] = "MBPS";
 	static char help_message[] =  "MBPS reads a multibeam bathymetry data file and creates a postscript 3-d mesh plot";
 	static char usage_message[] = "mbps [-Iinfile -Fformat -Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc -Aalpha -Keta -Dviewdir -Xvertexag -T\"title\" -Wmetersperinch -Sspeedmin -Ggap -Ydisplay_stats -Zdisplay_scales -V -H]";

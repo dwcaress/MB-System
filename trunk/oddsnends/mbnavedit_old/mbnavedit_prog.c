@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_prog.c	6/23/95
- *    $Id: mbnavedit_prog.c,v 4.5 1996-04-05 20:07:02 caress Exp $
+ *    $Id: mbnavedit_prog.c,v 4.6 1996-04-22 13:22:24 caress Exp $
  *
  *    Copyright (c) 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,11 @@
  * Date:	June 23,  1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.5  1996/04/05  20:07:02  caress
+ * Added GUI mode so done means quit for real. Also changed done and
+ * quit handling in browse mode so that the program doesn't read the
+ * entire data file before closing it.
+ *
  * Revision 4.4  1995/11/02  19:22:45  caress
  *  Fixed mb_error calls.
  *
@@ -50,6 +55,7 @@
 /* MBIO include files */
 #include "mb_format.h"
 #include "mb_status.h"
+#include "mb_define.h"
 #include "mb_io.h"
 
 /* define global control parameters */
@@ -112,7 +118,7 @@ struct mbnavedit_plot_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbnavedit_prog.c,v 4.5 1996-04-05 20:07:02 caress Exp $";
+static char rcs_id[] = "$Id: mbnavedit_prog.c,v 4.6 1996-04-22 13:22:24 caress Exp $";
 static char program_name[] = "MBNAVEDIT";
 static char help_message[] =  "MBNAVEDIT is an interactive navigation editor for swath sonar data.\n\tIt can work with any data format supported by the MBIO library.\n";
 static char usage_message[] = "mbnavedit [-Byr/mo/da/hr/mn/sc -D  -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ooutfile -V -H]";
@@ -207,12 +213,6 @@ double	file_start_time_d;
 #define	XG_DASHLINE	1
 int	ncolors;
 int	pixel_values[256];
-
-/* some useful defines */
-#define DTR (M_PI/180.)
-#define RTD (180./M_PI)
-#define    min(A, B)       ((A) < (B) ? (A) : (B))
-#define    max(A, B)       ((A) > (B) ? (A) : (B))
 
 /* system function declarations */
 char	*ctime();
@@ -3017,54 +3017,54 @@ int mbnavedit_plot_all()
 	heave_max = ping[current_id].heave;
 	for (i=current_id+1;i<current_id+nplot;i++)
 		{
-		lon_min = min(ping[i].lon, lon_min);
-		lon_max = max(ping[i].lon, lon_max);
+		lon_min = MIN(ping[i].lon, lon_min);
+		lon_max = MAX(ping[i].lon, lon_max);
 		if (plot_lon_org == MB_YES)
 			{
-			lon_min = min(ping[i].lon_org, lon_min);
-			lon_max = max(ping[i].lon_org, lon_max);
+			lon_min = MIN(ping[i].lon_org, lon_min);
+			lon_max = MAX(ping[i].lon_org, lon_max);
 			}
-		lat_min = min(ping[i].lat, lat_min);
-		lat_max = max(ping[i].lat, lat_max);
+		lat_min = MIN(ping[i].lat, lat_min);
+		lat_max = MAX(ping[i].lat, lat_max);
 		if (plot_lat_org == MB_YES)
 			{
-			lat_min = min(ping[i].lat_org, lat_min);
-			lat_max = max(ping[i].lat_org, lat_max);
+			lat_min = MIN(ping[i].lat_org, lat_min);
+			lat_max = MAX(ping[i].lat_org, lat_max);
 			}
-		speed_min = min(ping[i].speed, speed_min);
-		speed_max = max(ping[i].speed, speed_max);
+		speed_min = MIN(ping[i].speed, speed_min);
+		speed_max = MAX(ping[i].speed, speed_max);
 		if (plot_speed_org == MB_YES)
 			{
-			speed_min = min(ping[i].speed_org, speed_min);
-			speed_max = max(ping[i].speed_org, speed_max);
+			speed_min = MIN(ping[i].speed_org, speed_min);
+			speed_max = MAX(ping[i].speed_org, speed_max);
 			}
 		if (plot_smg == MB_YES)
 			{
-			speed_min = min(ping[i].speed_made_good, speed_min);
-			speed_max = max(ping[i].speed_made_good, speed_max);
+			speed_min = MIN(ping[i].speed_made_good, speed_min);
+			speed_max = MAX(ping[i].speed_made_good, speed_max);
 			}
-		heading_min = min(ping[i].heading, heading_min);
-		heading_max = max(ping[i].heading, heading_max);
+		heading_min = MIN(ping[i].heading, heading_min);
+		heading_max = MAX(ping[i].heading, heading_max);
 		if (plot_heading_org == MB_YES)
 			{
-			heading_min = min(ping[i].heading_org, 
+			heading_min = MIN(ping[i].heading_org, 
 				heading_min);
-			heading_max = max(ping[i].heading_org, 
+			heading_max = MAX(ping[i].heading_org, 
 				heading_max);
 			}
 		if (plot_cmg == MB_YES)
 			{
-			heading_min = min(ping[i].course_made_good, 
+			heading_min = MIN(ping[i].course_made_good, 
 				heading_min);
-			heading_max = max(ping[i].course_made_good, 
+			heading_max = MAX(ping[i].course_made_good, 
 				heading_max);
 			}
-		roll_min = min(ping[i].roll, roll_min);
-		roll_max = max(ping[i].roll, roll_max);
-		pitch_min = min(ping[i].pitch, pitch_min);
-		pitch_max = max(ping[i].pitch, pitch_max);
-		heave_min = min(ping[i].heave, heave_min);
-		heave_max = max(ping[i].heave, heave_max);
+		roll_min = MIN(ping[i].roll, roll_min);
+		roll_max = MAX(ping[i].roll, roll_max);
+		pitch_min = MIN(ping[i].pitch, pitch_min);
+		pitch_max = MAX(ping[i].pitch, pitch_max);
+		heave_min = MIN(ping[i].heave, heave_min);
+		heave_max = MAX(ping[i].heave, heave_max);
 		}
 
 	/* scale the min max a bit larger so all points fit on plots */
@@ -3093,11 +3093,11 @@ int mbnavedit_plot_all()
 	range = 0.55*(heading_max - heading_min);
 	heading_min = center - range;
 	heading_max = center + range;
-	roll_max = 1.1*max(fabs(roll_min), fabs(roll_max));
+	roll_max = 1.1*MAX(fabs(roll_min), fabs(roll_max));
 	roll_min = -roll_max;
-	pitch_max = 1.1*max(fabs(pitch_min), fabs(pitch_max));
+	pitch_max = 1.1*MAX(fabs(pitch_min), fabs(pitch_max));
 	pitch_min = -pitch_max;
-	heave_max = 1.1*max(fabs(heave_min), fabs(heave_max));
+	heave_max = 1.1*MAX(fabs(heave_min), fabs(heave_max));
 	heave_min = -heave_max;
 
 	/* make sure lon and lat scaled the same if both plotted */

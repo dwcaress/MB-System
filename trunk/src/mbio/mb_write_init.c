@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_write_init.c	1/25/93
- *    $Id: mb_write_init.c,v 4.7 1995-11-02 19:48:51 caress Exp $
+ *    $Id: mb_write_init.c,v 4.8 1996-04-22 13:21:19 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -18,6 +18,9 @@
  * Date:	January 25, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.7  1995/11/02  19:48:51  caress
+ * Fixed error handling.
+ *
  * Revision 4.6  1995/03/22  19:14:25  caress
  * Added #ifdef's for HPUX.
  *
@@ -91,6 +94,7 @@
 #include "../../include/mb_status.h"
 #include "../../include/mb_format.h"
 #include "../../include/mb_io.h"
+#include "../../include/mb_define.h"
 
 /*--------------------------------------------------------------------*/
 int mb_write_init(verbose,file,format,
@@ -104,7 +108,7 @@ int	*beams_amp;
 int	*pixels_ss;
 int	*error;
 {
-	static char rcs_id[]="$Id: mb_write_init.c,v 4.7 1995-11-02 19:48:51 caress Exp $";
+	static char rcs_id[]="$Id: mb_write_init.c,v 4.8 1996-04-22 13:21:19 caress Exp $";
 	char	*function_name = "mb_write_init";
 	int	status = MB_SUCCESS;
 	int	format_num;

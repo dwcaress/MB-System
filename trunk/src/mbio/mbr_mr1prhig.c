@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mr1prhig.c	3/3/94
- *	$Id: mbr_mr1prhig.c,v 4.7 1996-04-22 11:16:30 caress Exp $
+ *	$Id: mbr_mr1prhig.c,v 4.8 1996-04-22 13:21:19 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	July 17, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.7  1996/04/22  11:16:30  caress
+ * DTR define now in mb_io.h
+ *
  * Revision 4.6  1996/03/12  17:21:55  caress
  * Added format 63, short HMR1 processing format.
  *
@@ -63,6 +66,7 @@
 #include "../../include/mb_status.h"
 #include "../../include/mb_format.h"
 #include "../../include/mb_io.h"
+#include "../../include/mb_define.h"
 #include "../../include/mbsys_mr1.h"
 #include "../../include/mbf_mr1prhig.h"
 
@@ -72,7 +76,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_mr1prhig.c,v 4.7 1996-04-22 11:16:30 caress Exp $";
+	static char res_id[]="$Id: mbr_mr1prhig.c,v 4.8 1996-04-22 13:21:19 caress Exp $";
 	char	*function_name = "mbr_alm_mr1prhig";
 	int	status = MB_SUCCESS;
 	int	i;
