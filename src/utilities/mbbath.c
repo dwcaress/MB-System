@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbbath.c	3/31/93
- *    $Id: mbbath.c,v 4.5 1994-10-21 13:02:31 caress Exp $
+ *    $Id: mbbath.c,v 4.6 1994-11-09 22:01:21 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -20,6 +20,9 @@
  * Date:	March 31, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.5  1994/10/21  13:02:31  caress
+ * Release V4.0
+ *
  * Revision 4.4  1994/07/29  19:02:56  caress
  * Changes associated with supporting byte swapped Lynx OS and
  * using unix second time base.
@@ -98,7 +101,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbbath.c,v 4.5 1994-10-21 13:02:31 caress Exp $";
+	static char rcs_id[] = "$Id: mbbath.c,v 4.6 1994-11-09 22:01:21 caress Exp $";
 	static char program_name[] = "MBBATH";
 	static char help_message[] =  "MBBATH calculates bathymetry from \
 the travel time data by raytracing \nthrough a layered water velocity \
@@ -213,6 +216,7 @@ and stdout.";
 	double	*dist = NULL;
 	double	*ttimes = NULL;
 	double	*angles = NULL;
+	double	*angles_forward = NULL;
 	int	*flags = NULL;
 
 	char	buffer[128], tmp[128], *result;
@@ -222,7 +226,6 @@ and stdout.";
 	int	nbeams;
 	int	center_beam;
 	double	tt, factor, zz, xx, vavg;
-	int	setup;
 	int	i, j, k, l, m;
 
 	char	*ctime();
@@ -655,6 +658,7 @@ and stdout.";
 		}
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&ttimes,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&angles,&error);
+	status = mb_malloc(verbose,beams_bath*sizeof(double),&angles_forward,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(int),&flags,&error);
 
 	/* if error initializing memory then quit */
@@ -1026,7 +1030,6 @@ and stdout.";
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
 
 	/* read and write */
-	setup = MB_NO;
 	while (error <= MB_ERROR_NO_ERROR)
 		{
 		/* read some data */
@@ -1101,27 +1104,11 @@ and stdout.";
 			&& (kind == MB_DATA_DATA 
 			|| kind == MB_DATA_CALIBRATE))
 			{
-			/* if needed do setup */
-			if (setup != MB_YES )
-				{
-				/* set up the raytracing for 
-					both survey and calibrate pings */
-				status = setup_raytracing(verbose,
-					imbio_ptr,store_ptr,
-					nbeams,ttimes,angles,flags,
-					roll_bias,dangle,
-					nvel,vel,dep,
-					s_angle,s_p,s_ttime_tab,s_dist_tab,
-					&error);
-				status = setup_raytracing(verbose,
-					imbio_ptr,store_ptr,
-					nbeams,ttimes,angles,flags,
-					pitch_bias,dangle,
-					nvel,vel,dep,
-					c_angle,c_p,c_ttime_tab,c_dist_tab,
-					&error);
-				setup = MB_YES;
-				}
+			/* extract travel times */
+			status = mb_ttimes(verbose,imbio_ptr,
+				store_ptr,&kind,&nbeams,
+				ttimes,angles,
+				angles_forward,flags,&error);
 
 			/* if needed get roll correction */
 			if (nroll > 0 && kind == MB_DATA_DATA)
@@ -1129,21 +1116,29 @@ and stdout.";
 				status = get_roll_correction(verbose,
 					nroll,roll_time,roll_corr,
 					time_d,&roll_correction,&error);
+				}
 
-				/* set up the raytracing for survey pings */
+			/* set up the raytracing */
+			if (kind == MB_DATA_DATA)
+				{
 				status = setup_raytracing(verbose,
-					imbio_ptr,store_ptr,
-					nbeams,ttimes,angles,flags,
-					roll_bias+roll_correction,dangle,
+					imbio_ptr,store_ptr,nbeams,ttimes,
+					angles,angles_forward,
+					flags,roll_bias,dangle,
 					nvel,vel,dep,
 					s_angle,s_p,s_ttime_tab,s_dist_tab,
 					&error);
 				}
-
-			/* extract travel times */
-			status = mb_ttimes(verbose,imbio_ptr,
-				store_ptr,&kind,&nbeams,
-				ttimes,angles,flags,&error);
+			else if (kind == MB_DATA_CALIBRATE)
+				{
+				status = setup_raytracing(verbose,
+					imbio_ptr,store_ptr,nbeams,ttimes,
+					angles,angles_forward,
+					flags,pitch_bias,dangle,
+					nvel,vel,dep,
+					c_angle,c_p,c_ttime_tab,c_dist_tab,
+					&error);
+				}
 
 			/* loop over the beams */
 			for (i=0;i<beams_bath;i++)
@@ -1184,7 +1179,8 @@ and stdout.";
 						+ vel[j]*(zz - dep[j]))/zz;
 					  zz = zz*1500./vavg;
 					  }
-					bathalongtrack[i] = xx;
+					bathacrosstrack[i] = xx*cos(DTR*angles_forward[i]);
+					bathalongtrack[i] = xx*sin(DTR*angles_forward[i]);
 					bath[i] = zz;
 					if (nbath_corr == beams_bath)
 						bath[i] -= bath_corr[i];
@@ -1217,10 +1213,10 @@ and stdout.";
 				fprintf(stderr,"\ndbg5  Depth values calculated in program <%s>:\n",program_name);
 				fprintf(stderr,"dbg5       kind:  %d\n",kind);
 				fprintf(stderr,"dbg5      beam    time      depth        dist\n");	
-				for (i=0;i<MBSYS_HSDS_BEAMS;i++)
-					fprintf(stderr,"dbg5       %2d   %6.0f   %f   %f\n",
+				for (i=0;i<nbath;i++)
+					fprintf(stderr,"dbg5       %2d   %6.0f   %f   %f   %f\n",
 						i,ttimes[i],
-						bath[i],
+						bath[i],bathacrosstrack[i],
 						bathalongtrack[i]);
 				}
 			}
@@ -1230,10 +1226,10 @@ and stdout.";
 			|| kind == MB_DATA_COMMENT)
 			{
 			status = mb_put_all(verbose,ombio_ptr,
-					store_ptr,MB_NO,kind,
+					store_ptr,MB_YES,kind,
 					time_i,time_d,
 					navlon,navlat,speed,heading,
-					beams_bath,beams_amp,pixels_ss,
+					nbath,namp,nss,
 					bath,amp,bathacrosstrack,bathalongtrack,
 					ss,ssacrosstrack,ssalongtrack,
 					comment,&error);
@@ -1289,6 +1285,7 @@ and stdout.";
 	mb_free(verbose,&c_dist_tab,&error);
 	mb_free(verbose,&ttimes,&error);
 	mb_free(verbose,&angles,&error);
+	mb_free(verbose,&angles_forward,&error);
 	mb_free(verbose,&flags,&error);
 	mb_free(verbose,&bath,&error); 
 	mb_free(verbose,&bathacrosstrack,&error); 
@@ -1315,8 +1312,8 @@ and stdout.";
 	exit(status);
 }
 /*--------------------------------------------------------------------*/
-int setup_raytracing(verbose,mbio_ptr,store_ptr,
-	nbeams,ttimes,angles,flags,
+int setup_raytracing(verbose,mbio_ptr,store_ptr,nbeams,ttimes,
+	angles,angles_forward,flags,
 	angle_bias,dangle,nvel,vel,dep,
 	angle,p,ttime_tab,dist_tab,error)
 int	verbose;
@@ -1325,6 +1322,7 @@ char	*store_ptr;
 int	nbeams;
 double	*ttimes;
 double	*angles;
+double	*angles_forward;
 int	*flags;
 double	angle_bias;
 double	dangle;
@@ -1357,7 +1355,8 @@ int	*error;
 		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
 		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
 		fprintf(stderr,"dbg2       ttimes:     %d\n",ttimes);
-		fprintf(stderr,"dbg2       angles:     %d\n",angles);
+		fprintf(stderr,"dbg2       angles_xtrk:%d\n",angles);
+		fprintf(stderr,"dbg2       angles_ltrk:%d\n",angles_forward);
 		fprintf(stderr,"dbg2       flags:      %d\n",flags);
 		fprintf(stderr,"dbg2       angle_bias: %f\n",angle_bias);
 		fprintf(stderr,"dbg2       dangle:     %f\n",dangle);
@@ -1381,10 +1380,6 @@ int	*error;
 			p[i] = sin(DTR*angle[i])/vel[0];
 			}
 		}
-	else
-		status = mb_ttimes(verbose,mbio_ptr,
-				store_ptr,&kind,&nbeams,
-				ttimes,angles,flags,error);
 	for (i=0;i<nbeams;i++)
 		{
 		angle[i] = angles[i];
