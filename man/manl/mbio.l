@@ -1,4 +1,4 @@
-.TH mbio l "11 April 2003" "MB-System 5.0" "MB-System 5.0"
+.TH mbio l "21 August 2003" "MB-System 5.0" "MB-System 5.0"
 
 .SH NAME
 \fBmbio\fP - Format independent input/output library for swath mapping sonar data.
@@ -561,7 +561,26 @@ The following swath mapping sonar data formats are supported in this version of
     Attributes:           single beam bathymetry, nav,  
                           magnetics, gravity, ascii,  
                           NOAA NGDC
-    
+
+    MBIO Data Format ID:  162
+    Format name:          MBF_ASCIIXYZ
+    Informal Description: Generic XYZ sounding format
+    Attributes:           XYZ (lon lat depth) ASCII 
+                          soundings, generic
+
+    MBIO Data Format ID:  163
+    Format name:          MBF_ASCIIYXZ
+    Informal Description: Generic YXZ sounding format
+    Attributes:           YXZ (lat lon depth) ASCII 
+                          soundings, generic
+
+    MBIO Data Format ID:  164
+    Format name:         MBF_HYDROB93
+    Informal Description: NGDC binary hydrographic 
+                          sounding format
+    Attributes:           XYZ (lon lat depth) binary 
+                          soundings
+
     MBIO Data Format ID:  165
     Format name:          MBF_MBARIROV
     Informal Description: MBARI ROV navigation format
