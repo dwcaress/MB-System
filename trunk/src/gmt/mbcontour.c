@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcontour.c	6/4/93
- *    $Id: mbcontour.c,v 4.14 1995-11-22 22:13:02 caress Exp $
+ *    $Id: mbcontour.c,v 4.15 1995-11-28 21:06:16 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Date:	June 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.14  1995/11/22  22:13:02  caress
+ * Now handles bathymetry in feet with -W option.
+ *
  * Revision 4.13  1995/11/02  19:24:45  caress
  * Fixed mb_error calls.
  *
@@ -130,7 +133,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbcontour.c,v 4.14 1995-11-22 22:13:02 caress Exp $";
+	static char rcs_id[] = "$Id: mbcontour.c,v 4.15 1995-11-28 21:06:16 caress Exp $";
 #ifdef MBCONTOURFILTER
 	static char program_name[] = "MBCONTOURFILTER";
 	static char help_message[] =  "MBCONTOURFILTER is a utility which creates a pen plot \ncontour map of multibeam swath bathymetry.  \nThe primary purpose of this program is to serve as \npart of a real-time plotting system.  The contour \nlevels and colors can be controlled \ndirectly or set implicitly using contour and color change intervals. \nContours can also be set to have ticks pointing downhill.";
@@ -789,7 +792,7 @@ char **argv;
 			{
 			for (i=0;i<beams_bath;i++)
 				{
-				bath[i] = 0.3048 * bath[i];
+				bath[i] = 3.2808399 * bath[i];
 				}
 			}
 
