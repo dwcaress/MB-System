@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_singlebeam.c	4/13/99
- *	$Id: mbsys_singlebeam.c,v 4.1 1999-07-16 19:24:15 caress Exp $
+ *	$Id: mbsys_singlebeam.c,v 4.2 1999-10-21 22:40:10 caress Exp $
  *
  *    Copyright (c) 1999 by 
  *    D. W. Caress (caress@mbari.org)
@@ -22,6 +22,7 @@
  *      MBF_LDEOUWDT : MBIO ID 163
  *      MBF_MBARINAV : MBIO ID 164
  *      MBF_MBARIROV : MBIO ID 165
+ *      MBF_MBPRONAV : MBIO ID 166
  *
  * These functions include:
  *   mbsys_singlebeam_alloc	- allocate memory for mbsys_singlebeam_struct structure
@@ -41,6 +42,9 @@
  * Date:	April 13,  1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1999/07/16  19:24:15  caress
+ * Yet another version.
+ *
  *
  *
  */
@@ -64,7 +68,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_singlebeam.c,v 4.1 1999-07-16 19:24:15 caress Exp $";
+ static char res_id[]="$Id: mbsys_singlebeam.c,v 4.2 1999-10-21 22:40:10 caress Exp $";
 	char	*function_name = "mbsys_singlebeam_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
