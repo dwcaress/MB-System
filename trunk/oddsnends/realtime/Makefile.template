@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 4.5 1994-10-31 18:43:01 caress Exp $
+#	$Id: Makefile.template,v 4.6 1994-10-31 20:11:26 caress Exp $
 #
 #     Copyright (c) 1993, 1994 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.5  1994/10/31  18:43:01  caress
+# Changed man pages from section 1 to section l.
+#
 # Revision 4.4  1994/10/21  12:56:50  caress
 # Release V4.0
 #
@@ -103,13 +106,13 @@ blocka.o: blocka.f
 	$(FC) -c $(FFLAGS) blocka.f -o blocka.o
 
 # copy the man pages to the man page directory
-$(MANDIR)/mbcontourfilter.l:	mbcontourfilter.l
-	cp mbcontourfilter.l $(MANDIR)/mbcontourfilter.l
+$(MANDIR)/mbcontourfilter.l:	mbcontourfilter.manl
+	cp mbcontourfilter.manl $(MANDIR)/mbcontourfilter.l
 	chmod 664 $(MANDIR)/mbcontourfilter.l
-$(MANDIR)/mbplotfilter.l:	mbplotfilter.l
-	cp mbplotfilter.l $(MANDIR)/mbplotfilter.l
+$(MANDIR)/mbplotfilter.l:	mbplotfilter.manl
+	cp mbplotfilter.manl $(MANDIR)/mbplotfilter.l
 	chmod 664 $(MANDIR)/mbplotfilter.l
-$(MANDIR)/mbm_calcomp_plot.l:	mbm_calcomp_plot.l
-	cp mbm_calcomp_plot.l $(MANDIR)/mbm_calcomp_plot.l
+$(MANDIR)/mbm_calcomp_plot.l:	mbm_calcomp_plot.manl
+	cp mbm_calcomp_plot.manl $(MANDIR)/mbm_calcomp_plot.l
 	chmod 664 $(MANDIR)/mbm_calcomp_plot.l
 
