@@ -1,0 +1,200 @@
+#     The MB-system:	Makefile.template  5/23/94
+#	$Id: Makefile.template,v 4.0 1994-05-24 02:34:15 caress Exp $
+#
+#     Copyright (c) 1993, 1994 by 
+#     D. W. Caress (caress@lamont.ldgo.columbia.edu)
+#     and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
+#     Lamont-Doherty Earth Observatory
+#     Palisades, NY  10964
+#
+#     See README file for copying and redistribution conditions.
+#
+# Makefile template for MB-system at the src/utilities directory level
+# Author:	D. W. Caress
+# Date:		May 23, 1994
+#
+# $Log: not supported by cvs2svn $
+#
+
+# *** CHANGE THESE TO FIT YOUR LOCAL ENVIRONMENT ***
+#
+# Locations of GMT libraries, binaries, and include files:
+GMTLIBDIR = /ocean/mgg/gmt2/sun4/lib
+GMTINCDIR = /ocean/mgg/gmt2/src
+NETCDFDIR = /ocean/mgg/netcdf/sun4/lib
+#
+# Location of Levitus annual database file
+LEVITUS = /ocean/mgg/levitus/annual
+#
+# Compile and load flags:
+CFLAGS = -O2
+LFLAGS = -lm
+#
+# *** LEAVE EVERYTHING ELSE BELOW ALONE ***
+
+### sets locations of vital objects
+BINDIR = ../../bin
+LIBDIR = ../../lib
+INCDIR = ../../include
+MANDIR = ../../man/man1
+
+### make all makes the MB-system utilites and man pages
+all:	$(MANDIR)/mbsystem.1 \
+	$(BINDIR)/mbformat $(MANDIR)/mbformat.1 \
+	$(BINDIR)/mbdefaults $(MANDIR)/mbdefaults.1 \
+	$(BINDIR)/mbinfo $(MANDIR)/mbinfo.1 \
+	$(BINDIR)/mbcopy $(MANDIR)/mbcopy.1 \
+	$(BINDIR)/mblist $(MANDIR)/mblist.1 \
+	$(BINDIR)/mbmerge $(MANDIR)/mbmerge.1 \
+	$(BINDIR)/mbclean $(MANDIR)/mbclean.1 \
+	$(BINDIR)/mbunclean $(MANDIR)/mbunclean.1 \
+	$(BINDIR)/mbgrid $(MANDIR)/mbgrid.1 \
+	$(BINDIR)/mblevitus $(MANDIR)/mblevitus.1 \
+	$(BINDIR)/mbbath $(MANDIR)/mbbath.1 \
+	$(BINDIR)/hsbath $(MANDIR)/hsbath.1 \
+	$(BINDIR)/hsdump $(MANDIR)/hsdump.1 \
+	$(BINDIR)/mbrollbias $(MANDIR)/mbrollbias.1 \
+	$(BINDIR)/mbgetmask $(MANDIR)/mbgetmask.1 \
+	$(BINDIR)/mbmask $(MANDIR)/mbmask.1 \
+	$(BINDIR)/mbsmooth $(MANDIR)/mbsmooth.1 \
+	$(BINDIR)/mbps $(MANDIR)/mbps.1
+
+### make clean removes the object files
+clean:
+	rm -f *.o
+
+### link the executables
+$(BINDIR)/mbformat:	mbformat.o $(LIBDIR)/libmbio.a
+	$(CC) $(CFLAGS) mbformat.o $(LIBDIR)/libmbio.a $(LFLAGS) -o $(BINDIR)/mbformat
+$(BINDIR)/mbdefaults:	mbdefaults.o $(LIBDIR)/libmbio.a
+	$(CC) $(CFLAGS) mbdefaults.o $(LIBDIR)/libmbio.a $(LFLAGS) -o $(BINDIR)/mbdefaults
+$(BINDIR)/mbinfo:	mbinfo.o $(LIBDIR)/libmbio.a
+	$(CC) $(CFLAGS) mbinfo.o $(LIBDIR)/libmbio.a $(LFLAGS) -o $(BINDIR)/mbinfo
+$(BINDIR)/mbcopy:	mbcopy.o $(LIBDIR)/libmbio.a
+	$(CC) $(CFLAGS) mbcopy.o $(LIBDIR)/libmbio.a $(LFLAGS) -o $(BINDIR)/mbcopy
+$(BINDIR)/mblist:	mblist.o $(LIBDIR)/libmbio.a
+	$(CC) $(CFLAGS) mblist.o $(LIBDIR)/libmbio.a $(LFLAGS) -o $(BINDIR)/mblist
+$(BINDIR)/mbmerge:	mbmerge.o $(LIBDIR)/libmbio.a
+	$(CC) $(CFLAGS) mbmerge.o $(LIBDIR)/libmbio.a $(LFLAGS) -o $(BINDIR)/mbmerge
+$(BINDIR)/mbclean:	mbclean.o $(LIBDIR)/libmbio.a
+	$(CC) $(CFLAGS) mbclean.o $(LIBDIR)/libmbio.a $(LFLAGS) -o $(BINDIR)/mbclean
+$(BINDIR)/mbunclean:	mbunclean.o $(LIBDIR)/libmbio.a
+	$(CC) $(CFLAGS) mbunclean.o $(LIBDIR)/libmbio.a $(LFLAGS) -o $(BINDIR)/mbunclean
+$(BINDIR)/mbgrid:	mbgrid.o surfunc.o $(LIBDIR)/libmbio.a
+	$(CC) $(CFLAGS) mbgrid.o surfunc.o $(LIBDIR)/libmbio.a $(GMTLIBDIR)/libgmt.a $(NETCDFDIR)/libnetcdf.a $(LFLAGS) -o $(BINDIR)/mbgrid
+$(BINDIR)/mblevitus:	mblevitus.o
+	$(CC) $(CFLAGS) mblevitus.o $(LFLAGS) -o $(BINDIR)/mblevitus
+$(BINDIR)/mbbath:	mbbath.o $(LIBDIR)/libmbio.a
+	$(CC) $(CFLAGS) mbbath.o $(LIBDIR)/libmbio.a $(LFLAGS) -o $(BINDIR)/mbbath
+$(BINDIR)/hsbath:	$(BINDIR)/mbbath
+	cd $(BINDIR); pwd; rm -f hsbath; ln -s mbbath hsbath
+$(BINDIR)/hsdump:	hsdump.o $(LIBDIR)/libmbio.a
+	$(CC) $(CFLAGS) hsdump.o $(LIBDIR)/libmbio.a $(LFLAGS) -o $(BINDIR)/hsdump
+$(BINDIR)/mbrollbias:	mbrollbias.o $(LIBDIR)/libmbio.a
+	$(CC) $(CFLAGS) mbrollbias.o $(LIBDIR)/libmbio.a $(LFLAGS) -o $(BINDIR)/mbrollbias
+$(BINDIR)/mbgetmask:	mbgetmask.o $(LIBDIR)/libmbio.a
+	$(CC) $(CFLAGS) mbgetmask.o $(LIBDIR)/libmbio.a $(LFLAGS) -o $(BINDIR)/mbgetmask
+$(BINDIR)/mbmask:	mbmask.o $(LIBDIR)/libmbio.a
+	$(CC) $(CFLAGS) mbmask.o $(LIBDIR)/libmbio.a $(LFLAGS) -o $(BINDIR)/mbmask
+$(BINDIR)/mbsmooth:	mbsmooth.o $(LIBDIR)/libmbio.a
+	$(CC) $(CFLAGS) mbsmooth.o $(LIBDIR)/libmbio.a $(LFLAGS) -o $(BINDIR)/mbsmooth
+$(BINDIR)/mbps:	mbps.o $(LIBDIR)/libmbio.a
+	$(CC) $(CFLAGS) mbps.o $(LIBDIR)/libmbio.a $(GMTLIBDIR)/libgmt.a $(GMTLIBDIR)/libpsl.a $(LFLAGS) -o $(BINDIR)/mbps
+
+### compile the source files
+mbformat.o:	mbformat.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
+	$(CC) -c $(CFLAGS) mbformat.c
+mbdefaults.o:	mbdefaults.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
+	$(CC) -c $(CFLAGS) mbdefaults.c
+mbinfo.o:	mbinfo.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
+	$(CC) -c $(CFLAGS) mbinfo.c
+mbcopy.o:	mbcopy.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
+	$(CC) -c $(CFLAGS) mbcopy.c
+mblist.o:	mblist.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
+	$(CC) -c $(CFLAGS) mblist.c
+mbmerge.o:	mbmerge.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
+	$(CC) -c $(CFLAGS) mbmerge.c
+mbclean.o:	mbclean.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
+	$(CC) -c $(CFLAGS) mbclean.c
+mbunclean.o:	mbunclean.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
+	$(CC) -c $(CFLAGS) mbunclean.c
+mbgrid.o:	mbgrid.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
+	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) mbgrid.c
+mblevitus.o:	mblevitus.c $(INCDIR)/mb_status.h
+	echo "	char *ifile = "'"$(LEVITUS)"'";" > levitus.h
+	$(CC) -c $(CFLAGS) mblevitus.c
+surfunc.o:	surfunc.c
+	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) surfunc.c
+mbbath.o:	mbbath.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
+	$(CC) -c $(CFLAGS) mbbath.c
+hsdump.o:	hsdump.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mbsys_hsds.h
+	$(CC) -c $(CFLAGS) hsdump.c
+mbrollbias.o:	mbrollbias.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
+	$(CC) -c $(CFLAGS) mbrollbias.c
+mbgetmask.o:	mbgetmask.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
+	$(CC) -c $(CFLAGS) mbgetmask.c
+mbmask.o:	mbmask.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
+	$(CC) -c $(CFLAGS) mbmask.c
+mbsmooth.o:	mbsmooth.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
+	$(CC) -c $(CFLAGS) mbsmooth.c
+mbps.o:	mbps.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
+	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) mbps.c
+
+### copy the man pages to the man page directory
+$(MANDIR)/mbsystem.1:	mbsystem.1
+	cp mbsystem.1 $(MANDIR)/mbsystem.1
+	chmod 664 $(MANDIR)/mbsystem.1
+$(MANDIR)/mbformat.1:	mbformat.1
+	cp mbformat.1 $(MANDIR)/mbformat.1
+	chmod 664 $(MANDIR)/mbformat.1
+$(MANDIR)/mbdefaults.1:	mbdefaults.1
+	cp mbdefaults.1 $(MANDIR)/mbdefaults.1
+	chmod 664 $(MANDIR)/mbdefaults.1
+$(MANDIR)/mbinfo.1:	mbinfo.1
+	cp mbinfo.1 $(MANDIR)/mbinfo.1
+	chmod 664 $(MANDIR)/mbinfo.1
+$(MANDIR)/mbcopy.1:	mbcopy.1
+	cp mbcopy.1 $(MANDIR)/mbcopy.1
+	chmod 664 $(MANDIR)/mbcopy.1
+$(MANDIR)/mblist.1:	mblist.1
+	cp mblist.1 $(MANDIR)/mblist.1
+	chmod 664 $(MANDIR)/mblist.1
+$(MANDIR)/mbmerge.1:	mbmerge.1
+	cp mbmerge.1 $(MANDIR)/mbmerge.1
+	chmod 664 $(MANDIR)/mbmerge.1
+$(MANDIR)/mbclean.1:	mbclean.1
+	cp mbclean.1 $(MANDIR)/mbclean.1
+	chmod 664 $(MANDIR)/mbclean.1
+$(MANDIR)/mbunclean.1:	mbunclean.1
+	cp mbunclean.1 $(MANDIR)/mbunclean.1
+	chmod 664 $(MANDIR)/mbunclean.1
+$(MANDIR)/mbgrid.1:	mbgrid.1
+	cp mbgrid.1 $(MANDIR)/mbgrid.1
+	chmod 664 $(MANDIR)/mbgrid.1
+$(MANDIR)/mblevitus.1:	mblevitus.1
+	cp mblevitus.1 $(MANDIR)/mblevitus.1
+	chmod 664 $(MANDIR)/mblevitus.1
+$(MANDIR)/mbbath.1:	mbbath.1
+	cp mbbath.1 $(MANDIR)/mbbath.1
+	chmod 664 $(MANDIR)/mbbath.1
+$(MANDIR)/hsbath.1:	$(MANDIR)/mbbath.1
+	cd $(MANDIR); pwd; rm -f hsbath.1; ln -s mbbath.1 hsbath.1
+$(MANDIR)/hsdump.1:	hsdump.1
+	cp hsdump.1 $(MANDIR)/hsdump.1
+	chmod 664 $(MANDIR)/hsdump.1
+$(MANDIR)/mbrollbias.1:	mbrollbias.1
+	cp mbrollbias.1 $(MANDIR)/mbrollbias.1
+	chmod 664 $(MANDIR)/mbrollbias.1
+$(MANDIR)/mbgetmask.1:	mbmask.1
+	cp mbmask.1 $(MANDIR)/mbgetmask.1
+	chmod 664 $(MANDIR)/mbgetmask.1
+$(MANDIR)/mbmask.1:	mbmask.1
+	cp mbmask.1 $(MANDIR)/mbmask.1
+	chmod 664 $(MANDIR)/mbmask.1
+$(MANDIR)/mbsmooth.1:	mbsmooth.1
+	cp mbsmooth.1 $(MANDIR)/mbsmooth.1
+	chmod 664 $(MANDIR)/mbsmooth.1
+$(MANDIR)/mbps.1:	mbps.1
+	cp mbps.1 $(MANDIR)/mbps.1
+	chmod 664 $(MANDIR)/mbps.1
+

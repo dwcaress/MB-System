@@ -1,0 +1,83 @@
+#     The MB-system:	Makefile.template  5/23/94
+#	$Id: Makefile.template,v 4.0 1994-05-24 02:31:58 caress Exp $
+#
+#     Copyright (c) 1993, 1994 by 
+#     D. W. Caress (caress@lamont.ldgo.columbia.edu)
+#     and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
+#     Lamont-Doherty Earth Observatory
+#     Palisades, NY  10964
+#
+#     See README file for copying and redistribution conditions.
+#
+# Makefile template for MB-system in the src/gmt directory level
+# Author:	D. W. Caress
+# Date:		May 23, 1994
+#
+# $Log: not supported by cvs2svn $
+#
+
+# *** CHANGE THESE TO FIT YOUR LOCAL ENVIRONMENT ***
+#
+# Locations of GMT libraries, binaries, and include files:
+GMTLIBDIR = /ocean/mgg/gmt2/sun4/lib
+GMTINCDIR = /ocean/mgg/gmt2/src
+NETCDFDIR = /ocean/mgg/netcdf/sun4/lib
+#
+# Compile and load flags:
+CFLAGS = -O2
+LFLAGS = -lm
+#
+# *** LEAVE EVERYTHING ELSE BELOW ALONE ***
+
+### sets locations of vital objects
+BINDIR = ../../bin
+LIBDIR = ../../lib
+INCDIR = ../../include
+MANDIR = ../../man/man1
+
+### make all makes the MB-system macros and man pages
+all:	$(BINDIR)/grdmakecmd $(MANDIR)/grdmakecmd.1 \
+	$(BINDIR)/mbcontour $(MANDIR)/mbcontour.1 \
+	$(BINDIR)/mbswath $(MANDIR)/mbswath.1
+
+### make clean removes the object files
+clean:
+	rm -f *.o
+
+### link or copy the executables
+$(BINDIR)/grdmakecmd: grdmakecmd.o
+	$(CC) $(CFLAGS) grdmakecmd.o $(GMTLIBDIR)/libgmt.a -lnetcdf $(LFLAGS) -o $(BINDIR)/grdmakecmd
+$(BINDIR)/mbcontour: mbcontour.o mb_truecont.o mb_delaun.o mb_track.o mb_pslibface.o ../../lib/libmbio.a
+	$(CC) $(CFLAGS) mbcontour.o mb_truecont.o mb_delaun.o mb_track.o mb_pslibface.o ../../lib/libmbio.a $(GMTLIBDIR)/libpsl.a $(GMTLIBDIR)/libgmt.a $(LFLAGS) -o $(BINDIR)/mbcontour
+$(BINDIR)/mbswath: mbswath.o ../../lib/libmbio.a
+	$(CC) $(CFLAGS) mbswath.o ../../lib/libmbio.a $(GMTLIBDIR)/libpsl.a $(GMTLIBDIR)/libgmt.a $(LFLAGS) -o $(BINDIR)/mbswath
+
+### compile the source files
+grdmakecmd.o:	grdmakecmd.c  $(INCDIR)/mb_status.h
+	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) grdmakecmd.c
+mbcontour.o:	mbcontour.c $(INCDIR)/mb_status.h $(INCDIR)/mb_contour.h
+	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) mbcontour.c
+mb_truecont.o:	mb_truecont.c  $(INCDIR)/mb_status.h $(INCDIR)/mb_contour.h
+	$(CC) -c $(CFLAGS) mb_truecont.c
+mb_delaun.o:	mb_delaun.c  $(INCDIR)/mb_status.h
+	$(CC) -c $(CFLAGS) mb_delaun.c
+mb_track.o:	mb_track.c  $(INCDIR)/mb_status.h $(INCDIR)/mb_contour.h
+	$(CC) -c $(CFLAGS) mb_track.c
+mb_pslibface.o:	mb_pslibface.c  $(INCDIR)/mb_status.h
+	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) mb_pslibface.c
+$(INCDIR)/mb_contour.h:	 mb_contour.h
+	cp mb_contour.h $(INCDIR)/mb_contour.h
+mbswath.o:	mbswath.c  $(INCDIR)/mb_status.h
+	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) ../../lib/libmbio.a  mbswath.c
+
+### copy the man pages to the man page directory
+$(MANDIR)/grdmakecmd.1:	grdmakecmd.1
+	cp grdmakecmd.1 $(MANDIR)/grdmakecmd.1
+	chmod 664 $(MANDIR)/grdmakecmd.1
+$(MANDIR)/mbcontour.1:	mbcontour.1
+	cp mbcontour.1 $(MANDIR)/mbcontour.1
+	chmod 664 $(MANDIR)/mbcontour.1
+$(MANDIR)/mbswath.1:	mbswath.1
+	cp mbswath.1 $(MANDIR)/mbswath.1
+	chmod 664 $(MANDIR)/mbswath.1
+
