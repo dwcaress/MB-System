@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbset.c	3/31/93
- *    $Id: mbset.c,v 5.3 2001-06-08 21:45:46 caress Exp $
+ *    $Id: mbset.c,v 5.4 2001-06-11 17:47:38 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -30,6 +30,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2001/06/08  21:45:46  caress
+ * Version 5.0.beta01
+ *
  * Revision 5.2  2001/06/03  07:07:34  caress
  * Release 5.0.beta01.
  *
@@ -66,7 +69,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbset.c,v 5.3 2001-06-08 21:45:46 caress Exp $";
+	static char rcs_id[] = "$Id: mbset.c,v 5.4 2001-06-11 17:47:38 caress Exp $";
 	static char program_name[] = "mbset";
 	static char help_message[] = "MBset is a tool for setting values in an mbprocess parameter file.\n\
 MBprocess is a tool for processing swath sonar bathymetry data  \n\
@@ -490,7 +493,7 @@ the manual pages for mbprocess and mbset. \n\n";
 		    sscanf(pargv[i], "PITCHBIAS:%lf", &process.mbp_pitchbias);
 		    if (explicit == MB_NO)
 			{
-			process.mbp_pitchbias = MBP_PITCHBIAS_ON;
+			process.mbp_pitchbias_mode = MBP_PITCHBIAS_ON;
 			}
 		    }
     
