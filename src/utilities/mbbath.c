@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbbath.c	3/31/93
- *    $Id: mbbath.c,v 4.22 1997-04-21 17:19:14 caress Exp $
+ *    $Id: mbbath.c,v 4.23 1997-07-25 14:28:10 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -20,6 +20,9 @@
  * Date:	March 31, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.22  1997/04/21  17:19:14  caress
+ * MB-System 4.5 Beta Release.
+ *
  * Revision 4.22  1997/04/17  15:14:38  caress
  * MB-System 4.5 Beta Release
  *
@@ -151,7 +154,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbbath.c,v 4.22 1997-04-21 17:19:14 caress Exp $";
+	static char rcs_id[] = "$Id: mbbath.c,v 4.23 1997-07-25 14:28:10 caress Exp $";
 	static char program_name[] = "MBBATH";
 	static char help_message[] =  "MBBATH calculates bathymetry from \
 the travel time data by raytracing \nthrough a layered water velocity \
@@ -228,12 +231,13 @@ and stdout.";
 	char	date[25], user[128], *user_ptr, host[128];
 
 	/* velocity profile handling variables */
+	int	use_svp = MB_NO;
 	char	vfile[128];
 	double	roll_bias;
 	double	pitch_bias;
 	double	roll_angle_correction;
 	double	pitch_angle_correction;
-	double	alpha, beta;
+	double	range, alpha, beta;
 	double	draught;
 	int	uncorrected;
 	FILE	*vfp;
@@ -263,9 +267,11 @@ and stdout.";
 	double	*angles = NULL;
 	double	*angles_forward = NULL;
 	double	*angles_null = NULL;
+	double	*depth_offset = NULL;
+	double	*alongtrack_offset = NULL;
 	int	*flags = NULL;
-	double	depth_offset;
 	double	ssv;
+	double	depth_offset_use;
 	double	ttime;
 	int	ray_stat;
 
@@ -396,6 +402,7 @@ and stdout.";
 		case 'W':
 		case 'w':
 			sscanf (optarg,"%s", vfile);
+			use_svp == MB_YES;
 			flag++;
 			break;
 		case 'Z':
@@ -460,6 +467,7 @@ and stdout.";
 		fprintf(stderr,"dbg2       input file:      %s\n",ifile);
 		fprintf(stderr,"dbg2       output file:     %s\n",ofile);
 		fprintf(stderr,"dbg2       velocity file:   %s\n",vfile);
+		fprintf(stderr,"dbg2       use_svp:         %d\n",use_svp);
 		fprintf(stderr,"dbg2       roll bias:       %f\n",roll_bias);
 		fprintf(stderr,"dbg2       pitch bias:      %f\n",pitch_bias);
 		fprintf(stderr,"dbg2       draught:         %f\n",draught);
@@ -488,104 +496,108 @@ and stdout.";
 		exit(error);
 		}
 
-	/* if a velocity profile file has been specified then
-		count the velocity points */
-	if (((int) strlen(vfile)) > 0)
+	/* if raytracing to be done get svp */
+	if (use_svp == MB_YES)
 		{
-		nvel = 0;
-		if ((vfp = fopen(vfile, "r")) == NULL) 
+		/* if a velocity profile file has been specified then
+			count the velocity points */
+		if (((int) strlen(vfile)) > 0)
 			{
-			error = MB_ERROR_OPEN_FAIL;
-			fprintf(stderr,"\nUnable to Open Velocity Profile File <%s> for reading\n",vfile);
-			fprintf(stderr,"\nProgram <%s> Terminated\n",
-				program_name);
-			exit(error);
-			}
-		while ((result = fgets(buffer,128,vfp)) == buffer)
-			if (buffer[0] != '#')
-				nvel++;
-		fclose(vfp);
-		}		
-	/* else assume a 1500 m/s half space */
-	else
-		nvel = 2;
-
-	/* allocate space for the velocity profile and raytracing tables */
-	size = (nvel+1)*sizeof(double);
-	status = mb_malloc(verbose,size,&depth,&error);
-	status = mb_malloc(verbose,size,&velocity,&error);
-	status = mb_malloc(verbose,size,&velocity_sum,&error);
-
-	/* if error initializing memory then quit */
-	if (error != MB_ERROR_NO_ERROR)
-		{
-		mb_error(verbose,error,&message);
-		fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
-		fprintf(stderr,"\nProgram <%s> Terminated\n",
-			program_name);
-		exit(error);
-		}
-
-	/* if a velocity profile file has been specified then
-		read in velocity profile data */
-	if (((int)strlen(vfile)) > 0)
-		{
-		nvel = 0;
-		if ((vfp = fopen(vfile, "r")) == NULL) 
-			{
-			error = MB_ERROR_OPEN_FAIL;
-			fprintf(stderr,"\nUnable to Open Velocity Profile File <%s> for reading\n",vfile);
-			fprintf(stderr,"\nProgram <%s> Terminated\n",
-				program_name);
-			exit(error);
-			}
-		strncpy(buffer,"\0",sizeof(buffer));
-		while ((result = fgets(buffer,128,vfp)) == buffer)
-		  {
-		  if (buffer[0] != '#')
-			{
-			sscanf(buffer,"%lf %lf",&depth[nvel],&velocity[nvel]);
-
-			/* output some debug values */
-			if (verbose >= 5)
+			nvel = 0;
+			if ((vfp = fopen(vfile, "r")) == NULL) 
 				{
-				fprintf(stderr,"\ndbg5  New velocity value read in program <%s>\n",program_name);
-				fprintf(stderr,"dbg5       depth[%d]: %f  velocity[%d]: %f\n",
-					nvel,depth[nvel],nvel,velocity[nvel]);
+				error = MB_ERROR_OPEN_FAIL;
+				fprintf(stderr,"\nUnable to Open Velocity Profile File <%s> for reading\n",vfile);
+				fprintf(stderr,"\nProgram <%s> Terminated\n",
+					program_name);
+				exit(error);
 				}
+			while ((result = fgets(buffer,128,vfp)) == buffer)
+				if (buffer[0] != '#')
+					nvel++;
+			fclose(vfp);
+			}		
+		/* else assume a 1500 m/s half space */
+		else
+			nvel = 2;
+	
+		/* allocate space for the velocity profile and raytracing tables */
+		size = (nvel+1)*sizeof(double);
+		status = mb_malloc(verbose,size,&depth,&error);
+		status = mb_malloc(verbose,size,&velocity,&error);
+		status = mb_malloc(verbose,size,&velocity_sum,&error);
+	
+		/* if error initializing memory then quit */
+		if (error != MB_ERROR_NO_ERROR)
+			{
+			mb_error(verbose,error,&message);
+			fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
+			fprintf(stderr,"\nProgram <%s> Terminated\n",
+				program_name);
+			exit(error);
+			}
+	
+		/* if a velocity profile file has been specified then
+			read in velocity profile data */
+		if (((int)strlen(vfile)) > 0)
+			{
+			nvel = 0;
+			if ((vfp = fopen(vfile, "r")) == NULL) 
+				{
+				error = MB_ERROR_OPEN_FAIL;
+				fprintf(stderr,"\nUnable to Open Velocity Profile File <%s> for reading\n",vfile);
+				fprintf(stderr,"\nProgram <%s> Terminated\n",
+					program_name);
+				exit(error);
+				}
+			strncpy(buffer,"\0",sizeof(buffer));
+			while ((result = fgets(buffer,128,vfp)) == buffer)
+			  {
+			  if (buffer[0] != '#')
+				{
+				sscanf(buffer,"%lf %lf",&depth[nvel],&velocity[nvel]);
+	
+				/* output some debug values */
+				if (verbose >= 5)
+					{
+					fprintf(stderr,"\ndbg5  New velocity value read in program <%s>\n",program_name);
+					fprintf(stderr,"dbg5       depth[%d]: %f  velocity[%d]: %f\n",
+						nvel,depth[nvel],nvel,velocity[nvel]);
+					}
+				nvel++;
+				}
+			  strncpy(buffer,"\0",sizeof(buffer));
+			  }
+			fclose(vfp);
+			}
+		/* else assume a 1500 m/s half space */
+		else
+			{
+			nvel = 2;
+			velocity[0] = 1500.0;
+			velocity[1] = 1500.0;
+			depth[0] = 0.0;
+			depth[1] = 12000.0;
+			}
+	
+		/* if velocity profile doesn't extend to 12000 m depth
+			extend it to that depth */
+		if (depth[nvel-1] < 12000.0)
+			{
+			depth[nvel] = 12000.0;
+			velocity[nvel] = velocity[nvel-1];
 			nvel++;
 			}
-		  strncpy(buffer,"\0",sizeof(buffer));
-		  }
-		fclose(vfp);
-		}
-	/* else assume a 1500 m/s half space */
-	else
-		{
-		nvel = 2;
-		velocity[0] = 1500.0;
-		velocity[1] = 1500.0;
-		depth[0] = 0.0;
-		depth[1] = 12000.0;
-		}
-
-	/* if velocity profile doesn't extend to 12000 m depth
-		extend it to that depth */
-	if (depth[nvel-1] < 12000.0)
-		{
-		depth[nvel] = 12000.0;
-		velocity[nvel] = velocity[nvel-1];
-		nvel++;
-		}
-
-	/* get velocity sums */
-	velocity_sum[0] = 0.5*(velocity[1] + velocity[0])
-		*(depth[1] - depth[0]);
-	for (i=1;i<nvel-1;i++)
-		{
-		velocity_sum[i] = velocity_sum[i-1] 
-		    + 0.5*(velocity[i+1] + velocity[i])
-		    *(depth[i+1] - depth[i]);
+	
+		/* get velocity sums */
+		velocity_sum[0] = 0.5*(velocity[1] + velocity[0])
+			*(depth[1] - depth[0]);
+		for (i=1;i<nvel-1;i++)
+			{
+			velocity_sum[i] = velocity_sum[i-1] 
+			    + 0.5*(velocity[i+1] + velocity[i])
+			    *(depth[i+1] - depth[i]);
+			}
 		}
 
 	/* if a roll correction file has been specified then
@@ -693,6 +705,8 @@ and stdout.";
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&angles,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&angles_forward,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&angles_null,&error);
+	status = mb_malloc(verbose,beams_bath*sizeof(double),&depth_offset,&error);
+	status = mb_malloc(verbose,beams_bath*sizeof(double),&alongtrack_offset,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(int),&flags,&error);
 
 	/* if error initializing memory then quit */
@@ -732,8 +746,9 @@ and stdout.";
 			status = mb_ttimes(verbose,imbio_ptr,
 				store_ptr,&kind,&nbeams,
 				ttimes,angles,
-				angles_forward,angles_null,flags,
-				&depth_offset,&ssv,&error);
+				angles_forward,angles_null,
+				depth_offset,alongtrack_offset,flags,
+				&ssv,&error);
 				
 			/* check surface sound velocity */
 			if (ssv > 0.0)
@@ -1173,8 +1188,9 @@ and stdout.";
 			status = mb_ttimes(verbose,imbio_ptr,
 				store_ptr,&kind,&nbeams,
 				ttimes,angles,
-				angles_forward,angles_null,flags,
-				&depth_offset,&ssv,&error);
+				angles_forward,angles_null,
+				depth_offset,alongtrack_offset,flags,
+				&ssv,&error);
 
 			/* set surface sound speed to default if needed */
 			if (ssv <= 0.0)
@@ -1202,28 +1218,6 @@ and stdout.";
 					}
 				}
 
-			/* add user specified draught */
-			if (draught > 0.0)
-				depth_offset = depth_offset + draught;
-
-			/* check depth_offset */
-			if (depth_offset < 0.0)
-				{
-				fprintf(stderr, "\nDepth offset negative - raytracing starts above water!\n");
-				fprintf(stderr, "Depth offset is sum of heave + transducer depth.\n");
-				fprintf(stderr, "Depth offset from data: %f\n", depth_offset - draught);
-				fprintf(stderr, "User specified offset:  %f\n", draught);
-				fprintf(stderr, "Data Record: %d\n",odata);
-				fprintf(stderr, "Ping time:  %4d %2d %2d %2d:%2d:%2d.%6d\n", 
-					time_i[0], time_i[1], time_i[2], 
-					time_i[3], time_i[4], time_i[5], time_i[6]);
-				fprintf(stderr,"\nProgram <%s> Terminated\n",
-					program_name);
-				error = MB_ERROR_BAD_PARAMETER;
-				status = MB_FAILURE;
-				exit(error);
-				}
-
 			/* if needed get roll correction */
 			if (nroll > 0 && kind == MB_DATA_DATA)
 				{
@@ -1247,91 +1241,191 @@ and stdout.";
 					roll_bias + roll_correction;
 				}
 
-			/* loop over the beams */
-			for (i=0;i<beams_bath;i++)
-			  {
-			  if (ttimes[i] > 0.0)
+			/* if svp specified recalculate bathymetry
+			    by raytracing  */
+			if (use_svp == MB_YES)
 			    {
-			    /* if needed, translate angles from takeoff
-				    angle coordinates to roll-pitch 
-				    coordinates, apply roll and pitch
-				    corrections, and translate back */
-			    if (roll_angle_correction != 0.0 
-				    || pitch_angle_correction != 0.0)
-				    {
-				    mb_takeoff_to_rollpitch(
-					    verbose,
-					    angles[i], angles_forward[i], 
-					    &alpha, &beta, 
-					    &error);
-				    alpha += pitch_angle_correction;
-				    beta += roll_angle_correction;
-				    mb_rollpitch_to_takeoff(
-					    verbose, 
-					    alpha, beta, 
-					    &angles[i], &angles_forward[i], 
-					    &error); 
-				    }
-			    
-			    /* raytrace */
-			    status = mb_rt(verbose, rt_svp, depth_offset, 
-				    angles[i], 0.5*ttimes[i],
-				    ssv, angles_null[i], 
-				    0, NULL, NULL, NULL, 
-				    &xx, &zz, 
-				    &ttime, &ray_stat, &error);
-
-			    /* uncorrect depth if desired */
-			    if (uncorrected)
+			    /* loop over the beams */
+			    for (i=0;i<beams_bath;i++)
+			      {
+			      if (ttimes[i] > 0.0)
 				{
-				k = -1;
-				for (j=0;j<nvel-1;j++)
-				    if (depth[j] > zz & depth[j+1] <= zz)
-					k = j;
-				if (k > -1)
+				/* if needed, translate angles from takeoff
+					angle coordinates to roll-pitch 
+					coordinates, apply roll and pitch
+					corrections, and translate back */
+				if (roll_angle_correction != 0.0 
+					|| pitch_angle_correction != 0.0)
+					{
+					mb_takeoff_to_rollpitch(
+						verbose,
+						angles[i], angles_forward[i], 
+						&alpha, &beta, 
+						&error);
+					alpha += pitch_angle_correction;
+					beta += roll_angle_correction;
+					mb_rollpitch_to_takeoff(
+						verbose, 
+						alpha, beta, 
+						&angles[i], &angles_forward[i], 
+						&error); 
+					}
+    
+				/* add user specified draught */
+				depth_offset_use = depth_offset[i];
+				if (draught > 0.0)
+					depth_offset_use += draught;
+	
+				/* check depth_offset */
+				if (depth_offset_use < 0.0)
+					{
+					fprintf(stderr, "\nDepth offset negative - raytracing starts above water!\n");
+					fprintf(stderr, "Depth offset is sum of heave + transducer depth.\n");
+					fprintf(stderr, "Depth offset from data: %f\n", depth_offset_use - draught);
+					fprintf(stderr, "User specified offset:  %f\n", draught);
+					fprintf(stderr, "Data Record: %d\n",odata);
+					fprintf(stderr, "Ping time:  %4d %2d %2d %2d:%2d:%2d.%6d\n", 
+						time_i[0], time_i[1], time_i[2], 
+						time_i[3], time_i[4], time_i[5], time_i[6]);
+					fprintf(stderr,"\nProgram <%s> Terminated\n",
+						program_name);
+					error = MB_ERROR_BAD_PARAMETER;
+					status = MB_FAILURE;
+					exit(error);
+					}
+				
+				/* raytrace */
+				status = mb_rt(verbose, rt_svp, depth_offset_use, 
+					angles[i], 0.5*ttimes[i],
+					ssv, angles_null[i], 
+					0, NULL, NULL, NULL, 
+					&xx, &zz, 
+					&ttime, &ray_stat, &error);
+    
+				/* uncorrect depth if desired */
+				if (uncorrected)
 				    {
-				    vavg = velocity_sum[k] + 0.5*(2*velocity[k] 
-					+ (zz - depth[k])*(velocity[k+1] - velocity[k])
-					/(depth[k+1] - depth[k]))*(zz - depth[k]);
-				    zz = zz*1500./vavg;
+				    k = -1;
+				    for (j=0;j<nvel-1;j++)
+					if (depth[j] > zz & depth[j+1] <= zz)
+					    k = j;
+				    if (k > -1)
+					{
+					vavg = velocity_sum[k] + 0.5*(2*velocity[k] 
+					    + (zz - depth[k])*(velocity[k+1] - velocity[k])
+					    /(depth[k+1] - depth[k]))*(zz - depth[k]);
+					zz = zz*1500./vavg;
+					}
+				    }
+    
+				/* get alongtrack and acrosstrack distances
+					and depth */
+				bathacrosstrack[i] = xx*cos(DTR*angles_forward[i]);
+				bathalongtrack[i] = xx*sin(DTR*angles_forward[i]);
+				bath[i] = zz;
+    
+				/* apply static correction */
+				if (nbath_corr == beams_bath)
+				    bath[i] -= bath_corr[i];
+				
+				/* flag depths as needed */
+				if (flags[i] == MB_YES)
+				    bath[i] = -bath[i];
+    
+				/* output some debug values */
+				if (verbose >= 5)
+				    fprintf(stderr,"dbg5       %3d %3d %6.3f %6.3f %6.3f %8.2f %8.2f %8.2f\n",
+					idata, i, 0.5*ttimes[i], angles[i], angles_forward[i],  
+					bathacrosstrack[i], bathalongtrack[i], bath[i]);
+    
+				/* output some debug messages */
+				if (verbose >= 5)
+				    {
+				    fprintf(stderr,"\ndbg5  Depth value calculated in program <%s>:\n",program_name);
+				    fprintf(stderr,"dbg5       kind:  %d\n",kind);
+				    fprintf(stderr,"dbg5       beam:  %d\n",i);
+				    fprintf(stderr,"dbg5       tt:     %f\n",ttimes[i]);
+				    fprintf(stderr,"dbg5       xx:     %f\n",xx);
+				    fprintf(stderr,"dbg5       zz:     %f\n",zz);
+				    fprintf(stderr,"dbg5       xtrack: %f\n",bathacrosstrack[i]);
+				    fprintf(stderr,"dbg5       ltrack: %f\n",bathalongtrack[i]);
+				    fprintf(stderr,"dbg5       depth:  %f\n",bath[i]);
 				    }
 				}
-
-			    /* get alongtrack and acrosstrack distances
-				    and depth */
-			    bathacrosstrack[i] = xx*cos(DTR*angles_forward[i]);
-			    bathalongtrack[i] = xx*sin(DTR*angles_forward[i]);
-			    bath[i] = zz;
-
-			    /* apply static correction */
-			    if (nbath_corr == beams_bath)
-				bath[i] -= bath_corr[i];
-			    
-			    /* flag depths as needed */
-			    if (flags[i] == MB_YES)
-				bath[i] = -bath[i];
-
-			    /* output some debug values */
-			    if (verbose >= 5)
-				fprintf(stderr,"dbg5       %3d %3d %6.3f %6.3f %6.3f %8.2f %8.2f %8.2f\n",
-				    idata, i, 0.5*ttimes[i], angles[i], angles_forward[i],  
-				    bathacrosstrack[i], bathalongtrack[i], bath[i]);
-
-			    /* output some debug messages */
-			    if (verbose >= 5)
-				{
-				fprintf(stderr,"\ndbg5  Depth value calculated in program <%s>:\n",program_name);
-				fprintf(stderr,"dbg5       kind:  %d\n",kind);
-				fprintf(stderr,"dbg5       beam:  %d\n",i);
-				fprintf(stderr,"dbg5       tt:     %f\n",ttimes[i]);
-				fprintf(stderr,"dbg5       xx:     %f\n",xx);
-				fprintf(stderr,"dbg5       zz:     %f\n",zz);
-				fprintf(stderr,"dbg5       xtrack: %f\n",bathacrosstrack[i]);
-				fprintf(stderr,"dbg5       ltrack: %f\n",bathalongtrack[i]);
-				fprintf(stderr,"dbg5       depth:  %f\n",bath[i]);
-				}
+			      }
 			    }
-			  }
+
+			/* if svp not specified recalculate bathymetry
+			    by rigid rotations  */
+			else if (use_svp == MB_NO)
+			    {
+			    /* loop over the beams */
+			    for (i=0;i<beams_bath;i++)
+			      {
+			      if (bath[i] != 0.0)
+				{
+				/* set flagged depths positive */
+				bath[i] = fabs(bath[i]);
+				
+				/* strip off heave + draft */
+				bath[i] -= (depth_offset[i] + draught);
+				
+				/* get range and angles in 
+				    roll-pitch frame */
+				range = sqrt(bath[i] * bath[i] 
+					    + bathacrosstrack[i] 
+						* bathacrosstrack[i]
+					    + bathalongtrack[i] 
+						* bathalongtrack[i]);
+				alpha = asin(bathalongtrack[i] 
+					/ range);
+				beta = acos(bathacrosstrack[i] 
+					/ range / cos(alpha));
+
+				/* apply roll pitch corrections */
+				alpha += DTR * pitch_angle_correction;
+				beta +=  DTR * roll_angle_correction;
+				
+				/* recalculate bathymetry */
+				bath[i] 
+				    = range * cos(alpha) * sin(beta);
+				bathalongtrack[i] 
+				    = range * sin(alpha);
+				bathacrosstrack[i] 
+				    = range * cos(alpha) * cos(beta);	
+					
+				/* add heave and draft back in */	    
+				bath[i] += (depth_offset[i] + draught);
+    
+				/* apply static correction */
+				if (nbath_corr == beams_bath)
+				    bath[i] -= bath_corr[i];
+				
+				/* flag depths as needed */
+				if (flags[i] == MB_YES)
+				    bath[i] = -bath[i];
+    
+				/* output some debug values */
+				if (verbose >= 5)
+				    fprintf(stderr,"dbg5       %3d %3d %8.2f %8.2f %8.2f\n",
+					idata, i, 
+					bathacrosstrack[i], 
+					bathalongtrack[i], 
+					bath[i]);
+    
+				/* output some debug messages */
+				if (verbose >= 5)
+				    {
+				    fprintf(stderr,"\ndbg5  Depth value calculated in program <%s>:\n",program_name);
+				    fprintf(stderr,"dbg5       kind:  %d\n",kind);
+				    fprintf(stderr,"dbg5       beam:  %d\n",i);
+				    fprintf(stderr,"dbg5       xtrack: %f\n",bathacrosstrack[i]);
+				    fprintf(stderr,"dbg5       ltrack: %f\n",bathalongtrack[i]);
+				    fprintf(stderr,"dbg5       depth:  %f\n",bath[i]);
+				    }
+				}
+			      }
+			    }
 
 			/* fix possible problem with SB2100 data */
 			if (error == MB_ERROR_NO_ERROR
@@ -1431,6 +1525,9 @@ and stdout.";
 	mb_free(verbose,&ttimes,&error);
 	mb_free(verbose,&angles,&error);
 	mb_free(verbose,&angles_forward,&error);
+	mb_free(verbose,&angles_null,&error);
+	mb_free(verbose,&depth_offset,&error);
+	mb_free(verbose,&alongtrack_offset,&error);
 	mb_free(verbose,&flags,&error);
 	mb_free(verbose,&bath,&error); 
 	mb_free(verbose,&bathacrosstrack,&error); 

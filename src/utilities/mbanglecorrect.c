@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbanglecorrect.c	8/13/95
- *    $Id: mbanglecorrect.c,v 4.10 1997-04-21 17:19:14 caress Exp $
+ *    $Id: mbanglecorrect.c,v 4.11 1997-07-25 14:28:10 caress Exp $
  *
  *    Copyright (c) 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -45,6 +45,9 @@ The default input and output streams are stdin and stdout.\n";
  * Date:	January 12, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.10  1997/04/21  17:19:14  caress
+ * MB-System 4.5 Beta Release.
+ *
  * Revision 4.10  1997/04/17  15:14:38  caress
  * MB-System 4.5 Beta Release
  *
@@ -91,6 +94,7 @@ The default input and output streams are stdin and stdout.\n";
 #include "../../include/mb_status.h"
 #include "../../include/mb_format.h"
 #include "../../include/mb_define.h"
+#include "../../include/mb_io.h"
 
 /* mode defines */
 #define	MBANGLECORRECT_AMP		1
@@ -98,9 +102,8 @@ The default input and output streams are stdin and stdout.\n";
 #define MBANGLECORRECT_LENGTH_NUMBER	1
 #define MBANGLECORRECT_LENGTH_DISTANCE	2
 
-/* MBIO buffer structure pointer */
-#define	MBANGLECORRECT_BUFFER	250
-#define	MBANGLECORRECT_HOLD	50
+/* MBIO buffer size default */
+#define	MBANGLECORRECT_BUFFER_DEFAULT	500
 
 /* ping structure definition */
 struct mbanglecorrect_ping_struct 
@@ -138,7 +141,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbanglecorrect.c,v 4.10 1997-04-21 17:19:14 caress Exp $";
+	static char rcs_id[] = "$Id: mbanglecorrect.c,v 4.11 1997-07-25 14:28:10 caress Exp $";
 	static char program_name[] = "MBANGLECORRECT";
 	static char help_message[] =  
 "mbanglecorrect is a tool for processing sidescan data.  This program\n\t\
@@ -203,20 +206,22 @@ The default input and output streams are stdin and stdout.\n";
 
 	/* buffer handling parameters */
 	char	*buff_ptr;
-	int	nwant = MBANGLECORRECT_BUFFER;
-	int	nhold = MBANGLECORRECT_HOLD;
+	int	n_buffer_max = MBANGLECORRECT_BUFFER_DEFAULT;
+	int	nwant = MBANGLECORRECT_BUFFER_DEFAULT;
+	int	nhold = 0;
+	int	nhold_ping = 0;
 	int	nbuff = 0;
 	int	nload;
 	int	ndump;
 	int	nexpect;
-	struct mbanglecorrect_ping_struct ping[MBANGLECORRECT_BUFFER];
+	struct mbanglecorrect_ping_struct ping[MB_BUFFER_MAX];
 	int	nping = 0;
 	int	nping_start;
 	int	nping_end;
 	int	first = MB_YES;
 	int	start, done;
 	int	first_distance;
-	double	save_time_d;
+	double	save_time_d = 0.0;
 
 	/* time, user, host variables */
 	long int	right_now;
@@ -306,7 +311,7 @@ The default input and output streams are stdin and stdout.\n";
 	strcpy (sfile, "\0");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "A:a:B:b:CcD:d:E:e:F:f:GgHhI:i:KkM:m:N:n:O:o:R:r:S:s:VvXxZ:z:")) != -1)
+	while ((c = getopt(argc, argv, "A:a:B:b:CcD:d:E:e:F:f:GgHhI:i:KkL:l:M:m:N:n:O:o:R:r:S:s:VvXxZ:z:")) != -1)
 	  switch (c) 
 		{
 		case 'A':
@@ -363,6 +368,14 @@ The default input and output streams are stdin and stdout.\n";
 		case 'K':
 		case 'k':
 			subtract_mode = MB_YES;
+			flag++;
+			break;
+		case 'L':
+		case 'l':
+			sscanf (optarg,"%d", &n_buffer_max);
+			if (n_buffer_max > MB_BUFFER_MAX
+			    || n_buffer_max < 50)
+			    n_buffer_max = MBANGLECORRECT_BUFFER_DEFAULT;
 			flag++;
 			break;
 		case 'M':
@@ -465,8 +478,10 @@ The default input and output streams are stdin and stdout.\n";
 		fprintf(stderr,"dbg2       input file:     %s\n",ifile);
 		fprintf(stderr,"dbg2       output file:    %s\n",ofile);
 		fprintf(stderr,"dbg2       AGA file:       %s\n",sfile);
+		fprintf(stderr,"dbg2       n_buffer_max:   %d\n",n_buffer_max);
 		fprintf(stderr,"dbg2       ampkind:        %d\n",ampkind);
 		fprintf(stderr,"dbg2       depth_def:      %f\n",depth_default);
+		fprintf(stderr,"dbg2       scale:          %f\n",scale);
 		fprintf(stderr,"dbg2       length_mode:    %d\n",length_mode);
 		fprintf(stderr,"dbg2       length_max:     %f\n",length_max);
 		fprintf(stderr,"dbg2       use_slope:      %d\n",use_slope);
@@ -532,7 +547,7 @@ The default input and output streams are stdin and stdout.\n";
 		}
 
 	/* allocate memory for data arrays */
-	for (i=0;i<MBANGLECORRECT_BUFFER;i++)
+	for (i=0;i<n_buffer_max;i++)
 		{
 		ping[i].bath = NULL;
 		ping[i].amp = NULL;
@@ -743,43 +758,13 @@ The default input and output streams are stdin and stdout.\n";
 
 	/* write comments to beginning of output file */
 	kind = MB_DATA_COMMENT;
-	strncpy(comment,"\0",256);
 	sprintf(comment,"Sidescan data altered by program %s",
 		program_name);
-	status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,ping[0].ssacrosstrack,
-			ping[0].ssalongtrack,
-			comment,&error);
-	strncpy(comment,"\0",256);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	sprintf(comment,"Version %s",rcs_id);
-	status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,ping[0].ssacrosstrack,
-			ping[0].ssalongtrack,
-			comment,&error);
-	strncpy(comment,"\0",256);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	sprintf(comment,"MB-system Version %s",MB_VERSION);
-	status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,ping[0].ssacrosstrack,
-			ping[0].ssalongtrack,
-			comment,&error);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	right_now = time((long *)0);
 	strncpy(date,"\0",25);
 	right_now = time((long *)0);
@@ -791,260 +776,81 @@ The default input and output streams are stdin and stdout.\n";
 	else
 		strcpy(user, "unknown");
 	gethostname(host,128);
-	strncpy(comment,"\0",256);
 	sprintf(comment,"Run by user <%s> on cpu <%s> at <%s>",
 		user,host,date);
-	status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,ping[0].ssacrosstrack,
-			ping[0].ssalongtrack,
-			comment,&error);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	if (ampkind == MBANGLECORRECT_AMP)
 		{
-		strncpy(comment,"\0",256);
 		sprintf(comment,"Beam amplitude values corrected by dividing");
-		status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,ping[0].ssacrosstrack,
-			ping[0].ssalongtrack,
-			comment,&error);
+		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		}
 	else
 		{
-		strncpy(comment,"\0",256);
 		sprintf(comment,"Sidescan values corrected by dividing");
-		status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,ping[0].ssacrosstrack,
-			ping[0].ssalongtrack,
-			comment,&error);
+		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		}
 	if (use_global_statics == MB_NO)
 		{
-		strncpy(comment,"\0",256);
 		sprintf(comment,"  by a locally defined function of grazing angle.");
-		status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,ping[0].ssacrosstrack,
-			ping[0].ssalongtrack,
-			comment,&error);
+		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		}
 	else
 		{
-		strncpy(comment,"\0",256);
 		sprintf(comment,"  by a user supplied function of grazing angle.");
-		status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,ping[0].ssacrosstrack,
-			ping[0].ssalongtrack,
-			comment,&error);
+		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		}
-	strncpy(comment,"\0",256);
 	sprintf(comment,"Control Parameters:");
-	status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,ping[0].ssacrosstrack,
-			ping[0].ssalongtrack,
-			comment,&error);
-	strncpy(comment,"\0",256);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	sprintf(comment,"  MBIO data format:   %d",format);
-	status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,ping[0].ssacrosstrack,
-			ping[0].ssalongtrack,
-			comment,&error);
-	strncpy(comment,"\0",256);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	sprintf(comment,"  Input file:         %s",ifile);
-	status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,ping[0].ssacrosstrack,
-			ping[0].ssalongtrack,
-			comment,&error);
-	strncpy(comment,"\0",256);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	sprintf(comment,"  Output file:        %s",ofile);
-	status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,ping[0].ssacrosstrack,
-			ping[0].ssalongtrack,
-			comment,&error);
-	strncpy(comment,"\0",256);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	sprintf(comment,"  Longitude flip:     %d",lonflip);
-	status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,ping[0].ssacrosstrack,
-			ping[0].ssalongtrack,
-			comment,&error);
-	strncpy(comment,"\0",256);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	sprintf(comment,"  Data kind:         %d",ampkind);
-	status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,ping[0].ssacrosstrack,
-			ping[0].ssalongtrack,
-			comment,&error);
-	strncpy(comment,"\0",256);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	sprintf(comment,"  Default depth:      %f",depth_default);
-	status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,ping[0].ssacrosstrack,
-			ping[0].ssalongtrack,
-			comment,&error);
-	strncpy(comment,"\0",256);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	sprintf(comment,"  Smoothing dimension: %d",nsmooth);
-	status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,ping[0].ssacrosstrack,
-			ping[0].ssalongtrack,
-			comment,&error);
-	strncpy(comment,"\0",256);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	sprintf(comment,"  Length mode:        %d",length_mode);
-	status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,ping[0].ssacrosstrack,
-			ping[0].ssalongtrack,
-			comment,&error);
-	strncpy(comment,"\0",256);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	sprintf(comment,"  Length max:         %f",length_max);
-	status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,ping[0].ssacrosstrack,
-			ping[0].ssalongtrack,
-			comment,&error);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	if (use_global_statics == MB_YES)
 		{
-		strncpy(comment,"\0",256);
 		sprintf(comment,"  Static angle correction file: %s",sfile);
-		status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,ping[0].ssacrosstrack,
-			ping[0].ssalongtrack,
-			comment,&error);
-		strncpy(comment,"\0",256);
+		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		sprintf(comment,"  Static sidescan corrections:");
-		status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,ping[0].ssacrosstrack,
-			ping[0].ssalongtrack,
-			comment,&error);
+		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		for (i=0;i<nangles;i++)
 			{
-			strncpy(comment,"\0",256);
 			sprintf(comment,"    %f  %f",angles[i],mean[i]);
-			status = mb_put(verbose,ombio_ptr,kind,
-				ping[0].time_i,ping[0].time_d,
-				ping[0].navlon,ping[0].navlat,
-				ping[0].speed,ping[0].heading,
-				beams_bath,beams_amp,pixels_ss,
-				ping[0].bath,ping[0].amp,
-				ping[0].bathacrosstrack,ping[0].bathalongtrack,
-				ping[0].ss,ping[0].ssacrosstrack,
-				ping[0].ssalongtrack,
-				comment,&error);
+			status = mb_put_comment(verbose,ombio_ptr,
+						comment,&error);
 			}
 		}
-	strncpy(comment,"\0",256);
 	sprintf(comment," ");
-	status = mb_put(verbose,ombio_ptr,kind,
-			ping[0].time_i,ping[0].time_d,
-			ping[0].navlon,ping[0].navlat,
-			ping[0].speed,ping[0].heading,
-			beams_bath,beams_amp,pixels_ss,
-			ping[0].bath,ping[0].amp,
-			ping[0].bathacrosstrack,ping[0].bathalongtrack,
-			ping[0].ss,ping[0].ssacrosstrack,
-			ping[0].ssalongtrack,
-			comment,&error);
+	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 
 	/* initialize the buffer */
 	status = mb_buffer_init(verbose,&buff_ptr,&error);
+	
+	/* set handling of buffer */
+	if (use_global_statics == MB_YES)
+		nhold_ping = 0;
+	else if (length_mode == MBANGLECORRECT_LENGTH_NUMBER)
+		nhold_ping = length_num;
+	else
+		nhold_ping = 0;
+
 
 	/* read and write */
 	done = MB_NO;
 	first = MB_YES;
+	nwant = n_buffer_max;
 	if (verbose == 1) fprintf(stderr,"\n");
 	while (!done)
 		{
@@ -1075,7 +881,8 @@ The default input and output streams are stdin and stdout.\n";
 		jend = 0;
 		first_distance = MB_YES;
 		status = MB_SUCCESS;
-		while (status == MB_SUCCESS)
+		while (status == MB_SUCCESS
+			&& ndata < n_buffer_max)
 			{
 			status = mb_buffer_get_next_data(verbose,
 				buff_ptr,imbio_ptr,start,&ping[ndata].id,
@@ -1149,15 +956,6 @@ The default input and output streams are stdin and stdout.\n";
 				if (save_time_d == ping[ndata].time_d)
 				    jbeg = ndata + 1;
 				}
-			if (status == MB_SUCCESS && done != MB_YES)
-				{
-				if (jend == 0 && ping[ndata].id >= 
-				    nbuff - MBANGLECORRECT_HOLD/2)
-				    {
-				    jend = ndata;
-				    save_time_d = ping[ndata].time_d;
-				    }
-				}
 			if (status == MB_SUCCESS)
 				{
 				start = ping[ndata].id + 1;
@@ -1165,20 +963,26 @@ The default input and output streams are stdin and stdout.\n";
 				}
 			}
 		if (first == MB_YES)
-			{
 			jbeg = 0;
-			}
 		if (done == MB_YES)
 			jend = ndata - 1;
-		if (jend <= 0 && ndata > 0)
+		else if (ndata > nhold_ping + jbeg)
+			{
+			jend = ndata - 1 - nhold_ping;
+			save_time_d = ping[jend].time_d;
+			}
+		else
 			{
 			jend = ndata - 1;
-			save_time_d = ping[ndata-1].time_d;
+			save_time_d = ping[jend].time_d;
 			}
-		else if (ndata <= 0)
-			jend = -1;
 		if (ndata > 0)
 		    nbathdata += (jend - jbeg + 1);
+		if (verbose >= 1)
+			{
+			fprintf(stderr,"%d survey records being processed\n",
+				(jend - jbeg + 1));
+			}
 		if (first == MB_YES && nbathdata > 0)
 			first = MB_NO;
 
@@ -1590,21 +1394,21 @@ The default input and output streams are stdin and stdout.\n";
 				comment,&error);
 		  }
 
+
 		/* find number of pings to hold */
 		if (done == MB_YES)
 			nhold = 0;
-		else if (ndata > MBANGLECORRECT_HOLD)
-			{
-			nhold = nbuff 
-				- ping[ndata-MBANGLECORRECT_HOLD].id + 1;
-			}
+		else if (jend <= jbeg)
+			nhold = 0;
+		else if (nhold_ping < jend)
+			nhold = nbuff - ping[jend+1-nhold_ping].id;
 		else if (ndata > 0)
 			{
-			nhold = nbuff - ping[jend].id + 1;
+			nhold = nbuff - ping[0].id + 1;
+			if (nhold > nbuff / 2)
+				nhold = nbuff / 2;
 			}
 		else
-			nhold = 0;
-		if (jend >= ndata - 1)
 			nhold = 0;
 
 		/* dump data from the buffer */
@@ -1628,7 +1432,7 @@ The default input and output streams are stdin and stdout.\n";
 	status = mb_close(verbose,&ombio_ptr,&error);
 
 	/* free the memory */
-	for (j=0;j<MBANGLECORRECT_BUFFER;j++)
+	for (j=0;j<n_buffer_max;j++)
 		{
 		mb_free(verbose,&ping[j].bath,&error); 
 		mb_free(verbose,&ping[j].bathacrosstrack,&error); 
