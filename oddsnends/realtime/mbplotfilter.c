@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
-#include <local/graphics.h>
+#include <graphics.h>
 
 #define IUP 3
 #define IDN 2
