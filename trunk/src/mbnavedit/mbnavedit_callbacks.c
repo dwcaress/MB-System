@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_callbacks.c	6/24/95
- *    $Id: mbnavedit_callbacks.c,v 5.7 2003-04-17 21:09:06 caress Exp $
+ *    $Id: mbnavedit_callbacks.c,v 5.8 2004-05-21 23:33:03 caress Exp $
  *
  *    Copyright (c) 1995, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	August 28, 2000 (New version - no buffered i/o)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2003/04/17 21:09:06  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.6  2001/07/20 00:34:00  caress
  * Release 5.0.beta03
  *
@@ -207,6 +210,8 @@ void	do_filebutton_on();
 void	do_filebutton_off();
 void	do_open_file(int);
 void	do_checkuseprevious();
+XtEventHandler do_resize( Widget w, XtPointer client_data, XEvent *event, Boolean *unused);
+
 
 /*--------------------------------------------------------------------*/
 /*      Function Name:	BxExitCB
@@ -599,7 +604,14 @@ do_mbnavedit_init(int argc, char **argv)
     XSetFont(display,gc,fontStruct->fid);
     
     XSelectInput(display, can_xid, EV_MASK );
-    
+
+    /* get resize events - add an event handler */
+    XtAddEventHandler(XtParent(bulletinBoard), 
+			    StructureNotifyMask, 
+			    False, 
+			    do_resize, 
+			    (XtPointer)NULL);
+
     /* Load the colors that will be used in this program. */
     status = XLookupColor(display,colormap, "white",&db_color,&colors[0]);
     if ((status = XAllocColor(display,colormap,&colors[0])) == 0)
@@ -914,13 +926,25 @@ void do_set_controls()
 	    
 	/* enable or disable time interpolation */
 	if (timestamp_problem == MB_YES)
+		{
 		XtVaSetValues(pushButton_controls_timeinterpolation, 
 			XmNsensitive, True, 
 			NULL);
+		XtVaSetValues(pushButton_controls_deletebadtimetag, 
+			XmNsensitive, True, 
+			NULL);
+		}
 	else
+		{
 		XtVaSetValues(pushButton_controls_timeinterpolation, 
 			XmNsensitive, False, 
 			NULL);
+		XtVaSetValues(pushButton_controls_deletebadtimetag, 
+			XmNsensitive, False, 
+			NULL);
+		XtUnmanageChild(bulletinBoard_deletebadtimetag);
+		XtUnmanageChild(bulletinBoard_timeinterpolation);
+		}
 	    
 }
 
@@ -1328,10 +1352,27 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
 
 /*--------------------------------------------------------------------*/
 /* ARGSUSED */
-void
-do_resize( Widget w, XtPointer client_data, XtPointer call_data)
+XtEventHandler
+do_resize( Widget w, XtPointer client_data, XEvent *event, Boolean *unused)
 {
-	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+	XConfigureEvent *cevent = (XConfigureEvent *) event;
+	Dimension   width, height;
+	
+	/* do this only if a resize event happens */
+	if (cevent->type == ConfigureNotify)
+	    {
+	XtVaGetValues(bulletinBoard, 
+			XmNwidth, &width, 
+			XmNheight, &height, 
+			NULL);
+	window_width = (int)width - 220;	
+	window_height = (int)height - 90;	
+	XtVaSetValues(scrolledWindow, 
+			XmNwidth, (Dimension)window_width, 
+			XmNheight, (Dimension)window_height, 
+			NULL);
+	    }
+
 
 }
 
@@ -1843,6 +1884,26 @@ do_timeinterpolation_apply( Widget w, XtPointer client_data, XtPointer call_data
 	/* update controls */
 	do_set_controls();
 
+}
+
+/*--------------------------------------------------------------------*/
+
+void
+do_deletebadtimetag_apply( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+	
+	/* interpolate time stamps */
+	mbnavedit_action_deletebadtime();
+	
+	/* reset timestamp problem flag */
+	timestamp_problem = MB_NO;
+	
+	/* replot */
+	mbnavedit_plot_all();
+		
+	/* update controls */
+	do_set_controls();
 }
 
 /*--------------------------------------------------------------------*/

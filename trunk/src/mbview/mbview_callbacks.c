@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbview_callbacks.c	10/7/2002
- *    $Id: mbview_callbacks.c,v 5.2 2004-02-24 22:52:28 caress Exp $
+ *    $Id: mbview_callbacks.c,v 5.3 2004-05-21 23:40:39 caress Exp $
  *
  *    Copyright (c) 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -18,6 +18,9 @@
  * Date:	October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2004/02/24 22:52:28  caress
+ * Added spherical projection to MBview.
+ *
  * Revision 5.1  2004/01/06 21:11:04  caress
  * Added pick region capability.
  *
@@ -96,7 +99,7 @@ Cardinal 	ac;
 Arg      	args[256];
 char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_callbacks.c,v 5.2 2004-02-24 22:52:28 caress Exp $";
+static char rcs_id[]="$Id: mbview_callbacks.c,v 5.3 2004-05-21 23:40:39 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 
@@ -3018,7 +3021,7 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 		    {		
 		    /* set cursor for rotate */
 		    XDefineCursor(view->dpy,view->xid,view->FleurRedCursor);
-	    
+
 		    /* rotate viewpoint of 3D map */
 		    data->modelazimuth3d = view->modelazimuth3d_save 
 			    + 180.0 * ((double)(view->button_move_x 
@@ -5934,27 +5937,17 @@ fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_shadeparmsapply\n");
 }
 /*------------------------------------------------------------------------------*/
 
-void
-do_mbview_3dparmspopup( Widget w, XtPointer client_data, XtPointer call_data)
+int do_mbview_3dparmstext(int instance)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
-	int	instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 
-	/* get instance */
-	ac = 0;
-	XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
-	XtGetValues(w, args, ac);
-
 if (mbv_verbose >= 2)
-fprintf(stderr,"do_mbview_3dparmspopup: instance:%d\n", instance);
+fprintf(stderr,"do_mbview_3dparmstext: instance:%d\n", instance);
 	    
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
-
-    	XtManageChild(view->mb3dview.mbview_bulletinBoard_3dparms);
 
 	/* set values of widgets */
 	sprintf(value_text,"%g", data->modelazimuth3d);
@@ -5984,6 +5977,34 @@ fprintf(stderr,"do_mbview_3dparmspopup: instance:%d\n", instance);
 	sprintf(value_text,"%g", view->viewoffset3d_z);
 	XmTextFieldSetString(view->mb3dview.mbview_textField_view_3dzoom, 
 			value_text);
+
+}
+/*------------------------------------------------------------------------------*/
+
+void
+do_mbview_3dparmspopup( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+	int	instance;
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
+
+	/* get instance */
+	ac = 0;
+	XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
+	XtGetValues(w, args, ac);
+
+if (mbv_verbose >= 2)
+fprintf(stderr,"do_mbview_3dparmspopup: instance:%d\n", instance);
+	    
+	/* get view */
+	view = &(mbviews[instance]);
+	data = &(view->data);
+
+    	XtManageChild(view->mb3dview.mbview_bulletinBoard_3dparms);
+
+	/* set values of widgets */
+	do_mbview_3dparmstext(instance);
 
 }
 /*------------------------------------------------------------------------------*/
@@ -6133,6 +6154,32 @@ fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_3dparmsapply\n");
 }
 /*------------------------------------------------------------------------------*/
 
+int do_mbview_2dparmstext(int instance)
+{
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
+
+if (mbv_verbose >= 2)
+fprintf(stderr,"do_mbview_2dparmstext: instance:%d\n", instance);
+	    
+	/* get view */
+	view = &(mbviews[instance]);
+	data = &(view->data);
+
+ 	/* set values of widgets */
+	sprintf(value_text,"%g", view->offset2d_x);
+	XmTextFieldSetString(view->mb3dview.mbview_textField_view_2doffsetx, 
+			value_text);
+	sprintf(value_text,"%g", view->offset2d_y);
+	XmTextFieldSetString(view->mb3dview.mbview_textField_view_2doffsety, 
+			value_text);
+	sprintf(value_text,"%g", view->size2d);
+	XmTextFieldSetString(view->mb3dview.mbview_textField_view_2dzoom, 
+			value_text);
+
+}
+/*------------------------------------------------------------------------------*/
+
 void
 do_mbview_2dparmspopup( Widget w, XtPointer client_data, XtPointer call_data)
 {
@@ -6156,15 +6203,7 @@ fprintf(stderr,"do_mbview_2dparmspopup: instance:%d\n", instance);
     	XtManageChild(view->mb3dview.mbview_bulletinBoard_2dparms);
 
 	/* set values of widgets */
-	sprintf(value_text,"%g", view->offset2d_x);
-	XmTextFieldSetString(view->mb3dview.mbview_textField_view_2doffsetx, 
-			value_text);
-	sprintf(value_text,"%g", view->offset2d_y);
-	XmTextFieldSetString(view->mb3dview.mbview_textField_view_2doffsety, 
-			value_text);
-	sprintf(value_text,"%g", view->size2d);
-	XmTextFieldSetString(view->mb3dview.mbview_textField_view_2dzoom, 
-			value_text);
+	do_mbview_2dparmstext(instance);
 
 }
 /*------------------------------------------------------------------------------*/
@@ -6502,6 +6541,10 @@ fprintf(stderr,"do_mbview_reset_view\n");
 	data->viewelevation3d = 90.0;
 	data->viewazimuth3d = 0.0;
 	view->size2d = 1.0;
+
+	/* reset dialog widgets */
+	do_mbview_3dparmstext(instance);
+	do_mbview_2dparmstext(instance);
 	
 	/* rescale grid */
     	mbview_zscaleclear(instance);

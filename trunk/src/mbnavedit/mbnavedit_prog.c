@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_prog.c	6/23/95
- *    $Id: mbnavedit_prog.c,v 5.11 2003-07-02 18:13:13 caress Exp $
+ *    $Id: mbnavedit_prog.c,v 5.12 2004-05-21 23:33:03 caress Exp $
  *
  *    Copyright (c) 1995, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	August 28, 2000 (New version - no buffered i/o)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.11  2003/07/02 18:13:13  caress
+ * Release 5.0.0
+ *
  * Revision 5.10  2003/04/17 21:09:06  caress
  * Release 5.0.beta30
  *
@@ -226,7 +229,7 @@ struct mbnavedit_plot_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbnavedit_prog.c,v 5.11 2003-07-02 18:13:13 caress Exp $";
+static char rcs_id[] = "$Id: mbnavedit_prog.c,v 5.12 2004-05-21 23:33:03 caress Exp $";
 static char program_name[] = "MBNAVEDIT";
 static char help_message[] =  "MBNAVEDIT is an interactive navigation editor for swath sonar data.\n\tIt can work with any data format supported by the MBIO library.\n";
 static char usage_message[] = "mbnavedit [-Byr/mo/da/hr/mn/sc -D  -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ooutfile -X -V -H]";
@@ -1116,7 +1119,6 @@ int mbnavedit_load_data()
 	char	*function_name = "mbnavedit_load_data";
 	int	status = MB_SUCCESS;
 	int	i;
-	int	start;
 	char	string[50];
 
 	/* print input debug statements */
@@ -1127,7 +1129,6 @@ int mbnavedit_load_data()
 		}
 		
 	/* turn message on */
-	start = 0;
 	nload = 0;
 	timestamp_problem = MB_NO;
 	sprintf(string, "MBnavedit: %d records loaded so far...", nload);
@@ -1197,6 +1198,7 @@ int mbnavedit_load_data()
 				}
 
 			/* get original values */
+			ping[nbuff].id = nload;
 			ping[nbuff].record = ping[nbuff].id + ndump_total;
 			ping[nbuff].lon_org = ping[nbuff].lon;
 			ping[nbuff].lat_org = ping[nbuff].lat;
@@ -1236,7 +1238,6 @@ int mbnavedit_load_data()
 				}
 
 			/* increment counting variables */
-			start = ping[nbuff].id + 1;
 			nbuff++;
 			nload++;
 			
@@ -3505,8 +3506,6 @@ int mbnavedit_action_fixtime()
 	/* local variables */
 	char	*function_name = "mbnavedit_action_fixtime";
 	int	status = MB_SUCCESS;
-	int	iplot;
-	int	active_plot;
 	int	istart, iend;
 	double	start_time_d, end_time_d;
 	int	i, j;
@@ -3553,6 +3552,76 @@ int mbnavedit_action_fixtime()
 			}
 		    
 		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:       %d\n",error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:      %d\n",status);
+		}
+
+	/* return */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbnavedit_action_deletebadtime()
+{
+	/* local variables */
+	char	*function_name = "mbnavedit_action_deletebadtime";
+	int	status = MB_SUCCESS;
+	double	lastgood_time_d;
+	int	i, j, nbuffnew;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		}
+
+	/* loop over the data looking for bad times */
+	for (i=0;i<nbuff;i++)
+		{
+		if (i == 0)
+			{
+			lastgood_time_d = ping[i].time_d;
+			}
+		else if (ping[i].time_d > lastgood_time_d)
+			{
+			lastgood_time_d = ping[i].time_d;
+			}
+		else if (ping[i].time_d <= lastgood_time_d)
+			{
+			ping[i].id = -1;
+			}
+		}
+
+	/* loop over the data in reverse deleting data with bad times */
+	nbuffnew = nbuff;
+	for (i=nbuff-1;i>=0;i--)
+		{
+		if (ping[i].id == -1)
+			{
+			for (j=i;j<nbuffnew-1;j++)
+				{
+				ping[j] = ping[j+1];
+				}
+			if (i > 0)
+				ping[i-1].tint = ping[i].time_d 
+					- ping[i-1].time_d;
+			if (i == nbuffnew - 2 && i > 0)
+				ping[i].tint = ping[i-1].tint;
+			else if (i == nbuffnew - 2 && i == 0)
+				ping[i].tint = 0.0;
+			nbuffnew--;
+			}
+		}
+fprintf(stderr,"Data deleted: nbuff:%d nbuffnew:%d\n",nbuff,nbuffnew);
+	nbuff = nbuffnew;
 
 	/* print output debug statements */
 	if (verbose >= 2)

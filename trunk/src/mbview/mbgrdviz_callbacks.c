@@ -67,7 +67,7 @@ extern int isnanf(float x);
 #define MBGRDVIZ_ROUTE_VERSION "1.00"
 
 /* id variables */
-static char rcs_id[] = "$Id: mbgrdviz_callbacks.c,v 5.2 2004-02-24 22:52:28 caress Exp $";
+static char rcs_id[] = "$Id: mbgrdviz_callbacks.c,v 5.3 2004-05-21 23:40:39 caress Exp $";
 static char program_name[] = "MBgrdviz";
 static char help_message[] = "MBgrdviz is an interactive 2D/3D visualization tool for GMT grid files.";
 static char usage_message[] = "mbgrdviz [-H -T -V]";
@@ -1985,7 +1985,7 @@ int do_mbgrdviz_readnav(int instance, char *swathfile, int format, double weight
 	
 	double	mtodeglon, mtodeglat;
 	double	headingx, headingy;
-	double	xd, yd;
+	double	xd, yd, zd;
 
 	int	form;
 	int	icenter, iport, istbd;
@@ -2025,12 +2025,14 @@ int do_mbgrdviz_readnav(int instance, char *swathfile, int format, double weight
 		bounds[3] = data->primary_ymax;
 		status = mbview_projectforward(instance, MB_YES,
 				data->primary_xmin, data->primary_ymin,
+				0.5 * (data->primary_min + data->primary_max),
 				&bounds[0], &bounds[2],
-				&xd, &yd);
+				&xd, &yd, &zd);
 		status = mbview_projectforward(instance, MB_YES,
 				data->primary_xmax, data->primary_ymax,
+				0.5 * (data->primary_min + data->primary_max),
 				&bounds[1], &bounds[3],
-				&xd, &yd);
+				&xd, &yd, &zd);
 
 		}
 	

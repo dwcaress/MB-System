@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavadjust_callbacks.c	2/22/2000
- *    $Id: mbnavadjust_callbacks.c,v 5.5 2003-04-17 21:07:49 caress Exp $
+ *    $Id: mbnavadjust_callbacks.c,v 5.6 2004-05-21 23:31:28 caress Exp $
  *
  *    Copyright (c) 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	March 22, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2003/04/17 21:07:49  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.4  2002/08/28 01:32:45  caress
  * Finished first cut at man page.
  *
@@ -177,6 +180,7 @@ void	do_fileselection_cancel( Widget w, XtPointer client_data, XtPointer call_da
 void	do_view_showcrossings( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_view_showdata( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_view_showties( Widget w, XtPointer client_data, XtPointer call_data);
+void	do_action_makecontours( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_action_analyzecrossings( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_action_invertnav( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_fileselection_list(Widget w, XtPointer client, XtPointer call);
@@ -568,7 +572,10 @@ do_mbnavadjust_init(int argc, char **argv)
     status = XLookupColor(display,colormap, "coral",&db_color,&colors[5]);
     if ((status = XAllocColor(display,colormap,&colors[5])) == 0)
 	    fprintf(stderr,"Failure to allocate color: coral\n");
-    j = 6;
+    status = XLookupColor(display,colormap, "yellow",&db_color,&colors[6]);
+    if ((status = XAllocColor(display,colormap,&colors[6])) == 0)
+	    fprintf(stderr,"Failure to allocate color: yellow\n");
+    j = 7;
     for (i=0;i<16;i++)
     	    {
     	    colors[j+i].red = 65535;
@@ -1034,6 +1041,9 @@ void do_update_status()
 		&& project.open == MB_YES
 		&& project.num_files > 0)
 		{
+		XtVaSetValues(pushButton_makecontours,
+			XmNsensitive, True,
+			NULL);
 		XtVaSetValues(pushButton_analyzecrossings,
 			XmNsensitive, True,
 			NULL);
@@ -1043,6 +1053,9 @@ void do_update_status()
 		}
 	else
 		{
+		XtVaSetValues(pushButton_makecontours,
+			XmNsensitive, False,
+			NULL);
 		XtVaSetValues(pushButton_analyzecrossings,
 			XmNsensitive, False,
 			NULL);
@@ -1283,35 +1296,14 @@ do_update_naverr()
 void
 do_naverr_offsetlabel()
 {
-    struct mbna_crossing *crossing;
-    struct mbna_tie *tie;
-    int	    allow_set;
-    
-    /* assume offset is not ready to be set or reset, change if otherwise */
-    allow_set = False;
-    
     /* look at current crossing */
     if (mbna_current_crossing >= 0)
     	{
     	/* set main naverr status label */
-	crossing = &project.crossings[mbna_current_crossing];
         sprintf(string,":::t\"Working Offsets: %10.3f m  %10.3f m\":t\"Working Tie Points: %d:%d\"",
         		mbna_offset_x / mbna_mtodeglon,
 			mbna_offset_y / mbna_mtodeglat,
 			mbna_snav_1, mbna_snav_2);
-			
-	/* check for changed offsets */
-    	if (mbna_current_tie >= 0)
-	    {
-	    tie = &crossing->ties[mbna_current_tie];
-	    if (tie->snav_1 != mbna_snav_1
-		|| tie->snav_2 != mbna_snav_2
-		|| tie->offset_x != mbna_offset_x
-		|| tie->offset_y != mbna_offset_y)
-		{
-		allow_set = True;
-		}
-	    }
     	}
 
     else
@@ -1324,10 +1316,10 @@ do_naverr_offsetlabel()
 
     /* set button sensitivity for setting or resetting offsets */
     XtVaSetValues(pushButton_naverr_settie,
-	    XmNsensitive, allow_set,
+	    XmNsensitive, mbna_allow_set_tie,
 	    NULL);
     XtVaSetValues(pushButton_naverr_resettie,
-	    XmNsensitive, allow_set,
+	    XmNsensitive, mbna_allow_set_tie,
 	    NULL);
 
 }
@@ -1502,6 +1494,7 @@ do_naverr_cont_input( Widget w, XtPointer client_data, XtPointer call_data)
 		    mbna_offset_y_old = mbna_offset_y;
 		
 		    /* reset offset label */
+		    mbnavadjust_naverr_checkoksettie();
 		    do_naverr_offsetlabel();
 
 		    } /* end of left button events */
@@ -1778,6 +1771,7 @@ do_naverr_setoffset( Widget w, XtPointer client_data, XtPointer call_data)
     XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
 
     mbnavadjust_naverr_save();
+    mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
     do_update_naverr();
     do_update_status();
 }
@@ -1814,6 +1808,7 @@ do_dismiss_naverr( Widget w, XtPointer client_data, XtPointer call_data)
     XFreeGC(display,corr_gc);
     xg_free(cont_xgid);
     xg_free(corr_xgid);
+    mbnavadjust_naverr_checkoksettie();
     do_update_naverr();
     do_update_status();
 }
@@ -2385,6 +2380,7 @@ do_quit( Widget w, XtPointer client_data, XtPointer call_data)
 	    XFreeGC(display,corr_gc);
 	    xg_free(cont_xgid);
 	    xg_free(corr_xgid);
+	    mbnavadjust_naverr_checkoksettie();
 	    do_update_naverr();
 	    do_update_status();
 	    }
@@ -2506,6 +2502,20 @@ do_action_unfix( Widget w, XtPointer client_data, XtPointer call_data)
     sprintf(string, "Set file %d unfixed: %s\n",
 		mbna_file_select,project.files[mbna_file_select].file);
     do_info_add(string, MB_YES);
+}
+/*--------------------------------------------------------------------*/
+
+void
+do_action_makecontours( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    
+    /* make sure that contours are generated for all of the existing crossings */
+		
+    mbna_status = MBNA_STATUS_MAKECONTOUR;
+    mbnavadjust_makecontours();
+    mbna_status = MBNA_STATUS_GUI;
+    
 }
 /*--------------------------------------------------------------------*/
 void

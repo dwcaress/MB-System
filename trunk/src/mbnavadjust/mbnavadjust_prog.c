@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavadjust_prog.c	3/23/00
- *    $Id: mbnavadjust_prog.c,v 5.12 2003-04-17 21:07:49 caress Exp $
+ *    $Id: mbnavadjust_prog.c,v 5.13 2004-05-21 23:31:27 caress Exp $
  *
  *    Copyright (c) 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	March 23, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.12  2003/04/17 21:07:49  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.11  2002/08/28 01:32:45  caress
  * Finished first cut at man page.
  *
@@ -116,7 +119,7 @@ struct swathraw
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbnavadjust_prog.c,v 5.12 2003-04-17 21:07:49 caress Exp $";
+static char rcs_id[] = "$Id: mbnavadjust_prog.c,v 5.13 2004-05-21 23:31:27 caress Exp $";
 static char program_name[] = "mbnavadjust";
 static char help_message[] =  "mbnavadjust is an interactive navigation adjustment package for swath sonar data.\n";
 static char usage_message[] = "mbnavadjust [-Iproject -V -H]";
@@ -269,6 +272,7 @@ int mbnavadjust_init_globals()
 	project.cont_int = 25.;
 	project.col_int = 100.;
 	project.tick_int = 100.;
+	project.label_int = 100000.;
 	mbna_contour_algorithm = MB_CONTOUR_OLD;
 	mbna_ncolor = 4;
 	mbna_contour = NULL;
@@ -282,6 +286,7 @@ int mbnavadjust_init_globals()
 	mbna_offsetweight = 1.0;
 	mbna_misfit_center = MBNA_MISFIT_AUTOCENTER;
 	mbna_bias_mode = MBNA_BIAS_SAME;
+	mbna_allow_set_tie = MB_NO;
 
 	/* set mbio default values */
 	status = mb_defaults(mbna_verbose,&iformat,&pings,&lonflip,bounds,
@@ -312,7 +317,7 @@ int mbnavadjust_init_globals()
 	/* print output debug statements */
 	if (mbna_verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+		fprintf(stderr,"\ndbg2  MBnavadjust function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",error);
@@ -428,7 +433,7 @@ int mbnavadjust_init(int argc,char **argv,int *startup_file)
 	/* print output debug statements */
 	if (mbna_verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+		fprintf(stderr,"\ndbg2  MBnavadjust function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",error);
@@ -487,7 +492,7 @@ int mbnavadjust_set_graphics(int cn_xgid, int cr_xgid,
 	/* print output debug statements */
 	if (mbna_verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+		fprintf(stderr,"\ndbg2  MBnavadjust function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:       %d\n",error);
@@ -643,7 +648,7 @@ int mbnavadjust_file_new(char *projectname)
 	/* print output debug statements */
 	if (mbna_verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+		fprintf(stderr,"\ndbg2  MBnavadjust function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:       %d\n",error);
@@ -789,7 +794,7 @@ int mbnavadjust_file_open(char *projectname)
 	/* print output debug statements */
 	if (mbna_verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+		fprintf(stderr,"\ndbg2  MBnavadjust function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:       %d\n",error);
@@ -867,7 +872,7 @@ int mbnavadjust_close_project()
 	/* print output debug statements */
 	if (mbna_verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+		fprintf(stderr,"\ndbg2  MBnavadjust function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:       %d\n",error);
@@ -1026,7 +1031,7 @@ int mbnavadjust_write_project()
 	/* print output debug statements */
 	if (mbna_verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+		fprintf(stderr,"\ndbg2  MBnavadjust function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:       %d\n",error);
@@ -1455,7 +1460,7 @@ fprintf(stderr,"Reset tie snav_2 on read:%d\n",tie->snav_2);
 	/* print output debug statements */
 	if (mbna_verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+		fprintf(stderr,"\ndbg2  MBnavadjust function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:       %d\n",error);
@@ -1523,7 +1528,7 @@ int mbnavadjust_import_data(char *path, int iformat)
  	/* print output debug statements */
 	if (mbna_verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+		fprintf(stderr,"\ndbg2  MBnavadjust function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:       %d\n",error);
@@ -2436,7 +2441,7 @@ crossing->file_id_2,crossing->section_2);*/
  	/* print output debug statements */
 	if (mbna_verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+		fprintf(stderr,"\ndbg2  MBnavadjust function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:       %d\n",error);
@@ -2506,7 +2511,7 @@ int mbnavadjust_fix_file()
  	/* print output debug statements */
 	if (mbna_verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+		fprintf(stderr,"\ndbg2  MBnavadjust function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:       %d\n",error);
@@ -2575,7 +2580,7 @@ int mbnavadjust_unfix_file()
  	/* print output debug statements */
 	if (mbna_verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+		fprintf(stderr,"\ndbg2  MBnavadjust function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:       %d\n",error);
@@ -2641,7 +2646,7 @@ int mbnavadjust_naverr_save()
  	/* print output debug statements */
 	if (mbna_verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+		fprintf(stderr,"\ndbg2  MBnavadjust function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:       %d\n",error);
@@ -2727,7 +2732,7 @@ int mbnavadjust_naverr_specific(int new_crossing, int new_tie)
  	/* print output debug statements */
 	if (mbna_verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+		fprintf(stderr,"\ndbg2  MBnavadjust function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:       %d\n",error);
@@ -2799,7 +2804,7 @@ int mbnavadjust_naverr_next()
  	/* print output debug statements */
 	if (mbna_verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+		fprintf(stderr,"\ndbg2  MBnavadjust function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:       %d\n",error);
@@ -2871,7 +2876,7 @@ int mbnavadjust_naverr_previous()
  	/* print output debug statements */
 	if (mbna_verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+		fprintf(stderr,"\ndbg2  MBnavadjust function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:       %d\n",error);
@@ -2980,7 +2985,7 @@ int mbnavadjust_naverr_nextunset()
  	/* print output debug statements */
 	if (mbna_verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+		fprintf(stderr,"\ndbg2  MBnavadjust function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:       %d\n",error);
@@ -3062,7 +3067,7 @@ int mbnavadjust_naverr_selecttie()
  	/* print output debug statements */
 	if (mbna_verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+		fprintf(stderr,"\ndbg2  MBnavadjust function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:       %d\n",error);
@@ -3084,6 +3089,7 @@ int mbnavadjust_naverr_addtie()
 	struct mbna_section *section1, *section2;
 	struct mbna_file *file1, *file2;
 	int	found;
+	int	ix, iy;
    	int	i;
 
  	/* print input debug statements */
@@ -3168,7 +3174,19 @@ int mbnavadjust_naverr_addtie()
     			tie->inversion_offset_y_m = mbna_invert_offset_y / mbna_mtodeglat;
    			if (project.inversion == MBNA_INVERSION_CURRENT)
     				project.inversion = MBNA_INVERSION_OLD;
-		
+				
+			/* now put tie in center of plot */
+			ix = (int)(0.5 * (mbna_plot_lon_max - mbna_plot_lon_min) 
+					* mbna_plotx_scale);
+			iy = (int)(cont_borders[3] 
+					- (0.5 * (mbna_plot_lat_max - mbna_plot_lat_min) 
+						* mbna_ploty_scale));
+			mbnavadjust_naverr_snavpoints(ix, iy);
+     			tie->snav_1 = mbna_snav_1;
+     			tie->snav_2 = mbna_snav_2;
+     			tie->snav_1_time_d = mbna_snav_1_time_d;
+     			tie->snav_2_time_d = mbna_snav_2_time_d;
+			
 			/* write updated project */
 			mbnavadjust_write_project();
 	
@@ -3179,6 +3197,36 @@ int mbnavadjust_naverr_addtie()
 				crossing->file_id_2, crossing->section_2, tie->snav_2,
 				tie->offset_x_m, tie->offset_y_m);
 			do_info_add(message, MB_YES);
+
+ 			/* print output debug statements */
+			if (mbna_verbose >= 2)
+				{
+				fprintf(stderr,"\ndbg2  snav point selected in MBnavadjust function <%s>\n",
+					function_name);
+				fprintf(stderr,"dbg2  snav values:\n");
+				fprintf(stderr,"dbg2       mbna_snav_1:        %d\n",mbna_snav_1);
+				fprintf(stderr,"dbg2       mbna_snav_1_time_d: %f\n",mbna_snav_1_time_d);
+				fprintf(stderr,"dbg2       mbna_snav_1_lon:    %f\n",mbna_snav_1_lon);
+				fprintf(stderr,"dbg2       mbna_snav_1_lat:    %f\n",mbna_snav_1_lat);
+				fprintf(stderr,"dbg2       section1->num_snav:  %d\n",section1->num_snav);
+				for (i=0;i<section1->num_snav;i++)
+					{
+					fprintf(stderr,"dbg2       section1->snav_time_d[%d]: %f\n",i,section1->snav_time_d[i]);
+					fprintf(stderr,"dbg2       section1->snav_lon[%d]:    %f\n",i,section1->snav_lon[i]);
+					fprintf(stderr,"dbg2       section1->snav_lat[%d]:    %f\n",i,section1->snav_lat[i]);
+					}
+				fprintf(stderr,"dbg2       mbna_snav_2:        %d\n",mbna_snav_2);
+				fprintf(stderr,"dbg2       mbna_snav_2_time_d: %f\n",mbna_snav_2_time_d);
+				fprintf(stderr,"dbg2       mbna_snav_2_lon:    %f\n",mbna_snav_2_lon);
+				fprintf(stderr,"dbg2       mbna_snav_2_lat:    %f\n",mbna_snav_2_lat);
+				fprintf(stderr,"dbg2       section2->num_snav:  %d\n",section2->num_snav);
+				for (i=0;i<section2->num_snav;i++)
+					{
+					fprintf(stderr,"dbg2       section2->snav_time_d[%d]: %f\n",i,section2->snav_time_d[i]);
+					fprintf(stderr,"dbg2       section2->snav_lon[%d]:    %f\n",i,section2->snav_lon[i]);
+					fprintf(stderr,"dbg2       section2->snav_lat[%d]:    %f\n",i,section2->snav_lat[i]);
+					}
+				}
   			}
    		}
    		
@@ -3202,7 +3250,7 @@ int mbnavadjust_naverr_addtie()
  	/* print output debug statements */
 	if (mbna_verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+		fprintf(stderr,"\ndbg2  MBnavadjust function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:       %d\n",error);
@@ -3316,7 +3364,7 @@ int mbnavadjust_naverr_deletetie()
  	/* print output debug statements */
 	if (mbna_verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+		fprintf(stderr,"\ndbg2  MBnavadjust function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:       %d\n",error);
@@ -3393,7 +3441,7 @@ int mbnavadjust_naverr_resettie()
  	/* print output debug statements */
 	if (mbna_verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+		fprintf(stderr,"\ndbg2  MBnavadjust function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:       %d\n",error);
@@ -3403,6 +3451,53 @@ int mbnavadjust_naverr_resettie()
 
 	return(status);
 }
+		
+/*--------------------------------------------------------------------*/
+int mbnavadjust_naverr_checkoksettie()
+{
+	/* local variables */
+	char	*function_name = "mbnavadjust_naverr_checkoksettie";
+	int	status = MB_SUCCESS;
+	struct mbna_crossing *crossing;
+	struct mbna_tie *tie;
+
+ 	/* print input debug statements */
+	if (mbna_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		}
+
+	/* check for changed offsets */
+    	mbna_allow_set_tie = MB_NO;
+    	if (mbna_current_crossing >= 0
+		&& mbna_current_tie >= 0)
+	    {
+    	    crossing = &project.crossings[mbna_current_crossing];
+	    tie = &crossing->ties[mbna_current_tie];
+	    if (tie->snav_1 != mbna_snav_1
+		|| tie->snav_2 != mbna_snav_2
+		|| tie->offset_x != mbna_offset_x
+		|| tie->offset_y != mbna_offset_y)
+		{
+		mbna_allow_set_tie = MB_YES;
+		}
+	    }
+			
+ 	/* print output debug statements */
+	if (mbna_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBnavadjust function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:       %d\n",error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:      %d\n",status);
+		}
+
+	return(status);
+}
+		
 /*--------------------------------------------------------------------*/
 int mbnavadjust_naverr_skip()
 {
@@ -3464,7 +3559,7 @@ int mbnavadjust_naverr_skip()
  	/* print output debug statements */
 	if (mbna_verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+		fprintf(stderr,"\ndbg2  MBnavadjust function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:       %d\n",error);
@@ -3484,7 +3579,6 @@ int mbnavadjust_crossing_load()
 	struct mbna_tie *tie;
 	struct mbna_file *file1, *file2;
 	struct mbna_section *section1, *section2;
-	char	path1[STRING_MAX], path2[STRING_MAX];
 
  	/* print input debug statements */
 	if (mbna_verbose >= 2)
@@ -3500,7 +3594,7 @@ int mbnavadjust_crossing_load()
 		}
 		
      	/* load current crossing */
-    	if (mbna_status == MBNA_STATUS_NAVERR
+    	if ((mbna_status == MBNA_STATUS_NAVERR || mbna_status == MBNA_STATUS_MAKECONTOUR)
 		&& project.open == MB_YES
     		&& project.num_crossings > 0
     		&& mbna_current_crossing >= 0)
@@ -3546,10 +3640,6 @@ int mbnavadjust_crossing_load()
 		    mbna_offset_x = 0.0;
 		    mbna_offset_y = 0.0;
 		    }
-		sprintf(path1,"%s/nvs_%4.4d_%4.4d.mb71",
-			project.datadir,mbna_file_id_1,mbna_section_1);
-		sprintf(path2,"%s/nvs_%4.4d_%4.4d.mb71",
-			project.datadir,mbna_file_id_2,mbna_section_2);
 		mbna_lon_min = MIN(section1->lonmin,section2->lonmin);
 		mbna_lon_max = MAX(section1->lonmax,section2->lonmax);
 		mbna_lat_min = MIN(section1->latmin,section2->latmin);
@@ -3562,25 +3652,40 @@ int mbnavadjust_crossing_load()
 				&mbna_mtodeglon,&mbna_mtodeglat);
 			
 		/* load sections */
-		status = mbnavadjust_section_load(path1, (void **) &swathraw1, (void **) &swath1, section1->num_pings);
-		status = mbnavadjust_section_load(path2, (void **) &swathraw2, (void **) &swath2, section2->num_pings);
+		sprintf(message,"Loading section 1 of crossing %d...",mbna_current_crossing);
+		do_message_on(message);
+		status = mbnavadjust_section_load(mbna_file_id_1, mbna_section_1, (void **) &swathraw1, (void **) &swath1, section1->num_pings);
+		sprintf(message,"Loading section 2 of crossing %d...",mbna_current_crossing);
+		do_message_on(message);
+		status = mbnavadjust_section_load(mbna_file_id_2, mbna_section_2, (void **) &swathraw2, (void **) &swath2, section2->num_pings);
 			
 		/* get lon lat positions for soundings */
+		sprintf(message,"Transforming section 1 of crossing %d...",mbna_current_crossing);
+		do_message_on(message);
 		status = mbnavadjust_section_translate(mbna_file_id_1, swathraw1, swath1);
+		sprintf(message,"Transforming section 2 of crossing %d...",mbna_current_crossing);
+		do_message_on(message);
 		status = mbnavadjust_section_translate(mbna_file_id_2, swathraw2, swath2);
 	
 		/* generate contour data */
-		status = mbnavadjust_section_contour(swath1,&mbna_contour1);
-		status = mbnavadjust_section_contour(swath2,&mbna_contour2);
+		sprintf(message,"Contouring section 1 of crossing %d...",mbna_current_crossing);
+		do_message_on(message);
+		status = mbnavadjust_section_contour(mbna_file_id_1,mbna_section_1,swath1,&mbna_contour1);
+		sprintf(message,"Contouring section 2 of crossing %d...",mbna_current_crossing);
+		do_message_on(message);
+		status = mbnavadjust_section_contour(mbna_file_id_2,mbna_section_2,swath2,&mbna_contour2);
 		
 		/* generate misfit grids */
+		sprintf(message,"Getting misfit for crossing %d...",mbna_current_crossing);
+		do_message_on(message);
 		status = mbnavadjust_get_misfit();
 
 		/* set loaded flag */
 		mbna_naverr_load = MB_YES;
 	
 		/* turn off message */
-		do_message_off();
+		if (mbna_status == MBNA_STATUS_NAVERR)
+			do_message_off();
    		}
    		
    	/* set mbna_crossing_select */	
@@ -3603,7 +3708,7 @@ int mbnavadjust_crossing_load()
  	/* print output debug statements */
 	if (mbna_verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+		fprintf(stderr,"\ndbg2  MBnavadjust function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:       %d\n",error);
@@ -3723,7 +3828,7 @@ int mbnavadjust_crossing_unload()
  	/* print output debug statements */
 	if (mbna_verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+		fprintf(stderr,"\ndbg2  MBnavadjust function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:       %d\n",error);
@@ -3748,29 +3853,22 @@ int mbnavadjust_crossing_replot()
 		}
 		
 	/* replot loaded crossing */
-	if (mbna_naverr_load == MB_YES)
-		{
-    		/* reset contouring parameters */
-		swath1->contour_int = project.cont_int;
-		swath1->color_int = project.col_int;
-		swath1->tick_int = project.tick_int;
-		swath2->contour_int = project.cont_int;
-		swath2->color_int = project.col_int;
-		swath2->tick_int = project.tick_int;
-			
+	if (mbna_status == MBNA_STATUS_NAVERR
+		&& mbna_naverr_load == MB_YES)
+		{			
 		/* get lon lat positions for soundings */
 		status = mbnavadjust_section_translate(mbna_file_id_1, swathraw1, swath1);
 		status = mbnavadjust_section_translate(mbna_file_id_2, swathraw2, swath2);
 	
 		/* generate contour data */
-		status = mbnavadjust_section_contour(swath1,&mbna_contour1);
-		status = mbnavadjust_section_contour(swath2,&mbna_contour2);
+		status = mbnavadjust_section_contour(mbna_file_id_1,mbna_section_1,swath1,&mbna_contour1);
+		status = mbnavadjust_section_contour(mbna_file_id_2,mbna_section_2,swath2,&mbna_contour2);
    		}
 			
  	/* print output debug statements */
 	if (mbna_verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+		fprintf(stderr,"\ndbg2  MBnavadjust function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:       %d\n",error);
@@ -3781,7 +3879,7 @@ int mbnavadjust_crossing_replot()
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbnavadjust_section_load(char *path, void **swathraw_ptr, void **swath_ptr, int num_pings)
+int mbnavadjust_section_load(int file_id, int section_id, void **swathraw_ptr, void **swath_ptr, int num_pings)
 {
 	/* local variables */
 	char	*function_name = "mbnavadjust_section_load";
@@ -3790,6 +3888,9 @@ int mbnavadjust_section_load(char *path, void **swathraw_ptr, void **swath_ptr, 
 	struct swathraw *swathraw;
 	struct pingraw *pingraw;
 	struct swath *swath;
+	struct mbna_file *file;
+	struct mbna_section *section;
+	char	path[STRING_MAX];
 	int	iformat;
 	double	tick_len_map, label_hgt_map;
 	int	done;
@@ -3801,19 +3902,22 @@ int mbnavadjust_section_load(char *path, void **swathraw_ptr, void **swath_ptr, 
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       path:         %s\n",path);
+		fprintf(stderr,"dbg2       file_id:      %d\n",file_id);
+		fprintf(stderr,"dbg2       section_id:   %d\n",section_id);
 		fprintf(stderr,"dbg2       swath_ptr:    %d  %d\n",swath_ptr, *swath_ptr);
 		fprintf(stderr,"dbg2       num_pings:    %d\n",num_pings);
 		}
 		
-     	/* load current crossing */
-    	if (mbna_status == MBNA_STATUS_NAVERR
-		&& project.open == MB_YES
-    		&& project.num_crossings > 0
-    		&& mbna_current_crossing >= 0)
+     	/* load specified section */
+    	if (project.open == MB_YES
+    		&& project.num_crossings > 0)
     		{		
-		/* set section format */
+		/* set section format and path */
+		sprintf(path,"%s/nvs_%4.4d_%4.4d.mb71",
+			project.datadir,file_id,section_id);
 		iformat = 71;
+		file = &(project.files[file_id]);
+		section = &(file->sections[section_id]);
 
 		/* initialize section for reading */
 		if ((status = mb_read_init(
@@ -3860,17 +3964,17 @@ int mbnavadjust_section_load(char *path, void **swathraw_ptr, void **swath_ptr, 
 				}
 
 			/* initialize contour controls */
-			tick_len_map = MAX(mbna_lon_max - mbna_lon_min,
-						mbna_lat_max - mbna_lat_min) / 500;
-			label_hgt_map = MAX(mbna_lon_max - mbna_lon_min,
-						mbna_lat_max - mbna_lat_min) / 100;
+			tick_len_map = MAX(section->lonmax - section->lonmin,
+						section->latmax - section->latmin) / 500;
+			label_hgt_map = MAX(section->lonmax - section->lonmin,
+						section->latmax - section->latmin) / 100;
  			status = mb_contour_init(mbna_verbose, (struct swath **)swath_ptr,
 					    num_pings,
 					    beams_bath,
 					    mbna_contour_algorithm,
 					    MB_YES,MB_NO,MB_NO,
 					    project.cont_int, project.col_int,
-					    project.tick_int, 1000000.,
+					    project.tick_int, project.label_int,
 					    tick_len_map, label_hgt_map, 0.0, 
 					    mbna_ncolor, 0, NULL, NULL, NULL,
 					    0.0, 0.0, 0.0, 0.0,
@@ -3921,6 +4025,8 @@ int mbnavadjust_section_load(char *path, void **swathraw_ptr, void **swath_ptr, 
 			    	if (error == MB_ERROR_NO_ERROR)
 				    {
 				    swathraw->npings++;
+				    if (swathraw->npings >= swathraw->npings_max)
+				    	done = MB_YES;
 				    }
 
 				/* extract all nav values */
@@ -3963,6 +4069,8 @@ ping->navlon, ping->navlat, beams_bath, swath->beams_bath);*/
 					    beams_amp);
 				    fprintf(stderr,"dbg2       pixels_ss:      %d\n",
 					    pixels_ss);
+				    fprintf(stderr,"dbg2       done:           %d\n",
+					    done);
 				    fprintf(stderr,"dbg2       error:          %d\n",
 					    error);
 				    fprintf(stderr,"dbg2       status:         %d\n",
@@ -3985,7 +4093,7 @@ ping->navlon, ping->navlat, beams_bath, swath->beams_bath);*/
  	/* print output debug statements */
 	if (mbna_verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+		fprintf(stderr,"\ndbg2  MBnavadjust function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:       %d\n",error);
@@ -4020,8 +4128,7 @@ int mbnavadjust_section_translate(int file_id, void *swathraw_ptr, void *swath_p
 		}
 		
      	/* translate sounding positions for loaded section */
-    	if (mbna_status == MBNA_STATUS_NAVERR
-		&& project.open == MB_YES
+    	if (project.open == MB_YES
     		&& project.num_crossings > 0
     		&& mbna_current_crossing >= 0)
     		{
@@ -4098,7 +4205,7 @@ int mbnavadjust_section_translate(int file_id, void *swathraw_ptr, void *swath_p
  	/* print output debug statements */
 	if (mbna_verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+		fprintf(stderr,"\ndbg2  MBnavadjust function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:       %d\n",error);
@@ -4109,12 +4216,23 @@ int mbnavadjust_section_translate(int file_id, void *swathraw_ptr, void *swath_p
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbnavadjust_section_contour(struct swath *swath,
+int mbnavadjust_section_contour(int fileid, int sectionid, 
+				struct swath *swath,
 				struct mbna_contour_vector *contour)
 {
 	/* local variables */
 	char	*function_name = "mbnavadjust_section_contour";
 	int	status = MB_SUCCESS;
+	FILE	*cfp;
+	char	path[STRING_MAX];
+	int	index;
+	char	buffer[128];
+	int	done;
+	int	versionmajor, versionminor;
+	double	contour_interval, color_interval, tick_interval, label_interval;
+	int	nvector, unused;
+	int	i;
+	
 
  	/* print input debug statements */
 	if (mbna_verbose >= 2)
@@ -4122,6 +4240,8 @@ int mbnavadjust_section_contour(struct swath *swath,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       fileid:       %d\n",fileid);
+		fprintf(stderr,"dbg2       sectionid:    %d\n",sectionid);
 		fprintf(stderr,"dbg2       swath:        %d\n",swath);
 		fprintf(stderr,"dbg2       contour:      %d\n",contour);
 		fprintf(stderr,"dbg2       nvector:      %d\n",contour->nvector);
@@ -4132,16 +4252,118 @@ int mbnavadjust_section_contour(struct swath *swath,
 		{
 		/* set vectors */
 		mbna_contour = contour;
-		mbna_contour->nvector = 0;
+		contour->nvector = 0;
+		done = MB_NO;
 		
-		/* plot data */
-		status = mb_contour(mbna_verbose,swath,&error);
+		/* set contour file path */
+		sprintf(path,"%s/nvs_%4.4d_%4.4d.cntr",
+			project.datadir,fileid,sectionid);
+		
+		/* read contours from file if possible */
+		if ((cfp = fopen(path,"r")) != NULL)
+		    {
+		    /* read contour file header */
+		    index = 4 * sizeof(int) + 4 * sizeof(double);
+		    fread(buffer, 1, index, cfp);
+		    index = 0;
+		    mb_get_binary_int(MB_NO, &buffer[index], &versionmajor); index += sizeof(int);
+		    mb_get_binary_int(MB_NO, &buffer[index], &versionminor); index += sizeof(int);
+		    mb_get_binary_double(MB_NO, &buffer[index], &contour_interval); index += sizeof(double);
+		    mb_get_binary_double(MB_NO, &buffer[index], &color_interval); index += sizeof(double);
+		    mb_get_binary_double(MB_NO, &buffer[index], &tick_interval); index += sizeof(double);
+		    mb_get_binary_double(MB_NO, &buffer[index], &label_interval); index += sizeof(double);
+		    mb_get_binary_int(MB_NO, &buffer[index], &nvector); index += sizeof(int);
+		    mb_get_binary_int(MB_NO, &buffer[index], &unused); index += sizeof(int);
+		    
+		    /* read contours if parameters are the same as at present */
+		    if (contour_interval == project.cont_int
+		    	&& color_interval == project.col_int
+		    	&& tick_interval == project.tick_int)
+			{
+			/* make sure space is allocated for contours */
+			if (contour->nvector_alloc < nvector)
+				{
+	    			contour->vector = (struct mbna_plot_vector *)
+	    						realloc(contour->vector,
+								sizeof(struct mbna_plot_vector) * nvector);
+	    			if (contour->vector != NULL)
+					contour->nvector_alloc = nvector;
+				else
+					contour->nvector_alloc = 0;
+				}
+			
+			/* read contour plot vectors */
+	    		if (contour->vector != NULL)
+				{
+				for (i=0;i<nvector;i++)
+					{
+		    			index = 2 * sizeof(int) + 2 * sizeof(double);
+					fread(buffer, 1, index, cfp);
+					index = 0;
+					mb_get_binary_int(MB_NO, &buffer[index], &contour->vector[i].command); index += sizeof(int);
+					mb_get_binary_int(MB_NO, &buffer[index], &contour->vector[i].color); index += sizeof(int);
+					mb_get_binary_double(MB_NO, &buffer[index], &contour->vector[i].x); index += sizeof(double);
+					mb_get_binary_double(MB_NO, &buffer[index], &contour->vector[i].y); index += sizeof(double);
+					contour->nvector++;
+					}
+				
+				/* set done flag so that contours aren't regenerated */
+				done = MB_YES;
+				}
+			}
+
+		    /* close the contour file */
+		    fclose(cfp);
+		    }
+		
+		/* plot data if needed */
+		if (done == MB_NO)
+			{
+    			/* reset contouring parameters */
+			swath->contour_int = project.cont_int;
+			swath->color_int = project.col_int;
+			swath->tick_int = project.tick_int;
+
+			/* generate contours */
+			status = mb_contour(mbna_verbose,swath,&error);
+
+			/* write out contour file if possible */
+			if ((cfp = fopen(path,"w")) != NULL)
+			    {
+			    /* write contour file header */
+			    index = 0;
+			    mb_put_binary_int(MB_NO, 1, &buffer[index]); index += sizeof(int);
+			    mb_put_binary_int(MB_NO, 0, &buffer[index]); index += sizeof(int);
+			    mb_put_binary_double(MB_NO, project.cont_int, &buffer[index]); index += sizeof(double);
+			    mb_put_binary_double(MB_NO, project.col_int, &buffer[index]); index += sizeof(double);
+			    mb_put_binary_double(MB_NO, project.tick_int, &buffer[index]); index += sizeof(double);
+			    mb_put_binary_double(MB_NO, project.label_int, &buffer[index]); index += sizeof(double);
+			    mb_put_binary_int(MB_NO, contour->nvector, &buffer[index]); index += sizeof(int);
+			    mb_put_binary_int(MB_NO, 0, &buffer[index]); index += sizeof(int);
+			    fwrite(buffer, 1, index, cfp);
+
+			    /* write contour plot vectors */
+			    for (i=0;i<contour->nvector;i++)
+		    		{
+		        	index = 0;
+		        	mb_put_binary_int(MB_NO, contour->vector[i].command, &buffer[index]); index += sizeof(int);
+		        	mb_put_binary_int(MB_NO, contour->vector[i].color, &buffer[index]); index += sizeof(int);
+		        	mb_put_binary_double(MB_NO, contour->vector[i].x, &buffer[index]); index += sizeof(double);
+		        	mb_put_binary_double(MB_NO, contour->vector[i].y, &buffer[index]); index += sizeof(double);
+		        	fwrite(buffer, 1, index, cfp);
+				}
+
+			    /* close the file */
+			    fclose(cfp);
+			    }
+			}
+		
 		}
 			
  	/* print output debug statements */
 	if (mbna_verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+		fprintf(stderr,"\ndbg2  MBnavadjust function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:       %d\n",error);
@@ -4163,7 +4385,7 @@ int mbnavadjust_naverr_snavpoints(int ix, int iy)
 	int	i;
 
  	/* print input debug statements */
-	if (mbna_verbose >= 2)
+	if (mbna_verbose >= 0)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
@@ -4177,6 +4399,7 @@ int mbnavadjust_naverr_snavpoints(int ix, int iy)
     		/* get position in lon and lat */
 	    	x = ix / mbna_plotx_scale +  mbna_plot_lon_min;
 	    	y = (cont_borders[3] - iy) / mbna_ploty_scale +  mbna_plot_lat_min;
+fprintf(stderr,"x:%f y:%f\n",x,y);
 		crossing = &project.crossings[mbna_current_crossing];
 	    	
 	    	/* get closest snav point in swath 1 */
@@ -4218,9 +4441,41 @@ int mbnavadjust_naverr_snavpoints(int ix, int iy)
 		}
 			
  	/* print output debug statements */
+	if (mbna_verbose >= 0)
+		{
+		fprintf(stderr,"\ndbg2  snav point selected in MBnavadjust function <%s>\n",
+			function_name);
+		fprintf(stderr,"dbg2  snav values:\n");
+		section = &project.files[crossing->file_id_1].sections[crossing->section_1];
+		fprintf(stderr,"dbg2       mbna_snav_1:        %d\n",mbna_snav_1);
+		fprintf(stderr,"dbg2       mbna_snav_1_time_d: %f\n",mbna_snav_1_time_d);
+		fprintf(stderr,"dbg2       mbna_snav_1_lon:    %f\n",mbna_snav_1_lon);
+		fprintf(stderr,"dbg2       mbna_snav_1_lat:    %f\n",mbna_snav_1_lat);
+		fprintf(stderr,"dbg2       section->num_snav:  %d\n",section->num_snav);
+		for (i=0;i<section->num_snav;i++)
+			{
+			fprintf(stderr,"dbg2       section1->snav_time_d[%d]: %f\n",i,section->snav_time_d[i]);
+			fprintf(stderr,"dbg2       section1->snav_lon[%d]:    %f\n",i,section->snav_lon[i]);
+			fprintf(stderr,"dbg2       section1->snav_lat[%d]:    %f\n",i,section->snav_lat[i]);
+			}
+		section = &project.files[crossing->file_id_2].sections[crossing->section_2];
+		fprintf(stderr,"dbg2       mbna_snav_2:        %d\n",mbna_snav_2);
+		fprintf(stderr,"dbg2       mbna_snav_2_time_d: %f\n",mbna_snav_2_time_d);
+		fprintf(stderr,"dbg2       mbna_snav_2_lon:    %f\n",mbna_snav_2_lon);
+		fprintf(stderr,"dbg2       mbna_snav_2_lat:    %f\n",mbna_snav_2_lat);
+		fprintf(stderr,"dbg2       section->num_snav:  %d\n",section->num_snav);
+		for (i=0;i<section->num_snav;i++)
+			{
+			fprintf(stderr,"dbg2       section2->snav_time_d[%d]: %f\n",i,section->snav_time_d[i]);
+			fprintf(stderr,"dbg2       section2->snav_lon[%d]:    %f\n",i,section->snav_lon[i]);
+			fprintf(stderr,"dbg2       section2->snav_lat[%d]:    %f\n",i,section->snav_lat[i]);
+			}
+		}
+			
+ 	/* print output debug statements */
 	if (mbna_verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+		fprintf(stderr,"\ndbg2  MBnavadjust function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:       %d\n",error);
@@ -4445,7 +4700,7 @@ ic, jc, gridnm[kc], grid1[kc], grid2[kc], gridm[kc]);*/
  	/* print output debug statements */
 	if (mbna_verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+		fprintf(stderr,"\ndbg2  MBnavadjust function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:       %d\n",error);
@@ -4581,6 +4836,7 @@ mbnavadjust_naverr_plot(int plotmode)
 	static int 	pixel, ipixel;
 	int	snav_1, snav_2;
 	double	dmisfit;
+	int		fill;
 	int	    	i, j, k;
 
  	/* print input debug statements */
@@ -4791,6 +5047,7 @@ mbnavadjust_naverr_plot(int plotmode)
 		}
 		
 	    /* plot tie points */
+	    mbnavadjust_naverr_checkoksettie();
 	    crossing = &project.crossings[mbna_current_crossing];
 	    if (crossing->num_ties > 0)
 		{
@@ -4803,6 +5060,10 @@ mbnavadjust_naverr_plot(int plotmode)
 			boxwid = 13;
 			snav_1 = mbna_snav_1;
 			snav_2 = mbna_snav_2;
+			if (mbna_allow_set_tie == MB_YES)
+				fill = pixel_values[2];
+		    	else
+				fill = pixel_values[6];
 			}
 		    else
 			{
@@ -4810,16 +5071,17 @@ mbnavadjust_naverr_plot(int plotmode)
 			boxwid = 7;
 			snav_1 = tie->snav_1;
 			snav_2 = tie->snav_2;
+		    	fill = pixel_values[6];
 			}
 		    ix = (int)(mbna_plotx_scale * (section1->snav_lon[snav_1] + mbna_offset_x - mbna_plot_lon_min));
 		    iy = (int)(cont_borders[3] - mbna_ploty_scale * (section1->snav_lat[snav_1] + mbna_offset_y - mbna_plot_lat_min));
-		    xg_fillrectangle(pcont_xgid, ix-boxoff, iy-boxoff, boxwid, boxwid, pixel_values[2], XG_SOLIDLINE);
+		    xg_fillrectangle(pcont_xgid, ix-boxoff, iy-boxoff, boxwid, boxwid, fill, XG_SOLIDLINE);
 		    xg_drawrectangle(pcont_xgid, ix-boxoff, iy-boxoff, boxwid, boxwid, pixel_values[1], XG_SOLIDLINE);
 		    ixo = ix;
 		    iyo = iy;
 		    ix = (int)(mbna_plotx_scale * (section2->snav_lon[snav_2] - mbna_plot_lon_min));
 		    iy = (int)(cont_borders[3] - mbna_ploty_scale * (section2->snav_lat[snav_2] - mbna_plot_lat_min));
-		    xg_fillrectangle(pcont_xgid, ix-boxoff, iy-boxoff, boxwid, boxwid, pixel_values[2], XG_SOLIDLINE);
+		    xg_fillrectangle(pcont_xgid, ix-boxoff, iy-boxoff, boxwid, boxwid, fill, XG_SOLIDLINE);
 		    xg_drawrectangle(pcont_xgid, ix-boxoff, iy-boxoff, boxwid, boxwid, pixel_values[1], XG_SOLIDLINE);
 		    xg_drawline(pcont_xgid, ixo, iyo, ix, iy, pixel_values[1], XG_SOLIDLINE);
 		    }
@@ -4861,8 +5123,8 @@ mbnavadjust_naverr_plot(int plotmode)
 					    * (j - gridm_ny / 2 - 0.5))
 				    - iy;
 			ipixel = 7 + log10(gridm[k] - misfit_min)/dmisfit;
-			if (ipixel < 6) ipixel = 6;
-			else if (ipixel > 85) ipixel = 85;
+			if (ipixel < 7) ipixel = 7;
+			else if (ipixel > 86) ipixel = 86;
     /*fprintf(stderr, "%d %d %f %f %f   %f %d\n",
     i, j, misfit_min, misfit_max, dmisfit, gridm[k], ipixel);  */
 			xg_fillrectangle(pcorr_xgid,
@@ -4930,13 +5192,83 @@ mbnavadjust_naverr_plot(int plotmode)
  	/* print output debug statements */
 	if (mbna_verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+		fprintf(stderr,"\ndbg2  MBnavadjust function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:       %d\n",error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:      %d\n",status);
 		}
+}
+/*--------------------------------------------------------------------*/
+
+int
+mbnavadjust_makecontours()
+{
+	/* local variables */
+	char	*function_name = "mbnavadjust_makecontours";
+	int	status = MB_SUCCESS;
+	struct 	mbna_file *file;
+	struct 	mbna_crossing *crossing;
+	int	i, j, k;
+
+ 	/* print input debug statements */
+	if (mbna_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		}
+
+	/* make sure that all sections referenced in crossings have up-to-date contours made */
+    	if (project.open == MB_YES
+    		&& project.num_crossings > 0)
+    		{
+		/* set message dialog on */
+		sprintf(message,"Generating contours...");
+		do_message_on(message);
+		sprintf(message,"Contours generated for all crossings.\n");
+		do_info_add(message,MB_YES);
+		
+		/* loop over all crossings */
+		for (i=0;i<project.num_crossings;i++)
+			{
+			/* set up crossing parameters */
+			mbna_current_crossing = i;
+    			crossing = &project.crossings[mbna_current_crossing];
+    			mbna_file_id_1 = crossing->file_id_1;
+    			mbna_section_1 = crossing->section_1;
+     			mbna_file_id_2 = crossing->file_id_2;
+    			mbna_section_2 = crossing->section_2;
+			mbna_current_tie = -1;
+			
+			/* set message dialog on */
+			sprintf(message,"Loading crossing %d...", mbna_current_crossing);
+			fprintf(stderr,"%s: %s\n",function_name,message);
+			do_message_on(message);
+
+    			/* load crossing */
+  			mbnavadjust_crossing_load();
+			
+    			/* unload crossing */
+  			mbnavadjust_crossing_unload();
+			}
+		
+		/* turn off message dialog */
+		do_message_off();
+		}
+
+ 	/* print output debug statements */
+	if (mbna_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBnavadjust function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:       %d\n",error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:      %d\n",status);
+		}
+
+	return(status);
 }
 /*--------------------------------------------------------------------*/
 
@@ -5549,10 +5881,9 @@ iter,smoothweight,sigma_total / mbna_mtodeglat,sigma_crossing / mbna_mtodeglat,
 			}
 		    }
 
-		if (mbna_verbose >= 0)
+		if (mbna_verbose > 0)
 		for (i=0;i<nc/2;i++)
 		    {
-		    if (mbna_verbose > 1)
 		    fprintf(stderr, "i:%d  offsets: %f %f  crossings: %d %d\n",
 		    		i, x[2*i], x[2*i+1], nx[2*i], nx[2*i+1]);
 		    }
@@ -5723,6 +6054,9 @@ navlon, navlat, heading, speed);*/
 						&error);
 	    
 			    /* update output file in mbprocess parameter file */
+			    status = mb_pr_update_format(mbna_verbose, file->path, 
+					MB_YES, file->format, 
+					&error);
 			    status = mb_pr_update_navadj(mbna_verbose, file->path, 
 					MBP_NAV_ON, opath, 
 					MBP_NAV_LINEAR, 
@@ -5795,7 +6129,7 @@ navlon, navlat, heading, speed);*/
  	/* print output debug statements */
 	if (mbna_verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+		fprintf(stderr,"\ndbg2  MBnavadjust function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:       %d\n",error);

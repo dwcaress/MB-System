@@ -50,13 +50,6 @@ names = case_sensitive
 !(BX) bx_info("integrate_xrunner", "false")
 
 procedure BxGlobalWidgetId;
-identifier BXG_pulldownMenu_savesite;
-identifier BXG_pulldownMenu_saveroute;
-identifier BXG_pulldownMenu_openswath;
-identifier BXG_pulldownMenu_opennav;
-identifier BXG_pulldownMenu_opensite;
-identifier BXG_pulldownMenu_openroute;
-identifier BXG_pulldownMenu_openoverlay;
 identifier BXG_pushButton_file_openprimary;
 identifier BXG_label_about_version;
 identifier BXG_fileSelectionBox;
@@ -97,8 +90,8 @@ object fileSelectionBox : XmFileSelectionDialog widget {
         arguments Style_use;
         XmNautoUnmanage = true;
         XmNpattern = compound_string("*grd");
-        XmNx = 57;
-        XmNy = 319;
+        XmNx = 511;
+        XmNy = 374;
         XmNwidth = 334;
         XmNheight = 505;
     };
@@ -356,8 +349,8 @@ object bulletinBoard_about : XmBulletinBoardDialog widget {
     arguments {
         arguments Style_use;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 26;
-        XmNy = 306;
+        XmNx = 391;
+        XmNy = 459;
         XmNwidth = 463;
         XmNheight = 528;
     };
@@ -432,261 +425,7 @@ object pushButton_file_openprimary : XmPushButton widget {
 !(BX)    };
 };
 
-object pulldownMenu_openoverlay : XmPulldownMenu widget {
-    arguments {
-        arguments Style_use;
-        XmNx = 0;
-        XmNy = 0;
-        XmNwidth = 1;
-        XmNheight = 1;
-    };
-    controls {
-    };
-    callbacks {
-        callbacks Style_useReasons;
-        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pulldownMenu_openoverlay);
-    };
-!(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
-!(BX)    };
-};
-
-object cascadeButton_openoverlay : XmCascadeButton widget {
-    arguments {
-        arguments Style_use;
-        XmNlabelString = compound_string("Open Overlay Grid");
-    };
-    controls {
-         unmanaged XmPulldownMenu pulldownMenu_openoverlay;
-    };
-    callbacks {
-        callbacks Style_useReasons;
-    };
-!(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
-!(BX)    };
-};
-
-object pulldownMenu_openroute : XmPulldownMenu widget {
-    arguments {
-        arguments Style_use;
-        XmNx = 0;
-        XmNy = 0;
-        XmNwidth = 1;
-        XmNheight = 1;
-    };
-    controls {
-    };
-    callbacks {
-        callbacks Style_useReasons;
-        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pulldownMenu_openroute);
-    };
-!(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
-!(BX)    };
-};
-
-object cascadeButton_openroute : XmCascadeButton widget {
-    arguments {
-        arguments Style_use;
-        XmNlabelString = compound_string("Open Route File");
-    };
-    controls {
-         unmanaged XmPulldownMenu pulldownMenu_openroute;
-    };
-    callbacks {
-        callbacks Style_useReasons;
-    };
-!(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
-!(BX)    };
-};
-
-object pulldownMenu_opensite : XmPulldownMenu widget {
-    arguments {
-        XmNx = 0;
-        XmNy = 0;
-        XmNwidth = 1;
-        XmNheight = 1;
-    };
-    controls {
-    };
-    callbacks {
-        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pulldownMenu_opensite);
-    };
-};
-
-object cascadeButton_opensite : XmCascadeButton widget {
-    arguments {
-        arguments Style_use;
-        XmNlabelString = compound_string("Open Site File");
-    };
-    controls {
-         unmanaged XmPulldownMenu pulldownMenu_opensite;
-    };
-    callbacks {
-        callbacks Style_useReasons;
-    };
-!(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
-!(BX)    };
-};
-
-object pulldownMenu_opennav : XmPulldownMenu widget {
-    arguments {
-        arguments Style_use;
-        XmNx = 0;
-        XmNy = 0;
-        XmNwidth = 1;
-        XmNheight = 1;
-    };
-    controls {
-    };
-    callbacks {
-        callbacks Style_useReasons;
-        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pulldownMenu_opennav);
-    };
-!(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
-!(BX)    };
-};
-
-object cascadeButton_opennav : XmCascadeButton widget {
-    arguments {
-        arguments Style_use;
-        XmNlabelString = compound_string("Open Nav Data");
-    };
-    controls {
-         unmanaged XmPulldownMenu pulldownMenu_opennav;
-    };
-    callbacks {
-        callbacks Style_useReasons;
-    };
-!(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
-!(BX)    };
-};
-
-object pulldownMenu_openswath : XmPulldownMenu widget {
-    arguments {
-        arguments Style_use;
-        XmNx = 0;
-        XmNy = 0;
-        XmNwidth = 1;
-        XmNheight = 1;
-    };
-    controls {
-    };
-    callbacks {
-        callbacks Style_useReasons;
-        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pulldownMenu_openswath);
-    };
-!(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
-!(BX)    };
-};
-
-object cascadeButton_openswath : XmCascadeButton widget {
-    arguments {
-        arguments Style_use;
-        XmNlabelString = compound_string("Open Swath Data");
-    };
-    controls {
-         unmanaged XmPulldownMenu pulldownMenu_openswath;
-    };
-    callbacks {
-        callbacks Style_useReasons;
-    };
-!(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
-!(BX)    };
-};
-
 object separator : XmSeparator widget {
-    arguments {
-        arguments Style_use;
-    };
-    controls {
-    };
-    callbacks {
-        callbacks Style_useReasons;
-    };
-!(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
-!(BX)    };
-};
-
-object pulldownMenu_saveroute : XmPulldownMenu widget {
-    arguments {
-        arguments Style_use;
-        XmNx = 0;
-        XmNy = 0;
-        XmNwidth = 1;
-        XmNheight = 1;
-    };
-    controls {
-    };
-    callbacks {
-        callbacks Style_useReasons;
-        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pulldownMenu_saveroute);
-    };
-!(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
-!(BX)    };
-};
-
-object cascadeButton_saveroute : XmCascadeButton widget {
-    arguments {
-        arguments Style_use;
-        XmNlabelString = compound_string("Save Route File");
-    };
-    controls {
-         unmanaged XmPulldownMenu pulldownMenu_saveroute;
-    };
-    callbacks {
-        callbacks Style_useReasons;
-    };
-!(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
-!(BX)    };
-};
-
-object pulldownMenu_savesite : XmPulldownMenu widget {
-    arguments {
-        arguments Style_use;
-        XmNx = 0;
-        XmNy = 0;
-        XmNwidth = 1;
-        XmNheight = 1;
-    };
-    controls {
-    };
-    callbacks {
-        callbacks Style_useReasons;
-        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pulldownMenu_savesite);
-    };
-!(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
-!(BX)    };
-};
-
-object cascadeButton_savesite : XmCascadeButton widget {
-    arguments {
-        arguments Style_use;
-        XmNlabelString = compound_string("Save Site File");
-    };
-    controls {
-         unmanaged XmPulldownMenu pulldownMenu_savesite;
-    };
-    callbacks {
-        callbacks Style_useReasons;
-    };
-!(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
-!(BX)    };
-};
-
-object separator2 : XmSeparator widget {
     arguments {
         arguments Style_use;
     };
@@ -725,19 +464,11 @@ object pulldownMenu_file : XmPulldownMenu widget {
         XmNx = 304;
         XmNy = 114;
         XmNwidth = 160;
-        XmNheight = 224;
+        XmNheight = 54;
     };
     controls {
          managed XmPushButton pushButton_file_openprimary;
-         managed XmCascadeButton cascadeButton_openoverlay;
-         managed XmCascadeButton cascadeButton_openroute;
-         managed XmCascadeButton cascadeButton_opensite;
-         managed XmCascadeButton cascadeButton_opennav;
-         managed XmCascadeButton cascadeButton_openswath;
          managed XmSeparator separator;
-         managed XmCascadeButton cascadeButton_saveroute;
-         managed XmCascadeButton cascadeButton_savesite;
-         managed XmSeparator separator2;
          managed XmPushButton pushButton_quit;
     };
     callbacks {

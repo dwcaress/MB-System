@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit_callbacks.c	3/28/97
- *    $Id: mbedit_callbacks.c,v 5.11 2004-02-25 20:48:58 caress Exp $
+ *    $Id: mbedit_callbacks.c,v 5.12 2004-05-21 23:26:04 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	March 28, 1997  GUI recast
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.11  2004/02/25 20:48:58  caress
+ * Release 5.0.3
+ *
  * Revision 5.10  2003/04/17 20:50:01  caress
  * Release 5.0.beta30
  *
@@ -1581,6 +1584,26 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
 		    key_a_down = 0;
 		    key_d_down = 1;
 		    break;
+	    case '<':
+	    case ',':
+	    case 'X':
+	    case 'x':
+		    status = mbedit_action_flag_view(
+			    mplot_width,mexager,
+			    mx_interval,my_interval,
+			    mplot_size,mshow_detects, mshow_flagged,mshow_time,
+			    &nbuffer,&ngood,&icurrent,&mnplot);
+		    break;
+	    case '>':
+	    case '.':
+	    case 'C':
+	    case 'c':
+		    status = mbedit_action_unflag_view(
+			    mplot_width,mexager,
+			    mx_interval,my_interval,
+			    mplot_size,mshow_detects, mshow_flagged,mshow_time,
+			    &nbuffer,&ngood,&icurrent,&mnplot);
+		    break;
 	    case '!':
 		    status = mbedit_action_zero_ping(
 			    mplot_width,mexager,
@@ -1883,6 +1906,20 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
       } /* end of button pressed events */
     } /* end of inputs from window */
 } /* end do_event function */
+
+/*--------------------------------------------------------------------*/
+
+void
+do_flag_view( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+
+    status = mbedit_action_flag_view(
+	    mplot_width,mexager,
+	    mx_interval,my_interval,
+	    mplot_size,mshow_detects, mshow_flagged,mshow_time,
+	    &nbuffer,&ngood,&icurrent,&mnplot);
+}
 
 /*--------------------------------------------------------------------*/
 

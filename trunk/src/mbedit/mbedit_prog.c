@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	4/8/93
- *    $Id: mbedit_prog.c,v 5.22 2003-07-30 16:39:32 caress Exp $
+ *    $Id: mbedit_prog.c,v 5.23 2004-05-21 23:26:04 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -27,6 +27,10 @@
  * Date:	September 19, 2000 (New version - no buffered i/o)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.22  2003/07/30 16:39:32  caress
+ * Fixed ping nulling (shift-! key macro).
+ * Augmented patience window.
+ *
  * Revision 5.22  2003/07/28 05:19:34  caress
  * Fixed label_message.
  *
@@ -334,7 +338,7 @@ struct mbedit_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbedit_prog.c,v 5.22 2003-07-30 16:39:32 caress Exp $";
+static char rcs_id[] = "$Id: mbedit_prog.c,v 5.23 2004-05-21 23:26:04 caress Exp $";
 static char program_name[] = "MBedit";
 static char help_message[] =  
 "MBedit is an interactive editor used to identify and flag\n\
@@ -3345,6 +3349,122 @@ int mbedit_action_zero_ping(
 	else
 		{
 		status = MB_FAILURE;
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       nbuffer:     %d\n",*nbuffer);
+		fprintf(stderr,"dbg2       ngood:       %d\n",*ngood);
+		fprintf(stderr,"dbg2       icurrent:    %d\n",*icurrent);
+		fprintf(stderr,"dbg2       nplt:        %d\n",*nplt);
+		fprintf(stderr,"dbg2       error:       %d\n",error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:      %d\n",status);
+		}
+
+	/* return */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbedit_action_flag_view(
+		int	plwd, 
+		int	exgr, 
+		int	xntrvl, 
+		int	yntrvl, 
+		int	plt_size, 
+		int	sh_dtcts, 
+		int	sh_flggd, 
+		int	sh_time,
+		int	*nbuffer, 
+		int	*ngood, 
+		int	*icurrent, 
+		int	*nplt)
+{
+	/* local variables */
+	char	*function_name = "mbedit_action_flag_view";
+	int	status = MB_SUCCESS;
+	int	i, j;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       plot_width:  %d\n",plwd);
+		fprintf(stderr,"dbg2       exager:      %d\n",exgr);
+		fprintf(stderr,"dbg2       x_interval:  %d\n",xntrvl);
+		fprintf(stderr,"dbg2       y_interval:  %d\n",yntrvl);
+		fprintf(stderr,"dbg2       plot_size:   %d\n",plt_size);
+		fprintf(stderr,"dbg2       show_detects:%d\n",sh_dtcts);
+		fprintf(stderr,"dbg2       show_flagged:%d\n",sh_flggd);
+		fprintf(stderr,"dbg2       show_time:   %d\n",sh_time);
+		}
+
+	/* reset info */
+	info_set = MB_NO;
+
+	/* do nothing unless file has been opened */
+	if (file_open == MB_YES)
+		{
+		/* flag all unflagged beams */
+		for (i=current_id;i<current_id+nplot;i++)
+			{
+			for (j=0;j<ping[i].beams_bath;j++)
+			    {
+			    if (mb_beam_ok(ping[i].beamflag[j]))
+				    {
+				    /* write edit to save file */
+				    if (esffile_open == MB_YES)
+					mb_ess_save(verbose, &esf,
+						ping[i].time_d, j, 
+						MBP_EDIT_FLAG, &error);
+		    
+				    /* apply edit */
+				    ping[i].beamflag[j] =  MB_FLAG_FLAG + MB_FLAG_MANUAL;
+				    if (verbose >= 1)
+					{
+					fprintf(stderr,"\nping: %d beam:%d depth:%10.3f ",
+						i,j,ping[i].bath[j]);
+					fprintf(stderr," flagged\n");
+					}
+				    beam_save = MB_YES;
+				    iping_save = i;
+				    jbeam_save = j;
+				    }
+			    }
+			}
+
+
+		/* set some return values */
+		*nbuffer = nbuff;
+		*ngood = nbuff;
+		*icurrent = current_id;
+
+		/* clear the screen */
+		status = mbedit_clear_screen();
+	
+		/* set up plotting */
+		if (*ngood > 0)
+			{
+			status = mbedit_plot_all(plwd,exgr,xntrvl,yntrvl,
+					plt_size,sh_dtcts,sh_flggd,sh_time,nplt, MB_NO);
+			}
+		}
+		
+	/* if no file open set failure status */
+	else if (file_open == MB_NO)
+		{
+		status = MB_FAILURE;
+		*nbuffer = nbuff;
+		*nbuffer = nbuff;
+		*ngood = nbuff;
+		current_id = 0;
+		*icurrent = current_id;
 		}
 
 	/* print output debug statements */

@@ -30,13 +30,6 @@ EXTERNAL Widget   dialogShell_open;
 EXTERNAL Widget   fileSelectionBox;
 EXTERNAL Widget   label_about_version;
 EXTERNAL Widget   pushButton_file_openprimary;
-EXTERNAL Widget   pulldownMenu_openoverlay;
-EXTERNAL Widget   pulldownMenu_openroute;
-EXTERNAL Widget   pulldownMenu_opensite;
-EXTERNAL Widget   pulldownMenu_opennav;
-EXTERNAL Widget   pulldownMenu_openswath;
-EXTERNAL Widget   pulldownMenu_saveroute;
-EXTERNAL Widget   pulldownMenu_savesite;
 /*
  * End Global Widget Declarations.
  */

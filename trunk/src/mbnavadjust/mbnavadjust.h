@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavadjust.h	6/24/95
- *    $Id: mbnavadjust.h,v 5.3 2002-03-26 07:43:57 caress Exp $
+ *    $Id: mbnavadjust.h,v 5.4 2004-05-21 23:31:28 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	March 22, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2002/03/26 07:43:57  caress
+ * Release 5.0.beta15
+ *
  * Revision 5.2  2001/10/19 00:55:42  caress
  * Now tries to use relative paths.
  *
@@ -61,8 +64,9 @@
 #define ALLOC_NUM			10
 #define MBNA_SNAV_NUM			11
 #define	MBNA_STATUS_GUI			0
-#define	MBNA_STATUS_NAVERR		1
-#define	MBNA_STATUS_NAVSOLVE		2
+#define	MBNA_STATUS_MAKECONTOUR		1
+#define	MBNA_STATUS_NAVERR		2
+#define	MBNA_STATUS_NAVSOLVE		3
 #define	MBNA_INVERSION_NONE		0
 #define	MBNA_INVERSION_OLD		1
 #define	MBNA_INVERSION_CURRENT		2
@@ -259,6 +263,7 @@ EXTERNAL int	mbna_zoom_y2;
 EXTERNAL double mbna_smoothweight;
 EXTERNAL double mbna_offsetweight;
 EXTERNAL int	mbna_bias_mode;
+EXTERNAL int	mbna_allow_set_tie;
 
 /* plot vector data */
 EXTERNAL struct mbna_contour_vector *mbna_contour;
@@ -301,10 +306,11 @@ int	mbnavadjust_naverr_addtie();
 int	mbnavadjust_naverr_deletetie();
 int	mbnavadjust_naverr_settie();
 int	mbnavadjust_naverr_resettie();
+int	mbnavadjust_naverr_checkoksettie();
 int	mbnavadjust_naverr_skip();
 int	mbnavadjust_crossing_load();
 int	mbnavadjust_crossing_unload();
-int	mbnavadjust_section_load(char *fpath, void **swathraw_ptr, void **swath_ptr, int num_pings);
+int	mbnavadjust_section_load(int file_id, int section_id, void **swathraw_ptr, void **swath_ptr, int num_pings);
 int	mbnavadjust_section_translate(int file_id, void *swathraw_ptr, void *swath_ptr);
 void 	plot(double x,double y,int ipen);
 void 	newpen(int ipen);
