@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbio_status.h	2/1/93
- *    $Id: mb_status.h,v 5.22 2002-05-02 04:02:51 caress Exp $
+ *    $Id: mb_status.h,v 5.23 2002-05-29 23:40:48 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.22  2002/05/02 04:02:51  caress
+ * Release 5.0.beta17
+ *
  * Revision 5.21  2002/04/08 21:10:50  caress
  * Release 5.0.beta17
  *
@@ -177,15 +180,15 @@
 #define MB_STATUS_DEF
 
 /* MB-system version id */
-#define	MB_VERSION	"5.0.beta17"
-#define	MB_BUILD_DATE	"May 1, 2002"
+#define	MB_VERSION	"5.0.beta18"
+#define	MB_BUILD_DATE	"May 29, 2002"
 
 /* MBIO function boolean convention */
 #define	MB_YES	1
 #define	MB_NO	0
 
 /* MBIO data type ("kind") convention */
-#define	MB_DATA_KINDS			19
+#define	MB_DATA_KINDS			31
 #define	MB_DATA_NONE			0
 #define	MB_DATA_DATA			1	/* general survey data */
 #define	MB_DATA_COMMENT			2	/* general comment */
@@ -215,6 +218,10 @@
 #define	MB_DATA_NAVIGATION_ERROR	26	/* GSF */
 #define	MB_DATA_RAW_LINE		27	/* uninterpretable line
 							for ascii formats */
+#define	MB_DATA_NAV1			28	/* ancillary nav system 1 */
+#define	MB_DATA_NAV2			29	/* ancillary nav system 2 */
+#define	MB_DATA_NAV3			30	/* ancillary nav system 3 */
+#define	MB_DATA_TILT			31	/* Simrad */
 
 /* MBIO function status convention */
 #define	MB_SUCCESS			1
@@ -259,6 +266,15 @@
 #define	MB_ERROR_NO_MORE_DATA		-14
 #define	MB_ERROR_DATA_NOT_INSERTED	-15
 
+/* MBIO problem values */
+#define	MB_PROBLEM_MAX			6
+#define	MB_PROBLEM_NO_DATA		1
+#define	MB_PROBLEM_ZERO_NAV		2
+#define	MB_PROBLEM_TOO_FAST		3
+#define	MB_PROBLEM_AVG_TOO_FAST		4
+#define	MB_PROBLEM_TOO_DEEP		5
+#define	MB_PROBLEM_BAD_DATAGRAM		6
+
 /* MBIO function error messages */
 static char *fatal_error_msg[] = 
 	{
@@ -302,6 +318,82 @@ static char *unknown_error_msg[] =
 	{
 	"Unknown error identifier"
 	};
+
+/* MBIO maximum notice value */
+#define	MB_NOTICE_MAX	(MB_DATA_KINDS - MB_ERROR_MIN + MB_PROBLEM_MAX + 1)
+
+/* MBIO function notice messages */
+static char *notice_msg[] = 
+	{
+	"Unknown notice identifier", 
+
+	/* notices for data record types */
+	"MB_DATA_DATA (ID=1): survey data", 
+	"MB_DATA_COMMENT (ID=2): comment", 
+	"MB_DATA_HEADER (ID=3): general header", 
+	"MB_DATA_CALIBRATE (ID=4): Hydrosweep DS calibration ping", 
+	"MB_DATA_MEAN_VELOCITY (ID=5): Hydrosweep DS mean sound speed", 
+	"MB_DATA_VELOCITY_PROFILE (ID=6): SVP", 
+	"MB_DATA_STANDBY (ID=7): Hydrosweep DS standby record", 
+	"MB_DATA_NAV_SOURCE (ID=8): Hydrosweep DS nav source record", 
+	"MB_DATA_PARAMETER (ID=9): Parameter record", 
+	"MB_DATA_START (ID=10): Simrad start datagram", 
+	"MB_DATA_STOP (ID=11): Simrad stop datagram", 
+	"MB_DATA_NAV (ID=12): Navigation record", 
+	"MB_DATA_RUN_PARAMETER (ID=13): Simrad runtime parameter datagram", 
+	"MB_DATA_CLOCK (ID=14): Simrad clock datagram", 
+	"MB_DATA_TIDE (ID=15): TIde record", 
+	"MB_DATA_HEIGHT (ID=16): Simrad height datagram", 
+	"MB_DATA_HEADING (ID=17): Heading record", 
+	"MB_DATA_ATTITUDE (ID=18): Attitude record", 
+	"MB_DATA_SSV (ID=19): Surface sound speed record", 
+	"MB_DATA_ANGLE (ID=20): Beam angle record", 
+	"MB_DATA_EVENT (ID=21): Hydrosweep MD event record", 
+	"MB_DATA_HISTORY (ID=22): GSF history record", 
+	"MB_DATA_SUMMARY (ID=23): GSF summary record", 
+	"MB_DATA_PROCESSING_PARAMETERS (ID=24): GSF processing parameters record", 
+	"MB_DATA_SENSOR_PARAMETERS (ID=25): GSF sensor parameter record", 
+	"MB_DATA_NAVIGATION_ERROR (ID=26): GSF navigation error record", 
+	"MB_DATA_RAW_LINE (ID=27): uninterpretable ASCII line", 
+	"MB_DATA_NAV1 (ID=28): Auxilliary nav system 1", 
+	"MB_DATA_NAV2 (ID=29): Auxilliary nav system 2", 
+	"MB_DATA_NAV3 (ID=30): Auxilliary nav system 3", 
+	"MB_DATA_TILT (ID=31): Mechanical tilt record", 
+	
+	/* notices for nonfatal error messages */
+	"MB_ERROR_TIME_GAP (ID=-1): Time gap in data",
+	"MB_ERROR_OUT_BOUNDS (ID=-2): Data outside specified location bounds",
+	"MB_ERROR_OUT_TIME (ID=-3): Data outside specified time interval",
+	"MB_ERROR_SPEED_TOO_SMALL (ID=-4): Ship speed too small",
+	"MB_ERROR_COMMENT (ID=-5): Comment record",
+	"MB_ERROR_OTHER (ID=-6): Neither a data record nor a comment record",
+	"MB_ERROR_UNINTELLIGIBLE (ID=-7): Unintelligible data record",
+	"MB_ERROR_IGNORE (ID=-8): Ignore this data",
+	"MB_ERROR_NO_DATA_REQUESTED (ID=-9): No data requested for buffer load",
+	"MB_ERROR_BUFFER_FULL (ID=-10): Data buffer is full",
+	"MB_ERROR_NO_DATA_LOADED (ID=-11): No data was loaded into the buffer",
+	"MB_ERROR_BUFFER_EMPTY (ID=-12): Data buffer is empty",
+	"MB_ERROR_NO_DATA_DUMPED (ID=-13): No data was dumped from the buffer",
+	"MB_ERROR_NO_MORE_DATA (ID=-14): No more survey data records in buffer", 
+	"MB_ERROR_DATA_NOT_INSERTED (ID=-15): Data inconsistencies prevented inserting data into storage structure", 
+	
+	/* problem notices */
+	"APPARENT DATA PROBLEM (ID=1): No survey data found",
+	"APPARENT DATA PROBLEM (ID=2): Zero longitude or latitude in survey data",
+	"APPARENT DATA PROBLEM (ID=3): Instantaneous speed exceeds 25 km/hr",
+	"APPARENT DATA PROBLEM (ID=4): Average speed exceeds 25 km/hr",
+	"APPARENT DATA PROBLEM (ID=5): Sounding depth exceeds 11000 m",
+	"APPARENT DATA PROBLEM (ID=6): Unsupported Simrad datagram",
+	};
+static char *unknown_notice_msg[] =
+	{
+	"Unknown notice identifier"
+	};
+	
+/* MBIO unknown time flag:
+	- time_d value used to flag unknown time tag
+	- e.g. for xyz soundings */
+#define MB_TIME_D_UNKNOWN -2209075200.000000
 
 /*
  * The following defines the values used to flag or 

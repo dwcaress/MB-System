@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_time.c	1/21/93
- *    $Id: mb_time.c,v 5.0 2000-12-01 22:48:41 caress Exp $
+ *    $Id: mb_time.c,v 5.1 2002-05-29 23:36:53 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	January 21, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01 22:48:41  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.14  2000/10/11  01:02:30  caress
  * Convert to ANSI C
  *
@@ -109,7 +112,7 @@
 #define SECINMINUTE     60.0
 #define IMININHOUR 60
 int	yday[] = {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334};
-static char rcs_id[]="$Id: mb_time.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
+static char rcs_id[]="$Id: mb_time.c,v 5.1 2002-05-29 23:36:53 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 /* 	function mb_get_time returns the number of seconds from
@@ -226,7 +229,7 @@ int mb_get_date(int verbose, double time_d, int time_i[7])
 		{
 		fprintf(stderr,"\nMBIO function <%s> completed\n",
 			function_name);
-		fprintf(stderr,"dbg2  Return values:");
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       year:    %d\n",time_i[0]);
 		fprintf(stderr,"dbg2       month:   %d\n",time_i[1]);
 		fprintf(stderr,"dbg2       day:     %d\n",time_i[2]);

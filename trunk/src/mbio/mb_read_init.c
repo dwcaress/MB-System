@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_read_init.c	1/25/93
- *    $Id: mb_read_init.c,v 5.9 2002-05-02 03:55:34 caress Exp $
+ *    $Id: mb_read_init.c,v 5.10 2002-05-29 23:36:53 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	January 25, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.9  2002/05/02 03:55:34  caress
+ * Release 5.0.beta17
+ *
  * Revision 5.8  2002/02/22 09:03:43  caress
  * Release 5.0.beta13
  *
@@ -192,7 +195,7 @@ int mb_read_init(int verbose, char *file,
 		int *beams_bath, int *beams_amp, int *pixels_ss, 
 		int *error)
 {
-	static char rcs_id[]="$Id: mb_read_init.c,v 5.9 2002-05-02 03:55:34 caress Exp $";
+	static char rcs_id[]="$Id: mb_read_init.c,v 5.10 2002-05-29 23:36:53 caress Exp $";
 	char	*function_name = "mb_read_init";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
@@ -700,6 +703,10 @@ int mb_read_init(int verbose, char *file,
 		mb_io_ptr->heading_time_d[i] = 0.0;
 		mb_io_ptr->heading_heading[i] = 0.0;
 		}
+		
+	/* initialize notices */
+	for (i=0;i<MB_NOTICE_MAX;i++)
+		mb_io_ptr->notice_list[i] = 0;
 
 	/* set error and status (if you got here you succeeded */
 	*error = MB_ERROR_NO_ERROR;

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbinfo.c	2/1/93
- *    $Id: mbinfo.c,v 5.9 2002-02-22 09:07:08 caress Exp $
+ *    $Id: mbinfo.c,v 5.10 2002-05-29 23:43:09 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -26,6 +26,9 @@
  * Date:	February 1, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.9  2002/02/22 09:07:08  caress
+ * Release 5.0.beta13
+ *
  * Revision 5.8  2001/11/20  20:41:55  caress
  * Reset output of comments to not use ##.
  *
@@ -181,10 +184,10 @@ struct ping
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbinfo.c,v 5.9 2002-02-22 09:07:08 caress Exp $";
+	static char rcs_id[] = "$Id: mbinfo.c,v 5.10 2002-05-29 23:43:09 caress Exp $";
 	static char program_name[] = "MBINFO";
 	static char help_message[] =  "MBINFO reads a swath sonar data file and outputs \nsome basic statistics.  If pings are averaged (pings > 2) \nMBINFO estimates the variance for each of the swath \nbeams by reading a set number of pings (>2) and then finding \nthe variance of the detrended values for each beam. \nThe results are dumped to stdout.";
-	static char usage_message[] = "mbinfo [-Byr/mo/da/hr/mn/sc -C -Eyr/mo/da/hr/mn/sc -Fformat -Ifile -Llonflip -Ppings -Rw/e/s/n -Sspeed -V -H]";
+	static char usage_message[] = "mbinfo [-Byr/mo/da/hr/mn/sc -C -Eyr/mo/da/hr/mn/sc -Fformat -Ifile -Llonflip -Mnx/ny -N -Ppings -Rw/e/s/n -Sspeed -V -H]";
 	extern char *optarg;
 	extern int optkind;
 	int	errflg = 0;
@@ -303,6 +306,12 @@ main (int argc, char **argv)
 	double	timtot = 0.0;
 	double	spdavg = 0.0;
 	int	irec = 0;
+	double	timbegfile = 0.0;
+	double	timendfile = 0.0;
+	double	distotfile = 0.0;
+	double	timtotfile = 0.0;
+	double	spdavgfile = 0.0;
+	int	irecfile = 0;
 	int	ntdbeams = 0;
 	int	ngdbeams = 0;
 	int	nzdbeams = 0;
@@ -357,6 +366,12 @@ main (int argc, char **argv)
 	double	mask_dx = 0.0;
 	double	mask_dy = 0.0;
 	int	*mask = NULL;
+	
+	/* notice variables */
+	int	print_notices = MB_NO;
+	int	notice_list[MB_NOTICE_MAX];
+	int	notice_list_tot[MB_NOTICE_MAX];
+	char	*notice_msg;
 
 	/* output stream for basic stuff (stdout if verbose <= 1,
 		output if verbose > 1) */
@@ -367,21 +382,26 @@ main (int argc, char **argv)
 	char	*fileprint;
 
 	int	read_data;
-	char	line[MB_PATH_MAXLINE];
 	double	speed_apparent, time_d_last;
 	int	val_int;
 	double	val_double;
 	int	ix, iy;
-	int	i, j, k, l, m;
+	int	i, j, k;
 
 	char	*getenv();
 
-	/* initialize some time variables */
+	/* initialize some variables */
 	for (i=0;i<7;i++)
 		{
 		timbeg_i[i] = 0;
 		timend_i[i] = 0;
 		}
+	for (i=0;i<MB_NOTICE_MAX;i++)
+		{
+		notice_list[i] = 0;
+		notice_list_tot[i] = 0;
+		}		
+		
 	/* get current default values */
 	status = mb_defaults(verbose,&format,&pings_get,&lonflip,bounds,
 		btime_i,etime_i,&speedmin,&timegap);
@@ -390,7 +410,7 @@ main (int argc, char **argv)
 	strcpy (read_file, "stdin");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhB:b:CcE:e:F:f:GgI:i:L:l:M:m:OoP:p:R:r:S:s:T:t:Ww")) != -1)
+	while ((c = getopt(argc, argv, "VvHhB:b:CcE:e:F:f:GgI:i:L:l:M:m:NnOoP:p:R:r:S:s:T:t:Ww")) != -1)
 	  switch (c) 
 		{
 		case 'B':
@@ -444,6 +464,11 @@ main (int argc, char **argv)
 		case 'm':
 			sscanf (optarg,"%d/%d", &mask_nx, &mask_ny);
 			coverage_mask = MB_YES;
+			flag++;
+			break;
+		case 'N':
+		case 'n':
+			print_notices = MB_YES;
 			flag++;
 			break;
 		case 'O':
@@ -765,6 +790,10 @@ main (int argc, char **argv)
 		}
 
 	/* initialize data arrays */
+	irecfile = 0;
+	distotfile = 0.0;
+	timtotfile = 0.0;
+	spdavgfile = 0.0;
 	if (pass == 0 && pings_read > 1)
 		{
 		for (i=0;i<beams_bath_alloc;i++)
@@ -839,6 +868,7 @@ main (int argc, char **argv)
 				    || error == MB_ERROR_TIME_GAP))
 				{
 				irec++;
+				irecfile++;
 				nread++;
 				}
 
@@ -963,7 +993,7 @@ main (int argc, char **argv)
 				mb_error(verbose,error,&message);
 				fprintf(stream,"\nNonfatal MBIO Error:\n%s\n",
 					message);
-				fprintf(stream,"Number of good records so far: %d\n",irec);
+				fprintf(stream,"Number of good records so far: %d\n",irecfile);
 				}
 			else if (verbose >= 1 && error > MB_ERROR_NO_ERROR 
 				&& error != MB_ERROR_EOF)
@@ -1057,6 +1087,7 @@ main (int argc, char **argv)
 					lonbeg = navlon;
 					latbeg = navlat;
 					timbeg = time_d;
+					timbegfile = time_d;
 					for (i=0;i<7;i++)
 						timbeg_i[i] = time_i[i];
 					spdbeg = speed;
@@ -1077,6 +1108,7 @@ main (int argc, char **argv)
 				sdpend = sonardepth;
 				altend = altitude;
 				timend = time_d;
+				timendfile = time_d;
 				for (i=0;i<7;i++)
 					timend_i[i] = time_i[i];
 
@@ -1100,7 +1132,10 @@ main (int argc, char **argv)
 				if (good_nav_only == MB_NO ||
 					(good_nav == MB_YES 
 					&& speed_apparent < speed_threshold))
-					distot = distot + distance;
+					{
+					distot+= distance;
+					distotfile += distance;
+					}
 
 				/* get starting mins and maxs */
 				if (beginnav == MB_NO && good_nav == MB_YES) 
@@ -1251,6 +1286,27 @@ main (int argc, char **argv)
 					{
 					mask[ix+iy*mask_nx] = MB_YES;
 					}
+				    }
+				}
+			    }
+
+			/* look for problems */
+			if (pass == 0
+				&& (error == MB_ERROR_NO_ERROR 
+				    || error == MB_ERROR_TIME_GAP))
+			    {
+			    if (navlon == 0.0 || navlat == 0.0)
+				mb_notice_log_problem(verbose, mbio_ptr, MB_PROBLEM_ZERO_NAV);
+			    else if (beginnav == MB_YES
+				&& speed_apparent >= speed_threshold)
+				mb_notice_log_problem(verbose, mbio_ptr, MB_PROBLEM_TOO_FAST);
+			    for (i=0;i<beams_bath;i++)
+				{
+				if (mb_beam_ok(beamflag[i]))
+				    {
+				    if (bath[i] > 11000.0)
+					mb_notice_log_problem(verbose, mbio_ptr, 
+						MB_PROBLEM_TOO_DEEP);
 				    }
 				}
 			    }
@@ -1411,6 +1467,24 @@ main (int argc, char **argv)
 			}
 		}
 
+	/* look for problems */
+	timtotfile = (timendfile - timbegfile)/3600.0;
+	if (timtotfile > 0.0)
+		spdavgfile = distotfile/timtotfile;
+	if (irecfile <= 0)
+	    mb_notice_log_problem(verbose, mbio_ptr, MB_PROBLEM_NO_DATA);
+	else if (timtotfile > 0.0 && spdavgfile >= speed_threshold)
+		mb_notice_log_problem(verbose, mbio_ptr, MB_PROBLEM_AVG_TOO_FAST);
+
+	/* get notices if desired */
+	if (print_notices == MB_YES && pass == 0)
+		{
+		status = mb_notice_get_list(verbose, mbio_ptr, 
+					    notice_list);
+		for (i=0;i<MB_NOTICE_MAX;i++)
+			notice_list_tot[i] += notice_list[i];
+		}
+
 	/* close the swath file */
 	status = mb_close(verbose,&mbio_ptr,&error);
 
@@ -1454,7 +1528,7 @@ main (int argc, char **argv)
 	pass++;
 		
 	/* end loop over reading passes */
-	} 
+	}
 
 	/* calculate final variances */
 	if (pings_read > 2)
@@ -1519,7 +1593,7 @@ main (int argc, char **argv)
 
 	/* now print out the results */
 	timtot = (timend - timbeg)/3600.0;
-	if (distot > 0.0)
+	if (timtot > 0.0)
 		spdavg = distot/timtot;
 	mb_get_jtime(verbose,timbeg_i,timbeg_j);
 	mb_get_jtime(verbose,timend_i,timend_j);
@@ -1638,6 +1712,39 @@ main (int argc, char **argv)
 				i,nssvar[i],ssmean[i],
 				ssvar[i],sqrt(ssvar[i]));
 		fprintf(output,"\n");
+		}
+	if (print_notices == MB_YES)
+		{
+		fprintf(output,"\nData Record Type Notices:\n");
+		for (i=0;i<=MB_DATA_KINDS;i++)
+			{
+			if (notice_list_tot[i] > 0)
+				{
+				mb_notice_message(verbose, i, &notice_msg);
+				fprintf(output, "DN: %d %s\n", 
+					notice_list_tot[i], notice_msg);
+				}
+			}
+		fprintf(output,"\nNonfatal Error Notices:\n");
+		for (i=MB_DATA_KINDS+1;i<=MB_DATA_KINDS-MB_ERROR_MIN;i++)
+			{
+			if (notice_list_tot[i] > 0)
+				{
+				mb_notice_message(verbose, i, &notice_msg);
+				fprintf(output, "EN: %d %s\n", 
+					notice_list_tot[i], notice_msg);
+				}
+			}
+		fprintf(output,"\nProblem Notices:\n");
+		for (i=MB_DATA_KINDS-MB_ERROR_MIN+1;i<MB_NOTICE_MAX;i++)
+			{
+			if (notice_list_tot[i] > 0)
+				{
+				mb_notice_message(verbose, i, &notice_msg);
+				fprintf(output, "PN: %d %s\n", 
+					notice_list_tot[i], notice_msg);
+				}
+			}
 		}
 	if (coverage_mask == MB_YES)
 		{

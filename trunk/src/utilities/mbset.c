@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbset.c	3/31/93
- *    $Id: mbset.c,v 5.15 2002-04-06 02:53:45 caress Exp $
+ *    $Id: mbset.c,v 5.16 2002-05-29 23:43:09 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -30,6 +30,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.15  2002/04/06 02:53:45  caress
+ * Release 5.0.beta16
+ *
  * Revision 5.14  2001/12/18 04:29:57  caress
  * Release 5.0.beta11.
  *
@@ -102,7 +105,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbset.c,v 5.15 2002-04-06 02:53:45 caress Exp $";
+	static char rcs_id[] = "$Id: mbset.c,v 5.16 2002-05-29 23:43:09 caress Exp $";
 	static char program_name[] = "mbset";
 	static char help_message[] = "MBset is a tool for setting values in an mbprocess parameter file.\n\
 MBprocess is a tool for processing swath sonar bathymetry data  \n\
@@ -1176,7 +1179,6 @@ the manual pages for mbprocess and mbset. \n\n";
 	    }
 
 	/* write parameters */
-fprintf(stderr,"Tide file:%s\n", process.mbp_tidefile);
 	status = mb_pr_writepar(verbose, mbp_ifile, 
 			&process, &error);
 			

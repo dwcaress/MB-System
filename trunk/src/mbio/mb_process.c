@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_process.c	9/11/00
- *    $Id: mb_process.c,v 5.19 2002-05-02 03:55:34 caress Exp $
+ *    $Id: mb_process.c,v 5.20 2002-05-29 23:36:53 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	September 11, 2000
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.19  2002/05/02 03:55:34  caress
+ * Release 5.0.beta17
+ *
  * Revision 5.18  2002/04/06 02:43:39  caress
  * Release 5.0.beta16
  *
@@ -107,7 +110,7 @@
 #include "../../include/mb_format.h"
 #include "../../include/mb_process.h"
 
-static char rcs_id[]="$Id: mb_process.c,v 5.19 2002-05-02 03:55:34 caress Exp $";
+static char rcs_id[]="$Id: mb_process.c,v 5.20 2002-05-29 23:36:53 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_pr_readpar(int verbose, char *file, int lookforfiles, 
@@ -1664,6 +1667,307 @@ int mb_pr_default_output(int verbose, struct mb_process_struct *process,
 		fprintf(stderr,"dbg2       mbp_ofile:           %s\n",process->mbp_ofile);
 		fprintf(stderr,"dbg2       mbp_format_specified:%d\n",process->mbp_format_specified);
 		fprintf(stderr,"dbg2       mbp_format:          %d\n",process->mbp_format);
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_pr_get_output(int verbose, int *format, 
+			char *ifile, char *ofile, 
+			int *error)
+{
+	char	*function_name = "mb_pr_get_output";
+	int	status = MB_SUCCESS;
+	char	fileroot[MBP_FILENAMESIZE];
+	int	tformat;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:	%d\n",verbose);
+		fprintf(stderr,"dbg2       format:	%d\n",*format);
+		fprintf(stderr,"dbg2       ifile:	%s\n",ifile);
+		}
+   
+	/* figure out data format and fileroot if possible */
+	status = mb_get_format(verbose, ifile, 
+					fileroot, &tformat, error);
+				
+	/* use fileroot if possible */
+	if (status == MB_SUCCESS)
+	    {
+	    /* set format if needed */
+	    if (*format <= 0)
+		*format = tformat;
+		
+	    /* use .txt suffix if MBARI ROV navigation */
+	    if (*format == MBF_MBARIROV)
+		sprintf(ofile, "%sedited.txt", 
+			fileroot);
+			
+	    /* else use standard .mbXXX suffix */
+	    else
+		sprintf(ofile, "%sp.mb%d", 
+			fileroot, *format);
+	    }
+	    
+	/* else just add suffix */
+	else if (format > 0)
+	    {
+	    sprintf(ofile, "%sp.mb%d", 
+			ifile, *format);
+	    status = MB_SUCCESS;
+	    *error = MB_ERROR_NO_ERROR;
+	    }
+	    
+	/* else failure */
+	else
+	    {
+	    sprintf(ofile, "%s.proc", 
+		    ifile);	    
+	    }
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       format:	%d\n",*format);
+		fprintf(stderr,"dbg2       ofile:	%s\n",ofile);
+		fprintf(stderr,"dbg2       error:	%d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:	%d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_pr_check(int verbose, char *ifile, 
+			int *problem, 	
+			int *error)
+{
+	char	*function_name = "mb_pr_check";
+	int	status = MB_SUCCESS;
+	struct mb_process_struct process;
+	char	ofile[MBP_FILENAMESIZE];
+	int	format;
+	int	unexpected_format = MB_NO;
+	int	unexpected_output = MB_NO;
+	int	missing_ifile = MB_NO;
+	int	missing_ofile = MB_NO;
+	int	missing_navfile = MB_NO;
+	int	missing_navadjfile = MB_NO;
+	int	missing_svpfile = MB_NO;
+	int	missing_editfile = MB_NO;
+	int	missing_tidefile = MB_NO;
+	struct	stat statbuf;
+	
+	/* output stream for basic stuff (stdout if verbose <= 1,
+		output if verbose > 1) */
+	FILE	*output;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:   %d\n",verbose);
+		fprintf(stderr,"dbg2       ifile:     %s\n",ifile);
+		}
+
+	/* set output stream */
+	if (verbose <= 1)
+		output = stdout;
+	else
+		output = stderr;
+		
+	/* set no problem */
+	*problem = MB_NO;
+	unexpected_format = MB_NO;
+	unexpected_output = MB_NO;
+	missing_ifile = MB_NO;
+	missing_ofile = MB_NO;
+	missing_navfile = MB_NO;
+	missing_navadjfile = MB_NO;
+	missing_svpfile = MB_NO;
+	missing_editfile = MB_NO;
+	missing_tidefile = MB_NO;
+	    
+	/* check if input exists */
+	if (stat(ifile, &statbuf) != 0)
+	    {
+	    missing_ifile = MB_YES;
+	    *problem = MB_YES;
+	    }
+	
+	/* only check rest if parameter file exists */
+	sprintf(ofile, "%s.par", ifile);
+	if (stat(ofile, &statbuf) == 0)
+	    {
+
+	    /* get known process parameters */
+	    status = mb_pr_readpar(verbose, ifile, MB_NO, &process, error);
+       
+	    /* get default data format and output file */
+	    format = 0;
+	    status = mb_pr_get_output(verbose, &format, process.mbp_ifile, 
+					    ofile, error);
+    
+	    /* check data format */
+	    if (status == MB_SUCCESS 
+		&& process.mbp_format_specified == MB_YES
+		&& format != 0
+		&& process.mbp_format != format)
+		{
+		unexpected_format = MB_YES;
+		*problem = MB_YES;
+		
+		/* get output file with specified format */
+		status = mb_pr_get_output(verbose, &process.mbp_format, process.mbp_ifile, 
+					    ofile, error);	    
+		}
+		
+	    /* check output file */
+	    if (status == MB_SUCCESS
+		&& process.mbp_ofile_specified == MB_YES
+		&& format != 0)
+		{
+		if (strcmp(process.mbp_ofile, ofile) != 0)
+		    {
+		    unexpected_output = MB_YES;
+		    *problem = MB_YES;
+		    }
+		}
+    
+	    /* check if output file specified but does not exist */
+	    if (process.mbp_ofile_specified == MB_YES
+		&& stat(process.mbp_ofile, &statbuf) != 0)
+		{
+		missing_ofile = MB_YES;
+		*problem = MB_YES;
+		}
+    
+	    /* check if nav file specified but does not exist */
+	    if (process.mbp_nav_mode == MBP_NAV_ON
+		&& stat(process.mbp_navfile, &statbuf) != 0)
+		{
+		missing_navfile = MB_YES;
+		*problem = MB_YES;
+		}
+    
+	    /* check if navadj file specified but does not exist */
+	    if (process.mbp_navadj_mode == MBP_NAV_ON
+		&& stat(process.mbp_navadjfile, &statbuf) != 0)
+		{
+		missing_navadjfile = MB_YES;
+		*problem = MB_YES;
+		}
+    
+	    /* check if svp file specified but does not exist */
+	    if (process.mbp_svp_mode == MBP_SVP_ON
+		&& stat(process.mbp_svpfile, &statbuf) != 0)
+		{
+		missing_svpfile = MB_YES;
+		*problem = MB_YES;
+		}
+    
+	    /* check if edit file specified but does not exist */
+	    if (process.mbp_edit_mode == MBP_EDIT_ON
+		&& stat(process.mbp_editfile, &statbuf) != 0)
+		{
+		missing_editfile = MB_YES;
+		*problem = MB_YES;
+		}
+    
+	    /* check if tide file specified but does not exist */
+	    if (process.mbp_tide_mode == MBP_TIDE_ON
+		&& stat(process.mbp_tidefile, &statbuf) != 0)
+		{
+		missing_tidefile = MB_YES;
+		*problem = MB_YES;
+		}
+	    }
+	    
+	/* output results */
+	if (*problem == MB_YES && verbose > 0)
+	    {
+	    fprintf(output, "\nParameter File Problem: %s\n", process.mbp_ifile);
+	    if (unexpected_format == MB_YES)
+		fprintf(output, "\tUnexpected format: %d instead of %d\n", 
+			process.mbp_format, format);
+	    if (unexpected_output == MB_YES)
+		fprintf(output, "\tUnexpected output: %s instead of %s\n", 
+			process.mbp_ofile, ofile);
+	    if (missing_ifile == MB_YES)
+		fprintf(output, "\tMissing input file: %s does not exist\n", 
+			process.mbp_ifile);
+	    if (missing_ofile == MB_YES)
+		fprintf(output, "\tMissing output file: %s does not exist\n", 
+			process.mbp_ofile);
+	    if (missing_navfile == MB_YES)
+		fprintf(output, "\tMissing nav file: %s does not exist\n", 
+			process.mbp_navfile);
+	    if (missing_navadjfile == MB_YES)
+		fprintf(output, "\tMissing navadj file: %s does not exist\n", 
+			process.mbp_navadjfile);
+	    if (missing_svpfile == MB_YES)
+		fprintf(output, "\tMissing svp file: %s does not exist\n", 
+			process.mbp_svpfile);
+	    if (missing_editfile == MB_YES)
+		fprintf(output, "\tMissing edit file: %s does not exist\n", 
+			process.mbp_editfile);
+	    if (missing_tidefile == MB_YES)
+		fprintf(output, "\tMissing tide file: %s does not exist\n", 
+			process.mbp_tidefile);
+	    }
+	else if (*problem == MB_YES)
+	    {
+	    if (unexpected_format == MB_YES)
+		fprintf(output, "%s : Unexpected format : %d\n", 
+			process.mbp_ifile, process.mbp_format);
+	    if (unexpected_output == MB_YES)
+		fprintf(output, "%s : Unexpected output : %s\n", 
+			process.mbp_ifile, process.mbp_ofile);
+	    if (missing_ifile == MB_YES)
+		fprintf(output, "%s : Missing input file : %s\n", 
+			process.mbp_ifile, process.mbp_ifile);
+	    if (missing_ofile == MB_YES)
+		fprintf(output, "%s : Missing output file : %s\n", 
+			process.mbp_ifile, process.mbp_ofile);
+	    if (missing_navfile == MB_YES)
+		fprintf(output, "%s : Missing nav file : %s\n", 
+			process.mbp_ifile, process.mbp_navfile);
+	    if (missing_navadjfile == MB_YES)
+		fprintf(output, "%s : Missing navadj file : %s\n", 
+			process.mbp_ifile, process.mbp_navadjfile);
+	    if (missing_svpfile == MB_YES)
+		fprintf(output, "%s : Missing svp file : %s\n", 
+			process.mbp_ifile, process.mbp_svpfile);
+	    if (missing_editfile == MB_YES)
+		fprintf(output, "%s : Missing edit file : %s\n", 
+			process.mbp_ifile, process.mbp_editfile);
+	    if (missing_tidefile == MB_YES)
+		fprintf(output, "%s : Missing tide file : %s\n", 
+			process.mbp_ifile, process.mbp_tidefile);
+	    }
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       problem:    %d\n",problem);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:     %d\n",status);

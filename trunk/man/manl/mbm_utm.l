@@ -1,28 +1,22 @@
-.TH mbm_project l "13 May 2002" "MB-System 5.0" "MB-System 5.0"
+.TH mbm_project l "29 May 2002" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
-\fBmbm_project\fP - Create an executable shellscript which will generate
-a TIFF image of gridded data in a GMT grd file.
+\fBmbm_utm\fP - Macro to perform forward and inverse UTM projections
+of ASCII data triples.
 
 .SH VERSION
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbm_project\fP \fB-JZ\fP\fIprojection\fP 
-[\fB-I\fP\fIfile\fP \fB-H -Q\fP]
+mbm_utm \fB-I\fP\fIinfile\fP \fB-O\fP\fIoutfile\fP 
+\fB-Z\fP\fIzone\fP \fB-E\fP\fIellipsoid\fP [\fB-F -Q -H -V\fP]
 
 .SH DESCRIPTION
-\fBmbm_project\fP is a macro to generate a shellscript 
-which, when executed, will 
-generate a geographically located TIFF image of gridded 
-data. The primary purpose of this macro is to allow the simple, 
-semi-automated production of a nice looking image with a few 
-command line arguments. This image can be loaded into the 
-ArcInfo and ArcView GIS packages as geographically located 
-coverages. Several styles of images can be generated, including 
-color fill and shaded relief maps. The available options mirror 
-a subset of the options in \fBmbm_grdplot\fP, allowing users to easily 
-generate equivalent Postscript plots and TIFF images of gridded 
-data. 
+\fBmbm_utm\fP is a macro to perform forward and inverse UTM projections
+of ASCII data triples using the GMT program mapproject. 
+Forward projections translate from geographic data 
+(lon, lat, value) to UTM eastings and northings (x, y, value). 
+Inverse projections translate from (x, y, z) to (lon, lat, z).
+Both the input and output files must be specified.
 
 .SH AUTHORSHIP
 David W. Caress (caress@mbari.org)
@@ -39,38 +33,38 @@ Dale N. Chayes (dale@ldeo.columbia.edu)
 This "help" flag cause the program to print out a description
 of its operation and then exit immediately.
 .TP
-.B \fB-I\fP\fIfile\fP
+.B \fB-E\fP\fIellipsoid\fP
+Sets the ellipsoid to be used. The default
+is to use the WGS-84 ellipsoid, in accordance with
+the NAD-83 datum. If ellipsoid = "Clarke-1866",
+then the Clarke-1866 ellipsoid will be used in
+accordance with the NAD-27 datum. Note that this
+macro cannot be used to accomplish a true datum
+shift between NAD-27 and NAD-83 because the 1986
+transition to NAD-83 also involved additional
+adjustments to positions. 
+.TP
+.B \fB-F\fP
+Causes \fBmbm_utm\fP to use or generate eastings and northings
+in feet rather than meters. 
+.TP
+.B \fB-I\fP\fIinfile\fP
 Sets the name of the data file to be processed.
 The first two columns of the ASCII input
 data stream must be either longitude and
 latitude values (for geographic to projected
 transformation) or easting and northing values
 (for projected to geographic transformation). 
-Any additional data is not affected by the transformation.
+Any additional columns of data are passed unaltered to the output.
 .TP
-\fB\-JZ\fP\fIprojection\fP
-.br
-The supported projections include defined ellipsoids and
-origins, allowing the calculation of locations
-in projected meters or feet; these units are called
-eastings and northings. The \fIprojection\fP parameter
-includes a six character projection id followed by a
-one character units flag. The currently supported
-special projections are:
-.br
- 	Projection Name		Projection ID
- 	---------------		-------------
- 	UTM Zone +01			UTM+01
- 	UTM Zone +02			UTM+02
-	............			......
- 	UTM Zone +18			UTM+18
-.br
-The units flag controls the units of the eastings
-and northings. Values
-of 'M' or 'm' indicate eastings and northings calculated
-in feet from the projection origin. Values
-of 'F' or 'f' indicate eastings and northings calculated
-in meters.
+.B \fB-O\fP\fIoutfile\fP
+Sets the name of the output data file to be generated.
+The first two columns of the ASCII output
+data stream will be either easting and northing 
+values (for geographic to projected
+transformation) or longitude and latitude values
+(for projected to geographic transformation). 
+Any additional columns of data are passed unaltered to the output.
 .TP
 .B \fB-Q\fP
 This option causes the transformation to be from
@@ -78,6 +72,9 @@ projected coordinates (eastings and northings) to
 geographic coordinates (longitude and latitude).
 The default is to transform from geographic to
 projected coordinates.
+.TP
+.B \fB-Z\fP\fIzone\fP
+Sets the UTM zone.
 
 .SH EXAMPLES
 Suppose we have a file containing longitude, latitude,
@@ -85,17 +82,17 @@ and depth triples called llz.dat. To transform the
 coordinates to eastings and northings in the 
 UTM Zone 10 projection, use:
 .br
- 	mbm_project -Illz.dat -JZUTM+10 > enz.dat
+ 	mbm_utm -Illz.dat -Z10 -Oenz.dat
 .br
 The file enz.dat will contain eastings and northings
 instead of longitude and latitude values. To transform
 back to geographic coordinates, use:
 .br
- 	mbm_project -Ienz.dat -JZUTM+10 -Q > llz2.dat
+ 	mbm_utm -Ienz.dat -Z10 -Q -Ollz2.dat
 .br
 
 .SH SEE ALSO
 \fBmbsystem\fP(l), \fBproject\fP
 
 .SH BUGS
-More projections need to be supported. 
+Too new to have bugs. 

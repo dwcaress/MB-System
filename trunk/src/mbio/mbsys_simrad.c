@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad.c	3.00	8/5/94
- *	$Id: mbsys_simrad.c,v 5.5 2001-08-25 00:54:13 caress Exp $
+ *	$Id: mbsys_simrad.c,v 5.6 2002-05-29 23:40:48 caress Exp $
  *
  *    Copyright (c) 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -31,6 +31,9 @@
  * Date:	August 5, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2001/08/25 00:54:13  caress
+ * Adding beamwidth values to extract functions.
+ *
  * Revision 5.4  2001/07/20  00:32:54  caress
  * Release 5.0.beta03
  *
@@ -137,11 +140,12 @@
 #define MBSYS_SIMRAD_C
 #include "../../include/mbsys_simrad.h"
 
+static char res_id[]="$Id: mbsys_simrad.c,v 5.6 2002-05-29 23:40:48 caress Exp $";
+
 /*--------------------------------------------------------------------*/
 int mbsys_simrad_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_simrad.c,v 5.5 2001-08-25 00:54:13 caress Exp $";
 	char	*function_name = "mbsys_simrad_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -273,7 +277,6 @@ int mbsys_simrad_survey_alloc(int verbose,
 			void *mbio_ptr, void *store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_simrad.c,v 5.5 2001-08-25 00:54:13 caress Exp $";
 	char	*function_name = "mbsys_simrad_survey_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -618,21 +621,11 @@ int mbsys_simrad_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			ss_spacing = 0.15;
 		for (i=0;i<*nbath;i++)
 			{
-			if (ping->bath[i] < 0)
-			    {
-			    beamflag[i] = MB_FLAG_MANUAL + MB_FLAG_FLAG;
-			    bath[i] = -depthscale*ping->bath[i];
-			    }
-			else if (ping->bath[i] > 0)
-			    {
+			if (ping->bath[i] > 0)
 			    beamflag[i] = MB_FLAG_NONE;
-			    bath[i] = depthscale*ping->bath[i];
-			    }
 			else
-			    {
 			    beamflag[i] = MB_FLAG_NULL;
-			    bath[i] = depthscale*ping->bath[i];
-			    }
+			bath[i] = depthscale*ping->bath[i];
 			bathacrosstrack[i] 
 				= dacrscale*ping->bath_acrosstrack[i];
 			bathalongtrack[i] 
@@ -1081,14 +1074,13 @@ int mbsys_simrad_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			{
 			for (i=0;i<nbath;i++)
 				{
-				if (mb_beam_check_flag(beamflag[i]))
-				    ping->bath[i] = -bath[i]/depthscale;
-				else
-				    ping->bath[i] = bath[i]/depthscale;
+				ping->bath[i] = bath[i]/depthscale;
 				ping->bath_acrosstrack[i]
 					= bathacrosstrack[i]/dacrscale;
 				ping->bath_alongtrack[i] 
 					= bathalongtrack[i]/daloscale;
+				if (beamflag[i] != MB_FLAG_NONE)
+				    ping->bath[i] = 0;
 				}
 			for (i=0;i<namp;i++)
 				{

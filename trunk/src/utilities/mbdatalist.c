@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbdatalist.c	10/10/2001
- *    $Id: mbdatalist.c,v 5.5 2002-04-08 21:01:04 caress Exp $
+ *    $Id: mbdatalist.c,v 5.6 2002-05-29 23:43:09 caress Exp $
  *
  *    Copyright (c) 2001, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	October 10, 2001
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2002/04/08 21:01:04  caress
+ * Release 5.0.beta17
+ *
  * Revision 5.4  2002/04/06 02:53:45  caress
  * Release 5.0.beta16
  *
@@ -55,10 +58,10 @@
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbdatalist.c,v 5.5 2002-04-08 21:01:04 caress Exp $";
+	static char rcs_id[] = "$Id: mbdatalist.c,v 5.6 2002-05-29 23:43:09 caress Exp $";
 	static char program_name[] = "mbdatalist";
 	static char help_message[] =  "mbdatalist parses recursive datalist files and outputs the\ncomplete list of data files and formats. \nThe results are dumped to stdout.";
-	static char usage_message[] = "mbdatalist [-Fformat -Ifile -N -O -P -Rw/e/s/n -U -V -H]";
+	static char usage_message[] = "mbdatalist [-Fformat -Ifile -N -O -P -Q -Rw/e/s/n -U -V -H]";
 	extern char *optarg;
 	extern int optkind;
 	int	errflg = 0;
@@ -88,9 +91,12 @@ main (int argc, char **argv)
 	double	timegap;
 	char	file[MB_PATH_MAXLINE];
 	char	pwd[MB_PATH_MAXLINE];
-	char	command[MB_PATH_MAXLINE];
+	int	nfile = 0;
 	int	make_inf = MB_NO;
 	int	force_update = MB_NO;
+	int	problem_report = MB_NO;
+	int	problem = MB_NO;
+	int	nproblem = 0;
 	
 	/* output stream for basic stuff (stdout if verbose <= 1,
 		output if verbose > 1) */
@@ -104,7 +110,7 @@ main (int argc, char **argv)
 	strcpy (read_file, "datalist.mb-1");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhF:f:I:i:NnOoPpR:r:Uu")) != -1)
+	while ((c = getopt(argc, argv, "VvHhF:f:I:i:NnOoPpQqR:r:Uu")) != -1)
 	  switch (c) 
 		{
 		case 'F':
@@ -135,6 +141,11 @@ main (int argc, char **argv)
 		case 'P':
 		case 'p':
 			look_processed = MB_DATALIST_LOOK_YES;
+			flag++;
+			break;
+		case 'Q':
+		case 'q':
+			problem_report = MB_YES;
 			flag++;
 			break;
 		case 'R':
@@ -194,6 +205,7 @@ main (int argc, char **argv)
 		fprintf(output,"dbg2       look_processed: %d\n",look_processed);
 		fprintf(output,"dbg2       make_inf:       %d\n",make_inf);
 		fprintf(output,"dbg2       force_update:   %d\n",force_update);
+		fprintf(output,"dbg2       problem_report: %d\n",problem_report);
 		fprintf(output,"dbg2       pings:          %d\n",pings);
 		fprintf(output,"dbg2       lonflip:        %d\n",lonflip);
 		fprintf(output,"dbg2       bounds[0]:      %f\n",bounds[0]);
@@ -233,10 +245,18 @@ main (int argc, char **argv)
 	/* if not a datalist just output filename format and weight */
 	if (format > 0)
 		{
+		nfile++;
+		
 		if (make_inf == MB_YES)
 		    {
 		    status = mb_make_info(verbose, force_update, 
-						file, format, &error);
+						read_file, format, &error);
+		    }
+		else if (problem_report == MB_YES)
+		    {
+		    status = mb_pr_check(verbose, read_file, &problem, &error);
+		    if (problem == MB_YES)
+			nproblem++;
 		    }
 		else
 		    {
@@ -276,12 +296,19 @@ main (int argc, char **argv)
 					    file,&format,&file_weight,&error)
 			    == MB_SUCCESS)
 			{
+			nfile++;
 			getcwd(pwd, MB_PATH_MAXLINE);
 			mb_get_relative_path(verbose, file, pwd, &error);
 			if (make_inf == MB_YES)
 			    {
 			    status = mb_make_info(verbose, force_update,
 							file, format, &error);
+			    }
+			else if (problem_report == MB_YES)
+			    {
+			    status = mb_pr_check(verbose, file, &problem, &error);
+			    if (problem == MB_YES)
+				nproblem++;
 			    }
 			else
 			    {
@@ -309,6 +336,14 @@ main (int argc, char **argv)
 
 	/* set program status */
 	status = MB_SUCCESS;
+	
+	/* output counts */
+	if (verbose > 0)
+	    {
+	    fprintf(output, "\nTotal swath files: %d\n", nfile);
+	    if (problem_report == MB_YES)
+		fprintf(output, "Total problems identified: %d\n", nproblem);
+	    }
 
 	/* check memory */
 	if (verbose >= 4)

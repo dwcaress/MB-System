@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad2.c	3.00	10/9/98
- *	$Id: mbsys_simrad2.c,v 5.11 2001-10-19 21:48:16 caress Exp $
+ *	$Id: mbsys_simrad2.c,v 5.12 2002-05-29 23:40:48 caress Exp $
  *
  *    Copyright (c) 1998, 2001 by
  *    David W. Caress (caress@mbari.org)
@@ -31,6 +31,10 @@
  * Date:	October 9, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.11  2001/10/19 21:48:16  caress
+ * Fixed acrosstrack scaling.
+ * .,
+ *
  * Revision 5.10  2001/09/12  19:27:57  caress
  * Fixed depth scaling problem.
  *
@@ -96,11 +100,12 @@
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_simrad2.h"
 
+static char res_id[]="$Id: mbsys_simrad2.c,v 5.12 2002-05-29 23:40:48 caress Exp $";
+
 /*--------------------------------------------------------------------*/
 int mbsys_simrad2_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_simrad2.c,v 5.11 2001-10-19 21:48:16 caress Exp $";
 	char	*function_name = "mbsys_simrad2_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -395,6 +400,9 @@ int mbsys_simrad2_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	/* pointer to ssv data structure */
 	store->ssv = NULL;
 
+	/* pointer to tilt data structure */
+	store->tilt = NULL;
+
 	/* pointer to survey data structure */
 	store->ping = NULL;
 
@@ -419,7 +427,6 @@ int mbsys_simrad2_survey_alloc(int verbose,
 			void *mbio_ptr, void *store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_simrad2.c,v 5.11 2001-10-19 21:48:16 caress Exp $";
 	char	*function_name = "mbsys_simrad2_survey_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -680,7 +687,6 @@ int mbsys_simrad2_attitude_alloc(int verbose,
 			void *mbio_ptr, void *store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_simrad2.c,v 5.11 2001-10-19 21:48:16 caress Exp $";
 	char	*function_name = "mbsys_simrad2_attitude_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -768,7 +774,6 @@ int mbsys_simrad2_heading_alloc(int verbose,
 			void *mbio_ptr, void *store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_simrad2.c,v 5.11 2001-10-19 21:48:16 caress Exp $";
 	char	*function_name = "mbsys_simrad2_heading_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -848,7 +853,6 @@ int mbsys_simrad2_ssv_alloc(int verbose,
 			void *mbio_ptr, void *store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_simrad2.c,v 5.11 2001-10-19 21:48:16 caress Exp $";
 	char	*function_name = "mbsys_simrad2_ssv_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -898,12 +902,89 @@ int mbsys_simrad2_ssv_alloc(int verbose,
 				/* system 1 or system 2 serial number */
 		ssv->ssv_ndata = 0;	
 				/* number of ssv data */
-		for (i=0;i<MBSYS_SIMRAD2_MAXSSV;i++)
+		for (i=0;i<MBSYS_SIMRAD2_MAXTILT;i++)
 		    {
 		    ssv->ssv_time[i] = 0;
 				/* time since record start (msec) */
 		    ssv->ssv_ssv[i] = 0;
 				/* ssv (0.1 m/s) */
+		    }
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbsys_simrad2_tilt_alloc(int verbose, 
+			void *mbio_ptr, void *store_ptr, 
+			int *error)
+{
+	char	*function_name = "mbsys_simrad2_tilt_alloc";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	struct mbsys_simrad2_struct *store;
+	struct mbsys_simrad2_tilt_struct *tilt;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* get data structure pointer */
+	store = (struct mbsys_simrad2_struct *) store_ptr;
+
+	/* allocate memory for data structure if needed */
+	if (store->tilt == NULL)
+		status = mb_malloc(verbose,
+			sizeof(struct mbsys_simrad2_tilt_struct),
+			&(store->tilt),error);
+			
+	if (status == MB_SUCCESS)
+		{
+
+		/* get data structure pointer */
+		tilt = (struct mbsys_simrad2_tilt_struct *) store->tilt;
+
+		/* initialize everything */
+		tilt->tlt_date = 0;	
+				/* date = year*10000 + month*100 + day
+				    Feb 26, 1995 = 19950226 */
+		tilt->tlt_msec = 0;	
+				/* time since midnight in msec
+				    08:12:51.234 = 29570234 */
+		tilt->tlt_count = 0;	
+				/* sequential counter or input identifier */
+		tilt->tlt_serial = 0;	
+				/* system 1 or system 2 serial number */
+		tilt->tlt_ndata = 0;	
+				/* number of tilt data */
+		for (i=0;i<MBSYS_SIMRAD2_MAXTILT;i++)
+		    {
+		    tilt->tlt_time[i] = 0;
+				/* time since record start (msec) */
+		    tilt->tlt_tilt[i] = 0;
+				/* tilt + forward (0.01 deg) */
 		    }
 		}
 
@@ -959,6 +1040,10 @@ int mbsys_simrad2_deall(int verbose, void *mbio_ptr, void **store_ptr,
 	/* deallocate memory for ssv data structure */
 	if (store->ssv != NULL)
 		status = mb_free(verbose,&(store->ssv),error);
+
+	/* deallocate memory for tilt data structure */
+	if (store->tilt != NULL)
+		status = mb_free(verbose,&(store->tilt),error);
 
 	/* deallocate memory for data structure */
 	status = mb_free(verbose,store_ptr,error);
@@ -1252,6 +1337,7 @@ int mbsys_simrad2_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		depthscale = 0.01 * ping->png_depth_res;
 		depthoffset = 0.01 * ping->png_xducer_depth
 				+ 655.36 * ping->png_offset_multiplier;
+
 		dacrscale  = 0.01 * ping->png_distance_res;
 		daloscale  = 0.01 * ping->png_distance_res;
 		reflscale  = 0.5;
@@ -1348,7 +1434,10 @@ int mbsys_simrad2_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		}
 
 	/* extract data from structure */
-	else if (*kind == MB_DATA_NAV)
+	else if (*kind == MB_DATA_NAV
+		|| *kind == MB_DATA_NAV1
+		|| *kind == MB_DATA_NAV2
+		|| *kind == MB_DATA_NAV3)
 		{
 		/* get time */
 		time_i[0] = store->pos_date / 10000;
@@ -1803,7 +1892,10 @@ int mbsys_simrad2_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		}
 
 	/* insert data in nav structure */
-	else if (store->kind == MB_DATA_NAV)
+	else if (store->kind == MB_DATA_NAV
+		|| store->kind == MB_DATA_NAV1
+		|| store->kind == MB_DATA_NAV2
+		|| store->kind == MB_DATA_NAV3)
 		{
 
 		/* get time */
@@ -1828,6 +1920,26 @@ int mbsys_simrad2_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		store->pos_speed = (int) rint(speed / 0.036);
 
 		/* get roll pitch and heave */
+		
+		/* set "active" flag if needed */
+		if (store->kind == MB_DATA_NAV)
+		    {
+		    store->pos_system = store->pos_system | 128;
+		    }
+		
+		/* set secondary nav flag if needed */
+		else if (store->kind == MB_DATA_NAV1)
+		    {
+		    store->pos_system = store->pos_system | 1;
+		    }
+		else if (store->kind == MB_DATA_NAV2)
+		    {
+		    store->pos_system = store->pos_system | 2;
+		    }
+		else if (store->kind == MB_DATA_NAV3)
+		    {
+		    store->pos_system = store->pos_system | 3;
+		    }
 		}
 
 	/* insert comment in structure */
@@ -2304,7 +2416,10 @@ int mbsys_simrad2_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		}
 
 	/* extract data from nav structure */
-	else if (*kind == MB_DATA_NAV)
+	else if (*kind == MB_DATA_NAV
+		|| *kind == MB_DATA_NAV1
+		|| *kind == MB_DATA_NAV2
+		|| *kind == MB_DATA_NAV3)
 		{
                 /* get survey data structure */
 		if (store->ping != NULL)
@@ -2571,7 +2686,10 @@ int mbsys_simrad2_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		}
 
 	/* insert data in nav structure */
-	else if (store->kind == MB_DATA_NAV)
+	else if (store->kind == MB_DATA_NAV
+		|| store->kind == MB_DATA_NAV1
+		|| store->kind == MB_DATA_NAV2
+		|| store->kind == MB_DATA_NAV3)
 		{
 
 		/* get time */
@@ -2596,6 +2714,26 @@ int mbsys_simrad2_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		store->pos_speed = (int) rint(speed / 0.036);
 
 		/* get roll pitch and heave */
+		
+		/* set "active" flag if needed */
+		if (store->kind == MB_DATA_NAV)
+		    {
+		    store->pos_system = store->pos_system | 128;
+		    }
+		
+		/* set secondary nav flag if needed */
+		else if (store->kind == MB_DATA_NAV1)
+		    {
+		    store->pos_system = store->pos_system | 1;
+		    }
+		else if (store->kind == MB_DATA_NAV2)
+		    {
+		    store->pos_system = store->pos_system | 2;
+		    }
+		else if (store->kind == MB_DATA_NAV3)
+		    {
+		    store->pos_system = store->pos_system | 3;
+		    }
 		}
 
 	/* print output debug statements */
@@ -2779,6 +2917,9 @@ int mbsys_simrad2_copy(int verbose, void *mbio_ptr,
 	struct mbsys_simrad2_ssv_struct *ssv_store;
 	struct mbsys_simrad2_ssv_struct *ssv_copy;
 	char	*ssv_save;
+	struct mbsys_simrad2_tilt_struct *tilt_store;
+	struct mbsys_simrad2_tilt_struct *tilt_copy;
+	char	*tilt_save;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -2865,6 +3006,22 @@ int mbsys_simrad2_copy(int verbose, void *mbio_ptr,
 		/* save pointer value */
 		ssv_save = (char *)copy->ssv;
 		}
+	
+	/* check if tilt data needs to be copied */
+	if (store->tilt != NULL)
+		{
+		/* make sure a tilt data structure exists to
+			be copied into */
+		if (copy->tilt == NULL)
+			{
+			status = mbsys_simrad2_tilt_alloc(
+					verbose,mbio_ptr,
+					copy_ptr,error);
+			}
+			
+		/* save pointer value */
+		tilt_save = (char *)copy->tilt;
+		}
 
 	/* copy the main structure */
 	*copy = *store;
@@ -2907,6 +3064,15 @@ int mbsys_simrad2_copy(int verbose, void *mbio_ptr,
 		ssv_store = (struct mbsys_simrad2_ssv_struct *) store->ssv;
 		ssv_copy = (struct mbsys_simrad2_ssv_struct *) copy->ssv;
 		*ssv_copy = *ssv_store;
+		}
+	
+	/* if needed copy the tilt data structure */
+	if (store->tilt != NULL && status == MB_SUCCESS)
+		{
+		copy->tilt = (struct mbsys_simrad2_tilt_struct *) tilt_save;
+		tilt_store = (struct mbsys_simrad2_tilt_struct *) store->tilt;
+		tilt_copy = (struct mbsys_simrad2_tilt_struct *) copy->tilt;
+		*tilt_copy = *tilt_store;
 		}
 
 	/* print output debug statements */
@@ -2952,7 +3118,7 @@ int mbsys_simrad2_makess(int verbose, void *mbio_ptr, void *store_ptr,
 	double	angle, depth, xtrack, ltrack, xtrackss;
 	double	range, beam_foot, beamwidth, sint;
 	int	first, last, k1, k2;
-	int	i, j, k, jj, kk, l, m;
+	int	i, j, k, jj, kk;
 
 	/* compare function for qsort */
 	int mb_double_compare();

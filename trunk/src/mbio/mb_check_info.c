@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_check_info.c	1/25/93
- *    $Id: mb_check_info.c,v 5.6 2002-05-02 03:55:34 caress Exp $
+ *    $Id: mb_check_info.c,v 5.7 2002-05-29 23:36:53 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	September 3, 1996
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2002/05/02 03:55:34  caress
+ * Release 5.0.beta17
+ *
  * Revision 5.5  2002/04/08 20:59:38  caress
  * Release 5.0.beta17
  *
@@ -81,7 +84,7 @@ int mb_check_info(int verbose, char *file, int lonflip,
 		    double bounds[4], int *file_in_bounds,
 		    int *error)
 {
-	static char rcs_id[]="$Id: mb_check_info.c,v 5.6 2002-05-02 03:55:34 caress Exp $";
+	static char rcs_id[]="$Id: mb_check_info.c,v 5.7 2002-05-29 23:36:53 caress Exp $";
 	char	*function_name = "mb_check_info";
 	int	status;
 	char	file_inf[128];
@@ -166,7 +169,7 @@ int mb_check_info(int verbose, char *file, int lonflip,
 			    sscanf(line, "CM dimensions: %d %d", &mask_nx, &mask_ny);
 			    status = mb_malloc(verbose,mask_nx*mask_ny*sizeof(int),
 							&mask,error);
-			    for (j=0;j<mask_ny;j++)
+			    for (j=mask_ny-1;j>=0;j--)
 				{
 				if ((startptr = fgets(line, 128, fp)) != NULL)
 				    {
@@ -393,8 +396,12 @@ int mb_make_info(int verbose, int force,
 	    && format != MBF_HSURICEN
 	    && format != MBF_HSURIVAX
 	    && format != MBF_SB2000SS
+	    && format != MBF_SB2000SB
 	    && format != MBF_MSTIFFSS
 	    && format != MBF_MBLDEOIH
+	    && format != MBF_MBNETCDF
+	    && format != MBF_ASCIIXYZ
+	    && format != MBF_ASCIIYXZ
 	    && format != MBF_MGD77DAT
 	    && format != MBF_MBARIROV
 	    && format != MBF_MBPRONAV)
@@ -410,8 +417,11 @@ int mb_make_info(int verbose, int force,
 	if ((force
 		|| (datmodtime > 0 
 	    		&& datmodtime > fnvmodtime))
+	    && format != MBF_ASCIIXYZ
+	    && format != MBF_ASCIIYXZ
 	    && format != MBF_MGD77DAT
 	    && format != MBF_MBARIROV
+	    && format != MBF_NVNETCDF
 	    && format != MBF_MBPRONAV)
 		{
 		if (verbose >= 1)

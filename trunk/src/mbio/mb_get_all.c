@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_get_all.c	1/26/93
- *    $Id: mb_get_all.c,v 5.3 2001-07-20 00:31:11 caress Exp $
+ *    $Id: mb_get_all.c,v 5.4 2002-05-29 23:36:53 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	January 26, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2001/07/20 00:31:11  caress
+ * Release 5.0.beta03
+ *
  * Revision 5.2  2001/06/08  21:44:01  caress
  * Version 5.0.beta01
  *
@@ -108,6 +111,8 @@
 #include "../../include/mb_io.h"
 #include "../../include/mb_define.h"
 
+static char rcs_id[]="$Id: mb_get_all.c,v 5.4 2002-05-29 23:36:53 caress Exp $";
+
 /*--------------------------------------------------------------------*/
 int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind,
 		int time_i[7], double *time_d,
@@ -120,7 +125,6 @@ int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
 		char *comment, int *error)
 {
-  static char rcs_id[]="$Id: mb_get_all.c,v 5.3 2001-07-20 00:31:11 caress Exp $";
 	char	*function_name = "mb_get_all";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -422,6 +426,7 @@ int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind,
 			*error = MB_ERROR_OUT_BOUNDS;
 			}
 		else if (mb_io_ptr->etime_d > mb_io_ptr->btime_d
+			&& *time_d > MB_TIME_D_UNKNOWN 
 			&& (*time_d > mb_io_ptr->etime_d 
 				|| *time_d < mb_io_ptr->btime_d))
 			{
@@ -429,6 +434,7 @@ int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind,
 			*error = MB_ERROR_OUT_TIME;
 			}
 		else if (mb_io_ptr->etime_d < mb_io_ptr->btime_d
+			&& *time_d > MB_TIME_D_UNKNOWN 
 			&& (*time_d > mb_io_ptr->etime_d 
 				&& *time_d < mb_io_ptr->btime_d))
 			{
@@ -467,6 +473,10 @@ int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind,
 			*error = MB_ERROR_SPEED_TOO_SMALL;
 			}
 		}
+			
+	/* log errors */
+	if (*error < MB_ERROR_NO_ERROR)
+		mb_notice_log_error(verbose, mbio_ptr, *error);
 
 	/* print debug statements */
 	if (verbose >= 4)

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad2.h	10/9/98
- *	$Id: mbsys_simrad2.h,v 5.7 2001-07-20 00:32:54 caress Exp $
+ *	$Id: mbsys_simrad2.h,v 5.8 2002-05-29 23:41:49 caress Exp $
  *
  *    Copyright (c) 1998, 2001 by
  *    David W. Caress (caress@mbari.org)
@@ -32,6 +32,9 @@
  * Date:	October 9, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2001/07/20 00:32:54  caress
+ * Release 5.0.beta03
+ *
  * Revision 5.6  2001/06/08  21:44:01  caress
  * Version 5.0.beta01
  *
@@ -122,10 +125,10 @@
  *        *0x0244: Bathymetry                             48-4092 bytes
  *         0x0245: Single beam echosounder depth          32 bytes
  *         0x0246: Raw range and beam angle               24-2056 bytes
- *         0x0247: Surface sound speed                    variable size
+ *        *0x0247: Surface sound speed                    variable size
  *        *0x0248: Heading Output                         422 bytes
  *        *0x0249: Parameter - Start                      variable size
- *         0x024A: Mechanical transducer tilt             variable size
+ *        *0x024A: Mechanical transducer tilt             variable size
  *         0x024B: Central beams echogram                 variable size
  *        *0x0250: Position                               100-134 bytes
  *        *0x0252: Runtime Parameter                      52 bytes
@@ -288,6 +291,7 @@
 #define	MBSYS_SIMRAD2_MAXATTITUDE	100
 #define	MBSYS_SIMRAD2_MAXHEADING	100
 #define	MBSYS_SIMRAD2_MAXSSV		100
+#define	MBSYS_SIMRAD2_MAXTILT		100
 #define	MBSYS_SIMRAD2_COMMENT_LENGTH	256
 #define	MBSYS_SIMRAD2_BUFFER_SIZE	2048
 
@@ -301,6 +305,7 @@
 #define	EM2_ON			0x0232
 #define	EM2_RUN_PARAMETER	0x0252
 #define	EM2_CLOCK		0x0243
+#define	EM2_TILT		0x024A
 #define	EM2_TIDE		0x0254
 #define	EM2_HEIGHT		0x0268
 #define	EM2_HEADING		0x0248
@@ -325,6 +330,8 @@
 #define	EM2_HEADING_SLICE_SIZE		4
 #define	EM2_SSV_HEADER_SIZE		14
 #define	EM2_SSV_SLICE_SIZE		4
+#define	EM2_TILT_HEADER_SIZE		14
+#define	EM2_TILT_SLICE_SIZE		4
 #define	EM2_ATTITUDE_HEADER_SIZE	14
 #define	EM2_ATTITUDE_SLICE_SIZE		12
 #define	EM2_POS_HEADER_SIZE		30
@@ -583,6 +590,22 @@ struct mbsys_simrad2_ssv_struct
 	int	ssv_ssv[MBSYS_SIMRAD2_MAXSSV];
 				/* ssv (0.1 m/s) */
 	};
+
+/* internal data structure for tilt data */
+struct mbsys_simrad2_tilt_struct
+	{
+	int	tlt_date;	/* date = year*10000 + month*100 + day
+				    Feb 26, 1995 = 19950226 */
+	int	tlt_msec;	/* time since midnight in msec
+				    08:12:51.234 = 29570234 */
+	int	tlt_count;	/* sequential counter or input identifier */
+	int	tlt_serial;	/* system 1 or system 2 serial number */
+	int	tlt_ndata;	/* number of tilt data */
+	int	tlt_time[MBSYS_SIMRAD2_MAXTILT];
+				/* time since record start (msec) */
+	int	tlt_tilt[MBSYS_SIMRAD2_MAXTILT];
+				/* tilt + forward (0.01 degree) */
+	};
 	
 /* internal data structure */
 struct mbsys_simrad2_struct
@@ -835,6 +858,9 @@ struct mbsys_simrad2_struct
 	/* pointer to ssv data structure */
 	struct mbsys_simrad2_ssv_struct *ssv;
 
+	/* pointer to tilt data structure */
+	struct mbsys_simrad2_tilt_struct *tilt;
+
 	/* pointer to survey data structure */
 	struct mbsys_simrad2_ping_struct *ping;
 	};
@@ -853,6 +879,9 @@ int mbsys_simrad2_heading_alloc(int verbose,
 			void *mbio_ptr, void *store_ptr, 
 			int *error);
 int mbsys_simrad2_ssv_alloc(int verbose, 
+			void *mbio_ptr, void *store_ptr, 
+			int *error);
+int mbsys_simrad2_tlt_alloc(int verbose, 
 			void *mbio_ptr, void *store_ptr, 
 			int *error);
 int mbsys_simrad2_deall(int verbose, void *mbio_ptr, void **store_ptr, 

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_read.c	2/20/93
- *    $Id: mb_read.c,v 5.3 2002-05-02 03:55:34 caress Exp $
+ *    $Id: mb_read.c,v 5.4 2002-05-29 23:36:53 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	February 20, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2002/05/02 03:55:34  caress
+ * Release 5.0.beta17
+ *
  * Revision 5.2  2001/07/20 00:31:11  caress
  * Release 5.0.beta03
  *
@@ -131,6 +134,8 @@
 #include "../../include/mb_io.h"
 #include "../../include/mb_define.h"
 
+static char rcs_id[]="$Id: mb_read.c,v 5.4 2002-05-29 23:36:53 caress Exp $";
+
 /*--------------------------------------------------------------------*/
 int mb_read(int verbose, void *mbio_ptr,
 		int *kind, int *pings, 
@@ -145,7 +150,6 @@ int mb_read(int verbose, void *mbio_ptr,
 		char *comment, int *error)
 {
 
-  static char rcs_id[]="$Id: mb_read.c,v 5.3 2002-05-02 03:55:34 caress Exp $";
 	char	*function_name = "mb_read";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -230,6 +234,10 @@ int mb_read(int verbose, void *mbio_ptr,
 			status = mb_read_ping(verbose,mbio_ptr,store_ptr,
 						&mb_io_ptr->new_kind,error);
 			
+			/* log errors */
+			if (*error < MB_ERROR_NO_ERROR)
+				mb_notice_log_error(verbose, mbio_ptr, *error);
+			
 			/* if survey data read into storage array */
 			if (status == MB_SUCCESS
 				&& (mb_io_ptr->new_kind == MB_DATA_DATA
@@ -281,12 +289,14 @@ int mb_read(int verbose, void *mbio_ptr,
 					status = MB_FAILURE;
 					*error = MB_ERROR_COMMENT;
 					mb_io_ptr->new_error = *error;
+					mb_notice_log_error(verbose, mbio_ptr, *error);
 					}
 				else
 					{
 					status = MB_FAILURE;
 					*error = MB_ERROR_OTHER;
 					mb_io_ptr->new_error = *error;
+					mb_notice_log_error(verbose, mbio_ptr, *error);
 					}
 				}
 			}
@@ -346,20 +356,25 @@ int mb_read(int verbose, void *mbio_ptr,
 				{
 				status = MB_FAILURE;
 				*error = MB_ERROR_OUT_BOUNDS;
+				mb_notice_log_error(verbose, mbio_ptr, *error);
 				}
 			else if (mb_io_ptr->etime_d > mb_io_ptr->btime_d
+				&& mb_io_ptr->new_time_d > MB_TIME_D_UNKNOWN 
 				&& (mb_io_ptr->new_time_d > mb_io_ptr->etime_d 
 					|| mb_io_ptr->new_time_d < mb_io_ptr->btime_d))
 				{
 				status = MB_FAILURE;
 				*error = MB_ERROR_OUT_TIME;
+				mb_notice_log_error(verbose, mbio_ptr, *error);
 				}
 			else if (mb_io_ptr->etime_d < mb_io_ptr->btime_d
+				&& mb_io_ptr->new_time_d > MB_TIME_D_UNKNOWN 
 				&& (mb_io_ptr->new_time_d > mb_io_ptr->etime_d 
 					&& mb_io_ptr->new_time_d < mb_io_ptr->btime_d))
 				{
 				status = MB_FAILURE;
 				*error = MB_ERROR_OUT_TIME;
+				mb_notice_log_error(verbose, mbio_ptr, *error);
 				}
 			}
 
@@ -373,6 +388,7 @@ int mb_read(int verbose, void *mbio_ptr,
 				{
 				status = MB_FAILURE;
 				*error = MB_ERROR_TIME_GAP;
+				mb_notice_log_error(verbose, mbio_ptr, *error);
 				}
 			}
 
@@ -739,6 +755,7 @@ int mb_read(int verbose, void *mbio_ptr,
 		else
 			{
 			*error = MB_ERROR_NO_PINGS_BINNED;
+			mb_notice_log_error(verbose, mbio_ptr, *error);
 			}
 		}
 
@@ -804,6 +821,7 @@ int mb_read(int verbose, void *mbio_ptr,
 			{
 			status = MB_FAILURE;
 			*error = MB_ERROR_SPEED_TOO_SMALL;
+			mb_notice_log_error(verbose, mbio_ptr, *error);
 			}
 		}
 
