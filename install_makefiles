@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	install_makefiles	5/20/94
-#    $Id: install_makefiles,v 5.9 2003-12-05 07:54:13 caress Exp $
+#    $Id: install_makefiles,v 5.10 2003-12-06 00:15:06 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 1996, 1997, 2001, 2002, 2003 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -41,10 +41,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   May 20, 1994
 #
 # Version:
-#   $Id: install_makefiles,v 5.9 2003-12-05 07:54:13 caress Exp $
+#   $Id: install_makefiles,v 5.10 2003-12-06 00:15:06 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.9  2003/12/05 07:54:13  caress
+#   The script now recognizes mbview when OpenGL libraries are specified.
+#
 #   Revision 5.8  2003/12/02 07:49:03  caress
 #   Now creates bin include lib directories if needed.
 #
@@ -455,17 +458,17 @@ print "Projections Data Location: $PROJECTIONS\n";
 #      mbsystem/bin mbsystem/lib mbsystem/include 
 if (! -d "bin")
 	{
-	mkdir("bin");
+	`mkdir bin`;
 	print "Created directory: $MBSYSTEM_HOME/bin\n";
 	}
 if (! -d "lib")
 	{
-	mkdir("lib");
+	`mkdir lib`;
 	print "Created directory: $MBSYSTEM_HOME/lib\n";
 	}
 if (! -d "include")
 	{
-	mkdir("include");
+	`mkdir include`;
 	print "Created directory: $MBSYSTEM_HOME/include\n";
 	}
 
@@ -593,7 +596,10 @@ while (@files)
 		elsif (index($_,"cd mbnavadjust",0) >= 0 && $GRAPHICAL ne "YES")
 			{
 			}
-		elsif (index($_,"cd mbview",0) >= 0 && ($GRAPHICAL ne "YES" || !$OPENGLLIBS))
+		elsif (index($_,"cd mbview",0) >= 0 
+					&& ($GRAPHICAL ne "YES" 
+						|| !$OPENGLLIBS
+						|| ! -e "src/mbview"))
 			{
 			}
 		else
