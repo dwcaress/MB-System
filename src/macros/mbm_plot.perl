@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_plot.perl	6/18/93
-#    $Id: mbm_plot.perl,v 5.10 2002-09-07 03:13:59 caress Exp $
+#    $Id: mbm_plot.perl,v 5.11 2002-09-19 00:35:04 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 2000 by 
 #    D. W. Caress (caress@mbari.org)
@@ -72,10 +72,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   June 17, 1993
 #
 # Version:
-#   $Id: mbm_plot.perl,v 5.10 2002-09-07 03:13:59 caress Exp $
+#   $Id: mbm_plot.perl,v 5.11 2002-09-19 00:35:04 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.10  2002/09/07 03:13:59  caress
+#   Fixed typo.
+#
 #   Revision 5.9  2002/07/25 19:05:02  caress
 #   Release 5.0.beta21
 #
@@ -961,6 +964,14 @@ if (!$lonflip)
 	}
 
 # get limits of file using mbinfo
+if ($bounds)
+	{
+	$bounds_info = "-R$bounds";
+	}
+else
+	{
+	$bounds_info = " ";
+	}
 if ($format >= 0)
 	{
 	push(@files_data, $file_data);
@@ -971,7 +982,7 @@ else
 	# we used to use this perl function
 	# 	MBparsedatalist($file_data);
 	# but now we use the program mbdatalist
-	@mbdatalist = `mbdatalist -F-1 -I$file_data`;
+	@mbdatalist = `mbdatalist -F-1 -I$file_data $bounds_info`;
 	while (@mbdatalist)
 		{
 		$line = shift @mbdatalist;
@@ -983,10 +994,6 @@ else
 			push(@formats, $format_mb);
 			}
 		}
-	}
-if ($bounds)
-	{
-	$bounds_info = "-R$bounds";
 	}
 $cnt = 0;
 foreach $file_mb (@files_data)
@@ -1063,10 +1070,17 @@ foreach $file_mb (@files_data)
 			    $use_inf = 1;
 			    }
 			elsif ($nrec_f > 0 &&
+			    $xmax_f < $xmin || $xmin_f > $xmax
+			    || $ymin_f <= $ymin || $ymin_f > $ymax)
+			    {
+			    $use_inf = 1;
+			    }
+			elsif ($nrec_f > 0 &&
 			    ($xmin_f < $xmin 
 				|| $xmax_f > $xmax
 				|| $ymin_f < $ymin 
-				|| $ymax_f > $ymax))
+				|| $ymax_f > $ymax)
+			    && $color_mode)
 			    {
 			    $use_inf = 0;
 			    }
@@ -1092,7 +1106,6 @@ foreach $file_mb (@files_data)
 			{
 			$time_info = $time_info . "-E$mb_etime";
 			}
-print"mbinfo -F$formats[$cnt] -I$file_mb $time_info $bounds_info -G\n";
 		@mbinfo = `mbinfo -F$formats[$cnt] -I$file_mb $time_info $bounds_info -G`;		}
 
 	# now parse the mbinfo input 

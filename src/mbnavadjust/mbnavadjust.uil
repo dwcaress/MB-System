@@ -38,7 +38,6 @@ names = case_sensitive
 !(BX) bx_info("c_dirpath", "")
 !(BX) bx_info("include_path", ".", false)
 !(BX) bx_info("xrunner_command", "$(M_ROOT)/arch/X11.5/Xm1.2/mic_xm.o", false)
-!(BX) bx_info("purify_command", "purify", false)
 !(BX) bx_info("system_directory", "/usr/bx50")
 !(BX) bx_info("builder_version", "Builder Xcessory Version 5.0.3")
 !(BX) bx_info("build_lang", "C")
@@ -490,8 +489,8 @@ object bulletinBoard_biases : XmBulletinBoardDialog widget {
         XmNdialogTitle = compound_string("Heading & Roll Bias");
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 176;
-        XmNy = 32;
+        XmNx = 365;
+        XmNy = 114;
         XmNwidth = 284;
         XmNheight = 446;
     };
@@ -882,8 +881,8 @@ object bulletinBoard_controls : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 220;
-        XmNy = 168;
+        XmNx = 8;
+        XmNy = 32;
         XmNwidth = 573;
         XmNheight = 337;
     };
@@ -1478,8 +1477,8 @@ object bulletinBoard_naverr : XmBulletinBoardDialog widget {
         XmNautoUnmanage = false;
         XmNnoResize = true;
         XmNresizePolicy = XmRESIZE_NONE;
-        XmNx = 97;
-        XmNy = 234;
+        XmNx = 84;
+        XmNy = 40;
         XmNwidth = 845;
         XmNheight = 595;
     };
@@ -1606,8 +1605,8 @@ object bulletinBoard_fileselection : XmBulletinBoardDialog widget {
     arguments {
         XmNdialogStyle = XmDIALOG_FULL_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_NONE;
-        XmNx = 172;
-        XmNy = 315;
+        XmNx = 99;
+        XmNy = 219;
         XmNwidth = 611;
         XmNheight = 530;
     };
@@ -1723,8 +1722,8 @@ object bulletinBoard_error : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNdialogStyle = XmDIALOG_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 351;
-        XmNy = 257;
+        XmNx = 8;
+        XmNy = 32;
         XmNwidth = 311;
         XmNheight = 160;
     };
@@ -1803,8 +1802,8 @@ object bulletinBoard_message : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNdialogStyle = XmDIALOG_FULL_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_ANY;
-        XmNx = 236;
-        XmNy = 294;
+        XmNx = 8;
+        XmNy = 32;
         XmNwidth = 542;
         XmNheight = 86;
     };
@@ -2012,12 +2011,11 @@ object label_about_create : XmLabel widget {
     arguments {
         XmNfontList = font_table(
 		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1'));
-        XmNlabelString = compound_string("Created by:", separate=true) &
- compound_string("David W. Caress    and    Dale N. Chayes");
+        XmNlabelString = compound_string("Created by:");
         XmNx = 10;
         XmNy = 240;
         XmNwidth = 650;
-        XmNheight = 50;
+        XmNheight = 20;
     };
     controls {
     };
@@ -2055,6 +2053,23 @@ object separator1 : XmSeparator widget {
     };
 };
 
+object label_about_create1 : XmLabel widget {
+    arguments {
+        XmNfontList = font_table(
+		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1'));
+        XmNlabelString = compound_string("David W. Caress    and    Dale N" &
+ ". Chayes");
+        XmNx = 10;
+        XmNy = 260;
+        XmNwidth = 650;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+    };
+};
+
 object bulletinBoard_about : XmBulletinBoardDialog widget {
     arguments {
         XmNresizePolicy = XmRESIZE_GROW;
@@ -2064,6 +2079,7 @@ object bulletinBoard_about : XmBulletinBoardDialog widget {
         XmNheight = 470;
     };
     controls {
+         managed XmLabel label_about_create1;
          managed XmSeparator separator1;
          managed XmPushButton pushButton_about_dismiss;
          managed XmLabel label_about_create;

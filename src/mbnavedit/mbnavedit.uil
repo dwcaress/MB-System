@@ -38,7 +38,6 @@ names = case_sensitive
 !(BX) bx_info("c_dirpath", "")
 !(BX) bx_info("include_path", ".", false)
 !(BX) bx_info("xrunner_command", "$(M_ROOT)/arch/X11.5/Xm1.2/mic_xm.o", false)
-!(BX) bx_info("purify_command", "purify", false)
 !(BX) bx_info("system_directory", "/usr/bx50")
 !(BX) bx_info("builder_version", "Builder Xcessory Version 5.0.3")
 !(BX) bx_info("build_lang", "C")
@@ -271,8 +270,8 @@ object bulletinBoard_timeinterpolation : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 303;
-        XmNy = 381;
+        XmNx = 366;
+        XmNy = 297;
         XmNwidth = 307;
         XmNheight = 149;
     };
@@ -375,8 +374,8 @@ object bulletinBoard_useprevious : XmBulletinBoardDialog widget {
  "?");
         XmNautoUnmanage = true;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 234;
-        XmNy = 356;
+        XmNx = 268;
+        XmNy = 309;
         XmNwidth = 503;
         XmNheight = 126;
     };
@@ -747,8 +746,8 @@ object bulletinBoard_modeling : XmBulletinBoardDialog widget {
         XmNdialogTitle = compound_string("Navigation Modeling");
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 252;
-        XmNy = 362;
+        XmNx = 272;
+        XmNy = 146;
         XmNwidth = 496;
         XmNheight = 451;
     };
@@ -988,8 +987,8 @@ object bulletinBoard_timestepping : XmBulletinBoardDialog widget {
         XmNdialogTitle = compound_string("Time Stepping");
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 254;
-        XmNy = 270;
+        XmNx = 274;
+        XmNy = 274;
         XmNwidth = 491;
         XmNheight = 195;
     };
@@ -1203,8 +1202,8 @@ object textField_output_file : XmTextField widget {
 object bulletinBoard_fileselection : XmBulletinBoardDialog widget {
     arguments {
         XmNresizePolicy = XmRESIZE_NONE;
-        XmNx = 199;
-        XmNy = 308;
+        XmNx = 213;
+        XmNy = 69;
         XmNwidth = 614;
         XmNheight = 606;
     };
@@ -1324,8 +1323,8 @@ object bulletinBoard_error : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNdialogStyle = XmDIALOG_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 272;
-        XmNy = 353;
+        XmNx = 364;
+        XmNy = 291;
         XmNwidth = 311;
         XmNheight = 161;
     };
@@ -1405,8 +1404,8 @@ object bulletinBoard_message : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNdialogStyle = XmDIALOG_FULL_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_NONE;
-        XmNx = 316;
-        XmNy = 344;
+        XmNx = 330;
+        XmNy = 329;
         XmNwidth = 379;
         XmNheight = 86;
     };
@@ -1544,8 +1543,7 @@ object label_about_mbpub : XmLabel widget {
     arguments {
         XmNfontList = font_table(
 		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1'));
-        XmNlabelString = compound_string("An Open Source Software Package" &
- "");
+        XmNlabelString = compound_string("An Open Source Software Package");
         XmNx = 10;
         XmNy = 160;
         XmNwidth = 450;
@@ -1613,12 +1611,11 @@ object label_about_create : XmLabel widget {
     arguments {
         XmNfontList = font_table(
 		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1'));
-        XmNlabelString = compound_string("Created by:", separate=true) &
- compound_string("David W. Caress    and    Dale N. Chayes");
+        XmNlabelString = compound_string("Created by:");
         XmNx = 10;
         XmNy = 240;
         XmNwidth = 450;
-        XmNheight = 50;
+        XmNheight = 20;
     };
     controls {
     };
@@ -1656,15 +1653,33 @@ object separator1 : XmSeparator widget {
     };
 };
 
+object label_about_create1 : XmLabel widget {
+    arguments {
+        XmNfontList = font_table(
+		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1'));
+        XmNlabelString = compound_string("David W. Caress    and    Dale N" &
+ ". Chayes");
+        XmNx = 10;
+        XmNy = 260;
+        XmNwidth = 450;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+    };
+};
+
 object bulletinBoard_about : XmBulletinBoardDialog widget {
     arguments {
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 259;
-        XmNy = 316;
+        XmNx = 279;
+        XmNy = 139;
         XmNwidth = 481;
-        XmNheight = 463;
+        XmNheight = 466;
     };
     controls {
+         managed XmLabel label_about_create1;
          managed XmSeparator separator1;
          managed XmPushButton pushButton_about_dismiss;
          managed XmLabel label_about_create;
@@ -1688,7 +1703,7 @@ object bulletinBoard_about : XmBulletinBoardDialog widget {
 !(BX)        XmNtitle = "About MBnavedit";
 !(BX)        XmNdeleteResponse = XmUNMAP;
 !(BX)        XmNwidth = 481;
-!(BX)        XmNheight = 463;
+!(BX)        XmNheight = 466;
 !(BX)    };
 !(BX)    controls {
 !(BX)         managed XmBulletinBoardDialog bulletinBoard_about;
@@ -2678,8 +2693,8 @@ object pushButton_controls_timeinterpolation : XmPushButton widget {
 object pulldownMenu_controls : XmPulldownMenu widget {
     arguments {
         arguments Style_use;
-        XmNx = 153;
-        XmNy = 71;
+        XmNx = 0;
+        XmNy = 0;
         XmNwidth = 137;
         XmNheight = 76;
     };
