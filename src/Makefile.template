@@ -1,0 +1,35 @@
+#     The MB-system:	Makefile.template	5/24/94
+#	$Id: Makefile.template,v 4.0 1994-05-24 18:33:40 caress Exp $
+#
+#     Copyright (c) 1993, 1994 by 
+#     D. W. Caress (caress@lamont.ldgo.columbia.edu)
+#     and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
+#     Lamont-Doherty Earth Observatory
+#     Palisades, NY  10964
+#
+#     See README file for copying and redistribution conditions.
+#
+# Makefile template for MB-system in the src directory
+# Author:	D. W. Caress
+# Date:		January 21, 1993
+# 
+# $Log: not supported by cvs2svn $
+#
+#
+
+all:
+	cd mbio; make all
+	cd utilities; make all
+	cd mbedit; make all
+	cd mbvelocitytool; make all
+	cd gmt; make all
+	cd macros; make all
+	cd realtime; make all
+
+clean:
+	cd mbio; make clean
+	cd utilities; make clean
+	cd gmt; make clean
+	cd macros; make clean
+	cd realtime; make clean
+
