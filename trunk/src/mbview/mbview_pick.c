@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_pick.c	9/29/2003
- *    $Id: mbview_pick.c,v 5.4 2004-07-27 19:50:28 caress Exp $
+ *    $Id: mbview_pick.c,v 5.5 2005-02-02 08:23:50 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  *		begun on October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2004/07/27 19:50:28  caress
+ * Improving route planning capability.
+ *
  * Revision 5.3  2004/06/18 04:26:06  caress
  * June 17, 2004 update.
  *
@@ -60,6 +63,9 @@
 #include <Xm/PushB.h>
 #include <Xm/Separator.h>
 #include "MB3DView.h"
+#include "MB3DSiteList.h"
+#include "MB3DRouteList.h"
+#include "MB3DNavList.h"
 
 /* OpenGL include files */
 #include <GL/gl.h>
@@ -83,7 +89,7 @@ Arg      	args[256];
 char		value_text[MB_PATH_MAXLINE];
 char		value_list[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_pick.c,v 5.4 2004-07-27 19:50:28 caress Exp $";
+static char rcs_id[]="$Id: mbview_pick.c,v 5.5 2005-02-02 08:23:50 caress Exp $";
 	
 
 /*------------------------------------------------------------------------------*/
@@ -218,6 +224,7 @@ int mbview_picksize(int instance)
 	int	status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
+	double	scalefactor;
 	double	xlength;
 	int	found;
 	int	i;
@@ -242,7 +249,11 @@ int mbview_picksize(int instance)
 		|| data->pickinfo_mode == MBV_PICK_TWOPOINT)
 		{
 		/* set size of 'X' marks in gl units for 3D case */
-		xlength = 0.05;
+		scalefactor = MIN( ((double)(data->viewbounds[1] - data->viewbounds[0])) 
+					/ ((double)data->primary_nx), 
+				   ((double)(data->viewbounds[3] - data->viewbounds[2])) 
+					/ ((double)data->primary_ny) );
+		xlength = 0.05 * scalefactor;
 
 		/* set pick location x marker */
 		data->pick.xpoints[0].xdisplay = data->pick.endpoints[0].xdisplay - xlength;
@@ -464,99 +475,105 @@ int mbview_pick_text(int instance)
 			data->region.width,
 			data->region.height);
 		}
-	else if (data->pickinfo_mode == MBV_PICK_SITE)
+	else if (data->pickinfo_mode == MBV_PICK_SITE
+		&& shared.shareddata.site_selected != MBV_SELECT_NONE)
 		{
-		mbview_setlonlatstrings(data->sites[data->site_selected].point.xlon, 
-					data->sites[data->site_selected].point.ylat, 
+		mbview_setlonlatstrings(shared.shareddata.sites[shared.shareddata.site_selected].point.xlon, 
+					shared.shareddata.sites[shared.shareddata.site_selected].point.ylat, 
 					lonstr0, latstr0);
 		sprintf(value_text,":::t\"Site %d Pick Info:\":t\" Lon: %s\":t\" Lat: %s\":t\" Depth: %.3f m\":t\" Color: %d\":t\" Size: %d\":t\" Name: %s\"", 
-			data->site_selected, lonstr0, latstr0,
-			data->sites[data->site_selected].point.zdata,
-			data->sites[data->site_selected].color,
-			data->sites[data->site_selected].size,
-			data->sites[data->site_selected].name);
+			shared.shareddata.site_selected, lonstr0, latstr0,
+			shared.shareddata.sites[shared.shareddata.site_selected].point.zdata,
+			shared.shareddata.sites[shared.shareddata.site_selected].color,
+			shared.shareddata.sites[shared.shareddata.site_selected].size,
+			shared.shareddata.sites[shared.shareddata.site_selected].name);
 		sprintf(value_list,"Site %d Pick Info: Lon: %s Lat: %s Depth: %.3f m Color: %d Size: %d Name: %s", 
-			data->site_selected, lonstr0, latstr0,
-			data->sites[data->site_selected].point.zdata,
-			data->sites[data->site_selected].color,
-			data->sites[data->site_selected].size,
-			data->sites[data->site_selected].name);
+			shared.shareddata.site_selected, lonstr0, latstr0,
+			shared.shareddata.sites[shared.shareddata.site_selected].point.zdata,
+			shared.shareddata.sites[shared.shareddata.site_selected].color,
+			shared.shareddata.sites[shared.shareddata.site_selected].size,
+			shared.shareddata.sites[shared.shareddata.site_selected].name);
 		}
-	else if (data->pickinfo_mode == MBV_PICK_ROUTE)
+	else if (data->pickinfo_mode == MBV_PICK_ROUTE
+		&& shared.shareddata.route_selected != MBV_SELECT_NONE
+		&& shared.shareddata.route_point_selected != MBV_SELECT_NONE)
 		{
-		mbview_setlonlatstrings(data->routes[data->route_selected].points[data->route_point_selected].xlon, 
-					data->routes[data->route_selected].points[data->route_point_selected].ylat, 
+		mbview_setlonlatstrings(shared.shareddata.routes[shared.shareddata.route_selected].points[shared.shareddata.route_point_selected].xlon, 
+					shared.shareddata.routes[shared.shareddata.route_selected].points[shared.shareddata.route_point_selected].ylat, 
 					lonstr0, latstr0);
 		sprintf(value_text,":::t\"Route %d Pick Info:\":t\" Point: %d\":t\" Lon: %s\":t\" Lat: %s\":t\" Depth: %.3f m\":t\" Color: %d\":t\" Size: %d\":t\" Name: %s\"", 
-			data->route_selected,data->route_point_selected, 
+			shared.shareddata.route_selected,shared.shareddata.route_point_selected, 
 			lonstr0, latstr0,
-			data->routes[data->route_selected].points[data->route_point_selected].zdata,
-			data->routes[data->route_selected].color,
-			data->routes[data->route_selected].size,
-			data->routes[data->route_selected].name);
+			shared.shareddata.routes[shared.shareddata.route_selected].points[shared.shareddata.route_point_selected].zdata,
+			shared.shareddata.routes[shared.shareddata.route_selected].color,
+			shared.shareddata.routes[shared.shareddata.route_selected].size,
+			shared.shareddata.routes[shared.shareddata.route_selected].name);
 		sprintf(value_list,"Route %d Pick Info: Point: %d Lon: %s Lat: %s Depth: %.3f m Color: %d Size: %d Name: %s", 
-			data->route_selected,data->route_point_selected, 
+			shared.shareddata.route_selected,shared.shareddata.route_point_selected, 
 			lonstr0, latstr0,
-			data->routes[data->route_selected].points[data->route_point_selected].zdata,
-			data->routes[data->route_selected].color,
-			data->routes[data->route_selected].size,
-			data->routes[data->route_selected].name);
+			shared.shareddata.routes[shared.shareddata.route_selected].points[shared.shareddata.route_point_selected].zdata,
+			shared.shareddata.routes[shared.shareddata.route_selected].color,
+			shared.shareddata.routes[shared.shareddata.route_selected].size,
+			shared.shareddata.routes[shared.shareddata.route_selected].name);
 		}
 	else if (data->pickinfo_mode == MBV_PICK_NAV
-		&& data->navpick_type == MBV_PICK_ONEPOINT)
+		&& shared.shareddata.navpick_type == MBV_PICK_ONEPOINT
+		&& shared.shareddata.nav_selected[0] != MBV_SELECT_NONE)
 		{
 		mb_get_date(mbv_verbose,
-				data->navs[data->nav_selected[0]].navpts[data->nav_point_selected[0]].time_d,
+				shared.shareddata.navs[shared.shareddata.nav_selected[0]].navpts[shared.shareddata.nav_point_selected[0]].time_d,
 				time_i);
 		sprintf(date0, "%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%3.3d",
 			time_i[0], time_i[1], time_i[2], 
 			time_i[3], time_i[4], time_i[5], 
 			(time_i[6] / 1000));
-		mbview_setlonlatstrings(data->navs[data->nav_selected[0]].navpts[data->nav_point_selected[0]].point.xlon, 
-					data->navs[data->nav_selected[0]].navpts[data->nav_point_selected[0]].point.ylat, 
+		mbview_setlonlatstrings(shared.shareddata.navs[shared.shareddata.nav_selected[0]].navpts[shared.shareddata.nav_point_selected[0]].point.xlon, 
+					shared.shareddata.navs[shared.shareddata.nav_selected[0]].navpts[shared.shareddata.nav_point_selected[0]].point.ylat, 
 					lonstr0, latstr0);
 		sprintf(value_text,":::t\"Navigation Pick Info:\":t\" %s\":t\" %s\":t\" Lon: %s\":t\" Lat: %s\":t\" Vehicle Depth: %.3f m\":t\" Heading: %.1f deg\":t\" Speed: %.1f km/hr\"", 
-			data->navs[data->nav_selected[0]].name, 
+			shared.shareddata.navs[shared.shareddata.nav_selected[0]].name, 
 			date0, lonstr0, latstr0,
-			data->navs[data->nav_selected[0]].navpts[data->nav_point_selected[0]].point.zdata,
-			data->navs[data->nav_selected[0]].navpts[data->nav_point_selected[0]].heading,
-			data->navs[data->nav_selected[0]].navpts[data->nav_point_selected[0]].speed);
+			shared.shareddata.navs[shared.shareddata.nav_selected[0]].navpts[shared.shareddata.nav_point_selected[0]].point.zdata,
+			shared.shareddata.navs[shared.shareddata.nav_selected[0]].navpts[shared.shareddata.nav_point_selected[0]].heading,
+			shared.shareddata.navs[shared.shareddata.nav_selected[0]].navpts[shared.shareddata.nav_point_selected[0]].speed);
 		sprintf(value_list,"Navigation Pick Info: %s %s Lon: %s Lat: %s Vehicle Depth: %.3f m Heading: %.1f deg Speed: %.1f km/hr", 
-			data->navs[data->nav_selected[0]].name, 
+			shared.shareddata.navs[shared.shareddata.nav_selected[0]].name, 
 			date0, lonstr0, latstr0,
-			data->navs[data->nav_selected[0]].navpts[data->nav_point_selected[0]].point.zdata,
-			data->navs[data->nav_selected[0]].navpts[data->nav_point_selected[0]].heading,
-			data->navs[data->nav_selected[0]].navpts[data->nav_point_selected[0]].speed);
+			shared.shareddata.navs[shared.shareddata.nav_selected[0]].navpts[shared.shareddata.nav_point_selected[0]].point.zdata,
+			shared.shareddata.navs[shared.shareddata.nav_selected[0]].navpts[shared.shareddata.nav_point_selected[0]].heading,
+			shared.shareddata.navs[shared.shareddata.nav_selected[0]].navpts[shared.shareddata.nav_point_selected[0]].speed);
 		}
 	else if (data->pickinfo_mode == MBV_PICK_NAV
-		&& data->navpick_type == MBV_PICK_TWOPOINT)
+		&& shared.shareddata.navpick_type == MBV_PICK_TWOPOINT
+		&& shared.shareddata.nav_selected[0] != MBV_SELECT_NONE
+		&& shared.shareddata.nav_selected[1] != MBV_SELECT_NONE)
 		{
 		mb_get_date(mbv_verbose,
-				data->navs[data->nav_selected[0]].navpts[data->nav_point_selected[0]].time_d,
+				shared.shareddata.navs[shared.shareddata.nav_selected[0]].navpts[shared.shareddata.nav_point_selected[0]].time_d,
 				time_i);
 		sprintf(date0, "%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%3.3d",
 			time_i[0], time_i[1], time_i[2], 
 			time_i[3], time_i[4], time_i[5], 
 			(time_i[6] / 1000));
-		mbview_setlonlatstrings(data->navs[data->nav_selected[0]].navpts[data->nav_point_selected[0]].point.xlon, 
-					data->navs[data->nav_selected[0]].navpts[data->nav_point_selected[0]].point.ylat, 
+		mbview_setlonlatstrings(shared.shareddata.navs[shared.shareddata.nav_selected[0]].navpts[shared.shareddata.nav_point_selected[0]].point.xlon, 
+					shared.shareddata.navs[shared.shareddata.nav_selected[0]].navpts[shared.shareddata.nav_point_selected[0]].point.ylat, 
 					lonstr0, latstr0);
 		mb_get_date(mbv_verbose,
-				data->navs[data->nav_selected[1]].navpts[data->nav_point_selected[1]].time_d,
+				shared.shareddata.navs[shared.shareddata.nav_selected[1]].navpts[shared.shareddata.nav_point_selected[1]].time_d,
 				time_i);
 		sprintf(date1, "%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%3.3d",
 			time_i[0], time_i[1], time_i[2], 
 			time_i[3], time_i[4], time_i[5], 
 			(time_i[6] / 1000));
-		mbview_setlonlatstrings(data->navs[data->nav_selected[1]].navpts[data->nav_point_selected[1]].point.xlon, 
-					data->navs[data->nav_selected[1]].navpts[data->nav_point_selected[1]].point.ylat, 
+		mbview_setlonlatstrings(shared.shareddata.navs[shared.shareddata.nav_selected[1]].navpts[shared.shareddata.nav_point_selected[1]].point.xlon, 
+					shared.shareddata.navs[shared.shareddata.nav_selected[1]].navpts[shared.shareddata.nav_point_selected[1]].point.ylat, 
 					lonstr1, latstr1);
 		sprintf(value_text,":::t\"Navigation Picks Info:\":t\" %s\":t\" %s\":t\" Lon: %s\":t\" Lat: %s\":t\" %s\":t\" %s\":t\" Lon: %s\":t\" Lat: %s\"", 
-			data->navs[data->nav_selected[0]].name, date0, lonstr0, latstr0,
-			data->navs[data->nav_selected[1]].name, date1, lonstr1, latstr1);
+			shared.shareddata.navs[shared.shareddata.nav_selected[0]].name, date0, lonstr0, latstr0,
+			shared.shareddata.navs[shared.shareddata.nav_selected[1]].name, date1, lonstr1, latstr1);
 		sprintf(value_list,"Navigation Picks Info: %s %s Lon: %s Lat: %s %s %s Lon: %s Lat: %s", 
-			data->navs[data->nav_selected[0]].name, date0, lonstr0, latstr0,
-			data->navs[data->nav_selected[1]].name, date1, lonstr1, latstr1);
+			shared.shareddata.navs[shared.shareddata.nav_selected[0]].name, date0, lonstr0, latstr0,
+			shared.shareddata.navs[shared.shareddata.nav_selected[1]].name, date1, lonstr1, latstr1);
 		}
 	else
 		{

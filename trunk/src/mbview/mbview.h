@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbview.h	10/9/2002
- *    $Id: mbview.h,v 5.5 2004-09-16 21:44:40 caress Exp $
+ *    $Id: mbview.h,v 5.6 2005-02-02 08:23:53 caress Exp $
  *
  *    Copyright (c) 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -18,6 +18,9 @@
  * Date:	October 10,  2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2004/09/16 21:44:40  caress
+ * Many changes over the summer.
+ *
  * Revision 5.4  2004/07/27 19:50:28  caress
  * Improving route planning capability.
  *
@@ -216,6 +219,17 @@ struct mbview_point_struct {
 	double	zdisplay;
 	};
 	
+struct mbview_pointw_struct {
+	double	xgrid[MBV_MAX_WINDOWS];
+	double	ygrid[MBV_MAX_WINDOWS];
+	double	xlon;
+	double	ylat;
+	double	zdata;
+	double	xdisplay[MBV_MAX_WINDOWS];
+	double	ydisplay[MBV_MAX_WINDOWS];
+	double	zdisplay[MBV_MAX_WINDOWS];
+	};
+	
 struct mbview_navpoint_struct {
 	int	draped;
 	int	selected;
@@ -229,6 +243,20 @@ struct mbview_navpoint_struct {
 	int	shot;
 	int	cdp;
 	};
+	
+struct mbview_navpointw_struct {
+	int	draped;
+	int	selected;
+	double	time_d;
+	double	heading;
+	double	speed;
+	struct mbview_pointw_struct point;
+	struct mbview_pointw_struct pointport;
+	struct mbview_pointw_struct pointcntr;
+	struct mbview_pointw_struct pointstbd;
+	int	shot;
+	int	cdp;
+	};
 
 struct mbview_linesegment_struct {
 	struct mbview_point_struct *endpoints[2];
@@ -237,11 +265,25 @@ struct mbview_linesegment_struct {
 	struct mbview_point_struct *lspoints;
 	};
 
+struct mbview_linesegmentw_struct {
+	struct mbview_pointw_struct *endpoints[2];
+	int	nls;
+	int	nls_alloc;
+	struct mbview_pointw_struct *lspoints;
+	};
+
 struct mbview_pick_struct {
 	struct mbview_point_struct endpoints[2];
 	struct mbview_point_struct xpoints[8];
 	struct mbview_linesegment_struct segment;
 	struct mbview_linesegment_struct xsegments[4];
+	};
+
+struct mbview_pickw_struct {
+	struct mbview_pointw_struct endpoints[2];
+	struct mbview_pointw_struct xpoints[8];
+	struct mbview_linesegmentw_struct segment;
+	struct mbview_linesegmentw_struct xsegments[4];
 	};
 
 struct mbview_region_struct {
@@ -262,7 +304,7 @@ struct mbview_area_struct {
 	};
 	
 struct mbview_site_struct {
-	struct mbview_point_struct point;
+	struct mbview_pointw_struct point;
 	int	color;
 	int	size;
 	mb_path	name;
@@ -275,8 +317,8 @@ struct mbview_route_struct {
 	int	npoints;
 	int	npoints_alloc;
 	int	*waypoint;
-	struct mbview_point_struct *points;
-	struct mbview_linesegment_struct *segments;
+	struct mbview_pointw_struct *points;
+	struct mbview_linesegmentw_struct *segments;
 	};
 
 struct mbview_nav_struct {
@@ -289,8 +331,37 @@ struct mbview_nav_struct {
 	int	npoints;
 	int	npoints_alloc;
 	int	nselected;
-	struct mbview_navpoint_struct *navpts;
-	struct mbview_linesegment_struct *segments;
+	struct mbview_navpointw_struct *navpts;
+	struct mbview_linesegmentw_struct *segments;
+	};
+
+struct mbview_shareddata_struct {
+	/* nav pick */
+	int	navpick_type;
+	struct mbview_pickw_struct navpick;
+	
+	/* site data */
+	int	site_mode;
+	int	nsite;
+	int	nsite_alloc;
+	int	site_selected;
+	struct mbview_site_struct *sites;
+	
+	/* route data */
+	int	route_mode;
+	int	nroute;
+	int	nroute_alloc;
+	int	route_selected;
+	int	route_point_selected;
+	struct mbview_route_struct *routes;
+	
+	/* nav data */
+	int	nav_mode;
+	int	nnav;
+	int	nnav_alloc;
+	int	nav_selected[2];
+	int	nav_point_selected[2];
+	struct mbview_nav_struct *navs;
 	};
 
 struct mbview_struct {
@@ -418,36 +489,12 @@ struct mbview_struct {
 	int	region_pickcorner;
 	struct mbview_region_struct region;
 	
-	/* nav pick */
-	int	navpick_type;
-	struct mbview_pick_struct navpick;
-	
-	/* site data */
-	int	site_mode;
+	/* global data view modes */
 	int	site_view_mode;
-	int	nsite;
-	int	nsite_alloc;
-	int	site_selected;
-	struct mbview_site_struct *sites;
-	
-	/* route data */
-	int	route_mode;
 	int	route_view_mode;
-	int	nroute;
-	int	nroute_alloc;
-	int	route_selected;
-	int	route_point_selected;
-	struct mbview_route_struct *routes;
-	
-	/* nav data */
-	int	nav_mode;
 	int	nav_view_mode;
 	int	navdrape_view_mode;
-	int	nnav;
-	int	nnav_alloc;
-	int	nav_selected[2];
-	int	nav_point_selected[2];
-	struct mbview_nav_struct *navs;
+	
 	};
 
 /* mbview API function prototypes */
@@ -738,9 +785,11 @@ int mbview_destroy(int verbose, int instance, int destroywidgets, int *error);
 int mbview_pick_site_select(int instance, int which, int xpixel, int ypixel);
 int mbview_pick_site_add(int instance, int which, int xpixel, int ypixel);
 int mbview_pick_site_delete(int instance, int xpixel, int ypixel);
+int mbview_site_delete(int instance, int isite);
 int mbview_pick_route_select(int instance, int which, int xpixel, int ypixel);
 int mbview_pick_route_add(int instance, int which, int xpixel, int ypixel);
 int mbview_pick_route_delete(int instance, int xpixel, int ypixel);
+int mbview_route_delete(int instance, int iroute, int ipoint);
 	
 int mbview_projectforward(int instance, int needlonlat,
 				double xgrid, double ygrid, double zgrid,

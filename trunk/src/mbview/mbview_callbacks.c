@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbview_callbacks.c	10/7/2002
- *    $Id: mbview_callbacks.c,v 5.4 2004-09-16 21:44:39 caress Exp $
+ *    $Id: mbview_callbacks.c,v 5.5 2005-02-02 08:23:51 caress Exp $
  *
  *    Copyright (c) 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -18,6 +18,9 @@
  * Date:	October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2004/09/16 21:44:39  caress
+ * Many changes over the summer.
+ *
  * Revision 5.3  2004/05/21 23:40:39  caress
  * Moved to new version of BX GUI builder
  *
@@ -77,6 +80,9 @@
 #include <Xm/PushB.h>
 #include <Xm/Separator.h>
 #include "MB3DView.h"
+#include "MB3DSiteList.h"
+#include "MB3DRouteList.h"
+#include "MB3DNavList.h"
 
 /* OpenGL include files */
 #include <GL/gl.h>
@@ -102,7 +108,9 @@ Cardinal 	ac;
 Arg      	args[256];
 char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_callbacks.c,v 5.4 2004-09-16 21:44:39 caress Exp $";
+static char rcs_id[]="$Id: mbview_callbacks.c,v 5.5 2005-02-02 08:23:51 caress Exp $";
+
+/* function prototypes */
 
 /*------------------------------------------------------------------------------*/
 
@@ -264,6 +272,8 @@ int mbview_startup(int verbose, Widget parent, XtAppContext app, int *error)
 	int	status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
+	XmString    tmp0;
+	Boolean  argok = False;
 	int	i;
 		
 	/* set local verbosity */
@@ -291,11 +301,113 @@ int mbview_startup(int verbose, Widget parent, XtAppContext app, int *error)
 	/* set starting number of windows */
 	mbv_ninstance = 0;
 	
+	/* initialize shared data */
+	mbview_reset_shared(MB_YES);
+	
 	/* initialize windows */
 	for (i=0;i<MBV_MAX_WINDOWS;i++)
 		{
 		mbview_reset(i);
 		}
+	
+	/* create and manage site list window */
+	shared.init_sitelist = MBV_WINDOW_NULL;
+	ac = 0;
+	XtSetArg(args[ac], XmNtitle, "Site List"); ac++;
+	shared.topLevelShell_sitelist = XtCreatePopupShell("topLevelShell",
+	    topLevelShellWidgetClass,
+	    parent_widget,
+	    args, 
+	    ac);
+	shared.mainWindow_sitelist = XmCreateMainWindow(
+	    shared.topLevelShell_sitelist, 
+	    "mainWindow_sitelist",
+            args, 
+            ac);
+    	XtManageChild(shared.mainWindow_sitelist);
+	MB3DSiteListCreate(&(shared.mb3d_sitelist), 
+            shared.mainWindow_sitelist,
+            "mbview_sitelist",
+            args,
+            ac);
+	ac = 0;
+        tmp0 = (XmString) BX_CONVERT(shared.mb3d_sitelist.MB3DSiteList, 
+				(char *)"Site | Lon | Lat | Depth | Color | Size | Name", 
+                		XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+	XtSetValues(shared.mb3d_sitelist.mbview_sitelist_label, args, ac);
+    	XtManageChild(shared.mb3d_sitelist.MB3DSiteList);
+	XtAddEventHandler(shared.topLevelShell_sitelist, 
+				StructureNotifyMask, 
+				False, 
+				mbview_sitelistresize, 
+				(XtPointer)0);
+	
+	/* create and manage route list window */
+	shared.init_routelist = MBV_WINDOW_NULL;
+	ac = 0;
+	XtSetArg(args[ac], XmNtitle, "Route List"); ac++;
+	shared.topLevelShell_routelist = XtCreatePopupShell("topLevelShell",
+	    topLevelShellWidgetClass,
+	    parent_widget,
+	    args, 
+	    ac);
+	shared.mainWindow_routelist = XmCreateMainWindow(
+	    shared.topLevelShell_routelist, 
+	    "mainWindow_routelist",
+            args, 
+            ac);
+    	XtManageChild(shared.mainWindow_routelist);
+	MB3DRouteListCreate(&(shared.mb3d_routelist), 
+            shared.mainWindow_routelist,
+            "mbview_routelist",
+            args,
+            ac);
+	ac = 0;
+        tmp0 = (XmString) BX_CONVERT(shared.mb3d_routelist.MB3DRouteList, 
+				(char *)"Route | Waypoint | Lon | Lat | Depth | Color | Size | Name", 
+                		XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+	XtSetValues(shared.mb3d_routelist.mbview_routelist_label, args, ac);
+    	XtManageChild(shared.mb3d_routelist.MB3DRouteList);
+	XtAddEventHandler(shared.topLevelShell_routelist, 
+				StructureNotifyMask, 
+				False, 
+				mbview_routelistresize, 
+				(XtPointer)0);
+	
+	/* create and manage navigation list window */
+	shared.init_navlist = MBV_WINDOW_NULL;
+	ac = 0;
+	XtSetArg(args[ac], XmNtitle, "Navigation List"); ac++;
+	shared.topLevelShell_navlist = XtCreatePopupShell("topLevelShell",
+	    topLevelShellWidgetClass,
+	    parent_widget,
+	    args, 
+	    ac);
+	shared.mainWindow_navlist = XmCreateMainWindow(
+	    shared.topLevelShell_navlist, 
+	    "mainWindow_navlist",
+            args, 
+            ac);
+    	XtManageChild(shared.mainWindow_navlist);
+	MB3DNavListCreate(&(shared.mb3d_navlist), 
+            shared.mainWindow_navlist,
+            "mbview_navlist",
+            args,
+            ac);
+	ac = 0;
+        tmp0 = (XmString) BX_CONVERT(shared.mb3d_navlist.MB3DNavList, 
+			(char *)"Route | Navpoints | Color | Size | Name", 
+                	XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+	XtSetValues(shared.mb3d_navlist.mbview_navlist_label, args, ac);
+    	XtManageChild(shared.mb3d_navlist.MB3DNavList);
+	XtAddEventHandler(shared.topLevelShell_navlist, 
+				StructureNotifyMask, 
+				False, 
+				mbview_navlistresize, 
+				(XtPointer)0);
 
 	/* set timer function */
 	/*do_mbview_settimer();*/
@@ -307,6 +419,120 @@ int mbview_startup(int verbose, Widget parent, XtAppContext app, int *error)
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:        %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:       %d\n",status);
+		}
+
+	/* return */
+	return(status);
+}
+
+/*------------------------------------------------------------------------------*/
+int mbview_reset_shared(int mode)
+{
+	/* local variables */
+	char	*function_name = "mbview_reset_shared";
+	int	status = MB_SUCCESS;
+	int	instance;
+	int	i, j;
+
+	/* print starting debug statements */
+	if (mbv_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
+		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
+		fprintf(stderr,"dbg2       mode:                    %d\n", mode);
+		}
+		
+	if (mode == MB_YES)
+		{
+		shared.init_sitelist = MBV_WINDOW_NULL;
+		shared.topLevelShell_sitelist = NULL;	
+		shared.mainWindow_sitelist = NULL;	
+		shared.init_routelist = MBV_WINDOW_NULL;
+		shared.topLevelShell_routelist = NULL;	
+		shared.mainWindow_routelist = NULL;	
+		shared.init_navlist = MBV_WINDOW_NULL;
+		shared.topLevelShell_navlist = NULL;	
+		shared.mainWindow_navlist = NULL;
+		}
+
+	/* site data */
+	shared.shareddata.site_mode = MBV_SITE_OFF;
+	shared.shareddata.nsite = 0;
+	shared.shareddata.nsite_alloc = 0;
+	shared.shareddata.site_selected = MBV_SELECT_NONE;
+	shared.shareddata.sites = NULL;
+
+	/* route data */
+	shared.shareddata.route_mode = MBV_ROUTE_OFF;
+	shared.shareddata.nroute = 0;
+	shared.shareddata.nroute_alloc = 0;
+	shared.shareddata.route_selected = MBV_SELECT_NONE;
+	shared.shareddata.route_point_selected = MBV_SELECT_NONE;
+	shared.shareddata.routes = NULL;
+
+	/* nav data */
+	shared.shareddata.nav_mode = MBV_NAV_OFF;
+	shared.shareddata.nnav = 0;
+	shared.shareddata.nnav_alloc = 0;
+	shared.shareddata.nav_selected[0] = MBV_SELECT_NONE;
+	shared.shareddata.nav_point_selected[0] = MBV_SELECT_NONE;
+	shared.shareddata.nav_selected[1] = MBV_SELECT_NONE;
+	shared.shareddata.nav_point_selected[1] = MBV_SELECT_NONE;
+	shared.shareddata.navs = NULL;
+	
+	for (instance=0;instance<MBV_MAX_WINDOWS;instance++)
+		{
+		/* nav pick data */
+		shared.shareddata.navpick_type = MBV_PICK_NONE;
+		for (i=0;i<2;i++)
+		    {
+		    shared.shareddata.navpick.endpoints[i].xgrid[instance] = 0.0;
+		    shared.shareddata.navpick.endpoints[i].ygrid[instance] = 0.0;
+		    shared.shareddata.navpick.endpoints[i].xlon = 0.0;
+		    shared.shareddata.navpick.endpoints[i].ylat = 0.0;
+		    shared.shareddata.navpick.endpoints[i].zdata = 0.0;
+		    shared.shareddata.navpick.endpoints[i].xdisplay[instance] = 0.0;
+		    shared.shareddata.navpick.endpoints[i].ydisplay[instance] = 0.0;
+		    shared.shareddata.navpick.endpoints[i].zdisplay[instance] = 0.0;
+		    shared.shareddata.navpick.segment.endpoints[i] 
+		    		= &(shared.shareddata.navpick.endpoints[i]);
+		    }
+		shared.shareddata.navpick.segment.nls = 0;
+		shared.shareddata.navpick.segment.nls_alloc = 0;
+		shared.shareddata.navpick.segment.lspoints = NULL;
+		for (i=0;i<8;i++)
+		    {
+		    shared.shareddata.navpick.xpoints[i].xgrid[instance] = 0.0;
+		    shared.shareddata.navpick.xpoints[i].ygrid[instance] = 0.0;
+		    shared.shareddata.navpick.xpoints[i].xlon = 0.0;
+		    shared.shareddata.navpick.xpoints[i].ylat = 0.0;
+		    shared.shareddata.navpick.xpoints[i].zdata = 0.0;
+		    shared.shareddata.navpick.xpoints[i].xdisplay[instance] = 0.0;
+		    shared.shareddata.navpick.xpoints[i].ydisplay[instance] = 0.0;
+		    shared.shareddata.navpick.xpoints[i].zdisplay[instance] = 0.0;
+		    }
+		}
+	for (j=0;j<4;j++)
+	    {
+	    shared.shareddata.navpick.xsegments[j].nls = 0;
+	    shared.shareddata.navpick.xsegments[j].nls_alloc = 0;
+	    shared.shareddata.navpick.xsegments[j].lspoints = NULL;
+	    for (i=0;i<2;i++)
+		{
+		shared.shareddata.navpick.xsegments[j].endpoints[i] 
+		    	    = &(shared.shareddata.navpick.xpoints[2*j+i]);
+		}
+	    }
+		
+	/* print output debug statements */
+	if (mbv_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:       %d\n",status);
 		}
@@ -566,75 +792,15 @@ int mbview_reset(int instance)
 		    data->area.segments[i].lspoints = NULL;
 		    }
 
-		/* nav pick data */
-		data->navpick_type = MBV_PICK_NONE;
-		for (i=0;i<2;i++)
-		    {
-		    data->navpick.endpoints[i].xgrid = 0.0;
-		    data->navpick.endpoints[i].ygrid = 0.0;
-		    data->navpick.endpoints[i].xlon = 0.0;
-		    data->navpick.endpoints[i].ylat = 0.0;
-		    data->navpick.endpoints[i].zdata = 0.0;
-		    data->navpick.endpoints[i].xdisplay = 0.0;
-		    data->navpick.endpoints[i].ydisplay = 0.0;
-		    data->navpick.endpoints[i].zdisplay = 0.0;
-		    data->navpick.segment.endpoints[i] 
-		    		= &(data->navpick.endpoints[i]);
-		    }
-		data->navpick.segment.nls = 0;
-		data->navpick.segment.nls_alloc = 0;
-		data->navpick.segment.lspoints = NULL;
-		for (i=0;i<8;i++)
-		    {
-		    data->navpick.xpoints[i].xgrid = 0.0;
-		    data->navpick.xpoints[i].ygrid = 0.0;
-		    data->navpick.xpoints[i].xlon = 0.0;
-		    data->navpick.xpoints[i].ylat = 0.0;
-		    data->navpick.xpoints[i].zdata = 0.0;
-		    data->navpick.xpoints[i].xdisplay = 0.0;
-		    data->navpick.xpoints[i].ydisplay = 0.0;
-		    data->navpick.xpoints[i].zdisplay = 0.0;
-		    }
-		for (j=0;j<4;j++)
-		    {
-		    data->navpick.xsegments[j].nls = 0;
-		    data->navpick.xsegments[j].nls_alloc = 0;
-		    data->navpick.xsegments[j].lspoints = NULL;
-		    for (i=0;i<2;i++)
-			{
-			data->navpick.xsegments[j].endpoints[i] 
-		    		    = &(data->navpick.xpoints[2*j+i]);
-			}
-		    }
-
 		/* site data */
 		data->site_view_mode = MBV_VIEW_OFF;
-		data->site_mode = MBV_SITE_OFF;
-		data->nsite = 0;
-		data->nsite_alloc = 0;
-		data->site_selected = MBV_SELECT_NONE;
-		data->sites = NULL;
 
 		/* route data */
 		data->route_view_mode = MBV_VIEW_OFF;
-		data->route_mode = MBV_ROUTE_OFF;
-		data->nroute = 0;
-		data->nroute_alloc = 0;
-		data->route_selected = MBV_SELECT_NONE;
-		data->route_point_selected = MBV_SELECT_NONE;
-		data->routes = NULL;
 
 		/* nav data */
 		data->nav_view_mode = MBV_VIEW_OFF;
 		data->navdrape_view_mode = MBV_VIEW_OFF;
-		data->nav_mode = MBV_NAV_OFF;
-		data->nnav = 0;
-		data->nnav_alloc = 0;
-		data->nav_selected[0] = MBV_SELECT_NONE;
-		data->nav_point_selected[0] = MBV_SELECT_NONE;
-		data->nav_selected[1] = MBV_SELECT_NONE;
-		data->nav_point_selected[1] = MBV_SELECT_NONE;
-		data->navs = NULL;
 		
 		/* windows */
 		view->topLevelShell = NULL;
@@ -658,7 +824,9 @@ int mbview_reset(int instance)
 		view->gl_width = 0;
 		view->gl_height = 0;
 		view->projected = MB_NO;
+		view->globalprojected = MB_NO;
 		view->lastdrawrez = MBV_REZ_NONE;
+		view->viewboundscount = MBV_BOUNDSFREQUENCY;
 		mbview_zscaleclear(instance);
 		mbview_setcolorparms(instance);
 		mbview_colorclear(instance);
@@ -719,6 +887,7 @@ int mbview_reset(int instance)
 	/* return */
 	return(status);
 }
+
 
 /*------------------------------------------------------------------------------*/
 int mbview_init(int verbose, int *instance, int *error)
@@ -805,6 +974,7 @@ int mbview_getdataptr(int verbose, int instance, struct mbview_struct **datahand
 	/* get view */
 	view = &(mbviews[instance]);
 	*datahandle = &(view->data);
+	data = &(view->data);
 		
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -815,199 +985,199 @@ int mbview_getdataptr(int verbose, int instance, struct mbview_struct **datahand
 		fprintf(stderr,"dbg2       datahandle:                %d\n", *datahandle);
 		
 		/* widget controls */
-		fprintf(stderr,"dbg2       title:                     %s\n", (*datahandle)->title);
-		fprintf(stderr,"dbg2       xo:                        %d\n", (*datahandle)->xo);
-		fprintf(stderr,"dbg2       yo:                        %d\n", (*datahandle)->yo);
-		fprintf(stderr,"dbg2       width:                     %d\n", (*datahandle)->width);
-		fprintf(stderr,"dbg2       height:                    %d\n", (*datahandle)->height);
-		fprintf(stderr,"dbg2       lorez_dimension:           %d\n", (*datahandle)->lorez_dimension);
-		fprintf(stderr,"dbg2       hirez_dimension:           %d\n", (*datahandle)->hirez_dimension);
+		fprintf(stderr,"dbg2       title:                     %s\n", data->title);
+		fprintf(stderr,"dbg2       xo:                        %d\n", data->xo);
+		fprintf(stderr,"dbg2       yo:                        %d\n", data->yo);
+		fprintf(stderr,"dbg2       width:                     %d\n", data->width);
+		fprintf(stderr,"dbg2       height:                    %d\n", data->height);
+		fprintf(stderr,"dbg2       lorez_dimension:           %d\n", data->lorez_dimension);
+		fprintf(stderr,"dbg2       hirez_dimension:           %d\n", data->hirez_dimension);
 
 		/* mode controls */
-		fprintf(stderr,"dbg2       display_mode:              %d\n", (*datahandle)->display_mode);
-		fprintf(stderr,"dbg2       mouse_mode:                %d\n", (*datahandle)->mouse_mode);
-		fprintf(stderr,"dbg2       grid_mode:                 %d\n", (*datahandle)->grid_mode);
-		fprintf(stderr,"dbg2       grid_contour_mode:         %d\n", (*datahandle)->grid_contour_mode);
+		fprintf(stderr,"dbg2       display_mode:              %d\n", data->display_mode);
+		fprintf(stderr,"dbg2       mouse_mode:                %d\n", data->mouse_mode);
+		fprintf(stderr,"dbg2       grid_mode:                 %d\n", data->grid_mode);
+		fprintf(stderr,"dbg2       grid_contour_mode:         %d\n", data->grid_contour_mode);
 
 		/* colortable controls */
-		fprintf(stderr,"dbg2       primary_colortable:        %d\n", (*datahandle)->primary_colortable);
-		fprintf(stderr,"dbg2       primary_colortable_mode:   %d\n", (*datahandle)->primary_colortable_mode);
-		fprintf(stderr,"dbg2       primary_colortable_min:    %f\n", (*datahandle)->primary_colortable_min);
-		fprintf(stderr,"dbg2       primary_colortable_max:    %f\n", (*datahandle)->primary_colortable_max);
-		fprintf(stderr,"dbg2       primary_shade_mode:        %d\n", (*datahandle)->primary_shade_mode);
-		fprintf(stderr,"dbg2       slope_colortable:          %d\n", (*datahandle)->slope_colortable);
-		fprintf(stderr,"dbg2       slope_colortable_mode:     %d\n", (*datahandle)->slope_colortable_mode);
-		fprintf(stderr,"dbg2       slope_colortable_min:      %f\n", (*datahandle)->slope_colortable_min);
-		fprintf(stderr,"dbg2       slope_colortable_max:      %f\n", (*datahandle)->slope_colortable_max);
-		fprintf(stderr,"dbg2       slope_shade_mode:          %d\n", (*datahandle)->slope_shade_mode);
-		fprintf(stderr,"dbg2       secondary_colortable:      %d\n", (*datahandle)->secondary_colortable);
-		fprintf(stderr,"dbg2       secondary_colortable_mode: %d\n", (*datahandle)->secondary_colortable_mode);
-		fprintf(stderr,"dbg2       secondary_colortable_min:  %f\n", (*datahandle)->secondary_colortable_min);
-		fprintf(stderr,"dbg2       secondary_colortable_max:  %f\n", (*datahandle)->secondary_colortable_max);
-		fprintf(stderr,"dbg2       secondary_shade_mode:      %d\n", (*datahandle)->secondary_shade_mode);
+		fprintf(stderr,"dbg2       primary_colortable:        %d\n", data->primary_colortable);
+		fprintf(stderr,"dbg2       primary_colortable_mode:   %d\n", data->primary_colortable_mode);
+		fprintf(stderr,"dbg2       primary_colortable_min:    %f\n", data->primary_colortable_min);
+		fprintf(stderr,"dbg2       primary_colortable_max:    %f\n", data->primary_colortable_max);
+		fprintf(stderr,"dbg2       primary_shade_mode:        %d\n", data->primary_shade_mode);
+		fprintf(stderr,"dbg2       slope_colortable:          %d\n", data->slope_colortable);
+		fprintf(stderr,"dbg2       slope_colortable_mode:     %d\n", data->slope_colortable_mode);
+		fprintf(stderr,"dbg2       slope_colortable_min:      %f\n", data->slope_colortable_min);
+		fprintf(stderr,"dbg2       slope_colortable_max:      %f\n", data->slope_colortable_max);
+		fprintf(stderr,"dbg2       slope_shade_mode:          %d\n", data->slope_shade_mode);
+		fprintf(stderr,"dbg2       secondary_colortable:      %d\n", data->secondary_colortable);
+		fprintf(stderr,"dbg2       secondary_colortable_mode: %d\n", data->secondary_colortable_mode);
+		fprintf(stderr,"dbg2       secondary_colortable_min:  %f\n", data->secondary_colortable_min);
+		fprintf(stderr,"dbg2       secondary_colortable_max:  %f\n", data->secondary_colortable_max);
+		fprintf(stderr,"dbg2       secondary_shade_mode:      %d\n", data->secondary_shade_mode);
 
 		/* view controls */
-		fprintf(stderr,"dbg2       exageration:               %f\n", (*datahandle)->exageration);
-		fprintf(stderr,"dbg2       modelelevation3d:          %f\n", (*datahandle)->modelelevation3d);
-		fprintf(stderr,"dbg2       modelazimuth3d:            %f\n", (*datahandle)->modelazimuth3d);
-		fprintf(stderr,"dbg2       viewelevation3d:           %f\n", (*datahandle)->viewelevation3d);
-		fprintf(stderr,"dbg2       viewazimuth3d:             %f\n", (*datahandle)->viewazimuth3d);
+		fprintf(stderr,"dbg2       exageration:               %f\n", data->exageration);
+		fprintf(stderr,"dbg2       modelelevation3d:          %f\n", data->modelelevation3d);
+		fprintf(stderr,"dbg2       modelazimuth3d:            %f\n", data->modelazimuth3d);
+		fprintf(stderr,"dbg2       viewelevation3d:           %f\n", data->viewelevation3d);
+		fprintf(stderr,"dbg2       viewazimuth3d:             %f\n", data->viewazimuth3d);
 
 		/* shading controls */
-		fprintf(stderr,"dbg2       illuminate_magnitude:      %f\n", (*datahandle)->illuminate_magnitude);
-		fprintf(stderr,"dbg2       illuminate_elevation:      %f\n", (*datahandle)->illuminate_elevation);
-		fprintf(stderr,"dbg2       illuminate_azimuth:        %f\n", (*datahandle)->illuminate_azimuth);
-		fprintf(stderr,"dbg2       slope_magnitude:           %f\n", (*datahandle)->slope_magnitude);
+		fprintf(stderr,"dbg2       illuminate_magnitude:      %f\n", data->illuminate_magnitude);
+		fprintf(stderr,"dbg2       illuminate_elevation:      %f\n", data->illuminate_elevation);
+		fprintf(stderr,"dbg2       illuminate_azimuth:        %f\n", data->illuminate_azimuth);
+		fprintf(stderr,"dbg2       slope_magnitude:           %f\n", data->slope_magnitude);
 
 		/* contour controls */
-		fprintf(stderr,"dbg2       contour_interval:           %f\n", (*datahandle)->slope_magnitude);
+		fprintf(stderr,"dbg2       contour_interval:           %f\n", data->slope_magnitude);
 
 		/* projection controls */
-		fprintf(stderr,"dbg2       primary_grid_projection_mode:   %d\n", (*datahandle)->primary_grid_projection_mode);
-		fprintf(stderr,"dbg2       primary_grid_projection_id:     %s\n", (*datahandle)->primary_grid_projection_id);
-		fprintf(stderr,"dbg2       secondary_grid_projection_mode: %d\n", (*datahandle)->secondary_grid_projection_mode);
-		fprintf(stderr,"dbg2       secondary_grid_projection_id:   %s\n", (*datahandle)->secondary_grid_projection_id);
-		fprintf(stderr,"dbg2       display_projection_mode:        %d\n", (*datahandle)->display_projection_mode);
-		fprintf(stderr,"dbg2       display_projection_id:          %s\n", (*datahandle)->display_projection_id);
+		fprintf(stderr,"dbg2       primary_grid_projection_mode:   %d\n", data->primary_grid_projection_mode);
+		fprintf(stderr,"dbg2       primary_grid_projection_id:     %s\n", data->primary_grid_projection_id);
+		fprintf(stderr,"dbg2       secondary_grid_projection_mode: %d\n", data->secondary_grid_projection_mode);
+		fprintf(stderr,"dbg2       secondary_grid_projection_id:   %s\n", data->secondary_grid_projection_id);
+		fprintf(stderr,"dbg2       display_projection_mode:        %d\n", data->display_projection_mode);
+		fprintf(stderr,"dbg2       display_projection_id:          %s\n", data->display_projection_id);
 		
 		/* primary grid data */
-		fprintf(stderr,"dbg2       primary_nodatavalue:       %d\n", (*datahandle)->primary_nodatavalue);
-		fprintf(stderr,"dbg2       primary_nxy:               %d\n", (*datahandle)->primary_nxy);
-		fprintf(stderr,"dbg2       primary_nx:                %d\n", (*datahandle)->primary_nx);
-		fprintf(stderr,"dbg2       primary_ny:                %d\n", (*datahandle)->primary_ny);
-		fprintf(stderr,"dbg2       primary_min:               %f\n", (*datahandle)->primary_min);
-		fprintf(stderr,"dbg2       primary_max:               %f\n", (*datahandle)->primary_max);
-		fprintf(stderr,"dbg2       primary_xmin:              %f\n", (*datahandle)->primary_xmin);
-		fprintf(stderr,"dbg2       primary_xmax:              %f\n", (*datahandle)->primary_xmax);
-		fprintf(stderr,"dbg2       primary_ymin:              %f\n", (*datahandle)->primary_ymin);
-		fprintf(stderr,"dbg2       primary_ymax:              %f\n", (*datahandle)->primary_ymax);
-		fprintf(stderr,"dbg2       primary_dx:                %f\n", (*datahandle)->primary_dx);
-		fprintf(stderr,"dbg2       primary_dy:                %f\n", (*datahandle)->primary_dy);
-		fprintf(stderr,"dbg2       primary_data:              %d\n", (*datahandle)->primary_data);
-		fprintf(stderr,"dbg2       primary_x:                 %d\n", (*datahandle)->primary_x);
-		fprintf(stderr,"dbg2       primary_y:                 %d\n", (*datahandle)->primary_y);
-		fprintf(stderr,"dbg2       primary_z:                 %d\n", (*datahandle)->primary_z);
-		fprintf(stderr,"dbg2       primary_dxdz:              %d\n", (*datahandle)->primary_dzdx);
-		fprintf(stderr,"dbg2       primary_dydz:              %d\n", (*datahandle)->primary_dzdy);
-		fprintf(stderr,"dbg2       primary_r:                 %d\n", (*datahandle)->primary_r);
-		fprintf(stderr,"dbg2       primary_g:                 %d\n", (*datahandle)->primary_g);
-		fprintf(stderr,"dbg2       primary_b:                 %d\n", (*datahandle)->primary_b);
-		fprintf(stderr,"dbg2       primary_stat_color:        %d\n", (*datahandle)->primary_stat_color);
-		fprintf(stderr,"dbg2       primary_stat_z:            %d\n", (*datahandle)->primary_stat_z);
+		fprintf(stderr,"dbg2       primary_nodatavalue:       %d\n", data->primary_nodatavalue);
+		fprintf(stderr,"dbg2       primary_nxy:               %d\n", data->primary_nxy);
+		fprintf(stderr,"dbg2       primary_nx:                %d\n", data->primary_nx);
+		fprintf(stderr,"dbg2       primary_ny:                %d\n", data->primary_ny);
+		fprintf(stderr,"dbg2       primary_min:               %f\n", data->primary_min);
+		fprintf(stderr,"dbg2       primary_max:               %f\n", data->primary_max);
+		fprintf(stderr,"dbg2       primary_xmin:              %f\n", data->primary_xmin);
+		fprintf(stderr,"dbg2       primary_xmax:              %f\n", data->primary_xmax);
+		fprintf(stderr,"dbg2       primary_ymin:              %f\n", data->primary_ymin);
+		fprintf(stderr,"dbg2       primary_ymax:              %f\n", data->primary_ymax);
+		fprintf(stderr,"dbg2       primary_dx:                %f\n", data->primary_dx);
+		fprintf(stderr,"dbg2       primary_dy:                %f\n", data->primary_dy);
+		fprintf(stderr,"dbg2       primary_data:              %d\n", data->primary_data);
+		fprintf(stderr,"dbg2       primary_x:                 %d\n", data->primary_x);
+		fprintf(stderr,"dbg2       primary_y:                 %d\n", data->primary_y);
+		fprintf(stderr,"dbg2       primary_z:                 %d\n", data->primary_z);
+		fprintf(stderr,"dbg2       primary_dxdz:              %d\n", data->primary_dzdx);
+		fprintf(stderr,"dbg2       primary_dydz:              %d\n", data->primary_dzdy);
+		fprintf(stderr,"dbg2       primary_r:                 %d\n", data->primary_r);
+		fprintf(stderr,"dbg2       primary_g:                 %d\n", data->primary_g);
+		fprintf(stderr,"dbg2       primary_b:                 %d\n", data->primary_b);
+		fprintf(stderr,"dbg2       primary_stat_color:        %d\n", data->primary_stat_color);
+		fprintf(stderr,"dbg2       primary_stat_z:            %d\n", data->primary_stat_z);
 		
 		/* secondary grid data */
-		fprintf(stderr,"dbg2       secondary_sameas_primary:  %d\n", (*datahandle)->secondary_sameas_primary);
-		fprintf(stderr,"dbg2       secondary_nodatavalue:     %d\n", (*datahandle)->secondary_nodatavalue);
-		fprintf(stderr,"dbg2       secondary_nxy:             %d\n", (*datahandle)->secondary_nxy);
-		fprintf(stderr,"dbg2       secondary_nx:              %d\n", (*datahandle)->secondary_nx);
-		fprintf(stderr,"dbg2       secondary_ny:              %d\n", (*datahandle)->secondary_ny);
-		fprintf(stderr,"dbg2       secondary_xmin:            %f\n", (*datahandle)->secondary_xmin);
-		fprintf(stderr,"dbg2       secondary_xmax:            %f\n", (*datahandle)->secondary_xmax);
-		fprintf(stderr,"dbg2       secondary_ymin:            %f\n", (*datahandle)->secondary_ymin);
-		fprintf(stderr,"dbg2       secondary_ymax:            %f\n", (*datahandle)->secondary_ymax);
-		fprintf(stderr,"dbg2       secondary_dx:              %f\n", (*datahandle)->secondary_dx);
-		fprintf(stderr,"dbg2       secondary_dy:              %f\n", (*datahandle)->secondary_dy);
-		fprintf(stderr,"dbg2       secondary_data:            %d\n", (*datahandle)->secondary_data);
+		fprintf(stderr,"dbg2       secondary_sameas_primary:  %d\n", data->secondary_sameas_primary);
+		fprintf(stderr,"dbg2       secondary_nodatavalue:     %d\n", data->secondary_nodatavalue);
+		fprintf(stderr,"dbg2       secondary_nxy:             %d\n", data->secondary_nxy);
+		fprintf(stderr,"dbg2       secondary_nx:              %d\n", data->secondary_nx);
+		fprintf(stderr,"dbg2       secondary_ny:              %d\n", data->secondary_ny);
+		fprintf(stderr,"dbg2       secondary_xmin:            %f\n", data->secondary_xmin);
+		fprintf(stderr,"dbg2       secondary_xmax:            %f\n", data->secondary_xmax);
+		fprintf(stderr,"dbg2       secondary_ymin:            %f\n", data->secondary_ymin);
+		fprintf(stderr,"dbg2       secondary_ymax:            %f\n", data->secondary_ymax);
+		fprintf(stderr,"dbg2       secondary_dx:              %f\n", data->secondary_dx);
+		fprintf(stderr,"dbg2       secondary_dy:              %f\n", data->secondary_dy);
+		fprintf(stderr,"dbg2       secondary_data:            %d\n", data->secondary_data);
 		
 		/* site data */
-		fprintf(stderr,"dbg2       site_view_mode:       %d\n",(*datahandle)->site_view_mode);
-		fprintf(stderr,"dbg2       site_mode:            %d\n",(*datahandle)->site_mode);
-		fprintf(stderr,"dbg2       nsite:                %d\n",(*datahandle)->nsite);
-		fprintf(stderr,"dbg2       nsite_alloc:          %d\n",(*datahandle)->nsite_alloc);
-		fprintf(stderr,"dbg2       site_selected:        %d\n",(*datahandle)->site_selected);
-		for (i=0;i<(*datahandle)->nsite;i++)
+		fprintf(stderr,"dbg2       site_view_mode:       %d\n",data->site_view_mode);
+		fprintf(stderr,"dbg2       site_mode:            %d\n",shared.shareddata.site_mode);
+		fprintf(stderr,"dbg2       nsite:                %d\n",shared.shareddata.nsite);
+		fprintf(stderr,"dbg2       nsite_alloc:          %d\n",shared.shareddata.nsite_alloc);
+		fprintf(stderr,"dbg2       site_selected:        %d\n",shared.shareddata.site_selected);
+		for (i=0;i<shared.shareddata.nsite;i++)
 			{
-			fprintf(stderr,"dbg2       site %d xgrid:       %f\n",i,(*datahandle)->sites[i].point.xgrid);
-			fprintf(stderr,"dbg2       site %d ygrid:       %f\n",i,(*datahandle)->sites[i].point.ygrid);
-			fprintf(stderr,"dbg2       site %d xlon:        %f\n",i,(*datahandle)->sites[i].point.xlon);
-			fprintf(stderr,"dbg2       site %d ylat:        %f\n",i,(*datahandle)->sites[i].point.ylat);
-			fprintf(stderr,"dbg2       site %d zdata:       %f\n",i,(*datahandle)->sites[i].point.zdata);
-			fprintf(stderr,"dbg2       site %d xdisplay:    %f\n",i,(*datahandle)->sites[i].point.xdisplay);
-			fprintf(stderr,"dbg2       site %d ydisplay:    %f\n",i,(*datahandle)->sites[i].point.ydisplay);
-			fprintf(stderr,"dbg2       site %d zdisplay:    %f\n",i,(*datahandle)->sites[i].point.zdisplay);
-			fprintf(stderr,"dbg2       site %d color:       %d\n",i,(*datahandle)->sites[i].color);
-			fprintf(stderr,"dbg2       site %d size:        %d\n",i,(*datahandle)->sites[i].size);
-			fprintf(stderr,"dbg2       site %d name:        %s\n",i,(*datahandle)->sites[i].name);
+			fprintf(stderr,"dbg2       site %d xgrid:       %f\n",i,shared.shareddata.sites[i].point.xgrid[0]);
+			fprintf(stderr,"dbg2       site %d ygrid:       %f\n",i,shared.shareddata.sites[i].point.ygrid[0]);
+			fprintf(stderr,"dbg2       site %d xlon:        %f\n",i,shared.shareddata.sites[i].point.xlon);
+			fprintf(stderr,"dbg2       site %d ylat:        %f\n",i,shared.shareddata.sites[i].point.ylat);
+			fprintf(stderr,"dbg2       site %d zdata:       %f\n",i,shared.shareddata.sites[i].point.zdata);
+			fprintf(stderr,"dbg2       site %d xdisplay:    %f\n",i,shared.shareddata.sites[i].point.xdisplay[0]);
+			fprintf(stderr,"dbg2       site %d ydisplay:    %f\n",i,shared.shareddata.sites[i].point.ydisplay[0]);
+			fprintf(stderr,"dbg2       site %d zdisplay:    %f\n",i,shared.shareddata.sites[i].point.zdisplay[0]);
+			fprintf(stderr,"dbg2       site %d color:       %d\n",i,shared.shareddata.sites[i].color);
+			fprintf(stderr,"dbg2       site %d size:        %d\n",i,shared.shareddata.sites[i].size);
+			fprintf(stderr,"dbg2       site %d name:        %s\n",i,shared.shareddata.sites[i].name);
 			}
 		
 		/* route data */
-		fprintf(stderr,"dbg2       route_view_mode:      %d\n",(*datahandle)->route_view_mode);
-		fprintf(stderr,"dbg2       route_mode:           %d\n",(*datahandle)->route_mode);
-		fprintf(stderr,"dbg2       nroute:               %d\n",(*datahandle)->nroute);
-		fprintf(stderr,"dbg2       nroute_alloc:         %d\n",(*datahandle)->nroute_alloc);
-		fprintf(stderr,"dbg2       route_selected:       %d\n",(*datahandle)->route_selected);
-		fprintf(stderr,"dbg2       route_point_selected: %d\n",(*datahandle)->route_point_selected);
-		for (i=0;i<(*datahandle)->nroute;i++)
+		fprintf(stderr,"dbg2       route_view_mode:      %d\n",data->route_view_mode);
+		fprintf(stderr,"dbg2       route_mode:           %d\n",shared.shareddata.route_mode);
+		fprintf(stderr,"dbg2       nroute:               %d\n",shared.shareddata.nroute);
+		fprintf(stderr,"dbg2       nroute_alloc:         %d\n",shared.shareddata.nroute_alloc);
+		fprintf(stderr,"dbg2       route_selected:       %d\n",shared.shareddata.route_selected);
+		fprintf(stderr,"dbg2       route_point_selected: %d\n",shared.shareddata.route_point_selected);
+		for (i=0;i<shared.shareddata.nroute;i++)
 			{
-			fprintf(stderr,"dbg2       route %d color:       %d\n",i,(*datahandle)->routes[i].color);
-			fprintf(stderr,"dbg2       route %d size:        %d\n",i,(*datahandle)->routes[i].size);
-			fprintf(stderr,"dbg2       route %d name:        %s\n",i,(*datahandle)->routes[i].name);
-			for (j=0;j<(*datahandle)->routes[i].npoints;j++)
+			fprintf(stderr,"dbg2       route %d color:       %d\n",i,shared.shareddata.routes[i].color);
+			fprintf(stderr,"dbg2       route %d size:        %d\n",i,shared.shareddata.routes[i].size);
+			fprintf(stderr,"dbg2       route %d name:        %s\n",i,shared.shareddata.routes[i].name);
+			for (j=0;j<shared.shareddata.routes[i].npoints;j++)
 				{
-				fprintf(stderr,"dbg2       route %d %d xgrid:    %f\n",i,j,(*datahandle)->routes[i].points[j].xgrid);
-				fprintf(stderr,"dbg2       route %d %d ygrid:    %f\n",i,j,(*datahandle)->routes[i].points[j].ygrid);
-				fprintf(stderr,"dbg2       route %d %d xlon:     %f\n",i,j,(*datahandle)->routes[i].points[j].xlon);
-				fprintf(stderr,"dbg2       route %d %d ylat:     %f\n",i,j,(*datahandle)->routes[i].points[j].ylat);
-				fprintf(stderr,"dbg2       route %d %d zdata:    %f\n",i,j,(*datahandle)->routes[i].points[j].zdata);
-				fprintf(stderr,"dbg2       route %d %d xdisplay: %f\n",i,j,(*datahandle)->routes[i].points[j].xdisplay);
-				fprintf(stderr,"dbg2       route %d %d ydisplay: %f\n",i,j,(*datahandle)->routes[i].points[j].ydisplay);
-				fprintf(stderr,"dbg2       route %d %d zdisplay: %f\n",i,j,(*datahandle)->routes[i].points[j].zdisplay);
+				fprintf(stderr,"dbg2       route %d %d xgrid:    %f\n",i,j,shared.shareddata.routes[i].points[j].xgrid[0]);
+				fprintf(stderr,"dbg2       route %d %d ygrid:    %f\n",i,j,shared.shareddata.routes[i].points[j].ygrid[0]);
+				fprintf(stderr,"dbg2       route %d %d xlon:     %f\n",i,j,shared.shareddata.routes[i].points[j].xlon);
+				fprintf(stderr,"dbg2       route %d %d ylat:     %f\n",i,j,shared.shareddata.routes[i].points[j].ylat);
+				fprintf(stderr,"dbg2       route %d %d zdata:    %f\n",i,j,shared.shareddata.routes[i].points[j].zdata);
+				fprintf(stderr,"dbg2       route %d %d xdisplay: %f\n",i,j,shared.shareddata.routes[i].points[j].xdisplay[0]);
+				fprintf(stderr,"dbg2       route %d %d ydisplay: %f\n",i,j,shared.shareddata.routes[i].points[j].ydisplay[0]);
+				fprintf(stderr,"dbg2       route %d %d zdisplay: %f\n",i,j,shared.shareddata.routes[i].points[j].zdisplay[0]);
 				}
 			}
 		
 		/* nav data */
-		fprintf(stderr,"dbg2       nav_view_mode:             %d\n",(*datahandle)->nav_view_mode);
-		fprintf(stderr,"dbg2       navdrape_view_mode:        %d\n",(*datahandle)->navdrape_view_mode);
-		fprintf(stderr,"dbg2       nav_mode:                  %d\n",(*datahandle)->nav_mode);
-		fprintf(stderr,"dbg2       nnav:                      %d\n",(*datahandle)->nnav);
-		fprintf(stderr,"dbg2       nnav_alloc:                %d\n",(*datahandle)->nnav_alloc);
-		fprintf(stderr,"dbg2       nav_selected:              %d\n",(*datahandle)->nav_selected);
-		fprintf(stderr,"dbg2       nav_point_selected:        %d\n",(*datahandle)->nav_point_selected);
-		for (i=0;i<(*datahandle)->nnav;i++)
+		fprintf(stderr,"dbg2       nav_view_mode:             %d\n",data->nav_view_mode);
+		fprintf(stderr,"dbg2       navdrape_view_mode:        %d\n",data->navdrape_view_mode);
+		fprintf(stderr,"dbg2       nav_mode:                  %d\n",shared.shareddata.nav_mode);
+		fprintf(stderr,"dbg2       nnav:                      %d\n",shared.shareddata.nnav);
+		fprintf(stderr,"dbg2       nnav_alloc:                %d\n",shared.shareddata.nnav_alloc);
+		fprintf(stderr,"dbg2       nav_selected:              %d\n",shared.shareddata.nav_selected);
+		fprintf(stderr,"dbg2       nav_point_selected:        %d\n",shared.shareddata.nav_point_selected);
+		for (i=0;i<shared.shareddata.nnav;i++)
 			{
-			fprintf(stderr,"dbg2       nav %d color:         %d\n",i,(*datahandle)->navs[i].color);
-			fprintf(stderr,"dbg2       nav %d size:          %d\n",i,(*datahandle)->navs[i].size);
-			fprintf(stderr,"dbg2       nav %d name:          %s\n",i,(*datahandle)->navs[i].name);
-			fprintf(stderr,"dbg2       nav %d swathbounds:   %d\n",i,(*datahandle)->navs[i].swathbounds);
-			fprintf(stderr,"dbg2       nav %d shot:          %d\n",i,(*datahandle)->navs[i].shot);
-			fprintf(stderr,"dbg2       nav %d cdp:           %d\n",i,(*datahandle)->navs[i].cdp);
-			fprintf(stderr,"dbg2       nav %d npoints:       %d\n",i,(*datahandle)->navs[i].npoints);
-			fprintf(stderr,"dbg2       nav %d npoints_alloc: %d\n",i,(*datahandle)->navs[i].npoints_alloc);
-			fprintf(stderr,"dbg2       nav %d nselected:     %d\n",i,(*datahandle)->navs[i].nselected);
-			for (j=0;j<(*datahandle)->navs[i].npoints;j++)
+			fprintf(stderr,"dbg2       nav %d color:         %d\n",i,shared.shareddata.navs[i].color);
+			fprintf(stderr,"dbg2       nav %d size:          %d\n",i,shared.shareddata.navs[i].size);
+			fprintf(stderr,"dbg2       nav %d name:          %s\n",i,shared.shareddata.navs[i].name);
+			fprintf(stderr,"dbg2       nav %d swathbounds:   %d\n",i,shared.shareddata.navs[i].swathbounds);
+			fprintf(stderr,"dbg2       nav %d shot:          %d\n",i,shared.shareddata.navs[i].shot);
+			fprintf(stderr,"dbg2       nav %d cdp:           %d\n",i,shared.shareddata.navs[i].cdp);
+			fprintf(stderr,"dbg2       nav %d npoints:       %d\n",i,shared.shareddata.navs[i].npoints);
+			fprintf(stderr,"dbg2       nav %d npoints_alloc: %d\n",i,shared.shareddata.navs[i].npoints_alloc);
+			fprintf(stderr,"dbg2       nav %d nselected:     %d\n",i,shared.shareddata.navs[i].nselected);
+			for (j=0;j<shared.shareddata.navs[i].npoints;j++)
 				{
-				fprintf(stderr,"dbg2       nav %d %d xgrid:    %f\n",i,j,(*datahandle)->navs[i].navpts[j].point.xgrid);
-				fprintf(stderr,"dbg2       nav %d %d ygrid:    %f\n",i,j,(*datahandle)->navs[i].navpts[j].point.ygrid);
-				fprintf(stderr,"dbg2       nav %d %d xlon:     %f\n",i,j,(*datahandle)->navs[i].navpts[j].point.xlon);
-				fprintf(stderr,"dbg2       nav %d %d ylat:     %f\n",i,j,(*datahandle)->navs[i].navpts[j].point.ylat);
-				fprintf(stderr,"dbg2       nav %d %d zdata:    %f\n",i,j,(*datahandle)->navs[i].navpts[j].point.zdata);
-				fprintf(stderr,"dbg2       nav %d %d xdisplay: %f\n",i,j,(*datahandle)->navs[i].navpts[j].point.xdisplay);
-				fprintf(stderr,"dbg2       nav %d %d ydisplay: %f\n",i,j,(*datahandle)->navs[i].navpts[j].point.ydisplay);
-				fprintf(stderr,"dbg2       nav %d %d zdisplay: %f\n",i,j,(*datahandle)->navs[i].navpts[j].point.zdisplay);
-				fprintf(stderr,"dbg2       nav %d %d port xgrid:    %f\n",i,j,(*datahandle)->navs[i].navpts[j].pointport.xgrid);
-				fprintf(stderr,"dbg2       nav %d %d port ygrid:    %f\n",i,j,(*datahandle)->navs[i].navpts[j].pointport.ygrid);
-				fprintf(stderr,"dbg2       nav %d %d port xlon:     %f\n",i,j,(*datahandle)->navs[i].navpts[j].pointport.xlon);
-				fprintf(stderr,"dbg2       nav %d %d port ylat:     %f\n",i,j,(*datahandle)->navs[i].navpts[j].pointport.ylat);
-				fprintf(stderr,"dbg2       nav %d %d port zdata:    %f\n",i,j,(*datahandle)->navs[i].navpts[j].pointport.zdata);
-				fprintf(stderr,"dbg2       nav %d %d port xdisplay: %f\n",i,j,(*datahandle)->navs[i].navpts[j].pointport.xdisplay);
-				fprintf(stderr,"dbg2       nav %d %d port ydisplay: %f\n",i,j,(*datahandle)->navs[i].navpts[j].pointport.ydisplay);
-				fprintf(stderr,"dbg2       nav %d %d port zdisplay: %f\n",i,j,(*datahandle)->navs[i].navpts[j].pointport.zdisplay);
-				fprintf(stderr,"dbg2       nav %d %d cntr xgrid:    %f\n",i,j,(*datahandle)->navs[i].navpts[j].pointcntr.xgrid);
-				fprintf(stderr,"dbg2       nav %d %d cntr ygrid:    %f\n",i,j,(*datahandle)->navs[i].navpts[j].pointcntr.ygrid);
-				fprintf(stderr,"dbg2       nav %d %d cntr xlon:     %f\n",i,j,(*datahandle)->navs[i].navpts[j].pointcntr.xlon);
-				fprintf(stderr,"dbg2       nav %d %d cntr ylat:     %f\n",i,j,(*datahandle)->navs[i].navpts[j].pointcntr.ylat);
-				fprintf(stderr,"dbg2       nav %d %d cntr zdata:    %f\n",i,j,(*datahandle)->navs[i].navpts[j].pointcntr.zdata);
-				fprintf(stderr,"dbg2       nav %d %d cntr xdisplay: %f\n",i,j,(*datahandle)->navs[i].navpts[j].pointcntr.xdisplay);
-				fprintf(stderr,"dbg2       nav %d %d cntr ydisplay: %f\n",i,j,(*datahandle)->navs[i].navpts[j].pointcntr.ydisplay);
-				fprintf(stderr,"dbg2       nav %d %d cntr zdisplay: %f\n",i,j,(*datahandle)->navs[i].navpts[j].pointcntr.zdisplay);
-				fprintf(stderr,"dbg2       nav %d %d stbd xgrid:    %f\n",i,j,(*datahandle)->navs[i].navpts[j].pointstbd.xgrid);
-				fprintf(stderr,"dbg2       nav %d %d stbd ygrid:    %f\n",i,j,(*datahandle)->navs[i].navpts[j].pointstbd.ygrid);
-				fprintf(stderr,"dbg2       nav %d %d stbd xlon:     %f\n",i,j,(*datahandle)->navs[i].navpts[j].pointstbd.xlon);
-				fprintf(stderr,"dbg2       nav %d %d stbd ylat:     %f\n",i,j,(*datahandle)->navs[i].navpts[j].pointstbd.ylat);
-				fprintf(stderr,"dbg2       nav %d %d stbd zdata:    %f\n",i,j,(*datahandle)->navs[i].navpts[j].pointstbd.zdata);
-				fprintf(stderr,"dbg2       nav %d %d stbd xdisplay: %f\n",i,j,(*datahandle)->navs[i].navpts[j].pointstbd.xdisplay);
-				fprintf(stderr,"dbg2       nav %d %d stbd ydisplay: %f\n",i,j,(*datahandle)->navs[i].navpts[j].pointstbd.ydisplay);
-				fprintf(stderr,"dbg2       nav %d %d stbd zdisplay: %f\n",i,j,(*datahandle)->navs[i].navpts[j].pointstbd.zdisplay);
+				fprintf(stderr,"dbg2       nav %d %d xgrid:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].point.xgrid[0]);
+				fprintf(stderr,"dbg2       nav %d %d ygrid:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].point.ygrid[0]);
+				fprintf(stderr,"dbg2       nav %d %d xlon:     %f\n",i,j,shared.shareddata.navs[i].navpts[j].point.xlon);
+				fprintf(stderr,"dbg2       nav %d %d ylat:     %f\n",i,j,shared.shareddata.navs[i].navpts[j].point.ylat);
+				fprintf(stderr,"dbg2       nav %d %d zdata:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].point.zdata);
+				fprintf(stderr,"dbg2       nav %d %d xdisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].point.xdisplay[0]);
+				fprintf(stderr,"dbg2       nav %d %d ydisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].point.ydisplay[0]);
+				fprintf(stderr,"dbg2       nav %d %d zdisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].point.zdisplay[0]);
+				fprintf(stderr,"dbg2       nav %d %d port xgrid:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointport.xgrid[0]);
+				fprintf(stderr,"dbg2       nav %d %d port ygrid:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointport.ygrid[0]);
+				fprintf(stderr,"dbg2       nav %d %d port xlon:     %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointport.xlon);
+				fprintf(stderr,"dbg2       nav %d %d port ylat:     %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointport.ylat);
+				fprintf(stderr,"dbg2       nav %d %d port zdata:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointport.zdata);
+				fprintf(stderr,"dbg2       nav %d %d port xdisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointport.xdisplay[0]);
+				fprintf(stderr,"dbg2       nav %d %d port ydisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointport.ydisplay[0]);
+				fprintf(stderr,"dbg2       nav %d %d port zdisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointport.zdisplay[0]);
+				fprintf(stderr,"dbg2       nav %d %d cntr xgrid:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointcntr.xgrid[0]);
+				fprintf(stderr,"dbg2       nav %d %d cntr ygrid:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointcntr.ygrid[0]);
+				fprintf(stderr,"dbg2       nav %d %d cntr xlon:     %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointcntr.xlon);
+				fprintf(stderr,"dbg2       nav %d %d cntr ylat:     %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointcntr.ylat);
+				fprintf(stderr,"dbg2       nav %d %d cntr zdata:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointcntr.zdata);
+				fprintf(stderr,"dbg2       nav %d %d cntr xdisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointcntr.xdisplay[0]);
+				fprintf(stderr,"dbg2       nav %d %d cntr ydisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointcntr.ydisplay[0]);
+				fprintf(stderr,"dbg2       nav %d %d cntr zdisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointcntr.zdisplay[0]);
+				fprintf(stderr,"dbg2       nav %d %d stbd xgrid:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointstbd.xgrid[0]);
+				fprintf(stderr,"dbg2       nav %d %d stbd ygrid:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointstbd.ygrid[0]);
+				fprintf(stderr,"dbg2       nav %d %d stbd xlon:     %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointstbd.xlon);
+				fprintf(stderr,"dbg2       nav %d %d stbd ylat:     %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointstbd.ylat);
+				fprintf(stderr,"dbg2       nav %d %d stbd zdata:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointstbd.zdata);
+				fprintf(stderr,"dbg2       nav %d %d stbd xdisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointstbd.xdisplay[0]);
+				fprintf(stderr,"dbg2       nav %d %d stbd ydisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointstbd.ydisplay[0]);
+				fprintf(stderr,"dbg2       nav %d %d stbd zdisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointstbd.zdisplay[0]);
 				}
 			}
 
@@ -1356,112 +1526,112 @@ fprintf(stderr,"Opening mbview window instance:%d\n",instance);
 		
 		/* site data */
 		fprintf(stderr,"dbg2       site_view_mode:       %d\n",data->site_view_mode);
-		fprintf(stderr,"dbg2       site_mode:            %d\n",data->site_mode);
-		fprintf(stderr,"dbg2       nsite:                %d\n",data->nsite);
-		fprintf(stderr,"dbg2       nsite_alloc:          %d\n",data->nsite_alloc);
-		fprintf(stderr,"dbg2       site_selected:        %d\n",data->site_selected);
-		for (i=0;i<data->nsite;i++)
+		fprintf(stderr,"dbg2       site_mode:            %d\n",shared.shareddata.site_mode);
+		fprintf(stderr,"dbg2       nsite:                %d\n",shared.shareddata.nsite);
+		fprintf(stderr,"dbg2       nsite_alloc:          %d\n",shared.shareddata.nsite_alloc);
+		fprintf(stderr,"dbg2       site_selected:        %d\n",shared.shareddata.site_selected);
+		for (i=0;i<shared.shareddata.nsite;i++)
 			{
-			fprintf(stderr,"dbg2       site %d xgrid:       %f\n",i,data->sites[i].point.xgrid);
-			fprintf(stderr,"dbg2       site %d ygrid:       %f\n",i,data->sites[i].point.ygrid);
-			fprintf(stderr,"dbg2       site %d xlon:        %f\n",i,data->sites[i].point.xlon);
-			fprintf(stderr,"dbg2       site %d ylat:        %f\n",i,data->sites[i].point.ylat);
-			fprintf(stderr,"dbg2       site %d zdata:       %f\n",i,data->sites[i].point.zdata);
-			fprintf(stderr,"dbg2       site %d xdisplay:    %f\n",i,data->sites[i].point.xdisplay);
-			fprintf(stderr,"dbg2       site %d ydisplay:    %f\n",i,data->sites[i].point.ydisplay);
-			fprintf(stderr,"dbg2       site %d zdisplay:    %f\n",i,data->sites[i].point.zdisplay);
-			fprintf(stderr,"dbg2       site %d color:       %d\n",i,data->sites[i].color);
-			fprintf(stderr,"dbg2       site %d size:        %d\n",i,data->sites[i].size);
-			fprintf(stderr,"dbg2       site %d name:        %s\n",i,data->sites[i].name);
+			fprintf(stderr,"dbg2       site %d xgrid:       %f\n",i,shared.shareddata.sites[i].point.xgrid);
+			fprintf(stderr,"dbg2       site %d ygrid:       %f\n",i,shared.shareddata.sites[i].point.ygrid);
+			fprintf(stderr,"dbg2       site %d xlon:        %f\n",i,shared.shareddata.sites[i].point.xlon);
+			fprintf(stderr,"dbg2       site %d ylat:        %f\n",i,shared.shareddata.sites[i].point.ylat);
+			fprintf(stderr,"dbg2       site %d zdata:       %f\n",i,shared.shareddata.sites[i].point.zdata);
+			fprintf(stderr,"dbg2       site %d xdisplay:    %f\n",i,shared.shareddata.sites[i].point.xdisplay);
+			fprintf(stderr,"dbg2       site %d ydisplay:    %f\n",i,shared.shareddata.sites[i].point.ydisplay);
+			fprintf(stderr,"dbg2       site %d zdisplay:    %f\n",i,shared.shareddata.sites[i].point.zdisplay);
+			fprintf(stderr,"dbg2       site %d color:       %d\n",i,shared.shareddata.sites[i].color);
+			fprintf(stderr,"dbg2       site %d size:        %d\n",i,shared.shareddata.sites[i].size);
+			fprintf(stderr,"dbg2       site %d name:        %s\n",i,shared.shareddata.sites[i].name);
 			}
 		
 		/* route data */
 		fprintf(stderr,"dbg2       route_view_mode:      %d\n",data->route_view_mode);
-		fprintf(stderr,"dbg2       route_mode:           %d\n",data->route_mode);
-		fprintf(stderr,"dbg2       nroute:               %d\n",data->nroute);
-		fprintf(stderr,"dbg2       nroute_alloc:         %d\n",data->nroute_alloc);
-		fprintf(stderr,"dbg2       route_selected:       %d\n",data->route_selected);
-		fprintf(stderr,"dbg2       route_point_selected: %d\n",data->route_point_selected);
-		for (i=0;i<data->nroute;i++)
+		fprintf(stderr,"dbg2       route_mode:           %d\n",shared.shareddata.route_mode);
+		fprintf(stderr,"dbg2       nroute:               %d\n",shared.shareddata.nroute);
+		fprintf(stderr,"dbg2       nroute_alloc:         %d\n",shared.shareddata.nroute_alloc);
+		fprintf(stderr,"dbg2       route_selected:       %d\n",shared.shareddata.route_selected);
+		fprintf(stderr,"dbg2       route_point_selected: %d\n",shared.shareddata.route_point_selected);
+		for (i=0;i<shared.shareddata.nroute;i++)
 			{
-			fprintf(stderr,"dbg2       route %d color:       %d\n",i,data->routes[i].color);
-			fprintf(stderr,"dbg2       route %d size:        %d\n",i,data->routes[i].size);
-			fprintf(stderr,"dbg2       route %d name:        %s\n",i,data->routes[i].name);
-			fprintf(stderr,"dbg2       route %d npoints:     %d\n",i,data->routes[i].npoints);
-			fprintf(stderr,"dbg2       route %d npoints_alloc: %d\n",i,data->routes[i].npoints_alloc);
-			for (j=0;j<data->routes[i].npoints;j++)
+			fprintf(stderr,"dbg2       route %d color:       %d\n",i,shared.shareddata.routes[i].color);
+			fprintf(stderr,"dbg2       route %d size:        %d\n",i,shared.shareddata.routes[i].size);
+			fprintf(stderr,"dbg2       route %d name:        %s\n",i,shared.shareddata.routes[i].name);
+			fprintf(stderr,"dbg2       route %d npoints:     %d\n",i,shared.shareddata.routes[i].npoints);
+			fprintf(stderr,"dbg2       route %d npoints_alloc: %d\n",i,shared.shareddata.routes[i].npoints_alloc);
+			for (j=0;j<shared.shareddata.routes[i].npoints;j++)
 				{
-				fprintf(stderr,"dbg2       route %d %d xgrid:    %f\n",i,j,data->routes[i].points[j].xgrid);
-				fprintf(stderr,"dbg2       route %d %d ygrid:    %f\n",i,j,data->routes[i].points[j].ygrid);
-				fprintf(stderr,"dbg2       route %d %d xlon:     %f\n",i,j,data->routes[i].points[j].xlon);
-				fprintf(stderr,"dbg2       route %d %d ylat:     %f\n",i,j,data->routes[i].points[j].ylat);
-				fprintf(stderr,"dbg2       route %d %d zdata:    %f\n",i,j,data->routes[i].points[j].zdata);
-				fprintf(stderr,"dbg2       route %d %d xdisplay: %f\n",i,j,data->routes[i].points[j].xdisplay);
-				fprintf(stderr,"dbg2       route %d %d ydisplay: %f\n",i,j,data->routes[i].points[j].ydisplay);
-				fprintf(stderr,"dbg2       route %d %d zdisplay: %f\n",i,j,data->routes[i].points[j].zdisplay);
+				fprintf(stderr,"dbg2       route %d %d xgrid:    %f\n",i,j,shared.shareddata.routes[i].points[j].xgrid);
+				fprintf(stderr,"dbg2       route %d %d ygrid:    %f\n",i,j,shared.shareddata.routes[i].points[j].ygrid);
+				fprintf(stderr,"dbg2       route %d %d xlon:     %f\n",i,j,shared.shareddata.routes[i].points[j].xlon);
+				fprintf(stderr,"dbg2       route %d %d ylat:     %f\n",i,j,shared.shareddata.routes[i].points[j].ylat);
+				fprintf(stderr,"dbg2       route %d %d zdata:    %f\n",i,j,shared.shareddata.routes[i].points[j].zdata);
+				fprintf(stderr,"dbg2       route %d %d xdisplay: %f\n",i,j,shared.shareddata.routes[i].points[j].xdisplay);
+				fprintf(stderr,"dbg2       route %d %d ydisplay: %f\n",i,j,shared.shareddata.routes[i].points[j].ydisplay);
+				fprintf(stderr,"dbg2       route %d %d zdisplay: %f\n",i,j,shared.shareddata.routes[i].points[j].zdisplay);
 				}
 			}
 		
 		/* nav data */
 		fprintf(stderr,"dbg2       nav_view_mode:         %d\n",data->nav_view_mode);
 		fprintf(stderr,"dbg2       navdrape_view_mode:    %d\n",data->navdrape_view_mode);
-		fprintf(stderr,"dbg2       nav_mode:              %d\n",data->nav_mode);
-		fprintf(stderr,"dbg2       nnav:                  %d\n",data->nnav);
-		fprintf(stderr,"dbg2       nnav_alloc:            %d\n",data->nnav_alloc);
-		fprintf(stderr,"dbg2       nav_selected:          %d\n",data->nav_selected);
-		fprintf(stderr,"dbg2       nav_point_selected:    %d\n",data->nav_point_selected);
-		for (i=0;i<data->nnav;i++)
+		fprintf(stderr,"dbg2       nav_mode:              %d\n",shared.shareddata.nav_mode);
+		fprintf(stderr,"dbg2       nnav:                  %d\n",shared.shareddata.nnav);
+		fprintf(stderr,"dbg2       nnav_alloc:            %d\n",shared.shareddata.nnav_alloc);
+		fprintf(stderr,"dbg2       nav_selected:          %d\n",shared.shareddata.nav_selected);
+		fprintf(stderr,"dbg2       nav_point_selected:    %d\n",shared.shareddata.nav_point_selected);
+		for (i=0;i<shared.shareddata.nnav;i++)
 			{
-			fprintf(stderr,"dbg2       nav %d color:         %d\n",i,data->navs[i].color);
-			fprintf(stderr,"dbg2       nav %d size:          %d\n",i,data->navs[i].size);
-			fprintf(stderr,"dbg2       nav %d name:          %s\n",i,data->navs[i].name);
-			fprintf(stderr,"dbg2       nav %d swathbounds:   %d\n",i,data->navs[i].swathbounds);
-			fprintf(stderr,"dbg2       nav %d shot:          %d\n",i,data->navs[i].shot);
-			fprintf(stderr,"dbg2       nav %d cdp:           %d\n",i,data->navs[i].cdp);
-			fprintf(stderr,"dbg2       nav %d npoints:       %d\n",i,data->navs[i].npoints);
-			fprintf(stderr,"dbg2       nav %d npoints_alloc: %d\n",i,data->navs[i].npoints_alloc);
-			fprintf(stderr,"dbg2       nav %d nselected:     %d\n",i,data->navs[i].nselected);
-			for (j=0;j<data->navs[i].npoints;j++)
+			fprintf(stderr,"dbg2       nav %d color:         %d\n",i,shared.shareddata.navs[i].color);
+			fprintf(stderr,"dbg2       nav %d size:          %d\n",i,shared.shareddata.navs[i].size);
+			fprintf(stderr,"dbg2       nav %d name:          %s\n",i,shared.shareddata.navs[i].name);
+			fprintf(stderr,"dbg2       nav %d swathbounds:   %d\n",i,shared.shareddata.navs[i].swathbounds);
+			fprintf(stderr,"dbg2       nav %d shot:          %d\n",i,shared.shareddata.navs[i].shot);
+			fprintf(stderr,"dbg2       nav %d cdp:           %d\n",i,shared.shareddata.navs[i].cdp);
+			fprintf(stderr,"dbg2       nav %d npoints:       %d\n",i,shared.shareddata.navs[i].npoints);
+			fprintf(stderr,"dbg2       nav %d npoints_alloc: %d\n",i,shared.shareddata.navs[i].npoints_alloc);
+			fprintf(stderr,"dbg2       nav %d nselected:     %d\n",i,shared.shareddata.navs[i].nselected);
+			for (j=0;j<shared.shareddata.navs[i].npoints;j++)
 				{
-				fprintf(stderr,"dbg2       nav %d %d draped:   %d\n",i,j,data->navs[i].navpts[j].draped);
-				fprintf(stderr,"dbg2       nav %d %d selected: %d\n",i,j,data->navs[i].navpts[j].selected);
-				fprintf(stderr,"dbg2       nav %d %d time_d:   %f\n",i,j,data->navs[i].navpts[j].time_d);
-				fprintf(stderr,"dbg2       nav %d %d heading:  %f\n",i,j,data->navs[i].navpts[j].heading);
-				fprintf(stderr,"dbg2       nav %d %d speed:    %f\n",i,j,data->navs[i].navpts[j].speed);
-				fprintf(stderr,"dbg2       nav %d %d shot:     %d\n",i,j,data->navs[i].navpts[j].shot);
-				fprintf(stderr,"dbg2       nav %d %d cdp:      %d\n",i,j,data->navs[i].navpts[j].cdp);
-				fprintf(stderr,"dbg2       nav %d %d xgrid:    %f\n",i,j,data->navs[i].navpts[j].point.xgrid);
-				fprintf(stderr,"dbg2       nav %d %d ygrid:    %f\n",i,j,data->navs[i].navpts[j].point.ygrid);
-				fprintf(stderr,"dbg2       nav %d %d xlon:     %f\n",i,j,data->navs[i].navpts[j].point.xlon);
-				fprintf(stderr,"dbg2       nav %d %d ylat:     %f\n",i,j,data->navs[i].navpts[j].point.ylat);
-				fprintf(stderr,"dbg2       nav %d %d zdata:    %f\n",i,j,data->navs[i].navpts[j].point.zdata);
-				fprintf(stderr,"dbg2       nav %d %d xdisplay: %f\n",i,j,data->navs[i].navpts[j].point.xdisplay);
-				fprintf(stderr,"dbg2       nav %d %d ydisplay: %f\n",i,j,data->navs[i].navpts[j].point.ydisplay);
-				fprintf(stderr,"dbg2       nav %d %d zdisplay: %f\n",i,j,data->navs[i].navpts[j].point.zdisplay);
-				fprintf(stderr,"dbg2       nav %d %d port xgrid:    %f\n",i,j,data->navs[i].navpts[j].pointport.xgrid);
-				fprintf(stderr,"dbg2       nav %d %d port ygrid:    %f\n",i,j,data->navs[i].navpts[j].pointport.ygrid);
-				fprintf(stderr,"dbg2       nav %d %d port xlon:     %f\n",i,j,data->navs[i].navpts[j].pointport.xlon);
-				fprintf(stderr,"dbg2       nav %d %d port ylat:     %f\n",i,j,data->navs[i].navpts[j].pointport.ylat);
-				fprintf(stderr,"dbg2       nav %d %d port zdata:    %f\n",i,j,data->navs[i].navpts[j].pointport.zdata);
-				fprintf(stderr,"dbg2       nav %d %d port xdisplay: %f\n",i,j,data->navs[i].navpts[j].pointport.xdisplay);
-				fprintf(stderr,"dbg2       nav %d %d port ydisplay: %f\n",i,j,data->navs[i].navpts[j].pointport.ydisplay);
-				fprintf(stderr,"dbg2       nav %d %d port zdisplay: %f\n",i,j,data->navs[i].navpts[j].pointport.zdisplay);
-				fprintf(stderr,"dbg2       nav %d %d cntr xgrid:    %f\n",i,j,data->navs[i].navpts[j].pointcntr.xgrid);
-				fprintf(stderr,"dbg2       nav %d %d cntr ygrid:    %f\n",i,j,data->navs[i].navpts[j].pointcntr.ygrid);
-				fprintf(stderr,"dbg2       nav %d %d cntr xlon:     %f\n",i,j,data->navs[i].navpts[j].pointcntr.xlon);
-				fprintf(stderr,"dbg2       nav %d %d cntr ylat:     %f\n",i,j,data->navs[i].navpts[j].pointcntr.ylat);
-				fprintf(stderr,"dbg2       nav %d %d cntr zdata:    %f\n",i,j,data->navs[i].navpts[j].pointcntr.zdata);
-				fprintf(stderr,"dbg2       nav %d %d cntr xdisplay: %f\n",i,j,data->navs[i].navpts[j].pointcntr.xdisplay);
-				fprintf(stderr,"dbg2       nav %d %d cntr ydisplay: %f\n",i,j,data->navs[i].navpts[j].pointcntr.ydisplay);
-				fprintf(stderr,"dbg2       nav %d %d cntr zdisplay: %f\n",i,j,data->navs[i].navpts[j].pointcntr.zdisplay);
-				fprintf(stderr,"dbg2       nav %d %d stbd xgrid:    %f\n",i,j,data->navs[i].navpts[j].pointstbd.xgrid);
-				fprintf(stderr,"dbg2       nav %d %d stbd ygrid:    %f\n",i,j,data->navs[i].navpts[j].pointstbd.ygrid);
-				fprintf(stderr,"dbg2       nav %d %d stbd xlon:     %f\n",i,j,data->navs[i].navpts[j].pointstbd.xlon);
-				fprintf(stderr,"dbg2       nav %d %d stbd ylat:     %f\n",i,j,data->navs[i].navpts[j].pointstbd.ylat);
-				fprintf(stderr,"dbg2       nav %d %d stbd zdata:    %f\n",i,j,data->navs[i].navpts[j].pointstbd.zdata);
-				fprintf(stderr,"dbg2       nav %d %d stbd xdisplay: %f\n",i,j,data->navs[i].navpts[j].pointstbd.xdisplay);
-				fprintf(stderr,"dbg2       nav %d %d stbd ydisplay: %f\n",i,j,data->navs[i].navpts[j].pointstbd.ydisplay);
-				fprintf(stderr,"dbg2       nav %d %d stbd zdisplay: %f\n",i,j,data->navs[i].navpts[j].pointstbd.zdisplay);
+				fprintf(stderr,"dbg2       nav %d %d draped:   %d\n",i,j,shared.shareddata.navs[i].navpts[j].draped);
+				fprintf(stderr,"dbg2       nav %d %d selected: %d\n",i,j,shared.shareddata.navs[i].navpts[j].selected);
+				fprintf(stderr,"dbg2       nav %d %d time_d:   %f\n",i,j,shared.shareddata.navs[i].navpts[j].time_d);
+				fprintf(stderr,"dbg2       nav %d %d heading:  %f\n",i,j,shared.shareddata.navs[i].navpts[j].heading);
+				fprintf(stderr,"dbg2       nav %d %d speed:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].speed);
+				fprintf(stderr,"dbg2       nav %d %d shot:     %d\n",i,j,shared.shareddata.navs[i].navpts[j].shot);
+				fprintf(stderr,"dbg2       nav %d %d cdp:      %d\n",i,j,shared.shareddata.navs[i].navpts[j].cdp);
+				fprintf(stderr,"dbg2       nav %d %d xgrid:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].point.xgrid);
+				fprintf(stderr,"dbg2       nav %d %d ygrid:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].point.ygrid);
+				fprintf(stderr,"dbg2       nav %d %d xlon:     %f\n",i,j,shared.shareddata.navs[i].navpts[j].point.xlon);
+				fprintf(stderr,"dbg2       nav %d %d ylat:     %f\n",i,j,shared.shareddata.navs[i].navpts[j].point.ylat);
+				fprintf(stderr,"dbg2       nav %d %d zdata:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].point.zdata);
+				fprintf(stderr,"dbg2       nav %d %d xdisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].point.xdisplay);
+				fprintf(stderr,"dbg2       nav %d %d ydisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].point.ydisplay);
+				fprintf(stderr,"dbg2       nav %d %d zdisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].point.zdisplay);
+				fprintf(stderr,"dbg2       nav %d %d port xgrid:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointport.xgrid);
+				fprintf(stderr,"dbg2       nav %d %d port ygrid:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointport.ygrid);
+				fprintf(stderr,"dbg2       nav %d %d port xlon:     %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointport.xlon);
+				fprintf(stderr,"dbg2       nav %d %d port ylat:     %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointport.ylat);
+				fprintf(stderr,"dbg2       nav %d %d port zdata:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointport.zdata);
+				fprintf(stderr,"dbg2       nav %d %d port xdisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointport.xdisplay);
+				fprintf(stderr,"dbg2       nav %d %d port ydisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointport.ydisplay);
+				fprintf(stderr,"dbg2       nav %d %d port zdisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointport.zdisplay);
+				fprintf(stderr,"dbg2       nav %d %d cntr xgrid:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointcntr.xgrid);
+				fprintf(stderr,"dbg2       nav %d %d cntr ygrid:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointcntr.ygrid);
+				fprintf(stderr,"dbg2       nav %d %d cntr xlon:     %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointcntr.xlon);
+				fprintf(stderr,"dbg2       nav %d %d cntr ylat:     %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointcntr.ylat);
+				fprintf(stderr,"dbg2       nav %d %d cntr zdata:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointcntr.zdata);
+				fprintf(stderr,"dbg2       nav %d %d cntr xdisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointcntr.xdisplay);
+				fprintf(stderr,"dbg2       nav %d %d cntr ydisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointcntr.ydisplay);
+				fprintf(stderr,"dbg2       nav %d %d cntr zdisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointcntr.zdisplay);
+				fprintf(stderr,"dbg2       nav %d %d stbd xgrid:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointstbd.xgrid);
+				fprintf(stderr,"dbg2       nav %d %d stbd ygrid:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointstbd.ygrid);
+				fprintf(stderr,"dbg2       nav %d %d stbd xlon:     %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointstbd.xlon);
+				fprintf(stderr,"dbg2       nav %d %d stbd ylat:     %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointstbd.ylat);
+				fprintf(stderr,"dbg2       nav %d %d stbd zdata:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointstbd.zdata);
+				fprintf(stderr,"dbg2       nav %d %d stbd xdisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointstbd.xdisplay);
+				fprintf(stderr,"dbg2       nav %d %d stbd ydisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointstbd.ydisplay);
+				fprintf(stderr,"dbg2       nav %d %d stbd zdisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointstbd.zdisplay);
 				}
 			}
 
@@ -1585,6 +1755,7 @@ fprintf(stderr,"Opening mbview window instance:%d\n",instance);
 		XtSetValues(view->mainWindow, args, ac);
 		XtSetValues(view->mb3dview.MB3DView, args, ac);
 		XtSetValues(view->mb3dview.mbview_pushButton_reset, args, ac);
+		XtSetValues(view->mb3dview.mbview_pushButton_clearpicks, args, ac);
 		XtSetValues(view->mb3dview.mbview_radioBox_mouse, args, ac);
 		XtSetValues(view->mb3dview.mbview_toggleButton_mode_rmove, args, ac);
 		XtSetValues(view->mb3dview.mbview_toggleButton_mode_rrotate, args, ac);
@@ -1627,7 +1798,6 @@ fprintf(stderr,"Opening mbview window instance:%d\n",instance);
 		XtSetValues(view->mb3dview.mbview_pulldownMenu_controls, args, ac);
 		XtSetValues(view->mb3dview.mbview_pushButton_colorbounds, args, ac);
 		XtSetValues(view->mb3dview.mbview_pushButton_resolution, args, ac);
-		XtSetValues(view->mb3dview.mbview_pushButton_sitelist, args, ac);
 		XtSetValues(view->mb3dview.mbview_pushButton_projections, args, ac);
 		XtSetValues(view->mb3dview.mbview_cascadeButton_mouse, args, ac);
 		XtSetValues(view->mb3dview.mbview_pulldownMenu_mouse, args, ac);
@@ -1784,7 +1954,9 @@ fprintf(stderr,"Opening mbview window instance:%d\n",instance);
 	
 	/* make sure some key parameters are set */
 	view->projected = MB_NO;
+	view->globalprojected = MB_NO;
 	view->lastdrawrez = MBV_REZ_NONE;
+	view->viewboundscount = MBV_BOUNDSFREQUENCY;
 	mbview_zscaleclear(instance);
 	mbview_setcolorparms(instance);
 	mbview_colorclear(instance);
@@ -1867,7 +2039,9 @@ fprintf(stderr,"Updating mbview window instance:%d\n",instance);
 	
 	/* make sure some key parameters are set */
 	/*view->projected = MB_NO;*/
+	/*view->globalprojected = MB_NO;*/
 	view->lastdrawrez = MBV_REZ_NONE;
+	view->viewboundscount = MBV_BOUNDSFREQUENCY;
 	mbview_zscaleclear(instance);
 	mbview_setcolorparms(instance);
 	mbview_colorclear(instance);
@@ -1919,6 +2093,7 @@ fprintf(stderr,"Updating mbview window instance:%d\n",instance);
 if (mbv_verbose >= 2)
 fprintf(stderr,"Calling mbview_plotlowhigh from mbview_update\n");
 	mbview_plotlowhigh(instance);
+	mbview_plotlowhighall(instance);
 		
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -2045,7 +2220,7 @@ int mbview_update_sensitivity(int verbose, int instance, int *error)
 	XtSetValues(view->mb3dview.mbview_textField_overlay_center, args, ac);
 
 	ac = 0;
-	if (data->site_mode == MBV_SITE_OFF)
+	if (shared.shareddata.site_mode == MBV_SITE_OFF)
 		{
 		XtSetArg(args[ac], XmNsensitive, False); ac++;
 		}
@@ -2056,7 +2231,7 @@ int mbview_update_sensitivity(int verbose, int instance, int *error)
 	XtSetValues(view->mb3dview.mbview_toggleButton_site, args, ac);
 	XtSetValues(view->mb3dview.mbview_toggleButton_mode_site, args, ac);
 	XtSetValues(view->mb3dview.mbview_toggleButton_mode_rsite, args, ac);
-	if (data->site_mode != MBV_SITE_EDIT)
+	if (shared.shareddata.site_mode != MBV_SITE_EDIT)
 		{
 		set_mbview_label_string(view->mb3dview.mbview_toggleButton_mode_site, "Pick Sites");
 		set_mbview_label_string(view->mb3dview.mbview_toggleButton_mode_rsite, "Pick Sites");
@@ -2068,7 +2243,7 @@ int mbview_update_sensitivity(int verbose, int instance, int *error)
 		}
 
 	ac = 0;
-	if (data->route_mode == MBV_ROUTE_OFF)
+	if (shared.shareddata.route_mode == MBV_ROUTE_OFF)
 		{
 		XtSetArg(args[ac], XmNsensitive, False); ac++;
 		}
@@ -2079,7 +2254,7 @@ int mbview_update_sensitivity(int verbose, int instance, int *error)
 	XtSetValues(view->mb3dview.mbview_toggleButton_route, args, ac);
 	XtSetValues(view->mb3dview.mbview_toggleButton_mode_route, args, ac);
 	XtSetValues(view->mb3dview.mbview_toggleButton_mode_rroute, args, ac);
-	if (data->route_mode != MBV_ROUTE_EDIT)
+	if (shared.shareddata.route_mode != MBV_ROUTE_EDIT)
 		{
 		set_mbview_label_string(view->mb3dview.mbview_toggleButton_mode_route, "Pick Routes");
 		set_mbview_label_string(view->mb3dview.mbview_toggleButton_mode_rroute, "Pick Routes");
@@ -2091,8 +2266,7 @@ int mbview_update_sensitivity(int verbose, int instance, int *error)
 		}
 
 	ac = 0;
-fprintf(stderr,"nav_mode:%d\n",data->nav_mode);
-	if (data->nav_mode == MBV_NAV_OFF)
+	if (shared.shareddata.nav_mode == MBV_NAV_OFF)
 		{
 		XtSetArg(args[ac], XmNsensitive, False); ac++;
 		}
@@ -2171,30 +2345,30 @@ int mbview_action_sensitivity(int instance)
 				XtSetArg(args[ac], XmNsensitive, True);
 				}
 			else if (view->actionsensitive[i] & MBV_PICKMASK_SITE
-				&& data->site_selected >= 0)
+				&& shared.shareddata.site_selected >= 0)
 				{
 				XtSetArg(args[ac], XmNsensitive, True);
 				}
 			else if (view->actionsensitive[i] & MBV_PICKMASK_ROUTE
-				&& data->route_selected >= 0)
+				&& shared.shareddata.route_selected >= 0)
 				{
 				XtSetArg(args[ac], XmNsensitive, True);
 				}
 			else if (view->actionsensitive[i] & MBV_PICKMASK_NAVONEPOINT
-				&& data->navpick_type == MBV_PICK_ONEPOINT)
+				&& shared.shareddata.navpick_type == MBV_PICK_ONEPOINT)
 				{
 				XtSetArg(args[ac], XmNsensitive, True);
 				}
 			else if (view->actionsensitive[i] & MBV_PICKMASK_NAVTWOPOINT
-				&& data->navpick_type == MBV_PICK_TWOPOINT)
+				&& shared.shareddata.navpick_type == MBV_PICK_TWOPOINT)
 				{
 				XtSetArg(args[ac], XmNsensitive, True);
 				}
 			else if (view->actionsensitive[i] & MBV_PICKMASK_NAVANY)
 				{
-				for (j=0;j<data->nnav;j++)
+				for (j=0;j<shared.shareddata.nnav;j++)
 					{
-					if (data->navs[j].nselected > 0)
+					if (shared.shareddata.navs[j].nselected > 0)
 						XtSetArg(args[ac], XmNsensitive, True);
 					}
 				}
@@ -2390,7 +2564,7 @@ mbview_resize( Widget w, XtPointer client_data, XEvent *event, Boolean *unused)
 	    instance = (int)client_data;
 	    view = &(mbviews[instance]);
 	    data = &(view->data);
-	    
+		    
 	    /* get new shell size */
 	    XtVaGetValues(view->topLevelShell, 
 	    XmNwidth, &width, 
@@ -2444,6 +2618,411 @@ fprintf(stderr,"Calling mbview_plotlowhigh from mbview_resize\n");
 	    }
 }
 /*------------------------------------------------------------------------------*/
+void
+do_mbview_projection_popup( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+	int	instance;
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
+
+	/* get instance */
+	ac = 0;
+	XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
+	XtGetValues(w, args, ac);
+
+fprintf(stderr,"do_mbview_projection_popup: instance:%d\n", instance);
+	    
+	/* get view */
+	view = &(mbviews[instance]);
+	data = &(view->data);
+
+    	XtManageChild(view->mb3dview.mbview_bulletinBoard_projection);
+
+	/* set values of widgets */
+	if (data->display_projection_mode == MBV_PROJECTION_GEOGRAPHIC)
+		{
+	    	XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_geographic, 
+			TRUE, FALSE);
+		XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_utm, 
+			FALSE, FALSE);
+		XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_spheroid, 
+			FALSE, FALSE);
+		}
+	else if (data->display_projection_mode == MBV_PROJECTION_PROJECTED
+		|| data->display_projection_mode == MBV_PROJECTION_ALREADYPROJECTED)
+		{
+		XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_geographic, 
+			FALSE, FALSE);
+	    	XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_utm, 
+			TRUE, FALSE);
+		XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_spheroid, 
+			FALSE, FALSE);
+		}
+	else if (data->display_projection_mode == MBV_PROJECTION_SPHEROID)
+		{
+	    	XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_spheroid, 
+			TRUE, FALSE);
+		XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_utm, 
+			FALSE, FALSE);
+		XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_spheroid, 
+			FALSE, FALSE);
+		}
+		
+	/* set label */
+	do_mbview_set_projection_label(instance);
+	
+}
+
+
+/*------------------------------------------------------------------------------*/
+void
+do_mbview_set_projection_label(int instance)
+{
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
+	int	projectionid;
+	mb_path	tmptext;
+
+fprintf(stderr,"do_mbview_set_projection_label: instance:%d\n", instance);
+	    
+	/* get view */
+	view = &(mbviews[instance]);
+	data = &(view->data);
+		
+	/* set projection label */
+	sprintf(value_text,":::t\"Primary Grid Projection:\"");
+	if (data->primary_grid_projection_mode == MBV_PROJECTION_GEOGRAPHIC)
+		{
+		strcat(value_text, ":t\"  Geographic\"");
+		}
+	else if (data->primary_grid_projection_mode == MBV_PROJECTION_PROJECTED
+		|| data->primary_grid_projection_mode == MBV_PROJECTION_ALREADYPROJECTED)
+		{
+		if (sscanf(data->primary_grid_projection_id, "epsg%d", &projectionid) == 1
+			&& projectionid == 32661)
+			{
+			sprintf(tmptext,":t\"  Projected: %s\":t\"    North Polar Steographic\"",
+				data->secondary_grid_projection_id,
+				projectionid - 32600);
+			strcat(value_text, tmptext);
+			}
+		else if (sscanf(data->primary_grid_projection_id, "epsg%d", &projectionid) == 1
+			&& projectionid == 32761)
+			{
+			sprintf(tmptext,":t\"  Projected: %s\":t\"    South Polar Steographic\"",
+				data->secondary_grid_projection_id,
+				projectionid - 32600);
+			strcat(value_text, tmptext);
+			}
+		else if (sscanf(data->primary_grid_projection_id, "epsg%d", &projectionid) == 1
+			&& projectionid >= 32600 && projectionid < 32700)
+			{
+			sprintf(tmptext,":t\"  Projected: %s\":t\"    UTM Zone %d N\"",
+				data->primary_grid_projection_id,
+				projectionid - 32600);
+			strcat(value_text, tmptext);
+			}
+		else if (sscanf(data->primary_grid_projection_id, "epsg%d", &projectionid) == 1
+			&& projectionid >= 32700 && projectionid < 32800)
+			{
+			sprintf(tmptext,":t\"  Projected: %s\":t\"    UTM Zone %d N\"",
+				data->primary_grid_projection_id,
+				projectionid - 32700);
+			strcat(value_text, tmptext);
+			}
+		else
+			{
+			sprintf(tmptext,":t\"  Projected: %s\"", data->primary_grid_projection_id);
+			strcat(value_text, tmptext);
+			}
+		}
+	else if (data->primary_grid_projection_mode == MBV_PROJECTION_SPHEROID)
+		{
+		strcat(value_text, ":t\"  Spheroid\"");
+		}
+
+	if (data->secondary_nxy > 0)
+		{
+		strcat(value_text,":t\"Secondary Grid Projection:\"");
+		if (data->secondary_grid_projection_mode == MBV_PROJECTION_GEOGRAPHIC)
+			{
+			strcat(value_text, ":t\"  Geographic\"");
+			}
+		else if (data->secondary_grid_projection_mode == MBV_PROJECTION_PROJECTED
+			|| data->secondary_grid_projection_mode == MBV_PROJECTION_ALREADYPROJECTED)
+			{
+			if (sscanf(data->secondary_grid_projection_id, "epsg%d", &projectionid) == 1
+				&& projectionid == 32661)
+				{
+				sprintf(tmptext,":t\"  Projected: %s\":t\"    North Polar Steographic\"",
+					data->secondary_grid_projection_id,
+					projectionid - 32600);
+				strcat(value_text, tmptext);
+				}
+			else if (sscanf(data->secondary_grid_projection_id, "epsg%d", &projectionid) == 1
+				&& projectionid == 32761)
+				{
+				sprintf(tmptext,":t\"  Projected: %s\":t\"    South Polar Steographic\"",
+					data->secondary_grid_projection_id,
+					projectionid - 32600);
+				strcat(value_text, tmptext);
+				}
+			else if (sscanf(data->secondary_grid_projection_id, "epsg%d", &projectionid) == 1
+				&& projectionid >= 32600 && projectionid < 32700)
+				{
+				sprintf(tmptext,":t\"  Projected: %s\":t\"    UTM Zone %d N\"",
+					data->secondary_grid_projection_id,
+					projectionid - 32600);
+				strcat(value_text, tmptext);
+				}
+			else if (sscanf(data->secondary_grid_projection_id, "epsg%d", &projectionid) == 1
+				&& projectionid >= 32700 && projectionid < 32800)
+				{
+				sprintf(tmptext,":t\"  Projected: %s\":t\"    UTM Zone %d S\"",
+					data->secondary_grid_projection_id,
+					projectionid - 32700);
+				strcat(value_text, tmptext);
+				}
+			else
+				{
+				sprintf(tmptext,":t\"  Projected: %s\"", data->secondary_grid_projection_id);
+				strcat(value_text, tmptext);
+				}
+			}
+		else if (data->secondary_grid_projection_mode == MBV_PROJECTION_SPHEROID)
+			{
+			strcat(value_text, ":t\"  Spheroid\"");
+			}
+		}
+
+	strcat(value_text,":t\"Display Grid Projection:\"");
+	if (data->display_projection_mode == MBV_PROJECTION_GEOGRAPHIC)
+		{
+		strcat(value_text, ":t\"  Geographic\"");
+		}
+	else if (data->display_projection_mode == MBV_PROJECTION_PROJECTED
+		|| data->display_projection_mode == MBV_PROJECTION_ALREADYPROJECTED)
+		{
+		if (sscanf(data->display_projection_id, "epsg%d", &projectionid) == 1
+			&& projectionid == 32661)
+			{
+			sprintf(tmptext,":t\"  Projected: %s\":t\"    North Polar Steographic\"",
+				data->secondary_grid_projection_id,
+				projectionid - 32600);
+			strcat(value_text, tmptext);
+			}
+		else if (sscanf(data->display_projection_id, "epsg%d", &projectionid) == 1
+			&& projectionid == 32761)
+			{
+			sprintf(tmptext,":t\"  Projected: %s\":t\"    South Polar Steographic\"",
+				data->secondary_grid_projection_id,
+				projectionid - 32600);
+			strcat(value_text, tmptext);
+			}
+		else if (sscanf(data->display_projection_id, "epsg%d", &projectionid) == 1
+			&& projectionid >= 32600 && projectionid < 32700)
+			{
+			sprintf(tmptext,":t\"  Projected: %s\":t\"    UTM Zone %d N",
+				data->display_projection_id,
+				projectionid - 32600);
+			strcat(value_text, tmptext);
+			}
+		else if (sscanf(data->display_projection_id, "epsg%d", &projectionid) == 1
+			&& projectionid >= 32700 && projectionid < 32800)
+			{
+			sprintf(tmptext,":t\"  Projected: %s\":t\"    UTM Zone %d S\"",
+				data->display_projection_id,
+				projectionid - 32700);
+			strcat(value_text, tmptext);
+			}
+		else
+			{
+			sprintf(tmptext,":t\"  Projected: %s\"", data->display_projection_id);
+			strcat(value_text, tmptext);
+			}
+		}
+	else if (data->display_projection_mode == MBV_PROJECTION_SPHEROID)
+		{
+		strcat(value_text, ":t\"  Spheroid\"");
+		}
+        set_mbview_label_multiline_string(view->mb3dview.mbview_label_projection, value_text);
+	
+}
+
+
+/*------------------------------------------------------------------------------*/
+void
+do_mbview_projection_popdown( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+	int	instance;
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
+
+	/* get instance */
+	ac = 0;
+	XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
+	XtGetValues(w, args, ac);
+
+if (mbv_verbose >= 2)
+fprintf(stderr,"do_mbview_projection_popdown: instance:%d\n", instance);
+	    
+	/* get view */
+	view = &(mbviews[instance]);
+	data = &(view->data);
+
+    	XtUnmanageChild(view->mb3dview.mbview_bulletinBoard_projection);
+}
+
+
+/*------------------------------------------------------------------------------*/
+void
+do_mbview_display_spheroid( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+	int	instance;
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
+    
+	/* get instance */
+	ac = 0;
+	XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
+	XtGetValues(w, args, ac);
+
+fprintf(stderr,"do_mbview_display_spheroid: instance:%d\n", instance);
+	    
+	/* get view */
+	view = &(mbviews[instance]);
+	data = &(view->data);
+
+	/* reproject as spheroid if the togglebutton has been set */
+	if (XmToggleButtonGetState(view->mb3dview.mbview_toggleButton_spheroid))
+		{
+		data->display_projection_mode = MBV_PROJECTION_SPHEROID;
+		view->plot_done = MB_NO;
+		view->projected = MB_NO;
+		view->globalprojected = MB_NO;
+		view->viewboundscount = MBV_BOUNDSFREQUENCY;
+		
+		/* set label */
+		do_mbview_set_projection_label(instance);
+		
+		/* clear zscale for grid */
+		mbview_zscaleclear(instance);
+
+		/* project and scale data other than the grid */
+		mbview_zscale(instance);
+
+		/* draw */
+fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_display_spheroid\n");
+		mbview_plotlowhigh(instance);
+		}
+}
+/*------------------------------------------------------------------------------*/
+
+void
+do_mbview_display_geographic( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+	int	instance;
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
+    
+	/* get instance */
+	ac = 0;
+	XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
+	XtGetValues(w, args, ac);
+
+fprintf(stderr,"do_mbview_display_geographic: instance:%d\n", instance);
+	    
+	/* get view */
+	view = &(mbviews[instance]);
+	data = &(view->data);
+
+	/* reproject as geographic if the togglebutton has been set */
+	if (XmToggleButtonGetState(view->mb3dview.mbview_toggleButton_geographic))
+		{
+		data->display_projection_mode = MBV_PROJECTION_GEOGRAPHIC;
+		view->plot_done = MB_NO;
+		view->projected = MB_NO;
+		view->globalprojected = MB_NO;
+		view->viewboundscount = MBV_BOUNDSFREQUENCY;
+
+		/* set label */
+		do_mbview_set_projection_label(instance);
+		
+		/* clear zscale for grid */
+		mbview_zscaleclear(instance);
+
+		/* project and scale data other than the grid */
+		mbview_zscale(instance);
+
+		/* draw */
+fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_display_geographic\n");
+		mbview_plotlowhigh(instance);
+		}
+}
+
+
+/*------------------------------------------------------------------------------*/
+void
+do_mbview_display_utm( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+	int	instance;
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
+	int	projectionid, utmzone;
+	double	reference_lon;
+    
+	/* get instance */
+	ac = 0;
+	XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
+	XtGetValues(w, args, ac);
+
+fprintf(stderr,"do_mbview_display_utm: instance:%d\n", instance);
+	    
+	/* get view */
+	view = &(mbviews[instance]);
+	data = &(view->data);
+
+	/* reproject as utm if the togglebutton has been set */
+	if (XmToggleButtonGetState(view->mb3dview.mbview_toggleButton_utm))
+		{
+		data->display_projection_mode = MBV_PROJECTION_PROJECTED;
+		view->plot_done = MB_NO;
+		view->projected = MB_NO;
+		view->globalprojected = MB_NO;
+		view->viewboundscount = MBV_BOUNDSFREQUENCY;
+
+		reference_lon = 0.5 * (data->primary_xmin + data->primary_xmax);
+		if (reference_lon > 180.0)
+			reference_lon -= 360.0;
+		utmzone = (int)(((reference_lon + 183.0)
+				/ 6.0) + 0.5);
+		if (0.5 * (data->primary_ymin + data->primary_ymax) >= 0.0)
+			projectionid = 32600 + utmzone;
+		else
+			projectionid = 32700 + utmzone;
+		sprintf(data->display_projection_id, "epsg%d", projectionid);
+		
+		/* set label */
+		do_mbview_set_projection_label(instance);
+		
+		/* clear zscale for grid */
+		mbview_zscaleclear(instance);
+
+		/* project and scale data other than the grid */
+		mbview_zscale(instance);
+
+		/* draw */
+fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_display_utm\n");
+		mbview_plotlowhigh(instance);
+		}
+}
+
+/*------------------------------------------------------------------------------*/
 	
 void
 do_mbview_glwda_expose( Widget w, XtPointer client_data, XtPointer call_data)
@@ -2491,6 +3070,8 @@ do_mbview_glwda_input( Widget w, XtPointer client_data, XtPointer call_data)
 	char buffer[1];
 	int actual;
 	int shade_mode;
+	int replotall;
+	int i;
 
     /* get instance */
     ac = 0;
@@ -2503,6 +3084,9 @@ acs->width, acs->height, instance);
     /* get view */
     view = &(mbviews[instance]);
     data = &(view->data);
+    
+    /* set replotall to MB_NO */
+    replotall = MB_NO;
 	
     /* get event */
     event = acs->event;
@@ -2571,6 +3155,9 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 				    view->button_down_x, 
 				    data->height - view->button_down_y);
 
+		    /* set replotall */
+		    replotall = MB_YES;
+
 		    /* replot */
 		    mbview_plotlow(instance);
 		    }
@@ -2585,6 +3172,9 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 		    mbview_pick_route_select(instance, MBV_PICK_DOWN,
 				    view->button_down_x, 
 				    data->height - view->button_down_y);
+
+		    /* set replotall */
+		    replotall = MB_YES;
 
 		    /* replot */
 		    mbview_plotlow(instance);
@@ -2699,6 +3289,9 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 				    view->button_down_x, 
 				    data->height - view->button_down_y);
 
+		    /* set replotall */
+		    replotall = MB_YES;
+
 		    /* replot */
 		    mbview_plotlow(instance);
 		    }
@@ -2714,6 +3307,9 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 				    view->button_down_x, 
 				    data->height - view->button_down_y);
 
+		    /* set replotall */
+		    replotall = MB_YES;
+
 		    /* replot */
 		    mbview_plotlow(instance);
 		    }
@@ -2728,6 +3324,9 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 		    mbview_pick_nav_select(instance, MB_YES, MBV_PICK_DOWN,
 				    view->button_down_x, 
 				    data->height - view->button_down_y);
+
+		    /* set replotall */
+		    replotall = MB_YES;
 
 		    /* replot */
 		    mbview_plotlow(instance);
@@ -2844,6 +3443,9 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 				    view->button_down_x, 
 				    data->height - view->button_down_y);
 
+		    /* set replotall */
+		    replotall = MB_YES;
+
 		    /* replot */
 		    mbview_plotlow(instance);
 		    }
@@ -2858,6 +3460,9 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 		    mbview_pick_route_delete(instance, 
 				    view->button_down_x, 
 				    data->height - view->button_down_y);
+
+		    /* set replotall */
+		    replotall = MB_YES;
 
 		    /* replot */
 		    mbview_plotlow(instance);
@@ -2874,11 +3479,20 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 				    view->button_down_x, 
 				    data->height - view->button_down_y);
 
+		    /* set replotall */
+		    replotall = MB_YES;
+
 		    /* replot */
 		    mbview_plotlow(instance);
 		    }
 		    
 		} /* end of right button events */
+
+	  /* if needed replot all active instances */
+	  if (replotall == MB_YES)
+		{
+		mbview_plotlowall(instance);
+		}
 			
       } /* end of button press events */		    		    		
 
@@ -2944,6 +3558,9 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 				    view->button_move_x, 
 				    data->height - view->button_move_y);
 
+		    /* set replotall */
+		    replotall = MB_YES;
+
 		    /* replot */
 		    mbview_plotlow(instance);
 		    }
@@ -2958,6 +3575,9 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 		    mbview_pick_route_select(instance, MBV_PICK_MOVE,
 				    view->button_move_x, 
 				    data->height - view->button_move_y);
+
+		    /* set replotall */
+		    replotall = MB_YES;
 
 		    /* replot */
 		    mbview_plotlow(instance);
@@ -3015,6 +3635,9 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 				}
 			}
 			
+		    /* set flag to reset view bounds */
+		    view->viewboundscount++;
+			
 		    /* replot */
 		    mbview_plotlow(instance);
 		    }
@@ -3043,6 +3666,9 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 			    XmTextFieldSetString(view->mb3dview.mbview_textField_model_elevation, 
 					    value_text);
 			    }
+			
+		    /* set flag to reset view bounds */
+		    view->viewboundscount++;
 			
 		    /* replot */
 		    mbview_plotlow(instance);
@@ -3118,6 +3744,9 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 					    value_text);
 			    }
 			
+		    /* set flag to reset view bounds */
+		    view->viewboundscount++;
+			
 		    /* replot */
 		    mbview_plotlow(instance);
 		    }
@@ -3148,6 +3777,9 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 				    view->button_move_x, 
 				    data->height - view->button_move_y);
 
+		    /* set replotall */
+		    replotall = MB_YES;
+
 		    /* replot */
 		    mbview_plotlow(instance);
 		    }
@@ -3163,6 +3795,9 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 				    view->button_move_x, 
 				    data->height - view->button_move_y);
 
+		    /* set replotall */
+		    replotall = MB_YES;
+
 		    /* replot */
 		    mbview_plotlow(instance);
 		    }
@@ -3177,6 +3812,9 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 		    mbview_pick_nav_select(instance, MB_YES, MBV_PICK_MOVE,
 				    view->button_move_x, 
 				    data->height - view->button_move_y);
+
+		    /* set replotall */
+		    replotall = MB_YES;
 
 		    /* replot */
 		    mbview_plotlow(instance);
@@ -3222,6 +3860,9 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 				}
 			}
 			
+		    /* set flag to reset view bounds */
+		    view->viewboundscount++;
+			
 		    /* replot */
 		    mbview_plotlow(instance);
 		    }
@@ -3257,6 +3898,9 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 		    
 		    /* rescale data other than the grid */
 		    mbview_zscale(instance);
+			
+		    /* set flag to reset view bounds */
+		    view->viewboundscount++;
  			
 		    /* replot */
 		    mbview_plotlow(instance);
@@ -3383,6 +4027,9 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 				}
 			}
 			
+		    /* set flag to reset view bounds */
+		    view->viewboundscount++;
+			
 		    /* replot */
 		    mbview_plotlow(instance);
 		    }
@@ -3413,6 +4060,9 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 		    /* set cursor for sites */
 		    XDefineCursor(view->dpy,view->xid,view->TargetRedCursor);
 
+		    /* set replotall */
+		    replotall = MB_YES;
+
 		    /* replot */
 		    mbview_plotlow(instance);
 		    }
@@ -3422,6 +4072,9 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 		    {				    		
 		    /* set cursor for routes */
 		    XDefineCursor(view->dpy,view->xid,view->TargetRedCursor);
+
+		    /* set replotall */
+		    replotall = MB_YES;
 
 		    /* replot */
 		    mbview_plotlow(instance);
@@ -3438,11 +4091,20 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 				    view->button_move_x, 
 				    data->height - view->button_move_y);
 
+		    /* set replotall */
+		    replotall = MB_YES;
+
 		    /* replot */
 		    mbview_plotlow(instance);
 		    }
 
 		} /* end of right button events */
+
+	  /* if needed replot all active instances */
+	  if (replotall == MB_YES)
+		{
+		mbview_plotlowall(instance);
+		}
 			
       } /* end of motion notify events */		    		    		
 
@@ -3497,13 +4159,48 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 		    /* replot */
 		    mbview_plotlow(instance);
 		    }
+					    
+		/* handle editing sites */
+		else if (data->mouse_mode == MBV_MOUSE_SITE)
+		    {				    		
+		    /* set replotall */
+		    replotall = MB_YES;
+		    }
+					    
+		/* handle editing routes */
+		else if (data->mouse_mode == MBV_MOUSE_ROUTE)
+		    {				    		
+		    /* set replotall */
+		    replotall = MB_YES;
+		    }
 		}
 
 	   /* If middle mouse button is released */
 	  else if (view->button2down == MB_YES)
 		{		    		    		
+		/* handle move */
+		if (data->mouse_mode == MBV_MOUSE_MOVE)
+		    {		
+		    /* set flag to reset view bounds */
+		    view->viewboundscount = MBV_BOUNDSFREQUENCY;
+		    }
+	    
+		/* handle 3D rotate */
+		else if (data->mouse_mode == MBV_MOUSE_ROTATE)
+		    {
+		    /* set flag to reset view bounds */
+		    view->viewboundscount = MBV_BOUNDSFREQUENCY;
+		    }
+					    
+		/* handle viewpoint rotation */
+		else if (data->mouse_mode == MBV_MOUSE_VIEWPOINT)
+		    {				    
+		    /* set flag to reset view bounds */
+		    view->viewboundscount = MBV_BOUNDSFREQUENCY;
+		    }
+		    
 		/* handle area picking */
-		if (data->mouse_mode == MBV_MOUSE_AREA
+		else if (data->mouse_mode == MBV_MOUSE_AREA
 		    && (view->button_down_x != view->button_up_x
 		    	|| view->button_down_y != view->button_up_y))
 		    {				    
@@ -3519,6 +4216,20 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 		    mbview_plotlow(instance);
 		    }
 					    
+		/* handle editing sites */
+		else if (data->mouse_mode == MBV_MOUSE_SITE)
+		    {				    		
+		    /* set replotall */
+		    replotall = MB_YES;
+		    }
+					    
+		/* handle editing routes */
+		else if (data->mouse_mode == MBV_MOUSE_ROUTE)
+		    {				    		
+		    /* set replotall */
+		    replotall = MB_YES;
+		    }
+					    
 		/* handle selecting navigation */
 		else if (data->mouse_mode == MBV_MOUSE_NAV)
 		    {				    		
@@ -3526,6 +4237,9 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 		    mbview_pick_nav_select(instance, MB_YES, MBV_PICK_UP,
 				    view->button_move_x, 
 				    data->height - view->button_move_y);
+
+		    /* set replotall */
+		    replotall = MB_YES;
 
 		    /* replot */
 		    mbview_plotlow(instance);
@@ -3535,6 +4249,40 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 	   /* If right mouse button is released */
 	  else if (view->button3down == MB_YES)
 		{
+		/* change the map scaling */
+		if (data->mouse_mode == MBV_MOUSE_MOVE)
+		    {
+		    /* set flag to reset view bounds */
+		    view->viewboundscount = MBV_BOUNDSFREQUENCY;
+		    }		
+	    
+		/* handle vertical exagerate */
+		else if (data->mouse_mode == MBV_MOUSE_ROTATE)
+		    {
+		    /* set flag to reset view bounds */
+		    view->viewboundscount = MBV_BOUNDSFREQUENCY;
+		    }
+					    
+		/* handle vertical exagerate */
+		else if (data->mouse_mode == MBV_MOUSE_VIEWPOINT)
+		    {				    
+		    /* set flag to reset view bounds */
+		    view->viewboundscount = MBV_BOUNDSFREQUENCY;
+		    }
+					    
+		/* handle editing sites */
+		else if (data->mouse_mode == MBV_MOUSE_SITE)
+		    {				    		
+		    /* set replotall */
+		    replotall = MB_YES;
+		    }
+					    
+		/* handle editing routes */
+		else if (data->mouse_mode == MBV_MOUSE_ROUTE)
+		    {				    		
+		    /* set replotall */
+		    replotall = MB_YES;
+		    }
 					    
 		/* handle deselecting navigation */
 		if (data->mouse_mode == MBV_MOUSE_NAV)
@@ -3543,6 +4291,9 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 		    mbview_pick_nav_select(instance, MB_NO, MBV_PICK_UP,
 				    view->button_move_x, 
 				    data->height - view->button_move_y);
+
+		    /* set replotall */
+		    replotall = MB_YES;
 
 		    /* replot */
 		    mbview_plotlow(instance);
@@ -3558,10 +4309,19 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 	  /* replot in high rez if last draw was low rez */
 	  if (view->lastdrawrez == MBV_REZ_LOW)
 	  	{
+		/* update action buttons according to pick state */
 		mbview_action_sensitivity(instance);
+		
+		/* replot the current instance */
 		mbview_plothigh(instance);
 		}
-    
+
+	  /* if needed replot all active instances */
+	  if (replotall == MB_YES)
+		{
+		mbview_plothighall(instance);
+		}
+
 	  /* reset cursor */
 	  XDefineCursor(view->dpy,view->xid,view->TargetBlackCursor);
 	  
@@ -3768,17 +4528,58 @@ fprintf(stderr, "Freeing arrays for mbview instance:%d\n", instance);
 		    && data->region.segments[i].lspoints != NULL)
    		    status = mb_free(mbv_verbose, &data->region.segments[i].lspoints, error);
 		    }
-	    if (status == MB_SUCCESS
-		    && data->navpick.segment.nls_alloc != 0
-		    && data->navpick.segment.lspoints != NULL)
-		    status = mb_free(mbv_verbose, &data->navpick.segment.lspoints, error);
-	    for (i=0;i<4;i++)
+		    
+	    /* deallocate shared data if no more active instances */
+	    if (mbv_ninstance <= 0)
+	    	{
+		shared.init_sitelist = MBV_WINDOW_NULL;
+		XmListDeleteAllItems(shared.mb3d_sitelist.mbview_list_sitelist);
+    		XtPopdown(XtParent(shared.mainWindow_sitelist));
+
+		shared.init_routelist = MBV_WINDOW_NULL;
+		XmListDeleteAllItems(shared.mb3d_routelist.mbview_list_routelist);
+    		XtPopdown(XtParent(shared.mainWindow_routelist));
+
+		shared.init_navlist = MBV_WINDOW_NULL;
+ 		XmListDeleteAllItems(shared.mb3d_navlist.mbview_list_navlist);
+   		XtPopdown(XtParent(shared.mainWindow_navlist));
+		
+		if (status == MB_SUCCESS
+		    && shared.shareddata.navpick.segment.nls_alloc != 0
+		    && shared.shareddata.navpick.segment.lspoints != NULL)
+		    status = mb_free(mbv_verbose, &shared.shareddata.navpick.segment.lspoints, error);
+		for (i=0;i<4;i++)
 		    {
-     		    if (status == MB_SUCCESS
-		    && data->navpick.xsegments[i].lspoints != 0
-		    && data->navpick.xsegments[i].lspoints != NULL)
-   		    status = mb_free(mbv_verbose, &data->navpick.xsegments[i].lspoints, error);
+		    if (status == MB_SUCCESS
+		    && shared.shareddata.navpick.xsegments[i].lspoints != 0
+		    && shared.shareddata.navpick.xsegments[i].lspoints != NULL)
+		    status = mb_free(mbv_verbose, &shared.shareddata.navpick.xsegments[i].lspoints, error);
 		    }
+		if (status == MB_SUCCESS
+		    && shared.shareddata.nsite_alloc != 0
+		    && shared.shareddata.sites != NULL)
+		    {
+		    status = mb_free(mbv_verbose, &(shared.shareddata.sites), error);
+		    shared.shareddata.nsite_alloc = 0;
+		    shared.shareddata.sites = NULL;
+		    }
+		if (status == MB_SUCCESS
+		    && shared.shareddata.nroute_alloc != 0
+		    && shared.shareddata.routes != NULL)
+		    {
+		    status = mb_free(mbv_verbose, &(shared.shareddata.routes), error);
+		    shared.shareddata.nroute_alloc = 0;
+		    shared.shareddata.routes = NULL;
+		    }
+		if (status == MB_SUCCESS
+		    && shared.shareddata.nnav_alloc != 0
+		    && shared.shareddata.navs != NULL)
+		    {
+		    status = mb_free(mbv_verbose, &(shared.shareddata.navs), error);
+		    shared.shareddata.nnav_alloc = 0;
+		    shared.shareddata.navs = NULL;
+		    }
+		}
 
 	    if (status != MB_SUCCESS)
 		    {
@@ -3787,6 +4588,10 @@ fprintf(stderr, "Freeing arrays for mbview instance:%d\n", instance);
 			    function_name);
 		    exit(0);
 		    }
+		    
+	    /* if no more active instances reset shared data */
+	    if (mbv_ninstance <= 0)
+	    	mbview_reset_shared(MB_NO);
 
 	    /* initialize view for next use */
 fprintf(stderr, "Calling mbview_reset() for mbview instance:%d\n", instance);
@@ -3831,6 +4636,11 @@ int mbview_quit(int verbose, int *error)
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
 		}
+    
+	/* Destroy the list windows */
+    	XtUnmanageChild(shared.mb3d_sitelist.MB3DSiteList);
+    	XtUnmanageChild(shared.mb3d_routelist.MB3DRouteList);
+    	XtUnmanageChild(shared.mb3d_navlist.MB3DNavList);
     
 	/* loope over all possible instances and dismiss anything that's up */
 	for (i=0;i<MBV_MAX_WINDOWS;i++)
@@ -3889,6 +4699,9 @@ instance, data->display_mode);
     view->contourlorez = MB_NO;
     view->contourhirez = MB_NO;
     view->contourfullrez = MB_NO;
+			
+    /* set flag to reset view bounds */
+    view->viewboundscount = MBV_BOUNDSFREQUENCY;
 
     /* draw */
 if (mbv_verbose >= 2)
@@ -3930,6 +4743,9 @@ instance, data->display_mode);
     view->contourlorez = MB_NO;
     view->contourhirez = MB_NO;
     view->contourfullrez = MB_NO;
+			
+    /* set flag to reset view bounds */
+    view->viewboundscount = MBV_BOUNDSFREQUENCY;
     
     /* draw */
 if (mbv_verbose >= 2)
@@ -4329,7 +5145,7 @@ do_mbview_site( Widget w, XtPointer client_data, XtPointer call_data)
 	    set_mbview_mouse_mode(instance, data->mouse_mode);
 
 	    /* make sure sites aren't selected if edit modes off */
-	    data->site_selected = MBV_SELECT_NONE;
+	    shared.shareddata.site_selected = MBV_SELECT_NONE;
 	    data->pickinfo_mode = data->pick_type;
 
 	    /* set pick annotation */
@@ -4381,8 +5197,8 @@ do_mbview_route( Widget w, XtPointer client_data, XtPointer call_data)
 	    set_mbview_mouse_mode(instance, data->mouse_mode);
 
 	    /* make sure routes aren't selected if edit modes off */
-	    data->route_selected = MBV_SELECT_NONE;
-	    data->route_point_selected = MBV_SELECT_NONE;
+	    shared.shareddata.route_selected = MBV_SELECT_NONE;
+	    shared.shareddata.route_point_selected = MBV_SELECT_NONE;
 	    data->pickinfo_mode = data->pick_type;
 
 	    /* set pick annotation */
@@ -4829,17 +5645,17 @@ fprintf(stderr,"do_mbview_mouse_rmode: \n");
 	    
 	/* make sure sites or routes aren't selected if edit modes off */
 	if (data->mouse_mode != MBV_MOUSE_SITE
-	    && data->site_selected != MBV_SELECT_NONE)
+	    && shared.shareddata.site_selected != MBV_SELECT_NONE)
 	    {
-	    data->site_selected = MBV_SELECT_NONE;
+	    shared.shareddata.site_selected = MBV_SELECT_NONE;
 	    data->pickinfo_mode = data->pick_type;
 	    replot = MB_YES;
 	    }
 	if (data->mouse_mode != MBV_MOUSE_ROUTE
-	    && data->route_selected != MBV_SELECT_NONE)
+	    && shared.shareddata.route_selected != MBV_SELECT_NONE)
 	    {
-	    data->route_selected = MBV_SELECT_NONE;
-	    data->route_point_selected = MBV_SELECT_NONE;
+	    shared.shareddata.route_selected = MBV_SELECT_NONE;
+	    shared.shareddata.route_point_selected = MBV_SELECT_NONE;
 	    data->pickinfo_mode = data->pick_type;
 	    replot = MB_YES;
 	    }
@@ -4931,17 +5747,17 @@ fprintf(stderr,"do_mbview_mouse_mode: \n");
 	    
 	/* make sure sites or routes aren't selected if edit modes off */
 	if (data->mouse_mode != MBV_MOUSE_SITE
-	    && data->site_selected != MBV_SELECT_NONE)
+	    && shared.shareddata.site_selected != MBV_SELECT_NONE)
 	    {
-	    data->site_selected = MBV_SELECT_NONE;
+	    shared.shareddata.site_selected = MBV_SELECT_NONE;
 	    data->pickinfo_mode = data->pick_type;
 	    replot = MB_YES;
 	    }
 	if (data->mouse_mode != MBV_MOUSE_ROUTE
-	    && data->route_selected != MBV_SELECT_NONE)
+	    && shared.shareddata.route_selected != MBV_SELECT_NONE)
 	    {
-	    data->route_selected = MBV_SELECT_NONE;
-	    data->route_point_selected = MBV_SELECT_NONE;
+	    shared.shareddata.route_selected = MBV_SELECT_NONE;
+	    shared.shareddata.route_point_selected = MBV_SELECT_NONE;
 	    data->pickinfo_mode = data->pick_type;
 	    replot = MB_YES;
 	    }
@@ -6152,6 +6968,9 @@ fprintf(stderr,"do_mbview_3dparmsapply: instance:%d\n", instance);
     	    mbview_setcolorparms(instance);
 	    mbview_colorclear(instance);
 	    }
+			
+    /* set flag to reset view bounds */
+    view->viewboundscount = MBV_BOUNDSFREQUENCY;
     
     /* draw */
 if (mbv_verbose >= 2)
@@ -6297,6 +7116,9 @@ fprintf(stderr,"do_mbview_2dparmsapply: instance:%d\n", instance);
     	    mbview_setcolorparms(instance);
 	    mbview_colorclear(instance);
 	    }
+			
+    /* set flag to reset view bounds */
+    view->viewboundscount = MBV_BOUNDSFREQUENCY;
     
     /* draw */
 if (mbv_verbose >= 2)
@@ -6430,58 +7252,626 @@ fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_resolutionchange\n");
 /*------------------------------------------------------------------------------*/
 
 void
-do_mbview_sitelistpopdown( Widget w, XtPointer client_data, XtPointer call_data)
-{
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
-	int	instance;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-
-	/* get instance */
-	ac = 0;
-	XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
-	XtGetValues(w, args, ac);
-
-if (mbv_verbose >= 2)
-fprintf(stderr,"do_mbview_sitelistpopdown: instance:%d\n", instance);
-	    
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
-
-    	XtUnmanageChild(view->mb3dview.mbview_bulletinBoard_sitelist);
-}
-/*------------------------------------------------------------------------------*/
-
-void
-do_mbview_sitelistapply( Widget w, XtPointer client_data, XtPointer call_data)
-{
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
-}
-/*------------------------------------------------------------------------------*/
-
-void
 do_mbview_sitelistpopup( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
-	int	instance;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-
-	/* get instance */
-	ac = 0;
-	XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
-	XtGetValues(w, args, ac);
 
 if (mbv_verbose >= 2)
-fprintf(stderr,"do_mbview_sitelistpopup: instance:%d\n", instance);
-	    
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
+fprintf(stderr,"do_mbview_sitelistpopup: \n");
 
-    	XtManageChild(view->mb3dview.mbview_bulletinBoard_sitelist);
-    
+    	XtPopup(XtParent(shared.mainWindow_sitelist), XtGrabNone);
+	shared.init_sitelist = MBV_WINDOW_VISIBLE;
+	mbview_updatesitelist(); 
+}
+/*------------------------------------------------------------------------------*/
+
+void
+do_mbview_routelistpopup( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+
+if (mbv_verbose >= 2)
+fprintf(stderr,"do_mbview_routelistpopup:\n");
+
+    	XtPopup(XtParent(shared.mainWindow_routelist), XtGrabNone);	
+	shared.init_routelist = MBV_WINDOW_VISIBLE;
+	mbview_updateroutelist();
+}
+/*------------------------------------------------------------------------------*/
+
+void
+do_mbview_navlistpopup( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+
+if (mbv_verbose >= 2)
+fprintf(stderr,"do_mbview_navlistpopup:\n");
+
+    	XtPopup(XtParent(shared.mainWindow_navlist), XtGrabNone);
+	shared.init_navlist = MBV_WINDOW_VISIBLE;
+	mbview_updatenavlist();
+}
+/*------------------------------------------------------------------------------*/
+void 
+mbview_sitelistresize( Widget w, XtPointer client_data, XEvent *event, Boolean *unused)
+{
+	int	instance;
+	Dimension	width;
+	Dimension	height;
+	XConfigureEvent *cevent = (XConfigureEvent *) event;
+	
+	/* do this only if a resize event happens */
+	if (cevent->type == ConfigureNotify)
+	    {
+	    /* get new shell size */
+	    XtVaGetValues(shared.mainWindow_sitelist, 
+	    XmNwidth, &width, 
+	    XmNheight, &height, 
+	    NULL);
+
+fprintf(stderr,"mbview_sitelistresize: %d %d\n", width, height);
+	    /* do this only if the shell was REALLY resized and not just moved */
+	    if (width != width - LEFT_WIDTH
+	    	|| height != height - LEFT_HEIGHT)
+	    	{
+
+		/* set ScrolledWindow size */
+		ac = 0;
+		XtSetArg(args[ac], XmNwidth, width - LEFT_WIDTH); ac++;
+		XtSetArg(args[ac], XmNheight, height - LEFT_HEIGHT); ac++;
+		XtSetValues(shared.mb3d_sitelist.mbview_scrolledWindow_sitelist, args, ac);
+printf(stderr,"mbview_sitelistresize: reset list width:%d %d\n", 
+width - LEFT_WIDTH, height - LEFT_HEIGHT);
+
+	    	}
+	    }
+}
+/*------------------------------------------------------------------------------*/
+void 
+mbview_routelistresize( Widget w, XtPointer client_data, XEvent *event, Boolean *unused)
+{
+	int	instance;
+	Dimension	width;
+	Dimension	height;
+	XConfigureEvent *cevent = (XConfigureEvent *) event;
+	
+	/* do this only if a resize event happens */
+	if (cevent->type == ConfigureNotify)
+	    {
+	    /* get new shell size */
+	    XtVaGetValues(shared.mainWindow_routelist, 
+	    XmNwidth, &width, 
+	    XmNheight, &height, 
+	    NULL);
+
+fprintf(stderr,"mbview_routelistresize: %d %d\n", width, height);
+	    /* do this only if the shell was REALLY resized and not just moved */
+	    if (width != width - LEFT_WIDTH
+	    	|| height != height - LEFT_HEIGHT)
+	    	{
+
+		/* set ScrolledWindow size */
+		ac = 0;
+		XtSetArg(args[ac], XmNwidth, width - LEFT_WIDTH); ac++;
+		XtSetArg(args[ac], XmNheight, height - LEFT_HEIGHT); ac++;
+		XtSetValues(shared.mb3d_routelist.mbview_scrolledWindow_routelist, args, ac);
+
+	    	}
+	    }
+}
+/*------------------------------------------------------------------------------*/
+void 
+mbview_navlistresize( Widget w, XtPointer client_data, XEvent *event, Boolean *unused)
+{
+	int	instance;
+	Dimension	width;
+	Dimension	height;
+	XConfigureEvent *cevent = (XConfigureEvent *) event;
+	
+	/* do this only if a resize event happens */
+	if (cevent->type == ConfigureNotify)
+	    {
+	    /* get new shell size */
+	    XtVaGetValues(shared.mainWindow_navlist, 
+	    XmNwidth, &width, 
+	    XmNheight, &height, 
+	    NULL);
+
+fprintf(stderr,"mbview_navlistresize: %d %d\n", width, height);
+	    /* do this only if the shell was REALLY resized and not just moved */
+	    if (width != width - LEFT_WIDTH
+	    	|| height != height - LEFT_HEIGHT)
+	    	{
+
+		/* set ScrolledWindow size */
+		ac = 0;
+		XtSetArg(args[ac], XmNwidth, width - LEFT_WIDTH); ac++;
+		XtSetArg(args[ac], XmNheight, height - LEFT_HEIGHT); ac++;
+		XtSetValues(shared.mb3d_navlist.mbview_scrolledWindow_navlist, args, ac);
+
+	    	}
+	    }
+}
+/*------------------------------------------------------------------------------*/
+
+void
+do_mbview_sitelistselect( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    int	*position_list = NULL;
+    int position_count = 0;
+    int	instance;
+    int	i;
+
+if (mbv_verbose >= 2)
+fprintf(stderr,"do_mbview_sitelistselect:\n");
+
+	/* get position of selected list item */
+	ac = 0;
+	XtSetArg(args[ac], XmNselectedPositionCount, (XtPointer) &position_count); ac++;
+	XtSetArg(args[ac], XmNselectedPositions, (XtPointer) &position_list); ac++;
+	XtGetValues(w, args, ac);
+
+	/* find selected site point if any */
+	shared.shareddata.site_selected = MBV_SELECT_NONE;
+	if (position_count == 1)
+		{
+		shared.shareddata.site_selected = position_list[0] - 1;
+		}
+		
+	/* get first valid instance */
+	instance = -1;
+	for (i=0;i<MBV_MAX_WINDOWS;i++)
+		{
+		if (instance < 0 && mbviews[i].data.active == MB_YES)
+			instance = i;
+		if (mbviews[i].data.active == MB_YES)
+			{
+			/* set instance to first good instance */
+			if (instance < 0)
+				instance = i;
+
+			/* set pick annotation */
+			mbviews[i].data.pickinfo_mode = MBV_PICK_SITE;
+			mbview_pick_text(i);
+			}
+		}
+		
+	if (instance >= 0)
+		{
+		/* draw */
+if (mbv_verbose >= 2)
+fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_sitelistselect\n");
+		mbview_plotlowhigh(instance);
+		mbview_plotlowhighall(instance);
+		}
+}
+/*------------------------------------------------------------------------------*/
+
+void
+do_mbview_routelistselect( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    int	*position_list = NULL;
+    int position_count = 0;
+    int	iroute, iposition;
+    int	iroutepos;
+    int	instance;
+    int	i;
+
+if (mbv_verbose >= 2)
+fprintf(stderr,"do_mbview_routelistselect:\n");
+
+	/* get position of selected list item */
+	ac = 0;
+	XtSetArg(args[ac], XmNselectedPositionCount, (XtPointer) &position_count); ac++;
+	XtSetArg(args[ac], XmNselectedPositions, (XtPointer) &position_list); ac++;
+	XtGetValues(shared.mb3d_routelist.mbview_list_routelist, args, ac);
+
+	/* find selected route point if any */
+	shared.shareddata.route_selected = MBV_SELECT_NONE;
+	shared.shareddata.route_point_selected = MBV_SELECT_NONE;
+	if (position_count == 1)
+		{
+		iposition = position_list[0] - 1;
+		iroutepos = 0;
+		for (iroute=0;iroute<shared.shareddata.nroute;iroute++)
+			{
+			if (iroutepos <= iposition
+				&& iroutepos + shared.shareddata.routes[iroute].npoints > iposition)
+				{
+				shared.shareddata.route_selected = iroute;
+				shared.shareddata.route_point_selected = iposition - iroutepos;
+				}
+			iroutepos += shared.shareddata.routes[iroute].npoints;
+			}
+		}
+		
+	/* get first valid instance */
+	instance = -1;
+	for (i=0;i<MBV_MAX_WINDOWS;i++)
+		{
+		if (instance < 0 && mbviews[i].data.active == MB_YES)
+			instance = i;
+		if (mbviews[i].data.active == MB_YES)
+			{
+			/* set instance to first good instance */
+			if (instance < 0)
+				instance = i;
+
+			/* set pick annotation */
+			mbviews[i].data.pickinfo_mode = MBV_PICK_ROUTE;
+			mbview_pick_text(i);
+			}
+		}
+		
+	if (instance >= 0)
+		{
+		/* draw */
+if (mbv_verbose >= 2)
+fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_routelistselect\n");
+		mbview_plotlowhigh(instance);
+		mbview_plotlowhighall(instance);
+		}
+}
+/*------------------------------------------------------------------------------*/
+
+void
+do_mbview_navlistselect( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    int	*position_list = NULL;
+    int position_count = 0;
+    int	snav, inav, jpt;
+    int	instance;
+    int	i, j;
+
+if (mbv_verbose >= 2)
+fprintf(stderr,"do_mbview_navlistselect:\n");
+
+	/* get position of selected list item */
+	ac = 0;
+	XtSetArg(args[ac], XmNselectedPositionCount, (XtPointer) &position_count); ac++;
+	XtSetArg(args[ac], XmNselectedPositions, (XtPointer) &position_list); ac++;
+	XtGetValues(shared.mb3d_navlist.mbview_list_navlist, args, ac);
+
+	/* first deselect all navigation */
+	shared.shareddata.navpick_type = MBV_PICK_NONE;
+	shared.shareddata.nav_selected[0] = MBV_SELECT_NONE;
+	shared.shareddata.nav_point_selected[0] = MBV_SELECT_NONE;
+	shared.shareddata.nav_selected[1] = MBV_SELECT_NONE;
+	shared.shareddata.nav_point_selected[1] = MBV_SELECT_NONE;
+	for (inav=0;inav<shared.shareddata.nnav;inav++)
+		{
+		shared.shareddata.navs[inav].nselected = 0;
+		for (jpt=0;jpt<shared.shareddata.navs[inav].npoints;jpt++)
+			{
+			shared.shareddata.navs[inav].navpts[jpt].selected = MB_NO;
+			}
+		}
+	
+	/* now select all nav points in selected files */
+	for (j=0;j<position_count;j++)
+		{
+		inav = position_list[j] - 1;
+		if (shared.shareddata.navs[inav].npoints > 0)
+			{
+
+			/* Select all nav points in inav */
+			for (jpt=0;jpt<shared.shareddata.navs[inav].npoints;jpt++)
+				{
+				shared.shareddata.navs[inav].navpts[jpt].selected = MB_YES;
+				shared.shareddata.navs[inav].nselected++;
+				}
+				
+			/* pick first and last navigation points */
+			if (j == 0)
+				{
+				shared.shareddata.navpick_type = MBV_PICK_ONEPOINT;
+				shared.shareddata.nav_selected[0] = inav;
+				shared.shareddata.nav_point_selected[0] = 0;
+				shared.shareddata.navpick.endpoints[0]
+					= shared.shareddata.navs[inav].navpts[shared.shareddata.nav_point_selected[0]].point;
+				}
+			if (j == position_count - 1)
+				{
+				shared.shareddata.navpick_type = MBV_PICK_TWOPOINT;
+				shared.shareddata.nav_selected[1] = inav;
+				shared.shareddata.nav_point_selected[1] = shared.shareddata.navs[inav].npoints - 1;
+				shared.shareddata.navpick.endpoints[1]
+					= shared.shareddata.navs[inav].navpts[shared.shareddata.nav_point_selected[1]].point;
+				}
+			}
+		}
+	
+	/* only call it a two point pick if the two points are different */
+	if (shared.shareddata.navpick_type == MBV_PICK_TWOPOINT
+			&& shared.shareddata.nav_selected[0] == shared.shareddata.nav_selected[1]
+			&& shared.shareddata.nav_point_selected[0] == shared.shareddata.nav_point_selected[1])
+		shared.shareddata.navpick_type = MBV_PICK_ONEPOINT;
+		
+	/* get first valid instance */
+	instance = -1;
+	for (i=0;i<MBV_MAX_WINDOWS;i++)
+		{
+		if (instance < 0 && mbviews[i].data.active == MB_YES)
+			instance = i;
+		if (mbviews[i].data.active == MB_YES)
+			{
+			/* set instance to first good instance */
+			if (instance < 0)
+				instance = i;
+			
+			/* generate 3D drape of pick marks */
+			mbview_navpicksize(i);
+
+			/* set pick annotation */
+			mbviews[i].data.pickinfo_mode = MBV_PICK_NAV;
+			mbview_pick_text(i);
+			}
+		}
+		
+	if (instance >= 0)
+		{
+		/* draw */
+if (mbv_verbose >= 2)
+fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_sitelistselect\n");
+		mbview_plotlowhigh(instance);
+		mbview_plotlowhighall(instance);
+		}
+}
+
+/*------------------------------------------------------------------------------*/
+void
+do_mbview_sitelist_delete( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    int	*position_list = NULL;
+    int position_count = 0;
+    int	isite;
+    int	instance;
+    int	i;
+
+if (mbv_verbose >= 2)
+fprintf(stderr,"do_mbview_sitelist_delete:\n");
+
+	/* get position of selected list item */
+	ac = 0;
+	XtSetArg(args[ac], XmNselectedPositionCount, (XtPointer) &position_count); ac++;
+	XtSetArg(args[ac], XmNselectedPositions, (XtPointer) &position_list); ac++;
+	XtGetValues(shared.mb3d_sitelist.mbview_list_sitelist, args, ac);
+
+	/* deselect any selected site */
+	shared.shareddata.site_selected = MBV_SELECT_NONE;
+		
+	/* get first valid instance */
+	instance = -1;
+	for (i=0;i<MBV_MAX_WINDOWS;i++)
+		{
+		if (instance < 0 && mbviews[i].data.active == MB_YES)
+			instance = i;
+		}
+
+	/* delete selected site points in reverse order if any */
+	for (i=position_count-1;i>=0;i--)
+		{
+		isite = position_list[i] - 1;
+		mbview_site_delete(instance, isite);
+		}
+		
+	/* reset pick annotation */
+	if (position_count > 0)
+		{
+		for (i=0;i<MBV_MAX_WINDOWS;i++)
+			{
+			if (mbviews[i].data.active == MB_YES)
+				{
+				/* set pick annotation */
+				if (mbviews[i].data.pickinfo_mode == MBV_PICK_SITE)
+					mbviews[i].data.pickinfo_mode == MBV_PICK_NONE;
+				mbview_pick_text(i);
+				}
+			}
+
+		/* update site list */
+		mbview_updatesitelist();
+		}
+
+	if (instance >= 0)
+		{
+		/* draw */
+if (mbv_verbose >= 2)
+fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_sitelist_delete\n");
+		mbview_plotlowhigh(instance);
+		mbview_plotlowhighall(instance);
+		}
+}
+
+/*------------------------------------------------------------------------------*/
+void
+do_mbview_routelist_delete( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    int	*position_list = NULL;
+    int position_count = 0;
+    int	iposition, iroutepos;
+    int	iroute, ipoint;
+    int	instance;
+    int	i;
+
+if (mbv_verbose >= 2)
+fprintf(stderr,"do_mbview_routelist_delete:\n");
+
+	/* get position of selected list item */
+	ac = 0;
+	XtSetArg(args[ac], XmNselectedPositionCount, (XtPointer) &position_count); ac++;
+	XtSetArg(args[ac], XmNselectedPositions, (XtPointer) &position_list); ac++;
+	XtGetValues(shared.mb3d_routelist.mbview_list_routelist, args, ac);
+
+	/* deselect any selected route */
+	shared.shareddata.route_selected = MBV_SELECT_NONE;
+		
+	/* get first valid instance */
+	instance = -1;
+	for (i=0;i<MBV_MAX_WINDOWS;i++)
+		{
+		if (instance < 0 && mbviews[i].data.active == MB_YES)
+			instance = i;
+		}
+
+	/* delete selected route points if any */
+	for (i=position_count-1;i>=0;i--)
+		{
+		iposition = position_list[i] - 1;
+		iroutepos = 0;
+		for (iroute=0;iroute<shared.shareddata.nroute;iroute++)
+			{
+			if (iroutepos <= iposition
+				&& iroutepos + shared.shareddata.routes[iroute].npoints > iposition)
+				{
+				ipoint = iposition - iroutepos;
+				mbview_route_delete(instance, iroute, ipoint);
+				}
+			iroutepos += shared.shareddata.routes[iroute].npoints;
+			}
+		}
+		
+	/* reset pick annotation */
+	if (position_count > 0)
+		{
+		for (i=0;i<MBV_MAX_WINDOWS;i++)
+			{
+			if (mbviews[i].data.active == MB_YES)
+				{
+				/* set pick annotation */
+				if (mbviews[i].data.pickinfo_mode == MBV_PICK_ROUTE)
+					mbviews[i].data.pickinfo_mode == MBV_PICK_NONE;
+				mbview_pick_text(i);
+				}
+			}
+
+		/* update route list */
+		mbview_updateroutelist();
+		}
+
+	if (instance >= 0)
+		{
+		/* draw */
+if (mbv_verbose >= 2)
+fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_routelist_delete\n");
+		mbview_plotlowhigh(instance);
+		mbview_plotlowhighall(instance);
+		}
+}
+/*------------------------------------------------------------------------------*/
+void
+do_mbview_navlist_delete( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    int	*position_list = NULL;
+    int position_count = 0;
+    int	inav;
+    int	instance;
+    int	i;
+
+if (mbv_verbose >= 2)
+fprintf(stderr,"do_mbview_navlist_delete:\n");
+
+	/* get position of selected list item */
+	ac = 0;
+	XtSetArg(args[ac], XmNselectedPositionCount, (XtPointer) &position_count); ac++;
+	XtSetArg(args[ac], XmNselectedPositions, (XtPointer) &position_list); ac++;
+	XtGetValues(shared.mb3d_navlist.mbview_list_navlist, args, ac);
+
+	/* deselect any selected nav */
+	shared.shareddata.navpick_type = MBV_PICK_NONE;
+	shared.shareddata.nav_selected[0] = MBV_SELECT_NONE;
+	shared.shareddata.nav_selected[1] = MBV_SELECT_NONE;
+		
+	/* get first valid instance */
+	instance = -1;
+	for (i=0;i<MBV_MAX_WINDOWS;i++)
+		{
+		if (instance < 0 && mbviews[i].data.active == MB_YES)
+			instance = i;
+		}
+
+	/* delete selected nav points in reverse order if any */
+	for (i=position_count-1;i>=0;i--)
+		{
+		inav = position_list[i] - 1;
+		mbview_nav_delete(instance, inav);
+		}
+		
+	/* reset pick annotation */
+	if (position_count > 0)
+		{
+		for (i=0;i<MBV_MAX_WINDOWS;i++)
+			{
+			if (mbviews[i].data.active == MB_YES)
+				{
+				/* set pick annotation */
+				if (mbviews[i].data.pickinfo_mode == MBV_PICK_NAV)
+					mbviews[i].data.pickinfo_mode == MBV_PICK_NONE;
+				mbview_pick_text(i);
+				}
+			}
+
+		/* update nav list */
+		mbview_updatenavlist();
+		}
+
+	if (instance >= 0)
+		{
+		/* draw */
+if (mbv_verbose >= 2)
+fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_navlist_delete\n");
+		mbview_plotlowhigh(instance);
+		mbview_plotlowhighall(instance);
+		}
+}
+
+/*------------------------------------------------------------------------------*/
+
+void
+do_mbview_sitelist_popdown( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+
+if (mbv_verbose >= 2)
+fprintf(stderr,"do_mbview_sitelist_popdown:\n");
+
+	shared.init_sitelist = MBV_WINDOW_NULL;
+	XmListDeleteAllItems(shared.mb3d_sitelist.mbview_list_sitelist);
+    	XtPopdown(XtParent(shared.mainWindow_sitelist));
+}
+/*------------------------------------------------------------------------------*/
+
+void
+do_mbview_routelist_popdown( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+
+if (mbv_verbose >= 2)
+fprintf(stderr,"do_mbview_routelist_popdown:\n");
+
+	shared.init_routelist = MBV_WINDOW_NULL;
+	XmListDeleteAllItems(shared.mb3d_routelist.mbview_list_routelist);
+    	XtPopdown(XtParent(shared.mainWindow_routelist));
+}
+/*------------------------------------------------------------------------------*/
+
+void
+do_mbview_navlist_popdown( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+
+if (mbv_verbose >= 2)
+fprintf(stderr,"do_mbview_navlist_popdown:\n");
+
+	shared.init_navlist = MBV_WINDOW_NULL;
+ 	XmListDeleteAllItems(shared.mb3d_navlist.mbview_list_navlist);
+   	XtPopdown(XtParent(shared.mainWindow_navlist));
 }
 /*------------------------------------------------------------------------------*/
 void
@@ -6558,6 +7948,17 @@ fprintf(stderr,"do_mbview_reset_view\n");
 		    
 	/* rescale data other than the grid */
 	mbview_zscale(instance);
+ 
+	/* clear color status array */
+	if (data->display_mode == MBV_DISPLAY_3D)
+		{
+		view->lastdrawrez = MBV_REZ_NONE;
+		mbview_setcolorparms(instance);
+		mbview_colorclear(instance);
+		}
+			
+	/* set flag to reset view bounds */
+	view->viewboundscount = MBV_BOUNDSFREQUENCY;
     
     /* draw */
 if (mbv_verbose >= 2)
@@ -6565,6 +7966,98 @@ fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_reset_view\n");
     mbview_plotlowhigh(instance);
 }
 
+/*------------------------------------------------------------------------------*/
+
+void
+do_mbview_clearpicks( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+	int	instance;
+	int	replotinstance;
+	int	replotall;
+	XEvent  *event;
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
+	int	inav, jpoint;
+
+	/* get instance */
+	ac = 0;
+	XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
+	XtGetValues(w, args, ac);
+
+	/* get view */
+	view = &(mbviews[instance]);
+	data = &(view->data);
+if (mbv_verbose >= 2)
+fprintf(stderr,"do_mbview_clearpicks\n");
+
+	/* clear local picks */
+	replotinstance = MB_NO;
+	replotall = MB_NO;
+	if (data->pick_type != MBV_PICK_NONE)
+		{
+		data->pick_type = MBV_PICK_NONE;
+		replotinstance = MB_YES;
+		}
+	if (data->region_type != MBV_REGION_NONE)
+		{
+		data->region_type = MBV_REGION_NONE;
+		replotinstance = MB_YES;
+		}
+	if (data->area_type != MBV_AREA_NONE)
+		{
+		data->area_type = MBV_AREA_NONE;
+		replotinstance = MB_YES;
+		}
+
+	/* clear shared picks */		
+	if (shared.shareddata.navpick_type != MBV_PICK_NONE)
+		{
+		shared.shareddata.navpick_type = MBV_PICK_NONE;
+		shared.shareddata.nav_selected[0] = MBV_SELECT_NONE;
+		shared.shareddata.nav_selected[1] = MBV_SELECT_NONE;
+		replotall = MB_YES;
+
+		/* loop over the navs resetting selected points */
+		for (inav=0;inav<shared.shareddata.nnav;inav++)
+			{
+			for (jpoint=0;jpoint<shared.shareddata.navs[inav].npoints-1;jpoint++)
+				{
+				/* set size and color */
+				if (shared.shareddata.navs[inav].navpts[jpoint].selected == MB_YES)
+					{
+					shared.shareddata.navs[inav].navpts[jpoint].selected = MB_NO;
+					replotall = MB_YES;
+					}
+				}
+			}
+		}
+	if (shared.shareddata.site_selected != MBV_SELECT_NONE)
+		{
+		shared.shareddata.site_selected = MBV_SELECT_NONE;
+		replotall = MB_YES;
+		}
+	if (shared.shareddata.route_selected != MBV_SELECT_NONE)
+		{
+		shared.shareddata.route_selected = MBV_SELECT_NONE;
+		shared.shareddata.route_point_selected = MBV_SELECT_NONE;
+		replotall = MB_YES;
+		}
+    
+    /* draw */
+    if (replotinstance == MB_YES || replotall == MB_YES)
+    	{
+if (mbv_verbose >= 2)
+fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_clearpicks\n");
+    	mbview_plotlowhigh(instance);
+	}
+
+    /* if needed replot all active instances */
+    if (replotall == MB_YES)
+	{
+	mbview_plothighall(instance);
+	}
+}
 /*------------------------------------------------------------------------------*/
 
 int
@@ -6817,7 +8310,7 @@ int do_mbview_workfunction(XtPointer client_data)
     		/* get view */
     		view = &(mbviews[i]);
     		data = &(view->data);
-		
+			
 		/* check it if nothing already found */
 		if (data->primary_nxy > 0
 			&& view->plot_recursion > 0)
@@ -6836,7 +8329,7 @@ int do_mbview_workfunction(XtPointer client_data)
     		/* get view */
     		view = &(mbviews[instance]);
     		data = &(view->data);
-		
+			
 		if (view->zscaledonecount < data->primary_nxy - 1)
 			{
 			/* set found */
@@ -6871,7 +8364,7 @@ int do_mbview_workfunction(XtPointer client_data)
     		/* get view */
     		view = &(mbviews[i]);
     		data = &(view->data);
-		
+			
 		/* check it if nothing already found */
 		if (found == MB_NO 
 			&& data->primary_nxy > 0)
@@ -6913,7 +8406,7 @@ int do_mbview_workfunction(XtPointer client_data)
     		/* get view */
     		view = &(mbviews[instance]);
     		data = &(view->data);
-		
+			
 		/* first work on zscale */
 		if (mode == MBV_BACKGROUND_ZSCALE)
 			{
@@ -6974,403 +8467,4 @@ int do_mbview_workfunction(XtPointer client_data)
 }
 
 /*------------------------------------------------------------------------------*/
-void
-do_mbview_projection_popup( Widget w, XtPointer client_data, XtPointer call_data)
-{
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
-	int	instance;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
-	/* get instance */
-	ac = 0;
-	XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
-	XtGetValues(w, args, ac);
-
-fprintf(stderr,"do_mbview_projection_popup: instance:%d\n", instance);
-	    
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
-
-    	XtManageChild(view->mb3dview.mbview_bulletinBoard_projection);
-
-	/* set values of widgets */
-	if (data->display_projection_mode == MBV_PROJECTION_GEOGRAPHIC)
-		{
-	    	XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_geographic, 
-			TRUE, FALSE);
-		XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_utm, 
-			FALSE, FALSE);
-		XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_spheroid, 
-			FALSE, FALSE);
-		}
-	else if (data->display_projection_mode == MBV_PROJECTION_PROJECTED
-		|| data->display_projection_mode == MBV_PROJECTION_ALREADYPROJECTED)
-		{
-		XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_geographic, 
-			FALSE, FALSE);
-	    	XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_utm, 
-			TRUE, FALSE);
-		XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_spheroid, 
-			FALSE, FALSE);
-		}
-	else if (data->display_projection_mode == MBV_PROJECTION_SPHEROID)
-		{
-	    	XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_spheroid, 
-			TRUE, FALSE);
-		XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_utm, 
-			FALSE, FALSE);
-		XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_spheroid, 
-			FALSE, FALSE);
-		}
-		
-	/* set label */
-	do_mbview_set_projection_label(instance);
-	
-}
-
-
-/*------------------------------------------------------------------------------*/
-void
-do_mbview_set_projection_label(int instance)
-{
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-	int	projectionid;
-	mb_path	tmptext;
-
-fprintf(stderr,"do_mbview_set_projection_label: instance:%d\n", instance);
-	    
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
-		
-	/* set projection label */
-	sprintf(value_text,":::t\"Primary Grid Projection:\"");
-	if (data->primary_grid_projection_mode == MBV_PROJECTION_GEOGRAPHIC)
-		{
-		strcat(value_text, ":t\"  Geographic\"");
-		}
-	else if (data->primary_grid_projection_mode == MBV_PROJECTION_PROJECTED
-		|| data->primary_grid_projection_mode == MBV_PROJECTION_ALREADYPROJECTED)
-		{
-		if (sscanf(data->primary_grid_projection_id, "epsg%d", &projectionid) == 1
-			&& projectionid == 32661)
-			{
-			sprintf(tmptext,":t\"  Projected: %s\":t\"    North Polar Steographic\"",
-				data->secondary_grid_projection_id,
-				projectionid - 32600);
-			strcat(value_text, tmptext);
-			}
-		else if (sscanf(data->primary_grid_projection_id, "epsg%d", &projectionid) == 1
-			&& projectionid == 32761)
-			{
-			sprintf(tmptext,":t\"  Projected: %s\":t\"    South Polar Steographic\"",
-				data->secondary_grid_projection_id,
-				projectionid - 32600);
-			strcat(value_text, tmptext);
-			}
-		else if (sscanf(data->primary_grid_projection_id, "epsg%d", &projectionid) == 1
-			&& projectionid >= 32600 && projectionid < 32700)
-			{
-			sprintf(tmptext,":t\"  Projected: %s\":t\"    UTM Zone %d N\"",
-				data->primary_grid_projection_id,
-				projectionid - 32600);
-			strcat(value_text, tmptext);
-			}
-		else if (sscanf(data->primary_grid_projection_id, "epsg%d", &projectionid) == 1
-			&& projectionid >= 32700 && projectionid < 32800)
-			{
-			sprintf(tmptext,":t\"  Projected: %s\":t\"    UTM Zone %d N\"",
-				data->primary_grid_projection_id,
-				projectionid - 32700);
-			strcat(value_text, tmptext);
-			}
-		else
-			{
-			sprintf(tmptext,":t\"  Projected: %s\"", data->primary_grid_projection_id);
-			strcat(value_text, tmptext);
-			}
-		}
-	else if (data->primary_grid_projection_mode == MBV_PROJECTION_SPHEROID)
-		{
-		strcat(value_text, ":t\"  Spheroid\"");
-		}
-
-	if (data->secondary_nxy > 0)
-		{
-		strcat(value_text,":t\"Secondary Grid Projection:\"");
-		if (data->secondary_grid_projection_mode == MBV_PROJECTION_GEOGRAPHIC)
-			{
-			strcat(value_text, ":t\"  Geographic\"");
-			}
-		else if (data->secondary_grid_projection_mode == MBV_PROJECTION_PROJECTED
-			|| data->secondary_grid_projection_mode == MBV_PROJECTION_ALREADYPROJECTED)
-			{
-			if (sscanf(data->secondary_grid_projection_id, "epsg%d", &projectionid) == 1
-				&& projectionid == 32661)
-				{
-				sprintf(tmptext,":t\"  Projected: %s\":t\"    North Polar Steographic\"",
-					data->secondary_grid_projection_id,
-					projectionid - 32600);
-				strcat(value_text, tmptext);
-				}
-			else if (sscanf(data->secondary_grid_projection_id, "epsg%d", &projectionid) == 1
-				&& projectionid == 32761)
-				{
-				sprintf(tmptext,":t\"  Projected: %s\":t\"    South Polar Steographic\"",
-					data->secondary_grid_projection_id,
-					projectionid - 32600);
-				strcat(value_text, tmptext);
-				}
-			else if (sscanf(data->secondary_grid_projection_id, "epsg%d", &projectionid) == 1
-				&& projectionid >= 32600 && projectionid < 32700)
-				{
-				sprintf(tmptext,":t\"  Projected: %s\":t\"    UTM Zone %d N\"",
-					data->secondary_grid_projection_id,
-					projectionid - 32600);
-				strcat(value_text, tmptext);
-				}
-			else if (sscanf(data->secondary_grid_projection_id, "epsg%d", &projectionid) == 1
-				&& projectionid >= 32700 && projectionid < 32800)
-				{
-				sprintf(tmptext,":t\"  Projected: %s\":t\"    UTM Zone %d S\"",
-					data->secondary_grid_projection_id,
-					projectionid - 32700);
-				strcat(value_text, tmptext);
-				}
-			else
-				{
-				sprintf(tmptext,":t\"  Projected: %s\"", data->secondary_grid_projection_id);
-				strcat(value_text, tmptext);
-				}
-			}
-		else if (data->secondary_grid_projection_mode == MBV_PROJECTION_SPHEROID)
-			{
-			strcat(value_text, ":t\"  Spheroid\"");
-			}
-		}
-
-	strcat(value_text,":t\"Display Grid Projection:\"");
-	if (data->display_projection_mode == MBV_PROJECTION_GEOGRAPHIC)
-		{
-		strcat(value_text, ":t\"  Geographic\"");
-		}
-	else if (data->display_projection_mode == MBV_PROJECTION_PROJECTED
-		|| data->display_projection_mode == MBV_PROJECTION_ALREADYPROJECTED)
-		{
-		if (sscanf(data->display_projection_id, "epsg%d", &projectionid) == 1
-			&& projectionid == 32661)
-			{
-			sprintf(tmptext,":t\"  Projected: %s\":t\"    North Polar Steographic\"",
-				data->secondary_grid_projection_id,
-				projectionid - 32600);
-			strcat(value_text, tmptext);
-			}
-		else if (sscanf(data->display_projection_id, "epsg%d", &projectionid) == 1
-			&& projectionid == 32761)
-			{
-			sprintf(tmptext,":t\"  Projected: %s\":t\"    South Polar Steographic\"",
-				data->secondary_grid_projection_id,
-				projectionid - 32600);
-			strcat(value_text, tmptext);
-			}
-		else if (sscanf(data->display_projection_id, "epsg%d", &projectionid) == 1
-			&& projectionid >= 32600 && projectionid < 32700)
-			{
-			sprintf(tmptext,":t\"  Projected: %s\":t\"    UTM Zone %d N",
-				data->display_projection_id,
-				projectionid - 32600);
-			strcat(value_text, tmptext);
-			}
-		else if (sscanf(data->display_projection_id, "epsg%d", &projectionid) == 1
-			&& projectionid >= 32700 && projectionid < 32800)
-			{
-			sprintf(tmptext,":t\"  Projected: %s\":t\"    UTM Zone %d S\"",
-				data->display_projection_id,
-				projectionid - 32700);
-			strcat(value_text, tmptext);
-			}
-		else
-			{
-			sprintf(tmptext,":t\"  Projected: %s\"", data->display_projection_id);
-			strcat(value_text, tmptext);
-			}
-		}
-	else if (data->display_projection_mode == MBV_PROJECTION_SPHEROID)
-		{
-		strcat(value_text, ":t\"  Spheroid\"");
-		}
-        set_mbview_label_multiline_string(view->mb3dview.mbview_label_projection, value_text);
-	
-}
-
-
-/*------------------------------------------------------------------------------*/
-void
-do_mbview_projection_popdown( Widget w, XtPointer client_data, XtPointer call_data)
-{
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
-	int	instance;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-
-	/* get instance */
-	ac = 0;
-	XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
-	XtGetValues(w, args, ac);
-
-if (mbv_verbose >= 2)
-fprintf(stderr,"do_mbview_projection_popdown: instance:%d\n", instance);
-	    
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
-
-    	XtUnmanageChild(view->mb3dview.mbview_bulletinBoard_projection);
-}
-
-
-/*------------------------------------------------------------------------------*/
-void
-do_mbview_display_spheroid( Widget w, XtPointer client_data, XtPointer call_data)
-{
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
-	int	instance;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-    
-	/* get instance */
-	ac = 0;
-	XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
-	XtGetValues(w, args, ac);
-
-fprintf(stderr,"do_mbview_display_spheroid: instance:%d\n", instance);
-	    
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
-
-	/* reproject as spheroid if the togglebutton has been set */
-	if (XmToggleButtonGetState(view->mb3dview.mbview_toggleButton_spheroid))
-		{
-		data->display_projection_mode = MBV_PROJECTION_SPHEROID;
-		view->plot_done = MB_NO;
-		view->projected = MB_NO;
-		
-		/* set label */
-		do_mbview_set_projection_label(instance);
-		
-		/* clear zscale for grid */
-		mbview_zscaleclear(instance);
-
-		/* project and scale data other than the grid */
-		mbview_zscale(instance);
-
-		/* draw */
-fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_display_spheroid\n");
-		mbview_plotlowhigh(instance);
-		}
-}
-/*------------------------------------------------------------------------------*/
-
-void
-do_mbview_display_geographic( Widget w, XtPointer client_data, XtPointer call_data)
-{
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
-	int	instance;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-    
-	/* get instance */
-	ac = 0;
-	XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
-	XtGetValues(w, args, ac);
-
-fprintf(stderr,"do_mbview_display_geographic: instance:%d\n", instance);
-	    
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
-
-	/* reproject as geographic if the togglebutton has been set */
-	if (XmToggleButtonGetState(view->mb3dview.mbview_toggleButton_geographic))
-		{
-		data->display_projection_mode = MBV_PROJECTION_GEOGRAPHIC;
-		view->plot_done = MB_NO;
-		view->projected = MB_NO;
-		
-		/* set label */
-		do_mbview_set_projection_label(instance);
-		
-		/* clear zscale for grid */
-		mbview_zscaleclear(instance);
-
-		/* project and scale data other than the grid */
-		mbview_zscale(instance);
-
-		/* draw */
-fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_display_geographic\n");
-		mbview_plotlowhigh(instance);
-		}
-}
-
-
-/*------------------------------------------------------------------------------*/
-void
-do_mbview_display_utm( Widget w, XtPointer client_data, XtPointer call_data)
-{
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
-	int	instance;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-	int	projectionid, utmzone;
-	double	reference_lon;
-    
-	/* get instance */
-	ac = 0;
-	XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
-	XtGetValues(w, args, ac);
-
-fprintf(stderr,"do_mbview_display_utm: instance:%d\n", instance);
-	    
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
-
-	/* reproject as utm if the togglebutton has been set */
-	if (XmToggleButtonGetState(view->mb3dview.mbview_toggleButton_utm))
-		{
-		data->display_projection_mode = MBV_PROJECTION_PROJECTED;
-		view->plot_done = MB_NO;
-		view->projected = MB_NO;
-		reference_lon = 0.5 * (data->primary_xmin + data->primary_xmax);
-		if (reference_lon > 180.0)
-			reference_lon -= 360.0;
-		utmzone = (int)(((reference_lon + 183.0)
-				/ 6.0) + 0.5);
-		if (0.5 * (data->primary_ymin + data->primary_ymax) >= 0.0)
-			projectionid = 32600 + utmzone;
-		else
-			projectionid = 32700 + utmzone;
-		sprintf(data->display_projection_id, "epsg%d", projectionid);
-		
-		/* set label */
-		do_mbview_set_projection_label(instance);
-		
-		/* clear zscale for grid */
-		mbview_zscaleclear(instance);
-
-		/* project and scale data other than the grid */
-		mbview_zscale(instance);
-
-		/* draw */
-fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_display_utm\n");
-		mbview_plotlowhigh(instance);
-		}
-}
-
-
-
-/*------------------------------------------------------------------------------*/

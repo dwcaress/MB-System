@@ -77,6 +77,7 @@ extern int isnanf(float x);
 #define MBGRDVIZ_SURVEY_DIRECTION_NW			2
 #define MBGRDVIZ_SURVEY_DIRECTION_NE			3
 int	working_route = -1;
+int	survey_instance = 0;
 int	survey_mode = MBGRDVIZ_SURVEY_MODE_UNIFORM;
 int	survey_platform = MBGRDVIZ_SURVEY_PLATFORM_SUBMERGED_ALTITUDE;
 int	survey_interleaving = 1;
@@ -90,7 +91,7 @@ int	survey_color = MBV_COLOR_BLACK;
 char	survey_name[MB_PATH_MAXLINE];
 
 /* id variables */
-static char rcs_id[] = "$Id: mbgrdviz_callbacks.c,v 5.8 2004-12-02 06:36:31 caress Exp $";
+static char rcs_id[] = "$Id: mbgrdviz_callbacks.c,v 5.9 2005-02-02 08:23:52 caress Exp $";
 static char program_name[] = "MBgrdviz";
 static char help_message[] = "MBgrdviz is an interactive 2D/3D visualization tool for GMT grid files.";
 static char usage_message[] = "mbgrdviz [-H -T -V]";
@@ -470,7 +471,7 @@ do_mbgrdviz_fileSelectionBox_openroute( Widget w, XtPointer client_data, XtPoint
 
 	/* set fileSelectionBox parameters */
 	ac = 0;
-	tmp0 = (XmString) BX_CONVERT(dialogShell_open, "*", 
+	tmp0 = (XmString) BX_CONVERT(dialogShell_open, "*.rte", 
                 				XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNpattern, tmp0); ac++;
 	actionid = MBGRDVIZ_OPENROUTE * MBV_MAX_WINDOWS + instance;
@@ -502,7 +503,7 @@ do_mbgrdviz_fileSelectionBox_opensite( Widget w, XtPointer client_data, XtPointe
 
 	/* set fileSelectionBox parameters */
 	ac = 0;
-	tmp0 = (XmString) BX_CONVERT(dialogShell_open, "*", 
+	tmp0 = (XmString) BX_CONVERT(dialogShell_open, "*.ste", 
                 				XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNpattern, tmp0); ac++;
 	actionid = MBGRDVIZ_OPENSITE * MBV_MAX_WINDOWS + instance;
@@ -1112,8 +1113,7 @@ fprintf(stderr, "using internal test grid...\n");
 					mbv_display_projection_id,
 					&error);
 		
-
-		/* set more mbview control values */
+		/* set primary grid data */
 		if (status == MB_SUCCESS)
 		status = mbview_setprimarygrid(verbose, instance,
 					mbv_primary_grid_projection_mode,
@@ -1131,6 +1131,8 @@ fprintf(stderr, "using internal test grid...\n");
 					mbv_primary_dy,
 					mbv_primary_data,
 					&error);
+		
+		/* set more mbview control values */
 		if (status == MB_SUCCESS)
 		status = mbview_setprimarycolortable(verbose, instance,
 					mbv_primary_colortable,
@@ -3104,6 +3106,10 @@ fprintf(stderr,"Called do_mbgrdviz_make_survey instance:%d\n", instance);
 		XtSetValues(spinBox_arearoute_linecontrol, args, ac);
 		XtSetValues(spinText_arearoute_linecontrol, args, ac);
 		XtSetValues(pushButton_arearoute_ok, args, ac);
+	
+		/* setting instance into XmNuserData resources
+			doesn't seem to work, so set survey_instance as well */
+		survey_instance = instance;
 		
 		/* set parameters */
 
@@ -3200,6 +3206,10 @@ void do_mbgrdviz_generate_survey( Widget w, XtPointer client_data, XtPointer cal
 
     	/* get source mbview instance */
 	instance = (int) client_data;
+	
+	/* getting instance from client_data doesn't seem
+		to work so use survey_instance instead */
+	instance = survey_instance;
 fprintf(stderr,"Called do_mbgrdviz_generate_survey instance:%d\n", instance);
 	    
     	/* check data source for area to bounding desired survey */
