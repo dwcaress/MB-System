@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 4.4 1994-10-31 20:24:03 caress Exp $
+#	$Id: Makefile.template,v 4.5 1994-11-21 19:05:43 caress Exp $
 #
 #     Copyright (c) 1993, 1994 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.4  1994/10/31  20:24:03  caress
+# Change man pages from section 1 to l.
+#
 # Revision 4.3  1994/10/31  20:17:32  caress
 # Change man pages from section 1 to l.
 #
@@ -81,41 +84,59 @@ clean:
 
 ### link the executables
 $(BINDIR)/mbformat:	mbformat.o $(LIBDIR)/libmbio.a
-	$(CC) $(CFLAGS) mbformat.o $(LIBDIR)/libmbio.a $(LFLAGS) -o $(BINDIR)/mbformat
+	$(CC) $(CFLAGS) mbformat.o $(LIBDIR)/libmbio.a $(LFLAGS) \
+		-o $(BINDIR)/mbformat
 $(BINDIR)/mbdefaults:	mbdefaults.o $(LIBDIR)/libmbio.a
-	$(CC) $(CFLAGS) mbdefaults.o $(LIBDIR)/libmbio.a $(LFLAGS) -o $(BINDIR)/mbdefaults
+	$(CC) $(CFLAGS) mbdefaults.o $(LIBDIR)/libmbio.a $(LFLAGS) \
+		-o $(BINDIR)/mbdefaults
 $(BINDIR)/mbinfo:	mbinfo.o $(LIBDIR)/libmbio.a
-	$(CC) $(CFLAGS) mbinfo.o $(LIBDIR)/libmbio.a $(LFLAGS) -o $(BINDIR)/mbinfo
+	$(CC) $(CFLAGS) mbinfo.o $(LIBDIR)/libmbio.a $(LFLAGS) \
+		-o $(BINDIR)/mbinfo
 $(BINDIR)/mbcopy:	mbcopy.o $(LIBDIR)/libmbio.a
-	$(CC) $(CFLAGS) mbcopy.o $(LIBDIR)/libmbio.a $(LFLAGS) -o $(BINDIR)/mbcopy
+	$(CC) $(CFLAGS) mbcopy.o $(LIBDIR)/libmbio.a $(LFLAGS) \
+		-o $(BINDIR)/mbcopy
 $(BINDIR)/mblist:	mblist.o $(LIBDIR)/libmbio.a
-	$(CC) $(CFLAGS) mblist.o $(LIBDIR)/libmbio.a $(LFLAGS) -o $(BINDIR)/mblist
+	$(CC) $(CFLAGS) mblist.o $(LIBDIR)/libmbio.a $(LFLAGS) \
+		-o $(BINDIR)/mblist
 $(BINDIR)/mbmerge:	mbmerge.o $(LIBDIR)/libmbio.a
-	$(CC) $(CFLAGS) mbmerge.o $(LIBDIR)/libmbio.a $(LFLAGS) -o $(BINDIR)/mbmerge
+	$(CC) $(CFLAGS) mbmerge.o $(LIBDIR)/libmbio.a $(LFLAGS) \
+		-o $(BINDIR)/mbmerge
 $(BINDIR)/mbclean:	mbclean.o $(LIBDIR)/libmbio.a
-	$(CC) $(CFLAGS) mbclean.o $(LIBDIR)/libmbio.a $(LFLAGS) -o $(BINDIR)/mbclean
+	$(CC) $(CFLAGS) mbclean.o $(LIBDIR)/libmbio.a $(LFLAGS) \
+		-o $(BINDIR)/mbclean
 $(BINDIR)/mbunclean:	mbunclean.o $(LIBDIR)/libmbio.a
-	$(CC) $(CFLAGS) mbunclean.o $(LIBDIR)/libmbio.a $(LFLAGS) -o $(BINDIR)/mbunclean
+	$(CC) $(CFLAGS) mbunclean.o $(LIBDIR)/libmbio.a $(LFLAGS) \
+		-o $(BINDIR)/mbunclean
 $(BINDIR)/mbgrid:	mbgrid.o surfunc.o $(LIBDIR)/libmbio.a
-	$(CC) $(CFLAGS) mbgrid.o surfunc.o $(LIBDIR)/libmbio.a $(GMTLIBDIR)/libgmt.a $(NETCDFDIR)/libnetcdf.a $(LFLAGS) -o $(BINDIR)/mbgrid
+	$(CC) $(CFLAGS) mbgrid.o surfunc.o $(LIBDIR)/libmbio.a \
+		$(GMTLIBDIR)/libgmt.a $(NETCDFDIR)/libnetcdf.a \
+		$(LFLAGS) -o $(BINDIR)/mbgrid
 $(BINDIR)/mblevitus:	mblevitus.o $(LIBDIR)/libmbio.a
-	$(CC) $(CFLAGS) mblevitus.o $(LIBDIR)/libmbio.a $(LFLAGS) -o $(BINDIR)/mblevitus
-$(BINDIR)/mbbath:	mbbath.o $(LIBDIR)/libmbio.a
-	$(CC) $(CFLAGS) mbbath.o $(LIBDIR)/libmbio.a $(LFLAGS) -o $(BINDIR)/mbbath
+	$(CC) $(CFLAGS) mblevitus.o $(LIBDIR)/libmbio.a $(LFLAGS) \
+		-o $(BINDIR)/mblevitus
+$(BINDIR)/mbbath:	mbbath.o mb_rt.o $(LIBDIR)/libmbio.a
+	$(CC) $(CFLAGS) mbbath.o mb_rt.o $(LIBDIR)/libmbio.a $(LFLAGS) \
+		-o $(BINDIR)/mbbath
 $(BINDIR)/hsbath:	$(BINDIR)/mbbath
 	cd $(BINDIR); pwd; rm -f hsbath; ln -s mbbath hsbath
 $(BINDIR)/hsdump:	hsdump.o $(LIBDIR)/libmbio.a
-	$(CC) $(CFLAGS) hsdump.o $(LIBDIR)/libmbio.a $(LFLAGS) -o $(BINDIR)/hsdump
+	$(CC) $(CFLAGS) hsdump.o $(LIBDIR)/libmbio.a $(LFLAGS) \
+		-o $(BINDIR)/hsdump
 $(BINDIR)/mbrollbias:	mbrollbias.o $(LIBDIR)/libmbio.a
-	$(CC) $(CFLAGS) mbrollbias.o $(LIBDIR)/libmbio.a $(LFLAGS) -o $(BINDIR)/mbrollbias
+	$(CC) $(CFLAGS) mbrollbias.o $(LIBDIR)/libmbio.a $(LFLAGS) \
+		-o $(BINDIR)/mbrollbias
 $(BINDIR)/mbgetmask:	mbgetmask.o $(LIBDIR)/libmbio.a
-	$(CC) $(CFLAGS) mbgetmask.o $(LIBDIR)/libmbio.a $(LFLAGS) -o $(BINDIR)/mbgetmask
+	$(CC) $(CFLAGS) mbgetmask.o $(LIBDIR)/libmbio.a $(LFLAGS) \
+		-o $(BINDIR)/mbgetmask
 $(BINDIR)/mbmask:	mbmask.o $(LIBDIR)/libmbio.a
-	$(CC) $(CFLAGS) mbmask.o $(LIBDIR)/libmbio.a $(LFLAGS) -o $(BINDIR)/mbmask
+	$(CC) $(CFLAGS) mbmask.o $(LIBDIR)/libmbio.a $(LFLAGS) \
+		-o $(BINDIR)/mbmask
 $(BINDIR)/mbsmooth:	mbsmooth.o $(LIBDIR)/libmbio.a
-	$(CC) $(CFLAGS) mbsmooth.o $(LIBDIR)/libmbio.a $(LFLAGS) -o $(BINDIR)/mbsmooth
+	$(CC) $(CFLAGS) mbsmooth.o $(LIBDIR)/libmbio.a $(LFLAGS) \
+		-o $(BINDIR)/mbsmooth
 $(BINDIR)/mbps:	mbps.o $(LIBDIR)/libmbio.a
-	$(CC) $(CFLAGS) mbps.o $(LIBDIR)/libmbio.a $(GMTLIBDIR)/libgmt.a $(GMTLIBDIR)/libpsl.a $(LFLAGS) -o $(BINDIR)/mbps
+	$(CC) $(CFLAGS) mbps.o $(LIBDIR)/libmbio.a $(GMTLIBDIR)/libgmt.a \
+		$(GMTLIBDIR)/libpsl.a $(LFLAGS) -o $(BINDIR)/mbps
 
 ### compile the source files
 mbformat.o:	mbformat.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
@@ -143,6 +164,8 @@ surfunc.o:	surfunc.c
 	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) surfunc.c
 mbbath.o:	mbbath.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
 	$(CC) -c $(CFLAGS) mbbath.c
+mb_rt.o:	mb_rt.c
+	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) mb_rt.c
 hsdump.o:	hsdump.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mbsys_hsds.h
 	$(CC) -c $(CFLAGS) hsdump.c
 mbrollbias.o:	mbrollbias.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
