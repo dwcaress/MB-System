@@ -9,7 +9,7 @@ Version 4.3
 .SH SYNOPSIS
 \fBmbgetmask\fP [\fB-F\fPformat \fB-B\fPyr/mo/da/hr/mn/sc \fB-E\fPyr/mo/da/hr/mn/sc \fB-S\fPspeed \fB-I\fPinfile \fB-V -H\fP]
 .br
-\fBmbmask\fP [\fB-F\fIformat \fB-M\fImaskfile\fP \fB-I\fIinfile \fB-O\fIoutfile \fB-V -H\fP]
+\fBmbmask\fP [\fB-F\fIformat \fB-M\fMmaskfile\fP \fB-I\fIinfile \fB-O\fIoutfile \fB-V -H\fP]
 
 .SH DESCRIPTION
 Multibeam bathymetry data is typically edited either with interactive
@@ -103,10 +103,10 @@ Data file from which the input data will be read. If
 no input file is specified, the input will be read
 from stdin. Default: \fIinfile\fP = stdin.
 .TP
-.B \fB-I\fImaskfile\fP
+.B \fB-M\fImaskfile\fP
 Input file containing a data flagging mask created by \fBmbgetmask\fP.
 .TP
-.B \fB-I\fIoutfile\fP
+.B \fB-O\fIoutfile\fP
 Data file to which the output data will be written. If
 no output file is specified, the output will be written to
 stdout. Default: \fIoutfile\fP = stdout.
@@ -136,5 +136,4 @@ Then, apply the mask to the raw file as follows:
 \fBmbsystem\fP(l), \fBmbedit\fP(l), \fBmbclean\fP(l), \fBmbunclean\fP(l)
 
 .SH BUGS
-The program \fBmbmask\fP occasionally seems to hang on the last 
-data record.  We will probably fix this the next time we have to use it.
+Let us know.
