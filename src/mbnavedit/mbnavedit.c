@@ -75,6 +75,13 @@ int main( int argc, char **argv)
     Widget   mainWindow;
     
     /* Begin user code block <declarations> */
+    
+    /* make sure that the argc that goes to XtVaAppInitialize
+       is 1 so that no options are removed by its option parsing */
+    int		 argc_save;
+    argc_save = argc;
+    argc = 1;
+
     /* End user code block <declarations> */
     
     /*
@@ -136,7 +143,7 @@ int main( int argc, char **argv)
     do_wait_until_viewed(app);
     
     /* initialize everything */
-    do_mbnavedit_init(argc,argv);
+    do_mbnavedit_init(argc_save,argv);
     
     /* End user code block <app_procedures> */
     

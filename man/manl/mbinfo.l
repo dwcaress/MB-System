@@ -1,4 +1,4 @@
-.TH mbinfo l "17 January 2002" "MB-System 5.0" "MB-System 5.0"
+.TH mbinfo l "28 May 2002" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbinfo\fP - Output some basic statistics of swath sonar data files.
 
@@ -8,7 +8,8 @@ Version 5.0
 .SH SYNOPSIS
 \fBmbinfo\fP [\fB-B\fIyr/mo/da/hr/mn/sc\fP \fB-C -E\fIyr/mo/da/hr/mn/sc\fP 
 \fB-F\fIformat\fP \fB-G\fP \fB-I\fIfilename\fP 
-\fB-L\fIlonflip\fP \fB-M\fIlondim/latdim\fP \fB-O\fP \fB-P\fIping\fP 
+\fB-L\fIlonflip\fP \fB-M\fIlondim/latdim\fP 
+\fB-N\fP \fB-O\fP \fB-P\fIping\fP 
 \fB-R\fIwest/east/south/norths\fP \fB-S\fIspeed\fP \fB-W -V -H\fP]
 
 .SH DESCRIPTION
@@ -184,6 +185,22 @@ mask representing where data lies within the file's bounding
 box. This mask is shown as a table of 0's and 1's, where
 the 1's indicate bins with data. The dimensions of the mask
 are specified with the \fB-M\fP\fIlondim/latdim\fP option.
+.TP
+.B \-N
+.br
+Extends the program output to include notices. These notices
+include three sections. The first is a list of all of the
+data record types (e.g. survey, comment, navigation, parameter)
+encountered while reading the file. Some formats are quite simple
+and only include survey records and comments. Other formats
+are complex and may contain many different sorts of data
+records, including some that only derive from a particular
+sonar model. The second section lists any nonfatal error messages
+(e.g. unintelligible record) generated while reading the
+file. Finally, the third section of notices lists any 
+particular problems with the data that have been identified
+(e.g. some navigation is zero or some depths are too large
+to be correct).
 .TP
 .B \-O
 .br
@@ -421,4 +438,4 @@ obtaining:
 \fBmbsystem\fP(l)
 
 .SH BUGS
-No bugs, only features...
+No bugs, only features. Maybe too many features...

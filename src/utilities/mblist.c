@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mblist.c	2/1/93
- *    $Id: mblist.c,v 5.9 2002-04-06 02:53:45 caress Exp $
+ *    $Id: mblist.c,v 5.10 2002-05-29 23:43:09 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -28,6 +28,9 @@
  *		in 1990.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.9  2002/04/06 02:53:45  caress
+ * Release 5.0.beta16
+ *
  * Revision 5.8  2002/03/26 23:21:15  caress
  * Fixed default output string.
  *
@@ -259,11 +262,12 @@ int printNaN(int verbose, int ascii, int *invert, int *flipsign, int *error);
 /* NaN value */
 double	NaN;
 
+static char rcs_id[] = "$Id: mblist.c,v 5.10 2002-05-29 23:43:09 caress Exp $";
+
 /*--------------------------------------------------------------------*/
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mblist.c,v 5.9 2002-04-06 02:53:45 caress Exp $";
 	static char program_name[] = "MBLIST";
 	static char help_message[] =  "MBLIST prints the specified contents of a swath data \nfile to stdout. The form of the output is quite flexible; \nMBLIST is tailored to produce ascii files in spreadsheet \nstyle with data columns separated by tabs.";
 	static char usage_message[] = "mblist [-Byr/mo/da/hr/mn/sc -Ddump_mode -Eyr/mo/da/hr/mn/sc \n-Fformat -H -Ifile -Llonflip -Mbeam_start/beam_end -Npixel_start/pixel_end \n-Ooptions -Ppings -Rw/e/s/n -Sspeed -Ttimegap -Ucheck -V -W -Zsegment]";
@@ -308,11 +312,11 @@ main (int argc, char **argv)
 	int	beam_set = MBLIST_SET_OFF;
 	int	beam_start;
 	int	beam_end;
-	int	beam_vertical;
+	int	beam_vertical = 0;
 	int	pixel_set = MBLIST_SET_OFF;
 	int	pixel_start;
 	int	pixel_end;
-	int	pixel_vertical;
+	int	pixel_vertical = 0;
 	int	dump_mode = 1;
 	double	distance_total;
 	int	nread;
@@ -365,7 +369,6 @@ main (int argc, char **argv)
 	/* additional time variables */
 	int	first_m = MB_YES;
 	double	time_d_ref;
-	struct tm	time_tm;
 	int	first_u = MB_YES;
 	time_t	time_u;
 	time_t	time_u_ref;
@@ -391,7 +394,7 @@ main (int argc, char **argv)
 	double	speed_made_good, speed_made_good_old;
 	double	navlon_old, navlat_old;
 	double	dx, dy, dist;
-	double	delta, a, b, theta;
+	double	delta, b;
 	double	dlon, dlat, minutes;
 	int	degrees;
 	char	hemi;
@@ -739,26 +742,26 @@ main (int argc, char **argv)
 		}
 
 	/* allocate memory for data arrays */
-	status = mb_malloc(verbose,beams_bath*sizeof(char),&beamflag,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),&bath,&error);
+	status = mb_malloc(verbose,beams_bath*sizeof(char),(char **)&beamflag,&error);
+	status = mb_malloc(verbose,beams_bath*sizeof(double),(char **)&bath,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),
-			&bathacrosstrack,&error);
+			(char **)&bathacrosstrack,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),
-			&bathalongtrack,&error);
-	status = mb_malloc(verbose,beams_amp*sizeof(double),&amp,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(double),&ss,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(double),&ssacrosstrack,
+			(char **)&bathalongtrack,&error);
+	status = mb_malloc(verbose,beams_amp*sizeof(double),(char **)&amp,&error);
+	status = mb_malloc(verbose,pixels_ss*sizeof(double),(char **)&ss,&error);
+	status = mb_malloc(verbose,pixels_ss*sizeof(double),(char **)&ssacrosstrack,
 			&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(double),&ssalongtrack,
+	status = mb_malloc(verbose,pixels_ss*sizeof(double),(char **)&ssalongtrack,
 			&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),
-					&depths,&error);
+					(char **)&depths,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),
-					&depthacrosstrack,&error);
+					(char **)&depthacrosstrack,&error);
 	status = mb_malloc(verbose,(beams_bath+1)*sizeof(double),
-					&slopes,&error);
+					(char **)&slopes,&error);
 	status = mb_malloc(verbose,(beams_bath+1)*sizeof(double),
-					&slopeacrosstrack,&error);
+					(char **)&slopeacrosstrack,&error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
@@ -1036,7 +1039,7 @@ main (int argc, char **argv)
 			if (ns > 0)
 			  {
 			  delta = ns*sxx - sx*sx;
-			  a = (sxx*sy - sx*sxy)/delta;
+			  /* a = (sxx*sy - sx*sxy)/delta; */
 			  b = (ns*sxy - sx*sy)/delta;
 			  avgslope = RTD * atan(b);
 			  }
@@ -2110,18 +2113,18 @@ main (int argc, char **argv)
 	status = mb_close(verbose,&mbio_ptr,&error);
 
 	/* deallocate memory used for data arrays */
-	mb_free(verbose,&beamflag,&error); 
-	mb_free(verbose,&bath,&error); 
-	mb_free(verbose,&bathacrosstrack,&error); 
-	mb_free(verbose,&bathalongtrack,&error); 
-	mb_free(verbose,&amp,&error); 
-	mb_free(verbose,&ss,&error); 
-	mb_free(verbose,&ssacrosstrack,&error); 
-	mb_free(verbose,&ssalongtrack,&error); 
-	mb_free(verbose,&depths,&error);
-	mb_free(verbose,&depthacrosstrack,&error);
-	mb_free(verbose,&slopes,&error);
-	mb_free(verbose,&slopeacrosstrack,&error);
+	mb_free(verbose,(char **)&beamflag,&error); 
+	mb_free(verbose,(char **)&bath,&error); 
+	mb_free(verbose,(char **)&bathacrosstrack,&error); 
+	mb_free(verbose,(char **)&bathalongtrack,&error); 
+	mb_free(verbose,(char **)&amp,&error); 
+	mb_free(verbose,(char **)&ss,&error); 
+	mb_free(verbose,(char **)&ssacrosstrack,&error); 
+	mb_free(verbose,(char **)&ssalongtrack,&error); 
+	mb_free(verbose,(char **)&depths,&error);
+	mb_free(verbose,(char **)&depthacrosstrack,&error);
+	mb_free(verbose,(char **)&slopes,&error);
+	mb_free(verbose,(char **)&slopeacrosstrack,&error);
 
 	/* figure out whether and what to read next */
         if (read_datalist == MB_YES)
@@ -2216,7 +2219,17 @@ int set_output(	int	verbose,
 	*error = MB_ERROR_NO_ERROR;
 	status = MB_SUCCESS;
 
-	if (beam_set == MBLIST_SET_OFF && pixel_set != MBLIST_SET_OFF)
+	if (beam_set == MBLIST_SET_OFF 
+		&& pixel_set == MBLIST_SET_OFF
+		&& beams_bath <= 0
+		&& pixels_ss <= 0)
+		{
+		*beam_start = 0;
+		*beam_end = 1;
+		*pixel_start = 0;
+		*pixel_end = -1;
+		}
+	else if (beam_set == MBLIST_SET_OFF && pixel_set != MBLIST_SET_OFF)
 		{
 		*beam_start = 0;
 		*beam_end = -1;
@@ -2288,15 +2301,16 @@ int set_output(	int	verbose,
 		}
 
 	/* check if beam and pixel range is ok */
-	if ((use_bath == MB_YES || *beam_end >= *beam_start)
+	if ((use_bath == MB_YES && *beam_end >= *beam_start)
 		&& beams_bath <= 0)
 		{
 		fprintf(stderr,"\nBathymetry data not available\n");
 		status = MB_FAILURE;
 		*error = MB_ERROR_BAD_USAGE;
 		}
-	else if (*beam_end >= *beam_start && 
-		(*beam_start < 0 || *beam_end >= beams_bath))
+	else if (use_bath == MB_YES 
+		&& *beam_end >= *beam_start 
+		&& (*beam_start < 0 || *beam_end >= beams_bath))
 		{
 		fprintf(stderr,"\nBeam range %d to %d exceeds available beams 0 to %d\n",
 			*beam_start,*beam_end,beams_bath-1);
@@ -2561,9 +2575,7 @@ int printsimplevalue(int verbose,
 {
 	char	*function_name = "printsimplevalue";
 	int	status = MB_SUCCESS;
-	char	format[24];
-	int	i;
-	
+	char	format[24];	
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -2630,8 +2642,6 @@ int printNaN(int verbose, int ascii, int *invert, int *flipsign, int *error)
 {
 	char	*function_name = "printNaN";
 	int	status = MB_SUCCESS;
-	int	i;
-	
 
 	/* print input debug statements */
 	if (verbose >= 2)

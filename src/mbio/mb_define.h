@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	4/21/96
- *    $Id: mb_define.h,v 5.16 2002-05-02 04:00:41 caress Exp $
+ *    $Id: mb_define.h,v 5.17 2002-05-29 23:40:48 caress Exp $
  *
  *    Copyright (c) 1996, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	April 21, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.16  2002/05/02 04:00:41  caress
+ * Release 5.0.beta17
+ *
  * Revision 5.15  2002/04/08 20:59:38  caress
  * Release 5.0.beta17
  *
@@ -426,6 +429,11 @@ int mb_buffer_get_ptr(int verbose, void *buff_ptr, void *mbio_ptr,
 		int *error);
 
 int mb_error(int, int, char **);
+int mb_notice_log_datatype(int verbose, void *mbio_ptr, int data_id);
+int mb_notice_log_error(int verbose, void *mbio_ptr, int error_id);
+int mb_notice_log_problem(int verbose, void *mbio_ptr, int problem_id);
+int mb_notice_get_list(int verbose, void *mbio_ptr, int *notice_list);
+int mb_notice_message(int verbose, int notice, char **message);
 int mb_navint_add(int verbose, void *mbio_ptr, 
 		double time_d, double lon, double lat, int *error);
 int mb_navint_interp(int verbose, void *mbio_ptr, 

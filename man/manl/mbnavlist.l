@@ -1,4 +1,4 @@
-.TH mbnavlist l "9 August 2001" "MB-System 5.0" "MB-System 5.0"
+.TH mbnavlist l "28 May 2002" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbnavlist\fP - List navigation data in swath sonar data files.
 
@@ -6,15 +6,15 @@
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbnavlist\fP [\fB-B\fIyr/mo/da/hr/mn/sc 
-\fB-E\fIyr/mo/da/hr/mn/sc \fB-F\fIformat \fB-H \fB-I\fIfile 
-\fB-L\fIlonflip
-\fB-O\fIoutput_format \fB-R\fIwest/east/south/north 
-\fB-S\fIspeed \fB-T\fItimegap \fB-V\fP -\fB-Z\fP\fIsegment\fP]
+\fBmbnavlist\fP [\fB-B\fP\fIyr/mo/da/hr/mn/sc \fP
+\fB-E\fP\fIyr/mo/da/hr/mn/sc\fP \fB-F\fP\fIformat\fP \fB-H -I\fP\fIfile \fP
+\fB-L\fP\fIlonflip\fP \fB-N\fP\fInavchannel\fP
+\fB-O\fP\fIoutput_format\fP \fB-R\fP\fIwest/east/south/north\fP 
+\fB-S\fP\fIspeed\fP \fB-T\fP\fItimegap\fP \fB-V\fP \fB-Z\fP\fIsegment\fP]
 
 .SH DESCRIPTION
 \fBmbnavlist\fP prints the specified contents of navigation records
-in a swath sonar data file to stdout. By default, \fBmblist\fP 
+in a swath sonar data file to stdout. By default, \fBmbnavlist\fP 
 produces ASCII files in
 spreadsheet style, with data columns separated by tabs. Alternatively,
 the output can be binary, with each field represented 
@@ -23,6 +23,29 @@ as a double precision float (\fB-A\fP option). The output of
 option \fB-O\fP\fIoutput_format\fP can be 
 used to control the data types that
 are sent to stdout. 
+By default, \fBmbnavlist\fP extracts navigation from the 
+data record type listed as the "navigation source" for a particular
+data format. Swath data formats may contain synchronous navigation
+(navigation is included in survey data records), asynchronous navigation
+(navigation comes in records separate from and at different times
+than the survey data records), or both (survey records contain merged
+navigation while the original asynchronous navigation is preserved in
+separate navigation records). Some data formats provide for multiple
+navigation sources, so that there are more than one channel of
+asynchronous data records. In this case one channel is always designated
+as the primary or active navigation channel. The \fB-N\fP option allows
+the user to specify that \fBmbnavlist\fP outputs navigation from
+the primary asynchronous navigation (\fB-N\fP\fI0\fP) or from one
+of three auxilliary navigation channels 
+(\fB-N\fP\fI1\fP, \fB-N\fP\fI2\fP, or \fB-N\fP\fI3\fP). If the data
+format only uses asynchronous navigation, then the default
+navigation source will already be the primary asynchronous navigation
+and \fB-N\fP need not be used. If \fB-N\fP is used but the data file
+does not contain asynchronous navigation or the specified auxilliary
+navigation channels, then \fBmbnavlist\fP will output nothing. To
+determine if a datafile contains asynchronous navigation and/or auxilliary
+navigation, run \fBmbinfo\fP using its \fB-N\fP option to get counts
+of all data record types in the file.
 
 .SH AUTHORSHIP
 David W. Caress (caress@mbari.org)
@@ -117,6 +140,31 @@ then the longitude values will be in
 the range from 0 to 360 degrees.
 Default: \fIlonflip\fP = 0.
 .TP
+.B \-N
+\fInavchannel\fP
+.br
+Sets \fBmbnavlist\fP to look for navigation in navigation records rather
+than the record type listed as the "navigation source" for a particular
+data format. Swath data formats may contain synchronous navigation
+(navigation is included in survey data records), asynchronous navigation
+(navigation comes in records separate from and at different times
+than the survey data records), or both (survey records contain merged
+navigation while the original asynchronous navigation is preserved in
+separate navigation records). Some data formats provide for multiple
+navigation sources, so that there are more than one channel of
+asynchronous data records. In this case one channel is always designated
+as the primary or active navigation channel. The \fB-N\fP option allows
+the user to specify that \fBmbnavlist\fP outputs navigation from
+the primary asynchronous navigation (\fB-N\fP\fI0\fP) or from one
+of three auxilliary navigation channels 
+(\fB-N\fP\fI1\fP, \fB-N\fP\fI2\fP, or \fB-N\fP\fI3\fP). If \fB-N\fP is
+used but the data file
+does not contain asynchronous navigation or the specified auxilliary
+navigation channels, then \fBmbnavlist\fP will output nothing. To
+determine if a datafile contains asynchronous navigation and/or auxilliary
+navigation, run \fBmbinfo\fP using its \fB-N\fP option to get counts
+of all data record types in the file.
+.TP
 .B \-O
 \fIoutput_format\fP
 .br
@@ -172,9 +220,9 @@ Sets the maximum time gap in minutes between adjacent pings allowed before
 the data is considered to have a gap. Default: \fItimegap\fP = 1.
 .TP
 .B \-V
-Normally, \fBmblist\fP works "silently" without outputting
+Normally, \fBmbnavlist\fP works "silently" without outputting
 anything to the stderr stream.  If the
-\fB-V\fP flag is given, then \fBmblist\fP works in a "verbose" mode and
+\fB-V\fP flag is given, then \fBmbnavlist\fP works in a "verbose" mode and
 outputs the program version being used and all error status messages.
 .TP
 .B \-Z

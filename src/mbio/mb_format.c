@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.c	2/18/94
- *    $Id: mb_format.c,v 5.17 2002-05-02 03:55:34 caress Exp $
+ *    $Id: mb_format.c,v 5.18 2002-05-29 23:36:53 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	Februrary 18, 1994
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.17  2002/05/02 03:55:34  caress
+ * Release 5.0.beta17
+ *
  * Revision 5.16  2002/04/08 20:59:38  caress
  * Release 5.0.beta17
  *
@@ -153,7 +156,7 @@
 #include "../../include/mbsys_simrad.h"
 #include "../../include/mbsys_simrad2.h"
 
-static char rcs_id[]="$Id: mb_format.c,v 5.17 2002-05-02 03:55:34 caress Exp $";
+static char rcs_id[]="$Id: mb_format.c,v 5.18 2002-05-29 23:36:53 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_format_register(int verbose, 
@@ -393,6 +396,14 @@ int mb_format_register(int verbose,
 		{
 		status = mbr_register_mgd77dat(verbose, mbio_ptr, error); 
 		}
+	else if (*format == MBF_ASCIIXYZ)
+		{
+		status = mbr_register_asciixyz(verbose, mbio_ptr, error); 
+		}
+	else if (*format == MBF_ASCIIYXZ)
+		{
+		status = mbr_register_asciiyxz(verbose, mbio_ptr, error); 
+		}
 	else if (*format == MBF_MBARIROV)
 		{
 		status = mbr_register_mbarirov(verbose, mbio_ptr, error); 
@@ -400,6 +411,10 @@ int mb_format_register(int verbose,
 	else if (*format == MBF_MBPRONAV)
 		{
 		status = mbr_register_mbpronav(verbose, mbio_ptr, error); 
+		}
+	else if (*format == MBF_NVNETCDF)
+		{
+		status = mbr_register_nvnetcdf(verbose, mbio_ptr, error); 
 		}
 	else if (*format == MBF_L3XSERAW)
 		{
@@ -1026,6 +1041,28 @@ int mb_format_info(int verbose,
 			beamwidth_xtrack, beamwidth_ltrack, 
 			error);
 		}
+	else if (*format == MBF_ASCIIXYZ)
+		{
+		status = mbr_info_asciixyz(verbose, system, 
+			beams_bath_max, beams_amp_max, pixels_ss_max, 
+			format_name, system_name, format_description, 
+			numfile, filetype, 
+			variable_beams, traveltime, beam_flagging, 
+			nav_source, heading_source, vru_source, 
+			beamwidth_xtrack, beamwidth_ltrack, 
+			error);
+		}
+	else if (*format == MBF_ASCIIYXZ)
+		{
+		status = mbr_info_asciiyxz(verbose, system, 
+			beams_bath_max, beams_amp_max, pixels_ss_max, 
+			format_name, system_name, format_description, 
+			numfile, filetype, 
+			variable_beams, traveltime, beam_flagging, 
+			nav_source, heading_source, vru_source, 
+			beamwidth_xtrack, beamwidth_ltrack, 
+			error);
+		}
 	else if (*format == MBF_MBARIROV)
 		{
 		status = mbr_info_mbarirov(verbose, system, 
@@ -1040,6 +1077,17 @@ int mb_format_info(int verbose,
 	else if (*format == MBF_MBPRONAV)
 		{
 		status = mbr_info_mbpronav(verbose, system, 
+			beams_bath_max, beams_amp_max, pixels_ss_max, 
+			format_name, system_name, format_description, 
+			numfile, filetype, 
+			variable_beams, traveltime, beam_flagging, 
+			nav_source, heading_source, vru_source, 
+			beamwidth_xtrack, beamwidth_ltrack, 
+			error);
+		}
+	else if (*format == MBF_NVNETCDF)
+		{
+		status = mbr_info_nvnetcdf(verbose, system, 
 			beams_bath_max, beams_amp_max, pixels_ss_max, 
 			format_name, system_name, format_description, 
 			numfile, filetype, 
@@ -1238,7 +1286,7 @@ int mb_format(int verbose, int *format, int *error)
 /*--------------------------------------------------------------------*/
 int mb_format_system(int verbose, int *format, int *system, int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.17 2002-05-02 03:55:34 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.18 2002-05-29 23:36:53 caress Exp $";
 	char	*function_name = "mb_format_system";
 	int	status;
 
@@ -1307,7 +1355,7 @@ int mb_format_dimensions(int verbose, int *format,
 		int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.17 2002-05-02 03:55:34 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.18 2002-05-29 23:36:53 caress Exp $";
 	char	*function_name = "mb_format_dimensions";
 	int	status;
 
@@ -1375,7 +1423,7 @@ int mb_format_dimensions(int verbose, int *format,
 /*--------------------------------------------------------------------*/
 int mb_format_description(int verbose, int *format, char *description, int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.17 2002-05-02 03:55:34 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.18 2002-05-29 23:36:53 caress Exp $";
 	char	*function_name = "mb_format_description";
 	int	status;
 
@@ -1440,7 +1488,7 @@ int mb_format_flags(int verbose, int *format,
 		int *variable_beams, int *traveltime, int *beam_flagging, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.17 2002-05-02 03:55:34 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.18 2002-05-29 23:36:53 caress Exp $";
 	char	*function_name = "mb_format_flags";
 	int	status;
 
@@ -1511,7 +1559,7 @@ int mb_format_source(int verbose, int *format,
 		int *nav_source, int *heading_source, int *vru_source, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.17 2002-05-02 03:55:34 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.18 2002-05-29 23:36:53 caress Exp $";
 	char	*function_name = "mb_format_source";
 	int	status;
 
@@ -1582,7 +1630,7 @@ int mb_format_beamwidth(int verbose, int *format,
 		double *beamwidth_xtrack, double *beamwidth_ltrack,
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.17 2002-05-02 03:55:34 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.18 2002-05-29 23:36:53 caress Exp $";
 	char	*function_name = "mb_format_beamwidth";
 	int	status;
 
@@ -1696,14 +1744,37 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 		}
 	    }
 
-	/* look for mbnavedit and mbnavadjust navigation suffixes */
+	/* look for mbnavedit navigation suffix */
 	if (found == MB_NO)
 	    {
 	    if (strlen(filename) > 4)
 		i = strlen(filename) - 4;
 	    else
 		i = 0;
-	    if ((suffix = strstr(&filename[i],".nv")) != NULL)
+	    if ((suffix = strstr(&filename[i],".nve")) != NULL)
+		{
+		suffix_len = strlen(suffix);
+		if (suffix_len == 4)
+		    {
+		    if (fileroot != NULL)
+			{
+			strncpy(fileroot, filename, strlen(filename)-suffix_len);
+			fileroot[strlen(filename)-suffix_len] = '\0';
+			}
+		    *format = MBF_MBPRONAV;
+		    found = MB_YES;
+		    }
+		}
+	    }
+
+	/* look for mbnavadjust navigation suffixes */
+	if (found == MB_NO)
+	    {
+	    if (strlen(filename) > 4)
+		i = strlen(filename) - 4;
+	    else
+		i = 0;
+	    if ((suffix = strstr(&filename[i],".na")) != NULL)
 		{
 		suffix_len = strlen(suffix);
 		if (suffix_len == 4)
@@ -2043,6 +2114,56 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 		    fileroot[strlen(filename)-suffix_len] = '\0';
 		    }
 		*format = MBF_MBNETCDF;
+		found = MB_YES;
+		}
+	    }
+
+	/* look for IFREMER netCDF navigation format convention */
+	if (found == MB_NO)
+	    {
+	    if (strlen(filename) >= 5)
+		i = strlen(filename) - 4;
+	    else
+		i = 0;
+	    if ((suffix = strstr(&filename[i],".nvi")) != NULL)
+		suffix_len = 4;
+	    else if ((suffix = strstr(&filename[i],".NVI")) != NULL)
+		suffix_len = 4;
+	    else
+		suffix_len = 0;
+	    if (suffix_len == 4)
+		{
+		if (fileroot != NULL)
+		    {
+		    strncpy(fileroot, filename, strlen(filename)-suffix_len);
+		    fileroot[strlen(filename)-suffix_len] = '\0';
+		    }
+		*format = MBF_NVNETCDF;
+		found = MB_YES;
+		}
+	    }
+
+	/* look for xyz sounding format convention */
+	if (found == MB_NO)
+	    {
+	    if (strlen(filename) >= 5)
+		i = strlen(filename) - 4;
+	    else
+		i = 0;
+	    if ((suffix = strstr(&filename[i],".xyz")) != NULL)
+		suffix_len = 4;
+	    else if ((suffix = strstr(&filename[i],".XYZ")) != NULL)
+		suffix_len = 4;
+	    else
+		suffix_len = 0;
+	    if (suffix_len == 4)
+		{
+		if (fileroot != NULL)
+		    {
+		    strncpy(fileroot, filename, strlen(filename)-suffix_len);
+		    fileroot[strlen(filename)-suffix_len] = '\0';
+		    }
+		*format = MBF_ASCIIXYZ;
 		found = MB_YES;
 		}
 	    }

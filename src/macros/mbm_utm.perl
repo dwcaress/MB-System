@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_utm.perl	5/13/2002
-#    $Id: mbm_utm.perl,v 5.0 2002-05-14 18:53:03 caress Exp $
+#    $Id: mbm_utm.perl,v 5.1 2002-05-29 23:35:57 caress Exp $
 #
 #    Copyright (c) 2002 by
 #    D. W. Caress (caress@mbari.org)
@@ -27,7 +27,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   Inverse projections translate from (x, y, z) to (lon, lat, z).
 #
 # Basic Usage:
-#   mbm_utm -Ifile -Zzone -Ddatum [-F -Q -H -V]
+#   mbm_utm -Ifile -Zzone -Dellipsoid [-F -Q -H -V]
 #
 # Author:
 #   David W. Caress
@@ -36,22 +36,25 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   May 13, 2002
 #
 # Version:
-#   $Id: mbm_utm.perl,v 5.0 2002-05-14 18:53:03 caress Exp $
+#   $Id: mbm_utm.perl,v 5.1 2002-05-29 23:35:57 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.0  2002/05/14 18:53:03  caress
+#   Initial revision.
+#
 #
 #
 $program_name = "mbm_utm";
 
 # Deal with command line arguments
 $command_line = "@ARGV";
-&MBGetopts('HHD:d:FfI:i:O:o:QqZ:z:Vv');
+&MBGetopts('HHE:e:FfI:i:O:o:QqZ:z:Vv');
 $help =    		($opt_H || $opt_h);
 $file_data =    	($opt_I || $opt_i);
 $file_out =    		($opt_O || $opt_o);
 $zone =    		($opt_Z || $opt_z || 10);
-$datum =    		($opt_D || $opt_d || "NAD83");
+$ellipsoid =    	($opt_E || $opt_e || "WGS-84");
 $usefeet = 		($opt_F || $opt_f);
 $inverse = 		($opt_Q || $opt_q);
 $verbose = 		($opt_V || $opt_v);
@@ -66,7 +69,7 @@ if ($help)
 	print "(lon, lat, value) to UTM eastings and northings (x, y, value). ";
 	print "Inverse projections translate from (x, y, z) to (lon, lat, z).";
 	print "\nUsage: \n";
-	print "\t$program_name -Ddatum -Ifile -Ooutput -Zzone [-F -Q -H -V]\n";
+	print "\t$program_name -Eellipsoid -Ifile -Ooutput -Zzone [-F -Q -H -V]\n";
 	exit 0;
 	}
 
@@ -109,7 +112,7 @@ $bounds = "$org_lon" . "/" . "$org_lat"
 # set gmt defaults
 ($d_format) = `gmtdefaults -L | grep D_FORMAT` =~ /\S+\s+\S+\s+(\S+)/;
 ($ellipsoid) = `gmtdefaults -L | grep ELLIPSOID` =~ /\S+\s+\S+\s+(\S+)/;
-if ($datum eq "NAD27")
+if ($ellipsoid eq "Clarke-1866")
 	{ 
 	`gmtset D_FORMAT %.10lg ELLIPSOID Clarke-1866`;
 	}

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em300mba.c	10/16/98
- *	$Id: mbr_em300mba.c,v 5.9 2001-08-10 22:41:19 dcaress Exp $
+ *	$Id: mbr_em300mba.c,v 5.10 2002-05-29 23:38:53 caress Exp $
  *
  *    Copyright (c) 1998, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	October 16,  1998
  * $Log: not supported by cvs2svn $
+ * Revision 5.9  2001/08/10 22:41:19  dcaress
+ * Release 5.0.beta07
+ *
  * Revision 5.8  2001-08-03 18:00:02-07  caress
  * Applied mods from Gordon Keith.
  *
@@ -206,10 +209,11 @@ int mbr_em300mba_wr_rawbeam(int verbose, FILE *mbfp,
 int mbr_em300mba_wr_ss(int verbose, FILE *mbfp, 
 		struct mbsys_simrad2_struct *store, int *error);
 
+static char res_id[]="$Id: mbr_em300mba.c,v 5.10 2002-05-29 23:38:53 caress Exp $";
+
 /*--------------------------------------------------------------------*/
 int mbr_register_em300mba(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_em300mba.c,v 5.9 2001-08-10 22:41:19 dcaress Exp $";
 	char	*function_name = "mbr_register_em300mba";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -339,7 +343,6 @@ int mbr_info_em300mba(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_em300mba.c,v 5.9 2001-08-10 22:41:19 dcaress Exp $";
 	char	*function_name = "mbr_info_em300mba";
 	int	status = MB_SUCCESS;
 
@@ -408,7 +411,6 @@ int mbr_info_em300mba(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_em300mba(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_em300mba.c,v 5.9 2001-08-10 22:41:19 dcaress Exp $";
 	char	*function_name = "mbr_alm_em300mba";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -895,6 +897,17 @@ Have a nice day...\n");
 			}
 		
 		/* allocate secondary data structure for
+			tilt data if needed */
+		if (status == MB_SUCCESS && 
+			(*type == EM2_TILT)
+			&& store->tilt == NULL)
+			{
+			status = mbsys_simrad2_tilt_alloc(
+					verbose,mbio_ptr,
+					store_ptr,error);
+			}
+		
+		/* allocate secondary data structure for
 			survey data if needed */
 		if (status == MB_SUCCESS && 
 			(*type == EM2_BATH_MBA
@@ -936,6 +949,7 @@ Have a nice day...\n");
 			&& *type != EM2_HEIGHT
 			&& *type != EM2_HEADING
 			&& *type != EM2_SSV
+			&& *type != EM2_TILT
 			&& *type != EM2_ATTITUDE
 			&& *type != EM2_POS
 			&& *type != EM2_SVP2
@@ -1095,6 +1109,26 @@ Have a nice day...\n");
 	fprintf(stderr,"call mbr_em300mba_rd_ssv type %x\n",*type);
 #endif
 			status = mbr_em300mba_rd_ssv(
+				verbose,mbfp,store,*sonar,error);
+			if (status == MB_SUCCESS)
+				{
+				done = MB_YES;
+				if (expect != EM2_NONE)
+					{
+					*expect_save = expect;
+					*expect_save_flag = MB_YES;
+					*first_type_save = first_type;
+					}
+				else
+					*expect_save_flag = MB_NO;
+				}
+			}
+		else if (*type == EM2_TILT)
+			{
+#ifdef MBR_EM300MBA_DEBUG
+	fprintf(stderr,"call mbr_em300mba_rd_tilt type %x\n",*type);
+#endif
+			status = mbr_em300mba_rd_tilt(
 				verbose,mbfp,store,*sonar,error);
 			if (status == MB_SUCCESS)
 				{
@@ -1329,6 +1363,7 @@ int mbr_em300mba_chk_label(int verbose, void *mbio_ptr, short type, short sonar)
 	struct mb_io_struct *mb_io_ptr;
 	char	startid;
 	short	*sonar_save;
+	int 	error;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -1375,6 +1410,7 @@ int mbr_em300mba_chk_label(int verbose, void *mbio_ptr, short type, short sonar)
 		&& type != EM2_HEIGHT
 		&& type != EM2_HEADING
 		&& type != EM2_SSV
+		&& type != EM2_TILT
 		&& type != EM2_ATTITUDE
 		&& type != EM2_POS
 		&& type != EM2_SVP
@@ -1384,7 +1420,7 @@ int mbr_em300mba_chk_label(int verbose, void *mbio_ptr, short type, short sonar)
 		&& type != EM2_SS_MBA)
 		{
 		status = MB_FAILURE;
-		if ((verbose >= 1 && startid == 2)
+		if (startid == 2
 		    && (sonar == MBSYS_SIMRAD2_EM120
 			|| sonar == MBSYS_SIMRAD2_EM300
 			|| sonar == MBSYS_SIMRAD2_EM1002
@@ -1403,7 +1439,10 @@ int mbr_em300mba_chk_label(int verbose, void *mbio_ptr, short type, short sonar)
 			|| sonar == MBSYS_SIMRAD2_EM100
 			|| sonar == MBSYS_SIMRAD2_EM1000))
 			{
-			fprintf(stderr, "Bad datagram type: %4.4hX %4.4hX | %d %d\n", type, sonar, type, sonar);
+			mb_notice_log_problem(verbose, mbio_ptr, 
+				MB_PROBLEM_BAD_DATAGRAM);
+			if (verbose >= 1)
+			    fprintf(stderr, "Bad datagram type: %4.4hX %4.4hX | %d %d\n", type, sonar, type, sonar);
 			}
 		}
 		
@@ -2563,6 +2602,145 @@ int mbr_em300mba_rd_ssv(int verbose, FILE *mbfp,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+int mbr_em300mba_rd_tilt(int verbose, FILE *mbfp, 
+		struct mbsys_simrad2_struct *store, 
+		short sonar, int *error)
+{
+	char	*function_name = "mbr_em300mba_rd_tilt";
+	int	status = MB_SUCCESS;
+	struct mbsys_simrad2_tilt_struct *tilt;
+	char	line[EM2_TILT_HEADER_SIZE];
+	short	short_val;
+	int	read_len;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
+		fprintf(stderr,"dbg2       store:      %d\n",store);
+		fprintf(stderr,"dbg2       sonar:      %d\n",sonar);
+		}
+		
+	/* get  storage structure */
+	tilt = (struct mbsys_simrad2_tilt_struct *) store->tilt;
+	
+	/* set kind and type values */
+	store->kind = MB_DATA_TILT;
+	store->type = EM2_TILT;
+	store->sonar = sonar;
+
+	/* read binary header values into char array */
+	read_len = fread(line,1,EM2_TILT_HEADER_SIZE,mbfp);
+	if (read_len == EM2_TILT_HEADER_SIZE)
+		status = MB_SUCCESS;
+	else
+		{
+		status = MB_FAILURE;
+		*error = MB_ERROR_EOF;
+		}
+
+	/* get binary header data */
+	if (status == MB_SUCCESS)
+		{
+		mb_get_binary_int(MB_NO, &line[0], &tilt->tlt_date); 
+		    store->date = tilt->tlt_date;
+		mb_get_binary_int(MB_NO, &line[4], &tilt->tlt_msec); 
+		    store->msec = tilt->tlt_msec;
+		mb_get_binary_short(MB_NO, &line[8], &short_val); 
+		    tilt->tlt_count = (int) ((unsigned short) short_val);
+		mb_get_binary_short(MB_NO, &line[10], &short_val); 
+		    tilt->tlt_serial = (int) ((unsigned short) short_val);
+		mb_get_binary_short(MB_NO, &line[12], &short_val); 
+		    tilt->tlt_ndata = (int) ((unsigned short) short_val);
+		}
+
+	/* read binary tilt values */
+	if (status == MB_SUCCESS)
+	    {
+	    for (i=0;i<tilt->tlt_ndata && status == MB_SUCCESS;i++)
+		{
+		read_len = fread(line,1,EM2_TILT_SLICE_SIZE,mbfp);
+		if (read_len == EM2_TILT_SLICE_SIZE 
+			&& i < MBSYS_SIMRAD2_MAXTILT)
+			{
+			status = MB_SUCCESS;
+			mb_get_binary_short(MB_NO, &line[0], &short_val); 
+			    tilt->tlt_time[i] = (int) ((unsigned short) short_val);
+			mb_get_binary_short(MB_NO, &line[2], &short_val); 
+			    tilt->tlt_tilt[i] = (int) ((unsigned short) short_val);
+			}
+		else
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_EOF;
+			}
+		}
+	    tilt->tlt_ndata = MIN(tilt->tlt_ndata, MBSYS_SIMRAD2_MAXTILT);
+	    }
+		
+	/* now get last bytes of record */
+	if (status == MB_SUCCESS)
+		{
+		read_len = fread(&line[0],1,4,mbfp);
+		if (read_len == 4)
+			{
+			status = MB_SUCCESS;
+			}
+		else
+			{
+			/* return success here because all of the
+			    important information in this record has
+			    already been read - next attempt to read
+			    file will return error */
+			status = MB_SUCCESS;
+			}
+#ifdef MBR_EM300MBA_DEBUG
+	fprintf(stderr, "End Bytes: %8.8X %d\n", 
+		*((int *)&(line[0])), *((int *)&(line[0])));
+#endif
+		}
+
+	/* print debug statements */
+	if (verbose >= 5)
+		{
+		fprintf(stderr,"\ndbg5  Values read in MBIO function <%s>\n",
+			function_name);
+		fprintf(stderr,"dbg5       type:            %d\n",store->type);
+		fprintf(stderr,"dbg5       sonar:           %d\n",store->sonar);
+		fprintf(stderr,"dbg5       date:            %d\n",store->date);
+		fprintf(stderr,"dbg5       msec:            %d\n",store->msec);
+		fprintf(stderr,"dbg5       tlt_date:        %d\n",tilt->tlt_date);
+		fprintf(stderr,"dbg5       tlt_msec:        %d\n",tilt->tlt_msec);
+		fprintf(stderr,"dbg5       tlt_count:       %d\n",tilt->tlt_count);
+		fprintf(stderr,"dbg5       tlt_serial:      %d\n",tilt->tlt_serial);
+		fprintf(stderr,"dbg5       tlt_ndata:       %d\n",tilt->tlt_ndata);
+		fprintf(stderr,"dbg5       count    time (msec)    tilt (0.01 deg)\n");
+		fprintf(stderr,"dbg5       -----    -----------    ------------------\n");
+		for (i=0;i<tilt->tlt_ndata;i++)
+			fprintf(stderr,"dbg5        %4d      %7d          %7d\n",
+				i, tilt->tlt_time[i], tilt->tlt_tilt[i]);
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
 int mbr_em300mba_rd_attitude(int verbose, FILE *mbfp, 
 		struct mbsys_simrad2_struct *store, 
 		short sonar, int *error)
@@ -2727,6 +2905,7 @@ int mbr_em300mba_rd_pos(int verbose, FILE *mbfp,
 	int	int_val;
 	int	read_len, len;
 	int	done;
+	int	navchannel;
 	int	i;
 
 	/* print input debug statements */
@@ -2841,6 +3020,41 @@ int mbr_em300mba_rd_pos(int verbose, FILE *mbfp,
 	fprintf(stderr, "\n");
 #endif
 	    }
+		
+	/* check for navigation source */
+	if (status == MB_SUCCESS)
+		{
+		/* "active" nav system has first bit set in store->pos_system */
+		if (store->pos_system & 128)
+		    {
+		    store->kind = MB_DATA_NAV;
+		    }
+
+		/* otherwise its from a secondary nav system */
+		else
+		    {
+		    navchannel = (store->pos_system & 0x03);
+		    if (navchannel == 1)
+			{
+			store->kind = MB_DATA_NAV1;
+			}
+		    else if (navchannel == 2)
+			{
+			store->kind = MB_DATA_NAV2;
+			}
+		    else if (navchannel == 3)
+			{
+			store->kind = MB_DATA_NAV3;
+			}
+    
+		    /* otherwise its an error */
+		    else
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_UNINTELLIGIBLE;
+			}
+		    }
+		}	
 
 	/* print debug statements */
 	if (verbose >= 5)
@@ -3265,10 +3479,15 @@ int mbr_em300mba_rd_bath(int verbose, FILE *mbfp,
 			{
 			status = MB_SUCCESS;
 			mb_get_binary_short(MB_NO, &line[0], &short_val); 
-			    if (store->sonar == MBSYS_SIMRAD2_EM120
-				|| store->sonar == MBSYS_SIMRAD2_EM300)
+			if (store->sonar == MBSYS_SIMRAD2_EM120
+				|| store->sonar == MBSYS_SIMRAD2_EM300
+				|| store->sonar == MBSYS_SIMRAD2_EM12S
+				|| store->sonar == MBSYS_SIMRAD2_EM12D
+				|| store->sonar == MBSYS_SIMRAD2_EM121
+				|| store->sonar == MBSYS_SIMRAD2_EM100
+				|| store->sonar == MBSYS_SIMRAD2_EM1000)
 				ping->png_depth[i] = (int) ((unsigned short) short_val);
-			    else
+			else
 				ping->png_depth[i] = (int) short_val;
 			mb_get_binary_short(MB_NO, &line[2], &short_val); 
 			    ping->png_acrosstrack[i] = (int) short_val;
@@ -4054,6 +4273,13 @@ int mbr_em300mba_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 #endif
 		status = mbr_em300mba_wr_ssv(verbose,mbfp,store,error);
 		}
+	else if (store->kind == MB_DATA_TILT)
+		{
+#ifdef MBR_EM300MBA_DEBUG
+	fprintf(stderr,"call mbr_em300mba_wr_tilt kind:%d type %x\n",store->kind,store->type);
+#endif
+		status = mbr_em300mba_wr_tilt(verbose,mbfp,store,error);
+		}
 	else if (store->kind == MB_DATA_ATTITUDE)
 		{
 #ifdef MBR_EM300MBA_DEBUG
@@ -4061,7 +4287,10 @@ int mbr_em300mba_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 #endif
 		status = mbr_em300mba_wr_attitude(verbose,mbfp,store,error);
 		}
-	else if (store->kind == MB_DATA_NAV)
+	else if (store->kind == MB_DATA_NAV
+		|| store->kind == MB_DATA_NAV1
+		|| store->kind == MB_DATA_NAV2
+		|| store->kind == MB_DATA_NAV3)
 		{
 #ifdef MBR_EM300MBA_DEBUG
 	fprintf(stderr,"call mbr_em300mba_wr_pos kind:%d type %x\n",store->kind,EM2_POS);
@@ -5487,6 +5716,203 @@ int mbr_em300mba_wr_ssv(int verbose, FILE *mbfp,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+int mbr_em300mba_wr_tilt(int verbose, FILE *mbfp, 
+		struct mbsys_simrad2_struct *store, int *error)
+{
+	char	*function_name = "mbr_em300mba_wr_tilt";
+	int	status = MB_SUCCESS;
+	struct mbsys_simrad2_tilt_struct *tilt;
+	char	line[EM2_TILT_HEADER_SIZE];
+	short	label;
+	int	write_len;
+	int	write_size;
+	unsigned short checksum;
+	mb_u_char   *uchar_ptr;
+	int	i, j;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
+		fprintf(stderr,"dbg2       store:      %d\n",store);
+		}
+		
+	/* get storage structure */
+	tilt = (struct mbsys_simrad2_tilt_struct *) store->tilt;
+
+	/* print debug statements */
+	if (verbose >= 5)
+		{
+		fprintf(stderr,"\ndbg5  Values to be written in MBIO function <%s>\n",
+			function_name);
+		fprintf(stderr,"dbg5       type:            %d\n",store->type);
+		fprintf(stderr,"dbg5       sonar:           %d\n",store->sonar);
+		fprintf(stderr,"dbg5       date:            %d\n",store->date);
+		fprintf(stderr,"dbg5       msec:            %d\n",store->msec);
+		fprintf(stderr,"dbg5       tlt_date:        %d\n",tilt->tlt_date);
+		fprintf(stderr,"dbg5       tlt_msec:        %d\n",tilt->tlt_msec);
+		fprintf(stderr,"dbg5       tlt_count:       %d\n",tilt->tlt_count);
+		fprintf(stderr,"dbg5       tlt_serial:      %d\n",tilt->tlt_serial);
+		fprintf(stderr,"dbg5       tlt_ndata:       %d\n",tilt->tlt_ndata);
+		fprintf(stderr,"dbg5       count    time (msec)    tilt (0.01 deg)\n");
+		fprintf(stderr,"dbg5       -----    -----------    ------------------\n");
+		for (i=0;i<tilt->tlt_ndata;i++)
+			fprintf(stderr,"dbg5        %4d      %7d          %7d\n",
+				i, tilt->tlt_time[i], tilt->tlt_tilt[i]);
+		}
+		
+	/* zero checksum */
+	checksum = 0;
+
+	/* write the record size */
+	mb_put_binary_int(MB_NO, (int) (EM2_TILT_HEADER_SIZE 
+			+ EM2_TILT_SLICE_SIZE * tilt->tlt_ndata + 8), (void *) &write_size); 
+	write_len = fwrite(&write_size,1,4,mbfp);
+	if (write_len != 4)
+		{
+		status = MB_FAILURE;
+		*error = MB_ERROR_WRITE_FAIL;
+		}
+	else
+		status = MB_SUCCESS;
+
+	/* write the record label */
+	if (status == MB_SUCCESS)
+		{
+		mb_put_binary_short(MB_NO, (short) (EM2_TILT), (void *) &label); 
+		write_len = fwrite(&label,1,2,mbfp);
+		if (write_len != 2)
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_WRITE_FAIL;
+			}
+		else
+			status = MB_SUCCESS;
+		
+		/* compute checksum */
+		uchar_ptr = (mb_u_char *) &label;
+		checksum += uchar_ptr[1];
+		}
+
+	/* write the sonar id */
+	if (status == MB_SUCCESS)
+		{
+		mb_put_binary_short(MB_NO, (short) (store->sonar), (void *) &label); 
+		write_len = fwrite(&label,1,2,mbfp);
+		if (write_len != 2)
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_WRITE_FAIL;
+			}
+		else
+			status = MB_SUCCESS;
+		
+		/* compute checksum */
+		uchar_ptr = (mb_u_char *) &label;
+		checksum += uchar_ptr[0];
+		checksum += uchar_ptr[1];
+		}
+
+	/* output binary header data */
+	if (status == MB_SUCCESS)
+		{
+		mb_put_binary_int(MB_NO, (int) tilt->tlt_date, (void *) &line[0]); 
+		mb_put_binary_int(MB_NO, (int) tilt->tlt_msec, (void *) &line[4]); 
+		mb_put_binary_short(MB_NO, (unsigned short) tilt->tlt_count, (void *) &line[8]);
+		mb_put_binary_short(MB_NO, (unsigned short) tilt->tlt_serial, (void *) &line[10]);
+		mb_put_binary_short(MB_NO, (unsigned short) tilt->tlt_ndata, (void *) &line[12]);
+		
+		/* compute checksum */
+		uchar_ptr = (mb_u_char *) line;
+		for (j=0;j<EM2_TILT_HEADER_SIZE;j++)
+		    checksum += uchar_ptr[j];
+
+		/* write out data */
+		write_len = fwrite(line,1,EM2_TILT_HEADER_SIZE,mbfp);
+		if (write_len != EM2_TILT_HEADER_SIZE)
+			{
+			*error = MB_ERROR_WRITE_FAIL;
+			status = MB_FAILURE;
+			}
+		else
+			{
+			*error = MB_ERROR_NO_ERROR;
+			status = MB_SUCCESS;
+			}
+		}
+
+	/* output binary tilt data */
+	if (status == MB_SUCCESS)
+	    for (i=0;i<tilt->tlt_ndata;i++)
+		{
+		mb_put_binary_short(MB_NO, (unsigned short) tilt->tlt_time[i], (void *) &line[0]);
+		mb_put_binary_short(MB_NO, (unsigned short) tilt->tlt_tilt[i], (void *) &line[2]);
+		
+		/* compute checksum */
+		uchar_ptr = (mb_u_char *) line;
+		for (j=0;j<EM2_TILT_SLICE_SIZE;j++)
+		    checksum += uchar_ptr[j];
+
+		/* write out data */
+		write_len = fwrite(line,1,EM2_TILT_SLICE_SIZE,mbfp);
+		if (write_len != EM2_TILT_SLICE_SIZE)
+			{
+			*error = MB_ERROR_WRITE_FAIL;
+			status = MB_FAILURE;
+			}
+		else
+			{
+			*error = MB_ERROR_NO_ERROR;
+			status = MB_SUCCESS;
+			}
+		}
+
+	/* output end of record */
+	if (status == MB_SUCCESS)
+		{
+		line[0] = 0;
+		line[1] = 0x03;
+		
+		/* compute checksum */
+		uchar_ptr = (mb_u_char *) line;
+		checksum += uchar_ptr[0];
+	    
+		/* set checksum */
+		mb_put_binary_short(MB_NO, (unsigned short) checksum, (void *) &line[2]);
+
+		/* write out data */
+		write_len = fwrite(line,1,4,mbfp);
+		if (write_len != 4)
+			{
+			*error = MB_ERROR_WRITE_FAIL;
+			status = MB_FAILURE;
+			}
+		else
+			{
+			*error = MB_ERROR_NO_ERROR;
+			status = MB_SUCCESS;
+			}
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
 int mbr_em300mba_wr_attitude(int verbose, FILE *mbfp, 
 		struct mbsys_simrad2_struct *store, int *error)
 {
@@ -5827,7 +6253,7 @@ int mbr_em300mba_wr_pos(int verbose, FILE *mbfp,
 			}
 		}
 
-	/* output original ascii heading data */
+	/* output original ascii nav data */
 	if (status == MB_SUCCESS)
 		{
 		write_size = store->pos_input_size 
@@ -6249,7 +6675,12 @@ int mbr_em300mba_wr_bath(int verbose, FILE *mbfp,
 	    for (i=0;i<ping->png_nbeams;i++)
 		{
 		if (store->sonar == MBSYS_SIMRAD2_EM120
-			|| store->sonar == MBSYS_SIMRAD2_EM300)
+				|| store->sonar == MBSYS_SIMRAD2_EM300
+				|| store->sonar == MBSYS_SIMRAD2_EM12S
+				|| store->sonar == MBSYS_SIMRAD2_EM12D
+				|| store->sonar == MBSYS_SIMRAD2_EM121
+				|| store->sonar == MBSYS_SIMRAD2_EM100
+				|| store->sonar == MBSYS_SIMRAD2_EM1000)
 		    mb_put_binary_short(MB_NO, (unsigned short) ping->png_depth[i], (void *) &line[0]);
 		else
 		    mb_put_binary_short(MB_NO, (short) ping->png_depth[i], (void *) &line[0]);

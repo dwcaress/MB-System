@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	1/19/93
- *    $Id: mb_io.h,v 5.8 2002-05-02 04:00:41 caress Exp $
+ *    $Id: mb_io.h,v 5.9 2002-05-29 23:40:48 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2002/05/02 04:00:41  caress
+ * Release 5.0.beta17
+ *
  * Revision 5.7  2001/10/12 21:10:41  caress
  * Added interpolation of attitude data.
  *
@@ -129,6 +132,10 @@
 
 #ifndef MB_DEFINE_DEF
 #include "mb_define.h"
+#endif
+
+#ifndef MB_STATUS_DEF
+#include "mb_status.h"
 #endif
 
 /* MBIO input/output control structure */
@@ -297,6 +304,9 @@ struct mb_io_struct
 	int nheading;
 	double heading_time_d[MB_ASYNCH_SAVE_MAX];
 	double heading_heading[MB_ASYNCH_SAVE_MAX];
+	
+	/* variables for accumulating MBIO notices */
+	int	notice_list[MB_NOTICE_MAX];
 	
 	/* variables for saving information */
 	char	save_label[12];

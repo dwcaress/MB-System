@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavlist.c	2/1/93
- *    $Id: mbnavlist.c,v 5.4 2001-07-24 17:40:54 caress Exp $
+ *    $Id: mbnavlist.c,v 5.5 2002-05-29 23:43:09 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  *
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2001/07/24 17:40:54  caress
+ * Fixed typo.
+ *
  * Revision 5.3  2001/07/20 00:34:38  caress
  * Release 5.0.beta03
  *
@@ -85,7 +88,7 @@ double	NaN;
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbnavlist.c,v 5.4 2001-07-24 17:40:54 caress Exp $";
+	static char rcs_id[] = "$Id: mbnavlist.c,v 5.5 2002-05-29 23:43:09 caress Exp $";
 	static char program_name[] = "mbnavlist";
 	static char help_message[] =  "mbnavlist prints the specified contents of navigation records\nin a swath sonar data file to stdout. The form of the \noutput is quite flexible; mbnavlist is tailored to produce \nascii files in spreadsheet style with data columns separated by tabs.";
 	static char usage_message[] = "mbnavlist [-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc \n-Fformat -H -Ifile -Llonflip \n-Ooptions -Rw/e/s/n -Sspeed \n-Ttimegap -V -Zsegment]";
@@ -127,6 +130,7 @@ main (int argc, char **argv)
 	int	nav_source;
 	int	heading_source;
 	int	vru_source;
+	int	aux_nav_channel = -1;
 
 	/* output format list controls */
 	char	list[MAX_OPTIONS];
@@ -207,7 +211,7 @@ main (int argc, char **argv)
 	n_list = 6;
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "B:b:E:e:F:f:I:i:L:l:O:o:R:r:S:s:T:t:Z:z:VvHh")) != -1)
+	while ((c = getopt(argc, argv, "B:b:E:e:F:f:I:i:L:l:N:n:O:o:R:r:S:s:T:t:Z:z:VvHh")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -247,6 +251,11 @@ main (int argc, char **argv)
 		case 'L':
 		case 'l':
 			sscanf (optarg,"%d", &lonflip);
+			flag++;
+			break;
+		case 'N':
+		case 'n':
+			sscanf (optarg,"%d", &aux_nav_channel);
 			flag++;
 			break;
 		case 'O':
@@ -397,6 +406,21 @@ main (int argc, char **argv)
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
 		exit(error);
+		}
+		
+	/* set auxilliary nav source if requested */
+	if (aux_nav_channel == 0)
+		{
+		nav_source = MB_DATA_NAV;
+		}
+	else if (aux_nav_channel > 0)
+		{
+		if (aux_nav_channel == 1)
+		    nav_source = MB_DATA_NAV1;
+		else if (aux_nav_channel == 2)
+		    nav_source = MB_DATA_NAV2;
+		else if (aux_nav_channel == 3)
+		    nav_source = MB_DATA_NAV3;
 		}
 
 	/* initialize reading the swath file */

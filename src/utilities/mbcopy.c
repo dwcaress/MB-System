@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcopy.c	2/4/93
- *    $Id: mbcopy.c,v 5.9 2002-05-02 04:01:37 caress Exp $
+ *    $Id: mbcopy.c,v 5.10 2002-05-29 23:43:09 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	February 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.9  2002/05/02 04:01:37  caress
+ * Release 5.0.beta17
+ *
  * Revision 5.8  2002/04/06 02:53:45  caress
  * Release 5.0.beta16
  *
@@ -196,7 +199,7 @@ int mbcopy_any_to_mbldeoih(int verbose,
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbcopy.c,v 5.9 2002-05-02 04:01:37 caress Exp $";
+	static char rcs_id[] = "$Id: mbcopy.c,v 5.10 2002-05-29 23:43:09 caress Exp $";
 	static char program_name[] = "MBcopy";
 	static char help_message[] =  "MBcopy copies an input swath sonar data file to an output \nswath sonar data file with the specified conversions.  Options include \nwindowing in time and space and ping averaging.  The input and \noutput data formats may differ, though not all possible combinations \nmake sense.  The default input and output streams are stdin and stdout.";
 	static char usage_message[] = "mbcopy [-Byr/mo/da/hr/mn/sc -Ccommentfile -D -Eyr/mo/da/hr/mn/sc \n\t-Fiformat/oformat -H  -Iinfile -Llonflip -N -Ooutfile \n\t-Ppings -Qsleep_factor -Rw/e/s/n -Sspeed -V]";
@@ -2288,10 +2291,8 @@ int mbcopy_simrad_to_simrad2(int verbose,
 			/* set beam values */
 			for (i=0;i<oping->png_nbeams;i++)
 			    {
-			    oping->png_depth[i] = iping->bath[i];	
+			    oping->png_depth[i] = (int)((unsigned short)iping->bath[i]);	
 					/* depths in depth resolution units */
-			    if (oping->png_depth[i] < 0)
-				oping->png_depth[i] = -oping->png_depth[i];
 			    if (oping->png_depth[i] != 0)
 				oping->png_depth[i] -= (int)(bath_offset / (0.01 * oping->png_depth_res));
 			    oping->png_acrosstrack[i] = iping->bath_acrosstrack[i];
@@ -2342,9 +2343,7 @@ int mbcopy_simrad_to_simrad2(int verbose,
 			    oping->png_beam_num[i] = i + 1;	
 					/* beam 128 is first beam on 
 					    second head of EM3000D */
-			    if (iping->bath[i] < 0)
-				oping->png_beamflag[i] = MB_FLAG_MANUAL + MB_FLAG_FLAG;
-			    else if (iping->bath[i] > 0)
+			    if (iping->bath[i] > 0)
 				oping->png_beamflag[i] = MB_FLAG_NONE;
 			    else
 				oping->png_beamflag[i] = MB_FLAG_NULL;

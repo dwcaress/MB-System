@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad.h	8/5/94
- *	$Id: mbsys_simrad.h,v 5.3 2001-07-20 00:32:54 caress Exp $
+ *	$Id: mbsys_simrad.h,v 5.4 2002-05-29 23:41:49 caress Exp $
  *
  *    Copyright (c) 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -32,6 +32,9 @@
  * Date:	August 5, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2001/07/20 00:32:54  caress
+ * Release 5.0.beta03
+ *
  * Revision 5.2  2001/03/22  20:50:02  caress
  * Trying to make version 5.0.beta0
  *
@@ -1213,7 +1216,7 @@ struct mbsys_simrad_survey_struct
 	int	xducer_pitch;	/* 0.01 degrees */
 	int	ping_heave;	/* 0.01 meters */
 	int	sound_vel;	/* 0.1 meters/sec */
-	short int bath[MBSYS_SIMRAD_MAXBEAMS];	
+	unsigned short int bath[MBSYS_SIMRAD_MAXBEAMS];	
 				/* depths:
 					EM-1000:        0.02 meters 
 					EM-12 high res: 0.10 meters 

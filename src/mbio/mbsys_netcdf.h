@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_netcdf.h	4/8/2002
- *	$Id: mbsys_netcdf.h,v 5.0 2002-05-02 03:56:34 caress Exp $
+ *	$Id: mbsys_netcdf.h,v 5.1 2002-05-29 23:41:49 caress Exp $
  *
  *    Copyright (c) 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	April 8, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2002/05/02 03:56:34  caress
+ * Release 5.0.beta17
+ *
  *
  */
 /*
@@ -71,6 +74,9 @@
 #define MBSYS_NETCDF_SONAR_BEAMS_EM3000D    254
 #define MBSYS_NETCDF_SONAR_BEAMS_EM300	    127
 #define MBSYS_NETCDF_SONAR_BEAMS_FURUNO	    45
+
+/* seconds in day */
+#define SECINDAY     86400.0
 
 /* internal data structure */
 struct mbsys_netcdf_struct
@@ -197,7 +203,7 @@ struct mbsys_netcdf_struct
         short *mbDynamicDraught;
         short *mbTide;
         short *mbSoundVelocity;
-        short *mbHeading;
+        unsigned short *mbHeading;
         short *mbRoll;
         short *mbPitch;
         short *mbTransmissionHeave;

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	4/8/93
- *    $Id: mbedit_prog.c,v 5.10 2002-05-02 03:53:45 caress Exp $
+ *    $Id: mbedit_prog.c,v 5.11 2002-05-29 23:36:28 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -27,6 +27,9 @@
  * Date:	September 19, 2000 (New version - no buffered i/o)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.10  2002/05/02 03:53:45  caress
+ * Release 5.0.beta17
+ *
  * Revision 5.9  2001/11/16 01:25:20  caress
  * Added info mode.
  *
@@ -220,6 +223,7 @@
 
 /* standard include files */
 #include <stdio.h>
+#include <unistd.h>
 #include <math.h>
 #include <string.h>
 #include <sys/stat.h>
@@ -279,7 +283,7 @@ struct mbedit_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbedit_prog.c,v 5.10 2002-05-02 03:53:45 caress Exp $";
+static char rcs_id[] = "$Id: mbedit_prog.c,v 5.11 2002-05-29 23:36:28 caress Exp $";
 static char program_name[] = "MBedit";
 static char help_message[] =  
 "MBedit is an interactive editor used to identify and flag\n\
@@ -501,7 +505,10 @@ int mbedit_init(int argc, char ** argv, int *startup_file)
 	strcpy(ifile,"\0");
 
 	/* process argument list */
+fprintf(stderr, "argc:%d argv[0]:%s argv[1]:%s\n", argc, argv[0], argv[1]);
 	while ((c = getopt(argc, argv, "VvHhB:b:DdE:e:F:f:GgI:i:SsXx")) != -1)
+	  {
+fprintf(stderr, "c:%c\n", c);
 	  switch (c) 
 		{
 		case 'H':
@@ -562,6 +569,7 @@ int mbedit_init(int argc, char ** argv, int *startup_file)
 		case '?':
 			errflg++;
 		}
+	    }
 
 	/* if error flagged then print it and exit */
 	if (errflg)
@@ -1035,6 +1043,10 @@ int mbedit_get_startup(
 
 	/* get file */
 	strcpy(file, ifile);
+
+	/* get format if required */
+	if (format == 0)
+		mb_get_format(verbose,ifile,NULL,&format,&error);
 
 	/* get format */
 	*form = format;

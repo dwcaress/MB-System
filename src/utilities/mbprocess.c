@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbprocess.c	3/31/93
- *    $Id: mbprocess.c,v 5.19 2002-04-08 21:01:04 caress Exp $
+ *    $Id: mbprocess.c,v 5.20 2002-05-29 23:43:09 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -36,6 +36,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.19  2002/04/08 21:01:04  caress
+ * Release 5.0.beta17
+ *
  * Revision 5.18  2002/04/06 02:53:45  caress
  * Release 5.0.beta16
  *
@@ -129,7 +132,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbprocess.c,v 5.19 2002-04-08 21:01:04 caress Exp $";
+	static char rcs_id[] = "$Id: mbprocess.c,v 5.20 2002-05-29 23:43:09 caress Exp $";
 	static char program_name[] = "mbprocess";
 	static char help_message[] =  "mbprocess is a tool for processing swath sonar bathymetry data.\n\
 This program performs a number of functions, including:\n\
@@ -450,11 +453,23 @@ and mbedit edit save files.\n";
 	    exit(error);
 	    }
 
+	/* try to datalist.mb-1 as input */
+	if (mbp_ifile_specified == MB_NO)
+	    {
+	    if ((fstat = stat("datalist.mb-1", &file_status)) == 0
+		    && (file_status.st_mode & S_IFMT) != S_IFDIR)
+		    {
+		    strcpy(read_file, "datalist.mb-1");
+		    mbp_ifile_specified = MB_YES;
+		    }
+	    }
+
 	/* quit if no input file specified */
 	if (mbp_ifile_specified == MB_NO)
 	    {
 	    fprintf(stderr,"\nProgram <%s> requires an input data file.\n",program_name);
-	    fprintf(stderr,"The input file must be specified with the -I option.\n");
+	    fprintf(stderr,"The input file may be specified with the -I option.\n");
+	    fprintf(stderr,"The default input file is \"datalist.mb-1\".\n");
 	    fprintf(stderr,"\nProgram <%s> Terminated\n",
 		    program_name);
 	    error = MB_ERROR_OPEN_FAIL;
@@ -774,10 +789,8 @@ and mbedit edit save files.\n";
 	    fprintf(stderr,"\nInput and Output Files:\n");
 	    if (process.mbp_format_specified == MB_YES)
 		    fprintf(stderr,"  Format:                        %d\n",process.mbp_format);
-	    if (process.mbp_ifile_specified == MB_YES)
-		    fprintf(stderr,"  Input file:                    %s\n",process.mbp_ifile);
-	    if (process.mbp_ifile_specified == MB_YES)
-		    fprintf(stderr,"  Output file:                   %s\n",process.mbp_ofile);
+	    fprintf(stderr,"  Input file:                    %s\n",process.mbp_ifile);
+	    fprintf(stderr,"  Output file:                   %s\n",process.mbp_ofile);
 	    if (strip_comments == MB_YES)
 		fprintf(stderr,"  Comments in output:            OFF\n");
 	    else

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_mem.c	3/1/93
- *    $Id: mb_mem.c,v 5.0 2000-12-01 22:48:41 caress Exp $
+ *    $Id: mb_mem.c,v 5.1 2002-05-29 23:36:53 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	March 1, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01 22:48:41  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.9  2000/10/11  01:02:30  caress
  * Convert to ANSI C
  *
@@ -95,13 +98,13 @@ static int	n_mb_alloc = 0;
 static char	*mb_alloc_ptr[MB_MEMORY_HEAP_MAX];
 static int	mb_alloc_size[MB_MEMORY_HEAP_MAX];
 
+static char rcs_id[]="$Id: mb_mem.c,v 5.1 2002-05-29 23:36:53 caress Exp $";
+
 /*--------------------------------------------------------------------*/
-int mb_malloc(int verbose, int size, char **ptr, int *error)
+int mb_malloc(int verbose, int size, void **ptr, int *error)
 {
-  static char rcs_id[]="$Id: mb_mem.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
 	char	*function_name = "mb_malloc";
 	int	status = MB_SUCCESS;
-	int	iptr;
 	int	i;
 
 	/* print input debug statements */
@@ -181,7 +184,123 @@ int mb_malloc(int verbose, int size, char **ptr, int *error)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_free(int verbose, char **ptr, int *error)
+int mb_realloc(int verbose, int size, void **ptr, int *error)
+{
+	char	*function_name = "mb_realloc";
+	int	status = MB_SUCCESS;
+	int	i;
+	int	iptr;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       size:       %d\n",size);
+		fprintf(stderr,"dbg2       ptr:        %d\n",ptr);
+		fprintf(stderr,"dbg2       *ptr:       %d\n",*ptr);
+		}
+
+	/* check if pointer is in list */
+	iptr = -1;
+	for (i=0;i<n_mb_alloc;i++)
+		if (mb_alloc_ptr[i] == *ptr)
+			iptr = i;
+			
+	/* if pointer is non-NULL use realloc */
+	if (*ptr != NULL)
+	    *ptr = (char *) realloc(*ptr, size);
+
+	/* if pointer is NULL use malloc */
+	else if (size > 0)
+	    *ptr = (char *) malloc(size);
+	    
+	/* check for success */
+	if (size > 0 && *ptr == NULL)
+	    {
+	    *error = MB_ERROR_MEMORY_FAIL;
+	    status = MB_FAILURE;
+	    }
+	else
+	    {
+	    *error = MB_ERROR_NO_ERROR;
+	    status = MB_SUCCESS;
+	    }
+
+	/* if pointer was already in list update it */
+	if (status == MB_SUCCESS
+	    && iptr > -1)
+	    {
+	    /* if pointer non-NULL update it */
+	    if (size > 0 && *ptr != NULL)
+		{
+		mb_alloc_ptr[iptr] = *ptr;
+		mb_alloc_size[iptr] = size;
+		}
+		    
+	    /* else remove it from list */
+	    else
+		{
+		for (i=iptr;i<n_mb_alloc-1;i++)
+			{
+			mb_alloc_ptr[i] = mb_alloc_ptr[i+1];
+			mb_alloc_size[i] = mb_alloc_size[i+1];
+			}
+		n_mb_alloc--;
+		}
+	    }
+    
+	/* else add to list if possible */
+	else if (status == MB_SUCCESS
+	    && n_mb_alloc < MB_MEMORY_HEAP_MAX && size > 0)
+	    {
+	    mb_alloc_ptr[n_mb_alloc] = *ptr;
+	    mb_alloc_size[n_mb_alloc] = size;
+	    n_mb_alloc++;
+	    }
+
+	/* print debug statements */
+	if (verbose >= 5 && size > 0)
+		{
+		fprintf(stderr,"\ndbg5  Memory reallocated in MBIO function <%s>\n",
+			function_name);
+		fprintf(stderr,"dbg5       i:%d  ptr:%d  size:%d\n",
+			n_mb_alloc,*ptr,size);
+		}
+
+	/* print debug statements */
+	if (verbose >= 6)
+		{
+		fprintf(stderr,"\ndbg6  Allocated memory list in MBIO function <%s>\n",
+			function_name);
+		for (i=0;i<n_mb_alloc;i++)
+			fprintf(stderr,"dbg6       i:%d  ptr:%d  size:%d\n",
+				i,mb_alloc_ptr[i],mb_alloc_size[i]);
+		}
+
+	/* assume success */
+	*error = MB_ERROR_NO_ERROR;
+	status = MB_SUCCESS;
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       ptr:        %d\n",*ptr);
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_free(int verbose, void **ptr, int *error)
 {
 	char	*function_name = "mb_free";
 	int	status = MB_SUCCESS;
