@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mbldeoih.c	2/2/93
- *	$Id: mbr_mbldeoih.c,v 5.9 2004-09-16 18:59:42 caress Exp $
+ *	$Id: mbr_mbldeoih.c,v 5.10 2004-12-02 06:33:31 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	February 2, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 5.9  2004/09/16 18:59:42  caress
+ * Comment updates.
+ *
  * Revision 5.8  2003/05/20 18:05:32  caress
  * Added svp_source to data source parameters.
  *
@@ -204,7 +207,7 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 #define	MBF_MBLDEOIH_OLDHEADERSIZE	38
 #define	MBF_MBLDEOIH_NEWHEADERSIZE	44
 
-static char res_id[]="$Id: mbr_mbldeoih.c,v 5.9 2004-09-16 18:59:42 caress Exp $";
+static char res_id[]="$Id: mbr_mbldeoih.c,v 5.10 2004-12-02 06:33:31 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_mbldeoih(int verbose, void *mbio_ptr, int *error)
@@ -1047,6 +1050,7 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 				store->bath_acrosstrack[i],store->bath_alongtrack[i]);
 			fprintf(stderr,"dbg5       pixels_ss:  %d\n",
 				store->pixels_ss);
+			for (i=0;i<store->pixels_ss;i++)
 			  fprintf(stderr,"dbg5       pixel:%d  ss:%d acrosstrack:%d  alongtrack:%d\n",
 				i,store->ss[i],
 				store->ss_acrosstrack[i],store->ss_alongtrack[i]);

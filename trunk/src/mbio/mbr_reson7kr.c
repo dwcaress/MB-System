@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_reson7kr.c	4/4/2004
- *	$Id: mbr_reson7kr.c,v 5.5 2004-11-08 05:47:19 caress Exp $
+ *	$Id: mbr_reson7kr.c,v 5.6 2004-12-02 06:33:31 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	April 4,2004
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2004/11/08 05:47:19  caress
+ * Now gets sidescan from snippet data, maybe even properly...
+ *
  * Revision 5.4  2004/11/06 03:55:16  caress
  * Working to support the Reson 7k format.
  *
@@ -59,7 +62,7 @@
 #include "../../include/mb_swap.h"
 	
 /* turn on debug statements here */
-#define MBR_RESON7KR_DEBUG 1
+/* #define MBR_RESON7KR_DEBUG 1 */
 	
 /* essential function prototypes */
 int mbr_register_reson7kr(int verbose, void *mbio_ptr, 
@@ -177,7 +180,7 @@ int mbr_reson7kr_wr_soundvelocity(int verbose, int *bufferalloc, char **bufferpt
 int mbr_reson7kr_wr_absorptionloss(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 int mbr_reson7kr_wr_spreadingloss(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 
-static char res_id[]="$Id: mbr_reson7kr.c,v 5.5 2004-11-08 05:47:19 caress Exp $";
+static char res_id[]="$Id: mbr_reson7kr.c,v 5.6 2004-12-02 06:33:31 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_reson7kr(int verbose, void *mbio_ptr, int *error)
@@ -231,6 +234,7 @@ int mbr_register_reson7kr(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr->mb_io_extract = &mbsys_reson7k_extract; 
 	mb_io_ptr->mb_io_insert = &mbsys_reson7k_insert; 
 	mb_io_ptr->mb_io_extract_nav = &mbsys_reson7k_extract_nav; 
+	mb_io_ptr->mb_io_extract_nnav = &mbsys_reson7k_extract_nnav; 
 	mb_io_ptr->mb_io_insert_nav = &mbsys_reson7k_insert_nav; 
 	mb_io_ptr->mb_io_extract_altitude = &mbsys_reson7k_extract_altitude; 
 	mb_io_ptr->mb_io_insert_altitude = NULL; 
@@ -349,10 +353,10 @@ int mbr_info_reson7kr(int verbose,
 	*filetype = MB_FILETYPE_NORMAL;
 	*variable_beams = MB_YES;
 	*traveltime = MB_YES;
-	*beam_flagging = MB_NO;
+	*beam_flagging = MB_YES;
 	*nav_source = MB_DATA_NAV;
-	*heading_source = MB_DATA_DATA;
-	*vru_source = MB_DATA_ATTITUDE;
+	*heading_source = MB_DATA_NAV;
+	*vru_source = MB_DATA_NAV;
 	*svp_source = MB_DATA_VELOCITY_PROFILE;
 	*beamwidth_xtrack = 1.0;
 	*beamwidth_ltrack = 1.0;
@@ -621,26 +625,26 @@ int mbr_rt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		for (i=0;i<bluefin->number_frames;i++)
 			{
 			mb_navint_add(verbose, mbio_ptr, 
-					(double)(bluefin->nav[i].position_time - 32.0), 
+					(double)(bluefin->nav[i].position_time), 
 					(double)(RTD * bluefin->nav[i].longitude), 
 					(double)(RTD * bluefin->nav[i].latitude), 
 					error);
 			mb_attint_add(verbose, mbio_ptr,
-					(double)(bluefin->nav[i].position_time - 32.0), 
+					(double)(bluefin->nav[i].position_time), 
 					(double)(0.0), 
 					(double)(RTD * bluefin->nav[i].roll), 
 					(double)(RTD * bluefin->nav[i].pitch), 
 					error);
 			mb_hedint_add(verbose, mbio_ptr,
-					(double)(bluefin->nav[i].position_time - 32.0), 
+					(double)(bluefin->nav[i].position_time), 
 					(double)(RTD * bluefin->nav[i].yaw), 
 					error);
 			mb_depint_add(verbose, mbio_ptr,
-					(double)(bluefin->nav[i].position_time - 32.0), 
+					(double)(bluefin->nav[i].position_time), 
 					(double)(bluefin->nav[i].depth), 
 					error);
 			mb_altint_add(verbose, mbio_ptr,
-					(double)(bluefin->nav[i].altitude_time - 32.0), 
+					(double)(bluefin->nav[i].altitude_time), 
 					(double)(bluefin->nav[i].altitude), 
 					error);
 			}
@@ -680,7 +684,16 @@ fprintf(stderr,"Record returned: type:%d status:%d error:%d\n\n",store->kind, st
 		for (i=0;i<bathymetry->number_beams;i++)
 			{
 			if ((bathymetry->quality[i] & 15) < 2)
-				bathymetry->quality[i] = (bathymetry->quality[i] & 240) + 15;
+				{
+				if (bathymetry->range[i] > 0.007)
+					{
+					bathymetry->quality[i] = (bathymetry->quality[i] & 240) + 15;
+					}
+				else
+					{
+					bathymetry->quality[i] = (bathymetry->quality[i] & 240) + 3;
+					}
+				}
 			}
 		}
 
@@ -722,9 +735,6 @@ fprintf(stderr,"Record returned: type:%d status:%d error:%d\n\n",store->kind, st
 			{
 			if ((bathymetry->quality[i] & 15) > 0)
 				{
-				beamgeometry->angle_alongtrack[MBSYS_RESON7K_MAX_BEAMS];
-				beamgeometry->angle_acrosstrack[MBSYS_RESON7K_MAX_BEAMS];
-				
 				alpha = RTD * beamgeometry->angle_alongtrack[i] + bathymetry->pitch;
 				beta = 90.0 - RTD * beamgeometry->angle_acrosstrack[i] + bathymetry->roll;
 				mb_rollpitch_to_takeoff(
@@ -738,8 +748,8 @@ fprintf(stderr,"Record returned: type:%d status:%d error:%d\n\n",store->kind, st
 				bathymetry->acrosstrack[i] = xx * cos(DTR * phi);
 				bathymetry->alongtrack[i] = xx * sin(DTR * phi);
 				bathymetry->depth[i] = zz + sonar_depth;
-				bathymetry->pointing_angle[i] = theta;
-				bathymetry->azimuth_angle[i] = phi;
+				bathymetry->pointing_angle[i] = DTR * theta;
+				bathymetry->azimuth_angle[i] = DTR * phi;
 				}
 			else
 				{
@@ -752,7 +762,11 @@ fprintf(stderr,"Record returned: type:%d status:%d error:%d\n\n",store->kind, st
 			}
 		
 		/* set flag */
-		bathymetry->optionaldata == MB_YES;
+		bathymetry->optionaldata = MB_YES;
+		bathymetry->header.OffsetToOptionalData 
+				= MBSYS_RESON7K_RECORDHEADER_SIZE 
+					+ R7KHDRSIZE_7kBathymetricData
+					+ bathymetry->number_beams * 9;
 		}
 
 	/* set error and kind in mb_io_ptr */
@@ -823,6 +837,8 @@ int mbr_reson7kr_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_reson7k_struct *store;
+	s7k_header *header;
+	s7kr_bathymetry *bathymetry;
 	FILE	*mbfp;
 	int	done;
 	int	*current_ping;
@@ -845,6 +861,7 @@ int mbr_reson7kr_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	int	skip;
 	int	ping_record;
 double klugelon, klugelat;
+	int	time_j[5];
 	int	i;
 
 	/* print input debug statements */
@@ -1038,6 +1055,25 @@ skip, *recordid, *recordid,
 					*last_ping = -1;
 					for (i=0;i<*size;i++)
 						buffersave[i] = buffer[i];
+
+					/* get the time */
+					bathymetry = &(store->bathymetry);
+					header = &(bathymetry->header);
+					time_j[0] = header->s7kTime.Year;
+					time_j[1] = header->s7kTime.Day;
+					time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+					time_j[3] = (int) header->s7kTime.Seconds;
+					time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+					mb_get_itime(verbose, time_j, store->time_i);
+					mb_get_time(verbose, store->time_i, &(store->time_d));
+					
+					/* not a complete record unless there is bathymetry */
+					if (store->read_bathymetry == MB_NO)
+						{
+						status = MB_FAILURE;
+						*error = MB_ERROR_UNINTELLIGIBLE;
+						}
+
 					}
 				else if (*last_ping >= 0
 					&& *new_ping >= 0
@@ -1847,8 +1883,7 @@ int mbr_reson7kr_rd_reference(int verbose, char *buffer, void *store_ptr, int *e
 #else
 	if (verbose >= 2)
 #endif
-	mbsys_reson7k_print_reference(verbose, reference, error);
-	
+	mbsys_reson7k_print_reference(verbose, reference, error);	
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -4918,7 +4953,7 @@ int mbr_reson7kr_rd_bathymetry(int verbose, char *buffer, void *store_ptr, int *
 		mb_get_binary_float(MB_YES, &buffer[index], &(bathymetry->pitch)); index += 4;
 		mb_get_binary_float(MB_YES, &buffer[index], &(bathymetry->heave)); index += 4;
 		mb_get_binary_float(MB_YES, &buffer[index], &(bathymetry->vehicle_height)); index += 4;
-		for (i=0;i<MBSYS_RESON7K_MAX_BEAMS;i++)
+		for (i=0;i<bathymetry->number_beams;i++)
 			{
 			mb_get_binary_float(MB_YES, &buffer[index], &(bathymetry->depth[i])); index += 4;
 			mb_get_binary_float(MB_YES, &buffer[index], &(bathymetry->acrosstrack[i])); index += 4;
@@ -6041,7 +6076,6 @@ int mbr_reson7kr_rd_remotecontrolsettings(int verbose, char *buffer, void *store
 	index = header->Offset + 4;
 	mb_get_binary_long(MB_YES, &buffer[index], &(remotecontrolsettings->serial_number)); index += 8;
 	mb_get_binary_int(MB_YES, &buffer[index], &(remotecontrolsettings->ping_number)); index += 4;
-	mb_get_binary_short(MB_YES, &buffer[index], &(remotecontrolsettings->multi_ping)); index += 2;
 	mb_get_binary_float(MB_YES, &buffer[index], &(remotecontrolsettings->frequency)); index += 4;
 	mb_get_binary_float(MB_YES, &buffer[index], &(remotecontrolsettings->sample_rate)); index += 4;
 	mb_get_binary_float(MB_YES, &buffer[index], &(remotecontrolsettings->receiver_bandwidth)); index += 4;
@@ -6069,7 +6103,6 @@ int mbr_reson7kr_rd_remotecontrolsettings(int verbose, char *buffer, void *store
 	mb_get_binary_int(MB_YES, &buffer[index], &(remotecontrolsettings->receive_weighting)); index += 4;
 	mb_get_binary_float(MB_YES, &buffer[index], &(remotecontrolsettings->receive_weighting_par)); index += 4;
 	mb_get_binary_int(MB_YES, &buffer[index], &(remotecontrolsettings->receive_flags)); index += 4;
-	mb_get_binary_float(MB_YES, &buffer[index], &(remotecontrolsettings->receive_width)); index += 4;
 	mb_get_binary_float(MB_YES, &buffer[index], &(remotecontrolsettings->range_minimum)); index += 4;
 	mb_get_binary_float(MB_YES, &buffer[index], &(remotecontrolsettings->range_maximum)); index += 4;
 	mb_get_binary_float(MB_YES, &buffer[index], &(remotecontrolsettings->depth_minimum)); index += 4;
@@ -6102,7 +6135,7 @@ int mbr_reson7kr_rd_remotecontrolsettings(int verbose, char *buffer, void *store
 
 	/* print out the results */
 #ifdef MBR_RESON7KR_DEBUG
-	if (verbose > 0)
+	if (verbose >= 0)
 #else
 	if (verbose >= 2)
 #endif
@@ -10515,7 +10548,7 @@ int mbr_reson7kr_wr_bathymetry(int verbose, int *bufferalloc, char **bufferptr, 
 	*size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
 	*size += R7KHDRSIZE_7kBathymetricData;
 	*size += bathymetry->number_beams * 9;
-	if (header->OffsetToOptionalData > 0)
+	if (bathymetry->optionaldata == MB_YES)
 		{
 		*size += 45 + bathymetry->number_beams * 20;
 		}
@@ -10540,7 +10573,7 @@ int mbr_reson7kr_wr_bathymetry(int verbose, int *bufferalloc, char **bufferptr, 
 		{
 		/* get buffer for writing */
 		buffer = (char *) *bufferptr;
-
+		
 		/* insert the header */
 		index = 0;
 		status = mbr_reson7kr_wr_header(verbose, buffer, &index, header, error);
@@ -10566,11 +10599,9 @@ int mbr_reson7kr_wr_bathymetry(int verbose, int *bufferalloc, char **bufferptr, 
 			mb_put_binary_float(MB_YES, bathymetry->intensity[i], &buffer[index]); index += 4;
 			}
 
-		/* extract the optional data */
-		if (header->OffsetToOptionalData > 0)
+		/* insert the optional data */
+		if (bathymetry->optionaldata == MB_YES)
 			{
-			index = header->OffsetToOptionalData;
-			bathymetry->optionaldata = MB_YES;
 			mb_put_binary_float(MB_YES, bathymetry->frequency, &buffer[index]); index += 4;
 			mb_put_binary_double(MB_YES, bathymetry->latitude, &buffer[index]); index += 8;
 			mb_put_binary_double(MB_YES, bathymetry->longitude, &buffer[index]); index += 8;
@@ -10581,35 +10612,13 @@ int mbr_reson7kr_wr_bathymetry(int verbose, int *bufferalloc, char **bufferptr, 
 			mb_put_binary_float(MB_YES, bathymetry->pitch, &buffer[index]); index += 4;
 			mb_put_binary_float(MB_YES, bathymetry->heave, &buffer[index]); index += 4;
 			mb_put_binary_float(MB_YES, bathymetry->vehicle_height, &buffer[index]); index += 4;
-			for (i=0;i<MBSYS_RESON7K_MAX_BEAMS;i++)
+			for (i=0;i<bathymetry->number_beams;i++)
 				{
 				mb_put_binary_float(MB_YES, bathymetry->depth[i], &buffer[index]); index += 4;
 				mb_put_binary_float(MB_YES, bathymetry->acrosstrack[i], &buffer[index]); index += 4;
 				mb_put_binary_float(MB_YES, bathymetry->alongtrack[i], &buffer[index]); index += 4;
 				mb_put_binary_float(MB_YES, bathymetry->pointing_angle[i], &buffer[index]); index += 4;
 				mb_put_binary_float(MB_YES, bathymetry->azimuth_angle[i], &buffer[index]); index += 4;
-				}
-			}
-		else
-			{
-			bathymetry->optionaldata = MB_NO;
-			bathymetry->frequency = 0.0;
-			bathymetry->latitude = 0.0;
-			bathymetry->longitude = 0.0;
-			bathymetry->heading = 0.0;
-			bathymetry->height_source = 0;
-			bathymetry->tide = 0.0;
-			bathymetry->roll = 0.0;
-			bathymetry->pitch = 0.0;
-			bathymetry->heave = 0.0;
-			bathymetry->vehicle_height = 0.0;
-			for (i=0;i<MBSYS_RESON7K_MAX_BEAMS;i++)
-				{
-				bathymetry->depth[i] = 0.0;
-				bathymetry->acrosstrack[i] = 0.0;
-				bathymetry->alongtrack[i] = 0.0;
-				bathymetry->pointing_angle[i] = 0.0;
-				bathymetry->azimuth_angle[i] = 0.0;
 				}
 			}
 
@@ -11964,7 +11973,6 @@ int mbr_reson7kr_wr_remotecontrolsettings(int verbose, int *bufferalloc, char **
 		index = header->Offset + 4;
 		mb_put_binary_long(MB_YES, remotecontrolsettings->serial_number, &buffer[index]); index += 8;
 		mb_put_binary_int(MB_YES, remotecontrolsettings->ping_number, &buffer[index]); index += 4;
-		mb_put_binary_short(MB_YES, remotecontrolsettings->multi_ping, &buffer[index]); index += 2;
 		mb_put_binary_float(MB_YES, remotecontrolsettings->frequency, &buffer[index]); index += 4;
 		mb_put_binary_float(MB_YES, remotecontrolsettings->sample_rate, &buffer[index]); index += 4;
 		mb_put_binary_float(MB_YES, remotecontrolsettings->receiver_bandwidth, &buffer[index]); index += 4;
@@ -11992,7 +12000,6 @@ int mbr_reson7kr_wr_remotecontrolsettings(int verbose, int *bufferalloc, char **
 		mb_put_binary_int(MB_YES, remotecontrolsettings->receive_weighting, &buffer[index]); index += 4;
 		mb_put_binary_float(MB_YES, remotecontrolsettings->receive_weighting_par, &buffer[index]); index += 4;
 		mb_put_binary_int(MB_YES, remotecontrolsettings->receive_flags, &buffer[index]); index += 4;
-		mb_put_binary_float(MB_YES, remotecontrolsettings->receive_width, &buffer[index]); index += 4;
 		mb_put_binary_float(MB_YES, remotecontrolsettings->range_minimum, &buffer[index]); index += 4;
 		mb_put_binary_float(MB_YES, remotecontrolsettings->range_maximum, &buffer[index]); index += 4;
 		mb_put_binary_float(MB_YES, remotecontrolsettings->depth_minimum, &buffer[index]); index += 4;
@@ -12014,7 +12021,6 @@ int mbr_reson7kr_wr_remotecontrolsettings(int verbose, int *bufferalloc, char **
 		/* check size */
 		if (*size != index)
 			{
-fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
 fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
 			status = MB_FAILURE;
 			*error = MB_ERROR_BAD_DATA;

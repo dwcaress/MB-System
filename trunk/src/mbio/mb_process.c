@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_process.c	9/11/00
- *    $Id: mb_process.c,v 5.28 2004-10-06 19:04:24 caress Exp $
+ *    $Id: mb_process.c,v 5.29 2004-12-02 06:33:30 caress Exp $
  *
- *    Copyright (c) 2000, 2002, 2003 by
+ *    Copyright (c) 2000, 2002, 2003, 2004 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -22,6 +22,9 @@
  * Date:	September 11, 2000
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.28  2004/10/06 19:04:24  caress
+ * Release 5.0.5 update.
+ *
  * Revision 5.27  2004/09/16 01:11:48  caress
  * Fixed how esf file path is determined.
  *
@@ -134,7 +137,7 @@
 #include "../../include/mb_format.h"
 #include "../../include/mb_process.h"
 
-static char rcs_id[]="$Id: mb_process.c,v 5.28 2004-10-06 19:04:24 caress Exp $";
+static char rcs_id[]="$Id: mb_process.c,v 5.29 2004-12-02 06:33:30 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_pr_readpar(int verbose, char *file, int lookforfiles, 
@@ -186,6 +189,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 	process->mbp_nav_heading = MBP_NAV_OFF;
 	process->mbp_nav_speed = MBP_NAV_OFF;
 	process->mbp_nav_draft = MBP_NAV_OFF;
+	process->mbp_nav_attitude = MBP_NAV_OFF;
 	process->mbp_nav_algorithm = MBP_NAV_LINEAR;
 	process->mbp_nav_timeshift = 0.0;
 	process->mbp_nav_shift = MBP_NAV_OFF;
@@ -196,6 +200,11 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 	process->mbp_navadj_mode = MBP_NAV_OFF;
 	process->mbp_navadjfile[0] = '\0';
 	process->mbp_navadj_algorithm = MBP_NAV_LINEAR;
+	
+	/* attitude merging */
+	process->mbp_attitude_mode = 0;
+	process->mbp_attitudefile[0] = '\0';
+	process->mbp_attitude_format = 1;
 
 	/* data cutting */
 	process->mbp_cut_num = 0;
@@ -363,6 +372,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 			    process->mbp_nav_heading = MBP_NAV_ON;
 			    process->mbp_nav_speed = MBP_NAV_ON;
 			    process->mbp_nav_draft = MBP_NAV_ON;
+			    process->mbp_nav_attitude = MBP_NAV_ON;
 			    }
 			}
 		    else if (strncmp(buffer, "NAVFORMAT", 9) == 0)
@@ -380,6 +390,10 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 		    else if (strncmp(buffer, "NAVDRAFT", 8) == 0)
 			{
 			sscanf(buffer, "%s %d", dummy, &process->mbp_nav_draft);
+			}
+		    else if (strncmp(buffer, "NAVATTITUDE", 8) == 0)
+			{
+			sscanf(buffer, "%s %d", dummy, &process->mbp_nav_attitude);
 			}
 		    else if (strncmp(buffer, "NAVINTERP", 9) == 0)
 			{
@@ -422,6 +436,24 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 		    else if (strncmp(buffer, "NAVADJINTERP", 12) == 0)
 			{
 			sscanf(buffer, "%s %d", dummy, &process->mbp_navadj_algorithm);
+			}
+	
+		    /* attitude merging */
+		    else if (strncmp(buffer, "ATTITUDEMODE", 12) == 0)
+			{
+			sscanf(buffer, "%s %d", dummy, &process->mbp_attitude_mode);
+			}
+		    else if (strncmp(buffer, "ATTITUDEFILE", 12) == 0)
+			{
+			sscanf(buffer, "%s %s", dummy, process->mbp_attitudefile);
+			if (explicit == MB_NO)
+			    {
+			    process->mbp_attitude_mode = MBP_ATTITUDE_ON;
+			    }
+			}
+		    else if (strncmp(buffer, "ATTITUDEFORMAT", 14) == 0)
+			{
+			sscanf(buffer, "%s %d", dummy, &process->mbp_attitude_format);
 			}
 
 		    /* data cutting */
@@ -1111,6 +1143,17 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 	    strcat(process->mbp_navfile, dummy);
 	    }
 
+	/* reset attitude file */
+	if (len > 1
+	    && strlen(process->mbp_attitudefile) > 1
+	    && process->mbp_attitudefile[0] != '/')
+	    {
+	    strcpy(dummy, process->mbp_attitudefile);
+	    strncpy(process->mbp_attitudefile, process->mbp_ifile, len);
+	    process->mbp_attitudefile[len] = '\0';
+	    strcat(process->mbp_attitudefile, dummy);
+	    }
+
 	/* reset svp file */
 	if (len > 1
 	    && strlen(process->mbp_svpfile) > 1
@@ -1180,6 +1223,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 	/* make sure all global paths are as short as possible */
 	mb_get_shortest_path(verbose, process->mbp_navadjfile, error);
 	mb_get_shortest_path(verbose, process->mbp_navfile, error);
+	mb_get_shortest_path(verbose, process->mbp_attitudefile, error);
 	mb_get_shortest_path(verbose, process->mbp_svpfile, error);
 	mb_get_shortest_path(verbose, process->mbp_editfile, error);
 	mb_get_shortest_path(verbose, process->mbp_staticfile, error);
@@ -1217,6 +1261,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 		fprintf(stderr,"dbg2       mbp_nav_heading:        %d\n",process->mbp_nav_heading);
 		fprintf(stderr,"dbg2       mbp_nav_speed:          %d\n",process->mbp_nav_speed);
 		fprintf(stderr,"dbg2       mbp_nav_draft:          %d\n",process->mbp_nav_draft);
+		fprintf(stderr,"dbg2       mbp_nav_attitude:       %d\n",process->mbp_nav_attitude);
 		fprintf(stderr,"dbg2       mbp_nav_algorithm:      %d\n",process->mbp_nav_algorithm);
 		fprintf(stderr,"dbg2       mbp_nav_timeshift:      %f\n",process->mbp_nav_timeshift);
 		fprintf(stderr,"dbg2       mbp_nav_shift:          %d\n",process->mbp_nav_shift);
@@ -1226,6 +1271,9 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 		fprintf(stderr,"dbg2       mbp_navadj_mode:        %d\n",process->mbp_navadj_mode);
 		fprintf(stderr,"dbg2       mbp_navadjfile:         %s\n",process->mbp_navadjfile);
 		fprintf(stderr,"dbg2       mbp_navadj_algorithm:   %d\n",process->mbp_navadj_algorithm);
+		fprintf(stderr,"dbg2       mbp_attitude_mode:      %d\n",process->mbp_attitude_mode);
+		fprintf(stderr,"dbg2       mbp_attitudefile:       %s\n",process->mbp_attitudefile);
+		fprintf(stderr,"dbg2       mbp_attitude_format:    %d\n",process->mbp_attitude_format);
 		fprintf(stderr,"dbg2       mbp_cut_num:            %d\n",process->mbp_cut_num);
 		for (i=0;i<process->mbp_cut_num;i++)
 			{
@@ -1355,6 +1403,7 @@ int mb_pr_writepar(int verbose, char *file,
 		fprintf(stderr,"dbg2       mbp_nav_heading:        %d\n",process->mbp_nav_heading);
 		fprintf(stderr,"dbg2       mbp_nav_speed:          %d\n",process->mbp_nav_speed);
 		fprintf(stderr,"dbg2       mbp_nav_draft:          %d\n",process->mbp_nav_draft);
+		fprintf(stderr,"dbg2       mbp_nav_attitude:       %d\n",process->mbp_nav_attitude);
 		fprintf(stderr,"dbg2       mbp_nav_algorithm:      %d\n",process->mbp_nav_algorithm);
 		fprintf(stderr,"dbg2       mbp_nav_timeshift:      %f\n",process->mbp_nav_timeshift);
 		fprintf(stderr,"dbg2       mbp_nav_shift:          %d\n",process->mbp_nav_shift);
@@ -1364,6 +1413,9 @@ int mb_pr_writepar(int verbose, char *file,
 		fprintf(stderr,"dbg2       mbp_navadj_mode:        %d\n",process->mbp_navadj_mode);
 		fprintf(stderr,"dbg2       mbp_navadjfile:         %s\n",process->mbp_navadjfile);
 		fprintf(stderr,"dbg2       mbp_navadj_algorithm:   %d\n",process->mbp_navadj_algorithm);
+		fprintf(stderr,"dbg2       mbp_attitude_mode:      %d\n",process->mbp_attitude_mode);
+		fprintf(stderr,"dbg2       mbp_attitudefile:       %s\n",process->mbp_attitudefile);
+		fprintf(stderr,"dbg2       mbp_attitude_format:    %d\n",process->mbp_attitude_format);
 		fprintf(stderr,"dbg2       mbp_cut_num:            %d\n",process->mbp_cut_num);
 		for (i=0;i<process->mbp_cut_num;i++)
 			{
@@ -1479,6 +1531,7 @@ int mb_pr_writepar(int verbose, char *file,
 	status = mb_get_relative_path(verbose, process->mbp_ofile, pwd, error);
 	status = mb_get_relative_path(verbose, process->mbp_navfile, pwd, error);
 	status = mb_get_relative_path(verbose, process->mbp_navadjfile, pwd, error);
+	status = mb_get_relative_path(verbose, process->mbp_attitudefile, pwd, error);
 	status = mb_get_relative_path(verbose, process->mbp_editfile, pwd, error);
 	status = mb_get_relative_path(verbose, process->mbp_svpfile, pwd, error);
 	status = mb_get_relative_path(verbose, process->mbp_tidefile, pwd, error);
@@ -1546,6 +1599,7 @@ int mb_pr_writepar(int verbose, char *file,
 	    fprintf(fp, "NAVHEADING %d\n", process->mbp_nav_heading);
 	    fprintf(fp, "NAVSPEED %d\n", process->mbp_nav_speed);
 	    fprintf(fp, "NAVDRAFT %d\n", process->mbp_nav_draft);
+	    fprintf(fp, "NAVATTITUDE %d\n", process->mbp_nav_attitude);
 	    fprintf(fp, "NAVINTERP %d\n", process->mbp_nav_algorithm);
 	    fprintf(fp, "NAVTIMESHIFT %f\n", process->mbp_nav_timeshift);
 	    fprintf(fp, "NAVSHIFT %d\n", process->mbp_nav_shift);
@@ -1558,6 +1612,12 @@ int mb_pr_writepar(int verbose, char *file,
 	    fprintf(fp, "NAVADJMODE %d\n", process->mbp_navadj_mode);
 	    fprintf(fp, "NAVADJFILE %s\n", process->mbp_navadjfile);
 	    fprintf(fp, "NAVADJINTERP %d\n", process->mbp_navadj_algorithm);
+	    
+	    /* attitude merging */
+	    fprintf(fp, "##\n## Attitude Merging:\n");
+	    fprintf(fp, "ATTITUDEMODE %d\n", process->mbp_attitude_mode);
+	    fprintf(fp, "ATTITUDEFILE %s\n", process->mbp_attitudefile);
+	    fprintf(fp, "ATTITUDEFORMAT %d\n", process->mbp_attitude_format);
 
 	    /* data cutting */
 	    fprintf(fp, "##\n## Data cutting:\n");
@@ -1937,6 +1997,7 @@ int mb_pr_check(int verbose, char *ifile,
 	int	missing_ofile = MB_NO;
 	int	missing_navfile = MB_NO;
 	int	missing_navadjfile = MB_NO;
+	int	missing_attitudefile = MB_NO;
 	int	missing_svpfile = MB_NO;
 	int	missing_editfile = MB_NO;
 	int	missing_tidefile = MB_NO;
@@ -1970,6 +2031,7 @@ int mb_pr_check(int verbose, char *ifile,
 	missing_ofile = MB_NO;
 	missing_navfile = MB_NO;
 	missing_navadjfile = MB_NO;
+	missing_attitudefile = MB_NO;
 	missing_svpfile = MB_NO;
 	missing_editfile = MB_NO;
 	missing_tidefile = MB_NO;
@@ -2043,6 +2105,14 @@ int mb_pr_check(int verbose, char *ifile,
 		missing_navadjfile = MB_YES;
 		*problem = MB_YES;
 		}
+   
+	    /* check if attitude file specified but does not exist */
+	    if (process.mbp_attitude_mode == MBP_ATTITUDE_ON
+		&& stat(process.mbp_attitudefile, &statbuf) != 0)
+		{
+		missing_attitudefile = MB_YES;
+		*problem = MB_YES;
+		}
     
 	    /* check if svp file specified but does not exist */
 	    if (process.mbp_svp_mode == MBP_SVP_ON
@@ -2091,6 +2161,9 @@ int mb_pr_check(int verbose, char *ifile,
 	    if (missing_navadjfile == MB_YES)
 		fprintf(output, "\tMissing navadj file: %s does not exist\n", 
 			process.mbp_navadjfile);
+	    if (missing_attitudefile == MB_YES)
+		fprintf(output, "\tMissing attitude file: %s does not exist\n", 
+			process.mbp_attitudefile);
 	    if (missing_svpfile == MB_YES)
 		fprintf(output, "\tMissing svp file: %s does not exist\n", 
 			process.mbp_svpfile);
@@ -2121,6 +2194,9 @@ int mb_pr_check(int verbose, char *ifile,
 	    if (missing_navadjfile == MB_YES)
 		fprintf(output, "%s : Missing navadj file : %s\n", 
 			process.mbp_ifile, process.mbp_navadjfile);
+	    if (missing_attitudefile == MB_YES)
+		fprintf(output, "%s : Missing attitude file : %s\n", 
+			process.mbp_ifile, process.mbp_attitudefile);
 	    if (missing_svpfile == MB_YES)
 		fprintf(output, "%s : Missing svp file : %s\n", 
 			process.mbp_ifile, process.mbp_svpfile);
@@ -2827,6 +2903,59 @@ int mb_pr_update_navadj(int verbose, char *file,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+int mb_pr_update_attitude(int verbose, char *file, 
+			int	mbp_attitude_mode, 
+			char *mbp_attitudefile, 
+			int	mbp_attitude_format, 
+			int *error)
+{
+	char	*function_name = "mb_pr_update_attitude";
+	struct mb_process_struct process;
+	int	status = MB_SUCCESS;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
+		fprintf(stderr,"dbg2       file:              %s\n",file);
+		fprintf(stderr,"dbg2       mbp_attitude_mode: %d\n",mbp_attitude_mode);
+		fprintf(stderr,"dbg2       mbp_attitudefile:  %s\n",mbp_attitudefile);
+		fprintf(stderr,"dbg2       mbp_attitude_format:%d\n",mbp_attitude_format);
+		}
+
+	/* get known process parameters */
+	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+
+	/* set lever values */
+	process.mbp_attitude_mode = mbp_attitude_mode;
+	if (mbp_attitudefile != NULL)
+		strcpy(process.mbp_attitudefile,mbp_attitudefile);
+	process.mbp_attitude_format = mbp_attitude_format;
+	    
+	/* update bathymetry recalculation mode */
+	mb_pr_bathmode(verbose, &process, error);
+
+	/* write new process parameter file */
+	status = mb_pr_writepar(verbose, file, &process, error);
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
 int mb_pr_update_nav(int verbose, char *file, 
 			int	mbp_nav_mode, 
 			char	*mbp_navfile, 
@@ -2834,6 +2963,7 @@ int mb_pr_update_nav(int verbose, char *file,
 			int	mbp_nav_heading, 
 			int	mbp_nav_speed, 
 			int	mbp_nav_draft, 
+			int	mbp_nav_attitude, 
 			int	mbp_nav_algorithm, 
 			double mbp_nav_timeshift,
 			int *error)
@@ -2856,6 +2986,7 @@ int mb_pr_update_nav(int verbose, char *file,
 		fprintf(stderr,"dbg2       mbp_nav_heading:   %d\n",mbp_nav_heading);
 		fprintf(stderr,"dbg2       mbp_nav_speed:     %d\n",mbp_nav_speed);
 		fprintf(stderr,"dbg2       mbp_nav_draft:     %d\n",mbp_nav_draft);
+		fprintf(stderr,"dbg2       mbp_nav_attitude:  %d\n",mbp_nav_attitude);
 		fprintf(stderr,"dbg2       mbp_nav_algorithm: %d\n",mbp_nav_algorithm);
 		fprintf(stderr,"dbg2       mbp_nav_timeshift: %f\n",mbp_nav_timeshift);
 		}
@@ -2871,6 +3002,7 @@ int mb_pr_update_nav(int verbose, char *file,
 	process.mbp_nav_heading = mbp_nav_heading;
 	process.mbp_nav_speed = mbp_nav_speed;
 	process.mbp_nav_draft = mbp_nav_draft;
+	process.mbp_nav_attitude = mbp_nav_attitude;
 	process.mbp_nav_algorithm = mbp_nav_algorithm;
 	process.mbp_nav_timeshift = mbp_nav_timeshift;
 
@@ -4058,6 +4190,53 @@ int mb_pr_get_navadj(int verbose, char *file,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+int mb_pr_get_attitude(int verbose, char *file, 
+			int	*mbp_attitude_mode, 
+			char *mbp_attitudefile, 
+			int	*mbp_attitude_format, 
+			int *error)
+{
+	char	*function_name = "mb_pr_get_attitude";
+	struct mb_process_struct process;
+	int	status = MB_SUCCESS;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
+		fprintf(stderr,"dbg2       file:              %s\n",file);
+		}
+
+	/* get known process parameters */
+	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+
+	/* set lever values */
+	*mbp_attitude_mode = process.mbp_attitude_mode;
+	if (mbp_attitudefile != NULL)
+		strcpy(mbp_attitudefile,process.mbp_attitudefile);
+	*mbp_attitude_format = process.mbp_attitude_format;
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       mbp_attitude_mode: %d\n",*mbp_attitude_mode);
+		fprintf(stderr,"dbg2       mbp_attitudefile:  %s\n",mbp_attitudefile);
+		fprintf(stderr,"dbg2       mbp_attitude_format:%d\n",*mbp_attitude_format);
+		fprintf(stderr,"dbg2       error:             %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:            %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
 int mb_pr_get_nav(int verbose, char *file, 
 			int	*mbp_nav_mode, 
 			char	*mbp_navfile, 
@@ -4065,6 +4244,7 @@ int mb_pr_get_nav(int verbose, char *file,
 			int	*mbp_nav_heading, 
 			int	*mbp_nav_speed, 
 			int	*mbp_nav_draft, 
+			int	*mbp_nav_attitude, 
 			int	*mbp_nav_algorithm, 
 			double *mbp_nav_timeshift,
 			int *error)
@@ -4094,6 +4274,7 @@ int mb_pr_get_nav(int verbose, char *file,
 	*mbp_nav_heading = process.mbp_nav_heading;
 	*mbp_nav_speed = process.mbp_nav_speed;
 	*mbp_nav_draft = process.mbp_nav_draft;
+	*mbp_nav_attitude = process.mbp_nav_attitude;
 	*mbp_nav_algorithm = process.mbp_nav_algorithm;
 	*mbp_nav_timeshift = process.mbp_nav_timeshift;
 
@@ -4109,6 +4290,7 @@ int mb_pr_get_nav(int verbose, char *file,
 		fprintf(stderr,"dbg2       mbp_nav_heading:   %d\n",*mbp_nav_heading);
 		fprintf(stderr,"dbg2       mbp_nav_speed:     %d\n",*mbp_nav_speed);
 		fprintf(stderr,"dbg2       mbp_nav_draft:     %d\n",*mbp_nav_draft);
+		fprintf(stderr,"dbg2       mbp_nav_attitude:  %d\n",*mbp_nav_attitude);
 		fprintf(stderr,"dbg2       mbp_nav_algorithm: %d\n",*mbp_nav_algorithm);
 		fprintf(stderr,"dbg2       mbp_nav_timeshift: %f\n",*mbp_nav_timeshift);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);

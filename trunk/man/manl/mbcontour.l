@@ -1,4 +1,4 @@
-.TH mbcontour l "3 April 2002" "MB-System 5.0" "MB-System 5.0"
+.TH mbcontour l "11 October 2004" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbcontour\fP - GMT compatible utility for color fill or color shaded relief
 swath plots of swath sonar data using Postscript.
@@ -24,18 +24,18 @@ Version 5.0
 \fBmbcontour\fP is a utility for swath contouring of swath bathymetry 
 data using Postscript.  Like \fBmbswath\fP, \fBmbcontour\fP
 is fully compatible with the GMT package version 3. Two contouring
-algorithms are available. The first draws contours between successive
-pings; this algorithm is simple and therefore fast but produces poor
+algorithms are available; the \fB-Z\fP option specifies which is used. 
+The first, default approach draws contours between successive pings; 
+this algorithm is simple and therefore fast but produces poor
 looking contours when beams from one ping lie "behind" beams from a
 previous ping (this happens for sonars that ping at nonnull pitch
 angles or for the "inside" beams when ships make sharp turns). The
 second algorithm constructs a triangular network from the available
 soundings and contours the network; this approach is complicated
 and therefore slow but produces good looking contours under most
-conditions. The contour levels 
-and colors can be controlled directly or set implicitly using contour 
-and color change intervals. Contours can also be set to have ticks 
-pointing downhill.
+conditions. The contour levels  and colors can be controlled 
+directly or set implicitly using contour and color change intervals. 
+Contours can also be set to have ticks pointing downhill.
 
 Before opening an input swath data file, \fBmbcontour\fP checks for
 an ascii file in the same directory having the same name except
@@ -295,7 +295,7 @@ Force conversion to monochrome image using the [television] YIQ transformation.
 Sets the number of pings to be read in before each contouring
 episode. See the description of the \fB-Z\fP\fIalgorithm\fP option
 for advice on reasonable values
-Default: \fInplot\fP = 50 unless \fB-Z\fI1\fP is specified,
+Default: \fInplot\fP = 50 unless \fB-Z\fP\fI1\fP is specified,
 in which case the default is \fInplot\fP = 5.
 .TP
 .B \-O

@@ -1,4 +1,4 @@
-.TH mbnavlist l "29 July 2003" "MB-System 5.0" "MB-System 5.0"
+.TH mbnavlist l "21 November 2004" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbnavlist\fP - List navigation data in swath sonar data files.
 
@@ -172,6 +172,7 @@ of all data record types in the file.
 Determines the form of the output. \fIOutput_format\fP is a string composed
 of one or more of the following characters:
 
+ 	\fBc\fP  for sonar depth (meters)
  	\fBH\fP  for heading (degrees)
  	\fBh\fP  for course made good (degrees)
   	\fBJ\fP  for a time string (yyyy jd hh mm ss.ssssss) 
@@ -184,6 +185,10 @@ of one or more of the following characters:
  	\fBM\fP  for unix time in decimal seconds since 1/1/70 00:00:00
  	\fBm\fP  for time in decimal seconds since first record
  	\fBN\fP  for ping count
+ 	\fBP\fP  for pitch in degrees
+ 	\fBp\fP  for draft in meters
+ 	\fBR\fP  for roll in degrees
+ 	\fBr\fP  for heave in meters
   	\fBS\fP  for speed (km/hr)
   	\fBs\fP  for speed made good (km/hr)
   	\fBT\fP  for a time string (yyyy/mm/dd/hh/mm/ss)

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbprocess.c	3/31/93
- *    $Id: mbprocess.c,v 5.34 2004-10-06 19:10:52 caress Exp $
+ *    $Id: mbprocess.c,v 5.35 2004-12-02 06:37:42 caress Exp $
  *
  *    Copyright (c) 2000, 2002, 2003, 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -36,6 +36,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.34  2004/10/06 19:10:52  caress
+ * Release 5.0.5 update.
+ *
  * Revision 5.33  2004/04/27 02:56:37  caress
  * Implemented Kluge004
  *
@@ -201,7 +204,7 @@ int get_anglecorr(int verbose,
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbprocess.c,v 5.34 2004-10-06 19:10:52 caress Exp $";
+	static char rcs_id[] = "$Id: mbprocess.c,v 5.35 2004-12-02 06:37:42 caress Exp $";
 	static char program_name[] = "mbprocess";
 	static char help_message[] =  "mbprocess is a tool for processing swath sonar bathymetry data.\n\
 This program performs a number of functions, including:\n\
@@ -321,6 +324,7 @@ and mbedit edit save files.\n";
 	int	pfilemodtime = 0;
 	int	navfilemodtime = 0;
 	int	navadjfilemodtime = 0;
+	int	attitudefilemodtime = 0;
 	int	esfmodtime = 0;
 	int	svpmodtime = 0;
  	int	format = 0;
@@ -341,9 +345,10 @@ and mbedit edit save files.\n";
 	int	fstat;
 	int	nnav = 0;
 	int	nanav = 0;
+	int	nattitude = 0;
 	int	ntide = 0;
 	int	nstatic = 0;
-	int	size, nchar, len, nget, nav_ok, tide_ok, static_ok;
+	int	size, nchar, len, nget, nav_ok, attitude_ok, tide_ok, static_ok;
 	int	time_j[5], stime_i[7], ftime_i[7];
 	int	ihr;
 	double	sec, hr;
@@ -353,10 +358,13 @@ and mbedit edit save files.\n";
 	int	degree, time_set;
 	double	dminute;
 	double	splineflag;
-	double	*ntime, *nlon, *nlat, *nheading, *nspeed, *ndraft;
+	double	*ntime, *nlon, *nlat, *nheading, *nspeed;
+	double	*ndraft, *nroll, *npitch, *nheave;
 	double	*natime, *nalon, *nalat;
 	double	*nlonspl, *nlatspl;
 	double	*nalonspl, *nalatspl;
+	double	*attitudetime, *attituderoll, *attitudepitch, *attitudeheave;
+	double	rollval, pitchval, heaveval;
 	double	*tidetime, *tide, tideval;
 	int	*staticbeam;
 	double	*staticoffset;
@@ -770,6 +778,14 @@ and mbedit edit save files.\n";
 		    else
 			    navadjfilemodtime = 0;
     
+		    /* get mod time for the attitude file if needed */
+		    if (process.mbp_attitude_mode != MBP_ATTITUDE_OFF
+			    && (fstat = stat(process.mbp_attitudefile, &file_status)) == 0
+			    && (file_status.st_mode & S_IFMT) != S_IFDIR)
+			    attitudefilemodtime = file_status.st_mtime;
+		    else
+			    attitudefilemodtime = 0;
+    
 		    /* get mod time for the edit save file if needed */
 		    if (process.mbp_edit_mode != MBP_EDIT_OFF
 			    && (fstat = stat(process.mbp_editfile, &file_status)) == 0
@@ -792,6 +808,7 @@ and mbedit edit save files.\n";
 			    && ofilemodtime >= pfilemodtime
 			    && ofilemodtime >= navfilemodtime
 			    && ofilemodtime >= navadjfilemodtime
+			    && ofilemodtime >= attitudefilemodtime
 			    && ofilemodtime >= esfmodtime
 			    && ofilemodtime >= svpmodtime)
 			{
@@ -837,11 +854,12 @@ and mbedit edit save files.\n";
 	if (process.mbp_nav_mode == MBP_NAV_ON
 	    && (process.mbp_nav_heading == MBP_NAV_ON
 		|| process.mbp_nav_speed == MBP_NAV_ON
-		|| process.mbp_nav_draft == MBP_NAV_ON)
+		|| process.mbp_nav_draft == MBP_NAV_ON
+		|| process.mbp_nav_attitude == MBP_NAV_ON)
 	    && process.mbp_nav_format != 9)
 	    {
 	    fprintf(stderr,"\nWarning:\n\tNavigation format <%d> does not include \n",process.mbp_nav_format);
-	    fprintf(stderr,"\theading, speed, and draft values.\n");
+	    fprintf(stderr,"\theading, speed, draft, roll, pitch and heave values.\n");
 	    if (process.mbp_nav_heading == MBP_NAV_ON)
 		{
 		fprintf(stderr,"Merging of heading data disabled.\n");
@@ -856,6 +874,11 @@ and mbedit edit save files.\n";
 		{
 		fprintf(stderr,"Merging of draft data disabled.\n");
 		process.mbp_nav_draft = MBP_NAV_OFF;
+		}
+	    if (process.mbp_nav_attitude == MBP_NAV_ON)
+		{
+		fprintf(stderr,"Merging of roll, pitch, and heave data disabled.\n");
+		process.mbp_nav_attitude = MBP_NAV_OFF;
 		}
 	    }
 
@@ -900,6 +923,8 @@ and mbedit edit save files.\n";
 	    if (process.mbp_nav_mode == MBP_NAV_ON)
 		{
 		fprintf(stderr,"  Navigation merged from navigation file.\n");
+		fprintf(stderr,"  Navigation file:               %s\n", process.mbp_navfile);
+	        fprintf(stderr,"  Navigation format:             %d\n", process.mbp_nav_format);
 		if (process.mbp_nav_heading == MBP_NAV_ON)
 		    fprintf(stderr,"  Heading merged from navigation file.\n");
 		else
@@ -912,7 +937,10 @@ and mbedit edit save files.\n";
 		    fprintf(stderr,"  Draft merged from navigation file.\n");
 		else
 		    fprintf(stderr,"  Draft not merged from navigation file.\n");
-	    	fprintf(stderr,"  Navigation file:               %s\n", process.mbp_navfile);
+		if (process.mbp_nav_attitude == MBP_NAV_ON)
+		    fprintf(stderr,"  Roll, pitch, and heave merged from navigation file.\n");
+		else
+		    fprintf(stderr,"  Roll, pitch, and heave not merged from navigation file.\n");
 	    	if (process.mbp_nav_algorithm == MBP_NAV_LINEAR)
 			fprintf(stderr,"  Navigation algorithm:          linear interpolation\n");
 	    	else if (process.mbp_nav_algorithm == MBP_NAV_SPLINE)
@@ -941,6 +969,16 @@ and mbedit edit save files.\n";
 		fprintf(stderr,"  Adjusted navigation algorithm: linear interpolation\n");
 	    else if (process.mbp_navadj_algorithm == MBP_NAV_SPLINE)
 		fprintf(stderr,"  Adjusted navigation algorithm: spline interpolation\n");
+
+	    fprintf(stderr,"\nAttitude Merging:\n");
+	    if (process.mbp_attitude_mode == MBP_NAV_ON)
+	        {
+		fprintf(stderr,"  Attitude merged from attitude file.\n");
+	        fprintf(stderr,"  Attitude file:                 %s\n", process.mbp_attitudefile);
+	        fprintf(stderr,"  Attitude format:               %d\n", process.mbp_attitude_format);
+		}
+	    else
+		fprintf(stderr,"  Attitude not merged from attitude file.\n");
 
 	    fprintf(stderr,"\nData Cutting:\n");
 	    if (process.mbp_cut_num > 0)
@@ -1354,6 +1392,9 @@ and mbedit edit save files.\n";
 		status = mb_malloc(verbose,nnav*sizeof(double),&nheading,&error);
 		status = mb_malloc(verbose,nnav*sizeof(double),&nspeed,&error);
 		status = mb_malloc(verbose,nnav*sizeof(double),&ndraft,&error);
+		status = mb_malloc(verbose,nnav*sizeof(double),&nroll,&error);
+		status = mb_malloc(verbose,nnav*sizeof(double),&npitch,&error);
+		status = mb_malloc(verbose,nnav*sizeof(double),&nheave,&error);
 		status = mb_malloc(verbose,nnav*sizeof(double),&nlonspl,&error);
 		status = mb_malloc(verbose,nnav*sizeof(double),&nlatspl,&error);
 	
@@ -1628,13 +1669,13 @@ and mbedit edit save files.\n";
 		/* deal with nav in form: yr mon day hour min sec time_d lon lat heading speed draft*/
 		else if (process.mbp_nav_format == 9)
 			{
-			nget = sscanf(buffer,"%d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf",
+			nget = sscanf(buffer,"%d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf",
 				&time_i[0],&time_i[1],&time_i[2],
 				&time_i[3],&time_i[4],&sec,
 				&ntime[nnav],
 				&nlon[nnav],&nlat[nnav],
-				&nheading[nnav],&nspeed[nnav],
-				&ndraft[nnav]);
+				&nheading[nnav],&nspeed[nnav],&ndraft[nnav],
+				&nroll[nnav],&npitch[nnav],&nheave[nnav]);
 			if (nget >= 9)
 				nav_ok = MB_YES;
 			if (nav_ok == MB_YES)
@@ -1654,17 +1695,28 @@ and mbedit edit save files.\n";
 				fprintf(stderr,"Draft data missing from nav file.\nMerging of draft data disabled.\n");
 				process.mbp_nav_draft = MBP_NAV_OFF;
 				}
+			    if (process.mbp_nav_draft == MBP_NAV_ON && nget < 15)
+				{
+				fprintf(stderr,"Roll, pitch, and heave data missing from nav file.\nMerging of roll, pitch, and heave data disabled.\n");
+				process.mbp_nav_attitude = MBP_NAV_OFF;
+				}
 			    if (process.mbp_nav_heading == MBP_NAV_OFF)
 				{
 				nheading[nnav] = 0.0;
 				}
 			    if (process.mbp_nav_speed == MBP_NAV_OFF)
 				{
-				nheading[nnav] = 0.0;
+				nspeed[nnav] = 0.0;
 				}
 			    if (process.mbp_nav_draft == MBP_NAV_OFF)
 				{
-				nheading[nnav] = 0.0;
+				ndraft[nnav] = 0.0;
+				}
+			    if (process.mbp_nav_attitude == MBP_NAV_OFF)
+				{
+				nroll[nnav] = 0.0;
+				npitch[nnav] = 0.0;
+				nheave[nnav] = 0.0;
 				}
 			    }
 			}
@@ -1933,6 +1985,211 @@ and mbedit edit save files.\n";
 			    stime_i[0],stime_i[1],stime_i[2],stime_i[3],
 			    stime_i[4],stime_i[5],stime_i[6]);
 		    fprintf(stderr,"Adjusted nav end time:   %4.4d %2.2d %2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
+			    ftime_i[0],ftime_i[1],ftime_i[2],ftime_i[3],
+			    ftime_i[4],ftime_i[5],ftime_i[6]);
+		    }
+	    }
+
+	/*--------------------------------------------
+	  get attitude
+	  --------------------------------------------*/
+
+	/* if attitude merging to be done get attitude */
+	if (process.mbp_attitude_mode == MBP_ATTITUDE_ON)
+	    {
+	    /* set max number of characters to be read at a time */
+	    nchar = 128;
+
+	    /* count the data points in the attitude file */
+	    nattitude = 0;
+	    if ((tfp = fopen(process.mbp_attitudefile, "r")) == NULL) 
+		    {
+		    error = MB_ERROR_OPEN_FAIL;
+		    fprintf(stderr,"\nUnable to Open Attitude File <%s> for reading\n",process.mbp_attitudefile);
+		    fprintf(stderr,"\nProgram <%s> Terminated\n",
+			    program_name);
+		    exit(error);
+		    }
+	    while ((result = fgets(buffer,nchar,tfp)) == buffer)
+		    nattitude++;
+	    fclose(tfp);
+	    
+	    /* allocate arrays for attitude */
+	    if (nattitude > 1)
+		{
+		size = (nattitude+1)*sizeof(double);
+		status = mb_malloc(verbose,nattitude*sizeof(double),&attitudetime,&error);
+		status = mb_malloc(verbose,nattitude*sizeof(double),&attituderoll,&error);
+		status = mb_malloc(verbose,nattitude*sizeof(double),&attitudepitch,&error);
+		status = mb_malloc(verbose,nattitude*sizeof(double),&attitudeheave,&error);
+ 	
+		/* if error initializing memory then quit */
+		if (error != MB_ERROR_NO_ERROR)
+		    {
+		    mb_error(verbose,error,&message);
+		    fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
+		    fprintf(stderr,"\nProgram <%s> Terminated\n",
+			    program_name);
+		    exit(error);
+		    }		    
+		}
+	
+	    /* if no attitude data then quit */
+	    else
+		{
+		error = MB_ERROR_BAD_DATA;
+		fprintf(stderr,"\nUnable to read data from attitude file <%s>\n",process.mbp_attitudefile);
+		fprintf(stderr,"\nProgram <%s> Terminated\n",
+			program_name);
+		exit(error);
+		}		    
+		
+	    /* read the data points in the attitude file */
+	    nattitude = 0;
+	    if ((tfp = fopen(process.mbp_attitudefile, "r")) == NULL) 
+		{
+		error = MB_ERROR_OPEN_FAIL;
+		fprintf(stderr,"\nUnable to Open Attitude File <%s> for reading\n",process.mbp_attitudefile);
+		fprintf(stderr,"\nProgram <%s> Terminated\n",
+			program_name);
+		exit(error);
+		}
+	    while ((result = fgets(buffer,nchar,tfp)) == buffer)
+		{
+		attitude_ok = MB_NO;
+		
+		/* ignore comments */
+		if (buffer[0] != '#')
+			{
+
+			/* deal with attitude in form: time_d roll pitch heave */
+			if (process.mbp_attitude_format == 1)
+				{
+				nget = sscanf(buffer,"%lf %lf %lf %lf",
+					&attitudetime[nattitude],&attituderoll[nattitude],
+					&attitudepitch[nattitude],&attitudeheave[nattitude]);
+				if (nget == 4)
+					attitude_ok = MB_YES;
+				}
+	
+			/* deal with attitude in form: yr mon day hour min sec roll pitch heave */
+			else if (process.mbp_attitude_format == 2)
+				{
+				nget = sscanf(buffer,"%d %d %d %d %d %lf %lf %lf %lf",
+					&time_i[0],&time_i[1],&time_i[2],
+					&time_i[3],&time_i[4],&sec,
+					&attituderoll[nattitude],
+					&attitudepitch[nattitude],
+					&attitudeheave[nattitude]);
+				time_i[5] = (int) sec;
+				time_i[6] = 1000000*(sec - time_i[5]);
+				mb_get_time(verbose,time_i,&time_d);
+				attitudetime[nattitude] = time_d;
+				if (nget == 9)
+					attitude_ok = MB_YES;
+				}
+	
+			/* deal with attitude in form: yr jday hour min sec roll pitch heave */
+			else if (process.mbp_attitude_format == 3)
+				{
+				nget = sscanf(buffer,"%d %d %d %d %lf %lf %lf %lf",
+					&time_j[0],&time_j[1],&ihr,
+					&time_j[2],&sec,
+					&attituderoll[nattitude],
+					&attitudepitch[nattitude],
+					&attitudeheave[nattitude]);
+				time_j[2] = time_j[2] + 60*hr;
+				time_j[3] = (int) sec;
+				time_j[4] = 1000000*(sec - time_j[3]);
+				mb_get_itime(verbose,time_j,time_i);
+				mb_get_time(verbose,time_i,&time_d);
+				attitudetime[nattitude] = time_d;
+				if (nget == 9)
+					attitude_ok = MB_YES;
+				}
+	
+			/* deal with attitude in form: yr jday daymin sec roll pitch heave */
+			else if (process.mbp_attitude_format == 4)
+				{
+				nget = sscanf(buffer,"%d %d %d %lf %lf %lf %lf",
+					&time_j[0],&time_j[1],&time_j[2],
+					&sec,
+					&attituderoll[nattitude],
+					&attitudepitch[nattitude],
+					&attitudeheave[nattitude]);
+				time_j[3] = (int) sec;
+				time_j[4] = 1000000*(sec - time_j[3]);
+				mb_get_itime(verbose,time_j,time_i);
+				mb_get_time(verbose,time_i,&time_d);
+				attitudetime[nattitude] = time_d;
+				if (nget == 7)
+					attitude_ok = MB_YES;
+				}
+			}
+	
+		/* output some debug values */
+		if (verbose >= 5 && attitude_ok == MB_YES)
+			{
+			fprintf(stderr,"\ndbg5  New attitude point read in program <%s>\n",program_name);
+			fprintf(stderr,"dbg5       attitude[%d]: %f %f %f %f\n",
+				nattitude,attitudetime[nattitude],attituderoll[nattitude],
+				attitudepitch[nattitude],attitudeheave[nattitude]);
+			}
+		else if (verbose >= 5)
+			{
+			fprintf(stderr,"\ndbg5  Error parsing line in attitude file in program <%s>\n",program_name);
+			fprintf(stderr,"dbg5       line: %s\n",buffer);
+			}
+
+		/* check for reverses or repeats in time */
+		if (attitude_ok == MB_YES)
+			{
+			if (nattitude == 0)
+				nattitude++;
+			else if (attitudetime[nattitude] > attitudetime[nattitude-1])
+				nattitude++;
+			else if (nattitude > 0 && attitudetime[nattitude] <= attitudetime[nattitude-1] 
+				&& verbose >= 5)
+				{
+				fprintf(stderr,"\ndbg5  Attitude time error in program <%s>\n",program_name);
+				fprintf(stderr,"dbg5       attitude[%d]: %f %f\n",
+					nattitude-1,attitudetime[nattitude-1],
+					attituderoll[nattitude-1],
+					attitudepitch[nattitude-1],
+					attitudeheave[nattitude-1]);
+				fprintf(stderr,"dbg5       attitude[%d]: %f %f\n",
+					nattitude,attitudetime[nattitude],
+					attituderoll[nattitude-1],
+					attitudepitch[nattitude-1],
+					attitudeheave[nattitude-1]);
+				}
+			}
+		strncpy(buffer,"\0",sizeof(buffer));
+		}
+	    fclose(tfp);
+
+		
+	    /* check for attitude */
+	    if (nattitude < 2)
+		    {
+		    fprintf(stderr,"\nNo attitude read from file <%s>\n",process.mbp_attitudefile);
+		    fprintf(stderr,"\nProgram <%s> Terminated\n",
+			    program_name);
+		    exit(error);
+		    }
+     
+	    /* get start and finish times of attitude */
+	    mb_get_date(verbose,attitudetime[0],stime_i);
+	    mb_get_date(verbose,attitudetime[nattitude-1],ftime_i);
+    
+	    /* give the statistics */
+	    if (verbose >= 1)
+		    {
+		    fprintf(stderr,"\n%d attitude records read\n",nattitude);
+		    fprintf(stderr,"Attitude start time: %4.4d %2.2d %2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
+			    stime_i[0],stime_i[1],stime_i[2],stime_i[3],
+			    stime_i[4],stime_i[5],stime_i[6]);
+		    fprintf(stderr,"Attitude end time:   %4.4d %2.2d %2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
 			    ftime_i[0],ftime_i[1],ftime_i[2],ftime_i[3],
 			    ftime_i[4],ftime_i[5],ftime_i[6]);
 		    }
@@ -3214,43 +3471,22 @@ and mbedit edit save files.\n";
  			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			if (error == MB_ERROR_NO_ERROR) ocomment++;
 			}
-		if (process.mbp_navadj_mode == MBP_NAV_OFF)
-			{
-			strncpy(comment,"\0",MBP_FILENAMESIZE);
-			sprintf(comment,"  Merge adjusted navigation: OFF");
-			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
-			if (error == MB_ERROR_NO_ERROR) ocomment++;
-			}
-		else if (process.mbp_navadj_mode == MBP_NAV_ON)
-			{
-			strncpy(comment,"\0",MBP_FILENAMESIZE);
-			sprintf(comment,"  Adjusted navigation file: %s", process.mbp_navadjfile);
-			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
-			if (error == MB_ERROR_NO_ERROR) ocomment++;
-			strncpy(comment,"\0",MBP_FILENAMESIZE);
-			if (process.mbp_navadj_algorithm == MBP_NAV_LINEAR)
-			    sprintf(comment,"  Adjusted navigation algorithm: linear interpolation");
-			else if (process.mbp_navadj_algorithm == MBP_NAV_SPLINE)
-			    sprintf(comment,"  Adjusted navigation algorithm: spline interpolation");
-			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
-			if (error == MB_ERROR_NO_ERROR) ocomment++;
-			}
 		if (process.mbp_nav_mode == MBP_NAV_OFF)
 			{
 			strncpy(comment,"\0",MBP_FILENAMESIZE);
-			sprintf(comment,"  Merge edited navigation:   OFF");
+			sprintf(comment,"  Merge navigation:          OFF");
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			if (error == MB_ERROR_NO_ERROR) ocomment++;
 			}
 		else if (process.mbp_nav_mode == MBP_NAV_ON)
 			{
 			strncpy(comment,"\0",MBP_FILENAMESIZE);
-			sprintf(comment,"  Edited navigation file:    %s", process.mbp_navfile);
+			sprintf(comment,"  Merged navigation file:    %s", process.mbp_navfile);
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			if (error == MB_ERROR_NO_ERROR) ocomment++;
 	
 			strncpy(comment,"\0",MBP_FILENAMESIZE);
-			sprintf(comment,"  Edited navigation format:  %d", process.mbp_nav_format);
+			sprintf(comment,"  Merged navigation format:  %d", process.mbp_nav_format);
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			if (error == MB_ERROR_NO_ERROR) ocomment++;
 	
@@ -3296,6 +3532,20 @@ and mbedit edit save files.\n";
 			    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			    if (error == MB_ERROR_NO_ERROR) ocomment++;
 			    }
+			if (process.mbp_nav_attitude == MBP_NAV_ON)
+			    {
+			    strncpy(comment,"\0",MBP_FILENAMESIZE);
+			    sprintf(comment,"  Attitude merge:        ON");
+			    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+			    if (error == MB_ERROR_NO_ERROR) ocomment++;
+			    }
+			else
+			    {
+			    strncpy(comment,"\0",MBP_FILENAMESIZE);
+			    sprintf(comment,"  Attitude merge:        OFF");
+			    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+			    if (error == MB_ERROR_NO_ERROR) ocomment++;
+			    }
 			if (process.mbp_nav_algorithm == MBP_NAV_LINEAR)
 			    {
 			    strncpy(comment,"\0",MBP_FILENAMESIZE);
@@ -3334,6 +3584,45 @@ and mbedit edit save files.\n";
 			    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			    if (error == MB_ERROR_NO_ERROR) ocomment++;
 				}
+			}
+		if (process.mbp_navadj_mode == MBP_NAV_OFF)
+			{
+			strncpy(comment,"\0",MBP_FILENAMESIZE);
+			sprintf(comment,"  Merge adjusted navigation: OFF");
+			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+			if (error == MB_ERROR_NO_ERROR) ocomment++;
+			}
+		else if (process.mbp_navadj_mode == MBP_NAV_ON)
+			{
+			strncpy(comment,"\0",MBP_FILENAMESIZE);
+			sprintf(comment,"  Adjusted navigation file: %s", process.mbp_navadjfile);
+			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+			if (error == MB_ERROR_NO_ERROR) ocomment++;
+			strncpy(comment,"\0",MBP_FILENAMESIZE);
+			if (process.mbp_navadj_algorithm == MBP_NAV_LINEAR)
+			    sprintf(comment,"  Adjusted navigation algorithm: linear interpolation");
+			else if (process.mbp_navadj_algorithm == MBP_NAV_SPLINE)
+			    sprintf(comment,"  Adjusted navigation algorithm: spline interpolation");
+			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+			if (error == MB_ERROR_NO_ERROR) ocomment++;
+			}
+	    	if (process.mbp_attitude_mode == MBP_ATTITUDE_OFF)
+			{
+			sprintf(comment,"  Attitude merging:              OFF.");
+			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+			if (error == MB_ERROR_NO_ERROR) ocomment++;
+			}
+	    	else
+			{
+			sprintf(comment,"  Attitude merging:              ON.");
+			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+			if (error == MB_ERROR_NO_ERROR) ocomment++;
+	    		sprintf(comment,"  Attitude file:                 %s", process.mbp_attitudefile);
+			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+			if (error == MB_ERROR_NO_ERROR) ocomment++;
+	    		sprintf(comment,"  Attitude format:               %d", process.mbp_attitude_format);
+ 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+			if (error == MB_ERROR_NO_ERROR) ocomment++;
 			}
 		if (process.mbp_heading_mode == MBP_HEADING_OFF)
 			{
@@ -3587,42 +3876,6 @@ and mbedit edit save files.\n";
 			    && kind == MB_DATA_DATA)
 			    draft -= heave;
 			}
-			
-		/* do lever calculation to find heave implied by roll and pitch
-		   for a sonar displaced from the vru - this will be added to the
-		   bathymetry */
-	    	if (error == MB_ERROR_NO_ERROR
-			&& process.mbp_lever_mode == MBP_LEVER_ON
-			&& kind == MB_DATA_DATA)
-			{
-			alpha = pitch;
-			beta = roll;
-			if (process.mbp_pitchbias_mode == MBP_PITCHBIAS_ON)
-			    	alpha += process.mbp_pitchbias;
-			if (process.mbp_rollbias_mode == MBP_ROLLBIAS_SINGLE)
-			    	beta += process.mbp_rollbias;
-			else if (process.mbp_rollbias_mode == MBP_ROLLBIAS_DOUBLE)
-			    	beta += 0.5 * (process.mbp_rollbias_port 
-							+ process.mbp_rollbias_stbd);
-			mb_lever(verbose, 
-			    	process.mbp_sonar_offsetx,
-			    	process.mbp_sonar_offsety,
-			    	process.mbp_sonar_offsetz,
-			    	(double) 0.0,
-			    	(double) 0.0,
-			    	(double) 0.0,
-				process.mbp_vru_offsetx,
-				process.mbp_vru_offsety,
-				process.mbp_vru_offsetz,
-				alpha,
-				beta,
-				&lever_x,
-				&lever_y,
-				&lever_heave,
-				&error);	
-/*fprintf(stderr, "alpha:%f beta:%f lever:%f\n", 
-alpha, beta, lever_heave);*/
-			}
 
 		/* interpolate the navigation if desired */
 		if (error == MB_ERROR_NO_ERROR
@@ -3659,7 +3912,7 @@ alpha, beta, lever_heave);*/
 			/* interpolate heading */
 			if (process.mbp_nav_heading == MBP_NAV_ON)
 			    {
-			    intstat = mb_linear_interp(verbose, 
+			    intstat = mb_linear_interp_degrees(verbose, 
 					ntime-1, nheading-1,
 					nnav, time_d, &heading, &itime, 
 					&error);
@@ -3680,6 +3933,23 @@ alpha, beta, lever_heave);*/
 			    intstat = mb_linear_interp(verbose, 
 					ntime-1, ndraft-1,
 					nnav, time_d, &draft, &itime, 
+					&error);
+			    }
+			    
+			/* interpolate attitude */
+			if (process.mbp_nav_attitude == MBP_NAV_ON)
+			    {
+			    intstat = mb_linear_interp(verbose, 
+					ntime-1, nroll-1,
+					nnav, time_d, &roll, &itime, 
+					&error);
+			    intstat = mb_linear_interp(verbose, 
+					ntime-1, npitch-1,
+					nnav, time_d, &pitch, &itime, 
+					&error);
+			    intstat = mb_linear_interp(verbose, 
+					ntime-1, nheave-1,
+					nnav, time_d, &heave, &itime, 
 					&error);
 			    }
 			}
@@ -3716,6 +3986,27 @@ alpha, beta, lever_heave);*/
 					&error);
 			    }
 			}
+
+		/* interpolate the attitude if desired */
+		if (error == MB_ERROR_NO_ERROR
+			&& process.mbp_attitude_mode == MBP_ATTITUDE_ON
+			&& (kind == MB_DATA_DATA
+			    || kind == MB_DATA_NAV))
+			{			
+			/* interpolate adjusted navigation */
+			intstat = mb_linear_interp(verbose, 
+					attitudetime-1, attituderoll-1,
+					nattitude, time_d, &roll, &iatime, 
+					&error);
+			intstat = mb_linear_interp(verbose, 
+					attitudetime-1, attitudepitch-1,
+					nattitude, time_d, &pitch, &iatime, 
+					&error);
+			intstat = mb_linear_interp(verbose, 
+					attitudetime-1, attitudeheave-1,
+					nattitude, time_d, &heave, &iatime, 
+					&error);
+			}
     
 		/* add user specified draft correction if desired */
 		if (error == MB_ERROR_NO_ERROR
@@ -3730,6 +4021,42 @@ alpha, beta, lever_heave);*/
 				draft = draft * process.mbp_draft_mult + process.mbp_draft_offset;
 			else if (process.mbp_draft_mode == MBP_DRAFT_SET)
 				draft = process.mbp_draft;
+			}
+			
+		/* do lever calculation to find heave implied by roll and pitch
+		   for a sonar displaced from the vru - this will be added to the
+		   bathymetry */
+	    	if (error == MB_ERROR_NO_ERROR
+			&& process.mbp_lever_mode == MBP_LEVER_ON
+			&& kind == MB_DATA_DATA)
+			{
+			alpha = pitch;
+			beta = roll;
+			if (process.mbp_pitchbias_mode == MBP_PITCHBIAS_ON)
+			    	alpha += process.mbp_pitchbias;
+			if (process.mbp_rollbias_mode == MBP_ROLLBIAS_SINGLE)
+			    	beta += process.mbp_rollbias;
+			else if (process.mbp_rollbias_mode == MBP_ROLLBIAS_DOUBLE)
+			    	beta += 0.5 * (process.mbp_rollbias_port 
+							+ process.mbp_rollbias_stbd);
+			mb_lever(verbose, 
+			    	process.mbp_sonar_offsetx,
+			    	process.mbp_sonar_offsety,
+			    	process.mbp_sonar_offsetz,
+			    	(double) 0.0,
+			    	(double) 0.0,
+			    	(double) 0.0,
+				process.mbp_vru_offsetx,
+				process.mbp_vru_offsety,
+				process.mbp_vru_offsetz,
+				alpha,
+				beta,
+				&lever_x,
+				&lever_y,
+				&lever_heave,
+				&error);	
+/*fprintf(stderr, "alpha:%f beta:%f lever:%f\n", 
+alpha, beta, lever_heave);*/
 			}
 
 		/* make up heading and speed if required */
@@ -4728,6 +5055,9 @@ i,esf.edit[i].time_d,esf.edit[i].beam,esf.edit[i].action,esf.edit[i].use);*/
 		mb_free(verbose,&nheading,&error);
 		mb_free(verbose,&nspeed,&error);
 		mb_free(verbose,&ndraft,&error);
+		mb_free(verbose,&nroll,&error);
+		mb_free(verbose,&npitch,&error);
+		mb_free(verbose,&nheave,&error);
 		mb_free(verbose,&nlonspl,&error);
 		mb_free(verbose,&nlatspl,&error);
 		}
@@ -4740,6 +5070,15 @@ i,esf.edit[i].time_d,esf.edit[i].beam,esf.edit[i].action,esf.edit[i].use);*/
 		mb_free(verbose,&nalat,&error);
 		mb_free(verbose,&nalonspl,&error);
 		mb_free(verbose,&nalatspl,&error);
+		}
+
+	/* deallocate arrays for attitude merging */
+	if (nanav > 0)
+		{
+		mb_free(verbose,&attitudetime,&error);
+		mb_free(verbose,&attituderoll,&error);
+		mb_free(verbose,&attitudepitch,&error);
+		mb_free(verbose,&attitudeheave,&error);
 		}
 
 	/* deallocate arrays for beam edits */

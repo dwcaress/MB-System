@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_get_all.c	1/26/93
- *    $Id: mb_get_all.c,v 5.8 2004-04-27 01:46:12 caress Exp $
+ *    $Id: mb_get_all.c,v 5.9 2004-12-02 06:33:30 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	January 26, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2004/04/27 01:46:12  caress
+ * Various updates of April 26, 2004.
+ *
  * Revision 5.7  2003/04/17 21:05:23  caress
  * Release 5.0.beta30
  *
@@ -123,7 +126,7 @@
 #include "../../include/mb_io.h"
 #include "../../include/mb_define.h"
 
-static char rcs_id[]="$Id: mb_get_all.c,v 5.8 2004-04-27 01:46:12 caress Exp $";
+static char rcs_id[]="$Id: mb_get_all.c,v 5.9 2004-12-02 06:33:30 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind,
@@ -144,6 +147,7 @@ int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind,
 	double	mtodeglon, mtodeglat;
 	double	dx, dy;
 	double	delta_time;
+	double	roll, pitch, heave;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -230,6 +234,19 @@ int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind,
 				kind,
 				sonardepth, 
 				altitude, 
+				error);
+			}
+		else if (status == MB_SUCCESS
+			&& (*kind == MB_DATA_NAV
+				|| *kind == MB_DATA_NAV1
+				|| *kind == MB_DATA_NAV2
+				|| *kind == MB_DATA_NAV3))
+			{
+			status = mb_extract_nav(verbose, 
+				mbio_ptr, *store_ptr, kind,
+				time_i, time_d,
+				navlon, navlat, speed, heading,
+				sonardepth, &roll, &pitch, &heave,
 				error);
 			}
 		}

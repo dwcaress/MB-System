@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_ldeoih.c	2/26/93
- *	$Id: mbsys_ldeoih.c,v 5.8 2003-04-17 21:05:23 caress Exp $
+ *	$Id: mbsys_ldeoih.c,v 5.9 2004-12-02 06:33:32 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	February 26, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2003/04/17 21:05:23  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.7  2003/04/16 16:47:41  caress
  * Release 5.0.beta30
  *
@@ -129,7 +132,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_ldeoih.h"
 
-static char res_id[]="$Id: mbsys_ldeoih.c,v 5.8 2003-04-17 21:05:23 caress Exp $";
+static char res_id[]="$Id: mbsys_ldeoih.c,v 5.9 2004-12-02 06:33:32 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_ldeoih_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
@@ -510,6 +513,7 @@ int mbsys_ldeoih_insert(int verbose, void *mbio_ptr, void *store_ptr,
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_ldeoih_struct *store;
 	int	time_j[5];
+	double	altitude, transducer_depth;
 	double	depthscale, depthmax;
 	double	distscale, distmax;
 	int	i;
@@ -719,6 +723,11 @@ int mbsys_ldeoih_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			}
 		    }
 		    
+		/* save existing altitude and transducer_depth values */
+		depthscale = 0.001 * store->depth_scale;
+		transducer_depth = depthscale * store->transducer_depth;
+		altitude = depthscale * store->altitude;
+
 		/* get scaling */
 		store->depth_scale = 1000;
 		store->distance_scale = 1000;
@@ -778,6 +787,10 @@ int mbsys_ldeoih_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			store->ss_alongtrack[i] = ssalongtrack[i]
 							/ distscale;
 			}
+		    
+		/* save existing altitude and transducer_depth values */
+		store->transducer_depth = transducer_depth / depthscale;
+		store->altitude = altitude / depthscale;
 		}
 
 	/* insert comment in structure */

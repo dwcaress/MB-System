@@ -1,4 +1,4 @@
-.TH mbsegygrid l "22 September 2004" "MB-System 5.0" "MB-System 5.0"
+.TH mbsegygrid l "21 October 2004" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbsegygrid\fP - Generate time vs. trace number grids of seismic data from segy files.
 
@@ -20,7 +20,7 @@ format grid files.
 The x-dimension of the grid is determined by the number of traces specified
 by the \fB-S\fP option and any decimation specified with option \fB-D\fP. The 
 y-dimension of the grid is determined by the sample spacing, any decimation
-specified with option \fB-D\fP, and the time sweep specified by the  fB-T\fP
+specified with option \fB-D\fP, and the time sweep specified by the  \fB-T\fP
 option.
 
 If the \fB-S\fP option is not specified, then all of the traces in the segy file

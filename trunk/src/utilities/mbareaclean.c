@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbareaclean.c	2/27/2003
- *    $Id: mbareaclean.c,v 5.3 2004-09-16 00:57:46 caress Exp $
+ *    $Id: mbareaclean.c,v 5.4 2004-12-02 06:39:28 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -37,6 +37,9 @@
  *		Amsterdam Airport
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2004/09/16 00:57:46  caress
+ * Fixed parsing of bounds argument.
+ *
  * Revision 5.2  2003/07/26 18:01:22  caress
  * Changed beamflag handling code.
  *
@@ -119,7 +122,7 @@ int getsoundingptr(int verbose, int soundingid,
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbareaclean.c,v 5.3 2004-09-16 00:57:46 caress Exp $";
+	static char rcs_id[] = "$Id: mbareaclean.c,v 5.4 2004-12-02 06:39:28 caress Exp $";
 	static char program_name[] = "MBAREACLEAN";
 	static char help_message[] =  "MBAREACLEAN identifies and flags artifacts in swath bathymetry data";
 	static char usage_message[] = "mbareaclean [-Fformat -Iinfile -Rwest/east/south/north -B -G -Mthreshold/nmin -Sbinsize]";
@@ -958,19 +961,21 @@ ix,iy,kgrid,gsndg[kgrid][i],sndg->sndg_beamflag,binnum);*/
 			qsort((char *)bindepths,binnum,sizeof(double),
 				mb_double_compare);
 			median_depth = bindepths[binnum / 2];
-/*if (binnum>0)
+if (binnum>0)
 fprintf(stderr,"bin: %d %d %d  pos: %f %f  nsoundings:%d median:%f\n",
-ix,iy,kgrid,xx,yy,binnum,median_depth);*/
+ix,iy,kgrid,xx,yy,binnum,median_depth);
 
 			/* process the soundings */
 			for (i=0;i<gsndgnum[kgrid];i++)
 				{
 				getsoundingptr(verbose, gsndg[kgrid][i], &sndg, &error);
-				threshold = median_filter_threshold 
-						* files[sndg->sndg_file].ping_altitude[sndg->sndg_ping];
-/*fprintf(stderr,"sounding:%d file:%d time_d:%f depth:%f\n",
+				threshold = fabs(median_filter_threshold 
+						* files[sndg->sndg_file].ping_altitude[sndg->sndg_ping]);
+/*fprintf(stderr,"sounding:%d file:%d time_d:%f depth:%f median:%f altitude:%f threshold:%f",
 gsndg[kgrid][i],sndg->sndg_file,
-files[sndg->sndg_file].ping_time_d[sndg->sndg_ping], sndg->sndg_depth);*/
+files[sndg->sndg_file].ping_time_d[sndg->sndg_ping], sndg->sndg_depth,median_depth,
+files[sndg->sndg_file].ping_altitude[sndg->sndg_ping],
+threshold);*/
 				if (output_bad == MB_YES
 					&& mb_beam_ok(sndg->sndg_beamflag)
 					&& fabs(sndg->sndg_depth - median_depth) 
@@ -978,6 +983,7 @@ files[sndg->sndg_file].ping_time_d[sndg->sndg_ping], sndg->sndg_depth);*/
 					{
 					sndg->sndg_beamflag = MB_FLAG_FLAG + MB_FLAG_FILTER;
 					files[sndg->sndg_file].nflagged++;
+/*fprintf(stderr," FLAGGED");*/
 					} 
 				else if (output_good == MB_YES
 					&& !mb_beam_ok(sndg->sndg_beamflag)
@@ -987,7 +993,9 @@ files[sndg->sndg_file].ping_time_d[sndg->sndg_ping], sndg->sndg_depth);*/
 					{
 					sndg->sndg_beamflag = MB_FLAG_NONE;
 					files[sndg->sndg_file].nunflagged++;
+/*fprintf(stderr," UNFLAGGED");*/
 					}
+/*fprintf(stderr,"\n");*/
 				}
 			}
 		}
@@ -1038,6 +1046,18 @@ files[sndg->sndg_file].ping_time_d[sndg->sndg_ping], sndg->sndg_depth);*/
 			
 		/* close esf file */
 		mb_esf_close(verbose, &esf, &error);
+
+		/* update mbprocess parameter file */
+		if (esffile_open == MB_YES)
+		    {
+		    /* update mbprocess parameter file */
+		    status = mb_pr_update_format(verbose, files[i].filelist, 
+				MB_YES, files[i].file_format, 
+				&error);
+		    status = mb_pr_update_edit(verbose, files[i].filelist, 
+				MBP_EDIT_ON, esffile, 
+				&error);
+		    }
 		}
 
 	/* give the total statistics */

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_reson7k.c	3.00	3/23/2004
- *	$Id: mbsys_reson7k.c,v 5.6 2004-11-08 05:47:20 caress Exp $
+ *	$Id: mbsys_reson7k.c,v 5.7 2004-12-02 06:33:31 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -26,6 +26,9 @@
  * Date:	March 23, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2004/11/08 05:47:20  caress
+ * Now gets sidescan from snippet data, maybe even properly...
+ *
  * Revision 5.5  2004/11/06 03:55:15  caress
  * Working to support the Reson 7k format.
  *
@@ -62,9 +65,9 @@
 #include "../../include/mb_segy.h"
 	
 /* turn on debug statements here */
-/*#define MSYS_RESON7KR_DEBUG 1*/
+/* #define MSYS_RESON7KR_DEBUG 1 */
 
-static char res_id[]="$Id: mbsys_reson7k.c,v 5.6 2004-11-08 05:47:20 caress Exp $";
+static char res_id[]="$Id: mbsys_reson7k.c,v 5.7 2004-12-02 06:33:31 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_zero7kheader(int verbose, s7k_header	*header, 
@@ -857,7 +860,6 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	mbsys_reson7k_zero7kheader(verbose, &remotecontrolsettings->header, error);
 	remotecontrolsettings->serial_number = 0;
 	remotecontrolsettings->ping_number = 0;
-	remotecontrolsettings->multi_ping = 0;
 	remotecontrolsettings->frequency = 0.0;
 	remotecontrolsettings->sample_rate = 0.0;
 	remotecontrolsettings->receiver_bandwidth = 0.0;
@@ -885,7 +887,6 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	remotecontrolsettings->receive_weighting = 0;
 	remotecontrolsettings->receive_weighting_par = 0.0;
 	remotecontrolsettings->receive_flags = 0;
-	remotecontrolsettings->receive_width = 0.0;
 	remotecontrolsettings->range_minimum = 0.0;
 	remotecontrolsettings->range_maximum = 0.0;
 	remotecontrolsettings->depth_minimum = 0.0;
@@ -2586,6 +2587,7 @@ int mbsys_reson7k_print_bluefin(int verbose,
 			fprintf(stderr,"%s     nav[%d].longitude:          %f\n",first,i,bluefin->nav[i].longitude);
 			fprintf(stderr,"%s     nav[%d].speed:              %f\n",first,i,bluefin->nav[i].speed);
 			fprintf(stderr,"%s     nav[%d].depth:              %f\n",first,i,bluefin->nav[i].depth);
+			fprintf(stderr,"%s     nav[%d].altitude:           %f\n",first,i,bluefin->nav[i].altitude);
 			fprintf(stderr,"%s     nav[%d].roll:               %f\n",first,i,bluefin->nav[i].roll);
 			fprintf(stderr,"%s     nav[%d].pitch:              %f\n",first,i,bluefin->nav[i].pitch);
 			fprintf(stderr,"%s     nav[%d].yaw:                %f\n",first,i,bluefin->nav[i].yaw);
@@ -3768,7 +3770,6 @@ int mbsys_reson7k_print_remotecontrolsettings(int verbose,
 	fprintf(stderr,"%sStructure Contents:\n", first);
 	fprintf(stderr,"%s     serial_number:              %u\n",first,remotecontrolsettings->serial_number);
 	fprintf(stderr,"%s     ping_number:                %d\n",first,remotecontrolsettings->ping_number);
-	fprintf(stderr,"%s     multi_ping:                 %d\n",first,remotecontrolsettings->multi_ping);
 	fprintf(stderr,"%s     frequency:                  %f\n",first,remotecontrolsettings->frequency);
 	fprintf(stderr,"%s     sample_rate:                %f\n",first,remotecontrolsettings->sample_rate);
 	fprintf(stderr,"%s     receiver_bandwidth:         %f\n",first,remotecontrolsettings->receiver_bandwidth);
@@ -3796,7 +3797,6 @@ int mbsys_reson7k_print_remotecontrolsettings(int verbose,
 	fprintf(stderr,"%s     receive_weighting:          %d\n",first,remotecontrolsettings->receive_weighting);
 	fprintf(stderr,"%s     receive_weighting_par:      %f\n",first,remotecontrolsettings->receive_weighting_par);
 	fprintf(stderr,"%s     receive_flags:              %d\n",first,remotecontrolsettings->receive_flags);
-	fprintf(stderr,"%s     receive_width:              %f\n",first,remotecontrolsettings->receive_width);
 	fprintf(stderr,"%s     range_minimum:              %f\n",first,remotecontrolsettings->range_minimum);
 	fprintf(stderr,"%s     range_maximum:              %f\n",first,remotecontrolsettings->range_maximum);
 	fprintf(stderr,"%s     depth_minimum:              %f\n",first,remotecontrolsettings->depth_minimum);
@@ -4090,6 +4090,7 @@ int mbsys_reson7k_extract(int verbose, void *mbio_ptr, void *store_ptr,
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_reson7k_struct *store;
+	s7kr_bluefin *bluefin;
 	s7kr_volatilesettings *volatilesettings;
 	s7kr_bathymetry *bathymetry;
 	s7kr_backscatter *backscatter;
@@ -4118,6 +4119,7 @@ int mbsys_reson7k_extract(int verbose, void *mbio_ptr, void *store_ptr,
 
 	/* get data structure pointer */
 	store = (struct mbsys_reson7k_struct *) store_ptr;
+	bluefin = (s7kr_bluefin *) &store->bluefin;
 	volatilesettings = (s7kr_volatilesettings *) &store->volatilesettings;
 	bathymetry = (s7kr_bathymetry *) &store->bathymetry;
 	backscatter = (s7kr_backscatter *) &store->backscatter;
@@ -4166,12 +4168,18 @@ int mbsys_reson7k_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		for (i=0;i<*nbath;i++)
 			{
 			bath[i] = bathymetry->depth[i];
-			if (bathymetry->quality[i] & 15 == 15)
+			if ((bathymetry->quality[i] & 15) == 15)
+				{
 				beamflag[i] = MB_FLAG_NONE;
-			else if (bathymetry->quality[i] & 15 == 0)
+				}
+			else if ((bathymetry->quality[i] & 15) == 0)
+				{
 				beamflag[i] = MB_FLAG_NULL;
+				}
 			else
+				{
 				beamflag[i] = MB_FLAG_FLAG + MB_FLAG_SONAR;
+				}
 			bathacrosstrack[i] = bathymetry->acrosstrack[i];
 			bathalongtrack[i] = bathymetry->alongtrack[i];
 			amp[i] = bathymetry->intensity[i];
@@ -4272,6 +4280,71 @@ int mbsys_reson7k_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		/* get navigation */
 		*navlon = RTD * position->longitude;
 		*navlat = RTD * position->latitude;
+
+		/* set beam and pixel numbers */
+		*nbath = 0;
+		*namp = 0;
+		*nss = 0;
+
+		/* print debug statements */
+		if (verbose >= 5)
+			{
+			fprintf(stderr,"\ndbg4  Data extracted by MBIO function <%s>\n",
+				function_name);
+			fprintf(stderr,"dbg4  Extracted values:\n");
+			fprintf(stderr,"dbg4       kind:       %d\n",
+				*kind);
+			fprintf(stderr,"dbg4       error:      %d\n",
+				*error);
+			fprintf(stderr,"dbg4       time_i[0]:  %d\n",
+				time_i[0]);
+			fprintf(stderr,"dbg4       time_i[1]:  %d\n",
+				time_i[1]);
+			fprintf(stderr,"dbg4       time_i[2]:  %d\n",
+				time_i[2]);
+			fprintf(stderr,"dbg4       time_i[3]:  %d\n",
+				time_i[3]);
+			fprintf(stderr,"dbg4       time_i[4]:  %d\n",
+				time_i[4]);
+			fprintf(stderr,"dbg4       time_i[5]:  %d\n",
+				time_i[5]);
+			fprintf(stderr,"dbg4       time_i[6]:  %d\n",
+				time_i[6]);
+			fprintf(stderr,"dbg4       time_d:     %f\n",
+				*time_d);
+			fprintf(stderr,"dbg4       longitude:  %f\n",
+				*navlon);
+			fprintf(stderr,"dbg4       latitude:   %f\n",
+				*navlat);
+			fprintf(stderr,"dbg4       speed:      %f\n",
+				*speed);
+			fprintf(stderr,"dbg4       heading:    %f\n",
+				*heading);
+			}
+
+		/* done translating values */
+
+		}
+
+	/* extract data from structure */
+	else if (*kind == MB_DATA_NAV1)
+		{
+		/* get time */
+		for (i=0;i<7;i++)
+			time_i[i] = store->time_i[i];
+		*time_d = store->time_d;
+		
+		/* get heading */
+		*heading = RTD * bluefin->nav[0].yaw;
+		
+		/* get speed */
+		*speed = 0.0;
+		mb_navint_interp(verbose, mbio_ptr, store->time_d, *heading, *speed, 
+				    navlon, navlat, speed, error);
+
+		/* get navigation */
+		*navlon = RTD * bluefin->nav[0].longitude;
+		*navlat = RTD * bluefin->nav[0].latitude;
 
 		/* set beam and pixel numbers */
 		*nbath = 0;
@@ -4629,6 +4702,7 @@ int mbsys_reson7k_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 	s7kr_ctd *ctd;
 	s7kr_reference *reference;
 	double	heave_use, roll, pitch;
+	double	alpha, beta, theta, phi;
 	int	i, j;
 
 	/* print input debug statements */
@@ -4713,13 +4787,20 @@ int mbsys_reson7k_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 				}
 			else
 				{
+				alpha = RTD * beamgeometry->angle_alongtrack[i] + bathymetry->pitch;
+				beta = 90.0 - RTD * beamgeometry->angle_acrosstrack[i] + bathymetry->roll;
 				mb_rollpitch_to_takeoff(
 					verbose, 
-					pitch, (RTD * beamgeometry->angle_acrosstrack[i] + roll), 
-					&(angles_forward[i]), &(angles[i]), 
+					alpha, beta, 
+					&theta, &phi, 
 					error);
+				angles[i] = theta;
+				angles_forward[i] = phi;
 				}
-			angles_null[i] = angles[i];
+			if (bathymetry->header.DeviceId == 7100)
+				angles_null[i] = angles[i];
+			else
+				angles_null[i] = 0.0;
 			heave[i] = heave_use;
 			alongtrack_offset[i] = 0.0;
 			}
@@ -5035,6 +5116,7 @@ int mbsys_reson7k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_reson7k_struct *store;
 	s7kr_bathymetry *bathymetry;
+	s7kr_bluefin *bluefin;
 	s7kr_position *position;
 	s7kr_depth *depth;
 	s7kr_attitude *attitude;
@@ -5059,6 +5141,7 @@ int mbsys_reson7k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 	/* get data structure pointer */
 	store = (struct mbsys_reson7k_struct *) store_ptr;
 	bathymetry = (s7kr_bathymetry *) &store->bathymetry;
+	bluefin = (s7kr_bluefin *) &store->bluefin;
 	position = (s7kr_position *) &store->position;
 	depth = (s7kr_depth *) &store->depth;
 	attitude = (s7kr_attitude *) &store->attitude;
@@ -5121,50 +5204,6 @@ int mbsys_reson7k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 				   	heave, roll, pitch, error);
 			}
 
-		/* print debug statements */
-		if (verbose >= 5)
-			{
-			fprintf(stderr,"\ndbg4  Data extracted by MBIO function <%s>\n",
-				function_name);
-			fprintf(stderr,"dbg4  Extracted values:\n");
-			fprintf(stderr,"dbg4       kind:       %d\n",
-				*kind);
-			fprintf(stderr,"dbg4       error:      %d\n",
-				*error);
-			fprintf(stderr,"dbg4       time_i[0]:  %d\n",
-				time_i[0]);
-			fprintf(stderr,"dbg4       time_i[1]:  %d\n",
-				time_i[1]);
-			fprintf(stderr,"dbg4       time_i[2]:  %d\n",
-				time_i[2]);
-			fprintf(stderr,"dbg4       time_i[3]:  %d\n",
-				time_i[3]);
-			fprintf(stderr,"dbg4       time_i[4]:  %d\n",
-				time_i[4]);
-			fprintf(stderr,"dbg4       time_i[5]:  %d\n",
-				time_i[5]);
-			fprintf(stderr,"dbg4       time_i[6]:  %d\n",
-				time_i[6]);
-			fprintf(stderr,"dbg4       time_d:     %f\n",
-				*time_d);
-			fprintf(stderr,"dbg4       longitude:  %f\n",
-				*navlon);
-			fprintf(stderr,"dbg4       latitude:   %f\n",
-				*navlat);
-			fprintf(stderr,"dbg4       speed:      %f\n",
-				*speed);
-			fprintf(stderr,"dbg4       heading:    %f\n",
-				*heading);
-			fprintf(stderr,"dbg4       draft:      %f\n",
-				*draft);
-			fprintf(stderr,"dbg4       roll:       %f\n",
-				*roll);
-			fprintf(stderr,"dbg4       pitch:      %f\n",
-				*pitch);
-			fprintf(stderr,"dbg4       heave:      %f\n",
-				*heave);
-			}
-
 		/* done translating values */
 
 		}
@@ -5194,15 +5233,15 @@ int mbsys_reson7k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 				    heave, roll, pitch, error);
 
 		/* get draft  */
-		if (mb_io_ptr->nsonardepth > 0)
+		if (bathymetry->optionaldata == MB_YES)
+			{
+			*draft = -bathymetry->vehicle_height + reference->water_z;
+			*heave = 0.0;
+			}
+		else if (mb_io_ptr->nsonardepth > 0)
 			{
 			mb_depint_interp(verbose, mbio_ptr, store->time_d,  
 				    draft, error);
-			*heave = 0.0;
-			}
-		else if (bathymetry->optionaldata == MB_YES)
-			{
-			*draft = -bathymetry->vehicle_height + reference->water_z;
 			*heave = 0.0;
 			}
 		else
@@ -5210,48 +5249,283 @@ int mbsys_reson7k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 			*draft = reference->water_z;
 			}
 
-		/* print debug statements */
-		if (verbose >= 5)
+		/* done translating values */
+
+		}
+
+	/* extract data from structure */
+	else if (*kind == MB_DATA_NAV1)
+		{
+		/* get time */
+		for (i=0;i<7;i++)
+			time_i[i] = store->time_i[i];
+		*time_d = store->time_d;
+		
+		/* get heading */
+		*heading = RTD * bluefin->nav[0].yaw;
+		
+		/* get speed */
+		*speed = 0.0;
+		mb_navint_interp(verbose, mbio_ptr, store->time_d, *heading, *speed, 
+				    navlon, navlat, speed, error);
+
+		/* get navigation */
+		*navlon = RTD * bluefin->nav[0].longitude;
+		*navlat = RTD * bluefin->nav[0].latitude;
+
+		/* get roll pitch and heave */
+		*roll = RTD * bluefin->nav[0].roll;
+		*pitch = RTD * bluefin->nav[0].pitch;
+		*heave = 0.0;
+
+		/* get draft  */
+		*draft = bluefin->nav[0].depth;
+
+		/* done translating values */
+
+		}
+
+	/* deal with comment */
+	else if (*kind == MB_DATA_COMMENT)
+		{
+		/* set status */
+		*error = MB_ERROR_COMMENT;
+		status = MB_FAILURE;
+		}
+
+	/* deal with other record type */
+	else
+		{
+		/* set status */
+		*error = MB_ERROR_OTHER;
+		status = MB_FAILURE;
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       kind:          %d\n",*kind);
+		fprintf(stderr,"dbg2       time_i[0]:     %d\n",time_i[0]);
+		fprintf(stderr,"dbg2       time_i[1]:     %d\n",time_i[1]);
+		fprintf(stderr,"dbg2       time_i[2]:     %d\n",time_i[2]);
+		fprintf(stderr,"dbg2       time_i[3]:     %d\n",time_i[3]);
+		fprintf(stderr,"dbg2       time_i[4]:     %d\n",time_i[4]);
+		fprintf(stderr,"dbg2       time_i[5]:     %d\n",time_i[5]);
+		fprintf(stderr,"dbg2       time_i[6]:     %d\n",time_i[6]);
+		fprintf(stderr,"dbg2       time_d:        %f\n",*time_d);
+		fprintf(stderr,"dbg2       longitude:     %f\n",*navlon);
+		fprintf(stderr,"dbg2       latitude:      %f\n",*navlat);
+		fprintf(stderr,"dbg2       speed:         %f\n",*speed);
+		fprintf(stderr,"dbg2       heading:       %f\n",*heading);
+		fprintf(stderr,"dbg2       draft:         %f\n",*draft);
+		fprintf(stderr,"dbg2       roll:          %f\n",*roll);
+		fprintf(stderr,"dbg2       pitch:         %f\n",*pitch);
+		fprintf(stderr,"dbg2       heave:         %f\n",*heave);
+		fprintf(stderr,"dbg2       error:         %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:        %d\n",status);
+		}
+/*if (status == MB_SUCCESS)
+fprintf(stderr,"%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %f %f %f %f %f %f %f %f\n",
+time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],
+*navlon,*navlat,*speed,*heading,*draft,*roll,*pitch,*heave);*/
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbsys_reson7k_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr,
+			int nmax, int *kind, int *n,
+			int *time_i, double *time_d,
+			double *navlon, double *navlat,
+			double *speed, double *heading, double *draft, 
+			double *roll, double *pitch, double *heave, 
+			int *error)
+{
+	char	*function_name = "mbsys_reson7k_extract_nnav";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	struct mbsys_reson7k_struct *store;
+	s7kr_bathymetry *bathymetry;
+	s7kr_bluefin *bluefin;
+	s7kr_position *position;
+	s7kr_depth *depth;
+	s7kr_attitude *attitude;
+	s7kr_reference *reference;
+	int	i, inav;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mb_ptr:     %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       nmax:       %d\n",nmax);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* get data structure pointer */
+	store = (struct mbsys_reson7k_struct *) store_ptr;
+	bathymetry = (s7kr_bathymetry *) &store->bathymetry;
+	bluefin = (s7kr_bluefin *) &store->bluefin;
+	position = (s7kr_position *) &store->position;
+	depth = (s7kr_depth *) &store->depth;
+	attitude = (s7kr_attitude *) &store->attitude;
+	reference = (s7kr_reference *) &store->reference;
+
+	/* get data kind */
+	*kind = store->kind;
+
+	/* extract data from ping structure */
+	if (*kind == MB_DATA_DATA)
+		{
+		/* just one navigation value */
+		*n = 1;
+
+		/* get time */
+		for (i=0;i<7;i++)
+			time_i[i] = store->time_i[i];
+		time_d[0] = store->time_d;
+
+		/* get interpolated nav heading and speed  */
+		speed[0] = 0.0;
+		mb_hedint_interp(verbose, mbio_ptr, store->time_d,  
+				    &(heading[0]), error);
+		mb_navint_interp(verbose, mbio_ptr, store->time_d, heading[0], speed[0], 
+				    &(navlon[0]), &(navlat[0]), &(speed[0]), error);
+
+		/* get heading */
+		if (bathymetry->optionaldata == MB_YES)
+			heading[0] = RTD * bathymetry->heading;
+
+		/* get navigation */
+		if (bathymetry->optionaldata == MB_YES)
 			{
-			fprintf(stderr,"\ndbg4  Data extracted by MBIO function <%s>\n",
-				function_name);
-			fprintf(stderr,"dbg4  Extracted values:\n");
-			fprintf(stderr,"dbg4       kind:       %d\n",
-				*kind);
-			fprintf(stderr,"dbg4       error:      %d\n",
-				*error);
-			fprintf(stderr,"dbg4       time_i[0]:  %d\n",
-				time_i[0]);
-			fprintf(stderr,"dbg4       time_i[1]:  %d\n",
-				time_i[1]);
-			fprintf(stderr,"dbg4       time_i[2]:  %d\n",
-				time_i[2]);
-			fprintf(stderr,"dbg4       time_i[3]:  %d\n",
-				time_i[3]);
-			fprintf(stderr,"dbg4       time_i[4]:  %d\n",
-				time_i[4]);
-			fprintf(stderr,"dbg4       time_i[5]:  %d\n",
-				time_i[5]);
-			fprintf(stderr,"dbg4       time_i[6]:  %d\n",
-				time_i[6]);
-			fprintf(stderr,"dbg4       time_d:     %f\n",
-				*time_d);
-			fprintf(stderr,"dbg4       longitude:  %f\n",
-				*navlon);
-			fprintf(stderr,"dbg4       latitude:   %f\n",
-				*navlat);
-			fprintf(stderr,"dbg4       speed:      %f\n",
-				*speed);
-			fprintf(stderr,"dbg4       heading:    %f\n",
-				*heading);
-			fprintf(stderr,"dbg4       draft:      %f\n",
-				*draft);
-			fprintf(stderr,"dbg4       roll:       %f\n",
-				*roll);
-			fprintf(stderr,"dbg4       pitch:      %f\n",
-				*pitch);
-			fprintf(stderr,"dbg4       heave:      %f\n",
-				*heave);
+			navlon[0] = RTD * bathymetry->longitude;
+			navlat[0] = RTD * bathymetry->latitude;
+			}
+
+		/* get draft  */
+		if (bathymetry->optionaldata == MB_YES)
+			{
+			draft[0] = -bathymetry->vehicle_height + reference->water_z;
+			}
+		else if (mb_io_ptr->nsonardepth > 0)
+			{
+			mb_depint_interp(verbose, mbio_ptr, store->time_d,  
+				    &(draft[0]), error);
+			}
+		else
+			{
+			draft[0] = reference->water_z;
+			}
+
+		/* get attitude  */
+		if (bathymetry->optionaldata == MB_YES)
+			{
+			roll[0] = RTD * bathymetry->roll;
+			pitch[0] = RTD * bathymetry->pitch;
+			heave[0] = bathymetry->heave;
+			}
+		else
+			{
+			mb_attint_interp(verbose, mbio_ptr, store->time_d,  
+				   	&(heave[0]), &(roll[0]), &(pitch[0]), error);
+			}
+
+		/* done translating values */
+
+		}
+
+	/* extract data from nav structure */
+	else if (*kind == MB_DATA_NAV)
+		{
+		/* just one navigation value */
+		*n = 1;
+
+		/* get time */
+		for (i=0;i<7;i++)
+			time_i[i] = store->time_i[i];
+		time_d[0] = store->time_d;
+
+		/* get navigation and heading */
+		speed[0] = 0.0;
+		mb_hedint_interp(verbose, mbio_ptr, store->time_d,  
+				    &(heading[0]), error);
+		mb_navint_interp(verbose, mbio_ptr, store->time_d, heading[0], speed[0], 
+				    &(navlon[0]), &(navlat[0]), &(speed[0]), error);
+		navlon[0] = RTD * position->longitude;
+		navlat[0] = RTD * position->latitude;
+
+		/* get roll pitch and heave */
+		mb_attint_interp(verbose, mbio_ptr, *time_d,  
+				    &(heave[0]), &(roll[0]), &(pitch[0]), error);
+
+		/* get draft  */
+		if (bathymetry->optionaldata == MB_YES)
+			{
+			draft[0] = -bathymetry->vehicle_height + reference->water_z;
+			heave[0] = 0.0;
+			}
+		else if (mb_io_ptr->nsonardepth > 0)
+			{
+			mb_depint_interp(verbose, mbio_ptr, store->time_d,  
+				    draft[0], error);
+			heave[0] = 0.0;
+			}
+		else
+			{
+			draft[0] = reference->water_z;
+			}
+
+		/* done translating values */
+
+		}
+
+	/* extract data from structure */
+	else if (*kind == MB_DATA_NAV1)
+		{
+		/* get number of available navigation values */
+		if (bluefin->data_format ==  0 && bluefin->number_frames > 0)
+			*n = bluefin->number_frames;
+		else 
+			*n = 0;
+		
+		/* loop over navigation values */
+		for (inav=0;inav<*n;inav++)
+			{
+			/* get time */
+			time_d[inav] = bluefin->nav[inav].position_time;
+			mb_get_date(verbose, time_d[inav], &(time_i[7 * inav]));
+
+			/* get heading */
+			heading[inav] = RTD * bluefin->nav[inav].yaw;
+
+			/* get speed */
+			speed[inav] = 0.0;
+			mb_navint_interp(verbose, mbio_ptr, time_d[inav], heading[inav], speed[inav], 
+					    &(navlon[inav]), &(navlat[inav]), &(speed[inav]), error);
+
+			/* get navigation */
+			navlon[inav] = RTD * bluefin->nav[inav].longitude;
+			navlat[inav] = RTD * bluefin->nav[inav].latitude;
+
+			/* get roll pitch and heave */
+			roll[inav] = RTD * bluefin->nav[inav].roll;
+			pitch[inav] = RTD * bluefin->nav[inav].pitch;
+			heave[inav] = 0.0;
+
+			/* get draft  */
+			draft[inav] = bluefin->nav[inav].depth;
 			}
 
 		/* done translating values */
@@ -5281,29 +5555,21 @@ int mbsys_reson7k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
-		}
-	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
-		&& *kind == MB_DATA_DATA)
-		{
-		fprintf(stderr,"dbg2       time_i[0]:     %d\n",time_i[0]);
-		fprintf(stderr,"dbg2       time_i[1]:     %d\n",time_i[1]);
-		fprintf(stderr,"dbg2       time_i[2]:     %d\n",time_i[2]);
-		fprintf(stderr,"dbg2       time_i[3]:     %d\n",time_i[3]);
-		fprintf(stderr,"dbg2       time_i[4]:     %d\n",time_i[4]);
-		fprintf(stderr,"dbg2       time_i[5]:     %d\n",time_i[5]);
-		fprintf(stderr,"dbg2       time_i[6]:     %d\n",time_i[6]);
-		fprintf(stderr,"dbg2       time_d:        %f\n",*time_d);
-		fprintf(stderr,"dbg2       longitude:     %f\n",*navlon);
-		fprintf(stderr,"dbg2       latitude:      %f\n",*navlat);
-		fprintf(stderr,"dbg2       speed:         %f\n",*speed);
-		fprintf(stderr,"dbg2       heading:       %f\n",*heading);
-		fprintf(stderr,"dbg2       draft:         %f\n",*draft);
-		fprintf(stderr,"dbg2       roll:          %f\n",*roll);
-		fprintf(stderr,"dbg2       pitch:         %f\n",*pitch);
-		fprintf(stderr,"dbg2       heave:         %f\n",*heave);
-		}
-	if (verbose >= 2)
-		{
+		fprintf(stderr,"dbg2       n:          %d\n",*n);
+		for (inav=0;inav<*n;inav++)
+			{
+			for (i=0;i<7;i++)
+				fprintf(stderr,"dbg2       %d time_i[%d]:     %d\n",inav,i,time_i[inav * 7 + i]);
+			fprintf(stderr,"dbg2       %d time_d:        %f\n",inav,time_d[inav]);
+			fprintf(stderr,"dbg2       %d longitude:     %f\n",inav,navlon[inav]);
+			fprintf(stderr,"dbg2       %d latitude:      %f\n",inav,navlat[inav]);
+			fprintf(stderr,"dbg2       %d speed:         %f\n",inav,speed[inav]);
+			fprintf(stderr,"dbg2       %d heading:       %f\n",inav,heading[inav]);
+			fprintf(stderr,"dbg2       %d draft:         %f\n",inav,draft[inav]);
+			fprintf(stderr,"dbg2       %d roll:          %f\n",inav,roll[inav]);
+			fprintf(stderr,"dbg2       %d pitch:         %f\n",inav,pitch[inav]);
+			fprintf(stderr,"dbg2       %d heave:         %f\n",inav,heave[inav]);
+			}
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:     %d\n",status);
@@ -5391,12 +5657,9 @@ int mbsys_reson7k_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		bathymetry->vehicle_height = reference->water_z - draft;
 
 		/* get roll pitch and heave */
-		if (attitude->n > 0)
-			{
-			bathymetry->heave = DTR * heave;
-			bathymetry->pitch = DTR * pitch;
-			bathymetry->roll = roll;
-			}
+		bathymetry->heave = heave;
+		bathymetry->pitch = DTR * pitch;
+		bathymetry->roll = DTR * roll;
 		}
 
 	/* insert data in nav structure */
@@ -7117,6 +7380,7 @@ nsample_use * ss_spacing / beam_foot);*/
 					xtrackss = xtrack + ss_spacing_use * (k - nsample / 2);
 				kk = MBSYS_RESON7K_MAX_PIXELS / 2 
 				    + (int)(xtrackss / (*pixel_size));
+				kk = MIN(MAX(0,kk), MBSYS_RESON7K_MAX_PIXELS-1);
 				if (sample_type_amp == 1)
 					ss[kk]  += (double) charptr[k];
 				else if (sample_type_amp == 2)
