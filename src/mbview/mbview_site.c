@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_site.c	9/25/2003
- *    $Id: mbview_site.c,v 5.1 2004-02-24 22:52:28 caress Exp $
+ *    $Id: mbview_site.c,v 5.2 2005-02-02 08:23:51 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  *		begun on October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2004/02/24 22:52:28  caress
+ * Added spherical projection to MBview.
+ *
  * Revision 5.0  2003/12/02 20:38:32  caress
  * Making version number 5.0
  *
@@ -51,6 +54,9 @@
 #include <Xm/PushB.h>
 #include <Xm/Separator.h>
 #include "MB3DView.h"
+#include "MB3DSiteList.h"
+#include "MB3DRouteList.h"
+#include "MB3DNavList.h"
 
 /* OpenGL include files */
 #include <GL/gl.h>
@@ -80,8 +86,9 @@ extern char	*mbsystem_library_name;
 /* local variables */
 Cardinal 	ac = 0;
 Arg      	args[256];
+char	value_string[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_site.c,v 5.1 2004-02-24 22:52:28 caress Exp $";
+static char rcs_id[]="$Id: mbview_site.c,v 5.2 2005-02-02 08:23:51 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_getsitecount(int verbose, int instance,
@@ -114,7 +121,7 @@ fprintf(stderr,"Called mbview_getsitecount:%d\n",instance);
 	data = &(view->data);
 
 	/* get number of sites */
-	*nsite = data->nsite;
+	*nsite = shared.shareddata.nsite;
 		
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -321,28 +328,28 @@ fprintf(stderr,"Called mbview_addsites:%d\n",instance);
 	data = &(view->data);
 
 	/* make sure no site is selected */
-	data->site_selected = MBV_SELECT_NONE;
+	shared.shareddata.site_selected = MBV_SELECT_NONE;
 
 	/* allocate memory if required */
-	if (data->nsite_alloc < data->nsite + nsite)
+	if (shared.shareddata.nsite_alloc < shared.shareddata.nsite + nsite)
 		{
 fprintf(stderr,"Have %d sites allocated but need %d + %d = %d\n",
-data->nsite_alloc, data->nsite, nsite, data->nsite + nsite);
-		data->nsite_alloc = data->nsite + nsite;
+shared.shareddata.nsite_alloc, shared.shareddata.nsite, nsite, shared.shareddata.nsite + nsite);
+		shared.shareddata.nsite_alloc = shared.shareddata.nsite + nsite;
 		status = mb_realloc(mbv_verbose, 
-			    	data->nsite_alloc * sizeof(struct mbview_site_struct),
-			    	&(data->sites), &error);
+			    	shared.shareddata.nsite_alloc * sizeof(struct mbview_site_struct),
+			    	&(shared.shareddata.sites), &error);
 		if (status == MB_FAILURE)
 			{
-			data->nsite_alloc = 0;
+			shared.shareddata.nsite_alloc = 0;
 			}
 		else
 			{
-			for (i=data->nsite;i<data->nsite_alloc;i++)
+			for (i=shared.shareddata.nsite;i<shared.shareddata.nsite_alloc;i++)
 				{
-				data->sites[i].color = MBV_COLOR_GREEN;
-				data->sites[i].size = 1;
-				data->sites[i].name[0] = '\0';
+				shared.shareddata.sites[i].color = MBV_COLOR_GREEN;
+				shared.shareddata.sites[i].size = 1;
+				shared.shareddata.sites[i].name[0] = '\0';
 				}
 			}
 		}
@@ -368,23 +375,26 @@ data->nsite_alloc, data->nsite, nsite, data->nsite + nsite);
 				&xdisplay, &ydisplay, &zdisplay);
 
 		/* add the new site */
-		data->sites[data->nsite].point.xgrid = xgrid;
-		data->sites[data->nsite].point.ygrid = ygrid;
-		data->sites[data->nsite].point.xlon = sitelon[i];
-		data->sites[data->nsite].point.ylat = sitelat[i];
-		data->sites[data->nsite].point.zdata = zdata;
-		data->sites[data->nsite].point.xdisplay = xdisplay;
-		data->sites[data->nsite].point.ydisplay = ydisplay;
-		data->sites[data->nsite].point.zdisplay = zdisplay;
-		data->sites[data->nsite].color = sitecolor[i];
-		data->sites[data->nsite].size = sitesize[i];
-		strcpy(data->sites[data->nsite].name, sitename[i]);
+		shared.shareddata.sites[shared.shareddata.nsite].point.xgrid[instance] = xgrid;
+		shared.shareddata.sites[shared.shareddata.nsite].point.ygrid[instance] = ygrid;
+		shared.shareddata.sites[shared.shareddata.nsite].point.xlon = sitelon[i];
+		shared.shareddata.sites[shared.shareddata.nsite].point.ylat = sitelat[i];
+		shared.shareddata.sites[shared.shareddata.nsite].point.zdata = zdata;
+		shared.shareddata.sites[shared.shareddata.nsite].point.xdisplay[instance] = xdisplay;
+		shared.shareddata.sites[shared.shareddata.nsite].point.ydisplay[instance] = ydisplay;
+		shared.shareddata.sites[shared.shareddata.nsite].point.zdisplay[instance] = zdisplay;
+		shared.shareddata.sites[shared.shareddata.nsite].color = sitecolor[i];
+		shared.shareddata.sites[shared.shareddata.nsite].size = sitesize[i];
+		strcpy(shared.shareddata.sites[shared.shareddata.nsite].name, sitename[i]);
+		
+		/* set grid and display coordinates for all instances */
+		mbview_updatepointw(instance, &(shared.shareddata.sites[shared.shareddata.nsite].point));
 
 		/* set nsite */
-		data->nsite++;
+		shared.shareddata.nsite++;
 		nadded++;
 fprintf(stderr,"Added site %d added so far:%d total;%d\n",
-data->nsite-1, nadded, data->nsite);
+shared.shareddata.nsite-1, nadded, shared.shareddata.nsite);
 		}
 
 	/* make sites viewable */
@@ -392,6 +402,9 @@ data->nsite-1, nadded, data->nsite);
 		{
 		data->site_view_mode = MBV_VIEW_ON;
 		}
+	
+	/* update site list */
+	mbview_updatesitelist();
 		
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -463,15 +476,15 @@ fprintf(stderr,"Called mbview_getsites:%d\n",instance);
 	else
 		{	
 		/* loop over the sites */
-		*nsite = data->nsite;
+		*nsite = shared.shareddata.nsite;
 		for (i=0;i<*nsite;i++)
 			{
-			sitelon[i] = data->sites[i].point.xlon;
-			sitelat[i] = data->sites[i].point.ylat ;
-			sitetopo[i] = data->sites[i].point.zdata;
-			sitecolor[i] = data->sites[i].color;
-			sitesize[i] = data->sites[i].size;
-			strcpy(sitename[i], data->sites[i].name);
+			sitelon[i] = shared.shareddata.sites[i].point.xlon;
+			sitelat[i] = shared.shareddata.sites[i].point.ylat ;
+			sitetopo[i] = shared.shareddata.sites[i].point.zdata;
+			sitecolor[i] = shared.shareddata.sites[i].color;
+			sitesize[i] = shared.shareddata.sites[i].size;
+			strcpy(sitename[i], shared.shareddata.sites[i].name);
 			}
 		}
 		
@@ -528,7 +541,7 @@ fprintf(stderr,"Called mbview_enableviewsites:%d\n",instance);
 	data = &(view->data);
 	
 	/* set values */
-        data->site_mode = MBV_SITE_VIEW;
+        shared.shareddata.site_mode = MBV_SITE_VIEW;
 		
 	/* set widget sensitivity */
 	if (data->active == MB_YES)
@@ -579,7 +592,7 @@ fprintf(stderr,"Called mbview_enableeditsites:%d\n",instance);
 	data = &(view->data);
 	
 	/* set values */
-        data->site_mode = MBV_SITE_EDIT;
+        shared.shareddata.site_mode = MBV_SITE_EDIT;
 		
 	/* set widget sensitivity */
 	if (data->active == MB_YES)
@@ -635,10 +648,10 @@ int mbview_pick_site_select(int instance, int which, int xpixel, int ypixel)
 	data = &(view->data);
 	
 	/* only select sites if enabled and not in move mode */
-	if (data->site_mode != MBV_SITE_OFF
-		&& data->nsite > 0
+	if (shared.shareddata.site_mode != MBV_SITE_OFF
+		&& shared.shareddata.nsite > 0
 		&& (which == MBV_PICK_DOWN
-			|| data->site_selected == MBV_SELECT_NONE))
+			|| shared.shareddata.site_selected == MBV_SELECT_NONE))
 		{
 		/* look for point */
 		mbview_findpoint(instance, xpixel, ypixel, 
@@ -651,38 +664,38 @@ int mbview_pick_site_select(int instance, int which, int xpixel, int ypixel)
 		if (found == MB_YES)
 			{
 			/* first deselect previously selected site */
-			data->site_selected = MBV_SELECT_NONE;
+			shared.shareddata.site_selected = MBV_SELECT_NONE;
 			
 			/* now figure out which site will be selected next */
 			rrmin = 1000000000.0;
-			for (i=0;i<data->nsite;i++)
+			for (i=0;i<shared.shareddata.nsite;i++)
 				{
-				xx = xgrid - data->sites[i].point.xgrid;
-				yy = ygrid - data->sites[i].point.ygrid;
+				xx = xgrid - shared.shareddata.sites[i].point.xgrid[instance];
+				yy = ygrid - shared.shareddata.sites[i].point.ygrid[instance];
 				rr = sqrt(xx * xx + yy * yy);
 				if (rr < rrmin)
 					{
 					rrmin = rr;
-					data->site_selected = i;
+					shared.shareddata.site_selected = i;
 					}
 				}
 			}
-		else if (data->site_selected == MBV_SELECT_NONE)
+		else if (shared.shareddata.site_selected == MBV_SELECT_NONE)
 			{
 			XBell(view->dpy,100);
 			}
 		else
 			{
 			/* deselect previously selected site */
-			data->site_selected = MBV_SELECT_NONE;
+			shared.shareddata.site_selected = MBV_SELECT_NONE;
 			}
 		}
 	
 	/* only move selected sites if enabled */
-	else if (data->site_mode != MBV_SITE_OFF
-		&& data->nsite > 0
+	else if (shared.shareddata.site_mode != MBV_SITE_OFF
+		&& shared.shareddata.nsite > 0
 		&& (which == MBV_PICK_MOVE
-			&& data->site_selected != MBV_SELECT_NONE))
+			&& shared.shareddata.site_selected != MBV_SELECT_NONE))
 		{
 		/* look for point */
 		mbview_findpoint(instance, xpixel, ypixel, 
@@ -694,31 +707,34 @@ int mbview_pick_site_select(int instance, int which, int xpixel, int ypixel)
 		/* reset selected site position */
 		if (found)
 			{
-			data->sites[data->site_selected].point.xgrid = xgrid;
-			data->sites[data->site_selected].point.ygrid = ygrid;
-			data->sites[data->site_selected].point.xlon = xlon;
-			data->sites[data->site_selected].point.ylat = ylat;
-			data->sites[data->site_selected].point.zdata = zdata;
-			data->sites[data->site_selected].point.xdisplay = xdisplay;
-			data->sites[data->site_selected].point.ydisplay = ydisplay;
-			data->sites[data->site_selected].point.zdisplay = zdisplay;
+			shared.shareddata.sites[shared.shareddata.site_selected].point.xgrid[instance] = xgrid;
+			shared.shareddata.sites[shared.shareddata.site_selected].point.ygrid[instance] = ygrid;
+			shared.shareddata.sites[shared.shareddata.site_selected].point.xlon = xlon;
+			shared.shareddata.sites[shared.shareddata.site_selected].point.ylat = ylat;
+			shared.shareddata.sites[shared.shareddata.site_selected].point.zdata = zdata;
+			shared.shareddata.sites[shared.shareddata.site_selected].point.xdisplay[instance] = xdisplay;
+			shared.shareddata.sites[shared.shareddata.site_selected].point.ydisplay[instance] = ydisplay;
+			shared.shareddata.sites[shared.shareddata.site_selected].point.zdisplay[instance] = zdisplay;
+		
+			/* set grid and display coordinates for all instances */
+			mbview_updatepointw(instance, &(shared.shareddata.sites[shared.shareddata.site_selected].point));
 			}
 		}
 
 	/* else beep */
 	else
 		{
-		if (data->site_selected != MBV_SELECT_NONE)
+		if (shared.shareddata.site_selected != MBV_SELECT_NONE)
 			{
 			/* deselect previously selected site */
-			data->site_selected = MBV_SELECT_NONE;
+			shared.shareddata.site_selected = MBV_SELECT_NONE;
 			}
 
 		XBell(view->dpy,100);
 		}
 		
 	/* set what kind of pick to annotate */
-	if (data->site_selected != MBV_SELECT_NONE)
+	if (shared.shareddata.site_selected != MBV_SELECT_NONE)
 		{
 		data->pickinfo_mode = MBV_PICK_SITE;
 		}
@@ -730,6 +746,9 @@ int mbview_pick_site_select(int instance, int which, int xpixel, int ypixel)
 	/* set pick annotation */
 	mbview_pick_text(instance);
 	
+	/* update site list */
+	mbview_updatesitelist();
+	
 	/* print site debug statements */
 	if (mbv_verbose >= 2)
 		{
@@ -737,23 +756,23 @@ int mbview_pick_site_select(int instance, int which, int xpixel, int ypixel)
 			function_name);
 		fprintf(stderr,"dbg2  Site values:\n");
 		fprintf(stderr,"dbg2       site_view_mode:      %d\n",data->site_view_mode);
-		fprintf(stderr,"dbg2       site_mode:           %d\n",data->site_mode);
-		fprintf(stderr,"dbg2       nsite:               %d\n",data->nsite);
-		fprintf(stderr,"dbg2       nsite_alloc:         %d\n",data->nsite_alloc);
-		fprintf(stderr,"dbg2       site_selected:       %d\n",data->site_selected);
-		for (i=0;i<data->nsite;i++)
+		fprintf(stderr,"dbg2       site_mode:           %d\n",shared.shareddata.site_mode);
+		fprintf(stderr,"dbg2       nsite:               %d\n",shared.shareddata.nsite);
+		fprintf(stderr,"dbg2       nsite_alloc:         %d\n",shared.shareddata.nsite_alloc);
+		fprintf(stderr,"dbg2       site_selected:       %d\n",shared.shareddata.site_selected);
+		for (i=0;i<shared.shareddata.nsite;i++)
 			{
-			fprintf(stderr,"dbg2       site %d xgrid:       %f\n",i,data->sites[i].point.xgrid);
-			fprintf(stderr,"dbg2       site %d ygrid:       %f\n",i,data->sites[i].point.ygrid);
-			fprintf(stderr,"dbg2       site %d xlon:        %f\n",i,data->sites[i].point.xlon);
-			fprintf(stderr,"dbg2       site %d ylat:        %f\n",i,data->sites[i].point.ylat);
-			fprintf(stderr,"dbg2       site %d zdata:       %f\n",i,data->sites[i].point.zdata);
-			fprintf(stderr,"dbg2       site %d xdisplay:    %f\n",i,data->sites[i].point.xdisplay);
-			fprintf(stderr,"dbg2       site %d ydisplay:    %f\n",i,data->sites[i].point.ydisplay);
-			fprintf(stderr,"dbg2       site %d zdisplay:    %f\n",i,data->sites[i].point.zdisplay);
-			fprintf(stderr,"dbg2       site %d color:       %d\n",i,data->sites[i].color);
-			fprintf(stderr,"dbg2       site %d size:        %d\n",i,data->sites[i].size);
-			fprintf(stderr,"dbg2       site %d name:        %s\n",i,data->sites[i].name);
+			fprintf(stderr,"dbg2       site %d xgrid:       %f\n",i,shared.shareddata.sites[i].point.xgrid[instance]);
+			fprintf(stderr,"dbg2       site %d ygrid:       %f\n",i,shared.shareddata.sites[i].point.ygrid[instance]);
+			fprintf(stderr,"dbg2       site %d xlon:        %f\n",i,shared.shareddata.sites[i].point.xlon);
+			fprintf(stderr,"dbg2       site %d ylat:        %f\n",i,shared.shareddata.sites[i].point.ylat);
+			fprintf(stderr,"dbg2       site %d zdata:       %f\n",i,shared.shareddata.sites[i].point.zdata);
+			fprintf(stderr,"dbg2       site %d xdisplay:    %f\n",i,shared.shareddata.sites[i].point.xdisplay[instance]);
+			fprintf(stderr,"dbg2       site %d ydisplay:    %f\n",i,shared.shareddata.sites[i].point.ydisplay[instance]);
+			fprintf(stderr,"dbg2       site %d zdisplay:    %f\n",i,shared.shareddata.sites[i].point.zdisplay[instance]);
+			fprintf(stderr,"dbg2       site %d color:       %d\n",i,shared.shareddata.sites[i].color);
+			fprintf(stderr,"dbg2       site %d size:        %d\n",i,shared.shareddata.sites[i].size);
+			fprintf(stderr,"dbg2       site %d name:        %s\n",i,shared.shareddata.sites[i].name);
 			}
 		}
 	
@@ -807,9 +826,9 @@ int mbview_pick_site_add(int instance, int which, int xpixel, int ypixel)
 	data = &(view->data);
 	
 	/* only add sites if enabled and not in move mode */
-	if (data->site_mode == MBV_SITE_EDIT
+	if (shared.shareddata.site_mode == MBV_SITE_EDIT
 		&& (which == MBV_PICK_DOWN
-			|| data->site_selected == MBV_SELECT_NONE))
+			|| shared.shareddata.site_selected == MBV_SELECT_NONE))
 		{
 		/* look for point */
 		mbview_findpoint(instance, xpixel, ypixel, 
@@ -822,74 +841,77 @@ int mbview_pick_site_add(int instance, int which, int xpixel, int ypixel)
 		if (found)
 			{
 			/* add site after currently selected site if any */
-			if (data->site_selected == MBV_SELECT_NONE)
-				inew = data->nsite;
+			if (shared.shareddata.site_selected == MBV_SELECT_NONE)
+				inew = shared.shareddata.nsite;
 			else 
 				{
-				inew = data->site_selected + 1;
-				data->site_selected = MBV_SELECT_NONE;
+				inew = shared.shareddata.site_selected + 1;
+				shared.shareddata.site_selected = MBV_SELECT_NONE;
 				}
 			
 			/* now figure out which site will be selected next */
 				
 			/* allocate memory if required */
-			if (data->nsite_alloc < data->nsite + 1)
+			if (shared.shareddata.nsite_alloc < shared.shareddata.nsite + 1)
 				{
-				data->nsite_alloc += MBV_ALLOC_NUM;
+				shared.shareddata.nsite_alloc += MBV_ALLOC_NUM;
 				status = mb_realloc(mbv_verbose, 
-			    			data->nsite_alloc * sizeof(struct mbview_site_struct),
-			    			&(data->sites), &error);
+			    			shared.shareddata.nsite_alloc * sizeof(struct mbview_site_struct),
+			    			&(shared.shareddata.sites), &error);
 				if (status == MB_FAILURE)
 					{
-					data->nsite_alloc = 0;
+					shared.shareddata.nsite_alloc = 0;
 					}
 				else
 					{
-					for (i=data->nsite;i<data->nsite_alloc;i++)
+					for (i=shared.shareddata.nsite;i<shared.shareddata.nsite_alloc;i++)
 						{
-						data->sites[i].color = MBV_COLOR_GREEN;
-						data->sites[i].size = 1;
-						data->sites[i].name[0] = '\0';
+						shared.shareddata.sites[i].color = MBV_COLOR_GREEN;
+						shared.shareddata.sites[i].size = 1;
+						shared.shareddata.sites[i].name[0] = '\0';
 						}
 					}
 				}
 			
 			/* move old sites if necessary */
-			for (i=data->nsite;i>inew;i--)
+			for (i=shared.shareddata.nsite;i>inew;i--)
 				{
-				data->sites[i] = data->sites[i-1];
+				shared.shareddata.sites[i] = shared.shareddata.sites[i-1];
 				}
 			
 			/* add the new site */
-			data->sites[inew].point.xgrid = xgrid;
-			data->sites[inew].point.ygrid = ygrid;
-			data->sites[inew].point.xlon = xlon;
-			data->sites[inew].point.ylat = ylat;
-			data->sites[inew].point.zdata = zdata;
-			data->sites[inew].point.xdisplay = xdisplay;
-			data->sites[inew].point.ydisplay = ydisplay;
-			data->sites[inew].point.zdisplay = zdisplay;
-			data->sites[inew].color = MBV_COLOR_GREEN;
-			data->sites[inew].size = 1;
-			sprintf(data->sites[inew].name,"Site %d", data->nsite);
+			shared.shareddata.sites[inew].point.xgrid[instance] = xgrid;
+			shared.shareddata.sites[inew].point.ygrid[instance] = ygrid;
+			shared.shareddata.sites[inew].point.xlon = xlon;
+			shared.shareddata.sites[inew].point.ylat = ylat;
+			shared.shareddata.sites[inew].point.zdata = zdata;
+			shared.shareddata.sites[inew].point.xdisplay[instance] = xdisplay;
+			shared.shareddata.sites[inew].point.ydisplay[instance] = ydisplay;
+			shared.shareddata.sites[inew].point.zdisplay[instance] = zdisplay;
+			shared.shareddata.sites[inew].color = MBV_COLOR_GREEN;
+			shared.shareddata.sites[inew].size = 1;
+			sprintf(shared.shareddata.sites[inew].name,"Site %d", shared.shareddata.nsite);
+		
+			/* set grid and display coordinates for all instances */
+			mbview_updatepointw(instance, &(shared.shareddata.sites[inew].point));
 			
 			/* set nsite */
-			data->nsite++;
+			shared.shareddata.nsite++;
 			
 			/* select the new site */
-			data->site_selected = inew;
+			shared.shareddata.site_selected = inew;
 			}
-		else if (data->site_selected == MBV_SELECT_NONE)
+		else if (shared.shareddata.site_selected == MBV_SELECT_NONE)
 			{
 			XBell(view->dpy,100);
 			}
 		}
 	
 	/* only move selected sites if enabled */
-	else if (data->site_mode != MBV_SITE_OFF
-		&& data->nsite > 0
+	else if (shared.shareddata.site_mode != MBV_SITE_OFF
+		&& shared.shareddata.nsite > 0
 		&& (which == MBV_PICK_MOVE
-			&& data->site_selected != MBV_SELECT_NONE))
+			&& shared.shareddata.site_selected != MBV_SELECT_NONE))
 		{
 		/* look for point */
 		mbview_findpoint(instance, xpixel, ypixel, 
@@ -901,30 +923,33 @@ int mbview_pick_site_add(int instance, int which, int xpixel, int ypixel)
 		/* reset selected site position */
 		if (found)
 			{
-			data->sites[data->site_selected].point.xgrid = xgrid;
-			data->sites[data->site_selected].point.ygrid = ygrid;
-			data->sites[data->site_selected].point.xlon = xlon;
-			data->sites[data->site_selected].point.ylat = ylat;
-			data->sites[data->site_selected].point.zdata = zdata;
-			data->sites[data->site_selected].point.xdisplay = xdisplay;
-			data->sites[data->site_selected].point.ydisplay = ydisplay;
-			data->sites[data->site_selected].point.zdisplay = zdisplay;
+			shared.shareddata.sites[shared.shareddata.site_selected].point.xgrid[instance] = xgrid;
+			shared.shareddata.sites[shared.shareddata.site_selected].point.ygrid[instance] = ygrid;
+			shared.shareddata.sites[shared.shareddata.site_selected].point.xlon = xlon;
+			shared.shareddata.sites[shared.shareddata.site_selected].point.ylat = ylat;
+			shared.shareddata.sites[shared.shareddata.site_selected].point.zdata = zdata;
+			shared.shareddata.sites[shared.shareddata.site_selected].point.xdisplay[instance] = xdisplay;
+			shared.shareddata.sites[shared.shareddata.site_selected].point.ydisplay[instance] = ydisplay;
+			shared.shareddata.sites[shared.shareddata.site_selected].point.zdisplay[instance] = zdisplay;
+		
+			/* set grid and display coordinates for all instances */
+			mbview_updatepointw(instance, &(shared.shareddata.sites[shared.shareddata.site_selected].point));
 			}
 		}
 
 	/* else beep */
 	else
 		{
-		if (data->site_selected != MBV_SELECT_NONE)
+		if (shared.shareddata.site_selected != MBV_SELECT_NONE)
 			{
 			/* deselect previously selected site */
-			data->site_selected = MBV_SELECT_NONE;
+			shared.shareddata.site_selected = MBV_SELECT_NONE;
 			}
 		XBell(view->dpy,100);
 		}
 		
 	/* set what kind of pick to annotate */
-	if (data->site_selected != MBV_SELECT_NONE)
+	if (shared.shareddata.site_selected != MBV_SELECT_NONE)
 		{
 		data->pickinfo_mode = MBV_PICK_SITE;
 		}
@@ -936,6 +961,9 @@ int mbview_pick_site_add(int instance, int which, int xpixel, int ypixel)
 	/* set pick annotation */
 	mbview_pick_text(instance);
 	
+	/* update site list */
+	mbview_updatesitelist();
+	
 	/* print site debug statements */
 	if (mbv_verbose >= 2)
 		{
@@ -943,23 +971,23 @@ int mbview_pick_site_add(int instance, int which, int xpixel, int ypixel)
 			function_name);
 		fprintf(stderr,"dbg2  Site values:\n");
 		fprintf(stderr,"dbg2       site_view_mode:      %d\n",data->site_view_mode);
-		fprintf(stderr,"dbg2       site_mode:           %d\n",data->site_mode);
-		fprintf(stderr,"dbg2       nsite:               %d\n",data->nsite);
-		fprintf(stderr,"dbg2       nsite_alloc:         %d\n",data->nsite_alloc);
-		fprintf(stderr,"dbg2       site_selected:       %d\n",data->site_selected);
-		for (i=0;i<data->nsite;i++)
+		fprintf(stderr,"dbg2       site_mode:           %d\n",shared.shareddata.site_mode);
+		fprintf(stderr,"dbg2       nsite:               %d\n",shared.shareddata.nsite);
+		fprintf(stderr,"dbg2       nsite_alloc:         %d\n",shared.shareddata.nsite_alloc);
+		fprintf(stderr,"dbg2       site_selected:       %d\n",shared.shareddata.site_selected);
+		for (i=0;i<shared.shareddata.nsite;i++)
 			{
-			fprintf(stderr,"dbg2       site %d xgrid:       %f\n",i,data->sites[i].point.xgrid);
-			fprintf(stderr,"dbg2       site %d ygrid:       %f\n",i,data->sites[i].point.ygrid);
-			fprintf(stderr,"dbg2       site %d xlon:        %f\n",i,data->sites[i].point.xlon);
-			fprintf(stderr,"dbg2       site %d ylat:        %f\n",i,data->sites[i].point.ylat);
-			fprintf(stderr,"dbg2       site %d zdata:       %f\n",i,data->sites[i].point.zdata);
-			fprintf(stderr,"dbg2       site %d xdisplay:    %f\n",i,data->sites[i].point.xdisplay);
-			fprintf(stderr,"dbg2       site %d ydisplay:    %f\n",i,data->sites[i].point.ydisplay);
-			fprintf(stderr,"dbg2       site %d zdisplay:    %f\n",i,data->sites[i].point.zdisplay);
-			fprintf(stderr,"dbg2       site %d color:       %d\n",i,data->sites[i].color);
-			fprintf(stderr,"dbg2       site %d size:        %d\n",i,data->sites[i].size);
-			fprintf(stderr,"dbg2       site %d name:        %s\n",i,data->sites[i].name);
+			fprintf(stderr,"dbg2       site %d xgrid:       %f\n",i,shared.shareddata.sites[i].point.xgrid[instance]);
+			fprintf(stderr,"dbg2       site %d ygrid:       %f\n",i,shared.shareddata.sites[i].point.ygrid[instance]);
+			fprintf(stderr,"dbg2       site %d xlon:        %f\n",i,shared.shareddata.sites[i].point.xlon);
+			fprintf(stderr,"dbg2       site %d ylat:        %f\n",i,shared.shareddata.sites[i].point.ylat);
+			fprintf(stderr,"dbg2       site %d zdata:       %f\n",i,shared.shareddata.sites[i].point.zdata);
+			fprintf(stderr,"dbg2       site %d xdisplay:    %f\n",i,shared.shareddata.sites[i].point.xdisplay[instance]);
+			fprintf(stderr,"dbg2       site %d ydisplay:    %f\n",i,shared.shareddata.sites[i].point.ydisplay[instance]);
+			fprintf(stderr,"dbg2       site %d zdisplay:    %f\n",i,shared.shareddata.sites[i].point.zdisplay[instance]);
+			fprintf(stderr,"dbg2       site %d color:       %d\n",i,shared.shareddata.sites[i].color);
+			fprintf(stderr,"dbg2       site %d size:        %d\n",i,shared.shareddata.sites[i].size);
+			fprintf(stderr,"dbg2       site %d name:        %s\n",i,shared.shareddata.sites[i].name);
 			}
 		}
 	
@@ -991,7 +1019,7 @@ int mbview_pick_site_delete(int instance, int xpixel, int ypixel)
 	double	xlon, ylat, zdata;
 	double	xdisplay, ydisplay, zdisplay;
 	double	xx, yy, rr, rrmin;
-	int	i, idelete;
+	int	i, isite;
 
 	/* print starting debug statements */
 	if (mbv_verbose >= 2)
@@ -1011,8 +1039,8 @@ int mbview_pick_site_delete(int instance, int xpixel, int ypixel)
 	data = &(view->data);
 	
 	/* only delete a selected site if enabled */
-	if (data->site_mode == MBV_SITE_EDIT
-		&& data->site_selected != MBV_SELECT_NONE)
+	if (shared.shareddata.site_mode == MBV_SITE_EDIT
+		&& shared.shareddata.site_selected != MBV_SELECT_NONE)
 		{
 		/* look for point */
 		mbview_findpoint(instance, xpixel, ypixel, 
@@ -1025,50 +1053,45 @@ int mbview_pick_site_delete(int instance, int xpixel, int ypixel)
 		if (found)
 			{
 			rrmin = 1000000000.0;
-			idelete = MBV_SELECT_NONE;
-			for (i=0;i<data->nsite;i++)
+			isite = MBV_SELECT_NONE;
+			for (i=0;i<shared.shareddata.nsite;i++)
 				{
-				xx = xgrid - data->sites[i].point.xgrid;
-				yy = ygrid - data->sites[i].point.ygrid;
+				xx = xgrid - shared.shareddata.sites[i].point.xgrid[instance];
+				yy = ygrid - shared.shareddata.sites[i].point.ygrid[instance];
 				rr = sqrt(xx * xx + yy * yy);
 				if (rr < rrmin)
 					{
 					rrmin = rr;
-					idelete = i;
+					isite = i;
 					}
 				}
 			}
 
 		/* delete site if its the same as previously selected */
-		if (found && data->site_selected == idelete)
+		if (found && shared.shareddata.site_selected == isite)
 			{
-			
-			/* move site data if necessary */
-			for (i=idelete;i<data->nsite-1;i++)
-				{
-				data->sites[i] = data->sites[i+1];
-				}
-			
-			/* set nsite */
-			data->nsite--;
-			
-			/* select the new site */
-			data->site_selected = MBV_SELECT_NONE;
+			mbview_site_delete(instance, isite);
 			}
 		else
 			{
-			XBell(view->dpy,100);
+			status = MB_FAILURE;
 			}
 		}
 
 	/* else beep */
 	else
 		{
+		status = MB_FAILURE;
+		}
+
+	/* beep for failure */
+	if (status == MB_FAILURE)
+		{
 		XBell(view->dpy,100);
 		}
 		
 	/* set what kind of pick to annotate */
-	if (data->site_selected != MBV_SELECT_NONE)
+	if (shared.shareddata.site_selected != MBV_SELECT_NONE)
 		{
 		data->pickinfo_mode = MBV_PICK_SITE;
 		}
@@ -1080,6 +1103,9 @@ int mbview_pick_site_delete(int instance, int xpixel, int ypixel)
 	/* set pick annotation */
 	mbview_pick_text(instance);
 	
+	/* update site list */
+	mbview_updatesitelist();
+	
 	/* print site debug statements */
 	if (mbv_verbose >= 2)
 		{
@@ -1087,24 +1113,84 @@ int mbview_pick_site_delete(int instance, int xpixel, int ypixel)
 			function_name);
 		fprintf(stderr,"dbg2  Site values:\n");
 		fprintf(stderr,"dbg2       site_view_mode:      %d\n",data->site_view_mode);
-		fprintf(stderr,"dbg2       site_mode:           %d\n",data->site_mode);
-		fprintf(stderr,"dbg2       nsite:               %d\n",data->nsite);
-		fprintf(stderr,"dbg2       nsite_alloc:         %d\n",data->nsite_alloc);
-		fprintf(stderr,"dbg2       site_selected:       %d\n",data->site_selected);
-		for (i=0;i<data->nsite;i++)
+		fprintf(stderr,"dbg2       site_mode:           %d\n",shared.shareddata.site_mode);
+		fprintf(stderr,"dbg2       nsite:               %d\n",shared.shareddata.nsite);
+		fprintf(stderr,"dbg2       nsite_alloc:         %d\n",shared.shareddata.nsite_alloc);
+		fprintf(stderr,"dbg2       site_selected:       %d\n",shared.shareddata.site_selected);
+		for (i=0;i<shared.shareddata.nsite;i++)
 			{
-			fprintf(stderr,"dbg2       site %d xgrid:       %f\n",i,data->sites[i].point.xgrid);
-			fprintf(stderr,"dbg2       site %d ygrid:       %f\n",i,data->sites[i].point.ygrid);
-			fprintf(stderr,"dbg2       site %d xlon:        %f\n",i,data->sites[i].point.xlon);
-			fprintf(stderr,"dbg2       site %d ylat:        %f\n",i,data->sites[i].point.ylat);
-			fprintf(stderr,"dbg2       site %d zdata:       %f\n",i,data->sites[i].point.zdata);
-			fprintf(stderr,"dbg2       site %d xdisplay:    %f\n",i,data->sites[i].point.xdisplay);
-			fprintf(stderr,"dbg2       site %d ydisplay:    %f\n",i,data->sites[i].point.ydisplay);
-			fprintf(stderr,"dbg2       site %d zdisplay:    %f\n",i,data->sites[i].point.zdisplay);
-			fprintf(stderr,"dbg2       site %d color:       %d\n",i,data->sites[i].color);
-			fprintf(stderr,"dbg2       site %d size:        %d\n",i,data->sites[i].size);
-			fprintf(stderr,"dbg2       site %d name:        %s\n",i,data->sites[i].name);
+			fprintf(stderr,"dbg2       site %d xgrid:       %f\n",i,shared.shareddata.sites[i].point.xgrid[instance]);
+			fprintf(stderr,"dbg2       site %d ygrid:       %f\n",i,shared.shareddata.sites[i].point.ygrid[instance]);
+			fprintf(stderr,"dbg2       site %d xlon:        %f\n",i,shared.shareddata.sites[i].point.xlon);
+			fprintf(stderr,"dbg2       site %d ylat:        %f\n",i,shared.shareddata.sites[i].point.ylat);
+			fprintf(stderr,"dbg2       site %d zdata:       %f\n",i,shared.shareddata.sites[i].point.zdata);
+			fprintf(stderr,"dbg2       site %d xdisplay:    %f\n",i,shared.shareddata.sites[i].point.xdisplay[instance]);
+			fprintf(stderr,"dbg2       site %d ydisplay:    %f\n",i,shared.shareddata.sites[i].point.ydisplay[instance]);
+			fprintf(stderr,"dbg2       site %d zdisplay:    %f\n",i,shared.shareddata.sites[i].point.zdisplay[instance]);
+			fprintf(stderr,"dbg2       site %d color:       %d\n",i,shared.shareddata.sites[i].color);
+			fprintf(stderr,"dbg2       site %d size:        %d\n",i,shared.shareddata.sites[i].size);
+			fprintf(stderr,"dbg2       site %d name:        %s\n",i,shared.shareddata.sites[i].name);
 			}
+		}
+	
+	/* print output debug statements */
+	if (mbv_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:          %d\n",status);
+		}
+
+	/* return */
+	return(status);
+}
+
+/*------------------------------------------------------------------------------*/
+int mbview_site_delete(int instance, int isite)
+{
+
+	/* local variables */
+	char	*function_name = "mbview_site_delete";
+	int	status = MB_SUCCESS;
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
+	int	i;
+
+	/* print starting debug statements */
+	if (mbv_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
+		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       isite:            %d\n",isite);
+		fprintf(stderr,"dbg2       instance:         %d\n",instance);
+		}
+		
+	/* get view */
+	view = &(mbviews[instance]);
+	data = &(view->data);
+
+	/* delete site if its the same as previously selected */
+	if (isite >= 0 && isite < shared.shareddata.nsite)
+		{
+		/* move site data if necessary */
+		for (i=isite;i<shared.shareddata.nsite-1;i++)
+			{
+			shared.shareddata.sites[i] = shared.shareddata.sites[i+1];
+			}
+
+		/* set nsite */
+		shared.shareddata.nsite--;
+
+		/* no selection */
+		shared.shareddata.site_selected = MBV_SELECT_NONE;
+		}
+	else
+		{
+		status = MB_FAILURE;
 		}
 	
 	/* print output debug statements */
@@ -1155,93 +1241,98 @@ int mbview_drawsite(int instance, int rez)
 	data = &(view->data);
 		
 	/* draw sites in 2D */
-	if (data->site_mode != MBV_SITE_OFF
+	if (shared.shareddata.site_mode != MBV_SITE_OFF
 		&& data->display_mode == MBV_DISPLAY_2D
 		&& data->site_view_mode == MBV_VIEW_ON
-		&& data->nsite > 0)
+		&& shared.shareddata.nsite > 0)
 		{
 		/* set stride for looping over data */
 		stride = 1;
 	
 		/* loop over the sites */
-		for (isite=0;isite<data->nsite;isite++)
+		for (isite=0;isite<shared.shareddata.nsite;isite++)
 			{
 			/* get grid bounds for plotting */
-			ix = (data->sites[isite].point.xgrid - data->primary_xmin) / data->primary_dx;
-			jy = (data->sites[isite].point.ygrid - data->primary_ymin) / data->primary_dy;
-			if (isite == data->site_selected)
-				ixsize = MAX(data->primary_nx, data->primary_ny) / 100;
-			else
-				ixsize = MAX(data->primary_nx, data->primary_ny) / 125;
-			if (ixsize < 1) ixsize = 1;
-			jysize = (int)((ixsize * (1000.0 * data->primary_dy / data->primary_dx)) / 1000.0);
-			if (ixsize < 1) ixsize = 1;
-			ixmin = MAX(ix - ixsize, 0);
-			ixmax = MIN(ix + ixsize, data->primary_nx - stride);
-			jymin = MAX(jy - jysize, 0);
-			jymax = MIN(jy + jysize, data->primary_ny - stride);
+			ix = (shared.shareddata.sites[isite].point.xgrid[instance] - data->primary_xmin) / data->primary_dx;
+			jy = (shared.shareddata.sites[isite].point.ygrid[instance] - data->primary_ymin) / data->primary_dy;
+			if (ix >= 0 && ix < data->primary_nx && jy >= 0 && jy < data->primary_ny)
+				{
+				ixsize = MAX(data->viewbounds[1] - data->viewbounds[0] + 1, 
+						data->viewbounds[3] - data->viewbounds[2] + 1);
+				if (isite == shared.shareddata.site_selected)
+					ixsize /= 100;
+				else
+					ixsize /= 125;
+				if (ixsize < 1) ixsize = 1;
+				jysize = (int)((ixsize * (1000.0 * data->primary_dy / data->primary_dx)) / 1000.0);
+				if (jysize < 1) jysize = 1;
+				ixmin = MAX(ix - ixsize, 0);
+				ixmax = MIN(ix + ixsize, data->primary_nx - stride);
+				jymin = MAX(jy - jysize, 0);
+				jymax = MIN(jy + jysize, data->primary_ny - stride);
 
-			/* set the color for this site */
-			if (isite == data->site_selected)
-				icolor = MBV_COLOR_RED;
-			else
-				icolor = MBV_COLOR_GREEN;
-			glColor3f(colortable_object_red[icolor], 
-				colortable_object_green[icolor], 
-				colortable_object_blue[icolor]);
+				/* set the color for this site */
+				if (isite == shared.shareddata.site_selected)
+					icolor = MBV_COLOR_RED;
+				else
+					icolor = MBV_COLOR_GREEN;
+				glColor3f(colortable_object_red[icolor], 
+					colortable_object_green[icolor], 
+					colortable_object_blue[icolor]);
 
-			/* draw the site box */
-			glLineWidth(2.0);
-			glBegin(GL_QUADS);
-			k = ixmin * data->primary_ny + jymin;
-			glVertex3f(data->primary_x[k],
-				   data->primary_y[k],
-				   data->primary_z[k] + MBV_OPENGL_3D_LINE_OFFSET);
-			k = ixmax * data->primary_ny + jymin;
-			glVertex3f(data->primary_x[k],
-				   data->primary_y[k],
-				   data->primary_z[k] + MBV_OPENGL_3D_LINE_OFFSET);
-			k = ixmax * data->primary_ny + jymax;
-			glVertex3f(data->primary_x[k],
-				   data->primary_y[k],
-				   data->primary_z[k] + MBV_OPENGL_3D_LINE_OFFSET);
-			k = ixmin * data->primary_ny + jymax;
-			glVertex3f(data->primary_x[k],
-				   data->primary_y[k],
-				   data->primary_z[k] + MBV_OPENGL_3D_LINE_OFFSET);
-			glEnd();
+				/* draw the site box */
+				glLineWidth(2.0);
+				glBegin(GL_QUADS);
+				k = ixmin * data->primary_ny + jymin;
+				glVertex3f(data->primary_x[k],
+					   data->primary_y[k],
+					   data->primary_z[k] + MBV_OPENGL_3D_LINE_OFFSET);
+				k = ixmax * data->primary_ny + jymin;
+				glVertex3f(data->primary_x[k],
+					   data->primary_y[k],
+					   data->primary_z[k] + MBV_OPENGL_3D_LINE_OFFSET);
+				k = ixmax * data->primary_ny + jymax;
+				glVertex3f(data->primary_x[k],
+					   data->primary_y[k],
+					   data->primary_z[k] + MBV_OPENGL_3D_LINE_OFFSET);
+				k = ixmin * data->primary_ny + jymax;
+				glVertex3f(data->primary_x[k],
+					   data->primary_y[k],
+					   data->primary_z[k] + MBV_OPENGL_3D_LINE_OFFSET);
+				glEnd();
 
-			/* draw the boundary */
-			glColor3f(colortable_object_red[MBV_COLOR_BLACK], 
-				colortable_object_green[MBV_COLOR_BLACK], 
-				colortable_object_blue[MBV_COLOR_BLACK]);
-			glLineWidth(2.0);
-			glBegin(GL_LINE_LOOP);
-			k = ixmin * data->primary_ny + jymin;
-			glVertex3f(data->primary_x[k],
-				   data->primary_y[k],
-				   data->primary_z[k] + MBV_OPENGL_3D_LINE_OFFSET);
-			k = ixmax * data->primary_ny + jymin;
-			glVertex3f(data->primary_x[k],
-				   data->primary_y[k],
-				   data->primary_z[k] + MBV_OPENGL_3D_LINE_OFFSET);
-			k = ixmax * data->primary_ny + jymax;
-			glVertex3f(data->primary_x[k],
-				   data->primary_y[k],
-				   data->primary_z[k] + MBV_OPENGL_3D_LINE_OFFSET);
-			k = ixmin * data->primary_ny + jymax;
-			glVertex3f(data->primary_x[k],
-				   data->primary_y[k],
-				   data->primary_z[k] + MBV_OPENGL_3D_LINE_OFFSET);
-			glEnd();
+				/* draw the boundary */
+				glColor3f(colortable_object_red[MBV_COLOR_BLACK], 
+					colortable_object_green[MBV_COLOR_BLACK], 
+					colortable_object_blue[MBV_COLOR_BLACK]);
+				glLineWidth(2.0);
+				glBegin(GL_LINE_LOOP);
+				k = ixmin * data->primary_ny + jymin;
+				glVertex3f(data->primary_x[k],
+					   data->primary_y[k],
+					   data->primary_z[k] + MBV_OPENGL_3D_LINE_OFFSET);
+				k = ixmax * data->primary_ny + jymin;
+				glVertex3f(data->primary_x[k],
+					   data->primary_y[k],
+					   data->primary_z[k] + MBV_OPENGL_3D_LINE_OFFSET);
+				k = ixmax * data->primary_ny + jymax;
+				glVertex3f(data->primary_x[k],
+					   data->primary_y[k],
+					   data->primary_z[k] + MBV_OPENGL_3D_LINE_OFFSET);
+				k = ixmin * data->primary_ny + jymax;
+				glVertex3f(data->primary_x[k],
+					   data->primary_y[k],
+					   data->primary_z[k] + MBV_OPENGL_3D_LINE_OFFSET);
+				glEnd();
+				}
 			}
 		}
 		
 	/* draw sites in 3D */
-	else if (data->site_mode != MBV_SITE_OFF
+	else if (shared.shareddata.site_mode != MBV_SITE_OFF
 		&& data->display_mode == MBV_DISPLAY_3D
 		&& data->site_view_mode == MBV_VIEW_ON
-		&& data->nsite > 0)
+		&& shared.shareddata.nsite > 0)
 		{
 		/* set stride for looping over data */
 		if (rez == MBV_REZ_FULL)
@@ -1256,130 +1347,221 @@ int mbview_drawsite(int instance, int rez)
 					/ ((double)data->lorez_dimension)), 
 				(int)ceil(((double)data->primary_ny) 
 					/ ((double)data->lorez_dimension)));
+stride = 1;
 	
 		/* loop over the sites */
-		for (isite=0;isite<data->nsite;isite++)
+		for (isite=0;isite<shared.shareddata.nsite;isite++)
 			{
 			/* get grid bounds for plotting */
-			ix = (data->sites[isite].point.xgrid - data->primary_xmin) / data->primary_dx;
-			jy = (data->sites[isite].point.ygrid - data->primary_ymin) / data->primary_dy;
-			if (isite == data->site_selected)
-				ixsize = MAX(data->primary_nx, data->primary_ny) / 400;
-			else
-				ixsize = MAX(data->primary_nx, data->primary_ny) / 500;
-			if (ixsize < 1) ixsize = 1;
-			jysize = (int)((ixsize * (1000.0 * data->primary_dy / data->primary_dx)) / 1000.0);
-			if (ixsize < 1) ixsize = 1;
-			ixmin = MAX(stride * ((ix - ixsize) / stride), 0);
-			ixmax = MIN(stride * ((ix + ixsize) / stride + 1), 
-					data->primary_nx - stride);
-			jymin = MAX(stride * ((jy - jysize) / stride), 0);
-			jymax = MIN(stride * ((jy + jysize) / stride + 1), 
-					data->primary_ny - stride);
-
-			/* set the color for this site */
-			if (isite == data->site_selected)
-				icolor = MBV_COLOR_RED;
-			else
-				icolor = MBV_COLOR_GREEN;
-			glColor3f(colortable_object_red[icolor], 
-				colortable_object_green[icolor], 
-				colortable_object_blue[icolor]);
-
-			/* draw the data as triangle strips */
-			for (i=ixmin;i<ixmax;i+=stride)
+			ix = (shared.shareddata.sites[isite].point.xgrid[instance] - data->primary_xmin) / data->primary_dx;
+			jy = (shared.shareddata.sites[isite].point.ygrid[instance] - data->primary_ymin) / data->primary_dy;
+			if (ix >= 0 && ix < data->primary_nx && jy >= 0 && jy < data->primary_ny)
 				{
-				on = MB_NO;
-				flip = MB_NO;
-				for (j=jymin;j<=jymax;j+=stride)
+				ixsize = MAX(data->viewbounds[1] - data->viewbounds[0] + 1, 
+						data->viewbounds[3] - data->viewbounds[2] + 1);
+				if (isite == shared.shareddata.site_selected)
+					ixsize /= 400;
+				else
+					ixsize /= 500;
+				if (ixsize < 1) ixsize = 1;
+				jysize = (int)((ixsize * (1000.0 * data->primary_dy / data->primary_dx)) / 1000.0);
+				if (ixsize < 1) ixsize = 1;
+				ixmin = MAX(stride * ((ix - ixsize) / stride), 0);
+				ixmax = MIN(stride * ((ix + ixsize) / stride + 1), 
+						data->primary_nx - stride);
+				jymin = MAX(stride * ((jy - jysize) / stride), 0);
+				jymax = MIN(stride * ((jy + jysize) / stride + 1), 
+						data->primary_ny - stride);
+
+				/* set the color for this site */
+				if (isite == shared.shareddata.site_selected)
+					icolor = MBV_COLOR_RED;
+				else
+					icolor = MBV_COLOR_GREEN;
+				glColor3f(colortable_object_red[icolor], 
+					colortable_object_green[icolor], 
+					colortable_object_blue[icolor]);
+
+				/* draw the data as triangle strips */
+				for (i=ixmin;i<ixmax;i+=stride)
 					{
-					k = i * data->primary_ny + j;
-					l = (i + stride) * data->primary_ny + j;
-					if (flip == MB_NO)
-						{
-						kk = k;
-						ll = l;
-						}
-					else
-						{
-						kk = l;
-						ll = k;
-						}
-					if (data->primary_data[kk] != data->primary_nodatavalue)
-						{
-						if (on == MB_NO)
-							{
-							glBegin(GL_TRIANGLE_STRIP);
-							on = MB_YES;
-							if (kk == k)
-								flip = MB_NO;
-							else
-								flip = MB_YES;
-							}
-						glVertex3f(data->primary_x[kk],
-							data->primary_y[kk],
-							data->primary_z[kk]+MBV_OPENGL_3D_LINE_OFFSET);
-						}
-					else
-						{
-						glEnd();
-						on = MB_NO;
-						flip = MB_NO;
-						}
-					if (data->primary_data[ll] != data->primary_nodatavalue)
-						{
-						if (on == MB_NO)
-							{
-							glBegin(GL_TRIANGLE_STRIP);
-							on = MB_YES;
-							if (ll == l)
-								flip = MB_NO;
-							else
-								flip = MB_YES;
-							}
-						glVertex3f(data->primary_x[ll],
-							data->primary_y[ll],
-							data->primary_z[ll]+MBV_OPENGL_3D_LINE_OFFSET);
-						}
-					else
-						{
-						glEnd();
-						on = MB_NO;
-						flip = MB_NO;
-						}
-					}
-				if (on == MB_YES)
-					{
-					glEnd();
 					on = MB_NO;
 					flip = MB_NO;
+					for (j=jymin;j<=jymax;j+=stride)
+						{
+						k = i * data->primary_ny + j;
+						l = (i + stride) * data->primary_ny + j;
+						if (flip == MB_NO)
+							{
+							kk = k;
+							ll = l;
+							}
+						else
+							{
+							kk = l;
+							ll = k;
+							}
+						if (data->primary_data[kk] != data->primary_nodatavalue)
+							{
+							if (on == MB_NO)
+								{
+								glBegin(GL_TRIANGLE_STRIP);
+								on = MB_YES;
+								if (kk == k)
+									flip = MB_NO;
+								else
+									flip = MB_YES;
+								}
+							glVertex3f(data->primary_x[kk],
+								data->primary_y[kk],
+								data->primary_z[kk]+MBV_OPENGL_3D_LINE_OFFSET);
+							}
+						else
+							{
+							glEnd();
+							on = MB_NO;
+							flip = MB_NO;
+							}
+						if (data->primary_data[ll] != data->primary_nodatavalue)
+							{
+							if (on == MB_NO)
+								{
+								glBegin(GL_TRIANGLE_STRIP);
+								on = MB_YES;
+								if (ll == l)
+									flip = MB_NO;
+								else
+									flip = MB_YES;
+								}
+							glVertex3f(data->primary_x[ll],
+								data->primary_y[ll],
+								data->primary_z[ll]+MBV_OPENGL_3D_LINE_OFFSET);
+							}
+						else
+							{
+							glEnd();
+							on = MB_NO;
+							flip = MB_NO;
+							}
+						}
+					if (on == MB_YES)
+						{
+						glEnd();
+						on = MB_NO;
+						flip = MB_NO;
+						}
+					glEnd();
 					}
+
+				/* draw the boundary */
+				glColor3f(colortable_object_red[MBV_COLOR_BLACK], 
+					colortable_object_green[MBV_COLOR_BLACK], 
+					colortable_object_blue[MBV_COLOR_BLACK]);
+				glLineWidth(2.0);
+				glBegin(GL_LINE_LOOP);
+				k = ixmin * data->primary_ny + jymin;
+				glVertex3f(data->primary_x[k],
+					   data->primary_y[k],
+					   data->primary_z[k] + MBV_OPENGL_3D_LINE_OFFSET);
+				k = ixmax * data->primary_ny + jymin;
+				glVertex3f(data->primary_x[k],
+					   data->primary_y[k],
+					   data->primary_z[k] + MBV_OPENGL_3D_LINE_OFFSET);
+				k = ixmax * data->primary_ny + jymax;
+				glVertex3f(data->primary_x[k],
+					   data->primary_y[k],
+					   data->primary_z[k] + MBV_OPENGL_3D_LINE_OFFSET);
+				k = ixmin * data->primary_ny + jymax;
+				glVertex3f(data->primary_x[k],
+					   data->primary_y[k],
+					   data->primary_z[k] + MBV_OPENGL_3D_LINE_OFFSET);
 				glEnd();
 				}
+			}
+		}
 
-			/* draw the boundary */
-			glColor3f(colortable_object_red[MBV_COLOR_BLACK], 
-				colortable_object_green[MBV_COLOR_BLACK], 
-				colortable_object_blue[MBV_COLOR_BLACK]);
-			glLineWidth(2.0);
-			glBegin(GL_LINE_LOOP);
-			k = ixmin * data->primary_ny + jymin;
-			glVertex3f(data->primary_x[k],
-				   data->primary_y[k],
-				   data->primary_z[k] + MBV_OPENGL_3D_LINE_OFFSET);
-			k = ixmax * data->primary_ny + jymin;
-			glVertex3f(data->primary_x[k],
-				   data->primary_y[k],
-				   data->primary_z[k] + MBV_OPENGL_3D_LINE_OFFSET);
-			k = ixmax * data->primary_ny + jymax;
-			glVertex3f(data->primary_x[k],
-				   data->primary_y[k],
-				   data->primary_z[k] + MBV_OPENGL_3D_LINE_OFFSET);
-			k = ixmin * data->primary_ny + jymax;
-			glVertex3f(data->primary_x[k],
-				   data->primary_y[k],
-				   data->primary_z[k] + MBV_OPENGL_3D_LINE_OFFSET);
-			glEnd();
+	/* print output debug statements */
+	if (mbv_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return */
+	return(status);
+}
+
+
+/*------------------------------------------------------------------------------*/
+int mbview_updatesitelist()
+{
+	/* local variables */
+	char	*function_name = "mbview_updatesitelist";
+	int	status = MB_SUCCESS;
+   	XmString *xstr;
+	int	isite;
+	char	lonstr0[24];
+	char	latstr0[24];
+	
+
+	/* print starting debug statements */
+	if (mbv_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
+		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		}
+		
+	/* update site list */
+	if (shared.init_sitelist == MBV_WINDOW_VISIBLE)
+		{
+		/* remove all existing items */
+		XmListDeleteAllItems(shared.mb3d_sitelist.mbview_list_sitelist);
+		
+		if (shared.shareddata.nsite > 0)
+			{
+			/* allocate array of label XmStrings */
+			xstr = (XmString *) malloc(shared.shareddata.nsite * sizeof(XmString));
+
+			/* loop over the sites */
+			for (isite=0;isite<shared.shareddata.nsite;isite++)
+				{
+				/* add list item for each site */
+				mbview_setlonlatstrings(shared.shareddata.sites[isite].point.xlon, 
+							shared.shareddata.sites[isite].point.ylat, 
+							lonstr0, latstr0);
+				sprintf(value_string,"%3d | %s | %s | %.3f | %s | %d | %s", 
+					isite, lonstr0, latstr0,
+					shared.shareddata.sites[isite].point.zdata,
+					mbview_colorname[shared.shareddata.sites[isite].color],
+					shared.shareddata.sites[isite].size,
+					shared.shareddata.sites[isite].name);
+    				xstr[isite] = XmStringCreateLocalized(value_string);
+				}
+
+			/* add list items */
+    			XmListAddItems(shared.mb3d_sitelist.mbview_list_sitelist,
+					xstr, shared.shareddata.nsite,0);
+					
+			/* select list item for selected site */
+			if (shared.shareddata.site_selected != MBV_SELECT_NONE)
+				{
+				XmListSelectPos(shared.mb3d_sitelist.mbview_list_sitelist,
+						shared.shareddata.site_selected+1,0);
+				XmListSetPos(shared.mb3d_sitelist.mbview_list_sitelist,
+					MAX(shared.shareddata.site_selected+1-5, 1));
+				}
+
+			/* deallocate memory no longer needed */
+			for (isite=0;isite<shared.shareddata.nsite;isite++)
+				{
+    				XmStringFree(xstr[isite]);
+    				}
+    			free(xstr);
 			}
 		}
 

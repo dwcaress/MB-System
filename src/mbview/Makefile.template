@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  7/27/2003
-#	$Id: Makefile.template,v 5.3 2004-12-02 06:36:32 caress Exp $
+#	$Id: Makefile.template,v 5.4 2005-02-02 08:23:52 caress Exp $
 #
 #     Copyright (c) 2003 by
 #     David W. Caress (caress@mbari.org)
@@ -16,6 +16,9 @@
 # Date:		August 31, 2002
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.3  2004/12/02 06:36:32  caress
+# Fixes while supporting Reson 7k data.
+#
 # Revision 5.1  2004/01/06 21:04:12  caress
 # Added mbeditviz
 #
@@ -63,6 +66,9 @@ all: $(LIBDIR)/libmbview.a $(BINDIR)/mbgrdviz $(BINDIR)/mbeditviz
 
 ### make the library
 $(LIBDIR)/libmbview.a:	MB3DView.o \
+		MB3DSiteList.o\
+		MB3DRouteList.o\
+		MB3DNavList.o\
 		mbview_callbacks.o\
 		mbview_process.o \
 		mbview_plot.o \
@@ -74,6 +80,9 @@ $(LIBDIR)/libmbview.a:	MB3DView.o \
 		mbview_nav.o
 	$(ARCHIVE) $(LIBDIR)/libmbview.a \
 		MB3DView.o \
+		MB3DSiteList.o\
+		MB3DRouteList.o\
+		MB3DNavList.o\
 		mbview_callbacks.o \
 		mbview_process.o \
 		mbview_plot.o \
@@ -146,6 +155,12 @@ $(BINDIR)/mbeditviz: mbeditviz_main.o \
 ### compile the source files
 MB3DView.o: MB3DView.c MB3DView.h mbview.h mbviewprivate.h
 	$(CC) $(CFLAGS) -I$(INCDIR) -I$(MOTIFINCDIR) -c MB3DView.c
+MB3DSiteList.o: MB3DSiteList.c MB3DSiteList.h mbview.h mbviewprivate.h
+	$(CC) $(CFLAGS) -I$(INCDIR) -I$(MOTIFINCDIR) -c MB3DSiteList.c
+MB3DRouteList.o: MB3DRouteList.c MB3DRouteList.h mbview.h mbviewprivate.h
+	$(CC) $(CFLAGS) -I$(INCDIR) -I$(MOTIFINCDIR) -c MB3DRouteList.c
+MB3DNavList.o: MB3DNavList.c MB3DNavList.h mbview.h mbviewprivate.h
+	$(CC) $(CFLAGS) -I$(INCDIR) -I$(MOTIFINCDIR) -c MB3DNavList.c
 mbview_callbacks.o: mbview_callbacks.c mbview.h mbviewprivate.h
 	$(CC) $(CFLAGS) -DMBVIEW_LIBRARY -I$(INCDIR) -I$(MOTIFINCDIR) -c mbview_callbacks.c
 mbview_process.o: mbview_process.c mbview.h mbviewprivate.h

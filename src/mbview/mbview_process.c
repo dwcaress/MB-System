@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_process.c	9/25/2003
- *    $Id: mbview_process.c,v 5.5 2004-09-16 21:44:40 caress Exp $
+ *    $Id: mbview_process.c,v 5.6 2005-02-02 08:23:53 caress Exp $
  *
  *    Copyright (c) 2003, 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  *		begun on October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2004/09/16 21:44:40  caress
+ * Many changes over the summer.
+ *
  * Revision 5.4  2004/07/15 19:26:44  caress
  * Improvements to survey planning.
  *
@@ -66,6 +69,9 @@
 #include <Xm/PushB.h>
 #include <Xm/Separator.h>
 #include "MB3DView.h"
+#include "MB3DSiteList.h"
+#include "MB3DRouteList.h"
+#include "MB3DNavList.h"
 
 /* OpenGL include files */
 #include <GL/gl.h>
@@ -88,7 +94,7 @@ Cardinal 	ac;
 Arg      	args[256];
 char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_process.c,v 5.5 2004-09-16 21:44:40 caress Exp $";
+static char rcs_id[]="$Id: mbview_process.c,v 5.6 2005-02-02 08:23:53 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_projectdata(int instance)
@@ -562,6 +568,241 @@ fprintf(stderr,"  Display scale: %f\n", view->scale);
 	return(status);
 }
 /*------------------------------------------------------------------------------*/
+int mbview_projectglobaldata(int instance)
+{
+	/* local variables */
+	char	*function_name = "mbview_projectglobaldata";
+	int	status = MB_SUCCESS;
+	int	error = MB_ERROR_NO_ERROR;
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
+	struct mbview_pointw_struct *pointw;
+	int	i, j, k;
+
+	/* print starting debug statements */
+	if (mbv_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
+		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       instance:         %d\n",instance);
+		}
+if (mbv_verbose >= 2)
+fprintf(stderr,"mbview_projectglobaldata: %d\n", instance);
+		
+	/* get view */
+	view = &(mbviews[instance]);
+	data = &(view->data);
+	
+	/* can only project if projections are set up */
+	if (view->projected == MB_YES)
+		{
+		/* handle navpicks */
+		if (shared.shareddata.navpick_type != MBV_PICK_NONE)
+			{
+			pointw = &(shared.shareddata.navpick.endpoints[0]);
+			status = mbview_projectfromlonlat(instance,
+					pointw->xlon, pointw->ylat, pointw->zdata, 
+					&(pointw->xgrid[instance]), 
+					&(pointw->ygrid[instance]),
+					&(pointw->xdisplay[instance]), 
+					&(pointw->ydisplay[instance]), 
+					&(pointw->zdisplay[instance]));
+			for (i=0;i<4;i++)
+				{
+				pointw = &(shared.shareddata.navpick.xpoints[i]);
+				status = mbview_projectfromlonlat(instance,
+						pointw->xlon, pointw->ylat, pointw->zdata, 
+						&(pointw->xgrid[instance]), 
+						&(pointw->ygrid[instance]),
+						&(pointw->xdisplay[instance]), 
+						&(pointw->ydisplay[instance]), 
+						&(pointw->zdisplay[instance]));
+				}
+			for(i=0;i<2;i++)
+				{
+				if (shared.shareddata.navpick.xsegments[i].nls > 0)
+					{
+					for (j=0;j<shared.shareddata.navpick.xsegments[i].nls;j++)
+						{
+						pointw = &(shared.shareddata.navpick.xsegments[i].lspoints[j]);
+						status = mbview_projectfromlonlat(instance,
+								pointw->xlon, pointw->ylat, pointw->zdata, 
+								&(pointw->xgrid[instance]), 
+								&(pointw->ygrid[instance]),
+								&(pointw->xdisplay[instance]), 
+								&(pointw->ydisplay[instance]), 
+								&(pointw->zdisplay[instance]));
+						}
+					}
+				}
+			}
+		if (shared.shareddata.navpick_type == MBV_PICK_TWOPOINT)
+			{
+			pointw = &(shared.shareddata.navpick.endpoints[1]);
+			status = mbview_projectfromlonlat(instance,
+					pointw->xlon, pointw->ylat, pointw->zdata, 
+					&(pointw->xgrid[instance]), 
+					&(pointw->ygrid[instance]),
+					&(pointw->xdisplay[instance]), 
+					&(pointw->ydisplay[instance]), 
+					&(pointw->zdisplay[instance]));
+			for (i=4;i<8;i++)
+				{
+				pointw = &(shared.shareddata.navpick.xpoints[i]);
+				status = mbview_projectfromlonlat(instance,
+						pointw->xlon, pointw->ylat, pointw->zdata, 
+						&(pointw->xgrid[instance]), 
+						&(pointw->ygrid[instance]),
+						&(pointw->xdisplay[instance]), 
+						&(pointw->ydisplay[instance]), 
+						&(pointw->zdisplay[instance]));
+				}
+			for(i=2;i<4;i++)
+				{
+				if (shared.shareddata.navpick.xsegments[i].nls > 0)
+					{
+					for (j=0;j<shared.shareddata.navpick.xsegments[i].nls;j++)
+						{
+						pointw = &(shared.shareddata.navpick.xsegments[i].lspoints[j]);
+						status = mbview_projectfromlonlat(instance,
+								pointw->xlon, pointw->ylat, pointw->zdata, 
+								&(pointw->xgrid[instance]), 
+								&(pointw->ygrid[instance]),
+								&(pointw->xdisplay[instance]), 
+								&(pointw->ydisplay[instance]), 
+								&(pointw->zdisplay[instance]));
+						}
+					}
+				}
+			}
+
+		/* handle sites */
+		if (shared.shareddata.nsite > 0)
+			{
+			for (i=0;i<shared.shareddata.nsite;i++)
+				{
+				pointw = &(shared.shareddata.sites[i].point);
+				status = mbview_projectfromlonlat(instance,
+						pointw->xlon, pointw->ylat, pointw->zdata, 
+						&(pointw->xgrid[instance]), 
+						&(pointw->ygrid[instance]),
+						&(pointw->xdisplay[instance]), 
+						&(pointw->ydisplay[instance]), 
+						&(pointw->zdisplay[instance]));
+				}
+			}
+
+		/* handle routes */
+		if (shared.shareddata.nroute > 0)
+			{
+			for (i=0;i<shared.shareddata.nroute;i++)
+			    {
+			    for (j=0;j<shared.shareddata.routes[i].npoints;j++)
+				{
+				pointw = &(shared.shareddata.routes[i].points[j]);
+				status = mbview_projectfromlonlat(instance,
+						pointw->xlon, pointw->ylat, pointw->zdata, 
+						&(pointw->xgrid[instance]), 
+						&(pointw->ygrid[instance]),
+						&(pointw->xdisplay[instance]), 
+						&(pointw->ydisplay[instance]), 
+						&(pointw->zdisplay[instance]));
+				}
+			    for (j=0;j<shared.shareddata.routes[i].npoints-1;j++)
+				{
+				for (k=0;k<shared.shareddata.routes[i].segments[j].nls;k++)
+					{
+					pointw = &(shared.shareddata.routes[i].segments[j].lspoints[k]);
+					status = mbview_projectfromlonlat(instance,
+							pointw->xlon, pointw->ylat, pointw->zdata, 
+							&(pointw->xgrid[instance]), 
+							&(pointw->ygrid[instance]),
+							&(pointw->xdisplay[instance]), 
+							&(pointw->ydisplay[instance]), 
+							&(pointw->zdisplay[instance]));
+					}
+				}
+			    }
+			}
+
+		/* handle nav */
+		if (shared.shareddata.nnav > 0)
+			{
+			for (i=0;i<shared.shareddata.nnav;i++)
+			    {
+			    for (j=0;j<shared.shareddata.navs[i].npoints;j++)
+				{
+				pointw = &(shared.shareddata.navs[i].navpts[j].point);
+				status = mbview_projectfromlonlat(instance,
+						pointw->xlon, pointw->ylat, pointw->zdata, 
+						&(pointw->xgrid[instance]), 
+						&(pointw->ygrid[instance]),
+						&(pointw->xdisplay[instance]), 
+						&(pointw->ydisplay[instance]), 
+						&(pointw->zdisplay[instance]));
+				pointw = &(shared.shareddata.navs[i].navpts[j].pointport);
+				status = mbview_projectfromlonlat(instance,
+						pointw->xlon, pointw->ylat, pointw->zdata, 
+						&(pointw->xgrid[instance]), 
+						&(pointw->ygrid[instance]),
+						&(pointw->xdisplay[instance]), 
+						&(pointw->ydisplay[instance]), 
+						&(pointw->zdisplay[instance]));
+				pointw = &(shared.shareddata.navs[i].navpts[j].pointcntr);
+				status = mbview_projectfromlonlat(instance,
+						pointw->xlon, pointw->ylat, pointw->zdata, 
+						&(pointw->xgrid[instance]), 
+						&(pointw->ygrid[instance]),
+						&(pointw->xdisplay[instance]), 
+						&(pointw->ydisplay[instance]), 
+						&(pointw->zdisplay[instance]));
+				pointw = &(shared.shareddata.navs[i].navpts[j].pointstbd);
+				status = mbview_projectfromlonlat(instance,
+						pointw->xlon, pointw->ylat, pointw->zdata, 
+						&(pointw->xgrid[instance]), 
+						&(pointw->ygrid[instance]),
+						&(pointw->xdisplay[instance]), 
+						&(pointw->ydisplay[instance]), 
+						&(pointw->zdisplay[instance]));
+				}
+			    for (j=0;j<shared.shareddata.navs[i].npoints-1;j++)
+				{
+				for (k=0;k<shared.shareddata.navs[i].segments[j].nls;k++)
+					{
+					pointw = &(shared.shareddata.navs[i].segments[j].lspoints[k]);
+					status = mbview_projectfromlonlat(instance,
+							pointw->xlon, pointw->ylat, pointw->zdata, 
+							&(pointw->xgrid[instance]), 
+							&(pointw->ygrid[instance]),
+							&(pointw->xdisplay[instance]), 
+							&(pointw->ydisplay[instance]), 
+							&(pointw->zdisplay[instance]));
+					}
+				}
+			    }
+			}
+
+		/* set globalprojected flag */
+		view->globalprojected = MB_YES;
+		}
+
+
+	/* print output debug statements */
+	if (mbv_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return */
+	return(status);
+}
+/*------------------------------------------------------------------------------*/
 int mbview_zscalegridpoint(int instance, int k)
 {
 	/* local variables */
@@ -642,7 +883,7 @@ fprintf(stderr,"mbview_zscalegridpoint: %d %d\n", i, j);
 }
 
 /*------------------------------------------------------------------------------*/
-int mbview_zscalepoint(int instance, int global, double offset_factor, 
+int mbview_zscalepoint(int instance, int globalview, double offset_factor, 
 			struct mbview_point_struct *point)
 {
 	/* local variables */
@@ -662,7 +903,7 @@ int mbview_zscalepoint(int instance, int global, double offset_factor,
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       instance:         %d\n",instance);
-		fprintf(stderr,"dbg2       global:           %d\n",global);
+		fprintf(stderr,"dbg2       globalview:       %d\n",globalview);
 		fprintf(stderr,"dbg2       offset_factor:    %f\n",offset_factor);
 		}
 if (mbv_verbose >= 2)
@@ -687,7 +928,7 @@ fprintf(stderr,"mbview_zscalepoint: %d\n", instance);
 					&point->xlon, &point->ylat,
 					&point->xdisplay, &point->ydisplay, &point->zdisplay);
 					
-		if (global == MB_NO)
+		if (globalview == MB_NO)
 			{
 			point->zdisplay += offset_factor;
 			}
@@ -697,6 +938,184 @@ fprintf(stderr,"mbview_zscalepoint: %d\n", instance);
 			point->ydisplay += point->ydisplay * offset_factor;
 			point->zdisplay += point->zdisplay * offset_factor;
 			}
+		}
+
+	/* print output debug statements */
+	if (mbv_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return */
+	return(status);
+}
+
+/*------------------------------------------------------------------------------*/
+int mbview_zscalepointw(int instance, int globalview, double offset_factor, 
+			struct mbview_pointw_struct *pointw)
+{
+	/* local variables */
+	char	*function_name = "mbview_zscale";
+	int	status = MB_SUCCESS;
+	int	error = MB_ERROR_NO_ERROR;
+	int	i, j, k, l;
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
+
+	/* print starting debug statements */
+	if (mbv_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
+		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       instance:         %d\n",instance);
+		fprintf(stderr,"dbg2       globalview:       %d\n",globalview);
+		fprintf(stderr,"dbg2       offset_factor:    %f\n",offset_factor);
+		}
+if (mbv_verbose >= 2)
+fprintf(stderr,"mbview_zscalepointw: %d\n", instance);
+		
+	/* get view */
+	view = &(mbviews[instance]);
+	data = &(view->data);
+
+	/* scale z value */
+	if (data->display_projection_mode != MBV_PROJECTION_SPHEROID)
+		{
+		/* scale z value alone */
+		pointw->zdisplay[instance] = view->scale * (data->exageration * pointw->zdata - view->zorigin)
+					+ offset_factor;
+		}
+	else
+		{
+		/* reproject positions into display coordinates */
+		mbview_projectforward(instance, MB_NO,
+					pointw->xgrid[instance], pointw->ygrid[instance], pointw->zdata,
+					&(pointw->xlon), &(pointw->ylat),
+					&(pointw->xdisplay[instance]), 
+					&(pointw->ydisplay[instance]), 
+					&(pointw->zdisplay[instance]));
+					
+		if (globalview == MB_NO)
+			{
+			pointw->zdisplay[instance] += offset_factor;
+			}
+		else
+			{
+			pointw->xdisplay[instance] += pointw->xdisplay[instance] * offset_factor;
+			pointw->ydisplay[instance] += pointw->ydisplay[instance] * offset_factor;
+			pointw->zdisplay[instance] += pointw->zdisplay[instance] * offset_factor;
+			}
+		}
+
+	/* print output debug statements */
+	if (mbv_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return */
+	return(status);
+}
+/*------------------------------------------------------------------------------*/
+int mbview_updatepointw(int instance, struct mbview_pointw_struct *pointw)
+{
+	/* local variables */
+	char	*function_name = "mbview_updatepointw";
+	int	status = MB_SUCCESS;
+	int	error = MB_ERROR_NO_ERROR;
+	int	i;
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
+
+	/* print starting debug statements */
+	if (mbv_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
+		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       instance:         %d\n",instance);
+		}
+if (mbv_verbose >= 2)
+fprintf(stderr,"mbview_updatepointw: %d\n", instance);
+
+	/* update grid and display coordinates for pointw for all
+		active instances other than instance, which has
+		already been set */
+	for (i=0;i<MBV_MAX_WINDOWS;i++)
+		{
+		view = &(mbviews[i]);
+		if (i != instance && view->init != MBV_WINDOW_NULL)
+			{
+			data = &(view->data);
+			
+			/* get positions in grid coordinates */
+			status = mbview_projectll2xygrid(i,
+					pointw->xlon, pointw->ylat, 
+					&(pointw->xgrid[i]), 
+					&(pointw->ygrid[i]));
+
+			/* get positions in display coordinates */
+			status = mbview_projectll2display(i,
+					pointw->xlon, pointw->ylat, pointw->zdata, 
+					&(pointw->xdisplay[i]), 
+					&(pointw->ydisplay[i]), 
+					&(pointw->zdisplay[i]));
+			}
+		}
+
+	/* print output debug statements */
+	if (mbv_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return */
+	return(status);
+}
+/*------------------------------------------------------------------------------*/
+int mbview_updatesegmentw(int instance, struct mbview_linesegmentw_struct *segmentw)
+{
+	/* local variables */
+	char	*function_name = "mbview_updatesegmentw";
+	int	status = MB_SUCCESS;
+	int	error = MB_ERROR_NO_ERROR;
+	int	i;
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
+
+	/* print starting debug statements */
+	if (mbv_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
+		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       instance:         %d\n",instance);
+		}
+if (mbv_verbose >= 2)
+fprintf(stderr,"mbview_updatesegmentw: %d\n", instance);
+
+	/* update grid and display coordinates for segmentw for all
+		active instances other than instance, which has
+		already been set */
+	for (i=0;i<segmentw->nls;i++)
+		{
+		mbview_updatepointw(instance, &(segmentw->lspoints[i]));
 		}
 
 	/* print output debug statements */
@@ -721,7 +1140,7 @@ int mbview_zscale(int instance)
 	int	i, j, k, l;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
-	int	global;
+	int	globalview;
 	double	offset_factor;
 
 	/* print starting debug statements */
@@ -747,50 +1166,50 @@ fprintf(stderr,"mbview_zscale: %d\n", instance);
 		&& view->sphere_refy == 0.0
 		&& view->sphere_refz == 0.0)
 		{
-		global = MB_YES;
+		globalview = MB_YES;
 		offset_factor = 10.0 * MBV_OPENGL_3D_CONTOUR_OFFSET / (view->scale * MBV_SPHEROID_RADIUS);
 		}
 	else
 		{
-		global = MB_NO;
+		globalview = MB_NO;
 		offset_factor = MBV_OPENGL_3D_CONTOUR_OFFSET;
 		}
 
 	/* handle picks */
 	if (data->pick_type != MBV_PICK_NONE)
 		{
-		mbview_zscalepoint(instance, global, offset_factor, &(data->pick.endpoints[0]));
+		mbview_zscalepoint(instance, globalview, offset_factor, &(data->pick.endpoints[0]));
 		for (i=0;i<4;i++)
 			{
-			mbview_zscalepoint(instance, global, offset_factor, &(data->pick.xpoints[i]));
+			mbview_zscalepoint(instance, globalview, offset_factor, &(data->pick.xpoints[i]));
 			}
 		for (i=0;i<2;i++)
 			{
 			for (j=0;j<data->pick.xsegments[i].nls;j++)
 				{
-				mbview_zscalepoint(instance, global, offset_factor, &(data->pick.xsegments[i].lspoints[j]));
+				mbview_zscalepoint(instance, globalview, offset_factor, &(data->pick.xsegments[i].lspoints[j]));
 				}
 			}
 		}
 	if (data->pick_type == MBV_PICK_TWOPOINT)
 		{
-		mbview_zscalepoint(instance, global, offset_factor, &(data->pick.endpoints[1]));
+		mbview_zscalepoint(instance, globalview, offset_factor, &(data->pick.endpoints[1]));
 		for (i=4;i<8;i++)
 			{
-			mbview_zscalepoint(instance, global, offset_factor, &(data->pick.xpoints[i]));
+			mbview_zscalepoint(instance, globalview, offset_factor, &(data->pick.xpoints[i]));
 			}
 		for (i=2;i<4;i++)
 			{
 			for (j=0;j<data->pick.xsegments[i].nls;j++)
 				{
-				mbview_zscalepoint(instance, global, offset_factor, &(data->pick.xsegments[i].lspoints[j]));
+				mbview_zscalepoint(instance, globalview, offset_factor, &(data->pick.xsegments[i].lspoints[j]));
 				}
 			}
 		if (data->pick.segment.nls > 0)
 			{
 			for (j=0;j<data->pick.segment.nls;j++)
 				{
-				mbview_zscalepoint(instance, global, offset_factor, &(data->pick.segment.lspoints[j]));
+				mbview_zscalepoint(instance, globalview, offset_factor, &(data->pick.segment.lspoints[j]));
 				}
 			}
 		}
@@ -800,21 +1219,21 @@ fprintf(stderr,"mbview_zscale: %d\n", instance);
 		{
 		for (i=0;i<2;i++)
 			{
-			mbview_zscalepoint(instance, global, offset_factor, &(data->area.endpoints[i]));
+			mbview_zscalepoint(instance, globalview, offset_factor, &(data->area.endpoints[i]));
 			}
 		for (j=0;j<data->area.segment.nls;j++)
 			{
-			mbview_zscalepoint(instance, global, offset_factor, &(data->area.segment.lspoints[j]));
+			mbview_zscalepoint(instance, globalview, offset_factor, &(data->area.segment.lspoints[j]));
 			}
 		for (i=0;i<4;i++)
 			{
 			for (j=0;j<2;j++)
 				{
-				mbview_zscalepoint(instance, global, offset_factor, data->area.segments[i].endpoints[j]);
+				mbview_zscalepoint(instance, globalview, offset_factor, data->area.segments[i].endpoints[j]);
 				}
 			for (j=0;j<data->area.segments[i].nls;j++)
 				{
-				mbview_zscalepoint(instance, global, offset_factor, &(data->area.segments[i].lspoints[j]));
+				mbview_zscalepoint(instance, globalview, offset_factor, &(data->area.segments[i].lspoints[j]));
 				}
 			}
 		}
@@ -824,99 +1243,99 @@ fprintf(stderr,"mbview_zscale: %d\n", instance);
 		{
 		for (i=0;i<4;i++)
 			{
-			mbview_zscalepoint(instance, global, offset_factor, &(data->region.cornerpoints[i]));
+			mbview_zscalepoint(instance, globalview, offset_factor, &(data->region.cornerpoints[i]));
 			for (j=0;j<data->region.segments[i].nls;j++)
 				{
-				mbview_zscalepoint(instance, global, offset_factor, &(data->region.segments[i].lspoints[j]));
+				mbview_zscalepoint(instance, globalview, offset_factor, &(data->region.segments[i].lspoints[j]));
 				}
 			}
 		}
 	
 	/* handle navpicks */
-	if (data->navpick_type != MBV_PICK_NONE)
+	if (shared.shareddata.navpick_type != MBV_PICK_NONE)
 		{
-		mbview_zscalepoint(instance, global, offset_factor, &(data->navpick.endpoints[0]));
+		mbview_zscalepointw(instance, globalview, offset_factor, &(shared.shareddata.navpick.endpoints[0]));
 		for (i=0;i<4;i++)
 			{
-			mbview_zscalepoint(instance, global, offset_factor, &(data->navpick.xpoints[i]));
+			mbview_zscalepointw(instance, globalview, offset_factor, &(shared.shareddata.navpick.xpoints[i]));
 			}
 		for(i=0;i<2;i++)
 			{
-			if (data->navpick.xsegments[i].nls > 0)
+			if (shared.shareddata.navpick.xsegments[i].nls > 0)
 				{
-				for (j=0;j<data->navpick.xsegments[i].nls;j++)
+				for (j=0;j<shared.shareddata.navpick.xsegments[i].nls;j++)
 					{
-					mbview_zscalepoint(instance, global, offset_factor, 
-								&(data->navpick.xsegments[i].lspoints[j]));
+					mbview_zscalepointw(instance, globalview, offset_factor, 
+								&(shared.shareddata.navpick.xsegments[i].lspoints[j]));
 					}
 				}
 			}
 		}
-	if (data->navpick_type == MBV_PICK_TWOPOINT)
+	if (shared.shareddata.navpick_type == MBV_PICK_TWOPOINT)
 		{
-		mbview_zscalepoint(instance, global, offset_factor, &(data->navpick.endpoints[1]));
+		mbview_zscalepointw(instance, globalview, offset_factor, &(shared.shareddata.navpick.endpoints[1]));
 		for (i=4;i<8;i++)
 			{
-			mbview_zscalepoint(instance, global, offset_factor, &(data->navpick.xpoints[i]));
+			mbview_zscalepointw(instance, globalview, offset_factor, &(shared.shareddata.navpick.xpoints[i]));
 			}
 		for(i=2;i<4;i++)
 			{
-			if (data->navpick.xsegments[i].nls > 0)
+			if (shared.shareddata.navpick.xsegments[i].nls > 0)
 				{
-				for (j=0;j<data->navpick.xsegments[i].nls;j++)
+				for (j=0;j<shared.shareddata.navpick.xsegments[i].nls;j++)
 					{
-					mbview_zscalepoint(instance, global, offset_factor, 
-								&(data->navpick.xsegments[i].lspoints[j]));
+					mbview_zscalepointw(instance, globalview, offset_factor, 
+								&(shared.shareddata.navpick.xsegments[i].lspoints[j]));
 					}
 				}
 			}
 		}
 		
 	/* handle sites */
-	if (data->nsite > 0)
+	if (shared.shareddata.nsite > 0)
 		{
-		for (i=0;i<data->nsite;i++)
+		for (i=0;i<shared.shareddata.nsite;i++)
 			{
-			mbview_zscalepoint(instance, global, offset_factor, &(data->sites[i].point));
+			mbview_zscalepointw(instance, globalview, offset_factor, &(shared.shareddata.sites[i].point));
 			}
 		}
 		
 	/* handle routes */
-	if (data->nroute > 0)
+	if (shared.shareddata.nroute > 0)
 		{
-		for (i=0;i<data->nroute;i++)
+		for (i=0;i<shared.shareddata.nroute;i++)
 		    {
-		    for (j=0;j<data->routes[i].npoints;j++)
+		    for (j=0;j<shared.shareddata.routes[i].npoints;j++)
 			{
-			mbview_zscalepoint(instance, global, offset_factor, &(data->routes[i].points[j]));
+			mbview_zscalepointw(instance, globalview, offset_factor, &(shared.shareddata.routes[i].points[j]));
 			}
-		    for (j=0;j<data->routes[i].npoints-1;j++)
+		    for (j=0;j<shared.shareddata.routes[i].npoints-1;j++)
 			{
-			for (k=0;k<data->routes[i].segments[j].nls;k++)
+			for (k=0;k<shared.shareddata.routes[i].segments[j].nls;k++)
 				{
-				mbview_zscalepoint(instance, global, offset_factor, &(data->routes[i].segments[j].lspoints[k]));
+				mbview_zscalepointw(instance, globalview, offset_factor, &(shared.shareddata.routes[i].segments[j].lspoints[k]));
 				}
 			}
 		    }
 		}
 		
 	/* handle nav */
-	if (data->nnav > 0)
+	if (shared.shareddata.nnav > 0)
 		{
-		for (i=0;i<data->nnav;i++)
+		for (i=0;i<shared.shareddata.nnav;i++)
 		    {
-		    for (j=0;j<data->navs[i].npoints;j++)
+		    for (j=0;j<shared.shareddata.navs[i].npoints;j++)
 			{
-			mbview_zscalepoint(instance, global, offset_factor, &(data->navs[i].navpts[j].point));
-			mbview_zscalepoint(instance, global, offset_factor, &(data->navs[i].navpts[j].pointport));
-			mbview_zscalepoint(instance, global, offset_factor, &(data->navs[i].navpts[j].pointcntr));
-			mbview_zscalepoint(instance, global, offset_factor, &(data->navs[i].navpts[j].pointstbd));
+			mbview_zscalepointw(instance, globalview, offset_factor, &(shared.shareddata.navs[i].navpts[j].point));
+			mbview_zscalepointw(instance, globalview, offset_factor, &(shared.shareddata.navs[i].navpts[j].pointport));
+			mbview_zscalepointw(instance, globalview, offset_factor, &(shared.shareddata.navs[i].navpts[j].pointcntr));
+			mbview_zscalepointw(instance, globalview, offset_factor, &(shared.shareddata.navs[i].navpts[j].pointstbd));
 			}
-		    for (j=0;j<data->navs[i].npoints-1;j++)
+		    for (j=0;j<shared.shareddata.navs[i].npoints-1;j++)
 			{
-			for (k=0;k<data->navs[i].segments[j].nls;k++)
+			for (k=0;k<shared.shareddata.navs[i].segments[j].nls;k++)
 				{
-				mbview_zscalepoint(instance, global, offset_factor, &(data->navs[i].segments[j].lspoints[k]));
+				mbview_zscalepointw(instance, globalview, offset_factor, &(shared.shareddata.navs[i].segments[j].lspoints[k]));
 				}
 			}
 		    }

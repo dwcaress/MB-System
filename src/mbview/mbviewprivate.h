@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbviewprivate.h	9/24/2003
- *    $Id: mbviewprivate.h,v 5.4 2004-07-15 19:26:45 caress Exp $
+ *    $Id: mbviewprivate.h,v 5.5 2005-02-02 08:23:50 caress Exp $
  *
  *    Copyright (c) 2003, 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -18,6 +18,9 @@
  * Date:	September 24,  2003
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2004/07/15 19:26:45  caress
+ * Improvements to survey planning.
+ *
  * Revision 5.3  2004/05/21 23:40:40  caress
  * Moved to new version of BX GUI builder
  *
@@ -56,6 +59,7 @@
 #define MBV_REZ_LOW 	1
 #define MBV_REZ_HIGH 	2
 #define MBV_REZ_FULL 	3
+#define MBV_BOUNDSFREQUENCY 25
 #define MBV_EVENTCHECKCOARSENESS	5
 
 #define	MBV_NUMBACKGROUNDCALC	500
@@ -63,8 +67,8 @@
 #define	MBV_BACKGROUND_COLOR	2
 #define	MBV_BACKGROUND_FULLPLOT	3
 
-#define MBVIEW_PICK_IDIVISION 15
-#define MBVIEW_PICK_DIVISION ((double)MBVIEW_PICK_IDIVISION)
+#define MBV_PICK_IDIVISION 15
+#define MBV_PICK_DIVISION ((double)MBV_PICK_IDIVISION)
 #define MBV_PICK_DOWN	1
 #define MBV_PICK_MOVE	2
 #define MBV_PICK_UP	3
@@ -104,6 +108,7 @@ XtAppContext	app_context;
 int	work_function_set;
 int	timer_count;
 struct mbview_world_struct mbviews[MBV_MAX_WINDOWS];
+struct mbview_shared_struct shared;
 char	*mbsystem_library_name;
 
 /* library colortables */
@@ -172,6 +177,16 @@ float	colortable_object_blue[MBV_NUM_COLORS] =
                 { 0.000, 1.000, 0.000, 0.000, 0.000, 1.000, 
                   1.000, 1.000, 0.000, 0.000, 0.000 };
 		  
+char	*mbview_colorname[MBV_NUM_COLORS] = 
+		{ "Black",
+		  "White",
+		  "Red",
+		  "Yellow",
+		  "Green",
+		  "Blue-Green",
+		  "Blue",
+		  "Purple" };
+		  
 /* status mask arrays */
 char	statmask[8] = { MBV_STATMASK0,
 			MBV_STATMASK1,
@@ -190,6 +205,7 @@ extern Widget	parent_widget;
 extern XtAppContext	app_context;
 extern int	work_function_set;
 extern struct mbview_world_struct mbviews[MBV_MAX_WINDOWS];
+extern struct mbview_shared_struct shared;
 extern char	*mbsystem_library_name;
 
 /* library colortables */
@@ -214,10 +230,35 @@ extern float	colortable_abovesealevel_blue[MBV_NUM_COLORS+1];
 extern float	colortable_object_red[MBV_NUM_COLORS+1];
 extern float	colortable_object_green[MBV_NUM_COLORS+1];
 extern float	colortable_object_blue[MBV_NUM_COLORS+1];
+extern char	*mbview_colorname[MBV_NUM_COLORS];
 		  
 /* status mask arrays */
 extern char	statmask[8];
 #endif
+
+/* structure to hold single mbview windows */
+struct mbview_shared_struct
+    {
+    /* flags if list windows are initialized */
+    int			init_sitelist;
+    int			init_routelist;
+    int			init_navlist;
+    
+    /* pointer to structure holding global data */
+    struct mbview_shareddata_struct shareddata;
+    
+    /* widgets and other Xwindows stuff of interest */
+    Widget		topLevelShell_sitelist;
+    Widget		mainWindow_sitelist;
+    MB3DSiteListData	mb3d_sitelist;
+    Widget		topLevelShell_routelist;
+    Widget		mainWindow_routelist;
+    MB3DRouteListData	mb3d_routelist;
+    Widget		topLevelShell_navlist;
+    Widget		mainWindow_navlist;
+    MB3DNavListData	mb3d_navlist;
+    };
+ 
 
 /* structure to hold instances of mbview windows */
 struct mbview_world_struct
@@ -287,7 +328,9 @@ struct mbview_world_struct
     float bottom;
     float aspect_ratio;
     int projected;
+    int	globalprojected;
     int lastdrawrez;
+    int	viewboundscount;
     int	zscaledonecount;
     int	colordonecount;
     int contourlorez;
@@ -362,16 +405,19 @@ struct mbview_world_struct
     int button_move_y;
     int button_up_x;
     int button_up_y;
-   	
     };
-
 	
 /*--------------------------------------------------------------------*/
 
+int mbview_reset_global();
+int mbview_reset(int instance);
 void do_mbview_glwda_expose( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbview_glwda_resize( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbview_glwda_input( Widget w, XtPointer client_data, XtPointer call_data);
 void mbview_resize( Widget w, XtPointer client_data, XEvent *event, Boolean *unused);
+void mbview_sitelistresize( Widget w, XtPointer client_data, XEvent *event, Boolean *unused);
+void mbview_routelistresize( Widget w, XtPointer client_data, XEvent *event, Boolean *unused);
+void mbview_navlistresize( Widget w, XtPointer client_data, XEvent *event, Boolean *unused);
 void do_mbview_dismiss( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbview_data_primary( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbview_data_primaryslope( Widget w, XtPointer client_data, XtPointer call_data);
@@ -405,6 +451,9 @@ int mbview_zscalegridpoint(int instance, int k);
 int mbview_zscalepoint(int instance, 
 				int global, double offset_factor, 
 				struct mbview_point_struct *point);
+int mbview_zscalepointw(int instance, 
+				int global, double offset_factor, 
+				struct mbview_pointw_struct *point);
 int mbview_projectgrid2ll(int instance,
 				double xgrid, double ygrid,
 				double *xlon, double *ylat);
@@ -447,8 +496,9 @@ int mbview_findpointrez(int instance, int rez, int xpixel, int ypixel,
 			double *xgrid, double *ygrid,
 			double *xlon, double *ylat, double *zdata,
 			double *xdisplay, double *ydisplay, double *zdisplay);
-int mbview_viewbounds(int instance, int rez);
+int mbview_viewbounds(int instance);
 int mbview_drapesegment(int instance, struct mbview_linesegment_struct *seg);
+int mbview_drapesegmentw(int instance, struct mbview_linesegmentw_struct *seg);
 int do_mbview_setbackgroundwork(int instance);
 int do_mbview_settimer();
 int do_mbview_workfunction(XtPointer client_data);
@@ -457,6 +507,7 @@ int mbview_update_sensitivity(int verbose, int instance, int *error);
 int mbview_action_sensitivity(int instance);
 /*--------------------------------------------------------------------*/
 int mbview_projectdata(int instance);
+int mbview_projectglobaldata(int instance);
 int mbview_zscalegridpoint(int instance, int k);
 int mbview_zscalepoint(int instance, int global, double offset_factor, 
 			struct mbview_point_struct *point);
