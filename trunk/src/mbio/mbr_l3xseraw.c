@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_l3xseraw.c	3/27/2000
- *	$Id: mbr_l3xseraw.c,v 5.1 2001-04-09 18:04:51 caress Exp $
+ *	$Id: mbr_l3xseraw.c,v 5.2 2001-06-03 06:54:56 caress Exp $
  *
  *    Copyright (c) 2000 by 
  *    D. W. Caress (caress@mbari.org)
@@ -26,6 +26,9 @@
  * Additional Authors:	P. A. Cohen and S. Dzurenko
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2001/04/09  18:04:51  caress
+ * Fixed bug related to nav handling.
+ *
  * Revision 5.0  2001/04/05  18:33:25  caress
  * Initial version.
  * Consolidates two former i/o modules elmk2xse and sb2120xs.
@@ -53,22 +56,10 @@
 */
 
 /* set up byte swapping scenario */
-#ifdef BYTESWAPPED
-
-#ifndef DATAINPCBYTEORDER
-#define SWAPFLAG    MB_YES
-#else
-#define SWAPFLAG    MB_NO
-#endif
-
-#else
-
 #ifdef DATAINPCBYTEORDER
 #define SWAPFLAG    MB_YES
 #else
 #define SWAPFLAG    MB_NO
-#endif
-
 #endif
 
 /* essential function prototypes */
@@ -101,7 +92,7 @@ int mbr_wt_l3xseraw(int verbose, char *mbio_ptr, char *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_l3xseraw(int verbose, char *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.1 2001-04-09 18:04:51 caress Exp $";
+	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.2 2001-06-03 06:54:56 caress Exp $";
 	char	*function_name = "mbr_register_l3xseraw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -231,7 +222,7 @@ int mbr_info_l3xseraw(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.1 2001-04-09 18:04:51 caress Exp $";
+	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.2 2001-06-03 06:54:56 caress Exp $";
 	char	*function_name = "mbr_info_l3xseraw";
 	int	status = MB_SUCCESS;
 
@@ -300,7 +291,7 @@ int mbr_info_l3xseraw(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_l3xseraw(int verbose, char *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.1 2001-04-09 18:04:51 caress Exp $";
+	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.2 2001-06-03 06:54:56 caress Exp $";
 	char	*function_name = "mbr_alm_l3xseraw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
