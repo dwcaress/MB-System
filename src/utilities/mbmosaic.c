@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmosaic.c	2/10/97
- *    $Id: mbmosaic.c,v 5.0 2000-12-01 22:57:08 caress Exp $
+ *    $Id: mbmosaic.c,v 5.1 2001-03-22 21:15:49 caress Exp $
  *
  *    Copyright (c) 1997, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	February 10, 1997
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01  22:57:08  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.12  2000/10/11  01:06:15  caress
  * Convert to ANSI C
  *
@@ -114,7 +117,7 @@
 #define	NO_DATA_FLAG	99999
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbmosaic.c,v 5.0 2000-12-01 22:57:08 caress Exp $";
+static char rcs_id[] = "$Id: mbmosaic.c,v 5.1 2001-03-22 21:15:49 caress Exp $";
 static char program_name[] = "mbmosaic";
 static char help_message[] =  "mbmosaic is an utility used to mosaic amplitude or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered by multibeam swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbmosaic -Ifilelist -Oroot \
@@ -163,6 +166,7 @@ main (int argc, char **argv)
 	char	filelist[128];
 	char	fileroot[128];
 	char	*datalist;
+	int	look_processed = MB_DATALIST_LOOK_UNSET;
 	double	file_weight;
 	int	xdim = 0;
 	int	ydim = 0;
@@ -209,6 +213,8 @@ main (int argc, char **argv)
 	double	speed;
 	double	heading;
 	double	distance;
+	double	altitude;
+	double	sonardepth;
 	char	*beamflag = NULL;
 	double	*bath = NULL;
 	double	*bathacrosstrack = NULL;
@@ -476,19 +482,7 @@ main (int argc, char **argv)
 			break;
 		case 'R':
 		case 'r':
-			sscanf (optarg, "%s", buffer);
-			result = strtok(buffer, "/");
-			i = 0;
-			while (result)
-			    {
-#ifdef GMT3_0
-			    gbnd[i] = ddmmss_to_degree (result);
-#else
-			    gbnd[i] = GMT_ddmmss_to_degree (result);
-#endif
-			    i++;
-			    result = strtok (NULL, "/");
-			    }
+			mb_get_bounds(optarg, gbnd);
 			flag++;
 			break;
 		case 'S':
@@ -1123,7 +1117,7 @@ main (int argc, char **argv)
 	/* read in data */
 	ndata = 0;
 	if (status = mb_datalist_open(verbose,&datalist,
-					filelist,&error) != MB_SUCCESS)
+					filelist,look_processed,&error) != MB_SUCCESS)
 		{
 		error = MB_ERROR_OPEN_FAIL;
 		fprintf(outfp,"\nUnable to open data list file: %s\n",
@@ -1220,7 +1214,9 @@ main (int argc, char **argv)
 			{
 			status = mb_get(verbose,mbio_ptr,&kind,
 				&rpings,time_i,&time_d,
-				&navlon,&navlat,&speed,&heading,&distance,
+				&navlon,&navlat,
+				&speed,&heading,
+				&distance,&altitude,&sonardepth,
 				&beams_bath,&beams_amp,&pixels_ss,
 				beamflag,bath,amp,bathacrosstrack,bathalongtrack,
 				ss,ssacrosstrack,ssalongtrack,
@@ -1445,7 +1441,7 @@ main (int argc, char **argv)
 	/* read in data */
 	ndata = 0;
 	if (status = mb_datalist_open(verbose,&datalist,
-					filelist,&error) != MB_SUCCESS)
+					filelist,look_processed,&error) != MB_SUCCESS)
 		{
 		error = MB_ERROR_OPEN_FAIL;
 		fprintf(outfp,"\nUnable to open data list file: %s\n",
@@ -1542,7 +1538,9 @@ main (int argc, char **argv)
 			{
 			status = mb_get(verbose,mbio_ptr,&kind,
 				&rpings,time_i,&time_d,
-				&navlon,&navlat,&speed,&heading,&distance,
+				&navlon,&navlat,
+				&speed,&heading,
+				&distance,&altitude,&sonardepth,
 				&beams_bath,&beams_amp,&pixels_ss,
 				beamflag,bath,amp,bathacrosstrack,bathalongtrack,
 				ss,ssacrosstrack,ssalongtrack,

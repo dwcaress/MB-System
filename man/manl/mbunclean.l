@@ -87,9 +87,9 @@ and the number of unflagged beams.
 
 .SH EXAMPLES
 Suppose one wishes to unflag the bathymetry data in a previously edited
-binary Hydrosweep file (format 24) called hs_edit.  The following will
+binary Hydrosweep file (format 24) called hs_e.mb24.  The following will
 suffice:
- 	mbunclean -F24 -Ihs_clean -Ohs_unclean
+ 	mbunclean -F24 -Ihs_e.mb24 -Ohs_eu.mb24
 
 .SH SEE ALSO
 \fBmbsystem\fP(l), \fBmbclean\fP(l), \fBmbedit\fP(l)

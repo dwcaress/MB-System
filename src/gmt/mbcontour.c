@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcontour.c	6/4/93
- *    $Id: mbcontour.c,v 5.1 2001-01-22 05:03:25 caress Exp $
+ *    $Id: mbcontour.c,v 5.2 2001-03-22 21:03:31 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	June 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2001/01/22  05:03:25  caress
+ * Release 5.0.beta01
+ *
  * Revision 5.0  2000/12/01  22:52:16  caress
  * First cut at Version 5.0.
  *
@@ -165,15 +168,15 @@
 
 main (int argc, char **argv) 
 {
-	static char rcs_id[] = "$Id: mbcontour.c,v 5.1 2001-01-22 05:03:25 caress Exp $";
+	static char rcs_id[] = "$Id: mbcontour.c,v 5.2 2001-03-22 21:03:31 caress Exp $";
 #ifdef MBCONTOURFILTER
 	static char program_name[] = "MBCONTOURFILTER";
 	static char help_message[] =  "MBCONTOURFILTER is a utility which creates a pen plot \ncontour map of multibeam swath bathymetry.  \nThe primary purpose of this program is to serve as \npart of a real-time plotting system.  The contour \nlevels and colors can be controlled \ndirectly or set implicitly using contour and color change intervals. \nContours can also be set to have ticks pointing downhill.";
-	static char usage_message[] = "mbcontourfilter -Jparameters -Rwest/east/south/north \n\t[-Acontour_int/color_int/tick_int/label_int/tick_len/label_hgt \n\t-Btickinfo -byr/mon/day/hour/min/sec -Ccontourfile \n\t-Dtime_tick/time_annot/date_annot/time_tick_len -Eyr/mon/day/hour/min/sec \n\t-fformat -Fred/green/blue -Idatalist -K -Llonflip -M -O -Nnplot \n\t-P -ppings -Q -Ttimegap -U -Xx-shift -Yy-shift -Zalgorithm -#copies -V -H]";
+	static char usage_message[] = "mbcontourfilter -Jparameters -Rwest/east/south/north \n\t[-Acontour_int/color_int/tick_int/label_int/tick_len/label_hgt/label_spacing \n\t-Btickinfo -byr/mon/day/hour/min/sec -Ccontourfile \n\t-Dtime_tick/time_annot/date_annot/time_tick_len -Eyr/mon/day/hour/min/sec \n\t-fformat -Fred/green/blue -Idatalist -K -Llonflip -M -O -Nnplot \n\t-P -ppings -Q -Ttimegap -U -Xx-shift -Yy-shift -Zalgorithm -#copies -V -H]";
 #else
 	static char program_name[] = "MBCONTOUR";
 	static char help_message[] =  "MBCONTOUR is a GMT compatible utility which creates a color postscript \ncontour map of multibeam swath bathymetry.  \nComplete maps are made by using MBCONTOUR in conjunction with the  \nusual GMT programs.  The contour levels and colors can be controlled \ndirectly or set implicitly using contour and color change intervals. \nContours can also be set to have ticks pointing downhill.";
-	static char usage_message[] = "mbcontour -Jparameters -Rwest/east/south/north \n\t[-Acontour_int/color_int/tick_int/label_int/tick_len/label_hgt \n\t-Btickinfo -byr/mon/day/hour/min/sec -Ccontourfile -ccopies \n\t-Dtime_tick/time_annot/date_annot/time_tick_len \n\t-Eyr/mon/day/hour/min/sec \n\t-fformat -Fred/green/blue -Idatalist -K -Llonflip -Nnplot -O \n\t-P -ppings -U -Xx-shift -Yy-shift -Zalgorithm -V -H]";
+	static char usage_message[] = "mbcontour -Jparameters -Rwest/east/south/north \n\t[-Acontour_int/color_int/tick_int/label_int/tick_len/label_hgt/label_spacing \n\t-Btickinfo -byr/mon/day/hour/min/sec -Ccontourfile -ccopies \n\t-Dtime_tick/time_annot/date_annot/time_tick_len \n\t-Eyr/mon/day/hour/min/sec \n\t-fformat -Fred/green/blue -Idatalist -K -Llonflip -Nnplot -O \n\t-P -ppings -U -Xx-shift -Yy-shift -Zalgorithm -V -H]";
 #endif
 
 	extern char *optarg;
@@ -194,6 +197,7 @@ main (int argc, char **argv)
         int     read_datalist;
 	int	read_data;
 	char	*datalist;
+	int	look_processed = MB_DATALIST_LOOK_UNSET;
 	double	file_weight;
 	FILE	*fp;
 	int	format;
@@ -226,6 +230,8 @@ main (int argc, char **argv)
 	double	speed;
 	double	*heading = NULL;
 	double	distance;
+	double	altitude;
+	double	sonardepth;
 	char	*beamflag = NULL;
 	double	*bath = NULL;
 	double	*bathlon = NULL;
@@ -256,8 +262,10 @@ main (int argc, char **argv)
 	double	label_int;
 	double	tick_len;
 	double	label_hgt;
+	double	label_spacing;
 	double	tick_len_map;
 	double	label_hgt_map;
+	double	label_spacing_map;
 	int	plot_track;
 	double	time_tick_int;
 	double	time_annot_int;
@@ -287,6 +295,8 @@ main (int argc, char **argv)
 	int	setcolors;
 	double	navlon_old;
 	double	navlat_old;
+	double	d1, d2, d3, d4, d5, d6, d7;
+	int	nscan;
 	int	i;
 
 	/* get current mb default values */
@@ -313,6 +323,7 @@ main (int argc, char **argv)
 	tick_int = 100.;
 	label_int = 100.;
 	label_hgt = 0.1;
+	label_spacing = 0.0;
 	tick_len = 0.05;
 	plot_track = MB_NO;
 	time_tick_int = 0.25;
@@ -331,11 +342,24 @@ main (int argc, char **argv)
 		{
 		case 'A':
 		case 'a':
-			sscanf (optarg, "%lf/%lf/%lf/%lf/%lf/%lf",
-					&cont_int,&col_int,
-					&tick_int,&label_int,
-					&tick_len,&label_hgt);
-			plot_contours = MB_YES;
+			nscan = sscanf (optarg, "%lf/%lf/%lf/%lf/%lf/%lf/%lf",
+					&d1,&d2,&d3,&d4,&d5,&d6,&d7);
+			if (nscan >= 1)
+			    cont_int = d1;
+			if (nscan >= 2)
+			    col_int = d2;
+			if (nscan >= 3)
+			    tick_int = d3;
+			if (nscan >= 4)
+			    label_int = d4;
+			if (nscan >= 5)
+			    tick_len = d5;
+			if (nscan >= 6)
+			    label_hgt = d6;
+			if (nscan >= 7)
+			    label_spacing = d7;
+			if (nscan >= 1)
+			    plot_contours = MB_YES;
 			break;
 		case 'b':
 			sscanf (optarg, "%d/%d/%d/%d/%d/%d",
@@ -542,6 +566,7 @@ main (int argc, char **argv)
 		fprintf(stderr,"dbg2       label interval:   %f\n",label_int);
 		fprintf(stderr,"dbg2       tick length:      %f\n",tick_len);
 		fprintf(stderr,"dbg2       label height:     %f\n",label_hgt);
+		fprintf(stderr,"dbg2       label spacing:    %f\n",label_spacing);
 		fprintf(stderr,"dbg2       number contoured: %d\n",nplot);
 		fprintf(stderr,"dbg2       time tick int:    %f\n",
 			time_tick_int);
@@ -567,6 +592,7 @@ main (int argc, char **argv)
 
 	/* scale label and tick sizes */
 	label_hgt_map = inchtolon*label_hgt;
+	label_spacing_map = inchtolon*label_spacing;
 	tick_len_map = inchtolon*tick_len;
 	time_tick_len_map = inchtolon*time_tick_len;
 
@@ -687,7 +713,7 @@ main (int argc, char **argv)
 	if (read_datalist == MB_YES)
 	    {
 	    if ((status = mb_datalist_open(verbose,&datalist,
-					    read_file,&error)) != MB_SUCCESS)
+					    read_file,look_processed,&error)) != MB_SUCCESS)
 		{
 		error = MB_ERROR_OPEN_FAIL;
 		fprintf(stderr,"\nUnable to open data list file: %s\n",
@@ -764,7 +790,7 @@ main (int argc, char **argv)
 				    contour_algorithm,
 				    plot_contours,plot_triangles,plot_track,
 				    cont_int,col_int,tick_int,label_int,
-				    tick_len_map,label_hgt_map,
+				    tick_len_map,label_hgt_map,label_spacing_map,
 				    ncolor,nlevel,level,label,tick,
 				    time_tick_int,time_annot_int,
 				    date_annot_int,time_tick_len_map,
@@ -806,8 +832,9 @@ main (int argc, char **argv)
 		    bathlat = pingcur->bathlat;
 		    status = mb_read(verbose,mbio_ptr,&kind,
 			    &pings_read,time_i,time_d,
-			    navlon,navlat,&speed,
-			    heading,&distance,
+			    navlon,navlat,
+			    &speed,heading,
+			    &distance,&altitude,&sonardepth,
 			    &beams_bath,&beams_amp,&pixels_ss,
 			    beamflag,bath,amp,bathlon,bathlat,
 			    ss,sslon,sslat,

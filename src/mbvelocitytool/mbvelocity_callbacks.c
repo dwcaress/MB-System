@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbvelocity_callbacks.c	4/7/97
- *    $Id: mbvelocity_callbacks.c,v 5.1 2001-01-22 07:51:19 caress Exp $
+ *    $Id: mbvelocity_callbacks.c,v 5.2 2001-03-22 21:12:42 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -26,6 +26,9 @@
  * Date:	April 7, 1997  GUI recast
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2001/01/22  07:51:19  caress
+ * Version 5.0.beta01
+ *
  * Revision 5.0  2000/12/01  22:56:47  caress
  * First cut at Version 5.0.
  *
@@ -153,6 +156,7 @@ double	maxdepth_gui;
 double	velrange_gui;
 double	resrange_gui;
 int	format_gui;
+int	anglemode_gui;
 int	nload;
 
 /* file opening parameters */
@@ -580,7 +584,7 @@ void do_set_controls()
 
 	/* get some values from mbvelocitytool */
 	mbvt_get_values(&edit_gui,&ndisplay_gui,&maxdepth_gui,
-		&velrange_gui,&resrange_gui,&format_gui);
+		&velrange_gui,&resrange_gui,&anglemode_gui,&format_gui);
 			
 	/* set about version label */
 	sprintf(value_text, ":::t\"MB-System Release %s\":t\"%s\"", 
@@ -602,6 +606,17 @@ void do_set_controls()
 			XmNvalue, ((int) (10 * resrange_gui)), 
 			NULL);
 
+	/* set values of angle mode radiobox */
+	if (anglemode_gui == 0)
+	    XmToggleButtonSetState(toggleButton_mode_ok, 
+			TRUE, TRUE);
+	else if (anglemode_gui == 1)
+	    XmToggleButtonSetState(toggleButton_mode_snell, 
+			TRUE, TRUE);
+	else if (anglemode_gui == 2)
+	    XmToggleButtonSetState(toggleButton_mode_null, 
+			TRUE, TRUE);
+
 	/* set value of format text item */
 	sprintf(value_text,"%2.2d",format_gui);
 	XmTextFieldSetString(textField_mbformat, value_text);
@@ -617,7 +632,7 @@ do_velrange( Widget w, XtPointer client_data, XtPointer call_data)
     velrange_gui = (double) acs->value;
 
     mbvt_set_values(edit_gui,ndisplay_gui,maxdepth_gui,
-	    velrange_gui,resrange_gui);
+	    velrange_gui,resrange_gui,anglemode_gui);
 
     /* replot everything */
     do_set_controls();
@@ -662,7 +677,30 @@ do_maxdepth( Widget w, XtPointer client_data, XtPointer call_data)
     maxdepth_gui = (double) acs->value;
     
     mbvt_set_values(edit_gui,ndisplay_gui,maxdepth_gui,
-	    velrange_gui,resrange_gui);
+	    velrange_gui,resrange_gui,anglemode_gui);
+
+    /* replot everything */
+    do_set_controls();
+
+    mbvt_plot();
+
+}
+/*--------------------------------------------------------------------*/
+
+void
+do_anglemode( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    
+    if (XmToggleButtonGetState(toggleButton_mode_ok))
+	anglemode_gui = 0;
+    else if (XmToggleButtonGetState(toggleButton_mode_snell))
+	anglemode_gui = 1;
+    else if (XmToggleButtonGetState(toggleButton_mode_null))
+	anglemode_gui = 2;
+
+    mbvt_set_values(edit_gui,ndisplay_gui,maxdepth_gui,
+	    velrange_gui,resrange_gui,anglemode_gui);
 
     /* replot everything */
     do_set_controls();
@@ -855,6 +893,53 @@ do_open( Widget w, XtPointer client_data, XtPointer call_data)
 
     }
 }
+/*--------------------------------------------------------------------*/
+
+void
+do_open_commandline(char *file, int format)
+{
+	/* local definitions */
+	int	status;
+
+	/* turn off expose plots */
+	expose_plot_ok = False;
+
+	/* get format id value */
+	strcpy(input_file, file);
+	format_gui = format;
+
+	/* open file */
+	status = mbvt_open_swath_file(input_file,format_gui, &nload);
+
+	/* reset status message */
+	if (status == 1)
+	  {
+	  sprintf(message_str, "Read %d pings from swath file: %s", 
+			nload, input_file);
+	  set_label_string(label_status_mb, 
+		    message_str);
+	  XtVaSetValues(pushButton_save_svpfile, 
+		    XmNsensitive, True,
+		    NULL);
+	  }
+	if (status == 1 && edit_gui != 1)
+	  {
+	   sprintf(message_str, "Loaded default editable SVP");
+	   set_label_string(label_status_edit, 
+		    message_str);
+	  }
+	    
+	/* turn on expose plots */
+	expose_plot_ok = True;
+
+	if (status != 1)
+	    XBell(display,100);
+
+	/* replot everything */
+	do_set_controls();
+	mbvt_plot();
+
+}
 
 /*--------------------------------------------------------------------*/
 
@@ -885,7 +970,7 @@ do_residual_range( Widget w, XtPointer client_data, XtPointer call_data)
     resrange_gui = ((double)acs->value / 10.0);
     
     mbvt_set_values(edit_gui,ndisplay_gui,maxdepth_gui,
-	    velrange_gui,resrange_gui);
+	    velrange_gui,resrange_gui,anglemode_gui);
 
     /* replot everything */
     do_set_controls();

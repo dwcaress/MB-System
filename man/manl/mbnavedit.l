@@ -1,4 +1,4 @@
-.TH mbnavedit l "18 January 2001" "MB-System 5.0" "MB-System 5.0"
+.TH mbnavedit l "16 March 2001" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbnavedit\fP - Interactive navigation editor for swath sonar data.
 
@@ -372,11 +372,11 @@ before exiting.
 This button causes a dialog to appear showing some information
 about the program.
 .TP
-.B Show Entire Buffer
+.B Show All
 This button causes the plots to expand to show all of the data
 in the current buffer.
 .TP
-.B Pick Time Interval
+.B Pick Zoom
 This button allows users to focus the plots on a particular
 time interval. Once the button is pushed, the left mouse button
 is used to select the left edge of the time selection. Similarly,
@@ -387,7 +387,21 @@ satisfaction, pressing the right mouse button will cause the
 plots to be redrawn with the selected beginning and ending
 times.
 .TP
+.B Interpolate
+This button causes the selected data to be 
+replaced by linear interpolation
+of the surrounding unselected data. If the selection extends to the
+edge of the data, the selected data will be replaced by the first
+unselected datum on the other side.
+.TP
+.B Revert Selection
+This button causes the selected data to revert to their
+original values.
+.TP
 .B Use Solution
+This button only appears when one of the two navigation
+modeling algorithms is activated from the Navigation Modeling
+dialog.
 This button causes any selected longitude or latitude values
 to be replaced by values from navigation modeling. Either
 dead reckoning or smooth inversion navigation modeling
@@ -404,16 +418,25 @@ vice versa). The typical sequence is to:
        navigation model is adopted for all longitude
        and latitude values
 .TP
-.B Interpolate
-This button causes the selected data to be 
-replaced by linear interpolation
-of the surrounding unselected data. If the selection extends to the
-edge of the data, the selected data will be replaced by the first
-unselected datum on the other side.
+.B Flag
+This button only appears when the smooth inversion navigation
+modeling algorithms is activated from the Navigation Modeling
+dialog.
+This button causes any selected longitude or latitude values
+to be flagged to be ignored by the smooth inversion modeling
+algorithm. Flagged positions are shown in orange.
 .TP
-.B Revert Selection
-This button causes the selected data to revert to their
-original values.
+.B Unflag
+This button only appears when the smooth inversion navigation
+modeling algorithms is activated from the Navigation Modeling
+dialog.
+This button causes any selected longitude or latitude values
+to be unflagged. Flagged positions are ignored by the smooth inversion modeling
+algorithm. Any positions which are unflagged will once again be
+used by the inversion. Flagged positions are shown in orange.
+Unflagged positions are shown in either black (if they are unchanged)
+or purple (if they have been altered by interpolation or application
+of a modeling solution).
 .TP
 .B Pick
 Clicking on this toggle button sets the edit mode to "pick". In

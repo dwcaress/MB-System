@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrid.c	5/2/94
- *    $Id: mbgrid.c,v 5.0 2000-12-01 22:57:08 caress Exp $
+ *    $Id: mbgrid.c,v 5.1 2001-03-22 21:15:49 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -40,6 +40,9 @@
  * Rererewrite:	January 2, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01  22:57:08  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.50  2000/10/11  01:06:15  caress
  * Convert to ANSI C
  *
@@ -256,6 +259,7 @@
 #include "../../include/mb_status.h"
 #include "../../include/mb_format.h"
 #include "../../include/mb_define.h"
+#include "../../include/mb_io.h"
 
 /* GMT include files */
 #include "gmt.h"
@@ -298,7 +302,7 @@ double erfcc();
 double mbgrid_erf();
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbgrid.c,v 5.0 2000-12-01 22:57:08 caress Exp $";
+static char rcs_id[] = "$Id: mbgrid.c,v 5.1 2001-03-22 21:15:49 caress Exp $";
 static char program_name[] = "mbgrid";
 static char help_message[] =  "mbgrid is an utility used to grid bathymetry, amplitude, or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbgrid -Ifilelist -Oroot \
@@ -340,11 +344,13 @@ main (int argc, char **argv)
 	char	file[128];
 	int	file_in_bounds;
 	char	*mbio_ptr = NULL;
+	struct mb_io_struct *mb_io_ptr = NULL;
 
 	/* mbgrid control variables */
 	char	filelist[128];
 	char	fileroot[128];
 	char	*datalist;
+	int	look_processed = MB_DATALIST_LOOK_UNSET;
 	double	file_weight;
 	int	xdim = 0;
 	int	ydim = 0;
@@ -385,6 +391,8 @@ main (int argc, char **argv)
 	double	speed;
 	double	heading;
 	double	distance;
+	double	altitude;
+	double	sonardepth;
 	char	*beamflag = NULL;
 	double	*bath = NULL;
 	double	*bathlon = NULL;
@@ -518,7 +526,6 @@ main (int argc, char **argv)
 
 	/* other variables */
 	FILE	*fp, *dfp;
-	char	buffer[128], *result;
 	int	i, j, k, ii, jj, kk, n;
 	int	kgrid, kout, kint, ib, ix, iy;
 	int	ix1, ix2, iy1, iy2;
@@ -664,19 +671,7 @@ main (int argc, char **argv)
 			break;
 		case 'R':
 		case 'r':
-			sscanf (optarg, "%s", buffer);
-			result = strtok(buffer, "/");
-			i = 0;
-			while (result)
-			    {
-#ifdef GMT3_0
-			    gbnd[i] = ddmmss_to_degree (result);
-#else
-			    gbnd[i] = GMT_ddmmss_to_degree (result);
-#endif
-			    i++;
-			    result = strtok (NULL, "/");
-			    }
+			mb_get_bounds(optarg, gbnd);
 			flag++;
 			break;
 		case 'S':
@@ -1273,7 +1268,7 @@ main (int argc, char **argv)
 	/* read in data */
 	ndata = 0;
 	if (status = mb_datalist_open(verbose,&datalist,
-					filelist,&error) != MB_SUCCESS)
+					filelist,look_processed,&error) != MB_SUCCESS)
 		{
 		error = MB_ERROR_OPEN_FAIL;
 		fprintf(outfp,"\nUnable to open data list file: %s\n",
@@ -1317,6 +1312,9 @@ main (int argc, char **argv)
 				program_name);
 			exit(error);
 			}
+			
+		    /* get mb_io_ptr */
+		    mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 		    /* allocate memory for reading data arrays */
 		    status = mb_malloc(verbose,beams_bath*sizeof(char),
@@ -1352,7 +1350,9 @@ main (int argc, char **argv)
 			{
 			status = mb_read(verbose,mbio_ptr,&kind,
 				&rpings,time_i,&time_d,
-				&navlon,&navlat,&speed,&heading,&distance,
+				&navlon,&navlat,
+				&speed,&heading,
+				&distance,&altitude,&sonardepth,
 				&beams_bath,&beams_amp,&pixels_ss,
 				beamflag,bath,amp,bathlon,bathlat,
 				ss,sslon,sslat,
@@ -1453,6 +1453,10 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], navlon, navlat);*/
 				   sonar at surface - also assumes lon lat grid 
 				   - to be generalized in later version 
 				   DWC 11/16/99 */
+				/* calculate footprint - now uses sonar altitude
+				   - still assumes lon lat grid 
+				   - to be generalized in later version 
+				   DWC 1/29/2001 */
 				foot_dx = (bathlon[ib] - navlon) / mtodeglon;
 				foot_dy = (bathlat[ib] - navlat) / mtodeglat;
 				foot_lateral = sqrt(foot_dx * foot_dx + foot_dy * foot_dy);
@@ -1466,23 +1470,14 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], navlon, navlat);*/
 				    foot_dxn = 1.0;
 				    foot_dyn = 0.0;
 				    }
-				foot_range = sqrt(foot_lateral * foot_lateral + bath[ib] * bath[ib]);
+				foot_range = sqrt(foot_lateral * foot_lateral + altitude * altitude);
 				foot_theta = RTD * atan2(foot_lateral, bath[ib]);
-				if (format == 121)
-				    {
-				    foot_dtheta = 0.5;
-				    foot_dphi = 0.5;
-				    }
-				else if (format >= 20)
-				    {
+				foot_dtheta = 0.5 * mb_io_ptr->beamwidth_xtrack;
+				foot_dphi = 0.5 * mb_io_ptr->beamwidth_ltrack;
+				if (foot_dtheta <= 0.0)
 				    foot_dtheta = 1.0;
+				if (foot_dphi <= 0.0)
 				    foot_dphi = 1.0;
-				    }
-				else
-				    {
-				    foot_dtheta = 2.0;
-				    foot_dphi = 2.0;
-				    }
 /*fprintf(stderr, "dx:%f dy:%f lateral:%f range:%f theta:%f\n", 
 foot_dx, foot_dy, foot_lateral, foot_range, foot_theta);*/
 				foot_hwidth =bath[ib] * tan(DTR * (foot_theta + foot_dtheta)) 
@@ -1661,7 +1656,7 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 	/* read in data */
 	ndata = 0;
 	if (status = mb_datalist_open(verbose,&datalist,
-					filelist,&error) != MB_SUCCESS)
+					filelist,look_processed,&error) != MB_SUCCESS)
 		{
 		error = MB_ERROR_OPEN_FAIL;
 		fprintf(outfp,"\nUnable to open data list file: %s\n",
@@ -1740,7 +1735,9 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 			{
 			status = mb_read(verbose,mbio_ptr,&kind,
 				&rpings,time_i,&time_d,
-				&navlon,&navlat,&speed,&heading,&distance,
+				&navlon,&navlat,
+				&speed,&heading,
+				&distance,&altitude,&sonardepth,
 				&beams_bath,&beams_amp,&pixels_ss,
 				beamflag,bath,amp,bathlon,bathlat,
 				ss,sslon,sslat,
@@ -2329,7 +2326,7 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 	/* read in data */
 	ndata = 0;
 	if (status = mb_datalist_open(verbose,&datalist,
-					filelist,&error) != MB_SUCCESS)
+					filelist,look_processed,&error) != MB_SUCCESS)
 		{
 		error = MB_ERROR_OPEN_FAIL;
 		fprintf(outfp,"\nUnable to open data list file: %s\n",
@@ -2408,7 +2405,9 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 			{
 			status = mb_read(verbose,mbio_ptr,&kind,
 				&rpings,time_i,&time_d,
-				&navlon,&navlat,&speed,&heading,&distance,
+				&navlon,&navlat,
+				&speed,&heading,
+				&distance,&altitude,&sonardepth,
 				&beams_bath,&beams_amp,&pixels_ss,
 				beamflag,bath,amp,bathlon,bathlat,
 				ss,sslon,sslat,

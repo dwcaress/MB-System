@@ -1,4 +1,4 @@
-.TH mbsystem l "19 January 2001" "MB-System 5.0" "MB-System 5.0"
+.TH mbsystem l "14 March 2001" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbsystem\fP - A set of utilities for manipulating and 
 processing swath sonar bathymetry, amplitude, and sidescan data.
@@ -7,35 +7,38 @@ processing swath sonar bathymetry, amplitude, and sidescan data.
 Version 5.0
 
 .SH INTRODUCTION
-\fBMB-System\fP is an open source software package for the processing
-and display of swath mapping sonar data which is being
-developed at the Monterey Bay Aquarium Research Institute (MBARI)
-and the Lamont-Doherty Earth Observatory (L-DEO).
+\fBMB-System\fP is a software package consisting of programs which manipulate, process, list, or
+display swath sonar bathymetry, amplitude, and sidescan data. This software is distributed freely
+(and for free) in the form of source code for Unix platforms. The heart of the system is an
+input/output library called \fBMBIO\fP which allows programs to work transparently with any of a
+number of supported swath sonar data formats. This approach has allowed the creation of
+"generic" utilities which can be applied in a uniform manner to sonar data from a variety of
+sources. Most of the programs are command-line tools, but the package does include graphical
+tools for editing swath bathymetry, editing navigation, modeling bathymetry calculation, and
+adjusting survey navigation.
 
-This software is distributed as source code under the GNU General
-Public License.
-The heart of the system is an input/output library 
-called \fBMBIO\fP which allows programs to transparently
-work with any of a number of supported swath sonar data formats.  This
-approach has allowed the creation of "generic" utilities which can
-be applied in a uniform manner to sonar data from a variety
-of sources. Most of the utilities are run from the command
-line and are controlled by command line arguments. A few
-graphical utilities are included to provide data editing
-and modeling capabilities.
+The acronym MB stands for MultiBeam; this reflects the fact that the early development of
+\fBMB-System\fP focused on processing deep sea data from multibeam sonars. However, \fBMB-System\fP
+now supports several data formats from sidescan and interferometric sonars and works with data
+from all depth ranges. 
 
-The source code for \fBMB-System\fP is written 
-in ANSI C and should be portable
-to a wide variety of Unix and Linux platforms. 
-The graphical utilities are based 
-on the X Window System and the Motif widget 
-set (and work with the open source Lesstif widget set).  
-To date, \fBMB-System\fP has been successfully
-installed on computers running under the SunOS4.1 
-(older Sun workstations), Solaris (recent Sun workstations
-and PC's), IRIX (Silicon Graphics workstations), 
-HPUX (Hewlett Packard workstations), Linux (PC's and Macintosh's), 
-and Lynx (PC's) operating systems.
+The National Science Foundation (NSF) has been the primary supporter of \fBMB-System\fP
+development. NSF initially provided grants to the authors at the Lamont-Doherty Earth
+Observatory in 1993 (two years), and 1995 (five years). SeaBeam Instruments also contributed
+significant effort from 1994 to 1999. This support has been renewed through a new five year
+grant (2001-2005) to Caress at the Monterey Bay Aquarium Research Institute (MBARI) and to
+Chayes at Lamont. MBARI is matching the NSF support as part of its seafloor mapping program.
+
+The original NSF mandate was to create a set of generic tools which would work with all of the
+sonar data used in NSF-supported projects. Not surprisingly, the core of the \fBMB-System\fP user
+community consists of NSF-supported researchers at U.S. institutions such as the
+Lamont-Doherty Earth Observatory, the Scripps Institution of Oceanography, and the Woods
+Hole Oceanographic Institution. However, \fBMB-System\fP has also come to be used widely in the
+international marine geological community. 
+
+The \fBMB-System\fP source code is distributed under the GNU General Public License as formulated
+by the GNU Project. MB-System installation depends on some other software packages (e.g.
+GMT and netCDF), all of which are freely available as source code.
 
 .SH AUTHORSHIP
 David W. Caress (caress@mbari.org)
@@ -47,7 +50,7 @@ Dale N. Chayes (dale@ldeo.columbia.edu)
   Lamont-Doherty Earth Observatory
 
 .SH COPYRIGHT AND LICENSING
-\fBMB-System\fP Version 5 Copyright (C) 2001 by
+\fBMB-System\fP Copyright (C) 1993-2001 by
 .br
 David W. Caress (caress@mbari.org)
     Monterey Bay Aquarium Research Institute
@@ -56,43 +59,132 @@ David W. Caress (caress@mbari.org)
 Dale N. Chayes (dale@ldeo.columbia.edu)
     Lamont-Doherty Earth Observatory
     Palisades, NY 10964
+.br
+All Rights Reserved
+.br
+All Wrongs Remembered
 
-The \fBMB-System\fP source code is distributed under the
-GNU General Public License (http:\\www.gnu.org/copyleft/gpl).
-As such, \fBMB-System\fP is open source software.
-Some elements of the source code included in \fBMB-System\fP
-derive from other organizations, and may be obtained 
-elsewhere with different licensing and distribution terms.
-Such special circumstances are noted in the comments in 
-the affected source code files.
+The MB-System source code is distributed under the GNU General Public License as formulated
+by the GNU Project. Previous MB-System distributions have been described as "public domain",
+which meant there was no restrictions whatsoever on the use of the code. We have now adopted
+the more restrictive GNU GPL license in order to insure that anyone who distributes software
+based in whole or in part on MB-System also distributes the modified MB-System source code
+and any additional source code. 
+
+The GNU GPL also prohibits the distribution of proprietary executables linked with
+MB-System libraries unless the source code is also distributed. We waive this restriction on
+distributing proprietary compiled programs for specific software products if and only if those
+software products meet the following two conditions:
+     1) The software product was created, sold, and delivered to customers using source code 
+derived from MB-System release 4.6 distributions. 
+     2) The software product was sold and delivered to customers prior to January 1, 2001. 
 
 .SH HISTORY
-The development of \fBMBIO\fP and its associated programs began in 1990
-as part of ongoing research at L-DEO involving multibeam bathymetry data. 
-Development was accelerated in 1991 as part of the effort to support
-the Atlas Hydrosweep DS multibeam sonar on L-DEO's ship, the R/V
-Maurice Ewing.  The National Science Foundation (NSF) 
-provided support in 1993 
-to improve and extend \fBMB-System\fP so as to provide
-a standard "generic" set of tools for processing and display of 
-swath sonar data that could be used by the U.S. academic community.
-SeaBeam Instruments and Antarctic Support Associates provided
-additional support in 1994 for the
-development of \fBMB-System\fP, with particular emphasis on capabilities 
-related to the new SeaBeam 2100 series of sonars.
+The development of \fBMB-System\fP began in 1990 as part of ongoing research at L-DEO
+involving swath bathymetry data collected with SeaBeam multibeam sonars. Development
+was accelerated in 1991 as part of the effort to support the STN-Atlas Hydrosweep DS
+multibeam sonar on L-DEO's ship, the R/V Maurice Ewing. The National Science
+Foundation provided support in 1993 and 1994 to improve and extend \fBMB-System\fP. The
+intent of this initial grant was to provide a standard "generic" set of tools for processing
+and display of swath sonar data that could be used by the U.S. academic community. The
+first generally released version of \fBMB-System\fP (3.0) was made available in the Spring of
+1993. This was followed by versions 3.1 and 3.2 in July, 1993, version 3.3 in November,
+1993, and version 3.4 in December 1993. All of these early releases supported only
+SeaBeam and Hydrosweep data.
 
-The NSF supported a five year effort at L-DEO
-begun in 1995 to maintain and further 
-develop \fBMB-System\fP; this funding
-was augmented by additional efforts at SeaBeam Instruments
-which related to SeaBeam products but were nonetheless released
-to the open source distribution. MBARI became involved in the
-\fBMB-System\fP project beginning in late 1998. NSF has now renewed support
-for another five years of \fBMB-System\fP development and 
-support at MBARI and L-DEO beginning in 2001.
+SeaBeam Instruments and Antarctic Support Associates provided additional support in
+1994 for the development of \fBMB-System\fP, with particular emphasis on capabilities related
+to the new SeaBeam 2100 series of sonars. A considerably enhanced \fBMB-System\fP version
+4.0 was released on October 22, 1994; this release followed an almost complete rewrite of
+the underlying source code. The new capabilities included support for sidescan as well as
+bathymetry data and support for data from a number of very different sonars. 
 
-.SH VERSION 5 CHANGES - A NEW DATA PROCESSING STRUCTURE
-Previous versions of MB-System have emphasized
+The National Science Foundation funded a five year effort begun in 1995 to maintain and
+further develop \fBMB-System\fP. From 1994 to 1997, SeaBeam Instruments (a major
+multibeam sonar manufacturer and, at the time, the principal employer of David W.
+Caress) provided significant support for \fBMB-System\fP development and maintenance.
+Similarly, the Newport, RI office of the Science Applications International Corporation
+(SAIC) supported some \fBMB-System\fP development during 1997-1998, when David W.
+Caress worked there. Version 4.1 was released in November, 1994, followed by 4.2 in
+February 1995, 4.3 on March 12, 1996, 4.4 on August 27, 1996, and 4.5 on September 23,
+1997.
+
+David W. Caress joined the Monterey Bay Aquarium Research Institute (MBARI) in
+September, 1998. Version 4.6 was released on April 16, 1999. The final update to version
+4.6 (4.6.10) was announced on March 8, 2000. The primary innovations during this period
+included support for the new generation of Simrad multibeam sonars and tools for
+generating data products that could be imported directly into GIS software packages.
+
+The National Science Foundation has now funded a second five year grant to MBARI and
+L-DEO which support the \fBMB-System\fP project from 2001-2005. The version 5.0 release,
+of which this documentation is a part, incorporates yet another substantial rewrite of the
+underlying code as well as providing significant new capabilities.
+
+.SH WHAT'S NEW ABOUT VERSION 5
+The version 5.0 release of \fBMB-System\fP includes a number of changes and improvements relative
+to the version 4 releases. The most significant changes include:
+
+\fBA new approach to managing data processing.\fP
+.br
+- Many tools - one output file. In previous versions of \fBMB-System\fP, each processing
+program read an input swath data file and produced an output swath data file. This
+"serial" processing scheme generally produced a large number of intermediate data
+files. \fBMB-System\fP version 5.0 features the integration of the editing and analysis
+tools with a single program, mbprocess, that outputs processed data files. The new
+"parallel" processing scheme covers bathymetry data processing, but does not yet
+incorporate the sidescan processing capabilities. All of the old tools and capabilities
+are still part of the distribution. 
+.br
+- Recursive datalists. The lists of data files used by gridding and plotting programs can
+now be recursive, making it simpler to manage data from many different surveys. 
+.br
+- Automatic format identification. \fBMB-System\fP programs will now attempt to
+automatically identify the swath data format based on the filename suffix. 
+.br
+- Extended inf files. Users can generate inf files by directing the output of mbinfo to a
+file named by adding an ".inf" suffix to the swath data file name. Several programs
+can parse inf files, if they exist, to quickly obtain data locations or ranges. This
+feature speeds operations such as gridding, mosaicing, and automated plotting. 
+
+\fBNew tools.\fP
+.br
+- \fBmbnavadjust\fP. This new tool allows users to adjust poorly navigated surveys by
+matching features in overlapping swathes. It is particularly useful for processing
+surveys conducted from submerged platforms. 
+.br
+- \fBmbprocess\fP. This new tool performs a variety of processing tasks and produces a
+single output processed swath data file. The program mbprocess can apply
+bathymetry edits from mbedit and mbclean, navigation edits from mbnavedit, sound
+velocity profile changes from mbvelocitytool, and a variety of other corrections. 
+.br
+- \fBmbset\fP. This new tool allows users to create and modify the parameter files used to
+control the operation of mbprocess. 
+
+\fBRestructuring the code.\fP
+.br
+- All of the C code now conforms to the ANSI C standard. 
+.br
+- The underlying input/output library (\fBMBIO\fP) has been substantially rewritten. The
+structure has been streamlined, simplifying both future development and support of
+the existing code. The \fBMBIO\fP API has been greatly modified. 
+
+\fBHandling of old Simrad multibeam data. \fP
+.br
+- Vendor format data from the old Simrad multibeams (pre-1997 sonars) are now
+supported by a single format id (51) rather than a separate format id for each sonar
+model. The old format id's are automatically aliased to 51, so existing shellscripts
+will continue to work. 
+.br
+- Sidescan data from old Simrad multibeams (pre-1997 sonars) are now handled in the
+same manner as data from the newer sonars (e.g. EM3000, EM3000, EM120). The
+raw samples in the vendor data format are binned, averaged, and interpolated into a
+1024 pixel sidescan swath. This binned sidescan is not saved in the vendor format, so
+it is recommended that the data be copied to an extended format (57) that stores both
+bathymetry beam flags and processed sidescan. Format 57 is also used for processing
+data from the current Simrad multibeam sonars. 
+
+.SH THE NEW VERSION 5 DATA PROCESSING STRUCTURE
+Previous versions of \fBMB-System\fP have emphasized
 processing utilities that operate serially, that is, that
 read in an input swath data file, modify it, and then
 output a second swath data file. Serial processing utilities do allow
@@ -104,7 +196,7 @@ number of intermediate data files. For instance, if
 an EM300 data file called "mbari_1998_524.mb57" has
 spikes in the bathymetry, outliers in the navigation, and 
 the bathymetry has been calculated using an incorrect model
-for the water sound speed structure, users of MB-System
+for the water sound speed structure, users of \fBMB-System\fP
 would previously have processed it with a sequence 
 something like this:
 
@@ -256,7 +348,7 @@ impacting on the bathymetry editing or navigation editing
 components of the processing.
 
 All of the old, serial processing utilities are still
-distributed with MB-System. However, some of the serial
+distributed with \fBMB-System\fP. However, some of the serial
 tools have been replaced by new versions of the same name
 (e.g. \fBmbedit\fP, \fBmbclean\fP, and \fBmbnavedit\fP).
 In these cases, the old versions are preserved as programs
@@ -304,7 +396,7 @@ These are the current MB-system programs:
  		to sidescan, beam amplitude, or 
  		bathymetry data. 
  \fBmbformat\fP:   List information about swath sonar 
- 		data formats supported by the MBIO library. 
+ 		data formats supported by the \fBMBIO\fP library. 
  \fBmbgetmask\fP:  Extract list of flagged or edited 
  		beams from a swath sonar data file.
  \fBmbgrid\fP:  Grid bathymetry, amplitude, and sidescan 

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbhistogram.c	12/28/94
- *    $Id: mbhistogram.c,v 5.0 2000-12-01 22:57:08 caress Exp $
+ *    $Id: mbhistogram.c,v 5.1 2001-03-22 21:15:49 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	December 28, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01  22:57:08  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.12  2000/10/11  01:06:15  caress
  * Convert to ANSI C
  *
@@ -86,7 +89,7 @@
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbhistogram.c,v 5.0 2000-12-01 22:57:08 caress Exp $";
+	static char rcs_id[] = "$Id: mbhistogram.c,v 5.1 2001-03-22 21:15:49 caress Exp $";
 	static char program_name[] = "MBHISTOGRAM";
 	static char help_message[] =  "MBHISTOGRAM reads a swath sonar data file and generates a histogram\n\tof the bathymetry,  amplitude,  or sidescan values. Alternatively, \n\tmbhistogram can output a list of values which break up the\n\tdistribution into equal sized regions.\n\tThe results are dumped to stdout.";
 	static char usage_message[] = "mbhistogram [-Akind -Byr/mo/da/hr/mn/sc -Dmin/max -Eyr/mo/da/hr/mn/sc -Fformat -G -Ifile -Llonflip -Mnintervals -Nnbins -Ppings -Rw/e/s/n -Sspeed -V -H]";
@@ -107,6 +110,7 @@ main (int argc, char **argv)
 	int	read_datalist = MB_NO;
 	char	read_file[128];
 	char	*datalist;
+	int	look_processed = MB_DATALIST_LOOK_UNSET;
 	double	file_weight;
 	int	format;
 	int	pings;
@@ -133,6 +137,8 @@ main (int argc, char **argv)
 	double	speed;
 	double	heading;
 	double	distance;
+	double	altitude;
+	double	sonardepth;
 	char	*beamflag = NULL;
 	double	*bath = NULL;
 	double	*bathacrosstrack = NULL;
@@ -258,8 +264,7 @@ main (int argc, char **argv)
 			break;
 		case 'R':
 		case 'r':
-			sscanf (optarg,"%lf/%lf/%lf/%lf", 
-				&bounds[0],&bounds[1],&bounds[2],&bounds[3]);
+			mb_get_bounds(optarg, bounds);
 			flag++;
 			break;
 		case 'S':
@@ -303,6 +308,10 @@ main (int argc, char **argv)
 		fprintf(output,"Version %s\n",rcs_id);
 		fprintf(output,"MB-system Version %s\n",MB_VERSION);
 		}
+
+	/* get format if required */
+	if (format == 0)
+		mb_get_format(verbose,read_file,NULL,&format,&error);
 
 	/* figure out histogram dimensions */
 	if (nintervals > 0 && nbins <= 0)
@@ -408,7 +417,7 @@ main (int argc, char **argv)
 	if (read_datalist == MB_YES)
 	    {
 	    if ((status = mb_datalist_open(verbose,&datalist,
-					    read_file,&error)) != MB_SUCCESS)
+					    read_file,look_processed,&error)) != MB_SUCCESS)
 		{
 		error = MB_ERROR_OPEN_FAIL;
 		fprintf(stderr,"\nUnable to open data list file: %s\n",
@@ -507,7 +516,9 @@ main (int argc, char **argv)
 		/* read a ping of data */
 		status = mb_get(verbose,mbio_ptr,&kind,&pings,
 				time_i,&time_d,
-				&navlon,&navlat,&speed,&heading,&distance,
+				&navlon,&navlat,
+				&speed,&heading,
+				&distance,&altitude,&sonardepth,
 				&beams_bath,&beams_amp,&pixels_ss,
 				beamflag,bath,amp,bathacrosstrack,bathalongtrack,
 				ss,ssacrosstrack,ssalongtrack,

@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  6/23/95
-#	$Id: Makefile.template,v 4.6 2000-09-30 07:21:55 caress Exp $
+#	$Id: Makefile.template,v 5.0 2001-03-22 21:11:38 caress Exp $
 #
 #     Copyright (c) 1995, 2000 by
 #     David W. Caress (caress@mbari.org)
@@ -16,6 +16,9 @@
 # Date:		June 23, 1995
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.6  2000/09/30  07:21:55  caress
+# Snapshot for Dale.
+#
 # Revision 4.5  1999/12/11  04:42:03  caress
 # Moved xgraphics.c to src/xgraphics
 #
@@ -71,6 +74,7 @@ $(BINDIR)/mbnaveditold: mbnavedit.o \
 		mbnavedit_util.o \
 		mbnavedit_prog.o \
 		$(LIBDIR)/libmbaux.a \
+		$(LIBDIR)/libmbxgr.a \
 		$(LIBDIR)/libmbio.a \
 		$(LIBDIR)/libgsf.a
 	$(CC) $(CFLAGS) mbnavedit.o \
@@ -79,6 +83,7 @@ $(BINDIR)/mbnaveditold: mbnavedit.o \
 		mbnavedit_util.o \
 		mbnavedit_prog.o \
 		$(LIBDIR)/libmbaux.a \
+		$(LIBDIR)/libmbxgr.a \
 		$(LIBDIR)/libmbio.a \
 		$(LIBDIR)/libgsf.a \
 		$(MOTIFLIBS) $(LFLAGS) \

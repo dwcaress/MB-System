@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbprocess.c	3/31/93
- *    $Id: mbprocess.c,v 5.2 2001-01-22 07:54:22 caress Exp $
+ *    $Id: mbprocess.c,v 5.3 2001-03-22 21:15:49 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -36,6 +36,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2001/01/22  07:54:22  caress
+ * Version 5.0.beta01
+ *
  * Revision 5.1  2000/12/10  20:30:44  caress
  * Version 5.0.alpha02
  *
@@ -77,7 +80,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbprocess.c,v 5.2 2001-01-22 07:54:22 caress Exp $";
+	static char rcs_id[] = "$Id: mbprocess.c,v 5.3 2001-03-22 21:15:49 caress Exp $";
 	static char program_name[] = "mbprocess";
 	static char help_message[] =  "mbprocess is a tool for processing swath sonar bathymetry data.\n\
 This program performs a number of functions, including:\n\
@@ -144,6 +147,8 @@ and mbedit edit save files.\n";
 	double	speed;
 	double	heading;
 	double	distance;
+	double	altitude;
+	double	sonardepth;
 	double	draft;
 	double	roll;
 	double	pitch;
@@ -246,7 +251,7 @@ and mbedit edit save files.\n";
 	double	*alongtrack_offset = NULL;
 
 	/* ssv handling variables */
-	int	ssv_mode = MBP_SSV_CORRECT;
+	int	angle_mode = MBP_ANGLES_OK;
 	int	ssv_prelimpass = MB_YES;
 	double	ssv_default;
 	double	ssv_start;
@@ -1507,8 +1512,9 @@ and mbedit edit save files.\n";
 		error = MB_ERROR_NO_ERROR;
 		status = MB_SUCCESS;
 		status = mb_get_all(verbose,imbio_ptr,&store_ptr,&kind,
-				time_i,&time_d,&navlon,&navlat,&speed,
-				&heading,&distance,
+				time_i,&time_d,&navlon,&navlat,
+				&speed,&heading,
+				&distance,&altitude,&sonardepth,
 				&nbath,&namp,&nss,
 				beamflag,bath,amp,bathacrosstrack,bathalongtrack,
 				ss,ssacrosstrack,ssalongtrack,
@@ -1658,17 +1664,24 @@ and mbedit edit save files.\n";
 	
 		if (process.mbp_bathrecalc_mode == MBP_BATHRECALC_RAYTRACE)
 		    {
-		    if (ssv_mode == MBP_SSV_CORRECT)
+		    if (angle_mode == MBP_ANGLES_OK)
 			{
 			strncpy(comment,"\0",MBP_FILENAMESIZE);
-			sprintf(comment,"  SSV mode:           original SSV correct");
+			sprintf(comment,"  Angle mode:         angles not altered");
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			if (error == MB_ERROR_NO_ERROR) ocomment++;
 			}
-		    else
+		    else if (angle_mode == MBP_ANGLES_SNELL)
 			{
 			strncpy(comment,"\0",MBP_FILENAMESIZE);
-			sprintf(comment,"  SSV mode:           original SSV incorrect");
+			sprintf(comment,"  Angle mode:         angles corrected using Snell's Law");
+			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+			if (error == MB_ERROR_NO_ERROR) ocomment++;
+			}
+		    else if (angle_mode == MBP_ANGLES_SNELLNULL)
+			{
+			strncpy(comment,"\0",MBP_FILENAMESIZE);
+			sprintf(comment,"  Angle mode:         angles corrected using Snell's Law and array geometry");
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			if (error == MB_ERROR_NO_ERROR) ocomment++;
 			}
@@ -2029,8 +2042,9 @@ and mbedit edit save files.\n";
 		error = MB_ERROR_NO_ERROR;
 		status = MB_SUCCESS;
 		status = mb_get_all(verbose,imbio_ptr,&store_ptr,&kind,
-				time_i,&time_d,&navlon,&navlat,&speed,
-				&heading,&distance,
+				time_i,&time_d,&navlon,&navlat,
+				&speed,&heading,
+				&distance,&altitude,&sonardepth,
 				&nbath,&namp,&nss,
 				beamflag,bath,amp,
 				bathacrosstrack,bathalongtrack,
@@ -2334,6 +2348,16 @@ and mbedit edit save files.\n";
 			    for (i=0;i<beams_bath;i++)
 				ttimes[i] *= process.mbp_tt_mult;
 			    }
+				
+			/* if ssv adjustment specified do it */
+			if (process.mbp_ssv_mode == MBP_SSV_SET)
+			    {
+			    ssv = process.mbp_ssv;
+			    }
+			else if (process.mbp_ssv_mode == MBP_SSV_OFFSET)
+			    {
+			    ssv += process.mbp_ssv;
+			    }
 
 			/* if svp specified recalculate bathymetry
 			    by raytracing  */
@@ -2391,7 +2415,7 @@ and mbedit edit save files.\n";
 				/* raytrace */
 				status = mb_rt(verbose, rt_svp, depth_offset_use, 
 					angles[i], 0.5*ttimes[i],
-					ssv_mode, ssv, angles_null[i], 
+					angle_mode, ssv, angles_null[i], 
 					0, NULL, NULL, NULL, 
 					&xx, &zz, 
 					&ttime, &ray_stat, &error);
@@ -2628,6 +2652,21 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 					speed,heading,draft,roll,pitch,heave,&error);
 			}
 
+		/* insert the altered data if available */
+		if (error == MB_ERROR_NO_ERROR
+			&& (kind == MB_DATA_DATA
+			    || kind == MB_DATA_COMMENT))
+			{
+			status = mb_insert(verbose,imbio_ptr,
+					store_ptr,kind, 
+					time_i,time_d,
+					navlon,navlat,speed,heading,
+					nbath,namp,nss,
+					beamflag,bath,amp,bathacrosstrack,bathalongtrack,
+					ss,ssacrosstrack,ssalongtrack,
+					comment,&error);
+			}
+
 		/* recalculate the sidescan */
 		if (process.mbp_ssrecalc_mode == MBP_SSRECALC_ON
 		    && error == MB_ERROR_NO_ERROR
@@ -2647,7 +2686,7 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 				&& strip_comments == MB_NO))
 			{
 			status = mb_put_all(verbose,ombio_ptr,
-					store_ptr,MB_YES,kind,
+					store_ptr,MB_NO,kind,
 					time_i,time_d,
 					navlon,navlat,speed,heading,
 					nbath,namp,nss,

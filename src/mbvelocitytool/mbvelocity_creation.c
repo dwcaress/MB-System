@@ -20,13 +20,14 @@
 #include <Xm/DialogS.h>
 #include <Xm/MwmUtil.h>
 #include <Xm/BulletinB.h>
+#include <Xm/RowColumn.h>
+#include <Xm/ToggleB.h>
 #include <Xm/PushB.h>
 #include <Xm/Label.h>
 #include <Xm/Scale.h>
 #include <Xm/TextF.h>
 #include <Xm/FileSB.h>
 #include <Xm/Separator.h>
-#include <Xm/RowColumn.h>
 #include <Xm/CascadeB.h>
 #include <Xm/DrawingA.h>
 
@@ -64,6 +65,7 @@ extern void BX_SET_BACKGROUND_COLOR(Widget, ArgList, Cardinal *, Pixel);
  */
 extern void do_quit(Widget, XtPointer, XtPointer);
 extern void BxUnmanageCB(Widget, XtPointer, XtPointer);
+extern void do_anglemode(Widget, XtPointer, XtPointer);
 extern void do_residual_range(Widget, XtPointer, XtPointer);
 extern void do_velrange(Widget, XtPointer, XtPointer);
 extern void do_maxdepth(Widget, XtPointer, XtPointer);
@@ -91,6 +93,10 @@ Createwindow_mbvelocity(Widget parent)
     Cardinal cdc = 0;
     Boolean  argok = False;
     Widget   window_mbvelocity;
+    Widget   dialogShell_mode;
+    Widget   bulletinBoard_mode;
+    Widget   radioBox_mode;
+    Widget   pushButton_mode_dismiss;
     Widget   xmDialogShell_scaling;
     Widget   bulletinBoard_scaling;
     Widget   pushButton_scaling_dismiss;
@@ -117,7 +123,8 @@ Createwindow_mbvelocity(Widget parent)
     Widget   label_about_function;
     Widget   label_about_mbedit;
     Widget   input_screen;
-    Widget   pushButton;
+    Widget   pushButton_mode;
+    Widget   pushButton_plotscaling;
     Widget   rowColumn;
     Widget   menuBar_file;
     Widget   cascadeButton_file;
@@ -139,6 +146,8 @@ Createwindow_mbvelocity(Widget parent)
     XtInitializeWidgetClass((WidgetClass)xmMainWindowWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmDialogShellWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmBulletinBoardWidgetClass);
+    XtInitializeWidgetClass((WidgetClass)xmRowColumnWidgetClass);
+    XtInitializeWidgetClass((WidgetClass)xmToggleButtonWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmPushButtonWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmLabelWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmScaleWidgetClass);
@@ -154,7 +163,7 @@ Createwindow_mbvelocity(Widget parent)
     
     ac = 0;
     XtSetArg(args[ac], XmNx, 8); ac++;
-    XtSetArg(args[ac], XmNy, 32); ac++;
+    XtSetArg(args[ac], XmNy, 213); ac++;
     XtSetArg(args[ac], XmNwidth, 1016); ac++;
     XtSetArg(args[ac], XmNheight, 668); ac++;
     window_mbvelocity = XmCreateMainWindow(parent,
@@ -178,21 +187,21 @@ Createwindow_mbvelocity(Widget parent)
     {
         XmString    tmp0;
         
-        tmp0 = (XmString) BX_CONVERT(input_screen, "Plot Scaling", 
+        tmp0 = (XmString) BX_CONVERT(input_screen, "Angle Mode", 
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 210); ac++;
+        XtSetArg(args[ac], XmNx, 330); ac++;
         XtSetArg(args[ac], XmNy, 0); ac++;
         XtSetArg(args[ac], XmNwidth, 90); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList, 
             BX_CONVERT(input_screen, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
-        pushButton = XmCreatePushButton(input_screen,
-            "pushButton",
+        pushButton_mode = XmCreatePushButton(input_screen,
+            "pushButton_mode",
             args, 
             ac);
-        XtManageChild(pushButton);
+        XtManageChild(pushButton_mode);
         
         /*
          * Free any memory allocated for resources.
@@ -200,7 +209,35 @@ Createwindow_mbvelocity(Widget parent)
         XmStringFree((XmString)tmp0);
     }
     
-    XtAddCallback(pushButton, XmNactivateCallback, BxManageCB, (XtPointer)"bulletinBoard_scaling");
+    XtAddCallback(pushButton_mode, XmNactivateCallback, BxManageCB, (XtPointer)"bulletinBoard_mode");
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(input_screen, "Plot Scaling", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNx, 160); ac++;
+        XtSetArg(args[ac], XmNy, 0); ac++;
+        XtSetArg(args[ac], XmNwidth, 90); ac++;
+        XtSetArg(args[ac], XmNheight, 30); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(input_screen, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        pushButton_plotscaling = XmCreatePushButton(input_screen,
+            "pushButton_plotscaling",
+            args, 
+            ac);
+        XtManageChild(pushButton_plotscaling);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(pushButton_plotscaling, XmNactivateCallback, BxManageCB, (XtPointer)"bulletinBoard_scaling");
     
     ac = 0;
     XtSetArg(args[ac], XmNx, 0); ac++;
@@ -252,8 +289,8 @@ Createwindow_mbvelocity(Widget parent)
     
     
     ac = 0;
-    XtSetArg(args[ac], XmNx, 13); ac++;
-    XtSetArg(args[ac], XmNy, 61); ac++;
+    XtSetArg(args[ac], XmNx, 0); ac++;
+    XtSetArg(args[ac], XmNy, 0); ac++;
     XtSetArg(args[ac], XmNwidth, 172); ac++;
     XtSetArg(args[ac], XmNheight, 150); ac++;
     pulldownMenu_file = XmCreatePulldownMenu(XtParent(cascadeButton_file),
@@ -468,7 +505,7 @@ Createwindow_mbvelocity(Widget parent)
         tmp0 = (XmString) BX_CONVERT(input_screen, "Quit", 
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 680); ac++;
+        XtSetArg(args[ac], XmNx, 700); ac++;
         XtSetArg(args[ac], XmNy, 0); ac++;
         XtSetArg(args[ac], XmNwidth, 80); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
@@ -496,7 +533,7 @@ Createwindow_mbvelocity(Widget parent)
         tmp0 = (XmString) BX_CONVERT(input_screen, "Reprocess", 
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 430); ac++;
+        XtSetArg(args[ac], XmNx, 520); ac++;
         XtSetArg(args[ac], XmNy, 0); ac++;
         XtSetArg(args[ac], XmNwidth, 90); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
@@ -628,8 +665,8 @@ Createwindow_mbvelocity(Widget parent)
     
     ac = 0;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNx, 266); ac++;
-    XtSetArg(args[ac], XmNy, 135); ac++;
+    XtSetArg(args[ac], XmNx, 201); ac++;
+    XtSetArg(args[ac], XmNy, 322); ac++;
     XtSetArg(args[ac], XmNwidth, 481); ac++;
     XtSetArg(args[ac], XmNheight, 449); ac++;
     bulletinBoard_about = XmCreateBulletinBoard(xmDialogShell_about,
@@ -963,7 +1000,7 @@ Createwindow_mbvelocity(Widget parent)
     XtSetArg(args[ac], XmNmwmInputMode, MWM_INPUT_MODELESS); ac++;
     XtSetArg(args[ac], XmNdeleteResponse, XmUNMAP); ac++;
     XtSetArg(args[ac], XmNwidth, 379); ac++;
-    XtSetArg(args[ac], XmNheight, 86); ac++;
+    XtSetArg(args[ac], XmNheight, 88); ac++;
     xmDialogShell_message = XtCreatePopupShell("xmDialogShell_message",
         xmDialogShellWidgetClass,
         window_mbvelocity,
@@ -973,10 +1010,10 @@ Createwindow_mbvelocity(Widget parent)
     ac = 0;
     XtSetArg(args[ac], XmNdialogStyle, XmDIALOG_FULL_APPLICATION_MODAL); ac++;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_NONE); ac++;
-    XtSetArg(args[ac], XmNx, 317); ac++;
-    XtSetArg(args[ac], XmNy, 317); ac++;
+    XtSetArg(args[ac], XmNx, 252); ac++;
+    XtSetArg(args[ac], XmNy, 503); ac++;
     XtSetArg(args[ac], XmNwidth, 379); ac++;
-    XtSetArg(args[ac], XmNheight, 86); ac++;
+    XtSetArg(args[ac], XmNheight, 88); ac++;
     bulletinBoard_message = XmCreateBulletinBoard(xmDialogShell_message,
         "bulletinBoard_message",
         args, 
@@ -1052,8 +1089,8 @@ Createwindow_mbvelocity(Widget parent)
     ac = 0;
     XtSetArg(args[ac], XmNautoUnmanage, False); ac++;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNx, 211); ac++;
-    XtSetArg(args[ac], XmNy, 91); ac++;
+    XtSetArg(args[ac], XmNx, 146); ac++;
+    XtSetArg(args[ac], XmNy, 278); ac++;
     XtSetArg(args[ac], XmNwidth, 591); ac++;
     XtSetArg(args[ac], XmNheight, 537); ac++;
     bulletinBoard_fileselect = XmCreateBulletinBoard(xmDialogShell_fileselect,
@@ -1141,8 +1178,8 @@ Createwindow_mbvelocity(Widget parent)
     ac = 0;
     XtSetArg(args[ac], XmNdialogStyle, XmDIALOG_APPLICATION_MODAL); ac++;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNx, 351); ac++;
-    XtSetArg(args[ac], XmNy, 279); ac++;
+    XtSetArg(args[ac], XmNx, 286); ac++;
+    XtSetArg(args[ac], XmNy, 466); ac++;
     XtSetArg(args[ac], XmNwidth, 311); ac++;
     XtSetArg(args[ac], XmNheight, 161); ac++;
     bulletinBoard_error = XmCreateBulletinBoard(xmDialogShell_error,
@@ -1273,8 +1310,8 @@ Createwindow_mbvelocity(Widget parent)
     
     ac = 0;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNx, 8); ac++;
-    XtSetArg(args[ac], XmNy, 278); ac++;
+    XtSetArg(args[ac], XmNx, 176); ac++;
+    XtSetArg(args[ac], XmNy, 465); ac++;
     XtSetArg(args[ac], XmNwidth, 532); ac++;
     XtSetArg(args[ac], XmNheight, 164); ac++;
     bulletinBoard_scaling = XmCreateBulletinBoard(xmDialogShell_scaling,
@@ -1551,6 +1588,159 @@ Createwindow_mbvelocity(Widget parent)
         XmStringFree((XmString)tmp0);
     }
     
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNtitle, "Beam Angle Mode"); ac++;
+    XtSetArg(args[ac], XmNwidth, 348); ac++;
+    XtSetArg(args[ac], XmNheight, 172); ac++;
+    dialogShell_mode = XtCreatePopupShell("dialogShell_mode",
+        xmDialogShellWidgetClass,
+        window_mbvelocity,
+        args, 
+        ac);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(dialogShell_mode, "Beam Angle Mode", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNdialogTitle, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNautoUnmanage, False); ac++;
+        XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
+        XtSetArg(args[ac], XmNx, 268); ac++;
+        XtSetArg(args[ac], XmNy, 461); ac++;
+        XtSetArg(args[ac], XmNwidth, 348); ac++;
+        XtSetArg(args[ac], XmNheight, 172); ac++;
+        bulletinBoard_mode = XmCreateBulletinBoard(dialogShell_mode,
+            "bulletinBoard_mode",
+            args, 
+            ac);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNx, 20); ac++;
+    XtSetArg(args[ac], XmNy, 10); ac++;
+    XtSetArg(args[ac], XmNwidth, 293); ac++;
+    XtSetArg(args[ac], XmNheight, 96); ac++;
+    XtSetArg(args[ac], XmNisHomogeneous, False); ac++;
+    radioBox_mode = XmCreateRadioBox(bulletinBoard_mode,
+        "radioBox_mode",
+        args, 
+        ac);
+    XtManageChild(radioBox_mode);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(radioBox_mode, "Do Not Change Beam Angles", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNwidth, 287); ac++;
+        XtSetArg(args[ac], XmNheight, 28); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(radioBox_mode, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        toggleButton_mode_ok = XmCreateToggleButton(radioBox_mode,
+            "toggleButton_mode_ok",
+            args, 
+            ac);
+        XtManageChild(toggleButton_mode_ok);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(toggleButton_mode_ok, XmNvalueChangedCallback, do_anglemode, (XtPointer)0);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(radioBox_mode, "Adjust Angles Using Snell\'s Law", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNwidth, 287); ac++;
+        XtSetArg(args[ac], XmNheight, 28); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(radioBox_mode, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        toggleButton_mode_snell = XmCreateToggleButton(radioBox_mode,
+            "toggleButton_mode_snell",
+            args, 
+            ac);
+        XtManageChild(toggleButton_mode_snell);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(toggleButton_mode_snell, XmNvalueChangedCallback, do_anglemode, (XtPointer)0);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(radioBox_mode, "Adjust Angles Using Sonar Geometry", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNwidth, 287); ac++;
+        XtSetArg(args[ac], XmNheight, 28); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(radioBox_mode, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        toggleButton_mode_null = XmCreateToggleButton(radioBox_mode,
+            "toggleButton_mode_null",
+            args, 
+            ac);
+        XtManageChild(toggleButton_mode_null);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(toggleButton_mode_null, XmNvalueChangedCallback, do_anglemode, (XtPointer)0);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(bulletinBoard_mode, "Dismiss", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNx, 120); ac++;
+        XtSetArg(args[ac], XmNy, 120); ac++;
+        XtSetArg(args[ac], XmNwidth, 100); ac++;
+        XtSetArg(args[ac], XmNheight, 40); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(bulletinBoard_mode, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        pushButton_mode_dismiss = XmCreatePushButton(bulletinBoard_mode,
+            "pushButton_mode_dismiss",
+            args, 
+            ac);
+        XtManageChild(pushButton_mode_dismiss);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(pushButton_mode_dismiss, XmNactivateCallback, BxUnmanageCB, (XtPointer)"bulletinBoard_mode");
     
     
     /* Begin user code block <end_Createwindow_mbvelocity> */

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavlist.c	2/1/93
- *    $Id: mbnavlist.c,v 5.1 2000-12-10 20:30:44 caress Exp $
+ *    $Id: mbnavlist.c,v 5.2 2001-03-22 21:15:49 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  *
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2000/12/10  20:30:44  caress
+ * Version 5.0.alpha02
+ *
  * Revision 5.0  2000/12/01  22:57:08  caress
  * First cut at Version 5.0.
  *
@@ -67,7 +70,7 @@
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbnavlist.c,v 5.1 2000-12-10 20:30:44 caress Exp $";
+	static char rcs_id[] = "$Id: mbnavlist.c,v 5.2 2001-03-22 21:15:49 caress Exp $";
 	static char program_name[] = "mbnavlist";
 	static char help_message[] =  "mbnavlist prints the specified contents of navigation records\nin a swath sonar data file to stdout. The form of the \noutput is quite flexible; mbnavlist is tailored to produce \nascii files in spreadsheet style with data columns separated by tabs.";
 	static char usage_message[] = "mbnavlist [-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc \n-Fformat -H -Ifile -Llonflip \n-Ooptions -Rw/e/s/n -Sspeed -Ttimegap -V]";
@@ -88,6 +91,7 @@ main (int argc, char **argv)
 	int	read_datalist = MB_NO;
 	char	read_file[128];
 	char	*datalist;
+	int	look_processed = MB_DATALIST_LOOK_UNSET;
 	double	file_weight;
 	int	format;
 	int	pings;
@@ -128,6 +132,8 @@ main (int argc, char **argv)
 	double	speed;
 	double	heading;
 	double	distance;
+	double	altitude;
+	double	sonardepth;
 	char	*beamflag = NULL;
 	double	*bath = NULL;
 	double	*bathacrosstrack = NULL;
@@ -234,8 +240,7 @@ main (int argc, char **argv)
 			break;
 		case 'R':
 		case 'r':
-			sscanf (optarg,"%lf/%lf/%lf/%lf", 
-				&bounds[0],&bounds[1],&bounds[2],&bounds[3]);
+			mb_get_bounds(optarg, bounds);
 			flag++;
 			break;
 		case 'S':
@@ -317,6 +322,10 @@ main (int argc, char **argv)
 		exit(error);
 		}
 
+	/* get format if required */
+	if (format == 0)
+		mb_get_format(verbose,read_file,NULL,&format,&error);
+
 	/* determine whether to read one file or a list of files */
 	if (format < 0)
 		read_datalist = MB_YES;
@@ -325,7 +334,7 @@ main (int argc, char **argv)
 	if (read_datalist == MB_YES)
 	    {
 	    if ((status = mb_datalist_open(verbose,&datalist,
-					    read_file,&error)) != MB_SUCCESS)
+					    read_file,look_processed,&error)) != MB_SUCCESS)
 		{
 		error = MB_ERROR_OPEN_FAIL;
 		fprintf(stderr,"\nUnable to open data list file: %s\n",
@@ -411,8 +420,9 @@ main (int argc, char **argv)
 		{
 		/* read a ping of data */
 		status = mb_get_all(verbose,mbio_ptr,&store_ptr,&kind,
-			time_i,&time_d,&navlon,&navlat,&speed,
-			&heading,&distance,
+			time_i,&time_d,&navlon,&navlat,
+			&speed,&heading,
+			&distance,&altitude,&sonardepth,
 			&beams_bath,&beams_amp,&pixels_ss,
 			beamflag,bath,amp,bathacrosstrack,bathalongtrack,
 			ss,ssacrosstrack,ssalongtrack,

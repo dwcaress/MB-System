@@ -12,14 +12,22 @@ Version 5.0
 
 .SH DESCRIPTION
 \fBmblevitus\fP generates a mean water sound velocity profile for a 
-specified location from the Levitus temperature and salinity database.
+specified location using temperature and salinity data
+from the 1982 Climatological Atlas of the World Ocean [Levitus, 1982].
 The water velocity profile is representative of the mean annual
 water column structure for a specified 1 degree by 1 degree region.
 The profile is output to a specified file which can be read and
 used by programs (e.g. \fBmbbath\fP or \fBmbvelocitytool\fP) 
 which calculate swath sonar sonar
 bathymetry from travel times by raytracing through a water velocity
-model.  The water sound velocity values are calculated using
+model.  
+
+The Levitus [1982] reference is:
+     Levitus, S, Climatological Atlas of the World Ocean, 
+     NOAA Professional Paper 13, U.S. Government Printing Office, 
+     Washington D.C., 173pp, 1982.
+.br
+The water sound velocity values are calculated using
 the DelGrosso equations, following:
      Dusha, B. D., P. F. Worcester, B. D. Cornuelle, 
        B. M. Howe, "On equations for the speed of 

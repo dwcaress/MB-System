@@ -8,7 +8,7 @@ Version 5.0
 
 .SH SYNOPSIS
 \fBmbcontour\fP \fB-J\fIparameters\fP \fB-R\fIwest/east/south/north 
-\fP[\fB-A\fIcont_int/col_int/tic_int/lab_int/tic_int/lab_hgt\fP 
+\fP[\fB-A\fIcont_int/col_int/tic_int/lab_int/tic_int/lab_hgt/lab_spacing\fP 
 \fB-B\fItickinfo\fP \fB-b\fIyr/mo/da/hr/mn/sc\fP 
 \fB-C\fIcontourfile\fP \fB-c\fIcopies\fP 
 \fB-D\fItime_tick/time_annot/date_annot/time_tick_len\fP 
@@ -66,7 +66,7 @@ Dale N. Chayes (dale@ldeo.columbia.edu)
 .SH OPTIONS
 .TP
 .B \-A
-\fIcont_int/col_int/tic_int/lab_int/tic_len/lab_hgt\fP
+\fIcont_int/col_int/tic_int/lab_int/tic_len/lab_hgt/lab_spacing\fP
 .br
 If specific contour levels are not specified with the \fI-C\fP option,
 then contours will be
@@ -76,10 +76,15 @@ generated at invervals of \fIcont_int\fP meters.  Color changes
 will occur at intervals of \fIcol_int\fP meters.  Contours will have
 downhill facing tickmarks \fItic_int\fP inches long every \fItic_int\fP
 meters. Contours will have annotations 
-\fIlabel_len\fP inches high every \fIlab_int\fP meters.
+\fIlabel_len\fP inches high every \fIlab_int\fP meters. The origins of
+contour labels will be separated by at least \fIlab_spacing\fP
+inches (potentially overlapping labels will be omitted); 
+if \fIlab_spacing\fP = 0.0 then the spacing will be defined by
+\fIlab_hgt\fP. If fewer than seven parameters are specified, the
+default values are used for the  missing parameters.
 Defaults: \fIcont_int\fP = 25; \fIcol_int\fP = 100; 
 \fItic_int\fP = 100; \fIlab_int\fP = 100; \fItic_int\fP = 0.1; 
-\fIlab_hgt\fP = 0.05.
+\fIlab_hgt\fP = 0.05; \fIlab_spacing\fP = 0.0.
 .TP
 .B \-B
 \fItickinfo\fP
@@ -270,7 +275,7 @@ Force conversion to monochrome image using the [television] YIQ transformation.
 .B \-N
 \fInplot\fP
 Sets the number of pings to be read in before each contouring
-episode. See the description of the \fB-Z\fIalgorithm\fP option
+episode. See the description of the \fB-Z\fP\fIalgorithm\fP option
 for advice on reasonable values
 Default: \fInplot\fP = 50 unless \fB-Z\fI1\fP is specified,
 in which case the default is \fInplot\fP = 5.
@@ -295,7 +300,7 @@ Default: \fIpings\fP = 1 (no ping averaging).
 .B \-Q
 Causes the program to plot the triangles constructed as part of the
 contouring if the "triangle algorithm" is specified using the
-\fB-Z\fI1\fP option. This allows the data distribution to be 
+\fB-Z\fP\fI1\fP option. This allows the data distribution to be 
 directly viewed.
 .TP
 .B \-R

@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 5.0 2001-01-22 08:07:07 caress Exp $
+#	$Id: Makefile.template,v 5.1 2001-03-22 21:14:16 caress Exp $
 #
 #     Copyright (c) 1993, 1994, 2000 by
 #     David W. Caress (caress@mbari.org)
@@ -16,6 +16,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.0  2001/01/22  08:07:07  caress
+# Version 5.0.beta01
+#
 # Revision 4.21  2000/12/10  20:30:44  caress
 # Version 5.0.alpha02
 #
@@ -133,6 +136,7 @@ all:	$(MANDIR)/mbsystem.l \
 	$(BINDIR)/mbbath $(MANDIR)/mbbath.l \
 	$(BINDIR)/hsdump $(MANDIR)/hsdump.l \
 	$(BINDIR)/mbrollbias $(MANDIR)/mbrollbias.l \
+	$(BINDIR)/mbgetesf $(MANDIR)/mbgetesf.l \
 	$(BINDIR)/mbgetmask $(MANDIR)/mbgetmask.l \
 	$(BINDIR)/mbmask $(MANDIR)/mbmask.l \
 	$(BINDIR)/mbsmooth $(MANDIR)/mbsmooth.l \
@@ -202,6 +206,9 @@ $(BINDIR)/hsdump:	hsdump.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a
 $(BINDIR)/mbrollbias:	mbrollbias.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a
 	$(CC) $(CFLAGS) mbrollbias.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a $(LFLAGS) \
 		-o $(BINDIR)/mbrollbias
+$(BINDIR)/mbgetesf:	mbgetesf.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a
+	$(CC) $(CFLAGS) mbgetesf.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a $(LFLAGS) \
+		-o $(BINDIR)/mbgetesf
 $(BINDIR)/mbgetmask:	mbgetmask.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a
 	$(CC) $(CFLAGS) mbgetmask.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a $(LFLAGS) \
 		-o $(BINDIR)/mbgetmask
@@ -258,7 +265,7 @@ mbinfo.o:	mbinfo.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_def
 mbcopy.o:	mbcopy.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbcopy.c
 mblist.o:	mblist.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
-	$(CC) -c $(CFLAGS) mblist.c
+	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) mblist.c
 mbmerge.o:	mbmerge.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbmerge.c
 mbclean.o:	mbclean.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
@@ -280,6 +287,8 @@ hsdump.o:	hsdump.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_def
 	$(CC) -c $(CFLAGS) hsdump.c
 mbrollbias.o:	mbrollbias.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbrollbias.c
+mbgetesf.o:	mbgetesf.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
+	$(CC) -c $(CFLAGS) mbgetesf.c
 mbgetmask.o:	mbgetmask.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbgetmask.c
 mbmask.o:	mbmask.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
@@ -363,6 +372,9 @@ $(MANDIR)/mbrollbias.l:	mbrollbias.manl
 $(MANDIR)/mbgetmask.l:	mbmask.manl
 	cp mbmask.manl $(MANDIR)/mbgetmask.l
 	chmod 664 $(MANDIR)/mbgetmask.l
+$(MANDIR)/mbgetesf.l:	mbmask.manl
+	cp mbgetesf.manl $(MANDIR)/mbgetesf.l
+	chmod 664 $(MANDIR)/mbgetesf.l
 $(MANDIR)/mbmask.l:	mbmask.manl
 	cp mbmask.manl $(MANDIR)/mbmask.l
 	chmod 664 $(MANDIR)/mbmask.l

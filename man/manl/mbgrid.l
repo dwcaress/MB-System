@@ -1,4 +1,4 @@
-.TH mbgrid l "4 January 2001" "MB-System 5.0" "MB-System 5.0"
+.TH mbgrid l "29 January 2001" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbgrid\fP - Grid bathymetry, amplitude, or sidescan data 
 from swath sonar data files.
@@ -82,6 +82,20 @@ maximum value, and A is a normalizing factor set so that the sum of all
 the weights adds to a value of 1.  Normally, the distance a is set to be
 half the average grid point spacing, but this can be varied using the \fB-W\fP
 option. 
+
+If the \fB-F\fP\fI5\fP option is used, the gridding is performed using
+beam footprints rather than a weighting function tied to the grid
+cell spacing. In this algorithm, the beam footprints are calculated
+using the angular beamwidths and the sonar altitude above the seafloor.
+A weighting value is calculated for each grid cell which fully or
+parially lies within the beam footprint; these weighting values 
+represent the fraction of the beam contained within the cell. This
+approach allows one to sensibly grid data using a resolution
+greater than that of the raw data. Thus, if one has data with
+a large depth variation, one can generate a grid with a cell spacing
+appropriate for the high resolution, shallow data and still get
+sensible results in deep regions where the grid cells may be
+much smaller than the beam footprints.
 
 If the \fB-F\fP\fI2\fP option is used, the gridding is performed with a
 median filter scheme instead of a Gaussian weighted average. In this
@@ -239,6 +253,7 @@ Sets the gridding algorithm to be used.
  	\fImode\fP = 2:         Median Filter
  	\fImode\fP = 3:         Minimum Filter
  	\fImode\fP = 4:         Maximum Filter
+ 	\fImode\fP = 5:         Weighted Sonar Footprint
 The default is \fImode\fP = 1 (Gaussian Weighted Mean).
 .TP
 .B \-G
@@ -429,7 +444,7 @@ will be filled in through spine interpolation even in the areas
 not covered by data. The output looks like:
  
  Program MBGRID
- Version $Id: mbgrid.l,v 5.0 2001-01-22 07:51:57 caress Exp $
+ Version $Id: mbgrid.l,v 5.1 2001-03-22 21:17:36 caress Exp $
  MB-system Version 4.5
  
  MBGRID Parameters:

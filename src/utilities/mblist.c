@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mblist.c	2/1/93
- *    $Id: mblist.c,v 5.0 2000-12-01 22:57:08 caress Exp $
+ *    $Id: mblist.c,v 5.1 2001-03-22 21:15:49 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -28,6 +28,9 @@
  *		in 1990.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01  22:57:08  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.26  2000/10/11  01:06:15  caress
  * Convert to ANSI C
  *
@@ -174,6 +177,9 @@
 #include "../../include/mb_format.h"
 #include "../../include/mb_define.h"
 
+/* GMT include files */
+#include "gmt_nan.h"
+
 /* local options */
 #define	MAX_OPTIONS	25
 #define	DUMP_MODE_LIST	1
@@ -181,15 +187,61 @@
 #define	DUMP_MODE_TOPO	3
 #define	DUMP_MODE_AMP	4
 #define	DUMP_MODE_SS	5
+#define	MBLIST_CHECK_ON			0
+#define	MBLIST_CHECK_ON_NULL		1
+#define	MBLIST_CHECK_OFF_RAW		2
+#define	MBLIST_CHECK_OFF_NAN		3
+#define	MBLIST_CHECK_OFF_FLAGNAN	4
+#define	MBLIST_SET_OFF	0
+#define	MBLIST_SET_ON	1
+#define	MBLIST_SET_ALL	2
+
+/* function prototypes */
+int set_output(	int	verbose, 
+		int	beams_bath, 
+		int	beams_amp, 
+		int	pixels_ss, 
+		int	use_bath, 
+		int	use_amp, 
+		int	use_ss, 
+		int	dump_mode, 
+		int	beam_set, 
+		int	pixel_set, 
+		int	beam_vertical, 
+		int	pixel_vertical, 
+		int	*beam_start, 
+		int	*beam_end, 
+		int	*pixel_start, 
+		int	*pixel_end, 
+		int	*n_list, 
+		char	*list, 
+		int	*error);
+int set_bathyslope(int verbose,
+	int nbath, char *beamflag, double *bath, double *bathacrosstrack,
+	int *ndepths, double *depths, double *depthacrosstrack, 
+	int *nslopes, double *slopes, double *slopeacrosstrack, 
+	int *error);
+int get_bathyslope(int verbose,
+	int ndepths, double *depths, double *depthacrosstrack, 
+	int nslopes, double *slopes, double *slopeacrosstrack, 
+	double acrosstrack, double *depth,  double *slope, 
+	int *error);
+int printsimplevalue(int verbose, 
+	double value, int width, int precision, 
+	int ascii, int *invert, int *error);
+int printNaN(int verbose, int ascii, int *invert, int *error);
+
+/* NaN value */
+double	NaN;
 
 /*--------------------------------------------------------------------*/
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mblist.c,v 5.0 2000-12-01 22:57:08 caress Exp $";
+	static char rcs_id[] = "$Id: mblist.c,v 5.1 2001-03-22 21:15:49 caress Exp $";
 	static char program_name[] = "MBLIST";
 	static char help_message[] =  "MBLIST prints the specified contents of a swath data \nfile to stdout. The form of the output is quite flexible; \nMBLIST is tailored to produce ascii files in spreadsheet \nstyle with data columns separated by tabs.";
-	static char usage_message[] = "mblist [-Byr/mo/da/hr/mn/sc -Ddump_mode -Eyr/mo/da/hr/mn/sc \n-Fformat -H -Ifile -Llonflip -Mbeam_start/beam_end -Npixel_start/pixel_end \n-Ooptions -Ppings -Rw/e/s/n -Sspeed -Ttimegap -V -W]";
+	static char usage_message[] = "mblist [-Byr/mo/da/hr/mn/sc -Ddump_mode -Eyr/mo/da/hr/mn/sc \n-Fformat -H -Ifile -Llonflip -Mbeam_start/beam_end -Npixel_start/pixel_end \n-Ooptions -Ppings -Rw/e/s/n -Sspeed -Ttimegap -Ucheck -V -W]";
 	extern char *optarg;
 	extern int optkind;
 	int	errflg = 0;
@@ -205,8 +257,9 @@ main (int argc, char **argv)
 
 	/* MBIO read control parameters */
 	int	read_datalist = MB_NO;
-	char	read_file[128];
+	char	read_file[MB_PATH_MAXLINE];
 	char	*datalist;
+	int	look_processed = MB_DATALIST_LOOK_UNSET;
 	double	file_weight;
 	int	format;
 	int	pings;
@@ -226,12 +279,14 @@ main (int argc, char **argv)
 	/* output format list controls */
 	char	list[MAX_OPTIONS];
 	int	n_list;
-	int	beam_set = MB_NO;
+	int	beam_set = MBLIST_SET_OFF;
 	int	beam_start;
 	int	beam_end;
-	int	pixel_set = MB_NO;
+	int	beam_vertical;
+	int	pixel_set = MBLIST_SET_OFF;
 	int	pixel_start;
 	int	pixel_end;
+	int	pixel_vertical;
 	int	dump_mode = 1;
 	double	distance_total;
 	int	nread;
@@ -241,11 +296,14 @@ main (int argc, char **argv)
 	int	use_bath = MB_NO;
 	int	use_amp = MB_NO;
 	int	use_ss = MB_NO;
-	int	check_values = MB_YES;
+	int	use_slope = MB_NO;
+	int	check_values = MBLIST_CHECK_ON;
 	int	check_bath = MB_NO;
 	int	check_amp = MB_NO;
 	int	check_ss = MB_NO;
+	int	invert_next_value = MB_NO;
 	int	first = MB_YES;
+	int	ascii = MB_YES;
 
 	/* MBIO read values */
 	char	*mbio_ptr = NULL;
@@ -257,6 +315,8 @@ main (int argc, char **argv)
 	double	speed;
 	double	heading;
 	double	distance;
+	double	altitude;
+	double	sonardepth;
 	char	*beamflag = NULL;
 	double	*bath = NULL;
 	double	*bathacrosstrack = NULL;
@@ -277,7 +337,7 @@ main (int argc, char **argv)
 	time_t	time_u_ref;
 
 	/* crosstrack slope values */
-	double	slope;
+	double	avgslope;
 	double	sx, sy, sxx, sxy;
 	int	ns;
 	double	delta, a, b, theta;
@@ -285,6 +345,13 @@ main (int argc, char **argv)
 	int	degrees;
 	char	hemi;
 	double	headingx, headingy, mtodeglon, mtodeglat;
+	double	angle, depth, slope;
+	int	ndepths;
+	double	*depths;
+	double	*depthacrosstrack;
+	int	nslopes;
+	double	*slopes;
+	double	*slopeacrosstrack;
 
 	/* course calculation variables */
 	int	use_course = MB_NO;
@@ -302,6 +369,8 @@ main (int argc, char **argv)
 
 	int	read_data;
 	char	line[128];
+	double	distmin;
+	int	found;
 	int	i, j, k;
 
 	/* get current default values */
@@ -312,18 +381,28 @@ main (int argc, char **argv)
 	strcpy (read_file, "stdin");
 
 	/* set up the default list controls 
-		(lon, lat, along-track distance, center beam depth) */
+		(Time, lon, lat, heading, speed, along-track distance, center beam depth) */
+	list[0]='T';
 	list[0]='X';
 	list[1]='Y';
+	list[2]='H';
+	list[2]='S';
 	list[2]='L';
 	list[3]='Z';
-	n_list = 4;
+	n_list = 7;
 
 	/* set dump mode flag to DUMP_MODE_LIST */
 	dump_mode = DUMP_MODE_LIST;
 
+	/* get NaN value */
+#ifdef GMT3_0
+	NaN = zero/zero;
+#else
+	GMT_make_dnan(NaN);
+#endif
+
 	/* process argument list */
-	while ((c = getopt(argc, argv, "B:b:D:d:E:e:F:f:I:i:L:l:M:m:N:n:O:o:P:p:QqR:r:S:s:T:t:VvWwHh")) != -1)
+	while ((c = getopt(argc, argv, "AaB:b:D:d:E:e:F:f:I:i:L:l:M:m:N:n:O:o:P:p:QqR:r:S:s:T:t:U:u:VvWwHh")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -333,6 +412,11 @@ main (int argc, char **argv)
 		case 'V':
 		case 'v':
 			verbose++;
+			break;
+		case 'A':
+		case 'a':
+			ascii = MB_NO;
+			flag++;
 			break;
 		case 'B':
 		case 'b':
@@ -372,14 +456,28 @@ main (int argc, char **argv)
 			break;
 		case 'M':
 		case 'm':
-			sscanf (optarg,"%d/%d", &beam_start,&beam_end);
-			beam_set = MB_YES;
+			if (optarg[0] == 'a' || optarg[0] == 'A')
+			    {
+			    beam_set = MBLIST_SET_ALL;
+			    }
+			else
+			    {
+			    sscanf (optarg,"%d/%d", &beam_start,&beam_end);
+			    beam_set = MBLIST_SET_ON;
+			    }
 			flag++;
 			break;
 		case 'N':
 		case 'n':
-			sscanf (optarg,"%d/%d", &pixel_start,&pixel_end);
-			pixel_set = MB_YES;
+			if (optarg[0] == 'a' || optarg[0] == 'A')
+			    {
+			    pixel_set = MBLIST_SET_ALL;
+			    }
+			else
+			    {
+			    sscanf (optarg,"%d/%d", &pixel_start,&pixel_end);
+			    pixel_set = MBLIST_SET_ON;
+			    }
 			flag++;
 			break;
 		case 'O':
@@ -396,13 +494,12 @@ main (int argc, char **argv)
 			break;
 		case 'Q':
 		case 'q':
-			check_values = MB_NO;
+			check_values = MBLIST_CHECK_OFF_RAW;
 			flag++;
 			break;
 		case 'R':
 		case 'r':
-			sscanf (optarg,"%lf/%lf/%lf/%lf", 
-				&bounds[0],&bounds[1],&bounds[2],&bounds[3]);
+			mb_get_bounds(optarg, bounds);
 			flag++;
 			break;
 		case 'S':
@@ -413,6 +510,14 @@ main (int argc, char **argv)
 		case 'T':
 		case 't':
 			sscanf (optarg,"%lf", &timegap);
+			flag++;
+			break;
+		case 'U':
+		case 'u':
+			sscanf (optarg,"%d", &check_values);
+			if (check_values < MBLIST_CHECK_ON 
+			    || check_values > MBLIST_CHECK_OFF_FLAGNAN)
+			    check_values = MBLIST_CHECK_ON;
 			flag++;
 			break;
 		case 'W':
@@ -474,6 +579,7 @@ main (int argc, char **argv)
 		fprintf(stderr,"dbg2       speedmin:       %f\n",speedmin);
 		fprintf(stderr,"dbg2       timegap:        %f\n",timegap);
 		fprintf(stderr,"dbg2       file:           %s\n",file);
+		fprintf(stderr,"dbg2       ascii:          %d\n",ascii);
 		fprintf(stderr,"dbg2       beam_set:       %d\n",beam_set);
 		fprintf(stderr,"dbg2       beam_start:     %d\n",beam_start);
 		fprintf(stderr,"dbg2       beam_end:       %d\n",beam_end);
@@ -496,6 +602,10 @@ main (int argc, char **argv)
 		exit(error);
 		}
 
+	/* get format if required */
+	if (format == 0)
+		mb_get_format(verbose,read_file,NULL,&format,&error);
+
 	/* set bathymetry scaling */
 	if (bathy_in_feet == MB_YES)
 		bathy_scale = 1.0 / 0.3048;
@@ -510,7 +620,7 @@ main (int argc, char **argv)
 	if (read_datalist == MB_YES)
 	    {
 	    if ((status = mb_datalist_open(verbose,&datalist,
-					    read_file,&error)) != MB_SUCCESS)
+					    read_file,look_processed,&error)) != MB_SUCCESS)
 		{
 		error = MB_ERROR_OPEN_FAIL;
 		fprintf(stderr,"\nUnable to open data list file: %s\n",
@@ -575,8 +685,12 @@ main (int argc, char **argv)
 				use_course = MB_YES;
 			if (list[i] == 'V' || list[i] == 'v')
 				use_time_interval = MB_YES;
+			if (list[i] == 'A' || list[i] == 'a'
+				|| list[i] == 'G' || list[i] == 'g')
+				use_slope = MB_YES;
 			}
-	if (check_values == MB_YES)
+	if (check_values == MBLIST_CHECK_ON
+		|| check_values == MBLIST_CHECK_ON_NULL)
 		{
 		if (use_bath == MB_YES) check_bath = MB_YES;
 		if (use_amp == MB_YES) check_amp = MB_YES;
@@ -596,6 +710,14 @@ main (int argc, char **argv)
 			&error);
 	status = mb_malloc(verbose,pixels_ss*sizeof(double),&ssalongtrack,
 			&error);
+	status = mb_malloc(verbose,beams_bath*sizeof(double),
+					&depths,&error);
+	status = mb_malloc(verbose,beams_bath*sizeof(double),
+					&depthacrosstrack,&error);
+	status = mb_malloc(verbose,(beams_bath+1)*sizeof(double),
+					&slopes,&error);
+	status = mb_malloc(verbose,(beams_bath+1)*sizeof(double),
+					&slopeacrosstrack,&error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
@@ -616,7 +738,9 @@ main (int argc, char **argv)
 		{
 		/* read a ping of data */
 		status = mb_get(verbose,mbio_ptr,&kind,&pings,time_i,&time_d,
-			&navlon,&navlat,&speed,&heading,&distance,
+			&navlon,&navlat,
+			&speed,&heading,
+			&distance,&altitude,&sonardepth,
 			&beams_bath,&beams_amp,&pixels_ss,
 			beamflag,bath,amp,bathacrosstrack,bathalongtrack,
 			ss,ssacrosstrack,ssalongtrack,
@@ -659,14 +783,82 @@ main (int argc, char **argv)
 			}
 
 		/* set output beams and pixels */
-		if (error == MB_ERROR_NO_ERROR && first == MB_YES)
+		if (error == MB_ERROR_NO_ERROR)
 			{
+			/* find vertical-most beam */
+			if (beams_bath > 0)
+			    {
+			    found = MB_NO;
+			    beam_vertical = beams_bath / 2;			
+			    for (i=0;i<beams_bath;i++)
+				{
+				if (mb_beam_ok(beamflag[i]))
+				    {
+				    if (found == MB_NO)
+					{
+					distmin = fabs(bathacrosstrack[i]);
+					beam_vertical = i;
+					found = MB_YES;
+					}
+				    else if (fabs(bathacrosstrack[i]) < distmin)
+					{
+					distmin = fabs(bathacrosstrack[i]);
+					beam_vertical = i;
+					}
+				    }
+				}
+			    if (found == MB_NO)
+			    for (i=0;i<beams_bath;i++)
+				{
+				if (beamflag[i] != MB_FLAG_NULL)
+				    {
+				    if (found == MB_NO)
+					{
+					distmin = fabs(bathacrosstrack[i]);
+					beam_vertical = i;
+					found = MB_YES;
+					}
+				    else if (fabs(bathacrosstrack[i]) < distmin)
+					{
+					distmin = fabs(bathacrosstrack[i]);
+					beam_vertical = i;
+					}
+				    }
+				}
+			    }
+
+			/* find vertical-most pixel */
+			if (pixels_ss > 0)
+			    {
+			    found = MB_NO;
+			    pixel_vertical = pixels_ss / 2;			
+			    for (i=0;i<pixels_ss;i++)
+				{
+				if (ss[i] != 0.0)
+				    {
+				    if (found == MB_NO)
+					{
+					distmin = fabs(ssacrosstrack[i]);
+					pixel_vertical = i;
+					found = MB_YES;
+					}
+				    else if (fabs(ssacrosstrack[i]) < distmin)
+					{
+					distmin = fabs(ssacrosstrack[i]);
+					pixel_vertical = i;
+					}
+				    }
+				}
+			    }
+
 			/* set and/or check beams and pixels to be output */
 			status = set_output(verbose,
 				beams_bath,beams_amp,pixels_ss,
 				use_bath,use_amp,use_ss,
 				dump_mode,beam_set,pixel_set,
-				&beam_start,&beam_end,&pixel_start,&pixel_end,
+				beam_vertical, pixel_vertical, 
+				&beam_start,&beam_end,
+				&pixel_start,&pixel_end,
 				&n_list,list,&error);
 
 			if (status == MB_FAILURE)
@@ -675,7 +867,6 @@ main (int argc, char **argv)
 					program_name);
 				exit(error);
 				}
-
 
 			/* print debug statements */
 			if (verbose >= 2)
@@ -700,6 +891,8 @@ main (int argc, char **argv)
 					pixel_start);
 				fprintf(stderr,"dbg2       pixel_end:    %d\n",
 					pixel_end);
+				fprintf(stderr,"dbg2       check_values: %d\n",
+					check_values);
 				fprintf(stderr,"dbg2       check_bath:   %d\n",
 					check_bath);
 				fprintf(stderr,"dbg2       check_amp:    %d\n",
@@ -765,6 +958,44 @@ main (int argc, char **argv)
 						= speed_made_good_old;
 				}
 			}
+			
+		/* calculate slopes if required */
+		if (error == MB_ERROR_NO_ERROR 
+			&& use_slope == MB_YES)
+			{
+			/* get average slope */
+			ns = 0;
+			sx = 0.0;
+			sy = 0.0;
+			sxx = 0.0;
+			sxy = 0.0;
+			for (k=0;k<beams_bath;k++)
+			  if (mb_beam_ok(beamflag[k]))
+			    {
+			    sx += bathacrosstrack[k];
+			    sy += bath[k];
+			    sxx += bathacrosstrack[k]
+				*bathacrosstrack[k];
+			    sxy += bathacrosstrack[k]*bath[k];
+			    ns++;
+			    }
+			if (ns > 0)
+			  {
+			  delta = ns*sxx - sx*sx;
+			  a = (sxx*sy - sx*sxy)/delta;
+			  b = (ns*sxy - sx*sy)/delta;
+			  avgslope = RTD * atan(b);
+			  }
+			else
+			  avgslope = 0.0;
+			  
+			/* get per beam slope */
+			set_bathyslope(verbose, 
+				beams_bath,beamflag,bath,bathacrosstrack,
+				&ndepths,depths,depthacrosstrack,
+				&nslopes,slopes,slopeacrosstrack,
+				&error);
+			}
 
 		/* reset old values */
 		if (error == MB_ERROR_NO_ERROR)
@@ -782,14 +1013,26 @@ main (int argc, char **argv)
 		  {
 		  /* check beam status */
 		  beam_status = MB_SUCCESS;
-		  if (check_bath == MB_YES && !mb_beam_ok(beamflag[j]))
+		  if (check_bath == MB_YES 
+		    && check_values == MBLIST_CHECK_ON 
+		    && !mb_beam_ok(beamflag[j]))
 			beam_status = MB_FAILURE;
-		  if (check_amp == MB_YES && !mb_beam_ok(beamflag[j]))
+		  else if (check_bath == MB_YES 
+		    && check_values == MBLIST_CHECK_ON_NULL 
+		    && beamflag[j] == MB_FLAG_NULL)
 			beam_status = MB_FAILURE;
-		  if (check_ss == MB_YES && j != beams_bath/2)
+		  if (check_amp == MB_YES 
+		    && check_values == MBLIST_CHECK_ON 
+		    && !mb_beam_ok(beamflag[j]))
 			beam_status = MB_FAILURE;
-		  else if (check_ss == MB_YES && j == beams_bath/2)
-			if (ss[pixels_ss/2] <= 0)
+		  else if (check_amp == MB_YES 
+		    && check_values == MBLIST_CHECK_ON_NULL 
+		    && beamflag[j] == MB_FLAG_NULL)
+			beam_status = MB_FAILURE;
+		  if (check_ss == MB_YES && j != beam_vertical)
+			beam_status = MB_FAILURE;
+		  else if (check_ss == MB_YES && j == beam_vertical)
+			if (ss[pixel_vertical] <= 0)
 				beam_status = MB_FAILURE;
 		  if (use_time_interval == MB_YES && first == MB_YES)
 			beam_status = MB_FAILURE;
@@ -801,77 +1044,213 @@ main (int argc, char **argv)
 			{
 			switch (list[i]) 
 				{
-				case 'A': /* Seafloor crosstrack slope */
-				case 'a':
-					ns = 0;
-					sx = 0.0;
-					sy = 0.0;
-					sxx = 0.0;
-					sxy = 0.0;
-					for (k=0;k<beams_bath;k++)
-					  if (mb_beam_ok(beamflag[k]))
+				case '/': /* Inverts next simple value */
+					invert_next_value = MB_YES;
+					break;
+				case 'A': /* Average seafloor crosstrack slope */
+					printsimplevalue(verbose, avgslope, 0, 4, ascii, 
+							    &invert_next_value, &error);
+					break;
+				case 'a': /* Per-beam seafloor crosstrack slope */
+					if (beamflag[j] == MB_FLAG_NULL
+					    && (check_values == MBLIST_CHECK_OFF_NAN
+						|| check_values == MBLIST_CHECK_OFF_FLAGNAN))
 					    {
-					    sx += bathacrosstrack[k];
-					    sy += bath[k];
-					    sxx += bathacrosstrack[k]
-						*bathacrosstrack[k];
-					    sxy += bathacrosstrack[k]*bath[k];
-					    ns++;
+					    printNaN(verbose, ascii, &invert_next_value, &error);
 					    }
-					if (ns > 0)
-					  {
-					  delta = ns*sxx - sx*sx;
-					  a = (sxx*sy - sx*sxy)/delta;
-					  b = (ns*sxy - sx*sy)/delta;
-					  slope = atan(b)/DTR;
-					  }
+					else if (!mb_beam_ok(beamflag[j])
+					    && check_values == MBLIST_CHECK_OFF_FLAGNAN)
+					    {
+					    printNaN(verbose, ascii, &invert_next_value, &error);
+					    }
 					else
-					  slope = 0.0;
-					printf("%.4f",slope);
+					    {
+					    status = get_bathyslope(verbose,
+						ndepths,depths,depthacrosstrack,
+						nslopes,slopes,slopeacrosstrack,
+						bathacrosstrack[j],
+						&depth,&slope,&error);
+					    printsimplevalue(verbose, slope, 0, 4, ascii, 
+							    &invert_next_value, &error);
+					    }
 					break;
 				case 'B': /* amplitude */
-					printf("%.3f",amp[j]);
+					if (beamflag[j] == MB_FLAG_NULL
+					    && (check_values == MBLIST_CHECK_OFF_NAN
+						|| check_values == MBLIST_CHECK_OFF_FLAGNAN))
+					    {
+					    printNaN(verbose, ascii, &invert_next_value, &error);
+					    }
+					else if (!mb_beam_ok(beamflag[j])
+					    && check_values == MBLIST_CHECK_OFF_FLAGNAN)
+					    {
+					    printNaN(verbose, ascii, &invert_next_value, &error);
+					    }
+					else
+					    {
+					    printsimplevalue(verbose, amp[j], 0, 3, ascii, 
+							    &invert_next_value, &error);
+					    }
 					break;
 				case 'b': /* sidescan */
-					printf("%.3f",ss[pixels_ss/2]);
+					printsimplevalue(verbose, ss[pixel_vertical], 0, 3, ascii, 
+							    &invert_next_value, &error);
+					break;
+				case 'C': /* Sonar altitude (m) */
+					printsimplevalue(verbose, altitude, 0, 3, ascii, 
+							    &invert_next_value, &error);
+					break;
+				case 'c': /* Sonar transducer depth (m) */
+					printsimplevalue(verbose, sonardepth, 0, 3, ascii, 
+							    &invert_next_value, &error);
 					break;
 				case 'D': /* acrosstrack dist. */
 				case 'd':
-					printf("%.3f",
-					bathy_scale * bathacrosstrack[j]);
+					if (beamflag[j] == MB_FLAG_NULL
+					    && (check_values == MBLIST_CHECK_OFF_NAN
+						|| check_values == MBLIST_CHECK_OFF_FLAGNAN))
+					    {
+					    printNaN(verbose, ascii, &invert_next_value, &error);
+					    }
+					else if (!mb_beam_ok(beamflag[j])
+					    && check_values == MBLIST_CHECK_OFF_FLAGNAN)
+					    {
+					    printNaN(verbose, ascii, &invert_next_value, &error);
+					    }
+					else
+					    {
+					    b = bathy_scale * bathacrosstrack[j];
+					    printsimplevalue(verbose, b, 0, 3, ascii, 
+							    &invert_next_value, &error);
+					    }
 					break;
 				case 'E': /* alongtrack dist. */
 				case 'e':
-					printf("%.3f",
-					bathy_scale * bathalongtrack[j]);
+					if (beamflag[j] == MB_FLAG_NULL
+					    && (check_values == MBLIST_CHECK_OFF_NAN
+						|| check_values == MBLIST_CHECK_OFF_FLAGNAN))
+					    {
+					    printNaN(verbose, ascii, &invert_next_value, &error);
+					    }
+					else if (!mb_beam_ok(beamflag[j])
+					    && check_values == MBLIST_CHECK_OFF_FLAGNAN)
+					    {
+					    printNaN(verbose, ascii, &invert_next_value, &error);
+					    }
+					else
+					    {
+					    b = bathy_scale * bathalongtrack[j];
+					    printsimplevalue(verbose, b, 0, 3, ascii, 
+							    &invert_next_value, &error);
+					    }
+					break;
+				case 'G': /* flat bottom grazing angle */
+					if (beamflag[j] == MB_FLAG_NULL
+					    && (check_values == MBLIST_CHECK_OFF_NAN
+						|| check_values == MBLIST_CHECK_OFF_FLAGNAN))
+					    {
+					    printNaN(verbose, ascii, &invert_next_value, &error);
+					    }
+					else if (!mb_beam_ok(beamflag[j])
+					    && check_values == MBLIST_CHECK_OFF_FLAGNAN)
+					    {
+					    printNaN(verbose, ascii, &invert_next_value, &error);
+					    }
+					else
+					    {
+					    angle = RTD*(atan(bathacrosstrack[j] / bath[j]));
+					    printsimplevalue(verbose, angle, 0, 2, ascii, 
+							    &invert_next_value, &error);
+					    }
+					break;
+				case 'g': /* grazing angle using slope */
+					if (beamflag[j] == MB_FLAG_NULL
+					    && (check_values == MBLIST_CHECK_OFF_NAN
+						|| check_values == MBLIST_CHECK_OFF_FLAGNAN))
+					    {
+					    printNaN(verbose, ascii, &invert_next_value, &error);
+					    }
+					else if (!mb_beam_ok(beamflag[j])
+					    && check_values == MBLIST_CHECK_OFF_FLAGNAN)
+					    {
+					    printNaN(verbose, ascii, &invert_next_value, &error);
+					    }
+					else
+					    {
+					    status = get_bathyslope(verbose,
+						ndepths,depths,depthacrosstrack,
+						nslopes,slopes,slopeacrosstrack,
+						bathacrosstrack[j],
+						&depth,&slope,&error);
+					    angle = RTD * (atan(bathacrosstrack[j] / bath[j]))
+						+ slope;
+					    printsimplevalue(verbose, angle, 0, 2, ascii, 
+							    &invert_next_value, &error);
+					    }
 					break;
 				case 'H': /* heading */
-					printf("%5.1f",heading);
+					printsimplevalue(verbose, heading, 5, 1, ascii, 
+							    &invert_next_value, &error);
 					break;
 				case 'h': /* course */
-					printf("%5.1f",course);
+					printsimplevalue(verbose, course, 5, 1, ascii, 
+							    &invert_next_value, &error);
 					break;
 				case 'J': /* time string */
 					mb_get_jtime(verbose,time_i,time_j);
-					printf(
-					"%.4d %.3d %.2d %.2d %.2d.%6.6d",
-					time_j[0],time_j[1],
-					time_i[3],time_i[4],
-					time_i[5],time_i[6]);
+					if (ascii == MB_YES)
+					    {
+					    printf("%.4d %.3d %.2d %.2d %.2d.%6.6d",
+						time_j[0],time_j[1],
+						time_i[3],time_i[4],
+						time_i[5],time_i[6]);
+					    }
+					else
+					    {
+					    b = time_j[0];
+					    fwrite(&b, sizeof(double), 1, stdout);
+					    b = time_j[1];
+					    fwrite(&b, sizeof(double), 1, stdout);
+					    b = time_i[3];
+					    fwrite(&b, sizeof(double), 1, stdout);
+					    b = time_i[4];
+					    fwrite(&b, sizeof(double), 1, stdout);
+					    b = time_i[5];
+					    fwrite(&b, sizeof(double), 1, stdout);
+					    b = time_i[6];
+					    fwrite(&b, sizeof(double), 1, stdout);
+					    }
 					break;
 				case 'j': /* time string */
 					mb_get_jtime(verbose,time_i,time_j);
-					printf(
-					"%.4d %.3d %.4d %.2d.%6.6d",
-					time_j[0],time_j[1],
-					time_j[2],time_j[3],time_j[4]);
+					if (ascii == MB_YES)
+					    {
+					    printf("%.4d %.3d %.4d %.2d.%6.6d",
+						time_j[0],time_j[1],
+						time_j[2],time_j[3],time_j[4]);
+					    }
+					else
+					    {
+					    b = time_j[0];
+					    fwrite(&b, sizeof(double), 1, stdout);
+					    b = time_j[1];
+					    fwrite(&b, sizeof(double), 1, stdout);
+					    b = time_j[2];
+					    fwrite(&b, sizeof(double), 1, stdout);
+					    b = time_j[3];
+					    fwrite(&b, sizeof(double), 1, stdout);
+					    b = time_j[4];
+					    fwrite(&b, sizeof(double), 1, stdout);
+					    }
 					break;
 				case 'L': /* along-track dist. */
-					printf("%7.3f",distance_total);
+					printsimplevalue(verbose, distance_total, 7, 3, ascii, 
+							    &invert_next_value, &error);
 					break;
 				case 'M': /* Decimal unix seconds since 
 						1/1/70 00:00:00 */
-					printf("%.6f",time_d);
+					printsimplevalue(verbose, time_d, 0, 6, ascii, 
+							    &invert_next_value, &error);
 					break;
 				case 'm': /* time in decimal seconds since 
 						first record */
@@ -880,34 +1259,80 @@ main (int argc, char **argv)
 						time_d_ref = time_d;
 						first_m = MB_NO;
 						}
-					printf("%.6f",time_d - time_d_ref);
+					b = time_d - time_d_ref;
+					printsimplevalue(verbose, b, 0, 6, ascii, 
+							    &invert_next_value, &error);
 					break;
 				case 'N': /* ping counter */
-					printf("%6d",nread);
+					if (ascii == MB_YES)
+					    printf("%6d",nread);
+					else
+					    {
+					    b = nread;
+					    fwrite(&b, sizeof(double), 1, stdout);
+					    }
 					break;
 				case 'S': /* speed */
-					printf("%5.2f",speed);
+					printsimplevalue(verbose, speed, 5, 2, ascii, 
+							    &invert_next_value, &error);
 					break;
 				case 's': /* speed made good */
-					printf("%5.2f",speed_made_good);
+					printsimplevalue(verbose, speed_made_good, 5, 2, ascii, 
+							    &invert_next_value, &error);
 					break;
 				case 'T': /* yyyy/mm/dd/hh/mm/ss time string */
-					printf(
-					"%.4d/%.2d/%.2d/%.2d/%.2d/%.2d.%.6d",
-					time_i[0],time_i[1],time_i[2],
-					time_i[3],time_i[4],time_i[5],
-					time_i[6]);
+					if (ascii == MB_YES)
+					    printf("%.4d/%.2d/%.2d/%.2d/%.2d/%.2d.%.6d",
+						time_i[0],time_i[1],time_i[2],
+						time_i[3],time_i[4],time_i[5],
+						time_i[6]);
+					else
+					    {
+					    b = time_i[0];
+					    fwrite(&b, sizeof(double), 1, stdout);
+					    b = time_i[1];
+					    fwrite(&b, sizeof(double), 1, stdout);
+					    b = time_i[2];
+					    fwrite(&b, sizeof(double), 1, stdout);
+					    b = time_i[3];
+					    fwrite(&b, sizeof(double), 1, stdout);
+					    b = time_i[4];
+					    fwrite(&b, sizeof(double), 1, stdout);
+					    b = time_i[5] + 1e-6 * time_i[6];
+					    fwrite(&b, sizeof(double), 1, stdout);
+					    }
 					break;
 				case 't': /* yyyy mm dd hh mm ss time string */
-					printf(
-					"%.4d %.2d %.2d %.2d %.2d %.2d.%.6d",
-					time_i[0],time_i[1],time_i[2],
-					time_i[3],time_i[4],time_i[5],
-					time_i[6]);
+					if (ascii == MB_YES)
+					    printf("%.4d %.2d %.2d %.2d %.2d %.2d.%.6d",
+						time_i[0],time_i[1],time_i[2],
+						time_i[3],time_i[4],time_i[5],
+						time_i[6]);
+					else
+					    {
+					    b = time_i[0];
+					    fwrite(&b, sizeof(double), 1, stdout);
+					    b = time_i[1];
+					    fwrite(&b, sizeof(double), 1, stdout);
+					    b = time_i[2];
+					    fwrite(&b, sizeof(double), 1, stdout);
+					    b = time_i[3];
+					    fwrite(&b, sizeof(double), 1, stdout);
+					    b = time_i[4];
+					    fwrite(&b, sizeof(double), 1, stdout);
+					    b = time_i[5] + 1e-6 * time_i[6];
+					    fwrite(&b, sizeof(double), 1, stdout);
+					    }
 					break;
 				case 'U': /* unix time in seconds since 1/1/70 00:00:00 */
 					time_u = (int) time_d;
-					printf("%d",time_u);
+					if (ascii == MB_YES)
+					    printf("%d",time_u);
+					else
+					    {
+					    b = time_u;
+					    fwrite(&b, sizeof(double), 1, stdout);
+					    }
 					break;
 				case 'u': /* time in seconds since first record */
 					time_u = (int) time_d;
@@ -916,29 +1341,45 @@ main (int argc, char **argv)
 						time_u_ref = time_u;
 						first_u = MB_NO;
 						}
-					printf("%d",time_u - time_u_ref);
+					if (ascii == MB_YES)
+					    printf("%d",time_u - time_u_ref);
+					else
+					    {
+					    b = time_u - time_u_ref;
+					    fwrite(&b, sizeof(double), 1, stdout);
+					    }
 					break;
 				case 'V': /* time in seconds since last ping */
 				case 'v': 
-					if ( fabs(time_interval) > 100. )
+					if (ascii == MB_YES)
+					    {
+					    if ( fabs(time_interval) > 100. )
 						printf("%g",time_interval); 
-					else
+					    else
 						printf("%7.3f",time_interval);
+					    }
+					else
+					    {
+					    fwrite(&time_interval, sizeof(double), 1, stdout);
+					    }
 					break;
 				case 'X': /* longitude decimal degrees */
-					dlon = navlon 
-					+ headingy*mtodeglon
-						*bathacrosstrack[j]
-					+ headingx*mtodeglon
-						*bathalongtrack[j];
-					printf("%11.6f",dlon);
+					dlon = navlon;
+					if (beam_set != MBLIST_SET_OFF)
+					    dlon += headingy*mtodeglon
+							*bathacrosstrack[j]
+						    + headingx*mtodeglon
+							*bathalongtrack[j];
+					printsimplevalue(verbose, dlon, 11, 6, ascii, 
+							    &invert_next_value, &error);
 					break;
 				case 'x': /* longitude degress + decimal minutes */
-					dlon = navlon 
-					+ headingy*mtodeglon
-						*bathacrosstrack[j]
-					+ headingx*mtodeglon
-						*bathalongtrack[j];
+					dlon = navlon;
+					if (beam_set != MBLIST_SET_OFF)
+					    dlon += headingy*mtodeglon
+							*bathacrosstrack[j]
+						    + headingx*mtodeglon
+							*bathalongtrack[j];
 					if (dlon < 0.0)
 						{
 						hemi = 'W';
@@ -948,23 +1389,37 @@ main (int argc, char **argv)
 						hemi = 'E';
 					degrees = (int) dlon;
 					minutes = 60.0*(dlon - degrees);
-					printf("%3d %8.5f%c",
+					if (ascii == MB_YES)
+					    {
+					    printf("%3d %8.5f%c",
 						degrees, minutes, hemi);
+					    }
+					else
+					    {
+					    b = degrees;
+					    if (hemi == 'W') b = -b;
+					    fwrite(&b, sizeof(double), 1, stdout);
+					    b = minutes;
+					    fwrite(&b, sizeof(double), 1, stdout);
+					    }
 					break;
 				case 'Y': /* latitude decimal degrees */
-					dlat = navlat 
-					- headingx*mtodeglat
-						*bathacrosstrack[j]
-					+ headingy*mtodeglat
-						*bathalongtrack[j];
-					printf("%11.6f",dlat);
+					dlat = navlat;
+					if (beam_set != MBLIST_SET_OFF)
+					    dlat += headingx*mtodeglat
+							*bathacrosstrack[j]
+						    + headingy*mtodeglat
+							*bathalongtrack[j];
+					printsimplevalue(verbose, dlat, 11, 6, ascii, 
+							    &invert_next_value, &error);
 					break;
 				case 'y': /* latitude degrees + decimal minutes */
-					dlat = navlat 
-					- headingx*mtodeglat
-						*bathacrosstrack[j]
-					+ headingy*mtodeglat
-						*bathalongtrack[j];
+					dlat = navlat;
+					if (beam_set != MBLIST_SET_OFF)
+					    dlat += headingx*mtodeglat
+							*bathacrosstrack[j]
+						    + headingy*mtodeglat
+							*bathalongtrack[j];
 					if (dlat < 0.0)
 						{
 						hemi = 'S';
@@ -974,25 +1429,78 @@ main (int argc, char **argv)
 						hemi = 'N';
 					degrees = (int) dlat;
 					minutes = 60.0*(dlat - degrees);
-					printf("%3d %8.5f%c",
+					if (ascii == MB_YES)
+					    {
+					    printf("%3d %8.5f%c",
 						degrees, minutes, hemi);
+					    }
+					else
+					    {
+					    b = degrees;
+					    if (hemi == 'S') b = -b;
+					    fwrite(&b, sizeof(double), 1, stdout);
+					    b = minutes;
+					    fwrite(&b, sizeof(double), 1, stdout);
+					    }
 					break;
 				case 'Z': /* topography */
-					printf("%.3f",-bathy_scale * bath[j]);
+					if (beamflag[j] == MB_FLAG_NULL
+					    && (check_values == MBLIST_CHECK_OFF_NAN
+						|| check_values == MBLIST_CHECK_OFF_FLAGNAN))
+					    {
+					    printNaN(verbose, ascii, &invert_next_value, &error);
+					    }
+					else if (!mb_beam_ok(beamflag[j])
+					    && check_values == MBLIST_CHECK_OFF_FLAGNAN)
+					    {
+					    printNaN(verbose, ascii, &invert_next_value, &error);
+					    }
+					else
+					    {
+					    b = -bathy_scale * bath[j];
+					    printsimplevalue(verbose, b, 0, 3, ascii, 
+							    &invert_next_value, &error);
+					    }
 					break;
 				case 'z': /* depth */
-					printf("%.3f",bathy_scale * bath[j]);
+					if (beamflag[j] == MB_FLAG_NULL
+					    && (check_values == MBLIST_CHECK_OFF_NAN
+						|| check_values == MBLIST_CHECK_OFF_FLAGNAN))
+					    {
+					    printNaN(verbose, ascii, &invert_next_value, &error);
+					    }
+					else if (!mb_beam_ok(beamflag[j])
+					    && check_values == MBLIST_CHECK_OFF_FLAGNAN)
+					    {
+					    printNaN(verbose, ascii, &invert_next_value, &error);
+					    }
+					else
+					    {
+					    b = bathy_scale * bath[j];
+					    printsimplevalue(verbose, b, 0, 3, ascii, 
+							    &invert_next_value, &error);
+					    }
 					break;
 				case '#': /* beam number */
-					printf("%6d",j);
+					if (ascii == MB_YES)
+					    printf("%6d",j);
+					else
+					    {
+					    b = j;
+					    fwrite(&b, sizeof(double), 1, stdout);
+					    }
 					break;
 				default:
-					printf("<Invalid Option: %c>",
+					if (ascii == MB_YES)
+					    printf("<Invalid Option: %c>",
 						list[i]);
 					break;
 				}
-				if (i<(n_list-1)) printf ("\t");
-				else printf ("\n");
+			if (ascii == MB_YES)
+			    {
+			    if (i<(n_list-1)) printf ("\t");
+			    else printf ("\n");
+			    }
 			}
 		    }
 		  }
@@ -1003,16 +1511,28 @@ main (int argc, char **argv)
 		  {
 		  /* check pixel status */
 		  pixel_status = MB_SUCCESS;
-		  if (check_bath == MB_YES && j != pixels_ss/2)
+		  if (check_bath == MB_YES && j != pixel_vertical)
 			pixel_status = MB_FAILURE;
-		  else if (check_bath == MB_YES && j == pixels_ss/2)
-			if (!mb_beam_ok(beamflag[beams_bath/2]))
+		  else if (check_bath == MB_YES && j == pixel_vertical)
+			{
+			if (check_values == MBLIST_CHECK_ON
+			    && !mb_beam_ok(beamflag[beam_vertical]))
 				pixel_status = MB_FAILURE;
-		  if (check_amp == MB_YES && j != pixels_ss/2)
+			else if (check_values == MBLIST_CHECK_ON_NULL
+			    && beamflag[beam_vertical] == MB_FLAG_NULL)
+				pixel_status = MB_FAILURE;
+			}
+		  if (check_amp == MB_YES && j != pixel_vertical)
 			pixel_status = MB_FAILURE;
-		  else if (check_amp == MB_YES && j == pixels_ss/2)
-			if (!mb_beam_ok(beamflag[beams_bath/2]))
+		  else if (check_amp == MB_YES && j == pixel_vertical)
+			{
+			if (check_values == MBLIST_CHECK_ON
+			    && !mb_beam_ok(beamflag[beam_vertical]))
 				pixel_status = MB_FAILURE;
+			else if (check_values == MBLIST_CHECK_ON_NULL
+			    && beamflag[beam_vertical] == MB_FLAG_NULL)
+				pixel_status = MB_FAILURE;
+			}
 		  if (check_ss == MB_YES && ss[j] <= 0)
 			pixel_status = MB_FAILURE;
 		  if (use_time_interval == MB_YES && first == MB_YES)
@@ -1025,108 +1545,216 @@ main (int argc, char **argv)
 			{
 			switch (list[i]) 
 				{
-				case 'A': /* Seafloor crosstrack slope */
-				case 'a':
-					ns = 0;
-					sx = 0.0;
-					sy = 0.0;
-					sxx = 0.0;
-					sxy = 0.0;
-					for (k=0;k<beams_bath;k++)
-					  if (mb_beam_ok(beamflag[k]))
-					    {
-					    sx += bathacrosstrack[k];
-					    sy += bath[k];
-					    sxx += bathacrosstrack[k]
-						*bathacrosstrack[k];
-					    sxy += bathacrosstrack[k]*bath[k];
-					    ns++;
-					    }
-					if (ns > 0)
-					  {
-					  delta = ns*sxx - sx*sx;
-					  a = (sxx*sy - sx*sxy)/delta;
-					  b = (ns*sxy - sx*sy)/delta;
-					  slope = atan(b)/DTR;
-					  }
-					else
-					  slope = 0.0;
-					printf("%.4f",slope);
+				case '/': /* Inverts next simple value */
+					invert_next_value = MB_YES;
+					break;
+				case 'A': /* Average seafloor crosstrack slope */
+					printsimplevalue(verbose, avgslope, 0, 4, ascii, 
+							    &invert_next_value, &error);
+					break;
+				case 'a': /* Per-pixel seafloor crosstrack slope */
+					status = get_bathyslope(verbose,
+						ndepths,depths,depthacrosstrack,
+						nslopes,slopes,slopeacrosstrack,
+						ssacrosstrack[j],
+						&depth,&slope,&error);
+					printsimplevalue(verbose, slope, 0, 4, ascii, 
+							    &invert_next_value, &error);
 					break;
 				case 'B': /* amplitude */
-					printf("%.3f",amp[beams_bath/2]);
+					printsimplevalue(verbose, amp[beam_vertical], 0, 3, ascii, 
+							    &invert_next_value, &error);
 					break;
 				case 'b': /* sidescan */
-					printf("%.3f",ss[j]);
+					printsimplevalue(verbose, ss[j], 0, 3, ascii, 
+							    &invert_next_value, &error);
+					break;
+				case 'C': /* Sonar altitude (m) */
+					printsimplevalue(verbose, altitude, 0, 3, ascii, 
+							    &invert_next_value, &error);
+					break;
+				case 'c': /* Sonar transducer depth (m) */
+					printsimplevalue(verbose, sonardepth, 0, 3, ascii, 
+							    &invert_next_value, &error);
 					break;
 				case 'D': /* acrosstrack dist. */
 				case 'd':
-					printf("%.3f",
-					bathy_scale * ssacrosstrack[j]);
+					b = bathy_scale * ssacrosstrack[j];
+					printsimplevalue(verbose, b, 0, 3, ascii, 
+							&invert_next_value, &error);
 					break;
 				case 'E': /* alongtrack dist. */
 				case 'e':
-					printf("%.3f",
-					bathy_scale * ssalongtrack[j]);
+					b = bathy_scale * ssalongtrack[j];
+					printsimplevalue(verbose, b, 0, 3, ascii, 
+							&invert_next_value, &error);
+					break;
+				case 'G': /* flat bottom grazing angle */
+					status = get_bathyslope(verbose,
+					    ndepths,depths,depthacrosstrack,
+					    nslopes,slopes,slopeacrosstrack,
+					    ssacrosstrack[j],
+					    &depth,&slope,&error);
+					angle = RTD*(atan(ssacrosstrack[j] / depth));
+					printsimplevalue(verbose, angle, 0, 2, ascii, 
+							    &invert_next_value, &error);
+					break;
+				case 'g': /* grazing angle using slope */
+					status = get_bathyslope(verbose,
+					    ndepths,depths,depthacrosstrack,
+					    nslopes,slopes,slopeacrosstrack,
+					    ssacrosstrack[j],
+					    &depth,&slope,&error);
+					angle = RTD * (atan(bathacrosstrack[j] / depth))
+					    + slope;
+					printsimplevalue(verbose, angle, 0, 2, ascii, 
+							    &invert_next_value, &error);
 					break;
 				case 'H': /* heading */
-					printf("%5.1f",heading);
+					printsimplevalue(verbose, heading, 5, 1, ascii, 
+							    &invert_next_value, &error);
 					break;
 				case 'h': /* course */
-					printf("%5.1f",course);
+					printsimplevalue(verbose, course, 5, 1, ascii, 
+							    &invert_next_value, &error);
 					break;
 				case 'J': /* time string */
 					mb_get_jtime(verbose,time_i,time_j);
-					printf(
-					"%.4d %.3d %.2d %.2d %.2d",
-					time_j[0],time_j[1],
-					time_i[3],time_i[4],time_i[5]);
+					if (ascii == MB_YES)
+					    {
+					    printf("%.4d %.3d %.2d %.2d %.2d.%6.6d",
+						time_j[0],time_j[1],
+						time_i[3],time_i[4],
+						time_i[5],time_i[6]);
+					    }
+					else
+					    {
+					    b = time_j[0];
+					    fwrite(&b, sizeof(double), 1, stdout);
+					    b = time_j[1];
+					    fwrite(&b, sizeof(double), 1, stdout);
+					    b = time_i[3];
+					    fwrite(&b, sizeof(double), 1, stdout);
+					    b = time_i[4];
+					    fwrite(&b, sizeof(double), 1, stdout);
+					    b = time_i[5];
+					    fwrite(&b, sizeof(double), 1, stdout);
+					    b = time_i[6];
+					    fwrite(&b, sizeof(double), 1, stdout);
+					    }
 					break;
 				case 'j': /* time string */
 					mb_get_jtime(verbose,time_i,time_j);
-					printf(
-					"%.4d %.3d %.4d %.2d",
-					time_j[0],time_j[1],
-					time_j[2],time_j[3]);
+					if (ascii == MB_YES)
+					    {
+					    printf("%.4d %.3d %.4d %.2d.%6.6d",
+						time_j[0],time_j[1],
+						time_j[2],time_j[3],time_j[4]);
+					    }
+					else
+					    {
+					    b = time_j[0];
+					    fwrite(&b, sizeof(double), 1, stdout);
+					    b = time_j[1];
+					    fwrite(&b, sizeof(double), 1, stdout);
+					    b = time_j[2];
+					    fwrite(&b, sizeof(double), 1, stdout);
+					    b = time_j[3];
+					    fwrite(&b, sizeof(double), 1, stdout);
+					    b = time_j[4];
+					    fwrite(&b, sizeof(double), 1, stdout);
+					    }
 					break;
 				case 'L': /* along-track dist. */
-					printf("%7.3f",distance_total);
+					printsimplevalue(verbose, distance_total, 7, 3, ascii, 
+							    &invert_next_value, &error);
 					break;
-				case 'M': /* Unix time in decimal seconds since 1/1/70 00:00:00 */
-					printf("%.6f",time_d);
+				case 'M': /* Decimal unix seconds since 
+						1/1/70 00:00:00 */
+					printsimplevalue(verbose, time_d, 0, 6, ascii, 
+							    &invert_next_value, &error);
 					break;
-				case 'm': /* time in decimal seconds since first record */
+				case 'm': /* time in decimal seconds since 
+						first record */
 					if (first_m == MB_YES)
 						{
 						time_d_ref = time_d;
 						first_m = MB_NO;
 						}
-					printf("%.6f",time_d - time_d_ref);
+					b = time_d - time_d_ref;
+					printsimplevalue(verbose, b, 0, 6, ascii, 
+							    &invert_next_value, &error);
 					break;
 				case 'N': /* ping counter */
-					printf("%6d",nread);
+					if (ascii == MB_YES)
+					    printf("%6d",nread);
+					else
+					    {
+					    b = nread;
+					    fwrite(&b, sizeof(double), 1, stdout);
+					    }
 					break;
 				case 'S': /* speed */
-					printf("%5.2f",speed);
+					printsimplevalue(verbose, speed, 5, 2, ascii, 
+							    &invert_next_value, &error);
 					break;
 				case 's': /* speed made good */
-					printf("%5.2f",speed_made_good);
+					printsimplevalue(verbose, speed_made_good, 5, 2, ascii, 
+							    &invert_next_value, &error);
 					break;
 				case 'T': /* yyyy/mm/dd/hh/mm/ss time string */
-					printf(
-					"%.4d/%.2d/%.2d/%.2d/%.2d/%.2d",
-					time_i[0],time_i[1],time_i[2],
-					time_i[3],time_i[4],time_i[5]);
+					if (ascii == MB_YES)
+					    printf("%.4d/%.2d/%.2d/%.2d/%.2d/%.2d.%.6d",
+						time_i[0],time_i[1],time_i[2],
+						time_i[3],time_i[4],time_i[5],
+						time_i[6]);
+					else
+					    {
+					    b = time_i[0];
+					    fwrite(&b, sizeof(double), 1, stdout);
+					    b = time_i[1];
+					    fwrite(&b, sizeof(double), 1, stdout);
+					    b = time_i[2];
+					    fwrite(&b, sizeof(double), 1, stdout);
+					    b = time_i[3];
+					    fwrite(&b, sizeof(double), 1, stdout);
+					    b = time_i[4];
+					    fwrite(&b, sizeof(double), 1, stdout);
+					    b = time_i[5] + 1e-6 * time_i[6];
+					    fwrite(&b, sizeof(double), 1, stdout);
+					    }
 					break;
 				case 't': /* yyyy mm dd hh mm ss time string */
-					printf(
-					"%.4d %.2d %.2d %.2d %.2d %.2d",
-					time_i[0],time_i[1],time_i[2],
-					time_i[3],time_i[4],time_i[5]);
+					if (ascii == MB_YES)
+					    printf("%.4d %.2d %.2d %.2d %.2d %.2d.%.6d",
+						time_i[0],time_i[1],time_i[2],
+						time_i[3],time_i[4],time_i[5],
+						time_i[6]);
+					else
+					    {
+					    b = time_i[0];
+					    fwrite(&b, sizeof(double), 1, stdout);
+					    b = time_i[1];
+					    fwrite(&b, sizeof(double), 1, stdout);
+					    b = time_i[2];
+					    fwrite(&b, sizeof(double), 1, stdout);
+					    b = time_i[3];
+					    fwrite(&b, sizeof(double), 1, stdout);
+					    b = time_i[4];
+					    fwrite(&b, sizeof(double), 1, stdout);
+					    b = time_i[5] + 1e-6 * time_i[6];
+					    fwrite(&b, sizeof(double), 1, stdout);
+					    }
 					break;
 				case 'U': /* unix time in seconds since 1/1/70 00:00:00 */
 					time_u = (int) time_d;
-					printf("%d",time_u);
+					if (ascii == MB_YES)
+					    printf("%d",time_u);
+					else
+					    {
+					    b = time_u;
+					    fwrite(&b, sizeof(double), 1, stdout);
+					    }
 					break;
 				case 'u': /* time in seconds since first record */
 					time_u = (int) time_d;
@@ -1135,29 +1763,45 @@ main (int argc, char **argv)
 						time_u_ref = time_u;
 						first_u = MB_NO;
 						}
-					printf("%d",time_u - time_u_ref);
+					if (ascii == MB_YES)
+					    printf("%d",time_u - time_u_ref);
+					else
+					    {
+					    b = time_u - time_u_ref;
+					    fwrite(&b, sizeof(double), 1, stdout);
+					    }
 					break;
 				case 'V': /* time in seconds since last ping */
 				case 'v': 
-					if ( fabs(time_interval) > 100. )
+					if (ascii == MB_YES)
+					    {
+					    if ( fabs(time_interval) > 100. )
 						printf("%g",time_interval); 
-					else
+					    else
 						printf("%7.3f",time_interval);
+					    }
+					else
+					    {
+					    fwrite(&time_interval, sizeof(double), 1, stdout);
+					    }
 					break;
 				case 'X': /* longitude decimal degrees */
-					dlon = navlon 
-					+ headingy*mtodeglon
-						*ssacrosstrack[j]
-					+ headingx*mtodeglon
-						*ssalongtrack[j];
-					printf("%11.6f",dlon);
+					dlon = navlon;
+					if (pixel_set != MBLIST_SET_OFF)
+					    dlon += headingy*mtodeglon
+							*ssacrosstrack[j]
+						    + headingx*mtodeglon
+							*ssalongtrack[j];
+					printsimplevalue(verbose, dlon, 11, 6, ascii, 
+							    &invert_next_value, &error);
 					break;
 				case 'x': /* longitude degress + decimal minutes */
-					dlon = navlon 
-					+ headingy*mtodeglon
-						*ssacrosstrack[j]
-					+ headingx*mtodeglon
-						*ssalongtrack[j];
+					dlon = navlon;
+					if (pixel_set != MBLIST_SET_OFF)
+					    dlon += headingy*mtodeglon
+							*ssacrosstrack[j]
+						    + headingx*mtodeglon
+							*ssalongtrack[j];
 					if (dlon < 0.0)
 						{
 						hemi = 'W';
@@ -1167,16 +1811,29 @@ main (int argc, char **argv)
 						hemi = 'E';
 					degrees = (int) dlon;
 					minutes = 60.0*(dlon - degrees);
-					printf("%3d %8.5f%c",
+					if (ascii == MB_YES)
+					    {
+					    printf("%3d %8.5f%c",
 						degrees, minutes, hemi);
+					    }
+					else
+					    {
+					    b = degrees;
+					    if (hemi == 'W') b = -b;
+					    fwrite(&b, sizeof(double), 1, stdout);
+					    b = minutes;
+					    fwrite(&b, sizeof(double), 1, stdout);
+					    }
 					break;
 				case 'Y': /* latitude decimal degrees */
-					dlat = navlat 
-					- headingx*mtodeglat
-						*ssacrosstrack[j]
-					+ headingy*mtodeglat
-						*ssalongtrack[j];
-					printf("%11.6f",dlat);
+					dlat = navlat;
+					if (pixel_set != MBLIST_SET_OFF)
+					    dlat += headingx*mtodeglat
+							*ssacrosstrack[j]
+						    + headingy*mtodeglat
+							*ssalongtrack[j];
+					printsimplevalue(verbose, dlat, 11, 6, ascii, 
+							    &invert_next_value, &error);
 					break;
 				case 'y': /* latitude degrees + decimal minutes */
 					dlat = navlat 
@@ -1193,14 +1850,57 @@ main (int argc, char **argv)
 						hemi = 'N';
 					degrees = (int) dlat;
 					minutes = 60.0*(dlat - degrees);
-					printf("%3d %8.5f%c",
+					if (ascii == MB_YES)
+					    {
+					    printf("%3d %8.5f%c",
 						degrees, minutes, hemi);
+					    }
+					else
+					    {
+					    b = degrees;
+					    if (hemi == 'S') b = -b;
+					    fwrite(&b, sizeof(double), 1, stdout);
+					    b = minutes;
+					    fwrite(&b, sizeof(double), 1, stdout);
+					    }
 					break;
 				case 'Z': /* topography */
-					printf("%.3f",-bathy_scale * bath[beams_bath/2]);
+					if (beamflag[beam_vertical] == MB_FLAG_NULL
+					    && (check_values == MBLIST_CHECK_OFF_NAN
+						|| check_values == MBLIST_CHECK_OFF_FLAGNAN))
+					    {
+					    printNaN(verbose, ascii, &invert_next_value, &error);
+					    }
+					else if (!mb_beam_ok(beamflag[beam_vertical])
+					    && check_values == MBLIST_CHECK_OFF_FLAGNAN)
+					    {
+					    printNaN(verbose, ascii, &invert_next_value, &error);
+					    }
+					else
+					    {
+					    b = -bathy_scale * bath[beam_vertical];
+					    printsimplevalue(verbose, b, 0, 3, ascii, 
+							    &invert_next_value, &error);
+					    }
 					break;
 				case 'z': /* depth */
-					printf("%.3f",bathy_scale * bath[beams_bath/2]);
+					if (beamflag[beam_vertical] == MB_FLAG_NULL
+					    && (check_values == MBLIST_CHECK_OFF_NAN
+						|| check_values == MBLIST_CHECK_OFF_FLAGNAN))
+					    {
+					    printNaN(verbose, ascii, &invert_next_value, &error);
+					    }
+					else if (!mb_beam_ok(beamflag[beam_vertical])
+					    && check_values == MBLIST_CHECK_OFF_FLAGNAN)
+					    {
+					    printNaN(verbose, ascii, &invert_next_value, &error);
+					    }
+					else
+					    {
+					    b = bathy_scale * bath[beam_vertical];
+					    printsimplevalue(verbose, b, 0, 3, ascii, 
+							    &invert_next_value, &error);
+					    }
 					break;
 				case '#': /* pixel number */
 					printf("%6d",j);
@@ -1236,6 +1936,10 @@ main (int argc, char **argv)
 	mb_free(verbose,&ss,&error); 
 	mb_free(verbose,&ssacrosstrack,&error); 
 	mb_free(verbose,&ssalongtrack,&error); 
+	mb_free(verbose,&depths,&error);
+	mb_free(verbose,&depthacrosstrack,&error);
+	mb_free(verbose,&slopes,&error);
+	mb_free(verbose,&slopeacrosstrack,&error);
 
 	/* figure out whether and what to read next */
         if (read_datalist == MB_YES)
@@ -1284,6 +1988,8 @@ int set_output(	int	verbose,
 		int	dump_mode, 
 		int	beam_set, 
 		int	pixel_set, 
+		int	beam_vertical, 
+		int	pixel_vertical, 
 		int	*beam_start, 
 		int	*beam_end, 
 		int	*pixel_start, 
@@ -1302,23 +2008,25 @@ int set_output(	int	verbose,
 		fprintf(stderr,"\ndbg2  MBLIST function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:       %d\n",verbose);
-		fprintf(stderr,"dbg2       beams_bath:    %d\n",beams_bath);
-		fprintf(stderr,"dbg2       beams_amp:     %d\n",beams_amp);
-		fprintf(stderr,"dbg2       pixels_ss:     %d\n",pixels_ss);
-		fprintf(stderr,"dbg2       use_bath:      %d\n",use_bath);
-		fprintf(stderr,"dbg2       use_amp:       %d\n",use_amp);
-		fprintf(stderr,"dbg2       use_ss:        %d\n",use_ss);
-		fprintf(stderr,"dbg2       dump_mode:     %d\n",dump_mode);
-		fprintf(stderr,"dbg2       beam_set:      %d\n",beam_set);
-		fprintf(stderr,"dbg2       pixel_set:     %d\n",pixel_set);
-		fprintf(stderr,"dbg2       beam_start:    %d\n",*beam_start);
-		fprintf(stderr,"dbg2       beam_end:      %d\n",*beam_end);
-		fprintf(stderr,"dbg2       pixel_start:   %d\n",*pixel_start);
-		fprintf(stderr,"dbg2       pixel_end:     %d\n",*pixel_end);
-		fprintf(stderr,"dbg2       n_list:        %d\n",*n_list);
+		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
+		fprintf(stderr,"dbg2       beams_bath:      %d\n",beams_bath);
+		fprintf(stderr,"dbg2       beams_amp:       %d\n",beams_amp);
+		fprintf(stderr,"dbg2       pixels_ss:       %d\n",pixels_ss);
+		fprintf(stderr,"dbg2       use_bath:        %d\n",use_bath);
+		fprintf(stderr,"dbg2       use_amp:         %d\n",use_amp);
+		fprintf(stderr,"dbg2       use_ss:          %d\n",use_ss);
+		fprintf(stderr,"dbg2       dump_mode:       %d\n",dump_mode);
+		fprintf(stderr,"dbg2       beam_set:        %d\n",beam_set);
+		fprintf(stderr,"dbg2       pixel_set:       %d\n",pixel_set);
+		fprintf(stderr,"dbg2       beam_vertical:   %d\n",beam_vertical);
+		fprintf(stderr,"dbg2       pixel_vertical:  %d\n",pixel_vertical);
+		fprintf(stderr,"dbg2       beam_start:      %d\n",*beam_start);
+		fprintf(stderr,"dbg2       beam_end:        %d\n",*beam_end);
+		fprintf(stderr,"dbg2       pixel_start:     %d\n",*pixel_start);
+		fprintf(stderr,"dbg2       pixel_end:       %d\n",*pixel_end);
+		fprintf(stderr,"dbg2       n_list:          %d\n",*n_list);
 		for (i=0;i<*n_list;i++)
-		fprintf(stderr,"dbg2       list[%2d]:      %c\n",
+		    fprintf(stderr,"dbg2       list[%2d]:        %c\n",
 						i,list[i]);
 		}
 
@@ -1326,27 +2034,37 @@ int set_output(	int	verbose,
 	*error = MB_ERROR_NO_ERROR;
 	status = MB_SUCCESS;
 
-	if (beam_set == MB_NO && pixel_set == MB_YES)
+	if (beam_set == MBLIST_SET_OFF && pixel_set != MBLIST_SET_OFF)
 		{
 		*beam_start = 0;
 		*beam_end = -1;
 		}
-	else if (beam_set == MB_NO && beams_bath <= 0)
+	else if (beam_set == MBLIST_SET_OFF && beams_bath <= 0)
 		{
 		*beam_start = 0;
 		*beam_end = -1;
-		*pixel_start = pixels_ss/2;
-		*pixel_end = pixels_ss/2;
+		*pixel_start = pixel_vertical;
+		*pixel_end = pixel_vertical;
 		}
-	else if (beam_set == MB_NO)
+	else if (beam_set == MBLIST_SET_OFF)
 		{
-		*beam_start = beams_bath/2;
-		*beam_end = beams_bath/2;
+		*beam_start = beam_vertical;
+		*beam_end = beam_vertical;			
 		}
-	if (pixel_set == MB_NO && beams_bath > 0)
+	else if (beam_set == MBLIST_SET_ALL)
+		{
+		*beam_start = 0;
+		*beam_end = beams_bath - 1;			
+		}
+	if (pixel_set == MBLIST_SET_OFF && beams_bath > 0)
 		{
 		*pixel_start = 0;
 		*pixel_end = -1;
+		}
+	else if (pixel_set == MBLIST_SET_ALL)
+		{
+		*pixel_start = 0;
+		*pixel_end = pixels_ss - 1;
 		}
 
 	/* deal with dump_mode if set */
@@ -1454,6 +2172,308 @@ int set_output(	int	verbose,
 						i,list[i]);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int set_bathyslope(int verbose,
+	int nbath, char *beamflag, double *bath, double *bathacrosstrack,
+	int *ndepths, double *depths, double *depthacrosstrack, 
+	int *nslopes, double *slopes, double *slopeacrosstrack, 
+	int *error)
+{
+	char	*function_name = "set_bathyslope";
+	int	status = MB_SUCCESS;
+	int	i;
+	
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBlist function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
+		fprintf(stderr,"dbg2       nbath:           %d\n",nbath);
+		fprintf(stderr,"dbg2       bath:            %d\n",bath);
+		fprintf(stderr,"dbg2       bathacrosstrack: %d\n",
+			bathacrosstrack);
+		fprintf(stderr,"dbg2       bath:\n");
+		for (i=0;i<nbath;i++)
+			fprintf(stderr,"dbg2         %d %f %f\n", 
+				i, bath[i], bathacrosstrack[i]);
+		}
+
+	/* first find all depths */
+	*ndepths = 0;
+	for (i=0;i<nbath;i++)
+		{
+		if (mb_beam_ok(beamflag[i]))
+			{
+			depths[*ndepths] = bath[i];
+			depthacrosstrack[*ndepths] = bathacrosstrack[i];
+			(*ndepths)++;
+			}
+		}
+
+	/* now calculate slopes */
+	*nslopes = *ndepths + 1;
+	for (i=0;i<*ndepths-1;i++)
+		{
+		slopes[i+1] = (depths[i+1] - depths[i])
+			/(depthacrosstrack[i+1] - depthacrosstrack[i]);
+		slopeacrosstrack[i+1] = 0.5*(depthacrosstrack[i+1] 
+			+ depthacrosstrack[i]);
+		}
+	if (*ndepths > 1)
+		{
+		slopes[0] = 0.0;
+		slopeacrosstrack[0] = depthacrosstrack[0];
+		slopes[*ndepths] = 0.0;
+		slopeacrosstrack[*ndepths] = 
+			depthacrosstrack[*ndepths-1];
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBlist function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       ndepths:         %d\n",
+			*ndepths);
+		fprintf(stderr,"dbg2       depths:\n");
+		for (i=0;i<*ndepths;i++)
+			fprintf(stderr,"dbg2         %d %f %f\n", 
+				i, depths[i], depthacrosstrack[i]);
+		fprintf(stderr,"dbg2       nslopes:         %d\n",
+			*nslopes);
+		fprintf(stderr,"dbg2       slopes:\n");
+		for (i=0;i<*nslopes;i++)
+			fprintf(stderr,"dbg2         %d %f %f\n", 
+				i, slopes[i], slopeacrosstrack[i]);
+		fprintf(stderr,"dbg2       error:           %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:          %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int get_bathyslope(int verbose,
+	int ndepths, double *depths, double *depthacrosstrack, 
+	int nslopes, double *slopes, double *slopeacrosstrack, 
+	double acrosstrack, double *depth,  double *slope, 
+	int *error)
+{
+	char	*function_name = "get_bathyslope";
+	int	status = MB_SUCCESS;
+	int	found_depth, found_slope;
+	int	idepth, islope;
+	int	i;
+	
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBlist function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
+		fprintf(stderr,"dbg2       ndepths:         %d\n",
+			ndepths);
+		fprintf(stderr,"dbg2       depths:\n");
+		for (i=0;i<ndepths;i++)
+			fprintf(stderr,"dbg2         %d %f %f\n", 
+				i, depths[i], depthacrosstrack[i]);
+		fprintf(stderr,"dbg2       nslopes:         %d\n",
+			nslopes);
+		fprintf(stderr,"dbg2       slopes:\n");
+		for (i=0;i<nslopes;i++)
+			fprintf(stderr,"dbg2         %d %f %f\n", 
+				i, slopes[i], slopeacrosstrack[i]);
+		fprintf(stderr,"dbg2       acrosstrack:     %f\n",acrosstrack);
+		}
+
+	/* check if acrosstrack is in defined interval */
+	found_depth = MB_NO;
+	found_slope = MB_NO;
+	if (ndepths > 1)
+	if (acrosstrack >= depthacrosstrack[0]
+		&& acrosstrack <= depthacrosstrack[ndepths-1])
+	    {
+
+	    /* look for depth */
+	    idepth = -1;
+	    while (found_depth == MB_NO && idepth < ndepths - 2)
+		{
+		idepth++;
+		if (acrosstrack >= depthacrosstrack[idepth]
+		    && acrosstrack <= depthacrosstrack[idepth+1])
+		    {
+		    *depth = depths[idepth] 
+			    + (acrosstrack - depthacrosstrack[idepth])
+			    /(depthacrosstrack[idepth+1] 
+			    - depthacrosstrack[idepth])
+			    *(depths[idepth+1] - depths[idepth]);
+		    found_depth = MB_YES;
+		    *error = MB_ERROR_NO_ERROR;
+		    }
+		}
+
+	    /* look for slope */
+	    islope = -1;
+	    while (found_slope == MB_NO && islope < nslopes - 2)
+		{
+		islope++;
+		if (acrosstrack >= slopeacrosstrack[islope]
+		    && acrosstrack <= slopeacrosstrack[islope+1])
+		    {
+		    *slope = slopes[islope] 
+			    + (acrosstrack - slopeacrosstrack[islope])
+			    /(slopeacrosstrack[islope+1] 
+			    - slopeacrosstrack[islope])
+			    *(slopes[islope+1] - slopes[islope]);
+		    found_slope = MB_YES;
+		    *error = MB_ERROR_NO_ERROR;
+		    }
+		}
+	    }
+
+	/* translate slope to degrees */
+	if (found_slope == MB_YES)
+	    *slope = RTD * atan(*slope);
+
+	/* check for failure */
+	if (found_depth != MB_YES || found_slope != MB_YES)
+		{
+		status = MB_FAILURE;
+		*error = MB_ERROR_OTHER;
+		*depth = 0.0;
+		*slope = 0.0;
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBlist function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       depth:           %f\n",*depth);
+		fprintf(stderr,"dbg2       slope:           %f\n",*slope);
+		fprintf(stderr,"dbg2       error:           %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:          %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int printsimplevalue(int verbose, 
+	double value, int width, int precision, 
+	int ascii, int *invert, int *error)
+{
+	char	*function_name = "printsimplevalue";
+	int	status = MB_SUCCESS;
+	char	format[24];
+	int	i;
+	
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBlist function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
+		fprintf(stderr,"dbg2       value:           %f\n",value);
+		fprintf(stderr,"dbg2       width:           %d\n",width);
+		fprintf(stderr,"dbg2       precision:       %d\n",precision);
+		fprintf(stderr,"dbg2       ascii:           %d\n",ascii);
+		fprintf(stderr,"dbg2       invert:          %d\n",*invert);
+		}
+		
+	/* make print format */
+	format[0] = '%';
+	if (*invert == MB_YES)
+	    strcpy(format, "%g");
+	else if (width > 0)
+	    sprintf(&format[1], "%d.%df", width, precision);
+	else
+	    sprintf(&format[1], ".%df", precision);
+	
+	/* invert value if desired */
+	if (*invert == MB_YES)
+	    {
+	    *invert = MB_NO;
+	    if (value != 0.0)
+		value = 1.0 / value;
+	    }
+	    
+	/* print value */
+	if (ascii == MB_YES)
+	    printf(format, value);
+	else
+	    fwrite(&value, sizeof(double), 1, stdout);
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBlist function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       invert:          %d\n",*invert);
+		fprintf(stderr,"dbg2       error:           %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:          %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int printNaN(int verbose, int ascii, int *invert, int *error)
+{
+	char	*function_name = "printNaN";
+	int	status = MB_SUCCESS;
+	int	i;
+	
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBlist function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
+		fprintf(stderr,"dbg2       ascii:           %d\n",ascii);
+		fprintf(stderr,"dbg2       invert:          %d\n",*invert);
+		}
+		
+	/* reset invert flag */
+	if (*invert == MB_YES)
+	    *invert = MB_NO;
+	    
+	/* print value */
+	if (ascii == MB_YES)
+	    printf("NaN");
+	else
+	    fwrite(&NaN, sizeof(double), 1, stdout);
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBlist function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       invert:          %d\n",*invert);
+		fprintf(stderr,"dbg2       error:           %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:          %d\n",status);
 		}
 
 	/* return status */

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbdefaults.c	1/23/93
- *	$Id: mbdefaults.c,v 5.0 2000-12-01 22:57:08 caress Exp $
+ *	$Id: mbdefaults.c,v 5.1 2001-03-22 21:14:16 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Author:	D. W. Caress
  * Date:	January 23, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01  22:57:08  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.7  2000/10/11  01:06:15  caress
  * Convert to ANSI C
  *
@@ -79,7 +82,7 @@
 
 main (int argc, char **argv)
 {
-static char rcs_id[]="$Id: mbdefaults.c,v 5.0 2000-12-01 22:57:08 caress Exp $";
+static char rcs_id[]="$Id: mbdefaults.c,v 5.1 2001-03-22 21:14:16 caress Exp $";
 	static char program_name[] = "MBDEFAULTS";
 	static char help_message[] = "MBDEFAULTS sets and retrieves the /default MBIO control \nparameters stored in the file ~/.mbio_defaults. \nOnly the parameters specified by command line \narguments will be changed; if no ~/.mbio_defaults \nfile exists one will be created.";
 	static char usage_message[] = "mbdefaults [-Dpsdisplay -Fformat -Rw/e/s/n -Ppings -Sspeed -Llonflip\n	-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc -Wproject -V -H]";
@@ -163,8 +166,7 @@ static char rcs_id[]="$Id: mbdefaults.c,v 5.0 2000-12-01 22:57:08 caress Exp $";
 			break;
 		case 'R':
 		case 'r':
-			sscanf (optarg,"%lf/%lf/%lf/%lf", 
-				&bounds[0],&bounds[1],&bounds[2],&bounds[3]);
+			mb_get_bounds(optarg, bounds);
 			flag++;
 			break;
 		case 'S':

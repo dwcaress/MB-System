@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbtide.c	8/24/93
  *
- *    $Id: mbtide.c,v 5.0 2000-12-01 22:57:08 caress Exp $
+ *    $Id: mbtide.c,v 5.1 2001-03-22 21:15:49 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	August 24, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01  22:57:08  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.7  2000/10/11  01:06:15  caress
  * Convert to ANSI C
  *
@@ -71,7 +74,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbtide.c,v 5.0 2000-12-01 22:57:08 caress Exp $";
+	static char rcs_id[] = "$Id: mbtide.c,v 5.1 2001-03-22 21:15:49 caress Exp $";
 	static char program_name[] = "MBTIDE";
 	static char help_message[] =  "MBTIDE corrects swath bathymetry data for tides. \nThe default input and output streams are stdin and stdout.";
 	static char usage_message[] = "mbtide [-Fformat -V -H  -Iinfile -Mtide_format -Ooutfile -Ttidefile]";
@@ -122,6 +125,8 @@ main (int argc, char **argv)
 	double	speed;
 	double	heading;
 	double	distance;
+	double	altitude;
+	double	sonardepth;
 	int	nbath;
 	int	namp;
 	int	nss;
@@ -293,6 +298,10 @@ main (int argc, char **argv)
 		fprintf(stderr,"\nusage: %s\n", usage_message);
 		exit(MB_SUCCESS);
 		}
+
+	/* get format if required */
+	if (format == 0)
+		mb_get_format(verbose,ifile,NULL,&format,&error);
 
 	/* count the tide points */
 	ntide = 0;
@@ -522,8 +531,9 @@ main (int argc, char **argv)
 		error = MB_ERROR_NO_ERROR;
 		status = MB_SUCCESS;
 		status = mb_get_all(verbose,imbio_ptr,&store_ptr,&kind,
-				time_i,&time_d,&navlon,&navlat,&speed,
-				&heading,&distance,
+				time_i,&time_d,&navlon,&navlat,
+				&speed,&heading,
+				&distance,&altitude,&sonardepth,
 				&beams_bath,&beams_amp,&pixels_ss,
 				beamflag,bath,amp,bathacrosstrack,bathalongtrack,
 				ss,ssacrosstrack,ssalongtrack,

@@ -26,6 +26,9 @@
 /*
  * Start Global Widget Declarations.
  */
+EXTERNAL Widget   toggleButton_mode_ok;
+EXTERNAL Widget   toggleButton_mode_snell;
+EXTERNAL Widget   toggleButton_mode_null;
 EXTERNAL Widget   label_res_range_max;
 EXTERNAL Widget   slider_residual_range;
 EXTERNAL Widget   label_vel_range_max;

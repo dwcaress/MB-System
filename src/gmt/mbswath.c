@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbswath.c	5/30/93
- *    $Id: mbswath.c,v 5.1 2001-01-22 05:03:25 caress Exp $
+ *    $Id: mbswath.c,v 5.2 2001-03-22 21:03:31 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -14,7 +14,7 @@
  *--------------------------------------------------------------------*/
 /*
  * MBSWATH is a GMT compatible utility which creates a color postscript
- * image of multibeam swath bathymetry or backscatter data.  The image
+ * image of swath bathymetry or backscatter data.  The image
  * may be shaded relief as well.  Complete maps are made by using
  * MBSWATH in conjunction with the usual GMT programs.  The modes
  * of operation are:
@@ -29,6 +29,9 @@
  * Date:	May 30, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2001/01/22  05:03:25  caress
+ * Release 5.0.beta01
+ *
  * Revision 5.0  2000/12/01  22:52:16  caress
  * First cut at Version 5.0.
  *
@@ -220,6 +223,8 @@ struct	ping
 	double	speed;
 	double	heading;
 	double	distance;
+	double	altitude;
+	double	sonardepth;
 	int	beams_bath;
 	int	beams_amp;
 	int	pixels_ss;
@@ -276,9 +281,9 @@ unsigned char r, g, b, gray;
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbswath.c,v 5.1 2001-01-22 05:03:25 caress Exp $";
+	static char rcs_id[] = "$Id: mbswath.c,v 5.2 2001-03-22 21:03:31 caress Exp $";
 	static char program_name[] = "MBSWATH";
-	static char help_message[] =  "MBSWATH is a GMT compatible utility which creates a color postscript \nimage of multibeam swath bathymetry or backscatter data.  The image \nmay be shaded relief as well.  Complete maps are made by using \nMBSWATH in conjunction with the usual GMT programs.";
+	static char help_message[] =  "MBSWATH is a GMT compatible utility which creates a color postscript \nimage of swath bathymetry or backscatter data.  The image \nmay be shaded relief as well.  Complete maps are made by using \nMBSWATH in conjunction with the usual GMT programs.";
 	static char usage_message[] = "mbswath -Ccptfile -Jparameters -Rwest/east/south/north \n\t[-Afactor -Btickinfo -byr/mon/day/hour/min/sec \n\t-ccopies -Dmode/ampscale/ampmin/ampmax \n\t-Eyr/mon/day/hour/min/sec -fformat \n\t-Fred/green/blue -Gmagnitude/azimuth -Idatalist \n\t-K -Ncptfile -O -P -ppings -Qdpi -Ttimegap -U -W -Xx-shift -Yy-shift \n\t-Zmode -V -H]";
 
 	extern char *optarg;
@@ -299,6 +304,7 @@ main (int argc, char **argv)
         int     read_datalist = MB_NO;
 	int	read_data;
 	char	*datalist;
+	int	look_processed = MB_DATALIST_LOOK_UNSET;
 	double	file_weight;
 	FILE	*fp;
 	int	format;
@@ -701,7 +707,7 @@ main (int argc, char **argv)
 		exit(error);
 		}
 
-	/* set bounds for multibeam reading larger than
+	/* set bounds for data reading larger than
 		map borders */
 	bounds[0] = borders_use[0] 
 		- 0.25*(borders_use[1] - borders_use[0]);
@@ -904,7 +910,7 @@ main (int argc, char **argv)
 	if (read_datalist == MB_YES)
 	    {
 	    if ((status = mb_datalist_open(verbose,&datalist,
-					    read_file,&error)) != MB_SUCCESS)
+					    read_file,look_processed,&error)) != MB_SUCCESS)
 		{
 		error = MB_ERROR_OPEN_FAIL;
 		fprintf(stderr,"\nUnable to open data list file: %s\n",
@@ -945,7 +951,7 @@ main (int argc, char **argv)
 	    if (file_in_bounds == MB_YES)
 		{
 		
-		/* initialize reading the multibeam file */
+		/* initialize reading the swath data file */
 		if ((status = mb_read_init(
 		    verbose,file,format,pings,lonflip,bounds,
 		    btime_i,etime_i,speedmin,timegap,
@@ -1064,8 +1070,10 @@ main (int argc, char **argv)
 		    sslat = pingcur->sslat;
 		    status = mb_read(verbose,mbio_ptr,&(pingcur->kind),
 			    &(pingcur->pings),pingcur->time_i,&(pingcur->time_d),
-			    &(pingcur->navlon),&(pingcur->navlat),&(pingcur->speed),
-			    &(pingcur->heading),&(pingcur->distance),
+			    &(pingcur->navlon),&(pingcur->navlat),
+			    &(pingcur->speed),&(pingcur->heading),
+			    &(pingcur->distance),&(pingcur->altitude),
+			    &(pingcur->sonardepth),
 			    &(pingcur->beams_bath),
 			    &(pingcur->beams_amp),
 			    &(pingcur->pixels_ss),
@@ -1599,6 +1607,8 @@ int get_footprints(int verbose, int mode, int fp_mode,
 					- pingcur->navlat)/mtodeglat;
 				if (depth_def > 0.0)
 					dddepth = depth_def;
+				else if (pingcur->altitude > 0.0)
+					dddepth = pingcur->altitude;
 				else
 					dddepth = pingcur->bath[j];
 				r = rfactor*sqrt(ddlonx*ddlonx 
@@ -1688,6 +1698,8 @@ int get_footprints(int verbose, int mode, int fp_mode,
 					- pingcur->navlat)/mtodeglat;
 				if (depth_def > 0.0)
 					dddepth = depth_def;
+				else if (pingcur->altitude > 0.0)
+					dddepth = pingcur->altitude;
 				else if (pingcur->beams_bath > 0 
 					&& mb_beam_ok(pingcur->beamflag[pingcur->beams_bath/2]))
 					dddepth = pingcur->bath[pingcur->beams_bath/2];
@@ -1764,6 +1776,8 @@ int get_footprints(int verbose, int mode, int fp_mode,
 					- pingcur->navlat)/mtodeglat;
 				if (depth_def > 0.0)
 					dddepth = depth_def;
+				else if (pingcur->altitude > 0.0)
+					dddepth = pingcur->altitude;
 				else
 					dddepth = pingcur->bath[j];
 				r = rfactor*sqrt(ddlonx*ddlonx 
@@ -1809,6 +1823,8 @@ int get_footprints(int verbose, int mode, int fp_mode,
 					- pingcur->navlat)/mtodeglat;
 				if (depth_def > 0.0)
 					dddepth = depth_def;
+				else if (pingcur->altitude > 0.0)
+					dddepth = pingcur->altitude;
 				else
 					dddepth = pingcur->bath[j];
 				r = rfactor*sqrt(ddlonx*ddlonx 
@@ -1857,6 +1873,8 @@ int get_footprints(int verbose, int mode, int fp_mode,
 					- pingcur->navlat)/mtodeglat;
 				if (depth_def > 0.0)
 					dddepth = depth_def;
+				else if (pingcur->altitude > 0.0)
+					dddepth = pingcur->altitude;
 				else if (pingcur->beams_bath > 0 
 					&& mb_beam_ok(pingcur->beamflag[pingcur->beams_bath/2]))
 					dddepth = pingcur->bath[pingcur->beams_bath/2];
@@ -1901,6 +1919,8 @@ int get_footprints(int verbose, int mode, int fp_mode,
 					- pingcur->navlat)/mtodeglat;
 				if (depth_def > 0.0)
 					dddepth = depth_def;
+				else if (pingcur->altitude > 0.0)
+					dddepth = pingcur->altitude;
 				else if (pingcur->beams_bath > 0 
 					&& mb_beam_ok(pingcur->beamflag[pingcur->beams_bath/2]))
 					dddepth = pingcur->bath[pingcur->beams_bath/2];
@@ -2919,13 +2939,6 @@ int plot_box(int verbose, double *x, double *y, int *rgb, int *error)
 #ifdef GMT3_0
 int plot_point(int verbose, double x, double y, 
 		int red, int green, int blue, int *error)
-int	verbose;
-double	x;
-double	y;
-int	red;
-int	green;
-int	blue;
-int	*error;
 {
 	char	*function_name = "plot_point";
 	int	status = MB_SUCCESS;
@@ -3115,6 +3128,8 @@ int ping_copy(int verbose, int one, int two, struct swath *swath, int *error)
 	ping1->speed = ping2->speed;
 	ping1->heading = ping2->heading;
 	ping1->distance = ping2->distance;
+	ping1->altitude = ping2->altitude;
+	ping1->sonardepth = ping2->sonardepth;
 	strcpy(ping1->comment,ping2->comment);
 	ping1->beams_bath = ping2->beams_bath;
 	ping1->beams_amp = ping2->beams_amp;
