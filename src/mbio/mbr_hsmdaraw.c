@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsmdaraw.c	2/11/93
- *	$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbr_hsmdaraw.c,v 5.2 2001-03-22 20:50:02 caress Exp $
+ *	$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbr_hsmdaraw.c,v 5.3 2001-06-08 21:44:01 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	August 11, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2001/03/22  20:50:02  caress
+ * Trying to make version 5.0.beta0
+ *
  * Revision 5.1  2001/01/22  07:43:34  caress
  * Version 5.0.beta01
  *
@@ -143,7 +146,7 @@ int mbr_wt_hsmdaraw(int verbose, char *mbio_ptr, char *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_hsmdaraw(int verbose, char *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_hsmdaraw.c,v 5.2 2001-03-22 20:50:02 caress Exp $";
+	static char res_id[]="$Id: mbr_hsmdaraw.c,v 5.3 2001-06-08 21:44:01 caress Exp $";
 	char	*function_name = "mbr_register_hsmdaraw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -273,7 +276,7 @@ int mbr_info_hsmdaraw(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_hsmdaraw.c,v 5.2 2001-03-22 20:50:02 caress Exp $";
+	static char res_id[]="$Id: mbr_hsmdaraw.c,v 5.3 2001-06-08 21:44:01 caress Exp $";
 	char	*function_name = "mbr_info_hsmdaraw";
 	int	status = MB_SUCCESS;
 
@@ -342,7 +345,7 @@ int mbr_info_hsmdaraw(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_hsmdaraw(int verbose, char *mbio_ptr, int *error)
 {
-	static char res_id[]="$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbr_hsmdaraw.c,v 5.2 2001-03-22 20:50:02 caress Exp $";
+	static char res_id[]="$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbr_hsmdaraw.c,v 5.3 2001-06-08 21:44:01 caress Exp $";
 	char	 *function_name = "mbr_alm_hsmdaraw";
 	int	 status = MB_SUCCESS;
 	int	 i;
@@ -652,7 +655,7 @@ int mbr_rt_hsmdaraw(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 		time_i[6] = 1000 * data->millisecond;
 		mb_get_time(verbose, time_i, &time_d);
 		heading = data->heading_tx;
-		mb_navint_interp(verbose, mbio_ptr, time_d, heading, 
+		mb_navint_interp(verbose, mbio_ptr, time_d, heading, 0.0, 
 				    &lon, &lat, &speed, error);
 		data->lon = lon;
 		data->lat = lat;

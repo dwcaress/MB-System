@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.c	2/18/94
- *    $Id: mb_format.c,v 5.4 2001-04-06 22:05:59 caress Exp $
+ *    $Id: mb_format.c,v 5.5 2001-06-08 21:44:01 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -13,17 +13,16 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- * mb_format.c contains several functions.
- * mb_format() finds the internal format array location associated 
- *     with an MBIO format id.  If the format id is invalid, 
- *     0 is returned.
- * mb_get_format() guesses the format id of a filename
- *     based on the file suffix.
+ * mb_format.c contains several functions associated with getting
+ * information about data formats.
  *
  * Author:	D. W. Caress
  * Date:	Februrary 18, 1994
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2001/04/06  22:05:59  caress
+ * Consolidated xse formats into one format.
+ *
  * Revision 5.3  2001/03/22  20:45:56  caress
  * Trying to make 5.0.beta0...
  *
@@ -118,7 +117,7 @@
 #include "../../include/mbsys_simrad.h"
 #include "../../include/mbsys_simrad2.h"
 
-static char rcs_id[]="$Id: mb_format.c,v 5.4 2001-04-06 22:05:59 caress Exp $";
+static char rcs_id[]="$Id: mb_format.c,v 5.5 2001-06-08 21:44:01 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_format_register(int verbose, 
@@ -165,6 +164,7 @@ int mb_format_register(int verbose,
 		/* set new format value */
 		*format = i;
 		}
+		
 	/* handle old Simrad EM12 and EM121 formats */
 	else if (*format == 52 || *format == 55)
 		*format = 51;
@@ -1124,7 +1124,7 @@ int mb_format(int verbose, int *format, int *error)
 /*--------------------------------------------------------------------*/
 int mb_format_system(int verbose, int *format, int *system, int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.4 2001-04-06 22:05:59 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.5 2001-06-08 21:44:01 caress Exp $";
 	char	*function_name = "mb_format_system";
 	int	status;
 
@@ -1192,7 +1192,7 @@ int mb_format_dimensions(int verbose, int *format,
 		int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.4 2001-04-06 22:05:59 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.5 2001-06-08 21:44:01 caress Exp $";
 	char	*function_name = "mb_format_dimensions";
 	int	status;
 
@@ -1259,7 +1259,7 @@ int mb_format_dimensions(int verbose, int *format,
 /*--------------------------------------------------------------------*/
 int mb_format_description(int verbose, int *format, char *description, int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.4 2001-04-06 22:05:59 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.5 2001-06-08 21:44:01 caress Exp $";
 	char	*function_name = "mb_format_description";
 	int	status;
 
@@ -1323,7 +1323,7 @@ int mb_format_flags(int verbose, int *format,
 		int *variable_beams, int *traveltime, int *beam_flagging, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.4 2001-04-06 22:05:59 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.5 2001-06-08 21:44:01 caress Exp $";
 	char	*function_name = "mb_format_flags";
 	int	status;
 
@@ -1393,7 +1393,7 @@ int mb_format_source(int verbose, int *format,
 		int *nav_source, int *heading_source, int *vru_source, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.4 2001-04-06 22:05:59 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.5 2001-06-08 21:44:01 caress Exp $";
 	char	*function_name = "mb_format_source";
 	int	status;
 
@@ -1463,7 +1463,7 @@ int mb_format_beamwidth(int verbose, int *format,
 		double *beamwidth_xtrack, double *beamwidth_ltrack,
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.4 2001-04-06 22:05:59 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.5 2001-06-08 21:44:01 caress Exp $";
 	char	*function_name = "mb_format_beamwidth";
 	int	status;
 

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbprocess.c	3/31/93
- *    $Id: mbprocess.c,v 5.4 2001-06-03 07:07:34 caress Exp $
+ *    $Id: mbprocess.c,v 5.5 2001-06-08 21:45:46 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -36,6 +36,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2001/06/03  07:07:34  caress
+ * Release 5.0.beta01.
+ *
  * Revision 5.3  2001/03/22 21:15:49  caress
  * Trying to make release 5.0.beta0.
  *
@@ -83,7 +86,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbprocess.c,v 5.4 2001-06-03 07:07:34 caress Exp $";
+	static char rcs_id[] = "$Id: mbprocess.c,v 5.5 2001-06-08 21:45:46 caress Exp $";
 	static char program_name[] = "mbprocess";
 	static char help_message[] =  "mbprocess is a tool for processing swath sonar bathymetry data.\n\
 This program performs a number of functions, including:\n\
@@ -616,6 +619,8 @@ and mbedit edit save files.\n";
 	    fprintf(stderr,"\nDraft Correction:\n");
 	    if (process.mbp_draft_mode == MBP_DRAFT_OFF)
 		fprintf(stderr,"  Draft not modified.\n");
+	    else if (process.mbp_draft_mode == MBP_DRAFT_SET)
+		fprintf(stderr,"  Draft set to constant.\n");
 	    else if (process.mbp_draft_mode == MBP_DRAFT_OFFSET)
 		fprintf(stderr,"  Draft offset by constant.\n");
 	    else if (process.mbp_draft_mode == MBP_DRAFT_MULTIPLY)
@@ -2557,11 +2562,17 @@ and mbedit edit save files.\n";
 			dy = process.mbp_sonar_offsety - process.mbp_vru_offsety;
 			dz = process.mbp_sonar_offsetz - process.mbp_vru_offsetz;
 			r = sqrt(dx * dx + dy * dy + dz * dz);
-			alpha = RTD * acos(dx / r);
-			beta = RTD * asin(dy / (r * cos(DTR * alpha)));
-			alpha += pitch + process.mbp_pitchbias;
-			beta += roll + process.mbp_rollbias;
-			lever_heave =  r * cos(DTR * alpha) * sin(DTR * beta);
+			if (r > 0.0)
+			    {
+			    alpha = RTD * asin(dy / r);
+			    if (cos(DTR * alpha) != 0.0)
+				beta = RTD * acos(dx / (r * cos(DTR * alpha)));
+			    else
+				beta = 0.0;
+			    alpha += pitch + process.mbp_pitchbias;
+			    beta += roll + process.mbp_rollbias;
+			    lever_heave =  r * cos(DTR * alpha) * sin(DTR * beta) - dz;
+			    }
 fprintf(stderr, "dx:%f dy:%f dz:%f alpha:%f beta:%f lever:%f\n", 
 dx, dy, dz, alpha, beta, lever_heave);
 			}

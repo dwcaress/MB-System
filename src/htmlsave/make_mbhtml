@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	make_mbhtml	8/19/97
-#    $Id: make_mbhtml,v 5.1 2001-04-25 05:10:56 caress Exp $
+#    $Id: make_mbhtml,v 5.2 2001-06-08 21:54:03 caress Exp $
 #
 #    Copyright (c) 1997 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -30,10 +30,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   August 19,  1997
 #
 # Version:
-#   $Id: make_mbhtml,v 5.1 2001-04-25 05:10:56 caress Exp $
+#   $Id: make_mbhtml,v 5.2 2001-06-08 21:54:03 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 5.1  2001/04/25  05:10:56  caress
+# Changed from using awf to groff.
+#
 #   Revision 5.0  2001/03/23 01:48:38  caress
 #   Trying to get out release 5.0.beta00.
 #
@@ -89,7 +92,7 @@ foreach $man_page (@manual_pages) {
     chop($date);
     chop($date);
     $date = substr($date, 1);
-    `groff -man ../../man/manl/$man_page.l -Tascii | ./man2html -leftm 1 -topm 5 -botm 5 -pgsize 55 > $raw_html_file`;
+    `groff -Tascii -man ../../man/manl/$man_page.l | ./man2html -leftm 1 -topm 5 -botm 5 -pgsize 55 > $raw_html_file`;
 
     # Open the input file
     if (!open(IHTML,"$raw_html_file"))

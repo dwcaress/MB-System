@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_get_all.c	1/26/93
- *    $Id: mb_get_all.c,v 5.1 2001-03-22 20:45:56 caress Exp $
+ *    $Id: mb_get_all.c,v 5.2 2001-06-08 21:44:01 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	January 26, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2001/03/22  20:45:56  caress
+ * Trying to make 5.0.beta0...
+ *
  * Revision 5.0  2000/12/01  22:48:41  caress
  * First cut at Version 5.0.
  *
@@ -114,7 +117,7 @@ int mb_get_all(int verbose, char *mbio_ptr, char **store_ptr, int *kind,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
 		char *comment, int *error)
 {
-  static char rcs_id[]="$Id: mb_get_all.c,v 5.1 2001-03-22 20:45:56 caress Exp $";
+  static char rcs_id[]="$Id: mb_get_all.c,v 5.2 2001-06-08 21:44:01 caress Exp $";
 	char	*function_name = "mb_get_all";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -225,10 +228,12 @@ int mb_get_all(int verbose, char *mbio_ptr, char **store_ptr, int *kind,
 	/* increment counters */
 	if (status == MB_SUCCESS)
 		{
-		if (*kind == MB_DATA_COMMENT)
-			mb_io_ptr->comment_count++;
-		else
+		if (*kind == MB_DATA_DATA)
 			mb_io_ptr->ping_count++;
+		else if (*kind == MB_DATA_NAV)
+			mb_io_ptr->nav_count++;
+		else if (*kind == MB_DATA_COMMENT)
+			mb_io_ptr->comment_count++;
 		}
 
 	/* if first ping read set "old" navigation values */
@@ -243,10 +248,19 @@ int mb_get_all(int verbose, char *mbio_ptr, char **store_ptr, int *kind,
 		mb_io_ptr->old_lat = *navlat;
 		}
 
-	/* calculate speed and distance */
+	/* if first nav read set "old" navigation values */
+	if (status == MB_SUCCESS 
+		&& (*kind == MB_DATA_NAV)
+		&& mb_io_ptr->nav_count == 1)
+		{
+		mb_io_ptr->old_ntime_d = *time_d;
+		mb_io_ptr->old_nlon = *navlon;
+		mb_io_ptr->old_nlat = *navlat;
+		}
+
+	/* calculate speed and distance for ping data */
 	if (status == MB_SUCCESS
 		&& (*kind == MB_DATA_DATA
-		    || *kind == MB_DATA_NAV
 		    || *kind == MB_DATA_CALIBRATE))
 		{
 		/* get coordinate scaling */
@@ -312,6 +326,73 @@ int mb_get_all(int verbose, char *mbio_ptr, char **store_ptr, int *kind,
 			}
 		}
 
+	/* calculate speed and distance for nav data */
+	if (status == MB_SUCCESS
+		&& (*kind == MB_DATA_NAV))
+		{
+		/* get coordinate scaling */
+		mb_coor_scale(verbose,*navlat,&mtodeglon,&mtodeglat);
+
+		/* get distance value */
+		if (mb_io_ptr->old_ntime_d > 0.0)
+			{
+			dx = (*navlon - mb_io_ptr->old_nlon)/mtodeglon;
+			dy = (*navlat - mb_io_ptr->old_nlat)/mtodeglat;
+			*distance = 0.001*sqrt(dx*dx + dy*dy); /* km */
+			}
+		else
+			*distance = 0.0;
+
+		/* get speed value */
+		if (*speed <= 0.0 && mb_io_ptr->old_ntime_d > 0.0)
+			{
+			delta_time = 0.000277778*
+				(*time_d - mb_io_ptr->old_ntime_d); /* hours */
+			if (delta_time > 0.0)
+				*speed = *distance/delta_time; /* km/hr */
+			else
+				*speed = 0.0;
+			}
+		else if (*speed < 0.0)
+			*speed = 0.0;
+
+		/* print debug statements */
+		if (verbose >= 4)
+			{
+			fprintf(stderr,"\ndbg4  Distance and Speed Calculated in MBIO function <%s>\n",
+				function_name);
+			fprintf(stderr,"dbg4  Speed and Distance Related Values:\n");
+			fprintf(stderr,"dbg4       ping_count:   %d\n",
+					mb_io_ptr->ping_count);
+			fprintf(stderr,"dbg4       time:         %f\n",
+					*time_d);
+			fprintf(stderr,"dbg4       lon:          %f\n",
+					*navlon);
+			fprintf(stderr,"dbg4       lat:          %f\n",
+					*navlat);
+			fprintf(stderr,"dbg4       old time:     %f\n",
+					mb_io_ptr->old_ntime_d);
+			fprintf(stderr,"dbg4       old lon:      %f\n",
+					mb_io_ptr->old_nlon);
+			fprintf(stderr,"dbg4       old lat:      %f\n",
+					mb_io_ptr->old_lat);
+			fprintf(stderr,"dbg4       distance:     %f\n",
+					*distance);
+			fprintf(stderr,"dbg4       altitude:     %f\n",
+					*altitude);
+			fprintf(stderr,"dbg4       sonardepth:   %f\n",
+					*sonardepth);
+			fprintf(stderr,"dbg4       delta_time:   %f\n",
+					delta_time);
+			fprintf(stderr,"dbg4       raw speed:    %f\n",
+					mb_io_ptr->new_speed);
+			fprintf(stderr,"dbg4       speed:        %f\n",
+					*speed);
+			fprintf(stderr,"dbg4       error:        %d\n",*error);
+			fprintf(stderr,"dbg4       status:       %d\n",status);
+			}
+		}
+
 	/* check for out of location or time bounds */
 	if (status == MB_SUCCESS 
 		&& (*kind == MB_DATA_DATA
@@ -349,7 +430,7 @@ int mb_get_all(int verbose, char *mbio_ptr, char **store_ptr, int *kind,
 		    || *kind == MB_DATA_CALIBRATE) 
 		&& mb_io_ptr->ping_count > 1)
 		{
-		if ((*time_d - mb_io_ptr->old_time_d) 
+		if ((*time_d - mb_io_ptr->old_ntime_d) 
 			> 60*mb_io_ptr->timegap)
 			{
 			status = MB_FAILURE;
@@ -360,10 +441,11 @@ int mb_get_all(int verbose, char *mbio_ptr, char **store_ptr, int *kind,
 	/* check for less than minimum speed */
 	if ((*error == MB_ERROR_NO_ERROR 
 		|| *error == MB_ERROR_TIME_GAP)
-		&& (*kind == MB_DATA_DATA
-		    || *kind == MB_DATA_NAV
-		    || *kind == MB_DATA_CALIBRATE) 
-		&& mb_io_ptr->ping_count > 1)
+		&& (((*kind == MB_DATA_DATA
+			|| *kind == MB_DATA_CALIBRATE) 
+			&& mb_io_ptr->ping_count > 1)
+		    || (*kind == MB_DATA_NAV
+			&& mb_io_ptr->nav_count > 1)))
 		{
 		if (*speed < mb_io_ptr->speedmin)
 			{
@@ -382,6 +464,8 @@ int mb_get_all(int verbose, char *mbio_ptr, char **store_ptr, int *kind,
 			*kind);
 		fprintf(stderr,"dbg4       ping_count:    %d\n",
 			mb_io_ptr->ping_count);
+		fprintf(stderr,"dbg4       nav_count:     %d\n",
+			mb_io_ptr->nav_count);
 		fprintf(stderr,"dbg4       comment_count: %d\n",
 			mb_io_ptr->comment_count);
 		fprintf(stderr,"dbg4       error:         %d\n",
@@ -392,14 +476,23 @@ int mb_get_all(int verbose, char *mbio_ptr, char **store_ptr, int *kind,
 
 	/* reset "old" navigation values */
 	if (*error <= MB_ERROR_NO_ERROR 
+		&& *error > MB_ERROR_COMMENT
 		&& (*kind == MB_DATA_DATA
-		    || *kind == MB_DATA_NAV
-		    || *kind == MB_DATA_CALIBRATE)
-		&& *error > MB_ERROR_COMMENT)
+		    || *kind == MB_DATA_CALIBRATE))
 		{
 		mb_io_ptr->old_time_d = *time_d;
 		mb_io_ptr->old_lon = *navlon;
 		mb_io_ptr->old_lat = *navlat;
+		}
+
+	/* reset "old" navigation values */
+	if (*error <= MB_ERROR_NO_ERROR 
+		&& *error > MB_ERROR_COMMENT
+		&& *kind == MB_DATA_NAV)
+		{
+		mb_io_ptr->old_ntime_d = *time_d;
+		mb_io_ptr->old_nlon = *navlon;
+		mb_io_ptr->old_nlat = *navlat;
 		}
 
 	/* print output debug statements */

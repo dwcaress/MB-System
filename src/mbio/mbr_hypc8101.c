@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hypc8101.c	8/8/94
- *	$Id: mbr_hypc8101.c,v 5.2 2001-03-22 20:50:02 caress Exp $
+ *	$Id: mbr_hypc8101.c,v 5.3 2001-06-08 21:44:01 caress Exp $
  *
  *    Copyright (c) 1998, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	December 10, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2001/03/22  20:50:02  caress
+ * Trying to make version 5.0.beta0
+ *
  * Revision 5.1  2001/01/22  07:43:34  caress
  * Version 5.0.beta01
  *
@@ -92,7 +95,7 @@ int mbr_wt_hypc8101(int verbose, char *mbio_ptr, char *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_hypc8101(int verbose, char *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_hypc8101.c,v 5.2 2001-03-22 20:50:02 caress Exp $";
+	static char res_id[]="$Id: mbr_hypc8101.c,v 5.3 2001-06-08 21:44:01 caress Exp $";
 	char	*function_name = "mbr_register_hypc8101";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -222,7 +225,7 @@ int mbr_info_hypc8101(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_hypc8101.c,v 5.2 2001-03-22 20:50:02 caress Exp $";
+	static char res_id[]="$Id: mbr_hypc8101.c,v 5.3 2001-06-08 21:44:01 caress Exp $";
 	char	*function_name = "mbr_info_hypc8101";
 	int	status = MB_SUCCESS;
 
@@ -291,7 +294,7 @@ int mbr_info_hypc8101(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_hypc8101(int verbose, char *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_hypc8101.c,v 5.2 2001-03-22 20:50:02 caress Exp $";
+	static char res_id[]="$Id: mbr_hypc8101.c,v 5.3 2001-06-08 21:44:01 caress Exp $";
 	char	*function_name = "mbr_alm_hypc8101";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -598,7 +601,7 @@ int mbr_rt_hypc8101(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 			+ 100*data->thousandth_sec;
 		mb_get_time(verbose,time_i, &time_d);
 		heading = 0.01 * data->heading;
-		mb_navint_interp(verbose, mbio_ptr, time_d, heading, 
+		mb_navint_interp(verbose, mbio_ptr, time_d, heading, 0.0, 
 				    &lon, &lat, &speed, error);
 		data->longitude = (int) (lon / 0.00000009);
 		data->latitude = (int) (lat / 0.00000009);

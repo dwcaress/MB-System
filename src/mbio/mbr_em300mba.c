@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em300mba.c	10/16/98
- *	$Id: mbr_em300mba.c,v 5.5 2001-06-01 00:14:06 caress Exp $
+ *	$Id: mbr_em300mba.c,v 5.6 2001-06-08 21:44:01 caress Exp $
  *
  *    Copyright (c) 1998, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	October 16,  1998
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2001/06/01  00:14:06  caress
+ * Redid support for current Simrad multibeam data.
+ *
  * Revision 5.4  2001/05/30  17:57:26  caress
  * Fixed New Simrad data handling, plus removed use of
  * intermediate data structure. Still need to reduce use
@@ -197,7 +200,7 @@ int mbr_em300mba_wr_ss(int verbose, FILE *mbfp,
 /*--------------------------------------------------------------------*/
 int mbr_register_em300mba(int verbose, char *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_em300mba.c,v 5.5 2001-06-01 00:14:06 caress Exp $";
+	static char res_id[]="$Id: mbr_em300mba.c,v 5.6 2001-06-08 21:44:01 caress Exp $";
 	char	*function_name = "mbr_register_em300mba";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -327,7 +330,7 @@ int mbr_info_em300mba(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_em300mba.c,v 5.5 2001-06-01 00:14:06 caress Exp $";
+	static char res_id[]="$Id: mbr_em300mba.c,v 5.6 2001-06-08 21:44:01 caress Exp $";
 	char	*function_name = "mbr_info_em300mba";
 	int	status = MB_SUCCESS;
 
@@ -396,7 +399,7 @@ int mbr_info_em300mba(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_em300mba(int verbose, char *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_em300mba.c,v 5.5 2001-06-01 00:14:06 caress Exp $";
+	static char res_id[]="$Id: mbr_em300mba.c,v 5.6 2001-06-08 21:44:01 caress Exp $";
 	char	*function_name = "mbr_alm_em300mba";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -501,13 +504,6 @@ int mbr_rt_em300mba(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 	struct mbsys_simrad2_ping_struct *ping;
 	int	time_i[7];
 	double	bath_time_d, ss_time_d;
-	double	dd, dt, dx, dy;
-	double	plon, plat, pspeed;
-	double	mtodeglon, mtodeglat;
-	double	headingx, headingy;
-	double	*pixel_size, *swath_width;
-	int	ifix;
-	int	first, last;
 	int	i, j, k;
 
 	/* print input debug statements */
@@ -533,8 +529,6 @@ int mbr_rt_em300mba(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 	heading = (struct mbsys_simrad2_heading_struct *) store->heading;
 	ssv = (struct mbsys_simrad2_ssv_struct *) store->ssv;
 	ping = (struct mbsys_simrad2_ping_struct *) store->ping;
-	pixel_size = (double *) &mb_io_ptr->saved1;
-	swath_width = (double *) &mb_io_ptr->saved2;
 	
 	/* if no sidescan read then zero sidescan data */
 	if (status == MB_SUCCESS 
@@ -698,6 +692,7 @@ int mbr_em300mba_rd_data(int verbose, char *mbio_ptr, char *store_ptr, int *erro
 	int	*expect_save_flag;
 	short	*first_type_save;
 	short	*typelast;
+	int	*nbadrec;
 	int	match;
 	int	read_len;
 	int	skip = 0;
@@ -734,6 +729,7 @@ int mbr_em300mba_rd_data(int verbose, char *mbio_ptr, char *store_ptr, int *erro
 	expect_save = (short *) &mb_io_ptr->save1;
 	first_type_save = (short *) &mb_io_ptr->save2;
 	typelast = (short *) &mb_io_ptr->save6;
+	nbadrec = (int *) &mb_io_ptr->save7;
 	if (*expect_save_flag == MB_YES)
 		{
 		expect = *expect_save;
@@ -807,17 +803,22 @@ int mbr_em300mba_rd_data(int verbose, char *mbio_ptr, char *store_ptr, int *erro
 			/* report problem */
 			if (skip > 0 && !(skip == 4 || *wrapper < 0))
 			    {
-			    fprintf(stderr, 
-"\nThe MBF_EM300MBA module skipped %d bytes between\n\
-identified data records %d:%x and %d:%x \n\
-Something is broken...\n\
-The data may include a data record type that we\n\
+			    if (*nbadrec == 0)
+					fprintf(stderr, 
+"\nThe MBF_EM300MBA module skipped data between identified\n\
+data records. Something is broken, most probably the data...\n\
+However, the data may include a data record type that we\n\
 haven't seen yet, or there could be an error in the code.\n\
-We recommend you send a data sample and problem \n\
+If skipped data are reported multiple times, \n\
+we recommend you send a data sample and problem \n\
 description to the MB-System team \n\
 (caress@mbari.org and dale@ldeo.columbia.edu)\n\
-Have a nice day...\n", 
-skip, *typelast, *typelast, *type, *type);
+Have a nice day...\n");
+
+				fprintf(stderr,
+						"MBF_EM300MBA skipped %d bytes between records %4.4hX:%d and %4.4hX:%d\n",
+						skip, *typelast, *typelast, *type, *type);
+				(*nbadrec)++;
 			    }
 			*typelast = *type;
 
@@ -1255,7 +1256,7 @@ skip, *typelast, *typelast, *type, *type);
 #ifdef MBR_EM300MBA_DEBUG
 	fprintf(stderr,"done:%d expect:%x status:%d error:%d\n", 
 		done, expect, status, *error);
-	fprintf(stderr,"end of mbr_em300mba_rd_data loop:\n");
+	fprintf(stderr,"end of mbr_em300mba_rd_data loop:\n\n");
 #endif
 		}
 		
@@ -1304,10 +1305,14 @@ int mbr_em300mba_chk_label(int verbose, char *mbio_ptr, short type, short sonar)
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 	sonar_save = (short *) (&mb_io_ptr->save4);
 
+#ifdef MBR_EM300MBA_DEBUG
+	fprintf(stderr, "Check label: %4.4hX %4.4hX | %d %d\n", type, sonar, type, sonar);
+#endif
+
 		/* swap bytes if necessary */
 #ifdef BYTESWAPPED
-		type = (short) mb_swap_short(type);
-		sonar = (short) mb_swap_short(sonar);
+	type = (short) mb_swap_short(type);
+	sonar = (short) mb_swap_short(sonar);
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"dbg2  Input values byte swapped:\n");
@@ -1339,36 +1344,46 @@ int mbr_em300mba_chk_label(int verbose, char *mbio_ptr, short type, short sonar)
 		status = MB_FAILURE;
 		startid = (char *) &type;
 		if ((verbose >= 1 && *startid == 2)
-		    && (sonar == EM2_EM120
-			|| sonar == EM2_EM300
-			|| sonar == EM2_EM1002
-			|| sonar == EM2_EM2000
-			|| sonar == EM2_EM3000
-			|| sonar == EM2_EM3000D_1
-			|| sonar == EM2_EM3000D_2
-			|| sonar == EM2_EM3000D_3
-			|| sonar == EM2_EM3000D_4
-			|| sonar == EM2_EM3000D_5
-			|| sonar == EM2_EM3000D_6
-			|| sonar == EM2_EM3000D_7))
+		    && (sonar == MBSYS_SIMRAD2_EM120
+			|| sonar == MBSYS_SIMRAD2_EM300
+			|| sonar == MBSYS_SIMRAD2_EM1002
+			|| sonar == MBSYS_SIMRAD2_EM2000
+			|| sonar == MBSYS_SIMRAD2_EM3000
+			|| sonar == MBSYS_SIMRAD2_EM3000D_1
+			|| sonar == MBSYS_SIMRAD2_EM3000D_2
+			|| sonar == MBSYS_SIMRAD2_EM3000D_3
+			|| sonar == MBSYS_SIMRAD2_EM3000D_4
+			|| sonar == MBSYS_SIMRAD2_EM3000D_5
+			|| sonar == MBSYS_SIMRAD2_EM3000D_6
+			|| sonar == MBSYS_SIMRAD2_EM3000D_7
+			|| sonar != MBSYS_SIMRAD2_EM12S
+			|| sonar != MBSYS_SIMRAD2_EM12D
+			|| sonar != MBSYS_SIMRAD2_EM121
+			|| sonar != MBSYS_SIMRAD2_EM100
+			|| sonar != MBSYS_SIMRAD2_EM1000))
 			{
-			fprintf(stderr, "Bad datagram type: %d %x   %d %x\n", type, type, sonar, sonar);
+			fprintf(stderr, "Bad datagram type: %4.4hX %4.4hX | %d %d\n", type, sonar, type, sonar);
 			}
 		}
 		
 	/* check for valid sonar model */
-	if (sonar != EM2_EM120
-		&& sonar != EM2_EM300
-		&& sonar != EM2_EM1002
-		&& sonar != EM2_EM2000
-		&& sonar != EM2_EM3000
-		&& sonar != EM2_EM3000D_1
-		&& sonar != EM2_EM3000D_2
-		&& sonar != EM2_EM3000D_3
-		&& sonar != EM2_EM3000D_4
-		&& sonar != EM2_EM3000D_5
-		&& sonar != EM2_EM3000D_6
-		&& sonar != EM2_EM3000D_7)
+	if (sonar != MBSYS_SIMRAD2_EM120
+		&& sonar != MBSYS_SIMRAD2_EM300
+		&& sonar != MBSYS_SIMRAD2_EM1002
+		&& sonar != MBSYS_SIMRAD2_EM2000
+		&& sonar != MBSYS_SIMRAD2_EM3000
+		&& sonar != MBSYS_SIMRAD2_EM3000D_1
+		&& sonar != MBSYS_SIMRAD2_EM3000D_2
+		&& sonar != MBSYS_SIMRAD2_EM3000D_3
+		&& sonar != MBSYS_SIMRAD2_EM3000D_4
+		&& sonar != MBSYS_SIMRAD2_EM3000D_5
+		&& sonar != MBSYS_SIMRAD2_EM3000D_6
+		&& sonar != MBSYS_SIMRAD2_EM3000D_7
+		&& sonar != MBSYS_SIMRAD2_EM12S
+		&& sonar != MBSYS_SIMRAD2_EM12D
+		&& sonar != MBSYS_SIMRAD2_EM121
+		&& sonar != MBSYS_SIMRAD2_EM100
+		&& sonar != MBSYS_SIMRAD2_EM1000)
 		{
 		status = MB_FAILURE;
 		}
@@ -1378,7 +1393,7 @@ int mbr_em300mba_chk_label(int verbose, char *mbio_ptr, short type, short sonar)
 	    *sonar_save = sonar;
 		
 	/* allow exception found in some EM3000 data */
-	if (type == EM2_SVP && sonar == 0 && *sonar_save == EM2_EM3000)
+	if (type == EM2_SVP && sonar == 0 && *sonar_save == MBSYS_SIMRAD2_EM3000)
 		{
 		status = MB_SUCCESS;
 		}
@@ -1443,11 +1458,9 @@ int mbr_em300mba_rd_start(int verbose, FILE *mbfp,
 	/* get binary header data */
 	if (status == MB_SUCCESS)
 		{
-		mb_get_binary_int(MB_NO, &line[0], &int_val); 
-		    store->par_date = (int) int_val;
+		mb_get_binary_int(MB_NO, &line[0], &store->par_date); 
 		    store->date = store->par_date;
-		mb_get_binary_int(MB_NO, &line[4], &int_val); 
-		    store->par_msec = (int) int_val;
+		mb_get_binary_int(MB_NO, &line[4], &store->par_msec); 
 		    store->msec = store->par_msec;
 		mb_get_binary_short(MB_NO, &line[8], &short_val); 
 		    store->par_line_num = (int) ((unsigned short) short_val);
@@ -1671,11 +1684,15 @@ int mbr_em300mba_rd_start(int verbose, FILE *mbfp,
 	    {
 	    /* if EM2_END not yet found then the 
 		next byte should be EM2_END */
-/*fprintf(stderr, "endbyte1: %d:%x:%c\n", line[0], line[0], line[0]);*/
+#ifdef MBR_EM300MBA_DEBUG
+	fprintf(stderr, "End Bytes: %2.2hX %d", line[0], line[0]);
+#endif
 	    if (line[0] != EM2_END)
 		{
 		read_len = fread(&line[0],1,1,mbfp);
-/*fprintf(stderr, "endbyte2: %d:%x:%c\n", line[0], line[0], line[0]);*/
+#ifdef MBR_EM300MBA_DEBUG
+	fprintf(stderr, "| %2.2hX %d", line[0], line[0]);
+#endif
 		}
 		
 	    /* if EM2_END not yet found then the 
@@ -1683,11 +1700,14 @@ int mbr_em300mba_rd_start(int verbose, FILE *mbfp,
 	    if (line[0] != EM2_END)
 		{
 		read_len = fread(&line[0],1,1,mbfp);
-/*fprintf(stderr, "endbyte3: %d:%x:%c\n", line[0], line[0], line[0]);*/
+#ifdef MBR_EM300MBA_DEBUG
+	fprintf(stderr, "| %2.2hX %d", line[0], line[0]);
+#endif
 		}
 		
 	    /* if we got the end byte then get check sum bytes */
 	    if (line[0] == EM2_END)
+		{
 		read_len = fread(&line[0],2,1,mbfp);
 	    /* don't check success of read
 	        - return success here even if read fails
@@ -1695,6 +1715,15 @@ int mbr_em300mba_rd_start(int verbose, FILE *mbfp,
 		important information in this record has
 		already been read - next attempt to read
 		file will return error */
+#ifdef MBR_EM300MBA_DEBUG
+	fprintf(stderr, "| %4.4hX %d", 
+		*((short int *)&(line[0])), 
+		*((short int *)&(line[0])));
+#endif
+		}
+#ifdef MBR_EM300MBA_DEBUG
+	fprintf(stderr, "\n");
+#endif
 	    }
 
 	/* print debug statements */
@@ -1837,18 +1866,15 @@ int mbr_em300mba_rd_run_parameter(int verbose, FILE *mbfp,
 	/* get binary data */
 	if (status == MB_SUCCESS)
 		{
-		mb_get_binary_int(MB_NO, &line[0], &int_val); 
-		    store->run_date = (int) int_val;
+		mb_get_binary_int(MB_NO, &line[0], &store->run_date); 
 		    if (store->run_date != 0) store->date = store->run_date;
-		mb_get_binary_int(MB_NO, &line[4], &int_val); 
-		    store->run_msec = (int) int_val;
+		mb_get_binary_int(MB_NO, &line[4], &store->run_msec); 
 		    if (store->run_date != 0) store->msec = store->run_msec;
 		mb_get_binary_short(MB_NO, &line[8], &short_val); 
 		    store->run_ping_count = (int) ((unsigned short) short_val);
 		mb_get_binary_short(MB_NO, &line[10], &short_val); 
 		    store->run_serial = (int) ((unsigned short) short_val);
-		mb_get_binary_int(MB_NO, &line[12], &int_val); 
-		    store->run_status = (int) int_val;
+		mb_get_binary_int(MB_NO, &line[12], &store->run_status); 
 		store->run_mode = (mb_u_char) line[16];
 		store->run_filter_id = (mb_u_char) line[17];
 		mb_get_binary_short(MB_NO, &line[18], &short_val); 
@@ -1874,6 +1900,11 @@ int mbr_em300mba_rd_run_parameter(int verbose, FILE *mbfp,
 		store->run_stab_mode = (mb_u_char) line[38];
 		for (i=0;i<6;i++)
 		    store->run_spare[i] = line[39+i];
+#ifdef MBR_EM300MBA_DEBUG
+	fprintf(stderr, "End Bytes: %8.8X %d\n", 
+		*((int *)&(line[EM2_RUN_PARAMETER_SIZE-9])), 
+		*((int *)&(line[EM2_RUN_PARAMETER_SIZE-9])));
+#endif
 		}
 
 	/* print debug statements */
@@ -1969,21 +2000,22 @@ int mbr_em300mba_rd_clock(int verbose, FILE *mbfp,
 	/* get binary data */
 	if (status == MB_SUCCESS)
 		{
-		mb_get_binary_int(MB_NO, &line[0], &int_val); 
-		    store->clk_date = (int) int_val;
+		mb_get_binary_int(MB_NO, &line[0], &store->clk_date); 
 		    store->date = store->clk_date;
-		mb_get_binary_int(MB_NO, &line[4], &int_val); 
-		    store->clk_msec = (int) int_val;
+		mb_get_binary_int(MB_NO, &line[4], &store->clk_msec); 
 		    store->msec = store->clk_msec;
 		mb_get_binary_short(MB_NO, &line[8], &short_val); 
 		    store->clk_count = (int) ((unsigned short) short_val);
 		mb_get_binary_short(MB_NO, &line[10], &short_val); 
 		    store->clk_serial = (int) ((unsigned short) short_val);
-		mb_get_binary_int(MB_NO, &line[12], &int_val); 
-		    store->clk_origin_date = (int) int_val;
-		mb_get_binary_int(MB_NO, &line[16], &int_val); 
-		    store->clk_origin_msec = (int) int_val;
+		mb_get_binary_int(MB_NO, &line[12], &store->clk_origin_date); 
+		mb_get_binary_int(MB_NO, &line[16], &store->clk_origin_msec); 
 		store->clk_1_pps_use = (mb_u_char) line[20];
+#ifdef MBR_EM300MBA_DEBUG
+	fprintf(stderr, "End Bytes: %8.8X %d\n", 
+		*((int *)&(line[EM2_CLOCK_SIZE-9])), 
+		*((int *)&(line[EM2_CLOCK_SIZE-9])));
+#endif
 		}
 
 	/* print debug statements */
@@ -2062,22 +2094,23 @@ int mbr_em300mba_rd_tide(int verbose, FILE *mbfp,
 	/* get binary data */
 	if (status == MB_SUCCESS)
 		{
-		mb_get_binary_int(MB_NO, &line[0], &int_val); 
-		    store->tid_date = (int) int_val;
+		mb_get_binary_int(MB_NO, &line[0], &store->tid_date); 
 		    store->date = store->tid_date;
-		mb_get_binary_int(MB_NO, &line[4], &int_val); 
-		    store->tid_msec = (int) int_val;
+		mb_get_binary_int(MB_NO, &line[4], &store->tid_msec); 
 		    store->msec = store->tid_msec;
 		mb_get_binary_short(MB_NO, &line[8], &short_val); 
 		    store->tid_count = (int) ((unsigned short) short_val);
 		mb_get_binary_short(MB_NO, &line[10], &short_val); 
 		    store->tid_serial = (int) ((unsigned short) short_val);
-		mb_get_binary_int(MB_NO, &line[12], &int_val); 
-		    store->tid_origin_date = (int) int_val;
-		mb_get_binary_int(MB_NO, &line[16], &int_val); 
-		    store->tid_origin_msec = (int) int_val;
+		mb_get_binary_int(MB_NO, &line[12], &store->tid_origin_date); 
+		mb_get_binary_int(MB_NO, &line[16], &store->tid_origin_msec); 
 		mb_get_binary_short(MB_NO, &line[20], &short_val); 
 		    store->tid_tide = (int) short_val;
+#ifdef MBR_EM300MBA_DEBUG
+	fprintf(stderr, "End Bytes: %8.8X %d\n", 
+		*((int *)&(line[EM2_TIDE_SIZE-9])), 
+		*((int *)&(line[EM2_TIDE_SIZE-9])));
+#endif
 		}
 
 	/* print debug statements */
@@ -2156,19 +2189,20 @@ int mbr_em300mba_rd_height(int verbose, FILE *mbfp,
 	/* get binary data */
 	if (status == MB_SUCCESS)
 		{
-		mb_get_binary_int(MB_NO, &line[0], &int_val); 
-		    store->hgt_date = (int) int_val;
+		mb_get_binary_int(MB_NO, &line[0], &store->hgt_date); 
 		    store->date = store->hgt_date;
-		mb_get_binary_int(MB_NO, &line[4], &int_val); 
-		    store->hgt_msec = (int) int_val;
+		mb_get_binary_int(MB_NO, &line[4], &store->hgt_msec); 
 		    store->msec = store->hgt_msec;
 		mb_get_binary_short(MB_NO, &line[8], &short_val); 
 		    store->hgt_count = (int) ((unsigned short) short_val);
 		mb_get_binary_short(MB_NO, &line[10], &short_val); 
 		    store->hgt_serial = (int) ((unsigned short) short_val);
-		mb_get_binary_int(MB_NO, &line[12], &int_val); 
-		    store->hgt_height = (int) int_val;
+		mb_get_binary_int(MB_NO, &line[12], &store->hgt_height); 
 		store->hgt_type = (mb_u_char) line[16];
+#ifdef MBR_EM300MBA_DEBUG
+	fprintf(stderr, "End Bytes: %8.8X %d\n", 
+		*((int *)&(line[EM2_HEIGHT_SIZE-9])));
+#endif
 		}
 
 	/* print debug statements */
@@ -2250,11 +2284,9 @@ int mbr_em300mba_rd_heading(int verbose, FILE *mbfp,
 	/* get binary header data */
 	if (status == MB_SUCCESS)
 		{
-		mb_get_binary_int(MB_NO, &line[0], &int_val); 
-		    heading->hed_date = (int) int_val;
+		mb_get_binary_int(MB_NO, &line[0], &heading->hed_date); 
 		    store->date = heading->hed_date;
-		mb_get_binary_int(MB_NO, &line[4], &int_val); 
-		    heading->hed_msec = (int) int_val;
+		mb_get_binary_int(MB_NO, &line[4], &heading->hed_msec); 
 		    store->msec = heading->hed_msec;
 		mb_get_binary_short(MB_NO, &line[8], &short_val); 
 		    heading->hed_count = (int) ((unsigned short) short_val);
@@ -2305,6 +2337,10 @@ int mbr_em300mba_rd_heading(int verbose, FILE *mbfp,
 			    file will return error */
 			status = MB_SUCCESS;
 			}
+#ifdef MBR_EM300MBA_DEBUG
+	fprintf(stderr, "End Bytes: %8.8X %d\n", 
+		*((int *)&(line[0])));
+#endif
 		}
 
 	/* print debug statements */
@@ -2391,11 +2427,9 @@ int mbr_em300mba_rd_ssv(int verbose, FILE *mbfp,
 	/* get binary header data */
 	if (status == MB_SUCCESS)
 		{
-		mb_get_binary_int(MB_NO, &line[0], &int_val); 
-		    ssv->ssv_date = (int) int_val;
+		mb_get_binary_int(MB_NO, &line[0], &ssv->ssv_date); 
 		    store->date = ssv->ssv_date;
-		mb_get_binary_int(MB_NO, &line[4], &int_val); 
-		    ssv->ssv_msec = (int) int_val;
+		mb_get_binary_int(MB_NO, &line[4], &ssv->ssv_msec); 
 		    store->msec = ssv->ssv_msec;
 		mb_get_binary_short(MB_NO, &line[8], &short_val); 
 		    ssv->ssv_count = (int) ((unsigned short) short_val);
@@ -2445,6 +2479,10 @@ int mbr_em300mba_rd_ssv(int verbose, FILE *mbfp,
 			    file will return error */
 			status = MB_SUCCESS;
 			}
+#ifdef MBR_EM300MBA_DEBUG
+	fprintf(stderr, "End Bytes: %8.8X %d\n", 
+		*((int *)&(line[0])));
+#endif
 		}
 
 	/* print debug statements */
@@ -2530,11 +2568,9 @@ int mbr_em300mba_rd_attitude(int verbose, FILE *mbfp,
 	/* get binary header data */
 	if (status == MB_SUCCESS)
 		{
-		mb_get_binary_int(MB_NO, &line[0], &int_val); 
-		    attitude->att_date = (int) int_val;
+		mb_get_binary_int(MB_NO, &line[0], &attitude->att_date); 
 		    store->date = attitude->att_date;
-		mb_get_binary_int(MB_NO, &line[4], &int_val); 
-		    attitude->att_msec = (int) int_val;
+		mb_get_binary_int(MB_NO, &line[4], &attitude->att_msec); 
 		    store->msec = attitude->att_msec;
 		mb_get_binary_short(MB_NO, &line[8], &short_val); 
 		    attitude->att_count = (int) ((unsigned short) short_val);
@@ -2593,6 +2629,10 @@ int mbr_em300mba_rd_attitude(int verbose, FILE *mbfp,
 			    file will return error */
 			status = MB_SUCCESS;
 			}
+#ifdef MBR_EM300MBA_DEBUG
+	fprintf(stderr, "End Bytes: %8.8X %d\n", 
+		*((int *)&(line[0])));
+#endif
 		}
 
 	/* print debug statements */
@@ -2677,20 +2717,16 @@ int mbr_em300mba_rd_pos(int verbose, FILE *mbfp,
 	/* get binary header data */
 	if (status == MB_SUCCESS)
 		{
-		mb_get_binary_int(MB_NO, &line[0], &int_val); 
-		    store->pos_date = (int) int_val;
+		mb_get_binary_int(MB_NO, &line[0], &store->pos_date); 
 		    store->date = store->pos_date;
-		mb_get_binary_int(MB_NO, &line[4], &int_val); 
-		    store->pos_msec = (int) int_val;
+		mb_get_binary_int(MB_NO, &line[4], &store->pos_msec); 
 		    store->msec = store->pos_msec;
 		mb_get_binary_short(MB_NO, &line[8], &short_val); 
 		    store->pos_count = (int) ((unsigned short) short_val);
 		mb_get_binary_short(MB_NO, &line[10], &short_val); 
 		    store->pos_serial = (int) ((unsigned short) short_val);
-		mb_get_binary_int(MB_NO, &line[12], &int_val); 
-		    store->pos_latitude = (int) int_val;
-		mb_get_binary_int(MB_NO, &line[16], &int_val); 
-		    store->pos_longitude = (int) int_val;
+		mb_get_binary_int(MB_NO, &line[12], &store->pos_latitude); 
+		mb_get_binary_int(MB_NO, &line[16], &store->pos_longitude); 
 		mb_get_binary_short(MB_NO, &line[20], &short_val); 
 		    store->pos_quality = (int) ((unsigned short) short_val);
 		mb_get_binary_short(MB_NO, &line[22], &short_val); 
@@ -2724,15 +2760,26 @@ int mbr_em300mba_rd_pos(int verbose, FILE *mbfp,
 	if (status == MB_SUCCESS)
 	    {
 	    done = MB_NO;
+#ifdef MBR_EM300MBA_DEBUG
+	fprintf(stderr, "End Bytes:");
+#endif
 	    while (done == MB_NO)
 		{
 		read_len = fread(&line[0],1,1,mbfp);
+#ifdef MBR_EM300MBA_DEBUG
+	fprintf(stderr, " %2.2hX %d |", line[0], line[0]);
+#endif
 		if (read_len == 1 && line[0] == EM2_END)
 			{
 			done = MB_YES;
 			status = MB_SUCCESS;
 			/* get last two check sum bytes */
 			read_len = fread(&line[0],2,1,mbfp);
+#ifdef MBR_EM300MBA_DEBUG
+	fprintf(stderr, " %4.4hX %d", 
+		*((short int *)&(line[0])), 
+		*((short int *)&(line[0])));
+#endif
 			}
 		else if (read_len == 1)
 			{
@@ -2748,6 +2795,9 @@ int mbr_em300mba_rd_pos(int verbose, FILE *mbfp,
 			status = MB_SUCCESS;
 			}
 		}
+#ifdef MBR_EM300MBA_DEBUG
+	fprintf(stderr, "\n");
+#endif
 	    }
 
 	/* print debug statements */
@@ -2832,20 +2882,16 @@ int mbr_em300mba_rd_svp(int verbose, FILE *mbfp,
 	/* get binary header data */
 	if (status == MB_SUCCESS)
 		{
-		mb_get_binary_int(MB_NO, &line[0], &int_val); 
-		    store->svp_use_date = (int) int_val;
+		mb_get_binary_int(MB_NO, &line[0], &store->svp_use_date); 
 		    store->date = store->svp_use_date;
-		mb_get_binary_int(MB_NO, &line[4], &int_val); 
-		    store->svp_use_msec = (int) int_val;
+		mb_get_binary_int(MB_NO, &line[4], &store->svp_use_msec); 
 		    store->msec = store->svp_use_msec;
 		mb_get_binary_short(MB_NO, &line[8], &short_val); 
 		    store->svp_count = (int) ((unsigned short) short_val);
 		mb_get_binary_short(MB_NO, &line[10], &short_val); 
 		    store->svp_serial = (int) ((unsigned short) short_val);
-		mb_get_binary_int(MB_NO, &line[12], &int_val); 
-		    store->svp_origin_date = (int) int_val;
-		mb_get_binary_int(MB_NO, &line[16], &int_val); 
-		    store->svp_origin_msec = (int) int_val;
+		mb_get_binary_int(MB_NO, &line[12], &store->svp_origin_date); 
+		mb_get_binary_int(MB_NO, &line[16], &store->svp_origin_msec); 
 		mb_get_binary_short(MB_NO, &line[20], &short_val); 
 		    store->svp_num = (int) ((unsigned short) short_val);
 		mb_get_binary_short(MB_NO, &line[22], &short_val); 
@@ -2891,6 +2937,10 @@ int mbr_em300mba_rd_svp(int verbose, FILE *mbfp,
 			    file will return error */
 			status = MB_SUCCESS;
 			}
+#ifdef MBR_EM300MBA_DEBUG
+	fprintf(stderr, "End Bytes: %8.8X %d\n", 
+		*((int *)&(line[0])));
+#endif
 		}
 
 	/* print debug statements */
@@ -2975,20 +3025,16 @@ int mbr_em300mba_rd_svp2(int verbose, FILE *mbfp,
 	/* get binary header data */
 	if (status == MB_SUCCESS)
 		{
-		mb_get_binary_int(MB_NO, &line[0], &int_val); 
-		    store->svp_use_date = (int) int_val;
+		mb_get_binary_int(MB_NO, &line[0], &store->svp_use_date); 
 		    store->date = store->svp_use_date;
-		mb_get_binary_int(MB_NO, &line[4], &int_val); 
-		    store->svp_use_msec = (int) int_val;
+		mb_get_binary_int(MB_NO, &line[4], &store->svp_use_msec); 
 		    store->msec = store->svp_use_msec;
 		mb_get_binary_short(MB_NO, &line[8], &short_val); 
 		    store->svp_count = (int) ((unsigned short) short_val);
 		mb_get_binary_short(MB_NO, &line[10], &short_val); 
 		    store->svp_serial = (int) ((unsigned short) short_val);
-		mb_get_binary_int(MB_NO, &line[12], &int_val); 
-		    store->svp_origin_date = (int) int_val;
-		mb_get_binary_int(MB_NO, &line[16], &int_val); 
-		    store->svp_origin_msec = (int) int_val;
+		mb_get_binary_int(MB_NO, &line[12], &store->svp_origin_date); 
+		mb_get_binary_int(MB_NO, &line[16], &store->svp_origin_msec); 
 		mb_get_binary_short(MB_NO, &line[20], &short_val); 
 		    store->svp_num = (int) ((unsigned short) short_val);
 		mb_get_binary_short(MB_NO, &line[22], &short_val); 
@@ -3032,6 +3078,10 @@ int mbr_em300mba_rd_svp2(int verbose, FILE *mbfp,
 			    file will return error */
 			status = MB_SUCCESS;
 			}
+#ifdef MBR_EM300MBA_DEBUG
+	fprintf(stderr, "End Bytes: %8.8X %d\n", 
+		*((int *)&(line[0])));
+#endif
 		}
 
 	/* print debug statements */
@@ -3121,20 +3171,16 @@ int mbr_em300mba_rd_bath(int verbose, FILE *mbfp,
 	/* get binary header data */
 	if (status == MB_SUCCESS)
 		{
-		mb_get_binary_int(MB_NO, &line[0], &int_val); 
-		    ping->png_date = (int) int_val;
+		mb_get_binary_int(MB_NO, &line[0], &ping->png_date); 
 		    store->date = ping->png_date;
-		mb_get_binary_int(MB_NO, &line[4], &int_val); 
-		    ping->png_msec = (int) int_val;
+		mb_get_binary_int(MB_NO, &line[4], &ping->png_msec); 
 		    store->msec = ping->png_msec;
 		mb_get_binary_short(MB_NO, &line[8], &short_val); 
 		    ping->png_count = (int) ((unsigned short) short_val);
 		mb_get_binary_short(MB_NO, &line[10], &short_val); 
 		    ping->png_serial = (int) ((unsigned short) short_val);
-		mb_get_binary_int(MB_NO, &line[12], &int_val); 
-		    ping->png_latitude = (int) int_val;
-		mb_get_binary_int(MB_NO, &line[16], &int_val); 
-		    ping->png_longitude = (int) int_val;
+		mb_get_binary_int(MB_NO, &line[12], &ping->png_latitude); 
+		mb_get_binary_int(MB_NO, &line[16], &ping->png_longitude); 
 		mb_get_binary_short(MB_NO, &line[20], &short_val); 
 		    ping->png_speed = (int) ((unsigned short) short_val);
 		mb_get_binary_short(MB_NO, &line[22], &short_val); 
@@ -3177,8 +3223,8 @@ int mbr_em300mba_rd_bath(int verbose, FILE *mbfp,
 			{
 			status = MB_SUCCESS;
 			mb_get_binary_short(MB_NO, &line[0], &short_val); 
-			    if (store->sonar == EM2_EM120
-				|| store->sonar == EM2_EM300)
+			    if (store->sonar == MBSYS_SIMRAD2_EM120
+				|| store->sonar == MBSYS_SIMRAD2_EM300)
 				ping->png_depth[i] = (int) ((unsigned short) short_val);
 			    else
 				ping->png_depth[i] = (int) short_val;
@@ -3221,6 +3267,10 @@ int mbr_em300mba_rd_bath(int verbose, FILE *mbfp,
 			status = MB_FAILURE;
 			*error = MB_ERROR_EOF;
 			}
+#ifdef MBR_EM300MBA_DEBUG
+	fprintf(stderr, "End Bytes: %8.8X %d\n", 
+		*((int *)&(line[0])));
+#endif
 		}
 		
 	/* check for some other indicators of a broken record 
@@ -3349,11 +3399,9 @@ int mbr_em300mba_rd_rawbeam(int verbose, FILE *mbfp,
 	/* get binary header data */
 	if (status == MB_SUCCESS)
 		{
-		mb_get_binary_int(MB_NO, &line[0], &int_val); 
-		    ping->png_date = (int) int_val;
+		mb_get_binary_int(MB_NO, &line[0], &ping->png_date); 
 		    store->date = ping->png_date;
-		mb_get_binary_int(MB_NO, &line[4], &int_val); 
-		    ping->png_msec = (int) int_val;
+		mb_get_binary_int(MB_NO, &line[4], &ping->png_msec); 
 		    store->msec = ping->png_msec;
 		mb_get_binary_short(MB_NO, &line[8], &short_val); 
 		    ping->png_count = (int) ((unsigned short) short_val);
@@ -3420,6 +3468,10 @@ int mbr_em300mba_rd_rawbeam(int verbose, FILE *mbfp,
 			status = MB_FAILURE;
 			*error = MB_ERROR_EOF;
 			}
+#ifdef MBR_EM300MBA_DEBUG
+	fprintf(stderr, "End Bytes: %8.8X %d\n", 
+		*((int *)&(line[0])));
+#endif
 		}
 		
 	/* check for some other indicators of a broken record 
@@ -3533,11 +3585,9 @@ int mbr_em300mba_rd_ss(int verbose, FILE *mbfp,
 	/* get binary header data */
 	if (status == MB_SUCCESS)
 		{
-		mb_get_binary_int(MB_NO, &line[0], &int_val); 
-		    ping->png_ss_date = (int) int_val;
+		mb_get_binary_int(MB_NO, &line[0], &ping->png_ss_date); 
 		    store->date = ping->png_ss_date;
-		mb_get_binary_int(MB_NO, &line[4], &int_val); 
-		    ping->png_ss_msec = (int) int_val;
+		mb_get_binary_int(MB_NO, &line[4], & ping->png_ss_msec); 
 		    store->msec = ping->png_ss_msec;
 		mb_get_binary_short(MB_NO, &line[8], &short_val); 
 		    ping->png_count = (int) ((unsigned short) short_val);
@@ -3732,15 +3782,26 @@ int mbr_em300mba_rd_ss(int verbose, FILE *mbfp,
 	if (status == MB_SUCCESS)
 	    {
 	    done = MB_NO;
+#ifdef MBR_EM300MBA_DEBUG
+	fprintf(stderr, "End Bytes:");
+#endif
 	    while (done == MB_NO)
 		{
 		read_len = fread(&line[0],1,1,mbfp);
+#ifdef MBR_EM300MBA_DEBUG
+	fprintf(stderr, " %2.2hX %d |", line[0], line[0]);
+#endif
 		if (read_len == 1 && line[0] == EM2_END)
 			{
 			done = MB_YES;
 			status = MB_SUCCESS;
 			/* get last two check sum bytes */
 			read_len = fread(&line[0],2,1,mbfp);
+#ifdef MBR_EM300MBA_DEBUG
+	fprintf(stderr, " %4.4hX %d", 
+		*((short int *)&(line[0])), 
+		*((short int *)&(line[0])));
+#endif
 			}
 		else if (read_len == 1)
 			{
@@ -3756,6 +3817,9 @@ int mbr_em300mba_rd_ss(int verbose, FILE *mbfp,
 			status = MB_SUCCESS;
 			}
 		}
+#ifdef MBR_EM300MBA_DEBUG
+	fprintf(stderr, "\n");
+#endif
 	    }
 		
 	/* check if bath and sidescan time tags agree 
@@ -3882,7 +3946,7 @@ int mbr_em300mba_wr_data(int verbose, char *mbio_ptr, char *store_ptr, int *erro
 
 #ifdef MBR_EM300MBA_DEBUG
 	fprintf(stderr,"\nstart of mbr_em300mba_wr_data:\n");
-	fprintf(stderr,"kind:%d %d type:%x\n", store->kind, mb_io_ptr->new_kind, store->type);
+	fprintf(stderr,"kind:%d %d\n", store->kind, mb_io_ptr->new_kind);
 #endif
 
 	if (store->kind == MB_DATA_COMMENT
@@ -3890,98 +3954,98 @@ int mbr_em300mba_wr_data(int verbose, char *mbio_ptr, char *store_ptr, int *erro
 		|| store->kind == MB_DATA_STOP)
 		{
 #ifdef MBR_EM300MBA_DEBUG
-	fprintf(stderr,"call mbr_em300mba_wr_start kind:%d type %x\n",store->kind,store->type);
+	fprintf(stderr,"call mbr_em300mba_wr_start kind:%d type %x\n",store->kind,EM2_START);
 #endif
 		status = mbr_em300mba_wr_start(verbose,mbfp,store,error);
 		}
 	else if (store->kind == MB_DATA_RUN_PARAMETER)
 		{
 #ifdef MBR_EM300MBA_DEBUG
-	fprintf(stderr,"call mbr_em300mba_wr_run_parameter kind:%d type %x\n",store->kind,store->type);
+	fprintf(stderr,"call mbr_em300mba_wr_run_parameter kind:%d type %x\n",store->kind,EM2_RUN_PARAMETER);
 #endif
 		status = mbr_em300mba_wr_run_parameter(verbose,mbfp,store,error);
 		}
 	else if (store->kind == MB_DATA_CLOCK)
 		{
 #ifdef MBR_EM300MBA_DEBUG
-	fprintf(stderr,"call mbr_em300mba_wr_clock kind:%d type %x\n",store->kind,store->type);
+	fprintf(stderr,"call mbr_em300mba_wr_clock kind:%d type %x\n",store->kind,EM2_CLOCK);
 #endif
 		status = mbr_em300mba_wr_clock(verbose,mbfp,store,error);
 		}
 	else if (store->kind == MB_DATA_TIDE)
 		{
 #ifdef MBR_EM300MBA_DEBUG
-	fprintf(stderr,"call mbr_em300mba_wr_tide kind:%d type %x\n",store->kind,store->type);
+	fprintf(stderr,"call mbr_em300mba_wr_tide kind:%d type %x\n",store->kind,EM2_TIDE);
 #endif
 		status = mbr_em300mba_wr_tide(verbose,mbfp,store,error);
 		}
 	else if (store->kind == MB_DATA_HEIGHT)
 		{
 #ifdef MBR_EM300MBA_DEBUG
-	fprintf(stderr,"call mbr_em300mba_wr_height kind:%d type %x\n",store->kind,store->type);
+	fprintf(stderr,"call mbr_em300mba_wr_height kind:%d type %x\n",store->kind,EM2_HEIGHT);
 #endif
 		status = mbr_em300mba_wr_height(verbose,mbfp,store,error);
 		}
 	else if (store->kind == MB_DATA_HEADING)
 		{
 #ifdef MBR_EM300MBA_DEBUG
-	fprintf(stderr,"call mbr_em300mba_wr_heading kind:%d type %x\n",store->kind,store->type);
+	fprintf(stderr,"call mbr_em300mba_wr_heading kind:%d type %x\n",store->kind,EM2_HEADING);
 #endif
 		status = mbr_em300mba_wr_heading(verbose,mbfp,store,error);
 		}
 	else if (store->kind == MB_DATA_SSV)
 		{
 #ifdef MBR_EM300MBA_DEBUG
-	fprintf(stderr,"call mbr_em300mba_wr_ssv kind:%d type %x\n",store->kind,store->type);
+	fprintf(stderr,"call mbr_em300mba_wr_ssv kind:%d type %x\n",store->kind,EM2_SSV);
 #endif
 		status = mbr_em300mba_wr_ssv(verbose,mbfp,store,error);
 		}
 	else if (store->kind == MB_DATA_ATTITUDE)
 		{
 #ifdef MBR_EM300MBA_DEBUG
-	fprintf(stderr,"call mbr_em300mba_wr_attitude kind:%d type %x\n",store->kind,store->type);
+	fprintf(stderr,"call mbr_em300mba_wr_attitude kind:%d type %x\n",store->kind,EM2_ATTITUDE);
 #endif
 		status = mbr_em300mba_wr_attitude(verbose,mbfp,store,error);
 		}
 	else if (store->kind == MB_DATA_NAV)
 		{
 #ifdef MBR_EM300MBA_DEBUG
-	fprintf(stderr,"call mbr_em300mba_wr_pos kind:%d type %x\n",store->kind,store->type);
+	fprintf(stderr,"call mbr_em300mba_wr_pos kind:%d type %x\n",store->kind,EM2_POS);
 #endif
 		status = mbr_em300mba_wr_pos(verbose,mbfp,store,error);
 		}
 	else if (store->kind == MB_DATA_VELOCITY_PROFILE)
 		{
 #ifdef MBR_EM300MBA_DEBUG
-	fprintf(stderr,"call mbr_em300mba_wr_svp kind:%d type %x\n",store->kind,store->type);
+	fprintf(stderr,"call mbr_em300mba_wr_svp kind:%d type %x\n",store->kind,EM2_SVP2);
 #endif
 		status = mbr_em300mba_wr_svp(verbose,mbfp,store,error);
 		}
 	else if (store->kind == MB_DATA_DATA)
 		{
 #ifdef MBR_EM300MBA_DEBUG
-	fprintf(stderr,"call mbr_em300mba_wr_bath kind:%d type %x\n",store->kind,store->type);
+	fprintf(stderr,"call mbr_em300mba_wr_bath kind:%d type %x\n",store->kind,EM2_BATH_MBA);
 #endif
 		status = mbr_em300mba_wr_bath(verbose,mbfp,store,error);
 		if (ping->png_raw_read == MB_YES)
 		    {
 #ifdef MBR_EM300MBA_DEBUG
-	fprintf(stderr,"call mbr_em300mba_wr_rawbeam kind:%d type %x\n",store->kind,store->type);
+	fprintf(stderr,"call mbr_em300mba_wr_rawbeam kind:%d type %x\n",store->kind,EM2_RAWBEAM);
 #endif
 		    status = mbr_em300mba_wr_rawbeam(verbose,mbfp,store,error);
 		    }
 #ifdef MBR_EM300MBA_DEBUG
-	else fprintf(stderr,"NOT call mbr_em300mba_wr_rawbeam kind:%d type %x\n",store->kind,store->type);
+	else fprintf(stderr,"NOT call mbr_em300mba_wr_rawbeam kind:%d type %x\n",store->kind,EM2_RAWBEAM);
 #endif
 		if (ping->png_ss_read == MB_YES)
 		    {
 #ifdef MBR_EM300MBA_DEBUG
-	fprintf(stderr,"call mbr_em300mba_wr_ss kind:%d type %x\n",store->kind,store->type);
+	fprintf(stderr,"call mbr_em300mba_wr_ss kind:%d type %x\n",store->kind,EM2_SS_MBA);
 #endif
 		    status = mbr_em300mba_wr_ss(verbose,mbfp,store,error);
 		    }
 #ifdef MBR_EM300MBA_DEBUG
-	else fprintf(stderr,"NOT call mbr_em300mba_wr_ss kind:%d type %x\n",store->kind,store->type);
+	else fprintf(stderr,"NOT call mbr_em300mba_wr_ss kind:%d type %x\n",store->kind,EM2_SS_MBA);
 #endif
 		}
 	else
@@ -4136,7 +4200,7 @@ int mbr_em300mba_wr_start(int verbose, FILE *mbfp,
 	    
 	/* if sonar not set use EM300 */
 	if (store->sonar == 0)
-	    store->sonar = EM2_EM300;
+	    store->sonar = MBSYS_SIMRAD2_EM300;
 		
 	/* set up start of output buffer - we handle this
 	   record differently because of the ascii data */
@@ -6130,8 +6194,8 @@ int mbr_em300mba_wr_bath(int verbose, FILE *mbfp,
 	if (status == MB_SUCCESS)
 	    for (i=0;i<ping->png_nbeams;i++)
 		{
-		if (store->sonar == EM2_EM120
-			|| store->sonar == EM2_EM300)
+		if (store->sonar == MBSYS_SIMRAD2_EM120
+			|| store->sonar == MBSYS_SIMRAD2_EM300)
 		    mb_put_binary_short(MB_NO, (unsigned short) ping->png_depth[i], (void *) &line[0]);
 		else
 		    mb_put_binary_short(MB_NO, (short) ping->png_depth[i], (void *) &line[0]);

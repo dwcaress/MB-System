@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_xse.c	3/27/2000
- *	$Id: mbsys_xse.c,v 5.3 2001-04-06 22:05:59 caress Exp $
+ *	$Id: mbsys_xse.c,v 5.4 2001-06-08 21:44:01 caress Exp $
  *
  *    Copyright (c) 2000 by 
  *    D. W. Caress (caress@mbari.org)
@@ -28,6 +28,9 @@
  * Additional Authors:	P. A. Cohen and S. Dzurenko
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2001/04/06  22:05:59  caress
+ * Consolidated xse formats into one format.
+ *
  * Revision 5.2  2001/01/22  07:43:34  caress
  * Version 5.0.beta01
  *
@@ -66,7 +69,7 @@
 int mbsys_xse_alloc(int verbose, char *mbio_ptr, char **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_xse.c,v 5.3 2001-04-06 22:05:59 caress Exp $";
+ static char res_id[]="$Id: mbsys_xse.c,v 5.4 2001-06-08 21:44:01 caress Exp $";
 	char	*function_name = "mbsys_xse_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -321,6 +324,8 @@ int mbsys_xse_extract(int verbose, char *mbio_ptr, char *store_ptr,
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_xse_struct *store;
+	double	xtrackmin, xtrackmax;
+	int	ixtrackmin, ixtrackmax;
 	int	i, j;
 
 	/* print input debug statements */
@@ -389,27 +394,48 @@ int mbsys_xse_extract(int verbose, char *mbio_ptr, char *store_ptr,
 		*nss = 0;
 		if (store->mul_frame == MB_YES)
 		    {
+		    /* set number of beams */
+		    *nbath = store->mul_num_beams;
+		    if (store->mul_group_amp == MB_YES)
+			    *namp = store->mul_num_beams;
+			    
+		    /* determine whether beams are ordered 
+			port to starboard or starboard to port */
+		    xtrackmin = 0.0;
+		    xtrackmax = 0.0;
+		    ixtrackmin = 0;
+		    ixtrackmax = 0;
 		    for (i=0;i<store->mul_num_beams;i++)
 			{
-			j = store->beams[i].beam - 1;
-			*nbath = j + 1;
-			if (store->mul_group_amp == MB_YES)
-			    *namp = j + 1;
+			if (store->beams[i].lateral < xtrackmin)
+			    {
+			    xtrackmin = store->beams[i].lateral;
+			    ixtrackmin = i;
+			    }
+			if (store->beams[i].lateral > xtrackmax)
+			    {
+			    xtrackmax = store->beams[i].lateral;
+			    ixtrackmax = i;
+			    }
+			}
+
+		    /* now extract the bathymetry */		  
+		    for (i=0;i<store->mul_num_beams;i++)
+			{
+			if (ixtrackmax > ixtrackmin)
+			    j = store->mul_num_beams - store->beams[i].beam;
+			else
+			    j = store->beams[i].beam - 1;
 			if (store->beams[i].quality == 1)
-			    beamflag[j] 
-				= MB_FLAG_NONE;
+			    beamflag[j] = MB_FLAG_NONE;
 			else if (store->beams[i].quality < 8)
-			    beamflag[j] 
-				= MB_FLAG_SONAR + MB_FLAG_FLAG;
+			    beamflag[j] = MB_FLAG_SONAR + MB_FLAG_FLAG;
 			else if (store->beams[i].quality == 8)
-			    beamflag[j] 
-				= MB_FLAG_NULL;
+			    beamflag[j] = MB_FLAG_NULL;
 			else if (store->beams[i].quality == 10)
-			    beamflag[j] 
-				= MB_FLAG_MANUAL + MB_FLAG_FLAG;
+			    beamflag[j] = MB_FLAG_MANUAL + MB_FLAG_FLAG;
 			else if (store->beams[i].quality == 20)
-			    beamflag[j] 
-				= MB_FLAG_FILTER + MB_FLAG_FLAG;
+			    beamflag[j] = MB_FLAG_FILTER + MB_FLAG_FLAG;
 			else
 			    beamflag[j] = MB_FLAG_NULL;
 			bath[j] = store->beams[i].depth
@@ -419,7 +445,7 @@ int mbsys_xse_extract(int verbose, char *mbio_ptr, char *store_ptr,
 			else
 			    bath[j] += store->par_trans_z_stbd;
 			bathacrosstrack[j] 
-				= store->beams[i].lateral;
+				= -store->beams[i].lateral;
 			bathalongtrack[j] 
 				= store->beams[i].along;
 			amp[j] = store->beams[i].amplitude;
@@ -430,17 +456,18 @@ int mbsys_xse_extract(int verbose, char *mbio_ptr, char *store_ptr,
 		    *nss = store->sid_num_pixels;
 		    for (i=0;i<store->sid_num_pixels;i++)
 			{
-			ss[i] = store->ss[i];
-			ssacrosstrack[i] 
-			    = 0.001 * store->sid_bin_size 
+			j = store->sid_num_pixels - i - 1;
+			ss[j] = store->ss[i];
+			ssacrosstrack[j] 
+			    = -0.001 * store->sid_bin_size 
 				* (i - store->sid_num_pixels / 2);
 			if (store->mul_frame == MB_YES)
-			    ssalongtrack[i] 
+			    ssalongtrack[j] 
 				= 0.5 * store->nav_speed_ground 
 				    * (store->sid_sec + 0.000001 * store->sid_usec
 					- store->mul_sec + 0.000001 * store->mul_usec);
 			else
-			    ssalongtrack[i] = 0.0;
+			    ssalongtrack[j] = 0.0;
 			}
 		    }
 
@@ -588,8 +615,8 @@ int mbsys_xse_insert(int verbose, char *mbio_ptr, char *store_ptr,
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_xse_struct *store;
-	double	maxoffset;
-	int	imaxoffset;
+	double	maxoffset, xtrackmin, xtrackmax;
+	int	imaxoffset, ixtrackmin, ixtrackmax;
 	int	i, j;
 
 	/* print input debug statements */
@@ -673,36 +700,60 @@ int mbsys_xse_insert(int verbose, char *mbio_ptr, char *store_ptr,
 		store->nav_speed_ground = speed / 1.8;
 
 		/* insert distance and depth values into storage arrays */
+		xtrackmin = 0.0;
+		xtrackmax = 0.0;
+		ixtrackmin = 0;
+		ixtrackmax = 0;
 		if (store->mul_frame == MB_YES)
 		    {
-		    for (i=0;i<nbath;i++)
+		    /* determine whether beams are ordered 
+			port to starboard or starboard to port */
+		    for (i=0;i<store->mul_num_beams;i++)
 			{
-			for (j=0;j<store->mul_num_beams;j++)
+			if (store->beams[i].lateral < xtrackmin)
 			    {
-			    if (store->beams[j].beam == i + 1)
+			    xtrackmin = store->beams[i].lateral;
+			    ixtrackmin = i;
+			    }
+			if (store->beams[i].lateral > xtrackmax)
+			    {
+			    xtrackmax = store->beams[i].lateral;
+			    ixtrackmax = i;
+			    }
+			}
+
+		    /* now insert the bathymetry */		  
+		    for (i=0;i<store->mul_num_beams;i++)
+			{
+			if (ixtrackmax > ixtrackmin)
+			    j = store->mul_num_beams - store->beams[i].beam;
+			else
+			    j = store->beams[i].beam - 1;
+			if (j < nbath)
+			    {
+			    if (mb_beam_check_flag(beamflag[j]))
 				{
-				if (mb_beam_check_flag(beamflag[i]))
-				    {
-				    if (mb_beam_check_flag_null(beamflag[i]))
-					store->beams[j].quality = 8;
-				    else if (mb_beam_check_flag_manual(beamflag[i]))
-					store->beams[j].quality = 10;
-				    else if (mb_beam_check_flag_filter(beamflag[i]))
-					store->beams[j].quality = 20;
-				    else if (store->beams[j].quality == 1)
-					store->beams[j].quality = 7;
-				    }
-				else 
-				    store->beams[j].quality = 1;
-				store->beams[j].depth 
-					= bath[i] - store->beams[j].heave;
-				store->beams[j].lateral = bathacrosstrack[i];
-				store->beams[j].along = bathalongtrack[i];
-				store->beams[j].amplitude = (int) (amp[i]);
+				if (mb_beam_check_flag_null(beamflag[j]))
+				    store->beams[i].quality = 8;
+				else if (mb_beam_check_flag_manual(beamflag[j]))
+				    store->beams[i].quality = 10;
+				else if (mb_beam_check_flag_filter(beamflag[j]))
+				    store->beams[i].quality = 20;
+				else if (store->beams[i].quality == 1)
+				    store->beams[i].quality = 7;
 				}
+			    else 
+				store->beams[i].quality = 1;
+			    store->beams[i].depth 
+				    = bath[j] - store->beams[i].heave;
+			    store->beams[i].lateral = -bathacrosstrack[j];
+			    store->beams[i].along = bathalongtrack[j];
+			    store->beams[i].amplitude = (int) (amp[j]);
 			    }
 			}
 		    }
+
+		/* now insert the sidescan */		  
 		if (store->sid_frame == MB_YES)
 		    {
 		    if (nss != store->sid_num_pixels)
@@ -721,9 +772,16 @@ int mbsys_xse_insert(int verbose, char *mbio_ptr, char *store_ptr,
 			if (maxoffset > 0.0 && imaxoffset != 0)
 			    store->sid_bin_size = (int)(1000 * maxoffset / imaxoffset);
 			}
-		    for (i=0;i<nss;i++)
+		    for (i=0;i<store->sid_num_pixels;i++)
 			{
-			store->ss[i]= ss[i];
+			if (ixtrackmax > ixtrackmin)
+			    j = store->sid_num_pixels - i - 1;
+			else
+			    j = i;
+			if (j < nss)
+			    {
+			    store->ss[i]= ss[j];
+			    }
 			}
 		    }
 		}

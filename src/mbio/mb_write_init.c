@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_write_init.c	1/25/93
- *    $Id: mb_write_init.c,v 5.2 2001-03-22 20:45:56 caress Exp $
+ *    $Id: mb_write_init.c,v 5.3 2001-06-08 21:44:01 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	January 25, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2001/03/22  20:45:56  caress
+ * Trying to make 5.0.beta0...
+ *
  * Revision 5.1  2001/01/22  07:43:34  caress
  * Version 5.0.beta01
  *
@@ -148,7 +151,7 @@ int mb_write_init(int verbose,
 		int *beams_bath, int *beams_amp, int *pixels_ss,
 		int *error)
 {
-	static char rcs_id[]="$Id: mb_write_init.c,v 5.2 2001-03-22 20:45:56 caress Exp $";
+	static char rcs_id[]="$Id: mb_write_init.c,v 5.3 2001-06-08 21:44:01 caress Exp $";
 	char	*function_name = "mb_write_init";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -527,6 +530,7 @@ int mb_write_init(int verbose,
 
 	/* initialize the working variables */
 	mb_io_ptr->ping_count = 0;
+	mb_io_ptr->nav_count = 0;
 	mb_io_ptr->comment_count = 0;
 	mb_io_ptr->pings_avg = 1;
 	mb_io_ptr->pings_read = 0;
@@ -537,6 +541,9 @@ int mb_write_init(int verbose,
 	mb_io_ptr->old_time_d = 0.0;
 	mb_io_ptr->old_lon = 0.0;
 	mb_io_ptr->old_lat = 0.0;
+	mb_io_ptr->old_ntime_d = 0.0;
+	mb_io_ptr->old_nlon = 0.0;
+	mb_io_ptr->old_nlat = 0.0;
 	mb_io_ptr->time_d = 0.0;
 	mb_io_ptr->lon = 0.0;
 	mb_io_ptr->lat = 0.0;

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcopy.c	2/4/93
- *    $Id: mbcopy.c,v 5.2 2001-06-03 07:07:34 caress Exp $
+ *    $Id: mbcopy.c,v 5.3 2001-06-08 21:45:46 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	February 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2001/06/03  07:07:34  caress
+ * Release 5.0.beta01.
+ *
  * Revision 5.1  2001/03/22 21:14:16  caress
  * Trying to make release 5.0.beta0.
  *
@@ -160,7 +163,7 @@ int mbcopy_simrad_time_convert(int verbose,
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbcopy.c,v 5.2 2001-06-03 07:07:34 caress Exp $";
+	static char rcs_id[] = "$Id: mbcopy.c,v 5.3 2001-06-08 21:45:46 caress Exp $";
 	static char program_name[] = "MBcopy";
 	static char help_message[] =  "MBcopy copies an input swath sonar data file to an output \nswath sonar data file with the specified conversions.  Options include \nwindowing in time and space and ping averaging.  The input and \noutput data formats may differ, though not all possible combinations \nmake sense.  The default input and output streams are stdin and stdout.";
 	static char usage_message[] = "mbcopy [-Byr/mo/da/hr/mn/sc -Ccommentfile -Eyr/mo/da/hr/mn/sc \n\t-Fiformat/oformat -H  -Iinfile -Llonflip -N -Ooutfile \n\t-Ppings -Qsleep_factor -Rw/e/s/n -Sspeed -V]";
@@ -2223,8 +2226,22 @@ int mbcopy_simrad_to_simrad2(int verbose,
 			    else
 				oping->png_beamflag[i] = MB_FLAG_NULL;
 			    }
+					   
+			/* raw travel time and angle data */
+			oping->png_raw_read = MB_NO;	/* flag indicating actual reading of rawbeam record */
+			oping->png_nrawbeams = 0;	/* number of raw travel times and angles
+				    - nonzero only if raw beam record read */
+					/* number of valid beams */
 	
 			/* get raw pixel size to be stored in oping->png_max_range */
+			if (iping->pixels_ssraw > 0)
+			    oping->png_ss_read = MB_YES;	/* flag indicating actual reading of sidescan record */
+			else
+			    oping->png_ss_read = MB_NO;	/* flag indicating actual reading of sidescan record */
+			oping->png_ss_date = oping->png_date;	/* date = year*10000 + month*100 + day
+				    Feb 26, 1995 = 19950226 */
+			oping->png_ss_msec = oping->png_msec;	/* time since midnight in msec
+				    08:12:51.234 = 29570234 */
 			if (istore->sonar == MBSYS_SIMRAD_EM12D
 			    || istore->sonar == MBSYS_SIMRAD_EM12S
 			    || istore->sonar == MBSYS_SIMRAD_EM121)

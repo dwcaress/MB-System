@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	4/21/96
- *    $Id: mb_define.h,v 5.4 2001-06-01 00:14:06 caress Exp $
+ *    $Id: mb_define.h,v 5.5 2001-06-08 21:44:01 caress Exp $
  *
  *    Copyright (c) 1996, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	April 21, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2001/06/01  00:14:06  caress
+ * Redid support for current Simrad multibeam data.
+ *
  * Revision 5.3  2001/04/30  05:14:10  caress
  * Changes to MB-System defaults.
  *
@@ -369,6 +372,12 @@ int mb_buffer_get_ptr(int verbose, char *buff_ptr, char *mbio_ptr,
 		int *error);
 
 int mb_error(int, int, char **);
+int mb_navint_add(int verbose, char *mbio_ptr, 
+		double time_d, double lon, double lat, int *error);
+int mb_navint_interp(int verbose, char *mbio_ptr, 
+		double time_d, double heading, double rawspeed, 
+		double *lon, double *lat, double *speed, 
+		int *error);
 int mb_get_double(double *, char *, int);
 int mb_get_int(int *, char *, int);
 int mb_get_binary_short(int, void *, short *);

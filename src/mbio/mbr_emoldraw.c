@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_emoldraw.c	3/4/2001
- *	$Id: mbr_emoldraw.c,v 5.0 2001-03-22 20:49:19 caress Exp $
+ *	$Id: mbr_emoldraw.c,v 5.1 2001-06-08 21:44:01 caress Exp $
  *
  *    Copyright (c) 2001 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	March 4, 2001
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2001/03/22  20:49:19  caress
+ * Trying to make version 5.0.beta0
+ *
  *
  *
  */
@@ -77,7 +80,7 @@ int mbr_wt_emoldraw(int verbose, char *mbio_ptr, char *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_emoldraw(int verbose, char *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_emoldraw.c,v 5.0 2001-03-22 20:49:19 caress Exp $";
+	static char res_id[]="$Id: mbr_emoldraw.c,v 5.1 2001-06-08 21:44:01 caress Exp $";
 	char	*function_name = "mbr_register_emoldraw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -207,7 +210,7 @@ int mbr_info_emoldraw(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_emoldraw.c,v 5.0 2001-03-22 20:49:19 caress Exp $";
+	static char res_id[]="$Id: mbr_emoldraw.c,v 5.1 2001-06-08 21:44:01 caress Exp $";
 	char	*function_name = "mbr_info_emoldraw";
 	int	status = MB_SUCCESS;
 
@@ -276,7 +279,7 @@ int mbr_info_emoldraw(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_emoldraw(int verbose, char *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_emoldraw.c,v 5.0 2001-03-22 20:49:19 caress Exp $";
+	static char res_id[]="$Id: mbr_emoldraw.c,v 5.1 2001-06-08 21:44:01 caress Exp $";
 	char	*function_name = "mbr_alm_emoldraw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -389,13 +392,10 @@ int mbr_rt_emoldraw(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 	double	ntime_d;
 	int	ptime_i[7];
 	double	ptime_d;
+	double	rawspeed, pheading;
 	double	plon, plat, pspeed;
-	double	dd, dt, dx, dy;
-	double	mtodeglon, mtodeglat;
-	double	headingx, headingy;
 	double	*pixel_size;
 	double	*swath_width;
-	int	ifix;
 	int	i, j, k;
 
 	/* print input debug statements */
@@ -425,22 +425,7 @@ int mbr_rt_emoldraw(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 	/* save fix if nav data */
 	if (status == MB_SUCCESS
 		&& store->kind == MB_DATA_NAV)
-		{				
-		/* make room for latest fix */
-		if (mb_io_ptr->nfix >= MB_NAV_SAVE_MAX)
-			{
-			for (i=0;i<mb_io_ptr->nfix-1;i++)
-				{
-				mb_io_ptr->fix_time_d[i]
-				    = mb_io_ptr->fix_time_d[i+1];
-				mb_io_ptr->fix_lon[i]
-				    = mb_io_ptr->fix_lon[i+1];
-				mb_io_ptr->fix_lat[i]
-				    = mb_io_ptr->fix_lat[i+1];
-				}
-			mb_io_ptr->nfix--;
-			}
-			
+		{							
 		/* get nav time */
 		mb_fix_y2k(verbose, store->pos_year, 
 			    &ntime_i[0]);
@@ -453,13 +438,11 @@ int mbr_rt_emoldraw(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 		mb_get_time(verbose, ntime_i, &ntime_d);
 		
 		/* add latest fix */
-		mb_io_ptr->fix_time_d[mb_io_ptr->nfix] 
-			= ntime_d;
-		mb_io_ptr->fix_lon[mb_io_ptr->nfix] 
-			= store->pos_longitude;
-		mb_io_ptr->fix_lat[mb_io_ptr->nfix] 
-			= store->pos_latitude;
-		mb_io_ptr->nfix++;
+		mb_navint_add(verbose, mbio_ptr, 
+			ntime_d, 
+			store->pos_longitude, 
+			store->pos_latitude, 
+			error);
 		}
 
 	/* handle navigation interpolation and generate sidescan */
@@ -480,128 +463,13 @@ int mbr_rt_emoldraw(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 		ptime_i[6] = 10000*store->centisecond;
 		mb_get_time(verbose, ptime_i, &ptime_d);
 
-		/* interpolate from saved nav if possible */
-		if (mb_io_ptr->nfix > 1)
-			{
-			/* get speed if necessary */
-			if (store->speed <= 0.0)
-			    {
-                            mb_coor_scale(verbose,
-                                mb_io_ptr->fix_lat[mb_io_ptr->nfix-1],
-                                &mtodeglon,&mtodeglat);
-                            dx = (mb_io_ptr->fix_lon[mb_io_ptr->nfix-1]
-                                - mb_io_ptr->fix_lon[0])/mtodeglon;
-                            dy = (mb_io_ptr->fix_lat[mb_io_ptr->nfix-1]
-                                - mb_io_ptr->fix_lat[0])/mtodeglat;
-                            dt = mb_io_ptr->fix_time_d[mb_io_ptr->nfix-1]
-                                - mb_io_ptr->fix_time_d[0];
-                            pspeed = 3.6 * sqrt(dx*dx + dy*dy)/dt; /* km/hr */
-			    store->speed = pspeed / 3.6;
-			    }
-			else
-			    {
-			    pspeed = 3.6 * store->speed;
-			    }
-			if (pspeed > 100.0)
-			    pspeed = 0.0;
+		/* interpolate from saved nav */
+		rawspeed =  3.6 * store->speed;
+		pheading = store->line_heading;
+		mb_navint_interp(verbose, mbio_ptr, ptime_d, pheading, rawspeed, 
+				    &plon, &plat, &pspeed, error);
 
-			/* interpolation possible */
-			if (ptime_d >= mb_io_ptr->fix_time_d[0]
-			    && ptime_d <= mb_io_ptr->fix_time_d[mb_io_ptr->nfix-1])
-			    {
-			    ifix = 0;
-			    while (ptime_d > mb_io_ptr->fix_time_d[ifix+1])
-				ifix++;
-			    plon = mb_io_ptr->fix_lon[ifix]
-				+ (mb_io_ptr->fix_lon[ifix+1] 
-				    - mb_io_ptr->fix_lon[ifix])
-				* (ptime_d
-				    - mb_io_ptr->fix_time_d[ifix])
-				/ (mb_io_ptr->fix_time_d[ifix+1]
-				    - mb_io_ptr->fix_time_d[ifix]);
-			    plat = mb_io_ptr->fix_lat[ifix]
-				+ (mb_io_ptr->fix_lat[ifix+1] 
-				    - mb_io_ptr->fix_lat[ifix])
-				* (ptime_d
-				    - mb_io_ptr->fix_time_d[ifix])
-				/ (mb_io_ptr->fix_time_d[ifix+1]
-				    - mb_io_ptr->fix_time_d[ifix]);
-			    }
-			
-			/* extrapolate from first fix */
-			else if (ptime_d 
-				< mb_io_ptr->fix_time_d[0]
-				&& pspeed > 0.0)
-			    {
-			    dd = (ptime_d 
-				- mb_io_ptr->fix_time_d[0])
-				* pspeed / 3.6;
-			    mb_coor_scale(verbose,mb_io_ptr->fix_lat[0],
-				&mtodeglon,&mtodeglat);
-			    headingx = sin(DTR*(store->line_heading));
-			    headingy = cos(DTR*(store->line_heading));
-			    plon = mb_io_ptr->fix_lon[0] 
-				+ headingx*mtodeglon*dd;
-			    plat = mb_io_ptr->fix_lat[0] 
-				+ headingy*mtodeglat*dd;
-			    }
-			
-			/* extrapolate from last fix */
-			else if (ptime_d 
-				> mb_io_ptr->fix_time_d[mb_io_ptr->nfix-1]
-				&& pspeed > 0.0)
-			    {
-			    dd = (ptime_d 
-				- mb_io_ptr->fix_time_d[mb_io_ptr->nfix-1])
-				* pspeed / 3.6;
-			    mb_coor_scale(verbose,mb_io_ptr->fix_lat[mb_io_ptr->nfix-1],
-				&mtodeglon,&mtodeglat);
-			    headingx = sin(DTR*(store->line_heading));
-			    headingy = cos(DTR*(store->line_heading));
-			    plon = mb_io_ptr->fix_lon[mb_io_ptr->nfix-1] 
-				+ headingx*mtodeglon*dd;
-			    plat = mb_io_ptr->fix_lat[mb_io_ptr->nfix-1] 
-				+ headingy*mtodeglat*dd;
-			    }
-			
-			/* use last fix */
-			else
-			    {
-			    plon = mb_io_ptr->fix_lon[mb_io_ptr->nfix-1];
-			    plat = mb_io_ptr->fix_lat[mb_io_ptr->nfix-1];
-			    }
-			}
-			
-		/* else extrapolate from only fix */
-		else if (mb_io_ptr->nfix == 1
-			&& store->speed > 0.0)
-			{
-			pspeed = 3.6 * store->speed;
-			dd = (ptime_d - mb_io_ptr->fix_time_d[mb_io_ptr->nfix-1])
-				* pspeed / 3.6;
-			mb_coor_scale(verbose,mb_io_ptr->fix_lat[mb_io_ptr->nfix-1],
-				&mtodeglon,&mtodeglat);
-			headingx = sin(DTR*(store->line_heading));
-			headingy = cos(DTR*(store->line_heading));
-			plon = mb_io_ptr->fix_lon[mb_io_ptr->nfix-1] 
-				+ headingx*mtodeglon*dd;
-			plat = mb_io_ptr->fix_lat[mb_io_ptr->nfix-1] 
-				+ headingy*mtodeglat*dd;
-			}
-
-		/* else just take last position */
-		else if (mb_io_ptr->nfix == 1)
-			{
-			plon = mb_io_ptr->fix_lon[mb_io_ptr->nfix-1];
-			plat = mb_io_ptr->fix_lat[mb_io_ptr->nfix-1];
-			pspeed = 0.0;
-			}
-		else
-			{
-			plon = 0.0;
-			plat = 0.0;
-			pspeed = 0.0;
-			}
+		/* handle lon flipping */
 		if (mb_io_ptr->lonflip < 0)
 			{
 			if (plon > 0.) 
@@ -1741,7 +1609,7 @@ int mbr_emoldraw_chk_label(int verbose, char *mbio_ptr, short type)
 		startid = (char *) &type;
 		if (verbose >= 1 && *startid == 2)
 			{
-			fprintf(stderr, "Bad datagram type: %d %x\n", type, type);
+			fprintf(stderr, "Bad datagram type: %4.4hX  %d\n", type, type);
 			}
 		}
 
