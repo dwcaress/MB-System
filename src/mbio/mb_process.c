@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_process.c	9/11/00
- *    $Id: mb_process.c,v 5.13 2001-10-19 19:41:09 caress Exp $
+ *    $Id: mb_process.c,v 5.14 2001-11-04 00:14:41 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	September 11, 2000
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.13  2001/10/19 19:41:09  caress
+ * Now uses relative paths.
+ *
  * Revision 5.12  2001/10/19  00:54:37  caress
  * Now tries to use relative paths.
  *
@@ -31,7 +34,7 @@
  * Revision 5.10  2001/08/10  22:41:19  dcaress
  * Release 5.0.beta07
  *
- * Revision 5.9  2001-08-03 18:00:02-07  caress
+\ * Revision 5.9  2001-08-03 18:00:02-07  caress
  * Added cut by speed.
  *
  * Revision 5.8  2001/07/31  00:40:52  caress
@@ -89,7 +92,7 @@
 #include "../../include/mb_format.h"
 #include "../../include/mb_process.h"
 
-static char rcs_id[]="$Id: mb_process.c,v 5.13 2001-10-19 19:41:09 caress Exp $";
+static char rcs_id[]="$Id: mb_process.c,v 5.14 2001-11-04 00:14:41 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_pr_readpar(int verbose, char *file, int lookforfiles, 
@@ -936,6 +939,9 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 		fprintf(stderr,"dbg2       mbp_svp_mode:           %d\n",process->mbp_svp_mode);
 		fprintf(stderr,"dbg2       mbp_svpfile:            %s\n",process->mbp_svpfile);
 		fprintf(stderr,"dbg2       mbp_corrected:          %d\n",process->mbp_corrected);
+		fprintf(stderr,"dbg2       mbp_tt_mode:            %d\n",process->mbp_tt_mode);
+		fprintf(stderr,"dbg2       mbp_tt_mult:            %f\n",process->mbp_tt_mult);
+		fprintf(stderr,"dbg2       mbp_angle_mode:         %d\n",process->mbp_angle_mode);
 		fprintf(stderr,"dbg2       mbp_heading_mode:       %d\n",process->mbp_heading_mode);
 		fprintf(stderr,"dbg2       mbp_headingbias:        %f\n",process->mbp_headingbias);
 		fprintf(stderr,"dbg2       mbp_edit_mode:          %d\n",process->mbp_edit_mode);
@@ -1051,6 +1057,9 @@ int mb_pr_writepar(int verbose, char *file,
 		fprintf(stderr,"dbg2       mbp_svp_mode:           %d\n",process->mbp_svp_mode);
 		fprintf(stderr,"dbg2       mbp_svpfile:            %s\n",process->mbp_svpfile);
 		fprintf(stderr,"dbg2       mbp_corrected:          %d\n",process->mbp_corrected);
+		fprintf(stderr,"dbg2       mbp_tt_mode:            %d\n",process->mbp_tt_mode);
+		fprintf(stderr,"dbg2       mbp_tt_mult:            %f\n",process->mbp_tt_mult);
+		fprintf(stderr,"dbg2       mbp_angle_mode:         %d\n",process->mbp_angle_mode);
 		fprintf(stderr,"dbg2       mbp_heading_mode:       %d\n",process->mbp_heading_mode);
 		fprintf(stderr,"dbg2       mbp_headingbias:        %f\n",process->mbp_headingbias);
 		fprintf(stderr,"dbg2       mbp_edit_mode:          %d\n",process->mbp_edit_mode);
