@@ -33,10 +33,16 @@
 #   June 17, 1993
 #
 # Version:
-#   $Id: mbm_plot.perl,v 3.1 1993-06-19 11:50:30 caress Exp $
+#   $Id: mbm_plot.perl,v 3.2 1993-06-19 15:06:54 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 3.1  1993/06/19  11:50:30  caress
+# Improved autoscaling so that a reasonable box including
+# all of the data is always (I hope) used.  Also added -P
+# option to turn on the invocation of pageview; pageview
+# is now put in the output shellscript only if requested.
+#
 # Revision 3.0  1993/06/19  01:00:18  caress
 # Initial version.
 #
@@ -46,7 +52,7 @@ $program_name = "mbm_plot";
 # Deal with command line arguments
 &Getopts('F:f:I:i:O:o:R:r:GgCcSsNnA:a:XxPpVvHh');
 $file =    ($opt_I || $opt_i);
-$root =    ($opt_I || $opt_i);
+$root =    ($opt_O || $opt_o);
 $format =  ($opt_F || $opt_f);
 $bounds =  ($opt_R || $opt_r);
 $color =   ($opt_G || $opt_g);
