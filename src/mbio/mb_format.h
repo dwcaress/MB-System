@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.h	3.00	1/19/93
- *    $Id: mb_format.h,v 3.0 1993-04-23 15:50:54 dale Exp $
+ *    $Id: mb_format.h,v 3.1 1993-06-13 16:01:22 sohara Exp $
  *
  *    Copyright (c) 1993 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -17,6 +17,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 3.0  1993/04/23  15:50:54  dale
+ * Initial version
+ *
  */
 
 /* Supported multibeam systems */
@@ -143,3 +146,18 @@ static int mb_flag_table[] =
 	1,		/* MBF_HSLDEOIH */
 	1,		/* MBF_MBLDEOIH */
 	};
+
+/* names of formats for use in button or label names */
+static char *mb_button_name[] =
+        {
+        " SBSIOMRG ",
+        " SBSIOCEN ",
+        " SBSIOLSI ",
+        " SBURICEN ",
+        " HSATLRAW ",
+        " HSLDEDMB ",
+        " HSURICEN ",
+        " HSLDEOIH ",
+        " MBLDEOIH "
+        };
+
