@@ -3,9 +3,9 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_plot.perl	6/18/93
-#    $Id: mbm_plot.perl,v 5.11 2002-09-19 00:35:04 caress Exp $
+#    $Id: mbm_plot.perl,v 5.12 2003-04-17 20:42:48 caress Exp $
 #
-#    Copyright (c) 1993, 1994, 1995, 2000 by 
+#    Copyright (c) 1993, 1994, 1995, 2000, 2003 by 
 #    D. W. Caress (caress@mbari.org)
 #      Monterey Bay Aquarium Research Institute
 #      Moss Landing, CA
@@ -72,10 +72,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   June 17, 1993
 #
 # Version:
-#   $Id: mbm_plot.perl,v 5.11 2002-09-19 00:35:04 caress Exp $
+#   $Id: mbm_plot.perl,v 5.12 2003-04-17 20:42:48 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.11  2002/09/19 00:35:04  caress
+#   Release 5.0.beta23
+#
 #   Revision 5.10  2002/09/07 03:13:59  caress
 #   Fixed typo.
 #

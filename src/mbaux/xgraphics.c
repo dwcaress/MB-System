@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	xgraphics.c	8/3/94
- *    $Id: xgraphics.c,v 5.1 2003-03-10 19:56:16 caress Exp $
+ *    $Id: xgraphics.c,v 5.2 2003-04-17 20:45:10 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1999, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	August 3, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2003/03/10 19:56:16  caress
+ * Expanded the libraries ability to deal with various screen types.
+ *
  * Revision 5.0  2000/12/01 22:53:59  caress
  * First cut at Version 5.0.
  *
@@ -91,7 +94,7 @@ struct xg_graphic
 int xg_init(Display *display, Window can_xid, 
 		int *can_bounds, char *fontname)
 {
-static char rcs_id[]="$Id: xgraphics.c,v 5.1 2003-03-10 19:56:16 caress Exp $";
+static char rcs_id[]="$Id: xgraphics.c,v 5.2 2003-04-17 20:45:10 caress Exp $";
 	/* local variables */
 	struct xg_graphic *graphic;
 	XGCValues gc_val;
@@ -111,9 +114,9 @@ static char rcs_id[]="$Id: xgraphics.c,v 5.1 2003-03-10 19:56:16 caress Exp $";
 	/* check for the type of display and set the display_type */
 	graphic->display_depth = DisplayPlanes(graphic->dpy, 
 			DefaultScreen(graphic->dpy));
-fprintf(stderr,"graphic->display_depth:%d Default Visual:%d\n", 
+/*fprintf(stderr,"graphic->display_depth:%d Default Visual:%d\n", 
 graphic->display_depth,
-DefaultVisual(graphic->dpy, DefaultScreen(graphic->dpy)));
+DefaultVisual(graphic->dpy, DefaultScreen(graphic->dpy)));*/
 	if (graphic->display_depth == 1 )
 		{
 		if (XMatchVisualInfo(graphic->dpy,DefaultScreen(graphic->dpy),

@@ -3,9 +3,9 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grdplot.perl	8/6/95
-#    $Id: mbm_grdplot.perl,v 5.8 2002-11-14 03:50:19 caress Exp $
+#    $Id: mbm_grdplot.perl,v 5.9 2003-04-17 20:42:48 caress Exp $
 #
-#    Copyright (c) 1993, 1994, 1995, 2000 by 
+#    Copyright (c) 1993, 1994, 1995, 2000, 2003 by 
 #    D. W. Caress (caress@mbari.org)
 #      Monterey Bay Aquarium Research Institute
 #      Moss Landing, CA
@@ -66,10 +66,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   October 19, 1994
 #
 # Version:
-#   $Id: mbm_grdplot.perl,v 5.8 2002-11-14 03:50:19 caress Exp $
+#   $Id: mbm_grdplot.perl,v 5.9 2003-04-17 20:42:48 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.8  2002/11/14 03:50:19  caress
+#   Release 5.0.beta27
+#
 #   Revision 5.7  2002/08/02 01:00:05  caress
 #   Release 5.0.beta22
 #

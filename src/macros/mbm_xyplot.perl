@@ -3,9 +3,9 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_xyplot.perl	8/6/95
-#    $Id: mbm_xyplot.perl,v 5.5 2002-04-06 02:51:54 caress Exp $
+#    $Id: mbm_xyplot.perl,v 5.6 2003-04-17 20:42:48 caress Exp $
 #
-#    Copyright (c) 1993, 1994, 1995, 2000 by 
+#    Copyright (c) 1993, 1994, 1995, 2000, 2003 by 
 #    D. W. Caress (caress@mbari.org)
 #      Monterey Bay Aquarium Research Institute
 #      Moss Landing, CA
@@ -56,10 +56,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   August 9, 1995
 #
 # Version:
-#   $Id: mbm_xyplot.perl,v 5.5 2002-04-06 02:51:54 caress Exp $
+#   $Id: mbm_xyplot.perl,v 5.6 2003-04-17 20:42:48 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.5  2002/04/06 02:51:54  caress
+#   Release 5.0.beta16
+#
 #   Revision 5.4  2001/12/18 04:26:12  caress
 #   Version 5.0.beta11.
 #

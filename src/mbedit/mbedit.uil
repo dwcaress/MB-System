@@ -68,6 +68,10 @@ identifier BXG_toggleButton_show_detects;
 identifier BXG_toggleButton_show_flagged_on;
 identifier BXG_toggleButton_reverse_mouse;
 identifier BXG_toggleButton_reverse_keys;
+identifier BXG_pushButton_next;
+identifier BXG_pushButton_done;
+identifier BXG_pushButton_forward;
+identifier BXG_pushButton_reverse;
 identifier BXG_slider_scale_x_label;
 identifier BXG_slider_scale_x;
 identifier BXG_slider_scale_x_max_label;
@@ -761,8 +765,8 @@ object bulletinBoard_filters : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 449;
-        XmNy = 533;
+        XmNx = 314;
+        XmNy = 631;
         XmNwidth = 426;
         XmNheight = 300;
     };
@@ -974,8 +978,8 @@ object bulletinBoard_annotation : XmBulletinBoardDialog widget {
     arguments {
         XmNdialogTitle = compound_string("Annotation");
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 394;
-        XmNy = 616;
+        XmNx = 259;
+        XmNy = 714;
         XmNwidth = 536;
         XmNheight = 135;
     };
@@ -1186,8 +1190,8 @@ object pushButton_buffer_dismiss : XmPushButton widget {
 object bulletinBoard_buffer : XmBulletinBoardDialog widget {
     arguments {
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 394;
-        XmNy = 612;
+        XmNx = 259;
+        XmNy = 710;
         XmNwidth = 536;
         XmNheight = 142;
     };
@@ -1304,8 +1308,8 @@ object bulletinBoard_error : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNdialogStyle = XmDIALOG_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 506;
-        XmNy = 603;
+        XmNx = 371;
+        XmNy = 701;
         XmNwidth = 311;
         XmNheight = 161;
     };
@@ -1424,8 +1428,8 @@ object bulletinBoard_editsave : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNdialogStyle = XmDIALOG_FULL_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 446;
-        XmNy = 617;
+        XmNx = 311;
+        XmNy = 715;
         XmNwidth = 431;
         XmNheight = 133;
     };
@@ -1510,8 +1514,8 @@ object bulletinBoard_message : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNdialogStyle = XmDIALOG_FULL_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_NONE;
-        XmNx = 472;
-        XmNy = 640;
+        XmNx = 337;
+        XmNy = 738;
         XmNwidth = 379;
         XmNheight = 86;
     };
@@ -1780,8 +1784,8 @@ object label_about_create1 : XmLabel widget {
 object bulletinBoard_about : XmBulletinBoardDialog widget {
     arguments {
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 290;
-        XmNy = 394;
+        XmNx = 8;
+        XmNy = 553;
         XmNwidth = 473;
         XmNheight = 457;
     };
@@ -2095,8 +2099,8 @@ object bulletinBoard_goto : XmBulletinBoardDialog widget {
     arguments {
         arguments Style_use;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 564;
-        XmNy = 532;
+        XmNx = 429;
+        XmNy = 630;
         XmNwidth = 196;
         XmNheight = 302;
     };
@@ -2416,8 +2420,8 @@ object bulletinBoard_file : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 138;
-        XmNy = 509;
+        XmNx = 256;
+        XmNy = 527;
         XmNwidth = 541;
         XmNheight = 489;
     };
@@ -2965,6 +2969,7 @@ object pushButton_reverse : XmPushButton widget {
     };
     callbacks {
         callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_reverse);
         XmNactivateCallback = procedure do_reverse();
     };
 !(BX)    handlers {
@@ -2985,6 +2990,7 @@ object pushButton_forward : XmPushButton widget {
     };
     callbacks {
         callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_forward);
         XmNactivateCallback = procedure do_forward();
     };
 !(BX)    handlers {
@@ -3005,6 +3011,7 @@ object pushButton_done : XmPushButton widget {
     };
     callbacks {
         callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_done);
         XmNactivateCallback = procedure do_done();
     };
 !(BX)    handlers {
@@ -3025,6 +3032,7 @@ object pushButton_next : XmPushButton widget {
     };
     callbacks {
         callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_next);
         XmNactivateCallback = procedure do_next_buffer();
     };
 !(BX)    handlers {
@@ -3688,7 +3696,7 @@ object window_mbedit : XmMainWindow widget {
     arguments {
         arguments Style_use;
         XmNx = 20;
-        XmNy = 290;
+        XmNy = 351;
         XmNwidth = 1014;
         XmNheight = 665;
     };

@@ -3,9 +3,9 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_fmtvel.perl	6/18/93
-#    $Id: mbm_fmtvel.perl,v 5.0 2000-12-01 22:58:01 caress Exp $
+#    $Id: mbm_fmtvel.perl,v 5.1 2003-04-17 20:42:48 caress Exp $
 #
-#    Copyright (c) 1993, 1994, 2000 by 
+#    Copyright (c) 1993, 1994, 2000, 2003 by 
 #    D. W. Caress (caress@mbari.org)
 #      Monterey Bay Aquarium Research Institute
 #      Moss Landing, CA
@@ -38,10 +38,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   May 19, 1993
 #
 # Version:
-#   $Id: mbm_fmtvel.perl,v 5.0 2000-12-01 22:58:01 caress Exp $
+#   $Id: mbm_fmtvel.perl,v 5.1 2003-04-17 20:42:48 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.0  2000/12/01 22:58:01  caress
+#   First cut at Version 5.0.
+#
 # Revision 4.4  2000/10/03  21:42:17  caress
 # Snapshot for Dale.
 #
@@ -222,7 +225,7 @@ sub Getopts {
 ;# Waldemar Kebsch, Federal Republic of Germany, November 1988
 ;# kebsch.pad@nixpbe.UUCP
 ;# Modified March 1990, Feb 1991 to properly handle timezones
-;#  $RCSfile: mbm_fmtvel.perl,v $$Revision: 5.0 $$Date: 2000-12-01 22:58:01 $
+;#  $RCSfile: mbm_fmtvel.perl,v $$Revision: 5.1 $$Date: 2003-04-17 20:42:48 $
 ;#   Marion Hakanson (hakanson@cse.ogi.edu)
 ;#   Oregon Graduate Institute of Science and Technology
 ;#

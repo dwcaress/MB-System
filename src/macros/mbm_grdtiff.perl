@@ -3,9 +3,9 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grdtiff.perl	11/3/1999
-#    $Id: mbm_grdtiff.perl,v 5.2 2002-08-02 01:00:05 caress Exp $
+#    $Id: mbm_grdtiff.perl,v 5.3 2003-04-17 20:42:48 caress Exp $
 #
-#    Copyright (c) 1999, 2000 by
+#    Copyright (c) 1999, 2000, 2003 by
 #    D. W. Caress (caress@mbari.org)
 #      Monterey Bay Aquarium Research Institute
 #      Moss Landing, CA
@@ -49,10 +49,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   October 19, 1994
 #
 # Version:
-#   $Id: mbm_grdtiff.perl,v 5.2 2002-08-02 01:00:05 caress Exp $
+#   $Id: mbm_grdtiff.perl,v 5.3 2003-04-17 20:42:48 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.2  2002/08/02 01:00:05  caress
+#   Release 5.0.beta22
+#
 #   Revision 5.1  2001/06/03 06:59:24  caress
 #   Release 5.0.beta01
 #

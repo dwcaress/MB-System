@@ -3,9 +3,9 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_rollover.perl	6/18/93
-#    $Id: mbm_rollerror.perl,v 5.1 2001-03-22 21:05:45 caress Exp $
+#    $Id: mbm_rollerror.perl,v 5.2 2003-04-17 20:42:48 caress Exp $
 #
-#    Copyright (c) 1993, 1994, 2000 by 
+#    Copyright (c) 1993, 1994, 2000, 2003 by 
 #    D. W. Caress (caress@mbari.org)
 #      Monterey Bay Aquarium Research Institute
 #      Moss Landing, CA
@@ -35,10 +35,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   June 13, 1993
 #
 # Version:
-#   $Id: mbm_rollerror.perl,v 5.1 2001-03-22 21:05:45 caress Exp $
+#   $Id: mbm_rollerror.perl,v 5.2 2003-04-17 20:42:48 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.1  2001/03/22 21:05:45  caress
+#   Trying to make release 5.0.beta0
+#
 # Revision 5.0  2000/12/01  22:58:01  caress
 # First cut at Version 5.0.
 #

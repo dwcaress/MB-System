@@ -3,9 +3,9 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_utm.perl	5/13/2002
-#    $Id: mbm_utm.perl,v 5.2 2003-03-27 07:58:11 caress Exp $
+#    $Id: mbm_utm.perl,v 5.3 2003-04-17 20:42:48 caress Exp $
 #
-#    Copyright (c) 2002 by
+#    Copyright (c) 2002, 2003 by
 #    D. W. Caress (caress@mbari.org)
 #      Monterey Bay Aquarium Research Institute
 #      Moss Landing, CA
@@ -36,10 +36,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   May 13, 2002
 #
 # Version:
-#   $Id: mbm_utm.perl,v 5.2 2003-03-27 07:58:11 caress Exp $
+#   $Id: mbm_utm.perl,v 5.3 2003-04-17 20:42:48 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.2  2003/03/27 07:58:11  caress
+#   This macro now sets MEASURE_UNIT to inches and then resets it to the original value.
+#
 #   Revision 5.1  2002/05/29 23:35:57  caress
 #   Release 5.0.beta18
 #

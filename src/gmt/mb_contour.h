@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_contour.h	5/16/94
- *    $Id: mb_contour.h,v 5.0 2000-12-01 22:52:16 caress Exp $
+ *    $Id: mb_contour.h,v 5.1 2003-04-17 20:47:15 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000 by
+ *    Copyright (c) 1993, 1994, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -21,6 +21,9 @@
  * Date:	May 15, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01 22:52:16  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.3  2000/09/30  06:52:17  caress
  * Snapshot for Dale.
  *
