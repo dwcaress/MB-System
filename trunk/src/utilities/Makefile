@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile	3.00  1/21/93
-#	$Id: Makefile,v 1.7 1993-08-16 22:21:44 caress Exp $
+#	$Id: Makefile,v 1.8 1993-11-04 19:35:01 caress Exp $
 #
 #     Copyright (c) 1993 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,13 @@
 # Date:		January 21, 1993
 #
 # $Log: not supported by cvs2svn $
+# Revision 1.1  1993/08/17  02:32:19  caress
+# Initial revision
+#
+# Revision 1.7  1993/08/16  22:21:44  caress
+# Don't know changes exactly, but probably involved setting
+# L-DEO locations of gmt stuff.
+#
 # Revision 1.6  1993/06/16  23:09:17  caress
 # Added hsdump and removed hsveldump.
 #
@@ -41,7 +48,7 @@ BINDIR = ../../bin
 LIBDIR = ../../lib
 INCDIR = ../../include
 MANDIR = ../../man/man1
-GMTBINDIR = /ocean/mgg/gmt2/sun4
+GMTLIBDIR = /ocean/mgg/gmt2/sun4/lib
 GMTINCDIR = /ocean/mgg/gmt2/src
 
 ### make all makes the MB-system utilites and man pages
@@ -60,7 +67,9 @@ all:	$(MANDIR)/mbsystem.1 \
 	$(BINDIR)/hsdump $(MANDIR)/hsdump.1 \
 	$(BINDIR)/mbrollbias $(MANDIR)/mbrollbias.1 \
 	$(BINDIR)/mbgetmask $(MANDIR)/mbgetmask.1 \
-	$(BINDIR)/mbmask $(MANDIR)/mbmask.1
+	$(BINDIR)/mbmask $(MANDIR)/mbmask.1 \
+	$(BINDIR)/mbsmooth \
+	$(BINDIR)/mbps $(MANDIR)/mbps.1
 
 ### make clean removes the object files
 clean:
@@ -84,7 +93,7 @@ $(BINDIR)/mbclean:	mbclean.o $(LIBDIR)/libmbio.a
 $(BINDIR)/mbunclean:	mbunclean.o $(LIBDIR)/libmbio.a
 	$(CC) $(CFLAGS) mbunclean.o $(LIBDIR)/libmbio.a $(LFLAGS) -o $(BINDIR)/mbunclean
 $(BINDIR)/mbgrid:	mbgrid.o zgrid.o $(LIBDIR)/libmbio.a
-	$(CC) $(CFLAGS) mbgrid.o zgrid.o $(LIBDIR)/libmbio.a $(GMTBINDIR)/gmtlib.a -lnetcdf $(FWITHCFLAGS) $(LFLAGS) -o $(BINDIR)/mbgrid
+	$(CC) $(CFLAGS) mbgrid.o zgrid.o $(LIBDIR)/libmbio.a $(GMTLIBDIR)/libgmt.a -lnetcdf $(FWITHCFLAGS) $(LFLAGS) -o $(BINDIR)/mbgrid
 $(BINDIR)/mblevitus:	mblevitus.o
 	$(CC) $(CFLAGS) mblevitus.o $(LFLAGS) -o $(BINDIR)/mblevitus
 $(BINDIR)/hsbath:	hsbath.o $(LIBDIR)/libmbio.a
@@ -97,6 +106,10 @@ $(BINDIR)/mbgetmask:	mbgetmask.o $(LIBDIR)/libmbio.a
 	$(CC) $(CFLAGS) mbgetmask.o $(LIBDIR)/libmbio.a $(LFLAGS) -o $(BINDIR)/mbgetmask
 $(BINDIR)/mbmask:	mbmask.o $(LIBDIR)/libmbio.a
 	$(CC) $(CFLAGS) mbmask.o $(LIBDIR)/libmbio.a $(LFLAGS) -o $(BINDIR)/mbmask
+$(BINDIR)/mbsmooth:	mbsmooth.o $(LIBDIR)/libmbio.a
+	$(CC) $(CFLAGS) mbsmooth.o $(LIBDIR)/libmbio.a $(LFLAGS) -o $(BINDIR)/mbsmooth
+$(BINDIR)/mbps:	mbps.o $(LIBDIR)/libmbio.a
+	$(CC) $(CFLAGS) mbps.o $(LIBDIR)/libmbio.a $(GMTLIBDIR)/libgmt.a $(GMTLIBDIR)/libpsl.a $(LFLAGS) -o $(BINDIR)/mbps
 
 ### compile the source files
 mbformat.o:	mbformat.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
@@ -131,6 +144,10 @@ mbgetmask.o:	mbgetmask.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
 	$(CC) -c $(CFLAGS) mbgetmask.c
 mbmask.o:	mbmask.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
 	$(CC) -c $(CFLAGS) mbmask.c
+mbsmooth.o:	mbsmooth.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
+	$(CC) -c $(CFLAGS) mbsmooth.c
+mbps.o:	mbps.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
+	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) mbps.c
 
 ### copy the man pages to the man page directory
 $(MANDIR)/mbsystem.1:	mbsystem.1
@@ -181,4 +198,7 @@ $(MANDIR)/mbgetmask.1:	mbmask.1
 $(MANDIR)/mbmask.1:	mbmask.1
 	cp mbmask.1 $(MANDIR)/mbmask.1
 	chmod 664 $(MANDIR)/mbmask.1
+$(MANDIR)/mbps.1:	mbps.1
+	cp mbps.1 $(MANDIR)/mbps.1
+	chmod 664 $(MANDIR)/mbps.1
 
