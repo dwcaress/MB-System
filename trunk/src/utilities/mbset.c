@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbset.c	3/31/93
- *    $Id: mbset.c,v 5.12 2001-11-04 00:27:11 caress Exp $
+ *    $Id: mbset.c,v 5.13 2001-11-15 22:58:02 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -30,6 +30,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.12  2001/11/04  00:27:11  caress
+ * Fixed handling of angle modes.
+ *
  * Revision 5.11  2001/10/19 19:40:32  caress
  * Now uses relative paths.
  *
@@ -93,7 +96,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbset.c,v 5.12 2001-11-04 00:27:11 caress Exp $";
+	static char rcs_id[] = "$Id: mbset.c,v 5.13 2001-11-15 22:58:02 caress Exp $";
 	static char program_name[] = "mbset";
 	static char help_message[] = "MBset is a tool for setting values in an mbprocess parameter file.\n\
 MBprocess is a tool for processing swath sonar bathymetry data  \n\
@@ -130,9 +133,18 @@ the manual pages for mbprocess and mbset. \n\n";
 	
 	/* processing variables */
 	int	explicit = MB_NO;
+	int	read_datalist = MB_NO;
+	int	read_data = MB_NO;
+	char	read_file[MBP_FILENAMESIZE];
+	void	*datalist;
+	int	look_processed = MB_DATALIST_LOOK_NO;
+	double	file_weight;
 	int	lookforfiles = 0;
+ 	int	format = 0;
 	int	mbp_ifile_specified;
 	char	mbp_ifile[MBP_FILENAMESIZE];
+	int	mbp_format_specified;
+	int	mbp_format;
 	int	nscan, toggle;
 	int	i, j;
 	
@@ -142,9 +154,11 @@ the manual pages for mbprocess and mbset. \n\n";
 	/* set default input and output */
 	mbp_ifile_specified = MB_NO;
 	strcpy (mbp_ifile, "\0");
+	strcpy (read_file, "\0");
+	mbp_format_specified = MB_NO;
 	
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhEeI:i:LlP:p:")) != -1)
+	while ((c = getopt(argc, argv, "VvHhEeF:f:I:i:LlP:p:")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -160,10 +174,16 @@ the manual pages for mbprocess and mbset. \n\n";
 			explicit = MB_YES;
 			flag++;
 			break;
+		case 'F':
+		case 'f':
+			sscanf (optarg,"%d", &format);
+			mbp_format_specified = MB_YES;
+			flag++;
+			break;
 		case 'I':
 		case 'i':
 			mbp_ifile_specified = MB_YES;
-			sscanf (optarg,"%s", mbp_ifile);
+			sscanf (optarg,"%s", read_file);
 			flag++;
 			break;
 		case 'L':
@@ -223,11 +243,50 @@ the manual pages for mbprocess and mbset. \n\n";
 	    error = MB_ERROR_OPEN_FAIL;
 	    exit(error);
 	    }
-		
+
+	/* get format if required */
+	if (format == 0)
+		mb_get_format(verbose,read_file,NULL,&format,&error);
+  
+	/* determine whether to read one file or a list of files */
+	if (format < 0)
+		read_datalist = MB_YES;
+	
+	/* open file list */
+	if (read_datalist == MB_YES)
+	    {
+	    if ((status = mb_datalist_open(verbose,&datalist,
+					    read_file,look_processed,&error)) != MB_SUCCESS)
+		{
+		error = MB_ERROR_OPEN_FAIL;
+		fprintf(stderr,"\nUnable to open data list file: %s\n",
+			read_file);
+		fprintf(stderr,"\nProgram <%s> Terminated\n",
+			program_name);
+		exit(error);
+		}
+	    if (status = mb_datalist_read(verbose,datalist,
+			    mbp_ifile,&mbp_format,&file_weight,&error)
+			    == MB_SUCCESS)
+		read_data = MB_YES;
+	    else
+		read_data = MB_NO;
+	    }
+	/* else copy single filename to be read */
+	else
+	    {
+	    strcpy(mbp_ifile, read_file);
+	    mbp_format = format;
+	    read_data = MB_YES;
+	    }
+	    
+	/* loop over all files to be read */
+	while (read_data == MB_YES)
+	{
+	
 	/* load parameters */
 	status = mb_pr_readpar(verbose, mbp_ifile, lookforfiles, 
 			&process, &error);
-	strcpy(process.mbp_ifile, mbp_ifile);
 	process.mbp_ifile_specified = MB_YES;
 	
 	/* process parameter list */
@@ -1061,6 +1120,26 @@ the manual pages for mbprocess and mbset. \n\n";
 	/* write parameters */
 	status = mb_pr_writepar(verbose, mbp_ifile, 
 			&process, &error);
+
+	/* figure out whether and what to read next */
+        if (read_datalist == MB_YES)
+                {
+		if (status = mb_datalist_read(verbose,datalist,
+			    mbp_ifile,&format,&file_weight,&error)
+			    == MB_SUCCESS)
+                        read_data = MB_YES;
+                else
+                        read_data = MB_NO;
+                }
+        else
+                {
+                read_data = MB_NO;
+                }
+
+	} /* end loop over datalist */
+
+	if (read_datalist == MB_YES)
+		mb_datalist_close(verbose,&datalist,&error);
 
 	/* check memory */
 	if (verbose >= 4)

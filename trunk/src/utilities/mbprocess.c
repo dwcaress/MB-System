@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbprocess.c	3/31/93
- *    $Id: mbprocess.c,v 5.13 2001-11-04 00:27:29 caress Exp $
+ *    $Id: mbprocess.c,v 5.14 2001-11-15 22:58:02 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -36,6 +36,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.13  2001/11/04  00:27:29  caress
+ * Fixed handling of angle modes.
+ *
  * Revision 5.12  2001/11/02  01:03:08  caress
  * Now handles ray source above top of SVP even when
  * SVP begins at nonzero depth.
@@ -111,7 +114,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbprocess.c,v 5.13 2001-11-04 00:27:29 caress Exp $";
+	static char rcs_id[] = "$Id: mbprocess.c,v 5.14 2001-11-15 22:58:02 caress Exp $";
 	static char program_name[] = "mbprocess";
 	static char help_message[] =  "mbprocess is a tool for processing swath sonar bathymetry data.\n\
 This program performs a number of functions, including:\n\
@@ -132,7 +135,7 @@ The program will look for and use a parameter file with the \n\
 name \"infile.par\". If no parameter file exists, the program \n\
 will infer a reasonable processing path by looking for navigation\n\
 and mbedit edit save files.\n";
-	static char usage_message[] = "mbprocess -Iinfile [-C -Fformat -N -Ooutfile -V -H]";
+	static char usage_message[] = "mbprocess -Iinfile [-C -Fformat -N -Ooutfile -P -T -V -H]";
 
 	/* parsing variables */
 	extern char *optarg;
@@ -217,6 +220,7 @@ and mbedit edit save files.\n";
 	
 	/* processing variables */
 	int	checkuptodate = MB_YES;
+	int	testonly = MB_NO;
 	int	read_datalist = MB_NO;
 	int	read_data = MB_NO;
 	char	read_file[MB_PATH_MAXLINE];
@@ -356,7 +360,7 @@ and mbedit edit save files.\n";
 	strip_comments = MB_NO;
 	
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhF:f:I:i:NnO:o:Pp")) != -1)
+	while ((c = getopt(argc, argv, "VvHhF:f:I:i:NnO:o:PpTt")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -394,6 +398,11 @@ and mbedit edit save files.\n";
 		case 'P':
 		case 'p':
 			checkuptodate = MB_NO;
+			flag++;
+			break;
+		case 'T':
+		case 't':
+			testonly = MB_YES;
 			flag++;
 			break;
 		case '?':
@@ -508,6 +517,7 @@ and mbedit edit save files.\n";
 	    fprintf(stderr,"dbg2       timegap:         %f\n",timegap);
 	    fprintf(stderr,"dbg2       strip_comments:  %d\n",strip_comments);
 	    fprintf(stderr,"dbg2       checkuptodate:   %d\n",checkuptodate);
+	    fprintf(stderr,"dbg2       testonly:        %d\n",testonly);
 	    fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
 	    }
 
@@ -588,11 +598,11 @@ and mbedit edit save files.\n";
 			{
 			proceedprocess = MB_NO;
 	    		fprintf(stderr,"Data skipped - no parameter file: %s\n",
-				mbp_ifile);
+				mbp_pfile);
 			}
 
 		/* get mod time for the input file */
-		if ((fstat = stat(process.mbp_ifile, &file_status)) == 0
+		if ((fstat = stat(mbp_ifile, &file_status)) == 0
 			&& (file_status.st_mode & S_IFMT) != S_IFDIR)
 			{
  			ifilemodtime = file_status.st_mtime;
@@ -601,7 +611,7 @@ and mbedit edit save files.\n";
 			{
 			proceedprocess = MB_NO;
 	    		fprintf(stderr,"Data skipped - no input file: %s\n",
-				mbp_ifile);
+				process.mbp_ifile);
 			}
 
 		/* if input and parameter files found check output and dependencies */
@@ -657,14 +667,28 @@ and mbedit edit save files.\n";
 			{
 			proceedprocess = MB_NO;
 	    		fprintf(stderr,"Data skipped - up to date: %s\n",
-				mbp_ifile);
+				process.mbp_ifile);
+			}
+		    else if (testonly == MB_YES)
+			{
+			proceedprocess = MB_NO;
+			fprintf(stderr,"Data would be processed (test-only mode) - out of date: %s\n",
+				process.mbp_ifile);
 			}
 		    else
 			{
 			fprintf(stderr,"Data processed - out of date: \n\tInput:  %s\n\tOutput: %s\n",
-				mbp_ifile, process.mbp_ofile);
+				process.mbp_ifile, process.mbp_ofile);
 			}
 		    }
+		}
+
+	/* force mode but test only */
+	else if (testonly == MB_YES)
+		{
+		proceedprocess = MB_NO;
+		fprintf(stderr,"Data would be processed (test-only mode): %s\n",
+			process.mbp_ifile);
 		}
 
 	/* else just do it */
@@ -672,7 +696,7 @@ and mbedit edit save files.\n";
 		{
 		proceedprocess = MB_YES;
 		fprintf(stderr,"Data processed: \n\tInput:  %s\n\tOutput: %s\n",
-			mbp_ifile, process.mbp_ofile);
+			process.mbp_ifile, process.mbp_ofile);
 		}
 		
 	/* now process the input file */
