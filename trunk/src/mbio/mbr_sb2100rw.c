@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sb2100rw.c	3/3/94
- *	$Id: mbr_sb2100rw.c,v 4.14 1995-05-08 21:26:28 caress Exp $
+ *	$Id: mbr_sb2100rw.c,v 4.15 1995-06-03 03:25:13 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	March 3, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.14  1995/05/08  21:26:28  caress
+ * Made changes consistent with new i/o spec for SB2100 data.
+ *
  * Revision 4.13  1995/03/06  19:38:54  caress
  * Changed include strings.h to string.h for POSIX compliance.
  *
@@ -102,7 +105,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_sb2100rw.c,v 4.14 1995-05-08 21:26:28 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2100rw.c,v 4.15 1995-06-03 03:25:13 caress Exp $";
 	char	*function_name = "mbr_alm_sb2100rw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -344,7 +347,7 @@ int	*error;
 	struct mbf_sb2100rw_struct *data;
 	struct mbsys_sb2100_struct *store;
 	int	time_j[5];
-	double	scale,  pixel_size;
+	double	scale,  pixel_size, pixel_scale;
 	int	i, j, k;
 
 	/* print input debug statements */
@@ -491,6 +494,16 @@ int	*error;
 			scale = 0.1;
 		else
 			scale = 1.0;
+		if (data->pixel_size_scale == 'S')
+			pixel_scale = 0.01;
+		else if (data->pixel_size_scale == 'I')
+			pixel_scale = 0.1;
+		else
+			pixel_scale = 1.0;
+		if (data->frequency[0] == 'L')
+			pixel_size = data->pixel_size_12khz;
+		else
+			pixel_size = data->pixel_size_36khz;
 		for (i=0;i<mb_io_ptr->beams_bath;i++)
 			{
 			mb_io_ptr->new_bath[i] 
@@ -505,16 +518,12 @@ int	*error;
 			mb_io_ptr->new_amp[i] 
 				= data->amplitude_beam[i];
 			}
-		if (data->frequency[0] == 'L')
-			pixel_size = data->pixel_size_12khz;
-		else
-			pixel_size = data->pixel_size_36khz;
 		for (i=0;i<mb_io_ptr->pixels_ss;i++)
 			{
 			mb_io_ptr->new_ss[i] 
 				= data->amplitude_ss[i];
 			mb_io_ptr->new_ss_acrosstrack[i] 
-				= scale*pixel_size*
+				= pixel_scale*pixel_size*
 					(i - MBF_SB2100RW_CENTER_PIXEL);
 			mb_io_ptr->new_ss_alongtrack[i] 
 				= scale*data->alongtrack_ss[i];
@@ -704,7 +713,7 @@ int	*error;
 	struct mbsys_sb2100_struct *store;
 	double	scalefactor;
 	int	time_j[5];
-	double	scale;
+	double	scale, pixel_size;
 	int	set_pixel_size;
 	int	i;
 
@@ -903,33 +912,37 @@ int	*error;
 			 data->amplitude_beam[i]
 				= mb_io_ptr->new_amp[i];
 			}
-		set_pixel_size = MB_YES;
+		if ((data->frequency[0] == 'H' 
+			    && data->pixel_size_36khz <= 0.0)
+			|| (data->frequency[0] != 'H' 
+			    && data->pixel_size_12khz <= 0.0))
+			set_pixel_size = MB_YES;
+		else
+			set_pixel_size = MB_NO;
 		for (i=0;i<mb_io_ptr->pixels_ss;i++)
 			{
 			data->amplitude_ss[i]
 				= (int) mb_io_ptr->new_ss[i];
-			if (set_pixel_size == MB_YES
-			    && (data->frequency[0] == 'H' 
-			    && data->pixel_size_36khz <= 0)
-				&& mb_io_ptr->new_ss_acrosstrack[i] > 0)
-				{
-				data->pixel_size_36khz = 
-					mb_io_ptr->new_ss_acrosstrack[i]/
-					(i - MBF_SB2100RW_CENTER_PIXEL);
-				set_pixel_size = MB_NO;
-				}
-			else if (set_pixel_size == MB_YES
-			    && (data->frequency[0] != 'H' 
-			    && data->pixel_size_12khz <= 0)
-				&& mb_io_ptr->new_ss_acrosstrack[i] > 0)
-				{
-				data->pixel_size_12khz = 
-					mb_io_ptr->new_ss_acrosstrack[i]/
-					(i - MBF_SB2100RW_CENTER_PIXEL);
-				set_pixel_size = MB_NO;
-				}
 			data->alongtrack_ss[i]
 				= scale*mb_io_ptr->new_ss_alongtrack[i];
+			if (set_pixel_size == MB_YES
+				&& mb_io_ptr->new_ss_acrosstrack[i] > 0)
+				{
+				pixel_size = 
+					mb_io_ptr->new_ss_acrosstrack[i]/
+					(i - MBF_SB2100RW_CENTER_PIXEL);
+				if (data->pixel_size_scale == 'S')
+					pixel_size = 100*pixel_size;
+				else if (data->pixel_size_scale == 'I')
+					pixel_size = 10*pixel_size;
+				else 
+					data->pixel_size_scale = 'D';
+				if (data->frequency[0] == 'H')
+					data->pixel_size_36khz = pixel_size;
+				else
+					data->pixel_size_12khz = pixel_size;
+				set_pixel_size = MB_NO;
+				}
 			}
 		}
 
