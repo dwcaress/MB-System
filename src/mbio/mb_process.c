@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_process.c	9/11/00
- *    $Id: mb_process.c,v 5.6 2001-07-20 00:31:11 caress Exp $
+ *    $Id: mb_process.c,v 5.7 2001-07-27 19:07:16 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	September 11, 2000
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2001/07/20 00:31:11  caress
+ * Release 5.0.beta03
+ *
  * Revision 5.5  2001/06/08  21:44:01  caress
  * Version 5.0.beta01
  *
@@ -68,7 +71,7 @@
 #include "../../include/mb_format.h"
 #include "../../include/mb_process.h"
 
-static char rcs_id[]="$Id: mb_process.c,v 5.6 2001-07-20 00:31:11 caress Exp $";
+static char rcs_id[]="$Id: mb_process.c,v 5.7 2001-07-27 19:07:16 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_pr_readpar(int verbose, char *file, int lookforfiles, 
@@ -130,7 +133,17 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 	process->mbp_navadj_mode = MBP_NAV_OFF;
 	process->mbp_navadjfile[0] = '\0';
 	process->mbp_navadj_algorithm = MBP_NAV_LINEAR;
-	
+
+	/* data cutting */
+	process->mbp_cut_num = 0;
+	for (i=0;i<MBP_CUT_NUM_MAX;i++)
+		{
+		process->mbp_cut_kind[i] = MBP_CUT_DATA_BATH;
+		process->mbp_cut_mode[i] = MBP_CUT_MODE_NONE;
+		process->mbp_cut_min[i] = 0.0;
+		process->mbp_cut_max[i] = 0.0;
+		}
+
 	/* bathymetry editing */
 	process->mbp_edit_mode = MBP_EDIT_OFF;
 	process->mbp_editfile[0] = '\0';
@@ -309,6 +322,96 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 		    else if (strncmp(buffer, "NAVADJINTERP", 12) == 0)
 			{
 			sscanf(buffer, "%s %d", dummy, &process->mbp_navadj_algorithm);
+			}
+
+		    /* data cutting */
+		    else if (strncmp(buffer, "DATACUTCLEAR", 12) == 0)
+			{
+			process->mbp_cut_num = 0;
+			}
+		    else if (strncmp(buffer, "DATACUT", 12) == 0)
+			{
+			if (process->mbp_cut_num < MBP_CUT_NUM_MAX)
+				{
+				sscanf(buffer, "%s %d %d %lf %lf", dummy, 
+					&process->mbp_cut_kind[process->mbp_cut_num],
+					&process->mbp_cut_mode[process->mbp_cut_num],
+					&process->mbp_cut_min[process->mbp_cut_num],
+					&process->mbp_cut_max[process->mbp_cut_num]);
+				process->mbp_cut_num++;
+				}
+			}
+		    else if (strncmp(buffer, "BATHCUTNUMBER", 13) == 0)
+			{
+			if (process->mbp_cut_num < MBP_CUT_NUM_MAX)
+				{
+				sscanf(buffer, "%s %lf %lf", dummy, 
+					&process->mbp_cut_min[process->mbp_cut_num],
+					&process->mbp_cut_max[process->mbp_cut_num]);
+				process->mbp_cut_kind[process->mbp_cut_num] = MBP_CUT_DATA_BATH; 
+				process->mbp_cut_mode[process->mbp_cut_num] = MBP_CUT_MODE_NUMBER; 
+				process->mbp_cut_num++;
+				}
+			}
+		    else if (strncmp(buffer, "BATHCUTDISTANCE", 15) == 0)
+			{
+			if (process->mbp_cut_num < MBP_CUT_NUM_MAX)
+				{
+				sscanf(buffer, "%s %lf %lf", dummy, 
+					&process->mbp_cut_min[process->mbp_cut_num],
+					&process->mbp_cut_max[process->mbp_cut_num]);
+				process->mbp_cut_kind[process->mbp_cut_num] = MBP_CUT_DATA_BATH; 
+				process->mbp_cut_mode[process->mbp_cut_num] = MBP_CUT_MODE_DISTANCE; 
+				process->mbp_cut_num++;
+				}
+			}
+		    else if (strncmp(buffer, "AMPCUTNUMBER", 12) == 0)
+			{
+			if (process->mbp_cut_num < MBP_CUT_NUM_MAX)
+				{
+				sscanf(buffer, "%s %lf %lf", dummy, 
+					&process->mbp_cut_min[process->mbp_cut_num],
+					&process->mbp_cut_max[process->mbp_cut_num]);
+				process->mbp_cut_kind[process->mbp_cut_num] = MBP_CUT_DATA_AMP; 
+				process->mbp_cut_mode[process->mbp_cut_num] = MBP_CUT_MODE_NUMBER; 
+				process->mbp_cut_num++;
+				}
+			}
+		    else if (strncmp(buffer, "AMPCUTDISTANCE", 14) == 0)
+			{
+			if (process->mbp_cut_num < MBP_CUT_NUM_MAX)
+				{
+				sscanf(buffer, "%s %lf %lf", dummy, 
+					&process->mbp_cut_min[process->mbp_cut_num],
+					&process->mbp_cut_max[process->mbp_cut_num]);
+				process->mbp_cut_kind[process->mbp_cut_num] = MBP_CUT_DATA_AMP; 
+				process->mbp_cut_mode[process->mbp_cut_num] = MBP_CUT_MODE_DISTANCE; 
+				process->mbp_cut_num++;
+				}
+			}
+		    else if (strncmp(buffer, "SSCUTNUMBER", 12) == 0)
+			{
+			if (process->mbp_cut_num < MBP_CUT_NUM_MAX)
+				{
+				sscanf(buffer, "%s %lf %lf", dummy, 
+					&process->mbp_cut_min[process->mbp_cut_num],
+					&process->mbp_cut_max[process->mbp_cut_num]);
+				process->mbp_cut_kind[process->mbp_cut_num] = MBP_CUT_DATA_SS; 
+				process->mbp_cut_mode[process->mbp_cut_num] = MBP_CUT_MODE_NUMBER; 
+				process->mbp_cut_num++;
+				}
+			}
+		    else if (strncmp(buffer, "SSCUTDISTANCE", 14) == 0)
+			{
+			if (process->mbp_cut_num < MBP_CUT_NUM_MAX)
+				{
+				sscanf(buffer, "%s %lf %lf", dummy, 
+					&process->mbp_cut_min[process->mbp_cut_num],
+					&process->mbp_cut_max[process->mbp_cut_num]);
+				process->mbp_cut_kind[process->mbp_cut_num] = MBP_CUT_DATA_SS; 
+				process->mbp_cut_mode[process->mbp_cut_num] = MBP_CUT_MODE_DISTANCE; 
+				process->mbp_cut_num++;
+				}
 			}
 	
 		    /* bathymetry editing */
@@ -684,6 +787,15 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 		fprintf(stderr,"dbg2       mbp_navadj_mode:        %d\n",process->mbp_navadj_mode);
 		fprintf(stderr,"dbg2       mbp_navadjfile:         %s\n",process->mbp_navadjfile);
 		fprintf(stderr,"dbg2       mbp_navadj_algorithm:   %d\n",process->mbp_navadj_algorithm);
+		fprintf(stderr,"dbg2       mbp_cut_num:            %d\n",process->mbp_cut_num);
+		for (i=0;i<process->mbp_cut_num;i++)
+			{
+			fprintf(stderr,"dbg2           cut %d:\n",i);
+			fprintf(stderr,"dbg2           mbp_cut_kind[%d]:     %d\n",process->mbp_cut_kind[i]);
+			fprintf(stderr,"dbg2           mbp_cut_mode[%d]:     %d\n",process->mbp_cut_mode[i]);
+			fprintf(stderr,"dbg2           mbp_cut_min[%d]:      %d\n",process->mbp_cut_min[i]);
+			fprintf(stderr,"dbg2           mbp_cut_max[%d]:      %d\n",process->mbp_cut_max[i]);
+			}
 		fprintf(stderr,"dbg2       mbp_bathrecalc_mode:    %d\n",process->mbp_bathrecalc_mode);
 		fprintf(stderr,"dbg2       mbp_rollbias_mode:      %d\n",process->mbp_rollbias_mode);
 		fprintf(stderr,"dbg2       mbp_rollbias:           %f\n",process->mbp_rollbias);
@@ -777,6 +889,15 @@ int mb_pr_writepar(int verbose, char *file,
 		fprintf(stderr,"dbg2       mbp_navadj_mode:        %d\n",process->mbp_navadj_mode);
 		fprintf(stderr,"dbg2       mbp_navadjfile:         %s\n",process->mbp_navadjfile);
 		fprintf(stderr,"dbg2       mbp_navadj_algorithm:   %d\n",process->mbp_navadj_algorithm);
+		fprintf(stderr,"dbg2       mbp_cut_num:            %d\n",process->mbp_cut_num);
+		for (i=0;i<process->mbp_cut_num;i++)
+			{
+			fprintf(stderr,"dbg2           cut %d:\n",i);
+			fprintf(stderr,"dbg2           mbp_cut_kind[%d]:     %d\n",process->mbp_cut_kind[i]);
+			fprintf(stderr,"dbg2           mbp_cut_mode[%d]:     %d\n",process->mbp_cut_mode[i]);
+			fprintf(stderr,"dbg2           mbp_cut_min[%d]:      %d\n",process->mbp_cut_min[i]);
+			fprintf(stderr,"dbg2           mbp_cut_max[%d]:      %d\n",process->mbp_cut_max[i]);
+			}
 		fprintf(stderr,"dbg2       mbp_bathrecalc_mode:    %d\n",process->mbp_bathrecalc_mode);
 		fprintf(stderr,"dbg2       mbp_rollbias_mode:      %d\n",process->mbp_rollbias_mode);
 		fprintf(stderr,"dbg2       mbp_rollbias:           %f\n",process->mbp_rollbias);
@@ -894,6 +1015,20 @@ int mb_pr_writepar(int verbose, char *file,
 	    fprintf(fp, "NAVADJMODE %d\n", process->mbp_navadj_mode);
 	    fprintf(fp, "NAVADJFILE %s\n", process->mbp_navadjfile);
 	    fprintf(fp, "NAVADJINTERP %d\n", process->mbp_navadj_algorithm);
+
+	    /* data cutting */
+	    fprintf(fp, "##\n## Data cutting:\n");
+	    if (process->mbp_cut_num == 0)
+	    	fprintf(fp, "DATACUTCLEAR\n");
+	    else
+		{
+		for (i=0;i<process->mbp_cut_num;i++)
+	    		fprintf(fp, "DATACUT %d %d %f %f\n", 
+				process->mbp_cut_kind[i],
+				process->mbp_cut_mode[i],
+				process->mbp_cut_min[i],
+				process->mbp_cut_max[i]);
+		}
 	    
 	    /* bathymetry editing */
 	    fprintf(fp, "##\n## Bathymetry Flagging:\n");
@@ -1841,6 +1976,68 @@ int mb_pr_update_heading(int verbose, char *file,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+int mb_pr_update_datacut(int verbose, char *file, 
+			int	mbp_cut_num,
+			int	*mbp_cut_kind,
+			int	*mbp_cut_mode,
+			double	*mbp_cut_min,
+			double	*mbp_cut_max,
+			int *error)
+{
+	char	*function_name = "mb_pr_update_datacut";
+	struct mb_process_struct process;
+	int	status = MB_SUCCESS;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
+		fprintf(stderr,"dbg2       file:              %s\n",file);
+		fprintf(stderr,"dbg2       mbp_cut_num:       %d\n",mbp_cut_num);
+		for (i=0;i<mbp_cut_num;i++)
+			{
+			fprintf(stderr,"dbg2       mbp_cut_kind[%d]:   %d\n",i,mbp_cut_kind[i]);
+			fprintf(stderr,"dbg2       mbp_cut_mode[%d]:   %d\n",i,mbp_cut_mode[i]);
+			fprintf(stderr,"dbg2       mbp_cut_min[%d]:    %f\n",i,mbp_cut_min[i]);
+			fprintf(stderr,"dbg2       mbp_cut_max[%d]:    %f\n",i,mbp_cut_max[i]);
+			}
+		}
+
+	/* get known process parameters */
+	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+
+	/* set datacut values */
+	process.mbp_cut_num = mbp_cut_num;
+	for (i=0;i<mbp_cut_num;i++)
+		{
+		process.mbp_cut_kind[i] = mbp_cut_kind[i];
+		process.mbp_cut_mode[i] = mbp_cut_mode[i];
+		process.mbp_cut_min[i] = mbp_cut_min[i];
+		process.mbp_cut_max[i] = mbp_cut_max[i];
+		}
+
+	/* write new process parameter file */
+	status = mb_pr_writepar(verbose, file, &process, error);
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
 int mb_pr_update_edit(int verbose, char *file, 
 			int	mbp_edit_mode, 
 			char	*mbp_editfile, 
@@ -2733,6 +2930,65 @@ int mb_pr_get_heading(int verbose, char *file,
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_pr_get_datacut(int verbose, char *file, 
+			int	*mbp_cut_num,
+			int	*mbp_cut_kind,
+			int	*mbp_cut_mode,
+			double	*mbp_cut_min,
+			double	*mbp_cut_max,
+			int *error)
+{
+	char	*function_name = "mb_pr_update_datacut";
+	struct mb_process_struct process;
+	int	status = MB_SUCCESS;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
+		fprintf(stderr,"dbg2       file:              %s\n",file);
+		}
+
+	/* get known process parameters */
+	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+
+	/* set datacut values */
+	*mbp_cut_num = process.mbp_cut_num;
+	for (i=0;i<*mbp_cut_num;i++)
+		{
+		mbp_cut_kind[i] = process.mbp_cut_kind[i];
+		mbp_cut_mode[i] = process.mbp_cut_mode[i];
+		mbp_cut_min[i] = process.mbp_cut_min[i];
+		mbp_cut_max[i] = process.mbp_cut_max[i];
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       mbp_cut_num:        %d\n",*mbp_cut_num);
+		for (i=0;i<*mbp_cut_num;i++)
+			{
+			fprintf(stderr,"dbg2       mbp_cut_kind[%d]:   %d\n",i,mbp_cut_kind[i]);
+			fprintf(stderr,"dbg2       mbp_cut_mode[%d]:   %d\n",i,mbp_cut_mode[i]);
+			fprintf(stderr,"dbg2       mbp_cut_min[%d]:    %f\n",i,mbp_cut_min[i]);
+			fprintf(stderr,"dbg2       mbp_cut_max[%d]:    %f\n",i,mbp_cut_max[i]);
+			}
+		fprintf(stderr,"dbg2       error:              %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:             %d\n",status);
 		}
 
 	/* return status */
