@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	1/19/93
- *    $Id: mb_io.h,v 4.6 1997-04-21 17:02:07 caress Exp $
+ *    $Id: mb_io.h,v 4.7 1997-07-25 14:19:53 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.6  1997/04/21  17:02:07  caress
+ * MB-System 4.5 Beta Release.
+ *
  * Revision 4.7  1997/04/17  15:07:36  caress
  * MB-System 4.5 Beta Release
  *
@@ -90,10 +93,19 @@ struct mb_io_struct
 	/* file descriptor, file name, and usage flag */
 	FILE	*mbfp;		/* file descriptor */
 	char	file[256];	/* file name */
+	long	file_pos;	/* file position at start of
+				    last record read */
+	long	file_bytes;	/* number of bytes read from file */
 	FILE	*mbfp2;		/* file descriptor #2 */
 	char	file2[256];	/* file name #2 */
+	long	file2_pos;	/* file position #2 at start of
+				    last record read */
+	long	file2_bytes;	/* number of bytes read from file */
 	FILE	*mbfp3;		/* file descriptor #3 */
 	char	file3[256];	/* file name #3 */
+	long	file3_pos;	/* file position #3 at start of
+				    last record read */
+	long	file3_bytes;	/* number of bytes read from file */
 	char	*xdrs;		/* XDR stream handle */
 
 	/* read or write history */

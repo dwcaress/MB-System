@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_elac.c	3.00	8/20/94
- *	$Id: mbsys_elac.c,v 4.10 1997-04-21 17:02:07 caress Exp $
+ *	$Id: mbsys_elac.c,v 4.11 1997-07-25 14:19:53 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -37,6 +37,9 @@
  * Date:	August 20, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.10  1997/04/21  17:02:07  caress
+ * MB-System 4.5 Beta Release.
+ *
  * Revision 4.9  1996/08/05  15:21:58  caress
  * Just redid i/o for Simrad sonars, including adding EM12S and EM121 support.
  *
@@ -97,7 +100,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_elac.c,v 4.10 1997-04-21 17:02:07 caress Exp $";
+ static char res_id[]="$Id: mbsys_elac.c,v 4.11 1997-07-25 14:19:53 caress Exp $";
 	char	*function_name = "mbsys_elac_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -682,8 +685,8 @@ int	*error;
 }
 /*--------------------------------------------------------------------*/
 int mbsys_elac_ttimes(verbose,mbio_ptr,store_ptr,kind,nbeams,
-	ttimes,angles,angles_forward,angles_null,flags,
-	depthadd,ssv,error)
+	ttimes,angles,angles_forward,angles_null,
+	depth_offset,alongtrack_offset,flags,ssv,error)
 int	verbose;
 char	*mbio_ptr;
 char	*store_ptr;
@@ -693,8 +696,9 @@ double	*ttimes;
 double	*angles;
 double	*angles_forward;
 double	*angles_null;
+double	*depth_offset;
+double	*alongtrack_offset;
 int	*flags;
-double	*depthadd;
 double	*ssv;
 int	*error;
 {
@@ -702,7 +706,8 @@ int	*error;
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_elac_struct *store;
-	double	ttscale, angscale;
+	double	daloscale, ttscale, angscale;
+	double	depthadd;
 	int	ibeam;
 	int	i, j;
 
@@ -719,6 +724,8 @@ int	*error;
 		fprintf(stderr,"dbg2       angles_xtrk:%d\n",angles);
 		fprintf(stderr,"dbg2       angles_ltrk:%d\n",angles_forward);
 		fprintf(stderr,"dbg2       angles_null:%d\n",angles_null);
+		fprintf(stderr,"dbg2       depth_off:  %d\n",depth_offset);
+		fprintf(stderr,"dbg2       ltrk_off:   %d\n",alongtrack_offset);
 		fprintf(stderr,"dbg2       flags:      %d\n",flags);
 		}
 
@@ -737,8 +744,21 @@ int	*error;
 		/* get nbeams */
 		*nbeams = store->beams_bath;
 
+		/* get depth offset (heave + heave offset) */
+		/*depthadd = 0.005 * (store->transducer_starboard_depth
+				    + store->transducer_port_depth)
+				+ 0.001 * store->heave_offset;*/
+		depthadd = 0.0; /* parameter records only found
+				    sporadically */
+
+		/* get ssv */
+		*ssv = store->sound_vel;
+		if (*ssv < 1400.0 || *ssv > 1600.0)
+			*ssv = 1480.0; /* hard wired for UNB MB course 96 */
+
 		/* get travel times, angles, and flags */
-		ttscale = 0.00005;
+		daloscale  = 0.01;
+		ttscale = 0.0001;
 		angscale = 0.005;
 		for (i=0;i<store->profile_num;i++)
 		  for (j=0;j<8;j++)
@@ -750,28 +770,27 @@ int	*error;
 			if (angles[ibeam] < 0.0)
 				{
 				angles[ibeam] = -angles[ibeam];
-				angles_forward[ibeam] = 180.0;
+				angles_forward[ibeam] = 0.0;
 				angles_null[ibeam] = 30.0 
 					+ angscale 
 					* store->transducer_port_error;
 				}
 			else
 				{
-				angles_forward[ibeam] = 0.0;
+				angles_forward[ibeam] = 180.0;
 				angles_null[ibeam] = 30.0 
 					+ angscale 
 					* store->transducer_starboard_error;
 				}
-			if (store->profile[i].bath[i] < 0)
+			depth_offset[ibeam] = depthadd 
+				+ 0.001 * store->profile[i].heave;
+			alongtrack_offset[ibeam] = daloscale
+				*store->profile[i].bath_alongtrack[j];
+			if (store->profile[i].bath[j] < 0)
 				flags[ibeam] = MB_YES;
 			else
 				flags[ibeam] = MB_NO;
 			}
-
-		/* get depth offset (heave + heave offset) */
-		*depthadd = 0.001*(store->profile[0].heave + store->heave_offset);
-		/**ssv = store->sound_vel;*/
-		*ssv = 1480.0; /* hard wired for UNB MB course 96 */
 
 		/* set status */
 		*error = MB_ERROR_NO_ERROR;
@@ -807,13 +826,14 @@ int	*error;
 		}
 	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR)
 		{
-		fprintf(stderr,"dbg2       depthadd:   %f\n",*depthadd);
 		fprintf(stderr,"dbg2       ssv:        %f\n",*ssv);
 		fprintf(stderr,"dbg2       nbeams:     %d\n",*nbeams);
 		for (i=0;i<*nbeams;i++)
-			fprintf(stderr,"dbg2       beam %d: tt:%f  angle_xtrk:%f  angle_ltrk:%f  angle_null:%f  flag:%d\n",
+			fprintf(stderr,"dbg2       beam %d: tt:%f  angle_xtrk:%f  angle_ltrk:%f  angle_null:%f  depth_off:%f  ltrk_off:%f  flag:%d\n",
 				i,ttimes[i],angles[i],
-				angles_forward[i],angles_null[i],flags[i]);
+				angles_forward[i],angles_null[i],
+				depth_offset[i],alongtrack_offset[i],
+				flags[i]);
 		}
 	if (verbose >= 2)
 		{
@@ -848,7 +868,6 @@ int	*error;
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_elac_struct *store;
-	double	depthscale, dacrscale, daloscale,reflscale;
 	int	ibeam;
 	int	i, j;
 
@@ -1044,7 +1063,6 @@ int	*error;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_elac_struct *store;
 	int	kind;
-	double	depthscale, dacrscale,daloscale,reflscale;
 	int	ibeam;
 	int	i, j;
 

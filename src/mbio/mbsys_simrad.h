@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad.h	8/5/94
- *	$Id: mbsys_simrad.h,v 4.5 1997-04-21 17:02:07 caress Exp $
+ *	$Id: mbsys_simrad.h,v 4.6 1997-07-25 14:19:53 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -27,6 +27,9 @@
  * Date:	August 5, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.5  1997/04/21  17:02:07  caress
+ * MB-System 4.5 Beta Release.
+ *
  * Revision 4.5  1997/04/17  15:07:36  caress
  * MB-System 4.5 Beta Release
  *
@@ -246,7 +249,7 @@ struct mbsys_simrad_survey_struct
 					EM-1000:         0.05 msec 
 					EM-12 high res:  0.20 msec 
 					EM-12 low res:   0.80 msec
-					EM-121:          range_res meters */
+					EM-121:          0.1 * range_res msec */
 	signed char	amp[MBSYS_SIMRAD_MAXBEAMS];	/* 0.5 dB */
 	unsigned char	quality[MBSYS_SIMRAD_MAXBEAMS];	/* meters */
 	signed char	heave[MBSYS_SIMRAD_MAXBEAMS];	/* 0.1 meters */

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_read_init.c	1/25/93
- *    $Id: mb_read_init.c,v 4.11 1997-04-21 17:02:07 caress Exp $
+ *    $Id: mb_read_init.c,v 4.12 1997-07-25 14:19:53 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -18,6 +18,9 @@
  * Date:	January 25, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 4.11  1997/04/21  17:02:07  caress
+ * MB-System 4.5 Beta Release.
+ *
  * Revision 4.11  1997/04/17  18:48:52  caress
  * Added LINUX ifdef.
  *
@@ -149,7 +152,7 @@ int	*beams_amp;
 int	*pixels_ss;
 int	*error;
 {
-	static char rcs_id[]="$Id: mb_read_init.c,v 4.11 1997-04-21 17:02:07 caress Exp $";
+	static char rcs_id[]="$Id: mb_read_init.c,v 4.12 1997-07-25 14:19:53 caress Exp $";
 	char	*function_name = "mb_read_init";
 	int	status;
 	int	format_num;
@@ -217,10 +220,16 @@ int	*error;
 	/* initialize file access for the mbio descriptor */
 	mb_io_ptr->mbfp = NULL;
 	strcpy(mb_io_ptr->file,file);
+	mb_io_ptr->file_pos = 0;
+	mb_io_ptr->file_bytes = 0;
 	mb_io_ptr->mbfp2 = NULL;
 	strcpy(mb_io_ptr->file2,"\0");
+	mb_io_ptr->file2_pos = 0;
+	mb_io_ptr->file2_bytes = 0;
 	mb_io_ptr->mbfp3 = NULL;
 	strcpy(mb_io_ptr->file3,"\0");
+	mb_io_ptr->file3_pos = 0;
+	mb_io_ptr->file3_bytes = 0;
 	mb_io_ptr->xdrs = NULL;
 
 	/* load control parameters into the mbio descriptor */

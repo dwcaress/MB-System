@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_elac.h	8/20/94
- *	$Id: mbsys_elac.h,v 4.2 1997-04-21 17:02:07 caress Exp $
+ *	$Id: mbsys_elac.h,v 4.3 1997-07-25 14:19:53 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -15,13 +15,16 @@
  * to store data from Elac SeaBat 9001 multibeam sonar systems.
  * The data formats which are commonly used to store Elac 
  * data in files include
- *      MBF_CBAT9001 : MBIO ID 81
+ *      MBF_BCHRTUNB : MBIO ID 91
  *
  *
  * Author:	D. W. Caress (L-DEO)
  * Date:	August 20, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1997/04/21  17:02:07  caress
+ * MB-System 4.5 Beta Release.
+ *
  * Revision 4.1  1995/07/13  19:15:09  caress
  * Intermediate check-in during major bug-fixing flail.
  *

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_hsmd.c	Aug 10, 1995
- *	$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbsys_hsmd.c,v 4.4 1997-04-21 17:02:07 caress Exp $
+ *	$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbsys_hsmd.c,v 4.5 1997-07-25 14:19:53 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -39,6 +39,9 @@
  * Date:	August 10, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.4  1997/04/21  17:02:07  caress
+ * MB-System 4.5 Beta Release.
+ *
  * Revision 4.3  1996/07/16  22:07:12  caress
  * Fixed port/starboard mixup and made null angles for raytracing 40 degrees to
  * reflect 40 degree tranducer array mounting.
@@ -95,7 +98,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbsys_hsmd.c,v 4.4 1997-04-21 17:02:07 caress Exp $";
+	static char res_id[]="$Id: mbsys_hsmd.c,v 4.5 1997-07-25 14:19:53 caress Exp $";
 	char	*function_name = "mbsys_hsmd_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -654,8 +657,8 @@ int	*error;
 }
 /*--------------------------------------------------------------------*/
 int mbsys_hsmd_ttimes(verbose,mbio_ptr,store_ptr,kind,nbeams,
-	ttimes,angles,angles_forward,angles_null,flags,
-	depthadd,ssv,error)
+	ttimes,angles,angles_forward,angles_null,
+	depth_offset,alongtrack_offset,flags,ssv,error)
 int	verbose;
 char	*mbio_ptr;
 char	*store_ptr;
@@ -665,8 +668,9 @@ double	*ttimes;
 double	*angles;
 double	*angles_forward;
 double	*angles_null;
+double	*depth_offset;
+double	*alongtrack_offset;
 int	*flags;
-double	*depthadd;
 double	*ssv;
 int	*error;
 {
@@ -690,6 +694,8 @@ int	*error;
 		fprintf(stderr,"dbg2       angles_xtrk:%d\n",angles);
 		fprintf(stderr,"dbg2       angles_ltrk:%d\n",angles_forward);
 		fprintf(stderr,"dbg2       angles_null:%d\n",angles_null);
+		fprintf(stderr,"dbg2       depth_off:  %d\n",depth_offset);
+		fprintf(stderr,"dbg2       ltrk_off:   %d\n",alongtrack_offset);
 		fprintf(stderr,"dbg2       flags:      %d\n",flags);
 		}
 
@@ -715,6 +721,8 @@ int	*error;
 			angles[i] = 0.0;
 			angles_forward[i] = 0.0;
 			angles_null[i] = 40.0;
+			depth_offset[i] = 0.0;
+			alongtrack_offset[i] = 0.0;
 			flags[i] = MB_NO;
 			}
 
@@ -743,6 +751,7 @@ int	*error;
 					angles[j] = store->angle[i];
 					angles_forward[j] = 180.0;
 					}
+				depth_offset[j] = store->heave;
 				if (store->spfb[i] < 0.0)
 					flags[j] = MB_YES;
      	 			}
@@ -756,13 +765,11 @@ int	*error;
 				j = i + MBSYS_HSMD_BEAMS_PING - 1;
 				ttimes[j] = fabs(scale * store->spfb[i]);
 				angles[j] = store->angle[i];
+				depth_offset[j] = store->heave;
 				if (store->spfb[i] < 0.0)
 					flags[j] = MB_YES;
       				}
     			}
-
-		/* get depth offset (heave) */
-		*depthadd = store->heave;
 
 		/* get sound velocity at transducers */
 		*ssv = store->ckeel;
@@ -801,13 +808,14 @@ int	*error;
 		}
 	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR)
 		{
-		fprintf(stderr,"dbg2       depthadd:   %f\n",*depthadd);
 		fprintf(stderr,"dbg2       ssv:        %f\n",*ssv);
 		fprintf(stderr,"dbg2       nbeams:     %d\n",*nbeams);
 		for (i=0;i<*nbeams;i++)
-			fprintf(stderr,"dbg2       beam %d: tt:%f  angle_xtrk:%f  angle_ltrk:%f  angle_null:%f  flag:%d\n",
+			fprintf(stderr,"dbg2       beam %d: tt:%f  angle_xtrk:%f  angle_ltrk:%f  angle_null:%f  depth_off:%f  ltrk_off:%f  flag:%d\n",
 				i,ttimes[i],angles[i],
-				angles_forward[i],angles_null[i],flags[i]);
+				angles_forward[i],angles_null[i],
+				depth_offset[i],alongtrack_offset[i],
+				flags[i]);
 		}
 	if (verbose >= 2)
 		{

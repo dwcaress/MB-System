@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsmdldih.c	9/26/95
- *	$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbr_hsmdldih.c,v 4.5 1997-04-21 17:02:07 caress Exp $
+ *	$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbr_hsmdldih.c,v 4.6 1997-07-25 14:19:53 caress Exp $
  *
  *    Copyright (c) 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -23,6 +23,9 @@
  * Date:	September 26, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.5  1997/04/21  17:02:07  caress
+ * MB-System 4.5 Beta Release.
+ *
  * Revision 4.4  1996/07/16  22:07:12  caress
  * Fixed port/starboard mixup and made null angles for raytracing 40 degrees to
  * reflect 40 degree tranducer array mounting.
@@ -69,7 +72,7 @@ int    verbose;
 char   *mbio_ptr;
 int    *error;
 {
-	static char res_id[]="$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbr_hsmdldih.c,v 4.5 1997-04-21 17:02:07 caress Exp $";
+	static char res_id[]="$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbr_hsmdldih.c,v 4.6 1997-07-25 14:19:53 caress Exp $";
 	char	 *function_name = "mbr_alm_hsmdldih";
 	int	 status = MB_SUCCESS;
 	int	 i;
@@ -936,6 +939,9 @@ int    *error;
 	/* initialize everything to zeros */
 	mbr_zero_hsmdldih(verbose,data_ptr,error);
 
+	/* set file position */
+	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
+
 	/* Start reading an HSMD Header structure */
 	for (i=0;i<4;i++)
 		status = xdr_char(xdrs, &data->scsid[i]);
@@ -1731,6 +1737,9 @@ int    *error;
 	    			}
 	  		} 
       		}
+		
+	/* get file position */
+	mb_io_ptr->file_bytes = ftell(mb_io_ptr->mbfp);
 
 	/* print output debug statements */
 	if (verbose >= 2)

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsatlraw.c	2/11/93
- *	$Id: mbr_hsatlraw.c,v 4.11 1997-04-21 17:02:07 caress Exp $
+ *	$Id: mbr_hsatlraw.c,v 4.12 1997-07-25 14:19:53 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	February 11, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.11  1997/04/21  17:02:07  caress
+ * MB-System 4.5 Beta Release.
+ *
  * Revision 4.10  1996/04/24  01:14:38  caress
  * Code now keeps any water sound velocity or position offset
  * data encountered in memory.
@@ -109,7 +112,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_hsatlraw.c,v 4.11 1997-04-21 17:02:07 caress Exp $";
+ static char res_id[]="$Id: mbr_hsatlraw.c,v 4.12 1997-07-25 14:19:53 caress Exp $";
 	char	*function_name = "mbr_alm_hsatlraw";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -971,6 +974,9 @@ int	*error;
 	/* initialize everything to zeros */
 	mbr_zero_hsatlraw(verbose,data_ptr,ZERO_SOME,error);
 
+	/* set file position */
+	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
+
 	done = MB_NO;
 	expect = MBF_HSATLRAW_NONE;
 	while (done == MB_NO)
@@ -978,18 +984,23 @@ int	*error;
 
 		/* get next record label */
 		if (line_save_flag == MB_NO)
+			{
+			mb_io_ptr->file_bytes = ftell(mbfp);
 			status = mbr_hsatlraw_rd_label(verbose,mbfp,
 				raw_line,&type,&shift,error);
+			}
 		else
 			line_save_flag = MB_NO;
 
 		/* read the appropriate data records */
 		if (status == MB_FAILURE && expect == MBF_HSATLRAW_NONE)
 			{
+			mb_io_ptr->file_bytes = ftell(mbfp);
 			done = MB_YES;
 			}
 		else if (status == MB_FAILURE && expect != MBF_HSATLRAW_NONE)
 			{
+			mb_io_ptr->file_bytes = ftell(mbfp);
 			done = MB_YES;
 			*error = MB_ERROR_NO_ERROR;
 			status = MB_SUCCESS;
@@ -1002,6 +1013,7 @@ int	*error;
 		else if (type == MBF_HSATLRAW_RAW_LINE)
 			{
 			strcpy(data->comment,raw_line+shift);
+			mb_io_ptr->file_bytes = ftell(mbfp);
 			done = MB_YES;
 			data->kind = MB_DATA_RAW_LINE;
 			*error = MB_ERROR_UNINTELLIGIBLE;
@@ -1011,6 +1023,7 @@ int	*error;
 			{
 			status = mbr_hsatlraw_rd_ergnhydi(
 				verbose,mbfp,data,shift,error);
+			mb_io_ptr->file_bytes = ftell(mbfp);
 			if (status == MB_SUCCESS)
 				{
 				done = MB_YES;
@@ -1021,6 +1034,7 @@ int	*error;
 			{
 			status = mbr_hsatlraw_rd_ergnpara(
 				verbose,mbfp,data,shift,error);
+			mb_io_ptr->file_bytes = ftell(mbfp);
 			if (status == MB_SUCCESS)
 				{
 				done = MB_YES;
@@ -1031,6 +1045,7 @@ int	*error;
 			{
 			status = mbr_hsatlraw_rd_ergnposi(
 				verbose,mbfp,data,shift,error);
+			mb_io_ptr->file_bytes = ftell(mbfp);
 			if (status == MB_SUCCESS)
 				{
 				done = MB_YES;
@@ -1041,6 +1056,7 @@ int	*error;
 			{
 			status = mbr_hsatlraw_rd_ergneich(
 				verbose,mbfp,data,shift,error);
+			mb_io_ptr->file_bytes = ftell(mbfp);
 			if (status == MB_SUCCESS)
 				{
 				done = MB_NO;
@@ -1052,6 +1068,7 @@ int	*error;
 			{
 			status = mbr_hsatlraw_rd_ergnmess(
 				verbose,mbfp,data,shift,error);
+			mb_io_ptr->file_bytes = ftell(mbfp);
 			if (status == MB_SUCCESS)
 				{
 				done = MB_NO;
@@ -1063,6 +1080,7 @@ int	*error;
 			{
 			status = mbr_hsatlraw_rd_ergnslzt(
 				verbose,mbfp,data,shift,error);
+			mb_io_ptr->file_bytes = ftell(mbfp);
 			if (status == MB_SUCCESS && expect == MBF_HSATLRAW_ERGNSLZT)
 				{
 				done = MB_NO;
@@ -1080,6 +1098,7 @@ int	*error;
 			{
 			status = mbr_hsatlraw_rd_ergnctds(
 				verbose,mbfp,data,shift,error);
+			mb_io_ptr->file_bytes = ftell(mbfp);
 			if (status == MB_SUCCESS)
 				{
 				done = MB_YES;
@@ -1090,6 +1109,7 @@ int	*error;
 			{
 			status = mbr_hsatlraw_rd_ergnampl(
 				verbose,mbfp,data,shift,error);
+			mb_io_ptr->file_bytes = ftell(mbfp);
 			if (status == MB_SUCCESS 
 				&& expect == MBF_HSATLRAW_ERGNAMPL)
 				{
@@ -1108,6 +1128,7 @@ int	*error;
 			{
 			status = mbr_hsatlraw_rd_ldeocmnt(
 				verbose,mbfp,data,shift,error);
+			mb_io_ptr->file_bytes = ftell(mbfp);
 			if (status == MB_SUCCESS)
 				{
 				done = MB_YES;
