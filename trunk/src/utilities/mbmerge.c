@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmerge.c	2/20/93
  *
- *    $Id: mbmerge.c,v 4.3 1994-05-02 03:35:14 caress Exp $
+ *    $Id: mbmerge.c,v 4.4 1994-05-11 19:35:20 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,10 @@
  * Date:	February 20, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1994/05/02  03:35:14  caress
+ * Set mbmerge to ignore records with times outside the
+ * input navigation times.
+ *
  * Revision 4.2  1994/04/29  18:00:51  caress
  * Added ability to read navigation in five different formats.
  *
@@ -62,7 +66,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbmerge.c,v 4.3 1994-05-02 03:35:14 caress Exp $";
+	static char rcs_id[] = "$Id: mbmerge.c,v 4.4 1994-05-11 19:35:20 caress Exp $";
 	static char program_name[] = "MBMERGE";
 	static char help_message[] =  "MBMERGE merges new navigation with multibeam data from an \ninput file and then writes the merged data to an output \nmultibeam data file. The default input \nand output streams are stdin and stdout.";
 	static char usage_message[] = "mbmerge [-Fformat -Llonflip -V -H  -Iinfile -Ooutfile -Mnavformat -Nnavfile]";
@@ -427,7 +431,21 @@ char **argv;
 			fprintf(stderr,"dbg5       nav[%d]: %f %f %f\n",
 				nnav,ntime[nnav],nlon[nnav],nlat[nnav]);
 			}
-		nnav++;
+
+		/* check for reverses or repeats in time */
+		if (nnav == 0)
+			nnav++;
+		else if (ntime[nnav] > ntime[nnav-1])
+			nnav++;
+		else if (nnav > 0 && ntime[nnav] <= ntime[nnav-1] 
+			&& verbose >= 5)
+			{
+			fprintf(stderr,"\ndbg5  Navigation time error in program <%s>\n",program_name);
+			fprintf(stderr,"dbg5       nav[%d]: %f %f %f\n",
+				nnav-1,ntime[nnav-1],nlon[nnav-1],nlat[nnav-1]);
+			fprintf(stderr,"dbg5       nav[%d]: %f %f %f\n",
+				nnav,ntime[nnav],nlon[nnav],nlat[nnav]);
+			}
 		strncpy(buffer,"\0",sizeof(buffer));
 		}
 
@@ -811,7 +829,8 @@ int n;
 		}
 	a=(xa[khi]-x)/h;
 	b=(x-xa[klo])/h;
-	*y=a*ya[klo]+b*ya[khi]+((a*a*a-a)*y2a[klo]+(b*b*b-b)*y2a[khi])*(h*h)/6.0;
+	*y=a*ya[klo]+b*ya[khi]+((a*a*a-a)*y2a[klo]
+		+(b*b*b-b)*y2a[khi])*(h*h)/6.0;
 	return(0);
 }
 /*--------------------------------------------------------------------*/
