@@ -26,7 +26,7 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
-Version 5.0.5          ????????????
+Version 5.0.5          October 6, 2004
 Version 5.0.4          May 22, 2004
 Version 5.0.3          February 27, 2004
 Version 5.0.2          December 24, 2003
@@ -114,9 +114,9 @@ System release 4.6 distributions.
 customers prior to January 1, 2001.
 
 The MB-System does not come with any warranties, nor is it
-guarenteed to work on your computer or to do anything useful.  The
-user assumes full responsibility for the use of this system.  In
-particular, David W.  Caress, Dale N. Chayes, the Lamont-Doherty 
+guarenteed to work on your computer or to do anything useful. The
+user assumes full responsibility for the use of this system. In
+particular, David W. Caress, Dale N. Chayes, the Lamont-Doherty 
 Earth Observatory of Columbia University, the Monterey Bay 
 Aquarium Research Institute, or any other individuals or 
 organizations involved in the design and maintenance of the 
@@ -134,6 +134,8 @@ files using grd2xyz as well as through raster databases using
 grdraster. See the -Kbackground option documentation in the
 mbgrid manual page.
 
+The macro mbm_xbt has been substantially updated.
+
 The -G option of mbinfo now avoids reporting zero starting 
 positions (it always ignored zero positions for the reported
 data bounds).
@@ -147,10 +149,59 @@ format (this can apply only to data formats that incorporate
 subbottom data in with swath sonar data, and at present only
 supports format 88).
 
+A new program mbsegyinfo is a utility for reading a segy 
+format seismic data file and outputting some basic statistics. 
+The table generated shows the filename, data counts, navigation 
+totals, time and navigation of the first and last data records, 
+minimum and maximum data values, and the geographic bounding box 
+of the data.
+
+A new program mbsegylist is a utility to output specified 
+header values from segy seismic data files to stdout. 
+The option -Ooutput_format is used to control the type and 
+order of values output. By default, mbsegylist produces 
+ASCII files in spreadsheet style, with data columns separated by
+tabs. Alternatively, the output can be binary, with each field 
+represented as a double precision float (-A option).
+
 A new program mbsegygrid generates grids from subbottom
 profiler data (and seismic reflection data, and potentially
 other seismic data) in the SEGY format. These grids can then
-be displayed using GMT (through mbm_grdviz if desired).
+be displayed using GMT (through mbm_grdplot if desired).
+
+The program mbm_plot now works properly when start and end times 
+are specified using the -MMB and -MME options.
+
+A bug involving the handling of edit save filenames by mbset and
+mbprocess has bee fixed.
+
+Errors in handling Simrad datagrams and edit save files on 
+byteswapped  machines (e.g. Intel or AMD processors) have been 
+fixed.
+
+The program mbdatalist has a new option -Z which causes a 
+standard "datalistp.mb-1" file to be created. This is a
+convenience file that applies the $PROCESSED flag to be 
+applied to the swath files referenced in a datalist named
+"datalist.mb-1".
+
+Problems with the creation of amplitude vs. grazing angle
+correction tables using mbbackangle, and the use of those
+tables by mbprocess, have been fixed. The default settings
+for mbbackangle and amplitude vs. grazing angle correction
+by mbprocess have been changed.
+
+The default angle mode for raytracing has been changed so
+that starting angles are adjusted using Snell's Law for the
+difference between the SSV and the initial depth in the SVP.
+This change affects mbvelocitytool, mbsvplist, mbset, and 
+mbprocess. 
+
+The program mbsvplist now has an option -P that not only 
+outputs SVPs in a swath file to individual ancillary SVP
+files (as with the -O option), but also sets the first SVP
+output file to be used by mbprocess to recalculate the
+bathymetry.
 
 MB-SYSTEM VERSION 5.0.4 RELEASE NOTES:
 ------------------------------------------
@@ -818,10 +869,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.51 2004-09-16 21:49:59 caress Exp $
+RCS ID: $Id: README,v 5.52 2004-10-06 21:30:50 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.51  2004/09/16 21:49:59  caress
+More changes leading up to 5.0.5 release.
+
 Revision 5.50  2004/06/18 02:58:15  caress
 Added first notes for 5.0.5 release.
 

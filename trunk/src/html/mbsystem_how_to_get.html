@@ -1,249 +1,290 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
-<HTML>
-<HEAD>
-   <TITLE>How to Get and Install MB-System</TITLE>
-  <meta http-equiv="Content-Type" content="text/html">
-  <meta name="Title" content="MB-System: Mapping the Seafloor">
-  <meta name="Author" content="David Caress, Dale Chayes">
-  <meta name="Description" content="open source software for processing bathymetry and backscatter data from multibeam and sidescan sonar">
-  <meta name="Keywords" content="seafloor,mapping,multibeam,sonar,bathymetry,sidescan,swath processing,open,source,software">
-</HEAD>
-<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
-
-<CENTER><DD><A NAME="MB-get"></A><B><FONT SIZE=+2>How To Get MB-System</FONT></B></DD></CENTER>
-
-<P>The source code for MB-System is available as a compressed tar archive
-by anonymous ftp to the Lamont-Doherty Earth Observatory of Columbia University.
+<html>
+<head>
+  <title>How to Get and Install MB-System</title>
+  <meta content="text/html" http-equiv="Content-Type">
+  <meta content="MB-System: Mapping the Seafloor" name="Title">
+  <meta content="David Caress, Dale Chayes" name="Author">
+  <meta
+ content="open source software for processing bathymetry and backscatter data from multibeam and sidescan sonar"
+ name="Description">
+  <meta
+ content="seafloor,mapping,multibeam,sonar,bathymetry,sidescan,swath processing,open,source,software"
+ name="Keywords">
+</head>
+<body alink="#cc9900" vlink="#997040" link="#336699" bgcolor="#ffffff"
+ text="#000000">
+<center><dd><a name="MB-get"></a><b><font size="+2">How To Get MB-System</font></b></dd>
+</center>
+<p>The source code for MB-System is available as a compressed tar
+archive
+by anonymous ftp to the Lamont-Doherty Earth Observatory of Columbia
+University.
 This archive file is about 1.2 megabytes in size and, depending on the
-speed of your internet connection, may take a few minutes to transfer.</P>
-
-<P>Click<A HREF="ftp://ftp.ldeo.columbia.edu/pub/MB-System/MB-System.tar.gz">
-here to ftp</A> the current compressed MB-System tar archive.</P>
-
-<P>Click <A HREF="ftp://ftp.ldeo.columbia.edu/pub/MB-System">here to
-get point-and-click ftp access</A> to all of the MB-System related files
-available from Lamont (these may include data examples and beta distributions
-of MB-System ).</P>
-
-<P>If access through the above links fails, try running ftp from a terminal shell.
-The following commands represent a typical anonymous ftp session (note that
-your@email.address literally means to enter your email address).</P>
-
-<P>
-<UL>
-% ftp ftp.ldeo.columbia.edu<BR>
-Name: anonymous<BR>
-Password: your@email.address<BR>
-> cd pub/MB-System<BR>
-> binary<BR>
-> get MB-System.tar.gz<BR>
-> quit<BR>
-</UL>
-</P>
-
-If anonymous ftp fails with an error message like: "Sorry no DNS entry" after 
-the email address is entered as the anonymous password, this means 
-that the internet address (also called IP address) of the computer in use is
-not known to the Lamont network to be legitimate. As a security measure,
-illegitimate IP addresses are not allowed to connect to the Lamont network.
-The Lamont ftp server attempts to look up or resolve IP addresses using 
-the primary Domain Name Service (DNS) servers associated with the internet as a whole.  
-So, this problem arises when computers use IP addresses are not 
-properly registered with the global DNS servers. This situation sometimes
-exists for computers connecting through improperly configured firewalls or  
-Network Address Translation (NAT) devices. Users facing this issue can often
-succeed by running ftp from a "better connected" server in their 
-organization. Otherwise, they will need to contact their internet service
+speed of your internet connection, may take a few minutes to transfer.</p>
+<p>Click<a
+ href="ftp://ftp.ldeo.columbia.edu/pub/MB-System/MB-System.tar.gz">
+here to ftp</a> the current compressed MB-System tar archive.</p>
+<p>Click <a href="ftp://ftp.ldeo.columbia.edu/pub/MB-System">here to
+get point-and-click ftp access</a> to all of the MB-System related
+files
+available from Lamont (these may include data examples and beta
+distributions
+of MB-System ).</p>
+<p>If access through the above links fails, try running ftp from a
+terminal shell.
+The following commands represent a typical anonymous ftp session (note
+that
+your@email.address literally means to enter your email address).</p>
+<p>
+</p>
+<ul>
+% ftp ftp.ldeo.columbia.edu<br>
+Name: anonymous<br>
+Password: your@email.address<br>
+&gt; cd pub/MB-System<br>
+&gt; binary<br>
+&gt; get MB-System.tar.gz<br>
+&gt; quit<br>
+</ul>
+<p></p>
+If anonymous ftp fails with an error message like: "Sorry no DNS entry"
+after the email address is entered as the anonymous password, this
+means that the internet address (also called IP address) of the
+computer in use is
+not known to the Lamont network to be legitimate. As a security
+measure,
+illegitimate IP addresses are not allowed to connect to the Lamont
+network.
+The Lamont ftp server attempts to look up or resolve IP addresses using
+the primary Domain Name Service (DNS) servers associated with the
+internet as a whole. So, this problem arises when computers use IP
+addresses are not properly registered with the global DNS servers. This
+situation sometimes
+exists for computers connecting through improperly configured firewalls
+or Network Address Translation (NAT) devices. Users facing this issue
+can often
+succeed by running ftp from a "better connected" server in their
+organization. Otherwise, they will need to contact their internet
+service
 provider or their network/computing support staff.
-
-<CENTER><P><HR WIDTH="67%"></P></CENTER>
-
-<CENTER><DD><A NAME="MB-required"></A><B><FONT SIZE=+2>Other Required and
-Suggested Software and Data</FONT></B></DD></CENTER>
-
-<P>MB-System requires a number of other software packages and databases
-to be fully functional. These are:</P>
-
-<UL>
-<LI><B>GMT</B> version 3.0 or later: MB-System makes use of the Generic
-Mapping Tools (GMT) libraries and programs for much of its graphics. GMT
-also includes a detailed global coastline database. GMT has been developed
-by Professor Paul Wessel of SOEST (School of Ocean and Earth Science and
-Technology at the Univeristy of Hawaii) and Dr. Walter H. F. Smith of NOAA.
-The GMT source code is available from the <A HREF="http://gmt.soest.hawaii.edu/">GMT
-web page</A>. Use of GMT version 3.4 or later is strongly recommended.</LI>
-
-<LI><B>NetCDF</B> version 2.3r2 or later: Both GMT and MB-System require
-the <A HREF="ftp://unidata.ucar.edu/pub/netcdf/netcdf.tar.Z">NCAR netCDF
-library</A>.</LI>
-
-<LI><B>Perl</B> version 4.0r19 or later: Perl is a fast, well documented
+<center>
+<p></p>
+<hr width="67%">
+<p></p>
+</center>
+<center><dd><a name="MB-required"></a><b><font size="+2">Other Required
+and
+Suggested Software and Data</font></b></dd>
+</center>
+<p>MB-System requires a number of other software packages and databases
+to be fully functional. These are:</p>
+<ul>
+  <li><b>GMT</b> version 4.0 or later: MB-System makes use of the
+Generic
+Mapping Tools (GMT) libraries and programs for much of its graphics.
+GMT
+also includes a detailed global coastline database. GMT has been
+developed
+by Professor Paul Wessel of SOEST (School of Ocean and Earth Science
+and
+Technology at the Univeristy of Hawaii) and Dr. Walter H. F. Smith of
+NOAA.
+The GMT source code is available from the <a
+ href="http://gmt.soest.hawaii.edu/">GMT
+web page</a>. Use of GMT version 4.0 or later is required.</li>
+  <li><b>NetCDF</b> version 2.3r2 or later: Both GMT and MB-System
+require
+the <a href="ftp://unidata.ucar.edu/pub/netcdf/netcdf.tar.Z">NCAR
+netCDF
+library</a>.</li>
+  <li><b>Perl</b> version 4.0r19 or later: Perl is a fast, well
+documented
 scripting language used widely in the Unix world. MB-System contains a
-number of perl scripts used both for installation and to ease common tasks.
+number of perl scripts used both for installation and to ease common
+tasks.
 Most of the current Unix operating systems include perl. If you need to
-obtain the perl source code, first check with your local system administrator
-- you will probably find perl already available locally. The perl source
-code can be obtained from the <A HREF="http://www.gnu.org/directory">GNU
-software archives</A> of the <A HREF="http://www.gnu.org">Free Software
-Foundation</A>.</LI>
-
-<LI><B>Motif</B>: The interactive graphical utilities in MB-System (e.g.
+obtain the perl source code, first check with your local system
+administrator
+- you will probably find perl already available locally. The perl
+source
+code can be obtained from the <a href="http://www.gnu.org/directory">GNU
+software archives</a> of the <a href="http://www.gnu.org">Free
+Software
+Foundation</a>.</li>
+  <li><b>Motif</b>: The interactive graphical utilities in MB-System
+(e.g.
 data editors) use the Motif widget set, and Motif-compatible libraries
 or equivalent are required for these utilities to be built and to run.
-Most current Unix operating systems include the required Motif libraries.
-If you do not have these libraries, there are options. The libraries can
-be purchased from one of several vendors. An open source Motif-compatible
-distribution called <A HREF="http://www.lesstif.org">LessTif </A>has been
-available for some time, and works well with MB-System. Most significantly,
-the Motif source itself has been released as open source and free, compiled
-versions are now available through <A HREF="http://www.motifzone.net/download/">Motifzone
-</A>for most Unix platforms.</LI>
-
-<LI><B>Levitus Database</B>: The MB-System program mblevitus depends on
-a 16 MByte data file that is not included in the MB-System tarfile. Click
-<A HREF="ftp://ftp.ldeo.columbia.edu/pub/MB-System/annual.gz">here</A>
-to ftp this file. Be sure to uncompress the file and to set the &quot;LEVITUS&quot;
+Most current Unix operating systems include the required Motif
+libraries.
+If you do not have these libraries, there are options. The libraries
+can
+be purchased from one of several vendors. An open source
+Motif-compatible
+distribution called <a href="http://www.lesstif.org">LessTif </a>has
+been
+available for some time, and works well with MB-System. Most
+significantly,
+the Motif source itself has been released as open source and free,
+compiled
+versions are now available through <a
+ href="http://www.motifzone.net/download/">Motifzone
+    </a>for most Unix platforms.</li>
+  <li><b>Levitus Database</b>: The MB-System program mblevitus depends
+on
+a 16 MByte data file that is not included in the MB-System tarfile.
+Click
+    <a href="ftp://ftp.ldeo.columbia.edu/pub/MB-System/annual.gz">here</a>
+to ftp this file. Be sure to uncompress the file and to set the
+"LEVITUS"
 flag in the install_makefiles appropriately, as described below in the
-installation section.</LI>
-</UL>
-
-<P>MB-System produces Postscript based graphics. Most current Unix operating
-systems provide a program which serves as a screen-based Postscript viewer.
-If you do not have a Postscript viewer, one option is to obtain one of several Ghostscript-based
-packages from the Free Software Foundation.</P>
-
-<UL>
-<LI><B>ghostview</B>:&nbsp;Open source screen Postscript viewer. The
-source code can be obtained from the <A HREF="http://www.gnu.org/directory">GNU
-software archives</A> of the <A HREF="http://www.gnu.org">Free Software
-Foundation</A>.</LI>
-</UL>
-
-<UL>
-<LI><B>gv</B>:&nbsp;Open source screen Postscript viewer. This package is a bit more 
-sophisticated than ghostview and can handle poster-sized plots. The
-source code can be obtained from the <A HREF="http://www.gnu.org/directory">GNU
-software archives</A> of the <A HREF="http://www.gnu.org">Free Software
-Foundation</A>.</LI>
-</UL>
-
-<CENTER><P>
-<HR WIDTH="67%"></P></CENTER>
-
-<CENTER><P><A NAME="MB-install"></A><B><FONT SIZE=+2>How to Install MB-System</FONT></B></P></CENTER>
-
-<P>The MB-System source code is extracted by first uncompressing the tar
-file and then running tar:</P>
-
-<UL>
-<PRE>% gunzip MB-System.tar.gz</PRE>
-
-<PRE>% tar xvf MB-System.tar</PRE>
-</UL>
-
-<P>This will create a directory called (for the 5.0.1 distribution): </P>
-
-<UL>
-<PRE>mbsystem-5.0.1</PRE>
-</UL>
-
-<P>In order to
-configure your installation, you must edit the shellscript mbsystem-5.0.1/install_makefiles.
-This is perl script will read template makefiles in the MB-System source
-directories and create makefiles with the correct attributes. This enables
-users to install MB-System without having to edit the makefiles. Instead
-of editing the makefiles directly, the installer should edit this script
-so that the locations of important libraries and include files are accurate
-and so that the compile and link flags are correct.</P>
-
-<P>The important parameters to be set in install_makefiles are:</P>
-
-<UL>
-<LI>MBSYSTEM_HOME - Absolute path to the directory containing this file.
-</LI>
-
-<LI>OS Operating system - (e.g. SUN, IRIX, HPUX, LINUX, LYNX). </LI>
-
-<LI>BYTESWAPPED - If set to &quot;YES&quot; will enable byte swapping of
+installation section.</li>
+</ul>
+<p>MB-System produces Postscript based graphics. Most current Unix
+operating
+systems provide a program which serves as a screen-based Postscript
+viewer.
+If you do not have a Postscript viewer, one option is to obtain one of
+several Ghostscript-based
+packages from the Free Software Foundation.</p>
+<ul>
+  <li><b>ghostview</b>:&nbsp;Open source screen Postscript viewer. The
+source code can be obtained from the <a
+ href="http://www.gnu.org/directory">GNU
+software archives</a> of the <a href="http://www.gnu.org">Free
+Software
+Foundation</a>.</li>
+</ul>
+<ul>
+  <li><b>gv</b>:&nbsp;Open source screen Postscript viewer. This
+package is a bit more sophisticated than ghostview and can handle
+poster-sized plots. The
+source code can be obtained from the <a
+ href="http://www.gnu.org/directory">GNU
+software archives</a> of the <a href="http://www.gnu.org">Free
+Software
+Foundation</a>.</li>
+</ul>
+<center>
+<p></p>
+<hr width="67%">
+<p></p>
+</center>
+<center>
+<p><a name="MB-install"></a><b><font size="+2">How to Install MB-System</font></b></p>
+</center>
+<p>The MB-System source code is extracted by first uncompressing the
+tar
+file and then running tar:</p>
+<ul>
+  <pre>% gunzip MB-System.tar.gz</pre>
+  <pre>% tar xvf MB-System.tar</pre>
+</ul>
+<p>This will create a directory called (for the 5.0.1 distribution): </p>
+<ul>
+  <pre>mbsystem-5.0.1</pre>
+</ul>
+<p>In order to
+configure your installation, you must edit the shellscript
+mbsystem-5.0.1/install_makefiles.
+This is perl script will read template makefiles in the MB-System
+source
+directories and create makefiles with the correct attributes. This
+enables
+users to install MB-System without having to edit the makefiles.
+Instead
+of editing the makefiles directly, the installer should edit this
+script
+so that the locations of important libraries and include files are
+accurate
+and so that the compile and link flags are correct.</p>
+<p>The important parameters to be set in install_makefiles are:</p>
+<ul>
+  <li>MBSYSTEM_HOME - Absolute path to the directory containing this
+file.
+  </li>
+  <li>OS Operating system - (e.g. SUN, IRIX, HPUX, LINUX, LYNX). </li>
+  <li>BYTESWAPPED - If set to "YES" will enable byte swapping of
 input and output binary data. Otherwise byte swapping is disabled. Byte
-swapping needs to be enabled when installing on &quot;little endian&quot;
-machines such as PCs or VAXs. </LI>
-
-<LI>CC - C compiler to be used (optional). </LI>
-
-<LI>GRAPHICAL - If set to &quot;YES&quot; will enable the installation
-of the Motif based graphical utilities mbedit, mbnavedit, and mbvelocitytool.
-If Motif is not available but the nongraphical utilities are desired then
-disable with &quot;NO&quot; (optional, default is &quot;YES&quot;). </LI>
-
-<LI>MOTIFINCDIR - Location of Motif include files. </LI>
-
-<LI>MOTIFLIBS - X and Motif libraries required for graphical tools. </LI>
-
-<LI>GMTVERSION - GMT version used. GMT version 3.2 is used by default;
-this parameter must be set to &quot;3.0&quot; or &quot;3.1&quot; to successfully
-link with libraries from either of those versions.</LI>
-
-<LI>GMTLIBDIR - Location of GMT libraries libgmt.a and libpsl.a </LI>
-
-<LI>GMTINCDIR - Location of GMT include files gmt.h, grd.h, and pslib.h
-</LI>
-
-<LI>NETCDFDIR - Location of NetCDF library libnetcdf.a </LI>
-
-<LI>LEVITUS - Path for Levitus data file annual.</LI>
-
-<LI>CFLAGS - Compile flags for C source files. </LI>
-
-<LI>LFLAGS - Load flags for all object files. </LI>
-</UL>
-
-<P>Examples of appropriate values for several different installations (e.g.
-Sun, SGI, PC) are included in the comments in install_makefiles. To execute
-install_makefiles, do the following:</P>
-
-<UL>
-<PRE>% cd mbsystem-5.0.1 </PRE>
-<PRE>% install_makefiles</PRE>
-</UL>
-
-<P>Because install_makefiles is a perl script, the executable perl must
-be available in the installer's path. Once install_makefiles has been correctly
-configured and run, give the command &quot;make all&quot; to generate the
-executable programs:</P>
-
-<UL>
-<PRE>% make all</PRE>
-</UL>
-
-<P>The make command will descend recursively down through the directory
-structure, compiling source files, linking object files, and copying executables
-and manual pages to the appropriate directories. The executables will be
-placed in mbsystem-5.0.1/bin, the libraries in mbsystem-5.0.1/lib, and the manual pages
-in mbsystem-5.0.1/man/man1.</P>
-
-<P>Naturally, in order for users to use the MB-System utilities, the directory
+swapping needs to be enabled when installing on "little endian"
+machines such as PCs or VAXs. </li>
+  <li>CC - C compiler to be used (optional). </li>
+  <li>GRAPHICAL - If set to "YES" will enable the installation
+of the Motif based graphical utilities mbedit, mbnavedit, and
+mbvelocitytool.
+If Motif is not available but the nongraphical utilities are desired
+then
+disable with "NO" (optional, default is "YES"). </li>
+  <li>MOTIFINCDIR - Location of Motif include files. </li>
+  <li>MOTIFLIBS - X and Motif libraries required for graphical tools. </li>
+  <li>GMTVERSION - GMT version used. GMT version 3.2 is used by
+default;
+this parameter must be set to "3.0" or "3.1" to successfully
+link with libraries from either of those versions.</li>
+  <li>GMTLIBDIR - Location of GMT libraries libgmt.a and libpsl.a </li>
+  <li>GMTINCDIR - Location of GMT include files gmt.h, grd.h, and
+pslib.h
+  </li>
+  <li>NETCDFDIR - Location of NetCDF library libnetcdf.a </li>
+  <li>LEVITUS - Path for Levitus data file annual.</li>
+  <li>CFLAGS - Compile flags for C source files. </li>
+  <li>LFLAGS - Load flags for all object files. </li>
+</ul>
+<p>Examples of appropriate values for several different installations
+(e.g.
+Sun, SGI, PC) are included in the comments in install_makefiles. To
+execute
+install_makefiles, do the following:</p>
+<ul>
+  <pre>% cd mbsystem-5.0.1 </pre>
+  <pre>% install_makefiles</pre>
+</ul>
+<p>Because install_makefiles is a perl script, the executable perl must
+be available in the installer's path. Once install_makefiles has been
+correctly
+configured and run, give the command "make all" to generate the
+executable programs:</p>
+<ul>
+  <pre>% make all</pre>
+</ul>
+<p>The make command will descend recursively down through the directory
+structure, compiling source files, linking object files, and copying
+executables
+and manual pages to the appropriate directories. The executables will
+be
+placed in mbsystem-5.0.1/bin, the libraries in mbsystem-5.0.1/lib, and
+the manual pages
+in mbsystem-5.0.1/man/man1.</p>
+<p>Naturally, in order for users to use the MB-System utilities, the
+directory
 containing the executables must be included in their path (usually this
-is done by editing the .cshrc file in the user's home directory). The executable
-perl must also be available in the user's path for most of the macros to
-work.</P>
-
-<P>Most users will also wish to specify which program they generally use
-to view Postscript plots on their screen. This parameter can be set either
+is done by editing the .cshrc file in the user's home directory). The
+executable
+perl must also be available in the user's path for most of the macros
+to
+work.</p>
+<p>Most users will also wish to specify which program they generally
+use
+to view Postscript plots on their screen. This parameter can be set
+either
 with the mbdefaults program or using the PS_VIEWER environment variable
-- the former is recommended (see the mbdefaults manual page for details).
+- the former is recommended (see the mbdefaults manual page for
+details).
 On Sun workstations pageview is a popular Postscript viewer; on Silicon
-Graphics machines xpsview is commonly used. Popular open source alternatives
-to these platform specific programs include ghostview and gv.</P>
-
-<CENTER><P><BR>
-Last Updated: $Date: 2004-02-25 19:59:48 $ $Revision: 5.13 $</P></CENTER>
-
-<P>
-<HR WIDTH="67%"></P>
-
-<P><A HREF="mbsystem_home.html"><IMG SRC="mbsystem_logo_small.gif" BORDER=0 HEIGHT=55 WIDTH=158></A><A HREF="mbsystem_home.html">Back
-to MB-System Home Page...</A></P>
-
-</BODY>
-</HTML>
+Graphics machines xpsview is commonly used. Popular open source
+alternatives
+to these platform specific programs include ghostview and gv.</p>
+<center>
+<p><br>
+Last Updated: $Date: 2004-10-06 21:31:56 $ $Revision: 5.14 $</p>
+</center>
+<p>
+</p>
+<hr width="67%">
+<p></p>
+<p><a href="mbsystem_home.html"><img width="158" height="55" border="0"
+ src="mbsystem_logo_small.gif"></a><a href="mbsystem_home.html">Back
+to MB-System Home Page...</a></p>
+</body>
+</html>
