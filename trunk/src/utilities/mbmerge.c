@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmerge.c	2/20/93
  *
- *    $Id: mbmerge.c,v 4.7 1995-02-14 21:18:41 caress Exp $
+ *    $Id: mbmerge.c,v 4.8 1995-02-24 16:53:43 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,9 @@
  * Date:	February 20, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.7  1995/02/14  21:18:41  caress
+ * Version 4.2
+ *
  * Revision 4.6  1994/11/01  21:52:08  caress
  * Added ability to create heading and speed from nav if required.
  * This is the "-Z" option.
@@ -84,7 +87,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbmerge.c,v 4.7 1995-02-14 21:18:41 caress Exp $";
+	static char rcs_id[] = "$Id: mbmerge.c,v 4.8 1995-02-24 16:53:43 caress Exp $";
 	static char program_name[] = "MBMERGE";
 	static char help_message[] =  "MBMERGE merges new navigation with multibeam data from an \ninput file and then writes the merged data to an output \nmultibeam data file. The default input \nand output streams are stdin and stdout.";
 	static char usage_message[] = "mbmerge [-Fformat -Llonflip -V -H  -Iinfile -Ooutfile -Mnavformat -Nnavfile]";
@@ -165,12 +168,14 @@ char **argv;
 	int	nav_ok;
 	int	make_heading = MB_NO;
 	int	make_heading_now;
+	int	time_set;
 	int	nget;
 	int	time_j[5], hr;
 	double	sec;
 	char	NorS[2], EorW[2];
 	double	mlon, llon, mlat, llat;
 	int	degree, minute;
+	double	dminute;
 	double	second;
 	double	splineflag;
 	int	stime_i[7], ftime_i[7];
@@ -178,7 +183,7 @@ char **argv;
 	double	mtodeglon, mtodeglat;
 	double	del_time, dx, dy, dist;
 
-	char	buffer[128], tmp[128], *result;
+	char	buffer[128], tmp[128], *result, *bufftmp;
 	int	i, j, k, l, m;
 
 	char	*ctime();
@@ -363,6 +368,8 @@ char **argv;
 
 	/* read in nav points */
 	nnav = 0;
+	if (nformat == 6 || nformat == 7)
+		time_set = MB_NO;
 	if ((nfp = fopen(nfile, "r")) == NULL) 
 		{
 		error = MB_ERROR_OPEN_FAIL;
@@ -472,52 +479,79 @@ char **argv;
 			nav_ok = MB_YES;
 			}
 
-		/* deal with nav in ISAH format */
-		else if (nformat == 6)
+		/* deal with nav in real and pseudo NMEA 0183 format */
+		else if (nformat == 6 || nformat == 7)
 			{
-			if (strncmp(buffer,"$PQDAT",6) == 0)
+			/* check if real sentence */
+			if (strncmp(buffer,"$",1) == 0)
+			    {
+			    if (strncmp(&buffer[3],"DAT",3) == 0)
 				{
 				strncpy(tmp,"\0",128);
 				time_i[0] = atoi(strncpy(tmp,buffer+7,4));
 				time_i[1] = atoi(strncpy(tmp,buffer+11,2));
 				time_i[2] = atoi(strncpy(tmp,buffer+13,2));
 				}
-			else if (strncmp(buffer,"$PQGLL",6) == 0)
+			    else if (strncmp(&buffer[3],"ZDA",3) == 0
+				    || strncmp(&buffer[3],"UNX",3) == 0)
 				{
+				/* find start of ",hhmmss.ss" */
+				bufftmp = strchr(buffer, ',');
 				strncpy(tmp,"\0",128);
-				degree = atoi(strncpy(tmp,buffer+7,2));
+				time_i[3] = atoi(strncpy(tmp,bufftmp+1,2));
 				strncpy(tmp,"\0",128);
-				minute = atoi(strncpy(tmp,buffer+9,2));
+				time_i[4] = atoi(strncpy(tmp,bufftmp+3,2));
 				strncpy(tmp,"\0",128);
-				second = atof(strncpy(tmp,buffer+11,5));
+				time_i[5] = atoi(strncpy(tmp,bufftmp+5,2));
+				if (bufftmp[7] == '.')
+				    {
+				    strncpy(tmp,"\0",128);
+				    time_i[6] = 10000*
+					atoi(strncpy(tmp,bufftmp+8,2));
+				    }
+				else
+				    time_i[6] = 0;
+				/* find start of ",dd,mm,yyyy" */
+				bufftmp = strchr(&bufftmp[1], ',');
+				strncpy(tmp,"\0",128);
+				time_i[2] = atoi(strncpy(tmp,bufftmp+1,2));
+				strncpy(tmp,"\0",128);
+				time_i[1] = atoi(strncpy(tmp,bufftmp+4,2));
+				strncpy(tmp,"\0",128);
+				time_i[0] = atoi(strncpy(tmp,bufftmp+7,4));
+				time_set = MB_YES;
+				}
+			    else if (((nformat == 6 && strncmp(&buffer[3],"GLL",3) == 0)
+				|| (nformat == 7 && strncmp(&buffer[3],"GGA",3) == 0))
+				&& time_set == MB_YES)
+				{
+				/* find start of ",ddmm.mm,N,ddmm.mm,E" */
+				bufftmp = strchr(buffer, ',');
+				if (nformat == 7)
+				    bufftmp = strchr(&bufftmp[1], ',');
+				strncpy(tmp,"\0",128);
+				degree = atoi(strncpy(tmp,bufftmp+1,2));
+				strncpy(tmp,"\0",128);
+				dminute = atof(strncpy(tmp,bufftmp+3,5));
 				strncpy(NorS,"\0",sizeof(NorS));
-				strncpy(NorS,buffer+17,1);
-				nlat[nnav] = degree + minute/60. + second/3600.;
+				strncpy(NorS,bufftmp+9,1);
+				nlat[nnav] = degree + dminute/60.;
 				if (strncmp(NorS,"S",1) == 0) 
 					nlat[nnav] = -nlat[nnav];
 				strncpy(tmp,"\0",128);
-				degree = atoi(strncpy(tmp,buffer+19,3));
+				degree = atoi(strncpy(tmp,bufftmp+11,3));
 				strncpy(tmp,"\0",128);
-				minute = atoi(strncpy(tmp,buffer+22,2));
-				strncpy(tmp,"\0",128);
-				second = atof(strncpy(tmp,buffer+24,5));
+				dminute = atof(strncpy(tmp,bufftmp+14,5));
 				strncpy(EorW,"\0",sizeof(EorW));
-				strncpy(EorW,buffer+30,1);
-				nlon[nnav] = degree + minute/60. + second/3600.;
+				strncpy(EorW,bufftmp+20,1);
+				nlon[nnav] = degree + dminute/60.;
 				if (strncmp(EorW,"W",1) == 0) 
 					nlon[nnav] = -nlon[nnav];
-				strncpy(tmp,"\0",128);
-				time_i[3] = atoi(strncpy(tmp,buffer+32,2));
-				strncpy(tmp,"\0",128);
-				time_i[4] = atoi(strncpy(tmp,buffer+34,2));
-				strncpy(tmp,"\0",128);
-				time_i[5] = atoi(strncpy(tmp,buffer+36,2));
-				strncpy(tmp,"\0",128);
-				time_i[6] = 10000*atoi(strncpy(tmp,buffer+38,2));
 				mb_get_time(verbose,time_i,&time_d);
 				ntime[nnav] = time_d;
 				nav_ok = MB_YES;
 				}
+			    }
 			}
 
 		/* make sure longitude is defined according to lonflip */
