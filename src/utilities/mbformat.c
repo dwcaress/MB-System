@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbformat.c	1/22/93
- *    $Id: mbformat.c,v 5.5 2002-10-02 23:56:06 caress Exp $
+ *    $Id: mbformat.c,v 5.6 2003-02-27 04:43:23 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	January 22, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2002/10/02 23:56:06  caress
+ * Release 5.0.beta24
+ *
  * Revision 5.4  2001/07/21 22:04:10  caress
  * Made the -i and -f options work better.
  *
@@ -96,12 +99,17 @@
 #include "../../include/mb_status.h"
 #include "../../include/mb_define.h"
 
+/* local defines */
+#define MBFORMAT_LIST_LONG	0
+#define MBFORMAT_LIST_SIMPLE	1
+#define MBFORMAT_LIST_ROOT	2
+
 /*--------------------------------------------------------------------*/
 
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbformat.c,v 5.5 2002-10-02 23:56:06 caress Exp $";
+	static char rcs_id[] = "$Id: mbformat.c,v 5.6 2003-02-27 04:43:23 caress Exp $";
 	static char program_name[] = "MBFORMAT";
 	static char help_message[] = "MBFORMAT is an utility which identifies the swath data formats \nassociated with MBIO format id's.  If no format id is specified, \nMBFORMAT lists all of the currently supported formats.";
 	static char usage_message[] = "mbformat [-Fformat -Ifile -L -W -V -H]";
@@ -117,6 +125,7 @@ main (int argc, char **argv)
 	int	html;
 	int	verbose;
 	char	file[MB_PATH_MAXLINE];
+	char	root[MB_PATH_MAXLINE];
 	int	file_specified;
 	int	format;
 	int	format_save;
@@ -128,7 +137,7 @@ main (int argc, char **argv)
 	char	format_name[MB_DESCRIPTION_LENGTH];
 	char	format_informal[MB_DESCRIPTION_LENGTH];
 	char	format_attributes[MB_DESCRIPTION_LENGTH];
-	int	list_simple;
+	int	list_mode;
 	int	i;
 
 	help = 0;
@@ -137,10 +146,10 @@ main (int argc, char **argv)
 	format = 0;
 	format_specified = MB_NO;
 	html = MB_NO;
-	list_simple = MB_NO;
+	list_mode = MBFORMAT_LIST_LONG;
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "F:f:HhI:i:LlVvWw")) != -1)
+	while ((c = getopt(argc, argv, "F:f:HhI:i:LlKkVvWw")) != -1)
 	  switch (c) 
 		{
 		case 'F':
@@ -150,7 +159,11 @@ main (int argc, char **argv)
 			break;
 		case 'L':
 		case 'l':
-			list_simple = MB_YES;
+			list_mode = MBFORMAT_LIST_SIMPLE;
+			break;
+		case 'K':
+		case 'k':
+			list_mode = MBFORMAT_LIST_ROOT;
 			break;
 		case 'H':
 		case 'h':
@@ -215,7 +228,8 @@ main (int argc, char **argv)
 	/* print out the info */
 	if (file_specified == MB_YES)
 		{
-		status = mb_get_format(verbose,file,NULL,&format,&error);
+		format_save = format;
+		status = mb_get_format(verbose,file,root,&format,&error);
 		}
 	else if (format_specified == MB_YES)
 		{
@@ -225,39 +239,49 @@ main (int argc, char **argv)
 	if (file_specified == MB_YES
 		&& format == 0)
 		{
-		if (list_simple == MB_YES)
+		if (list_mode == MBFORMAT_LIST_SIMPLE)
 			printf("%d\n",format);
+		else if (list_mode == MBFORMAT_LIST_ROOT)
+			printf("%s %d\n", root, format);
 		else
 			printf("Program %s unable to infer format from filename %s\n",program_name,file);
 		}
 	else if (format_specified == MB_YES
 		&& format == 0)
 		{
-		if (list_simple == MB_YES)
+		if (list_mode == MBFORMAT_LIST_SIMPLE)
 			printf("%d\n",format);
+		else if (list_mode == MBFORMAT_LIST_ROOT)
+			printf("%s %d\n", root, format);
 		else
 			printf("Specified format %d invalid for MB-System\n",format_save);
 		}
-	else if (format != 0
-		&& list_simple == MB_YES)
-		{
-		printf("%d\n",format);
-		}
 	else if (format != 0)
 		{
-		status = mb_format_description(verbose,&format,format_description,&error);
-		if (status == MB_SUCCESS)
+		if (list_mode == MBFORMAT_LIST_SIMPLE)
 			{
-			printf("\nMBIO data format id: %d\n",format);
-			printf("%s",format_description);
+			printf("%d\n",format);
 			}
-		else if (file_specified == MB_YES)
+		else if (list_mode == MBFORMAT_LIST_ROOT)
 			{
-			printf("Program %s unable to infer format from filename %s\n",program_name,file);
+			printf("%s %d\n", root, format);
 			}
-		else if (format_specified == MB_YES)
+		else
 			{
-			printf("Specified format %d invalid for MB-System\n",format_save);
+			status = mb_format_description(verbose,&format,format_description,&error);
+			if (status == MB_SUCCESS)
+				{
+				printf("\nMBIO data format id: %d\n",format);
+				printf("%s",format_description);
+				}
+			else if (file_specified == MB_YES)
+				{
+				printf("Program %s unable to infer format from filename %s\n",program_name,file);
+				}
+			else if (format_specified == MB_YES)
+				{
+				printf("Specified format %d invalid for MB-System\n",format_save);
+				}
 			}
 		}
 	else if (html == MB_YES)
@@ -334,7 +358,7 @@ main (int argc, char **argv)
 		status = MB_SUCCESS;
 		error = MB_ERROR_NO_ERROR;
 		}
-	else if (list_simple == MB_YES)
+	else if (list_mode == MB_YES)
 		{
 		for (i=0;i<=1000;i++)
 			{
