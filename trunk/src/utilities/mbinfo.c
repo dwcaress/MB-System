@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbinfo.c	2/1/93
- *    $Id: mbinfo.c,v 4.12 1995-07-18 17:14:55 caress Exp $
+ *    $Id: mbinfo.c,v 4.13 1995-11-22 22:21:36 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -24,6 +24,9 @@
  * Date:	February 1, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.12  1995/07/18  17:14:55  caress
+ * Added -G option to try to exclude bad nav from min max results.
+ *
  * Revision 4.11  1995/05/12  17:12:32  caress
  * Made exit status values consistent with Unix convention.
  * 0: ok  nonzero: error
@@ -122,7 +125,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbinfo.c,v 4.12 1995-07-18 17:14:55 caress Exp $";
+	static char rcs_id[] = "$Id: mbinfo.c,v 4.13 1995-11-22 22:21:36 caress Exp $";
 	static char program_name[] = "MBINFO";
 	static char help_message[] =  "MBINFO reads a multibeam data file and outputs \nsome basic statistics.  If pings are averaged (pings > 2) \nMBINFO estimates the variance for each of the multibeam \nbeams by reading a set number of pings (>2) and then finding \nthe variance of the detrended values for each beam. \nThe results are dumped to stdout.";
 	static char usage_message[] = "mbinfo [-Byr/mo/da/hr/mn/sc -C -Eyr/mo/da/hr/mn/sc -Fformat -Ifile -Llonflip -Ppings -Rw/e/s/n -Sspeed -V -H]";
@@ -188,6 +191,8 @@ char **argv;
 	int	good_nav_only = MB_NO;
 	int	good_nav;
 	double	speed_threshold = 50.0;
+	int	bathy_in_feet = MB_NO;
+	double	bathy_scale;
 
 	/* limit variables */
 	double	lonmin = 0.0;
@@ -285,7 +290,7 @@ char **argv;
 	strcpy (read_file, "stdin");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhB:b:CcE:e:F:f:GgI:i:L:l:P:p:R:r:S:s:T:t:")) != -1)
+	while ((c = getopt(argc, argv, "VvHhB:b:CcE:e:F:f:GgI:i:L:l:P:p:R:r:S:s:T:t:Ww")) != -1)
 	  switch (c) 
 		{
 		case 'B':
@@ -362,6 +367,10 @@ char **argv;
 		case 'v':
 			verbose++;
 			break;
+		case 'W':
+		case 'w':
+			bathy_in_feet = MB_YES;
+			break;
 		case '?':
 			errflg++;
 		}
@@ -425,6 +434,7 @@ char **argv;
 		fprintf(output,"dbg2       good_nav:   %d\n",good_nav_only);
 		fprintf(output,"dbg2       comments:   %d\n",comments);
 		fprintf(output,"dbg2       file:       %s\n",read_file);
+		fprintf(output,"dbg2       bathy feet: %d\n",bathy_in_feet);
 		}
 
 	/* if help desired then print it and exit */
@@ -434,6 +444,12 @@ char **argv;
 		fprintf(output,"\nusage: %s\n", usage_message);
 		exit(error);
 		}
+
+	/* set bathymetry scaling */
+	if (bathy_in_feet == MB_YES)
+		bathy_scale = 0.3048;
+	else
+		bathy_scale = 1.0;
 
 	/* determine whether to read one file or a list of files */
 	if (format < 0)
@@ -1125,16 +1141,24 @@ char **argv;
 	fprintf(output,"Time:  %2.2d %2.2d %4.4d %2.2d:%2.2d:%2.2d.%6.6d  JD%d\n",
 		timbeg_i[1],timbeg_i[2],timbeg_i[0],timbeg_i[3],
 		timbeg_i[4],timbeg_i[5],timbeg_i[6],timbeg_j[1]);
-	fprintf(output,"Lon: %9.4f     Lat: %9.4f     Depth: %10.4f meters\n",
-		lonbeg,latbeg,bathbeg);
+	if (bathy_in_feet == MB_NO)
+		fprintf(output,"Lon: %9.4f     Lat: %9.4f     Depth: %10.4f meters\n",
+			lonbeg,latbeg,bathbeg);
+	else
+		fprintf(output,"Lon: %9.4f     Lat: %9.4f     Depth: %10.4f feet\n",
+			lonbeg,latbeg,bathy_scale*bathbeg);
 	fprintf(output,"Speed: %7.4f km/hr (%7.4f knots)  Heading:%9.4f degrees\n",
 		spdbeg,spdbeg/1.85,hdgbeg);
 	fprintf(output,"\nEnd of Data:\n");
 	fprintf(output,"Time:  %2.2d %2.2d %4.4d %2.2d:%2.2d:%2.2d.%6.6d  JD%d\n",
 		timend_i[1],timend_i[2],timend_i[0],timend_i[3],
 		timend_i[4],timend_i[5],timend_i[6],timend_j[1]);
-	fprintf(output,"Lon: %9.4f     Lat: %9.4f     Depth: %10.4f meters\n",
-		lonend,latend,bathend);
+	if (bathy_in_feet == MB_NO)
+		fprintf(output,"Lon: %9.4f     Lat: %9.4f     Depth: %10.4f meters\n",
+			lonend,latend,bathend);
+	else
+		fprintf(output,"Lon: %9.4f     Lat: %9.4f     Depth: %10.4f feet\n",
+			lonend,latend,bathy_scale*bathend);
 	fprintf(output,"Speed: %7.4f km/hr (%7.4f knots)  Heading:%9.4f degrees\n",
 		spdend,spdend/1.85,hdgend);
 	fprintf(output,"\nLimits:\n");
@@ -1142,7 +1166,7 @@ char **argv;
 	fprintf(output,"Minimum Latitude:  %10.4f   Maximum Latitude:  %10.4f\n",latmin,latmax);
 	if (ngdbeams > 0 || verbose >= 1)
 		fprintf(output,"Minimum Depth:     %10.4f   Maximum Depth:     %10.4f\n",
-			bathmin,bathmax);
+			bathy_scale*bathmin,bathy_scale*bathmax);
 	if (ngabeams > 0 || verbose >= 1)
 		fprintf(output,"Minimum Amplitude: %10.4f   Maximum Amplitude: %10.4f\n",
 			ampmin,ampmax);
@@ -1158,8 +1182,9 @@ char **argv;
 		fprintf(output," ----     -      ----     --------    -----\n");
 		for (i=0;i<beams_bath;i++)
 			fprintf(output,"%4d  %5d   %8.2f   %8.2f  %8.2f\n",
-				i,nbathvar[i],bathmean[i],
-				bathvar[i],sqrt(bathvar[i]));
+				i,nbathvar[i],bathy_scale*bathmean[i],
+				bathy_scale*bathy_scale*bathvar[i],
+				bathy_scale*sqrt(bathvar[i]));
 		fprintf(output,"\n");
 		}
 	if (pings_read > 2 && beams_amp > 0 
