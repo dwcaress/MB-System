@@ -1,4 +1,4 @@
-.TH mbnavedit l "9 April 1999" "MB-System 4.6" "MB-System 4.6"
+.TH mbnavedit l "16 July 1999" "MB-System 4.6" "MB-System 4.6"
 .SH NAME
 \fBmbnavedit\fP - Interactive navigation editor for swath sonar data.
 
@@ -361,4 +361,6 @@ the same action.
 
 .SH BUGS
 This program doesn't handle the roll, pitch, and
-heave data in a general way.
+heave data in a general way. The main
+window for \fBmbnavedit\fP is too large for use on screens
+smaller than 1024 X 768 pixels.
