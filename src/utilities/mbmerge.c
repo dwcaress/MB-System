@@ -1,9 +1,9 @@
 /*--------------------------------------------------------------------
- *    The MB-system:	mbmerge.c	3.00	2/20/93
+ *    The MB-system:	mbmerge.c	2/20/93
  *
- *    $Id: mbmerge.c,v 3.1 1993-06-01 21:26:40 caress Exp $
+ *    $Id: mbmerge.c,v 4.0 1994-03-06 00:13:22 caress Exp $
  *
- *    Copyright (c) 1993 by 
+ *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
  *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
  *    Lamont-Doherty Earth Observatory
@@ -21,6 +21,15 @@
  * Date:	February 20, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/03/01  18:59:27  caress
+ * First cut at new version. Any changes are associated with
+ * support of three data types (beam bathymetry, beam amplitude,
+ * and sidescan) instead of two (bathymetry and backscatter).
+ *
+ * Revision 3.1  1993/06/01  21:26:40  caress
+ * Changed exit codes so that exits with MB_SUCCESS=1 if
+ * successful and with MB_FAILURE=0 if failed.
+ *
  * Revision 3.0  1993/05/04  22:10:41  dale
  * Initial version
  *
@@ -43,7 +52,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbmerge.c,v 3.1 1993-06-01 21:26:40 caress Exp $";
+	static char rcs_id[] = "$Id: mbmerge.c,v 4.0 1994-03-06 00:13:22 caress Exp $";
 	static char program_name[] = "MBMERGE";
 	static char help_message[] =  "MBMERGE merges new navigation with multibeam data from an \ninput file and then writes the merged data to an output \nmultibeam data file. The default input \nand output streams are stdin and stdout.";
 	static char usage_message[] = "mbmerge [-Fformat -Llonflip -V -H  -Iinfile -Ooutfile -Nnavfile]";
@@ -74,7 +83,8 @@ char **argv;
 	double	speedmin;
 	double	timegap;
 	int	beams_bath;
-	int	beams_back;
+	int	beams_amp;
+	int	pixels_ss;
 	char	ifile[128];
 	char	*imbio_ptr;
 	char	ofile[128];
@@ -93,11 +103,15 @@ char **argv;
 	double	heading;
 	double	distance;
 	int	nbath;
+	int	namp;
+	int	nss;
 	int	*bath;
-	int	*bathdist;
-	int	nback;
-	int	*back;
-	int	*backdist;
+	int	*bathacrosstrack;
+	int	*bathalongtrack;
+	int	*amp;
+	int	*ss;
+	int	*ssacrosstrack;
+	int	*ssalongtrack;
 	int	idata = 0;
 	int	icomment = 0;
 	int	odata = 0;
@@ -367,7 +381,7 @@ char **argv;
 		verbose,ifile,format,pings,lonflip,bounds,
 		btime_i,etime_i,speedmin,timegap,
 		&imbio_ptr,&btime_d,&etime_d,
-		&beams_bath,&beams_back,&error)) != MB_SUCCESS)
+		&beams_bath,&beams_amp,&pixels_ss,&error)) != MB_SUCCESS)
 		{
 		mb_error(verbose,error,&message);
 		fprintf(stderr,"\nMBIO Error returned from function <mb_read_init>:\n%s\n",message);
@@ -386,7 +400,7 @@ char **argv;
 	/* initialize writing the output multibeam file */
 	if ((status = mb_write_init(
 		verbose,ofile,format,&ombio_ptr,
-		&beams_bath,&beams_back,&error)) != MB_SUCCESS)
+		&beams_bath,&beams_amp,&pixels_ss,&error)) != MB_SUCCESS)
 		{
 		mb_error(verbose,error,&message);
 		fprintf(stderr,"\nMBIO Error returned from function <mb_write_init>:\n%s\n",message);
@@ -404,9 +418,16 @@ char **argv;
 
 	/* allocate memory for data arrays */
 	status = mb_malloc(verbose,beams_bath*sizeof(int),&bath,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(int),&bathdist,&error);
-	status = mb_malloc(verbose,beams_back*sizeof(int),&back,&error);
-	status = mb_malloc(verbose,beams_back*sizeof(int),&backdist,&error);
+	status = mb_malloc(verbose,beams_amp*sizeof(int),&amp,&error);
+	status = mb_malloc(verbose,beams_bath*sizeof(int),
+			&bathacrosstrack,&error);
+	status = mb_malloc(verbose,beams_bath*sizeof(int),
+			&bathalongtrack,&error);
+	status = mb_malloc(verbose,pixels_ss*sizeof(int),&ss,&error);
+	status = mb_malloc(verbose,pixels_ss*sizeof(int),
+			&ssacrosstrack,&error);
+	status = mb_malloc(verbose,pixels_ss*sizeof(int),
+			&ssalongtrack,&error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
@@ -426,8 +447,9 @@ char **argv;
 	status = mb_put(verbose,ombio_ptr,kind,
 			time_i,time_d,
 			navlon,navlat,speed,heading,
-			beams_bath,bath,bathdist,
-			beams_back,back,backdist,
+			beams_bath,beams_amp,pixels_ss,
+			bath,amp,bathacrosstrack,bathalongtrack,
+			ss,ssacrosstrack,ssalongtrack,
 			comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
 	strncpy(comment,"\0",256);
@@ -435,8 +457,6 @@ char **argv;
 	status = mb_put(verbose,ombio_ptr,kind,
 			time_i,time_d,
 			navlon,navlat,speed,heading,
-			beams_bath,bath,bathdist,
-			beams_back,back,backdist,
 			comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
 	right_now = time((long *)0);
@@ -451,8 +471,9 @@ char **argv;
 	status = mb_put(verbose,ombio_ptr,kind,
 			time_i,time_d,
 			navlon,navlat,speed,heading,
-			beams_bath,bath,bathdist,
-			beams_back,back,backdist,
+			beams_bath,beams_amp,pixels_ss,
+			bath,amp,bathacrosstrack,bathalongtrack,
+			ss,ssacrosstrack,ssalongtrack,
 			comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
 	strncpy(comment,"\0",256);
@@ -460,8 +481,9 @@ char **argv;
 	status = mb_put(verbose,ombio_ptr,kind,
 			time_i,time_d,
 			navlon,navlat,speed,heading,
-			beams_bath,bath,bathdist,
-			beams_back,back,backdist,
+			beams_bath,beams_amp,pixels_ss,
+			bath,amp,bathacrosstrack,bathalongtrack,
+			ss,ssacrosstrack,ssalongtrack,
 			comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
 	strncpy(comment,"\0",256);
@@ -469,8 +491,9 @@ char **argv;
 	status = mb_put(verbose,ombio_ptr,kind,
 			time_i,time_d,
 			navlon,navlat,speed,heading,
-			beams_bath,bath,bathdist,
-			beams_back,back,backdist,
+			beams_bath,beams_amp,pixels_ss,
+			bath,amp,bathacrosstrack,bathalongtrack,
+			ss,ssacrosstrack,ssalongtrack,
 			comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
 	strncpy(comment,"\0",256);
@@ -478,8 +501,9 @@ char **argv;
 	status = mb_put(verbose,ombio_ptr,kind,
 			time_i,time_d,
 			navlon,navlat,speed,heading,
-			beams_bath,bath,bathdist,
-			beams_back,back,backdist,
+			beams_bath,beams_amp,pixels_ss,
+			bath,amp,bathacrosstrack,bathalongtrack,
+			ss,ssacrosstrack,ssalongtrack,
 			comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
 	strncpy(comment,"\0",256);
@@ -487,8 +511,9 @@ char **argv;
 	status = mb_put(verbose,ombio_ptr,kind,
 			time_i,time_d,
 			navlon,navlat,speed,heading,
-			beams_bath,bath,bathdist,
-			beams_back,back,backdist,
+			beams_bath,beams_amp,pixels_ss,
+			bath,amp,bathacrosstrack,bathalongtrack,
+			ss,ssacrosstrack,ssalongtrack,
 			comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
 	strncpy(comment,"\0",256);
@@ -496,8 +521,9 @@ char **argv;
 	status = mb_put(verbose,ombio_ptr,kind,
 			time_i,time_d,
 			navlon,navlat,speed,heading,
-			beams_bath,bath,bathdist,
-			beams_back,back,backdist,
+			beams_bath,beams_amp,pixels_ss,
+			bath,amp,bathacrosstrack,bathalongtrack,
+			ss,ssacrosstrack,ssalongtrack,
 			comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
 	strncpy(comment,"\0",256);
@@ -505,8 +531,9 @@ char **argv;
 	status = mb_put(verbose,ombio_ptr,kind,
 			time_i,time_d,
 			navlon,navlat,speed,heading,
-			beams_bath,bath,bathdist,
-			beams_back,back,backdist,
+			beams_bath,beams_amp,pixels_ss,
+			bath,amp,bathacrosstrack,bathalongtrack,
+			ss,ssacrosstrack,ssalongtrack,
 			comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
 	strncpy(comment,"\0",256);
@@ -514,8 +541,9 @@ char **argv;
 	status = mb_put(verbose,ombio_ptr,kind,
 			time_i,time_d,
 			navlon,navlat,speed,heading,
-			beams_bath,bath,bathdist,
-			beams_back,back,backdist,
+			beams_bath,beams_amp,pixels_ss,
+			bath,amp,bathacrosstrack,bathalongtrack,
+			ss,ssacrosstrack,ssalongtrack,
 			comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
 
@@ -528,8 +556,9 @@ char **argv;
 		status = mb_get_all(verbose,imbio_ptr,&store_ptr,&kind,
 				time_i,&time_d,&navlon,&navlat,&speed,
 				&heading,&distance,
-				&nbath,bath,bathdist,
-				&nback,back,backdist,
+				&beams_bath,&beams_amp,&pixels_ss,
+				bath,amp,bathacrosstrack,bathalongtrack,
+				ss,ssacrosstrack,ssalongtrack,
 				comment,&error);
 
 		/* increment counter */
@@ -605,8 +634,9 @@ char **argv;
 					store_ptr,MB_YES,kind,
 					time_i,time_d,
 					navlon,navlat,speed,heading,
-					beams_bath,bath,bathdist,
-					beams_back,back,backdist,
+					beams_bath,beams_amp,pixels_ss,
+					bath,amp,bathacrosstrack,bathalongtrack,
+					ss,ssacrosstrack,ssalongtrack,
 					comment,&error);
 			if (status == MB_SUCCESS)
 				{
@@ -642,9 +672,12 @@ char **argv;
 	mb_free(verbose,nlonspl,&error);
 	mb_free(verbose,nlatspl,&error);
 	mb_free(verbose,bath,&error); 
-	mb_free(verbose,bathdist,&error); 
-	mb_free(verbose,back,&error); 
-	mb_free(verbose,backdist,&error); 
+	mb_free(verbose,amp,&error); 
+	mb_free(verbose,bathacrosstrack,&error); 
+	mb_free(verbose,bathalongtrack,&error); 
+	mb_free(verbose,ss,&error); 
+	mb_free(verbose,ssacrosstrack,&error); 
+	mb_free(verbose,ssalongtrack,&error); 
 
 	/* check memory */
 	if (verbose >= 4)

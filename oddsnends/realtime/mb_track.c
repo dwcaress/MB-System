@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
- *    The MB-system:	mb_track.c	3.00	8/15/93
- *    $Id: mb_track.c,v 3.1 1993-11-05 18:58:09 caress Exp $
+ *    The MB-system:	mb_track.c	8/15/93
+ *    $Id: mb_track.c,v 4.0 1994-03-06 00:09:08 caress Exp $
  *
- *    Copyright (c) 1993 by 
+ *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
  *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
  *    Lamont-Doherty Earth Observatory
@@ -17,6 +17,12 @@
  * Date:	August, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/03/01  20:50:45  caress
+ * First cut at new version.
+ *
+ * Revision 3.1  1993/11/05  18:58:09  caress
+ * Not sure if there are any changes.
+ *
  * Revision 3.0  1993/08/26  00:59:59  caress
  * Initial version.
  *
@@ -58,18 +64,20 @@ struct	ping
 	double	heading;
 	double	distance;
 	double	*bath;
+	double	*amp;
 	double	*bathlon;
 	double	*bathlat;
-	double	*back;
-	double	*backlon;
-	double	*backlat;
+	double	*ss;
+	double	*sslon;
+	double	*sslat;
 	char	comment[256];
 	};
 struct swath
 	{
 	int	npings;
 	int	beams_bath;
-	int	beams_back;
+	int	beams_amp;
+	int	pixels_ss;
 	struct ping data[MAXPINGS];
 	};
 struct pingflag
@@ -94,7 +102,7 @@ struct swath *swath;
 double	time_tick_int,time_annot_int,date_annot_int,time_tick_len;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_track.c,v 3.1 1993-11-05 18:58:09 caress Exp $";
+  	static char rcs_id[]="$Id: mb_track.c,v 4.0 1994-03-06 00:09:08 caress Exp $";
 	char	*function_name = "mb_track";
 	int	status = MB_SUCCESS;
 	int	time_tick, time_annot, date_annot;

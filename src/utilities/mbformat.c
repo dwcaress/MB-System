@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
- *    The MB-system:	mbformat.c	3.00	1/22/93
- *    $Id: mbformat.c,v 3.0 1993-05-04 22:38:45 dale Exp $
+ *    The MB-system:	mbformat.c	1/22/93
+ *    $Id: mbformat.c,v 4.0 1994-03-06 00:13:22 caress Exp $
  *
- *    Copyright (c) 1993 by 
+ *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
  *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
  *    Lamont-Doherty Earth Observatory
@@ -20,6 +20,14 @@
  * Date:	January 22, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/03/01  18:59:27  caress
+ * First cut at new version. Any changes are associated with
+ * support of three data types (beam bathymetry, beam amplitude,
+ * and sidescan) instead of two (bathymetry and backscatter).
+ *
+ * Revision 3.0  1993/05/04  22:38:45  dale
+ * Inital version.
+ *
  */
 
 /* standard include files */
@@ -38,7 +46,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbformat.c,v 3.0 1993-05-04 22:38:45 dale Exp $";
+	static char rcs_id[] = "$Id: mbformat.c,v 4.0 1994-03-06 00:13:22 caress Exp $";
 	static char program_name[] = "MBFORMAT";
 	static char help_message[] = "MBFORMAT is an utility which identifies the multibeam data formats \nassociated with MBIO format id's.  If no format id is specified, \nMBFORMAT lists all of the currently supported formats.";
 	static char usage_message[] = "mbformat [-Fformat -V -H]";
@@ -48,10 +56,12 @@ char **argv;
 	extern int optkind;
 	int	errflg = 0;
 	int	c;
+	int	error;
 	int	status;
 	int	help;
 	int	verbose;
 	int	format;
+	int	format_num;
 	char	*message;
 	int	i;
 
@@ -117,7 +127,8 @@ char **argv;
 	/* print out the info */
 	if (format != 0)
 		{
-		status = mb_format_inf(verbose,format,&message);
+		status = mb_format(verbose,&format,&format_num,&error);
+		status = mb_format_inf(verbose,format_num,&message);
 		printf("\nMBIO data format id: %d\n",format);
 		printf("%s",message);
 		}
@@ -125,7 +136,7 @@ char **argv;
 		for (i=1;i<=MB_FORMATS;i++)
 			{
 			status = mb_format_inf(verbose,i,&message);
-			printf("\nMBIO Data Format ID:  %d\n",i);
+			printf("\nMBIO Data Format ID:  %d\n",format_table[i]);
 			printf("%s",message);
 			}
 

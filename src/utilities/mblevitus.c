@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
- *    The MB-system:	mblevitus.c	3.00	4/15/93
- *    $Id: mblevitus.c,v 3.5 1993-11-05 16:13:40 caress Exp $
+ *    The MB-system:	mblevitus.c	4/15/93
+ *    $Id: mblevitus.c,v 4.0 1994-03-06 00:13:22 caress Exp $
  *
- *    Copyright (c) 1993 by 
+ *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
  *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
  *    Lamont-Doherty Earth Observatory
@@ -19,6 +19,17 @@
  * Date:	April 15, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/03/01  18:59:27  caress
+ * First cut at new version. Any changes are associated with
+ * support of three data types (beam bathymetry, beam amplitude,
+ * and sidescan) instead of two (bathymetry and backscatter).
+ *
+ * Revision 3.5  1993/11/05  16:13:40  caress
+ * Now the location of the Levitus annual database file is set
+ * at compile time from a variable in the Makefile.  This is
+ * accomplished by creating an include file each time Make is
+ * run which is referenced in mblevitus.c.
+ *
  * Revision 3.4  1993/06/30  21:50:13  caress
  * Set for LDEO location of Levitus annual database.
  *
@@ -58,7 +69,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mblevitus.c,v 3.5 1993-11-05 16:13:40 caress Exp $";
+	static char rcs_id[] = "$Id: mblevitus.c,v 4.0 1994-03-06 00:13:22 caress Exp $";
 	static char program_name[] = "MBLEVITUS";
 	static char help_message[] = "MBLEVITUS generates an average water velocity profile for a \nspecified location from the Levitus temperature and salinity database.";
 	static char usage_message[] = "mblevitus [-Rlon/lat -Ooutfile -V -H]";

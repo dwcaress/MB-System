@@ -1,11 +1,11 @@
-.TH mbcontourfilter 1 "25 August 1993"
+.TH mbcontourfilter 1 "1 March 1994"
 .SH NAME
 mbcontourfilter - Read multibeam bathymetry data and generate
 a contoured swath plot using generic ascii plot calls which
 can be interpreted by other programs.
 
 .SH VERSION
-Version 3.00
+Version 4.00
 
 .SH SYNOPSIS
 \fBmbcontourfilter\fP \fB-F\fIformat \fB-R\fIwest/east/south/north \fP[\fB-A\fItime_tick/time_annot/date_annot/time_tick_len \fB-B\fIyr/mo/da/hr/mn/sc \fB-C\fIcontour/color/tick/label/ticklen/labelhgt \fB-E\fIyr/mo/da/hr/mn/sc \fB-J\fIscale \fB-L\fIlonflip \fB-N\fInumcont \fB-P\fIpings \fB-S\fIspeed \fB-T\fItimegap \fB-V -H\fP]
@@ -35,18 +35,6 @@ Palisades, NY 10964
 
 .SH OPTIONS
 .TP
-.B \fB-F\fIformat\fP
-Sets the format for the input multibeam data using 
-\fBMBIO\fP integer format identifiers. 
-This program uses the \fBMBIO\fP library and will read or write any multibeam
-format supported by \fBMBIO\fP. A list of the multibeam data formats
-currently supported by \fBMBIO\fP and their identifier values
-is given in the \fBMBIO\fP manual page.
-.TP
-.B \fB-R\fIwest/east/south/north\fP
-Sets the longitude and latitude bounds of the plotting.  A mercator
-projection is used.
-.TP
 .B \fB-A\fItime_tick/time_annot/date_annot/time_tick_len\fP
 Sets the parameters governing the annotation of the shiptrack.  
 Time marks are made with "X" marks along the shiptrack; annotated
@@ -66,11 +54,6 @@ Sets the starting time for data allowed in the input data; pings
 with times before the starting time will be ignored. 
 Default = 1962/2/21/0/0/0.
 .TP
-.B \fB-E\fIyr/mo/da/hr/mn/sc\fP
-Sets the ending time for data allowed in the input data; pings
-with times after the ending time will be ignored. 
-Default = 2062/2/21/0/0/0.
-.TP
 .B \fB-C\fIcontour/color/tick/label/ticklen/labelhgt\fP
 Sets the basic contouring parameters, including the contour
 interval \fIcontour\fP, the color change interval \fIcolor \fP,
@@ -85,6 +68,23 @@ of \fIticklen\fP=0.001 and \fIlabelhgt\fP=0.003 work well for
 24 inch per degree longitude plots.
 Default \fIcontour\fP=25, \fIcolor\fP=100, \fItick\fP=100, 
 \fIlabel\fP=100, \fIticklen\fP=0.001, \fIlabelhgt\fP=0.003.
+.TP
+.B \fB-E\fIyr/mo/da/hr/mn/sc\fP
+Sets the ending time for data allowed in the input data; pings
+with times after the ending time will be ignored. 
+Default = 2062/2/21/0/0/0.
+.TP
+.B \fB-F\fIformat\fP
+Sets the format for the input multibeam data using 
+\fBMBIO\fP integer format identifiers. 
+This program uses the \fBMBIO\fP library and will read or write any multibeam
+format supported by \fBMBIO\fP. A list of the multibeam data formats
+currently supported by \fBMBIO\fP and their identifier values
+is given in the \fBMBIO\fP manual page.
+.TP
+.B \fB-H\fP
+This "help" flag cause the program to print out a description
+of its operation and then exit immediately.
 .TP
 .B \fB-J\fIscale\fP
 Sets the scale of the Mercator projection used in inches
@@ -117,6 +117,10 @@ be done so that the along-track ping spacing is equal to the across-track
 beam spacing.
 Default: \fIpings\fP = 1 (no ping averaging).
 .TP
+.B \fB-R\fIwest/east/south/north\fP
+Sets the longitude and latitude bounds of the plotting.  A mercator
+projection is used.
+.TP
 .B \fB-S\fIspeed\fP
 Sets the minimum speed in km/hr (5.5 kts ~ 10 km/hr) allowed in 
 the input data; pings associated with a smaller ship speed will not be
@@ -128,10 +132,6 @@ the data is considered to have a gap. Default: \fItimegap\fP = 1.
 .TP
 .B \fB-V\fIverbose\fP
 Causes status messages to be printed to stderr as the program runs.
-.TP
-.B \fB-H\fP
-This "help" flag cause the program to print out a description
-of its operation and then exit immediately.
 
 .SH EXAMPLES
 On the R/V Maurice Ewing, the real-time hydrosweep data 

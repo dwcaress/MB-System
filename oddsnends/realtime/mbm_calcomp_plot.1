@@ -1,10 +1,10 @@
-.TH mbm_calcomp_plot 1 "25 August 1993"
+.TH mbm_calcomp_plot 1 "1 March 1994"
 .SH NAME
 mbm_calcomp_plot - MB-System macro used for real time pen plotting
 on the R/V Maurice Ewing.
 
 .SH VERSION
-Version 3.00
+Version 4.00
 
 .SH SYNOPSIS
 \fBmbm_calcomp_plot\fP \fB-I\fIfile\fP \fB-R\fIwest/east/south/north \fB-S\fIscale\fP [\fB-B\fIyr/mo/da/hr/mn/sc \fB-E\fIyr/mo/da/hr/mn/sc \fB-F\fIformat \fB-N\fP \fB-P\fIport \fB-Q\fP \fB-T\fItitle \fB-H\fP]
@@ -38,16 +38,6 @@ Palisades, NY 10964
 
 .SH OPTIONS
 .TP
-.B \fB-I\fIfile\fP
-Sets the input multibeam data file.
-.TP
-.B \fB-R\fIwest/east/south/north\fP
-Sets the longitude and latitude bounds of the plotting.  A mercator
-projection is used.
-.TP
-.B \fB-S\fIscale\fP
-Sets the scale of the mercator projection used in inches per degree longitude.
-.TP
 .B \fB-B\fIyr/mo/da/hr/mn/sc\fP
 Sets the starting time for data allowed in the input data; pings
 with times before the starting time will be ignored. 
@@ -66,6 +56,13 @@ format supported by \fBMBIO\fP. A list of the multibeam data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page.
 Default: \fIformat\fP = 5 (raw Hydrosweep DS data ).
+.TP
+.B \fB-H\fP
+This "help" flag cause the program to print out a description
+of its operation and then exit immediately.
+.TP
+.B \fB-I\fIfile\fP
+Sets the input multibeam data file.
 .TP
 .B \fB-J\fIscale\fP
 Sets the scale of the Mercator projection used in inches
@@ -86,12 +83,15 @@ read with an infinite loop on the assumption that new data is always
 being appended to the file.  When \fB-Q\fP is set, reading will
 be terminated when the end of the file is reached.
 .TP
+.B \fB-R\fIwest/east/south/north\fP
+Sets the longitude and latitude bounds of the plotting.  A mercator
+projection is used.
+.TP
+.B \fB-S\fIscale\fP
+Sets the scale of the mercator projection used in inches per degree longitude.
+.TP
 .B \fB-T\fItitle\fP
 Sets the title of the plot.
-.TP
-.B \fB-H\fP
-This "help" flag cause the program to print out a description
-of its operation and then exit immediately.
 
 .SH EXAMPLES
 On the Ewing, the realtime Hydrosweep data is logged in a file in

@@ -1,10 +1,10 @@
-.TH mbplotfilter 1 "25 August 1993"
+.TH mbplotfilter 1 "1 March 1994"
 .SH NAME
 mbplotfilter - Produce L-DGO metafile graphics from output 
 of mbcontourfilter.
 
 .SH VERSION
-Version 3.00
+Version 4.00
 
 .SH SYNOPSIS
 \fBmbplotfilter\fP \fB-R\fIwest/east/south/north [-Wwidth -V]
@@ -31,13 +31,13 @@ Palisades, NY 10964
 Sets the longitude and latitude bounds of the plotting.  A mercator
 projection is used.
 .TP
+.B \fB-V\fIverbose\fP
+Causes status messages to be printed to stderr as the program runs.
+.TP
 .B \fB-W\fIwidth\fP
 Sets the width in inches of the plot.  A mercator projection is used
 to interprete the longitude and latitude values input in the
 plot calls.
-.TP
-.B \fB-N\fIverbose\fP
-Causes status messages to be printed to stderr as the program runs.
 
 .SH EXAMPLES
 On the R/V Maurice Ewing, the real-time hydrosweep data 
