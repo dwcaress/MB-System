@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit_stubs.c	3.00	4/8/93
- *    $Id: mbedit_stubs.c,v 1.1 1993-05-14 23:30:52 sohara Exp $
+ *    $Id: mbedit_stubs.c,v 3.0 1993-05-14 23:36:46 sohara Exp $
  *
  *    Copyright (c) 1993 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -23,7 +23,11 @@
  * Date:	April 8, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  1993/05/14  23:30:52  sohara
+ * Initial revision
+ *
  */
+
 
 /*--------------------------------------------------------------------*/
 /*
@@ -113,7 +117,7 @@ main(argc, argv)
 	int	argc;
 	char	**argv;
 {
-  static char rcs_id[]="$Id: mbedit_stubs.c,v 1.1 1993-05-14 23:30:52 sohara Exp $";
+  static char rcs_id[]="$Id: mbedit_stubs.c,v 3.0 1993-05-14 23:36:46 sohara Exp $";
 	int	status;
 	int	i;
 
