@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	4/8/93
- *    $Id: mbedit_prog.c,v 4.16 1997-04-29 15:50:50 caress Exp $
+ *    $Id: mbedit_prog.c,v 4.17 1997-07-25 14:42:55 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -24,6 +24,9 @@
  * Date:	March 28, 1997  GUI recast
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.16  1997/04/29  15:50:50  caress
+ * Fixed autoscaling in case of no good data.
+ *
  * Revision 4.15  1997/04/22  19:26:36  caress
  * Fixed startup mode.
  *
@@ -189,7 +192,7 @@ struct mbedit_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbedit_prog.c,v 4.16 1997-04-29 15:50:50 caress Exp $";
+static char rcs_id[] = "$Id: mbedit_prog.c,v 4.17 1997-07-25 14:42:55 caress Exp $";
 static char program_name[] = "MBedit";
 static char help_message[] =  
 "MBedit is an interactive editor used to identify and flag\n\
@@ -3546,6 +3549,7 @@ int	autoscale;
 	int	xcen;
 	int	y, dy, first, xold, yold;
 	char	string[128];
+	char	*string_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -3706,9 +3710,16 @@ int	autoscale;
 	xg_justify(mbedit_xgid,string,&swidth,
 		&sascent,&sdescent);
 	xg_drawstring(mbedit_xgid,50,
-		ymin-margin/2-3*sascent/2,string,pixel_values[BLACK],XG_SOLIDLINE);
-	xg_drawstring(mbedit_xgid,50+swidth,
-		ymin-margin/2-3*sascent/2,ifile,pixel_values[BLACK],XG_SOLIDLINE);
+		ymin-margin/2-3*sascent/2,string,
+		pixel_values[BLACK],XG_SOLIDLINE);
+	string_ptr = strrchr(ifile, '/');
+	if (string_ptr == NULL)
+		string_ptr = ifile;
+	else if (strlen(string_ptr) > 0)
+		string_ptr++;
+	xg_drawstring(mbedit_xgid,52+swidth,
+		ymin-margin/2-3*sascent/2,string_ptr,
+		pixel_values[BLACK],XG_SOLIDLINE);
 
 	/* plot scale bars */
 	dx_width = (xmax - xmin)/dxscale;
