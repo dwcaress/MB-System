@@ -1,5 +1,8 @@
 Revision History:
 $Log: not supported by cvs2svn $
+# Revision 3.5  1993/11/05  21:25:02  caress
+# Added discussion of how to run make to generate the executables.
+#
 # Revision 3.4  1993/11/05  14:59:04  caress
 # Some small changes by Dale.
 #
@@ -18,7 +21,7 @@ $Log: not supported by cvs2svn $
 # *** empty log message ***
 #
 
-RCS ID: $Id: README,v 3.5 1993-11-05 21:25:02 caress Exp $
+RCS ID: $Id: README,v 3.6 1993-11-06 21:24:39 caress Exp $
 
 MBSYSTEM 3.30 RELEASE Notes:
 ----------------------------
@@ -111,6 +114,13 @@ Also, the location of the Levitus annual database file must be
 set in the environment variable LEVITUS in the Makefile
 		src/utilities/Makefile
 if mblevitus is to be used.
+	The src/realtime directory contains source code used for
+running "realtime" plots on Calcomp 965A pen plotters on board
+the R/V Maurice Ewing.  This code is included in the distribution
+as an example for users who might wish to implement similar
+capabilities elsewhere.  The realtime code is not compiled during 
+general "make all" calls in the mbsystem directory because it depends
+on Calcomp related libraries not distributed with the MB-System.
 
 "Supported" Platforms:
 ----------------------
