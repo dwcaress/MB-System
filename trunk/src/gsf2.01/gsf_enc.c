@@ -58,6 +58,10 @@
  * jsb          12/29/98  Added support for Simrad em3000 series sonar systems.
  * wkm          3-30-99   Added EncodeCmpSassSpecific to deal with CMP SASS data.
  * wkm          8-02-99   Updated EncodeCmpSassSpecific to include lntens (heave) with CMP SASS data.
+ * bac          10-24-00  Updated EncodeEM3Specific to include data fields from updated
+ *                        EM series runtime parameter datagram.
+ * bac          07-18-01  Removed the useage of C++ reserved words "class" and "operator".
+ * jsb          01-19-02  Added support for Simrad EM120, and removed references to unsued variables.
  *
  * Classification : Unclassified
  *
@@ -74,7 +78,7 @@
 
 /* rely on the network type definitions of (u_short, and u_long) */
 #include <sys/types.h>
-#ifndef __WINDOWS__
+#ifndef WIN32
 #include <netinet/in.h>
 #else
 #include <winsock.h>
@@ -83,11 +87,6 @@
 /* gsf library interface description */
 #include "gsf.h"
 #include "gsf_enc.h"
-
-/* Static global data for this module */
-static int      last_depth_error_sum[GSF_MAX_OPEN_FILES];
-static int      last_across_track_error_sum[GSF_MAX_OPEN_FILES];
-static int      last_along_track_error_sum[GSF_MAX_OPEN_FILES];
 
 /* Global external data defined in this module */
 extern int      gsfError;                               /* defined in gsf.c */
@@ -421,7 +420,6 @@ EncodeBDBSpecific(unsigned char *sptr, gsfSBSensorSpecific * sdata)
 {
     unsigned char  *p = sptr;
     gsfuLong        ltemp;
-    gsfuShort       stemp;
 
     /* Next four byte integer contains the the document number */
     ltemp = htonl((gsfuLong) (sdata->gsfBDBSpecific.doc_no));
@@ -433,7 +431,7 @@ EncodeBDBSpecific(unsigned char *sptr, gsfSBSensorSpecific * sdata)
     p += 1;
 
     /* Next byte contains the classification flag */
-    *p = (unsigned char) sdata->gsfBDBSpecific.class;
+    *p = (unsigned char) sdata->gsfBDBSpecific.classification;
     p += 1;
 
     /* Next byte contains the track adjustment flag */
@@ -517,14 +515,9 @@ EncodeNOSHDBSpecific(unsigned char *sptr, gsfSBSensorSpecific * sdata)
 int
 gsfEncodeSinglebeam(unsigned char *sptr, gsfSingleBeamPing * ping)
 {
-    gsfsShort       signed_short;
-    gsfsLong        signed_int;
     gsfuLong        ltemp;
     gsfuShort       stemp;
     int             sensor_size = 0;
-    int             ret;
-    int             i;
-    double          error_sum;
     double          dtemp;
     unsigned char  *p = sptr;
     unsigned char  *temp_ptr;
@@ -776,8 +769,6 @@ gsfEncodeSwathBathymetryPing(unsigned char *sptr, gsfSwathBathyPing * ping, GSF_
     gsfuShort       stemp;
     int             sensor_size = 0;
     int             ret;
-    int             i;
-    double          error_sum;
     double          dtemp;
     unsigned char  *p = sptr;
     unsigned char  *temp_ptr;
@@ -1325,14 +1316,9 @@ gsfEncodeSwathBathymetryPing(unsigned char *sptr, gsfSwathBathyPing * ping, GSF_
             break;
 
         case (GSF_SWATH_BATHY_SUBRECORD_EM3000_SPECIFIC):
-            sensor_size = EncodeEM3Specific(p, &ping->sensor_data, ft);
-            break;
-
         case (GSF_SWATH_BATHY_SUBRECORD_EM1002_SPECIFIC):
-            sensor_size = EncodeEM3Specific(p, &ping->sensor_data, ft);
-            break;
-
         case (GSF_SWATH_BATHY_SUBRECORD_EM300_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_EM120_SPECIFIC):
             sensor_size = EncodeEM3Specific(p, &ping->sensor_data, ft);
             break;
 
@@ -1341,7 +1327,7 @@ gsfEncodeSwathBathymetryPing(unsigned char *sptr, gsfSwathBathyPing * ping, GSF_
             return (-1);
     }
 
-    /*  Identifier has sensor specific id in first byte, and size in the
+   /*  Identifier has sensor specific id in first byte, and size in the
     *  remaining three bytes
     */
     ltemp = ping->sensor_id << 24;
@@ -3079,8 +3065,8 @@ EncodeEM3Specific(unsigned char *sptr, gsfSensorSpecific *sdata, GSF_FILE_TABLE 
         *p = sdata->gsfEM3Specific.run_time[0].ssv_source;
         p += 1;
 
-        /* The next two byte value contains the maximum swath width */
-        stemp = htons(sdata->gsfEM3Specific.run_time[0].swath_width);
+        /* The next two byte value contains the maximum port swath width */
+        stemp = htons(sdata->gsfEM3Specific.run_time[0].port_swath_width);
         memcpy(p, &stemp, 2);
         p += 2;
 
@@ -3088,17 +3074,26 @@ EncodeEM3Specific(unsigned char *sptr, gsfSensorSpecific *sdata, GSF_FILE_TABLE 
         *p = (unsigned char) sdata->gsfEM3Specific.run_time[0].beam_spacing;
         p += 1;
 
-        /* The next one byte value contains the coverage sector */
-        *p = (unsigned char) sdata->gsfEM3Specific.run_time[0].coverage_sector;
+        /* The next one byte value contains the port coverage sector */
+        *p = (unsigned char) sdata->gsfEM3Specific.run_time[0].port_coverage_sector;
         p += 1;
 
         /* The next one byte value contains the yaw and pitch stabilization mode */
         *p = (unsigned char) sdata->gsfEM3Specific.run_time[0].stabilization;
         p += 1;
 
-        /* The next four bytes are reserved for future use */
-        memset(p, 0, 4);
-        p += 4;
+        /* The next one byte value contains the starboard coverage sector */
+        *p = (unsigned char) sdata->gsfEM3Specific.run_time[0].stbd_coverage_sector;
+        p += 1;
+
+        /* The next two byte value contains the maximum starboard swath width */
+        stemp = htons(sdata->gsfEM3Specific.run_time[0].stbd_swath_width);
+        memcpy(p, &stemp, 2);
+        p += 2;
+
+        /* The next one byte value contains the HiLo frequency absorption coefficient ratio */
+        *p = (unsigned char) sdata->gsfEM3Specific.run_time[0].hilo_freq_absorp_ratio;
+        p += 1;
 
         /* The next four bytes are reserved for future use */
         memset(p, 0, 4);
@@ -3202,8 +3197,8 @@ EncodeEM3Specific(unsigned char *sptr, gsfSensorSpecific *sdata, GSF_FILE_TABLE 
             *p = sdata->gsfEM3Specific.run_time[1].ssv_source;
             p += 1;
 
-            /* The next two byte value contains the maximum swath width */
-            stemp = htons(sdata->gsfEM3Specific.run_time[1].swath_width);
+            /* The next two byte value contains the maximum port swath width */
+            stemp = htons(sdata->gsfEM3Specific.run_time[1].port_swath_width);
             memcpy(p, &stemp, 2);
             p += 2;
 
@@ -3211,17 +3206,26 @@ EncodeEM3Specific(unsigned char *sptr, gsfSensorSpecific *sdata, GSF_FILE_TABLE 
             *p = (unsigned char) sdata->gsfEM3Specific.run_time[1].beam_spacing;
             p += 1;
 
-            /* The next one byte value contains the coverage sector */
-            *p = (unsigned char) sdata->gsfEM3Specific.run_time[1].coverage_sector;
+            /* The next one byte value contains the port coverage sector */
+            *p = (unsigned char) sdata->gsfEM3Specific.run_time[1].port_coverage_sector;
             p += 1;
 
             /* The next one byte value contains the yaw and pitch stabilization mode */
             *p = (unsigned char) sdata->gsfEM3Specific.run_time[1].stabilization;
             p += 1;
 
-            /* The next four bytes are reserved for future use */
-            memset(p, 0, 4);
-            p += 4;
+            /* The next one byte value contains the starboard coverage sector */
+            *p = (unsigned char) sdata->gsfEM3Specific.run_time[1].stbd_coverage_sector;
+            p += 1;
+
+            /* The next two byte value contains the maximum starboard swath width */
+            stemp = htons(sdata->gsfEM3Specific.run_time[1].stbd_swath_width);
+            memcpy(p, &stemp, 2);
+            p += 2;
+
+            /* The next one byte value contains the HiLo frequency absorption coefficient ratio */
+            *p = (unsigned char) sdata->gsfEM3Specific.run_time[1].hilo_freq_absorp_ratio;
+            p += 1;
 
             /* The next four bytes are reserved for future use */
             memset(p, 0, 4);
@@ -3502,7 +3506,6 @@ gsfEncodeComment(unsigned char *sptr, gsfComment * comment)
 {
     unsigned char  *p = sptr;
     gsfuLong        ltemp;
-    int             len;
 
     /* First four byte integer contains the seconds portion of the time
     *  the operator comment was made.
@@ -3580,13 +3583,13 @@ gsfEncodeHistory(unsigned char *sptr, gsfHistory * history)
     p += len;
 
     /* Next two byte integer contains the size of the of operator field  */
-    len = strlen(history->operator) + 1;
+    len = strlen(history->operator_name) + 1;
     stemp = htons(len);
     memcpy(p, &stemp, 2);
     p += 2;
 
     /* Next "len" bytes contains the name of the operator who processed this data */
-    memcpy(p, history->operator, len);
+    memcpy(p, history->operator_name, len);
     p += len;
 
     /* Next two byte integer contains the size of the command line field */
