@@ -1,12 +1,14 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	4/8/93
- *    $Id: mbedit_prog.c,v 4.29 2000-09-08 00:29:20 caress Exp $
+ *    $Id: mbedit_prog.c,v 4.30 2000-09-30 06:58:28 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 1995, 1997 by 
- *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
- *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
- *    Lamont-Doherty Earth Observatory
- *    Palisades, NY  10964
+ *    Copyright (c) 1993, 1994, 1995, 1997, 2000 by
+ *    David W. Caress (caress@mbari.org)
+ *      Monterey Bay Aquarium Research Institute
+ *      Moss Landing, CA 95039
+ *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Lamont-Doherty Earth Observatory
+ *      Palisades, NY 10964
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
@@ -24,6 +26,9 @@
  * Date:	March 28, 1997  GUI recast
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.29  2000/09/08  00:29:20  caress
+ * Revision of 7 September 2000.
+ *
  * Revision 4.28  2000/03/16  00:35:40  caress
  * Added mode to output edit save file only.
  *
@@ -237,7 +242,7 @@ struct mbedit_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbedit_prog.c,v 4.29 2000-09-08 00:29:20 caress Exp $";
+static char rcs_id[] = "$Id: mbedit_prog.c,v 4.30 2000-09-30 06:58:28 caress Exp $";
 static char program_name[] = "MBedit";
 static char help_message[] =  
 "MBedit is an interactive editor used to identify and flag\n\

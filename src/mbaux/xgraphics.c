@@ -1,14 +1,14 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	xgraphics.c	8/3/94
- *    $Id: xgraphics.c,v 4.4 1999-12-29 00:59:34 caress Exp $
+ *    $Id: xgraphics.c,v 4.5 2000-09-30 06:54:58 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 1999 by 
- *    D. W. Caress (caress@mbari.org)
+ *    Copyright (c) 1993, 1994, 1999, 2000 by
+ *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
- *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
+ *    and Dale N. Chayes (dale@ldeo.columbia.edu)
  *      Lamont-Doherty Earth Observatory
- *      Palisades, NY  10964
+ *      Palisades, NY 10964
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
@@ -24,6 +24,9 @@
  * Date:	August 3, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.4  1999/12/29  00:59:34  caress
+ * Release 4.6.8
+ *
  * Revision 4.3  1998/10/05  17:45:32  caress
  * MB-System version 4.6beta
  *
@@ -82,7 +85,7 @@ Window	can_xid;
 int	*can_bounds;
 char	*fontname;
 {
-static char rcs_id[]="$Id: xgraphics.c,v 4.4 1999-12-29 00:59:34 caress Exp $";
+static char rcs_id[]="$Id: xgraphics.c,v 4.5 2000-09-30 06:54:58 caress Exp $";
 	/* local variables */
 	struct xg_graphic *graphic;
 	XGCValues gc_val;
