@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	install_makefiles	5/20/94
-#    $Id: install_makefiles,v 5.14 2004-10-06 22:06:32 caress Exp $
+#    $Id: install_makefiles,v 5.15 2004-10-18 03:32:55 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 1996, 1997, 2001, 2002, 2003 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -15,7 +15,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #--------------------------------------------------------------------
 #
 # Command:
-#   install_makefiles
+#   install_makefiles [-Ppreset]
 #
 # Purpose:
 #   Perl shellscript to create makefiles appropriate to a particular
@@ -31,6 +31,19 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   important libraries and include files are accurate and so that
 #   the compile and link flags are correct.
 #
+#   A few preset variable configurations are defined and can be
+#   specified using the -P option. These include:
+#	macosxfink 	-install on MacOs X using fink
+#				- assumes installation in /sw
+#				- assumes use of Apple's X11
+#				- assumes netCDF, GMT, and OpenMotif installe
+#					using fink
+#       macosxusrlocal - install manually on MacOs X 
+#				- assumes installation in /usr/local/mbsystem
+#				- assumes use of Apple's X11
+#				- assumes netCDF, GMT, and OpenMotif installe
+#					using fink
+#
 # Usage:
 #   install_makefiles
 #
@@ -41,10 +54,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   May 20, 1994
 #
 # Version:
-#   $Id: install_makefiles,v 5.14 2004-10-06 22:06:32 caress Exp $
+#   $Id: install_makefiles,v 5.15 2004-10-18 03:32:55 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.14  2004/10/06 22:06:32  caress
+#   Release 5.0.5
+#
 #   Revision 5.13  2004/05/21 23:06:29  caress
 #   Supporting GMT 4.0
 #
@@ -365,24 +381,86 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #	$CFLAGS = "-g -I/usr/X11R6/include";
 #	$LFLAGS = "-Wl -lm -bind_at_load";
 #
-# **** EDIT THE PARAMETERS HERE ****
-# Set the environment parameters:
-$MBSYSTEM_HOME = "/Users/caress/sandbox/mbsystem";
-$OS = "DARWIN";
-$CC = "cc";
-$BYTESWAPPED = "NO";
-$GRAPHICAL = "YES";
-$MOTIFINCDIR = "/sw/include";
-$MOTIFLIBS = "-L/sw/lib -L/usr/X11R6/lib -lXm -lXt -lX11";
-$OPENGLLIBS = "-lGLw -lGLU -lGL";
-$GMTLIBDIR = "/usr/local/gmt4/lib";
-$GMTINCDIR = "/usr/local/gmt4/include";
-$NETCDFLIBDIR = "/sw/lib";
-$NETCDFINCDIR = "/sw/include";
-$LEVITUS = "$MBSYSTEM_HOME/share/LevitusAnnual82.dat";
-$PROJECTIONS = "$MBSYSTEM_HOME/share/Projections.dat";
-$CFLAGS = "-g -I/usr/X11R6/include";
-$LFLAGS = "-Wl -lm -bind_at_load";
+# **********************************
+
+# Deal with command line arguments
+$command_line = "@ARGV";
+&MBGetopts('P:p:');
+$preset = 	($opt_P || $opt_p);
+
+# USE APPROPRIATE PRESET CONFIGURATION
+# 
+# Preset configuration for MacOs X when building through fink
+if ($preset eq "macosxfink")
+	{
+	print "\nUsing preset configuration for MacOs X by fink in /sw...\n";
+	$FINKPREFIX = "/sw";
+	$GMTVERSION = "3.4";
+	$MBSYSTEM_HOME = "$FINKPREFIX";
+	$OS = "DARWIN";
+	$CC = "cc";
+	$BYTESWAPPED = "NO";
+	$GRAPHICAL = "YES";
+	$MOTIFINCDIR = "$FINKPREFIX/include";
+	$MOTIFLIBS = "-L$FINKPREFIX/lib -L/usr/X11R6/lib -lXm -lXt -lX11";
+	$OPENGLLIBS = "-lGLw -lGLU -lGL";
+	$GMTLIBDIR = "$FINKPREFIX/lib";
+	$GMTINCDIR = "$FINKPREFIX/include";
+	$NETCDFLIBDIR = "$FINKPREFIX/lib";
+	$NETCDFINCDIR = "$FINKPREFIX/include";
+	$LEVITUS = "$MBSYSTEM_HOME/share/mbsystem/LevitusAnnual82.dat";
+	$PROJECTIONS = "$MBSYSTEM_HOME/share/mbsystem/Projections.dat";
+	$CFLAGS = "-O3 -funroll-loops -fexpensive-optimizations -I/usr/X11R6/include -Wall -Wimplicit -pedantic -W -Wstrict-prototypes -Wredundant-decls  -Wimplicit-int -Wimplicit-function-declaration -Wnested-externs";
+	$LFLAGS = "-Wl -lm -bind_at_load";
+	}
+# 
+# Preset configuration for MacOs X when building in /usr/local
+#       assumes that GMT, netCDF, and OpenMotif are installed using fink
+elsif ($preset eq "macosxusrlocal")
+	{
+	print "\nUsing preset configuration for MacOs X in /usr/local/...\n";
+	$FINKPREFIX = "/sw";
+	$MBSYSTEM_HOME = "/usr/local/mbsystem";
+	$OS = "DARWIN";
+	$CC = "cc";
+	$BYTESWAPPED = "NO";
+	$GRAPHICAL = "YES";
+	$MOTIFINCDIR = "$FINKPREFIX/include";
+	$MOTIFLIBS = "-L$FINKPREFIX/lib -L/usr/X11R6/lib -lXm -lXt -lX11";
+	$OPENGLLIBS = "-lGLw -lGLU -lGL";
+	$GMTLIBDIR = "$FINKPREFIX/lib";
+	$GMTINCDIR = "$FINKPREFIX/include";
+	$NETCDFLIBDIR = "$FINKPREFIX/lib";
+	$NETCDFINCDIR = "$FINKPREFIX/include";
+	$LEVITUS = "$MBSYSTEM_HOME/share/LevitusAnnual82.dat";
+	$PROJECTIONS = "$MBSYSTEM_HOME/share/Projections.dat";
+	$CFLAGS = "-g -I/usr/X11R6/include";
+	$LFLAGS = "-Wl -lm -bind_at_load";
+	}
+	
+# EDIT THE PARAMETERS HERE IF NO APPROPRIATE PRESET CONFIGURATION IS DEFINED
+# Set the configuration parameters manually:
+else
+	{
+	print "\nUsing manually defined configuration...\n";
+	$MBSYSTEM_HOME = "/Users/caress/sandbox/mbsystem";
+	$OS = "DARWIN";
+	$CC = "cc";
+	$BYTESWAPPED = "NO";
+	$GRAPHICAL = "YES";
+	$MOTIFINCDIR = "/sw/include";
+	$MOTIFLIBS = "-L/sw/lib -L/usr/X11R6/lib -lXm -lXt -lX11";
+	$OPENGLLIBS = "-lGLw -lGLU -lGL";
+	$GMTLIBDIR = "/usr/local/gmt4/lib";
+	$GMTINCDIR = "/usr/local/gmt4/include";
+	$NETCDFLIBDIR = "/sw/lib";
+	$NETCDFINCDIR = "/sw/include";
+	$LEVITUS = "$MBSYSTEM_HOME/share/LevitusAnnual82.dat";
+	$PROJECTIONS = "$MBSYSTEM_HOME/share/Projections.dat";
+	$CFLAGS = "-g -I/usr/X11R6/include";
+	$LFLAGS = "-Wl -lm -bind_at_load";
+	}
+
 #
 # **** LEAVE EVERYTHING ELSE BELOW ALONE ****
 
@@ -658,5 +736,95 @@ while (@files)
 	}
 
 
-die "\nAll done!\n";
+print "\nAll done!\n";
+exit 0;
+
+#-----------------------------------------------------------------------
+# This version of Getopts has been augmented to support multiple
+# calls to the same option. If an arg in argumentative is followed
+# by "+" rather than ":",  then the corresponding scalar will
+# be concatenated rather than overwritten by multiple calls to
+# the same arg.
+#
+# Usage:
+#      do Getopts('a:b+c'); # -a takes arg, -b concatenates args,  
+#			    # -c does not take arg. Sets opt_* as a
+#                           # side effect.
+
+sub MBGetopts {
+    local($argumentative) = @_;
+    local(@args,$_,$first,$rest);
+    local($errs) = 0;
+    local($[) = 0;
+
+    @args = split( / */, $argumentative );
+    while(@ARGV && ($_ = $ARGV[0]) =~ /^-(.)(.*)/) {
+	($first,$rest) = ($1,$2);
+	$pos = index($argumentative,$first);
+	if($pos >= $[) {
+	    if($args[$pos+1] eq ':') {
+		shift(@ARGV);
+		if($rest eq '') {
+		    ++$errs unless @ARGV;
+		    $rest = shift(@ARGV);
+		}
+		eval "\$opt_$first = \$rest;";
+		eval "\$flg_$first = 1;";
+	    }
+	    elsif($args[$pos+1] eq '+') {
+		shift(@ARGV);
+		if($rest eq '') {
+		    ++$errs unless @ARGV;
+		    $rest = shift(@ARGV);
+		}
+		if (eval "\$opt_$first") {
+		    eval "\$opt_$first = \$opt_$first 
+				. \":\" . \$rest;";
+		}
+		else {
+		    eval "\$opt_$first = \$rest;";
+		}
+		eval "\$flg_$first = 1;";
+	    }
+	    elsif($args[$pos+1] eq '%') {
+		shift(@ARGV);
+		if($rest ne '') {
+		    eval "\$opt_$first = \$rest;";
+		}
+		else {
+		    $rest = $ARGV[0];
+		    ($one) = $rest =~ /^-(.).*/;
+		    $pos = index($argumentative,$one);
+		    if(!$one || $pos < $[) {
+			eval "\$opt_$first = \$rest;";
+			shift(@ARGV);
+		    }
+		}
+		eval "\$flg_$first = 1;";
+	    }
+	    else {
+		eval "\$opt_$first = 1";
+		eval "\$flg_$first = 1;";
+		if($rest eq '') {
+		    shift(@ARGV);
+		}
+		else {
+		    $ARGV[0] = "-$rest";
+		}
+	    }
+	}
+	else {
+	    print STDERR "Unknown option: $first\n";
+	    ++$errs;
+	    if($rest ne '') {
+		$ARGV[0] = "-$rest";
+	    }
+	    else {
+		shift(@ARGV);
+	    }
+	}
+    }
+    $errs == 0;
+}
+#-----------------------------------------------------------------------
 
