@@ -56,11 +56,11 @@ Default: \fIlonflip\fP = 0.
 .TP
 .B \fB-M\fInavformat\fP
 Defines the format of the navigation data to be read.  Currently,
-seven formats are allowed, all consisting of ascii records:
+eight formats are allowed:
 
 \fInavformat\fP = 1:  
 .br
-This format consists of lines of the form:
+This format consists of ascii lines of the form:
  	time_d lon lat
 .br
 where time_d is decimal unix time in seconds since
@@ -74,7 +74,7 @@ with the \fB-O\fP\fIMXY\fP option. Some representative lines are:
 
 \fInavformat\fP = 2:  
 .br
-This format consists of lines of the form:
+This format consists of ascii lines of the form:
  	year mon day hour min sec lon lat
 .br
 where lon and lat are in decimal degrees.
@@ -87,7 +87,7 @@ with the \fB-O\fP\fItXY\fP option. Some representative lines are:
 
 \fInavformat\fP = 3:  
 .br
-This format consists of lines of the form:
+This format consists of ascii lines of the form:
  	year jday hour min sec lon lat
 .br
 where jday is the julian day of the year and 
@@ -101,7 +101,7 @@ with the \fB-O\fP\fIJXY\fP option. Some representative lines are:
 
 \fInavformat\fP = 4:  
 .br
-This format consists of lines of the form:
+This format consists of ascii lines of the form:
  	year jday daymin sec lon lat
 .br
 where jday is the julian day of the year, daymin is the minute
@@ -191,6 +191,13 @@ GGA (GPS Position):
            |         | +- Latitude decimal minutes
            |         +- Latitude degrees 
            +- UTC time as in ZDA sentence
+
+\fInavformat\fP = 8:  
+.br
+This is the Simrad 90 Position datagram format. This
+type of navigation typically derives from the *.pos
+files created by the Simrad Mermaid or Merlin data
+logging packages (when run in the parallel file mode).
  
  Default: \fInavformat\fP = 5.
 .TP
