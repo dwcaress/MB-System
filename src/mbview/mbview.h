@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbview.h	10/9/2002
- *    $Id: mbview.h,v 5.4 2004-07-27 19:50:28 caress Exp $
+ *    $Id: mbview.h,v 5.5 2004-09-16 21:44:40 caress Exp $
  *
  *    Copyright (c) 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -18,6 +18,9 @@
  * Date:	October 10,  2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2004/07/27 19:50:28  caress
+ * Improving route planning capability.
+ *
  * Revision 5.3  2004/05/21 23:40:40  caress
  * Moved to new version of BX GUI builder
  *
@@ -162,6 +165,11 @@
 #define MBV_ROUTE_OFF			0
 #define MBV_ROUTE_VIEW			1
 #define MBV_ROUTE_EDIT			2
+#define MBV_ROUTE_WAYPOINT_NONE		0
+#define MBV_ROUTE_WAYPOINT_SIMPLE	1
+#define MBV_ROUTE_WAYPOINT_TRANSIT	2
+#define MBV_ROUTE_WAYPOINT_STARTLINE	3
+#define MBV_ROUTE_WAYPOINT_ENDLINE	4
 
 /* nav defines */
 #define MBV_NAV_OFF			0
@@ -266,6 +274,7 @@ struct mbview_route_struct {
 	mb_path	name;
 	int	npoints;
 	int	npoints_alloc;
+	int	*waypoint;
 	struct mbview_point_struct *points;
 	struct mbview_linesegment_struct *segments;
 	};
@@ -584,11 +593,26 @@ int mbview_getroutepointcount(int verbose, int instance,
 			int	*npoint,
 			int	*nintpoint,
 			int *error);
+int mbview_getroutepointcount(int verbose, int instance,
+			int	route,
+			int	*npoint,
+			int	*nintpoint,
+			int *error);
+int mbview_getrouteinfo(int verbose, int instance,
+			int working_route, 
+			int *nroutewaypoint, 
+			int *nroutpoint, 
+			char *routename, 
+			int *routecolor, 
+			int *routesize, 
+			double *routedistancelateral, 
+			double *routedistancetopo, 
+			int *error);
 int mbview_allocroutearrays(int verbose, 
 			int	npointtotal,
 			double	**routelon,
 			double	**routelat,
-			int	**interpolated,
+			int	**waypoint,
 			double	**routetopo,
 			double	**routebearing,
 			double	**distlateral,
@@ -598,7 +622,7 @@ int mbview_allocroutearrays(int verbose,
 int mbview_freeroutearrays(int verbose,
 			double	**routelon,
 			double	**routelat,
-			int	**interpolated,
+			int	**waypoint,
 			double	**routetopo,
 			double	**routebearing,
 			double	**distlateral,
@@ -609,16 +633,21 @@ int mbview_addroute(int verbose, int instance,
 			int	npoint,
 			double	*routelon,
 			double	*routelat,
+			int	*waypoint,
 			int	routecolor,
 			int	routesize,
 			mb_path	routename,
+			int 	*iroute,
+			int *error);
+int mbview_deleteroute(int verbose, int instance,
+			int	iroute,
 			int *error);
 int mbview_getroute(int verbose, int instance,
 			int	route,
 			int	*npointtotal,
 			double	*routelon,
 			double	*routelat,
-			int	*interpolated,
+			int	*waypoint,
 			double	*routetopo,
 			double	*routebearing,
 			double	*distlateral,

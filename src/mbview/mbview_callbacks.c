@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbview_callbacks.c	10/7/2002
- *    $Id: mbview_callbacks.c,v 5.3 2004-05-21 23:40:39 caress Exp $
+ *    $Id: mbview_callbacks.c,v 5.4 2004-09-16 21:44:39 caress Exp $
  *
  *    Copyright (c) 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -18,6 +18,9 @@
  * Date:	October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2004/05/21 23:40:39  caress
+ * Moved to new version of BX GUI builder
+ *
  * Revision 5.2  2004/02/24 22:52:28  caress
  * Added spherical projection to MBview.
  *
@@ -99,7 +102,7 @@ Cardinal 	ac;
 Arg      	args[256];
 char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_callbacks.c,v 5.3 2004-05-21 23:40:39 caress Exp $";
+static char rcs_id[]="$Id: mbview_callbacks.c,v 5.4 2004-09-16 21:44:39 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 
@@ -3614,7 +3617,9 @@ fprintf(stderr,"\ndo_mbview_dismiss instance:%d\n", instance);
 	data = &(view->data);
 
 	/* destroy the widgets for this instance  */
-	mbview_destroy(mbv_verbose, instance, MB_YES, &error);
+	if (data->active == MB_YES)
+		mbview_destroy(mbv_verbose, instance, MB_YES, &error);
+fprintf(stderr,"done with do_mbview_dismiss instance:%d\n", instance);
 }
 
 /*------------------------------------------------------------------------------*/
@@ -3640,7 +3645,9 @@ fprintf(stderr,"\ndo_mbview_goaway instance:%d\n", instance);
 	data = &(view->data);
 
 	/* destroy the widgets for this instance  */
-	mbview_destroy(mbv_verbose, instance, MB_NO, &error);
+	if (data->active == MB_YES)
+		mbview_destroy(mbv_verbose, instance, MB_NO, &error);
+fprintf(stderr,"done with do_mbview_goaway instance:%d\n", instance);
 }
 /*------------------------------------------------------------------------------*/
 
@@ -3693,103 +3700,103 @@ int mbview_destroy(int verbose, int instance, int destroywidgets, int *error)
 	    data->active = MB_NO;
 	    view->init = MBV_WINDOW_NULL;
 	    mbv_ninstance--;
-	    }
 	
-	/* deallocate memory */
+	    /* deallocate memory */
 fprintf(stderr, "Freeing arrays for mbview instance:%d\n", instance);
-    	if (status == MB_SUCCESS 
-		&& data->primary_data != NULL)
-    	status = mb_free(mbv_verbose, &data->primary_data, error);
-    	if (status == MB_SUCCESS 
-		&& data->primary_x != NULL)
-	status = mb_free(mbv_verbose, &data->primary_x, error);
-    	if (status == MB_SUCCESS 
-		&& data->primary_y != NULL)
-    	status = mb_free(mbv_verbose, &data->primary_y, error);
-    	if (status == MB_SUCCESS 
-		&& data->primary_z != NULL)
-    	status = mb_free(mbv_verbose, &data->primary_z,error);
-    	if (status == MB_SUCCESS 
-		&& data->primary_dzdx != NULL)
-    	status = mb_free(mbv_verbose, &data->primary_dzdx, error);
-    	if (status == MB_SUCCESS 
-		&& data->primary_dzdy != NULL)
-    	status = mb_free(mbv_verbose, &data->primary_dzdy, error);
-    	if (status == MB_SUCCESS 
-		&& data->primary_r != NULL)
-    	status = mb_free(mbv_verbose, &data->primary_r, error);
-    	if (status == MB_SUCCESS 
-		&& data->primary_g != NULL)
-    	status = mb_free(mbv_verbose, &data->primary_g, error);
-     	if (status == MB_SUCCESS 
-		&& data->primary_b != NULL)
-   	status = mb_free(mbv_verbose, &data->primary_b, error);
-     	if (status == MB_SUCCESS 
-		&& data->primary_stat_color != NULL)
-   	status = mb_free(mbv_verbose, &data->primary_stat_color, error);
-     	if (status == MB_SUCCESS 
-		&& data->primary_stat_z != NULL)
-   	status = mb_free(mbv_verbose, &data->primary_stat_z, error);
-    	if (status == MB_SUCCESS 
-		&& data->secondary_data != NULL)
-    	status = mb_free(mbv_verbose, &data->secondary_data, error);
-	if (status == MB_SUCCESS
-		&& data->pick.segment.nls_alloc != 0
-		&& data->pick.segment.lspoints != NULL)
-		status = mb_free(mbv_verbose, &data->pick.segment.lspoints, error);
-	for (i=0;i<4;i++)
-		{
-     		if (status == MB_SUCCESS
-		&& data->pick.xsegments[i].lspoints != 0
-		&& data->pick.xsegments[i].lspoints != NULL)
-   		status = mb_free(mbv_verbose, &data->pick.xsegments[i].lspoints, error);
-		}
-     	if (status == MB_SUCCESS
-		&& data->area.segment.lspoints != 0
-		&& data->area.segment.lspoints != NULL)
-   		status = mb_free(mbv_verbose, &data->area.segment.lspoints, error);
-	for (i=0;i<4;i++)
-		{
-     		if (status == MB_SUCCESS
-		&& data->area.segments[i].lspoints != 0
-		&& data->area.segments[i].lspoints != NULL)
-   		status = mb_free(mbv_verbose, &data->area.segments[i].lspoints, error);
-		}
-	for (i=0;i<4;i++)
-		{
-     		if (status == MB_SUCCESS
-		&& data->region.segments[i].lspoints != 0
-		&& data->region.segments[i].lspoints != NULL)
-   		status = mb_free(mbv_verbose, &data->region.segments[i].lspoints, error);
-		}
-	if (status == MB_SUCCESS
-		&& data->navpick.segment.nls_alloc != 0
-		&& data->navpick.segment.lspoints != NULL)
-		status = mb_free(mbv_verbose, &data->navpick.segment.lspoints, error);
-	for (i=0;i<4;i++)
-		{
-     		if (status == MB_SUCCESS
-		&& data->navpick.xsegments[i].lspoints != 0
-		&& data->navpick.xsegments[i].lspoints != NULL)
-   		status = mb_free(mbv_verbose, &data->navpick.xsegments[i].lspoints, error);
-		}
+    	    if (status == MB_SUCCESS 
+		    && data->primary_data != NULL)
+    	    status = mb_free(mbv_verbose, &data->primary_data, error);
+    	    if (status == MB_SUCCESS 
+		    && data->primary_x != NULL)
+	    status = mb_free(mbv_verbose, &data->primary_x, error);
+    	    if (status == MB_SUCCESS 
+		    && data->primary_y != NULL)
+    	    status = mb_free(mbv_verbose, &data->primary_y, error);
+    	    if (status == MB_SUCCESS 
+		    && data->primary_z != NULL)
+    	    status = mb_free(mbv_verbose, &data->primary_z,error);
+    	    if (status == MB_SUCCESS 
+		    && data->primary_dzdx != NULL)
+    	    status = mb_free(mbv_verbose, &data->primary_dzdx, error);
+    	    if (status == MB_SUCCESS 
+		    && data->primary_dzdy != NULL)
+    	    status = mb_free(mbv_verbose, &data->primary_dzdy, error);
+    	    if (status == MB_SUCCESS 
+		    && data->primary_r != NULL)
+    	    status = mb_free(mbv_verbose, &data->primary_r, error);
+    	    if (status == MB_SUCCESS 
+		    && data->primary_g != NULL)
+    	    status = mb_free(mbv_verbose, &data->primary_g, error);
+     	    if (status == MB_SUCCESS 
+		    && data->primary_b != NULL)
+   	    status = mb_free(mbv_verbose, &data->primary_b, error);
+     	    if (status == MB_SUCCESS 
+		    && data->primary_stat_color != NULL)
+   	    status = mb_free(mbv_verbose, &data->primary_stat_color, error);
+     	    if (status == MB_SUCCESS 
+		    && data->primary_stat_z != NULL)
+   	    status = mb_free(mbv_verbose, &data->primary_stat_z, error);
+    	    if (status == MB_SUCCESS 
+		    && data->secondary_data != NULL)
+    	    status = mb_free(mbv_verbose, &data->secondary_data, error);
+	    if (status == MB_SUCCESS
+		    && data->pick.segment.nls_alloc != 0
+		    && data->pick.segment.lspoints != NULL)
+		    status = mb_free(mbv_verbose, &data->pick.segment.lspoints, error);
+	    for (i=0;i<4;i++)
+		    {
+     		    if (status == MB_SUCCESS
+		    && data->pick.xsegments[i].lspoints != 0
+		    && data->pick.xsegments[i].lspoints != NULL)
+   		    status = mb_free(mbv_verbose, &data->pick.xsegments[i].lspoints, error);
+		    }
+     	    if (status == MB_SUCCESS
+		    && data->area.segment.lspoints != 0
+		    && data->area.segment.lspoints != NULL)
+   		    status = mb_free(mbv_verbose, &data->area.segment.lspoints, error);
+	    for (i=0;i<4;i++)
+		    {
+     		    if (status == MB_SUCCESS
+		    && data->area.segments[i].lspoints != 0
+		    && data->area.segments[i].lspoints != NULL)
+   		    status = mb_free(mbv_verbose, &data->area.segments[i].lspoints, error);
+		    }
+	    for (i=0;i<4;i++)
+		    {
+     		    if (status == MB_SUCCESS
+		    && data->region.segments[i].lspoints != 0
+		    && data->region.segments[i].lspoints != NULL)
+   		    status = mb_free(mbv_verbose, &data->region.segments[i].lspoints, error);
+		    }
+	    if (status == MB_SUCCESS
+		    && data->navpick.segment.nls_alloc != 0
+		    && data->navpick.segment.lspoints != NULL)
+		    status = mb_free(mbv_verbose, &data->navpick.segment.lspoints, error);
+	    for (i=0;i<4;i++)
+		    {
+     		    if (status == MB_SUCCESS
+		    && data->navpick.xsegments[i].lspoints != 0
+		    && data->navpick.xsegments[i].lspoints != NULL)
+   		    status = mb_free(mbv_verbose, &data->navpick.xsegments[i].lspoints, error);
+		    }
 
-	if (status != MB_SUCCESS)
-		{
-		fprintf(stderr,"\nUnable to free memory\n");
-		fprintf(stderr,"\nProgram terminated in function <%s>\n",
-			function_name);
-		exit(0);
-		}
-	
-	/* initialize view for next use */
+	    if (status != MB_SUCCESS)
+		    {
+		    fprintf(stderr,"\nUnable to free memory\n");
+		    fprintf(stderr,"\nProgram terminated in function <%s>\n",
+			    function_name);
+		    exit(0);
+		    }
+
+	    /* initialize view for next use */
 fprintf(stderr, "Calling mbview_reset() for mbview instance:%d\n", instance);
-	mbview_reset(instance);
-	
-	/* let the calling program know */
+	    mbview_reset(instance);
+
+	    /* let the calling program know */
 fprintf(stderr, "Calling mbview_dismiss_notify function (%d) for mbview instance:%d\n",
 data->mbview_dismiss_notify, instance);
-	(data->mbview_dismiss_notify)(instance);
+	    (data->mbview_dismiss_notify)(instance);
+	    }
 	
 	/* print output debug statements */
 	if (mbv_verbose >= 2)
