@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrid.c	5/2/94
- *    $Id: mbgrid.c,v 5.8 2002-09-19 00:28:12 caress Exp $
+ *    $Id: mbgrid.c,v 5.9 2002-09-20 22:30:45 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -38,6 +38,9 @@
  * Rererewrite:	January 2, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2002/09/19 00:28:12  caress
+ * Release 5.0.beta23
+ *
  * Revision 5.7  2002/08/02 01:00:25  caress
  * Release 5.0.beta22
  *
@@ -318,7 +321,7 @@ double erfcc();
 double mbgrid_erf();
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbgrid.c,v 5.8 2002-09-19 00:28:12 caress Exp $";
+static char rcs_id[] = "$Id: mbgrid.c,v 5.9 2002-09-20 22:30:45 caress Exp $";
 static char program_name[] = "mbgrid";
 static char help_message[] =  "mbgrid is an utility used to grid bathymetry, amplitude, or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbgrid -Ifilelist -Oroot \
@@ -486,7 +489,10 @@ main (int argc, char **argv)
 
 	/* other variables */
 	FILE	*dfp;
-	int	i, j, k, ii, jj, n;
+	int	i, j, k, ii, jj, iii, jjj, kkk, n;
+	int	i1, i2, j1, j2;
+	double	r;
+	int	dmask[9];
 	int	kgrid, kout, kint, ib, ix, iy;
 	int	ix1, ix2, iy1, iy2;
 	int	nscan;
@@ -2991,7 +2997,7 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 				{
 				j = 0;
 				kgrid = i*gydim + j;
-				if (grid[kgrid] == clipvalue)
+				if (grid[kgrid] >= clipvalue)
 					{
 					sdata[ndata++] = sxmin + dx*i;
 					sdata[ndata++] = symin + dy*j;
@@ -2999,7 +3005,7 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 					}
 				j = gydim - 1;
 				kgrid = i*gydim + j;
-				if (grid[kgrid] == clipvalue)
+				if (grid[kgrid] >= clipvalue)
 					{
 					sdata[ndata++] = sxmin + dx*i;
 					sdata[ndata++] = symin + dy*j;
@@ -3010,7 +3016,7 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 				{
 				i = 0;
 				kgrid = i*gydim + j;
-				if (grid[kgrid] == clipvalue)
+				if (grid[kgrid] >= clipvalue)
 					{
 					sdata[ndata++] = sxmin + dx*i;
 					sdata[ndata++] = symin + dy*j;
@@ -3018,7 +3024,7 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 					}
 				i = gxdim - 1;
 				kgrid = i*gydim + j;
-				if (grid[kgrid] == clipvalue)
+				if (grid[kgrid] >= clipvalue)
 					{
 					sdata[ndata++] = sxmin + dx*i;
 					sdata[ndata++] = symin + dy*j;
@@ -3040,20 +3046,59 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 			&ddx,&ddy,sdata,&ndata,
 			work1,work2,work3,&cay,&clip);
 
-		/* translate the interpolation into the grid array */
+		/* translate the interpolation into the grid array 
+		    - interpolate only to fill a data gap */
 		zflag = 5.0e34;
 		for (i=0;i<gxdim;i++)
-			for (j=0;j<gydim;j++)
-				{
-				kgrid = i*gydim + j;
-				kint = i + j*gxdim;
-				if (grid[kgrid] == clipvalue 
-					&& sgrid[kint] < zflag)
+		    for (j=0;j<gydim;j++)
+			{
+			kgrid = i*gydim + j;
+			kint = i + j*gxdim;
+			num[kgrid] = MB_NO;
+			if (grid[kgrid] >= clipvalue 
+			    && sgrid[kint] < zflag)
+			    {
+			    /* initialize direction mask 
+				and bounds of search */
+			    for (ii=0;ii<9;ii++)
+				dmask[ii] = MB_NO;
+			    i1 = MAX(0, i - clip);
+			    i2 = MIN(gxdim - 1, i + clip);
+			    j1 = MAX(0, j - clip);
+			    j2 = MIN(gydim - 1, j + clip);
+				    
+			    /* loop over data within clip region */
+			    for (ii=i1;ii<=i2;ii++)
+				for (jj=j1;jj<=j2;jj++)
+				    {
+				    if (grid[ii*gydim+jj] < clipvalue)
 					{
-					grid[kgrid] = sgrid[kint];
-					nbinspline++;
+					r = sqrt((double)((ii-i)*(ii-i) + (jj-j)*(jj-j)));
+					iii = rint((ii - i)/r) + 1;
+					jjj = rint((jj - j)/r) + 1;
+					kkk = iii * 3 + jjj;
+					dmask[kkk] = MB_YES;
 					}
+				    }
+				    
+			    if ((dmask[0] && dmask[8])
+				|| (dmask[3] && dmask[5])
+				|| (dmask[6] && dmask[2])
+				|| (dmask[1] && dmask[7]))
+				num[kgrid] = MB_YES;
+			    }
+			}
+		for (i=0;i<gxdim;i++)
+		    for (j=0;j<gydim;j++)
+			{
+			kgrid = i*gydim + j;
+			kint = i + j*gxdim;
+			if (num[kgrid] == MB_YES)
+				{
+				grid[kgrid] = sgrid[kint];
+				nbinspline++;
 				}
+			}
 		mb_free(verbose,&sdata,&error);
 		mb_free(verbose,&sgrid,&error);
 		mb_free(verbose,&work1,&error);
