@@ -142,20 +142,6 @@ run.  Normally the
 name of the input grid file or grid file list is 
 used as the \fIroot\fP. 
 .TP
-.B \-P
-\fIpagesize\fP
-.br
-This option sets the size of the page the plot will be centered
-on. If the user does not set the plot scale, the plot will be
-sized as large as will fit on the designated page. If the user
-sets the plot scale such that the plot will not fit on the
-designated page, a larger page will be used.
-The supported page sizes include ANSI A, B, C, D, E,
-F, and E1, as well as most metric page sizes. See the
-COMPLETE DESCRIPTION OF OPTIONS section 
-below for a complete list of 
-the supported page sizes. The default page size is A.
-.TP
 .B \-S
 \fI[color/shade]\fP
 .br
