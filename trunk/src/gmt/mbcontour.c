@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcontour.c	6/4/93
- *    $Id: mbcontour.c,v 4.10 1995-06-05 12:41:03 caress Exp $
+ *    $Id: mbcontour.c,v 4.11 1995-08-07 17:31:39 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,10 @@
  * Date:	June 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.10  1995/06/05  12:41:03  caress
+ * Now checks navlon != navlon_old || navlat != navlat_old instead
+ * of doing &
+ *
  * Revision 4.9  1995/05/12  17:19:02  caress
  * Made exit status values consistent with Unix convention.
  * 0: ok  nonzero: error
@@ -117,7 +121,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbcontour.c,v 4.10 1995-06-05 12:41:03 caress Exp $";
+	static char rcs_id[] = "$Id: mbcontour.c,v 4.11 1995-08-07 17:31:39 caress Exp $";
 #ifdef MBCONTOURFILTER
 	static char program_name[] = "MBCONTOURFILTER";
 	static char help_message[] =  "MBCONTOURFILTER is a utility which creates a pen plot \ncontour map of multibeam swath bathymetry.  \nThe primary purpose of this program is to serve as \npart of a real-time plotting system.  The contour \nlevels and colors can be controlled \ndirectly or set implicitly using contour and color change intervals. \nContours can also be set to have ticks pointing downhill.";
@@ -125,7 +129,7 @@ char **argv;
 #else
 	static char program_name[] = "MBCONTOUR";
 	static char help_message[] =  "MBCONTOUR is a GMT compatible utility which creates a color postscript \ncontour map of multibeam swath bathymetry.  \nComplete maps are made by using MBCONTOUR in conjunction with the  \nusual GMT programs.  The contour levels and colors can be controlled \ndirectly or set implicitly using contour and color change intervals. \nContours can also be set to have ticks pointing downhill.";
-	static char usage_message[] = "mbcontour -Jparameters -Rwest/east/south/north \n\t[-Acontour_int/color_int/tick_int/label_int/tick_len/label_hgt \n\t-Btickinfo -byr/mon/day/hour/min/sec -Ccontourfile \n\t-Dtime_tick/time_annot/date_annot/time_tick_len \n\t-Eyr/mon/day/hour/min/sec \n\t-fformat -Fred/green/blue -Idatalist -K -Llonflip -M -Nnplot -O \n\t-P -ppings -U -Xx-shift -Yy-shift -Zalgorithm -#copies -V -H]";
+	static char usage_message[] = "mbcontour -Jparameters -Rwest/east/south/north \n\t[-Acontour_int/color_int/tick_int/label_int/tick_len/label_hgt \n\t-Btickinfo -byr/mon/day/hour/min/sec -Ccontourfile -ccopies \n\t-Dtime_tick/time_annot/date_annot/time_tick_len \n\t-Eyr/mon/day/hour/min/sec \n\t-fformat -Fred/green/blue -Idatalist -K -Llonflip -Nnplot -O \n\t-P -ppings -U -Xx-shift -Yy-shift -Zalgorithm -V -H]";
 #endif
 
 	extern char *optarg;
@@ -271,7 +275,7 @@ char **argv;
 	plot_triangles = MB_NO;
 
 	/* deal with mb options */
-	while ((c = getopt(argc, argv, "VvHhA:a:b:C:c:D:d:E:e:f:I:i:L:l:N:n:p:QqS:s:T:t:B:F:MJ:KOPR:UX:x:Y:y:Z:z:#:")) != -1)
+	while ((c = getopt(argc, argv, "VvHhA:a:b:C:D:d:E:e:f:I:i:L:l:N:n:p:QqS:s:T:t:B:c:F:J:KOPR:UX:x:Y:y:Z:z:")) != -1)
 	  switch (c) 
 		{
 		case 'A':
@@ -289,7 +293,6 @@ char **argv;
 			btime_i[6] = 0;
 			break;
 		case 'C':
-		case 'c':
 			sscanf (optarg,"%s", contourfile);
 			plot_contours = MB_YES;
 			set_contours = MB_YES;
