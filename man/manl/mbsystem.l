@@ -98,6 +98,8 @@ These are the current MB-system programs:
  		to another file.
  \fBmbmerge\fP:  Merges multibeam data with new 
  		navigation. 
+ \fBmbtide\fP:  Corrects multibeam bathymetry
+ 		for tide data. 
  \fBmbrollbias\fP:  Evaluate the roll bias of a 
  		multibeam system using two pieces 
  		of coincident bathymetry data 
