@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
- *    The MB-system:	mbedit.c	3.00	4/8/93
- *    $Id: mbedit.c,v 3.4 1993-11-03 19:40:34 caress Exp $
+ *    The MB-system:	mbedit.c	4/8/93
+ *    $Id: mbedit.c,v 4.0 1994-03-05 23:54:35 caress Exp $
  *
- *    Copyright (c) 1993 by 
+ *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
  *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
  *    Lamont-Doherty Earth Observatory
@@ -24,6 +24,18 @@
  * Date:	April 8, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1994/03/03  03:51:47  caress
+ * Fixed copyright message.
+ *
+ * Revision 4.0  1994/03/01  00:19:16  caress
+ * First cut at new version.
+ *
+ * Revision 3.4  1993/11/03  19:40:34  caress
+ * Changed scaling:
+ *    x-scale has larger maximum.
+ *    y-scale widget now sets vertical exageration instead
+ *      of y-scale.
+ *
  * Revision 3.3  1993/08/30  19:03:20  caress
  * Added Go To option.  Also added Erase and Restore edit modes.
  *
@@ -72,15 +84,18 @@ struct mbedit_ping_struct
 	double	speed;
 	double	heading;
 	int	*bath;
-	int	*bathdist;
-	int	*back;
-	int	*backdist;
+	int	*bathacrosstrack;
+	int	*bathalongtrack;
+	int	*amp;
+	int	*ss;
+	int	*ssacrosstrack;
+	int	*ssalongtrack;
 	int	*bath_x;
 	int	*bath_y;
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbedit.c,v 3.4 1993-11-03 19:40:34 caress Exp $";
+static char rcs_id[] = "$Id: mbedit.c,v 4.0 1994-03-05 23:54:35 caress Exp $";
 static char program_name[] = "MBEDIT";
 static char help_message[] =  "MBEDIT is an interactive beam editor for multibeam bathymetry data.\n\tIt can work with any data format supported by the MBIO library.\n\tThis version uses the XVIEW toolkit and has been developed using\n\tthe DEVGUIDE package.  A future version will employ the MOTIF\n\ttoolkit for greater portability.  This file contains the code \n\tthat does not directly depend on the XVIEW interface - the companion \n\tfile mbedit_stubs.c contains the user interface related code.";
 static char usage_message[] = "mbedit [-Fformat -Ifile -Ooutfile -V -H]";
@@ -102,7 +117,8 @@ double	etime_d;
 double	speedmin;
 double	timegap;
 int	beams_bath;
-int	beams_back;
+int	beams_amp;
+int	pixels_ss;
 char	ifile[128];
 char	ofile[128];
 int	ofile_defined = MB_NO;
@@ -121,11 +137,15 @@ double	speed;
 double	heading;
 double	distance;
 int	nbath;
+int	namp;
+int	nss;
 int	*bath;
-int	*bathdist;
-int	nback;
-int	*back;
-int	*backdist;
+int	*bathacrosstrack;
+int	*bathalongtrack;
+int	*amp;
+int	*ss;
+int	*ssacrosstrack;
+int	*ssalongtrack;
 int	idata = 0;
 int	icomment = 0;
 int	odata = 0;
@@ -1103,10 +1123,14 @@ int	*nplt;
 				ping[iping].time_i,ping[iping].time_d,
 				ping[iping].navlon,ping[iping].navlat,
 				ping[iping].speed,ping[iping].heading,
-				beams_bath,ping[iping].bath,
-				ping[iping].bathdist,
-				beams_back,ping[iping].back,
-				ping[iping].backdist,
+				beams_bath,beams_amp,pixels_ss,
+				ping[iping].bath,
+				ping[iping].amp,
+				ping[iping].bathacrosstrack,
+				ping[iping].bathalongtrack,
+				ping[iping].ss,
+				ping[iping].ssacrosstrack,
+				ping[iping].ssalongtrack,
 				comment,
 				&error);
 			if (verbose >= 1)
@@ -1245,10 +1269,14 @@ int	*nplt;
 				ping[i].time_i,ping[i].time_d,
 				ping[i].navlon,ping[i].navlat,
 				ping[i].speed,ping[i].heading,
-				beams_bath,ping[i].bath,
-				ping[i].bathdist,
-				beams_back,ping[i].back,
-				ping[i].backdist,
+				beams_bath,beams_amp,pixels_ss,
+				ping[i].bath,
+				ping[i].amp,
+				ping[i].bathacrosstrack,
+				ping[i].bathalongtrack,
+				ping[i].ss,
+				ping[i].ssacrosstrack,
+				ping[i].ssalongtrack,
 				comment,
 				&error);
 			if (verbose >= 1)
@@ -1390,10 +1418,14 @@ int	*nplt;
 				ping[i].time_i,ping[i].time_d,
 				ping[i].navlon,ping[i].navlat,
 				ping[i].speed,ping[i].heading,
-				beams_bath,ping[i].bath,
-				ping[i].bathdist,
-				beams_back,ping[i].back,
-				ping[i].backdist,
+				beams_bath,beams_amp,pixels_ss,
+				ping[i].bath,
+				ping[i].amp,
+				ping[i].bathacrosstrack,
+				ping[i].bathalongtrack,
+				ping[i].ss,
+				ping[i].ssacrosstrack,
+				ping[i].ssalongtrack,
 				comment,
 				&error);
 			if (verbose >= 1)
@@ -1518,10 +1550,14 @@ int	*nplt;
 				ping[iping_save].time_i,ping[iping_save].time_d,
 				ping[iping_save].navlon,ping[iping_save].navlat,
 				ping[iping_save].speed,ping[iping_save].heading,
-				beams_bath,ping[iping_save].bath,
-				ping[iping_save].bathdist,
-				beams_back,ping[iping_save].back,
-				ping[iping_save].backdist,
+				beams_bath,beams_amp,pixels_ss,
+				ping[iping_save].bath,
+				ping[iping_save].amp,
+				ping[iping_save].bathacrosstrack,
+				ping[iping_save].bathalongtrack,
+				ping[iping_save].ss,
+				ping[iping_save].ssacrosstrack,
+				ping[iping_save].ssalongtrack,
 				comment,
 				&error);
 		if (verbose >= 1)
@@ -1631,10 +1667,14 @@ int	*nplt;
 				ping[iping_save].time_i,ping[iping_save].time_d,
 				ping[iping_save].navlon,ping[iping_save].navlat,
 				ping[iping_save].speed,ping[iping_save].heading,
-				beams_bath,ping[iping_save].bath,
-				ping[iping_save].bathdist,
-				beams_back,ping[iping_save].back,
-				ping[iping_save].backdist,
+				beams_bath,beams_amp,pixels_ss,
+				ping[iping_save].bath,
+				ping[iping_save].amp,
+				ping[iping_save].bathacrosstrack,
+				ping[iping_save].bathalongtrack,
+				ping[iping_save].ss,
+				ping[iping_save].ssacrosstrack,
+				ping[iping_save].ssalongtrack,
 				comment,
 				&error);
 		if (verbose >= 1)
@@ -1744,10 +1784,14 @@ int	*nplt;
 				ping[iping_save].time_i,ping[iping_save].time_d,
 				ping[iping_save].navlon,ping[iping_save].navlat,
 				ping[iping_save].speed,ping[iping_save].heading,
-				beams_bath,ping[iping_save].bath,
-				ping[iping_save].bathdist,
-				beams_back,ping[iping_save].back,
-				ping[iping_save].backdist,
+				beams_bath,beams_amp,pixels_ss,
+				ping[iping_save].bath,
+				ping[iping_save].amp,
+				ping[iping_save].bathacrosstrack,
+				ping[iping_save].bathalongtrack,
+				ping[iping_save].ss,
+				ping[iping_save].ssacrosstrack,
+				ping[iping_save].ssalongtrack,
 				comment,
 				&error);
 		if (verbose >= 1)
@@ -1857,10 +1901,14 @@ int	*nplt;
 				ping[iping_save].time_i,ping[iping_save].time_d,
 				ping[iping_save].navlon,ping[iping_save].navlat,
 				ping[iping_save].speed,ping[iping_save].heading,
-				beams_bath,ping[iping_save].bath,
-				ping[iping_save].bathdist,
-				beams_back,ping[iping_save].back,
-				ping[iping_save].backdist,
+				beams_bath,beams_amp,pixels_ss,
+				ping[iping_save].bath,
+				ping[iping_save].amp,
+				ping[iping_save].bathacrosstrack,
+				ping[iping_save].bathalongtrack,
+				ping[iping_save].ss,
+				ping[iping_save].ssacrosstrack,
+				ping[iping_save].ssalongtrack,
 				comment,
 				&error);
 		if (verbose >= 1)
@@ -2009,7 +2057,7 @@ int	form;
 		verbose,ifile,format,pings,lonflip,bounds,
 		btime_i,etime_i,speedmin,timegap,
 		&imbio_ptr,&btime_d,&etime_d,
-		&beams_bath,&beams_back,&error)) != MB_SUCCESS)
+		&beams_bath,&beams_amp,&pixels_ss,&error)) != MB_SUCCESS)
 		{
 		mb_error(verbose,error,&message);
 		fprintf(stderr,"\nMBIO Error returned from function <mb_read_init>:\n%s\n",message);
@@ -2021,7 +2069,7 @@ int	form;
 	/* initialize writing the output multibeam file */
 	if ((status = mb_write_init(
 		verbose,ofile,format,&ombio_ptr,
-		&beams_bath,&beams_back,&error)) != MB_SUCCESS)
+		&beams_bath,&beams_amp,&pixels_ss,&error)) != MB_SUCCESS)
 		{
 		mb_error(verbose,error,&message);
 		fprintf(stderr,"\nMBIO Error returned from function <mb_write_init>:\n%s\n",message);
@@ -2032,19 +2080,30 @@ int	form;
 
 	/* allocate memory for data arrays */
 	status = mb_malloc(verbose,beams_bath*sizeof(int),&bath,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(int),&bathdist,&error);
-	status = mb_malloc(verbose,beams_back*sizeof(int),&back,&error);
-	status = mb_malloc(verbose,beams_back*sizeof(int),&backdist,&error);
+	status = mb_malloc(verbose,beams_amp*sizeof(int),&amp,&error);
+	status = mb_malloc(verbose,beams_bath*sizeof(int),
+			&bathacrosstrack,&error);
+	status = mb_malloc(verbose,beams_bath*sizeof(int),
+			&bathalongtrack,&error);
+	status = mb_malloc(verbose,pixels_ss*sizeof(int),&ss,&error);
+	status = mb_malloc(verbose,pixels_ss*sizeof(int),&ssacrosstrack,&error);
+	status = mb_malloc(verbose,pixels_ss*sizeof(int),&ssalongtrack,&error);
 	for (i=0;i<MBEDIT_MAX_PINGS;i++)
 		{
 		status = mb_malloc(verbose,beams_bath*sizeof(int),
 			&ping[i].bath,&error);
+		status = mb_malloc(verbose,beams_amp*sizeof(int),
+			&ping[i].amp,&error);
 		status = mb_malloc(verbose,beams_bath*sizeof(int),
-			&ping[i].bathdist,&error);
-		status = mb_malloc(verbose,beams_back*sizeof(int),
-			&ping[i].back,&error);
-		status = mb_malloc(verbose,beams_back*sizeof(int),
-			&ping[i].backdist,&error);
+			&ping[i].bathacrosstrack,&error);
+		status = mb_malloc(verbose,beams_bath*sizeof(int),
+			&ping[i].bathalongtrack,&error);
+		status = mb_malloc(verbose,pixels_ss*sizeof(int),
+			&ping[i].ss,&error);
+		status = mb_malloc(verbose,pixels_ss*sizeof(int),
+			&ping[i].ssacrosstrack,&error);
+		status = mb_malloc(verbose,pixels_ss*sizeof(int),
+			&ping[i].ssalongtrack,&error);
 		status = mb_malloc(verbose,beams_bath*sizeof(int),
 			&ping[i].bath_x,&error);
 		status = mb_malloc(verbose,beams_bath*sizeof(int),
@@ -2073,8 +2132,9 @@ int	form;
 	status = mb_put(verbose,ombio_ptr,kind,
 			time_i,time_d,
 			navlon,navlat,speed,heading,
-			beams_bath,bath,bathdist,
-			beams_back,back,backdist,
+			beams_bath,beams_amp,pixels_ss,
+			bath,amp,bathacrosstrack,bathalongtrack,
+			ss,ssacrosstrack,ssalongtrack,
 			comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
 	strncpy(comment,"\0",256);
@@ -2082,8 +2142,9 @@ int	form;
 	status = mb_put(verbose,ombio_ptr,kind,
 			time_i,time_d,
 			navlon,navlat,speed,heading,
-			beams_bath,bath,bathdist,
-			beams_back,back,backdist,
+			beams_bath,beams_amp,pixels_ss,
+			bath,amp,bathacrosstrack,bathalongtrack,
+			ss,ssacrosstrack,ssalongtrack,
 			comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
 	right_now = time((long *)0);
@@ -2098,8 +2159,9 @@ int	form;
 	status = mb_put(verbose,ombio_ptr,kind,
 			time_i,time_d,
 			navlon,navlat,speed,heading,
-			beams_bath,bath,bathdist,
-			beams_back,back,backdist,
+			beams_bath,beams_amp,pixels_ss,
+			bath,amp,bathacrosstrack,bathalongtrack,
+			ss,ssacrosstrack,ssalongtrack,
 			comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
 	strncpy(comment,"\0",256);
@@ -2107,8 +2169,9 @@ int	form;
 	status = mb_put(verbose,ombio_ptr,kind,
 			time_i,time_d,
 			navlon,navlat,speed,heading,
-			beams_bath,bath,bathdist,
-			beams_back,back,backdist,
+			beams_bath,beams_amp,pixels_ss,
+			bath,amp,bathacrosstrack,bathalongtrack,
+			ss,ssacrosstrack,ssalongtrack,
 			comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
 	strncpy(comment,"\0",256);
@@ -2116,8 +2179,9 @@ int	form;
 	status = mb_put(verbose,ombio_ptr,kind,
 			time_i,time_d,
 			navlon,navlat,speed,heading,
-			beams_bath,bath,bathdist,
-			beams_back,back,backdist,
+			beams_bath,beams_amp,pixels_ss,
+			bath,amp,bathacrosstrack,bathalongtrack,
+			ss,ssacrosstrack,ssalongtrack,
 			comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
 	strncpy(comment,"\0",256);
@@ -2125,8 +2189,9 @@ int	form;
 	status = mb_put(verbose,ombio_ptr,kind,
 			time_i,time_d,
 			navlon,navlat,speed,heading,
-			beams_bath,bath,bathdist,
-			beams_back,back,backdist,
+			beams_bath,beams_amp,pixels_ss,
+			bath,amp,bathacrosstrack,bathalongtrack,
+			ss,ssacrosstrack,ssalongtrack,
 			comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
 	strncpy(comment,"\0",256);
@@ -2134,8 +2199,9 @@ int	form;
 	status = mb_put(verbose,ombio_ptr,kind,
 			time_i,time_d,
 			navlon,navlat,speed,heading,
-			beams_bath,bath,bathdist,
-			beams_back,back,backdist,
+			beams_bath,beams_amp,pixels_ss,
+			bath,amp,bathacrosstrack,bathalongtrack,
+			ss,ssacrosstrack,ssalongtrack,
 			comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
 	strncpy(comment,"\0",256);
@@ -2143,8 +2209,9 @@ int	form;
 	status = mb_put(verbose,ombio_ptr,kind,
 			time_i,time_d,
 			navlon,navlat,speed,heading,
-			beams_bath,bath,bathdist,
-			beams_back,back,backdist,
+			beams_bath,beams_amp,pixels_ss,
+			bath,amp,bathacrosstrack,bathalongtrack,
+			ss,ssacrosstrack,ssalongtrack,
 			comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
 
@@ -2194,15 +2261,21 @@ int mbedit_close_file()
 
 	/* deallocate memory for data arrays */
 	mb_free(verbose,bath,&error);
-	mb_free(verbose,bathdist,&error);
-	mb_free(verbose,back,&error);
-	mb_free(verbose,backdist,&error);
+	mb_free(verbose,amp,&error);
+	mb_free(verbose,bathacrosstrack,&error);
+	mb_free(verbose,bathalongtrack,&error);
+	mb_free(verbose,ss,&error);
+	mb_free(verbose,ssacrosstrack,&error);
+	mb_free(verbose,ssalongtrack,&error);
 	for (i=0;i<MBEDIT_MAX_PINGS;i++)
 		{
 		mb_free(verbose,ping[i].bath,&error);
-		mb_free(verbose,ping[i].bathdist,&error);
-		mb_free(verbose,ping[i].back,&error);
-		mb_free(verbose,ping[i].backdist,&error);
+		mb_free(verbose,ping[i].amp,&error);
+		mb_free(verbose,ping[i].bathacrosstrack,&error);
+		mb_free(verbose,ping[i].bathalongtrack,&error);
+		mb_free(verbose,ping[i].ss,&error);
+		mb_free(verbose,ping[i].ssacrosstrack,&error);
+		mb_free(verbose,ping[i].ssalongtrack,&error);
 		mb_free(verbose,ping[i].bath_x,&error);
 		mb_free(verbose,ping[i].bath_y,&error);
 		}
@@ -2345,8 +2418,9 @@ int	*icurrent;
 			time_i,&time_d,
 			&navlon,&navlat,
 			&speed,&heading,
-			&beams_bath,bath,bathdist,
-			&beams_back,back,backdist,
+			&beams_bath,&beams_amp,&pixels_ss,
+			bath,amp,bathacrosstrack,bathalongtrack,
+			ss,ssacrosstrack,ssalongtrack,
 			&error);
 		if (status == MB_SUCCESS)
 			{
@@ -2518,8 +2592,10 @@ int	*nplt;
 			ping[i].time_i,&ping[i].time_d,
 			&ping[i].navlon,&ping[i].navlat,
 			&ping[i].speed,&ping[i].heading,
-			&beams_bath,ping[i].bath,ping[i].bathdist,
-			&beams_back,ping[i].back,ping[i].backdist,
+			&beams_bath,&beams_amp,&pixels_ss,
+			ping[i].bath,ping[i].amp,
+			ping[i].bathacrosstrack,ping[i].bathalongtrack,
+			ping[i].ss,ping[i].ssacrosstrack,ping[i].ssalongtrack,
 			&error);
 		if (status == MB_SUCCESS)
 			{
@@ -2654,7 +2730,7 @@ int	*nplt;
 			if (ping[i].bath[j] != 0)
 				{
 				ping[i].bath_x[j] = xcen 
-					+ dxscale*ping[i].bathdist[j];
+					+ dxscale*ping[i].bathacrosstrack[j];
 				ping[i].bath_y[j] = y + dyscale*
 					(fabs((double)ping[i].bath[j]) 
 					- bathmean);
@@ -2988,8 +3064,10 @@ int	*nplt;
 			time_i,&time_d,
 			&navlon,&navlat,
 			&speed,&heading,
-			&beams_bath,bath,bathdist,
-			&beams_back,back,backdist,
+			&beams_bath,&beams_amp,&pixels_ss,
+			ping[i].bath,ping[i].amp,
+			ping[i].bathacrosstrack,ping[i].bathalongtrack,
+			ping[i].ss,ping[i].ssacrosstrack,ping[i].ssalongtrack,
 			&error);
 		if (time_d > ttime_d)
 			{
@@ -3017,8 +3095,9 @@ int	*nplt;
 				time_i,&time_d,
 				&navlon,&navlat,
 				&speed,&heading,
-				&beams_bath,bath,bathdist,
-				&beams_back,back,backdist,
+				&beams_bath,&beams_amp,&pixels_ss,
+				bath,amp,bathacrosstrack,bathalongtrack,
+				ss,ssacrosstrack,ssalongtrack,
 				&error);
 			if (time_d > ttime_d && found == MB_NO)
 				{

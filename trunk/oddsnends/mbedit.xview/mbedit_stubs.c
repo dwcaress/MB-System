@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
- *    The MB-system:	mbedit_stubs.c	3.00	4/8/93
- *    $Id: mbedit_stubs.c,v 3.1 1993-08-17 00:30:34 caress Exp $
+ *    The MB-system:	mbedit_stubs.c	4/8/93
+ *    $Id: mbedit_stubs.c,v 4.0 1994-03-05 23:54:35 caress Exp $
  *
- *    Copyright (c) 1993 by 
+ *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
  *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
  *    Lamont-Doherty Earth Observatory
@@ -23,6 +23,15 @@
  * Date:	April 8, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1994/03/03  03:51:47  caress
+ * Fixed copyright message.
+ *
+ * Revision 4.0  1994/03/01  00:19:16  caress
+ * First cut at new version.
+ *
+ * Revision 3.1  1993/08/17  00:30:34  caress
+ * Version current as of August 16, 1993
+ *
  * Revision 3.0  1993/05/14  23:36:46  sohara
  * fixed rcs_id messages
  *
@@ -54,11 +63,20 @@
 /* XVIEW UI include file for this application */
 #include "mbedit_ui.h"
 
+void	set_mode_pick();
+void	set_mode_erase();
+void	set_mode_restore();
 /*
  * Global object definitions.
  */
 mbedit_window_mbedit_objects	*Mbedit_window_mbedit;
 mbedit_popup_load_objects	*Mbedit_popup_load;
+mbedit_popup_goto_objects	*Mbedit_popup_goto;
+
+/* pick mode defines */
+#define	MODE_PICK	0
+#define	MODE_ERASE	1
+#define	MODE_RESTORE	2
 
 /* Global Xwindows graphics parameters */
 Display	*dpy;			/* Xwindows display/screen number */
@@ -72,9 +90,13 @@ char	*fontname = "8x13";
 Server_image	svr_image;
 Icon	icon;
 Xv_singlecolor	black, white;
-static Xv_Cursor	cursor;
+static Xv_Cursor	cursor_crosshair;
 static short 	crosshair[] = {
 #include "cursor.h"
+};
+static Xv_Cursor	cursor_eraser;
+static short 	eraser[] = {
+#include "eraser.h"
 };
 static short icon_image[] = {
 #include "mbedit.icon"
@@ -95,10 +117,12 @@ int	ngood;
 int	icurrent;
 int	nplot;
 int	scale_max;
+int	exager;
 int	xscale;
 int	yscale;
 int	x_interval;
 int	y_interval;
+int	mode_pick = 0;
 int	status;
 
 /* file opening parameters */
@@ -120,7 +144,7 @@ main(argc, argv)
 	int	argc;
 	char	**argv;
 {
-  static char rcs_id[]="$Id: mbedit_stubs.c,v 3.1 1993-08-17 00:30:34 caress Exp $";
+  static char rcs_id[]="$Id: mbedit_stubs.c,v 4.0 1994-03-05 23:54:35 caress Exp $";
 	int	status;
 	int	i;
 
@@ -136,6 +160,7 @@ main(argc, argv)
 	 */
 	Mbedit_window_mbedit = mbedit_window_mbedit_objects_initialize(NULL, NULL);
 	Mbedit_popup_load = mbedit_popup_load_objects_initialize(NULL, Mbedit_window_mbedit->window_mbedit);
+	Mbedit_popup_goto = mbedit_popup_goto_objects_initialize(NULL, Mbedit_window_mbedit->window_mbedit);
 
 	/* set up graphics initialization */
 	dpy      = (Display *)xv_get(Mbedit_window_mbedit->canvas_mbedit, XV_DISPLAY);
@@ -148,23 +173,40 @@ main(argc, argv)
 	borders[3] = (int) xv_get(Mbedit_window_mbedit->canvas_mbedit,CANVAS_HEIGHT)-1;
 
 	/* set cursor */
+	white.red = white.green = white.blue = 255;
+	black.red = black.green = black.blue = 0;
 	svr_image = (Server_image)xv_create(XV_NULL, SERVER_IMAGE,
 		XV_WIDTH,           64,
 		XV_HEIGHT,          64,
 		SERVER_IMAGE_BITS,  crosshair,
 		NULL); 
-	white.red = white.green = white.blue = 255;
-	black.red = black.green = black.blue = 0;
-	cursor = (Xv_Cursor)xv_create(XV_NULL, CURSOR,
+	cursor_crosshair = (Xv_Cursor)xv_create(XV_NULL, CURSOR,
 		CURSOR_IMAGE,               svr_image,
 		CURSOR_FOREGROUND_COLOR,    &black,
 		CURSOR_BACKGROUND_COLOR,    &white,
 		CURSOR_XHOT,                32,
 		CURSOR_YHOT,                32,
 		NULL);
-	xv_set(canvas_paint_window(Mbedit_window_mbedit->canvas_mbedit),
-		WIN_CURSOR,         cursor,
+	svr_image = (Server_image)xv_create(XV_NULL, SERVER_IMAGE,
+		XV_WIDTH,           64,
+		XV_HEIGHT,          64,
+		SERVER_IMAGE_BITS,  eraser,
+		NULL); 
+	cursor_eraser = (Xv_Cursor)xv_create(XV_NULL, CURSOR,
+		CURSOR_IMAGE,               svr_image,
+		CURSOR_FOREGROUND_COLOR,    &black,
+		CURSOR_BACKGROUND_COLOR,    &white,
+		CURSOR_XHOT,                32,
+		CURSOR_YHOT,                32,
 		NULL);
+	if (mode_pick == MODE_PICK)
+		xv_set(canvas_paint_window(Mbedit_window_mbedit->canvas_mbedit),
+			WIN_CURSOR,         cursor_crosshair,
+			NULL);
+	else
+		xv_set(canvas_paint_window(Mbedit_window_mbedit->canvas_mbedit),
+			WIN_CURSOR,         cursor_eraser,
+			NULL);
 
 	/* set up program icon */
 	svr_image = (Server_image)xv_create(NULL, SERVER_IMAGE,
@@ -228,6 +270,7 @@ main(argc, argv)
 			&hold_size,&format,
 			&scale_max,&xscale,&yscale,
 			&x_interval,&y_interval);
+	exager = 100*xscale/yscale;
 
 	/* set appropriate graphical control values */
 	xv_set(Mbedit_window_mbedit->slider_number_pings,
@@ -260,9 +303,9 @@ main(argc, argv)
 		PANEL_VALUE, xscale,
 		NULL);
 	xv_set(Mbedit_window_mbedit->slider_scale_y,
-		PANEL_MIN_VALUE, 1,
-		PANEL_MAX_VALUE, scale_max,
-		PANEL_VALUE, yscale,
+		PANEL_MIN_VALUE, 50,
+		PANEL_MAX_VALUE, 1000,
+		PANEL_VALUE, exager,
 		NULL);
 	xv_set(Mbedit_window_mbedit->textfield_x_interval,
 		PANEL_MIN_VALUE, 1,
@@ -414,6 +457,7 @@ set_scale_x(item, value, event)
 	mbedit_window_mbedit_objects *ip = (mbedit_window_mbedit_objects *) xv_get(item, XV_KEY_DATA, INSTANCE);
 	
 	xscale = value;
+	yscale = xscale/(0.01*exager);
 	status = mbedit_action_plot(xscale,yscale,
 		x_interval,y_interval,plot_size,&nbuffer,
 		&ngood,&icurrent,&nplot);
@@ -459,7 +503,8 @@ set_scale_y(item, value, event)
 {
 	mbedit_window_mbedit_objects *ip = (mbedit_window_mbedit_objects *) xv_get(item, XV_KEY_DATA, INSTANCE);
 	
-	yscale = value;
+	exager = value;
+	yscale = xscale/(0.01*exager);
 	status = mbedit_action_plot(xscale,yscale,
 		x_interval,y_interval,plot_size,&nbuffer,
 		&ngood,&icurrent,&nplot);
@@ -731,39 +776,93 @@ do_event(win, event, arg, type)
 	/* process events */
 	switch (event_action(event))
 		{
+		case 'M':
+		case 'm':
 		case 'Z':
 		case 'z':
-		case 'B':
-		case 'b':
 			if (event_is_down(event))
 			status = mbedit_action_bad_ping(
 				xscale,yscale,
 				x_interval,y_interval,plot_size,
 				&nbuffer,&ngood,&icurrent,&nplot);
 			break;
-		case 'G':
-		case 'g':
+		case 'K':
+		case 'k':
+		case 'S':
+		case 's':
 			if (event_is_down(event))
 			status = mbedit_action_good_ping(
 				xscale,yscale,
 				x_interval,y_interval,plot_size,
 				&nbuffer,&ngood,&icurrent,&nplot);
 			break;
-		case 'L':
-		case 'l':
+		case 'J':
+		case 'j':
+		case 'A':
+		case 'a':
 			if (event_is_down(event))
 			status = mbedit_action_left_ping(
 				xscale,yscale,
 				x_interval,y_interval,plot_size,
 				&nbuffer,&ngood,&icurrent,&nplot);
 			break;
-		case 'R':
-		case 'r':
+		case 'L':
+		case 'l':
+		case 'D':
+		case 'd':
 			if (event_is_down(event))
 			status = mbedit_action_right_ping(
 				xscale,yscale,
 				x_interval,y_interval,plot_size,
 				&nbuffer,&ngood,&icurrent,&nplot);
+			break;
+		case 'U':
+		case 'u':
+		case 'Q':
+		case 'q':
+			if (event_is_down(event))
+				{
+				mode_pick = MODE_PICK;
+				xv_set(canvas_paint_window
+					(Mbedit_window_mbedit->canvas_mbedit),
+					WIN_CURSOR, cursor_crosshair,
+					NULL);
+				xv_set(Mbedit_window_mbedit->setting_mode,
+					PANEL_VALUE, MODE_PICK,
+					NULL);
+				}
+			break;
+		case 'I':
+		case 'i':
+		case 'W':
+		case 'w':
+			if (event_is_down(event))
+				{
+				mode_pick = MODE_ERASE;
+				xv_set(canvas_paint_window
+					(Mbedit_window_mbedit->canvas_mbedit),
+					WIN_CURSOR, cursor_eraser,
+					NULL);
+				xv_set(Mbedit_window_mbedit->setting_mode,
+					PANEL_VALUE, MODE_ERASE,
+					NULL);
+				}
+			break;
+		case 'O':
+		case 'o':
+		case 'E':
+		case 'e':
+			if (event_is_down(event))
+				{
+				mode_pick = MODE_RESTORE;
+				xv_set(canvas_paint_window
+					(Mbedit_window_mbedit->canvas_mbedit),
+					WIN_CURSOR, cursor_eraser,
+					NULL);
+				xv_set(Mbedit_window_mbedit->setting_mode,
+					PANEL_VALUE, MODE_RESTORE,
+					NULL);
+				}
 			break;
 		case KBD_USE:
 			break;
@@ -772,6 +871,20 @@ do_event(win, event, arg, type)
 		case LOC_MOVE:
 			break;
 		case LOC_DRAG:
+			if (event_left_is_down(event) 
+				&& mode_pick == MODE_ERASE)
+			status = mbedit_action_mouse_erase(
+				event_x(event),event_y(event),
+				xscale,yscale,
+				x_interval,y_interval,plot_size,
+				&nbuffer,&ngood,&icurrent,&nplot);
+			else if (event_is_down(event) 
+				&& mode_pick == MODE_RESTORE)
+			status = mbedit_action_mouse_restore(
+				event_x(event),event_y(event),
+				xscale,yscale,
+				x_interval,y_interval,plot_size,
+				&nbuffer,&ngood,&icurrent,&nplot);
 			break;
 		case LOC_WINENTER:
 			break;
@@ -779,8 +892,22 @@ do_event(win, event, arg, type)
 			break;
 		case ACTION_SELECT:
 		case MS_LEFT:
-			if (event_is_down(event))
-			status = mbedit_action_mouse(
+			if (event_is_down(event) && mode_pick == MODE_PICK)
+			status = mbedit_action_mouse_pick(
+				event_x(event),event_y(event),
+				xscale,yscale,
+				x_interval,y_interval,plot_size,
+				&nbuffer,&ngood,&icurrent,&nplot);
+			else if (event_is_down(event) 
+				&& mode_pick == MODE_ERASE)
+			status = mbedit_action_mouse_erase(
+				event_x(event),event_y(event),
+				xscale,yscale,
+				x_interval,y_interval,plot_size,
+				&nbuffer,&ngood,&icurrent,&nplot);
+			else if (event_is_down(event) 
+				&& mode_pick == MODE_RESTORE)
+			status = mbedit_action_mouse_restore(
 				event_x(event),event_y(event),
 				xscale,yscale,
 				x_interval,y_interval,plot_size,
@@ -923,4 +1050,133 @@ action_show_colors(item, op)
 		break;
 	}
 	return item;
+}
+
+/*
+ * Notify callback function for `setting_mode'.
+ */
+void
+mbedit_window_mbedit_setting_mode_notify_callback(item, value, event)
+	Panel_item	item;
+	int		value;
+	Event		*event;
+{
+	mbedit_window_mbedit_objects *ip = (mbedit_window_mbedit_objects *) xv_get(item, XV_KEY_DATA, INSTANCE);
+	
+	
+	/* gxv_start_connections DO NOT EDIT THIS SECTION */
+
+	if (value == 0)
+	{
+		set_mode_pick(item, value, event);
+	}
+	
+	if (value == 1)
+	{
+		set_mode_erase(item, value, event);
+	}
+	
+	if (value == 2)
+	{
+		set_mode_restore(item, value, event);
+	}
+	
+	/* gxv_end_connections */
+
+}
+
+/*
+ * User-defined action for `setting_mode'.
+ */
+void
+set_mode_pick(item, value, event)
+	Panel_item	item;
+	int		value;
+	Event		*event;
+{
+	mode_pick = MODE_PICK;
+	xv_set(canvas_paint_window(Mbedit_window_mbedit->canvas_mbedit),
+		WIN_CURSOR,         cursor_crosshair,
+		NULL);
+}
+
+/*
+ * User-defined action for `setting_mode'.
+ */
+void
+set_mode_erase(item, value, event)
+	Panel_item	item;
+	int		value;
+	Event		*event;
+{
+	mode_pick = MODE_ERASE;
+	xv_set(canvas_paint_window(Mbedit_window_mbedit->canvas_mbedit),
+		WIN_CURSOR,         cursor_eraser,
+		NULL);
+}
+
+/*
+ * User-defined action for `setting_mode'.
+ */
+void
+set_mode_restore(item, value, event)
+	Panel_item	item;
+	int		value;
+	Event		*event;
+{
+	mode_pick = MODE_RESTORE;
+	xv_set(canvas_paint_window(Mbedit_window_mbedit->canvas_mbedit),
+		WIN_CURSOR,         cursor_eraser,
+		NULL);
+}
+
+/*
+ * Notify callback function for `button_goto'.
+ */
+void
+mbedit_window_mbedit_button_goto_notify_callback(item, event)
+	Panel_item	item;
+	Event		*event;
+{
+	mbedit_window_mbedit_objects *ip = (mbedit_window_mbedit_objects *) xv_get(item, XV_KEY_DATA, INSTANCE);
+	
+	
+	/* gxv_start_connections DO NOT EDIT THIS SECTION */
+
+	xv_set(Mbedit_popup_goto->popup_goto, XV_SHOW, TRUE, NULL);
+	
+	/* gxv_end_connections */
+
+}
+
+/*
+ * Notify callback function for `button_goto_apply'.
+ */
+void
+mbedit_popup_goto_button_goto_apply_notify_callback(item, event)
+	Panel_item	item;
+	Event		*event;
+{
+	mbedit_popup_goto_objects *ip = (mbedit_popup_goto_objects *) xv_get(item, XV_KEY_DATA, INSTANCE);
+
+	int	time_i[6];
+	
+	time_i[0] = (int) xv_get(Mbedit_popup_goto->textfield_year,PANEL_VALUE);
+	time_i[1] = (int) xv_get(Mbedit_popup_goto->textfield_month,PANEL_VALUE);
+	time_i[2] = (int) xv_get(Mbedit_popup_goto->textfield_day,PANEL_VALUE);
+	time_i[3] = (int) xv_get(Mbedit_popup_goto->textfield_hour,PANEL_VALUE);
+	time_i[4] = (int) xv_get(Mbedit_popup_goto->textfield_minute,PANEL_VALUE);
+	time_i[5] = (int) xv_get(Mbedit_popup_goto->textfield_second,PANEL_VALUE);
+	status = mbedit_action_goto(time_i,hold_size,buffer_size,
+			xscale,yscale,x_interval,y_interval,plot_size,
+			&ndumped,&nloaded,&nbuffer,
+			&ngood,&icurrent,&nplot);
+	if (status == 0) XBell(dpy,100);
+	
+	/* gxv_start_connections DO NOT EDIT THIS SECTION */
+
+	xv_set(Mbedit_popup_goto->popup_goto, XV_SHOW, FALSE, NULL);
+	
+	/* gxv_end_connections */
+
 }

@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
- *    The MB-system:	hsvelocitytool.c	3.00	6/6/93
- *    $Id: hsvelocitytool.c,v 1.2 1993-11-05 16:21:57 caress Exp $
+ *    The MB-system:	hsvelocitytool.c	6/6/93
+ *    $Id: hsvelocitytool.c,v 4.0 1994-03-05 23:49:05 caress Exp $
  *
- *    Copyright (c) 1993 by 
+ *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
  *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
  *    Lamont-Doherty Earth Observatory
@@ -23,6 +23,16 @@
  * Date:	June 6, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1994/03/03  03:53:26  caress
+ * Fixed copyright message.
+ *
+ * Revision 4.0  1994/02/27  00:17:23  caress
+ * First cut at new version.
+ *
+ * Revision 1.2  1993/11/05  16:21:57  caress
+ * The graphical representation of the editable velocity profile
+ * now shows the layered model actually used for the raytracing.
+ *
  * Revision 1.1  1993/08/16  23:28:30  caress
  * Initial revision
  *
@@ -68,7 +78,7 @@ struct profile
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: hsvelocitytool.c,v 1.2 1993-11-05 16:21:57 caress Exp $";
+static char rcs_id[] = "$Id: hsvelocitytool.c,v 4.0 1994-03-05 23:49:05 caress Exp $";
 static char program_name[] = "HSVELOCITYTOOL";
 static char help_message[] = "HSVELOCITYTOOL is an interactive water velocity profile editor  \nused to examine multiple water velocity profiles and to create  \nnew water velocity profiles which can be used for the processing  \nof hydrosweep multibeam sonar data.  In general, this tool is used to  \nexamine water velocity profiles obtained from XBTs, CTDs, or  \ndatabases, and to construct new profiles consistent with these  \nvarious sources of information.";
 static char usage_message[] = "hsvelocitytool [-V -H]";
@@ -124,7 +134,8 @@ double	etime_d;
 double	speedmin;
 double	timegap;
 int	beams_bath;
-int	beams_back;
+int	beams_amp;
+int	pixels_ss;
 char	*mbio_ptr;
 
 /* mbio read and write values */
@@ -139,11 +150,15 @@ double	speed;
 double	heading;
 double	distance;
 int	nbath;
+int	namp;
+int	nss;
 int	*bath;
-int	*bathdist;
-int	nback;
-int	*back;
-int	*backdist;
+int	*bathacrosstrack;
+int	*bathalongtrack;
+int	*amp;
+int	*ss;
+int	*ssacrosstrack;
+int	*ssalongtrack;
 char	comment[256];
 
 /* buffer control variables */
@@ -1481,6 +1496,7 @@ int	form;
 	char	*function_name = "hsvt_open_hydrosweep_file";
 	int	status = MB_SUCCESS;
 	char	*suffix;
+	int	format_num;
 	int	i;
 
 	/* print input debug statements */
@@ -1494,10 +1510,11 @@ int	form;
 		}
 
 	/* check for proper format */
+	status = mb_format(verbose,&format,&format_num,&error);
 	if (format != MBF_HSATLRAW && format != MBF_HSLDEOIH)
 		{
 		fprintf(stderr,"\nProgram <%s> requires complete Hydrosweep DS data stream\n",program_name);
-		fprintf(stderr,"!!Format %d is unacceptable, only formats %d and %d can be used\n",format,MBF_HSATLRAW,MBF_HSLDEOIH);
+		fprintf(stderr,"Format %d is unacceptable, only formats %d and %d can be used\n",format,MBF_HSATLRAW,MBF_HSLDEOIH);
 		fprintf(stderr,"\nMultibeam File <%s> not initialized for reading\n",file);
 		status = MB_FAILURE;
 		return(status);
@@ -1506,10 +1523,13 @@ int	form;
 	/* deallocate previously loaded data, if any */
 	if (nbuffer > 0)
 		{
-		mb_free(verbose,bath,&error);
-		mb_free(verbose,bathdist,&error);
-		mb_free(verbose,back,&error);
-		mb_free(verbose,backdist,&error);
+		mb_free(verbose,bath,&error); 
+		mb_free(verbose,bathacrosstrack,&error); 
+		mb_free(verbose,bathalongtrack,&error); 
+		mb_free(verbose,amp,&error); 
+		mb_free(verbose,ss,&error); 
+		mb_free(verbose,ssacrosstrack,&error); 
+		mb_free(verbose,ssalongtrack,&error); 
 		mb_buffer_close(verbose,buff_ptr,&error);
 		}
 
@@ -1519,7 +1539,7 @@ int	form;
 		verbose,file,format,pings,lonflip,bounds,
 		btime_i,etime_i,speedmin,timegap,
 		&mbio_ptr,&btime_d,&etime_d,
-		&beams_bath,&beams_back,&error)) != MB_SUCCESS)
+		&beams_bath,&beams_amp,&pixels_ss,&error)) != MB_SUCCESS)
 		{
 		mb_error(verbose,error,&message);
 		fprintf(stderr,"\nMBIO Error returned from function <mb_read_init>:\n%s\n",message);
@@ -1530,9 +1550,14 @@ int	form;
 
 	/* allocate memory for data arrays */
 	status = mb_malloc(verbose,beams_bath*sizeof(int),&bath,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(int),&bathdist,&error);
-	status = mb_malloc(verbose,beams_back*sizeof(int),&back,&error);
-	status = mb_malloc(verbose,beams_back*sizeof(int),&backdist,&error);
+	status = mb_malloc(verbose,beams_bath*sizeof(int),
+			&bathacrosstrack,&error);
+	status = mb_malloc(verbose,beams_bath*sizeof(int),
+			&bathalongtrack,&error);
+	status = mb_malloc(verbose,beams_amp*sizeof(int),&amp,&error);
+	status = mb_malloc(verbose,pixels_ss*sizeof(int),&ss,&error);
+	status = mb_malloc(verbose,pixels_ss*sizeof(int),&ssacrosstrack,&error);
+	status = mb_malloc(verbose,pixels_ss*sizeof(int),&ssalongtrack,&error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)

@@ -1,9 +1,9 @@
 #! /usr/local/bin/perl 
 #--------------------------------------------------------------------
-#    The MB-system:	mbm_vrefcheck.perl	3.00	6/18/93
-#    $Id  $
+#    The MB-system:	mbm_vrefcheck.perl	6/18/93
+#    $Id: mbm_vrefcheck.perl,v 4.0 1994-03-05 23:52:40 caress Exp $
 #
-#    Copyright (c) 1993 by 
+#    Copyright (c) 1993, 1994 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
 #    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
 #    Lamont-Doherty Earth Observatory
@@ -30,10 +30,19 @@
 #   June 13, 1993
 #
 # Version:
-#   $Id: mbm_vrefcheck.perl,v 3.3 1993-08-17 16:58:36 caress Exp $
+#   $Id: mbm_vrefcheck.perl,v 4.0 1994-03-05 23:52:40 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.1  1994/03/03  04:11:13  caress
+# Fixed copyright message.
+#
+# Revision 4.0  1994/02/26  19:37:57  caress
+# First cut at new version.
+#
+# Revision 3.3  1993/08/17  16:58:36  caress
+# Set location of perl to /usr/local/bin/perl
+#
 # Revision 3.2  1993/08/17  01:52:17  caress
 # Added MB-system header.
 #
@@ -50,7 +59,7 @@ $xmax = ($opt_B || $opt_b);
 # if needed set defaults
 if (!$format) 
 	{
-	$format = "8";
+	$format = "24";
 	}
 if (!$xscale) 
 	{

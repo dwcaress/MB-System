@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
- *    The MB-system:	mbcontour.c	3.00	6/4/93
- *    $Id  $
+ *    The MB-system:	mbcontour.c	6/4/93
+ *    $Id: mbcontour.c,v 4.0 1994-03-05 23:46:48 caress Exp $
  *
- *    Copyright (c) 1993 by 
+ *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
   *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
  *    Lamont-Doherty Earth Observatory
@@ -22,6 +22,16 @@
  * Date:	June 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1994/03/03  03:48:58  caress
+ * Fixed copyright message.
+ *
+ * Revision 4.0  1994/02/26  23:07:51  caress
+ * First cut at new version.
+ *
+ * Revision 3.3  1993/11/03  21:09:10  caress
+ * Changed ps_plotinit call to agree with current version
+ * of GMT (v2.1.4).
+ *
  * Revision 3.2  1993/08/16  22:57:49  caress
  * Changed ad hoc string justification.  Used to assume letter width
  * is 0.5 letter height, but now assumes letter width is 0.37 letter
@@ -69,16 +79,18 @@ struct	ping
 	double	*bath;
 	double	*bathlon;
 	double	*bathlat;
-	double	*back;
-	double	*backlon;
-	double	*backlat;
+	double	*amp;
+	double	*ss;
+	double	*sslon;
+	double	*sslat;
 	char	comment[256];
 	};
 struct swath
 	{
 	int	npings;
 	int	beams_bath;
-	int	beams_back;
+	int	beams_amp;
+	int	pixels_ss;
 	struct ping data[MAXPINGS];
 	};
 
@@ -99,7 +111,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbcontour.c,v 3.3 1993-11-03 21:09:10 caress Exp $";
+	static char rcs_id[] = "$Id: mbcontour.c,v 4.0 1994-03-05 23:46:48 caress Exp $";
 	static char program_name[] = "MBCONTOUR";
 	static char help_message[] =  "MBCONTOUR is a GMT compatible utility which creates a color postscript \ncontour map of multibeam swath bathymetry or backscatter data.  \nComplete maps are made by using MBCONTOUR in conjunction with the  \nusual GMT programs.  The contour levels and colors can be controlled \ndirectly or set implicitly using contour and color change intervals. \nContours can also be set to have ticks pointing downhill.";
 	static char usage_message[] = "mbcontour -Idatalist -Jparameters -Rwest/east/south/north [-Acontour_int/color_int/tick_int/label_int/tick_len/label_hgt -Btickinfo -Ccontourfile -Fred/green/blue -K -Llonflip -M -O -P -ppings -U -Xx-shift -Yy-shift -#copies -V -H]";
@@ -132,7 +144,8 @@ char **argv;
 	double	timegap;
 	char	file[128];
 	int	beams_bath;
-	int	beams_back;
+	int	beams_amp;
+	int	pixels_ss;
 	char	*mbio_ptr;
 
 	/* mbio read values */
@@ -141,9 +154,10 @@ char **argv;
 	double	*bath;
 	double	*bathlon;
 	double	*bathlat;
-	double	*back;
-	double	*backlon;
-	double	*backlat;
+	double	*amp;
+	double	*ss;
+	double	*sslon;
+	double	*sslat;
 
 	/* gmt control variables */
 	char	contourfile[128];
@@ -556,7 +570,7 @@ char **argv;
 		verbose,file,format,pings,lonflip,bounds,
 		btime_i,etime_i,speedmin,timegap,
 		&mbio_ptr,&btime_d,&etime_d,
-		&beams_bath,&beams_back,&error)) != MB_SUCCESS)
+		&beams_bath,&beams_amp,&pixels_ss,&error)) != MB_SUCCESS)
 		{
 		mb_error(verbose,error,&message);
 		fprintf(stderr,"\nMBIO Error returned from function <mb_read_init>:\n%s\n",message);
@@ -575,16 +589,18 @@ char **argv;
 		pingcur = &(swath_plot->data[i]);
 		status = mb_malloc(verbose,beams_bath*sizeof(double),
 			&(pingcur->bath),&error);
+		status = mb_malloc(verbose,beams_amp*sizeof(double),
+			&(pingcur->amp),&error);
 		status = mb_malloc(verbose,beams_bath*sizeof(double),
 			&(pingcur->bathlon),&error);
 		status = mb_malloc(verbose,beams_bath*sizeof(double),
 			&(pingcur->bathlat),&error);
-		status = mb_malloc(verbose,beams_back*sizeof(double),
-			&(pingcur->back),&error);
-		status = mb_malloc(verbose,beams_back*sizeof(double),
-			&(pingcur->backlon),&error);
-		status = mb_malloc(verbose,beams_back*sizeof(double),
-			&(pingcur->backlat),&error);
+		status = mb_malloc(verbose,pixels_ss*sizeof(double),
+			&(pingcur->ss),&error);
+		status = mb_malloc(verbose,pixels_ss*sizeof(double),
+			&(pingcur->sslon),&error);
+		status = mb_malloc(verbose,pixels_ss*sizeof(double),
+			&(pingcur->sslat),&error);
 		}
 
 	/* if error initializing memory then quit */
@@ -606,23 +622,26 @@ char **argv;
 	/* loop over reading */
 	*npings = 0;
 	swath_plot->beams_bath = beams_bath;
-	swath_plot->beams_back = beams_back;
+	swath_plot->beams_amp = beams_amp;
+	swath_plot->pixels_ss = pixels_ss;
 	done = MB_NO;
 	while (done == MB_NO)
 		{
 		pingcur = &swath_plot->data[*npings];
 		bath = pingcur->bath;
+		amp = pingcur->amp;
 		bathlon = pingcur->bathlon;
 		bathlat = pingcur->bathlat;
-		back = pingcur->back;
-		backlon = pingcur->backlon;
-		backlat = pingcur->backlat;
+		ss = pingcur->ss;
+		sslon = pingcur->sslon;
+		sslat = pingcur->sslat;
 		status = mb_read(verbose,mbio_ptr,&(pingcur->kind),
 			&(pingcur->pings),pingcur->time_i,&(pingcur->time_d),
 			&(pingcur->navlon),&(pingcur->navlat),&(pingcur->speed),
 			&(pingcur->heading),&(pingcur->distance),
-			&beams_bath,bath,bathlon,bathlat,
-			&beams_back,back,backlon,backlat,
+			&beams_bath,&beams_amp,&pixels_ss,
+			bath,amp,bathlon,bathlat,
+			ss,sslon,sslat,
 			pingcur->comment,&error);
 
 		/* print debug statements */
@@ -634,8 +653,10 @@ char **argv;
 				pingcur->kind);
 			fprintf(stderr,"dbg2       beams_bath:     %d\n",
 				beams_bath);
-			fprintf(stderr,"dbg2       beams_back:     %d\n",
-				beams_back);
+			fprintf(stderr,"dbg2       beams_amp:      %d\n",
+					beams_amp);
+			fprintf(stderr,"dbg2       pixels_ss:      %d\n",
+					pixels_ss);
 			fprintf(stderr,"dbg2       error:          %d\n",
 				error);
 			fprintf(stderr,"dbg2       status:         %d\n",
@@ -727,11 +748,12 @@ char **argv;
 		{
 		pingcur = &swath_plot->data[i];
 		mb_free(verbose,pingcur->bath,&error);
+		mb_free(verbose,pingcur->amp,&error);
 		mb_free(verbose,pingcur->bathlon,&error);
 		mb_free(verbose,pingcur->bathlat,&error);
-		mb_free(verbose,pingcur->back,&error);
-		mb_free(verbose,pingcur->backlon,&error);
-		mb_free(verbose,pingcur->backlat,&error);
+		mb_free(verbose,pingcur->ss,&error);
+		mb_free(verbose,pingcur->sslon,&error);
+		mb_free(verbose,pingcur->sslat,&error);
 		}
 	mb_free(verbose,swath_plot,&error);
 	/* end loop over files in list */
@@ -831,11 +853,15 @@ int	*error;
 		ping1->bathlon[i] = ping2->bathlon[i];
 		ping1->bathlat[i] = ping2->bathlat[i];
 		}
-	for (i=0;i<swath->beams_back;i++)
+	for (i=0;i<swath->beams_amp;i++)
 		{
-		ping1->back[i] = ping2->back[i];
-		ping1->backlon[i] = ping2->backlon[i];
-		ping1->backlat[i] = ping2->backlat[i];
+		ping1->amp[i] = ping2->amp[i];
+		}
+	for (i=0;i<swath->pixels_ss;i++)
+		{
+		ping1->ss[i] = ping2->ss[i];
+		ping1->sslon[i] = ping2->sslon[i];
+		ping1->sslat[i] = ping2->sslat[i];
 		}
 
 	/* assume success */
