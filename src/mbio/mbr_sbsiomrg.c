@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sbsiomrg.c	2/2/93
- *	$Id: mbr_sbsiomrg.c,v 5.3 2001-07-20 00:32:54 caress Exp $
+ *	$Id: mbr_sbsiomrg.c,v 5.4 2002-02-26 07:50:41 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	February 2, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2001/07/20 00:32:54  caress
+ * Release 5.0.beta03
+ *
  * Revision 5.2  2001/03/22  20:50:02  caress
  * Trying to make version 5.0.beta0
  *
@@ -140,10 +143,11 @@ int mbr_dem_sbsiomrg(int verbose, void *mbio_ptr, int *error);
 int mbr_rt_sbsiomrg(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_sbsiomrg(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
+static char res_id[]="$Id: mbr_sbsiomrg.c,v 5.4 2002-02-26 07:50:41 caress Exp $";
+
 /*--------------------------------------------------------------------*/
 int mbr_register_sbsiomrg(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_sbsiomrg.c,v 5.3 2001-07-20 00:32:54 caress Exp $";
 	char	*function_name = "mbr_register_sbsiomrg";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -273,7 +277,6 @@ int mbr_info_sbsiomrg(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_sbsiomrg.c,v 5.3 2001-07-20 00:32:54 caress Exp $";
 	char	*function_name = "mbr_info_sbsiomrg";
 	int	status = MB_SUCCESS;
 
@@ -342,7 +345,6 @@ int mbr_info_sbsiomrg(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_sbsiomrg(int verbose, void *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_sbsiomrg.c,v 5.3 2001-07-20 00:32:54 caress Exp $";
 	char	*function_name = "mbr_alm_sbsiomrg";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -434,7 +436,6 @@ int mbr_rt_sbsiomrg(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	struct mbf_sbsiomrg_data_struct *data;
 	struct mbsys_sb_struct *store;
 	char	*datacomment;
-	int	time_j[5];
 	int	i, j, k, l;
 	int	icenter;
 	int	jpos, jneg;
@@ -479,9 +480,28 @@ int mbr_rt_sbsiomrg(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		*error = MB_ERROR_EOF;
 		}
 
+	/* check for comment or unintelligible records */
+	if (status == MB_SUCCESS)
+		{
+		if (datacomment[0] == '#')
+			{
+			dataplus->kind = MB_DATA_COMMENT;
+			}
+		else if (data->year == 0)
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_UNINTELLIGIBLE;
+			}
+		else
+			{
+			dataplus->kind = MB_DATA_DATA;
+			}
+		}
+
 	/* byte swap the data if necessary */
 #ifdef BYTESWAPPED
-	if (status == MB_SUCCESS)
+	if (status == MB_SUCCESS 
+		&& dataplus->kind == MB_DATA_DATA)
 		{
 		data->year = mb_swap_short(data->year);
 		data->day = mb_swap_short(data->day);
@@ -504,24 +524,6 @@ int mbr_rt_sbsiomrg(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			data->spare2[i] = mb_swap_short(data->spare2[i]);
 		}
 #endif
-
-	/* check for comment or unintelligible records */
-	if (status == MB_SUCCESS)
-		{
-		if (data->year > 7000)
-			{
-			dataplus->kind = MB_DATA_COMMENT;
-			}
-		else if (data->year == 0)
-			{
-			status = MB_FAILURE;
-			*error = MB_ERROR_UNINTELLIGIBLE;
-			}
-		else
-			{
-			dataplus->kind = MB_DATA_DATA;
-			}
-		}
 
 	/* set kind and error in mb_io_ptr */
 	mb_io_ptr->new_kind = dataplus->kind;
@@ -695,7 +697,7 @@ int mbr_rt_sbsiomrg(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		store->minor = 0;
 
 		/* comment */
-		strncpy(store->comment,mb_io_ptr->new_comment,
+		strncpy(store->comment,&datacomment[2],
 			MBSYS_SB_MAXLINE);
 		}
 
@@ -723,8 +725,6 @@ int mbr_wt_sbsiomrg(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	struct mbf_sbsiomrg_data_struct *data;
 	struct mbsys_sb_struct *store;
 	char	*datacomment;
-	int	time_j[5];
-	double	lon, lat;
 	int	i, j;
 	int	offset, iend, id;
 

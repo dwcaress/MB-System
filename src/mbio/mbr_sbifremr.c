@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sbifremr.c	3/29/96
- *	$Id: mbr_sbifremr.c,v 5.3 2001-07-20 00:32:54 caress Exp $
+ *	$Id: mbr_sbifremr.c,v 5.4 2002-02-26 07:50:41 caress Exp $
  *
  *    Copyright (c) 1996, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -26,6 +26,9 @@
  * Location:	152 39.061W; 34 09.150S on R/V Ewing
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2001/07/20 00:32:54  caress
+ * Release 5.0.beta03
+ *
  * Revision 5.2  2001/03/22  20:50:02  caress
  * Trying to make version 5.0.beta0
  *
@@ -119,7 +122,7 @@ int mbr_wt_sbifremr(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_sbifremr(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_sbifremr.c,v 5.3 2001-07-20 00:32:54 caress Exp $";
+	static char res_id[]="$Id: mbr_sbifremr.c,v 5.4 2002-02-26 07:50:41 caress Exp $";
 	char	*function_name = "mbr_register_sbifremr";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -249,7 +252,7 @@ int mbr_info_sbifremr(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_sbifremr.c,v 5.3 2001-07-20 00:32:54 caress Exp $";
+	static char res_id[]="$Id: mbr_sbifremr.c,v 5.4 2002-02-26 07:50:41 caress Exp $";
 	char	*function_name = "mbr_info_sbifremr";
 	int	status = MB_SUCCESS;
 
@@ -318,7 +321,7 @@ int mbr_info_sbifremr(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_sbifremr(int verbose, void *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_sbifremr.c,v 5.3 2001-07-20 00:32:54 caress Exp $";
+ static char res_id[]="$Id: mbr_sbifremr.c,v 5.4 2002-02-26 07:50:41 caress Exp $";
 	char	*function_name = "mbr_alm_sbifremr";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -471,7 +474,7 @@ int mbr_rt_sbifremr(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		store->minor = 0;
 
 		/* comment */
-		strncpy(store->comment,mb_io_ptr->new_comment,
+		strncpy(store->comment,data->comment,
 			MBSYS_SB_MAXLINE);
 		}
 
