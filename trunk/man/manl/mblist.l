@@ -14,7 +14,7 @@ Version 4.2
 
 .SH DESCRIPTION
 \fBmblist\fP is a utility to list the contents of a multibeam 
-data file to stdout. \fBmblist\fP is tailored to 
+data file or files to stdout. \fBmblist\fP is tailored to 
 produce ASCII files in
 spreadsheet style, with data columns separated by tabs. The output of
 \fBmblist\fP can be piped to plotting and data analysis programs. The
@@ -80,10 +80,22 @@ is given in the \fBMBIO\fP manual page. Default: \fIformat\fP = 11.
 This "help" flag cause the program to print out a description
 of its operation and then exit immediately.
 .TP
-.B \fB-I\fIinfilename\fP
-Data file from which the input data will be read. If
-no input file is specified, the input will be read
-from stdin. Default = stdin.
+.B \fB-I\fIfilename\fP
+Sets the input filename. If \fIformat\fP > 0 (set with the 
+\fB-F\fP option) then the multibeam data contained in \fIinfile\fP 
+is read and processed. If \fIformat\fP < 0, then \fIinfile\fP
+is assumed to be an ascii file containing a list of the input multibeam
+data files to be processed and their formats.  The program will read 
+the data in each one of these files.
+In the \fIinfile\fP file, each
+data file should be followed by a data format identifier, e.g.:
+ 	datafile1 11
+ 	datafile2 24
+.br
+This program uses the \fBMBIO\fP library and will read or write any multibeam
+format supported by \fBMBIO\fP. A list of the multibeam data formats
+currently supported by \fBMBIO\fP and their identifier values
+is given in the \fBMBIO\fP manual page. Default: \fIinfile\fP = "stdin".
 .TP
 .B \fB-L\fIlonflip\fP
 Sets the range of the longitude values returned.

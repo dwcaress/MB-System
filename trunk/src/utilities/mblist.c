@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mblist.c	2/1/93
- *    $Id: mblist.c,v 4.15 1995-07-13 20:13:36 caress Exp $
+ *    $Id: mblist.c,v 4.16 1995-08-10 15:39:36 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -26,6 +26,10 @@
  *		in 1990.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.15  1995/07/13  20:13:36  caress
+ * Added output options x and y for longitude and latitude in
+ * integer degrees + decimal minutes + EW/NS
+ *
  * Revision 4.14  1995/06/06  13:31:48  caress
  * Fixed warnings under Solaris by explicit casting of strlen result.
  *
@@ -151,7 +155,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mblist.c,v 4.15 1995-07-13 20:13:36 caress Exp $";
+	static char rcs_id[] = "$Id: mblist.c,v 4.16 1995-08-10 15:39:36 caress Exp $";
 	static char program_name[] = "MBLIST";
 	static char help_message[] =  "MBLIST prints the specified contents of a multibeam data \nfile to stdout. The form of the output is quite flexible; \nMBLIST is tailored to produce ascii files in spreadsheet \nstyle with data columns separated by tabs.";
 	static char usage_message[] = "mblist [-Byr/mo/da/hr/mn/sc -Ddump_mode -Eyr/mo/da/hr/mn/sc \n-Fformat -H -Ifile -Llonflip -Mbeam_start/beam_end -Npixel_start/pixel_end \n-Ooptions -Ppings -Rw/e/s/n -Sspeed -Ttimegap -V]";
@@ -169,6 +173,9 @@ char **argv;
 	char	*message;
 
 	/* MBIO read control parameters */
+	int	read_datalist = MB_NO;
+	char	read_file[128];
+	FILE	*fp;
 	int	format;
 	int	pings;
 	int	lonflip;
@@ -252,6 +259,8 @@ char **argv;
 	double	navlon_old, navlat_old;
 	double	dx, dy, dist;
 
+	int	read_data;
+	char	line[128];
 	int	i, j, k;
 
 	/* get current default values */
@@ -312,7 +321,7 @@ char **argv;
 			break;
 		case 'I':
 		case 'i':
-			sscanf (optarg,"%s", file);
+			sscanf (optarg,"%s", read_file);
 			flag++;
 			break;
 		case 'L':
@@ -441,6 +450,39 @@ char **argv;
 		fprintf(stderr,"\nusage: %s\n", usage_message);
 		exit(error);
 		}
+
+	/* determine whether to read one file or a list of files */
+	if (format < 0)
+		read_datalist = MB_YES;
+
+	/* open file list */
+	if (read_datalist == MB_YES)
+	    {
+	    if ((fp = fopen(read_file,"r")) == NULL)
+		{
+		error = MB_ERROR_OPEN_FAIL;
+		fprintf(stderr,"\nUnable to open data list file: %s\n",
+			read_file);
+		fprintf(stderr,"\nProgram <%s> Terminated\n",
+			program_name);
+		exit(error);
+		}
+	    if (fgets(line,128,fp) != NULL
+		&& sscanf(line,"%s %d",file,&format) == 2)
+		read_data = MB_YES;
+	    else
+		read_data = MB_NO;
+	    }
+	/* else copy single filename to be read */
+	else
+	    {
+	    strcpy(file, read_file);
+	    read_data = MB_YES;
+	    }
+
+	/* loop over all files to be read */
+	while (read_data == MB_YES)
+	{
 
 	/* initialize reading the multibeam file */
 	if ((status = mb_read_init(
@@ -1125,6 +1167,25 @@ char **argv;
 	mb_free(verbose,&ss,&error); 
 	mb_free(verbose,&ssacrosstrack,&error); 
 	mb_free(verbose,&ssalongtrack,&error); 
+
+	/* figure out whether and what to read next */
+        if (read_datalist == MB_YES)
+                {
+                if (fgets(line,128,fp) != NULL
+                        && sscanf(line,"%s %d",file,&format) == 2)
+                        read_data = MB_YES;
+                else
+                        read_data = MB_NO;
+                }
+        else
+                {
+                read_data = MB_NO;
+                }
+
+	/* end loop over files in list */
+	}
+	if (read_datalist == MB_YES)
+		fclose (fp);
 
 	/* check memory */
 	if (verbose >= 4)
