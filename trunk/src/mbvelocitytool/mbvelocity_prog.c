@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:    mbvelocitytool.c        6/6/93
- *    $Id: mbvelocity_prog.c,v 5.3 2001-04-06 22:16:40 caress Exp $ 
+ *    $Id: mbvelocity_prog.c,v 5.4 2001-06-02 00:10:04 caress Exp $ 
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:        June 6, 1993 
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2001/04/06  22:16:40  caress
+ * Fixed bug.
+ *
  * Revision 5.2  2001/03/22  21:12:42  caress
  * Trying to make release 5.0.beta0.
  *
@@ -196,7 +199,7 @@ struct mbvt_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbvelocity_prog.c,v 5.3 2001-04-06 22:16:40 caress Exp $";
+static char rcs_id[] = "$Id: mbvelocity_prog.c,v 5.4 2001-06-02 00:10:04 caress Exp $";
 static char program_name[] = "MBVELOCITYTOOL";
 static char help_message[] = "MBVELOCITYTOOL is an interactive water velocity profile editor  \nused to examine multiple water velocity profiles and to create  \nnew water velocity profiles which can be used for the processing  \nof multibeam sonar data.  In general, this tool is used to  \nexamine water velocity profiles obtained from XBTs, CTDs, or  \ndatabases, and to construct new profiles consistent with these  \nvarious sources of information.";
 static char usage_message[] = "mbvelocitytool [-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ssvpfile -Wsvpfile -V -H]";
@@ -2271,6 +2274,50 @@ int mbvt_action_delete_node(int x, int y)
 		fprintf(stderr,"dbg2       status:      %d\n",status);
 		}
 
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbvt_get_format(char *file, int *form)
+{
+	/* local variables */
+	char	*function_name = "mbvt_get_format";
+	int	status = MB_SUCCESS;
+	char	tmp[MB_PATH_MAXLINE];
+	int	tform;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       file:        %s\n",file);
+		fprintf(stderr,"dbg2       format:      %d\n",*form);
+		}
+
+	/* get filenames */
+	/* look for MB suffix convention */
+	if ((status = mb_get_format(verbose, file, tmp, 
+				    &tform, &error))
+				    == MB_SUCCESS)
+	    {
+	    *form = tform;
+	    }		
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       format:      %d\n",*form);
+		fprintf(stderr,"dbg2       error:      %d\n",error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return */
 	return(status);
 }
 /*--------------------------------------------------------------------*/

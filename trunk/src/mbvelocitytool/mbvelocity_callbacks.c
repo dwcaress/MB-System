@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbvelocity_callbacks.c	4/7/97
- *    $Id: mbvelocity_callbacks.c,v 5.2 2001-03-22 21:12:42 caress Exp $
+ *    $Id: mbvelocity_callbacks.c,v 5.3 2001-06-02 00:10:04 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -26,6 +26,9 @@
  * Date:	April 7, 1997  GUI recast
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2001/03/22  21:12:42  caress
+ * Trying to make release 5.0.beta0.
+ *
  * Revision 5.1  2001/01/22  07:51:19  caress
  * Version 5.0.beta01
  *
@@ -746,37 +749,16 @@ do_fileselection_list( Widget w, XtPointer client_data, XtPointer call_data)
     if((int)strlen(selection_text) > 0)
 	    {
 	    /* look for MB suffix convention */
-	    if ((mb_suffix = strstr(selection_text,".mb")) != NULL)
-		    mb_len = strlen(mb_suffix);
-
-	    /* look for SeaBeam suffix convention */
-	    if ((sb_suffix = strstr(selection_text,".rec")) != NULL)
-		    sb_len = strlen(sb_suffix);
-
-	    /* if MB suffix convention used keep it */
-	    if (mb_len >= 4 && mb_len <= 6)
-		    {
-		    /* get the file format and set the widget */
-		    if (sscanf(&mb_suffix[3], "%d", &form) == 1)
-			    {
-			    format_gui = form;
-			    sprintf(value_text,"%d",format_gui);
-			    XmTextFieldSetString(
-				textField_mbformat, 
-				value_text);
-			    }
-		    }
-		    
-	    /* else look for ".rec" format 41 file */
-	    else if (sb_len == 4)
-		    {
-		    /* get the file format and set the widget */
-		    format_gui = 41;
-		    sprintf(value_text,"%d",format_gui);
-		    XmTextFieldSetString(
-			    textField_mbformat, 
-			    value_text);
-		    }
+	    form = format_gui;
+	    if ((status = mbvt_get_format(selection_text, 
+			    &form)) == MB_SUCCESS)
+		{
+		format_gui = form;
+		sprintf(value_text,"%d",format_gui);
+		XmTextFieldSetString(
+		    textField_mbformat, 
+		    value_text);
+		}
 	    }
 }
 
