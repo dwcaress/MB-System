@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcontour.c	6/4/93
- *    $Id: mbcontour.c,v 4.5 1994-10-21 11:34:20 caress Exp $
+ *    $Id: mbcontour.c,v 4.6 1994-12-21 20:23:30 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,12 @@
  * Date:	June 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.5  1994/10/21  11:34:20  caress
+ * Release V4.0
+ *
+ * Revision 4.5  1994/10/21  11:34:20  caress
+ * Release V4.0
+ *
  * Revision 4.4  1994/07/29  19:04:31  caress
  * Changes associated with supporting byte swapped Lynx OS and
  * >> using unix second time base.
@@ -96,7 +102,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbcontour.c,v 4.5 1994-10-21 11:34:20 caress Exp $";
+	static char rcs_id[] = "$Id: mbcontour.c,v 4.6 1994-12-21 20:23:30 caress Exp $";
 #ifdef MBCONTOURFILTER
 	static char program_name[] = "MBCONTOURFILTER";
 	static char help_message[] =  "MBCONTOURFILTER is a utility which creates a pen plot \ncontour map of multibeam swath bathymetry.  \nThe primary purpose of this program is to serve as \npart of a real-time plotting system.  The contour \nlevels and colors can be controlled \ndirectly or set implicitly using contour and color change intervals. \nContours can also be set to have ticks pointing downhill.";
@@ -726,7 +732,10 @@ char **argv;
 		/* update bookkeeping */
 		if (error == MB_ERROR_NO_ERROR)
 			{
-			if (*npings == 0 || (*npings > 0 
+			if (*npings == 0 || 
+				(*npings > 0 
+				&& contour_algorithm == MB_CONTOUR_TRIANGLES)
+				|| (*npings > 0 
 				&& *navlon != navlon_old 
 				&& *navlat != navlat_old))
 				{
