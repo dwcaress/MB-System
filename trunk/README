@@ -1,9 +1,9 @@
-MB-SYSTEM VERSION 5.0.BETA29 README FILE:
+MB-SYSTEM VERSION 5.0.BETA30 README FILE:
 ----------------------------------------
 
 This file is located at the top of the MB-System directory
 structure. This directory structure contains the version 
-5.0.betaf29 release of the MB-System software package for 
+5.0.beta30 release of the MB-System software package for 
 processing and display of swath sonar data.  
 
 MB-SYSTEM VERSION 5 DESCRIPTION:
@@ -26,6 +26,7 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
+Version 5.0.beta30     April 23, 2003
 Version 5.0.beta29     March 10, 2003
 Version 5.0.beta28     January 14, 2003
 Version 5.0.beta27     November 13, 2002
@@ -70,7 +71,7 @@ Palisades, NY 10964
 
 MB-SYSTEM COPYRIGHT, LICENSING AND CAVEAT:
 -----------------------------------------
-MB-System Copyright (C) 1993-2002 by
+MB-System Copyright (C) 1993-2003 by
 David W. Caress (caress@mbari.org)
   Monterey Bay Aquarium Research Institute
   Moss Landing, CA 95039
@@ -112,9 +113,70 @@ organizations involved in the design and maintenance of the
 MB-System software package are NOT responsible for any damage 
 that may follow from correct or incorrect use of these programs.
 
+MB-SYSTEM VERSION 5.0.BETA30 RELEASE NOTES:
+
+The version 5.0.beta30 release of MB-System includes
+some significant bug fixes and new features:
+  - An option (-K) has been added to mbgrid that underlays
+    bathymetry/topography grids with global or regional datasets
+    accessed through the GMT program grdraster.
+  - This -K option has also been added to the macro mbm_grid.
+  - The interpolation capability of mbgrid has been made
+    more flexible. Now the -C option has two parameters
+    (-Cclip/mode). If mode=1 (the default) the interpolation
+    is used to fill data gaps of two times clip cells or
+    less. If mode=2 the interpolation is used to fill all 
+    undefined cells within clip cells of swath data. The latter
+    option tends to add a band of interpolation around the
+    edges of a survey. If clip is greater than both of the
+    grid dimensions, or mode = 3, then the interpolation will
+    fill all undefined cells in the grid.
+  - Added ability to drape imagery over the bathymetry in
+    mbm_grd2geovrml.
+  - A bug has been fixed in mbprocess in which the program
+    bus faulted at mb_rt_init() when it was processing 
+    multiple files and a file not being raytraced followed
+    one that was being raytraced.
+  - Memory management bugs have been fixed in mbgrid.
+  - The SURF format i/o module has been improved, including
+    now handling SVP information (Thanks to Reinhard Holtkamp
+    of the New Zealand Defence Force).
+  - A set of problems in the format 56 and 57 i/o modules
+    relating to handling of secondary navigation has been
+    fixed (Thanks to Rolf Arne Ueland of Blom Maritime in 
+    Norway).
+  - The mbm_utm macro now saves and restores GMT environment
+    parameters so that it will work for users who use metric
+    page size units.
+  - A new program called mbareaclean has been added. 
+    MBareaclean identifies and flags artifacts in 
+    swath sonar bathymetry data within a specified 
+    area of interest. The input data are one swath 
+    file or a datalist referencing multiple swath files. 
+    An area is specified in longitude and latitude 
+    bounds, along with a bin size in meters. The area 
+    is divided into a grid with square cells of the 
+    specified bin size. As the data are read, each of
+    the soundings that fall within one of the bins is 
+    stored. Once all of data are read, one or more 
+    statistical tests are performed on the soundings
+    within each bin, providing there are a sufficient 
+    number of soundings. The edit events are output 
+    to edit save files which can be applied to the 
+    data by the program mbprocess.
+  - Features have been added to mbprocess and mbsvplist
+    to handle SVPs that have a nonzero first depth. Now
+    mbprocess will automatically add a depth & sound speed
+    pair with zero depth if needed, and mbsvplist has
+    an option (-Z) that forces it to output SVPs with
+    zero first depths.
+  - A bug has been fixed in the i/o module for current
+    Simrad multibeam data that failed to insert negative 
+    sonar depth values correctly.
+
 MB-SYSTEM VERSION 5.0.BETA29 RELEASE NOTES:
 
-The version 5.0.beta28 release of MB-System includes
+The version 5.0.beta29 release of MB-System includes
 some significant bug fixes and new features:
   - An error in the i/o module for the HSDS2RAW format have 
     been fixed. This problem prevented the code from compiling
@@ -1067,10 +1129,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.33 2003-03-10 22:42:28 caress Exp $
+RCS ID: $Id: README,v 5.34 2003-04-23 06:26:52 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.33  2003/03/10 22:42:28  caress
+Release 5.0.beta29
+
 Revision 5.32  2003/01/15 21:15:01  caress
 Release 5.0.beta28
 
