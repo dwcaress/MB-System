@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	install_makefiles	5/20/94
-#    $Id: install_makefiles,v 4.18 1999-04-16 00:26:05 caress Exp $
+#    $Id: install_makefiles,v 4.19 2000-09-30 05:07:19 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 1996, 1997 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -41,10 +41,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   May 20, 1994
 #
 # Version:
-#   $Id: install_makefiles,v 4.18 1999-04-16 00:26:05 caress Exp $
+#   $Id: install_makefiles,v 4.19 2000-09-30 05:07:19 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.18  1999/04/16  00:26:05  caress
+# Final 4.6 release?
+#
 # Revision 4.17  1999/02/04  23:55:57  caress
 # MB-System version 4.6beta7
 #
@@ -276,11 +279,11 @@ $LFLAGS = "-lm";
 $GRAPHICAL = "YES";
 $MOTIFINCDIR = "/usr/include/Xm";
 $MOTIFLIBS = "-lXm -lXt -lX11";
-$GMTVERSION = "3.2";
-$GMTLIBDIR = "/usr/local/gmt/src";
-$GMTINCDIR = "/usr/local/gmt/src";
-$NETCDFLIBDIR = "/usr/local/netcdf/lib";
-$NETCDFINCDIR = "/usr/local/netcdf/include";
+$GMTVERSION = "3.3";
+$GMTLIBDIR = "/mbari/local/gmt/src";
+$GMTINCDIR = "/mbari/local/gmt/src";
+$NETCDFLIBDIR = "/mbari/local/netcdf/lib";
+$NETCDFINCDIR = "/mbari/local/netcdf/include";
 $LEVITUS = "/usr/local/levitus/annual";
 #
 # **** LEAVE EVERYTHING ELSE BELOW ALONE ****
