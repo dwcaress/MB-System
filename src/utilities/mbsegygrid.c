@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsegygrid.c	6/12/2004
- *    $Id: mbsegygrid.c,v 5.0 2004-06-18 04:06:05 caress Exp $
+ *    $Id: mbsegygrid.c,v 5.1 2004-07-15 19:33:56 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	June 12, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2004/06/18 04:06:05  caress
+ * Adding support for segy i/o and working on support for Reson 7k format 88.
+ *
  *
  *
  *
@@ -47,11 +50,18 @@
 #include "gmt.h"
 
 /* local options */
-#define MBSEGYGRID_USESHOT	0
-#define MBSEGYGRID_USECMP	1
+#define MBSEGYGRID_USESHOT		0
+#define MBSEGYGRID_USECMP		1
+#define MBSEGYGRID_WINDOW_OFF		0
+#define MBSEGYGRID_WINDOW_ON		1
+#define MBSEGYGRID_WINDOW_SEAFLOOR	2
+#define MBSEGYGRID_WINDOW_DEPTH		3
+#define MBSEGYGRID_GAIN_OFF		0
+#define MBSEGYGRID_GAIN_TZERO		1
+#define MBSEGYGRID_GAIN_SEAFLOOR	2
 
 /* NaN value */
-double	NaN;
+float	NaN;
 
 int write_cdfgrd(int verbose, char *outfile, float *grid,
 		int nx, int ny, 
@@ -63,7 +73,7 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 char	*ctime();
 char	*getenv();
 
-static char rcs_id[] = "$Id: mbsegygrid.c,v 5.0 2004-06-18 04:06:05 caress Exp $";
+static char rcs_id[] = "$Id: mbsegygrid.c,v 5.1 2004-07-15 19:33:56 caress Exp $";
 
 static char program_name[] = "MBsegygrid";
 static char help_message[] =  "MBsegygrid grids trace data from segy data files.";
@@ -93,6 +103,8 @@ main (int argc, char **argv)
 	struct mb_segyfileheader_struct fileheader;
 	struct mb_segytraceheader_struct traceheader;
 	float	*trace = NULL;
+	float	*ptrace = NULL;
+	float	*wtrace = NULL;
 
 	/* grid controls */
 	char	gridfile[MB_PATH_MAXLINE];
@@ -106,6 +118,10 @@ main (int argc, char **argv)
 	double	timesweep = 0.0;
 	double	timedelay = 0.0;
 	double	sampleinterval = 0.0;
+	int	windowmode = MBSEGYGRID_WINDOW_OFF;
+	double	windowstart, windowend;
+	int	gainmode = MBSEGYGRID_GAIN_OFF;
+	double	gain = 0.0;
 	int	nsamples;
 	int	ntraces;
 	int	ngridx = 0;
@@ -116,8 +132,8 @@ main (int argc, char **argv)
 	double	xmax;
 	double	ymin;
 	double	ymax;
-	double	tracemin = 0.0;
-	double	tracemax = 0.0;
+	double	gridmintot = 0.0;
+	double	gridmaxtot = 0.0;
 	char	projection[MB_PATH_MAXLINE];
 	char	xlabel[MB_PATH_MAXLINE];
 	char	ylabel[MB_PATH_MAXLINE];
@@ -126,8 +142,13 @@ main (int argc, char **argv)
 
 	int	nread;
 	int	tracecount, tracenum, channum, traceok;
-	int	ix, iy, iys;
-	double	factor, stime;
+	double	tracemin, tracemax;
+	int	ix, iy, iys, igainstart;
+	int	iystart, iyend;
+	double	factor, gtime, btime, stime, dtime;
+	double	btimesave = 0.0;
+	double	stimesave = 0.0;
+	double	dtimesave = 0.0;
 	int	i, j, k, n;
 
 	/* set file to null */
@@ -137,11 +158,14 @@ main (int argc, char **argv)
 #ifdef GMT3_0
 	NaN = zero/zero;
 #else
-	GMT_make_dnan(NaN);
+	GMT_make_fnan (GMT_f_NaN);
+	GMT_make_dnan (GMT_d_NaN);
+	GMT_grd_in_nan_value = GMT_grd_out_nan_value = GMT_d_NaN;
+	GMT_make_fnan(NaN);
 #endif
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "D:d:I:i:O:o:S:s:T:t:VvWwHh")) != -1)
+	while ((c = getopt(argc, argv, "D:d:G:g:I:i:O:o:S:s:T:t:VvW:w:Hh")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -155,6 +179,11 @@ main (int argc, char **argv)
 		case 'D':
 		case 'd':
 			n = sscanf (optarg,"%d/%d", &decimatex, &decimatey);
+			flag++;
+			break;
+		case 'G':
+		case 'g':
+			n = sscanf (optarg,"%d/%lf", &gainmode, &gain);
 			flag++;
 			break;
 		case 'I':
@@ -191,6 +220,11 @@ main (int argc, char **argv)
 			n = sscanf (optarg,"%lf/%lf", &timesweep, &timedelay);
 			if (n < 2)
 				timedelay = 0.0;
+			flag++;
+			break;
+		case 'W':
+		case 'w':
+			n = sscanf (optarg,"%d/%lf/%lf", &windowmode, &windowstart, &windowend);
 			flag++;
 			break;
 		case '?':
@@ -238,6 +272,11 @@ main (int argc, char **argv)
 		fprintf(stderr,"dbg2       ngridx:         %d\n",ngridx);
 		fprintf(stderr,"dbg2       ngridy:         %d\n",ngridy);
 		fprintf(stderr,"dbg2       ngridxy:        %d\n",ngridxy);
+		fprintf(stderr,"dbg2       windowmode:     %d\n",windowmode);
+		fprintf(stderr,"dbg2       windowstart:    %f\n",windowstart);
+		fprintf(stderr,"dbg2       windowend:      %f\n",windowend);
+		fprintf(stderr,"dbg2       gainmode:       %d\n",gainmode);
+		fprintf(stderr,"dbg2       gain:           %f\n",gain);
 		}
 
 	/* if help desired then print it and exit */
@@ -289,8 +328,22 @@ main (int argc, char **argv)
 	ymin = ymax - ngridy * sampleinterval;
 	/*ymax = timedelay + timesweep + 0.5 * sampleinterval / decimatey;*/
 	
+	/* get start and end samples */
+	if (windowmode == MBSEGYGRID_WINDOW_OFF)
+		{
+		iystart = 0;
+		iyend = ngridy - 1;
+		}
+	else if (windowmode == MBSEGYGRID_WINDOW_ON)
+		{
+		iystart = MAX((windowstart) / sampleinterval, 0);
+		iyend = MIN((windowend) / sampleinterval, ngridy - 1);
+		}		
+	
 	/* allocate memory for grid array */
 	status = mb_malloc(verbose, 2 * ngridxy * sizeof(float), &grid, &error);
+	status = mb_malloc(verbose, ngridy * sizeof(float), &ptrace, &error);
+	status = mb_malloc(verbose, ngridy * sizeof(float), &wtrace, &error);
 	
 	/* proceed if all ok */
 	if (status == MB_SUCCESS)
@@ -299,6 +352,13 @@ main (int argc, char **argv)
 		/* fill grid with NaNs */
 		for (i=0;i<ngridxy;i++)
 			grid[i] = NaN;
+			
+		/* initialize working trace */
+		for (iy=0;iy<ngridy;iy++)
+			{
+			ptrace[iy] = 0.0;
+			wtrace[iy] = 0.0;
+			}
 
 		/* read and print data */
 		nread = 0;
@@ -339,8 +399,28 @@ main (int argc, char **argv)
 					factor = 1.0 / ((float) (-traceheader.elev_scalar));
 				else
 					factor = (float) traceheader.elev_scalar;
-				stime = factor * traceheader.src_depth / 750.0 + 0.001 * traceheader.delay_mils;
-				iys = (stime - timedelay) / sampleinterval;
+				if (traceheader.src_depth > 0)
+					{
+					btime = factor * traceheader.src_depth / 750.0 + 0.001 * traceheader.delay_mils;
+					dtime = factor * traceheader.src_depth / 750.0;
+					btimesave = btime;
+					dtimesave = dtime;
+					}
+				else
+					{
+					btime = btimesave;
+					dtime = dtimesave;
+					}
+				if (traceheader.src_wbd > 0)
+					{
+					stime = factor * traceheader.src_wbd / 750.0;
+					stimesave = stime;
+					}
+				else
+					{
+					stime = stimesave;
+					}
+				iys = (btime - timedelay) / sampleinterval;
 				
 				/* now check if this is a trace of interest */
 				traceok = MB_YES;
@@ -353,7 +433,17 @@ main (int argc, char **argv)
 					traceok = MB_NO;
 				else if (tracecount % decimatex != 0)
 					traceok = MB_NO;
-				if (verbose > 0)
+
+				/* get trace min and max */
+				tracemin = trace[0];
+				tracemax = trace[0];
+				for (i=0;i<traceheader.nsamps;i++)
+					{
+					tracemin = MIN(tracemin, trace[i]);
+					tracemax = MAX(tracemin, trace[i]);
+					}	
+
+				if (verbose > 0 || nread % 25 == 0)
 					{
 					if (traceok == MB_YES) 
 						fprintf(stderr,"PROCESS ");
@@ -365,24 +455,80 @@ main (int argc, char **argv)
 					else 
 						fprintf(stderr,"read:%d position:%d rp:%d channel:%d ",
 							nread,tracecount,tracenum,channum);
-					fprintf(stderr,"%4.4d/%3.3d %2.2d:%2.2d:%2.2d.%3.3d samples:%d interval:%d usec\n",
+					fprintf(stderr,"%4.4d/%3.3d %2.2d:%2.2d:%2.2d.%3.3d samples:%d interval:%d usec minmax: %f %f\n",
 					traceheader.year,traceheader.day_of_yr,
 					traceheader.hour,traceheader.min,traceheader.sec,traceheader.mils,
-					traceheader.nsamps,traceheader.si_micros);
+					traceheader.nsamps,traceheader.si_micros,
+					tracemin, tracemax);
 					}
 
 				/* now actually process traces of interest */
 				if (traceok == MB_YES)
 					{
+					/* get bounds of trace in depth window mode */
+					if (windowmode == MBSEGYGRID_WINDOW_DEPTH)
+						{
+						iystart = (int)((dtime + windowstart - timedelay) / sampleinterval);
+						iystart = MAX(iystart, 0);
+						iyend = (int)((dtime + windowend - timedelay) / sampleinterval);
+						iyend = MIN(iyend, ngridy - 1);
+						}
+					else if (windowmode == MBSEGYGRID_WINDOW_SEAFLOOR)
+						{
+						iystart = MAX((stime + windowstart - timedelay) / sampleinterval, 0);
+						iyend = MIN((stime + windowend - timedelay) / sampleinterval, ngridy - 1);
+						}
+
+					/* apply gain if desired */
+					if (gainmode != MBSEGYGRID_GAIN_OFF)
+						{
+						if (gainmode == MBSEGYGRID_GAIN_TZERO)
+							igainstart = btime / sampleinterval;
+						else if (gainmode == MBSEGYGRID_GAIN_SEAFLOOR)
+							igainstart = stime / sampleinterval;
+						igainstart = MAX(0, igainstart);
+						for (i=igainstart;i<=((iyend-iys)*decimatey);i++)
+							{
+							iy = iys + i / decimatey;
+							if (iy >= iystart && iy <= iyend)
+								{
+								gtime = (i - igainstart) * sampleinterval;
+								factor = 1.0 + gain * gtime;
+								factor = pow(10.0, gtime * gain);
+/*fprintf(stderr,"i:%d iy:%d factor:%f trace[%d]: %f",
+i,iy,factor,i,trace[i]);*/
+								trace[i] = trace[i] * factor;
+/*fprintf(stderr," %f\n",trace[i]);*/
+								}
+							}
+						}
+						
+					/* process trace */
 					for (i=0;i<traceheader.nsamps;i+=decimatey)
 						{
 						iy = iys + i / decimatey;
 						k = iy * ngridx + ix;
-						if (iy >= 0 && iy < ngridy)
+						if (iy >= iystart && iy <= iyend)
 							{
-							grid[k] = trace[i];
-							tracemin = MIN(trace[i], tracemin);
-							tracemax = MAX(trace[i], tracemax);
+							ptrace[iy] += trace[i];
+							wtrace[iy] += 1.0;
+							}
+						}
+						
+					/* if this is the last trace to go in this column, add it to the grid */
+					if ((tracecount + 1) % decimatex == 0)
+						{
+						for (iy=0;iy<ngridy;iy++)
+							{
+							k = iy * ngridx + ix;
+							if (wtrace[iy] > 0.0)
+								{
+								grid[k] = ptrace[iy] / wtrace[iy];
+								gridmintot = MIN(grid[k], gridmintot);
+								gridmaxtot = MAX(grid[k], gridmaxtot);
+								}
+							ptrace[iy] = 0.0;
+							wtrace[iy] = 0.0;
 							}
 						}
 					}
@@ -405,7 +551,7 @@ main (int argc, char **argv)
 	status = write_cdfgrd(verbose, gridfile, grid,
 		ngridx, ngridy, 
 		xmin, xmax, ymin, ymax,
-		tracemin, tracemax, (double) decimatex, sampleinterval, 
+		gridmintot, gridmaxtot, (double) decimatex, sampleinterval, 
 		xlabel, ylabel, zlabel, title, 
 		projection, argc, argv, &error);
 	
@@ -415,6 +561,8 @@ main (int argc, char **argv)
 
 	/* deallocate memory for grid array */
 	status = mb_free(verbose, &grid, &error);
+	status = mb_free(verbose, &ptrace, &error);
+	status = mb_free(verbose, &wtrace, &error);
 
 	/* check memory */
 	if (verbose >= 4)
@@ -456,7 +604,7 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 	char	*message;
 	char	*ctime();
 	char	*getenv();
-	int	i;
+	int	i,j,k;
 
 	/* print input debug statements */
 	if (verbose >= 0)
@@ -473,6 +621,8 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 		fprintf(stderr,"dbg2       xmax:       %f\n",xmax);
 		fprintf(stderr,"dbg2       ymin:       %f\n",ymin);
 		fprintf(stderr,"dbg2       ymax:       %f\n",ymax);
+		fprintf(stderr,"dbg2       zmin:       %f\n",zmin);
+		fprintf(stderr,"dbg2       zmax:       %f\n",zmax);
 		fprintf(stderr,"dbg2       dx:         %f\n",dx);
 		fprintf(stderr,"dbg2       dy:         %f\n",dy);
 		fprintf(stderr,"dbg2       xlab:       %s\n",xlab);
@@ -537,6 +687,12 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 #ifdef GMT3_0
 	write_grd(outfile, &grd, grid, w, e, s, n, pad, complex);
 #else
+/*for (i=0;i<nx;i++)
+for (j=0;j<ny;j++)
+{
+k = j * nx + i;
+fprintf(stderr,"%d %d %d %f\n",i,j,k,grid[k]);
+}*/
 	GMT_write_grd(outfile, &grd, grid, w, e, s, n, pad, complex);
 #endif
 
