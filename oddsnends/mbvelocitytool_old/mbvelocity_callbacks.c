@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbvelocity_callbacks.c	4/7/97
- *    $Id: mbvelocity_callbacks.c,v 4.0 1997-04-21 17:16:20 caress Exp $
+ *    $Id: mbvelocity_callbacks.c,v 4.1 1997-04-22 19:25:26 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -24,6 +24,9 @@
  * Date:	April 7, 1997  GUI recast
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1997/04/21  17:16:20  caress
+ * MB-System 4.5 Beta Release.
+ *
  * Revision 4.0  1997/04/16  21:36:42  caress
  * Complete rewrite of mbvelocitytool without uid file.
  *
@@ -119,6 +122,7 @@ unsigned long pixel_values_gui[NCOLORS];
 XColor db_color;
 
 /* Global mbvelocitytool definitions */
+int	expose_plot_ok = False;
 int	edit_gui;
 int	ndisplay_gui;
 double	maxdepth_gui;
@@ -441,12 +445,14 @@ Syntax Error - specify BxSetValuesCB data as\n\t\
 /*--------------------------------------------------------------------*/
 
 void
-do_mbvelocity_init(app, argc, argv)
- XtAppContext	app;
+do_mbvelocity_init(argc, argv)
  int argc;
  char **argv;
 {
     int	    i;
+    
+    /* make sure expose plots are off */
+    expose_plot_ok = False;
     
     /* get additional widgets */
     fileSelectionList = (Widget) 
@@ -465,7 +471,6 @@ do_mbvelocity_init(app, argc, argv)
 				    XmDIALOG_HELP_BUTTON));
 
     /* Setup the entire screen. */
-    app_context = app;
     display = XtDisplay(drawingArea);
     colormap = DefaultColormap(display,XDefaultScreen(display));
     
@@ -562,6 +567,9 @@ do_mbvelocity_init(app, argc, argv)
     status = mbvt_init(argc,argv);
     
     do_set_controls();
+    
+    /* finally allow expose plots */
+    expose_plot_ok = False;
 }
 
 /*--------------------------------------------------------------------*/
@@ -626,11 +634,17 @@ do_process_mb(w, client_data, call_data)
     XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call_data;
 
     fprintf(stderr, "\nAbout to process data\n");
+	    
+    /* turn off expose plots */
+    expose_plot_ok = False;
 
     /* process Swath Sonar data */
     status = mbvt_process_multibeam();
     if (status != 1)
 	    XBell(display,100);
+	    
+    /* turn on expose plots */
+    expose_plot_ok = True;
 
     /* replot everything */
     do_set_controls();
@@ -815,7 +829,10 @@ do_open(w, client_data, call_data)
 	      }
 	    }
        else if (open_type == MBVT_IO_OPEN_MB)
-	    {
+	    {	    
+	    /* turn off expose plots */
+	    expose_plot_ok = False;
+
 	    /* get format id value */
 	    get_text_string(textField_mbformat, format_text);
 	    sscanf(format_text, "%d", &format_gui);
@@ -838,6 +855,9 @@ do_open(w, client_data, call_data)
 	       set_label_string(label_status_edit, 
 			message_str);
 	      }
+	    
+	    /* turn on expose plots */
+	    expose_plot_ok = True;
 	    }
 
        if (status != 1)
@@ -1043,8 +1063,49 @@ do_expose(w, client_data, call_data)
 {
     XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call_data;
 
-    mbvt_plot();
+    if (expose_plot_ok == True)
+	    mbvt_plot();
 }
+
+/*--------------------------------------------------------------------*/
+
+int
+do_wait_until_viewed(app)
+XtAppContext app;
+{
+    Widget  topshell;
+    Window  topwindow;
+    XWindowAttributes	xwa;
+    XEvent  event;
+    
+    /* set app_context */
+    app_context = app;
+    
+    /* find the top level shell */
+    for (topshell = drawingArea; 
+	    !XtIsTopLevelShell(topshell);
+	    topshell = XtParent(topshell))
+	;
+	
+    /* keep processing events until it is viewed */
+    if (XtIsRealized(topshell))
+	{
+	topwindow = XtWindow(topshell);
+	
+	/* wait for the window to be mapped */
+	while (XGetWindowAttributes(
+			XtDisplay(drawingArea), 
+			topwindow, &xwa)
+		&& xwa.map_state != IsViewable)
+	    {
+	    XtAppNextEvent(app_context, &event);
+	    XtDispatchEvent(&event);
+	    }
+	}
+	
+    XmUpdateDisplay(topshell);
+}
+
 /*--------------------------------------------------------------------*/
 
 int

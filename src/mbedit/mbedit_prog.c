@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	4/8/93
- *    $Id: mbedit_prog.c,v 4.14 1997-04-21 16:56:14 caress Exp $
+ *    $Id: mbedit_prog.c,v 4.15 1997-04-22 19:26:36 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -24,6 +24,9 @@
  * Date:	March 28, 1997  GUI recast
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.14  1997/04/21  16:56:14  caress
+ * MB-System 4.5 Beta Release.
+ *
  * Revision 4.14  1997/04/16  21:29:30  caress
  * Complete rewrite without uid file.
  *
@@ -183,8 +186,8 @@ struct mbedit_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbedit_prog.c,v 4.14 1997-04-21 16:56:14 caress Exp $";
-static char program_name[] = "MBEDIT";
+static char rcs_id[] = "$Id: mbedit_prog.c,v 4.15 1997-04-22 19:26:36 caress Exp $";
+static char program_name[] = "MBedit";
 static char help_message[] =  
 "MBedit is an interactive editor used to identify and flag\n\
 artifacts in swath sonar bathymetry data. Once a file has\n\
@@ -482,20 +485,51 @@ int	*startup_file;
 
 	/* if file specified then use it */
 	if (fileflag > 0)
-		{
-		status = mbedit_action_open(ifile,format,
-				startup_save_mode, output_mode, 
-				plot_width, exager,
-				x_interval, y_interval, plot_size,
-				&buff_size, &buff_size_max,
-				&holdd_size, 
-				&ndump, &nload, &nbuff,
-				&nlist, &current_id, &nplot);
-		if (status = MB_SUCCESS)
-			*startup_file = MB_YES;
-		}
+		*startup_file = MB_YES;
 	else
 		*startup_file = MB_NO;
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       startup_file: %d\n",*startup_file);
+		fprintf(stderr,"dbg2       error:        %d\n",error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return */
+	return(status);
+}
+
+/*--------------------------------------------------------------------*/
+int mbedit_startup_file()
+{
+	/* local variables */
+	char	*function_name = "mbedit_startup_file";
+	int	status = MB_SUCCESS;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		}
+
+	/* open startup file */
+	status = mbedit_action_open(ifile,format,
+			startup_save_mode, output_mode, 
+			plot_width, exager,
+			x_interval, y_interval, plot_size,
+			show_flagged, 
+			&buff_size, &buff_size_max,
+			&holdd_size, 
+			&ndump, &nload, &nbuff,
+			&nlist, &current_id, &nplot);
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -813,7 +847,7 @@ int	*nplt;
 /*--------------------------------------------------------------------*/
 int mbedit_action_next_buffer(hold_size,buffer_size,
 	plwd,exgr,xntrvl,yntrvl,plt_size,sh_flggd,ndumped,
-	nloaded,nbuffer,ngood,icurrent,nplt)
+	nloaded,nbuffer,ngood,icurrent,nplt,quit)
 int	hold_size;
 int	buffer_size;
 int	plwd;
@@ -828,6 +862,7 @@ int	*nbuffer;
 int	*ngood;
 int	*icurrent;
 int	*nplt;
+int	*quit;
 {
 	/* local variables */
 	char	*function_name = "mbedit_action_next_buffer";
@@ -852,6 +887,9 @@ int	*nplt;
 
 	/* clear the screen */
 	status = mbedit_clear_screen();
+	
+	/* set quit off */
+	*quit = MB_NO;
 
 	/* check if a file has been opened */
 	if (file_open == MB_YES)
@@ -878,6 +916,18 @@ int	*nplt;
 			status = mbedit_close_file();
 			*ndumped = *ndumped + save_dumped;
 			*nplt = 0;
+				
+			/* if in normal mode last next_buffer 
+				does not mean quit,
+				if in gui mode it does mean quit */
+			if (gui_mode == MB_YES)
+				*quit = MB_YES;
+			else
+				*quit = MB_NO;
+		
+			/* if quitting let the world know... */
+			if (*quit == MB_YES && verbose >= 1)
+				fprintf(stderr,"\nQuitting MBedit\nBye Bye...\n");
 			}
 
 		/* else set up plotting */
@@ -917,7 +967,8 @@ int	*nplt;
 		fprintf(stderr,"dbg2       nbuffer:     %d\n",*nbuffer);
 		fprintf(stderr,"dbg2       ngood:       %d\n",*ngood);
 		fprintf(stderr,"dbg2       icurrent:    %d\n",*icurrent);
-		fprintf(stderr,"dbg2       nplot:        %d\n",*nplt);
+		fprintf(stderr,"dbg2       nplot:       %d\n",*nplt);
+		fprintf(stderr,"dbg2       quit:        %d\n",*quit);
 		fprintf(stderr,"dbg2       error:       %d\n",error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:      %d\n",status);
@@ -1065,7 +1116,7 @@ int	*quit;
 
 	/* if quitting let the world know... */
 	if (*quit == MB_YES && verbose >= 1)
-		fprintf(stderr,"\nShutting MBEDIT down without further ado...\n");
+		fprintf(stderr,"\nShutting MBedit down without further ado...\n");
 
 	/* call routine to deal with saving the current file, if any */
 	if (file_open == MB_YES)
@@ -1074,7 +1125,7 @@ int	*quit;
 
 	/* if quitting let the world know... */
 	if (*quit == MB_YES && verbose >= 1)
-		fprintf(stderr,"\nQuitting MBEDIT\nBye Bye...\n");
+		fprintf(stderr,"\nQuitting MBedit\nBye Bye...\n");
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -1122,7 +1173,7 @@ int	*icurrent;
 
 	/* let the world know... */
 	if (verbose >= 1)
-		fprintf(stderr,"\nShutting MBEDIT down without further ado...\n");
+		fprintf(stderr,"\nShutting MBedit down without further ado...\n");
 
 	/* call routine to deal with saving the current file, if any */
 	if (file_open == MB_YES)
@@ -1131,7 +1182,7 @@ int	*icurrent;
 
 	/* let the world know... */
 	if (verbose >= 1)
-		fprintf(stderr,"\nQuitting MBEDIT\nBye Bye...\n");
+		fprintf(stderr,"\nQuitting MBedit\nBye Bye...\n");
 
 	/* print output debug statements */
 	if (verbose >= 2)

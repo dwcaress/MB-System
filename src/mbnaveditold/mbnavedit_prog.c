@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_prog.c	6/23/95
- *    $Id: mbnavedit_prog.c,v 4.8 1997-04-21 17:07:38 caress Exp $
+ *    $Id: mbnavedit_prog.c,v 4.9 1997-04-22 19:25:57 caress Exp $
  *
  *    Copyright (c) 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,9 @@
  * Date:	June 23,  1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.8  1997/04/21  17:07:38  caress
+ * MB-System 4.5 Beta Release.
+ *
  * Revision 4.8  1997/04/16  21:40:29  caress
  * Version for MB-System 4.5.
  *
@@ -127,7 +130,7 @@ struct mbnavedit_plot_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbnavedit_prog.c,v 4.8 1997-04-21 17:07:38 caress Exp $";
+static char rcs_id[] = "$Id: mbnavedit_prog.c,v 4.9 1997-04-22 19:25:57 caress Exp $";
 static char program_name[] = "MBNAVEDIT";
 static char help_message[] =  "MBNAVEDIT is an interactive navigation editor for swath sonar data.\n\tIt can work with any data format supported by the MBIO library.\n";
 static char usage_message[] = "mbnavedit [-Byr/mo/da/hr/mn/sc -D  -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ooutfile -V -H]";
@@ -1225,7 +1228,8 @@ int mbnavedit_clear_screen()
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbnavedit_action_next_buffer()
+int mbnavedit_action_next_buffer(quit)
+int	*quit;
 {
 	/* local variables */
 	char	*function_name = "mbnavedit_action_next_buffer";
@@ -1241,6 +1245,9 @@ int mbnavedit_action_next_buffer()
 
 	/* clear the screen */
 	status = mbnavedit_clear_screen();
+	
+	/* set quit off */
+	*quit = MB_NO;
 
 	/* check if a file has been opened */
 	if (file_open == MB_YES)
@@ -1265,6 +1272,18 @@ int mbnavedit_action_next_buffer()
 			status = mbnavedit_dump_data(0);
 			status = mbnavedit_close_file();
 			ndump = ndump + save_dumped;
+				
+			/* if in normal mode last next_buffer 
+				does not mean quit,
+				if in gui mode it does mean quit */
+			if (gui_mode == MB_YES)
+				*quit = MB_YES;
+			else
+				*quit = MB_NO;
+		
+			/* if quitting let the world know... */
+			if (*quit == MB_YES && verbose >= 1)
+				fprintf(stderr,"\nQuitting MBnavedit\nBye Bye...\n");
 			}
 
 		/* else plot it */
@@ -1294,6 +1313,7 @@ int mbnavedit_action_next_buffer()
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       quit:        %d\n",*quit);
 		fprintf(stderr,"dbg2       error:       %d\n",error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:      %d\n",status);
@@ -1411,7 +1431,7 @@ int	*quit;
 
 	/* if quitting let the world know... */
 	if (*quit == MB_YES && verbose >= 1)
-		fprintf(stderr,"\nShutting MBNAVEDIT down without further ado...\n");
+		fprintf(stderr,"\nShutting MBnavedit down without further ado...\n");
 
 	/* call routine to deal with saving the current file, if any */
 	if (file_open == MB_YES)
@@ -1419,7 +1439,7 @@ int	*quit;
 
 	/* if quitting let the world know... */
 	if (*quit == MB_YES && verbose >= 1)
-		fprintf(stderr,"\nQuitting MBNAVEDIT\nBye Bye...\n");
+		fprintf(stderr,"\nQuitting MBnavedit\nBye Bye...\n");
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -1454,7 +1474,7 @@ int mbnavedit_action_quit()
 
 	/* let the world know... */
 	if (verbose >= 1)
-		fprintf(stderr,"\nShutting MBNAVEDIT down without further ado...\n");
+		fprintf(stderr,"\nShutting MBnavedit down without further ado...\n");
 
 	/* call routine to deal with saving the current file, if any */
 	if (file_open == MB_YES)
@@ -1462,7 +1482,7 @@ int mbnavedit_action_quit()
 
 	/* let the world know... */
 	if (verbose >= 1)
-		fprintf(stderr,"\nQuitting MBNAVEDIT\nBye Bye...\n");
+		fprintf(stderr,"\nQuitting MBnavedit\nBye Bye...\n");
 
 	/* print output debug statements */
 	if (verbose >= 2)

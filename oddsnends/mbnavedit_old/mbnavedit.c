@@ -129,8 +129,11 @@ int main(argc, argv)
     
     /* Begin user code block <app_procedures> */
     
+    /* initialize app value and wait until view realized */
+    do_wait_until_viewed(app);
+    
     /* initialize everything */
-    do_mbnavedit_init(app, argc,argv);
+    do_mbnavedit_init(argc,argv);
     
     /* End user code block <app_procedures> */
     
