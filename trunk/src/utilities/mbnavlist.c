@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavlist.c	2/1/93
- *    $Id: mbnavlist.c,v 5.7 2003-07-02 18:14:19 caress Exp $
+ *    $Id: mbnavlist.c,v 5.8 2003-07-30 16:41:06 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  *
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2003/07/02 18:14:19  caress
+ * Release 5.0.0
+ *
  * Revision 5.6  2003/04/17 21:18:57  caress
  * Release 5.0.beta30
  *
@@ -94,7 +97,7 @@ double	NaN;
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbnavlist.c,v 5.7 2003-07-02 18:14:19 caress Exp $";
+	static char rcs_id[] = "$Id: mbnavlist.c,v 5.8 2003-07-30 16:41:06 caress Exp $";
 	static char program_name[] = "mbnavlist";
 	static char help_message[] =  "mbnavlist prints the specified contents of navigation records\nin a swath sonar data file to stdout. The form of the \noutput is quite flexible; mbnavlist is tailored to produce \nascii files in spreadsheet style with data columns separated by tabs.";
 	static char usage_message[] = "mbnavlist [-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc \n-Fformat -H -Ifile -Llonflip \n-Ooptions -Rw/e/s/n -Sspeed \n-Ttimegap -V -Zsegment]";
@@ -204,8 +207,8 @@ main (int argc, char **argv)
 	status = mb_defaults(verbose,&format,&pings,&lonflip,bounds,
 		btime_i,etime_i,&speedmin,&timegap);
 
-	/* set default input to stdin */
-	strcpy (read_file, "stdin");
+	/* set default input to datalist.mb-1 */
+	strcpy (read_file, "datalist.mb-1");
 
 	/* set up the default list controls 
 		(lon, lat, along-track distance, center beam depth) */
