@@ -302,7 +302,7 @@ unsigned int main(argc, argv)
 	if(display == NULL)
 	{
 	 fprintf(stderr, "%s: CAN'T OPEN DISPLAY", argv[0]);
-	 exit(1);
+	 exit(-1);
 	}
 
 	n = 0;
@@ -864,9 +864,14 @@ static void do_done(w, tag, list)
 	int *tag;
 	XmListCallbackStruct *list;
 {
+	int	quit;
+	
 	status = mbedit_action_done(buffer_size,&ndumped,&nloaded,
-			&nbuffer,&ngood,&icurrent);
+			&nbuffer,&ngood,&icurrent,&quit);
 	if (status == 0) XBell(theDisplay,100);
+	
+	if (quit)
+		exit(0);
 }
 
 /********************************************************************/
@@ -961,7 +966,7 @@ static void do_quit(w, tag, list)
 			&nbuffer,&ngood,&icurrent);
 	if (status == 0) XBell(theDisplay,100);
 	
-		exit(0);
+	exit(0);
 
 }
 
