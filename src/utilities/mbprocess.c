@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbprocess.c	3/31/93
- *    $Id: mbprocess.c,v 5.29 2003-04-17 21:18:57 caress Exp $
+ *    $Id: mbprocess.c,v 5.30 2003-07-26 18:01:22 caress Exp $
  *
  *    Copyright (c) 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -36,6 +36,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.29  2003/04/17 21:18:57  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.28  2003/04/05 14:56:11  caress
  * Fixed bug where program bus faulted at mb_rt_init if it encountered a file not undergoing
  * raytracing after raytracing has been applied.
@@ -196,7 +199,7 @@ int get_anglecorr(int verbose,
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbprocess.c,v 5.29 2003-04-17 21:18:57 caress Exp $";
+	static char rcs_id[] = "$Id: mbprocess.c,v 5.30 2003-07-26 18:01:22 caress Exp $";
 	static char program_name[] = "mbprocess";
 	static char help_message[] =  "mbprocess is a tool for processing swath sonar bathymetry data.\n\
 This program performs a number of functions, including:\n\
@@ -4572,18 +4575,18 @@ j, i, slopeangle, rawangle, correction, reference_amp, ss[i]);*/
 		}
 for (i=0;i<esf.nedit;i++)
 {
-if (esf.edit_use[i] == 1000)
+if (esf.edit[i].use == 1000)
 fprintf(stderr,"BEAM FLAG TIED TO NULL BEAM: i:%d edit: %f %d %d   %d\n",
-i,esf.edit_time_d[i],esf.edit_beam[i],esf.edit_action[i],esf.edit_use[i]);
-else if (esf.edit_use[i] == 100)
+i,esf.edit[i].time_d,esf.edit[i].beam,esf.edit[i].action,esf.edit[i].use);
+else if (esf.edit[i].use == 100)
 fprintf(stderr,"DUPLICATE BEAM FLAG:         i:%d edit: %f %d %d   %d\n",
-i,esf.edit_time_d[i],esf.edit_beam[i],esf.edit_action[i],esf.edit_use[i]);
-else if (esf.edit_use[i] != 1)
+i,esf.edit[i].time_d,esf.edit[i].beam,esf.edit[i].action,esf.edit[i].use);
+else if (esf.edit[i].use != 1)
 fprintf(stderr,"BEAM FLAG NOT USED:          i:%d edit: %f %d %d   %d\n",
-i,esf.edit_time_d[i],esf.edit_beam[i],esf.edit_action[i],esf.edit_use[i]);
-/*else if (esf.edit_use[i] == 1)
+i,esf.edit[i].time_d,esf.edit[i].beam,esf.edit[i].action,esf.edit[i].use);
+/*else if (esf.edit[i].use == 1)
 fprintf(stderr,"BEAM FLAG USED:              i:%d edit: %f %d %d   %d\n",
-i,esf.edit_time_d[i],esf.edit_beam[i],esf.edit_action[i],esf.edit_use[i]);*/
+i,esf.edit[i].time_d,esf.edit[i].beam,esf.edit[i].action,esf.edit[i].use);*/
 }
 
 	/* close the files */

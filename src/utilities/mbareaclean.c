@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbareaclean.c	2/27/2003
- *    $Id: mbareaclean.c,v 5.1 2003-04-17 21:17:10 caress Exp $
+ *    $Id: mbareaclean.c,v 5.2 2003-07-26 18:01:22 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -37,6 +37,9 @@
  *		Amsterdam Airport
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2003/04/17 21:17:10  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.0  2003/03/10 20:47:08  caress
  * Initial version.
  *
@@ -113,7 +116,7 @@ int getsoundingptr(int verbose, int soundingid,
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbareaclean.c,v 5.1 2003-04-17 21:17:10 caress Exp $";
+	static char rcs_id[] = "$Id: mbareaclean.c,v 5.2 2003-07-26 18:01:22 caress Exp $";
 	static char program_name[] = "MBAREACLEAN";
 	static char help_message[] =  "MBAREACLEAN identifies and flags artifacts in swath bathymetry data";
 	static char usage_message[] = "mbareaclean [-Fformat -Iinfile -Rwest/east/south/north -B -G -Mthreshold/nmin -Sbinsize]";
@@ -171,7 +174,7 @@ main (int argc, char **argv)
 	int	beams_amp;
 	int	pixels_ss;
 	char	*beamflag;
-	char	*beamflagesf;
+	char	*beamflagorg;
 	double	*bath;
 	double	*amp;
 	double	*bathlon;
@@ -230,7 +233,7 @@ main (int argc, char **argv)
 	double	xx, yy;
 	int	done;
 	int	ix, iy, ib, kgrid;
-	int	d1, d2;
+	double	d1, d2;
 	int	i1, n;
 	int	i, j, k;
 
@@ -472,18 +475,20 @@ main (int argc, char **argv)
 		if (median_filter == MB_YES)
 			{
 			fprintf(stderr,"     Median filter: ON\n");
-			fprintf(stderr,"     Median filter threshold:    %f\n");
-			fprintf(stderr,"     Median filter minimum N:    %d\n");
-			fprintf(stderr,"     Median filter max fraction: %f\n");
+			fprintf(stderr,"     Median filter threshold:    %f\n",
+					median_filter_threshold);
+			fprintf(stderr,"     Median filter minimum N:    %d\n",
+					median_filter_nmin);
 			}
 		else
 			fprintf(stderr,"     Median filter: OFF\n");
 		if (plane_fit == MB_YES)
 			{
 			fprintf(stderr,"     Plane fit:     ON\n");
-			fprintf(stderr,"     Plane fit threshold:        %f\n");
-			fprintf(stderr,"     Plane fit minimum N:        %d\n");
-			fprintf(stderr,"     Plane fit max fraction:     %f\n");
+			fprintf(stderr,"     Plane fit threshold:        %f\n",
+					median_filter_threshold);
+			fprintf(stderr,"     Plane fit minimum N:        %d\n",
+					median_filter_nmin);
 			}
 		else
 			fprintf(stderr,"     Plane fit:     OFF\n");
@@ -584,7 +589,7 @@ main (int argc, char **argv)
 	status = mb_malloc(verbose, beams_bath * sizeof(char),
 			&beamflag, &error);
 	status = mb_malloc(verbose, beams_bath * sizeof(char),
-			&beamflagesf, &error);
+			&beamflagorg, &error);
 	status = mb_malloc(verbose, beams_bath * sizeof(double),
 			&bath, &error);
 	status = mb_malloc(verbose, beams_amp * sizeof(double),
@@ -706,17 +711,17 @@ main (int argc, char **argv)
 	    if (status == MB_SUCCESS && kind == MB_DATA_DATA)
 		{
 		for (i=0;i<beams_bath;i++)
-			beamflagesf[i] = beamflag[i];
+			beamflagorg[i] = beamflag[i];
 		status = mb_esf_apply(verbose, &esf, 
 		    		time_d, beams_bath, 
-				beamflagesf, &error);
+				beamflagorg, &error);
 		
 		/* update counters */
 		pings_tot++;
 		pings_file++;
 		for (i=0;i<beams_bath;i++)
 			{
-			if (mb_beam_ok(beamflagesf[i]))
+			if (mb_beam_ok(beamflagorg[i]))
 				{
 				beams_tot++;
 				beams_file++;
@@ -724,7 +729,7 @@ main (int argc, char **argv)
 				beams_good_org_file++;
 				files[nfile-1].ngood++;
 				}
-			else if (beamflagesf[i] == MB_FLAG_NULL)
+			else if (beamflagorg[i] == MB_FLAG_NULL)
 				{
 				beams_null_org_tot++;
 				beams_null_org_file++;
@@ -769,7 +774,7 @@ main (int argc, char **argv)
 		/* now loop over the beams and store the soundings in the grid bins */
 		for (ib=0;ib<beams_bath;ib++)
 			{
-			if (beamflagesf[ib] != MB_FLAG_NULL)
+			if (beamflagorg[ib] != MB_FLAG_NULL)
 				{
 				/* get bin for current beam */
 				ix = (bathlon[ib] - areabounds[0] - 0.5 * dx) / dx;
@@ -823,8 +828,8 @@ main (int argc, char **argv)
 					sndg->sndg_x = bathlon[ib];
 					sndg->sndg_y = bathlat[ib];
 					sndg->sndg_beamflag_org = beamflag[ib];
-					sndg->sndg_beamflag_esf = beamflagesf[ib];
-					sndg->sndg_beamflag = beamflagesf[ib];
+					sndg->sndg_beamflag_esf = beamflagorg[ib];
+					sndg->sndg_beamflag = beamflagorg[ib];
 					files[nfile-1].nsndg++;
 					nsndg++;
 					gsndg[kgrid][gsndgnum[kgrid]] 
@@ -857,7 +862,7 @@ files[sndg->sndg_file].ping_time_d[sndg->sndg_ping], sndg->sndg_depth);*/
 
 	/* free the memory */
 	mb_free(verbose,&beamflag,&error); 
-	mb_free(verbose,&beamflagesf,&error); 
+	mb_free(verbose,&beamflagorg,&error); 
 	mb_free(verbose,&bath,&error); 
 	mb_free(verbose,&amp,&error); 
 	mb_free(verbose,&bathlon,&error); 

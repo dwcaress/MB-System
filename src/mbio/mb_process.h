@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_process.h	9/11/00
- *    $Id: mb_process.h,v 5.17 2003-04-17 21:05:23 caress Exp $
+ *    $Id: mb_process.h,v 5.18 2003-07-26 17:59:32 caress Exp $
  *
  *    Copyright (c) 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -406,6 +406,9 @@
  * Date:	September 11, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.17  2003/04/17 21:05:23  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.16  2003/04/16 16:47:41  caress
  * Release 5.0.beta30
  *
@@ -489,6 +492,9 @@
 #define MBP_EDIT_UNFLAG		2
 #define MBP_EDIT_ZERO		3
 #define MBP_EDIT_FILTER		4
+#define MBP_ESF_NOWRITE		0
+#define MBP_ESF_WRITE		1
+#define MBP_ESF_APPEND		2
 #define MBP_BATHRECALC_OFF	0
 #define MBP_BATHRECALC_RAYTRACE	1
 #define MBP_BATHRECALC_ROTATE	2
@@ -694,15 +700,21 @@ struct mb_process_struct
 	
 /* edit save file definitions */
 #define MB_ESF_MAXTIMEDIFF 0.0011
+struct mb_edit_struct
+	{
+	double	time_d;
+	int	beam;
+	int	action;
+	int	use;
+	};
 struct mb_esf_struct 
 	{
 	char	esffile[MB_PATH_MAXLINE];
+	char	esstream[MB_PATH_MAXLINE];
 	int	nedit;
-	double	*edit_time_d;
-	int	*edit_beam;
-	int	*edit_action;
-	int	*edit_use;
+	struct mb_edit_struct	*edit;
 	FILE	*esffp;
+	FILE	*essfp;
 	};
 
 int mb_pr_readpar(int verbose, char *file, int lookforfiles, 
