@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sbifremr.c	3/29/96
- *	$Id: mbr_sbifremr.c,v 1.1 1996-04-22 10:57:09 caress Exp $
+ *	$Id: mbr_sbifremr.c,v 4.0 1996-04-22 11:01:20 caress Exp $
  *
  *    Copyright (c) 1996 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -24,6 +24,9 @@
  * Location:	152 39.061W; 34 09.150S on R/V Ewing
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  1996/04/22  10:57:09  caress
+ * Initial revision
+ *
  * Revision 4.4  1995/03/06  19:38:54  caress
  *
  */
@@ -49,7 +52,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_sbifremr.c,v 1.1 1996-04-22 10:57:09 caress Exp $";
+ static char res_id[]="$Id: mbr_sbifremr.c,v 4.0 1996-04-22 11:01:20 caress Exp $";
 	char	*function_name = "mbr_alm_sbifremr";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
