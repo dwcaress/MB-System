@@ -7,7 +7,8 @@ UTM eastings and northings to longitude and latitude.
 Version 4.6
 
 .SH SYNOPSIS
-\fBmbm_dslnavfix\fP \fB-I\fP\fIinfile\fP \fB-J\fP\fIutm_zone\fP 
+\fBmbm_dslnavfix\fP \fB-F\fP\fInavformat\fP 
+\fB-I\fP\fIinfile\fP \fB-J\fP\fIutm_zone\fP 
 \fB-O\fP\fIoutfile\fP 
 [\fB-E\fP\fIellipsoid\fP \fB-H\fP \fB-V\fP]
 
@@ -16,16 +17,9 @@ Version 4.6
 WHOI DSL AMS-120 navigation from
 UTM eastings and northings to longitude and latitude.
 The WHOI DSL group typically provides processed AMS-120
-data as a set of parallel files. An example of the filenames
-used is:
-.br
- 	DSL120.940630_1100.amp.dat 	(sidescan)
- 	DSL120.940630_1100.bat.dat 	(bathymetry)
- 	DSL120.940630_1100.nav 		(navigation)
-.br
-The sidescan and bathymetry files contain navigation, but it
-is generally poor. The processed navigation resides in the
-*.nav file, but it is sampled less frequently than the sonar
+navigation is files separate from the bathymetry and
+sidescan data. Moreover, the navigation is generally
+sampled less frequently than the sonar
 pings, and is reported in UTM easting and northing meters.
 The \fBmbm_dslnavfix\fP macro is used to translate the
 eastings and northings into the geographic coordinates
@@ -33,27 +27,37 @@ eastings and northings into the geographic coordinates
 program \fBmbmerge\fP can be used to merge the translated
 navigation in with the bathymetry and sidescan.
 
-The parallel files listed above are supported as format 111
-by \fBMB-System\fP; a similar single-file format is supported
-as format 112. We recommend the following procedure when
+The DSL AMS-120 bathymetry and sidescan are provided in
+either a set of parallel files supported as \fBMB-System\fP
+format 111 (the old scheme) or in the OIC single file format
+supported as \fBMB-System\fP format 141 (the new scheme).
+In either case, we recommend translating the data to similar
+but enhanced formats 112 and 142, respectively, to ease
+processing.
+
+We recommend the following procedure when
 processing WHOI DSL AMS-120 data with MB-System:
 .br
  	1) Concatenate all of the processed navigation
  	   files into a single file.
  		cat *.nav > cruise.rnav
  	2) Translate the DSL UTM navigation into geographic
- 	   coordinates. Note that you must know the UTM zone
- 	   used - here we assume the zone is +27.
+ 	   coordinates. In the "old" case the navigation is 
+           in a format designated by \fB-F\fP\fI1\fP and 
+           in the new case by \fB-F\fP\fI2\fP. Note that 
+           you must know the UTM zone used - here we assume 
+           the zone is +27.
  		mbm_dslnavfix -Icruise.rnav \\
- 			-Ocruise.mrg2 -J27 -V
+ 			-Ocruise.mrg2 -F1 -J27 -V
  	3) Copy the bathymetry and sidescan data in each
- 	   file from format 111 to format 112.
+ 	   file from format 111 to format 112 or from
+           format 141 to 142.
  		mbcopy -F111/112 \\
  			-IDSL120.940630_1100.bat.dat \\
  			-ODSL120.940630_1100.mb112
  	4) Merge the translated navigation with each of the 
- 	   format 112 data files. Note that \fBmbm_dslnavfix\fP
- 	   produces navigation in \fBmbmerge\fP format 2
+ 	   format 112 data files. Note  that \fBmbm_dslnavfix\fP 
+           produces navigation in \fBmbmerge\fP format 2
  	   so that the \fB-M\fP\fI2\fP option is used.
  		mbmerge -F112 \\
  			-IDSL120.940630_1100.mb112 \\
@@ -92,6 +96,13 @@ The choices are:
 .br
 Default: Clarke-1866 as per USGS standard.
 .TP
+.B \-F
+\fInavformat\fP
+.br
+Sets the input navigation format to either the old,
+pre-OIC format (\fB-F\fP\fI1\fP) or to the new, OIC
+associated format(\fB-F\fP\fI2\fP). 
+.TP
 .B \-H
 This "help" flag cause the program to print out a description
 of its operation and then exit immediately.
@@ -125,7 +136,7 @@ Suppose we have obtained a WHOI DSL navigation file
 as outlined above and execute the macro as suggested:
 .br
  		mbm_dslnavfix -Icruise.rnav \\
- 			-Ocruise.mrg2 -J27 -V
+ 			-Ocruise.mrg2 -F1 -J27 -V
 .br
 The output will appear as follows:
  
@@ -134,6 +145,7 @@ The output will appear as follows:
  Program Status:
  --------------
  
+   Input DSL navigation format:   1
    Input DSL navigation file:     dsl.nav
    Output navigation file:        dsl.mrg2
    Temporary projected nav file:  tmp_proj_8044.nav
