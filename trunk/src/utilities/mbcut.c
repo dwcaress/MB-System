@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcut.c	1/26/95
  *
- *    $Id: mbcut.c,v 5.3 2003-04-17 21:17:10 caress Exp $
+ *    $Id: mbcut.c,v 5.4 2005-03-25 04:43:00 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	January 26, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2003/04/17 21:17:10  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.2  2001/07/20 00:34:38  caress
  * Release 5.0.beta03
  *
@@ -100,7 +103,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbcut.c,v 5.3 2003-04-17 21:17:10 caress Exp $";
+	static char rcs_id[] = "$Id: mbcut.c,v 5.4 2005-03-25 04:43:00 caress Exp $";
 	static char program_name[] = "mbcut";
 	static char help_message[] = 
 "MBCUT removes swath data values that lie outside ranges\n\t\
@@ -144,9 +147,9 @@ The default input and output streams are stdin and stdout.";
 	int	beams_bath;
 	int	beams_amp;
 	int	pixels_ss;
-	char	ifile[128];
+	char	ifile[MB_PATH_MAXLINE];
 	void	*imbio_ptr = NULL;
-	char	ofile[128];
+	char	ofile[MB_PATH_MAXLINE];
 	void	*ombio_ptr = NULL;
 
 	/* mbio read and write values */
@@ -179,7 +182,7 @@ The default input and output streams are stdin and stdout.";
 	int	icomment = 0;
 	int	odata = 0;
 	int	ocomment = 0;
-	char	comment[256];
+	char	comment[MB_COMMENT_MAXLINE];
 
 	/* good data criterea variables */
 	int	ncut = 0;

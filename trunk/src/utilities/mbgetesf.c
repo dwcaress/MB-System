@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgetesf.c	6/15/93
- *    $Id: mbgetesf.c,v 5.3 2003-04-17 21:17:10 caress Exp $
+ *    $Id: mbgetesf.c,v 5.4 2005-03-25 04:43:02 caress Exp $
  *
  *    Copyright (c) 2001, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	January 24, 2001
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2003/04/17 21:17:10  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.2  2002/10/02 23:56:06  caress
  * Release 5.0.beta24
  *
@@ -58,7 +61,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbgetesf.c,v 5.3 2003-04-17 21:17:10 caress Exp $";
+	static char rcs_id[] = "$Id: mbgetesf.c,v 5.4 2005-03-25 04:43:02 caress Exp $";
 	static char program_name[] = "mbgetest";
 	static char help_message[] =  "mbgetesf reads a multibeam data file and writes out\nan edit save file which can be applied to other data files\ncontaining the same data (but presumably in a different\nstate of processing).  This allows editing of one data file to\nbe transferred to another with ease.  The programs mbedit and\nmbprocess can be used to apply the edit events to another file.";
 	static char usage_message[] = "mbgetesf [-Fformat -Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc -Sspeed -Iinfile -Oesffile -V -H]";
@@ -88,7 +91,7 @@ main (int argc, char **argv)
 	double	etime_d;
 	double	speedmin;
 	double	timegap;
-	char	ifile[128];
+	char	ifile[MB_PATH_MAXLINE];
 	int	beams_bath;
 	int	beams_amp;
 	int	pixels_ss;
@@ -126,7 +129,7 @@ main (int argc, char **argv)
 	int	beam_flag_manual = 0;
 	int	beam_flag_filter = 0;
 	int	beam_flag_sonar = 0;
-	char	comment[256];
+	char	comment[MB_COMMENT_MAXLINE];
 	int	mode;
 	int	kluge = 0;
 

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgetmask.c	6/15/93
- *    $Id: mbgetmask.c,v 5.3 2003-04-17 21:17:10 caress Exp $
+ *    $Id: mbgetmask.c,v 5.4 2005-03-25 04:43:00 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	June 15, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2003/04/17 21:17:10  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.2  2001/07/20 00:34:38  caress
  * Release 5.0.beta03
  *
@@ -110,7 +113,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbgetmask.c,v 5.3 2003-04-17 21:17:10 caress Exp $";
+	static char rcs_id[] = "$Id: mbgetmask.c,v 5.4 2005-03-25 04:43:00 caress Exp $";
 	static char program_name[] = "MBGETMASK";
 	static char help_message[] =  "MBGETMASK reads a multibeam data file and writes out \na data flag mask to stdout which can be applied to other data files \ncontaining the same data (but presumably in a different \nstate of processing).  This allows editing of one data file to \nbe transferred to another with ease.  The program MBMASK is \nused to apply the flag mask to another file. \nThe default input stream is stdin.";
 	static char usage_message[] = "mbgetmask [-Fformat -Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc -Sspeed -Iinfile -V -H]";
@@ -140,7 +143,7 @@ main (int argc, char **argv)
 	double	etime_d;
 	double	speedmin;
 	double	timegap;
-	char	ifile[128];
+	char	ifile[MB_PATH_MAXLINE];
 	int	beams_bath;
 	int	beams_amp;
 	int	pixels_ss;
@@ -177,7 +180,7 @@ main (int argc, char **argv)
 	int	beam_flag_manual = 0;
 	int	beam_flag_filter = 0;
 	int	beam_flag_sonar = 0;
-	char	comment[256];
+	char	comment[MB_COMMENT_MAXLINE];
 	int	kluge = 0;
 
 	/* time, user, host variables */

@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbtide.c	8/24/93
  *
- *    $Id: mbtide.c,v 5.3 2003-04-17 21:18:57 caress Exp $
+ *    $Id: mbtide.c,v 5.4 2005-03-25 04:42:59 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	August 24, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2003/04/17 21:18:57  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.2  2001/07/20 00:34:38  caress
  * Release 5.0.beta03
  *
@@ -80,7 +83,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbtide.c,v 5.3 2003-04-17 21:18:57 caress Exp $";
+	static char rcs_id[] = "$Id: mbtide.c,v 5.4 2005-03-25 04:42:59 caress Exp $";
 	static char program_name[] = "MBTIDE";
 	static char help_message[] =  "MBTIDE corrects swath bathymetry data for tides. \nThe default input and output streams are stdin and stdout.";
 	static char usage_message[] = "mbtide [-Fformat -V -H  -Iinfile -Mtide_format -Ooutfile -Ttidefile]";
@@ -113,11 +116,11 @@ main (int argc, char **argv)
 	int	beams_bath;
 	int	beams_amp;
 	int	pixels_ss;
-	char	ifile[128];
+	char	ifile[MB_PATH_MAXLINE];
 	void	*imbio_ptr;
-	char	ofile[128];
+	char	ofile[MB_PATH_MAXLINE];
 	void	*ombio_ptr;
-	char	tfile[128];
+	char	tfile[MB_PATH_MAXLINE];
 	int	tformat;
 	FILE	*tfp;
 
@@ -148,7 +151,7 @@ main (int argc, char **argv)
 	int	icomment = 0;
 	int	odata = 0;
 	int	ocomment = 0;
-	char	comment[256];
+	char	comment[MB_COMMENT_MAXLINE];
 
 	/* time, user, host variables */
 	time_t	right_now;

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbfilter.c	1/16/95
- *    $Id: mbfilter.c,v 5.3 2003-04-17 21:17:10 caress Exp $
+ *    $Id: mbfilter.c,v 5.4 2005-03-25 04:43:00 caress Exp $
  *
  *    Copyright (c) 1995, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -32,6 +32,9 @@
  * Date:	January 16, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2003/04/17 21:17:10  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.2  2001/07/20 00:34:38  caress
  * Release 5.0.beta03
  *
@@ -172,7 +175,7 @@ struct mbfilter_ping_struct
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbfilter.c,v 5.3 2003-04-17 21:17:10 caress Exp $";
+	static char rcs_id[] = "$Id: mbfilter.c,v 5.4 2005-03-25 04:43:00 caress Exp $";
 	static char program_name[] = "MBFILTER";
 	static char help_message[] =  
 "mbfilter applies one or more simple filters to the specified\n\t\
@@ -228,11 +231,11 @@ The default input and output streams are stdin and stdout.\n";
 	int	beams_bath;
 	int	beams_amp;
 	int	pixels_ss;
-	char	ifile[128];
+	char	ifile[MB_PATH_MAXLINE];
 	void	*imbio_ptr = NULL;
 
 	/* MBIO write control parameters */
-	char	ofile[128];
+	char	ofile[MB_PATH_MAXLINE];
 	void	*ombio_ptr = NULL;
 
 	/* mbio read and write values */
@@ -241,7 +244,7 @@ The default input and output streams are stdin and stdout.\n";
 	int	nrecord = 0;
 	int	nbathdata = 0;
 	int	ndata = 0;
-	char	comment[256];
+	char	comment[MB_COMMENT_MAXLINE];
 
 	/* buffer handling parameters */
 	void	*buff_ptr;
@@ -771,7 +774,7 @@ The default input and output streams are stdin and stdout.\n";
 		strcpy(user,user_ptr);
 	else
 		strcpy(user, "unknown");
-	gethostname(host,128);
+	gethostname(host,MB_PATH_MAXLINE);
 	sprintf(comment,"Run by user <%s> on cpu <%s> at <%s>",
 		user,host,date);
 	status = mb_put_comment(verbose,ombio_ptr,comment,&error);

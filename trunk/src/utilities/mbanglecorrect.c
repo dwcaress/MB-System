@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbanglecorrect.c	8/13/95
- *    $Id: mbanglecorrect.c,v 5.3 2003-04-17 21:17:10 caress Exp $
+ *    $Id: mbanglecorrect.c,v 5.4 2005-03-25 04:42:59 caress Exp $
  *
  *    Copyright (c) 1995, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -47,6 +47,9 @@ The default input and output streams are stdin and stdout.\n";
  * Date:	January 12, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2003/04/17 21:17:10  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.2  2001/07/20 00:34:38  caress
  * Release 5.0.beta03
  *
@@ -175,7 +178,7 @@ struct mbanglecorrect_ping_struct
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbanglecorrect.c,v 5.3 2003-04-17 21:17:10 caress Exp $";
+	static char rcs_id[] = "$Id: mbanglecorrect.c,v 5.4 2005-03-25 04:42:59 caress Exp $";
 	static char program_name[] = "MBANGLECORRECT";
 	static char help_message[] =  
 "mbanglecorrect is a tool for processing sidescan data.  This program\n\t\
@@ -222,11 +225,11 @@ The default input and output streams are stdin and stdout.\n";
 	int	beams_bath;
 	int	beams_amp;
 	int	pixels_ss;
-	char	ifile[128];
+	char	ifile[MB_PATH_MAXLINE];
 	void	*imbio_ptr = NULL;
 
 	/* MBIO write control parameters */
-	char	ofile[128];
+	char	ofile[MB_PATH_MAXLINE];
 	void	*ombio_ptr = NULL;
 
 	/* mbio read and write values */
@@ -235,7 +238,7 @@ The default input and output streams are stdin and stdout.\n";
 	int	nrecord = 0;
 	int	nbathdata = 0;
 	int	ndata = 0;
-	char	comment[256];
+	char	comment[MB_COMMENT_MAXLINE];
 
 	/* buffer handling parameters */
 	void	*buff_ptr;
@@ -261,7 +264,7 @@ The default input and output streams are stdin and stdout.\n";
 
 	/* angle function variables */
 	int	ampkind = MBANGLECORRECT_SS;
-	char	sfile[128];
+	char	sfile[MB_PATH_MAXLINE];
 	int	use_global_statics = MB_NO;
 	int	symmetry = MB_YES;
 	int	subtract_mode = MB_NO;
@@ -294,7 +297,7 @@ The default input and output streams are stdin and stdout.\n";
 	int	nsmooth = 0;
 
 	FILE	*fp;
-	char	buffer[128], tmp[128], *result;
+	char	buffer[MB_PATH_MAXLINE], tmp[MB_PATH_MAXLINE], *result;
 	double	mtodeglon, mtodeglat;
 	double	dlon, dlat;
 	int	first_set;
@@ -655,7 +658,7 @@ The default input and output streams are stdin and stdout.\n";
 			exit(error);
 			}
 		nangles = 0;
-		while ((result = fgets(buffer,128,fp)) == buffer)
+		while ((result = fgets(buffer,MB_PATH_MAXLINE,fp)) == buffer)
 			{
 			if (buffer[0] != '#')
 				{
@@ -696,7 +699,7 @@ The default input and output streams are stdin and stdout.\n";
 			exit(error);
 			}
 		nangles = 0;
-		while ((result = fgets(buffer,128,fp)) == buffer)
+		while ((result = fgets(buffer,MB_PATH_MAXLINE,fp)) == buffer)
 			{
 			if (buffer[0] != '#')
 				{

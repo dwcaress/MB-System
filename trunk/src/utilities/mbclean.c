@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbclean.c	2/26/93
- *    $Id: mbclean.c,v 5.10 2004-12-18 01:38:52 caress Exp $
+ *    $Id: mbclean.c,v 5.11 2005-03-25 04:43:00 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2001, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -54,6 +54,9 @@
  * by David Caress.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.10  2004/12/18 01:38:52  caress
+ * Working towards release 5.0.6.
+ *
  * Revision 5.8  2003/07/26 18:01:22  caress
  * Changed beamflag handling code.
  *
@@ -238,7 +241,7 @@ int mbclean_save_edit(int verbose, FILE *sofp, double time_d, int beam,
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbclean.c,v 5.10 2004-12-18 01:38:52 caress Exp $";
+	static char rcs_id[] = "$Id: mbclean.c,v 5.11 2005-03-25 04:43:00 caress Exp $";
 	static char program_name[] = "MBCLEAN";
 	static char help_message[] =  "MBCLEAN identifies and flags artifacts in swath sonar bathymetry data\nBad beams  are  indentified  based  on  one simple criterion only: \nexcessive bathymetric slopes.   The default input and output streams \nare stdin and stdout.";
 	static char usage_message[] = "mbclean [-Amax -Blow/high -Cslope -Dmin/max \n\t-Fformat -Gfraction_low/fraction_high \n\t-Iinfile -Llonflip -Mmode -Nbuffersize -Ooutfile -Q -Sspike_slope/mode/format -Xzap_beams \n\t-V -H]";
@@ -328,7 +331,7 @@ main (int argc, char **argv)
 	int	nflagesf = 0;
 	int	nunflagesf = 0;
 	int	nzeroesf = 0;
-	char	comment[256];
+	char	comment[MB_COMMENT_MAXLINE];
 	int	check_slope = MB_NO;
 	double	slopemax = 1.0;
 	int	check_spike = MB_NO;

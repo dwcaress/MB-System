@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsmooth.c	6/12/93
- *    $Id: mbsmooth.c,v 5.3 2003-04-17 21:18:57 caress Exp $
+ *    $Id: mbsmooth.c,v 5.4 2005-03-25 04:43:02 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -31,6 +31,9 @@
  * in the current version.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2003/04/17 21:18:57  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.2  2001/07/20 00:34:38  caress
  * Release 5.0.beta03
  *
@@ -166,7 +169,7 @@ int	first = MB_YES;
 double	save_time_d = 0.0;
 
 /* gaussian filter parameters */
-char	wfile[128];
+char	wfile[MB_PATH_MAXLINE];
 double	*width = NULL;
 double	*factor = NULL;
 double	width_def = 250.0;
@@ -175,7 +178,7 @@ double	width_def = 250.0;
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbsmooth.c,v 5.3 2003-04-17 21:18:57 caress Exp $";
+	static char rcs_id[] = "$Id: mbsmooth.c,v 5.4 2005-03-25 04:43:02 caress Exp $";
 	static char program_name[] = "MBSMOOTH";
 	static char help_message[] =  "MBSMOOTH applies a spatial \
 domain gaussian filter to swath \nbathymetry data in order to \
@@ -209,11 +212,11 @@ smooth out noise in the data.";
 	int	beams_bath;
 	int	beams_amp;
 	int	pixels_ss;
-	char	ifile[128];
+	char	ifile[MB_PATH_MAXLINE];
 	void	*imbio_ptr = NULL;
 
 	/* MBIO write control parameters */
-	char	ofile[128];
+	char	ofile[MB_PATH_MAXLINE];
 	void	*ombio_ptr = NULL;
 
 	/* mbio read and write values */
@@ -222,7 +225,7 @@ smooth out noise in the data.";
 	int	nrecord = 0;
 	int	nbathdata = 0;
 	int	ndata = 0;
-	char	comment[256];
+	char	comment[MB_COMMENT_MAXLINE];
 
 	/* location processing variables */
 	double	mtodeglon;

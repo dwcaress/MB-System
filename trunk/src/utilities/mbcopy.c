@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcopy.c	2/4/93
- *    $Id: mbcopy.c,v 5.15 2004-09-16 01:00:01 caress Exp $
+ *    $Id: mbcopy.c,v 5.16 2005-03-25 04:42:59 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003, 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	February 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.15  2004/09/16 01:00:01  caress
+ * Fixed copyright.
+ *
  * Revision 5.14  2003/12/10 02:18:04  caress
  * Fixed bug in which pings could not be found inbounds when a timegap error occurred.
  *
@@ -214,7 +217,7 @@ int mbcopy_any_to_mbldeoih(int verbose,
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbcopy.c,v 5.15 2004-09-16 01:00:01 caress Exp $";
+	static char rcs_id[] = "$Id: mbcopy.c,v 5.16 2005-03-25 04:42:59 caress Exp $";
 	static char program_name[] = "MBcopy";
 	static char help_message[] =  "MBcopy copies an input swath sonar data file to an output \nswath sonar data file with the specified conversions.  Options include \nwindowing in time and space and ping averaging.  The input and \noutput data formats may differ, though not all possible combinations \nmake sense.  The default input and output streams are stdin and stdout.";
 	static char usage_message[] = "mbcopy [-Byr/mo/da/hr/mn/sc -Ccommentfile -D -Eyr/mo/da/hr/mn/sc \n\t-Fiformat/oformat -H  -Iinfile -Llonflip -N -Ooutfile \n\t-Ppings -Qsleep_factor -Rw/e/s/n -Sspeed -V]";
@@ -244,7 +247,7 @@ main (int argc, char **argv)
 	double	etime_d;
 	double	speedmin;
 	double	timegap;
-	char	ifile[128];
+	char	ifile[MB_PATH_MAXLINE];
 	int	ibeams_bath;
 	int	ibeams_amp;
 	int	ipixels_ss;
@@ -252,7 +255,7 @@ main (int argc, char **argv)
 
 	/* MBIO write control parameters */
 	int	oformat = 0;
-	char	ofile[128];
+	char	ofile[MB_PATH_MAXLINE];
 	int	obeams_bath;
 	int	obeams_amp;
 	int	opixels_ss;
@@ -301,10 +304,10 @@ main (int argc, char **argv)
 	int	istart_bath, iend_bath, offset_bath;
 	int	istart_amp, iend_amp, offset_amp;
 	int	istart_ss, iend_ss, offset_ss;
-	char	comment[256];
+	char	comment[MB_COMMENT_MAXLINE];
 	int	insertcomments = MB_NO;
 	int	bathonly = MB_NO;
-	char	commentfile[256];
+	char	commentfile[MB_PATH_MAXLINE];
 	int	stripcomments = MB_NO;
 	int	copymode = MBCOPY_PARTIAL;
 	int	use_sleep = MB_NO;
@@ -816,6 +819,7 @@ main (int argc, char **argv)
 		error = MB_ERROR_NO_ERROR;
 		status = MB_SUCCESS;
 		if (copymode != MBCOPY_PARTIAL)
+			{
 			status = mb_get_all(verbose,imbio_ptr,&istore_ptr,&kind,
 				time_i,&time_d,
 				&navlon,&navlat,
@@ -826,7 +830,9 @@ main (int argc, char **argv)
 				ibathacrosstrack,ibathalongtrack,
 				iss,issacrosstrack,issalongtrack,
 				comment,&error);
+			}
 		else
+			{
 			status = mb_get(verbose,imbio_ptr,&kind,&pings,
 				time_i,&time_d,
 				&navlon,&navlat,
@@ -837,6 +843,7 @@ main (int argc, char **argv)
 				ibathacrosstrack,ibathalongtrack,
 				iss,issacrosstrack,issalongtrack,
 				comment,&error);
+			}
 
 		/* increment counter */
 		if (error <= MB_ERROR_NO_ERROR 
@@ -2648,15 +2655,17 @@ int mbcopy_any_to_mbldeoih(int verbose,
 		/* set beam widths */
 		ostore->beam_xwidth = 100 * beamwidth_xtrack;
 		ostore->beam_lwidth = 100 * beamwidth_ltrack;
+		ostore->kind = kind;
 
 		/* insert data */
-		if (kind == MB_DATA_DATA
-		    || kind == MB_DATA_NAV)
+		if (kind == MB_DATA_DATA)
+		        {
 			mb_insert_nav(verbose, ombio_ptr, (void *)ostore, 
 					time_i, time_d, 
 					navlon, navlat, speed, heading, draft, 
 					roll, pitch, heave, 
 					error);
+			}
 		status = mb_insert(verbose, ombio_ptr, (void *)ostore,
 				kind, time_i, time_d, 
 				navlon, navlat, speed, heading, 

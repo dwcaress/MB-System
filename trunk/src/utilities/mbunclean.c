@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbunclean.c	3/10/93
- *    $Id: mbunclean.c,v 5.3 2003-04-17 21:18:57 caress Exp $
+ *    $Id: mbunclean.c,v 5.4 2005-03-25 04:43:03 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	March 10, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2003/04/17 21:18:57  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.2  2001/07/20 00:34:38  caress
  * Release 5.0.beta03
  *
@@ -82,6 +85,9 @@
  *
  * Revision 3.1  1993/05/14  23:49:32  sohara
  * fixed $Log: not supported by cvs2svn $
+ * fixed Revision 5.3  2003/04/17 21:18:57  caress
+ * fixed Release 5.0.beta30
+ * fixed
  * fixed Revision 5.2  2001/07/20 00:34:38  caress
  * fixed Release 5.0.beta03
  * fixed
@@ -161,7 +167,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbunclean.c,v 5.3 2003-04-17 21:18:57 caress Exp $";
+	static char rcs_id[] = "$Id: mbunclean.c,v 5.4 2005-03-25 04:43:03 caress Exp $";
 	static char program_name[] = "MBUNCLEAN";
 	static char help_message[] =  "MBUNCLEAN unflags swath bathymetry and amplitude data \nwhich has been flagged as bad by being set negative. \nThe default input and output streams are stdin and stdout.";
 	static char usage_message[] = "mbunclean [-Blow/high -Fformat -Llonflip -V -H  -Iinfile -Ooutfile]";
@@ -191,14 +197,14 @@ main (int argc, char **argv)
 	double	etime_d;
 	double	speedmin;
 	double	timegap;
-	char	ifile[128];
+	char	ifile[MB_PATH_MAXLINE];
 	int	beams_bath;
 	int	beams_amp;
 	int	pixels_ss;
 	void	*imbio_ptr = NULL;
 
 	/* MBIO write control parameters */
-	char	ofile[128];
+	char	ofile[MB_PATH_MAXLINE];
 	void	*ombio_ptr = NULL;
 
 	/* mbio read and write values */
@@ -227,7 +233,7 @@ main (int argc, char **argv)
 	int	ocomment = 0;
 	int	unflag = 0;
 	int	data_use;
-	char	comment[256];
+	char	comment[MB_COMMENT_MAXLINE];
 	int	check_range = MB_NO;
 	double	depth_low;
 	double	depth_high;

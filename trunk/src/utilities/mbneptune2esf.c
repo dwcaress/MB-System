@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbneptune2esf.c	2004/11/11
- *    $Id: mbneptune2esf.c,v 5.1 2004-12-18 01:38:52 caress Exp $
+ *    $Id: mbneptune2esf.c,v 5.2 2005-03-25 04:43:02 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    Gordon Keith
@@ -46,6 +46,9 @@
  * This program is based on a skeleton derived from mbclean.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2004/12/18 01:38:52  caress
+ * Working towards release 5.0.6.
+ *
  * Revision 5.0  2004/12/02 06:40:49  caress
  * New program submitted by Gordon Keith.
  *
@@ -137,7 +140,7 @@ int mbclean_save_edit(int verbose, FILE *sofp, double time_d, int beam,
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbneptune2esf.c,v 5.1 2004-12-18 01:38:52 caress Exp $";
+	static char rcs_id[] = "$Id: mbneptune2esf.c,v 5.2 2005-03-25 04:43:02 caress Exp $";
 	static char program_name[] = "mbneptune2esf";
 	static char help_message[] =  "mbneptune2esf reads a Simrad Neptune BinStat rules files and a list of MB-Systems data files\nand applies the flags in the rules file to the esf file of the coresponding line";
 	static char usage_message[] = "mbneptune2esf [-Rrules -Fformat -Iinfile -Ooutfile -V -H]";
@@ -207,7 +210,7 @@ main (int argc, char **argv)
 	int	nflagesf = 0;
 	int	nunflagesf = 0;
 	int	nzeroesf = 0;
-	char	comment[256];
+	char	comment[MB_COMMENT_MAXLINE];
 	int	mode = 1;
 	int	action;
 
