@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_close.c	1/25/93
- *	$Id: mb_close.c,v 5.8 2003-04-17 21:05:23 caress Exp $
+ *	$Id: mb_close.c,v 5.9 2003-11-24 19:25:02 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	January 25, 1993
  *	
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2003/04/17 21:05:23  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.7  2002/10/15 18:34:58  caress
  * Release 5.0.beta25
  *
@@ -146,7 +149,7 @@
 /*--------------------------------------------------------------------*/
 int mb_close(int verbose, void **mbio_ptr, int *error)
 {
-	static	char	rcs_id[]="$Id: mb_close.c,v 5.8 2003-04-17 21:05:23 caress Exp $";
+	static	char	rcs_id[]="$Id: mb_close.c,v 5.9 2003-11-24 19:25:02 caress Exp $";
 	char	*function_name = "mb_close";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -226,7 +229,13 @@ int mb_close(int verbose, void **mbio_ptr, int *error)
 		nc_enddef((int) mb_io_ptr->mbfp);
 	    nc_close((int) mb_io_ptr->mbfp);
 	    }
-	    
+
+        /* else handle surf files to be opened with libsapi */
+        else if (mb_io_ptr->filetype == MB_FILETYPE_SURF)
+            {
+  	    SAPI_close();
+	    }
+
 	/* deallocate UTM projection if required */
 	if (mb_io_ptr->projection_initialized == MB_YES)
 		{
