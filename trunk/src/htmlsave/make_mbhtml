@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	make_mbhtml	8/19/97
-#    $Id: make_mbhtml,v 5.4 2001-11-19 23:52:41 dcaress Exp $
+#    $Id: make_mbhtml,v 5.5 2001-12-30 21:03:54 caress Exp $
 #
 #    Copyright (c) 1997 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -30,10 +30,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   August 19,  1997
 #
 # Version:
-#   $Id: make_mbhtml,v 5.4 2001-11-19 23:52:41 dcaress Exp $
+#   $Id: make_mbhtml,v 5.5 2001-12-30 21:03:54 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.4  2001/11/19 23:52:41  dcaress
+#   Made it work on both SGI's and Linux.
+#
 #   Revision 5.3  2001-07-20 11:00:05-07  caress
 #   Don't know what I did...
 #
@@ -85,6 +88,10 @@ foreach $file (@preformatted_files) {
 @man_header2_lines = `cat mbsystem_man_hdr2.frag`;
 @man_footer_lines = `cat mbsystem_man_ftr.frag`;
 
+# Get operating system
+$os = `uname -s`;
+print "Operating System: $os\n";
+
 # Loop over files
 foreach $man_page (@manual_pages) {
     chop($man_page);
@@ -98,8 +105,7 @@ foreach $man_page (@manual_pages) {
     chop($date);
     chop($date);
     $date = substr($date, 1);
-    $os = `uname -s`;
-    if ($os == "IRIX64") 
+    if ($os eq "IRIX64") 
 	{
 	$groff = "awf";
 	}
