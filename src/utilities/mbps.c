@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbps.c	11/4/93
- *    $Id: mbps.c,v 4.0 1994-03-06 00:13:22 caress Exp $
+ *    $Id: mbps.c,v 4.1 1994-03-08 12:44:33 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,9 @@
  * Date:	August 31, 1991 (original version)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/03/06  00:13:22  caress
+ * First cut at version 4.0
+ *
  * Revision 4.0  1994/03/01  18:59:27  caress
  * First cut at new version. Any changes are associated with
  * support of three data types (beam bathymetry, beam amplitude,
@@ -114,7 +117,7 @@ char **argv;
 
 
 /* MBINFO.C definitions */
-	static char rcs_id[] = "$Id: mbps.c,v 4.0 1994-03-06 00:13:22 caress Exp $";
+	static char rcs_id[] = "$Id: mbps.c,v 4.1 1994-03-08 12:44:33 caress Exp $";
 	static char program_name[] = "MBPS";
 	static char help_message[] =  "MBPS reads a multibeam bathymetry data file and creates a postscript 3-d mesh plot";
 	static char usage_message[] = "mbps [-Iinfile -Fformat -Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc -Aalpha -Keta -Dviewdir -Xvertexag -T\"title\" -Wmetersperinch -Sspeedmin -Ggap -Ydisplay_stats -Zdisplay_scales -V -H]";
@@ -451,7 +454,7 @@ char **argv;
 		}
 
 	/* printf out file and format */
-	mb_format_inf(verbose,format,&message);
+	mb_format_inf(verbose,format_num,&message);
 	fprintf(stderr,"\nMultibeam Data File:  %s\n",file);
 	fprintf(stderr,"MBIO Data Format ID:  %d\n",format);
 	fprintf(stderr,"%s",message);
