@@ -1,20 +1,21 @@
-.TH MBIO 1 "11 March 1993"
+.TH MBIO 1 "1 March 1994"
 .SH NAME
 \fBMBIO\fP - Format independent input/output library for multibeam sonar data.
 
 .SH VERSION
-This manual page describes \fBMBIO\fP version 3.00
+This manual page describes \fBMBIO\fP version 4.00
 
 .SH DESCRIPTION
 \fBMBIO\fP (\fBM\fPulti\fBB\fPeam \fBI\fPnput/\fBO\fPutput) is a library
-of functions used for reading and writing multibeam sonar bathymetry
-and backscatter data files.  \fBMBIO\fP supports a large number of data
+of functions used for reading and writing multibeam sonar 
+data files.  \fBMBIO\fP supports a large number of data
 formats associated with different institutions and different sonar systems.
 The purpose of \fBMBIO\fP is to allow users to write processing and display
 programs which are independent of particular data formats and to provide
-a standard approach to multibeam data i/o.  Version 3.XX represents a complete
-rethinking and rewriting of \fBMBIO\fP; programs written to use versions 1.XX
-or 2.XX of \fBMBIO\fP will have to be modified and recompiled.
+a standard approach to multibeam data i/o.  Version 4.00 includes
+substantial changes to the function calls comprising \fBMBIO\fP and
+to the format id's used by \fBMBIO\fP functions; programs written 
+to use previous versions of \fBMBIO\fP will have to be modified and recompiled.
 
 .SH AUTHORSHIP
 David W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -26,6 +27,19 @@ Lamont-Doherty Earth Observatory
 Palisades, NY  10964
 
 .SH OVERVIEW
+\fBMBIO\fP handles three types of swath mapping data:  beam bathymetry,
+beam amplitude, and sidescan.  Both amplitude and sidescan represent
+measures of backscatter strength. Beam amplitudes are backscatter
+values associated with the same preformed beams used to
+obtain bathymetry; \fBMBIO\fP assumes that a bathymetry value
+exists for each amplitude value and uses the bathymetry beam
+location for the amplitude.  Sidescan is generally constructed with
+a higher spatial resolution than bathymetry, and carries its
+own location parameters.  In the context of \fBMB-System\fP documentation,
+the discrete values of bathymetry and
+amplitude are referred to as "beams", and the discrete values of
+sidescan are referred to as "pixels".
+
 \fBMBIO\fP opens and initializes multibeam data files for reading
 and writing using the functions \fBmb_read_open\fP and \fBmb_write_open\fP,
 respectively.  These functions return a pointer to a data structure
@@ -90,7 +104,7 @@ The level 2 and 3 functions require
 include files for the data structures used but allow access to the complete
 data structures; these functions are useful for applications which require
 special parameters peculiar to some particular data format (e.g. processing
-Hydrosweep DS backscatter by applying system gain settings to the measured
+Hydrosweep DS amplitudes by applying system gain settings to the measured
 values). A number of other \fBMBIO\fP functions dealing with default values for
 important parameters, error messages, memory management, and time conversions
 also exist and are discussed below.
@@ -106,8 +120,12 @@ sonar.  Consequently, it is possible to read and write the complete
 data stream when using the level 2 or 3 \fBMBIO\fP functions.
 At present, formats associated with the following multibeam systems are
 supported:
- 	Sea Beam 16 sonar
- 	Hydrosweep DS 59 beam  sonar
+ 	Sea Beam multibeam sonar 
+ 		(16 beams bathymetry)
+ 	Hydrosweep DS 59 beam sonar 
+ 		(59 beams bathymetry and amplitude)
+ 	Sea Beam 2100 multibeam sonar 
+ 		(59 beams bathymetry and amplitude, 151 pixels sidescan)
 .br
 We expect to support data formats for the following sonar systems in future
 versions of \fBMBIO\fP:
@@ -117,58 +135,85 @@ versions of \fBMBIO\fP:
  	SeaMARC II
 
 .SH SUPPORTED FORMATS
+With the introduction of \fBMB-System\fP version 4.00, the data format
+id's used by \fBMBIO\fP have changed considerably.  The old format id's,
+which ranged from 1 to 9, are still supported in the sense that they
+are automatically converted to the appropriate new format id's by \fBMBIO\fP.
+Thus, old shellscripts using the old format id's will continue to work
+without modification.  However, we recommend that the new format id's
+be used in the future.  Perpetual support for the old format id's is
+not guarenteed.
+
 The following multibeam data formats are supported in this version of 
 \fBMBIO\fP:
 
- 	MBIO Data Format ID:  1
- 	Format name:          MBF_SBSIOMRG
- 	Informal Description: SIO merge Sea Beam
- 	Attributes:           Sea Beam, 16 beam, bathymetry, binary, uncentered, SIO.
+      MBIO Data Format ID:  11
+      Format name:          MBF_SBSIOMRG
+      Informal Description: SIO merge Sea Beam
+      Attributes:           Sea Beam, bathymetry, 16 beams, binary, uncentered,
+                      SIO.
 
- 	MBIO Data Format ID:  2
- 	Format name:          MBF_SBSIOCEN
- 	Informal Description: SIO centered Sea Beam
- 	Attributes:           Sea Beam, 19 beam, bathymetry, binary, centered, SIO.
+      MBIO Data Format ID:  12
+      Format name:          MBF_SBSIOCEN
+      Informal Description: SIO centered Sea Beam
+      Attributes:           Sea Beam, bathymetry, 19 beams, binary, centered,
+                      SIO.
 
- 	MBIO Data Format ID:  3
- 	Format name:          MBF_SBSIOLSI
- 	Informal Description: SIO LSI Sea Beam
- 	Attributes:           Sea Beam, 19 beam, bathymetry, binary, centered, 
-                              obsolete, SIO.
+      MBIO Data Format ID:  13
+      Format name:          MBF_SBSIOLSI
+      Informal Description: SIO LSI Sea Beam
+      Attributes:           Sea Beam, bathymetry, 19 beams, binary, centered, 
+                      obsolete, SIO.
 
- 	MBIO Data Format ID:  4
- 	Format name:          MBF_SBURICEN
- 	Informal Description: URI Sea Beam
- 	Attributes:           Sea Beam, 19 beam, bathymetry, binary, centered, URI.
+      MBIO Data Format ID:  14
+      Format name:          MBF_SBURICEN
+      Informal Description: URI Sea Beam
+      Attributes:           Sea Beam, bathymetry, 19 beams, binary, centered,
+                      URI.
 
- 	MBIO Data Format ID:  5
- 	Format name:          MBF_HSATLRAW
- 	Informal Description: Raw Hydrosweep
- 	Attributes:           Hydrosweep DS, 59 beam, bathymetry and backscatter, 
-                              ascii, Atlas Electronik.
+      MBIO Data Format ID:  21
+      Format name:          MBF_HSATLRAW
+      Informal Description: Raw Hydrosweep
+      Attributes:           Hydrosweep DS, bathymetry and amplitude, 59 beams,
+                      ascii, Atlas Electronik.
 
- 	MBIO Data Format ID:  6
- 	Format name:          MBF_HSLDEDMB
- 	Informal Description: EDMB Hydrosweep
- 	Attributes:           Hydrosweep DS, 59 beam, bathymetry, binary, NRL.
+      MBIO Data Format ID:  22
+      Format name:          MBF_HSLDEDMB
+      Informal Description: EDMB Hydrosweep
+      Attributes:           Hydrosweep DS, bathymetry, 59 beams, binary, NRL.
 
- 	MBIO Data Format ID:  7
- 	Format name:          MBF_HSURICEN
- 	Informal Description: URI Hydrosweep
- 	Attributes:           Hydrosweep DS, 59 beam, bathymetry, binary, URI.
+      MBIO Data Format ID:  23
+      Format name:          MBF_HSURICEN
+      Informal Description: URI Hydrosweep
+      Attributes:           Hydrosweep DS, 59 beams, bathymetry, binary, URI.
 
- 	MBIO Data Format ID:  8
- 	Format name:          MBF_HSLDEOIH
- 	Informal Description: L-DEO in-house binary Hydrosweep
- 	Attributes:           Hydrosweep DS, 59 beam, bathymetry and backscatter, 
-                              binary, centered, L-DEO.
+      MBIO Data Format ID:  24
+      Format name:          MBF_HSLDEOIH
+      Informal Description: L-DEO in-house binary Hydrosweep
+      Attributes:           Hydrosweep DS, 59 beams, bathymetry and amplitude, 
+                      binary, centered, L-DEO.
 
- 	MBIO Data Format ID:  9
- 	Format name:          MBF_MBLDEOIH
- 	Informal Description: L-DEO in-house generic multibeam
- 	Attributes:           data from all sonar systems, variable beam, 
-                              bathymetry and backscatter, 
-                              binary, centered, L-DEO.
+      MBIO Data Format ID:  41
+      Format name:          MBF_SB2100RW
+      Informal Description: SeaBeam 2100/1000 series vender format
+      Attributes:           SeaBeam 2100/1000, bathymetry, amplitude 
+                      and sidescan, 151 beams and 1000 pixels, ascii 
+                      with binary sidescan, SeaBeam Instruments.
+
+      MBIO Data Format ID:  42
+      Format name:          MBF_SB2100IH
+      Informal Description: SeaBeam 2100/1000 series processing format
+      Attributes:           SeaBeam 2100/1000, bathymetry, amplitude 
+                      and sidescan, 151 beams bathymetry,
+                      1000 pixels sidescan, binary,
+                      L-DEO and SeaBeam Instruments.
+
+      MBIO Data Format ID:  61
+      Format name:          MBF_MBLDEOIH
+      Informal Description: L-DEO in-house generic multibeam
+      Attributes:           Data from all sonar systems, bathymetry, 
+                      amplitude and sidescan, variable beams and pixels, 
+                      binary, centered, L-DEO.
 
 The institutional acronyms used above have the following meanings:
  	SIO	Scripps Institution of Oceanography
@@ -245,7 +290,7 @@ int \fBmb_read_init\fP(\fIverbose\fP, \fIfile\fP,
 \fIbounds\fP, \fIbtime_i\fP, \fIetime_i\fP, \fIspeedmin\fP, 
 \fItimegap\fP,
 \fImbio_ptr\fP, \fIbtime_d\fP, \fIetime_d\fP, 
-\fIbeams_bath\fP, \fIbeams_back\fP, \fIerror\fP)
+\fIbeams_bath\fP, \fIbeams_amp\fP, \fIpixels_ss\fP, \fIerror\fP)
 .br
 int \fIverbose\fP
 .br
@@ -275,7 +320,9 @@ double *\fIetime_d\fP;
 .br
 int *\fIbeams_bath\fP;
 .br
-int *\fIbeams_back\fP;
+int *\fIbeams_amp\fP;
+.br
+int *\fIpixels_ss\fP;
 .br
 int *\fIerror\fP;
 .RS 10
@@ -372,19 +419,23 @@ The returned values are:
  	\fIbtime_d\fP:		desired beginning time in minutes since 1/1/81 00:00:0
  	\fIetime_d\fP:		desired ending time in minutes since 1/1/81 00:00:0
  	\fIbeams_bath\fP:	maximum number of bathymetry beams
- 	\fIbeams_back\fP:	maximum number of backscatter beams
+ 	\fIbeams_amp\fP:	maximum number of amplitude beams
+ 	\fIpixels_ss\fP:	maximum number of sidescan pixels
  	\fIerror\fP:		error value
 .br
 The structure pointed to by
 \fImbio_ptr\fP holds the file descriptor and all of the control parameters
 which govern how the data is read; this pointer must be provided to
 the functions \fBmb_read\fP, \fBmb_get\fP, \fBmb_get_all\fP, 
-or \fBmb_buffer_load\fP to read data. The values \fIbeams_bath\fP
-and \fIbeams_back\fP return the maximum number of bathymetry and backscatter
-beams that the specified data format may contain.  In order to successfully
+or \fBmb_buffer_load\fP to read data. The values \fIbeams_bath\fP,
+\fIbeams_amp\fP, and \fIpixels_ss\fP return the maximum number 
+of bathymetry and amplitude beams and sidescan pixels, respectively,
+that the specified data format may contain.  In general, \fIbeams_amp\fP
+will either be zero or equal to \fIbeams_bath\fP.  In order to successfully
 read data, the calling program must
 provide pointers to arrays large enough to hold \fIbeams_bath\fP bathymetry
-values and \fIbeams_back\fP backscatter variables. The values \fIbtime_d\fP
+values, \fIbeams_amp\fP amplitude values, and \fIpixels_ss\fP sidescan
+values. The values \fIbtime_d\fP
 and \fIetime_d\fP give the desired beginning and end times of the data
 converted to minutes since 00:00:00 on January 1, 1981;
 \fBMBIO\fP uses these units to calculate time internally.
@@ -393,7 +444,7 @@ argument passes more detailed information about initialization failures.
 .RE
 .IP
 int \fBmb_write_init\fP(\fIverbose\fP, \fIfile\fP, \fIformat\fP, 
-\fImbio_ptr\fP, \fIbeams_bath\fP, \fIbeams_back\fP, \fIerror\fP)
+\fImbio_ptr\fP, \fIbeams_bath\fP, \fIbeams_amp\fP, \fIpixels_ss\fP, \fIerror\fP)
 .br
 int \fIverbose\fP
 .br
@@ -405,7 +456,9 @@ char **\fImbio_ptr\fP;
 .br
 int *\fIbeams_bath\fP;
 .br
-int *\fIbeams_back\fP;
+int *\fIbeams_amp\fP;
+.br
+int *\fIpixels_ss\fP;
 .br
 int *\fIerror\fP;
 .RS 10
@@ -427,13 +480,15 @@ The structure pointed to by
 \fImbio_ptr\fP holds the output file descriptor; this pointer must be 
 provided to
 the functions \fBmb_write\fP, \fBmb_put\fP, \fBmb_put_all\fP, 
-or \fBmb_buffer_dump\fP to write data. The values 
-\fIbeams_bath\fP
-and \fIbeams_back\fP return the maximum number of bathymetry and backscatter
-beams that the specified data format may contain.  In order to successfully
+or \fBmb_buffer_dump\fP to write data. The values \fIbeams_bath\fP,
+\fIbeams_amp\fP, and \fIpixels_ss\fP return the maximum number 
+of bathymetry and amplitude beams and sidescan pixels, respectively,
+that the specified data format may contain.  In general, \fIbeams_amp\fP
+will either be zero or equal to \fIbeams_bath\fP.  In order to successfully
 write data, the calling program must
 provide pointers to arrays large enough to hold \fIbeams_bath\fP bathymetry
-values and \fIbeams_back\fP backscatter variables.
+values, \fIbeams_amp\fP amplitude values, and \fIpixels_ss\fP sidescan
+values. 
 A status value indicating success or failure is returned; an error value
 argument passes more detailed information about initialization failures. 
 .RE
@@ -458,8 +513,9 @@ argument passes more detailed information about failures.
 int \fBmb_read\fP(\fIverbose\fP, \fImbio_ptr\fP, \fIkind\fP, 
 \fIpings\fP, \fItime_i\fP, \fItime_d\fP, 
 \fInavlon\fP, \fInavlat\fP, \fIspeed\fP, \fIheading\fP, \fIdistance\fP, 
-\fInbath\fP, \fIbath\fP, \fIbathlon\fP, \fIbathlat\fP, 
-\fInback\fP, \fIback\fP, \fIbacklon\fP, \fIbacklat\fP, 
+\fInbath\fP, \fInamp\fP, \fInss\fP, 
+\fIbath\fP, \fIamp\fP, \fIbathlon\fP, \fIbathlat\fP, 
+\fIss\fP, \fIsslon\fP, \fIsslat\fP, 
 \fIcomment\fP, \fIerror\fP)
 .br
 int \fIverbose\fP
@@ -486,19 +542,23 @@ double *\fIdistance\fP;
 .br
 int *\fInbath\fP;
 .br
+int *\fInamp\fP;
+.br
+int *\fInss\fP;
+.br
 double *\fIbath\fP;
+.br
+double *\fIamp\fP;
 .br
 double *\fIbathlon\fP;
 .br
 double *\fIbathlat\fP;
 .br
-int *\fInback\fP;
+double *\fIss\fP;
 .br
-double *\fIback\fP;
+double *\fIsslon\fP;
 .br
-double *\fIbacklon\fP;
-.br
-double *\fIbacklat\fP;
+double *\fIsslat\fP;
 .br
 char \fIcomment\fP[256];
 .br
@@ -508,9 +568,9 @@ The function \fBmb_read\fP reads, processes, and returns multibeam
 data according to the \fBMBIO\fP descriptor pointed to by \fImbio_ptr\fP.
 The \fIverbose\fP
 value controls the standard error output verbosity of the function.
-The data is in the form of bathymetry and backscatter values combined
+The data is in the form of bathymetry, amplitude, and sidescan values combined
 with the longitude and latitude locations of the bathymetry and 
-backscatter measurements.
+sidescan measurements (amplitudes are coincident with the bathymetry).
 The return values are:
  	\fIkind\fP:		kind of data record read
  					1	survey data
@@ -532,17 +592,19 @@ The return values are:
  	\fIheading\fP:		ship heading in degrees
  	\fIdistance\fP:		distance along shiptrack since beginning of data in km
  	\fInbath\fP:		number of bathymetry values
+ 	\fInamp\fP:		number of amplitude values
+ 	\fInss\fP:		number of sidescan values
  	\fIbath\fP:		array of bathymetry values in meters
+ 	\fIamp\fP:		array of amplitude values in unknown units
  	\fIbathlon\fP:		array of of longitude values corresponding 
  			to bathymetry
  	\fIbathlat\fP:		array of of latitude values corresponding 
  			to bathymetry
- 	\fInback\fP:		number of backscatter values
- 	\fIback\fP:		array of backscatter values in meters
- 	\fIbacklon\fP:		array of of longitude values corresponding 
- 			to backscatter
- 	\fIbacklat\fP:		array of of latitude values corresponding 
- 			to backscatter
+ 	\fIss\fP:		array of sidescan values in unknown units
+ 	\fIsslon\fP:		array of of longitude values corresponding 
+ 			to sidescan
+ 	\fIsslat\fP:		array of of latitude values corresponding 
+ 			to sidescan
  	\fIcomment\fP:	comment string
  	\fIerror\fP:		error value
 .br
@@ -554,8 +616,9 @@ read failures.
 int \fBmb_write\fP(\fIverbose\fP, \fImbio_ptr\fP, 
 \fIkind\fP, \fItime_i\fP, \fItime_d\fP, 
 \fInavlon\fP, \fInavlat\fP, \fIspeed\fP, \fIheading\fP, 
-\fInbath\fP, \fIbath\fP, \fIbathlon\fP, \fIbathlat\fP, 
-\fInback\fP, \fIback\fP, \fIbacklon\fP, \fIbacklat\fP, 
+\fInbath\fP, \fInamp\fP, \fInss\fP, 
+\fIbath\fP, \fIamp\fP, \fIbathlon\fP, \fIbathlat\fP, 
+\fIss\fP, \fIsslon\fP, \fIsslat\fP, 
 \fIcomment\fP, \fIerror\fP)
 .br
 int \fIverbose\fP
@@ -578,19 +641,23 @@ double \fIheading\fP;
 .br
 int \fInbath\fP;
 .br
+int \fInamp\fP;
+.br
+int \fInss\fP;
+.br
 double *\fIbath\fP;
+.br
+double *\fIamp\fP;
 .br
 double *\fIbathlon\fP;
 .br
 double *\fIbathlat\fP;
 .br
-int \fInback\fP;
+double *\fIss\fP;
 .br
-double *\fIback\fP;
+double *\fIsslon\fP;
 .br
-double *\fIbacklon\fP;
-.br
-double *\fIbacklat\fP;
+double *\fIsslat\fP;
 .br
 char \fIcomment\fP[256];
 .br
@@ -621,17 +688,19 @@ The values to be output are:
  	\fIspeed\fP:		ship speed in km/s
  	\fIheading\fP:		ship heading in degrees
  	\fInbath\fP:		number of bathymetry values
+ 	\fInamp\fP:		number of amplitude values
+ 	\fInss\fP:		number of sidescan values
  	\fIbath\fP:		array of bathymetry values in meters
+ 	\fIamp\fP:		array of amplitude values in unknown units
  	\fIbathlon\fP:		array of of longitude values corresponding 
  			to bathymetry
  	\fIbathlat\fP:		array of of latitude values corresponding 
  			to bathymetry
- 	\fInback\fP:		number of backscatter values
- 	\fIback\fP:		array of backscatter values in meters
- 	\fIbacklon\fP:		array of of longitude values corresponding 
- 				to backscatter
- 	\fIbacklat\fP:		array of of latitude values corresponding 
- 			to backscatter
+ 	\fIss\fP:		array of sidescan values in unknown units
+ 	\fIsslon\fP:		array of of longitude values corresponding 
+ 			to sidescan
+ 	\fIsslat\fP:		array of of latitude values corresponding 
+ 			to sidescan
  	\fIcomment\fP:		comment string
 .br
 A status value indicating success or failure is returned; the error value
@@ -642,8 +711,10 @@ write failures.
 int \fBmb_get\fP(\fIverbose\fP, \fImbio_ptr\fP, \fIkind\fP, \fIpings\fP, 
 \fItime_i\fP, \fItime_d\fP, 
 \fInavlon\fP, \fInavlat\fP, \fIspeed\fP, \fIheading\fP, \fIdistance\fP, 
-\fInbath\fP, \fIbath\fP, \fIbathdist\fP,  
-\fInback\fP, \fIback\fP, \fIbackdist\fP, \fIcomment\fP, \fIerror\fP)
+\fInbath\fP, \fInamp\fP, \fInss\fP, 
+\fIbath\fP, \fIamp\fP, \fIbathacrosstrack\fP, \fIbathalongtrack\fP, 
+\fIss\fP, \fIssacrosstrack\fP, \fIssalongtrack\fP, 
+\fIcomment\fP, \fIerror\fP)
 .br
 int \fIverbose\fP;
 .br
@@ -669,15 +740,23 @@ double *\fIdistance\fP;
 .br
 int *\fInbath\fP;
 .br
-double *\fIbath\fP;
+int *\fInamp\fP;
 .br
-double *\fIbathdist\fP;
+int *\fInss\fP;
 .br
-int *\fInback\fP;
+int *\fIbath\fP;
 .br
-double *\fIback\fP;
+int *\fIamp\fP;
 .br
-double *\fIbackdist\fP;
+int *\fIbathacrosstrack\fP;
+.br
+int *\fIbathalongtrack\fP;
+.br
+int *\fIss\fP;
+.br
+int *\fIssacrosstrack\fP;
+.br
+int *\fIssalongtrack\fP;
 .br
 char \fIcomment\fP[256];
 .br
@@ -687,9 +766,10 @@ The function \fBmb_get\fP reads, processes, and returns multibeam
 data according to the \fBMBIO\fP descriptor pointed to by \fImbio_ptr\fP.
 The \fIverbose\fP
 value controls the standard error output verbosity of the function.
-The data is in the form of bathymetry and backscatter values combined
-with the crosstrack distances of the bathymetry and backscatter 
-measurements.
+The data is in the form of bathymetry, amplitude, and sidescan values combined
+with the acrosstrack and alongtrack distances relative to the navigation
+of the bathymetry and sidescan 
+measurements (amplitudes are coincident with the bathymetry values).
 The return values are:
  	\fIkind\fP:		kind of data record read
  					1	survey data
@@ -711,13 +791,19 @@ The return values are:
  	\fIheading\fP:		ship heading in degrees
  	\fIdistance\fP:	distance along shiptrack since beginning of data in km
  	\fInbath\fP:		number of bathymetry values
+ 	\fInamp\fP:		number of amplitude values
+ 	\fInss\fP:		number of sidescan values
  	\fIbath\fP:		array of bathymetry values in meters
- 	\fIbathdist\fP:		array of of crosstrack distances in meters
+ 	\fIbath\fP:		array of amplitude values in unknown units
+ 	\fIbathacrosstrack\fP:	array of of acrosstrack distances in meters
  			corresponding to bathymetry
- 	\fInback\fP:		number of backscatter values
- 	\fIback\fP:		array of backscatter values in unknown units
- 	\fIbackdist\fP:	array of of crosstrack distances in meters
- 			corresponding to backscatter
+ 	\fIbathalongtrack\fP:	array of of alongtrack distances in meters
+ 			corresponding to bathymetry
+ 	\fIss\fP:		array of sidescan values in unknown units
+ 	\fIssacrosstrack\fP:	array of of acrosstrack distances in meters
+ 			corresponding to sidescan
+ 	\fIssacrosstrack\fP:	array of of alongtrack distances in meters
+ 			corresponding to sidescan
  	\fIcomment\fP:		comment string
  	\fIerror\fP:		error value
 .br
@@ -729,8 +815,10 @@ read failures.
 int \fBmb_put\fP(\fIverbose\fP, \fImbio_ptr\fP, \fIkind\fP, 
 \fItime_i\fP, \fItime_d\fP, 
 \fInavlon\fP, \fInavlat\fP, \fIspeed\fP, \fIheading\fP,  
-\fInbath\fP, \fIbath\fP, \fIbathdist\fP,  
-\fInback\fP, \fIback\fP, \fIbackdist\fP, \fIcomment\fP, \fIerror\fP)
+\fInbath\fP, \fInamp\fP, \fInss\fP, 
+\fIbath\fP, \fIamp\fP, \fIbathacrosstrack\fP, \fIbathalongtrack\fP, 
+\fIss\fP, \fIssacrosstrack\fP, \fIssalongtrack\fP, 
+\fIcomment\fP, \fIerror\fP)
 .br
 int \fIverbose\fP;
 .br
@@ -752,15 +840,23 @@ double \fIheading\fP;
 .br
 int \fInbath\fP;
 .br
-double *\fIbath\fP;
+int \fInamp\fP;
 .br
-double *\fIbathdist\fP;
+int \fInss\fP;
 .br
-int \fInback\fP;
+int *\fIbath\fP;
 .br
-double *\fIback\fP;
+int *\fIamp\fP;
 .br
-double *\fIbackdist\fP;
+int *\fIbathacrosstrack\fP;
+.br
+int *\fIbathalongtrack\fP;
+.br
+int *\fIss\fP;
+.br
+int *\fIssacrosstrack\fP;
+.br
+int *\fIssalongtrack\fP;
 .br
 char \fIcomment\fP[256];
 .br
@@ -770,9 +866,10 @@ The function \fBmb_put\fP writes multibeam data to the file listed
 in the \fBMBIO\fP descriptor pointed to by \fIMBIO_ptr\fP.
 The \fIverbose\fP
 value controls the standard error output verbosity of the function.
-The data is in the form of bathymetry and backscatter values combined
-with the crosstrack distances of the bathymetry and backscatter 
-measurements.
+The data is in the form of bathymetry, amplitude, and sidescan values combined
+with the acrosstrack and alongtrack distances relative to the navigation
+of the bathymetry and sidescan 
+measurements (amplitudes are coincident with the bathymetry values).
 The values to be output are:
  	\fIkind\fP:		kind of data record to be written
  					1	survey data
@@ -792,14 +889,21 @@ The values to be output are:
  	\fIheading\fP:		ship heading in degrees
  	\fIdistance\fP:		distance along shiptrack since beginning of data in km
  	\fInbath\fP:		number of bathymetry values
+ 	\fInamp\fP:		number of amplitude values
+ 	\fInss\fP:		number of sidescan values
  	\fIbath\fP:		array of bathymetry values in meters
- 	\fIbathdist\fP:		array of of crosstrack distances in meters
+ 	\fIbath\fP:		array of amplitude values in unknown units
+ 	\fIbathacrosstrack\fP:	array of of acrosstrack distances in meters
  			corresponding to bathymetry
- 	\fInback\fP:		number of backscatter values
- 	\fIback\fP:		array of backscatter values in unknown units
- 	\fIbackdist\fP:	array of of crosstrack distances in meters
- 			corresponding to backscatter
+ 	\fIbathalongtrack\fP:	array of of alongtrack distances in meters
+ 			corresponding to bathymetry
+ 	\fIss\fP:		array of sidescan values in unknown units
+ 	\fIssacrosstrack\fP:	array of of acrosstrack distances in meters
+ 			corresponding to sidescan
+ 	\fIssacrosstrack\fP:	array of of alongtrack distances in meters
+ 			corresponding to sidescan
  	\fIcomment\fP:		comment string
+ 	\fIerror\fP:		error value
 .br
 A status value indicating success or failure is returned; the error value
 argument \fIerror\fP passes more detailed information about 
@@ -810,8 +914,10 @@ write failures.
 int \fBmb_get_all\fP(\fIverbose\fP, \fImbio_ptr\fP, \fIstore_ptr\fP, 
 \fIkind\fP, \fItime_i\fP, \fItime_d\fP, 
 \fInavlon\fP, \fInavlat\fP, \fIspeed\fP, \fIheading\fP, \fIdistance\fP, 
-\fInbath\fP, \fIbath\fP, \fIbathdist\fP,  
-\fInback\fP, \fIback\fP, \fIbackdist\fP, \fIcomment\fP, \fIerror\fP)
+\fInbath\fP, \fInamp\fP, \fInss\fP, 
+\fIbath\fP, \fIamp\fP, \fIbathacrosstrack\fP, \fIbathalongtrack\fP, 
+\fIss\fP, \fIssacrosstrack\fP, \fIssalongtrack\fP, 
+\fIcomment\fP, \fIerror\fP)
 .br
 int \fIverbose\fP;
 .br
@@ -837,15 +943,23 @@ double *\fIdistance\fP;
 .br
 int *\fInbath\fP;
 .br
-double *\fIbath\fP;
+int *\fInamp\fP;
 .br
-double *\fIbathdist\fP;
+int *\fInss\fP;
 .br
-int *\fInback\fP;
+int *\fIbath\fP;
 .br
-double *\fIback\fP;
+int *\fIamp\fP;
 .br
-double *\fIbackdist\fP;
+int *\fIbathacrosstrack\fP;
+.br
+int *\fIbathalongtrack\fP;
+.br
+int *\fIss\fP;
+.br
+int *\fIssacrosstrack\fP;
+.br
+int *\fIssalongtrack\fP;
 .br
 char \fIcomment\fP[256];
 .br
@@ -859,7 +973,8 @@ The data is returned one record at a time; no averaging is performed.
 A pointer to a data structure containing all of the data read is returned
 as \fIstore_ptr\fP; the form of the data structure is determined by the
 multibeam sonar system associated with the format of the data being read.
-Data is also returned in the forms of bathymetry and backscatter survey data
+Data is also returned in the forms of bathymetry, amplitude, and sidescan
+survey data
 and comment strings when the data record \fIkind\fP is survey data or
 comment data, respectively.
 The return values are:
@@ -888,13 +1003,19 @@ The return values are:
  	\fIheading\fP:		ship heading in degrees
  	\fIdistance\fP:		distance along shiptrack since beginning of data in km
  	\fInbath\fP:		number of bathymetry values
+ 	\fInamp\fP:		number of amplitude values
+ 	\fInss\fP:		number of sidescan values
  	\fIbath\fP:		array of bathymetry values in meters
- 	\fIbathdist\fP:		array of of crosstrack distances in meters
+ 	\fIbath\fP:		array of amplitude values in unknown units
+ 	\fIbathacrosstrack\fP:	array of of acrosstrack distances in meters
  			corresponding to bathymetry
- 	\fInback\fP:		number of backscatter values
- 	\fIback\fP:		array of backscatter values in unknown units
- 	\fIbackdist\fP:	array of of crosstrack distances in meters
- 			corresponding to backscatter
+ 	\fIbathalongtrack\fP:	array of of alongtrack distances in meters
+ 			corresponding to bathymetry
+ 	\fIss\fP:		array of sidescan values in unknown units
+ 	\fIssacrosstrack\fP:	array of of acrosstrack distances in meters
+ 			corresponding to sidescan
+ 	\fIssacrosstrack\fP:	array of of alongtrack distances in meters
+ 			corresponding to sidescan
  	\fIcomment\fP:	comment string
  	\fIerror\fP:		error value
 .br
@@ -907,8 +1028,10 @@ int \fBmb_put_all\fP(\fIverbose\fP, \fImbio_ptr\fP,
 \fIstore_ptr\fP, \fIusevalues\fP, \fIkind\fP, 
 \fItime_i\fP, \fItime_d\fP, 
 \fInavlon\fP, \fInavlat\fP, \fIspeed\fP, \fIheading\fP,  
-\fInbath\fP, \fIbath\fP, \fIbathdist\fP,  
-\fInback\fP, \fIback\fP, \fIbackdist\fP, \fIcomment\fP, \fIerror\fP)
+\fInbath\fP, \fInamp\fP, \fInss\fP, 
+\fIbath\fP, \fIamp\fP, \fIbathacrosstrack\fP, \fIbathalongtrack\fP, 
+\fIss\fP, \fIssacrosstrack\fP, \fIssalongtrack\fP, 
+\fIcomment\fP, \fIerror\fP)
 .br
 int \fIverbose\fP;
 .br
@@ -934,15 +1057,23 @@ double \fIheading\fP;
 .br
 int \fInbath\fP;
 .br
-double *\fIbath\fP;
+int \fInamp\fP;
 .br
-double *\fIbathdist\fP;
+int \fInss\fP;
 .br
-int \fInback\fP;
+int *\fIbath\fP;
 .br
-double *\fIback\fP;
+int *\fIamp\fP;
 .br
-double *\fIbackdist\fP;
+int *\fIbathacrosstrack\fP;
+.br
+int *\fIbathalongtrack\fP;
+.br
+int *\fIss\fP;
+.br
+int *\fIssacrosstrack\fP;
+.br
+int *\fIssalongtrack\fP;
 .br
 char \fIcomment\fP[256];
 .br
@@ -994,14 +1125,21 @@ The values to be output are:
  	\fIheading\fP:		ship heading in degrees
  	\fIdistance\fP:		distance along shiptrack since beginning of data in km
  	\fInbath\fP:		number of bathymetry values
+ 	\fInamp\fP:		number of amplitude values
+ 	\fInss\fP:		number of sidescan values
  	\fIbath\fP:		array of bathymetry values in meters
- 	\fIbathdist\fP:		array of of crosstrack distances in meters
+ 	\fIbath\fP:		array of amplitude values in unknown units
+ 	\fIbathacrosstrack\fP:	array of of acrosstrack distances in meters
  			corresponding to bathymetry
- 	\fInback\fP:		number of backscatter values
- 	\fIback\fP:		array of backscatter values in unknown units
- 	\fIbackdist\fP:	array of of crosstrack distances in meters
- 			corresponding to backscatter
-	\fIcomment\fP:		comment string
+ 	\fIbathalongtrack\fP:	array of of alongtrack distances in meters
+ 			corresponding to bathymetry
+ 	\fIss\fP:		array of sidescan values in unknown units
+ 	\fIssacrosstrack\fP:	array of of acrosstrack distances in meters
+ 			corresponding to sidescan
+ 	\fIssacrosstrack\fP:	array of of alongtrack distances in meters
+ 			corresponding to sidescan
+ 	\fIcomment\fP:	comment string
+ 	\fIerror\fP:		error value
 .br
 A status value indicating success or failure is returned; the error value
 argument \fIerror\fP passes more detailed information about 
@@ -1009,7 +1147,8 @@ write failures.
 .SH LEVEL 3 FUNCTIONS
 .RE
 .IP
-I'll write this real soon now - in the meantime look at the code in
+I'll write this real soon now (or at least someday when someone bugs
+me a tremendous amount) - in the meantime look at the code in
 mbclean.c for an idea of how to use the mb_buffer functions.  DWC
 .SH MISCELLANEOUS FUNCTIONS
 .RE
@@ -1045,6 +1184,25 @@ in the listings of the functions
 If an .mbio_defaults file exists in the user's home directory, 
 the defaults are read from this file. A status value is returned to 
 indicate success or failure.
+.RE
+.IP
+int \fBmb_format\fP(\fIverbose\fP, \fIformat\fP, \fIformat_num\fP, \fIerror\fP)
+.br
+int \fIverbose\fP;
+.br
+int *\fIformat\fP;
+.br
+int *\fIformat_num\fP;
+.br
+int *\fIerror\fP;
+.RS 10
+Given the format identifier \fIformat\fP, \fBmb_format\fP checks if the
+format is valid.  If the format id corresponds to a value used in
+previous (<4.00) versions of \fBMB-System\fP, then the format value
+will be aliased to the current corresponding value.  If the format id
+is valid, then the location of that format in the various format
+tables used by \fBMBIO\fP is returned in \fIformat_num\fP.  The return
+status value signals success if \fIformat\fP is valid and failure otherwise.
 .RE
 .IP
 int \fBmb_format_inf\fP(\fIverbose\fP, \fIformat\fP, \fImessage\fP)

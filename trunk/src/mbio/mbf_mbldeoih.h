@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
- *    The MB-system:	mbf_mbldeoih.h	3.00	1/20/93
- *	$Id: mbf_mbldeoih.h,v 3.0 1993-05-14 22:52:30 sohara Exp $
+ *    The MB-system:	mbf_mbldeoih.h	1/20/93
+ *	$Id: mbf_mbldeoih.h,v 4.0 1994-03-06 00:01:56 caress Exp $
  *
- *    Copyright (c) 1993 by 
+ *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
  *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
  *    Lamont-Doherty Earth Observatory
@@ -12,11 +12,27 @@
  *--------------------------------------------------------------------*/
 /*
  * mbf_mbldeoih.h defines the data structures used by MBIO functions
- * to store multibeam data read from the  MBF_MBLDEOIH format (MBIO id 10).  
+ * to store multibeam data read from the  MBF_MBLDEOIH format (MBIO id 61).  
  *
  * Author:	D. W. Caress
  * Date:	January 20, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1994/03/03  03:39:43  caress
+ * Fixed copyright message.
+ *
+ * Revision 4.1  1994/02/21  03:23:28  caress
+ * Changed location of amp array pointer in
+ * struct mbf_mbldeoih_data_struct .
+ *
+ * Revision 4.0  1994/02/17  21:11:32  caress
+ * First cut at new version.  Recast format to include both
+ * beam amplitude and sidescan data.  I hope no one has used
+ * the old version of this format, as the files will be
+ * orphaned!!!
+ *
+ * Revision 3.0  1993/05/14  22:52:30  sohara
+ * initial version
+ *
  */
 /*
  * Notes on the MBF_MBLDEOIH data format:
@@ -29,11 +45,11 @@
  *	entirely in 2-byte integers.
  *   3. Each data record has two parts.  First there is a 30-byte
  *      header section containing the time stamp, navigation, and
- *      the numbers of depth and backscatter values.  The second
- *      part contains the depth and backscatter values.  The number 
- *      of depth values may be different from the number of 
- *      backscatter values.  
- *   4. Both the depth and backscatter arrays are centered.
+ *      the numbers of depth, beam amplitude, and sidescan values.  The 
+ *      second part contains the depth and backscatter values.  The number 
+ *      of depth and beam amplitude values is generally different 
+ *      from the number of sidescan values.  
+ *   4. All data arrays are centered.
  *   5. Comments can be embedded in the data as 128 byte ascii strings,
  *	where the first two characters of the associated header
  *      must be set to "##" (the other 28 bytes of the header are
@@ -68,18 +84,23 @@ struct mbf_mbldeoih_header_struct
 					65535 = 359.9945 degrees
 					0 = 360 degrees */
 	unsigned short	speed;	/* km/s X100 */
-	short	beams_bath;	/* number of depth values in meters/bathscale */
-	short	beams_back;	/* number of backscatter values */
-	short	bathscale;	/* 1000Xscale where depth=bathXscale */
-	short	backscale;	/* 1000Xscale where backscatter=backXscale */
+	short	beams_bath;	/* number of depth values */
+	short	beams_amp;	/* number of amplitude values */
+	short	pixels_ss;	/* number of sidescan pixels */
+	short	bath_scale;	/* 1000Xscale where depth=bathXscale */
+	short	amp_scale;	/* 1000Xscale where amplitude=ampXscale */
+	short	ss_scale;	/* 1000Xscale where sidescan=ssXscale */
 	};
 
 struct mbf_mbldeoih_data_struct
 	{
 	short	bath[MBF_MBLDEOIH_MAX_BEAMS];
-	short	bathdist[MBF_MBLDEOIH_MAX_BEAMS];
-	short	back[MBF_MBLDEOIH_MAX_BEAMS];
-	short	backdist[MBF_MBLDEOIH_MAX_BEAMS];
+	short	bath_acrosstrack[MBF_MBLDEOIH_MAX_BEAMS];
+	short	bath_alongtrack[MBF_MBLDEOIH_MAX_BEAMS];
+	short	amp[MBF_MBLDEOIH_MAX_BEAMS];
+	short	ss[MBF_MBLDEOIH_MAX_BEAMS];
+	short	ss_acrosstrack[MBF_MBLDEOIH_MAX_BEAMS];
+	short	ss_alongtrack[MBF_MBLDEOIH_MAX_BEAMS];
 	};
 
 struct mbf_mbldeoih_struct

@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
- *    The MB-system:	mbsys_sb.h	3.00	2/17/93
- *	$Id: mbsys_sb.h,v 3.0 1993-05-14 23:05:32 sohara Exp $
+ *    The MB-system:	mbsys_sb.h	2/17/93
+ *	$Id: mbsys_sb.h,v 4.0 1994-03-06 00:01:56 caress Exp $
  *
- *    Copyright (c) 1993 by 
+ *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
  *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
  *    Lamont-Doherty Earth Observatory
@@ -12,21 +12,30 @@
  *--------------------------------------------------------------------*/
 /*
  * mbsys_sb.h defines the data structures used by MBIO functions
- * to store data from the 16-beam Sea Beam multibeam sonar systems.
- * The data formats which are commonly used to store Sea Beam
+ * to store data from the 16-beam SeaBeam multibeam sonar systems.
+ * The data formats which are commonly used to store SeaBeam
  * data in files include
- *      MBF_SBSIOMRG : MBIO ID 1
- *      MBF_SBSIOCEN : MBIO ID 2
- *      MBF_SBSIOLSI : MBIO ID 3
- *      MBF_SBURICEN : MBIO ID 4
+ *      MBF_SBSIOMRG : MBIO ID 11
+ *      MBF_SBSIOCEN : MBIO ID 12
+ *      MBF_SBSIOLSI : MBIO ID 13
+ *      MBF_SBURICEN : MBIO ID 14
  *
  * Author:	D. W. Caress
  * Date:	February 17, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1994/03/03  03:39:43  caress
+ * Fixed copyright message.
+ *
+ * Revision 4.0  1994/02/17  20:46:50  caress
+ * First cut at new version.  Comment changes only.
+ *
+ * Revision 3.0  1993/05/14  23:05:32  sohara
+ * initial version
+ *
  */
 /*
  * Notes on the MBSYS_SB data structure:
- *   1. Sea Beam multibeam systems output raw data in 16 uncentered
+ *   1. SeaBeam multibeam systems output raw data in 16 uncentered
  *      beams.  MBIO and most data formats store the data as 19
  *      centered beams.
  *   5. The kind value in the mbsys_sb_struct indicates whether the
@@ -35,7 +44,7 @@
  *        kind = 1 : data from a ping 
  *        kind = 2 : comment 
  *   6. The data structure defined below includes all of the values
- *      which are passed in Sea Beam records.
+ *      which are passed in SeaBeam records.
  */
 
 /* maximum line length in characters */
@@ -62,16 +71,16 @@ struct mbsys_sb_struct
 	int	sec;		/* seconds from beginning of minute (0-59) */
 
 	/* depths and distances */
-	int	dist[MBSYS_SB_BEAMS]; /* 19 depths from Sea Beam in meters
+	int	dist[MBSYS_SB_BEAMS]; /* 19 depths from SeaBeam in meters
 					assuming 1500 m/s water velocity */
 	int	deph[MBSYS_SB_BEAMS]; /* 19 cross track distances in 
 					meters from port (negative) 
 					to starboard (positive) */
 
 	/* additional values */
-	unsigned short	sbtim;	/* Sea Beam computer clock time in 10ths of
+	unsigned short	sbtim;	/* SeaBeam computer clock time in 10ths of
 					seconds from start of hour (0-3600) */
-	unsigned short	sbhdg;	/* Sea Beam gyro heading 
+	unsigned short	sbhdg;	/* SeaBeam gyro heading 
 					0 = 0 degrees
 					1 = 0.0055 degrees
 					16384 = 90 degrees

@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
- *    The MB-system:	mb_get_value.c	3.00	2/15/93
- *    $Id: mb_get_value.c,v 3.2 1993-05-15 14:44:54 caress Exp $
+ *    The MB-system:	mb_get_value.c	2/15/93
+ *    $Id: mb_get_value.c,v 4.0 1994-03-06 00:01:56 caress Exp $
  *
- *    Copyright (c) 1993 by 
+ *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
  *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
  *    Lamont-Doherty Earth Observatory
@@ -19,6 +19,15 @@
  * Date:	February 15, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1994/03/03  03:39:43  caress
+ * Fixed copyright message.
+ *
+ * Revision 4.0  1994/02/21  04:03:53  caress
+ * First cut at new version.  No changes.
+ *
+ * Revision 3.2  1993/05/15  14:44:54  caress
+ * removed excess rcs_id message
+ *
  * Revision 3.1  1993/05/14  22:27:02  sohara
  * fixed rcs_id message
  *
@@ -35,7 +44,7 @@
 /* maximum line length in characters */
 #define MB_GET_VALUE_MAXLINE 200
 
-static char rcs_id[]="$Id: mb_get_value.c,v 3.2 1993-05-15 14:44:54 caress Exp $";
+static char rcs_id[]="$Id: mb_get_value.c,v 4.0 1994-03-06 00:01:56 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 /*	function mb_get_double reads a double value from a string.

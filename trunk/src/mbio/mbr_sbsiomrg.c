@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
- *    The MB-system:	mbr_sbsiomrg.c	3.00	2/2/93
- *	$Id: mbr_sbsiomrg.c,v 3.1 1993-07-03 02:28:20 caress Exp $
+ *    The MB-system:	mbr_sbsiomrg.c	2/2/93
+ *	$Id: mbr_sbsiomrg.c,v 4.0 1994-03-06 00:01:56 caress Exp $
  *
- *    Copyright (c) 1993 by 
+ *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
  *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
  *    Lamont-Doherty Earth Observatory
@@ -22,6 +22,19 @@
  * Author:	D. W. Caress
  * Date:	February 2, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1994/03/03  03:39:43  caress
+ * Fixed copyright message.
+ *
+ * Revision 4.0  1994/02/21  03:59:50  caress
+ * First cut at new version. Altered to be consistent
+ * with passing of three types of data: bathymetry,
+ * amplitude, and sidescan.
+ *
+ * Revision 3.1  1993/07/03  02:28:20  caress
+ * Fixed bug where ping with single nonzero beam which is off-center
+ * caused a divide by zero.  Such a beam will not be passed on by
+ * the reading subroutines because the center beam is unknown.
+ *
  * Revision 3.0  1993/05/14  22:58:04  sohara
  * initial version
  *
@@ -45,7 +58,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_sbsiomrg.c,v 3.1 1993-07-03 02:28:20 caress Exp $";
+ static char res_id[]="$Id: mbr_sbsiomrg.c,v 4.0 1994-03-06 00:01:56 caress Exp $";
 	char	*function_name = "mbr_alm_sbsiomrg";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -261,7 +274,7 @@ int	*error;
 		for (i=0;i<MB_BEAMS_PROC_SBSIOMRG;i++)
 			{
 			mb_io_ptr->new_bath[i] = 0;
-			mb_io_ptr->new_bathdist[i] = 0;
+			mb_io_ptr->new_bath_acrosstrack[i] = 0;
 			}
 
 		/* find center beam */
@@ -362,7 +375,8 @@ int	*error;
 			for (i=j;i<k;i++)
 				{
 				mb_io_ptr->new_bath[i+id] = data->deph[i];
-				mb_io_ptr->new_bathdist[i+id] = data->dist[i];
+				mb_io_ptr->new_bath_acrosstrack[i+id] 
+					= data->dist[i];
 				}
 			}
 
@@ -401,13 +415,7 @@ int	*error;
 			for (i=0;i<mb_io_ptr->beams_bath;i++)
 			  fprintf(stderr,"dbg4       bath[%d]: %d  bathdist[%d]: %d\n",
 				i,mb_io_ptr->new_bath[i],
-				i,mb_io_ptr->new_bathdist[i]);
-			fprintf(stderr,"dbg4       beams_back: %d\n",
-				mb_io_ptr->beams_back);
-			for (i=0;i<mb_io_ptr->beams_back;i++)
-			  fprintf(stderr,"dbg4       back[%d]: %d  backdist[%d]: %d\n",
-				i,mb_io_ptr->new_back[i],
-				i,mb_io_ptr->new_backdist[i]);
+				i,mb_io_ptr->new_bath_acrosstrack[i]);
 			}
 
 		/* done translating values */
@@ -455,8 +463,8 @@ int	*error;
 		id = mb_io_ptr->beams_bath - 1;
 		for (i=0;i<mb_io_ptr->beams_bath;i++)
 			{
-			store->dist[id-i] = mb_io_ptr->new_bathdist[i];
 			store->deph[id-i] = mb_io_ptr->new_bath[i];
+			store->dist[id-i] = mb_io_ptr->new_bath_acrosstrack[i];
 			}
 
 		/* additional values */
@@ -652,7 +660,7 @@ int	*error;
 			{
 			j = i + offset;
 			data->deph[i] = mb_io_ptr->new_bath[j];
-			data->dist[i] = mb_io_ptr->new_bathdist[j];
+			data->dist[i] = mb_io_ptr->new_bath_acrosstrack[j];
 			}
 		}
 

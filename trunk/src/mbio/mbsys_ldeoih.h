@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
- *    The MB-system:	mbsys_hsds.h	3.00	3/2/93
- *	$Id: mbsys_ldeoih.h,v 3.0 1993-05-14 23:04:50 sohara Exp $
+ *    The MB-system:	mbsys_hsds.h	3/2/93
+ *	$Id: mbsys_ldeoih.h,v 4.0 1994-03-06 00:01:56 caress Exp $
  *
- *    Copyright (c) 1993 by 
+ *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
  *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
  *    Lamont-Doherty Earth Observatory
@@ -18,6 +18,18 @@
  * Author:	D. W. Caress
  * Date:	March 2, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1994/03/03  03:39:43  caress
+ * Fixed copyright message.
+ *
+ * Revision 4.0  1994/02/17  20:42:20  caress
+ * First cut at new version.  Recast format to include both
+ * beam amplitude and sidescan data.  I hope noone has used
+ * the old version of this format, as the files will be
+ * orphaned!!!
+ *
+ * Revision 3.0  1993/05/14  23:04:50  sohara
+ * initial version
+ *
  */
 /*
  * Notes on the MBSYS_LDEOIH data structure:
@@ -64,16 +76,21 @@ struct mbsys_ldeoih_struct
 	unsigned short	speed;	/* km/s X100 */
 
 	/* numbers of beams */
-	short	beams_bath;	/* number of depth values in meters/bathscale */
-	short	beams_back;	/* number of backscatter values */
-	short	bathscale;	/* 1000Xscale where depth=bathXscale */
-	short	backscale;	/* 1000Xscale where backscatter=backXscale */
+	short	beams_bath;	/* number of depth values */
+	short	beams_amp;	/* number of amplitude values */
+	short	pixels_ss;	/* number of sidescan pixels */
+	short	bath_scale;	/* 1000Xscale where depth=bathXscale */
+	short	amp_scale;	/* 1000Xscale where amplitude=ampXscale */
+	short	ss_scale;	/* 1000Xscale where sidescan=ssXscale */
 
 	/* pointers to arrays */
 	short	*bath;
-	short	*bathdist;
-	short	*back;
-	short	*backdist;
+	short	*amp;
+	short	*bath_acrosstrack;
+	short	*bath_alongtrack;
+	short	*ss;
+	short	*ss_acrosstrack;
+	short	*ss_alongtrack;
 
 	/* comment */
 	char	comment[MBSYS_LDEOIH_MAXLINE];

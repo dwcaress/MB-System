@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
- *    The MB-system:	mbsys_ldeoih.c	2/26/93
- *	$Id: mbsys_ldeoih.c,v 4.0 1994-03-06 00:01:56 caress Exp $
+ *    The MB-system:	mbsys_sb2100.c	3/2/94
+ *	$Id: mbsys_sb2100.c,v 4.0 1994-03-06 00:01:56 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -11,36 +11,27 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- * mbsys_ldeoih.c contains the functions for handling the data structure
- * used by MBIO functions to store data from a generic multibeam
- * format which handles data with arbitrary numbers of bathymetry,
- * amplitude, and sidescan data.  This generic format is 
- *      MBF_MBLDEOIH : MBIO ID 61
+ * mbsys_sb2100.c contains the functions for handling the data structure
+ * used by MBIO functions to store data from the SeaBeam 2100 and 
+ * SeaBeam 1000 series multibeam sonar systems.
+ * The data formats which are commonly used to store SeaBeam 1000/2100
+ * data in files include
+ *      MBF_SB2100RW : MBIO ID 71
+ *      MBF_SB2100BN : MBIO ID 72
  * These functions include:
- *   mbsys_ldeoih_alloc		- allocate memory for mbsys_ldeoih_struct 
- *					structure
- *   mbsys_ldeoih_deall		- deallocate memory for mbsys_ldeoih_struct 
- *					structure
- *   mbsys_ldeoih_extract	- extract basic data from mbsys_ldeoih_struct 
- *					structure
- *   mbsys_ldeoih_insert	- insert basic data into mbsys_ldeoih_struct 
- *					structure
- *   mbsys_ldeoih_copy		- copy data in one mbsys_ldeoih_struct 
- *					structure into another 
- *					mbsys_ldeoih_struct structure
+ *   mbsys_sb2100_alloc	- allocate memory for mbsys_sb2100_struct structure
+ *   mbsys_sb2100_deall	- deallocate memory for mbsys_sb2100_struct structure
+ *   mbsys_sb2100_extract	- extract basic data from mbsys_sb2100_struct structure
+ *   mbsys_sb2100_insert	- insert basic data into mbsys_sb2100_struct structure
+ *   mbsys_sb2100_copy	- copy data in one mbsys_sb2100_struct structure
+ *   				into another mbsys_sb2100_struct structure
  *
  * Author:	D. W. Caress
- * Date:	February 26, 1993
+ * Date:	March 2, 1994
  * $Log: not supported by cvs2svn $
- * Revision 4.1  1994/03/03  03:39:43  caress
- * Fixed copyright message.
+ * Revision 4.0  1994/03/05  02:12:07  caress
+ * First cut for SeaBeam 2100 i/o.
  *
- * Revision 4.0  1994/02/20  04:55:11  caress
- * First cut at new version.  Now handles both amplitude
- * and sidescan data.
- *
- * Revision 3.0  1993/05/14  23:04:29  sohara
- * initial version
  *
  */
 
@@ -53,20 +44,19 @@
 #include "../../include/mb_status.h"
 #include "../../include/mb_format.h"
 #include "../../include/mb_io.h"
-#include "../../include/mbsys_ldeoih.h"
+#include "../../include/mbsys_sb2100.h"
 
 /*--------------------------------------------------------------------*/
-int mbsys_ldeoih_alloc(verbose,mbio_ptr,store_ptr,error)
+int mbsys_sb2100_alloc(verbose,mbio_ptr,store_ptr,error)
 int	verbose;
 char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_ldeoih.c,v 4.0 1994-03-06 00:01:56 caress Exp $";
-	char	*function_name = "mbsys_ldeoih_alloc";
+ static char res_id[]="$Id: mbsys_sb2100.c,v 4.0 1994-03-06 00:01:56 caress Exp $";
+	char	*function_name = "mbsys_sb2100_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
-	struct mbsys_ldeoih_struct *store;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -82,30 +72,8 @@ int	*error;
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* allocate memory for data structure */
-	status = mb_malloc(verbose,sizeof(struct mbsys_ldeoih_struct),
+	status = mb_malloc(verbose,sizeof(struct mbsys_sb2100_struct),
 				store_ptr,error);
-
-	/* get pointer to data structure */
-	store = (struct mbsys_ldeoih_struct *) *store_ptr;
-
-	/* allocate memory for data arrays in structure */
-	status = mb_malloc(verbose,mb_io_ptr->beams_bath*sizeof(int),
-				&store->bath,error);
-	status = mb_malloc(verbose,mb_io_ptr->beams_bath*sizeof(int),
-				&store->bath_acrosstrack,error);
-	status = mb_malloc(verbose,mb_io_ptr->beams_bath*sizeof(int),
-				&store->bath_alongtrack,error);
-	status = mb_malloc(verbose,mb_io_ptr->beams_amp*sizeof(int),
-				&store->amp,error);
-	status = mb_malloc(verbose,mb_io_ptr->pixels_ss*sizeof(int),
-				&store->ss,error);
-	status = mb_malloc(verbose,mb_io_ptr->pixels_ss*sizeof(int),
-				&store->ss_acrosstrack,error);
-	status = mb_malloc(verbose,mb_io_ptr->pixels_ss*sizeof(int),
-				&store->ss_alongtrack,error);
-	store->beams_bath = mb_io_ptr->beams_bath;
-	store->beams_amp = mb_io_ptr->beams_amp;
-	store->pixels_ss = mb_io_ptr->pixels_ss;
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -123,16 +91,16 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_ldeoih_deall(verbose,mbio_ptr,store_ptr,error)
+int mbsys_sb2100_deall(verbose,mbio_ptr,store_ptr,error)
 int	verbose;
 char	*mbio_ptr;
 char	*store_ptr;
 int	*error;
 {
-	char	*function_name = "mbsys_ldeoih_deall";
+	char	*function_name = "mbsys_sb2100_deall";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
-	struct mbsys_ldeoih_struct *store;
+	struct mbsys_sb2100_struct *store;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -144,18 +112,6 @@ int	*error;
 		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
 		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
 		}
-
-	/* get pointer to data structure */
-	store = (struct mbsys_ldeoih_struct *) store_ptr;
-
-	/* deallocate memory for data structures */
-	status = mb_free(verbose,store->bath,error);
-	status = mb_free(verbose,store->bath_acrosstrack,error);
-	status = mb_free(verbose,store->bath_alongtrack,error);
-	status = mb_free(verbose,store->amp,error);
-	status = mb_free(verbose,store->ss,error);
-	status = mb_free(verbose,store->ss_acrosstrack,error);
-	status = mb_free(verbose,store->ss_alongtrack,error);
 
 	/* deallocate memory for data structure */
 	status = mb_free(verbose,store_ptr,error);
@@ -175,7 +131,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_ldeoih_extract(verbose,mbio_ptr,store_ptr,kind,
+int mbsys_sb2100_extract(verbose,mbio_ptr,store_ptr,kind,
 		time_i,time_d,navlon,navlat,speed,heading,
 		nbath,namp,nss,
 		bath,amp,bathacrosstrack,bathalongtrack,
@@ -204,12 +160,11 @@ int	*ssalongtrack;
 char	*comment;
 int	*error;
 {
-	char	*function_name = "mbsys_ldeoih_extract";
+	char	*function_name = "mbsys_sb2100_extract";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
-	struct mbsys_ldeoih_struct *store;
+	struct mbsys_sb2100_struct *store;
 	int	time_j[4];
-	int	id;
 	int	i;
 
 	/* print input debug statements */
@@ -227,7 +182,7 @@ int	*error;
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_ldeoih_struct *) store_ptr;
+	store = (struct mbsys_sb2100_struct *) store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -237,15 +192,15 @@ int	*error;
 		{
 		/* get time */
 		time_j[0] = store->year;
-		time_j[1] = store->day;
-		time_j[2] = store->min;
-		time_j[3] = store->sec;
+		time_j[1] = store->jday;
+		time_j[2] = 60*store->hour + store->minute;
+		time_j[3] = 0.001*store->msec;
 		mb_get_itime(verbose,time_j,time_i);
-		mb_get_time(verbose,time_i,time_d);
+		mb_get_time(verbose,time_i,&time_d);
 
 		/* get navigation */
-		*navlon = store->lon2u/60. + store->lon2b/600000.;
-		*navlat = store->lat2u/60. + store->lat2b/600000. - 90.;
+		*navlon = store->longitude;
+		*navlat = store->latitude;
 		if (mb_io_ptr->lonflip < 0)
 			{
 			if (*navlon > 0.) 
@@ -268,32 +223,32 @@ int	*error;
 				*navlon = *navlon + 360.;
 			}
 
-		/* get heading (360 degrees = 65536) */
-		*heading = store->heading*0.0054932;
+		/* get heading */
+		*heading = 0.01*store->heading_12khz;
 
 		/* set speed to zero */
-		*speed = 0.0;
+		*speed = 0.001*store->speed;
 
-		/* read distance, depth, and backscatter 
-			values into storage arrays */
+		/* read beam and pixel values into storage arrays */
 		*nbath = mb_io_ptr->beams_bath;
 		*namp = mb_io_ptr->beams_amp;
 		*nss = mb_io_ptr->pixels_ss;
 		for (i=0;i<*nbath;i++)
 			{
-			bath[i] = store->bath[i];
-			bathacrosstrack[i] = store->bath_acrosstrack[i];
-			bathalongtrack[i] = store->bath_alongtrack[i];
+			bath[i] = store->depth[i];
+			bathacrosstrack[i] = store->acrosstrack_beam[i];
+			bathalongtrack[i] = store->alongtrack_beam[i];
 			}
-		for (i=0;i<*nbath;i++)
+		for (i=0;i<*namp;i++)
 			{
-			amp[i] = store->amp[i];
+			amp[i] = store->amplitude_beam[i];
 			}
 		for (i=0;i<*nss;i++)
 			{
-			ss[i] = store->ss[i];
-			ssacrosstrack[i] = store->ss_acrosstrack[i];
-			ssalongtrack[i] = store->ss_alongtrack[i];
+			ss[i] = store->amplitude_ss[i];
+			ssacrosstrack[i] = (i - MBSYS_SB2100_CENTER_PIXEL)
+				*store->pixel_size_12khz;
+			ssalongtrack[i] = store->alongtrack_ss[i];
 			}
 
 		/* print debug statements */
@@ -331,20 +286,18 @@ int	*error;
 			fprintf(stderr,"dbg4       nbath:      %d\n",
 				*nbath);
 			for (i=0;i<*nbath;i++)
-			  fprintf(stderr,"dbg4       bath[%d]: %d  bathacrosstrack[%d]: %d  bathalongtrack[%d]: %d\n",
-				i,bath[i],
-				i,bathacrosstrack[i],
-				i,bathalongtrack[i]);
-			fprintf(stderr,"dbg4        namp:      %d\n",
+			  fprintf(stderr,"dbg4       beam:%d  bath:%d  acrosstrack:%d  alongtrack:%d\n",
+				i,bath[i],bathacrosstrack[i],bathalongtrack[i]);
+			fprintf(stderr,"dbg4        namp:     %d\n",
 				*namp);
 			for (i=0;i<*namp;i++)
-			  fprintf(stderr,"dbg4        amp[%d]: %d\n",
-				i,amp[i]);
+			  fprintf(stderr,"dbg4        beam:%d   amp:%d  acrosstrack:%d  alongtrack:%d\n",
+				i,amp[i],bathacrosstrack[i],bathalongtrack[i]);
+			fprintf(stderr,"dbg4        nss:      %d\n",
+				*nss);
 			for (i=0;i<*nss;i++)
-			  fprintf(stderr,"dbg4         ss[%d]: %d    ssacrosstrack[%d]: %d    ssalongtrack[%d]: %d\n",
-				i,bath[i],
-				i,ssacrosstrack[i],
-				i,ssalongtrack[i]);
+			  fprintf(stderr,"dbg4        beam:%d   ss:%d  acrosstrack:%d  alongtrack:%d\n",
+				i,ss[i],ssacrosstrack[i],ssalongtrack[i]);
 			}
 
 		/* done translating values */
@@ -405,20 +358,18 @@ int	*error;
 		fprintf(stderr,"dbg2       nbath:      %d\n",
 			*nbath);
 		for (i=0;i<*nbath;i++)
-		  fprintf(stderr,"dbg2       bath[%d]: %d  bathacrosstrack[%d]: %d  bathalongtrack[%d]: %d\n",
-			i,bath[i],
-			i,bathacrosstrack[i],
-			i,bathalongtrack[i]);
-		fprintf(stderr,"dbg2        namp:      %d\n",
+		  fprintf(stderr,"dbg2       beam:%d  bath:%d  acrosstrack:%d  alongtrack:%d\n",
+			i,bath[i],bathacrosstrack[i],bathalongtrack[i]);
+		fprintf(stderr,"dbg2        namp:     %d\n",
 			*namp);
 		for (i=0;i<*namp;i++)
-		  fprintf(stderr,"dbg2        amp[%d]: %d\n",
-			i,amp[i]);
+		  fprintf(stderr,"dbg2       beam:%d   amp:%d  acrosstrack:%d  alongtrack:%d\n",
+			i,amp[i],bathacrosstrack[i],bathalongtrack[i]);
+		fprintf(stderr,"dbg2        nss:      %d\n",
+			*nss);
 		for (i=0;i<*nss;i++)
-		  fprintf(stderr,"dbg2         ss[%d]: %d    ssacrosstrack[%d]: %d    ssalongtrack[%d]: %d\n",
-			i,bath[i],
-			i,ssacrosstrack[i],
-			i,ssalongtrack[i]);
+		  fprintf(stderr,"dbg2        beam:%d   ss:%d  acrosstrack:%d  alongtrack:%d\n",
+			i,ss[i],ssacrosstrack[i],ssalongtrack[i]);
 		}
 	if (verbose >= 2)
 		{
@@ -431,7 +382,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_ldeoih_insert(verbose,mbio_ptr,store_ptr,
+int mbsys_sb2100_insert(verbose,mbio_ptr,store_ptr,
 		time_i,time_d,navlon,navlat,speed,heading,
 		nbath,namp,nss,
 		bath,amp,bathacrosstrack,bathalongtrack,
@@ -459,13 +410,13 @@ int	*ssalongtrack;
 char	*comment;
 int	*error;
 {
-	char	*function_name = "mbsys_ldeoih_insert";
+	char	*function_name = "mbsys_sb2100_insert";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
-	struct mbsys_ldeoih_struct *store;
+	struct mbsys_sb2100_struct *store;
 	int	kind;
 	int	time_j[4];
-	int	id;
+	int	set_pixel_size;
 	int	i;
 
 	/* print input debug statements */
@@ -483,33 +434,26 @@ int	*error;
 		fprintf(stderr,"dbg2       time_i[3]:  %d\n",time_i[3]);
 		fprintf(stderr,"dbg2       time_i[4]:  %d\n",time_i[4]);
 		fprintf(stderr,"dbg2       time_i[5]:  %d\n",time_i[5]);
-		fprintf(stderr,"dbg2       time_d:     %d\n",time_d);
+		fprintf(stderr,"dbg2       time_d:     %f\n",time_d);
 		fprintf(stderr,"dbg2       navlon:     %f\n",navlon);
 		fprintf(stderr,"dbg2       navlat:     %f\n",navlat);
 		fprintf(stderr,"dbg2       speed:      %f\n",speed);
 		fprintf(stderr,"dbg2       heading:    %f\n",heading);
-		fprintf(stderr,"dbg2       nbath:      %d\n",
-			nbath);
+		fprintf(stderr,"dbg2       nbath:      %d\n",nbath);
 		if (verbose >= 3) 
-		  for (i=0;i<nbath;i++)
-		    fprintf(stderr,"dbg3       bath[%d]: %d  bathacrosstrack[%d]: %d  bathalongtrack[%d]: %d\n",
-			i,bath[i],
-			i,bathacrosstrack[i],
-			i,bathalongtrack[i]);
-		fprintf(stderr,"dbg2        namp:      %d\n",
-			namp);
+		 for (i=0;i<nbath;i++)
+		  fprintf(stderr,"dbg3       beam:%d  bath:%d  acrosstrack:%d  alongtrack:%d\n",
+			i,bath[i],bathacrosstrack[i],bathalongtrack[i]);
+		fprintf(stderr,"dbg2       namp:       %d\n",namp);
 		if (verbose >= 3) 
-		  for (i=0;i<namp;i++)
-		    fprintf(stderr,"dbg3        amp[%d]: %d\n",
-			i,amp[i]);
-		fprintf(stderr,"dbg2         nss:      %d\n",
-			nss);
+		 for (i=0;i<namp;i++)
+		  fprintf(stderr,"dbg3        beam:%d   amp:%d  acrosstrack:%d  alongtrack:%d\n",
+			i,amp[i],bathacrosstrack[i],bathalongtrack[i]);
+		fprintf(stderr,"dbg2        nss:       %d\n",nss);
 		if (verbose >= 3) 
-		  for (i=0;i<nss;i++)
-		    fprintf(stderr,"dbg3         ss[%d]: %d    ssacrosstrack[%d]: %d    ssalongtrack[%d]: %d\n",
-			i,bath[i],
-			i,ssacrosstrack[i],
-			i,ssalongtrack[i]);
+		 for (i=0;i<nss;i++)
+		  fprintf(stderr,"dbg3        beam:%d   ss:%d  acrosstrack:%d  alongtrack:%d\n",
+			i,ss[i],ssacrosstrack[i],ssalongtrack[i]);
 		fprintf(stderr,"dbg2       comment:    %s\n",comment);
 		}
 
@@ -517,7 +461,7 @@ int	*error;
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_ldeoih_struct *) store_ptr;
+	store = (struct mbsys_sb2100_struct *) store_ptr;
 
 	/* insert data in structure */
 	if (store->kind == MB_DATA_DATA)
@@ -525,40 +469,45 @@ int	*error;
 		/* get time */
 		mb_get_jtime(verbose,time_i,time_j);
 		store->year = time_j[0];
-		store->day = time_j[1];
-		store->min = time_j[2];
-		store->sec = time_j[3];
+		store->jday = time_j[1];
+		store->hour = time_j[2]/60;
+		store->minute = time_j[2] - store->hour;
+		store->msec = 1000*time_j[3];
 
 		/* get navigation */
 		if (navlon < 0.0) navlon = navlon + 360.0;
-		store->lon2u = (short int) 60.0*navlon;
-		store->lon2b = (short int) (600000.0*(navlon 
-			- store->lon2u/60.0));
-		navlat = navlat + 90.0;
-		store->lat2u = (short int) 60.0*navlat;
-		store->lat2b = (short int) (600000.0*(navlat 
-			- store->lat2u/60.0));
+		store->longitude = navlon;
+		store->latitude = navlat;
 
-		/* get heading (360 degrees = 65536) */
-		store->heading = 182.044444*heading;
+		/* get heading */
+		store->heading_12khz = 100*heading;
 
-		/* put distance, depth, and backscatter values 
+		/* get speed */
+		store->speed = 1000.0*speed;
+
+		/* put beam and pixel values 
 			into data structure */
 		for (i=0;i<nbath;i++)
 			{
-			store->bath[i] = bath[i];
-			store->bath_acrosstrack[i] = bathacrosstrack[i];
-			store->bath_alongtrack[i] = bathalongtrack[i];
+			store->depth[i] = bath[i];
+			store->acrosstrack_beam[i] = bathacrosstrack[i];
+			store->alongtrack_beam[i] = bathalongtrack[i];
 			}
 		for (i=0;i<namp;i++)
-			{
-			store->amp[i] = amp[i];
-			}
+			store->amplitude_beam[i] = amp[i];
+		set_pixel_size = MB_YES;
 		for (i=0;i<nss;i++)
 			{
-			store->ss[i] = ss[i];
-			store->ss_acrosstrack[i] = ssacrosstrack[i];
-			store->ss_alongtrack[i] = ssalongtrack[i];
+			store->amplitude_ss[i] = ss[i];
+			store->alongtrack_ss[i] = ssalongtrack[i];
+			if (store->pixel_size_12khz == 0 
+				&& set_pixel_size == MB_YES && ss[i] > 0 
+				&& i != MBSYS_SB2100_CENTER_PIXEL)
+				{
+				store->pixel_size_12khz = ssacrosstrack[i]/
+					(i - MBSYS_SB2100_CENTER_PIXEL);
+				set_pixel_size = MB_NO;
+				}
 			}
 		}
 
@@ -583,19 +532,18 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_ldeoih_copy(verbose,mbio_ptr,store_ptr,copy_ptr,error)
+int mbsys_sb2100_copy(verbose,mbio_ptr,store_ptr,copy_ptr,error)
 int	verbose;
 char	*mbio_ptr;
 char	*store_ptr;
 char	*copy_ptr;
 int	*error;
 {
-	char	*function_name = "mbsys_ldeoih_copy";
+	char	*function_name = "mbsys_sb2100_copy";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
-	struct mbsys_ldeoih_struct *store;
-	struct mbsys_ldeoih_struct *copy;
-	int	i;
+	struct mbsys_sb2100_struct *store;
+	struct mbsys_sb2100_struct *copy;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -613,47 +561,11 @@ int	*error;
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* get data structure pointers */
-	store = (struct mbsys_ldeoih_struct *) store_ptr;
-	copy = (struct mbsys_ldeoih_struct *) copy_ptr;
+	store = (struct mbsys_sb2100_struct *) store_ptr;
+	copy = (struct mbsys_sb2100_struct *) copy_ptr;
 
 	/* copy the data */
-	copy->kind = store->kind;
-	copy->lon2u = store->lon2u;
-	copy->lon2b = store->lon2b;
-	copy->lat2u = store->lat2u;
-	copy->lat2b = store->lat2b;
-	copy->year = store->year;
-	copy->day = store->day;
-	copy->min = store->min;
-	copy->sec = store->sec;
-	copy->heading = store->heading;
-	copy->speed = store->speed;
-	if (copy->beams_bath <= 0)
-		copy->beams_bath = store->beams_bath;
-	if (copy->beams_amp <= 0)
-		copy->beams_amp = store->beams_amp;
-	if (copy->pixels_ss <= 0)
-		copy->pixels_ss = store->pixels_ss;
-	copy->bath_scale = store->bath_scale;
-	copy->amp_scale = store->amp_scale;
-	copy->ss_scale = store->ss_scale;
-	for (i=0;i<copy->beams_bath;i++)
-		{
-		copy->bath[i] = store->bath[i];
-		copy->bath_acrosstrack[i] = store->bath_acrosstrack[i];
-		copy->bath_alongtrack[i] = store->bath_alongtrack[i];
-		}
-	for (i=0;i<copy->beams_amp;i++)
-		{
-		copy->amp[i] = store->amp[i];
-		}
-	for (i=0;i<copy->pixels_ss;i++)
-		{
-		copy->ss[i] = store->ss[i];
-		copy->ss_acrosstrack[i] = store->ss_acrosstrack[i];
-		copy->ss_alongtrack[i] = store->ss_alongtrack[i];
-		}
-	strcpy(copy->comment,store->comment);	
+	*copy = *store;
 
 	/* print output debug statements */
 	if (verbose >= 2)

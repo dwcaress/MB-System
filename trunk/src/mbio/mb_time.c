@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
- *    The MB-system:	mb_time.c	3.00	1/21/93
- *    $Id: mb_time.c,v 3.2 1993-05-15 14:40:30 caress Exp $
+ *    The MB-system:	mb_time.c	1/21/93
+ *    $Id: mb_time.c,v 4.0 1994-03-06 00:01:56 caress Exp $
  *
- *    Copyright (c) 1993 by 
+ *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
  *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
  *    Lamont-Doherty Earth Observatory
@@ -18,6 +18,15 @@
  * Date:	January 21, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1994/03/03  03:39:43  caress
+ * Fixed copyright message.
+ *
+ * Revision 4.0  1994/02/21  04:04:35  caress
+ * First cut at new version.  No changes.
+ *
+ * Revision 3.2  1993/05/15  14:40:30  caress
+ * removed excess rcs_id messages
+ *
  * Revision 3.1  1993/05/14  22:43:31  sohara
  * fixed rcs_id message
  *
@@ -43,7 +52,7 @@
 #define MININSECOND 0.0166667
 #define SECONDINMIN 60.0
 int	jday[] = {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334};
-static char rcs_id[]="$Id: mb_time.c,v 3.2 1993-05-15 14:40:30 caress Exp $";
+static char rcs_id[]="$Id: mb_time.c,v 4.0 1994-03-06 00:01:56 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 /* 	function mb_get_time returns the number of minutes from

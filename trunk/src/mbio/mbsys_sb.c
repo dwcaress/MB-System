@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
- *    The MB-system:	mbsys_sb.c	3.00	2/26/93
- *	$Id: mbsys_sb.c,v 3.0 1993-05-14 23:05:12 sohara Exp $
+ *    The MB-system:	mbsys_sb.c	2/26/93
+ *	$Id: mbsys_sb.c,v 4.0 1994-03-06 00:01:56 caress Exp $
  *
- *    Copyright (c) 1993 by 
+ *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
  *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
  *    Lamont-Doherty Earth Observatory
@@ -16,10 +16,10 @@
  * multibeam sonar systems.
  * The data formats which are commonly used to store Sea Beam
  * data in files include
- *      MBF_SBSIOMRG : MBIO ID 1
- *      MBF_SBSIOCEN : MBIO ID 2
- *      MBF_SBSIOLSI : MBIO ID 3
- *      MBF_SBURICEN : MBIO ID 4
+ *      MBF_SBSIOMRG : MBIO ID 11
+ *      MBF_SBSIOCEN : MBIO ID 12
+ *      MBF_SBSIOLSI : MBIO ID 13
+ *      MBF_SBURICEN : MBIO ID 14
  * These functions include:
  *   mbsys_sb_alloc	- allocate memory for mbsys_sb_struct structure
  *   mbsys_sb_deall	- deallocate memory for mbsys_sb_struct structure
@@ -31,6 +31,16 @@
  * Author:	D. W. Caress
  * Date:	February 26, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1994/03/03  03:39:43  caress
+ * Fixed copyright message.
+ *
+ * Revision 4.0  1994/02/20  04:13:19  caress
+ * First cut at new version.  Now passes unused arrays for
+ * amplitude and sidescan data.
+ *
+ * Revision 3.0  1993/05/14  23:05:12  sohara
+ * initial version
+ *
  */
 
 /* standard include files */
@@ -51,7 +61,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_sb.c,v 3.0 1993-05-14 23:05:12 sohara Exp $";
+ static char res_id[]="$Id: mbsys_sb.c,v 4.0 1994-03-06 00:01:56 caress Exp $";
 	char	*function_name = "mbsys_sb_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -131,7 +141,9 @@ int	*error;
 /*--------------------------------------------------------------------*/
 int mbsys_sb_extract(verbose,mbio_ptr,store_ptr,kind,
 		time_i,time_d,navlon,navlat,speed,heading,
-		nbath,bath,bathdist,nback,back,backdist,
+		nbath,namp,nss,
+		bath,amp,bathacrosstrack,bathalongtrack,
+		ss,ssacrosstrack,ssalongtrack,
 		comment,error)
 int	verbose;
 char	*mbio_ptr;
@@ -144,11 +156,15 @@ double	*navlat;
 double	*speed;
 double	*heading;
 int	*nbath;
+int	*namp;
+int	*nss;
 int	*bath;
-int	*bathdist;
-int	*nback;
-int	*back;
-int	*backdist;
+int	*amp;
+int	*bathacrosstrack;
+int	*bathalongtrack;
+int	*ss;
+int	*ssacrosstrack;
+int	*ssalongtrack;
 char	*comment;
 int	*error;
 {
@@ -225,12 +241,14 @@ int	*error;
 		/* read distance and depth values into storage arrays */
 		/* switch order of data as it is read into the global arrays */
 		*nbath = mb_io_ptr->beams_bath;
-		*nback = mb_io_ptr->beams_back;
+		*namp = 0;
+		*nss = 0;
 		id = *nbath - 1;
 		for (i=0;i<*nbath;i++)
 			{
-			bathdist[id-i] = store->dist[i];
 			bath[id-i] = store->deph[i];
+			bathacrosstrack[id-i] = store->dist[i];
+			bathalongtrack[id-i] = 0;
 			}
 
 		/* print debug statements */
@@ -270,13 +288,7 @@ int	*error;
 			for (i=0;i<*nbath;i++)
 			  fprintf(stderr,"dbg4       bath[%d]: %d  bathdist[%d]: %d\n",
 				i,bath[i],
-				i,bathdist[i]);
-			fprintf(stderr,"dbg4       nback:      %d\n",
-				*nback);
-			for (i=0;i<*nback;i++)
-			  fprintf(stderr,"dbg4       back[%d]: %d  backdist[%d]: %d\n",
-				i,back[i],
-				i,backdist[i]);
+				i,bathacrosstrack[i]);
 			}
 
 		/* done translating values */
@@ -337,11 +349,7 @@ int	*error;
 		fprintf(stderr,"dbg2       nbath:         %d\n",*nbath);
 		for (i=0;i<*nbath;i++)
 		  fprintf(stderr,"dbg2       bath[%d]: %d  bathdist[%d]: %d\n",
-			i,bath[i],i,bathdist[i]);
-		fprintf(stderr,"dbg2       nback:         %d\n",*nback);
-		for (i=0;i<*nback;i++)
-		  fprintf(stderr,"dbg2       back[%d]: %d  backdist[%d]: %d\n",
-			i,back[i],i,backdist[i]);
+			i,bath[i],i,bathacrosstrack[i]);
 		}
 	if (verbose >= 2)
 		{
@@ -356,7 +364,9 @@ int	*error;
 /*--------------------------------------------------------------------*/
 int mbsys_sb_insert(verbose,mbio_ptr,store_ptr,
 		time_i,time_d,navlon,navlat,speed,heading,
-		nbath,bath,bathdist,nback,back,backdist,
+		nbath,namp,nss,
+		bath,amp,bathacrosstrack,bathalongtrack,
+		ss,ssacrosstrack,ssalongtrack,
 		comment,error)
 int	verbose;
 char	*mbio_ptr;
@@ -368,11 +378,15 @@ double	navlat;
 double	speed;
 double	heading;
 int	nbath;
+int	namp;
+int	nss;
 int	*bath;
-int	*bathdist;
-int	nback;
-int	*back;
-int	*backdist;
+int	*amp;
+int	*bathacrosstrack;
+int	*bathalongtrack;
+int	*ss;
+int	*ssacrosstrack;
+int	*ssalongtrack;
 char	*comment;
 int	*error;
 {
@@ -409,12 +423,17 @@ int	*error;
 		if (verbose >= 3) 
 		 for (i=0;i<nbath;i++)
 		  fprintf(stderr,"dbg3       bath[%d]: %d  bathdist[%d]: %d\n",
-			i,bath[i],i,bathdist[i]);
-		fprintf(stderr,"dbg2       nback:      %d\n",nback);
+			i,bath[i],i,bathacrosstrack[i]);
+		fprintf(stderr,"dbg2       namp:       %d\n",namp);
 		if (verbose >= 3) 
-		 for (i=0;i<nback;i++)
-		  fprintf(stderr,"dbg3       back[%d]: %d  backdist[%d]: %d\n",
-			i,back[i],i,backdist[i]);
+		 for (i=0;i<namp;i++)
+		  fprintf(stderr,"dbg3        amp[%d]: %d\n",
+			i,amp[i]);
+		fprintf(stderr,"dbg2        nss:       %d\n",nss);
+		if (verbose >= 3) 
+		 for (i=0;i<nss;i++)
+		  fprintf(stderr,"dbg3        ss[%d]: %d    ssdist[%d]: %d\n",
+			i,ss[i],i,ssacrosstrack[i]);
 		fprintf(stderr,"dbg2       comment:    %s\n",comment);
 		}
 
@@ -455,7 +474,7 @@ int	*error;
 		for (i=0;i<nbath;i++)
 			{
 			store->deph[i] = bath[id-i];
-			store->dist[i] = bathdist[id-i];
+			store->dist[i] = bathacrosstrack[id-i];
 			}
 		}
 
