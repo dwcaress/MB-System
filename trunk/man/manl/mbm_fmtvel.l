@@ -1,0 +1,49 @@
+.TH mbm_fmtvel 1 "26 February 1994"
+.SH NAME
+\fBmbm_fmtvel\fP - Extract sound velocity info from Hydrosweep data
+files and create output in tabular format.
+
+.SH VERSION
+Version 4.00
+
+.SH SYNOPSIS
+\fBmbm_fmtvel\fP [\fB-F\fIformat \fB-I\fIinfilename \fP]
+
+.SH DESCRIPTION
+\fBmbm_fmtvel\fP is a macro that scans a Hydrosweep multibeam data file
+using the program \fBhsdump\fP and generates a list in columnar
+format with time, date, latitude, longitude, C-mean, and C-keel
+entrys. Comment records (lines) at the top of the output begin with '#'.
+The columns are tab-delimited. The only allowed formats are 21 (raw 
+Hydrosweep data) and 24 (L-DEO in-house binary Hydrosweep data).
+
+.SH AUTHORSHIP
+David W. Caress (caress@lamont.ldeo.columbia.edu)
+.br
+Dale N. Chayes (dale@lamont.ldeo.columbia.edu)
+.br
+Suzanne H. O'Hara (sohara@lamont.ldeo.columbia.edu)
+.br
+ Lamont-Doherty Earth Observatory
+.br
+Palisades, NY 10964
+
+.SH OPTIONS
+.TP
+.B \fB-F\fIformat\fP
+Sets the format for the input multibeam data using
+\fBMBIO\fP integer format identifiers.
+This program uses the \fBMBIO\fP library and will read any multibeam
+format supported by \fBMBIO\fP. A list of the multibeam data formats
+currently supported by \fBMBIO\fP and their identifier values
+is given in the \fBMBIO\fP manual page.  However, only Hydrosweep type
+5 and type 8 records contain C-keel or C-Mean data at this date.
+.TP
+.B \fB-I\fIinfilename\fP
+Data file from which the input data will be read. 
+
+.SH BUGS
+Only one output format is currently supported and it is not compatible
+with pswiggle.
+
+
