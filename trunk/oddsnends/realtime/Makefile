@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile	8/12/93
-#	$Id: Makefile,v 4.1 1994-04-12 21:03:58 caress Exp $
+#	$Id: Makefile,v 4.2 1994-04-19 01:35:32 caress Exp $
 #
 #     Copyright (c) 1993 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,9 @@
 # Date:		August 12, 1993
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.1  1994/04/12  21:03:58  caress
+# Changed for version 4.0beta4
+#
 # Revision 4.0  1994/03/06  00:12:00  caress
 # First cut at version 4.0
 #
@@ -86,7 +89,7 @@ $(BINDIR)/mbm_calcomp_plot: mbm_calcomp_plot.perl
 	chmod +x $(BINDIR)/mbm_calcomp_plot
 
 ### compile the source files
-mbcontour.o:	mbcontourfilter.c  $(INCDIR)/mb_status.h
+mbcontourfilter.o:	mbcontourfilter.c  $(INCDIR)/mb_status.h
 	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) mbcontourfilter.c
 mbplotfilter.o:	mbplotfilter.c
 	$(CC) -c -g -I$(GMTINCDIR) mbplotfilter.c
