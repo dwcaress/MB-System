@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbclean.c	2/26/93
- *    $Id: mbclean.c,v 4.8 1995-03-06 19:37:59 caress Exp $
+ *    $Id: mbclean.c,v 4.9 1995-03-13 19:22:12 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -26,6 +26,9 @@
  * by David Caress.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.8  1995/03/06  19:37:59  caress
+ * Changed include strings.h to string.h for POSIX compliance.
+ *
  * Revision 4.7  1995/03/02  13:49:21  caress
  * Fixed bug related to error messages.
  *
@@ -129,10 +132,10 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbclean.c,v 4.8 1995-03-06 19:37:59 caress Exp $";
+	static char rcs_id[] = "$Id: mbclean.c,v 4.9 1995-03-13 19:22:12 caress Exp $";
 	static char program_name[] = "MBCLEAN";
 	static char help_message[] =  "MBCLEAN identifies and flags artifacts in multibeam bathymetry data\nBad beams  are  indentified  based  on  one simple criterion only: \nexcessive bathymetric slopes.   The default input and output streams \nare stdin and stdout.";
-	static char usage_message[] = "mbclean [-Blow/high -Cslope -Ddistance -Fformat -Iinfile -Llonflip -Mmode -Ooutfile -Q -Xzap_beams \n\t-V -H]";
+	static char usage_message[] = "mbclean [-Blow/high -Cslope -Ddistance -Fformat -Gfraction_low/fraction_high -Iinfile -Llonflip -Mmode -Ooutfile -Q -Xzap_beams \n\t-V -H]";
 	extern char *optarg;
 	extern int optkind;
 	int	errflg = 0;
@@ -186,6 +189,7 @@ char **argv;
 	int	find_bad;
 	int	ndata = 0;
 	int	nrange = 0;
+	int	nfraction = 0;
 	int	nouter = 0;
 	int	nrail = 0;
 	int	nbad = 0;
@@ -200,6 +204,9 @@ char **argv;
 	int	check_range = MB_NO;
 	double	depth_low;
 	double	depth_high;
+	int	check_fraction = MB_NO;
+	double	fraction_low;
+	double	fraction_high;
 
 	/* rail processing variables */
 	int	center;
@@ -271,7 +278,7 @@ char **argv;
 	strcpy (ofile, "stdout");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhB:b:F:f:L:l:I:i:O:o:C:c:D:d:M:m:QqX:x:")) != -1)
+	while ((c = getopt(argc, argv, "VvHhB:b:C:c:D:d:G:g:F:f:L:l:I:i:M:m:O:o:QqX:x:")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -288,26 +295,6 @@ char **argv;
 			check_range = MB_YES;
 			flag++;
 			break;
-		case 'F':
-		case 'f':
-			sscanf (optarg,"%d", &format);
-			flag++;
-			break;
-		case 'L':
-		case 'l':
-			sscanf (optarg,"%d", &lonflip);
-			flag++;
-			break;
-		case 'I':
-		case 'i':
-			sscanf (optarg,"%s", ifile);
-			flag++;
-			break;
-		case 'O':
-		case 'o':
-			sscanf (optarg,"%s", ofile);
-			flag++;
-			break;
 		case 'C':
 		case 'c':
 			sscanf (optarg,"%lf", &slopemax);
@@ -318,9 +305,35 @@ char **argv;
 			sscanf (optarg,"%lf", &distancemin);
 			flag++;
 			break;
+		case 'F':
+		case 'f':
+			sscanf (optarg,"%d", &format);
+			flag++;
+			break;
+		case 'G':
+		case 'g':
+			sscanf (optarg,"%lf/%lf", &fraction_low,&fraction_high);
+			check_fraction = MB_YES;
+			flag++;
+			break;
+		case 'I':
+		case 'i':
+			sscanf (optarg,"%s", ifile);
+			flag++;
+			break;
+		case 'L':
+		case 'l':
+			sscanf (optarg,"%d", &lonflip);
+			flag++;
+			break;
 		case 'M':
 		case 'm':
 			sscanf (optarg,"%d", &mode);
+			flag++;
+			break;
+		case 'O':
+		case 'o':
+			sscanf (optarg,"%s", ofile);
 			flag++;
 			break;
 		case 'Q':
@@ -396,6 +409,9 @@ char **argv;
 		fprintf(stderr,"dbg2       check_range:    %d\n",check_range);
 		fprintf(stderr,"dbg2       depth_low:      %f\n",depth_low);
 		fprintf(stderr,"dbg2       depth_high:     %f\n",depth_high);
+		fprintf(stderr,"dbg2       check_fraction: %d\n",check_fraction);
+		fprintf(stderr,"dbg2       fraction_low:   %f\n",fraction_low);
+		fprintf(stderr,"dbg2       fraction_high:  %f\n",fraction_high);
 		}
 
 	/* if help desired then print it and exit */
@@ -420,7 +436,7 @@ char **argv;
 
 	/* check that clean mode is allowed 
 		for the specified data format */
-	if (mb_bath_flag_table[format_num] == MB_NO && mode <= 2)
+	if (mb_bath_flag_table[format_num] == MB_YES && mode <= 2)
 		{
 		fprintf(stderr,"\nMBIO format %d does not allow flagging of bad data \nas negative numbers (specified by cleaning mode %d).\n",format,mode);
 		fprintf(stderr,"\nCopy the data to another format or set the cleaning mode to zero \nbad data values (-M3 or -M4).\n");
@@ -489,7 +505,7 @@ char **argv;
 		status = mb_malloc(verbose,beams_bath*sizeof(double),
 			&ping[i].bathy,&error);
 		}
-	status = mb_malloc(verbose,3*beams_bath*sizeof(double),
+	status = mb_malloc(verbose,4*beams_bath*sizeof(double),
 			&list,&error);
 
 	/* if error initializing memory then quit */
@@ -718,6 +734,60 @@ char **argv;
 			ping[0].ssacrosstrack,ping[0].ssalongtrack,
 			comment,&error);
 		}
+	if (check_fraction == MB_YES)
+		{
+		strncpy(comment,"\0",256);
+		sprintf(comment,"  Depth fractional range checking on:");
+		status = mb_put(verbose,ombio_ptr,kind,
+			ping[0].time_i,ping[0].time_d,
+			ping[0].navlon,ping[0].navlat,
+			ping[0].speed,ping[0].heading,
+			beams_bath,beams_amp,pixels_ss,
+			ping[0].bath,ping[0].amp,
+			ping[0].bathacrosstrack,ping[0].bathalongtrack,
+			ping[0].ss,
+			ping[0].ssacrosstrack,ping[0].ssalongtrack,
+			comment,&error);
+		strncpy(comment,"\0",256);
+		sprintf(comment,"    Minimum acceptable depth fraction: %f",fraction_low);
+		status = mb_put(verbose,ombio_ptr,kind,
+			ping[0].time_i,ping[0].time_d,
+			ping[0].navlon,ping[0].navlat,
+			ping[0].speed,ping[0].heading,
+			beams_bath,beams_amp,pixels_ss,
+			ping[0].bath,ping[0].amp,
+			ping[0].bathacrosstrack,ping[0].bathalongtrack,
+			ping[0].ss,
+			ping[0].ssacrosstrack,ping[0].ssalongtrack,
+			comment,&error);
+		strncpy(comment,"\0",256);
+		sprintf(comment,"    Maximum acceptable depth fraction: %f",fraction_high);
+		status = mb_put(verbose,ombio_ptr,kind,
+			ping[0].time_i,ping[0].time_d,
+			ping[0].navlon,ping[0].navlat,
+			ping[0].speed,ping[0].heading,
+			beams_bath,beams_amp,pixels_ss,
+			ping[0].bath,ping[0].amp,
+			ping[0].bathacrosstrack,ping[0].bathalongtrack,
+			ping[0].ss,
+			ping[0].ssacrosstrack,ping[0].ssalongtrack,
+			comment,&error);
+		}
+	else
+		{
+		strncpy(comment,"\0",256);
+		sprintf(comment,"  Depth fractional range checking off");
+		status = mb_put(verbose,ombio_ptr,kind,
+			ping[0].time_i,ping[0].time_d,
+			ping[0].navlon,ping[0].navlat,
+			ping[0].speed,ping[0].heading,
+			beams_bath,beams_amp,pixels_ss,
+			ping[0].bath,ping[0].amp,
+			ping[0].bathacrosstrack,ping[0].bathalongtrack,
+			ping[0].ss,
+			ping[0].ssacrosstrack,ping[0].ssalongtrack,
+			comment,&error);
+		}
 	strncpy(comment,"\0",256);
 	sprintf(comment," ");
 	status = mb_put(verbose,ombio_ptr,kind,
@@ -860,6 +930,16 @@ char **argv;
 					&& (ping[1].bath[i] < depth_low
 					|| ping[1].bath[i] > depth_high))
 					{
+					if (verbose >= 1)
+					fprintf(stderr,"d: %4d %2d %2d %2.2d:%2.2d:%2.2d.%6.6d  %4d %8.2f\n",
+						ping[1].time_i[0],
+						ping[1].time_i[1],
+						ping[1].time_i[2],
+						ping[1].time_i[3],
+						ping[1].time_i[4],
+						ping[1].time_i[5],
+						ping[1].time_i[6],
+						i,ping[1].bath[i]);
 					find_bad = MB_YES;
 					if (mode <= 2)
 						{
@@ -920,6 +1000,16 @@ char **argv;
 			    find_bad = MB_YES;
 			    for (j=highbeam;j<beams_bath;j++)
 			  	{
+				if (verbose >= 1)
+				fprintf(stderr,"r: %4d %2d %2d %2.2d:%2.2d:%2.2d.%6.6d  %4d %8.2f\n",
+						ping[1].time_i[0],
+						ping[1].time_i[1],
+						ping[1].time_i[2],
+						ping[1].time_i[3],
+						ping[1].time_i[4],
+						ping[1].time_i[5],
+						ping[1].time_i[6],
+						j,ping[1].bath[j]);
 				if (mode <= 2)
 					{
 					ping[1].bath[j] = -ping[1].bath[j];
@@ -939,6 +1029,16 @@ char **argv;
 			    find_bad = MB_YES;
 			    for (k=0;k<=lowbeam;k++)
 			  	{
+				if (verbose >= 1)
+				fprintf(stderr,"r: %4d %2d %2d %2.2d:%2.2d:%2.2d.%6.6d  %4d %8.2f\n",
+						ping[1].time_i[0],
+						ping[1].time_i[1],
+						ping[1].time_i[2],
+						ping[1].time_i[3],
+						ping[1].time_i[4],
+						ping[1].time_i[5],
+						ping[1].time_i[6],
+						k,ping[1].bath[k]);
 				if (mode <= 2)
 					{
 					ping[1].bath[k] = -ping[1].bath[k];
@@ -1017,6 +1117,43 @@ char **argv;
 					list[nlist-1]);
 				}
 
+			/* check fractional depth range if desired */
+			if (check_fraction == MB_YES 
+				&& ping[1].id >= 0 && median > 0.0)
+				{
+				for (i=0;i<beams_bath;i++)
+					{
+					if (ping[1].bath[i] > 0.0
+					&& (ping[1].bath[i]/median < fraction_low
+					|| ping[1].bath[i]/median > fraction_high))
+					{
+					if (verbose >= 1)
+					fprintf(stderr,"f: %4d %2d %2d %2.2d:%2.2d:%2.2d.%6.6d  %4d %8.2f %8.2f\n",
+						ping[1].time_i[0],
+						ping[1].time_i[1],
+						ping[1].time_i[2],
+						ping[1].time_i[3],
+						ping[1].time_i[4],
+						ping[1].time_i[5],
+						ping[1].time_i[6],
+						i,ping[1].bath[i],median);
+					find_bad = MB_YES;
+					if (mode <= 2)
+						{
+						ping[1].bath[i] = -ping[1].bath[i];
+						nfraction++;
+						nflag++;
+						}
+					else
+						{
+						ping[1].bath[i] = 0.0;
+						nfraction++;
+						nzero++;
+						}
+					}
+					}
+				}
+
 			/* loop over each of the points in the current ping */
 			if (ping[1].id >= 0)
 			{
@@ -1067,17 +1204,6 @@ char **argv;
 								-ping[1].bath[i];
 							nbad++;
 							nflag = nflag + 2;
-							if (verbose >= 1)
-							fprintf(stderr,"%4d %2d %2d %2.2d:%2.2d:%2.2d.%6.6d  %4d %6.2f %f %f\n",
-							ping[j].time_i[0],
-							ping[j].time_i[1],
-							ping[j].time_i[2],
-							ping[j].time_i[3],
-							ping[j].time_i[4],
-							ping[j].time_i[5],
-							ping[j].time_i[6],
-							k,slope,
-							ping[j].bath[k],median);
 							}
 						else if (mode == MBCLEAN_FLAG_ONE)
 							{
@@ -1152,7 +1278,7 @@ char **argv;
 						b = bad[0].beam;
 						if (verbose >= 2)
 							fprintf(stderr,"\n");
-						fprintf(stderr,"%4d %2d %2d %2.2d:%2.2d:%2.2d.%6.6d  %4d %6.2f %8.2f %f %f\n",
+						fprintf(stderr,"s: %4d %2d %2d %2.2d:%2.2d:%2.2d.%6.6d  %4d %8.2g %8.2f %6.2f %6.2f\n",
 						ping[p].time_i[0],
 						ping[p].time_i[1],
 						ping[p].time_i[2],
@@ -1160,7 +1286,7 @@ char **argv;
 						ping[p].time_i[4],
 						ping[p].time_i[5],
 						ping[p].time_i[6],
-						b,slope,dd,bad[0].bath,median);
+						b,bad[0].bath,median,slope,dd);
 						}
 					if (verbose >= 1 && slope > slopemax
 						&& dd > distancemin
@@ -1170,7 +1296,7 @@ char **argv;
 						b = bad[1].beam;
 						if (verbose >= 2)
 							fprintf(stderr,"\n");
-						fprintf(stderr,"%4d %2d %2d %2.2d:%2.2d:%2.2d.%6.6d  %4d %6.2f %8.2f %f %f\n",
+						fprintf(stderr,"%s: 4d %2d %2d %2.2d:%2.2d:%2.2d.%6.6d  %4d %8.2g %8.2f %6.2f %6.2f\n",
 						ping[p].time_i[0],
 						ping[p].time_i[1],
 						ping[p].time_i[2],
@@ -1178,7 +1304,7 @@ char **argv;
 						ping[p].time_i[4],
 						ping[p].time_i[5],
 						ping[p].time_i[6],
-						b,slope,dd,bad[1].bath,median);
+						b,bad[1].bath,median,slope,dd);
 						}
 					}
 					
@@ -1297,6 +1423,7 @@ char **argv;
 		fprintf(stderr,"\n%d bathymetry data records processed\n",ndata);
 		fprintf(stderr,"%d outer beams zapped\n",nouter);
 		fprintf(stderr,"%d beams out of acceptable depth range\n",nrange);
+		fprintf(stderr,"%d beams out of acceptable fractional depth range\n",nfraction);
 		fprintf(stderr,"%d bad rail beams identified\n",nrail);
 		fprintf(stderr,"%d excessive slopes identified\n",nbad);
 		fprintf(stderr,"%d beams flagged\n",nflag);
