@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	4/8/93
- *    $Id: mbedit_prog.c,v 4.23 1999-02-04 23:52:20 caress Exp $
+ *    $Id: mbedit_prog.c,v 4.24 1999-02-12 21:19:30 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -24,6 +24,9 @@
  * Date:	March 28, 1997  GUI recast
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.23  1999/02/04  23:52:20  caress
+ * MB-System version 4.6beta7
+ *
  * Revision 4.22  1998/12/17  22:56:00  caress
  * MB-System version 4.6beta4
  *
@@ -215,7 +218,7 @@ struct mbedit_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbedit_prog.c,v 4.23 1999-02-04 23:52:20 caress Exp $";
+static char rcs_id[] = "$Id: mbedit_prog.c,v 4.24 1999-02-12 21:19:30 caress Exp $";
 static char program_name[] = "MBedit";
 static char help_message[] =  
 "MBedit is an interactive editor used to identify and flag\n\
@@ -928,6 +931,9 @@ int	*quit;
 	/* check if a file has been opened */
 	if (file_open == MB_YES)
 		{
+		/* set buffer size */
+		buff_size = buffer_size;
+		holdd_size = hold_size;
 
 		/* keep going until good data or end of file found */
 		do
