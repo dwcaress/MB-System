@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_plot.perl	6/18/93
-#    $Id: mbm_plot.perl,v 4.26 2000-01-13 22:48:11 caress Exp $
+#    $Id: mbm_plot.perl,v 4.27 2000-09-11 21:54:49 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -70,10 +70,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   June 17, 1993
 #
 # Version:
-#   $Id: mbm_plot.perl,v 4.26 2000-01-13 22:48:11 caress Exp $
+#   $Id: mbm_plot.perl,v 4.27 2000-09-11 21:54:49 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.26  2000/01/13  22:48:11  caress
+# Fixed usage of .inf files
+#
 # Revision 4.25  1999/12/29  00:17:55  caress
 # Release 4.6.8
 #
@@ -865,19 +868,7 @@ if ($format >= 0)
 	}
 else
 	{
-	if (open(FILEDATA,"<$file_data"))
-		{
-		while (<FILEDATA>)
-			{
-			($file_tmp, $format_tmp) = $_ =~ /(\S+)\s+(\S+)/;
-			if ($file_tmp && $format_tmp)
-				{
-				push(@files_data, $file_tmp);
-				push(@formats, $format_tmp);
-				}
-			}
-		close FILEDATA;
-		}
+	MBparsedatalist($file_data);
 	}
 if ($bounds)
 	{
@@ -2720,6 +2711,32 @@ sub max {
 		$max = $_[1];
 		}
 	$max;
+}
+#-----------------------------------------------------------------------
+sub MBparsedatalist {
+	local ($FILEDATA, $line, $file_tmp, $format_tmp);
+
+ 	if (open(FILEDATA,"<$_[0]"))
+        	{
+        	while ($line = <FILEDATA>)
+        		{
+			if (!($line =~ /^#/)
+			    && $line =~ /\S+\s+\S+/)
+			    {
+        		    ($file_tmp, $format_tmp) = $line =~ /(\S+)\s+(\S+)/;
+        		    if ($file_tmp && $format_tmp >= 0)
+        		 	{
+        			push(@files_data, $file_tmp);
+        			push(@formats, $format_tmp);
+        			}
+			    elsif ($file_tmp && $format_tmp == -1)
+				{
+				MBparsedatalist($file_tmp);
+				}
+			    }
+        		}
+        	close FILEDATA;
+        	}
 }
 #-----------------------------------------------------------------------
 sub GetDecimalDegrees {

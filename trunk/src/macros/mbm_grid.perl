@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grid.perl	6/11/99
-#    $Id: mbm_grid.perl,v 4.1 1999-10-21 20:42:32 caress Exp $
+#    $Id: mbm_grid.perl,v 4.2 2000-09-11 21:54:49 caress Exp $
 #
 #    Copyright (c) 1999 by
 #    D. W. Caress (caress@mbari.org)
@@ -53,10 +53,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   June 11, 1999
 #
 # Version:
-#   $Id: mbm_grid.perl,v 4.1 1999-10-21 20:42:32 caress Exp $
+#   $Id: mbm_grid.perl,v 4.2 2000-09-11 21:54:49 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.1  1999/10/21  20:42:32  caress
+# Fixed verbosity.
+#
 # Revision 4.0  1999/06/25  17:53:53  caress
 # Initial version.
 #
@@ -151,19 +154,7 @@ if ($format >= 0)
 	}
 else
 	{
- 	if (open(FILEDATA,"<$file_data"))
-        	{
-        	while (<FILEDATA>)
-        		{
-        		($file_tmp, $format_tmp) = $_ =~ /(\S+)\s+(\S+)/;
-        		if ($file_tmp && $format_tmp)
-        			{
-        			push(@files_data, $file_tmp);
-        			push(@formats, $format_tmp);
-        			}
-        		}
-        	close FILEDATA;
-        	}
+	MBparsedatalist($file_data);
 	}
 
 $cnt = -1;
@@ -556,6 +547,80 @@ sub max {
 		$max = $_[1];
 		}
 	$max;
+}
+#-----------------------------------------------------------------------
+sub MBparsedatalist {
+	local ($FILEDATA, $line, $file_tmp, $format_tmp);
+
+ 	if (open(FILEDATA,"<$_[0]"))
+        	{
+        	while ($line = <FILEDATA>)
+        		{
+			if (!($line =~ /^#/)
+			    && $line =~ /\S+\s+\S+/)
+			    {
+        		    ($file_tmp, $format_tmp) = $line =~ /(\S+)\s+(\S+)/;
+        		    if ($file_tmp && $format_tmp >= 0)
+        		 	{
+        			push(@files_data, $file_tmp);
+        			push(@formats, $format_tmp);
+        			}
+			    elsif ($file_tmp && $format_tmp == -1)
+				{
+				MBparsedatalist($file_tmp);
+				}
+			    }
+        		}
+        	close FILEDATA;
+        	}
+}
+#-----------------------------------------------------------------------
+sub GetDecimalDegrees {
+
+	# make local variables
+	local ($dec_degrees, $degrees, $minutes, $seconds);
+
+	# deal with dd:mm:ss format
+	if ($_[0] =~ /^\S+:\S+:\S+$/)
+		{
+		($degrees, $minutes, $seconds) 
+			= $_[0] =~ /^(\S+):(\S+):(\S+)$/;
+		if ($degrees =~ /^-\S+/)
+			{
+			$dec_degrees = $degrees 
+				- $minutes / 60.0 
+				- $seconds / 3600.0;
+			}
+		else
+			{
+			$dec_degrees = $degrees 
+				+ $minutes / 60.0 
+				+ $seconds / 3600.0;
+			}
+		}
+	# deal with dd:mm format
+	elsif ($_[0] =~ /^\S+:\S+$/)
+		{
+		($degrees, $minutes) 
+			= $_[0] =~ /^(\S+):(\S+)$/;
+		if ($degrees =~ /^-\S+/)
+			{
+			$dec_degrees = $degrees - $minutes / 60.0;
+			}
+		else
+			{
+			$dec_degrees = $degrees + $minutes / 60.0;
+			}
+		}
+
+	# value already in decimal degrees
+	else
+		{
+		$dec_degrees = $_[0];
+		}
+
+	# return decimal degrees;
+	$dec_degrees;
 }
 
 #-----------------------------------------------------------------------
