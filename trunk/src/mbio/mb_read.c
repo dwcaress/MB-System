@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_read.c	2/20/93
- *    $Id: mb_read.c,v 4.9 1998-10-05 17:46:15 caress Exp $
+ *    $Id: mb_read.c,v 4.10 1998-11-06 23:05:33 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,9 @@
  * Date:	February 20, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.9  1998/10/05  17:46:15  caress
+ * MB-System version 4.6beta
+ *
  * Revision 4.8  1997/04/21  17:02:07  caress
  * MB-System 4.5 Beta Release.
  *
@@ -138,7 +141,7 @@ char	*comment;
 int	*error;
 {
 
-  static char rcs_id[]="$Id: mb_read.c,v 4.9 1998-10-05 17:46:15 caress Exp $";
+  static char rcs_id[]="$Id: mb_read.c,v 4.10 1998-11-06 23:05:33 caress Exp $";
 	char	*function_name = "mb_read";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
@@ -836,12 +839,12 @@ int	*error;
 				sslon[i] = *navlon 
 					+ headingy*mtodeglon
 					*mb_io_ptr->ss_acrosstrack[i]
-					+ headingy*mtodeglon
+					+ headingx*mtodeglon
 					*mb_io_ptr->ss_alongtrack[i];
 				sslat[i] = *navlat 
 					- headingx*mtodeglat
 					*mb_io_ptr->ss_acrosstrack[i]
-					- headingx*mtodeglat
+					+ headingy*mtodeglat
 					*mb_io_ptr->ss_alongtrack[i];
 				}
 			}
