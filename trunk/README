@@ -26,7 +26,7 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
-Version 5.0.beta23     September 19, 2002
+Version 5.0.beta23     September 20, 2002
 Version 5.0.beta22     August 30, 2002
 Version 5.0.beta21     July 25, 2002
 Version 5.0.beta20     July 20, 2002
@@ -148,6 +148,12 @@ some significant new features and bug fixes:
     programs.
   - The NGDC binary hydrographic sounding format 
     (binary HYDRO93) is now supported as format 164.
+  - The behavior of the optional spline interpolation
+    in mbgrid and mbmosaic has changed. The interpolation
+    now is applied only to cells within data gaps, that
+    is, in locations with data on two sides withing the
+    clipping distance. Cells are no longer interpolated
+    (extrapolated really) around the edges of surveys.
   - A problem with the Simrad multibeam i/o modules
     that caused occasional segmentation faults when
     compiled with gcc has been fixed.
@@ -981,10 +987,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.26 2002-09-19 22:24:55 caress Exp $
+RCS ID: $Id: README,v 5.27 2002-09-20 22:39:48 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.26  2002/09/19 22:24:55  caress
+Release 5.0.beta23
+
 Revision 5.25  2002/09/19 17:31:21  caress
 Release 5.0.beta23
 
