@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	4/8/93
- *    $Id: mbedit_prog.c,v 5.13 2002-07-20 20:45:04 caress Exp $
+ *    $Id: mbedit_prog.c,v 5.14 2002-08-30 19:28:21 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -27,6 +27,9 @@
  * Date:	September 19, 2000 (New version - no buffered i/o)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.13  2002/07/20 20:45:04  caress
+ * Release 5.0.beta20
+ *
  * Revision 5.12  2002/05/30 21:33:02  caress
  * Release 5.0.beta18
  *
@@ -259,6 +262,21 @@
 #define	MBEDIT_OUTBOUNDS_FLAGGED	1
 #define	MBEDIT_OUTBOUNDS_UNFLAGGED	2
 
+/* plot modes */
+#define MBEDIT_PLOT_WIDE		0
+#define MBEDIT_PLOT_TIME		1
+#define MBEDIT_PLOT_INTERVAL		2
+#define MBEDIT_PLOT_LON			3
+#define MBEDIT_PLOT_LAT			4
+#define MBEDIT_PLOT_HEADING		5
+#define MBEDIT_PLOT_SPEED		6
+#define MBEDIT_PLOT_DEPTH		7
+#define MBEDIT_PLOT_ALTITUDE		8
+#define MBEDIT_PLOT_SONARDEPTH		9
+#define MBEDIT_PLOT_ROLL		10
+#define MBEDIT_PLOT_PITCH		11
+#define MBEDIT_PLOT_HEAVE		12
+
 /* ping structure definition */
 struct mbedit_ping_struct 
 	{
@@ -268,11 +286,16 @@ struct mbedit_ping_struct
 	int	outbounds;
 	int	time_i[7];
 	double	time_d;
+	double	time_interval;
 	double	navlon;
 	double	navlat;
 	double	speed;
 	double	heading;
 	double	altitude;
+	double	sonardepth;
+	double	roll;
+	double	pitch;
+	double	heave;
 	int	beams_bath;
 	char	*beamflag;
 	double	*bath;
@@ -290,7 +313,7 @@ struct mbedit_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbedit_prog.c,v 5.13 2002-07-20 20:45:04 caress Exp $";
+static char rcs_id[] = "$Id: mbedit_prog.c,v 5.14 2002-08-30 19:28:21 caress Exp $";
 static char program_name[] = "MBedit";
 static char help_message[] =  
 "MBedit is an interactive editor used to identify and flag\n\
@@ -334,13 +357,18 @@ int	kind;
 int	id;
 int	time_i[7];
 double	time_d;
+double	time_interval;
 double	navlon;
 double	navlat;
 double	speed;
 double	heading;
 double	distance;
 double	altitude;
+double	draft;
 double	sonardepth;
+double	roll;
+double	pitch;
+double	heave;
 int	nbath;
 int	namp;
 int	nss;
@@ -444,7 +472,7 @@ int	x_interval = 1000;
 int	y_interval = 250;
 int	show_detects = MB_NO;
 int	show_flagged = MB_NO;
-int	show_time = MB_YES;
+int	show_time = MBEDIT_PLOT_TIME;
 int	beam_save = MB_NO;
 int	iping_save = 0;
 int	jbeam_save = 0;
@@ -723,7 +751,7 @@ int mbedit_set_scaling(int *brdr, int sh_time)
 
 	/* set scaling */
 	show_time = sh_time;
-	if (show_time == MB_YES)
+	if (show_time > MBEDIT_PLOT_WIDE)
 		{
 		margin = (borders[1] - borders[0])/16;
 		xmin = 5 * margin;
@@ -2614,8 +2642,8 @@ int mbedit_action_mouse_info(
 			info_bathacrosstrack = ping[iping].bathacrosstrack[jbeam];
 			info_bathalongtrack = ping[iping].bathalongtrack[jbeam];
 			info_detect = ping[iping].detect[jbeam];
-			fprintf(stderr,"\nping: %d beam:%d depth:%10.3f \n",
-				iping,jbeam,ping[iping].bath[jbeam]);
+/*			fprintf(stderr,"\nping: %d beam:%d depth:%10.3f \n",
+				iping,jbeam,ping[iping].bath[jbeam]);*/
 
 			/* replot old info beam if needed */
 			status = mbedit_plot_beam(info_ping,info_beam);
@@ -4583,7 +4611,7 @@ int mbedit_load_data(int buffer_size,
 				&ping[nbuff].navlat,
 				&ping[nbuff].speed,
 				&ping[nbuff].heading,
-				&distance,&ping[nbuff].altitude,&sonardepth,
+				&distance,&ping[nbuff].altitude,&ping[nbuff].sonardepth,
 				&ping[nbuff].beams_bath,&namp,&nss,
 				beamflag,bath,amp, 
 				bathacrosstrack,bathalongtrack,
@@ -4592,6 +4620,23 @@ int mbedit_load_data(int buffer_size,
 		if (error <= MB_ERROR_NO_ERROR
 		    && kind == MB_DATA_DATA)
 		    	{
+			if (nbuff > 0)
+				ping[nbuff].time_interval =
+					ping[nbuff].time_d
+						- ping[nbuff-1].time_d;
+			status = mb_extract_nav(verbose,imbio_ptr,
+						store_ptr,&kind,
+						ping[nbuff].time_i,
+						&ping[nbuff].time_d,
+						&ping[nbuff].navlon,
+						&ping[nbuff].navlat,
+						&ping[nbuff].speed,
+						&ping[nbuff].heading,
+						&draft, 
+						&ping[nbuff].roll,
+						&ping[nbuff].pitch,
+						&ping[nbuff].heave, 
+						&error);
 			detect_status = mb_detects(verbose,imbio_ptr,store_ptr,
 						&kind,&nbeams,detect,&detect_error);
 			if (detect_status != MB_SUCCESS)
@@ -4891,10 +4936,11 @@ int mbedit_plot_all(
 	int	swidth, sascent, sdescent;
 	int	sxstart;
 	int	xcen;
-	int	y, dy;
+	int	x0, y0, x, y, dy;
 	char	string[MB_PATH_MAXLINE];
 	char	*string_ptr;
 	int	fpx, fpdx, fpy, fpdy;
+	double	tsmin, tsmax, tsscale, tsvalue;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -5110,7 +5156,7 @@ int mbedit_plot_all(
 	xg_justify(mbedit_xgid,string,&swidth,
 		&sascent,&sdescent);
 	xg_drawstring(mbedit_xgid,margin/2,
-		ymin-margin/2-1*(sascent+sdescent),string,
+		ymin-3*margin/4,string,
 		pixel_values[BLACK],XG_SOLIDLINE);
 	string_ptr = strrchr(ifile, '/');
 	if (string_ptr == NULL)
@@ -5118,25 +5164,25 @@ int mbedit_plot_all(
 	else if (strlen(string_ptr) > 0)
 		string_ptr++;
 	xg_drawstring(mbedit_xgid,margin/2+2+swidth,
-		ymin-margin/2-1*(sascent+sdescent),string_ptr,
+		ymin-margin/2-1*(sascent+sdescent)-5,string_ptr,
 		pixel_values[BLACK],XG_SOLIDLINE);
 		
 	/* plot file position bar */
 	fpx = margin/2 + ((4 * margin) * current_id) / nbuff;
 	fpdx = MAX((((4 * margin) * nplot) / nbuff), 5);
-	fpy = ymin - margin/2;
+	fpy = ymin - 5*margin/8;
 	fpdy = margin/4;
 	if (fpx + fpdx > 9 * margin / 2)
 	    fpx = 9 * margin /2 - fpdx;
 	xg_drawrectangle(mbedit_xgid,
 		margin/2,
-		ymin-margin/2, 
+		ymin-5*margin/8, 
 		4*margin, 
 		margin/4,
 		pixel_values[BLACK],XG_SOLIDLINE);
 	xg_drawrectangle(mbedit_xgid,
 		margin/2-1,
-		ymin-margin/2-1, 
+		ymin-5*margin/8-1, 
 		4*margin+2, 
 		margin/4+2,
 		pixel_values[BLACK],XG_SOLIDLINE);
@@ -5150,11 +5196,11 @@ int mbedit_plot_all(
 	xg_justify(mbedit_xgid,string,&swidth,
 		&sascent,&sdescent);
 	xg_drawstring(mbedit_xgid,margin/2-swidth,
-		ymin-3*margin/8+sascent/2,string,
+		ymin-margin/2+sascent/2,string,
 		pixel_values[BLACK],XG_SOLIDLINE);
 	sprintf(string," %d", nbuff);
 	xg_drawstring(mbedit_xgid,9*margin/2,
-		ymin-3*margin/8+sascent/2,string,
+		ymin-margin/2+sascent/2,string,
 		pixel_values[BLACK],XG_SOLIDLINE);
 
 	/* plot scale bars */
@@ -5202,6 +5248,70 @@ int mbedit_plot_all(
 		xg_drawstring(mbedit_xgid,xmax+5,
 			ymax-yy+sascent/2,string,
 			pixel_values[BLACK],XG_SOLIDLINE);
+		}
+		
+	/* plot time series if desired */
+	if (show_time > MBEDIT_PLOT_TIME)
+		{
+		/* get scaling */
+		mbedit_tsminmax(current_id, nplot, show_time, &tsmin, &tsmax);
+		tsscale = 2.0 * margin / (tsmax - tsmin);
+		
+		/* draw time series plot box */
+		xg_drawline(mbedit_xgid,margin/2,ymin,margin/2,ymax,
+			pixel_values[BLACK],XG_SOLIDLINE);
+		xg_drawline(mbedit_xgid,margin,ymin,margin,ymax,
+			pixel_values[BLACK],XG_DASHLINE);
+		xg_drawline(mbedit_xgid,3*margin/2,ymin,3*margin/2,ymax,
+			pixel_values[BLACK],XG_DASHLINE);
+		xg_drawline(mbedit_xgid,2*margin,ymin,2*margin,ymax,
+			pixel_values[BLACK],XG_DASHLINE);
+		xg_drawline(mbedit_xgid,5*margin/2,ymin,5*margin/2,ymax,
+			pixel_values[BLACK],XG_SOLIDLINE);
+		xg_drawline(mbedit_xgid,margin/2,ymax,5*margin/2,ymax,
+			pixel_values[BLACK],XG_SOLIDLINE);
+		xg_drawline(mbedit_xgid,margin/2,ymin,5*margin/2,ymin,
+			pixel_values[BLACK],XG_SOLIDLINE);
+		
+		/* draw time series labels */
+		/*sprintf(string,"Heading (deg)");*/
+		mbedit_tslabel(show_time, string);
+		xg_justify(mbedit_xgid,string,&swidth,
+			&sascent,&sdescent);
+		xg_drawstring(mbedit_xgid,3*margin/2-swidth/2,
+			ymin-sdescent,string,
+			pixel_values[BLACK],XG_SOLIDLINE);
+		sprintf(string,"%g",tsmin);
+		xg_justify(mbedit_xgid,string,&swidth,
+			&sascent,&sdescent);
+		xg_drawstring(mbedit_xgid,margin/2-swidth/2,
+			ymax+sascent+5,string,
+			pixel_values[BLACK],XG_SOLIDLINE);
+		sprintf(string,"%g",tsmax);
+		xg_justify(mbedit_xgid,string,&swidth,
+			&sascent,&sdescent);
+		xg_drawstring(mbedit_xgid,5*margin/2-swidth/2,
+			ymax+sascent+5,string,
+			pixel_values[BLACK],XG_SOLIDLINE);
+			
+		/*x0 = margin/2 + ping[current_id].heading / 360.0 * 2 * margin;*/
+		mbedit_tsvalue(current_id, show_time, &tsvalue);
+		x0 = margin/2 + (int) ((tsvalue - tsmin) * tsscale);
+		y0 = ymax - dy / 2;
+		for (i=current_id;i<current_id+nplot;i++)
+			{
+			/*x = margin/2 + ping[i].heading / 360.0 * 2 * margin;*/
+			mbedit_tsvalue(i, show_time, &tsvalue);
+			x = margin/2 + (int) ((tsvalue - tsmin) * tsscale);
+			y = ymax - dy / 2 - (i - current_id) * dy;
+			xg_drawline(mbedit_xgid,x0,y0,x,y,
+				pixel_values[BLACK],XG_SOLIDLINE);
+			xg_fillrectangle(mbedit_xgid, 
+				x-2, y-2, 4, 4, 
+				pixel_values[BLACK],XG_SOLIDLINE);
+			x0 = x;
+			y0 = y;
+			}
 		}
 
 	/* plot pings */
@@ -5466,7 +5576,7 @@ int mbedit_plot_ping_label(int iping, int save)
 		}
 
 	/* set info string with time tag */
-	if (show_time == MB_YES || save == MB_YES)
+	if (show_time == MBEDIT_PLOT_TIME || save == MB_YES)
 		{
 		if (ping[iping].beams_bath > 0)
 		sprintf(string,"%5d %2.2d/%2.2d/%4.4d %2.2d:%2.2d:%2.2d.%3.3d %10.3f",
@@ -5491,7 +5601,7 @@ int mbedit_plot_ping_label(int iping, int save)
 		}
 
 	/* set info string without time tag */
-	if (show_time == MB_NO)
+	if (show_time != MBEDIT_PLOT_TIME)
 		{
 		if (ping[iping].beams_bath > 0)
 		sprintf(string,"%5d %10.3f",
@@ -6108,6 +6218,286 @@ int mbedit_save_edit(double time_d, int beam, int action)
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:       %d\n",error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:      %d\n",status);
+		}
+
+	/* return */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbedit_tslabel(int data_id, char *label)
+{
+	/* local variables */
+	char	*function_name = "mbedit_tslabel";
+	int	status = MB_SUCCESS;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       data_id:         %d\n",data_id);
+		}
+		
+	/* get the time series label */
+       switch (data_id)
+	       {
+	       case MBEDIT_PLOT_WIDE:
+		       strcpy(label, "WIDE PLOT");
+		       break;
+	       case MBEDIT_PLOT_TIME:
+		       strcpy(label, "TIME STAMP");
+		       break;
+	       case MBEDIT_PLOT_INTERVAL:
+		       strcpy(label, "Ping Interval (sec)");
+		       break;
+	       case MBEDIT_PLOT_LON:
+		       strcpy(label, "Longitude (deg)");
+		       break;
+	       case MBEDIT_PLOT_LAT:
+		       strcpy(label, "Latitude (deg)");
+		       break;
+	       case MBEDIT_PLOT_HEADING:
+		       strcpy(label, "Heading (deg)");
+		       break;
+	       case MBEDIT_PLOT_SPEED:
+		       strcpy(label, "Speed (km/hr)");
+		       break;
+	       case MBEDIT_PLOT_DEPTH:
+		       strcpy(label, "Center Beam Depth (m)");
+		       break;
+	       case MBEDIT_PLOT_ALTITUDE:
+		       strcpy(label, "Sonar Altitude (m)");
+		       break;
+	       case MBEDIT_PLOT_SONARDEPTH:
+		       strcpy(label, "Sonar Depth (m)");
+		       break;
+	       case MBEDIT_PLOT_ROLL:
+		       strcpy(label, "Roll (deg)");
+		       break;
+	       case MBEDIT_PLOT_PITCH:
+		       strcpy(label, "Pitch (deg)");
+		       break;
+	       case MBEDIT_PLOT_HEAVE:
+		       strcpy(label, "Heave (m)");
+		       break;
+	       }
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       label:       %s\n",label);
+		fprintf(stderr,"dbg2       error:       %d\n",error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:      %d\n",status);
+		}
+
+	/* return */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbedit_tsvalue(int iping, int data_id, double *value)
+{
+	/* local variables */
+	char	*function_name = "mbedit_tsvalue";
+	int	status = MB_SUCCESS;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       iping:           %d\n",iping);
+		fprintf(stderr,"dbg2       data_id:         %d\n",data_id);
+		}
+		
+	/* get the time series value */
+	if (iping >= 0 && nbuff > iping)
+		{
+		switch (data_id)
+			{
+			case MBEDIT_PLOT_WIDE:
+				*value = 0.0;
+				break;
+			case MBEDIT_PLOT_TIME:
+				*value = 0.0;
+				break;
+			case MBEDIT_PLOT_INTERVAL:
+				*value = ping[iping].time_interval;
+				break;
+			case MBEDIT_PLOT_LON:
+				*value = ping[iping].navlon;
+				break;
+			case MBEDIT_PLOT_LAT:
+				*value = ping[iping].navlat;
+				break;
+			case MBEDIT_PLOT_HEADING:
+				*value = ping[iping].heading;
+				break;
+			case MBEDIT_PLOT_SPEED:
+				*value = ping[iping].speed;
+				break;
+			case MBEDIT_PLOT_DEPTH:
+				*value = ping[iping].bath[ping[iping].beams_bath/2];
+				break;
+			case MBEDIT_PLOT_ALTITUDE:
+				*value = ping[iping].altitude;
+				break;
+			case MBEDIT_PLOT_SONARDEPTH:
+				*value = ping[iping].sonardepth;
+				break;
+			case MBEDIT_PLOT_ROLL:
+				*value = ping[iping].roll;
+				break;
+			case MBEDIT_PLOT_PITCH:
+				*value = ping[iping].pitch;
+				break;
+			case MBEDIT_PLOT_HEAVE:
+				*value = ping[iping].heave;
+				break;
+			}
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       value:       %f\n",*value);
+		fprintf(stderr,"dbg2       error:       %d\n",error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:      %d\n",status);
+		}
+
+	/* return */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbedit_tsminmax(int iping, int nping, int data_id, double *tsmin, double *tsmax)
+{
+	/* local variables */
+	char	*function_name = "mbedit_tsminmax";
+	int	status = MB_SUCCESS;
+	double	value;
+	double	halfwidth;
+	double	center;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       iping:           %d\n",iping);
+		fprintf(stderr,"dbg2       nping:           %d\n",nping);
+		fprintf(stderr,"dbg2       data_id:         %d\n",data_id);
+		}
+		
+	/* get the time series minimum and maximum value */
+	*tsmin = 0.0;
+	*tsmax = 0.0;
+	if (iping >= 0 
+		&& nbuff > iping 
+		&& nping > 0 
+		&& iping + nping - 1 < nbuff)
+		{
+		mbedit_tsvalue(iping, data_id, tsmin);
+		*tsmax = *tsmin;
+		for (i=iping;i<iping+nping;i++)
+			{
+			mbedit_tsvalue(i, data_id, &value);
+			*tsmin = MIN(*tsmin, value);
+			*tsmax = MAX(*tsmax, value);
+			}
+		}
+		
+	/* adjust the min max according to data type */
+	switch (data_id)
+		{
+		case MBEDIT_PLOT_WIDE:
+			*tsmin = 0.0;
+			*tsmax = 1.0;
+			break;
+		case MBEDIT_PLOT_TIME:
+			*tsmin = 0.0;
+			*tsmax = 1.0;
+			break;
+		case MBEDIT_PLOT_INTERVAL:
+			*tsmin = 0.0;
+			*tsmax = MAX(1.1 * (*tsmax), 0.01);
+			break;
+		case MBEDIT_PLOT_LON:
+			halfwidth = MAX(0.001, 0.55 * (*tsmax - *tsmin));
+			center = 0.5 * (*tsmin + *tsmax);
+			*tsmin = center - halfwidth;
+			*tsmax = center + halfwidth;
+			break;
+		case MBEDIT_PLOT_LAT:
+			halfwidth = MAX(0.001, 0.55 * (*tsmax - *tsmin));
+			center = 0.5 * (*tsmin + *tsmax);
+			*tsmin = center - halfwidth;
+			*tsmax = center + halfwidth;
+			break;
+		case MBEDIT_PLOT_HEADING:
+			*tsmin = 0.0;
+			*tsmax = 360.0;
+			break;
+		case MBEDIT_PLOT_SPEED:
+			*tsmin = 0.0;
+			*tsmax = MAX(*tsmax, 5.0);
+			break;
+		case MBEDIT_PLOT_DEPTH:
+			halfwidth = MAX(1.0, 0.55 * (*tsmax - *tsmin));
+			center = 0.5 * (*tsmin + *tsmax);
+			*tsmin = center - halfwidth;
+			*tsmax = center + halfwidth;
+			break;
+		case MBEDIT_PLOT_ALTITUDE:
+			halfwidth = MAX(1.0, 0.55 * (*tsmax - *tsmin));
+			center = 0.5 * (*tsmin + *tsmax);
+			*tsmin = center - halfwidth;
+			*tsmax = center + halfwidth;
+			break;
+		case MBEDIT_PLOT_SONARDEPTH:
+			halfwidth = MAX(1.0, 0.55 * (*tsmax - *tsmin));
+			center = 0.5 * (*tsmin + *tsmax);
+			*tsmin = center - halfwidth;
+			*tsmax = center + halfwidth;
+			break;
+		case MBEDIT_PLOT_ROLL:
+			*tsmax = 1.1 * MAX(fabs(*tsmin), fabs(*tsmax));
+			*tsmax = MAX(*tsmax, 1.0);
+			*tsmin = -(*tsmax);
+			break;
+		case MBEDIT_PLOT_PITCH:
+			*tsmax = 1.1 * MAX(fabs(*tsmin), fabs(*tsmax));
+			*tsmax = MAX(*tsmax, 1.0);
+			*tsmin = -(*tsmax);
+			break;
+		case MBEDIT_PLOT_HEAVE:
+			*tsmax = 1.1 * MAX(fabs(*tsmin), fabs(*tsmax));
+			*tsmax = MAX(*tsmax, 0.25);
+			*tsmin = -(*tsmax);
+			break;
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       tsmin:       %f\n",*tsmin);
+		fprintf(stderr,"dbg2       tsmax:       %f\n",*tsmax);
 		fprintf(stderr,"dbg2       error:       %d\n",error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:      %d\n",status);
