@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 4.2 1994-05-24 18:04:28 caress Exp $
+#	$Id: Makefile.template,v 4.3 1994-06-13 20:18:48 caress Exp $
 #
 #     Copyright (c) 1993, 1994 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.2  1994/05/24  18:04:28  caress
+# Fixed references to L-DEO graphics.
+#
 # Revision 4.1  1994/05/24  02:47:50  caress
 # Fixed problem with F77 loads.
 #
@@ -57,8 +60,8 @@ clean:
 	rm -f *.o
 
 ### link or copy the executables
-$(BINDIR)/mbcontourfilter: ../gmt/mbcontour.o ../gmt/mb_truecont.o ../../include/mb_contour.h ../gmt/mb_delaun.o ../gmt/mb_track.o mb_penface.o label.o letter.o blocka.o
-	$(CC) $(CFLAGS) ../gmt/mbcontour.o ../gmt/mb_truecont.o ../gmt/mb_delaun.o ../gmt/mb_track.o label.o mb_penface.o letter.o blocka.o ../../lib/libmbio.a $(FWITHCFLAGS) $(LFLAGS) -o $(BINDIR)/mbcontourfilter
+$(BINDIR)/mbcontourfilter: ../gmt/mbcontourfilter.o ../gmt/mb_truecont.o ../../include/mb_contour.h ../gmt/mb_delaun.o ../gmt/mb_track.o mb_penface.o label.o letter.o blocka.o
+	$(CC) $(CFLAGS) ../gmt/mbcontourfilter.o ../gmt/mb_truecont.o ../gmt/mb_delaun.o ../gmt/mb_track.o label.o mb_penface.o letter.o blocka.o ../../lib/libmbio.a $(FWITHCFLAGS) $(LFLAGS) -o $(BINDIR)/mbcontourfilter
 
 $(BINDIR)/mbplotfilter:	mbplotfilter.o
 	$(CC) mbplotfilter.o $(GRPHLIBDIR)/libgraphics.a $(FWITHCFLAGS) $(LFLAGS) -o $(BINDIR)/mbplotfilter
@@ -68,8 +71,8 @@ $(BINDIR)/mbm_calcomp_plot: mbm_calcomp_plot.perl
 	chmod +x $(BINDIR)/mbm_calcomp_plot
 
 ### compile the source files
-../gmt/mbcontour.o:	../gmt/mbcontour.c ../gmt/mb_contour.h $(INCDIR)/mb_status.h
-	cd ../gmt; make all
+../gmt/mbcontourfilter.o:	../gmt/mbcontour.c ../gmt/mb_contour.h $(INCDIR)/mb_status.h
+	cd ../gmt; make mbcontourfilter.o
 ../gmt/mb_truecont.o:	../gmt/mb_truecont.c ../gmt/mb_contour.h $(INCDIR)/mb_status.h
 	cd ../gmt; make all
 ../gmt/mb_delaun.o:	../gmt/mb_delaun.c
