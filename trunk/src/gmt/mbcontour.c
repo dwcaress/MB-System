@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcontour.c	6/4/93
- *    $Id: mbcontour.c,v 4.2 1994-06-13 18:39:15 caress Exp $
+ *    $Id: mbcontour.c,v 4.3 1994-06-13 19:01:13 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Date:	June 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1994/06/13  18:39:15  caress
+ * Made it possible to read data from stdin.
+ *
  * Revision 4.1  1994/05/16  22:15:16  caress
  * First cut at new contouring scheme.  Additional major changes
  * include adding annotated ship track plot and isolation
@@ -83,15 +86,15 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbcontour.c,v 4.2 1994-06-13 18:39:15 caress Exp $";
+	static char rcs_id[] = "$Id: mbcontour.c,v 4.3 1994-06-13 19:01:13 caress Exp $";
 #ifdef MBCONTOURFILTER
 	static char program_name[] = "MBCONTOURFILTER";
-	static char help_message[] =  "MBCONTOURFILTER is a utility which creates a pen plot \ncontour map of multibeam swath bathymetry.  \nThe primary purpose of this program is to serve as \npart of a real-time plotting system.  The contour levels and colors can be controlled \ndirectly or set implicitly using contour and color change intervals. \nContours can also be set to have ticks pointing downhill.";
-	static char usage_message[] = "mbcontourfilter -Jparameters -Rwest/east/south/north \n\t[-Acontour_int/color_int/tick_int/label_int/tick_len/label_hgt \n\t-Btickinfo -Ccontourfile \n\t-Dtime_tick/time_annot/date_annot/time_tick_len \n\t-fformat -Fred/green/blue -Idatalist -K -Llonflip -M -O -P -ppings -U \n\t-Xx-shift -Yy-shift -#copies -V -H]";
+	static char help_message[] =  "MBCONTOURFILTER is a utility which creates a pen plot \ncontour map of multibeam swath bathymetry.  \nThe primary purpose of this program is to serve as \npart of a real-time plotting system.  The contour \nlevels and colors can be controlled \ndirectly or set implicitly using contour and color change intervals. \nContours can also be set to have ticks pointing downhill.";
+	static char usage_message[] = "mbcontourfilter -Jparameters -Rwest/east/south/north \n\t[-Acontour_int/color_int/tick_int/label_int/tick_len/label_hgt \n\t-Btickinfo -Ccontourfile \n\t-Dtime_tick/time_annot/date_annot/time_tick_len \n\t-fformat -Fred/green/blue -Idatalist -K -Llonflip -M -O \n\t-P -ppings -U -Xx-shift -Yy-shift -#copies -V -H]";
 #else
 	static char program_name[] = "MBCONTOUR";
 	static char help_message[] =  "MBCONTOUR is a GMT compatible utility which creates a color postscript \ncontour map of multibeam swath bathymetry.  \nComplete maps are made by using MBCONTOUR in conjunction with the  \nusual GMT programs.  The contour levels and colors can be controlled \ndirectly or set implicitly using contour and color change intervals. \nContours can also be set to have ticks pointing downhill.";
-	static char usage_message[] = "mbcontour -Jparameters -Rwest/east/south/north \n\t[-Acontour_int/color_int/tick_int/label_int/tick_len/label_hgt \n\t-Btickinfo -Ccontourfile \n\t-Dtime_tick/time_annot/date_annot/time_tick_len \n\t-fformat -Fred/green/blue -Idatalist -K -Llonflip -M -O -P -ppings -U \n\t-Xx-shift -Yy-shift -#copies -V -H]";
+	static char usage_message[] = "mbcontour -Jparameters -Rwest/east/south/north \n\t[-Acontour_int/color_int/tick_int/label_int/tick_len/label_hgt \n\t-Btickinfo -Ccontourfile \n\t-Dtime_tick/time_annot/date_annot/time_tick_len \n\t-fformat -Fred/green/blue -Idatalist -K -Llonflip -M -O \n\t-P -ppings -U -Xx-shift -Yy-shift -#copies -V -H]";
 #endif
 
 	extern char *optarg;
