@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrid.c	5/2/94
- *    $Id: mbgrid.c,v 5.14 2002-11-04 21:26:55 caress Exp $
+ *    $Id: mbgrid.c,v 5.15 2002-11-12 07:23:58 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -38,6 +38,9 @@
  * Rererewrite:	January 2, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.14  2002/11/04 21:26:55  caress
+ * Fixed memory leak using proj.
+ *
  * Revision 5.13  2002/10/15 18:20:12  caress
  * Release 5.0.beta25
  *
@@ -336,7 +339,7 @@ double erfcc();
 double mbgrid_erf();
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbgrid.c,v 5.14 2002-11-04 21:26:55 caress Exp $";
+static char rcs_id[] = "$Id: mbgrid.c,v 5.15 2002-11-12 07:23:58 caress Exp $";
 static char program_name[] = "mbgrid";
 static char help_message[] =  "mbgrid is an utility used to grid bathymetry, amplitude, or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbgrid -Ifilelist -Oroot \
@@ -1299,6 +1302,7 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 			message);
 		fprintf(outfp,"\nProgram <%s> Terminated\n",
 			program_name);
+		mb_memory_clear(verbose, &error);
 		exit(error);
 		}
 
@@ -1317,6 +1321,7 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 			message);
 		fprintf(outfp,"\nProgram <%s> Terminated\n",
 			program_name);
+		mb_memory_clear(verbose, &error);
 		exit(error);
 		}
 
@@ -1343,6 +1348,7 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 			filelist);
 		fprintf(outfp,"\nProgram <%s> Terminated\n",
 			program_name);
+		mb_memory_clear(verbose, &error);
 		exit(error);
 		}
 	while ((status = mb_datalist_read(verbose,datalist,
@@ -1386,6 +1392,7 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 			fprintf(outfp,"\nMultibeam File <%s> not initialized for reading\n",file);
 			fprintf(outfp,"\nProgram <%s> Terminated\n",
 				program_name);
+			mb_memory_clear(verbose, &error);
 			exit(error);
 			}
 			
@@ -1418,6 +1425,7 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 				message);
 			fprintf(outfp,"\nProgram <%s> Terminated\n",
 				program_name);
+			mb_memory_clear(verbose, &error);
 			exit(error);
 			}
 
@@ -1715,6 +1723,7 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 			message);
 		fprintf(outfp,"\nProgram <%s> Terminated\n",
 			program_name);
+		mb_memory_clear(verbose, &error);
 		exit(error);
 		}
 
@@ -1741,6 +1750,7 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 			filelist);
 		fprintf(outfp,"\nProgram <%s> Terminated\n",
 			program_name);
+		mb_memory_clear(verbose, &error);
 		exit(error);
 		}
 	while ((status = mb_datalist_read(verbose,datalist,
@@ -1784,6 +1794,7 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 			fprintf(outfp,"\nMultibeam File <%s> not initialized for reading\n",file);
 			fprintf(outfp,"\nProgram <%s> Terminated\n",
 				program_name);
+			mb_memory_clear(verbose, &error);
 			exit(error);
 			}
 
@@ -1813,6 +1824,7 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 				message);
 			fprintf(outfp,"\nProgram <%s> Terminated\n",
 				program_name);
+			mb_memory_clear(verbose, &error);
 			exit(error);
 			}
 
@@ -2242,6 +2254,7 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 				file);
 			fprintf(outfp,"\nProgram <%s> Terminated\n",
 				program_name);
+			mb_memory_clear(verbose, &error);
 			exit(error);
 			}
 
@@ -2400,6 +2413,7 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 			message);
 		fprintf(outfp,"\nProgram <%s> Terminated\n",
 			program_name);
+		mb_memory_clear(verbose, &error);
 		exit(error);
 		}
 
@@ -2426,6 +2440,7 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 			filelist);
 		fprintf(outfp,"\nProgram <%s> Terminated\n",
 			program_name);
+		mb_memory_clear(verbose, &error);
 		exit(error);
 		}
 	while ((status = mb_datalist_read(verbose,datalist,
@@ -2469,6 +2484,7 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 			fprintf(outfp,"\nMultibeam File <%s> not initialized for reading\n",file);
 			fprintf(outfp,"\nProgram <%s> Terminated\n",
 				program_name);
+			mb_memory_clear(verbose, &error);
 			exit(error);
 			}
 
@@ -2498,6 +2514,7 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 				message);
 			fprintf(outfp,"\nProgram <%s> Terminated\n",
 				program_name);
+			mb_memory_clear(verbose, &error);
 			exit(error);
 			}
 
@@ -2606,6 +2623,7 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 					fprintf(outfp,"reduce the number of data points to be gridded.\n");
 					fprintf(outfp,"\nProgram <%s> Terminated\n",
 					    program_name);
+					mb_memory_clear(verbose, &error);
 					exit(error);
 					}
 				  }
@@ -2694,6 +2712,7 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 					fprintf(outfp,"reduce the number of data points to be gridded.\n");
 					fprintf(outfp,"\nProgram <%s> Terminated\n",
 					    program_name);
+					mb_memory_clear(verbose, &error);
 					exit(error);
 					}
 				  }
@@ -2782,6 +2801,7 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 					fprintf(outfp,"reduce the number of data points to be gridded.\n");
 					fprintf(outfp,"\nProgram <%s> Terminated\n",
 					    program_name);
+					mb_memory_clear(verbose, &error);
 					exit(error);
 					}
 				  }
@@ -2829,6 +2849,7 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 				file);
 			fprintf(outfp,"\nProgram <%s> Terminated\n",
 				program_name);
+			mb_memory_clear(verbose, &error);
 			exit(error);
 			}
 
@@ -2879,6 +2900,7 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 				    fprintf(outfp,"reduce the number of data points to be gridded.\n");
 				    fprintf(outfp,"\nProgram <%s> Terminated\n",
 					program_name);
+				    mb_memory_clear(verbose, &error);
 				    exit(error);
 				    }
 			      }
@@ -3000,6 +3022,7 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 				message);
 			fprintf(outfp,"\nProgram <%s> Terminated\n",
 				program_name);
+			mb_memory_clear(verbose, &error);
 			exit(error);
 			}
 		memset((char *)sgrid,0,gxdim*gydim*sizeof(float));
@@ -3304,6 +3327,7 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 			ofile,message);
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
+		mb_memory_clear(verbose, &error);
 		exit(error);
 		}
 
@@ -3364,6 +3388,7 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 				ofile,message);
 			fprintf(stderr,"\nProgram <%s> Terminated\n",
 				program_name);
+			mb_memory_clear(verbose, &error);
 			exit(error);
 			}
 
@@ -3422,6 +3447,7 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 				ofile,message);
 			fprintf(stderr,"\nProgram <%s> Terminated\n",
 				program_name);
+			mb_memory_clear(verbose, &error);
 			exit(error);
 			}
 		}
