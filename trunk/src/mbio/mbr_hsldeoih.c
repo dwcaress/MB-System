@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsldeoih.c	2/11/93
- *	$Id: mbr_hsldeoih.c,v 4.7 1995-03-08 18:13:53 caress Exp $
+ *	$Id: mbr_hsldeoih.c,v 4.8 1995-07-26 14:45:39 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	February 11, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.7  1995/03/08  18:13:53  caress
+ * Fixed another bug regarding shallow water data.
+ *
  * Revision 4.6  1995/03/08  13:31:09  caress
  * Fixed bug related to handling of shallow water data and the depth scale.
  *
@@ -83,7 +86,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_hsldeoih.c,v 4.7 1995-03-08 18:13:53 caress Exp $";
+ static char res_id[]="$Id: mbr_hsldeoih.c,v 4.8 1995-07-26 14:45:39 caress Exp $";
 	char	*function_name = "mbr_alm_hsldeoih";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -854,10 +857,10 @@ int	*error;
 
 		/* put distance and depth values 
 			into hsldeoih data structure */
-		if (data->depth_scale > 0.0)
-			scalefactor = 1.0/data->depth_scale;
-		else
-			scalefactor = 1.0;
+		if (data->depth_scale <= 0.0)
+			data->depth_scale = 1.0;
+		scalefactor = 1.0/data->depth_scale;
+			
 		for (i=0;i<mb_io_ptr->beams_bath;i++)
 			{
 			data->depth[i] = scalefactor*mb_io_ptr->new_bath[i];
@@ -879,11 +882,10 @@ int	*error;
 
 		/* add some plausible amounts for some of the 
 			variables in the HSLDEOIH record */
-		data->speed_reference[0] = 'B';	/* assume speed over ground */
-		data->depth_center = data->depth[mb_io_ptr->beams_bath/2];
-		if (data->depth_scale <= 0.0)
-			data->depth_scale = 1.0;	/* this is a unit scale factor */
-		data->spare = 1;
+		if (data->speed_reference[0] == ' ')
+			data->speed_reference[0] = 'B';	/* assume speed over ground */
+		if (data->spare == 0)
+			data->spare = 1;
 		}
 
 	/* write next data to file */

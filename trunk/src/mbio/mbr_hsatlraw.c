@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsatlraw.c	2/11/93
- *	$Id: mbr_hsatlraw.c,v 4.7 1995-07-13 21:40:28 caress Exp $
+ *	$Id: mbr_hsatlraw.c,v 4.8 1995-07-26 14:45:39 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	February 11, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.7  1995/07/13  21:40:28  caress
+ * Fixed problem with scaling of center beam depths.
+ *
  * Revision 4.6  1995/03/17  15:12:59  caress
  * Changes related to handling early, problematic
  * Ewing Hydrosweep data.
@@ -87,7 +90,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_hsatlraw.c,v 4.7 1995-07-13 21:40:28 caress Exp $";
+ static char res_id[]="$Id: mbr_hsatlraw.c,v 4.8 1995-07-26 14:45:39 caress Exp $";
 	char	*function_name = "mbr_alm_hsatlraw";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -1570,7 +1573,11 @@ int	*error;
 		mb_get_double( &(data->depth_center),line+77+shift, 7);
 		mb_get_double( &(data->depth_scale),line+84+shift,  4);
 		mb_get_int( &(data->spare),line+88+shift,  2);
-		data->depth[29] = (int) data->depth_center;
+		if (data->depth_scale > 0.0)
+			data->depth[29] = 
+				(int) (data->depth_center/data->depth_scale);
+		else
+			data->depth[29] = (int) data->depth_center;
 		data->distance[29] = 0;
 		}
 
