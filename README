@@ -1,9 +1,9 @@
-MB-SYSTEM VERSION 5.0.BETA22 README FILE:
+MB-SYSTEM VERSION 5.0.BETA23 README FILE:
 ----------------------------------------
 
 This file is located at the top of the MB-System directory
 structure. This directory structure contains the version 
-5.0.beta22 release of the MB-System software package for 
+5.0.beta23 release of the MB-System software package for 
 processing and display of swath sonar data.  
 
 MB-SYSTEM VERSION 5 DESCRIPTION:
@@ -26,6 +26,7 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
+Version 5.0.beta23     September 19, 2002
 Version 5.0.beta22     August 30, 2002
 Version 5.0.beta21     July 25, 2002
 Version 5.0.beta20     July 20, 2002
@@ -104,6 +105,52 @@ Aquarium Research Institute, or any other individuals or
 organizations involved in the design and maintenance of the 
 MB-System software package are NOT responsible for any damage 
 that may follow from correct or incorrect use of these programs.
+
+MB-SYSTEM VERSION 5.0.BETA23 RELEASE NOTES:
+
+The version 5.0.beta23 release of MB-System includes
+some significant new features and bug fixes:
+  - MB-System is now set to support arbitrary projected
+    coordinate systems. In addition to the PROJ4 library
+    that appeared in 5.0.beta22, MB-System now includes
+    a list of dozens of common projected coordinate
+    systems (e.g. UTM) in the file 
+         mbsystem/share/Projections.dat
+    This file specifies projections using the same
+    syntax as in PROJ4 initialization files. The projections
+    specified so far include UTM for all zones using both
+    the WGS84 and the WGS72 ellipsoid, all state plane 
+    projections in both the NAD83 and NAD27 datums, and
+    over 1400 global projection systems defined by the
+    EPSG.
+  - Grids and mosaics produced by mbgrid and mbmosaic
+    may be registered in any of the projected coordinate 
+    systems specified in Projections.dat. The mechanism
+    for producing projected grids is to use 
+         -J Projection
+    where Projection is one of the projection id tags in
+    the Projections.dat file. For example, if one wants
+    to produce a grid in UTM eastings and northings in 
+    northern hemisphere zone 15, the command -JUTM15N
+    will work.
+  - A very crude mechanism for inverse projecting navigation
+    in swath files has been implemented. The issue is 
+    that some swath files have navigation in projected
+    eastings and northings, but MB-System only works with 
+    "real" navigation (longitude and latitude). In order
+    to automatically apply an inverse projection to the
+    navigation of a swath file named "mydata.mb131" as it 
+    is read, place a file named "mydata.mb131.prj" in the
+    same directory. This text file should contain only one 
+    line with the relevant projection id tag (e.g. UTM15N).
+    This approach will be augmented and perhaps replaced
+    by command line arguments to some or all MB-System
+    programs.
+  - A problem with the Simrad multibeam i/o modules
+    that caused occasional segmentation faults when
+    compiled with gcc has been fixed.
+  - A problem that caused segmentation faults in
+    mbedit has been fixed.
 
 MB-SYSTEM VERSION 5.0.BETA22 RELEASE NOTES:
 
@@ -932,10 +979,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.24 2002-08-30 19:37:35 caress Exp $
+RCS ID: $Id: README,v 5.25 2002-09-19 17:31:21 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.24  2002/08/30 19:37:35  caress
+Release 5.0.beta22
+
 Revision 5.23  2002/08/28 01:43:27  caress
 Release 5.0.beta22
 
