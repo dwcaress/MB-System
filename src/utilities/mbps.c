@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbps.c	11/4/93
- *    $Id: mbps.c,v 5.5 2004-05-21 23:51:19 caress Exp $
+ *    $Id: mbps.c,v 5.6 2005-03-25 04:43:01 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	August 31, 1991 (original version)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2004/05/21 23:51:19  caress
+ * Progress supporting Reson 7k data, including support for extracing subbottom profiler data.
+ *
  * Revision 5.4  2003/04/17 21:18:57  caress
  * Release 5.0.beta30
  *
@@ -156,7 +159,7 @@ int rgb_white[] = {255, 255, 255};
 main (int argc, char **argv)
 {
 
-	static char rcs_id[] = "$Id: mbps.c,v 5.5 2004-05-21 23:51:19 caress Exp $";
+	static char rcs_id[] = "$Id: mbps.c,v 5.6 2005-03-25 04:43:01 caress Exp $";
 	static char program_name[] = "MBPS";
 	static char help_message[] =  "MBPS reads a swath bathymetry data file and creates a postscript 3-d mesh plot";
 	static char usage_message[] = "mbps [-Iinfile -Fformat -Nnpings -Ppings\n\t-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc  \n\t-Aalpha -Keta -Dviewdir -Xvertexag \n\t-T\"title\" -Wmetersperinch \n\t-Sspeedmin -Ggap -Ydisplay_stats \n\t-Zdisplay_scales -V -H]";
@@ -211,7 +214,7 @@ main (int argc, char **argv)
 	double	etime_d;
 	double	speedmin;
 	double	timegap;
-	char	file[128];
+	char	file[MB_PATH_MAXLINE];
 	int	pings = 1;
 	int	beams_bath;
 	int	beams_amp;
@@ -239,13 +242,13 @@ main (int argc, char **argv)
 	double	*ss = NULL;
 	double	*ssacrosstrack = NULL;
 	double	*ssalongtrack = NULL;
-	char	comment[256];
+	char	comment[MB_COMMENT_MAXLINE];
 	int	timbeg_i[7];
 	int	timend_i[7];
 	double	distot = 0.0;
 	int	nread;
 
-	char	title[128];
+	char	title[MB_COMMENT_MAXLINE];
 	int	forward;
 	double	xx, yy, zz;
 	double	heading_start, dheading, dheadingx, dheadingy;

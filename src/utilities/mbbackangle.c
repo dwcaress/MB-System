@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbbackangle.c	1/6/95
- *    $Id: mbbackangle.c,v 5.8 2004-10-06 19:10:52 caress Exp $
+ *    $Id: mbbackangle.c,v 5.9 2005-03-25 04:43:00 caress Exp $
  *
  *    Copyright (c) 1995, 2000, 2002, 2003, 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	January 6, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2004/10/06 19:10:52  caress
+ * Release 5.0.5 update.
+ *
  * Revision 5.7  2003/04/17 21:17:10  caress
  * Release 5.0.beta30
  *
@@ -121,7 +124,7 @@ int output_table(int verbose, FILE *tfp, int ntable, int nping, double time_d,
 	int *nmean, double *mean, double *sigma, 
 	int *error);
 
-static char rcs_id[] = "$Id: mbbackangle.c,v 5.8 2004-10-06 19:10:52 caress Exp $";
+static char rcs_id[] = "$Id: mbbackangle.c,v 5.9 2005-03-25 04:43:00 caress Exp $";
 static char program_name[] = "mbbackangle";
 
 /*--------------------------------------------------------------------*/
@@ -197,7 +200,7 @@ by MBprocess.";
 	double	*ss = NULL;
 	double	*ssacrosstrack = NULL;
 	double	*ssalongtrack = NULL;
-	char	comment[256];
+	char	comment[MB_COMMENT_MAXLINE];
 
 	/* slope calculation variables */
 	int	nsmooth = 5;
