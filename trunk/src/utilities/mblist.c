@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mblist.c	2/1/93
- *    $Id: mblist.c,v 4.17 1995-08-17 15:04:52 caress Exp $
+ *    $Id: mblist.c,v 4.18 1995-09-19 14:56:59 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -26,6 +26,9 @@
  *		in 1990.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.17  1995/08/17  15:04:52  caress
+ * Revision for release 4.3.
+ *
  * Revision 4.16  1995/08/10  15:39:36  caress
  * mblist now works with datalist files.
  *
@@ -158,7 +161,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mblist.c,v 4.17 1995-08-17 15:04:52 caress Exp $";
+	static char rcs_id[] = "$Id: mblist.c,v 4.18 1995-09-19 14:56:59 caress Exp $";
 	static char program_name[] = "MBLIST";
 	static char help_message[] =  "MBLIST prints the specified contents of a multibeam data \nfile to stdout. The form of the output is quite flexible; \nMBLIST is tailored to produce ascii files in spreadsheet \nstyle with data columns separated by tabs.";
 	static char usage_message[] = "mblist [-Byr/mo/da/hr/mn/sc -Ddump_mode -Eyr/mo/da/hr/mn/sc \n-Fformat -H -Ifile -Llonflip -Mbeam_start/beam_end -Npixel_start/pixel_end \n-Ooptions -Ppings -Rw/e/s/n -Sspeed -Ttimegap -V]";
@@ -258,8 +261,10 @@ char **argv;
 
 	/* course calculation variables */
 	int	use_course = MB_NO;
+	int	use_time_interval = MB_NO;
 	double	course, course_old;
 	double	time_d_old, dt;
+	double	time_interval;
 	double	speed_made_good, speed_made_good_old;
 	double	navlon_old, navlat_old;
 	double	dx, dy, dist;
@@ -525,6 +530,8 @@ char **argv;
 				use_course = MB_YES;
 			if (list[i] == 's')
 				use_course = MB_YES;
+			if (list[i] == 'V' || list[i] == 'v')
+				use_time_interval = MB_YES;
 			}
 	if (check_values == MB_YES)
 		{
@@ -670,6 +677,19 @@ char **argv;
 			headingx = sin(DTR*heading);
 			headingy = cos(DTR*heading);
 			}
+		
+		/* get time interval since last ping */
+		if (error == MB_ERROR_NO_ERROR 
+			&& kind == MB_DATA_DATA
+			&& first == MB_YES)
+			{
+			time_interval = 0.0;
+			}
+		else if (error == MB_ERROR_NO_ERROR 
+			&& kind == MB_DATA_DATA)
+			{
+			time_interval = time_d - time_d_old;
+			}
 
 		/* calculate course made good */
 		if (error == MB_ERROR_NO_ERROR 
@@ -700,17 +720,16 @@ char **argv;
 					speed_made_good 
 						= speed_made_good_old;
 				}
+			}
+
+		/* reset old values */
+		if (error == MB_ERROR_NO_ERROR)
+			{
 			navlon_old = navlon;
 			navlat_old = navlat;
 			course_old = course;
 			speed_made_good_old = speed_made_good;
 			time_d_old = time_d;
-			}
-
-		/* reset first flag */
-		if (error == MB_ERROR_NO_ERROR && first == MB_YES)
-			{
-			first = MB_NO;
 			}
 
 		/* now loop over beams */
@@ -728,6 +747,8 @@ char **argv;
 		  else if (check_ss == MB_YES && j == beams_bath/2)
 			if (ss[pixels_ss/2] <= 0)
 				beam_status = MB_FAILURE;
+		  if (use_time_interval == MB_YES && first == MB_YES)
+			beam_status = MB_FAILURE;
 
 		  /* print out good pings */
 		  if (beam_status == MB_SUCCESS)
@@ -853,6 +874,10 @@ char **argv;
 						}
 					printf("%d",time_u - time_u_ref);
 					break;
+				case 'V': /* time in seconds since last ping */
+				case 'v': 
+					printf("%g",time_interval);
+					break;
 				case 'X': /* longitude decimal degrees */
 					if (j == beams_bath/2)
 						printf("%11.6f",navlon);
@@ -962,6 +987,8 @@ char **argv;
 			if (amp[beams_bath/2] <= 0)
 				pixel_status = MB_FAILURE;
 		  if (check_ss == MB_YES && ss[j] <= 0)
+			pixel_status = MB_FAILURE;
+		  if (use_time_interval == MB_YES && first == MB_YES)
 			pixel_status = MB_FAILURE;
 
 		  /* print out good pings */
@@ -1083,6 +1110,10 @@ char **argv;
 						}
 					printf("%d",time_u - time_u_ref);
 					break;
+				case 'V': /* time in seconds since last ping */
+				case 'v': 
+					printf("%g",time_interval);
+					break;
 				case 'X': /* longitude decimal degrees */
 					if (j == pixels_ss/2)
 						printf("%11.6f",navlon);
@@ -1174,6 +1205,12 @@ char **argv;
 			}
 		    }
 		  }
+
+		/* reset first flag */
+		if (error == MB_ERROR_NO_ERROR && first == MB_YES)
+			{
+			first = MB_NO;
+			}
 
 		}
 

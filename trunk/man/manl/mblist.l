@@ -152,6 +152,7 @@ of one or more of the following characters:
  	\fBt\fP  for a time string (yyyy mm dd hh mm ss)
  	\fBU\fP  for unix time in integer seconds since 1/1/70 00:00:00
  	\fBu\fP  for time in integer seconds since first record
+ 	\fBV\fP  for ping interval (decimal seconds)
  	\fBX\fP  for longitude (decimal degrees)
  	\fBx\fP  for longitude (degrees + decimal minutes + E/W)
  	\fBY\fP  for latitude (decimal degrees)
