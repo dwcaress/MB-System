@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_l3xseraw.c	3/27/2000
- *	$Id: mbr_l3xseraw.c,v 5.5 2001-07-22 21:17:01 caress Exp $
+ *	$Id: mbr_l3xseraw.c,v 5.6 2001-08-10 22:41:19 dcaress Exp $
  *
  *    Copyright (c) 2000 by 
  *    D. W. Caress (caress@mbari.org)
@@ -26,6 +26,9 @@
  * Additional Authors:	P. A. Cohen and S. Dzurenko
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2001-07-22 14:17:01-07  caress
+ * Fixed bug that deallocated an unallocated array.
+ *
  * Revision 5.4  2001/07/20 00:32:54  caress
  * Release 5.0.beta03
  *
@@ -101,7 +104,7 @@ int mbr_wt_l3xseraw(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_l3xseraw(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.5 2001-07-22 21:17:01 caress Exp $";
+	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.6 2001-08-10 22:41:19 dcaress Exp $";
 	char	*function_name = "mbr_register_l3xseraw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -231,7 +234,7 @@ int mbr_info_l3xseraw(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.5 2001-07-22 21:17:01 caress Exp $";
+	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.6 2001-08-10 22:41:19 dcaress Exp $";
 	char	*function_name = "mbr_info_l3xseraw";
 	int	status = MB_SUCCESS;
 
@@ -300,7 +303,7 @@ int mbr_info_l3xseraw(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_l3xseraw(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.5 2001-07-22 21:17:01 caress Exp $";
+	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.6 2001-08-10 22:41:19 dcaress Exp $";
 	char	*function_name = "mbr_alm_l3xseraw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -442,7 +445,8 @@ store->mul_frame, store->sid_frame);*/
 			    - MBSYS_XSE_TIME_OFFSET
 			    + 0.000001 * store->mul_usec;
 		heading = RTD * store->nav_course_ground;
-		mb_navint_interp(verbose, mbio_ptr, time_d, heading, (double) store->nav_speed_ground, 
+		mb_navint_interp(verbose, mbio_ptr, time_d, heading, 
+				 ((double) 3.6 * store->nav_speed_ground), 
 				    &lon, &lat, &speed, error);
 		store->mul_x = lon;
 		store->mul_y = lat;

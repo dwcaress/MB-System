@@ -999,10 +999,19 @@ function \fBmb_buffer_load\fP does no location checking.
  	\fIbounds\fP[2] : minimum latitude
  	\fIbounds\fP[3] : maximum latitude
 
-The \fIbtime_i\fP array sets the desired beginning time for the data.
-Data with an earlier time stamp will be returned with an error by 
-the reading function. The functions \fBmb_read\fP, 
-\fBmb_get\fP and \fBmb_get_all\fP use the \fIbtime_i\fP array; the
+The \fIbtime_i\fP array sets the desired beginning time for the data
+and the \fIetime_i\fP array sets the desired ending time.
+If the beginning time is earlier than the ending time, then any
+data with a time stamp before the beginning time or 
+after the ending time will be returned with an
+MB_ERROR_OUT_TIME error by the reading function.
+If the beginning time is after the ending time, then 
+data with time stamps between the ending and beginning
+time are returned with an error. This scheme allows time
+windowing outside or inside a specified interval.
+The functions \fBmb_read\fP, 
+\fBmb_get\fP and \fBmb_get_all\fP use the 
+\fIbtime_i\fP and \fIbtime_i\fP arrays; the
 function \fBmb_buffer_load\fP does no time checking.
  	\fIbtime\fP[0] : year
  	\fIbtime\fP[1] : month
@@ -1011,12 +1020,6 @@ function \fBmb_buffer_load\fP does no time checking.
  	\fIbtime\fP[4] : minute
  	\fIbtime\fP[5] : second
  	\fIbtime\fP[6] : microsecond
-
-The \fIetime_i\fP array sets the desired ending time for the data.
-Data with a later time stamp will be returned with an error by 
-the reading function. The functions \fBmb_read\fP, 
-\fBmb_get\fP and \fBmb_get_all\fP use the \fIetime_i\fP array; the
-function \fBmb_buffer_load\fP does no time checking.
  	\fIetime\fP[0] : year
  	\fIetime\fP[1] : month
  	\fIetime\fP[2] : day

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em12ifrm.c	12/4/00
- *	$Id: mbr_em12ifrm.c,v 5.3 2001-07-20 00:31:11 caress Exp $
+ *	$Id: mbr_em12ifrm.c,v 5.4 2001-08-10 22:41:19 dcaress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	December 4, 2000
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2001-07-19 17:31:11-07  caress
+ * Release 5.0.beta03
+ *
  * Revision 5.2  2001/03/22  20:45:56  caress
  * Trying to make 5.0.beta0...
  *
@@ -91,7 +94,7 @@ int mbr_wt_em12ifrm(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_em12ifrm(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_em12ifrm.c,v 5.3 2001-07-20 00:31:11 caress Exp $";
+	static char res_id[]="$Id: mbr_em12ifrm.c,v 5.4 2001-08-10 22:41:19 dcaress Exp $";
 	char	*function_name = "mbr_register_em12ifrm";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -221,7 +224,7 @@ int mbr_info_em12ifrm(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_em12ifrm.c,v 5.3 2001-07-20 00:31:11 caress Exp $";
+	static char res_id[]="$Id: mbr_em12ifrm.c,v 5.4 2001-08-10 22:41:19 dcaress Exp $";
 	char	*function_name = "mbr_info_em12ifrm";
 	int	status = MB_SUCCESS;
 
@@ -290,7 +293,7 @@ int mbr_info_em12ifrm(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_em12ifrm(int verbose, void *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_em12ifrm.c,v 5.3 2001-07-20 00:31:11 caress Exp $";
+ static char res_id[]="$Id: mbr_em12ifrm.c,v 5.4 2001-08-10 22:41:19 dcaress Exp $";
 	char	*function_name = "mbr_alm_em12ifrm";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -716,9 +719,9 @@ int mbr_rt_em12ifrm(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 
 		/* interpolate from saved nav */
 		mb_navint_interp(verbose, mbio_ptr, ptime_d, 
-				    (double)data->line_heading, 
-				    (double)data->speed, 
+				    (double)data->line_heading, 0.0, 
 				    &plon, &plat, &pspeed, error);
+		data->speed = pspeed / 3.6;
 		if (mb_io_ptr->lonflip < 0)
 			{
 			if (plon > 0.) 

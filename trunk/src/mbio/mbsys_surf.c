@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_surf.c	3.00	6/25/01
- *	$Id: mbsys_surf.c,v 5.4 2001-07-31 00:40:52 caress Exp $
+ *	$Id: mbsys_surf.c,v 5.5 2001-08-10 22:41:19 dcaress Exp $
  *
  *    Copyright (c) 2001 by
  *    David W. Caress (caress@mbari.org)
@@ -29,6 +29,9 @@
  * Date:	June 25, 2001
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2001-07-30 17:40:52-07  caress
+ * Fixed typos.
+ *
  * Revision 5.3  2001/07/26  03:40:56  caress
  * Fixed handling of sidescan.
  *
@@ -62,7 +65,7 @@
 int mbsys_surf_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_surf.c,v 5.4 2001-07-31 00:40:52 caress Exp $";
+ static char res_id[]="$Id: mbsys_surf.c,v 5.5 2001-08-10 22:41:19 dcaress Exp $";
 	char	*function_name = "mbsys_surf_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -230,7 +233,7 @@ int mbsys_surf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	/* processed bathymetry */
 	store->pr_navlon = 0.0;			/* longitude (degrees) */
 	store->pr_navlat = 0.0;			/* latitude (degrees) */
-	store->pr_speed = 0.0;			/* speed made good (km/hr) */
+	store->pr_speed = 0.0;			/* speed made good (m/s) */
 	for (i=0;i<MBSYS_SURF_MAXBEAMS;i++)
 	    {
 	    store->pr_bath[i] = 0.0;			/* bathymetry (m) */

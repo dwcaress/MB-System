@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbswath.c	5/30/93
- *    $Id: mbswath.c,v 5.4 2001-07-20 00:29:41 caress Exp $
+ *    $Id: mbswath.c,v 5.5 2001-08-10 22:40:02 dcaress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -29,6 +29,9 @@
  * Date:	May 30, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2001-07-19 17:29:41-07  caress
+ * Release 5.0.beta03
+ *
  * Revision 5.3  2001/06/08 21:42:53  caress
  * Version 5.0.beta01
  *
@@ -200,6 +203,9 @@
 /* GMT include files */
 #include "gmt.h"
 
+/* GMT argument handling define */
+#define MBSWATH_GMT_ARG_MAX     128
+
 /* MBSWATH MODE DEFINES */
 #define	MBSWATH_BATH		1
 #define	MBSWATH_BATH_RELIEF	2
@@ -287,13 +293,15 @@ unsigned char r, g, b, gray;
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbswath.c,v 5.4 2001-07-20 00:29:41 caress Exp $";
+	static char rcs_id[] = "$Id: mbswath.c,v 5.5 2001-08-10 22:40:02 dcaress Exp $";
 	static char program_name[] = "MBSWATH";
 	static char help_message[] =  "MBSWATH is a GMT compatible utility which creates a color postscript \nimage of swath bathymetry or backscatter data.  The image \nmay be shaded relief as well.  Complete maps are made by using \nMBSWATH in conjunction with the usual GMT programs.";
 	static char usage_message[] = "mbswath -Ccptfile -Jparameters -Rwest/east/south/north \n\t[-Afactor -Btickinfo -byr/mon/day/hour/min/sec \n\t-ccopies -Dmode/ampscale/ampmin/ampmax \n\t-Eyr/mon/day/hour/min/sec -fformat \n\t-Fred/green/blue -Gmagnitude/azimuth -Idatalist \n\t-K -Ncptfile -O -P -ppings -Qdpi -Ttimegap -U -W -Xx-shift -Yy-shift \n\t-Zmode -V -H]";
 
 	extern char *optarg;
 	extern int optkind;
+	int     argc_gmt = 0;
+	char    *argv_gmt[MBSWATH_GMT_ARG_MAX];
 	int	errflg = 0;
 	int	c;
 	int	help = 0;
@@ -407,97 +415,53 @@ main (int argc, char **argv)
 	borders[2] = 0.0;
 	borders[3] = 0.0;
 
-	/* deal with gmt options */
-#ifdef GMT3_0
-	argc = gmt_begin (argc, argv);
-#else
-	argc = GMT_begin (argc, argv);
-#endif
-	for (i = 1; i < argc; i++) 
-		{
-		if (argv[i][0] == '-') 
-			{
-			switch (argv[i][1]) 
-				{
-				/* Common parameters */
-			
-				case 'B':
-				case 'J':
-				case 'K':
-				case 'O':
-				case 'P':
-				case 'R':
-				case 'U':
-				case 'V':
-				case 'X':
-				case 'x':
-				case 'Y':
-				case 'y':
-				case 'c':
-				case '\0':
-#ifdef GMT3_0
-					errflg += get_common_args (argv[i], 
-						&borders[0], &borders[1], 
-						&borders[2], &borders[3]);
-#else
-					errflg += GMT_get_common_args (argv[i], 
-						&borders[0], &borders[1], 
-						&borders[2], &borders[3]);
-#endif
-					break;
-				
-				/* Supplemental parameters */
-			
-				case 'C':
-					strcpy(cptfile,&argv[i][2]);
-					break;
-				case 'F':
-#ifdef GMT3_0
-					if (gmt_getrgb (&argv[i][2], 
-						&gmtdefs.basemap_frame_rgb[0], 
-						&gmtdefs.basemap_frame_rgb[1], 
-						&gmtdefs.basemap_frame_rgb[2])) 
-						{
-						gmt_pen_syntax ('F');
-						errflg++;
-						}
-#else
-					if (GMT_getrgb (&argv[i][2], 
-						gmtdefs.basemap_frame_rgb)) 
-						{
-						GMT_pen_syntax ('F');
-						errflg++;
-						}
-#endif
-				case '0':
-					gmtdefs.color_image = 0;
-					image = MBSWATH_IMAGE_24;
-					break;
-				case '1':
-					gmtdefs.color_image = 1;
-					image = MBSWATH_IMAGE_VECTOR;
-					break;
-				case '2':
-					gmtdefs.color_image = 2;
-					image = MBSWATH_IMAGE_24;
-					break;
-			}
-			}
+	/* get GMT options into separate argv */
+	argv_gmt[0] = argv[0];
+	argc_gmt = 1;
+	for (i=1;i<argc;i++)
+	  {
+	  if (argv[i][0] == '-')
+	    {
+	    switch (argv[i][1])
+	        {
+		case 'B':
+       		case 'C':
+		case 'c':
+		case 'F':
+		case 'J':
+		case 'j':
+		case 'K':
+		case 'k':
+		case 'O':
+		case 'o':
+		case 'P':
+		case 'R':
+		case 'r':
+		case 'U':
+		case 'u':
+		case 'V':
+		case 'v':
+		case 'X':
+		case 'x':
+		case 'Y':
+		case 'y':
+		case '0':
+		case '1':
+		case '2':
+		case '#':
+		case '\0':
+		        if (argc_gmt < MBSWATH_GMT_ARG_MAX)
+			  {
+			  argv_gmt[argc_gmt] = argv[i];
+			  argc_gmt++;
+			  break;
+			  }    
 		}
-
-	/* if error flagged then print it and exit */
-	if (errflg)
-		{
-		fprintf(stderr,"usage: %s\n", usage_message);
-		fprintf(stderr,"GMT option error\n");
-		fprintf(stderr,"\nProgram <%s> Terminated\n",
-			program_name);
-		error = MB_ERROR_BAD_USAGE;
-		exit(error);
-		}
+	    }
+	  }
 
 	/* deal with mb options */
-	while ((c = getopt(argc, argv, "A:a:B:b:C:c:D:d:E:e:F:f:G:g:HhI:i:J:KL:l:MN:n:OPp:Q:R:S:s:T:t:UVvWwX:x:Y:y:Z:z:012")) != -1)
+	while ((c = getopt(argc, argv, "A:a:B:b:C:c:D:d:E:e:F:f:G:g:HhI:i:J:j:KkL:l:MN:n:OPp:Q:R:r:S:s:T:t:UuVvWwX:x:Y:y:Z:z:012")) != -1)
 	  switch (c) 
 		{
 		case 'A':
@@ -584,13 +548,19 @@ main (int argc, char **argv)
 			break;
 		case 'B':
 		case 'C':
+		case 'c':
 		case 'F':
 		case 'J':
+		case 'j':
 		case 'K':
+		case 'k':
 		case 'O':
+		case 'o':
 		case 'P':
 		case 'R':
+		case 'r':
 		case 'U':
+		case 'u':
 		case 'X':
 		case 'x':
 		case 'Y':
@@ -608,6 +578,95 @@ main (int argc, char **argv)
 	if (errflg)
 		{
 		fprintf(stderr,"usage: %s\n", usage_message);
+		fprintf(stderr,"\nProgram <%s> Terminated\n",
+			program_name);
+		error = MB_ERROR_BAD_USAGE;
+		exit(error);
+		}
+
+	/* deal with gmt options */
+#ifdef GMT3_0
+	argc = gmt_begin (argc_gmt, argv_gmt);
+#else
+	argc = GMT_begin (argc_gmt, argv_gmt);
+#endif
+	for (i = 1; i < argc_gmt; i++) 
+		{
+		if (argv_gmt[i][0] == '-') 
+			{
+			switch (argv_gmt[i][1]) 
+				{
+				/* Common parameters */
+			
+				case 'B':
+				case 'J':
+				case 'K':
+				case 'O':
+				case 'P':
+				case 'R':
+				case 'U':
+				case 'V':
+				case 'X':
+				case 'x':
+				case 'Y':
+				case 'y':
+				case 'c':
+				case '\0':
+#ifdef GMT3_0
+					errflg += get_common_args (argv_gmt[i], 
+						&borders[0], &borders[1], 
+						&borders[2], &borders[3]);
+#else
+					errflg += GMT_get_common_args (argv_gmt[i], 
+						&borders[0], &borders[1], 
+						&borders[2], &borders[3]);
+#endif
+					break;
+				
+				/* Supplemental parameters */
+			
+				case 'C':
+					strcpy(cptfile,&argv_gmt[i][2]);
+					break;
+				case 'F':
+#ifdef GMT3_0
+					if (gmt_getrgb (&argv_gmt[i][2], 
+						&gmtdefs.basemap_frame_rgb[0], 
+						&gmtdefs.basemap_frame_rgb[1], 
+						&gmtdefs.basemap_frame_rgb[2])) 
+						{
+						gmt_pen_syntax ('F');
+						errflg++;
+						}
+#else
+					if (GMT_getrgb (&argv_gmt[i][2], 
+						gmtdefs.basemap_frame_rgb)) 
+						{
+						GMT_pen_syntax ('F');
+						errflg++;
+						}
+#endif
+				case '0':
+					gmtdefs.color_image = 0;
+					image = MBSWATH_IMAGE_24;
+					break;
+				case '1':
+					gmtdefs.color_image = 1;
+					image = MBSWATH_IMAGE_VECTOR;
+					break;
+				case '2':
+					gmtdefs.color_image = 2;
+					image = MBSWATH_IMAGE_24;
+					break;
+			}
+			}
+		}
+
+	/* if error flagged then print it and exit */
+	if (errflg)
+		{
+		fprintf(stderr,"usage: %s\n", usage_message);
+		fprintf(stderr,"GMT option error\n");
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
 		error = MB_ERROR_BAD_USAGE;

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_time.c	10/30/2000
- *    $Id: mb_navint.c,v 5.2 2001-07-20 00:31:11 caress Exp $
+ *    $Id: mb_navint.c,v 5.3 2001-08-10 22:41:19 dcaress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	October 30, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2001-07-19 17:31:11-07  caress
+ * Release 5.0.beta03
+ *
  * Revision 5.1  2001/06/08 21:44:01  caress
  * Version 5.0.beta01
  *
@@ -142,6 +145,7 @@ int mb_navint_interp(int verbose, void *mbio_ptr,
 	double	mtodeglon, mtodeglat;
 	double	dx, dy, dt, dd;
 	double	factor, headingx, headingy;
+	double  speed_mps;
 	int	ifix;
 	int	i, j, k;
 
@@ -171,7 +175,7 @@ int mb_navint_interp(int verbose, void *mbio_ptr,
 	
 	/* use raw speed if available */
 	if (rawspeed > 0.0)
-		*speed = rawspeed / 3.6;
+	  *speed = rawspeed; /* km/hr */
 		
 	/* else get speed averaged over all available fixes */
 	else if (mb_io_ptr->nfix > 1)
@@ -182,12 +186,15 @@ int mb_navint_interp(int verbose, void *mbio_ptr,
 			- mb_io_ptr->fix_lat[0])/mtodeglat;
 		dt = mb_io_ptr->fix_time_d[mb_io_ptr->nfix-1] 
 			- mb_io_ptr->fix_time_d[0];
-		*speed = sqrt(dx*dx + dy*dy)/dt; /* m/sec */
+		*speed = 3.6 * sqrt(dx*dx + dy*dy)/dt; /* km/hr */
 		}
 		
 	/* else speed unknown */
 	else
 		*speed = 0.0;
+
+	/* get speed in m/s */
+	speed_mps = *speed / 3.6;
 	
 	/* interpolate if possible */
 	if (mb_io_ptr->nfix > 1
@@ -225,7 +232,7 @@ int mb_navint_interp(int verbose, void *mbio_ptr,
 		{		
 		/* extrapolated position using average speed */
 		dd = (time_d - mb_io_ptr->fix_time_d[mb_io_ptr->nfix-1])
-			* (*speed); /* meters */
+			* speed_mps; /* meters */
 		headingx = sin(DTR * heading);
 		headingy = cos(DTR * heading);
 		*lon = mb_io_ptr->fix_lon[mb_io_ptr->nfix-1] 
@@ -235,7 +242,7 @@ int mb_navint_interp(int verbose, void *mbio_ptr,
 		status = MB_SUCCESS;
 #ifdef MB_NAVINT_DEBUG
 	fprintf(stderr, "mb_navint_interp: Nav extrapolated from last fix of %d with distance:%f and speed:%f\n", 
-		mb_io_ptr->nfix, dd, *speed);
+		mb_io_ptr->nfix, dd, speed_mps);
 #endif
 		}
 		
@@ -245,7 +252,7 @@ int mb_navint_interp(int verbose, void *mbio_ptr,
 		{		
 		/* extrapolated position using average speed */
 		dd = (time_d - mb_io_ptr->fix_time_d[0])
-			* (*speed); /* meters */
+			* speed_mps; /* meters */
 		headingx = sin(DTR * heading);
 		headingy = cos(DTR * heading);
 		*lon = mb_io_ptr->fix_lon[0] 
@@ -255,7 +262,7 @@ int mb_navint_interp(int verbose, void *mbio_ptr,
 		status = MB_SUCCESS;
 #ifdef MB_NAVINT_DEBUG
 	fprintf(stderr, "mb_navint_interp: Nav extrapolated from first fix of %d with distance %f and speed:%f\n", 
-		mb_io_ptr->nfix, dd, *speed);
+		mb_io_ptr->nfix, dd, speed_mps);
 #endif
 		}
 

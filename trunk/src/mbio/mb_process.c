@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_process.c	9/11/00
- *    $Id: mb_process.c,v 5.9 2001-08-04 01:00:02 caress Exp $
+ *    $Id: mb_process.c,v 5.10 2001-08-10 22:41:19 dcaress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	September 11, 2000
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.9  2001-08-03 18:00:02-07  caress
+ * Added cut by speed.
+ *
  * Revision 5.8  2001/07/31  00:40:52  caress
  * Added data cutting capability.
  *
@@ -77,7 +80,7 @@
 #include "../../include/mb_format.h"
 #include "../../include/mb_process.h"
 
-static char rcs_id[]="$Id: mb_process.c,v 5.9 2001-08-04 01:00:02 caress Exp $";
+static char rcs_id[]="$Id: mb_process.c,v 5.10 2001-08-10 22:41:19 dcaress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_pr_readpar(int verbose, char *file, int lookforfiles, 
@@ -211,12 +214,24 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 	process->mbp_ssrecalc_interpolate = 0;
 
 	/* metadata insertion */
-	process->mbp_meta_operator[0] = '\0';
+	process->mbp_meta_vessel[0] = '\0';
+	process->mbp_meta_institution[0] = '\0';
 	process->mbp_meta_platform[0] = '\0';
 	process->mbp_meta_sonar[0] = '\0';
-	process->mbp_meta_survey[0] = '\0';
+	process->mbp_meta_cruiseid[0] = '\0';
+	process->mbp_meta_cruisename[0] = '\0';
 	process->mbp_meta_pi[0] = '\0';
+	process->mbp_meta_piinstitution[0] = '\0';
 	process->mbp_meta_client[0] = '\0';
+	process->mbp_meta_svcorrected = MBP_CORRECTION_UNKNOWN;
+	process->mbp_meta_tidecorrected = MBP_CORRECTION_UNKNOWN;
+	process->mbp_meta_batheditmanual = MBP_CORRECTION_UNKNOWN;
+	process->mbp_meta_batheditauto = MBP_CORRECTION_UNKNOWN;
+	process->mbp_meta_rollbias = 0.0;
+	process->mbp_meta_pitchbias = 0.0;
+	process->mbp_meta_headingbias = 0.0;
+	process->mbp_meta_draft = 0.0;
+
 
 	/* open and read parameter file */
 	if ((fp = fopen(parfile, "r")) != NULL) 
@@ -661,21 +676,37 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 			}
 	
 		    /* metadata strings */
-		    else if (strncmp(buffer, "METAOPERATOR", 12) == 0)
+		    else if (strncmp(buffer, "METAVESSEL", 10) == 0)
 			{
-			strncpy(process->mbp_meta_operator, &buffer[13], MBP_FILENAMESIZE);
+			strncpy(process->mbp_meta_vessel, &buffer[11], MBP_FILENAMESIZE);
+			}
+		    else if (strncmp(buffer, "METAINSTITUTION", 15) == 0)
+			{
+			strncpy(process->mbp_meta_institution, &buffer[16], MBP_FILENAMESIZE);
 			}
 		    else if (strncmp(buffer, "METAPLATFORM", 12) == 0)
 			{
 			strncpy(process->mbp_meta_platform, &buffer[13], MBP_FILENAMESIZE);
 			}
+		    else if (strncmp(buffer, "METASONARVERSION", 16) == 0)
+			{
+			strncpy(process->mbp_meta_sonarversion, &buffer[17], MBP_FILENAMESIZE);
+			}
 		    else if (strncmp(buffer, "METASONAR", 9) == 0)
 			{
 			strncpy(process->mbp_meta_sonar, &buffer[10], MBP_FILENAMESIZE);
 			}
-		    else if (strncmp(buffer, "METASURVEY", 10) == 0)
+		    else if (strncmp(buffer, "METACRUISEID", 12) == 0)
 			{
-			strncpy(process->mbp_meta_survey, &buffer[11], MBP_FILENAMESIZE);
+			strncpy(process->mbp_meta_cruiseid, &buffer[13], MBP_FILENAMESIZE);
+			}
+		    else if (strncmp(buffer, "METACRUISENAME", 14) == 0)
+			{
+			strncpy(process->mbp_meta_cruisename, &buffer[15], MBP_FILENAMESIZE);
+			}
+		    else if (strncmp(buffer, "METAPIINSTITUTION", 17) == 0)
+			{
+			strncpy(process->mbp_meta_piinstitution, &buffer[18], MBP_FILENAMESIZE);
 			}
 		    else if (strncmp(buffer, "METAPI", 6) == 0)
 			{
@@ -684,6 +715,42 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 		    else if (strncmp(buffer, "METACLIENT", 10) == 0)
 			{
 			strncpy(process->mbp_meta_client, &buffer[11], MBP_FILENAMESIZE);
+			}
+		    else if (strncmp(buffer, "METASVCORRECTED", 15) == 0)
+			{
+			sscanf(buffer, "METASVCORRECTED %d", &process->mbp_meta_svcorrected);
+			}
+		    else if (strncmp(buffer, "METATIDECORRECTED", 17) == 0)
+			{
+			sscanf(buffer, "METATIDECORRECTED %d", &process->mbp_meta_tidecorrected);
+			}
+		    else if (strncmp(buffer, "METABATHEDITMANUAL", 18) == 0)
+			{
+			sscanf(buffer, "METABATHEDITMANUAL %d", &process->mbp_meta_batheditmanual);
+			}
+		    else if (strncmp(buffer, "METABATHEDITAUTO", 16) == 0)
+			{
+			sscanf(buffer, "METABATHEDITAUTO %d", &process->mbp_meta_batheditauto);
+			}
+		    else if (strncmp(buffer, "METAROLLBIAS", 12) == 0)
+			{
+			sscanf(buffer, "METAROLLBIAS %lf", &process->mbp_meta_rollbias);
+			}
+		    else if (strncmp(buffer, "METAROLLBIAS", 12) == 0)
+			{
+			sscanf(buffer, "METAROLLBIAS %lf", &process->mbp_meta_rollbias);
+			}
+		    else if (strncmp(buffer, "METAPITCHBIAS", 13) == 0)
+			{
+			sscanf(buffer, "METAPITCHBIAS %lf", &process->mbp_meta_pitchbias);
+			}
+		    else if (strncmp(buffer, "METAHEADINGBIAS", 15) == 0)
+			{
+			sscanf(buffer, "METAHEADINGBIAS %lf", &process->mbp_meta_headingbias);
+			}
+		    else if (strncmp(buffer, "METADRAFT", 9) == 0)
+			{
+			sscanf(buffer, "METADRAFT %lf", &process->mbp_meta_draft);
 			}
 	
 		    /* processing kluges */
@@ -875,13 +942,24 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 		fprintf(stderr,"dbg2       mbp_ssrecalc_pixelsize: %f\n",process->mbp_ssrecalc_pixelsize);
 		fprintf(stderr,"dbg2       mbp_ssrecalc_swathwidth:%f\n",process->mbp_ssrecalc_swathwidth);
 		fprintf(stderr,"dbg2       mbp_ssrecalc_interp    :%d\n",process->mbp_ssrecalc_interpolate);
-		fprintf(stderr,"dbg2       mbp_meta_operator      :%s\n",process->mbp_meta_operator);
+		fprintf(stderr,"dbg2       mbp_meta_vessel        :%s\n",process->mbp_meta_vessel);
+		fprintf(stderr,"dbg2       mbp_meta_institution   :%s\n",process->mbp_meta_institution);
 		fprintf(stderr,"dbg2       mbp_meta_platform      :%s\n",process->mbp_meta_platform);
 		fprintf(stderr,"dbg2       mbp_meta_sonar         :%s\n",process->mbp_meta_sonar);
-		fprintf(stderr,"dbg2       mbp_meta_survey        :%s\n",process->mbp_meta_survey);
+		fprintf(stderr,"dbg2       mbp_meta_sonarversion  :%s\n",process->mbp_meta_sonarversion);
+		fprintf(stderr,"dbg2       mbp_meta_cruiseid      :%s\n",process->mbp_meta_cruiseid);
+		fprintf(stderr,"dbg2       mbp_meta_cruisename    :%s\n",process->mbp_meta_cruisename);
 		fprintf(stderr,"dbg2       mbp_meta_pi            :%s\n",process->mbp_meta_pi);
+		fprintf(stderr,"dbg2       mbp_meta_piinstitution :%s\n",process->mbp_meta_piinstitution);
 		fprintf(stderr,"dbg2       mbp_meta_client        :%s\n",process->mbp_meta_client);
-		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2       mbp_meta_svcorrected   :%d\n",process->mbp_meta_svcorrected);
+		fprintf(stderr,"dbg2       mbp_meta_tidecorrected :%d\n",process->mbp_meta_tidecorrected);
+		fprintf(stderr,"dbg2       mbp_meta_batheditmanual:%d\n",process->mbp_meta_batheditmanual);
+		fprintf(stderr,"dbg2       mbp_meta_batheditauto:  %d\n",process->mbp_meta_batheditauto);
+		fprintf(stderr,"dbg2       mbp_meta_rollbias:      %f\n",process->mbp_meta_rollbias);
+		fprintf(stderr,"dbg2       mbp_meta_pitchbias:     %f\n",process->mbp_meta_pitchbias);
+		fprintf(stderr,"dbg2       mbp_meta_headingbias:   %f\n",process->mbp_meta_headingbias);
+		fprintf(stderr,"dbg2       mbp_meta_draft:         %f\n",process->mbp_meta_draft);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:     %d\n",status);
 		}
@@ -977,12 +1055,24 @@ int mb_pr_writepar(int verbose, char *file,
 		fprintf(stderr,"dbg2       mbp_ssrecalc_pixelsize: %f\n",process->mbp_ssrecalc_pixelsize);
 		fprintf(stderr,"dbg2       mbp_ssrecalc_swathwidth:%f\n",process->mbp_ssrecalc_swathwidth);
 		fprintf(stderr,"dbg2       mbp_ssrecalc_interp    :%d\n",process->mbp_ssrecalc_interpolate);
-		fprintf(stderr,"dbg2       mbp_meta_operator      :%s\n",process->mbp_meta_operator);
+		fprintf(stderr,"dbg2       mbp_meta_vessel        :%s\n",process->mbp_meta_vessel);
+		fprintf(stderr,"dbg2       mbp_meta_institution   :%s\n",process->mbp_meta_institution);
 		fprintf(stderr,"dbg2       mbp_meta_platform      :%s\n",process->mbp_meta_platform);
 		fprintf(stderr,"dbg2       mbp_meta_sonar         :%s\n",process->mbp_meta_sonar);
-		fprintf(stderr,"dbg2       mbp_meta_survey        :%s\n",process->mbp_meta_survey);
+		fprintf(stderr,"dbg2       mbp_meta_sonarversion  :%s\n",process->mbp_meta_sonarversion);
+		fprintf(stderr,"dbg2       mbp_meta_cruiseid      :%s\n",process->mbp_meta_cruiseid);
+		fprintf(stderr,"dbg2       mbp_meta_cruisename    :%s\n",process->mbp_meta_cruisename);
 		fprintf(stderr,"dbg2       mbp_meta_pi            :%s\n",process->mbp_meta_pi);
+		fprintf(stderr,"dbg2       mbp_meta_piinstitution :%s\n",process->mbp_meta_piinstitution);
 		fprintf(stderr,"dbg2       mbp_meta_client        :%s\n",process->mbp_meta_client);
+		fprintf(stderr,"dbg2       mbp_meta_svcorrected   :%d\n",process->mbp_meta_svcorrected);
+		fprintf(stderr,"dbg2       mbp_meta_tidecorrected :%d\n",process->mbp_meta_tidecorrected);
+		fprintf(stderr,"dbg2       mbp_meta_batheditmanual:%d\n",process->mbp_meta_batheditmanual);
+		fprintf(stderr,"dbg2       mbp_meta_batheditauto:  %d\n",process->mbp_meta_batheditauto);
+		fprintf(stderr,"dbg2       mbp_meta_rollbias:      %f\n",process->mbp_meta_rollbias);
+		fprintf(stderr,"dbg2       mbp_meta_pitchbias:     %f\n",process->mbp_meta_pitchbias);
+		fprintf(stderr,"dbg2       mbp_meta_headingbias:   %f\n",process->mbp_meta_headingbias);
+		fprintf(stderr,"dbg2       mbp_meta_draft:         %f\n",process->mbp_meta_draft);
 		}
 
 	/* get expected process parameter file name */
@@ -1142,13 +1232,24 @@ int mb_pr_writepar(int verbose, char *file,
 	    fprintf(fp, "SSINTERPOLATE %d\n", process->mbp_ssrecalc_interpolate);
 	    
 	    /* metadata insertion */
-	    fprintf(fp, "##\n## Metadata Insertion:\n");
-	    fprintf(fp, "METAOPERATOR %s\n", process->mbp_meta_operator);
+	    fprintf(fp, "METAVESSEL %s\n", process->mbp_meta_vessel);
+	    fprintf(fp, "METAINSTITUTION %s\n", process->mbp_meta_institution);
 	    fprintf(fp, "METAPLATFORM %s\n", process->mbp_meta_platform);
 	    fprintf(fp, "METASONAR %s\n", process->mbp_meta_sonar);
-	    fprintf(fp, "METASURVEY %s\n", process->mbp_meta_survey);
+	    fprintf(fp, "METASONARVERSION %s\n", process->mbp_meta_sonarversion);
+	    fprintf(fp, "METACRUISEID %s\n", process->mbp_meta_cruiseid);
+	    fprintf(fp, "METACRUISENAME %s\n", process->mbp_meta_cruisename);
 	    fprintf(fp, "METAPI %s\n", process->mbp_meta_pi);
+	    fprintf(fp, "METAPIINSTITUTION %s\n", process->mbp_meta_piinstitution);
 	    fprintf(fp, "METACLIENT %s\n", process->mbp_meta_client);
+	    fprintf(fp, "METASVCORRECTED %d\n", process->mbp_meta_svcorrected);
+	    fprintf(fp, "METATIDECORRECTED %d\n", process->mbp_meta_tidecorrected);
+	    fprintf(fp, "METABATHEDITMANUAL %d\n", process->mbp_meta_batheditmanual);
+	    fprintf(fp, "METABATHEDITAUTO %d\n", process->mbp_meta_batheditauto);
+	    fprintf(fp, "METAROLLBIAS %f\n", process->mbp_meta_rollbias);
+	    fprintf(fp, "METAPITCHBIAS %f\n", process->mbp_meta_pitchbias);
+	    fprintf(fp, "METAHEADINGBIAS %f\n", process->mbp_meta_headingbias);
+	    fprintf(fp, "METADRAFT %f\n", process->mbp_meta_draft);
   	
 	    /* close file */
 	    fclose(fp);
@@ -2180,12 +2281,24 @@ int mb_pr_update_ssrecalc(int verbose, char *file,
 }
 /*--------------------------------------------------------------------*/
 int mb_pr_update_metadata(int verbose, char *file, 
-			char	*mbp_meta_operator,
+			char	*mbp_meta_vessel,
+			char	*mbp_meta_institution,
 			char	*mbp_meta_platform,
 			char	*mbp_meta_sonar,
-			char	*mbp_meta_survey,
+			char	*mbp_meta_sonarversion,
+			char	*mbp_meta_cruiseid,
+			char	*mbp_meta_cruisename,
 			char	*mbp_meta_pi,
+			char	*mbp_meta_piinstitution,
 			char	*mbp_meta_client,
+			int	mbp_meta_svcorrected,
+			int	mbp_meta_tidecorrected,
+			int	mbp_meta_batheditmanual,
+			int	mbp_meta_batheditauto,
+			double	mbp_meta_rollbias,
+			double	mbp_meta_pitchbias,
+			double	mbp_meta_headingbias,
+			double	mbp_meta_draft,
 			int *error)
 {
 	char	*function_name = "mb_pr_update_metadata";
@@ -2200,24 +2313,48 @@ int mb_pr_update_metadata(int verbose, char *file,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                  %d\n",verbose);
 		fprintf(stderr,"dbg2       file:                     %s\n",file);
-		fprintf(stderr,"dbg2       mbp_meta_operator:        %s\n",mbp_meta_operator);
-		fprintf(stderr,"dbg2       mbp_meta_platform:        %s\n",mbp_meta_platform);
-		fprintf(stderr,"dbg2       mbp_meta_sonar:           %s\n",mbp_meta_sonar);
-		fprintf(stderr,"dbg2       mbp_meta_survey:          %s\n",mbp_meta_survey);
-		fprintf(stderr,"dbg2       mbp_meta_pi:              %s\n",mbp_meta_pi);
-		fprintf(stderr,"dbg2       mbp_meta_client:          %s\n",mbp_meta_client);
+		fprintf(stderr,"dbg2       mbp_meta_vessel:          %s\n",process.mbp_meta_vessel);
+		fprintf(stderr,"dbg2       mbp_meta_institution:     %s\n",process.mbp_meta_institution);
+		fprintf(stderr,"dbg2       mbp_meta_platform:        %s\n",process.mbp_meta_platform);
+		fprintf(stderr,"dbg2       mbp_meta_sonar:           %s\n",process.mbp_meta_sonar);
+		fprintf(stderr,"dbg2       mbp_meta_sonarversion:    %s\n",process.mbp_meta_sonarversion);
+		fprintf(stderr,"dbg2       mbp_meta_cruiseid:        %s\n",process.mbp_meta_cruiseid);
+		fprintf(stderr,"dbg2       mbp_meta_cruisename:      %s\n",process.mbp_meta_cruisename);
+		fprintf(stderr,"dbg2       mbp_meta_p:i              %s\n",process.mbp_meta_pi);
+		fprintf(stderr,"dbg2       mbp_meta_piinstitution:   %s\n",process.mbp_meta_piinstitution);
+		fprintf(stderr,"dbg2       mbp_meta_client:          %s\n",process.mbp_meta_client);
+		fprintf(stderr,"dbg2       mbp_meta_svcorrected:     %d\n",process.mbp_meta_svcorrected);
+		fprintf(stderr,"dbg2       mbp_meta_tidecorrected    %d\n",process.mbp_meta_tidecorrected);
+		fprintf(stderr,"dbg2       mbp_meta_batheditmanual   %d\n",process.mbp_meta_batheditmanual);
+		fprintf(stderr,"dbg2       mbp_meta_batheditauto:    %d\n",process.mbp_meta_batheditauto);
+		fprintf(stderr,"dbg2       mbp_meta_rollbias:        %f\n",process.mbp_meta_rollbias);
+		fprintf(stderr,"dbg2       mbp_meta_pitchbias:       %f\n",process.mbp_meta_pitchbias);
+		fprintf(stderr,"dbg2       mbp_meta_headingbias:     %f\n",process.mbp_meta_headingbias);
+		fprintf(stderr,"dbg2       mbp_meta_draft:           %f\n",process.mbp_meta_draft);
 		}
 
 	/* get known process parameters */
 	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
 
 	/* set metadata values */
-	strcpy(process.mbp_meta_operator,mbp_meta_operator);
+	strcpy(process.mbp_meta_vessel,mbp_meta_vessel);
+	strcpy(process.mbp_meta_institution,mbp_meta_institution);
 	strcpy(process.mbp_meta_platform,mbp_meta_platform);
 	strcpy(process.mbp_meta_sonar,mbp_meta_sonar);
-	strcpy(process.mbp_meta_survey,mbp_meta_survey);
+	strcpy(process.mbp_meta_sonarversion,mbp_meta_sonarversion);
+	strcpy(process.mbp_meta_cruiseid,mbp_meta_cruiseid);
+	strcpy(process.mbp_meta_cruisename,mbp_meta_cruisename);
 	strcpy(process.mbp_meta_pi,mbp_meta_pi);
+	strcpy(process.mbp_meta_piinstitution,mbp_meta_piinstitution);
 	strcpy(process.mbp_meta_client,mbp_meta_client);
+        process.mbp_meta_svcorrected = mbp_meta_svcorrected;
+        process.mbp_meta_tidecorrected = mbp_meta_tidecorrected;
+        process.mbp_meta_batheditmanual = mbp_meta_batheditmanual;
+        process.mbp_meta_batheditauto = mbp_meta_batheditauto;
+        process.mbp_meta_rollbias = mbp_meta_rollbias;
+        process.mbp_meta_pitchbias = mbp_meta_pitchbias;
+        process.mbp_meta_headingbias = mbp_meta_headingbias;
+        process.mbp_meta_draft = mbp_meta_draft;
  
 	/* write new process parameter file */
 	status = mb_pr_writepar(verbose, file, &process, error);
@@ -3131,12 +3268,24 @@ int mb_pr_get_ssrecalc(int verbose, char *file,
 }
 /*--------------------------------------------------------------------*/
 int mb_pr_get_metadata(int verbose, char *file, 
-			char	*mbp_meta_operator,
+			char	*mbp_meta_vessel,
+			char	*mbp_meta_institution,
 			char	*mbp_meta_platform,
 			char	*mbp_meta_sonar,
-			char	*mbp_meta_survey,
+			char	*mbp_meta_sonarversion,
+			char	*mbp_meta_cruiseid,
+			char	*mbp_meta_cruisename,
 			char	*mbp_meta_pi,
+			char	*mbp_meta_piinstitution,
 			char	*mbp_meta_client,
+			int	*mbp_meta_svcorrected,
+			int	*mbp_meta_tidecorrected,
+			int	*mbp_meta_batheditmanual,
+			int	*mbp_meta_batheditauto,
+			double	*mbp_meta_rollbias,
+			double	*mbp_meta_pitchbias,
+			double	*mbp_meta_headingbias,
+			double	*mbp_meta_draft,
 			int *error)
 {
 	char	*function_name = "mb_pr_get_metadata";
@@ -3157,12 +3306,25 @@ int mb_pr_get_metadata(int verbose, char *file,
 	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
 
 	/* set metadata values */
-	strcpy(mbp_meta_operator,process.mbp_meta_operator);
+	strcpy(mbp_meta_vessel,process.mbp_meta_vessel);
+	strcpy(mbp_meta_institution,process.mbp_meta_institution);
 	strcpy(mbp_meta_platform,process.mbp_meta_platform);
 	strcpy(mbp_meta_sonar,process.mbp_meta_sonar);
-	strcpy(mbp_meta_survey,process.mbp_meta_survey);
+	strcpy(mbp_meta_sonarversion,process.mbp_meta_sonarversion);
+	strcpy(mbp_meta_cruiseid,process.mbp_meta_cruiseid);
+	strcpy(mbp_meta_cruisename,process.mbp_meta_cruisename);
 	strcpy(mbp_meta_pi,process.mbp_meta_pi);
+	strcpy(mbp_meta_piinstitution,process.mbp_meta_piinstitution);
 	strcpy(mbp_meta_client,process.mbp_meta_client);
+        *mbp_meta_svcorrected = process.mbp_meta_svcorrected;
+        *mbp_meta_tidecorrected = process.mbp_meta_tidecorrected;
+        *mbp_meta_batheditmanual = process.mbp_meta_batheditmanual;
+        *mbp_meta_batheditauto = process.mbp_meta_batheditauto;
+        *mbp_meta_rollbias = process.mbp_meta_rollbias;
+        *mbp_meta_pitchbias = process.mbp_meta_pitchbias;
+        *mbp_meta_headingbias = process.mbp_meta_headingbias;
+        *mbp_meta_draft = process.mbp_meta_draft;
+ 
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -3170,12 +3332,24 @@ int mb_pr_get_metadata(int verbose, char *file,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return value:\n");
-		fprintf(stderr,"dbg2       mbp_meta_operator:        %s\n",process.mbp_meta_operator);
-		fprintf(stderr,"dbg2       mbp_meta_platform:        %s\n",process.mbp_meta_platform);
-		fprintf(stderr,"dbg2       mbp_meta_sonar:           %s\n",process.mbp_meta_sonar);
-		fprintf(stderr,"dbg2       mbp_meta_survey:          %s\n",process.mbp_meta_survey);
-		fprintf(stderr,"dbg2       mbp_meta_pi:              %s\n",process.mbp_meta_pi);
-		fprintf(stderr,"dbg2       mbp_meta_client:          %s\n",process.mbp_meta_client);
+		fprintf(stderr,"dbg2       mbp_meta_vessel:          %s\n",mbp_meta_vessel);
+		fprintf(stderr,"dbg2       mbp_meta_institution:     %s\n",mbp_meta_institution);
+		fprintf(stderr,"dbg2       mbp_meta_platform:        %s\n",mbp_meta_platform);
+		fprintf(stderr,"dbg2       mbp_meta_sonar:           %s\n",mbp_meta_sonar);
+		fprintf(stderr,"dbg2       mbp_meta_sonarversion:    %s\n",mbp_meta_sonarversion);
+		fprintf(stderr,"dbg2       mbp_meta_cruiseid:        %s\n",mbp_meta_cruiseid);
+		fprintf(stderr,"dbg2       mbp_meta_cruisename:      %s\n",mbp_meta_cruisename);
+		fprintf(stderr,"dbg2       mbp_meta_p:i              %s\n",mbp_meta_pi);
+		fprintf(stderr,"dbg2       mbp_meta_piinstitution:   %s\n",mbp_meta_piinstitution);
+		fprintf(stderr,"dbg2       mbp_meta_client:          %s\n",mbp_meta_client);
+		fprintf(stderr,"dbg2       mbp_meta_svcorrected:     %d\n",*mbp_meta_svcorrected);
+		fprintf(stderr,"dbg2       mbp_meta_tidecorrected    %d\n",*mbp_meta_tidecorrected);
+		fprintf(stderr,"dbg2       mbp_meta_batheditmanual   %d\n",*mbp_meta_batheditmanual);
+		fprintf(stderr,"dbg2       mbp_meta_batheditauto:    %d\n",*mbp_meta_batheditauto);
+		fprintf(stderr,"dbg2       mbp_meta_rollbias:        %f\n",*mbp_meta_rollbias);
+		fprintf(stderr,"dbg2       mbp_meta_pitchbias:       %f\n",*mbp_meta_pitchbias);
+		fprintf(stderr,"dbg2       mbp_meta_headingbias:     %f\n",*mbp_meta_headingbias);
+		fprintf(stderr,"dbg2       mbp_meta_draft:           %f\n",*mbp_meta_draft);
 		fprintf(stderr,"dbg2       error:                    %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:                   %d\n",status);

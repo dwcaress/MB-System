@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbprocess.c	3/31/93
- *    $Id: mbprocess.c,v 5.9 2001-08-04 01:01:07 caress Exp $
+ *    $Id: mbprocess.c,v 5.10 2001-08-10 22:42:50 dcaress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -36,6 +36,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.9  2001-08-03 18:01:07-07  caress
+ * Added cut by speed.
+ *
  * Revision 5.8  2001/07/31  00:42:12  caress
  * Added data cutting capability.
  *
@@ -98,7 +101,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbprocess.c,v 5.9 2001-08-04 01:01:07 caress Exp $";
+	static char rcs_id[] = "$Id: mbprocess.c,v 5.10 2001-08-10 22:42:50 dcaress Exp $";
 	static char program_name[] = "mbprocess";
 	static char help_message[] =  "mbprocess is a tool for processing swath sonar bathymetry data.\n\
 This program performs a number of functions, including:\n\
@@ -431,8 +434,6 @@ and mbedit edit save files.\n";
 	/* determine whether to read one file or a list of files */
 	if (format < 0)
 		read_datalist = MB_YES;
-	else if (mbp_format_specified == MB_YES)
-		mbp_format = format;
 
 	/* open file list */
 	if (read_datalist == MB_YES)
@@ -458,6 +459,7 @@ and mbedit edit save files.\n";
 	else
 	    {
 	    strcpy(mbp_ifile, read_file);
+	    mbp_format = format;
 	    read_data = MB_YES;
 	    }
 
@@ -471,7 +473,7 @@ and mbedit edit save files.\n";
 	    fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
 	    fprintf(stderr,"dbg2       help:            %d\n",help);
 	    fprintf(stderr,"dbg2       read_file:       %s\n",read_file);
-	    fprintf(stderr,"dbg2       format:          %d\n",mbp_format);
+	    fprintf(stderr,"dbg2       format:          %d\n",format);
 	    fprintf(stderr,"dbg2       pings:           %d\n",pings);
 	    fprintf(stderr,"dbg2       lonflip:         %d\n",lonflip);
 	    fprintf(stderr,"dbg2       bounds[0]:       %f\n",bounds[0]);
@@ -507,7 +509,7 @@ and mbedit edit save files.\n";
 	    fprintf(stderr,"MB-system Version %s\n",MB_VERSION);		
 	    fprintf(stderr,"\nProgram Operation:\n");
 	    fprintf(stderr,"  Input file:      %s\n",read_file);
-	    fprintf(stderr,"  Format:          %d\n",mbp_format);
+	    fprintf(stderr,"  Format:          %d\n",format);
 	    if (checkuptodate == MB_YES)
 		fprintf(stderr,"  Files processed only if out of date.\n");
 	    else
@@ -543,6 +545,7 @@ and mbedit edit save files.\n";
 	if (status == MB_SUCCESS
 	    && mbp_ofile_specified == MB_NO
 	    && process.mbp_ofile[0] != '/'
+	    && strrchr(process.mbp_ifile,'/') != NULL
 	    && (len = strrchr(process.mbp_ifile,'/') 
 			- process.mbp_ifile + 1) > 1)
 	    {
@@ -941,12 +944,24 @@ and mbedit edit save files.\n";
 	    fprintf(stderr,"  Sidescan interpolation:        %d\n",process.mbp_ssrecalc_interpolate);
 
 	    fprintf(stderr,"\nMetadata Insertion:\n");
-	    fprintf(stderr,"  Metadata operator:             %s\n",process.mbp_meta_operator);
+	    fprintf(stderr,"  Metadata vessel:               %s\n",process.mbp_meta_vessel);
+	    fprintf(stderr,"  Metadata institution:          %s\n",process.mbp_meta_institution);
 	    fprintf(stderr,"  Metadata platform:             %s\n",process.mbp_meta_platform);
 	    fprintf(stderr,"  Metadata sonar:                %s\n",process.mbp_meta_sonar);
-	    fprintf(stderr,"  Metadata survey:               %s\n",process.mbp_meta_survey);
+	    fprintf(stderr,"  Metadata sonarversion:         %s\n",process.mbp_meta_sonarversion);
+	    fprintf(stderr,"  Metadata cruiseid:             %s\n",process.mbp_meta_cruiseid);
+	    fprintf(stderr,"  Metadata cruisename:           %s\n",process.mbp_meta_cruisename);
 	    fprintf(stderr,"  Metadata pi:                   %s\n",process.mbp_meta_pi);
+	    fprintf(stderr,"  Metadata piinstitution:        %s\n",process.mbp_meta_piinstitution);
 	    fprintf(stderr,"  Metadata client:               %s\n",process.mbp_meta_client);
+	    fprintf(stderr,"  Metadata svcorrected:          %d\n",process.mbp_meta_svcorrected);
+	    fprintf(stderr,"  Metadata tidecorrected         %d\n",process.mbp_meta_tidecorrected);
+	    fprintf(stderr,"  Metadata batheditmanual        %d\n",process.mbp_meta_batheditmanual);
+	    fprintf(stderr,"  Metadata batheditauto:         %d\n",process.mbp_meta_batheditauto);
+	    fprintf(stderr,"  Metadata rollbias:             %f\n",process.mbp_meta_rollbias);
+	    fprintf(stderr,"  Metadata pitchbias:            %f\n",process.mbp_meta_pitchbias);
+	    fprintf(stderr,"  Metadata headingbias:          %f\n",process.mbp_meta_headingbias);
+	    fprintf(stderr,"  Metadata draft:                %f\n",process.mbp_meta_draft);
 	    }
 
 	/*--------------------------------------------
@@ -2647,9 +2662,15 @@ and mbedit edit save files.\n";
 		if (error == MB_ERROR_NO_ERROR) ocomment++;
 
 		/* insert metadata */
-		if (strlen(process.mbp_meta_operator) > 0)
+		if (strlen(process.mbp_meta_vessel) > 0)
 			{
-			sprintf(comment,"METAOPERATOR:%s", process.mbp_meta_operator);
+			sprintf(comment,"METAVESSEL:%s", process.mbp_meta_vessel);
+			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+			if (error == MB_ERROR_NO_ERROR) ocomment++;
+			}
+		if (strlen(process.mbp_meta_institution) > 0)
+			{
+			sprintf(comment,"METAINSTITUTION:%s", process.mbp_meta_institution);
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			if (error == MB_ERROR_NO_ERROR) ocomment++;
 			}
@@ -2665,9 +2686,21 @@ and mbedit edit save files.\n";
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			if (error == MB_ERROR_NO_ERROR) ocomment++;
 			}
-		if (strlen(process.mbp_meta_survey) > 0)
+		if (strlen(process.mbp_meta_sonarversion) > 0)
 			{
-			sprintf(comment,"METASURVEY:%s", process.mbp_meta_survey);
+			sprintf(comment,"METASONARVERSION:%s", process.mbp_meta_sonarversion);
+			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+			if (error == MB_ERROR_NO_ERROR) ocomment++;
+			}
+		if (strlen(process.mbp_meta_cruiseid) > 0)
+			{
+			sprintf(comment,"METACRUISEID:%s", process.mbp_meta_cruiseid);
+			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+			if (error == MB_ERROR_NO_ERROR) ocomment++;
+			}
+		if (strlen(process.mbp_meta_cruisename) > 0)
+			{
+			sprintf(comment,"METACRUISENAME:%s", process.mbp_meta_cruisename);
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			if (error == MB_ERROR_NO_ERROR) ocomment++;
 			}
@@ -2677,13 +2710,67 @@ and mbedit edit save files.\n";
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			if (error == MB_ERROR_NO_ERROR) ocomment++;
 			}
+		if (strlen(process.mbp_meta_piinstitution) > 0)
+			{
+			sprintf(comment,"METAPIINSTITUTION:%s", process.mbp_meta_piinstitution);
+			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+			if (error == MB_ERROR_NO_ERROR) ocomment++;
+			}
 		if (strlen(process.mbp_meta_client) > 0)
 			{
 			sprintf(comment,"METACLIENT:%s", process.mbp_meta_client);
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			if (error == MB_ERROR_NO_ERROR) ocomment++;
 			}
-		}
+		if (process.mbp_meta_svcorrected > -1)
+			{
+			sprintf(comment,"METASVCORRECTED:%d", process.mbp_meta_svcorrected);
+			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+			if (error == MB_ERROR_NO_ERROR) ocomment++;
+			}
+		if (process.mbp_meta_tidecorrected > -1)
+			{
+			sprintf(comment,"METATIDECORRECTED:%d", process.mbp_meta_tidecorrected);
+			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+			if (error == MB_ERROR_NO_ERROR) ocomment++;
+			}
+		if (process.mbp_meta_batheditmanual > -1)
+			{
+			sprintf(comment,"METABATHEDITMANUAL:%d", process.mbp_meta_batheditmanual);
+			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+			if (error == MB_ERROR_NO_ERROR) ocomment++;
+			}
+		if (process.mbp_meta_batheditauto > -1)
+			{
+			sprintf(comment,"METABATHEDITAUTO:%d", process.mbp_meta_batheditauto);
+			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+			if (error == MB_ERROR_NO_ERROR) ocomment++;
+			}
+		if (process.mbp_meta_rollbias != 0.0)
+			{
+			sprintf(comment,"METAROLLBIAS:%f", process.mbp_meta_rollbias);
+			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+			if (error == MB_ERROR_NO_ERROR) ocomment++;
+			}
+		if (process.mbp_meta_pitchbias != 0.0)
+			{
+			sprintf(comment,"METAPITCHBIAS:%f", process.mbp_meta_pitchbias);
+			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+			if (error == MB_ERROR_NO_ERROR) ocomment++;
+			}
+		if (process.mbp_meta_headingbias != 0.0)
+			{
+			sprintf(comment,"METAHEADINGBIAS:%f", process.mbp_meta_headingbias);
+			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+			if (error == MB_ERROR_NO_ERROR) ocomment++;
+			}
+		if (process.mbp_meta_draft != 0.0)
+			{
+			sprintf(comment,"METADRAFT:%f", process.mbp_meta_draft);
+			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+			if (error == MB_ERROR_NO_ERROR) ocomment++;
+			}
+ 		}
 
 	/* set up the raytracing */
 	status = mb_rt_init(verbose, nsvp, depth, velocity, &rt_svp, &error);

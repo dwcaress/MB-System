@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbinfo.c	2/1/93
- *    $Id: mbinfo.c,v 5.3 2001-07-20 00:34:38 caress Exp $
+ *    $Id: mbinfo.c,v 5.4 2001-08-10 22:42:50 dcaress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -26,6 +26,9 @@
  * Date:	February 1, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2001-07-19 17:34:38-07  caress
+ * Release 5.0.beta03
+ *
  * Revision 5.2  2001/06/03 07:07:34  caress
  * Release 5.0.beta01.
  *
@@ -163,7 +166,7 @@ struct ping
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbinfo.c,v 5.3 2001-07-20 00:34:38 caress Exp $";
+	static char rcs_id[] = "$Id: mbinfo.c,v 5.4 2001-08-10 22:42:50 dcaress Exp $";
 	static char program_name[] = "MBINFO";
 	static char help_message[] =  "MBINFO reads a swath sonar data file and outputs \nsome basic statistics.  If pings are averaged (pings > 2) \nMBINFO estimates the variance for each of the swath \nbeams by reading a set number of pings (>2) and then finding \nthe variance of the detrended values for each beam. \nThe results are dumped to stdout.";
 	static char usage_message[] = "mbinfo [-Byr/mo/da/hr/mn/sc -C -Eyr/mo/da/hr/mn/sc -Fformat -Ifile -Llonflip -Ppings -Rw/e/s/n -Sspeed -V -H]";
@@ -981,12 +984,12 @@ main (int argc, char **argv)
 					latmin = MIN(latmin, navlat);
 					latmax = MAX(latmax, navlat);
 					}
-				if (sonardepth > 0.0 && beginsdp == MB_YES)
+				if (beginsdp == MB_YES)
 					{
 					sdpmin = MIN(sdpmin, sonardepth);
 					sdpmax = MAX(sdpmax, sonardepth);
 					}
-				if (altitude > 0.0 && beginalt == MB_YES)
+				if (beginalt == MB_YES)
 					{
 					altmin = MIN(altmin, altitude);
 					altmax = MAX(altmax, altitude);

@@ -1,4 +1,4 @@
-.TH mbdefaults l "13 July 2001" "MB-System 5.0" "MB-System 5.0"
+.TH mbdefaults l "9 August 2001" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbdefaults\fP - Set or list default mbio parameters for reading and writing swath sonar data
 
@@ -37,9 +37,16 @@ Dale N. Chayes (dale@ldeo.columbia.edu)
 .B \-B
 \fIyr/mo/da/hr/mn/sc\fP
 .br
-Sets the starting time for data allowed in the input data; pings
-with times before the starting time will be ignored. 
+This option sets the default starting time for data allowed in the input data.
+The \f-E\fP option sets the ending time for data. If the 
+starting time is before the ending time, then any data
+with a time stamp before the starting time or after the
+ending time is ignored. If instead the starting time is
+after the ending time, then any data between the ending
+and starting time will be ignored. This scheme allows time
+windowing both inside and outside a specified interval.
 Default: \fIyr/mo/da/hr/mn/sc\fP = 1962/2/21/10/30/0.
+.TP
 .B \-D
 \fIpsdisplay\fP
 .br
@@ -53,17 +60,28 @@ are \fBpageview\fP (for Sun workstations) and \fBxpsview\fP
 .B \-E
 \fIyr/mo/da/hr/mn/sc\fP
 .br
-Sets the ending time for data allowed in the input data; pings
-with times after the ending time will be ignored. 
+This option sets the default ending time for 
+data allowed in the input data.
+The \f-B\fP option sets the default starting time for data. If the 
+starting time is before the ending time, then any data
+with a time stamp before the starting time or after the
+ending time is ignored. If instead the starting time is
+after the ending time, then any data between the ending
+and starting time will be ignored. This scheme allows time
+windowing both inside and outside a specified interval.
 Default: \fIyr/mo/da/hr/mn/sc\fP = 2062/2/21/10/30/0.
 .TP
 .B \-F
 \fIformat\fP
 .br
-Sets the format for reading swath sonar data using the 
+Sets the default format for reading swath sonar data using the 
 \fBMBIO\fP integer format identifiers.  A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
-is given in the \fBMBIO\fP manual page.
+is given in the \fBMBIO\fP manual page. If the default format is 0,
+then \fBMB-System\fP programs will attempt to automatically 
+determine a file's format based on the filename 
+(unless the format is explicitly set using that program's
+\fB-F\fP option).
 Default = 11.
 .TP
 .B \-H
