@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_process.h	9/11/00
- *    $Id: mb_process.h,v 5.7 2001-08-02 01:49:25 caress Exp $
+ *    $Id: mb_process.h,v 5.8 2001-08-04 01:00:02 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -101,26 +101,28 @@
  *                                  #   0: linear interpolation (recommended)
  *                                  #   1: spline interpolation
  *
-#define	MBP_CUT_DATA_BATH	0
-#define	MBP_CUT_DATA_AMP	1
-#define	MBP_CUT_DATA_SS		2
-#define	MBP_CUT_MODE_NONE	0
-#define	MBP_CUT_MODE_NUMBER   	1
-#define	MBP_CUT_MODE_DISTANCE 	2
-#define	MBP_CUT_NUM_MAX	20
  * DATA CUTTING:
  *   DATACUTCLEAR                   # clears all data cutting commands
  *   DATACUT kind mode min max      # adds data cutting command that flags
  *                                  # specified bathymetery and amplitude
  *                                  # beams and zeroes specified sidescan 
- *                                  # pixels. 
+ *                                  # pixels. Note that cutting bathymetry
+ *                                  # means flagging beams, which affects
+ *                                  # both bathymetry and amplitude data.
+ *                                  # In contrast, cutting amplitude data
+ *                                  # means zeroing the values without
+ *                                  # affecting the bathymetry, and 
+ *                                  # cutting sidescan also means zeroing
+ *                                  # the values.
  *                                  # - kind:
  *                                  #   0: bathymetry
  *                                  #   1: amplitude
  *                                  #   2: sidescan
  *                                  # - mode:
- *                                  #   0: cut by beam/pixel number
- *                                  #   1: cut by distance
+ *                                  #   0: no cut
+ *                                  #   1: cut by beam/pixel number
+ *                                  #   2: cut by distance
+ *                                  #   3: cut by speed
  *                                  # - min: minimum beam/pixel number
  *                                  #   or acrosstrack distance for data
  *                                  #   data cutting zone.
@@ -134,6 +136,10 @@
  *                                  #   bathymetry by beam number from
  *                                  #   acrosstrack distance  min to 
  *                                  #   distance max.
+ *   BATHCUTSPEED min max           # adds data cutting command to cut
+ *                                  #   all bathymetry in pings with
+ *                                  #   speed less than min or more 
+ *                                  #   than max
  *   AMPCUTNUMBER min max           # adds data cutting command to cut
  *                                  #   amplitude by beam number from
  *                                  #   beam min to beam max.
@@ -141,6 +147,10 @@
  *                                  #   amplitude by beam number from
  *                                  #   acrosstrack distance  min to 
  *                                  #   distance max.
+ *   AMPCUTSPEED min max            # adds data cutting command to cut
+ *                                  #   all amplitude in pings with
+ *                                  #   speed less than min or more 
+ *                                  #   than max
  *   SSCUTNUMBER min max            # adds data cutting command to cut
  *                                  #   sidescan by beam number from
  *                                  #   beam min to beam max.
@@ -148,6 +158,10 @@
  *                                  #   sidescan by beam number from
  *                                  #   acrosstrack distance  min to 
  *                                  #   distance max.
+ *   SSCUTSPEED min max             # adds data cutting command to cut
+ *                                  #   all sidescan in pings with
+ *                                  #   speed less than min or more 
+ *                                  #   than max
  *
  * BATHYMETRY EDITING:
  *   EDITSAVEMODE boolean           # turns on reading edit save file (from mbedit) [0]
@@ -323,6 +337,9 @@
  * Date:	September 11, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2001/08/02  01:49:25  caress
+ * Added mb_pr_ function prototypes.
+ *
  * Revision 5.6  2001/07/31  00:40:52  caress
  * Added data cutting capability.
  *
@@ -367,7 +384,8 @@
 #define	MBP_CUT_MODE_NONE	0
 #define	MBP_CUT_MODE_NUMBER   	1
 #define	MBP_CUT_MODE_DISTANCE 	2
-#define	MBP_CUT_NUM_MAX	20
+#define	MBP_CUT_MODE_SPEED 	3
+#define	MBP_CUT_NUM_MAX		20
 #define MBP_EDIT_OFF		0
 #define MBP_EDIT_ON		1
 #define MBP_EDIT_FLAG		1

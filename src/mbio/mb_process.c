@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_process.c	9/11/00
- *    $Id: mb_process.c,v 5.8 2001-07-31 00:40:52 caress Exp $
+ *    $Id: mb_process.c,v 5.9 2001-08-04 01:00:02 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	September 11, 2000
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2001/07/31  00:40:52  caress
+ * Added data cutting capability.
+ *
  * Revision 5.7  2001/07/27  19:07:16  caress
  * Added data cutting.
  *
@@ -74,7 +77,7 @@
 #include "../../include/mb_format.h"
 #include "../../include/mb_process.h"
 
-static char rcs_id[]="$Id: mb_process.c,v 5.8 2001-07-31 00:40:52 caress Exp $";
+static char rcs_id[]="$Id: mb_process.c,v 5.9 2001-08-04 01:00:02 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_pr_readpar(int verbose, char *file, int lookforfiles, 
@@ -368,6 +371,18 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 				process->mbp_cut_num++;
 				}
 			}
+		    else if (strncmp(buffer, "BATHCUTSPEED", 12) == 0)
+			{
+			if (process->mbp_cut_num < MBP_CUT_NUM_MAX)
+				{
+				sscanf(buffer, "%s %lf %lf", dummy, 
+					&process->mbp_cut_min[process->mbp_cut_num],
+					&process->mbp_cut_max[process->mbp_cut_num]);
+				process->mbp_cut_kind[process->mbp_cut_num] = MBP_CUT_DATA_BATH; 
+				process->mbp_cut_mode[process->mbp_cut_num] = MBP_CUT_MODE_SPEED; 
+				process->mbp_cut_num++;
+				}
+			}
 		    else if (strncmp(buffer, "AMPCUTNUMBER", 12) == 0)
 			{
 			if (process->mbp_cut_num < MBP_CUT_NUM_MAX)
@@ -392,6 +407,18 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 				process->mbp_cut_num++;
 				}
 			}
+		    else if (strncmp(buffer, "AMPCUTSPEED", 11) == 0)
+			{
+			if (process->mbp_cut_num < MBP_CUT_NUM_MAX)
+				{
+				sscanf(buffer, "%s %lf %lf", dummy, 
+					&process->mbp_cut_min[process->mbp_cut_num],
+					&process->mbp_cut_max[process->mbp_cut_num]);
+				process->mbp_cut_kind[process->mbp_cut_num] = MBP_CUT_DATA_AMP; 
+				process->mbp_cut_mode[process->mbp_cut_num] = MBP_CUT_MODE_SPEED; 
+				process->mbp_cut_num++;
+				}
+			}
 		    else if (strncmp(buffer, "SSCUTNUMBER", 12) == 0)
 			{
 			if (process->mbp_cut_num < MBP_CUT_NUM_MAX)
@@ -413,6 +440,18 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 					&process->mbp_cut_max[process->mbp_cut_num]);
 				process->mbp_cut_kind[process->mbp_cut_num] = MBP_CUT_DATA_SS; 
 				process->mbp_cut_mode[process->mbp_cut_num] = MBP_CUT_MODE_DISTANCE; 
+				process->mbp_cut_num++;
+				}
+			}
+		    else if (strncmp(buffer, "SSCUTSPEED", 10) == 0)
+			{
+			if (process->mbp_cut_num < MBP_CUT_NUM_MAX)
+				{
+				sscanf(buffer, "%s %lf %lf", dummy, 
+					&process->mbp_cut_min[process->mbp_cut_num],
+					&process->mbp_cut_max[process->mbp_cut_num]);
+				process->mbp_cut_kind[process->mbp_cut_num] = MBP_CUT_DATA_SS; 
+				process->mbp_cut_mode[process->mbp_cut_num] = MBP_CUT_MODE_SPEED; 
 				process->mbp_cut_num++;
 				}
 			}

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbset.c	3/31/93
- *    $Id: mbset.c,v 5.6 2001-07-31 00:42:12 caress Exp $
+ *    $Id: mbset.c,v 5.7 2001-08-04 01:01:07 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -30,6 +30,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2001/07/31  00:42:12  caress
+ * Added data cutting capability.
+ *
  * Revision 5.5  2001/07/20 00:34:38  caress
  * Release 5.0.beta03
  *
@@ -75,7 +78,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbset.c,v 5.6 2001-07-31 00:42:12 caress Exp $";
+	static char rcs_id[] = "$Id: mbset.c,v 5.7 2001-08-04 01:01:07 caress Exp $";
 	static char program_name[] = "mbset";
 	static char help_message[] = "MBset is a tool for setting values in an mbprocess parameter file.\n\
 MBprocess is a tool for processing swath sonar bathymetry data  \n\
@@ -326,6 +329,18 @@ the manual pages for mbprocess and mbset. \n\n";
 				process.mbp_cut_num++;
 				}
 			}
+		    else if (strncmp(pargv[i], "BATHCUTSPEED", 12) == 0)
+			{
+			if (process.mbp_cut_num < MBP_CUT_NUM_MAX)
+				{
+				sscanf(pargv[i], "BATHCUTSPEED:%lf:%lf", 
+					&process.mbp_cut_min[process.mbp_cut_num],
+					&process.mbp_cut_max[process.mbp_cut_num]);
+				process.mbp_cut_kind[process.mbp_cut_num] = MBP_CUT_DATA_BATH; 
+				process.mbp_cut_mode[process.mbp_cut_num] = MBP_CUT_MODE_SPEED; 
+				process.mbp_cut_num++;
+				}
+			}
 		    else if (strncmp(pargv[i], "AMPCUTNUMBER", 12) == 0)
 			{
 			if (process.mbp_cut_num < MBP_CUT_NUM_MAX)
@@ -350,6 +365,18 @@ the manual pages for mbprocess and mbset. \n\n";
 				process.mbp_cut_num++;
 				}
 			}
+		    else if (strncmp(pargv[i], "AMPCUTSPEED", 11) == 0)
+			{
+			if (process.mbp_cut_num < MBP_CUT_NUM_MAX)
+				{
+				sscanf(pargv[i], "AMPCUTSPEED:%lf:%lf", 
+					&process.mbp_cut_min[process.mbp_cut_num],
+					&process.mbp_cut_max[process.mbp_cut_num]);
+				process.mbp_cut_kind[process.mbp_cut_num] = MBP_CUT_DATA_AMP; 
+				process.mbp_cut_mode[process.mbp_cut_num] = MBP_CUT_MODE_SPEED; 
+				process.mbp_cut_num++;
+				}
+			}
 		    else if (strncmp(pargv[i], "SSCUTNUMBER", 12) == 0)
 			{
 			if (process.mbp_cut_num < MBP_CUT_NUM_MAX)
@@ -371,6 +398,18 @@ the manual pages for mbprocess and mbset. \n\n";
 					&process.mbp_cut_max[process.mbp_cut_num]);
 				process.mbp_cut_kind[process.mbp_cut_num] = MBP_CUT_DATA_SS; 
 				process.mbp_cut_mode[process.mbp_cut_num] = MBP_CUT_MODE_DISTANCE; 
+				process.mbp_cut_num++;
+				}
+			}
+		    else if (strncmp(pargv[i], "SSCUTSPEED", 10) == 0)
+			{
+			if (process.mbp_cut_num < MBP_CUT_NUM_MAX)
+				{
+				sscanf(pargv[i], "SSCUTSPEED:%lf:%lf", 
+					&process.mbp_cut_min[process.mbp_cut_num],
+					&process.mbp_cut_max[process.mbp_cut_num]);
+				process.mbp_cut_kind[process.mbp_cut_num] = MBP_CUT_DATA_SS; 
+				process.mbp_cut_mode[process.mbp_cut_num] = MBP_CUT_MODE_SPEED; 
 				process.mbp_cut_num++;
 				}
 			}
