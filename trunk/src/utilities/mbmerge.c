@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmerge.c	2/20/93
  *
- *    $Id: mbmerge.c,v 4.10 1995-03-06 19:37:59 caress Exp $
+ *    $Id: mbmerge.c,v 4.11 1995-04-19 18:45:57 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,9 @@
  * Date:	February 20, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.10  1995/03/06  19:37:59  caress
+ * Changed include strings.h to string.h for POSIX compliance.
+ *
  * Revision 4.9  1995/03/02  13:49:21  caress
  * Fixed bug related to error messages.
  *
@@ -93,7 +96,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbmerge.c,v 4.10 1995-03-06 19:37:59 caress Exp $";
+	static char rcs_id[] = "$Id: mbmerge.c,v 4.11 1995-04-19 18:45:57 caress Exp $";
 	static char program_name[] = "MBMERGE";
 	static char help_message[] =  "MBMERGE merges new navigation with multibeam data from an \ninput file and then writes the merged data to an output \nmultibeam data file. The default input \nand output streams are stdin and stdout.";
 	static char usage_message[] = "mbmerge [-Fformat -Llonflip -V -H  -Iinfile -Ooutfile -Mnavformat -Nnavfile]";
@@ -190,6 +193,7 @@ char **argv;
 	double	del_time, dx, dy, dist;
 
 	char	buffer[128], tmp[128], *result, *bufftmp;
+	int	len;
 	int	i, j, k, l, m;
 
 	char	*ctime();
@@ -489,73 +493,85 @@ char **argv;
 		else if (nformat == 6 || nformat == 7)
 			{
 			/* check if real sentence */
+			len = strlen(buffer);
 			if (strncmp(buffer,"$",1) == 0)
 			    {
-			    if (strncmp(&buffer[3],"DAT",3) == 0)
+			    if (strncmp(&buffer[3],"DAT",3) == 0
+				&& len > 15)
 				{
+				time_set = MB_NO;
 				strncpy(tmp,"\0",128);
 				time_i[0] = atoi(strncpy(tmp,buffer+7,4));
 				time_i[1] = atoi(strncpy(tmp,buffer+11,2));
 				time_i[2] = atoi(strncpy(tmp,buffer+13,2));
 				}
-			    else if (strncmp(&buffer[3],"ZDA",3) == 0
+			    else if ((strncmp(&buffer[3],"ZDA",3) == 0
 				    || strncmp(&buffer[3],"UNX",3) == 0)
+				    && len > 14)
 				{
+				time_set = MB_NO;
 				/* find start of ",hhmmss.ss" */
-				bufftmp = strchr(buffer, ',');
-				strncpy(tmp,"\0",128);
-				time_i[3] = atoi(strncpy(tmp,bufftmp+1,2));
-				strncpy(tmp,"\0",128);
-				time_i[4] = atoi(strncpy(tmp,bufftmp+3,2));
-				strncpy(tmp,"\0",128);
-				time_i[5] = atoi(strncpy(tmp,bufftmp+5,2));
-				if (bufftmp[7] == '.')
+				if ((bufftmp = strchr(buffer, ',')) != NULL)
 				    {
 				    strncpy(tmp,"\0",128);
-				    time_i[6] = 10000*
-					atoi(strncpy(tmp,bufftmp+8,2));
+				    time_i[3] = atoi(strncpy(tmp,bufftmp+1,2));
+				    strncpy(tmp,"\0",128);
+				    time_i[4] = atoi(strncpy(tmp,bufftmp+3,2));
+				    strncpy(tmp,"\0",128);
+				    time_i[5] = atoi(strncpy(tmp,bufftmp+5,2));
+				    if (bufftmp[7] == '.')
+					{
+					strncpy(tmp,"\0",128);
+					time_i[6] = 10000*
+					    atoi(strncpy(tmp,bufftmp+8,2));
+					}
+				    else
+					time_i[6] = 0;
+				    /* find start of ",dd,mm,yyyy" */
+				    if ((bufftmp = strchr(&bufftmp[1], ',')) != NULL)
+					{
+					strncpy(tmp,"\0",128);
+					time_i[2] = atoi(strncpy(tmp,bufftmp+1,2));
+					strncpy(tmp,"\0",128);
+					time_i[1] = atoi(strncpy(tmp,bufftmp+4,2));
+					strncpy(tmp,"\0",128);
+					time_i[0] = atoi(strncpy(tmp,bufftmp+7,4));
+					time_set = MB_YES;
+					}
 				    }
-				else
-				    time_i[6] = 0;
-				/* find start of ",dd,mm,yyyy" */
-				bufftmp = strchr(&bufftmp[1], ',');
-				strncpy(tmp,"\0",128);
-				time_i[2] = atoi(strncpy(tmp,bufftmp+1,2));
-				strncpy(tmp,"\0",128);
-				time_i[1] = atoi(strncpy(tmp,bufftmp+4,2));
-				strncpy(tmp,"\0",128);
-				time_i[0] = atoi(strncpy(tmp,bufftmp+7,4));
-				time_set = MB_YES;
 				}
 			    else if (((nformat == 6 && strncmp(&buffer[3],"GLL",3) == 0)
 				|| (nformat == 7 && strncmp(&buffer[3],"GGA",3) == 0))
-				&& time_set == MB_YES)
+				&& time_set == MB_YES && len > 26)
 				{
+				time_set = MB_NO;
 				/* find start of ",ddmm.mm,N,ddmm.mm,E" */
-				bufftmp = strchr(buffer, ',');
-				if (nformat == 7)
-				    bufftmp = strchr(&bufftmp[1], ',');
-				strncpy(tmp,"\0",128);
-				degree = atoi(strncpy(tmp,bufftmp+1,2));
-				strncpy(tmp,"\0",128);
-				dminute = atof(strncpy(tmp,bufftmp+3,5));
-				strncpy(NorS,"\0",sizeof(NorS));
-				strncpy(NorS,bufftmp+9,1);
-				nlat[nnav] = degree + dminute/60.;
-				if (strncmp(NorS,"S",1) == 0) 
+				if ((bufftmp = strchr(buffer, ',')) != NULL)
+				    {
+				    if (nformat == 7)
+					bufftmp = strchr(&bufftmp[1], ',');
+				    strncpy(tmp,"\0",128);
+				    degree = atoi(strncpy(tmp,bufftmp+1,2));
+				    strncpy(tmp,"\0",128);
+				    dminute = atof(strncpy(tmp,bufftmp+3,5));
+				    strncpy(NorS,"\0",sizeof(NorS));
+				    strncpy(NorS,bufftmp+9,1);
+				    nlat[nnav] = degree + dminute/60.;
+				    if (strncmp(NorS,"S",1) == 0) 
 					nlat[nnav] = -nlat[nnav];
-				strncpy(tmp,"\0",128);
-				degree = atoi(strncpy(tmp,bufftmp+11,3));
-				strncpy(tmp,"\0",128);
-				dminute = atof(strncpy(tmp,bufftmp+14,5));
-				strncpy(EorW,"\0",sizeof(EorW));
-				strncpy(EorW,bufftmp+20,1);
-				nlon[nnav] = degree + dminute/60.;
-				if (strncmp(EorW,"W",1) == 0) 
+				    strncpy(tmp,"\0",128);
+				    degree = atoi(strncpy(tmp,bufftmp+11,3));
+				    strncpy(tmp,"\0",128);
+				    dminute = atof(strncpy(tmp,bufftmp+14,5));
+				    strncpy(EorW,"\0",sizeof(EorW));
+				    strncpy(EorW,bufftmp+20,1);
+				    nlon[nnav] = degree + dminute/60.;
+				    if (strncmp(EorW,"W",1) == 0) 
 					nlon[nnav] = -nlon[nnav];
-				mb_get_time(verbose,time_i,&time_d);
-				ntime[nnav] = time_d;
-				nav_ok = MB_YES;
+				    mb_get_time(verbose,time_i,&time_d);
+				    ntime[nnav] = time_d;
+				    nav_ok = MB_YES;
+				    }
 				}
 			    }
 			}
