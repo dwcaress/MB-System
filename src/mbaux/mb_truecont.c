@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_truecont.c	4/21/94
- *    $Id: mb_truecont.c,v 4.6 1996-04-22 13:18:44 caress Exp $
+ *    $Id: mb_truecont.c,v 4.7 1997-08-28 15:41:25 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -73,7 +73,7 @@ double	date_annot_int;
 double	time_tick_len;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_truecont.c,v 4.6 1996-04-22 13:18:44 caress Exp $";
+  	static char rcs_id[]="$Id: mb_truecont.c,v 4.7 1997-08-28 15:41:25 caress Exp $";
 	char	*function_name = "mb_contour_init";
 	int	status = MB_SUCCESS;
 	struct swath *dataptr;
@@ -318,7 +318,7 @@ int	*error;
 		fprintf(stderr,"dbg2       status:     %d\n",status);
 		}
 
-	return;
+	return(MB_SUCCESS);
 }
 
 /*--------------------------------------------------------------------------*/
@@ -329,7 +329,7 @@ int	verbose;
 struct swath *data;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_truecont.c,v 4.6 1996-04-22 13:18:44 caress Exp $";
+  	static char rcs_id[]="$Id: mb_truecont.c,v 4.7 1997-08-28 15:41:25 caress Exp $";
 	char	*function_name = "mb_contour_deall";
 	int	status = MB_SUCCESS;
 	struct ping *ping;
@@ -413,7 +413,7 @@ int	*error;
 		fprintf(stderr,"dbg2       status:     %d\n",status);
 		}
 
-	return;
+	return(MB_SUCCESS);
 }
 /*--------------------------------------------------------------------------*/
 /* 	function mb_contour calls the appropriate contouring routine. */
@@ -464,7 +464,7 @@ int	verbose;
 struct swath *data;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_truecont.c,v 4.6 1996-04-22 13:18:44 caress Exp $";
+  	static char rcs_id[]="$Id: mb_truecont.c,v 4.7 1997-08-28 15:41:25 caress Exp $";
 	char	*function_name = "mb_tcontour";
 	int	status = MB_SUCCESS;
 	struct ping *ping;
@@ -1151,7 +1151,7 @@ int	verbose;
 struct swath *data;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_truecont.c,v 4.6 1996-04-22 13:18:44 caress Exp $";
+  	static char rcs_id[]="$Id: mb_truecont.c,v 4.7 1997-08-28 15:41:25 caress Exp $";
 	char	*function_name = "mb_ocontour";
 	int	status = MB_SUCCESS;
 	struct ping *ping;
@@ -1373,14 +1373,24 @@ int	*error;
 						- data->xsave[data->nsave-1]),2.0) 
 						+ pow((y 
 						- data->ysave[data->nsave-1]),2.0));
-					data->xsave[data->nsave+1] = 
-						data->xsave[data->nsave] 
-						- hand*data->tick_len*(y 
-						- data->ysave[data->nsave-1])/magdis;
-					data->ysave[data->nsave+1] = 
-						data->ysave[data->nsave] 
-						+ hand*data->tick_len*(x 
-						- data->xsave[data->nsave-1])/magdis;
+					if (magdis > 0.0)
+					    {
+					    data->xsave[data->nsave+1] = 
+						    data->xsave[data->nsave] 
+						    - hand*data->tick_len*(y 
+						    - data->ysave[data->nsave-1])/magdis;
+					    data->ysave[data->nsave+1] = 
+						    data->ysave[data->nsave] 
+						    + hand*data->tick_len*(x 
+						    - data->xsave[data->nsave-1])/magdis;
+					    }
+					else
+					    {
+					    data->xsave[data->nsave+1] = 
+						    data->xsave[data->nsave];
+					    data->ysave[data->nsave+1] = 
+						    data->ysave[data->nsave];
+					    }
 					data->xsave[data->nsave+2] = 
 						data->xsave[data->nsave];
 					data->ysave[data->nsave+2] = 
@@ -1520,7 +1530,7 @@ int	*error;
 		fprintf(stderr,"dbg2       status:     %d\n",status);
 		}
 
-	return;
+	return(MB_SUCCESS);
 }
 /*--------------------------------------------------------------------------*/
 /* 	function get_start_old finds next contour starting point.
