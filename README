@@ -3,7 +3,7 @@ MB-SYSTEM VERSION 5.0.BETA08 README FILE:
 
 This file is located at the top of the MB-System directory
 structure. This directory structure contains the version 
-5.0.beta08 release of the MB-System software package for 
+5.0.beta09 release of the MB-System software package for 
 processing and display of swath sonar data.  
 
 MB-SYSTEM VERSION 5 DESCRIPTION:
@@ -91,6 +91,17 @@ Aquarium Research Institute, or any other individuals or
 organizations involved in the design and maintenance of the 
 MB-System software package are NOT responsible for any damage 
 that may follow from correct or incorrect use of these programs.
+
+MB-SYSTEM VERSION 5.0.BETA09 RELEASE NOTES:
+------------------------------------------
+
+The version 5.0.beta09 release of MB-System includes 
+fixes to the handling of bathymetry recalculation
+by mbprocess. Earlier problems failed to document
+or implement the angle handling modes used in
+mbvelocitytool. The ANGLEMODE parameter can now
+be set with mbset or mbvelocitytool, and will be
+used by mbprocess.
 
 MB-SYSTEM VERSION 5.0.BETA08 RELEASE NOTES:
 ------------------------------------------
@@ -600,10 +611,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.8 2001-10-19 19:49:08 caress Exp $
+RCS ID: $Id: README,v 5.9 2001-11-07 01:15:08 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+# Revision 5.8  2001/10/19  19:49:08  caress
+# Release 5.0.beta08
+#
 # Revision 5.7  2001/08/10  23:10:08  dcaress
 # Release 5.0.beta07
 #
