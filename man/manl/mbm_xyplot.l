@@ -1,4 +1,4 @@
-.TH mbm_xyplot l "4 January 2001" "MB-System 5.0" "MB-System 5.0"
+.TH mbm_xyplot l "13 October 2003" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbm_xyplot\fP - Create an executable shellscript which will generate
 a GMT plot of xy data.
@@ -8,7 +8,7 @@ Version 5.0
 
 .SH SYNOPSIS
 \fBmbm_xyplot\fP \fB-I\fP\fI[filepars:]file\fP 
-[\fB-G\fP\fIfill\fP \fB-H\fP 
+[\fB-D\fP\fIdelimiter\fP \fB-G\fP\fIfill\fP \fB-H\fP 
 \fB-O\fP\fIroot\fP \fB-P\fP\fIpagesize\fP
 \fB-S\fP\fIsymbol/size\fP
 \fB-U\fP\fIorientation\fP \fB-V\fP 
@@ -38,7 +38,18 @@ or, if the scale is user defined, the page size will be
 chosen in accordance with the plot size. The primary purpose 
 of this macro is to allow the simple, semi-automated
 production of nice looking plots with a few command line
-arguments. For users seeking more control over the plot
+arguments. 
+
+By default \fBmbm_xyplot\fP expects the input data files to have
+values organized in columns separated by white space. However, users may optionally specify
+a non-white-space delimiter for each file. Input data files can have an arbitrary number of columns. When more
+than two columns exist the one can specify which two columns to plot (the first and second
+are the default). Users may also specify a single column to be plotted
+versus data-point-number.  Alternatively, users can specify a more complicated perl expression 
+for extracting the data to be plotted. The macro uses the specified rules to extract
+the x-y pairs to be plotted and leaves the extracted data in files to be read by the plotting shellscript. 
+
+For users seeking more control over the plot
 appearance, a number of additional optional arguments are
 provided. Truly ambitious users may edit the plot shellscript 
 to take advantage of GMT capabilites not supported by this 
@@ -58,6 +69,27 @@ Suzanne H. O'Hara (sohara@ldeo.columbia.edu)
   Lamont-Doherty Earth Observatory
 
 .SH SIMPLE DESCRIPTION OF BASIC OPTIONS
+.TP
+.B \-C
+\fI<xexpression>_<yexpression>\fP 
+.br
+Sets rules used by \fBmbm_xyplot\fP to extract the x and y values 
+from the input data columns. By default, \fBmbm_xyplot\fP uses the
+first column as the x value and the second column as the y value on
+the plot. Here <xexpression> refers to a perl expression that will
+extract the desired x value, and <yexpression> to the corresponding
+expression for extracting the y value. The simplest expression is just
+the character '#', which is interpreted as the line number (or data count) 
+in the file. To extract values from a particular expression, use the
+expression 'c[N]', where N is the desired column number start
+.TP
+.B \-D
+\fIdelimiter\fP 
+.br
+Sets \fBmbm_xyplot\fP to parse an input file using the
+character(s) specified as \fIdelimiter\fP to delimiter the
+data into columns. By default, \fBmbm_xyplot\fP assumes
+the columns are separated by white space.
 .TP
 .B \-G
 \fIfill\fP 
@@ -85,7 +117,9 @@ of its operation and then exit immediately.
 \fI[filepars:]xy_file \fP
 .br
 Specifies a file containing (x,y) pairs to be plotted
-as lines or symbols. The line and symbol characteristics
+as lines or symbols. 
+
+The line and symbol characteristics
 are set using the last \fB-G\fP, \fB-S\fP, and \fB-W\fP
 options used. In order to plot different files
 using different line or symbol characteristics, 
