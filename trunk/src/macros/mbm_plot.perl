@@ -1,4 +1,4 @@
-#! /usr/lib/perl 
+#! /home/hs/bin/perl 
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_plot.perl	3.00	6/18/93
 #    $Id  $
@@ -33,10 +33,13 @@
 #   June 17, 1993
 #
 # Version:
-#   $Id: mbm_plot.perl,v 3.3 1993-07-03 02:08:27 caress Exp $
+#   $Id: mbm_plot.perl,v 3.4 1993-08-16 23:03:59 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 3.3  1993/07/03  02:08:27  caress
+# Changed /usr/local/bin/perl to /usr/lib/perl for L-DEO installation.
+#
 # Revision 3.2  1993/06/19  15:06:54  caress
 # Fixed handling of command line argument "-O".
 #
@@ -111,7 +114,7 @@ if ($verbose)
 	{
 	print "\nRunning $program_name...\nRunning mbinfo...\n";
 	}
-@mbinfo = `mbinfo -F$format -I$file $rbounds -N`;
+@mbinfo = `mbinfo -F$format -I$file $rbounds`;
 while (@mbinfo)
 	{
 	$line = shift @mbinfo;
