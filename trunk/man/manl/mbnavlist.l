@@ -1,6 +1,6 @@
 .TH mbnavlist l "28 December 1999" "MB-System 4.6" "MB-System 4.6"
 .SH NAME
-\fBmblist\fP - List navigation data in swath sonar data files.
+\fBmbnavlist\fP - List navigation data in swath sonar data files.
 
 .SH VERSION
 Version 4.6
@@ -8,7 +8,7 @@ Version 4.6
 .SH SYNOPSIS
 \fBmbnavlist\fP [\fB-B\fIyr/mo/da/hr/mn/sc 
 \fB-E\fIyr/mo/da/hr/mn/sc \fB-F\fIformat \fB-H \fB-I\fIfile 
-\fB-L\fIlonflip \fB-M\fIstart_beam/end_beam \fB-N\fIstart_pixel/end_pixel 
+\fB-L\fIlonflip
 \fB-O\fIoutput_format \fB-R\fIwest/east/south/north 
 \fB-S\fIspeed \fB-T\fItimegap \fB-V\fP]
 
@@ -47,10 +47,10 @@ Default: \fIyr/mo/da/hr/mn/sc\fP = 2062/2/21/10/30/0.
 .B \-F
 \fIformat\fP
 .br
-Sets the format for the input multibeam data using 
+Sets the format for the input swath sonar data using 
 \fBMBIO\fP integer format identifiers. 
-This program uses the \fBMBIO\fP library and will read any multibeam
-format supported by \fBMBIO\fP. A list of the multibeam data formats
+This program uses the \fBMBIO\fP library and will read any swath sonar
+format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page. Default: \fIformat\fP = 11.
 .TP
@@ -62,9 +62,9 @@ of its operation and then exit immediately.
 \fIfile\fP
 .br
 Sets the input filename. If \fIformat\fP > 0 (set with the 
-\fB-F\fP option) then the multibeam data contained in \fIfile\fP 
+\fB-F\fP option) then the swath sonar data contained in \fIfile\fP 
 is read and processed. If \fIformat\fP < 0, then \fIfile\fP
-is assumed to be an ascii file containing a list of the input multibeam
+is assumed to be an ascii file containing a list of the input swath sonar
 data files to be processed and their formats.  The program will read 
 the data in each one of these files.
 In the \fIfile\fP file, each
@@ -72,8 +72,8 @@ data file should be followed by a data format identifier, e.g.:
  	datafile1 11
  	datafile2 24
 .br
-This program uses the \fBMBIO\fP library and will read or write any multibeam
-format supported by \fBMBIO\fP. A list of the multibeam data formats
+This program uses the \fBMBIO\fP library and will read or write any swath sonar
+format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page. Default: \fIfile\fP = "stdin".
 .TP
@@ -124,7 +124,7 @@ longitude, heading, speed).
 .B \-R
 \fIwest/east/south/north\fP
 .br
-Sets the longitude and latitude bounds within which multibeam 
+Sets the longitude and latitude bounds within which swath sonar 
 data will be read. Only the data which lies within these bounds will
 be read. 
 Default: \fIwest\fP=-360, east\fI=360\fP, \fIsouth\fP=-90, \fInorth\fP=90.
@@ -171,5 +171,5 @@ The output will be as follows:
 \fBmbsystem\fP(l), \fBmbinfo\fP(l)
 
 .SH BUGS
-\fBmbnavlist\fP is not able to list all of the information available in some
-swath data formats.
+\fBmbnavlist\fP is not able to list all of the navigation information 
+available in some swath data formats.
