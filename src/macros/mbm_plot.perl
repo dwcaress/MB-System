@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_plot.perl	6/18/93
-#    $Id: mbm_plot.perl,v 4.19 1999-03-31 18:09:36 caress Exp $
+#    $Id: mbm_plot.perl,v 4.20 1999-04-15 19:28:52 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -68,10 +68,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   June 17, 1993
 #
 # Version:
-#   $Id: mbm_plot.perl,v 4.19 1999-03-31 18:09:36 caress Exp $
+#   $Id: mbm_plot.perl,v 4.20 1999-04-15 19:28:52 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.19  1999/03/31  18:09:36  caress
+# MB-System 4.6beta7
+#
 # Revision 4.18  1999/02/04  23:39:54  caress
 # MB-System version 4.6beta7
 #
@@ -957,8 +960,8 @@ if ($bounds)
 	elsif ($bounds =~ /^r$/)
 		{
 		$use_corner_points = 1;
-		$bounds_plot = sprintf "%1.8g/%1.8g/%1.8g/%1.8gr",
-			$xmin, $ymin, $xmax, $ymax;
+		$bounds_plot = sprintf ("%1.8g/%1.8g/%1.8g/%1.8gr",
+			$xmin, $ymin, $xmax, $ymax);
 		}
 	}
 
@@ -985,8 +988,8 @@ else
 		$ymin = $ymin - $dely;
 		$ymax = $ymax + $dely;
 		}
-	$bounds_plot = sprintf "%1.8g/%1.8g/%1.8g/%1.8g",
-		$xmin, $xmax, $ymin, $ymax;
+	$bounds_plot = sprintf ("%1.8g/%1.8g/%1.8g/%1.8g",
+		$xmin, $xmax, $ymin, $ymax);
 	}
 
 # set the relevent page width and height
@@ -1200,7 +1203,7 @@ elsif ($use_scale)
 
 	# construct plot scale parameters
 	($projection_pars) = $map_scale =~ /^$projection(\S+)/;
-	$projection_pars = sprintf "$projection_pars$separator%1.5g", $plot_scale;
+	$projection_pars = sprintf ("$projection_pars$separator%1.5g", $plot_scale);
 
 	# handle special case for linear projections
 	if ($geographic)
@@ -1258,7 +1261,7 @@ elsif ($use_width)
 
 	# construct plot scale parameters
 	($projection_pars) = $map_scale =~ /^$projection(\S+)/;
-	$projection_pars = sprintf "$projection_pars$separator%1.5g", $plot_width;
+	$projection_pars = sprintf ("$projection_pars$separator%1.5g", $plot_width);
 
 	# handle special case for linear projections
 	if ($geographic)
