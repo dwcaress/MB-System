@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 4.1 1994-10-21 13:03:49 caress Exp $
+#	$Id: Makefile.template,v 4.2 1994-10-31 18:47:28 caress Exp $
 #
 #     Copyright (c) 1993, 1994 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.1  1994/10/21  13:03:49  caress
+# Release V4.0
+#
 # Revision 4.0  1994/05/24  02:34:15  caress
 # First cut.
 #
@@ -43,28 +46,28 @@ LFLAGS = -lm
 BINDIR = ../../bin
 LIBDIR = ../../lib
 INCDIR = ../../include
-MANDIR = ../../man/man1
+MANDIR = ../../man/manl
 
 ### make all makes the MB-system utilites and man pages
-all:	$(MANDIR)/mbsystem.1 \
-	$(BINDIR)/mbformat $(MANDIR)/mbformat.1 \
-	$(BINDIR)/mbdefaults $(MANDIR)/mbdefaults.1 \
-	$(BINDIR)/mbinfo $(MANDIR)/mbinfo.1 \
-	$(BINDIR)/mbcopy $(MANDIR)/mbcopy.1 \
-	$(BINDIR)/mblist $(MANDIR)/mblist.1 \
-	$(BINDIR)/mbmerge $(MANDIR)/mbmerge.1 \
-	$(BINDIR)/mbclean $(MANDIR)/mbclean.1 \
-	$(BINDIR)/mbunclean $(MANDIR)/mbunclean.1 \
-	$(BINDIR)/mbgrid $(MANDIR)/mbgrid.1 \
-	$(BINDIR)/mblevitus $(MANDIR)/mblevitus.1 \
-	$(BINDIR)/mbbath $(MANDIR)/mbbath.1 \
-	$(BINDIR)/hsbath $(MANDIR)/hsbath.1 \
-	$(BINDIR)/hsdump $(MANDIR)/hsdump.1 \
-	$(BINDIR)/mbrollbias $(MANDIR)/mbrollbias.1 \
-	$(BINDIR)/mbgetmask $(MANDIR)/mbgetmask.1 \
-	$(BINDIR)/mbmask $(MANDIR)/mbmask.1 \
-	$(BINDIR)/mbsmooth $(MANDIR)/mbsmooth.1 \
-	$(BINDIR)/mbps $(MANDIR)/mbps.1
+all:	$(MANDIR)/mbsystem.l \
+	$(BINDIR)/mbformat $(MANDIR)/mbformat.l \
+	$(BINDIR)/mbdefaults $(MANDIR)/mbdefaults.l \
+	$(BINDIR)/mbinfo $(MANDIR)/mbinfo.l \
+	$(BINDIR)/mbcopy $(MANDIR)/mbcopy.l \
+	$(BINDIR)/mblist $(MANDIR)/mblist.l \
+	$(BINDIR)/mbmerge $(MANDIR)/mbmerge.l \
+	$(BINDIR)/mbclean $(MANDIR)/mbclean.l \
+	$(BINDIR)/mbunclean $(MANDIR)/mbunclean.l \
+	$(BINDIR)/mbgrid $(MANDIR)/mbgrid.l \
+	$(BINDIR)/mblevitus $(MANDIR)/mblevitus.l \
+	$(BINDIR)/mbbath $(MANDIR)/mbbath.l \
+	$(BINDIR)/hsbath $(MANDIR)/hsbath.l \
+	$(BINDIR)/hsdump $(MANDIR)/hsdump.l \
+	$(BINDIR)/mbrollbias $(MANDIR)/mbrollbias.l \
+	$(BINDIR)/mbgetmask $(MANDIR)/mbgetmask.l \
+	$(BINDIR)/mbmask $(MANDIR)/mbmask.l \
+	$(BINDIR)/mbsmooth $(MANDIR)/mbsmooth.l \
+	$(BINDIR)/mbps $(MANDIR)/mbps.l
 
 ### make clean removes the object files
 clean:
@@ -148,60 +151,60 @@ mbps.o:	mbps.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
 	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) mbps.c
 
 ### copy the man pages to the man page directory
-$(MANDIR)/mbsystem.1:	mbsystem.1
-	cp mbsystem.1 $(MANDIR)/mbsystem.1
-	chmod 664 $(MANDIR)/mbsystem.1
-$(MANDIR)/mbformat.1:	mbformat.1
-	cp mbformat.1 $(MANDIR)/mbformat.1
-	chmod 664 $(MANDIR)/mbformat.1
-$(MANDIR)/mbdefaults.1:	mbdefaults.1
-	cp mbdefaults.1 $(MANDIR)/mbdefaults.1
-	chmod 664 $(MANDIR)/mbdefaults.1
-$(MANDIR)/mbinfo.1:	mbinfo.1
-	cp mbinfo.1 $(MANDIR)/mbinfo.1
-	chmod 664 $(MANDIR)/mbinfo.1
-$(MANDIR)/mbcopy.1:	mbcopy.1
-	cp mbcopy.1 $(MANDIR)/mbcopy.1
-	chmod 664 $(MANDIR)/mbcopy.1
-$(MANDIR)/mblist.1:	mblist.1
-	cp mblist.1 $(MANDIR)/mblist.1
-	chmod 664 $(MANDIR)/mblist.1
-$(MANDIR)/mbmerge.1:	mbmerge.1
-	cp mbmerge.1 $(MANDIR)/mbmerge.1
-	chmod 664 $(MANDIR)/mbmerge.1
-$(MANDIR)/mbclean.1:	mbclean.1
-	cp mbclean.1 $(MANDIR)/mbclean.1
-	chmod 664 $(MANDIR)/mbclean.1
-$(MANDIR)/mbunclean.1:	mbunclean.1
-	cp mbunclean.1 $(MANDIR)/mbunclean.1
-	chmod 664 $(MANDIR)/mbunclean.1
-$(MANDIR)/mbgrid.1:	mbgrid.1
-	cp mbgrid.1 $(MANDIR)/mbgrid.1
-	chmod 664 $(MANDIR)/mbgrid.1
-$(MANDIR)/mblevitus.1:	mblevitus.1
-	cp mblevitus.1 $(MANDIR)/mblevitus.1
-	chmod 664 $(MANDIR)/mblevitus.1
-$(MANDIR)/mbbath.1:	mbbath.1
-	cp mbbath.1 $(MANDIR)/mbbath.1
-	chmod 664 $(MANDIR)/mbbath.1
-$(MANDIR)/hsbath.1:	$(MANDIR)/mbbath.1
-	cd $(MANDIR); pwd; rm -f hsbath.1; ln -s mbbath.1 hsbath.1
-$(MANDIR)/hsdump.1:	hsdump.1
-	cp hsdump.1 $(MANDIR)/hsdump.1
-	chmod 664 $(MANDIR)/hsdump.1
-$(MANDIR)/mbrollbias.1:	mbrollbias.1
-	cp mbrollbias.1 $(MANDIR)/mbrollbias.1
-	chmod 664 $(MANDIR)/mbrollbias.1
-$(MANDIR)/mbgetmask.1:	mbmask.1
-	cp mbmask.1 $(MANDIR)/mbgetmask.1
-	chmod 664 $(MANDIR)/mbgetmask.1
-$(MANDIR)/mbmask.1:	mbmask.1
-	cp mbmask.1 $(MANDIR)/mbmask.1
-	chmod 664 $(MANDIR)/mbmask.1
-$(MANDIR)/mbsmooth.1:	mbsmooth.1
-	cp mbsmooth.1 $(MANDIR)/mbsmooth.1
-	chmod 664 $(MANDIR)/mbsmooth.1
-$(MANDIR)/mbps.1:	mbps.1
-	cp mbps.1 $(MANDIR)/mbps.1
-	chmod 664 $(MANDIR)/mbps.1
+$(MANDIR)/mbsystem.l:	mbsystem.l
+	cp mbsystem.l $(MANDIR)/mbsystem.l
+	chmod 664 $(MANDIR)/mbsystem.l
+$(MANDIR)/mbformat.l:	mbformat.l
+	cp mbformat.l $(MANDIR)/mbformat.l
+	chmod 664 $(MANDIR)/mbformat.l
+$(MANDIR)/mbdefaults.l:	mbdefaults.l
+	cp mbdefaults.l $(MANDIR)/mbdefaults.l
+	chmod 664 $(MANDIR)/mbdefaults.l
+$(MANDIR)/mbinfo.l:	mbinfo.l
+	cp mbinfo.l $(MANDIR)/mbinfo.l
+	chmod 664 $(MANDIR)/mbinfo.l
+$(MANDIR)/mbcopy.l:	mbcopy.l
+	cp mbcopy.l $(MANDIR)/mbcopy.l
+	chmod 664 $(MANDIR)/mbcopy.l
+$(MANDIR)/mblist.l:	mblist.l
+	cp mblist.l $(MANDIR)/mblist.l
+	chmod 664 $(MANDIR)/mblist.l
+$(MANDIR)/mbmerge.l:	mbmerge.l
+	cp mbmerge.l $(MANDIR)/mbmerge.l
+	chmod 664 $(MANDIR)/mbmerge.l
+$(MANDIR)/mbclean.l:	mbclean.l
+	cp mbclean.l $(MANDIR)/mbclean.l
+	chmod 664 $(MANDIR)/mbclean.l
+$(MANDIR)/mbunclean.l:	mbunclean.l
+	cp mbunclean.l $(MANDIR)/mbunclean.l
+	chmod 664 $(MANDIR)/mbunclean.l
+$(MANDIR)/mbgrid.l:	mbgrid.l
+	cp mbgrid.l $(MANDIR)/mbgrid.l
+	chmod 664 $(MANDIR)/mbgrid.l
+$(MANDIR)/mblevitus.l:	mblevitus.l
+	cp mblevitus.l $(MANDIR)/mblevitus.l
+	chmod 664 $(MANDIR)/mblevitus.l
+$(MANDIR)/mbbath.l:	mbbath.l
+	cp mbbath.l $(MANDIR)/mbbath.l
+	chmod 664 $(MANDIR)/mbbath.l
+$(MANDIR)/hsbath.l:	$(MANDIR)/mbbath.l
+	cd $(MANDIR); pwd; rm -f hsbath.l; ln -s mbbath.l hsbath.l
+$(MANDIR)/hsdump.l:	hsdump.l
+	cp hsdump.l $(MANDIR)/hsdump.l
+	chmod 664 $(MANDIR)/hsdump.l
+$(MANDIR)/mbrollbias.l:	mbrollbias.l
+	cp mbrollbias.l $(MANDIR)/mbrollbias.l
+	chmod 664 $(MANDIR)/mbrollbias.l
+$(MANDIR)/mbgetmask.l:	mbmask.l
+	cp mbmask.l $(MANDIR)/mbgetmask.l
+	chmod 664 $(MANDIR)/mbgetmask.l
+$(MANDIR)/mbmask.l:	mbmask.l
+	cp mbmask.l $(MANDIR)/mbmask.l
+	chmod 664 $(MANDIR)/mbmask.l
+$(MANDIR)/mbsmooth.l:	mbsmooth.l
+	cp mbsmooth.l $(MANDIR)/mbsmooth.l
+	chmod 664 $(MANDIR)/mbsmooth.l
+$(MANDIR)/mbps.l:	mbps.l
+	cp mbps.l $(MANDIR)/mbps.l
+	chmod 664 $(MANDIR)/mbps.l
 
