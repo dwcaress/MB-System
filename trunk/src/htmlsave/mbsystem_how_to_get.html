@@ -31,14 +31,13 @@ Suggested Software and Data</FONT></B></DD></CENTER>
 to be fully functional. These are:</P>
 
 <UL>
-<LI><B>GMT</B> version 3.0: MB-System makes use of the Generic Mapping
-Tools (GMT) libraries and programs for much of its graphics. GMT also includes
-a detailed global coastline database. GMT has been developed by Professor
-Paul Wessel of SOEST (School of Ocean and Earth Science and Technology
-at the Univeristy of Hawaii) and Dr. Walter H. F. Smith of NOAA. The GMT
-source code is available from the <A HREF="http://www.soest.hawaii.edu/wessel/gmt.html">GMT
-web page</A>. Note that this version of MB-System will not work with GMT
-version 3.1, which is currently in beta testing.</LI>
+<LI><B>GMT</B> version 3.0 or later: MB-System makes use of the Generic
+Mapping Tools (GMT) libraries and programs for much of its graphics. GMT
+also includes a detailed global coastline database. GMT has been developed
+by Professor Paul Wessel of SOEST (School of Ocean and Earth Science and
+Technology at the Univeristy of Hawaii) and Dr. Walter H. F. Smith of NOAA.
+The GMT source code is available from the <A HREF="http://www.soest.hawaii.edu/wessel/gmt.html">GMT
+web page</A>. Use of GMT version 3.2 is strongly recommended.</LI>
 
 <LI><B>NetCDF</B> version 2.3r2 or later: Both GMT and MB-System require
 the <A HREF="ftp://unidata.ucar.edu/pub/netcdf/netcdf.tar.Z">NCAR netCDF
@@ -108,38 +107,43 @@ and so that the compile and link flags are correct.</P>
 <P>The important parameters to be set in install_makefiles are:</P>
 
 <UL>
-<LI>MBSYSTEM_HOME Absolute path to the directory containing this file.
+<LI>MBSYSTEM_HOME - Absolute path to the directory containing this file.
 </LI>
 
-<LI>OS Operating system (e.g. SUN, IRIX, HPUX, LINUX, LYNX). </LI>
+<LI>OS Operating system - (e.g. SUN, IRIX, HPUX, LINUX, LYNX). </LI>
 
-<LI>BYTESWAPPED If set to &quot;YES&quot; will enable byte swapping of
+<LI>BYTESWAPPED - If set to &quot;YES&quot; will enable byte swapping of
 input and output binary data. Otherwise byte swapping is disabled. Byte
 swapping needs to be enabled when installing on &quot;little endian&quot;
 machines such as PCs or VAXs. </LI>
 
-<LI>CC C compiler to be used (optional). </LI>
+<LI>CC - C compiler to be used (optional). </LI>
 
-<LI>CFLAGS Compile flags for C source files. </LI>
+<LI>CFLAGS - Compile flags for C source files. </LI>
 
-<LI>LFLAGS Load flags for all object files. </LI>
+<LI>LFLAGS - Load flags for all object files. </LI>
 
-<LI>GRAPHICAL If set to &quot;YES&quot; will enable the installation of
-the Motif based graphical utilities mbedit, mbnavedit, and mbvelocitytool.
+<LI>GRAPHICAL - If set to &quot;YES&quot; will enable the installation
+of the Motif based graphical utilities mbedit, mbnavedit, and mbvelocitytool.
 If Motif is not available but the nongraphical utilities are desired then
 disable with &quot;NO&quot; (optional, default is &quot;YES&quot;). </LI>
 
-<LI>MOTIFINCDIR Location of Motif include files. </LI>
+<LI>MOTIFINCDIR - Location of Motif include files. </LI>
 
-<LI>MOTIFLIBS X and Motif libraries required for graphical tools. </LI>
+<LI>MOTIFLIBS - X and Motif libraries required for graphical tools. </LI>
 
-<LI>GMTLIBDIR Location of GMT libraries libgmt.a and libpsl.a </LI>
+<LI>GMTVERSION - GMT version used. GMT version 3.2 is used by default;
+this parameter must be set to &quot;3.0&quot; or &quot;3.1&quot; to successfully
+link with libraries from either of those versions.</LI>
 
-<LI>GMTINCDIR Location of GMT include files gmt.h, grd.h, and pslib.h </LI>
+<LI>GMTLIBDIR - Location of GMT libraries libgmt.a and libpsl.a </LI>
 
-<LI>NETCDFDIR Location of NetCDF library libnetcdf.a </LI>
+<LI>GMTINCDIR - Location of GMT include files gmt.h, grd.h, and pslib.h
+</LI>
 
-<LI>LEVITUS Path for Levitus data file annual.</LI>
+<LI>NETCDFDIR - Location of NetCDF library libnetcdf.a </LI>
+
+<LI>LEVITUS - Path for Levitus data file annual.</LI>
 </UL>
 
 <P>Examples of appropriate values for several different installations (e.g.
@@ -182,7 +186,7 @@ Graphics machines xpsview is commonly used. A popular generic alternative
 to these platform specific programs is ghostview.</P>
 
 <CENTER><P><BR>
-Last Updated: $Date: 1998-10-04 04:32:24 $ $Revision: 4.4 $</P></CENTER>
+Last Updated: $Date: 1999-04-16 01:22:25 $ $Revision: 4.5 $</P></CENTER>
 
 <P>
 <HR WIDTH="100%"></P>
