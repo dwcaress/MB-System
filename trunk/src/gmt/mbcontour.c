@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcontour.c	6/4/93
- *    $Id: mbcontour.c,v 5.0 2000-12-01 22:52:16 caress Exp $
+ *    $Id: mbcontour.c,v 5.1 2001-01-22 05:03:25 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	June 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01  22:52:16  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.24  2000/10/11  00:53:45  caress
  * Converted to ANSI C
  *
@@ -162,7 +165,7 @@
 
 main (int argc, char **argv) 
 {
-	static char rcs_id[] = "$Id: mbcontour.c,v 5.0 2000-12-01 22:52:16 caress Exp $";
+	static char rcs_id[] = "$Id: mbcontour.c,v 5.1 2001-01-22 05:03:25 caress Exp $";
 #ifdef MBCONTOURFILTER
 	static char program_name[] = "MBCONTOURFILTER";
 	static char help_message[] =  "MBCONTOURFILTER is a utility which creates a pen plot \ncontour map of multibeam swath bathymetry.  \nThe primary purpose of this program is to serve as \npart of a real-time plotting system.  The contour \nlevels and colors can be controlled \ndirectly or set implicitly using contour and color change intervals. \nContours can also be set to have ticks pointing downhill.";
@@ -190,7 +193,7 @@ main (int argc, char **argv)
 	char	read_file[128];
         int     read_datalist;
 	int	read_data;
-	struct mb_datalist_struct *datalist;
+	char	*datalist;
 	double	file_weight;
 	FILE	*fp;
 	int	format;
