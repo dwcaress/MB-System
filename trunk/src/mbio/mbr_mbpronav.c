@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mbpronav.c	5/20/99
- *	$Id: mbr_mbpronav.c,v 4.0 1999-10-21 22:39:24 caress Exp $
+ *	$Id: mbr_mbpronav.c,v 4.1 1999-12-29 00:34:06 caress Exp $
  *
  *    Copyright (c) 1999 by
  *    D. W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	October 18, 1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1999/10/21  22:39:24  caress
+ * Added MBPRONAV format.
+ *
  *
  */
 
@@ -47,7 +50,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_mbpronav.c,v 4.0 1999-10-21 22:39:24 caress Exp $";
+ static char res_id[]="$Id: mbr_mbpronav.c,v 4.1 1999-12-29 00:34:06 caress Exp $";
 	char	*function_name = "mbr_alm_mbpronav";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -511,6 +514,8 @@ int	*error;
 	double	timetag;
 	char	*line_ptr;
 	int	nread;
+	double  sec;
+	double  d1, d2, d3, d4, d5;
 	int	i;
 
 	/* print input debug statements */
@@ -564,27 +569,63 @@ int	*error;
 
 	    /* read data */
 	    nread = sscanf(line,
-			"%d %d %d %d %d %d.%d %lf %lf %lf %lf %lf",
+			"%d %d %d %d %d %lf %lf %lf %lf %lf %lf",
 			&data->time_i[0],
 			&data->time_i[1],
 			&data->time_i[2],
 			&data->time_i[3],
 			&data->time_i[4],
-			&data->time_i[5],
-			&data->time_i[6],
-			&data->time_d,
-			&data->longitude,
-			&data->latitude,
-			&data->heading,
-			&data->speed);
-	    if (nread == 12)
-	    	{
+			&sec,
+			&d1,
+			&d2,
+			&d3,
+			&d4,
+			&d5);
+	    data->time_i[5] = (int) sec;
+	    data->time_i[6] = 1000000.0 * (sec - data->time_i[5]);
+	    if (nread == 8)
+	        {
+	        mb_get_time(verbose,data->time_i,&data->time_d);
+		data->longitude = d1;
+		data->latitude = d2;
+		data->heading = 0.0;
+		data->speed = 0.0;
 	    	status = MB_SUCCESS;
 	   	*error = MB_ERROR_NO_ERROR;
-	    	
-	    	/* get time */
-	    	mb_get_date(verbose,data->time_d,data->time_i);
+		}
+	    else if (nread == 9)
+	        {
+	        data->time_d = d1;
+		data->longitude = d2;
+		data->latitude = d3;
+		data->heading = 0.0;
+		data->speed = 0.0;
+	    	status = MB_SUCCESS;
+	   	*error = MB_ERROR_NO_ERROR;
+		}
+	    else if (nread == 10)
+	        {
+	        data->time_d = d1;
+		data->longitude = d2;
+		data->latitude = d3;
+		data->heading = d4;
+		data->speed = 0.0;
+	    	status = MB_SUCCESS;
+	   	*error = MB_ERROR_NO_ERROR;
+		}
+	    else if (nread == 11)
+	        {
+	        data->time_d = d1;
+		data->longitude = d2;
+		data->latitude = d3;
+		data->heading = d4;
+		data->speed = d5;
+	    	status = MB_SUCCESS;
+	   	*error = MB_ERROR_NO_ERROR;
+		}
 
+	    if (status == MB_SUCCESS)
+	        {
 		/* print output debug statements */
 		if (verbose >= 4)
 			{

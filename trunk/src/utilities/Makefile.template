@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 4.17 1998-12-17 22:52:10 caress Exp $
+#	$Id: Makefile.template,v 4.18 1999-12-29 00:35:11 caress Exp $
 #
 #     Copyright (c) 1993, 1994 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.17  1998/12/17  22:52:10  caress
+# MB-System version 4.6beta4
+#
 # Revision 4.16  1998/10/05 19:19:24  caress
 # MB-System version 4.6beta
 #
@@ -125,7 +128,8 @@ all:	$(MANDIR)/mbsystem.l \
 	$(BINDIR)/mbfilter $(MANDIR)/mbfilter.l \
 	$(BINDIR)/mbcut $(MANDIR)/mbcut.l \
 	$(BINDIR)/mbtide $(MANDIR)/mbtide.l \
-	$(BINDIR)/mbsimradmakess $(MANDIR)/mbsimradmakess.l
+	$(BINDIR)/mbsimradmakess $(MANDIR)/mbsimradmakess.l \
+	$(BINDIR)/mbnavlist $(MANDIR)/mbnavlist.l
 
 ### make clean removes the object files
 clean:
@@ -210,6 +214,9 @@ $(BINDIR)/mbtide:	mbtide.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a
 $(BINDIR)/mbsimradmakess:	mbsimradmakess.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a
 	$(CC) $(CFLAGS) mbsimradmakess.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a \
 		$(LFLAGS) -o $(BINDIR)/mbsimradmakess
+$(BINDIR)/mbnavlist:	mbnavlist.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a
+	$(CC) $(CFLAGS) mbnavlist.o $(LIBDIR)/libmbio.a $(LIBDIR)/libgsf.a \
+		$(LFLAGS) -o $(BINDIR)/mbnavlist
 
 ### compile the source files
 mbformat.o:	mbformat.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
@@ -265,6 +272,8 @@ mbtide.o:	mbtide.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_def
 	$(CC) -c $(CFLAGS) mbtide.c
 mbsimradmakess.o:	mbsimradmakess.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbsimradmakess.c
+mbnavlist.o:	mbnavlist.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
+	$(CC) -c $(CFLAGS) mbnavlist.c
 
 ### copy the man pages to the man page directory
 $(MANDIR)/mbsystem.l:	mbsystem.manl
@@ -345,3 +354,6 @@ $(MANDIR)/mbtide.l:	mbtide.manl
 $(MANDIR)/mbsimradmakess.l:	mbsimradmakess.manl
 	cp mbsimradmakess.manl $(MANDIR)/mbsimradmakess.l
 	chmod 664 $(MANDIR)/mbsimradmakess.l
+$(MANDIR)/mbnavlist.l:	mbnavlist.manl
+	cp mbnavlist.manl $(MANDIR)/mbnavlist.l
+	chmod 664 $(MANDIR)/mbnavlist.l

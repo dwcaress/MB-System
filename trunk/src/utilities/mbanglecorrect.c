@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbanglecorrect.c	8/13/95
- *    $Id: mbanglecorrect.c,v 4.14 1999-02-04 23:55:08 caress Exp $
+ *    $Id: mbanglecorrect.c,v 4.15 1999-12-29 00:35:11 caress Exp $
  *
  *    Copyright (c) 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -45,6 +45,9 @@ The default input and output streams are stdin and stdout.\n";
  * Date:	January 12, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.14  1999/02/04  23:55:08  caress
+ * MB-System version 4.6beta7
+ *
  * Revision 4.13  1998/12/17  22:50:20  caress
  * MB-System version 4.6beta4
  *
@@ -152,7 +155,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbanglecorrect.c,v 4.14 1999-02-04 23:55:08 caress Exp $";
+	static char rcs_id[] = "$Id: mbanglecorrect.c,v 4.15 1999-12-29 00:35:11 caress Exp $";
 	static char program_name[] = "MBANGLECORRECT";
 	static char help_message[] =  
 "mbanglecorrect is a tool for processing sidescan data.  This program\n\t\
@@ -954,7 +957,7 @@ The default input and output streams are stdin and stdout.\n";
 			if (status == MB_SUCCESS 
 				&& ping[ndata].beams_bath > 0)
 				{
-				set_bathyslope(verbose-5, 
+				set_bathyslope(verbose, 
 					nsmooth, 
 					ping[ndata].beams_bath,
 					ping[ndata].beamflag,
@@ -1085,7 +1088,7 @@ The default input and output streams are stdin and stdout.\n";
 			    {
 			    if (ping[jj].ndepths > 1)
 				{
-				status = get_bathyslope(verbose-5,
+				status = get_bathyslope(verbose,
 				    ping[jj].ndepths,
 				    ping[jj].depths,
 				    ping[jj].depthacrosstrack,
@@ -1132,7 +1135,7 @@ The default input and output streams are stdin and stdout.\n";
 			    {
 			    if (ping[jj].ndepths > 1)
 				{
-				status = get_bathyslope(verbose-5,
+				status = get_bathyslope(verbose,
 				    ping[jj].ndepths,
 				    ping[jj].depths,
 				    ping[jj].depthacrosstrack,
@@ -1247,7 +1250,7 @@ The default input and output streams are stdin and stdout.\n";
 			    {
 			    if (ping[j].ndepths > 0)
 				{
-				status = get_bathyslope(verbose-5,
+				status = get_bathyslope(verbose,
 				    ping[j].ndepths,
 				    ping[j].depths,
 				    ping[j].depthacrosstrack,
@@ -1302,7 +1305,7 @@ The default input and output streams are stdin and stdout.\n";
 			    {
 			    if (ping[j].ndepths > 1)
 				{
-				status = get_bathyslope(verbose-5,
+				status = get_bathyslope(verbose,
 				    ping[j].ndepths,
 				    ping[j].depths,
 				    ping[j].depthacrosstrack,
@@ -1343,6 +1346,8 @@ The default input and output streams are stdin and stdout.\n";
 				else
 				    ping[j].dataprocess[i] = 
 					scale * ping[j].ss[i] / correction;
+/*fprintf(stderr, "ping:%d pixel:%d slope:%f angle:%f corr:%f ss: %f %f\n", 
+j, i, slopeangle, rawangle, correction, ping[j].ss[i], ping[j].dataprocess[i]);*/
 				if (ping[j].dataprocess[i] < 0.0)
 				    ping[j].dataprocess[i] = 0.0;
 				}
@@ -1673,8 +1678,8 @@ int	*error;
 			bathacrosstrack);
 		fprintf(stderr,"dbg2       bath:\n");
 		for (i=0;i<nbath;i++)
-			fprintf(stderr,"dbg2         %d %f %f\n", 
-				i, bath[i], bathacrosstrack[i]);
+			fprintf(stderr,"dbg2         %d  %d  %f %f\n", 
+				i, beamflag[i], bath[i], bathacrosstrack[i]);
 		}
 
 	/* initialize depths */
@@ -1714,7 +1719,7 @@ int	*error;
 			j = i + 1;
 			while (next == i && j < nbath)
 				{
-				if (bath[j] > 0.0)
+				if (mb_beam_ok(beamflag[j]))
 					next = j;
 				else
 					j++;

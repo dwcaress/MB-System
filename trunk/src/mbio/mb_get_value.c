@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_get_value.c	2/15/93
- *    $Id: mb_get_value.c,v 4.5 1999-08-08 04:12:45 caress Exp $
+ *    $Id: mb_get_value.c,v 4.6 1999-12-29 00:34:06 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,9 @@
  * Date:	February 15, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.5  1999/08/08  04:12:45  caress
+ * Added ELMK2XSE format.
+ *
  * Revision 4.4  1998/10/05  18:32:27  caress
  * MB-System version 4.6beta
  *
@@ -76,7 +79,7 @@
 /* maximum line length in characters */
 #define MB_GET_VALUE_MAXLINE 200
 
-static char rcs_id[]="$Id: mb_get_value.c,v 4.5 1999-08-08 04:12:45 caress Exp $";
+static char rcs_id[]="$Id: mb_get_value.c,v 4.6 1999-12-29 00:34:06 caress Exp $";
 char	tmp[MB_GET_VALUE_MAXLINE];
 
 /*--------------------------------------------------------------------*/
@@ -154,10 +157,10 @@ float	*value;
 	memcpy(value, buffer, sizeof(float));
 #ifdef BYTESWAPPED
 	if (swapped == MB_NO)
-	    *value = mb_swap_float(*value);
+	    mb_swap_float(value);
 #else
 	if (swapped == MB_YES)
-	    *value = mb_swap_float(*value);
+	    mb_swap_float(value);
 #endif
 	return(0);
 }
@@ -173,10 +176,10 @@ double	*value;
 	memcpy(value, buffer, sizeof(double));
 #ifdef BYTESWAPPED
 	if (swapped == MB_NO)
-	    *value = mb_swap_double(*value);
+	    mb_swap_double(value);
 #else
 	if (swapped == MB_YES)
-	    *value = mb_swap_double(*value);
+	    mb_swap_double(value);
 #endif
 	return(0);
 }
@@ -229,10 +232,10 @@ void	*buffer;
 {
 #ifdef BYTESWAPPED
 	if (swapped == MB_NO)
-	    value = mb_swap_float(value);
+	    mb_swap_float(&value);
 #else
 	if (swapped == MB_YES)
-	    value = mb_swap_float(value);
+	    mb_swap_float(&value);
 #endif
 	memcpy(buffer, &value, sizeof(float));
 	return(0);
@@ -248,10 +251,10 @@ void	*buffer;
 {
 #ifdef BYTESWAPPED
 	if (swapped == MB_NO)
-	    value = mb_swap_double(value);
+	    mb_swap_double(&value);
 #else
 	if (swapped == MB_YES)
-	    value = mb_swap_double(value);
+	    mb_swap_double(&value);
 #endif
 	memcpy(buffer, &value, sizeof(double));
 	return(0);
