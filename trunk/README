@@ -1,9 +1,9 @@
-MB-SYSTEM VERSION 5.0.BETA09 README FILE:
+MB-SYSTEM VERSION 5.0.BETA10 README FILE:
 ----------------------------------------
 
 This file is located at the top of the MB-System directory
 structure. This directory structure contains the version 
-5.0.beta09 release of the MB-System software package for 
+5.0.beta10 release of the MB-System software package for 
 processing and display of swath sonar data.  
 
 MB-SYSTEM VERSION 5 DESCRIPTION:
@@ -26,6 +26,7 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
+Version 5.0.beta10     November 19, 2001
 Version 5.0.beta09     November 6, 2001
 Version 5.0.beta08     October 19, 2001
 Version 5.0.beta07     August 10, 2001
@@ -92,6 +93,19 @@ Aquarium Research Institute, or any other individuals or
 organizations involved in the design and maintenance of the 
 MB-System software package are NOT responsible for any damage 
 that may follow from correct or incorrect use of these programs.
+
+MB-SYSTEM VERSION 5.0.BETA10 RELEASE NOTES:
+------------------------------------------
+
+The version 5.0.beta10 release of MB-System includes 
+new features for mbedit and mbset. The interactive
+bathymetry editor mbedit now includes an "info" mode
+that allows users to access timetag and navigation
+information about selected soundings. The program
+mbset, used to modify or create mbprocess parameter
+files, will now accept datalists as input. This release
+also includes a significant bug fix to the handling
+of datalists in mbprocess.
 
 MB-SYSTEM VERSION 5.0.BETA09 RELEASE NOTES:
 ------------------------------------------
@@ -612,10 +626,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.10 2001-11-07 01:57:54 caress Exp $
+RCS ID: $Id: README,v 5.11 2001-11-16 20:14:47 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.10  2001/11/07 01:57:54  caress
+Fixed for release 5.0.beta09
+
 # Revision 5.9  2001/11/07  01:15:08  caress
 # Release 5.0.beta09
 #
