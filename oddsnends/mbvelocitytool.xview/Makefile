@@ -70,10 +70,10 @@ $(PROGRAM): $(SOURCES.c) $(TARGETS.c) $(TARGETS.h) $(OBJECTS)
 	$(LINK.c) -o $@ $(OBJECTS) $(LDLIBS)
 
 # link old program to new program
-../../man/man1/hsvelocitytool.1: $(EXEC)
-	ln -s $(EXEC) ../../bin/hsvelocitytool
-../../bin/hsvelocitytool: $(MANPAGE)
-	ln -s $(MANPAGE) ../../man/man1/hsvelocitytool.1
+../../man/man1/hsvelocitytool.1: $(MANPAGE)
+	cd ../../man/man1; rm -f hsvelocitytool.1; ln -s mbvelocitytool.1 hsvelocitytool.1
+../../bin/hsvelocitytool: $(EXEC)
+	cd ../../bin; rm -f hsvelocitytool; ln -s mbvelocitytool hsvelocitytool
 
 # Targets to be used by Saber-C.
 
