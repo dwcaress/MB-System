@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbanglecorrect.c	1/12/95
- *    $Id: mbanglecorrect.c,v 4.0 1995-02-14 21:17:15 caress Exp $
+ *    $Id: mbanglecorrect.c,v 4.1 1995-02-22 21:53:14 caress Exp $
  *
  *    Copyright (c) 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -29,6 +29,9 @@
  * Date:	January 12, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1995/02/14  21:17:15  caress
+ * Version 4.2
+ *
  *
  */
 
@@ -91,7 +94,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbanglecorrect.c,v 4.0 1995-02-14 21:17:15 caress Exp $";
+	static char rcs_id[] = "$Id: mbanglecorrect.c,v 4.1 1995-02-22 21:53:14 caress Exp $";
 	static char program_name[] = "MBANGLECORRECT";
 	static char help_message[] =  
 "mbanglecorrect is a tool for processing sidescan data.  This program\n\t\
@@ -1056,6 +1059,11 @@ The default input and output streams are stdin and stdout.\n";
 			}
 		if (done == MB_YES)
 			jend = ndata - 1;
+		if (jend == 0 && ndata > 0)
+			{
+			jend = ndata - 1;
+			save_time_d = ping[ndata-1].time_d;
+			}
 		nbathdata += (jend - jbeg + 1);
 		if (first == MB_YES && nbathdata > 0)
 			first = MB_NO;
@@ -1456,7 +1464,8 @@ The default input and output streams are stdin and stdout.\n";
 			nhold = 0;
 		else if (ndata > MBANGLECORRECT_HOLD)
 			{
-			nhold = nbuff - ping[ndata-MBANGLECORRECT_HOLD].id + 1;
+			nhold = nbuff 
+				- ping[ndata-MBANGLECORRECT_HOLD].id + 1;
 			}
 		else if (ndata > 0)
 			{
