@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_proj.c	7/16/2002
- *    $Id: mb_proj.c,v 5.3 2003-04-17 21:05:23 caress Exp $
+ *    $Id: mb_proj.c,v 5.4 2004-02-24 22:17:05 caress Exp $
  *
  *    Copyright (c) 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -13,12 +13,14 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- * mb_proj.c includes the "mb_" functions used to initialize UTM
- * projections, and then to do forward and inverse projections
+ * mb_proj.c includes the "mb_" functions used to initialize
+ * projections, and then to do forward (mb_proj_forward()) 
+ * and inverse (mb_proj_inverse()) projections
  * between geographic coordinates (longitude and latitude) and
- * UTM coordinates (eastings and northings in meters).
- * This code uses libproj. The code from libproj was derived from
- * the PROJ.4 distribution. PROJ was originally developed by 
+ * projected coordinates (e.g. eastings and northings in meters).
+ * One can also tranlate between coordinate systems using mb_proj_transform().
+ * This code uses libproj. The code in libproj derives without modification
+ * from the PROJ.4 distribution. PROJ was originally developed by 
  * Gerard Evandim, and is now maintained and distributed by
  * Frank Warmerdam, <warmerdam@pobox.com>
  * 
@@ -31,6 +33,9 @@
  * Date:	July 16, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2003/04/17 21:05:23  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.2  2002/09/18 23:32:59  caress
  * Release 5.0.beta23
  *
@@ -263,6 +268,60 @@ int mb_proj_inverse(int verbose,
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       lon:             %f\n",*lon);
 		fprintf(stderr,"dbg2       lat:             %f\n",*lat);
+		fprintf(stderr,"dbg2       error:           %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:          %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_proj_transform(int verbose,
+		void *pjsrcptr,
+		void *pjdstptr,
+		int npoint,
+		double *x, double *y, double *z,
+		int *error)
+{
+	char	*function_name = "mb_proj_transform";
+	int	status = MB_SUCCESS;
+	int	i;
+	
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       pjptr:      %d\n",pjsrcptr);
+		fprintf(stderr,"dbg2       pjptr:      %d\n",pjdstptr);
+		fprintf(stderr,"dbg2       npoint:     %d\n",npoint);
+		for (i=0;i<npoint;i++)
+			fprintf(stderr,"dbg2       point[%d]:  x:%f y:%f z:%f\n", i, x[i], y[i], z[i]);
+		}
+		
+	/* do transform */
+	if (pjsrcptr != NULL && pjdstptr != NULL)
+		{
+		pj_transform((projPJ *)pjsrcptr, (projPJ *)pjdstptr, npoint, 1, x, y, z);
+		}
+
+	/* assume success */
+	*error = MB_ERROR_NO_ERROR;
+	status = MB_SUCCESS;
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       npoint:     %d\n",npoint);
+		for (i=0;i<npoint;i++)
+			fprintf(stderr,"dbg2       point[%d]:  x:%f y:%f z:%f\n", i, x[i], y[i], z[i]);
 		fprintf(stderr,"dbg2       error:           %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:          %d\n",status);
