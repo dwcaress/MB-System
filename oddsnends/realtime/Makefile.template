@@ -1,0 +1,93 @@
+#     The MB-system:	Makefile.template  5/23/94
+#	$Id: Makefile.template,v 4.0 1994-05-24 02:33:48 caress Exp $
+#
+#     Copyright (c) 1993, 1994 by 
+#     D. W. Caress (caress@lamont.ldgo.columbia.edu)
+#     and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
+#     Lamont-Doherty Earth Observatory
+#     Palisades, NY  10964
+#
+#     See README file for copying and redistribution conditions.
+#
+# Makefile template for MB-system in the src/realtime directory level
+# Author:	D. W. Caress
+# Date:		May 23, 1994
+#
+# $Log: not supported by cvs2svn $
+#
+
+# *** CHANGE THESE TO FIT YOUR LOCAL ENVIRONMENT ***
+#
+# Locations of GMT libraries, binaries, and include files:
+GMTLIBDIR = /ocean/mgg/gmt2/sun4/lib
+GMTINCDIR = /ocean/mgg/gmt2/src
+NETCDFDIR = /ocean/mgg/netcdf/sun4/lib
+#
+# Location of L-DEO shipboard graphics library:
+GRAPHICSDIR = /usr/local/lamont_graphics/graphics/src
+#
+# Compile and load flags:
+CFLAGS = -O2
+FFLAGS = -O2
+FWITHCFLAGS = -lF77
+LFLAGS = -lm
+#
+# *** LEAVE EVERYTHING ELSE BELOW ALONE ***
+
+### sets locations of vital objects
+BINDIR = ../../bin
+LIBDIR = ../../lib
+INCDIR = ../../include
+MANDIR = ../../man/man1
+
+### make all makes the MB-system macros and man pages
+all:	$(BINDIR)/mbcontourfilter $(MANDIR)/mbcontourfilter.1 \
+	$(BINDIR)/mbplotfilter $(MANDIR)/mbplotfilter.1 \
+	$(BINDIR)/mbm_calcomp_plot $(MANDIR)/mbm_calcomp_plot.1
+
+### make clean removes the object files
+clean:
+	rm -f *.o
+
+### link or copy the executables
+$(BINDIR)/mbcontourfilter: ../gmt/mbcontour.o ../gmt/mb_truecont.o ../../include/mb_contour.h ../gmt/mb_delaun.o ../gmt/mb_track.o mb_penface.o label.o letter.o blocka.o
+	$(CC) $(CFLAGS) ../gmt/mbcontour.o ../gmt/mb_truecont.o ../gmt/mb_delaun.o ../gmt/mb_track.o label.o mb_penface.o letter.o blocka.o ../../lib/libmbio.a $(FWITHCFLAGS) $(LFLAGS) -o $(BINDIR)/mbcontourfilter
+
+$(BINDIR)/mbplotfilter:	mbplotfilter.o
+	$(CC) mbplotfilter.o -g $(LFLAGS) $(GRAPHLIBDIR)/libgraphics.a -o $(BINDIR)/mbplotfilter
+
+$(BINDIR)/mbm_calcomp_plot: mbm_calcomp_plot.perl
+	cp mbm_calcomp_plot.perl $(BINDIR)/mbm_calcomp_plot
+	chmod +x $(BINDIR)/mbm_calcomp_plot
+
+### compile the source files
+../gmt/mbcontour.o:	../gmt/mbcontour.c ../gmt/mb_contour.h $(INCDIR)/mb_status.h
+	cd ../gmt; make all
+../gmt/mb_truecont.o:	../gmt/mb_truecont.c ../gmt/mb_contour.h $(INCDIR)/mb_status.h
+	cd ../gmt; make all
+../gmt/mb_delaun.o:	../gmt/mb_delaun.c
+	cd ../gmt; make all
+../gmt/mb_track.o:	../gmt/mb_track.c ../gmt/mb_contour.h $(INCDIR)/mb_status.h
+	cd ../gmt; make all
+mbplotfilter.o:	mbplotfilter.c
+	$(CC) -c -g -I$(GMTINCDIR) mbplotfilter.c
+mb_penface.o:	mb_penface.c
+	$(CC) -c $(CFLAGS) mb_penface.c
+label.o: label.f
+	$(FC) -c label.f -o label.o
+letter.o: letter.f
+	$(FC) -c letter.f -o letter.o
+blocka.o: blocka.f
+	$(FC) -c blocka.f -o blocka.o
+
+# copy the man pages to the man page directory
+$(MANDIR)/mbcontourfilter.1:	mbcontourfilter.1
+	cp mbcontourfilter.1 $(MANDIR)/mbcontourfilter.1
+	chmod 664 $(MANDIR)/mbcontourfilter.1
+$(MANDIR)/mbplotfilter.1:	mbplotfilter.1
+	cp mbplotfilter.1 $(MANDIR)/mbplotfilter.1
+	chmod 664 $(MANDIR)/mbplotfilter.1
+$(MANDIR)/mbm_calcomp_plot.1:	mbm_calcomp_plot.1
+	cp mbm_calcomp_plot.1 $(MANDIR)/mbm_calcomp_plot.1
+	chmod 664 $(MANDIR)/mbm_calcomp_plot.1
+
