@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.h	1/19/93
- *    $Id: mb_format.h,v 4.27 1999-10-21 22:40:10 caress Exp $
+ *    $Id: mb_format.h,v 4.28 2000-07-19 03:53:11 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -17,6 +17,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.27  1999/10/21  22:40:10  caress
+ * Added MBPRONAV format.
+ *
  * Revision 4.26  1999/09/14  20:39:11  caress
  * Fixed bugs handling HSMD
  *
@@ -173,6 +176,7 @@
 #define MB_SYS_HDCS		18
 #define MB_SYS_SINGLEBEAM	19
 #define MB_SYS_XSE		20
+#define MB_SYS_HS10		21
 
 /* Table of the swath sonar system miniumum frequencies */
 static int frequency_table[] = 
@@ -198,10 +202,11 @@ static int frequency_table[] =
 	12,	/* MB_SYS_HDCS */
 	12,	/* MB_SYS_SINGLEBEAM */
 	50,	/* MB_SYS_XSE */
+	12,	/* MB_SYS_HS10 */
 	};
 
 /* Number of supported MBIO data formats */
-#define	MB_FORMATS	50
+#define	MB_FORMATS	52
 
 /* Data formats supported by MBIO */
 #define	MBF_SBSIOMRG	11	/* SeaBeam, 16 beam, bathymetry, 
@@ -283,6 +288,10 @@ static int frequency_table[] =
 					up to 254 beam bathymetry and 
 					amplitude, variable pixel sidescan, 
 					ascii + binary, MBARI */ 
+#define	MBF_EM12DIFR	58	/* Simrad EM12D multibeam archive format, 
+					162 beam bathymetry and 
+					amplitude, 
+					binary, IFREMER */ 
 #define	MBF_MR1PRHIG	61	/* MR1 post processed format, 
 					variable beam bathymetry, variable
 					pixel sidescan, xdr binary, SOEST */ 
@@ -350,6 +359,7 @@ static int frequency_table[] =
 					ascii, NOAA NGDC */ 
 #define MBF_MBARIROV    165     /* MBARI ROV navigation format, ascii, MBARI */ 
 #define MBF_MBPRONAV    166     /* MB-System simple navigation format, ascii, MBARI */ 
+#define MBF_FRNOHS10    181     /* Furuno HS10 multibeam format, 45 beams, bathymetry and amplitude, Hexadecimal, JAMSTEC */ 
  
 /* Translation table of the format id's */
 static int format_table[] = 
@@ -381,6 +391,7 @@ static int format_table[] =
 	55,	/* MBF_EM121RAW */
 	56,	/* MBF_EM300RAW */
 	57,	/* MBF_EM300MBA */
+	58,	/* MBF_EM12DIFR */
 	61,	/* MBF_MR1PRHIG */
 	62,	/* MBF_MR1ALDEO */
 	63,	/* MBF_MR1BLDEO */
@@ -404,6 +415,7 @@ static int format_table[] =
 	161,    /* MBF_MGD77DAT */
 	165,    /* MBF_MBARIROV */
 	166,    /* MBF_MBPRONAV */
+	181,    /* MBF_FRNOHS10 */
 	};
 
 /* Table of which formats are really supported */
@@ -431,11 +443,12 @@ static int supported_format_table[] =
 	1,	/* MBF_SB2100B2 */
 	1,	/* MBF_EM1000RW */
 	1,	/* MBF_EM12SRAW */
-	0,	/* MBF_EM12DRAW */
+	1,	/* MBF_EM12DRAW */
 	1,	/* MBF_EM12DARW */
 	1,	/* MBF_EM121RAW */
 	1,	/* MBF_EM300RAW */
 	1,	/* MBF_EM300MBA */
+	1,	/* MBF_EM12DIFR */
 	1,	/* MBF_MR1PRHIG */
 	1,	/* MBF_MR1ALDEO */
 	1,	/* MBF_MR1BLDEO */
@@ -459,6 +472,7 @@ static int supported_format_table[] =
 	1,      /* MBF_MGD77DAT */
 	1,      /* MBF_MBARIROV */
 	1,      /* MBF_MBPRONAV */
+	1,      /* MBF_FRNOHS10 */
 	};
 
 /* Alias table for old (pre-version 4.0) format id's */
@@ -506,6 +520,7 @@ static char *format_description[] =
 	"Format name:          MBF_EM121RAW\nInformal Description: Simrad EM121 vendor format\nAttributes:           Simrad EM121, bathymetry, amplitude, and sidescan,\n                      121 beams, variable pixels, ascii + binary, Simrad.\n",
 	"Format name:          MBF_EM300RAW\nInformal Description: Simrad EM300/EM3000 multibeam vendor format\nAttributes:           Simrad EM300/EM3000, bathymetry, amplitude, and sidescan,\n                      up to 254 beams, variable pixels, ascii + binary, Simrad.\n",
 	"Format name:          MBF_EM300MBA\nInformal Description: Simrad EM300/EM3000 multibeam processing format\nAttributes:           Simrad EM300/EM3000, bathymetry, amplitude, and sidescan,\n                      up to 254 beams, variable pixels, ascii + binary, MBARI.\n",
+	"Format name:          MBF_EM12DIFR\nInformal Description: Simrad EM12D multibeam archive format\nAttributes:           Simrad EM12D, bathymetry and amplitude,\n                      162 beams, binary, IFREMER.\n",
 	"Format name:          MBF_MR1PRHIG\nInformal Description: SOEST MR1 post processed format\nAttributes:           SOEST MR1, bathymetry and sidescan,\n                      variable beams and pixels, xdr binary, \n                      SOEST, University of Hawaii.\n",
 	"Format name:          MBF_MR1ALDEO\nInformal Description: L-DEO MR1 post processed format with travel times\nAttributes:           L-DEO MR1, bathymetry and sidescan,\n                      variable beams and pixels, xdr binary, \n                      L-DEO.\n",
 	"Format name:          MBF_MR1BLDEO\nInformal Description: L-DEO small MR1 post processed format with travel times\nAttributes:           L-DEO MR1, bathymetry and sidescan,\n                      variable beams and pixels, xdr binary, \n                      L-DEO.\n",
@@ -529,6 +544,7 @@ static char *format_description[] =
 	"Format name:          MBF_MGD77DAT\nInformal Description: NGDC MGD77 underway geophysics format\nAttributes:           single beam bathymetry, nav, magnetics,\n                      gravity, ascii, NOAA NGDC\n",
 	"Format name:          MBF_MBARIROV\nInformal Description: MBARI ROV navigation format\nAttributes:           ROV navigation, MBARI\n",
 	"Format name:          MBF_MBPRONAV\nInformal Description: MB-System simple navigation format\nAttributes:           navigation, MBARI\n",
+	"Format name:          MBF_FRNOHS10\nInformal Description: Furuno HS10 multibeam format\nAttributes:           bathymetry and amplitude, 45 beams, JAMSTEC\n",
 	};
 
 /* Table of which swath sonar system each data format 
@@ -562,6 +578,7 @@ static int mb_system_table[] =
 	MB_SYS_SIMRAD,	/* MBF_EM121RAW */
 	MB_SYS_SIMRAD2,	/* MBF_EM300RAW */
 	MB_SYS_SIMRAD2,	/* MBF_EM300MBA */
+	MB_SYS_SIMRAD,	/* MBF_EM12DIFR */
 	MB_SYS_MR1,	/* MBF_MR1PRHIG */
 	MB_SYS_MR1,	/* MBF_MR1ALDEO */
 	MB_SYS_MR1B,	/* MBF_MR1BLDEO */
@@ -585,6 +602,7 @@ static int mb_system_table[] =
 	MB_SYS_SINGLEBEAM,	/* MBF_MGD77DAT */
 	MB_SYS_SINGLEBEAM,	/* MBF_MBARIROV */
 	MB_SYS_SINGLEBEAM,	/* MBF_MBPRONAV */
+	MB_SYS_HS10,	/* MBF_FRNOHS10 */
 	};
 
 /* Table of the number of parallel files required for i/o */
@@ -617,6 +635,7 @@ static int mb_numfile_table[] =
 	1,		/* MBF_EM121RAW */
 	1,		/* MBF_EM300RAW */
 	1,		/* MBF_EM300MBA */
+	1,		/* MBF_EM12DIFR */
 	1,		/* MBF_MR1PRHIG */
 	1,		/* MBF_MR1ALDEO */
 	1,		/* MBF_MR1BLDEO */
@@ -640,6 +659,7 @@ static int mb_numfile_table[] =
 	1,		/* MBF_MGD77DAT */
 	1,		/* MBF_MBARIROV */
 	1,		/* MBF_MBPRONAV */
+	1,		/* MBF_FRNOHS10 */
 	};
 
 /* Table of what type files are used by swath sonar data formats */
@@ -675,6 +695,7 @@ static int mb_filetype_table[] =
 	MB_FILETYPE_NORMAL,	/* MBF_EM121RAW */
 	MB_FILETYPE_NORMAL,	/* MBF_EM300RAW */
 	MB_FILETYPE_NORMAL,	/* MBF_EM300MBA */
+	MB_FILETYPE_NORMAL,	/* MBF_EM12DIFR */
 	MB_FILETYPE_XDR,	/* MBF_MR1PRHIG */
 	MB_FILETYPE_XDR,	/* MBF_MR1ALDEO */
 	MB_FILETYPE_XDR,	/* MBF_MR1BLDEO */
@@ -698,6 +719,7 @@ static int mb_filetype_table[] =
 	MB_FILETYPE_NORMAL,	/* MBF_MGD77DAT */
 	MB_FILETYPE_NORMAL,	/* MBF_MBARIROV */
 	MB_FILETYPE_NORMAL,	/* MBF_MBPRONAV */
+	MB_FILETYPE_NORMAL,	/* MBF_FRNOHS10 */
 	};
 
 /* Table of the maximum number of bathymetry beams for each format */
@@ -730,6 +752,7 @@ static int beams_bath_table[] =
 	121,	/* MBF_EM121RAW */
 	254,	/* MBF_EM300RAW */
 	254,	/* MBF_EM300MBA */
+	81,	/* MBF_EM12DIFR */
 	3003,	/* MBF_MR1PRHIG */
 	3003,	/* MBF_MR1ALDEO */
 	153,	/* MBF_MR1BLDEO */
@@ -753,6 +776,7 @@ static int beams_bath_table[] =
 	1,	/* MBF_MGD77DAT */
 	1,	/* MBF_MBARIROV */
 	1,	/* MBF_MBPRONAV */
+	45,	/* MBF_FRNOHS10 */
 	};
 
 /* Table of the maximum number of amplitude beams for each format */
@@ -785,6 +809,7 @@ static int beams_amp_table[] =
 	121,	/* MBF_EM121RAW */
 	254,	/* MBF_EM300RAW */
 	254,	/* MBF_EM300MBA */
+	81,	/* MBF_EM12DIFR */
 	0,	/* MBF_MR1PRHIG */
 	0,	/* MBF_MR1ALDEO */
 	0,	/* MBF_MR1BLDEO */
@@ -808,6 +833,7 @@ static int beams_amp_table[] =
 	0,	/* MBF_MGD77DAT */
 	0,	/* MBF_MBARIROV */
 	0,	/* MBF_MBPRONAV */
+	45,	/* MBF_FRNOHS10 */
 	};
 
 /* Table of the maximum number of sidescan pixels for each format */
@@ -840,6 +866,7 @@ static int pixels_ss_table[] =
 	6050,	/* MBF_EM121RAW */
 	1024,	/* MBF_EM300RAW */
 	1024,	/* MBF_EM300MBA */
+	0,	/* MBF_EM12DIFR */
 	7003,	/* MBF_MR1PRHIG */
 	7003,	/* MBF_MR1ALDEO */
 	4003,	/* MBF_MR1BLDEO */
@@ -863,6 +890,7 @@ static int pixels_ss_table[] =
 	0,   /* MBF_MGD77DAT */
 	0,   /* MBF_MBARIROV */
 	0,   /* MBF_MBPRONAV */
+	0,   /* MBF_FRNOHS10 */
 	};
 
 /* Table of which data formats have variable numbers of beams */
@@ -895,6 +923,7 @@ static int variable_beams_table[] =
 	0,	/* MBF_EM121RAW */
 	1,	/* MBF_EM300RAW */
 	1,	/* MBF_EM300MBA */
+	0,	/* MBF_EM12DIFR */
 	0,	/* MBF_MR1PRHIG */
 	0,	/* MBF_MR1ALDEO */
 	0,	/* MBF_MR1BLDEO */
@@ -918,6 +947,7 @@ static int variable_beams_table[] =
 	0,      /* MBF_MGD77DAT */
 	0,      /* MBF_MBARIROV */
 	0,      /* MBF_MBPRONAV */
+	0,      /* MBF_FRNOHS10 */
 	};
 
 /* Table of which swath sonar data formats include 
@@ -951,6 +981,7 @@ static int mb_traveltime_table[] =
 	0,	/* MBF_EM121RAW */
 	1,	/* MBF_EM300RAW */
 	1,	/* MBF_EM300MBA */
+	1,	/* MBF_EM12DIFR */
 	1,	/* MBF_MR1PRHIG */
 	1,	/* MBF_MR1ALDEO */
 	1,	/* MBF_MR1BLDEO */
@@ -974,6 +1005,7 @@ static int mb_traveltime_table[] =
 	1,      /* MBF_MGD77DAT */
 	1,      /* MBF_MBARIROV */
 	1,      /* MBF_MBPRONAV */
+	1,      /* MBF_FRNOHS10 */
 	};
 
 /* Table of which swath sonar data formats CANNOT support 
@@ -1007,6 +1039,7 @@ static int mb_no_flag_table[] =
 	0,	/* MBF_EM121RAW */
 	1,	/* MBF_EM300RAW */
 	0,	/* MBF_EM300MBA */
+	0,	/* MBF_EM12DIFR */
 	0,	/* MBF_MR1PRHIG */
 	0,	/* MBF_MR1ALDEO */
 	0,	/* MBF_MR1BLDEO */
@@ -1030,6 +1063,7 @@ static int mb_no_flag_table[] =
 	1,      /* MBF_MGD77DAT */
 	1,      /* MBF_MBARIROV */
 	1,      /* MBF_MBPRONAV */
+	0,      /* MBF_FRNOHS10 */
 	};
 
 /* Table of the data record types containing the primary navigation */
@@ -1062,6 +1096,7 @@ static int mb_nav_source[] =
 	MB_DATA_NAV,	/* MBF_EM121RAW */
 	MB_DATA_NAV,	/* MBF_EM300RAW */
 	MB_DATA_DATA,	/* MBF_EM300MBA */
+	MB_DATA_DATA,	/* MBF_EM12DIFR */
 	MB_DATA_DATA,	/* MBF_MR1PRHIG */
 	MB_DATA_DATA,	/* MBF_MR1ALDEO */
 	MB_DATA_DATA,	/* MBF_MR1BLDEO */
@@ -1085,6 +1120,7 @@ static int mb_nav_source[] =
 	MB_DATA_DATA,   /* MBF_MGD77DAT */
 	MB_DATA_DATA,   /* MBF_MBARIROV */
 	MB_DATA_DATA,   /* MBF_MBPRONAV */
+	MB_DATA_DATA,   /* MBF_FRNOHS10 */
 	};
 
 /* Table of the data record types containing the primary heading */
@@ -1117,6 +1153,7 @@ static int mb_heading_source[] =
 	MB_DATA_DATA,	/* MBF_EM121RAW */
 	MB_DATA_DATA,	/* MBF_EM300RAW */
 	MB_DATA_DATA,	/* MBF_EM300MBA */
+	MB_DATA_DATA,	/* MBF_EM12DIFR */
 	MB_DATA_DATA,	/* MBF_MR1PRHIG */
 	MB_DATA_DATA,	/* MBF_MR1ALDEO */
 	MB_DATA_DATA,	/* MBF_MR1BLDEO */
@@ -1140,6 +1177,7 @@ static int mb_heading_source[] =
 	MB_DATA_DATA,   /* MBF_MGD77DAT */
 	MB_DATA_DATA,   /* MBF_MBARIROV */
 	MB_DATA_DATA,   /* MBF_MBPRONAV */
+	MB_DATA_DATA,   /* MBF_FRNOHS10 */
 	};
 
 /* Table of the data record types containing the primary vru */
@@ -1172,6 +1210,7 @@ static int mb_vru_source[] =
 	MB_DATA_DATA,	/* MBF_EM121RAW */
 	MB_DATA_ATTITUDE,	/* MBF_EM300RAW */
 	MB_DATA_ATTITUDE,	/* MBF_EM300MBA */
+	MB_DATA_DATA,	/* MBF_EM12DIFR */
 	MB_DATA_DATA,	/* MBF_MR1PRHIG */
 	MB_DATA_DATA,	/* MBF_MR1ALDEO */
 	MB_DATA_DATA,	/* MBF_MR1BLDEO */
@@ -1195,6 +1234,7 @@ static int mb_vru_source[] =
 	MB_DATA_DATA,   /* MBF_MGD77DAT */
 	MB_DATA_DATA,   /* MBF_MBARIROV */
 	MB_DATA_DATA,   /* MBF_MBPRONAV */
+	MB_DATA_DATA,   /* MBF_FRNOHS10 */
 	};
 
 /* Table of the fore-aft beamwidths */
@@ -1227,6 +1267,7 @@ static float mb_foreaft_beamwidth_table[] =
 	2.00,	/* MBF_EM121RAW */
 	2.00,	/* MBF_EM300RAW */
 	2.00,	/* MBF_EM300MBA */
+	2.00,	/* MBF_EM12DIFR */
 	2.00,	/* MBF_MR1PRHIG */
 	2.00,	/* MBF_MR1ALDEO */
 	2.00,	/* MBF_MR1BLDEO */
@@ -1250,6 +1291,7 @@ static float mb_foreaft_beamwidth_table[] =
 	2.00,   /* MBF_MGD77DAT */
 	2.00,   /* MBF_MBARIROV */
 	2.00,   /* MBF_MBPRONAV */
+	2.00,   /* MBF_FRNOHS10 */
 	};
 
 /* names of formats for use in button or label names */
@@ -1281,6 +1323,8 @@ static char *mb_button_name[] =
         " EM12DARW ",
         " EM121RAW ",
         " EM300RAW ",
+        " EM300MBA ",
+        " EM12DIFR ",
         " MR1PRHIG ",
         " MR1ALDEO ",
         " MR1BLDEO ",
@@ -1304,6 +1348,7 @@ static char *mb_button_name[] =
 	" MGD77DAT ", 
 	" MBARIROV ", 
 	" MBPRONAV ", 
+	" FRNOHS10 ", 
         };
 
 
