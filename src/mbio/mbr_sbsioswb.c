@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sbsioswb.c	9/18/93
- *	$Id: mbr_sbsioswb.c,v 4.1 1994-10-21 15:42:42 caress Exp $
+ *	$Id: mbr_sbsioswb.c,v 4.2 1994-11-01 16:00:08 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	February 2, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1994/10/21  15:42:42  caress
+ * Release V4.0
+ *
  * Revision 4.0  1994/10/21  12:34:58  caress
  * Release V4.0
  *
@@ -57,7 +60,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_sbsioswb.c,v 4.1 1994-10-21 15:42:42 caress Exp $";
+ static char res_id[]="$Id: mbr_sbsioswb.c,v 4.2 1994-11-01 16:00:08 caress Exp $";
 	char	*function_name = "mbr_alm_sbsioswb";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -801,9 +804,8 @@ int	*error;
 		data->sec = 100*store->sec;
 
 		/* heading */
-		data->heading = store->sbhdg > 327680
-		    ? (short int) round(((int)store->sbhdg - 655360)*0.054931641625)
-		    : (short int) round(((int)store->sbhdg)*0.054931641625);
+		data->heading =  
+		    (short int) round(((int)store->sbhdg)*0.054931641625);
 
 		/* additional values */
 		data->eclipse_time = store->sbtim;
