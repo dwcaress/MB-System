@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsldeoih.c	2/11/93
- *	$Id: mbr_hsldeoih.c,v 4.6 1995-03-08 13:31:09 caress Exp $
+ *	$Id: mbr_hsldeoih.c,v 4.7 1995-03-08 18:13:53 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	February 11, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.6  1995/03/08  13:31:09  caress
+ * Fixed bug related to handling of shallow water data and the depth scale.
+ *
  * Revision 4.5  1995/03/06  19:38:54  caress
  * Changed include strings.h to string.h for POSIX compliance.
  *
@@ -80,7 +83,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_hsldeoih.c,v 4.6 1995-03-08 13:31:09 caress Exp $";
+ static char res_id[]="$Id: mbr_hsldeoih.c,v 4.7 1995-03-08 18:13:53 caress Exp $";
 	char	*function_name = "mbr_alm_hsldeoih";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -878,7 +881,8 @@ int	*error;
 			variables in the HSLDEOIH record */
 		data->speed_reference[0] = 'B';	/* assume speed over ground */
 		data->depth_center = data->depth[mb_io_ptr->beams_bath/2];
-		data->depth_scale = 1.0;	/* this is a unit scale factor */
+		if (data->depth_scale <= 0.0)
+			data->depth_scale = 1.0;	/* this is a unit scale factor */
 		data->spare = 1;
 		}
 
