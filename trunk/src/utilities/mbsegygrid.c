@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsegygrid.c	6/12/2004
- *    $Id: mbsegygrid.c,v 5.3 2004-10-06 19:10:52 caress Exp $
+ *    $Id: mbsegygrid.c,v 5.4 2004-11-08 05:49:17 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	June 12, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2004/10/06 19:10:52  caress
+ * Release 5.0.5 update.
+ *
  * Revision 5.2  2004/09/16 01:01:12  caress
  * Fixed many things.
  *
@@ -85,7 +88,7 @@ char	*getenv();
 	outfp if verbose > 1) */
 FILE	*outfp;
 
-static char rcs_id[] = "$Id: mbsegygrid.c,v 5.3 2004-10-06 19:10:52 caress Exp $";
+static char rcs_id[] = "$Id: mbsegygrid.c,v 5.4 2004-11-08 05:49:17 caress Exp $";
 static char program_name[] = "MBsegygrid";
 static char help_message[] =  "MBsegygrid grids trace data from segy data files.";
 static char usage_message[] = "MBsegygrid -Ifile -Oroot [-Ddecimatex/decimatey\n\
@@ -395,7 +398,7 @@ main (int argc, char **argv)
 	xmin = (double) tracestart - 0.5;
 	xmax = (double) traceend + 0.5;
 	ymax = -(timedelay - 0.5 * sampleinterval / decimatey);
-	ymin = ymax - ngridy * sampleinterval;
+	ymin = ymax - ngridy * sampleinterval * decimatey;
 	/*ymax = timedelay + timesweep + 0.5 * sampleinterval / decimatey;*/
 	
 	/* get start and end samples */
@@ -674,7 +677,7 @@ i,iy,factor,i,trace[i]);*/
 	status = write_cdfgrd(verbose, gridfile, grid,
 		ngridx, ngridy, 
 		xmin, xmax, ymin, ymax,
-		gridmintot, gridmaxtot, (double) decimatex, sampleinterval, 
+		gridmintot, gridmaxtot, (double) decimatex, sampleinterval / decimatey, 
 		xlabel, ylabel, zlabel, title, 
 		projection, argc, argv, &error);
 	
