@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbformat.c	1/22/93
- *    $Id: mbformat.c,v 5.2 2001-04-25 05:39:43 caress Exp $
+ *    $Id: mbformat.c,v 5.3 2001-07-20 17:05:25 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	January 22, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2001/04/25  05:39:43  caress
+ * Fixed -W option so html page looks right (white background).
+ *
  * Revision 5.1  2001/03/22 21:14:16  caress
  * Trying to make release 5.0.beta0.
  *
@@ -91,10 +94,10 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbformat.c,v 5.2 2001-04-25 05:39:43 caress Exp $";
+	static char rcs_id[] = "$Id: mbformat.c,v 5.3 2001-07-20 17:05:25 caress Exp $";
 	static char program_name[] = "MBFORMAT";
 	static char help_message[] = "MBFORMAT is an utility which identifies the swath data formats \nassociated with MBIO format id's.  If no format id is specified, \nMBFORMAT lists all of the currently supported formats.";
-	static char usage_message[] = "mbformat [-Fformat -Ifile -L -V -H]";
+	static char usage_message[] = "mbformat [-Fformat -Ifile -L -W -V -H]";
 
 	/* parsing variables */
 	extern char *optarg;
@@ -304,7 +307,8 @@ main (int argc, char **argv)
 			}
 
 		printf("\n<CENTER><P><BR>\n");
-		printf("Last Updated: $Date: 2001-04-25 05:39:43 $ $Revision: 5.2 $</P></CENTER>\n");
+		printf("Last Updated: %s</P></CENTER>\n", 
+			mb_format_updatedate);
 		printf("\n<P>\n<HR WIDTH=\"100%%\"></P>\n\n");
 		printf("<P><IMG SRC=\"mbsystem_logo_small.gif\" HEIGHT=55 WIDTH=158><A HREF=\"mbsystem_home.html\">Back\n");
 		printf("to MB-System Home Page...</A></P>\n");
