@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbvelocitytool.c	6/6/93
- *    $Id: mbvelocity_prog.c,v 4.2 1994-11-18 18:58:19 caress Exp $
+ *    $Id: mbvelocity_prog.c,v 4.3 1994-11-24 01:54:08 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -23,6 +23,9 @@
  * Date:	June 6, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1994/11/18  18:58:19  caress
+ * First gradient raytracing version.
+ *
  * Revision 4.1  1994/11/10  01:16:07  caress
  * Set program to do raytracing for every ping rather than once at beginning.
  *
@@ -82,7 +85,7 @@ struct profile
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbvelocity_prog.c,v 4.2 1994-11-18 18:58:19 caress Exp $";
+static char rcs_id[] = "$Id: mbvelocity_prog.c,v 4.3 1994-11-24 01:54:08 caress Exp $";
 static char program_name[] = "MBVELOCITYTOOL";
 static char help_message[] = "MBVELOCITYTOOL is an interactive water velocity profile editor  \nused to examine multiple water velocity profiles and to create  \nnew water velocity profiles which can be used for the processing  \nof multibeam sonar data.  In general, this tool is used to  \nexamine water velocity profiles obtained from XBTs, CTDs, or  \ndatabases, and to construct new profiles consistent with these  \nvarious sources of information.";
 static char usage_message[] = "mbvelocitytool [-Adangle -V -H]";
@@ -1903,9 +1906,9 @@ int	form;
 	nraypathmax = 100*profile_edit.n;
 	for (i=0;i<beams_bath;i++)
 		{
-		status = mb_malloc(verbose,nraypathmax*sizeof(double *),
+		status = mb_malloc(verbose,nraypathmax*sizeof(double),
 				&raypathx[i],&error);
-		status = mb_malloc(verbose,nraypathmax*sizeof(double *),
+		status = mb_malloc(verbose,nraypathmax*sizeof(double),
 				&raypathy[i],&error);
 		}
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&depth,&error);
@@ -2078,6 +2081,8 @@ int mbvt_process_multibeam()
 		if (buff->buffer_kind[k] == MB_DATA_DATA)
 		  for (i=0;i<nbeams;i++)
 		    {
+		    if (ttimes[i] <= 0.0)
+			flags[i] = 1;
 		    /* trace the ray */
 		    if (flags[i] == 0)
 			{

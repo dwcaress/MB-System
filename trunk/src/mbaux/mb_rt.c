@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_rt.c	11/14/94
- *    $Id: mb_rt.c,v 4.0 1994-11-18 19:01:16 caress Exp $
+ *    $Id: mb_rt.c,v 4.1 1994-11-24 01:54:08 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -99,7 +99,7 @@ double	*velocity;
 char	**modelptr;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_rt.c,v 4.0 1994-11-18 19:01:16 caress Exp $";
+  	static char rcs_id[]="$Id: mb_rt.c,v 4.1 1994-11-24 01:54:08 caress Exp $";
 	char	*function_name = "mb_rt_init";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -191,7 +191,7 @@ int	verbose;
 char	**modelptr;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_rt.c,v 4.0 1994-11-18 19:01:16 caress Exp $";
+  	static char rcs_id[]="$Id: mb_rt.c,v 4.1 1994-11-24 01:54:08 caress Exp $";
 	char	*function_name = "mb_rt";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -247,13 +247,10 @@ double	*travel_time;
 int	*ray_stat;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_rt.c,v 4.0 1994-11-18 19:01:16 caress Exp $";
+  	static char rcs_id[]="$Id: mb_rt.c,v 4.1 1994-11-24 01:54:08 caress Exp $";
 	char	*function_name = "mb_rt";
 	int	status = MB_SUCCESS;
 	int	i;
-
-if (source_angle == 0.0)
-verbose = 5;
 
 	/* get pointer to velocity model */
 	model = (struct velocity_model *) modelptr;
@@ -426,7 +423,8 @@ verbose = 5;
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       nplot:      %d\n",*nplot);
+		if (nplot_max > 0)
+		    fprintf(stderr,"dbg2       nplot:      %d\n",*nplot);
 		fprintf(stderr,"dbg2       x:          %f\n",*x);
 		fprintf(stderr,"dbg2       z:          %f\n",*z);
 		fprintf(stderr,"dbg2       travel_time:%f\n",*travel_time);
@@ -443,7 +441,7 @@ mb_rt_circular(verbose, error)
 int	verbose;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_rt.c,v 4.0 1994-11-18 19:01:16 caress Exp $";
+  	static char rcs_id[]="$Id: mb_rt.c,v 4.1 1994-11-24 01:54:08 caress Exp $";
 	char	*function_name = "mb_rt_circular";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -489,7 +487,7 @@ mb_rt_quad1(verbose, error)
 int	verbose;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_rt.c,v 4.0 1994-11-18 19:01:16 caress Exp $";
+  	static char rcs_id[]="$Id: mb_rt.c,v 4.1 1994-11-24 01:54:08 caress Exp $";
 	char	*function_name = "mb_rt_quad1";
 	int	status = MB_SUCCESS;
 	double	vi;
@@ -618,7 +616,7 @@ mb_rt_quad2(verbose, error)
 int	verbose;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_rt.c,v 4.0 1994-11-18 19:01:16 caress Exp $";
+  	static char rcs_id[]="$Id: mb_rt.c,v 4.1 1994-11-24 01:54:08 caress Exp $";
 	char	*function_name = "mb_rt_quad2";
 	int	status = MB_SUCCESS;
 	double	vi;
@@ -691,7 +689,7 @@ mb_rt_quad3(verbose, error)
 int	verbose;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_rt.c,v 4.0 1994-11-18 19:01:16 caress Exp $";
+  	static char rcs_id[]="$Id: mb_rt.c,v 4.1 1994-11-24 01:54:08 caress Exp $";
 	char	*function_name = "mb_rt_quad3";
 	int	status = MB_SUCCESS;
 	double	vi;
@@ -764,7 +762,7 @@ mb_rt_quad4(verbose, error)
 int	verbose;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_rt.c,v 4.0 1994-11-18 19:01:16 caress Exp $";
+  	static char rcs_id[]="$Id: mb_rt.c,v 4.1 1994-11-24 01:54:08 caress Exp $";
 	char	*function_name = "mb_rt_quad4";
 	int	status = MB_SUCCESS;
 	double	vi;
@@ -897,7 +895,7 @@ int	turn_sign;
 double	*depth;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_rt.c,v 4.0 1994-11-18 19:01:16 caress Exp $";
+  	static char rcs_id[]="$Id: mb_rt.c,v 4.1 1994-11-24 01:54:08 caress Exp $";
 	char	*function_name = "mb_rt_get_depth";
 	int	status = MB_SUCCESS;
 	double	alpha;
@@ -944,7 +942,7 @@ mb_rt_plot_circular(verbose, error)
 int	verbose;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_rt.c,v 4.0 1994-11-18 19:01:16 caress Exp $";
+  	static char rcs_id[]="$Id: mb_rt.c,v 4.1 1994-11-24 01:54:08 caress Exp $";
 	char	*function_name = "mb_rt_plot_circular";
 	int	status = MB_SUCCESS;
 	double	ai;
@@ -997,7 +995,7 @@ mb_rt_line(verbose, error)
 int	verbose;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_rt.c,v 4.0 1994-11-18 19:01:16 caress Exp $";
+  	static char rcs_id[]="$Id: mb_rt.c,v 4.1 1994-11-24 01:54:08 caress Exp $";
 	char	*function_name = "mb_rt_line";
 	int	status = MB_SUCCESS;
 	double	theta;
@@ -1079,7 +1077,7 @@ mb_rt_vertical(verbose, error)
 int	verbose;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_rt.c,v 4.0 1994-11-18 19:01:16 caress Exp $";
+  	static char rcs_id[]="$Id: mb_rt.c,v 4.1 1994-11-24 01:54:08 caress Exp $";
 	char	*function_name = "mb_rt_vertical";
 	int	status = MB_SUCCESS;
 	double	vi;
