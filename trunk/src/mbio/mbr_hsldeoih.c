@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsldeoih.c	2/11/93
- *	$Id: mbr_hsldeoih.c,v 4.14 1999-07-16 19:24:15 caress Exp $
+ *	$Id: mbr_hsldeoih.c,v 4.15 2000-03-08 00:44:59 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	February 11, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.14  1999/07/16  19:24:15  caress
+ * Yet another version.
+ *
  * Revision 4.13  1998/10/05  17:46:15  caress
  * MB-System version 4.6beta
  *
@@ -115,7 +118,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_hsldeoih.c,v 4.14 1999-07-16 19:24:15 caress Exp $";
+ static char res_id[]="$Id: mbr_hsldeoih.c,v 4.15 2000-03-08 00:44:59 caress Exp $";
 	char	*function_name = "mbr_alm_hsldeoih";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -1132,6 +1135,10 @@ int	*error;
 		
 	/* get file position */
 	mb_io_ptr->file_bytes = ftell(mbfp);
+		
+	/* handle Hydrosweep Y2K problem */
+	if (status == MB_SUCCESS && data->year < 1962)
+		data->year = 2000 + (data->year % 100);
 
 	/* print output debug statements */
 	if (verbose >= 2)
