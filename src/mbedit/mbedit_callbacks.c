@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit_callbacks.c	3/28/97
- *    $Id: mbedit_callbacks.c,v 5.12 2004-05-21 23:26:04 caress Exp $
+ *    $Id: mbedit_callbacks.c,v 5.13 2004-12-02 06:31:02 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	March 28, 1997  GUI recast
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.12  2004/05/21 23:26:04  caress
+ * Moved to new version of BX GUI builder
+ *
  * Revision 5.11  2004/02/25 20:48:58  caress
  * Release 5.0.3
  *
@@ -183,6 +186,9 @@ Widget	fileSelectionText;
 #define	MODE_ERASE	2
 #define	MODE_RESTORE	3
 #define	MODE_INFO	4
+#define	VIEW_WATERFALL		0
+#define	VIEW_ALONGTRACK		1
+#define	VIEW_ACROSSTRACK	2
 #define	OUTPUT_MODE_OUTPUT	0
 #define	OUTPUT_MODE_EDIT	1
 #define	OUTPUT_MODE_BROWSE	2
@@ -220,6 +226,7 @@ int	mexager;
 int	mplot_width;
 int	mx_interval;
 int	my_interval;
+int	mode_view = VIEW_WATERFALL;
 int	mode_pick = MODE_TOGGLE;
 int	mshow_detects = MB_NO;
 int	mshow_flagged = MB_NO;
@@ -1704,6 +1711,48 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
 			    XAllocNamedColor(theDisplay,colormap,"coral",&closest[1],&exact[1]);
 			    XRecolorCursor(theDisplay,myCursor,&closest[0],&closest[1]);
 			    XDefineCursor(theDisplay,can_xid,myCursor);
+			    }
+		    break;
+	    case '2':
+	    case '@':
+			    {
+			    /* set the view mode */
+			    mode_view = VIEW_WATERFALL;
+			    mbedit_set_viewmode(mode_view);
+
+			    /* replot the data */
+			    status = mbedit_action_plot(mplot_width, mexager,
+				    mx_interval, my_interval, 
+				    mplot_size, mshow_detects, mshow_flagged, mshow_time, 
+				    &nbuffer, &ngood, &icurrent, &mnplot);
+			    }
+		    break;
+	    case '3':
+	    case '#':
+			    {
+			    /* set the view mode */
+			    mode_view = VIEW_ALONGTRACK;
+			    mbedit_set_viewmode(mode_view);
+
+			    /* replot the data */
+			    status = mbedit_action_plot(mplot_width, mexager,
+				    mx_interval, my_interval, 
+				    mplot_size, mshow_detects, mshow_flagged, mshow_time, 
+				    &nbuffer, &ngood, &icurrent, &mnplot);
+			    }
+		    break;
+	    case '4':
+	    case '$':
+			    {
+			    /* set the view mode */
+			    mode_view = VIEW_ACROSSTRACK;
+			    mbedit_set_viewmode(mode_view);
+
+			    /* replot the data */
+			    status = mbedit_action_plot(mplot_width, mexager,
+				    mx_interval, my_interval, 
+				    mplot_size, mshow_detects, mshow_flagged, mshow_time, 
+				    &nbuffer, &ngood, &icurrent, &mnplot);
 			    }
 		    break;
 	    default:
