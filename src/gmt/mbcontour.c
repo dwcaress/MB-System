@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcontour.c	6/4/93
- *    $Id: mbcontour.c,v 4.9 1995-05-12 17:19:02 caress Exp $
+ *    $Id: mbcontour.c,v 4.10 1995-06-05 12:41:03 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,10 @@
  * Date:	June 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.9  1995/05/12  17:19:02  caress
+ * Made exit status values consistent with Unix convention.
+ * 0: ok  nonzero: error
+ *
  * Revision 4.8  1995/03/06  19:39:52  caress
  * Changed include strings.h to string.h for POSIX compliance.
  *
@@ -113,7 +117,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbcontour.c,v 4.9 1995-05-12 17:19:02 caress Exp $";
+	static char rcs_id[] = "$Id: mbcontour.c,v 4.10 1995-06-05 12:41:03 caress Exp $";
 #ifdef MBCONTOURFILTER
 	static char program_name[] = "MBCONTOURFILTER";
 	static char help_message[] =  "MBCONTOURFILTER is a utility which creates a pen plot \ncontour map of multibeam swath bathymetry.  \nThe primary purpose of this program is to serve as \npart of a real-time plotting system.  The contour \nlevels and colors can be controlled \ndirectly or set implicitly using contour and color change intervals. \nContours can also be set to have ticks pointing downhill.";
@@ -733,6 +737,13 @@ char **argv;
 				program_name);
 			fprintf(stderr,"dbg2       kind:           %d\n",
 				kind);
+			fprintf(stderr,"dbg2       npings:         %d\n",
+				*npings);
+			fprintf(stderr,"dbg2       time:           %4d %2d %2d %2d %2d %2d %6.6d\n",
+				time_i[0],time_i[1],time_i[2],
+				time_i[3],time_i[4],time_i[5],time_i[6]);
+			fprintf(stderr,"dbg2       navigation:     %f  %f\n",
+				*navlon, *navlat);
 			fprintf(stderr,"dbg2       beams_bath:     %d\n",
 				beams_bath);
 			fprintf(stderr,"dbg2       beams_amp:      %d\n",
@@ -752,8 +763,8 @@ char **argv;
 				(*npings > 0 
 				&& contour_algorithm == MB_CONTOUR_TRIANGLES)
 				|| (*npings > 0 
-				&& *navlon != navlon_old 
-				&& *navlat != navlat_old))
+				&& (*navlon != navlon_old 
+				|| *navlat != navlat_old)))
 				{
 				nping_read += pings_read;
 				(*npings)++;
