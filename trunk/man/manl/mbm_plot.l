@@ -1,4 +1,4 @@
-.TH mbm_plot l "15 December 2004" "MB-System 5.0" "MB-System 5.0"
+.TH mbm_plot l "23 March 2005" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbm_plot\fP - Create an executable shellscript which will generate
 a GMT plot of swath sonar swath data.
@@ -854,7 +854,7 @@ GMT Technical reference for a discussion of GMT pen values.
 texture = solid]. 
 .TP
 .B \-N
-\fI[time_tick/time_annot/date_annot/time_tick_len[/name_hgt] | F]\fP
+\fI[time_tick/time_annot/date_annot/time_tick_len[/name_hgt/name_perp]] | F | FP]\fP
 .br
 This option causes a navigation track plot to be generated, 
 and can also set the start of each 
@@ -862,7 +862,10 @@ swath file to be annotated with the filename.
 If the \fB-N\fP option is given alone, then the default
 parameters given below will be used, If the \fB-N\fP\fIF\fP is
 given, then a navigation track will be generated with filename
-annotation. The optional parameters allow users to control the 
+annotation along the shiptrack. If the \fB-N\fP\fIFP\fP is
+given, then a navigation track will be generated with filename
+annotation perpendicular to the shiptrack. The optional 
+parameters allow users to control the 
 details of the navigation track annotation. 
 Time marks are made with "X" marks along the shiptrack; annotated
 time marks show the time in HH:MM format next to the time mark
@@ -876,9 +879,12 @@ annotated date ticks are given in hours by
 If the \fIname_hgt\fP parameter is not given when the other parameters
 are specified, then no filename annotation will be done. If given,
 \fIname_hgt\fP sets the height in inches of the filename annotation
-and turns that annotation on.
+and turns that annotation on. If given as 1,
+\fIname_perp\fP causes the filename annotation to be perpendicular
+to the shiptrack rather than parallel (the default).
 Defaults: \fItime_tick\fP = 0.25; \fItime_annot\fP = 1.0; 
-\fIdate_annot\fP = 4.0; \fItime_tick_len\fP = 0.1; \fIname_hgt\fP = 0.1.
+\fIdate_annot\fP = 4.0; \fItime_tick_len\fP = 0.1; \fIname_hgt\fP = 0.1; 
+\fIname_perp\fP = 0.
 .TP
 .B \-O
 \fIroot\fP
