@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	hsdump.c	6/16/93
- *    $Id: hsdump.c,v 4.1 1994-03-12 01:44:37 caress Exp $
+ *    $Id: hsdump.c,v 4.2 1994-06-03 23:54:03 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,10 @@
  * Date:	June 16, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1994/03/12  01:44:37  caress
+ * Added declarations of ctime and/or getenv for compatability
+ * with SGI compilers.
+ *
  * Revision 4.0  1994/03/06  00:13:22  caress
  * First cut at version 4.0
  *
@@ -53,7 +57,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: hsdump.c,v 4.1 1994-03-12 01:44:37 caress Exp $";
+	static char rcs_id[] = "$Id: hsdump.c,v 4.2 1994-06-03 23:54:03 caress Exp $";
 	static char program_name[] = "HSDUMP";
 	static char help_message[] =  "HSDUMP lists the information contained in data records on\n\tHydrosweep DS data files, including survey, calibrate, water \n\tvelocity and comment records. The default input stream is stdin.";
 	static char usage_message[] = "hsdump [-Fformat -V -H -Iinfile -Okind]";
@@ -74,6 +78,7 @@ char **argv;
 
 	/* MBIO read and write control parameters */
 	int	format = 0;
+	int	format_num;
 	int	pings;
 	int	lonflip;
 	double	bounds[4];
@@ -294,6 +299,7 @@ char **argv;
 		}
 
 	/* if bad format specified then print it and exit */
+	status = mb_format(verbose,&format,&format_num,&error);
 	if (format != MBF_HSATLRAW && format != MBF_HSLDEOIH)
 		{
 		fprintf(output,"\nProgram <%s> requires complete Hydrosweep DS data stream\n",program_name);
@@ -340,7 +346,7 @@ char **argv;
 		}
 
 	/* printf out file and format */
-	mb_format_inf(verbose,format,&message);
+	mb_format_inf(verbose,format_num,&message);
 	fprintf(output,"\nHydrosweep DS Data File:  %s\n",file);
 	fprintf(output,"MBIO Data Format ID:  %d\n",format);
 	fprintf(output,"%s",message);
