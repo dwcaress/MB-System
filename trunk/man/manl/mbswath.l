@@ -1,4 +1,4 @@
-.TH mbswath l "25 March 1997" "MB-System 4.5" "MB-System 4.5"
+.TH mbswath l "16 September 1997" "MB-System 4.5" "MB-System 4.5"
 .SH NAME
 \fBmbswath\fP - GMT compatible utility for color fill or color shaded relief
 swath plots of swath sonar data using Postscript.
@@ -59,7 +59,9 @@ Palisades, NY 10964
 
 .SH OPTIONS
 .TP
-.B \fB-A\fIfactor/mode/depth\fP
+.B -A
+\fIfactor/mode/depth\fP
+.br
 This option determines how the along-track dimension of the
 beam or pixel footprints is calculated. If \fImode\fP = 1,
 then the fore-aft beam angle width of the sonar is used so that
@@ -79,24 +81,32 @@ If \fImode\fP = 3, then each data point is plotted as a point,
 and the \fIfactor\fP and \fIdepth\fP parameters are ignored.
 Default: \fIfactor\fP = 1.0, \fImode\fP = 1, \fIdepth\fP = 3000.0.
 .TP
-.B \fB-B\fItickinfo\fP
+.B -B
+\fItickinfo\fP
+.br
 Sets map boundary tickmark intervals. See the \fBpsbasemap\fP
 manual page for details.
 .TP
-.B \fB-b\fIyr/mo/da/hr/mn/sc\fP
+.B -b
+\fIyr/mo/da/hr/mn/sc\fP
+.br
 Sets the starting time for data allowed in the input data; pings
 with times before the starting time will be ignored. 
 Default: \fIyr/mo/da/hr/mn/sc\fP = 1962/2/21/10/30/0.
 .TP
-.B \fB-C\fP
+.B -C
 Sets the color palette file which controls the color of the plot.
 See documentation of the GMT package for a complete description
 of cpt files.
 .TP
-.B \fB-c\fIcopies\fP
+.B -c
+\fIcopies\fP
+.br
 Specifies the number of plot copies (the default is 1).
 .TP
-.B \fB-D\fImode/scale/min/max\fP
+.B -D
+\fImode/scale/min/max\fP
+.br
 Sets scaling of beam amplitude or sidescan pixel values which
 can be applied before plotting. If \fImode\fP = 1 or 2, then
 a linear scaling of the form:
@@ -112,15 +122,21 @@ if it is greater than \fImax\fP; this clipping happens prior to the
 multiplication by \fIscale\fP. Default: \fImode\fP = 1, \fIscale\fP = 1.0,
 \fImin\fP = 0.0, \fImax\fP = 1.0.
 .TP
-.B \fB-E\fIyr/mo/da/hr/mn/sc\fP
+.B -E
+\fIyr/mo/da/hr/mn/sc\fP
+.br
 Sets the ending time for data allowed in the input data; pings
 with times after the ending time will be ignored. 
 Default: \fIyr/mo/da/hr/mn/sc\fP = 2062/2/21/10/30/0.
 .TP
-.B \fB-F\fIred/green/blue\fP
+.B -F
+\fIred/green/blue\fP
+.br
 Sets the color used for Frame and annotation. [Default is black]
 .TP
-.B \fB-f\fIformat\fP
+.B -f
+\fIformat\fP
+.br
 Sets the data format used if the input is read from stdin
 or from a file. If \fIformat\fP < 0, then the input file specified
 with the \fB-I\fP option will actually contain a list of input swath sonar
@@ -130,8 +146,9 @@ format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page. Default: \fIformat\fP = -1.
 .TP
-.B \fB-G\fImagnitude/azimuth\fP
-.B \fB-G\fImagnitude/median\fP
+.B -G
+\fImagnitude/azimuth\fP or \fImagnitude/median\fP
+.br
 Sets the parameters which control how \fBmbswath\fP generates
 simulated illumination of bathymetry, which can be either
 shaded relief bathymetry or bathymetry draped with amplitude data.
@@ -145,11 +162,13 @@ If \fImode\fP is set to 3 (bathymetry shaded using amplitudes) using the
 modulates the intensity of the shading; the value \fImedian\fP sets the
 amplitude value which serves as the zero or neutral level.  
 .TP
-.B \fB-H\fP
+.B -H
 This "help" flag cause the program to print out a description
 of its operation and then exit immediately.
 .TP
-.B \fB-I\fIinfile\fP
+.B -I
+\fIinfile\fP
+.br
 Sets the input filename. If \fIformat\fP > 0 (set with the 
 \fB-f\fP option) then the swath sonar data contained in \fIinfile\fP 
 is read and processed. If \fIformat\fP < 0, then \fIinfile\fP
@@ -241,7 +260,9 @@ More details can be found in the \fBpsbasemap\fP manpages.
 .B \-K
 More \fIPostScript\fP code will be appended later [Default terminates the plot system].
 .TP
-.B \fB-L\fIlonflip\fP
+.B -L
+\fIlonflip\fP
+.br
 Sets the range of the longitude values returned by the swath sonar i/o routines.
 If \fIlonflip\fP=-1 then the longitude values will be in
 the range from -360 to 0 degrees. If \fIlonflip\fP=0 
@@ -251,7 +272,9 @@ then the longitude values will be in
 the range from 0 to 360 degrees.
 Default: \fIlonflip\fP = 0.
 .TP
-.B \fB-N\fIcptfile\fP
+.B -N
+\fIcptfile\fP
+.br
 Normally, shading of bathymetry with amplitudes (\fImode\fP = 3
 as set with the \fB-Z\fP option) is accomplished
 by linearly mapping the amplitudes to shade values. This option
@@ -264,7 +287,9 @@ Selects Overlay plot mode [Default initializes a new plot system].
 .B \-P
 Selects Portrait plotting mode [GMT Default is Landscape, see gmtdefaults to change this].
 .TP
-.B \fB-p\fIpings\fP
+.B -p
+\fIpings\fP
+.br
 Sets the ping averaging of the input data. If \fIpings\fP = 1, then
 no ping averaging is performed. If \fIpings\fP > 0, then
 that number of input pings will be averaged to produce one output
@@ -273,23 +298,31 @@ be done so that the along-track ping spacing is equal to the across-track
 beam spacing. 
 Default: \fIpings\fP = 1 (no ping averaging).
 .TP
-.B \fB-Q\fIdpi\fP
+.B -Q
+\fIdpi\fP
+.br
 Sets the resolution of the color image output by \fBmbswath\fP
 in pixels per inch (except when the \fB-1\fP option is used to force individual
 polygon color fills). Default: \fIdpi\fP = 100.
 .TP
-.B \fB-R\fIwest/east/south/north\fP
+.B -R
+\fIwest/east/south/north\fP
+.br
 Sets the longitude and latitude bounds within which swath sonar 
 data will be read and plotted. Only the data which lies within 
 these bounds will be read. 
 Default: \fIwest\fP=-360, east\fI=360\fP, \fIsouth\fP=-90, \fInorth\fP=90.
 .TP
-.B \fB-S\fIspeed\fP
+.B -S
+\fIspeed\fP
+.br
 Sets the minimum speed in km/hr (5.5 kts ~ 10 km/hr) allowed in 
 the input data; pings associated with a smaller ship speed will not be
 processed. Default: \fIspeed\fP = 0.
 .TP
-.B \fB-T\fItimegap\fP
+.B -T
+\fItimegap\fP
+.br
 Sets the maximum time gap in minutes between adjacent pings allowed before
 the data is considered to have a gap. Default: \fItimegap\fP = 1.
 .TP
@@ -300,7 +333,7 @@ the command string.
 .B \-V
 Selects verbose mode, which will send progress reports to stderr [Default runs "silently"].
 .TP
-.B \fB-W\fP
+.B -W
 Normally, \fBmbswath\fP works with bathymetry values in meters.  If the
 \fB-W\fP flag is given, then \fBmbswath\fP will work with bathymetry
 values in feet. The color pallette file used must conform to the
@@ -309,7 +342,9 @@ range of bathymetry values in feet.
 .B \-X \-Y
 Shift origin of plot by (\fIx-shift,y-shift\fP) inches  [Default is (1,1) for new plots, (0,0) for overlays].
 .TP
-.B \fB-Z\fImode\fP
+.B -Z
+\fImode\fP
+.br
 Sets the style of the plot.
  	\fImode\fP = 1:	Color fill of bathymetry data.
  	\fImode\fP = 2:	Color shaded relief bathymetry.
