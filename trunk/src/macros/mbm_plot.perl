@@ -1,4 +1,4 @@
-#! /usr/local/bin/perl 
+#! /usr/lib/perl 
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_plot.perl	3.00	6/18/93
 #    $Id  $
@@ -33,10 +33,13 @@
 #   June 17, 1993
 #
 # Version:
-#   $Id: mbm_plot.perl,v 3.2 1993-06-19 15:06:54 caress Exp $
+#   $Id: mbm_plot.perl,v 3.3 1993-07-03 02:08:27 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 3.2  1993/06/19  15:06:54  caress
+# Fixed handling of command line argument "-O".
+#
 # Revision 3.1  1993/06/19  11:50:30  caress
 # Improved autoscaling so that a reasonable box including
 # all of the data is always (I hope) used.  Also added -P
