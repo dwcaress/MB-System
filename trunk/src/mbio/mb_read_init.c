@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_read_init.c	1/25/93
- *    $Id: mb_read_init.c,v 5.3 2001-06-08 21:44:01 caress Exp $
+ *    $Id: mb_read_init.c,v 5.4 2001-06-29 22:48:04 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	January 25, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2001/06/08  21:44:01  caress
+ * Version 5.0.beta01
+ *
  * Revision 5.2  2001/03/22  20:45:56  caress
  * Trying to make 5.0.beta0...
  *
@@ -169,7 +172,7 @@ int mb_read_init(int verbose, char *file,
 		int *beams_bath, int *beams_amp, int *pixels_ss, 
 		int *error)
 {
-	static char rcs_id[]="$Id: mb_read_init.c,v 5.3 2001-06-08 21:44:01 caress Exp $";
+	static char rcs_id[]="$Id: mb_read_init.c,v 5.4 2001-06-29 22:48:04 caress Exp $";
 	char	*function_name = "mb_read_init";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
@@ -232,7 +235,13 @@ int mb_read_init(int verbose, char *file,
 		{
 		/* free memory for mbio descriptor */
 		if (mbio_ptr != NULL)
-			mb_free(verbose,mbio_ptr,error);
+			{
+			status_save = status;
+			error_save = *error;
+			status = mb_free(verbose,mbio_ptr,error);
+			status = status_save;
+			*error = error_save;
+			}
 
 		/* output debug information */
 		if (verbose >= 2)
@@ -261,6 +270,7 @@ int mb_read_init(int verbose, char *file,
 	mb_io_ptr->file3_pos = 0;
 	mb_io_ptr->file3_bytes = 0;
 	mb_io_ptr->xdrs = NULL;
+	mb_io_ptr->xdrs2 = NULL;
 
 	/* load control parameters into the mbio descriptor */
 	mb_io_ptr->format = format;
@@ -495,6 +505,26 @@ int mb_read_init(int verbose, char *file,
 		    *error = MB_ERROR_MEMORY_FAIL;
 		    }
 		}
+
+	    /* if needed, initialize second XDR stream */
+	    if (status == MB_SUCCESS 
+		&& mb_io_ptr->filetype == MB_FILETYPE_XDR
+		&& (mb_io_ptr->numfile >= 2 || mb_io_ptr->numfile <= -2)
+		&& mb_io_ptr->mbfp2 != NULL)
+		{
+		status = mb_malloc(verbose,sizeof(XDR),
+				&mb_io_ptr->xdrs2,error);
+		if (status == MB_SUCCESS)
+		    {
+		    xdrstdio_create((XDR *)mb_io_ptr->xdrs2, 
+			    mb_io_ptr->mbfp2, XDR_DECODE);
+		    }
+		else
+		    {
+		    status = MB_FAILURE;
+		    *error = MB_ERROR_MEMORY_FAIL;
+		    }
+		}
 	    }
 	    
 	/* else handle gsf files to be opened with gsflib */
@@ -523,8 +553,12 @@ int mb_read_init(int verbose, char *file,
 		error_save = *error;
 
 		/* free allocated memory */
-		if (mb_io_ptr->filetype == MB_FILETYPE_XDR)
+		if (mb_io_ptr->filetype == MB_FILETYPE_XDR
+		    && mb_io_ptr->xdrs != NULL)
 			status = mb_free(verbose,&mb_io_ptr->xdrs,error);
+		if (mb_io_ptr->filetype == MB_FILETYPE_XDR
+		    && mb_io_ptr->xdrs2 != NULL)
+			status = mb_free(verbose,&mb_io_ptr->xdrs2,error);
 		status = mb_free(verbose,&mb_io_ptr->beamflag,error);
 		status = mb_free(verbose,&mb_io_ptr->bath,error);
 		status = mb_free(verbose,&mb_io_ptr->amp,error);
@@ -547,11 +581,8 @@ int mb_read_init(int verbose, char *file,
 		status = mb_free(verbose,&mb_io_ptr,error);
 
 		/* restore error and status values */
-		if (status == MB_SUCCESS)
-			{
-			status = status_save;
-			*error = error_save;
-			}
+		status = status_save;
+		*error = error_save;
 
 		/* output debug message */
 		if (verbose >= 2)
