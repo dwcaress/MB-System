@@ -48,6 +48,12 @@
  *		  This is GSF library version GSF-v1.04.
  * bac 10/27/97  Added a sensor specific subrecord for the SeaBeam 2112/36.
  * dwc 1/9/98    Added a sensor specific subrecord for the Elac Bottomchart MkII.
+ *-------------------------------------------------------------
+ * dwc 2/16/99   Altered code for MB-System - this no longer an
+ *		    official GSF distribution. The timespec structure
+ *                  has been altered to a gsfTimespec typedef to
+ *                  avoid portability problems.
+ *-------------------------------------------------------------
  *
  * Classification : Unclassified
  *
@@ -235,16 +241,12 @@ gsfDataID;
 #define GSF_NULL_NAV_POS_ERROR	       0.0
 
 /* define Posix.4 proposed structure for internal storage of time */
-#if !defined(_STRUCT_TIMESPEC_) && !defined (_TIMESPEC_T) && !defined (_STRUCT_TIMESPEC)	/* SAIC define */
-#define _STRUCT_TIMESPEC_
-#define _STRUCT_TIMESPEC
-#define _TIMESPEC_T
-    struct timespec
-    {
-	time_t		tv_sec;
-	long		tv_nsec;
-    };
-#endif
+typedef struct t_gsfTimespec
+{
+    time_t		tv_sec;
+    long		tv_nsec;
+}
+gsfTimespec;
 
 /* Define a structure for the gsf header record */
 #define GSF_VERSION_SIZE 12
@@ -257,8 +259,8 @@ gsfHeader;
 /* Define the data structure for the swath bathymety summary record */
 typedef struct t_gsfSwathBathySummary
 {
-    struct timespec start_time;
-    struct timespec end_time;
+    gsfTimespec	    start_time;
+    gsfTimespec	    end_time;
     double	    min_latitude;
     double	    min_longitude;
     double	    max_latitude;
@@ -606,7 +608,7 @@ typedef struct t_gsfScaleFactors
 /* Define the data structure for a ping from a swath bathymetric system */
 typedef struct t_gsfSwathBathyPing
 {
-    struct timespec ping_time;		/* seconds and nanoseconds */
+    gsfTimespec	    ping_time;		/* seconds and nanoseconds */
     double	    latitude;		/* in degrees */
     double	    longitude;		/* in degrees */
     short	    number_beams;	/* in this ping */
@@ -648,7 +650,7 @@ gsfSwathBathyPing;
 /* Define a single beam record structure. */
 typedef struct t_gsfSingleBeamPing
 {
-    struct timespec ping_time;		/* Time the sounding was made */
+    gsfTimespec	    ping_time;		/* Time the sounding was made */
     double	    latitude;		/* latitude (degrees) of sounding */
     double	    longitude;		/* longitude (degrees) of sounding */
     double	    tide_corrector;	/* in meters */
@@ -668,8 +670,8 @@ gsfSingleBeamPing;
 /* Define the sound velocity profile structure */
 typedef struct t_gsfSVP
 {
-    struct timespec observation_time;	/* time the SVP measurement was made		*/
-    struct timespec application_time;	/* time the SVP was used by the sonar		*/
+    gsfTimespec	    observation_time;	/* time the SVP measurement was made		*/
+    gsfTimespec	    application_time;	/* time the SVP was used by the sonar		*/
     double	    latitude;		/* latitude (degrees) of SVP measurement	*/
     double	    longitude;		/* longitude (degrees) of SVP measurement	*/
     int 	    number_points;	/* number of data points in the profile 	*/
@@ -682,7 +684,7 @@ gsfSVP;
 #define GSF_MAX_PROCESSING_PARAMETERS 64
 typedef struct t_gsfProcessingParameters
 {
-    struct timespec param_time;
+    gsfTimespec	    param_time;
     int 	    number_parameters;
     short	    param_size[GSF_MAX_PROCESSING_PARAMETERS];	/* array of sizes of param text */
     char	   *param[GSF_MAX_PROCESSING_PARAMETERS];	/* array of parameters: "param_name=param_value" */
@@ -693,7 +695,7 @@ gsfProcessingParameters;
 #define GSF_MAX_SENSOR_PARAMETERS 32
 typedef struct t_gsfSensorParameters
 {
-    struct timespec param_time;
+    gsfTimespec	    param_time;
     int 	    number_parameters;
     short	    param_size[GSF_MAX_SENSOR_PARAMETERS];	/* array of sizes of param text */
     char	   *param[GSF_MAX_SENSOR_PARAMETERS];	/* array of parameters: "param_name=param_value" */
@@ -703,7 +705,7 @@ gsfSensorParameters;
 /* Define the comment record structure */
 typedef struct t_gsfComment
 {
-    struct timespec comment_time;
+    gsfTimespec	    comment_time;
     int 	    comment_length;
     char	   *comment;
 }
@@ -714,7 +716,7 @@ gsfComment;
 #define GSF_HOST_NAME_LENGTH 64
 typedef struct t_gsfHistory
 {
-    struct timespec history_time;
+    gsfTimespec	    history_time;
     char	    host_name[GSF_HOST_NAME_LENGTH + 1];
     char	    operator[GSF_OPERATOR_LENGTH + 1];
     char	   *command_line;
@@ -725,7 +727,7 @@ gsfHistory;
 /* Define the navigation error record */
 typedef struct t_gsfNavigationError
 {
-    struct timespec nav_error_time;
+    gsfTimespec	    nav_error_time;
     int 	    record_id;	/* Containing nav with these errors */
     double	    latitude_error;	/* 90% CE in meters */
     double	    longitude_error;	/* 90% CE in meters */
