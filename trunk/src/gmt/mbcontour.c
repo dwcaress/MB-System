@@ -22,6 +22,9 @@
  * Date:	June 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 3.1  1993/06/21  00:04:52  caress
+ * Fixed help message.
+ *
  * Revision 3.0  1993/06/19  01:17:26  caress
  * Initial version
  * ls
@@ -91,7 +94,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbcontour.c,v 3.1 1993-06-21 00:04:52 caress Exp $";
+	static char rcs_id[] = "$Id: mbcontour.c,v 3.2 1993-08-16 22:57:49 caress Exp $";
 	static char program_name[] = "MBCONTOUR";
 	static char help_message[] =  "MBCONTOUR is a GMT compatible utility which creates a color postscript \ncontour map of multibeam swath bathymetry or backscatter data.  \nComplete maps are made by using MBCONTOUR in conjunction with the  \nusual GMT programs.  The contour levels and colors can be controlled \ndirectly or set implicitly using contour and color change intervals. \nContours can also be set to have ticks pointing downhill.";
 	static char usage_message[] = "mbcontour -Idatalist -Jparameters -Rwest/east/south/north [-Acontour_int/color_int/tick_int/label_int/tick_len/label_hgt -Btickinfo -Ccontourfile -Fred/green/blue -K -Llonflip -M -O -P -ppings -U -Xx-shift -Yy-shift -#copies -V -H]";
@@ -876,9 +879,9 @@ double	*s;
 
 	len = strlen(string);
 	s[0] = 0.0;
-	s[1] = 0.25*height*len;
-	s[2] = 0.5*len*height;
-	s[3] = 0.5*len*height;
+	s[1] = 0.185*height*len;
+	s[2] = 0.37*len*height;
+	s[3] = 0.37*len*height;
 
 	return;
 }
