@@ -1769,7 +1769,7 @@ static void get_file_selection(w, tag, list)
 	selection_text = XmTextGetString(widget_array[k_selection_text]);
 
 	/* get output file */
-	if(strlen(selection_text) > 0)
+	if((int)strlen(selection_text) > 0)
 		{
 		/* look for MB suffix convention */
 		if ((suffix = strstr(selection_text,".mb")) != NULL)
