@@ -21,8 +21,34 @@ get point-and-click ftp access</A> to all of the MB-System related files
 available from Lamont (these may include data examples and beta distributions
 of MB-System ).</P>
 
+<P>If access through the above links fails, try running ftp from a terminal shell.
+The following commands represent a typical anonymous ftp session (note that
+your@email.address literally means to enter your email address).</P>
+
 <P>
-<HR WIDTH="67%"></P>
+<UL>
+% ftp ftp.ldeo.columbia.edu<BR>
+Name: anonymous<BR>
+Password: your@email.address<BR>
+> cd pub/MB-System<BR>
+> binary<BR>
+> get MB-System.tar.gz<BR>
+> quit<BR>
+</UL>
+</P>
+
+If anonymous ftp fails with an error message like: "Sorry no DNS entry" after the email address is entered as the anonymous password, this means 
+that the internet address (also called IP address) of the computer in use is
+not known to the Lamont network to be legitimate. The Lamont ftp server
+attempts to look up or resolve IP addresses using the primary Domain Name Service
+(DNS) servers associated with the internet as a whole. This situation sometimes
+exists for computers connecting through improperly configured firewalls or  
+Network Address Translation (NAT) devices. Users facing this issue can often
+succeed by running ftp from a "better connected" server in their 
+organization. Otherwise, they will need to contact their internet service
+provider or their network/computing support staff.
+
+<CENTER><P><HR WIDTH="67%"></P></CENTER>
 
 <CENTER><DD><A NAME="MB-required"></A><B><FONT SIZE=+2>Other Required and
 Suggested Software and Data</FONT></B></DD></CENTER>
@@ -156,7 +182,6 @@ install_makefiles, do the following:</P>
 
 <UL>
 <PRE>% cd mbsystem </PRE>
-
 <PRE>% install_makefiles</PRE>
 </UL>
 
@@ -190,7 +215,7 @@ Graphics machines xpsview is commonly used. A popular generic alternative
 to these platform specific programs is ghostview.</P>
 
 <CENTER><P><BR>
-Last Updated: $Date: 2003-04-17 21:43:48 $ $Revision: 5.7 $</P></CENTER>
+Last Updated: $Date: 2003-07-02 19:36:34 $ $Revision: 5.8 $</P></CENTER>
 
 <P>
 <HR WIDTH="67%"></P>
