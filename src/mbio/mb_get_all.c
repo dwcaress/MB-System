@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_get_all.c	1/26/93
- *    $Id: mb_get_all.c,v 4.11 2000-10-11 01:02:30 caress Exp $
+ *    $Id: mb_get_all.c,v 4.12 2000-10-16 21:52:54 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	January 26, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.11  2000/10/11  01:02:30  caress
+ * Convert to ANSI C
+ *
  * Revision 4.10  2000/09/30  06:26:58  caress
  * Snapshot for Dale.
  *
@@ -104,7 +107,7 @@ int mb_get_all(int verbose, char *mbio_ptr, char **store_ptr, int *kind,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
 		char *comment, int *error)
 {
-  static char rcs_id[]="$Id: mb_get_all.c,v 4.11 2000-10-11 01:02:30 caress Exp $";
+  static char rcs_id[]="$Id: mb_get_all.c,v 4.12 2000-10-16 21:52:54 caress Exp $";
 	char	*function_name = "mb_get_all";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -140,6 +143,7 @@ int mb_get_all(int verbose, char *mbio_ptr, char **store_ptr, int *kind,
 	*nbath = 0;
 	*namp = 0;
 	*nss = 0;
+	if (bath != NULL)
 	for (i=0;i<mb_io_ptr->beams_bath;i++)
 		{
 		beamflag[i] = MB_FLAG_NULL;
@@ -147,10 +151,12 @@ int mb_get_all(int verbose, char *mbio_ptr, char **store_ptr, int *kind,
 		bathacrosstrack[i] = 0.0;
 		bathalongtrack[i] = 0.0;
 		}
+	if (amp != NULL)
 	for (i=0;i<mb_io_ptr->beams_amp;i++)
 		{
 		amp[i] = 0.0;
 		}
+	if (ss != NULL)
 	for (i=0;i<mb_io_ptr->pixels_ss;i++)
 		{
 		ss[i] = 0.0;
