@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_elmk2unb.c	6/6/97
- *	$Id: mbr_elmk2unb.c,v 4.4 1999-03-31 18:11:35 caress Exp $
+ *	$Id: mbr_elmk2unb.c,v 4.5 1999-04-02 00:55:11 caress Exp $
  *
  *    Copyright (c) 1997 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -23,6 +23,9 @@
  * Date:	June 6, 1997
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.4  1999/03/31  18:11:35  caress
+ * MB-System 4.6beta7
+ *
  * Revision 4.3  1998/10/05  17:46:15  caress
  * MB-System version 4.6beta
  *
@@ -63,7 +66,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_elmk2unb.c,v 4.4 1999-03-31 18:11:35 caress Exp $";
+	static char res_id[]="$Id: mbr_elmk2unb.c,v 4.5 1999-04-02 00:55:11 caress Exp $";
 	char	*function_name = "mbr_alm_elmk2unb";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -625,7 +628,7 @@ int	*error;
 			}
 		}
 
-	if (status == MB_SUCCESS
+	else if (status == MB_SUCCESS
 		&& data->kind == MB_DATA_NAV)
 		{
 		mb_io_ptr->new_lon 
@@ -678,7 +681,7 @@ int	*error;
 		}
 
 	/* copy comment to mbio descriptor structure */
-	if (status == MB_SUCCESS
+	else if (status == MB_SUCCESS
 		&& data->kind == MB_DATA_COMMENT)
 		{
 		/* copy comment */
@@ -1039,6 +1042,10 @@ int	*error;
 	else if (mb_io_ptr->new_error == MB_ERROR_NO_ERROR
 		&& mb_io_ptr->new_kind == MB_DATA_DATA)
 		{
+		/*get navigation */
+		data->pos_longitude = mb_io_ptr->new_lon / 0.00000009;
+		data->pos_latitude = mb_io_ptr->new_lat / 0.00000009;
+
 		/* get heading */
 		data->heading 
 			= (int) (mb_io_ptr->new_heading * 100);
@@ -1080,6 +1087,34 @@ int	*error;
 			    = (int) (mb_io_ptr->new_amp[i]
 					/reflscale);
 		    }
+		}
+
+	/* else check for nav data to be copied from mb_io_ptr */
+	else if (mb_io_ptr->new_error == MB_ERROR_NO_ERROR
+		&& mb_io_ptr->new_kind == MB_DATA_NAV)
+		{
+		/* get time */
+		mb_unfix_y2k(verbose, mb_io_ptr->new_time_i[0], 
+			    &data->pos_year);
+		data->pos_month = mb_io_ptr->new_time_i[1];
+		data->pos_day = mb_io_ptr->new_time_i[2];
+		data->pos_hour = mb_io_ptr->new_time_i[3];
+		data->pos_minute = mb_io_ptr->new_time_i[4];
+		data->pos_second = mb_io_ptr->new_time_i[5];
+		data->pos_hundredth_sec 
+			= mb_io_ptr->new_time_i[6]/10000;
+		data->pos_thousandth_sec 
+			= (mb_io_ptr->new_time_i[6] 
+			- 10000*data->pos_hundredth_sec)/100;
+
+		/*get navigation */
+		data->pos_longitude = mb_io_ptr->new_lon / 0.00000009;
+		data->pos_latitude = mb_io_ptr->new_lat / 0.00000009;
+
+		/* get heading */
+		data->heading 
+			= (int) (mb_io_ptr->new_heading * 100);
+
 		}
 
 	/* write next data to file */
