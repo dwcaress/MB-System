@@ -1,4 +1,4 @@
-.TH mbnavedit l "16 March 2001" "MB-System 5.0" "MB-System 5.0"
+.TH mbnavedit l "6 March 2004" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbnavedit\fP - Interactive navigation editor for swath sonar data.
 
@@ -53,23 +53,6 @@ from "course-made-good" or "speed-made-good", respectively.
 Data can only be selected and altered in a single 
 plot at a time (this avoids confusion and prevents mistakes).
 
-Two algorithms for obtaining and using smooth navigation models are
-available. Replacing the original navigation with a smoothed
-version can be advantageous in some cases of very noisy 
-navigation (typically from sonars on towed platforms or 
-submerged vehicles). The first approach is simple dead reckoning 
-from the initial position using the current (possibly edited)
-heading and speed values. The dead reckoning navigation can also
-incorporate user-specified longitude and latitude drift rates.
-The second algorithm is an inversion for a smooth 
-navigation that minimizes
-speed and acceleration while fitting the original navigation
-in a least squares sense. The inversion weighting against 
-speed and acceleration are user specified, and only unaltered
-navigation values are used in the inversion (this means that
-longitude and latitude values that have previously been selected and
-interpolated are not used to generate the smooth model).
-
 The nature of the navigation data being edited depends upon the
 data format. Some data formats include the navigation in the
 same data records as the ping or survey data. This synchronous
@@ -87,9 +70,50 @@ records. For data formats with only asynchronous navigation,
 navigation records. The \fBMBIO\fP manual page includes a listing
 of which type of navigation is used by the supported data formats.
 
+For some data formats, the user can also 
+inspect plots of roll, pitch, and heaved
+data to determine if the ship's vertical reference sensors
+were working properly.
+
+The edited data is usually output to a file, but the program
+can be operated in a "browse" mode where no data is output.
+
+.SH SMOOTHING NAVIGATION
+
+Two algorithms for obtaining and using smooth navigation models are
+available. Replacing the original navigation with a smoothed
+version can be advantageous in some cases of very noisy 
+navigation (typically from sonars on towed platforms or 
+submerged vehicles). The first approach is simple dead reckoning 
+from the initial position using the current (possibly edited)
+heading and speed values. The dead reckoning navigation can also
+incorporate user-specified longitude and latitude drift rates.
+The second algorithm is an inversion for a smooth 
+navigation that minimizes
+speed and acceleration while fitting the original navigation
+in a least squares sense. The inversion weighting against 
+speed and acceleration are user specified, and only unaltered
+navigation values are used in the inversion (this means that
+longitude and latitude values that have previously been selected and
+interpolated are not used to generate the smooth model).
+
+.SH HANDLING BAD TIME STAMPS
+
 The time interval plot allows
 users to spot problems with time stamps and to change the
-time stamps, if necessary. If the navigation is 
+time stamps, if necessary. The most obvious time stamp errors
+are multiple pings with the same time stamps (producing a zero
+time interval value), or 
+sequential pings with decreasing time stamps (resulting in
+negative time interval values). \fBMBnavedit\fP
+provides two tools for dealing with zero or negative time intervals: 
+time stamp interpolation or deletion of the affected pings. Control
+dialogs allow users to apply either to the entire buffer at once.
+Time stamp interpolation may also be accomplished by selecting
+the relevant values in the time interval display, and then
+selecting interpolation.
+
+If the navigation is 
 asynchronous, that generally means the time interval should be
 constant since navigation systems are set to output values at
 a uniform rate. A problem with the time stamps of asynchronous
@@ -99,37 +123,14 @@ the offending point in the time interval plot and interpolating
 to reset the time stamp.
 
 If the navigation is synchronous with the sonar
-pings, then the time interval will vary because the ping
-rate for many sonars varies with the sonars altitude above the
+pings, then the time interval will likely vary because the ping
+rate for most sonars varies with the sonars altitude above the
 seafloor. In this case, time stamp problems will 
 not produce spikes in the speed-made-good plot 
 because the navigation has been interpolated
 using the existing time stamps. Time interval spikes may also
 reflect problems with the sonar (e.g. occasional failure to ping
 at the appropriate time) rather than erroneous time stamps. 
-However, one can reasonably infer a time stamp problem when
-two or more pings have the same time stamp, and the facility
-to select and interpolate the time interval values can be 
-used to fix this problem.
-
-For some data formats, the user can also 
-inspect plots of roll, pitch, and heaved
-data to determine if the ship's vertical reference sensors
-were working properly.
-
-One special case which has been encountered is a problem with
-the time stamps of survey records in data using a format with
-asynchronous navigation. In order to use \fBMBnavedit\fP to
-fix the time stamps of the survey data, one may invoke 
-the \fB-P\fP option at the command line. This forces 
-\fBMBnavedit\fP to work with interpolated synchronous navigation
-rather than the asynchronous navigation records.
-In this case, any changes made to the navigation values  will be
-lost, but changes made to the time stamps will be applied to
-the survey data records.
-
-The edited data is usually output to a file, but the program
-can be operated in a "browse" mode where no data is output.
 
 .SH AUTHORSHIP
 David W. Caress (caress@mbari.org)
@@ -260,8 +261,9 @@ is read and the navigition times series
 plots are displayed.
 .TP
 .B Controls
-This button activates a pulldown menu with three buttons:
-\fBTime Stepping\fP, \fBNav Modeling\fP, and \fBTime Interpolation\fP. Each
+This button activates a pulldown menu with four buttons:
+\fBTime Stepping\fP, \fBNav Modeling\fP, \fBTime Interpolation\fP, 
+and \fBDelete Bad Times\fP. Each
 of these buttons brings up a dialog window containing widgets
 that set parameters or perform actions.
 .TP
@@ -341,6 +343,28 @@ displayed in the longitude and latitude plots.
 .TP
 .B Controls->Navigation Modeling->Dismiss
 This button causes the \fBNavigation Modeling\fP dialog
+to disappear.
+.TP
+.B Controls->Time Interpolation->Apply
+This button causes the time stamps of all data in
+the current buffer associated
+with negative or zero time intervals to be interpolated so
+that the time intervals are positive. The \fBTime Interpolation\fP
+dialog disappears after this action is taken.
+.TP
+.B Controls->Time Interpolation->Dismiss
+This button causes the \fBTime Interpolation\fP dialog
+to disappear.
+.TP
+.B Controls->Delete Bad Times->Apply
+This button causes all data in
+the current buffer associated
+with negative or zero time intervals to be deleted. 
+The \fBDelete Bad Times\fP
+dialog disappears after this action is taken.
+.TP
+.B Controls->Delete Bad Times->Dismiss
+This button causes the \fBDelete Bad Times\fP dialog
 to disappear.
 .TP
 .B Next Buffer

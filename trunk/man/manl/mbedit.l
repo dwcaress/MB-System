@@ -1,4 +1,4 @@
-.TH mbedit l "29 August 2001" "MB-System 5.0" "MB-System 5.0"
+.TH mbedit l "16 March 2001" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbedit\fP - Interactive editor used to flag bad bathymetry values in swath sonar bathymetry data.
 
@@ -642,6 +642,11 @@ key macros (see the keyboard action section):
  	Info:		'T', 't', '{', '[' 
 .TP
 .B Unflag View
+This button flags all unflagged beams among the currently
+displayed pings. Pings in the buffer before or after the current 
+display are unaffected.
+.TP
+.B Unflag View
 This button unflags all flagged beams among the currently
 displayed pings. Pings in the buffer before or after the current 
 display are unaffected.
@@ -686,6 +691,18 @@ the same action.
 .B Bad Ping:
 Pressing one of these keys causes all of the beams in the last picked
 ping to be flagged as bad.
+.TP
+.B 'X', 'x', '<', or ','
+.B Right:
+Pressing one of these keys causes all of the unflagged beams 
+in the current display to to be flagged as bad. This is equivalent
+to the CFlag View\fP button.
+.TP
+.B 'C', 'c', '>', or '.'
+.B Right:
+Pressing one of these keys causes all of the flagged beams 
+in the current display to to be unflagged. This is equivalent
+to the \fBUnflag View\fP button.
 .TP
 .B 'S', 's', 'K', or 'k'
 .B Good Ping:
