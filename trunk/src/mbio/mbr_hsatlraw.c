@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsatlraw.c	2/11/93
- *	$Id: mbr_hsatlraw.c,v 5.8 2003-05-20 18:05:32 caress Exp $
+ *	$Id: mbr_hsatlraw.c,v 5.9 2004-05-22 06:00:07 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	February 11, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2003/05/20 18:05:32  caress
+ * Added svp_source to data source parameters.
+ *
  * Revision 5.7  2003/04/17 21:05:23  caress
  * Release 5.0.beta30
  *
@@ -180,7 +183,7 @@ int mbr_dem_hsatlraw(int verbose, void *mbio_ptr, int *error);
 int mbr_rt_hsatlraw(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_hsatlraw(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
-static char res_id[]="$Id: mbr_hsatlraw.c,v 5.8 2003-05-20 18:05:32 caress Exp $";
+static char res_id[]="$Id: mbr_hsatlraw.c,v 5.9 2004-05-22 06:00:07 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_hsatlraw(int verbose, void *mbio_ptr, int *error)
@@ -635,6 +638,7 @@ int mbr_rt_hsatlraw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	struct mb_io_struct *mb_io_ptr;
 	struct mbf_hsatlraw_struct *data;
 	struct mbsys_hsds_struct *store;
+	double	xx, rr, zz, tt;
 	int	i;
 
 	/* print input debug statements */
@@ -768,6 +772,33 @@ int mbr_rt_hsatlraw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		for (i=0;i<MBSYS_HSDS_BEAMS;i++)
 			{
 			store->back[i] = mb_io_ptr->new_amp[i];
+			}
+			
+		/* deal with missing travel times if needed */
+		if (store->kind == MB_DATA_DATA)
+			{
+			if (store->vel_mean <= 0.0)
+				store->vel_mean = 1500.0;
+			if (store->vel_keel <= 0.0)
+				store->vel_keel = 1500.0;
+			if (store->time_scale == 0)
+				store->time_scale = 0.01;
+			if (store->time_center <= 0.0 && store->depth_center != 0.0)
+				{
+				rr = fabs(store->depth_center) + store->draught + store->heave;
+				store->time_center = rr / store->vel_mean;
+				}
+			for (i=0;i<MBSYS_HSDS_BEAMS;i++)
+				{
+				if (data->time[i] <= 0 && store->depth[i] != 0)
+					{
+					zz = store->depth_scale * (fabs((double)store->depth[i]) + store->draught + store->heave);
+					xx = store->depth_scale * store->distance[i];
+					rr = sqrt(xx * xx + zz * zz);
+					tt = rr / store->vel_mean;
+					store->time[i] = tt / store->time_scale;
+					}
+				}
 			}
 		}
 

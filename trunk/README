@@ -151,6 +151,11 @@ A "Flag View" feature has been added to MBedit, allowing users to
 flag all of the beams in the current display. Key macros have also
 been defined for both the "Flag View" and "Unflag View" buttons.
 
+The raw Hydrosweep DS format (format 21) i/o module now estimates
+travel times from the bathymetry when data files lacking travel time
+records are read. This allows users to recalculate bathymetry by
+raytracing even if the travel times are not recorded.
+
 MB-SYSTEM VERSION 5.0.3 RELEASE NOTES:
 ------------------------------------------
 
@@ -783,10 +788,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.48 2004-05-22 04:22:02 caress Exp $
+RCS ID: $Id: README,v 5.49 2004-05-22 05:58:18 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.48  2004/05/22 04:22:02  caress
+Release 5.0.4
+
 Revision 5.47  2004/05/21 23:59:31  caress
 Getting ready for release 5.0.4
 
