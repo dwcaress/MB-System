@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_sb2100.c	3/2/94
- *	$Id: mbsys_sb2100.c,v 4.6 1995-05-08 21:26:28 caress Exp $
+ *	$Id: mbsys_sb2100.c,v 4.7 1995-06-03 03:25:13 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -31,6 +31,9 @@
  * Author:	D. W. Caress
  * Date:	March 2, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.6  1995/05/08  21:26:28  caress
+ * Made changes consistent with new i/o spec for SB2100 data.
+ *
  * Revision 4.5  1995/03/06  19:38:54  caress
  * Changed include strings.h to string.h for POSIX compliance.
  *
@@ -79,7 +82,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_sb2100.c,v 4.6 1995-05-08 21:26:28 caress Exp $";
+ static char res_id[]="$Id: mbsys_sb2100.c,v 4.7 1995-06-03 03:25:13 caress Exp $";
 	char	*function_name = "mbsys_sb2100_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -191,7 +194,7 @@ int	*error;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_sb2100_struct *store;
 	int	time_j[5];
-	double	scale;
+	double	scale,  pixel_size, pixel_scale;
 	int	i;
 
 	/* print input debug statements */
@@ -270,6 +273,16 @@ int	*error;
 			scale = 0.1;
 		else
 			scale = 1.0;
+		if (store->pixel_size_scale == 'S')
+			pixel_scale = 0.01;
+		else if (store->pixel_size_scale == 'I')
+			pixel_scale = 0.1;
+		else
+			pixel_scale = 1.0;
+		if (store->frequency[0] == 'L')
+			pixel_size = store->pixel_size_12khz;
+		else
+			pixel_size = store->pixel_size_36khz;
 		for (i=0;i<*nbath;i++)
 			{
 			bath[i] = scale*store->depth[i];
@@ -283,8 +296,8 @@ int	*error;
 		for (i=0;i<*nss;i++)
 			{
 			ss[i] = store->amplitude_ss[i];
-			ssacrosstrack[i] = scale*(i - MBSYS_SB2100_CENTER_PIXEL)
-				*store->pixel_size_12khz;
+			ssacrosstrack[i] = pixel_scale*pixel_size
+				*(i - MBSYS_SB2100_CENTER_PIXEL);
 			ssalongtrack[i] = scale*store->alongtrack_ss[i];
 			}
 
@@ -456,7 +469,7 @@ int	*error;
 	struct mbsys_sb2100_struct *store;
 	int	kind;
 	int	time_j[5];
-	double	scale;
+	double	scale, pixel_size;
 	int	set_pixel_size;
 	int	i;
 
@@ -550,29 +563,32 @@ int	*error;
 			}
 		for (i=0;i<namp;i++)
 			store->amplitude_beam[i] = amp[i];
-		set_pixel_size = MB_YES;
+		if ((store->frequency[0] == 'H' 
+			    && store->pixel_size_36khz <= 0.0)
+			|| (store->frequency[0] != 'H' 
+			    && store->pixel_size_12khz <= 0.0))
+			set_pixel_size = MB_YES;
+		else
+			set_pixel_size = MB_NO;
 		for (i=0;i<nss;i++)
 			{
 			store->amplitude_ss[i] = ss[i];
 			store->alongtrack_ss[i] = scale*ssalongtrack[i];
 			if (set_pixel_size == MB_YES
-			    && (store->frequency[0] == 'H' 
-			    && store->pixel_size_36khz <= 0)
 				&& ssacrosstrack[i] > 0)
 				{
-				store->pixel_size_36khz = 
-					ssacrosstrack[i]/
+				pixel_size = ssacrosstrack[i]/
 					(i - MBSYS_SB2100_CENTER_PIXEL);
-				set_pixel_size = MB_NO;
-				}
-			else if (set_pixel_size == MB_YES
-			    && (store->frequency[0] != 'H' 
-			    && store->pixel_size_12khz <= 0)
-				&& ssacrosstrack[i] > 0)
-				{
-				store->pixel_size_12khz = 
-					ssacrosstrack[i]/
-					(i - MBSYS_SB2100_CENTER_PIXEL);
+				if (store->pixel_size_scale == 'S')
+					pixel_size = 100*pixel_size;
+				else if (store->pixel_size_scale == 'I')
+					pixel_size = 10*pixel_size;
+				else 
+					store->pixel_size_scale = 'D';
+				if (store->frequency[0] == 'H')
+					store->pixel_size_36khz = pixel_size;
+				else
+					store->pixel_size_12khz = pixel_size;
 				set_pixel_size = MB_NO;
 				}
 			}
