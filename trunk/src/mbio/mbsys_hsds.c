@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_hsds.c	3/2/93
- *	$Id: mbsys_hsds.c,v 4.11 1996-04-22 13:21:19 caress Exp $
+ *	$Id: mbsys_hsds.c,v 4.12 1996-08-05 15:21:58 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -37,6 +37,9 @@
  * Author:	D. W. Caress
  * Date:	March 2, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.11  1996/04/22  13:21:19  caress
+ * Now have DTR and MIN/MAX defines in mb_define.h
+ *
  * Revision 4.10  1995/11/27  21:50:55  caress
  * New version of mb_ttimes with ssv and angles_null.
  *
@@ -107,7 +110,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_hsds.c,v 4.11 1996-04-22 13:21:19 caress Exp $";
+ static char res_id[]="$Id: mbsys_hsds.c,v 4.12 1996-08-05 15:21:58 caress Exp $";
 	char	*function_name = "mbsys_hsds_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -627,7 +630,13 @@ int	*error;
 			ttimes[i] = store->time_scale*store->time[i];
 			angles[i] = (i-MBSYS_HSDS_BEAMS/2)
 				*MBSYS_HSDS_BEAM_SPACING;
-			angles_forward[i] = 0.0;
+			if (angles[i] < 0.0)
+				{
+				angles[i] = -angles[i];
+				angles_forward[i] = 180.0;
+				}
+			else
+				angles_forward[i] = 0.0;
 			angles_null[i] = 0.0;
 			if (store->depth[i] < 0)
 				flags[i] = MB_YES;

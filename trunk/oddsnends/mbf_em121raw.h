@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_em121raw.h	8/8/94
- *	$Id: mbf_em121raw.h,v 4.0 1996-07-26 21:07:59 caress Exp $
+ *	$Id: mbf_em121raw.h,v 4.1 1996-08-05 15:25:43 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -17,6 +17,9 @@
  * Author:	D. W. Caress
  * Date:	August 8, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1996/07/26  21:07:59  caress
+ * Initial version.
+ *
  * Revision 4.0  1994/10/21  12:35:04  caress
  * Release V4.0
  *
@@ -66,7 +69,7 @@
 
 /* maximum number of beams and pixels */
 #define	MBF_EM121RAW_MAXBEAMS	121
-#define	MBF_EM121RAW_MAXPIXELS	100*MBF_EM121RAW_MAXBEAMS
+#define	MBF_EM121RAW_MAXPIXELS	50*MBF_EM121RAW_MAXBEAMS
 
 struct mbf_em121raw_struct
 	{
@@ -147,9 +150,9 @@ struct mbf_em121raw_struct
 	int	minute;
 	int	second;
 	int	centisecond;
-	int	ping_number;
 
 	/* bathymetry */
+	int	ping_number;
 	int	beams_bath;	/* EM-1000:  60
 				   EM12S:    81
 				   EM121:   121 

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.h	1/19/93
- *    $Id: mb_format.h,v 4.12 1996-04-22 10:59:01 caress Exp $
+ *    $Id: mb_format.h,v 4.13 1996-08-05 15:25:43 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -17,6 +17,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.12  1996/04/22  10:59:01  caress
+ * Added SBIFREMR format.
+ *
  * Revision 4.11  1996/03/12  17:23:31  caress
  * Added format 63, short HMR1 processing format.
  *
@@ -100,15 +103,16 @@
 #define	MB_SYS_SB2000	3
 #define	MB_SYS_SB2100	4
 #define	MB_SYS_SIMRAD	5
-#define	MB_SYS_MR1	6
-#define	MB_SYS_MR1B	7
-#define	MB_SYS_LDEOIH	8
-#define	MB_SYS_RESON	9
-#define	MB_SYS_ELAC	10
-#define MB_SYS_HSMD     11
+#define	MB_SYS_SIMRAD2	6
+#define	MB_SYS_MR1	7
+#define	MB_SYS_MR1B	8
+#define	MB_SYS_LDEOIH	9
+#define	MB_SYS_RESON	10
+#define	MB_SYS_ELAC	11
+#define MB_SYS_HSMD     12
 
 /* Number of supported MBIO data formats */
-#define	MB_FORMATS	29
+#define	MB_FORMATS	32
 
 /* Data formats supported by MBIO */
 #define	MBF_SBSIOMRG	11	/* SeaBeam, 16 beam, bathymetry, 
@@ -174,6 +178,14 @@
 #define	MBF_EM12DARW	54	/* Simrad EM12 RRS Darwin processed format, 
 					81 beam, bathymetry and amplitude,
 					binary, centered, Oxford University */ 
+#define	MBF_EM121RAW	55	/* Simrad EM121 series vendor format, 
+					121 beam bathymetry and 
+					amplitude, variable pixel sidescan, 
+					ascii + binary, Simrad */ 
+#define	MBF_EM3000RW	56	/* Simrad EM3000 series vendor format, 
+					151 beam bathymetry and 
+					amplitude, variable pixel sidescan, 
+					ascii + binary, Simrad */ 
 #define	MBF_MR1PRHIG	61	/* MR1 post processed format, 
 					variable beam bathymetry, variable
 					pixel sidescan, xdr binary, SOEST */ 
@@ -226,6 +238,8 @@ static int format_table[] =
 	52,	/* MBF_EM12SRAW */
 	53,	/* MBF_EM12DRAW */
 	54,	/* MBF_EM12DARW */
+	55,	/* MBF_EM121RAW */
+	56,	/* MBF_EM3000RW */
 	61,	/* MBF_MR1PRHIG */
 	62,	/* MBF_MR1ALDEO */
 	63,	/* MBF_MR1BLDEO */
@@ -259,9 +273,11 @@ static int supported_format_table[] =
 	1,	/* MBF_SB2100RW */
 	0,	/* MBF_SB2100IH */
 	1,	/* MBF_EM1000RW */
-	0,	/* MBF_EM12SRAW */
+	1,	/* MBF_EM12SRAW */
 	0,	/* MBF_EM12DRAW */
 	1,	/* MBF_EM12DARW */
+	1,	/* MBF_EM121RAW */
+	0,	/* MBF_EM3000RW */
 	1,	/* MBF_MR1PRHIG */
 	1,	/* MBF_MR1ALDEO */
 	1,	/* MBF_MR1BLDEO */
@@ -313,6 +329,8 @@ static char *format_description[] =
 	"Format name:          MBF_EM12SRAW\nInformal Description: Simrad EM12S vendor format\nAttributes:           Simrad EM12S, bathymetry, amplitude, and sidescan,\n                      81 beams, variable pixels, ascii + binary, Simrad.\n",
 	"Format name:          MBF_EM12DRAW\nInformal Description: Simrad EM12D vendor format\nAttributes:           Simrad EM12D, bathymetry, amplitude, and sidescan,\n                      162 beams, variable pixels, ascii + binary, Simrad.\n",
 	"Format name:          MBF_EM12DARW\nInformal Description: Simrad EM12S RRS Darwin processed format\nAttributes:           Simrad EM12S, bathymetry and amplitude,\n                      81 beams, binary, Oxford University.\n",
+	"Format name:          MBF_EM121RAW\nInformal Description: Simrad EM121 vendor format\nAttributes:           Simrad EM121, bathymetry, amplitude, and sidescan,\n                      121 beams, variable pixels, ascii + binary, Simrad.\n",
+	"Format name:          MBF_EM3000RW\nInformal Description: Simrad EM3000 vendor format\nAttributes:           Simrad EM3000, bathymetry, amplitude, and sidescan,\n                      254 beams, variable pixels, ascii + binary, Simrad.\n",
 	"Format name:          MBF_MR1PRHIG\nInformal Description: SOEST MR1 post processed format\nAttributes:           SOEST MR1, bathymetry and sidescan,\n                      variable beams and pixels, xdr binary, \n                      SOEST, University of Hawaii.\n",
 	"Format name:          MBF_MR1ALDEO\nInformal Description: L-DEO MR1 post processed format with travel times\nAttributes:           L-DEO MR1, bathymetry and sidescan,\n                      variable beams and pixels, xdr binary, \n                      L-DEO.\n",
 	"Format name:          MBF_MR1BLDEO\nInformal Description: L-DEO small MR1 post processed format with travel times\nAttributes:           L-DEO MR1, bathymetry and sidescan,\n                      variable beams and pixels, xdr binary, \n                      L-DEO.\n",
@@ -350,6 +368,8 @@ static int mb_system_table[] =
 	MB_SYS_SIMRAD,	/* MBF_EM12SRAW */
 	MB_SYS_SIMRAD,	/* MBF_EM12DRAW */
 	MB_SYS_SIMRAD,	/* MBF_EM12DARW */
+	MB_SYS_SIMRAD,	/* MBF_EM121RAW */
+	MB_SYS_SIMRAD2,	/* MBF_EM3000RW */
 	MB_SYS_MR1,	/* MBF_MR1PRHIG */
 	MB_SYS_MR1,	/* MBF_MR1ALDEO */
 	MB_SYS_MR1B,	/* MBF_MR1BLDEO */
@@ -387,6 +407,8 @@ static int mb_xdr_table[] =
 	0,		/* MBF_EM12SRAW */
 	0,		/* MBF_EM12DRAW */
 	0,		/* MBF_EM12DARW */
+	0,		/* MBF_EM121RAW */
+	0,		/* MBF_EM3000RW */
 	1,		/* MBF_MR1PRHIG */
 	1,		/* MBF_MR1ALDEO */
 	1,		/* MBF_MR1BLDEO */
@@ -421,8 +443,10 @@ static int beams_bath_table[] =
 	151,	/* MBF_SB2100IH */
 	60,	/* MBF_EM1000RW */
 	81,	/* MBF_EM12SRAW */
-	162,	/* MBF_EM12DRAW */
+	81,	/* MBF_EM12DRAW */
 	81,	/* MBF_EM12DARW */
+	121,	/* MBF_EM121RAW */
+	254,	/* MBF_EM3000RW */
 	3003,	/* MBF_MR1PRHIG */
 	3003,	/* MBF_MR1ALDEO */
 	153,	/* MBF_MR1BLDEO */
@@ -457,8 +481,10 @@ static int beams_amp_table[] =
 	151,	/* MBF_SB2100IH */
 	60,	/* MBF_EM1000RW */
 	81,	/* MBF_EM12SRAW */
-	162,	/* MBF_EM12DRAW */
+	81,	/* MBF_EM12DRAW */
 	81,	/* MBF_EM12DARW */
+	121,	/* MBF_EM121RAW */
+	254,	/* MBF_EM3000RW */
 	0,	/* MBF_MR1PRHIG */
 	0,	/* MBF_MR1ALDEO */
 	0,	/* MBF_MR1BLDEO */
@@ -493,8 +519,10 @@ static int pixels_ss_table[] =
 	2000,	/* MBF_SB2100IH */
 	3000,	/* MBF_EM1000RW */
 	4050,	/* MBF_EM12SRAW */
-	8100,	/* MBF_EM12DRAW */
+	4050,	/* MBF_EM12DRAW */
 	0,	/* MBF_EM12DARW */
+	6050,	/* MBF_EM121RAW */
+	3000,	/* MBF_EM3000RW */
 	7003,	/* MBF_MR1PRHIG */
 	7003,	/* MBF_MR1ALDEO */
 	4003,	/* MBF_MR1BLDEO */
@@ -531,6 +559,8 @@ static int variable_beams_table[] =
 	0,	/* MBF_EM12SRAW */
 	0,	/* MBF_EM12DRAW */
 	0,	/* MBF_EM12DARW */
+	0,	/* MBF_EM121RAW */
+	0,	/* MBF_EM3000RW */
 	0,	/* MBF_MR1PRHIG */
 	0,	/* MBF_MR1ALDEO */
 	0,	/* MBF_MR1BLDEO */
@@ -568,6 +598,8 @@ static int mb_traveltime_table[] =
 	1,	/* MBF_EM12SRAW */
 	1,	/* MBF_EM12DRAW */
 	1,	/* MBF_EM12DARW */
+	1,	/* MBF_EM121RAW */
+	1,	/* MBF_EM3000RW */
 	1,	/* MBF_MR1PRHIG */
 	1,	/* MBF_MR1ALDEO */
 	1,	/* MBF_MR1BLDEO */
@@ -605,6 +637,8 @@ static int mb_bath_flag_table[] =
 	0,	/* MBF_EM12SRAW */
 	0,	/* MBF_EM12DRAW */
 	0,	/* MBF_EM12DARW */
+	0,	/* MBF_EM121RAW */
+	0,	/* MBF_EM3000RW */
 	0,	/* MBF_MR1PRHIG */
 	0,	/* MBF_MR1ALDEO */
 	0,	/* MBF_MR1BLDEO */
@@ -638,10 +672,12 @@ static int mb_amp_flag_table[] =
 	0,	/* MBF_SB2000SS */
 	0,	/* MBF_SB2100RW */
 	0,	/* MBF_SB2100IH */
-	0,	/* MBF_EM1000RW */
-	0,	/* MBF_EM12SRAW */
-	0,	/* MBF_EM12DRAW */
-	0,	/* MBF_EM12DARW */
+	1,	/* MBF_EM1000RW */
+	1,	/* MBF_EM12SRAW */
+	1,	/* MBF_EM12DRAW */
+	1,	/* MBF_EM12DARW */
+	1,	/* MBF_EM121RAW */
+	1,	/* MBF_EM3000RW */
 	0,	/* MBF_MR1PRHIG */
 	0,	/* MBF_MR1ALDEO */
 	0,	/* MBF_MR1BLDEO */
@@ -675,10 +711,12 @@ static int mb_ss_flag_table[] =
 	0,	/* MBF_SB2000SS */
 	0,	/* MBF_SB2100RW */
 	0,	/* MBF_SB2100IH */
-	0,	/* MBF_EM1000RW */
-	0,	/* MBF_EM12SRAW */
-	0,	/* MBF_EM12DRAW */
-	0,	/* MBF_EM12DARW */
+	1,	/* MBF_EM1000RW */
+	1,	/* MBF_EM12SRAW */
+	1,	/* MBF_EM12DRAW */
+	1,	/* MBF_EM12DARW */
+	1,	/* MBF_EM121RAW */
+	1,	/* MBF_EM3000RW */
 	0,	/* MBF_MR1PRHIG */
 	0,	/* MBF_MR1ALDEO */
 	0,	/* MBF_MR1BLDEO */
@@ -715,6 +753,8 @@ static float mb_foreaft_beamwidth_table[] =
 	2.00,	/* MBF_EM12SRAW */
 	2.00,	/* MBF_EM12DRAW */
 	2.00,	/* MBF_EM12DARW */
+	2.00,	/* MBF_EM121RAW */
+	2.00,	/* MBF_EM3000RW */
 	2.00,	/* MBF_MR1PRHIG */
 	2.00,	/* MBF_MR1ALDEO */
 	2.00,	/* MBF_MR1BLDEO */
@@ -751,6 +791,8 @@ static char *mb_button_name[] =
         " EM12SRAW ",
         " EM12DRAW ",
         " EM12DARW ",
+        " EM121RAW ",
+        " EM3000RW ",
         " MR1PRHIG ",
         " MR1ALDEO ",
         " MR1BLDEO ",

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_reson.c	3.00	8/20/94
- *	$Id: mbsys_reson.c,v 4.8 1996-04-22 13:21:19 caress Exp $
+ *	$Id: mbsys_reson.c,v 4.9 1996-08-05 15:21:58 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -37,6 +37,9 @@
  * Date:	August 20, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.8  1996/04/22  13:21:19  caress
+ * Now have DTR and MIN/MAX defines in mb_define.h
+ *
  * Revision 4.7  1996/04/22  10:57:09  caress
  * DTR define now in mb_io.h
  *
@@ -88,7 +91,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_reson.c,v 4.8 1996-04-22 13:21:19 caress Exp $";
+ static char res_id[]="$Id: mbsys_reson.c,v 4.9 1996-08-05 15:21:58 caress Exp $";
 	char	*function_name = "mbsys_reson_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -724,7 +727,13 @@ int	*error;
 			{
 			ttimes[i] = ttscale*store->tt[i];
 			angles[i] = angscale*store->angle[i];
-			angles_forward[i] = 0.0;
+			if (angles[i] < 0.0)
+				{
+				angles[i] = -angles[i];
+				angles_forward[i] = 180.0;
+				}
+			else
+				angles_forward[i] = 0.0;
 			angles_null[i] = angles[i];
 			if (store->bath[i] < 0)
 				flags[i] = MB_YES;

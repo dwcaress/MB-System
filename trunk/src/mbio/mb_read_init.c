@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_read_init.c	1/25/93
- *    $Id: mb_read_init.c,v 4.8 1996-04-22 13:21:19 caress Exp $
+ *    $Id: mb_read_init.c,v 4.9 1996-08-05 15:21:58 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -18,6 +18,9 @@
  * Date:	January 25, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 4.8  1996/04/22  13:21:19  caress
+ * Now have DTR and MIN/MAX defines in mb_define.h
+ *
  * Revision 4.7  1995/11/02  19:48:51  caress
  * Fixed error handling.
  *
@@ -134,7 +137,7 @@ int	*beams_amp;
 int	*pixels_ss;
 int	*error;
 {
-	static char rcs_id[]="$Id: mb_read_init.c,v 4.8 1996-04-22 13:21:19 caress Exp $";
+	static char rcs_id[]="$Id: mb_read_init.c,v 4.9 1996-08-05 15:21:58 caress Exp $";
 	char	*function_name = "mb_read_init";
 	int	status;
 	int	format_num;
@@ -199,8 +202,16 @@ int	*error;
 		}
 	mb_io_ptr = (struct mb_io_struct *) *mbio_ptr;
 
-	/* load control parameters into the mbio descriptor */
+	/* initialize file access for the mbio descriptor */
+	mb_io_ptr->mbfp = NULL;
 	strcpy(mb_io_ptr->file,file);
+	mb_io_ptr->mbfp2 = NULL;
+	strcpy(mb_io_ptr->file2,"\0");
+	mb_io_ptr->mbfp3 = NULL;
+	strcpy(mb_io_ptr->file3,"\0");
+	mb_io_ptr->xdrs = NULL;
+
+	/* load control parameters into the mbio descriptor */
 	mb_io_ptr->format = format;
 	mb_io_ptr->format_num = format_num;
 	mb_io_ptr->pings = pings;
@@ -260,6 +271,11 @@ int	*error;
 	mb_io_ptr->new_ss = NULL;
 	mb_io_ptr->new_ss_acrosstrack = NULL;
 	mb_io_ptr->new_ss_alongtrack = NULL;
+	
+	/* initialize ancillary variables used
+		to save information in certain cases */
+	mb_io_ptr->save_flag = MB_NO;
+	mb_io_ptr->save_label_flag = MB_NO;
 
 	/* allocate arrays */
 	if (status == MB_SUCCESS)

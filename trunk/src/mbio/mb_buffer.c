@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_buffer.c	2/25/93
- *    $Id: mb_buffer.c,v 4.9 1996-04-22 13:21:19 caress Exp $
+ *    $Id: mb_buffer.c,v 4.10 1996-08-05 15:21:58 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -35,6 +35,9 @@
  * Date:	February 25, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.9  1996/04/22  13:21:19  caress
+ * Now have DTR and MIN/MAX defines in mb_define.h
+ *
  * Revision 4.8  1996/03/12  17:21:55  caress
  * Added format 63, short HMR1 processing format.
  *
@@ -117,7 +120,7 @@ int	verbose;
 char	**buff_ptr;
 int	*error;
 {
-  static char rcs_id[]="$Id: mb_buffer.c,v 4.9 1996-04-22 13:21:19 caress Exp $";
+  static char rcs_id[]="$Id: mb_buffer.c,v 4.10 1996-08-05 15:21:58 caress Exp $";
 	char	*function_name = "mb_buffer_init";
 	int	status = MB_SUCCESS;
 	struct mb_buffer_struct *buff;
@@ -341,17 +344,20 @@ int	*error;
 		if (*error == MB_ERROR_NO_ERROR && store_ptr != NULL)
 			{
 
-			/* print debug statements */
+			/* allocate space and copy the data */
 			status = mb_buffer_alloc(verbose,buff_ptr,mbio_ptr,
 				&buff->buffer[buff->nbuffer],
 				error);
+			if (status == MB_SUCCESS)
 			status = mb_copy_record(verbose,buff_ptr,mbio_ptr,
 				store_ptr,
 				buff->buffer[buff->nbuffer],error);
-			buff->buffer_kind[buff->nbuffer] = kind;
-			buff->nbuffer++;
 			if (status == MB_SUCCESS)
+				{
+				buff->buffer_kind[buff->nbuffer] = kind;
+				buff->nbuffer++;
 				(*nload)++;
+				}
 			}
 
 		/* print debug statements */

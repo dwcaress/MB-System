@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_mr1b.c	7/19/94
- *	$Id: mbsys_mr1b.c,v 4.2 1996-04-22 13:21:19 caress Exp $
+ *	$Id: mbsys_mr1b.c,v 4.3 1996-08-05 15:21:58 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -34,6 +34,9 @@
  * Date:	July 19, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1996/04/22  13:21:19  caress
+ * Now have DTR and MIN/MAX defines in mb_define.h
+ *
  * Revision 4.1  1996/04/22  11:16:30  caress
  * DTR define now in mb_io.h
  *
@@ -68,7 +71,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_mr1b.c,v 4.2 1996-04-22 13:21:19 caress Exp $";
+ static char res_id[]="$Id: mbsys_mr1b.c,v 4.3 1996-08-05 15:21:58 caress Exp $";
 	char	*function_name = "mbsys_mr1b_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -704,9 +707,9 @@ int	*error;
 		for (i=0;i<store->port_btycount;i++)
 			{
 			j = beam_center - i - 2;
-			angles_forward[j] = 0.0;
-			angles_null[j] = -MBSYS_MR1B_XDUCER_ANGLE;
+			angles_null[j] = MBSYS_MR1B_XDUCER_ANGLE;
 			flags[j] = MB_NO;
+			angles_forward[j] = 180.0;
 			if (fabs(store->bath_port[i]) > 0.0)
 				{
 				ttimes[j] = store->tt_port[i];

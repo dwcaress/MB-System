@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad.c	3.00	8/5/94
- *	$Id: mbsys_simrad.c,v 4.9 1996-07-26 21:06:00 caress Exp $
+ *	$Id: mbsys_simrad.c,v 4.10 1996-08-05 15:21:58 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -42,6 +42,9 @@
  * Date:	August 5, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.9  1996/07/26  21:06:00  caress
+ * Version after first cut of handling em12s and em121 data.
+ *
  * Revision 4.8  1996/04/22  13:21:19  caress
  * Now have DTR and MIN/MAX defines in mb_define.h
  *
@@ -96,7 +99,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_simrad.c,v 4.9 1996-07-26 21:06:00 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad.c,v 4.10 1996-08-05 15:21:58 caress Exp $";
 	char	*function_name = "mbsys_simrad_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -204,50 +207,8 @@ int	*error;
 	store->second = 0;
 	store->centisecond = 0;
 	
-	/* bathymetry and sidescan */
-	store->ping_number = 0;
-	store->beams_bath = MBSYS_SIMRAD_MAXBEAMS;
-	store->bath_mode = 0;
-	store->bath_res = 0;
-	store->bath_quality = 0;
-	store->bath_num = 0;
-	store->pulse_length = 0;
-	store->beam_width = 0;
-	store->power_level = 0;
-	store->tx_status = 0;
-	store->rx_status = 0;
-	store->along_res = 0;
-	store->across_res = 0;
-	store->depth_res = 0;
-	store->range_res = 0;
-	store->keel_depth = 0;
-	store->heading = 0;
-	store->roll = 0;
-	store->pitch = 0;
-	store->xducer_pitch = 0;
-	store->ping_heave = 0;
-	store->sound_vel = 0;
-	store->pixels_ss = 0;
-	store->ss_mode = 0;
-	for (i=0;i<MBSYS_SIMRAD_MAXBEAMS;i++)
-		{
-		store->bath[i] = 0;
-		store->bath_acrosstrack[i] = 0;
-		store->bath_alongtrack[i] = 0;
-		store->tt[i] = 0;
-		store->amp[i] = 0;
-		store->quality[i] = 0;
-		store->heave[i] = 0;
-		store->beam_frequency[i] = 0;
-		store->beam_samples[i] = 0;
-		store->beam_center_sample[i] = 0;
-		store->beam_start_sample[i] = 0;
-		}
-	for (i=0;i<MBSYS_SIMRAD_MAXPIXELS;i++)
-		{
-		store->ss[i] = 0;
-		store->ssp[i] = 0;
-		}
+	/* survey data structure not allocated yet */
+	store->ping = NULL;
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -256,6 +217,112 @@ int	*error;
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       store_ptr:  %d\n",*store_ptr);
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+
+/*--------------------------------------------------------------------*/
+int mbsys_simrad_survey_alloc(verbose,mbio_ptr,store_ptr,error)
+int	verbose;
+char	*mbio_ptr;
+char	*store_ptr;
+int	*error;
+{
+ static char res_id[]="$Id: mbsys_simrad.c,v 4.10 1996-08-05 15:21:58 caress Exp $";
+	char	*function_name = "mbsys_simrad_survey_alloc";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	struct mbsys_simrad_struct *store;
+	struct mbsys_simrad_survey_struct *ping;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* get data structure pointer */
+	store = (struct mbsys_simrad_struct *) store_ptr;
+
+	/* allocate memory for data structure if needed */
+	if (store->ping == NULL)
+		status = mb_malloc(verbose,
+			sizeof(struct mbsys_simrad_survey_struct),
+			&(store->ping),error);
+			
+	if (status == MB_SUCCESS)
+		{
+
+		/* get data structure pointer */
+		ping = (struct mbsys_simrad_survey_struct *) store->ping;
+
+		/* initialize everything */
+		ping->swath_id = EM_SWATH_CENTER;
+		ping->ping_number = 0;
+		ping->beams_bath = MBSYS_SIMRAD_MAXBEAMS;
+		ping->bath_mode = 0;
+		ping->bath_res = 0;
+		ping->bath_quality = 0;
+		ping->bath_num = 0;
+		ping->pulse_length = 0;
+		ping->beam_width = 0;
+		ping->power_level = 0;
+		ping->tx_status = 0;
+		ping->rx_status = 0;
+		ping->along_res = 0;
+		ping->across_res = 0;
+		ping->depth_res = 0;
+		ping->range_res = 0;
+		ping->keel_depth = 0;
+		ping->heading = 0;
+		ping->roll = 0;
+		ping->pitch = 0;
+		ping->xducer_pitch = 0;
+		ping->ping_heave = 0;
+		ping->sound_vel = 0;
+		ping->pixels_ss = 0;
+		ping->ss_mode = 0;
+		for (i=0;i<MBSYS_SIMRAD_MAXBEAMS;i++)
+			{
+			ping->bath[i] = 0;
+			ping->bath_acrosstrack[i] = 0;
+			ping->bath_alongtrack[i] = 0;
+			ping->tt[i] = 0;
+			ping->amp[i] = 0;
+			ping->quality[i] = 0;
+			ping->heave[i] = 0;
+			ping->beam_frequency[i] = 0;
+			ping->beam_samples[i] = 0;
+			ping->beam_center_sample[i] = 0;
+			ping->beam_start_sample[i] = 0;
+			}
+		for (i=0;i<MBSYS_SIMRAD_MAXPIXELS;i++)
+			{
+			ping->ss[i] = 0;
+			ping->ssp[i] = 0;
+			}
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:     %d\n",status);
@@ -274,6 +341,7 @@ int	*error;
 	char	*function_name = "mbsys_simrad_deall";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
+	struct mbsys_simrad_struct *store;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -285,6 +353,13 @@ int	*error;
 		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
 		fprintf(stderr,"dbg2       store_ptr:  %d\n",*store_ptr);
 		}
+
+	/* get data structure pointer */
+	store = (struct mbsys_simrad_struct *) *store_ptr;
+
+	/* deallocate memory for survey data structure */
+	if (store->ping != NULL)
+		status = mb_free(verbose,&(store->ping),error);
 
 	/* deallocate memory for data structure */
 	status = mb_free(verbose,store_ptr,error);
@@ -337,6 +412,7 @@ int	*error;
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_simrad_struct *store;
+	struct mbsys_simrad_survey_struct *ping;
 	int	ntime_i[7];
 	double	ntime_d;
 	signed char *beam_ss;
@@ -370,6 +446,9 @@ int	*error;
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA)
 		{
+		/* get survey data structure */
+		ping = (struct mbsys_simrad_survey_struct *) store->ping;
+		
 		/* get time */
 		time_i[0] = store->year + 1900;
 		time_i[1] = store->month;
@@ -419,18 +498,18 @@ int	*error;
 
 		/* get heading */
 		if (store->sonar == MBSYS_SIMRAD_EM121)
-			*heading = 0.01 * store->heading;
+			*heading = 0.01 * ping->heading;
 		else
-			*heading = 0.1 * store->heading;
+			*heading = 0.1 * ping->heading;
 
 		/* get speed  */
 		*speed = 3.6*store->speed;
 
 		/* read distance and depth values into storage arrays */
-		*nbath = store->beams_bath;
-		mb_io_ptr->beams_bath = store->beams_bath;
-		*namp = store->beams_bath;
-		mb_io_ptr->beams_amp = store->beams_bath;
+		*nbath = ping->beams_bath;
+		mb_io_ptr->beams_bath = ping->beams_bath;
+		*namp = ping->beams_bath;
+		mb_io_ptr->beams_amp = ping->beams_bath;
 		if (store->sonar == MBSYS_SIMRAD_EM1000)
 			{
 			depthscale = 0.02;
@@ -440,7 +519,7 @@ int	*error;
 			reflscale  = 0.5;
 			}
 		else if (store->sonar == MBSYS_SIMRAD_EM12S 
-			&& store->bath_res == 1)
+			&& ping->bath_res == 1)
 			{
 			depthscale = 0.1;
 			dacrscale  = 0.2;
@@ -449,7 +528,7 @@ int	*error;
 			reflscale  = 0.5;
 			}
 		else if (store->sonar == MBSYS_SIMRAD_EM12S 
-			&& store->bath_res == 2)
+			&& ping->bath_res == 2)
 			{
 			depthscale = 0.2;
 			dacrscale  = 0.5;
@@ -459,10 +538,10 @@ int	*error;
 			}
 		else if (store->sonar == MBSYS_SIMRAD_EM121)
 			{
-			depthscale = 0.01 * store->depth_res;
-			dacrscale  = 0.01 * store->across_res;
-			daloscale  = 0.01 * store->along_res;
-			ttscale    = 0.1 * store->range_res;
+			depthscale = 0.01 * ping->depth_res;
+			dacrscale  = 0.01 * ping->across_res;
+			daloscale  = 0.01 * ping->along_res;
+			ttscale    = 0.1 * ping->range_res;
 			reflscale  = 0.5;
 			}
 		else
@@ -473,41 +552,41 @@ int	*error;
 			ttscale    = 0.2;
 			reflscale  = 0.5;
 			}
-		if (store->ss_mode == 1)
+		if (ping->ss_mode == 1)
 			ss_spacing = 0.6;
-		else if (store->ss_mode == 2)
+		else if (ping->ss_mode == 2)
 			ss_spacing = 2.4;
-		else if (store->ss_mode == 3)
+		else if (ping->ss_mode == 3)
 			ss_spacing = 0.3;
-		else if (store->ss_mode == 4)
+		else if (ping->ss_mode == 4)
 			ss_spacing = 0.3;
 		else
 			ss_spacing = 0.15;
 		for (i=0;i<*nbath;i++)
 			{
-			bath[i] = depthscale*store->bath[i];
+			bath[i] = depthscale*ping->bath[i];
 			bathacrosstrack[i] 
-				= dacrscale*store->bath_acrosstrack[i];
+				= dacrscale*ping->bath_acrosstrack[i];
 			bathalongtrack[i] 
-				= daloscale*store->bath_alongtrack[i];
+				= daloscale*ping->bath_alongtrack[i];
 			}
 		for (i=0;i<*namp;i++)
 			{
-			if (store->bath[i] != 0)
-				amp[i] = reflscale*store->amp[i] + 64;
+			if (ping->bath[i] != 0)
+				amp[i] = reflscale*ping->amp[i] + 64;
 			else
 				amp[i] = 0;
 			}
 		*nss = 0;
 		for (i=0;i<*nbath;i++)
 			{
-			beam_ss = &store->ss[store->beam_start_sample[i]];
-			for (j=0;j<store->beam_samples[i];j++)
+			beam_ss = &ping->ss[ping->beam_start_sample[i]];
+			for (j=0;j<ping->beam_samples[i];j++)
 				{
 				ss[*nss] = reflscale*beam_ss[j] + 64;
 				ssacrosstrack[*nss] = dacrscale*bathacrosstrack[i] 
 					+ ss_spacing*
-					(j - store->beam_center_sample[i]);
+					(j - ping->beam_center_sample[i]);
 				ssalongtrack[*nss] = daloscale*bathalongtrack[i];
 				(*nss)++;
 				}
@@ -677,6 +756,7 @@ int	*error;
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_simrad_struct *store;
+	struct mbsys_simrad_survey_struct *ping;
 	int	kind;
 	int	time_j[5];
 	double	depthscale, dacrscale,daloscale,ttscale,reflscale;
@@ -730,6 +810,18 @@ int	*error;
 	/* insert data in structure */
 	if (store->kind == MB_DATA_DATA)
 		{
+		/* allocate secondary data structure for
+			survey data if needed */
+		if (store->ping == NULL)
+			{
+			status = mbsys_simrad_survey_alloc(
+					verbose,mbio_ptr,
+					store_ptr,error);
+			}
+
+		/* get survey data structure */
+		ping = (struct mbsys_simrad_survey_struct *) store->ping;
+		
 		/* get time */
 		store->year = time_i[0] - 1900;
 		store->month = time_i[1];
@@ -741,39 +833,39 @@ int	*error;
 
 		/* get heading */
 		if (store->sonar == MBSYS_SIMRAD_EM121)
-			store->heading = (int) (heading * 100);
+			ping->heading = (int) (heading * 100);
 		else
-			store->heading = (int) (heading * 10);
+			ping->heading = (int) (heading * 10);
 
 		/* get speed  */
 		store->speed = speed/3.6;
 
 		/* insert distance and depth values into storage arrays */
-		store->beams_bath = nbath;
+		ping->beams_bath = nbath;
 		if (store->sonar == MBSYS_SIMRAD_UNKNOWN)
 			{
 			if (nbath <= 60)
 				{
 				store->sonar = MBSYS_SIMRAD_EM1000;
-				store->bath_mode = 0;
+				ping->bath_mode = 0;
 				}
 			else if (nbath <= 81)
 				{
 				store->sonar = MBSYS_SIMRAD_EM12S;
-				store->bath_mode = 0;
-				store->bath_res = 2;
+				ping->bath_mode = 0;
+				ping->bath_res = 2;
 				}
 			else if (nbath <= 121)
 				{
 				store->sonar = MBSYS_SIMRAD_EM121;
-				store->bath_mode = 0;
-				store->bath_res = 2;
+				ping->bath_mode = 0;
+				ping->bath_res = 2;
 				}
 			else if (nbath <= 162)
 				{
 				store->sonar = MBSYS_SIMRAD_EM12D;
-				store->bath_mode = 0;
-				store->bath_res = 2;
+				ping->bath_mode = 0;
+				ping->bath_res = 2;
 				}
 			else
 				{
@@ -790,7 +882,7 @@ int	*error;
 			reflscale  = 0.5;
 			}
 		else if (store->sonar == MBSYS_SIMRAD_EM12S 
-			&& store->bath_res == 1)
+			&& ping->bath_res == 1)
 			{
 			depthscale = 0.1;
 			dacrscale  = 0.2;
@@ -799,7 +891,7 @@ int	*error;
 			reflscale  = 0.5;
 			}
 		else if (store->sonar == MBSYS_SIMRAD_EM12S 
-			&& store->bath_res == 2)
+			&& ping->bath_res == 2)
 			{
 			depthscale = 0.2;
 			dacrscale  = 0.5;
@@ -809,10 +901,10 @@ int	*error;
 			}
 		else if (store->sonar == MBSYS_SIMRAD_EM121)
 			{
-			depthscale = 0.01 * store->depth_res;
-			dacrscale  = 0.01 * store->across_res;
-			daloscale  = 0.01 * store->along_res;
-			ttscale    = 0.1 * store->range_res;
+			depthscale = 0.01 * ping->depth_res;
+			dacrscale  = 0.01 * ping->across_res;
+			daloscale  = 0.01 * ping->along_res;
+			ttscale    = 0.1 * ping->range_res;
 			reflscale  = 0.5;
 			}
 		else
@@ -824,26 +916,26 @@ int	*error;
 			{
 			for (i=0;i<nbath;i++)
 				{
-				store->bath[i] = bath[i]/depthscale;
-				store->bath_acrosstrack[i]
+				ping->bath[i] = bath[i]/depthscale;
+				ping->bath_acrosstrack[i]
 					= bathacrosstrack[i]/dacrscale;
-				store->bath_alongtrack[i] 
+				ping->bath_alongtrack[i] 
 					= bathalongtrack[i]/daloscale;
 				}
 			for (i=0;i<namp;i++)
 				{
-				if (store->bath[i] != 0)
-					store->amp[i] = (amp[i] - 64) 
+				if (ping->bath[i] != 0)
+					ping->amp[i] = (amp[i] - 64) 
 						/ reflscale;
 				else
-					store->amp[i] = 0;
+					ping->amp[i] = 0;
 				}
 			}
-		if (status == MB_SUCCESS && nss == store->pixels_ss)
+		if (status == MB_SUCCESS && nss == ping->pixels_ss)
 			{
-			for (i=0;i<store->pixels_ss;i++)
+			for (i=0;i<ping->pixels_ss;i++)
 				{
-				store->ss[i] = (ss[i] - 64) / reflscale;
+				ping->ss[i] = (ss[i] - 64) / reflscale;
 				}
 			}
 		}
@@ -890,8 +982,9 @@ int	*error;
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_simrad_struct *store;
+	struct mbsys_simrad_survey_struct *ping;
 	double	ttscale;
-	int	i;
+	int	i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -921,6 +1014,9 @@ int	*error;
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA)
 		{
+		/* get survey data structure */
+		ping = (struct mbsys_simrad_survey_struct *) store->ping;
+
 		/* get nbeams */
 		*nbeams = mb_io_ptr->beams_bath;
 
@@ -928,22 +1024,22 @@ int	*error;
 		if (store->sonar == MBSYS_SIMRAD_EM1000)
 			ttscale = 0.05;
 		else if (store->sonar == MBSYS_SIMRAD_EM12S 
-			&& store->bath_res == 1)
+			&& ping->bath_res == 1)
 			ttscale    = 0.2;
 		else if (store->sonar == MBSYS_SIMRAD_EM12S 
-			&& store->bath_res == 2)
+			&& ping->bath_res == 2)
 			ttscale    = 0.8;
 		else if (store->sonar == MBSYS_SIMRAD_EM121)
-			ttscale    = 0.1 * store->range_res;
+			ttscale    = 0.1 * ping->range_res;
 		else
 			ttscale    = 0.2;
 		for (i=0;i<mb_io_ptr->beams_bath;i++)
 			{
-			ttimes[i] = ttscale*store->tt[i];
+			ttimes[i] = ttscale*ping->tt[i];
 			angles[i] = 0.0;
 			angles_forward[i] = 0.0;
 			angles_null[i] = angles[i];
-			if (store->bath[i] < 0)
+			if (ping->bath[i] < 0)
 				flags[i] = MB_YES;
 			else
 				flags[i] = MB_NO;
@@ -951,14 +1047,14 @@ int	*error;
 
 		/* get depth offset (heave + heave offset) */
 		if (store->sonar == MBSYS_SIMRAD_EM12S)
-			*depthadd = 100.0*store->ping_heave + store->em12_td;
+			*depthadd = 100.0*ping->ping_heave + store->em12_td;
 		else if (store->sonar == MBSYS_SIMRAD_EM12D)
-			*depthadd = 100.0*store->ping_heave + store->em12_td;
+			*depthadd = 100.0*ping->ping_heave + store->em12_td;
 		else if (store->sonar == MBSYS_SIMRAD_EM100)
-			*depthadd = 100.0*store->ping_heave + store->em100_td;
+			*depthadd = 100.0*ping->ping_heave + store->em100_td;
 		else if (store->sonar == MBSYS_SIMRAD_EM1000)
-			*depthadd = 100.0*store->ping_heave + store->em1000_td;
-		*ssv = 0.1 * store->sound_vel;
+			*depthadd = 100.0*ping->ping_heave + store->em1000_td;
+		*ssv = 0.1 * ping->sound_vel;
 
 		/* set status */
 		*error = MB_ERROR_NO_ERROR;
@@ -1035,6 +1131,7 @@ int	*error;
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_simrad_struct *store;
+	struct mbsys_simrad_survey_struct *ping;
 	int	ntime_i[7];
 	double	ntime_d;
 	signed char *beam_ss;
@@ -1068,6 +1165,9 @@ int	*error;
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA)
 		{
+		/* get survey data structure */
+		ping = (struct mbsys_simrad_survey_struct *) store->ping;
+
 		/* get time */
 		time_i[0] = store->year + 1900;
 		time_i[1] = store->month;
@@ -1117,17 +1217,17 @@ int	*error;
 
 		/* get heading */
 		if (store->sonar == MBSYS_SIMRAD_EM121)
-			*heading = 0.01 * store->heading;
+			*heading = 0.01 * ping->heading;
 		else
-			*heading = 0.1 * store->heading;
+			*heading = 0.1 * ping->heading;
 
 		/* get speed  */
 		*speed = 3.6*store->speed;
 
 		/* get roll pitch and heave */
-		*roll = 0.01*store->roll;
-		*pitch = 0.01*store->pitch;
-		*heave = 0.01*store->ping_heave;
+		*roll = 0.01*ping->roll;
+		*pitch = 0.01*ping->pitch;
+		*heave = 0.01*ping->ping_heave;
 
 		/* print debug statements */
 		if (verbose >= 5)
@@ -1250,6 +1350,7 @@ int	*error;
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_simrad_struct *store;
+	struct mbsys_simrad_survey_struct *ping;
 	int	kind;
 	int	time_j[5];
 	double	depthscale, dacrscale,daloscale,ttscale,reflscale;
@@ -1290,6 +1391,9 @@ int	*error;
 	/* insert data in structure */
 	if (store->kind == MB_DATA_DATA)
 		{
+		/* get survey data structure */
+		ping = (struct mbsys_simrad_survey_struct *) store->ping;
+
 		/* get time */
 		store->year = time_i[0] - 1900;
 		store->month = time_i[1];
@@ -1301,17 +1405,17 @@ int	*error;
 
 		/* get heading */
 		if (store->sonar == MBSYS_SIMRAD_EM121)
-			store->heading = (int) (heading * 100);
+			ping->heading = (int) (heading * 100);
 		else
-			store->heading = (int) (heading * 10);
+			ping->heading = (int) (heading * 10);
 
 		/* get speed  */
 		store->speed = speed/3.6;
 
 		/* get roll pitch and heave */
-		store->roll = roll*100.0;
-		store->pitch = pitch*100.0;
-		store->ping_heave = heave*100.0;
+		ping->roll = roll*100.0;
+		ping->pitch = pitch*100.0;
+		ping->ping_heave = heave*100.0;
 		}
 
 	/* print output debug statements */
@@ -1341,6 +1445,9 @@ int	*error;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_simrad_struct *store;
 	struct mbsys_simrad_struct *copy;
+	struct mbsys_simrad_survey_struct *ping_store;
+	struct mbsys_simrad_survey_struct *ping_copy;
+	char	*ping_save;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -1360,9 +1467,34 @@ int	*error;
 	/* get data structure pointers */
 	store = (struct mbsys_simrad_struct *) store_ptr;
 	copy = (struct mbsys_simrad_struct *) copy_ptr;
+	
+	/* check if survey data needs to be copied */
+	if (store->ping != NULL)
+		{
+		/* make sure a survey data structure exists to
+			be copied into */
+		if (copy->ping == NULL)
+			{
+			status = mbsys_simrad_survey_alloc(
+					verbose,mbio_ptr,
+					copy_ptr,error);
+			}
+			
+		/* save pointer value */
+		ping_save = (char *)copy->ping;
+		}
 
-	/* copy the data */
+	/* copy the main structure */
 	*copy = *store;
+	
+	/* if needed copy the survey data structure */
+	if (store->ping != NULL && status == MB_SUCCESS)
+		{
+		copy->ping = (struct mbsys_simrad_survey_struct *) ping_save;
+		ping_store = (struct mbsys_simrad_survey_struct *) store->ping;
+		ping_copy = (struct mbsys_simrad_survey_struct *) copy->ping;
+		*ping_copy = *ping_store;
+		}
 
 	/* print output debug statements */
 	if (verbose >= 2)

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em12darw.c	2/2/93
- *	$Id: mbr_em12darw.c,v 4.5 1996-07-26 21:09:33 caress Exp $
+ *	$Id: mbr_em12darw.c,v 4.6 1996-08-05 15:21:58 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	R. B. Owens
  * Date:	January 24, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.5  1996/07/26  21:09:33  caress
+ * Version after first cut of handling em12s and em121 data.
+ *
  * Revision 4.4  1996/04/22  13:21:19  caress
  * Now have DTR and MIN/MAX defines in mb_define.h
  *
@@ -70,7 +73,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_em12darw.c,v 4.5 1996-07-26 21:09:33 caress Exp $";
+ static char res_id[]="$Id: mbr_em12darw.c,v 4.6 1996-08-05 15:21:58 caress Exp $";
 	char	*function_name = "mbr_alm_em12darw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -97,8 +100,9 @@ int	*error;
 	mb_io_ptr->structure_size = sizeof(struct mbf_em12darw_struct);
 	status = mb_malloc(verbose,mb_io_ptr->structure_size,
 				&mb_io_ptr->raw_data,error);
-	status = mb_malloc(verbose,sizeof(struct mbsys_simrad_struct),
-				&mb_io_ptr->store_data,error);
+	status = mbsys_simrad_alloc(
+			verbose,mbio_ptr,
+			&mb_io_ptr->store_data,error);
 
 	/* get pointer to mbio descriptor */
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
@@ -148,16 +152,11 @@ int	*error;
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 	store = (struct mbsys_simrad_struct *) mb_io_ptr->store_data;
 
-	/* free pointers to sidescan arrays */
-	for (i=0;i<MBSYS_SIMRAD_MAXBEAMS;i++)
-		{
-		if (store->ss[i] != NULL)
-			mb_free(verbose,&store->ss[i],error);
-		}
-
 	/* deallocate memory for data descriptor */
 	status = mb_free(verbose,&mb_io_ptr->raw_data,error);
-	status = mb_free(verbose,&mb_io_ptr->store_data,error);
+	status = mbsys_simrad_deall(
+			verbose,mbio_ptr,
+			&mb_io_ptr->store_data,error);
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -270,6 +269,7 @@ int	*error;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbf_em12darw_struct *data;
 	struct mbsys_simrad_struct *store;
+	struct mbsys_simrad_survey_struct *ping;
 	char	*datacomment;
 	int	time_j[5];
 	int	time_i[7];
@@ -565,36 +565,54 @@ int	*error;
 		store->pos_quality = data->posq;
 		store->speed = data->speed;
 		store->line_heading = 10*data->gyro;
-
-		/* bathymetry */
-		store->ping_number = data->pingno;
-		store->beams_bath = MBF_EM12DARW_BEAMS;
-		store->bath_mode = 0;
-		store->bath_res = data->mode;
-		store->bath_quality = 0;
-		store->keel_depth = data->depthl;
-		store->heading = (int) 10*data->gyro;
-		store->roll = (int) 100*data->roll;
-		store->pitch = (int) 100*data->pitch;
-		store->xducer_pitch = (int) 100*data->pitch;
-		store->ping_heave = (int) 100*data->heave;
-		store->sound_vel = (int) 10*data->sndval;
-		store->pixels_ss = 0;
-		store->ss_mode = 0;
-		for (i=0;i<store->beams_bath;i++)
+		
+		/* allocate secondary data structure for
+			survey data if needed */
+		if (data_kind == MB_DATA_DATA
+			&& store->ping == NULL)
 			{
-			store->bath[i] = data->depth[i];
-			store->bath_acrosstrack[i] = data->distacr[i];
-			store->bath_alongtrack[i] = data->distalo[i];
-			store->tt[i] = data->range[i];
-			store->amp[i] = (signed char) data->refl[i];
-			store->quality[i] = (unsigned char) data->beamq[i];
-			store->heave[i] = (signed char) 0;
-			store->beam_frequency[i] = 0;
-			store->beam_samples[i] = 0;
-			store->beam_center_sample[i] = 0;
-			if (store->ss[i] != NULL)
-				mb_free(verbose,&store->ss[i],error);
+			status = mbsys_simrad_survey_alloc(
+					verbose,mbio_ptr,
+					store_ptr,error);
+			}
+		
+		/* deal with putting survey data into
+		secondary data structure */
+		if (status == MB_SUCCESS 
+			&& data_kind == MB_DATA_DATA)
+			{
+			/* get data structure pointer */
+			ping = (struct mbsys_simrad_survey_struct *) 
+				store->ping;
+
+			/* copy data */
+			ping->ping_number = data->pingno;
+			ping->beams_bath = MBF_EM12DARW_BEAMS;
+			ping->bath_mode = 0;
+			ping->bath_res = data->mode;
+			ping->bath_quality = 0;
+			ping->keel_depth = data->depthl;
+			ping->heading = (int) 10*data->gyro;
+			ping->roll = (int) 100*data->roll;
+			ping->pitch = (int) 100*data->pitch;
+			ping->xducer_pitch = (int) 100*data->pitch;
+			ping->ping_heave = (int) 100*data->heave;
+			ping->sound_vel = (int) 10*data->sndval;
+			ping->pixels_ss = 0;
+			ping->ss_mode = 0;
+			for (i=0;i<ping->beams_bath;i++)
+				{
+				ping->bath[i] = data->depth[i];
+				ping->bath_acrosstrack[i] = data->distacr[i];
+				ping->bath_alongtrack[i] = data->distalo[i];
+				ping->tt[i] = data->range[i];
+				ping->amp[i] = (signed char) data->refl[i];
+				ping->quality[i] = (unsigned char) data->beamq[i];
+				ping->heave[i] = (signed char) 0;
+				ping->beam_frequency[i] = 0;
+				ping->beam_samples[i] = 0;
+				ping->beam_center_sample[i] = 0;
+				}
 			}
 
 		/* comment */
@@ -628,6 +646,7 @@ int	*error;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbf_em12darw_struct *data;
 	struct mbsys_simrad_struct *store;
+	struct mbsys_simrad_survey_struct *ping;
 	char	*datacomment;
 	int	time_i[7];
 	int	time_j[5];
@@ -708,23 +727,39 @@ int	*error;
 				data->longitude = store->utm_easting;
 				}
 
-			/* bathymetry */
-			data->pingno = store->ping_number;
-			data->mode = store->bath_res;
-			data->depthl = store->keel_depth;
-			data->gyro = 0.1*store->heading;
-			data->roll = 0.01*store->roll;
-			data->pitch = 0.01*store->pitch;
-			data->heave = 0.01*store->ping_heave;
-			data->sndval = 0.1*store->sound_vel;
-			for (i=0;i<store->beams_bath;i++)
+		
+			/* deal with survey data 
+				in secondary data structure */
+			if (store->ping != NULL)
 				{
-				data->depth[i] = store->bath[i];
-				data->distacr[i] = store->bath_acrosstrack[i];
-				data->distalo[i] = store->bath_alongtrack[i];
-				data->range[i] = store->tt[i];
-				data->refl[i] = (short int) store->amp[i];
-				data->beamq[i] = (short int) store->quality[i];
+				/* get data structure pointer */
+				ping = (struct mbsys_simrad_survey_struct *) 
+					store->ping;
+
+				/* copy survey data */
+				data->pingno = ping->ping_number;
+				data->mode = ping->bath_res;
+				data->depthl = ping->keel_depth;
+				data->gyro = 0.1*ping->heading;
+				data->roll = 0.01*ping->roll;
+				data->pitch = 0.01*ping->pitch;
+				data->heave = 0.01*ping->ping_heave;
+				data->sndval = 0.1*ping->sound_vel;
+				for (i=0;i<ping->beams_bath;i++)
+					{
+					data->depth[i] 
+						= ping->bath[i];
+					data->distacr[i] 
+						= ping->bath_acrosstrack[i];
+					data->distalo[i] 
+						= ping->bath_alongtrack[i];
+					data->range[i] 
+						= ping->tt[i];
+					data->refl[i] 
+						= (short int) ping->amp[i];
+					data->beamq[i] 
+						= (short int) ping->quality[i];
+					}
 				}
 			}
 

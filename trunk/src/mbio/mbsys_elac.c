@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_elac.c	3.00	8/20/94
- *	$Id: mbsys_elac.c,v 4.8 1996-04-22 13:21:19 caress Exp $
+ *	$Id: mbsys_elac.c,v 4.9 1996-08-05 15:21:58 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -37,6 +37,9 @@
  * Date:	August 20, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.8  1996/04/22  13:21:19  caress
+ * Now have DTR and MIN/MAX defines in mb_define.h
+ *
  * Revision 4.7  1996/04/22  10:57:09  caress
  * DTR define now in mb_io.h
  *
@@ -88,7 +91,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_elac.c,v 4.8 1996-04-22 13:21:19 caress Exp $";
+ static char res_id[]="$Id: mbsys_elac.c,v 4.9 1996-08-05 15:21:58 caress Exp $";
 	char	*function_name = "mbsys_elac_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -738,11 +741,21 @@ int	*error;
 					+ store->profile_num*(7 - j);
 			ttimes[ibeam] = ttscale*store->profile[i].tt[j];
 			angles[ibeam] = angscale*store->profile[i].angle[j];
-			angles_forward[ibeam] = 0.0;
 			if (angles[ibeam] < 0.0)
-				angles_null[ibeam] = -45.0;
+				{
+				angles[ibeam] = -angles[ibeam];
+				angles_forward[ibeam] = 180.0;
+				angles_null[ibeam] = 30.0 
+					+ angscale 
+					* store->transducer_port_error;
+				}
 			else
-				angles_null[ibeam] = 45.0;
+				{
+				angles_forward[ibeam] = 0.0;
+				angles_null[ibeam] = 30.0 
+					+ angscale 
+					* store->transducer_starboard_error;
+				}
 			if (store->profile[i].bath[i] < 0)
 				flags[ibeam] = MB_YES;
 			else
@@ -750,8 +763,9 @@ int	*error;
 			}
 
 		/* get depth offset (heave + heave offset) */
-		*depthadd = 1000.0*(store->profile[0].heave + store->heave_offset);
-		*ssv = 0.1 *store->sound_vel;
+		*depthadd = 0.001*(store->profile[0].heave + store->heave_offset);
+		/**ssv = store->sound_vel;*/
+		*ssv = 1480.0; /* hard wired for UNB MB course 96 */
 
 		/* set status */
 		*error = MB_ERROR_NO_ERROR;
@@ -898,9 +912,9 @@ int	*error;
 		*speed = 0.0;
 
 		/* get roll pitch and heave */
-		*roll = 0.0;
-		*pitch = 0.0;
-		*heave = 0.0;
+		*roll = 0.005 * store->profile[0].roll;
+		*pitch = 0.005 * store->profile[0].pitch;
+		*heave = 0.001 * store->profile[0].heave;
 
 		/* print debug statements */
 		if (verbose >= 5)
