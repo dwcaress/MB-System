@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_buffer.c	2/25/93
- *    $Id: mb_buffer.c,v 5.0 2000-12-01 22:48:41 caress Exp $
+ *    $Id: mb_buffer.c,v 5.1 2001-07-20 00:31:11 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -39,6 +39,9 @@
  * Date:	February 25, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01 22:48:41  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.21  2000/10/11  01:02:30  caress
  * Convert to ANSI C
  *
@@ -159,9 +162,9 @@
 #include "../../include/mb_define.h"
 
 /*--------------------------------------------------------------------*/
-int mb_buffer_init(int verbose, char **buff_ptr, int *error)
+int mb_buffer_init(int verbose, void **buff_ptr, int *error)
 {
-  static char rcs_id[]="$Id: mb_buffer.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
+  static char rcs_id[]="$Id: mb_buffer.c,v 5.1 2001-07-20 00:31:11 caress Exp $";
 	char	*function_name = "mb_buffer_init";
 	int	status = MB_SUCCESS;
 	struct mb_buffer_struct *buff;
@@ -202,7 +205,7 @@ int mb_buffer_init(int verbose, char **buff_ptr, int *error)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_buffer_close(int verbose, char **buff_ptr, char *mbio_ptr, int *error)
+int mb_buffer_close(int verbose, void **buff_ptr, void *mbio_ptr, int *error)
 {
 	char	*function_name = "mb_buffer_close";
 	int	status = MB_SUCCESS;
@@ -255,7 +258,7 @@ int mb_buffer_close(int verbose, char **buff_ptr, char *mbio_ptr, int *error)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_buffer_load(int verbose, char *buff_ptr,char *mbio_ptr,
+int mb_buffer_load(int verbose, void *buff_ptr,void *mbio_ptr,
 		    int nwant, int *nload, int *nbuff, int *error)
 {
 	char	*function_name = "mb_buffer_load";
@@ -420,7 +423,7 @@ int mb_buffer_load(int verbose, char *buff_ptr,char *mbio_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_buffer_dump(int verbose, char *buff_ptr, char *mbio_ptr,
+int mb_buffer_dump(int verbose, void *buff_ptr, void *mbio_ptr,
 		    int nhold, int *ndump, int *nbuff, int *error)
 {
 	char	*function_name = "mb_buffer_dump";
@@ -609,7 +612,7 @@ int mb_buffer_dump(int verbose, char *buff_ptr, char *mbio_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_buffer_clear(int verbose, char *buff_ptr, char *mbio_ptr,
+int mb_buffer_clear(int verbose, void *buff_ptr, void *mbio_ptr,
 		    int nhold, int *ndump, int *nbuff, int *error)
 {
 	char	*function_name = "mb_buffer_clear";
@@ -783,7 +786,7 @@ int mb_buffer_clear(int verbose, char *buff_ptr, char *mbio_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_buffer_get_next_data(int verbose, char *buff_ptr, char *mbio_ptr,
+int mb_buffer_get_next_data(int verbose, void *buff_ptr, void *mbio_ptr,
 		int start, int *id,
 		int time_i[7], double *time_d,
 		double *navlon, double *navlat, 
@@ -909,7 +912,7 @@ int mb_buffer_get_next_data(int verbose, char *buff_ptr, char *mbio_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_buffer_get_next_nav(int verbose, char *buff_ptr, char *mbio_ptr,
+int mb_buffer_get_next_nav(int verbose, void *buff_ptr, void *mbio_ptr,
 		int start, int *id,
 		int time_i[7], double *time_d,
 		double *navlon, double *navlat, 
@@ -1010,7 +1013,7 @@ int mb_buffer_get_next_nav(int verbose, char *buff_ptr, char *mbio_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_buffer_extract(int verbose, char *buff_ptr, char *mbio_ptr,
+int mb_buffer_extract(int verbose, void *buff_ptr, void *mbio_ptr,
 		int id, int *kind, 
 		int time_i[7], double *time_d,
 		double *navlon, double *navlat, 
@@ -1144,7 +1147,7 @@ int mb_buffer_extract(int verbose, char *buff_ptr, char *mbio_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_buffer_extract_nav(int verbose, char *buff_ptr, char *mbio_ptr,
+int mb_buffer_extract_nav(int verbose, void *buff_ptr, void *mbio_ptr,
 		int id, int *kind, 
 		int time_i[7], double *time_d,
 		double *navlon, double *navlat, 
@@ -1241,7 +1244,7 @@ int mb_buffer_extract_nav(int verbose, char *buff_ptr, char *mbio_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_buffer_insert(int verbose, char *buff_ptr, char *mbio_ptr,
+int mb_buffer_insert(int verbose, void *buff_ptr, void *mbio_ptr,
 		int id, int time_i[7], double time_d,
 		double navlon, double navlat, 
 		double speed, double heading,
@@ -1350,7 +1353,7 @@ int mb_buffer_insert(int verbose, char *buff_ptr, char *mbio_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_buffer_insert_nav(int verbose, char *buff_ptr, char *mbio_ptr,
+int mb_buffer_insert_nav(int verbose, void *buff_ptr, void *mbio_ptr,
 		int id, int time_i[7], double time_d,
 		double navlon, double navlat, 
 		double speed, double heading, double draft,
@@ -1431,8 +1434,8 @@ int mb_buffer_insert_nav(int verbose, char *buff_ptr, char *mbio_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_buffer_get_ptr(int verbose, char *buff_ptr, char *mbio_ptr,
-			int id, char **store_ptr, 
+int mb_buffer_get_ptr(int verbose, void *buff_ptr, void *mbio_ptr,
+			int id, void **store_ptr, 
 			int *error)
 {
 	char	*function_name = "mb_buffer_get_ptr";

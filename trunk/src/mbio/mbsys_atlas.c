@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_surf.c	3.00	6/25/01
- *	$Id: mbsys_atlas.c,v 5.1 2001-06-30 17:40:14 caress Exp $
+ *	$Id: mbsys_atlas.c,v 5.2 2001-07-20 00:32:54 caress Exp $
  *
  *    Copyright (c) 2001 by
  *    David W. Caress (caress@mbari.org)
@@ -29,6 +29,9 @@
  * Date:	June 25, 2001
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2001/06/30  17:40:14  caress
+ * Release 5.0.beta02
+ *
  * Revision 5.0  2001/06/29  22:49:07  caress
  * Added support for HSDS2RAW
  *
@@ -50,10 +53,10 @@
 #include "../../include/mbsys_surf.h"
 
 /*--------------------------------------------------------------------*/
-int mbsys_surf_alloc(int verbose, char *mbio_ptr, char **store_ptr, 
+int mbsys_surf_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_atlas.c,v 5.1 2001-06-30 17:40:14 caress Exp $";
+ static char res_id[]="$Id: mbsys_atlas.c,v 5.2 2001-07-20 00:32:54 caress Exp $";
 	char	*function_name = "mbsys_surf_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -307,7 +310,7 @@ int mbsys_surf_alloc(int verbose, char *mbio_ptr, char **store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_surf_deall(int verbose, char *mbio_ptr, char **store_ptr, 
+int mbsys_surf_deall(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
 	char	*function_name = "mbsys_surf_deall";
@@ -347,7 +350,7 @@ int mbsys_surf_deall(int verbose, char *mbio_ptr, char **store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_surf_extract(int verbose, char *mbio_ptr, char *store_ptr, 
+int mbsys_surf_extract(int verbose, void *mbio_ptr, void *store_ptr, 
 		int *kind, int time_i[7], double *time_d,
 		double *navlon, double *navlat,
 		double *speed, double *heading,
@@ -588,7 +591,7 @@ int mbsys_surf_extract(int verbose, char *mbio_ptr, char *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_surf_insert(int verbose, char *mbio_ptr, char *store_ptr, 
+int mbsys_surf_insert(int verbose, void *mbio_ptr, void *store_ptr, 
 		int kind, int time_i[7], double time_d,
 		double navlon, double navlat,
 		double speed, double heading,
@@ -717,7 +720,7 @@ int mbsys_surf_insert(int verbose, char *mbio_ptr, char *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_surf_ttimes(int verbose, char *mbio_ptr, char *store_ptr,
+int mbsys_surf_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 	int *kind, int *nbeams,
 	double *ttimes, double *angles, 
 	double *angles_forward, double *angles_null,
@@ -729,7 +732,7 @@ int mbsys_surf_ttimes(int verbose, char *mbio_ptr, char *store_ptr,
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_surf_struct *store;
 	double	heave_use;
-	double	*angles;
+	double	*angle_table;
 	int	i, j;
 
 	/* print input debug statements */
@@ -761,17 +764,31 @@ int mbsys_surf_ttimes(int verbose, char *mbio_ptr, char *store_ptr,
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA)
 		{
-		/* get travel times, angles */
-		if (store->start_opmode[4] == 1)
-		    angles = (double *) ds2_ang_120;
-		else
-		    angles = (double *) ds2_ang_90;
+		/* get angle_table for 90 degree coverage */
+		if (store->start_opmode[3] == 0)
+		    {
+		    if (store->tt_beam_cnt == 140)
+			angle_table = (double *) ds2_ang_90d_140b;
+		    else if (store->tt_beam_cnt == 59)
+			angle_table = (double *) ds2_ang_90d_59b;
+		    }
+
+		/* get angle_table for 120 degree coverage */
+		else if (store->start_opmode[3] == 1)
+		    {
+		    if (store->tt_beam_cnt == 140)
+			angle_table = (double *) ds2_ang_120d_140b;
+		    else if (store->tt_beam_cnt == 59)
+			angle_table = (double *) ds2_ang_120d_59b;
+		    }
+
+		/* get travel times */
 		*nbeams = store->tt_beam_cnt;
-		for (i=0;i<MBSYS_SURF_MAXBEAMS;i++)
+		for (i=0;i<*nbeams;i++)
 			{
 			ttimes[i] = 0.0;
 			angles[i] = 0.0;
-			angles_forward[j] = 0.0;
+			angles_forward[i] = 0.0;
 			angles_null[i] = 0.0;
 			heave[i] = 0.0;
 			alongtrack_offset[i] = 0.0;
@@ -779,8 +796,8 @@ int mbsys_surf_ttimes(int verbose, char *mbio_ptr, char *store_ptr,
 		for (i=0;i<store->tt_beam_cnt;i++)
 			{
 			ttimes[i] = store->tt_lruntime[i];
-			angles[i] = RTD * fabs(angles[i]);
-			if (angles[i] < 0.0)
+			angles[i] = RTD * fabs(angle_table[i]);
+			if (angle_table[i] < 0.0)
 			    angles_forward[i] = 180.0;
 			else
 			    angles_forward[i] = 0.0;
@@ -843,7 +860,7 @@ int mbsys_surf_ttimes(int verbose, char *mbio_ptr, char *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_surf_extract_altitude(int verbose, char *mbio_ptr, char *store_ptr,
+int mbsys_surf_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 	int *kind, double *transducer_depth, double *altitude, 
 	int *error)
 {
@@ -955,7 +972,7 @@ int mbsys_surf_extract_altitude(int verbose, char *mbio_ptr, char *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_surf_extract_nav(int verbose, char *mbio_ptr, char *store_ptr,
+int mbsys_surf_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int time_i[7], double *time_d,
 		double *navlon, double *navlat,
 		double *speed, double *heading, double *draft, 
@@ -1024,7 +1041,7 @@ int mbsys_surf_extract_nav(int verbose, char *mbio_ptr, char *store_ptr,
 		*heading = RTD * store->start_heading;
 
 		/* get speed  */
-		*speed = store->pr_speed;
+		*speed = 3.6 * store->pr_speed;
 
 		/* get draft  */
 		*draft = store->tt_draught;
@@ -1137,7 +1154,7 @@ int mbsys_surf_extract_nav(int verbose, char *mbio_ptr, char *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_surf_insert_nav(int verbose, char *mbio_ptr, char *store_ptr,
+int mbsys_surf_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		int time_i[7], double time_d,
 		double navlon, double navlat,
 		double speed, double heading, double draft, 
@@ -1198,7 +1215,7 @@ int mbsys_surf_insert_nav(int verbose, char *mbio_ptr, char *store_ptr,
 		store->start_heading = DTR * heading;
 
 		/* get speed  */
-		store->pr_speed = speed;
+		store->pr_speed = speed / 3.6;
 
 		/* get draft  */
 		store->tt_draught = draft;
@@ -1224,8 +1241,8 @@ int mbsys_surf_insert_nav(int verbose, char *mbio_ptr, char *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_surf_copy(int verbose, char *mbio_ptr, 
-			char *store_ptr, char *copy_ptr,
+int mbsys_surf_copy(int verbose, void *mbio_ptr, 
+			void *store_ptr, void *copy_ptr,
 			int *error)
 {
 	char	*function_name = "mbsys_surf_copy";

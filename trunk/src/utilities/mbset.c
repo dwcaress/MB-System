@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbset.c	3/31/93
- *    $Id: mbset.c,v 5.4 2001-06-11 17:47:38 caress Exp $
+ *    $Id: mbset.c,v 5.5 2001-07-20 00:34:38 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -30,6 +30,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2001/06/11 17:47:38  caress
+ * Fixed pitchbias bug.
+ *
  * Revision 5.3  2001/06/08  21:45:46  caress
  * Version 5.0.beta01
  *
@@ -69,7 +72,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbset.c,v 5.4 2001-06-11 17:47:38 caress Exp $";
+	static char rcs_id[] = "$Id: mbset.c,v 5.5 2001-07-20 00:34:38 caress Exp $";
 	static char program_name[] = "mbset";
 	static char help_message[] = "MBset is a tool for setting values in an mbprocess parameter file.\n\
 MBprocess is a tool for processing swath sonar bathymetry data  \n\
@@ -250,11 +253,11 @@ the manual pages for mbprocess and mbset. \n\n";
 		    }
 		else if (strncmp(pargv[i], "NAVSPEED", 8) == 0)
 		    {
-		    sscanf(pargv[i], "%s:%d", &process.mbp_nav_speed);
+		    sscanf(pargv[i], "NAVSPEED:%d", &process.mbp_nav_speed);
 		    }
 		else if (strncmp(pargv[i], "NAVDRAFT", 8) == 0)
 		    {
-		    sscanf(pargv[i], "NAVSPEED:%d", &process.mbp_nav_draft);
+		    sscanf(pargv[i], "NAVDRAFT:%d", &process.mbp_nav_draft);
 		    }
 		else if (strncmp(pargv[i], "NAVINTERP", 9) == 0)
 		    {
@@ -282,7 +285,7 @@ the manual pages for mbprocess and mbset. \n\n";
 		/* bathymetry editing */
 		else if (strncmp(pargv[i], "EDITSAVEMODE", 12) == 0)
 		    {
-		    sscanf(pargv[i], "EDITSAVEMODE:%d", process.mbp_edit_mode);
+		    sscanf(pargv[i], "EDITSAVEMODE:%d", &process.mbp_edit_mode);
 		    }
 		else if (strncmp(pargv[i], "EDITSAVEFILE", 12) == 0)
 		    {

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_close.c	1/25/93
- *	$Id: mb_close.c,v 5.1 2001-06-29 22:48:04 caress Exp $
+ *	$Id: mb_close.c,v 5.2 2001-07-20 00:31:11 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	January 25, 1993
  *	
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2001/06/29 22:48:04  caress
+ * Added support for HSDS2RAW
+ *
  * Revision 5.0  2000/12/01  22:48:41  caress
  * First cut at Version 5.0.
  *
@@ -122,9 +125,9 @@
 #include "../../include/mb_define.h"
 
 /*--------------------------------------------------------------------*/
-int mb_close(int verbose, char **mbio_ptr, int *error)
+int mb_close(int verbose, void **mbio_ptr, int *error)
 {
-	static	char	rcs_id[]="$Id: mb_close.c,v 5.1 2001-06-29 22:48:04 caress Exp $";
+	static	char	rcs_id[]="$Id: mb_close.c,v 5.2 2001-07-20 00:31:11 caress Exp $";
 	char	*function_name = "mb_close";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

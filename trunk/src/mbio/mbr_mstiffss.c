@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mstiffss.c	4/7/98
- *	$Id: mbr_mstiffss.c,v 5.2 2001-03-22 20:50:02 caress Exp $
+ *	$Id: mbr_mstiffss.c,v 5.3 2001-07-20 00:32:54 caress Exp $
  *
  *    Copyright (c) 1998, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	April 7, 1998
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2001/03/22  20:50:02  caress
+ * Trying to make version 5.0.beta0
+ *
  * Revision 5.1  2001/01/22  07:43:34  caress
  * Version 5.0.beta01
  *
@@ -73,7 +76,7 @@
 #endif
 
 /* essential function prototypes */
-int mbr_register_mstiffss(int verbose, char *mbio_ptr, 
+int mbr_register_mstiffss(int verbose, void *mbio_ptr, 
 		int *error);
 int mbr_info_mstiffss(int verbose, 
 			int *system, 
@@ -94,15 +97,15 @@ int mbr_info_mstiffss(int verbose,
 			double *beamwidth_xtrack, 
 			double *beamwidth_ltrack, 
 			int *error);
-int mbr_alm_mstiffss(int verbose, char *mbio_ptr, int *error);
-int mbr_dem_mstiffss(int verbose, char *mbio_ptr, int *error);
-int mbr_rt_mstiffss(int verbose, char *mbio_ptr, char *store_ptr, int *error);
-int mbr_wt_mstiffss(int verbose, char *mbio_ptr, char *store_ptr, int *error);
+int mbr_alm_mstiffss(int verbose, void *mbio_ptr, int *error);
+int mbr_dem_mstiffss(int verbose, void *mbio_ptr, int *error);
+int mbr_rt_mstiffss(int verbose, void *mbio_ptr, void *store_ptr, int *error);
+int mbr_wt_mstiffss(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
 /*--------------------------------------------------------------------*/
-int mbr_register_mstiffss(int verbose, char *mbio_ptr, int *error)
+int mbr_register_mstiffss(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_mstiffss.c,v 5.2 2001-03-22 20:50:02 caress Exp $";
+	static char res_id[]="$Id: mbr_mstiffss.c,v 5.3 2001-07-20 00:32:54 caress Exp $";
 	char	*function_name = "mbr_register_mstiffss";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -125,9 +128,9 @@ int mbr_register_mstiffss(int verbose, char *mbio_ptr, int *error)
 			&mb_io_ptr->beams_bath_max, 
 			&mb_io_ptr->beams_amp_max, 
 			&mb_io_ptr->pixels_ss_max, 
-			&mb_io_ptr->format_name, 
-			&mb_io_ptr->system_name, 
-			&mb_io_ptr->format_description, 
+			mb_io_ptr->format_name, 
+			mb_io_ptr->system_name, 
+			mb_io_ptr->format_description, 
 			&mb_io_ptr->numfile, 
 			&mb_io_ptr->filetype, 
 			&mb_io_ptr->variable_beams, 
@@ -232,7 +235,7 @@ int mbr_info_mstiffss(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_mstiffss.c,v 5.2 2001-03-22 20:50:02 caress Exp $";
+	static char res_id[]="$Id: mbr_mstiffss.c,v 5.3 2001-07-20 00:32:54 caress Exp $";
 	char	*function_name = "mbr_info_mstiffss";
 	int	status = MB_SUCCESS;
 
@@ -299,9 +302,9 @@ int mbr_info_mstiffss(int verbose,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_alm_mstiffss(int verbose, char *mbio_ptr, int *error)
+int mbr_alm_mstiffss(int verbose, void *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_mstiffss.c,v 5.2 2001-03-22 20:50:02 caress Exp $";
+ static char res_id[]="$Id: mbr_mstiffss.c,v 5.3 2001-07-20 00:32:54 caress Exp $";
 	char	*function_name = "mbr_alm_mstiffss";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -352,7 +355,7 @@ int mbr_alm_mstiffss(int verbose, char *mbio_ptr, int *error)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_dem_mstiffss(int verbose, char *mbio_ptr, int *error)
+int mbr_dem_mstiffss(int verbose, void *mbio_ptr, int *error)
 {
 	char	*function_name = "mbr_dem_mstiffss";
 	int	status = MB_SUCCESS;
@@ -390,7 +393,7 @@ int mbr_dem_mstiffss(int verbose, char *mbio_ptr, int *error)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_rt_mstiffss(int verbose, char *mbio_ptr, char *store_ptr, int *error)
+int mbr_rt_mstiffss(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 {
 	char	*function_name = "mbr_rt_mstiffss";
 	int	status = MB_SUCCESS;
@@ -995,7 +998,7 @@ int mbr_rt_mstiffss(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_wt_mstiffss(int verbose, char *mbio_ptr, char *store_ptr, int *error)
+int mbr_wt_mstiffss(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 {
 	char	*function_name = "mbr_wt_mstiffss";
 	int	status = MB_SUCCESS;

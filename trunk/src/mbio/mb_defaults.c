@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_defaults.c	10/7/94
- *    $Id: mb_defaults.c,v 5.1 2001-04-30 05:13:06 caress Exp $
+ *    $Id: mb_defaults.c,v 5.2 2001-07-20 00:31:11 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,10 @@
  * Date:	January 23, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2001/04/30  05:13:06  caress
+ * Changed handling of mbdefaults - more flexible parsing of
+ * defaults file and addition of image viewer default.
+ *
  * Revision 5.0  2000/12/01 22:48:41  caress
  * First cut at Version 5.0.
  *
@@ -93,7 +97,7 @@ int mb_defaults(int verbose, int *format, int *pings,
 		int *btime_i, int *etime_i,
 		double *speedmin, double *timegap)
 {
-  static char rcs_id[]="$Id: mb_defaults.c,v 5.1 2001-04-30 05:13:06 caress Exp $";
+  static char rcs_id[]="$Id: mb_defaults.c,v 5.2 2001-07-20 00:31:11 caress Exp $";
 	char	*function_name = "mb_defaults";
 	int	status;
 	FILE	*fp;
@@ -158,7 +162,7 @@ int mb_defaults(int verbose, int *format, int *pings,
 			if (strncmp(string,"timegap:",6) == 0)
 				sscanf(string,"timegap: %lf",timegap);
 			if (strncmp(string,"bounds:",7) == 0)
-				sscanf(string,"bounds: %lf lf lf lf",
+				sscanf(string,"bounds: %lf %lf %lf %lf",
 					&bounds[0],&bounds[1],&bounds[2],&bounds[3]);
 			if (strncmp(string,"begin time:",11) == 0)
 				sscanf(string,"begin time:  %d %d %d %d %d %d %d",
@@ -213,7 +217,7 @@ int mb_defaults(int verbose, int *format, int *pings,
 /*--------------------------------------------------------------------*/
 int mb_env(int verbose, char *psdisplay, char *imgdisplay, char *mbproject)
 {
-  static char rcs_id[]="$Id: mb_defaults.c,v 5.1 2001-04-30 05:13:06 caress Exp $";
+  static char rcs_id[]="$Id: mb_defaults.c,v 5.2 2001-07-20 00:31:11 caress Exp $";
 	char	*function_name = "mbenv";
 	int	status;
 	FILE	*fp;

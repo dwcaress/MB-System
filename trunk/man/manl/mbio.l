@@ -1,4 +1,4 @@
-.TH mbio l "1 December 2000" "MB-System 5.0" "MB-System 5.0"
+.TH mbio l "2 July 2001" "MB-System 5.0" "MB-System 5.0"
 .SH WARNING!!!!!!
 .SH THIS MAN PAGE IS NOT UP TO DATE!!!!!!
 
@@ -621,6 +621,270 @@ using \fBMBIO\fP functions should adopt the following verbosity conventions:
 .SH INITIALIZATION AND CLOSING FUNCTIONS
 .RE
 .IP
+int \fI\fBmb_defaults\fP(int \fIverbose\fP, int \fI*format\fP, int \fI*pings\fP,
+		int \fI*lonflip\fP, double \fIbounds[4]\fP, \fI
+		int \fI*btime_i\fP, int \fI*etime_i\fP,
+		double \fI*speedmin\fP, double \fI*timegap\fP);
+int \fI\fBmb_env\fP(int \fIverbose\fP, char \fI*psdisplay\fP, char \fI*imgdisplay\fP, char \fI*mbproject\fP);
+int \fI\fBmb_format_register\fP(int \fIverbose\fP, int \fI*format\fP, char \fI*mbio_ptr\fP, \fI
+		int \fI*error\fP);
+int \fI\fBmb_format_info\fP(int \fIverbose\fP, int \fI*format\fP, int \fI*system\fP, \fI
+		int \fI*beams_bath_max\fP, int \fI*beams_amp_max\fP, int \fI*pixels_ss_max\fP, \fI
+		char \fI*format_name\fP, char \fI*system_name\fP, char \fI*format_description\fP, \fI
+		int \fI*numfile\fP, int \fI*filetype\fP, int \fI*variable_beams\fP, \fI
+		int \fI*traveltime\fP, int \fI*beam_flagging\fP, \fI
+		int \fI*nav_source\fP, int \fI*heading_source\fP, int \fI*vru_source\fP, \fI
+		double \fI*beamwidth_xtrack\fP, double \fI*beamwidth_ltrack\fP, \fI
+		int \fI*error\fP);
+int \fI\fBmb_format\fP(int \fIverbose\fP, int \fI*format\fP, int \fI*error\fP);
+int \fI\fBmb_format_system\fP(int \fIverbose\fP, int \fI*format\fP, int \fI*system\fP, int \fI*error\fP);
+int \fI\fBmb_format_description\fP(int \fIverbose\fP, int \fI*format\fP, \fI
+		char \fI*description\fP, int \fI*error\fP);
+int \fI\fBmb_format_dimensions\fP(int \fIverbose\fP, int \fI*format\fP, \fI
+		int \fI*beams_bath_max\fP, int \fI*beams_amp_max\fP, int \fI*pixels_ss_max\fP, \fI
+		int \fI*error\fP);
+int \fI\fBmb_format_flags\fP(int \fIverbose\fP, int \fI*format\fP, \fI
+		int \fI*variable_beams\fP, int \fI*traveltime\fP, int \fI*beam_flagging\fP, \fI
+		int \fI*error\fP);
+int \fI\fBmb_format_source\fP(int \fIverbose\fP, int \fI*format\fP, \fI
+		int \fI*nav_source\fP, int \fI*heading_source\fP, int \fI*vru_source\fP, \fI
+		int \fI*error\fP);
+int \fI\fBmb_format_beamwidth\fP(int \fIverbose\fP, int \fI*format\fP, \fI
+		double \fI*beamwidth_xtrack\fP, double \fI*beamwidth_ltrack\fP,
+		int \fI*error\fP);
+int \fI\fBmb_datalist_open\fP(int \fIverbose\fP,
+		char \fI**datalist\fP,
+		char \fI*path\fP, \fI
+		int \fIlook_processed\fP,
+		int \fI*error\fP);
+int \fI\fBmb_datalist_read\fP(int \fIverbose\fP,
+		char \fI \fI*datalist\fP,
+		char \fI*path\fP, int \fI*format\fP, double \fI*weight\fP,
+		int \fI*error\fP);
+int \fI\fBmb_datalist_close\fP(int \fIverbose\fP,
+		char \fI**datalist\fP, int \fI*error\fP);
+int \fI\fBmb_read_init\fP(int \fIverbose\fP, char \fI*file\fP, \fI
+		int \fIformat\fP, int \fIpings\fP, int \fIlonflip\fP, double \fIbounds[4]\fP,
+		int \fIbtime_i[7]\fP, int \fIetime_i[7]\fP, \fI
+		double \fIspeedmin\fP, double \fItimegap\fP,
+		char \fI**mbio_ptr\fP, double \fI*btime_d\fP, double \fI*etime_d\fP,
+		int \fI*beams_bath\fP, int \fI*beams_amp\fP, int \fI*pixels_ss\fP, \fI
+		int \fI*error\fP);
+int \fI\fBmb_write_init\fP(int \fIverbose\fP, \fI
+		char \fI*file\fP, int \fIformat\fP, char \fI**mbio_ptr\fP, \fI
+		int \fI*beams_bath\fP, int \fI*beams_amp\fP, int \fI*pixels_ss\fP,
+		int \fI*error\fP);
+int \fI\fBmb_read_ping\fP(int \fIverbose\fP, char \fI*mbio_ptr\fP, char \fI*store_ptr\fP, \fI
+		int \fI*kind\fP, int \fI*error\fP);
+int \fI\fBmb_get_all\fP(int \fIverbose\fP, char \fI*mbio_ptr\fP, char \fI**store_ptr\fP, int \fI*kind\fP,
+		int \fItime_i[7]\fP, double \fI*time_d\fP,
+		double \fI*navlon\fP, double \fI*navlat\fP, \fI
+		double \fI*speed\fP, double \fI*heading\fP, \fI
+		double \fI*distance\fP, double \fI*altitude\fP, double \fI*sonardepth\fP, \fI
+		int \fI*nbath\fP, int \fI*namp\fP, int \fI*nss\fP,
+		char \fI*beamflag\fP, double \fI*bath\fP, double \fI*amp\fP,
+		double \fI*bathacrosstrack\fP, double \fI*bathalongtrack\fP,
+		double \fI*ss\fP, double \fI*ssacrosstrack\fP, double \fI*ssalongtrack\fP,
+		char \fI*comment\fP, int \fI*error\fP);
+int \fI\fBmb_get\fP(int \fIverbose\fP, char \fI*mbio_ptr\fP, int \fI*kind\fP, int \fI*pings\fP, \fI
+		int \fItime_i[7]\fP, double \fI*time_d\fP,
+		double \fI*navlon\fP, double \fI*navlat\fP, \fI
+		double \fI*speed\fP, double \fI*heading\fP, \fI
+		double \fI*distance\fP, double \fI*altitude\fP, double \fI*sonardepth\fP, \fI
+		int \fI*nbath\fP, int \fI*namp\fP, int \fI*nss\fP,
+		char \fI*beamflag\fP, double \fI*bath\fP, double \fI*amp\fP,
+		double \fI*bathacrosstrack\fP, double \fI*bathalongtrack\fP,
+		double \fI*ss\fP, double \fI*ssacrosstrack\fP, double \fI*ssalongtrack\fP,
+		char \fI*comment\fP, int \fI*error\fP);
+int \fI\fBmb_read\fP(int \fIverbose\fP, char \fI*mbio_ptr\fP,
+		int \fI*kind\fP, int \fI*pings\fP, \fI
+		int \fItime_i[7]\fP, double \fI*time_d\fP,
+		double \fI*navlon\fP, double \fI*navlat\fP, \fI
+		double \fI*speed\fP, double \fI*heading\fP, \fI
+		double \fI*distance\fP, double \fI*altitude\fP, double \fI*sonardepth\fP, \fI
+		int \fI*nbath\fP, int \fI*namp\fP, int \fI*nss\fP,
+		char \fI*beamflag\fP, double \fI*bath\fP, double \fI*amp\fP, \fI
+		double \fI*bathlon\fP, double \fI*bathlat\fP,
+		double \fI*ss\fP, double \fI*sslon\fP, double \fI*sslat\fP,
+		char \fI*comment\fP, int \fI*error\fP);
+int \fI\fBmb_write_ping\fP(int \fIverbose\fP, char \fI*mbio_ptr\fP, char \fI*store_ptr\fP, \fI
+		int \fI*error\fP);
+int \fI\fBmb_put_all\fP(int \fIverbose\fP, char \fI*mbio_ptr\fP, char \fI*store_ptr\fP,
+		int \fIusevalues\fP, int \fIkind\fP, \fI
+		int \fItime_i[7]\fP, double \fItime_d\fP,
+		double \fInavlon\fP, double \fInavlat\fP, \fI
+		double \fIspeed\fP, double \fIheading\fP,
+		int \fInbath\fP, int \fInamp\fP, int \fInss\fP,
+		char \fI*beamflag\fP, double \fI*bath\fP, double \fI*amp\fP, \fI
+		double \fI*bathacrosstrack\fP, double \fI*bathalongtrack\fP,
+		double \fI*ss\fP, double \fI*ssacrosstrack\fP, double \fI*ssalongtrack\fP,
+		char \fI*comment\fP, int \fI*error\fP);
+int \fI\fBmb_put_comment\fP(int \fIverbose\fP, char \fI*mbio_ptr\fP, char \fI*comment\fP, \fI
+		int \fI*error\fP);
+int \fI\fBmb_alloc\fP(int \fIverbose\fP, char \fI*mbio_ptr\fP,
+		char \fI**store_ptr\fP, int \fI*error\fP);
+int \fI\fBmb_deall\fP(int \fIverbose\fP, char \fI*mbio_ptr\fP,
+		char \fI**store_ptr\fP, int \fI*error\fP);
+int \fI\fBmb_insert\fP(int \fIverbose\fP, char \fI*mbio_ptr\fP, char \fI*store_ptr\fP, \fI
+		int \fIkind\fP, int \fItime_i[7]\fP, double \fItime_d\fP,
+		double \fInavlon\fP, double \fInavlat\fP,
+		double \fIspeed\fP, double \fIheading\fP,
+		int \fInbath\fP, int \fInamp\fP, int \fInss\fP,
+		char \fI*beamflag\fP, double \fI*bath\fP, double \fI*amp\fP, \fI
+		double \fI*bathacrosstrack\fP, double \fI*bathalongtrack\fP,
+		double \fI*ss\fP, double \fI*ssacrosstrack\fP, double \fI*ssalongtrack\fP,
+		char \fI*comment\fP, int \fI*error\fP);
+int \fI\fBmb_extract\fP(int \fIverbose\fP, char \fI*mbio_ptr\fP, char \fI*store_ptr\fP, \fI
+		int \fI*kind\fP, int \fItime_i[7]\fP, double \fI*time_d\fP,
+		double \fI*navlon\fP, double \fI*navlat\fP,
+		double \fI*speed\fP, double \fI*heading\fP,
+		int \fI*nbath\fP, int \fI*namp\fP, int \fI*nss\fP,
+		char \fI*beamflag\fP, double \fI*bath\fP, double \fI*amp\fP, \fI
+		double \fI*bathacrosstrack\fP, double \fI*bathalongtrack\fP,
+		double \fI*ss\fP, double \fI*ssacrosstrack\fP, double \fI*ssalongtrack\fP,
+		char \fI*comment\fP, int \fI*error\fP);
+int \fI\fBmb_extract_nav\fP(int \fIverbose\fP, char \fI*mbio_ptr\fP, char \fI*store_ptr\fP, int \fI*kind\fP,
+		int \fItime_i[7]\fP, double \fI*time_d\fP, \fI
+		double \fI*navlon\fP, double \fI*navlat\fP,
+		double \fI*speed\fP, double \fI*heading\fP, double \fI*draft\fP, \fI
+		double \fI*roll\fP, double \fI*pitch\fP, double \fI*heave\fP, \fI
+		int \fI*error\fP);
+int \fI\fBmb_insert_nav\fP(int \fIverbose\fP, char \fI*mbio_ptr\fP, char \fI*store_ptr\fP,
+		int \fItime_i[7]\fP, double \fItime_d\fP, \fI
+		double \fInavlon\fP, double \fInavlat\fP,
+		double \fIspeed\fP, double \fIheading\fP, double \fIdraft\fP, \fI
+		double \fIroll\fP, double \fIpitch\fP, double \fIheave\fP, \fI
+		int \fI*error\fP);
+int \fI\fBmb_extract_altitude\fP(int \fIverbose\fP, char \fI*mbio_ptr\fP, char \fI*store_ptr\fP,
+		int \fI*kind\fP,
+		double \fI*transducer_depth\fP, double \fI*altitude\fP,
+		int \fI*error\fP);
+int \fI\fBmb_insert_altitude\fP(int \fIverbose\fP, char \fI*mbio_ptr\fP, char \fI*store_ptr\fP,
+		double \fItransducer_depth\fP, double \fIaltitude\fP,
+		int \fI*error\fP);
+int \fI\fBmb_extract_svp\fP(int \fIverbose\fP, char \fI*mbio_ptr\fP, char \fI*store_ptr\fP,
+		int \fI*kind\fP,
+		int \fI*nsvp\fP,
+		double \fI*depth\fP, double \fI*velocity\fP,
+		int \fI*error\fP);
+int \fI\fBmb_insert_svp\fP(int \fIverbose\fP, char \fI*mbio_ptr\fP, char \fI*store_ptr\fP,
+		int \fInsvp\fP,
+		double \fI*depth\fP, double \fI*velocity\fP,
+		int \fI*error\fP);
+int \fI\fBmb_ttimes\fP(int \fIverbose\fP, char \fI*mbio_ptr\fP, char \fI*store_ptr\fP,
+		int \fI*kind\fP, int \fI*nbeams\fP,
+		double \fI*ttimes\fP, double	*angles\fP, \fI
+		double \fI*angles_forward\fP, double \fI*angles_null\fP,
+		double \fI*heave\fP, double \fI*alongtrack_offset\fP, \fI
+		double \fI*draft\fP, double \fI*ssv\fP, int \fI*error\fP);
+int \fI\fBmb_extract_rawss\fP(int \fIverbose\fP, char \fI*mbio_ptr\fP, char \fI*store_ptr\fP,
+		int \fI*kind\fP,
+		int \fI*nrawss\fP,
+		double \fI*rawss\fP, \fI
+		double \fI*rawssacrosstrack\fP, \fI
+		double \fI*rawssalongtrack\fP, \fI
+		int \fI*error\fP);
+int \fI\fBmb_insert_rawss\fP(int \fIverbose\fP, char \fI*mbio_ptr\fP, char \fI*store_ptr\fP,
+		int \fInrawss\fP,
+		double \fI*rawss\fP, \fI
+		double \fI*rawssacrosstrack\fP, \fI
+		double \fI*rawssalongtrack\fP, \fI
+		int \fI*error\fP);
+int \fI\fBmb_copyrecord\fP(int \fIverbose\fP, char \fI*mbio_ptr\fP,
+		char \fI*store_ptr\fP, char \fI*copy_ptr\fP, int \fI*error\fP);
+
+int \fI\fBmb_buffer_init\fP(int \fIverbose\fP, char \fI**buff_ptr\fP, int \fI*error\fP);
+int \fI\fBmb_buffer_close\fP(int \fIverbose\fP, char \fI**buff_ptr\fP, char \fI*mbio_ptr\fP, \fI
+		int \fI*error\fP);
+int \fI\fBmb_buffer_load\fP(int \fIverbose\fP, char \fI*buff_ptr\fP,char \fI*mbio_ptr\fP,
+		int \fInwant\fP, int \fI*nload\fP, int \fI*nbuff\fP, int \fI*error\fP);
+int \fI\fBmb_buffer_dump\fP(int \fIverbose\fP, char \fI*buff_ptr\fP, char \fI*mbio_ptr\fP,
+		int \fInhold\fP, int \fI*ndump\fP, int \fI*nbuff\fP, int \fI*error\fP);
+int \fI\fBmb_buffer_clear\fP(int \fIverbose\fP, char \fI*buff_ptr\fP, char \fI*mbio_ptr\fP,
+		int \fInhold\fP, int \fI*ndump\fP, int \fI*nbuff\fP, int \fI*error\fP);
+int \fI\fBmb_buffer_info\fP(int \fIverbose\fP, char \fI*buff_ptr\fP, char \fI*mbio_ptr\fP,
+		int \fIid\fP, int \fI*system\fP, int \fI*kind\fP, int \fI*error\fP);
+int \fI\fBmb_buffer_get_next_data\fP(int \fIverbose\fP, char \fI*buff_ptr\fP, char \fI*mbio_ptr\fP,
+		int \fIstart\fP, int \fI*id\fP,
+		int \fItime_i[7]\fP, double \fI*time_d\fP,
+		double \fI*navlon\fP, double \fI*navlat\fP, \fI
+		double \fI*speed\fP, double \fI*heading\fP,
+		int \fI*nbath\fP, int \fI*namp\fP, int \fI*nss\fP,
+		char \fI*beamflag\fP, double \fI*bath\fP, double \fI*amp\fP,
+		double \fI*bathacrosstrack\fP, double \fI*bathalongtrack\fP,
+		double \fI*ss\fP, double \fI*ssacrosstrack\fP, double \fI*ssalongtrack\fP,
+		int \fI*error\fP);
+int \fI\fBmb_buffer_get_next_nav\fP(int \fIverbose\fP, char \fI*buff_ptr\fP, char \fI*mbio_ptr\fP,
+		int \fIstart\fP, int \fI*id\fP,
+		int \fItime_i[7]\fP, double \fI*time_d\fP,
+		double \fI*navlon\fP, double \fI*navlat\fP, \fI
+		double \fI*speed\fP, double \fI*heading\fP, double \fI*draft\fP, \fI
+		double \fI*roll\fP, double \fI*pitch\fP, double \fI*heave\fP,
+		int \fI*error\fP);
+int \fI\fBmb_buffer_extract\fP(int \fIverbose\fP, char \fI*buff_ptr\fP, char \fI*mbio_ptr\fP,
+		int \fIid\fP, int \fI*kind\fP, \fI
+		int \fItime_i[7]\fP, double \fI*time_d\fP,
+		double \fI*navlon\fP, double \fI*navlat\fP, \fI
+		double \fI*speed\fP, double \fI*heading\fP,
+		int \fI*nbath\fP, int \fI*namp\fP, int \fI*nss\fP,
+		char \fI*beamflag\fP, double \fI*bath\fP, double \fI*amp\fP,
+		double \fI*bathacrosstrack\fP, double \fI*bathalongtrack\fP,
+		double \fI*ss\fP, double \fI*ssacrosstrack\fP, double \fI*ssalongtrack\fP,
+		char \fI*comment\fP, \fI
+		int \fI*error\fP);
+int \fI\fBmb_buffer_extract_nav\fP(int \fIverbose\fP, char \fI*buff_ptr\fP, char \fI*mbio_ptr\fP,
+		int \fIid\fP, int \fI*kind\fP, \fI
+		int \fItime_i[7]\fP, double \fI*time_d\fP,
+		double \fI*navlon\fP, double \fI*navlat\fP, 
+		double \fI*speed\fP, double \fI*heading\fP, double \fI*draft\fP,
+		double \fI*roll\fP, double \fI*pitch\fP, double \fI*heave\fP,
+		int \fI*error\fP);
+int \fI\fBmb_buffer_insert\fP(int \fIverbose\fP, char \fI*buff_ptr\fP, char \fI*mbio_ptr\fP,
+		int \fIid\fP, int \fItime_i[7]\fP, double \fItime_d\fP,
+		double \fInavlon\fP, double \fInavlat\fP, 
+		double \fIspeed\fP, double \fIheading\fP,
+		int \fInbath\fP, int \fInamp\fP, int \fInss\fP,
+		char \fI*beamflag\fP, double \fI*bath\fP, double \fI*amp\fP,
+		double \fI*bathacrosstrack\fP, double \fI*bathalongtrack\fP,
+		double \fI*ss\fP, double \fI*ssacrosstrack\fP, double \fI*ssalongtrack\fP,
+		char \fI*comment\fP, 
+		int \fI*error\fP);
+int \fI\fBmb_buffer_insert_nav\fP(int \fIverbose\fP, char \fI*buff_ptr\fP, char \fI*mbio_ptr\fP,
+		int \fIid\fP, int \fItime_i[7]\fP, double \fItime_d\fP,
+		double \fInavlon\fP, double \fInavlat\fP, \fI
+		double \fIspeed\fP, double \fIheading\fP, double \fIdraft\fP,
+		double \fIroll\fP, double \fIpitch\fP, double \fIheave\fP,
+		int \fI*error\fP);
+int \fI\fBmb_buffer_get_ptr\fP(int \fIverbose\fP, char \fI*buff_ptr\fP, char \fI*mbio_ptr\fP,
+		int \fIid\fP, char \fI**store_ptr\fP, 
+		int \fI*error\fP);
+
+int \fI\fBmb_error\fP(int \fIerror\fP, int \fIerror\fP, char \fI**message\fP);
+int \fI\fBmb_navint_add\fP(int \fIverbose\fP, char \fI*mbio_ptr\fP, \fI
+		double \fItime_d\fP, double \fIlon\fP, double \fIlat\fP, int \fI*error\fP);
+int \fI\fBmb_navint_interp\fP(int \fIverbose\fP, char \fI*mbio_ptr\fP, \fI
+		double \fItime_d\fP, double \fIheading\fP, double \fIrawspeed\fP, \fI
+		double \fI*lon\fP, double \fI*lat\fP, double \fI*speed\fP, \fI
+		int \fI*error\fP);
+int \fI\fBmb_get_double\fP(double \fI*\fP, char \fI*\fP, int\fP);
+int \fI\fBmb_get_int\fP(int \fI*\fP, char \fI*\fP, int\fP);
+int \fI\fBmb_get_binary_short\fP(int\fP, \fIvoid \fI*\fP, \fIshort \fI*\fP);
+int \fI\fBmb_get_binary_int\fP(int\fP, \fIvoid \fI*\fP, int \fI*\fP);
+int \fI\fBmb_get_binary_float\fP(int\fP, \fIvoid \fI*\fP, \fIfloat \fI*\fP);
+int \fI\fBmb_get_binary_double\fP(int\fP, \fIvoid \fI*\fP, double \fI*\fP);
+int \fI\fBmb_put_binary_short\fP(int\fP, \fIshort\fP, \fIvoid \fI*\fP);
+int \fI\fBmb_put_binary_int\fP(int\fP, int\fP, \fIvoid \fI*\fP);
+int \fI\fBmb_put_binary_float\fP(int\fP, \fIfloat\fP, \fIvoid \fI*\fP);
+int \fI\fBmb_put_binary_double\fP(int\fP, double\fP, \fIvoid \fI*\fP);
+int \fI\fBmb_get_bounds \fI\fP(char \fI*text\fP, double \fI*bounds\fP);
+double \fI\fBmb_ddmmss_to_degree \fI\fP(char \fI*text\fP);
+int \fI\fBmb_takeoff_to_rollpitch\fP(int\fP, double\fP, double\fP, double \fI*\fP, double \fI*\fP, int \fI*\fP);
+int \fI\fBmb_rollpitch_to_takeoff\fP(int\fP, double\fP, double\fP, double \fI*\fP, double \fI*\fP, int \fI*\fP);
+int \fI\fBmb_double_compare\fP(double \fI*a\fP, double \fI*b\fP);
+int \fI\fBmb_int_compare\fP(int \fI*a\fP, int \fI*b\fP);
+
+
+
 int \fBmb_read_init\fP(\fIverbose\fP, \fIfile\fP, 
 \fIformat\fP, \fIpings\fP, \fIlonflip\fP, 
 \fIbounds\fP, \fIbtime_i\fP, \fIetime_i\fP, \fIspeedmin\fP, 

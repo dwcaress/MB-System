@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_read_init.c	1/25/93
- *    $Id: mb_read_init.c,v 5.4 2001-06-29 22:48:04 caress Exp $
+ *    $Id: mb_read_init.c,v 5.5 2001-07-20 00:31:11 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	January 25, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2001/06/29 22:48:04  caress
+ * Added support for HSDS2RAW
+ *
  * Revision 5.3  2001/06/08  21:44:01  caress
  * Version 5.0.beta01
  *
@@ -168,11 +171,11 @@ int mb_read_init(int verbose, char *file,
 		int format, int pings, int lonflip, double bounds[4],
 		int btime_i[7], int etime_i[7], 
 		double speedmin, double timegap,
-		char **mbio_ptr, double *btime_d, double *etime_d,
+		void **mbio_ptr, double *btime_d, double *etime_d,
 		int *beams_bath, int *beams_amp, int *pixels_ss, 
 		int *error)
 {
-	static char rcs_id[]="$Id: mb_read_init.c,v 5.4 2001-06-29 22:48:04 caress Exp $";
+	static char rcs_id[]="$Id: mb_read_init.c,v 5.5 2001-07-20 00:31:11 caress Exp $";
 	char	*function_name = "mb_read_init";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;

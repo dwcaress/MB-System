@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbprocess.c	3/31/93
- *    $Id: mbprocess.c,v 5.5 2001-06-08 21:45:46 caress Exp $
+ *    $Id: mbprocess.c,v 5.6 2001-07-20 00:34:38 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -36,6 +36,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2001/06/08 21:45:46  caress
+ * Version 5.0.beta01
+ *
  * Revision 5.4  2001/06/03  07:07:34  caress
  * Release 5.0.beta01.
  *
@@ -86,7 +89,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbprocess.c,v 5.5 2001-06-08 21:45:46 caress Exp $";
+	static char rcs_id[] = "$Id: mbprocess.c,v 5.6 2001-07-20 00:34:38 caress Exp $";
 	static char program_name[] = "mbprocess";
 	static char help_message[] =  "mbprocess is a tool for processing swath sonar bathymetry data.\n\
 This program performs a number of functions, including:\n\
@@ -107,7 +110,7 @@ The program will look for and use a parameter file with the \n\
 name \"infile.par\". If no parameter file exists, the program \n\
 will infer a reasonable processing path by looking for navigation\n\
 and mbedit edit save files.\n";
-	static char usage_message[] = "mbprocess -Iinfile [-Fformat -N -Ooutfile -V -H]";
+	static char usage_message[] = "mbprocess -Iinfile [-C -Fformat -N -Ooutfile -V -H]";
 
 	/* parsing variables */
 	extern char *optarg;
@@ -124,10 +127,6 @@ and mbedit edit save files.\n";
 	char	*message = NULL;
 
 	/* MBIO read and write control parameters */
-	int	format = 0;
-	int	variable_beams;
-	int	traveltime;
-	int	beam_flagging; 
 	int	pings;
 	int	lonflip;
 	double	bounds[4];
@@ -140,11 +139,11 @@ and mbedit edit save files.\n";
 	int	beams_bath;
 	int	beams_amp;
 	int	pixels_ss;
-	char	*imbio_ptr = NULL;
-	char	*ombio_ptr = NULL;
+	void	*imbio_ptr = NULL;
+	void	*ombio_ptr = NULL;
 
 	/* mbio read and write values */
-	char	*store_ptr = NULL;
+	void	*store_ptr = NULL;
 	int	kind;
 	int	time_i[7];
 	double	time_d;
@@ -195,8 +194,28 @@ and mbedit edit save files.\n";
 	struct mb_process_struct process;
 	
 	/* processing variables */
+	int	checkuptodate = MB_YES;
+	int	read_datalist = MB_NO;
+	int	read_data = MB_NO;
+	char	read_file[MB_PATH_MAXLINE];
+	void	*datalist;
+	int	look_processed = MB_DATALIST_LOOK_NO;
+	double	file_weight;
+	int	proceedprocess= MB_NO;
+	int	ifilemodtime = 0;
+	int	ofilemodtime = 0;
+	int	pfilemodtime = 0;
+	int	navfilemodtime = 0;
+	int	navadjfilemodtime = 0;
+	int	esfmodtime = 0;
+	int	svpmodtime = 0;
+ 	int	format = 0;
+	int	variable_beams;
+	int	traveltime;
+	int	beam_flagging; 
 	int	mbp_ifile_specified;
 	char	mbp_ifile[MBP_FILENAMESIZE];
+	char	mbp_pfile[MBP_FILENAMESIZE];
 	int	mbp_ofile_specified;
 	char	mbp_ofile[MBP_FILENAMESIZE];
 	int	mbp_format_specified;
@@ -210,6 +229,7 @@ and mbedit edit save files.\n";
 	int	ntide = 0;
 	int	size, nchar, len, nget, nav_ok, tide_ok;
 	int	time_j[5], stime_i[7], ftime_i[7];
+	int	ihr, isec;
 	double	sec, hr;
 	char	*bufftmp;
 	char	NorS[2], EorW[2];
@@ -312,7 +332,7 @@ and mbedit edit save files.\n";
 	strip_comments = MB_NO;
 	
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhF:f:I:i:NnO:o:")) != -1)
+	while ((c = getopt(argc, argv, "VvHhF:f:I:i:NnO:o:Pp")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -322,17 +342,18 @@ and mbedit edit save files.\n";
 		case 'V':
 		case 'v':
 			verbose++;
+			flag++;
 			break;
 		case 'F':
 		case 'f':
-			sscanf (optarg,"%d", &mbp_format);
+			sscanf (optarg,"%d", &format);
 			mbp_format_specified = MB_YES;
 			flag++;
 			break;
 		case 'I':
 		case 'i':
 			mbp_ifile_specified = MB_YES;
-			sscanf (optarg,"%s", mbp_ifile);
+			sscanf (optarg,"%s", read_file);
 			flag++;
 			break;
 		case 'N':
@@ -344,6 +365,11 @@ and mbedit edit save files.\n";
 		case 'o':
 			mbp_ofile_specified = MB_YES;
 			sscanf (optarg,"%s", mbp_ofile);
+			flag++;
+			break;
+		case 'P':
+		case 'p':
+			checkuptodate = MB_NO;
 			flag++;
 			break;
 		case '?':
@@ -386,31 +412,248 @@ and mbedit edit save files.\n";
 	    error = MB_ERROR_OPEN_FAIL;
 	    exit(error);
 	    }
-		
+
+	/* get format if required */
+	if (format == 0)
+		mb_get_format(verbose,read_file,NULL,&format,&error);
+  
+	/* determine whether to read one file or a list of files */
+	if (format < 0)
+		read_datalist = MB_YES;
+	else if (mbp_format_specified == MB_YES)
+		mbp_format = format;
+
+	/* open file list */
+	if (read_datalist == MB_YES)
+	    {
+	    if ((status = mb_datalist_open(verbose,&datalist,
+					    read_file,look_processed,&error)) != MB_SUCCESS)
+		{
+		error = MB_ERROR_OPEN_FAIL;
+		fprintf(stderr,"\nUnable to open data list file: %s\n",
+			read_file);
+		fprintf(stderr,"\nProgram <%s> Terminated\n",
+			program_name);
+		exit(error);
+		}
+	    if (status = mb_datalist_read(verbose,datalist,
+			    mbp_ifile,&mbp_format,&file_weight,&error)
+			    == MB_SUCCESS)
+		read_data = MB_YES;
+	    else
+		read_data = MB_NO;
+	    }
+	/* else copy single filename to be read */
+	else
+	    {
+	    strcpy(mbp_ifile, read_file);
+	    read_data = MB_YES;
+	    }
+
+	/* print starting debug statements */
+	if (verbose >= 2)
+	    {
+	    fprintf(stderr,"\ndbg2  Program <%s>\n",program_name);
+	    fprintf(stderr,"dbg2  Version %s\n",rcs_id);
+	    fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
+	    fprintf(stderr,"\ndbg2  MB-System Control Parameters:\n");
+	    fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
+	    fprintf(stderr,"dbg2       help:            %d\n",help);
+	    fprintf(stderr,"dbg2       read_file:       %s\n",read_file);
+	    fprintf(stderr,"dbg2       format:          %d\n",mbp_format);
+	    fprintf(stderr,"dbg2       pings:           %d\n",pings);
+	    fprintf(stderr,"dbg2       lonflip:         %d\n",lonflip);
+	    fprintf(stderr,"dbg2       bounds[0]:       %f\n",bounds[0]);
+	    fprintf(stderr,"dbg2       bounds[1]:       %f\n",bounds[1]);
+	    fprintf(stderr,"dbg2       bounds[2]:       %f\n",bounds[2]);
+	    fprintf(stderr,"dbg2       bounds[3]:       %f\n",bounds[3]);
+	    fprintf(stderr,"dbg2       btime_i[0]:      %d\n",btime_i[0]);
+	    fprintf(stderr,"dbg2       btime_i[1]:      %d\n",btime_i[1]);
+	    fprintf(stderr,"dbg2       btime_i[2]:      %d\n",btime_i[2]);
+	    fprintf(stderr,"dbg2       btime_i[3]:      %d\n",btime_i[3]);
+	    fprintf(stderr,"dbg2       btime_i[4]:      %d\n",btime_i[4]);
+	    fprintf(stderr,"dbg2       btime_i[5]:      %d\n",btime_i[5]);
+	    fprintf(stderr,"dbg2       btime_i[6]:      %d\n",btime_i[6]);
+	    fprintf(stderr,"dbg2       etime_i[0]:      %d\n",etime_i[0]);
+	    fprintf(stderr,"dbg2       etime_i[1]:      %d\n",etime_i[1]);
+	    fprintf(stderr,"dbg2       etime_i[2]:      %d\n",etime_i[2]);
+	    fprintf(stderr,"dbg2       etime_i[3]:      %d\n",etime_i[3]);
+	    fprintf(stderr,"dbg2       etime_i[4]:      %d\n",etime_i[4]);
+	    fprintf(stderr,"dbg2       etime_i[5]:      %d\n",etime_i[5]);
+	    fprintf(stderr,"dbg2       etime_i[6]:      %d\n",etime_i[6]);
+	    fprintf(stderr,"dbg2       speedmin:        %f\n",speedmin);
+	    fprintf(stderr,"dbg2       timegap:         %f\n",timegap);
+	    fprintf(stderr,"dbg2       strip_comments:  %d\n",strip_comments);
+	    fprintf(stderr,"dbg2       checkuptodate:   %d\n",checkuptodate);
+	    fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
+	    }
+
+	/* print starting info statements */
+	else
+	    {
+	    fprintf(stderr,"\nProgram <%s>\n",program_name);
+	    fprintf(stderr,"Version %s\n",rcs_id);
+	    fprintf(stderr,"MB-system Version %s\n",MB_VERSION);		
+	    fprintf(stderr,"\nProgram Operation:\n");
+	    fprintf(stderr,"  Input file:      %s\n",read_file);
+	    fprintf(stderr,"  Format:          %d\n",mbp_format);
+	    if (checkuptodate == MB_YES)
+		fprintf(stderr,"  Files processed only if out of date.\n");
+	    else
+		fprintf(stderr,"  All files processed.\n");
+	    if (strip_comments == MB_NO)
+		fprintf(stderr,"  Comments embedded in ouput.\n\n");
+	    else
+		fprintf(stderr,"  Comments stripped from ouput.\n\n");
+	    }
+	    
+	/* loop over all files to be read */
+	while (read_data == MB_YES)
+	{
+
 	/* load parameters */
 	status = mb_pr_readpar(verbose, mbp_ifile, MB_YES, 
 			&process, &error);
 			
-	/* reset output file and format */
-	if (mbp_ofile_specified == MB_YES)
+	/* reset output file and format if not reading from datalist */
+	if (read_datalist == MB_NO)
 	    {
-	    strcpy(process.mbp_ofile, mbp_ofile);
+	    if (mbp_ofile_specified == MB_YES)
+		{
+		strcpy(process.mbp_ofile, mbp_ofile);
+		}
+	    if (mbp_format_specified == MB_YES)
+		{
+		process.mbp_format = mbp_format;
+		}
 	    }
-	if (mbp_format_specified == MB_YES)
+			
+	/* make output file path global if needed */
+	if (status == MB_SUCCESS
+	    && mbp_ofile_specified == MB_NO
+	    && process.mbp_ofile[0] != '/'
+	    && (len = strrchr(process.mbp_ifile,'/') 
+			- process.mbp_ifile + 1) > 1)
 	    {
-	    process.mbp_format = mbp_format;
+	    strcpy(mbp_ofile,process.mbp_ofile);
+	    strncpy(process.mbp_ofile,process.mbp_ifile,len);
+	    process.mbp_ofile[len] = '\0';
+	    strcat(process.mbp_ofile,mbp_ofile);
 	    }
-
-	/* quit if no knowledge of what to do */
+	    
+	/* skip if processing cannot be inferred */
 	if (status == MB_FAILURE)
 	    {
-	    fprintf(stderr,"\nProgram <%s> requires a parameter file.\n",program_name);
-	    fprintf(stderr,"The parameter file must exist as 'infile.par', where the\n");
-	    fprintf(stderr,"input file 'infile' is specified with the -I option.\n");
-	    fprintf(stderr,"\nProgram <%s> Terminated\n",
-		    program_name);
-	    exit(error);
+	    proceedprocess = MB_NO;
+	    fprintf(stderr,"Data skipped - processing unknown: %s\n",
+		mbp_ifile);
 	    }
+
+	/* check for up to date if required */
+	else if (checkuptodate == MB_YES)
+		{
+		/* check for existing parameter file */
+		sprintf(mbp_pfile, "%s.par", mbp_ifile);
+	        if ((fstat = stat(mbp_pfile, &file_status)) == 0
+			&& (file_status.st_mode & S_IFMT) != S_IFDIR)
+			{
+			proceedprocess = MB_YES;
+			pfilemodtime = file_status.st_mtime;
+			}
+		else
+			{
+			proceedprocess = MB_NO;
+	    		fprintf(stderr,"Data skipped - no parameter file: %s\n",
+				mbp_ifile);
+			}
+
+		/* get mod time for the input file */
+		if ((fstat = stat(process.mbp_ifile, &file_status)) == 0
+			&& (file_status.st_mode & S_IFMT) != S_IFDIR)
+			{
+ 			ifilemodtime = file_status.st_mtime;
+			}
+		else
+			{
+			proceedprocess = MB_NO;
+	    		fprintf(stderr,"Data skipped - no input file: %s\n",
+				mbp_ifile);
+			}
+
+		/* if input and parameter files found check output and dependencies */
+		if (proceedprocess == MB_YES)
+		    {
+		    /* get mod time for the output file */
+		    if ((fstat = stat(process.mbp_ofile, &file_status)) == 0
+			    && (file_status.st_mode & S_IFMT) != S_IFDIR)
+			    ofilemodtime = file_status.st_mtime;
+		    else
+			    ofilemodtime = 0;
+    
+		    /* get mod time for the navigation file if needed */
+		    if (process.mbp_nav_mode != MBP_NAV_OFF
+			    && (fstat = stat(process.mbp_navfile, &file_status)) == 0
+			    && (file_status.st_mode & S_IFMT) != S_IFDIR)
+			    navfilemodtime = file_status.st_mtime;
+		    else
+			    navfilemodtime = 0;
+    
+		    /* get mod time for the navigation adjustment file if needed */
+		    if (process.mbp_navadj_mode != MBP_NAV_OFF
+			    && (fstat = stat(process.mbp_navadjfile, &file_status)) == 0
+			    && (file_status.st_mode & S_IFMT) != S_IFDIR)
+			    navadjfilemodtime = file_status.st_mtime;
+		    else
+			    navadjfilemodtime = 0;
+    
+		    /* get mod time for the edit save file if needed */
+		    if (process.mbp_edit_mode != MBP_EDIT_OFF
+			    && (fstat = stat(process.mbp_editfile, &file_status)) == 0
+			    && (file_status.st_mode & S_IFMT) != S_IFDIR)
+			    esfmodtime = file_status.st_mtime;
+		    else
+			    esfmodtime = 0;
+    
+		    /* get mod time for the svp file if needed */
+		    if (process.mbp_svp_mode != MBP_SVP_OFF
+			    && (fstat = stat(process.mbp_svpfile, &file_status)) == 0
+			    && (file_status.st_mode & S_IFMT) != S_IFDIR)
+			    svpmodtime = file_status.st_mtime;
+		    else
+			    svpmodtime = 0;
+			    
+		    /* now check if processed file is out of date */
+		    if (ofilemodtime > 0
+			    && ofilemodtime >= ifilemodtime
+			    && ofilemodtime >= pfilemodtime
+			    && ofilemodtime >= navfilemodtime
+			    && ofilemodtime >= navadjfilemodtime
+			    && ofilemodtime >= esfmodtime
+			    && ofilemodtime >= svpmodtime)
+			{
+			proceedprocess = MB_NO;
+	    		fprintf(stderr,"Data skipped - up to date: %s\n",
+				mbp_ifile);
+			}
+		    else
+			{
+			fprintf(stderr,"Data processed - out of date: \n\tInput:  %s\n\tOutput: %s\n",
+				mbp_ifile, process.mbp_ofile);
+			}
+		    }
+		}
+
+	/* else just do it */
+	else
+		{
+		proceedprocess = MB_YES;
+		fprintf(stderr,"Data processed: \n\tInput:  %s\n\tOutput: %s\n",
+			mbp_ifile, process.mbp_ofile);
+		}
+		
+	/* now process the input file */
+	if (proceedprocess == MB_YES)
+	{
 
 	/* check for nav format with heading, speed, and draft merge */
 	if (process.mbp_nav_mode == MBP_NAV_ON
@@ -446,11 +689,9 @@ and mbedit edit save files.\n";
 			&error);
 	    if (traveltime != MB_YES)
 		{
-		fprintf(stderr,"\nProgram <%s> requires travel time data to recalculate\n",program_name);
-		fprintf(stderr,"bathymetry from travel times and angles.\n");
-		fprintf(stderr,"Format %d is unacceptable because it does not include travel time data.\n",process.mbp_format);
-		fprintf(stderr,"\nProgram <%s> Terminated\n",
-			program_name);
+		process.mbp_bathrecalc_mode = MBP_BATHRECALC_OFF;
+		fprintf(stderr,"Bathymetry recalculation disabled because format %d does not include travel time data.\n",
+			process.mbp_format);
 		error = MB_ERROR_BAD_FORMAT;
 		exit(error);
 		}
@@ -464,57 +705,17 @@ and mbedit edit save files.\n";
 	    fprintf(stderr,"Format %d is specified. Sidescan recalculation disabled\n",process.mbp_format);
 	    process.mbp_ssrecalc_mode = MBP_SSRECALC_OFF;
 	    }
-	    
-
-	/* print starting debug statements */
-	if (verbose >= 2)
-	    {
-	    fprintf(stderr,"\ndbg2  Program <%s>\n",program_name);
-	    fprintf(stderr,"dbg2  Version %s\n",rcs_id);
-	    fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
-	    fprintf(stderr,"\ndbg2  MB-System Control Parameters:\n");
-	    fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
-	    fprintf(stderr,"dbg2       help:            %d\n",help);
-	    fprintf(stderr,"dbg2       format:          %d\n",format);
-	    fprintf(stderr,"dbg2       pings:           %d\n",pings);
-	    fprintf(stderr,"dbg2       lonflip:         %d\n",lonflip);
-	    fprintf(stderr,"dbg2       bounds[0]:       %f\n",bounds[0]);
-	    fprintf(stderr,"dbg2       bounds[1]:       %f\n",bounds[1]);
-	    fprintf(stderr,"dbg2       bounds[2]:       %f\n",bounds[2]);
-	    fprintf(stderr,"dbg2       bounds[3]:       %f\n",bounds[3]);
-	    fprintf(stderr,"dbg2       btime_i[0]:      %d\n",btime_i[0]);
-	    fprintf(stderr,"dbg2       btime_i[1]:      %d\n",btime_i[1]);
-	    fprintf(stderr,"dbg2       btime_i[2]:      %d\n",btime_i[2]);
-	    fprintf(stderr,"dbg2       btime_i[3]:      %d\n",btime_i[3]);
-	    fprintf(stderr,"dbg2       btime_i[4]:      %d\n",btime_i[4]);
-	    fprintf(stderr,"dbg2       btime_i[5]:      %d\n",btime_i[5]);
-	    fprintf(stderr,"dbg2       btime_i[6]:      %d\n",btime_i[6]);
-	    fprintf(stderr,"dbg2       etime_i[0]:      %d\n",etime_i[0]);
-	    fprintf(stderr,"dbg2       etime_i[1]:      %d\n",etime_i[1]);
-	    fprintf(stderr,"dbg2       etime_i[2]:      %d\n",etime_i[2]);
-	    fprintf(stderr,"dbg2       etime_i[3]:      %d\n",etime_i[3]);
-	    fprintf(stderr,"dbg2       etime_i[4]:      %d\n",etime_i[4]);
-	    fprintf(stderr,"dbg2       etime_i[5]:      %d\n",etime_i[5]);
-	    fprintf(stderr,"dbg2       etime_i[6]:      %d\n",etime_i[6]);
-	    fprintf(stderr,"dbg2       speedmin:        %f\n",speedmin);
-	    fprintf(stderr,"dbg2       timegap:         %f\n",timegap);
-	    fprintf(stderr,"dbg2       strip_comments:  %d\n",strip_comments);
-	    fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
-	    }
 
 	/* print starting info statements */
 	if (verbose == 1)
 	    {
-	    fprintf(stderr,"\nProgram <%s>\n",program_name);
-	    fprintf(stderr,"Version %s\n",rcs_id);
-	    fprintf(stderr,"MB-system Version %s\n",MB_VERSION);		
 	    fprintf(stderr,"\nInput and Output Files:\n");
 	    if (process.mbp_format_specified == MB_YES)
-		fprintf(stderr,"  Format:                        %d\n",process.mbp_format);
+		    fprintf(stderr,"  Format:                        %d\n",process.mbp_format);
 	    if (process.mbp_ifile_specified == MB_YES)
-		fprintf(stderr,"  Input file:                    %s\n",process.mbp_ifile);
+		    fprintf(stderr,"  Input file:                    %s\n",process.mbp_ifile);
 	    if (process.mbp_ifile_specified == MB_YES)
-		fprintf(stderr,"  Output file:                   %s\n",process.mbp_ofile);
+		    fprintf(stderr,"  Output file:                   %s\n",process.mbp_ofile);
 	    if (strip_comments == MB_YES)
 		fprintf(stderr,"  Comments in output:            OFF\n");
 	    else
@@ -918,7 +1119,7 @@ and mbedit edit save files.\n";
 		else if (process.mbp_nav_format == 3)
 			{
 			nget = sscanf(buffer,"%d %d %d %d %lf %lf %lf",
-				&time_j[0],&time_j[1],&hr,
+				&time_j[0],&time_j[1],&ihr,
 				&time_j[2],&sec,
 				&nlon[nnav],&nlat[nnav]);
 			time_j[2] = time_j[2] + 60*hr;
@@ -1511,8 +1712,8 @@ and mbedit edit save files.\n";
 		/* deal with tide in form: yr jday hour min sec tide */
 		else if (process.mbp_tide_format == 3)
 			{
-			nget = sscanf(buffer,"%d %d %d %d %lf %lf %lf",
-				&time_j[0],&time_j[1],&hr,
+			nget = sscanf(buffer,"%d %d %d %d %lf %lf",
+				&time_j[0],&time_j[1],&ihr,
 				&time_j[2],&sec,
 				&tide[ntide]);
 			time_j[2] = time_j[2] + 60*hr;
@@ -1528,7 +1729,7 @@ and mbedit edit save files.\n";
 		/* deal with tide in form: yr jday daymin sec tide */
 		else if (process.mbp_tide_format == 4)
 			{
-			nget = sscanf(buffer,"%d %d %d %lf %lf %lf",
+			nget = sscanf(buffer,"%d %d %d %lf %lf",
 				&time_j[0],&time_j[1],&time_j[2],
 				&sec,
 				&tide[ntide]);
@@ -2011,13 +2212,13 @@ and mbedit edit save files.\n";
 		    if (process.mbp_corrected == MB_YES)
 			{
 			strncpy(comment,"\0",MBP_FILENAMESIZE);
-			fprintf(comment,"Output bathymetry reference:   CORRECTED");
+			sprintf(comment,"Output bathymetry reference:   CORRECTED");
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			}
 		    else if (process.mbp_corrected == MB_NO)
 			{
 			strncpy(comment,"\0",MBP_FILENAMESIZE);
-			fprintf(comment,"Output bathymetry reference:   UNCORRECTED");
+			sprintf(comment,"Output bathymetry reference:   UNCORRECTED");
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			}
 		    }		    
@@ -3239,6 +3440,44 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 		fprintf(stderr,"%d output comment records\n",ocomment);
 		fprintf(stderr,"%d output other records\n",oother);
 		}
+		
+	/* generate inf file */
+	if (status == MB_SUCCESS)
+		{
+		if (verbose >= 1)
+			fprintf(stderr,"\nGenerating inf file for %s\n",process.mbp_ofile);
+		sprintf(user, "mbinfo -F %d -I %s -G > %s.inf", 
+			process.mbp_format, process.mbp_ofile, process.mbp_ofile);
+		system(user);
+		}
+		
+	} /* end processing file */
+
+	/* figure out whether and what to read next */
+        if (read_datalist == MB_YES)
+                {
+		if (status = mb_datalist_read(verbose,datalist,
+			    mbp_ifile,&format,&file_weight,&error)
+			    == MB_SUCCESS)
+                        read_data = MB_YES;
+                else
+                        read_data = MB_NO;
+                }
+        else
+                {
+                read_data = MB_NO;
+                }
+
+
+	} /* end loop over datalist */
+
+	if (read_datalist == MB_YES)
+		mb_datalist_close(verbose,&datalist,&error);
+
+	/* check memory */
+	if (verbose >= 4)
+		status = mb_memory_list(verbose,&error);
+
 
 	/* end it all */
 	exit(error);

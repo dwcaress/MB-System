@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcontour.c	6/4/93
- *    $Id: mbcontour.c,v 5.2 2001-03-22 21:03:31 caress Exp $
+ *    $Id: mbcontour.c,v 5.3 2001-07-20 00:29:41 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	June 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2001/03/22 21:03:31  caress
+ * Trying to make release 5.0.beta0.
+ *
  * Revision 5.1  2001/01/22  05:03:25  caress
  * Release 5.0.beta01
  *
@@ -168,7 +171,7 @@
 
 main (int argc, char **argv) 
 {
-	static char rcs_id[] = "$Id: mbcontour.c,v 5.2 2001-03-22 21:03:31 caress Exp $";
+	static char rcs_id[] = "$Id: mbcontour.c,v 5.3 2001-07-20 00:29:41 caress Exp $";
 #ifdef MBCONTOURFILTER
 	static char program_name[] = "MBCONTOURFILTER";
 	static char help_message[] =  "MBCONTOURFILTER is a utility which creates a pen plot \ncontour map of multibeam swath bathymetry.  \nThe primary purpose of this program is to serve as \npart of a real-time plotting system.  The contour \nlevels and colors can be controlled \ndirectly or set implicitly using contour and color change intervals. \nContours can also be set to have ticks pointing downhill.";
@@ -196,7 +199,7 @@ main (int argc, char **argv)
 	char	read_file[128];
         int     read_datalist;
 	int	read_data;
-	char	*datalist;
+	void	*datalist;
 	int	look_processed = MB_DATALIST_LOOK_UNSET;
 	double	file_weight;
 	FILE	*fp;
@@ -216,7 +219,7 @@ main (int argc, char **argv)
 	int	beams_bath;
 	int	beams_amp;
 	int	pixels_ss;
-	char	*mbio_ptr = NULL;
+	void	*mbio_ptr = NULL;
 
 	/* mbio read values */
 	struct swath *swath_plot = NULL;

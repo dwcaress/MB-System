@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrid.c	5/2/94
- *    $Id: mbgrid.c,v 5.3 2001-06-29 22:50:23 caress Exp $
+ *    $Id: mbgrid.c,v 5.4 2001-07-20 00:34:38 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -40,6 +40,9 @@
  * Rererewrite:	January 2, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2001/06/29 22:50:23  caress
+ * Atlas Hydrosweep DS2 raw data and SURF data formats.
+ *
  * Revision 5.2  2001/06/03  07:07:34  caress
  * Release 5.0.beta01.
  *
@@ -300,15 +303,12 @@
 #define MBGRID_USE_YES		1
 #define MBGRID_USE_CONDITIONAL	2
 
-/* compare function for qsort */
-int mb_double_compare();
-
 /* approximate complementary error function */
 double erfcc();
 double mbgrid_erf();
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbgrid.c,v 5.3 2001-06-29 22:50:23 caress Exp $";
+static char rcs_id[] = "$Id: mbgrid.c,v 5.4 2001-07-20 00:34:38 caress Exp $";
 static char program_name[] = "mbgrid";
 static char help_message[] =  "mbgrid is an utility used to grid bathymetry, amplitude, or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbgrid -Ifilelist -Oroot \
@@ -349,13 +349,13 @@ main (int argc, char **argv)
 	int	pixels_ss;
 	char	file[128];
 	int	file_in_bounds;
-	char	*mbio_ptr = NULL;
+	void	*mbio_ptr = NULL;
 	struct mb_io_struct *mb_io_ptr = NULL;
 
 	/* mbgrid control variables */
 	char	filelist[128];
 	char	fileroot[128];
-	char	*datalist;
+	void	*datalist;
 	int	look_processed = MB_DATALIST_LOOK_UNSET;
 	double	file_weight;
 	int	xdim = 0;
@@ -820,7 +820,7 @@ main (int argc, char **argv)
 		&& (datatype != MBGRID_DATA_TOPOGRAPHY
 		    && datatype != MBGRID_DATA_BATHYMETRY))
 		{
-		grid_mode == MBGRID_WEIGHTED_MEAN;
+		grid_mode = MBGRID_WEIGHTED_MEAN;
 		}
 
 	/* more option not available with minimum 
@@ -1206,7 +1206,7 @@ main (int argc, char **argv)
 			fprintf(outfp,"NaN values used to flag regions with no data\n");
 		else
 			fprintf(outfp,"Real value of %f used to flag regions with no data\n",
-				NO_DATA_FLAG);
+				outclipvalue);
 		if (more == MB_YES) 
 			fprintf(outfp,"Data density and sigma grids also created\n");
 		fprintf(outfp,"MBIO parameters:\n");

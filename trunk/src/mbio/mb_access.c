@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_access.c	11/1/00
- *    $Id: mb_access.c,v 5.2 2001-03-22 20:45:56 caress Exp $
+ *    $Id: mb_access.c,v 5.3 2001-07-20 00:31:11 caress Exp $
 
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	October 1, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2001/03/22 20:45:56  caress
+ * Trying to make 5.0.beta0...
+ *
  * Revision 5.1  2001/01/22  07:43:34  caress
  * Version 5.0.beta01
  *
@@ -41,8 +44,8 @@
 #include "../../include/mb_define.h"
 
 /*--------------------------------------------------------------------*/
-int mb_alloc(int verbose, char *mbio_ptr,
-		    char **store_ptr, int *error)
+int mb_alloc(int verbose, void *mbio_ptr,
+		    void **store_ptr, int *error)
 {
 	char	*function_name = "mb_alloc";
 	int	status = MB_SUCCESS;
@@ -89,8 +92,8 @@ int mb_alloc(int verbose, char *mbio_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_deall(int verbose, char *mbio_ptr,
-			char **store_ptr, int *error)
+int mb_deall(int verbose, void *mbio_ptr,
+			void **store_ptr, int *error)
 {
 	char	*function_name = "mb_deall";
 	int	status = MB_SUCCESS;
@@ -137,7 +140,7 @@ int mb_deall(int verbose, char *mbio_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_extract(int verbose, char *mbio_ptr, char *store_ptr, 
+int mb_extract(int verbose, void *mbio_ptr, void *store_ptr, 
 		int *kind, int time_i[7], double *time_d,
 		double *navlon, double *navlat,
 		double *speed, double *heading,
@@ -147,7 +150,7 @@ int mb_extract(int verbose, char *mbio_ptr, char *store_ptr,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
 		char *comment, int *error)
 {
-	static char rcs_id[]="$Id: mb_access.c,v 5.2 2001-03-22 20:45:56 caress Exp $";
+	static char rcs_id[]="$Id: mb_access.c,v 5.3 2001-07-20 00:31:11 caress Exp $";
 	char	*function_name = "mb_extract";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
@@ -248,7 +251,7 @@ int mb_extract(int verbose, char *mbio_ptr, char *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_insert(int verbose, char *mbio_ptr, char *store_ptr, 
+int mb_insert(int verbose, void *mbio_ptr, void *store_ptr, 
 		int kind, int time_i[7], double time_d,
 		double navlon, double navlat,
 		double speed, double heading,
@@ -258,7 +261,7 @@ int mb_insert(int verbose, char *mbio_ptr, char *store_ptr,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
 		char *comment, int *error)
 {
-	static char rcs_id[]="$Id: mb_access.c,v 5.2 2001-03-22 20:45:56 caress Exp $";
+	static char rcs_id[]="$Id: mb_access.c,v 5.3 2001-07-20 00:31:11 caress Exp $";
 	char	*function_name = "mb_insert";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
@@ -353,14 +356,14 @@ int mb_insert(int verbose, char *mbio_ptr, char *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_extract_nav(int verbose, char *mbio_ptr, char *store_ptr, int *kind,
+int mb_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 	int time_i[7], double *time_d, 
 	double *navlon, double *navlat,
 	double *speed, double *heading, double *draft, 
 	double *roll, double *pitch, double *heave, 
 	int *error)
 {
-  static char rcs_id[]="$Id: mb_access.c,v 5.2 2001-03-22 20:45:56 caress Exp $";
+  static char rcs_id[]="$Id: mb_access.c,v 5.3 2001-07-20 00:31:11 caress Exp $";
 	char	*function_name = "mb_extract_nav";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
@@ -428,14 +431,14 @@ int mb_extract_nav(int verbose, char *mbio_ptr, char *store_ptr, int *kind,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_insert_nav(int verbose, char *mbio_ptr, char *store_ptr,
+int mb_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 	int time_i[7], double time_d, 
 	double navlon, double navlat,
 	double speed, double heading, double draft, 
 	double roll, double pitch, double heave, 
 	int *error)
 {
-  static char rcs_id[]="$Id: mb_access.c,v 5.2 2001-03-22 20:45:56 caress Exp $";
+  static char rcs_id[]="$Id: mb_access.c,v 5.3 2001-07-20 00:31:11 caress Exp $";
 	char	*function_name = "mb_insert_nav";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
@@ -502,12 +505,12 @@ int mb_insert_nav(int verbose, char *mbio_ptr, char *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_extract_altitude(int verbose, char *mbio_ptr, char *store_ptr,
+int mb_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind,
 		double *transducer_depth, double *altitude,
 		int *error)
 {
-	static char rcs_id[]="$Id: mb_access.c,v 5.2 2001-03-22 20:45:56 caress Exp $";
+	static char rcs_id[]="$Id: mb_access.c,v 5.3 2001-07-20 00:31:11 caress Exp $";
 	char	*function_name = "mb_extract_altitude";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
@@ -557,11 +560,11 @@ int mb_extract_altitude(int verbose, char *mbio_ptr, char *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_insert_altitude(int verbose, char *mbio_ptr, char *store_ptr,
+int mb_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 		double transducer_depth, double altitude,
 		int *error)
 {
-	static char rcs_id[]="$Id: mb_access.c,v 5.2 2001-03-22 20:45:56 caress Exp $";
+	static char rcs_id[]="$Id: mb_access.c,v 5.3 2001-07-20 00:31:11 caress Exp $";
 	char	*function_name = "mb_insert_altitude";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
@@ -610,13 +613,13 @@ int mb_insert_altitude(int verbose, char *mbio_ptr, char *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_extract_svp(int verbose, char *mbio_ptr, char *store_ptr,
+int mb_extract_svp(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind,
 		int *nsvp,
 		double *depth, double *velocity,
 		int *error)
 {
-	static char rcs_id[]="$Id: mb_access.c,v 5.2 2001-03-22 20:45:56 caress Exp $";
+	static char rcs_id[]="$Id: mb_access.c,v 5.3 2001-07-20 00:31:11 caress Exp $";
 	char	*function_name = "mb_extract_svp";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
@@ -668,12 +671,12 @@ int mb_extract_svp(int verbose, char *mbio_ptr, char *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_insert_svp(int verbose, char *mbio_ptr, char *store_ptr,
+int mb_insert_svp(int verbose, void *mbio_ptr, void *store_ptr,
 		int nsvp,
 		double *depth, double *velocity,
 		int *error)
 {
-	static char rcs_id[]="$Id: mb_access.c,v 5.2 2001-03-22 20:45:56 caress Exp $";
+	static char rcs_id[]="$Id: mb_access.c,v 5.3 2001-07-20 00:31:11 caress Exp $";
 	char	*function_name = "mb_insert_svp";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
@@ -893,14 +896,14 @@ int mb_insert_svp(int verbose, char *mbio_ptr, char *store_ptr,
 *
  */
 /*--------------------------------------------------------------------*/
-int mb_ttimes(int verbose, char *mbio_ptr, char *store_ptr,
+int mb_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 	int *kind, int *nbeams,
 	double *ttimes, double	*angles, 
 	double *angles_forward, double *angles_null,
 	double *heave, double *alongtrack_offset, 
 	double *draft, double *ssv, int *error)
 {
-  static char rcs_id[]="$Id: mb_access.c,v 5.2 2001-03-22 20:45:56 caress Exp $";
+  static char rcs_id[]="$Id: mb_access.c,v 5.3 2001-07-20 00:31:11 caress Exp $";
 	char	*function_name = "mb_ttimes";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
@@ -966,7 +969,7 @@ int mb_ttimes(int verbose, char *mbio_ptr, char *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_extract_rawss(int verbose, char *mbio_ptr, char *store_ptr,
+int mb_extract_rawss(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind,
 		int *nrawss,
 		double *rawss, 
@@ -974,7 +977,7 @@ int mb_extract_rawss(int verbose, char *mbio_ptr, char *store_ptr,
 		double *rawssalongtrack, 
 		int *error)
 {
-	static char rcs_id[]="$Id: mb_access.c,v 5.2 2001-03-22 20:45:56 caress Exp $";
+	static char rcs_id[]="$Id: mb_access.c,v 5.3 2001-07-20 00:31:11 caress Exp $";
 	char	*function_name = "mb_extract_rawss";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
@@ -1029,14 +1032,14 @@ int mb_extract_rawss(int verbose, char *mbio_ptr, char *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_insert_rawss(int verbose, char *mbio_ptr, char *store_ptr,
+int mb_insert_rawss(int verbose, void *mbio_ptr, void *store_ptr,
 		int nrawss,
 		double *rawss, 
 		double *rawssacrosstrack, 
 		double *rawssalongtrack, 
 		int *error)
 {
-	static char rcs_id[]="$Id: mb_access.c,v 5.2 2001-03-22 20:45:56 caress Exp $";
+	static char rcs_id[]="$Id: mb_access.c,v 5.3 2001-07-20 00:31:11 caress Exp $";
 	char	*function_name = "mb_insert_rawss";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
@@ -1090,8 +1093,8 @@ int mb_insert_rawss(int verbose, char *mbio_ptr, char *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_copyrecord(int verbose, char *mbio_ptr,
-		    char *store_ptr, char *copy_ptr, int *error)
+int mb_copyrecord(int verbose, void *mbio_ptr,
+		    void *store_ptr, void *copy_ptr, int *error)
 {
 	char	*function_name = "mb_copy_record";
 	int	status = MB_SUCCESS;

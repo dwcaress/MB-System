@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_hs10.h	12/4/00
- *	$Id: mbsys_hs10.h,v 5.1 2001-01-22 07:43:34 caress Exp $
+ *	$Id: mbsys_hs10.h,v 5.2 2001-07-20 00:32:54 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	December 4, 2000
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2001/01/22  07:43:34  caress
+ * Version 5.0.beta01
+ *
  * Revision 5.0  2000/12/10  20:24:25  caress
  * Initial revision.
  *
@@ -180,11 +183,11 @@ struct mbsys_hs10_struct
 	};	
 	
 /* system specific function prototypes */
-int mbsys_hs10_alloc(int verbose, char *mbio_ptr, char **store_ptr, 
+int mbsys_hs10_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error);
-int mbsys_hs10_deall(int verbose, char *mbio_ptr, char **store_ptr, 
+int mbsys_hs10_deall(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error);
-int mbsys_hs10_extract(int verbose, char *mbio_ptr, char *store_ptr, 
+int mbsys_hs10_extract(int verbose, void *mbio_ptr, void *store_ptr, 
 			int *kind, int time_i[7], double *time_d,
 			double *navlon, double *navlat,
 			double *speed, double *heading,
@@ -193,7 +196,7 @@ int mbsys_hs10_extract(int verbose, char *mbio_ptr, char *store_ptr,
 			double *bathacrosstrack, double *bathalongtrack,
 			double *ss, double *ssacrosstrack, double *ssalongtrack,
 			char *comment, int *error);
-int mbsys_hs10_insert(int verbose, char *mbio_ptr, char *store_ptr, 
+int mbsys_hs10_insert(int verbose, void *mbio_ptr, void *store_ptr, 
 			int kind, int time_i[7], double time_d,
 			double navlon, double navlat,
 			double speed, double heading,
@@ -202,28 +205,28 @@ int mbsys_hs10_insert(int verbose, char *mbio_ptr, char *store_ptr,
 			double *bathacrosstrack, double *bathalongtrack,
 			double *ss, double *ssacrosstrack, double *ssalongtrack,
 			char *comment, int *error);
-int mbsys_hs10_ttimes(int verbose, char *mbio_ptr, char *store_ptr,
+int mbsys_hs10_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbeams,
 			double *ttimes, double *angles, 
 			double *angles_forward, double *angles_null,
 			double *heave, double *alongtrack_offset, 
 			double *draft, double *ssv, int *error);
-int mbsys_hs10_extract_altitude(int verbose, char *mbio_ptr, char *store_ptr,
+int mbsys_hs10_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, double *transducer_depth, double *altitude, 
 			int *error);
-int mbsys_hs10_extract_nav(int verbose, char *mbio_ptr, char *store_ptr,
+int mbsys_hs10_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int time_i[7], double *time_d,
 			double *navlon, double *navlat,
 			double *speed, double *heading, double *draft, 
 			double *roll, double *pitch, double *heave, 
 			int *error);
-int mbsys_hs10_insert_nav(int verbose, char *mbio_ptr, char *store_ptr,
+int mbsys_hs10_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 			int time_i[7], double time_d,
 			double navlon, double navlat,
 			double speed, double heading, double draft, 
 			double roll, double pitch, double heave,
 			int *error);
-int mbsys_hs10_copy(int verbose, char *mbio_ptr, 
-			char *store_ptr, char *copy_ptr,
+int mbsys_hs10_copy(int verbose, void *mbio_ptr, 
+			void *store_ptr, void *copy_ptr,
 			int *error);
 

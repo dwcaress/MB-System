@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 5.5 2001-06-29 22:50:04 caress Exp $
+#	$Id: Makefile.template,v 5.6 2001-07-20 00:32:54 caress Exp $
 #
 #     Copyright (c) 1993, 1994, 2000 by
 #     David W. Caress (caress@mbari.org)
@@ -16,6 +16,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.5  2001/06/29  22:50:04  caress
+# Atlas Hydrosweep DS2 raw data and SURF data formats.
+#
 # Revision 5.4  2001/06/03  06:57:42  caress
 # Release 5.0beta01.
 #
@@ -212,7 +215,7 @@ $(LIBDIR)/libmbio.a:	mb_format.o mb_error.o \
 		mbr_omghdcsj.o \
 		mbr_mgd77dat.o mbr_mbarirov.o \
 		mbr_mbpronav.o mbr_hs10jams.o \
-		mbr_hsds2raw.o
+		mbr_hsds2raw.o mbr_hsds2lam.o
 	$(ARCHIVE) $(LIBDIR)/libmbio.a \
 		mb_format.o mb_error.o \
 		mb_swap.o mb_compare.o mb_navint.o \
@@ -264,7 +267,7 @@ $(LIBDIR)/libmbio.a:	mb_format.o mb_error.o \
 		mbr_omghdcsj.o \
 		mbr_mgd77dat.o mbr_mbarirov.o \
 		mbr_mbpronav.o mbr_hs10jams.o \
-		mbr_hsds2raw.o
+		mbr_hsds2raw.o mbr_hsds2lam.o
 	ranlib $(LIBDIR)/libmbio.a
 
 ### compile the source files
@@ -456,6 +459,8 @@ mbr_hs10jams.o: mbr_hs10jams.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INC
 	$(CC) -c $(CFLAGS) mbr_hs10jams.c
 mbr_hsds2raw.o: mbr_hsds2raw.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbsys_surf.h
 	$(CC) -c $(CFLAGS) mbr_hsds2raw.c
+mbr_hsds2lam.o: mbr_hsds2lam.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbsys_surf.h
+	$(CC) -c $(CFLAGS) mbr_hsds2lam.c
 
 ### copy the man page to the man page directory
 $(MANDIR)/mbio.l:	mbio.manl

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:    mbvelocitytool.c        6/6/93
- *    $Id: mbvelocity_prog.c,v 5.4 2001-06-02 00:10:04 caress Exp $ 
+ *    $Id: mbvelocity_prog.c,v 5.5 2001-07-20 00:34:28 caress Exp $ 
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:        June 6, 1993 
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2001/06/02  00:10:04  caress
+ * Now use mb_get_format()
+ *
  * Revision 5.3  2001/04/06  22:16:40  caress
  * Fixed bug.
  *
@@ -199,7 +202,7 @@ struct mbvt_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbvelocity_prog.c,v 5.4 2001-06-02 00:10:04 caress Exp $";
+static char rcs_id[] = "$Id: mbvelocity_prog.c,v 5.5 2001-07-20 00:34:28 caress Exp $";
 static char program_name[] = "MBVELOCITYTOOL";
 static char help_message[] = "MBVELOCITYTOOL is an interactive water velocity profile editor  \nused to examine multiple water velocity profiles and to create  \nnew water velocity profiles which can be used for the processing  \nof multibeam sonar data.  In general, this tool is used to  \nexamine water velocity profiles obtained from XBTs, CTDs, or  \ndatabases, and to construct new profiles consistent with these  \nvarious sources of information.";
 static char usage_message[] = "mbvelocitytool [-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ssvpfile -Wsvpfile -V -H]";
@@ -261,19 +264,17 @@ int	beams_bath;
 int	beams_amp;
 int	pixels_ss;
 char	swathfile[MB_PATH_MAXLINE];
-char	*mbio_ptr;
+void	*mbio_ptr;
 
 /* mbio read and write values */
-char	*store_ptr = NULL;
+void	*store_ptr = NULL;
 int	kind;
 int	id;
 int	nbeams;
 
 /* buffer control variables */
 #define	MBVT_BUFFER_SIZE	25000
-int	buffer_size = MBVT_BUFFER_SIZE;
 int	nbuffer;
-int	nload;
 
 /* survey ping raytracing arrays */
 int	time_i[7];
@@ -1849,7 +1850,7 @@ int mbvt_plot()
 	xg_setclip(mbvt_xgid,xpmin,ypmin,(xpmax-xpmin),(ypmax-ypmin));
 
 	/* plot raypaths */
-	if (nbuffer > 0)
+	if (nbuffer > 0 && nraypath != NULL)
 	  for (i=0;i<nbeams;i++)
 	    {
 	    if (nraypath[i] > 0)
@@ -2470,8 +2471,8 @@ int mbvt_open_swath_file(char *file, int form, int *numload)
 	navlat_levitus = 0.0;
 		
 	/* turn message on */
-	nload = 0;
-	sprintf(string, "MBvelocitytool: %d records loaded so far...", nload);
+	*numload = 0;
+	sprintf(string, "MBvelocitytool: %d records loaded so far...", *numload);
 	do_message_on(string);
 
 	/* load data */
@@ -2597,12 +2598,12 @@ int mbvt_open_swath_file(char *file, int form, int *numload)
 		if (status == MB_SUCCESS)
 			{
 			nbuffer++;
-			nload++;
+			*numload++;
 			
 			/* update message every 250 records */
-			if (nload % 250 == 0)
+			if (*numload % 250 == 0)
 			    {
-			    sprintf(string, "MBvelocitytool: %d records loaded so far...", nload);
+			    sprintf(string, "MBvelocitytool: %d records loaded so far...", *numload);
 			    do_message_on(string);
 			    }
 			}
@@ -2625,8 +2626,6 @@ int mbvt_open_swath_file(char *file, int form, int *numload)
 	if (ssv_start <= 0.0)
 		ssv_start = 1500.0;
 		
-	*numload = nload;
-		
 	/* set maxdepth and apply */
 	if (bath_max > 0.0 && bath_max < 13000.0)
 		{
@@ -2647,7 +2646,7 @@ int mbvt_open_swath_file(char *file, int form, int *numload)
 		else
 			fprintf(stderr,"\nSwath Sonar File <%s> not read\n",swathfile);
 		fprintf(stderr,"Swath Sonar Data Format ID:   %d\n",format);
-		fprintf(stderr,"Records loaded into buffer: %d\n",nload);
+		fprintf(stderr,"Records loaded into buffer: %d\n",*numload);
 		fprintf(stderr,"Records in buffer:          %d\n",nbuffer);
 		}
 		
@@ -2899,7 +2898,6 @@ int mbvt_process_multibeam()
 	status = mb_rt_init(verbose, nvel, dep, vel, &rt_svp, &error);
 	first = MB_YES;
 	nbeams = 0;
-fprintf(stderr, "anglemode:%d\n", anglemode);
 
 	/* loop over the data records */
 	for (k=0;k<nbuffer;k++)

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_get_all.c	1/26/93
- *    $Id: mb_get_all.c,v 5.2 2001-06-08 21:44:01 caress Exp $
+ *    $Id: mb_get_all.c,v 5.3 2001-07-20 00:31:11 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	January 26, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2001/06/08  21:44:01  caress
+ * Version 5.0.beta01
+ *
  * Revision 5.1  2001/03/22  20:45:56  caress
  * Trying to make 5.0.beta0...
  *
@@ -106,7 +109,7 @@
 #include "../../include/mb_define.h"
 
 /*--------------------------------------------------------------------*/
-int mb_get_all(int verbose, char *mbio_ptr, char **store_ptr, int *kind,
+int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind,
 		int time_i[7], double *time_d,
 		double *navlon, double *navlat, 
 		double *speed, double *heading, 
@@ -117,7 +120,7 @@ int mb_get_all(int verbose, char *mbio_ptr, char **store_ptr, int *kind,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
 		char *comment, int *error)
 {
-  static char rcs_id[]="$Id: mb_get_all.c,v 5.2 2001-06-08 21:44:01 caress Exp $";
+  static char rcs_id[]="$Id: mb_get_all.c,v 5.3 2001-07-20 00:31:11 caress Exp $";
 	char	*function_name = "mb_get_all";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -327,7 +330,7 @@ int mb_get_all(int verbose, char *mbio_ptr, char **store_ptr, int *kind,
 		}
 
 	/* calculate speed and distance for nav data */
-	if (status == MB_SUCCESS
+	else if (status == MB_SUCCESS
 		&& (*kind == MB_DATA_NAV))
 		{
 		/* get coordinate scaling */
@@ -391,6 +394,17 @@ int mb_get_all(int verbose, char *mbio_ptr, char **store_ptr, int *kind,
 			fprintf(stderr,"dbg4       error:        %d\n",*error);
 			fprintf(stderr,"dbg4       status:       %d\n",status);
 			}
+		}
+		
+	/* else set nav values to zero */
+	else
+		{
+		*navlon = 0.0;
+		*navlat = 0.0;
+		*distance = 0.0;
+		*altitude = 0.0;
+		*sonardepth = 0.0;
+		*speed = 0.0;
 		}
 
 	/* check for out of location or time bounds */

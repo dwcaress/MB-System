@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_put_comment.c	7/15/97
- *    $Id: mb_put_comment.c,v 5.0 2000-12-01 22:48:41 caress Exp $
+ *    $Id: mb_put_comment.c,v 5.1 2001-07-20 00:31:11 caress Exp $
  *
  *    Copyright (c) 1997, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	July 15, 1997
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01  22:48:41  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.3  2000/10/11  01:02:30  caress
  * Convert to ANSI C
  *
@@ -54,15 +57,18 @@
 #include "../../include/mb_define.h"
 
 /*--------------------------------------------------------------------*/
-int mb_put_comment(int verbose, char *mbio_ptr, char *comment, int *error)
+int mb_put_comment(int verbose, void *mbio_ptr, char *comment, int *error)
 {
   static char rcs_id[]="$Id $";
 	char	*function_name = "mb_put_comment";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
-	int	time_i[7];
-	double	time_d;
-	double	navlon, navlat, speed, heading;
+	int	time_i[7] = {0, 0, 0, 0, 0, 0, 0};
+	double	time_d = 0.0;
+	double	navlon = 0.0;
+	double	navlat = 0.0;
+	double	speed = 0.0;
+	double	heading = 0.0;
 	int	i;
 
 	/* print input debug statements */
@@ -80,6 +86,10 @@ int mb_put_comment(int verbose, char *mbio_ptr, char *comment, int *error)
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* insert comment using mb_insert */
+	for (i=0;i<7;i++)
+	    time_i[i] = 0;
+	time_d = 0.0;
+	navlon = 0.0;
 	status = mb_insert(verbose,mbio_ptr,mb_io_ptr->store_data,
 			MB_DATA_COMMENT, 
 			time_i,time_d,navlon,navlat,speed,heading,

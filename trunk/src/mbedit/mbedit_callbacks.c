@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit_callbacks.c	3/28/97
- *    $Id: mbedit_callbacks.c,v 5.2 2001-06-30 17:39:31 caress Exp $
+ *    $Id: mbedit_callbacks.c,v 5.3 2001-07-20 00:30:32 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	March 28, 1997  GUI recast
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2001/06/30  17:39:31  caress
+ * Release 5.0.beta02
+ *
  * Revision 5.1  2001/01/22  07:40:13  caress
  * Version 5.0.0beta01
  *
@@ -235,7 +238,7 @@ void do_filebutton_off();
 void set_label_string(Widget, String);
 void set_label_multiline_string(Widget, String);
 void get_text_string(Widget, String);
-
+void do_checkuseprevious();
 /*--------------------------------------------------------------------*/
 
 /*      Function Name: 	BxUnmanageCB
@@ -1173,7 +1176,7 @@ do_load_check( Widget w, XtPointer client_data, XtPointer call_data)
 
 /*--------------------------------------------------------------------*/
 
-int
+void
 do_checkuseprevious( )
 {
     XtManageChild(bulletinBoard_editsave);

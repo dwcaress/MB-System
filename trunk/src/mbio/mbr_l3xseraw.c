@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_l3xseraw.c	3/27/2000
- *	$Id: mbr_l3xseraw.c,v 5.3 2001-06-08 21:44:01 caress Exp $
+ *	$Id: mbr_l3xseraw.c,v 5.4 2001-07-20 00:32:54 caress Exp $
  *
  *    Copyright (c) 2000 by 
  *    D. W. Caress (caress@mbari.org)
@@ -26,6 +26,9 @@
  * Additional Authors:	P. A. Cohen and S. Dzurenko
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2001/06/08  21:44:01  caress
+ * Version 5.0.beta01
+ *
  * Revision 5.2  2001/06/03  06:54:56  caress
  * Fixed support for xse format on byte swapped computers.
  *
@@ -66,7 +69,7 @@
 #endif
 
 /* essential function prototypes */
-int mbr_register_l3xseraw(int verbose, char *mbio_ptr, 
+int mbr_register_l3xseraw(int verbose, void *mbio_ptr, 
 		int *error);
 int mbr_info_l3xseraw(int verbose, 
 			int *system, 
@@ -87,15 +90,15 @@ int mbr_info_l3xseraw(int verbose,
 			double *beamwidth_xtrack, 
 			double *beamwidth_ltrack, 
 			int *error);
-int mbr_alm_l3xseraw(int verbose, char *mbio_ptr, int *error);
-int mbr_dem_l3xseraw(int verbose, char *mbio_ptr, int *error);
-int mbr_rt_l3xseraw(int verbose, char *mbio_ptr, char *store_ptr, int *error);
-int mbr_wt_l3xseraw(int verbose, char *mbio_ptr, char *store_ptr, int *error);
+int mbr_alm_l3xseraw(int verbose, void *mbio_ptr, int *error);
+int mbr_dem_l3xseraw(int verbose, void *mbio_ptr, int *error);
+int mbr_rt_l3xseraw(int verbose, void *mbio_ptr, void *store_ptr, int *error);
+int mbr_wt_l3xseraw(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
 /*--------------------------------------------------------------------*/
-int mbr_register_l3xseraw(int verbose, char *mbio_ptr, int *error)
+int mbr_register_l3xseraw(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.3 2001-06-08 21:44:01 caress Exp $";
+	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.4 2001-07-20 00:32:54 caress Exp $";
 	char	*function_name = "mbr_register_l3xseraw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -118,9 +121,9 @@ int mbr_register_l3xseraw(int verbose, char *mbio_ptr, int *error)
 			&mb_io_ptr->beams_bath_max, 
 			&mb_io_ptr->beams_amp_max, 
 			&mb_io_ptr->pixels_ss_max, 
-			&mb_io_ptr->format_name, 
-			&mb_io_ptr->system_name, 
-			&mb_io_ptr->format_description, 
+			mb_io_ptr->format_name, 
+			mb_io_ptr->system_name, 
+			mb_io_ptr->format_description, 
 			&mb_io_ptr->numfile, 
 			&mb_io_ptr->filetype, 
 			&mb_io_ptr->variable_beams, 
@@ -225,7 +228,7 @@ int mbr_info_l3xseraw(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.3 2001-06-08 21:44:01 caress Exp $";
+	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.4 2001-07-20 00:32:54 caress Exp $";
 	char	*function_name = "mbr_info_l3xseraw";
 	int	status = MB_SUCCESS;
 
@@ -292,9 +295,9 @@ int mbr_info_l3xseraw(int verbose,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_alm_l3xseraw(int verbose, char *mbio_ptr, int *error)
+int mbr_alm_l3xseraw(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.3 2001-06-08 21:44:01 caress Exp $";
+	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.4 2001-07-20 00:32:54 caress Exp $";
 	char	*function_name = "mbr_alm_l3xseraw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -336,7 +339,7 @@ int mbr_alm_l3xseraw(int verbose, char *mbio_ptr, int *error)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_dem_l3xseraw(int verbose, char *mbio_ptr, int *error)
+int mbr_dem_l3xseraw(int verbose, void *mbio_ptr, int *error)
 {
 	char	*function_name = "mbr_dem_l3xseraw";
 	int	status = MB_SUCCESS;
@@ -375,7 +378,7 @@ int mbr_dem_l3xseraw(int verbose, char *mbio_ptr, int *error)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_rt_l3xseraw(int verbose, char *mbio_ptr, char *store_ptr, int *error)
+int mbr_rt_l3xseraw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 {
 	char	*function_name = "mbr_rt_l3xseraw";
 	int	status = MB_SUCCESS;
@@ -458,7 +461,7 @@ store->mul_frame, store->sid_frame);*/
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_wt_l3xseraw(int verbose, char *mbio_ptr, char *store_ptr, int *error)
+int mbr_wt_l3xseraw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 {
 	char	*function_name = "mbr_wt_l3xseraw";
 	int	status = MB_SUCCESS;
@@ -503,7 +506,7 @@ int mbr_wt_l3xseraw(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_l3xseraw_rd_data(int verbose,char *mbio_ptr,char *store_ptr,int *error)
+int mbr_l3xseraw_rd_data(int verbose,void *mbio_ptr,void *store_ptr,int *error)
 {
 	char	*function_name = "mbr_l3xseraw_rd_data";
 	int	status = MB_SUCCESS;
@@ -553,13 +556,13 @@ int mbr_l3xseraw_rd_data(int verbose,char *mbio_ptr,char *store_ptr,int *error)
 	
 	/* read until done */
 	*error = MB_ERROR_NO_ERROR;
-	frame_expect = &mb_io_ptr->save1;
-	frame_save = &mb_io_ptr->save2;
-	frame_id_save = &mb_io_ptr->save3;
-	frame_source_save = &mb_io_ptr->save4;
-	frame_sec_save = (unsigned int *) &mb_io_ptr->save5;
-	frame_usec_save = (unsigned int *) &mb_io_ptr->save6;
-	buffer_size_save = &mb_io_ptr->save7;
+	frame_expect = (unsigned long *) &mb_io_ptr->save1;
+	frame_save = (unsigned long *) &mb_io_ptr->save2;
+	frame_id_save = (unsigned long *) &mb_io_ptr->save3;
+	frame_source_save = (unsigned long *) &mb_io_ptr->save4;
+	frame_sec_save = (unsigned long *) &mb_io_ptr->save5;
+	frame_usec_save = (unsigned long *) &mb_io_ptr->save6;
+	buffer_size_save = (unsigned long *) &mb_io_ptr->save7;
 	buffer = mb_io_ptr->hdr_comment;
 	store->sbm_properties = MB_NO;
 	store->sbm_hrp = MB_NO;
@@ -666,16 +669,16 @@ fprintf(stderr, "buffer_size=%u\n", buffer_size);
 		    {
 		    /* get frame id, source, and time */
 		    index = 8;
-		    mb_get_binary_int(SWAPFLAG, &buffer[index], &frame_id); index += 4;
-		    mb_get_binary_int(SWAPFLAG, &buffer[index], &frame_source); index += 4;
-		    mb_get_binary_int(SWAPFLAG, &buffer[index], &frame_sec); index += 4;
-		    mb_get_binary_int(SWAPFLAG, &buffer[index], &frame_usec); index += 4;
+		    mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &frame_id); index += 4;
+		    mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &frame_source); index += 4;
+		    mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &frame_sec); index += 4;
+		    mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &frame_usec); index += 4;
 
 		    /* if it's a control frame, get the transaction and address values */
 		    if(frame_id == MBSYS_XSE_CNT_FRAME)
 			    {
-			    mb_get_binary_int(SWAPFLAG, &buffer[index], &frame_transaction); index += 4;
-			    mb_get_binary_int(SWAPFLAG, &buffer[index], &frame_address); index += 4;
+			    mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &frame_transaction); index += 4;
+			    mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &frame_address); index += 4;
 			    }
 		    }
 		}
@@ -904,7 +907,7 @@ fprintf(stderr, "READ NOTHING - SAVE HEADER\n");
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_l3xseraw_rd_nav(int verbose,int buffer_size,char *buffer,char *store_ptr,int *error)
+int mbr_l3xseraw_rd_nav(int verbose,int buffer_size,char *buffer,void *store_ptr,int *error)
 {
 	char	*function_name = "mbr_l3xseraw_rd_nav";
 	int	status = MB_SUCCESS;
@@ -925,7 +928,7 @@ int mbr_l3xseraw_rd_nav(int verbose,int buffer_size,char *buffer,char *store_ptr
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       buffer_size:%d\n",buffer_size);
 		fprintf(stderr,"dbg2       buffer:     %u\n",buffer);
-		fprintf(stderr,"dbg2       store:      %u\n",store);
+		fprintf(stderr,"dbg2       store_ptr:  %u\n",store_ptr);
 		}
 
 	/* get pointer to store data structure */
@@ -933,9 +936,9 @@ int mbr_l3xseraw_rd_nav(int verbose,int buffer_size,char *buffer,char *store_ptr
 		
 	/* get source and time */
 	index = 12;
-	mb_get_binary_int(SWAPFLAG, &buffer[index], &store->nav_source); index += 4;
-	mb_get_binary_int(SWAPFLAG, &buffer[index], &store->nav_sec); index += 4;
-	mb_get_binary_int(SWAPFLAG, &buffer[index], &store->nav_usec); index += 4;
+	mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->nav_source); index += 4;
+	mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->nav_sec); index += 4;
+	mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->nav_usec); index += 4;
 		
 	/* loop over groups */
 	done = MB_NO;
@@ -970,8 +973,8 @@ int mbr_l3xseraw_rd_nav(int verbose,int buffer_size,char *buffer,char *store_ptr
 	    if (done == MB_NO)
 			{
 			/* get group size and id */
-			mb_get_binary_int(SWAPFLAG, &buffer[index], &byte_count); index += 4;
-			mb_get_binary_int(SWAPFLAG, &buffer[index], &group_id); index += 4;
+			mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &byte_count); index += 4;
+			mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &group_id); index += 4;
 
 			/* print debug statements */
 			if (verbose >= 5)
@@ -984,15 +987,15 @@ int mbr_l3xseraw_rd_nav(int verbose,int buffer_size,char *buffer,char *store_ptr
 		    if (group_id == MBSYS_XSE_NAV_GROUP_GEN)
 				{
 				/*fprintf(stderr, "READ NAV_GROUP_GEN\n");*/
-				mb_get_binary_int(SWAPFLAG, &buffer[index], &store->nav_quality); index += 4;
-				mb_get_binary_int(SWAPFLAG, &buffer[index], &store->nav_status); index += 4;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->nav_quality); index += 4;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->nav_status); index += 4;
 				}
 	    
 		    /* handle point group */
 		    else if (group_id == MBSYS_XSE_NAV_GROUP_POS)
 				{
 				/*fprintf(stderr, "READ NAV_GROUP_POS\n");*/
-				mb_get_binary_int(SWAPFLAG, &buffer[index], &store->nav_description_len); index += 4;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->nav_description_len); index += 4;
 				for (i=0;i<store->nav_description_len;i++)
 				    {
 				    store->nav_description[i] = buffer[index];
@@ -1121,7 +1124,7 @@ int mbr_l3xseraw_rd_nav(int verbose,int buffer_size,char *buffer,char *store_ptr
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_l3xseraw_rd_svp(int verbose,int buffer_size,char *buffer,char *store_ptr,int *error)
+int mbr_l3xseraw_rd_svp(int verbose,int buffer_size,char *buffer,void *store_ptr,int *error)
 {
 	char	*function_name = "mbr_l3xseraw_rd_svp";
 	int	status = MB_SUCCESS;
@@ -1149,9 +1152,9 @@ int mbr_l3xseraw_rd_svp(int verbose,int buffer_size,char *buffer,char *store_ptr
 		
 	/* get source and time */
 	index = 12;
-	mb_get_binary_int(SWAPFLAG, &buffer[index], &store->svp_source); index += 4;
-	mb_get_binary_int(SWAPFLAG, &buffer[index], &store->svp_sec); index += 4;
-	mb_get_binary_int(SWAPFLAG, &buffer[index], &store->svp_usec); index += 4;
+	mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->svp_source); index += 4;
+	mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->svp_sec); index += 4;
+	mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->svp_usec); index += 4;
 		
 	/* loop over groups */
 	done = MB_NO;
@@ -1186,8 +1189,8 @@ int mbr_l3xseraw_rd_svp(int verbose,int buffer_size,char *buffer,char *store_ptr
 	    if (done == MB_NO)
 			{
 			/* get group size and id */
-			mb_get_binary_int(SWAPFLAG, &buffer[index], &byte_count); index += 4;
-			mb_get_binary_int(SWAPFLAG, &buffer[index], &group_id); index += 4;
+			mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &byte_count); index += 4;
+			mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &group_id); index += 4;
 
 			/* print debug statements */
 			if (verbose >= 5)
@@ -1207,7 +1210,7 @@ int mbr_l3xseraw_rd_svp(int verbose,int buffer_size,char *buffer,char *store_ptr
 		    if (group_id == MBSYS_XSE_SVP_GROUP_DEPTH) 
 				{
 				/*fprintf(stderr, "READ SVP_GROUP_DEPTH\n");*/
-				mb_get_binary_int(SWAPFLAG, &buffer[index], &store->svp_nsvp); index += 4;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->svp_nsvp); index += 4;
 				for (i=0;i<store->svp_nsvp;i++)
 				    {
 				    if (i < MBSYS_XSE_MAXSVP)
@@ -1221,7 +1224,7 @@ int mbr_l3xseraw_rd_svp(int verbose,int buffer_size,char *buffer,char *store_ptr
 		    else if (group_id == MBSYS_XSE_SVP_GROUP_VELOCITY)
 				{
 				/*fprintf(stderr, "READ SVP_GROUP_VELOCITY\n");*/
-				mb_get_binary_int(SWAPFLAG, &buffer[index], &store->svp_nsvp); index += 4;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->svp_nsvp); index += 4;
 				for (i=0;i<store->svp_nsvp;i++)
 				    {
 				    if (i < MBSYS_XSE_MAXSVP)
@@ -1235,7 +1238,7 @@ int mbr_l3xseraw_rd_svp(int verbose,int buffer_size,char *buffer,char *store_ptr
 		    else if (group_id == MBSYS_XSE_SVP_GROUP_CONDUCTIVITY)
 				{
 				/*fprintf(stderr, "READ SVP_GROUP_CONDUCTIVITY\n");*/
-				mb_get_binary_int(SWAPFLAG, &buffer[index], &store->svp_nctd); index += 4;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->svp_nctd); index += 4;
 				for (i=0;i<store->svp_nctd;i++)
 				    {
 				    if (i < MBSYS_XSE_MAXSVP)
@@ -1249,7 +1252,7 @@ int mbr_l3xseraw_rd_svp(int verbose,int buffer_size,char *buffer,char *store_ptr
 		    else if (group_id == MBSYS_XSE_SVP_GROUP_SALINITY)
 				{
 				/*fprintf(stderr, "READ SVP_GROUP_SALINITY\n");*/
-				mb_get_binary_int(SWAPFLAG, &buffer[index], &store->svp_nctd); index += 4;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->svp_nctd); index += 4;
 				for (i=0;i<store->svp_nctd;i++)
 				    {
 				    if (i < MBSYS_XSE_MAXSVP)
@@ -1263,7 +1266,7 @@ int mbr_l3xseraw_rd_svp(int verbose,int buffer_size,char *buffer,char *store_ptr
 		    else if (group_id == MBSYS_XSE_SVP_GROUP_TEMP)
 				{
 				/*fprintf(stderr, "READ SVP_GROUP_TEMP\n");*/
-				mb_get_binary_int(SWAPFLAG, &buffer[index], &store->svp_nctd); index += 4;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->svp_nctd); index += 4;
 				for (i=0;i<store->svp_nctd;i++)
 				    {
 				    if (i < MBSYS_XSE_MAXSVP)
@@ -1277,7 +1280,7 @@ int mbr_l3xseraw_rd_svp(int verbose,int buffer_size,char *buffer,char *store_ptr
 		    else if (group_id == MBSYS_XSE_SVP_GROUP_PRESSURE)
 				{
 				/*fprintf(stderr, "READ SVP_GROUP_PRESSURE\n");*/
-				mb_get_binary_int(SWAPFLAG, &buffer[index], &store->svp_nctd); index += 4;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->svp_nctd); index += 4;
 				for (i=0;i<store->svp_nctd;i++)
 				    {
 				    if (i < MBSYS_XSE_MAXSVP)
@@ -1343,7 +1346,7 @@ int mbr_l3xseraw_rd_svp(int verbose,int buffer_size,char *buffer,char *store_ptr
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_l3xseraw_rd_tide(int verbose,int buffer_size,char *buffer,char *store_ptr,int *error)
+int mbr_l3xseraw_rd_tide(int verbose,int buffer_size,char *buffer,void *store_ptr,int *error)
 {
 	char    *function_name = "mbr_l3xseraw_rd_tide";
 	int status = MB_SUCCESS;
@@ -1386,7 +1389,7 @@ int mbr_l3xseraw_rd_tide(int verbose,int buffer_size,char *buffer,char *store_pt
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_l3xseraw_rd_ship(int verbose,int buffer_size,char *buffer,char *store_ptr,int *error)
+int mbr_l3xseraw_rd_ship(int verbose,int buffer_size,char *buffer,void *store_ptr,int *error)
 {
 	char	*function_name = "mbr_l3xseraw_rd_ship";
 	int	status = MB_SUCCESS;
@@ -1414,9 +1417,9 @@ int mbr_l3xseraw_rd_ship(int verbose,int buffer_size,char *buffer,char *store_pt
 		
 	/* get source and time */
 	index = 12;
-	mb_get_binary_int(SWAPFLAG, &buffer[index], &store->par_source); index += 4;
-	mb_get_binary_int(SWAPFLAG, &buffer[index], &store->par_sec); index += 4;
-	mb_get_binary_int(SWAPFLAG, &buffer[index], &store->par_usec); index += 4;
+	mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->par_source); index += 4;
+	mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->par_sec); index += 4;
+	mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->par_usec); index += 4;
 		
 	/* loop over groups */
 	done = MB_NO;
@@ -1451,8 +1454,8 @@ int mbr_l3xseraw_rd_ship(int verbose,int buffer_size,char *buffer,char *store_pt
 	    if (done == MB_NO)
 			{
 			/* get group size and id */
-			mb_get_binary_int(SWAPFLAG, &buffer[index], &byte_count); index += 4;
-			mb_get_binary_int(SWAPFLAG, &buffer[index], &group_id); index += 4;
+			mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &byte_count); index += 4;
+			mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &group_id); index += 4;
 
 			/* print debug statements */
 			if (verbose >= 5)
@@ -1571,7 +1574,7 @@ int mbr_l3xseraw_rd_ship(int verbose,int buffer_size,char *buffer,char *store_pt
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_l3xseraw_rd_sidescan(int verbose,int buffer_size,char *buffer,char *store_ptr,int *error)
+int mbr_l3xseraw_rd_sidescan(int verbose,int buffer_size,char *buffer,void *store_ptr,int *error)
 {
 	char	*function_name = "mbr_l3xseraw_rd_sidescan";
 	int	status = MB_SUCCESS;
@@ -1599,9 +1602,9 @@ int mbr_l3xseraw_rd_sidescan(int verbose,int buffer_size,char *buffer,char *stor
 
 	/* get source and time */
 	index = 12;
-	mb_get_binary_int(SWAPFLAG, &buffer[index], &store->sid_source); index += 4;
-	mb_get_binary_int(SWAPFLAG, &buffer[index], &store->sid_sec); index += 4;
-	mb_get_binary_int(SWAPFLAG, &buffer[index], &store->sid_usec); index += 4;
+	mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sid_source); index += 4;
+	mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sid_sec); index += 4;
+	mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sid_usec); index += 4;
 		
 	/* loop over groups */
 	done = MB_NO;
@@ -1636,8 +1639,8 @@ int mbr_l3xseraw_rd_sidescan(int verbose,int buffer_size,char *buffer,char *stor
 	    if (done == MB_NO)
 			{
 			/* get group size and id */
-			mb_get_binary_int(SWAPFLAG, &buffer[index], &byte_count); index += 4;
-			mb_get_binary_int(SWAPFLAG, &buffer[index], &group_id); index += 4;
+			mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &byte_count); index += 4;
+			mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &group_id); index += 4;
 
 			/* print debug statements */
 			if (verbose >= 5)
@@ -1650,7 +1653,7 @@ int mbr_l3xseraw_rd_sidescan(int verbose,int buffer_size,char *buffer,char *stor
 		    if (group_id == MBSYS_XSE_SSN_GROUP_GEN)
 				{
 				/*fprintf(stderr, "READ SSN_GROUP_GEN\n");*/
-				mb_get_binary_int(SWAPFLAG, &buffer[index], &store->sid_ping); index += 4;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sid_ping); index += 4;
 				mb_get_binary_float(SWAPFLAG, &buffer[index], &store->sid_frequency); index += 4;
 				mb_get_binary_float(SWAPFLAG, &buffer[index], &store->sid_pulse); index += 4;
 				mb_get_binary_float(SWAPFLAG, &buffer[index], &store->sid_power); index += 4;
@@ -1676,9 +1679,9 @@ int mbr_l3xseraw_rd_sidescan(int verbose,int buffer_size,char *buffer,char *stor
 		    else if (group_id == MBSYS_XSE_SSN_GROUP_AMPVSLAT)
 				{
 				/*fprintf(stderr, "READ SSN_GROUP_AMPVSLAT\n");*/
-				mb_get_binary_int(SWAPFLAG, &buffer[index], &store->sid_bin_size); index += 4;
-				mb_get_binary_int(SWAPFLAG, &buffer[index], &store->sid_offset); index += 4;
-				mb_get_binary_int(SWAPFLAG, &buffer[index], &store->sid_num_pixels); index += 4;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sid_bin_size); index += 4;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sid_offset); index += 4;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sid_num_pixels); index += 4;
 				for (i=0;i<store->sid_num_pixels;i++)
 				    if (i < MBSYS_XSE_MAXPIXELS)
 						{
@@ -1736,7 +1739,7 @@ int mbr_l3xseraw_rd_sidescan(int verbose,int buffer_size,char *buffer,char *stor
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_l3xseraw_rd_multibeam(int verbose,int buffer_size,char *buffer,char *store_ptr,int *error)
+int mbr_l3xseraw_rd_multibeam(int verbose,int buffer_size,char *buffer,void *store_ptr,int *error)
 {
 	char	*function_name = "mbr_l3xseraw_rd_multibeam";
 	int	status = MB_SUCCESS;
@@ -1782,9 +1785,9 @@ int mbr_l3xseraw_rd_multibeam(int verbose,int buffer_size,char *buffer,char *sto
 		
 	/* get source and time */
 	index = 12;
-	mb_get_binary_int(SWAPFLAG, &buffer[index], &store->mul_source); index += 4;
-	mb_get_binary_int(SWAPFLAG, &buffer[index], &store->mul_sec); index += 4;
-	mb_get_binary_int(SWAPFLAG, &buffer[index], &store->mul_usec); index += 4;
+	mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->mul_source); index += 4;
+	mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->mul_sec); index += 4;
+	mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->mul_usec); index += 4;
 		
 	/* loop over groups */
 	done = MB_NO;
@@ -1819,8 +1822,8 @@ int mbr_l3xseraw_rd_multibeam(int verbose,int buffer_size,char *buffer,char *sto
 	    if (done == MB_NO)
 			{
 			/* get group size and id */
-			mb_get_binary_int(SWAPFLAG, &buffer[index], &byte_count); index += 4;
-			mb_get_binary_int(SWAPFLAG, &buffer[index], &group_id); index += 4;
+			mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &byte_count); index += 4;
+			mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &group_id); index += 4;
 
 			/* print debug statements */
 			if (verbose >= 5)
@@ -1833,7 +1836,7 @@ int mbr_l3xseraw_rd_multibeam(int verbose,int buffer_size,char *buffer,char *sto
 		    if (group_id == MBSYS_XSE_MBM_GROUP_GEN)
 				{
 				/*fprintf(stderr, "READ MBM_GROUP_GEN\n");*/
-				mb_get_binary_int(SWAPFLAG, &buffer[index], &store->mul_ping); index += 4;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->mul_ping); index += 4;
 				mb_get_binary_float(SWAPFLAG, &buffer[index], &store->mul_frequency); index += 4;
 				mb_get_binary_float(SWAPFLAG, &buffer[index], &store->mul_pulse); index += 4;
 				mb_get_binary_float(SWAPFLAG, &buffer[index], &store->mul_power); index += 4;
@@ -1856,7 +1859,7 @@ fprintf(stderr, "swath=%f\n", store->mul_swath);
 				{
 				/*fprintf(stderr, "READ MBM_GROUP_BEAM\n");*/
 				store->mul_group_beam = MB_YES;
-				mb_get_binary_int(SWAPFLAG, &buffer[index], &store->mul_num_beams); index += 4;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->mul_num_beams); index += 4;
 				for (i=0;i<store->mul_num_beams;i++)
 				    {
 				    if (i < MBSYS_XSE_MAXBEAMS)
@@ -1871,7 +1874,7 @@ fprintf(stderr, "swath=%f\n", store->mul_swath);
 				{
 				/*fprintf(stderr, "READ MBM_GROUP_TT\n");*/
 				store->mul_group_tt = MB_YES;
-				mb_get_binary_int(SWAPFLAG, &buffer[index], &store->mul_num_beams); index += 4;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->mul_num_beams); index += 4;
 				for (i=0;i<store->mul_num_beams;i++)
 				    {
 				    if (i < MBSYS_XSE_MAXBEAMS)
@@ -1891,7 +1894,7 @@ for(i=0;i<store->mul_num_beams;i++)
 				{
 				/*fprintf(stderr, "READ MBM_GROUP_QUALITY\n");*/
 				store->mul_group_quality = MB_YES;
-				mb_get_binary_int(SWAPFLAG, &buffer[index], &store->mul_num_beams); index += 4;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->mul_num_beams); index += 4;
 				for (i=0;i<store->mul_num_beams;i++)
 				    {
 				    if (i < MBSYS_XSE_MAXBEAMS)
@@ -1909,7 +1912,7 @@ for(i=0;i<store->mul_num_beams;i++)
 				{
 				/*fprintf(stderr, "READ MBM_GROUP_AMP\n");*/
 				store->mul_group_amp = MB_YES;
-				mb_get_binary_int(SWAPFLAG, &buffer[index], &store->mul_num_beams); index += 4;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->mul_num_beams); index += 4;
 				for (i=0;i<store->mul_num_beams;i++)
 				    {
 				    if (i < MBSYS_XSE_MAXBEAMS)
@@ -1929,7 +1932,7 @@ for(i=0;i<store->mul_num_beams;i++)
 				{
 				/*fprintf(stderr, "READ MBM_GROUP_DELAY\n");*/
 				store->mul_group_delay = MB_YES;
-				mb_get_binary_int(SWAPFLAG, &buffer[index], &store->mul_num_beams); index += 4;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->mul_num_beams); index += 4;
 				for (i=0;i<store->mul_num_beams;i++)
 				    {
 				    if (i < MBSYS_XSE_MAXBEAMS)
@@ -1949,7 +1952,7 @@ for(i=0;i<store->mul_num_beams;i++)
 				{
 				/*fprintf(stderr, "READ MBM_GROUP_LATERAL\n");*/
 				store->mul_group_lateral = MB_YES;
-				mb_get_binary_int(SWAPFLAG, &buffer[index], &store->mul_num_beams); index += 4;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->mul_num_beams); index += 4;
 				for (i=0;i<store->mul_num_beams;i++)
 				    {
 				    if (i < MBSYS_XSE_MAXBEAMS)
@@ -1969,7 +1972,7 @@ for(i=0;i<store->mul_num_beams;i++)
 				{
 				/*fprintf(stderr, "READ MBM_GROUP_ALONG\n");*/
 				store->mul_group_along = MB_YES;
-				mb_get_binary_int(SWAPFLAG, &buffer[index], &store->mul_num_beams); index += 4;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->mul_num_beams); index += 4;
 				for (i=0;i<store->mul_num_beams;i++)
 				    {
 				    if (i < MBSYS_XSE_MAXBEAMS)
@@ -1989,7 +1992,7 @@ for(i=0;i<store->mul_num_beams;i++)
 				{
 				/*fprintf(stderr, "READ MBM_GROUP_DEPTH\n");*/
 				store->mul_group_depth = MB_YES;
-				mb_get_binary_int(SWAPFLAG, &buffer[index], &store->mul_num_beams); index += 4;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->mul_num_beams); index += 4;
 				for (i=0;i<store->mul_num_beams;i++)
 				    {
 				    if (i < MBSYS_XSE_MAXBEAMS)
@@ -2009,7 +2012,7 @@ for(i=0;i<store->mul_num_beams;i++)
 				{
 				/*fprintf(stderr, "READ MBM_GROUP_ANGLE\n");*/
 				store->mul_group_angle = MB_YES;
-				mb_get_binary_int(SWAPFLAG, &buffer[index], &store->mul_num_beams); index += 4;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->mul_num_beams); index += 4;
 				for (i=0;i<store->mul_num_beams;i++)
 				    {
 				    if (i < MBSYS_XSE_MAXBEAMS)
@@ -2029,7 +2032,7 @@ for(i=0;i<store->mul_num_beams;i++)
 				{
 				/*fprintf(stderr, "READ MBM_GROUP_HEAVE\n");*/
 				store->mul_group_heave = MB_YES;
-				mb_get_binary_int(SWAPFLAG, &buffer[index], &store->mul_num_beams); index += 4;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->mul_num_beams); index += 4;
 				for (i=0;i<store->mul_num_beams;i++)
 				    {
 				    if (i < MBSYS_XSE_MAXBEAMS)
@@ -2049,7 +2052,7 @@ for(i=0;i<store->mul_num_beams;i++)
 				{
 				/*fprintf(stderr, "READ MBM_GROUP_ROLL\n");*/
 				store->mul_group_roll = MB_YES;
-				mb_get_binary_int(SWAPFLAG, &buffer[index], &store->mul_num_beams); index += 4;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->mul_num_beams); index += 4;
 				for (i=0;i<store->mul_num_beams;i++)
 				    {
 				    if (i < MBSYS_XSE_MAXBEAMS)
@@ -2069,7 +2072,7 @@ for(i=0;i<store->mul_num_beams;i++)
 				{
 				/*fprintf(stderr, "READ MBM_GROUP_PITCH\n");*/
 				store->mul_group_pitch = MB_YES;
-				mb_get_binary_int(SWAPFLAG, &buffer[index], &store->mul_num_beams); index += 4;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->mul_num_beams); index += 4;
 				for (i=0;i<store->mul_num_beams;i++)
 				    {
 				    if (i < MBSYS_XSE_MAXBEAMS)
@@ -2241,7 +2244,7 @@ for(i=0;i<store->mul_num_beams;i++)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_l3xseraw_rd_singlebeam(int verbose,int buffer_size,char *buffer,char *store_ptr,int *error)
+int mbr_l3xseraw_rd_singlebeam(int verbose,int buffer_size,char *buffer,void *store_ptr,int *error)
 {
 	char    *function_name = "mbr_l3xseraw_rd_singlebeam";
 	int status = MB_SUCCESS;
@@ -2284,7 +2287,7 @@ int mbr_l3xseraw_rd_singlebeam(int verbose,int buffer_size,char *buffer,char *st
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_l3xseraw_rd_message(int verbose,int buffer_size,char *buffer,char *store_ptr,int *error)
+int mbr_l3xseraw_rd_message(int verbose,int buffer_size,char *buffer,void *store_ptr,int *error)
 {
 	char    *function_name = "mbr_l3xseraw_rd_message";
 	int status = MB_SUCCESS;
@@ -2327,7 +2330,7 @@ int mbr_l3xseraw_rd_message(int verbose,int buffer_size,char *buffer,char *store
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_l3xseraw_rd_seabeam(int verbose,int buffer_size,char *buffer,char *store_ptr,int *error)
+int mbr_l3xseraw_rd_seabeam(int verbose,int buffer_size,char *buffer,void *store_ptr,int *error)
 {
 	char    *function_name = "mbr_l3xseraw_rd_seabeam";
 	int status = MB_SUCCESS;
@@ -2356,9 +2359,9 @@ int mbr_l3xseraw_rd_seabeam(int verbose,int buffer_size,char *buffer,char *store
 		
 	/* get source and time */
 	index = 12;
-	mb_get_binary_int(SWAPFLAG, &buffer[index], &store->nav_source); index += 4;
-	mb_get_binary_int(SWAPFLAG, &buffer[index], &store->nav_sec); index += 4;
-	mb_get_binary_int(SWAPFLAG, &buffer[index], &store->nav_usec); index += 4;
+	mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->nav_source); index += 4;
+	mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->nav_sec); index += 4;
+	mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->nav_usec); index += 4;
 		
 	/* loop over groups */
 	done = MB_NO;
@@ -2393,8 +2396,8 @@ int mbr_l3xseraw_rd_seabeam(int verbose,int buffer_size,char *buffer,char *store
 	    if (done == MB_NO)
 		    {
 		    /* get group size and id */
-		    mb_get_binary_int(SWAPFLAG, &buffer[index], &byte_count); index += 4;
-		    mb_get_binary_int(SWAPFLAG, &buffer[index], &group_id); index += 4;
+		    mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &byte_count); index += 4;
+		    mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &group_id); index += 4;
 	
 		    /* print debug statements */
 		    if (verbose >= 5)
@@ -2408,15 +2411,15 @@ int mbr_l3xseraw_rd_seabeam(int verbose,int buffer_size,char *buffer,char *store
 				{
 				/*fprintf(stderr, "READ SBM_GROUP_PROPERTIES\n");*/
 				store->sbm_properties = MB_YES;
-				mb_get_binary_int(SWAPFLAG, &buffer[index], &store->sbm_ping); index += 4;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sbm_ping); index += 4;
 				mb_get_binary_float(SWAPFLAG, &buffer[index], &store->sbm_ping_gain); index += 4;
 				mb_get_binary_float(SWAPFLAG, &buffer[index], &store->sbm_pulse_width); index += 4;
 				mb_get_binary_float(SWAPFLAG, &buffer[index], &store->sbm_transmit_power); index += 4;
 				mb_get_binary_float(SWAPFLAG, &buffer[index], &store->sbm_pixel_width); index += 4;
 				mb_get_binary_float(SWAPFLAG, &buffer[index], &store->sbm_swath_width); index += 4;
 				mb_get_binary_float(SWAPFLAG, &buffer[index], &store->sbm_time_slice); index += 4;
-				mb_get_binary_int(SWAPFLAG, &buffer[index], &store->sbm_depth_mode); index += 4;
-				mb_get_binary_int(SWAPFLAG, &buffer[index], &store->sbm_beam_mode); index += 4;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sbm_depth_mode); index += 4;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sbm_beam_mode); index += 4;
 				}
 		    
 		    /* handle hrp group */
@@ -2434,8 +2437,8 @@ int mbr_l3xseraw_rd_seabeam(int verbose,int buffer_size,char *buffer,char *store
 				{
 				/*fprintf(stderr, "READ SBM_GROUP_CENTER\n");*/
 				store->sbm_center = MB_YES;
-				mb_get_binary_int(SWAPFLAG, &buffer[index], &store->sbm_center_beam); index += 4;
-				mb_get_binary_int(SWAPFLAG, &buffer[index], &store->sbm_center_count); index += 4;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sbm_center_beam); index += 4;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sbm_center_count); index += 4;
 				for (i=0;i<store->sbm_center_count;i++)
 				    {
 				    mb_get_binary_float(SWAPFLAG, &buffer[index], &store->sbm_center_amp[i]); 
@@ -2448,8 +2451,8 @@ int mbr_l3xseraw_rd_seabeam(int verbose,int buffer_size,char *buffer,char *store
 				{
 				/*fprintf(stderr, "READ SBM_GROUP_MESSAGE\n");*/
 				store->sbm_message = MB_YES;
-				mb_get_binary_int(SWAPFLAG, &buffer[index], &store->sbm_message_id); index += 4;
-				mb_get_binary_int(SWAPFLAG, &buffer[index], &store->sbm_message_len); index += 4;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sbm_message_id); index += 4;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sbm_message_len); index += 4;
 if (store->sbm_message_len > buffer_size)
  fprintf(stderr,"Read message: %d %d %d\n",buffer_size,store->sbm_message_len,store->sbm_message_id);
 				for (i=0;i<store->sbm_message_len;i++)
@@ -2519,7 +2522,7 @@ if (store->sbm_message_len > buffer_size)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_l3xseraw_rd_geodetic(int verbose,int buffer_size,char *buffer,char *store_ptr,int *error)
+int mbr_l3xseraw_rd_geodetic(int verbose,int buffer_size,char *buffer,void *store_ptr,int *error)
 {
 	char    *function_name = "mbr_l3xseraw_rd_geodetic";
 	int status = MB_SUCCESS;
@@ -2562,7 +2565,7 @@ int mbr_l3xseraw_rd_geodetic(int verbose,int buffer_size,char *buffer,char *stor
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_l3xseraw_rd_native(int verbose,int buffer_size,char *buffer,char *store_ptr,int *error)
+int mbr_l3xseraw_rd_native(int verbose,int buffer_size,char *buffer,void *store_ptr,int *error)
 {
 	char    *function_name = "mbr_l3xseraw_rd_native";
 	int status = MB_SUCCESS;
@@ -2605,7 +2608,7 @@ int mbr_l3xseraw_rd_native(int verbose,int buffer_size,char *buffer,char *store_
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_l3xseraw_rd_product(int verbose,int buffer_size,char *buffer,char *store_ptr,int *error)
+int mbr_l3xseraw_rd_product(int verbose,int buffer_size,char *buffer,void *store_ptr,int *error)
 {
 	char    *function_name = "mbr_l3xseraw_rd_product";
 	int status = MB_SUCCESS;
@@ -2648,7 +2651,7 @@ int mbr_l3xseraw_rd_product(int verbose,int buffer_size,char *buffer,char *store
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_l3xseraw_rd_bathymetry(int verbose,int buffer_size,char *buffer,char *store_ptr,int *error)
+int mbr_l3xseraw_rd_bathymetry(int verbose,int buffer_size,char *buffer,void *store_ptr,int *error)
 {
 	char    *function_name = "mbr_l3xseraw_rd_bathymetry";
 	int status = MB_SUCCESS;
@@ -2691,7 +2694,7 @@ int mbr_l3xseraw_rd_bathymetry(int verbose,int buffer_size,char *buffer,char *st
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_l3xseraw_rd_control(int verbose,int buffer_size,char *buffer,char *store_ptr,int *error)
+int mbr_l3xseraw_rd_control(int verbose,int buffer_size,char *buffer,void *store_ptr,int *error)
 {
 	char    *function_name = "mbr_l3xseraw_rd_control";
 	int status = MB_SUCCESS;
@@ -2734,7 +2737,7 @@ int mbr_l3xseraw_rd_control(int verbose,int buffer_size,char *buffer,char *store
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_l3xseraw_rd_comment(int verbose,int buffer_size,char *buffer,char *store_ptr,int *error)
+int mbr_l3xseraw_rd_comment(int verbose,int buffer_size,char *buffer,void *store_ptr,int *error)
 {
 	char	*function_name = "mbr_l3xseraw_rd_comment";
 	int	status = MB_SUCCESS;
@@ -2762,9 +2765,9 @@ int mbr_l3xseraw_rd_comment(int verbose,int buffer_size,char *buffer,char *store
 		
 	/* get source and time */
 	index = 12;
-	mb_get_binary_int(SWAPFLAG, &buffer[index], &store->com_source); index += 4;
-	mb_get_binary_int(SWAPFLAG, &buffer[index], &store->com_sec); index += 4;
-	mb_get_binary_int(SWAPFLAG, &buffer[index], &store->com_usec); index += 4;
+	mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->com_source); index += 4;
+	mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->com_sec); index += 4;
+	mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->com_usec); index += 4;
 		
 	/* loop over groups */
 	done = MB_NO;
@@ -2799,8 +2802,8 @@ int mbr_l3xseraw_rd_comment(int verbose,int buffer_size,char *buffer,char *store
 	    if (done == MB_NO)
 			{
 			/* get group size and id */
-			mb_get_binary_int(SWAPFLAG, &buffer[index], &byte_count); index += 4;
-			mb_get_binary_int(SWAPFLAG, &buffer[index], &group_id); index += 4;
+			mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &byte_count); index += 4;
+			mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &group_id); index += 4;
 
 			/* print debug statements */
 			if (verbose >= 5)
@@ -2846,7 +2849,7 @@ int mbr_l3xseraw_rd_comment(int verbose,int buffer_size,char *buffer,char *store
 }
 
 /*--------------------------------------------------------------------*/
-int mbr_l3xseraw_wr_data(int verbose,char *mbio_ptr,char *store_ptr,int *error)
+int mbr_l3xseraw_wr_data(int verbose,void *mbio_ptr,void *store_ptr,int *error)
 {
 	char	*function_name = "mbr_l3xseraw_wr_data";
 	int	status = MB_SUCCESS;
@@ -2982,7 +2985,7 @@ int mbr_l3xseraw_wr_data(int verbose,char *mbio_ptr,char *store_ptr,int *error)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_l3xseraw_wr_nav(int verbose,int *buffer_size,char *buffer,char *store_ptr,int *error)
+int mbr_l3xseraw_wr_nav(int verbose,int *buffer_size,char *buffer,void *store_ptr,int *error)
 {
 	char	*function_name = "mbr_l3xseraw_wr_nav";
 	int	status = MB_SUCCESS;
@@ -3203,7 +3206,7 @@ int mbr_l3xseraw_wr_nav(int verbose,int *buffer_size,char *buffer,char *store_pt
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_l3xseraw_wr_svp(int verbose,int *buffer_size,char *buffer,char *store_ptr,int *error)
+int mbr_l3xseraw_wr_svp(int verbose,int *buffer_size,char *buffer,void *store_ptr,int *error)
 {
 	char	*function_name = "mbr_l3xseraw_wr_svp";
 	int	status = MB_SUCCESS;
@@ -3593,7 +3596,7 @@ int mbr_l3xseraw_wr_svp(int verbose,int *buffer_size,char *buffer,char *store_pt
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_l3xseraw_wr_ship(int verbose,int *buffer_size,char *buffer,char *store_ptr,int *error)
+int mbr_l3xseraw_wr_ship(int verbose,int *buffer_size,char *buffer,void *store_ptr,int *error)
 {
 	char	*function_name = "mbr_l3xseraw_wr_ship";
 	int	status = MB_SUCCESS;
@@ -3757,7 +3760,7 @@ int mbr_l3xseraw_wr_ship(int verbose,int *buffer_size,char *buffer,char *store_p
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_l3xseraw_wr_multibeam(int verbose,int *buffer_size,char *buffer,char *store_ptr,int *error)
+int mbr_l3xseraw_wr_multibeam(int verbose,int *buffer_size,char *buffer,void *store_ptr,int *error)
 {
 	char	*function_name = "mbr_l3xseraw_wr_multibeam";
 	int	status = MB_SUCCESS;
@@ -4454,7 +4457,7 @@ int mbr_l3xseraw_wr_multibeam(int verbose,int *buffer_size,char *buffer,char *st
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_l3xseraw_wr_sidescan(int verbose,int *buffer_size,char *buffer,char *store_ptr,int *error)
+int mbr_l3xseraw_wr_sidescan(int verbose,int *buffer_size,char *buffer,void *store_ptr,int *error)
 {
 	char	*function_name = "mbr_l3xseraw_wr_sidescan";
 	int	status = MB_SUCCESS;
@@ -4643,7 +4646,7 @@ int mbr_l3xseraw_wr_sidescan(int verbose,int *buffer_size,char *buffer,char *sto
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_l3xseraw_wr_seabeam(int verbose,int *buffer_size,char *buffer,char *store_ptr,int *error)
+int mbr_l3xseraw_wr_seabeam(int verbose,int *buffer_size,char *buffer,void *store_ptr,int *error)
 {
 	char	*function_name = "mbr_l3xseraw_wr_seabeam";
 	int	status = MB_SUCCESS;
@@ -4946,7 +4949,7 @@ int mbr_l3xseraw_wr_seabeam(int verbose,int *buffer_size,char *buffer,char *stor
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_l3xseraw_wr_comment(int verbose,int *buffer_size,char *buffer,char *store_ptr,int *error)
+int mbr_l3xseraw_wr_comment(int verbose,int *buffer_size,char *buffer,void *store_ptr,int *error)
 {
 	char	*function_name = "mbr_l3xseraw_wr_comment";
 	int	status = MB_SUCCESS;

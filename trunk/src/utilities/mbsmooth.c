@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsmooth.c	6/12/93
- *    $Id: mbsmooth.c,v 5.1 2001-03-22 21:15:49 caress Exp $
+ *    $Id: mbsmooth.c,v 5.2 2001-07-20 00:34:38 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -31,6 +31,9 @@
  * in the current version.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2001/03/22 21:15:49  caress
+ * Trying to make release 5.0.beta0.
+ *
  * Revision 5.0  2000/12/01  22:57:08  caress
  * First cut at Version 5.0.
  *
@@ -121,7 +124,7 @@
 /* MBIO buffer structure pointer */
 #define	MBSMOOTH_BUFFER_DEFAULT	500
 #define	MBSMOOTH_NUM		3
-char	*buff_ptr;
+void	*buff_ptr;
 int	n_buffer_max = MBSMOOTH_BUFFER_DEFAULT;
 int	nwant = MBSMOOTH_BUFFER_DEFAULT;
 int	nhold = 0;
@@ -169,7 +172,7 @@ double	width_def = 250.0;
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbsmooth.c,v 5.1 2001-03-22 21:15:49 caress Exp $";
+	static char rcs_id[] = "$Id: mbsmooth.c,v 5.2 2001-07-20 00:34:38 caress Exp $";
 	static char program_name[] = "MBSMOOTH";
 	static char help_message[] =  "MBSMOOTH applies a spatial \
 domain gaussian filter to swath \nbathymetry data in order to \
@@ -204,14 +207,14 @@ smooth out noise in the data.";
 	int	beams_amp;
 	int	pixels_ss;
 	char	ifile[128];
-	char	*imbio_ptr = NULL;
+	void	*imbio_ptr = NULL;
 
 	/* MBIO write control parameters */
 	char	ofile[128];
-	char	*ombio_ptr = NULL;
+	void	*ombio_ptr = NULL;
 
 	/* mbio read and write values */
-	char	*store_ptr;
+	void	*store_ptr;
 	int	kind;
 	int	nrecord = 0;
 	int	nbathdata = 0;

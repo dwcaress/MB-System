@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_xse.c	3/27/2000
- *	$Id: mbsys_xse.c,v 5.4 2001-06-08 21:44:01 caress Exp $
+ *	$Id: mbsys_xse.c,v 5.5 2001-07-20 00:32:54 caress Exp $
  *
  *    Copyright (c) 2000 by 
  *    D. W. Caress (caress@mbari.org)
@@ -28,6 +28,9 @@
  * Additional Authors:	P. A. Cohen and S. Dzurenko
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2001/06/08  21:44:01  caress
+ * Version 5.0.beta01
+ *
  * Revision 5.3  2001/04/06  22:05:59  caress
  * Consolidated xse formats into one format.
  *
@@ -66,10 +69,10 @@
 #include "../../include/mbsys_xse.h"
 
 /*--------------------------------------------------------------------*/
-int mbsys_xse_alloc(int verbose, char *mbio_ptr, char **store_ptr, 
+int mbsys_xse_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_xse.c,v 5.4 2001-06-08 21:44:01 caress Exp $";
+ static char res_id[]="$Id: mbsys_xse.c,v 5.5 2001-07-20 00:32:54 caress Exp $";
 	char	*function_name = "mbsys_xse_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -274,7 +277,7 @@ int mbsys_xse_alloc(int verbose, char *mbio_ptr, char **store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_xse_deall(int verbose, char *mbio_ptr, char **store_ptr, 
+int mbsys_xse_deall(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
 	char	*function_name = "mbsys_xse_deall";
@@ -310,7 +313,7 @@ int mbsys_xse_deall(int verbose, char *mbio_ptr, char **store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_xse_extract(int verbose, char *mbio_ptr, char *store_ptr, 
+int mbsys_xse_extract(int verbose, void *mbio_ptr, void *store_ptr, 
 		int *kind, int time_i[7], double *time_d,
 		double *navlon, double *navlat,
 		double *speed, double *heading,
@@ -601,7 +604,7 @@ int mbsys_xse_extract(int verbose, char *mbio_ptr, char *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_xse_insert(int verbose, char *mbio_ptr, char *store_ptr, 
+int mbsys_xse_insert(int verbose, void *mbio_ptr, void *store_ptr, 
 		int kind, int time_i[7], double time_d,
 		double navlon, double navlat,
 		double speed, double heading,
@@ -683,7 +686,7 @@ int mbsys_xse_insert(int verbose, char *mbio_ptr, char *store_ptr,
 	if (store->kind == MB_DATA_DATA)
 		{
 		/* get time */
-		store->mul_sec = ((unsigned int) time_d) + MBSYS_XSE_TIME_OFFSET;
+		store->mul_sec = (unsigned int) (time_d + MBSYS_XSE_TIME_OFFSET);
 		store->mul_usec = (time_d 
 				    - ((int) time_d)) * 1000000;
 		store->sid_sec = store->mul_sec;
@@ -788,7 +791,7 @@ int mbsys_xse_insert(int verbose, char *mbio_ptr, char *store_ptr,
 	else if (store->kind == MB_DATA_NAV)
 		{
 		/* get time */
-		store->nav_sec = ((unsigned int) time_d) + MBSYS_XSE_TIME_OFFSET;
+		store->nav_sec = (unsigned int) (time_d + MBSYS_XSE_TIME_OFFSET);
 		store->nav_usec = (time_d 
 				    - ((int) time_d)) * 1000000;
 
@@ -824,7 +827,7 @@ int mbsys_xse_insert(int verbose, char *mbio_ptr, char *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_xse_ttimes(int verbose, char *mbio_ptr, char *store_ptr,
+int mbsys_xse_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 	int *kind, int *nbeams,
 	double *ttimes, double *angles, 
 	double *angles_forward, double *angles_null,
@@ -977,7 +980,7 @@ int mbsys_xse_ttimes(int verbose, char *mbio_ptr, char *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_xse_extract_altitude(int verbose, char *mbio_ptr, char *store_ptr,
+int mbsys_xse_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 	int *kind, double *transducer_depth, double *altitude, 
 	int *error)
 {
@@ -1090,7 +1093,7 @@ int mbsys_xse_extract_altitude(int verbose, char *mbio_ptr, char *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_xse_extract_nav(int verbose, char *mbio_ptr, char *store_ptr,
+int mbsys_xse_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int time_i[7], double *time_d,
 		double *navlon, double *navlat,
 		double *speed, double *heading, double *draft, 
@@ -1293,7 +1296,7 @@ int mbsys_xse_extract_nav(int verbose, char *mbio_ptr, char *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_xse_insert_nav(int verbose, char *mbio_ptr, char *store_ptr,
+int mbsys_xse_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		int time_i[7], double time_d,
 		double navlon, double navlat,
 		double speed, double heading, double draft, 
@@ -1343,7 +1346,7 @@ int mbsys_xse_insert_nav(int verbose, char *mbio_ptr, char *store_ptr,
 	if (store->kind == MB_DATA_DATA)
 		{
 		/* get time */
-		store->mul_sec = ((unsigned int) time_d) + MBSYS_XSE_TIME_OFFSET;
+		store->mul_sec = (unsigned int) (time_d + MBSYS_XSE_TIME_OFFSET);
 		store->mul_usec = (time_d 
 				    - ((int) time_d)) * 1000000;
 		store->sid_sec = store->mul_sec;
@@ -1366,7 +1369,7 @@ int mbsys_xse_insert_nav(int verbose, char *mbio_ptr, char *store_ptr,
 	else if (store->kind == MB_DATA_NAV)
 		{
 		/* get time */
-		store->nav_sec = ((unsigned int) time_d) + MBSYS_XSE_TIME_OFFSET;
+		store->nav_sec = (unsigned int) (time_d + MBSYS_XSE_TIME_OFFSET);
 		store->nav_usec = (time_d 
 				    - ((int) time_d)) * 1000000;
 
@@ -1398,7 +1401,7 @@ int mbsys_xse_insert_nav(int verbose, char *mbio_ptr, char *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_xse_extract_svp(int verbose, char *mbio_ptr, char *store_ptr,
+int mbsys_xse_extract_svp(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int *nsvp,
 		double *depth, double *velocity,
 		int *error)
@@ -1481,7 +1484,7 @@ int mbsys_xse_extract_svp(int verbose, char *mbio_ptr, char *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_xse_insert_svp(int verbose, char *mbio_ptr, char *store_ptr,
+int mbsys_xse_insert_svp(int verbose, void *mbio_ptr, void *store_ptr,
 		int nsvp,
 		double *depth, double *velocity,
 		int *error)
@@ -1542,8 +1545,8 @@ int mbsys_xse_insert_svp(int verbose, char *mbio_ptr, char *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_xse_copy(int verbose, char *mbio_ptr, 
-			char *store_ptr, char *copy_ptr,
+int mbsys_xse_copy(int verbose, void *mbio_ptr, 
+			void *store_ptr, void *copy_ptr,
 			int *error)
 {
 	char	*function_name = "mbsys_xse_copy";

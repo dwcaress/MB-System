@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_surf.h	6/22/01
- *	$Id: mbsys_atlas.h,v 5.0 2001-06-29 22:49:07 caress Exp $
+ *	$Id: mbsys_atlas.h,v 5.1 2001-07-20 00:32:54 caress Exp $
  *
  *    Copyright (c) 2001 by
  *    David W. Caress (caress@mbari.org)
@@ -30,6 +30,9 @@
  * Date:	June 22, 2001
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2001/06/29  22:49:07  caress
+ * Added support for HSDS2RAW
+ *
  *
  */
 /*
@@ -96,8 +99,10 @@
 #define	MBSYS_SURF_HSDS2_RX_PAR		20 
 #define	MBSYS_SURF_HSDS2_TX_PAR		10 
 #define	MBSYS_SURF_COMMENT_LENGTH	256
+#define	MBSYS_SURF_HSDS2_MAXBEAMS	140
 
 /* datagram type id's */
+#define	MBSYS_SURF_TELEGRAM_NONE		0
 #define	MBSYS_SURF_TELEGRAM_START		10
 #define	MBSYS_SURF_TELEGRAM_TRAVELTIMES		11
 #define	MBSYS_SURF_TELEGRAM_SIDESCAN		12
@@ -105,6 +110,8 @@
 #define	MBSYS_SURF_TELEGRAM_CENTERBEAM		26
 #define	MBSYS_SURF_TELEGRAM_BACKSCATTER		28
 #define	MBSYS_SURF_TELEGRAM_SYSTEM		40
+#define	MBSYS_SURF_TELEGRAM_HSDS2LAM		1179799367
+#define	MBSYS_SURF_TELEGRAM_COMMENTLAM		1129270605
 
 /* internal data structure for survey data */
 struct mbsys_surf_struct
@@ -312,10 +319,138 @@ struct mbsys_surf_struct
  *
  */
 #ifndef MBSYS_SURF_C
-extern double ds2_ang_120[];
-extern double ds2_ang_90[];
+extern double ds2_ang_120d_59b[];
+extern double ds2_ang_90d_59b[];
+extern double ds2_ang_120d_140b[];
+extern double ds2_ang_90d_140b[];
 #else
-double ds2_ang_120[] = 
+double ds2_ang_120d_59b[] = 
+	{
+	-1.040042,
+	-1.004178,
+	-0.968315,
+	-0.932451,
+	-0.896588,
+	-0.860724,
+	-0.824861,
+	-0.788997,
+	-0.753134,
+	-0.717270,
+	-0.681407,
+	-0.645543,
+	-0.609680,
+	-0.573816,
+	-0.537953,
+	-0.502089,
+	-0.466226,
+	-0.430362,
+	-0.394499,
+	-0.358635,
+	-0.322772,
+	-0.286908,
+	-0.251045,
+	-0.215181,
+	-0.179318,
+	-0.143454,
+	-0.107591,
+	-0.071727,
+	-0.035864,
+	0.000000,
+	0.035864,
+	0.071727,
+	0.107591,
+	0.143454,
+	0.179318,
+	0.215181,
+	0.251045,
+	0.286908,
+	0.322772,
+	0.358635,
+	0.394499,
+	0.430362,
+	0.466226,
+	0.502089,
+	0.537953,
+	0.573816,
+	0.609680,
+	0.645543,
+	0.681407,
+	0.717270,
+	0.753134,
+	0.788997,
+	0.824861,
+	0.860724,
+	0.896588,
+	0.932451,
+	0.968315,
+	1.004178,
+	1.040042
+	};
+	
+double ds2_ang_90d_59b[] = 
+	{
+	-0.779988,
+	-0.753092,
+	-0.726195,
+	-0.699299,
+	-0.672403,
+	-0.645507,
+	-0.618611,
+	-0.591715,
+	-0.564819,
+	-0.537923,
+	-0.511026,
+	-0.484130,
+	-0.457234,
+	-0.430338,
+	-0.403442,
+	-0.376546,
+	-0.349650,
+	-0.322754,
+	-0.295857,
+	-0.268961,
+	-0.242065,
+	-0.215169,
+	-0.188273,
+	-0.161377,
+	-0.134481,
+	-0.107584,
+	-0.080688,
+	-0.053792,
+	-0.026896,
+	0.000000,
+	0.026896,
+	0.053792,
+	0.080688,
+	0.107584,
+	0.134481,
+	0.161377,
+	0.188273,
+	0.215169,
+	0.242065,
+	0.268961,
+	0.295857,
+	0.322754,
+	0.349650,
+	0.376546,
+	0.403442,
+	0.430338,
+	0.457234,
+	0.484130,
+	0.511026,
+	0.537923,
+	0.564819,
+	0.591715,
+	0.618611,
+	0.645507,
+	0.672403,
+	0.699299,
+	0.726195,
+	0.753092,
+	0.779988
+	};
+	
+double ds2_ang_120d_140b[] = 
 	{
 	-1.040042,
 	-1.025077,
@@ -459,7 +594,7 @@ double ds2_ang_120[] =
 	1.040042
 	};
 
-double ds2_ang_90[] = 
+double ds2_ang_90d_140b[] = 
 	{
 	-0.77998,
 	-0.76876,
@@ -605,11 +740,11 @@ double ds2_ang_90[] =
 #endif
 	
 /* system specific function prototypes */
-int mbsys_surf_alloc(int verbose, char *mbio_ptr, char **store_ptr, 
+int mbsys_surf_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error);
-int mbsys_surf_deall(int verbose, char *mbio_ptr, char **store_ptr, 
+int mbsys_surf_deall(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error);
-int mbsys_surf_extract(int verbose, char *mbio_ptr, char *store_ptr, 
+int mbsys_surf_extract(int verbose, void *mbio_ptr, void *store_ptr, 
 			int *kind, int time_i[7], double *time_d,
 			double *navlon, double *navlat,
 			double *speed, double *heading,
@@ -618,7 +753,7 @@ int mbsys_surf_extract(int verbose, char *mbio_ptr, char *store_ptr,
 			double *bathacrosstrack, double *bathalongtrack,
 			double *ss, double *ssacrosstrack, double *ssalongtrack,
 			char *comment, int *error);
-int mbsys_surf_insert(int verbose, char *mbio_ptr, char *store_ptr, 
+int mbsys_surf_insert(int verbose, void *mbio_ptr, void *store_ptr, 
 			int kind, int time_i[7], double time_d,
 			double navlon, double navlat,
 			double speed, double heading,
@@ -627,28 +762,28 @@ int mbsys_surf_insert(int verbose, char *mbio_ptr, char *store_ptr,
 			double *bathacrosstrack, double *bathalongtrack,
 			double *ss, double *ssacrosstrack, double *ssalongtrack,
 			char *comment, int *error);
-int mbsys_surf_ttimes(int verbose, char *mbio_ptr, char *store_ptr,
+int mbsys_surf_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbeams,
 			double *ttimes, double *angles, 
 			double *angles_forward, double *angles_null,
 			double *heave, double *alongtrack_offset, 
 			double *draft, double *ssv, int *error);
-int mbsys_surf_extract_altitude(int verbose, char *mbio_ptr, char *store_ptr,
+int mbsys_surf_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, double *transducer_depth, double *altitude, 
 			int *error);
-int mbsys_surf_extract_nav(int verbose, char *mbio_ptr, char *store_ptr,
+int mbsys_surf_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int time_i[7], double *time_d,
 			double *navlon, double *navlat,
 			double *speed, double *heading, double *draft, 
 			double *roll, double *pitch, double *heave, 
 			int *error);
-int mbsys_surf_insert_nav(int verbose, char *mbio_ptr, char *store_ptr,
+int mbsys_surf_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 			int time_i[7], double time_d,
 			double navlon, double navlat,
 			double speed, double heading, double draft, 
 			double roll, double pitch, double heave,
 			int *error);
-int mbsys_surf_copy(int verbose, char *mbio_ptr, 
-			char *store_ptr, char *copy_ptr,
+int mbsys_surf_copy(int verbose, void *mbio_ptr, 
+			void *store_ptr, void *copy_ptr,
 			int *error);
 

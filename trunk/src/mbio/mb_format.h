@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.h	1/19/93
- *    $Id: mb_format.h,v 5.4 2001-06-30 17:40:14 caress Exp $
+ *    $Id: mb_format.h,v 5.5 2001-07-20 00:32:54 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -19,6 +19,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2001/06/30 17:40:14  caress
+ * Release 5.0.beta02
+ *
  * Revision 5.3  2001/04/06  22:05:59  caress
  * Consolidated xse formats into one format.
  *
@@ -352,18 +355,25 @@
 #define MBF_MBPRONAV    166     /* MB-System simple navigation format, ascii, MBARI */ 
 #define MBF_HS10JAMS    171     /* Furuno HS10 multibeam format, 45 beams, 
 					bathymetry and amplitude, ascii, JAMSTEC */ 
-#define MBF_ATLSSURF    181     /* STN Atlas processing multibeam format, \n
+#define MBF_ATLSSURF    181     /* STN Atlas processing multibeam format, 
 					Hydrosweep DS2, Hydrosweep MD, 
 					Fansweep 10, Fansweep 20, 
 					bathymetry, amplitude, and sidescan,
 					up to 1440 beams and 4096 pixels, 
 					XDR binary, STN Atlas. */ 
-#define MBF_HSDS2RAW    182     /* STN Atlas raw multibeam format, \n
+#define MBF_HSDS2RAW    182     /* STN Atlas raw multibeam format, 
 					Hydrosweep DS2, Hydrosweep MD, 
 					Fansweep 10, Fansweep 20, 
 					bathymetry, amplitude, and sidescan,
 					up to 1440 beams and 4096 pixels, 
 					XDR binary, STN Atlas. */
+#define MBF_HSDS2LAM    183     /* L-DEO HSDS2 processing format, 
+					STN Atlas multibeam sonars, 
+					Hydrosweep DS2, Hydrosweep MD, 
+					Fansweep 10, Fansweep 20, 
+					bathymetry, amplitude, and sidescan,
+					up to 1440 beams and 4096 pixels,
+					XDR binary, L-DEO. */
 
 /* Alias table for old (pre-version 4.0) format id's */
 static int format_alias_table[] = 

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavadjust_callbacks.c	2/22/2000
- *    $Id: mbnavadjust_callbacks.c,v 5.1 2001-01-22 07:45:59 caress Exp $
+ *    $Id: mbnavadjust_callbacks.c,v 5.2 2001-07-20 00:33:43 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	March 22, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2001/01/22 07:45:59  caress
+ * Version 5.0.beta01
+ *
  * Revision 5.0  2000/12/01  22:55:48  caress
  * First cut at Version 5.0.
  *
@@ -120,7 +123,7 @@ static int corr_borders[4] = { 0, 300, 0, 300 };
 #define FILE_MODE_OPEN 		2
 #define FILE_MODE_IMPORT 	3
 int	file_mode = FILE_MODE_NONE;
-int	format;
+int	format = 0;
 int	startup_file = 0;
 int	expose_plot_ok = True;
 static char	*input_file;
@@ -140,7 +143,6 @@ char	string[STRING_MAX];
 
 /* local function prototype definitions */
 void	do_list_data_select( Widget w, XtPointer client_data, XtPointer call_data);
-void	do_naverr_plot(int plotmode);
 void	do_naverr_cont_expose( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_naverr_corr_expose( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_naverr_cont_input( Widget w, XtPointer client_data, XtPointer call_data);
@@ -174,6 +176,7 @@ void	set_label_string(Widget w, String str);
 void	set_label_multiline_string(Widget w, String str);
 void	get_text_string(Widget w, String str);
 int	do_info_add(char *info, int timetag);
+
 /*--------------------------------------------------------------------*/
 /*      Function Name: 	BxManageCB
  *
@@ -681,7 +684,7 @@ void do_set_controls()
 }
 /*--------------------------------------------------------------------*/
 
-int do_update_status()
+void do_update_status()
 {
     	XmString *xstr;
     	struct mbna_file *file;
@@ -698,11 +701,11 @@ int do_update_status()
 		project.num_crossings,project.num_crossings_analyzed, 
 		project.num_ties);
         if (project.inversion == MBNA_INVERSION_CURRENT)
-        	strcat(string,"\:t\"Inversion Performed:                    Current\"");
+        	strcat(string,":t\"Inversion Performed:                    Current\"");
         else if (project.inversion == MBNA_INVERSION_OLD)
-        	strcat(string,"\:t\"Inversion Performed:                    Out of Date\"");
+        	strcat(string,":t\"Inversion Performed:                    Out of Date\"");
         else
-        	strcat(string,"\:t\"Inversion Performed:                    No\"");
+        	strcat(string,":t\"Inversion Performed:                    No\"");
 	set_label_multiline_string(label_status, string);
 
 	/* set list_data */
@@ -1117,7 +1120,7 @@ do_naverr_init()
     corr_xgid = xg_init(display, corr_xid, corr_borders, xgfont);
     status = mbnavadjust_set_graphics(cont_xgid,corr_xgid,
 		    cont_borders, corr_borders, 
-		    NCOLORS, mpixel_values);
+		    NCOLORS, (int *) mpixel_values);
 		
     /* set status flag */
     mbna_status = MBNA_STATUS_NAVERR;
@@ -1173,7 +1176,7 @@ do_update_naverr()
 :t\"Status: Unset \"\
 :t\"Contour Plot Width: %.2f m\"\
 :t\"Misfit Plot Width:  %.2f m\"\
-:t\"Zoom Factor: %.2f \%\"\
+:t\"Zoom Factor: %.2f \"\
 :t\"Tie Points: None\"\
 :t\"Relative Offsets:   None   None\"",
                	 	mbna_current_crossing, project.num_crossings,
@@ -1188,7 +1191,7 @@ do_update_naverr()
 :t\"Current Tie Point: %2d of %2d\"\
 :t\"Contour Plot Width: %.2f m\"\
 :t\"Misfit Plot Width:  %.2f m\"\
-:t\"Zoom Factor: %.2f \%\"\
+:t\"Zoom Factor: %.2f \"\
 :t\"Nav Points: %4d %4d\"\
 :t\"Relative Offsets:   %9.3f m   %9.3f m\"",
                	 	mbna_current_crossing, project.num_crossings,
@@ -1208,7 +1211,7 @@ do_update_naverr()
 :t\"Status: Skipped \"\
 :t\"Contour Plot Width: %.2f m\"\
 :t\"Misfit Plot Width:  %.2f m\"\
-:t\"Zoom Factor: %.2f \%\"\
+:t\"Zoom Factor: %.2f \"\
 :t\"Tie Points: Skipped\"\
 :t\"Relative Offsets:   Skipped   Skipped\"",
                	 	mbna_current_crossing, project.num_crossings,
@@ -1260,6 +1263,8 @@ do_naverr_test_graphics()
     double	rx, ry, rr, r;
 
     /* now test graphics */
+    ox = 0;
+    oy = 0;
     dx = (cont_borders[1] - cont_borders[0]) / 16;
     dy = (cont_borders[3] - cont_borders[2]) / 16;
     rx = cont_borders[1] - ox;

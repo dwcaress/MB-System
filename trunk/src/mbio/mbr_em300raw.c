@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em300raw.c	10/16/98
- *	$Id: mbr_em300raw.c,v 5.7 2001-06-08 21:44:01 caress Exp $
+ *	$Id: mbr_em300raw.c,v 5.8 2001-07-20 00:31:11 caress Exp $
  *
  *    Copyright (c) 1998, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	October 16,  1998
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2001/06/08  21:44:01  caress
+ * Version 5.0.beta01
+ *
  * Revision 5.6  2001/06/01  23:01:22  caress
  * Turned off debugging.
  *
@@ -106,7 +109,7 @@
 /* #define MBR_EM300RAW_DEBUG 1 */
 
 /* essential function prototypes */
-int mbr_register_em300raw(int verbose, char *mbio_ptr, 
+int mbr_register_em300raw(int verbose, void *mbio_ptr, 
 		int *error);
 int mbr_info_em300raw(int verbose, 
 			int *system, 
@@ -127,12 +130,12 @@ int mbr_info_em300raw(int verbose,
 			double *beamwidth_xtrack, 
 			double *beamwidth_ltrack, 
 			int *error);
-int mbr_alm_em300raw(int verbose, char *mbio_ptr, int *error);
-int mbr_dem_em300raw(int verbose, char *mbio_ptr, int *error);
-int mbr_rt_em300raw(int verbose, char *mbio_ptr, char *store_ptr, int *error);
-int mbr_wt_em300raw(int verbose, char *mbio_ptr, char *store_ptr, int *error);
-int mbr_em300raw_rd_data(int verbose, char *mbio_ptr, char *store_ptr, int *error);
-int mbr_em300raw_chk_label(int verbose, char *mbio_ptr, short type, short sonar);
+int mbr_alm_em300raw(int verbose, void *mbio_ptr, int *error);
+int mbr_dem_em300raw(int verbose, void *mbio_ptr, int *error);
+int mbr_rt_em300raw(int verbose, void *mbio_ptr, void *store_ptr, int *error);
+int mbr_wt_em300raw(int verbose, void *mbio_ptr, void *store_ptr, int *error);
+int mbr_em300raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error);
+int mbr_em300raw_chk_label(int verbose, void *mbio_ptr, short type, short sonar);
 int mbr_em300raw_rd_start(int verbose, FILE *mbfp, 
 		struct mbsys_simrad2_struct *store, 
 		short type, short sonar, int *version, int *error);
@@ -175,7 +178,7 @@ int mbr_em300raw_rd_rawbeam(int verbose, FILE *mbfp,
 int mbr_em300raw_rd_ss(int verbose, FILE *mbfp, 
 		struct mbsys_simrad2_struct *store, 
 		short sonar, int *match, int *error);
-int mbr_em300raw_wr_data(int verbose, char *mbio_ptr, char *store_ptr, int *error);
+int mbr_em300raw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_em300raw_wr_start(int verbose, FILE *mbfp, 
 		struct mbsys_simrad2_struct *store, int *error);
 int mbr_em300raw_wr_run_parameter(int verbose, FILE *mbfp, 
@@ -204,9 +207,9 @@ int mbr_em300raw_wr_ss(int verbose, FILE *mbfp,
 		struct mbsys_simrad2_struct *store, int *error);
 
 /*--------------------------------------------------------------------*/
-int mbr_register_em300raw(int verbose, char *mbio_ptr, int *error)
+int mbr_register_em300raw(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_em300raw.c,v 5.7 2001-06-08 21:44:01 caress Exp $";
+	static char res_id[]="$Id: mbr_em300raw.c,v 5.8 2001-07-20 00:31:11 caress Exp $";
 	char	*function_name = "mbr_register_em300raw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -229,9 +232,9 @@ int mbr_register_em300raw(int verbose, char *mbio_ptr, int *error)
 			&mb_io_ptr->beams_bath_max, 
 			&mb_io_ptr->beams_amp_max, 
 			&mb_io_ptr->pixels_ss_max, 
-			&mb_io_ptr->format_name, 
-			&mb_io_ptr->system_name, 
-			&mb_io_ptr->format_description, 
+			mb_io_ptr->format_name, 
+			mb_io_ptr->system_name, 
+			mb_io_ptr->format_description, 
 			&mb_io_ptr->numfile, 
 			&mb_io_ptr->filetype, 
 			&mb_io_ptr->variable_beams, 
@@ -336,7 +339,7 @@ int mbr_info_em300raw(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_em300raw.c,v 5.7 2001-06-08 21:44:01 caress Exp $";
+	static char res_id[]="$Id: mbr_em300raw.c,v 5.8 2001-07-20 00:31:11 caress Exp $";
 	char	*function_name = "mbr_info_em300raw";
 	int	status = MB_SUCCESS;
 
@@ -403,9 +406,9 @@ int mbr_info_em300raw(int verbose,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_alm_em300raw(int verbose, char *mbio_ptr, int *error)
+int mbr_alm_em300raw(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_em300raw.c,v 5.7 2001-06-08 21:44:01 caress Exp $";
+	static char res_id[]="$Id: mbr_em300raw.c,v 5.8 2001-07-20 00:31:11 caress Exp $";
 	char	*function_name = "mbr_alm_em300raw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -459,7 +462,7 @@ int mbr_alm_em300raw(int verbose, char *mbio_ptr, int *error)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_dem_em300raw(int verbose, char *mbio_ptr, int *error)
+int mbr_dem_em300raw(int verbose, void *mbio_ptr, int *error)
 {
 	char	*function_name = "mbr_dem_em300raw";
 	int	status = MB_SUCCESS;
@@ -498,7 +501,7 @@ int mbr_dem_em300raw(int verbose, char *mbio_ptr, int *error)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_rt_em300raw(int verbose, char *mbio_ptr, char *store_ptr, int *error)
+int mbr_rt_em300raw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 {
 	char	*function_name = "mbr_rt_em300raw";
 	int	status = MB_SUCCESS;
@@ -745,7 +748,7 @@ ping->png_bso);*/
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_wt_em300raw(int verbose, char *mbio_ptr, char *store_ptr, int *error)
+int mbr_wt_em300raw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 {
 	char	*function_name = "mbr_wt_em300raw";
 	int	status = MB_SUCCESS;
@@ -788,7 +791,7 @@ int mbr_wt_em300raw(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em300raw_rd_data(int verbose, char *mbio_ptr, char *store_ptr, int *error)
+int mbr_em300raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 {
 	char	*function_name = "mbr_em300raw_rd_data";
 	int	status = MB_SUCCESS;
@@ -1402,7 +1405,7 @@ Have a nice day...\n");
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em300raw_chk_label(int verbose, char *mbio_ptr, short type, short sonar)
+int mbr_em300raw_chk_label(int verbose, void *mbio_ptr, short type, short sonar)
 {
 	char	*function_name = "mbr_em300raw_chk_label";
 	int	status = MB_SUCCESS;
@@ -3957,7 +3960,7 @@ int mbr_em300raw_rd_ss(int verbose, FILE *mbfp,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em300raw_wr_data(int verbose, char *mbio_ptr, char *store_ptr, int *error)
+int mbr_em300raw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 {
 	char	*function_name = "mbr_em300raw_wr_data";
 	int	status = MB_SUCCESS;

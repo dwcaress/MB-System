@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbps.c	11/4/93
- *    $Id: mbps.c,v 5.2 2001-03-22 21:15:49 caress Exp $
+ *    $Id: mbps.c,v 5.3 2001-07-20 00:34:38 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	August 31, 1991 (original version)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2001/03/22 21:15:49  caress
+ * Trying to make release 5.0.beta0.
+ *
  * Revision 5.1  2001/01/22  07:54:22  caress
  * Version 5.0.beta01
  *
@@ -147,7 +150,7 @@ int rgb_white[] = {255, 255, 255};
 main (int argc, char **argv)
 {
 
-	static char rcs_id[] = "$Id: mbps.c,v 5.2 2001-03-22 21:15:49 caress Exp $";
+	static char rcs_id[] = "$Id: mbps.c,v 5.3 2001-07-20 00:34:38 caress Exp $";
 	static char program_name[] = "MBPS";
 	static char help_message[] =  "MBPS reads a swath bathymetry data file and creates a postscript 3-d mesh plot";
 	static char usage_message[] = "mbps [-Iinfile -Fformat -Nnpings -Ppings\n\t-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc  \n\t-Aalpha -Keta -Dviewdir -Xvertexag \n\t-T\"title\" -Wmetersperinch \n\t-Sspeedmin -Ggap -Ydisplay_stats \n\t-Zdisplay_scales -V -H]";
@@ -210,7 +213,7 @@ main (int argc, char **argv)
 	int	num_pings_max = MBPS_MAXPINGS;
 
 	/* MBIO read values */
-	char	*mbio_ptr = NULL;
+	void	*mbio_ptr = NULL;
 	int	kind;
 	struct ping data[MBPS_MAXPINGS+3];
 	int	time_i[7];

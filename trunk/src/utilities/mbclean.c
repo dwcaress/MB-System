@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbclean.c	2/26/93
- *    $Id: mbclean.c,v 5.2 2001-03-22 21:14:16 caress Exp $
+ *    $Id: mbclean.c,v 5.3 2001-07-20 00:34:38 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2001 by
  *    David W. Caress (caress@mbari.org)
@@ -54,6 +54,9 @@
  * by David Caress.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2001/03/22 21:14:16  caress
+ * Trying to make release 5.0.beta0.
+ *
  * Revision 5.1  2001/01/23  01:16:25  caress
  * Working esf version.
  *
@@ -204,9 +207,6 @@ struct bad_struct
 	double	bath;
 	};
 
-/* compare function for qsort */
-int mb_double_compare();
-
 /* edit output function */
 int mbclean_save_edit(int verbose, FILE *sofp, double time_d, int beam, 
 			int action, int *error);
@@ -215,7 +215,7 @@ int mbclean_save_edit(int verbose, FILE *sofp, double time_d, int beam,
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbclean.c,v 5.2 2001-03-22 21:14:16 caress Exp $";
+	static char rcs_id[] = "$Id: mbclean.c,v 5.3 2001-07-20 00:34:38 caress Exp $";
 	static char program_name[] = "MBCLEAN";
 	static char help_message[] =  "MBCLEAN identifies and flags artifacts in swath sonar bathymetry data\nBad beams  are  indentified  based  on  one simple criterion only: \nexcessive bathymetric slopes.   The default input and output streams \nare stdin and stdout.";
 	static char usage_message[] = "mbclean [-Amax -Blow/high -Cslope -Dmin/max \n\t-Fformat -Gfraction_low/fraction_high \n\t-Iinfile -Llonflip -Mmode -Nbuffersize -Ooutfile -Q -Xzap_beams \n\t-V -H]";
@@ -257,10 +257,10 @@ main (int argc, char **argv)
 	double	*ssacrosstrack;
 	double	*ssalongtrack;
 	char	ifile[128];
-	char	*imbio_ptr = NULL;
+	void	*imbio_ptr = NULL;
 
 	/* mbio read and write values */
-	char	*store_ptr = NULL;
+	void	*store_ptr = NULL;
 	int	kind;
 	struct mbclean_ping_struct ping[3];
 	int	nrec, irec;

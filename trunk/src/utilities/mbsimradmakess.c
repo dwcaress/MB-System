@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsimradmakess.c	11/29/98
  *
- *    $Id: mbsimradmakess.c,v 5.2 2001-03-22 21:15:49 caress Exp $
+ *    $Id: mbsimradmakess.c,v 5.3 2001-07-20 00:34:38 caress Exp $
  *
  *    Copyright (c) 1998, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -58,6 +58,9 @@
  * Date:	November 29, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2001/03/22 21:15:49  caress
+ * Trying to make release 5.0.beta0.
+ *
  * Revision 5.1  2001/01/22  07:54:22  caress
  * Version 5.0.beta01
  *
@@ -102,7 +105,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbsimradmakess.c,v 5.2 2001-03-22 21:15:49 caress Exp $";
+	static char rcs_id[] = "$Id: mbsimradmakess.c,v 5.3 2001-07-20 00:34:38 caress Exp $";
 	static char program_name[] = "MBSIMRADMAKESS";
 	static char help_message[] =  "MBSIMRADMAKESS is an utility for regenerating sidescan imagery from the raw amplitude samples contained in data from  Simrad \nEM300 and EM3000 multibeam sonars. This program ignores amplitude \ndata associated with flagged (bad) bathymetry data, thus removing \none important source of noise in the sidescan data. The default \ninput and output streams are stdin and stdout.";
 	static char usage_message[] = "mbsimradmakess [-Fformat -V -H  -Iinfile -Ooutfile -Ppixel_size -Sswath_width -Tpixel_int]";
@@ -136,12 +139,12 @@ main (int argc, char **argv)
 	int	beams_amp;
 	int	pixels_ss;
 	char	ifile[128];
-	char	*imbio_ptr;
+	void	*imbio_ptr;
 	char	ofile[128];
-	char	*ombio_ptr;
+	void	*ombio_ptr;
 
 	/* mbio read and write values */
-	char	*store_ptr;
+	void	*store_ptr;
 	int	kind;
 	int	time_i[7];
 	double	time_d;
@@ -194,9 +197,6 @@ main (int argc, char **argv)
 	double	xtrack;
 	int	first, last, k1, k2;
 	int	i, j, k, jj, kk, l, m;
-
-	/* compare function for qsort */
-	int mb_double_compare();
 
 	char	*ctime();
 	char	*getenv();

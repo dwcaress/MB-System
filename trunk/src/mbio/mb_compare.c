@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_compare.c	11/19/98
- *    $Id: mb_compare.c,v 5.0 2000-12-01 22:48:41 caress Exp $
+ *    $Id: mb_compare.c,v 5.1 2001-07-20 00:31:11 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	November 19,  1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01 22:48:41  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.2  2000/10/11  01:02:30  caress
  * Convert to ANSI C
  *
@@ -36,22 +39,32 @@
 /* mbio include files */
 #include "../../include/mb_define.h"
 
-static char rcs_id[]="$Id: mb_compare.c,v 5.0 2000-12-01 22:48:41 caress Exp $";
+static char rcs_id[]="$Id: mb_compare.c,v 5.1 2001-07-20 00:31:11 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 /* 	function mb_int_compare compares int values. */
-int mb_int_compare(int *a, int *b)
+int mb_int_compare(void *a, void *b)
 {
-	if (*a > *b)
+	int	*aa, *bb;
+	
+	aa = (int *) a;
+	bb = (int *) b;
+	
+	if (*aa > *bb)
 		return(1);
 	else
 		return(-1);
 }
 /*--------------------------------------------------------------------*/
 /* 	function mb_double_compare compares double values. */
-int mb_double_compare(double *a, double *b)
+int mb_double_compare(void *a, void *b)
 {
-	if (*a > *b)
+	double	*aa, *bb;
+	
+	aa = (double *) a;
+	bb = (double *) b;
+	
+	if (*aa > *bb)
 		return(1);
 	else
 		return(-1);

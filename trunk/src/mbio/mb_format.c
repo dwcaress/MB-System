@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.c	2/18/94
- *    $Id: mb_format.c,v 5.6 2001-06-29 22:48:04 caress Exp $
+ *    $Id: mb_format.c,v 5.7 2001-07-20 00:31:11 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	Februrary 18, 1994
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2001/06/29  22:48:04  caress
+ * Added support for HSDS2RAW
+ *
  * Revision 5.5  2001/06/08  21:44:01  caress
  * Version 5.0.beta01
  *
@@ -120,12 +123,12 @@
 #include "../../include/mbsys_simrad.h"
 #include "../../include/mbsys_simrad2.h"
 
-static char rcs_id[]="$Id: mb_format.c,v 5.6 2001-06-29 22:48:04 caress Exp $";
+static char rcs_id[]="$Id: mb_format.c,v 5.7 2001-07-20 00:31:11 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_format_register(int verbose, 
 			int *format, 
-			char *mbio_ptr, 
+			void *mbio_ptr, 
 			int *error)
 {
 	char	*function_name = "mb_format_register";
@@ -363,6 +366,10 @@ int mb_format_register(int verbose,
 	else if (*format == MBF_HSDS2RAW)
 		{
 		status = mbr_register_hsds2raw(verbose, mbio_ptr, error); 
+		}
+	else if (*format == MBF_HSDS2LAM)
+		{
+		status = mbr_register_hsds2lam(verbose, mbio_ptr, error); 
 		}
 	else
 		{
@@ -997,6 +1004,17 @@ int mb_format_info(int verbose,
 			beamwidth_xtrack, beamwidth_ltrack, 
 			error);
 		}
+	else if (*format == MBF_HSDS2LAM)
+		{
+		status = mbr_info_hsds2lam(verbose, system, 
+			beams_bath_max, beams_amp_max, pixels_ss_max, 
+			format_name, system_name, format_description, 
+			numfile, filetype, 
+			variable_beams, traveltime, beam_flagging, 
+			nav_source, heading_source, vru_source, 
+			beamwidth_xtrack, beamwidth_ltrack, 
+			error);
+		}
 	else if (*format == MBF_DATALIST)
 		{
 		*format = MBF_DATALIST;
@@ -1142,7 +1160,7 @@ int mb_format(int verbose, int *format, int *error)
 /*--------------------------------------------------------------------*/
 int mb_format_system(int verbose, int *format, int *system, int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.6 2001-06-29 22:48:04 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.7 2001-07-20 00:31:11 caress Exp $";
 	char	*function_name = "mb_format_system";
 	int	status;
 
@@ -1210,7 +1228,7 @@ int mb_format_dimensions(int verbose, int *format,
 		int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.6 2001-06-29 22:48:04 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.7 2001-07-20 00:31:11 caress Exp $";
 	char	*function_name = "mb_format_dimensions";
 	int	status;
 
@@ -1277,7 +1295,7 @@ int mb_format_dimensions(int verbose, int *format,
 /*--------------------------------------------------------------------*/
 int mb_format_description(int verbose, int *format, char *description, int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.6 2001-06-29 22:48:04 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.7 2001-07-20 00:31:11 caress Exp $";
 	char	*function_name = "mb_format_description";
 	int	status;
 
@@ -1341,7 +1359,7 @@ int mb_format_flags(int verbose, int *format,
 		int *variable_beams, int *traveltime, int *beam_flagging, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.6 2001-06-29 22:48:04 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.7 2001-07-20 00:31:11 caress Exp $";
 	char	*function_name = "mb_format_flags";
 	int	status;
 
@@ -1411,7 +1429,7 @@ int mb_format_source(int verbose, int *format,
 		int *nav_source, int *heading_source, int *vru_source, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.6 2001-06-29 22:48:04 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.7 2001-07-20 00:31:11 caress Exp $";
 	char	*function_name = "mb_format_source";
 	int	status;
 
@@ -1481,7 +1499,7 @@ int mb_format_beamwidth(int verbose, int *format,
 		double *beamwidth_xtrack, double *beamwidth_ltrack,
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.6 2001-06-29 22:48:04 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.7 2001-07-20 00:31:11 caress Exp $";
 	char	*function_name = "mb_format_beamwidth";
 	int	status;
 
@@ -1873,7 +1891,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 }
 /*--------------------------------------------------------------------*/
 int mb_datalist_open(int verbose,
-		char **datalist,
+		void **datalist,
 		char *path, 
 		int look_processed, int *error)
 {
@@ -1890,7 +1908,7 @@ int mb_datalist_open(int verbose,
 		fprintf(stderr,"dbg2       verbose:       %d\n",verbose);
 		fprintf(stderr,"dbg2       datalist:      %d\n",*datalist);
 		fprintf(stderr,"dbg2       path:          %s\n",path);
-		fprintf(stderr,"dbg2       look_processed:%s\n",look_processed);
+		fprintf(stderr,"dbg2       look_processed:%d\n",look_processed);
 		}
 
 	/* allocate memory for datalist structure */
@@ -1944,7 +1962,7 @@ int mb_datalist_open(int verbose,
 		
 /*--------------------------------------------------------------------*/
 int mb_datalist_close(int verbose,
-		char **datalist, int *error)
+		void **datalist, int *error)
 {
 	/* local variables */
 	char	*function_name = "mb_datalist_close";
@@ -1996,7 +2014,7 @@ int mb_datalist_close(int verbose,
 		
 /*--------------------------------------------------------------------*/
 int mb_datalist_read(int verbose,
-		char *datalist,
+		void *datalist,
 		char *path, int *format, double *weight,
 		int *error)
 {
@@ -2164,7 +2182,7 @@ int mb_datalist_read(int verbose,
 					&& datalist_ptr->recursion < MB_DATALIST_RECURSION_MAX)
 				    {
 				    if (status = mb_datalist_open(verbose,
-						    (char *)&(datalist_ptr->datalist), path,
+						    (void **)&(datalist_ptr->datalist), path,
 							datalist_ptr->look_processed, error)
 					    == MB_SUCCESS)
 					{
@@ -2214,7 +2232,7 @@ int mb_datalist_read(int verbose,
 			    {
 			    /* recursively call mb_read_datalist */
 			    status = mb_datalist_read(verbose,
-					    (char *)datalist_ptr->datalist,
+					    (void *)datalist_ptr->datalist,
 					    path,
 					    format,
 					    weight,
@@ -2224,7 +2242,7 @@ int mb_datalist_read(int verbose,
 			    if (status == MB_FAILURE)
 				{
 				status = mb_datalist_close(verbose,
-					    (char *)&(datalist_ptr->datalist),
+					    (void **)&(datalist_ptr->datalist),
 					    error);
 				}
 			    else

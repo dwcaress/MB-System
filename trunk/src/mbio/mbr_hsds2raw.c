@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsds2raw.c	6/20/01
- *	$Id: mbr_hsds2raw.c,v 5.0 2001-06-29 22:49:07 caress Exp $
+ *	$Id: mbr_hsds2raw.c,v 5.1 2001-07-20 00:32:54 caress Exp $
  *
  *    Copyright (c) 2001 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * 		D. N. Chayes
  * Date:	June 20, 2001
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2001/06/29  22:49:07  caress
+ * Added support for HSDS2RAW
+ *
  *
  *
  */
@@ -45,7 +48,7 @@
 /* #define MBR_HSDS2RAW_DEBUG 1 */
 
 /* essential function prototypes */
-int mbr_register_hsds2raw(int verbose, char *mbio_ptr, 
+int mbr_register_hsds2raw(int verbose, void *mbio_ptr, 
 		int *error);
 int mbr_info_hsds2raw(int verbose, 
 			int *system, 
@@ -66,17 +69,17 @@ int mbr_info_hsds2raw(int verbose,
 			double *beamwidth_xtrack, 
 			double *beamwidth_ltrack, 
 			int *error);
-int mbr_alm_hsds2raw(int verbose, char *mbio_ptr, int *error);
-int mbr_dem_hsds2raw(int verbose, char *mbio_ptr, int *error);
-int mbr_rt_hsds2raw(int verbose, char *mbio_ptr, char *store_ptr, int *error);
-int mbr_wt_hsds2raw(int verbose, char *mbio_ptr, char *store_ptr, int *error);
-int mbr_hsds2raw_rd_data(int verbose, char *mbio_ptr, char *store_ptr, int *error);
-int mbr_hsds2raw_wr_data(int verbose, char *mbio_ptr, char *store_ptr, int *error);
+int mbr_alm_hsds2raw(int verbose, void *mbio_ptr, int *error);
+int mbr_dem_hsds2raw(int verbose, void *mbio_ptr, int *error);
+int mbr_rt_hsds2raw(int verbose, void *mbio_ptr, void *store_ptr, int *error);
+int mbr_wt_hsds2raw(int verbose, void *mbio_ptr, void *store_ptr, int *error);
+int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error);
+int mbr_hsds2raw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
 /*--------------------------------------------------------------------*/
-int mbr_register_hsds2raw(int verbose, char *mbio_ptr, int *error)
+int mbr_register_hsds2raw(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_hsds2raw.c,v 5.0 2001-06-29 22:49:07 caress Exp $";
+	static char res_id[]="$Id: mbr_hsds2raw.c,v 5.1 2001-07-20 00:32:54 caress Exp $";
 	char	*function_name = "mbr_register_hsds2raw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -99,9 +102,9 @@ int mbr_register_hsds2raw(int verbose, char *mbio_ptr, int *error)
 			&mb_io_ptr->beams_bath_max, 
 			&mb_io_ptr->beams_amp_max, 
 			&mb_io_ptr->pixels_ss_max, 
-			&mb_io_ptr->format_name, 
-			&mb_io_ptr->system_name, 
-			&mb_io_ptr->format_description, 
+			mb_io_ptr->format_name, 
+			mb_io_ptr->system_name, 
+			mb_io_ptr->format_description, 
 			&mb_io_ptr->numfile, 
 			&mb_io_ptr->filetype, 
 			&mb_io_ptr->variable_beams, 
@@ -206,7 +209,7 @@ int mbr_info_hsds2raw(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_hsds2raw.c,v 5.0 2001-06-29 22:49:07 caress Exp $";
+	static char res_id[]="$Id: mbr_hsds2raw.c,v 5.1 2001-07-20 00:32:54 caress Exp $";
 	char	*function_name = "mbr_info_hsds2raw";
 	int	status = MB_SUCCESS;
 
@@ -273,9 +276,9 @@ int mbr_info_hsds2raw(int verbose,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_alm_hsds2raw(int verbose, char *mbio_ptr, int *error)
+int mbr_alm_hsds2raw(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_hsds2raw.c,v 5.0 2001-06-29 22:49:07 caress Exp $";
+	static char res_id[]="$Id: mbr_hsds2raw.c,v 5.1 2001-07-20 00:32:54 caress Exp $";
 	char	*function_name = "mbr_alm_hsds2raw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -331,7 +334,7 @@ int mbr_alm_hsds2raw(int verbose, char *mbio_ptr, int *error)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_dem_hsds2raw(int verbose, char *mbio_ptr, int *error)
+int mbr_dem_hsds2raw(int verbose, void *mbio_ptr, int *error)
 {
 	char	*function_name = "mbr_dem_hsds2raw";
 	int	status = MB_SUCCESS;
@@ -370,7 +373,7 @@ int mbr_dem_hsds2raw(int verbose, char *mbio_ptr, int *error)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_rt_hsds2raw(int verbose, char *mbio_ptr, char *store_ptr, int *error)
+int mbr_rt_hsds2raw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 {
 	char	*function_name = "mbr_rt_hsds2raw";
 	int	status = MB_SUCCESS;
@@ -416,7 +419,7 @@ int mbr_rt_hsds2raw(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_wt_hsds2raw(int verbose, char *mbio_ptr, char *store_ptr, int *error)
+int mbr_wt_hsds2raw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 {
 	char	*function_name = "mbr_wt_hsds2raw";
 	int	status = MB_SUCCESS;
@@ -458,13 +461,15 @@ int mbr_wt_hsds2raw(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hsds2raw_rd_data(int verbose, char *mbio_ptr, char *store_ptr, int *error)
+int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 {
 	char	*function_name = "mbr_hsds2raw_rd_data";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_surf_struct *store;
 	int	xdr_status;
+	int	read_status;
+	int	nskip;
 	int	done;
 	int	strlen;
 	int	read_len;
@@ -546,7 +551,7 @@ int mbr_hsds2raw_rd_data(int verbose, char *mbio_ptr, char *store_ptr, int *erro
 	int	sys_wind_status;
 
 	double	rr;
-	double	*angles;
+	double	*angle_table;
 	int	i;
 
 	/* print input debug statements */
@@ -575,21 +580,48 @@ int mbr_hsds2raw_rd_data(int verbose, char *mbio_ptr, char *store_ptr, int *erro
 	
 	/* get start telegram */
 	xdr_status = xdr_long(mb_io_ptr->xdrs, &telegram_id);
-	if (xdr_status == MB_YES && telegram_id != MBSYS_SURF_TELEGRAM_START)
+
+	/* telegram id ok - just read send and receive strings */
+	if (xdr_status == MB_YES && telegram_id == MBSYS_SURF_TELEGRAM_START)
 	    {
-	    *error = MB_ERROR_UNINTELLIGIBLE;
-	    status = MB_FAILURE;
+	    if (xdr_status == MB_YES) 
+		xdr_status = xdr_long(mb_io_ptr->xdrs, &telegram_cnt);
+	    if (xdr_status == MB_YES) 
+		xdr_status = xdr_long(mb_io_ptr->xdrs, &strlen);
+	    if (xdr_status == MB_YES) 
+		xdr_status = xdr_opaque(mb_io_ptr->xdrs, telegram_send, 16);
+	    if (xdr_status == MB_YES) 
+		xdr_status = xdr_long(mb_io_ptr->xdrs, &strlen);
+	    if (xdr_status == MB_YES) 
+		xdr_status = xdr_opaque(mb_io_ptr->xdrs, telegram_recv, 16);
 	    }
-	if (xdr_status == MB_YES) 
-	    xdr_status = xdr_long(mb_io_ptr->xdrs, &telegram_cnt);
-	if (xdr_status == MB_YES) 
-	    xdr_status = xdr_long(mb_io_ptr->xdrs, &strlen);
-	if (xdr_status == MB_YES) 
-	    xdr_status = xdr_opaque(mb_io_ptr->xdrs, telegram_send, 16);
-	if (xdr_status == MB_YES) 
-	    xdr_status = xdr_long(mb_io_ptr->xdrs, &strlen);
-	if (xdr_status == MB_YES) 
-	    xdr_status = xdr_opaque(mb_io_ptr->xdrs, telegram_recv, 16);
+	    
+	/* expected telegram id wrong - try to resync on recv string */
+	else if (xdr_status == MB_YES)
+	    {
+	    memset(telegram_recv, 0, 16);
+	    read_status = 1;
+	    nskip = 0;
+	    while (strncmp(telegram_recv, "BROADCAST", 9) != 0
+		&& read_status == 1)
+		{
+		for (i=0;i<15;i++)
+		    telegram_recv[i] = telegram_recv[i+1];
+		if ((read_status = fread(&(telegram_recv[15]), 1, 1, mb_io_ptr->mbfp)) == 1)
+		    nskip++;
+		}
+	    if (read_status == MB_YES)
+		{
+		fprintf(stderr, "Resync on START telegram: %d missing bytes\n", 
+			(44 - nskip));
+		}
+	    else
+		{
+		xdr_status = MB_NO;
+		}
+	    }
+	    
+	/* hopefully we are synced - read the telegram */
 	if (xdr_status == MB_YES) 
 	    xdr_status = xdr_double(mb_io_ptr->xdrs, &telegram_utc_time_d);
 	if (xdr_status == MB_YES) 
@@ -634,6 +666,7 @@ int mbr_hsds2raw_rd_data(int verbose, char *mbio_ptr, char *store_ptr, int *erro
 		{
 		fprintf(stderr,"\ndbg5  Start telegram read in MBIO function <%s>\n",
 			function_name);
+		fprintf(stderr,"dbg5       xdr_status:              %d\n",xdr_status);
 		fprintf(stderr,"dbg5       telegram_id:             %d\n",telegram_id);
 		fprintf(stderr,"dbg5       telegram_cnt:            %d\n",telegram_cnt);
 		fprintf(stderr,"dbg5       telegram_send:           %s\n",telegram_send);
@@ -665,21 +698,48 @@ int mbr_hsds2raw_rd_data(int verbose, char *mbio_ptr, char *store_ptr, int *erro
 		{
 		if (xdr_status == MB_YES) 
 		    xdr_status = xdr_long(mb_io_ptr->xdrs, &telegram_id);
-		if (xdr_status == MB_YES && telegram_id != MBSYS_SURF_TELEGRAM_TRAVELTIMES)
+
+		/* telegram id ok - just read send and receive strings */
+		if (xdr_status == MB_YES && telegram_id == MBSYS_SURF_TELEGRAM_TRAVELTIMES)
 		    {
-		    *error = MB_ERROR_UNINTELLIGIBLE;
-		    status = MB_FAILURE;
+		    if (xdr_status == MB_YES) 
+			xdr_status = xdr_long(mb_io_ptr->xdrs, &telegram_cnt);
+		    if (xdr_status == MB_YES) 
+			xdr_status = xdr_long(mb_io_ptr->xdrs, &strlen);
+		    if (xdr_status == MB_YES) 
+			xdr_status = xdr_opaque(mb_io_ptr->xdrs, telegram_send, 16);
+		    if (xdr_status == MB_YES) 
+			xdr_status = xdr_long(mb_io_ptr->xdrs, &strlen);
+		    if (xdr_status == MB_YES) 
+			xdr_status = xdr_opaque(mb_io_ptr->xdrs, telegram_recv, 16);
 		    }
-		if (xdr_status == MB_YES) 
-		    xdr_status = xdr_long(mb_io_ptr->xdrs, &telegram_cnt);
-		if (xdr_status == MB_YES) 
-		    xdr_status = xdr_long(mb_io_ptr->xdrs, &strlen);
-		if (xdr_status == MB_YES) 
-		    xdr_status = xdr_opaque(mb_io_ptr->xdrs, telegram_send, 16);
-		if (xdr_status == MB_YES) 
-		    xdr_status = xdr_long(mb_io_ptr->xdrs, &strlen);
-		if (xdr_status == MB_YES) 
-		    xdr_status = xdr_opaque(mb_io_ptr->xdrs, telegram_recv, 16);
+
+		/* expected telegram id wrong - try to resync on recv string */
+		else if (xdr_status == MB_YES)
+		    {
+		    memset(telegram_recv, 0, 16);
+		    read_status = 1;
+		    nskip = 0;
+		    while (strncmp(telegram_recv, "BROADCAST", 9) != 0
+			&& read_status == 1)
+			{
+			for (i=0;i<15;i++)
+			    telegram_recv[i] = telegram_recv[i+1];
+			if ((read_status = fread(&(telegram_recv[15]), 1, 1, mb_io_ptr->mbfp)) == 1)
+			    nskip++;
+			}
+		    if (read_status == MB_YES)
+			{
+			fprintf(stderr, "Resync on TRAVELTIMES telegram: %d missing bytes\n", 
+				(44 - nskip));
+			}
+		    else
+			{
+			xdr_status = MB_NO;
+			}
+		    }
+		    
+		/* hopefully we are synced - read the telegram */
 		if (xdr_status == MB_YES) 
 		    xdr_status = xdr_double(mb_io_ptr->xdrs, &telegram_utc_time_d);
 		if (xdr_status == MB_YES) 
@@ -751,6 +811,7 @@ int mbr_hsds2raw_rd_data(int verbose, char *mbio_ptr, char *store_ptr, int *erro
 			{
 			fprintf(stderr,"\ndbg5  Travel time telegrams read in MBIO function <%s>\n",
 				function_name);
+			fprintf(stderr,"dbg5       xdr_status:              %d\n",xdr_status);
 			fprintf(stderr,"dbg5       telegram_id:             %d\n",telegram_id);
 			fprintf(stderr,"dbg5       telegram_cnt:            %d\n",telegram_cnt);
 			fprintf(stderr,"dbg5       telegram_send:           %s\n",telegram_send);
@@ -773,6 +834,7 @@ int mbr_hsds2raw_rd_data(int verbose, char *mbio_ptr, char *store_ptr, int *erro
 		{
 		fprintf(stderr,"\ndbg5  Travel time telegrams read in MBIO function <%s>\n",
 			function_name);
+		fprintf(stderr,"dbg5       xdr_status:              %d\n",xdr_status);
 		fprintf(stderr,"dbg5       tt_ping_no:              %d\n",store->tt_ping_no);
 		fprintf(stderr,"dbg5       tt_transmit_time_d:      %f\n",store->tt_transmit_time_d);
 		fprintf(stderr,"dbg5       tt_beam_table_index:     %d\n",store->tt_beam_table_index);
@@ -785,6 +847,7 @@ int mbr_hsds2raw_rd_data(int verbose, char *mbio_ptr, char *store_ptr, int *erro
 		fprintf(stderr,"dbg5       tt_double2:              %f\n",store->tt_double2);
 		fprintf(stderr,"dbg5       tt_sensdraught:          %f\n",store->tt_sensdraught);
 		fprintf(stderr,"dbg5       tt_draught:              %f\n",store->tt_draught);
+		if (verbose > 0)
 		for (i=0;i<MBSYS_SURF_MAXBEAMS;i++)
 			fprintf(stderr,"dbg5       beam[%d] tt amp stat:    %12f %3d %3d\n",
 				i, store->tt_lruntime[i], store->tt_lamplitude[i], store->tt_lstatus[i]);
@@ -796,21 +859,48 @@ int mbr_hsds2raw_rd_data(int verbose, char *mbio_ptr, char *store_ptr, int *erro
 		{
 		if (xdr_status == MB_YES) 
 		    xdr_status = xdr_long(mb_io_ptr->xdrs, &telegram_id);
-		if (xdr_status == MB_YES && telegram_id != MBSYS_SURF_TELEGRAM_SIDESCAN)
+
+		/* telegram id ok - just read send and receive strings */
+		if (xdr_status == MB_YES && telegram_id == MBSYS_SURF_TELEGRAM_SIDESCAN)
 		    {
-		    *error = MB_ERROR_UNINTELLIGIBLE;
-		    status = MB_FAILURE;
+		    if (xdr_status == MB_YES) 
+			xdr_status = xdr_long(mb_io_ptr->xdrs, &telegram_cnt);
+		    if (xdr_status == MB_YES) 
+			xdr_status = xdr_long(mb_io_ptr->xdrs, &strlen);
+		    if (xdr_status == MB_YES) 
+			xdr_status = xdr_opaque(mb_io_ptr->xdrs, telegram_send, 16);
+		    if (xdr_status == MB_YES) 
+			xdr_status = xdr_long(mb_io_ptr->xdrs, &strlen);
+		    if (xdr_status == MB_YES) 
+			xdr_status = xdr_opaque(mb_io_ptr->xdrs, telegram_recv, 16);
 		    }
-		if (xdr_status == MB_YES) 
-		    xdr_status = xdr_long(mb_io_ptr->xdrs, &telegram_cnt);
-		if (xdr_status == MB_YES) 
-		    xdr_status = xdr_long(mb_io_ptr->xdrs, &strlen);
-		if (xdr_status == MB_YES) 
-		    xdr_status = xdr_opaque(mb_io_ptr->xdrs, telegram_send, 16);
-		if (xdr_status == MB_YES) 
-		    xdr_status = xdr_long(mb_io_ptr->xdrs, &strlen);
-		if (xdr_status == MB_YES) 
-		    xdr_status = xdr_opaque(mb_io_ptr->xdrs, telegram_recv, 16);
+
+		/* expected telegram id wrong - try to resync on recv string */
+		else if (xdr_status == MB_YES)
+		    {
+		    memset(telegram_recv, 0, 16);
+		    read_status = 1;
+		    nskip = 0;
+		    while (strncmp(telegram_recv, "BROADCAST", 9) != 0
+			&& read_status == 1)
+			{
+			for (i=0;i<15;i++)
+			    telegram_recv[i] = telegram_recv[i+1];
+			if ((read_status = fread(&(telegram_recv[15]), 1, 1, mb_io_ptr->mbfp)) == 1)
+			    nskip++;
+			}
+		    if (read_status == MB_YES)
+			{
+			fprintf(stderr, "Resync on SIDESCAN telegram: %d missing bytes\n", 
+				(44 - nskip));
+			}
+		    else
+			{
+			xdr_status = MB_NO;
+			}
+		    }
+		    
+		/* hopefully we are synced - read the telegram */
 		if (xdr_status == MB_YES) 
 		    xdr_status = xdr_double(mb_io_ptr->xdrs, &telegram_utc_time_d);
 		if (xdr_status == MB_YES) 
@@ -845,8 +935,11 @@ int mbr_hsds2raw_rd_data(int verbose, char *mbio_ptr, char *store_ptr, int *erro
 		    xdr_status = xdr_long(mb_io_ptr->xdrs, &strlen);
 		if (xdr_status == MB_YES) 
 			{
-			i = (telegram_act_no - 1) * MBSYS_SURF_MAXPIXELTELEGRAM;
-		    xdr_status = xdr_opaque(mb_io_ptr->xdrs, &(store->ss_sidescan[i]), 
+			if (telegram_act_no * MBSYS_SURF_MAXPIXELTELEGRAM <= MBSYS_SURF_MAXPIXELS)
+			    i = (telegram_act_no - 1) * MBSYS_SURF_MAXPIXELTELEGRAM;
+			else
+			    i = 0;
+			xdr_status = xdr_opaque(mb_io_ptr->xdrs, &(store->ss_sidescan[i]), 
 						MBSYS_SURF_MAXPIXELTELEGRAM);
 			}
 
@@ -862,6 +955,7 @@ int mbr_hsds2raw_rd_data(int verbose, char *mbio_ptr, char *store_ptr, int *erro
 			{
 			fprintf(stderr,"\ndbg5  Sidescan telegram read in MBIO function <%s>\n",
 				function_name);
+			fprintf(stderr,"dbg5       xdr_status:              %d\n",xdr_status);
 			fprintf(stderr,"dbg5       telegram_id:             %d\n",telegram_id);
 			fprintf(stderr,"dbg5       telegram_cnt:            %d\n",telegram_cnt);
 			fprintf(stderr,"dbg5       telegram_send:           %s\n",telegram_send);
@@ -886,33 +980,62 @@ int mbr_hsds2raw_rd_data(int verbose, char *mbio_ptr, char *store_ptr, int *erro
 		{
 		fprintf(stderr,"\ndbg5  Sidescan telegrams read in MBIO function <%s>\n",
 			function_name);
+		fprintf(stderr,"dbg5       xdr_status:              %d\n",xdr_status);
 		fprintf(stderr,"dbg5       ss_ping_no:              %d\n",store->ss_ping_no);
 		fprintf(stderr,"dbg5       ss_transmit_time_d:      %f\n",store->ss_transmit_time_d);
-		fprintf(stderr,"dbg5       ss_timedelay:     %d\n",store->ss_timedelay);
-		fprintf(stderr,"dbg5       ss_timespacing:             %d\n",store->ss_timespacing);
-		fprintf(stderr,"dbg5       ss_max_side_bb_cnt:                %d\n",store->ss_max_side_bb_cnt);
-		fprintf(stderr,"dbg5       ss_max_side_sb_cnt:                %d\n",store->ss_max_side_sb_cnt);
+		fprintf(stderr,"dbg5       ss_timedelay:            %f\n",store->ss_timedelay);
+		fprintf(stderr,"dbg5       ss_timespacing:          %f\n",store->ss_timespacing);
+		fprintf(stderr,"dbg5       ss_max_side_bb_cnt:      %d\n",store->ss_max_side_bb_cnt);
+		fprintf(stderr,"dbg5       ss_max_side_sb_cnt:      %d\n",store->ss_max_side_sb_cnt);
+		if (verbose > 0)
 		for (i=0;i<MBSYS_SURF_MAXPIXELS;i++)
-			fprintf(stderr,"dbg5       pixel[%d] ss:             %d\n",i, store->ss_sidescan[i]);
+			fprintf(stderr,"dbg5       pixel[%d] ss:            %d\n",i, store->ss_sidescan[i]);
 		}
 	
 	/* get tracking window telegram */
 	xdr_status = xdr_long(mb_io_ptr->xdrs, &telegram_id);
-	if (xdr_status == MB_YES && telegram_id != MBSYS_SURF_TELEGRAM_TRACKINGWINDOWS)
+
+	/* telegram id ok - just read send and receive strings */
+	if (xdr_status == MB_YES && telegram_id == MBSYS_SURF_TELEGRAM_TRACKINGWINDOWS)
 	    {
-	    *error = MB_ERROR_UNINTELLIGIBLE;
-	    status = MB_FAILURE;
+	    if (xdr_status == MB_YES) 
+		xdr_status = xdr_long(mb_io_ptr->xdrs, &telegram_cnt);
+	    if (xdr_status == MB_YES) 
+		xdr_status = xdr_long(mb_io_ptr->xdrs, &strlen);
+	    if (xdr_status == MB_YES) 
+		xdr_status = xdr_opaque(mb_io_ptr->xdrs, telegram_send, 16);
+	    if (xdr_status == MB_YES) 
+		xdr_status = xdr_long(mb_io_ptr->xdrs, &strlen);
+	    if (xdr_status == MB_YES) 
+		xdr_status = xdr_opaque(mb_io_ptr->xdrs, telegram_recv, 16);
 	    }
-	if (xdr_status == MB_YES) 
-	    xdr_status = xdr_long(mb_io_ptr->xdrs, &telegram_cnt);
-	if (xdr_status == MB_YES) 
-	    xdr_status = xdr_long(mb_io_ptr->xdrs, &strlen);
-	if (xdr_status == MB_YES) 
-	    xdr_status = xdr_opaque(mb_io_ptr->xdrs, telegram_send, 16);
-	if (xdr_status == MB_YES) 
-	    xdr_status = xdr_long(mb_io_ptr->xdrs, &strlen);
-	if (xdr_status == MB_YES) 
-	    xdr_status = xdr_opaque(mb_io_ptr->xdrs, telegram_recv, 16);
+
+	/* expected telegram id wrong - try to resync on recv string */
+	else if (xdr_status == MB_YES)
+	    {
+	    memset(telegram_recv, 0, 16);
+	    read_status = 1;
+	    nskip = 0;
+	    while (strncmp(telegram_recv, "BROADCAST", 9) != 0
+		&& read_status == 1)
+		{
+		for (i=0;i<15;i++)
+		    telegram_recv[i] = telegram_recv[i+1];
+		if ((read_status = fread(&(telegram_recv[15]), 1, 1, mb_io_ptr->mbfp)) == 1)
+		    nskip++;
+		}
+	    if (read_status == MB_YES)
+		{
+		fprintf(stderr, "Resync on TRACKINGWINDOWS telegram: %d missing bytes\n", 
+			(44 - nskip));
+		}
+	    else
+		{
+		xdr_status = MB_NO;
+		}
+	    }
+	    
+	/* hopefully we are synced - read the telegram */
 	if (xdr_status == MB_YES) 
 	    xdr_status = xdr_double(mb_io_ptr->xdrs, &telegram_utc_time_d);
 	if (xdr_status == MB_YES) 
@@ -950,6 +1073,7 @@ int mbr_hsds2raw_rd_data(int verbose, char *mbio_ptr, char *store_ptr, int *erro
 		{
 		fprintf(stderr,"\ndbg5  Tracking windows telegram read in MBIO function <%s>\n",
 			function_name);
+		fprintf(stderr,"dbg5       xdr_status:              %d\n",xdr_status);
 		fprintf(stderr,"dbg5       telegram_id:             %d\n",telegram_id);
 		fprintf(stderr,"dbg5       telegram_cnt:            %d\n",telegram_cnt);
 		fprintf(stderr,"dbg5       telegram_send:           %s\n",telegram_send);
@@ -966,6 +1090,7 @@ int mbr_hsds2raw_rd_data(int verbose, char *mbio_ptr, char *store_ptr, int *erro
 		fprintf(stderr,"dbg5       tr_transmit_time_d:      %f\n",store->tr_transmit_time_d);
 		fprintf(stderr,"dbg5       tr_window_mode:          %d\n",store->tr_window_mode);
 		fprintf(stderr,"dbg5       tr_no_of_win_groups:     %d\n",store->tr_no_of_win_groups);
+		if (verbose > 0)
 		for (i=0;i<MBSYS_SURF_MAXWINDOWS;i++)
 			{
 			fprintf(stderr,"dbg5       window[%d]:cnt start stop: %d %f %f\n", 
@@ -975,21 +1100,48 @@ int mbr_hsds2raw_rd_data(int verbose, char *mbio_ptr, char *store_ptr, int *erro
 	
 	/* get backscatter telegram */
 	xdr_status = xdr_long(mb_io_ptr->xdrs, &telegram_id);
-	if (xdr_status == MB_YES && telegram_id != MBSYS_SURF_TELEGRAM_BACKSCATTER)
+
+	/* telegram id ok - just read send and receive strings */
+	if (xdr_status == MB_YES && telegram_id == MBSYS_SURF_TELEGRAM_BACKSCATTER)
 	    {
-	    *error = MB_ERROR_UNINTELLIGIBLE;
-	    status = MB_FAILURE;
+	    if (xdr_status == MB_YES) 
+		xdr_status = xdr_long(mb_io_ptr->xdrs, &telegram_cnt);
+	    if (xdr_status == MB_YES) 
+		xdr_status = xdr_long(mb_io_ptr->xdrs, &strlen);
+	    if (xdr_status == MB_YES) 
+		xdr_status = xdr_opaque(mb_io_ptr->xdrs, telegram_send, 16);
+	    if (xdr_status == MB_YES) 
+		xdr_status = xdr_long(mb_io_ptr->xdrs, &strlen);
+	    if (xdr_status == MB_YES) 
+		xdr_status = xdr_opaque(mb_io_ptr->xdrs, telegram_recv, 16);
 	    }
-	if (xdr_status == MB_YES) 
-	    xdr_status = xdr_long(mb_io_ptr->xdrs, &telegram_cnt);
-	if (xdr_status == MB_YES) 
-	    xdr_status = xdr_long(mb_io_ptr->xdrs, &strlen);
-	if (xdr_status == MB_YES) 
-	    xdr_status = xdr_opaque(mb_io_ptr->xdrs, telegram_send, 16);
-	if (xdr_status == MB_YES) 
-	    xdr_status = xdr_long(mb_io_ptr->xdrs, &strlen);
-	if (xdr_status == MB_YES) 
-	    xdr_status = xdr_opaque(mb_io_ptr->xdrs, telegram_recv, 16);
+
+	/* expected telegram id wrong - try to resync on recv string */
+	else if (xdr_status == MB_YES)
+	    {
+	    memset(telegram_recv, 0, 16);
+	    read_status = 1;
+	    nskip = 0;
+	    while (strncmp(telegram_recv, "BROADCAST", 9) != 0
+		&& read_status == 1)
+		{
+		for (i=0;i<15;i++)
+		    telegram_recv[i] = telegram_recv[i+1];
+		if ((read_status = fread(&(telegram_recv[15]), 1, 1, mb_io_ptr->mbfp)) == 1)
+		    nskip++;
+		}
+	    if (read_status == MB_YES)
+		{
+		fprintf(stderr, "Resync on BACKSCATTER telegram: %d missing bytes\n", 
+			(44 - nskip));
+		}
+	    else
+		{
+		xdr_status = MB_NO;
+		}
+	    }
+	    
+	/* hopefully we are synced - read the telegram */
 	if (xdr_status == MB_YES) 
 	    xdr_status = xdr_double(mb_io_ptr->xdrs, &telegram_utc_time_d);
 	if (xdr_status == MB_YES) 
@@ -1057,6 +1209,7 @@ int mbr_hsds2raw_rd_data(int verbose, char *mbio_ptr, char *store_ptr, int *erro
 		{
 		fprintf(stderr,"\ndbg5  Backscatter telegram read in MBIO function <%s>\n",
 			function_name);
+		fprintf(stderr,"dbg5       xdr_status:              %d\n",xdr_status);
 		fprintf(stderr,"dbg5       telegram_id:             %d\n",telegram_id);
 		fprintf(stderr,"dbg5       telegram_cnt:            %d\n",telegram_cnt);
 		fprintf(stderr,"dbg5       telegram_send:           %s\n",telegram_send);
@@ -1075,12 +1228,14 @@ int mbr_hsds2raw_rd_data(int verbose, char *mbio_ptr, char *store_ptr, int *erro
 		fprintf(stderr,"dbg5       bs_rxGup:                %f\n",store->bs_rxGup);
 		fprintf(stderr,"dbg5       bs_rxGain:               %f\n",store->bs_rxGain);
 		fprintf(stderr,"dbg5       bs_ar:                   %f\n",store->bs_ar);
+		if (verbose > 0)
 		for (i=0;i<MBSYS_SURF_HSDS2_RX_PAR;i++)
 			{
 			fprintf(stderr,"dbg5       tvgrx[%d]: time gain: %f %f\n", 
 				i, store->bs_TvgRx_time[i], store->bs_TvgRx_gain[i]);		
 			}
 		fprintf(stderr,"dbg5       bs_nrTxSets:             %d\n",store->bs_nrTxSets);
+		if (verbose > 0)
 		for (i=0;i<MBSYS_SURF_HSDS2_TX_PAR;i++)
 			{
 			fprintf(stderr,"dbg5       tx[%d]: # gain ang len:    %d %f %f %f\n", 
@@ -1088,6 +1243,7 @@ int mbr_hsds2raw_rd_data(int verbose, char *mbio_ptr, char *store_ptr, int *erro
 				store->bs_txBeamAngle[i], store->bs_pulseLength[i]);		
 			}
 		fprintf(stderr,"dbg5       bs_nrBsSets:             %d\n",store->bs_nrBsSets);
+		if (verbose > 0)
 		for (i=0;i<MBSYS_SURF_HSDS2_TX_PAR;i++)
 			{
 			fprintf(stderr,"dbg5       bs[%d]: # tau amp nis:   %f %d %d\n", 
@@ -1102,24 +1258,75 @@ int mbr_hsds2raw_rd_data(int verbose, char *mbio_ptr, char *store_ptr, int *erro
 		status = MB_FAILURE;
 		}
 
+	/* check for broken records - these do happen!!! */
+	if (status == MB_SUCCESS
+	    && (store->tt_beam_cnt > MBSYS_SURF_MAXBEAMS
+		|| store->ss_max_side_bb_cnt > MBSYS_SURF_MAXPIXELS
+		|| store->ss_max_side_sb_cnt > MBSYS_SURF_MAXPIXELS
+		|| store->start_opmode[0] != 1))
+		{
+		*error = MB_ERROR_UNINTELLIGIBLE;
+		status = MB_FAILURE;
+		}
+		
+	/* check again for broken records - these do happen!!! */
+	if (status == MB_SUCCESS)
+	    {
+	    for (i=0;i<store->tt_beam_cnt;i++)
+		{
+		if (store->tt_lruntime[i] > 20.0)
+		    {
+		    *error = MB_ERROR_UNINTELLIGIBLE;
+		    status = MB_FAILURE;
+		    }
+		}
+	    }	
+		
+	/* check again for broken records - these do happen!!! */
+	if (status == MB_SUCCESS)
+	    {
+	    for (i=0;i<store->tt_beam_cnt;i++)
+		{
+		if (store->tt_lruntime[i] > 20.0)
+		    {
+		    *error = MB_ERROR_UNINTELLIGIBLE;
+		    status = MB_FAILURE;
+		    }
+		}
+	    }	
+
 	/* calculate bathymetry */
 	if (status == MB_SUCCESS)
 		{
 		for (i=0;i<store->tt_beam_cnt;i++)
 			{
-			/* get travel times, angles */
-			if (store->start_opmode[4] == 1)
-		    	angles = (double *) ds2_ang_120;
-			else
-		    	angles = (double *) ds2_ang_90;
+			/* get angle_table for 90 degree coverage */
+			if (store->start_opmode[3] == 0)
+			    {
+			    if (store->tt_beam_cnt == 140)
+		    		angle_table = (double *) ds2_ang_90d_140b;
+			    else if (store->tt_beam_cnt == 59)
+		    		angle_table = (double *) ds2_ang_90d_59b;
+			    }
+
+			/* get angle_table for 120 degree coverage */
+			else if (store->start_opmode[3] == 1)
+			    {
+			    if (store->tt_beam_cnt == 140)
+		    		angle_table = (double *) ds2_ang_120d_140b;
+			    else if (store->tt_beam_cnt == 59)
+		    		angle_table = (double *) ds2_ang_120d_59b;
+			    }
+
+			/* get travel times */
 			for (i=0;i<store->tt_beam_cnt;i++)
 				{
 				if (store->tt_lruntime[i] > 0.0)
 					{
 					rr = store->start_cmean * store->tt_lruntime[i] / 2.0;
-					store->pr_bath[i] = rr * cos(angles[i]) 
+					store->pr_bath[i] = rr * cos(angle_table[i]) 
 									+ store->start_heave + store->tt_draught;
-					store->pr_bathacrosstrack[i] = rr * sin(angles[i]);
+					store->pr_bathacrosstrack[i] = rr * sin(angle_table[i]);
  					store->pr_bathalongtrack[i] = 0.0;
 					store->pr_beamflag[i] = MB_FLAG_NONE;
 					}
@@ -1145,21 +1352,48 @@ int mbr_hsds2raw_rd_data(int verbose, char *mbio_ptr, char *store_ptr, int *erro
 			{
 			/* get system telegram */
 			xdr_status = xdr_long(mb_io_ptr->xdrs2, &telegram_id);
-			if (xdr_status == MB_YES && telegram_id != MBSYS_SURF_TELEGRAM_SYSTEM)
+
+			/* telegram id ok - just read send and receive strings */
+			if (xdr_status == MB_YES && telegram_id == MBSYS_SURF_TELEGRAM_SYSTEM)
 			    {
-			    *error = MB_ERROR_UNINTELLIGIBLE;
-			    status = MB_FAILURE;
+			    if (xdr_status == MB_YES) 
+				xdr_status = xdr_long(mb_io_ptr->xdrs2, &telegram_cnt);
+			    if (xdr_status == MB_YES) 
+				xdr_status = xdr_long(mb_io_ptr->xdrs2, &strlen);
+			    if (xdr_status == MB_YES) 
+				xdr_status = xdr_opaque(mb_io_ptr->xdrs2, telegram_send, 16);
+			    if (xdr_status == MB_YES) 
+				xdr_status = xdr_long(mb_io_ptr->xdrs2, &strlen);
+			    if (xdr_status == MB_YES) 
+				xdr_status = xdr_opaque(mb_io_ptr->xdrs2, telegram_recv, 16);
 			    }
-			if (xdr_status == MB_YES) 
-			    xdr_status = xdr_long(mb_io_ptr->xdrs2, &telegram_cnt);
-			if (xdr_status == MB_YES) 
-			    xdr_status = xdr_long(mb_io_ptr->xdrs2, &strlen);
-			if (xdr_status == MB_YES) 
-			    xdr_status = xdr_opaque(mb_io_ptr->xdrs2, telegram_send, 16);
-			if (xdr_status == MB_YES) 
-			    xdr_status = xdr_long(mb_io_ptr->xdrs2, &strlen);
-			if (xdr_status == MB_YES) 
-			    xdr_status = xdr_opaque(mb_io_ptr->xdrs2, telegram_recv, 16);
+		
+			/* expected telegram id wrong - try to resync on recv string */
+			else if (xdr_status == MB_YES)
+			    {
+			    memset(telegram_recv, 0, 16);
+			    read_status = 1;
+			    nskip = 0;
+			    while (strncmp(telegram_recv, "BROADCAST", 9) != 0
+				&& read_status == 1)
+				{
+				for (i=0;i<15;i++)
+				    telegram_recv[i] = telegram_recv[i+1];
+				if ((read_status = fread(&(telegram_recv[15]), 1, 1, mb_io_ptr->mbfp2)) == 1)
+				    nskip++;
+				}
+			    if (read_status == MB_YES)
+				{
+				fprintf(stderr, "Resync on SYSTEM telegram: %d missing bytes\n", 
+					(44 - nskip));
+				}
+			    else
+				{
+				xdr_status = MB_NO;
+				}
+			    }
+			    
+			/* hopefully we are synced - read the telegram */
 			if (xdr_status == MB_YES) 
 			    xdr_status = xdr_double(mb_io_ptr->xdrs2, &telegram_utc_time_d);
 			if (xdr_status == MB_YES) 
@@ -1202,6 +1436,7 @@ int mbr_hsds2raw_rd_data(int verbose, char *mbio_ptr, char *store_ptr, int *erro
 				{
 				fprintf(stderr,"\ndbg5  System telegram read in MBIO function <%s>\n",
 					function_name);
+				fprintf(stderr,"dbg5       xdr_status:              %d\n",xdr_status);
 				fprintf(stderr,"dbg5       telegram_id:             %d\n",telegram_id);
 				fprintf(stderr,"dbg5       telegram_cnt:            %d\n",telegram_cnt);
 				fprintf(stderr,"dbg5       telegram_send:           %s\n",telegram_send);
@@ -1351,6 +1586,7 @@ int mbr_hsds2raw_rd_data(int verbose, char *mbio_ptr, char *store_ptr, int *erro
 			if (verbose >= 5)
 #endif
 				{
+				fprintf(stderr,"dbg5       xdr_status:              %d\n",xdr_status);
 				fprintf(stderr,"dbg5       telegram_block_no:       %d\n",telegram_block_no);
 				fprintf(stderr,"dbg5       telegram_block_cnt:      %d\n",telegram_block_cnt);
 				fprintf(stderr,"dbg5       sys_pos_lat:             %f\n",sys_pos_lat);
@@ -1456,7 +1692,7 @@ int mbr_hsds2raw_rd_data(int verbose, char *mbio_ptr, char *store_ptr, int *erro
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hsds2raw_wr_data(int verbose, char *mbio_ptr, char *store_ptr, int *error)
+int mbr_hsds2raw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 {
 	char	*function_name = "mbr_hsds2raw_wr_data";
 	int	status = MB_SUCCESS;

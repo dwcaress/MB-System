@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_dsl120pf.c	8/6/96
- *	$Id: mbr_dsl120pf.c,v 5.3 2001-03-22 20:45:56 caress Exp $
+ *	$Id: mbr_dsl120pf.c,v 5.4 2001-07-20 00:31:11 caress Exp $
  *
  *    Copyright (c) 1996, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	August 6, 1996
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2001/03/22  20:45:56  caress
+ * Trying to make 5.0.beta0...
+ *
  * Revision 5.2  2001/01/22  07:43:34  caress
  * Version 5.0.beta01
  *
@@ -75,7 +78,7 @@
 #include "../../include/mbf_dsl120pf.h"
 
 /* essential function prototypes */
-int mbr_register_dsl120pf(int verbose, char *mbio_ptr, 
+int mbr_register_dsl120pf(int verbose, void *mbio_ptr, 
 		int *error);
 int mbr_info_dsl120pf(int verbose, 
 			int *system, 
@@ -96,15 +99,15 @@ int mbr_info_dsl120pf(int verbose,
 			double *beamwidth_xtrack, 
 			double *beamwidth_ltrack, 
 			int *error);
-int mbr_alm_dsl120pf(int verbose, char *mbio_ptr, int *error);
-int mbr_dem_dsl120pf(int verbose, char *mbio_ptr, int *error);
-int mbr_rt_dsl120pf(int verbose, char *mbio_ptr, char *store_ptr, int *error);
-int mbr_wt_dsl120pf(int verbose, char *mbio_ptr, char *store_ptr, int *error);
+int mbr_alm_dsl120pf(int verbose, void *mbio_ptr, int *error);
+int mbr_dem_dsl120pf(int verbose, void *mbio_ptr, int *error);
+int mbr_rt_dsl120pf(int verbose, void *mbio_ptr, void *store_ptr, int *error);
+int mbr_wt_dsl120pf(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
 /*--------------------------------------------------------------------*/
-int mbr_register_dsl120pf(int verbose, char *mbio_ptr, int *error)
+int mbr_register_dsl120pf(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_dsl120pf.c,v 5.3 2001-03-22 20:45:56 caress Exp $";
+	static char res_id[]="$Id: mbr_dsl120pf.c,v 5.4 2001-07-20 00:31:11 caress Exp $";
 	char	*function_name = "mbr_register_dsl120pf";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -127,9 +130,9 @@ int mbr_register_dsl120pf(int verbose, char *mbio_ptr, int *error)
 			&mb_io_ptr->beams_bath_max, 
 			&mb_io_ptr->beams_amp_max, 
 			&mb_io_ptr->pixels_ss_max, 
-			&mb_io_ptr->format_name, 
-			&mb_io_ptr->system_name, 
-			&mb_io_ptr->format_description, 
+			mb_io_ptr->format_name, 
+			mb_io_ptr->system_name, 
+			mb_io_ptr->format_description, 
 			&mb_io_ptr->numfile, 
 			&mb_io_ptr->filetype, 
 			&mb_io_ptr->variable_beams, 
@@ -234,7 +237,7 @@ int mbr_info_dsl120pf(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_dsl120pf.c,v 5.3 2001-03-22 20:45:56 caress Exp $";
+	static char res_id[]="$Id: mbr_dsl120pf.c,v 5.4 2001-07-20 00:31:11 caress Exp $";
 	char	*function_name = "mbr_info_dsl120pf";
 	int	status = MB_SUCCESS;
 
@@ -301,9 +304,9 @@ int mbr_info_dsl120pf(int verbose,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_alm_dsl120pf(int verbose, char *mbio_ptr, int *error)
+int mbr_alm_dsl120pf(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_dsl120pf.c,v 5.3 2001-03-22 20:45:56 caress Exp $";
+	static char res_id[]="$Id: mbr_dsl120pf.c,v 5.4 2001-07-20 00:31:11 caress Exp $";
 	char	*function_name = "mbr_alm_dsl120pf";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -385,7 +388,7 @@ int mbr_alm_dsl120pf(int verbose, char *mbio_ptr, int *error)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_dem_dsl120pf(int verbose, char *mbio_ptr, int *error)
+int mbr_dem_dsl120pf(int verbose, void *mbio_ptr, int *error)
 {
 	char	*function_name = "mbr_dem_dsl120pf";
 	int	status = MB_SUCCESS;
@@ -533,7 +536,7 @@ int mbr_zero_dsl120pf(int verbose, char *data_ptr, int *error)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_rt_dsl120pf(int verbose, char *mbio_ptr, char *store_ptr, int *error)
+int mbr_rt_dsl120pf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 {
 	char	*function_name = "mbr_rt_dsl120pf";
 	int	status = MB_SUCCESS;
@@ -649,7 +652,7 @@ int mbr_rt_dsl120pf(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_wt_dsl120pf(int verbose, char *mbio_ptr, char *store_ptr, int *error)
+int mbr_wt_dsl120pf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 {
 	char	*function_name = "mbr_wt_dsl120pf";
 	int	status = MB_SUCCESS;
@@ -763,7 +766,7 @@ int mbr_wt_dsl120pf(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_dsl120pf_rd_data(int verbose, char *mbio_ptr, int *error)
+int mbr_dsl120pf_rd_data(int verbose, void *mbio_ptr, int *error)
 {
 	char	*function_name = "mbr_dsl120pf_rd_data";
 	int	status = MB_SUCCESS;
@@ -985,7 +988,7 @@ int mbr_dsl120pf_rd_data(int verbose, char *mbio_ptr, int *error)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_dsl120pf_rd_header(int verbose, char *mbio_ptr, FILE *mbfp, int *error)
+int mbr_dsl120pf_rd_header(int verbose, void *mbio_ptr, FILE *mbfp, int *error)
 {
 	char	*function_name = "mbr_dsl120pf_rd_header";
 	int	status = MB_SUCCESS;
@@ -1037,17 +1040,17 @@ int mbr_dsl120pf_rd_header(int verbose, char *mbio_ptr, FILE *mbfp, int *error)
 		data->rec_type = DSL_HEADER;
 		
  		index = 0;
-		mb_get_binary_int(MB_NO,&buffer[index],&data->rec_len);
+		mb_get_binary_int(MB_NO, &buffer[index], (int *)&data->rec_len);
 		index += 4;
- 		mb_get_binary_int(MB_NO,&buffer[index],&data->rec_hdr_len);
+ 		mb_get_binary_int(MB_NO, &buffer[index], (int *)&data->rec_hdr_len);
 		index += 4;
- 		mb_get_binary_int(MB_NO,&buffer[index],&tmp_int);
+ 		mb_get_binary_int(MB_NO, &buffer[index], (int *)&tmp_int);
  		if (tmp_int != 0)
 		    data->p_flags = tmp_int;
 		index += 4;
- 		mb_get_binary_int(MB_NO,&buffer[index],&data->num_data_types);
+ 		mb_get_binary_int(MB_NO, &buffer[index], (int *)&data->num_data_types);
 		index += 4;
- 		mb_get_binary_int(MB_NO,&buffer[index],&data->ping);
+ 		mb_get_binary_int(MB_NO, &buffer[index], (int *)&data->ping);
 		index += 4;
 		for (i=0;i<4;i++)
 			{
@@ -1059,42 +1062,42 @@ int mbr_dsl120pf_rd_header(int verbose, char *mbio_ptr, FILE *mbfp, int *error)
 			data->time_stamp[i] = buffer[index];
 			index++;
 			}
- 		mb_get_binary_float(MB_NO,&buffer[index],&data->nav_x);
+ 		mb_get_binary_float(MB_NO, &buffer[index], &data->nav_x);
 		index += 4;
- 		mb_get_binary_float(MB_NO,&buffer[index],&data->nav_y);
+ 		mb_get_binary_float(MB_NO, &buffer[index], &data->nav_y);
 		index += 4;
- 		mb_get_binary_float(MB_NO,&buffer[index],&data->depth);
+ 		mb_get_binary_float(MB_NO, &buffer[index], &data->depth);
 		index += 4;
- 		mb_get_binary_float(MB_NO,&buffer[index],&data->heading);
+ 		mb_get_binary_float(MB_NO, &buffer[index], &data->heading);
 		index += 4;
- 		mb_get_binary_float(MB_NO,&buffer[index],&data->pitch);
+ 		mb_get_binary_float(MB_NO, &buffer[index], &data->pitch);
 		index += 4;
- 		mb_get_binary_float(MB_NO,&buffer[index],&data->roll);
+ 		mb_get_binary_float(MB_NO, &buffer[index], &data->roll);
 		index += 4;
- 		mb_get_binary_float(MB_NO,&buffer[index],&tmp_float);
+ 		mb_get_binary_float(MB_NO, &buffer[index], &tmp_float);
  		if (tmp_int != 0)
 		    data->alt = tmp_float;
 		index += 4;
- 		mb_get_binary_float(MB_NO,&buffer[index],&data->ang_offset);
+ 		mb_get_binary_float(MB_NO, &buffer[index], &data->ang_offset);
 		index += 4;
- 		mb_get_binary_int(MB_NO,&buffer[index],&data->transmit_pwr);
+ 		mb_get_binary_int(MB_NO, &buffer[index], (int *)&data->transmit_pwr);
 		index += 4;
- 		mb_get_binary_int(MB_NO,&buffer[index],&data->gain_port);
+ 		mb_get_binary_int(MB_NO, &buffer[index], (int *)&data->gain_port);
 		index += 4;
- 		mb_get_binary_int(MB_NO,&buffer[index],&data->gain_starbd);
+ 		mb_get_binary_int(MB_NO, &buffer[index], (int *)&data->gain_starbd);
 		index += 4;
- 		mb_get_binary_float(MB_NO,&buffer[index],&data->pulse_width);
+ 		mb_get_binary_float(MB_NO, &buffer[index], &data->pulse_width);
 		index += 4;
- 		mb_get_binary_int(MB_NO,&buffer[index],&data->swath_width);
+ 		mb_get_binary_int(MB_NO, &buffer[index], (int *)&data->swath_width);
 		index += 4;
 		data->side = buffer[index];
 		index++;
 		data->swapped = buffer[index];
 		index++;
 		index += 2;
-		mb_get_binary_int(MB_NO,&buffer[index],&data->tv_sec);
+		mb_get_binary_int(MB_NO, &buffer[index], (int *)&data->tv_sec);
 		index += 4;
-		mb_get_binary_int(MB_NO,&buffer[index],&data->tv_usec);
+		mb_get_binary_int(MB_NO, &buffer[index], (int *)&data->tv_usec);
 		index += 4;
 		mb_get_binary_short(MB_NO,&buffer[index],&data->interface);
 		index += 2;
@@ -1160,7 +1163,7 @@ int mbr_dsl120pf_rd_header(int verbose, char *mbio_ptr, FILE *mbfp, int *error)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_dsl120pf_rd_dataheader(int verbose, char *mbio_ptr, FILE *mbfp,
+int mbr_dsl120pf_rd_dataheader(int verbose, void *mbio_ptr, FILE *mbfp,
 	char *type, int *len, int *hdr_len, int *error)
 {
 	char	*function_name = "mbr_dsl120pf_rd_dataheader";
@@ -1223,7 +1226,7 @@ int mbr_dsl120pf_rd_dataheader(int verbose, char *mbio_ptr, FILE *mbfp,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_dsl120pf_rd_bath(int verbose, char *mbio_ptr, FILE *mbfp, int *error)
+int mbr_dsl120pf_rd_bath(int verbose, void *mbio_ptr, FILE *mbfp, int *error)
 {
 	char	*function_name = "mbr_dsl120pf_rd_bath";
 	int	status = MB_SUCCESS;
@@ -1273,13 +1276,13 @@ int mbr_dsl120pf_rd_bath(int verbose, char *mbio_ptr, FILE *mbfp, int *error)
 	if (status == MB_SUCCESS)
 		{
 		index = 0;
-		mb_get_binary_int(MB_NO,&buffer[index],&data->bat_num_bins);
+		mb_get_binary_int(MB_NO, &buffer[index], (int *)&data->bat_num_bins);
 		index += 4;
-		mb_get_binary_float(MB_NO,&buffer[index],&data->bat_sampleSize);
+		mb_get_binary_float(MB_NO, &buffer[index], &data->bat_sampleSize);
 		index += 4;
-		mb_get_binary_int(MB_NO,&buffer[index],&data->bat_p_flags);
+		mb_get_binary_int(MB_NO, &buffer[index], (int *)&data->bat_p_flags);
 		index += 4;
-		mb_get_binary_float(MB_NO,&buffer[index],&data->bat_max_range);
+		mb_get_binary_float(MB_NO, &buffer[index], &data->bat_max_range);
 		index += 4;
 		for (i=0;i<9;i++)
 			{
@@ -1332,7 +1335,7 @@ int mbr_dsl120pf_rd_bath(int verbose, char *mbio_ptr, FILE *mbfp, int *error)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_dsl120pf_rd_amp(int verbose, char *mbio_ptr, FILE *mbfp, int *error)
+int mbr_dsl120pf_rd_amp(int verbose, void *mbio_ptr, FILE *mbfp, int *error)
 {
 	char	*function_name = "mbr_dsl120pf_rd_amp";
 	int	status = MB_SUCCESS;
@@ -1382,15 +1385,15 @@ int mbr_dsl120pf_rd_amp(int verbose, char *mbio_ptr, FILE *mbfp, int *error)
 	if (status == MB_SUCCESS)
 		{
 		index = 0;
-		mb_get_binary_int(MB_NO,&buffer[index],&data->amp_num_samp);
+		mb_get_binary_int(MB_NO, &buffer[index], (int *)&data->amp_num_samp);
 		index += 4;
-		mb_get_binary_float(MB_NO,&buffer[index],&data->amp_sampleSize);
+		mb_get_binary_float(MB_NO, &buffer[index], &data->amp_sampleSize);
 		index += 4;
-		mb_get_binary_int(MB_NO,&buffer[index],&data->amp_p_flags);
+		mb_get_binary_int(MB_NO, &buffer[index], (int *)&data->amp_p_flags);
 		index += 4;
-		mb_get_binary_float(MB_NO,&buffer[index],&data->amp_max_range);
+		mb_get_binary_float(MB_NO, &buffer[index], &data->amp_max_range);
 		index += 4;
-		mb_get_binary_int(MB_NO,&buffer[index],&data->amp_channel);
+		mb_get_binary_int(MB_NO, &buffer[index], (int *)&data->amp_channel);
 		index += 4;
 		for (i=0;i<8;i++)
 			{
@@ -1444,7 +1447,7 @@ int mbr_dsl120pf_rd_amp(int verbose, char *mbio_ptr, FILE *mbfp, int *error)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_dsl120pf_rd_comment(int verbose, char *mbio_ptr, FILE *mbfp, int *error)
+int mbr_dsl120pf_rd_comment(int verbose, void *mbio_ptr, FILE *mbfp, int *error)
 {
 	char	*function_name = "mbr_dsl120pf_rd_comment";
 	int	status = MB_SUCCESS;
@@ -1516,7 +1519,7 @@ int mbr_dsl120pf_rd_comment(int verbose, char *mbio_ptr, FILE *mbfp, int *error)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_dsl120pf_wr_data(int verbose, char *mbio_ptr, char *data_ptr, int *error)
+int mbr_dsl120pf_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_dsl120pf_wr_data";
 	int	status = MB_SUCCESS;
@@ -1587,7 +1590,7 @@ int mbr_dsl120pf_wr_data(int verbose, char *mbio_ptr, char *data_ptr, int *error
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_dsl120pf_wr_bath(int verbose, char *mbio_ptr, FILE *mbfp, int *error)
+int mbr_dsl120pf_wr_bath(int verbose, void *mbio_ptr, FILE *mbfp, int *error)
 {
 	char	*function_name = "mbr_dsl120pf_wr_bath";
 	int	status = MB_SUCCESS;
@@ -1793,7 +1796,7 @@ int mbr_dsl120pf_wr_bath(int verbose, char *mbio_ptr, FILE *mbfp, int *error)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_dsl120pf_wr_amp(int verbose, char *mbio_ptr, FILE *mbfp, int *error)
+int mbr_dsl120pf_wr_amp(int verbose, void *mbio_ptr, FILE *mbfp, int *error)
 {
 	char	*function_name = "mbr_dsl120pf_wr_amp";
 	int	status = MB_SUCCESS;
@@ -2002,7 +2005,7 @@ int mbr_dsl120pf_wr_amp(int verbose, char *mbio_ptr, FILE *mbfp, int *error)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_dsl120pf_wr_comment(int verbose, char *mbio_ptr, FILE *mbfp, int *error)
+int mbr_dsl120pf_wr_comment(int verbose, void *mbio_ptr, FILE *mbfp, int *error)
 {
 	char	*function_name = "mbr_dsl120pf_wr_comment";
 	int	status = MB_SUCCESS;
