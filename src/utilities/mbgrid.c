@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrid.c	5/2/94
- *    $Id: mbgrid.c,v 5.17 2003-01-15 20:52:13 caress Exp $
+ *    $Id: mbgrid.c,v 5.18 2003-03-06 00:13:29 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -38,6 +38,9 @@
  * Rererewrite:	January 2, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.17  2003/01/15 20:52:13  caress
+ * Release 5.0.beta28
+ *
  * Revision 5.16  2002/11/14 03:52:25  caress
  * Release 5.0.beta27
  *
@@ -346,7 +349,7 @@ double erfcc();
 double mbgrid_erf();
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbgrid.c,v 5.17 2003-01-15 20:52:13 caress Exp $";
+static char rcs_id[] = "$Id: mbgrid.c,v 5.18 2003-03-06 00:13:29 caress Exp $";
 static char program_name[] = "mbgrid";
 static char help_message[] =  "mbgrid is an utility used to grid bathymetry, amplitude, or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbgrid -Ifilelist -Oroot \
@@ -1517,6 +1520,10 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 			  /* reproject beam positions if necessary */
 			  if (use_projection == MB_YES)
 			    {
+			    mb_proj_forward(verbose, pjptr, 
+					    navlon, navlat,
+					    &navlon, &navlat,
+					    &error);
 			    for (ib=0;ib<beams_bath;ib++)
 			      if (mb_beam_ok(beamflag[ib]))
 				mb_proj_forward(verbose, pjptr, 
@@ -1591,8 +1598,18 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], navlon, navlat);*/
 				   - still assumes lon lat grid 
 				   - to be generalized in later version 
 				   DWC 1/29/2001 */
-				foot_dx = (bathlon[ib] - navlon) / mtodeglon;
-				foot_dy = (bathlat[ib] - navlat) / mtodeglat;
+				/* now handles projected grids 
+				   DWC 3/5/2003 */
+			  	if (use_projection == MB_YES)
+			  	  {
+				  foot_dx = (bathlon[ib] - navlon);
+				  foot_dy = (bathlat[ib] - navlat);
+				  }
+			  	else
+			  	  {
+				  foot_dx = (bathlon[ib] - navlon) / mtodeglon;
+				  foot_dy = (bathlat[ib] - navlat) / mtodeglat;
+				  }
 				foot_lateral = sqrt(foot_dx * foot_dx + foot_dy * foot_dy);
 				if (foot_lateral > 0.0)
 				    {
@@ -1621,10 +1638,20 @@ foot_dx, foot_dy, foot_lateral, foot_range, foot_theta);*/
 dx, dy, mtodeglon, mtodeglat);*/
 
 				/* get range of bins around footprint to examine */
-				foot_wix = fabs(foot_hwidth * cos(DTR * foot_theta) * mtodeglon / dx);
-				foot_wiy = fabs(foot_hwidth * sin(DTR * foot_theta) * mtodeglon / dx);
-				foot_lix = fabs(foot_hlength * sin(DTR * foot_theta) * mtodeglat / dy);
-				foot_liy = fabs(foot_hlength * cos(DTR * foot_theta) * mtodeglat / dy);
+			  	if (use_projection == MB_YES)
+			  	  {
+				  foot_wix = fabs(foot_hwidth * cos(DTR * foot_theta) / dx);
+				  foot_wiy = fabs(foot_hwidth * sin(DTR * foot_theta) / dx);
+				  foot_lix = fabs(foot_hlength * sin(DTR * foot_theta) / dy);
+				  foot_liy = fabs(foot_hlength * cos(DTR * foot_theta) / dy);
+				  }
+			  	else
+			  	  {
+				  foot_wix = fabs(foot_hwidth * cos(DTR * foot_theta) * mtodeglon / dx);
+				  foot_wiy = fabs(foot_hwidth * sin(DTR * foot_theta) * mtodeglon / dx);
+				  foot_lix = fabs(foot_hlength * sin(DTR * foot_theta) * mtodeglat / dy);
+				  foot_liy = fabs(foot_hlength * cos(DTR * foot_theta) * mtodeglat / dy);
+				  }
 				foot_dix = 2 * MAX(foot_wix, foot_lix);
 				foot_diy = 2 * MAX(foot_wiy, foot_liy);
 /*fprintf(stderr, "foot_hwidth:%f foot_hlength:%f\n", foot_hwidth, foot_hlength);
@@ -1646,10 +1673,20 @@ foot_wix, foot_wiy, foot_lix, foot_liy, foot_dix, foot_diy);*/
 				   yy = (wbnd[2] + jj*dy + 0.5*dy - bathlat[ib]);
 				   
 				   /* get center and corners of bin in meters from sounding center */
-				   xx0 = xx / mtodeglon;
-				   yy0 = yy / mtodeglon;
-				   bdx = 0.5 * dx/ mtodeglon;
-				   bdy = 0.5 * dy/ mtodeglat;
+			  	  if (use_projection == MB_YES)
+			  	    {
+				     xx0 = xx;
+				     yy0 = yy;
+				     bdx = 0.5 * dx;
+				     bdy = 0.5 * dy;
+				     }
+			  	  else
+			  	    {
+				     xx0 = xx / mtodeglon;
+				     yy0 = yy / mtodeglat;
+				     bdx = 0.5 * dx/ mtodeglon;
+				     bdy = 0.5 * dy/ mtodeglat;
+				     }
 				   xx1 = xx0 - bdx;
 				   xx2 = xx0 + bdx;
 				   yy1 = yy0 - bdy;
