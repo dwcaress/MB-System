@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsatlraw.c	2/11/93
- *	$Id: mbr_hsatlraw.c,v 4.12 1997-07-25 14:19:53 caress Exp $
+ *	$Id: mbr_hsatlraw.c,v 4.13 1997-09-12 14:58:34 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,10 @@
  * Author:	D. W. Caress
  * Date:	February 11, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.12  1997/07/25  14:19:53  caress
+ * Version 4.5beta2.
+ * Much mucking, particularly with Simrad formats.
+ *
  * Revision 4.11  1997/04/21  17:02:07  caress
  * MB-System 4.5 Beta Release.
  *
@@ -112,7 +116,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_hsatlraw.c,v 4.12 1997-07-25 14:19:53 caress Exp $";
+ static char res_id[]="$Id: mbr_hsatlraw.c,v 4.13 1997-09-12 14:58:34 caress Exp $";
 	char	*function_name = "mbr_alm_hsatlraw";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -1325,7 +1329,7 @@ int	*error;
 		}
 
 	/* read event record from file */
-	status = mbr_hsatlraw_read_line(verbose,mbfp,shift+7,line,error);
+	status = mbr_hsatlraw_read_line(verbose,mbfp,shift+9,line,error);
 
 	/* parse data from first line */
 	if (status == MB_SUCCESS)
@@ -1413,7 +1417,7 @@ int	*error;
 		}
 
 	/* read event record from file */
-	status = mbr_hsatlraw_read_line(verbose,mbfp,shift+7,line,error);
+	status = mbr_hsatlraw_read_line(verbose,mbfp,shift+9,line,error);
 
 	/* parse data from first line */
 	if (status == MB_SUCCESS)
@@ -1511,7 +1515,7 @@ int	*error;
 		}
 
 	/* read event record from file */
-	status = mbr_hsatlraw_read_line(verbose,mbfp,shift+7,line,error);
+	status = mbr_hsatlraw_read_line(verbose,mbfp,shift+9,line,error);
 
 	/* parse data from first line */
 	if (status == MB_SUCCESS)
@@ -1599,7 +1603,7 @@ int	*error;
 		}
 
 	/* read event record from file */
-	status = mbr_hsatlraw_read_line(verbose,mbfp,shift+7,line,error);
+	status = mbr_hsatlraw_read_line(verbose,mbfp,shift+9,line,error);
 
 	/* parse data from event record */
 	if (status == MB_SUCCESS)
@@ -1632,7 +1636,7 @@ int	*error;
 		}
 
 	/* read and parse data from first data record */
-	if ((status = mbr_hsatlraw_read_line(verbose,mbfp,shift+7,line,error)) 
+	if ((status = mbr_hsatlraw_read_line(verbose,mbfp,shift+9,line,error)) 
 		== MB_SUCCESS)
 		{
 		mb_get_int(&numvals,line+shift,2);
@@ -1647,7 +1651,7 @@ int	*error;
 		}
 
 	/* read and parse data from second data record */
-	if ((status = mbr_hsatlraw_read_line(verbose,mbfp,shift+7,line,error)) 
+	if ((status = mbr_hsatlraw_read_line(verbose,mbfp,shift+9,line,error)) 
 		== MB_SUCCESS)
 		{
 		mb_get_int(&numvals,line+shift,2);
@@ -1662,7 +1666,7 @@ int	*error;
 		}
 
 	/* read and parse data from third data record */
-	if ((status = mbr_hsatlraw_read_line(verbose,mbfp,shift+7,line,error)) 
+	if ((status = mbr_hsatlraw_read_line(verbose,mbfp,shift+9,line,error)) 
 		== MB_SUCCESS)
 		{
 		mb_get_int(&numvals,line+shift,2);
@@ -1680,7 +1684,7 @@ int	*error;
 		}
 
 	/* read and parse data from fourth data record */
-	if ((status = mbr_hsatlraw_read_line(verbose,mbfp,shift+7,line,error)) 
+	if ((status = mbr_hsatlraw_read_line(verbose,mbfp,shift+9,line,error)) 
 		== MB_SUCCESS)
 		{
 		mb_get_int(&numvals,line+shift,2);
@@ -1778,7 +1782,7 @@ int	*error;
 		}
 
 	/* read event record from file */
-	status = mbr_hsatlraw_read_line(verbose,mbfp,shift+7,line,error);
+	status = mbr_hsatlraw_read_line(verbose,mbfp,shift+9,line,error);
 
 	/* parse data from event record */
 	if (status == MB_SUCCESS)
@@ -1812,7 +1816,7 @@ int	*error;
 
 	/* read and parse data from first data record */
 	if ((status = mbr_hsatlraw_read_line(verbose,mbfp,
-		shift+7,line,error)) == MB_SUCCESS)
+		shift+9,line,error)) == MB_SUCCESS)
 		{
 		mb_get_int(&numvals,line+shift,2);
 		if (numvals == 29)
@@ -1828,7 +1832,7 @@ int	*error;
 
 	/* read and parse data from second data record */
 	if ((status = mbr_hsatlraw_read_line(verbose,mbfp,
-		shift+7,line,error)) == MB_SUCCESS)
+		shift+9,line,error)) == MB_SUCCESS)
 		{
 		mb_get_int(&numvals,line+shift,2);
 		if (numvals == 29)
@@ -1846,7 +1850,7 @@ int	*error;
 
 	/* read and parse data from third data record */
 	if ((status = mbr_hsatlraw_read_line(verbose,mbfp,
-		shift+7,line,error)) == MB_SUCCESS)
+		shift+9,line,error)) == MB_SUCCESS)
 		{
 		mb_get_int(&numvals,line+shift,2);
 		if (numvals == 29)
@@ -1866,7 +1870,7 @@ int	*error;
 
 	/* read and parse data from fourth data record */
 	if ((status = mbr_hsatlraw_read_line(verbose,mbfp,
-		shift+7,line,error)) == MB_SUCCESS)
+		shift+9,line,error)) == MB_SUCCESS)
 		{
 		mb_get_int(&numvals,line+shift,2);
 		if (numvals == 29)
@@ -1966,7 +1970,7 @@ int	*error;
 		}
 
 	/* read event record from file */
-	status = mbr_hsatlraw_read_line(verbose,mbfp,shift+7,line,error);
+	status = mbr_hsatlraw_read_line(verbose,mbfp,shift+9,line,error);
 
 	/* parse data from event record */
 	if (status == MB_SUCCESS)
@@ -1992,7 +1996,7 @@ int	*error;
 		}
 
 	/* read and parse data from first data record */
-	if ((status = mbr_hsatlraw_read_line(verbose,mbfp,shift+7,line,error)) 
+	if ((status = mbr_hsatlraw_read_line(verbose,mbfp,shift+9,line,error)) 
 		== MB_SUCCESS)
 		{
 		mb_get_int(&numvals,line+shift,2);
@@ -2007,7 +2011,7 @@ int	*error;
 		}
 
 	/* read and parse data from second data record */
-	if ((status = mbr_hsatlraw_read_line(verbose,mbfp,shift+7,line,error)) 
+	if ((status = mbr_hsatlraw_read_line(verbose,mbfp,shift+9,line,error)) 
 		== MB_SUCCESS)
 		{
 		mb_get_int(&numvals,line+shift,2);
@@ -2022,7 +2026,7 @@ int	*error;
 		}
 
 	/* read and parse data from third data record */
-	if ((status = mbr_hsatlraw_read_line(verbose,mbfp,shift+7,line,error)) 
+	if ((status = mbr_hsatlraw_read_line(verbose,mbfp,shift+9,line,error)) 
 		== MB_SUCCESS)
 		{
 		for (i=0;i<11;i++)
@@ -2112,7 +2116,7 @@ int	*error;
 		}
 
 	/* read event record from file */
-	status = mbr_hsatlraw_read_line(verbose,mbfp,shift+7,line,error);
+	status = mbr_hsatlraw_read_line(verbose,mbfp,shift+9,line,error);
 
 	/* parse data from event record */
 	if (status == MB_SUCCESS)
@@ -2141,7 +2145,7 @@ int	*error;
 	/* read and parse data records from file */
 	for (i=0;i<nlines;i++)
 		{
-		if ((status = mbr_hsatlraw_read_line(verbose,mbfp,shift+7,line,error)) 
+		if ((status = mbr_hsatlraw_read_line(verbose,mbfp,shift+9,line,error)) 
 			== MB_SUCCESS)
 			{
 			numvals = 10;
@@ -2221,7 +2225,7 @@ int	*error;
 		}
 
 	/* read event record from file */
-	status = mbr_hsatlraw_read_line(verbose,mbfp,shift+7,line,error);
+	status = mbr_hsatlraw_read_line(verbose,mbfp,shift+9,line,error);
 
 	/* parse data from event record */
 	if (status == MB_SUCCESS)
@@ -2259,7 +2263,7 @@ int	*error;
 		}
 
 	/* read and parse data from first data record */
-	if ((status = mbr_hsatlraw_read_line(verbose,mbfp,shift+7,line,error)) 
+	if ((status = mbr_hsatlraw_read_line(verbose,mbfp,shift+9,line,error)) 
 		== MB_SUCCESS)
 		{
 		for (i=0;i<8;i++)
@@ -2277,7 +2281,7 @@ int	*error;
 		}
 
 	/* read and parse data from second data record */
-	if ((status = mbr_hsatlraw_read_line(verbose,mbfp,shift+7,line,error)) 
+	if ((status = mbr_hsatlraw_read_line(verbose,mbfp,shift+9,line,error)) 
 		== MB_SUCCESS)
 		{
 		for (i=0;i<8;i++)
@@ -2295,7 +2299,7 @@ int	*error;
 		}
 
 	/* read and parse data from third data record */
-	if ((status = mbr_hsatlraw_read_line(verbose,mbfp,shift+7,line,error)) 
+	if ((status = mbr_hsatlraw_read_line(verbose,mbfp,shift+9,line,error)) 
 		== MB_SUCCESS)
 		{
 		for (i=0;i<8;i++)
@@ -2313,7 +2317,7 @@ int	*error;
 		}
 
 	/* read and parse data from fourth data record */
-	if ((status = mbr_hsatlraw_read_line(verbose,mbfp,shift+7,line,error)) 
+	if ((status = mbr_hsatlraw_read_line(verbose,mbfp,shift+9,line,error)) 
 		== MB_SUCCESS)
 		{
 		for (i=0;i<8;i++)
