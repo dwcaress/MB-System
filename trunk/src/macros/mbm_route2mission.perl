@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system: mbm_route2mission.perl   7/18/2004
-#    $Id: mbm_route2mission.perl,v 5.1 2004-09-16 19:29:11 caress Exp $
+#    $Id: mbm_route2mission.perl,v 5.2 2004-12-02 06:27:45 caress Exp $
 #
 #    Copyright (c) 2004 by 
 #    D. W. Caress (caress@mbari.org)
@@ -34,10 +34,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #      Moss Landing, CA
 #
 # Version:
-# $Id: mbm_route2mission.perl,v 5.1 2004-09-16 19:29:11 caress Exp $
+# $Id: mbm_route2mission.perl,v 5.2 2004-12-02 06:27:45 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.1  2004/09/16 19:29:11  caress
+#   Development to support for MBARI Mapping AUV.
+#
 #   Revision 5.0  2004/07/27 19:56:43  caress
 #   Macro to translate MBgrdviz route file into MBARI AUV mission file.
 #
@@ -77,8 +80,7 @@ $descentdepth = 3.0;
 $descendtime = 300;
 
 # behavior ascend
-$ascendrate = 0.5; # m/s
-$ascendyaw = 10;
+$ascendrudder = 10;
 $ascendpitch = 20;
 $ascendenddepth = 2;
 
@@ -88,6 +90,9 @@ $resonduration = 6;
 # behavior waypoint
 $depthmax = 130.0;
 $depthabort = 150.0;
+
+# assumed ascent and descent rate
+$ascendrate = 0.5; # m/s
 
 $forwarddist = 400.0;
 $waypointdist = 200.0;
@@ -385,8 +390,8 @@ $aborttime = 1.2 * $missiontime;
 if ($outputoff)
 	{
 	printf "Route: $routefile\r\n";
-	printf "Distance: %.0f\r\n", $distancelastmpoint;
-	printf "Time: %.1f\r\n", $missiontime;
+	printf "Distance: %.0f (m)\r\n", $distancelastmpoint;
+	printf "Time: %d (s)\r\n", $missiontime;
 	}
 elsif ($verbose)
 	{
@@ -396,9 +401,9 @@ elsif ($verbose)
 	printf "Mission Summary:\r\n";
 	printf "    Route File:               $routefile\r\n";
 	printf "    Mission File:             $missionfile\r\n";
-	printf "    Distance:                 %.0f m  %.3f km \r\n", $distancelastmpoint, 0.001 * $distancelastmpoint;
-	printf "    Estimated Time:           %.1f s  %.3f hr \r\n", $missiontime, $missiontime / 3600.0;
-	printf "    Abort Time:               $aborttime\r\n";
+	printf "    Distance:                 %.0f (m)  %.3f (km)\r\n", $distancelastmpoint, 0.001 * $distancelastmpoint;
+	printf "    Estimated Time:           %d (s)  %.3f (hr)\r\n", $missiontime, $missiontime / 3600.0;
+	printf "    Abort Time:               %d (s)\r\n", $aborttime;
 	printf "    Way Points:               $nwaypoints\r\n";
 	printf "    Route Points:             $nmissionpoints\r\n";
 	printf "\r\n";
@@ -412,17 +417,17 @@ elsif ($verbose)
 	printf "    Waypoint Spacing:         $waypointdist (m)\r\n";
 	if ($starttime)
 		{
-		printf "    Time to First Waypoint:   $starttime (s)\r\n";
+		printf "    Time to First Waypoint:   %d (s)\r\n", $starttime;
 		}
 	if ($startposition)
 		{
 		printf "    Start Longitude:          $startlon (deg)\r\n";
 		printf "    Start Latitude:           $startlat (deg)\r\n";
 		}
-	printf "    GPS Duration:             $gpsduration (s)\r\n";
-	printf "    Ascend Rate:              $ascendrate (m/s)\r\n";
-	printf "    Descend Duration:         $descendtime (s)\r\n";
-	printf "    Setpoint Duration:        $setpointtime (s)\r\n";
+	printf "    GPS Duration:             %d (s)\r\n", $gpsduration;
+	printf "    Ascend/Descend Rate:      $ascendrate (m/s)\r\n";
+	printf "    Descend Duration:         %d (s)\r\n", $descendtime;
+	printf "    Setpoint Duration:        %d (s)\r\n", $setpointtime;
 	printf "\r\n";
 	printf "The primary waypoints from the route file are:\r\n";
 	printf "  <number> <longitude (deg)> <latitude (deg)> <topography (m)> <distance (m)> <type>\r\n";
@@ -444,9 +449,9 @@ else
 	printf "Mission Summary:\r\n";
 	printf "    Route File:               $routefile\r\n";
 	printf "    Mission File:             $missionfile\r\n";
-	printf "    Distance:                 %.0f m  %.3f km \r\n", $distancelastmpoint, 0.001 * $distancelastmpoint;
-	printf "    Estimated Time:           %.1f s  %.3f hr \r\n", $missiontime, $missiontime / 3600.0;
-	printf "    Abort Time:               $aborttime\r\n";
+	printf "    Distance:                 %.0f (m)  %.3f (km) \r\n", $distancelastmpoint, 0.001 * $distancelastmpoint;
+	printf "    Estimated Time:           %d (s)  %.3f (hr) \r\n", $missiontime, $missiontime / 3600.0;
+	printf "    Abort Time:               %d (s)\r\n", $aborttime;
 	printf "    Way Points:               $nwaypoints\r\n";
 	printf "    Route Points:             $nmissionpoints\r\n";
 	}
@@ -462,59 +467,59 @@ if (!$outputoff)
 	open(MFILE,">$missionfile") || die "Cannot open output mission file: $missionfile\r\n$program_name aborted.\r\n";
 
 	# output mission file comments
-	print MFILE "# This MBARI Mapping AUV mission file has been generated\r\n";
-	print MFILE "# by the MB-System program $program_name run by\r\n";
-	print MFILE "# user <$user> on cpu <$host> at <$date>\r\n";
-	print MFILE "# \r\n";
-	print MFILE "# Mission Summary:\r\n";
-	print MFILE "#     Route File:               $routefile\r\n";
-	print MFILE "#     Mission File:             $missionfile\r\n";
-	print MFILE "#     Distance:                 $distancelastmpoint\r\n";
-	print MFILE "#     Estimated Time:           $missiontime\r\n";
-	print MFILE "#     Abort Time:               $aborttime\r\n";
-	print MFILE "#     Way Points:               $nwaypoints\r\n";
-	print MFILE "#     Route Points:             $nmissionpoints\r\n";
-	print MFILE "# \r\n";
-	print MFILE "# Mission Parameters:\r\n";
-	print MFILE "#     Minimum Vehicle Altitude: $altitudemin (m)\r\n";
-	print MFILE "#     Abort Vehicle Altitude:   $altitudeabort (m)\r\n";
-	print MFILE "#     Maximum Vehicle Depth:    $depthmax (m)\r\n";
-	print MFILE "#     Abort Vehicle Depth:      $depthabort (m)\r\n";
-	print MFILE "#     Descent Vehicle Depth:    $descentdepth (m)\r\n";
-	print MFILE "#     Forward Looking Distance: $forwarddist (m)\r\n";
-	print MFILE "#     Waypoint Spacing:         $waypointdist (m)\r\n";
+	printf MFILE "# This MBARI Mapping AUV mission file has been generated\r\n";
+	printf MFILE "# by the MB-System program $program_name run by\r\n";
+	printf MFILE "# user <$user> on cpu <$host> at <$date>\r\n";
+	printf MFILE "# \r\n";
+	printf MFILE "# Mission Summary:\r\n";
+	printf MFILE "#     Route File:               $routefile\r\n";
+	printf MFILE "#     Mission File:             $missionfile\r\n";
+	printf MFILE "#     Distance:                 $distancelastmpoint (m)\r\n";
+	printf MFILE "#     Estimated Time:           %d (s)\r\n", $missiontime;
+	printf MFILE "#     Abort Time:               %d (s)\r\n", $aborttime;
+	printf MFILE "#     Way Points:               $nwaypoints\r\n";
+	printf MFILE "#     Route Points:             $nmissionpoints\r\n";
+	printf MFILE "# \r\n";
+	printf MFILE "# Mission Parameters:\r\n";
+	printf MFILE "#     Minimum Vehicle Altitude: $altitudemin (m)\r\n";
+	printf MFILE "#     Abort Vehicle Altitude:   $altitudeabort (m)\r\n";
+	printf MFILE "#     Maximum Vehicle Depth:    $depthmax (m)\r\n";
+	printf MFILE "#     Abort Vehicle Depth:      $depthabort (m)\r\n";
+	printf MFILE "#     Descent Vehicle Depth:    $descentdepth (m)\r\n";
+	printf MFILE "#     Forward Looking Distance: $forwarddist (m)\r\n";
+	printf MFILE "#     Waypoint Spacing:         $waypointdist (m)\r\n";
 	if ($starttime)
 		{
-		print MFILE "#     Time to First Waypoint:   $starttime (s)\r\n";
+		printf MFILE "#     Time to First Waypoint:   %d (s)\r\n", $starttime;
 		}
 	if ($startposition)
 		{
-		print MFILE "#     Start Longitude:          $startlon (deg)\r\n";
-		print MFILE "#     Start Latitude:           $startlat (deg)\r\n";
+		printf MFILE "#     Start Longitude:          $startlon (deg)\r\n";
+		printf MFILE "#     Start Latitude:           $startlat (deg)\r\n";
 		}
-	print MFILE "#     GPS Duration:             $gpsduration (s)\r\n";
-	print MFILE "#     Ascend Rate:              $ascendrate (m/s)\r\n";
-	print MFILE "#     Descend Duration:         $descendtime (s)\r\n";
-	print MFILE "#     Setpoint Duration:        $setpointtime (s)\r\n";
-	print MFILE "# \r\n";
-	print MFILE "# The primary waypoints from the route file are:\r\n";
-	print MFILE "#   <number> <longitude (deg)> <latitude (deg)> <topography (m)> <distance (m)> <type>\r\n";
+	printf MFILE "#     GPS Duration:             %d (s)\r\n", $gpsduration;
+	printf MFILE "#     Ascend Rate:              $ascendrate (m/s)\r\n";
+	printf MFILE "#     Descend Duration:         %d (s)\r\n", $descendtime;
+	printf MFILE "#     Setpoint Duration:        %d (s)\r\n", $setpointtime;
+	printf MFILE "# \r\n";
+	printf MFILE "# The primary waypoints from the route file are:\r\n";
+	printf MFILE "#   <number> <longitude (deg)> <latitude (deg)> <topography (m)> <distance (m)> <type>\r\n";
 	$cnt = 0;
 	for ($i = 0; $i < $npoints; $i++)
  		{
 		if ($waypoints[$i] != 0)
 			{
- 			print MFILE "#   $cnt $lons[$i] $lats[$i] $topos[$i] $distances[$i] $waypoints[$i]\r\n";
+ 			printf MFILE "#   $cnt $lons[$i] $lats[$i] $topos[$i] $distances[$i] $waypoints[$i]\r\n";
 			$cnt++;
 			}
  		}
-	print MFILE "# \r\n";
+	printf MFILE "# \r\n";
 	printf MFILE "# A total of %d mission points have been defined.\r\n", $nmissionpoints;
-	print MFILE "# \r\n";
-	print MFILE "# Define Mission parameters:\r\n";
+	printf MFILE "# \r\n";
+	printf MFILE "# Define Mission parameters:\r\n";
 	printf MFILE "#define MISSION_SPEED     %f\r\n", $mission_speed;
 	printf MFILE "#define MISSION_DISTANCE  %f\r\n", $distancelastmpoint;
-	printf MFILE "#define MISSION_TIME      %f\r\n", $missiontime;
+	printf MFILE "#define MISSION_TIME      %d\r\n", $missiontime;
 	printf MFILE "#define MISSION_TIMEOUT   %d\r\n", $aborttime;
 	printf MFILE "#define DEPTH_MAX         %f\r\n", $depthmax;
 	printf MFILE "#define DEPTH_ABORT       %f\r\n", $depthabort;
@@ -522,10 +527,10 @@ if (!$outputoff)
 	printf MFILE "#define ALTITUDE_ABORT    %f\r\n", $altitudeabort;
 	printf MFILE "#define GPS_DURATION      %d\r\n", $gpsduration;
 	printf MFILE "#define DESCENT_DEPTH     %f\r\n", $descentdepth;
-	printf MFILE "#define DESCEND_DURATION  %f\r\n", $descendtime;
-	printf MFILE "#define SETPOINT_DURATION %f\r\n", $setpointtime;
+	printf MFILE "#define DESCEND_DURATION  %d\r\n", $descendtime;
+	printf MFILE "#define SETPOINT_DURATION %d\r\n", $setpointtime;
 	printf MFILE "#define GPSMINHITS        %d\r\n", $gpsminhits;
-	printf MFILE "#define ASCENDYAW         %f\r\n", $ascendyaw;
+	printf MFILE "#define ASCENDRUDDER      %f\r\n", $ascendrudder;
 	printf MFILE "#define ASCENDPITCH       %f\r\n", $ascendpitch;
 	printf MFILE "#define ASCENDENDDEPTH    %f\r\n", $ascendenddepth;
 	printf MFILE "#define DESCENDPITCH      %f\r\n", $descendpitch;
@@ -567,7 +572,7 @@ if (!$outputoff)
 	$i = $nmissionpoints - 1;
 	print MFILE "duration  = $ascendtimes[$i]; \r\n";
 	print MFILE "horizontalMode   = rudder; \r\n";
-	print MFILE "horizontal       = ASCENDYAW; \r\n";
+	print MFILE "horizontal       = ASCENDRUDDER; \r\n";
 	print MFILE "pitch            = ASCENDPITCH; \r\n";
 	print MFILE "speed            = MISSION_SPEED; \r\n";
 	print MFILE "endDepth         = ASCENDENDDEPTH; \r\n";
@@ -666,7 +671,7 @@ if (!$outputoff)
 			print MFILE "{ \r\n";
 			printf MFILE "duration  = %d; \r\n", $ascendtimes[$i];
 			print MFILE "horizontalMode   = rudder; \r\n";
-			print MFILE "horizontal       = ASCENDYAW; \r\n";
+			print MFILE "horizontal       = ASCENDRUDDER; \r\n";
 			print MFILE "pitch            = ASCENDPITCH; \r\n";
 			print MFILE "speed            = MISSION_SPEED; \r\n";
 			print MFILE "endDepth         = ASCENDENDDEPTH; \r\n";
