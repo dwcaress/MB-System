@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavadjust_prog.c	3/23/00
- *    $Id: mbnavadjust_prog.c,v 4.0 2000-09-30 07:00:06 caress Exp $
+ *    $Id: mbnavadjust_prog.c,v 4.1 2000-10-03 21:49:28 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	March 23, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  2000/09/30  07:00:06  caress
+ * Snapshot for Dale.
+ *
  *
  *
  */
@@ -50,7 +53,7 @@
 #include "mbnavadjust.h"
 
 /* id variables */
-static char rcs_id[] = "$Id: mbnavadjust_prog.c,v 4.0 2000-09-30 07:00:06 caress Exp $";
+static char rcs_id[] = "$Id: mbnavadjust_prog.c,v 4.1 2000-10-03 21:49:28 caress Exp $";
 static char program_name[] = "mbnavadjust";
 static char help_message[] =  "mbnavadjust is an interactive navigation adjustment package for swath sonar data.\n";
 static char usage_message[] = "mbnavadjust [-Iproject -V -H]";
@@ -1499,11 +1502,12 @@ int mbnavadjust_import_file(char *path, int format)
 	    strcat(ipath,mb_suffix);
 	    }
 
-	/* else just at ".pro" to file name */
+	/* else just add p.mbXXX to file name */
 	else
 		{
-		strcpy(ipath,path);
-		strcat(ipath,".pro");
+		strcat(ipath,"p");
+		sprintf(mb_suffix, ".mb%d", format);
+		strcat(ipath,mb_suffix);
 		status = MB_SUCCESS;
 		error = MB_ERROR_NO_ERROR;
 		}
@@ -1790,6 +1794,7 @@ section->distance, distance, project.section_length);*/
 						{
 						section->continuity = MB_YES;
 						section->global_start_snav--;
+						mbna_total_num_snavs--;
 						}
 					}
 				else if (project.num_files > 1)
@@ -1801,6 +1806,7 @@ section->distance, distance, project.section_length);*/
 						{
 						section->continuity = MB_YES;
 						section->global_start_snav--;
+						mbna_total_num_snavs--;
 						}
 					}
 				section->distance = 0.0;
