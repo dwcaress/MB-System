@@ -27,16 +27,22 @@
  * Start Global Widget Declarations.
  */
 EXTERNAL Widget   window_mbedit;
+EXTERNAL Widget   radioBox_mediancalc;
+EXTERNAL Widget   scale_median_local_ltrack;
+EXTERNAL Widget   scale_median_local_xtrack;
+EXTERNAL Widget   scale_filters_cutangleend;
+EXTERNAL Widget   scale_filters_cutanglestart;
+EXTERNAL Widget   toggleButton_filters_cutangle;
 EXTERNAL Widget   scale_filters_cutdistanceend;
 EXTERNAL Widget   scale_filters_cutdistancestart;
 EXTERNAL Widget   toggleButton_filters_cutdistance;
 EXTERNAL Widget   scale_filters_cutbeamend;
 EXTERNAL Widget   scale_filters_cutbeamstart;
 EXTERNAL Widget   toggleButton_filters_cutbeam;
-EXTERNAL Widget   scale_filters_medianspike;
 EXTERNAL Widget   scale_filters_wrongside;
-EXTERNAL Widget   toggleButton_filters_medianspike;
 EXTERNAL Widget   toggleButton_filters_wrongside;
+EXTERNAL Widget   scale_filters_medianspike;
+EXTERNAL Widget   toggleButton_filters_medianspike;
 EXTERNAL Widget   slider_y_max_interval_label;
 EXTERNAL Widget   slider_y_interval;
 EXTERNAL Widget   slider_y_interval_label;
@@ -70,9 +76,9 @@ EXTERNAL Widget   setting_output_label;
 EXTERNAL Widget   setting_output;
 EXTERNAL Widget   setting_output_toggle_edit;
 EXTERNAL Widget   setting_output_toggle_browse;
-EXTERNAL Widget   pushButton_file;
+EXTERNAL Widget   toggleButton_show_time;
 EXTERNAL Widget   toggleButton_show_flagged_on;
-EXTERNAL Widget   toggleButton_show_flagged_off;
+EXTERNAL Widget   pushButton_file;
 EXTERNAL Widget   slider_scale_x_label;
 EXTERNAL Widget   slider_scale_x;
 EXTERNAL Widget   slider_scale_x_max_label;

@@ -51,9 +51,9 @@ names = case_sensitive
 !(BX) bx_info("integrate_xrunner", "false")
 
 procedure BxGlobalWidgetId;
-identifier BXG_pushButton_file;
-identifier BXG_toggleButton_show_flagged_off;
+identifier BXG_toggleButton_show_time;
 identifier BXG_toggleButton_show_flagged_on;
+identifier BXG_pushButton_file;
 identifier BXG_slider_scale_x_label;
 identifier BXG_slider_scale_x;
 identifier BXG_slider_scale_x_max_label;
@@ -104,16 +104,22 @@ identifier BXG_slider_y_interval_label;
 identifier BXG_slider_x_max_interval_label;
 identifier BXG_slider_x_interval;
 identifier BXG_slider_x_interval_label;
+identifier BXG_radioBox_mediancalc;
+identifier BXG_scale_median_local_ltrack;
+identifier BXG_scale_median_local_xtrack;
+identifier BXG_scale_filters_cutangleend;
+identifier BXG_scale_filters_cutanglestart;
+identifier BXG_toggleButton_filters_cutangle;
 identifier BXG_scale_filters_cutdistanceend;
 identifier BXG_scale_filters_cutdistancestart;
 identifier BXG_toggleButton_filters_cutdistance;
 identifier BXG_scale_filters_cutbeamend;
 identifier BXG_scale_filters_cutbeamstart;
 identifier BXG_toggleButton_filters_cutbeam;
-identifier BXG_scale_filters_medianspike;
 identifier BXG_scale_filters_wrongside;
-identifier BXG_toggleButton_filters_medianspike;
 identifier BXG_toggleButton_filters_wrongside;
+identifier BXG_scale_filters_medianspike;
+identifier BXG_toggleButton_filters_medianspike;
 identifier BXG_window_mbedit;
 procedure BxManageCB(string);
 procedure BxUnmanageCB;
@@ -140,14 +146,16 @@ procedure do_goto_apply();
 procedure do_expose();
 procedure do_load_check();
 procedure do_load_ok_with_save();
-procedure do_show_flagged_on();
-procedure do_show_flagged_off();
 procedure do_mode_toggle();
 procedure do_unflag_view();
 procedure do_unflag_all();
 procedure do_output_edit();
 procedure do_set_filters();
 procedure do_reset_filters();
+procedure do_show_flagged();
+procedure do_show_time();
+procedure do_check_median_xtrack();
+procedure do_check_median_ltrack();
 
 list BaseStyle : arguments {
 };
@@ -177,8 +185,8 @@ object pushButton_filters_dismiss : XmPushButton widget {
     arguments {
         arguments Style_use;
         XmNlabelString = compound_string("Dismiss");
-        XmNx = 290;
-        XmNy = 460;
+        XmNx = 270;
+        XmNy = 250;
         XmNwidth = 90;
         XmNheight = 40;
     };
@@ -193,116 +201,12 @@ object pushButton_filters_dismiss : XmPushButton widget {
 !(BX)    };
 };
 
-object toggleButton_filters_wrongside : XmToggleButton widget {
-    arguments {
-        arguments Style_use;
-        XmNalignment = XmALIGNMENT_BEGINNING;
-        XmNlabelString = compound_string("Wrong Side Filter");
-        XmNx = 10;
-        XmNy = 100;
-        XmNwidth = 170;
-        XmNheight = 40;
-    };
-    controls {
-    };
-    callbacks {
-        callbacks Style_useReasons;
-        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_toggleButton_filters_wrongside);
-    };
-!(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
-!(BX)    };
-};
-
-object toggleButton_filters_medianspike : XmToggleButton widget {
-    arguments {
-        arguments Style_use;
-        XmNalignment = XmALIGNMENT_BEGINNING;
-        XmNlabelString = compound_string("Median Spike Filter");
-        XmNx = 10;
-        XmNy = 10;
-        XmNwidth = 170;
-        XmNheight = 40;
-    };
-    controls {
-    };
-    callbacks {
-        callbacks Style_useReasons;
-        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_toggleButton_filters_medianspike);
-    };
-!(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
-!(BX)    };
-};
-
-object separator2 : XmSeparator widget {
-    arguments {
-        XmNx = 10;
-        XmNy = 70;
-        XmNwidth = 400;
-        XmNheight = 20;
-    };
-    controls {
-    };
-    callbacks {
-    };
-};
-
-object scale_filters_wrongside : XmScale widget {
-    arguments {
-        arguments Style_use;
-        XmNvalue = 10;
-        XmNtitleString = compound_string("Beams from Center Threshold");
-        XmNmaximum = 100;
-        XmNshowValue = true;
-        XmNorientation = XmHORIZONTAL;
-        XmNx = 200;
-        XmNy = 90;
-        XmNwidth = 210;
-        XmNheight = 63;
-    };
-    controls {
-    };
-    callbacks {
-        callbacks Style_useReasons;
-        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_scale_filters_wrongside);
-    };
-!(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
-!(BX)    };
-};
-
-object scale_filters_medianspike : XmScale widget {
-    arguments {
-        arguments Style_use;
-        XmNminimum = 1;
-        XmNdecimalPoints = 0;
-        XmNvalue = 10;
-        XmNtitleString = compound_string("% Median Depth Threshold ");
-        XmNshowValue = true;
-        XmNorientation = XmHORIZONTAL;
-        XmNx = 200;
-        XmNy = 10;
-        XmNwidth = 210;
-        XmNheight = 63;
-    };
-    controls {
-    };
-    callbacks {
-        callbacks Style_useReasons;
-        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_scale_filters_medianspike);
-    };
-!(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
-!(BX)    };
-};
-
 object pushButton_filters_apply : XmPushButton widget {
     arguments {
         arguments Style_use;
         XmNlabelString = compound_string("Apply");
         XmNx = 50;
-        XmNy = 460;
+        XmNy = 250;
         XmNwidth = 90;
         XmNheight = 40;
     };
@@ -321,8 +225,8 @@ object pushButton_filters_reset : XmPushButton widget {
     arguments {
         arguments Style_use;
         XmNlabelString = compound_string("Reset");
-        XmNx = 170;
-        XmNy = 460;
+        XmNx = 160;
+        XmNy = 250;
         XmNwidth = 90;
         XmNheight = 40;
     };
@@ -337,11 +241,106 @@ object pushButton_filters_reset : XmPushButton widget {
 !(BX)    };
 };
 
+object toggleButton_filters_medianspike : XmToggleButton widget {
+    arguments {
+        arguments Style_use;
+        XmNalignment = XmALIGNMENT_BEGINNING;
+        XmNlabelString = compound_string("Median", separate=true) &
+ compound_string("Spike", separate=true) &
+ compound_string("Filter");
+        XmNx = 10;
+        XmNy = 20;
+        XmNwidth = 90;
+        XmNheight = 60;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_toggleButton_filters_medianspike);
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object scale_filters_medianspike : XmScale widget {
+    arguments {
+        arguments Style_use;
+        XmNminimum = 1;
+        XmNdecimalPoints = 0;
+        XmNvalue = 10;
+        XmNtitleString = compound_string("% Median Depth Threshold ");
+        XmNshowValue = true;
+        XmNorientation = XmHORIZONTAL;
+        XmNx = 100;
+        XmNy = 10;
+        XmNwidth = 260;
+        XmNheight = 63;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_scale_filters_medianspike);
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object toggleButton_filters_wrongside : XmToggleButton widget {
+    arguments {
+        arguments Style_use;
+        XmNalignment = XmALIGNMENT_BEGINNING;
+        XmNlabelString = compound_string("Wrong", separate=true) &
+ compound_string("Side", separate=true) &
+ compound_string("Filter");
+        XmNx = 10;
+        XmNy = 680;
+        XmNwidth = 90;
+        XmNheight = 60;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_toggleButton_filters_wrongside);
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object scale_filters_wrongside : XmScale widget {
+    arguments {
+        arguments Style_use;
+        XmNvalue = 10;
+        XmNtitleString = compound_string("Beams from Center Threshold");
+        XmNmaximum = 100;
+        XmNshowValue = true;
+        XmNorientation = XmHORIZONTAL;
+        XmNx = 100;
+        XmNy = 670;
+        XmNwidth = 260;
+        XmNheight = 63;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_scale_filters_wrongside);
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
 object separator3 : XmSeparator widget {
     arguments {
         XmNx = 10;
-        XmNy = 150;
-        XmNwidth = 400;
+        XmNy = 360;
+        XmNwidth = 350;
         XmNheight = 20;
     };
     controls {
@@ -354,11 +353,13 @@ object toggleButton_filters_cutbeam : XmToggleButton widget {
     arguments {
         arguments Style_use;
         XmNalignment = XmALIGNMENT_BEGINNING;
-        XmNlabelString = compound_string("Flag by Beam Number");
+        XmNlabelString = compound_string("Flag by", separate=true) &
+ compound_string("Beam", separate=true) &
+ compound_string("Number");
         XmNx = 10;
-        XmNy = 180;
-        XmNwidth = 190;
-        XmNheight = 40;
+        XmNy = 240;
+        XmNwidth = 90;
+        XmNheight = 60;
     };
     controls {
     };
@@ -379,9 +380,9 @@ object scale_filters_cutbeamstart : XmScale widget {
         XmNmaximum = 100;
         XmNshowValue = true;
         XmNorientation = XmHORIZONTAL;
-        XmNx = 200;
-        XmNy = 170;
-        XmNwidth = 210;
+        XmNx = 100;
+        XmNy = 230;
+        XmNwidth = 260;
         XmNheight = 63;
     };
     controls {
@@ -403,9 +404,9 @@ object scale_filters_cutbeamend : XmScale widget {
         XmNmaximum = 100;
         XmNshowValue = true;
         XmNorientation = XmHORIZONTAL;
-        XmNx = 200;
-        XmNy = 230;
-        XmNwidth = 210;
+        XmNx = 100;
+        XmNy = 290;
+        XmNwidth = 260;
         XmNheight = 63;
     };
     controls {
@@ -422,21 +423,8 @@ object scale_filters_cutbeamend : XmScale widget {
 object separator4 : XmSeparator widget {
     arguments {
         XmNx = 10;
-        XmNy = 290;
-        XmNwidth = 400;
-        XmNheight = 20;
-    };
-    controls {
-    };
-    callbacks {
-    };
-};
-
-object separator5 : XmSeparator widget {
-    arguments {
-        XmNx = 10;
-        XmNy = 430;
-        XmNwidth = 400;
+        XmNy = 210;
+        XmNwidth = 350;
         XmNheight = 20;
     };
     controls {
@@ -449,10 +437,11 @@ object toggleButton_filters_cutdistance : XmToggleButton widget {
     arguments {
         arguments Style_use;
         XmNalignment = XmALIGNMENT_BEGINNING;
-        XmNlabelString = compound_string("Flag by Distance");
+        XmNlabelString = compound_string("Flag by", separate=true) &
+ compound_string("Distance");
         XmNx = 10;
-        XmNy = 320;
-        XmNwidth = 190;
+        XmNy = 390;
+        XmNwidth = 90;
         XmNheight = 40;
     };
     controls {
@@ -476,9 +465,9 @@ object scale_filters_cutdistancestart : XmScale widget {
         XmNscaleMultiple = 1;
         XmNshowValue = true;
         XmNorientation = XmHORIZONTAL;
-        XmNx = 200;
-        XmNy = 310;
-        XmNwidth = 210;
+        XmNx = 100;
+        XmNy = 380;
+        XmNwidth = 260;
         XmNheight = 63;
     };
     controls {
@@ -502,9 +491,9 @@ object scale_filters_cutdistanceend : XmScale widget {
         XmNscaleMultiple = 1;
         XmNshowValue = true;
         XmNorientation = XmHORIZONTAL;
-        XmNx = 200;
-        XmNy = 370;
-        XmNwidth = 210;
+        XmNx = 100;
+        XmNy = 440;
+        XmNwidth = 260;
         XmNheight = 63;
     };
     controls {
@@ -518,33 +507,250 @@ object scale_filters_cutdistanceend : XmScale widget {
 !(BX)    };
 };
 
-object bulletinBoard_filters : XmBulletinBoardDialog widget {
+object separator5 : XmSeparator widget {
     arguments {
-        arguments Style_use;
-        XmNautoUnmanage = false;
-        XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 263;
-        XmNy = 32;
-        XmNwidth = 425;
-        XmNheight = 510;
+        XmNx = 10;
+        XmNy = 500;
+        XmNwidth = 350;
+        XmNheight = 20;
     };
     controls {
+    };
+    callbacks {
+    };
+};
+
+object toggleButton_filters_cutangle : XmToggleButton widget {
+    arguments {
+        arguments Style_use;
+        XmNalignment = XmALIGNMENT_BEGINNING;
+        XmNlabelString = compound_string("Flag by", separate=true) &
+ compound_string("Beam", separate=true) &
+ compound_string("Angle");
+        XmNx = 10;
+        XmNy = 530;
+        XmNwidth = 80;
+        XmNheight = 60;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_toggleButton_filters_cutangle);
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object scale_filters_cutanglestart : XmScale widget {
+    arguments {
+        arguments Style_use;
+        XmNdecimalPoints = 2;
+        XmNvalue = 1000;
+        XmNtitleString = compound_string("Start Flagging Angle (deg)");
+        XmNmaximum = 10000;
+        XmNscaleMultiple = 1;
+        XmNshowValue = true;
+        XmNorientation = XmHORIZONTAL;
+        XmNx = 100;
+        XmNy = 520;
+        XmNwidth = 260;
+        XmNheight = 63;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_scale_filters_cutanglestart);
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object scale_filters_cutangleend : XmScale widget {
+    arguments {
+        arguments Style_use;
+        XmNdecimalPoints = 2;
+        XmNvalue = 1000;
+        XmNtitleString = compound_string("End Flagging Angle (deg)");
+        XmNmaximum = 10000;
+        XmNscaleMultiple = 1;
+        XmNshowValue = true;
+        XmNorientation = XmHORIZONTAL;
+        XmNx = 100;
+        XmNy = 580;
+        XmNwidth = 260;
+        XmNheight = 63;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_scale_filters_cutangleend);
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object separator6 : XmSeparator widget {
+    arguments {
+        XmNx = 10;
+        XmNy = 650;
+        XmNwidth = 350;
+        XmNheight = 20;
+    };
+    controls {
+    };
+    callbacks {
+    };
+};
+
+object scale_median_local_xtrack : XmScale widget {
+    arguments {
+        arguments Style_use;
+        XmNminimum = 1;
+        XmNvalue = 5;
+        XmNtitleString = compound_string("Median Acrosstrack Dimension");
+        XmNscaleMultiple = 1;
+        XmNshowValue = true;
+        XmNorientation = XmHORIZONTAL;
+        XmNx = 100;
+        XmNy = 80;
+        XmNwidth = 260;
+        XmNheight = 63;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_scale_median_local_xtrack);
+        XmNvalueChangedCallback = procedure do_check_median_xtrack();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object scale_median_local_ltrack : XmScale widget {
+    arguments {
+        arguments Style_use;
+        XmNminimum = 1;
+        XmNvalue = 1;
+        XmNtitleString = compound_string("Median Alongtrack Dimension");
+        XmNmaximum = 20;
+        XmNscaleMultiple = 1;
+        XmNshowValue = true;
+        XmNorientation = XmHORIZONTAL;
+        XmNx = 100;
+        XmNy = 140;
+        XmNwidth = 260;
+        XmNheight = 63;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_scale_median_local_ltrack);
+        XmNvalueChangedCallback = procedure do_check_median_ltrack();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object radioBox_mediancalc : XmRadioBox widget {
+    arguments {
+        arguments Style_use;
+        XmNx = 90;
+        XmNy = 70;
+        XmNwidth = 16;
+        XmNheight = 16;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_radioBox_mediancalc);
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object bulletinBoard_scrollfilters : XmBulletinBoard widget {
+    arguments {
+        arguments Style_use;
+        XmNresizePolicy = XmRESIZE_GROW;
+        XmNwidth = 375;
+        XmNheight = 810;
+    };
+    controls {
+         managed XmRadioBox radioBox_mediancalc;
+         managed XmScale scale_median_local_ltrack;
+         managed XmScale scale_median_local_xtrack;
+         managed XmSeparator separator6;
+         managed XmScale scale_filters_cutangleend;
+         managed XmScale scale_filters_cutanglestart;
+         managed XmToggleButton toggleButton_filters_cutangle;
+         managed XmSeparator separator5;
          managed XmScale scale_filters_cutdistanceend;
          managed XmScale scale_filters_cutdistancestart;
          managed XmToggleButton toggleButton_filters_cutdistance;
-         managed XmSeparator separator5;
          managed XmSeparator separator4;
          managed XmScale scale_filters_cutbeamend;
          managed XmScale scale_filters_cutbeamstart;
          managed XmToggleButton toggleButton_filters_cutbeam;
          managed XmSeparator separator3;
+         managed XmScale scale_filters_wrongside;
+         managed XmToggleButton toggleButton_filters_wrongside;
+         managed XmScale scale_filters_medianspike;
+         managed XmToggleButton toggleButton_filters_medianspike;
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object scrolledWindow_filters : XmScrolledWindow widget {
+    arguments {
+        arguments Style_use;
+        XmNscrollingPolicy = XmAUTOMATIC;
+        XmNx = 10;
+        XmNy = 10;
+        XmNwidth = 410;
+        XmNheight = 230;
+    };
+    controls {
+         managed XmBulletinBoard bulletinBoard_scrollfilters;
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object bulletinBoard_filters : XmBulletinBoardDialog widget {
+    arguments {
+        arguments Style_use;
+        XmNautoUnmanage = false;
+        XmNresizePolicy = XmRESIZE_GROW;
+        XmNx = 756;
+        XmNy = 35;
+        XmNwidth = 426;
+        XmNheight = 300;
+    };
+    controls {
+         managed XmScrolledWindow scrolledWindow_filters;
          managed XmPushButton pushButton_filters_reset;
          managed XmPushButton pushButton_filters_apply;
-         managed XmScale scale_filters_medianspike;
-         managed XmScale scale_filters_wrongside;
-         managed XmSeparator separator2;
-         managed XmToggleButton toggleButton_filters_medianspike;
-         managed XmToggleButton toggleButton_filters_wrongside;
          managed XmPushButton pushButton_filters_dismiss;
     };
     callbacks {
@@ -558,8 +764,8 @@ object bulletinBoard_filters : XmBulletinBoardDialog widget {
 !(BX)object dialogShell_filters : XmDialogShell widget {
 !(BX)    arguments {
 !(BX)        XmNtitle = "Filters";
-!(BX)        XmNwidth = 425;
-!(BX)        XmNheight = 510;
+!(BX)        XmNwidth = 426;
+!(BX)        XmNheight = 300;
 !(BX)    };
 !(BX)    controls {
 !(BX)         managed XmBulletinBoardDialog bulletinBoard_filters;
@@ -749,8 +955,8 @@ object bulletinBoard_annotation : XmBulletinBoardDialog widget {
     arguments {
         XmNdialogTitle = compound_string("Annotation");
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 247;
-        XmNy = 297;
+        XmNx = 279;
+        XmNy = 519;
         XmNwidth = 536;
         XmNheight = 135;
     };
@@ -961,8 +1167,8 @@ object pushButton_buffer_dismiss : XmPushButton widget {
 object bulletinBoard_buffer : XmBulletinBoardDialog widget {
     arguments {
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 247;
-        XmNy = 293;
+        XmNx = 279;
+        XmNy = 515;
         XmNwidth = 536;
         XmNheight = 142;
     };
@@ -1079,8 +1285,8 @@ object bulletinBoard_error : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNdialogStyle = XmDIALOG_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 359;
-        XmNy = 284;
+        XmNx = 391;
+        XmNy = 506;
         XmNwidth = 311;
         XmNheight = 161;
     };
@@ -1199,8 +1405,8 @@ object bulletinBoard_editsave : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNdialogStyle = XmDIALOG_FULL_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 299;
-        XmNy = 298;
+        XmNx = 122;
+        XmNy = 529;
         XmNwidth = 431;
         XmNheight = 133;
     };
@@ -1285,8 +1491,8 @@ object bulletinBoard_message : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNdialogStyle = XmDIALOG_FULL_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_NONE;
-        XmNx = 325;
-        XmNy = 321;
+        XmNx = 357;
+        XmNy = 543;
         XmNwidth = 379;
         XmNheight = 86;
     };
@@ -1539,8 +1745,8 @@ object separator1 : XmSeparator widget {
 object bulletinBoard_about : XmBulletinBoardDialog widget {
     arguments {
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 267;
-        XmNy = 273;
+        XmNx = 56;
+        XmNy = 527;
         XmNwidth = 473;
         XmNheight = 457;
     };
@@ -1853,8 +2059,8 @@ object bulletinBoard_goto : XmBulletinBoardDialog widget {
     arguments {
         arguments Style_use;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 409;
-        XmNy = 312;
+        XmNx = 449;
+        XmNy = 435;
         XmNwidth = 196;
         XmNheight = 302;
     };
@@ -2174,8 +2380,8 @@ object bulletinBoard_file : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 244;
-        XmNy = 267;
+        XmNx = 40;
+        XmNy = 516;
         XmNwidth = 541;
         XmNheight = 489;
     };
@@ -2197,7 +2403,8 @@ object bulletinBoard_file : XmBulletinBoardDialog widget {
 !(BX)object xmDialogShell_file : XmDialogShell widget {
 !(BX)    arguments {
 !(BX)        arguments Style_use;
-!(BX)        XmNtitle = "Open Source Swath Sonar Data File";
+!(BX)        XmNtitle = "Open Source Swath Sonar Data Fil" &
+!(BX) "e";
 !(BX)        XmNdeleteResponse = XmUNMAP;
 !(BX)        XmNwidth = 541;
 !(BX)        XmNheight = 489;
@@ -2314,7 +2521,7 @@ object setting_mode : XmRowColumn widget {
         XmNradioBehavior = true;
         XmNspacing = 0;
         XmNorientation = XmHORIZONTAL;
-        XmNx = 70;
+        XmNx = 50;
         XmNy = 110;
         XmNwidth = 289;
         XmNheight = 34;
@@ -2338,7 +2545,7 @@ object setting_mode_label : XmLabel widget {
         arguments Style_use;
         XmNlabelString = compound_string("Mode:");
         XmNmarginWidth = 0;
-        XmNx = 20;
+        XmNx = 10;
         XmNy = 110;
         XmNheight = 30;
     };
@@ -2669,86 +2876,6 @@ object slider_scale_x_label : XmLabel widget {
 !(BX)    };
 };
 
-object label_show_flagged : XmLabel widget {
-    arguments {
-        arguments Style_use;
-        XmNalignment = XmALIGNMENT_BEGINNING;
-        XmNlabelString = compound_string("Show flagged profile:");
-        XmNx = 730;
-        XmNy = 110;
-        XmNwidth = 160;
-        XmNheight = 30;
-    };
-    controls {
-    };
-    callbacks {
-        callbacks Style_useReasons;
-    };
-!(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
-!(BX)    };
-};
-
-object toggleButton_show_flagged_on : XmToggleButton widget {
-    arguments {
-        arguments Style_use;
-        XmNlabelString = compound_string("On");
-        XmNwidth = 49;
-        XmNheight = 28;
-    };
-    controls {
-    };
-    callbacks {
-        callbacks Style_useReasons;
-        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_toggleButton_show_flagged_on);
-        XmNvalueChangedCallback = procedure do_show_flagged_on();
-    };
-!(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
-!(BX)    };
-};
-
-object toggleButton_show_flagged_off : XmToggleButton widget {
-    arguments {
-        arguments Style_use;
-        XmNlabelString = compound_string("Off");
-        XmNwidth = 49;
-        XmNheight = 28;
-    };
-    controls {
-    };
-    callbacks {
-        callbacks Style_useReasons;
-        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_toggleButton_show_flagged_off);
-        XmNvalueChangedCallback = procedure do_show_flagged_off();
-    };
-!(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
-!(BX)    };
-};
-
-object radioBox_show_flagged : XmRadioBox widget {
-    arguments {
-        arguments Style_use;
-        XmNspacing = 10;
-        XmNorientation = XmHORIZONTAL;
-        XmNx = 880;
-        XmNy = 110;
-        XmNwidth = 114;
-        XmNheight = 34;
-    };
-    controls {
-         managed XmToggleButton toggleButton_show_flagged_on;
-         managed XmToggleButton toggleButton_show_flagged_off;
-    };
-    callbacks {
-        callbacks Style_useReasons;
-    };
-!(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
-!(BX)    };
-};
-
 object pushButton_quit : XmPushButton widget {
     arguments {
         arguments Style_use;
@@ -3009,9 +3136,9 @@ object pushButton_unflag_view : XmPushButton widget {
     arguments {
         arguments Style_use;
         XmNlabelString = compound_string("Unflag View");
-        XmNx = 390;
+        XmNx = 370;
         XmNy = 110;
-        XmNwidth = 130;
+        XmNwidth = 120;
         XmNheight = 30;
     };
     controls {
@@ -3029,9 +3156,9 @@ object pushButton_unflag_all : XmPushButton widget {
     arguments {
         arguments Style_use;
         XmNlabelString = compound_string("Unflag Forward");
-        XmNx = 530;
+        XmNx = 490;
         XmNy = 110;
-        XmNwidth = 130;
+        XmNwidth = 120;
         XmNheight = 30;
     };
     controls {
@@ -3039,6 +3166,50 @@ object pushButton_unflag_all : XmPushButton widget {
     callbacks {
         callbacks Style_useReasons;
         XmNactivateCallback = procedure do_unflag_all();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object toggleButton_show_flagged_on : XmToggleButton widget {
+    arguments {
+        arguments Style_use;
+        XmNalignment = XmALIGNMENT_BEGINNING;
+        XmNlabelString = compound_string("Show Flagged Profile");
+        XmNx = 790;
+        XmNy = 110;
+        XmNwidth = 210;
+        XmNheight = 28;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_toggleButton_show_flagged_on);
+        XmNvalueChangedCallback = procedure do_show_flagged();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object toggleButton_show_time : XmToggleButton widget {
+    arguments {
+        arguments Style_use;
+        XmNalignment = XmALIGNMENT_BEGINNING;
+        XmNlabelString = compound_string("Show Time");
+        XmNx = 650;
+        XmNy = 110;
+        XmNwidth = 140;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_toggleButton_show_time);
+        XmNvalueChangedCallback = procedure do_show_time();
     };
 !(BX)    handlers {
 !(BX)        handlers Style_useHandlers;
@@ -3057,6 +3228,8 @@ object controls_mbedit : XmBulletinBoard widget {
         XmNheight = 150;
     };
     controls {
+         managed XmToggleButton toggleButton_show_time;
+         managed XmToggleButton toggleButton_show_flagged_on;
          managed XmPushButton pushButton_unflag_all;
          managed XmPushButton pushButton_unflag_view;
          managed XmMenuBar menuBar_controls;
@@ -3067,8 +3240,6 @@ object controls_mbedit : XmBulletinBoard widget {
          managed XmPushButton pushButton_forward;
          managed XmPushButton pushButton_reverse;
          managed XmPushButton pushButton_quit;
-         managed XmRadioBox radioBox_show_flagged;
-         managed XmLabel label_show_flagged;
          managed XmLabel slider_scale_x_label;
          managed XmScale slider_scale_x;
          managed XmLabel slider_scale_x_max_label;
@@ -3117,8 +3288,8 @@ object mbedit_bboard : XmBulletinBoard widget {
 object window_mbedit : XmMainWindow widget {
     arguments {
         arguments Style_use;
-        XmNx = 9;
-        XmNy = 50;
+        XmNx = 40;
+        XmNy = 254;
         XmNwidth = 1014;
         XmNheight = 665;
     };
@@ -3183,8 +3354,8 @@ object window_mbedit : XmMainWindow widget {
 !(BX)        XmNiconName = "MBedit";
 !(BX)        XmNallowShellResize = false;
 !(BX)        XmNdeleteResponse = XmDESTROY;
-!(BX)        XmNx = 1;
-!(BX)        XmNy = 44;
+!(BX)        XmNx = 40;
+!(BX)        XmNy = 254;
 !(BX)        XmNwidth = 1014;
 !(BX)        XmNheight = 665;
 !(BX)    };
