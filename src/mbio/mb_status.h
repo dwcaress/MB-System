@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbio_status.h	2/1/93
- *    $Id: mb_status.h,v 4.9 1998-10-05 17:46:15 caress Exp $
+ *    $Id: mb_status.h,v 4.10 1998-10-07 22:48:34 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -18,6 +18,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.9  1998/10/05  17:46:15  caress
+ * MB-System version 4.6beta
+ *
  * Revision 4.8  1997/07/25  14:19:53  caress
  * Version 4.5beta2.
  * Much mucking, particularly with Simrad formats.
@@ -159,7 +162,7 @@ static char *fatal_error_msg[] =
 	"Invalid data record type specified for writing",
 	"Invalid control parameter specified by user",
 	"Invalid buffer id",
-	"Invalid system id - this should not happen!"
+	"Invalid system id - this should not happen!", 
 	"This data file is not in the specified format!"
 	};
 static char *nonfatal_error_msg[] =
