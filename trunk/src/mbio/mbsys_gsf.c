@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_gsf.c	3.00	8/20/94
- *	$Id: mbsys_gsf.c,v 4.2 1999-07-16 19:24:15 caress Exp $
+ *	$Id: mbsys_gsf.c,v 4.3 2000-03-06 21:54:21 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -37,6 +37,9 @@
  * Date:	March 5, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1999/07/16  19:24:15  caress
+ * Yet another version.
+ *
  * Revision 4.1  1999/05/05  22:48:29  caress
  * Disabled handling of ping flags in GSF data.
  *
@@ -72,7 +75,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_gsf.c,v 4.2 1999-07-16 19:24:15 caress Exp $";
+ static char res_id[]="$Id: mbsys_gsf.c,v 4.3 2000-03-06 21:54:21 caress Exp $";
 	char	*function_name = "mbsys_gsf_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -692,6 +695,7 @@ int	*error;
 	gsfDataID	    *dataID;
 	gsfRecords	    *records;
 	gsfSwathBathyPing   *mb_ping;
+	double	alpha, beta;
 	int	i, j;
 
 	/* print input debug statements */
@@ -733,16 +737,31 @@ int	*error;
 	    if (mb_ping->travel_time != NULL
 		&& mb_ping->beam_angle != NULL)
 		{
-		for (i=0;i<*nbeams;i++)
+		if (mb_ping->beam_angle_forward != NULL)
 		    {
-		    ttimes[i] = mb_ping->travel_time[i];
-		    angles[i] = fabs(mb_ping->beam_angle[i]);
-		    if (mb_ping->across_track[i] < 0.0)
-			    angles_forward[i] = 180.0;
-		    else
-			    angles_forward[i] = 0.0;
-		    heave[i] = mb_ping->heave;
-		    alongtrack_offset[i] = 0.0;
+		    for (i=0;i<*nbeams;i++)
+			{
+			ttimes[i] = mb_ping->travel_time[i];
+			angles[i] = fabs(mb_ping->beam_angle[i]);
+			angles_forward[i] = mb_ping->beam_angle_forward[i];
+			heave[i] = mb_ping->heave;
+			alongtrack_offset[i] = 0.0;
+			}
+		    }
+		else
+		    {
+		    for (i=0;i<*nbeams;i++)
+			{
+			ttimes[i] = mb_ping->travel_time[i];
+			angles[i] = fabs(mb_ping->beam_angle[i]);
+			if (mb_ping->across_track[i] < 0.0
+			    || mb_ping->beam_angle[i] < 0.0)
+				angles_forward[i] = 180.0;
+			else
+				angles_forward[i] = 0.0;
+			heave[i] = mb_ping->heave;
+			alongtrack_offset[i] = 0.0;
+			}
 		    }
 		
 		/* get surface sound velocity and 
@@ -800,6 +819,17 @@ int	*error;
 		    {
 		    *ssv = mb_ping->sensor_data.gsfSeaBatSpecific.surface_velocity;
 		    *draft = mb_ping->depth_corrector;
+		    if (mb_ping->beam_angle_forward == NULL)
+			{
+			for (i=0;i<*nbeams;i++)
+			    {
+			    beta = 90.0 - mb_ping->beam_angle[i];
+			    alpha = mb_ping->pitch;
+			    mb_rollpitch_to_takeoff(verbose, 
+				alpha, beta, &angles[i], 
+				&angles_forward[i], error);
+			    }
+			}
 		    for (i=0;i<*nbeams;i++)
 			    angles_null[i] = angles[i];
 		    }
@@ -832,6 +862,17 @@ int	*error;
 		    {
 		    *ssv = mb_ping->sensor_data.gsfSeaBatIISpecific.surface_velocity;
 		    *draft = mb_ping->depth_corrector;
+		    if (mb_ping->beam_angle_forward == NULL)
+			{
+			for (i=0;i<*nbeams;i++)
+			    {
+			    beta = 90.0 - mb_ping->beam_angle[i];
+			    alpha = mb_ping->pitch;
+			    mb_rollpitch_to_takeoff(verbose, 
+				alpha, beta, &angles[i], 
+				&angles_forward[i], error);
+			    }
+			}
 		    for (i=0;i<*nbeams;i++)
 			    angles_null[i] = angles[i];
 		    }
@@ -840,6 +881,17 @@ int	*error;
 		    {
 		    *ssv = mb_ping->sensor_data.gsfSeaBat8101Specific.surface_velocity;
 		    *draft = mb_ping->depth_corrector;
+		    if (mb_ping->beam_angle_forward == NULL)
+			{
+			for (i=0;i<*nbeams;i++)
+			    {
+			    beta = 90.0 - mb_ping->beam_angle[i];
+			    alpha = mb_ping->pitch;
+			    mb_rollpitch_to_takeoff(verbose, 
+				alpha, beta, &angles[i], 
+				&angles_forward[i], error);
+			    }
+			}
 		    for (i=0;i<*nbeams;i++)
 			    angles_null[i] = angles[i];
 		    }
@@ -856,6 +908,17 @@ int	*error;
 		    {
 		    *ssv = mb_ping->sensor_data.gsfElacMkIISpecific.sound_vel;
 		    *draft = mb_ping->depth_corrector;
+		    if (mb_ping->beam_angle_forward == NULL)
+			{
+			for (i=0;i<*nbeams;i++)
+			    {
+			    beta = 90.0 - mb_ping->beam_angle[i];
+			    alpha = mb_ping->pitch;
+			    mb_rollpitch_to_takeoff(verbose, 
+				alpha, beta, &angles[i], 
+				&angles_forward[i], error);
+			    }
+			}
 		    for (i=0;i<*nbeams;i++)
 			    angles_null[i] = 37.5;
 		    }
