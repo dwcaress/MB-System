@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbinfo.c	2/1/93
- *    $Id: mbinfo.c,v 4.1 1994-03-12 01:44:37 caress Exp $
+ *    $Id: mbinfo.c,v 4.2 1994-04-28 01:32:57 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -24,6 +24,10 @@
  * Date:	February 1, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1994/03/12  01:44:37  caress
+ * Added declarations of ctime and/or getenv for compatability
+ * with SGI compilers.
+ *
  * Revision 4.0  1994/03/06  00:13:22  caress
  * First cut at version 4.0
  *
@@ -62,25 +66,29 @@
 /* MBIO include files */
 #include "../../include/mb_status.h"
 
-/*--------------------------------------------------------------------*/
+/* min max defines */
+#define	min(A, B)	((A) < (B) ? (A) : (B))
+#define	max(A, B)	((A) > (B) ? (A) : (B))
 
 #define MBINFO_MAXPINGS 50
 struct ping
 	{
-	int	*bath;
-	int	*amp;
-	int	*bathacrosstrack;
-	int	*bathalongtrack;
-	int	*ss;
-	int	*ssacrosstrack;
-	int	*ssalongtrack;
+	double	*bath;
+	double	*bathlon;
+	double	*bathlat;
+	double	*amp;
+	double	*ss;
+	double	*sslon;
+	double	*sslat;
 	};
+
+/*--------------------------------------------------------------------*/
 
 main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbinfo.c,v 4.1 1994-03-12 01:44:37 caress Exp $";
+	static char rcs_id[] = "$Id: mbinfo.c,v 4.2 1994-04-28 01:32:57 caress Exp $";
 	static char program_name[] = "MBINFO";
 	static char help_message[] =  "MBINFO reads a multibeam data file and outputs \nsome basic statistics.  If pings are averaged (pings > 2) \nMBINFO estimates the variance for each of the multibeam \nbeams by reading a set number of pings (>2) and then finding \nthe variance of the detrended values for each beam. \nThe results are dumped to stdout.";
 	static char usage_message[] = "mbinfo [-Byr/mo/da/hr/mn/sc -C -Eyr/mo/da/hr/mn/sc -Fformat -Ifile -Llonflip -Ppings -Rw/e/s/n -Sspeed -V -H]";
@@ -128,13 +136,13 @@ char **argv;
 	double	speed;
 	double	heading;
 	double	distance;
-	int	*bath;
-	int	*amp;
-	int	*bath_acrosstrack;
-	int	*bath_alongtrack;
-	int	*ss;
-	int	*ss_acrosstrack;
-	int	*ss_alongtrack;
+	double	*bath;
+	double	*bathlon;
+	double	*bathlat;
+	double	*amp;
+	double	*ss;
+	double	*sslon;
+	double	*sslat;
 	char	comment[256];
 	int	icomment = 0;
 	int	comments = MB_NO;
@@ -388,26 +396,26 @@ char **argv;
 		if (error == MB_ERROR_NO_ERROR)
 			datacur = data[i];
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_malloc(verbose,beams_bath*sizeof(int),
+			status = mb_malloc(verbose,beams_bath*sizeof(double),
 					&datacur->bath,&error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_malloc(verbose,beams_amp*sizeof(int),
+			status = mb_malloc(verbose,beams_amp*sizeof(double),
 					&datacur->amp,&error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_malloc(verbose,beams_bath*sizeof(int),
-					&datacur->bathacrosstrack,&error);
+			status = mb_malloc(verbose,beams_bath*sizeof(double),
+					&datacur->bathlon,&error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_malloc(verbose,beams_bath*sizeof(int),
-					&datacur->bathalongtrack,&error);
+			status = mb_malloc(verbose,beams_bath*sizeof(double),
+					&datacur->bathlat,&error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_malloc(verbose,pixels_ss*sizeof(int),
+			status = mb_malloc(verbose,pixels_ss*sizeof(double),
 					&datacur->ss,&error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_malloc(verbose,pixels_ss*sizeof(int),
-					&datacur->ssacrosstrack,&error);
+			status = mb_malloc(verbose,pixels_ss*sizeof(double),
+					&datacur->sslon,&error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_malloc(verbose,pixels_ss*sizeof(int),
-					&datacur->ssalongtrack,&error);
+			status = mb_malloc(verbose,pixels_ss*sizeof(double),
+					&datacur->sslat,&error);
 		}
 	if (error == MB_ERROR_NO_ERROR)
 		status = mb_malloc(verbose,beams_bath*sizeof(double),
@@ -485,17 +493,17 @@ char **argv;
 			datacur = data[nread];
 			bath = datacur->bath;
 			amp = datacur->amp;
-			bath_acrosstrack = datacur->bathacrosstrack;
-			bath_alongtrack = datacur->bathalongtrack;
+			bathlon = datacur->bathlon;
+			bathlat = datacur->bathlat;
 			ss = datacur->ss;
-			ss_acrosstrack = datacur->ssacrosstrack;
-			ss_alongtrack = datacur->ssalongtrack;
-			status = mb_get(verbose,mbio_ptr,&kind,&pings,
+			sslon = datacur->sslon;
+			sslat = datacur->sslat;
+			status = mb_read(verbose,mbio_ptr,&kind,&pings,
 				time_i,&time_d,
 				&navlon,&navlat,&speed,&heading,&distance,
 				&beams_bath,&beams_amp,&pixels_ss,
-				bath,amp,bath_acrosstrack,bath_alongtrack,
-				ss,ss_acrosstrack,ss_alongtrack,
+				bath,amp,bathlon,bathlat,
+				ss,sslon,sslat,
 				comment,&error);
 
 			/* increment counters */
@@ -560,7 +568,7 @@ char **argv;
 					lonmax = navlon;
 					latmin = navlat;
 					latmax = navlat;
-					bathbeg = (double) bath[beams_bath/2];
+					bathbeg = bath[beams_bath/2];
 					lonbeg = navlon;
 					latbeg = navlat;
 					timbeg = time_d;
@@ -573,41 +581,45 @@ char **argv;
 					spdbeg = speed;
 				if (beginbath == 0 && beams_bath > 0)
 					for (i=0;i<beams_bath;i++)
-						if (bath[i] > 0)
+						if (bath[i] > 0.0)
 							{
-							bathmin = (double) bath[i];
-							bathmax = (double) bath[i];
+							bathmin = bath[i];
+							bathmax = bath[i];
 							beginbath = 1;
 							}
 				if (beginamp == 0 && beams_amp > 0)
 					for (i=0;i<beams_amp;i++)
-						if (amp[i] > 0)
+						if (amp[i] > 0.0)
 							{
-							ampmin = (double) amp[i];
-							ampmax = (double) amp[i];
+							ampmin = amp[i];
+							ampmax = amp[i];
 							beginamp = 1;
 							}
 				if (beginss == 0 && pixels_ss > 0)
 					for (i=0;i<pixels_ss;i++)
-						if (ss[i] > 0)
+						if (ss[i] > 0.0)
 							{
-							ssmin = (double) ss[i];
-							ssmax = (double) ss[i];
+							ssmin = ss[i];
+							ssmax = ss[i];
 							beginss = 1;
 							}
-				if (navlon < lonmin) lonmin = navlon;
-				if (navlon > lonmax) lonmax = navlon;
-				if (navlat < latmin) latmin = navlat;
-				if (navlat > latmax) latmax = navlat;
+				lonmin = min(lonmin, navlon);
+				lonmax = max(lonmax, navlon);
+				latmin = min(latmin, navlat);
+				latmax = max(latmax, navlat);
 				for (i=0;i<beams_bath;i++)
 					{
-					if (bath[i] > 0)
+					if (bath[i] > 0.0)
 						{
-						if (bath[i] < (int) bathmin) bathmin = (double) bath[i];
-						if (bath[i] > (int) bathmax) bathmax = (double) bath[i];
+						bathmin = min(bathmin, bath[i]);
+						bathmax = max(bathmax, bath[i]);
+						lonmin = min(lonmin, bathlon[i]);
+						lonmax = max(lonmax, bathlon[i]);
+						latmin = min(latmin, bathlat[i]);
+						latmax = max(latmax, bathlat[i]);
 						ngdbeams++;
 						}
-					else if (bath[i] == 0)
+					else if (bath[i] == 0.0)
 						nzdbeams++;
 					else
 						nfdbeams++;
@@ -616,30 +628,34 @@ char **argv;
 					{
 					if (amp[i] > 0)
 						{
-						if (amp[i] < (int) ampmin) ampmin = (double) amp[i];
-						if (amp[i] > (int) ampmax) ampmax = (double) amp[i];
+						ampmin = min(ampmin, amp[i]);
+						ampmax = max(ampmax, amp[i]);
 						ngabeams++;
 						}
-					else if (amp[i] == 0)
+					else if (amp[i] == 0.0)
 						nzabeams++;
 					else
 						nfabeams++;
 					}
 				for (i=0;i<pixels_ss;i++)
 					{
-					if (ss[i] > 0)
+					if (ss[i] > 0.0)
 						{
-						if (ss[i] < (int) ssmin) ssmin = (double) ss[i];
-						if (ss[i] > (int) ssmax) ssmax = (double) ss[i];
+						ssmin = min(ssmin, ss[i]);
+						ssmax = max(ssmax, ss[i]);
+						lonmin = min(lonmin, sslon[i]);
+						lonmax = max(lonmax, sslon[i]);
+						latmin = min(latmin, sslat[i]);
+						latmax = max(latmax, sslat[i]);
 						ngsbeams++;
 						}
-					else if (ss[i] == 0)
+					else if (ss[i] == 0.0)
 						nzsbeams++;
 					else
 						nfsbeams++;
 					}
 				distot = distot + distance;
-				bathend = (double) bath[beams_bath/2];
+				bathend = bath[beams_bath/2];
 				lonend = navlon;
 				latend = navlat;
 				spdend = speed;
@@ -683,7 +699,7 @@ char **argv;
 					{
 					datacur = data[j];
 					bath = datacur->bath;
-					if (bath[i] > 0)
+					if (bath[i] > 0.0)
 					  {
 					  nbath++;
 					  sumx  = sumx + j;
@@ -701,7 +717,7 @@ char **argv;
 					  {
 					  datacur = data[j];
 					  bath = datacur->bath;
-					  if (bath[i] > 0)
+					  if (bath[i] > 0.0)
 					    {
 					    dev = bath[i] - a - b*j;
 					    variance = variance + dev*dev;
@@ -725,7 +741,7 @@ char **argv;
 					{
 					datacur = data[j];
 					amp = datacur->amp;
-					if (amp[i] > 0)
+					if (amp[i] > 0.0)
 					  {
 					  namp++;
 					  mean  = mean + amp[i];
@@ -738,7 +754,7 @@ char **argv;
 					  {
 					  datacur = data[j];
 					  amp = datacur->amp;
-					  if (amp[i] > 0)
+					  if (amp[i] > 0.0)
 					    {
 					    dev = amp[i] - mean;
 					    variance = variance + dev*dev;
@@ -762,7 +778,7 @@ char **argv;
 					{
 					datacur = data[j];
 					ss = datacur->ss;
-					if (ss[i] > 0)
+					if (ss[i] > 0.0)
 					  {
 					  nss++;
 					  mean  = mean + ss[i];
@@ -775,7 +791,7 @@ char **argv;
 					  {
 					  datacur = data[j];
 					  ss = datacur->ss;
-					  if (ss[i] > 0)
+					  if (ss[i] > 0.0)
 					    {
 					    dev = ss[i] - mean;
 					    variance = variance + dev*dev;
@@ -926,11 +942,11 @@ char **argv;
 		{
 		mb_free(verbose,data[i]->bath,&error);
 		mb_free(verbose,data[i]->amp,&error);
-		mb_free(verbose,data[i]->bathacrosstrack,&error);
-		mb_free(verbose,data[i]->bathalongtrack,&error);
+		mb_free(verbose,data[i]->bathlon,&error);
+		mb_free(verbose,data[i]->bathlat,&error);
 		mb_free(verbose,data[i]->ss,&error);
-		mb_free(verbose,data[i]->ssacrosstrack,&error);
-		mb_free(verbose,data[i]->ssalongtrack,&error);
+		mb_free(verbose,data[i]->sslon,&error);
+		mb_free(verbose,data[i]->sslat,&error);
 		mb_free(verbose,data[i],&error);
 		}
 	mb_free(verbose,bathmean,&error);
