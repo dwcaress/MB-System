@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_dsl.h	8/5/94
- *	$Id: mbsys_dsl.h,v 1.1 1996-08-26 17:24:56 caress Exp $
+ *	$Id: mbsys_dsl.h,v 4.0 1996-08-26 17:29:56 caress Exp $
  *
  *    Copyright (c) 1996 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -23,6 +23,9 @@
  * Date:	August 5, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  1996/08/26  17:24:56  caress
+ * Initial revision
+ *
  *
  */
 /*

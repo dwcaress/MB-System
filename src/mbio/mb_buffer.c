@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_buffer.c	2/25/93
- *    $Id: mb_buffer.c,v 4.10 1996-08-05 15:21:58 caress Exp $
+ *    $Id: mb_buffer.c,v 4.11 1996-08-26 17:24:56 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -35,6 +35,9 @@
  * Date:	February 25, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.10  1996/08/05  15:21:58  caress
+ * Just redid i/o for Simrad sonars, including adding EM12S and EM121 support.
+ *
  * Revision 4.9  1996/04/22  13:21:19  caress
  * Now have DTR and MIN/MAX defines in mb_define.h
  *
@@ -120,7 +123,7 @@ int	verbose;
 char	**buff_ptr;
 int	*error;
 {
-  static char rcs_id[]="$Id: mb_buffer.c,v 4.10 1996-08-05 15:21:58 caress Exp $";
+  static char rcs_id[]="$Id: mb_buffer.c,v 4.11 1996-08-26 17:24:56 caress Exp $";
 	char	*function_name = "mb_buffer_init";
 	int	status = MB_SUCCESS;
 	struct mb_buffer_struct *buff;
@@ -1361,6 +1364,16 @@ int	*error;
 				ss,ssacrosstrack,ssalongtrack,
 				comment,error);
 			}
+		else if (system == MB_SYS_DSL)
+			{
+			status = mbsys_dsl_extract(verbose,mbio_ptr,
+				store_ptr,kind,
+				time_i,time_d,navlon,navlat,speed,heading,
+				nbath,namp,nss,
+				bath,amp,bathacrosstrack,bathalongtrack,
+				ss,ssacrosstrack,ssalongtrack,
+				comment,error);
+			}
 		else
 			{
 			status = MB_FAILURE;
@@ -1587,6 +1600,14 @@ int	*error;
 		else if (system == MB_SYS_HSMD)
 			{
 			status = mbsys_hsmd_extract_nav(verbose,mbio_ptr,
+				store_ptr,kind,
+				time_i,time_d,navlon,navlat,speed,heading,
+				roll,pitch,heave, 
+				error);
+			}
+		else if (system == MB_SYS_DSL)
+			{
+			status = mbsys_dsl_extract_nav(verbose,mbio_ptr,
 				store_ptr,kind,
 				time_i,time_d,navlon,navlat,speed,heading,
 				roll,pitch,heave, 
@@ -1842,6 +1863,15 @@ int	*error;
 			ss,ssacrosstrack,ssalongtrack,
 			comment,error);
 		}
+	else if (system == MB_SYS_DSL)
+		{
+		status = mbsys_dsl_insert(verbose,mbio_ptr,store_ptr,
+			time_i,time_d,navlon,navlat,speed,heading,
+			nbath,namp,nss,
+			bath,amp,bathacrosstrack,bathalongtrack,
+			ss,ssacrosstrack,ssalongtrack,
+			comment,error);
+		}
 	else
 		{
 		status = MB_FAILURE;
@@ -2025,6 +2055,14 @@ int	*error;
 			roll,pitch,heave, 
 			error);
 		}
+	else if (system == MB_SYS_DSL)
+		{
+		status = mbsys_dsl_insert_nav(verbose,
+			mbio_ptr,store_ptr,
+			time_i,time_d,navlon,navlat,speed,heading,
+			roll,pitch,heave, 
+			error);
+		}
 	else
 		{
 		status = MB_FAILURE;
@@ -2122,6 +2160,10 @@ int	*error;
 	else if (system == MB_SYS_HSMD)
 		{
 		status = mbsys_hsmd_alloc(verbose,mbio_ptr,store_ptr,error);
+		}
+	else if (system == MB_SYS_DSL)
+		{
+		status = mbsys_dsl_alloc(verbose,mbio_ptr,store_ptr,error);
 		}
 	else
 		{
@@ -2222,6 +2264,10 @@ int	*error;
 	else if (system == MB_SYS_HSMD)
 		{
 		status = mbsys_hsmd_deall(verbose,mbio_ptr,store_ptr,error);
+		}
+	else if (system == MB_SYS_DSL)
+		{
+		status = mbsys_dsl_deall(verbose,mbio_ptr,store_ptr,error);
 		}
 	else
 		{
@@ -2333,6 +2379,11 @@ int	*error;
 	else if (system == MB_SYS_HSMD)
 		{
 		status = mbsys_hsmd_copy(verbose,mbio_ptr,
+			store_ptr,copy_ptr,error);
+		}
+	else if (system == MB_SYS_DSL)
+		{
+		status = mbsys_dsl_copy(verbose,mbio_ptr,
 			store_ptr,copy_ptr,error);
 		}
 	else

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbbath.c	3/31/93
- *    $Id: mbbath.c,v 4.20 1996-04-22 13:23:05 caress Exp $
+ *    $Id: mbbath.c,v 4.21 1996-08-26 17:35:08 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -20,6 +20,9 @@
  * Date:	March 31, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.20  1996/04/22  13:23:05  caress
+ * Now have DTR and MIN/MAX defines in mb_define.h
+ *
  * Revision 4.19  1996/01/26  21:25:58  caress
  * Version 4.3 distribution
  *
@@ -142,7 +145,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbbath.c,v 4.20 1996-04-22 13:23:05 caress Exp $";
+	static char rcs_id[] = "$Id: mbbath.c,v 4.21 1996-08-26 17:35:08 caress Exp $";
 	static char program_name[] = "MBBATH";
 	static char help_message[] =  "MBBATH calculates bathymetry from \
 the travel time data by raytracing \nthrough a layered water velocity \
@@ -224,6 +227,7 @@ and stdout.";
 	double	pitch_bias;
 	double	roll_angle_correction;
 	double	pitch_angle_correction;
+	double	alpha, beta;
 	double	draught;
 	int	uncorrected;
 	FILE	*vfp;
@@ -232,6 +236,8 @@ and stdout.";
 	double	*velocity = NULL;
 	double	*velocity_sum = NULL;
 	char	*rt_svp;
+	double	ssv_default;
+	double	ssv_start;
 	int	fix_2100_tt = MB_NO;
 
 	/* roll error correction handling variables */
@@ -269,7 +275,7 @@ and stdout.";
 	double	tt, factor, zz, xx, vavg;
 	double	value_max;
 	int	i, j, k, l, m;
-
+	
 	char	*ctime();
 	char	*getenv();
 
@@ -316,10 +322,11 @@ and stdout.";
 	pitch_bias = 0.0;
 	roll_correction = 0.0;
 	draught = 0.0;
+	ssv_default = 1500.0;
 	uncorrected = MB_NO;
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhB:b:D:d:F:f:I:i:O:o:P:p:R:r:S:s:UuW:w:Zz")) != -1)
+	while ((c = getopt(argc, argv, "VvHhB:b:D:d:F:f:I:i:K:k:O:o:P:p:R:r:S:s:UuW:w:Zz")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -330,19 +337,39 @@ and stdout.";
 		case 'v':
 			verbose++;
 			break;
+		case 'B':
+		case 'b':
+			sscanf (optarg,"%lf", &roll_bias);
+			flag++;
+			break;
+		case 'D':
+		case 'd':
+			sscanf (optarg,"%lf", &draught);
+			flag++;
+			break;
 		case 'F':
 		case 'f':
 			sscanf (optarg,"%d", &format);
 			flag++;
 			break;
-		case 'W':
-		case 'w':
-			sscanf (optarg,"%s", vfile);
+		case 'I':
+		case 'i':
+			sscanf (optarg,"%s", ifile);
 			flag++;
 			break;
-		case 'B':
-		case 'b':
-			sscanf (optarg,"%lf", &roll_bias);
+		case 'K':
+		case 'k':
+			sscanf (optarg,"%lf", &ssv_default);
+			flag++;
+			break;
+		case 'O':
+		case 'o':
+			sscanf (optarg,"%s", ofile);
+			flag++;
+			break;
+		case 'P':
+		case 'p':
+			sscanf (optarg,"%lf", &pitch_bias);
 			flag++;
 			break;
 		case 'R':
@@ -355,29 +382,14 @@ and stdout.";
 			sscanf (optarg,"%s", sfile);
 			flag++;
 			break;
-		case 'P':
-		case 'p':
-			sscanf (optarg,"%lf", &pitch_bias);
-			flag++;
-			break;
-		case 'D':
-		case 'd':
-			sscanf (optarg,"%lf", &draught);
-			flag++;
-			break;
 		case 'U':
 		case 'u':
 			uncorrected = MB_YES;
 			flag++;
 			break;
-		case 'I':
-		case 'i':
-			sscanf (optarg,"%s", ifile);
-			flag++;
-			break;
-		case 'O':
-		case 'o':
-			sscanf (optarg,"%s", ofile);
+		case 'W':
+		case 'w':
+			sscanf (optarg,"%s", vfile);
 			flag++;
 			break;
 		case 'Z':
@@ -445,6 +457,7 @@ and stdout.";
 		fprintf(stderr,"dbg2       roll bias:       %f\n",roll_bias);
 		fprintf(stderr,"dbg2       pitch bias:      %f\n",pitch_bias);
 		fprintf(stderr,"dbg2       draught:         %f\n",draught);
+		fprintf(stderr,"dbg2       ssv_default:     %f\n",ssv_default);
 		fprintf(stderr,"dbg2       roll file:       %s\n",rfile);
 		fprintf(stderr,"dbg2       statics file:    %s\n",sfile);
 		}
@@ -685,6 +698,64 @@ and stdout.";
 			program_name);
 		exit(error);
 		}
+	
+	/* read input file until a surface sound velocity value
+		is obtained, then close and reopen the file 
+		this provides the starting surface sound velocity
+		for recalculating the bathymetry */
+	error = MB_ERROR_NO_ERROR;
+	ssv_start = 0.0;
+	while (error <= MB_ERROR_NO_ERROR
+		&& ssv_start <= 0.0)
+		{
+		/* read some data */
+		error = MB_ERROR_NO_ERROR;
+		status = MB_SUCCESS;
+		status = mb_get_all(verbose,imbio_ptr,&store_ptr,&kind,
+				time_i,&time_d,&navlon,&navlat,&speed,
+				&heading,&distance,
+				&nbath,&namp,&nss,
+				bath,amp,bathacrosstrack,bathalongtrack,
+				ss,ssacrosstrack,ssalongtrack,
+				comment,&error);
+				
+		if (kind = MB_DATA_DATA 
+			&& error <= MB_ERROR_NO_ERROR)
+			{
+			/* extract travel times */
+			status = mb_ttimes(verbose,imbio_ptr,
+				store_ptr,&kind,&nbeams,
+				ttimes,angles,
+				angles_forward,angles_null,flags,
+				&depth_offset,&ssv,&error);
+				
+			/* check surface sound velocity */
+			if (ssv > 0.0)
+				ssv_start = ssv;
+			}
+		}
+	if (ssv_start <= 0.0)
+		ssv_start = ssv_default;
+	
+	/* close and reopen the input file */
+	status = mb_close(verbose,&imbio_ptr,&error);
+	if ((status = mb_read_init(
+		verbose,ifile,format,pings,lonflip,bounds,
+		btime_i,etime_i,speedmin,timegap,
+		&imbio_ptr,&btime_d,&etime_d,
+		&beams_bath,&beams_amp,&pixels_ss,&error)) != MB_SUCCESS)
+		{
+		mb_error(verbose,error,&message);
+		fprintf(stderr,"\nMBIO Error returned from function <mb_read_init>:\n%s\n",message);
+		fprintf(stderr,"\nMultibeam File <%s> not initialized for reading\n",ifile);
+		fprintf(stderr,"\nProgram <%s> Terminated\n",
+			program_name);
+		exit(error);
+		}
+	
+	/* reset error */
+	error = MB_ERROR_NO_ERROR;
+	status = MB_SUCCESS;
 
 	/* if specified get static beam depth corrections */
 	if (((int) strlen(sfile)) > 0)
@@ -1094,13 +1165,21 @@ and stdout.";
 				angles_forward,angles_null,flags,
 				&depth_offset,&ssv,&error);
 
+			/* set surface sound speed to default if needed */
+			if (ssv <= 0.0)
+				ssv = ssv_start;
+			else
+				ssv_start = ssv;
+
 			/* fix possible problem with SB2100 data */
 			if (error == MB_ERROR_NO_ERROR
 				&& kind == MB_DATA_DATA
 				&& format == 41
 				&& fix_2100_tt == MB_YES)
 				{
-				/* check ping pulsewidth and double ttime if < 3 */
+				/* check ping pulsewidth and double ttime if < 3 
+					this is temporary problem with the
+					Seis Surveyor SB2136 data */
 
 				/* get data structure pointer */
 				store = (struct mbsys_sb2100_struct *) store_ptr;
@@ -1162,8 +1241,26 @@ and stdout.";
 			  {
 			  if (ttimes[i] > 0.0)
 			    {
-			    /* get takeoff angle */
-			    angles[i] = angles[i] + roll_angle_correction;
+			    /* if needed, translate angles from takeoff
+				    angle coordinates to roll-pitch 
+				    coordinates, apply roll and pitch
+				    corrections, and translate back */
+			    if (roll_angle_correction != 0.0 
+				    || pitch_angle_correction != 0.0)
+				    {
+				    mb_takeoff_to_rollpitch(
+					    verbose,
+					    angles[i], angles_forward[i], 
+					    &alpha, &beta, 
+					    &error);
+				    alpha += pitch_angle_correction;
+				    beta += roll_angle_correction;
+				    mb_rollpitch_to_takeoff(
+					    verbose, 
+					    alpha, beta, 
+					    &angles[i], &angles_forward[i], 
+					    &error); 
+				    }
 			    
 			    /* raytrace */
 			    status = mb_rt(verbose, rt_svp, depth_offset, 
@@ -1191,14 +1288,10 @@ and stdout.";
 
 			    /* get alongtrack and acrosstrack distances
 				    and depth */
-			    if (angles[i] < 0.0)
-				xx = -xx;
-			    angles_forward[i] = angles_forward[i] 
-				+ pitch_angle_correction;
 			    bathacrosstrack[i] = xx*cos(DTR*angles_forward[i]);
 			    bathalongtrack[i] = xx*sin(DTR*angles_forward[i]);
 			    bath[i] = zz;
-			    
+
 			    /* apply static correction */
 			    if (nbath_corr == beams_bath)
 				bath[i] -= bath_corr[i];
@@ -1209,9 +1302,9 @@ and stdout.";
 
 			    /* output some debug values */
 			    if (verbose >= 5)
-				fprintf(stderr,"dbg5       %3d %3d %6.3f %6.3f %8.2f %8.2f\n",
-				    idata, i, 0.5*ttimes[i], angles[i], 
-				    bathacrosstrack[i],bath[i]);
+				fprintf(stderr,"dbg5       %3d %3d %6.3f %6.3f %6.3f %8.2f %8.2f %8.2f\n",
+				    idata, i, 0.5*ttimes[i], angles[i], angles_forward[i],  
+				    bathacrosstrack[i], bathalongtrack[i], bath[i]);
 
 			    /* output some debug messages */
 			    if (verbose >= 5)
@@ -1414,6 +1507,122 @@ int	*error;
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       roll_correction: %f\n",
 						*roll_correction);
+		fprintf(stderr,"dbg2       error:           %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:          %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_takeoff_to_rollpitch(verbose,theta,phi,alpha,beta,error)
+int	verbose;
+double	theta;
+double	phi;
+double	*alpha;
+double	*beta;
+int	*error;
+{
+	char	*function_name = "mb_takeoff_to_rollpitch";
+	int	status = MB_SUCCESS;
+	double	x, y, z;
+	int	i, j;
+	
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBBATH function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       theta:      %f\n",theta);
+		fprintf(stderr,"dbg2       phi:        %f\n",phi);
+		}
+		
+	/* convert to cartesian coordinates */
+	x = sin(DTR * theta) * cos(DTR * phi);
+	y = sin(DTR * theta) * sin(DTR * phi);
+	z = cos(DTR * theta);
+
+	/* convert to roll-pitch coordinates */
+	*alpha = asin(y);
+	*beta = acos(x / cos(*alpha));
+	*alpha *= RTD;
+	*beta *= RTD;
+
+	/* assume success */
+	*error = MB_ERROR_NO_ERROR;
+	status = MB_SUCCESS;
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBBATH function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       alpha:           %f\n",*alpha);
+		fprintf(stderr,"dbg2       beta:            %f\n",*beta);
+		fprintf(stderr,"dbg2       error:           %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:          %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_rollpitch_to_takeoff(verbose,alpha,beta,theta,phi,error)
+int	verbose;
+double	alpha;
+double	beta;
+double	*theta;
+double	*phi;
+int	*error;
+{
+	char	*function_name = "mb_rollpitch_to_takeoff";
+	int	status = MB_SUCCESS;
+	double	x, y, z;
+	int	i, j;
+	
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBBATH function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       alpha:      %f\n",alpha);
+		fprintf(stderr,"dbg2       beta:       %f\n",beta);
+		}
+		
+	/* convert to cartesian coordinates */
+	x = cos(DTR * alpha) * cos(DTR * beta);
+	y = sin(DTR * alpha);
+	z = cos(DTR * alpha) * sin(DTR * beta);
+
+	/* convert to takeoff angle coordinates */
+	*theta = acos(z);
+	*phi = asin(y / sin(*theta));
+	*theta *= RTD;
+	*phi *= RTD;
+	if (x < 0.0)
+		*phi = 180.0 - *phi;
+
+	/* assume success */
+	*error = MB_ERROR_NO_ERROR;
+	status = MB_SUCCESS;
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBBATH function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       theta:           %f\n",*theta);
+		fprintf(stderr,"dbg2       phi:             %f\n",*phi);
 		fprintf(stderr,"dbg2       error:           %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:          %d\n",status);

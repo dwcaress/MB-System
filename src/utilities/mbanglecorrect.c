@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbanglecorrect.c	8/13/95
- *    $Id: mbanglecorrect.c,v 4.8 1996-04-22 13:23:05 caress Exp $
+ *    $Id: mbanglecorrect.c,v 4.9 1996-08-26 17:35:08 caress Exp $
  *
  *    Copyright (c) 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -45,6 +45,9 @@ The default input and output streams are stdin and stdout.\n";
  * Date:	January 12, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.8  1996/04/22  13:23:05  caress
+ * Now have DTR and MIN/MAX defines in mb_define.h
+ *
  * Revision 4.7  1996/03/12  17:27:01  caress
  * Check-in after flail with format 63.
  *
@@ -126,7 +129,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbanglecorrect.c,v 4.8 1996-04-22 13:23:05 caress Exp $";
+	static char rcs_id[] = "$Id: mbanglecorrect.c,v 4.9 1996-08-26 17:35:08 caress Exp $";
 	static char program_name[] = "MBANGLECORRECT";
 	static char help_message[] =  
 "mbanglecorrect is a tool for processing sidescan data.  This program\n\t\
@@ -144,7 +147,7 @@ variability in seafloor reflectivity.\n\t\
 The default input and output streams are stdin and stdout.\n";
 	static char usage_message[] = "mbanglecorrect [\
 -Akind/scale -Byr/mo/da/hr/mn/sc -C -Dmode/length -Eyr/mo/da/hr/mn/sc \
--Fformat -G -Iinfile -Mnsmooth -Nnangles/angle_max -Ooutfile -Rw/e/s/n \
+-Fformat -G -Iinfile -K -Mnsmooth -Nnangles/angle_max -Ooutfile -Rw/e/s/n \
 -Scorrectionfile -Zdepth -V -H]";
 	extern char *optarg;
 	extern int optkind;
@@ -215,6 +218,7 @@ The default input and output streams are stdin and stdout.\n";
 	char	sfile[128];
 	int	use_global_statics = MB_NO;
 	int	symmetry = MB_YES;
+	int	subtract_mode = MB_NO;
 	int	nangles = 161;
 	double	angle_min = -80.0;
 	double	angle_max = 80.0;
@@ -292,7 +296,7 @@ The default input and output streams are stdin and stdout.\n";
 	strcpy (sfile, "\0");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "A:a:B:b:CcD:d:E:e:F:f:GgHhI:i:M:m:N:n:O:o:R:r:S:s:VvZ:z:")) != -1)
+	while ((c = getopt(argc, argv, "A:a:B:b:CcD:d:E:e:F:f:GgHhI:i:KkM:m:N:n:O:o:R:r:S:s:VvZ:z:")) != -1)
 	  switch (c) 
 		{
 		case 'A':
@@ -344,6 +348,11 @@ The default input and output streams are stdin and stdout.\n";
 		case 'I':
 		case 'i':
 			sscanf (optarg,"%s", ifile);
+			flag++;
+			break;
+		case 'K':
+		case 'k':
+			subtract_mode = MB_YES;
 			flag++;
 			break;
 		case 'M':
@@ -705,6 +714,10 @@ The default input and output streams are stdin and stdout.\n";
 		fprintf(stderr, "Maximum angle:         %f\n", angle_max);
 		fprintf(stderr, "Default depth:         %f\n", depth_default);
 		fprintf(stderr, "Scaling factor:        %f\n", scale);
+		if (subtract_mode == MB_YES)
+			fprintf(stderr, "Correcting by subtraction (appropriate for log or dB data)...\n");
+		else
+			fprintf(stderr, "Correcting by division (appropriate for linear data)...\n");
 		if (ampkind == MBANGLECORRECT_AMP)
 			fprintf(stderr, "Working on beam amplitude data...\n");
 		else
@@ -1383,8 +1396,14 @@ The default input and output streams are stdin and stdout.\n";
 				status = get_anglecorr(verbose, 
 					    nangles, angles, mean, 
 					    angle, &correction, &error);
-				ping[j].dataprocess[i] = 
-				    scale*ping[j].amp[i]/correction;
+				if (subtract_mode == MB_YES)
+				    ping[j].dataprocess[i] = 
+					ping[j].amp[i] - correction + scale;
+				else
+				    ping[j].dataprocess[i] = 
+					scale * ping[j].amp[i] / correction;
+				if (ping[j].dataprocess[i] < 0.0)
+				    ping[j].dataprocess[i] = 0.0;
 				}
 			    }
 			}
@@ -1432,8 +1451,14 @@ The default input and output streams are stdin and stdout.\n";
 				status = get_anglecorr(verbose, 
 					nangles, angles, mean, 
 					angle, &correction, &error);
-				ping[j].dataprocess[i] = scale*
-				    ping[j].ss[i]/correction;
+				if (subtract_mode == MB_YES)
+				    ping[j].dataprocess[i] = 
+					ping[j].ss[i] - correction + scale;
+				else
+				    ping[j].dataprocess[i] = 
+					scale * ping[j].ss[i] / correction;
+				if (ping[j].dataprocess[i] < 0.0)
+				    ping[j].dataprocess[i] = 0.0;
 				}
 			    }
 			}
@@ -1497,7 +1522,9 @@ The default input and output streams are stdin and stdout.\n";
 		  {
 		  if (ampkind == MBANGLECORRECT_SS)
 			for (i=0;i<pixels_ss;i++)
+				{
 				ping[j].ss[i] = ping[j].dataprocess[i];
+				}
 		  else if (ampkind == MBANGLECORRECT_AMP)
 			for (i=0;i<beams_amp;i++)
 				ping[j].amp[i] = ping[j].dataprocess[i];
@@ -1526,7 +1553,7 @@ The default input and output streams are stdin and stdout.\n";
 			}
 		else if (ndata > 0)
 			{
-			nhold = nbuff - ping[0].id + 1;
+			nhold = nbuff - ping[ndata/2].id + 1;
 			}
 		else
 			nhold = 0;

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbswath.c	5/30/93
- *    $Id: mbswath.c,v 4.21 1996-08-13 18:32:53 caress Exp $
+ *    $Id: mbswath.c,v 4.22 1996-08-26 17:31:55 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -27,6 +27,9 @@
  * Date:	May 30, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.21  1996/08/13  18:32:53  caress
+ * Fixed bug in getting footprints of outer beams.
+ *
  * Revision 4.20  1996/08/13  16:10:07  caress
  * Fixed bug in plotting the first sidescan pixel.
  *
@@ -223,7 +226,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbswath.c,v 4.21 1996-08-13 18:32:53 caress Exp $";
+	static char rcs_id[] = "$Id: mbswath.c,v 4.22 1996-08-26 17:31:55 caress Exp $";
 	static char program_name[] = "MBSWATH";
 	static char help_message[] =  "MBSWATH is a GMT compatible utility which creates a color postscript \nimage of multibeam swath bathymetry or backscatter data.  The image \nmay be shaded relief as well.  Complete maps are made by using \nMBSWATH in conjunction with the usual GMT programs.";
 	static char usage_message[] = "mbswath -Ccptfile -Jparameters -Rwest/east/south/north \n\t[-Afactor -Btickinfo -byr/mon/day/hour/min/sec \n\t-ccopies -Dmode/ampscale/ampmin/ampmax \n\t-Eyr/mon/day/hour/min/sec -fformat \n\t-Fred/green/blue -Gmagnitude/azimuth -Idatalist \n\t-K -Ncptfile -O -P -ppings -Qdpi -Ttimegap -U -W -Xx-shift -Yy-shift \n\t-Zmode -V -H]";
@@ -296,7 +299,8 @@ char **argv;
 	int	footprint_mode = MBSWATH_FOOTPRINT_REAL;
 	double	rawfactor = 1.0;
 	double	factor;
-	double	default_depth = 3000.0;
+	double	default_depth = 0.0;
+	double	default_depth_use;
 	int	mode = MBSWATH_BATH;
 	int	bathy_in_feet = MB_NO;
 	int	start;
@@ -840,6 +844,13 @@ char **argv;
 		factor = rawfactor*mb_foreaft_beamwidth_table[format_num];
 	else
 		factor = rawfactor;
+		
+	/* set default depth, checking for deep-tow data */
+	if ((format == 111 || format == 112)
+		&& default_depth <= 0.0)
+		default_depth_use = 100.0;
+	else
+		default_depth_use = default_depth;
 
 	/* allocate memory for data arrays */
 	status = mb_malloc(verbose,sizeof(struct swath),
@@ -1085,7 +1096,7 @@ char **argv;
 			/* get footprint locations */
 			if (footprint_mode != MBSWATH_FOOTPRINT_POINT)
 			status = get_footprints(verbose,mode,
-				footprint_mode,factor,default_depth, 
+				footprint_mode,factor,default_depth_use, 
 				swath_plot,mtodeglon,mtodeglat,&error);
 
 			/* get shading */
@@ -1357,7 +1368,8 @@ int	*error;
 
 	/* take care of just one ping with nonzero center beam */
 	else if (swath->npings == 1 && fp_mode == MBSWATH_FOOTPRINT_FAKE
-		&& swath->data[0].bath[pingcur->beams_bath/2] > 0.0)
+		&& swath->data[0].bath[pingcur->beams_bath/2] > 0.0
+		&& depth_def <= 0.0)
 	  {
 	  pingcur = &swath->data[0];
 	  headingx = sin(pingcur->heading*DTR);
@@ -1433,7 +1445,8 @@ int	*error;
 
 			/* do it using fore-aft beam width */
 			if (setprint == MB_YES 
-				&& fp_mode == MBSWATH_FOOTPRINT_REAL)
+				&& fp_mode == MBSWATH_FOOTPRINT_REAL
+				&& depth_def <= 0.0)
 				{
 				print = &pingcur->bathfoot[j];
 				pingcur->bathflag[j] = MB_YES;
@@ -1441,9 +1454,13 @@ int	*error;
 					- pingcur->navlon)/mtodeglon;
 				ddlaty = (pingcur->bathlat[j] 
 					- pingcur->navlat)/mtodeglat;
+				if (depth_def > 0.0)
+					dddepth = depth_def;
+				else
+					dddepth = pingcur->bath[j];
 				r = rfactor*sqrt(ddlonx*ddlonx 
 					+ ddlaty*ddlaty 
-					+ pingcur->bath[j]*pingcur->bath[j]);
+					+ dddepth*dddepth);
 				pingcur->lonaft = -r*headingx*mtodeglon;
 				pingcur->lataft = -r*headingy*mtodeglat;
 				pingcur->lonfor = r*headingx*mtodeglon;
@@ -1526,11 +1543,11 @@ int	*error;
 					- pingcur->navlon)/mtodeglon;
 				ddlaty = (pingcur->sslat[j] 
 					- pingcur->navlat)/mtodeglat;
-				if (pingcur->beams_bath > 0 
+				if (depth_def > 0.0)
+					dddepth = depth_def;
+				else if (pingcur->beams_bath > 0 
 					&& pingcur->bath[pingcur->beams_bath/2] > 0.0)
 					dddepth = pingcur->bath[pingcur->beams_bath/2];
-				else if (dddepth <= 0.0)
-					dddepth = depth_def;
 				r = rfactor*sqrt(ddlonx*ddlonx 
 					+ ddlaty*ddlaty + dddepth*dddepth);
 				pingcur->lonaft = -r*headingx*mtodeglon;
@@ -1601,9 +1618,13 @@ int	*error;
 					- pingcur->navlon)/mtodeglon;
 				ddlaty = (pingcur->bathlat[j] 
 					- pingcur->navlat)/mtodeglat;
+				if (depth_def > 0.0)
+					dddepth = depth_def;
+				else
+					dddepth = pingcur->bath[j];
 				r = rfactor*sqrt(ddlonx*ddlonx 
 					+ ddlaty*ddlaty 
-					+ pingcur->bath[j]*pingcur->bath[j]);
+					+ dddepth*dddepth);
 				pingcur->lonaft = -r*headingx*mtodeglon;
 				pingcur->lataft = -r*headingy*mtodeglat;
 				pingcur->lonfor = r*headingx*mtodeglon;
@@ -1641,9 +1662,13 @@ int	*error;
 					- pingcur->navlon)/mtodeglon;
 				ddlaty = (pingcur->bathlat[j] 
 					- pingcur->navlat)/mtodeglat;
+				if (depth_def > 0.0)
+					dddepth = depth_def;
+				else
+					dddepth = pingcur->bath[j];
 				r = rfactor*sqrt(ddlonx*ddlonx 
 					+ ddlaty*ddlaty 
-					+ pingcur->bath[j]*pingcur->bath[j]);
+					+ dddepth*dddepth);
 				pingcur->lonaft = -r*headingx*mtodeglon;
 				pingcur->lataft = -r*headingy*mtodeglat;
 				pingcur->lonfor = r*headingx*mtodeglon;
@@ -1685,11 +1710,11 @@ int	*error;
 					- pingcur->navlon)/mtodeglon;
 				ddlaty = (pingcur->sslat[j] 
 					- pingcur->navlat)/mtodeglat;
-				if (pingcur->beams_bath > 0 
+				if (depth_def > 0.0)
+					dddepth = depth_def;
+				else if (pingcur->beams_bath > 0 
 					&& pingcur->bath[pingcur->beams_bath/2] > 0.0)
 					dddepth = pingcur->bath[pingcur->beams_bath/2];
-				else if (dddepth <= 0.0)
-					dddepth = depth_def;
 				r = rfactor*sqrt(ddlonx*ddlonx 
 					+ ddlaty*ddlaty + dddepth*dddepth);
 				pingcur->lonaft = -r*headingx*mtodeglon;
@@ -1728,11 +1753,11 @@ int	*error;
 					- pingcur->navlon)/mtodeglon;
 				ddlaty = (pingcur->sslat[j] 
 					- pingcur->navlat)/mtodeglat;
-				if (pingcur->beams_bath > 0 
+				if (depth_def > 0.0)
+					dddepth = depth_def;
+				else if (pingcur->beams_bath > 0 
 					&& pingcur->bath[pingcur->beams_bath/2] > 0.0)
 					dddepth = pingcur->bath[pingcur->beams_bath/2];
-				else if (dddepth <= 0.0)
-					dddepth = depth_def;
 				r = rfactor*sqrt(ddlonx*ddlonx 
 					+ ddlaty*ddlaty + dddepth*dddepth);
 				pingcur->lonaft = -r*headingx*mtodeglon;
