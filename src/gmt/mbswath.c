@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbswath.c	5/30/93
- *    $Id: mbswath.c,v 4.3 1994-10-21 11:34:20 caress Exp $
+ *    $Id: mbswath.c,v 4.4 1994-10-21 16:08:22 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -26,6 +26,9 @@
  * Date:	May 30, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1994/10/21  11:34:20  caress
+ * Release V4.0
+ *
  * Revision 4.2  1994/07/29  19:04:31  caress
  * Changes associated with supporting byte swapped Lynx OS and
  * >> using unix second time base.
@@ -162,7 +165,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbswath.c,v 4.3 1994-10-21 11:34:20 caress Exp $";
+	static char rcs_id[] = "$Id: mbswath.c,v 4.4 1994-10-21 16:08:22 caress Exp $";
 	static char program_name[] = "MBSWATH";
 	static char help_message[] =  "MBSWATH is a GMT compatible utility which creates a color postscript \nimage of multibeam swath bathymetry or backscatter data.  The image \nmay be shaded relief as well.  Complete maps are made by using \nMBSWATH in conjunction with the usual GMT programs.";
 	static char usage_message[] = "mbswath -Ccptfile -Jparameters -Rwest/east/south/north [-Afactor -Btickinfo -byr/mon/day/hour/min/sec -Dmode/ampscale/ampmin/ampmax -Eyr/mon/day/hour/min/sec -fformat -Fred/green/blue -Gmagnitude/azimuth -Idatalist -K -M -O -P -ppings -Qdpi -U -Xx-shift -Yy-shift -Zmode -#copies -V -H]";
@@ -878,8 +881,8 @@ char **argv;
 				first,nplot,&error);
 
 			/* let the world know */
-			if (verbose >= 1)
-			    fprintf(stderr,"plotted %d pings...\n",nplot);
+			/*if (verbose >= 1)
+			    fprintf(stderr,"plotted %d pings...\n",nplot);*/
 
 			/* reorganize data */
 			if (flush == MB_YES && save_new == MB_YES)
