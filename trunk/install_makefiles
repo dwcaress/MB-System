@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	install_makefiles	5/20/94
-#    $Id: install_makefiles,v 5.0 2001-01-22 05:02:30 caress Exp $
+#    $Id: install_makefiles,v 5.1 2001-06-08 21:25:04 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 1996, 1997, 2001 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -41,10 +41,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   May 20, 1994
 #
 # Version:
-#   $Id: install_makefiles,v 5.0 2001-01-22 05:02:30 caress Exp $
+#   $Id: install_makefiles,v 5.1 2001-06-08 21:25:04 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 5.0  2001/01/22  05:02:30  caress
+# Version 5.0.0
+#
 # Revision 4.20  2000/10/25  20:31:20  caress
 # Added references to GMT version 3.3
 #
@@ -509,10 +512,19 @@ while (@files)
 		elsif (index($_,"cd mbedit",0) >= 0 && $GRAPHICAL ne "YES")
 			{
 			}
+		elsif (index($_,"cd mbeditold",0) >= 0 && $GRAPHICAL ne "YES")
+			{
+			}
 		elsif (index($_,"cd mbvelocitytool",0) >= 0 && $GRAPHICAL ne "YES")
 			{
 			}
 		elsif (index($_,"cd mbnavedit",0) >= 0 && $GRAPHICAL ne "YES")
+			{
+			}
+		elsif (index($_,"cd mbnaveditold",0) >= 0 && $GRAPHICAL ne "YES")
+			{
+			}
+		elsif (index($_,"cd mbnavadjust",0) >= 0 && $GRAPHICAL ne "YES")
 			{
 			}
 		else
