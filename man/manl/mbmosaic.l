@@ -1,4 +1,4 @@
-.TH mbmosaic l "2 August 1999" "MB-System 4.6" "MB-System 4.6"
+.TH mbmosaic l "5 October 1999" "MB-System 4.6" "MB-System 4.6"
 .SH NAME
 \fBmbmosaic\fP - Mosaic amplitude or sidescan data 
 from swath mapping sonar data files.
@@ -211,15 +211,20 @@ Sets the grid cell spacing to \fIdx\fP in longitude and \fIdy\fP
 in latitude. If \fIunits\fP is not specified, the \fIdx\fP 
 and \fIdy\fP values are assumed to be in meters. Valid values
 for \fIunits\fP include "km", "meters", and "degrees".
+If not in degrees, the grid cell spacing values are converted to
+degrees using the central latitude of the grid. If 
+\fIdy\fP = 0.0, then the latitude cell spacing will be set
+equal to the longitude cell spacing (after conversion to
+degrees, if necessary).
 By default, the grid spacing is calculated from 
 the grid bounds and the grid dimensions. When the user
-uses the \fB-E\fP option to set the grid spacing, the
+uses the \fB-E\fP option to set the cell spacings, the
 grid dimensions are calculated using the grid bounds and
 grid cell spacings. However, slight adjustments to the
-grid cell spacing values are usually required to keep
+grid cell spacings are usually required to keep
 the grid bounds as specified. Appending an ! to the end of 
-the \fB-E\fP arguments forces \fBmbgrid\fP to use the
-exact grid spacing values specified by adjusting the 
+the \fB-E\fP arguments forces \fBmbmosaic\fP to use the
+exact grid cell spacing values specified by adjusting the 
 grid bounds.
 .TP
 .B \-F
@@ -248,6 +253,13 @@ If \fIgridkind\fP = 3, \fBmbmosaic\fP also outputs shellscripts
 which run GMT version 3 programs to provide preliminary color
 fill maps of the gridded data. These shellscripts are 
 generated using the \fBmbm_grdplot\fP macro.
+If \fIgridkind\fP = 4, the output grids will be in the Arc/Info ASCII 
+grid format.  Arc/Info ASCII grids use "square" bins,
+meaning that the longitude and latitude grid cell spacings must
+be identical. Thus, whenever the \fIgridkind\fP = 4 option is
+used, the \fB-E\fP option must also be used in a way which
+ensures equal grid cell spacings (see the \fB-E\fP documentation
+above).
 Default: \fIgridkind\fP = 3.
 .TP
 .B \-H
@@ -485,7 +497,7 @@ the mosaic to be filled in through spine interpolation .
 The output looks like:
  
  Program mbmosaic
- Version $Id: mbmosaic.l,v 4.6 1999-08-08 04:17:40 caress Exp $
+ Version $Id: mbmosaic.l,v 4.7 1999-10-05 22:04:18 caress Exp $
  MB-system Version 4.5
 
  MBMOSAIC Parameters:
@@ -647,7 +659,8 @@ The following will suffice:
  		-Operth_ss -U90/2.0 -V
 
 .SH SEE ALSO
-\fBmbsystem\fP(l), \fBmbgrid\fP(l), \fBmbcontour\fP(l), \fBmbswath\fP(l)
+\fBmbsystem\fP(l), \fBmbgrid\fP(l), \fBmbm_grid\fP(l), \fBmbm_grd2arc\fP(l)
 
 .SH BUGS
-Please let us know.
+The options for this program have grown a bit complicated.
+If you have other problems, please let us know.

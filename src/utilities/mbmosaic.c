@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmosaic.c	2/10/97
- *    $Id: mbmosaic.c,v 4.7 1999-09-24 23:11:07 caress Exp $
+ *    $Id: mbmosaic.c,v 4.8 1999-10-05 22:04:18 caress Exp $
  *
  *    Copyright (c) 1997 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -23,6 +23,9 @@
  * Date:	February 10, 1997
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.7  1999/09/24  23:11:07  caress
+ * Altered grid interval parameter handling
+ *
  * Revision 4.6  1999/08/08  04:17:40  caress
  * Unknown changes.
  *
@@ -93,17 +96,15 @@
 #define	NO_DATA_FLAG	99999
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbmosaic.c,v 4.7 1999-09-24 23:11:07 caress Exp $";
+static char rcs_id[] = "$Id: mbmosaic.c,v 4.8 1999-10-05 22:04:18 caress Exp $";
 static char program_name[] = "mbmosaic";
 static char help_message[] =  "mbmosaic is an utility used to mosaic amplitude or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered by multibeam swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbmosaic -Ifilelist -Oroot \
--Rwest/east/south/north [-Adatatype \
--Bborder -Cclip -Dxdim/ydim \
--Edx/dy/units -Fpriority_range -Ggridkind \
--H -Llonflip -M -N -Ppings\
--Sspeed -Ttension -Uazimuth/factor \
--V -Wscale -Xextend \
--Ypriority_file -Zbathdef]";
+-Rwest/east/south/north [-Adatatype \n\
+          -Bborder -Cclip -Dxdim/ydim -Edx/dy/units \n\
+          -Fpriority_range -Ggridkind -H -Llonflip -M -N -Ppings \n\
+          -Sspeed -Ttension -Uazimuth/factor -V -Wscale -Xextend \n\
+          -Ypriority_file -Zbathdef]";
 
 /*--------------------------------------------------------------------*/
 
@@ -2404,9 +2405,9 @@ int	*error;
 		{
 		fprintf(fp, "ncols %d\n", nx);
 		fprintf(fp, "nrows %d\n", ny);
-		fprintf(fp, "xllcorner %f\n", xmin);
-		fprintf(fp, "yllcorner %f\n", ymin);
-		fprintf(fp, "cellsize %g\n", dx);
+		fprintf(fp, "xllcorner %.10g\n", xmin);
+		fprintf(fp, "yllcorner %.10g\n", ymin);
+		fprintf(fp, "cellsize %.10g\n", dx);
 		fprintf(fp, "nodata_value -99999\n");
 		for (j=0;j<ny;j++)
 		    {
