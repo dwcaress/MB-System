@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	4/21/96
- *    $Id: mb_define.h,v 5.11 2001-12-18 04:27:45 caress Exp $
+ *    $Id: mb_define.h,v 5.12 2002-01-24 02:28:29 caress Exp $
  *
  *    Copyright (c) 1996, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	April 21, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.11  2001/12/18 04:27:45  caress
+ * Release 5.0.beta11.
+ *
  * Revision 5.10  2001/11/15  22:36:43  caress
  * Added function mb_get_shortest_path()
  *
@@ -126,6 +129,9 @@ typedef char	mb_s_char;
 #endif
 #ifdef HPUX
 typedef signed char	mb_s_char;
+#endif
+#ifdef DARWIN
+typedef char	mb_s_char;
 #endif
 #ifdef OTHER
 typedef signed char	mb_s_char;
