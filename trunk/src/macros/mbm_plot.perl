@@ -1,7 +1,7 @@
 #! /usr/local/bin/perl 
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_plot.perl	6/18/93
-#    $Id: mbm_plot.perl,v 4.0 1994-03-05 23:52:40 caress Exp $
+#    $Id: mbm_plot.perl,v 4.1 1994-05-02 00:19:44 caress Exp $
 #
 #    Copyright (c) 1993, 1994 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -37,10 +37,13 @@
 #   June 17, 1993
 #
 # Version:
-#   $Id: mbm_plot.perl,v 4.0 1994-03-05 23:52:40 caress Exp $
+#   $Id: mbm_plot.perl,v 4.1 1994-05-02 00:19:44 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.0  1994/03/05  23:52:40  caress
+# First cut at version 4.0
+#
 # Revision 4.3  1994/03/05  03:01:33  caress
 # Added capability to handle amplitude and sidescan plots.
 #
@@ -316,21 +319,21 @@ $colorscale_offy = -0.5;
 
 # figure out some reasonable tick intervals for the basemap
 $base_tick = $dxx/5;
-if ($base_tick < 0.01667)
+if ($base_tick < 0.0166667)
 	{
-	$base_tick = 0.01667;
+	$base_tick = 0.0166667;
 	}
-elsif ($base_tick < 0.03333)
+elsif ($base_tick < 0.0333333)
 	{
-	$base_tick = 0.03333;
+	$base_tick = 0.0333333;
 	}
-elsif ($base_tick < 0.08333)
+elsif ($base_tick < 0.0833333)
 	{
-	$base_tick = 0.08333;
+	$base_tick = 0.0833333;
 	}
-elsif ($base_tick < 0.16667)
+elsif ($base_tick < 0.1666667)
 	{
-	$base_tick = 0.16667;
+	$base_tick = 0.1666667;
 	}
 elsif ($base_tick < 0.25)
 	{
