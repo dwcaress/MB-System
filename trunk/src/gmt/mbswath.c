@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbswath.c	5/30/93
- *    $Id: mbswath.c,v 4.29 1999-02-04 23:41:29 caress Exp $
+ *    $Id: mbswath.c,v 4.30 1999-04-16 01:24:27 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -27,6 +27,9 @@
  * Date:	May 30, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.29  1999/02/04  23:41:29  caress
+ * MB-System version 4.6beta7
+ *
  * Revision 4.28  1998/12/17  22:53:13  caress
  * MB-System version 4.6beta4
  *
@@ -237,7 +240,7 @@ struct swath
 
 /* global image variables and defines */
 #ifndef YIQ
-#ifdef GMT_OLD
+#ifdef GMT3_0
 #define YIQ(r,g,b)	rint(0.299*(r) + 0.587*(g) + 0.114*(b))
 #else
 #define  YIQ(rgb)
@@ -257,7 +260,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbswath.c,v 4.29 1999-02-04 23:41:29 caress Exp $";
+	static char rcs_id[] = "$Id: mbswath.c,v 4.30 1999-04-16 01:24:27 caress Exp $";
 	static char program_name[] = "MBSWATH";
 	static char help_message[] =  "MBSWATH is a GMT compatible utility which creates a color postscript \nimage of multibeam swath bathymetry or backscatter data.  The image \nmay be shaded relief as well.  Complete maps are made by using \nMBSWATH in conjunction with the usual GMT programs.";
 	static char usage_message[] = "mbswath -Ccptfile -Jparameters -Rwest/east/south/north \n\t[-Afactor -Btickinfo -byr/mon/day/hour/min/sec \n\t-ccopies -Dmode/ampscale/ampmin/ampmax \n\t-Eyr/mon/day/hour/min/sec -fformat \n\t-Fred/green/blue -Gmagnitude/azimuth -Idatalist \n\t-K -Ncptfile -O -P -ppings -Qdpi -Ttimegap -U -W -Xx-shift -Yy-shift \n\t-Zmode -V -H]";
@@ -374,7 +377,7 @@ char **argv;
 	borders[3] = 0.0;
 
 	/* deal with gmt options */
-#ifdef GMT_OLD
+#ifdef GMT3_0
 	argc = gmt_begin (argc, argv);
 #else
 	argc = GMT_begin (argc, argv);
@@ -401,7 +404,7 @@ char **argv;
 				case 'y':
 				case 'c':
 				case '\0':
-#ifdef GMT_OLD
+#ifdef GMT3_0
 					errflg += get_common_args (argv[i], 
 						&borders[0], &borders[1], 
 						&borders[2], &borders[3]);
@@ -418,7 +421,7 @@ char **argv;
 					strcpy(cptfile,&argv[i][2]);
 					break;
 				case 'F':
-#ifdef GMT_OLD
+#ifdef GMT3_0
 					if (gmt_getrgb (&argv[i][2], 
 						&gmtdefs.basemap_frame_rgb[0], 
 						&gmtdefs.basemap_frame_rgb[1], 
@@ -691,7 +694,7 @@ char **argv;
 		+ 0.25*(borders_use[3] - borders_use[2]);
 	
 	/* set up map */
-#ifdef GMT_OLD
+#ifdef GMT3_0
 	map_setup(borders[0],borders[1],borders[2],borders[3]);
 #else
 	GMT_map_setup(borders[0],borders[1],borders[2],borders[3]);
@@ -702,7 +705,7 @@ char **argv;
 			&mtodeglon,&mtodeglat);
 
 	/* get color palette file */
-#ifdef GMT_OLD
+#ifdef GMT3_0
 	read_cpt(cptfile);
 	if (gmt_gray || gmt_b_and_w == MB_YES) 
 		image = MBSWATH_IMAGE_8;
@@ -799,20 +802,21 @@ char **argv;
 		gmtdefs.x_origin, gmtdefs.y_origin,
 		gmtdefs.global_x_scale, gmtdefs.global_y_scale, 
 		gmtdefs.n_copies, gmtdefs.dpi, gmtdefs.measure_unit, 
+#ifdef GMT3_0
 		gmtdefs.paper_width, gmtdefs.page_rgb, 
-#ifdef GMT_OLD
 		gmt_epsinfo (argv[0]));
 	echo_command (argc, argv);
 	if (gmtdefs.unix_time) 
 		timestamp (argc, argv);
 #else
+		gmtdefs.paper_width, gmtdefs.page_rgb, 
 		GMT_epsinfo (argv[0]));
 	GMT_echo_command (argc, argv);
 	if (gmtdefs.unix_time) 
 		GMT_timestamp (argc, argv);
 #endif
 	/* set clip path */
-#ifdef GMT_OLD
+#ifdef GMT3_0
 	geo_to_xy(borders_use[0],borders_use[2],&clipx[0],&clipy[0]);
 	geo_to_xy(borders_use[1],borders_use[2],&clipx[1],&clipy[1]);
 	geo_to_xy(borders_use[1],borders_use[3],&clipx[2],&clipy[2]);
@@ -846,7 +850,7 @@ char **argv;
 					&bitimage,&error);
 
 			/* set image to background color */
-#ifdef GMT_OLD
+#ifdef GMT3_0
 			gray = YIQ (gmtdefs.page_rgb[0],
 					gmtdefs.page_rgb[1],
 					gmtdefs.page_rgb[2]);
@@ -1312,7 +1316,7 @@ char **argv;
 		}
 	else if (image == MBSWATH_IMAGE_24)
 		{
-#ifdef GMT_OLD
+#ifdef GMT3_0
 		color_image (0., 0., x_inch, y_inch, bitimage, nx, ny);
 #else
 		GMT_color_image (0., 0., x_inch, y_inch, bitimage, nx, ny);
@@ -1322,7 +1326,7 @@ char **argv;
 	/* plot basemap if required */
 	if (frame_info.plot) 
 		{
-#ifdef GMT_OLD
+#ifdef GMT3_0
 		ps_setpaint (gmtdefs.basemap_frame_rgb[0], 
 			gmtdefs.basemap_frame_rgb[1], 
 			gmtdefs.basemap_frame_rgb[2]);
@@ -1359,7 +1363,7 @@ char **argv;
 		}
 
 	/* end it all */
-#ifdef GMT_OLD
+#ifdef GMT3_0
 	gmt_end(argc, argv);
 #else
 	GMT_end(argc, argv);
@@ -2288,7 +2292,7 @@ int	*error;
 				print = &pingcur->bathfoot[j];
 				x = &(print->x[0]);
 				y = &(print->y[0]);
-#ifdef GMT_OLD
+#ifdef GMT3_0
 				for (k=0;k<4;k++)
 					geo_to_xy(x[k],y[k],&xx[k],&yy[k]);
 				get_rgb24(pingcur->bath[j],&red,&green,&blue);
@@ -2324,7 +2328,7 @@ int	*error;
 				print = &pingcur->bathfoot[j];
 				x = &(print->x[0]);
 				y = &(print->y[0]);
-#ifdef GMT_OLD
+#ifdef GMT3_0
 				for (k=0;k<4;k++)
 					geo_to_xy(x[k],y[k],&xx[k],&yy[k]);
 				get_rgb24(pingcur->amp[j],&red,&green,&blue);
@@ -2351,7 +2355,7 @@ int	*error;
 				print = &pingcur->ssfoot[j];
 				x = &(print->x[0]);
 				y = &(print->y[0]);
-#ifdef GMT_OLD
+#ifdef GMT3_0
 				for (k=0;k<4;k++)
 					geo_to_xy(x[k],y[k],&xx[k],&yy[k]);
 				get_rgb24(pingcur->ss[j],&red,&green,&blue);
@@ -2427,7 +2431,7 @@ int	*error;
 			for (j=0;j<pingcur->beams_bath;j++)
 			  if (mb_beam_ok(pingcur->beamflag[j]))
 				{
-#ifdef GMT_OLD
+#ifdef GMT3_0
 				geo_to_xy(pingcur->bathlon[j], 
 					pingcur->bathlat[j], 
 					&xx, &yy);
@@ -2463,7 +2467,7 @@ int	*error;
 			for (j=0;j<pingcur->beams_amp;j++)
 			  if (mb_beam_ok(pingcur->beamflag[j]))
 				{
-#ifdef GMT_OLD
+#ifdef GMT3_0
 				geo_to_xy(pingcur->bathlon[j], 
 					pingcur->bathlat[j], 
 					&xx, &yy);
@@ -2489,7 +2493,7 @@ int	*error;
 			for (j=0;j<pingcur->pixels_ss;j++)
 			  if (pingcur->ss[j] > 0.0)
 				{
-#ifdef GMT_OLD
+#ifdef GMT3_0
 				geo_to_xy(pingcur->sslon[j], 
 					pingcur->sslat[j], 
 					&xx, &yy);
@@ -2527,7 +2531,7 @@ int	*error;
 }
 /*--------------------------------------------------------------------*/
 /* version for GMT 3.0 */
-#ifdef GMT_OLD
+#ifdef GMT3_0
 int plot_box(verbose,x,y,red,green,blue,error)
 int	verbose;
 double	*x;
@@ -2924,7 +2928,7 @@ int	*error;
 #endif
 /*--------------------------------------------------------------------*/
 /* version for GMT 3.0 */
-#ifdef GMT_OLD
+#ifdef GMT3_0
 int plot_point(verbose,x,y,red,green,blue,error)
 int	verbose;
 double	x;
