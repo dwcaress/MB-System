@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad.c	3.00	8/5/94
- *	$Id: mbsys_simrad.c,v 4.5 1995-09-28 18:10:48 caress Exp $
+ *	$Id: mbsys_simrad.c,v 4.6 1995-11-27 21:53:53 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -40,6 +40,9 @@
  * Date:	August 5, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.5  1995/09/28  18:10:48  caress
+ * Various bug fixes working toward release 4.3.
+ *
  * Revision 4.4  1995/08/17  14:41:09  caress
  * Revision for release 4.3.
  *
@@ -86,7 +89,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_simrad.c,v 4.5 1995-09-28 18:10:48 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad.c,v 4.6 1995-11-27 21:53:53 caress Exp $";
 	char	*function_name = "mbsys_simrad_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -808,7 +811,8 @@ int	*error;
 }
 /*--------------------------------------------------------------------*/
 int mbsys_simrad_ttimes(verbose,mbio_ptr,store_ptr,kind,nbeams,
-	ttimes,angles,angles_forward,flags,depthadd,error)
+	ttimes,angles,angles_forward,angles_null,flags,
+	depthadd,ssv,error)
 int	verbose;
 char	*mbio_ptr;
 char	*store_ptr;
@@ -817,8 +821,10 @@ int	*nbeams;
 double	*ttimes;
 double	*angles;
 double	*angles_forward;
+double	*angles_null;
 int	*flags;
 double	*depthadd;
+double	*ssv;
 int	*error;
 {
 	char	*function_name = "mbsys_simrad_ttimes";
@@ -840,6 +846,7 @@ int	*error;
 		fprintf(stderr,"dbg2       ttimes:     %d\n",ttimes);
 		fprintf(stderr,"dbg2       angles_xtrk:%d\n",angles);
 		fprintf(stderr,"dbg2       angles_ltrk:%d\n",angles_forward);
+		fprintf(stderr,"dbg2       angles_null:%d\n",angles_null);
 		fprintf(stderr,"dbg2       flags:      %d\n",flags);
 		}
 
@@ -870,6 +877,7 @@ int	*error;
 			ttimes[i] = ttscale*store->tt[i];
 			angles[i] = 0.0;
 			angles_forward[i] = 0.0;
+			angles_null[i] = angles[i];
 			if (store->bath[i] < 0)
 				flags[i] = MB_YES;
 			else
@@ -885,6 +893,7 @@ int	*error;
 			*depthadd = 100.0*store->ping_heave + store->em100_td;
 		else if (store->sonar == MBSYS_SIMRAD_EM1000)
 			*depthadd = 100.0*store->ping_heave + store->em1000_td;
+		*ssv = 0.1 * store->sound_vel;
 
 		/* set status */
 		*error = MB_ERROR_NO_ERROR;
@@ -921,11 +930,12 @@ int	*error;
 	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR)
 		{
 		fprintf(stderr,"dbg2       depthadd:   %f\n",*depthadd);
+		fprintf(stderr,"dbg2       ssv:        %f\n",*ssv);
 		fprintf(stderr,"dbg2       nbeams:     %d\n",*nbeams);
 		for (i=0;i<*nbeams;i++)
-			fprintf(stderr,"dbg2       beam %d: tt:%f  angle_xtrk:%f  angle_ltrk:%f  flag:%d\n",
+			fprintf(stderr,"dbg2       beam %d: tt:%f  angle_xtrk:%f  angle_ltrk:%f  angle_null:%f  flag:%d\n",
 				i,ttimes[i],angles[i],
-				angles_forward[i],flags[i]);
+				angles_forward[i],angles_null[i],flags[i]);
 		}
 	if (verbose >= 2)
 		{

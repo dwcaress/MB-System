@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_ttimes.c	4/9/94
- *    $Id: mb_ttimes.c,v 4.5 1995-09-28 18:10:48 caress Exp $
+ *    $Id: mb_ttimes.c,v 4.6 1995-11-27 21:49:01 caress Exp $
 
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,9 @@
  * Date:	April 9, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.5  1995/09/28  18:10:48  caress
+ * Various bug fixes working toward release 4.3.
+ *
  * Revision 4.4  1995/03/06  19:38:54  caress
  * Changed include strings.h to string.h for POSIX compliance.
  *
@@ -55,7 +58,8 @@
 
 /*--------------------------------------------------------------------*/
 int mb_ttimes(verbose,mbio_ptr,store_ptr,kind,nbeams,ttimes,
-	angles,angles_forward,flags,depthadd,error)
+	angles,angles_forward,angles_null,flags,
+	depthadd,ssv,error)
 int	verbose;
 char	*mbio_ptr;
 char	*store_ptr;
@@ -64,11 +68,13 @@ int	*nbeams;
 double	*ttimes;
 double	*angles;
 double	*angles_forward;
+double	*angles_null;
 int	*flags;
 double	*depthadd;
+double	*ssv;
 int	*error;
 {
-  static char rcs_id[]="$Id: mb_ttimes.c,v 4.5 1995-09-28 18:10:48 caress Exp $";
+  static char rcs_id[]="$Id: mb_ttimes.c,v 4.6 1995-11-27 21:49:01 caress Exp $";
 	char	*function_name = "mb_ttimes";
 	int	status;
 	int	system;
@@ -96,71 +102,71 @@ int	*error;
 		{
 		status = mbsys_sb_ttimes(verbose,mbio_ptr,store_ptr,
 				kind,nbeams,ttimes,
-				angles,angles_forward,
-				flags,depthadd,error);
+				angles,angles_forward,angles_null,
+				flags,depthadd,ssv,error);
 		}
 	else if (system == MB_SYS_HSDS)
 		{
 		status = mbsys_hsds_ttimes(verbose,mbio_ptr,store_ptr,
 				kind,nbeams,ttimes,
-				angles,angles_forward,
-				flags,depthadd,error);
+				angles,angles_forward,angles_null,
+				flags,depthadd,ssv,error);
 		}
 	else if (system == MB_SYS_SB2000)
 		{
 		status = mbsys_sb2000_ttimes(verbose,mbio_ptr,store_ptr,
 				kind,nbeams,ttimes,
-				angles,angles_forward,
-				flags,depthadd,error);
+				angles,angles_forward,angles_null,
+				flags,depthadd,ssv,error);
 		}
 	else if (system == MB_SYS_SB2100)
 		{
 		status = mbsys_sb2100_ttimes(verbose,mbio_ptr,store_ptr,
 				kind,nbeams,ttimes,
-				angles,angles_forward,
-				flags,depthadd,error);
+				angles,angles_forward,angles_null,
+				flags,depthadd,ssv,error);
 		}
 	else if (system == MB_SYS_SIMRAD)
 		{
 		status = mbsys_simrad_ttimes(verbose,mbio_ptr,store_ptr,
 				kind,nbeams,ttimes,
-				angles,angles_forward,
-				flags,depthadd,error);
+				angles,angles_forward,angles_null,
+				flags,depthadd,ssv,error);
 		}
 	else if (system == MB_SYS_MR1)
 		{
 		status = mbsys_mr1_ttimes(verbose,mbio_ptr,store_ptr,
 				kind,nbeams,ttimes,
-				angles,angles_forward,
-				flags,depthadd,error);
+				angles,angles_forward,angles_null,
+				flags,depthadd,ssv,error);
 		}
 	else if (system == MB_SYS_LDEOIH)
 		{
 		status = mbsys_ldeoih_ttimes(verbose,mbio_ptr,store_ptr,
 				kind,nbeams,ttimes,
-				angles,angles_forward,
-				flags,depthadd,error);
+				angles,angles_forward,angles_null,
+				flags,depthadd,ssv,error);
 		}
 	else if (system == MB_SYS_RESON)
 		{
 		status = mbsys_reson_ttimes(verbose,mbio_ptr,store_ptr,
 				kind,nbeams,ttimes,
-				angles,angles_forward,
-				flags,depthadd,error);
+				angles,angles_forward,angles_null,
+				flags,depthadd,ssv,error);
 		}
 	else if (system == MB_SYS_ELAC)
 		{
 		status = mbsys_elac_ttimes(verbose,mbio_ptr,store_ptr,
 				kind,nbeams,ttimes,
-				angles,angles_forward,
-				flags,depthadd,error);
+				angles,angles_forward,angles_null,
+				flags,depthadd,ssv,error);
 		}
 	else if (system == MB_SYS_HSMD)
 		{
 		status = mbsys_hsmd_ttimes(verbose,mbio_ptr,store_ptr,
 				kind,nbeams,ttimes,
-				angles,angles_forward,
-				flags,depthadd,error);
+				angles,angles_forward,angles_null,
+				flags,depthadd,ssv,error);
 		}
 	else
 		{
@@ -177,6 +183,7 @@ int	*error;
 		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
 		fprintf(stderr,"dbg2       nbeams:     %d\n",*nbeams);
 		fprintf(stderr,"dbg2       depthadd:   %f\n",*depthadd);
+		fprintf(stderr,"dbg2       ssv:        %f\n",*ssv);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:  %d\n",status);
