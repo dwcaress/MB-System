@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcopy.c	2/4/93
- *    $Id: mbcopy.c,v 5.12 2003-04-17 21:17:10 caress Exp $
+ *    $Id: mbcopy.c,v 5.13 2003-11-24 22:56:20 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	February 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.12  2003/04/17 21:17:10  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.11  2002/07/20 20:56:55  caress
  * Release 5.0.beta20
  *
@@ -205,7 +208,7 @@ int mbcopy_any_to_mbldeoih(int verbose,
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbcopy.c,v 5.12 2003-04-17 21:17:10 caress Exp $";
+	static char rcs_id[] = "$Id: mbcopy.c,v 5.13 2003-11-24 22:56:20 caress Exp $";
 	static char program_name[] = "MBcopy";
 	static char help_message[] =  "MBcopy copies an input swath sonar data file to an output \nswath sonar data file with the specified conversions.  Options include \nwindowing in time and space and ping averaging.  The input and \noutput data formats may differ, though not all possible combinations \nmake sense.  The default input and output streams are stdin and stdout.";
 	static char usage_message[] = "mbcopy [-Byr/mo/da/hr/mn/sc -Ccommentfile -D -Eyr/mo/da/hr/mn/sc \n\t-Fiformat/oformat -H  -Iinfile -Llonflip -N -Ooutfile \n\t-Ppings -Qsleep_factor -Rw/e/s/n -Sspeed -V]";
@@ -299,6 +302,7 @@ main (int argc, char **argv)
 	int	stripcomments = MB_NO;
 	int	copymode = MBCOPY_PARTIAL;
 	int	use_sleep = MB_NO;
+	int	inbounds = MB_YES;
 	
 	/* sleep variable */
 	double	sleep_factor = 1.0;
@@ -795,9 +799,13 @@ main (int argc, char **argv)
 		if (error == MB_ERROR_NO_ERROR) ocomment++;
 		}
 
+	/* start expecting data to be in time and space bounds */
+	inbounds = MB_YES;
+
 	/* read and write */
 	while (error <= MB_ERROR_NO_ERROR)
 		{
+		
 		/* read some data */
 		error = MB_ERROR_NO_ERROR;
 		status = MB_SUCCESS;
@@ -831,6 +839,16 @@ main (int argc, char **argv)
 		else if (error <= MB_ERROR_NO_ERROR 
 			&& kind == MB_DATA_COMMENT)
 			icomment++;
+			
+		/* check for survey data in or out of bounds */
+		if (kind == MB_DATA_DATA)
+			{
+			if (error == MB_ERROR_NO_ERROR)
+				inbounds = MB_YES;
+			else if (error == MB_ERROR_OUT_BOUNDS
+				||error == MB_ERROR_OUT_TIME)
+				inbounds = MB_NO;
+			}
 
 		/* check numbers of input and output beams */
 		if (copymode == MBCOPY_PARTIAL
@@ -1085,7 +1103,9 @@ main (int argc, char **argv)
 			}
 
 		/* write some data */
-		if ((error == MB_ERROR_NO_ERROR && kind != MB_DATA_COMMENT)
+		if ((error == MB_ERROR_NO_ERROR 
+				&& kind != MB_DATA_COMMENT
+				&& inbounds == MB_YES)
 			|| (kind == MB_DATA_COMMENT && stripcomments == MB_NO))
 			{
 			status = mb_put_all(verbose,ombio_ptr,
