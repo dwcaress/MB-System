@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_plot.perl	6/18/93
-#    $Id: mbm_plot.perl,v 4.4 1995-02-14 19:50:31 caress Exp $
+#    $Id: mbm_plot.perl,v 4.5 1995-03-20 16:42:45 caress Exp $
 #
 #    Copyright (c) 1993, 1994 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -39,10 +39,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   June 17, 1993
 #
 # Version:
-#   $Id: mbm_plot.perl,v 4.4 1995-02-14 19:50:31 caress Exp $
+#   $Id: mbm_plot.perl,v 4.5 1995-03-20 16:42:45 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.4  1995/02/14  19:50:31  caress
+# Version 4.2
+#
 # Revision 4.3  1994/10/21  13:54:57  caress
 # Release V4.0
 #
@@ -120,7 +123,7 @@ if ($help)
 	{
 	print "\n$program_name:\n";
 	print "\nPerl shellscript to generate a gmt plot of the multibeam data contained \nin the specified file.  The plot will be scaled to fit on an 8.5 X 11 \ninch page.  The plot may include bathymetry color fill (-G1),\nbathymetry color shaded relief (-G2), bathymetry shaded with amplitudes\n(-G3), greyshade fill amplitude (-G4), or greyshade fill sidescan (-G5).\nThe plot may also include four color contoured bathymetry (-C).  A gmt shellscript will be created which \ngenerates a postscript image and then displays it using pageview. \nThe -X option will cause the shellscript to be executed immediately.\n";
-	print "\nUsage: $program_name -Fformat -Ifile [-Oroot -Rw/e/s/n -Gmode -Amagnitude/azimuth -C -N -X -P -V -H]\n";
+	print "\nUsage: $program_name -Fformat -Ifile [-Oroot -Rw/e/s/n -Gmode -Amagnitude/azimuth -C -N -X -P -S -V -H]\n";
 	die "\n";
 	}
 

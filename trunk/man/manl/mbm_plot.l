@@ -9,7 +9,7 @@ Version 4.2
 .SH SYNOPSIS
 \fBmbm_plot\fP \fB-F\fP\fIformat\fP \fB-I\fP\fIfile\fP
 [\fB-A\fImagnitude/azimuth\fP \fB-C\fP \fB-G\fImode\fP 
-\fB-N\fP \fB-O\fIroot\fP \fB-R\fIw/e/s/n\fP
+\fB-N\fP \fB-O\fIroot\fP \fB-R\fIw/e/s/n\fP -S
  \fB-X -V -H\fP]
 
 .SH DESCRIPTION
