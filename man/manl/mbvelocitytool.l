@@ -6,7 +6,7 @@
 Version 4.3
 
 .SH SYNOPSIS
-\fBmbvelocitytool\fP [\fBA\fIdangle\fP \fB-V -H\fP]
+\fBmbvelocitytool\fP [\fB-A\fIdangle\fP \fB-D\fIdraft\fP \fB-V -H\fP]
 
 .SH DESCRIPTION
 \fBmbvelocitytool\fP is an interactive water sound velocity profile 
@@ -57,6 +57,15 @@ or MB-System may have incorrect information built in regarding certain
 sonars).  The default is to use the beam angle pattern that MB-System
 stores internally (or obtains from the data stream) for each 
 supported multibeam sonar system.
+.TP
+.B \fB-D\fIdraft\fP
+This option allows the user to specify the ship's draft in
+meters. This value will be added to the depths calculated
+by raytracing. This option is required in the circumstances
+where heave values are reported in the data stream but the
+ship's draft is missing (set to zero) or inaccurate. If the
+ship's draft is zero and upward heave is reported, then the
+raytracing will fail because the ray begins above sea level!
 .TP
 .B \fB-H\fP
 This "help" flag cause the program to print out a description

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbvelocitytool.c	6/6/93
- *    $Id: mbvelocity_prog.c,v 4.9 1995-09-28 18:03:58 caress Exp $
+ *    $Id: mbvelocity_prog.c,v 4.10 1995-10-02 22:25:20 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -23,6 +23,9 @@
  * Date:	June 6, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.9  1995/09/28  18:03:58  caress
+ * Improved handling of .mbxxx file suffix convention.
+ *
  * Revision 4.8  1995/06/06  12:57:17  caress
  * Fixed mb_close() call.
  *
@@ -106,7 +109,7 @@ struct profile
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbvelocity_prog.c,v 4.9 1995-09-28 18:03:58 caress Exp $";
+static char rcs_id[] = "$Id: mbvelocity_prog.c,v 4.10 1995-10-02 22:25:20 caress Exp $";
 static char program_name[] = "MBVELOCITYTOOL";
 static char help_message[] = "MBVELOCITYTOOL is an interactive water velocity profile editor  \nused to examine multiple water velocity profiles and to create  \nnew water velocity profiles which can be used for the processing  \nof multibeam sonar data.  In general, this tool is used to  \nexamine water velocity profiles obtained from XBTs, CTDs, or  \ndatabases, and to construct new profiles consistent with these  \nvarious sources of information.";
 static char usage_message[] = "mbvelocitytool [-Adangle -V -H]";
@@ -131,6 +134,7 @@ int	borders[4];
 int	maxdepth = 3000;
 int	velrange = 500;
 int	resrange = 200;
+double	draft = 0.0;
 
 /* plotting variables */
 int	xmin, xmax, ymin, ymax;
@@ -293,7 +297,7 @@ char	**argv;
 	nbeams = 16;
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "A:a:VvHh")) != -1)
+	while ((c = getopt(argc, argv, "A:a:D:d:VvHh")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -307,6 +311,11 @@ char	**argv;
 		case 'A':
 		case 'a':
 			sscanf (optarg,"%lf", &dangle);
+			flag++;
+			break;
+		case 'D':
+		case 'd':
+			sscanf (optarg,"%lf", &draft);
 			flag++;
 			break;
 		case '?':
@@ -340,6 +349,8 @@ char	**argv;
 		fprintf(stderr,"dbg2  Control Parameters:\n");
 		fprintf(stderr,"dbg2       verbose:            %d\n",verbose);
 		fprintf(stderr,"dbg2       help:               %d\n",help);
+		fprintf(stderr,"dbg2       dangle:             %f\n",dangle);
+		fprintf(stderr,"dbg2       draft:              %f\n",draft);
 		}
 
 	/* if help desired then print it and exit */
@@ -2122,6 +2133,9 @@ int mbvt_process_multibeam()
 			    for (i=0;i<nbeams;i++)
 				angles[i] = (i - icenter)*dangle;
 			    }
+
+			/* add user specified ship draft */
+			depth_offset = depth_offset + draft;
 			}
 
 		/* loop over the beams */
