@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_callbacks.c	6/24/95
- *    $Id: mbnavedit_callbacks.c,v 4.1 1995-08-17 14:58:12 caress Exp $
+ *    $Id: mbnavedit_callbacks.c,v 4.2 1995-09-28 18:01:01 caress Exp $
  *
  *    Copyright (c) 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,9 @@
  * Date:	June 24,  1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1995/08/17  14:58:12  caress
+ * Revision for release 4.3.
+ *
  * Revision 4.0  1995/08/07  18:33:22  caress
  * First cut.
  *
@@ -1285,8 +1288,10 @@ XtPointer client;
 XtPointer call;
 {
 	static char *selection_text;
-	char	*suffix;
-	int	len;
+	char	*mb_suffix;
+	char	*sb_suffix;
+	int	mb_len;
+	int	sb_len;
 	int	form;
 	char	value_text[10];
 
@@ -1299,28 +1304,52 @@ XtPointer call;
 	if((int)strlen(selection_text) > 0)
 		{
 		/* look for MB suffix convention */
-		if ((suffix = strstr(selection_text,".mb")) != NULL)
-			len = strlen(suffix);
+		if ((mb_suffix = strstr(selection_text,".mb")) != NULL)
+			mb_len = strlen(mb_suffix);
+
+		/* look for SeaBeam suffix convention */
+		if ((sb_suffix = strstr(selection_text,".rec")) != NULL)
+			sb_len = strlen(sb_suffix);
 
 		/* if MB suffix convention used keep it */
-		if (len >= 4 && len <= 5)
+		if (mb_len >= 4 && mb_len <= 6)
 			{
 			/* get the output filename */
 			strncpy(ofile,"\0",128);
 			strncpy(ofile,selection_text,
-				strlen(selection_text)-len);
-			strcat(ofile,"n");
-			strcat(ofile,suffix);
+				strlen(selection_text)-mb_len);
+			if (strstr(ofile, "_") != NULL)
+				strcat(ofile, "n");
+			else
+				strcat(ofile,"_n");
+			strcat(ofile,mb_suffix);
 
 			/* get the file format and set the widget */
-			if (sscanf(&suffix[3], "%d", &form) == 1)
+			if (sscanf(&mb_suffix[3], "%d", &form) == 1)
 				{
 				format = form;
-				sprintf(value_text,"%2.2d",format);
+				sprintf(value_text,"%d",format);
 				XmTextFieldSetString(
 				    textField_format, 
 				    value_text);
 				}
+			}
+			
+		/* else look for ".rec" format 41 file */
+		else if (sb_len == 4)
+			{
+			/* get the output filename */
+			strncpy(ofile,"\0",128);
+			strncpy(ofile,selection_text,
+				strlen(selection_text)-sb_len);
+			strcat(ofile,"_n.mb41");
+
+			/* get the file format and set the widget */
+			format = 41;
+			sprintf(value_text,"%d",format);
+			XmTextFieldSetString(
+				textField_format, 
+				value_text);
 			}
 
 		/* else just at ".ned" to file name */

@@ -1052,12 +1052,8 @@ static void do_load_ok(fs, client_data, cbs)
 	XmFileSelectionBoxCallbackStruct *cbs;
 {
 	/* local definitions */
-	char	*suffix;
-	int	len;
 	static  char *format_text;
 	static  char *output_text;
-
-	len = 0;
 
 /*****************************************************************/
 /* Read the selected input file name, add an "e" to the name and */
@@ -1760,8 +1756,10 @@ static void get_file_selection(w, tag, list)
 	XmListCallbackStruct *list;
 {
 	static char *selection_text;
-	char	*suffix;
-	int	len;
+	char	*mb_suffix;
+	char	*sb_suffix;
+	int	mb_len;
+	int	sb_len;
 	int	form;
 	char	value_text[10];
 
@@ -1772,28 +1770,52 @@ static void get_file_selection(w, tag, list)
 	if((int)strlen(selection_text) > 0)
 		{
 		/* look for MB suffix convention */
-		if ((suffix = strstr(selection_text,".mb")) != NULL)
-			len = strlen(suffix);
+		if ((mb_suffix = strstr(selection_text,".mb")) != NULL)
+			mb_len = strlen(mb_suffix);
+
+		/* look for SeaBeam suffix convention */
+		if ((sb_suffix = strstr(selection_text,".rec")) != NULL)
+			sb_len = strlen(sb_suffix);
 
 		/* if MB suffix convention used keep it */
-		if (len >= 4 && len <= 5)
+		if (mb_len >= 4 && mb_len <= 6)
 			{
 			/* get the output filename */
 			strncpy(output_file,"\0",128);
 			strncpy(output_file,selection_text,
-				strlen(selection_text)-len);
-			strcat(output_file,"e");
-			strcat(output_file,suffix);
+				strlen(selection_text)-mb_len);
+			if (strstr(output_file, "_") != NULL)
+				strcat(output_file, "e");
+			else
+				strcat(output_file,"_e");
+			strcat(output_file,mb_suffix);
 
 			/* get the file format and set the widget */
-			if (sscanf(&suffix[3], "%d", &form) == 1)
+			if (sscanf(&mb_suffix[3], "%d", &form) == 1)
 				{
 				mformat = form;
-				sprintf(value_text,"%2.2d",mformat);
+				sprintf(value_text,"%d",mformat);
 				XmTextFieldSetString(
 				    widget_array[k_mbio_format], 
 				    value_text);
 				}
+			}
+			
+		/* else look for ".rec" format 41 file */
+		else if (sb_len == 4)
+			{
+			/* get the output filename */
+			strncpy(output_file,"\0",128);
+			strncpy(output_file,selection_text,
+				strlen(selection_text)-sb_len);
+			strcat(output_file,"_e.mb41");
+
+			/* get the file format and set the widget */
+			mformat = 41;
+			sprintf(value_text,"%d",mformat);
+			XmTextFieldSetString(
+				widget_array[k_mbio_format], 
+				value_text);
 			}
 
 		/* else just at ".ed" to file name */

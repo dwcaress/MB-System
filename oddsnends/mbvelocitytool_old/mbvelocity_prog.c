@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbvelocitytool.c	6/6/93
- *    $Id: mbvelocity_prog.c,v 4.8 1995-06-06 12:57:17 caress Exp $
+ *    $Id: mbvelocity_prog.c,v 4.9 1995-09-28 18:03:58 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -23,6 +23,9 @@
  * Date:	June 6, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.8  1995/06/06  12:57:17  caress
+ * Fixed mb_close() call.
+ *
  * Revision 4.7  1995/05/12  17:27:40  caress
  * Made exit status values consistent with Unix convention.
  * 0: ok  nonzero: error
@@ -103,7 +106,7 @@ struct profile
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbvelocity_prog.c,v 4.8 1995-06-06 12:57:17 caress Exp $";
+static char rcs_id[] = "$Id: mbvelocity_prog.c,v 4.9 1995-09-28 18:03:58 caress Exp $";
 static char program_name[] = "MBVELOCITYTOOL";
 static char help_message[] = "MBVELOCITYTOOL is an interactive water velocity profile editor  \nused to examine multiple water velocity profiles and to create  \nnew water velocity profiles which can be used for the processing  \nof multibeam sonar data.  In general, this tool is used to  \nexamine water velocity profiles obtained from XBTs, CTDs, or  \ndatabases, and to construct new profiles consistent with these  \nvarious sources of information.";
 static char usage_message[] = "mbvelocitytool [-Adangle -V -H]";
@@ -217,6 +220,10 @@ double	bath_max;
 /* residual variables */
 double	*residual;
 int	*nresidual;
+
+/* beam range variables */
+int	beam_first = 0;
+int	beam_last = 100;
 
 /* color control values */
 #define	WHITE	0	
@@ -397,7 +404,7 @@ int mbvt_quit()
 	/* deallocate previously loaded data, if any */
 	if (nbuffer > 0)
 		{
-		mb_buffer_close(verbose,buff_ptr,mbio_ptr,&error);
+		mb_buffer_close(verbose,&buff_ptr,mbio_ptr,&error);
 		mb_close(verbose,&mbio_ptr,&error);
 		mb_free(verbose,&ttimes,&error);
 		mb_free(verbose,&angles,&error);
@@ -1356,8 +1363,8 @@ int mbvt_plot()
 	yrmax = 0.5*(borders[3] - borders[2]);
 	xrcen = xrmin + (xrmax - xrmin)/2;
 	yrcen = yrmin + (yrmax - yrmin)/2;
-	xrminimum = -1.0;
-	xrmaximum = nbeams;
+	xrminimum = beam_first - 1.0;
+	xrmaximum = beam_last + 1.0;
 	deltaxr = (int) (0.1*(xrmaximum - xrminimum));
 	xrscale = (xrmax - xrmin)/(xrmaximum - xrminimum);
 	xr_int = deltaxr*xrscale;
@@ -1891,7 +1898,7 @@ int	form;
 	/* deallocate previously loaded data, if any */
 	if (nbuffer > 0)
 		{
-		mb_buffer_close(verbose,buff_ptr,mbio_ptr,&error);
+		mb_buffer_close(verbose,&buff_ptr,mbio_ptr,&error);
 		mb_close(verbose,&mbio_ptr,&error);
 		mb_free(verbose,&ttimes,&error);
 		mb_free(verbose,&angles,&error);
@@ -1925,6 +1932,10 @@ int	form;
 		status = MB_FAILURE;
 		return(status);
 		}
+
+	/* set beam_first and beam_last */
+	beam_first = 0;
+	beam_last = beams_bath;
 
 	/* allocate memory for data arrays */
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&ttimes,&error);
@@ -2023,6 +2034,7 @@ int mbvt_process_multibeam()
 	char	*rt_svp = NULL;
 	double	ttime;
 	int	ray_stat;
+	double	depth_offset;
 	double	sx, sy, sxx, sxy;
 	double	delta, a, b;
 	int	ns;
@@ -2099,7 +2111,8 @@ int mbvt_process_multibeam()
 			status = mb_ttimes(verbose,mbio_ptr,
 				buff->buffer[k],&kind,&nbeams,
 				ttimes,angles,
-				angles_forward,flags,&error);
+				angles_forward,flags,
+				&depth_offset,&error);
 
 			/* if angle separation specified, 
 				recalculate beam angles */
@@ -2121,13 +2134,15 @@ int mbvt_process_multibeam()
 		    if (flags[i] == 0)
 			{
 			if (nraypath[i] > 0)
-			status = mb_rt(verbose, rt_svp, 0.0, 
+			status = mb_rt(verbose, 
+				    rt_svp, depth_offset, 
 				    angles[i], 0.5*ttimes[i],
 				    0, NULL, NULL, NULL, 
 				    &acrosstrack[i], &depth[i], 
 				    &ttime, &ray_stat, &error);
 			else
-			status = mb_rt(verbose, rt_svp, 0.0, 
+			status = mb_rt(verbose, 
+				    rt_svp, depth_offset, 
 				    angles[i], 0.5*ttimes[i],
 				    nraypathmax, &nraypath[i], 
 				    raypathx[i], raypathy[i], 
@@ -2188,9 +2203,17 @@ int mbvt_process_multibeam()
 	status = mb_rt_deall(verbose, &rt_svp, &error);
 
 	/* calculate final residuals */
+	beam_first = nbeams;
+	beam_last = -1;
 	for (i=0;i<nbeams;i++)
 		if (nresidual[i] > 0)
+			{
 			residual[i] = residual[i]/nresidual[i];
+			if (i < beam_first)
+				beam_first = i;
+			if (i > beam_last)
+				beam_last = i;
+			}
 
 	/* output residuals and stuff */
 	if (verbose >= 1)
