@@ -147,6 +147,10 @@ This slider sets the minimum and maximum bathymetry residual values
 of the bathymetry residual display.  The residual plot has a minimum
 value of -range and a maximum value of +range. 
 
+.SH SEE ALSO
+\fBmbsystem\fP(l), \fBmbbath\fP(l), \fBmblevitus\fP(l), 
+\fBmbm_xbt\fP(l), \fBmbxbt\fP(l)
+
 .SH BUGS
 Users cannot remove display sound velocity profiles from the screen
 once they are read in.

@@ -78,5 +78,8 @@ Here ipen is the pen number to be used (usually 1-4), x and y are the plot
 coordinates in longitude and latitude, and penup indicates whether
 the pen is up (penup=3) or down (penup=2) during the pen move.
 
+.SH SEE ALSO
+\fBmbsystem\fP(l), \fBmbcontourfilter\fP(l), \fBmbm_calcomp_plot\fP(l)
+
 .SH BUGS
 \fBmbplotfilter\fP works only with plot calls from \fBmbcontourfilter\fP.

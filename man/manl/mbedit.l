@@ -220,6 +220,10 @@ clicking the left mouse button will cause any beam under the cursor
 while the left mouse button is held down to be unflagged.
 The edit mode can also be set using the \fBMode\fP button.
 
+.SH SEE ALSO
+\fBmbsystem\fP(l), \fBmbclean\fP(l), 
+\fBmbunclean\fP(l), \fBmbinfo\fP(l)
+
 .SH BUGS
 It might be better to define the cross track distance scale
 in terms of the swath width that is desired rather than in m/100 pixels.

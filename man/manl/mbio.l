@@ -1295,6 +1295,9 @@ short error message in the string **\fImessage\fP. The \fIverbose\fP
 value controls the standard error output verbosity of the function.  The return
 status value signals success if \fIformat\fP is valid and failure otherwise.
 
+.SH SEE ALSO
+\fBmbsystem\fP(l), \fBmbformat\fP(l)
+
 .SH BUGS
 Undoubtably...
 .br
