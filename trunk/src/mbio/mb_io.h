@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	1/19/93
- *    $Id: mb_io.h,v 5.14 2003-04-17 21:05:23 caress Exp $
+ *    $Id: mb_io.h,v 5.15 2003-05-20 18:05:32 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.14  2003/04/17 21:05:23  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.13  2002/10/15 18:34:58  caress
  * Release 5.0.beta25
  *
@@ -175,6 +178,7 @@ struct mb_io_struct
 	int	nav_source;	/* data record types containing the primary navigation */
 	int	heading_source;	/* data record types containing the primary heading */
 	int	vru_source;	/* data record types containing the primary vru */
+	int	svp_source;	/* data record types containing the primary svp */
 	double	beamwidth_xtrack;   /* nominal acrosstrack beamwidth */
 	double	beamwidth_ltrack;   /* nominal alongtrack beamwidth */
 

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	4/21/96
- *    $Id: mb_define.h,v 5.19 2003-04-17 21:05:23 caress Exp $
+ *    $Id: mb_define.h,v 5.20 2003-05-20 18:05:32 caress Exp $
  *
  *    Copyright (c) 1996, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	April 21, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.19  2003/04/17 21:05:23  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.18  2002/07/20 20:42:40  caress
  * Release 5.0.beta20
  *
@@ -196,7 +199,7 @@ int mb_format_info(int verbose, int *format, int *system,
 		char *format_name, char *system_name, char *format_description, 
 		int *numfile, int *filetype, int *variable_beams, 
 		int *traveltime, int *beam_flagging, 
-		int *nav_source, int *heading_source, int *vru_source, 
+		int *nav_source, int *heading_source, int *vru_source, int *svp_source, 
 		double *beamwidth_xtrack, double *beamwidth_ltrack, 
 		int *error);
 int mb_format(int verbose, int *format, int *error);
@@ -210,7 +213,8 @@ int mb_format_flags(int verbose, int *format,
 		int *variable_beams, int *traveltime, int *beam_flagging, 
 		int *error);
 int mb_format_source(int verbose, int *format, 
-		int *nav_source, int *heading_source, int *vru_source, 
+		int *nav_source, int *heading_source, 
+		int *vru_source, int *svp_source, 
 		int *error);
 int mb_format_beamwidth(int verbose, int *format, 
 		double *beamwidth_xtrack, double *beamwidth_ltrack,
