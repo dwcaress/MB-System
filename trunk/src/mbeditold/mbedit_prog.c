@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	4/8/93
- *    $Id: mbedit_prog.c,v 4.27 2000-01-26 03:02:05 caress Exp $
+ *    $Id: mbedit_prog.c,v 4.28 2000-03-16 00:35:40 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -24,6 +24,9 @@
  * Date:	March 28, 1997  GUI recast
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.27  2000/01/26  03:02:05  caress
+ * Fixed bug in making output filename.
+ *
  * Revision 4.26  2000/01/25  01:46:20  caress
  * Altered handling of filenames and edit save files.
  *
@@ -181,7 +184,8 @@
 
 /* output mode defines */
 #define	MBEDIT_OUTPUT_OUTPUT 0
-#define	MBEDIT_OUTPUT_BROWSE 1
+#define	MBEDIT_OUTPUT_EDIT   1
+#define	MBEDIT_OUTPUT_BROWSE 2
 
 /* edit action defines */
 #define	MBEDIT_FLAG	1
@@ -227,7 +231,7 @@ struct mbedit_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbedit_prog.c,v 4.27 2000-01-26 03:02:05 caress Exp $";
+static char rcs_id[] = "$Id: mbedit_prog.c,v 4.28 2000-03-16 00:35:40 caress Exp $";
 static char program_name[] = "MBedit";
 static char help_message[] =  
 "MBedit is an interactive editor used to identify and flag\n\
@@ -1053,10 +1057,10 @@ int	*icurrent;
 	/* clear the screen */
 	status = mbedit_clear_screen();
 
-	/* if file has been opened and browse mode 
+	/* if file has been opened and in browse or edit mode 
 		just dump the current buffer and close the file */
 	if (file_open == MB_YES 
-		&& output_mode == MBEDIT_OUTPUT_BROWSE)
+		&& output_mode != MBEDIT_OUTPUT_OUTPUT)
 		{
 
 		/* dump the buffer */
@@ -3619,7 +3623,7 @@ int	savemode;
 	/* now deal with new edit save file */
 	sofile_open = MB_NO;
 	if (status == MB_SUCCESS 
-		&& output_mode == MBEDIT_OUTPUT_OUTPUT)
+		&& output_mode != MBEDIT_OUTPUT_BROWSE)
 		{
 		/* get edit save file exists */
 		sprintf(sofile, "%s.mbesf", ifile);
@@ -5065,7 +5069,7 @@ int	*beam;
 int	*action;
 {
 	/* local variables */
-	char	*function_name = "mbedit_save_edit";
+	char	*function_name = "mbedit_retrieve_edit";
 	int	status = MB_SUCCESS;
 
 	/* print input debug statements */

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit_callbacks.c	3/28/97
- *    $Id: mbedit_callbacks.c,v 4.7 2000-01-25 01:46:20 caress Exp $
+ *    $Id: mbedit_callbacks.c,v 4.8 2000-03-16 00:35:40 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Date:	March 28, 1997  GUI recast
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.7  2000/01/25  01:46:20  caress
+ * Altered handling of filenames.
+ *
  * Revision 4.6  2000/01/20  00:05:38  caress
  * Added pick mode and two unflag buttons.
  *
@@ -131,7 +134,8 @@ Widget	fileSelectionText;
 #define	SHOW_FLAGGED_OFF	0
 #define	SHOW_FLAGGED_ON		1
 #define	OUTPUT_MODE_OUTPUT	0
-#define	OUTPUT_MODE_BROWSE	1
+#define	OUTPUT_MODE_EDIT	1
+#define	OUTPUT_MODE_BROWSE	2
 
 /* global variables */
 XtAppContext app_context;
@@ -168,7 +172,7 @@ int	mx_interval;
 int	my_interval;
 int	mode_pick = MODE_TOGGLE;
 int	mshow_flagged = SHOW_FLAGGED_OFF;
-int	mode_output = OUTPUT_MODE_OUTPUT;
+int	mode_output = OUTPUT_MODE_EDIT;
 int	ttime_i[7];
 int	status;
 
@@ -544,6 +548,13 @@ int do_setup_data()
 	    XtManageChild(output_file_text);
 	    XtManageChild(output_file_label);
 	    }
+	else if (mode_output == OUTPUT_MODE_EDIT)
+	    {
+	    XmToggleButtonSetState(setting_output_toggle_edit, 
+			TRUE, TRUE);
+	    XtUnmanageChild(output_file_text);
+	    XtUnmanageChild(output_file_label);
+	    }
 	else
 	    {
 	    XmToggleButtonSetState(setting_output_toggle_browse,  
@@ -862,6 +873,44 @@ int do_reset_scale_x(pwidth, maxx)
 
 	return(1);
 	
+}
+
+/*--------------------------------------------------------------------*/
+
+void
+do_output_output(w, client_data, call_data)
+ Widget w;
+ XtPointer client_data;
+ XtPointer call_data;
+{
+    XmToggleButtonCallbackStruct *acs=(XmToggleButtonCallbackStruct*)call_data;
+
+    /* set values if needed */
+    if (acs->reason == XmCR_VALUE_CHANGED && acs->set)
+	    {
+	    mode_output = OUTPUT_MODE_OUTPUT;
+	    XtManageChild(output_file_text);
+	    XtManageChild(output_file_label);
+	    }
+}
+
+/*--------------------------------------------------------------------*/
+
+void
+do_output_edit(w, client_data, call_data)
+ Widget w;
+ XtPointer client_data;
+ XtPointer call_data;
+{
+    XmToggleButtonCallbackStruct *acs=(XmToggleButtonCallbackStruct*)call_data;
+
+    /* set values if needed */
+    if (acs->reason == XmCR_VALUE_CHANGED && acs->set)
+	    {
+	    mode_output = OUTPUT_MODE_EDIT;
+	    XtUnmanageChild(output_file_text);
+	    XtUnmanageChild(output_file_label);
+	    }
 }
 
 /*--------------------------------------------------------------------*/
@@ -1718,25 +1767,6 @@ do_reverse(w, client_data, call_data)
 	    &ngood,&icurrent,&mnplot);
     if (status == 0) XBell(theDisplay,100);
 
-}
-
-/*--------------------------------------------------------------------*/
-
-void
-do_output_output(w, client_data, call_data)
- Widget w;
- XtPointer client_data;
- XtPointer call_data;
-{
-    XmToggleButtonCallbackStruct *acs=(XmToggleButtonCallbackStruct*)call_data;
-
-    /* set values if needed */
-    if (acs->reason == XmCR_VALUE_CHANGED && acs->set)
-	    {
-	    mode_output = OUTPUT_MODE_OUTPUT;
-	    XtManageChild(output_file_text);
-	    XtManageChild(output_file_label);
-	    }
 }
 
 /*--------------------------------------------------------------------*/
