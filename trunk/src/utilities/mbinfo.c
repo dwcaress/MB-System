@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbinfo.c	2/1/93
- *    $Id: mbinfo.c,v 5.15 2004-04-27 02:59:48 caress Exp $
+ *    $Id: mbinfo.c,v 5.16 2004-07-15 19:33:57 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -26,6 +26,9 @@
  * Date:	February 1, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.15  2004/04/27 02:59:48  caress
+ * Added support for subbottom data.
+ *
  * Revision 5.14  2003/04/17 21:18:57  caress
  * Release 5.0.beta30
  *
@@ -200,7 +203,7 @@ struct ping
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbinfo.c,v 5.15 2004-04-27 02:59:48 caress Exp $";
+	static char rcs_id[] = "$Id: mbinfo.c,v 5.16 2004-07-15 19:33:57 caress Exp $";
 	static char program_name[] = "MBINFO";
 	static char help_message[] =  "MBINFO reads a swath sonar data file and outputs \nsome basic statistics.  If pings are averaged (pings > 2) \nMBINFO estimates the variance for each of the swath \nbeams by reading a set number of pings (>2) and then finding \nthe variance of the detrended values for each beam. \nThe results are dumped to stdout.";
 	static char usage_message[] = "mbinfo [-Byr/mo/da/hr/mn/sc -C -Eyr/mo/da/hr/mn/sc -Fformat -Ifile -Llonflip -Mnx/ny -N -Ppings -Rw/e/s/n -Sspeed -V -H]";
@@ -1114,6 +1117,10 @@ main (int argc, char **argv)
 
 			/* output error messages */
 			if (pass != 0 || error == MB_ERROR_COMMENT)
+				{
+				/* do nothing */
+				}
+			else if (error == MB_ERROR_SUBBOTTOM)
 				{
 				/* do nothing */
 				}

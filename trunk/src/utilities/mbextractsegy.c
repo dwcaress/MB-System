@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbextractsegy.c	4/18/2004
- *    $Id: mbextractsegy.c,v 5.1 2004-06-18 05:20:05 caress Exp $
+ *    $Id: mbextractsegy.c,v 5.2 2004-07-15 19:33:57 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	April 18, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2004/06/18 05:20:05  caress
+ * Working on adding support for segy i/o and for Reson 7k format 88.
+ *
  * Revision 5.0  2004/05/21 23:50:44  caress
  * Progress supporting Reson 7k data, including support for extracing subbottom profiler data.
  *
@@ -39,7 +42,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mb_segy.h"
 
-static char rcs_id[] = "$Id: mbextractsegy.c,v 5.1 2004-06-18 05:20:05 caress Exp $";
+static char rcs_id[] = "$Id: mbextractsegy.c,v 5.2 2004-07-15 19:33:57 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
@@ -132,6 +135,7 @@ main (int argc, char **argv)
 	int	nwrite;
 	int	first;
 	int	index;
+	double	tracemin, tracemax;
 	int	i, j, k;
 
 	/* get current default values */
@@ -504,12 +508,23 @@ main (int argc, char **argv)
 		    /* note good status */
 		    if (status == MB_SUCCESS)
 		    	{
+			/* get trace min and max */
+			tracemin = segydata[0];
+			tracemax = segydata[0];
+			for (i=0;i<segytraceheader.nsamps;i++)
+				{
+				tracemin = MIN(tracemin, segydata[i]);
+				tracemax = MAX(tracemin, segydata[i]);
+				}
+			
+			/* output info */
 			nread++;
-			fprintf(stderr,"file:%s record:%d shot:%d  %4.4d/%3.3d %2.2d:%2.2d:%2.2d.%3.3d samples:%d interval:%d\n",
+			if (nread % 10 == 0 || verbose > 0)
+			fprintf(stderr,"file:%s record:%d shot:%d  %4.4d/%3.3d %2.2d:%2.2d:%2.2d.%3.3d samples:%d interval:%d usec  minmax: %f %f\n",
 				file,nread,segytraceheader.shot_num,
 				segytraceheader.year,segytraceheader.day_of_yr,
 				segytraceheader.hour,segytraceheader.min,segytraceheader.sec,segytraceheader.mils,
-				segytraceheader.nsamps,segytraceheader.si_micros);
+				segytraceheader.nsamps,segytraceheader.si_micros,tracemin,tracemax);
 			
 			/* insert segy header data into output buffer */
 			index = 0;
