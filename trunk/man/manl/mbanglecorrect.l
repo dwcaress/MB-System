@@ -1,10 +1,10 @@
-.TH mbanglecorrect l "20 August 1996" "MB-System 4.4" "MB-System 4.4"
+.TH mbanglecorrect l "25 March 1997" "MB-System 4.5" "MB-System 4.5"
 .SH NAME
 \fBmbanglecorrect\fP - Apply a grazing angle correction to beam
-amplitude or sidescan data.
+amplitude or sidescan data in swath sonar data.
 
 .SH VERSION
-Version 4.4
+Version 4.5
 
 .SH SYNOPSIS
 \fBmbanglecorrect\fP [\fB-A\fIkind/scale\fP \fB-B\fIyr/mo/da/hr/mn/sc 
@@ -111,8 +111,8 @@ Default: \fIyr/mo/da/hr/mn/sc\fP = 2062/2/21/10/30/0.
 .B \fB-F\fIformat\fP
 Sets the data format used in reading the input from stdin
 or from a file. This program uses the \fBMBIO\fP library 
-and will read or write any multibeam
-format supported by \fBMBIO\fP. A list of the multibeam data formats
+and will read or write any swath sonar
+format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page. Default: \fIformat\fP = 11.
 .TP
@@ -126,9 +126,9 @@ This "help" flag causes the program to print out a description
 of its operation and then exit immediately.
 .TP
 .B \fB-I\fIinfile\fP
-Sets the input multibeam data filename. 
-This program uses the \fBMBIO\fP library and will read or write any multibeam
-format supported by \fBMBIO\fP. A list of the multibeam data formats
+Sets the input swath sonar data filename. 
+This program uses the \fBMBIO\fP library and will read or write any swath sonar
+format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page. Default: \fIinfile\fP = "stdin".
 .TP
@@ -163,7 +163,7 @@ no output file is specified, the output will be written to
 stdout. Default: \fIoutfile\fP = stdout.
 .TP
 .B \fB-R\fIwest/east/south/north\fP
-Sets the longitude and latitude bounds within which multibeam 
+Sets the longitude and latitude bounds within which swath sonar 
 data will be read. Only the data which lies within these bounds will
 be copied. 
 Default: \fIwest\fP=-360, east\fI=360\fP, \fIsouth\fP=-90, \fInorth\fP=90.

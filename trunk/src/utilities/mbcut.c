@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcut.c	1/26/95
  *
- *    $Id: mbcut.c,v 4.6 1996-04-22 13:23:05 caress Exp $
+ *    $Id: mbcut.c,v 4.7 1997-04-21 17:19:14 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,12 @@
  * Date:	January 26, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.7  1997/04/17  15:14:38  caress
+ * MB-System 4.5 Beta Release
+ *
+ * Revision 4.6  1996/04/22  13:23:05  caress
+ * Now have DTR and MIN/MAX defines in mb_define.h
+ *
  * Revision 4.5  1996/03/11  15:29:02  caress
  * Fixed typo causing beams to be zero'd rather than flagged.
  *
@@ -69,7 +75,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbcut.c,v 4.6 1996-04-22 13:23:05 caress Exp $";
+	static char rcs_id[] = "$Id: mbcut.c,v 4.7 1997-04-21 17:19:14 caress Exp $";
 	static char program_name[] = "mbcut";
 	static char help_message[] = 
 "MBCUT removes swath data values that lie outside ranges\n\t\
@@ -157,7 +163,7 @@ The default input and output streams are stdin and stdout.";
 
 	/* time, user, host variables */
 	long int	right_now;
-	char	date[25], user[128], host[128];
+	char	date[25], user[128], *user_ptr, host[128];
 
 	int	icut, istart, iend;
 	int	i, j, k, l, m;
@@ -405,7 +411,12 @@ The default input and output streams are stdin and stdout.";
 	strncpy(date,"\0",25);
 	right_now = time((long *)0);
 	strncpy(date,ctime(&right_now),24);
-	strcpy(user,getenv("USER"));
+	if ((user_ptr = getenv("USER")) == NULL)
+		user_ptr = getenv("LOGNAME");
+	if (user_ptr != NULL)
+		strcpy(user,user_ptr);
+	else
+		strcpy(user, "unknown");
 	gethostname(host,128);
 	strncpy(comment,"\0",256);
 	sprintf(comment,"Run by user <%s> on cpu <%s> at <%s>",

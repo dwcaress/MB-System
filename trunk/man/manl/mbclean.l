@@ -1,9 +1,9 @@
-.TH mbclean l "20 August 1996" "MB-System 4.4" "MB-System 4.4"
+.TH mbclean l "25 March 1997" "MB-System 4.5" "MB-System 4.5"
 .SH NAME
-\fBmbclean\fP - Identifies and flags bad beams in multibeam bathymetry data.
+\fBmbclean\fP - Identifies and flags bad beams in swath sonar bathymetry data.
 
 .SH VERSION
-Version 4.4
+Version 4.5
 
 .SH SYNOPSIS
 \fBmbclean\fP [\fB-A\fImax\fP \fB-B\fIlow/high\fP \fB-C\fIslope\fP 
@@ -13,7 +13,7 @@ Version 4.4
 \fB-M\fImode\fP \fB-Q\fP \fB-U\fInmin\fP \fB-X\fIzap_beams\fP \fB-V -H\fP]
 
 .SH DESCRIPTION
-\fBmbclean\fP identifies and flags artifacts in multibeam bathymetry data.
+\fBmbclean\fP identifies and flags artifacts in swath sonar bathymetry data.
 Several algorithms are available for identifying artifacts; multiple
 algorithms can be applied in a single pass.
 The most commonly used approach is to identify artifacts  
@@ -87,10 +87,10 @@ beams within the maximum distance are used to check for excessive slopes.
 Default: \fImin/max\fP = 0.01/0.25.
 .TP
 .B \fB-F\fIformat\fP
-Sets the format for the input and output multibeam data using 
+Sets the format for the input and output swath sonar data using 
 \fBMBIO\fP integer format identifiers. 
-This program uses the \fBMBIO\fP library and will read or write any multibeam
-format supported by \fBMBIO\fP. A list of the multibeam data formats
+This program uses the \fBMBIO\fP library and will read or write any swath sonar
+format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page.
 Default: \fIformat\fP = 11.
@@ -149,7 +149,7 @@ stdout. Default: \fIoutfile\fP = stdout.
 .TP
 .B \fB-Q\fP
 This flag causes \fBmbclean\fP to search for bad "rails" in the
-multibeam swath; the "rails" refer to groups of outer beams which
+swath sonar swath; the "rails" refer to groups of outer beams which
 have crosstrack distances (and depths) much less than they should 
 have.  These are identified when one or more outer beams lies
 inboard of a more inner beam; all beams outboard of the first
@@ -189,7 +189,7 @@ The program will output some information because of the
 \fB-V\fP option:
 .br
  	Program MBCLEAN
- 	Version $Id: mbclean.l,v 4.8 1996-08-20 20:01:44 caress Exp $
+ 	Version $Id: mbclean.l,v 4.9 1997-04-21 17:19:14 caress Exp $
  	MB-system Version 4.3
 .br
  	132 records loaded into buffer

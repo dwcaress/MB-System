@@ -1,9 +1,9 @@
-.TH MBPS l "20 August 1996" "MB-System 4.4" "MB-System 4.4"
+.TH MBPS l "25 March 1997" "MB-System 4.5" "MB-System 4.5"
 .SH NAME
-\fBmbps\fP - Generates a PostScript perspective plot of a piece of multibeam data.
+\fBmbps\fP - Generates a PostScript perspective plot of a piece of swath sonar data.
 
 .SH VERSION
-Version 4.4
+Version 4.5
 
 .SH SYNOPSIS
 \fBmbps\fP [\fB-B\fIyr/mo/da/hr/mn/sc \fB-E\fIyr/mo/da/hr/mn/sc 
@@ -14,7 +14,7 @@ Version 4.4
 
 .SH DESCRIPTION
 \fBmbps\fP is a utility to generate an (almost correct) perspective view
-of a piece of multibeam data. It is especially useful to get a detailed
+of a piece of swath sonar data. It is especially useful to get a detailed
 view of the quality of the data (which is not very well assessed in a contour
 plot) and to make pretty pictures of features that fit within a swath.
 The output is PostScript code, that can be piped to a PostScript printer, or to a file.
@@ -67,10 +67,10 @@ with times after the ending time will be ignored.
 Default: \fIyr/mo/da/hr/mn/sc\fP = 2062/2/21/10/30/0.
 .TP
 .B \fB-F\fIformat\fP
-Sets the format for the input multibeam data using 
+Sets the format for the input swath sonar data using 
 \fBMBIO\fP integer format identifiers. 
-This program uses the \fBMBIO\fP library and will read any multibeam
-format supported by \fBMBIO\fP. A list of the multibeam data formats
+This program uses the \fBMBIO\fP library and will read any swath sonar
+format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page. Default: \fIformat\fP = 11.
 .TP

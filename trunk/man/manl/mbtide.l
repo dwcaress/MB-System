@@ -1,9 +1,9 @@
-.TH mbtide l "20 August 1996" "MB-System 4.4 "MB-System 4.4"
+.TH mbtide l "25 March 1997" "MB-System 4.5" "MB-System 4.5"
 .SH NAME
-\fBmbtide\fP - MBTIDE corrects multibeam bathymetry data for tides.
+\fBmbtide\fP - MBTIDE corrects swath sonar bathymetry data for tides.
 
 .SH VERSION
-Version 4.4
+Version 4.5
 
 .SH SYNOPSIS
 \fBmbtide\fP [\fB-F\fIformat \fB-I\fIinfile \fB-O\fIoutfile 
@@ -32,10 +32,10 @@ Palisades, NY 10964
 .SH OPTIONS
 .TP
 .B \fB-F\fIformat\fP
-Sets the format for the input and output multibeam data using 
+Sets the format for the input and output swath sonar data using 
 \fBMBIO\fP integer format identifiers. 
-This program uses the \fBMBIO\fP library and will read or write any multibeam
-format supported by \fBMBIO\fP. A list of the multibeam data formats
+This program uses the \fBMBIO\fP library and will read or write any swath sonar
+format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page.
 Default: \fIformat\fP = 11.

@@ -1,16 +1,16 @@
-.TH mbsmooth l "20 August 1996" "MB-System 4.4" "MB-System 4.4"
+.TH mbsmooth l "25 March 1997" "MB-System 4.5" "MB-System 4.5"
 .SH NAME
-\fBmbsmooth\fP - Smooths multibeam bathymetry data.
+\fBmbsmooth\fP - Smooths swath sonar bathymetry data.
 
 .SH VERSION
-Version 4.4
+Version 4.5
 
 .SH SYNOPSIS
 \fBmbsmooth\fP [\fB-F\fIformat\fP \fB-G\fIwidth\fP \fB-I\fIinfile\fP \fB-L\fIlonflip\fP \fB-O\fIoutfile\fP \fB-W\fIfilterfile\fP \fB-V -H\fP]
 
 .SH DESCRIPTION
 \fBmbsmooth\fP applies a spatial domain gaussian filter 
-to multibeam bathymetry data in order to smooth out noise 
+to swath sonar bathymetry data in order to smooth out noise 
 in the data.  The width of the filter can be varied as a
 function of beam number.
 The default input and output streams are stdin and stdout.
@@ -36,10 +36,10 @@ in the current version.
 .SH OPTIONS
 .TP
 .B \fB-F\fIformat\fP
-Sets the format for the input and output multibeam data using 
+Sets the format for the input and output swath sonar data using 
 \fBMBIO\fP integer format identifiers. 
-This program uses the \fBMBIO\fP library and will read or write any multibeam
-format supported by \fBMBIO\fP. A list of the multibeam data formats
+This program uses the \fBMBIO\fP library and will read or write any swath sonar
+format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page.
 Default: \fIformat\fP = 11.

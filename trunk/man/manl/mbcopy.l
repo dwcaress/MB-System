@@ -1,9 +1,9 @@
-.TH mbcopy l "20 August 1996" "MB-System 4.4" "MB-System 4.4"
+.TH mbcopy l "25 March 1997" "MB-System 4.5" "MB-System 4.5"
 .SH NAME
-\fBmbcopy\fP - Copy multibeam bathymetry data files.
+\fBmbcopy\fP - Copy swath sonar bathymetry data files.
 
 .SH VERSION
-Version 4.4
+Version 4.5
 
 .SH SYNOPSIS
 \fBmbcopy\fP [\fB-B\fIyr/mo/da/hr/mn/sc\fP \fB-C\fIcommentfile\fP 
@@ -14,7 +14,7 @@ Version 4.4
 \fB-S\fIspeed\fP \fB-V\fP]
 
 .SH DESCRIPTION
-\fBmbcopy\fP is an utility for copying multibeam data files which
+\fBmbcopy\fP is an utility for copying swath sonar data files which
 may be used to change formats, average pings, or window
 in time and space. \fBmbcopy\fP can be used as a filter from
 stdin to stdout, or it may do i/o to and from files.
@@ -47,16 +47,16 @@ with times after the ending time will be ignored.
 Default: \fIyr/mo/da/hr/mn/sc\fP = 2062/2/21/10/30/0.
 .TP
 .B \fB-F\fIinformat/outformat\fP
-Sets the format for the input and output multibeam data using 
+Sets the format for the input and output swath sonar data using 
 \fBMBIO\fP integer format identifiers. 
-This program uses the \fBMBIO\fP library and will read or write any multibeam
-format supported by \fBMBIO\fP. A list of the multibeam data formats
+This program uses the \fBMBIO\fP library and will read or write any swath sonar
+format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page. When the \fIinformat\fP and
-\fIoutformat\fP values are both associated with the same multibeam
+\fIoutformat\fP values are both associated with the same swath sonar
 sonar system (e.g. the Atlas Hydrosweep DS system), then the complete
 data stream contained in the input file can be copied to the output
-file.  If the two formats are associated with two different multibeam
+file.  If the two formats are associated with two different swath sonar
 systems, then only the time stamp, navigation, and beam values will
 be copied.  The use of ping averaging also causes a partial data stream
 to be passed, even when compatible or identical input and output formats
@@ -114,7 +114,7 @@ previous and current pings times the value \fIsleep_factor\fP.
 Default: \fIsleep_factor\fP = 1.0
 .TP
 .B \fB-R\fIwest/east/south/north\fP
-Sets the longitude and latitude bounds within which multibeam 
+Sets the longitude and latitude bounds within which swath sonar 
 data will be read. Only the data which lies within these bounds will
 be copied. 
 Default: \fIwest\fP=-360, east\fI=360\fP, \fIsouth\fP=-90, \fInorth\fP=90.

@@ -1,15 +1,15 @@
-.TH mbrollbias l "20 August 1996" "MB-System 4.4" "MB-System 4.4"
+.TH mbrollbias l "25 March 1997" "MB-System 4.5" "MB-System 4.5"
 .SH NAME
-\fBmbrollbias\fP - Assess roll bias of multibeam sonar systems.
+\fBmbrollbias\fP - Assess roll bias of swath sonar sonar systems.
 
 .SH VERSION
-Version 4.4
+Version 4.5
 
 .SH SYNOPSIS
 \fBmbrollbias\fP \fB-F\fIformat1/format2 \fB-L\fIlonflip \fB-I\fIfile1 \fB-J\fIfile2 \fB-R\fIwest/east/south/north [\fB-D\fIxdim/ydim \fB-H -V\fI]
 
 .SH DESCRIPTION
-\fBmbrollbias\fP is an utility used to assess roll bias of multibeam 
+\fBmbrollbias\fP is an utility used to assess roll bias of swath sonar 
 sonar systems using bathymetry data from two swaths covering the same  
 seafloor in opposite directions. The program takes two input  
 files and calculates best fitting planes for each dataset.   
@@ -25,7 +25,7 @@ ensure that no artifacts will bias the roll bias calculations.
 Typically, this means using \fBmbclean\fP and or \fBmbedit\fP to
 remove noisy outer beams.
 A positive roll bias value means that the the vertical reference 
-used by the multibeam system is biased to starboard, 
+used by the swath sonar system is biased to starboard, 
 giving rise to shallow bathymetry to port and deep bathymetry 
 to starboard.  Results are written to stdout.
 
@@ -43,8 +43,8 @@ Palisades, NY 10964
 .B \fB-F\fIformat1/format2\fP
 Sets the \fBMBIO\fP format identifiers for the first and
 second data files, respectively.
-This program uses the \fBMBIO\fP library and will read or write any multibeam
-format supported by \fBMBIO\fP. A list of the multibeam data formats
+This program uses the \fBMBIO\fP library and will read or write any swath sonar
+format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page.
 .TP
@@ -94,7 +94,7 @@ Run \fBmbrollbias\fP as follows:
 The output looks like:
 
  Program mbrollbias
- Version $Id: mbrollbias.l,v 4.7 1996-08-20 20:01:44 caress Exp $
+ Version $Id: mbrollbias.l,v 4.8 1997-04-21 17:19:14 caress Exp $
  MB-system Version 4.00
 
  mbrollbias Parameters:

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbbath.c	3/31/93
- *    $Id: mbbath.c,v 4.21 1996-08-26 17:35:08 caress Exp $
+ *    $Id: mbbath.c,v 4.22 1997-04-21 17:19:14 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -20,6 +20,12 @@
  * Date:	March 31, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.22  1997/04/17  15:14:38  caress
+ * MB-System 4.5 Beta Release
+ *
+ * Revision 4.21  1996/08/26  17:35:08  caress
+ * Release 4.4 revision.
+ *
  * Revision 4.20  1996/04/22  13:23:05  caress
  * Now have DTR and MIN/MAX defines in mb_define.h
  *
@@ -145,7 +151,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbbath.c,v 4.21 1996-08-26 17:35:08 caress Exp $";
+	static char rcs_id[] = "$Id: mbbath.c,v 4.22 1997-04-21 17:19:14 caress Exp $";
 	static char program_name[] = "MBBATH";
 	static char help_message[] =  "MBBATH calculates bathymetry from \
 the travel time data by raytracing \nthrough a layered water velocity \
@@ -219,7 +225,7 @@ and stdout.";
 
 	/* time, user, host variables */
 	long int	right_now;
-	char	date[25], user[128], host[128];
+	char	date[25], user[128], *user_ptr, host[128];
 
 	/* velocity profile handling variables */
 	char	vfile[128];
@@ -834,7 +840,12 @@ and stdout.";
 	strncpy(date,"\0",25);
 	right_now = time((long *)0);
 	strncpy(date,ctime(&right_now),24);
-	strcpy(user,getenv("USER"));
+	if ((user_ptr = getenv("USER")) == NULL)
+		user_ptr = getenv("LOGNAME");
+	if (user_ptr != NULL)
+		strcpy(user,user_ptr);
+	else
+		strcpy(user, "unknown");
 	gethostname(host,128);
 	strncpy(comment,"\0",256);
 	sprintf(comment,"Run by user <%s> on cpu <%s> at <%s>",
@@ -1183,8 +1194,8 @@ and stdout.";
 
 				/* get data structure pointer */
 				store = (struct mbsys_sb2100_struct *) store_ptr;
-				if (store->frequency[0] == 'H' 
-					&& store->ping_pulse_width_36khz < 3)
+				if (store->frequency == 'H' 
+					&& store->ping_pulse_width < 3)
 					{
 					for (i=0;i<beams_bath;i++)
 						ttimes[i] = 2.0 * ttimes[i];
@@ -1584,6 +1595,7 @@ int	*error;
 	char	*function_name = "mb_rollpitch_to_takeoff";
 	int	status = MB_SUCCESS;
 	double	x, y, z;
+	double	aa;
 	int	i, j;
 	
 
@@ -1605,7 +1617,13 @@ int	*error;
 
 	/* convert to takeoff angle coordinates */
 	*theta = acos(z);
-	*phi = asin(y / sin(*theta));
+	aa = y / sin(*theta);
+	if (aa > 1.0)
+	    *phi = 0.5 * M_PI;
+	else if (aa < -1.0)
+	    *phi = -0.5 * M_PI;
+	else
+	    *phi = asin(aa);
 	*theta *= RTD;
 	*phi *= RTD;
 	if (x < 0.0)

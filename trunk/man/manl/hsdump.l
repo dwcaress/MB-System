@@ -1,9 +1,9 @@
-.TH hsdump l "20 August 1996" "MB-System 4.4" "MB-System 4.4"
+.TH hsdump l "25 March 1997" "MB-System 4.5" "MB-System 4.5"
 .SH NAME
 \fBhsdump\fP - hsdump lists the information contained in Hydrosweep DS data files.
 
 .SH VERSION
-Version 4.4
+Version 4.5
 
 .SH SYNOPSIS
 \fBhsdump\fP [\fB-F\fIformat \fB-I\fIinfile \fB-O\fIkind \fB-V -H\fP]
@@ -25,10 +25,10 @@ Palisades, NY 10964
 .SH OPTIONS
 .TP
 .B \fB-F\fIformat\fP
-Sets the format for the input and output multibeam data using 
+Sets the format for the input and output swath sonar data using 
 \fBMBIO\fP integer format identifiers. 
 This program is specific to Hydrosweep DS data, and cannot be used 
-with data from any other multibeam system or with data in a Hydrosweep
+with data from any other swath sonar system or with data in a Hydrosweep
 format that does not include water velocity records. Currently, the two formats
 which can be used are the raw Hydrosweep DS format (\fBMBIO\fP id 21)
 and the L-DEO in-house binary Hydrosweep format (\fBMBIO\fP id 24).

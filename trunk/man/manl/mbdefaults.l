@@ -1,9 +1,9 @@
-.TH mbdefaults l "20 August 1996" "MB-System 4.4" "MB-System 4.4"
+.TH mbdefaults l "25 March 1997" "MB-System 4.5" "MB-System 4.5"
 .SH NAME
-\fBmbdefaults\fP - Set or list default mbio parameters for reading and writing multibeam bathymetry data
+\fBmbdefaults\fP - Set or list default mbio parameters for reading and writing swath sonar data
 
 .SH VERSION
-Version 4.4
+Version 4.5
 
 .SH SYNOPSIS
 \fBmbdefaults\fP [\fB-B\fIyr/mo/da/hr/mn/sc \fB-D\fIpsdisplay \fB-E\fIyr/mo/da/hr/mn/sc 
@@ -52,8 +52,8 @@ with times after the ending time will be ignored.
 Default: \fIyr/mo/da/hr/mn/sc\fP = 2062/2/21/10/30/0.
 .TP
 .B \fB-F\fIformat\fP
-Sets the format for reading multibeam data using the 
-\fBMBIO\fP integer format identifiers.  A list of the multibeam data formats
+Sets the format for reading swath sonar data using the 
+\fBMBIO\fP integer format identifiers.  A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page.
 Default = 11.
@@ -83,7 +83,7 @@ only a partial data stream can be copied (see the \fB-F\fP option).
 Default: \fIpings\fP = 1 (no ping averaging).
 .TP
 .B \fB-R\fIwest/east/south/north\fP
-Sets the longitude and latitude bounds within which multibeam bathymetry 
+Sets the longitude and latitude bounds within which swath sonar 
 data will be read. If no data within the input satisfies the bounds 
 then an initialization error will be returned. 
 Default: west=-360, east=360, south=-90, north=90.
