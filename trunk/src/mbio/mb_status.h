@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbio_status.h	2/1/93
- *    $Id: mb_status.h,v 4.15 1999-07-16 19:24:15 caress Exp $
+ *    $Id: mb_status.h,v 4.16 1999-09-15 21:03:17 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -18,6 +18,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.15  1999/07/16  19:24:15  caress
+ * Yet another version.
+ *
  * Revision 4.14  1999/05/06  23:45:04  caress
  * Release 4.6a.
  *
@@ -91,7 +94,8 @@
 #define MB_STATUS_DEF
 
 /* MB-system version id */
-#define	MB_VERSION	"4.6"
+#define	MB_VERSION	"4.6.6"
+#define	MB_BUILD_DATE	"September 15, 1999"
 
 /* MBIO function boolean convention */
 #define	MB_YES	1
