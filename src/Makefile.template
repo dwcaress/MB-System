@@ -1,7 +1,7 @@
 #     The MB-system:	Makefile.template	5/24/94
-#	$Id: Makefile.template,v 4.13 2003-03-10 07:38:51 caress Exp $
+#	$Id: Makefile.template,v 5.0 2003-08-07 22:36:16 caress Exp $
 #
-#     Copyright (c) 1993, 1994, 2000 by
+#     Copyright (c) 1993, 1994, 2000, 2003 by
 #     David W. Caress (caress@mbari.org)
 #       Monterey Bay Aquarium Research Institute
 #       Moss Landing, CA 95039
@@ -16,6 +16,9 @@
 # Date:		January 21, 1993
 # 
 # $Log: not supported by cvs2svn $
+# Revision 4.13  2003/03/10 07:38:51  caress
+# Added mr1pr library
+#
 # Revision 4.12  2002/07/25 19:04:01  caress
 # Release 5.0.beta21
 #
