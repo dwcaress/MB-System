@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_mr1.c	7/19/94
- *	$Id: mbsys_mr1.c,v 4.3 1994-11-23 23:16:34 caress Exp $
+ *	$Id: mbsys_mr1.c,v 4.4 1994-11-24 01:53:22 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -29,6 +29,12 @@
  * Author:	D. W. Caress
  * Date:	July 19, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1994/11/23  23:16:34  caress
+ * Now uses png_course instead of png_heading for heading
+ * value because png_heading has large errors. Will
+ * change back after processing tools to correct heading
+ * are created.
+ *
  * Revision 4.2  1994/11/09  21:40:34  caress
  * Changed ttimes extraction routines to handle forward beam angles
  * so that alongtrack distances can be calculated.
@@ -65,7 +71,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_mr1.c,v 4.3 1994-11-23 23:16:34 caress Exp $";
+ static char res_id[]="$Id: mbsys_mr1.c,v 4.4 1994-11-24 01:53:22 caress Exp $";
 	char	*function_name = "mbsys_mr1_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -254,7 +260,10 @@ int	*error;
 		for (i=0;i<3;i++)
 			{
 			j = beam_center + i - 1;
-			bath[j] = 0.0;
+			if (j == beam_center)
+				bath[j] = store->png_prdepth + store->png_alt;
+			else
+				bath[j] = 0.0;
 			bathacrosstrack[j] = 0.0;
 			bathalongtrack[j] = 0.0;
 			}
