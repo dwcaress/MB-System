@@ -1,9 +1,9 @@
-MB-SYSTEM VERSION 5.0.3 README FILE:
+MB-SYSTEM VERSION 5.0.4 README FILE:
 ----------------------------------------
 
 This file is located at the top of the MB-System directory
 structure. This directory structure contains the version 
-5.0.3 release of the MB-System software package for 
+5.0.4 release of the MB-System software package for 
 processing and display of swath sonar data.  
 
 MB-SYSTEM VERSION 5 DESCRIPTION:
@@ -26,6 +26,7 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
+Version 5.0.4          ?????????????????
 Version 5.0.3          February 27, 2004
 Version 5.0.2          December 24, 2003
 Version 5.0.1          December 12, 2003
@@ -79,7 +80,7 @@ Palisades, NY 10964
 
 MB-SYSTEM COPYRIGHT, LICENSING AND CAVEAT:
 -----------------------------------------
-MB-System Copyright (C) 1993-2003 by
+MB-System Copyright (C) 1993-2004 by
 David W. Caress (caress@mbari.org)
   Monterey Bay Aquarium Research Institute
   Moss Landing, CA 95039
@@ -120,6 +121,26 @@ Aquarium Research Institute, or any other individuals or
 organizations involved in the design and maintenance of the 
 MB-System software package are NOT responsible for any damage 
 that may follow from correct or incorrect use of these programs.
+
+MB-SYSTEM VERSION 5.0.4 RELEASE NOTES:
+------------------------------------------
+
+The version 5.0.4 release of MB-System includes several changes
+relative to the 5.0.3 release.
+
+All of the interactive tools (MBedit, MBnavedit, MBvelocitytool,
+MBnavadjust) have been changed to require linking with the Motif 2.0
+or later library (or compatible open source versions such as OpenMotif
+or LessTif).
+
+MBnavadjust has a significant new feature in which the contours
+displayed by the Nav Err window can be pre-generated. This greatly
+increases the speed with which the bathymetry crossings can be
+analyzed.
+
+A "Flag View" feature has been added to MBedit, allowing users to
+flag all of the beams in the current display. Key macros have also
+been defined for both the "Flag View" and "Unflag View" buttons.
 
 MB-SYSTEM VERSION 5.0.3 RELEASE NOTES:
 ------------------------------------------
@@ -753,10 +774,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.45 2004-02-27 18:12:49 caress Exp $
+RCS ID: $Id: README,v 5.46 2004-04-27 00:29:25 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.45  2004/02/27 18:12:49  caress
+Release 5.0.3
+
 Revision 5.44  2004/02/26 22:41:02  caress
 Release 5.0.3
 
