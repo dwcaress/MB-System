@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_ldeoih.c	2/26/93
- *	$Id: mbsys_ldeoih.c,v 4.4 1995-03-06 19:38:54 caress Exp $
+ *	$Id: mbsys_ldeoih.c,v 4.5 1995-03-22 19:44:26 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -32,6 +32,9 @@
  * Author:	D. W. Caress
  * Date:	February 26, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.4  1995/03/06  19:38:54  caress
+ * Changed include strings.h to string.h for POSIX compliance.
+ *
  * Revision 4.3  1994/11/09  21:40:34  caress
  * Changed ttimes extraction routines to handle forward beam angles
  * so that alongtrack distances can be calculated.
@@ -80,7 +83,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_ldeoih.c,v 4.4 1995-03-06 19:38:54 caress Exp $";
+ static char res_id[]="$Id: mbsys_ldeoih.c,v 4.5 1995-03-22 19:44:26 caress Exp $";
 	char	*function_name = "mbsys_ldeoih_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -263,8 +266,10 @@ int	*error;
 		mb_get_time(verbose,time_i,time_d);
 
 		/* get navigation */
-		*navlon = store->lon2u/60. + store->lon2b/600000.;
-		*navlat = store->lat2u/60. + store->lat2b/600000. - 90.;
+		*navlon = ((double) store->lon2u)/60. 
+			+ ((double) store->lon2b)/600000.;
+		*navlat = ((double) store->lat2u)/60. 
+			+ ((double) store->lat2b)/600000. - 90.;
 		if (mb_io_ptr->lonflip < 0)
 			{
 			if (*navlon > 0.) 
@@ -556,11 +561,11 @@ int	*error;
 		if (navlon < 0.0) navlon = navlon + 360.0;
 		store->lon2u = (short int) 60.0*navlon;
 		store->lon2b = (short int) (600000.0*(navlon 
-			- store->lon2u/60.0));
+			- ((double) store->lon2u)/60.0));
 		navlat = navlat + 90.0;
 		store->lat2u = (short int) 60.0*navlat;
 		store->lat2b = (short int) (600000.0*(navlat 
-			- store->lat2u/60.0));
+			- ((double) store->lat2u)/60.0));
 
 		/* get heading (360 degrees = 65536) */
 		store->heading = 182.044444*heading;

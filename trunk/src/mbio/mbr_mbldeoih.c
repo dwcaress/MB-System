@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mbldeoih.c	2/2/93
- *	$Id: mbr_mbldeoih.c,v 4.3 1995-03-06 19:38:54 caress Exp $
+ *	$Id: mbr_mbldeoih.c,v 4.4 1995-03-22 19:44:26 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	February 2, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1995/03/06  19:38:54  caress
+ * Changed include strings.h to string.h for POSIX compliance.
+ *
  * Revision 4.2  1994/10/21  12:20:01  caress
  * Release V4.0
  *
@@ -68,7 +71,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_mbldeoih.c,v 4.3 1995-03-06 19:38:54 caress Exp $";
+ static char res_id[]="$Id: mbr_mbldeoih.c,v 4.4 1995-03-22 19:44:26 caress Exp $";
 	char	*function_name = "mbr_alm_mbldeoih";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -425,10 +428,10 @@ int	*error;
 			&(mb_io_ptr->new_time_d));
 
 		/* get navigation */
-		mb_io_ptr->new_lon = header->lon2u/60. 
-			+ header->lon2b/600000.;
-		mb_io_ptr->new_lat = header->lat2u/60. 
-			+ header->lat2b/600000. - 90.;
+		mb_io_ptr->new_lon = ((double) header->lon2u)/60. 
+			+ ((double) header->lon2b)/600000.;
+		mb_io_ptr->new_lat = ((double) header->lat2u)/60. 
+			+ ((double) header->lat2b)/600000. - 90.;
 		if (mb_io_ptr->lonflip < 0)
 			{
 			if (mb_io_ptr->new_lon > 0.) 
@@ -779,12 +782,12 @@ int	*error;
 		lon = mb_io_ptr->new_lon;
 		if (lon < 0.0) lon = lon + 360.0;
 		header->lon2u = (short int) 60.0*lon;
-		header->lon2b 
-			= (short int) (600000.0*(lon - header->lon2u/60.0));
+		header->lon2b = (short int) (600000.0*
+			(lon - ((double) header->lon2u)/60.0));
 		lat = mb_io_ptr->new_lat + 90.0;
 		header->lat2u = (short int) 60.0*lat;
-		header->lat2b 
-			= (short int) (600000.0*(lat - header->lat2u/60.0));
+		header->lat2b = (short int) (600000.0*
+			(lat - ((double) header->lat2u)/60.0));
 
 		/* get heading (360 degrees = 65536) */
 		header->heading = 182.044444*mb_io_ptr->new_heading;

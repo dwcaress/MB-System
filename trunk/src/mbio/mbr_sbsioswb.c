@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sbsioswb.c	9/18/93
- *	$Id: mbr_sbsioswb.c,v 4.3 1995-03-06 19:38:54 caress Exp $
+ *	$Id: mbr_sbsioswb.c,v 4.4 1995-03-22 19:44:26 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	February 2, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1995/03/06  19:38:54  caress
+ * Changed include strings.h to string.h for POSIX compliance.
+ *
  * Revision 4.2  1994/11/01  16:00:08  caress
  * Fixed heading output handling.
  *
@@ -63,7 +66,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_sbsioswb.c,v 4.3 1995-03-06 19:38:54 caress Exp $";
+ static char res_id[]="$Id: mbr_sbsioswb.c,v 4.4 1995-03-22 19:44:26 caress Exp $";
 	char	*function_name = "mbr_alm_sbsioswb";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -645,7 +648,7 @@ int	*error;
 		store->sec = 0.01*data->sec;
 		
 		/* heading */
-		store->sbhdg = data->heading < 0 
+		store->sbhdg = (data->heading < (short) 0) 
 		    ? (unsigned short int) round(((int)data->heading + 3600)*18.204444444)
 		    : (unsigned short int) round(data->heading*18.204444444);
 
