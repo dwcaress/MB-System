@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbbath.c	3/31/93
- *    $Id: mbbath.c,v 4.7 1994-11-24 01:56:52 caress Exp $
+ *    $Id: mbbath.c,v 4.8 1994-11-29 00:42:55 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -20,6 +20,9 @@
  * Date:	March 31, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.7  1994/11/24  01:56:52  caress
+ * First cut at gradient raytracing version of mbbath.
+ *
  * Revision 4.6  1994/11/09  22:01:21  caress
  * Fixed problems with initializing raytracing tables.
  *
@@ -104,7 +107,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbbath.c,v 4.7 1994-11-24 01:56:52 caress Exp $";
+	static char rcs_id[] = "$Id: mbbath.c,v 4.8 1994-11-29 00:42:55 caress Exp $";
 	static char program_name[] = "MBBATH";
 	static char help_message[] =  "MBBATH calculates bathymetry from \
 the travel time data by raytracing \nthrough a layered water velocity \
@@ -262,6 +265,8 @@ and stdout.";
 	strcpy (vfile, "\0");
 	strcpy (rfile, "\0");
 	strcpy (sfile, "\0");
+	nroll = 0;
+	nbath_corr = 0;
 
 	/* set default control parameters */
 	roll_bias = 0.0;
@@ -854,7 +859,7 @@ and stdout.";
 			ss,ssacrosstrack,ssalongtrack,
 			comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;
-	for (i=0;i<nvel-1;i++)
+	for (i=0;i<nvel;i++)
 		{
 		strncpy(comment,"\0",256);
 		sprintf(comment,"     %10.2f     %10.2f",
