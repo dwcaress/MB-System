@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.c	2/18/94
- *    $Id: mb_format.c,v 5.34 2004-12-18 01:34:43 caress Exp $
+ *    $Id: mb_format.c,v 5.35 2005-03-25 04:31:23 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000, 2002, 2002, 2003, 2004 by
+ *    Copyright (c) 1993, 1994, 2000, 2002, 2002, 2003, 2004, 2005 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -20,6 +20,9 @@
  * Date:	Februrary 18, 1994
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.34  2004/12/18 01:34:43  caress
+ * Working towards release 5.0.6.
+ *
  * Revision 5.33  2004/12/02 06:33:29  caress
  * Fixes while supporting Reson 7k data.
  *
@@ -204,7 +207,7 @@
 #include "../../include/mbsys_simrad.h"
 #include "../../include/mbsys_simrad2.h"
 
-static char rcs_id[]="$Id: mb_format.c,v 5.34 2004-12-18 01:34:43 caress Exp $";
+static char rcs_id[]="$Id: mb_format.c,v 5.35 2005-03-25 04:31:23 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_format_register(int verbose, 
@@ -1433,7 +1436,7 @@ int mb_format(int verbose, int *format, int *error)
 /*--------------------------------------------------------------------*/
 int mb_format_system(int verbose, int *format, int *system, int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.34 2004-12-18 01:34:43 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.35 2005-03-25 04:31:23 caress Exp $";
 	char	*function_name = "mb_format_system";
 	int	status;
 
@@ -1503,7 +1506,7 @@ int mb_format_dimensions(int verbose, int *format,
 		int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.34 2004-12-18 01:34:43 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.35 2005-03-25 04:31:23 caress Exp $";
 	char	*function_name = "mb_format_dimensions";
 	int	status;
 
@@ -1572,7 +1575,7 @@ int mb_format_dimensions(int verbose, int *format,
 /*--------------------------------------------------------------------*/
 int mb_format_description(int verbose, int *format, char *description, int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.34 2004-12-18 01:34:43 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.35 2005-03-25 04:31:23 caress Exp $";
 	char	*function_name = "mb_format_description";
 	int	status;
 
@@ -1638,7 +1641,7 @@ int mb_format_flags(int verbose, int *format,
 		int *variable_beams, int *traveltime, int *beam_flagging, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.34 2004-12-18 01:34:43 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.35 2005-03-25 04:31:23 caress Exp $";
 	char	*function_name = "mb_format_flags";
 	int	status;
 
@@ -1711,7 +1714,7 @@ int mb_format_source(int verbose, int *format,
 		int *vru_source, int *svp_source, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.34 2004-12-18 01:34:43 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.35 2005-03-25 04:31:23 caress Exp $";
 	char	*function_name = "mb_format_source";
 	int	status;
 
@@ -1782,7 +1785,7 @@ int mb_format_beamwidth(int verbose, int *format,
 		double *beamwidth_xtrack, double *beamwidth_ltrack,
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.34 2004-12-18 01:34:43 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.35 2005-03-25 04:31:23 caress Exp $";
 	char	*function_name = "mb_format_beamwidth";
 	int	status;
 
@@ -3399,11 +3402,23 @@ int mb_get_basename(int verbose,
 	if (result != NULL  && strlen(result) > 1)
 		strcpy(path,&result[1]);
 		
-	/* remove .fbt suffix if present */
+	/* remove .fbt .fnv .inf .esf suffix if present */
 	if (strlen(path) > 4)
 		{
 		i = strlen(path) - 4;
 		if ((result = strstr(&path[i],".fbt")) != NULL)
+			{
+			path[i] = '\0';
+			}
+		else if ((result = strstr(&path[i],".fnv")) != NULL)
+			{
+			path[i] = '\0';
+			}
+		else if ((result = strstr(&path[i],".inf")) != NULL)
+			{
+			path[i] = '\0';
+			}
+		else if ((result = strstr(&path[i],".esf")) != NULL)
 			{
 			path[i] = '\0';
 			}

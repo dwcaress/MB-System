@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_time.c	10/30/2000
- *    $Id: mb_navint.c,v 5.10 2004-07-15 19:25:04 caress Exp $
+ *    $Id: mb_navint.c,v 5.11 2005-03-25 04:31:23 caress Exp $
  *
  *    Copyright (c) 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	October 30, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.10  2004/07/15 19:25:04  caress
+ * Progress in supporting Reson 7k data.
+ *
  * Revision 5.9  2003/04/17 21:05:23  caress
  * Release 5.0.beta30
  *
@@ -72,7 +75,7 @@
     #define MB_ALTINT_DEBUG 1*/
 
 
-static char rcs_id[]="$Id: mb_navint.c,v 5.10 2004-07-15 19:25:04 caress Exp $";
+static char rcs_id[]="$Id: mb_navint.c,v 5.11 2005-03-25 04:31:23 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 /* 	function mb_navint_add adds a nav fix to the internal
@@ -872,12 +875,12 @@ int mb_depint_interp(int verbose, void *mbio_ptr,
 #endif
 		}
 		
-	/* extrapolate from last fix */
+	/* extrapolate from last value */
 	else if (mb_io_ptr->nsonardepth > 1
 		&& (mb_io_ptr->sonardepth_time_d[mb_io_ptr->nsonardepth-1] 
 			< time_d))
 		{		
-		/* extrapolated position using average speed */
+		/* extrapolated depth using last value */
 		*sonardepth = mb_io_ptr->sonardepth_sonardepth[mb_io_ptr->nsonardepth-1];
 		status = MB_SUCCESS;
 #ifdef MB_DEPINT_DEBUG
