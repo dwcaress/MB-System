@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbvelocitytool_stubs.c	6/6/93
- *    $Id: mbvelocitytool_stubs.c,v 4.2 1994-04-12 01:13:24 caress Exp $
+ *    $Id: mbvelocitytool_stubs.c,v 4.3 1994-04-12 14:32:21 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,7 +14,7 @@
  * MBVELOCITYTOOL is an interactive water velocity profile editor
  * used to examine multiple water velocity profiles and to create
  * new water velocity profiles which can be used for the processing
- * of hydrosweep multibeam sonar data.  In general, this tool is used to examine
+ * of multibeam sonar data.  In general, this tool is used to examine
  * water velocity profiles obtained from XBTs, CTDs, or databases,
  * and to construct new profiles consistent with these various
  * sources of information.
@@ -23,6 +23,11 @@
  * Date:	June 6, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1994/04/12  01:13:24  caress
+ * First cut at translation from hsvelocitytool. The new program
+ * mbvelocitytool will deal with all supported multibeam data
+ * including travel time observations.
+ *
  * Revision 4.0  1994/03/05  23:51:19  caress
  * First cut at version 4.0
  *
@@ -125,7 +130,7 @@ main(argc, argv)
 	int	argc;
 	char	**argv;
 {
-	static char rcs_id[]="$Id: mbvelocitytool_stubs.c,v 4.2 1994-04-12 01:13:24 caress Exp $";
+	static char rcs_id[]="$Id: mbvelocitytool_stubs.c,v 4.3 1994-04-12 14:32:21 caress Exp $";
 	int	status;
 	int	i;
 
@@ -265,7 +270,7 @@ mbvelocity_set_controls()
 	xv_set(Mbvelocitytool_popup_open_file->textfield_mbformat,
 		PANEL_VALUE, format,
 		NULL);
-	sprintf(message,"%d Hydrosweep records loaded",nbuffer);
+	sprintf(message,"%d Multibeam records loaded",nbuffer);
 	xv_set(Mbvelocitytool_window_base->message_status_hydrosweep,
 		PANEL_LABEL_STRING, message,
 		XV_SHOW, TRUE,
@@ -851,7 +856,7 @@ action_canvas_event(win, event, arg, type)
 }
 
 /*
- * Menu handler for `menu_file (Open Hydrosweep data)'.
+ * Menu handler for `menu_file (Open Multibeam data)'.
  */
 Menu_item
 mbvelocitytool_menu_file_item6_callback(item, op)
@@ -896,7 +901,7 @@ mbvelocitytool_menu_file_item6_callback(item, op)
 
 		/* rename popup title */
 		xv_set(Mbvelocitytool_popup_open_file->popup_open_file,
-				XV_LABEL, "Open Hydrosweep Data File",
+				XV_LABEL, "Open Multibeam Data File",
 				NULL);
 		
 		/* gxv_start_connections DO NOT EDIT THIS SECTION */
@@ -951,7 +956,7 @@ action_process_hydrsoweep(item, event)
 
 	mbvelocitytool_window_base_objects *ip = (mbvelocitytool_window_base_objects *) xv_get(item, XV_KEY_DATA, INSTANCE);
 
-	/* process Hydrosweep data */
+	/* process Multibeam data */
 	status = mbvt_setup_raytracing();
 	if (status == MB_SUCCESS)
 		status = mbvt_process_hydrosweep();

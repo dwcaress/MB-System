@@ -37,7 +37,7 @@
 	:menu-type              :command
 	:menu-handler           nil
 	:menu-title             "File"
-	:menu-item-labels       ("Open display profile" "Open editable profile" "New editable profile" "Save editable profile" "Close display profile" "--------" "Open Hydrosweep data" )
+	:menu-item-labels       ("Open display profile" "Open editable profile" "New editable profile" "Save editable profile" "Close display profile" "--------" "Open Multibeam data" )
 	:menu-item-label-types  (:string :string :string :string :string :string :string )
 	:menu-item-states       (:active :active :active :active :active :inactive :active )
 	:menu-item-defaults     (nil nil nil nil nil nil nil )
@@ -73,7 +73,7 @@
 		:action                 (Show)
 		)
 		(
-		:from                   (menu_file "Open Hydrosweep data")
+		:from                   (menu_file "Open Multibeam data")
 		:when                   (Notify )
 		:to                     (popup_open_file)
 		:function_type          :user_defined
@@ -97,7 +97,7 @@
 		:action                 (Hide)
 		)
 		(
-		:from                   (menu_file "Open Hydrosweep data")
+		:from                   (menu_file "Open Multibeam data")
 		:when                   (Notify )
 		:to                     (popup_open_file textfield_mbformat)
 		:function_type          :user_defined
@@ -368,7 +368,7 @@
 	:constant-width         nil
 	:button-type            :normal
 	:foreground-color       ""
-	:label                  "Process Hydrosweep"
+	:label                  "Process Multibeam"
 	:label-type             :string
 	:initial-state          :active
 	:menu                   nil
