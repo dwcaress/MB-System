@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_plot.perl	6/18/93
-#    $Id: mbm_plot.perl,v 4.22 1999-05-06 23:46:32 caress Exp $
+#    $Id: mbm_plot.perl,v 4.23 1999-06-25 17:55:47 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -68,10 +68,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   June 17, 1993
 #
 # Version:
-#   $Id: mbm_plot.perl,v 4.22 1999-05-06 23:46:32 caress Exp $
+#   $Id: mbm_plot.perl,v 4.23 1999-06-25 17:55:47 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.22  1999/05/06  23:46:32  caress
+# Release 4.6a
+#
 # Revision 4.21  1999/04/16  01:25:51  caress
 # Version 4.6 final release?
 #
@@ -1561,7 +1564,7 @@ if ($gmt_version eq "3.0"
 	}
 else
 	{
-	$gmt_def = "PAPER_MEDIA/$page_gmt_name{$pagesize}";
+	$gmt_def = "PAPER_MEDIA/$page_gmt_name{$pagesize}+";
 	push(@gmt_macro_defs, $gmt_def);
 	}
 $gmt_def = "ANOT_FONT/Helvetica";
@@ -1587,6 +1590,8 @@ push(@gmt_macro_defs, $gmt_def);
 $gmt_def = "COLOR_FOREGROUND/255/255/255";
 push(@gmt_macro_defs, $gmt_def);
 $gmt_def = "COLOR_NAN/255/255/255";
+push(@gmt_macro_defs, $gmt_def);
+$gmt_def = "DEGREE_FORMAT/3";
 push(@gmt_macro_defs, $gmt_def);
 
 # set shade control if not set by user
