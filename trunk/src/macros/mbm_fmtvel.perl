@@ -1,4 +1,4 @@
-#! /home/hs/bin/perl
+#! /usr/local/bin/perl
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_fmtvel.perl	3.00	6/18/93
 #    $Id  $
@@ -34,10 +34,14 @@
 #   May 19, 1993
 #
 # Version:
-#   $Id: mbm_fmtvel.perl,v 1.3 1993-08-16 23:03:15 caress Exp $
+#   $Id: mbm_fmtvel.perl,v 1.4 1993-08-17 16:58:36 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 1.3  1993/08/16  23:03:15  caress
+# I'm not sure what the changes are - I'm just checking in the
+# current version.
+#
 # Revision 1.2  1993/06/19  15:53:55  caress
 # Streamlined the Perl code. Now uses hsdump to scan the
 # Hydrosweep file, parses the output without using a
@@ -183,7 +187,7 @@ sub Getopts {
 ;# Waldemar Kebsch, Federal Republic of Germany, November 1988
 ;# kebsch.pad@nixpbe.UUCP
 ;# Modified March 1990, Feb 1991 to properly handle timezones
-;#  $RCSfile: mbm_fmtvel.perl,v $$Revision: 1.3 $$Date: 1993-08-16 23:03:15 $
+;#  $RCSfile: mbm_fmtvel.perl,v $$Revision: 1.4 $$Date: 1993-08-17 16:58:36 $
 ;#   Marion Hakanson (hakanson@cse.ogi.edu)
 ;#   Oregon Graduate Institute of Science and Technology
 ;#

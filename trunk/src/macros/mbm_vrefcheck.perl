@@ -1,4 +1,4 @@
-#! /home/hs/bin/perl 
+#! /usr/local/bin/perl 
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_vrefcheck.perl	3.00	6/18/93
 #    $Id  $
@@ -30,10 +30,13 @@
 #   June 13, 1993
 #
 # Version:
-#   $Id: mbm_vrefcheck.perl,v 3.2 1993-08-17 01:52:17 caress Exp $
+#   $Id: mbm_vrefcheck.perl,v 3.3 1993-08-17 16:58:36 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 3.2  1993/08/17  01:52:17  caress
+# Added MB-system header.
+#
 #
 # Deal with command line arguments
 &Getopts('I:i:F:f:S:s:X:x:A:a:B:b:');
