@@ -62,7 +62,8 @@ also outputs the program version being used.
 .SH EXAMPLES
 Suppose one wishes to identify the swath sonar data format associated
 with a format id of 11.  The following will suffice:
-	mbformat -F11
+.br
+ 	mbformat -F11
 .br
 and the result will be this output:
   MBIO data format id: 11
@@ -71,15 +72,15 @@ and the result will be this output:
   Attributes:           Sea Beam, bathymetry, 16 beams, binary, uncentered,
                         SIO.
 
-Suppose one wishes to list all of the currently supported data formats:
+Suppose one wishes to list all of the currently supported data formats.
 The following will suffice:
 .br
-  mbformat
+ 	mbformat
 
 Suppose one wants to find out what format is associated with a raw
 SeaBeam 2112 file named sb199811231045.rec:
 .br
-  mbformat -I sb199811231045.rec
+ 	mbformat -I sb199811231045.rec
 .br
 This results in the output:
   MBIO data format id: 41
