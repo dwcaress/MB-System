@@ -66,6 +66,10 @@
 #define	OUTPUT_MODE_OUTPUT	0
 #define	OUTPUT_MODE_BROWSE	1
 
+/* min max define */
+#define	min(A, B)	((A) < (B) ? (A) : (B))
+#define	max(A, B)	((A) > (B) ? (A) : (B))
+
 /************************************************************/
 /* GLOBAL VARIABLES                                         */
 /************************************************************/
@@ -907,6 +911,39 @@ static void set_scale_x(w, tag, scale)
 		mx_interval,my_interval,mplot_size,&nbuffer,
 		&ngood,&icurrent,&mnplot);
 	if (status == 0) XBell(theDisplay,100);
+	
+}
+
+/********************************************************************/
+/* Program driven reset for `slider_scale_x'.                       */
+/********************************************************************/
+ 
+int reset_scale_x(pwidth, max)
+	int pwidth;
+	int max;
+{
+	char	label[10];
+
+	mplot_width = pwidth;
+	
+	/* check max value */
+	if (pwidth > max - 1)
+		{
+		max = 2 * pwidth;
+		if (max < 2)
+			max = 2;
+		}
+	
+	/* reset the widget */
+	XtVaSetValues(widget_array[k_x_scale], 
+			XmNvalue, mplot_width, 
+			XmNmaximum, max, 
+			NULL);
+	sprintf(label, "%d", max);
+	XtVaSetValues(widget_array[k_x_scale_lab], 
+			XtVaTypedArg, XmNlabelString, 
+			    XmRString, label, (strlen(label) + 1), 
+			NULL);	
 	
 }
 

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	4/8/93
- *    $Id: mbedit_prog.c,v 4.8 1996-01-26 21:22:00 caress Exp $
+ *    $Id: mbedit_prog.c,v 4.9 1996-02-12 17:09:35 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -23,6 +23,9 @@
  * Date:	April 8, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.8  1996/01/26  21:22:00  caress
+ * Version 4.3 distribution.
+ *
  * Revision 4.7  1995/09/28  18:03:05  caress
  * Improved handling of .mbxxx file suffix convention.
  *
@@ -111,6 +114,14 @@
 #define	MBEDIT_OUTPUT_OUTPUT 0
 #define	MBEDIT_OUTPUT_BROWSE 1
 
+/* gui mode defines */
+#define	MBEDIT_GUI_NO	    0
+#define	MBEDIT_GUI_YES	    1
+
+/* min max define */
+#define	min(A, B)	((A) < (B) ? (A) : (B))
+#define	max(A, B)	((A) > (B) ? (A) : (B))
+
 /* ping structure definition */
 struct mbedit_ping_struct 
 	{
@@ -134,10 +145,10 @@ struct mbedit_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbedit_prog.c,v 4.8 1996-01-26 21:22:00 caress Exp $";
+static char rcs_id[] = "$Id: mbedit_prog.c,v 4.9 1996-02-12 17:09:35 caress Exp $";
 static char program_name[] = "MBEDIT";
 static char help_message[] =  "MBEDIT is an interactive beam editor for multibeam bathymetry data.\n\tIt can work with any data format supported by the MBIO library.\n\tThis version uses the XVIEW toolkit and has been developed using\n\tthe DEVGUIDE package.  A future version will employ the MOTIF\n\ttoolkit for greater portability.  This file contains the code \n\tthat does not directly depend on the XVIEW interface - the companion \n\tfile mbedit_stubs.c contains the user interface related code.";
-static char usage_message[] = "mbedit [-Fformat -Ifile -Ooutfile -V -H]";
+static char usage_message[] = "mbedit [-Byr/mo/da/hr/mn/sc -D  -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ooutfile -V -H]";
 
 /* status variables */
 int	error = MB_ERROR_NO_ERROR;
@@ -164,6 +175,7 @@ int	ofile_defined = MB_NO;
 char	*imbio_ptr = NULL;
 char	*ombio_ptr = NULL;
 int	output_mode = MBEDIT_OUTPUT_OUTPUT;
+int	gui_mode = MBEDIT_GUI_NO;
 
 /* mbio read and write values */
 char	*store_ptr = NULL;
@@ -297,7 +309,7 @@ int	*startup_file;
 	strcpy(ifile,"\0");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhBbF:f:I:i:O:o:")) != -1)
+	while ((c = getopt(argc, argv, "VvHhB:b:DdE:e:F:f:GgI:i:O:o:")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -310,12 +322,33 @@ int	*startup_file;
 			break;
 		case 'B':
 		case 'b':
+			sscanf (optarg,"%d/%d/%d/%d/%d/%d",
+				&btime_i[0],&btime_i[1],&btime_i[2],
+				&btime_i[3],&btime_i[4],&btime_i[5]);
+			btime_i[6] = 0;
+			flag++;
+			break;
+		case 'D':
+		case 'd':
 			output_mode = MBEDIT_OUTPUT_BROWSE;
+			flag++;
+			break;
+		case 'E':
+		case 'e':
+			sscanf (optarg,"%d/%d/%d/%d/%d/%d",
+				&etime_i[0],&etime_i[1],&etime_i[2],
+				&etime_i[3],&etime_i[4],&etime_i[5]);
+			etime_i[6] = 0;
 			flag++;
 			break;
 		case 'F':
 		case 'f':
 			sscanf (optarg,"%d", &format);
+			flag++;
+			break;
+		case 'G':
+		case 'g':
+			gui_mode = MBEDIT_GUI_YES;
 			flag++;
 			break;
 		case 'I':
@@ -649,7 +682,8 @@ int	*nplt;
 	/* set up plotting */
 	if (*ngood > 0)
 		{
-		status = mbedit_plot_all(plwd,exgr,xntrvl,yntrvl,plt_size,nplt);
+		status = mbedit_plot_all(plwd,exgr,xntrvl,yntrvl,
+			    plt_size,nplt, MB_YES);
 		}
 
 	/* reset beam_save */
@@ -746,7 +780,8 @@ int	*nplt;
 		/* else set up plotting */
 		else
 			{
-			status = mbedit_plot_all(plwd,exgr,xntrvl,yntrvl,plt_size,nplt);
+			status = mbedit_plot_all(plwd,exgr,xntrvl,yntrvl,
+				plt_size,nplt, MB_NO);
 			}
 		}
 
@@ -812,11 +847,22 @@ int	*icurrent;
 		fprintf(stderr,"dbg2       buffer_size: %d\n",buffer_size);
 		}
 
-	/* clear the screen */
-	status = mbedit_clear_screen();
+	/* if driven by gui done means quit */
+	if (gui_mode == MBEDIT_GUI_YES)
+	    {
+	    mbedit_action_quit(buffer_size,ndumped,
+				nloaded,nbuffer,ngood,icurrent);
+	    }
 
-	/* if file has been opened deal with it */
-	if (file_open == MB_YES)
+	/* else do done */
+	else
+	    {
+
+	    /* clear the screen */
+	    status = mbedit_clear_screen();
+
+	    /* if file has been opened deal with it */
+	    if (file_open == MB_YES)
 		{
 
 		/* dump and load until the end of the file is reached */
@@ -838,7 +884,7 @@ int	*icurrent;
 		status = mbedit_close_file();
 		}
 
-	else
+	    else
 		{
 		*ndumped = 0;
 		*nloaded = 0;
@@ -848,14 +894,15 @@ int	*icurrent;
 		status = MB_FAILURE;
 		}
 
-	/* reset beam_save */
-	beam_save = MB_NO;
+	    /* reset beam_save */
+	    beam_save = MB_NO;
 
-	/* let the world know... */
-	if (verbose >= 1)
+	    /* let the world know... */
+	    if (verbose >= 1)
 		{
 		fprintf(stderr,"\nLast ping viewed: %s\n",last_ping);
 		}
+	    }
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -994,7 +1041,8 @@ int	*nplt;
 		/* set the plotting list */
 		if (*ngood > 0)
 			{
-			status = mbedit_plot_all(plwd,exgr,xntrvl,yntrvl,plt_size,nplt);
+			status = mbedit_plot_all(plwd,exgr,xntrvl,yntrvl,
+				    plt_size,nplt, MB_NO);
 			}
 
 		/* set failure flag if no step was made */
@@ -1078,7 +1126,8 @@ int	*nplt;
 		/* set the plotting list */
 		if (*ngood > 0)
 			{
-			status = mbedit_plot_all(plwd,exgr,xntrvl,yntrvl,plt_size,nplt);
+			status = mbedit_plot_all(plwd,exgr,xntrvl,yntrvl,
+					plt_size,nplt, MB_NO);
 			}
 		}
 
@@ -2731,13 +2780,14 @@ int mbedit_clear_screen()
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_plot_all(plwd,exgr,xntrvl,yntrvl,plt_size,nplt)
+int mbedit_plot_all(plwd,exgr,xntrvl,yntrvl,plt_size,nplt,autoscale)
 int	plwd;
 int	exgr;
 int	xntrvl;
 int	yntrvl;
 int	plt_size;
 int	*nplt;
+int	autoscale;
 {
 	/* local variables */
 	char	*function_name = "mbedit_plot_all";
@@ -2746,6 +2796,8 @@ int	*nplt;
 	int	jbeam_cen;
 	int	nbathsum,  nbathlist;
 	double	bathsum, bathmean, bathmedian;
+	double	xtrack_max;
+	int	ndec, max;
 	double	dxscale, dyscale;
 	double	dx_width, dy_height;
 	int	nx_int, ny_int;
@@ -2768,6 +2820,7 @@ int	*nplt;
 		fprintf(stderr,"dbg2       y_interval:  %d\n",yntrvl);
 		fprintf(stderr,"dbg2       plot_size:   %d\n",plt_size);
 		fprintf(stderr,"dbg2       nplt:        %d\n",nplt);
+		fprintf(stderr,"dbg2       autoscale:   %d\n",autoscale);
 		}
 
 	/* set scales and tick intervals */
@@ -2788,6 +2841,7 @@ int	*nplt;
 	bathsum = 0.0;
 	nbathsum = 0;
 	nbathlist = 0;
+	xtrack_max = 0.0;
 	ii = current;
 	for (i=0;i<nplot;i++)
 		{
@@ -2812,6 +2866,8 @@ int	*nplt;
 					nbathsum++;
 					bathlist[nbathlist] = ping[i].bath[j];
 					nbathlist++;
+					xtrack_max = max(xtrack_max, 
+						fabs(ping[i].bathacrosstrack[j]));
 					}
 				}
 			}
@@ -2823,6 +2879,18 @@ int	*nplt;
 		{
 		sort(nbathlist, bathlist);
 		bathmedian = bathlist[nbathlist/2];
+		}
+		
+	/* if autoscale on reset plot width */
+	if (autoscale == MB_YES)
+		{
+		plot_width = 2.4 * xtrack_max;
+		ndec = max(1, (int) log10((double) plot_width));
+		max = 1;
+		for (i=0;i<ndec;i++)
+			max = max * 10;
+		max = (plot_width / max + 1) * max;
+		reset_scale_x(plot_width, max);
 		}
 
 	/* print out information */
@@ -3352,7 +3420,8 @@ int	*nplt;
 	/* set up plotting */
 	if (*ngood > 0)
 		{
-		status = mbedit_plot_all(plwd,exgr,xntrvl,yntrvl,plt_size,nplt);
+		status = mbedit_plot_all(plwd,exgr,
+			    xntrvl,yntrvl,plt_size,nplt, MB_NO);
 		}
 
 	/* let the world know... */
