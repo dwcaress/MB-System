@@ -15,7 +15,7 @@ from depth and temperature into depth and sound velocity.  Header
 lines are  turned into comments beginning with '#' characters. The 
 output filename consists of the input filename with the suffix ".sv".
 The conversion is done using the DelGrosso equation as referenced 
-in Dusha et al. [1993] (reference below).
+in Dusha et al. [1993] (reference below). 
 
 .SH AUTHORSHIP
 David W. Caress (caress@mbari.org)
