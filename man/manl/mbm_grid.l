@@ -15,6 +15,7 @@ mbm_grid \fB-I\fP\fIfile\fP
 \fB-D\fP\fIxdim/ydim\fP \fB-E\fP\fIdx/dy/units\fP
 {\fB-f\fP\fIpriority_range\fP | \fB-f\fP\fImode\fP}
 \fB-G\fP\fIgridkind\fP \fB-H\fP
+\fB-J\fP\fIprojection\fP
 \fB-L\fP\fIlonflip\fP \fB-M\fP \fB-N\fP \fB-P\fP\fIpings\fP
 \fB-S\fP\fIspeed\fP \fB-T\fP\fItension\fP
 \fB-U\fP\fI{azimuth/factor | time}\fP
@@ -34,7 +35,7 @@ grids and mosaics with a few command line arguments. The macro
 can determine the area covered by the swath data and set the
 grid bounds and dimensions accordingly. For users
 seeking more control over the grid and mosaic parameters,
-the full suite of mbgrid and mbmosaic commands are supported.
+almost the full suite of mbgrid and mbmosaic commands are supported.
 See the manual pages for \fBmbgrid\fP and \fBmbmosaic\fP for
 complete explanations of how these programs work.
 
@@ -176,6 +177,19 @@ This program uses the \fBMBIO\fP library and will read or write any swath sonar
 format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page.
+.TP
+.B \-J
+\fIprojection\fP
+The \fB-J\fP\fIprojection\fP option is passed on to \fBmbgrid\fP or
+\fBmbmosaic\fP by \fBmbm_grid\fP. If \fBprojection\fP is
+constructed correctly, this option will cause the
+grid or mosaic to be defined in a projected coordinated system
+(e.g. UTM eastings and northings) rather than the usual
+geographic coordinates (degrees longitude and latitude). See the \fBmbgrid\fP
+and \fBmbmosaic\fP manual pages for details on the currently
+supported projections. This macro does not support specification of
+the grid/mosaic bounds directly in eastings and northings; that option
+can be used directly in \fBmbgrid\fP and \fBmbmosaic\fP.
 .TP
 .B \-L
 \fIlonflip\fP

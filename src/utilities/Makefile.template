@@ -1,7 +1,7 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 5.7 2002-07-20 20:56:55 caress Exp $
+#	$Id: Makefile.template,v 5.8 2002-08-21 00:57:11 caress Exp $
 #
-#     Copyright (c) 1993, 1994, 2000 by
+#     Copyright (c) 1993, 1994, 2000, 2002 by
 #     David W. Caress (caress@mbari.org)
 #       Monterey Bay Aquarium Research Institute
 #       Moss Landing, CA 95039
@@ -16,6 +16,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.7  2002/07/20 20:56:55  caress
+# Release 5.0.beta20
+#
 # Revision 5.6  2002/05/02 04:01:37  caress
 # Release 5.0.beta17
 #
@@ -155,6 +158,7 @@ all:	$(MANDIR)/mbsystem.l \
 	$(BINDIR)/mblevitus $(MANDIR)/mblevitus.l \
 	$(BINDIR)/mbgetesf $(MANDIR)/mbgetesf.l \
 	$(BINDIR)/mbps $(MANDIR)/mbps.l \
+	$(BINDIR)/mbstripnan $(MANDIR)/mbstripnan.l \
 	$(BINDIR)/mbmerge $(MANDIR)/mbmerge.l \
 	$(BINDIR)/mbcleanold $(MANDIR)/mbcleanold.l \
 	$(BINDIR)/mbunclean $(MANDIR)/mbunclean.l \
@@ -242,6 +246,8 @@ $(BINDIR)/mbsmooth:	mbsmooth.o $(LIBDIR)/libmbio.a $(LIBDIR)/libproj.a $(LIBDIR)
 $(BINDIR)/mbps:	mbps.o $(LIBDIR)/libmbio.a $(LIBDIR)/libproj.a $(LIBDIR)/libgsf.a  $(LIBDIR)/libproj.a $(LIBDIR)/libsapi.a
 	$(CC) $(CFLAGS) mbps.o $(LIBDIR)/libmbio.a $(LIBDIR)/libproj.a $(LIBDIR)/libgsf.a  $(LIBDIR)/libproj.a $(LIBDIR)/libsapi.a $(GMTLIBDIR)/libgmt.a \
 		$(GMTLIBDIR)/libpsl.a $(LFLAGS) -o $(BINDIR)/mbps
+$(BINDIR)/mbstripnan:	mbstripnan.o
+	$(CC) $(CFLAGS) mbstripnan.o $(LFLAGS) -o $(BINDIR)/mbstripnan
 $(BINDIR)/mbhistogram:	mbhistogram.o $(LIBDIR)/libmbio.a $(LIBDIR)/libproj.a $(LIBDIR)/libgsf.a  $(LIBDIR)/libproj.a $(LIBDIR)/libsapi.a
 	$(CC) $(CFLAGS) mbhistogram.o $(LIBDIR)/libmbio.a $(LIBDIR)/libproj.a $(LIBDIR)/libgsf.a  $(LIBDIR)/libproj.a $(LIBDIR)/libsapi.a \
 		$(LFLAGS) -o $(BINDIR)/mbhistogram
@@ -323,6 +329,8 @@ mbsmooth.o:	mbsmooth.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb
 	$(CC) -c $(CFLAGS) mbsmooth.c
 mbps.o:	mbps.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) -I$(NETCDFINCDIR) mbps.c
+mbstripnan.o:	mbstripnan.c 
+	$(CC) -c $(CFLAGS) mbstripnan.c
 mbhistogram.o:	mbhistogram.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) mbhistogram.c
 mbbackangle.o:	mbbackangle.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
@@ -415,6 +423,9 @@ $(MANDIR)/mbsmooth.l:	mbsmooth.manl
 $(MANDIR)/mbps.l:	mbps.manl
 	cp mbps.manl $(MANDIR)/mbps.l
 	chmod 664 $(MANDIR)/mbps.l
+$(MANDIR)/mbstripnan.l:	mbstripnan.manl
+	cp mbstripnan.manl $(MANDIR)/mbstripnan.l
+	chmod 664 $(MANDIR)/mbstripnan.l
 $(MANDIR)/mbhistogram.l:	mbhistogram.manl
 	cp mbhistogram.manl $(MANDIR)/mbhistogram.l
 	chmod 664 $(MANDIR)/mbhistogram.l

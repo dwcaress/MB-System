@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbclean.c	2/26/93
- *    $Id: mbclean.c,v 5.4 2001-12-30 20:41:03 caress Exp $
+ *    $Id: mbclean.c,v 5.5 2002-08-21 00:57:11 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2001 by
  *    David W. Caress (caress@mbari.org)
@@ -54,6 +54,9 @@
  * by David Caress.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2001/12/30 20:41:03  caress
+ * Fixed sorting messages.
+ *
  * Revision 5.3  2001/07/20 00:34:38  caress
  * Release 5.0.beta03
  *
@@ -129,7 +132,8 @@
  *
  * Revision 4.3  1994/04/12  00:42:00  caress
  * Changed call to mb_buffer_close in accordance with change
- * in mb_buffer source code.  The parameter list now includes
+ * in mb_buffer source cp hs91_283.d01.esf.BAK hs91_283.d01.esf
+ code.  The parameter list now includes
  * mbio_ptr.
  *
  * Revision 4.2  1994/03/25  14:01:31  caress
@@ -183,6 +187,9 @@
 /* MBIO buffer size default */
 #define	MBCLEAN_BUFFER_DEFAULT	500
 
+/* edit action defines */
+#define	MBCLEAN_NOACTION	0
+
 /* ping structure definition */
 struct mbclean_ping_struct 
 	{
@@ -218,7 +225,7 @@ int mbclean_save_edit(int verbose, FILE *sofp, double time_d, int beam,
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbclean.c,v 5.4 2001-12-30 20:41:03 caress Exp $";
+	static char rcs_id[] = "$Id: mbclean.c,v 5.5 2002-08-21 00:57:11 caress Exp $";
 	static char program_name[] = "MBCLEAN";
 	static char help_message[] =  "MBCLEAN identifies and flags artifacts in swath sonar bathymetry data\nBad beams  are  indentified  based  on  one simple criterion only: \nexcessive bathymetric slopes.   The default input and output streams \nare stdin and stdout.";
 	static char usage_message[] = "mbclean [-Amax -Blow/high -Cslope -Dmin/max \n\t-Fformat -Gfraction_low/fraction_high \n\t-Iinfile -Llonflip -Mmode -Nbuffersize -Ooutfile -Q -Xzap_beams \n\t-V -H]";
@@ -236,6 +243,12 @@ main (int argc, char **argv)
 	char	*message = NULL;
 
 	/* MBIO read control parameters */
+	int	read_datalist = MB_NO;
+	char	read_file[MB_PATH_MAXLINE];
+	char	swathfile[MB_PATH_MAXLINE];
+	void	*datalist;
+	int	look_processed = MB_DATALIST_LOOK_UNSET;
+	double	file_weight;
 	int	format;
 	int	variable_beams;
 	int	traveltime;
@@ -259,16 +272,30 @@ main (int argc, char **argv)
 	double	*ss;
 	double	*ssacrosstrack;
 	double	*ssalongtrack;
-	char	ifile[128];
-	void	*imbio_ptr = NULL;
 
 	/* mbio read and write values */
+	void	*mbio_ptr = NULL;
 	void	*store_ptr = NULL;
 	int	kind;
 	struct mbclean_ping_struct ping[3];
 	int	nrec, irec;
 	struct bad_struct bad[2];
 	int	find_bad;
+	int	nfiletot = 0;
+	int	ndatatot = 0;
+	int	nrangetot = 0;
+	int	nfractiontot = 0;
+	int	ndeviationtot = 0;
+	int	noutertot = 0;
+	int	nrailtot = 0;
+	int	nmintot = 0;
+	int	nbadtot = 0;
+	int	nflagtot = 0;
+	int	nunflagtot = 0;
+	int	nzerotot = 0;
+	int	nflagesftot = 0;
+	int	nunflagesftot = 0;
+	int	nzeroesftot = 0;
 	int	ndata = 0;
 	int	nrange = 0;
 	int	nfraction = 0;
@@ -278,7 +305,11 @@ main (int argc, char **argv)
 	int	nmin = 0;
 	int	nbad = 0;
 	int	nflag = 0;
+	int	nunflag = 0;
 	int	nzero = 0;
+	int	nflagesf = 0;
+	int	nunflagesf = 0;
+	int	nzeroesf = 0;
 	char	comment[256];
 	int	check_slope = MB_NO;
 	double	slopemax = 1.0;
@@ -341,10 +372,14 @@ main (int argc, char **argv)
 	double	*editsave_time_d;
 	int	*editsave_beam;
 	int	*editsave_action;
+	int	*editcount;
 	int	insert;
 	char	notice[MB_PATH_MAXLINE];
+	int	apply;
+	int	firstedit, lastedit;
 
 	/* processing variables */
+	int	read_data;
 	int	start, done;
 	int	i, j, k, l, m, p, b;
 
@@ -426,7 +461,7 @@ main (int argc, char **argv)
 			break;
 		case 'I':
 		case 'i':
-			sscanf (optarg,"%s", ifile);
+			sscanf (optarg,"%s", read_file);
 			flag++;
 			break;
 		case 'L':
@@ -468,10 +503,6 @@ main (int argc, char **argv)
 		error = MB_ERROR_BAD_USAGE;
 		exit(error);
 		}
-
-	/* get format if required */
-	if (format == 0)
-		mb_get_format(verbose,ifile,NULL,&format,&error);
 
 	/* turn on slope checking if nothing else is to be used */
 	if (check_slope == MB_NO
@@ -523,7 +554,7 @@ main (int argc, char **argv)
 		fprintf(stderr,"dbg2       speedmin:       %f\n",speedmin);
 		fprintf(stderr,"dbg2       timegap:        %f\n",timegap);
 		fprintf(stderr,"dbg2       data format:    %d\n",format);
-		fprintf(stderr,"dbg2       input file:     %s\n",ifile);
+		fprintf(stderr,"dbg2       input file:     %s\n",read_file);
 		fprintf(stderr,"dbg2       mode:           %d\n",mode);
 		fprintf(stderr,"dbg2       zap_beams:      %d\n",zap_beams);
 		fprintf(stderr,"dbg2       zap_rails:      %d\n",zap_rails);
@@ -549,6 +580,45 @@ main (int argc, char **argv)
 		fprintf(stderr,"\nusage: %s\n", usage_message);
 		exit(error);
 		}
+
+	/* get format if required */
+	if (format == 0)
+		mb_get_format(verbose,read_file,NULL,&format,&error);
+
+	/* determine whether to read one file or a list of files */
+	if (format < 0)
+		read_datalist = MB_YES;
+
+	/* open file list */
+	if (read_datalist == MB_YES)
+	    {
+	    if ((status = mb_datalist_open(verbose,&datalist,
+					    read_file,look_processed,&error)) != MB_SUCCESS)
+		{
+		error = MB_ERROR_OPEN_FAIL;
+		fprintf(stderr,"\nUnable to open data list file: %s\n",
+			read_file);
+		fprintf(stderr,"\nProgram <%s> Terminated\n",
+			program_name);
+		exit(error);
+		}
+	    if (status = mb_datalist_read(verbose,datalist,
+			    swathfile,&format,&file_weight,&error)
+			    == MB_SUCCESS)
+		read_data = MB_YES;
+	    else
+		read_data = MB_NO;
+	    }
+	/* else copy single filename to be read */
+	else
+	    {
+	    strcpy(swathfile, read_file);
+	    read_data = MB_YES;
+	    }
+
+	/* loop over all files to be read */
+	while (read_data == MB_YES)
+	{
 
 	/* check format and get format flags */
 	if ((status = mb_format_flags(verbose,&format,
@@ -576,17 +646,39 @@ main (int argc, char **argv)
 
 	/* initialize reading the input swath sonar file */
 	if ((status = mb_read_init(
-		verbose,ifile,format,pings,lonflip,bounds,
+		verbose,swathfile,format,pings,lonflip,bounds,
 		btime_i,etime_i,speedmin,timegap,
-		&imbio_ptr,&btime_d,&etime_d,
+		&mbio_ptr,&btime_d,&etime_d,
 		&beams_bath,&beams_amp,&pixels_ss,&error)) != MB_SUCCESS)
 		{
 		mb_error(verbose,error,&message);
 		fprintf(stderr,"\nMBIO Error returned from function <mb_read_init>:\n%s\n",message);
-		fprintf(stderr,"\nMultibeam File <%s> not initialized for reading\n",ifile);
+		fprintf(stderr,"\nMultibeam File <%s> not initialized for reading\n",swathfile);
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
 		exit(error);
+		}
+		
+	/* initialize and increment counting variables */
+	ndata = 0;
+	nrange = 0;
+	nfraction = 0;
+	ndeviation = 0;
+	nouter = 0;
+	nrail = 0;
+	nmin = 0;
+	nbad = 0;
+	nflag = 0;
+	nunflag = 0;
+	nzero = 0;
+	nflagesf = 0;
+	nunflagesf = 0;
+	nzeroesf = 0;
+
+	/* give the statistics */
+	if (verbose >= 0)
+		{
+		fprintf(stderr,"\nProcessing %s\n",swathfile);
 		}
 
 	/* allocate memory for data arrays */
@@ -615,6 +707,7 @@ main (int argc, char **argv)
 	ss = NULL;
 	ssacrosstrack = NULL;
 	ssalongtrack = NULL;
+	editcount = NULL;
 	status = mb_malloc(verbose,beams_amp*sizeof(double),
 			&amp,&error);
 	status = mb_malloc(verbose,pixels_ss*sizeof(double),
@@ -625,6 +718,8 @@ main (int argc, char **argv)
 			&ssalongtrack,&error);
 	status = mb_malloc(verbose,4*beams_bath*sizeof(double),
 			&list,&error);
+	status = mb_malloc(verbose,beams_bath*sizeof(int),
+			&editcount,&error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
@@ -640,19 +735,19 @@ main (int argc, char **argv)
 	if (status == MB_SUCCESS)
 	    {
 	    /* check if old edit save file exists */
-	    sprintf(sofile, "%s.esf", ifile);
+	    sprintf(sofile, "%s.esf", swathfile);
 	    fstat = stat(sofile, &file_status);
 	    if (fstat != 0
 		|| (file_status.st_mode & S_IFMT) == S_IFDIR)
 		{
-		sprintf(sofile, "%s.mbesf", ifile);
+		sprintf(sofile, "%s.mbesf", swathfile);
 		fstat = stat(sofile, &file_status);
 		}
 	    if (fstat == 0
 		&& (file_status.st_mode & S_IFMT) != S_IFDIR)
 		{
 		/* get temporary file name */
-		sprintf(sifile, "%s.esf.tmp", ifile);
+		sprintf(sifile, "%s.esf.tmp", swathfile);
 
 		/* copy old edit save file to tmp file */
 		sprintf(command, "cp %s %s\n", 
@@ -691,7 +786,7 @@ main (int argc, char **argv)
 		else if (neditsave > 0)
 		    {
 		    /* reset message */
-		    fprintf(stderr, "MBclean is sorting %d old edits...\n", neditsave);
+		    fprintf(stderr, "Sorting %d old edits...\n", neditsave);
 
 		    error = MB_ERROR_NO_ERROR;
 		    insert = 0;
@@ -700,7 +795,7 @@ main (int argc, char **argv)
 			/* reset message */
 			if ((i+1)%10000 == 0)
 			    {
-			    fprintf(stderr, "MBclean has sorted %d of %d old edits...\n", i+1, neditsave);
+			    fprintf(stderr, "%d of %d old edits sorted...\n", i+1, neditsave);
 			    }
 
 			if (fread(&stime_d, sizeof(double), 1, sifp) != 1
@@ -759,7 +854,7 @@ main (int argc, char **argv)
 	if (status == MB_SUCCESS)
 	    {
 	    /* get edit save file exists */
-	    sprintf(sofile, "%s.esf", ifile);
+	    sprintf(sofile, "%s.esf", swathfile);
 		
 	    /* open the edit save file */
 	    if ((sofp = fopen(sofile,"w")) != NULL)
@@ -776,16 +871,14 @@ main (int argc, char **argv)
 	done = MB_NO;
 	start = 0;
 	nrec = 0;
-	if (verbose == 1) fprintf(stderr,"\n");
 	while (done == MB_NO)
 	    {
-	    /* give the statistics */
 	    if (verbose > 1) fprintf(stderr,"\n");
 
 	    /* read next record */
 	    error = MB_ERROR_NO_ERROR;
 	    status = mb_get(verbose,
-			    imbio_ptr,&kind,&pings,
+			    mbio_ptr,&kind,&pings,
 			    ping[nrec].time_i,&ping[nrec].time_d,
 			    &ping[nrec].navlon,&ping[nrec].navlat,
 			    &ping[nrec].speed,&ping[nrec].heading,
@@ -803,6 +896,9 @@ main (int argc, char **argv)
 		fprintf(stderr,"dbg2    status:     %d\n",status);
 		fprintf(stderr,"dbg2    ndata:      %d\n",ndata);
 		fprintf(stderr,"dbg2    nrec:       %d\n",nrec);
+		fprintf(stderr,"dbg2    nflagesf:   %d\n",nflagesf);
+		fprintf(stderr,"dbg2    nunflagesf: %d\n",nunflagesf);
+		fprintf(stderr,"dbg2    nzeroesf:   %d\n",nzeroesf);
 		fprintf(stderr,"dbg2    nouter:     %d\n",nouter);
 		fprintf(stderr,"dbg2    nmin:       %d\n",nmin);
 		fprintf(stderr,"dbg2    nrange:     %d\n",nrange);
@@ -811,6 +907,7 @@ main (int argc, char **argv)
 		fprintf(stderr,"dbg2    nrail:      %d\n",nrail);
 		fprintf(stderr,"dbg2    nbad:       %d\n",nbad);
 		fprintf(stderr,"dbg2    nflag:      %d\n",nflag);
+		fprintf(stderr,"dbg2    nunflag:    %d\n",nunflag);
 		fprintf(stderr,"dbg2    nzero:      %d\n",nzero);
 		}
 	    if (status == MB_SUCCESS && kind == MB_DATA_DATA)
@@ -839,6 +936,88 @@ main (int argc, char **argv)
 					ping[j].bathy[ping[j].beams_bath/2]);
 			}
 		    }
+		    
+		/* apply saved edits */
+		if (neditsave > 0)
+			{
+		    	/* find first and last edits for this ping */
+			firstedit = 0;
+		    	lastedit = firstedit - 1;
+		    	for (j = firstedit; j < neditsave && ping[nrec].time_d >= editsave_time_d[j]; j++)
+				{
+				if (editsave_time_d[j] == ping[nrec].time_d)
+				    {
+				    if (lastedit < firstedit)
+					firstedit = j;
+				    lastedit = j;
+				    }
+				}
+			
+		    	/* apply relevant edits, if any, to this ping */
+		    	if (lastedit > -1)
+				{
+				for (k=0;k<ping[nrec].beams_bath;k++)
+				    editcount[k] = MBCLEAN_NOACTION;
+				for (j=firstedit;j<=lastedit;j++)
+				    {
+				    editcount[editsave_beam[j]] = editsave_action[j];
+				    }
+				for (k=0;k<ping[nrec].beams_bath;k++)
+				    {
+				    /* apply edit */
+				    apply = MB_NO;
+				    if (editcount[k] == MBP_EDIT_FLAG
+					&& mb_beam_ok(ping[nrec].beamflag[k]))
+					{
+					ping[nrec].beamflag[k] 
+					    = MB_FLAG_FLAG + MB_FLAG_MANUAL;
+					apply = MB_YES;
+					}
+			    	    else if (editcount[k] == MBP_EDIT_FILTER
+					&& mb_beam_ok(ping[nrec].beamflag[k]))
+					{
+					ping[nrec].beamflag[k]
+					    = MB_FLAG_FLAG + MB_FLAG_FILTER;
+					apply = MB_YES;
+					}
+			    	    else if (editcount[k] == MBP_EDIT_UNFLAG
+					&& !mb_beam_ok(ping[nrec].beamflag[k]))
+					{
+					ping[nrec].beamflag[k] = MB_FLAG_NONE;
+					apply = MB_YES;
+					}
+				    else if (editcount[k] == MBP_EDIT_ZERO
+					&& ping[nrec].beamflag[k] != MB_FLAG_NULL)
+					{
+					ping[nrec].beamflag[k] = MB_FLAG_NULL;
+					apply = MB_YES;
+					}
+				
+				    /* write saved edit to current edit save file */
+				    if (apply == MB_YES)
+				    	{
+					if (editcount[k] == MBP_EDIT_FLAG
+						|| editcount[k] == MBP_EDIT_FILTER)
+						{
+						nflagesf++;
+						nflag++;
+						}
+					else if (editcount[k] == MBP_EDIT_UNFLAG)
+						{
+						nunflagesf++;
+						nunflag++;
+						}
+					else if (editcount[k] == MBP_EDIT_ZERO)
+						{
+						nzeroesf++;
+						nzero++;
+						}
+					mbclean_save_edit(verbose, sofp, ping[nrec].time_d, k, editcount[k], &error);
+					}
+				    }
+				}
+			}
+		
 
 		/* update counters */
 		ndata++;
@@ -1501,7 +1680,7 @@ main (int argc, char **argv)
 	    }
 
 	/* close the files */
-	status = mb_close(verbose,&imbio_ptr,&error);
+	status = mb_close(verbose,&mbio_ptr,&error);
 	if (sofile_open == MB_YES)
 	    {
 	    /* close edit save file */
@@ -1509,10 +1688,10 @@ main (int argc, char **argv)
 	    sofile_open = MB_NO;
 	    
 	    /* update mbprocess parameter file */
-	    status = mb_pr_update_format(verbose, ifile, 
+	    status = mb_pr_update_format(verbose, swathfile, 
 			MB_YES, format, 
 			&error);
-	    status = mb_pr_update_edit(verbose, ifile, 
+	    status = mb_pr_update_edit(verbose, swathfile, 
 			MBP_EDIT_ON, sofile, 
 			&error);
 	    }
@@ -1523,7 +1702,6 @@ main (int argc, char **argv)
 	    mb_free(verbose,&editsave_time_d,&error);
 	    mb_free(verbose,&editsave_beam,&error);
 	    mb_free(verbose,&editsave_action,&error);
-	    neditsave = 0;
 	    }
 	for (j=0;j<3;j++)
 		{
@@ -1539,15 +1717,39 @@ main (int argc, char **argv)
 	mb_free(verbose,&ssacrosstrack,&error); 
 	mb_free(verbose,&ssalongtrack,&error); 
 	mb_free(verbose,&list,&error); 
+	mb_free(verbose,&editcount,&error); 
 
 	/* check memory */
 	if (verbose >= 4)
 		status = mb_memory_list(verbose,&error);
 
+	/* increment the total counting variables */
+	nfiletot++;
+	ndatatot += ndata;
+	nflagesftot += nflagesf;
+	nunflagesftot += nunflagesf;
+	nzeroesftot += nzeroesf;
+	nrangetot += nrange;
+	nfractiontot += nfraction;
+	ndeviationtot += ndeviation;
+	noutertot += nouter;
+	nrailtot += nrail;
+	nmintot += nmin;
+	nbadtot += nbad;
+	nflagtot += nflag;
+	nunflagtot += nunflag;
+	nzerotot += nzero;
+
 	/* give the statistics */
-	if (verbose >= 1)
+	if (verbose >= 0)
 		{
-		fprintf(stderr,"\n%d bathymetry data records processed\n",ndata);
+		fprintf(stderr,"%d bathymetry data records processed\n",ndata);
+		if (neditsave > 0)
+			{
+			fprintf(stderr,"%d beams flagged in old esf file\n",nflagesf);
+			fprintf(stderr,"%d beams unflagged in old esf file\n",nunflagesf);
+			fprintf(stderr,"%d beams zeroed in old esf file\n",nzeroesf);
+			}
 		fprintf(stderr,"%d outer beams zapped\n",nouter);
 		fprintf(stderr,"%d beams zapped for too few good beams in ping\n",nmin);
 		fprintf(stderr,"%d beams out of acceptable depth range\n",nrange);
@@ -1556,7 +1758,66 @@ main (int argc, char **argv)
 		fprintf(stderr,"%d bad rail beams identified\n",nrail);
 		fprintf(stderr,"%d excessive slopes identified\n",nbad);
 		fprintf(stderr,"%d beams flagged\n",nflag);
+		fprintf(stderr,"%d beams unflagged\n",nunflag);
 		fprintf(stderr,"%d beams zeroed\n",nzero);
+		}
+
+	/* figure out whether and what to read next */
+        if (read_datalist == MB_YES)
+                {
+		if (status = mb_datalist_read(verbose,datalist,
+			    swathfile,&format,&file_weight,&error)
+			    == MB_SUCCESS)
+                        read_data = MB_YES;
+                else
+                        read_data = MB_NO;
+                }
+        else
+                {
+                read_data = MB_NO;
+                }
+
+	/* end loop over files in list */
+	}
+        if (read_datalist == MB_YES)
+		mb_datalist_close(verbose,&datalist,&error);
+
+	/* give the total statistics */
+	if (verbose >= 0)
+		{
+		fprintf(stderr,"\nMBclean Processing Totals:\n");
+		fprintf(stderr,"-------------------------\n");
+		fprintf(stderr,"%d total swath data files processed\n",nfiletot);
+		fprintf(stderr,"%d total bathymetry data records processed\n",ndatatot);
+		fprintf(stderr,"%d total beams flagged in old esf files\n",nflagesftot);
+		fprintf(stderr,"%d total beams unflagged in old esf files\n",nunflagesftot);
+		fprintf(stderr,"%d total beams zeroed in old esf files\n",nzeroesftot);
+		fprintf(stderr,"%d total outer beams zapped\n",noutertot);
+		fprintf(stderr,"%d total beams zapped for too few good beams in ping\n",nmintot);
+		fprintf(stderr,"%d total beams out of acceptable depth range\n",nrangetot);
+		fprintf(stderr,"%d total beams out of acceptable fractional depth range\n",nfractiontot);
+		fprintf(stderr,"%d total beams exceed acceptable deviation from median depth\n",ndeviationtot);
+		fprintf(stderr,"%d total bad rail beams identified\n",nrailtot);
+		fprintf(stderr,"%d total excessive slopes identified\n",nbadtot);
+		fprintf(stderr,"%d total beams flagged\n",nflagtot);
+		fprintf(stderr,"%d total beams unflagged\n",nunflagtot);
+		fprintf(stderr,"%d total beams zeroed\n",nzerotot);
+		}
+
+	/* set program status */
+	status = MB_SUCCESS;
+
+	/* check memory */
+	if (verbose >= 4)
+		status = mb_memory_list(verbose,&error);
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  Program <%s> completed\n",
+			program_name);
+		fprintf(stderr,"dbg2  Ending status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
 		}
 
 	/* end it all */

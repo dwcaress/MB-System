@@ -29,14 +29,14 @@ The code is simple.  Here it is:
    * triplets but ones where z == NaN
    */
   main () {
-	  struct node { double lon, lat, height; };
-	  struct node n;
-	  while ( ( fread(&n, 24, 1, stdin) > 0 ) ) {
-		  if ( ! isnand(n.height) ) {
-			  fwrite(&n, 24, 1, stdout);
-		  }
-	  }
-  }
+ 	  struct node { double lon, lat, height; };
+ 	  struct node n;
+ 	  while ( ( fread(&n, 24, 1, stdin) > 0 ) ) {
+ 		  if ( ! isnan(n.height) ) {
+ 			  fwrite(&n, 24, 1, stdout);
+ 		  }
+ 	  }
+   }
   
 
 .SH EXAMPLE
@@ -69,4 +69,4 @@ This is a command that \fBmbm_grd2geovrml\fP constructs and executes:
 
 How many bugs can there be in an 8 line program?  
 
-
+

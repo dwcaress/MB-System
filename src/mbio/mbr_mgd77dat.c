@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mgd77dat.c	5/18/99
- *	$Id: mbr_mgd77dat.c,v 5.4 2002-02-22 09:03:43 caress Exp $
+ *	$Id: mbr_mgd77dat.c,v 5.5 2002-08-21 00:55:46 caress Exp $
  *
  *    Copyright (c) 1999, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	May 18, 1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2002/02/22 09:03:43  caress
+ * Release 5.0.beta13
+ *
  * Revision 5.3  2001/07/20 00:32:54  caress
  * Release 5.0.beta03
  *
@@ -92,7 +95,7 @@ int mbr_dem_mgd77dat(int verbose, void *mbio_ptr, int *error);
 int mbr_rt_mgd77dat(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_mgd77dat(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
-static char res_id[]="$Id: mbr_mgd77dat.c,v 5.4 2002-02-22 09:03:43 caress Exp $";
+static char res_id[]="$Id: mbr_mgd77dat.c,v 5.5 2002-08-21 00:55:46 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_mgd77dat(int verbose, void *mbio_ptr, int *error)
@@ -656,7 +659,7 @@ int mbr_mgd77dat_rd_data(int verbose, void *mbio_ptr, int *error)
 	int	shift;
 	int	itmp;
 	double	dtmp;
-	int	i;
+	int	i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -700,24 +703,28 @@ int mbr_mgd77dat_rd_data(int verbose, void *mbio_ptr, int *error)
 		
 	/* handle "pseudo-mgd77" in which each record is
 	 * followed by a cr or lf */
-	while (status == MB_SUCCESS
-	    && (line[0] == '\r' || line[0] == '\n'))
+	for (i=0;i<MBF_MGD77DAT_DATA_LEN;i++)
 	    {
-	    for (i=0;i<MBF_MGD77DAT_DATA_LEN-1;i++)
-		line[i] = line[i+1];
-	    if ((read_len = fread(&line[MBF_MGD77DAT_DATA_LEN-1],1,1,
+	    if (line[i] == '\r' || line[i] == '\n')
+	    	{
+		for (j=i;j<MBF_MGD77DAT_DATA_LEN-1;j++)
+			{
+			line[j] = line[j+1];
+			}
+	        if ((read_len = fread(&line[MBF_MGD77DAT_DATA_LEN-1],1,1,
 			    mb_io_ptr->mbfp)) == 1) 
 		    {
 		    mb_io_ptr->file_bytes += read_len;
 		    status = MB_SUCCESS;
 		    *error = MB_ERROR_NO_ERROR;
 		    }
-	    else
+	        else
 		    {
 		    mb_io_ptr->file_bytes += read_len;
 		    status = MB_FAILURE;
 		    *error = MB_ERROR_EOF;
 		    }
+		}
 	    }
 	
 	mb_io_ptr->file_bytes = ftell(mb_io_ptr->mbfp);	
@@ -728,7 +735,7 @@ int mbr_mgd77dat_rd_data(int verbose, void *mbio_ptr, int *error)
 	    && *header_read < MBF_MGD77DAT_HEADER_NUM)
 	    {
 	    data->kind = MB_DATA_HEADER;
-	    *header_read++;
+	    (*header_read)++;
 	    for (i=0;i<MBF_MGD77DAT_DATA_LEN;i++)
 		data->comment[i] = line[i];
 	    }
@@ -736,7 +743,7 @@ int mbr_mgd77dat_rd_data(int verbose, void *mbio_ptr, int *error)
 	    && (line[0] == '1' || line[0] == '4'))
 	    {
 	    data->kind = MB_DATA_HEADER;
-	    *header_read = 1;
+	    (*header_read) = 1;
 	    for (i=0;i<MBF_MGD77DAT_DATA_LEN;i++)
 		data->comment[i] = line[i];
 	    }

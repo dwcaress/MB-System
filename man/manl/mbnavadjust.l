@@ -1,4 +1,4 @@
-.TH mbnavadjust l "26 July 2002" "MB-System 5.0" "MB-System 5.0"
+.TH mbnavadjust l "2 August 2002" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbnavadjust\fP - Package that solves for optimal navigation by
 matching bathymetry of overlapping swathes.
@@ -41,7 +41,7 @@ original navigational constraints, satisfies the requirement
 of reasonableness, and also causes features in overlapping swathes
 to match within the sonar's resolution. 
 
-Previous attempts to address this problem (e.g. Nishimura et al.)
+Previous attempts to address this problem (e.g. Nishimura et al. [1988])
 have focused on automating the identification of matching features
 and their navigational offsets. The automated approach is 
 problematic because seafloor features are complex, and the
@@ -75,9 +75,8 @@ The inversion for an optimal navigation which fits the offsets identified
 at matching features must also be reasonable. This is achieved by
 minimizing perturbations to speed and acceleration in the inversion.
 This approach of penalizing first and second derivatives within
-a linear inverse problem is common within both the geophysical
-inverse theory literature (e.g. Parker, Constable et al.) and
-within general linear optimization theory (e.g. Lawson and Hanson).
+a linear inverse problem is common within the geophysical
+inverse theory literature (e.g. Parker [1994]).
 
 .SH USING MBNAVADJUST 1: IMPORTING DATA
 Users begin using \fBmbnavadjust\fP by starting up the program
@@ -88,7 +87,7 @@ on the command line:
 In order to get started, one must either open an existing
 \fBmbnavadjust\fP project or initialize a new one. Both options
 are available under the <File> menu with the <File->New> and <File->Open>
-menu buttons. When one clicks the <File->New> option, a dialog opens
+menu buttons. When one pulls down the <File->New> option, a dialog opens
 that allows navigation of the filesystem and specification of 
 a project name. Whatever project location and name is chosen,
 a directory "{project_path}/{project_name}.dir" and a file
@@ -96,17 +95,6 @@ a directory "{project_path}/{project_name}.dir" and a file
 a project exists and has been opened, swath data can be imported and then
 analyzed. To open an existing \fBmbnavadjust\fP project, click
 the <File->Open> option and select the corresponding "*.nvh" file.
-
-Swath data can be imported in single files or through
-datalists (see the \fBMB-System\fP manual page for a description
-of recursive datalists). Each file that is imported is broken into
-a number of sections. The maximum size of the sections in line length or
-in number of soundings is set in a dialog opened by clicking on 
-<Option->Controls>. The data for each section is written as a format 71
-bathymetry-only file in the "*.dir" directory.
-As the files are imported, the areal extent of each section is 
-compared to the other sections. Any pair of sections that overlap
-is added to a list of crossings to be investigated graphically. 
 
 The main \fBmbnavadjust\fP window displays basic information in a set of
 labels in the upper left, including the open project name, the number of
@@ -118,9 +106,29 @@ performed by the program during the current session. Another scrollable
 window on the right displays one of three tables of information according
 a user selection under the <View> menu. The three choices are a table
 of the imported swath files, a table of the swath crossings, and a table
-of the interactively defined navigation tie points. Immediately following
-the initial data importation, a number of crossings will be defined (assuming that 
+of the interactively defined navigation tie points. If no swath data has
+yet been imported, then the all of the tables will be empty. Once some data
+files are imported, the swath file table will have entries and
+some number of crossings will be defined (assuming that 
 swathes do overlap and cross), but no tie points will yet be defined.
+
+In order to import swath data into an \fBmbnavadjust\fP project,
+pull down the <File->Import Swath Data> menu item. A file selection
+dialog will appear. Swath data can be imported in single files or through
+datalists (see the \fBMB-System\fP manual page for a description
+of recursive datalists). As with other \fBMB-System\fP programs, the format
+id will be automatically determined if possible for each file selected.
+If a filename does not follow the the \fBMB-System\fP naming convention, the
+user may need to manually set the format id in the appropriately labeled
+dialog text widget. Each file that is imported is broken into
+a number of sections. The maximum size of the sections in line length or
+in number of soundings is set in a dialog opened by clicking on 
+<Option->Controls>. The data for each section is written as a format 71
+bathymetry-only file in the "*.dir" directory.
+As the files are imported, the areal extent of each section is 
+compared to the other sections. Any pair of sections that overlap
+is added to a list of crossings to be investigated graphically. This list
+can be displayed by pulling down the <View->Show Crossings> menu item.
 
 As the user
 later works through the crossings, he or she will will define tie points
@@ -130,16 +138,236 @@ some case multiple tie points to be defined. Other crossings will still have
 no tie points, either
 because the swathes don't really overlap or because there aren't any
 distinctive features to match. When all of the crossings have been inspected, 
-then the user can invoke inversion for an optimal navigation solution.
+then the user can invoke inversion for an optimal navigation solution. 
 
 .SH USING MBNAVADJUST 2: INSPECTING CROSSINGS
+
+.SS Bringing Up The Nav Error Window
+
 The heart of \fBmbnavadjust\fP is the interactive inspection of the
 swath crossings. One can bring up the crossing inspection window
 (entitled "Nav Error") in a number of ways. If one pulls down the
 menu option <Action->Analyze Crossings>, then the "Nav Error" window 
-will come up with the first Crossing loading. Alternatively, if the
-user specifies 
+will come up with the first crossing loaded. Alternatively, if the
+<View->Show Crossings> menu item has been selected so that a table of
+crossings is displayed, clicking once on any of the crossing items in
+this tabel will bring up the  "Nav Error" window with that crossing loaded.
+Similarly, if tie points have been established and the tie point table
+displayed by selecting the <View->Show Ties> menu item, then clicking on
+any of the tie items this table will bring up the "Nav Error" window 
+and load the crossing that includes the selected tie point. If the
+"Nav Error" window is already displayed, clicking on crossing or tie items
+in the display tables will load the selected crossing in place of whatever
+crossing was previously shown.
 
+Once the "Nav Err" window is displayed, the user can also move through
+the crossings by clicking on the <Previous>, <Next>, and <Next Unset>
+buttons. The <Previous> and <Next> buttons will load the previous or
+next, respectively, crossings in the crossing list. As discussed below,
+each crossing must ultimately be "resolved" by either having one or
+more navigation offsets set at particular "tie points", or by being
+"skipped" because no matchable seafloor features are found. The <Next Unset>
+button will load the next crossing that has not been resolved.
+To close the "Nav Err" window, click the <Dismiss> button.
+
+.SS Interactively Matching Seafloor Features
+
+The "Nav Error" window is complicated in appearance, and
+regrettably complicated in function also.
+The purpose is to allow the user to determine if any seafloor features
+can be confidently matched in the overlapping swathes. If so, one or more
+tie points can be defined. In order to ease the identification of matching
+features, two simultaneous displays are provided. 
+The larger plot on the right consists of overlain
+bathymetric contours derived from each of the two swathes. The smaller
+canvas on the left shows a color two dimensional plot 
+of the RMS misfit between the two swathes. The misfit is shown
+as a function of relative lateral offsets between the two swathes. Put another
+way, the misfit plot shows how good, or bad, the misfit becomes as one moves
+one swath relative to another. The lowest misfit values are shown in red; higher
+misfits are shown in blues to purples. The location of the minimum misfit is
+marked by a black "X", and the location of the current navigation offset is
+shown by a small red square with a black outline.
+
+The interactive aspect of the "Nav Error" window works simultaneously
+in both displays. If the user holds down the left mouse button in the
+contour plot and moves the cursor, the bathymetry contours from one swath
+will move along with the cursor. In this way, the user can move one of the
+swathes around relative to the other until the contours line up and features
+match. As the contours move, the red square showing the current offset location
+also moves on the misfit plot. The user can thus visually relate the contour matching
+to the misfit function. The combination of these two displays greatly improves
+a user's ability to reliably determine navigational offsets (and to conclude
+where navigational offsets cannot be determined).
+
+The "Nav Err" window includes two buttons that are particularly useful during
+efforts to match seafloor features. The <Minimum Misfit> 
+button below the misfit display will cause 
+\fBmbnavadjust\fP to set the current navigational offset to that
+associated with the smallest misfit for the current misfit display. This button
+is often used first to get close to the right offsets.
+The <Zero Offset> button above the contour display will return both displays
+to a state of zero navigational offset. 
+
+The relationship between the contoured bathymetry and the misfit plot
+is usually quite clear. If a strongly matching seafloor feature
+exists, then a distinct minimum will show up in the misfit plot. If the navigation
+is good and the feature already matches, then the misfit minimum will be located
+at the center of the plot, corresponding to an offset that is zero distance in
+both the east-west and north-south directions. If the navigation is bad, then
+the misfit minimum will be offset from the origin, and the offset vector
+will correspond to how far and what direction one must move one swath so that
+the features in both swathes match. In cases where there is no distinctive
+seafloor feature to match, the misfit plot will not display a strong
+minimum and it will be impossible to determine the relative navigational
+offset. Alternatively, the existence of multiple similar features can
+produce multiple local minima in the misfit map. In this case, the ambiguity
+between multiple possible solutions prevents the determination of the 
+navigational offset. We have found that combining both contour
+and misfit displays allows interactive, visually based decision making that
+is more generally reliable than any automated scheme we can devise.
+
+Navigational offsets can only be used when they are associated with specific
+points on the overlapping swath navigation. These points are called "tie points".
+All crossings will begin with no tie points, and users can generate one or more
+tie points for any crossing as required.
+The creation and manipulation of tie points is discussed in detail in a later section.
+
+It is also important to understand that any apparent navigation offset observed
+in the contour and misfit plots is relative. It may turn
+out that both swathes are poorly navigated and have to be moved, or that all
+of the offset can be applied to one swath or the other. The set of decisions about
+how to distribute the relative navigation offsets among the affected swath files
+intrinsically involves speed and acceleration changes. Fortunately, 
+we are able to formulate the automated inversion process discussed below to obtain an 
+optimal navigation solution.
+
+.SS Display Controls
+
+The user controls the appearance of the bathymetry contour plot.
+The contours are generated at regular intervals in depth, and also change
+color and are annotated with downhill facing tickmarks at regular intervals.
+A controls dialog brought up by clicking on the <Settings->Contours> button
+allows the user to set the contour, color change, and tickmark intervals. This
+same dialog also sets a decimation parameter that causes the contours to be
+calculated from fewer soundings (the data are decimated by ignoring pings). The application of
+decimation may speed up the crossing loadings, but is not generally recommended
+unless the bathymetry is strongly oversampled.
+
+Users may also use a "zoom" feature to focus on small areas in the contour plot.
+The center mouse button is used to drag a box over a region of interest in the
+contour plot. When the center button is released, both the contour and misfit plots
+are regenerated to show the smaller area. 
+Users may zoom as many times in succession as
+desired. One cannot undo the individual zoom events, but clicking the <Full Size>
+button in the "Nav Err" window will cause the plots to show the original, full
+area covered by the two swathes in the current crossing.
+
+The misfit plot represents lateral offsets scaled according to the current
+contour plot display. Specifically, the width and height of the misfit plot
+correspond to one half the width and height of the bathymetry contour plot.
+When the bathymetry plot area changes due to a zoom event, the misfit is 
+recalculated and redisplayed centered around the current offset. The color map 
+used for the misfit display is automatically scaled according to the
+minimum and maximum misfit values.
+
+.SS Setting Crossing Ties and Offsets
+
+In order to actually set the relative navigational offset between two particular
+points on overlapping or crossing swathes, the user must first create a tie point.
+This is accomplished by clicking on the <Add Tie> button in the "Nav Err" window.
+Once a tie point exists, it will shown on the contour plot as two red-filled, black
+outlined squares connected by a thin black line. Each of the squares 
+is located along one of the swath navigation tracks, and represents a 
+selected point in the sonar navigation. There can be multiple 
+tie points for each crossing, and
+each one is created by clicking on the <Add Tie> button. Only one tie point
+will be active at any time. The active tie point is displayed with larger boxes
+(the inactive tie points are only 1/4 the size. If only one tie point has been
+defined, it will always be active. If more than one tie point exists, 
+clicking on the <Select Tie> button in the "Nav Err" window will change the
+active tie point to the next in the list for the displayed crossing 
+(the tie points are selected in the order in which they were
+created). If the user wishes to delete a tie point, then click <Select Tie> until
+the undesirable tie point is active, and then click <Delete Tie>.
+
+When viewing a crossing with one or more tie points, the offsets displayed are
+associated with the current tie point. As one moves the contours to match
+overlapping features, it is important to remember that the navigational
+offset will be applied to the navigation points indicated for the current
+tie. Thus, the feature being matched should derive from data (soundings)
+associated with those particular points on the shiptrack. This is
+accomplished by clicking on the bathymetric feature in the contour display 
+with the right mouse button. The "right-click" causes \fBmbnavadjust\fP to
+find the soundings from each swath that are closest to the point clicked, and
+then to shift the current tie point to the navigation points on each swath 
+that include these soundings (that is, the navigation points associated with
+the sonar pings that include the closest soundings).
+
+In order to set, and save, a navigational offset that causes a bathymetric
+feature to be matched in overlapping swathes, the user must click the
+<Set Offset> button above the contour display. If a user changes 
+the active tie point or loads a different crossing
+without clicking <Set Tie>, then no offset information will be saved.
+Conversely, for any crossing with one or more tie points, 
+the <Reset Offset> button will reset the navigational
+offset to the last value set for the current crossing and tie point.
+
+So, in practice, setting navigational offsets that will be used in obtaining
+an optimal navigation solution involves the following steps:
+.br
+ 	1. Identify a bathymetric feature with 
+ 	   overlapping data so that it can be 
+ 	   matched.
+ 	2. Create a tie point by clicking the 
+ 	   <Add Tie> button.
+ 	3. Set the tie point location by right
+ 	   -clicking on the feature.
+ 	4. If necessary, zoom the display to 
+ 	   focus on the bathymetric feature 
+ 	   of interest by dragging a box
+ 	   with the middle mouse button.
+ 	5. Adjust the offsets so that the 
+ 	   feature is matched in both swathes 
+ 	   (operating in the contour display, 
+ 	   the misfit display, or both).
+ 	6. Click the <Set Offset> button.
+.br
+These steps should be followed for every feature that can be matched
+in overlapping swathes. 
+
+In some cases, the user will find it useful
+to create and set multiple tie points in a single crossing. Other crossings
+may not allow any features to be matched. Users should click the 
+<Skip Crossing> button on crossings that do not allow one or more offsets
+to be determined. In fact, \fBmbnavadjust\fP will 
+only allow the calculation of a navigation
+solution when all of the crossings have been acted on by either having tie
+points set or by having been explicitly skipped.
+
+Users should feel free to iterate any way they like during
+crossing inspection. Crossings may be displayed as many
+times as desired, and ties can be created, deleted, and
+changed without restriction. Users may also quit \fBmbnavadjust\fP
+and then later reopen the same project without losing any
+information.
+
+.SH USING MBNAVADJUST 3: INVERTING FOR AN OPTIMAL NAVIGATION SOLUTION
+
+Once the user has interactively analyzed all of the crossings
+and closed the "Nav Err" window by clicking the <Dismiss> button,
+the <Action->Invert navigation> button becomes enabled. Clicking
+this button causes \fBmbnavadjust\fP to construct and solve
+an inversion for the optimal navigation.
+
+The inversion is constructed as a sparse overdetermined least squares
+matrix problem. Suppose we have n navigation points in all of the 
+swath files and have defined m tie points. The form of the problem is:
+.br
+ 	A X = D
+.br
+where X is the vector of unknowns, which happen to be the longitude
+and latitude values of 
 
 
 
@@ -174,6 +402,13 @@ and a large amount of other information.
 .SH INTERACTIVE CONTROLS
 .TP
 .B File
+
+.SH REFERENCES
+
+Nishimura, C. E., and D. W. Forsyth, Improvements in navigation 
+using SeaBeam crossing errors, \fIMar. Geophys. Res.\fP, \fB9\fP, 333-352, 1988.
+.br
+Parker, R. L., \fBGeophysical Inverse Theory\fP, Princeton University Press, Princeton, NJ, 1994.
 
 .SH SEE ALSO
 \fBmbsystem\fP(l), \fBmbio\fP(l), \fBmbprocess\fP(l), 
