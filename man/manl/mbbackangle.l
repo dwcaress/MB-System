@@ -1,4 +1,4 @@
-.TH mbbackangle l "17 September 1997" "MB-System 4.5" "MB-System 4.5"
+.TH mbbackangle l "5 October 1998" "MB-System 4.6" "MB-System 4.6"
 .SH NAME
 \fBmbbackangle\fP - Generates a table of the average amplitude or 
 sidescan values in swath sonar data as a function of 

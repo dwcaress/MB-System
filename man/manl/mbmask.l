@@ -1,4 +1,4 @@
-.TH mbmask l "17 September 1997" "MB-System 4.5" "MB-System 4.5"
+.TH mbmask l "5 October 1998" "MB-System 4.6" "MB-System 4.6"
 .SH NAME
 \fBmbmask\fP, \fBmbgetmask\fP - Extract multibeam data flags from one
 file and apply to another.

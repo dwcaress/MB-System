@@ -1,4 +1,4 @@
-.TH mbm_rollerror l "16 September 1997" "MB-System 4.5" "MB-System 4.5"
+.TH mbm_rollerror l "5 October 1998" "MB-System 4.6" "MB-System 4.6"
 .SH NAME
 \fBmbm_rollerror\fP - Macro to read a swath sonar bathymetry file, calculate the noise in the vertical reference used by the sonar, and generate a file containing roll corrections which can be applied to the data.
 

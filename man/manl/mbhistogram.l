@@ -1,4 +1,4 @@
-.TH mbhistogram l "17 September 1997" "MB-System 4.5" "MB-System 4.5"
+.TH mbhistogram l "5 October 1998" "MB-System 4.6" "MB-System 4.6"
 .SH NAME
 \fBmbhistogram\fP - Generate a histogram of bathymetry, amplitude, or sidescan values
 from swath sonar data files.

@@ -1,4 +1,4 @@
-.TH mbfilter l "17 September 1997" "MB-System 4.5" "MB-System 4.5"
+.TH mbfilter l "5 October 1998" "MB-System 4.6" "MB-System 4.6"
 .SH NAME
 \fBmbfilter\fP - Apply some simple filter functions to sidescan, beam
 amplitude, or bathymetry data from swath sonar data files.

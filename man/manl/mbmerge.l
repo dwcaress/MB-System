@@ -1,4 +1,4 @@
-.TH mbmerge l "17 September 1997" "MB-System 4.5" "MB-System 4.5"
+.TH mbmerge l "5 October 1998" "MB-System 4.6" "MB-System 4.6"
 .SH NAME
 \fBmbmerge\fP - Merges swath sonar data with new navigation.
 
