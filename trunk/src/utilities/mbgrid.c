@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrid.c	5/2/94
- *    $Id: mbgrid.c,v 5.23 2003-11-25 00:54:44 caress Exp $
+ *    $Id: mbgrid.c,v 5.24 2003-12-12 01:45:11 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -38,6 +38,9 @@
  * Rererewrite:	January 2, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.23  2003/11/25 00:54:44  caress
+ * Now generates datalist of all swath files actually contributing to the grid.
+ *
  * Revision 5.22  2003/08/28 18:36:49  caress
  * Fixed problems with interpolating background data extracted with grdraster.
  *
@@ -371,10 +374,10 @@ double mbgrid_erf();
 
 /* output stream for basic stuff (stdout if verbose <= 1,
 	stderr if verbose > 1) */
-FILE	*outfp = stdout;
+FILE	*outfp;
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbgrid.c,v 5.23 2003-11-25 00:54:44 caress Exp $";
+static char rcs_id[] = "$Id: mbgrid.c,v 5.24 2003-12-12 01:45:11 caress Exp $";
 static char program_name[] = "mbgrid";
 static char help_message[] =  "mbgrid is an utility used to grid bathymetry, amplitude, or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbgrid -Ifilelist -Oroot \
@@ -761,9 +764,11 @@ main (int argc, char **argv)
 			errflg++;
 		}
 
-	/* set output stream to stderr */
+	/* set output stream to stdout or stderr */
 	if (verbose >= 2)
 	    outfp = stderr;
+	else
+	    outfp = stdout;
 
 	/* if error flagged then print it and exit */
 	if (errflg)
