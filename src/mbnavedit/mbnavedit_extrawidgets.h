@@ -1,12 +1,14 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_extrawidgets.h	8/7/95
- *    $Id: mbnavedit_extrawidgets.h,v 4.1 1997-04-21 17:07:38 caress Exp $
+ *    $Id: mbnavedit_extrawidgets.h,v 4.2 2000-09-30 07:03:14 caress Exp $
  *
- *    Copyright (c) 1995 by 
- *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
- *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
- *    Lamont-Doherty Earth Observatory
- *    Palisades, NY  10964
+ *    Copyright (c) 1995, 2000 by
+ *    David W. Caress (caress@mbari.org)
+ *      Monterey Bay Aquarium Research Institute
+ *      Moss Landing, CA 95039
+ *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Lamont-Doherty Earth Observatory
+ *      Palisades, NY 10964
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
@@ -20,6 +22,9 @@
  * Date:	June 24,  1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1997/04/21  17:07:38  caress
+ * MB-System 4.5 Beta Release.
+ *
  * Revision 4.0  1995/08/07  18:33:22  caress
  * First cut.
  *
