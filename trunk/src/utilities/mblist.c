@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mblist.c	2/1/93
- *    $Id: mblist.c,v 4.16 1995-08-10 15:39:36 caress Exp $
+ *    $Id: mblist.c,v 4.17 1995-08-17 15:04:52 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -26,6 +26,9 @@
  *		in 1990.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.16  1995/08/10  15:39:36  caress
+ * mblist now works with datalist files.
+ *
  * Revision 4.15  1995/07/13  20:13:36  caress
  * Added output options x and y for longitude and latitude in
  * integer degrees + decimal minutes + EW/NS
@@ -155,7 +158,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mblist.c,v 4.16 1995-08-10 15:39:36 caress Exp $";
+	static char rcs_id[] = "$Id: mblist.c,v 4.17 1995-08-17 15:04:52 caress Exp $";
 	static char program_name[] = "MBLIST";
 	static char help_message[] =  "MBLIST prints the specified contents of a multibeam data \nfile to stdout. The form of the output is quite flexible; \nMBLIST is tailored to produce ascii files in spreadsheet \nstyle with data columns separated by tabs.";
 	static char usage_message[] = "mblist [-Byr/mo/da/hr/mn/sc -Ddump_mode -Eyr/mo/da/hr/mn/sc \n-Fformat -H -Ifile -Llonflip -Mbeam_start/beam_end -Npixel_start/pixel_end \n-Ooptions -Ppings -Rw/e/s/n -Sspeed -Ttimegap -V]";
@@ -256,6 +259,8 @@ char **argv;
 	/* course calculation variables */
 	int	use_course = MB_NO;
 	double	course, course_old;
+	double	time_d_old, dt;
+	double	speed_made_good, speed_made_good_old;
 	double	navlon_old, navlat_old;
 	double	dx, dy, dist;
 
@@ -518,6 +523,8 @@ char **argv;
 				use_ss = MB_YES;
 			if (list[i] == 'h')
 				use_course = MB_YES;
+			if (list[i] == 's')
+				use_course = MB_YES;
 			}
 	if (check_values == MB_YES)
 		{
@@ -671,6 +678,9 @@ char **argv;
 			if (first == MB_YES)
 				{
 				course = heading;
+				speed_made_good = speed;
+				course_old = heading;
+				speed_made_good_old = speed;
 				}
 			else
 				{
@@ -678,18 +688,23 @@ char **argv;
 				dy = (navlat - navlat_old)/mtodeglat;
 				dist = sqrt(dx*dx + dy*dy);
 				if (dist > 0.0)
-					{
 					course = RTD*atan2(dx/dist,dy/dist);
-					course_old = course;
-					}
 				else
 					course = course_old;
 				if (course < 0.0)
 					course = course + 360.0;
+				dt = (time_d - time_d_old);
+				if (dt > 0.0)
+					speed_made_good = 3.6*dist/dt;
+				else
+					speed_made_good 
+						= speed_made_good_old;
 				}
 			navlon_old = navlon;
 			navlat_old = navlat;
 			course_old = course;
+			speed_made_good_old = speed_made_good;
+			time_d_old = time_d;
 			}
 
 		/* reset first flag */
@@ -807,6 +822,9 @@ char **argv;
 					break;
 				case 'S': /* speed */
 					printf("%5.2f",speed);
+					break;
+				case 's': /* speed made good */
+					printf("%5.2f",speed_made_good);
 					break;
 				case 'T': /* yyyy/mm/dd/hh/mm/ss time string */
 					printf(
@@ -1036,6 +1054,9 @@ char **argv;
 					break;
 				case 'S': /* speed */
 					printf("%5.2f",speed);
+					break;
+				case 's': /* speed made good */
+					printf("%5.2f",speed_made_good);
 					break;
 				case 'T': /* yyyy/mm/dd/hh/mm/ss time string */
 					printf(

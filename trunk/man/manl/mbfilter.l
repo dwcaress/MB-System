@@ -1,10 +1,10 @@
-.TH mbfilter l "14 February 1995"
+.TH mbfilter l "14 August 1995"
 .SH NAME
 \fBmbfilter\fP - Apply some simple filter functions to sidescan, beam
 amplitude, or bathymetry data.
 
 .SH VERSION
-Version 4.2
+Version 4.3
 
 .SH SYNOPSIS
 \fBmbfilter\fP [\fB-A\fIkind\fP \fB-B\fIyr/mo/da/hr/mn/sc 
@@ -13,6 +13,7 @@ Version 4.2
 \fB-F\fIformat\fP \fB-I\fIinfile\fP
 \fB-O\fIoutfile\fP \fB-R\fIwest/east/south/north\fP 
 \fB-S\fImode/xdim/ldim/iteration\fP 
+\fB-T\fIthreshold_lo/threshold_hi\fP
 \fB-V -H\fP]
 
 .SH DESCRIPTION
@@ -45,6 +46,16 @@ with edges, thus tending to preserve the sharpness of features
 more than the simpler smoothing filters. Descriptions of these 
 speckle reduction filters can be found in the reference given below. 
 .br
+The median smoothing filter can be set by the \fB-T\fP
+option to operate with low and high
+ratio thresholds (the value is changed only if the original
+value divided by the median value is less than the low
+threshold or greater than the high threshold). This allows the
+filter to preferentially despike the data. In particular, this
+approach is useful for suppressing "stripes" or "bad" 
+pings which have amplitude or sidescan values differing significantly
+from surrounding pings.
+.br
 The hi-pass filters are constructed by calculating a low-pass
 filtered version of the data and then subtracting that from
 the original data. An offset value is added to the hi-passed
@@ -60,7 +71,7 @@ Each of the specified filters can be iteratively applied
 as many times as the user desires.
 The user specifies the window size
 used by the filters (3x3 or 5x5 are typical for using smoothing
-filters iteratively to reduce speckle; larger windows like 3x10
+filters iteratively to reduce speckle; larger windows like 3x20
 are typical for hi-pass filtering). 
 .br
 The default input and output streams are stdin and stdout.
@@ -162,6 +173,18 @@ the number of times the filter is applied; there is no limit to
 this value.
 Default: \fImode\fP = 1, \fIxdim\fP = 3, \fIldim\fP = 3, 
 \fIiteration\fP = 1.
+.TP
+.B \fB-T\fIthreshold_lo/threshold_hi\fP
+This option causes the boxcar median smoothing filter to
+operate with low and high
+ratio thresholds (the value is changed only if the original
+value divided by the median value is less than \fIthreshold_lo\fP
+or greater than \fIthreshold_hi\fP). This allows the
+filter to preferentially despike the data. In particular, this
+approach is useful for suppressing "stripes" or "bad" 
+pings which have amplitude or sidescan values differing significantly
+from surrounding pings. This option only works with the median
+smoothing filter.
 .TP
 .B \fB-V\fP
 Normally, \fBmbfilter\fP works "silently" without outputting

@@ -1,9 +1,9 @@
-.TH mbtide l "10 July 1995"
+.TH mbtide l "14 August 1995"
 .SH NAME
 \fBmbtide\fP - MBTIDE corrects multibeam bathymetry data for tides.
 
 .SH VERSION
-Version 4.2
+Version 4.3
 
 .SH SYNOPSIS
 \fBmbtide\fP [\fB-F\fIformat \fB-I\fIinfile \fB-O\fIoutfile 

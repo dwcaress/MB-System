@@ -1,21 +1,22 @@
-.TH mbanglecorrect l "14 February 1995"
+.TH mbanglecorrect l "14 August 1995"
 .SH NAME
 \fBmbanglecorrect\fP - Apply a grazing angle correction to beam
 amplitude or sidescan data.
 
 .SH VERSION
-Version 4.2
+Version 4.3
 
 .SH SYNOPSIS
 \fBmbanglecorrect\fP [\fB-A\fIkind/scale\fP \fB-B\fIyr/mo/da/hr/mn/sc 
 \fB-C\fP \fB-D\fImode/length\fP \fB-E\fIyr/mo/da/hr/mn/sc 
-\fB-F\fIformat\fP \fB-G\fI\fP \fB-I\fIinfile\fP  \fB-N\fInangle/anglemax\fP
+\fB-F\fIformat\fP \fB-G\fI\fP \fB-I\fIinfile\fP  
+\fB-M\fInsmooth\fP \fB-N\fInangle/anglemax\fP
 \fB-O\fIoutfile\fP \fB-R\fIwest/east/south/north\fP 
 \fB-S\fIcorrectionfile\fP 
 \fB-Z\fIdepth\fP \fB-V -H\fP]
 
 .SH DESCRIPTION
-The program mbanglecorrect is used for processing sidescan data.  
+The program \fBmbanglecorrect\fP is used for processing sidescan data.  
 This program corrects the sidescan data by dividing by a model of the
 backscatter vs grazing angle function to produce a flat image
 which shows geology better than the raw data (each value is
@@ -43,7 +44,8 @@ angles, unless the \fB-G\fP option is used to force the
 assumption of a flat seafloor (this pertains only to the application
 of the grazing angle correction; seafloor slopes are always used,
 if available, in calculating local grazing angle correction
-functions). If bathymetry is
+functions). The bathymetry can be smoothed prior to the calculation
+of slopes, if desired. If bathymetry is
 not available, the seafloor is assumed to be flat with a depth
 specified by the \fB-Z\fP option. The use of bathymetric slopes
 in the grazing angle calculations will tend to remove 
@@ -129,6 +131,12 @@ This program uses the \fBMBIO\fP library and will read or write any multibeam
 format supported by \fBMBIO\fP. A list of the multibeam data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page. Default: \fIinfile\fP = "stdin".
+.TP
+.B \fB-M\fInsmooth\fP
+Causes the bathymetry to be smoothed prior to the calculation
+of seafloor slopes. An acrosstrack boxcar mean filter is applied
+extending \fInsmooth\fP beams to either side of each beam
+(2 * \fInsmooth\fP + 1).
 .TP
 .B \fB-N\fInangle/angle\fP
 The amplitude vs grazing angle table is calculated by binning the

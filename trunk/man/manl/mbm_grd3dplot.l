@@ -1,7 +1,7 @@
 .TH mbm_grdplot l "14 August 1995"
 .SH NAME
 \fBmbm_grdplot\fP - Create an executable shellscript which will generate
-a GMT map of gridded data in a GMT grd file.
+a GMT 3D perspective plot of gridded data in a GMT grd file.
 
 .SH VERSION
 Version 4.3
@@ -9,18 +9,17 @@ Version 4.3
 .SH SYNOPSIS
 \fBmbm_grdplot\fP \fB-I\fP\fIfile\fP 
 [\fB-A\fP[\fImagnitude\fP[\fI/azimuth\fP] 
-\fB-C\fP[\fIcontour_control\fP] 
 \fB-D\fP[\fIflipcolor/flipshade\fP]
-\fB-G\fP\fIcolor_mode\fP \fB-H\fP 
-\fB-K\fP\fIintensity_file\fP
-\fB-O\fP\fIroot\fP \fB-P\fP\fIpagesize\fP
-\fB-S\fP\fI[color/shade]\fP
-\fB-U\fP\fIorientation\fP \fB-V\fP 
+\fB-E\fP[\fIview_az/view_el\fP] 
+\fB-G\fP\fIcolor_mode\fP \fB-H\fP \fB-K\fP\fIintensity_file \fP
+\fB-N\fP\fIdrape_file\fP
+\fB-O\fP\fIroot\fP \fB-P\fP\fIpagesize \fP
+\fB-S\fP\fI[color/shade]\fP \fB-U\fP\fIorientation\fP \fB-V\fP 
 \fB-W\fP\fIcolor_style\fP[\fI/pallette\fP[\fIncolors\fP]] ]
 
 Additional Options:
 .br
-[\fB-B\fP\fItickinfo\fP \fP
+[\fB-B\fP\fItickinfo\fP
 \fB-J\fP\fIprojection\fP[\fI/scale | width\fP]
 \fB-L\fP\fItitle\fP[\fI:scale_label\fP] \fB-M\fP\fImisc\fP 
 \fB-Q\fP \fB-R\fP\fIw/e/s/n\fP \fB-X\fP \fB-Y\fP 
@@ -33,31 +32,25 @@ Miscellaneous Options:
 \fB-MGQ\fP\fIdpi\fP \fB-MGS\fP\fIscalefactor\fP
 \fB-MGT\fP\fIx/y/size/angle/font/just/text\fP
 \fB-MGU\fP\fP[\fI/dx/dy/\fP][\fIlabel\fP] 
-\fB-MCA\fP\fIanot_int/\fP[\fIffont_size\fP][\fIaangle\fP][\fI/r/g/b\fP][\fIo\fP]]
-\fB-MCG\fP\fIgap/width\fP \fB-MCQ\fP\fIcut \fP
-\fB-MCT\fP[\fI+|-\fP][\fIgap/length\fP][\fI:LH\fP] \fB-MCW\fP\fItype\fP[\fIpen\fP]
-\fB-MXG\fP\fIfill\fP \fB-MXI\fP\fIxy_file \fP
-\fB-MXS\fP\fIsymbol/size\fP \fB-MXW\fP\fIpen\fP]
+\fB-MVM\fP\fImesh_pen\fP \fB-MVN\fP\fInull[/r/g/b]\fP ]
+
 
 .SH DESCRIPTION
-\fBmbm_grdplot\fP is an utility that generates a 
-shellscript of \fBGMT\fP commands which, 
-when executed, will generate a Postscript plot of gridded 
-data.  Several styles of plots can be generated, including 
-color fill maps, contour maps, color fill maps overlaid with
-contours, shaded relief color maps, text labels, and xy data
-in lines or symbols. Five different color schemes are included.
-The plot will be scaled to fit on the specified page size 
-or, if the scale is user defined, the page size will be 
+Macro to generate a shellscript of GMT commands which, when 
+executed, will generate a 3D perspective Postscript plot of  
+gridded data.  Several styles of plots can be generated, 
+including color fill views, color shaded relief views, mesh  
+plot views, and text labels. Five different color schemes are 
+included. The plot will be scaled to fit on the specified page  
+size or, if the scale is user defined, the page size will be  
 chosen in accordance with the plot size. The primary purpose 
-of this macro is to allow the simple, semi-automated
-production of nice looking maps with a few command line
-arguments. For users seeking more control over the plot
-appearance, a number of additional optional arguments are
+of this macro is to allow the simple, semi-automated 
+production of nice looking maps with a few command line 
+arguments. For users seeking more control over the plot 
+appearance, a number of additional optional arguments are 
 provided. Truly ambitious users may edit the plot shellscript 
-to take advantage of \fBGMT\fP capabilites not supported by this 
-macro. A companion macro \fBmbm_grd3dplot\fP can be used
-similarly to generate 3D perspective views of gridded data.
+to take advantage of GMT capabilites not supported by this 
+macro.
 
 .SH AUTHORSHIP
 David W. Caress (caress@lamont.ldeo.columbia.edu)
@@ -80,13 +73,6 @@ The value \fIazimuth\fP
 is the azimuth from which the data is illuminated.
 Defaults: \fImagnitude\fP = 0.2; \fIazimuth\fP = 0.0;
 .TP
-.B \fB-C\fP\fIcontour_control\fP
-If \fB-C\fP is given alone, it causes unannotated contours
-to be drawn using a contour interval calculated from the
-data. The user may also use \fIcontour_control\fP 
-to specify the contour interval. See the COMPLETE DESCRIPTION OF OPTIONS
-section below for a more complete discussion.
-.TP
 .B \fB-D\fP\fI[flipcolor/flipshade]\fP
 Normally, the color or grayscale tables used for color maps run from
 cool colors (or dark grays) for low grid values 
@@ -102,16 +88,25 @@ to be reversed (e.g. high intensities overlaid as light shading).
 Using \fB-D\fP\fI0/1\fP will flip the shading convention
 but leave the default color convention.
 .TP
+.B \fB-E\fP[\fIview_az/view_el\fP]
+Sets the azimuth and elevation in degrees of the
+viewpoint for 3D perspective views.  An \fIview_az\fP of 0
+represents a view from the north, and \fIview_az\fP = 90
+represents a view from the east.  An \fIview_el\fP of 0
+represents a horizontal view.  Default: \fIview_az\fP = 200.;
+elevation = 40.
+.TP
 .B \fB-G\fP\fIcolor_mode\fP
 Turns on color fill plot and sets the style of the plot.
 .br
-        \fIcolor_mode\fP = 1: Color/gray fill.
-        \fIcolor_mode\fP = 2: Color/gray fill shaded by 
+        \fIcolor_mode\fP = 1: 3D color/gray fill.
+        \fIcolor_mode\fP = 2: 3D color/gray fill shaded by 
                         synthetic illumination.
-        \fIcolor_mode\fP = 3: Color/gray fill shaded by 
+        \fIcolor_mode\fP = 3: 3D color/gray fill shaded by 
                         an intensity file. The \fB-K\fP 
                         option must be used to specify
  			the intensity file.
+        \fIcolor_mode\fP = 4: 3D mesh plot.
 .TP
 .B \fB-H\fP
 This "help" flag cause the program to print out a description
@@ -125,10 +120,13 @@ Alternatively, \fIgrdfile\fP may be a list of grid files
 .B \fB-K\fP\fIintensity_file\fP
 Sets the name of the gridded data file containing
 instensity values to be used for shading the map.  
-Alternatively, \fIgrdfile\fP may be a list of grid files
-(one filename on each line) to be used together. If a
-list of file is supplied, the intensity files must
-conform in order to the data grid files they will shade.
+.TP
+.B \fB-N\fP\fIdrape_file\fP
+Sets the name of the gridded data file to be draped on
+the relief provided by the file specified with the \fB-I\fP
+option. If \fB-N\fP\fIdrape_file\fP is specified, then
+all color control options will apply to the data in 
+\\fIdrape_file\fP.
 .TP
 .B \fB-O\fP\fIroot\fP
 Sets the root used to construct the filename of the output shellscript
@@ -194,7 +192,7 @@ are available:
 .br
 A complete description of the color pallettes is given
 in the COMPLETE DESCRIPTION OF OPTIONS section below.
- 
+.br
 The \fIncolors\fP parameter sets the number of color
 values used in plotting, whether the colors are 
 represented in a continuous color scale or a
@@ -217,38 +215,6 @@ Sets map boundary tickmark intervals. See the \fBpsbasemap\fP
 manual page for details. By default the program chooses
 basemap annotations based on the map boundaries.
 .TP
-.B \fB-C\fIcontour_control\fP
-If \fB-C\fP is given alone, it causes unannotated contours
-to be drawn using a contour interval calculated from the
-data. If \fIcontour_control\fP is given, it specifies
-the contours to be drawn in one of 
-three possible ways:
- 
-If \fIcontour_control\fP has the suffix ".cpt" and 
-can be opened as a file, it is assumed
-to be a color palette table.  The color boundaries 
-are then used as contour levels.
-If the cpt-file has anotation flags in the last 
-column then those contours will be
-anotated.  By default no contours are labeled; use 
-\fB\-MCA\fP to anotate all contours.
- 
-If \fIcontour_control\fP is a file but not a 
-cpt-file, it is expected to contain contour levels
-in column 1 and a C(ontour) OR A(nnotate) in col 2. 
-The levels marked C (or c) are contoured,
-the levels marked A (or a) are contoured and 
-annotated.  Optionally, a third column may be
-present and contain the fixed anotation angle for 
-this contour level.
- 
-If no file is found, then \fIcontour_control\fP is
-interpreted as a constant contour interval.  
- 
-If a file is given and \fB\-MCT\fP is set, 
-then only contours marked with upper case 
-C or A will have tickmarks.
-.TP
 .B \fB-D\fP\fI[flipcolor/flipshade]\fP
 Normally, the color or grayscale tables used for color maps run from
 cool colors (or dark grays) for low grid values 
@@ -264,16 +230,25 @@ to be reversed (e.g. high intensities overlaid as light shading).
 Using \fB-D\fP\fI0/1\fP will flip the shading convention
 but leave the default color convention.
 .TP
+.B \fB-E\fP[\fIview_az/view_el\fP]
+Sets the azimuth and elevation in degrees of the
+viewpoint for 3D perspective views.  An \fIview_az\fP of 0
+represents a view from the north, and \fIview_az\fP = 90
+represents a view from the east.  An \fIview_el\fP of 0
+represents a horizontal view.  Default: \fIview_az\fP = 200.;
+elevation = 40.
+.TP
 .B \fB-G\fP\fIcolor_mode\fP
 Turns on color fill plot and sets the style of the plot.
 .br
-        \fIcolor_mode\fP = 1: Color/gray fill.
-        \fIcolor_mode\fP = 2: Color/gray fill shaded by 
+        \fIcolor_mode\fP = 1: 3D color/gray fill.
+        \fIcolor_mode\fP = 2: 3D color/gray fill shaded by 
                         synthetic illumination.
-        \fIcolor_mode\fP = 3: Color/gray fill shaded by 
+        \fIcolor_mode\fP = 3: 3D color/gray fill shaded by 
                         an intensity file. The \fB-K\fP 
                         option must be used to specify
  			the intensity file.
+        \fIcolor_mode\fP = 4: 3D mesh plot.
 .br
 See the \fBgrdimage\fP manual page for information on shading
 with intensity files
@@ -286,10 +261,6 @@ of its operation and then exit immediately.
 Sets the name of the gridded data file to be plotted.  
 The data must be in a form acceptable to \fBGMT\fP version 3
 programs (see the \fBGMT\fP Cookbook & Technical Reference).
-Alternatively, \fIgrdfile\fP may be a list of grid files
-(one filename on each line) to be plotted together. This
-is useful when data from a region is broken up into several
-grid files rather than a single very large grid file.
 .TP
 .B \fB-J\fIprojection\fP[\fI/scale | /width\fP]
 Selects the map projection. By default the map projection is
@@ -377,10 +348,6 @@ More details can be found in the \fBpsbasemap\fP manpages.
 .B \fB-K\fP\fIintensity_file\fP
 Sets the name of the gridded data file containing
 instensity values to be used for shading the map.  
-Alternatively, \fIgrdfile\fP may be a list of grid files
-(one filename on each line) to be used together. If a
-list of files is supplied, the intensity files must
-conform in order to the list of data grid files they will shade.
 .TP
 .B \fB-L\fItitle:scalelabel\fP
 Sets the title and the label for the colorscale (if used) of
@@ -397,8 +364,15 @@ A series of "miscellaneous" options are provided which are
 given as \fB-M\fP followed by a two character identifier, followed
 by any other parameters associated with that option.
 The \fB-M\fP options may be strung together separated by
-colons, e.g. "-MGQ100:GU:CA200/10", which is equivalent to
-"-MGQ -MGU -MCA200/10". 
+colons, e.g. "-MGQ100:GU", which is equivalent to
+"-MGQ -MGU". 
+.TP
+.B \fB-N\fP\fIdrape_file\fP
+Sets the name of the gridded data file to be draped on
+the relief provided by the file specified with the \fB-I\fP
+option. If \fB-N\fP\fIdrape_file\fP is specified, then
+all color control options will apply to the data in 
+\\fIdrape_file\fP.
 .TP
 .B \fB-MGD\fIgmtdef/value\fP
 Allows the user to set the \fBGMT\fP default values used as
@@ -454,133 +428,19 @@ Draw Unix System time stamp on plot.  User may specify where the lower left corn
 of the stamp should fall on the page relative to lower left corner of plot in inch [Default is (-0.75,-0.75)].  Optionally,
 append a label, or \fBc\fP (which will plot the command string.)
 .TP
-.B \fB-MCA\fP\fIanot_int/\fP[\fIffont_size\fP][\fIaangle\fP][\fI/r/g/b\fP][\fIo\fP]]
-\fIanot_int\fP is annotation interval in data units.  
-Ignored if contour levels are given in a file.
-[Default is no annotations].  Several options 
-can be set to modify the form of the annotation.  
-Append f\fIfont_size\fP to change font size [9], 
-append \fI/r/g/b\fP to change color of text fill box
-[PAGE_COLOR], append a\fIangle\fP to fix 
-annotation angle [Default follows contour], 
-and append 'o' to draw the outline of the 
-surrounding text box [Default is no outline].
-.TP
-.B \fB-MCG\fP\fIgap/width\fP \fB-MCQ\fP\fIcut \fP
-\fIgap\fP is distance in inch between each 
-annotation along the same contour.
-\fIwidth\fP is number of points over which to 
-estimate the best fitting slope
-for contour labels  [Default is 4/10].
-.TP
-.B -MCQcut
-Do not draw contours with less than \fIcut\fP number 
-of points [Draw all contours].
-.TP
-.B \fB-MCT\fP[\fI+|-\fP][\fIgap/length\fP][\fI:LH\fP] 
-Will draw tickmarks pointing in the downward direction every \fIgap\fP along the innermost closed contours.  Append \fIgap\fP and tickmark length (in inch) or use defaults [0.2/0.05].
-User may choose to tick only local highs or local lows by specifying \fB\-T+\fP or \fB\-T-\fP, respectively.  Appending :LH will plot the characters L and H at the center of closed
-innermost contours (local lows and highs).  L and H can be any single character (e.g., LH, -+, etc.)
-If a file is given by \fB\-C\fP and \fB\-T\fP is set, 
-then only contours marked with upper case C or A will have tickmarks [and anotation].
-.TP
-.B \fB-MCW\fP\fItype\fP[\fIpen\fP]
-\fItype\fP, if present, can be 'a' for annotated contours or 'c' for regular contours [Default].
-\fIpen\fP sets the attributes for the particular line.  Default values for annotated contours:
-width = 3, color = black, texture = solid.  Regular contours have default width = 1.
-.TP
-.B \fB-MXG\fP\fIfill\fP 
-Select filling of symbols for xy plotting.  
-Set the shade (0\-255) or color 
-(r/g/b) [Default is no fill]. To reset no fill,
-use \fIfill\fP = "N".
-For polygons, you may optionally specify 
-\fB\-Gp\fP\fIicon_size/pattern\fP, where 
-\fIpattern\fP gives the number of the
-image pattern (1-32) OR the name of a 
-icon-format file.  \fIicon_size\fP sets 
-the unit size in inch.
-To invert black and white pixels, use 
-\fB\-GP\fP instead of \fB\-Gp\fP.  See 
-\fBGMTs\fP Cookbook & Technical Reference
-Appendix E for information on individual patterns.
-.TP
-.B \fB-MXI\fP\fIxy_file \fP
-Specifies a file containing (x,y) pairs to be plotted
-as lines or symbols. The line and symbol characteristics
-are set using the last \fB-MXG\fP, \fB-MXS\fP, and \fB-MXW\fP
-options used. All of the \fB-MX\fP commands can be
-given multiple times, so by stringing series of these
-commands together the user can plot different files
-using different line or symbol characteristics.
-[Default is a solid black line].
-.TP
-.B \fB-MXS\fP\fIsymbol/size\fP 
-Selects symbol to be used for plotting the next xy data
-file. Setting \fIsymbol\fP = "N" causes line plotting.
-Choose between:
-.TP
-.B \-MXSa
-st\fBa\fPr.  \fIsize\fP is radius of circumscribing circle.
-.TP
-.B \-MXSb
-\fBb\fPar extending from \fIbase\fP to y.  \fIsize\fP is bar width.  By default,
-\fIbase\fP = 0.  Append /\fIbase\fP to change this value.  Append \fBu\fP if \fIsize\fP
-is in x-units [Default is inch].
-.TP
-.B \-MXSc
-\fBc\fPircle.  \fIsize\fP is diameter of circle.
-.TP
-.B \-MXSd
-\fBd\fPiamond.  \fIsize\fP is side of diamond.
-.TP
-.B \-MXSe
-\fBe\fPllipse.  Direction (in degrees counterclockwise from horizontal), major_axis (in inch), and minor_axis (in inch) must be found in columns 3, 4, and 5.
-.TP
-.B \-MXSf
-\fBf\fPault.  Give distance gap between ticks and ticklength in inch.  If gap is
-negative, it is interpreted to mean number of ticks instead.  Append \fBl\fP or \fBr\fP to draw tick on
-the left or right side of line [Default is centered].  Upper case \fBL\fP or \fBR\fP draws a triangle
-instead of line segment.
-.TP
-.B \-MXSh
-\fBh\fPexagon.  Give side in inch.
-.TP
-.B \-MXSi
-\fBi\fPnverted triangle.  Give side in inch.
-.TP
-.B \-MXSl
-\fBl\fPetter or text string.  Give size in inch, and append /\fIstring\fP after the size.  Note that the size is only approximate; no individual scaling
-is done for different characters.  Remember to escape special characters like *.
-.TP
-.B \-MXSp
-\fBp\fPoint.  No size needs to be specified (1 pixel is used).
-.TP
-.B \-MXSs
-\fBs\fPquare.  Give side in inch.
-.TP
-.B \-MXSt
-\fBt\fPriangle.  Give side in inch.
-.TP
-.B \-MXSv
-\fBv\fPector.  Direction (in degrees counterclockwise from horizontal) and length (in inch) must be found in columns 3 and 4.  \fIsize\fP,
-if present, will be interpreted as arrowwidth/headlength/headwidth (in inch) [Default is 0.03/0.12/0.1 inch].
-By default arrow attributes remains invariant to the length
-of the arrow.  To have the size of the vector scale down with decreasing size,
-append n\fPnorm\fP, where vectors shorter than \fInorm\fP will have their
-attributes scaled by length/\fInorm\fP.
-.TP
-.B \-MXSV
-Same as \fB\-MXSv\fP, except azimuth (in degrees east of north) should be given instead of direction.  The azimuth will
-be mapped into an angle based on the chosen map projection (\fB\-MXSv\fP leaves the directions
-unchanged.)
-.TP
-.B \-MXSx
-cross.  Give length in inch.
-.TP
-.B \fB-MXW\fP\fIpen\fP]
-Set pen attributes for xy plotting.  [Defaults: width = 1, color = 0/0/0, 
+.B \fB-MVM\fP\fImesh_pen\fP
+Set pen attributes for mesh plot.  The mesh plot must be specified
+with the \fB-G\fP option. [Defaults: width = 1, color = 0/0/0, 
 texture = solid]. 
+.TP
+.B \fB-MVN\fP\fInull[/r/g/b]\fP
+Draws a plane at the level of the \fInull\fP value (with
+respect to the data in the grid file specified with the \fB-I\fP
+option. If the optional r/g/b is provided,
+the frontal facade between the plane and the data perimeter is
+filled with this color. By default, \fBmbm_grd3dplot\fP causes
+the null plane to be drawn at the minimum z-level and the facade
+to be colored a light gray (r=g=b=200).
 .TP
 .B \fB-O\fIroot\fP
 Sets the root used to construct the filename of the output shellscript
@@ -689,11 +549,6 @@ The \fB-U\fP option allows the user to set the plot orientation. If
 \fIorientation\fP = 1, a portrait plot will be produced; if
 \fIorientation\fP = 2, a landscape plot will be produced.
 .TP
-.B \fB-V\fP
-Causes \fBmbm_grdplot\fP to operate in "verbose" mode 
-so that it outputs
-more information than usual.
-.TP
 .B \fB-W\fP\fIcolor_style\fP[\fI/pallette\fP[\fIncolors\fP]]
 This option controls the color scheme used for color
 fill plots. If \fIcolor_style\fP = 1 [default], then
@@ -754,6 +609,11 @@ values used in plotting, whether the colors are
 represented in a continuous color scale or a
 stepped, discrete color scale [default is 11].
 .TP
+.B \fB-V\fP
+Causes \fBmbm_grdplot\fP to operate in "verbose" mode 
+so that it outputs
+more information than usual.
+.TP
 .B \fB-X\fP
 Normally, \fBmbm_grdplot\fP creates an executable shellscript and
 then exits.  This option will cause the shellscript to be executed
@@ -778,86 +638,49 @@ Suppose we have obtained two GRD files with dimensions of
 127 by 194, one containing gridded bathymetry
 (grd_sb2112_example_bath) and the other gridded sidescan
 (grd_sb2112_example_ss). In order to generate a shellscript
-which will in turn generate a contour plot of the bathymetry,
-the following will suffice:
+which will in turn generate a 3D color shaded relief 
+view of the bathymetry, we use the \fB-G\fP\fI2\fP option.
+The grid file is in
+bathymetry (positive down) rather in topography (positive
+up), so the bathymetry needs to be rescaled by multiplying
+by -1 (\fB-MGS\fP\fI-1\fP). We choose an illumination magnitude of 0.4
+and an illumination azimuth of 45 degrees (\fB-A\fP\fI0.4/45\fP). We 
+also choose a perspective azimuth of 250 degrees and an 
+elevation of 30 degrees (\fB-E\fP\fI240/30\fP):
  
-  	mbm_grdplot -Igrd_sb2112_example_bath -C \\
-  	    -V -Ogrd_sb2112_example_bathcont
+  	mbm_grd3dplot -Igrd_sb2112_example_bath \\
+  	    -G2 -A0.4/45 -E250/30 -MGS-1 -X -V \\
+  	    -Osb2112_example_bath3d
  
-In order to generate a color fill plot overlaid by
-contours, we use both the -G1 and -C options.
-Because the data has been gridded as bathymetry (positive
-down) rather than as topography (positive up), the default
-plot will have "hot" colors for deep regions and "cold"
-colors for shallow regions; this is the opposite of the
-convention we usually use. In order to fix the colors, we have
-to either rescale the data by multiplying the bathymetry
-by -1 (accomplished with -MGS-1), or flip the color
-pallette (accomplished with -D). We use the latter approach:
+Now, to generate a 3D perspective view of the gridded
+bathymetry shaded using the gridded sidescan data, we
+use the \fB-G\fP\fI3\fP and \fB-K\fP options.
+We want the sidescan data to
+be histogram equalized, so we use \fB-S\fP\fI0/1\fP. We also want
+the shading to be more prominent than the default
+shading magnitude of 0.2 would produce, so we use \fB-A\fP\fI0.5\fP:
  
-  	mbm_grdplot -Igrd_sb2112_example_bath -G1 -C -D \\
-  	    -V -Ogrd_sb2112_example_bathfill
+  	mbm_grd3dplot -Igrd_sb2112_example_bath \\
+  	    -Kgrd_sb2112_example_ss \\
+  	    -G3 -A0.5 -E250/30 -D0/1 \\
+  	    -S0/1 -MGS-1 -X -V \\
+  	    -Osb2112_example_bathss3d
  
-In order to generate a grayscale plot of the sidescan grid, 
-we use -G1 and -W1/4. We also use -D so that high sidescan
-amplitudes are shown as dark.
- 
-  	mbm_grdplot -Igrd_sb2112_example_ss -G1 -D \\
-  	    -V -Ogrd_sb2112_example_ssfill
- 
-Now consider generating a shaded relief view of the
-gridded bathymetry. We choose to illuminate
-the bathymetry from the northeast (azimuth of 45 degrees)
-and to use a shading magnitude of 0.4 (-A0.4/45).
-Because this grid is so small, the default shaded
-relief image is likely to be grainy. To fix this problem, we
-specify a dots per inch resolution of 72 (-MGQ72); this
-will take longer and generate a larger plotfile, but the
-plot will look better. We also use the -L option to specify
-the title and color scale label for the plot.  We also use 
-the -X flag this so that the plot generation shellscript is 
-executed immediately. Here is the command:
- 
-  	mbm_grdplot -Igrd_sb2112_example_bath \\
-  	    -G2 -A0.4/45 -D -MGQ72 -X -V \\
-  	    -L"Shaded Relief Bathymetry":"Depth (meters)" \\
-  	    -Osb2112_example_bathshade
- 
-Now, consider generating a plot of the bathymetry 
-overlaid with the gridded sidescan.
-The sidescan overlay is specified using the -K option.
-We want the colors for the bathymetry to be chosen without
-histogram equalization, but we also want histogram
-equalization to be applied to the sidescan data used for
-shading. To do this, we use -S0/1, where the first number
-(0) specifies no histogram equalization of the color
-scale and the second number (1) causes histogram 
-equalization of the shading sidescan data to be
-implemented. In order to maintain the convention that
-high sidescan amplitudes are black, we flip both the
-color pallette (as in the previous example) and the
-shading scale with -D1/1. We could also flip the shading
-by specifing a negative shading magnitude (-A-0.4).
-In this case, we forgo specifying the image resolution,
-resulting in a grainy plot:
- 
-  	mbm_grdplot -Igrd_sb2112_example_bath \\
-  	    -G3 -Kgrd_sb2112_example_ss \\
-  	    -S0/1 -D1/1 -A0.4 -X -V \\
-  	    -L"Bathymetry Overlaid With Sidescan":"Depth (meters)" \\
-  	    -Osb2112_example_bathss
- 
+The first example produces and executes a plot generation
+shellscript called sb2112_example_bath3d.cmd and the second
+produces a shellscript called sb2112_example_bathss3d.cmd.
 As an example, the contents of the plotting shellscript 
-"grd_sb2112_example_bathfill.cmd" are:
+"sb2112_example_bathss3d.cmd" are:
  
-.br
  #
  # Shellscript to create Postscript plot of data in grd file
- # Created by macro mbm_grdplot
+ # Created by macro mbm_grd3dplot
  #
  # This shellscript created by following command line:
- # mbm_grdplot -Igrd_sb2112_example_bath -G1 -C -D \\
- #	-V -Ogrd_sb2112_example_bathfill
+ # mbm_grd3dplot -Igrd_sb2112_example_bath \\
+ #      -Kgrd_sb2112_example_ss -G3 -A0.5 \\
+ #      -E250/30 -D0/1 -S0/1 -MGS-1 -X -V \\
+ #      -Osb2112_example_bathss3d
  #
  # Save existing GMT defaults
  echo Saving GMT defaults...
@@ -880,78 +703,77 @@ As an example, the contents of the plotting shellscript
  #
  # Make color pallette table file
  echo Making color pallette table file...
- echo   3000 255 255 255   3150 255 186 133 > \\
-		grd_sb2112_example_bathfill.cpt
- echo   3150 255 186 133   3300 255 161  68 >> \\
-		grd_sb2112_example_bathfill.cpt
- echo   3300 255 161  68   3450 255 189  87 >> \\
-		grd_sb2112_example_bathfill.cpt
- echo   3450 255 189  87   3600 240 236 121 >> \\
-		grd_sb2112_example_bathfill.cpt
- echo   3600 240 236 121   3750 205 255 162 >> \\
-		grd_sb2112_example_bathfill.cpt
- echo   3750 205 255 162   3900 138 236 174 >> \\
-		grd_sb2112_example_bathfill.cpt
- echo   3900 138 236 174   4050 106 235 255 >> \\
-		grd_sb2112_example_bathfill.cpt
- echo   4050 106 235 255   4200  50 190 255 >> \\
-		grd_sb2112_example_bathfill.cpt
- echo   4200  50 190 255   4350  40 127 251 >> \\
-		grd_sb2112_example_bathfill.cpt
- echo   4350  40 127 251   4500  37  57 175 >> \\
-		grd_sb2112_example_bathfill.cpt
+ echo  -4500  37  57 175  -4350  40 127 251 > \\
+ 	sb2112_example_bathss3d.cpt
+ echo  -4350  40 127 251  -4200  50 190 255 >> \\
+ 	sb2112_example_bathss3d.cpt
+ echo  -4200  50 190 255  -4050 106 235 255 >> \\
+ 	sb2112_example_bathss3d.cpt
+ echo  -4050 106 235 255  -3900 138 236 174 >> \\
+ 	sb2112_example_bathss3d.cpt
+ echo  -3900 138 236 174  -3750 205 255 162 >> \\
+ 	sb2112_example_bathss3d.cpt
+ echo  -3750 205 255 162  -3600 240 236 121 >> \\
+ 	sb2112_example_bathss3d.cpt
+ echo  -3600 240 236 121  -3450 255 189  87 >> \\
+ 	sb2112_example_bathss3d.cpt
+ echo  -3450 255 189  87  -3300 255 161  68 >> \\
+ 	sb2112_example_bathss3d.cpt
+ echo  -3300 255 161  68  -3150 255 186 133 >> \\
+ 	sb2112_example_bathss3d.cpt
+ echo  -3150 255 186 133  -3000 255 255 255 >> \\
+ 	sb2112_example_bathss3d.cpt
  #
- # Make color image
- echo Running grdimage...
- grdimage grd_sb2112_example_bath -Jm24.418434289993325 \\
-.br
-        -R114.221/114.421/-31.9001/-31.6377 \\
-.br
-        -Cgrd_sb2112_example_bathfill.cpt \\
-.br
-        -P -X1.8081565710006675 -Y2 -K -V \\
-.br
-        > grd_sb2112_example_bathfill.ps
-.br
+ # Rescale data
+ echo Rescaling data by -1...
+ echo Running grdmath...
+ grdmath grd_sb2112_example_bath -1 x = \\
+ 	grd_sb2112_example_bath.scale
  #
- # Make contour plot
- echo Running grdcontour...
- grdcontour grd_sb2112_example_bath -Jm24.418434289993325 \\
-.br
-        -R114.221/114.421/-31.9001/-31.6377 \\
-.br
-        -C50 \\
-.br
-        -L3144.51/4499.44 -Wc1p \\
-.br
-        -P -K -O -V >> grd_sb2112_example_bathfill.ps
+ # Get shading array
+ echo Getting shading array...
+ echo Running grdhisteq...
+ grdhisteq grd_sb2112_example_ss \\
+ 	-Ggrd_sb2112_example_ss.eq -N
+ echo Running grdmath...
+ grdmath grd_sb2112_example_ss.eq -0.5 x \\
+ 	= grd_sb2112_example_ss.int
+ rm -f grd_sb2112_example_ss.eq
  #
-.br
+ # Make 3D view
+ echo Running grdview...
+ grdview grd_sb2112_example_bath.scale \\
+ 	-Jm13.678801784792578 \\
+ 	-Jz0.0014760910157720331 \\
+ 	-E250/30 \\
+ 	-R114.221/114.421/-31.9001/-31.6377 \\
+ 	-Csb2112_example_bathss3d.cpt \\
+ 	-N-4499.4399999999996/200/200/200 \\
+ 	-Igrd_sb2112_example_ss.int \\
+ 	-Qi \\
+ 	-P -X1.8081565710006675 -Y2 -K -V \\
+ 	> sb2112_example_bathss3d.ps
+ #
  # Make color scale
  echo Running psscale...
- psscale -Cgrd_sb2112_example_bathfill.cpt \\
-.br
-        -D2.4418/-0.5000/4.8837/0.1500h \\
-.br
-        -B":.Data Values:" \\
-.br
-        -P -K -O -V >> grd_sb2112_example_bathfill.ps
-.br
+ psscale -Csb2112_example_bathss3d.cpt \\
+ 	-D2.4418/-0.5000/4.8837/0.1500h \\
+  	-B":.Data Values:" \\
+ 	-P -K -O -V >> sb2112_example_bathss3d.ps
  #
  # Make basemap
  echo Running psbasemap...
- psbasemap -Jm24.418434289993325 \\
-.br
-        -R114.221/114.421/-31.9001/-31.6377 \\
-.br
-        -B5m/5m:."Data File grd_sb2112_example_bath": \\
-.br
-        -P -O -V >> grd_sb2112_example_bathfill.ps
-.br
+ psbasemap -Jm13.678801784792578 \\
+ 	-Jz0.0014760910157720331 \\
+ 	-E250/30 \\
+ 	-R114.221/114.421/-31.9001/-31.6377 \\
+ 	-B5m/5m:."Data File grd_sb2112_example_bath":WSZ \\
+ 	-P -O -V >> sb2112_example_bathss3d.ps
  #
  # Delete surplus files
  echo Deleting surplus files...
- rm -f grd_sb2112_example_bathfill.cpt
+ rm -f sb2112_example_bathss3d.cpt
+ rm -f grd_sb2112_example_bath.scale
  #
  # Reset GMT default fonts
  echo Resetting GMT fonts...
@@ -959,7 +781,7 @@ As an example, the contents of the plotting shellscript
  #
  # Run xpsview
  echo Running xpsview in background...
- xpsview -ps a -maxp 4m grd_sb2112_example_bathfill.ps &
+ xpsview -ps a -maxp 4m sb2112_example_bathss3d.ps &
  #
  # All done!
  echo All done!

@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 4.3 1995-07-27 20:38:17 caress Exp $
+#	$Id: Makefile.template,v 4.4 1995-08-17 15:08:03 caress Exp $
 #
 #     Copyright (c) 1993, 1994 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.3  1995/07/27  20:38:17  caress
+# Added mbm_xyplot.
+#
 # Revision 4.2  1994/10/31  19:43:01  caress
 # Change man pages from section 1 to l.
 #
@@ -43,6 +46,7 @@ all:	$(MANDIR)/xbt.l \
 	$(BINDIR)/mbm_rollerror $(MANDIR)/mbm_rollerror.l \
 	$(BINDIR)/mbm_plot $(MANDIR)/mbm_plot.l \
 	$(BINDIR)/mbm_grdplot $(MANDIR)/mbm_grdplot.l \
+	$(BINDIR)/mbm_grd3dplot $(MANDIR)/mbm_grd3dplot.l \
 	$(BINDIR)/mbm_xyplot $(MANDIR)/mbm_xyplot.l \
 	$(BINDIR)/mbm_stat $(MANDIR)/mbm_stat.l
 
@@ -68,7 +72,10 @@ $(BINDIR)/mbm_plot:	mbm_plot.perl
 	chmod 775 $(BINDIR)/mbm_plot
 $(BINDIR)/mbm_grdplot:	mbm_grdplot.perl
 	cp mbm_grdplot.perl $(BINDIR)/mbm_grdplot
-	chmod 775 $(BINDIR)/mbm_xyplot
+	chmod 775 $(BINDIR)/mbm_grdplot
+$(BINDIR)/mbm_grd3dplot:	mbm_grd3dplot.perl
+	cp mbm_grd3dplot.perl $(BINDIR)/mbm_grd3dplot
+	chmod 775 $(BINDIR)/mbm_grd3dplot
 $(BINDIR)/mbm_xyplot:	mbm_xyplot.perl
 	cp mbm_xyplot.perl $(BINDIR)/mbm_xyplot
 	chmod 775 $(BINDIR)/mbm_xyplot
@@ -98,6 +105,9 @@ $(MANDIR)/mbm_plot.l:	mbm_plot.manl
 $(MANDIR)/mbm_grdplot.l:	mbm_grdplot.manl
 	cp mbm_grdplot.manl $(MANDIR)/mbm_grdplot.l
 	chmod 664 $(MANDIR)/mbm_grdplot.l
+$(MANDIR)/mbm_grd3dplot.l:	mbm_grd3dplot.manl
+	cp mbm_grd3dplot.manl $(MANDIR)/mbm_grd3dplot.l
+	chmod 664 $(MANDIR)/mbm_grd3dplot.l
 $(MANDIR)/mbm_xyplot.l:	mbm_xyplot.manl
 	cp mbm_xyplot.manl $(MANDIR)/mbm_xyplot.l
 	chmod 664 $(MANDIR)/mbm_xyplot.l

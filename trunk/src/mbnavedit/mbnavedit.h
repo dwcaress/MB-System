@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit.h	6/24/95
- *    $Id: mbnavedit.h,v 4.0 1995-08-07 18:33:22 caress Exp $
+ *    $Id: mbnavedit.h,v 4.1 1995-08-17 14:59:39 caress Exp $
  *
  *    Copyright (c) 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -20,6 +20,9 @@
  * Date:	June 24,  1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1995/08/07  18:33:22  caress
+ * First cut.
+ *
  *
  */
 
@@ -53,6 +56,9 @@ EXTERNAL int	plot_smg;
 EXTERNAL int	plot_heading;
 EXTERNAL int	plot_heading_org;
 EXTERNAL int	plot_cmg;
+EXTERNAL int	plot_roll;
+EXTERNAL int	plot_pitch;
+EXTERNAL int	plot_heave;
 EXTERNAL int	format;
 EXTERNAL char	ifile[128];
 EXTERNAL char	ofile[128];
@@ -75,4 +81,7 @@ EXTERNAL int	number_plots;
 #define	PLOT_LATITUDE	1
 #define	PLOT_SPEED	2
 #define	PLOT_HEADING	3
+#define	PLOT_ROLL	4
+#define	PLOT_PITCH	5
+#define	PLOT_HEAVE	6
 /*--------------------------------------------------------------------*/

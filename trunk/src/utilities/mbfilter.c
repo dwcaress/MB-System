@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbfilter.c	1/16/95
- *    $Id: mbfilter.c,v 4.3 1995-05-12 17:12:32 caress Exp $
+ *    $Id: mbfilter.c,v 4.4 1995-08-17 15:04:52 caress Exp $
  *
  *    Copyright (c) 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -30,6 +30,10 @@
  * Date:	January 16, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1995/05/12  17:12:32  caress
+ * Made exit status values consistent with Unix convention.
+ * 0: ok  nonzero: error
+ *
  * Revision 4.2  1995/03/06  19:37:59  caress
  * Changed include strings.h to string.h for POSIX compliance.
  *
@@ -107,7 +111,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbfilter.c,v 4.3 1995-05-12 17:12:32 caress Exp $";
+	static char rcs_id[] = "$Id: mbfilter.c,v 4.4 1995-08-17 15:04:52 caress Exp $";
 	static char program_name[] = "MBFILTER";
 	static char help_message[] =  
 "mbfilter applies one or more simple filters to the specified\n\t\
@@ -128,9 +132,10 @@ fine scale structure in the data.\n\t\
 The default input and output streams are stdin and stdout.\n";
 
 	static char usage_message[] = "mbfilter [\
--Akind -Byr/mo/da/hr/mn/sc -Dmode/xdim/ldim/iteration/offset \
--Eyr/mo/da/hr/mn/sc -Fformat -Iinfile -Ooutfile \
--Rwest/east/south/north -Smode/xdim/ldim/iteration -V -H]";
+-Akind -Byr/mo/da/hr/mn/sc -Dmode/xdim/ldim/iteration/offset\n\t \
+-Eyr/mo/da/hr/mn/sc -Fformat -Iinfile -Ooutfile\n\t \
+-Rwest/east/south/north -Smode/xdim/ldim/iteration\n\t \
+-Tthreshold -V -H]";
 	extern char *optarg;
 	extern int optkind;
 	int	errflg = 0;
@@ -210,6 +215,9 @@ The default input and output streams are stdin and stdout.\n";
 	int	contrast_xdim = 3;
 	int	contrast_ldim = 3;
 	int	contrast_iter = 1;
+	int	apply_threshold = MB_NO;
+	double	threshold_lo = 0.0;
+	double	threshold_hi = 0.0;
 	int	nweight;
 	int	nweightmax;
 	double	*weights;
@@ -262,7 +270,7 @@ The default input and output streams are stdin and stdout.\n";
 	strcpy (ofile, "stdout");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "A:a:B:b:C:c:D:d:E:e:F:f:HhI:i:O:o:R:r:S:s:Vv")) != -1)
+	while ((c = getopt(argc, argv, "A:a:B:b:C:c:D:d:E:e:F:f:HhI:i:O:o:R:r:S:s:T:t:Vv")) != -1)
 	  switch (c) 
 		{
 		case 'A':
@@ -331,6 +339,13 @@ The default input and output streams are stdin and stdout.\n";
 			sscanf (optarg,"%d/%d/%d/%d",
 				&smooth_mode, &smooth_xdim, 
 				&smooth_ldim, &smooth_iter);
+			flag++;
+			break;
+		case 'T':
+		case 't':
+			sscanf (optarg,"%lf/%lf",
+				&threshold_lo, &threshold_hi);
+			apply_threshold = MB_YES;
 			flag++;
 			break;
 		case 'V':
@@ -495,6 +510,12 @@ The default input and output streams are stdin and stdout.\n";
 			fprintf(stderr, "applying median filter for smoothing\n");
 		else if (smooth_mode == MBFILTER_SMOOTH_GRADIENT)
 			fprintf(stderr, "applying inverse gradient filter for smoothing\n");
+		if (smooth_mode == MBFILTER_SMOOTH_MEDIAN
+			&& apply_threshold == MB_YES)
+			{
+			fprintf(stderr, "  filter low ratio threshold:   %f\n", threshold_lo);
+			fprintf(stderr, "  filter high ratio threshold:  %f\n", threshold_hi);
+			}
 		if (smooth_mode != MBFILTER_SMOOTH_NONE)
 			{
 			fprintf(stderr, "  filter acrosstrack dimension: %d\n", smooth_xdim);
@@ -1081,7 +1102,9 @@ The default input and output streams are stdin and stdout.\n";
 				weights, distances, 
 				&ping[j].dataprocess[i], &error);
 		      else if (smooth_mode == MBFILTER_SMOOTH_MEDIAN)
-		        smooth_median(verbose, nweight, values, weights, 
+		        smooth_median(verbose, dataptr0[i], 
+				apply_threshold, threshold_lo, threshold_hi,
+				nweight, values, weights, 
 				&ping[j].dataprocess[i], &error);
 		      else if (smooth_mode == MBFILTER_SMOOTH_GRADIENT)
 		        smooth_gradient(verbose, nweight, values, weights, 
@@ -1612,9 +1635,15 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int smooth_median(verbose, n, val, wgt, 
+int smooth_median(verbose, original, 
+		apply_threshold, threshold_lo, threshold_hi, 
+		n, val, wgt, 
 		smooth, error)
 int	verbose;
+double	original;
+int	apply_threshold;
+double	threshold_lo;
+double	threshold_hi;
 int	n;
 double	*val;
 double	*wgt;
@@ -1623,6 +1652,7 @@ int	*error;
 {
 	char	*function_name = "smooth_median";
 	int	status = MB_SUCCESS;
+	double	ratio;
 	int	i;	
 
 	/* print input debug statements */
@@ -1632,6 +1662,8 @@ int	*error;
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
+		fprintf(stderr,"dbg2       original:        %f\n",original);
+		fprintf(stderr,"dbg2       apply_threshold: %d\n",apply_threshold);
 		fprintf(stderr,"dbg2       n:               %d\n",n);
 		fprintf(stderr,"dbg2       val:             %d\n",val);
 		fprintf(stderr,"dbg2       wgt:             %d\n",wgt);
@@ -1647,6 +1679,15 @@ int	*error;
 		{
 		sort(n, val);
 		*smooth = val[n/2];
+		}
+
+	/* apply thresholding */
+	if (apply_threshold == MB_YES)
+		{
+		ratio = original/(*smooth);
+		if (ratio < threshold_hi
+			&& ratio > threshold_lo)
+			*smooth = original;
 		}
 
 	/* print output debug statements */

@@ -1,11 +1,11 @@
-.TH mbcontourfilter l "14 February 1995"
+.TH mbcontourfilter l "14 August 1995"
 .SH NAME
 \fBmbcontourfilter\fP - Read multibeam bathymetry data and generate
 a contoured swath plot using generic ascii plot calls which
 can be interpreted by other programs.
 
 .SH VERSION
-Version 4.2
+Version 4.3
 
 .SH SYNOPSIS
 \fBmbcontourfilter\fP \fB-I\fIdatalist \fB-J\fIparameters \fB-R\fIwest/east/south/north \fP[\fB-A\fIcont_int/col_int/tic_int/lab_int/tic_int/lab_hgt \fB-b\fIyr/mo/da/hr/mn/sc \fB-D\fItime_tick/time_annot/date_annot/time_tick_len\fP \fB-E\fIyr/mo/da/hr/mn/sc \fB-L\fIlonflip \fB-N\fInplot \fB-p\fIpings\fP \fB-V -H\fP]

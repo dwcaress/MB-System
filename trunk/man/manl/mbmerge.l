@@ -1,9 +1,9 @@
-.TH mbmerge l "14 February 1995"
+.TH mbmerge l "14 August 1995"
 .SH NAME
 \fBmbmerge\fP - Merges multibeam data with new navigation.
 
 .SH VERSION
-Version 4.2
+Version 4.3
 
 .SH SYNOPSIS
 \fBmbmerge\fP [\fB-F\fIformat \fB-L\fIlonflip\fP 

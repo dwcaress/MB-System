@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
- *    The MB-system:	mbanglecorrect.c	1/12/95
- *    $Id: mbanglecorrect.c,v 4.4 1995-05-12 17:12:32 caress Exp $
+ *    The MB-system:	mbanglecorrect.c	8/13/95
+ *    $Id: mbanglecorrect.c,v 4.5 1995-08-17 15:04:52 caress Exp $
  *
  *    Copyright (c) 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -11,24 +11,44 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- * mbanglecorrect is a tool for processing sidescan data.  This program
- * corrects the sidescan data by dividing by a model of the
- * backscatter vs grazing angle function to produce a "flat" image which
- * shows geology better than the raw data. The backscatter vs grazing
- * angle model is obtained by averaging over the input sidescan data
- * in some number of nearby pings using the same algorithm as the
- * program mbbackangle. Because the model used to correct the data
- * is locally defined,  this program is best suited to producing data
- * which shows local (fine scale) structure. A program which uses
- * a single model to correct all of the data will produce data 
- * better suited to showing large scale variability in seafloor 
- * reflectivity.
- * The default input and output streams are stdin and stdout.
+The program mbanglecorrect is used for processing sidescan data.  
+This program corrects the sidescan data by dividing by a model of the
+backscatter vs grazing angle function to produce a flat image which 
+shows geology better than the raw data (each value is also multiplied 
+by a scale factor set with the -A option. The backscatter vs grazing 
+angle model is either read from a file (global correction) or obtained 
+by averaging over the input sidescan data in some number of nearby 
+pings (local correction) using the same algorithm as the program 
+mbbackangle. If local correction is used, the user specifies the 
+angular width of the swath considered and the number of angular bins 
+in that swath which are used in calculating the local correction. When 
+the correction model is defined using the entire dataset the output 
+data will predominantly show large scale variability in seafloor 
+reflectivity. When the model used to correct the data is locally 
+defined, the output data will tend to show an enhanced view of local 
+or fine scale structure, although odd effects may occur at boundaries 
+between different types of seafloor. No assumption is made about the 
+nature of the data or the sonar used to collect it. If bathymetry 
+data is available, then the acrosstrack seafloor slope is taken into 
+account when calculating grazing angles, unless the -G option is used 
+to force the assumption of a flat seafloor (this pertains only to the 
+application of the grazing angle correction; seafloor slopes are always 
+used, if available, in calculating local grazing angle correction
+functions). The bathymetry can be smoothed prior to the calculation
+of slopes, if desired. If bathymetry is not available, the seafloor is 
+assumed to be flat with a depth specified by the -Z option. The use 
+of bathymetric slopes in the grazing angle calculations will tend to 
+remove bathymetric signals from the data. 
+The default input and output streams are stdin and stdout.\n";
  *
  * Author:	D. W. Caress
  * Date:	January 12, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.4  1995/05/12  17:12:32  caress
+ * Made exit status values consistent with Unix convention.
+ * 0: ok  nonzero: error
+ *
  * Revision 4.3  1995/03/06  19:37:59  caress
  * Changed include strings.h to string.h for POSIX compliance.
  *
@@ -62,7 +82,7 @@
 
 /* mode defines */
 #define	MBANGLECORRECT_AMP		1
-#define	MBANGLECORRECT_SS			2
+#define	MBANGLECORRECT_SS		2
 #define MBANGLECORRECT_LENGTH_NUMBER	1
 #define MBANGLECORRECT_LENGTH_DISTANCE	2
 
@@ -103,7 +123,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbanglecorrect.c,v 4.4 1995-05-12 17:12:32 caress Exp $";
+	static char rcs_id[] = "$Id: mbanglecorrect.c,v 4.5 1995-08-17 15:04:52 caress Exp $";
 	static char program_name[] = "MBANGLECORRECT";
 	static char help_message[] =  
 "mbanglecorrect is a tool for processing sidescan data.  This program\n\t\
@@ -121,7 +141,7 @@ variability in seafloor reflectivity.\n\t\
 The default input and output streams are stdin and stdout.\n";
 	static char usage_message[] = "mbanglecorrect [\
 -Akind/scale -Byr/mo/da/hr/mn/sc -C -Dmode/length -Eyr/mo/da/hr/mn/sc \
--Fformat -G -Iinfile -Nnangles/angle_max -Ooutfile -Rw/e/s/n \
+-Fformat -G -Iinfile -Mnsmooth -Nnangles/angle_max -Ooutfile -Rw/e/s/n \
 -Scorrectionfile -Zdepth -V -H]";
 	extern char *optarg;
 	extern int optkind;
@@ -211,11 +231,13 @@ The default input and output streams are stdin and stdout.\n";
 	/* slope calculation variables */
 	int	ndepths;
 	double	*depths;
+	double	*depthsmooth;
 	double	*depthacrosstrack;
 	int	nslopes;
 	double	*slopes;
 	double	*slopeacrosstrack;
 	int	use_slope = MB_YES;
+	int	nsmooth = 0;
 
 	FILE	*fp;
 	char	buffer[128], tmp[128], *result;
@@ -267,7 +289,7 @@ The default input and output streams are stdin and stdout.\n";
 	strcpy (sfile, "\0");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "A:a:B:b:CcD:d:E:e:F:f:GgHhI:i:N:n:O:o:R:r:S:s:VvZ:z:")) != -1)
+	while ((c = getopt(argc, argv, "A:a:B:b:CcD:d:E:e:F:f:GgHhI:i:M:m:N:n:O:o:R:r:S:s:VvZ:z:")) != -1)
 	  switch (c) 
 		{
 		case 'A':
@@ -319,6 +341,11 @@ The default input and output streams are stdin and stdout.\n";
 		case 'I':
 		case 'i':
 			sscanf (optarg,"%s", ifile);
+			flag++;
+			break;
+		case 'M':
+		case 'm':
+			sscanf (optarg,"%d", &nsmooth);
 			flag++;
 			break;
 		case 'N':
@@ -416,6 +443,7 @@ The default input and output streams are stdin and stdout.\n";
 		fprintf(stderr,"dbg2       length_mode:    %d\n",length_mode);
 		fprintf(stderr,"dbg2       length_max:     %f\n",length_max);
 		fprintf(stderr,"dbg2       use_slope:      %d\n",use_slope);
+		fprintf(stderr,"dbg2       nsmooth:        %d\n",nsmooth);
 		}
 
 	/* if help desired then print it and exit */
@@ -515,6 +543,8 @@ The default input and output streams are stdin and stdout.\n";
 		else
 			status = mb_malloc(verbose,beams_amp*sizeof(double),
 				&ping[i].dataprocess,&error);
+		status = mb_malloc(verbose,beams_bath*sizeof(double),
+			&depthsmooth,&error);
 		}
 
 	/* if error initializing memory then quit */
@@ -881,6 +911,18 @@ The default input and output streams are stdin and stdout.\n";
 			ping[0].ssalongtrack,
 			comment,&error);
 	strncpy(comment,"\0",256);
+	sprintf(comment,"  Smoothing dimension: %d",nsmooth);
+	status = mb_put(verbose,ombio_ptr,kind,
+			ping[0].time_i,ping[0].time_d,
+			ping[0].navlon,ping[0].navlat,
+			ping[0].speed,ping[0].heading,
+			beams_bath,beams_amp,pixels_ss,
+			ping[0].bath,ping[0].amp,
+			ping[0].bathacrosstrack,ping[0].bathalongtrack,
+			ping[0].ss,ping[0].ssacrosstrack,
+			ping[0].ssalongtrack,
+			comment,&error);
+	strncpy(comment,"\0",256);
 	sprintf(comment,"  Length mode:        %d",length_mode);
 	status = mb_put(verbose,ombio_ptr,kind,
 			ping[0].time_i,ping[0].time_d,
@@ -1014,8 +1056,8 @@ The default input and output streams are stdin and stdout.\n";
 			/* get the seafloor slopes */
 			if (status == MB_SUCCESS && beams_bath > 0)
 				{
-				if (beams_bath > 0)
-				    set_bathyslope(verbose, 
+				set_bathyslope(verbose, 
+					nsmooth, 
 					beams_bath,
 					ping[ndata].bath,
 					ping[ndata].bathacrosstrack,
@@ -1025,6 +1067,7 @@ The default input and output streams are stdin and stdout.\n";
 					&ping[ndata].nslopes,
 					ping[ndata].slopes,
 					ping[ndata].slopeacrosstrack,
+					depthsmooth,
 					&error);
 				}
 
@@ -1521,6 +1564,7 @@ The default input and output streams are stdin and stdout.\n";
 		mb_free(verbose,&ping[j].slopeacrosstrack,&error); 
 		mb_free(verbose,&ping[j].dataprocess,&error); 
 		}
+	mb_free(verbose,&depthsmooth,&error); 
 	mb_free(verbose,&nmean,&error); 
 	mb_free(verbose,&mean,&error); 
 	mb_free(verbose,&angles,&error); 
@@ -1543,11 +1587,14 @@ The default input and output streams are stdin and stdout.\n";
 }
 /*--------------------------------------------------------------------*/
 int set_bathyslope(verbose,
+	nsmooth, 
 	nbath,bath,bathacrosstrack,
 	ndepths,depths,depthacrosstrack, 
 	nslopes,slopes,slopeacrosstrack, 
+	depthsmooth, 
 	error)
 int	verbose;
+int	nsmooth;
 int	nbath;
 double	*bath;
 double	*bathacrosstrack;
@@ -1557,11 +1604,16 @@ double	*depthacrosstrack;
 int	*nslopes;
 double	*slopes;
 double	*slopeacrosstrack;
+double	*depthsmooth;
 int	*error;
 {
 	char	*function_name = "set_bathyslope";
 	int	status = MB_SUCCESS;
-	int	i;
+	int	first, next, last;
+	int	nbathgood;
+	double	depthsum;
+	int	j1, j2;
+	int	i, j;
 	
 
 	/* print input debug statements */
@@ -1581,34 +1633,117 @@ int	*error;
 				i, bath[i], bathacrosstrack[i]);
 		}
 
-	/* first find all depths */
+	/* initialize depths */
 	*ndepths = 0;
+	for (i=0;i<nbath;i++)
+		{
+		depths[i] = 0.0;
+		depthacrosstrack[i] = 0.0;
+		}
+
+	/* first fill in the existing depths */
+	first = -1;
+	last = -1;
+	nbathgood = 0;
 	for (i=0;i<nbath;i++)
 		{
 		if (bath[i] > 0.0)
 			{
-			depths[*ndepths] = bath[i];
-			depthacrosstrack[*ndepths] = bathacrosstrack[i];
-			(*ndepths)++;
+			if (first == -1)
+				{
+				first = i;
+				}
+			last = i;
+			depths[i] = bath[i];
+			depthacrosstrack[i] = bathacrosstrack[i];
+			nbathgood++;
+			}
+		}
+
+	/* now interpolate the depths */
+	if (nbathgood > 0)
+	for (i=first;i<last;i++)
+		{
+		if (bath[i] > 0.0)
+			{
+			next = i;
+			j = i + 1;
+			while (next == i && j < nbath)
+				{
+				if (bath[j] > 0.0)
+					next = j;
+				else
+					j++;
+				}
+			if (next > i)
+				{
+				for (j=i+1;j<next;j++)
+					{
+					depths[j] = bath[i] + 
+						(bath[next] - bath[i])
+						*(j-i)/(next-1);
+					depthacrosstrack[j] = bathacrosstrack[i] + 
+						(bathacrosstrack[next] - bathacrosstrack[i])
+						*(j-i)/(next-1);
+					}
+				}
+			}
+		}
+
+	/* now smooth the depths */
+	if (nbathgood > 0 && nsmooth > 0)
+		{
+		for (i=first;i<=last;i++)
+			{
+			j1 = i - nsmooth;
+			j2 = i + nsmooth;
+			if (j1 < first)
+				j1 = first;
+			if (j2 > last)
+				j2 = last;
+			depthsum = 0.0;
+			for (j=j1;j<=j2;j++)
+				{
+				depthsum += depths[j];
+				}
+			if (depthsum > 0.0)
+				depthsmooth[i] = depthsum/(j2-j1+1);
+			else
+				depthsmooth[i] = depths[i];
+			}
+		for (i=first;i<=last;i++)
+			depths[i] = depthsmooth[i];
+		}
+
+	/* now extrapolate the depths at the ends of the swath */
+	if (nbathgood > 0)
+		{
+		*ndepths = nbath;
+		for (i=0;i<first;i++)
+			{
+			depths[i] = depths[first];
+			}
+		for (i=last+1;i<nbath;i++)
+			{
+			depths[i] = depths[last];
 			}
 		}
 
 	/* now calculate slopes */
-	*nslopes = *ndepths + 1;
-	for (i=0;i<*ndepths-1;i++)
+	if (nbathgood > 0)
 		{
-		slopes[i+1] = (depths[i+1] - depths[i])
-			/(depthacrosstrack[i+1] - depthacrosstrack[i]);
-		slopeacrosstrack[i+1] = 0.5*(depthacrosstrack[i+1] 
-			+ depthacrosstrack[i]);
-		}
-	if (*ndepths > 1)
-		{
+		*nslopes = nbath + 1;
+		for (i=0;i<nbath-1;i++)
+			{
+			slopes[i+1] = (depths[i+1] - depths[i])
+				/(depthacrosstrack[i+1] - depthacrosstrack[i]);
+			slopeacrosstrack[i+1] = 0.5*(depthacrosstrack[i+1] 
+				+ depthacrosstrack[i]);
+			}
 		slopes[0] = 0.0;
 		slopeacrosstrack[0] = depthacrosstrack[0];
-		slopes[*ndepths] = 0.0;
-		slopeacrosstrack[*ndepths] = 
-			depthacrosstrack[*ndepths-1];
+		slopes[nbath] = 0.0;
+		slopeacrosstrack[nbath] = depthacrosstrack[nbath-1];
 		}
 
 	/* print output debug statements */
@@ -1620,7 +1755,7 @@ int	*error;
 		fprintf(stderr,"dbg2       ndepths:         %d\n",
 			*ndepths);
 		fprintf(stderr,"dbg2       depths:\n");
-		for (i=0;i<*ndepths;i++)
+		for (i=0;i<nbath;i++)
 			fprintf(stderr,"dbg2         %d %f %f\n", 
 				i, depths[i], depthacrosstrack[i]);
 		fprintf(stderr,"dbg2       nslopes:         %d\n",
