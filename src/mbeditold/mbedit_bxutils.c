@@ -1044,6 +1044,38 @@ static wchar_t *CStrCommonWideCharsGet()
 
 /*
  * Function:
+ *      CvtXmStringDestructor(app, converted, data, args, num_args)
+ * Description:
+ *      This destructor is called by the X Toolkit Intrinsics to delete
+ *	the memory allocated in CvtStringToXmString.
+ * Input:
+ *      app		- XtAppContext	: The Xt application context
+ *	converted	- XrmValue *	: The value allocated by 
+ *					  CvtStringToXmString
+ *	data		- XtPointer	: The extra data originally passed
+ *					  to the converter
+ *	args		- XrmValue *	: The extra arguments originally
+ *					  passed to the converter
+ *	num_args	- Cardinal *	: The number of args originally 
+ *					  passed to the converter
+ * Output:
+ *      None
+ */
+static void
+CvtXmStringDestructor
+    ARGLIST((app, converted, data, args, num_args))
+        UARG(XtAppContext, app)
+        ARG(XrmValue *, converted)
+        UARG(XtPointer, data)
+        UARG(XrmValue *, args)
+        GRAU(Cardinal *, num_args)
+{
+    XmString	freestr = (XmString)converted->addr;
+    if ( freestr != NULL ) XmStringFree(freestr);
+}
+    
+/*
+ * Function:
  *	CONVERTER CvtStringToXmString
  *
  * Description:
@@ -1270,6 +1302,43 @@ static Boolean CvtStringToXmStringTable
     return(True);
 }
 
+/*
+ * Function:
+ *      CvtXmStringTableDestructor(app, converted, data, args, num_args)
+ * Description:
+ *      This destructor is called by the X Toolkit Intrinsics to delete
+ *	the memory allocated in CvtStringToXmString.
+ * Input:
+ *      app		- XtAppContext	: The Xt application context
+ *	converted	- XrmValue *	: The value allocated by 
+ *					  CvtStringToXmStringTable
+ *	data		- XtPointer	: The extra data originally passed
+ *					  to the converter
+ *	args		- XrmValue *	: The extra arguments originally
+ *					  passed to the converter
+ *	num_args	- Cardinal *	: The number of args originally 
+ *					  passed to the converter
+ * Output:
+ *      None
+ */
+static void
+CvtXmStringTableDestructor
+    ARGLIST((app, converted, data, args, num_args))
+        UARG(XtAppContext, app)
+        ARG(XrmValue *, converted)
+        UARG(XtPointer, data)
+        UARG(XrmValue *, args)
+        GRAU(Cardinal *, num_args)
+{
+    XmString	*ptr = (XmString *)converted->addr;
+    while ( *ptr != NULL )
+    {
+	XmStringFree(*ptr);
+	ptr++;
+    }
+    XtFree((char*)converted->addr);
+}
+    
 /*****************************************************************************
  *	GLOBAL CODE
  *****************************************************************************/
@@ -1292,12 +1361,14 @@ void RegisterBxConverters
         GRA(XtAppContext, appContext)
 {
     XtAppSetTypeConverter(appContext, XmRString, XmRXmString,
-			  (XtTypeConverter)CvtStringToXmString,
-			  NULL, 0, XtCacheNone, NULL);
+			  (XtTypeConverter)&CvtStringToXmString,
+			  NULL, 0, XtCacheNone,
+                          (XtDestructor)&CvtXmStringDestructor);
 
     XtAppSetTypeConverter(appContext, XmRString, XmRXmStringTable,
-			  (XtTypeConverter)CvtStringToXmStringTable,
-			  NULL, 0, XtCacheNone, NULL);
+			  (XtTypeConverter)&CvtStringToXmStringTable,
+			  NULL, 0, XtCacheNone, 
+			  (XtDestructor)&CvtXmStringTableDestructor);
 }
 
 /*
@@ -1486,10 +1557,10 @@ void BX_MENU_POST
 #ifdef DEFINE_OLD_BXUTILS
 void MENU_POST
     ARGLIST((p, mw, ev, dispatch))
-        UARG(Widget, p)
+        ARG(Widget, p)
         ARG(XtPointer, mw)
         ARG(XEvent *, ev)
-        GRAU(Boolean *, dispatch)
+        GRA(Boolean *, dispatch)
 {
     BX_MENU_POST(p, mw, ev, dispatch);
 }
@@ -2584,7 +2655,6 @@ GRA(BxXpmAttributes *, attributes)
     Boolean pixel_defined;
     unsigned int key;
 
-
     /*
      * retrieve information from the BxXpmAttributes 
      */
@@ -3635,23 +3705,38 @@ GRA(char **, pixmapName)
     Pixmap		pixmap;
     Pixmap		shape;
     int			returnValue;
-    
+
+    attributes.valuemask = 0;
+    attributes.depth = 0;
+    attributes.colormap = 0;
+    attributes.visual = 0;
+
     argcnt = 0;
     XtSetArg(args[argcnt], XmNdepth, &(attributes.depth)); argcnt++;
     XtSetArg(args[argcnt], XmNcolormap, &(attributes.colormap)); argcnt++;
-    XtGetValues(w, args, argcnt);
+    if ( ! XtIsWidget(w) )
+    {
+	XtGetValues(XtParent(w), args, argcnt);
+    }
+    else
+    {
+	XtGetValues(w, args, argcnt);
+    }
 
-    attributes.visual = DefaultVisual(XtDisplay(w),
-				      DefaultScreen(XtDisplay(w)));
-    attributes.valuemask = (BxXpmDepth | BxXpmColormap | BxXpmVisual);
+    attributes.visual = DefaultVisual(XtDisplayOfObject(w),
+				      DefaultScreen(XtDisplayOfObject(w)));
+
+    if ( attributes.depth != 0 ) attributes.valuemask |= BxXpmDepth;
+    if ( attributes.colormap != 0 ) attributes.valuemask |= BxXpmColormap;
+    if ( attributes.visual != 0 ) attributes.valuemask |= BxXpmVisual;
     
-    returnValue = BxXpmCreatePixmapFromData(XtDisplay(w),
-					  DefaultRootWindow(XtDisplay(w)),
-					  pixmapName, &pixmap, &shape,
-					  &attributes);
+    returnValue = BxXpmCreatePixmapFromData(XtDisplayOfObject(w),
+				       DefaultRootWindow(XtDisplayOfObject(w)),
+				       pixmapName, &pixmap, &shape,
+				       &attributes);
     if ( shape )
     {
-	XFreePixmap(XtDisplay(w), shape);
+	XFreePixmap(XtDisplayOfObject(w), shape);
     }	
 
     switch(returnValue)
@@ -3669,7 +3754,7 @@ GRA(char **, pixmapName)
 
 #endif
 
-/* This structure is for capturing app-defaults values for a Class */
+ /* This structure is for capturing app-defaults values for a Class */
 
 typedef struct _UIAppDefault
 {
@@ -3816,101 +3901,100 @@ ARG(UIAppDefault*, defs)
 ARG(char*, inst_name)
 GRA(Boolean, override_inst)
 {
-   Display*		dpy = XtDisplay ( w );	/*  Retrieve the display */
+   Display*		dpy = XtDisplay (w);	/*  Retrieve the display */
    XrmDatabase		rdb = NULL;		/* A resource data base */
-   char			lineage[1000];
    char			buf[1000];
-   Widget       	parent;
+   char 		*appName, *appClass;
 
-   /* Protect ourselves */
-   
-   if (inst_name == NULL) return;
+   /*
+    * Protect ourselves
+    */
+   if ( inst_name == NULL ) return;
 
-   /*  Create an empty resource database */
+   /*
+    * Create an empty resource database
+    */
+   rdb = XrmGetStringDatabase ("");
+   XtGetApplicationNameAndClass(XtDisplay(w), &appName, &appClass);
 
-   rdb = XrmGetStringDatabase ( "" );
-
-   /* Start the lineage with our name and then get our parents */
-
-   lineage[0] = '\0';
-   parent = w;
-
-   while (parent)
+   /*
+    * Add the Component resources, prepending the name of the component
+    */
+   while ( defs->wName != NULL )
    {
-       WidgetClass wclass = XtClass(parent);
-
-       if (wclass == applicationShellWidgetClass) break;
-
-       strcpy(buf, lineage);
-       sprintf(lineage, "*%s%s", XtName(parent), buf);
-
-       parent = XtParent(parent);
-   }
-
-   /*  Add the Component resources, prepending the name of the component */
-   while (defs->wName != NULL)
-   {
-       int name_length;
+       int namelen;
        /*
         * We don't deal with the resource if it isn't found in the
 	* Xrm database at class initializtion time (in initAppDefaults).
 	* Special handling of class instances.
 	*/
-       if (strchr(defs->wName, '.'))
+       if ( strchr(defs->wName, '.') )
        {
-	   name_length = strlen(defs->wName) - 
-		strlen(strchr(defs->wName, '.'));
+	   namelen = strlen(defs->wName) - strlen(strchr(defs->wName, '.'));
        }
        else
        {
-	   name_length = strlen(defs->wName) > strlen(inst_name) ?
-	       strlen(defs->wName) : strlen(inst_name);
+	   int		wnamelen = strlen(defs->wName);
+	   int		inamelen = strlen(inst_name);
+	   namelen = (wnamelen > inamelen ? wnamelen : inamelen);
        }
-       if (defs->value == NULL ||
-	   override_inst && strncmp(inst_name, defs->wName, name_length) ||
-	   ! override_inst && defs->cInstName != NULL)
+       if ( defs->value == NULL ||
+	    (override_inst && strncmp(inst_name, defs->wName, namelen)) ||
+	    (!override_inst && defs->cInstName != NULL) )
        {
 	   defs++;
 	   continue;
        }
 
-       /* Build up string after lineage */
-       if (defs->cInstName != NULL)
+       /*
+	* Build up resource database string
+	*/
+       if ( defs->cInstName != NULL )
        {
-	   /* Don't include class instance name if it is also the instance */
-	   /* being affected.  */
-
-	   if (*defs->cInstName != '\0')
+	   /*
+	    * Don't include class instance name if it is also
+	    * the widget instance being worked on.
+	    */
+	   if ( *defs->cInstName != '\0' )
 	   {
-	       sprintf(buf, "%s*%s*%s.%s: %s",
-		       lineage, defs->wName, defs->cInstName, 
-			defs->wRsc, defs->value);
+	       sprintf(buf, "%s*%s*%s.%s: %s", appClass, defs->cInstName,
+		       defs->wName, defs->wRsc, defs->value);
 	   }
 	   else
 	   {
 	       sprintf(buf, "%s*%s.%s: %s",
-		       lineage, defs->wName, defs->wRsc, 
-			defs->value);
+		       appClass, defs->wName, defs->wRsc, defs->value);
 	   }
        }
-       else if (*defs->wName != '\0')
+       else if ( *defs->wName != '\0' )
        {
 	   sprintf(buf, "%s*%s*%s.%s: %s",
-		   lineage, inst_name, defs->wName, defs->wRsc, defs->value);
+		   appClass, inst_name, defs->wName, defs->wRsc, defs->value);
        }
        else
        {
 	   sprintf(buf, "%s*%s.%s: %s", 
-		   lineage, inst_name,defs->wRsc, defs->value);
+		   appClass, inst_name,defs->wRsc, defs->value);
        }
 
-       XrmPutLineResource( &rdb, buf );
+       XrmPutLineResource(&rdb, buf);
        defs++;
    }
 
-   /* Merge them into the Xt database, with lowest precendence */
+   /*
+    * Merge them into the Xt database, with lowest precendence
+    */
    if ( rdb )
    {
+       /*  DO NOT do an XrmDestroyDatabase(rdb) here.  This looks like a
+	* program leak, but is really an X problem.
+	*
+	* XrmCombineDatabase() squirrels away a copy of the pointers in
+	* rdb.  Either XrmCombineDatabase should save a duplicate, or else
+	* XrmCombineDatabase needs to assume responsibility for destroying
+	* rdb at the right time.  We do not know when the pointers are no 
+	* longer needed.
+	*/
 #if (XlibSpecificationRelease >= 5)
         XrmDatabase db = XtDatabase(dpy);
 	XrmCombineDatabase(rdb, &db, FALSE);
