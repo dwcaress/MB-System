@@ -1,4 +1,4 @@
-.TH mbformat l "14 August 1995"
+.TH mbformat l "14 August 1995" "MB-System 4.3" "MB-System 4.3"
 .SH NAME
 \fBmbformat\fP -  List information about multibeam bathymetry data formats
 supported by the \fBMBIO\fP library.

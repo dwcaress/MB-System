@@ -1,4 +1,4 @@
-.TH mblevitus l "14 August 1995"
+.TH mblevitus l "14 August 1995" "MB-System 4.3" "MB-System 4.3"
 .SH NAME
 \fBmblevitus\fP - Create a water velocity profile which is representative
 of the mean annual water column for a specified 1 degree by 1 degree

@@ -1,4 +1,4 @@
-.TH mbswath l "22 November 1995"
+.TH mbswath l "22 November 1995" "MB-System 4.3" "MB-System 4.3"
 .SH NAME
 \fBmbswath\fP - GMT compatible utility for color fill or color shaded relief
 swath plots of multibeam data using Postscript.
@@ -25,9 +25,11 @@ or color shaded relief using Postscript.  Like \fBmbcontour\fP, \fBmbswath\fP
 is fully compatible with the GMT package version 3, including the use
 of GMT style color pallete (cpt) files to control the color table. 
 A 24-bit true color \fIPostScript\fP file is output using one of 
-three methods.
+three methods. Unless individual polygon fills are used (\fB-1\fP option),
+only one call to \fBmbswath\fP can be made for each plot because the
+color image produced covers the entire plot space.
 The program can read data from stdin (the default) or from one 
-or more multibeam files. 
+or more multibeam files.
 
 .SH AUTHORSHIP
 David W. Caress (caress@lamont.ldeo.columbia.edu)

@@ -1,4 +1,4 @@
-.TH mbbackangle l "14 August 1995"
+.TH mbbackangle l "14 August 1995" "MB-System 4.3" "MB-System 4.3"
 .SH NAME
 \fBmbbackangle\fP - Generates a table of the average amplitude or 
 sidescan values as a function of the grazing angle with the seafloor.

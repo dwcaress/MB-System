@@ -1,4 +1,4 @@
-.TH mbanglecorrect l "14 August 1995"
+.TH mbanglecorrect l "14 August 1995" "MB-System 4.3" "MB-System 4.3"
 .SH NAME
 \fBmbanglecorrect\fP - Apply a grazing angle correction to beam
 amplitude or sidescan data.

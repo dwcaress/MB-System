@@ -1,4 +1,4 @@
-.TH mbgrid l "29 December 1995"
+.TH mbgrid l "29 December 1995" "MB-System 4.3" "MB-System 4.3"
 .SH NAME
 \fBmbgrid\fP - Grid bathymetry, amplitude, or sidescan data 
 from multibeam data files.
@@ -363,7 +363,7 @@ will be filled in through spine interpolation even in the areas
 not covered by data. The output looks like:
  
  Program MBGRID
- Version $Id: mbgrid.l,v 4.10 1995-12-29 22:18:07 caress Exp $
+ Version $Id: mbgrid.l,v 4.11 1996-01-26 21:14:21 caress Exp $
  MB-system Version 4.3
  
  MBGRID Parameters:

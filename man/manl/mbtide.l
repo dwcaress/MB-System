@@ -1,4 +1,4 @@
-.TH mbtide l "14 August 1995"
+.TH mbtide l "14 August 1995" "MB-System 4.3" "MB-System 4.3"
 .SH NAME
 \fBmbtide\fP - MBTIDE corrects multibeam bathymetry data for tides.
 

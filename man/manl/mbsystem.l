@@ -1,4 +1,4 @@
-.TH mbsystem l "14 August 1995"
+.TH mbsystem l "27 December 1995" "MB-System 4.3" "MB-System 4.3"
 .SH NAME
 \fBmbsystem\fP - A set of utilities for manipulating and processing multibeam
 bathymetry data.
@@ -109,14 +109,16 @@ These are the current MB-system programs:
  \fBmbnavedit\fP:  Interactive editor used to fix
  		problems with navigation in
  		multibeam data files. 
- \fBmbtide\fP:  Corrects multibeam bathymetry
- 		for tide data. 
+ \fBmbps\fP:    Simple perspective views of swath
+ 		bathymetry in Postscript. 
  \fBmbrollbias\fP:  Evaluate the roll bias of a 
  		multibeam system using two pieces 
  		of coincident bathymetry data 
  		collected with opposing ship headings.
  \fBmbswath\fP:  Generate GMT compatible Postscript 
  		color and color shaded relief swath plots.
+ \fBmbtide\fP:  Corrects multibeam bathymetry
+ 		for tide data. 
  \fBmbunclean\fP:  Unflags edited beams in multibeam 
  		bathymetry data. 
  \fBmbvelocitytool\fP:  Interactive program for 
@@ -576,7 +578,8 @@ interactive editing easier and sometimes
 it just makes things worse.  Use the command:
 
  	mbclean -F24 -Ihsbat_ew9204_134_b.mb24 \\
- 		-Ohscln_ew9204_134_bc.mb24
+ 		-Ohscln_ew9204_134_bc.mb24 \\
+ 		-D0.01/0.25 -G0.97/1.03 -C2.5 -V
 
 \fBStep 6\fP: Interactively edit the data using 
 \fBmbedit\fP. Start up \fBmbedit\fP and 

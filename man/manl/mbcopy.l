@@ -1,4 +1,4 @@
-.TH mbcopy l "14 August 1995"
+.TH mbcopy l "14 August 1995" "MB-System 4.3" "MB-System 4.3"
 .SH NAME
 \fBmbcopy\fP - Copy multibeam bathymetry data files.
 
@@ -6,9 +6,12 @@
 Version 4.3
 
 .SH SYNOPSIS
-\fBmbcopy\fP [\fB-F\fIinformat/outformat \fB-R\fIwest/east/south/north \fB-P\fIpings 
-\fB-S\fIspeed \fB-L\fIlonflip \fB-B\fIyr/mo/da/hr/mn/sc \fB-E\fIyr/mo/da/hr/mn/sc 
-\fB-I\fIinfilename \fB-O\fIoutfilename \fB-C\fIcommentfile\fP \fB-N \fB-V -H\fP]
+\fBmbcopy\fP [\fB-B\fIyr/mo/da/hr/mn/sc\fP \fB-C\fIcommentfile\fP 
+\fB-E\fIyr/mo/da/hr/mn/sc\fP \fB-F\fIinformat/outformat\fP 
+\fB-H\fP \fB-I\fIinfilename\fP 
+\fB-L\fIlonflip\fP \fB-N\fP \fB-O\fIoutfilename\fP 
+\fB-P\fIpings\fP \fB-Q\fIsleep_factor\fP \fB-R\fIwest/east/south/north\fP 
+\fB-S\fIspeed\fP \fB-V\fP]
 
 .SH DESCRIPTION
 \fBmbcopy\fP is an utility for copying multibeam data files which
@@ -103,6 +106,12 @@ be done so that the along-track ping spacing is equal to the across-track
 beam spacing. If ping averaging is used (\fIpings\fP != 1), then
 only a partial data stream can be copied (see the \fB-F\fP option).
 Default: \fIpings\fP = 1 (no ping averaging).
+.TP
+.B \fB-Q\fIsleep_factor\fP
+Causes the program to sleep before writing each data record, thus simulating
+a simple data logger. The amount of time slept is the time between the
+previous and current pings times the value \fIsleep_factor\fP.
+Default: \fIsleep_factor\fP = 1.0
 .TP
 .B \fB-R\fIwest/east/south/north\fP
 Sets the longitude and latitude bounds within which multibeam 

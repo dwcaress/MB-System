@@ -1,4 +1,4 @@
-.TH mbcut l "14 August 1995"
+.TH mbcut l "14 August 1995" "MB-System 4.3" "MB-System 4.3"
 .SH NAME
 \fBmbcut\fP - Removes data in specified regions of a swath,
 defined either in terms of acrosstrack distance or 

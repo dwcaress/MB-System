@@ -1,4 +1,4 @@
-.TH mbcontour l "22 November 1995"
+.TH mbcontour l "22 November 1995" "MB-System 4.3" "MB-System 4.3"
 .SH NAME
 \fBmbcontour\fP - GMT compatible utility for color fill or color shaded relief
 swath plots of multibeam data using Postscript.
@@ -14,7 +14,7 @@ Version 4.3
 \fB-D\fItime_tick/time_annot/date_annot/time_tick_len\fP 
 \fB-E\fIyr/mo/da/hr/mn/sc\fP \fB-F\fIred/green/blue\fP 
 \fB-I\fIinfile\fP \fB-K\fP \fB-L\fIlonflip\fP \fB-M\fP 
-\fB-N\fInplot\fP \fB-N\fImode/min/max \fB-O\fP \fB-P\fP \fB-p\fIpings\fP 
+\fB-N\fInplot\fP \fB-O\fP \fB-P\fP \fB-p\fIpings\fP 
 \fB-Q\fP \fB-S\fIspeed \fB-T\fItimegap\fP \fB-U\fP \fB-W\fP \fB-X\fIx-shift\fP 
 \fB-Y\fIy-shift\fP \fB-Z\fIalgorithm\fP 
 \fB-V -H\fP]
@@ -64,14 +64,22 @@ Defaults: \fIcont_int\fP = 25; \fIcol_int\fP = 100;
 .B \fB-B\fItickinfo\fP
 Sets map boundary tickmark intervals. See \fBpsbasemap\fP for details.
 .TP
+.B \fB-b\fIyr/mo/da/hr/mn/sc\fP
+Sets the starting time for data allowed in the input data; pings
+with times before the starting time will be ignored. 
+Default: \fIyr/mo/da/hr/mn/sc\fP = 1962/2/21/10/30/0.
+.TP
 .B \fB-C\fIcontourfile\fP
-Sets the file from which the contour levels and their style and color are read.
+Sets the file from which the contour levels and their 
+style and color are read.
 This file consists of lines in the format:
  	\fIlevel label tick red green blue\fP
 .br
-where \fIlevel\fP is the depth value to be contoured in meters, \fIlabel\fP
-is either 'a' for annotated or 'n' for not annotated, \fItick\fP is either
-'t' for tick marks or 'n' for no tick marks, and \fIred\fP, \fIgreen\fP,
+where \fIlevel\fP is the depth value to be contoured 
+in meters, \fIlabel\fP
+is either 'a' for annotated or 'n' for not annotated, 
+\fItick\fP is either 't' for tick marks or 'n' for no 
+tick marks, and \fIred\fP, \fIgreen\fP,
 and \fIblue\fP set the color of the contour lines (these values can
 range from 0 to 255). If a GMT cpt file is given as the \fIcontourfile\fP,
 the color boundaries specified in the cpt file will be interpreted as
@@ -251,7 +259,8 @@ Default: \fIpings\fP = 1 (no ping averaging).
 .B \fB-Q\fP
 Causes the program to plot the triangles constructed as part of the
 contouring if the "triangle algorithm" is specified using the
-\fB-Z\fI0\fP option. This allows the data distribution to be directly viewed.
+\fB-Z\fI1\fP option. This allows the data distribution to be 
+directly viewed.
 .TP
 .B \fB-R\fIwest/east/south/north\fP
 Sets the longitude and latitude bounds within which multibeam 

@@ -1,4 +1,4 @@
-.TH hsdump l "14 August 1995"
+.TH hsdump l "14 August 1995" "MB-System 4.3" "MB-System 4.3"
 .SH NAME
 \fBhsdump\fP - hsdump lists the information contained in Hydrosweep DS data files.
 

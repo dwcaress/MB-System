@@ -1,4 +1,4 @@
-.TH MBPS l "14 August 1995"
+.TH MBPS l "14 August 1995" "MB-System 4.3" "MB-System 4.3"
 .SH NAME
 \fBmbps\fP - Generates a PostScript perspective plot of a piece of multibeam data.
 
@@ -25,11 +25,11 @@ the \fB-D\fP option, the data can be viewed from port, starboard,
 or from the back. In the first two cases, the y-axis is horizontal in
 the plot; in the third case, the x-axis is horizontal.  The angle \fIalpha\fP
 is the angle between the x-axis and the y-axis in the final view; \fIeta\fP is the angle of elevation of the observing point (90 degrees being the zenith).  The
-data points are ploted as triangular polygons with the vertices at three good (ie. unflagged) adjacent data points. A given point is adjacent to 8 points in the surrounding swath (top, bottom, 2 sides, and 4 corners).  Now that you are thoroughly
+data points are plotted as triangular polygons with the vertices at three good (ie. unflagged) adjacent data points. A given point is adjacent to 8 points in the surrounding swath (top, bottom, 2 sides, and 4 corners).  Now that you are thoroughly
 confused, just try plotting a half-hour or so of data from your favorite
 place. The defaults are such that a decent plot should come out.
 The plot will be scaled automatically to fit on a page, and will contain vertical and horizontal scales, an arrow pointing in the direction of the ship's motion, coordinate axes, and miscellaneous
-information identifying the piece of data being ploted.
+information identifying the piece of data being plotted.
 Now change some of the options, and things should get clearer.
 
 .SH AUTHORSHIP
@@ -111,10 +111,10 @@ a scale such that the plot fits on a page.
 Sets the vertical exaggeration. Default \fIve\fP = 5.
 .TP
 .B \fB-Y\fIdisplay_stats\fP
-Sets whether the final plot includes info such as mean latitude, mean longitude, mean heading, \fIalpha\fP, \fIeta\fP, \fIve\fP, scale, track length, begin time, and end time. if \fIdisplay_stats \fP= 1 then the above info is ploted; if \fIdispaly_stats \fP= 0 then it is not ploted.  Default: \fIdisplay_stats  \fP= 1.
+Sets whether the final plot includes info such as mean latitude, mean longitude, mean heading, \fIalpha\fP, \fIeta\fP, \fIve\fP, scale, track length, begin time, and end time. if \fIdisplay_stats \fP= 1 then the above info is plotted; if \fIdispaly_stats \fP= 0 then it is not plotted.  Default: \fIdisplay_stats  \fP= 1.
 .TP
 .B \fB-Z\fIdisplay_scales\fP
-Sets whether the final plot includes a horizontal scale, a vertical scale, an arrow pointing in the ship heading direction, and coordinate axes.  if \fIdisplay_scales \fP= 1 then the above info is ploted; if \fIdispaly_scales \fP= 0 then it is not ploted.  Default: \fIdisplay_scales  \fP= 1.
+Sets whether the final plot includes a horizontal scale, a vertical scale, an arrow pointing in the ship heading direction, and coordinate axes.  if \fIdisplay_scales \fP= 1 then the above info is plotted; if \fIdispaly_scales \fP= 0 then it is not plotted.  Default: \fIdisplay_scales  \fP= 1.
 
 .SH EXAMPLES
 Suppose one wishes to take a look at data from a Hydrosweep file in

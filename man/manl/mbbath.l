@@ -1,4 +1,4 @@
-.TH mbbath l "14 August 1995"
+.TH mbbath l "14 August 1995" "MB-System 4.3" "MB-System 4.3"
 .SH NAME
 \fBmbbath\fP - Generates bathymetry from travel times in multibeam data.
 
@@ -59,9 +59,9 @@ but could be different on different installations of the
 same sonar.
 .TP
 .B \fB-B\fIroll_bias\fP
-Sets the roll bias used in calculating crosstrack distances and depths
-for the beams in survey (athwartships) pings.  The roll bias is
-added to the takeoff angles for each of the survey beams prior to
+Sets the roll bias (in degrees) used in calculating 
+beam locations.  The roll bias is
+added to the acrosstrack component of the beam takeoff angles prior to
 the raytracing.  Ship roll is measured with starboard negative and
 port positive.
 Default: \fIroll_bias\fP = 0.0
@@ -96,11 +96,11 @@ no output file is specified, the output will be written to
 stdout. Default: \fIoutfile\fP = stdout.
 .TP
 .B \fB-P\fIpitch_bias\fP
-Sets the pitch bias used in calculating crosstrack distances and depths
-for the beams in calibrate (fore-aft) pings.  The pitch bias is
-added to the takeoff angles for each of the calibrate beams prior to
-the raytracing.  Ship pitch is measured with aft negative and
-fore positive.
+Sets the pitch bias (in degrees) used in calculating beam 
+locations.  The pitch bias is
+added to the fore-aft component of the beam takeoff angles prior to
+the raytracing.  Ship pitch is measured with aft (bow down) negative and
+fore (bow up) positive.
 Default: \fIpitch_bias\fP = 0.0
 .TP
 .B \fB-R\fIrollfile\fP
@@ -111,8 +111,7 @@ read. The roll corrections should be in the form
 .br
 where the time is in seconds since 1/1/71 00:00:0 (Unix time) and the
 roll correction is in degrees with starboard negative and
-port positive. This correction file can be created using the
-macro mbm_rollerror.
+port positive.
 .TP
 .B \fB-S\fIstaticfile\fP
 Data file from which static depth corrections as a function of

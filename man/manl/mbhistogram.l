@@ -1,4 +1,4 @@
-.TH mbhistogram l "14 August 1995"
+.TH mbhistogram l "14 August 1995" "MB-System 4.3" "MB-System 4.3"
 .SH NAME
 \fBmbhistogram\fP - Generate a histogram of bathymetry, amplitude, or sidescan values.
 
