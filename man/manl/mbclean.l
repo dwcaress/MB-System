@@ -8,6 +8,7 @@ Version 4.2
 .SH SYNOPSIS
 \fBmbclean\fP [\fB-B\fIlow/high \fB-C\fIslope\fP 
 \fB-D\fIdistance\fP \fB-F\fIformat\fP 
+\fB-G\fIfraction_low/fraction_high\fP 
 \fB-I\fIinfile\fP \fB-L\fIlonflip\fP \fB-O\fIoutfile\fP 
 \fB-M\fImode\fP \fB-Q\fP \fB-X\fIzap_beams\fP \fB-V -H\fP]
 
@@ -17,7 +18,9 @@ Bad beams are primarily identified based on excessive bathymetric slopes.
 If desired, \fBmbclean\fP will also flag beams associated with "rails" where
 outer beams have smaller crosstrack distances than more inner beams.
 Low and high bounds on acceptable depth values can be set; depth values
-outside the acceptable range will be flagged.
+outside the acceptable range will be flagged. The acceptable depth
+ranges can either be absolute (\fB-B\fP) option or relative
+to the local median depth (\fB-G\fP option).
 A set number of outer beams can also be flagged.
 The default input and output streams 
 are stdin and stdout.
@@ -65,6 +68,18 @@ format supported by \fBMBIO\fP. A list of the multibeam data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page.
 Default: \fIformat\fP = 11.
+.TP
+.B \fB-G\fIfraction_low/fraction_high\fP
+This option sets the range of acceptable depth values relative to
+the local median depth. The median depth is obtained from the
+current ping and the pings immediately before and after that
+ping.  If a depth
+value is less than \fIfraction_low\fP times the median depth
+(e.g. \fIfraction_low\fP = 0.5 means one half the median
+depth) or more than \fIfraction_high\fP times the median depth then it
+will be flagged. No fractional depth range checking is 
+done if the \fB-G\fP option
+is not used.
 .TP
 .B \fB-H\fP
 This "help" flag cause the program to print out a description
