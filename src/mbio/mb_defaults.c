@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_defaults.c	10/7/94
- *    $Id: mb_defaults.c,v 4.1 1994-10-21 12:11:53 caress Exp $
+ *    $Id: mb_defaults.c,v 4.2 1995-01-25 18:17:24 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Date:	January 23, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1994/10/21  12:11:53  caress
+ * Release V4.0
+ *
  * Revision 4.0  1994/03/05  23:55:38  caress
  * First cut at version 4.0
  *
@@ -66,7 +69,7 @@ int *etime_i;
 double *speedmin;
 double *timegap;
 {
-  static char rcs_id[]="$Id: mb_defaults.c,v 4.1 1994-10-21 12:11:53 caress Exp $";
+  static char rcs_id[]="$Id: mb_defaults.c,v 4.2 1995-01-25 18:17:24 caress Exp $";
 	char	*function_name = "mb_defaults";
 	int	status;
 	FILE	*fp;
@@ -189,7 +192,7 @@ int verbose;
 char *psdisplay;
 char *mbproject;
 {
-  static char rcs_id[]="$Id: mb_defaults.c,v 4.1 1994-10-21 12:11:53 caress Exp $";
+  static char rcs_id[]="$Id: mb_defaults.c,v 4.2 1995-01-25 18:17:24 caress Exp $";
 	char	*function_name = "mbenv";
 	int	status;
 	FILE	*fp;
@@ -208,8 +211,24 @@ char *mbproject;
 		fprintf(stderr,"dbg2       verbose: %d\n",verbose);
 		}
 
-	/* set system default values */
+	/* set system default Postscript displayer */
+#ifdef IRIX
+	strcpy(psdisplay, "xpsview");
+#endif
+#ifdef SOLARIS
+	strcpy(psdisplay, "pageview");
+#endif
+#ifdef LYNX
 	strcpy(psdisplay, "ghostview");
+#endif
+#ifdef SUN
+	strcpy(psdisplay, "pageview");
+#endif
+#ifdef OTHER
+	strcpy(psdisplay, "ghostview");
+#endif
+
+	/* set system default project name */
 	strcpy(mbproject, "none");
 
 	/* set the filename */
