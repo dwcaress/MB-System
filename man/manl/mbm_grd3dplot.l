@@ -1,4 +1,4 @@
-.TH mbm_grd3dplot l "16 September 1997" "MB-System 4.5" "MB-System 4.5"
+.TH mbm_grd3dplot l "2 October 1998" "MB-System 4.5" "MB-System 4.5"
 .SH NAME
 \fBmbm_grd3dplot\fP - Create an executable shellscript which will generate
 a GMT 3D perspective plot of gridded data in a GMT grd file.
@@ -8,7 +8,7 @@ Version 4.5
 
 .SH SYNOPSIS
 \fBmbm_grd3dplot\fP \fB-I\fP\fIfile\fP 
-[\fB-A\fP[\fImagnitude\fP[\fI/azimuth\fP] 
+[\fB-A\fP[\fImagnitude\fP[\fI/azimuth/elevation\fP] 
 \fB-D\fP[\fIflipcolor/flipshade\fP]
 \fB-E\fP[\fIview_az/view_el\fP] 
 \fB-G\fP\fIcolor_mode\fP \fB-H\fP \fB-K\fP\fIintensity_file \fP
@@ -64,16 +64,19 @@ Palisades, NY 10964
 .SH SIMPLE DESCRIPTION OF BASIC OPTIONS
 .TP
 .B \-A
-\fImagnitude[/azimuth]\fP
+\fImagnitude[/azimuth/elevation]\fP
 .br
 Sets the parameters which control the
 synthetic illumination of the gridded data (shaded relief).
 The value \fImagnitude\fP
 is an effective vertical exageration which modulates the intensity of
-the shading; typical values are in the 0.1 to 0.5 range.  
+the shading; typical values are in the 0.1 to 10 range.  
 The value \fIazimuth\fP
-is the azimuth from which the data is illuminated.
-Defaults: \fImagnitude\fP = 0.2; \fIazimuth\fP = 0.0;
+is the azimuth in degrees from north from which the data is illuminated.
+The value \fIelevation\fP is the elevation of the illumination 
+in degrees from horizontal.
+Defaults: \fImagnitude\fP = 0.2; \fIazimuth\fP = 0.0; 
+\fIelevation\fP = 30.0;
 .TP
 .B \-D
 \fI[flipcolor/flipshade]\fP

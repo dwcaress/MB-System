@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grdplot.perl	8/6/95
-#    $Id: mbm_grdplot.perl,v 4.6 1997-04-21 16:54:41 caress Exp $
+#    $Id: mbm_grdplot.perl,v 4.7 1998-10-05 17:00:15 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -36,7 +36,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   macro.
 #
 # Basic Usage: 
-#   mbm_grdplot -Ifile [-Amagnitude[/azimuth] -C[contour_control] 
+#   mbm_grdplot -Ifile [-Amagnitude[/azimuth/elevation] -C[contour_control] 
 #            -Gcolor_mode -H -Kintensity_file -Oroot -Ppagesize
 #            -S[color/shade] -Uorientation -V 
 #            -Wcolor_style[/pallette[/ncolors]] ]
@@ -61,10 +61,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   October 19, 1994
 #
 # Version:
-#   $Id: mbm_grdplot.perl,v 4.6 1997-04-21 16:54:41 caress Exp $
+#   $Id: mbm_grdplot.perl,v 4.7 1998-10-05 17:00:15 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.6  1997/04/21  16:54:41  caress
+# MB-System 4.5 Beta Release.
+#
 # Revision 4.6  1997/04/17  15:06:49  caress
 # MB-System 4.5 Beta Release
 #
@@ -93,6 +96,9 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #
 #
 $program_name = "mbm_grdplot";
+
+# set degree to radians conversion
+$DTR = 3.1415926 / 180.0;
 
 # set page size database
 @page_size_names = (  
@@ -220,7 +226,7 @@ $contour_mode = 	($flg_C || $flg_c);
 $contour_control = 	($opt_C || $opt_c);
 $color_flip_mode = 	($flg_D || $flg_d);
 $color_flip_control = 	($opt_D || $opt_d);
-$color_mode =   	($opt_G || $opt_g);
+$color_mode =   	($opt_G || $opt_g || $flg_G || $flg_g);
 $help =    		($opt_H || $opt_h);
 $file_data =    	($opt_I || $opt_i);
 $map_scale =    	($opt_J || $opt_j);
@@ -263,7 +269,7 @@ if ($help)
 	print "to take advantage of GMT capabilites not supported by this \n";
 	print "macro.\n";
 	print "\nBasic Usage: \n";
-	print "\t$program_name -Ifile [-Amagnitude[/azimuth] -C[contour_control] \n";
+	print "\t$program_name -Ifile [-Amagnitude[/azimuth/elevation] -C[contour_control] \n";
 	print "\t\t-Gcolor_mode -H -Kintensity_file -Oroot -Ppagesize -S[color/shade]\n";
 	print "\t\t-Uorientation -V -Wcolor_style[/pallette[/ncolors]] ]\n";
 	print "Additional Options:\n";
@@ -365,13 +371,13 @@ if ($misc)
 			}
 
 		# set unix time stamp
-		if ($cmd =~ /^[Gg][Uu]/)
-			{
-			$unix_stamp_on = 1;
-			}
-		elsif ($cmd =~ /^[Gg][Uu]./)
+		if ($cmd =~ /^[Gg][Uu]./)
 			{
 			($unix_stamp) = $cmd =~ /^[Gg][Uu](\S+)/;
+			$unix_stamp_on = 1;
+			}
+		elsif ($cmd =~ /^[Gg][Uu]/)
+			{
 			$unix_stamp_on = 1;
 			}
 
@@ -481,7 +487,12 @@ if (!$color_mode && !$contour_mode)
 	}
 if ($shade_control)
 	{
-	if ($shade_control =~ /^(\S+)\/(\S+)/)
+	if ($shade_control =~ /^(\S+)\/(\S+)\/(\S+)/)
+		{
+		($magnitude, $azimuth, $elevation) = 
+			$shade_control =~ /^(\S+)\/(\S+)\/(\S+)/;
+		}
+	elsif ($shade_control =~ /^(\S+)\/(\S+)/)
 		{
 		($magnitude, $azimuth) = 
 			$shade_control =~ /^(\S+)\/(\S+)/;
@@ -502,11 +513,15 @@ if ($color_mode == 2 && !$azimuth)
 	}
 if ($color_mode == 2 && !$magnitude)
 	{
-	$magnitude = 0.2;
+	$magnitude = 1.0;
 	}
 elsif ($color_mode == 3 && !$magnitude)
 	{
 	$magnitude = -0.4;
+	}
+if ($color_mode == 2 && !$elevation)
+	{
+	$elevation = 30.0;
 	}
 if ($color_control)
 	{
@@ -569,15 +584,6 @@ elsif ($color_flip_mode)
 	{
 	$color_flip = 1;
 	}
-# flip grayscale so default sidescan is high amplitude = black
-if ($color_pallette == 4 && $color_flip)
-	{
-	$color_flip = 0;
-	}
-elsif ($color_pallette == 4 && !$color_flip)
-	{
-	$color_flip = 1;
-	}
 if ($color_mode && $shade_flip)
 	{
 	$magnitude = -1 * $magnitude;
@@ -598,6 +604,10 @@ if ($stretch_control)
 elsif ($stretch_mode)
 	{
 	$stretch_color = 1;
+	}
+if ($color_mode && $file_cpt)
+	{
+	$cptfile = $file_cpt;
 	}
 
 # set page size
@@ -783,16 +793,16 @@ if ($bounds)
 	elsif ($bounds =~ /^r$/)
 		{
 		$use_corner_points = 1;
-		$bounds_plot = "$xmin" . "/" . "$ymin" . "/"
-			. "$xmax" . "/" . "$ymax" . "r";
+		$bounds_plot = sprintf "%1.8g/%1.8g/%1.8g/%1.8gr",
+			$xmin, $ymin, $xmax, $ymax;
 		}
 	}
 
 # set bounds string for plotting if not already set
 if (!$bounds_plot)
 	{
-	$bounds_plot = "$xmin" . "/" . "$xmax" . "/" 
-		. "$ymin" . "/" . "$ymax";
+	$bounds_plot = sprintf "%1.8g/%1.8g/%1.8g/%1.8g",
+		$xmin, $xmax, $ymin, $ymax;
 	}
 
 # use user defined data limits
@@ -856,7 +866,7 @@ else
 `echo $xmax $ymax >> tmp$$.dat`;
 `echo $xmin $ymax >> tmp$$.dat`;
 @projected = `mapproject tmp$$.dat -J$projection$projection_pars -R$bounds_plot 2>&1 `;
-`rm -f tmp$$.dat`;
+`/bin/rm -f tmp$$.dat`;
 while (@projected)
 	{
 	$line = shift @projected;
@@ -1032,7 +1042,7 @@ elsif ($use_scale)
 
 	# construct plot scale parameters
 	($projection_pars) = $map_scale =~ /^$projection(\S+)/;
-	$projection_pars = "$projection_pars$separator$plot_scale";
+	$projection_pars = sprintf "$projection_pars$separator%1.5g", $plot_scale;
 
 	# handle special case for linear projections
 	if ($geographic)
@@ -1090,7 +1100,7 @@ elsif ($use_width)
 
 	# construct plot scale parameters
 	($projection_pars) = $map_scale =~ /^$projection(\S+)/;
-	$projection_pars = "$projection_pars$separator$plot_width";
+	$projection_pars = sprintf "$projection_pars$separator%1.5g", $plot_width;
 
 	# handle special case for linear projections
 	if ($geographic)
@@ -1245,9 +1255,9 @@ $gmtfile = "gmtdefaults\$\$";
 
 # set some gmtisms
 $first_gmt = 1;
-$first = "-X$xoffset -Y$yoffset -K -V > $psfile";
-$middle = "-K -O -V >> $psfile";
-$end = "-O -V >> $psfile";
+$first = "-X\$X_OFFSET -Y\$Y_OFFSET -K -V >! \$PS_FILE";
+$middle = "-K -O -V >> \$PS_FILE";
+$end = "-O -V >> \$PS_FILE";
 
 # set macro gmt default settings
 $gmt_def = "MEASURE_UNIT/inch";
@@ -1287,10 +1297,21 @@ if (!open(FCMD,">$cmdfile"))
 	}
 
 # write the shellscript header
+print FCMD "#! /bin/csh -f\n";
 print FCMD "#\n# Shellscript to create Postscript plot of data in grd file\n";
 print FCMD "# Created by macro $program_name\n";
 print FCMD "#\n# This shellscript created by following command line:\n";
 print FCMD "# $program_name $command_line\n";
+
+# Define shell variables
+print FCMD "#\n# Define shell variables used in this script:\n";
+print FCMD "set PS_FILE         = $psfile\n";
+print FCMD "set CPT_FILE        = $cptfile\n";
+print FCMD "set MAP_PROJECTION  = $projection\n";
+print FCMD "set MAP_SCALE       = $projection_pars\n";
+print FCMD "set MAP_REGION      = $bounds_plot\n";
+printf FCMD "set X_OFFSET        = %1.5g\n", $xoffset;
+printf FCMD "set Y_OFFSET        = %1.5g\n", $yoffset;
 
 # Reset GMT defaults, saving old defaults
 print FCMD "#\n# Save existing GMT defaults\n";
@@ -1315,11 +1336,7 @@ if (@gmt_defs)
 	}
 
 # generate color pallette table file if needed
-if ($color_mode && $file_cpt)
-	{
-	$cptfile = $file_cpt;
-	}
-elsif ($color_mode)
+if ($color_mode && !$file_cpt)
 	{
 	# break data distribution up into equal size 
 	# regions using grdhisteq on first data file
@@ -1393,7 +1410,7 @@ elsif ($color_mode)
 				{
 				print FCMD " >>";
 				}
-			print FCMD " $cptfile\n";
+			print FCMD " \$CPT_FILE\n";
 			$d1 = $d2
 			}
 		}
@@ -1420,7 +1437,7 @@ elsif ($color_mode)
 				{
 				print FCMD " >>";
 				}
-			print FCMD " $cptfile\n";
+			print FCMD " \$CPT_FILE\n";
 			$d1 = $d2
 			}
 		}
@@ -1447,7 +1464,7 @@ elsif ($color_mode)
 				{
 				print FCMD " >>";
 				}
-			print FCMD " $cptfile\n";
+			print FCMD " \$CPT_FILE\n";
 			$d1 = $d2
 			}
 		}
@@ -1474,7 +1491,7 @@ elsif ($color_mode)
 				{
 				print FCMD " >>";
 				}
-			print FCMD " $cptfile\n";
+			print FCMD " \$CPT_FILE\n";
 			$d1 = $d2
 			}
 		}
@@ -1489,48 +1506,98 @@ if (@files_intensity)
 	$file_int = shift @files_intensity;
 	}
 
+# Define shell variables
+print FCMD "#\n# Define data files to be plotted:\n";
+print FCMD "set DATA_FILE        = $file_grd\n";
+print FCMD "set INTENSITY_FILE   = $file_int\n";
+
 # scale data if needed
-$file_use = $file_grd;
+$file_use = "\$DATA_FILE";
 if ($data_scale)
 	{
 	printf FCMD "#\n# Rescale data\n";
 	printf FCMD "echo Rescaling data by $data_scale...\n";
 	printf FCMD "echo Running grdmath...\n";
-	printf FCMD "grdmath $file_grd $data_scale x = $file_grd.scale\n";
-	$file_use = "$file_grd.scale";
+	printf FCMD "grdmath \$DATA_FILE $data_scale x = \$DATA_FILE.scale\n";
+	$file_use = "\$DATA_FILE.scale";
 	}
+
+# get shading by illumination if needed
+#if ($color_mode == 2)
+#	{
+#	printf FCMD "#\n# Get shading array\n";
+#	printf FCMD "echo Getting shading array...\n";
+#	printf FCMD "echo Running grdgradient...\n";
+#	printf FCMD "grdgradient $file_use -A$azimuth -G\$DATA_FILE.grad -N -M\n";
+#	printf FCMD "echo Running grdhisteq...\n";
+#	printf FCMD "grdhisteq \$DATA_FILE.grad -G\$DATA_FILE.eq -N\n";
+#	printf FCMD "echo Running grdmath...\n";
+#	printf FCMD "grdmath \$DATA_FILE.eq $magnitude x = \$DATA_FILE.int\n";
+#	printf FCMD "/bin/rm -f \$DATA_FILE.grad \$DATA_FILE.eq\n";
+#	$file_shade = "\$DATA_FILE.int";
+#	}
 
 # get shading by illumination if needed
 if ($color_mode == 2)
 	{
+	# Compute lighting vector from sun azimuth and elevation
+	$light_x = sin($DTR * $azimuth) * cos($DTR * $elevation);
+	$light_y = cos($DTR * $azimuth) * cos($DTR * $elevation);
+	$light_z = sin($DTR * $elevation);
+
 	printf FCMD "#\n# Get shading array\n";
 	printf FCMD "echo Getting shading array...\n";
-	printf FCMD "echo Running grdgradient...\n";
-	printf FCMD "grdgradient $file_use -A$azimuth -G$file_grd.grad -N -M\n";
-	printf FCMD "echo Running grdhisteq...\n";
-	printf FCMD "grdhisteq $file_grd.grad -G$file_grd.eq -N\n";
-	printf FCMD "echo Running grdmath...\n";
-	printf FCMD "grdmath $file_grd.eq $magnitude x = $file_grd.int\n";
-	printf FCMD "rm -f $file_grd.grad $file_grd.eq\n";
-	$file_shade = "$file_grd.int";
+	printf FCMD "echo Running grdgradient to get x component of the gradient...\n";
+	printf FCMD "grdgradient $file_use -A90 -G\$DATA_FILE.drvx -M\n";
+	printf FCMD "echo Running grdgradient to get y component of the gradient...\n";
+	printf FCMD "grdgradient $file_use -A0 -G\$DATA_FILE.drvy -M\n";
+
+	printf FCMD "echo Running grdmath to get adjusted x gradient...\n";
+	printf FCMD "grdmath \$DATA_FILE.drvx $magnitude MUL 10 MUL = \$DATA_FILE.magx\n";
+	printf FCMD "echo Running grdmath to get adjusted y gradient...\n";
+	printf FCMD "grdmath \$DATA_FILE.drvy $magnitude MUL 10 MUL = \$DATA_FILE.magy\n";
+
+	printf FCMD "echo Running grdmath to get normalization factor...\n";
+	printf FCMD "grdmath \$DATA_FILE.magx 2.0 POW \\\n";
+		printf FCMD "\t\$DATA_FILE.magy 2.0 POW ADD \\\n";
+		printf FCMD "\t1.0 ADD SQRT = \$DATA_FILE.denom\n";
+
+	printf FCMD "echo Running grdmath to get normalized x gradient...\n";
+	printf FCMD "grdmath \$DATA_FILE.magx \$DATA_FILE.denom DIV = \$DATA_FILE.normx\n";
+	printf FCMD "echo Running grdmath to get normalized y gradient...\n";
+	printf FCMD "grdmath \$DATA_FILE.magy \$DATA_FILE.denom DIV = \$DATA_FILE.normy\n";
+	printf FCMD "echo Running grdmath to get normalized z gradient...\n";
+	printf FCMD "grdmath 1.0 \$DATA_FILE.denom DIV = \$DATA_FILE.normz\n";
+
+	printf FCMD "echo Running grdmath to apply lighting vector to normalized gradient...\n";
+	printf FCMD "grdmath \$DATA_FILE.normx $light_x MUL \\\n";
+		printf FCMD "\t\$DATA_FILE.normy $light_y MUL ADD \\\n";
+		printf FCMD "\t\$DATA_FILE.normz $light_z MUL ADD -0.5 ADD = \$DATA_FILE.int\n";
+
+	printf FCMD "/bin/rm -f \$DATA_FILE.drvx \$DATA_FILE.drvy \\\n";
+	printf FCMD "\t\$DATA_FILE.magx \$DATA_FILE.magy \\\n";
+	printf FCMD "\t\$DATA_FILE.denom \$DATA_FILE.normx \\\n";
+	printf FCMD "\t\$DATA_FILE.normy \$DATA_FILE.normz\n";
+	$file_shade = "\$DATA_FILE.int";
 	}
 
 # get equalized shading by intensity file if needed
-if ($color_mode == 3 && $file_intensity && $stretch_shade)
+if ($color_mode == 3 && $file_int && $stretch_shade)
 	{
 	printf FCMD "#\n# Get shading array\n";
 	printf FCMD "echo Getting shading array...\n";
 	printf FCMD "echo Running grdhisteq...\n";
-	printf FCMD "grdhisteq $file_int -G$file_int.eq -N\n";
+	printf FCMD "grdhisteq \$INTENSITY_FILE -G\$INTENSITY_FILE.eq -N\n";
 	printf FCMD "echo Running grdmath...\n";
-	printf FCMD "grdmath $file_int.eq $magnitude x = $file_int.int\n";
-	printf FCMD "rm -f $file_int.eq\n";
-	$file_shade = "$file_int.int";
+	printf FCMD "grdmath \$INTENSITY_FILE.eq $magnitude x = \$INTENSITY_FILE.int\n";
+	printf FCMD "/bin/rm -f \$INTENSITY_FILE.eq\n";
+	$file_shade = "\$INTENSITY_FILE.int";
 	}
+
 # get shading by unaltered intensity file
 elsif ($color_mode == 3 && $file_int)
 	{
-	$file_shade = $file_int;
+	$file_shade = "\$INTENSITY_FILE";
 	}
 
 # do grdimage plot
@@ -1538,8 +1605,8 @@ if ($color_mode)
 	{
 	printf FCMD "#\n# Make color image\n";
 	printf FCMD "echo Running grdimage...\n";
-	printf FCMD "grdimage $file_use -J$projection$projection_pars \\\n\t";
-	printf FCMD "-R$bounds_plot -C$cptfile \\\n\t";
+	printf FCMD "grdimage $file_use -J\$MAP_PROJECTION\$MAP_SCALE \\\n\t";
+	printf FCMD "-R\$MAP_REGION -C\$CPT_FILE \\\n\t";
 	if ($color_mode > 1)
 		{
 		printf FCMD "-I$file_shade \\\n\t";
@@ -1568,8 +1635,8 @@ if ($contour_mode)
 	{
 	printf FCMD "#\n# Make contour plot\n";
 	printf FCMD "echo Running grdcontour...\n";
-	printf FCMD "grdcontour $file_use -J$projection$projection_pars \\\n\t";
-	printf FCMD "-R$bounds_plot \\\n\t";
+	printf FCMD "grdcontour $file_use -J\$MAP_PROJECTION\$MAP_SCALE \\\n\t";
+	printf FCMD "-R\$MAP_REGION \\\n\t";
 	printf FCMD "-C$contour_control \\\n\t";
 	printf FCMD "-L$zmin/$zmax -Wc1p \\\n\t";
 	if ($contour_anot_int)
@@ -1660,8 +1727,8 @@ for ($i = 0; $i < scalar(@xyfiles); $i++)
 	printf FCMD "#\n# Make xy data plot\n";
 	printf FCMD "echo Running psxy...\n";
 	printf FCMD "psxy $xyfiles[$i] \\\n\t";
-	printf FCMD "-J$projection$projection_pars \\\n\t";
-	printf FCMD "-R$bounds_plot \\\n\t";
+	printf FCMD "-J\$MAP_PROJECTION\$MAP_SCALE \\\n\t";
+	printf FCMD "-R\$MAP_REGION \\\n\t";
 	if ($xyfills[$i] ne "N")
 		{
 		printf FCMD "-G$xyfills[$i] \\\n\t";
@@ -1694,7 +1761,7 @@ if ($color_mode && $color_pallette < 5)
 	{
 	printf FCMD "#\n# Make color scale\n";
 	printf FCMD "echo Running psscale...\n";
-	printf FCMD "psscale -C$cptfile \\\n\t";
+	printf FCMD "psscale -C\$CPT_FILE \\\n\t";
 	printf FCMD "-D%.4f/%.4f/%.4f/%.4f%s \\\n\t", 
 		$colorscale_offx,$colorscale_offy,
 		$colorscale_length,$colorscale_thick, 
@@ -1712,8 +1779,8 @@ if (@text)
 	{
 	printf FCMD "#\n# Make text labels\n";
 	printf FCMD "echo Running pstext...\n";
-	printf FCMD "pstext -J$projection$projection_pars \\\n\t";
-	printf FCMD "-R$bounds_plot \\\n\t";
+	printf FCMD "pstext -J\$MAP_PROJECTION\$MAP_SCALE \\\n\t";
+	printf FCMD "-R\$MAP_REGION \\\n\t";
 	printf FCMD "$middle <<EOT\n";
 	foreach $text_info (@text) {
 	    ($tx, $ty, $tsize, $tangle, $font, $just, $txt) = $text_info
@@ -1728,8 +1795,8 @@ if (@text)
 # do psbasemap plot
 printf FCMD "#\n# Make basemap\n";
 printf FCMD "echo Running psbasemap...\n";
-printf FCMD "psbasemap -J$projection$projection_pars \\\n\t";
-printf FCMD "-R$bounds_plot \\\n\t";
+printf FCMD "psbasemap -J\$MAP_PROJECTION\$MAP_SCALE \\\n\t";
+printf FCMD "-R\$MAP_REGION \\\n\t";
 printf FCMD "-B$axes \\\n\t";
 if ($length_scale)
 	{
@@ -1737,7 +1804,7 @@ if ($length_scale)
 	}
 if ($unix_stamp_on && $unix_stamp)
 	{
-	printf FCMD "-U$unix_stamp_on \\\n\t";
+	printf FCMD "-U$unix_stamp \\\n\t";
 	}
 elsif ($unix_stamp_on)
 	{
@@ -1754,17 +1821,17 @@ print FCMD "#\n# Delete surplus files\n";
 print FCMD "echo Deleting surplus files...\n";
 if (!$file_cpt)
 	{
-	print FCMD "rm -f $cptfile\n";
+	print FCMD "/bin/rm -f \$CPT_FILE\n";
 	}
 if ($data_scale)
 	{
-	printf FCMD "rm -f $file_use\n";
+	printf FCMD "/bin/rm -f $file_use\n";
 	}
 
 # reset GMT defaults
 print FCMD "#\n# Reset GMT default fonts\n";
 print FCMD "echo Resetting GMT fonts...\n";
-print FCMD "mv $gmtfile .gmtdefaults\n";
+print FCMD "/bin/mv $gmtfile .gmtdefaults\n";
 
 # display image on screen if desired
 print FCMD "#\n# Run $ps_viewer\n";
@@ -1844,7 +1911,11 @@ if ($verbose)
 		{
 		print "    Map distance scale\n";
 		}
-	if ($unix_stamp_on)
+	if ($unix_stamp_on && $unix_stamp)
+		{
+		print "    Unix time stamp: $unix_stamp\n";
+		}
+	elsif ($unix_stamp_on)
 		{
 		print "    Unix time stamp\n";
 		}
@@ -1952,6 +2023,7 @@ if ($verbose)
 	elsif ($color_mode == 2)
 		{
 		printf "    Illumination Azimuth:     %f\n", $azimuth;
+		printf "    Illumination Elevation:   %f\n", $elevation;
 		printf "    Illumination Magnitude:   %f\n", $magnitude;
 		}
 	if (@xyfiles)

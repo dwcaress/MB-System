@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_plot.perl	6/18/93
-#    $Id: mbm_plot.perl,v 4.15 1997-04-21 16:54:41 caress Exp $
+#    $Id: mbm_plot.perl,v 4.16 1998-10-05 17:00:15 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -68,10 +68,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   June 17, 1993
 #
 # Version:
-#   $Id: mbm_plot.perl,v 4.15 1997-04-21 16:54:41 caress Exp $
+#   $Id: mbm_plot.perl,v 4.16 1998-10-05 17:00:15 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.15  1997/04/21  16:54:41  caress
+# MB-System 4.5 Beta Release.
+#
 # Revision 4.16  1997/04/17  15:06:49  caress
 # MB-System 4.5 Beta Release
 #
@@ -288,7 +291,7 @@ $ncpt = 11;
 
 # Deal with command line arguments
 $command_line = "@ARGV";
-&MBGetopts('A:a:B:b:C%c%D%d%F:f:G:g:HhI:i:J:j:L:l:M+m+N%n%O:o:P:p:QqR:r:S%s%T%t%U:u:VvW:w:XxYyZ:z:');
+&MBGetopts('A:a:B:b:C%c%D%d%F:f:G%g%HhI:i:J:j:L:l:M+m+N%n%O:o:P:p:QqR:r:S%s%T%t%U:u:VvW:w:XxYyZ:z:');
 $shade_control = 	($opt_A || $opt_a);
 $tick_info = 		($opt_B || $opt_b);
 $contour_mode = 	($flg_C || $flg_c);
@@ -296,7 +299,7 @@ $contour_control = 	($opt_C || $opt_c);
 $color_flip_mode = 	($flg_D || $flg_d);
 $color_flip_control = 	($opt_D || $opt_d);
 $format = 		($opt_F || $opt_f);
-$color_mode =   	($opt_G || $opt_g);
+$color_mode =   	($opt_G || $opt_g || $flg_G || $flg_g);
 $help =    		($opt_H || $opt_h);
 $file_data =    	($opt_I || $opt_i);
 $map_scale =    	($opt_J || $opt_j);
@@ -442,13 +445,13 @@ if ($misc)
 			}
 
 		# set unix time stamp
-		if ($cmd =~ /^[Gg][Uu]/)
-			{
-			$unix_stamp_on = 1;
-			}
-		elsif ($cmd =~ /^[Gg][Uu]./)
+		if ($cmd =~ /^[Gg][Uu]./)
 			{
 			($unix_stamp) = $cmd =~ /^[Gg][Uu](\S+)/;
+			$unix_stamp_on = 1;
+			}
+		elsif ($cmd =~ /^[Gg][Uu]/)
+			{
 			$unix_stamp_on = 1;
 			}
 
@@ -780,10 +783,10 @@ if ($bounds)
 $cnt = -1;
 foreach $file_mb (@files_data)
 	{
-	# use .inf file if it exists 
+	# use .inf file if it exists and no time or space bounds applied
 	$use_inf = 0;
 	$file_inf = $file_mb . ".inf";
-	if (-r $file_inf)
+	if (-r $file_inf && !$mb_btime && !$mb_etime && !bounds_info)
 		{
 		if ($verbose) 
 			{
@@ -800,7 +803,7 @@ foreach $file_mb (@files_data)
 			}
 		}
 
-	# if .inf file not accessible run mbinfo directly 
+	# if .inf file not accessible or suitable run mbinfo directly 
 	if (!$use_inf)
 		{
 		if ($verbose) 
@@ -808,7 +811,15 @@ foreach $file_mb (@files_data)
 			print "Running mbinfo on file $file_mb...\n";
 			}
 		$cnt++;
-		@mbinfo = `mbinfo -F$formats[$cnt] -I$file_mb $bounds_info -G`;
+		if ($mb_btime)
+			{
+			$time_info = "-B$mb_btime";
+			}
+		if ($mb_etime)
+			{
+			$time_info = $time_info . "-B$mb_btime";
+			}
+		@mbinfo = `mbinfo -F$formats[$cnt] -I$file_mb $time_info $bounds_info -G`;
 		}
 
 	# now parse the mbinfo input 
@@ -885,7 +896,7 @@ else
 # check that there is data
 if ($xmin_data >= $xmax_data || $ymin_data >= $ymax_data)
 	{
-	die "Does not appear to be any data in the input!\n$program_name aborted.\n";
+	die "$xmin_data $xmax_data $ymin_data $ymax_data \nDoes not appear to be any data in the input!\n$program_name aborted.\n";
 	}
 if (($color == 1 || $color == 2 || $color == 3) && ($zmin_data >= $zmax_data))
 	{
@@ -927,8 +938,8 @@ if ($bounds)
 	elsif ($bounds =~ /^r$/)
 		{
 		$use_corner_points = 1;
-		$bounds_plot = "$xmin" . "/" . "$ymin" . "/"
-			. "$xmax" . "/" . "$ymax" . "r";
+		$bounds_plot = sprintf "%1.8g/%1.8g/%1.8g/%1.8gr",
+			$xmin, $ymin, $xmax, $ymax;
 		}
 	}
 
@@ -955,8 +966,8 @@ else
 		$ymin = $ymin - $dely;
 		$ymax = $ymax + $dely;
 		}
-	$bounds_plot = "$xmin" . "/" . "$xmax" . "/" 
-		. "$ymin" . "/" . "$ymax";
+	$bounds_plot = sprintf "%1.8g/%1.8g/%1.8g/%1.8g",
+		$xmin, $xmax, $ymin, $ymax;
 	}
 
 # set the relevent page width and height
@@ -994,7 +1005,7 @@ else
 `echo $xmax $ymax >> tmp$$.dat`;
 `echo $xmin $ymax >> tmp$$.dat`;
 @projected = `mapproject tmp$$.dat -J$projection$projection_pars -R$bounds_plot 2>&1 `;
-`rm -f tmp$$.dat`;
+`/bin/rm -f tmp$$.dat`;
 while (@projected)
 	{
 	$line = shift @projected;
@@ -1170,7 +1181,7 @@ elsif ($use_scale)
 
 	# construct plot scale parameters
 	($projection_pars) = $map_scale =~ /^$projection(\S+)/;
-	$projection_pars = "$projection_pars$separator$plot_scale";
+	$projection_pars = sprintf "$projection_pars$separator%1.5g", $plot_scale;
 
 	# handle special case for linear projections
 	if ($geographic)
@@ -1228,7 +1239,7 @@ elsif ($use_width)
 
 	# construct plot scale parameters
 	($projection_pars) = $map_scale =~ /^$projection(\S+)/;
-	$projection_pars = "$projection_pars$separator$plot_width";
+	$projection_pars = sprintf "$projection_pars$separator%1.5g", $plot_width;
 
 	# handle special case for linear projections
 	if ($geographic)
@@ -1479,9 +1490,9 @@ if ($contour_mode)
 # come up with the filenames
 $cmdfile = "$root.cmd";
 $psfile = "$root.ps";
-if ($format <= -1)
+if ($format == -1)
 	{
-	$file_list = $file_data;
+	$file_list = "\$INPUT_FILE";
 	}
 else
 	{
@@ -1493,9 +1504,9 @@ $gmtfile = "gmtdefaults\$\$";
 
 # set some gmtisms
 $first_gmt = 1;
-$first = "-X$xoffset -Y$yoffset -K -V > $psfile";
-$middle = "-K -O -V >> $psfile";
-$end = "-O -V >> $psfile";
+$first = "-X\$X_OFFSET -Y\$Y_OFFSET -K -V >! \$PS_FILE";
+$middle = "-K -O -V >> \$PS_FILE";
+$end = "-O -V >> \$PS_FILE";
 
 # set macro gmt default settings
 $gmt_def = "MEASURE_UNIT/inch";
@@ -1578,7 +1589,7 @@ if ($nlabels < 1 && $format < 0)
 	}
 elsif ($nlabels < 1)
 	{
-	$tlabel = "Data File $file_data";
+	$tlabel = "Data File \$INPUT_FILE";
 	}
 if ($nlabels < 2)
 	{
@@ -1620,10 +1631,23 @@ if (!open(FCMD,">$cmdfile"))
 	}
 
 # write the shellscript header
+print FCMD "#! /bin/csh -f\n";
 print FCMD "#\n# Shellscript to create Postscript plot of swath sonar data\n";
 print FCMD "# Created by macro $program_name\n";
 print FCMD "#\n# This shellscript created by following command line:\n";
 print FCMD "# $program_name $command_line\n";
+
+# Define shell variables
+print FCMD "#\n# Define shell variables used in this script:\n";
+print FCMD "set PS_FILE         = $psfile\n";
+print FCMD "set CPT_FILE        = $cptfile\n";
+print FCMD "set MAP_PROJECTION  = $projection\n";
+print FCMD "set MAP_SCALE       = $projection_pars\n";
+print FCMD "set MAP_REGION      = $bounds_plot\n";
+printf FCMD "set X_OFFSET        = %1.5g\n", $xoffset;
+printf FCMD "set Y_OFFSET        = %1.5g\n", $yoffset;
+print FCMD "set INPUT_FILE      = $file_data\n";
+print FCMD "set INPUT_FORMAT    = $format\n";
 
 # Reset GMT defaults, saving old defaults
 print FCMD "#\n# Save existing GMT defaults\n";
@@ -1652,7 +1676,7 @@ if ($format != -1)
 	{
 	print FCMD "#\n# Make datalist file \n";
 	print FCMD "echo Making datalist file...\n";
-	print FCMD "echo $file_data $format > $file_list\n";
+	print FCMD "echo \$INPUT_FILE \$INPUT_FORMAT >! $file_list\n";
 	}
 
 # generate color pallette table file if needed
@@ -1713,13 +1737,13 @@ elsif ($color_mode)
 				$d2,@cptr[$i+1],@cptg[$i+1],@cptb[$i+1];
 			if ($i == 0)
 				{
-				print FCMD " >";
+				print FCMD " >!";
 				}
 			else
 				{
 				print FCMD " >>";
 				}
-			print FCMD " $cptfile\n";
+			print FCMD " \$CPT_FILE\n";
 			$d1 = $d2
 			}
 		}
@@ -1740,13 +1764,13 @@ elsif ($color_mode)
 				$d2,@cptr[$i],@cptg[$i],@cptb[$i];
 			if ($i == ($ncolors - 2))
 				{
-				print FCMD " >";
+				print FCMD " >!";
 				}
 			else
 				{
 				print FCMD " >>";
 				}
-			print FCMD " $cptfile\n";
+			print FCMD " \$CPT_FILE\n";
 			$d1 = $d2
 			}
 		}
@@ -1767,13 +1791,13 @@ elsif ($color_mode)
 				$d2,@cptr[$i],@cptg[$i],@cptb[$i];
 			if ($i == 0)
 				{
-				print FCMD " >";
+				print FCMD " >!";
 				}
 			else
 				{
 				print FCMD " >>";
 				}
-			print FCMD " $cptfile\n";
+			print FCMD " \$CPT_FILE\n";
 			$d1 = $d2
 			}
 		}
@@ -1794,13 +1818,13 @@ elsif ($color_mode)
 				$d2,@cptr[$i],@cptg[$i],@cptb[$i];
 			if ($i == ($ncolors - 2))
 				{
-				print FCMD " >";
+				print FCMD " >!";
 				}
 			else
 				{
 				print FCMD " >>";
 				}
-			print FCMD " $cptfile\n";
+			print FCMD " \$CPT_FILE\n";
 			$d1 = $d2
 			}
 		}
@@ -1869,9 +1893,9 @@ if ($color_mode)
 	print FCMD "#\n# Run mbswath\n";
 	print FCMD "echo Running mbswath...\n";
 	printf FCMD "mbswath -f-1 -I$file_list \\\n\t";
-	printf FCMD "-J$projection$projection_pars \\\n\t";
-	printf FCMD "-R$bounds_plot \\\n\t";
-	printf FCMD "-C$cptfile \\\n\t";
+	printf FCMD "-J\$MAP_PROJECTION\$MAP_SCALE \\\n\t";
+	printf FCMD "-R\$MAP_REGION \\\n\t";
+	printf FCMD "-C\$CPT_FILE \\\n\t";
 	print FCMD "-Z$color_mode \\\n\t";
 	if ($swath_footprint)
 		{
@@ -1935,8 +1959,8 @@ if ($contour_mode || $navigation_mode)
 	print FCMD "#\n# Run mbcontour\n";
 	print FCMD "echo Running mbcontour...\n";
 	printf FCMD "mbcontour -f-1 -I$file_list \\\n\t";
-	printf FCMD "-J$projection$projection_pars \\\n\t";
-	printf FCMD "-R$bounds_plot \\\n\t";
+	printf FCMD "-J\$MAP_PROJECTION\$MAP_SCALE \\\n\t";
+	printf FCMD "-R\$MAP_REGION \\\n\t";
 	if ($contour_mode && $contour_algorithm)
 		{
 		printf FCMD "-Z$contour_algorithm \\\n\t";
@@ -1997,8 +2021,8 @@ for ($i = 0; $i < scalar(@xyfiles); $i++)
 	printf FCMD "#\n# Make xy data plot\n";
 	printf FCMD "echo Running psxy...\n";
 	printf FCMD "psxy $xyfiles[$i] \\\n\t";
-	printf FCMD "-J$projection$projection_pars \\\n\t";
-	printf FCMD "-R$bounds_plot \\\n\t";
+	printf FCMD "-J\$MAP_PROJECTION\$MAP_SCALE \\\n\t";
+	printf FCMD "-R\$MAP_REGION \\\n\t";
 	if ($xyfills[$i] ne "N")
 		{
 		printf FCMD "-G$xyfills[$i] \\\n\t";
@@ -2031,7 +2055,7 @@ if ($color_mode && $color_pallette < 5)
 	{
 	printf FCMD "#\n# Make color scale\n";
 	printf FCMD "echo Running psscale...\n";
-	printf FCMD "psscale -C$cptfile \\\n\t";
+	printf FCMD "psscale -C\$CPT_FILE \\\n\t";
 	printf FCMD "-D%.4f/%.4f/%.4f/%.4f%s \\\n\t", 
 		$colorscale_offx,$colorscale_offy,
 		$colorscale_length,$colorscale_thick, 
@@ -2049,8 +2073,8 @@ if (@text)
 	{
 	printf FCMD "#\n# Make text labels\n";
 	printf FCMD "echo Running pstext...\n";
-	printf FCMD "pstext -J$projection$projection_pars \\\n\t";
-	printf FCMD "-R$bounds_plot \\\n\t";
+	printf FCMD "pstext -J\$MAP_PROJECTION\$MAP_SCALE \\\n\t";
+	printf FCMD "-R\$MAP_REGION \\\n\t";
 	printf FCMD "$middle <<EOT\n";
 	foreach $text_info (@text) {
 	    ($tx, $ty, $tsize, $tangle, $font, $just, $txt) = $text_info
@@ -2065,8 +2089,8 @@ if (@text)
 # do psbasemap plot
 printf FCMD "#\n# Make basemap\n";
 printf FCMD "echo Running psbasemap...\n";
-printf FCMD "psbasemap -J$projection$projection_pars \\\n\t";
-printf FCMD "-R$bounds_plot \\\n\t";
+printf FCMD "psbasemap -J\$MAP_PROJECTION\$MAP_SCALE \\\n\t";
+printf FCMD "-R\$MAP_REGION \\\n\t";
 printf FCMD "-B$axes \\\n\t";
 if ($length_scale)
 	{
@@ -2074,7 +2098,7 @@ if ($length_scale)
 	}
 if ($unix_stamp_on && $unix_stamp)
 	{
-	printf FCMD "-U$unix_stamp_on \\\n\t";
+	printf FCMD "-U$unix_stamp \\\n\t";
 	}
 elsif ($unix_stamp_on)
 	{
@@ -2089,16 +2113,16 @@ printf FCMD "$end\n";
 # delete surplus files
 print FCMD "#\n# Delete surplus files\n";
 print FCMD "echo Deleting surplus files...\n";
-print FCMD "rm -f $cptfile\n";
+print FCMD "/bin/rm -f \$CPT_FILE\n";
 if ($format > -1)
 	{
-	print FCMD "rm -f $file_list\n";
+	print FCMD "/bin/rm -f $file_list\n";
 	}
 
 # reset GMT defaults
 print FCMD "#\n# Reset GMT default fonts\n";
 print FCMD "echo Resetting GMT fonts...\n";
-print FCMD "mv $gmtfile .gmtdefaults\n";
+print FCMD "/bin/mv $gmtfile .gmtdefaults\n";
 
 # display image on screen if desired
 print FCMD "#\n# Run $ps_viewer\n";
@@ -2113,12 +2137,12 @@ elsif ($ps_viewer eq "xpsview" && $landscape)
 if ($no_view_ps)
 	{
 	print FCMD "#echo Running $ps_viewer in background...\n";
-	print FCMD "#$ps_viewer $view_pageflag $psfile &\n";
+	print FCMD "#$ps_viewer $view_pageflag \$PS_FILE &\n";
 	}
 else
 	{
 	print FCMD "echo Running $ps_viewer in background...\n";
-	print FCMD "$ps_viewer $view_pageflag $psfile &\n";
+	print FCMD "$ps_viewer $view_pageflag \$PS_FILE &\n";
 	}
 
 # claim it's all over
@@ -2186,7 +2210,11 @@ if ($verbose)
 		{
 		print "    Map distance scale\n";
 		}
-	if ($unix_stamp_on)
+	if ($unix_stamp_on && $unix_stamp)
+		{
+		print "    Unix time stamp: $unix_stamp\n";
+		}
+	elsif ($unix_stamp_on)
 		{
 		print "    Unix time stamp\n";
 		}
