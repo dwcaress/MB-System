@@ -1,0 +1,61 @@
+#     The MB-system:	Makefile.template  1/12/98
+#	$Id: Makefile.template,v 4.0 1998-10-04 04:30:25 caress Exp $
+#
+#     Copyright (c) 1998 by 
+#     D. W. Caress (caress@lamont.ldgo.columbia.edu)
+#     and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
+#     Lamont-Doherty Earth Observatory
+#     Palisades, NY  10964
+#
+#     See README file for copying and redistribution conditions.
+#
+# Makefile template for MB-system at the src/mbio directory level
+# Author:	D. W. Caress
+# Date:		January 12, 1998
+#
+# $Log: not supported by cvs2svn $
+#
+#
+
+# *** CHANGE THESE TO FIT YOUR LOCAL ENVIRONMENT ***
+# 
+# Compilers 
+# C compiler left as default
+#
+# Compile and load flags:
+CFLAGS = -g -DIRIX
+ARCHIVE = ar rcv
+#
+# *** LEAVE EVERYTHING ELSE BELOW ALONE ***
+
+LIBDIR = ../../lib
+INCDIR = ../../include
+MANDIR = ../../man/manl
+
+### make all makes the gsf library, man page, and associated include files
+all:	$(LIBDIR)/libgsf.a \
+	$(INCDIR)/gsf.h $(INCDIR)/gsf.h 
+
+### make clean removes the object files
+clean:
+	rm -f *.o
+
+### put together the library
+$(LIBDIR)/libgsf.a:	gsf.o gsf_dec.o gsf_enc.o gsf_indx.o
+	$(ARCHIVE) $(LIBDIR)/libgsf.a \
+		gsf.o gsf_dec.o gsf_enc.o gsf_indx.o
+
+### compile the source files
+gsf.o:      gsf.c $(INCDIR)/gsf.h gsf_dec.h gsf_enc.h gsf_ft.h gsf_indx.h
+	$(CC) -c $(CFLAGS) gsf.c
+gsf_dec.o:  gsf_dec.c $(INCDIR)/gsf.h gsf_dec.h gsf_enc.h gsf_ft.h gsf_indx.h
+	$(CC) -c $(CFLAGS) gsf_dec.c
+gsf_enc.o:  gsf_enc.c $(INCDIR)/gsf.h gsf_dec.h gsf_enc.h gsf_ft.h gsf_indx.h
+	$(CC) -c $(CFLAGS) gsf_enc.c
+gsf_indx.o: gsf_indx.c $(INCDIR)/gsf.h gsf_dec.h gsf_enc.h gsf_ft.h gsf_indx.h
+	$(CC) -c $(CFLAGS) gsf_indx.c
+
+### copy the include files to the include file directory
+$(INCDIR)/gsf.h:	gsf.h
+	cp gsf.h $(INCDIR)/gsf.h
+	chmod 664 $(INCDIR)/gsf.h
