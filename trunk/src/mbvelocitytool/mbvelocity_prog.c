@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:    mbvelocitytool.c        6/6/93
- *    $Id: mbvelocity_prog.c,v 5.10 2002-07-25 19:06:27 caress Exp $ 
+ *    $Id: mbvelocity_prog.c,v 5.11 2002-08-21 00:51:54 caress Exp $ 
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:        June 6, 1993 
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.10  2002/07/25 19:06:27  caress
+ * Release 5.0.beta21
+ *
  * Revision 5.9  2002/07/20 20:46:57  caress
  * Release 5.0.beta20
  *
@@ -217,7 +220,7 @@ struct mbvt_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbvelocity_prog.c,v 5.10 2002-07-25 19:06:27 caress Exp $";
+static char rcs_id[] = "$Id: mbvelocity_prog.c,v 5.11 2002-08-21 00:51:54 caress Exp $";
 static char program_name[] = "MBVELOCITYTOOL";
 static char help_message[] = "MBVELOCITYTOOL is an interactive water velocity profile editor  \nused to examine multiple water velocity profiles and to create  \nnew water velocity profiles which can be used for the processing  \nof multibeam sonar data.  In general, this tool is used to  \nexamine water velocity profiles obtained from XBTs, CTDs, or  \ndatabases, and to construct new profiles consistent with these  \nvarious sources of information.";
 static char usage_message[] = "mbvelocitytool [-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ssvpfile -Wsvpfile -V -H]";
@@ -511,17 +514,15 @@ int mbvt_init(int argc, char **argv)
 		}
 
 	/* if files specified then use them at startup */
-	if (strlen(wfile) > 0)
+	if (strlen(wfile) > 0
+		|| strlen(sfile) > 0
+		|| strlen(ifile) > 0)
 		{
-		status = mbvt_open_edit_profile(wfile);
-		}
-	if (strlen(sfile) > 0)
-		{
-		status = mbvt_open_display_profile(sfile);
-		}
-	if (strlen(ifile) > 0)
-		{
-		do_open_commandline(ifile, format);
+	    	if (format == 0 && strlen(ifile) > 0)
+			mb_get_format(verbose,ifile,NULL,&format,&error);
+fprintf(stderr,"calling do_open_commandline: <%s> <%s> <%s> <%d>\n",
+wfile, sfile, ifile, format);
+		do_open_commandline(wfile, sfile, ifile, format);
 		}
 
 	/* print output debug statements */
@@ -2945,7 +2946,6 @@ int mbvt_deallocate_swath()
 			{
 			if (ping[i].allocated > 0 && ping[i].allocated != 60)
 			    {
-fprintf(stderr, "Freeing ping: ping[%d].allocated:%d\n",  i, ping[i].allocated);
 			    ping[i].allocated = 0;
 			    free(ping[i].beamflag);
 			    free(ping[i].bath);
