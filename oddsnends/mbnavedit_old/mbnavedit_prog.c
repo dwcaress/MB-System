@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_prog.c	6/23/95
- *    $Id: mbnavedit_prog.c,v 4.10 1997-09-15 19:10:20 caress Exp $
+ *    $Id: mbnavedit_prog.c,v 4.11 1998-10-09 18:43:08 caress Exp $
  *
  *    Copyright (c) 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,9 @@
  * Date:	June 23,  1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.10  1997/09/15  19:10:20  caress
+ * Real Version 4.5
+ *
  * Revision 4.9  1997/04/22  19:25:57  caress
  * Fixed startup mode.
  *
@@ -66,6 +69,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
+#include <time.h>
 
 /* MBIO include files */
 #include "mb_format.h"
@@ -133,7 +137,7 @@ struct mbnavedit_plot_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbnavedit_prog.c,v 4.10 1997-09-15 19:10:20 caress Exp $";
+static char rcs_id[] = "$Id: mbnavedit_prog.c,v 4.11 1998-10-09 18:43:08 caress Exp $";
 static char program_name[] = "MBNAVEDIT";
 static char help_message[] =  "MBNAVEDIT is an interactive navigation editor for swath sonar data.\n\tIt can work with any data format supported by the MBIO library.\n";
 static char usage_message[] = "mbnavedit [-Byr/mo/da/hr/mn/sc -D  -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ooutfile -V -H]";
@@ -172,6 +176,7 @@ double	distance;
 int	nbath;
 int	namp;
 int	nss;
+char		*beamflag = NULL;
 double	*bath = NULL;
 double	*bathacrosstrack = NULL;
 double	*bathalongtrack = NULL;
@@ -411,7 +416,7 @@ int	*startup_file;
 		}
 
 	/* print starting message */
-	if (verbose == 1)
+	if (verbose == 1 || help)
 		{
 		fprintf(stderr,"\nProgram %s\n",program_name);
 		fprintf(stderr,"Version %s\n",rcs_id);
@@ -498,7 +503,7 @@ int	*pixels;
 		fprintf(stderr,"dbg2       ncolors:      %d\n",ncol);
 		for (i=0;i<ncol;i++)
 			fprintf(stderr,"dbg2       pixel[%d]:     %d\n",
-				pixels[i]);
+				i, pixels[i]);
 		}
 
 	/* set graphics id */
@@ -620,7 +625,7 @@ int mbnavedit_open_file()
 	int	i;
 
 	/* time, user, host variables */
-	long int	right_now;
+	time_t	right_now;
 	char	date[25], user[128], *user_ptr, host[128];
 
 	/* print input debug statements */
@@ -716,6 +721,7 @@ int mbnavedit_open_file()
 		ombio_ptr = NULL;
 
 	/* allocate memory for data arrays */
+	status = mb_malloc(verbose,beams_bath*sizeof(char),&beamflag,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&bath,&error);
 	status = mb_malloc(verbose,beams_amp*sizeof(double),&amp,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),
@@ -754,27 +760,14 @@ int mbnavedit_open_file()
 		strncpy(comment,"\0",256);
 		sprintf(comment,"Navigation data edited interactively using program %s version %s",
 			program_name,rcs_id);
-		status = mb_put(verbose,ombio_ptr,kind,
-			time_i,time_d,
-			navlon,navlat,speed,heading,
-			beams_bath,beams_amp,pixels_ss,
-			bath,amp,bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,&error);
+		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		if (error == MB_ERROR_NO_ERROR) ocomment++;
 		strncpy(comment,"\0",256);
 		sprintf(comment,"MB-system Version %s",MB_VERSION);
-		status = mb_put(verbose,ombio_ptr,kind,
-			time_i,time_d,
-			navlon,navlat,speed,heading,
-			beams_bath,beams_amp,pixels_ss,
-			bath,amp,bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,&error);
+		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		if (error == MB_ERROR_NO_ERROR) ocomment++;
-		right_now = time((long *)0);
 		strncpy(date,"\0",25);
-		right_now = time((long *)0);
+		right_now = time((time_t *)0);
 		strncpy(date,ctime(&right_now),24);
 		if ((user_ptr = getenv("USER")) == NULL)
 			user_ptr = getenv("LOGNAME");
@@ -786,63 +779,27 @@ int mbnavedit_open_file()
 		strncpy(comment,"\0",256);
 		sprintf(comment,"Run by user <%s> on cpu <%s> at <%s>",
 			user,host,date);
-		status = mb_put(verbose,ombio_ptr,kind,
-			time_i,time_d,
-			navlon,navlat,speed,heading,
-			beams_bath,beams_amp,pixels_ss,
-			bath,amp,bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,&error);
+		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		if (error == MB_ERROR_NO_ERROR) ocomment++;
 		strncpy(comment,"\0",256);
 		sprintf(comment,"Control Parameters:");
-		status = mb_put(verbose,ombio_ptr,kind,
-			time_i,time_d,
-			navlon,navlat,speed,heading,
-			beams_bath,beams_amp,pixels_ss,
-			bath,amp,bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,&error);
+		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		if (error == MB_ERROR_NO_ERROR) ocomment++;
 		strncpy(comment,"\0",256);
 		sprintf(comment,"  MBIO data format:   %d",format);
-		status = mb_put(verbose,ombio_ptr,kind,
-			time_i,time_d,
-			navlon,navlat,speed,heading,
-			beams_bath,beams_amp,pixels_ss,
-			bath,amp,bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,&error);
+		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		if (error == MB_ERROR_NO_ERROR) ocomment++;
 		strncpy(comment,"\0",256);
 		sprintf(comment,"  Input file:         %s",ifile);
-		status = mb_put(verbose,ombio_ptr,kind,
-			time_i,time_d,
-			navlon,navlat,speed,heading,
-			beams_bath,beams_amp,pixels_ss,
-			bath,amp,bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,&error);
+		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		if (error == MB_ERROR_NO_ERROR) ocomment++;
 		strncpy(comment,"\0",256);
 		sprintf(comment,"  Output file:        %s",ofile);
-		status = mb_put(verbose,ombio_ptr,kind,
-			time_i,time_d,
-			navlon,navlat,speed,heading,
-			beams_bath,beams_amp,pixels_ss,
-			bath,amp,bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,&error);
+		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		if (error == MB_ERROR_NO_ERROR) ocomment++;
 		strncpy(comment,"\0",256);
 		sprintf(comment," ");
-		status = mb_put(verbose,ombio_ptr,kind,
-			time_i,time_d,
-			navlon,navlat,speed,heading,
-			beams_bath,beams_amp,pixels_ss,
-			bath,amp,bathacrosstrack,bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
-			comment,&error);
+		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		if (error == MB_ERROR_NO_ERROR) ocomment++;
 		}
 
@@ -893,6 +850,7 @@ int mbnavedit_close_file()
 	ofile_defined = MB_NO;
 
 	/* deallocate memory for data arrays */
+	mb_free(verbose,&beamflag,&error);
 	mb_free(verbose,&bath,&error);
 	mb_free(verbose,&amp,&error);
 	mb_free(verbose,&bathacrosstrack,&error);
@@ -3312,7 +3270,7 @@ int mbnavedit_plot_all()
 		fprintf(stderr,"\n%d data records set for plotting (%d desired)\n",
 			nplot,data_show_size);
 		for (i=current_id;i<current_id+nplot;i++)
-			fprintf(stderr,"dbg5       %4d %4d %4d  %d/%d/%d %2.2d:%2.2d:%2.2d.%6.6d  %11.6f %11.6f %5.2f %5.1f\n",
+			fprintf(stderr,"dbg5       %4d %4d %4d  %d/%d/%d %2.2d:%2.2d:%2.2d.%6.6d  %11.6f %11.6f %5.2f %5.1f %5.1f %5.1f %5.1f\n",
 				i,ping[i].id,ping[i].record,
 				ping[i].time_i[1],ping[i].time_i[2],
 				ping[i].time_i[0],ping[i].time_i[3],
