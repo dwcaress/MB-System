@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	4/8/93
- *    $Id: mbedit_prog.c,v 4.0 1994-10-21 11:55:41 caress Exp $
+ *    $Id: mbedit_prog.c,v 4.1 1994-11-24 01:52:07 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -24,6 +24,9 @@
  * Date:	April 8, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/10/21  11:55:41  caress
+ * Release V4.0
+ *
  * Revision 1.1  1994/07/14  21:21:54  brockda
  * Initial revision
  *
@@ -103,7 +106,7 @@ struct mbedit_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbedit_prog.c,v 4.0 1994-10-21 11:55:41 caress Exp $";
+static char rcs_id[] = "$Id: mbedit_prog.c,v 4.1 1994-11-24 01:52:07 caress Exp $";
 static char program_name[] = "MBEDIT";
 static char help_message[] =  "MBEDIT is an interactive beam editor for multibeam bathymetry data.\n\tIt can work with any data format supported by the MBIO library.\n\tThis version uses the XVIEW toolkit and has been developed using\n\tthe DEVGUIDE package.  A future version will employ the MOTIF\n\ttoolkit for greater portability.  This file contains the code \n\tthat does not directly depend on the XVIEW interface - the companion \n\tfile mbedit_stubs.c contains the user interface related code.";
 static char usage_message[] = "mbedit [-Fformat -Ifile -Ooutfile -V -H]";
@@ -194,6 +197,7 @@ int	y_interval = 250;
 int	beam_save = MB_NO;
 int	iping_save = 0;
 int	jbeam_save = 0;
+double	*bathlist;
 
 /* color control values */
 #define	WHITE	0	
@@ -2086,6 +2090,8 @@ int	form;
 		status = mb_malloc(verbose,beams_bath*sizeof(int),
 			&ping[i].bath_y,&error);
 		}
+	status = mb_malloc(verbose,beams_bath*MBEDIT_MAX_PINGS*sizeof(double),
+			&bathlist,&error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
@@ -2256,6 +2262,7 @@ int mbedit_close_file()
 		mb_free(verbose,&ping[i].bath_x,&error);
 		mb_free(verbose,&ping[i].bath_y,&error);
 		}
+	mb_free(verbose, &bathlist, &error);
 
 	/* check memory */
 	if (verbose >= 4)
@@ -2516,8 +2523,8 @@ int	*nplt;
 	int	status = MB_SUCCESS;
 	int	i, j, k, ii;
 	int	jbeam_cen;
-	int	nbathsum;
-	double	bathsum, bathmean;
+	int	nbathsum,  nbathlist;
+	double	bathsum, bathmean, bathmedian;
 	double	dxscale, dyscale;
 	double	exager;
 	int	xmin, xmax, ymin, ymax;
@@ -2558,9 +2565,11 @@ int	*nplt;
 	else
 		nplot = plot_size;
 	*nplt = nplot;
+
 	/* get data into ping arrays and find mean depth value */
 	bathsum = 0.0;
 	nbathsum = 0;
+	nbathlist = 0;
 	ii = current;
 	for (i=0;i<nplot;i++)
 		{
@@ -2583,6 +2592,8 @@ int	*nplt;
 					{
 					bathsum += ping[i].bath[j];
 					nbathsum++;
+					bathlist[nbathlist] = ping[i].bath[j];
+					nbathlist++;
 					}
 				}
 			}
@@ -2590,9 +2601,14 @@ int	*nplt;
 		}
 	if (nbathsum > 0)
 		bathmean = bathsum/nbathsum;
+	if (nbathlist > 0)
+		{
+		sort(nbathlist, bathlist);
+		bathmedian = bathlist[nbathlist/2];
+		}
 
 	/* print out information */
-	jbeam_cen = beams_bath/2;
+	jbeam_cen = beams_bath/2;    
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\n%d data records set for plotting (%d desired)\n",
@@ -2720,7 +2736,7 @@ int	*nplt;
 					+ dxscale*ping[i].bathacrosstrack[j];
 				ping[i].bath_y[j] = y + dyscale*
 					(fabs((double)ping[i].bath[j]) 
-					- bathmean);
+					- bathmedian);
 				}
 			else
 				{
@@ -3168,6 +3184,47 @@ int	*nplt;
 	/* return */
 	return(status);
 }
+/*--------------------------------------------------------------------*/
+/* 	function sort sorts the data.  
+ *	Uses the shell method from Numerical Recipes.
+ */
+#define ALN2I 1.442695022
+#define TINY 1.0e-5
+int sort(n,r)
+int	n;
+double *r;
+{
+	int	status = MB_SUCCESS;
+	int	nn, m, j, i, lognb2;
+	double	tr;
+
+	if (n <= 0) 
+		{
+		status = MB_FAILURE;
+		return(status);
+		}
+
+	lognb2 = (log((double) n)*ALN2I + TINY);
+	m = n;
+	for (nn=1;nn<=lognb2;nn++)
+		{
+		m >>= 1;
+		for (j=m+1;j<=n;j++)
+			{
+			i = j - m;
+			tr = r[j];
+			while (i >= 1 && r[i] > tr)
+				{
+				r[i+m] = r[i];
+				i -= m;
+				}
+			r[i+m] = tr;
+			}
+		}
+
+	return(status);
+}
+/*--------------------------------------------------------------------*/
 
 /*********************************************************************/
 /* END OF "mbedit_prog.c" FILE.                                      */
