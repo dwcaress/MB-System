@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbinfo.c	2/1/93
- *    $Id: mbinfo.c,v 4.11 1995-05-12 17:12:32 caress Exp $
+ *    $Id: mbinfo.c,v 4.12 1995-07-18 17:14:55 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -24,6 +24,10 @@
  * Date:	February 1, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.11  1995/05/12  17:12:32  caress
+ * Made exit status values consistent with Unix convention.
+ * 0: ok  nonzero: error
+ *
  * Revision 4.10  1995/05/08  21:32:34  caress
  * Fixed ability to read from stdin.
  *
@@ -118,7 +122,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbinfo.c,v 4.11 1995-05-12 17:12:32 caress Exp $";
+	static char rcs_id[] = "$Id: mbinfo.c,v 4.12 1995-07-18 17:14:55 caress Exp $";
 	static char program_name[] = "MBINFO";
 	static char help_message[] =  "MBINFO reads a multibeam data file and outputs \nsome basic statistics.  If pings are averaged (pings > 2) \nMBINFO estimates the variance for each of the multibeam \nbeams by reading a set number of pings (>2) and then finding \nthe variance of the detrended values for each beam. \nThe results are dumped to stdout.";
 	static char usage_message[] = "mbinfo [-Byr/mo/da/hr/mn/sc -C -Eyr/mo/da/hr/mn/sc -Fformat -Ifile -Llonflip -Ppings -Rw/e/s/n -Sspeed -V -H]";
@@ -178,7 +182,12 @@ char **argv;
 	double	*sslat = NULL;
 	char	comment[256];
 	int	icomment = 0;
+
+	/* mbinfo control parameters */
 	int	comments = MB_NO;
+	int	good_nav_only = MB_NO;
+	int	good_nav;
+	double	speed_threshold = 50.0;
 
 	/* limit variables */
 	double	lonmin = 0.0;
@@ -229,9 +238,10 @@ char **argv;
 	double	ngs_percent;
 	double	nzs_percent;
 	double	nfs_percent;
-	int	beginbath = 0;
-	int	beginamp = 0;
-	int	beginss = 0;
+	int	beginnav = MB_NO;
+	int	beginbath = MB_NO;
+	int	beginamp = MB_NO;
+	int	beginss = MB_NO;
 	int	nread = 0;
 
 	/* variance finding variables */
@@ -256,6 +266,7 @@ char **argv;
 
 	int	read_data;
 	char	line[128];
+	double	speed_apparent, time_d_last;
 	int i, j, k, l, m;
 
 	char	*getenv();
@@ -274,7 +285,7 @@ char **argv;
 	strcpy (read_file, "stdin");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhF:f:P:p:L:l:R:r:B:b:E:e:S:s:T:t:I:i:Cc")) != -1)
+	while ((c = getopt(argc, argv, "VvHhB:b:CcE:e:F:f:GgI:i:L:l:P:p:R:r:S:s:T:t:")) != -1)
 	  switch (c) 
 		{
 		case 'B':
@@ -301,6 +312,11 @@ char **argv;
 		case 'F':
 		case 'f':
 			sscanf (optarg,"%d", &format);
+			flag++;
+			break;
+		case 'G':
+		case 'g':
+			good_nav_only = MB_YES;
 			flag++;
 			break;
 		case 'H':
@@ -406,6 +422,7 @@ char **argv;
 		fprintf(output,"dbg2       etime_i[6]: %d\n",etime_i[6]);
 		fprintf(output,"dbg2       speedmin:   %f\n",speedmin);
 		fprintf(output,"dbg2       timegap:    %f\n",timegap);
+		fprintf(output,"dbg2       good_nav:   %d\n",good_nav_only);
 		fprintf(output,"dbg2       comments:   %d\n",comments);
 		fprintf(output,"dbg2       file:       %s\n",read_file);
 		}
@@ -667,12 +684,9 @@ char **argv;
 			if (error == MB_ERROR_NO_ERROR 
 				|| error == MB_ERROR_TIME_GAP)
 				{
+				/* get beginning values */
 				if (irec == 1)
 					{
-					lonmin = navlon;
-					lonmax = navlon;
-					latmin = navlat;
-					latmax = navlat;
 					if (beams_bath > 0)
 						bathbeg = bath[beams_bath/2];
 					lonbeg = navlon;
@@ -685,44 +699,95 @@ char **argv;
 					}
 				if (irec == 2 && spdbeg <= 0.0)
 					spdbeg = speed;
-				if (beginbath == 0 && beams_bath > 0)
+
+				/* reset ending values each time */
+				if (beams_bath > 0)
+					bathend = bath[beams_bath/2];
+				lonend = navlon;
+				latend = navlat;
+				spdend = speed;
+				hdgend = heading;
+				timend = time_d;
+				for (i=0;i<7;i++)
+					timend_i[i] = time_i[i];
+
+				/* check for good nav */
+				speed_apparent = 3600.0*distance
+					/(time_d - time_d_last);
+				if (good_nav_only == MB_YES)
+					{
+					if (navlon == 0.0 || navlat == 0.0)
+					    good_nav = MB_NO;
+					else if (beginnav == MB_YES
+					    && speed_apparent >= speed_threshold)
+					    good_nav = MB_NO;
+					else
+					    good_nav = MB_YES;
+					}
+				else
+					good_nav = MB_YES;
+
+				/* get total distance */
+				if (good_nav_only == MB_NO ||
+					(good_nav == MB_YES 
+					&& speed_apparent < speed_threshold))
+					distot = distot + distance;
+
+				/* get starting mins and maxs */
+				if (beginnav == MB_NO && good_nav == MB_YES) 
+					{
+					lonmin = navlon;
+					lonmax = navlon;
+					latmin = navlat;
+					latmax = navlat;
+					beginnav = MB_YES;
+					}
+				if (beginbath == MB_NO && beams_bath > 0)
 					for (i=0;i<beams_bath;i++)
 						if (bath[i] > 0.0)
 							{
 							bathmin = bath[i];
 							bathmax = bath[i];
-							beginbath = 1;
+							beginbath = MB_YES;
 							}
-				if (beginamp == 0 && beams_amp > 0)
+				if (beginamp == MB_NO && beams_amp > 0)
 					for (i=0;i<beams_amp;i++)
 						if (amp[i] > 0.0)
 							{
 							ampmin = amp[i];
 							ampmax = amp[i];
-							beginamp = 1;
+							beginamp = MB_YES;
 							}
-				if (beginss == 0 && pixels_ss > 0)
+				if (beginss == MB_NO && pixels_ss > 0)
 					for (i=0;i<pixels_ss;i++)
 						if (ss[i] > 0.0)
 							{
 							ssmin = ss[i];
 							ssmax = ss[i];
-							beginss = 1;
+							beginss = MB_YES;
 							}
-				lonmin = min(lonmin, navlon);
-				lonmax = max(lonmax, navlon);
-				latmin = min(latmin, navlat);
-				latmax = max(latmax, navlat);
+
+				/* get mins and maxs */
+				if (good_nav == MB_YES && beginnav == MB_YES)
+					{
+					lonmin = min(lonmin, navlon);
+					lonmax = max(lonmax, navlon);
+					latmin = min(latmin, navlat);
+					latmax = max(latmax, navlat);
+					}
 				for (i=0;i<beams_bath;i++)
 					{
 					if (bath[i] > 0.0)
 						{
+						if (good_nav == MB_YES && beginnav == MB_YES)
+							{
+							lonmin = min(lonmin, bathlon[i]);
+							lonmax = max(lonmax, bathlon[i]);
+							latmin = min(latmin, bathlat[i]);
+							latmax = max(latmax, bathlat[i]);
+							}
 						bathmin = min(bathmin, bath[i]);
 						bathmax = max(bathmax, bath[i]);
-						lonmin = min(lonmin, bathlon[i]);
-						lonmax = max(lonmax, bathlon[i]);
-						latmin = min(latmin, bathlat[i]);
-						latmax = max(latmax, bathlat[i]);
 						ngdbeams++;
 						}
 					else if (bath[i] == 0.0)
@@ -747,12 +812,15 @@ char **argv;
 					{
 					if (ss[i] > 0.0)
 						{
+						if (good_nav == MB_YES && beginnav == MB_YES)
+							{
+							lonmin = min(lonmin, sslon[i]);
+							lonmax = max(lonmax, sslon[i]);
+							latmin = min(latmin, sslat[i]);
+							latmax = max(latmax, sslat[i]);
+							}
 						ssmin = min(ssmin, ss[i]);
 						ssmax = max(ssmax, ss[i]);
-						lonmin = min(lonmin, sslon[i]);
-						lonmax = max(lonmax, sslon[i]);
-						latmin = min(latmin, sslat[i]);
-						latmax = max(latmax, sslat[i]);
 						ngsbeams++;
 						}
 					else if (ss[i] == 0.0)
@@ -760,16 +828,9 @@ char **argv;
 					else
 						nfsbeams++;
 					}
-				distot = distot + distance;
-				if (beams_bath > 0)
-					bathend = bath[beams_bath/2];
-				lonend = navlon;
-				latend = navlat;
-				spdend = speed;
-				hdgend = heading;
-				timend = time_d;
-				for (i=0;i<7;i++)
-					timend_i[i] = time_i[i];
+
+				/* reset time of last ping */
+				time_d_last = time_d;
 				}
 			}
 
@@ -1058,7 +1119,8 @@ char **argv;
 	fprintf(output,"\nNavigation Totals:\n");
 	fprintf(output,"Total Time:         %10.4f hours\n",timtot);
 	fprintf(output,"Total Track Length: %10.4f km\n",distot);
-	fprintf(output,"Average Speed:      %10.4f km/hr (%7.4f knots)\n",spdavg,spdavg/1.85);
+	fprintf(output,"Average Speed:      %10.4f km/hr (%7.4f knots)\n",
+		spdavg,spdavg/1.85);
 	fprintf(output,"\nStart of Data:\n");
 	fprintf(output,"Time:  %2.2d %2.2d %4.4d %2.2d:%2.2d:%2.2d.%6.6d  JD%d\n",
 		timbeg_i[1],timbeg_i[2],timbeg_i[0],timbeg_i[3],
