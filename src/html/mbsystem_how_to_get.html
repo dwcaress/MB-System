@@ -105,11 +105,19 @@ installation section.</LI>
 
 <P>MB-System produces Postscript based graphics. Most current Unix operating
 systems provide a program which serves as a screen-based Postscript viewer.
-If you do not have a Postscript viewer, one option is to obtain the Ghostscript
-package from the Free Software Foundation.</P>
+If you do not have a Postscript viewer, one option is to obtain one of several Ghostscript-based
+packages from the Free Software Foundation.</P>
 
 <UL>
-<LI><B>Ghostview</B>:&nbsp;&quot;Free&quot; screen Postscript viewer. The
+<LI><B>ghostview</B>:&nbsp;Open source screen Postscript viewer. The
+source code can be obtained from the <A HREF="http://www.gnu.org/directory">GNU
+software archives</A> of the <A HREF="http://www.gnu.org">Free Software
+Foundation</A>.</LI>
+</UL>
+
+<UL>
+<LI><B>gv</B>:&nbsp;Open source screen Postscript viewer. This package is a bit more 
+sophisticated than ghostview and can handle poster-sized plots. The
 source code can be obtained from the <A HREF="http://www.gnu.org/directory">GNU
 software archives</A> of the <A HREF="http://www.gnu.org">Free Software
 Foundation</A>.</LI>
@@ -129,8 +137,14 @@ file and then running tar:</P>
 <PRE>% tar xvf MB-System.tar</PRE>
 </UL>
 
-<P>This will create a directory structure called mbsystem. In order to
-configure your installation, you must edit the shellscript mbsystem/install_makefiles.
+<P>This will create a directory called (for the 5.0.0 distribution): </P>
+
+<UL>
+<PRE>mbsystem-5.0.0</PRE>
+</UL>
+
+<P>In order to
+configure your installation, you must edit the shellscript mbsystem-5.0.0/install_makefiles.
 This is perl script will read template makefiles in the MB-System source
 directories and create makefiles with the correct attributes. This enables
 users to install MB-System without having to edit the makefiles. Instead
@@ -185,7 +199,7 @@ Sun, SGI, PC) are included in the comments in install_makefiles. To execute
 install_makefiles, do the following:</P>
 
 <UL>
-<PRE>% cd mbsystem </PRE>
+<PRE>% cd mbsystem-5.0.0 </PRE>
 <PRE>% install_makefiles</PRE>
 </UL>
 
@@ -201,8 +215,8 @@ executable programs:</P>
 <P>The make command will descend recursively down through the directory
 structure, compiling source files, linking object files, and copying executables
 and manual pages to the appropriate directories. The executables will be
-placed in mbsystem/bin, the libraries in mbsystem/lib, and the manual pages
-in mbsystem/man/man1.</P>
+placed in mbsystem-5.0.0/bin, the libraries in mbsystem-5.0.0/lib, and the manual pages
+in mbsystem-5.0.0/man/man1.</P>
 
 <P>Naturally, in order for users to use the MB-System utilities, the directory
 containing the executables must be included in their path (usually this
@@ -215,11 +229,11 @@ to view Postscript plots on their screen. This parameter can be set either
 with the mbdefaults program or using the PS_VIEWER environment variable
 - the former is recommended (see the mbdefaults manual page for details).
 On Sun workstations pageview is a popular Postscript viewer; on Silicon
-Graphics machines xpsview is commonly used. A popular generic alternative
-to these platform specific programs is ghostview.</P>
+Graphics machines xpsview is commonly used. Popular open source alternatives
+to these platform specific programs include ghostview and gv.</P>
 
 <CENTER><P><BR>
-Last Updated: $Date: 2003-07-02 19:53:51 $ $Revision: 5.9 $</P></CENTER>
+Last Updated: $Date: 2003-07-11 07:34:31 $ $Revision: 5.10 $</P></CENTER>
 
 <P>
 <HR WIDTH="67%"></P>
