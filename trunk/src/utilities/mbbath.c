@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbbath.c	3/31/93
- *    $Id: mbbath.c,v 4.4 1994-07-29 19:02:56 caress Exp $
+ *    $Id: mbbath.c,v 4.5 1994-10-21 13:02:31 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -20,6 +20,10 @@
  * Date:	March 31, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.4  1994/07/29  19:02:56  caress
+ * Changes associated with supporting byte swapped Lynx OS and
+ * using unix second time base.
+ *
  * Revision 4.3  1994/04/12  18:58:00  caress
  * Fixed fprintf statements on lines 689 and 691.
  *
@@ -94,7 +98,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbbath.c,v 4.4 1994-07-29 19:02:56 caress Exp $";
+	static char rcs_id[] = "$Id: mbbath.c,v 4.5 1994-10-21 13:02:31 caress Exp $";
 	static char program_name[] = "MBBATH";
 	static char help_message[] =  "MBBATH calculates bathymetry from \
 the travel time data by raytracing \nthrough a layered water velocity \
@@ -118,7 +122,7 @@ and stdout.";
 	int	status = MB_SUCCESS;
 	int	verbose = 0;
 	int	error = MB_ERROR_NO_ERROR;
-	char	*message;
+	char	*message = NULL;
 
 	/* MBIO read and write control parameters */
 	int	format = 0;
@@ -126,8 +130,8 @@ and stdout.";
 	int	pings;
 	int	lonflip;
 	double	bounds[4];
-	int	btime_i[6];
-	int	etime_i[6];
+	int	btime_i[7];
+	int	etime_i[7];
 	double	btime_d;
 	double	etime_d;
 	double	speedmin;
@@ -136,14 +140,14 @@ and stdout.";
 	int	beams_amp;
 	int	pixels_ss;
 	char	ifile[128];
-	char	*imbio_ptr;
+	char	*imbio_ptr = NULL;
 	char	ofile[128];
-	char	*ombio_ptr;
+	char	*ombio_ptr = NULL;
 
 	/* mbio read and write values */
-	char	*store_ptr;
+	char	*store_ptr = NULL;
 	int	kind;
-	int	time_i[6];
+	int	time_i[7];
 	double	time_d;
 	double	navlon;
 	double	navlat;
@@ -153,13 +157,13 @@ and stdout.";
 	int	nbath;
 	int	namp;
 	int	nss;
-	int	*bath;
-	int	*bathacrosstrack;
-	int	*bathalongtrack;
-	int	*amp;
-	int	*ss;
-	int	*ssacrosstrack;
-	int	*ssalongtrack;
+	double	*bath = NULL;
+	double	*bathacrosstrack = NULL;
+	double	*bathalongtrack = NULL;
+	double	*amp = NULL;
+	double	*ss = NULL;
+	double	*ssacrosstrack = NULL;
+	double	*ssalongtrack = NULL;
 	int	idata = 0;
 	int	icomment = 0;
 	int	odata = 0;
@@ -179,37 +183,37 @@ and stdout.";
 	int	uncorrected;
 	FILE	*vfp;
 	int	nvel;
-	double	*vel;
-	double	*velraw;
-	double	*dep;
-	double	*vsum;
+	double	*vel = NULL;
+	double	*velraw = NULL;
+	double	*dep = NULL;
+	double	*vsum = NULL;
 
 	/* roll error correction handling variables */
 	char	rfile[128];
 	int	nroll;
-	double	*roll_time;
-	double	*roll_corr;
+	double	*roll_time = NULL;
+	double	*roll_corr = NULL;
 	double	roll_correction;
 
 	/* static bathymetry correction handling variables */
 	char	sfile[128];
 	int	nbath_corr;
-	int	*bath_corr;
+	double	*bath_corr = NULL;
 
 	/* survey and calibrate ping raytracing arrays */
-	double	*s_angle;
-	double	*s_p;
+	double	*s_angle = NULL;
+	double	*s_p = NULL;
 	double	**s_ttime_tab;
 	double	**s_dist_tab;
-	double	*c_angle;
-	double	*c_p;
+	double	*c_angle = NULL;
+	double	*c_p = NULL;
 	double	**c_ttime_tab;
 	double	**c_dist_tab;
-	double	*ttime;
-	double	*dist;
-	double	*ttimes;
-	double	*angles;
-	int	*flags;
+	double	*ttime = NULL;
+	double	*dist = NULL;
+	double	*ttimes = NULL;
+	double	*angles = NULL;
+	int	*flags = NULL;
 
 	char	buffer[128], tmp[128], *result;
 	int	size;
@@ -242,12 +246,14 @@ and stdout.";
 	btime_i[3] = 10;
 	btime_i[4] = 30;
 	btime_i[5] = 0;
+	btime_i[6] = 0;
 	etime_i[0] = 2062;
 	etime_i[1] = 2;
 	etime_i[2] = 21;
 	etime_i[3] = 10;
 	etime_i[4] = 30;
 	etime_i[5] = 0;
+	etime_i[6] = 0;
 	speedmin = 0.0;
 	timegap = 1000000000.0;
 
@@ -375,12 +381,14 @@ and stdout.";
 		fprintf(stderr,"dbg2       btime_i[3]:      %d\n",btime_i[3]);
 		fprintf(stderr,"dbg2       btime_i[4]:      %d\n",btime_i[4]);
 		fprintf(stderr,"dbg2       btime_i[5]:      %d\n",btime_i[5]);
+		fprintf(stderr,"dbg2       btime_i[6]:      %d\n",btime_i[6]);
 		fprintf(stderr,"dbg2       etime_i[0]:      %d\n",etime_i[0]);
 		fprintf(stderr,"dbg2       etime_i[1]:      %d\n",etime_i[1]);
 		fprintf(stderr,"dbg2       etime_i[2]:      %d\n",etime_i[2]);
 		fprintf(stderr,"dbg2       etime_i[3]:      %d\n",etime_i[3]);
 		fprintf(stderr,"dbg2       etime_i[4]:      %d\n",etime_i[4]);
 		fprintf(stderr,"dbg2       etime_i[5]:      %d\n",etime_i[5]);
+		fprintf(stderr,"dbg2       etime_i[6]:      %d\n",etime_i[6]);
 		fprintf(stderr,"dbg2       speedmin:        %f\n",speedmin);
 		fprintf(stderr,"dbg2       timegap:         %f\n",timegap);
 		fprintf(stderr,"dbg2       input file:      %s\n",ifile);
@@ -614,16 +622,16 @@ and stdout.";
 		}
 
 	/* allocate memory for data arrays */
-	status = mb_malloc(verbose,beams_bath*sizeof(int),&bath,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(int),
+	status = mb_malloc(verbose,beams_bath*sizeof(double),&bath,&error);
+	status = mb_malloc(verbose,beams_bath*sizeof(double),
 				&bathacrosstrack,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(int),
+	status = mb_malloc(verbose,beams_bath*sizeof(double),
 				&bathalongtrack,&error);
-	status = mb_malloc(verbose,beams_amp*sizeof(int),&amp,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(int),&ss,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(int),&ssacrosstrack,
+	status = mb_malloc(verbose,beams_amp*sizeof(double),&amp,&error);
+	status = mb_malloc(verbose,pixels_ss*sizeof(double),&ss,&error);
+	status = mb_malloc(verbose,pixels_ss*sizeof(double),&ssacrosstrack,
 				&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(int),&ssalongtrack,
+	status = mb_malloc(verbose,pixels_ss*sizeof(double),&ssalongtrack,
 				&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&s_angle,&error);
 	status = mb_malloc(verbose,beams_bath*sizeof(double),&s_p,&error);
@@ -670,7 +678,7 @@ and stdout.";
 				program_name);
 			exit(error);
 			}
-		status = mb_malloc(verbose,beams_bath*sizeof(int),&bath_corr,&error);
+		status = mb_malloc(verbose,beams_bath*sizeof(double),&bath_corr,&error);
 		if (error != MB_ERROR_NO_ERROR)
 			{
 			mb_error(verbose,error,message);
@@ -685,8 +693,8 @@ and stdout.";
 			{
 			if (buffer[0] != '#')
 				{
-				sscanf(buffer,"%d %lf",&i,&dummy);
-				bath_corr[nbath_corr] = (int) dummy;
+				sscanf(buffer,"%d %lf",&i,
+					&bath_corr[nbath_corr]);
 				}
 			nbath_corr++;
 			}
@@ -1154,9 +1162,9 @@ and stdout.";
 
 			  /* calculate the depths 
 				and crosstrack distances */ 
-			  bath[i] = 0;
-			  bathacrosstrack[i] = 0;
-			  bathalongtrack[i] = 0;
+			  bath[i] = 0.0;
+			  bathacrosstrack[i] = 0.0;
+			  bathalongtrack[i] = 0.0;
 			  if (ttimes[i] > 0.0)
 				{
 				for (j=0;j<nvel-1;j++)
@@ -1176,8 +1184,8 @@ and stdout.";
 						+ vel[j]*(zz - dep[j]))/zz;
 					  zz = zz*1500./vavg;
 					  }
-					bathalongtrack[i] = (int) (xx + 0.5);
-					bath[i] = (int) (zz + 0.5);
+					bathalongtrack[i] = xx;
+					bath[i] = zz;
 					if (nbath_corr == beams_bath)
 						bath[i] -= bath_corr[i];
 					if (flags[i] == MB_YES)
@@ -1196,8 +1204,8 @@ and stdout.";
 						fprintf(stderr,"dbg5       xx:     %f\n",xx);
 						fprintf(stderr,"dbg5       zz:     %f\n",zz);
 						fprintf(stderr,"dbg5       vavg:   %f\n",vavg);
-						fprintf(stderr,"dbg5       dist:   %d\n",bathalongtrack[i]);
-						fprintf(stderr,"dbg5       depth:  %d\n",bath[i]);
+						fprintf(stderr,"dbg5       dist:   %f\n",bathalongtrack[i]);
+						fprintf(stderr,"dbg5       depth:  %f\n",bath[i]);
 						}
 					}
 				}
@@ -1210,7 +1218,7 @@ and stdout.";
 				fprintf(stderr,"dbg5       kind:  %d\n",kind);
 				fprintf(stderr,"dbg5      beam    time      depth        dist\n");	
 				for (i=0;i<MBSYS_HSDS_BEAMS;i++)
-					fprintf(stderr,"dbg5       %2d   %6.0f   %6d   %6d\n",
+					fprintf(stderr,"dbg5       %2d   %6.0f   %f   %f\n",
 						i,ttimes[i],
 						bath[i],
 						bathalongtrack[i]);
@@ -1242,9 +1250,10 @@ and stdout.";
 				fprintf(stderr,"\nMBIO Error returned from function <mb_put>:\n%s\n",message);
 				fprintf(stderr,"\nMultibeam Data Not Written To File <%s>\n",ofile);
 				fprintf(stderr,"Output Record: %d\n",odata+1);
-				fprintf(stderr,"Time: %d %d %d %d %d %d\n",
+				fprintf(stderr,"Time: %d %d %d %d %d %d %d\n",
 					time_i[0],time_i[1],time_i[2],
-					time_i[3],time_i[4],time_i[5]);
+					time_i[3],time_i[4],time_i[5],
+					time_i[6]);
 				fprintf(stderr,"\nProgram <%s> Terminated\n",
 					program_name);
 				exit(error);
@@ -1253,41 +1262,41 @@ and stdout.";
 		}
 
 	/* close the files */
-	status = mb_close(verbose,imbio_ptr,&error);
-	status = mb_close(verbose,ombio_ptr,&error);
+	status = mb_close(verbose,&imbio_ptr,&error);
+	status = mb_close(verbose,&ombio_ptr,&error);
 
 	/* deallocate memory for data arrays */
-	mb_free(verbose,vel,&error);
-	mb_free(verbose,dep,&error);
-	mb_free(verbose,vsum,&error);
-	mb_free(verbose,roll_time,&error);
-	mb_free(verbose,roll_corr,&error);
-	mb_free(verbose,bath_corr,&error);
-	mb_free(verbose,s_angle,&error);
-	mb_free(verbose,s_p,&error);
-	mb_free(verbose,c_angle,&error);
-	mb_free(verbose,c_p,&error);
+	mb_free(verbose,&vel,&error);
+	mb_free(verbose,&dep,&error);
+	mb_free(verbose,&vsum,&error);
+	mb_free(verbose,&roll_time,&error);
+	mb_free(verbose,&roll_corr,&error);
+	mb_free(verbose,&bath_corr,&error);
+	mb_free(verbose,&s_angle,&error);
+	mb_free(verbose,&s_p,&error);
+	mb_free(verbose,&c_angle,&error);
+	mb_free(verbose,&c_p,&error);
 	for (i=0;i<beams_bath;i++)
 		{
-		mb_free(verbose,s_ttime_tab[i],&error);
-		mb_free(verbose,s_dist_tab[i],&error);
-		mb_free(verbose,c_ttime_tab[i],&error);
-		mb_free(verbose,c_dist_tab[i],&error);
+		mb_free(verbose,&s_ttime_tab[i],&error);
+		mb_free(verbose,&s_dist_tab[i],&error);
+		mb_free(verbose,&c_ttime_tab[i],&error);
+		mb_free(verbose,&c_dist_tab[i],&error);
 		}
-	mb_free(verbose,s_ttime_tab,&error);
-	mb_free(verbose,s_dist_tab,&error);
-	mb_free(verbose,c_ttime_tab,&error);
-	mb_free(verbose,c_dist_tab,&error);
-	mb_free(verbose,ttimes,&error);
-	mb_free(verbose,angles,&error);
-	mb_free(verbose,flags,&error);
-	mb_free(verbose,bath,&error); 
-	mb_free(verbose,bathacrosstrack,&error); 
-	mb_free(verbose,bathalongtrack,&error); 
-	mb_free(verbose,amp,&error); 
-	mb_free(verbose,ss,&error); 
-	mb_free(verbose,ssacrosstrack,&error); 
-	mb_free(verbose,ssalongtrack,&error); 
+	mb_free(verbose,&s_ttime_tab,&error);
+	mb_free(verbose,&s_dist_tab,&error);
+	mb_free(verbose,&c_ttime_tab,&error);
+	mb_free(verbose,&c_dist_tab,&error);
+	mb_free(verbose,&ttimes,&error);
+	mb_free(verbose,&angles,&error);
+	mb_free(verbose,&flags,&error);
+	mb_free(verbose,&bath,&error); 
+	mb_free(verbose,&bathacrosstrack,&error); 
+	mb_free(verbose,&bathalongtrack,&error); 
+	mb_free(verbose,&amp,&error); 
+	mb_free(verbose,&ss,&error); 
+	mb_free(verbose,&ssacrosstrack,&error); 
+	mb_free(verbose,&ssalongtrack,&error); 
 
 	/* check memory */
 	if (verbose >= 4)

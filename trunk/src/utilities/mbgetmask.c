@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgetmask.c	6/15/93
- *    $Id: mbgetmask.c,v 4.1 1994-03-12 01:44:37 caress Exp $
+ *    $Id: mbgetmask.c,v 4.2 1994-10-21 13:02:31 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -23,6 +23,10 @@
  * Date:	June 15, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1994/03/12  01:44:37  caress
+ * Added declarations of ctime and/or getenv for compatability
+ * with SGI compilers.
+ *
  * Revision 4.0  1994/03/06  00:13:22  caress
  * First cut at version 4.0
  *
@@ -54,7 +58,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbgetmask.c,v 4.1 1994-03-12 01:44:37 caress Exp $";
+	static char rcs_id[] = "$Id: mbgetmask.c,v 4.2 1994-10-21 13:02:31 caress Exp $";
 	static char program_name[] = "MBGETMASK";
 	static char help_message[] =  "MBGETMASK reads a multibeam data file and writes out \na data flag mask to stdout which can be applied to other data files \ncontaining the same data (but presumably in a different \nstate of processing).  This allows editing of one data file to \nbe transferred to another with ease.  The program MBMASK is \nused to apply the flag mask to another file. \nThe default input stream is stdin.";
 	static char usage_message[] = "mbgetmask [-Fformat -Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc -Sspeed -Iinfile -V -H]";
@@ -71,15 +75,15 @@ char **argv;
 	int	status;
 	int	verbose = 0;
 	int	error = MB_ERROR_NO_ERROR;
-	char	*message;
+	char	*message = NULL;
 
 	/* MBIO read control parameters */
 	int	format;
 	int	pings;
 	int	lonflip;
 	double	bounds[4];
-	int	btime_i[6];
-	int	etime_i[6];
+	int	btime_i[7];
+	int	etime_i[7];
 	double	btime_d;
 	double	etime_d;
 	double	speedmin;
@@ -88,25 +92,25 @@ char **argv;
 	int	beams_bath;
 	int	beams_amp;
 	int	pixels_ss;
-	char	*imbio_ptr;
+	char	*imbio_ptr = NULL;
 
 	/* mbio read and write values */
 	char	*store_ptr;
 	int	kind;
-	int	time_i[6];
+	int	time_i[7];
 	double	time_d;
 	double	navlon;
 	double	navlat;
 	double	speed;
 	double	heading;
 	double	distance;
-	int	*bath;
-	int	*bathacrosstrack;
-	int	*bathalongtrack;
-	int	*amp;
-	int	*ss;
-	int	*ssacrosstrack;
-	int	*ssalongtrack;
+	double	*bath = NULL;
+	double	*bathacrosstrack = NULL;
+	double	*bathalongtrack = NULL;
+	double	*amp = NULL;
+	double	*ss = NULL;
+	double	*ssacrosstrack = NULL;
+	double	*ssalongtrack = NULL;
 	int	idata = 0;
 	int	icomment = 0;
 	int	omask = 0;
@@ -140,12 +144,14 @@ char **argv;
 	btime_i[3] = 10;
 	btime_i[4] = 30;
 	btime_i[5] = 0;
+	btime_i[6] = 0;
 	etime_i[0] = 2062;
 	etime_i[1] = 2;
 	etime_i[2] = 21;
 	etime_i[3] = 10;
 	etime_i[4] = 30;
 	etime_i[5] = 0;
+	etime_i[6] = 0;
 	speedmin = 0.0;
 	timegap = 1000000000.0;
 
@@ -169,6 +175,7 @@ char **argv;
 			sscanf (optarg,"%d/%d/%d/%d/%d/%d",
 				&btime_i[0],&btime_i[1],&btime_i[2],
 				&btime_i[3],&btime_i[4],&btime_i[5]);
+			btime_i[6] = 0;
 			flag++;
 			break;
 		case 'E':
@@ -176,6 +183,7 @@ char **argv;
 			sscanf (optarg,"%d/%d/%d/%d/%d/%d",
 				&etime_i[0],&etime_i[1],&etime_i[2],
 				&etime_i[3],&etime_i[4],&etime_i[5]);
+			etime_i[6] = 0;
 			flag++;
 			break;
 		case 'S':
@@ -236,12 +244,14 @@ char **argv;
 		fprintf(stderr,"dbg2       btime_i[3]:     %d\n",btime_i[3]);
 		fprintf(stderr,"dbg2       btime_i[4]:     %d\n",btime_i[4]);
 		fprintf(stderr,"dbg2       btime_i[5]:     %d\n",btime_i[5]);
+		fprintf(stderr,"dbg2       btime_i[6]:     %d\n",btime_i[6]);
 		fprintf(stderr,"dbg2       etime_i[0]:     %d\n",etime_i[0]);
 		fprintf(stderr,"dbg2       etime_i[1]:     %d\n",etime_i[1]);
 		fprintf(stderr,"dbg2       etime_i[2]:     %d\n",etime_i[2]);
 		fprintf(stderr,"dbg2       etime_i[3]:     %d\n",etime_i[3]);
 		fprintf(stderr,"dbg2       etime_i[4]:     %d\n",etime_i[4]);
 		fprintf(stderr,"dbg2       etime_i[5]:     %d\n",etime_i[5]);
+		fprintf(stderr,"dbg2       etime_i[6]:     %d\n",etime_i[6]);
 		fprintf(stderr,"dbg2       speedmin:       %f\n",speedmin);
 		fprintf(stderr,"dbg2       timegap:        %f\n",timegap);
 		fprintf(stderr,"dbg2       input file:     %s\n",ifile);
@@ -271,16 +281,16 @@ char **argv;
 		}
 
 	/* allocate memory for data arrays */
-	status = mb_malloc(verbose,beams_bath*sizeof(int),&bath,&error);
-	status = mb_malloc(verbose,beams_amp*sizeof(int),&amp,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(int),
+	status = mb_malloc(verbose,beams_bath*sizeof(double),&bath,&error);
+	status = mb_malloc(verbose,beams_amp*sizeof(double),&amp,&error);
+	status = mb_malloc(verbose,beams_bath*sizeof(double),
 			&bathacrosstrack,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(int),
+	status = mb_malloc(verbose,beams_bath*sizeof(double),
 			&bathalongtrack,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(int),&ss,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(int),
+	status = mb_malloc(verbose,pixels_ss*sizeof(double),&ss,&error);
+	status = mb_malloc(verbose,pixels_ss*sizeof(double),
 			&ssacrosstrack,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(int),
+	status = mb_malloc(verbose,pixels_ss*sizeof(double),
 			&ssalongtrack,&error);
 
 	/* if error initializing memory then quit */
@@ -321,12 +331,12 @@ char **argv;
 	printf("#   Longitude flip:     %d\n",lonflip);
 	printf("#   Longitude bounds:   %f %f\n",bounds[0],bounds[1]);
 	printf("#   Latitude bounds:    %f %f\n",bounds[2],bounds[3]);
-	printf("#   Begin time:         %d %d %d %d %d %d\n",
+	printf("#   Begin time:         %d %d %d %d %d %d.%6.6d\n",
 			btime_i[0],btime_i[1],btime_i[2],
-			btime_i[3],btime_i[4],btime_i[5]);
-	printf("#   End time:           %d %d %d %d %d %d\n",
+			btime_i[3],btime_i[4],btime_i[5],btime_i[6]);
+	printf("#   End time:           %d %d %d %d %d %d.%6.6d\n",
 			etime_i[0],etime_i[1],etime_i[2],
-			etime_i[3],etime_i[4],etime_i[5]);
+			etime_i[3],etime_i[4],etime_i[5],etime_i[6]);
 	printf("#   Minimum speed:      %f\n",speedmin);
 	printf("# \n");
 	printf("%4d %4d\n",beams_bath,beams_amp);
@@ -373,9 +383,9 @@ char **argv;
 			mb_error(verbose,error,&message);
 			fprintf(stderr,"\nNonfatal MBIO Error:\n%s\n",message);
 			fprintf(stderr,"Input Record: %d\n",idata);
-			fprintf(stderr,"Time: %d %d %d %d %d %d\n",
+			fprintf(stderr,"Time: %d %d %d %d %d %d %d\n",
 				time_i[0],time_i[1],time_i[2],
-				time_i[3],time_i[4],time_i[5]);
+				time_i[3],time_i[4],time_i[5],time_i[6]);
 			}
 		else if (verbose >= 1 && error < MB_ERROR_NO_ERROR)
 			{
@@ -388,9 +398,9 @@ char **argv;
 			{
 			mb_error(verbose,error,&message);
 			fprintf(stderr,"\nFatal MBIO Error:\n%s\n",message);
-			fprintf(stderr,"Last Good Time: %d %d %d %d %d %d\n",
+			fprintf(stderr,"Last Good Time: %d %d %d %d %d %d %d\n",
 				time_i[0],time_i[1],time_i[2],
-				time_i[3],time_i[4],time_i[5]);
+				time_i[3],time_i[4],time_i[5],time_i[6]);
 			}
 
 		/* process some data */
@@ -399,11 +409,11 @@ char **argv;
 			&& error == MB_ERROR_NO_ERROR)
 			{
 			omask++;
-			printf("%4d %2d %2d %2d %2d %2d\n",
+			printf("%4d %2d %2d %2d %2d %2d %6.6d\n",
 				time_i[0],time_i[1],time_i[2],
-				time_i[3],time_i[4],time_i[5]);
+				time_i[3],time_i[4],time_i[5],time_i[6]);
 			for (i=0;i<beams_bath;i++)
-				if (bath[i] >= 0)
+				if (bath[i] >= 0.0)
 					printf("1");
 				else
 					{
@@ -412,7 +422,7 @@ char **argv;
 					}
 			printf("\n");
 			for (i=0;i<beams_amp;i++)
-				if (amp[i] >= 0)
+				if (amp[i] >= 0.0)
 					printf("1");
 				else
 					{
@@ -424,16 +434,16 @@ char **argv;
 		}
 
 	/* close the file */
-	status = mb_close(verbose,imbio_ptr,&error);
+	status = mb_close(verbose,&imbio_ptr,&error);
 
 	/* deallocate memory for data arrays */
-	mb_free(verbose,bath,&error); 
-	mb_free(verbose,amp,&error); 
-	mb_free(verbose,bathacrosstrack,&error); 
-	mb_free(verbose,bathalongtrack,&error); 
-	mb_free(verbose,ss,&error); 
-	mb_free(verbose,ssacrosstrack,&error); 
-	mb_free(verbose,ssalongtrack,&error); 
+	mb_free(verbose,&bath,&error); 
+	mb_free(verbose,&amp,&error); 
+	mb_free(verbose,&bathacrosstrack,&error); 
+	mb_free(verbose,&bathalongtrack,&error); 
+	mb_free(verbose,&ss,&error); 
+	mb_free(verbose,&ssacrosstrack,&error); 
+	mb_free(verbose,&ssalongtrack,&error); 
 
 	/* check memory */
 	if (verbose >= 4)

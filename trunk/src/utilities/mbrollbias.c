@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbrollbias.c	5/16/93
- *    $Id: mbrollbias.c,v 4.1 1994-07-29 19:02:56 caress Exp $
+ *    $Id: mbrollbias.c,v 4.2 1994-10-21 13:02:31 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -31,6 +31,10 @@
  * Date:	May 16, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1994/07/29  19:02:56  caress
+ * Changes associated with supporting byte swapped Lynx OS and
+ * using unix second time base.
+ *
  * Revision 4.0  1994/03/06  00:13:22  caress
  * First cut at version 4.0
  *
@@ -77,7 +81,7 @@ struct bathptr
 	};
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbrollbias.c,v 4.1 1994-07-29 19:02:56 caress Exp $";
+static char rcs_id[] = "$Id: mbrollbias.c,v 4.2 1994-10-21 13:02:31 caress Exp $";
 static char program_name[] = "MBROLLBIAS";
 static char help_message[] =  "MBROLLBIAS is an utility used to assess roll bias of multibeam \nsonar systems using bathymetry data from two swaths covering the \nsame seafloor in opposite directions. The program takes two input  \nfiles and calculates best fitting planes for each dataset.   \nThe roll bias is calculated by solving for a common roll bias\nfactor which explains the difference between the seafloor\nslopes observed on the two swaths.  This approach assumes that \npitch bias is not a factor; this assumption is most correct when\nthe heading of the two shiptracks are exactly opposite. The area is\ndivided into a number of rectangular regions and calculations are done  \nin each region containing a sufficient number of data from both \nswaths.  A positive roll bias value means that the the vertical \nreference used by the multibeam system is biased to starboard, \ngiving rise to shallow bathymetry to port and deep bathymetry \nto starboard.";
 static char usage_message[] = "mbrollbias -Dxdim/ydim -Rw/e/s/n  -Llonflip -V -H -Ifile1 -Jfile2]";
@@ -106,8 +110,8 @@ char **argv;
 	int	pings;
 	int	lonflip;
 	double	bounds[4];
-	int	btime_i[6];
-	int	etime_i[6];
+	int	btime_i[7];
+	int	etime_i[7];
 	double	btime_d;
 	double	etime_d;
 	double	speedmin;
@@ -116,7 +120,7 @@ char **argv;
 	int	beams_amp;
 	int	pixels_ss;
 	char	file[128];
-	char	*mbio_ptr;
+	char	*mbio_ptr = NULL;
 
 	/* mbrollbias control variables */
 	int	iformat;
@@ -129,7 +133,7 @@ char **argv;
 	/* mbio read values */
 	int	rpings;
 	int	kind;
-	int	time_i[6];
+	int	time_i[7];
 	double	time_d;
 	double	navlon;
 	double	navlat;
@@ -139,24 +143,24 @@ char **argv;
 	int	nbath;
 	int	namp;
 	int	nss;
-	double	*bath;
-	double	*bathlon;
-	double	*bathlat;
-	double	*amp;
-	double	*ss;
-	double	*sslon;
-	double	*sslat;
+	double	*bath = NULL;
+	double	*bathlon = NULL;
+	double	*bathlat = NULL;
+	double	*amp = NULL;
+	double	*ss = NULL;
+	double	*sslon = NULL;
+	double	*sslat = NULL;
 	char	comment[256];
 
 	/* grid variables */
 	double	deglontokm, deglattokm;
 	double	mtodeglon, mtodeglat;
 	double	dx, dy;
-	int	*icount;
-	int	*jcount;
-	struct bathptr	*idata;
-	struct bathptr	*jdata;
-	struct bath	*zone;
+	int	*icount = NULL;
+	int	*jcount = NULL;
+	struct bathptr	*idata = NULL;
+	struct bathptr	*jdata = NULL;
+	struct bath	*zone = NULL;
 	int	ndata, ndatafile;
 	double	iheading;
 	double	jheading;
@@ -204,12 +208,14 @@ char **argv;
 	btime_i[3] = 10;
 	btime_i[4] = 30;
 	btime_i[5] = 0;
+	btime_i[6] = 0;
 	etime_i[0] = 2062;
 	etime_i[1] = 2;
 	etime_i[2] = 21;
 	etime_i[3] = 10;
 	etime_i[4] = 30;
 	etime_i[5] = 0;
+	etime_i[6] = 0;
 	speedmin = 0.0;
 	timegap = 1000000000.0;
 	bounds[0] = 0.0;
@@ -306,12 +312,14 @@ char **argv;
 		fprintf(outfp,"dbg2       btime_i[3]:       %d\n",btime_i[3]);
 		fprintf(outfp,"dbg2       btime_i[4]:       %d\n",btime_i[4]);
 		fprintf(outfp,"dbg2       btime_i[5]:       %d\n",btime_i[5]);
+		fprintf(outfp,"dbg2       btime_i[6]:       %d\n",btime_i[6]);
 		fprintf(outfp,"dbg2       etime_i[0]:       %d\n",etime_i[0]);
 		fprintf(outfp,"dbg2       etime_i[1]:       %d\n",etime_i[1]);
 		fprintf(outfp,"dbg2       etime_i[2]:       %d\n",etime_i[2]);
 		fprintf(outfp,"dbg2       etime_i[3]:       %d\n",etime_i[3]);
 		fprintf(outfp,"dbg2       etime_i[4]:       %d\n",etime_i[4]);
 		fprintf(outfp,"dbg2       etime_i[5]:       %d\n",etime_i[5]);
+		fprintf(outfp,"dbg2       etime_i[6]:       %d\n",etime_i[6]);
 		fprintf(outfp,"dbg2       speedmin:         %f\n",speedmin);
 		fprintf(outfp,"dbg2       timegap:          %f\n",timegap);
 		fprintf(outfp,"dbg2       input file 1:     %s\n",ifile);
@@ -476,14 +484,14 @@ char **argv;
 				}
 			}
 		}
-	status = mb_close(verbose,mbio_ptr,&error);
-	mb_free(verbose,bath,&error); 
-	mb_free(verbose,bathlon,&error); 
-	mb_free(verbose,bathlat,&error); 
-	mb_free(verbose,amp,&error); 
-	mb_free(verbose,ss,&error); 
-	mb_free(verbose,sslon,&error); 
-	mb_free(verbose,sslat,&error); 
+	status = mb_close(verbose,&mbio_ptr,&error);
+	mb_free(verbose,&bath,&error); 
+	mb_free(verbose,&bathlon,&error); 
+	mb_free(verbose,&bathlat,&error); 
+	mb_free(verbose,&amp,&error); 
+	mb_free(verbose,&ss,&error); 
+	mb_free(verbose,&sslon,&error); 
+	mb_free(verbose,&sslat,&error); 
 	status = MB_SUCCESS;
 	error = MB_ERROR_NO_ERROR;
 	if (verbose >= 2) 
@@ -576,14 +584,14 @@ char **argv;
 				}
 			}
 		}
-	status = mb_close(verbose,mbio_ptr,&error);
-	mb_free(verbose,bath,&error); 
-	mb_free(verbose,bathlon,&error); 
-	mb_free(verbose,bathlat,&error); 
-	mb_free(verbose,amp,&error); 
-	mb_free(verbose,ss,&error); 
-	mb_free(verbose,sslon,&error); 
-	mb_free(verbose,sslat,&error); 
+	status = mb_close(verbose,&mbio_ptr,&error);
+	mb_free(verbose,&bath,&error); 
+	mb_free(verbose,&bathlon,&error); 
+	mb_free(verbose,&bathlat,&error); 
+	mb_free(verbose,&amp,&error); 
+	mb_free(verbose,&ss,&error); 
+	mb_free(verbose,&sslon,&error); 
+	mb_free(verbose,&sslat,&error); 
 	status = MB_SUCCESS;
 	error = MB_ERROR_NO_ERROR;
 	if (verbose >= 2) 
@@ -600,6 +608,8 @@ char **argv;
 		for (j=0;j<ydim;j++)
 			{
 			k = i*ydim + j;
+			idata[k].ptr = NULL;
+			jdata[k].ptr = NULL;
 			if (icount[k] > 0)
 				{
 				status = mb_malloc(verbose,
@@ -723,14 +733,14 @@ char **argv;
 				}
 			}
 		}
-	status = mb_close(verbose,mbio_ptr,&error);
-	mb_free(verbose,bath,&error); 
-	mb_free(verbose,bathlon,&error); 
-	mb_free(verbose,bathlat,&error); 
-	mb_free(verbose,amp,&error); 
-	mb_free(verbose,ss,&error); 
-	mb_free(verbose,sslon,&error); 
-	mb_free(verbose,sslat,&error); 
+	status = mb_close(verbose,&mbio_ptr,&error);
+	mb_free(verbose,&bath,&error); 
+	mb_free(verbose,&bathlon,&error); 
+	mb_free(verbose,&bathlat,&error); 
+	mb_free(verbose,&amp,&error); 
+	mb_free(verbose,&ss,&error); 
+	mb_free(verbose,&sslon,&error); 
+	mb_free(verbose,&sslat,&error); 
 	status = MB_SUCCESS;
 	error = MB_ERROR_NO_ERROR;
 	if (verbose >= 2) 
@@ -833,14 +843,14 @@ char **argv;
 				}
 			}
 		}
-	status = mb_close(verbose,mbio_ptr,&error);
-	mb_free(verbose,bath,&error); 
-	mb_free(verbose,bathlon,&error); 
-	mb_free(verbose,bathlat,&error); 
-	mb_free(verbose,amp,&error); 
-	mb_free(verbose,ss,&error); 
-	mb_free(verbose,sslon,&error); 
-	mb_free(verbose,sslat,&error); 
+	status = mb_close(verbose,&mbio_ptr,&error);
+	mb_free(verbose,&bath,&error); 
+	mb_free(verbose,&bathlon,&error); 
+	mb_free(verbose,&bathlat,&error); 
+	mb_free(verbose,&amp,&error); 
+	mb_free(verbose,&ss,&error); 
+	mb_free(verbose,&sslon,&error); 
+	mb_free(verbose,&sslat,&error); 
 	status = MB_SUCCESS;
 	error = MB_ERROR_NO_ERROR;
 	if (verbose >= 2) 
@@ -996,17 +1006,17 @@ char **argv;
 			k = i*ydim + j;
 			if (icount[k] > 0)
 				{
-				status = mb_free(verbose,idata[k].ptr,&error);
+				status = mb_free(verbose,&idata[k].ptr,&error);
 				}
 			if (jcount[k] > 0)
 				{
-				status = mb_free(verbose,jdata[k].ptr,&error);
+				status = mb_free(verbose,&jdata[k].ptr,&error);
 				}
 			}
-	status = mb_free(verbose,idata,&error);
-	status = mb_free(verbose,jdata,&error);
-	status = mb_free(verbose,icount,&error);
-	status = mb_free(verbose,jcount,&error);
+	status = mb_free(verbose,&idata,&error);
+	status = mb_free(verbose,&jdata,&error);
+	status = mb_free(verbose,&icount,&error);
+	status = mb_free(verbose,&jcount,&error);
 
 	/* check memory */
 	if (verbose >= 4)

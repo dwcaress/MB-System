@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsmooth.c	6/12/93
- *    $Id: mbsmooth.c,v 4.3 1994-07-29 19:02:56 caress Exp $
+ *    $Id: mbsmooth.c,v 4.4 1994-10-21 13:02:31 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -29,6 +29,10 @@
  * in the current version.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1994/07/29  19:02:56  caress
+ * Changes associated with supporting byte swapped Lynx OS and
+ * using unix second time base.
+ *
  * Revision 4.2  1994/04/12  00:42:00  caress
  * Changed call to mb_buffer_close in accordance with change
  * in mb_buffer source code.  The parameter list now includes
@@ -84,19 +88,19 @@ int	ndump;
 struct mbsmooth_ping_struct 
 	{
 	int	id;
-	int	time_i[6];
+	int	time_i[7];
 	double	time_d;
 	double	navlon;
 	double	navlat;
 	double	speed;
 	double	heading;
-	int	*bath;
-	int	*bathacrosstrack;
-	int	*bathalongtrack;
-	int	*amp;
-	int	*ss;
-	int	*ssacrosstrack;
-	int	*ssalongtrack;
+	double	*bath;
+	double	*bathacrosstrack;
+	double	*bathalongtrack;
+	double	*amp;
+	double	*ss;
+	double	*ssacrosstrack;
+	double	*ssalongtrack;
 	double	*bathx;
 	double	*bathy;
 	int	*bathsmooth;
@@ -109,8 +113,8 @@ int	first = MB_YES;
 
 /* gaussian filter parameters */
 char	wfile[128];
-double	*width;
-double	*factor;
+double	*width = NULL;
+double	*factor = NULL;
 double	width_def = 250.0;
 
 /*--------------------------------------------------------------------*/
@@ -119,7 +123,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbsmooth.c,v 4.3 1994-07-29 19:02:56 caress Exp $";
+	static char rcs_id[] = "$Id: mbsmooth.c,v 4.4 1994-10-21 13:02:31 caress Exp $";
 	static char program_name[] = "MBSMOOTH";
 	static char help_message[] =  "MBSMOOTH applies a spatial \
 domain gaussian filter to multibeam \nbathymetry data in order to \
@@ -144,8 +148,8 @@ smooth out noise in multibeam \nbathymetry data.";
 	int	pings;
 	int	lonflip;
 	double	bounds[4];
-	int	btime_i[6];
-	int	etime_i[6];
+	int	btime_i[7];
+	int	etime_i[7];
 	double	btime_d;
 	double	etime_d;
 	double	speedmin;
@@ -154,11 +158,11 @@ smooth out noise in multibeam \nbathymetry data.";
 	int	beams_amp;
 	int	pixels_ss;
 	char	ifile[128];
-	char	*imbio_ptr;
+	char	*imbio_ptr = NULL;
 
 	/* MBIO write control parameters */
 	char	ofile[128];
-	char	*ombio_ptr;
+	char	*ombio_ptr = NULL;
 
 	/* mbio read and write values */
 	char	*store_ptr;
@@ -209,12 +213,14 @@ smooth out noise in multibeam \nbathymetry data.";
 	btime_i[3] = 10;
 	btime_i[4] = 30;
 	btime_i[5] = 0;
+	btime_i[6] = 0;
 	etime_i[0] = 2062;
 	etime_i[1] = 2;
 	etime_i[2] = 21;
 	etime_i[3] = 10;
 	etime_i[4] = 30;
 	etime_i[5] = 0;
+	etime_i[6] = 0;
 	speedmin = 0.0;
 	timegap = 1000000000.0;
 
@@ -307,12 +313,14 @@ smooth out noise in multibeam \nbathymetry data.";
 		fprintf(stderr,"dbg2       btime_i[3]:     %d\n",btime_i[3]);
 		fprintf(stderr,"dbg2       btime_i[4]:     %d\n",btime_i[4]);
 		fprintf(stderr,"dbg2       btime_i[5]:     %d\n",btime_i[5]);
+		fprintf(stderr,"dbg2       btime_i[6]:     %d\n",btime_i[6]);
 		fprintf(stderr,"dbg2       etime_i[0]:     %d\n",etime_i[0]);
 		fprintf(stderr,"dbg2       etime_i[1]:     %d\n",etime_i[1]);
 		fprintf(stderr,"dbg2       etime_i[2]:     %d\n",etime_i[2]);
 		fprintf(stderr,"dbg2       etime_i[3]:     %d\n",etime_i[3]);
 		fprintf(stderr,"dbg2       etime_i[4]:     %d\n",etime_i[4]);
 		fprintf(stderr,"dbg2       etime_i[5]:     %d\n",etime_i[5]);
+		fprintf(stderr,"dbg2       etime_i[6]:     %d\n",etime_i[6]);
 		fprintf(stderr,"dbg2       speedmin:       %f\n",speedmin);
 		fprintf(stderr,"dbg2       timegap:        %f\n",timegap);
 		fprintf(stderr,"dbg2       data format:    %d\n",format);
@@ -361,19 +369,29 @@ smooth out noise in multibeam \nbathymetry data.";
 	/* allocate memory for data arrays */
 	for (i=0;i<MBSMOOTH_BUFFER;i++)
 		{
-		status = mb_malloc(verbose,beams_bath*sizeof(int),
+		ping[i].bath = NULL;
+		ping[i].amp = NULL;
+		ping[i].bathacrosstrack = NULL;
+		ping[i].bathalongtrack = NULL;
+		ping[i].ss = NULL;
+		ping[i].ssacrosstrack = NULL;
+		ping[i].ssalongtrack = NULL;
+		ping[i].bathx = NULL;
+		ping[i].bathy = NULL;
+		ping[i].bathsmooth = NULL;
+		status = mb_malloc(verbose,beams_bath*sizeof(double),
 			&ping[i].bath,&error);
-		status = mb_malloc(verbose,beams_amp*sizeof(int),
+		status = mb_malloc(verbose,beams_amp*sizeof(double),
 			&ping[i].amp,&error);
-		status = mb_malloc(verbose,beams_bath*sizeof(int),
+		status = mb_malloc(verbose,beams_bath*sizeof(double),
 			&ping[i].bathacrosstrack,&error);
-		status = mb_malloc(verbose,beams_bath*sizeof(int),
+		status = mb_malloc(verbose,beams_bath*sizeof(double),
 			&ping[i].bathalongtrack,&error);
-		status = mb_malloc(verbose,pixels_ss*sizeof(int),
+		status = mb_malloc(verbose,pixels_ss*sizeof(double),
 			&ping[i].ss,&error);
-		status = mb_malloc(verbose,pixels_ss*sizeof(int),
+		status = mb_malloc(verbose,pixels_ss*sizeof(double),
 			&ping[i].ssacrosstrack,&error);
-		status = mb_malloc(verbose,pixels_ss*sizeof(int),
+		status = mb_malloc(verbose,pixels_ss*sizeof(double),
 			&ping[i].ssalongtrack,&error);
 		status = mb_malloc(verbose,beams_bath*sizeof(double),
 			&ping[i].bathx,&error);
@@ -765,25 +783,25 @@ smooth out noise in multibeam \nbathymetry data.";
 		}
 
 	/* close the files */
-	status = mb_buffer_close(verbose,buff_ptr,imbio_ptr,&error);
-	status = mb_close(verbose,imbio_ptr,&error);
-	status = mb_close(verbose,ombio_ptr,&error);
+	status = mb_buffer_close(verbose,&buff_ptr,imbio_ptr,&error);
+	status = mb_close(verbose,&imbio_ptr,&error);
+	status = mb_close(verbose,&ombio_ptr,&error);
 
 	/* free the memory */
 	for (j=0;j<3;j++)
 		{
-		mb_free(verbose,ping[j].bath,&error); 
-		mb_free(verbose,ping[j].bathacrosstrack,&error); 
-		mb_free(verbose,ping[j].bathalongtrack,&error); 
-		mb_free(verbose,ping[j].amp,&error); 
-		mb_free(verbose,ping[j].ss,&error); 
-		mb_free(verbose,ping[j].ssacrosstrack,&error); 
-		mb_free(verbose,ping[j].ssalongtrack,&error); 
-		mb_free(verbose,ping[j].bathx,&error); 
-		mb_free(verbose,ping[j].bathy,&error); 
-		mb_free(verbose,ping[j].bathsmooth,&error); 
+		mb_free(verbose,&ping[j].bath,&error); 
+		mb_free(verbose,&ping[j].bathacrosstrack,&error); 
+		mb_free(verbose,&ping[j].bathalongtrack,&error); 
+		mb_free(verbose,&ping[j].amp,&error); 
+		mb_free(verbose,&ping[j].ss,&error); 
+		mb_free(verbose,&ping[j].ssacrosstrack,&error); 
+		mb_free(verbose,&ping[j].ssalongtrack,&error); 
+		mb_free(verbose,&ping[j].bathx,&error); 
+		mb_free(verbose,&ping[j].bathy,&error); 
+		mb_free(verbose,&ping[j].bathsmooth,&error); 
 		}
-	mb_free(verbose,width,&error); 
+	mb_free(verbose,&width,&error); 
 
 	/* check memory */
 	if (verbose >= 4)

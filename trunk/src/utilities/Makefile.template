@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 4.0 1994-05-24 02:34:15 caress Exp $
+#	$Id: Makefile.template,v 4.1 1994-10-21 13:03:49 caress Exp $
 #
 #     Copyright (c) 1993, 1994 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.0  1994/05/24  02:34:15  caress
+# First cut.
+#
 #
 
 # *** CHANGE THESE TO FIT YOUR LOCAL ENVIRONMENT ***
@@ -25,6 +28,10 @@ NETCDFDIR = /ocean/mgg/netcdf/sun4/lib
 #
 # Location of Levitus annual database file
 LEVITUS = /ocean/mgg/levitus/annual
+# 
+# Compilers 
+CC = cc 
+FC = f77 
 #
 # Compile and load flags:
 CFLAGS = -O2
@@ -82,8 +89,8 @@ $(BINDIR)/mbunclean:	mbunclean.o $(LIBDIR)/libmbio.a
 	$(CC) $(CFLAGS) mbunclean.o $(LIBDIR)/libmbio.a $(LFLAGS) -o $(BINDIR)/mbunclean
 $(BINDIR)/mbgrid:	mbgrid.o surfunc.o $(LIBDIR)/libmbio.a
 	$(CC) $(CFLAGS) mbgrid.o surfunc.o $(LIBDIR)/libmbio.a $(GMTLIBDIR)/libgmt.a $(NETCDFDIR)/libnetcdf.a $(LFLAGS) -o $(BINDIR)/mbgrid
-$(BINDIR)/mblevitus:	mblevitus.o
-	$(CC) $(CFLAGS) mblevitus.o $(LFLAGS) -o $(BINDIR)/mblevitus
+$(BINDIR)/mblevitus:	mblevitus.o $(LIBDIR)/libmbio.a
+	$(CC) $(CFLAGS) mblevitus.o $(LIBDIR)/libmbio.a $(LFLAGS) -o $(BINDIR)/mblevitus
 $(BINDIR)/mbbath:	mbbath.o $(LIBDIR)/libmbio.a
 	$(CC) $(CFLAGS) mbbath.o $(LIBDIR)/libmbio.a $(LFLAGS) -o $(BINDIR)/mbbath
 $(BINDIR)/hsbath:	$(BINDIR)/mbbath
