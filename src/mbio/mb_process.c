@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_process.c	9/11/00
- *    $Id: mb_process.c,v 5.20 2002-05-29 23:36:53 caress Exp $
+ *    $Id: mb_process.c,v 5.21 2002-07-20 20:42:40 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	September 11, 2000
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.20  2002/05/29 23:36:53  caress
+ * Release 5.0.beta18
+ *
  * Revision 5.19  2002/05/02 03:55:34  caress
  * Release 5.0.beta17
  *
@@ -110,7 +113,7 @@
 #include "../../include/mb_format.h"
 #include "../../include/mb_process.h"
 
-static char rcs_id[]="$Id: mb_process.c,v 5.20 2002-05-29 23:36:53 caress Exp $";
+static char rcs_id[]="$Id: mb_process.c,v 5.21 2002-07-20 20:42:40 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_pr_readpar(int verbose, char *file, int lookforfiles, 
@@ -1719,7 +1722,7 @@ int mb_pr_get_output(int verbose, int *format,
 	    }
 	    
 	/* else just add suffix */
-	else if (format > 0)
+	else if (*format > 0)
 	    {
 	    sprintf(ofile, "%sp.mb%d", 
 			ifile, *format);

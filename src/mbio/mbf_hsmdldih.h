@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_hsmdldih.h	9/26/95
- *	$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbf_hsmdldih.h,v 5.0 2000-12-01 22:48:41 caress Exp $
+ *	$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbf_hsmdldih.h,v 5.1 2002-07-20 20:42:40 caress Exp $
  *
  *    Copyright (c) 1995, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	September 26, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01 22:48:41  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.4  2000/09/30  06:34:20  caress
  * Snapshot for Dale.
  *
@@ -230,8 +233,8 @@ struct  mbf_hsmdldih_struct {
 	/* ------------------------------- Theoretical data from Sound Speed record */
 
 	int	num_vel;		/* number of Depth/Sound Speed pairs */
-	double	vdepth[20];		/* array of depths */
-	double	velocity[20];		/* array of sound speeds */
+	double	vdepth[MBF_HSMDLDIH_MAXVEL];		/* array of depths */
+	double	velocity[MBF_HSMDLDIH_MAXVEL];		/* array of sound speeds */
 
 	/* ----------------- derived data --------------------------------  */
 

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_read_init.c	1/25/93
- *    $Id: mb_read_init.c,v 5.10 2002-05-29 23:36:53 caress Exp $
+ *    $Id: mb_read_init.c,v 5.11 2002-07-20 20:42:40 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	January 25, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.10  2002/05/29 23:36:53  caress
+ * Release 5.0.beta18
+ *
  * Revision 5.9  2002/05/02 03:55:34  caress
  * Release 5.0.beta17
  *
@@ -184,6 +187,7 @@
 #include "../../include/mb_io.h"
 #include "../../include/mb_define.h"
 #include "../../include/gsf.h"
+#include "../../include/sapi.h"
 #include "netcdf.h"
 
 /*--------------------------------------------------------------------*/
@@ -195,12 +199,15 @@ int mb_read_init(int verbose, char *file,
 		int *beams_bath, int *beams_amp, int *pixels_ss, 
 		int *error)
 {
-	static char rcs_id[]="$Id: mb_read_init.c,v 5.10 2002-05-29 23:36:53 caress Exp $";
+	static char rcs_id[]="$Id: mb_read_init.c,v 5.11 2002-07-20 20:42:40 caress Exp $";
 	char	*function_name = "mb_read_init";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
 	int	status_save;
 	int	error_save;
+	int	sapi_status;
+	char	*lastslash;
+	char	path[MB_PATH_MAXLINE], name[MB_PATH_MAXLINE];
 	int	i;
 	char	*stdin_string = "stdin";
 
@@ -357,6 +364,12 @@ int mb_read_init(int verbose, char *file,
 	mb_io_ptr->new_ss = NULL;
 	mb_io_ptr->new_ss_acrosstrack = NULL;
 	mb_io_ptr->new_ss_alongtrack = NULL;
+	
+	/* initialize UTM projection parameters */
+	mb_io_ptr->projection_initialized = MB_NO;
+	mb_io_ptr->pjptr = NULL;
+	mb_io_ptr->utm_zone = 0;
+	strcpy(mb_io_ptr->ellipsoid, "WGS84");
 	
 	/* initialize ancillary variables used
 		to save information in certain cases */
@@ -579,6 +592,51 @@ int mb_read_init(int verbose, char *file,
 		{
 		status = MB_SUCCESS;
 		*error = MB_ERROR_NO_ERROR;
+		}
+	    else
+		{
+		status = MB_FAILURE;
+		*error = MB_ERROR_OPEN_FAIL;
+		}
+	    }
+	    
+	/* else handle surf files to be opened with libsapi */
+	else if (mb_io_ptr->filetype == MB_FILETYPE_SURF)
+	    {
+	    lastslash = strrchr(file, '/');
+	    if (lastslash != NULL && strlen(lastslash) > 1)
+	    	{
+		strcpy(name,&(lastslash[1]));
+		strcpy(path,file);
+		path[strlen(file) - strlen(lastslash)] = '\0';
+		}
+	    else if (strlen(file) > 0)
+	    	{
+		strcpy(path, ".");
+		strcpy(name, file);
+		}
+	    else
+	     	{
+		status = MB_FAILURE;
+		*error = MB_ERROR_OPEN_FAIL;
+		}
+	    if (status == MB_SUCCESS)
+	    	{
+		if (strcmp(&name[strlen(name)-4],".sda") == 0)
+			name[strlen(name)-4] = '\0';
+		else if (strcmp(&name[strlen(name)-4],".six") == 0)
+			name[strlen(name)-4] = '\0';
+	    	sapi_status = SAPI_open(path,name,verbose);
+	    	if (sapi_status == 0)
+			{
+			status = MB_SUCCESS;
+			*error = MB_ERROR_NO_ERROR;
+			}
+	    	else
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_OPEN_FAIL;
+			}
 		}
 	    else
 		{

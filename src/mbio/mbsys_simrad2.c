@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad2.c	3.00	10/9/98
- *	$Id: mbsys_simrad2.c,v 5.12 2002-05-29 23:40:48 caress Exp $
+ *	$Id: mbsys_simrad2.c,v 5.13 2002-07-20 20:42:40 caress Exp $
  *
  *    Copyright (c) 1998, 2001 by
  *    David W. Caress (caress@mbari.org)
@@ -31,6 +31,9 @@
  * Date:	October 9, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.12  2002/05/29 23:40:48  caress
+ * Release 5.0.beta18
+ *
  * Revision 5.11  2001/10/19 21:48:16  caress
  * Fixed acrosstrack scaling.
  * .,
@@ -100,7 +103,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_simrad2.h"
 
-static char res_id[]="$Id: mbsys_simrad2.c,v 5.12 2002-05-29 23:40:48 caress Exp $";
+static char res_id[]="$Id: mbsys_simrad2.c,v 5.13 2002-07-20 20:42:40 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_simrad2_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
@@ -118,6 +121,7 @@ int mbsys_simrad2_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
 		}
@@ -338,6 +342,9 @@ int mbsys_simrad2_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 				    invalid = 0xFFFF */
 	store->pos_heading = 0;	/* heading (0.01 deg) if valid,
 				    invalid = 0xFFFF */
+	store->pos_heave = 0;	/* heave from interpolation (0.01 m) */
+	store->pos_roll = 0;	/* roll from interpolation (0.01 deg) */
+	store->pos_pitch = 0;	/* pitch from interpolation (0.01 deg) */
 	store->pos_system = 0;		/* position system number, type, and realtime use
 				    - position system number given by two lowest bits
 				    - fifth bit set means position must be derived
@@ -440,6 +447,7 @@ int mbsys_simrad2_survey_alloc(int verbose,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
 		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
@@ -487,6 +495,12 @@ int mbsys_simrad2_survey_alloc(int verbose,
 				    invalid = 0xFFFF */
 		ping->png_heading = 0;	
 				/* heading (0.01 deg) */
+		ping->png_heave = 0;	
+				/* heave from interpolation (0.01 m) */
+		ping->png_roll = 0;	
+				/* roll from interpolation (0.01 deg) */
+		ping->png_pitch = 0;	
+				/* pitch from interpolation (0.01 deg) */
 		ping->png_ssv = 0;	
 				/* sound speed at transducer (0.1 m/sec) */
 		ping->png_xducer_depth = 0;   
@@ -576,41 +590,92 @@ int mbsys_simrad2_survey_alloc(int verbose,
 		    }
 		    
 		/* raw beam record */
-		ping->png_raw_read = MB_NO;	
-				/* flag indicating actual reading of rawbeam record */
-		ping->png_nrawbeams = 0;	
-				/* number of raw travel times and angles
-				    - nonzero only if raw beam record read */
+		ping->png_raw1_read = MB_NO;	/* flag indicating actual reading of old rawbeam record */
+		ping->png_raw2_read = MB_NO;	/* flag indicating actual reading of new rawbeam record */
+		ping->png_raw_date = 0;	
+				/* date = year*10000 + month*100 + day
+				    Feb 26, 1995 = 19950226 */
+		ping->png_raw_msec = 0;	
+				/* time since midnight in msec
+				    08:12:51.234 = 29570234 */
+		ping->png_raw_count = 0;	
+				/* sequential counter or input identifier */
+		ping->png_raw_serial = 0;	
+				/* system 1 or system 2 serial number */
+		ping->png_raw_heading = 0;	/* heading (0.01 deg) */
+		ping->png_raw_ssv = 0;		/* sound speed at transducer (0.1 m/sec) */
+		ping->png_raw_xducer_depth = 0;	/* transmit transducer depth (0.01 m) */
+		ping->png_raw_nbeams_max = 0;		/* maximum number of beams possible */
+		ping->png_raw_nbeams = 0;		/* number of valid beams */
+		ping->png_raw_depth_res = 0;		/* depth resolution (0.01 m) */
+		ping->png_raw_distance_res = 0;	/* x and y resolution (0.01 m) */
+		ping->png_raw_sample_rate = 0;	/* sampling rate (Hz) */
+		ping->png_raw_status = 0;		/* status from PU/TRU */
+		ping->png_raw_nbeams = 0;		/* number of raw travel times and angles
+							- nonzero only if raw beam record read */
+		ping->png_raw_rangenormal = 0;	/* normal incidence range (meters) */
+		ping->png_raw_normalbackscatter = 0; 	/* normal incidence backscatter (dB) (-60 to +9) */
+		ping->png_raw_obliquebackscatter = 0; /* oblique incidence backscatter (dB) (-60 to +9) */
+		ping->png_raw_fixedgain = 0;		/* fixed gain (dB) (0 to 30) */
+		ping->png_raw_txpower = 0;		/* transmit power (dB) (0, -10, or -20) */
+		ping->png_raw_mode = 0;		/* sonar mode: 
+							0 : very shallow
+							1 : shallow
+							2 : medium
+							3 : deep
+							4 : very deep
+							5 : extra deep */
+		ping->png_raw_coverage = 0;	/* swath width (degrees) (10 to 150 degrees) */
+		ping->png_raw_yawstabheading = 0; /* yaw stabilization heading (0.01 degrees) */
+		ping->png_raw_ntx = 0;		/* number of TX pulses (1 to 9) */
+		for (i=0;i<MBSYS_SIMRAD2_MAXTX;i++)
+			{
+			ping->png_raw_txlastbeam[i] = 0;/* last beam number in this TX pulse */
+			ping->png_raw_txtiltangle[i] = 0;/* tilt angle (0.01 deg) */
+			ping->png_raw_txheading[i] = 0;	/* heading (0.01 deg) */
+			ping->png_raw_txroll[i] = 0;	/* roll (0.01 deg) */
+			ping->png_raw_txpitch[i] = 0;	/* pitch angle (0.01 deg) */
+			ping->png_raw_txheave[i] = 0;	/* heave (0.01 m) */
+			}
 		for (i=0;i<MBSYS_SIMRAD2_MAXBEAMS;i++)
-		    {
-		    ping->png_rawpointangle[i] = 0;
-				/* Raw beam pointing angles in 0.01 degree,
-					positive to port. 
-					These values are relative to the transducer 
-					array and have not been corrected
-					for vessel motion. */
-		    ping->png_rawtiltangle[i] = 0;
-				/* Raw transmit tilt angles in 0.01 degree,
-					positive forward. 
-					These values are relative to the transducer 
-					array and have not been corrected
-					for vessel motion. */
-		    ping->png_rawrange[i] = 0;
+		    	{
+			ping->png_raw_rxrange[i] = 0;
 				/* Ranges as raw two way travel times in time 
 					units defined as one-fourth the inverse 
 					sampling rate. These values have not 
 					been corrected for changes in the
 					heave during the ping cycle. */
-		    ping->png_rawamp[i] = 0;		
-				/* 0.5 dB */
-		    ping->png_rawbeam_num[i] = 0;	
+			ping->png_raw_rxquality[i] = 0;	/* beam quality flag */
+			ping->png_raw_rxwindow[i] = 0;	/* length of detection window */
+			ping->png_raw_rxamp[i] = 0;		/* 0.5 dB */
+			ping->png_raw_rxbeam_num[i] = 0;	
 				/* beam 128 is first beam on 
 				    second head of EM3000D */
-		    }
+			ping->png_raw_rxpointangle[i] = 0;
+				/* Raw beam pointing angles in 0.01 degree,
+					positive to port. 
+					These values are relative to the transducer 
+					array and have not been corrected
+					for vessel motion. */
+			ping->png_raw_rxtiltangle[i] = 0;
+				/* Raw transmit tilt angles in 0.01 degree,
+					positive forward. 
+					These values are relative to the transducer 
+					array and have not been corrected
+					for vessel motion. */
+			ping->png_raw_rxheading[i] = 0;	/* heading (0.01 deg) */
+			ping->png_raw_rxroll[i] = 0;	/* roll (0.01 deg) */
+			ping->png_raw_rxpitch[i] = 0;	/* pitch angle (0.01 deg) */
+			ping->png_raw_rxheave[i] = 0;	/* heave (0.01 m) */
+		    	}
 	
 		/* sidescan */
 		ping->png_ss_read = MB_NO;	
 				/* flag indicating actual reading of sidescan record */
+		ping->png_ss_count = 0;	
+				/* sequential counter or input identifier */
+		ping->png_ss_serial = 0;	
+				/* system 1 or system 2 serial number */
 		ping->png_max_range = 0;  
 				/* max range of ping in number of samples */
 		ping->png_r_zero = 0;	
@@ -700,6 +765,7 @@ int mbsys_simrad2_attitude_alloc(int verbose,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
 		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
@@ -787,6 +853,7 @@ int mbsys_simrad2_heading_alloc(int verbose,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
 		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
@@ -866,6 +933,7 @@ int mbsys_simrad2_ssv_alloc(int verbose,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
 		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
@@ -943,6 +1011,7 @@ int mbsys_simrad2_tilt_alloc(int verbose,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
 		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
@@ -1017,6 +1086,7 @@ int mbsys_simrad2_deall(int verbose, void *mbio_ptr, void **store_ptr,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
 		fprintf(stderr,"dbg2       store_ptr:  %d\n",*store_ptr);
@@ -1077,6 +1147,7 @@ int mbsys_simrad2_zero_ss(int verbose, void *store_ptr, int *error)
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
 		}
@@ -1095,6 +1166,10 @@ int mbsys_simrad2_zero_ss(int verbose, void *store_ptr, int *error)
 		ping->png_ss_msec = 0;	
 				/* time since midnight in msec
 				    08:12:51.234 = 29570234 */
+		ping->png_ss_count = 0;	
+				/* sequential counter or input identifier */
+		ping->png_ss_serial = 0;	
+				/* system 1 or system 2 serial number */
 		ping->png_max_range = 0;  
 				/* max range of ping in number of samples */
 		ping->png_r_zero = 0;	
@@ -1184,9 +1259,7 @@ int mbsys_simrad2_extract(int verbose, void *mbio_ptr, void *store_ptr,
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_simrad2_struct *store;
 	struct mbsys_simrad2_ping_struct *ping;
-	int	ntime_i[7];
 	double	ntime_d;
-	mb_s_char	*beam_ss;
 	double	depthscale, depthoffset;
 	double	dacrscale, daloscale, reflscale;
 	double	pixel_size;
@@ -1198,6 +1271,7 @@ int mbsys_simrad2_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mb_ptr:     %d\n",mbio_ptr);
 		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
@@ -1641,6 +1715,7 @@ int mbsys_simrad2_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
 		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
@@ -1978,7 +2053,6 @@ int mbsys_simrad2_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 	struct mbsys_simrad2_ping_struct *ping;
 	double	ttscale;
 	double	heave_use;
-	double	*angles_simrad;
 	int	i, j;
 
 	/* print input debug statements */
@@ -1987,6 +2061,7 @@ int mbsys_simrad2_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mb_ptr:     %d\n",mbio_ptr);
 		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
@@ -2145,6 +2220,108 @@ int mbsys_simrad2_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+int mbsys_simrad2_detects(int verbose, void *mbio_ptr, void *store_ptr,
+	int *kind, int *nbeams, int *detects, int *error)
+{
+	char	*function_name = "mbsys_simrad2_detects";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	struct mbsys_simrad2_struct *store;
+	struct mbsys_simrad2_ping_struct *ping;
+	int	i, j;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mb_ptr:     %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       detects:    %d\n",detects);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* get data structure pointer */
+	store = (struct mbsys_simrad2_struct *) store_ptr;
+
+	/* get data kind */
+	*kind = store->kind;
+
+	/* extract data from structure */
+	if (*kind == MB_DATA_DATA)
+		{
+		/* get survey data structure */
+		ping = (struct mbsys_simrad2_ping_struct *) store->ping;
+
+		*nbeams = ping->png_nbeams_max;
+		for (j=0;j<ping->png_nbeams_max;j++)
+			{
+			detects[j] = MB_DETECT_UNKNOWN;
+			}
+		for (i=0;i<ping->png_nbeams;i++)
+			{
+			j = ping->png_beam_num[i] - 1;
+			if (ping->png_quality[i] & 128)
+				detects[j] = MB_DETECT_PHASE;
+			else
+				detects[j] = MB_DETECT_AMPLITUDE;
+			}
+
+		/* set status */
+		*error = MB_ERROR_NO_ERROR;
+		status = MB_SUCCESS;
+
+		/* done translating values */
+
+		}
+
+	/* deal with comment */
+	else if (*kind == MB_DATA_COMMENT)
+		{
+		/* set status */
+		*error = MB_ERROR_COMMENT;
+		status = MB_FAILURE;
+		}
+
+	/* deal with other record type */
+	else
+		{
+		/* set status */
+		*error = MB_ERROR_OTHER;
+		status = MB_FAILURE;
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
+		}
+	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR)
+		{
+		fprintf(stderr,"dbg2       nbeams:     %d\n",*nbeams);
+		for (i=0;i<*nbeams;i++)
+			fprintf(stderr,"dbg2       beam %d: detects:%d\n",
+				i,detects[i]);
+		}
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
 int mbsys_simrad2_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 	int *kind, double *transducer_depth, double *altitude, 
 	int *error)
@@ -2158,7 +2335,7 @@ int mbsys_simrad2_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 	double	bath_best;
 	double	xtrack_min;
 	int	found;
-	int	i, j;
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -2166,6 +2343,7 @@ int mbsys_simrad2_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mb_ptr:     %d\n",mbio_ptr);
 		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
@@ -2277,10 +2455,6 @@ int mbsys_simrad2_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_simrad2_struct *store;
 	struct mbsys_simrad2_ping_struct *ping;
-	int	ntime_i[7];
-	double	ntime_d;
-	mb_s_char	*beam_ss;
-	int	i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -2288,6 +2462,7 @@ int mbsys_simrad2_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mb_ptr:     %d\n",mbio_ptr);
 		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
@@ -2363,9 +2538,9 @@ int mbsys_simrad2_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 				+ 655.36 * ping->png_offset_multiplier;
 
 		/* get roll pitch and heave */
-		*roll = 0.0; /* kluge must get from attitude datagrams */
-		*pitch = 0.0;
-		*heave = 0.0;
+		*roll = 0.01 * ping->png_roll;
+		*pitch = 0.01 * ping->png_pitch;
+		*heave = 0.01 * ping->png_heave;
 
 		/* print debug statements */
 		if (verbose >= 5)
@@ -2486,9 +2661,9 @@ int mbsys_simrad2_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 			*draft = 0.0;
 
 		/* get roll pitch and heave */
-		*roll = 0.0; /* kluge must get from attitude datagrams */
-		*pitch = 0.0;
-		*heave = 0.0;
+		*roll = 0.01 * store->pos_roll;
+		*pitch = 0.01 * store->pos_pitch;
+		*heave = 0.01 * store->pos_heave;
 
 		/* print debug statements */
 		if (verbose >= 5)
@@ -2605,8 +2780,6 @@ int mbsys_simrad2_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_simrad2_struct *store;
 	struct mbsys_simrad2_ping_struct *ping;
-	int	kind;
-	int	i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -2614,6 +2787,7 @@ int mbsys_simrad2_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
 		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
@@ -2683,6 +2857,9 @@ int mbsys_simrad2_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 			= 100 * (draft - 655.36 * ping->png_offset_multiplier);
 
 		/* get roll pitch and heave */
+		ping->png_roll = (int) rint(roll / 0.01);
+		ping->png_pitch = (int) rint(pitch / 0.01);
+		ping->png_heave = (int) rint(heave / 0.01);
 		}
 
 	/* insert data in nav structure */
@@ -2714,6 +2891,9 @@ int mbsys_simrad2_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		store->pos_speed = (int) rint(speed / 0.036);
 
 		/* get roll pitch and heave */
+		store->pos_roll = (int) rint(roll / 0.01);
+		store->pos_pitch = (int) rint(pitch / 0.01);
+		store->pos_heave = (int) rint(heave / 0.01);
 		
 		/* set "active" flag if needed */
 		if (store->kind == MB_DATA_NAV)
@@ -2760,7 +2940,7 @@ int mbsys_simrad2_extract_svp(int verbose, void *mbio_ptr, void *store_ptr,
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_simrad2_struct *store;
-	int	i, j;
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -2768,6 +2948,7 @@ int mbsys_simrad2_extract_svp(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mb_ptr:     %d\n",mbio_ptr);
 		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
@@ -2843,8 +3024,7 @@ int mbsys_simrad2_insert_svp(int verbose, void *mbio_ptr, void *store_ptr,
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_simrad2_struct *store;
-	int	kind;
-	int	i, j;
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -2852,6 +3032,7 @@ int mbsys_simrad2_insert_svp(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
 		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
@@ -2927,6 +3108,7 @@ int mbsys_simrad2_copy(int verbose, void *mbio_ptr,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
 		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
@@ -3115,10 +3297,10 @@ int mbsys_simrad2_makess(int verbose, void *mbio_ptr, void *store_ptr,
 	double  pixel_size_calc;
 	double	ss_spacing, ss_spacing_use;
 	int	pixel_int_use;
-	double	angle, depth, xtrack, ltrack, xtrackss;
+	double	angle, depth, xtrack, xtrackss;
 	double	range, beam_foot, beamwidth, sint;
 	int	first, last, k1, k2;
-	int	i, j, k, jj, kk;
+	int	i, k, kk;
 
 	/* compare function for qsort */
 	int mb_double_compare();
@@ -3258,14 +3440,12 @@ int mbsys_simrad2_makess(int verbose, void *mbio_ptr, void *store_ptr,
 		for (i=0;i<ping->png_nbeams_ss;i++)
 			{
 			beam_ss = &ping->png_ssraw[ping->png_start_sample[i]];
-			j = ping->png_beam_num[i] - 1;
 			if (mb_beam_ok(ping->png_beamflag[i]))
 			    {
 			    if (ping->png_beam_samples[i] > 0)
 				{
 				depth = depthscale * ping->png_depth[i];
 				xtrack = dacrscale * ping->png_acrosstrack[i];
-				ltrack = daloscale * ping->png_alongtrack[i];
 				range = sqrt(depth * depth + xtrack * xtrack);
 				angle = 90.0 - 0.01 * ping->png_depression[i];
 				beam_foot = range * sin(DTR * beamwidth)
@@ -3295,7 +3475,6 @@ ping->png_beam_samples[i] * ss_spacing / beam_foot);*/
 					    {
 					    if (ping->png_range[i] != ping->png_range[i-1])
 						{
-						jj = ping->png_beam_num[i-1] - 1;
 						xtrackss = dacrscale * ping->png_acrosstrack[i]
 						    + (dacrscale * ping->png_acrosstrack[i]
 							- dacrscale * ping->png_acrosstrack[i-1])
@@ -3312,8 +3491,6 @@ ping->png_beam_samples[i] * ss_spacing / beam_foot);*/
 					    {
 					    if (ping->png_range[i] != ping->png_range[i+1])
 						{
-						jj = ping->png_beam_num[i+1] - 1;
-						    
 						xtrackss = dacrscale * ping->png_acrosstrack[i]
 						    + (dacrscale * ping->png_acrosstrack[i+1]
 							- dacrscale * ping->png_acrosstrack[i])

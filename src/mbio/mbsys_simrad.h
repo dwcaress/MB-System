@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad.h	8/5/94
- *	$Id: mbsys_simrad.h,v 5.4 2002-05-29 23:41:49 caress Exp $
+ *	$Id: mbsys_simrad.h,v 5.5 2002-07-20 20:42:40 caress Exp $
  *
  *    Copyright (c) 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -32,6 +32,9 @@
  * Date:	August 5, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2002/05/29 23:41:49  caress
+ * Release 5.0.beta18
+ *
  * Revision 5.3  2001/07/20 00:32:54  caress
  * Release 5.0.beta03
  *
@@ -1392,6 +1395,9 @@ int mbsys_simrad_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 			double *angles_forward, double *angles_null,
 			double *heave, double *alongtrack_offset, 
 			double *draft, double *ssv, int *error);
+int mbsys_simrad_detects(int verbose, void *mbio_ptr, void *store_ptr,
+			int *kind, int *nbeams,
+			int *detects, int *error);
 int mbsys_simrad_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, double *transducer_depth, double *altitude, 
 			int *error);

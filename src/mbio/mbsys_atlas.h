@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
- *    The MB-system:	mbsys_surf.h	6/22/01
- *	$Id: mbsys_atlas.h,v 5.3 2001-12-18 04:27:45 caress Exp $
+ *    The MB-system:	mbsys_atlas.h	6/22/01
+ *	$Id: mbsys_atlas.h,v 5.4 2002-07-20 20:42:40 caress Exp $
  *
  *    Copyright (c) 2001 by
  *    David W. Caress (caress@mbari.org)
@@ -13,16 +13,16 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- * mbsys_surf.h defines the MBIO data structures for handling data from 
+ * mbsys_atlas.h defines the MBIO data structures for handling data from 
  * STN Atlas Marine Electronics multibeam sonars.
  * The relevant sonars include Hydrosweep DS2 and Fansweep sonars.
  * The older  Hydrosweep DS and MD sonars produce data in different 
  * formats (e.g. 21-24 and 101-102).
  * The data formats associated with (newer) STN Atlas sonars
  * include:
- *    MBSYS_SURF formats (code in mbsys_surf.c and mbsys_surf.h):
- *      MBF_ATLSSURF : MBIO ID 181 - Vendor processing format
- *      MBF_HSDS1RAW : MBIO ID 182 - Vendor raw HSDS2 and Fansweep format
+ *    MBSYS_ATLAS formats (code in mbsys_atlas.c and mbsys_atlas.h):
+ *      MBF_HSDS2RAW : MBIO ID 182 - Vendor raw HSDS2 and Fansweep format
+ *      MBF_HSDS2LAM : MBIO ID 183 - L-DEO HSDS2 and Fansweep processing format
  *
  *
  * Author:	D. W. Caress
@@ -30,6 +30,9 @@
  * Date:	June 22, 2001
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2001/12/18 04:27:45  caress
+ * Release 5.0.beta11.
+ *
  * Revision 5.2  2001/08/10 22:41:19  dcaress
  * Release 5.0.beta07
  *
@@ -42,7 +45,7 @@
  *
  */
 /*
- * Notes on the MBSYS_SURF data structure:
+ * Notes on the MBSYS_ATLAS data structure:
  *
  * 1) STN Atlas Marine Electronics (aka SAM) sonars write raw data in real-time
  *    as binary XDR encoded data. Files are stored on disk by the HYDROMAP 
@@ -90,37 +93,37 @@
 #endif
 
 /* sonar models */
-#define	MBSYS_SURF_UNKNOWN	0
-#define	MBSYS_SURF_HSDS2	1
-#define	MBSYS_SURF_FANSWEEP15	2
-#define	MBSYS_SURF_FANSWEEP20	3
+#define	MBSYS_ATLAS_UNKNOWN	0
+#define	MBSYS_ATLAS_HSDS2	1
+#define	MBSYS_ATLAS_FANSWEEP15	2
+#define	MBSYS_ATLAS_FANSWEEP20	3
 
 /* maximum number of beams and pixels */
-#define	MBSYS_SURF_MAXBEAMS		1440
-#define	MBSYS_SURF_MAXPIXELS		4096
-#define	MBSYS_SURF_MAXBEAMTELEGRAM	200
-#define	MBSYS_SURF_MAXPIXELTELEGRAM	1024
-#define	MBSYS_SURF_MAXWINDOWS		100
-#define	MBSYS_SURF_HSDS2_PFB_NUM	59 
-#define	MBSYS_SURF_HSDS2_RX_PAR		20 
-#define	MBSYS_SURF_HSDS2_TX_PAR		10 
-#define	MBSYS_SURF_COMMENT_LENGTH	256
-#define	MBSYS_SURF_HSDS2_MAXBEAMS	140
+#define	MBSYS_ATLAS_MAXBEAMS		1440
+#define	MBSYS_ATLAS_MAXPIXELS		4096
+#define	MBSYS_ATLAS_MAXBEAMTELEGRAM	200
+#define	MBSYS_ATLAS_MAXPIXELTELEGRAM	1024
+#define	MBSYS_ATLAS_MAXWINDOWS		100
+#define	MBSYS_ATLAS_HSDS2_PFB_NUM	59 
+#define	MBSYS_ATLAS_HSDS2_RX_PAR		20 
+#define	MBSYS_ATLAS_HSDS2_TX_PAR		10 
+#define	MBSYS_ATLAS_COMMENT_LENGTH	256
+#define	MBSYS_ATLAS_HSDS2_MAXBEAMS	140
 
 /* datagram type id's */
-#define	MBSYS_SURF_TELEGRAM_NONE		0
-#define	MBSYS_SURF_TELEGRAM_START		10
-#define	MBSYS_SURF_TELEGRAM_TRAVELTIMES		11
-#define	MBSYS_SURF_TELEGRAM_SIDESCAN		12
-#define	MBSYS_SURF_TELEGRAM_TRACKINGWINDOWS	19
-#define	MBSYS_SURF_TELEGRAM_CENTERBEAM		26
-#define	MBSYS_SURF_TELEGRAM_BACKSCATTER		28
-#define	MBSYS_SURF_TELEGRAM_SYSTEM		40
-#define	MBSYS_SURF_TELEGRAM_HSDS2LAM		1179799367
-#define	MBSYS_SURF_TELEGRAM_COMMENTLAM		1129270605
+#define	MBSYS_ATLAS_TELEGRAM_NONE		0
+#define	MBSYS_ATLAS_TELEGRAM_START		10
+#define	MBSYS_ATLAS_TELEGRAM_TRAVELTIMES		11
+#define	MBSYS_ATLAS_TELEGRAM_SIDESCAN		12
+#define	MBSYS_ATLAS_TELEGRAM_TRACKINGWINDOWS	19
+#define	MBSYS_ATLAS_TELEGRAM_CENTERBEAM		26
+#define	MBSYS_ATLAS_TELEGRAM_BACKSCATTER		28
+#define	MBSYS_ATLAS_TELEGRAM_SYSTEM		40
+#define	MBSYS_ATLAS_TELEGRAM_HSDS2LAM		1179799367
+#define	MBSYS_ATLAS_TELEGRAM_COMMENTLAM		1129270605
 
 /* internal data structure for survey data */
-struct mbsys_surf_struct
+struct mbsys_atlas_struct
 	{
 	int		kind;
 	
@@ -243,11 +246,11 @@ struct mbsys_surf_struct
 	double		tt_double2;		/* FS10: data age */
 	double		tt_sensdraught;		/* sens/inst draft */
 	double		tt_draught;		/* system draft (m) */
-	float		tt_lruntime[MBSYS_SURF_MAXBEAMS];	/* array of beam traveltimes with   */
+	float		tt_lruntime[MBSYS_ATLAS_MAXBEAMS];	/* array of beam traveltimes with   */
 								/* each entry related to the beam   */
 								/* angle in the actual angle table  */
-	mb_u_char	tt_lamplitude[MBSYS_SURF_MAXBEAMS];	/* array of beam amplitudes:	    */
-	mb_u_char	tt_lstatus[MBSYS_SURF_MAXBEAMS];	/* array of beam states:	    */
+	mb_u_char	tt_lamplitude[MBSYS_ATLAS_MAXBEAMS];	/* array of beam amplitudes:	    */
+	mb_u_char	tt_lstatus[MBSYS_ATLAS_MAXBEAMS];	/* array of beam states:	    */
 								/*	DS2: NIS data		    */
 								/*	FS:			    */
 								/*	    bit 0 => beamside	    */
@@ -265,10 +268,10 @@ struct mbsys_surf_struct
 	double		pr_navlon;					/* longitude (degrees) */
 	double		pr_navlat;					/* latitude (degrees) */
 	double		pr_speed;					/* speed made good (m/s) */
-	double		pr_bath[MBSYS_SURF_MAXBEAMS];			/* bathymetry (m) */
-	double		pr_bathacrosstrack[MBSYS_SURF_MAXBEAMS];	/* acrosstrack distance (m) */
-	double		pr_bathalongtrack[MBSYS_SURF_MAXBEAMS];		/* alongtrack distance (m) */
-	char		pr_beamflag[MBSYS_SURF_MAXBEAMS];		/* beam edit/status flags */
+	double		pr_bath[MBSYS_ATLAS_MAXBEAMS];			/* bathymetry (m) */
+	double		pr_bathacrosstrack[MBSYS_ATLAS_MAXBEAMS];	/* acrosstrack distance (m) */
+	double		pr_bathalongtrack[MBSYS_ATLAS_MAXBEAMS];		/* alongtrack distance (m) */
+	char		pr_beamflag[MBSYS_ATLAS_MAXBEAMS];		/* beam edit/status flags */
 	
 	/* sidescan telegrams */
 	unsigned int	ss_ping_no;		/* ping number */
@@ -277,7 +280,7 @@ struct mbsys_surf_struct
 	double		ss_timespacing;		/* time spacing between sidescan values (s) */
 	int		ss_max_side_bb_cnt;	/* total number of values to port */
 	int		ss_max_side_sb_cnt;	/* total number of values to starboard */
-	mb_u_char		ss_sidescan[MBSYS_SURF_MAXPIXELS];
+	mb_u_char		ss_sidescan[MBSYS_ATLAS_MAXPIXELS];
 
 	/* tracking windows telegram */
 	double		tr_transmit_time_d;	/* ping timestamp */
@@ -286,11 +289,11 @@ struct mbsys_surf_struct
 	int		tr_no_of_win_groups;	/* number of window groups  */
 						/* DS2 & MD => 8	    */
 						/* Fansweep => 20	    */
-	int		tr_repeat_count[MBSYS_SURF_MAXWINDOWS];	    /* this window repeats n times  */
+	int		tr_repeat_count[MBSYS_ATLAS_MAXWINDOWS];	    /* this window repeats n times  */
 								    /* DS2 => 6,8,8,8,8,8,8,5	    */
 								    /* MD => 5,5,5,5,5,5,5,5	    */
-	float		tr_start[MBSYS_SURF_MAXWINDOWS];	    /* start time (s) - two way	    */
-	float		tr_stop[MBSYS_SURF_MAXWINDOWS];		    /* stop time (s) - two way	    */
+	float		tr_start[MBSYS_ATLAS_MAXWINDOWS];	    /* start time (s) - two way	    */
+	float		tr_stop[MBSYS_ATLAS_MAXWINDOWS];		    /* stop time (s) - two way	    */
 	
 	/* backscatter telegram */	
 	double		bs_transmit_time_d;	/* ping timestamp */
@@ -300,20 +303,20 @@ struct mbsys_surf_struct
 						/* MD: -185.0 dB relative to 1 V/uPa */
 	float		bs_rxGain;		/* scale : dB */
 	float		bs_ar;			/* scale : dB/m */
-	float		bs_TvgRx_time[MBSYS_SURF_HSDS2_RX_PAR];	    /* two way time (s) */
-	float		bs_TvgRx_gain[MBSYS_SURF_HSDS2_RX_PAR];	    /* receiver gain (dB) */
+	float		bs_TvgRx_time[MBSYS_ATLAS_HSDS2_RX_PAR];	    /* two way time (s) */
+	float		bs_TvgRx_gain[MBSYS_ATLAS_HSDS2_RX_PAR];	    /* receiver gain (dB) */
 	unsigned short	bs_nrTxSets;				    /* number of transmit sets (1, 3, 5) */
-	unsigned int	bs_txBeamIndex[MBSYS_SURF_HSDS2_TX_PAR];    /* code of external beamshape table */
-	float		bs_txLevel[MBSYS_SURF_HSDS2_TX_PAR];	    /* transmit level: dB relative to 1 uPa */
-	float		bs_txBeamAngle[MBSYS_SURF_HSDS2_TX_PAR];    /* transmit beam angle (radians) */
-	float		bs_pulseLength[MBSYS_SURF_HSDS2_TX_PAR];    /* transmit pulse length (s) */
+	unsigned int	bs_txBeamIndex[MBSYS_ATLAS_HSDS2_TX_PAR];    /* code of external beamshape table */
+	float		bs_txLevel[MBSYS_ATLAS_HSDS2_TX_PAR];	    /* transmit level: dB relative to 1 uPa */
+	float		bs_txBeamAngle[MBSYS_ATLAS_HSDS2_TX_PAR];    /* transmit beam angle (radians) */
+	float		bs_pulseLength[MBSYS_ATLAS_HSDS2_TX_PAR];    /* transmit pulse length (s) */
 	unsigned short	bs_nrBsSets;				    /* number of backscatter sets */
-	float		bs_m_tau[MBSYS_SURF_HSDS2_PFB_NUM];	    /* echo duration (s) */
-	char		bs_eff_ampli[MBSYS_SURF_HSDS2_PFB_NUM];	    /* effective amplitude */
-	char		bs_nis[MBSYS_SURF_HSDS2_PFB_NUM];	    /* noise isotropic */
+	float		bs_m_tau[MBSYS_ATLAS_HSDS2_PFB_NUM];	    /* echo duration (s) */
+	char		bs_eff_ampli[MBSYS_ATLAS_HSDS2_PFB_NUM];	    /* effective amplitude */
+	char		bs_nis[MBSYS_ATLAS_HSDS2_PFB_NUM];	    /* noise isotropic */
 	
 	/* comment */
-	char		comment[MBSYS_SURF_COMMENT_LENGTH];
+	char		comment[MBSYS_ATLAS_COMMENT_LENGTH];
 	};
 	
 
@@ -324,7 +327,7 @@ struct mbsys_surf_struct
  * The values were extracted from a sample "raw" angle data file.
  *
  */
-#ifndef MBSYS_SURF_C
+#ifndef MBSYS_ATLAS_C
 extern double ds2_ang_120d_59b[];
 extern double ds2_ang_90d_59b[];
 extern double ds2_ang_120d_140b[];
@@ -1336,11 +1339,11 @@ double DS2_TimeCorrDeep4[] = {
 #endif
 	
 /* system specific function prototypes */
-int mbsys_surf_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_atlas_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error);
-int mbsys_surf_deall(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_atlas_deall(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error);
-int mbsys_surf_extract(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_atlas_extract(int verbose, void *mbio_ptr, void *store_ptr, 
 			int *kind, int time_i[7], double *time_d,
 			double *navlon, double *navlat,
 			double *speed, double *heading,
@@ -1349,7 +1352,7 @@ int mbsys_surf_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			double *bathacrosstrack, double *bathalongtrack,
 			double *ss, double *ssacrosstrack, double *ssalongtrack,
 			char *comment, int *error);
-int mbsys_surf_insert(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_atlas_insert(int verbose, void *mbio_ptr, void *store_ptr, 
 			int kind, int time_i[7], double time_d,
 			double navlon, double navlat,
 			double speed, double heading,
@@ -1358,28 +1361,30 @@ int mbsys_surf_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			double *bathacrosstrack, double *bathalongtrack,
 			double *ss, double *ssacrosstrack, double *ssalongtrack,
 			char *comment, int *error);
-int mbsys_surf_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
+int mbsys_atlas_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbeams,
 			double *ttimes, double *angles, 
 			double *angles_forward, double *angles_null,
 			double *heave, double *alongtrack_offset, 
 			double *draft, double *ssv, int *error);
-int mbsys_surf_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
+int mbsys_atlas_detects(int verbose, void *mbio_ptr, void *store_ptr,
+			int *kind, int *nbeams, int *detects, int *error);
+int mbsys_atlas_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, double *transducer_depth, double *altitude, 
 			int *error);
-int mbsys_surf_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
+int mbsys_atlas_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int time_i[7], double *time_d,
 			double *navlon, double *navlat,
 			double *speed, double *heading, double *draft, 
 			double *roll, double *pitch, double *heave, 
 			int *error);
-int mbsys_surf_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
+int mbsys_atlas_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 			int time_i[7], double time_d,
 			double navlon, double navlat,
 			double speed, double heading, double draft, 
 			double roll, double pitch, double heave,
 			int *error);
-int mbsys_surf_copy(int verbose, void *mbio_ptr, 
+int mbsys_atlas_copy(int verbose, void *mbio_ptr, 
 			void *store_ptr, void *copy_ptr,
 			int *error);
 

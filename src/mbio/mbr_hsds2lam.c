@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsds2raw.c	6/20/01
- *	$Id: mbr_hsds2lam.c,v 5.0 2001-07-20 00:32:06 caress Exp $
+ *	$Id: mbr_hsds2lam.c,v 5.1 2002-07-20 20:42:40 caress Exp $
  *
  *    Copyright (c) 2001 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * 		D. N. Chayes
  * Date:	June 20, 2001
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2001/07/20 00:32:06  caress
+ * Release 5.0.beta03
+ *
  * Revision 5.0  2001/06/29  22:49:07  caress
  * Added support for HSDS2LAM
  *
@@ -42,7 +45,7 @@
 #include "../../include/mb_format.h"
 #include "../../include/mb_io.h"
 #include "../../include/mb_define.h"
-#include "../../include/mbsys_surf.h"
+#include "../../include/mbsys_atlas.h"
 	
 /* turn on debug statements here */
 /* #define MBR_HSDS2LAM_DEBUG 1 */
@@ -79,7 +82,7 @@ int mbr_hsds2lam_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 /*--------------------------------------------------------------------*/
 int mbr_register_hsds2lam(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_hsds2lam.c,v 5.0 2001-07-20 00:32:06 caress Exp $";
+	static char res_id[]="$Id: mbr_hsds2lam.c,v 5.1 2002-07-20 20:42:40 caress Exp $";
 	char	*function_name = "mbr_register_hsds2lam";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -120,20 +123,20 @@ int mbr_register_hsds2lam(int verbose, void *mbio_ptr, int *error)
 	/* set format and system specific function pointers */
 	mb_io_ptr->mb_io_format_alloc = &mbr_alm_hsds2lam;
 	mb_io_ptr->mb_io_format_free = &mbr_dem_hsds2lam; 
-	mb_io_ptr->mb_io_store_alloc = &mbsys_surf_alloc; 
-	mb_io_ptr->mb_io_store_free = &mbsys_surf_deall; 
+	mb_io_ptr->mb_io_store_alloc = &mbsys_atlas_alloc; 
+	mb_io_ptr->mb_io_store_free = &mbsys_atlas_deall; 
 	mb_io_ptr->mb_io_read_ping = &mbr_rt_hsds2lam; 
 	mb_io_ptr->mb_io_write_ping = &mbr_wt_hsds2lam; 
-	mb_io_ptr->mb_io_extract = &mbsys_surf_extract; 
-	mb_io_ptr->mb_io_insert = &mbsys_surf_insert; 
-	mb_io_ptr->mb_io_extract_nav = &mbsys_surf_extract_nav; 
-	mb_io_ptr->mb_io_insert_nav = &mbsys_surf_insert_nav; 
-	mb_io_ptr->mb_io_extract_altitude = &mbsys_surf_extract_altitude; 
+	mb_io_ptr->mb_io_extract = &mbsys_atlas_extract; 
+	mb_io_ptr->mb_io_insert = &mbsys_atlas_insert; 
+	mb_io_ptr->mb_io_extract_nav = &mbsys_atlas_extract_nav; 
+	mb_io_ptr->mb_io_insert_nav = &mbsys_atlas_insert_nav; 
+	mb_io_ptr->mb_io_extract_altitude = &mbsys_atlas_extract_altitude; 
 	mb_io_ptr->mb_io_insert_altitude = NULL; 
 	mb_io_ptr->mb_io_extract_svp = NULL; 
 	mb_io_ptr->mb_io_insert_svp = NULL; 
-	mb_io_ptr->mb_io_ttimes = &mbsys_surf_ttimes; 
-	mb_io_ptr->mb_io_copyrecord = &mbsys_surf_copy; 
+	mb_io_ptr->mb_io_ttimes = &mbsys_atlas_ttimes; 
+	mb_io_ptr->mb_io_copyrecord = &mbsys_atlas_copy; 
 	mb_io_ptr->mb_io_extract_rawss = NULL; 
 	mb_io_ptr->mb_io_insert_rawss = NULL; 
 
@@ -209,7 +212,7 @@ int mbr_info_hsds2lam(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_hsds2lam.c,v 5.0 2001-07-20 00:32:06 caress Exp $";
+	static char res_id[]="$Id: mbr_hsds2lam.c,v 5.1 2002-07-20 20:42:40 caress Exp $";
 	char	*function_name = "mbr_info_hsds2lam";
 	int	status = MB_SUCCESS;
 
@@ -225,12 +228,12 @@ int mbr_info_hsds2lam(int verbose,
 	/* set format info parameters */
 	status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
-	*system = MB_SYS_SURF;
-	*beams_bath_max = MBSYS_SURF_MAXBEAMS;
-	*beams_amp_max = MBSYS_SURF_MAXBEAMS;
-	*pixels_ss_max = MBSYS_SURF_MAXPIXELS;
+	*system = MB_SYS_ATLAS;
+	*beams_bath_max = MBSYS_ATLAS_MAXBEAMS;
+	*beams_amp_max = MBSYS_ATLAS_MAXBEAMS;
+	*pixels_ss_max = MBSYS_ATLAS_MAXPIXELS;
 	strncpy(format_name, "HSDS2LAM", MB_NAME_LENGTH);
-	strncpy(system_name, "SURF", MB_NAME_LENGTH);
+	strncpy(system_name, "ATLAS", MB_NAME_LENGTH);
 	strncpy(format_description, "Format name:          MBF_HSDS2LAM\nInformal Description: L-DEO HSDS2 processing format\nAttributes:           STN Atlas multibeam sonars, \n                      Hydrosweep DS2, Hydrosweep MD, \n                      Fansweep 10, Fansweep 20, \n                      bathymetry, amplitude, and sidescan,\n                      up to 1440 beams and 4096 pixels,\n                      XDR binary, L-DEO.\n", MB_DESCRIPTION_LENGTH);
 	*numfile = 1;
 	*filetype = MB_FILETYPE_XDR;
@@ -278,7 +281,7 @@ int mbr_info_hsds2lam(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_hsds2lam(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_hsds2lam.c,v 5.0 2001-07-20 00:32:06 caress Exp $";
+	static char res_id[]="$Id: mbr_hsds2lam.c,v 5.1 2002-07-20 20:42:40 caress Exp $";
 	char	*function_name = "mbr_alm_hsds2lam";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -302,7 +305,7 @@ int mbr_alm_hsds2lam(int verbose, void *mbio_ptr, int *error)
 	/* allocate memory for data structure */
 	mb_io_ptr->structure_size = 0;
 	mb_io_ptr->data_structure_size = 0;
-	status = mbsys_surf_alloc(
+	status = mbsys_atlas_alloc(
 			verbose,mbio_ptr,
 			&mb_io_ptr->store_data,error);
 
@@ -341,7 +344,7 @@ int mbr_dem_hsds2lam(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* deallocate memory for data descriptor */
-	status = mbsys_surf_deall(
+	status = mbsys_atlas_deall(
 			verbose,mbio_ptr,
 			&mb_io_ptr->store_data,error);
 
@@ -365,7 +368,7 @@ int mbr_rt_hsds2lam(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	char	*function_name = "mbr_rt_hsds2lam";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
-	struct mbsys_surf_struct *store;
+	struct mbsys_atlas_struct *store;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -385,7 +388,7 @@ int mbr_rt_hsds2lam(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	status = mbr_hsds2lam_rd_data(verbose,mbio_ptr,store_ptr,error);
 
 	/* get pointers to data structures */
-	store = (struct mbsys_surf_struct *) store_ptr;
+	store = (struct mbsys_atlas_struct *) store_ptr;
 
 	/* set error and kind in mb_io_ptr */
 	mb_io_ptr->new_error = *error;
@@ -411,7 +414,7 @@ int mbr_wt_hsds2lam(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	char	*function_name = "mbr_wt_hsds2lam";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
-	struct mbsys_surf_struct *store;
+	struct mbsys_atlas_struct *store;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -428,7 +431,7 @@ int mbr_wt_hsds2lam(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* get pointer to raw data structure */
-	store = (struct mbsys_surf_struct *) store_ptr;
+	store = (struct mbsys_atlas_struct *) store_ptr;
 
 	/* write next data to file */
 	status = mbr_hsds2lam_wr_data(verbose,mbio_ptr,store_ptr,error);
@@ -453,7 +456,7 @@ int mbr_hsds2lam_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	char	*function_name = "mbr_hsds2lam_rd_data";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
-	struct mbsys_surf_struct *store;
+	struct mbsys_atlas_struct *store;
 	int	xdr_status;
 	int	strlength;
 	int	telegram_id;
@@ -475,7 +478,7 @@ int mbr_hsds2lam_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* get pointer to raw data structure */
-	store = (struct mbsys_surf_struct *) store_ptr;
+	store = (struct mbsys_atlas_struct *) store_ptr;
 
 	/* set file position */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
@@ -487,15 +490,15 @@ int mbr_hsds2lam_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	nskip = 0;
 	xdr_status = xdr_long(mb_io_ptr->xdrs, &telegram_id);
 	while (xdr_status == MB_YES 
-	    && telegram_id != MBSYS_SURF_TELEGRAM_HSDS2LAM
-	    && telegram_id != MBSYS_SURF_TELEGRAM_COMMENTLAM)
+	    && telegram_id != MBSYS_ATLAS_TELEGRAM_HSDS2LAM
+	    && telegram_id != MBSYS_ATLAS_TELEGRAM_COMMENTLAM)
 	    {
 	    xdr_status = xdr_long(mb_io_ptr->xdrs, &telegram_id);
 	    nskip++;
 	    }
 
 	/* read ping record */
-	if (telegram_id == MBSYS_SURF_TELEGRAM_HSDS2LAM)
+	if (telegram_id == MBSYS_ATLAS_TELEGRAM_HSDS2LAM)
 	    {
 	    if (xdr_status == MB_YES) 
 		xdr_status = xdr_u_long(mb_io_ptr->xdrs, &store->start_ping_no);
@@ -628,7 +631,7 @@ int mbr_hsds2lam_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		xdr_status = xdr_float(mb_io_ptr->xdrs, &store->bs_rxGain);
 	    if (xdr_status == MB_YES) 
 		xdr_status = xdr_float(mb_io_ptr->xdrs, &store->bs_ar);
-	    for (i=0;i<MBSYS_SURF_HSDS2_RX_PAR;i++)
+	    for (i=0;i<MBSYS_ATLAS_HSDS2_RX_PAR;i++)
 		{
 		if (xdr_status == MB_YES) 
 		    xdr_status = xdr_float(mb_io_ptr->xdrs, &store->bs_TvgRx_time[i]);
@@ -637,7 +640,7 @@ int mbr_hsds2lam_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		}
 	    if (xdr_status == MB_YES) 
 		xdr_status = xdr_u_short(mb_io_ptr->xdrs, &store->bs_nrTxSets);
-	    for (i=0;i<MBSYS_SURF_HSDS2_TX_PAR;i++)
+	    for (i=0;i<MBSYS_ATLAS_HSDS2_TX_PAR;i++)
 		{
 		if (xdr_status == MB_YES) 
 		    xdr_status = xdr_u_long(mb_io_ptr->xdrs, &store->bs_txBeamIndex[i]);
@@ -650,7 +653,7 @@ int mbr_hsds2lam_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		}
 	    if (xdr_status == MB_YES) 
 		xdr_status = xdr_u_short(mb_io_ptr->xdrs, &store->bs_nrBsSets);
-	    for (i=0;i<MBSYS_SURF_HSDS2_PFB_NUM;i++)
+	    for (i=0;i<MBSYS_ATLAS_HSDS2_PFB_NUM;i++)
 		{
 		if (xdr_status == MB_YES) 
 		    xdr_status = xdr_float(mb_io_ptr->xdrs, &store->bs_m_tau[i]);
@@ -672,7 +675,7 @@ int mbr_hsds2lam_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	    }
 
 	/* read comment record */
-	else if (telegram_id == MBSYS_SURF_TELEGRAM_COMMENTLAM)
+	else if (telegram_id == MBSYS_ATLAS_TELEGRAM_COMMENTLAM)
 	    {
 	    if (xdr_status == MB_YES) 
 		xdr_status = xdr_long(mb_io_ptr->xdrs, &strlength);
@@ -693,9 +696,9 @@ int mbr_hsds2lam_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	/* check for broken records - these do happen!!! */
 	if (status == MB_SUCCESS
 	    && store->kind != MB_DATA_COMMENT
-	    && (store->tt_beam_cnt > MBSYS_SURF_MAXBEAMS
-		|| store->ss_max_side_bb_cnt > MBSYS_SURF_MAXPIXELS
-		|| store->ss_max_side_sb_cnt > MBSYS_SURF_MAXPIXELS
+	    && (store->tt_beam_cnt > MBSYS_ATLAS_MAXBEAMS
+		|| store->ss_max_side_bb_cnt > MBSYS_ATLAS_MAXPIXELS
+		|| store->ss_max_side_sb_cnt > MBSYS_ATLAS_MAXPIXELS
 		|| store->start_opmode[0] != 1))
 		{
 		*error = MB_ERROR_UNINTELLIGIBLE;
@@ -789,7 +792,7 @@ int mbr_hsds2lam_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		    fprintf(stderr,"dbg5       tr_transmit_time_d:      %f\n",store->tr_transmit_time_d);
 		    fprintf(stderr,"dbg5       tr_window_mode:          %d\n",store->tr_window_mode);
 		    fprintf(stderr,"dbg5       tr_no_of_win_groups:     %d\n",store->tr_no_of_win_groups);
-		    for (i=0;i<MBSYS_SURF_MAXWINDOWS;i++)
+		    for (i=0;i<MBSYS_ATLAS_MAXWINDOWS;i++)
 			    {
 			    fprintf(stderr,"dbg5       window[%d]:cnt start stop: %d %f %f\n", 
 				    i, store->tr_repeat_count[i], store->tr_start[i], store->tr_stop[i]);		
@@ -800,20 +803,20 @@ int mbr_hsds2lam_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		    fprintf(stderr,"dbg5       bs_rxGup:                %f\n",store->bs_rxGup);
 		    fprintf(stderr,"dbg5       bs_rxGain:               %f\n",store->bs_rxGain);
 		    fprintf(stderr,"dbg5       bs_ar:                   %f\n",store->bs_ar);
-		    for (i=0;i<MBSYS_SURF_HSDS2_RX_PAR;i++)
+		    for (i=0;i<MBSYS_ATLAS_HSDS2_RX_PAR;i++)
 			    {
 			    fprintf(stderr,"dbg5       tvgrx[%d]: time gain: %f %f\n", 
 				    i, store->bs_TvgRx_time[i], store->bs_TvgRx_gain[i]);		
 			    }
 		    fprintf(stderr,"dbg5       bs_nrTxSets:             %d\n",store->bs_nrTxSets);
-		    for (i=0;i<MBSYS_SURF_HSDS2_TX_PAR;i++)
+		    for (i=0;i<MBSYS_ATLAS_HSDS2_TX_PAR;i++)
 			    {
 			    fprintf(stderr,"dbg5       tx[%d]: # gain ang len:    %d %f %f %f\n", 
 				    i, store->bs_txBeamIndex[i], store->bs_txLevel[i], 		
 				    store->bs_txBeamAngle[i], store->bs_pulseLength[i]);		
 			    }
 		    fprintf(stderr,"dbg5       bs_nrBsSets:             %d\n",store->bs_nrBsSets);
-		    for (i=0;i<MBSYS_SURF_HSDS2_TX_PAR;i++)
+		    for (i=0;i<MBSYS_ATLAS_HSDS2_TX_PAR;i++)
 			    {
 			    fprintf(stderr,"dbg5       bs[%d]: # tau amp nis:   %f %d %d\n", 
 				    i, store->bs_m_tau[i], store->bs_eff_ampli[i], store->bs_nis[i]);		
@@ -844,7 +847,7 @@ int mbr_hsds2lam_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	char	*function_name = "mbr_hsds2lam_wr_data";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
-	struct mbsys_surf_struct *store;
+	struct mbsys_atlas_struct *store;
 	int	xdr_status;
 	int	strlength;
 	int	telegram_id;
@@ -865,7 +868,7 @@ int mbr_hsds2lam_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* get pointer to raw data structure */
-	store = (struct mbsys_surf_struct *) store_ptr;
+	store = (struct mbsys_atlas_struct *) store_ptr;
 
 	/* print debug statements */
 #ifndef MBR_HSDS2LAM_DEBUG
@@ -925,7 +928,7 @@ int mbr_hsds2lam_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		    fprintf(stderr,"dbg5       tr_transmit_time_d:      %f\n",store->tr_transmit_time_d);
 		    fprintf(stderr,"dbg5       tr_window_mode:          %d\n",store->tr_window_mode);
 		    fprintf(stderr,"dbg5       tr_no_of_win_groups:     %d\n",store->tr_no_of_win_groups);
-		    for (i=0;i<MBSYS_SURF_MAXWINDOWS;i++)
+		    for (i=0;i<MBSYS_ATLAS_MAXWINDOWS;i++)
 			    {
 			    fprintf(stderr,"dbg5       window[%d]:cnt start stop: %d %f %f\n", 
 				    i, store->tr_repeat_count[i], store->tr_start[i], store->tr_stop[i]);		
@@ -936,20 +939,20 @@ int mbr_hsds2lam_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		    fprintf(stderr,"dbg5       bs_rxGup:                %f\n",store->bs_rxGup);
 		    fprintf(stderr,"dbg5       bs_rxGain:               %f\n",store->bs_rxGain);
 		    fprintf(stderr,"dbg5       bs_ar:                   %f\n",store->bs_ar);
-		    for (i=0;i<MBSYS_SURF_HSDS2_RX_PAR;i++)
+		    for (i=0;i<MBSYS_ATLAS_HSDS2_RX_PAR;i++)
 			    {
 			    fprintf(stderr,"dbg5       tvgrx[%d]: time gain: %f %f\n", 
 				    i, store->bs_TvgRx_time[i], store->bs_TvgRx_gain[i]);		
 			    }
 		    fprintf(stderr,"dbg5       bs_nrTxSets:             %d\n",store->bs_nrTxSets);
-		    for (i=0;i<MBSYS_SURF_HSDS2_TX_PAR;i++)
+		    for (i=0;i<MBSYS_ATLAS_HSDS2_TX_PAR;i++)
 			    {
 			    fprintf(stderr,"dbg5       tx[%d]: # gain ang len:    %d %f %f %f\n", 
 				    i, store->bs_txBeamIndex[i], store->bs_txLevel[i], 		
 				    store->bs_txBeamAngle[i], store->bs_pulseLength[i]);		
 			    }
 		    fprintf(stderr,"dbg5       bs_nrBsSets:             %d\n",store->bs_nrBsSets);
-		    for (i=0;i<MBSYS_SURF_HSDS2_TX_PAR;i++)
+		    for (i=0;i<MBSYS_ATLAS_HSDS2_TX_PAR;i++)
 			    {
 			    fprintf(stderr,"dbg5       bs[%d]: # tau amp nis:   %f %d %d\n", 
 				    i, store->bs_m_tau[i], store->bs_eff_ampli[i], store->bs_nis[i]);		
@@ -964,7 +967,7 @@ int mbr_hsds2lam_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	if (store->kind == MB_DATA_DATA
 	    || store->kind == MB_DATA_CALIBRATE)
 	    {
-	    telegram_id = MBSYS_SURF_TELEGRAM_HSDS2LAM;
+	    telegram_id = MBSYS_ATLAS_TELEGRAM_HSDS2LAM;
 	    xdr_status = xdr_long(mb_io_ptr->xdrs, &telegram_id);
 	    if (xdr_status == MB_YES) 
 		xdr_status = xdr_u_long(mb_io_ptr->xdrs, &store->start_ping_no);
@@ -1113,7 +1116,7 @@ int mbr_hsds2lam_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		xdr_status = xdr_float(mb_io_ptr->xdrs, &store->bs_rxGain);
 	    if (xdr_status == MB_YES) 
 		xdr_status = xdr_float(mb_io_ptr->xdrs, &store->bs_ar);
-	    for (i=0;i<MBSYS_SURF_HSDS2_RX_PAR;i++)
+	    for (i=0;i<MBSYS_ATLAS_HSDS2_RX_PAR;i++)
 		{
 		if (xdr_status == MB_YES) 
 		    xdr_status = xdr_float(mb_io_ptr->xdrs, &store->bs_TvgRx_time[i]);
@@ -1122,7 +1125,7 @@ int mbr_hsds2lam_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		}
 	    if (xdr_status == MB_YES) 
 		xdr_status = xdr_u_short(mb_io_ptr->xdrs, &store->bs_nrTxSets);
-	    for (i=0;i<MBSYS_SURF_HSDS2_TX_PAR;i++)
+	    for (i=0;i<MBSYS_ATLAS_HSDS2_TX_PAR;i++)
 		{
 		if (xdr_status == MB_YES) 
 		    xdr_status = xdr_u_long(mb_io_ptr->xdrs, &store->bs_txBeamIndex[i]);
@@ -1135,17 +1138,17 @@ int mbr_hsds2lam_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		}
 	    if (xdr_status == MB_YES) 
 		xdr_status = xdr_u_short(mb_io_ptr->xdrs, &store->bs_nrBsSets);
-	    for (i=0;i<MBSYS_SURF_HSDS2_PFB_NUM;i++)
+	    for (i=0;i<MBSYS_ATLAS_HSDS2_PFB_NUM;i++)
 		{
 		if (xdr_status == MB_YES) 
 		    xdr_status = xdr_float(mb_io_ptr->xdrs, &store->bs_m_tau[i]);
 		}
-	    strlength = MBSYS_SURF_HSDS2_PFB_NUM;
+	    strlength = MBSYS_ATLAS_HSDS2_PFB_NUM;
 	    if (xdr_status == MB_YES) 
 		xdr_status = xdr_long(mb_io_ptr->xdrs, &strlength);
 	    if (xdr_status == MB_YES) 
 		xdr_status = xdr_opaque(mb_io_ptr->xdrs, store->bs_eff_ampli, strlength);
-	    strlength = MBSYS_SURF_HSDS2_PFB_NUM;
+	    strlength = MBSYS_ATLAS_HSDS2_PFB_NUM;
 	    if (xdr_status == MB_YES) 
 		xdr_status = xdr_long(mb_io_ptr->xdrs, &strlength);
 	    if (xdr_status == MB_YES) 
@@ -1155,7 +1158,7 @@ int mbr_hsds2lam_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	/* write comment record */
 	else if (store->kind == MB_DATA_COMMENT)
 	    {
-	    telegram_id = MBSYS_SURF_TELEGRAM_COMMENTLAM;
+	    telegram_id = MBSYS_ATLAS_TELEGRAM_COMMENTLAM;
 	    xdr_status = xdr_long(mb_io_ptr->xdrs, &telegram_id);
 	    if ((strlen(store->comment) + 1) % 4 == 0)
 		strlength = strlen(store->comment) + 1;

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_access.c	11/1/00
- *    $Id: mb_access.c,v 5.4 2002-05-02 03:55:34 caress Exp $
+ *    $Id: mb_access.c,v 5.5 2002-07-20 20:42:40 caress Exp $
 
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	October 1, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2002/05/02 03:55:34  caress
+ * Release 5.0.beta17
+ *
  * Revision 5.3  2001/07/20 00:31:11  caress
  * Release 5.0.beta03
  *
@@ -45,6 +48,8 @@
 #include "../../include/mb_format.h"
 #include "../../include/mb_io.h"
 #include "../../include/mb_define.h"
+
+static char rcs_id[]="$Id: mb_access.c,v 5.5 2002-07-20 20:42:40 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_alloc(int verbose, void *mbio_ptr,
@@ -192,7 +197,6 @@ int mb_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
 		char *comment, int *error)
 {
-	static char rcs_id[]="$Id: mb_access.c,v 5.4 2002-05-02 03:55:34 caress Exp $";
 	char	*function_name = "mb_extract";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
@@ -303,7 +307,6 @@ int mb_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
 		char *comment, int *error)
 {
-	static char rcs_id[]="$Id: mb_access.c,v 5.4 2002-05-02 03:55:34 caress Exp $";
 	char	*function_name = "mb_insert";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
@@ -405,7 +408,6 @@ int mb_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 	double *roll, double *pitch, double *heave, 
 	int *error)
 {
-  static char rcs_id[]="$Id: mb_access.c,v 5.4 2002-05-02 03:55:34 caress Exp $";
 	char	*function_name = "mb_extract_nav";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
@@ -480,7 +482,6 @@ int mb_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 	double roll, double pitch, double heave, 
 	int *error)
 {
-  static char rcs_id[]="$Id: mb_access.c,v 5.4 2002-05-02 03:55:34 caress Exp $";
 	char	*function_name = "mb_insert_nav";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
@@ -552,7 +553,6 @@ int mb_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 		double *transducer_depth, double *altitude,
 		int *error)
 {
-	static char rcs_id[]="$Id: mb_access.c,v 5.4 2002-05-02 03:55:34 caress Exp $";
 	char	*function_name = "mb_extract_altitude";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
@@ -606,7 +606,6 @@ int mb_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 		double transducer_depth, double altitude,
 		int *error)
 {
-	static char rcs_id[]="$Id: mb_access.c,v 5.4 2002-05-02 03:55:34 caress Exp $";
 	char	*function_name = "mb_insert_altitude";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
@@ -661,7 +660,6 @@ int mb_extract_svp(int verbose, void *mbio_ptr, void *store_ptr,
 		double *depth, double *velocity,
 		int *error)
 {
-	static char rcs_id[]="$Id: mb_access.c,v 5.4 2002-05-02 03:55:34 caress Exp $";
 	char	*function_name = "mb_extract_svp";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
@@ -718,7 +716,6 @@ int mb_insert_svp(int verbose, void *mbio_ptr, void *store_ptr,
 		double *depth, double *velocity,
 		int *error)
 {
-	static char rcs_id[]="$Id: mb_access.c,v 5.4 2002-05-02 03:55:34 caress Exp $";
 	char	*function_name = "mb_insert_svp";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
@@ -945,7 +942,6 @@ int mb_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 	double *heave, double *alongtrack_offset, 
 	double *draft, double *ssv, int *error)
 {
-  static char rcs_id[]="$Id: mb_access.c,v 5.4 2002-05-02 03:55:34 caress Exp $";
 	char	*function_name = "mb_ttimes";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
@@ -1011,6 +1007,67 @@ int mb_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+int mb_detects(int verbose, void *mbio_ptr, void *store_ptr,
+	int *kind, int *nbeams, int *detects, int *error)
+{
+	char	*function_name = "mb_detects";
+	int	status;
+	struct mb_io_struct *mb_io_ptr;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mb_ptr:     %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* call the appropriate mbsys_ extraction routine */
+	if (mb_io_ptr->mb_io_detects != NULL)
+		{
+		status = (*mb_io_ptr->mb_io_detects)
+				(verbose,mbio_ptr,store_ptr,
+				kind,nbeams,detects,error);
+		}
+	else
+		{
+		status = MB_FAILURE;
+		*error = MB_ERROR_BAD_SYSTEM;
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
+		}
+	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR)
+		{
+		fprintf(stderr,"dbg2       nbeams:     %d\n",*nbeams);
+		for (i=0;i<*nbeams;i++)
+			fprintf(stderr,"dbg2       beam %d: detects:%d\n",
+				i,detects[i]);
+		}
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
 int mb_extract_rawss(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind,
 		int *nrawss,
@@ -1019,7 +1076,6 @@ int mb_extract_rawss(int verbose, void *mbio_ptr, void *store_ptr,
 		double *rawssalongtrack, 
 		int *error)
 {
-	static char rcs_id[]="$Id: mb_access.c,v 5.4 2002-05-02 03:55:34 caress Exp $";
 	char	*function_name = "mb_extract_rawss";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
@@ -1081,7 +1137,6 @@ int mb_insert_rawss(int verbose, void *mbio_ptr, void *store_ptr,
 		double *rawssalongtrack, 
 		int *error)
 {
-	static char rcs_id[]="$Id: mb_access.c,v 5.4 2002-05-02 03:55:34 caress Exp $";
 	char	*function_name = "mb_insert_rawss";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;

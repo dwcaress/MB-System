@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	1/19/93
- *    $Id: mb_io.h,v 5.9 2002-05-29 23:40:48 caress Exp $
+ *    $Id: mb_io.h,v 5.10 2002-07-20 20:42:40 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.9  2002/05/29 23:40:48  caress
+ * Release 5.0.beta18
+ *
  * Revision 5.8  2002/05/02 04:00:41  caress
  * Release 5.0.beta17
  *
@@ -280,6 +283,12 @@ struct mb_io_struct
 	double	*new_ss;
 	double	*new_ss_acrosstrack;
 	double	*new_ss_alongtrack;
+	
+	/* variables for projections to and from UTM coordinates */
+	int	projection_initialized;
+	void 	*pjptr;
+	int	utm_zone;
+	char	ellipsoid[MB_NAME_LENGTH];
 
 	/* variables for interpolating/extrapolating navigation 
 		for formats containing nav as asynchronous
@@ -397,6 +406,8 @@ struct mb_io_struct
 		double *angles_forward, double *angles_null,
 		double *heave, double *alongtrack_offset, 
 		double *draft, double *ssv, int *error);
+	int (*mb_io_detects)(int verbose, void *mbio_ptr, void *store_ptr,
+		int *kind, int *nbeams, int *detects, int *error);
 	int (*mb_io_extract_rawss)(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int *nrawss,
 		double *rawss, 

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad2.h	10/9/98
- *	$Id: mbsys_simrad2.h,v 5.8 2002-05-29 23:41:49 caress Exp $
+ *	$Id: mbsys_simrad2.h,v 5.9 2002-07-20 20:42:40 caress Exp $
  *
  *    Copyright (c) 1998, 2001 by
  *    David W. Caress (caress@mbari.org)
@@ -32,6 +32,9 @@
  * Date:	October 9, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2002/05/29 23:41:49  caress
+ * Release 5.0.beta18
+ *
  * Revision 5.7  2001/07/20 00:32:54  caress
  * Release 5.0.beta03
  *
@@ -124,7 +127,7 @@
  *        *0x0243: Clock Output                           28 bytes
  *        *0x0244: Bathymetry                             48-4092 bytes
  *         0x0245: Single beam echosounder depth          32 bytes
- *         0x0246: Raw range and beam angle               24-2056 bytes
+ *        *0x0246: Raw range and beam angle               24-2056 bytes
  *        *0x0247: Surface sound speed                    variable size
  *        *0x0248: Heading Output                         422 bytes
  *        *0x0249: Parameter - Start                      variable size
@@ -137,6 +140,7 @@
  *        *0x0255: Sound velocity profile (new)           variable size
  *        *0x0256: Sound velocity profile (old)           variable size
  *         0x0257: SSP input                              variable size
+ *        *0x0265: Raw range and beam angle               112-1658 bytes
  *        *0x0268: Height Output                          24 bytes
  *        *0x0269: Parameter - Stop                       variable size
  *         0x0270: Parameter - Remote                     variable size
@@ -219,6 +223,11 @@
  *      purpose of the uncorrected data mode is to allow users to
  *      fully recalculate the data following revision of the heading and
  *      attitude data streams.
+ *      NOTE: As of May 2002, Simrad seems to have implemented a different
+ *      scheme for the EM300 and EM120 sonars. There is a new raw range and
+ *      angle datagram (0x0265) that is output in addition to the depth and
+ *      seafloor image datagrams. This would seem to make obsolete the notion
+ *      of placing uncorrected ranges and angles in the depth datagram.
  *  11. The sidescan is structured in terms of a certain number of samples
  *      per beam. The range sampling rate for the sidescan is the same as
  *      that specified in the depth datagram and the ranges in the sidescan
@@ -287,6 +296,7 @@
 #define	MBSYS_SIMRAD2_MAXBEAMS		254
 #define	MBSYS_SIMRAD2_MAXPIXELS		1024
 #define	MBSYS_SIMRAD2_MAXRAWPIXELS	32000
+#define MBSYS_SIMRAD2_MAXTX		9
 #define	MBSYS_SIMRAD2_MAXSVP		1024
 #define	MBSYS_SIMRAD2_MAXATTITUDE	100
 #define	MBSYS_SIMRAD2_MAXHEADING	100
@@ -317,6 +327,7 @@
 #define	EM2_BATH		0x0244
 #define	EM2_BATH_MBA		0x02E1
 #define	EM2_RAWBEAM		0x0246
+#define	EM2_RAWBEAM2		0x0265
 #define	EM2_SS			0x0253
 #define	EM2_SS_MBA		0x02E2
 
@@ -345,6 +356,9 @@
 #define	EM2_BATH_MBA_BEAM_SIZE		18
 #define	EM2_RAWBEAM_HEADER_SIZE		16
 #define	EM2_RAWBEAM_BEAM_SIZE		8
+#define	EM2_RAWBEAM2_HEADER_SIZE	42
+#define	EM2_RAWBEAM2_BEAM_SIZE		16
+#define	EM2_RAWBEAM2_TX_SIZE		12
 #define	EM2_SS_HEADER_SIZE		28
 #define	EM2_SS_BEAM_SIZE		6
 #define	EM2_SS_MBA_HEADER_SIZE		32
@@ -375,6 +389,9 @@ struct mbsys_simrad2_ping_struct
 	int	png_speed;	/* speed over ground (cm/sec) if valid,
 				    invalid = 0xFFFF */
 	int	png_heading;	/* heading (0.01 deg) */
+	int	png_heave;	/* heave from interpolation (0.01 m) */
+	int	png_roll;	/* roll from interpolation (0.01 deg) */
+	int	png_pitch;	/* pitch from interpolation (0.01 deg) */
 	int	png_ssv;	/* sound speed at transducer (0.1 m/sec) */
 	int	png_xducer_depth;   
 				/* transmit transducer depth (0.01 m) 
@@ -455,32 +472,73 @@ struct mbsys_simrad2_ping_struct
 				/* uses standard MB-System beamflags */
 				
 	/* raw travel time and angle data */
-	int	png_raw_read;	/* flag indicating actual reading of rawbeam record */
-	int	png_nrawbeams;	/* number of raw travel times and angles
-				    - nonzero only if raw beam record read */
-	int	png_rawpointangle[MBSYS_SIMRAD2_MAXBEAMS];
-				/* Raw beam pointing angles in 0.01 degree,
-					positive to port. 
-					These values are relative to the transducer 
-					array and have not been corrected
-					for vessel motion. */
-	int	png_rawtiltangle[MBSYS_SIMRAD2_MAXBEAMS];
-				/* Raw transmit tilt angles in 0.01 degree,
-					positive forward. 
-					These values are relative to the transducer 
-					array and have not been corrected
-					for vessel motion. */
-	int	png_rawrange[MBSYS_SIMRAD2_MAXBEAMS];
+	int	png_raw1_read;	/* flag indicating actual reading of old rawbeam record */
+	int	png_raw2_read;	/* flag indicating actual reading of new rawbeam record */
+	int	png_raw_date;	/* date = year*10000 + month*100 + day
+				    Feb 26, 1995 = 19950226 */
+	int	png_raw_msec;	/* time since midnight in msec
+				    08:12:51.234 = 29570234 */
+	int	png_raw_count;	/* sequential counter or input identifier */
+	int	png_raw_serial;	/* system 1 or system 2 serial number */
+	int	png_raw_heading;	/* heading (0.01 deg) */
+	int	png_raw_ssv;		/* sound speed at transducer (0.1 m/sec) */
+	int	png_raw_xducer_depth;	/* transmit transducer depth (0.01 m) */
+	int	png_raw_nbeams_max;	/* maximum number of beams possible */
+	int	png_raw_nbeams;		/* number of raw travel times and angles
+					    - nonzero only if raw beam record read */
+	int	png_raw_depth_res;	/* depth resolution (0.01 m) */
+	int	png_raw_distance_res;	/* x and y resolution (0.01 m) */
+	int	png_raw_sample_rate;	/* sampling rate (Hz) */
+	int	png_raw_status;		/* status from PU/TRU */
+	int	png_raw_rangenormal;	/* normal incidence range (meters) */
+	int	png_raw_normalbackscatter; /* normal incidence backscatter (dB) (-60 to +9) */
+	int	png_raw_obliquebackscatter; /* oblique incidence backscatter (dB) (-60 to +9) */
+	int	png_raw_fixedgain;	/* fixed gain (dB) (0 to 30) */
+	int	png_raw_txpower;	/* transmit power (dB) (0, -10, or -20) */
+	int	png_raw_mode;		/* sonar mode: 
+						0 : very shallow
+						1 : shallow
+						2 : medium
+						3 : deep
+						4 : very deep
+						5 : extra deep */
+	int	png_raw_coverage;	/* swath width (degrees) (10 to 150 degrees) */
+	int	png_raw_yawstabheading; /* yaw stabilization heading (0.01 degrees) */
+	int	png_raw_ntx;		/* number of TX pulses (1 to 9) */
+	int	png_raw_txlastbeam[MBSYS_SIMRAD2_MAXTX];/* last beam number in this TX pulse */
+	int	png_raw_txtiltangle[MBSYS_SIMRAD2_MAXTX];/* tilt angle (0.01 deg) */
+	int	png_raw_txheading[MBSYS_SIMRAD2_MAXTX];	/* heading (0.01 deg) */
+	int	png_raw_txroll[MBSYS_SIMRAD2_MAXTX];	/* roll (0.01 deg) */
+	int	png_raw_txpitch[MBSYS_SIMRAD2_MAXTX];	/* pitch angle (0.01 deg) */
+	int	png_raw_txheave[MBSYS_SIMRAD2_MAXTX];	/* heave (0.01 m) */
+	int	png_raw_rxrange[MBSYS_SIMRAD2_MAXBEAMS];
 				/* Ranges as raw two way travel times in time 
 					units defined as one-fourth the inverse 
 					sampling rate. These values have not 
 					been corrected for changes in the
 					heave during the ping cycle. */
-	int	png_rawamp[MBSYS_SIMRAD2_MAXBEAMS];		
-				/* 0.5 dB */
-	int	png_rawbeam_num[MBSYS_SIMRAD2_MAXBEAMS];	
+	int	png_raw_rxquality[MBSYS_SIMRAD2_MAXBEAMS];	/* beam quality flag */
+	int	png_raw_rxwindow[MBSYS_SIMRAD2_MAXBEAMS];	/* length of detection window */
+	int	png_raw_rxamp[MBSYS_SIMRAD2_MAXBEAMS];		/* 0.5 dB */
+	int	png_raw_rxbeam_num[MBSYS_SIMRAD2_MAXBEAMS];	
 				/* beam 128 is first beam on 
 				    second head of EM3000D */
+	int	png_raw_rxpointangle[MBSYS_SIMRAD2_MAXBEAMS];
+				/* Raw beam pointing angles in 0.01 degree,
+					positive to port. 
+					These values are relative to the transducer 
+					array and have not been corrected
+					for vessel motion. */
+	int	png_raw_rxtiltangle[MBSYS_SIMRAD2_MAXBEAMS];
+				/* Raw transmit tilt angles in 0.01 degree,
+					positive forward. 
+					These values are relative to the transducer 
+					array and have not been corrected
+					for vessel motion. */
+	int	png_raw_rxheading[MBSYS_SIMRAD2_MAXBEAMS];	/* heading (0.01 deg) */
+	int	png_raw_rxroll[MBSYS_SIMRAD2_MAXBEAMS];	/* roll (0.01 deg) */
+	int	png_raw_rxpitch[MBSYS_SIMRAD2_MAXBEAMS];	/* pitch angle (0.01 deg) */
+	int	png_raw_rxheave[MBSYS_SIMRAD2_MAXBEAMS];	/* heave (0.01 m) */
 
 	/* sidescan */
 	int	png_ss_read;	/* flag indicating actual reading of sidescan record */
@@ -488,6 +546,8 @@ struct mbsys_simrad2_ping_struct
 				    Feb 26, 1995 = 19950226 */
 	int	png_ss_msec;	/* time since midnight in msec
 				    08:12:51.234 = 29570234 */
+	int	png_ss_count;	/* sequential counter or input identifier */
+	int	png_ss_serial;	/* system 1 or system 2 serial number */
 	int	png_max_range;	/* old: max range of ping in number of samples */
 				/* current: mean absorption coefficient in 0.01 db/km */
 				/* also: used to store sidescan pixel size in range (m)
@@ -799,6 +859,9 @@ struct mbsys_simrad2_struct
 				    invalid = 0xFFFF */
 	int	pos_heading;	/* heading (0.01 deg) if valid,
 				    invalid = 0xFFFF */
+	int	pos_heave;	/* heave from interpolation (0.01 m) */
+	int	pos_roll;	/* roll from interpolation (0.01 deg) */
+	int	pos_pitch;	/* pitch from interpolation (0.01 deg) */
 	int	pos_system;	/* position system number, type, and realtime use
 				    - position system number given by two lowest bits
 				    - fifth bit set means position must be derived
@@ -911,6 +974,8 @@ int mbsys_simrad2_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 			double *angles_forward, double *angles_null,
 			double *heave, double *alongtrack_offset, 
 			double *draft, double *ssv, int *error);
+int mbsys_simrad2_detects(int verbose, void *mbio_ptr, void *store_ptr,
+			int *kind, int *nbeams, int *detects, int *error);
 int mbsys_simrad2_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, double *transducer_depth, double *altitude, 
 			int *error);

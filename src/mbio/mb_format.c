@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.c	2/18/94
- *    $Id: mb_format.c,v 5.18 2002-05-29 23:36:53 caress Exp $
+ *    $Id: mb_format.c,v 5.19 2002-07-20 20:42:40 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	Februrary 18, 1994
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.18  2002/05/29 23:36:53  caress
+ * Release 5.0.beta18
+ *
  * Revision 5.17  2002/05/02 03:55:34  caress
  * Release 5.0.beta17
  *
@@ -156,7 +159,7 @@
 #include "../../include/mbsys_simrad.h"
 #include "../../include/mbsys_simrad2.h"
 
-static char rcs_id[]="$Id: mb_format.c,v 5.18 2002-05-29 23:36:53 caress Exp $";
+static char rcs_id[]="$Id: mb_format.c,v 5.19 2002-07-20 20:42:40 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_format_register(int verbose, 
@@ -432,6 +435,10 @@ int mb_format_register(int verbose,
 		{
 		status = mbr_register_hsds2lam(verbose, mbio_ptr, error); 
 		}
+	else if (*format == MBF_SAMESURF)
+		{
+		status = mbr_register_samesurf(verbose, mbio_ptr, error); 
+		}
 	else
 		{
 		status = MB_FAILURE;
@@ -478,6 +485,7 @@ int mb_format_register(int verbose,
 		fprintf(stderr,"dbg2       extract_svp:        %d\n",mb_io_ptr->mb_io_extract_svp);
 		fprintf(stderr,"dbg2       insert_svp:         %d\n",mb_io_ptr->mb_io_insert_svp);
 		fprintf(stderr,"dbg2       ttimes:             %d\n",mb_io_ptr->mb_io_ttimes);
+		fprintf(stderr,"dbg2       detects:            %d\n",mb_io_ptr->mb_io_detects);
 		fprintf(stderr,"dbg2       copyrecord:         %d\n",mb_io_ptr->mb_io_copyrecord);
 		fprintf(stderr,"dbg2       error:              %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -1140,6 +1148,17 @@ int mb_format_info(int verbose,
 			beamwidth_xtrack, beamwidth_ltrack, 
 			error);
 		}
+	else if (*format == MBF_SAMESURF)
+		{
+		status = mbr_info_samesurf(verbose, system, 
+			beams_bath_max, beams_amp_max, pixels_ss_max, 
+			format_name, system_name, format_description, 
+			numfile, filetype, 
+			variable_beams, traveltime, beam_flagging, 
+			nav_source, heading_source, vru_source, 
+			beamwidth_xtrack, beamwidth_ltrack, 
+			error);
+		}
 	else if (*format == MBF_DATALIST)
 		{
 		*format = MBF_DATALIST;
@@ -1286,7 +1305,7 @@ int mb_format(int verbose, int *format, int *error)
 /*--------------------------------------------------------------------*/
 int mb_format_system(int verbose, int *format, int *system, int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.18 2002-05-29 23:36:53 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.19 2002-07-20 20:42:40 caress Exp $";
 	char	*function_name = "mb_format_system";
 	int	status;
 
@@ -1355,7 +1374,7 @@ int mb_format_dimensions(int verbose, int *format,
 		int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.18 2002-05-29 23:36:53 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.19 2002-07-20 20:42:40 caress Exp $";
 	char	*function_name = "mb_format_dimensions";
 	int	status;
 
@@ -1423,7 +1442,7 @@ int mb_format_dimensions(int verbose, int *format,
 /*--------------------------------------------------------------------*/
 int mb_format_description(int verbose, int *format, char *description, int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.18 2002-05-29 23:36:53 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.19 2002-07-20 20:42:40 caress Exp $";
 	char	*function_name = "mb_format_description";
 	int	status;
 
@@ -1488,7 +1507,7 @@ int mb_format_flags(int verbose, int *format,
 		int *variable_beams, int *traveltime, int *beam_flagging, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.18 2002-05-29 23:36:53 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.19 2002-07-20 20:42:40 caress Exp $";
 	char	*function_name = "mb_format_flags";
 	int	status;
 
@@ -1559,7 +1578,7 @@ int mb_format_source(int verbose, int *format,
 		int *nav_source, int *heading_source, int *vru_source, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.18 2002-05-29 23:36:53 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.19 2002-07-20 20:42:40 caress Exp $";
 	char	*function_name = "mb_format_source";
 	int	status;
 
@@ -1630,7 +1649,7 @@ int mb_format_beamwidth(int verbose, int *format,
 		double *beamwidth_xtrack, double *beamwidth_ltrack,
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.18 2002-05-29 23:36:53 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.19 2002-07-20 20:42:40 caress Exp $";
 	char	*function_name = "mb_format_beamwidth";
 	int	status;
 
@@ -2139,6 +2158,31 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 		    fileroot[strlen(filename)-suffix_len] = '\0';
 		    }
 		*format = MBF_NVNETCDF;
+		found = MB_YES;
+		}
+	    }
+
+	/* look for SAME SURF format convention */
+	if (found == MB_NO)
+	    {
+	    if (strlen(filename) >= 5)
+		i = strlen(filename) - 4;
+	    else
+		i = 0;
+	    if ((suffix = strstr(&filename[i],".six")) != NULL)
+		suffix_len = 4;
+	    else if ((suffix = strstr(&filename[i],".sda")) != NULL)
+		suffix_len = 4;
+	    else
+		suffix_len = 0;
+	    if (suffix_len == 4)
+		{
+		if (fileroot != NULL)
+		    {
+		    strncpy(fileroot, filename, strlen(filename)-suffix_len);
+		    fileroot[strlen(filename)-suffix_len] = '\0';
+		    }
+		*format = MBF_SAMESURF;
 		found = MB_YES;
 		}
 	    }

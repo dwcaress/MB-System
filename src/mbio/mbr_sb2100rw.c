@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sb2100rw.c	3/3/94
- *	$Id: mbr_sb2100rw.c,v 5.7 2002-04-30 17:41:29 caress Exp $
+ *	$Id: mbr_sb2100rw.c,v 5.8 2002-07-20 20:42:40 caress Exp $
  *
  *    Copyright (c) 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	March 3, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2002/04/30 17:41:29  caress
+ * Fixed writing of number of pixels.
+ *
  * Revision 5.6  2001/12/18 04:27:45  caress
  * Release 5.0.beta11.
  *
@@ -205,7 +208,7 @@ int mbr_wt_sb2100rw(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_sb2100rw(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_sb2100rw.c,v 5.7 2002-04-30 17:41:29 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2100rw.c,v 5.8 2002-07-20 20:42:40 caress Exp $";
 	char	*function_name = "mbr_register_sb2100rw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -259,6 +262,7 @@ int mbr_register_sb2100rw(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr->mb_io_extract_svp = &mbsys_sb2100_extract_svp; 
 	mb_io_ptr->mb_io_insert_svp = &mbsys_sb2100_insert_svp; 
 	mb_io_ptr->mb_io_ttimes = &mbsys_sb2100_ttimes; 
+	mb_io_ptr->mb_io_detects = &mbsys_sb2100_detects; 
 	mb_io_ptr->mb_io_copyrecord = &mbsys_sb2100_copy; 
 	mb_io_ptr->mb_io_extract_rawss = NULL; 
 	mb_io_ptr->mb_io_insert_rawss = NULL; 
@@ -302,6 +306,7 @@ int mbr_register_sb2100rw(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2       extract_svp:        %d\n",mb_io_ptr->mb_io_extract_svp);
 		fprintf(stderr,"dbg2       insert_svp:         %d\n",mb_io_ptr->mb_io_insert_svp);
 		fprintf(stderr,"dbg2       ttimes:             %d\n",mb_io_ptr->mb_io_ttimes);
+		fprintf(stderr,"dbg2       detects:            %d\n",mb_io_ptr->mb_io_detects);
 		fprintf(stderr,"dbg2       extract_rawss:      %d\n",mb_io_ptr->mb_io_extract_rawss);
 		fprintf(stderr,"dbg2       insert_rawss:       %d\n",mb_io_ptr->mb_io_insert_rawss);
 		fprintf(stderr,"dbg2       copyrecord:         %d\n",mb_io_ptr->mb_io_copyrecord);
@@ -335,7 +340,7 @@ int mbr_info_sb2100rw(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_sb2100rw.c,v 5.7 2002-04-30 17:41:29 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2100rw.c,v 5.8 2002-07-20 20:42:40 caress Exp $";
 	char	*function_name = "mbr_info_sb2100rw";
 	int	status = MB_SUCCESS;
 
@@ -404,7 +409,7 @@ int mbr_info_sb2100rw(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_sb2100rw(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_sb2100rw.c,v 5.7 2002-04-30 17:41:29 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2100rw.c,v 5.8 2002-07-20 20:42:40 caress Exp $";
 	char	*function_name = "mbr_alm_sb2100rw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

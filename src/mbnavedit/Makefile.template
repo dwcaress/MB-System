@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  6/23/95
-#	$Id: Makefile.template,v 5.1 2001-06-30 17:41:04 caress Exp $
+#	$Id: Makefile.template,v 5.2 2002-07-20 20:46:10 caress Exp $
 #
 #     Copyright (c) 1995, 2000 by
 #     David W. Caress (caress@mbari.org)
@@ -16,6 +16,9 @@
 # Date:		June 23, 1995
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.1  2001/06/30 17:41:04  caress
+# Release 5.0.beta01
+#
 # Revision 5.0  2001/03/22  21:10:23  caress
 # Trying to make release 5.0.beta0.
 #
@@ -79,7 +82,9 @@ $(BINDIR)/mbnavedit: mbnavedit.o \
 		$(LIBDIR)/libmbaux.a \
 		$(LIBDIR)/libmbxgr.a \
 		$(LIBDIR)/libmbio.a \
-		$(LIBDIR)/libgsf.a
+		$(LIBDIR)/libproj.a \
+		$(LIBDIR)/libgsf.a \
+		$(LIBDIR)/libsapi.a
 	$(CC) $(CFLAGS) mbnavedit.o \
 		mbnavedit_creation.o \
 		mbnavedit_callbacks.o \
@@ -88,7 +93,9 @@ $(BINDIR)/mbnavedit: mbnavedit.o \
 		$(LIBDIR)/libmbaux.a \
 		$(LIBDIR)/libmbxgr.a \
 		$(LIBDIR)/libmbio.a \
+		$(LIBDIR)/libproj.a \
 		$(LIBDIR)/libgsf.a \
+		$(LIBDIR)/libsapi.a \
 		$(MOTIFLIBS) $(LFLAGS) \
 		-o $(BINDIR)/mbnavedit
 

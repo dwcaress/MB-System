@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_sb2100.c	3/2/94
- *	$Id: mbsys_sb2100.c,v 5.3 2001-08-25 00:54:13 caress Exp $
+ *	$Id: mbsys_sb2100.c,v 5.4 2002-07-20 20:42:40 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Author:	D. W. Caress
  * Date:	March 2, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2001/08/25 00:54:13  caress
+ * Adding beamwidth values to extract functions.
+ *
  * Revision 5.2  2001/07/20  00:32:54  caress
  * Release 5.0.beta03
  *
@@ -125,7 +128,7 @@
 int mbsys_sb2100_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_sb2100.c,v 5.3 2001-08-25 00:54:13 caress Exp $";
+ static char res_id[]="$Id: mbsys_sb2100.c,v 5.4 2002-07-20 20:42:40 caress Exp $";
 	char	*function_name = "mbsys_sb2100_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -307,6 +310,8 @@ int mbsys_sb2100_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		for (i=0;i<*nbath;i++)
 			{
 			if (store->beams[i].quality == ' ')
+			    beamflag[i] = MB_FLAG_NONE;
+			else if (store->beams[i].quality == '\n')
 			    beamflag[i] = MB_FLAG_NONE;
 			else if (store->beams[i].quality == '0')
 			    beamflag[i] = MB_FLAG_NULL;
@@ -750,6 +755,103 @@ int mbsys_sb2100_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 				i,ttimes[i],angles[i],
 				angles_forward[i],angles_null[i],
 				heave[i],alongtrack_offset[i]);
+		}
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbsys_sb2100_detects(int verbose, void *mbio_ptr, void *store_ptr,
+	int *kind, int *nbeams, int *detects, int *error)
+{
+	char	*function_name = "mbsys_sb2100_ttimes";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	struct mbsys_sb2100_struct *store;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mb_ptr:     %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       detects:    %d\n",detects);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* get data structure pointer */
+	store = (struct mbsys_sb2100_struct *) store_ptr;
+
+	/* get data kind */
+	*kind = store->kind;
+
+	/* extract data from structure */
+	if (*kind == MB_DATA_DATA)
+		{
+		/* get nbeams */
+		*nbeams = store->nbeams;
+
+		/* get bottom detects */
+		for (i=0;i<*nbeams;i++)
+			{
+			if (store->beams[i].source == 'W')
+				detects[i] = MB_DETECT_AMPLITUDE;
+			else if (store->beams[i].source == 'B')
+				detects[i] = MB_DETECT_PHASE;
+			else
+				detects[i] = MB_DETECT_UNKNOWN;
+			}
+
+		/* set status */
+		*error = MB_ERROR_NO_ERROR;
+		status = MB_SUCCESS;
+
+		/* done translating values */
+
+		}
+
+	/* deal with comment */
+	else if (*kind == MB_DATA_COMMENT)
+		{
+		/* set status */
+		*error = MB_ERROR_COMMENT;
+		status = MB_FAILURE;
+		}
+
+	/* deal with other record type */
+	else
+		{
+		/* set status */
+		*error = MB_ERROR_OTHER;
+		status = MB_FAILURE;
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
+		}
+	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR)
+		{
+		fprintf(stderr,"dbg2       nbeams:     %d\n",*nbeams);
+		for (i=0;i<*nbeams;i++)
+			fprintf(stderr,"dbg2       beam %d: detect:%d\n",
+				i,detects[i]);
 		}
 	if (verbose >= 2)
 		{
