@@ -46,6 +46,8 @@
  *                summary record was added release 1.03.
  * jsb  10/07/98  Added direct access support for new navigation errors record.
  *                 This change made in support of CRs: 98-001, and 98-002.
+ * jsb  04/05/00  Updated for consistent use of swap field to ensure that index
+ *                 files are portable between big and little endian machines.
  *
  *
  * Classification : Unclassified
@@ -209,24 +211,11 @@ gsfOpenIndex(const char *filename, int handle, GSF_FILE_TABLE *ft)
         return(0);
     }
 
-    /* If the expected header is found then compair the current gsf file
-     * size to the size that existed when the index was file was created,
-     * and append to the index file if necessary.
-     */
+    /* Next four bytes contain the size of the GSF file when the index file was created */
     fread(&index_header.gsfFileSize, 4, 1, ft->index_data.fp);
-    if (index_header.gsfFileSize < ft->file_size)
-    {
-        ret = gsfAppendIndexFile(ndx_file, handle, ft);
-        if (ret)
-        {
-            return(-1);
-        }
-        return(0);
-    }
 
-    /* If we get here, then the index file that exists is ready to use.
-     * Read the endian indicator to detect whether to swap incoming data.
-     * If the endian indicator is not kosher, error out.
+    /* The next four bytes contain the endian indicator.  Read this to determine whether 
+     * to swap incoming data. If the endian indicator is not kosher, error out.
      */
     fread(&index_header.endian, 4, 1, ft->index_data.fp);
     if (index_header.endian == 0x00010203)
@@ -242,6 +231,30 @@ gsfOpenIndex(const char *filename, int handle, GSF_FILE_TABLE *ft)
         gsfError = GSF_CORRUPT_INDEX_FILE_ERROR;
         return (-1);
     }
+
+    /* If the expected header is found then compair the current gsf file
+     * size to the size that existed when the index was file was created,
+     * and append to the index file if necessary.
+     */
+    if (ft->index_data.swap)
+    {
+        SwapLong((unsigned long *) &index_header.gsfFileSize, 1);
+    }
+
+
+
+    if (index_header.gsfFileSize < ft->file_size)
+    {
+        ret = gsfAppendIndexFile(ndx_file, handle, ft);
+        if (ret)
+        {
+            return(-1);
+        }
+        return(0);
+    }
+
+    /* If we get here, then the index file that exists is ready to use. */
+
 
     /* Read the number of record types in the index file. */
     fread(&index_header.number_record_types, 4, 1, ft->index_data.fp);
@@ -275,7 +288,7 @@ gsfOpenIndex(const char *filename, int handle, GSF_FILE_TABLE *ft)
         {
             SwapLong((unsigned long *) &j, 1);
         }
-
+		   
         /*  This is not really necessary but it makes things easier to code.
          *  Put the record type into the record_type[record_type] member of
          *  the index_data structure.
@@ -289,8 +302,8 @@ gsfOpenIndex(const char *filename, int handle, GSF_FILE_TABLE *ft)
 
         if (ft->index_data.swap)
         {
-            SwapLong((unsigned long *) &ft->index_data.start_addr[i], 1);
-            SwapLong((unsigned long *) &ft->index_data.number_of_records[i], 1);
+            SwapLong((unsigned long *) &ft->index_data.start_addr[j], 1);
+            SwapLong((unsigned long *) &ft->index_data.number_of_records[j], 1);
         }
     }
 
@@ -316,9 +329,11 @@ gsfOpenIndex(const char *filename, int handle, GSF_FILE_TABLE *ft)
                 ft->index_data.fp);
             if (ft->index_data.swap)
             {
-                SwapLong((unsigned long *) &ft->index_data.scale_factor_addr[i], 3);
+                SwapLong((unsigned long *) &ft->index_data.scale_factor_addr[i].sec, 1);
+                SwapLong((unsigned long *) &ft->index_data.scale_factor_addr[i].nsec, 1);
+                SwapLong((unsigned long *) &ft->index_data.scale_factor_addr[i].addr, 1);
             }
-        }
+        } 
     }
 
     return (0);
@@ -757,7 +772,7 @@ gsfCreateIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
             fseek(temp[i], 0, 0);
             ft->index_data.start_addr[i] = ftell(ft->index_data.fp);
             ft->index_data.record_type[i] = i;
-
+		    
             /*  Read through the temp file and write to the final file. */
             while (fread(&index_rec, sizeof(INDEX_REC), 1, temp[i]) == 1)
             {
@@ -794,6 +809,7 @@ gsfCreateIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
                 ft->index_data.fp);
             fwrite(&ft->index_data.number_of_records[i], 4, 1,
                 ft->index_data.fp);
+
             /* Advance to the end of the index file */
             fseek(ft->index_data.fp, 0, SEEK_END);
 
@@ -874,6 +890,7 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
     long             eof;
     long             current;
     long             endian = 0x00010203;
+    long             l_temp;
     FILE            *temp[NUM_REC_TYPES];
     gsfDataID        data_id;
     gsfRecords       records;
@@ -889,23 +906,6 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
         temp[i] = (FILE *) NULL;
     }
 
-    /* Read the endian indicator to detect whether to swap incoming data.
-     * If the endian indicator is not kosher, error out.
-     */
-    fread(&index_header.endian, 4, 1, ft->index_data.fp);
-    if (index_header.endian == 0x00010203)
-    {
-        ft->index_data.swap = 0;
-    }
-    else if (index_header.endian == 0x03020100)
-    {
-        ft->index_data.swap = 1;
-    }
-    else
-    {
-        gsfError = GSF_CORRUPT_INDEX_FILE_ERROR;
-        return (-1);
-    }
 
     /* Read the number of record types in the index file. */
     fread(&index_header.number_record_types, 4, 1, ft->index_data.fp);
@@ -953,8 +953,8 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
 
         if (ft->index_data.swap)
         {
-            SwapLong((unsigned long *) &ft->index_data.start_addr[i], 1);
-            SwapLong((unsigned long *) &ft->index_data.number_of_records[i], 1);
+            SwapLong((unsigned long *) &ft->index_data.start_addr[j], 1);
+            SwapLong((unsigned long *) &ft->index_data.number_of_records[j], 1);
         }
     }
 
@@ -1019,6 +1019,12 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
         {
             fread(&ft->index_data.scale_factor_addr[i], sizeof(INDEX_REC), 1,
                 ft->index_data.fp);
+            if (ft->index_data.swap)
+            {
+                SwapLong((unsigned long *) &ft->index_data.scale_factor_addr[i].sec, 1);
+                SwapLong((unsigned long *) &ft->index_data.scale_factor_addr[i].nsec, 1);
+                SwapLong((unsigned long *) &ft->index_data.scale_factor_addr[i].addr, 1);
+            }
         }
     }
 
@@ -1358,12 +1364,31 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
      * space reserved in the header for future information.
      */
     strncpy(index_header.version, GSF_INDEX_VERSION, GSF_INDEX_VERSION_SIZE);
-    index_header.gsfFileSize = ft->file_size;
-    index_header.endian = endian;
     fwrite(index_header.version, GSF_INDEX_VERSION_SIZE, 1, ft->index_data.fp);
-    fwrite(&index_header.gsfFileSize, 4, 1, ft->index_data.fp);
-    fwrite(&index_header.endian, 4, 1, ft->index_data.fp);
-    fwrite(&index_header.number_record_types, 4, 1, ft->index_data.fp);
+
+    index_header.gsfFileSize = ft->file_size;
+    l_temp = ft->file_size;
+    if (ft->index_data.swap)
+    {
+        SwapLong((unsigned long *) &l_temp, 1);
+    }
+    fwrite(&l_temp, 4, 1, ft->index_data.fp);
+
+    index_header.endian = endian;
+    l_temp = endian;
+    if (ft->index_data.swap)
+    {
+        SwapLong((unsigned long *) &l_temp, 1);
+    }
+    fwrite(&l_temp, 4, 1, ft->index_data.fp);
+
+    l_temp = index_header.number_record_types;
+    if (ft->index_data.swap)
+    {
+        SwapLong((unsigned long *) &l_temp, 1);
+    }
+    fwrite(&l_temp, 4, 1, ft->index_data.fp);
+
     fwrite(&index_header.spare1, 4, 1, ft->index_data.fp);
     fwrite(&index_header.spare2, 4, 1, ft->index_data.fp);
     fwrite(&index_header.spare3, 4, 1, ft->index_data.fp);
@@ -1402,6 +1427,10 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
             /*  Read through the temp file and write to the final file. */
             while (fread(&index_rec, sizeof(INDEX_REC), 1, temp[i]) == 1)
             {
+                if (ft->index_data.swap)
+                {
+                    SwapLong((unsigned long *) &index_rec, 3);
+		}
                 fwrite(&index_rec, sizeof(INDEX_REC), 1, ft->index_data.fp);
             }
 
@@ -1415,12 +1444,28 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
              *  types, and reserved space.
              */
             fseek(ft->index_data.fp, (j * 12) + 44, 0);
-            fwrite(&ft->index_data.record_type[i], 4, 1,
-                ft->index_data.fp);
-            fwrite(&ft->index_data.start_addr[i], 4, 1,
-                ft->index_data.fp);
-            fwrite(&ft->index_data.number_of_records[i], 4, 1,
-                ft->index_data.fp);
+
+	    l_temp = ft->index_data.record_type[i];
+	    if (ft->index_data.swap)
+	    {
+	        SwapLong((unsigned long *) &l_temp, 1);
+	    }
+            fwrite(&l_temp, 4, 1, ft->index_data.fp);
+	    
+	    l_temp = ft->index_data.start_addr[i];
+	    if (ft->index_data.swap)
+	    {
+	        SwapLong((unsigned long *) &l_temp, 1);
+	    }
+            fwrite(&l_temp, 4, 1, ft->index_data.fp);
+
+	    l_temp = ft->index_data.number_of_records[i];
+	    if (ft->index_data.swap)
+	    {
+	        SwapLong((unsigned long *) &l_temp, 1);
+	    }
+            fwrite(&l_temp, 4, 1, ft->index_data.fp);
+
             /* Advance to the end of the index file */
             fseek(ft->index_data.fp, 0, SEEK_END);
 
@@ -1462,13 +1507,24 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
         {
             fread(&ft->index_data.scale_factor_addr[i], sizeof(INDEX_REC), 1,
                 ft->index_data.fp);
+            if (ft->index_data.swap)
+            {
+                SwapLong((unsigned long *) &ft->index_data.scale_factor_addr[i].sec, 1);
+                SwapLong((unsigned long *) &ft->index_data.scale_factor_addr[i].nsec, 1);
+                SwapLong((unsigned long *) &ft->index_data.scale_factor_addr[i].addr, 1);
+            }
+
         }
     }
 
     /*  Set the byte swap indicator off.  No need to swap on a
      *  machine of the same sex.
+     *
+     * jsb - 04/05/2000 - Don't modify the swap field, when we append an
+     *  index file, we'll preserve the original sex.
+     *
+     *  ft->index_data.swap = 0;
      */
-    ft->index_data.swap = 0;
 
     printf("                                            \r");
 

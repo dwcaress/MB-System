@@ -72,6 +72,10 @@
  *                and gsfLoadDepthScaleFactorAutoOffset in support of signed depth.
  *                This release addresses the following CRs: GSF-99-002, GSF-99-006, GSF-99-007,
  *                GSF-99-008, GSF-99-009, GSF-99-010, GSF-99-011, GSF-99-012,
+ * jsb  04/05/00  Updated so that an application can work with up to GSF_MAX_OPEN_FILES at
+ *                a time.  Prior to these updates an application could only open (GSF_MAX_OPEN_FILES-1)
+ *                files at a time. Also updated gsfOpen and gsfOpenBuffered to return the correct
+ *                error code if a failure occures reading the file header.
  *
  * Classification : Unclassified
  *
@@ -92,7 +96,11 @@
 
 /* rely on the network type definitions of (u_short, and u_long) */
 #include <sys/types.h>
+#ifndef __WINDOWS__
 #include <netinet/in.h>
+#else
+#include <winsock.h>
+#endif
 
 /* gsf library interface description */
 #include "gsf.h"
@@ -335,6 +343,17 @@ gsfOpen(const char *filename, const int mode, int *handle)
         }
         /* Read the GSF header */
         headerSize = gsfRead(*handle, GSF_NEXT_RECORD, &id, &gsfFileTable[fileTableIndex].rec, NULL, 0);
+	/* JSB 04/05/00 Updated to return correct error code */
+        if (headerSize < 0)
+	{
+            fclose(fp);
+            numOpenFiles--;
+            *handle = 0;
+            gsfFileTable[fileTableIndex].occupied = 0;
+            memset(&gsfFileTable[fileTableIndex].rec.header, 0, sizeof(gsfFileTable[fileTableIndex].rec.header));
+            return (-1);
+	}
+	/* JSB end of updates from 04/055/00 */
         if (!strstr(gsfFileTable[fileTableIndex].rec.header.version, "GSF-"))
         {
             fclose(fp);
@@ -644,6 +663,17 @@ gsfOpenBuffered(const char *filename, const int mode, int *handle, int buf_size)
         }
         /* Read the GSF header */
         headerSize = gsfRead(*handle, GSF_NEXT_RECORD, &id, &gsfFileTable[fileTableIndex].rec, NULL, 0);
+	/* JSB 04/05/00 Updated to return correct error code */
+        if (headerSize < 0)
+	{
+            fclose(fp);
+            numOpenFiles--;
+            *handle = 0;
+            gsfFileTable[fileTableIndex].occupied = 0;
+            memset(&gsfFileTable[fileTableIndex].rec.header, 0, sizeof(gsfFileTable[fileTableIndex].rec.header));
+            return (-1);
+	}
+	/* JSB end of updates from 04/055/00 */
         if (!strstr(gsfFileTable[fileTableIndex].rec.header.version, "GSF-"))
         {
             fclose(fp);
@@ -770,7 +800,8 @@ gsfOpenBuffered(const char *filename, const int mode, int *handle, int buf_size)
 int
 gsfClose(const int handle)
 {
-    if ((handle < 1) || (handle >= GSF_MAX_OPEN_FILES))
+    /* JSB 04/05/00 replaced ">=" with ">" */
+    if ((handle < 1) || (handle > GSF_MAX_OPEN_FILES))
     {
         gsfError = GSF_BAD_FILE_HANDLE;
         return (-1);
@@ -847,7 +878,8 @@ gsfClose(const int handle)
 int
 gsfSeek(int handle, int option)
 {
-    if ((handle < 1) || (handle >= GSF_MAX_OPEN_FILES))
+    /* JSB 04/05/00 replaced ">=" with ">" */
+    if ((handle < 1) || (handle > GSF_MAX_OPEN_FILES))
     {
         gsfError = GSF_BAD_FILE_HANDLE;
         return (-1);
@@ -982,7 +1014,8 @@ gsfRead(int handle, int desiredRecord, gsfDataID *dataID, gsfRecords *rptr, unsi
     /* Clear gsfError before each read */
     gsfError = 0;
 
-    if ((handle < 1) || (handle >= GSF_MAX_OPEN_FILES))
+    /* JSB 04/05/00 replaced ">=" with ">" */
+    if ((handle < 1) || (handle > GSF_MAX_OPEN_FILES))
     {
         gsfError = GSF_BAD_FILE_HANDLE;
         return (-1);
@@ -1385,7 +1418,8 @@ gsfSeekRecord(int handle, gsfDataID *id)
     /* Clear gsfError before each seek */
     gsfError = 0;
 
-    if ((handle < 1) || (handle >= GSF_MAX_OPEN_FILES))
+    /* JSB 04/05/00 replaced ">=" with ">" */
+    if ((handle < 1) || (handle > GSF_MAX_OPEN_FILES))
     {
         gsfError = GSF_BAD_FILE_HANDLE;
         return (-1);
@@ -1588,7 +1622,8 @@ gsfWrite(int handle, gsfDataID *id, gsfRecords *rptr)
     /* Clear gsfError before each write */
     gsfError = 0;
 
-    if ((handle < 1) || (handle >= GSF_MAX_OPEN_FILES))
+    /* JSB 04/05/00 replaced ">=" with ">" */
+    if ((handle < 1) || (handle > GSF_MAX_OPEN_FILES))
     {
         gsfError = GSF_BAD_FILE_HANDLE;
         return (-1);
@@ -1949,7 +1984,8 @@ gsfGetScaleFactor(int handle, int subrecordID, unsigned char *c_flag, double *mu
         return(-1);
     }
 
-    if ((handle < 1) || (handle >= GSF_MAX_OPEN_FILES))
+    /* JSB 04/05/00 replaced ">=" with ">" */
+    if ((handle < 1) || (handle > GSF_MAX_OPEN_FILES))
     {
         gsfError = GSF_BAD_FILE_HANDLE;
         return (-1);
@@ -2589,7 +2625,8 @@ gsfPercent (int handle)
     /* Clear gsfError each time down */
     gsfError = 0;
 
-    if ((handle < 1) || (handle >= GSF_MAX_OPEN_FILES))
+    /* JSB 04/05/00 replaced ">=" with ">" */
+    if ((handle < 1) || (handle > GSF_MAX_OPEN_FILES))
     {
         gsfError = GSF_BAD_FILE_HANDLE;
         return (-1);
@@ -2641,7 +2678,8 @@ gsfGetNumberRecords (int handle, int desiredRecord)
     /* Clear gsfError each time down */
     gsfError = 0;
 
-    if ((handle < 1) || (handle >= GSF_MAX_OPEN_FILES))
+    /* JSB 04/05/00 replaced ">=" with ">" */
+    if ((handle < 1) || (handle > GSF_MAX_OPEN_FILES))
     {
         gsfError = GSF_BAD_FILE_HANDLE;
         return (-1);
