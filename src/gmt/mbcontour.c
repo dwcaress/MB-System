@@ -22,6 +22,11 @@
  * Date:	June 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 3.2  1993/08/16  22:57:49  caress
+ * Changed ad hoc string justification.  Used to assume letter width
+ * is 0.5 letter height, but now assumes letter width is 0.37 letter
+ * height.
+ *
  * Revision 3.1  1993/06/21  00:04:52  caress
  * Fixed help message.
  *
@@ -94,7 +99,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbcontour.c,v 3.2 1993-08-16 22:57:49 caress Exp $";
+	static char rcs_id[] = "$Id: mbcontour.c,v 3.3 1993-11-03 21:09:10 caress Exp $";
 	static char program_name[] = "MBCONTOUR";
 	static char help_message[] =  "MBCONTOUR is a GMT compatible utility which creates a color postscript \ncontour map of multibeam swath bathymetry or backscatter data.  \nComplete maps are made by using MBCONTOUR in conjunction with the  \nusual GMT programs.  The contour levels and colors can be controlled \ndirectly or set implicitly using contour and color change intervals. \nContours can also be set to have ticks pointing downhill.";
 	static char usage_message[] = "mbcontour -Idatalist -Jparameters -Rwest/east/south/north [-Acontour_int/color_int/tick_int/label_int/tick_len/label_hgt -Btickinfo -Ccontourfile -Fred/green/blue -K -Llonflip -M -O -P -ppings -U -Xx-shift -Yy-shift -#copies -V -H]";
@@ -504,7 +509,7 @@ char **argv;
 		gmtdefs.x_origin, gmtdefs.y_origin,
 		gmtdefs.global_x_scale, gmtdefs.global_y_scale, 
 		gmtdefs.n_copies, gmtdefs.dpi, gmtdefs.measure_unit, 
-		gmtdefs.paper_width, gmt_epsinfo (argv[0]));
+		gmtdefs.paper_width, gmtdefs.page_rgb, gmt_epsinfo (argv[0]));
 	echo_command (argc, argv);
 	if (gmtdefs.unix_time) 
 		timestamp (TIME_STAMP_X, TIME_STAMP_Y, argc, argv);
