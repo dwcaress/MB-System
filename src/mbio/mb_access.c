@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_access.c	11/1/00
- *    $Id: mb_access.c,v 5.10 2004-06-18 03:07:15 caress Exp $
+ *    $Id: mb_access.c,v 5.11 2004-09-16 19:02:33 caress Exp $
 
  *    Copyright (c) 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	October 1, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.10  2004/06/18 03:07:15  caress
+ * Adding support for segy i/o and working on support for Reson 7k format 88.
+ *
  * Revision 5.9  2004/05/21 23:46:22  caress
  * Progress supporting Reson 7k data, including support for extracing subbottom profiler data.
  *
@@ -65,7 +68,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mb_segy.h"
 
-static char rcs_id[]="$Id: mb_access.c,v 5.10 2004-06-18 03:07:15 caress Exp $";
+static char rcs_id[]="$Id: mb_access.c,v 5.11 2004-09-16 19:02:33 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_alloc(int verbose, void *mbio_ptr,
@@ -1432,6 +1435,7 @@ int mb_extract_segytraceheader(int verbose, void *mbio_ptr, void *store_ptr,
 }
 /*--------------------------------------------------------------------*/
 int mb_extract_segy(int verbose, void *mbio_ptr, void *store_ptr,
+		int *sampleformat,
 		int *kind,
 		void *segytraceheader_ptr, 
 		float *segydata, 
@@ -1452,6 +1456,7 @@ int mb_extract_segy(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2       verbose:        %d\n",verbose);
 		fprintf(stderr,"dbg2       mb_ptr:         %d\n",mbio_ptr);
 		fprintf(stderr,"dbg2       store_ptr:      %d\n",store_ptr);
+		fprintf(stderr,"dbg2       sampleformat:   %d\n",*sampleformat);
 		fprintf(stderr,"dbg2       segytraceheader_ptr: %d\n",segytraceheader_ptr);
 		fprintf(stderr,"dbg2       segydata:       %d\n",segydata);
 		}
@@ -1464,7 +1469,7 @@ int mb_extract_segy(int verbose, void *mbio_ptr, void *store_ptr,
 	if (mb_io_ptr->mb_io_extract_segy != NULL)
 		{
 		status = (*mb_io_ptr->mb_io_extract_segy)
-				(verbose,mbio_ptr,store_ptr,
+				(verbose,mbio_ptr,store_ptr,sampleformat,
 				kind,segytraceheader_ptr,segydata,
 				error);
 		}
@@ -1480,6 +1485,7 @@ int mb_extract_segy(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       sampleformat:   %d\n",*sampleformat);
 		fprintf(stderr,"dbg2       kind:           %d\n",*kind);
 		fprintf(stderr,"dbg2       seq_num:        %d\n",mb_segytraceheader_ptr->seq_num);
 		fprintf(stderr,"dbg2       seq_reel:       %d\n",mb_segytraceheader_ptr->seq_reel);

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_reson7k.c	3.00	3/23/2004
- *	$Id: mbsys_reson7k.c,v 5.3 2004-07-15 19:25:04 caress Exp $
+ *	$Id: mbsys_reson7k.c,v 5.4 2004-09-16 19:02:34 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -26,6 +26,9 @@
  * Date:	March 23, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2004/07/15 19:25:04  caress
+ * Progress in supporting Reson 7k data.
+ *
  * Revision 5.2  2004/06/18 05:22:32  caress
  * Working on adding support for segy i/o and for Reson 7k format 88.
  *
@@ -55,7 +58,7 @@
 /* turn on debug statements here */
 /*#define MSYS_RESON7KR_DEBUG 1*/
 
-static char res_id[]="$Id: mbsys_reson7k.c,v 5.3 2004-07-15 19:25:04 caress Exp $";
+static char res_id[]="$Id: mbsys_reson7k.c,v 5.4 2004-09-16 19:02:34 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_zero7kheader(int verbose, s7k_header	*header, 
@@ -4602,7 +4605,7 @@ int mbsys_reson7k_extract_segytraceheader(int verbose, void *mbio_ptr, void *sto
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_extract_segy(int verbose, void *mbio_ptr, void *store_ptr,
-		int *kind, void *segyheader_ptr, float *segydata, int *error)
+		int *sampleformat, int *kind, void *segyheader_ptr, float *segydata, int *error)
 {
 	char	*function_name = "mbsys_reson7k_extract_segy";
 	int	status = MB_SUCCESS;
@@ -4623,13 +4626,15 @@ int mbsys_reson7k_extract_segy(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:         %s\n",res_id);
-		fprintf(stderr,"dbg2       verbose:        %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:         %d\n",mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:      %d\n",store_ptr);
-		fprintf(stderr,"dbg2       kind:           %d\n",kind);
-		fprintf(stderr,"dbg2       segyheader_ptr: %d\n",segyheader_ptr);
-		fprintf(stderr,"dbg2       segydata:       %d\n",segydata);
+		fprintf(stderr,"dbg2       res_id:            %s\n",res_id);
+		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
+		fprintf(stderr,"dbg2       mb_ptr:            %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:         %d\n",store_ptr);
+		fprintf(stderr,"dbg2       sampleformat:      %d\n",sampleformat);
+		fprintf(stderr,"dbg2       sampleformat:      %d\n",*sampleformat);
+		fprintf(stderr,"dbg2       kind:              %d\n",kind);
+		fprintf(stderr,"dbg2       segyheader_ptr:    %d\n",segyheader_ptr);
+		fprintf(stderr,"dbg2       segydata:          %d\n",segydata);
 		}
 
 	/* get mbio descriptor */
@@ -4660,6 +4665,7 @@ int mbsys_reson7k_extract_segy(int verbose, void *mbio_ptr, void *store_ptr,
 		/* extract the data */
 		if (fsdwsb->data_format == EDGETECH_TRACEFORMAT_ENVELOPE)
 			{
+			*sampleformat = MB_SEGY_SAMPLEFORMAT_ENVELOPE;
 			for (i=0;i<fsdwchannel->number_samples;i++)
 				{
 				segydata[i] = (float) ushortptr[i];
@@ -4667,14 +4673,42 @@ int mbsys_reson7k_extract_segy(int verbose, void *mbio_ptr, void *store_ptr,
 			}
 		else if (fsdwsb->data_format == EDGETECH_TRACEFORMAT_ANALYTIC)
 			{
-			for (i=0;i<fsdwchannel->number_samples;i++)
+			/* if no format specified do envelope by default */
+			if (*sampleformat == MB_SEGY_SAMPLEFORMAT_NONE)
+				*sampleformat = MB_SEGY_SAMPLEFORMAT_ENVELOPE;
+			
+			/* convert analytic data to desired envelope */
+			if (*sampleformat == MB_SEGY_SAMPLEFORMAT_ENVELOPE)
 				{
-				segydata[i] = (float) sqrt((float) (shortptr[2*i] * shortptr[2*i] 
+				for (i=0;i<fsdwchannel->number_samples;i++)
+					{
+					segydata[i] = (float) sqrt((float) (shortptr[2*i] * shortptr[2*i] 
 								+ shortptr[2*i+1] * shortptr[2*i+1]));
+					}
+				}
+			
+			/* else extract desired analytic data */
+			else if (*sampleformat == MB_SEGY_SAMPLEFORMAT_ANALYTIC)
+				{
+				for (i=0;i<fsdwchannel->number_samples;i++)
+					{
+					segydata[2*i]   = (float) shortptr[2*i];
+					segydata[2*i+1] = (float) shortptr[2*i+1];
+					}
+				}
+			
+			/* else extract desired real trace from analytic data */
+			else if (*sampleformat == MB_SEGY_SAMPLEFORMAT_TRACE)
+				{
+				for (i=0;i<fsdwchannel->number_samples;i++)
+					{
+					segydata[i] = (float) shortptr[2*i];
+					}
 				}
 			}
 		else if (fsdwsb->data_format == EDGETECH_TRACEFORMAT_RAW)
 			{
+			*sampleformat = MB_SEGY_SAMPLEFORMAT_TRACE;
 			for (i=0;i<fsdwchannel->number_samples;i++)
 				{
 				segydata[i] = (float) ushortptr[i];
@@ -4682,6 +4716,7 @@ int mbsys_reson7k_extract_segy(int verbose, void *mbio_ptr, void *store_ptr,
 			}
 		else if (fsdwsb->data_format == EDGETECH_TRACEFORMAT_REALANALYTIC)
 			{
+			*sampleformat = MB_SEGY_SAMPLEFORMAT_TRACE;
 			for (i=0;i<fsdwchannel->number_samples;i++)
 				{
 				segydata[i] = (float) ushortptr[i];
@@ -4689,6 +4724,7 @@ int mbsys_reson7k_extract_segy(int verbose, void *mbio_ptr, void *store_ptr,
 			}
 		else if (fsdwsb->data_format == EDGETECH_TRACEFORMAT_PIXEL)
 			{
+			*sampleformat = MB_SEGY_SAMPLEFORMAT_TRACE;
 			for (i=0;i<fsdwchannel->number_samples;i++)
 				{
 				segydata[i] = (float) ushortptr[i];
@@ -4721,6 +4757,7 @@ int mbsys_reson7k_extract_segy(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       sampleformat:      %d\n",*sampleformat);
 		fprintf(stderr,"dbg2       kind:              %d\n",*kind);
 		fprintf(stderr,"dbg2       seq_num:           %d\n",mb_segytraceheader_ptr->seq_num);
 		fprintf(stderr,"dbg2       seq_reel:          %d\n",mb_segytraceheader_ptr->seq_reel);

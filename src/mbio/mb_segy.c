@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_segy.c	5/25/2004
- *    $Id: mb_segy.c,v 5.1 2004-07-27 19:44:38 caress Exp $
+ *    $Id: mb_segy.c,v 5.2 2004-09-16 19:02:34 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	May 25, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2004/07/27 19:44:38  caress
+ * Working on handling subbottom data.
+ *
  * Revision 5.0  2004/06/18 03:03:04  caress
  * Adding support for segy i/o.
  *
@@ -38,7 +41,7 @@
 #include "../../include/mb_segy.h"
 #include "../../include/mb_swap.h"
 
-static char rcs_id[]="$Id: mb_segy.c,v 5.1 2004-07-27 19:44:38 caress Exp $";
+static char rcs_id[]="$Id: mb_segy.c,v 5.2 2004-09-16 19:02:34 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 /* 	function mb_segy_read_init opens an existing segy file for 
@@ -1047,3 +1050,68 @@ int mb_segy_write_trace(int verbose, void *mbsegyio_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+/* Code for numerical Hilbert Transform taken from web pages of
+	Per Stoltze:
+		http://www.aue.auc.dk/~stoltze/tools/hilbert/hilbert.htm
+	on 18 August 2004 
+   Usage: The input data are in delta and the call 
+		hilbert(n, delta, kappa) 
+	will return the Hilbert transform of delta in 
+	kappa. The values of n and delta are not modified.*/
+void hilbert(int n, double delta[], double kappa[])
+{
+	double d1, d2, d3, d4;
+	int i1, i2;
+
+	for (i1 = 0; i1 < n; i1++)
+	{
+		kappa[i1] = 0.;
+		for (i2 = 1; i2 < n; i2++)
+		{
+			d1 = (i1+i2<n)? delta[i1+i2]: 0.;
+			d2 = (i1-i2>=0)? delta[i1-i2]: 0.;
+			d3 = (i1+i2+1<n)? delta[i1+i2+1]: 0.;
+			d4 = (i1-i2-1>=0)? delta[i1-i2-1]: 0.;
+
+			kappa[i1] -= 0.5 * (d1-d2) / i2 + 0.5 * (d3 - d4) / (i2 + 1);
+		}
+		kappa[i1] /= M_PI;
+	}
+}
+
+/*--------------------------------------------------------------------*/
+/* Code for numerical Hilbert Transform modified from web pages of
+	Per Stoltze:
+		http://www.aue.auc.dk/~stoltze/tools/hilbert/hilbert.htm
+	on 18 August 2004 
+   Usage: The input data are in even elements of data 
+   		(data[0], data[2], ...data[n-2])
+	and the call 
+		hilbert2(n, data) 
+	will return the Hilbert transform of delta in 
+	the odd elements of data: 
+   		(data[1], data[3], ...data[n-1])
+	The values of n and even elements of data are not modified.*/
+void hilbert2(int n, double data[])
+{
+	double d1, d2, d3, d4;
+	int i1, i2;
+
+	for (i1 = 0; i1 < n; i1++)
+	{
+		data[2*i1+1] = 0.;
+		for (i2 = 1; i2 < n; i2++)
+		{
+			d1 = (i1+i2<n)? data[2*(i1+i2)]: 0.;
+			d2 = (i1-i2>=0)? data[2*(i1-i2)]: 0.;
+			d3 = (i1+i2+1<n)? data[2*(i1+i2+1)]: 0.;
+			d4 = (i1-i2-1>=0)? data[2*(i1-i2-1)]: 0.;
+
+			data[2*i1+1] -= 0.5 * (d1-d2) / i2 + 0.5 * (d3 - d4) / (i2 + 1);
+		}
+		data[2*i1+1] /= M_PI;
+	}
+}
+
+/*--------------------------------------------------------------------*/
+

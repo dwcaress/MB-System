@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	1/19/93
- *    $Id: mb_segy.h,v 5.3 2004-07-27 19:44:38 caress Exp $
+ *    $Id: mb_segy.h,v 5.4 2004-09-16 19:02:33 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -26,6 +26,9 @@
  * Date:	April 13, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2004/07/27 19:44:38  caress
+ * Working on handling subbottom data.
+ *
  * Revision 5.2  2004/06/18 05:22:32  caress
  * Working on adding support for segy i/o and for Reson 7k format 88.
  *
@@ -38,9 +41,18 @@
  *
  */
 
+/* Standard SEGY format sizes */
 #define   MB_SEGY_ASCIIHEADER_LENGTH  3200
 #define   MB_SEGY_FILEHEADER_LENGTH  400
 #define   MB_SEGY_TRACEHEADER_LENGTH  240
+
+/* Flags used to specify desired data type in mb_extract_segy() calls */
+#define   MB_SEGY_SAMPLEFORMAT_NONE	1
+#define   MB_SEGY_SAMPLEFORMAT_TRACE	2
+#define   MB_SEGY_SAMPLEFORMAT_ENVELOPE	3
+#define   MB_SEGY_SAMPLEFORMAT_ANALYTIC	4
+
+/* SEGY structures */
 struct mb_segyasciiheader_struct
 	{
 	char line[80][40];

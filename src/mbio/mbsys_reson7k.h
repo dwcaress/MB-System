@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_reson7k.h	3/3/2004
- *	$Id: mbsys_reson7k.h,v 5.3 2004-07-15 19:25:05 caress Exp $
+ *	$Id: mbsys_reson7k.h,v 5.4 2004-09-16 19:02:34 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	March 3, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2004/07/15 19:25:05  caress
+ * Progress in supporting Reson 7k data.
+ *
  * Revision 5.2  2004/06/18 05:22:33  caress
  * Working on adding support for segy i/o and for Reson 7k format 88.
  *
@@ -1214,19 +1217,20 @@ int mbsys_reson7k_insert_svp(int verbose, void *mbio_ptr, void *store_ptr,
 			double *depth, double *velocity,
 			int *error);
 int mbsys_reson7k_extract_segytraceheader(int verbose, void *mbio_ptr, void *store_ptr,
-		int *kind,
-		void *segyheader_ptr, 
-		int *error);
+			int *kind,
+			void *segyheader_ptr, 
+			int *error);
 int mbsys_reson7k_extract_segy(int verbose, void *mbio_ptr, void *store_ptr,
-		int *kind,
-		void *segyheader_ptr, 
-		float *segydata, 
-		int *error);
+			int *sampleformat,
+			int *kind,
+			void *segyheader_ptr, 
+			float *segydata, 
+			int *error);
 int mbsys_reson7k_insert_segy(int verbose, void *mbio_ptr, void *store_ptr,
-		int kind,
-		void *segyheader_ptr, 
-		float *segydata, 
-		int *error);
+			int kind,
+			void *segyheader_ptr, 
+			float *segydata, 
+			int *error);
 int mbsys_reson7k_copy(int verbose, void *mbio_ptr, 
 			void *store_ptr, void *copy_ptr,
 			int *error);

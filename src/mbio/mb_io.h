@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	1/19/93
- *    $Id: mb_io.h,v 5.18 2004-07-15 19:25:03 caress Exp $
+ *    $Id: mb_io.h,v 5.19 2004-09-16 19:02:34 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.18  2004/07/15 19:25:03  caress
+ * Progress in supporting Reson 7k data.
+ *
  * Revision 5.17  2004/06/18 03:07:16  caress
  * Adding support for segy i/o and working on support for Reson 7k format 88.
  *
@@ -462,6 +465,7 @@ struct mb_io_struct
 		void *segytraceheader_ptr, 
 		int *error);
 	int (*mb_io_extract_segy)(int verbose, void *mbio_ptr, void *store_ptr,
+		int *sampleformat,
 		int *kind,
 		void *segytraceheader_ptr, 
 		float *segydata, 
