@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad.h	10/9/98
- *	$Id: mbsys_simrad2.h,v 4.0 1998-12-17 22:59:14 caress Exp $
+ *	$Id: mbsys_simrad2.h,v 4.1 2000-07-19 03:54:23 caress Exp $
  *
  *    Copyright (c) 1998 by 
  *    D. W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	October 9, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1998/12/17  22:59:14  caress
+ * MB-System version 4.6beta4
+ *
  *
  */
 /*
@@ -44,6 +47,11 @@
  *                   beams of bathymetry and a variable number of sidescan
  *                   samples per bathymetry beam.
  *         EM-300:   Single array 30 kHz mid water system with up to 135
+ *                   beams of bathymetry and a variable number of sidescan
+ *                   samples per bathymetry beam. This system is notable
+ *                   for applying pitch and yaw compensation to achieve
+ *                   more uniform coverage of the seafloor.
+ *         EM-120:   Single array 12 kHz full ocean system with up to 191
  *                   beams of bathymetry and a variable number of sidescan
  *                   samples per bathymetry beam. This system is notable
  *                   for applying pitch and yaw compensation to achieve
@@ -191,6 +199,7 @@
 
 /* sonar models */
 #define	MBSYS_SIMRAD2_UNKNOWN	0
+#define	MBSYS_SIMRAD2_EM120	120
 #define	MBSYS_SIMRAD2_EM300	300
 #define	MBSYS_SIMRAD2_EM3000	3000
 #define	MBSYS_SIMRAD2_EM3000D_2	3002
@@ -211,6 +220,7 @@
 #define	MBSYS_SIMRAD2_COMMENT_LENGTH	256
 
 /* sonar model numbers */
+#define	EM2_EM120		120
 #define	EM2_EM300		300
 #define	EM2_EM3000		3000
 #define	EM2_EM3000D_1		3002
