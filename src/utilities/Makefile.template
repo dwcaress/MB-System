@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 4.7 1995-01-04 17:08:14 caress Exp $
+#	$Id: Makefile.template,v 4.8 1995-02-14 21:20:26 caress Exp $
 #
 #     Copyright (c) 1993, 1994 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.7  1995/01/04  17:08:14  caress
+# Added mbhistogram
+#
 # Revision 4.6  1994/11/21  20:40:18  caress
 # Fixed mblevitus target so changing Makefile causes remake
 # of mblevitus.
@@ -84,7 +87,11 @@ all:	$(MANDIR)/mbsystem.l \
 	$(BINDIR)/mbmask $(MANDIR)/mbmask.l \
 	$(BINDIR)/mbsmooth $(MANDIR)/mbsmooth.l \
 	$(BINDIR)/mbps $(MANDIR)/mbps.l \
-	$(BINDIR)/mbhistogram $(MANDIR)/mbhistogram.l
+	$(BINDIR)/mbhistogram $(MANDIR)/mbhistogram.l \
+	$(BINDIR)/mbbackangle $(MANDIR)/mbbackangle.l \
+	$(BINDIR)/mbanglecorrect $(MANDIR)/mbanglecorrect.l \
+	$(BINDIR)/mbfilter $(MANDIR)/mbfilter.l \
+	$(BINDIR)/mbcut $(MANDIR)/mbcut.l
 
 ### make clean removes the object files
 clean:
@@ -148,6 +155,18 @@ $(BINDIR)/mbps:	mbps.o $(LIBDIR)/libmbio.a
 $(BINDIR)/mbhistogram:	mbhistogram.o $(LIBDIR)/libmbio.a
 	$(CC) $(CFLAGS) mbhistogram.o $(LIBDIR)/libmbio.a \
 		$(LFLAGS) -o $(BINDIR)/mbhistogram
+$(BINDIR)/mbbackangle:	mbbackangle.o $(LIBDIR)/libmbio.a
+	$(CC) $(CFLAGS) mbbackangle.o $(LIBDIR)/libmbio.a \
+		$(LFLAGS) -o $(BINDIR)/mbbackangle
+$(BINDIR)/mbanglecorrect:	mbanglecorrect.o $(LIBDIR)/libmbio.a
+	$(CC) $(CFLAGS) mbanglecorrect.o $(LIBDIR)/libmbio.a \
+		$(LFLAGS) -o $(BINDIR)/mbanglecorrect
+$(BINDIR)/mbfilter:	mbfilter.o $(LIBDIR)/libmbio.a
+	$(CC) $(CFLAGS) mbfilter.o $(LIBDIR)/libmbio.a \
+		$(LFLAGS) -o $(BINDIR)/mbfilter
+$(BINDIR)/mbcut:	mbcut.o $(LIBDIR)/libmbio.a
+	$(CC) $(CFLAGS) mbcut.o $(LIBDIR)/libmbio.a \
+		$(LFLAGS) -o $(BINDIR)/mbcut
 
 ### compile the source files
 mbformat.o:	mbformat.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
@@ -191,6 +210,14 @@ mbps.o:	mbps.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
 	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) mbps.c
 mbhistogram.o:	mbhistogram.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
 	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) mbhistogram.c
+mbbackangle.o:	mbbackangle.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
+	$(CC) -c $(CFLAGS) mbbackangle.c
+mbanglecorrect.o:	mbanglecorrect.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
+	$(CC) -c $(CFLAGS) mbanglecorrect.c
+mbfilter.o:	mbfilter.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
+	$(CC) -c $(CFLAGS) mbfilter.c
+mbcut.o:	mbcut.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
+	$(CC) -c $(CFLAGS) mbcut.c
 
 ### copy the man pages to the man page directory
 $(MANDIR)/mbsystem.l:	mbsystem.manl
@@ -252,3 +279,15 @@ $(MANDIR)/mbps.l:	mbps.manl
 $(MANDIR)/mbhistogram.l:	mbhistogram.manl
 	cp mbhistogram.manl $(MANDIR)/mbhistogram.l
 	chmod 664 $(MANDIR)/mbhistogram.l
+$(MANDIR)/mbbackangle.l:	mbbackangle.manl
+	cp mbbackangle.manl $(MANDIR)/mbbackangle.l
+	chmod 664 $(MANDIR)/mbbackangle.l
+$(MANDIR)/mbanglecorrect.l:	mbanglecorrect.manl
+	cp mbanglecorrect.manl $(MANDIR)/mbanglecorrect.l
+	chmod 664 $(MANDIR)/mbanglecorrect.l
+$(MANDIR)/mbfilter.l:	mbfilter.manl
+	cp mbfilter.manl $(MANDIR)/mbfilter.l
+	chmod 664 $(MANDIR)/mbfilter.l
+$(MANDIR)/mbcut.l:	mbcut.manl
+	cp mbcut.manl $(MANDIR)/mbcut.l
+	chmod 664 $(MANDIR)/mbcut.l
