@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbinfo.c	3.00	2/1/93
- *    $Id: mbinfo.c,v 3.1 1993-06-12 04:29:33 caress Exp $
+ *    $Id: mbinfo.c,v 3.2 1993-06-17 16:14:13 caress Exp $
  *
  *    Copyright (c) 1993 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -23,6 +23,10 @@
  * Date:	February 1, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 3.1  1993/06/12  04:29:33  caress
+ * Added -N option which prevents mbinfo from listing out
+ * comments encountered in the input data file.
+ *
  * Revision 3.0  1993/05/04  22:38:24  dale
  * Inital version.
  *
@@ -51,7 +55,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbinfo.c,v 3.1 1993-06-12 04:29:33 caress Exp $";
+	static char rcs_id[] = "$Id: mbinfo.c,v 3.2 1993-06-17 16:14:13 caress Exp $";
 	static char program_name[] = "MBINFO";
 	static char help_message[] =  "MBINFO reads a multibeam bathymetry data file and outputs \nsome basic statistics.  If pings are averaged (pings > 2) \nMBINFO estimates the variance for each of the multibeam \nbeams by reading a set number of pings (>2) and then finding \nthe variance of the detrended values for each beam. \nThe results are dumped to stdout.";
 	static char usage_message[] = "mbinfo [-Fformat -Rw/e/s/n -Ppings -Sspeed -Llonflip\n	-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc -N -V -H -Ifile]";
@@ -106,14 +110,31 @@ char **argv;
 	int	comments = MB_YES;
 
 	/* limit variables */
-	double	lonmin, lonmax, latmin, latmax;
-	double	bathmin, bathmax, backmin, backmax;
-	double	bathbeg, lonbeg, latbeg, bathend, lonend, latend;
-	double	spdbeg, hdgbeg, spdend, hdgend;
-	double	timbeg, timend;
-	int	timbeg_i[6], timend_i[6];
+	double	lonmin = 0.0;
+	double	lonmax = 0.0;
+	double	latmin = 0.0;
+	double	latmax = 0.0;
+	double	bathmin = 0.0;
+	double	bathmax = 0.0;
+	double	backmin = 0.0;
+	double	backmax = 0.0;
+	double	bathbeg = 0.0;
+	double	lonbeg = 0.0;
+	double	latbeg = 0.0;
+	double	bathend = 0.0;
+	double	lonend = 0.0;
+	double	latend = 0.0;
+	double	spdbeg = 0.0;
+	double	hdgbeg = 0.0;
+	double	spdend = 0.0;
+	double	hdgend = 0.0;
+	double	timbeg = 0.0;
+	double	timend = 0.0;
+	int	timbeg_i[6];
+	int	timend_i[6];
 	double	distot = 0.0;
-	double	timtot, spdavg;
+	double	timtot = 0.0;
+	double	spdavg = 0.0;
 	int	irec = 0;
 	int	ngdbeams = 0;
 	int	nzdbeams = 0;
@@ -122,7 +143,7 @@ char **argv;
 	int	nzbbeams = 0;
 	int	nfbbeams = 0;
 	int	begin = 0;
-	int	nread;
+	int	nread = 0;
 
 	/* variance finding variables */
 	int	nbath;
@@ -141,6 +162,12 @@ char **argv;
 
 	int i, j, k, l, m;
 
+	/* initialize some time variables */
+	for (i=0;i<6;i++)
+		{
+		timbeg_i[i] = 0;
+		timend_i[i] = 0;
+		}
 	/* get current default values */
 	status = mb_defaults(verbose,&format,&pings_get,&lonflip,bounds,
 		btime_i,etime_i,&speedmin,&timegap);
@@ -636,7 +663,8 @@ char **argv;
 	/* now print out the results */
 	timtot = (timend - timbeg)/60.0;
 	distot = distot;
-	spdavg = distot/timtot;
+	if (distot > 0.0)
+		spdavg = distot/timtot;
 	fprintf(output,"\nData Totals:\n");
 	fprintf(output,"Number of Records:        %8d\n",irec);
 	fprintf(output,"Bathymetry Data:\n");
