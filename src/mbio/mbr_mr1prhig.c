@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mr1prhig.c	3/3/94
- *	$Id: mbr_mr1prhig.c,v 4.12 2000-09-30 06:34:20 caress Exp $
+ *	$Id: mbr_mr1prhig.c,v 4.13 2000-10-03 21:48:03 caress Exp $
  *
  *    Copyright (c) 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	July 17, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.12  2000/09/30  06:34:20  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.11  1999/05/05  20:32:19  caress
  * Fixed bugs in handling updated bathymetry through mb_put_all call.
  *
@@ -93,7 +96,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_mr1prhig.c,v 4.12 2000-09-30 06:34:20 caress Exp $";
+	static char res_id[]="$Id: mbr_mr1prhig.c,v 4.13 2000-10-03 21:48:03 caress Exp $";
 	char	*function_name = "mbr_alm_mr1prhig";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -347,18 +350,14 @@ int	*error;
 	mb_io_ptr->new_lat = 0.0;
 	mb_io_ptr->new_heading = 0.0;
 	mb_io_ptr->new_speed = 0.0;
-	for (i=0;i<mb_io_ptr->beams_bath;i++)
+	for (i=0;i<MBF_MR1PRHIG_BEAMS;i++)
 		{
 		mb_io_ptr->new_beamflag[i] = MB_FLAG_NULL;
 		mb_io_ptr->new_bath[i] = 0.0;
 		mb_io_ptr->new_bath_acrosstrack[i] = 0.0;
 		mb_io_ptr->new_bath_alongtrack[i] = 0.0;
 		}
-	for (i=0;i<mb_io_ptr->beams_amp;i++)
-		{
-		mb_io_ptr->new_amp[i] = 0.0;
-		}
-	for (i=0;i<mb_io_ptr->pixels_ss;i++)
+	for (i=0;i<MBF_MR1PRHIG_PIXELS;i++)
 		{
 		mb_io_ptr->new_ss[i] = 0.0;
 		mb_io_ptr->new_ss_acrosstrack[i] = 0.0;
@@ -436,13 +435,22 @@ int	*error;
 			}
 
 		/* get heading */
-		mb_io_ptr->new_heading = data->png_compass;
-		/*mb_io_ptr->new_heading = data->png_course;*/
+		if (data->png_compass != 0.0)
+		    mb_io_ptr->new_heading = data->png_compass;
+		else
+		    mb_io_ptr->new_heading = data->png_course;
 
 		/* get speed */
 		mb_io_ptr->new_speed = 0.0;
 
 		/* read beam and pixel values into storage arrays */
+		mb_io_ptr->beams_bath 
+		    = 2 * MAX(data->port_btycount, data->stbd_btycount) + 3;
+		mb_io_ptr->beams_amp = 0;
+		mb_io_ptr->pixels_ss 
+		    = 2 * MAX(data->port_sscount, data->stbd_sscount);
+		if (mb_io_ptr->pixels_ss > 0)
+		    mb_io_ptr->pixels_ss +=3;
 		beam_center = mb_io_ptr->beams_bath/2;
 		pixel_center = mb_io_ptr->pixels_ss/2;
 		for (i=0;i<data->port_btycount;i++)
@@ -601,7 +609,7 @@ int	*error;
 			}
 		}
 
-	/* translate values to sb2100 data storage structure */
+	/* translate values to mr1 data storage structure */
 	if (status == MB_SUCCESS
 		&& store != NULL)
 		{

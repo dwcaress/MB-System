@@ -3,13 +3,15 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grdplot.perl	8/6/95
-#    $Id: mbm_grdplot.perl,v 4.15 1999-12-29 00:17:55 caress Exp $
+#    $Id: mbm_grdplot.perl,v 4.16 2000-10-03 21:42:17 caress Exp $
 #
-#    Copyright (c) 1993, 1994, 1995 by 
-#    D. W. Caress (caress@lamont.ldgo.columbia.edu)
+#    Copyright (c) 1993, 1994, 1995, 2000 by 
+#    D. W. Caress (caress@mbari.org)
+#      Monterey Bay Aquarium Research Institute
+#      Moss Landing, CA
 #    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
-#    Lamont-Doherty Earth Observatory
-#    Palisades, NY  10964
+#      Lamont-Doherty Earth Observatory
+#      Palisades, NY  10964
 #
 #    See README file for copying and redistribution conditions.
 #--------------------------------------------------------------------
@@ -64,10 +66,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   October 19, 1994
 #
 # Version:
-#   $Id: mbm_grdplot.perl,v 4.15 1999-12-29 00:17:55 caress Exp $
+#   $Id: mbm_grdplot.perl,v 4.16 2000-10-03 21:42:17 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.15  1999/12/29  00:17:55  caress
+# Release 4.6.8
+#
 # Revision 4.14  1999/08/08  04:17:04  caress
 # Added coastline plots.
 #

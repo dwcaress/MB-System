@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mr1aldeo.c	10/24/95
- *	$Id: mbr_mr1aldeo.c,v 1.8 2000-09-30 06:34:20 caress Exp $
+ *	$Id: mbr_mr1aldeo.c,v 1.9 2000-10-03 21:48:03 caress Exp $
  *
  *    Copyright (c) 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	October 24, 1995
  * $Log: not supported by cvs2svn $
+ * Revision 1.8  2000/09/30  06:34:20  caress
+ * Snapshot for Dale.
+ *
  * Revision 1.7  1999/05/05  20:32:19  caress
  * Fixed bugs in handling updated bathymetry through mb_put_all call.
  *
@@ -74,7 +77,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_mr1aldeo.c,v 1.8 2000-09-30 06:34:20 caress Exp $";
+	static char res_id[]="$Id: mbr_mr1aldeo.c,v 1.9 2000-10-03 21:48:03 caress Exp $";
 	char	*function_name = "mbr_alm_mr1aldeo";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -333,18 +336,14 @@ int	*error;
 	mb_io_ptr->new_lat = 0.0;
 	mb_io_ptr->new_heading = 0.0;
 	mb_io_ptr->new_speed = 0.0;
-	for (i=0;i<mb_io_ptr->beams_bath;i++)
+	for (i=0;i<MBF_MR1ALDEO_BEAMS;i++)
 		{
 		mb_io_ptr->new_beamflag[i] = MB_FLAG_NULL;
 		mb_io_ptr->new_bath[i] = 0.0;
 		mb_io_ptr->new_bath_acrosstrack[i] = 0.0;
 		mb_io_ptr->new_bath_alongtrack[i] = 0.0;
 		}
-	for (i=0;i<mb_io_ptr->beams_amp;i++)
-		{
-		mb_io_ptr->new_amp[i] = 0.0;
-		}
-	for (i=0;i<mb_io_ptr->pixels_ss;i++)
+	for (i=0;i<MBF_MR1ALDEO_PIXELS;i++)
 		{
 		mb_io_ptr->new_ss[i] = 0.0;
 		mb_io_ptr->new_ss_acrosstrack[i] = 0.0;
@@ -429,6 +428,13 @@ int	*error;
 		mb_io_ptr->new_speed = 0.0;
 
 		/* read beam and pixel values into storage arrays */
+		mb_io_ptr->beams_bath 
+		    = 2 * MAX(data->port_btycount, data->stbd_btycount) + 3;
+		mb_io_ptr->beams_amp = 0;
+		mb_io_ptr->pixels_ss 
+		    = 2 * MAX(data->port_sscount, data->stbd_sscount);
+		if (mb_io_ptr->pixels_ss > 0)
+		    mb_io_ptr->pixels_ss +=3;
 		beam_center = mb_io_ptr->beams_bath/2;
 		pixel_center = mb_io_ptr->pixels_ss/2;
 		for (i=0;i<data->port_btycount;i++)

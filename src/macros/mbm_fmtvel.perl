@@ -3,13 +3,15 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_fmtvel.perl	6/18/93
-#    $Id: mbm_fmtvel.perl,v 4.3 1997-04-21 16:54:41 caress Exp $
+#    $Id: mbm_fmtvel.perl,v 4.4 2000-10-03 21:42:17 caress Exp $
 #
-#    Copyright (c) 1993, 1994 by 
-#    D. W. Caress (caress@lamont.ldgo.columbia.edu)
+#    Copyright (c) 1993, 1994, 2000 by 
+#    D. W. Caress (caress@mbari.org)
+#      Monterey Bay Aquarium Research Institute
+#      Moss Landing, CA
 #    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
-#    Lamont-Doherty Earth Observatory
-#    Palisades, NY  10964
+#      Lamont-Doherty Earth Observatory
+#      Palisades, NY  10964
 #
 #    See README file for copying and redistribution conditions.
 #--------------------------------------------------------------------
@@ -36,10 +38,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   May 19, 1993
 #
 # Version:
-#   $Id: mbm_fmtvel.perl,v 4.3 1997-04-21 16:54:41 caress Exp $
+#   $Id: mbm_fmtvel.perl,v 4.4 2000-10-03 21:42:17 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.3  1997/04/21  16:54:41  caress
+# MB-System 4.5 Beta Release.
+#
 # Revision 4.2  1995/05/12  17:43:23  caress
 # Made exit status values consistent with Unix convention.
 # 0: ok  nonzero: error
@@ -214,7 +219,7 @@ sub Getopts {
 ;# Waldemar Kebsch, Federal Republic of Germany, November 1988
 ;# kebsch.pad@nixpbe.UUCP
 ;# Modified March 1990, Feb 1991 to properly handle timezones
-;#  $RCSfile: mbm_fmtvel.perl,v $$Revision: 4.3 $$Date: 1997-04-21 16:54:41 $
+;#  $RCSfile: mbm_fmtvel.perl,v $$Revision: 4.4 $$Date: 2000-10-03 21:42:17 $
 ;#   Marion Hakanson (hakanson@cse.ogi.edu)
 ;#   Oregon Graduate Institute of Science and Technology
 ;#
