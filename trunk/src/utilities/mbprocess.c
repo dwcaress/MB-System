@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbprocess.c	3/31/93
- *    $Id: mbprocess.c,v 5.32 2003-11-25 01:16:58 caress Exp $
+ *    $Id: mbprocess.c,v 5.33 2004-04-27 02:56:37 caress Exp $
  *
  *    Copyright (c) 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -36,6 +36,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.32  2003/11/25 01:16:58  caress
+ * The LDEO processed nav format has changed slightly. The code now reads old or new LDEO nav as NAVFORMAT:5.
+ *
  * Revision 5.31  2003/07/30 16:43:59  caress
  * Fixed handling of nonfatal errors in data.
  * Added KLUGE003 for fixing roll units error in Healy 2112 data.
@@ -207,7 +210,7 @@ int get_anglecorr(int verbose,
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbprocess.c,v 5.32 2003-11-25 01:16:58 caress Exp $";
+	static char rcs_id[] = "$Id: mbprocess.c,v 5.33 2004-04-27 02:56:37 caress Exp $";
 	static char program_name[] = "mbprocess";
 	static char help_message[] =  "mbprocess is a tool for processing swath sonar bathymetry data.\n\
 This program performs a number of functions, including:\n\
@@ -321,6 +324,7 @@ and mbedit edit save files.\n";
 	int	look_processed = MB_DATALIST_LOOK_NO;
 	double	file_weight;
 	int	proceedprocess= MB_NO;
+	double	time_d_lastping = 0.0;
 	int	ifilemodtime = 0;
 	int	ofilemodtime = 0;
 	int	pfilemodtime = 0;
@@ -389,17 +393,6 @@ and mbedit edit save files.\n";
 	struct mb_esf_struct esf;
 	char	esffile[MB_PATH_MAXLINE];
 	char	notice[MB_PATH_MAXLINE];
-	
-	/*int	nedit = 0;
-	double	*edit_time_d = NULL;
-	int	*edit_beam = NULL;
-	int	*edit_action = NULL;
-	int	*edit_use = NULL;
-	double	stime_d;
-	int	sbeam;
-	int	saction;
-	double	last_time_d;
-	int	insert, firstedit, lastedit;*/
 	
 	double	draft_org, depth_offset_use, depth_offset_change, depth_offset_org, static_shift;
 	double	ttime, range;
@@ -3378,7 +3371,7 @@ and mbedit edit save files.\n";
 		else if (process.mbp_kluge004 == MB_YES)
 			{
 			strncpy(comment,"\0",MBP_FILENAMESIZE);
-			sprintf(comment,"  Processing Kluge004 applied (undefined)");
+			sprintf(comment,"  Processing Kluge004 applied (remove data with overlapping time stamps)");
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			if (error == MB_ERROR_NO_ERROR) ocomment++;
 			}
@@ -3425,6 +3418,9 @@ and mbedit edit save files.\n";
 			}
 		pixel_int = process.mbp_ssrecalc_interpolate;
 		}
+	
+	/* initialize time_d_lastping */
+	time_d_lastping = 0.0;
 
 	/* read and write */
 	while (error <= MB_ERROR_NO_ERROR)
@@ -3461,6 +3457,22 @@ and mbedit edit save files.\n";
 			{
 			status = MB_SUCCESS;
 			error = MB_ERROR_NO_ERROR;
+			}
+			
+		/* compare and save survey data timestamps */
+		if (process.mbp_kluge004 == MB_YES
+			&& error == MB_ERROR_NO_ERROR 
+			&& kind == MB_DATA_DATA)
+			{
+			if (time_d < time_d_lastping)
+				{
+				error = MB_ERROR_UNINTELLIGIBLE;
+				status = MB_FAILURE;
+				}
+			else
+				{
+				time_d_lastping = time_d;
+				}
 			}
 
 		/* increment counter */
