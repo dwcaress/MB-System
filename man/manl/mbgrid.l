@@ -1,4 +1,4 @@
-.TH mbgrid l "14 February 1995"
+.TH mbgrid l "22 February 1995"
 .SH NAME
 \fBmbgrid\fP - Grid bathymetry, amplitude, or sidescan data 
 from multibeam data files.
@@ -7,7 +7,13 @@ from multibeam data files.
 Version 4.2
 
 .SH SYNOPSIS
-\fBmbgrid\fP \fB-I\fIfilelist\fP \fB-O\fIroot\fP \fB-R\fIwest/east/south/north\fP [\fB-A\fIdatatype\fP \fB-B\fIborder\fP -C\fIclip\fP \fB-D\fIxdim/ydim\fP \fB-E\fIdx/dy\fP \fB-F\fP \fB-G\fIgridkind\fP \fB-L\fIlonflip\fP \fB-M -N \fB-P\fIpings\fP \fB-S\fIspeed\fP \fB-T\fItension\fP \fB-V\fP -W\fIscale\fP \fB-X\fIextend\fP]
+\fBmbgrid\fP \fB-I\fIfilelist\fP \fB-O\fIroot\fP 
+\fB-R\fIwest/east/south/north\fP [\fB-A\fIdatatype\fP 
+\fB-B\fIborder\fP -C\fIclip\fP \fB-D\fIxdim/ydim\fP 
+\fB-E\fIdx/dy\fP \fB-F\fP \fB-G\fIgridkind\fP 
+\fB-L\fIlonflip\fP \fB-M -N \fB-P\fIpings\fP 
+\fB-S\fIspeed\fP \fB-T\fItension\fP \fB-U\fItime\fP 
+\fB-V\fP -W\fIscale\fP \fB-X\fIextend\fP]
 
 .SH DESCRIPTION
 \fBmbgrid\fP is an utility used to grid bathymetry, amplitude, or sidescan 
@@ -71,7 +77,21 @@ that in the absence of artifacts, the weighted average scheme
 does a better job of representing the gridded field, particularly
 if the spectral characteristics of the gridded field are important.
 The median filter approach also requires much more memory than
-a weighted average.
+a weighted average. In general, edited bathymetry should be gridded
+using the Gaussian weighted average, while unedited bathymetry,
+beam amplitude, and sidescan data should be gridded using the
+median filter.
+
+Normally, all of the data which falls into the region of interest
+is used to construct the gridded data set. This means that the
+data from overlapping swaths will be "averaged" in the region of
+overlap. Averaging bathymetry data from overlapping swaths is 
+usually fine, but averaging imagery data (beam amplitude or sidescan) 
+derived from different swaths is usually undesirable. The \fB-U\fP
+option allows the user to force \fBmbgrid\fP to ignore data which
+overlies regions already covered by previous data (as defined by
+a time lag criterea). This option works best with the median
+filter scheme. 
 
 If the \fB-C\fP option is used to set clipping to a value > 0, then a
 2D thin plate spline algorithm is applied to the successfully calculated 
@@ -170,9 +190,9 @@ Sets the format of the output grid file.
 .br
 \fBmbgrid\fP also outputs shellscripts which run graphics programs,
 thus providing a preliminary view of the gridded data.  If 
-\fIgridkind\fP = 1 or 2 then the shellscript will run the program
+\fIgridkind\fP = 1 then the shellscript will run the program
 \fBSHADE\fP (this will probably vanish soon since \fBSHADE\fP is
-obsolete and no longer supported).  If \fIgridkind\fP = 3 then the
+obsolete and no longer supported).  If \fIgridkind\fP = 2 or 3 then the
 shellscript will run GMT version 2 programs and then put the image
 on the screen using \fBPAGEVIEW\fP.  In either case, the image will
 consist of a color fill plot overlaid with contours.
@@ -247,6 +267,14 @@ the interpolation toward the edges. The \fItension\fP must be between 0 and
 information.
 Default: \fItension\fP = 0.35.
 .TP
+.B \fB-U\fItime\fP
+Forces \fBmbgrid\fP to avoid averaging overlapping swaths by
+ignoring the data from later swaths. "Later" data is identified
+using the \fItime\fP value. The time of the first data point
+is saved for each bin in the grid; any other data points which
+are more than \fItime\fP minutes before or after the initial
+data point in the relevent bin are ignored.
+.TP
 .B \fB-V\fP
 Normally, \fBmbgrid\fP prints out information regarding its
 controlling parameters during execution; the 
@@ -292,7 +320,7 @@ will be filled in through spine interpolation even in the areas
 not covered by data. The output looks like:
 
  Program mbgrid
- Version $Id: mbgrid.l,v 4.3 1995-02-14 21:15:05 caress Exp $
+ Version $Id: mbgrid.l,v 4.4 1995-02-22 21:54:25 caress Exp $
  MB-system Version 4.00
 
  mbgrid Parameters:
@@ -369,7 +397,7 @@ standard deviation values. The following will suffice:
 The output looks like:
 
  Program mbgrid
- Version $Id: mbgrid.l,v 4.3 1995-02-14 21:15:05 caress Exp $
+ Version $Id: mbgrid.l,v 4.4 1995-02-22 21:54:25 caress Exp $
  MB-system Version 4.00
 
  mbgrid Parameters:
