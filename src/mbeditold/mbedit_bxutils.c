@@ -47,7 +47,7 @@
  */
 #if defined(__cplusplus) || defined(__STDC__) || defined(__EXTENSIONS__)
 #include <stdlib.h>
-#ifndef VMS
+#if !defined(VMS) && !defined(DARWIN)
 #include <malloc.h>
 #endif
 #endif
