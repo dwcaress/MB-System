@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em300raw.c	10/16/98
- *	$Id: mbr_em300raw.c,v 5.22 2004-02-24 22:29:02 caress Exp $
+ *	$Id: mbr_em300raw.c,v 5.23 2004-06-20 18:40:47 caress Exp $
  *
  *    Copyright (c) 1998, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	October 16,  1998
  * $Log: not supported by cvs2svn $
+ * Revision 5.22  2004/02/24 22:29:02  caress
+ * Fixed errors in handling Simrad datagrams and edit save files on byteswapped machines (e.g. Intel or AMD processors).
+ *
  * Revision 5.21  2003/12/04 23:10:23  caress
  * Fixed problems with format 54 EM12DARW due to old code assuming how internal structure was packed. Also changed handling of beamflags for formats that don't support beamflags. Now flagged beams will always be nulled in such cases.
  *
@@ -261,7 +264,7 @@ int mbr_em300raw_wr_rawbeam2(int verbose, FILE *mbfp,
 int mbr_em300raw_wr_ss(int verbose, FILE *mbfp, 
 		struct mbsys_simrad2_struct *store, int *error);
 
-static char res_id[]="$Id: mbr_em300raw.c,v 5.22 2004-02-24 22:29:02 caress Exp $";
+static char res_id[]="$Id: mbr_em300raw.c,v 5.23 2004-06-20 18:40:47 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_em300raw(int verbose, void *mbio_ptr, int *error)
@@ -1710,7 +1713,8 @@ int mbr_em300raw_chk_label(int verbose, void *mbio_ptr, short type, short sonar)
 			|| sonar == MBSYS_SIMRAD2_EM3000D_4
 			|| sonar == MBSYS_SIMRAD2_EM3000D_5
 			|| sonar == MBSYS_SIMRAD2_EM3000D_6
-			|| sonar == MBSYS_SIMRAD2_EM3000D_7))
+			|| sonar == MBSYS_SIMRAD2_EM3000D_7
+			|| sonar == MBSYS_SIMRAD2_EM3000D_8))
 			{
 			mb_notice_log_problem(verbose, mbio_ptr, 
 				MB_PROBLEM_BAD_DATAGRAM);
@@ -1731,7 +1735,8 @@ int mbr_em300raw_chk_label(int verbose, void *mbio_ptr, short type, short sonar)
 		&& sonar != MBSYS_SIMRAD2_EM3000D_4
 		&& sonar != MBSYS_SIMRAD2_EM3000D_5
 		&& sonar != MBSYS_SIMRAD2_EM3000D_6
-		&& sonar != MBSYS_SIMRAD2_EM3000D_7)
+		&& sonar != MBSYS_SIMRAD2_EM3000D_7
+		&& sonar != MBSYS_SIMRAD2_EM3000D_8)
 		{
 		status = MB_FAILURE;
 		}
