@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mr1prhig.c	3/3/94
- *	$Id: mbr_mr1prhig.c,v 5.4 2002-09-18 23:32:59 caress Exp $
+ *	$Id: mbr_mr1prhig.c,v 5.5 2003-03-10 20:02:29 caress Exp $
  *
  *    Copyright (c) 1994, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	July 17, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2002/09/18 23:32:59  caress
+ * Release 5.0.beta23
+ *
  * Revision 5.3  2001/07/20 00:32:54  caress
  * Release 5.0.beta03
  *
@@ -138,7 +141,7 @@ int mbr_wt_mr1prhig(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_mr1prhig(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_mr1prhig.c,v 5.4 2002-09-18 23:32:59 caress Exp $";
+	static char res_id[]="$Id: mbr_mr1prhig.c,v 5.5 2003-03-10 20:02:29 caress Exp $";
 	char	*function_name = "mbr_register_mr1prhig";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -268,7 +271,7 @@ int mbr_info_mr1prhig(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_mr1prhig.c,v 5.4 2002-09-18 23:32:59 caress Exp $";
+	static char res_id[]="$Id: mbr_mr1prhig.c,v 5.5 2003-03-10 20:02:29 caress Exp $";
 	char	*function_name = "mbr_info_mr1prhig";
 	int	status = MB_SUCCESS;
 
@@ -290,7 +293,7 @@ int mbr_info_mr1prhig(int verbose,
 	*pixels_ss_max = 7003;
 	strncpy(format_name, "MR1PRHIG", MB_NAME_LENGTH);
 	strncpy(system_name, "MR1", MB_NAME_LENGTH);
-	strncpy(format_description, "Format name:          MBF_MR1PRHIG\nInformal Description: SOEST MR1 post processed format\nAttributes:           SOEST MR1, bathymetry and sidescan,\n                      variable beams and pixels, xdr binary, \n                      SOEST, University of Hawaii.\n", MB_DESCRIPTION_LENGTH);
+	strncpy(format_description, "Format name:      MBF_MR1PRHIG\nInformal Description: Obsolete SOEST MR1 post processed format\nAttributes:           SOEST MR1, bathymetry and sidescan,\n                      variable beams and pixels, xdr binary, \n                      SOEST, University of Hawaii.\n", MB_DESCRIPTION_LENGTH);
 	*numfile = 1;
 	*filetype = MB_FILETYPE_XDR;
 	*variable_beams = MB_YES;
@@ -337,7 +340,7 @@ int mbr_info_mr1prhig(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_mr1prhig(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_mr1prhig.c,v 5.4 2002-09-18 23:32:59 caress Exp $";
+	static char res_id[]="$Id: mbr_mr1prhig.c,v 5.5 2003-03-10 20:02:29 caress Exp $";
 	char	*function_name = "mbr_alm_mr1prhig";
 	int	status = MB_SUCCESS;
 	int	i;

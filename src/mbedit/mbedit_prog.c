@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	4/8/93
- *    $Id: mbedit_prog.c,v 5.17 2003-01-15 20:50:40 caress Exp $
+ *    $Id: mbedit_prog.c,v 5.18 2003-03-10 19:57:07 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -27,6 +27,9 @@
  * Date:	September 19, 2000 (New version - no buffered i/o)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.17  2003/01/15 20:50:40  caress
+ * Release 5.0.beta28
+ *
  * Revision 5.16  2002/10/02 23:53:44  caress
  * Release 5.0.beta24
  *
@@ -322,7 +325,7 @@ struct mbedit_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbedit_prog.c,v 5.17 2003-01-15 20:50:40 caress Exp $";
+static char rcs_id[] = "$Id: mbedit_prog.c,v 5.18 2003-03-10 19:57:07 caress Exp $";
 static char program_name[] = "MBedit";
 static char help_message[] =  
 "MBedit is an interactive editor used to identify and flag\n\
@@ -4296,7 +4299,7 @@ int mbedit_open_file(char *file, int form, int savemode)
 				{
 				if (insert > 0 && stime_d < editsave_time_d[insert])
 				    {
-				    for (j = insert; j >= 0 && stime_d < editsave_time_d[j]; j--)
+				    for (j = insert; j > 0 && stime_d < editsave_time_d[j-1]; j--)
 					insert--;
 				    }
 				else if (stime_d >= editsave_time_d[insert])

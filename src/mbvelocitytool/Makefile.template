@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  8/2/94
-#	$Id: Makefile.template,v 5.2 2002-07-20 20:46:57 caress Exp $
+#	$Id: Makefile.template,v 5.3 2003-03-10 20:01:03 caress Exp $
 #
 #     Copyright (c) 1993, 1994, 1997, 2000 by
 #     David W. Caress (caress@mbari.org)
@@ -16,6 +16,9 @@
 # Date:		September 14, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.2  2002/07/20 20:46:57  caress
+# Release 5.0.beta20
+#
 # Revision 5.1  2001/06/30 17:41:43  caress
 # Release 5.0.beta02
 #
@@ -92,6 +95,7 @@ $(BINDIR)/mbvelocitytool: mbvelocity.o \
 		$(LIBDIR)/libmbio.a \
 		$(LIBDIR)/libproj.a \
 		$(LIBDIR)/libgsf.a \
+		$(LIBDIR)/libmr1pr.a  \
 		$(LIBDIR)/libsapi.a \
 		$(LIBDIR)/libmbaux.a \
 		$(LIBDIR)/libmbxgr.a
@@ -103,6 +107,7 @@ $(BINDIR)/mbvelocitytool: mbvelocity.o \
 		$(LIBDIR)/libmbio.a \
 		$(LIBDIR)/libproj.a \
 		$(LIBDIR)/libgsf.a \
+		$(LIBDIR)/libmr1pr.a  \
 		$(LIBDIR)/libsapi.a \
 		$(LIBDIR)/libmbaux.a \
 		$(LIBDIR)/libmbxgr.a \

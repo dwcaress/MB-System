@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.h	1/19/93
- *    $Id: mb_format.h,v 5.12 2002-09-19 22:19:00 caress Exp $
+ *    $Id: mb_format.h,v 5.13 2003-03-10 20:04:45 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2001, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -19,6 +19,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.12  2002/09/19 22:19:00  caress
+ * Release 5.0.beta23
+ *
  * Revision 5.11  2002/09/18 23:32:59  caress
  * Release 5.0.beta23
  *
@@ -199,7 +202,7 @@
 #define MB_FORMAT_DEF
 
 /* define date of last format update */
-static char mb_format_updatedate[] = "$Date: 2002-09-19 22:19:00 $ $Revision: 5.12 $";
+static char mb_format_updatedate[] = "$Date: 2003-03-10 20:04:45 $ $Revision: 5.13 $";
 
 /* Supported swath sonar systems */
 #define	MB_SYS_NONE		0
@@ -211,26 +214,27 @@ static char mb_format_updatedate[] = "$Date: 2002-09-19 22:19:00 $ $Revision: 5.
 #define	MB_SYS_SIMRAD2		6
 #define	MB_SYS_MR1		7
 #define	MB_SYS_MR1B		8
-#define	MB_SYS_LDEOIH		9
-#define	MB_SYS_RESON		10
-#define	MB_SYS_ELAC		11
-#define	MB_SYS_ELACMK2		12
-#define MB_SYS_HSMD		13
-#define MB_SYS_DSL		14
-#define MB_SYS_GSF		15
-#define MB_SYS_MSTIFF		16
-#define MB_SYS_OIC		17
-#define MB_SYS_HDCS		18
-#define MB_SYS_SINGLEBEAM	19
-#define MB_SYS_XSE		20
-#define MB_SYS_HS10		21
-#define	MB_SYS_NETCDF		22
-#define	MB_SYS_ATLAS		23
-#define	MB_SYS_NAVNETCDF	24
-#define	MB_SYS_SURF		25
+#define	MB_SYS_MR1V2001		9
+#define	MB_SYS_LDEOIH		10
+#define	MB_SYS_RESON		11
+#define	MB_SYS_ELAC		12
+#define	MB_SYS_ELACMK2		13
+#define MB_SYS_HSMD		14
+#define MB_SYS_DSL		15
+#define MB_SYS_GSF		16
+#define MB_SYS_MSTIFF		17
+#define MB_SYS_OIC		18
+#define MB_SYS_HDCS		10
+#define MB_SYS_SINGLEBEAM	20
+#define MB_SYS_XSE		21
+#define MB_SYS_HS10		22
+#define	MB_SYS_NETCDF		23
+#define	MB_SYS_ATLAS		24
+#define	MB_SYS_NAVNETCDF	25
+#define	MB_SYS_SURF		26
 
 /* Number of supported MBIO data formats */
-#define	MB_FORMATS	53
+#define	MB_FORMATS	54
 
 /* Data formats supported by MBIO */
 #define MBF_DATALIST	-1
@@ -309,7 +313,7 @@ static char mb_format_updatedate[] = "$Date: 2002-09-19 22:19:00 $ $Revision: 5.
 					up to 254 beam bathymetry and 
 					amplitude, variable pixel sidescan, 
 					ascii + binary, MBARI */ 
-#define	MBF_MR1PRHIG	61	/* MR1 post processed format, 
+#define	MBF_MR1PRHIG	61	/* Obsolete MR1 post processed format, 
 					variable beam bathymetry, variable
 					pixel sidescan, xdr binary, SOEST */ 
 #define	MBF_MR1ALDEO	62	/* MR1 Lamont format with travel times, 
@@ -318,6 +322,9 @@ static char mb_format_updatedate[] = "$Date: 2002-09-19 22:19:00 $ $Revision: 5.
 #define	MBF_MR1BLDEO	63	/* MR1 small Lamont format with travel times, 
 					variable beam bathymetry, variable
 					pixel sidescan, xdr binary, L-DEO */ 
+#define	MBF_MR1PRVR2	64	/* MR1 post processed format, 
+					variable beam bathymetry, variable
+					pixel sidescan, xdr binary, SOEST */ 
 #define	MBF_MBLDEOIH	71	/* Generic in-house multibeam, variable beam, 
  					bathymetry, amplitude, and sidescan
  					binary, centered, L-DEO. */

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_surf.h	6/13/02
- *	$Id: mbsys_surf.h,v 5.5 2003-02-27 04:33:33 caress Exp $
+ *	$Id: mbsys_surf.h,v 5.6 2003-03-10 20:04:45 caress Exp $
  *
  *    Copyright (c) 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -28,6 +28,9 @@
  * Date:	June 13, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2003/02/27 04:33:33  caress
+ * Fixed handling of SURF format data.
+ *
  * Revision 5.4  2002/07/20 20:42:40  caress
  * Release 5.0.beta20
  *
@@ -172,6 +175,15 @@ int mbsys_surf_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 			double navlon, double navlat,
 			double speed, double heading, double draft,
 			double roll, double pitch, double heave,
+			int *error);
+int mbsys_surf_extract_svp(int verbose, void *mbio_ptr, void *store_ptr,
+			int *kind,
+			int *nsvp,
+			double *depth, double *velocity,
+			int *error);
+int mbsys_surf_insert_svp(int verbose, void *mbio_ptr, void *store_ptr,
+			int nsvp,
+			double *depth, double *velocity,
 			int *error);
 int mbsys_surf_copy(int verbose, void *mbio_ptr,
 			void *store_ptr, void *copy_ptr,

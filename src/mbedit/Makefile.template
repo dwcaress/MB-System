@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  8/2/94
-#	$Id: Makefile.template,v 4.11 2002-07-20 20:45:04 caress Exp $
+#	$Id: Makefile.template,v 4.12 2003-03-10 19:57:07 caress Exp $
 #
 #     Copyright (c) 1993, 1994, 2000 by
 #     David W. Caress (caress@mbari.org)
@@ -16,6 +16,9 @@
 # Date:		August 2, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.11  2002/07/20 20:45:04  caress
+# Release 5.0.beta20
+#
 # Revision 4.10  2001/06/30 17:39:31  caress
 # Release 5.0.beta02
 #
@@ -84,6 +87,7 @@ $(BINDIR)/mbedit: mbedit.o mbedit_prog.o \
 		$(LIBDIR)/libproj.a \
 		$(LIBDIR)/libgsf.a \
 		$(LIBDIR)/libsapi.a \
+		$(LIBDIR)/libmr1pr.a  \
 		$(LIBDIR)/libmbps.a \
 		$(LIBDIR)/libmbxgr.a \
 		mbedit_callbacks.o \
@@ -93,6 +97,7 @@ $(BINDIR)/mbedit: mbedit.o mbedit_prog.o \
 		$(LIBDIR)/libproj.a \
 		$(LIBDIR)/libgsf.a \
 		$(LIBDIR)/libsapi.a \
+		$(LIBDIR)/libmr1pr.a  \
 		$(LIBDIR)/libmbps.a \
 		$(LIBDIR)/libmbxgr.a \
 		mbedit_callbacks.o \
