@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_samesurf.c	6/13/2002
- *	$Id: mbr_samesurf.c,v 5.4 2003-02-27 04:33:33 caress Exp $
+ *	$Id: mbr_samesurf.c,v 5.5 2003-03-06 00:14:52 caress Exp $
  *
  *    Copyright (c) 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	June 13, 2002
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2003/02/27 04:33:33  caress
+ * Fixed handling of SURF format data.
+ *
  * Revision 5.3  2002/09/18 23:32:59  caress
  * Release 5.0.beta23
  *
@@ -83,7 +86,7 @@ int mbr_wt_samesurf(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_samesurf(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_samesurf.c,v 5.4 2003-02-27 04:33:33 caress Exp $";
+	static char res_id[]="$Id: mbr_samesurf.c,v 5.5 2003-03-06 00:14:52 caress Exp $";
 	char	*function_name = "mbr_register_samesurf";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -134,8 +137,8 @@ int mbr_register_samesurf(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr->mb_io_insert_nav = &mbsys_surf_insert_nav;
 	mb_io_ptr->mb_io_extract_altitude = &mbsys_surf_extract_altitude;
 	mb_io_ptr->mb_io_insert_altitude = NULL;
-	mb_io_ptr->mb_io_extract_svp = NULL;
-	mb_io_ptr->mb_io_insert_svp = NULL;
+	mb_io_ptr->mb_io_extract_svp = &mbsys_surf_extract_svp;
+	mb_io_ptr->mb_io_insert_svp = &mbsys_surf_insert_svp;
 	mb_io_ptr->mb_io_ttimes = &mbsys_surf_ttimes;
 	mb_io_ptr->mb_io_detects = &mbsys_surf_detects;
 	mb_io_ptr->mb_io_copyrecord = &mbsys_surf_copy;
@@ -214,7 +217,7 @@ int mbr_info_samesurf(int verbose,
 			double *beamwidth_ltrack,
 			int *error)
 {
-	static char res_id[]="$Id: mbr_samesurf.c,v 5.4 2003-02-27 04:33:33 caress Exp $";
+	static char res_id[]="$Id: mbr_samesurf.c,v 5.5 2003-03-06 00:14:52 caress Exp $";
 	char	*function_name = "mbr_info_samesurf";
 	int	status = MB_SUCCESS;
 
@@ -283,7 +286,7 @@ int mbr_info_samesurf(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_samesurf(int verbose, void *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_samesurf.c,v 5.4 2003-02-27 04:33:33 caress Exp $";
+ static char res_id[]="$Id: mbr_samesurf.c,v 5.5 2003-03-06 00:14:52 caress Exp $";
 	char	*function_name = "mbr_alm_samesurf";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

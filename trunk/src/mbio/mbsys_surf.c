@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_surf.c	3.00	6/25/01
- *	$Id: mbsys_surf.c,v 5.10 2003-02-27 04:33:33 caress Exp $
+ *	$Id: mbsys_surf.c,v 5.11 2003-03-06 00:14:52 caress Exp $
  *
  *    Copyright (c) 2001, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -27,6 +27,9 @@
  * Date:	June 20, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.10  2003/02/27 04:33:33  caress
+ * Fixed handling of SURF format data.
+ *
  * Revision 5.9  2002/09/18 23:32:59  caress
  * Release 5.0.beta23
  *
@@ -50,7 +53,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_surf.h"
 
-static char res_id[]="$Id: mbsys_surf.c,v 5.10 2003-02-27 04:33:33 caress Exp $";
+static char res_id[]="$Id: mbsys_surf.c,v 5.11 2003-03-06 00:14:52 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_surf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
@@ -1222,6 +1225,156 @@ int mbsys_surf_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		store->SoundingData.rollWhileTransmitting = (float) (DTR * roll);
 		store->SoundingData.pitchWhileTransmitting = (float) (DTR * pitch);
 		store->SoundingData.heaveWhileTransmitting = (float) heave;
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbsys_surf_extract_svp(int verbose, void *mbio_ptr, void *store_ptr,
+		int *kind, int *nsvp,
+		double *depth, double *velocity,
+		int *error)
+{
+	char	*function_name = "mbsys_surf_extract_svp";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	struct mbsys_surf_struct *store;
+	int	i, j;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mb_ptr:     %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* get data structure pointer */
+	store = (struct mbsys_surf_struct *) store_ptr;
+
+	/* get data kind */
+	*kind = store->kind;
+
+	/* extract data from structure */
+	if (*kind == MB_DATA_DATA &&
+		store->ActualCProfileTable.numberOfActualValues > 0)
+		{
+		/* get number of depth-velocity pairs */
+		*nsvp = store->ActualCProfileTable.numberOfActualValues;
+
+		/* get profile */
+		for (i=0;i<*nsvp;i++)
+			{
+			depth[i] = store->ActualCProfileTable.values[i].depth;
+			velocity[i] = store->ActualCProfileTable.values[i].cValue;
+			}
+
+		/* done translating values */
+		}
+
+	/* deal with comment */
+	else if (*kind == MB_DATA_COMMENT)
+		{
+		/* set status */
+		*error = MB_ERROR_COMMENT;
+		status = MB_FAILURE;
+		}
+
+	/* deal with other record type */
+	else
+		{
+		/* set status */
+		*error = MB_ERROR_OTHER;
+		status = MB_FAILURE;
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       kind:              %d\n",*kind);
+		fprintf(stderr,"dbg2       nsvp:              %d\n",*nsvp);
+		for (i=0;i<*nsvp;i++)
+		    fprintf(stderr,"dbg2       depth[%d]: %f   velocity[%d]: %f\n",i, depth[i], i, velocity[i]);
+		fprintf(stderr,"dbg2       error:             %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:            %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbsys_surf_insert_svp(int verbose, void *mbio_ptr, void *store_ptr,
+		int nsvp,
+		double *depth, double *velocity,
+		int *error)
+{
+	char	*function_name = "mbsys_surf_insert_svp";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	struct mbsys_surf_struct *store;
+	int	kind;
+	int	i, j;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       nsvp:       %d\n",nsvp);
+		for (i=0;i<nsvp;i++)
+		    fprintf(stderr,"dbg2       depth[%d]: %f   velocity[%d]: %f\n",i, depth[i], i, velocity[i]);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* get data structure pointer */
+	store = (struct mbsys_surf_struct *) store_ptr;
+
+	/* get data kind */
+	kind = store->kind;
+
+	/* insert data in structure */
+	if (kind == MB_DATA_DATA && nsvp > 0)
+		{
+		store->NrSoundvelocityProfiles++;
+
+		/* set number of depth-velocity pairs */
+		store->ActualCProfileTable.numberOfActualValues
+			= MIN(nsvp, MBSYS_SURF_MAXCVALUES);
+
+		/* set profile */
+		for (i=0;i<store->ActualCProfileTable.numberOfActualValues;i++)
+			{
+			store->ActualCProfileTable.values[i].depth = depth[i];
+			store->ActualCProfileTable.values[i].cValue = velocity[i];
+			}
 		}
 
 	/* print output debug statements */
