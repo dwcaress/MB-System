@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	install_makefiles	5/20/94
-#    $Id: install_makefiles,v 4.4 1994-10-21 13:38:18 caress Exp $
+#    $Id: install_makefiles,v 4.5 1995-02-15 14:42:44 caress Exp $
 #
 #    Copyright (c) 1993, 1994 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -41,10 +41,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   May 20, 1994
 #
 # Version:
-#   $Id: install_makefiles,v 4.4 1994-10-21 13:38:18 caress Exp $
+#   $Id: install_makefiles,v 4.5 1995-02-15 14:42:44 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.4  1994/10/21  13:38:18  caress
+# Release V4.0
+#
 # Revision 4.3  1994/10/20  21:23:53  caress
 # Release V4.0
 #
@@ -65,7 +68,8 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # The important parameters to be set are:
 #	MBSYSTEM_HOME	Absolute path to the directory containing
 #				this file.
-#	OS		Operating system (SUN, IRIX, LYNX, or OTHER).
+#	OS		Operating system (SUN, IRIX, LYNX, 
+#				SOLARIS, or OTHER).
 #	BYTESWAPPED	If set to "YES" will enable byte swapping
 #				of input and output binary data.
 #				Otherwise byte swapping is disabled.
@@ -139,6 +143,26 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #	$GRPHLIBDIR = "/otter/home/graphics/lib";
 #	$GRPHINCDIR = "/otter/home/graphics/lib";
 #
+# Example for installing on WHOI Sun workstations running Solaris:
+#	$MBSYSTEM_HOME = "/usr/local/mbsystem";
+#	$OS = "SOLARIS";
+#	$BYTESWAPPED = "NO";
+#	$CFLAGS = "-O -I/usr/ucbinclude";
+#	$FFLAGS = "-O";
+#	$LFLAGS = "-lrpcsvc -lnsl -lm";
+#	$FWITHCFLAGS = "-lF77 -lU77 -lI77 -lisam";
+#	$GRAPHICAL = "NO";
+#	$MOTIFINCDIR = "/usr/include/Xm";
+#	$MOTIFLIBS = "-lXm -lXt -lX11 -lMrm";
+#	$UIL = "/usr/bin/X11/uil";
+#	$GMTLIBDIR = "/usr/local/gmt/src";
+#	$GMTINCDIR = "/usr/local/gmt/src";
+#	$NETCDFDIR = "/usr/local/lib";
+#	$LEVITUS = "/usr/local/data/annual";
+#	$REALTIME = 0;
+#	$GRPHLIBDIR = "";
+#	$GRPHINCDIR = "";
+#
 # Example for installing on SeaBeam Instruments SGI IRIX workstations:
 #	$MBSYSTEM_HOME = "/usr/local/mbsystem";
 #	$OS = "IRIX";
@@ -188,19 +212,19 @@ $OS = "IRIX";
 $BYTESWAPPED = "NO";
 $CFLAGS = "-g";
 $FFLAGS = "-g";
-$LFLAGS = " -lmalloc_cv -lm -lsun -g";
+$LFLAGS = " -lmalloc -lm -lsun -g";
 $FWITHCFLAGS = "-lF77 -lU77 -lI77 -lisam -lfgl";
 $GRAPHICAL = "YES";
 $MOTIFINCDIR = "/usr/include/Xm";
 $MOTIFLIBS = "-lXm -lXt -lX11 -lMrm";
 $UIL = "/usr/bin/X11/uil";
-$GMTLIBDIR = "/usr/local/gmt/src";
-$GMTINCDIR = "/usr/local/gmt/src";
-$NETCDFDIR = "/usr/local/netcdf/lib";
-$LEVITUS = "/usr/local/levitus/annual";
+$GMTLIBDIR = "/indy02/usr/local/gmt/src";
+$GMTINCDIR = "/indy02/usr/local/gmt/src";
+$NETCDFDIR = "/indy02/usr/local/netcdf/lib";
+$LEVITUS = "/indy02/usr/local/levitus/annual";
 $REALTIME = 1;
-$GRPHLIBDIR = "/usr/local/lamont_graphics/graphics/src";
-$GRPHINCDIR = "/usr/local/lamont_graphics/graphics/src";
+$GRPHLIBDIR = "/indy02/usr/local/lamont_graphics/graphics/src";
+$GRPHINCDIR = "/indy02/usr/local/lamont_graphics/graphics/src";
 #
 # **** LEAVE EVERYTHING ELSE BELOW ALONE ****
 
