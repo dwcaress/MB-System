@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template	5/24/94
-#	$Id: Makefile.template,v 4.12 2002-07-25 19:04:01 caress Exp $
+#	$Id: Makefile.template,v 4.13 2003-03-10 07:38:51 caress Exp $
 #
 #     Copyright (c) 1993, 1994, 2000 by
 #     David W. Caress (caress@mbari.org)
@@ -16,6 +16,9 @@
 # Date:		January 21, 1993
 # 
 # $Log: not supported by cvs2svn $
+# Revision 4.12  2002/07/25 19:04:01  caress
+# Release 5.0.beta21
+#
 # Revision 4.11  2000/09/30 07:18:57  caress
 # Snapshot for Dale.
 #
@@ -64,6 +67,7 @@
 all:
 	cd gsf; make all
 	cd surf; make all
+	cd mr1pr; make all
 	cd proj; make all
 	cd mbio; make all
 	cd mbaux; make all
@@ -80,6 +84,7 @@ all:
 clean:
 	- cd gsf; make clean
 	- cd surf; make clean
+	- cd mr1pr; make clean
 	- cd proj; make clean
 	- cd mbio; make clean
 	- cd mbaux; make clean
