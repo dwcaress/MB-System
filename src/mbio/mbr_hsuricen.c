@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsuricen.c	2/2/93
- *	$Id: mbr_hsuricen.c,v 4.9 1997-07-25 14:19:53 caress Exp $
+ *	$Id: mbr_hsuricen.c,v 4.10 1998-10-05 17:46:15 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,10 @@
  * Author:	D. W. Caress
  * Date:	February 2, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.9  1997/07/25  14:19:53  caress
+ * Version 4.5beta2.
+ * Much mucking, particularly with Simrad formats.
+ *
  * Revision 4.8  1997/04/21  17:02:07  caress
  * MB-System 4.5 Beta Release.
  *
@@ -91,7 +95,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_hsuricen.c,v 4.9 1997-07-25 14:19:53 caress Exp $";
+ static char res_id[]="$Id: mbr_hsuricen.c,v 4.10 1998-10-05 17:46:15 caress Exp $";
 	char	*function_name = "mbr_alm_hsuricen";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -242,8 +246,8 @@ int	*error;
 		data->min = mb_swap_short(data->min);
 		data->day = mb_swap_short(data->day);
 		data->year = mb_swap_short(data->year);
-		data->lat = mb_swap_long(data->lat);
-		data->lon = mb_swap_long(data->lon);
+		data->lat = mb_swap_int(data->lat);
+		data->lon = mb_swap_int(data->lon);
 		data->hdg = mb_swap_short(data->hdg);
 		data->course = mb_swap_short(data->course);
 		data->speed = mb_swap_short(data->speed);
@@ -329,27 +333,31 @@ int	*error;
 		/* read distance and depth values into storage arrays */
 		/* switch order of data as it is read into the global arrays */
 		id = mb_io_ptr->beams_bath - 1;
-		if (data->scale != 100 && data->scale > 0)
-			{
+		if (data->scale > 0)
 			scale = 0.01*data->scale;
-			for (i=0;i<mb_io_ptr->beams_bath;i++)
-				{
-				mb_io_ptr->new_bath[id-i] 
-					= scale*data->deph[i];
-				mb_io_ptr->new_bath_acrosstrack[id-i] 
-					= scale*data->dist[i];
-				mb_io_ptr->new_bath_alongtrack[id-i] = 0.0;
-				}
-			}
-		else
+		else 
+			scale = 1.0;
+		for (i=0;i<mb_io_ptr->beams_bath;i++)
 			{
-			for (i=0;i<mb_io_ptr->beams_bath;i++)
-				{
-				mb_io_ptr->new_bath[id-i] = data->deph[i];
-				mb_io_ptr->new_bath_acrosstrack[id-i] 
-					= data->dist[i];
-				mb_io_ptr->new_bath_alongtrack[id-i] = 0.0;
-				}
+			if (data->deph[i] > 0)
+			    {
+			    mb_io_ptr->new_beamflag[id-i] = MB_FLAG_NONE;
+			    mb_io_ptr->new_bath[id-i] = scale*data->deph[i];
+			    }
+			else if (data->deph[i] < 0)
+			    {
+			    mb_io_ptr->new_beamflag[id-i] = 
+				MB_FLAG_MANUAL + MB_FLAG_FLAG;
+			    mb_io_ptr->new_bath[id-i] = -scale*data->deph[i];
+			    }
+			else
+			    {
+			    mb_io_ptr->new_beamflag[id-i] = MB_FLAG_NULL;
+			    mb_io_ptr->new_bath[id-i] = scale*data->deph[i];
+			    }
+			mb_io_ptr->new_bath_acrosstrack[id-i] 
+				= scale*data->dist[i];
+			mb_io_ptr->new_bath_alongtrack[id-i] = 0;
 			}
 
 		/* print debug statements */
@@ -387,15 +395,16 @@ int	*error;
 			fprintf(stderr,"dbg4       beams_bath: %d\n",
 				mb_io_ptr->beams_bath);
 			for (i=0;i<mb_io_ptr->beams_bath;i++)
-			  fprintf(stderr,"dbg4       bath[%d]: %f  bathdist[%d]: %f\n",
-				i,mb_io_ptr->new_bath[i],
-				i,mb_io_ptr->new_bath_acrosstrack[i]);
+			  fprintf(stderr,"dbg4       %d  flag:%d bath: %f  bathdist: %f\n",
+				i,mb_io_ptr->new_beamflag[i],
+				mb_io_ptr->new_bath[i],
+				mb_io_ptr->new_bath_acrosstrack[i]);
 			fprintf(stderr,"dbg4       beams_amp: %d\n",
 				mb_io_ptr->beams_amp);
 			for (i=0;i<mb_io_ptr->beams_amp;i++)
-			  fprintf(stderr,"dbg4       amp[%d]: %f  bathdist[%d]: %f\n",
+			  fprintf(stderr,"dbg4       %d  amp: %f  bathdist: %f\n",
 				i,mb_io_ptr->new_amp[i],
-				i,mb_io_ptr->new_bath_acrosstrack[i]);
+				mb_io_ptr->new_bath_acrosstrack[i]);
 			}
 
 		/* done translating values */
@@ -710,7 +719,10 @@ int	*error;
 			scalefactor = 1.0;
 		for (i=0;i<mb_io_ptr->beams_bath;i++)
 			{
-			data->deph[i] = scalefactor*mb_io_ptr->new_bath[id-i];
+			if (mb_beam_check_flag(mb_io_ptr->new_beamflag[id-i]))
+			    data->deph[i] = -scalefactor*mb_io_ptr->new_bath[id-i];
+			else
+			    data->deph[i] = scalefactor*mb_io_ptr->new_bath[id-i];
 			data->dist[i] = scalefactor*mb_io_ptr->new_bath_acrosstrack[id-i];
 			}
 		}
@@ -734,8 +746,8 @@ int	*error;
 		data->min = mb_swap_short(data->min);
 		data->day = mb_swap_short(data->day);
 		data->year = mb_swap_short(data->year);
-		data->lat = mb_swap_long(data->lat);
-		data->lon = mb_swap_long(data->lon);
+		data->lat = mb_swap_int(data->lat);
+		data->lon = mb_swap_int(data->lon);
 		data->hdg = mb_swap_short(data->hdg);
 		data->course = mb_swap_short(data->course);
 		data->speed = mb_swap_short(data->speed);

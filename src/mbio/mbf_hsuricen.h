@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_hsuricen.h	1/20/93
- *	$Id: mbf_hsuricen.h,v 4.3 1997-09-15 19:06:40 caress Exp $
+ *	$Id: mbf_hsuricen.h,v 4.4 1998-10-05 17:46:15 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -17,6 +17,9 @@
  * Author:	D. W. Caress
  * Date:	January 20, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1997/09/15  19:06:40  caress
+ * Real Version 4.5
+ *
  * Revision 4.2  1997/04/21  17:02:07  caress
  * MB-System 4.5 Beta Release.
  *
@@ -72,8 +75,8 @@ struct mbf_hsuricen_data_struct
 	short	min;		/* minute of the day */
 	short	day;		/* day of the year */
 	short	year;		/* 4-digit year */
-	long	lat;		/* latitude in degrees times 10^7 */
-	long	lon;		/* longitude in degrees times 10^7 */
+	int	lat;		/* latitude in degrees times 10^7 */
+	int	lon;		/* longitude in degrees times 10^7 */
 	short	hdg;		/* heading in degrees x 10 */
 	short	course;		/* course in degrees x 10 */
 	short	speed;		/* speed in knots x 100 */

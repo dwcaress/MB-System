@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_close.c	1/25/93
- *	$Id: mb_close.c,v 4.9 1997-04-21 17:02:07 caress Exp $
+ *	$Id: mb_close.c,v 4.10 1998-10-05 17:46:15 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -18,6 +18,9 @@
  * Date:	January 25, 1993
  *	
  * $Log: not supported by cvs2svn $
+ * Revision 4.9  1997/04/21  17:02:07  caress
+ * MB-System 4.5 Beta Release.
+ *
  * Revision 4.9  1997/04/17  18:51:12  caress
  * Added LINUX ifdef.
  *
@@ -76,6 +79,9 @@
 #ifdef IRIX
 #include <rpc/rpc.h>
 #endif
+#ifdef IRIX64
+#include <rpc/rpc.h>
+#endif
 #ifdef SOLARIS
 #include <rpc/rpc.h>
 #endif
@@ -107,7 +113,7 @@ int	verbose;
 char	**mbio_ptr;
 int	*error;
 {
-	static	char	rcs_id[]="$Id: mb_close.c,v 4.9 1997-04-21 17:02:07 caress Exp $";
+	static	char	rcs_id[]="$Id: mb_close.c,v 4.10 1998-10-05 17:46:15 caress Exp $";
 	char	*function_name = "mb_close";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -130,10 +136,11 @@ int	*error;
 	status = mb_mem_deall(verbose,*mbio_ptr,error);
 
 	/* deallocate memory for arrays within the mbio descriptor */
-	if (mb_xdr_table[mb_io_ptr->format_num] == MB_YES)
+	if (mb_filetype_table[mb_io_ptr->format_num] == MB_FILETYPE_XDR)
 		status = mb_free(verbose,&mb_io_ptr->xdrs,error);
 	if (mb_io_ptr->hdr_comment != NULL)
 		status = mb_free(verbose,&mb_io_ptr->hdr_comment,error);
+	status = mb_free(verbose,&mb_io_ptr->beamflag,error);
 	status = mb_free(verbose,&mb_io_ptr->bath,error);
 	status = mb_free(verbose,&mb_io_ptr->amp,error);
 	status = mb_free(verbose,&mb_io_ptr->bath_acrosstrack,error);
@@ -144,6 +151,7 @@ int	*error;
 	status = mb_free(verbose,&mb_io_ptr->ss_acrosstrack,error);
 	status = mb_free(verbose,&mb_io_ptr->ss_alongtrack,error);
 	status = mb_free(verbose,&mb_io_ptr->ss_num,error);
+	status = mb_free(verbose,&mb_io_ptr->new_beamflag,error);
 	status = mb_free(verbose,&mb_io_ptr->new_bath,error);
 	status = mb_free(verbose,&mb_io_ptr->new_amp,error);
 	status = mb_free(verbose,&mb_io_ptr->new_bath_acrosstrack,error);
@@ -152,13 +160,23 @@ int	*error;
 	status = mb_free(verbose,&mb_io_ptr->new_ss_acrosstrack,error);
 	status = mb_free(verbose,&mb_io_ptr->new_ss_alongtrack,error);
 
-	/* close the files */
-	if (mb_io_ptr->mbfp != NULL)
-		fclose(mb_io_ptr->mbfp);
-	if (mb_io_ptr->mbfp2 != NULL)
-		fclose(mb_io_ptr->mbfp2);
-	if (mb_io_ptr->mbfp3 != NULL)
-		fclose(mb_io_ptr->mbfp3);
+	/* close the files if normal */
+	if (mb_filetype_table[mb_io_ptr->format_num] == MB_FILETYPE_NORMAL
+	    || mb_filetype_table[mb_io_ptr->format_num] == MB_FILETYPE_XDR)
+	    {
+	    if (mb_io_ptr->mbfp != NULL)
+		    fclose(mb_io_ptr->mbfp);
+	    if (mb_io_ptr->mbfp2 != NULL)
+		    fclose(mb_io_ptr->mbfp2);
+	    if (mb_io_ptr->mbfp3 != NULL)
+		    fclose(mb_io_ptr->mbfp3);
+	    }
+	
+	/* else if gsf then use gsfClose */
+	else if (mb_filetype_table[mb_io_ptr->format_num] == MB_FILETYPE_GSF)
+	    {
+	    gsfClose((int) mb_io_ptr->mbfp);
+	    }
 
 	/* deallocate the mbio descriptor */
 	status = mb_free(verbose,mbio_ptr,error);

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	1/19/93
- *    $Id: mb_io.h,v 4.7 1997-07-25 14:19:53 caress Exp $
+ *    $Id: mb_io.h,v 4.8 1998-10-05 17:46:15 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,10 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.7  1997/07/25  14:19:53  caress
+ * Version 4.5beta2.
+ * Much mucking, particularly with Simrad formats.
+ *
  * Revision 4.6  1997/04/21  17:02:07  caress
  * MB-System 4.5 Beta Release.
  *
@@ -173,6 +177,7 @@ struct mb_io_struct
 	double	lat;
 	double	speed;
 	double	heading;
+	char	*beamflag;
 	double	*bath;
 	double	*amp;
 	double	*bath_acrosstrack;
@@ -195,6 +200,7 @@ struct mb_io_struct
 	double	new_lat;
 	double	new_speed;
 	double	new_heading;
+	char	*new_beamflag;
 	double	*new_bath;
 	double	*new_amp;
 	double	*new_bath_acrosstrack;
@@ -219,6 +225,14 @@ struct mb_io_struct
 	int	save2;
 	int	save3;
 	int	save4;
+	int	save5;
+	int	save6;
+	int	save7;
+	int	save8;
+	int	save9;
+	int	save10;
+	int	save11;
+	double	saved1;
 	};
 
 /* MBIO buffer control structure */

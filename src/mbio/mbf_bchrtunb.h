@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_bchrtunb.h	8/21/94
- *	$Id: mbf_bchrtunb.h,v 4.3 1997-09-15 19:06:40 caress Exp $
+ *	$Id: mbf_bchrtunb.h,v 4.4 1998-10-05 17:46:15 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -17,6 +17,9 @@
  * Author:	D. W. Caress
  * Date:	August 21, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1997/09/15  19:06:40  caress
+ * Real Version 4.5
+ *
  * Revision 4.2  1997/04/21  17:02:07  caress
  * MB-System 4.5 Beta Release.
  *
@@ -95,7 +98,9 @@ struct mbf_bchrtunb_profile_struct
 				/* alongtrack distances: 0.01 meters */
 	short int tt[8];	/* travel times:         0.05 msec */
 	short int angle[8];	/* 0.005 degrees */
-	short int quality[8];	/* 0 (bad) to 3 (good) */
+	short int quality[8];	/* 1 (good) to 8 (bad) 
+				    extension:	10: flag by manual edit
+						20: flag by filter edit */
 	short int amp[8];	/* ??? */
 
 	};
@@ -156,8 +161,8 @@ struct mbf_bchrtunb_struct
 	int	pos_thousandth_sec;
 	int	pos_latitude;		/* 180 deg = 2e9 */
 	int	pos_longitude;		/* 180 deg = 2e9 */
-	unsigned long	utm_northing;
-	unsigned long	utm_easting;
+	unsigned int	utm_northing;
+	unsigned int	utm_easting;
 	int	utm_zone_lon;		/* 180 deg = 2e9 */
 	char	utm_zone;
 	char	hemisphere;

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em121raw.c	7/8/96
- *	$Id: mbr_em121raw.c,v 4.7 1997-09-15 19:06:40 caress Exp $
+ *	$Id: mbr_em121raw.c,v 4.8 1998-10-05 17:46:15 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	August 8, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.7  1997/09/15  19:06:40  caress
+ * Real Version 4.5
+ *
  * Revision 4.6  1997/07/25  14:19:53  caress
  * Version 4.5beta2.
  * Much mucking, particularly with Simrad formats.
@@ -73,7 +76,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_em121raw.c,v 4.7 1997-09-15 19:06:40 caress Exp $";
+	static char res_id[]="$Id: mbr_em121raw.c,v 4.8 1998-10-05 17:46:15 caress Exp $";
 	char	*function_name = "mbr_alm_em121raw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -387,6 +390,7 @@ int	*error;
 	mb_io_ptr->new_speed = 0.0;
 	for (i=0;i<mb_io_ptr->beams_bath;i++)
 		{
+		mb_io_ptr->new_beamflag[i] = MB_FLAG_NULL;
 		mb_io_ptr->new_bath[i] = 0.0;
 		mb_io_ptr->new_bath_acrosstrack[i] = 0.0;
 		mb_io_ptr->new_bath_alongtrack[i] = 0.0;
@@ -657,7 +661,27 @@ int	*error;
 			ss_spacing = 0.15;
 		for (i=0;i<mb_io_ptr->beams_bath;i++)
 			{
-			mb_io_ptr->new_bath[i] = depthscale*data->bath[i];
+			if (data->bath[i] < 0)
+			    {
+			    mb_io_ptr->new_beamflag[i] 
+				    = MB_FLAG_MANUAL + MB_FLAG_FLAG;
+			    mb_io_ptr->new_bath[i] 
+				    = -depthscale*data->bath[i];
+			    }
+			else if (data->bath[i] > 0)
+			    {
+			    mb_io_ptr->new_beamflag[i] 
+				    = MB_FLAG_NONE;
+			    mb_io_ptr->new_bath[i] 
+				    = depthscale*data->bath[i];
+			    }
+			else
+			    {
+			    mb_io_ptr->new_beamflag[i] 
+				    = MB_FLAG_NULL;
+			    mb_io_ptr->new_bath[i] 
+				    = depthscale*data->bath[i];
+			    }
 			mb_io_ptr->new_bath_acrosstrack[i] 
 				= dacrscale*data->bath_acrosstrack[i];
 			mb_io_ptr->new_bath_alongtrack[i] 
@@ -701,8 +725,9 @@ int	*error;
 			fprintf(stderr,"dbg4       beams_amp:  %d\n",
 				mb_io_ptr->beams_amp);
 			for (i=0;i<mb_io_ptr->beams_bath;i++)
-			  fprintf(stderr,"dbg4       beam:%d  bath:%f  amp:%f  acrosstrack:%f  alongtrack:%f\n",
-				i,mb_io_ptr->new_bath[i],
+			  fprintf(stderr,"dbg4       beam:%d  flag:%3d  bath:%f  amp:%f  acrosstrack:%f  alongtrack:%f\n",
+				i,mb_io_ptr->new_beamflag[i],
+				mb_io_ptr->new_bath[i],
 				mb_io_ptr->new_amp[i],
 				mb_io_ptr->new_bath_acrosstrack[i],
 				mb_io_ptr->new_bath_alongtrack[i]);
@@ -1157,7 +1182,15 @@ int	*error;
 			{
 			for (i=0;i<mb_io_ptr->beams_bath;i++)
 				{
-				data->bath[i] = mb_io_ptr->new_bath[i]/depthscale;
+				if (mb_beam_check_flag(
+					mb_io_ptr->new_beamflag[i]))
+				    data->bath[i] 
+					= -mb_io_ptr->new_bath[i]
+						/depthscale;
+				else
+				    data->bath[i] 
+					= mb_io_ptr->new_bath[i]
+						/depthscale;
 				data->bath_acrosstrack[i]
 					= mb_io_ptr->new_bath_acrosstrack[i]/dacrscale;
 				data->bath_alongtrack[i] 

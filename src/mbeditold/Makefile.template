@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  8/2/94
-#	$Id: Makefile.template,v 4.5 1997-09-23 13:55:25 caress Exp $
+#	$Id: Makefile.template,v 4.6 1998-10-05 17:45:32 caress Exp $
 #
 #     Copyright (c) 1993, 1994 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,9 @@
 # Date:		August 2, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.5  1997/09/23  13:55:25  caress
+# Fixed typo.
+#
 # Revision 4.4  1997/04/21  16:56:14  caress
 # MB-System 4.5 Beta Release.
 #
@@ -61,10 +64,12 @@ all: $(BINDIR)/mbedit $(MANDIR)/mbedit.l
 ### link the executable
 $(BINDIR)/mbedit: mbedit.o mbedit_prog.o xgraphics.o \
 		$(LIBDIR)/libmbio.a \
+		$(LIBDIR)/libgsf.a \
 		mbedit_callbacks.o \
 		mbedit_creation.o mbedit_bxutils.o
 	$(CC) $(CFLAGS) mbedit.o mbedit_prog.o xgraphics.o \
 		$(LIBDIR)/libmbio.a \
+		$(LIBDIR)/libgsf.a \
 		mbedit_callbacks.o \
 		mbedit_creation.o mbedit_bxutils.o \
 		$(MOTIFLIBS) $(LFLAGS) -o $(BINDIR)/mbedit

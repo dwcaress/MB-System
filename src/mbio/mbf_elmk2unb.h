@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_elmk2unb.h	6/6/97
- *	$Id: mbf_elmk2unb.h,v 4.0 1997-07-25 14:25:40 caress Exp $
+ *	$Id: mbf_elmk2unb.h,v 4.1 1998-10-05 17:46:15 caress Exp $
  *
  *    Copyright (c) 1997 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -18,6 +18,9 @@
  * Date:	June 6, 1997
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1997/07/25  14:25:40  caress
+ * Version 4.5beta2.
+ *
  * Revision 1.1  1997/07/25  14:19:53  caress
  * Initial revision
  *
@@ -128,8 +131,8 @@ struct mbf_elmk2unb_struct
 	int	pos_thousandth_sec;
 	int	pos_latitude;		/* 180 deg = 2e9 */
 	int	pos_longitude;		/* 180 deg = 2e9 */
-	unsigned long	utm_northing;
-	unsigned long	utm_easting;
+	unsigned int	utm_northing;
+	unsigned int	utm_easting;
 	int	utm_zone_lon;		/* 180 deg = 2e9 */
 	char	utm_zone;
 	char	hemisphere;

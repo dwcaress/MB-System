@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sbifremr.c	3/29/96
- *	$Id: mbr_sbifremr.c,v 4.4 1997-07-28 15:04:13 caress Exp $
+ *	$Id: mbr_sbifremr.c,v 4.5 1998-10-05 17:46:15 caress Exp $
  *
  *    Copyright (c) 1996 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -24,6 +24,9 @@
  * Location:	152 39.061W; 34 09.150S on R/V Ewing
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.4  1997/07/28  15:04:13  caress
+ * Fixed time_j typo.
+ *
  * Revision 4.3  1997/07/25  14:19:53  caress
  * Version 4.5beta2.
  * Much mucking, particularly with Simrad formats.
@@ -69,7 +72,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_sbifremr.c,v 4.4 1997-07-28 15:04:13 caress Exp $";
+ static char res_id[]="$Id: mbr_sbifremr.c,v 4.5 1998-10-05 17:46:15 caress Exp $";
 	char	*function_name = "mbr_alm_sbifremr";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -248,7 +251,22 @@ int	*error;
 		id = mb_io_ptr->beams_bath - 1;
 		for (i=0;i<mb_io_ptr->beams_bath;i++)
 			{
-			mb_io_ptr->new_bath[id-i] = data->deph[i];
+			if (data->deph[i] > 0)
+			    {
+			    mb_io_ptr->new_beamflag[id-i] = MB_FLAG_NONE;
+			    mb_io_ptr->new_bath[id-i] = data->deph[i];
+			    }
+			else if (data->deph[i] < 0)
+			    {
+			    mb_io_ptr->new_beamflag[id-i] = 
+				MB_FLAG_MANUAL + MB_FLAG_FLAG;
+			    mb_io_ptr->new_bath[id-i] = -data->deph[i];
+			    }
+			else
+			    {
+			    mb_io_ptr->new_beamflag[id-i] = MB_FLAG_NULL;
+			    mb_io_ptr->new_bath[id-i] = data->deph[i];
+			    }
 			mb_io_ptr->new_bath_acrosstrack[id-i] = data->dist[i];
 			mb_io_ptr->new_bath_alongtrack[id-i] = 0.0;
 			}
@@ -288,8 +306,8 @@ int	*error;
 			fprintf(stderr,"dbg4       beams_bath: %d\n",
 				mb_io_ptr->beams_bath);
 			for (i=0;i<mb_io_ptr->beams_bath;i++)
-			  fprintf(stderr,"dbg4       bath[%d]: %f  bathdist[%d]: %f\n",
-				i,mb_io_ptr->new_bath[i],
+			  fprintf(stderr,"dbg4       flag[%d]:%4d  bath: %f  bathdist[%d]: %f\n",
+				i,mb_io_ptr->new_beamflag[i],mb_io_ptr->new_bath[i],
 				i,mb_io_ptr->new_bath_acrosstrack[i]);
 			}
 

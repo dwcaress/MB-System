@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_defaults.c	10/7/94
- *    $Id: mb_defaults.c,v 4.5 1997-04-21 17:02:07 caress Exp $
+ *    $Id: mb_defaults.c,v 4.6 1998-10-05 17:46:15 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Date:	January 23, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 4.5  1997/04/21  17:02:07  caress
+ * MB-System 4.5 Beta Release.
+ *
  * Revision 4.5  1997/04/17  18:53:33  caress
  * Added LINUX ifdef.
  *
@@ -82,7 +85,7 @@ int *etime_i;
 double *speedmin;
 double *timegap;
 {
-  static char rcs_id[]="$Id: mb_defaults.c,v 4.5 1997-04-21 17:02:07 caress Exp $";
+  static char rcs_id[]="$Id: mb_defaults.c,v 4.6 1998-10-05 17:46:15 caress Exp $";
 	char	*function_name = "mb_defaults";
 	int	status;
 	FILE	*fp;
@@ -205,7 +208,7 @@ int verbose;
 char *psdisplay;
 char *mbproject;
 {
-  static char rcs_id[]="$Id: mb_defaults.c,v 4.5 1997-04-21 17:02:07 caress Exp $";
+  static char rcs_id[]="$Id: mb_defaults.c,v 4.6 1998-10-05 17:46:15 caress Exp $";
 	char	*function_name = "mbenv";
 	int	status;
 	FILE	*fp;
@@ -226,6 +229,9 @@ char *mbproject;
 
 	/* set system default Postscript displayer */
 #ifdef IRIX
+	strcpy(psdisplay, "xpsview");
+#endif
+#ifdef IRIX64
 	strcpy(psdisplay, "xpsview");
 #endif
 #ifdef SOLARIS

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_swap.h	6/21/94
- *    $Id: mb_swap.h,v 4.3 1997-04-21 17:02:07 caress Exp $
+ *    $Id: mb_swap.h,v 4.4 1998-10-05 17:46:15 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,9 @@
  * Date:	June 21, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1997/04/21  17:02:07  caress
+ * MB-System 4.5 Beta Release.
+ *
  * Revision 4.2  1994/10/21  12:11:53  caress
  * Release V4.0
  *
@@ -42,20 +45,19 @@
 
 #define mb_swap_short(a) ( ((a & 0xff) << 8) | ((unsigned short)(a) >> 8) )
 
-#define mb_swap_long(a) ( ((a) << 24) | \
+#define mb_swap_int(a) ( ((a) << 24) | \
                        (((a) << 8) & 0x00ff0000) | \
                        (((a) >> 8) & 0x0000ff00) | \
-                        ((unsigned long)(a) >>24) )
+                        ((unsigned int)(a) >>24) )
 
-/* this will work someday when we have 8 byte "longer int" values */
-/*#define mb_swap_longer(a) ( ((a) << 56) | \
+#define mb_swap_long(a) ( ((a) << 56) | \
                        (((a) << 40) & 0x00ff000000000000) | \
                        (((a) << 24) & 0x0000ff0000000000) | \
                        (((a) <<  8) & 0x000000ff00000000) | \
                        (((a) >>  8) & 0x00000000ff000000) | \
                        (((a) >> 24) & 0x0000000000ff0000) | \
                        (((a) >> 40) & 0x000000000000ff00) | \
-                        ((unsigned longer)(a) >> 56)) 
-*/
+                        ((unsigned long)(a) >> 56)) 
+
 
 /*--------------------------------------------------------------------*/

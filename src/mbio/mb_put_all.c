@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_put_all.c	2/4/93
- *    $Id: mb_put_all.c,v 4.5 1997-04-21 17:02:07 caress Exp $
+ *    $Id: mb_put_all.c,v 4.6 1998-10-05 17:46:15 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Date:	February 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.5  1997/04/21  17:02:07  caress
+ * MB-System 4.5 Beta Release.
+ *
  * Revision 4.4  1996/04/22  13:21:19  caress
  * Now have DTR and MIN/MAX defines in mb_define.h
  *
@@ -91,7 +94,7 @@
 int mb_put_all(verbose,mbio_ptr,store_ptr,usevalues,kind,time_i,time_d,
 		navlon,navlat,speed,heading,
 		nbath,namp,nss,
-		bath,amp,bathacrosstrack,bathalongtrack,
+		beamflag,bath,amp,bathacrosstrack,bathalongtrack,
 		ss,ssacrosstrack,ssalongtrack,
 		comment,error)
 int	verbose;
@@ -108,6 +111,7 @@ double	heading;
 int	nbath;
 int	namp;
 int	nss;
+char	*beamflag;
 double	*bath;
 double	*amp;
 double	*bathacrosstrack;
@@ -118,7 +122,7 @@ double	*ssalongtrack;
 char	*comment;
 int	*error;
 {
-  static char rcs_id[]="$Id: mb_put_all.c,v 4.5 1997-04-21 17:02:07 caress Exp $";
+  static char rcs_id[]="$Id: mb_put_all.c,v 4.6 1998-10-05 17:46:15 caress Exp $";
 	char	*function_name = "mb_put_all";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -160,10 +164,10 @@ int	*error;
 		fprintf(stderr,"dbg2       nbath:      %d\n",nbath);
 		if (verbose >= 3 && nbath > 0)
 		  {
-		  fprintf(stderr,"dbg3       beam   bath  crosstrack alongtrack\n");
+		  fprintf(stderr,"dbg3       beam  flag  bath  crosstrack alongtrack\n");
 		  for (i=0;i<nbath;i++)
-		    fprintf(stderr,"dbg3       %4d   %f    %f     %f\n",
-			i,bath[i],
+		    fprintf(stderr,"dbg3       %4d   %3d   %f    %f     %f\n",
+			i,beamflag[i],bath[i],
 			bathacrosstrack[i],bathalongtrack[i]);
 		  }
 		fprintf(stderr,"dbg2       namp:       %d\n",namp);
@@ -213,7 +217,7 @@ int	*error;
 		mb_io_ptr->new_error = MB_ERROR_NO_ERROR;
 		mb_io_ptr->new_kind = kind;
 		if (time_i[0] == 0)
-			mb_get_time(verbose,time_d,mb_io_ptr->new_time_i);
+			mb_get_date(verbose,time_d,mb_io_ptr->new_time_i);
 		else
 			for (i=0;i<7;i++)
 				mb_io_ptr->new_time_i[i] = time_i[i];
@@ -224,6 +228,7 @@ int	*error;
 		mb_io_ptr->new_heading = heading;
 		for (i=0;i<mb_io_ptr->beams_bath;i++)
 			{
+			mb_io_ptr->new_beamflag[i] = beamflag[i];
 			mb_io_ptr->new_bath[i] = bath[i];
 			mb_io_ptr->new_bath_acrosstrack[i] = bathacrosstrack[i];
 			mb_io_ptr->new_bath_alongtrack[i] = bathalongtrack[i];

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mr1prhig.c	3/3/94
- *	$Id: mbr_mr1prhig.c,v 4.9 1997-04-21 17:02:07 caress Exp $
+ *	$Id: mbr_mr1prhig.c,v 4.10 1998-10-05 17:46:15 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	July 17, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.9  1997/04/21  17:02:07  caress
+ * MB-System 4.5 Beta Release.
+ *
  * Revision 4.8  1996/04/22  13:21:19  caress
  * Now have DTR and MIN/MAX defines in mb_define.h
  *
@@ -82,7 +85,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_mr1prhig.c,v 4.9 1997-04-21 17:02:07 caress Exp $";
+	static char res_id[]="$Id: mbr_mr1prhig.c,v 4.10 1998-10-05 17:46:15 caress Exp $";
 	char	*function_name = "mbr_alm_mr1prhig";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -338,6 +341,7 @@ int	*error;
 	mb_io_ptr->new_speed = 0.0;
 	for (i=0;i<mb_io_ptr->beams_bath;i++)
 		{
+		mb_io_ptr->new_beamflag[i] = MB_FLAG_NULL;
 		mb_io_ptr->new_bath[i] = 0.0;
 		mb_io_ptr->new_bath_acrosstrack[i] = 0.0;
 		mb_io_ptr->new_bath_alongtrack[i] = 0.0;
@@ -436,8 +440,22 @@ int	*error;
 		for (i=0;i<data->port_btycount;i++)
 			{
 			j = beam_center - i - 2;
-			mb_io_ptr->new_bath[j] 
-				= data->bath_port[i];
+			if (data->bath_port[i] > 0)
+			    {
+			    mb_io_ptr->new_beamflag[j] = MB_FLAG_NONE;
+			    mb_io_ptr->new_bath[j] = data->bath_port[i];
+			    }
+			else if (data->bath_port[i] < 0)
+			    {
+			    mb_io_ptr->new_beamflag[j] = 
+				MB_FLAG_MANUAL + MB_FLAG_FLAG;
+			    mb_io_ptr->new_bath[j] = -data->bath_port[i];
+			    }
+			else
+			    {
+			    mb_io_ptr->new_beamflag[j] = MB_FLAG_NULL;
+			    mb_io_ptr->new_bath[j] = data->bath_port[i];
+			    }
 			mb_io_ptr->new_bath_acrosstrack[j] 
 				= -data->bath_acrosstrack_port[i];
 			mb_io_ptr->new_bath_alongtrack[j] = 0.0;
@@ -448,24 +466,51 @@ int	*error;
 			if (j == beam_center)
 				{
 				if (data->png_alt > 0.0)
+				    {
+				    mb_io_ptr->new_beamflag[j] = MB_FLAG_NONE;
 				    mb_io_ptr->new_bath[j] 
 					= data->png_prdepth + data->png_alt;
+				    }
 				else if (data->png_alt < 0.0)
+				    {
+				    mb_io_ptr->new_beamflag[j] = 
+					MB_FLAG_MANUAL + MB_FLAG_FLAG;
 				    mb_io_ptr->new_bath[j] 
-					= -data->png_prdepth + data->png_alt;
+					= data->png_prdepth - data->png_alt;
+				    }
 				else
+				    {
+				    mb_io_ptr->new_beamflag[j] = MB_FLAG_NULL;
 				    mb_io_ptr->new_bath[j] = 0.0;
+				    }
 				}
 			else
+				{
+				mb_io_ptr->new_beamflag[j] = MB_FLAG_NULL;
 				mb_io_ptr->new_bath[j] = 0.0;
+				}
 			mb_io_ptr->new_bath_acrosstrack[j] = 0.0;
 			mb_io_ptr->new_bath_alongtrack[j] = 0.0;
 			}
 		for (i=0;i<data->stbd_btycount;i++)
 			{
 			j = beam_center + 2 + i;
-			mb_io_ptr->new_bath[j] 
-				= data->bath_stbd[i];
+			if (data->bath_stbd[i] > 0)
+			    {
+			    mb_io_ptr->new_beamflag[j] = MB_FLAG_NONE;
+			    mb_io_ptr->new_bath[j] = data->bath_stbd[i];
+			    }
+			else if (data->bath_stbd[i] < 0)
+			    {
+			    mb_io_ptr->new_beamflag[j] = 
+				MB_FLAG_MANUAL + MB_FLAG_FLAG;
+			    mb_io_ptr->new_bath[j] = -data->bath_stbd[i];
+			    }
+			else
+			    {
+			    mb_io_ptr->new_beamflag[j] = MB_FLAG_NULL;
+			    mb_io_ptr->new_bath[j] = data->bath_stbd[i];
+			    }
 			mb_io_ptr->new_bath_acrosstrack[j] 
 				= data->bath_acrosstrack_stbd[i];
 			mb_io_ptr->new_bath_alongtrack[j] = 0.0;
@@ -512,8 +557,9 @@ int	*error;
 			fprintf(stderr,"dbg4       beams_amp:  %d\n",
 				mb_io_ptr->beams_amp);
 			for (i=0;i<mb_io_ptr->beams_bath;i++)
-			  fprintf(stderr,"dbg4       beam:%d  bath:%f  acrosstrack:%f  alongtrack:%f\n",
-				i,mb_io_ptr->new_bath[i],
+			  fprintf(stderr,"dbg4       beam:%d  flag:%d  bath:%f  acrosstrack:%f  alongtrack:%f\n",
+				i,mb_io_ptr->new_beamflag[i],
+				mb_io_ptr->new_bath[i],
 				mb_io_ptr->new_bath_acrosstrack[i],
 				mb_io_ptr->new_bath_alongtrack[i]);
 			fprintf(stderr,"dbg4       pixels_ss:  %d\n",
@@ -826,9 +872,13 @@ int	*error;
 		data->port_btycount = 0;
 		for (i=beam_center-1;i>-1;i--)
 			{
-			if (mb_io_ptr->new_bath[i] != 0)
+			if (mb_io_ptr->new_beamflag[i] != MB_FLAG_NULL)
 				{
-				data->bath_port[data->port_btycount] 
+				if (mb_beam_check_flag(mb_io_ptr->new_beamflag[i]))
+				    data->bath_port[data->port_btycount] 
+					= -mb_io_ptr->new_bath[i];
+				else
+				    data->bath_port[data->port_btycount] 
 					= mb_io_ptr->new_bath[i];
 				data->bath_acrosstrack_port[data->port_btycount]
 					= -mb_io_ptr->new_bath_acrosstrack[i];
@@ -836,34 +886,38 @@ int	*error;
 				}
 			}
 
-		/* get starboard bathymetry */
-		data->stbd_btycount = 0;
-		for (i=beam_center+1;i<mb_io_ptr->beams_bath;i++)
-			{
-			if (mb_io_ptr->new_bath[i] != 0)
-				{
-				data->bath_stbd[data->stbd_btycount] 
-					= mb_io_ptr->new_bath[i];
-				data->bath_acrosstrack_stbd[data->stbd_btycount]
-					= mb_io_ptr->new_bath_acrosstrack[i];
-				data->stbd_btycount++;
-				}
-			}
-
 		/* get center beam bathymetry */
-		if (mb_io_ptr->new_bath[beam_center] > 0.0)
+		if (mb_io_ptr->new_beamflag[beam_center] == MB_FLAG_NULL)
 			{
-			data->png_alt = mb_io_ptr->new_bath[beam_center] 
-				- data->png_prdepth;
+			data->png_alt = 0.0;
 			}
-		else if (mb_io_ptr->new_bath[beam_center] < 0.0)
+		else if (mb_beam_check_flag(mb_io_ptr->new_beamflag[beam_center]))
 			{
-			data->png_alt = mb_io_ptr->new_bath[beam_center] 
+			data->png_alt = -mb_io_ptr->new_bath[beam_center] 
 				+ data->png_prdepth;
 			}
 		else
 			{
-			data->png_alt = 0.0;
+			data->png_alt = mb_io_ptr->new_bath[beam_center] 
+				- data->png_prdepth;
+			}
+
+		/* get starboard bathymetry */
+		data->stbd_btycount = 0;
+		for (i=beam_center+1;i<mb_io_ptr->beams_bath;i++)
+			{
+			if (mb_io_ptr->new_beamflag[i] != MB_FLAG_NULL)
+				{
+				if (mb_beam_check_flag(mb_io_ptr->new_beamflag[i]))
+				    data->bath_stbd[data->stbd_btycount] 
+					= -mb_io_ptr->new_bath[i];
+				else
+				    data->bath_stbd[data->stbd_btycount] 
+					= mb_io_ptr->new_bath[i];
+				data->bath_acrosstrack_stbd[data->stbd_btycount]
+					= -mb_io_ptr->new_bath_acrosstrack[i];
+				data->stbd_btycount++;
+				}
 			}
 
 		/* get port sidescan */
@@ -1054,7 +1108,7 @@ int	*error;
 			{
 			status = mb_malloc(verbose,len+1,hdr_comment,error);
 			status = xdr_bytes(xdrs,hdr_comment,
-					&ulen,(unsigned long)(len + 1));
+					&ulen,(unsigned int)(len + 1));
 			}
 		else if (len < 0)
 			status = MB_FAILURE;
@@ -1528,7 +1582,7 @@ int	*error;
 		{
 		ulen = len;
 		status = xdr_bytes(xdrs,hdr_comment,
-				&ulen,(unsigned long)len);
+				&ulen,(unsigned int)len);
 		}
 
 	/* check for an error */

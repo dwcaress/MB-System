@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_ttimes.c	4/9/94
- *    $Id: mb_ttimes.c,v 4.12 1997-07-25 14:19:53 caress Exp $
+ *    $Id: mb_ttimes.c,v 4.13 1998-10-05 17:46:15 caress Exp $
 
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -12,7 +12,7 @@
  *--------------------------------------------------------------------*/
 /*
  * mb_ttimes.c calls the appropriate mbsys_ routine for 
- * extracting travel times, beam angles, and bad data flags from
+ * extracting travel times and  beam angles from
  * a stored survey data ping.
  * 
  * The coordinates of the beam angles can be a bit confusing.
@@ -181,6 +181,10 @@
  * Date:	April 9, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.12  1997/07/25  14:19:53  caress
+ * Version 4.5beta2.
+ * Much mucking, particularly with Simrad formats.
+ *
  * Revision 4.11  1997/04/21  17:02:07  caress
  * MB-System 4.5 Beta Release.
  *
@@ -243,7 +247,7 @@
 /*--------------------------------------------------------------------*/
 int mb_ttimes(verbose,mbio_ptr,store_ptr,kind,nbeams,
 	ttimes,angles,angles_forward,angles_null,
-	depth_offset,alongtrack_offset,flags,ssv,error)
+	heave,alongtrack_offset,draft,ssv,error)
 int	verbose;
 char	*mbio_ptr;
 char	*store_ptr;
@@ -253,13 +257,13 @@ double	*ttimes;
 double	*angles;
 double	*angles_forward;
 double	*angles_null;
-double	*depth_offset;
+double	*heave;
 double	*alongtrack_offset;
-int	*flags;
+double	*draft;
 double	*ssv;
 int	*error;
 {
-  static char rcs_id[]="$Id: mb_ttimes.c,v 4.12 1997-07-25 14:19:53 caress Exp $";
+  static char rcs_id[]="$Id: mb_ttimes.c,v 4.13 1998-10-05 17:46:15 caress Exp $";
 	char	*function_name = "mb_ttimes";
 	int	status;
 	int	system;
@@ -288,104 +292,120 @@ int	*error;
 		status = mbsys_sb_ttimes(verbose,mbio_ptr,store_ptr,
 				kind,nbeams,ttimes,
 				angles,angles_forward,angles_null,
-				depth_offset,alongtrack_offset,
-				flags,ssv,error);
+				heave,alongtrack_offset,
+				draft,ssv,error);
 		}
 	else if (system == MB_SYS_HSDS)
 		{
 		status = mbsys_hsds_ttimes(verbose,mbio_ptr,store_ptr,
 				kind,nbeams,ttimes,
 				angles,angles_forward,angles_null,
-				depth_offset,alongtrack_offset,
-				flags,ssv,error);
+				heave,alongtrack_offset,
+				draft,ssv,error);
 		}
 	else if (system == MB_SYS_SB2000)
 		{
 		status = mbsys_sb2000_ttimes(verbose,mbio_ptr,store_ptr,
 				kind,nbeams,ttimes,
 				angles,angles_forward,angles_null,
-				depth_offset,alongtrack_offset,
-				flags,ssv,error);
+				heave,alongtrack_offset,
+				draft,ssv,error);
 		}
 	else if (system == MB_SYS_SB2100)
 		{
 		status = mbsys_sb2100_ttimes(verbose,mbio_ptr,store_ptr,
 				kind,nbeams,ttimes,
 				angles,angles_forward,angles_null,
-				depth_offset,alongtrack_offset,
-				flags,ssv,error);
+				heave,alongtrack_offset,
+				draft,ssv,error);
 		}
 	else if (system == MB_SYS_SIMRAD)
 		{
 		status = mbsys_simrad_ttimes(verbose,mbio_ptr,store_ptr,
 				kind,nbeams,ttimes,
 				angles,angles_forward,angles_null,
-				depth_offset,alongtrack_offset,
-				flags,ssv,error);
+				heave,alongtrack_offset,
+				draft,ssv,error);
 		}
 	else if (system == MB_SYS_MR1)
 		{
 		status = mbsys_mr1_ttimes(verbose,mbio_ptr,store_ptr,
 				kind,nbeams,ttimes,
 				angles,angles_forward,angles_null,
-				depth_offset,alongtrack_offset,
-				flags,ssv,error);
+				heave,alongtrack_offset,
+				draft,ssv,error);
 		}
 	else if (system == MB_SYS_MR1B)
 		{
 		status = mbsys_mr1b_ttimes(verbose,mbio_ptr,store_ptr,
 				kind,nbeams,ttimes,
 				angles,angles_forward,angles_null,
-				depth_offset,alongtrack_offset,
-				flags,ssv,error);
+				heave,alongtrack_offset,
+				draft,ssv,error);
 		}
 	else if (system == MB_SYS_LDEOIH)
 		{
 		status = mbsys_ldeoih_ttimes(verbose,mbio_ptr,store_ptr,
 				kind,nbeams,ttimes,
 				angles,angles_forward,angles_null,
-				depth_offset,alongtrack_offset,
-				flags,ssv,error);
+				heave,alongtrack_offset,
+				draft,ssv,error);
 		}
 	else if (system == MB_SYS_RESON)
 		{
 		status = mbsys_reson_ttimes(verbose,mbio_ptr,store_ptr,
 				kind,nbeams,ttimes,
 				angles,angles_forward,angles_null,
-				depth_offset,alongtrack_offset,
-				flags,ssv,error);
+				heave,alongtrack_offset,
+				draft,ssv,error);
 		}
 	else if (system == MB_SYS_ELAC)
 		{
 		status = mbsys_elac_ttimes(verbose,mbio_ptr,store_ptr,
 				kind,nbeams,ttimes,
 				angles,angles_forward,angles_null,
-				depth_offset,alongtrack_offset,
-				flags,ssv,error);
+				heave,alongtrack_offset,
+				draft,ssv,error);
 		}
 	else if (system == MB_SYS_ELACMK2)
 		{
 		status = mbsys_elacmk2_ttimes(verbose,mbio_ptr,store_ptr,
 				kind,nbeams,ttimes,
 				angles,angles_forward,angles_null,
-				depth_offset,alongtrack_offset,
-				flags,ssv,error);
+				heave,alongtrack_offset,
+				draft,ssv,error);
 		}
 	else if (system == MB_SYS_HSMD)
 		{
 		status = mbsys_hsmd_ttimes(verbose,mbio_ptr,store_ptr,
 				kind,nbeams,ttimes,
 				angles,angles_forward,angles_null,
-				depth_offset,alongtrack_offset,
-				flags,ssv,error);
+				heave,alongtrack_offset,
+				draft,ssv,error);
 		}
 	else if (system == MB_SYS_DSL)
 		{
 		status = mbsys_dsl_ttimes(verbose,mbio_ptr,store_ptr,
 				kind,nbeams,ttimes,
 				angles,angles_forward,angles_null,
-				depth_offset,alongtrack_offset,
-				flags,ssv,error);
+				heave,alongtrack_offset,
+				draft,ssv,error);
+		}
+	else if (system == MB_SYS_GSF)
+		{
+		status = mbsys_gsf_ttimes(verbose,mbio_ptr,store_ptr,
+				kind,nbeams,ttimes,
+				angles,angles_forward,angles_null,
+				heave,alongtrack_offset,
+				draft,ssv,error);
+		}
+	else if (system == MB_SYS_MSTIFF)
+		{
+		status = mbsys_mstiff_ttimes(verbose,mbio_ptr,store_ptr,
+				kind,nbeams,ttimes,
+				angles,angles_forward,angles_null,
+				heave,alongtrack_offset,
+				draft,ssv,error);
 		}
 	else
 		{

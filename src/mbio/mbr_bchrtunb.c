@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_bchrtunb.c	8/8/94
- *	$Id: mbr_bchrtunb.c,v 4.9 1997-09-15 19:06:40 caress Exp $
+ *	$Id: mbr_bchrtunb.c,v 4.10 1998-10-05 17:46:15 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	August 8, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.9  1997/09/15  19:06:40  caress
+ * Real Version 4.5
+ *
  * Revision 4.8  1997/07/28  14:58:19  caress
  * Fixed typos.
  *
@@ -82,7 +85,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_bchrtunb.c,v 4.9 1997-09-15 19:06:40 caress Exp $";
+	static char res_id[]="$Id: mbr_bchrtunb.c,v 4.10 1998-10-05 17:46:15 caress Exp $";
 	char	*function_name = "mbr_alm_bchrtunb";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -377,6 +380,7 @@ int	*error;
 	mb_io_ptr->new_speed = 0.0;
 	for (i=0;i<mb_io_ptr->beams_bath;i++)
 		{
+		mb_io_ptr->new_beamflag[i] = MB_FLAG_NULL;
 		mb_io_ptr->new_bath[i] = 0.0;
 		mb_io_ptr->new_bath_acrosstrack[i] = 0.0;
 		mb_io_ptr->new_bath_alongtrack[i] = 0.0;
@@ -641,6 +645,24 @@ int	*error;
 			{
 			ibeam = (data->profile_num - 1 - i)
 					+ data->profile_num*(7 - j);
+			if (data->profile[i].quality[j] == 1)
+			    mb_io_ptr->new_beamflag[ibeam] 
+				= MB_FLAG_NONE;
+			else if (data->profile[i].quality[j] < 8)
+			    mb_io_ptr->new_beamflag[ibeam] 
+				= MB_FLAG_SONAR + MB_FLAG_FLAG;
+			else if (data->profile[i].quality[j] == 8)
+			    mb_io_ptr->new_beamflag[ibeam] 
+				= MB_FLAG_NULL;
+			else if (data->profile[i].quality[j] == 10)
+			    mb_io_ptr->new_beamflag[ibeam] 
+				= MB_FLAG_MANUAL + MB_FLAG_FLAG;
+			else if (data->profile[i].quality[j] == 20)
+			    mb_io_ptr->new_beamflag[ibeam] 
+				= MB_FLAG_FILTER + MB_FLAG_FLAG;
+			else
+			    mb_io_ptr->new_beamflag[ibeam] 
+				= MB_FLAG_NULL;
 			mb_io_ptr->new_bath[ibeam] 
 				= depthscale*data->profile[i].bath[j];
 			mb_io_ptr->new_bath_acrosstrack[ibeam] 
@@ -669,8 +691,9 @@ int	*error;
 			fprintf(stderr,"dbg4       beams_amp:  %d\n",
 				mb_io_ptr->beams_amp);
 			for (i=0;i<mb_io_ptr->beams_bath;i++)
-			  fprintf(stderr,"dbg4       beam:%d  bath:%f  amp:%f  acrosstrack:%f  alongtrack:%f\n",
-				i,mb_io_ptr->new_bath[i],
+			  fprintf(stderr,"dbg4       beam:%d  flag:%3d  bath:%f  amp:%f  acrosstrack:%f  alongtrack:%f\n",
+				i,mb_io_ptr->new_beamflag[i],
+				mb_io_ptr->new_bath[i],
 				mb_io_ptr->new_amp[i],
 				mb_io_ptr->new_bath_acrosstrack[i],
 				mb_io_ptr->new_bath_alongtrack[i]);
@@ -1153,6 +1176,22 @@ int	*error;
 				{
 				ibeam = (data->profile_num - 1 - i)
 					+ data->profile_num*(7 - j);
+				if (!mb_beam_check_flag(mb_io_ptr->new_beamflag[ibeam]))
+				    data->profile[i].quality[j] = 1;
+				else if (mb_io_ptr->new_beamflag[ibeam]
+				    == MB_FLAG_NULL)
+				    data->profile[i].quality[j] = 8;
+				else if (mb_beam_check_flag_manual(
+					    mb_io_ptr->new_beamflag[ibeam]))
+				    data->profile[i].quality[j] = 10;
+				else if (mb_beam_check_flag_filter(
+					    mb_io_ptr->new_beamflag[ibeam]))
+				    data->profile[i].quality[j] = 20;
+				else if (mb_beam_check_flag_sonar(
+					    mb_io_ptr->new_beamflag[ibeam])
+					    && (data->profile[i].quality[j] < 2
+					    || data->profile[i].quality[j] > 7))
+				    data->profile[i].quality[j] = 7;
 				data->profile[i].bath[j] 
 					= mb_io_ptr->new_bath[ibeam]/depthscale;
 				data->profile[i].bath_acrosstrack[j] 
@@ -1701,15 +1740,15 @@ int	*error;
 		data->other_quality = (int) *short_ptr;
 #else
 		int_ptr = (int *) &line[8];
-		data->pos_latitude = (int) mb_swap_long(*int_ptr);
+		data->pos_latitude = (int) mb_swap_int(*int_ptr);
 		int_ptr = (int *) &line[12];
-		data->pos_longitude = (int) mb_swap_long(*int_ptr);
+		data->pos_longitude = (int) mb_swap_int(*int_ptr);
 		int_ptr = (int *) &line[16];
-		data->utm_northing = (int) mb_swap_long(*int_ptr);
+		data->utm_northing = (int) mb_swap_int(*int_ptr);
 		int_ptr = (int *) &line[20];
-		data->utm_easting = (int) mb_swap_long(*int_ptr);
+		data->utm_easting = (int) mb_swap_int(*int_ptr);
 		int_ptr = (int *) &line[24];
-		data->utm_zone_lon = (int) mb_swap_long(*int_ptr);
+		data->utm_zone_lon = (int) mb_swap_int(*int_ptr);
 		data->utm_zone = line[28];
 		data->hemisphere = line[29];
 		data->ellipsoid = line[30];
@@ -1822,9 +1861,9 @@ int	*error;
 		data->svp_longitude = *int_ptr;
 #else
 		int_ptr = (int *) &line[8];
-		data->svp_latitude = (int) mb_swap_long(*int_ptr);
+		data->svp_latitude = (int) mb_swap_int(*int_ptr);
 		int_ptr = (int *) &line[12];
-		data->svp_latitude = (int) mb_swap_long(*int_ptr);
+		data->svp_latitude = (int) mb_swap_int(*int_ptr);
 #endif
 		data->svp_num = 0;
 		for (i=0;i<500;i++)
@@ -1859,7 +1898,7 @@ int	*error;
 		fprintf(stderr,"dbg5       svp_longitude:    %d\n",data->svp_longitude);
 		fprintf(stderr,"dbg5       svp_num:          %d\n",data->svp_num);
 		for (i=0;i<data->svp_num;i++)
-			fprintf(stderr,"dbg5       depth: %f     vel: %f\n",
+			fprintf(stderr,"dbg5       depth: %d     vel: %d\n",
 				data->svp_depth[i],data->svp_vel[i]);
 		}
 
@@ -1980,10 +2019,10 @@ int	*error;
 #else
 			int_ptr = (int *) &profile[8];
 			data->profile[i].latitude 
-				= (int) mb_swap_long(*int_ptr);
+				= (int) mb_swap_int(*int_ptr);
 			int_ptr = (int *) &profile[12];
 			data->profile[i].longitude 
-				= (int) mb_swap_long(*int_ptr);
+				= (int) mb_swap_int(*int_ptr);
 			short_ptr = (short int *) &profile[16];
 			data->profile[i].roll 
 				= (int) mb_swap_short(*short_ptr);
@@ -2208,10 +2247,10 @@ int	*error;
 #else
 			int_ptr = (int *) &profile[8];
 			data->profile[i].latitude 
-				= (int) mb_swap_long(*int_ptr);
+				= (int) mb_swap_int(*int_ptr);
 			int_ptr = (int *) &profile[12];
 			data->profile[i].longitude 
-				= (int) mb_swap_long(*int_ptr);
+				= (int) mb_swap_int(*int_ptr);
 			short_ptr = (short int *) &profile[16];
 			data->profile[i].roll 
 				= (int) mb_swap_short(*short_ptr);
@@ -2436,10 +2475,10 @@ int	*error;
 #else
 			int_ptr = (int *) &profile[8];
 			data->profile[i].latitude 
-				= (int) mb_swap_long(*int_ptr);
+				= (int) mb_swap_int(*int_ptr);
 			int_ptr = (int *) &profile[12];
 			data->profile[i].longitude 
-				= (int) mb_swap_long(*int_ptr);
+				= (int) mb_swap_int(*int_ptr);
 			short_ptr = (short int *) &profile[16];
 			data->profile[i].roll 
 				= (int) mb_swap_short(*short_ptr);
@@ -3088,15 +3127,15 @@ int	*error;
 		*short_ptr = (short int) data->other_quality;
 #else
 		int_ptr = (int *) &line[8];
-		*int_ptr = (int) mb_swap_long(data->pos_latitude);
+		*int_ptr = (int) mb_swap_int(data->pos_latitude);
 		int_ptr = (int *) &line[12];
-		*int_ptr = (int) mb_swap_long(data->pos_longitude);
+		*int_ptr = (int) mb_swap_int(data->pos_longitude);
 		int_ptr = (int *) &line[16];
-		*int_ptr = (int) mb_swap_long(data->utm_northing);
+		*int_ptr = (int) mb_swap_int(data->utm_northing);
 		int_ptr = (int *) &line[20];
-		*int_ptr = (int) mb_swap_long(data->utm_easting);
+		*int_ptr = (int) mb_swap_int(data->utm_easting);
 		int_ptr = (int *) &line[24];
-		*int_ptr = (int) mb_swap_long(data->utm_zone_lon);
+		*int_ptr = (int) mb_swap_int(data->utm_zone_lon);
 		line[28] = data->utm_zone;
 		line[29] = data->hemisphere;
 		line[30] = data->ellipsoid;
@@ -3186,7 +3225,7 @@ int	*error;
 		fprintf(stderr,"dbg5       svp_longitude:    %d\n",data->svp_longitude);
 		fprintf(stderr,"dbg5       svp_num:          %d\n",data->svp_num);
 		for (i=0;i<data->svp_num;i++)
-			fprintf(stderr,"dbg5       depth: %f     vel: %f\n",
+			fprintf(stderr,"dbg5       depth: %d     vel: %d\n",
 				data->svp_depth[i],data->svp_vel[i]);
 		}
 
@@ -3223,9 +3262,9 @@ int	*error;
 		*int_ptr = data->svp_longitude;
 #else
 		int_ptr = (int *) &line[8];
-		*int_ptr = (int) mb_swap_long(data->svp_latitude);
+		*int_ptr = (int) mb_swap_int(data->svp_latitude);
 		int_ptr = (int *) &line[12];
-		*int_ptr = (int) mb_swap_long(data->svp_longitude);
+		*int_ptr = (int) mb_swap_int(data->svp_longitude);
 #endif
 		for (i=0;i<data->svp_num;i++)
 			{
@@ -3462,10 +3501,10 @@ int	*error;
 #else
 			int_ptr = (int *) &profile[8];
 			*int_ptr 
-				= (int) mb_swap_long(data->profile[i].latitude);
+				= (int) mb_swap_int(data->profile[i].latitude);
 			int_ptr = (int *) &profile[12];
 			*int_ptr 
-				= (int) mb_swap_long(data->profile[i].longitude);
+				= (int) mb_swap_int(data->profile[i].longitude);
 			short_ptr = (short int *) &profile[16];
 			*short_ptr = (short int) 
 				mb_swap_short((short int) data->profile[i].roll);
@@ -3715,10 +3754,10 @@ int	*error;
 #else
 			int_ptr = (int *) &profile[8];
 			*int_ptr 
-				= (int) mb_swap_long(data->profile[i].latitude);
+				= (int) mb_swap_int(data->profile[i].latitude);
 			int_ptr = (int *) &profile[12];
 			*int_ptr 
-				= (int) mb_swap_long(data->profile[i].longitude);
+				= (int) mb_swap_int(data->profile[i].longitude);
 			short_ptr = (short int *) &profile[16];
 			*short_ptr = (short int) 
 				mb_swap_short((short int) data->profile[i].roll);
@@ -3968,10 +4007,10 @@ int	*error;
 #else
 			int_ptr = (int *) &profile[8];
 			*int_ptr 
-				= (int) mb_swap_long(data->profile[i].latitude);
+				= (int) mb_swap_int(data->profile[i].latitude);
 			int_ptr = (int *) &profile[12];
 			*int_ptr 
-				= (int) mb_swap_long(data->profile[i].longitude);
+				= (int) mb_swap_int(data->profile[i].longitude);
 			short_ptr = (short int *) &profile[16];
 			*short_ptr = (short int) 
 				mb_swap_short((short int) data->profile[i].roll);

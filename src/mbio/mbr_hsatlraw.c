@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsatlraw.c	2/11/93
- *	$Id: mbr_hsatlraw.c,v 4.13 1997-09-12 14:58:34 caress Exp $
+ *	$Id: mbr_hsatlraw.c,v 4.14 1998-10-05 17:46:15 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	February 11, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.13  1997/09/12  14:58:34  caress
+ * Set size of tape block headers to exclude at 12 characters.
+ *
  * Revision 4.12  1997/07/25  14:19:53  caress
  * Version 4.5beta2.
  * Much mucking, particularly with Simrad formats.
@@ -116,7 +119,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_hsatlraw.c,v 4.13 1997-09-12 14:58:34 caress Exp $";
+ static char res_id[]="$Id: mbr_hsatlraw.c,v 4.14 1998-10-05 17:46:15 caress Exp $";
 	char	*function_name = "mbr_alm_hsatlraw";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -535,13 +538,45 @@ int	*error;
 		/* read distance and depth values into storage arrays */
 		for (i=0;i<mb_io_ptr->beams_bath;i++)
 			{
-			mb_io_ptr->new_bath[i] 
-				= data->depth_scale*data->depth[i];
+			if (data->depth[i] > 0)
+			    {
+			    mb_io_ptr->new_beamflag[i] = MB_FLAG_NONE;
+			    mb_io_ptr->new_bath[i] = 
+				    data->depth_scale*data->depth[i];
+			    }
+			else if (data->depth[i] < 0)
+			    {
+			    mb_io_ptr->new_beamflag[i] = 
+				    MB_FLAG_MANUAL + MB_FLAG_FLAG;
+			    mb_io_ptr->new_bath[i] = 
+				    -data->depth_scale*data->depth[i];
+			    }
+			else
+			    {
+			    mb_io_ptr->new_beamflag[i] = MB_FLAG_NULL;
+			    mb_io_ptr->new_bath[i] = 
+				    data->depth_scale*data->depth[i];
+			    }
 			mb_io_ptr->new_bath_acrosstrack[i] 
 				= data->depth_scale*data->distance[i];
 			mb_io_ptr->new_bath_alongtrack[i] = 0.0;
 			}
-		mb_io_ptr->new_bath[29] = data->depth_center;
+		if (data->depth_center > 0.0)
+		    {
+		    mb_io_ptr->new_beamflag[29] = MB_FLAG_NONE;
+		    mb_io_ptr->new_bath[29] = data->depth_center;
+		    }
+		else if (data->depth_center < 0.0)
+		    {
+		    mb_io_ptr->new_beamflag[29] = 
+			    MB_FLAG_MANUAL + MB_FLAG_FLAG;
+		    mb_io_ptr->new_bath[29] = data->depth_center;
+		    }
+		else
+		    {
+		    mb_io_ptr->new_beamflag[29] = MB_FLAG_NULL;
+		    mb_io_ptr->new_bath[29] = data->depth_center;
+		    }
 		mb_io_ptr->new_bath_acrosstrack[29] = 0.0;
 
 		/* process beam amplitudes */
@@ -551,9 +586,6 @@ int	*error;
 			factor = 100.*pow(10.,(-0.05*gain_beam));
 			mb_io_ptr->new_amp[i] 
 					= factor*data->amplitude[i];
-			if (data->depth[i] < 0)
-				mb_io_ptr->new_amp[i] = 
-					-mb_io_ptr->new_amp[i];
 			}
 
 		/* print more debug statements */
@@ -903,7 +935,10 @@ int	*error;
 			data->distance[i] 
 				= scalefactor*mb_io_ptr->new_bath_acrosstrack[i];
 			}
-		data->depth_center = mb_io_ptr->new_bath[29];
+		if (mb_beam_check_flag(mb_io_ptr->new_beamflag[29]))
+		    data->depth_center = -mb_io_ptr->new_bath[29];
+		else
+		    data->depth_center = mb_io_ptr->new_bath[29];
 
 		/* add some plausible amounts for some of the 
 			variables in the HSATLRAW record */
@@ -2907,7 +2942,7 @@ int	*error;
 		status = fprintf(mbfp,"%c",data->speed_reference[0]);
 		status = fprintf(mbfp,"%+4.1f",data->pitch);
 		status = fprintf(mbfp,"%4.4d",data->track);
-		status = fprintf(mbfp,"%7.1f\n",data->depth);
+		status = fprintf(mbfp,"%7.1f\n",data->depth_center);
 
 		/* check for an error */
 		if (status > 0)
@@ -3410,7 +3445,7 @@ int	*error;
 				i,data->time[i]);
 		fprintf(stderr,"dbg5       gyro headings:\n");
 		for (i=0;i<11;i++)
-			fprintf(stderr,"dbg5         %d  %d\n",
+			fprintf(stderr,"dbg5         %d  %f\n",
 				i,data->gyro[i]);
 		}
 
@@ -3561,7 +3596,7 @@ int	*error;
 			{
 			for (i=0;i<10;i++)
 				status = fprintf(mbfp,"%5.0f%6.1f",
-					data->depth[i],data->velocity[i]);
+					data->vdepth[i],data->velocity[i]);
 			status = fprintf(mbfp,"\n");
 			}
 
@@ -3570,7 +3605,7 @@ int	*error;
 			{
 			for (i=0;i<nrem;i++)
 				status = fprintf(mbfp,"%5.0f%6.1f",
-					data->depth[i],data->velocity[i]);
+					data->vdepth[i],data->velocity[i]);
 			for (i=0;i<(10-nrem);i++)
 				status = fprintf(mbfp,"           ");
 			status = fprintf(mbfp,"\n");

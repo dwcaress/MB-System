@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sb2000sb.c	10/11/94
- *	$Id: mbr_sb2000sb.c,v 4.4 1997-07-25 14:19:53 caress Exp $
+ *	$Id: mbr_sb2000sb.c,v 4.5 1998-10-05 17:46:15 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,10 @@
  * Author:	D. W. Caress
  * Date:	October 11, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.4  1997/07/25  14:19:53  caress
+ * Version 4.5beta2.
+ * Much mucking, particularly with Simrad formats.
+ *
  * Revision 4.3  1997/04/21  17:02:07  caress
  * MB-System 4.5 Beta Release.
  *
@@ -70,7 +74,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_sb2000sb.c,v 4.4 1997-07-25 14:19:53 caress Exp $";
+ static char res_id[]="$Id: mbr_sb2000sb.c,v 4.5 1998-10-05 17:46:15 caress Exp $";
 	char	*function_name = "mbr_alm_sb2000sb";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -230,8 +234,8 @@ int	*error;
 		data->day = mb_swap_short(data->day);
 		data->min = mb_swap_short(data->min);
 		data->sec = mb_swap_short(data->sec);
-		data->lat = mb_swap_long(data->lat);
-		data->lon = mb_swap_long(data->lon);
+		data->lat = mb_swap_int(data->lat);
+		data->lon = mb_swap_int(data->lon);
 		data->heading = mb_swap_short(data->heading);
 		data->course = mb_swap_short(data->course);
 		data->speed = mb_swap_short(data->speed);
@@ -285,8 +289,8 @@ int	*error;
 		data->day = mb_swap_short(data->day);
 		data->min = mb_swap_short(data->min);
 		data->sec = mb_swap_short(data->sec);
-		data->lat = mb_swap_long(data->lat);
-		data->lon = mb_swap_long(data->lon);
+		data->lat = mb_swap_int(data->lat);
+		data->lon = mb_swap_int(data->lon);
 		data->heading = mb_swap_short(data->heading);
 		data->course = mb_swap_short(data->course);
 		data->speed = mb_swap_short(data->speed);
@@ -322,8 +326,8 @@ int	*error;
 		data->day = mb_swap_short(data->day);
 		data->min = mb_swap_short(data->min);
 		data->sec = mb_swap_short(data->sec);
-		data->lat = mb_swap_long(data->lat);
-		data->lon = mb_swap_long(data->lon);
+		data->lat = mb_swap_int(data->lat);
+		data->lon = mb_swap_int(data->lon);
 		data->heading = mb_swap_short(data->heading);
 		data->course = mb_swap_short(data->course);
 		data->speed = mb_swap_short(data->speed);
@@ -551,7 +555,7 @@ int	*error;
 #ifdef BYTESWAPPED
 	if (status == MB_SUCCESS && data->kind == MB_DATA_VELOCITY_PROFILE)
 		{
-		data->svp_mean = mb_swap_long(data->svp_mean);
+		data->svp_mean = mb_swap_int(data->svp_mean);
 		data->svp_number = mb_swap_short(data->svp_number);
 		data->svp_spare = mb_swap_short(data->svp_spare);
 		for (i=0;i<30;i++)
@@ -698,7 +702,22 @@ int	*error;
 		/* read distance and depth values into storage arrays */
 		for (i=0;i<MBF_SB2000SB_BEAMS;i++)
 			{
-			mb_io_ptr->new_bath[i] = data->bath_struct[i].bath;
+			if (data->bath_struct[i].bath > 0)
+			    {
+			    mb_io_ptr->new_beamflag[i] = MB_FLAG_NONE;
+			    mb_io_ptr->new_bath[i] = data->bath_struct[i].bath;
+			    }
+			else if (data->bath_struct[i].bath < 0)
+			    {
+			    mb_io_ptr->new_beamflag[i] = 
+				MB_FLAG_MANUAL + MB_FLAG_FLAG;
+			    mb_io_ptr->new_bath[i] = -data->bath_struct[i].bath;
+			    }
+			else
+			    {
+			    mb_io_ptr->new_beamflag[i] = MB_FLAG_NULL;
+			    mb_io_ptr->new_bath[i] = data->bath_struct[i].bath;
+			    }
 			mb_io_ptr->new_bath_acrosstrack[i] = 
 				data->bath_struct[i].bath_acrosstrack;
 			mb_io_ptr->new_bath_alongtrack[i] = 0.0;
@@ -739,9 +758,9 @@ int	*error;
 			fprintf(stderr,"dbg5       beams_bath: %d\n",
 				mb_io_ptr->beams_bath);
 			for (i=0;i<mb_io_ptr->beams_bath;i++)
-			  fprintf(stderr,"dbg5       bath[%d]: %f  bathdist[%d]: %f\n",
-				i,mb_io_ptr->new_bath[i],
-				i,mb_io_ptr->new_bath_acrosstrack[i]);
+			  fprintf(stderr,"dbg4       flag[%d]:%4d  bath: %f  bathdist: %f\n",
+				i,mb_io_ptr->new_beamflag[i],mb_io_ptr->new_bath[i],
+				mb_io_ptr->new_bath_acrosstrack[i]);
 			}
 
 		/* done translating values */
@@ -1123,7 +1142,10 @@ int	*error;
 		/* initialize depth and distance in output structure */
 		for (i=0;i<MBF_SB2000SB_BEAMS;i++)
 			{
-			data->bath_struct[i].bath = mb_io_ptr->new_bath[i];;
+			if (mb_beam_check_flag(mb_io_ptr->new_beamflag[i]))
+			    data->bath_struct[i].bath = -mb_io_ptr->new_bath[i];
+			else
+			    data->bath_struct[i].bath = mb_io_ptr->new_bath[i];
 			data->bath_struct[i].bath_acrosstrack = 
 				mb_io_ptr->new_bath_acrosstrack[i];;
 			}
@@ -1276,8 +1298,8 @@ int	*error;
 	data->day = mb_swap_short(data->day);
 	data->min = mb_swap_short(data->min);
 	data->sec = mb_swap_short(data->sec);
-	data->lat = mb_swap_long(data->lat);
-	data->lon = mb_swap_long(data->lon);
+	data->lat = mb_swap_int(data->lat);
+	data->lon = mb_swap_int(data->lon);
 	data->heading = mb_swap_short(data->heading);
 	data->course = mb_swap_short(data->course);
 	data->speed = mb_swap_short(data->speed);
@@ -1301,9 +1323,9 @@ int	*error;
 
 	if (data->kind == MB_DATA_VELOCITY_PROFILE)
 		{
-		data->svp_mean = mb_swap_long(data->svp_mean);
-		data->svp_number = mb_swap_long(data->svp_number);
-		data->svp_spare = mb_swap_long(data->svp_spare);
+		data->svp_mean = mb_swap_int(data->svp_mean);
+		data->svp_number = mb_swap_int(data->svp_number);
+		data->svp_spare = mb_swap_int(data->svp_spare);
 		for (i=0;i<30;i++)
 			{
 			data->svp_struct[i].svp_depth = 

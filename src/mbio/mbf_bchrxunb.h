@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_bchrxunb.h	8/29/97
- *	$Id: mbf_bchrxunb.h,v 4.0 1997-09-15 19:09:17 caress Exp $
+ *	$Id: mbf_bchrxunb.h,v 4.1 1998-10-05 17:46:15 caress Exp $
  *
  *    Copyright (c) 1997 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -12,11 +12,14 @@
  *--------------------------------------------------------------------*/
 /*
  * mbf_bchrxunb.h defines the data structures used by MBIO functions
- * to store multibeam data read from the MBF_BCHRXUNB format (MBIO id 91).  
+ * to store multibeam data read from the MBF_BCHRXUNB format (MBIO id 92).  
  *
  * Author:	D. W. Caress
  * Date:	August 29, 1997
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1997/09/15  19:09:17  caress
+ * Real Version 4.5
+ *
  * Revision 1.1  1997/09/15  19:06:40  caress
  * Initial revision
  *
@@ -83,7 +86,9 @@ struct mbf_bchrxunb_profile_struct
 				/* alongtrack distances: 0.01 meters */
 	short int tt[8];	/* travel times:         0.05 msec */
 	short int angle[8];	/* 0.005 degrees */
-	short int quality[8];	/* 0 (bad) to 3 (good) */
+	short int quality[8];	/* 1 (good) to 8 (bad) 
+				    extension:	10: flag by manual edit
+						20: flag by filter edit */
 	short int amp[8];	/* ??? */
 
 	};
@@ -144,8 +149,8 @@ struct mbf_bchrxunb_struct
 	int	pos_thousandth_sec;
 	int	pos_latitude;		/* 180 deg = 2e9 */
 	int	pos_longitude;		/* 180 deg = 2e9 */
-	unsigned long	utm_northing;
-	unsigned long	utm_easting;
+	unsigned int	utm_northing;
+	unsigned int	utm_easting;
 	int	utm_zone_lon;		/* 180 deg = 2e9 */
 	char	utm_zone;
 	char	hemisphere;

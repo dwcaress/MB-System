@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sbsiomrg.c	2/2/93
- *	$Id: mbr_sbsiomrg.c,v 4.9 1997-07-25 14:19:53 caress Exp $
+ *	$Id: mbr_sbsiomrg.c,v 4.10 1998-10-05 17:46:15 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,10 @@
  * Author:	D. W. Caress
  * Date:	February 2, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.9  1997/07/25  14:19:53  caress
+ * Version 4.5beta2.
+ * Much mucking, particularly with Simrad formats.
+ *
  * Revision 4.8  1997/04/21  17:02:07  caress
  * MB-System 4.5 Beta Release.
  *
@@ -95,7 +99,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_sbsiomrg.c,v 4.9 1997-07-25 14:19:53 caress Exp $";
+ static char res_id[]="$Id: mbr_sbsiomrg.c,v 4.10 1998-10-05 17:46:15 caress Exp $";
 	char	*function_name = "mbr_alm_sbsiomrg";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -374,6 +378,7 @@ int	*error;
 			mb_io_ptr->new_bath[i] = 0.0;
 			mb_io_ptr->new_bath_acrosstrack[i] = 0.0;
 			mb_io_ptr->new_bath_alongtrack[i] = 0.0;
+			mb_io_ptr->new_beamflag[i] = MB_FLAG_NULL;
 			}
 
 		/* find center beam */
@@ -473,7 +478,22 @@ int	*error;
 				k = MB_BEAMS_PROC_SBSIOMRG - id;
 			for (i=j;i<k;i++)
 				{
-				mb_io_ptr->new_bath[i+id] = data->deph[i];
+				if (data->deph[i] > 0)
+				    {
+				    mb_io_ptr->new_beamflag[i+id] = MB_FLAG_NONE;
+				    mb_io_ptr->new_bath[i+id] = data->deph[i];
+				    }
+				else if (data->deph[i] < 0)
+				    {
+				    mb_io_ptr->new_beamflag[i+id] = 
+					MB_FLAG_MANUAL + MB_FLAG_FLAG;
+				    mb_io_ptr->new_bath[i+id] = -data->deph[i];
+				    }
+				else
+				    {
+				    mb_io_ptr->new_beamflag[i+id] = MB_FLAG_NULL;
+				    mb_io_ptr->new_bath[i+id] = data->deph[i];
+				    }
 				mb_io_ptr->new_bath_acrosstrack[i+id] 
 					= data->dist[i];
 				mb_io_ptr->new_bath_alongtrack[i+id] = 0.0;
@@ -515,8 +535,8 @@ int	*error;
 			fprintf(stderr,"dbg5       beams_bath: %d\n",
 				mb_io_ptr->beams_bath);
 			for (i=0;i<mb_io_ptr->beams_bath;i++)
-			  fprintf(stderr,"dbg5       bath[%d]: %f  bathdist[%d]: %f\n",
-				i,mb_io_ptr->new_bath[i],
+			  fprintf(stderr,"dbg4       flag[%d]:%4d  bath: %f  bathdist[%d]: %f\n",
+				i,mb_io_ptr->new_beamflag[i],mb_io_ptr->new_bath[i],
 				i,mb_io_ptr->new_bath_acrosstrack[i]);
 			}
 
@@ -566,6 +586,10 @@ int	*error;
 		for (i=0;i<mb_io_ptr->beams_bath;i++)
 			{
 			store->deph[id-i] = mb_io_ptr->new_bath[i];
+			if (!mb_beam_ok(mb_io_ptr->new_beamflag[i]))
+			    store->deph[id-i] = -store->deph[id-i];
+			else if (mb_io_ptr->new_beamflag[i] == MB_FLAG_NULL)
+			    store->deph[id-i] = 0;
 			store->dist[id-i] = mb_io_ptr->new_bath_acrosstrack[i];
 			}
 
@@ -762,7 +786,10 @@ int	*error;
 		for (i=0;i<iend;i++)
 			{
 			j = i + offset;
-			data->deph[i] = mb_io_ptr->new_bath[j];
+			if (mb_beam_check_flag(mb_io_ptr->new_beamflag[j]))
+			    data->deph[i] = -mb_io_ptr->new_bath[j];
+			else
+			    data->deph[i] = mb_io_ptr->new_bath[j];
 			data->dist[i] = mb_io_ptr->new_bath_acrosstrack[j];
 			}
 		}

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sb2100rw.c	3/3/94
- *	$Id: mbr_sb2100rw.c,v 4.25 1997-07-25 14:19:53 caress Exp $
+ *	$Id: mbr_sb2100rw.c,v 4.26 1998-10-05 17:46:15 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,10 @@
  * Author:	D. W. Caress
  * Date:	March 3, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.25  1997/07/25  14:19:53  caress
+ * Version 4.5beta2.
+ * Much mucking, particularly with Simrad formats.
+ *
  * Revision 4.24  1997/04/21  17:02:07  caress
  * MB-System 4.5 Beta Release.
  *
@@ -141,7 +145,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_sb2100rw.c,v 4.25 1997-07-25 14:19:53 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2100rw.c,v 4.26 1998-10-05 17:46:15 caress Exp $";
 	char	*function_name = "mbr_alm_sb2100rw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -427,6 +431,7 @@ int	*error;
 	mb_io_ptr->new_speed = 0.0;
 	for (i=0;i<mb_io_ptr->beams_bath;i++)
 		{
+		mb_io_ptr->new_beamflag[i] = MB_FLAG_NULL;
 		mb_io_ptr->new_bath[i] = 0.0;
 		mb_io_ptr->new_bath_acrosstrack[i] = 0.0;
 		mb_io_ptr->new_bath_alongtrack[i] = 0.0;
@@ -564,6 +569,19 @@ int	*error;
 		gain_factor = pow(10.0, (-gain_db / 20.0));
 		for (i=0;i<mb_io_ptr->beams_bath;i++)
 			{
+			if (data->quality[i] == ' ')
+			    mb_io_ptr->new_beamflag[i] = MB_FLAG_NONE;
+			else if (data->quality[i] == '0')
+			    mb_io_ptr->new_beamflag[i] = MB_FLAG_NULL;
+			else if (data->quality[i] == 'Q')
+			    mb_io_ptr->new_beamflag[i] 
+				    = MB_FLAG_SONAR + MB_FLAG_FLAG;
+			else if (data->quality[i] == 'E')
+			    mb_io_ptr->new_beamflag[i] 
+				    = MB_FLAG_MANUAL + MB_FLAG_FLAG;
+			else if (data->quality[i] == 'F')
+			    mb_io_ptr->new_beamflag[i] 
+				    = MB_FLAG_FILTER + MB_FLAG_FLAG;
 			mb_io_ptr->new_bath[i] 
 				= scale * data->depth[i];
 			mb_io_ptr->new_bath_acrosstrack[i] 
@@ -603,8 +621,9 @@ int	*error;
 			fprintf(stderr,"dbg4       beams_amp:  %d\n",
 				mb_io_ptr->beams_amp);
 			for (i=0;i<mb_io_ptr->beams_bath;i++)
-			  fprintf(stderr,"dbg4       beam:%d  bath:%f  amp:%f  acrosstrack:%f  alongtrack:%f\n",
-				i,mb_io_ptr->new_bath[i],
+			  fprintf(stderr,"dbg4       beam:%d  flag:%d  bath:%f  amp:%f  acrosstrack:%f  alongtrack:%f\n",
+				i,mb_io_ptr->new_beamflag[i],
+				mb_io_ptr->new_bath[i],
 				mb_io_ptr->new_amp[i],
 				mb_io_ptr->new_bath_acrosstrack[i],
 				mb_io_ptr->new_bath_alongtrack[i]);
@@ -1075,11 +1094,24 @@ int	*error;
 		gain_factor = pow(10.0, (gain_db / 20.0));
 		for (i=0;i<mb_io_ptr->beams_bath;i++)
 			{
-			 data->depth[i]
+			if (mb_beam_check_flag(mb_io_ptr->new_beamflag[i]))
+			    {
+			    if (mb_beam_check_flag_null(mb_io_ptr->new_beamflag[i]))
+				data->quality[i] = '0';
+			    else if (mb_beam_check_flag_manual(mb_io_ptr->new_beamflag[i]))
+				data->quality[i] = 'E';
+			    else if (mb_beam_check_flag_filter(mb_io_ptr->new_beamflag[i]))
+				data->quality[i] = 'F';
+			    else if (mb_beam_check_flag_sonar(mb_io_ptr->new_beamflag[i]))
+				data->quality[i] = 'Q';
+			    }
+			else 
+			    data->quality[i] = ' ';
+			data->depth[i]
 				= mb_io_ptr->new_bath[i] / scale;
-			 data->acrosstrack_beam[i]
+			data->acrosstrack_beam[i]
 				= mb_io_ptr->new_bath_acrosstrack[i] / scale;
-			 data->alongtrack_beam[i]
+			data->alongtrack_beam[i]
 				= mb_io_ptr->new_bath_alongtrack[i] / scale;
 			}
 		for (i=0;i<mb_io_ptr->beams_amp;i++)
@@ -1815,11 +1847,6 @@ int	*error;
 		mb_get_int(&(data->signal_to_noise[i]),  line+37, 2);
 		mb_get_int(&(data->echo_length[i]),      line+39, 3);
 		data->quality[i] = line[42];
-		if (data->quality[i] != ' ' && data->depth[i] > 0)
-			{
-			data->depth[i] = -data->depth[i];
-			data->amplitude_beam[i] = -data->amplitude_beam[i];
-			}
 		}
 	  }
 
@@ -2711,28 +2738,6 @@ int	*error;
 		/* output a line for each beam */
 		for (i=0;i<data->num_beams;i++)
 			{
-			if (data->depth[i] < 0 && data->quality[i] == ' ')
-				{
-				data->quality[i] = 'F';
-				data->depth[i] = -data->depth[i];
-				}
-			else if (data->depth[i] < 0)
-				{
-				data->depth[i] = -data->depth[i];
-				}
-			else if (data->depth[i] == 0)
-				{
-				data->quality[i] = '0';
-				}
-			else if (data->depth[i] > 0)
-				{
-				data->quality[i] = ' ';
-				}
-			if (data->amplitude_beam[i] < 0)
-				{
-				data->amplitude_beam[i] = 
-					-data->amplitude_beam[i];
-				}
 			if (data->quality[i] == '0')
 				{
 				status = fprintf(mbfp,"                                          0\r\n");

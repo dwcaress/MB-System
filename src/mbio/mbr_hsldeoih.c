@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsldeoih.c	2/11/93
- *	$Id: mbr_hsldeoih.c,v 4.12 1997-07-25 14:19:53 caress Exp $
+ *	$Id: mbr_hsldeoih.c,v 4.13 1998-10-05 17:46:15 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,10 @@
  * Author:	D. W. Caress
  * Date:	February 11, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.12  1997/07/25  14:19:53  caress
+ * Version 4.5beta2.
+ * Much mucking, particularly with Simrad formats.
+ *
  * Revision 4.11  1997/04/21  17:02:07  caress
  * MB-System 4.5 Beta Release.
  *
@@ -108,7 +112,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_hsldeoih.c,v 4.12 1997-07-25 14:19:53 caress Exp $";
+ static char res_id[]="$Id: mbr_hsldeoih.c,v 4.13 1998-10-05 17:46:15 caress Exp $";
 	char	*function_name = "mbr_alm_hsldeoih";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -409,6 +413,7 @@ int	*error;
 	mb_io_ptr->new_speed = 0.0;
 	for (i=0;i<mb_io_ptr->beams_bath;i++)
 		{
+		mb_io_ptr->new_beamflag[i] = MB_FLAG_NULL;
 		mb_io_ptr->new_bath[i] = 0.0;
 		mb_io_ptr->new_bath_acrosstrack[i] = 0.0;
 		mb_io_ptr->new_bath_alongtrack[i] = 0.0;
@@ -530,13 +535,45 @@ int	*error;
 		/* read distance and depth values into storage arrays */
 		for (i=0;i<mb_io_ptr->beams_bath;i++)
 			{
-			mb_io_ptr->new_bath[i] 
-				= data->depth_scale*data->depth[i];
+			if (data->depth[i] > 0.0)
+			    {
+			    mb_io_ptr->new_beamflag[i] = MB_FLAG_NONE;
+			    mb_io_ptr->new_bath[i] 
+				    = data->depth_scale*data->depth[i];
+			    }
+			else if (data->depth[i] < 0.0)
+			    {
+			    mb_io_ptr->new_beamflag[i] = 
+				    MB_FLAG_MANUAL + MB_FLAG_FLAG;
+			    mb_io_ptr->new_bath[i] 
+				    = -data->depth_scale*data->depth[i];
+			    }
+			else
+			    {
+			    mb_io_ptr->new_beamflag[i] = MB_FLAG_NULL;
+			    mb_io_ptr->new_bath[i] 
+				    = data->depth_scale*data->depth[i];
+			    }
 			mb_io_ptr->new_bath_acrosstrack[i] 
 				= data->depth_scale*data->distance[i];
 			mb_io_ptr->new_bath_alongtrack[i] = 0;
 			}
-		mb_io_ptr->new_bath[29] = data->depth_center;
+		if (data->depth_center > 0.0)
+		    {
+		    mb_io_ptr->new_beamflag[29] = MB_FLAG_NONE;
+		    mb_io_ptr->new_bath[29] = data->depth_center;
+		    }
+		else if (data->depth_center < 0.0)
+		    {
+		    mb_io_ptr->new_beamflag[29] = 
+			    MB_FLAG_MANUAL + MB_FLAG_FLAG;
+		    mb_io_ptr->new_bath[29] = data->depth_center;
+		    }
+		else
+		    {
+		    mb_io_ptr->new_beamflag[29] = MB_FLAG_NULL;
+		    mb_io_ptr->new_bath[29] = data->depth_center;
+		    }
 		mb_io_ptr->new_bath_acrosstrack[29] = 0.0;
 
 		/* read processed amplitude values into storage arrays */
@@ -895,11 +932,17 @@ int	*error;
 			
 		for (i=0;i<mb_io_ptr->beams_bath;i++)
 			{
-			data->depth[i] = scalefactor*mb_io_ptr->new_bath[i];
+			if (mb_beam_check_flag(mb_io_ptr->new_beamflag[i]))
+			    data->depth[i] = -scalefactor*mb_io_ptr->new_bath[i];
+			else
+			    data->depth[i] = scalefactor*mb_io_ptr->new_bath[i];
 			data->distance[i] 
 				= scalefactor*mb_io_ptr->new_bath_acrosstrack[i];
 			}
-		data->depth_center = mb_io_ptr->new_bath[29];
+		if (mb_beam_check_flag(mb_io_ptr->new_beamflag[29]))
+		    data->depth_center = -mb_io_ptr->new_bath[29];
+		else
+		    data->depth_center = mb_io_ptr->new_bath[29];
 
 		/* put processed amplitude values 
 			into hsldeoih data structure */
@@ -991,7 +1034,7 @@ int	*error;
 
 	/* swap bytes if necessary */
 #ifdef BYTESWAPPED
-	label = mb_swap_long(label);
+	label = mb_swap_int(label);
 #endif
 
 	/* see if we just encountered a record label */
@@ -1856,8 +1899,6 @@ int	*error;
 				gain_beam = 6*data->gain[which_gain[i]];
 				factor = 100.*pow(10.,(-0.05*gain_beam));
 				data->back[i] = factor*data->amplitude[i];
-				if (data->depth[i] < 0)
-					data->back[i] = -data->back[i];
 				}
 			}
 		}
@@ -1975,7 +2016,7 @@ int	*error;
 		for (i=0;i<16;i++)
 			fprintf(stderr,"dbg5         %d  %d  %d\n",
 				i,data->gain[i],data->echo_scale[i]);
-		fprintf(stderr,"dbg5       back_scale:       %d\n",
+		fprintf(stderr,"dbg5       back_scale:       %f\n",
 			data->back_scale);
 		for (i=0;i<MBF_HSLDEOIH_BEAMS;i++)
 			fprintf(stderr,"dbg5         %d  %d\n",
@@ -2272,8 +2313,6 @@ int	*error;
 				gain_beam = 6*data->gain[which_gain[i]];
 				factor = 100.*pow(10.,(-0.05*gain_beam));
 				data->back[i] = factor*data->amplitude[i];
-				if (data->depth[i] < 0)
-					data->back[i] = -data->back[i];
 				}
 			}
 		}
@@ -2391,7 +2430,7 @@ int	*error;
 		for (i=0;i<16;i++)
 			fprintf(stderr,"dbg5         %d  %d  %d\n",
 				i,data->gain[i],data->echo_scale[i]);
-		fprintf(stderr,"dbg5       back_scale:       %d\n",
+		fprintf(stderr,"dbg5       back_scale:       %f\n",
 			data->back_scale);
 		for (i=0;i<MBF_HSLDEOIH_BEAMS;i++)
 			fprintf(stderr,"dbg5         %d  %d\n",
@@ -2521,7 +2560,7 @@ int	*error;
 	/* write record label to file */
 	label = MBF_HSLDEOIH_LABEL;
 #ifdef BYTESWAPPED
-	label = mb_swap_long(label);
+	label = mb_swap_int(label);
 #endif
 	if ((status = fwrite(&label,1,sizeof(int),mbfp)) != sizeof(int))
 		{
@@ -3276,7 +3315,7 @@ int	*error;
 		for (i=0;i<16;i++)
 			fprintf(stderr,"dbg5         %d  %d  %d\n",
 				i,data->gain[i],data->echo_scale[i]);
-		fprintf(stderr,"dbg5       back_scale:       %d\n",
+		fprintf(stderr,"dbg5       back_scale:       %f\n",
 			data->back_scale);
 		for (i=0;i<MBF_HSLDEOIH_BEAMS;i++)
 			fprintf(stderr,"dbg5         %d  %d\n",
@@ -3648,7 +3687,7 @@ int	*error;
 		for (i=0;i<16;i++)
 			fprintf(stderr,"dbg5         %d  %d  %d\n",
 				i,data->gain[i],data->echo_scale[i]);
-		fprintf(stderr,"dbg5       back_scale:       %d\n",
+		fprintf(stderr,"dbg5       back_scale:       %f\n",
 			data->back_scale);
 		for (i=0;i<MBF_HSLDEOIH_BEAMS;i++)
 			fprintf(stderr,"dbg5         %d  %d\n",

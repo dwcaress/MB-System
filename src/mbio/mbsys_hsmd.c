@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_hsmd.c	Aug 10, 1995
- *	$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbsys_hsmd.c,v 4.5 1997-07-25 14:19:53 caress Exp $
+ *	$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbsys_hsmd.c,v 4.6 1998-10-05 17:46:15 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -39,6 +39,10 @@
  * Date:	August 10, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.5  1997/07/25  14:19:53  caress
+ * Version 4.5beta2.
+ * Much mucking, particularly with Simrad formats.
+ *
  * Revision 4.4  1997/04/21  17:02:07  caress
  * MB-System 4.5 Beta Release.
  *
@@ -98,7 +102,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbsys_hsmd.c,v 4.5 1997-07-25 14:19:53 caress Exp $";
+	static char res_id[]="$Id: mbsys_hsmd.c,v 4.6 1998-10-05 17:46:15 caress Exp $";
 	char	*function_name = "mbsys_hsmd_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -541,7 +545,7 @@ int	*error;
 		fprintf(stderr,"dbg2        nss:       %d\n",nss);
 		if (verbose >= 3) 
 		 for (i=0;i<nss;i++)
-		  fprintf(stderr,"dbg3        ss[%d]: %d    ssdist[%d]: %d\n",
+		  fprintf(stderr,"dbg3        ss[%d]: %f    ssdist[%d]: %f\n",
 			i,ss[i],i,ssacrosstrack[i]);
 		fprintf(stderr,"dbg2       comment:    %s\n",comment);
 		}
@@ -658,7 +662,7 @@ int	*error;
 /*--------------------------------------------------------------------*/
 int mbsys_hsmd_ttimes(verbose,mbio_ptr,store_ptr,kind,nbeams,
 	ttimes,angles,angles_forward,angles_null,
-	depth_offset,alongtrack_offset,flags,ssv,error)
+	heave,alongtrack_offset,flags,draft,ssv,error)
 int	verbose;
 char	*mbio_ptr;
 char	*store_ptr;
@@ -668,9 +672,10 @@ double	*ttimes;
 double	*angles;
 double	*angles_forward;
 double	*angles_null;
-double	*depth_offset;
+double	*heave;
 double	*alongtrack_offset;
 int	*flags;
+double	*draft;
 double	*ssv;
 int	*error;
 {
@@ -694,7 +699,7 @@ int	*error;
 		fprintf(stderr,"dbg2       angles_xtrk:%d\n",angles);
 		fprintf(stderr,"dbg2       angles_ltrk:%d\n",angles_forward);
 		fprintf(stderr,"dbg2       angles_null:%d\n",angles_null);
-		fprintf(stderr,"dbg2       depth_off:  %d\n",depth_offset);
+		fprintf(stderr,"dbg2       heave:      %d\n",heave);
 		fprintf(stderr,"dbg2       ltrk_off:   %d\n",alongtrack_offset);
 		fprintf(stderr,"dbg2       flags:      %d\n",flags);
 		}
@@ -721,7 +726,7 @@ int	*error;
 			angles[i] = 0.0;
 			angles_forward[i] = 0.0;
 			angles_null[i] = 40.0;
-			depth_offset[i] = 0.0;
+			heave[i] = 0.0;
 			alongtrack_offset[i] = 0.0;
 			flags[i] = MB_NO;
 			}
@@ -751,7 +756,7 @@ int	*error;
 					angles[j] = store->angle[i];
 					angles_forward[j] = 180.0;
 					}
-				depth_offset[j] = store->heave;
+				heave[j] = store->heave;
 				if (store->spfb[i] < 0.0)
 					flags[j] = MB_YES;
      	 			}
@@ -765,7 +770,7 @@ int	*error;
 				j = i + MBSYS_HSMD_BEAMS_PING - 1;
 				ttimes[j] = fabs(scale * store->spfb[i]);
 				angles[j] = store->angle[i];
-				depth_offset[j] = store->heave;
+				heave[j] = store->heave;
 				if (store->spfb[i] < 0.0)
 					flags[j] = MB_YES;
       				}
@@ -773,6 +778,7 @@ int	*error;
 
 		/* get sound velocity at transducers */
 		*ssv = store->ckeel;
+		*draft = 0.0;
 
 		/* set status */
 		*error = MB_ERROR_NO_ERROR;
@@ -808,13 +814,14 @@ int	*error;
 		}
 	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR)
 		{
+		fprintf(stderr,"dbg2       draft:      %f\n",*draft);
 		fprintf(stderr,"dbg2       ssv:        %f\n",*ssv);
 		fprintf(stderr,"dbg2       nbeams:     %d\n",*nbeams);
 		for (i=0;i<*nbeams;i++)
 			fprintf(stderr,"dbg2       beam %d: tt:%f  angle_xtrk:%f  angle_ltrk:%f  angle_null:%f  depth_off:%f  ltrk_off:%f  flag:%d\n",
 				i,ttimes[i],angles[i],
 				angles_forward[i],angles_null[i],
-				depth_offset[i],alongtrack_offset[i],
+				heave[i],alongtrack_offset[i],
 				flags[i]);
 		}
 	if (verbose >= 2)
@@ -822,6 +829,123 @@ int	*error;
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbsys_hsmd_altitude(verbose,mbio_ptr,store_ptr,
+	kind,transducer_depth,altitude,error)
+int	verbose;
+char	*mbio_ptr;
+char	*store_ptr;
+int	*kind;
+double	*transducer_depth;
+double	*altitude;
+int	*error;
+{
+	char	*function_name = "mbsys_hsmd_altitude";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	struct mbsys_hsmd_struct *store;
+	double	bath_best;
+	double	xtrack_min;
+	int	i, j;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mb_ptr:     %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* get data structure pointer */
+	store = (struct mbsys_hsmd_struct *) store_ptr;
+
+	/* get data kind */
+	*kind = store->kind;
+
+	/* extract data from structure */
+	if (*kind == MB_DATA_DATA)
+		{
+		bath_best = 0.0;
+		if (store->depth[0] > 0.0)
+		    bath_best = store->depth[0];
+		else
+		    {
+		    xtrack_min = 99999999.9;
+		    for (i=0;i<MBSYS_HSMD_BEAMS_PING;i++)
+			{
+			if (store->depth[i] > 0.0
+			    && fabs(store->distance[i]) < xtrack_min)
+			    {
+			    xtrack_min = fabs(store->distance[i]);
+			    bath_best = store->depth[i];
+			    }
+			}		
+		    }
+		if (bath_best <= 0.0)
+		    {
+		    xtrack_min = 99999999.9;
+		    for (i=0;i<MBSYS_HSMD_BEAMS_PING;i++)
+			{
+			if (store->depth[i] < 0.0
+			    && fabs(store->distance[i]) < xtrack_min)
+			    {
+			    xtrack_min = fabs(store->distance[i]);
+			    bath_best = -store->depth[i];
+			    }
+			}		
+		    }
+		*transducer_depth = 0.0;
+		*altitude = bath_best - *transducer_depth;
+
+		/* set status */
+		*error = MB_ERROR_NO_ERROR;
+		status = MB_SUCCESS;
+
+		/* done translating values */
+
+		}
+
+	/* deal with comment */
+	else if (*kind == MB_DATA_COMMENT)
+		{
+		/* set status */
+		*error = MB_ERROR_COMMENT;
+		status = MB_FAILURE;
+		}
+
+	/* deal with other record type */
+	else
+		{
+		/* set status */
+		*error = MB_ERROR_OTHER;
+		status = MB_FAILURE;
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       kind:              %d\n",*kind);
+		fprintf(stderr,"dbg2       transducer_depth:  %f\n",*transducer_depth);
+		fprintf(stderr,"dbg2       altitude:          %f\n",*altitude);
+		fprintf(stderr,"dbg2       error:             %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:            %d\n",status);
 		}
 
 	/* return status */

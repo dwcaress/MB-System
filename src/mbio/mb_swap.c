@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_swap.c	7/6/94
- *    $Id: mb_swap.c,v 4.3 1997-09-15 19:06:40 caress Exp $
+ *    $Id: mb_swap.c,v 4.4 1998-10-05 17:46:15 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -26,6 +26,9 @@
  * Date:	July 6, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1997/09/15  19:06:40  caress
+ * Real Version 4.5
+ *
  * Revision 4.2  1997/04/21  17:02:07  caress
  * MB-System 4.5 Beta Release.
  *
@@ -57,9 +60,9 @@
 int mb_swap_float(a)
 float	*a;
 {
-	unsigned long	*t;
-	t = (unsigned long *) a;
-	*t = mb_swap_long(*t);
+	unsigned int	*t;
+	t = (unsigned int *) a;
+	*t = mb_swap_int(*t);
 	
 	return(MB_SUCCESS);
 }
@@ -70,14 +73,14 @@ int mb_swap_double(a)
 double	*a;
 {
 	double b;
-	unsigned long *t1;
-	unsigned long *t2;
+	unsigned int *t1;
+	unsigned int *t2;
 
 	b = *a;
-	t1 = (unsigned long *) &b;
-	t2 = (unsigned long *) a;
-	t2[1] = mb_swap_long(t1[0]);
-	t2[0] = mb_swap_long(t1[1]);
+	t1 = (unsigned int *) &b;
+	t2 = (unsigned int *) a;
+	t2[1] = mb_swap_int(t1[0]);
+	t2[0] = mb_swap_int(t1[1]);
 	
 	return(MB_SUCCESS);
 }

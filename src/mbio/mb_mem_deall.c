@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_mem_deall.c	2/3/93
- *    $Id: mb_mem_deall.c,v 4.13 1997-09-15 19:06:40 caress Exp $
+ *    $Id: mb_mem_deall.c,v 4.14 1998-10-05 17:46:15 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -18,6 +18,9 @@
  * Date:	February 3, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.13  1997/09/15  19:06:40  caress
+ * Real Version 4.5
+ *
  * Revision 4.12  1997/07/25  14:19:53  caress
  * Version 4.5beta2.
  * Much mucking, particularly with Simrad formats.
@@ -101,7 +104,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-  static char rcs_id[]="$Id: mb_mem_deall.c,v 4.13 1997-09-15 19:06:40 caress Exp $";
+  static char rcs_id[]="$Id: mb_mem_deall.c,v 4.14 1998-10-05 17:46:15 caress Exp $";
 	char	*function_name = "mb_mem_deall";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
@@ -255,6 +258,14 @@ int	*error;
 	else if (mb_io_ptr->format == MBF_DSL120SF)
 		{
 		status = mbr_dem_dsl120sf(verbose,mbio_ptr,error);
+		}
+	else if (mb_io_ptr->format == MBF_GSFGENMB)
+		{
+		status = mbr_dem_gsfgenmb(verbose,mbio_ptr,error);
+		}
+	else if (mb_io_ptr->format == MBF_MSTIFFSS)
+		{
+		status = mbr_dem_mstiffss(verbose,mbio_ptr,error);
 		}
 	else
 		{
