@@ -126,55 +126,55 @@ The \fBmbprocess\fP commands modified by \fBmbset\fP are:
         adds new bathymetry data cutting command where
         min and max are the start and end beam numbers
         between which data are flagged (note that 
- 	flagging bathymetry also flags amplitude data)
+        flagging bathymetry also flags amplitude data)
    BATHCUTDISTANCE min max
         adds new bathymetry data cutting command where
         min and max are the start and end acrosstrack
         distance (m) between which data are flagged 
- 	(note that flagging bathymetry also flags  
- 	amplitude data)
+        (note that flagging bathymetry also flags  
+        amplitude data)
    BATHCUTSPEED min max
         adds new bathymetry data cutting command where
         all beams are flagged for pings with a ship
- 	or vehicle speed less than min or greater than
- 	max (note that flagging bathymetry also flags  
- 	amplitude data)
+        or vehicle speed less than min or greater than
+        max (note that flagging bathymetry also flags  
+        amplitude data)
    AMPCUTNUMBER min max
         adds new amplitude data cutting command where
         min and max are the start and end beam numbers
         between which amplitude data are zeroed (note
- 	that zeroing amplitude data has no impact on
- 	bathymetry data)
+        that zeroing amplitude data has no impact on
+        bathymetry data)
    AMPCUTDISTANCE min max
         adds new amplitude data cutting command where
         min and max are the start and end acrosstrack
         distance (m) between which amplitude data are 
- 	zeroed (note that zeroing amplitude data has 
- 	no impact on bathymetry data)
+        zeroed (note that zeroing amplitude data has 
+        no impact on bathymetry data)
    AMPCUTSPEED min max
         adds new amplitude data cutting command where
         all amplitude values are zeroed for pings with 
- 	a ship or vehicle speed less than min or greater 
- 	than max (note that zeroing amplitude data has 
- 	no impact on bathymetry data)
+        a ship or vehicle speed less than min or greater 
+        than max (note that zeroing amplitude data has 
+        no impact on bathymetry data)
    SSCUTNUMBER min max
         adds new sidescan data cutting command where
         min and max are the start and end pixel numbers
         between which sidescan data are zeroed  (note 
- 	that zeroing sidescan data has no impact on 
- 	bathymetry data)
+        that zeroing sidescan data has no impact on 
+        bathymetry data)
    SSCUTDISTANCE min max
         adds new sidescan data cutting command where
         min and max are the start and end acrosstrack
         distance (m) between which sidescan data are 
- 	zeroed  (note that zeroing sidescan data has 
- 	no impact on bathymetry data)
+        zeroed  (note that zeroing sidescan data has 
+        no impact on bathymetry data)
    SSCUTSPEED min max
         adds new sidescan data cutting command where
         all sidescan values are zeroed for pings with 
- 	a ship or vehicle speed less than min or greater 
- 	than max (note that zeroing sidescan data has 
- 	no impact on bathymetry data)
+        a ship or vehicle speed less than min or greater 
+        than max (note that zeroing sidescan data has 
+        no impact on bathymetry data)
 
  BATHYMETRY EDITING:
    EDITSAVEMODE boolean
@@ -194,18 +194,31 @@ The \fBmbprocess\fP commands modified by \fBmbset\fP are:
    SVPFILE filename
         sets SVP file path [no default]
    SSVMODE boolean
-        sets ssv mode [0]
-         0: use ssv from file
-         1: offset ssv from file (set by SSV)
-         2: use constant ssv (set by SSV)
+        sets surface sound velocity (SSV) mode [0]
+         0: use SSV from file
+         1: offset SSV from file (set by SSV command)
+         2: use constant SSV (set by SSV command)
    SSV constant/offset
-        sets ssv value or offset (m/s) [1500.0]
+        sets SSV value or offset (m/s) [1500.0]
+   ANGLEMODE mode
+        sets handling of beam angles during 
+        raytracing [0]
+         0: angles not changed before raytracing
+         1: angles adjusted using Snell's Law for 
+            the difference between the surface sound  
+            velocity (SSV) and the sound speed at  
+            the sonar depth in the SVP.
+         2: angles adjusted using Snell's Law and
+            the sonar array geometry for the
+            difference between the surface sound  
+            velocity (SSV) and the sound speed at  
+            the sonar depth in the SVP.
    TTMULTIPLY multiplier
         sets value multiplied by travel times [1.0]
    SOUNDSPEEDREF boolean
         determines the handling of the sound 
         speed reference for bathymetry [1]
-	- note: if raytracing is turned off then
+        - note: if raytracing is turned off then
           this command implies correcting or
           uncorrecting using the SVP specified 
           with the SVPFILE command
@@ -249,7 +262,7 @@ The \fBmbprocess\fP commands modified by \fBmbset\fP are:
         sets value added to heave (m) 
    HEAVEMULTIPLY multiplier
         sets value multiplied by heave
-	    
+    
  LEVER CORRECTION:
    LEVERMODE mode
         sets heave correction by lever calculation [0]
@@ -503,7 +516,7 @@ an mbprocess parameter file "0051_20010829_223755.mb57.par".
 The contents of the parameter file are:
 
  ## MB-System processing parameter file
- ## Written by mb_pr_writepar version $Id: mbset.l,v 5.7 2001-10-19 19:40:32 caress Exp $
+ ## Written by mb_pr_writepar version $Id: mbset.l,v 5.8 2001-11-06 23:56:50 caress Exp $
  ## MB-system Version 5.0.beta07
  ## Generated by user <caress> on cpu <menard> at <Thu Sep 13 12:42:01 2001>
  ##
@@ -678,11 +691,11 @@ To process the data, run mbprocess:
 
  The output to the terminal is:
  Program mbprocess
- Version $Id: mbset.l,v 5.7 2001-10-19 19:40:32 caress Exp $
+ Version $Id: mbset.l,v 5.8 2001-11-06 23:56:50 caress Exp $
  MB-System Version 5.0.beta07
  
  Program <mbprocess>
- Version $Id: mbset.l,v 5.7 2001-10-19 19:40:32 caress Exp $
+ Version $Id: mbset.l,v 5.8 2001-11-06 23:56:50 caress Exp $
  MB-system Version 5.0.beta07
  
  Program Operation:
