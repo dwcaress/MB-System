@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_dsl.c	3.00	8/5/96
- *	$Id: mbsys_dsl.c,v 5.5 2002-09-18 23:32:59 caress Exp $
+ *	$Id: mbsys_dsl.c,v 5.6 2002-09-25 20:41:04 caress Exp $
  *
  *    Copyright (c) 1996, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	August 5, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2002/09/18 23:32:59  caress
+ * Release 5.0.beta23
+ *
  * Revision 5.4  2002/07/20 20:42:40  caress
  * Release 5.0.beta20
  *
@@ -89,7 +92,7 @@
 int mbsys_dsl_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_dsl.c,v 5.5 2002-09-18 23:32:59 caress Exp $";
+ static char res_id[]="$Id: mbsys_dsl.c,v 5.6 2002-09-25 20:41:04 caress Exp $";
 	char	*function_name = "mbsys_dsl_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -883,17 +886,17 @@ int mbsys_dsl_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 		    xtrack_min = 99999999.9;
 		    for (i=0;i<store->bat_num_bins;i++)
 			{
-			if (store->bat_port[i] < 0.0
+			if (store->bat_port[i] != 0.0
 			    && dx * (i + 0.5) < xtrack_min)
 			    {
 			    xtrack_min = dx * (i + 0.5);
-			    bath_best = -store->bat_port[i];
+			    bath_best = fabs(store->bat_port[i]);
 			    }
-			if (store->bat_stbd[i] < 0.0
+			if (store->bat_stbd[i] != 0.0
 			    && dx * (i + 0.5) < xtrack_min)
 			    {
 			    xtrack_min = dx * (i + 0.5);
-			    bath_best = -store->bat_stbd[i];
+			    bath_best = fabs(store->bat_stbd[i]);
 			    }
 			}		
 		    }

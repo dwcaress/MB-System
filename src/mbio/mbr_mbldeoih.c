@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mbldeoih.c	2/2/93
- *	$Id: mbr_mbldeoih.c,v 5.5 2002-04-06 02:43:39 caress Exp $
+ *	$Id: mbr_mbldeoih.c,v 5.6 2002-09-25 20:41:04 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	February 2, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2002/04/06 02:43:39  caress
+ * Release 5.0.beta16
+ *
  * Revision 5.4  2001/07/20 00:32:54  caress
  * Release 5.0.beta03
  *
@@ -197,7 +200,7 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 #define	MBF_MBLDEOIH_OLDHEADERSIZE	38
 #define	MBF_MBLDEOIH_NEWHEADERSIZE	44
 
-static char res_id[]="$Id: mbr_mbldeoih.c,v 5.5 2002-04-06 02:43:39 caress Exp $";
+static char res_id[]="$Id: mbr_mbldeoih.c,v 5.6 2002-09-25 20:41:04 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_mbldeoih(int verbose, void *mbio_ptr, int *error)
@@ -347,8 +350,8 @@ int mbr_info_mbldeoih(int verbose,
 	status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 	*system = MB_SYS_LDEOIH;
-	*beams_bath_max = 250;
-	*beams_amp_max = 250;
+	*beams_bath_max = 3003;
+	*beams_amp_max = 1440;
 	*pixels_ss_max = 10000;
 	strncpy(format_name, "MBLDEOIH", MB_NAME_LENGTH);
 	strncpy(system_name, "LDEOIH", MB_NAME_LENGTH);
