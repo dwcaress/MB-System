@@ -1,26 +1,38 @@
 #     The MB-system:	Makefile.template  9/8/00
-#	$Id: Makefile.template,v 4.0 2000-09-08 17:19:14 caress Exp $
+#	$Id: Makefile.template,v 5.0 2001-01-22 07:38:58 caress Exp $
 #
 #     Copyright (c) 2000 by
-#     D. W. Caress (caress@mbari.org)
+#     David W. Caress (caress@mbari.org)
 #       Monterey Bay Aquarium Research Institute
 #       Moss Landing, CA 95039
-#     and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
+#     and Dale N. Chayes (dale@ldeo.columbia.edu)
 #       Lamont-Doherty Earth Observatory
 #       Palisades, NY  10964
 #
 #     See README file for copying and redistribution conditions.
 #
-# Makefile template for MB-system at the src/mbcheb directory level
+# Makefile template for MB-system at the src/mbaux directory level
 # Author:	D. W. Caress
 # Date:		September 8, 2000
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.0  2000/09/08  17:19:14  caress
+# Initial version.
+#
+# Revision 4.0  2000/09/08  17:19:14  caress
+# Initial version.
+#
 #
 #
 #
 
 # *** CHANGE THESE TO FIT YOUR LOCAL ENVIRONMENT ***
+#
+# Locations of GMT libraries, binaries, and include files:
+GMTLIBDIR = /ocean/mgg/gmt2/sun4/lib
+GMTINCDIR = /ocean/mgg/gmt2/src
+NETCDFLIBDIR = /ocean/mgg/netcdf/sun4/lib
+NETCDFINCDIR = /ocean/mgg/netcdf/include
 # 
 # Compilers 
 CC = cc 
@@ -36,19 +48,58 @@ LIBDIR = ../../lib
 INCDIR = ../../include
 MANDIR = ../../man/manl
 
-### make all makes the mbio library, man page, and associated include files
-all:	$(LIBDIR)/libmbcheb.a 
+### make all makes the mbaux library and associated include files
+all:	$(LIBDIR)/libmbaux.a \
+	$(INCDIR)/mb_contour.h
 
 ### make clean removes the object files
 clean:
 	rm -f *.o
 
 ### put together the library
-$(LIBDIR)/libmbcheb.a:	mb_cheb.o
-	$(ARCHIVE) $(LIBDIR)/libmbcheb.a \
-		mb_cheb.o
-	ranlib $(LIBDIR)/libmbcheb.a
+$(LIBDIR)/libmbaux.a:	\
+		mb_spline.o \
+		mb_zgrid.o \
+		mb_cheb.o \
+		mb_delaun.o \
+		mb_pslibface.o \
+		mb_rt.o \
+		mb_track.o \
+		mb_truecont.o \
+		xgraphics.o
+	$(ARCHIVE) $(LIBDIR)/libmbaux.a \
+		mb_spline.o \
+		mb_zgrid.o \
+		mb_cheb.o \
+		mb_delaun.o \
+		mb_pslibface.o \
+		mb_rt.o \
+		mb_track.o \
+		mb_truecont.o \
+		xgraphics.o
+	ranlib $(LIBDIR)/libmbaux.a
 
 ### compile the source files
+mb_spline.o:	mb_spline.c $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
+	$(CC) -c $(CFLAGS) mb_spline.c
+mb_zgrid.o:	mb_zgrid.c $(INCDIR)/mb_define.h
+	$(CC) -c $(CFLAGS) mb_zgrid.c
 mb_cheb.o:	mb_cheb.c $(INCDIR)/mb_status.h
 	$(CC) -c $(CFLAGS) mb_cheb.c
+mb_delaun.o:	mb_delaun.c $(INCDIR)/mb_status.h
+	$(CC) -c $(CFLAGS) mb_delaun.c
+mb_pslibface.o:	mb_pslibface.c  $(INCDIR)/mb_status.h  $(INCDIR)/mb_define.h
+	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) -I$(NETCDFINCDIR) mb_pslibface.c
+mb_rt.o:	mb_rt.c $(INCDIR)/mb_status.h
+	$(CC) -c $(CFLAGS) mb_rt.c
+mb_track.o:	mb_track.c $(INCDIR)/mb_status.h $(INCDIR)/mb_contour.h
+	$(CC) -c $(CFLAGS) mb_track.c
+mb_truecont.o:	mb_truecont.c $(INCDIR)/mb_status.h
+	$(CC) -c $(CFLAGS) mb_truecont.c
+xgraphics.o:	xgraphics.c $(INCDIR)/mb_status.h
+	$(CC) -c $(CFLAGS) xgraphics.c
+
+### copy the include files to the include file directory
+$(INCDIR)/mb_contour.h:	mb_contour.h
+	cp mb_contour.h $(INCDIR)/mb_contour.h
+	chmod 664 $(INCDIR)/mb_contour.h

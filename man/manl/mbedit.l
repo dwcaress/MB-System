@@ -1,27 +1,54 @@
-.TH mbedit l "6 March 2000" "MB-System 4.6" "MB-System 4.6"
+.TH mbedit l "16 January 2001" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbedit\fP - Interactive editor used to flag bad bathymetry values in swath sonar bathymetry data.
 
 .SH VERSION
-Version 4.6
+Version 5.0
 
 .SH SYNOPSIS
 \fBmbedit\fP [\fB-B\fIyr/mo/da/hr/mn/sc\fP 
 \fB-D\fP \fB-E\fIyr/mo/da/hr/mn/sc\fP 
-\fB-F\fIformat\fP \fB -G -I\fIinfile\fP \fB-O\fIoutfile\fP \fB-S -V -H\fP]
+\fB-F\fIformat\fP \fB -G -I\fIinfile\fP \fB-S -X -V -H\fP]
 
 .SH DESCRIPTION
-\fBMBedit\fP is an interactive editor used to identify and flag 
-artifacts in swath sonar bathymetry data. Once a file has been
+\fBMBedit\fP is an interactive editor 
+used to identify and flag artifacts in swath sonar 
+bathymetry data. Once a file has been
 read in, \fBMBedit\fP displays the bathymetry profiles
 from several pings, allowing the user to identify and flag anomalous
 beams. In extreme circumstances,
-pings may be zeroed (see "KEYBOARD ACTIONS"). In the default mode
-the edited swath data is output to a file, and a
-second file contains a listing of the edit events. The program
-can also be operated in a "browse" mode where no data are output.
+entire pings may be nulled (see "KEYBOARD ACTIONS"). 
 
-The display consists of several bathymetry profiles plotted within
+In the default mode the edit events are output to 
+an "edit save" file. The program can also be operated 
+in a "browse" mode where no edit events are output.
+If saved, the edit events can be applied 
+to the data using the program \fBmbprocess\fP, which
+outputs a processed swath data file. 
+The \fBmbprocess\fP program is also used to merge
+edited navigation, recalculate bathymetry, and apply
+other corrections to swath bathymetry data. Users
+may cause \fBmbprocess\fP to be run automatically by
+specifying the \fB-X\fP option when starting \fBmbedit\fP.
+
+In previous  versions of \fBMB-System\fP 
+(version 4.6.10 or earlier), \fBmbedit\fP
+produced output swath data files directly by reading and
+storing all of the swath data information in memory (including
+non-survey data records). This approach limited the 
+amount of data that could be handled
+at once, frequently requiring users to process files in
+small pieces. The current version only stores the bathymetry
+data and only outputs changes to the beam flag status
+(good data or bad data) of bathymetry soundings.
+The previous form of \fBmbedit\fP is now distributed
+as \fBmbeditold\fP. The old version will continue to
+be supported for \fBMB-System\fP version 5.0. However,
+no improvements will be made to the old program, and
+it may be dropped from later \fBMB-System\fP distributions.
+
+The \fBmbedit\fP display consists of several 
+bathymetry profiles plotted within
 a box with annotation showing the scaling of the x 
 (acrosstrack distance) and y (depth) axes. The number of pings displayed,
 and the width, vertical exageration, and annotation of the plot 
@@ -46,6 +73,19 @@ erase mode, except that the affected bathymetry values are unflagged.
 A few keyboard macros described below add additional flexibility
 to the editing process.
 
+\fBMBedit\fP has some limited automatic flagging and unflagging
+options. The \fBUnflag View\fP button allows users to unflag all of
+the currently visible soundings, and the \fBUnflag Forward\fP
+button unflags all soundings from the current position forward
+to the end of the data held in memory. The \fBControls\fP menu
+includes a \fBFilters...\fP button that brings up a dialog
+which sets the automatic flagging functions. At present, these
+include a median filter algorithm and a "wrong side filter"
+that flags soundings positioned on the "wrong" side of the
+swath (port soundings incorrectly located on the starboard side,
+or vice versa). Additional automatic filters will be added
+in later versions.
+
 If the ping includes flagged depths outside the plotting box, the ping label
 is underlain by a green box. If
 the ping includes unflagged depths outside the plotting box, the label
@@ -67,14 +107,9 @@ The middle and right mouse buttons allow the user to step forward
 and backward, respectively, through the data file. The \fBForward\fP
 and \fBReverse\fP buttons provide a duplicate stepping capability. 
 
-\fBMBedit\fP can hold up to 5000 data records at a time in memory.
-Many data formats include data
-records in addition to those containing bathymetry data (e.g.
-comment, sonar parameter, or navigation records). Thus, the number
-of bathymetry records to be edited at any time may be less than
-the total number of records loaded. Also, the record id numbers
-shown on the ping labels may not be sequential. In the case that
-a data file contains more data records than can be held in memory,
+\fBMBedit\fP can hold up to 25000 swath bathymetry 
+profiles at a time in memory. In the case that
+a data file contains more survey data records than can be held in memory,
 users will find it necessary to step through multiple buffers of
 data. The \fBNext Buffer\fP button will cause \fBMBedit\fP to
 dump the current buffer contents and read in a new set of data.
@@ -87,12 +122,7 @@ Users on memory limited machines may find it necessary to set the
 maximum buffer size to a smaller number using the
 \fBData Buffer Size\fP slider.  The \fBBuffer Retain Size\fP 
 slider sets the number of data records
-retained from the old buffer when more data are loaded. Clicking on
-the \fBDone\fP button rather than the \fBNext Buffer\fP button will
-cause \fBMBedit\fP to dump the rest of the input data file directly
-to the output file without making the bathymetry available for editing.
-The output data file always contains all of the data records in the
-input file, regardless of whether all the data was actually edited.
+retained from the old buffer when more data are loaded.
 
 The user can bring up a \fBGo To Specified Time\fP dialog
 by pulling down the \fBGo to a specified time...\fP menu item from the
@@ -107,17 +137,27 @@ file is reached. Thus, specifying an incorrect "go to" time may cause
 
 \fBMBedit\fP creates "edit save" files containing a list of each
 edit command executed during an editing session. These files are
-given names consisting of the input filename appended with ".mbesf".
-In the event that a computer or program crash interrupts an edit,
-the edit save files contain all information required to recover the
-potentially lost work. If a user seeks to open a swath sonar data 
+given names consisting of the input filename appended with ".esf".
+The program also modifies the \fBmbprocess\fP parameter file
+for the input file by specifying the edit save file and setting
+the \fBmbprocess\fP mode to apply the edits when generating a
+processed swath output file. If no parameter file named "ifile.par"
+exists, \fBmbedit\fP creates one.
+
+If a user seeks to open a swath sonar data 
 file and an associated edit save file already exists, the user is
 given an option to apply the saved edits to the data as it is loaded.
-If the saved edits are to be applied, \fBMBedit\fP copies the edit
-save file to a file named "mbedit_tmp.mbesf" and reads the saved
-edits from that second file.
 If the user chooses not to apply the saved edits, those edits will
 be lost as a new edit save file is created.
+If (as is usually the case) the saved edits are to be 
+applied, \fBMBedit\fP copies the edit
+save file to a file named "mbedit_tmp.esf" and reads the saved
+edits from that second file. In this way, the use of 
+edit save files and \fBmbprocess\fP allows users
+to edit a swath data file multiple times without generating
+multiple output files. Subsequent editing sessions serve to
+update the processed data rather than generate additional
+edited data files. 
 
 .SH AUTHORSHIP
 David W. Caress (caress@mbari.org)
@@ -156,7 +196,7 @@ Default: \fIyr/mo/da/hr/mn/sc\fP = 2062/2/21/10/30/0.
 Sets the format at startup for the input and output swath sonar data using 
 \fBMBIO\fP integer format identifiers. This value can also be set
 interactively when specifying the input file.
-This program uses the \fBMBIO\fP library and will read or write any swath sonar
+This program uses the \fBMBIO\fP library and will read any swath sonar
 format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page.
@@ -179,27 +219,22 @@ Sets the data file from which the input data will be read at startup.
 This option is usually used only when \fBMBedit\fP is started
 automatically from some other process. The \fB-F\fP option should
 also be used to set the data format id. If the \fB-B\fP option is
-not used to specify browse mode and the \fB-O\fP option is
-not used to set the output filename, then the output filename is
-automatically set as follows:  If the input file is named
-using the \fBMB-System\fP convention of an ".mbXX" suffix (the XX
-corresponds to the \fBMBIO\fP format id), then the output file name
-will have an "e.mbXX" suffix. Otherwise, the output file will
-be \fIinfile\fP with ".ed" appended.
-.TP
-.B \-O
-\fIoutfile\fP
-.br
-Sets the output data file to be used at startup. 
-This option is usually used only when \fBMBedit\fP is started
-automatically from some other process and the \fB-I\fP option is
-used to specify a startup input data file.
+not used to specify browse mode, then the edit save output file is
+automatically set as \fIinfile\fP with ".esf" appended.
 .TP
 .B \-S
 This flag modifies how the program handles an input data file
 read at startup, as specified with the \fB-I\fP option. If the
 \fB-S\fP flag is given and an edit save file exists for the
 startup input data file, the edit save file will be used. 
+.TP
+.B \-X
+This option causes \fBmbprocess\fP to run automatically
+on an input swath data file when the \fBmbedit\fP editing session
+is completed. The \fB-X\fP option effectively means that the
+corresponding processed swath data is generated or updated immediately.
+The program \fBmbprocess\fP will not be invoked if the
+editing session is in the browse mode.
 .TP
 .B \-V
 Normally, \fBMBedit\fP outputs information to the stderr stream
@@ -223,21 +258,20 @@ identifier values is given in the \fBMBIO\fP manual page.
 If the swath sonar data file is named using the \fBMB-System\fP
 suffix convention (format 11 files end with ".mb11", format
 41 files end with ".mb41", etc.), then the program will
-automatically use the appropriate format id and the default
-output filename will have an "e.mbXX" suffix; otherwise the
-format must be set by the user and the default output filename
-will be \fIinfile\fP with ".ed" appended.
+automatically use the appropriate format id; otherwise the
+format must be set by the user.
 The popup window also allows the output mode to be set to "browse"
-so that no data are output. 
+so that no edit events are output. 
 When a valid file is specified and the \fBOK\fP button
 is clicked, as much data as will fit
-into the data buffer is read and several pings are displayed as 
+into the data buffer are read and several pings are displayed as 
 stacked bathymetry profiles.
 .TP
 .B Controls
-This button accesses a pulldown menu with three items: 
-\fBGo To Specified Time...\fP, \fBBuffer Controls...\fP, and
-\fBAnnotation...\fP. Each of these items brings up a dialog of
+This button accesses a pulldown menu with four items: 
+\fBGo To Specified Time...\fP, \fBBuffer Controls...\fP, 
+\fBAnnotation...\fP, and \fBAnnotation...\fP. 
+Each of these items brings up a dialog of
 the same name. These dialogs are discussed below.
 .TP
 .B Controls->Go To Specified Time...
@@ -290,6 +324,54 @@ If a particular value is desired which cannot be
 obtained by dragging the slider, the slider
 can be changed by increments of 1 by clicking with the left button
 inside the slider area, but not on the slider itself.
+.TP
+.B Controls->Filters
+This menu item brings up a dialog which
+allows the user to turn automatic bathymetry filtering algorithms
+on and off and to set the filter parameters 
+through the widgets discussed immediately below.
+Clicking on the \fBApply\fP button first removes any previous
+automatic filter flags and then applies the current
+filter settings to the swath bathymetry data. These actions
+are applied only from the current position 
+to the end of the data currently
+in memory. The filtering is not applied (or unapplied) to
+pings earlier in the data file than the current position.
+The \fBReset\fP button restores the filter settings that
+were applied last.
+.TP
+.B Controls->Filters->Median Spike Fllter
+This toggle button turns automatic median filtering of
+bathymetry profiles on and off.
+When median filtering is enabled, the median depth is
+calculated for each bathymetry ping. Each sounding in the
+ping is compared with the median value; any sounding that
+differs from the median by a percentage 
+greater than a threshold percentage
+is flagged as bad data.
+.TP
+.B Controls->Filters->% Median Depth Threshold
+This slider sets the threshold of the median depth
+filter in units of percentage of the median depth.
+.TP
+.B Controls->Filters->Wrong Side Fllter
+This toggle button turns automatic wrong side filtering of
+bathymetry profiles on and off. This filter expects
+bathymetry beams to be numbered from port to 
+starboard. Any beam numbered less than the 
+center beam with a positive
+(starboard) acrosstrack distance is considered to
+be on the "wrong side", and any beam numbered higher than
+the center beam with a negative (port) acrosstrack distance
+is similarly regarded. For most swath data, the center
+beam occurs near the midway point in the beam list. This
+algorithm ignores apparent wrong side beams close to
+the midway beam, where close is defined as being within
+a threshold number of the midway beam.
+.TP
+.B Controls->Filters->Beams from Center Threshold
+This slider sets the threshold of beam locations
+checked by the wrong side filter. 
 .TP
 .B Next Buffer
 This button causes the program to write out the data from the
@@ -461,8 +543,8 @@ while the left mouse button is held down to be unflagged.
 The edit mode can also be set using the \fBMode\fP button.
 
 .SH SEE ALSO
-\fBmbsystem\fP(l), \fBmbclean\fP(l), 
-\fBmbunclean\fP(l), \fBmbinfo\fP(l)
+\fBmbsystem\fP(l), \fBmbprocess\fP(l), \fBmbset\fP(l), 
+\fBmbclean\fP(l), \fBmbunclean\fP(l), \fBmbinfo\fP(l)
 
 .SH BUGS
 This program is only fun when the data are good. The main
