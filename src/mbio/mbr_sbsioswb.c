@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sbsioswb.c	9/18/93
- *	$Id: mbr_sbsioswb.c,v 5.7 2002-09-25 20:41:04 caress Exp $
+ *	$Id: mbr_sbsioswb.c,v 5.8 2002-10-15 18:34:58 caress Exp $
  *
  *    Copyright (c) 1994, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	February 2, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2002/09/25 20:41:04  caress
+ * Added check for corrupted records.
+ *
  * Revision 5.6  2002/09/18 23:32:59  caress
  * Release 5.0.beta23
  *
@@ -144,7 +147,7 @@ int mbr_dem_sbsioswb(int verbose, void *mbio_ptr, int *error);
 int mbr_rt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
-static char res_id[]="$Id: mbr_sbsioswb.c,v 5.7 2002-09-25 20:41:04 caress Exp $";
+static char res_id[]="$Id: mbr_sbsioswb.c,v 5.8 2002-10-15 18:34:58 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_sbsioswb(int verbose, void *mbio_ptr, int *error)
@@ -684,7 +687,7 @@ int mbr_rt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		}
 
 	/* read sensor record from file */
-	if (status == MB_SUCCESS)
+	if (status == MB_SUCCESS && data->sensor_size > 0)
 		{
 		if ((status = fread(sensorptr,1,data->sensor_size,
 			mb_io_ptr->mbfp)) == data->sensor_size) 
@@ -699,31 +702,32 @@ int mbr_rt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			status = MB_FAILURE;
 			*error = MB_ERROR_EOF;
 			}
-		}
 
-	/* byte swap the data if necessary */
+		/* byte swap the data if necessary */
 #ifdef BYTESWAPPED
-	if (status == MB_SUCCESS)
-		{
-		data->eclipse_time = mb_swap_short(data->eclipse_time);
-		data->eclipse_heading = mb_swap_short(data->eclipse_heading);
-		}
+		if (status == MB_SUCCESS)
+			{
+			data->eclipse_time = mb_swap_short(data->eclipse_time);
+			data->eclipse_heading = mb_swap_short(data->eclipse_heading);
+			}
 #endif
 
-	/* print debug statements */
-	if (status == MB_SUCCESS && verbose >= 5)
-		{
-		fprintf(stderr,"\ndbg5  New sensor record read by MBIO function <%s>\n",
-			function_name);
-		fprintf(stderr,"dbg5  New sensor values:\n");
-		fprintf(stderr,"dbg5       eclipse_time:    %d\n",
-			data->eclipse_time);
-		fprintf(stderr,"dbg5       eclipse_heading: %d\n",
-			data->eclipse_heading);
+		/* print debug statements */
+		if (status == MB_SUCCESS && verbose >= 5)
+			{
+			fprintf(stderr,"\ndbg5  New sensor record read by MBIO function <%s>\n",
+				function_name);
+			fprintf(stderr,"dbg5  New sensor values:\n");
+			fprintf(stderr,"dbg5       eclipse_time:    %d\n",
+				data->eclipse_time);
+			fprintf(stderr,"dbg5       eclipse_heading: %d\n",
+				data->eclipse_heading);
+			}
 		}
 
 	/* read data record from file */
-	if (status == MB_SUCCESS && data->kind == MB_DATA_DATA)
+	if (status == MB_SUCCESS && data->kind == MB_DATA_DATA 
+		&& data->data_size > 0)
 		{
 		if ((status = fread(datarecptr,1,data->data_size,
 			mb_io_ptr->mbfp)) == data->data_size) 
@@ -738,85 +742,85 @@ int mbr_rt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			status = MB_FAILURE;
 			*error = MB_ERROR_EOF;
 			}
-		}
 		
-	/* byte swap the data if necessary */
+		/* byte swap the data if necessary */
 #ifdef BYTESWAPPED
-	if (status == MB_SUCCESS && data->kind == MB_DATA_DATA)
-		{
-		data->beams_bath = mb_swap_short(data->beams_bath);
-		data->scale_factor = mb_swap_short(data->scale_factor);
-		}
+		if (status == MB_SUCCESS && data->kind == MB_DATA_DATA)
+			{
+			data->beams_bath = mb_swap_short(data->beams_bath);
+			data->scale_factor = mb_swap_short(data->scale_factor);
+			}
 #endif
 
-	/* check for unintelligible records */
-	if (status == MB_SUCCESS)
-		{
-		if (data->beams_bath < 0
-			|| data->beams_bath > MB_BEAMS_SBSIOSWB)
+		/* check for unintelligible records */
+		if (status == MB_SUCCESS)
 			{
-			status = MB_FAILURE;
-			*error = MB_ERROR_UNINTELLIGIBLE;
-			data->kind = MB_DATA_NONE;
+			if (data->beams_bath < 0
+				|| data->beams_bath > MB_BEAMS_SBSIOSWB)
+				{
+				status = MB_FAILURE;
+				*error = MB_ERROR_UNINTELLIGIBLE;
+				data->kind = MB_DATA_NONE;
+				}
 			}
-		}
 		
-	/* byte swap the data if necessary */
+		/* byte swap the data if necessary */
 #ifdef BYTESWAPPED
-	if (status == MB_SUCCESS && data->kind == MB_DATA_DATA)
-		{
-		for (i=0;i<data->beams_bath;i++)
+		if (status == MB_SUCCESS && data->kind == MB_DATA_DATA)
 			{
-			data->bath_struct[i].bath = 
-				mb_swap_short(data->bath_struct[i].bath);
-			data->bath_struct[i].bath_acrosstrack = 
-				mb_swap_short(data->bath_struct[i].bath_acrosstrack);
+			for (i=0;i<data->beams_bath;i++)
+				{
+				data->bath_struct[i].bath = 
+					mb_swap_short(data->bath_struct[i].bath);
+				data->bath_struct[i].bath_acrosstrack = 
+					mb_swap_short(data->bath_struct[i].bath_acrosstrack);
+				}
 			}
-		}
 #endif
 		
-	/* check for fewer than expected beams */
-	if (status == MB_SUCCESS
-		&& (data->data_size / 4) - 1 < data->beams_bath)
-		{
-		k = (data->data_size / 4) - 2;
-		for (i=k;i<data->beams_bath;i++)
-		    {
-		    data->bath_struct[i].bath = 0;
-		    data->bath_struct[i].bath_acrosstrack = 0;
-		    }
-		}
-		
-	/* zero ridiculous soundings */
-	if (status == MB_SUCCESS && data->kind == MB_DATA_DATA)
-		{
-		for (i=0;i<data->beams_bath;i++)
-		    {
-		    if (data->bath_struct[i].bath > 11000
-			|| data->bath_struct[i].bath_acrosstrack > 11000
-			    || data->bath_struct[i].bath_acrosstrack < -11000)
+		/* check for fewer than expected beams */
+		if (status == MB_SUCCESS
+			&& (data->data_size / 4) - 1 < data->beams_bath)
 			{
-			data->bath_struct[i].bath = 0;
-			data->bath_struct[i].bath_acrosstrack = 0;
+			k = (data->data_size / 4) - 2;
+			for (i=k;i<data->beams_bath;i++)
+			    {
+			    data->bath_struct[i].bath = 0;
+			    data->bath_struct[i].bath_acrosstrack = 0;
+			    }
 			}
-		    }
-		}
 
-	/* print debug statements */
-	if (status == MB_SUCCESS && verbose >= 5 
-		&& data->kind == MB_DATA_DATA)
-		{
-		fprintf(stderr,"\ndbg5  New data record read by MBIO function <%s>\n",
-			function_name);
-		fprintf(stderr,"dbg5  New data values:\n");
-		fprintf(stderr,"dbg5       beams_bath:   %d\n",
-			data->beams_bath);
-		fprintf(stderr,"dbg5       scale_factor: %d\n",
-			data->scale_factor);
-		for (i=0;i<data->beams_bath;i++)
-			fprintf(stderr,"dbg5       beam: %d  bath: %d  across_track: %d\n",
-				i,data->bath_struct[i].bath,
-				data->bath_struct[i].bath_acrosstrack);
+		/* zero ridiculous soundings */
+		if (status == MB_SUCCESS && data->kind == MB_DATA_DATA)
+			{
+			for (i=0;i<data->beams_bath;i++)
+			    {
+			    if (data->bath_struct[i].bath > 11000
+				|| data->bath_struct[i].bath_acrosstrack > 11000
+				    || data->bath_struct[i].bath_acrosstrack < -11000)
+				{
+				data->bath_struct[i].bath = 0;
+				data->bath_struct[i].bath_acrosstrack = 0;
+				}
+			    }
+			}
+
+		/* print debug statements */
+		if (status == MB_SUCCESS && verbose >= 5 
+			&& data->kind == MB_DATA_DATA)
+			{
+			fprintf(stderr,"\ndbg5  New data record read by MBIO function <%s>\n",
+				function_name);
+			fprintf(stderr,"dbg5  New data values:\n");
+			fprintf(stderr,"dbg5       beams_bath:   %d\n",
+				data->beams_bath);
+			fprintf(stderr,"dbg5       scale_factor: %d\n",
+				data->scale_factor);
+			for (i=0;i<data->beams_bath;i++)
+				fprintf(stderr,"dbg5       beam: %d  bath: %d  across_track: %d\n",
+					i,data->bath_struct[i].bath,
+					data->bath_struct[i].bath_acrosstrack);
+			}
 		}
 
 	/* read comment record from file */
@@ -837,17 +841,16 @@ int mbr_rt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			status = MB_FAILURE;
 			*error = MB_ERROR_EOF;
 			}
-		}
 
-	/* print debug statements */
-	if (status == MB_SUCCESS && verbose >= 5 
-		&& data->kind == MB_DATA_COMMENT)
-		{
-		fprintf(stderr,"\ndbg5  New comment record read by MBIO function <%s>\n",
-			function_name);
-		fprintf(stderr,"dbg5  New comment:\n");
-		fprintf(stderr,"dbg5       comment:   %s\n",
-			data->comment);
+		/* print debug statements */
+		if (status == MB_SUCCESS && verbose >= 5)
+			{
+			fprintf(stderr,"\ndbg5  New comment record read by MBIO function <%s>\n",
+				function_name);
+			fprintf(stderr,"dbg5  New comment:\n");
+			fprintf(stderr,"dbg5       comment:   %s\n",
+				data->comment);
+			}
 		}
 
 	/* set kind and error in mb_io_ptr */
@@ -855,52 +858,57 @@ int mbr_rt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	mb_io_ptr->new_error = *error;
 
 	/* translate values to seabeam data storage structure */
-	if (status == MB_SUCCESS
-		&& store != NULL)
+	if (status == MB_SUCCESS)
 		{
 		/* type of data record */
 		store->kind = data->kind;
 
-		/* position */
-		lon = 0.0000001*data->lon;
-		if (lon < 0.0) lon = lon + 360.0;
-		store->lon2u = (short) 60.0*lon;
-		store->lon2b = (short) round(600000.0*
-			(lon - store->lon2u/60.0));
-		lat = 0.0000001*data->lat + 90.0;
-		store->lat2u = (short) 60.0*lat;
-		store->lat2b = (short) round(600000.0*
-			(lat - store->lat2u/60.0));
-
-		/* time stamp */
-		store->year = data->year;
-		store->day = data->day;
-		store->min = data->min;
-		store->sec = 0.01*data->sec;
-		
-		/* heading */
-		store->sbhdg = (data->heading < (short) 0) 
-		    ? (unsigned short) round(((int)data->heading + 3600)*18.204444444)
-		    : (unsigned short) round(data->heading*18.204444444);
-
-		/* depths and distances */
-		id = data->beams_bath - 1;
-		for (i=0;i<data->beams_bath;i++)
+		if (store->kind == MB_DATA_DATA)
 			{
-			store->deph[id-i] = data->bath_struct[i].bath;
-			store->dist[id-i] = 
-				data->bath_struct[i].bath_acrosstrack;
+			/* position */
+			lon = 0.0000001*data->lon;
+			if (lon < 0.0) lon = lon + 360.0;
+			store->lon2u = (short) 60.0*lon;
+			store->lon2b = (short) round(600000.0*
+				(lon - store->lon2u/60.0));
+			lat = 0.0000001*data->lat + 90.0;
+			store->lat2u = (short) 60.0*lat;
+			store->lat2b = (short) round(600000.0*
+				(lat - store->lat2u/60.0));
+
+			/* time stamp */
+			store->year = data->year;
+			store->day = data->day;
+			store->min = data->min;
+			store->sec = 0.01*data->sec;
+
+			/* heading */
+			store->sbhdg = (data->heading < (short) 0) 
+			    ? (unsigned short) round(((int)data->heading + 3600)*18.204444444)
+			    : (unsigned short) round(data->heading*18.204444444);
+
+			/* depths and distances */
+			id = data->beams_bath - 1;
+			for (i=0;i<data->beams_bath;i++)
+				{
+				store->deph[id-i] = data->bath_struct[i].bath;
+				store->dist[id-i] = 
+					data->bath_struct[i].bath_acrosstrack;
+				}
+
+			/* additional values */
+			store->sbtim = data->eclipse_time;
+			store->axis = 0;
+			store->major = 0;
+			store->minor = 0;
 			}
-
-		/* additional values */
-		store->sbtim = data->eclipse_time;
-		store->axis = 0;
-		store->major = 0;
-		store->minor = 0;
-
-		/* comment */
-		strncpy(store->comment,data->comment,
-			MBSYS_SB_MAXLINE);
+			
+		else if (store->kind == MB_DATA_COMMENT)
+			{
+			/* comment */
+			strncpy(store->comment,data->comment,
+				MBSYS_SB_MAXLINE);
+			}
 		}
 
 	/* print output debug statements */
@@ -1000,24 +1008,14 @@ int mbr_wt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		data->bath_struct[i].bath_acrosstrack = 0;
 		}
 
-	/* second translate values from seabeam data storage structure */
-	if (store != NULL)
+	/* translate values from seabeam data storage structure */
+	data->kind = store->kind;
+	if (store->kind == MB_DATA_DATA)
 		{
-		data->kind = store->kind;
-		if (store->kind == MB_DATA_DATA)
-			{
-			data->sensor_type[0] = 'S';
-			data->sensor_type[1] = 'B';
-			data->data_type[0] = 'S';
-			data->data_type[1] = 'R';
-			}
-		else
-			{
-			data->sensor_type[0] = 0;
-			data->sensor_type[1] = 0;
-			data->data_type[0] = 'T';
-			data->data_type[1] = 'R';
-			}
+		data->sensor_type[0] = 'S';
+		data->sensor_type[1] = 'B';
+		data->data_type[0] = 'S';
+		data->data_type[1] = 'R';
 
 		/* position */
 		lon = 10000000*(store->lon2u/60. 
@@ -1043,33 +1041,18 @@ int mbr_wt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		data->eclipse_time = store->sbtim;
 		data->eclipse_heading = store->sbhdg;
 
-		if (store->kind == MB_DATA_DATA)
+		/* put distance and depth values 
+			into sbsioswb data structure */
+		id = data->beams_bath - 1;
+		for (i=0;i<MB_BEAMS_SBSIOSWB;i++)
 			{
-			/* put distance and depth values 
-				into sbsioswb data structure */
-			id = data->beams_bath - 1;
-			for (i=0;i<MB_BEAMS_SBSIOSWB;i++)
-				{
-				data->bath_struct[id-i].bath = store->deph[i];;
-				data->bath_struct[id-i].bath_acrosstrack = 
-					store->dist[i];;
-				}
+			data->bath_struct[id-i].bath = store->deph[i];;
+			data->bath_struct[id-i].bath_acrosstrack = 
+				store->dist[i];;
 			}
 
-		/* comment */
-		else if (store->kind == MB_DATA_COMMENT)
-			{
-			strncpy(commentptr,store->comment,
-				MB_SBSIOSWB_COMMENT_LENGTH-1);
-			data->data_size = strlen(commentptr);
-			data->sensor_size = 0;
-			}
-		}
-
-	/* byte swap the data if necessary */
+		/* byte swap the data if necessary */
 #ifdef BYTESWAPPED
-	if (data->kind == MB_DATA_DATA)
-		{
 		data->year = mb_swap_short(data->year);
 		data->day = mb_swap_short(data->day);
 		data->min = mb_swap_short(data->min);
@@ -1094,8 +1077,22 @@ int mbr_wt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			data->bath_struct[i].bath_acrosstrack = 
 				mb_swap_short(data->bath_struct[i].bath_acrosstrack);
 			}
-		}
 #endif
+		}
+
+	/* comment */
+	else if (store->kind == MB_DATA_COMMENT)
+		{
+		data->sensor_type[0] = 0;
+		data->sensor_type[1] = 0;
+		data->data_type[0] = 'T';
+		data->data_type[1] = 'R';
+
+		strncpy(commentptr,store->comment,
+			MB_SBSIOSWB_COMMENT_LENGTH-1);
+		data->data_size = strlen(commentptr);
+		data->sensor_size = 0;
+		}
 
 	/* print debug statements */
 	if (verbose >= 5)

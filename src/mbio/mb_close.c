@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_close.c	1/25/93
- *	$Id: mb_close.c,v 5.6 2002-09-18 23:32:59 caress Exp $
+ *	$Id: mb_close.c,v 5.7 2002-10-15 18:34:58 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	January 25, 1993
  *	
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2002/09/18 23:32:59  caress
+ * Release 5.0.beta23
+ *
  * Revision 5.5  2002/07/20 20:42:40  caress
  * Release 5.0.beta20
  *
@@ -140,7 +143,7 @@
 /*--------------------------------------------------------------------*/
 int mb_close(int verbose, void **mbio_ptr, int *error)
 {
-	static	char	rcs_id[]="$Id: mb_close.c,v 5.6 2002-09-18 23:32:59 caress Exp $";
+	static	char	rcs_id[]="$Id: mb_close.c,v 5.7 2002-10-15 18:34:58 caress Exp $";
 	char	*function_name = "mb_close";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -161,6 +164,10 @@ int mb_close(int verbose, void **mbio_ptr, int *error)
 
 	/* deallocate format dependent structures */
 	status = (*mb_io_ptr->mb_io_format_free)(verbose,*mbio_ptr,error);
+
+	/* deallocate system dependent structures */
+	/*status = (*mb_io_ptr->mb_io_store_free)
+			(verbose,*mbio_ptr,&(mb_io_ptr->store_data),error);*/
 
 	/* deallocate memory for arrays within the mbio descriptor */
 	if (mb_io_ptr->filetype == MB_FILETYPE_XDR

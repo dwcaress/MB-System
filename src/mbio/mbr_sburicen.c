@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sburicen.c	2/2/93
- *	$Id: mbr_sburicen.c,v 5.5 2002-09-18 23:32:59 caress Exp $
+ *	$Id: mbr_sburicen.c,v 5.6 2002-10-15 18:34:58 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	February 2, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2002/09/18 23:32:59  caress
+ * Release 5.0.beta23
+ *
  * Revision 5.4  2002/02/26 07:50:41  caress
  * Release 5.0.beta14
  *
@@ -139,7 +142,7 @@ int mbr_wt_sburicen(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_sburicen(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_sburicen.c,v 5.5 2002-09-18 23:32:59 caress Exp $";
+	static char res_id[]="$Id: mbr_sburicen.c,v 5.6 2002-10-15 18:34:58 caress Exp $";
 	char	*function_name = "mbr_register_sburicen";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -269,7 +272,7 @@ int mbr_info_sburicen(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_sburicen.c,v 5.5 2002-09-18 23:32:59 caress Exp $";
+	static char res_id[]="$Id: mbr_sburicen.c,v 5.6 2002-10-15 18:34:58 caress Exp $";
 	char	*function_name = "mbr_info_sburicen";
 	int	status = MB_SUCCESS;
 
@@ -338,7 +341,7 @@ int mbr_info_sburicen(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_sburicen(int verbose, void *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_sburicen.c,v 5.5 2002-09-18 23:32:59 caress Exp $";
+ static char res_id[]="$Id: mbr_sburicen.c,v 5.6 2002-10-15 18:34:58 caress Exp $";
 	char	*function_name = "mbr_alm_sburicen";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -525,37 +528,43 @@ int mbr_rt_sburicen(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		/* type of data record */
 		store->kind = dataplus->kind;
 
-		/* position */
-		store->lon2u = data->lon2u;
-		store->lon2b = data->lon2b;
-		store->lat2u = data->lat2u;
-		store->lat2b = data->lat2b;
-
-		/* time stamp */
-		store->year = data->year;
-		store->day = data->day;
-		store->min = data->min;
-		store->sec = data->sec;
-
-		/* depths and distances */
-		/* switch order of data as it is read into the global arrays */
-		id = MBSYS_SB_BEAMS - 1;
-		for (i=0;i<MBSYS_SB_BEAMS;i++)
+		if (store->kind == MB_DATA_DATA)
 			{
-			store->dist[id-i] = data->dist[i];
-			store->deph[id-i] = data->deph[i];
+			/* position */
+			store->lon2u = data->lon2u;
+			store->lon2b = data->lon2b;
+			store->lat2u = data->lat2u;
+			store->lat2b = data->lat2b;
+
+			/* time stamp */
+			store->year = data->year;
+			store->day = data->day;
+			store->min = data->min;
+			store->sec = data->sec;
+
+			/* depths and distances */
+			/* switch order of data as it is read into the global arrays */
+			id = MBSYS_SB_BEAMS - 1;
+			for (i=0;i<MBSYS_SB_BEAMS;i++)
+				{
+				store->dist[id-i] = data->dist[i];
+				store->deph[id-i] = data->deph[i];
+				}
+
+			/* additional values */
+			store->sbtim = data->sbtim;
+			store->sbhdg = data->sbhdg;
+			store->axis = data->axis;
+			store->major = data->major;
+			store->minor = data->minor;
 			}
 
-		/* additional values */
-		store->sbtim = data->sbtim;
-		store->sbhdg = data->sbhdg;
-		store->axis = data->axis;
-		store->major = data->major;
-		store->minor = data->minor;
-
-		/* comment */
-		strncpy(store->comment,&datacomment[2],
-			MBSYS_SB_MAXLINE);
+		else if (store->kind == MB_DATA_COMMENT)
+			{
+			/* comment */
+			strncpy(store->comment,&datacomment[2],
+				MBSYS_SB_MAXLINE);
+			}
 		}
 
 	/* print output debug statements */
@@ -614,48 +623,45 @@ int mbr_wt_sburicen(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	data->major = 0;
 	data->minor = 0;
 
-	/* second translate values from seabeam data storage structure */
-	if (store != NULL)
+	/* translate values from seabeam data storage structure */
+	dataplus->kind = store->kind;
+	if (store->kind == MB_DATA_DATA)
 		{
-		dataplus->kind = store->kind;
-		if (store->kind == MB_DATA_DATA)
+		/* position */
+		data->lon2u = store->lon2u;
+		data->lon2b = store->lon2b;
+		data->lat2u = store->lat2u;
+		data->lat2b = store->lat2b;
+
+		/* time stamp */
+		data->year = store->year;
+		data->day = store->day;
+		data->min = store->min;
+		data->sec = store->sec;
+
+		/* depths and distances */
+		/* switch order of data as it is read 
+			into the output arrays */
+		id = MBSYS_SB_BEAMS - 1;
+		for (i=0;i<MBSYS_SB_BEAMS;i++)
 			{
-			/* position */
-			data->lon2u = store->lon2u;
-			data->lon2b = store->lon2b;
-			data->lat2u = store->lat2u;
-			data->lat2b = store->lat2b;
-
-			/* time stamp */
-			data->year = store->year;
-			data->day = store->day;
-			data->min = store->min;
-			data->sec = store->sec;
-
-			/* depths and distances */
-			/* switch order of data as it is read 
-				into the output arrays */
-			id = MBSYS_SB_BEAMS - 1;
-			for (i=0;i<MBSYS_SB_BEAMS;i++)
-				{
-				data->dist[i] = store->dist[id-i];
-				data->deph[i] = store->deph[id-i];
-				}
-
-			/* additional values */
-			data->sbtim = store->sbtim;
-			data->sbhdg = store->sbhdg;
-			data->axis = store->axis;
-			data->major = store->major;
-			data->minor = store->minor;
+			data->dist[i] = store->dist[id-i];
+			data->deph[i] = store->deph[id-i];
 			}
 
-		/* comment */
-		else if (store->kind == MB_DATA_COMMENT)
-			{
-			strcpy(datacomment,"cc");
-			strncat(datacomment,store->comment,MBSYS_SB_MAXLINE);
-			}
+		/* additional values */
+		data->sbtim = store->sbtim;
+		data->sbhdg = store->sbhdg;
+		data->axis = store->axis;
+		data->major = store->major;
+		data->minor = store->minor;
+		}
+
+	/* comment */
+	else if (store->kind == MB_DATA_COMMENT)
+		{
+		strcpy(datacomment,"cc");
+		strncat(datacomment,store->comment,MBSYS_SB_MAXLINE);
 		}
 
 	/* print debug statements */

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	1/19/93
- *    $Id: mb_io.h,v 5.12 2002-09-18 23:32:59 caress Exp $
+ *    $Id: mb_io.h,v 5.13 2002-10-15 18:34:58 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.12  2002/09/18 23:32:59  caress
+ * Release 5.0.beta23
+ *
  * Revision 5.11  2002/07/25 19:09:04  caress
  * Release 5.0.beta21
  *
@@ -189,17 +192,17 @@ struct mb_io_struct
 
 	/* file descriptor, file name, and usage flag */
 	FILE	*mbfp;		/* file descriptor */
-	char	file[256];	/* file name */
+	char	file[MB_PATH_MAXLINE];	/* file name */
 	long	file_pos;	/* file position at start of
 				    last record read */
 	long	file_bytes;	/* number of bytes read from file */
 	FILE	*mbfp2;		/* file descriptor #2 */
-	char	file2[256];	/* file name #2 */
+	char	file2[MB_PATH_MAXLINE];	/* file name #2 */
 	long	file2_pos;	/* file position #2 at start of
 				    last record read */
 	long	file2_bytes;	/* number of bytes read from file */
 	FILE	*mbfp3;		/* file descriptor #3 */
-	char	file3[256];	/* file name #3 */
+	char	file3[MB_PATH_MAXLINE];	/* file name #3 */
 	long	file3_pos;	/* file position #3 at start of
 				    last record read */
 	long	file3_bytes;	/* number of bytes read from file */
