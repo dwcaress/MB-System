@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
- *    The MB-system:	mbsys_singlebeam.c	2/26/93
- *	$Id: mbsys_singlebeam.c,v 4.0 1999-04-16 01:27:33 caress Exp $
+ *    The MB-system:	mbsys_singlebeam.c	4/13/99
+ *	$Id: mbsys_singlebeam.c,v 4.1 1999-07-16 19:24:15 caress Exp $
  *
  *    Copyright (c) 1999 by 
  *    D. W. Caress (caress@mbari.org)
@@ -42,6 +42,7 @@
  *
  * $Log: not supported by cvs2svn $
  *
+ *
  */
 
 /* standard include files */
@@ -63,11 +64,12 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_singlebeam.c,v 4.0 1999-04-16 01:27:33 caress Exp $";
+ static char res_id[]="$Id: mbsys_singlebeam.c,v 4.1 1999-07-16 19:24:15 caress Exp $";
 	char	*function_name = "mbsys_singlebeam_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_singlebeam_struct *store;
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -87,11 +89,11 @@ int	*error;
 				store_ptr,error);
 
 	/* get data structure pointer */
-	store = (struct mbsys_singlebeam_struct *) store_ptr;
+	store = (struct mbsys_singlebeam_struct *) *store_ptr;
 	
 	/* initialize the structure */
 	store->kind = MB_DATA_NONE;
-	for (i=0;i<24;i++)
+	for (i=0;i<8;i++)
 	    store->survey_id[i] = 0;
 	store->time_d = 0.0;
 	for (i=0;i<7;i++)
@@ -99,6 +101,8 @@ int	*error;
 	store->timezone = 0;
 	store->longitude = 0.0;
 	store->latitude = 0.0;
+	store->easting = 0.0;
+	store->northing = 0.0;
 	store->heading = 0.0;
 	store->speed = 0.0;
 	store->nav_type = 9;
@@ -106,9 +110,11 @@ int	*error;
 	store->roll = 0.0;
 	store->pitch = 0.0;
 	store->heave = 0.0;
+	store->rov_pressure = 0.0;
+	store->rov_altitude = 0.0;
+	store->flag = MB_FLAG_NULL;
 	store->tt = 0.0;
 	store->bath = 0.0;
-	store->altitude = 0.0;
 	store->tide = 0.0;
 	store->bath_corr = 99;
 	store->bath_type = 9;
@@ -282,6 +288,10 @@ int	*error;
 		*namp = 0;
 		*nss = 0;
 		bath[0] = store->bath;
+		if (bath[0] > 0.0)
+			beamflag[0] = MB_FLAG_NONE;
+		else
+			beamflag[0] = MB_FLAG_NULL;
 		bathacrosstrack[0] = 0.0;
 		bathalongtrack[0] = 0.0;
 
@@ -499,6 +509,7 @@ int	*error;
 
 		/* put distance and depth values */
 		store->bath = bath[0];
+		store->flag = beamflag[0];
 		}
 
 	/* insert comment in structure */
@@ -576,7 +587,7 @@ int	*error;
 	if (*kind == MB_DATA_DATA)
 		{
 		/* get nbeams */
-		*nbeams = mb_io_ptr->beams_bath;
+		*nbeams = 1;
 
 		/* get travel times, angles */
 		ttimes[0] = store->tt;
@@ -683,15 +694,21 @@ int	*error;
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA)
 		{
-		if (store->altitude > 0.0)
+		if (store->rov_altitude > 0.0
+		    && store->bath > 0.0)
 		    {
-		    *altitude = store->altitude;
-		    *transducer_depth = store->bath - store->altitude;
+		    *altitude = store->rov_altitude;
+		    *transducer_depth = store->bath - store->rov_altitude;
+		    }
+		else if (store->rov_altitude > 0.0)
+		    {
+		    *altitude = store->rov_altitude;
+		    *transducer_depth = store->heave;
 		    }
 		else
 		    {
-		    *transducer_depth = 0.0;
-		    *altitude = store->bath;
+		    *altitude = store->bath - store->heave;
+		    *transducer_depth = store->heave;
 		    }
 
 		/* set status */

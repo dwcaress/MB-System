@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_gsf.c	3.00	8/20/94
- *	$Id: mbsys_gsf.c,v 4.1 1999-05-05 22:48:29 caress Exp $
+ *	$Id: mbsys_gsf.c,v 4.2 1999-07-16 19:24:15 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -37,6 +37,9 @@
  * Date:	March 5, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1999/05/05  22:48:29  caress
+ * Disabled handling of ping flags in GSF data.
+ *
  * Revision 4.0  1998/10/05  18:30:03  caress
  * MB-System version 4.6beta
  *
@@ -69,7 +72,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_gsf.c,v 4.1 1999-05-05 22:48:29 caress Exp $";
+ static char res_id[]="$Id: mbsys_gsf.c,v 4.2 1999-07-16 19:24:15 caress Exp $";
 	char	*function_name = "mbsys_gsf_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -1205,7 +1208,7 @@ int	*error;
 		/* get time */
 		*time_d = mb_ping->ping_time.tv_sec 
 				+ 0.000000001 * mb_ping->ping_time.tv_nsec;
-		mb_get_date(verbose,time_d,time_i);
+		mb_get_date(verbose,*time_d,time_i);
 
 		/* get navigation */
 		*navlon = mb_ping->longitude;

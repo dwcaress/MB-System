@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsldeoih.c	2/11/93
- *	$Id: mbr_hsldeoih.c,v 4.13 1998-10-05 17:46:15 caress Exp $
+ *	$Id: mbr_hsldeoih.c,v 4.14 1999-07-16 19:24:15 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	February 11, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.13  1998/10/05  17:46:15  caress
+ * MB-System version 4.6beta
+ *
  * Revision 4.12  1997/07/25  14:19:53  caress
  * Version 4.5beta2.
  * Much mucking, particularly with Simrad formats.
@@ -112,7 +115,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_hsldeoih.c,v 4.13 1998-10-05 17:46:15 caress Exp $";
+ static char res_id[]="$Id: mbr_hsldeoih.c,v 4.14 1999-07-16 19:24:15 caress Exp $";
 	char	*function_name = "mbr_alm_hsldeoih";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -709,7 +712,7 @@ int	*error;
 
 		/* water velocity profile (HS_ERGNCTDS) */
 		store->num_vel = data->num_vel;
-		for (i=0;i<data->num_vel;i++)
+		for (i=0;i<MBF_HSLDEOIH_MAXVEL;i++)
 			{
 			store->vdepth[i] = data->vdepth[i];
 			store->velocity[i] = data->velocity[i];
@@ -868,7 +871,7 @@ int	*error;
 
 		/* water velocity profile (HS_ERGNCTDS) */
 		data->num_vel = store->num_vel;
-		for (i=0;i<store->num_vel;i++)
+		for (i=0;i<MBF_HSLDEOIH_MAXVEL;i++)
 			{
 			data->vdepth[i] = store->vdepth[i];
 			data->velocity[i] = store->velocity[i];
@@ -1454,6 +1457,14 @@ int	*error;
 			data->vdepth[i] = read_data.vdepth[i];
 			data->velocity[i] = read_data.velocity[i];
 			}
+		}
+		
+	/* check for sensible numbers of velocity-depth pairs */
+	if (read_data.num_vel < 0
+		|| read_data.num_vel > MBF_HSLDEOIH_MAXVEL)
+		{
+		status = MB_FAILURE;
+		*error = MB_ERROR_UNINTELLIGIBLE;
 		}
 
 	/* print debug statements */

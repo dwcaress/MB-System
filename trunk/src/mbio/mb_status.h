@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbio_status.h	2/1/93
- *    $Id: mb_status.h,v 4.14 1999-05-06 23:45:04 caress Exp $
+ *    $Id: mb_status.h,v 4.15 1999-07-16 19:24:15 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -18,6 +18,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.14  1999/05/06  23:45:04  caress
+ * Release 4.6a.
+ *
  * Revision 4.13  1999/01/01  23:41:06  caress
  * MB-System version 4.6beta6
  *
@@ -99,29 +102,30 @@
 #define	MB_DATA_NONE			0
 #define	MB_DATA_DATA			1	/* general survey data */
 #define	MB_DATA_COMMENT			2	/* general comment */
-#define	MB_DATA_CALIBRATE		3	/* Hydrosweep DS */
-#define	MB_DATA_MEAN_VELOCITY		4	/* Hydrosweep DS */
-#define	MB_DATA_VELOCITY_PROFILE	5	/* general */
-#define	MB_DATA_STANDBY			6	/* Hydrosweep DS */
-#define	MB_DATA_NAV_SOURCE		7	/* Hydrosweep DS */
-#define	MB_DATA_PARAMETER		8	/* general */
-#define	MB_DATA_START			9	/* Simrad */
-#define	MB_DATA_STOP			10	/* Simrad */
-#define	MB_DATA_NAV			11	/* Simrad */
-#define	MB_DATA_RUN_PARAMETER		12	/* Simrad */
-#define	MB_DATA_CLOCK			13	/* Simrad */
-#define	MB_DATA_TIDE			14	/* Simrad */
-#define	MB_DATA_HEIGHT			15	/* Simrad */
-#define	MB_DATA_HEADING			16	/* Simrad, Hypack */
-#define	MB_DATA_ATTITUDE		17	/* Simrad, Hypack */
-#define	MB_DATA_ANGLE			18	/* HSMD */
-#define	MB_DATA_EVENT			19	/* HSMD */
-#define	MB_DATA_HISTORY			20	/* GSF */
-#define	MB_DATA_SUMMARY			21	/* GSF */
-#define	MB_DATA_PROCESSING_PARAMETERS	22	/* GSF */
-#define	MB_DATA_SENSOR_PARAMETERS	23	/* GSF */
-#define	MB_DATA_NAVIGATION_ERROR	24	/* GSF */
-#define	MB_DATA_RAW_LINE		25	/* uninterpretable line
+#define	MB_DATA_HEADER			3	/* general header */
+#define	MB_DATA_CALIBRATE		4	/* Hydrosweep DS */
+#define	MB_DATA_MEAN_VELOCITY		5	/* Hydrosweep DS */
+#define	MB_DATA_VELOCITY_PROFILE	6	/* general */
+#define	MB_DATA_STANDBY			7	/* Hydrosweep DS */
+#define	MB_DATA_NAV_SOURCE		8	/* Hydrosweep DS */
+#define	MB_DATA_PARAMETER		9	/* general */
+#define	MB_DATA_START			10	/* Simrad */
+#define	MB_DATA_STOP			11	/* Simrad */
+#define	MB_DATA_NAV			12	/* Simrad */
+#define	MB_DATA_RUN_PARAMETER		13	/* Simrad */
+#define	MB_DATA_CLOCK			14	/* Simrad */
+#define	MB_DATA_TIDE			15	/* Simrad */
+#define	MB_DATA_HEIGHT			16	/* Simrad */
+#define	MB_DATA_HEADING			17	/* Simrad, Hypack */
+#define	MB_DATA_ATTITUDE		18	/* Simrad, Hypack */
+#define	MB_DATA_ANGLE			19	/* HSMD */
+#define	MB_DATA_EVENT			20	/* HSMD */
+#define	MB_DATA_HISTORY			21	/* GSF */
+#define	MB_DATA_SUMMARY			22	/* GSF */
+#define	MB_DATA_PROCESSING_PARAMETERS	23	/* GSF */
+#define	MB_DATA_SENSOR_PARAMETERS	24	/* GSF */
+#define	MB_DATA_NAVIGATION_ERROR	25	/* GSF */
+#define	MB_DATA_RAW_LINE		26	/* uninterpretable line
 							for ascii formats */
 
 /* MBIO function status convention */

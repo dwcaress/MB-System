@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 4.16 1999-04-02 00:37:48 caress Exp $
+#	$Id: Makefile.template,v 4.17 1999-07-16 19:24:15 caress Exp $
 #
 #     Copyright (c) 1993, 1994 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.16  1999/04/02  00:37:48  caress
+# Fixed dependencies on mb_format.h
+#
 # Revision 4.15  1999/03/31  18:11:35  caress
 # MB-System 4.6beta7
 #
@@ -97,6 +100,7 @@ all:	$(LIBDIR)/libmbio.a $(MANDIR)/mbio.l \
 	$(INCDIR)/mbsys_hsmd.h $(INCDIR)/mbsys_dsl.h \
 	$(INCDIR)/mbsys_gsf.h $(INCDIR)/mbsys_mstiff.h \
 	$(INCDIR)/mbsys_oic.h $(INCDIR)/mbsys_hdcs.h \
+	$(INCDIR)/mbsys_singlebeam.h \
 	$(INCDIR)/mbf_sbsiomrg.h $(INCDIR)/mbf_sbsiocen.h \
 	$(INCDIR)/mbf_sbsiolsi.h $(INCDIR)/mbf_sburicen.h \
 	$(INCDIR)/mbf_sbifremr.h $(INCDIR)/mbf_hsatlraw.h \
@@ -118,7 +122,8 @@ all:	$(LIBDIR)/libmbio.a $(MANDIR)/mbio.l \
 	$(INCDIR)/mbf_dsl120pf.h $(INCDIR)/mbf_dsl120sf.h \
 	$(INCDIR)/mbf_gsfgenmb.h $(INCDIR)/mbf_mstiffss.h \
 	$(INCDIR)/mbf_oicgeoda.h $(INCDIR)/mbf_oicmbari.h \
-	$(INCDIR)/mbf_omghdcsj.h 
+	$(INCDIR)/mbf_omghdcsj.h \
+	$(INCDIR)/mbf_mgd77dat.h $(INCDIR)/mbf_mbarirov.h 
 
 ### make clean removes the object files
 clean:
@@ -145,6 +150,7 @@ $(LIBDIR)/libmbio.a:	mb_format_inf.o mb_format.o mb_error.o \
 		mbsys_sb2000.o mbsys_hsmd.o mbsys_dsl.o \
 		mbsys_gsf.o mbsys_mstiff.o \
 		mbsys_oic.o mbsys_hdcs.o \
+		mbsys_singlebeam.o \
 		mbr_sbsiomrg.o mbr_sbsiocen.o \
 		mbr_sbsiolsi.o mbr_sburicen.o \
 		mbr_sburivax.o mbr_sbifremr.o \
@@ -168,7 +174,8 @@ $(LIBDIR)/libmbio.a:	mb_format_inf.o mb_format.o mb_error.o \
 		mbr_dsl120pf.o mbr_dsl120sf.o \
 		mbr_gsfgenmb.o mbr_mstiffss.o \
 		mbr_oicgeoda.o mbr_oicmbari.o \
-		mbr_omghdcsj.o
+		mbr_omghdcsj.o \
+		mbr_mgd77dat.o mbr_mbarirov.o
 	$(ARCHIVE) $(LIBDIR)/libmbio.a \
 		mb_format_inf.o mb_format.o mb_error.o \
 		mb_swap.o mb_compare.o \
@@ -190,6 +197,7 @@ $(LIBDIR)/libmbio.a:	mb_format_inf.o mb_format.o mb_error.o \
 		mbsys_sb2000.o mbsys_hsmd.o mbsys_dsl.o \
 		mbsys_gsf.o mbsys_mstiff.o \
 		mbsys_oic.o mbsys_hdcs.o \
+		mbsys_singlebeam.o \
 		mbr_sbsiomrg.o mbr_sbsiocen.o \
 		mbr_sbsiolsi.o mbr_sburicen.o \
 		mbr_sburivax.o mbr_sbifremr.o \
@@ -212,7 +220,8 @@ $(LIBDIR)/libmbio.a:	mb_format_inf.o mb_format.o mb_error.o \
 		mbr_dsl120pf.o mbr_dsl120sf.o \
 		mbr_gsfgenmb.o mbr_mstiffss.o \
 		mbr_oicgeoda.o mbr_oicmbari.o \
-		mbr_omghdcsj.o
+		mbr_omghdcsj.o \
+		mbr_mgd77dat.o mbr_mbarirov.o
 	ranlib $(LIBDIR)/libmbio.a
 
 ### compile the source files
@@ -310,6 +319,8 @@ mbsys_oic.o:	mbsys_oic.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/m
 	$(CC) -c $(CFLAGS) mbsys_oic.c
 mbsys_hdcs.o:	mbsys_hdcs.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mbsys_hdcs.h
 	$(CC) -c $(CFLAGS) mbsys_hdcs.c
+mbsys_singlebeam.o:	mbsys_singlebeam.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mbsys_singlebeam.h
+	$(CC) -c $(CFLAGS) mbsys_singlebeam.c
 mbr_sbsiomrg.o:	mbr_sbsiomrg.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbsys_sb.h $(INCDIR)/mbf_sbsiomrg.h
 	$(CC) -c $(CFLAGS) mbr_sbsiomrg.c
 mbr_sbsiocen.o: mbr_sbsiocen.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbsys_sb.h $(INCDIR)/mbf_sbsiocen.h
@@ -396,6 +407,10 @@ mbr_oicmbari.o: mbr_oicmbari.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INC
 	$(CC) -c $(CFLAGS) mbr_oicmbari.c
 mbr_omghdcsj.o: mbr_omghdcsj.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbf_omghdcsj.h
 	$(CC) -c $(CFLAGS) mbr_omghdcsj.c
+mbr_mgd77dat.o: mbr_mgd77dat.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbf_mgd77dat.h
+	$(CC) -c $(CFLAGS) mbr_mgd77dat.c
+mbr_mbarirov.o: mbr_mbarirov.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbf_mbarirov.h
+	$(CC) -c $(CFLAGS) mbr_mbarirov.c
 
 ### copy the man page to the man page directory
 $(MANDIR)/mbio.l:	mbio.manl
@@ -472,6 +487,9 @@ $(INCDIR)/mbsys_oic.h:	mbsys_oic.h
 $(INCDIR)/mbsys_hdcs.h:	mbsys_hdcs.h
 	cp mbsys_hdcs.h $(INCDIR)/mbsys_hdcs.h
 	chmod 664 $(INCDIR)/mbsys_hdcs.h
+$(INCDIR)/mbsys_singlebeam.h:	mbsys_singlebeam.h
+	cp mbsys_singlebeam.h $(INCDIR)/mbsys_singlebeam.h
+	chmod 664 $(INCDIR)/mbsys_singlebeam.h
 $(INCDIR)/mbf_sbsiomrg.h:	mbf_sbsiomrg.h
 	cp mbf_sbsiomrg.h $(INCDIR)/mbf_sbsiomrg.h
 	chmod 664 $(INCDIR)/mbf_sbsiomrg.h
@@ -595,4 +613,10 @@ $(INCDIR)/mbf_oicmbari.h:	mbf_oicmbari.h
 $(INCDIR)/mbf_omghdcsj.h:	mbf_omghdcsj.h
 	cp mbf_omghdcsj.h $(INCDIR)/mbf_omghdcsj.h
 	chmod 664 $(INCDIR)/mbf_omghdcsj.h
+$(INCDIR)/mbf_mgd77dat.h:	mbf_mgd77dat.h
+	cp mbf_mgd77dat.h $(INCDIR)/mbf_mgd77dat.h
+	chmod 664 $(INCDIR)/mbf_mgd77dat.h
+$(INCDIR)/mbf_mbarirov.h:	mbf_mbarirov.h
+	cp mbf_mbarirov.h $(INCDIR)/mbf_mbarirov.h
+	chmod 664 $(INCDIR)/mbf_mbarirov.h
 
