@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_read.c	3.00	2/20/93
- *    $Id: mb_read.c,v 3.3 1993-06-05 07:19:31 caress Exp $
+ *    $Id: mb_read.c,v 3.4 1993-06-09 08:16:54 caress Exp $
  *
  *    Copyright (c) 1993 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,9 @@
  * Date:	February 20, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 3.3  1993/06/05  07:19:31  caress
+ * Fixed heading averaging problem.
+ *
  * Revision 3.2  1993/06/02  11:11:07  caress
  * Forced mb_read to overwrite undefined beams with zero
  * depth and position values.
@@ -75,7 +78,7 @@ char	*comment;
 int	*error;
 {
 
-  static char rcs_id[]="$Id: mb_read.c,v 3.3 1993-06-05 07:19:31 caress Exp $";
+  static char rcs_id[]="$Id: mb_read.c,v 3.4 1993-06-09 08:16:54 caress Exp $";
 	char	*function_name = "mb_read";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
@@ -547,6 +550,8 @@ int	*error;
 			headingx = sin(*heading*DTR);
 			headingy = cos(*heading*DTR);
 			}
+		if (*heading < 0.0)
+			*heading = *heading + 360.0;
 
 		/* get coordinate scaling */
 		mb_coor_scale(verbose,*navlat,&mtodeglon,&mtodeglat);

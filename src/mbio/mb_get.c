@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_get.c	3.00	1/26/93
- *    $Id: mb_get.c,v 3.2 1993-06-05 07:19:31 caress Exp $
+ *    $Id: mb_get.c,v 3.3 1993-06-09 08:14:25 caress Exp $
  *
  *    Copyright (c) 1993 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,9 @@
  * Date:	January 26, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 3.2  1993/06/05  07:19:31  caress
+ * Fixed heading averaging problem.
+ *
  * Revision 3.1  1993/05/14  22:35:03  sohara
  * fixed rcs_id message
  *
@@ -66,7 +69,7 @@ int	*backdist;
 char	*comment;
 int	*error;
 {
-  static char rcs_id[]="$Id: mb_get.c,v 3.2 1993-06-05 07:19:31 caress Exp $";
+  static char rcs_id[]="$Id: mb_get.c,v 3.3 1993-06-09 08:14:25 caress Exp $";
 	char	*function_name = "mb_get";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
@@ -534,6 +537,8 @@ int	*error;
 			}
 		else
 			*heading = mb_io_ptr->heading/mb_io_ptr->pings_binned;
+		if (*heading < 0.0)
+			*heading = *heading + 360.0;
 
 		/* get coordinate scaling */
 		mb_coor_scale(verbose,*navlat,&mtodeglon,&mtodeglat);
