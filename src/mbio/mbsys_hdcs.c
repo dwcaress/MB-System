@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_hdcs.c	3/1/99
- *	$Id: mbsys_hdcs.c,v 4.0 1999-03-31 18:29:20 caress Exp $
+ *	$Id: mbsys_hdcs.c,v 4.1 1999-08-08 04:16:03 caress Exp $
  *
  *    Copyright (c) 1999 by 
  *    D. W. Caress (caress@mbari.org)
@@ -41,6 +41,9 @@
  * Date:	March 16, 1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1999/03/31  18:29:20  caress
+ * MB-System 4.6beta7
+ *
  * Revision 1.1  1999/03/31  18:11:35  caress
  * Initial revision
  *
@@ -66,7 +69,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_hdcs.c,v 4.0 1999-03-31 18:29:20 caress Exp $";
+ static char res_id[]="$Id: mbsys_hdcs.c,v 4.1 1999-08-08 04:16:03 caress Exp $";
 	char	*function_name = "mbsys_hdcs_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -306,8 +309,8 @@ int	*error;
 	    /* get time */
 	    *time_d = 100.0 * store->refTime
 					+ 1.0e-6 
-					    * ((double)(store->timeScale 
-					    * store->timeOffset));
+					    * ((double)store->timeScale) 
+					    * ((double)store->timeOffset);
 	    mb_get_date(verbose,*time_d,time_i);
 
 	    /* get navigation */
@@ -1024,8 +1027,8 @@ int	*error;
 	    /* get time */
 	    *time_d = 100.0 * store->refTime
 					+ 1.0e-6 
-					    * ((double)(store->timeScale 
-					    * store->timeOffset));
+					    * ((double)store->timeScale) 
+					    * ((double)store->timeOffset);
 	    mb_get_date(verbose,*time_d,time_i);
 
 	    /* get navigation */
