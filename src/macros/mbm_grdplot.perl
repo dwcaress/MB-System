@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grdplot.perl	8/6/95
-#    $Id: mbm_grdplot.perl,v 4.13 1999-06-25 17:55:47 caress Exp $
+#    $Id: mbm_grdplot.perl,v 4.14 1999-08-08 04:17:04 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -38,7 +38,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # Basic Usage: 
 #   mbm_grdplot -Ifile [-Amagnitude[/azimuth/elevation] -C[contour_control] 
 #            -Gcolor_mode -H -Kintensity_file -Oroot -Ppagesize
-#            -S[color/shade] -Uorientation -V 
+#            -S[color/shade] -T -Uorientation -V 
 #            -Wcolor_style[/pallette[/ncolors]] ]
 #
 # Additional Options:
@@ -52,6 +52,8 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #            -MGQdpi -MGSscalefactor -MGTx/y/size/angle/font/just/text
 #            -MGU[/dx/dy/][label] -MCAanot_int/[ffont_size][aangle][/r/g/b][o]]
 #            -MCGgap/width -MCQcut -MCT[+|-][gap/length][:LH] -MCWtype[pen]
+#            -MTCfill -MTDresolution -MTGfill -MTIriver[/pen] 
+#            -MTNborder[/pen] -MTSfill -MTWpen
 #            -MXGfill -MXIxy_file -MXSsymbol/size -MXWpen]
 #
 # Author:
@@ -61,10 +63,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   October 19, 1994
 #
 # Version:
-#   $Id: mbm_grdplot.perl,v 4.13 1999-06-25 17:55:47 caress Exp $
+#   $Id: mbm_grdplot.perl,v 4.14 1999-08-08 04:17:04 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.13  1999/06/25  17:55:47  caress
+# I must have changed something!
+#
 # Revision 4.12  1999/05/06  23:46:32  caress
 # Release 4.6a
 #
@@ -261,7 +266,7 @@ while (@grdinfo)
 
 # Deal with command line arguments
 $command_line = "@ARGV";
-&MBGetopts('A:a:B:b:C%c%D%d%G%g%HhI:i:J:j:K:k:L:l:M+m+O:o:P:p:QqR:r:S%s%T%t%U:u:VvW:w:XxYyZ:z:');
+&MBGetopts('A:a:B:b:C%c%D%d%G%g%HhI:i:J:j:K:k:L:l:M+m+O:o:P:p:QqR:r:S%s%TtU:u:VvW:w:XxYyZ:z:');
 $shade_control = 	($opt_A || $opt_a);
 $tick_info = 		($opt_B || $opt_b);
 $contour_mode = 	($flg_C || $flg_c);
@@ -281,8 +286,7 @@ $no_view_ps = 		($opt_Q || $opt_q);
 $bounds = 		($opt_R || $opt_r);
 $stretch_mode = 	($flg_S || $flg_s);
 $stretch_control = 	($opt_S || $opt_s);
-$coastline_control = 	($opt_T || $opt_t);
-$coastline_mode = 	($flg_T || $flg_t);
+$coast_control = 	($opt_T || $opt_t);
 $orientation = 		($opt_U || $opt_u);
 $verbose = 		($opt_V || $opt_v);
 $color_control = 	($opt_W || $opt_w);
@@ -312,7 +316,7 @@ if ($help)
 	print "macro.\n";
 	print "\nBasic Usage: \n";
 	print "\t$program_name -Ifile [-Amagnitude[/azimuth/elevation] -C[contour_control] \n";
-	print "\t\t-Gcolor_mode -H -Kintensity_file -Oroot -Ppagesize -S[color/shade]\n";
+	print "\t\t-Gcolor_mode -H -Kintensity_file -Oroot -Ppagesize -S[color/shade] -T\n";
 	print "\t\t-Uorientation -V -Wcolor_style[/pallette[/ncolors]] ]\n";
 	print "Additional Options:\n";
 	print "\t\t[-Btickinfo -Dflipcolor/flipshade \n";
@@ -324,6 +328,8 @@ if ($help)
 	print "\t\t-MGQdpi -MGSscalefactor -MGTx/y/size/angle/font/just/text\n";
 	print "\t\t-MGU[/dx/dy/][label] -MCAanot_int/[ffont_size][aangle][/r/g/b][o]]\n";
 	print "\t\t-MCGgap/width -MCQcut -MCT[+|-][gap/length][:LH] -MCWtype[pen]\n";
+	print "\t\t-MTCfill -MTDresolution -MTGfill -MTIriver[/pen]\n";
+	print "\t\t-MTNborder[/pen] -MTSfill -MTWpen\n";
 	print "\t\t-MXGfill -MXIxy_file -MXSsymbol/size -MXWpen]\n";
 	exit 0;
 	}
@@ -464,6 +470,52 @@ if ($misc)
 			{
 			($contour_pen) = $cmd =~ 
 				/^[Cc][Ww](\S+)/;
+			}
+
+		# deal with pscoast options
+		##############################
+
+		# set pscoast lake fill
+		if ($cmd =~ /^[Tt][Cc]./)
+			{
+			($coast_lakefill) = $cmd =~ /^[Tt][Cc](.+)/;
+			}
+
+		# set pscoast resolution
+		if ($cmd =~ /^[Tt][Dd]./)
+			{
+			($coast_resolution) = $cmd =~ /^[Tt][Dd](.+)/;
+			}
+
+		# set pscoast dry fill
+		if ($cmd =~ /^[Tt][Gg]./)
+			{
+			($coast_dryfill) = $cmd =~ /^[Tt][Gg](.+)/;
+			}
+
+		# set pscoast rivers
+		if ($cmd =~ /^[Tt][Ii]./)
+			{
+			($coast_river) = $cmd =~ /^[Tt][Ii](.+)/;
+			}
+
+		# set pscoast national boundaries
+		if ($cmd =~ /^[Tt][Nn]./)
+			{
+			($coast_boundary) = $cmd =~ /^[Tt][Nn](.+)/;
+			push(@coast_boundaries, $coast_boundary);
+			}
+
+		# set pscoast wet fill
+		if ($cmd =~ /^[Tt][Ss]./)
+			{
+			($coast_wetfill) = $cmd =~ /^[Tt][Ss](.+)/;
+			}
+
+		# set pscoast coastline pen
+		if ($cmd =~ /^[Tt][Ww]./)
+			{
+			($coast_pen) = $cmd =~ /^[Tt][Ww](.+)/;
 			}
 
 		# deal with psxy options
@@ -1294,6 +1346,23 @@ if (!$contour_control && $contour_mode)
 	$contour_control = $contour_int;
 	}
 
+# set pscoast control
+if ($coast_control
+	&& !$coast_wetfill
+	&& !$coast_dryfill
+	&& !$coast_coast
+	&& !$coast_boundary
+	&& !$coast_river)
+	{
+	$coast_dryfill = "200";
+	$coast_pen = "1p";
+	}
+if ($coast_control
+	&& !$coast_resolution)
+	{
+	$coast_resolution = "f";
+	}
+
 # come up with the filenames
 $cmdfile = "$root.cmd";
 $psfile = "$root.ps";
@@ -1779,6 +1848,57 @@ else
 	$axes = "$base_tick/$base_tick:.\"$tlabel\":";
 	}
 
+# do coastline plots
+if ($coast_control) 
+	{
+	printf FCMD "#\n# Make coastline data plot\n";
+	printf FCMD "echo Running pscoast...\n";
+	printf FCMD "pscoast \\\n\t";
+	printf FCMD "-J\$MAP_PROJECTION\$MAP_SCALE \\\n\t";
+	printf FCMD "-R\$MAP_REGION \\\n\t";
+	if ($coast_lakefill)
+		{
+		printf FCMD "-C$coast_lakefill \\\n\t";
+		}
+	if ($coast_resolution)
+		{
+		printf FCMD "-D$coast_resolution \\\n\t";
+		}
+	if ($coast_dryfill)
+		{
+		printf FCMD "-G$coast_dryfill \\\n\t";
+		}
+	if ($coast_river)
+		{
+		printf FCMD "-I$coast_river \\\n\t";
+		}
+	for ($i = 0; $i < scalar(@coast_boundaries); $i++) 
+		{
+		printf FCMD "-N$coast_boundaries[$i] \\\n\t";
+		}
+	if ($coast_wetfill)
+		{
+		printf FCMD "-S$coast_wetfill \\\n\t";
+		}
+	if ($coast_pen)
+		{
+		printf FCMD "-W$coast_pen \\\n\t";
+		}
+	if ($portrait)
+		{
+		printf FCMD "-P ";
+		}
+	if ($first_gmt == 1)
+		{
+		$first_gmt = 0;
+		printf FCMD "$first\n";
+		}
+	else
+		{
+		printf FCMD "$middle\n";
+		}
+	}
+
 # do xy plots
 for ($i = 0; $i < scalar(@xyfiles); $i++) 
 	{
@@ -1959,6 +2079,10 @@ if ($verbose)
 		{
 		print "    Contours\n";
 		}
+	if ($coast_control)
+		{
+		print "    Coastline\n";
+		}
 	if (@xyfiles)
 		{
 		print "    XY Plots of ", scalar(@xyfiles), " Datasets\n";
@@ -2096,6 +2220,42 @@ if ($verbose)
 		printf "    Illumination Azimuth:     %f\n", $azimuth;
 		printf "    Illumination Elevation:   %f\n", $elevation;
 		printf "    Illumination Magnitude:   %f\n", $magnitude;
+		}
+	if ($coast_control)
+		{
+		print "\n  Coastline Plotting Controls:\n";
+		}
+	if ($coast_control && $coast_resolution)
+		{
+		printf "    Coastline resolution:     $coast_resolution\n";
+		}
+	if ($coast_control && $coast_pen)
+		{
+		printf "    Coastline pen:            $coast_pen\n";
+		}
+	if ($coast_control && $coast_wetfill)
+		{
+		printf "    Ocean fill:               $coast_wetfill\n";
+		}
+	if ($coast_control && $coast_lakefill)
+		{
+		printf "    Lake fill:                $coast_lakefill\n";
+		}
+	if ($coast_control && $coast_dryfill)
+		{
+		printf "    Land fill:                $coast_dryfill\n";
+		}
+	if ($coast_control && $coast_river)
+		{
+		printf "    Rivers:                   $coast_river\n";
+		}
+
+	if ($coast_control && $coast_boundaries)
+		{
+		for ($i = 0; $i < scalar(@coast_boundaries); $i++) 
+			{
+			printf "    National Boundaries:      $coast_boundaries[$i]\n";
+			}
 		}
 	if (@xyfiles)
 		{
