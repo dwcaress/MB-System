@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbanglecorrect.c	8/13/95
- *    $Id: mbanglecorrect.c,v 4.15 1999-12-29 00:35:11 caress Exp $
+ *    $Id: mbanglecorrect.c,v 4.16 2000-06-06 20:32:46 caress Exp $
  *
  *    Copyright (c) 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -45,6 +45,9 @@ The default input and output streams are stdin and stdout.\n";
  * Date:	January 12, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.15  1999/12/29  00:35:11  caress
+ * Release 4.6.8
+ *
  * Revision 4.14  1999/02/04  23:55:08  caress
  * MB-System version 4.6beta7
  *
@@ -155,7 +158,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbanglecorrect.c,v 4.15 1999-12-29 00:35:11 caress Exp $";
+	static char rcs_id[] = "$Id: mbanglecorrect.c,v 4.16 2000-06-06 20:32:46 caress Exp $";
 	static char program_name[] = "MBANGLECORRECT";
 	static char help_message[] =  
 "mbanglecorrect is a tool for processing sidescan data.  This program\n\t\
@@ -1084,7 +1087,7 @@ The default input and output streams are stdin and stdout.\n";
 		      if (ampkind == MBANGLECORRECT_AMP)
 		      for (i=0;i<ping[jj].beams_amp;i++)
 			{
-			if (ping[jj].amp[i] > 0.0)
+			if (mb_beam_ok(ping[jj].beamflag[i]))
 			    {
 			    if (ping[jj].ndepths > 1)
 				{
@@ -1246,7 +1249,7 @@ The default input and output streams are stdin and stdout.\n";
 		    for (i=0;i<ping[j].beams_amp;i++)
 			{
 			ping[j].dataprocess[i] = 0.0;
-			if (ping[j].amp[i] > 0.0)
+			if (mb_beam_ok(ping[j].beamflag[i]))
 			    {
 			    if (ping[j].ndepths > 0)
 				{

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbbackangle.c	1/6/95
- *    $Id: mbbackangle.c,v 4.8 1998-10-05 19:19:24 caress Exp $
+ *    $Id: mbbackangle.c,v 4.9 2000-06-06 20:32:46 caress Exp $
  *
  *    Copyright (c) 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -23,6 +23,9 @@
  * Date:	January 6, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.8  1998/10/05  19:19:24  caress
+ * MB-System version 4.6beta
+ *
  * Revision 4.7  1997/07/25  14:28:10  caress
  * Version 4.5beta2
  *
@@ -72,7 +75,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbbackangle.c,v 4.8 1998-10-05 19:19:24 caress Exp $";
+	static char rcs_id[] = "$Id: mbbackangle.c,v 4.9 2000-06-06 20:32:46 caress Exp $";
 	static char program_name[] = "mbbackangle";
 	static char help_message[] =  
 "mbbackangle reads a swath sonar data file and generates a table\n\t\
@@ -512,7 +515,7 @@ The results are dumped to stdout.";
 		    if (ampkind == MBBACKANGLE_AMP)
 		    for (i=0;i<beams_amp;i++)
 			{
-			if (amp[i] > 0.0)
+			if (mb_beam_ok(beamflag[i]))
 			    {
 			    nvalue++;
 			    if (beams_bath != beams_amp)
