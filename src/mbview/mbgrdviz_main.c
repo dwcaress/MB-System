@@ -65,7 +65,7 @@ extern void BX_SET_BACKGROUND_COLOR(Widget, ArgList, Cardinal *, Pixel);
 /* global mbview variables */
 Widget mainWindow;
 
-static char rcs_id[] = "$Id: mbgrdviz_main.c,v 1.3 2003-11-25 02:06:14 caress Exp $";
+static char rcs_id[] = "$Id: mbgrdviz_main.c,v 5.0 2003-12-02 20:26:32 caress Exp $";
 static char program_name[] = "MBgrdviz";
 static char help_message[] =  "MBgrdviz is a simple vizualization demo for GMT grd files.";
 static char usage_message[] = "mbgrdviz [-Igrdfile -V -H]";
