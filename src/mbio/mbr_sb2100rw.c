@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sb2100rw.c	3/3/94
- *	$Id: mbr_sb2100rw.c,v 4.0 1994-03-06 00:01:56 caress Exp $
+ *	$Id: mbr_sb2100rw.c,v 4.1 1994-03-13 04:48:05 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	March 3, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/03/06  00:01:56  caress
+ * First cut at version 4.0
+ *
  * Revision 4.0  1994/03/05  02:13:52  caress
  * First cut for MBF_SB2100RW format.
  *
@@ -49,7 +52,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_sb2100rw.c,v 4.0 1994-03-06 00:01:56 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2100rw.c,v 4.1 1994-03-13 04:48:05 caress Exp $";
 	char	*function_name = "mbr_alm_sb2100rw";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -1330,12 +1333,12 @@ int	*error;
 		for (i=0;i<8;i++)
 			data->spare[i] = line[46+i];
 		data->range_scale = line[54];
-		mb_get_int(&(data->num_algorithms),       line+55,  1);
-		for (i=0;i<4;i++)
-			data->algorithm_order[i] = line[56+i];
+		mb_get_int(&(data->surface_sound_velocity),line+55,6);
+		data->ssv_source = line[61];
+		data->depth_gate_mode = line[62];
 
 		/* handle 12 kHz parameters if not in 36 kHz mode */
-		shift = 56;
+		shift = 63;
 		if (data->frequency[0] != 'H')
 		  {
 		  mb_get_int(&(data->ping_gain_12khz),    line+shift,    2);
@@ -1364,10 +1367,10 @@ int	*error;
 		  shift = shift + 21;
 		  }
 
-		/* now get last three things in header */
-		mb_get_int(&(data->surface_sound_velocity),line+shift,6);
-		data->ssv_source = line[6+shift];
-		data->depth_gate_mode = line[7+shift];
+		/* now get last things in header */
+		mb_get_int(&(data->num_algorithms),       line+shift,  1);
+		for (i=0;i<4;i++)
+			data->algorithm_order[i] = line[1+shift+i];
 		}
 
 	/* print debug statements */
@@ -1399,12 +1402,12 @@ int	*error;
 		fprintf(stderr,"\n");
 		fprintf(stderr,"dbg5       range_scale:      %c\n",
 			data->range_scale);
-		fprintf(stderr,"dbg5       num_algorithms:   %d\n",
-			data->num_algorithms);
-		fprintf(stderr,"dbg5       algorithm_order:  ");
-		for (i=0;i<4;i++)
-			fprintf(stderr,"%c",data->algorithm_order[i]);
-		fprintf(stderr,"\n");
+		fprintf(stderr,"dbg5       surface_sound_velocity: %d\n",
+			data->surface_sound_velocity);
+		fprintf(stderr,"dbg5       ssv_source:       %c\n",
+			data->ssv_source);
+		fprintf(stderr,"dbg5       depth_gate_mode:  %c\n",
+			data->depth_gate_mode);
 		fprintf(stderr,"dbg5       ping_gain_12khz:  %d\n",
 			data->ping_gain_12khz);
 		fprintf(stderr,"dbg5       ping_pulse_width_12khz:        %d\n",
@@ -1429,12 +1432,12 @@ int	*error;
 			data->roll_36khz);
 		fprintf(stderr,"dbg5       heading_36khz:    %d\n",
 			data->heading_36khz);
-		fprintf(stderr,"dbg5       surface_sound_velocity: %d\n",
-			data->surface_sound_velocity);
-		fprintf(stderr,"dbg5       ssv_source:       %c\n",
-			data->ssv_source);
-		fprintf(stderr,"dbg5       depth_gate_mode:  %c\n",
-			data->depth_gate_mode);
+		fprintf(stderr,"dbg5       num_algorithms:   %d\n",
+			data->num_algorithms);
+		fprintf(stderr,"dbg5       algorithm_order:  ");
+		for (i=0;i<4;i++)
+			fprintf(stderr,"%c",data->algorithm_order[i]);
+		fprintf(stderr,"\n");
 		}
 
 	/* read and parse data from subsequent lines of record
@@ -1555,10 +1558,12 @@ int	*error;
 		for (i=0;i<8;i++)
 			data->spare[i] = line[46+i];
 		data->range_scale = line[54];
-		mb_get_int(&(data->ss_data_length),       line+55,  4);
+		mb_get_int(&(data->surface_sound_velocity),line+55,6);
+		data->ssv_source = line[61];
+		data->depth_gate_mode = line[62];
 
 		/* handle 12 kHz parameters if not in 36 kHz mode */
-		shift = 59;
+		shift = 63;
 		if (data->frequency[0] != 'H')
 		  {
 		  mb_get_int(&(data->num_pixels_12khz),   line+shift,     3);
@@ -1591,10 +1596,8 @@ int	*error;
 		  shift = shift + 27;
 		  }
 
-		/* now get last three things in header */
-		mb_get_int(&(data->surface_sound_velocity),line+shift,6);
-		data->ssv_source = line[6+shift];
-		data->depth_gate_mode = line[7+shift];
+		/* now get last thing in header */
+		mb_get_int(&(data->ss_data_length),       line+shift,  4);
 		}
 
 	/* print debug statements */
@@ -1626,8 +1629,12 @@ int	*error;
 		fprintf(stderr,"\n");
 		fprintf(stderr,"dbg5       range_scale:      %c\n",
 			data->range_scale);
-		fprintf(stderr,"dbg5       ss_data_length:   %d\n",
-			data->ss_data_length);
+		fprintf(stderr,"dbg5       surface_sound_velocity: %d\n",
+			data->surface_sound_velocity);
+		fprintf(stderr,"dbg5       ssv_source:       %c\n",
+			data->ssv_source);
+		fprintf(stderr,"dbg5       depth_gate_mode:  %c\n",
+			data->depth_gate_mode);
 		fprintf(stderr,"dbg5       num_pixels_12khz: %d\n",
 			data->num_pixels_12khz);
 		fprintf(stderr,"dbg5       pixel_size_12khz: %d\n",
@@ -1660,12 +1667,8 @@ int	*error;
 			data->roll_36khz);
 		fprintf(stderr,"dbg5       heading_36khz:    %d\n",
 			data->heading_36khz);
-		fprintf(stderr,"dbg5       surface_sound_velocity: %d\n",
-			data->surface_sound_velocity);
-		fprintf(stderr,"dbg5       ssv_source:       %c\n",
-			data->ssv_source);
-		fprintf(stderr,"dbg5       depth_gate_mode:  %c\n",
-			data->depth_gate_mode);
+		fprintf(stderr,"dbg5       ss_data_length:   %d\n",
+			data->ss_data_length);
 		}
 
 	/* read sidescan data from character array */
@@ -1815,7 +1818,7 @@ int	*error;
 		}
 
 	/* write label in file */
-	sprintf(line,"%8s\n",mbf_sb2100rw_labels[type]);
+	sprintf(line,"%9s\r\n",mbf_sb2100rw_labels[type]);
 	status = mbr_sb2100rw_write_line(verbose,mbfp,line,error);
 
 	/* print output debug statements */
@@ -2007,7 +2010,7 @@ int	*error;
 		status = fprintf(mbfp,"%6d",data->roll_bias_starboard);
 		status = fprintf(mbfp,"%6d",data->pitch_bias);
 		status = fprintf(mbfp,"%2d",data->num_svp);
-		status = fprintf(mbfp,"\n");
+		status = fprintf(mbfp,"\r\n");
 
 		/* output the second line */
 		for (i=0;i<data->num_svp;i++)
@@ -2015,7 +2018,7 @@ int	*error;
 			status = fprintf(mbfp,"%7d",data->vdepth[i]);
 			status = fprintf(mbfp,"%6d",data->velocity[i]);
 			}
-		status = fprintf(mbfp,"\n");
+		status = fprintf(mbfp,"\r\n");
 
 		/* check for an error */
 		if (status > 0)
@@ -2086,7 +2089,7 @@ int	*error;
 	if (status == MB_SUCCESS)
 		{
 		/* output the event line */
-		status = fprintf(mbfp,"%s\n",data->comment);
+		status = fprintf(mbfp,"%s\r\n",data->comment);
 
 		/* check for an error */
 		if (status >= 0)
@@ -2276,9 +2279,9 @@ int	*error;
 		for (i=0;i<8;i++)
 			status = fprintf(mbfp,"%c",data->spare[i]);
 		status = fprintf(mbfp,"%c",data->range_scale);
-		status = fprintf(mbfp,"%1d",data->num_algorithms);
-		for (i=0;i<4;i++)
-			status = fprintf(mbfp,"%c",data->algorithm_order[i]);
+		status = fprintf(mbfp,"%6d",data->surface_sound_velocity);
+		status = fprintf(mbfp,"%c",data->ssv_source);
+		status = fprintf(mbfp,"%c",data->depth_gate_mode);
 		if (data->frequency[0] != 'H')
 			{
 			status = fprintf(mbfp,"%2d",data->ping_gain_12khz);
@@ -2301,10 +2304,10 @@ int	*error;
 			status = fprintf(mbfp,"%5d",data->roll_36khz);
 			status = fprintf(mbfp,"%5d",data->heading_36khz);
 			}
-		status = fprintf(mbfp,"%6d",data->surface_sound_velocity);
-		status = fprintf(mbfp,"%c",data->ssv_source);
-		status = fprintf(mbfp,"%c",data->depth_gate_mode);
-		status = fprintf(mbfp,"\n");
+		status = fprintf(mbfp,"%1d",data->num_algorithms);
+		for (i=0;i<4;i++)
+			status = fprintf(mbfp,"%c",data->algorithm_order[i]);
+		status = fprintf(mbfp,"\r\n");
 
 		/* output a line for each beam */
 		for (i=0;i<data->num_beams;i++)
@@ -2320,7 +2323,7 @@ int	*error;
 			status = fprintf(mbfp,"%2d",data->signal_to_noise[i]);
 			status = fprintf(mbfp,"%3d",data->echo_length[i]);
 			status = fprintf(mbfp,"%c",data->quality[i]);
-			status = fprintf(mbfp,"\n");
+			status = fprintf(mbfp,"\r\n");
 			}
 
 		/* check for an error */
@@ -2507,7 +2510,9 @@ int	*error;
 		for (i=0;i<8;i++)
 			status = fprintf(mbfp,"%c",data->spare[i]);
 		status = fprintf(mbfp,"%c",data->range_scale);
-		status = fprintf(mbfp,"%4d",data->ss_data_length);
+		status = fprintf(mbfp,"%6d",data->surface_sound_velocity);
+		status = fprintf(mbfp,"%c",data->ssv_source);
+		status = fprintf(mbfp,"%c",data->depth_gate_mode);
 		if (data->frequency[0] != 'H')
 			{
 			status = fprintf(mbfp,"%3d",data->num_pixels_12khz);
@@ -2534,10 +2539,9 @@ int	*error;
 			status = fprintf(mbfp,"%5d",data->roll_36khz);
 			status = fprintf(mbfp,"%5d",data->heading_36khz);
 			}
-		status = fprintf(mbfp,"%6d",data->surface_sound_velocity);
-		status = fprintf(mbfp,"%c",data->ssv_source);
-		status = fprintf(mbfp,"%c",data->depth_gate_mode);
-		status = fprintf(mbfp,"\n");
+		data->ss_data_length = 2*data->num_pixels + 2;
+		status = fprintf(mbfp,"%4d",data->ss_data_length);
+		status = fprintf(mbfp,"\r\n");
 
 		/* construct and write out sidescan data */
 		for (i=0;i<data->num_pixels;i++)
@@ -2546,7 +2550,8 @@ int	*error;
 			write_ss[2*i+1] 
 				= (unsigned char) data->alongtrack_ss[i];
 	  		}
-		write_ss[2*data->num_pixels+1] = '\n';
+		write_ss[2*data->num_pixels+1] = '\r';
+		write_ss[2*data->num_pixels+2] = '\n';
 		if ((status = fwrite(write_ss,1,data->ss_data_length,mbfp))
 			!= data->ss_data_length)
 			{
