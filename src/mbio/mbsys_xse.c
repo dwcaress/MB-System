@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_xse.c	3/27/2000
- *	$Id: mbsys_xse.c,v 5.6 2001-07-22 21:17:01 caress Exp $
+ *	$Id: mbsys_xse.c,v 5.7 2001-07-27 19:07:16 caress Exp $
  *
  *    Copyright (c) 2000 by 
  *    D. W. Caress (caress@mbari.org)
@@ -28,6 +28,9 @@
  * Additional Authors:	P. A. Cohen and S. Dzurenko
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2001/07/22 21:17:01  caress
+ * Fixed bug initialized too much in ttimes function.
+ *
  * Revision 5.5  2001/07/20 00:32:54  caress
  * Release 5.0.beta03
  *
@@ -75,7 +78,7 @@
 int mbsys_xse_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_xse.c,v 5.6 2001-07-22 21:17:01 caress Exp $";
+ static char res_id[]="$Id: mbsys_xse.c,v 5.7 2001-07-27 19:07:16 caress Exp $";
 	char	*function_name = "mbsys_xse_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -841,6 +844,8 @@ int mbsys_xse_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_xse_struct *store;
+	double	maxoffset, xtrackmin, xtrackmax;
+	int	imaxoffset, ixtrackmin, ixtrackmax;
 	double	alpha, beta;
 	int	i, j;
 
@@ -879,22 +884,47 @@ int mbsys_xse_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 
 		/* get ssv */
 		*ssv = store->svp_ssv;
-		
+
 		/* get travel times, angles */
 		*nbeams = 0;
 		if (store->mul_frame == MB_YES)
 		    {
+		    /* determine whether beams are ordered 
+			port to starboard or starboard to port */
+		    xtrackmin = 0.0;
+		    xtrackmax = 0.0;
+		    ixtrackmin = 0;
+		    ixtrackmax = 0;
 		    for (i=0;i<store->mul_num_beams;i++)
 			{
-			j = store->beams[i].beam - 1;
-			*nbeams = j;
+			if (store->beams[i].lateral < xtrackmin)
+			    {
+			    xtrackmin = store->beams[i].lateral;
+			    ixtrackmin = i;
+			    }
+			if (store->beams[i].lateral > xtrackmax)
+			    {
+			    xtrackmax = store->beams[i].lateral;
+			    ixtrackmax = i;
+			    }
+			}
+
+		    /* loop over beams */
+		    for (i=0;i<store->mul_num_beams;i++)
+			{
+			if (ixtrackmax > ixtrackmin)
+			    j = store->mul_num_beams - store->beams[i].beam;
+			else
+			    j = store->beams[i].beam - 1;
+			*nbeams = MAX(store->beams[i].beam, *nbeams);
 			ttimes[j] = store->beams[i].tt;
-			beta = 90.0 - RTD * store->beams[i].angle;
+			beta = 90.0 + RTD * store->beams[i].angle;
 			alpha = RTD * store->beams[i].pitch;
 			mb_rollpitch_to_takeoff(verbose, 
 			    alpha, beta, &angles[j], 
 			    &angles_forward[j], error);
-			if (store->mul_frequency >= 50.0)
+			if (store->mul_frequency >= 50.0
+				|| store->mul_frequency <= 0.0)
 			    {
 			    if (store->beams[j].angle < 0.0)
 				{
@@ -1160,6 +1190,10 @@ int mbsys_xse_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		/* get speed  */
 		*speed  = 1.8 * store->nav_speed_ground;
 
+		/* get draft */
+		*draft = 0.5 * (store->par_trans_z_port
+				    + store->par_trans_z_stbd);
+
 		/* get roll pitch and heave */
 		if (store->mul_num_beams > 0)
 			{
@@ -1217,6 +1251,10 @@ int mbsys_xse_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 
 		/* get speed  */
 		*speed  = 1.8 * store->nav_speed_ground;
+
+		/* get draft */
+		*draft = 0.5 * (store->par_trans_z_port
+				    + store->par_trans_z_stbd);
 
 		/* get roll pitch and heave */
 		if (store->mul_num_beams > 0)
@@ -1356,6 +1394,10 @@ int mbsys_xse_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		/* get speed */
 		store->nav_speed_ground = speed / 1.8;
 
+		/* get draft */
+		store->par_trans_z_port = draft;
+		store->par_trans_z_stbd = draft;
+
 		/* get roll pitch and heave */
 		}
 
@@ -1376,6 +1418,10 @@ int mbsys_xse_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 
 		/* get speed */
 		store->nav_speed_ground = speed / 1.8;
+
+		/* get draft */
+		store->par_trans_z_port = draft;
+		store->par_trans_z_stbd = draft;
 
 		/* get roll pitch and heave */
 		}
