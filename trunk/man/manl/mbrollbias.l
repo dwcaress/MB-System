@@ -6,7 +6,7 @@
 Version 4.3
 
 .SH SYNOPSIS
-\fBmbrollbias\fP \fB-D\fIxdim/ydim \fB-R\fIwest/east/south/north \fB-L\fIlonflip \fB-I\fIfile1 \fB-J\fIfile2 [\fB-H -V\fI]
+\fBmbrollbias\fP \fB-F\fIformat1/format2 \fB-L\fIlonflip \fB-I\fIfile1 \fB-J\fIfile2 \fB-R\fIwest/east/south/north [\fB-D\fIxdim/ydim \fB-H -V\fI]
 
 .SH DESCRIPTION
 \fBmbrollbias\fP is an utility used to assess roll bias of multibeam 
@@ -22,7 +22,7 @@ divided into a number of rectangular regions and calculations are done
 in each region containing a sufficient number of data from both 
 swaths.  The data contained in the two datafiles should be processed to
 ensure that no artifacts will bias the roll bias calculations.
-Typically, this means using \fBMBCLEAN\fP and or \fBMBEDIT\fP to
+Typically, this means using \fBmbclean\fP and or \fBmbedit\fP to
 remove noisy outer beams.
 A positive roll bias value means that the the vertical reference 
 used by the multibeam system is biased to starboard, 
@@ -94,7 +94,7 @@ Run \fBmbrollbias\fP as follows:
 The output looks like:
 
  Program mbrollbias
- Version $Id: mbrollbias.l,v 4.4 1995-08-17 15:06:46 caress Exp $
+ Version $Id: mbrollbias.l,v 4.5 1996-01-17 23:04:51 caress Exp $
  MB-system Version 4.00
 
  mbrollbias Parameters:
