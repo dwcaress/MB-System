@@ -1,0 +1,149 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="Mozilla/4.75 [en] (X11; U; Linux 2.2.16-22 i686) [Netscape]">
+   <title>What's New in MB-System</title>
+</head>
+<body>
+
+<center><!-- WEBMAGIC VERSION NUMBER="2.0.2" --><!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" --><!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" --></center>
+
+<center>
+<h1>
+What's New in MB-System Version 5</h1></center>
+The version 5.0 release of MB-System includes a number of changes and improvements
+relative to the version 4 releases. The most significant changes include:
+<ul>
+<li>
+A new approach to managing data processing.</li>
+
+<ul>
+<li>
+Many tools - one output file. In previous versions of MB-System, each processing
+program read an input swath data file and produced an output swath data
+file. This "serial" processing scheme generally produced a large number
+of intermediate data files. MB-System version 5.0 features the integration
+of the editing and analysis tools with a single program, mbprocess, that
+outputs processed data files. The new "parallel" processing scheme covers
+bathymetry data processing, but does not yet incorporate the sidescan processing
+capabilities. All of the old tools and capabilities are still part of the
+distribution.</li>
+
+<li>
+Recursive datalists. The lists of data files used by gridding and plotting
+programs can now be recursive, making it simpler to manage data from many
+different surveys.</li>
+
+<li>
+Automatic format identification. MB-System programs will now attempt to
+automatically identify the swath data format based on the filename suffix.</li>
+
+<li>
+Extended inf files. Users can generate inf files by directing the output
+of mbinfo to a file named by adding an ".inf" suffix to the swath data
+file name. Several programs can parse inf files, if they exist, to quickly
+obtain data locations or ranges. This feature speeds operations such as
+gridding, mosaicing, and automated plotting.</li>
+
+<br>&nbsp;</ul>
+
+<li>
+New tools.</li>
+
+<ul>
+<li>
+MBnavadjust. This new tool allows users to adjust poorly navigated surveys
+by matching features in overlapping swathes. It is particularly useful
+for processing surveys conducted from submerged platforms.</li>
+
+<li>
+MBprocess. This new tool performs a variety of processing tasks and produces
+a single output processed swath data file. The program mbprocess can apply
+bathymetry edits from mbedit and mbclean, navigation edits from mbnavedit,
+sound velocity profile changes from mbvelocitytool, and a variety of other
+corrections.</li>
+
+<li>
+MBset. This new tool allows users to create and modify the parameter files
+used to control the operation of mbprocess.</li>
+
+<li>
+MBsvplist. This new tool lists water sound velocity profiles embedded in
+swath data files, creating secondary files that can be read into MBvelocitytool.</li>
+
+<br>&nbsp;</ul>
+
+<li>
+Improved bathymetry and navigation editors.</li>
+
+<ul>
+<li>
+MBedit and MBnavedit now swallow data files whole rather than reading in
+limited size buffers.</li>
+
+<li>
+MBedit now outputs beam edit events rather than an entire swath file. The
+edits are applied by MBprocess.</li>
+
+<li>
+MBnavedit now outputs the edited navigation rather than an entire swath
+file. The edited navigation is merged using MBprocess.</li>
+
+<li>
+Both editors show the position of the currently displayed data within the
+entire data file.</li>
+
+<li>
+MBnavedit has two navigation modeling modes relevant to swath data collected
+using poorly navigated ROVs and towfishes. One mode applies a dead reckoning
+model with interactively set drifts, and the other involves inverting for
+an optimally smooth navigation by penalizing speed and acceleration.<br>
+<BR></li>
+</ul>
+
+<li>
+Restructuring the code.</li>
+
+<ul>
+<li>
+All of the C code now conforms to the ANSI C standard.</li>
+
+<li>
+The underlying input/output library (MBIO) has been substantially rewritten.
+The structure has been streamlined, simplifying both future development
+and support of the existing code. The MBIO API has been greatly modified.</li>
+
+<br>&nbsp;</ul>
+
+<li>
+Handling of old Simrad multibeam data.</li>
+
+<ul>
+<li>
+Vendor format data from the old Simrad multibeams (pre-1997 sonars) are
+now supported by a single format id (51) rather than a separate format
+id for each sonar model. The old format id's are automatically aliased
+to 51, so existing shellscripts will continue to work.</li>
+
+<li>
+Sidescan data from old Simrad multibeams (pre-1997 sonars) are now handled
+in the same manner as data from the newer sonars (e.g. EM3000, EM3000,
+EM120). The raw samples in the vendor data format are binned, averaged,
+and interpolated into a 1024 pixel sidescan swath. This binned sidescan
+is not saved in the vendor format, so it is recommended that the data be
+copied to an extended format (57) that stores both bathymetry beam flags
+and processed sidescan. Format 57 is also used for processing data from
+the current Simrad multibeam sonars.</li>
+</ul>
+</ul>
+
+<center>
+<p><br>Last Updated: $Date: 2001-03-23 01:46:00 $ $Revision: 1.1 $</center>
+
+<p>
+<hr WIDTH="100%">
+<p><a href="mbsystem_home.html"><img SRC="mbsystem_logo_small.gif" BORDER=0 height=55 width=158 align=BOTTOM></a><a href="mbsystem_home.html">Back
+to MB-System Home Page...</a>
+</body>
+</html>
