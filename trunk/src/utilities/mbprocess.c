@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbprocess.c	3/31/93
- *    $Id: mbprocess.c,v 5.11 2001-10-19 00:56:17 caress Exp $
+ *    $Id: mbprocess.c,v 5.12 2001-11-02 01:03:08 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -36,6 +36,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.11  2001/10/19  00:56:17  caress
+ * Now tries to use relative paths.
+ *
  * Revision 5.10  2001/08/10  22:42:50  dcaress
  * Release 5.0.beta07
  *
@@ -104,7 +107,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbprocess.c,v 5.11 2001-10-19 00:56:17 caress Exp $";
+	static char rcs_id[] = "$Id: mbprocess.c,v 5.12 2001-11-02 01:03:08 caress Exp $";
 	static char program_name[] = "mbprocess";
 	static char help_message[] =  "mbprocess is a tool for processing swath sonar bathymetry data.\n\
 This program performs a number of functions, including:\n\
@@ -3198,11 +3201,12 @@ dx, dy, dz, alpha, beta, lever_heave);*/
 				static_shift = 0.0;
 	
 				/* check depth_offset - use static shift if depth_offset negative */
-				if (depth_offset_use < 0.0)
+				if (depth_offset_use < depth[0])
 				    {
-				    fprintf(stderr, "\nWarning: Depth offset negative - transducers above water?!\n");
-				    fprintf(stderr, "Raytracing performed from zero depth followed by static shift.\n");
-				    fprintf(stderr, "Depth offset is sum of heave + transducer depth.\n");
+				    fprintf(stderr, "\nWarning: Sonar depth is shallower than the top\n");
+				    fprintf(stderr, "of the SVP - transducers above water?!\n");
+				    fprintf(stderr, "Raytracing performed from top of SVP followed by static shift.\n");
+				    fprintf(stderr, "Sonar depth is sum of heave + draft (or transducer depth).\n");
 				    fprintf(stderr, "Draft from data:       %f\n", draft);
 				    fprintf(stderr, "Heave from data:       %f\n", bheave[i]);
 				    fprintf(stderr, "Heave from lever calc: %f\n", lever_heave);
@@ -3213,8 +3217,8 @@ dx, dy, dz, alpha, beta, lever_heave);*/
 					    time_i[0], time_i[1], time_i[2], 
 					    time_i[3], time_i[4], time_i[5], time_i[6]);
 	    
-				    static_shift = depth_offset_use;
-				    depth_offset_use = 0.0;
+				    static_shift = depth_offset_use + depth[0];
+				    depth_offset_use = depth[0];
 				    }
 
 				/* raytrace */
