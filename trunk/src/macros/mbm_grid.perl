@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grid.perl	6/11/99
-#    $Id: mbm_grid.perl,v 5.8 2003-04-17 20:42:48 caress Exp $
+#    $Id: mbm_grid.perl,v 5.9 2003-09-25 16:59:52 caress Exp $
 #
 #    Copyright (c) 1999, 2002, 2003 by
 #    D. W. Caress (caress@mbari.org)
@@ -54,10 +54,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   June 11, 1999
 #
 # Version:
-#   $Id: mbm_grid.perl,v 5.8 2003-04-17 20:42:48 caress Exp $
+#   $Id: mbm_grid.perl,v 5.9 2003-09-25 16:59:52 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.8  2003/04/17 20:42:48  caress
+#   Release 5.0.beta30
+#
 #   Revision 5.7  2003/03/16 18:05:01  caress
 #   Added -K option for underlaying background data on grids.
 #
@@ -581,7 +584,7 @@ if ($scale)
 	}
 if ($extend)
 	{
-	printf FCMD "\t-X \\\n";
+	printf FCMD "\t-X$extend \\\n";
 	}
 # mbgrid only options
 if ($datatype <= 2)
