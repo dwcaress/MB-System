@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad2.c	3.00	10/9/98
- *	$Id: mbsys_simrad2.c,v 5.9 2001-08-25 00:54:13 caress Exp $
+ *	$Id: mbsys_simrad2.c,v 5.10 2001-09-12 19:27:57 caress Exp $
  *
  *    Copyright (c) 1998, 2001 by
  *    David W. Caress (caress@mbari.org)
@@ -31,6 +31,9 @@
  * Date:	October 9, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.9  2001/08/25  00:54:13  caress
+ * Adding beamwidth values to extract functions.
+ *
  * Revision 5.8  2001/08/04  01:00:02  caress
  * Applied mods from Gordon Keith.
  *
@@ -94,7 +97,7 @@
 int mbsys_simrad2_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_simrad2.c,v 5.9 2001-08-25 00:54:13 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad2.c,v 5.10 2001-09-12 19:27:57 caress Exp $";
 	char	*function_name = "mbsys_simrad2_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -413,7 +416,7 @@ int mbsys_simrad2_survey_alloc(int verbose,
 			void *mbio_ptr, void *store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_simrad2.c,v 5.9 2001-08-25 00:54:13 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad2.c,v 5.10 2001-09-12 19:27:57 caress Exp $";
 	char	*function_name = "mbsys_simrad2_survey_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -674,7 +677,7 @@ int mbsys_simrad2_attitude_alloc(int verbose,
 			void *mbio_ptr, void *store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_simrad2.c,v 5.9 2001-08-25 00:54:13 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad2.c,v 5.10 2001-09-12 19:27:57 caress Exp $";
 	char	*function_name = "mbsys_simrad2_attitude_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -762,7 +765,7 @@ int mbsys_simrad2_heading_alloc(int verbose,
 			void *mbio_ptr, void *store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_simrad2.c,v 5.9 2001-08-25 00:54:13 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad2.c,v 5.10 2001-09-12 19:27:57 caress Exp $";
 	char	*function_name = "mbsys_simrad2_heading_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -842,7 +845,7 @@ int mbsys_simrad2_ssv_alloc(int verbose,
 			void *mbio_ptr, void *store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_simrad2.c,v 5.9 2001-08-25 00:54:13 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad2.c,v 5.10 2001-09-12 19:27:57 caress Exp $";
 	char	*function_name = "mbsys_simrad2_ssv_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -1536,6 +1539,8 @@ int mbsys_simrad2_insert(int verbose, void *mbio_ptr, void *store_ptr,
 	struct mbsys_simrad2_ping_struct *ping;
 	double	depthscale, dacrscale,daloscale,reflscale;
 	double	depthoffset;
+	double	depthmax, distancemax;
+	int	png_depth_res, png_distance_res;
 	int	i, j;
 
 	/* print input debug statements */
@@ -1632,9 +1637,9 @@ int mbsys_simrad2_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		ping->png_heading = (int) rint(heading * 100);
 
 		/* get speed  */
-		ping->png_speed = (int) rint(speed / 0.036);
+		ping->png_speed = (int) rint(speed / 0.036);		
 
-		/* insert distance and depth values into storage arrays */
+		/* get guesses at sonar and resolutions if needed  */
 		if (store->sonar == MBSYS_SIMRAD2_UNKNOWN)
 			{
 			if (nbath <= 87)
@@ -1691,12 +1696,57 @@ int mbsys_simrad2_insert(int verbose, void *mbio_ptr, void *store_ptr,
 				status = MB_FAILURE;
 				}
 			}
+			
+		/* set initial values for resolutions */
 		depthscale = 0.01 * ping->png_depth_res;
 		depthoffset = 0.01 * ping->png_xducer_depth
 				+ 655.36 * ping->png_offset_multiplier;
 		dacrscale  = 0.01 * ping->png_distance_res;
 		daloscale  = 0.01 * ping->png_distance_res;
 		reflscale  = 0.5;
+		
+		/* Figure out depth and distance scaling on
+		 * the fly. Using the existing scaling got us
+		 * into trouble with Revelle data in August-September 2001.
+		 * Use calculated values only if needed to fit
+		 * new depths into short int's.
+		 */
+		if (status == MB_SUCCESS)
+			{
+			/* get max depth and distance values */
+			depthmax = 0.0;
+			distancemax = 0.0;
+			for (i=0;i<nbath;i++)
+			    {
+			    if (beamflag[i] != MB_FLAG_NULL)
+				{
+				depthmax = MAX(depthmax, fabs(bath[i] - depthoffset));
+				distancemax = MAX(depthmax, fabs(bathacrosstrack[i]));
+				}
+			    }
+			    
+			/* figure out best scaling */
+			if (store->sonar == MBSYS_SIMRAD2_EM120
+				|| store->sonar == MBSYS_SIMRAD2_EM300)
+				png_depth_res = (int)(depthmax / 655.36) + 1;
+			else
+				png_depth_res = (int)(depthmax / 327.68) + 1;
+			png_distance_res = (int)(distancemax / 327.68) + 1;
+				
+			/* Change scaling if needed */
+			if (png_depth_res > ping->png_depth_res)
+				{
+				ping->png_depth_res = png_depth_res;
+				depthscale = 0.01 * ping->png_depth_res;
+				}
+			if (png_distance_res > ping->png_distance_res)
+				{
+				ping->png_distance_res = png_distance_res;
+				dacrscale  = 0.01 * ping->png_distance_res;
+				daloscale  = 0.01 * ping->png_distance_res;
+				}
+			}
+
 		if (status == MB_SUCCESS && ping->png_nbeams == 0)
 			{
 			for (i=0;i<nbath;i++)
