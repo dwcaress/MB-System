@@ -1,0 +1,32 @@
+#     The MB-system:	Makefile.template	5/24/94
+#     $Id: Makefile.template,v 4.0 1994-05-24 18:33:14 caress Exp $
+#
+#     Copyright (c) 1993, 1994 by 
+#     D. W. Caress (caress@lamont.ldgo.columbia.edu)
+#     and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
+#     Lamont-Doherty Earth Observatory
+#     Palisades, NY  10964
+#
+#     See README file for copying and redistribution conditions.
+#
+# Makefile template for MB-system at the top directory level
+# Author:	D. W. Caress
+# Date:		May 24, 1994
+
+# $Log: not supported by cvs2svn $
+#
+#
+
+all:
+	cd src; make all
+	catman -M man 1
+	catman -w -M man 1
+
+clean:
+	cd bin; rm -f *
+	cd lib; rm -f *
+	cd include; rm -f *
+	cd man/man1; rm -f *
+	cd man; rm -f -r cat1 whatis
+	cd src; make clean
+
