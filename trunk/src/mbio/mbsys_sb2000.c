@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_sb2000.c	10/4/94
- *	$Id: mbsys_sb2000.c,v 5.2 2001-03-22 20:50:02 caress Exp $
+ *	$Id: mbsys_sb2000.c,v 5.3 2001-04-06 22:05:59 caress Exp $
  *
  *    Copyright (c) 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	October 4, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2001/03/22  20:50:02  caress
+ * Trying to make version 5.0.beta0
+ *
  * Revision 5.1  2001/01/22  07:43:34  caress
  * Version 5.0.beta01
  *
@@ -103,7 +106,7 @@
 int mbsys_sb2000_alloc(int verbose, char *mbio_ptr, char **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_sb2000.c,v 5.2 2001-03-22 20:50:02 caress Exp $";
+ static char res_id[]="$Id: mbsys_sb2000.c,v 5.3 2001-04-06 22:05:59 caress Exp $";
 	char	*function_name = "mbsys_sb2000_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -546,7 +549,7 @@ int mbsys_sb2000_insert(int verbose, char *mbio_ptr, char *store_ptr,
 			{
 			for (i=0;i<nss;i++)
 				{
-				store->ss[i] = ss[i];
+				store->ss[i] = (mb_u_char) ss[i];
 				}
 			}
 		else

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.c	2/18/94
- *    $Id: mb_format.c,v 5.3 2001-03-22 20:45:56 caress Exp $
+ *    $Id: mb_format.c,v 5.4 2001-04-06 22:05:59 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	Februrary 18, 1994
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2001/03/22  20:45:56  caress
+ * Trying to make 5.0.beta0...
+ *
  * Revision 5.2  2001/01/22  07:43:34  caress
  * Version 5.0.beta01
  *
@@ -115,7 +118,7 @@
 #include "../../include/mbsys_simrad.h"
 #include "../../include/mbsys_simrad2.h"
 
-static char rcs_id[]="$Id: mb_format.c,v 5.3 2001-03-22 20:45:56 caress Exp $";
+static char rcs_id[]="$Id: mb_format.c,v 5.4 2001-04-06 22:05:59 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_format_register(int verbose, 
@@ -346,9 +349,9 @@ int mb_format_register(int verbose,
 		{
 		status = mbr_register_mbpronav(verbose, mbio_ptr, error); 
 		}
-	else if (*format == MBF_ELMK2XSE)
+	else if (*format == MBF_L3XSERAW)
 		{
-		status = mbr_register_elmk2xse(verbose, mbio_ptr, error); 
+		status = mbr_register_l3xseraw(verbose, mbio_ptr, error); 
 		}
 	else if (*format == MBF_HS10JAMS)
 		{
@@ -954,9 +957,9 @@ int mb_format_info(int verbose,
 			beamwidth_xtrack, beamwidth_ltrack, 
 			error);
 		}
-	else if (*format == MBF_ELMK2XSE)
+	else if (*format == MBF_L3XSERAW)
 		{
-		status = mbr_info_elmk2xse(verbose, system, 
+		status = mbr_info_l3xseraw(verbose, system, 
 			beams_bath_max, beams_amp_max, pixels_ss_max, 
 			format_name, system_name, format_description, 
 			numfile, filetype, 
@@ -1121,7 +1124,7 @@ int mb_format(int verbose, int *format, int *error)
 /*--------------------------------------------------------------------*/
 int mb_format_system(int verbose, int *format, int *system, int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.3 2001-03-22 20:45:56 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.4 2001-04-06 22:05:59 caress Exp $";
 	char	*function_name = "mb_format_system";
 	int	status;
 
@@ -1189,7 +1192,7 @@ int mb_format_dimensions(int verbose, int *format,
 		int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.3 2001-03-22 20:45:56 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.4 2001-04-06 22:05:59 caress Exp $";
 	char	*function_name = "mb_format_dimensions";
 	int	status;
 
@@ -1256,7 +1259,7 @@ int mb_format_dimensions(int verbose, int *format,
 /*--------------------------------------------------------------------*/
 int mb_format_description(int verbose, int *format, char *description, int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.3 2001-03-22 20:45:56 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.4 2001-04-06 22:05:59 caress Exp $";
 	char	*function_name = "mb_format_description";
 	int	status;
 
@@ -1320,7 +1323,7 @@ int mb_format_flags(int verbose, int *format,
 		int *variable_beams, int *traveltime, int *beam_flagging, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.3 2001-03-22 20:45:56 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.4 2001-04-06 22:05:59 caress Exp $";
 	char	*function_name = "mb_format_flags";
 	int	status;
 
@@ -1390,7 +1393,7 @@ int mb_format_source(int verbose, int *format,
 		int *nav_source, int *heading_source, int *vru_source, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.3 2001-03-22 20:45:56 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.4 2001-04-06 22:05:59 caress Exp $";
 	char	*function_name = "mb_format_source";
 	int	status;
 
@@ -1460,7 +1463,7 @@ int mb_format_beamwidth(int verbose, int *format,
 		double *beamwidth_xtrack, double *beamwidth_ltrack,
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.3 2001-03-22 20:45:56 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.4 2001-04-06 22:05:59 caress Exp $";
 	char	*function_name = "mb_format_beamwidth";
 	int	status;
 
@@ -1636,6 +1639,29 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 			fileroot[strlen(filename)-suffix_len] = '\0';
 			}
 		    *format = MBF_SB2100RW;
+		    found = MB_YES;
+		    }
+		}
+	    }
+
+	/* look for L3 XSE suffix convention */
+	if (found == MB_NO)
+	    {
+	    if (strlen(filename) > 4)
+		i = strlen(filename) - 4;
+	    else
+		i = 0;
+	    if ((suffix = strstr(&filename[i],".xse")) != NULL)
+		{
+		suffix_len = strlen(suffix);
+		if (suffix_len == 4)
+		    {
+		    if (fileroot != NULL)
+			{
+			strncpy(fileroot, filename, strlen(filename)-suffix_len);
+			fileroot[strlen(filename)-suffix_len] = '\0';
+			}
+		    *format = MBF_L3XSERAW;
 		    found = MB_YES;
 		    }
 		}
