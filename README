@@ -1,5 +1,8 @@
 Revision History:
 $Log: not supported by cvs2svn $
+# Revision 3.4  1993/11/05  14:59:04  caress
+# Some small changes by Dale.
+#
 # Revision 3.3  1993/11/04  17:46:36  caress
 # Updated for version 3.3.  Added where to get required
 # software packages and what Makefile to change to fit
@@ -15,7 +18,7 @@ $Log: not supported by cvs2svn $
 # *** empty log message ***
 #
 
-RCS ID: $Id: README,v 3.4 1993-11-05 14:59:04 caress Exp $
+RCS ID: $Id: README,v 3.5 1993-11-05 21:25:02 caress Exp $
 
 MBSYSTEM 3.30 RELEASE Notes:
 ----------------------------
@@ -81,18 +84,32 @@ is available as follows:
 
 Installing MB-System:
 --------------------
+	The MB-System source code is extracted by first uncompressing
+the tar file and then running tar:
+		% uncompress MB-System3.3.tar.Z
+		% tar xvf MB-System3.3.tar.Z
+	This will create a directory structure called mbsystem. To
+generate the executable programs, change directories to mbsystem,
+and then give the command "make all":
+		% cd mbsystem
+		% make all
+	The make command will descend recursively down through the
+directory structure, compiling source files, linking object files,
+and copying executables and manual pages to the appropriate
+directories.  The executables will be placed in mbsystem/bin, the
+libraries in mbsystem/lib, and the manual pages in mbsystem/man/man1.
 	The user will need to alter some of the Makefiles in the
 MB-System directory structure to reflect the local environment
 before compiling.  In particular, environment variables related
 to the location of GMT libraries and include files (GMTBINDIR, 
 GMTINCDIR, and GMTLIBDIR) must be set correctly in the following 
 Makefiles:
-	src/utilities/Makefile
-	src/macros/Makefile
-	src/gmt/Makefile
+		src/utilities/Makefile
+		src/macros/Makefile
+		src/gmt/Makefile
 Also, the location of the Levitus annual database file must be
 set in the environment variable LEVITUS in the Makefile
-	src/utilities/Makefile
+		src/utilities/Makefile
 if mblevitus is to be used.
 
 "Supported" Platforms:
