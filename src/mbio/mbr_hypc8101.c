@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hypc8101.c	8/8/94
- *	$Id: mbr_hypc8101.c,v 4.3 2000-09-30 06:34:20 caress Exp $
+ *	$Id: mbr_hypc8101.c,v 4.4 2000-10-11 01:03:21 caress Exp $
  *
  *    Copyright (c) 1998, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	December 10, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  2000/09/30  06:34:20  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.2  1999/08/16  23:14:41  caress
  * Added ability to handle Mesotech SM2000 data
  *
@@ -51,12 +54,9 @@
 #include "../../include/mbf_hypc8101.h"
 
 /*--------------------------------------------------------------------*/
-int mbr_alm_hypc8101(verbose,mbio_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-int	*error;
+int mbr_alm_hypc8101(int verbose, char *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_hypc8101.c,v 4.3 2000-09-30 06:34:20 caress Exp $";
+	static char res_id[]="$Id: mbr_hypc8101.c,v 4.4 2000-10-11 01:03:21 caress Exp $";
 	char	*function_name = "mbr_alm_hypc8101";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -103,10 +103,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_dem_hypc8101(verbose,mbio_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-int	*error;
+int mbr_dem_hypc8101(int verbose, char *mbio_ptr, int *error)
 {
 	char	*function_name = "mbr_dem_hypc8101";
 	int	status = MB_SUCCESS;
@@ -144,10 +141,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_zero_hypc8101(verbose,data_ptr,error)
-int	verbose;
-char	*data_ptr;
-int	*error;
+int mbr_zero_hypc8101(int verbose, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_zero_hypc8101";
 	int	status = MB_SUCCESS;
@@ -299,11 +293,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_rt_hypc8101(verbose,mbio_ptr,store_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-char	*store_ptr;
-int	*error;
+int mbr_rt_hypc8101(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 {
 	char	*function_name = "mbr_rt_hypc8101";
 	int	status = MB_SUCCESS;
@@ -743,11 +733,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_wt_hypc8101(verbose,mbio_ptr,store_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-char	*store_ptr;
-int	*error;
+int mbr_wt_hypc8101(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 {
 	char	*function_name = "mbr_wt_hypc8101";
 	int	status = MB_SUCCESS;
@@ -786,10 +772,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hypc8101_rd_data(verbose,mbio_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-int	*error;
+int mbr_hypc8101_rd_data(int verbose, char *mbio_ptr, int *error)
 {
 	char	*function_name = "mbr_hypc8101_rd_data";
 	int	status = MB_SUCCESS;

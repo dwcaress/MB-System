@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbfilter.c	1/16/95
- *    $Id: mbfilter.c,v 4.16 2000-09-30 07:06:28 caress Exp $
+ *    $Id: mbfilter.c,v 4.17 2000-10-11 01:06:15 caress Exp $
  *
  *    Copyright (c) 1995, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -32,6 +32,9 @@
  * Date:	January 16, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.16  2000/09/30  07:06:28  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.15  1999/12/28  00:28:40  caress
  * Fixed bug in calculating data records to hold in buffer.
  *
@@ -155,11 +158,9 @@ int mb_double_compare();
 
 /*--------------------------------------------------------------------*/
 
-main (argc, argv)
-int argc;
-char **argv; 
+main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbfilter.c,v 4.16 2000-09-30 07:06:28 caress Exp $";
+	static char rcs_id[] = "$Id: mbfilter.c,v 4.17 2000-10-11 01:06:15 caress Exp $";
 	static char program_name[] = "MBFILTER";
 	static char help_message[] =  
 "mbfilter applies one or more simple filters to the specified\n\t\
@@ -1483,14 +1484,8 @@ done, jbeg, jend, nbuff, nhold_ping, nhold);*/
 	exit(error);
 }
 /*--------------------------------------------------------------------*/
-int hipass_mean(verbose, n, val, wgt, 
-		hipass, error)
-int	verbose;
-int	n;
-double	*val;
-double	*wgt;
-double	*hipass;
-int	*error;
+int hipass_mean(int verbose, int n, double *val, double *wgt, 
+		double *hipass, int *error)
 {
 	char	*function_name = "hipass_mean";
 	int	status = MB_SUCCESS;
@@ -1540,15 +1535,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int hipass_gaussian(verbose, n, val, wgt, dis, 
-		hipass, error)
-int	verbose;
-int	n;
-double	*val;
-double	*wgt;
-double	*dis;
-double	*hipass;
-int	*error;
+int hipass_gaussian(int verbose, int n, double *val, double *wgt, double *dis, 
+		double *hipass, int *error)
 {
 	char	*function_name = "hipass_gaussian";
 	int	status = MB_SUCCESS;
@@ -1612,14 +1600,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int hipass_median(verbose, n, val, wgt, 
-		hipass, error)
-int	verbose;
-int	n;
-double	*val;
-double	*wgt;
-double	*hipass;
-int	*error;
+int hipass_median(int verbose, int n, double *val, double *wgt, 
+		double *hipass, int *error)
 {
 	char	*function_name = "hipass_median";
 	int	status = MB_SUCCESS;
@@ -1664,14 +1646,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int smooth_mean(verbose, n, val, wgt, 
-		smooth, error)
-int	verbose;
-int	n;
-double	*val;
-double	*wgt;
-double	*smooth;
-int	*error;
+int smooth_mean(int verbose, int n, double *val, double *wgt, 
+		double *smooth, int *error)
 {
 	char	*function_name = "smooth_mean";
 	int	status = MB_SUCCESS;
@@ -1721,15 +1697,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int smooth_gaussian(verbose, n, val, wgt, dis, 
-		smooth, error)
-int	verbose;
-int	n;
-double	*val;
-double	*wgt;
-double	*dis;
-double	*smooth;
-int	*error;
+int smooth_gaussian(int verbose, int n, double *val, double *wgt, double *dis, 
+		double *smooth, int *error)
 {
 	char	*function_name = "smooth_gaussian";
 	int	status = MB_SUCCESS;
@@ -1793,20 +1762,10 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int smooth_median(verbose, original, 
-		apply_threshold, threshold_lo, threshold_hi, 
-		n, val, wgt, 
-		smooth, error)
-int	verbose;
-double	original;
-int	apply_threshold;
-double	threshold_lo;
-double	threshold_hi;
-int	n;
-double	*val;
-double	*wgt;
-double	*smooth;
-int	*error;
+int smooth_median(int verbose, double original, 
+		int apply_threshold, double threshold_lo, double threshold_hi, 
+		int n, double *val, double *wgt, 
+		double *smooth, int *error)
 {
 	char	*function_name = "smooth_median";
 	int	status = MB_SUCCESS;
@@ -1863,14 +1822,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int smooth_gradient(verbose, n, val, wgt, 
-		smooth, error)
-int	verbose;
-int	n;
-double	*val;
-double	*wgt;
-double	*smooth;
-int	*error;
+int smooth_gradient(int verbose, int n, double *val, double *wgt, 
+		double *smooth, int *error)
 {
 	char	*function_name = "smooth_gradient";
 	int	status = MB_SUCCESS;
@@ -1937,14 +1890,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int contrast_edge(verbose, n, val, grad, 
-		result, error)
-int	verbose;
-int	n;
-double	*val;
-double	*grad;
-double	*result;
-int	*error;
+int contrast_edge(int verbose, int n, double *val, double *grad, 
+		double *result, int *error)
 {
 	char	*function_name = "contrast_edge";
 	int	status = MB_SUCCESS;
@@ -2011,14 +1958,8 @@ val[0], *result, edge, contrast);*/
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int contrast_gradient(verbose, n, val, wgt, 
-		result, error)
-int	verbose;
-int	n;
-double	*val;
-double	*wgt;
-double	*result;
-int	*error;
+int contrast_gradient(int verbose, int n, double *val, double *wgt, 
+		double *result, int *error)
 {
 	char	*function_name = "contrast_gradient";
 	int	status = MB_SUCCESS;

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrid.c	5/2/94
- *    $Id: mbgrid.c,v 4.49 2000-09-30 07:06:28 caress Exp $
+ *    $Id: mbgrid.c,v 4.50 2000-10-11 01:06:15 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -40,6 +40,9 @@
  * Rererewrite:	January 2, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.49  2000/09/30  07:06:28  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.48  2000/09/11  20:10:02  caress
  * Linked to new datalist parsing functions. Now supports recursive datalists
  * and comments in datalists.
@@ -292,7 +295,7 @@ double erfcc();
 double mbgrid_erf();
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbgrid.c,v 4.49 2000-09-30 07:06:28 caress Exp $";
+static char rcs_id[] = "$Id: mbgrid.c,v 4.50 2000-10-11 01:06:15 caress Exp $";
 static char program_name[] = "mbgrid";
 static char help_message[] =  "mbgrid is an utility used to grid bathymetry, amplitude, or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbgrid -Ifilelist -Oroot \
@@ -302,9 +305,7 @@ static char usage_message[] = "mbgrid -Ifilelist -Oroot \
           -Ttension -Utime -V -Wscale -Xextend]";
 /*--------------------------------------------------------------------*/
 
-main (argc, argv)
-int argc;
-char **argv; 
+main (int argc, char **argv)
 {
 	extern char *optarg;
 	extern int optkind;
@@ -3372,15 +3373,10 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 /*
  * function write_ascii writes output grid to an ascii file 
  */
-int write_ascii(verbose,outfile,grid,
-			nx,ny,xmin,xmax,ymin,ymax,
-			dx,dy,error)
-int	verbose;
-char	*outfile;
-float	*grid;
-int	nx, ny;
-double	xmin, xmax, ymin, ymax, dx, dy;
-int	*error;
+int write_ascii(int verbose, char *outfile, float *grid,
+		int nx, int ny, 
+		double xmin, double xmax, double ymin, double ymax,
+		double dx, double dy, int *error)
 {
 	char	*function_name = "write_ascii";
 	int	status = MB_SUCCESS;
@@ -3460,16 +3456,10 @@ int	*error;
 /*
  * function write_arcascii writes output grid to an Arc/Info ascii file 
  */
-int write_arcascii(verbose,outfile,grid,
-			nx,ny,xmin,xmax,ymin,ymax,
-			dx,dy,nodata,error)
-int	verbose;
-char	*outfile;
-float	*grid;
-int	nx, ny;
-double	xmin, xmax, ymin, ymax, dx, dy;
-float	nodata;
-int	*error;
+int write_arcascii(int verbose, char *outfile, float *grid,
+		int nx, int ny, 
+		double xmin, double xmax, double ymin, double ymax,
+		double dx, double dy, double nodata, int *error)
 {
 	char	*function_name = "write_ascii";
 	int	status = MB_SUCCESS;
@@ -3550,15 +3540,10 @@ int	*error;
  * function write_oldgrd writes output grid to a 
  * GMT version 1 binary grd file 
  */
-int write_oldgrd(verbose,outfile,grid,
-			nx,ny,xmin,xmax,ymin,ymax,
-			dx,dy,error)
-int	verbose;
-char	*outfile;
-float	*grid;
-int	nx, ny;
-double	xmin, xmax, ymin, ymax, dx, dy;
-int	*error;
+int write_oldgrd(int verbose, char *outfile, float *grid,
+		int nx, int ny, 
+		double xmin, double xmax, double ymin, double ymax,
+		double dx, double dy, int *error)
 {
 	char	*function_name = "write_oldgrd";
 	int	status = MB_SUCCESS;
@@ -3624,18 +3609,13 @@ int	*error;
  * function write_cdfgrd writes output grid to a 
  * GMT version 2 netCDF grd file 
  */
-int write_cdfgrd(verbose,outfile,grid,nx,ny,
-			xmin,xmax,ymin,ymax,zmin,zmax,dx,dy,
-			xlab,ylab,zlab,titl,projection,argc,argv,error)
-int	verbose;
-char	*outfile;
-float	*grid;
-int	nx, ny;
-double	xmin, xmax, ymin, ymax, zmin, zmax, dx, dy;
-char	*xlab, *ylab, *zlab, *titl, *projection;
-int	argc;
-char	**argv; 
-int	*error;
+int write_cdfgrd(int verbose, char *outfile, float *grid,
+		int nx, int ny, 
+		double xmin, double xmax, double ymin, double ymax,
+		double zmin, double zmax, double dx, double dy, 
+		char *xlab, char *ylab, char *zlab, char *titl, 
+		char *projection, int argc, char **argv, 
+		int *error)
 {
 	char	*function_name = "write_cdfgrd";
 	int	status = MB_SUCCESS;
@@ -3772,13 +3752,8 @@ int	*error;
  * function mbgrid_project translates lon lat values into grid projected
  * values 
  */
-int mbgrid_project(verbose, lon, lat, x, y, error)
-int	verbose;
-double	lon;
-double	lat;
-double	*x;
-double	*y;
-int	*error;
+int mbgrid_project(int verbose, double lon, double lat, 
+		double *x, double *y, int *error)
 {
 	char	*function_name = "mbgrid_project";
 	int	status = MB_SUCCESS;
@@ -3822,23 +3797,10 @@ int	*error;
  * function mbgrid_weight calculates the integrated weight over a bin
  * given the footprint of a sounding
  */
-int mbgrid_weight(verbose, foot_a, foot_b, scale, 
-		    pcx, pcy, dx, dy, 
-		    px, py, 
-		    weight, use, error)
-int	verbose;
-double	foot_a;
-double	foot_b;
-double	scale;
-double	pcx;
-double	pcy;
-double	dx;
-double	dy;
-double	*px;
-double	*py;
-double	*weight;
-int	*use;
-int	*error;
+int mbgrid_weight(int verbose, double foot_a, double foot_b, double scale, 
+		    double pcx, double pcy, double dx, double dy, 
+		    double *px, double *py, 
+		    double *weight, int *use, int *error)
 {
 	char	*function_name = "mbgrid_weight";
 	int	status = MB_SUCCESS;
@@ -3940,9 +3902,8 @@ int	*error;
 	return(status);
 }				   
 /*--------------------------------------------------------------------*/
-double erfcc(x)
-double x;
 /* approximate complementary error function from numerical recipies */
+double erfcc(double x)
 {
 	double t,z,ans;
 
@@ -3955,9 +3916,8 @@ fprintf(stderr, "x:%f ans:%f\n", x, ans);
 	return  x >= 0.0 ? ans : 2.0-ans;
 }
 /*--------------------------------------------------------------------*/
-double mbgrid_erf(x)
-double x;
 /* approximate error function altered from numerical recipies */
+double mbgrid_erf(double x)
 {
 	double t, z, ans, erfc_d, erf_d;
 

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sb2100rw.c	3/3/94
- *	$Id: mbr_sb2100rw.c,v 4.28 2000-09-30 06:34:20 caress Exp $
+ *	$Id: mbr_sb2100rw.c,v 4.29 2000-10-11 01:03:21 caress Exp $
  *
  *    Copyright (c) 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	March 3, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.28  2000/09/30  06:34:20  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.27  1999/09/14  20:39:11  caress
  * Fixed bugs handling HSMD
  *
@@ -148,12 +151,9 @@
 #endif
 
 /*--------------------------------------------------------------------*/
-int mbr_alm_sb2100rw(verbose,mbio_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-int	*error;
+int mbr_alm_sb2100rw(int verbose, char *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_sb2100rw.c,v 4.28 2000-09-30 06:34:20 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2100rw.c,v 4.29 2000-10-11 01:03:21 caress Exp $";
 	char	*function_name = "mbr_alm_sb2100rw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -207,10 +207,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_dem_sb2100rw(verbose,mbio_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-int	*error;
+int mbr_dem_sb2100rw(int verbose, char *mbio_ptr, int *error)
 {
 	char	*function_name = "mbr_dem_sb2100rw";
 	int	status = MB_SUCCESS;
@@ -248,10 +245,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_zero_sb2100rw(verbose,data_ptr,error)
-int	verbose;
-char	*data_ptr;
-int	*error;
+int mbr_zero_sb2100rw(int verbose, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_zero_sb2100rw";
 	int	status = MB_SUCCESS;
@@ -390,11 +384,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_rt_sb2100rw(verbose,mbio_ptr,store_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-char	*store_ptr;
-int	*error;
+int mbr_rt_sb2100rw(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 {
 	char	*function_name = "mbr_rt_sb2100rw";
 	int	status = MB_SUCCESS;
@@ -808,11 +798,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_wt_sb2100rw(verbose,mbio_ptr,store_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-char	*store_ptr;
-int	*error;
+int mbr_wt_sb2100rw(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 {
 	char	*function_name = "mbr_wt_sb2100rw";
 	int	status = MB_SUCCESS;
@@ -1216,10 +1202,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_sb2100rw_rd_data(verbose,mbio_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-int	*error;
+int mbr_sb2100rw_rd_data(int verbose, char *mbio_ptr, int *error)
 {
 	char	*function_name = "mbr_sb2100rw_rd_data";
 	int	status = MB_SUCCESS;
@@ -1383,12 +1366,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int	mbr_sb2100rw_rd_label(verbose,mbfp,line,type,error)
-int	verbose;
-FILE	*mbfp;
-char	*line;
-int	*type;
-int	*error;
+int	mbr_sb2100rw_rd_label(int verbose, FILE *mbfp, 
+		char *line, int *type, int *error)
 {
 	char	*function_name = "mbr_sb2100rw_rd_label";
 	int	status = MB_SUCCESS;
@@ -1450,12 +1429,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int	mbr_sb2100rw_read_line(verbose,mbfp,minimum_size,line,error)
-int	verbose;
-FILE	*mbfp;
-int	minimum_size;
-char	*line;
-int	*error;
+int	mbr_sb2100rw_read_line(int verbose, FILE *mbfp,
+		int minimum_size, char *line, int *error)
 {
 	char	*function_name = "mbr_sb2100rw_read_line";
 	int	status = MB_SUCCESS;
@@ -1527,11 +1502,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_sb2100rw_rd_pr(verbose,mbfp,data,error)
-int	verbose;
-FILE	*mbfp;
-struct mbf_sb2100rw_struct *data;
-int	*error;
+int mbr_sb2100rw_rd_pr(int verbose, FILE *mbfp, 
+		struct mbf_sb2100rw_struct *data, int *error)
 {
 	char	*function_name = "mbr_sb2100rw_rd_pr";
 	int	status = MB_SUCCESS;
@@ -1625,11 +1597,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_sb2100rw_rd_tr(verbose,mbfp,data,error)
-int	verbose;
-FILE	*mbfp;
-struct mbf_sb2100rw_struct *data;
-int	*error;
+int mbr_sb2100rw_rd_tr(int verbose, FILE *mbfp, 
+		struct mbf_sb2100rw_struct *data, int *error)
 {
 	char	*function_name = "mbr_sb2100rw_rd_tr";
 	int	status = MB_SUCCESS;
@@ -1681,11 +1650,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_sb2100rw_rd_dr(verbose,mbfp,data,error)
-int	verbose;
-FILE	*mbfp;
-struct mbf_sb2100rw_struct *data;
-int	*error;
+int mbr_sb2100rw_rd_dr(int verbose, FILE *mbfp, 
+		struct mbf_sb2100rw_struct *data, int *error)
 {
 	char	*function_name = "mbr_sb2100rw_rd_dr";
 	int	status = MB_SUCCESS;
@@ -1908,11 +1874,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_sb2100rw_rd_ss(verbose,mbfp,data,error)
-int	verbose;
-FILE	*mbfp;
-struct mbf_sb2100rw_struct *data;
-int	*error;
+int mbr_sb2100rw_rd_ss(int verbose, FILE *mbfp, 
+		struct mbf_sb2100rw_struct *data, int *error)
 {
 	char	*function_name = "mbr_sb2100rw_rd_ss";
 	int	status = MB_SUCCESS;
@@ -2160,11 +2123,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_sb2100rw_wr_data(verbose,mbio_ptr,data_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-char	*data_ptr;
-int	*error;
+int mbr_sb2100rw_wr_data(int verbose, char *mbio_ptr, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_sb2100rw_wr_data";
 	int	status = MB_SUCCESS;
@@ -2236,11 +2195,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int	mbr_sb2100rw_wr_label(verbose,mbfp,type,error)
-int	verbose;
-FILE	*mbfp;
-char	type;
-int	*error;
+int	mbr_sb2100rw_wr_label(int verbose, FILE *mbfp, char type, int *error)
 {
 	char	*function_name = "mbr_sb2100rw_wr_label";
 	int	status = MB_SUCCESS;
@@ -2276,11 +2231,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int	mbr_sb2100rw_write_line(verbose,mbfp,line,error)
-int	verbose;
-FILE	*mbfp;
-char	*line;
-int	*error;
+int	mbr_sb2100rw_write_line(int verbose, FILE *mbfp, char *line, int *error)
 {
 	char	*function_name = "mbr_sb2100rw_write_line";
 	int	status = MB_SUCCESS;
@@ -2323,11 +2274,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_sb2100rw_wr_rawline(verbose,mbfp,data_ptr,error)
-int	verbose;
-FILE	*mbfp;
-char	*data_ptr;
-int	*error;
+int mbr_sb2100rw_wr_rawline(int verbose, FILE *mbfp, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_sb2100rw_wr_rawline";
 	int	status = MB_SUCCESS;
@@ -2388,11 +2335,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_sb2100rw_wr_pr(verbose,mbfp,data_ptr,error)
-int	verbose;
-FILE	*mbfp;
-char	*data_ptr;
-int	*error;
+int mbr_sb2100rw_wr_pr(int verbose, FILE *mbfp, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_sb2100rw_wr_pr";
 	int	status = MB_SUCCESS;
@@ -2489,11 +2432,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_sb2100rw_wr_tr(verbose,mbfp,data_ptr,error)
-int	verbose;
-FILE	*mbfp;
-char	*data_ptr;
-int	*error;
+int mbr_sb2100rw_wr_tr(int verbose, FILE *mbfp, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_sb2100rw_wr_tr";
 	int	status = MB_SUCCESS;
@@ -2560,11 +2499,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_sb2100rw_wr_dr(verbose,mbfp,data_ptr,error)
-int	verbose;
-FILE	*mbfp;
-char	*data_ptr;
-int	*error;
+int mbr_sb2100rw_wr_dr(int verbose, FILE *mbfp, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_sb2100rw_wr_dr";
 	int	status = MB_SUCCESS;
@@ -2808,11 +2743,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_sb2100rw_wr_ss(verbose,mbfp,data_ptr,error)
-int	verbose;
-FILE	*mbfp;
-char	*data_ptr;
-int	*error;
+int mbr_sb2100rw_wr_ss(int verbose, FILE *mbfp, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_sb2100rw_wr_ss";
 	int	status = MB_SUCCESS;

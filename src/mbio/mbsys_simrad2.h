@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad.h	10/9/98
- *	$Id: mbsys_simrad2.h,v 4.3 2000-09-30 06:31:19 caress Exp $
+ *	$Id: mbsys_simrad2.h,v 4.4 2000-10-11 01:03:21 caress Exp $
  *
  *    Copyright (c) 1998, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	October 9, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  2000/09/30  06:31:19  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.2  2000/07/20  20:24:59  caress
  * First cut at supporting both EM120 and EM1002.
  *
@@ -240,7 +243,7 @@
 /* maximum number of beams and pixels */
 #define	MBSYS_SIMRAD2_MAXBEAMS		254
 #define	MBSYS_SIMRAD2_MAXPIXELS		1024
-#define	MBSYS_SIMRAD2_MAXRAWPIXELS	8192
+#define	MBSYS_SIMRAD2_MAXRAWPIXELS	32000
 #define	MBSYS_SIMRAD2_MAXSVP		1024
 #define	MBSYS_SIMRAD2_MAXATTITUDE	100
 #define	MBSYS_SIMRAD2_MAXHEADING	100

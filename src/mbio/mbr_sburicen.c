@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sburicen.c	2/2/93
- *	$Id: mbr_sburicen.c,v 4.9 2000-09-30 06:34:20 caress Exp $
+ *	$Id: mbr_sburicen.c,v 4.10 2000-10-11 01:03:21 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	February 2, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.9  2000/09/30  06:34:20  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.8  1998/10/05  17:46:15  caress
  * MB-System version 4.6beta
  *
@@ -89,12 +92,9 @@
 #endif
 
 /*--------------------------------------------------------------------*/
-int mbr_alm_sburicen(verbose,mbio_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-int	*error;
+int mbr_alm_sburicen(int verbose, char *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_sburicen.c,v 4.9 2000-09-30 06:34:20 caress Exp $";
+ static char res_id[]="$Id: mbr_sburicen.c,v 4.10 2000-10-11 01:03:21 caress Exp $";
 	char	*function_name = "mbr_alm_sburicen";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -139,10 +139,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_dem_sburicen(verbose,mbio_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-int	*error;
+int mbr_dem_sburicen(int verbose, char *mbio_ptr, int *error)
 {
 	char	*function_name = "mbr_dem_sburicen";
 	int	status = MB_SUCCESS;
@@ -180,11 +177,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_rt_sburicen(verbose,mbio_ptr,store_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-char	*store_ptr;
-int	*error;
+int mbr_rt_sburicen(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 {
 	char	*function_name = "mbr_rt_sburicen";
 	int	status = MB_SUCCESS;
@@ -469,11 +462,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_wt_sburicen(verbose,mbio_ptr,store_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-char	*store_ptr;
-int	*error;
+int mbr_wt_sburicen(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 {
 	char	*function_name = "mbr_wt_sburicen";
 	int	status = MB_SUCCESS;

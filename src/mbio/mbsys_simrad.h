@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad.h	8/5/94
- *	$Id: mbsys_simrad.h,v 4.10 2000-09-30 06:31:19 caress Exp $
+ *	$Id: mbsys_simrad.h,v 4.11 2000-10-11 01:03:21 caress Exp $
  *
  *    Copyright (c) 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -29,6 +29,9 @@
  * Date:	August 5, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.10  2000/09/30  06:31:19  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.9  1998/12/17  23:01:15  caress
  * MB-System version 4.6beta4
  *
@@ -139,7 +142,7 @@
 
 /* maximum number of beams and pixels */
 #define	MBSYS_SIMRAD_MAXBEAMS	121
-#define	MBSYS_SIMRAD_MAXPIXELS	50*MBSYS_SIMRAD_MAXBEAMS
+#define	MBSYS_SIMRAD_MAXPIXELS	32000
 #define	MBSYS_SIMRAD_COMMENT_LENGTH	80
 
 /* datagram types */

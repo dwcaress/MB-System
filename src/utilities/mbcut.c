@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcut.c	1/26/95
  *
- *    $Id: mbcut.c,v 4.10 2000-09-30 07:06:28 caress Exp $
+ *    $Id: mbcut.c,v 4.11 2000-10-11 01:06:15 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	January 26, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.10  2000/09/30  07:06:28  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.9  1998/10/05  19:19:24  caress
  * MB-System version 4.6beta
  *
@@ -82,12 +85,10 @@
 
 /*--------------------------------------------------------------------*/
 
-main (argc, argv)
-int argc;
-char **argv; 
+main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbcut.c,v 4.10 2000-09-30 07:06:28 caress Exp $";
+	static char rcs_id[] = "$Id: mbcut.c,v 4.11 2000-10-11 01:06:15 caress Exp $";
 	static char program_name[] = "mbcut";
 	static char help_message[] = 
 "MBCUT removes swath data values that lie outside ranges\n\t\

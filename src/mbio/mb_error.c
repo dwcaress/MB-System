@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_error.c	2/2/93
- *    $Id: mb_error.c,v 4.6 2000-09-30 06:26:58 caress Exp $
+ *    $Id: mb_error.c,v 4.7 2000-10-11 01:02:30 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	February 2, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.6  2000/09/30  06:26:58  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.5  1998/10/05  18:32:27  caress
  * MB-System version 4.6beta
  *
@@ -71,12 +74,9 @@
 #include "../../include/mb_status.h"
 
 /*--------------------------------------------------------------------*/
-int mb_error(verbose,error,message)
-int	verbose;
-int	error;
-char	**message;
+int mb_error(int verbose, int error, char **message)
 {
-  static char rcs_id[]="$Id: mb_error.c,v 4.6 2000-09-30 06:26:58 caress Exp $";
+  static char rcs_id[]="$Id: mb_error.c,v 4.7 2000-10-11 01:02:30 caress Exp $";
 	char	*function_name = "mb_error";
 	int	status;
 

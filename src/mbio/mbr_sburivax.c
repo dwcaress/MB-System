@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sburivax.c	2/2/93
- *	$Id: mbr_sburivax.c,v 4.8 2000-09-30 06:34:20 caress Exp $
+ *	$Id: mbr_sburivax.c,v 4.9 2000-10-11 01:03:21 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -28,6 +28,9 @@
  * Author:	D. W. Caress
  * Date:	February 2, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.8  2000/09/30  06:34:20  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.7  1998/10/05  17:46:15  caress
  * MB-System version 4.6beta
  *
@@ -82,12 +85,9 @@
 #endif
 
 /*--------------------------------------------------------------------*/
-int mbr_alm_sburivax(verbose,mbio_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-int	*error;
+int mbr_alm_sburivax(int verbose, char *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_sburivax.c,v 4.8 2000-09-30 06:34:20 caress Exp $";
+ static char res_id[]="$Id: mbr_sburivax.c,v 4.9 2000-10-11 01:03:21 caress Exp $";
 	char	*function_name = "mbr_alm_sburivax";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -136,10 +136,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_dem_sburivax(verbose,mbio_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-int	*error;
+int mbr_dem_sburivax(int verbose, char *mbio_ptr, int *error)
 {
 	char	*function_name = "mbr_dem_sburivax";
 	int	status = MB_SUCCESS;
@@ -177,11 +174,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_rt_sburivax(verbose,mbio_ptr,store_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-char	*store_ptr;
-int	*error;
+int mbr_rt_sburivax(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 {
 	char	*function_name = "mbr_rt_sburivax";
 	int	status = MB_SUCCESS;
@@ -479,11 +472,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_wt_sburivax(verbose,mbio_ptr,store_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-char	*store_ptr;
-int	*error;
+int mbr_wt_sburivax(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 {
 	char	*function_name = "mbr_wt_sburivax";
 	int	status = MB_SUCCESS;

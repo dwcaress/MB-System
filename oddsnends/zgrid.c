@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	zgrid.c	    4/25/95
- *    $Id: zgrid.c,v 4.3 2000-09-30 07:06:28 caress Exp $
+ *    $Id: zgrid.c,v 4.4 2000-10-11 01:06:15 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -53,6 +53,9 @@
  * Date:	April 25, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  2000/09/30  07:06:28  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.2  1997/04/21  17:19:14  caress
  * MB-System 4.5 Beta Release.
  *
@@ -116,17 +119,11 @@
 /* MBIO include files */
 #include "../../include/mb_define.h"
 
-/* ----------------------------------------------------------------------- */
-int zgrid(z, nx, ny, x1, y1, dx, dy, xyz, n, zpij, knxt, imnew, cay, nrng)
-float *z;
-int *nx, *ny;
-float *x1, *y1, *dx, *dy, *xyz;
-int *n;
-float *zpij;
-int *knxt;
-int *imnew;
-float *cay;
-int *nrng;
+/*----------------------------------------------------------------------- */
+int zgrid(float *z, int *nx, int *ny, 
+		float *x1, float *y1, float *dx, float *dy, float *xyz, 
+		int *n, float *zpij, int *knxt, int *imnew, 
+		float *cay, int *nrng)
 {
     /* System generated locals */
     int z_dim1, z_offset, i__1, i__2, i__3;

@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmerge.c	2/20/93
  *
- *    $Id: mbmerge.c,v 4.26 2000-09-30 07:06:28 caress Exp $
+ *    $Id: mbmerge.c,v 4.27 2000-10-11 01:06:15 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	February 20, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.26  2000/09/30  07:06:28  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.25  1999/12/29  00:35:11  caress
  * Release 4.6.8
  *
@@ -142,12 +145,10 @@
 
 /*--------------------------------------------------------------------*/
 
-main (argc, argv)
-int argc;
-char **argv; 
+main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbmerge.c,v 4.26 2000-09-30 07:06:28 caress Exp $";
+	static char rcs_id[] = "$Id: mbmerge.c,v 4.27 2000-10-11 01:06:15 caress Exp $";
 	static char program_name[] = "MBMERGE";
 	static char help_message[] =  "MBMERGE merges new navigation with swath sonar data from an \ninput file and then writes the merged data to an output \nswath sonar data file. The default input \nand output streams are stdin and stdout.";
 	static char usage_message[] = "mbmerge [-Aheading_offset -B -Fformat -Llonflip -V -H  -Iinfile -Ooutfile -Mnavformat -Nnavfile -Z]";
@@ -1138,10 +1139,8 @@ char **argv;
 	exit(error);
 }
 /*--------------------------------------------------------------------*/
-int spline(x,y,n,yp1,ypn,y2)
 /* From Numerical Recipies */
-double x[],y[],yp1,ypn,y2[];
-int n;
+int spline(double *x, double *y, int n, double yp1, double ypn, double *y2)
 {
 	int i,k;
 	double p,qn,sig,un,*u,*vector();
@@ -1174,11 +1173,8 @@ int n;
 	return(0);
 }
 /*--------------------------------------------------------------------*/
-int splint(xa,ya,y2a,n,x,y,i)
-/* From Numerical Recipies */
-double xa[],ya[],y2a[],x,*y;
-int n;
-int *i;
+int splint(double *xa, double *ya, double *y2a,
+		int n, double x, double *y, int *i)
 {
 	int klo,khi,k;
 	double h,b,a;
@@ -1207,10 +1203,8 @@ int *i;
 	return(0);
 }
 /*--------------------------------------------------------------------*/
-int linint(xa,ya,n,x,y,i)
-double xa[],ya[],x,*y;
-int n;
-int *i;
+int linint(double *xa, double *ya,
+		int n, double x, double *y, int *i)
 {
 	int klo,khi,k;
 	double h,b;
@@ -1237,8 +1231,7 @@ int *i;
 	return(0);
 }
 /*--------------------------------------------------------------------*/
-double *vector(nl,nh)
-int nl,nh;
+double *vector(int nl, int nh)
 {
 	double *v;
 	v = (double *) malloc ((unsigned) (nh-nl+1)*sizeof(double));
@@ -1246,9 +1239,7 @@ int nl,nh;
 	return v-nl;
 }
 /*--------------------------------------------------------------------*/
-void free_vector(v,nl,nh)
-double *v;
-int nl,nh;
+void free_vector(double *v, int nl, int nh)
 {
 	free((char*) (v+nl));
 }

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_omghdcsj.c	3/10/99
- *	$Id: mbr_omghdcsj.c,v 4.4 2000-09-30 06:34:20 caress Exp $
+ *	$Id: mbr_omghdcsj.c,v 4.5 2000-10-11 01:03:21 caress Exp $
  *
  *    Copyright (c) 1999, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	March 10, 1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.4  2000/09/30  06:34:20  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.3  1999/08/08  04:16:03  caress
  * Added ELMK2XSE format.
  *
@@ -66,12 +69,9 @@
 int mb_double_compare();
 
 /*--------------------------------------------------------------------*/
-int mbr_alm_omghdcsj(verbose,mbio_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-int	*error;
+int mbr_alm_omghdcsj(int verbose, char *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_omghdcsj.c,v 4.4 2000-09-30 06:34:20 caress Exp $";
+ static char res_id[]="$Id: mbr_omghdcsj.c,v 4.5 2000-10-11 01:03:21 caress Exp $";
 	char	*function_name = "mbr_alm_omghdcsj";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -253,10 +253,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_dem_omghdcsj(verbose,mbio_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-int	*error;
+int mbr_dem_omghdcsj(int verbose, char *mbio_ptr, int *error)
 {
 	char	*function_name = "mbr_dem_omghdcsj";
 	int	status = MB_SUCCESS;
@@ -308,11 +305,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_rt_omghdcsj(verbose,mbio_ptr,store_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-char	*store_ptr;
-int	*error;
+int mbr_rt_omghdcsj(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 {
 	char	*function_name = "mbr_rt_omghdcsj";
 	int	status = MB_SUCCESS;
@@ -2057,11 +2050,7 @@ sample_count, beam->offset, offset_start);
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_wt_omghdcsj(verbose,mbio_ptr,store_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-char	*store_ptr;
-int	*error;
+int mbr_wt_omghdcsj(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 {
 	char	*function_name = "mbr_wt_omghdcsj";
 	int	status = MB_SUCCESS;

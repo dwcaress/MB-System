@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_process.c	9/11/00
- *    $Id: mb_process.c,v 4.1 2000-10-03 21:46:59 caress Exp $
+ *    $Id: mb_process.c,v 4.2 2000-10-11 01:02:30 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	September 11, 2000
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  2000/10/03  21:46:59  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.0  2000/09/30  06:28:42  caress
  * Snapshot for Dale.
  *
@@ -41,7 +44,7 @@
 #include "../../include/mb_status.h"
 #include "../../include/mb_process.h"
 
-static char rcs_id[]="$Id: mb_process.c,v 4.1 2000-10-03 21:46:59 caress Exp $";
+static char rcs_id[]="$Id: mb_process.c,v 4.2 2000-10-11 01:02:30 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_pr_readpar(int verbose, char *file, int lookforfiles, 
@@ -223,14 +226,14 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 			{
 			process->mbp_nav_algorithm = MBP_NAV_SPLINE;
 			}
-		    else if (strncmp(buffer, "HEADING", 7) == 0)
-			{
-			process->mbp_heading_mode = MBP_HEADING_CALC;
-			}
 		    else if (strncmp(buffer, "HEADINGOFFSET", 13) == 0)
 			{
 			sscanf(buffer, "%s %lf", dummy, &process->mbp_headingbias);
 			process->mbp_heading_mode = MBP_HEADING_OFFSET;
+			}
+		    else if (strncmp(buffer, "HEADING", 7) == 0)
+			{
+			process->mbp_heading_mode = MBP_HEADING_CALC;
 			}
 		    else if (strncmp(buffer, "SSVOFFSET", 11) == 0
 			&& process->mbp_ssv_mode == MBP_SSV_OFF)

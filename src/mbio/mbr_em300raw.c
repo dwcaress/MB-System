@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em300raw.c	10/16/98
- *	$Id: mbr_em300raw.c,v 4.9 2000-09-30 06:34:20 caress Exp $
+ *	$Id: mbr_em300raw.c,v 4.10 2000-10-11 01:03:21 caress Exp $
  *
  *    Copyright (c) 1998, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	October 16,  1998
  * $Log: not supported by cvs2svn $
+ * Revision 4.9  2000/09/30  06:34:20  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.8  2000/09/19  23:13:26  caress
  * Applied fixes from Gordon Keith at AGSO.
  *
@@ -78,12 +81,9 @@
 int mb_double_compare();
 
 /*--------------------------------------------------------------------*/
-int mbr_alm_em300raw(verbose,mbio_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-int	*error;
+int mbr_alm_em300raw(int verbose, char *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_em300raw.c,v 4.9 2000-09-30 06:34:20 caress Exp $";
+	static char res_id[]="$Id: mbr_em300raw.c,v 4.10 2000-10-11 01:03:21 caress Exp $";
 	char	*function_name = "mbr_alm_em300raw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -131,10 +131,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_dem_em300raw(verbose,mbio_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-int	*error;
+int mbr_dem_em300raw(int verbose, char *mbio_ptr, int *error)
 {
 	char	*function_name = "mbr_dem_em300raw";
 	int	status = MB_SUCCESS;
@@ -174,10 +171,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_zero_em300raw(verbose,data_ptr,error)
-int	verbose;
-char	*data_ptr;
-int	*error;
+int mbr_zero_em300raw(int verbose, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_zero_em300raw";
 	int	status = MB_SUCCESS;
@@ -683,10 +677,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_zero_ss_em300raw(verbose,data_ptr,error)
-int	verbose;
-char	*data_ptr;
-int	*error;
+int mbr_zero_ss_em300raw(int verbose, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_zero_ss_em300raw";
 	int	status = MB_SUCCESS;
@@ -782,11 +773,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_rt_em300raw(verbose,mbio_ptr,store_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-char	*store_ptr;
-int	*error;
+int mbr_rt_em300raw(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 {
 	char	*function_name = "mbr_rt_em300raw";
 	int	status = MB_SUCCESS;
@@ -1890,11 +1877,7 @@ i, kk, xtrack, *pixel_size);*/
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_wt_em300raw(verbose,mbio_ptr,store_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-char	*store_ptr;
-int	*error;
+int mbr_wt_em300raw(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 {
 	char	*function_name = "mbr_wt_em300raw";
 	int	status = MB_SUCCESS;
@@ -2427,10 +2410,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em300raw_rd_data(verbose,mbio_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-int	*error;
+int mbr_em300raw_rd_data(int verbose, char *mbio_ptr, int *error)
 {
 	char	*function_name = "mbr_em300raw_rd_data";
 	int	status = MB_SUCCESS;
@@ -2884,11 +2864,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em300raw_chk_label(verbose,mbio_ptr,type,sonar)
-int	verbose;
-char	*mbio_ptr;
-short	type;
-short	sonar;
+int mbr_em300raw_chk_label(int verbose, char *mbio_ptr, short type, short sonar)
 {
 	char	*function_name = "mbr_em300raw_chk_label";
 	int	status = MB_SUCCESS;
@@ -3002,14 +2978,9 @@ short	sonar;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em300raw_rd_start(verbose,mbfp,data,type,sonar,version,error)
-int	verbose;
-FILE	*mbfp;
-struct mbf_em300raw_struct *data;
-short	type;
-short	sonar;
-int	*version;
-int	*error;
+int mbr_em300raw_rd_start(int verbose, FILE *mbfp, 
+		struct mbf_em300raw_struct *data, 
+		short type, short sonar, int *version, int *error)
 {
 	char	*function_name = "mbr_em300raw_rd_start";
 	int	status = MB_SUCCESS;
@@ -3399,12 +3370,9 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em300raw_rd_run_parameter(verbose,mbfp,data,sonar,error)
-int	verbose;
-FILE	*mbfp;
-struct mbf_em300raw_struct *data;
-short	sonar;
-int	*error;
+int mbr_em300raw_rd_run_parameter(int verbose, FILE *mbfp, 
+		struct mbf_em300raw_struct *data, 
+		short sonar, int *error)
 {
 	char	*function_name = "mbr_em300raw_rd_run_parameter";
 	int	status = MB_SUCCESS;
@@ -3574,12 +3542,9 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em300raw_rd_clock(verbose,mbfp,data,sonar,error)
-int	verbose;
-FILE	*mbfp;
-struct mbf_em300raw_struct *data;
-short	sonar;
-int	*error;
+int mbr_em300raw_rd_clock(int verbose, FILE *mbfp, 
+		struct mbf_em300raw_struct *data, 
+		short sonar, int *error)
 {
 	char	*function_name = "mbr_em300raw_rd_clock";
 	int	status = MB_SUCCESS;
@@ -3688,12 +3653,9 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em300raw_rd_tide(verbose,mbfp,data,sonar,error)
-int	verbose;
-FILE	*mbfp;
-struct mbf_em300raw_struct *data;
-short	sonar;
-int	*error;
+int mbr_em300raw_rd_tide(int verbose, FILE *mbfp, 
+		struct mbf_em300raw_struct *data, 
+		short sonar, int *error)
 {
 	char	*function_name = "mbr_em300raw_rd_tide";
 	int	status = MB_SUCCESS;
@@ -3804,12 +3766,9 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em300raw_rd_height(verbose,mbfp,data,sonar,error)
-int	verbose;
-FILE	*mbfp;
-struct mbf_em300raw_struct *data;
-short	sonar;
-int	*error;
+int mbr_em300raw_rd_height(int verbose, FILE *mbfp, 
+		struct mbf_em300raw_struct *data, 
+		short sonar, int *error)
 {
 	char	*function_name = "mbr_em300raw_rd_height";
 	int	status = MB_SUCCESS;
@@ -3913,12 +3872,9 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em300raw_rd_heading(verbose,mbfp,data,sonar,error)
-int	verbose;
-FILE	*mbfp;
-struct mbf_em300raw_struct *data;
-short	sonar;
-int	*error;
+int mbr_em300raw_rd_heading(int verbose, FILE *mbfp, 
+		struct mbf_em300raw_struct *data, 
+		short sonar, int *error)
 {
 	char	*function_name = "mbr_em300raw_rd_heading";
 	int	status = MB_SUCCESS;
@@ -4075,12 +4031,9 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em300raw_rd_attitude(verbose,mbfp,data,sonar,error)
-int	verbose;
-FILE	*mbfp;
-struct mbf_em300raw_struct *data;
-short	sonar;
-int	*error;
+int mbr_em300raw_rd_attitude(int verbose, FILE *mbfp, 
+		struct mbf_em300raw_struct *data, 
+		short sonar, int *error)
 {
 	char	*function_name = "mbr_em300raw_rd_attitude";
 	int	status = MB_SUCCESS;
@@ -4255,12 +4208,9 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em300raw_rd_pos(verbose,mbfp,data,sonar,error)
-int	verbose;
-FILE	*mbfp;
-struct mbf_em300raw_struct *data;
-short	sonar;
-int	*error;
+int mbr_em300raw_rd_pos(int verbose, FILE *mbfp, 
+		struct mbf_em300raw_struct *data, 
+		short sonar, int *error)
 {
 	char	*function_name = "mbr_em300raw_rd_pos";
 	int	status = MB_SUCCESS;
@@ -4440,12 +4390,9 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em300raw_rd_svp(verbose,mbfp,data,sonar,error)
-int	verbose;
-FILE	*mbfp;
-struct mbf_em300raw_struct *data;
-short	sonar;
-int	*error;
+int mbr_em300raw_rd_svp(int verbose, FILE *mbfp, 
+		struct mbf_em300raw_struct *data, 
+		short sonar, int *error)
 {
 	char	*function_name = "mbr_em300raw_rd_svp";
 	int	status = MB_SUCCESS;
@@ -4614,12 +4561,9 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em300raw_rd_svp2(verbose,mbfp,data,sonar,error)
-int	verbose;
-FILE	*mbfp;
-struct mbf_em300raw_struct *data;
-short	sonar;
-int	*error;
+int mbr_em300raw_rd_svp2(int verbose, FILE *mbfp, 
+		struct mbf_em300raw_struct *data, 
+		short sonar, int *error)
 {
 	char	*function_name = "mbr_em300raw_rd_svp2";
 	int	status = MB_SUCCESS;
@@ -4788,14 +4732,9 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em300raw_rd_bath(verbose,mbfp,data,match,sonar,version,error)
-int	verbose;
-FILE	*mbfp;
-struct mbf_em300raw_struct *data;
-int	*match;
-short	sonar;
-int	version;
-int	*error;
+int mbr_em300raw_rd_bath(int verbose, FILE *mbfp, 
+		struct mbf_em300raw_struct *data, 
+		int *match, short sonar, int version, int *error)
 {
 	char	*function_name = "mbr_em300raw_rd_bath";
 	int	status = MB_SUCCESS;
@@ -5069,13 +5008,9 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em300raw_rd_ss(verbose,mbfp,data,sonar,match,error)
-int	verbose;
-FILE	*mbfp;
-struct mbf_em300raw_struct *data;
-short	sonar;
-int	*match;
-int	*error;
+int mbr_em300raw_rd_ss(int verbose, FILE *mbfp, 
+		struct mbf_em300raw_struct *data, 
+		short sonar, int *match, int *error)
 {
 	char	*function_name = "mbr_em300raw_rd_ss";
 	int	status = MB_SUCCESS;
@@ -5232,13 +5167,15 @@ int	*error;
 				data->png_beam_samples[i] = 0;
 			}
 		}
-	    if (data->png_npixels > MBF_EM300RAW_MAXRAWPIXELS
-		&& verbose > 0)
+	    if (data->png_npixels > MBF_EM300RAW_MAXRAWPIXELS)
 		{
-fprintf(stderr, "WARNING: EM300/3000 sidescan pixels %d exceed maximum %d!\n", 
-data->png_npixels, MBF_EM300RAW_MAXRAWPIXELS);
+		if (verbose > 0)
+		    fprintf(stderr, "WARNING: EM300/3000 sidescan pixels %d exceed maximum %d!\n", 
+			    data->png_npixels, MBF_EM300RAW_MAXRAWPIXELS);
 		junk_bytes = data->png_npixels - MBF_EM300RAW_MAXRAWPIXELS;
 		data->png_npixels = MBF_EM300RAW_MAXRAWPIXELS;
+		status = MB_FAILURE;
+		*error = MB_ERROR_UNINTELLIGIBLE;
 		}
 	    else
 		junk_bytes = 0;
@@ -5404,11 +5341,7 @@ data->png_npixels, MBF_EM300RAW_MAXRAWPIXELS);
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em300raw_wr_data(verbose,mbio_ptr,data_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-char	*data_ptr;
-int	*error;
+int mbr_em300raw_wr_data(int verbose, char *mbio_ptr, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_em300raw_wr_data";
 	int	status = MB_SUCCESS;
@@ -5521,11 +5454,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em300raw_wr_start(verbose,mbfp,data_ptr,error)
-int	verbose;
-FILE	*mbfp;
-char	*data_ptr;
-int	*error;
+int mbr_em300raw_wr_start(int verbose, FILE *mbfp, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_em300raw_wr_start";
 	int	status = MB_SUCCESS;
@@ -5916,11 +5845,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em300raw_wr_run_parameter(verbose,mbfp,data_ptr,error)
-int	verbose;
-FILE	*mbfp;
-char	*data_ptr;
-int	*error;
+int mbr_em300raw_wr_run_parameter(int verbose, FILE *mbfp, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_em300raw_wr_run_parameter";
 	int	status = MB_SUCCESS;
@@ -6164,11 +6089,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em300raw_wr_clock(verbose,mbfp,data_ptr,error)
-int	verbose;
-FILE	*mbfp;
-char	*data_ptr;
-int	*error;
+int mbr_em300raw_wr_clock(int verbose, FILE *mbfp, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_em300raw_wr_clock";
 	int	status = MB_SUCCESS;
@@ -6351,11 +6272,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em300raw_wr_tide(verbose,mbfp,data_ptr,error)
-int	verbose;
-FILE	*mbfp;
-char	*data_ptr;
-int	*error;
+int mbr_em300raw_wr_tide(int verbose, FILE *mbfp, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_em300raw_wr_tide";
 	int	status = MB_SUCCESS;
@@ -6541,11 +6458,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em300raw_wr_height(verbose,mbfp,data_ptr,error)
-int	verbose;
-FILE	*mbfp;
-char	*data_ptr;
-int	*error;
+int mbr_em300raw_wr_height(int verbose, FILE *mbfp, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_em300raw_wr_height";
 	int	status = MB_SUCCESS;
@@ -6723,11 +6636,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em300raw_wr_heading(verbose,mbfp,data_ptr,error)
-int	verbose;
-FILE	*mbfp;
-char	*data_ptr;
-int	*error;
+int mbr_em300raw_wr_heading(int verbose, FILE *mbfp, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_em300raw_wr_heading";
 	int	status = MB_SUCCESS;
@@ -6967,11 +6876,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em300raw_wr_attitude(verbose,mbfp,data_ptr,error)
-int	verbose;
-FILE	*mbfp;
-char	*data_ptr;
-int	*error;
+int mbr_em300raw_wr_attitude(int verbose, FILE *mbfp, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_em300raw_wr_attitude";
 	int	status = MB_SUCCESS;
@@ -7229,11 +7134,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em300raw_wr_pos(verbose,mbfp,data_ptr,error)
-int	verbose;
-FILE	*mbfp;
-char	*data_ptr;
-int	*error;
+int mbr_em300raw_wr_pos(int verbose, FILE *mbfp, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_em300raw_wr_pos";
 	int	status = MB_SUCCESS;
@@ -7485,11 +7386,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em300raw_wr_svp(verbose,mbfp,data_ptr,error)
-int	verbose;
-FILE	*mbfp;
-char	*data_ptr;
-int	*error;
+int mbr_em300raw_wr_svp(int verbose, FILE *mbfp, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_em300raw_wr_svp";
 	int	status = MB_SUCCESS;
@@ -7743,11 +7640,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em300raw_wr_bath(verbose,mbfp,data_ptr,error)
-int	verbose;
-FILE	*mbfp;
-char	*data_ptr;
-int	*error;
+int mbr_em300raw_wr_bath(int verbose, FILE *mbfp, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_em300raw_wr_bath";
 	int	status = MB_SUCCESS;
@@ -8050,11 +7943,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em300raw_wr_ss(verbose,mbfp,data_ptr,error)
-int	verbose;
-FILE	*mbfp;
-char	*data_ptr;
-int	*error;
+int mbr_em300raw_wr_ss(int verbose, FILE *mbfp, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_em300raw_wr_ss";
 	int	status = MB_SUCCESS;

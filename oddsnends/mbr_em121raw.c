@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em121raw.c	7/8/96
- *	$Id: mbr_em121raw.c,v 4.11 2000-09-30 06:34:20 caress Exp $
+ *	$Id: mbr_em121raw.c,v 4.12 2000-10-11 01:02:30 caress Exp $
  *
  *    Copyright (c) 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	August 8, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.11  2000/09/30  06:34:20  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.10  1999/03/31  18:11:35  caress
  * MB-System 4.6beta7
  *
@@ -82,12 +85,9 @@
 #include "../../include/mb_swap.h"
 
 /*--------------------------------------------------------------------*/
-int mbr_alm_em121raw(verbose,mbio_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-int	*error;
+int mbr_alm_em121raw(int verbose, char *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_em121raw.c,v 4.11 2000-09-30 06:34:20 caress Exp $";
+	static char res_id[]="$Id: mbr_em121raw.c,v 4.12 2000-10-11 01:02:30 caress Exp $";
 	char	*function_name = "mbr_alm_em121raw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -135,10 +135,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_dem_em121raw(verbose,mbio_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-int	*error;
+int mbr_dem_em121raw(int verbose, char *mbio_ptr, int *error)
 {
 	char	*function_name = "mbr_dem_em121raw";
 	int	status = MB_SUCCESS;
@@ -178,10 +175,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_zero_em121raw(verbose,data_ptr,error)
-int	verbose;
-char	*data_ptr;
-int	*error;
+int mbr_zero_em121raw(int verbose, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_zero_em121raw";
 	int	status = MB_SUCCESS;
@@ -346,11 +340,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_rt_em121raw(verbose,mbio_ptr,store_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-char	*store_ptr;
-int	*error;
+int mbr_rt_em121raw(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 {
 	char	*function_name = "mbr_rt_em121raw";
 	int	status = MB_SUCCESS;
@@ -999,11 +989,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_wt_em121raw(verbose,mbio_ptr,store_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-char	*store_ptr;
-int	*error;
+int mbr_wt_em121raw(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 {
 	char	*function_name = "mbr_wt_em121raw";
 	int	status = MB_SUCCESS;
@@ -1305,10 +1291,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em121raw_rd_data(verbose,mbio_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-int	*error;
+int mbr_em121raw_rd_data(int verbose, char *mbio_ptr, int *error)
 {
 	char	*function_name = "mbr_em121raw_rd_data";
 	int	status = MB_SUCCESS;
@@ -1661,11 +1644,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em121raw_rd_start(verbose,mbfp,data,error)
-int	verbose;
-FILE	*mbfp;
-struct mbf_em121raw_struct *data;
-int	*error;
+int mbr_em121raw_rd_start(int verbose, FILE *mbfp, 
+		struct mbf_em121raw_struct *data, int *error)
 {
 	char	*function_name = "mbr_em121raw_rd_start";
 	int	status = MB_SUCCESS;
@@ -1770,11 +1750,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em121raw_rd_stop(verbose,mbfp,data,error)
-int	verbose;
-FILE	*mbfp;
-struct mbf_em121raw_struct *data;
-int	*error;
+int mbr_em121raw_rd_stop(int verbose, FILE *mbfp, 
+		struct mbf_em121raw_struct *data, int *error)
 {
 	char	*function_name = "mbr_em121raw_rd_stop";
 	int	status = MB_SUCCESS;
@@ -1879,11 +1856,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em121raw_rd_parameter(verbose,mbfp,data,error)
-int	verbose;
-FILE	*mbfp;
-struct mbf_em121raw_struct *data;
-int	*error;
+int mbr_em121raw_rd_parameter(int verbose, FILE *mbfp, 
+		struct mbf_em121raw_struct *data, int *error)
 {
 	char	*function_name = "mbr_em121raw_rd_parameter";
 	int	status = MB_SUCCESS;
@@ -1988,11 +1962,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em121raw_rd_pos(verbose,mbfp,data,error)
-int	verbose;
-FILE	*mbfp;
-struct mbf_em121raw_struct *data;
-int	*error;
+int mbr_em121raw_rd_pos(int verbose, FILE *mbfp, 
+		struct mbf_em121raw_struct *data, int *error)
 {
 	char	*function_name = "mbr_em121raw_rd_pos";
 	int	status = MB_SUCCESS;
@@ -2100,11 +2071,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em121raw_rd_svp(verbose,mbfp,data,error)
-int	verbose;
-FILE	*mbfp;
-struct mbf_em121raw_struct *data;
-int	*error;
+int mbr_em121raw_rd_svp(int verbose, FILE *mbfp, 
+		struct mbf_em121raw_struct *data, int *error)
 {
 	char	*function_name = "mbr_em121raw_rd_svp";
 	int	status = MB_SUCCESS;
@@ -2198,11 +2166,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em121raw_rd_bath(verbose,mbfp,data,error)
-int	verbose;
-FILE	*mbfp;
-struct mbf_em121raw_struct *data;
-int	*error;
+int mbr_em121raw_rd_bath(int verbose, FILE *mbfp, 
+		struct mbf_em121raw_struct *data, int *error)
 {
 	char	*function_name = "mbr_em121raw_rd_bath";
 	int	status = MB_SUCCESS;
@@ -2397,13 +2362,9 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em121raw_rd_ss(verbose,mbfp,data,first,more,error)
-int	verbose;
-FILE	*mbfp;
-struct mbf_em121raw_struct *data;
-int	first;
-int	*more;
-int	*error;
+int mbr_em121raw_rd_ss(int verbose, FILE *mbfp, 
+		struct mbf_em121raw_struct *data, 
+		int first, int *more, int *error)
 {
 	char	*function_name = "mbr_em121raw_rd_ss";
 	int	status = MB_SUCCESS;
@@ -2629,11 +2590,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em121raw_wr_data(verbose,mbio_ptr,data_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-char	*data_ptr;
-int	*error;
+int mbr_em121raw_wr_data(int verbose, char *mbio_ptr, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_em121raw_wr_data";
 	int	status = MB_SUCCESS;
@@ -2713,11 +2670,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em121raw_wr_start(verbose,mbfp,data_ptr,error)
-int	verbose;
-FILE	*mbfp;
-char	*data_ptr;
-int	*error;
+int mbr_em121raw_wr_start(int verbose, FILE *mbfp, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_em121raw_wr_start";
 	int	status = MB_SUCCESS;
@@ -2846,11 +2799,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em121raw_wr_stop(verbose,mbfp,data_ptr,error)
-int	verbose;
-FILE	*mbfp;
-char	*data_ptr;
-int	*error;
+int mbr_em121raw_wr_stop(int verbose, FILE *mbfp, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_em121raw_wr_stop";
 	int	status = MB_SUCCESS;
@@ -2979,11 +2928,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em121raw_wr_parameter(verbose,mbfp,data_ptr,error)
-int	verbose;
-FILE	*mbfp;
-char	*data_ptr;
-int	*error;
+int mbr_em121raw_wr_parameter(int verbose, FILE *mbfp, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_em121raw_wr_parameter";
 	int	status = MB_SUCCESS;
@@ -3112,11 +3057,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em121raw_wr_pos(verbose,mbfp,data_ptr,error)
-int	verbose;
-FILE	*mbfp;
-char	*data_ptr;
-int	*error;
+int mbr_em121raw_wr_pos(int verbose, FILE *mbfp, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_em121raw_wr_pos";
 	int	status = MB_SUCCESS;
@@ -3275,11 +3216,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em121raw_wr_svp(verbose,mbfp,data_ptr,error)
-int	verbose;
-FILE	*mbfp;
-char	*data_ptr;
-int	*error;
+int mbr_em121raw_wr_svp(int verbose, FILE *mbfp, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_em121raw_wr_svp";
 	int	status = MB_SUCCESS;
@@ -3406,11 +3343,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em121raw_wr_bath(verbose,mbfp,data_ptr,error)
-int	verbose;
-FILE	*mbfp;
-char	*data_ptr;
-int	*error;
+int mbr_em121raw_wr_bath(int verbose, FILE *mbfp, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_em121raw_wr_bath";
 	int	status = MB_SUCCESS;
@@ -3654,11 +3587,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em121raw_wr_ss(verbose,mbfp,data_ptr,error)
-int	verbose;
-FILE	*mbfp;
-char	*data_ptr;
-int	*error;
+int mbr_em121raw_wr_ss(int verbose, FILE *mbfp, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_em121raw_wr_ss";
 	int	status = MB_SUCCESS;

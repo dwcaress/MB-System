@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_nav.c	8/29/2000
- *    $Id: mb_nav.c,v 4.0 2000-09-30 06:28:42 caress Exp $
+ *    $Id: mb_nav.c,v 4.1 2000-10-11 01:02:30 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	August 29, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  2000/09/30  06:28:42  caress
+ * Snapshot for Dale.
+ *
  *
  *
  */
@@ -37,26 +40,14 @@
 #include "../../include/mb_define.h"
 
 /*--------------------------------------------------------------------*/
-int mb_extract_nav(verbose,mbio_ptr,store_ptr,kind,
-	time_i,time_d,navlon,navlat,
-	speed,heading,draft,roll,pitch,heave,error)
-int	verbose;
-char	*mbio_ptr;
-char	*store_ptr;
-int	*kind;
-int	*time_i;
-double	*time_d;
-double	*navlon;
-double	*navlat;
-double	*speed;
-double	*heading;
-double	*draft;
-double	*roll;
-double	*pitch;
-double	*heave;
-int	*error;
+int mb_extract_nav(int verbose, char *mbio_ptr, char *store_ptr, int *kind,
+	int time_i[7], double *time_d, 
+	double *navlon, double *navlat,
+	double *speed, double *heading, double *draft, 
+	double *roll, double *pitch, double *heave, 
+	int *error)
 {
-  static char rcs_id[]="$Id: mb_nav.c,v 4.0 2000-09-30 06:28:42 caress Exp $";
+  static char rcs_id[]="$Id: mb_nav.c,v 4.1 2000-10-11 01:02:30 caress Exp $";
 	char	*function_name = "mb_extract_nav";
 	int	status;
 	int	system;
@@ -289,25 +280,14 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_insert_nav(verbose,mbio_ptr,store_ptr,
-	time_i,time_d,navlon,navlat,
-	speed,heading,draft,roll,pitch,heave,error)
-int	verbose;
-char	*mbio_ptr;
-char	*store_ptr;
-int	*time_i;
-double	time_d;
-double	navlon;
-double	navlat;
-double	speed;
-double	heading;
-double	draft;
-double	roll;
-double	pitch;
-double	heave;
-int	*error;
+int mb_insert_nav(int verbose, char *mbio_ptr, char *store_ptr,
+	int time_i[7], double time_d, 
+	double navlon, double navlat,
+	double speed, double heading, double draft, 
+	double roll, double pitch, double heave, 
+	int *error)
 {
-  static char rcs_id[]="$Id: mb_nav.c,v 4.0 2000-09-30 06:28:42 caress Exp $";
+  static char rcs_id[]="$Id: mb_nav.c,v 4.1 2000-10-11 01:02:30 caress Exp $";
 	char	*function_name = "mb_insert_nav";
 	int	status;
 	int	system;

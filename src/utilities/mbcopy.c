@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcopy.c	2/4/93
- *    $Id: mbcopy.c,v 4.14 2000-09-30 07:06:28 caress Exp $
+ *    $Id: mbcopy.c,v 4.15 2000-10-11 01:06:15 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	February 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.14  2000/09/30  07:06:28  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.13  1999/08/16  23:13:42  caress
  * Fixed pointer casting bug in elac data copying.
  *
@@ -117,12 +120,10 @@
 
 /*--------------------------------------------------------------------*/
 
-main (argc, argv)
-int argc;
-char **argv; 
+main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbcopy.c,v 4.14 2000-09-30 07:06:28 caress Exp $";
+	static char rcs_id[] = "$Id: mbcopy.c,v 4.15 2000-10-11 01:06:15 caress Exp $";
 	static char program_name[] = "MBCOPY";
 	static char help_message[] =  "MBCOPY copies an input swath sonar data file to an output \nswath sonar data file with the specified conversions.  Options include \nwindowing in time and space and ping averaging.  The input and \noutput data formats may differ, though not all possible combinations \nmake sense.  The default input and output streams are stdin and stdout.";
 	static char usage_message[] = "mbcopy [-Byr/mo/da/hr/mn/sc -Ccommentfile -Eyr/mo/da/hr/mn/sc \n\t-Fiformat/oformat -H  -Iinfile -Llonflip -N -Ooutfile \n\t-Ppings -Qsleep_factor -Rw/e/s/n -Sspeed -V]";
@@ -985,14 +986,8 @@ char **argv;
 	exit(error);
 }
 /*--------------------------------------------------------------------*/
-int setup_transfer_rules(verbose,ibeams,obeams,istart,iend,offset,error)
-int	verbose;
-int	ibeams;
-int	obeams;
-int	*istart;
-int	*iend;
-int	*offset;
-int	*error;
+int setup_transfer_rules(int verbose, int ibeams, int obeams,
+		int *istart, int *iend, int *offset, int *error)
 {
 	char	*function_name = "setup_transfer_rules";
 	int	status = MB_SUCCESS;
@@ -1050,11 +1045,10 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbcopy_elacmk2_to_xse(verbose, istore, ostore, error)
-int	verbose;
-struct mbsys_elacmk2_struct *istore;
-struct mbsys_xse_struct *ostore;
-int	*error;
+int mbcopy_elacmk2_to_xse(int verbose, 
+	struct mbsys_elacmk2_struct *istore, 
+	struct mbsys_xse_struct *ostore, 
+	int *error)
 {
 	char	*function_name = "mbcopy_elacmk2_to_xse";
 	int	status = MB_SUCCESS;
@@ -1281,11 +1275,10 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbcopy_xse_to_elacmk2(verbose, istore, ostore, error)
-int	verbose;
-struct mbsys_xse_struct *istore;
-struct mbsys_elacmk2_struct *ostore;
-int	*error;
+int mbcopy_xse_to_elacmk2(int verbose, 
+		struct mbsys_xse_struct *istore, 
+		struct mbsys_elacmk2_struct *ostore, 
+		int *error)
 {
 	char	*function_name = "mbcopy_xse_to_elacmk2";
 	int	status = MB_SUCCESS;

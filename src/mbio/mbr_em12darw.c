@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em12darw.c	2/2/93
- *	$Id: mbr_em12darw.c,v 4.13 2000-09-30 06:34:20 caress Exp $
+ *	$Id: mbr_em12darw.c,v 4.14 2000-10-11 01:02:30 caress Exp $
  *
  *    Copyright (c) 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	R. B. Owens
  * Date:	January 24, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.13  2000/09/30  06:34:20  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.12  1999/03/31  18:11:35  caress
  * MB-System 4.6beta7
  *
@@ -95,12 +98,9 @@
 #endif
 
 /*--------------------------------------------------------------------*/
-int mbr_alm_em12darw(verbose,mbio_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-int	*error;
+int mbr_alm_em12darw(int verbose, char *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_em12darw.c,v 4.13 2000-09-30 06:34:20 caress Exp $";
+ static char res_id[]="$Id: mbr_em12darw.c,v 4.14 2000-10-11 01:02:30 caress Exp $";
 	char	*function_name = "mbr_alm_em12darw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -154,10 +154,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_dem_em12darw(verbose,mbio_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-int	*error;
+int mbr_dem_em12darw(int verbose, char *mbio_ptr, int *error)
 {
 	char	*function_name = "mbr_dem_em12darw";
 	int	status = MB_SUCCESS;
@@ -200,10 +197,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_zero_em12darw(verbose,data_ptr,error)
-int	verbose;
-char	*data_ptr;
-int	*error;
+int mbr_zero_em12darw(int verbose, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_zero_em12darw";
 	int	status = MB_SUCCESS;
@@ -285,11 +279,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_rt_em12darw(verbose,mbio_ptr,store_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-char	*store_ptr;  
-int	*error;
+int mbr_rt_em12darw(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 {
 	char	*function_name = "mbr_rt_em12darw";
 	int	status = MB_SUCCESS;
@@ -689,11 +679,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_wt_em12darw(verbose,mbio_ptr,store_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-char	*store_ptr;
-int	*error;
+int mbr_wt_em12darw(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 {
 	char	*function_name = "mbr_wt_em12darw";
 	int	status = MB_SUCCESS;

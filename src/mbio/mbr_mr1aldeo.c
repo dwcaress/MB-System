@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mr1aldeo.c	10/24/95
- *	$Id: mbr_mr1aldeo.c,v 1.9 2000-10-03 21:48:03 caress Exp $
+ *	$Id: mbr_mr1aldeo.c,v 1.10 2000-10-11 01:03:21 caress Exp $
  *
  *    Copyright (c) 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	October 24, 1995
  * $Log: not supported by cvs2svn $
+ * Revision 1.9  2000/10/03  21:48:03  caress
+ * Snapshot for Dale.
+ *
  * Revision 1.8  2000/09/30  06:34:20  caress
  * Snapshot for Dale.
  *
@@ -72,12 +75,9 @@
 #include "../../include/mbf_mr1aldeo.h"
 
 /*--------------------------------------------------------------------*/
-int mbr_alm_mr1aldeo(verbose,mbio_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-int	*error;
+int mbr_alm_mr1aldeo(int verbose, char *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_mr1aldeo.c,v 1.9 2000-10-03 21:48:03 caress Exp $";
+	static char res_id[]="$Id: mbr_mr1aldeo.c,v 1.10 2000-10-11 01:03:21 caress Exp $";
 	char	*function_name = "mbr_alm_mr1aldeo";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -135,10 +135,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_dem_mr1aldeo(verbose,mbio_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-int	*error;
+int mbr_dem_mr1aldeo(int verbose, char *mbio_ptr, int *error)
 {
 	char	*function_name = "mbr_dem_mr1aldeo";
 	int	status = MB_SUCCESS;
@@ -176,10 +173,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_zero_mr1aldeo(verbose,data_ptr,error)
-int	verbose;
-char	*data_ptr;
-int	*error;
+int mbr_zero_mr1aldeo(int verbose, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_zero_mr1aldeo";
 	int	status = MB_SUCCESS;
@@ -291,11 +285,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_rt_mr1aldeo(verbose,mbio_ptr,store_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-char	*store_ptr;
-int	*error;
+int mbr_rt_mr1aldeo(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 {
 	char	*function_name = "mbr_rt_mr1aldeo";
 	int	status = MB_SUCCESS;
@@ -689,11 +679,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_wt_mr1aldeo(verbose,mbio_ptr,store_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-char	*store_ptr;
-int	*error;
+int mbr_wt_mr1aldeo(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 {
 	char	*function_name = "mbr_wt_mr1aldeo";
 	int	status = MB_SUCCESS;
@@ -925,10 +911,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_mr1aldeo_rd_data(verbose,mbio_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-int	*error;
+int mbr_mr1aldeo_rd_data(int verbose, char *mbio_ptr, int *error)
 {
 	char	*function_name = "mbr_mr1aldeo_rd_data";
 	int	status = MB_SUCCESS;
@@ -1025,12 +1008,9 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_mr1aldeo_rd_hdr(verbose,xdrs,data,hdr_comment,error)
-int	verbose;
-char	*xdrs;
-struct mbf_mr1aldeo_struct *data;
-char	**hdr_comment;
-int	*error;
+int mbr_mr1aldeo_rd_hdr(int verbose, char *xdrs, 
+		struct mbf_mr1aldeo_struct *data, char **hdr_comment,
+		int *error)
 {
 	char	*function_name = "mbr_mr1aldeo_rd_hdr";
 	int	status = MB_SUCCESS;
@@ -1108,11 +1088,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_mr1aldeo_rd_ping(verbose,xdrs,data,error)
-int	verbose;
-char	*xdrs;
-struct mbf_mr1aldeo_struct *data;
-int	*error;
+int mbr_mr1aldeo_rd_ping(int verbose, char *xdrs, 
+		struct mbf_mr1aldeo_struct *data, int *error)
 {
 	char	*function_name = "mbr_mr1aldeo_rd_ping";
 	int	status = MB_SUCCESS;
@@ -1387,11 +1364,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_mr1aldeo_wr_data(verbose,mbio_ptr,data_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-char	*data_ptr;
-int	*error;
+int mbr_mr1aldeo_wr_data(int verbose, char *mbio_ptr, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_mr1aldeo_wr_data";
 	int	status = MB_SUCCESS;
@@ -1490,12 +1463,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_mr1aldeo_wr_hdr(verbose,xdrs,data_ptr,hdr_comment,error)
-int	verbose;
-char	*xdrs;
-char	*data_ptr;
-char	**hdr_comment;
-int	*error;
+int mbr_mr1aldeo_wr_hdr(int verbose, char *xdrs, 
+		char *data_ptr, char **hdr_comment, int *error)
 {
 	char	*function_name = "mbr_mr1aldeo_wr_hdr";
 	int	status = MB_SUCCESS;
@@ -1576,11 +1545,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_mr1aldeo_wr_ping(verbose,xdrs,data_ptr,error)
-int	verbose;
-char	*xdrs;
-char	*data_ptr;
-int	*error;
+int mbr_mr1aldeo_wr_ping(int verbose, char *xdrs, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_mr1aldeo_wr_ping";
 	int	status = MB_SUCCESS;

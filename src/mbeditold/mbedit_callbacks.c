@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit_callbacks.c	3/28/97
- *    $Id: mbedit_callbacks.c,v 4.10 2000-09-30 06:58:28 caress Exp $
+ *    $Id: mbedit_callbacks.c,v 4.11 2000-10-11 01:02:07 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	March 28, 1997  GUI recast
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.10  2000/09/30  06:58:28  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.9  2000/09/08  00:29:20  caress
  * Revision of 7 September 2000.
  *
@@ -312,9 +315,7 @@ GRAU( XtPointer, call)
 /*--------------------------------------------------------------------*/
 
 void
-do_mbedit_init(argc, argv)
- int argc;
- char **argv;
+do_mbedit_init(int argc, char **argv)
 {
     int	    i;
     
@@ -631,10 +632,7 @@ int do_setup_data()
 /*--------------------------------------------------------------------*/
 
 void
-do_file_selection_cancel(w, client_data, call_data)
- Widget w;
- XtPointer client_data;
- XtPointer call_data;
+do_file_selection_cancel( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call_data;
 
@@ -648,10 +646,7 @@ do_file_selection_cancel(w, client_data, call_data)
 /*--------------------------------------------------------------------*/
 
 void
-do_expose(w, client_data, call_data)
- Widget w;
- XtPointer client_data;
- XtPointer call_data;
+do_expose( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call_data;
 
@@ -666,10 +661,7 @@ do_expose(w, client_data, call_data)
 /*--------------------------------------------------------------------*/
 
 void
-do_mode_toggle(w, client_data, call_data)
- Widget w;
- XtPointer client_data;
- XtPointer call_data;
+do_mode_toggle( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call_data;
 
@@ -685,10 +677,7 @@ do_mode_toggle(w, client_data, call_data)
 /*--------------------------------------------------------------------*/
 
 void
-do_mode_pick(w, client_data, call_data)
- Widget w;
- XtPointer client_data;
- XtPointer call_data;
+do_mode_pick( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call_data;
 
@@ -704,10 +693,7 @@ do_mode_pick(w, client_data, call_data)
 /*--------------------------------------------------------------------*/
 
 void
-do_mode_erase(w, client_data, call_data)
- Widget w;
- XtPointer client_data;
- XtPointer call_data;
+do_mode_erase( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call_data;
 
@@ -723,10 +709,7 @@ do_mode_erase(w, client_data, call_data)
 /*--------------------------------------------------------------------*/
 
 void
-do_mode_restore(w, client_data, call_data)
- Widget w;
- XtPointer client_data;
- XtPointer call_data;
+do_mode_restore( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call_data;
 
@@ -742,10 +725,7 @@ do_mode_restore(w, client_data, call_data)
 /*--------------------------------------------------------------------*/
 
 void
-do_scale_y(w, client_data, call_data)
- Widget w;
- XtPointer client_data;
- XtPointer call_data;
+do_scale_y( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmScaleCallbackStruct *acs=(XmScaleCallbackStruct*)call_data;
 
@@ -787,10 +767,7 @@ do_scale_y(w, client_data, call_data)
 /*--------------------------------------------------------------------*/
 
 void
-do_fileselection_init(w, client_data, call_data)
- Widget w;
- XtPointer client_data;
- XtPointer call_data;
+do_fileselection_init( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call_data;
 }
@@ -798,10 +775,7 @@ do_fileselection_init(w, client_data, call_data)
 /*--------------------------------------------------------------------*/
 
 void
-do_fileselection_list(w, client_data, call_data)
- Widget w;
- XtPointer client_data;
- XtPointer call_data;
+do_fileselection_list( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call_data;
 
@@ -838,10 +812,7 @@ do_fileselection_list(w, client_data, call_data)
 /*--------------------------------------------------------------------*/
 
 void
-do_scale_x(w, client_data, call_data)
- Widget w;
- XtPointer client_data;
- XtPointer call_data;
+do_scale_x( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmScaleCallbackStruct *acs=(XmScaleCallbackStruct*)call_data;
 
@@ -882,9 +853,7 @@ do_scale_x(w, client_data, call_data)
 
 /*--------------------------------------------------------------------*/
 
-int do_reset_scale_x(pwidth, maxx)
-	int pwidth;
-	int maxx;
+int do_reset_scale_x(int pwidth, int maxx)
 {
 	char	label[10];
 
@@ -914,10 +883,7 @@ int do_reset_scale_x(pwidth, maxx)
 /*--------------------------------------------------------------------*/
 
 void
-do_output_output(w, client_data, call_data)
- Widget w;
- XtPointer client_data;
- XtPointer call_data;
+do_output_output( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmToggleButtonCallbackStruct *acs=(XmToggleButtonCallbackStruct*)call_data;
 
@@ -933,10 +899,7 @@ do_output_output(w, client_data, call_data)
 /*--------------------------------------------------------------------*/
 
 void
-do_output_edit(w, client_data, call_data)
- Widget w;
- XtPointer client_data;
- XtPointer call_data;
+do_output_edit( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmToggleButtonCallbackStruct *acs=(XmToggleButtonCallbackStruct*)call_data;
 
@@ -952,10 +915,7 @@ do_output_edit(w, client_data, call_data)
 /*--------------------------------------------------------------------*/
 
 void
-do_output_browse(w, client_data, call_data)
- Widget w;
- XtPointer client_data;
- XtPointer call_data;
+do_output_browse( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmToggleButtonCallbackStruct *acs=(XmToggleButtonCallbackStruct*)call_data;
 
@@ -971,10 +931,7 @@ do_output_browse(w, client_data, call_data)
 /*--------------------------------------------------------------------*/
 
 void
-do_x_interval(w, client_data, call_data)
- Widget w;
- XtPointer client_data;
- XtPointer call_data;
+do_x_interval( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmScaleCallbackStruct *acs=(XmScaleCallbackStruct*)call_data;
 
@@ -1015,10 +972,7 @@ do_x_interval(w, client_data, call_data)
 /*--------------------------------------------------------------------*/
 
 void
-do_y_interval(w, client_data, call_data)
- Widget w;
- XtPointer client_data;
- XtPointer call_data;
+do_y_interval( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmScaleCallbackStruct *acs=(XmScaleCallbackStruct*)call_data;
 
@@ -1059,10 +1013,7 @@ do_y_interval(w, client_data, call_data)
 /*--------------------------------------------------------------------*/
 
 void
-do_load_ok(w, client_data, call_data)
- Widget w;
- XtPointer client_data;
- XtPointer call_data;
+do_load_ok( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmFileSelectionBoxCallbackStruct *acs=(XmFileSelectionBoxCallbackStruct*)call_data;
 
@@ -1118,10 +1069,7 @@ do_load_ok(w, client_data, call_data)
 /*--------------------------------------------------------------------*/
 
 void
-do_load_check(w, client_data, call_data)
- Widget w;
- XtPointer client_data;
- XtPointer call_data;
+do_load_check( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmFileSelectionBoxCallbackStruct *acs=(XmFileSelectionBoxCallbackStruct*)call_data;
 
@@ -1182,10 +1130,7 @@ do_load_check(w, client_data, call_data)
 /*--------------------------------------------------------------------*/
 
 void
-do_load_ok_with_save(w, client_data, call_data)
- Widget w;
- XtPointer client_data;
- XtPointer call_data;
+do_load_ok_with_save( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmFileSelectionBoxCallbackStruct *acs=(XmFileSelectionBoxCallbackStruct*)call_data;
 
@@ -1219,10 +1164,7 @@ do_filebutton_off()
 /*--------------------------------------------------------------------*/
 
 void
-do_forward(w, client_data, call_data)
- Widget w;
- XtPointer client_data;
- XtPointer call_data;
+do_forward( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call_data;
 
@@ -1236,10 +1178,7 @@ do_forward(w, client_data, call_data)
 /*--------------------------------------------------------------------*/
 
 void
-do_quit(w, client_data, call_data)
- Widget w;
- XtPointer client_data;
- XtPointer call_data;
+do_quit( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call_data;
     
@@ -1254,10 +1193,7 @@ do_quit(w, client_data, call_data)
 /*--------------------------------------------------------------------*/
 
 void
-do_event(w, client_data, call_data)
- Widget w;
- XtPointer client_data;
- XtPointer call_data;
+do_event( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmDrawingAreaCallbackStruct *acs=(XmDrawingAreaCallbackStruct*)call_data;
     static Position x_loc, y_loc;
@@ -1628,10 +1564,7 @@ do_unflag_all( Widget w, XtPointer client_data, XtPointer call_data)
 /*--------------------------------------------------------------------*/
 
 void
-do_next_buffer(w, client_data, call_data)
- Widget w;
- XtPointer client_data;
- XtPointer call_data;
+do_next_buffer( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call_data;
     
@@ -1664,10 +1597,7 @@ do_next_buffer(w, client_data, call_data)
 /*--------------------------------------------------------------------*/
 
 void
-do_number_step(w, client_data, call_data)
- Widget w;
- XtPointer client_data;
- XtPointer call_data;
+do_number_step( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmScaleCallbackStruct *acs=(XmScaleCallbackStruct*)call_data;
 
@@ -1701,10 +1631,7 @@ do_number_step(w, client_data, call_data)
 /*--------------------------------------------------------------------*/
 
 void
-do_show_flagged_off(w, client_data, call_data)
- Widget w;
- XtPointer client_data;
- XtPointer call_data;
+do_show_flagged_off( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call_data;
     
@@ -1720,10 +1647,7 @@ do_show_flagged_off(w, client_data, call_data)
 /*--------------------------------------------------------------------*/
 
 void
-do_show_flagged_on(w, client_data, call_data)
- Widget w;
- XtPointer client_data;
- XtPointer call_data;
+do_show_flagged_on( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call_data;
     
@@ -1738,10 +1662,7 @@ do_show_flagged_on(w, client_data, call_data)
 /*--------------------------------------------------------------------*/
 
 void
-do_buffer_hold(w, client_data, call_data)
- Widget w;
- XtPointer client_data;
- XtPointer call_data;
+do_buffer_hold( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmScaleCallbackStruct *acs=(XmScaleCallbackStruct*)call_data;
 
@@ -1751,10 +1672,7 @@ do_buffer_hold(w, client_data, call_data)
 /*--------------------------------------------------------------------*/
 
 void
-do_buffer_size(w, client_data, call_data)
- Widget w;
- XtPointer client_data;
- XtPointer call_data;
+do_buffer_size( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmScaleCallbackStruct *acs=(XmScaleCallbackStruct*)call_data;
 
@@ -1765,10 +1683,7 @@ do_buffer_size(w, client_data, call_data)
 /*--------------------------------------------------------------------*/
 
 void
-do_done(w, client_data, call_data)
- Widget w;
- XtPointer client_data;
- XtPointer call_data;
+do_done( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call_data;
 
@@ -1791,10 +1706,7 @@ do_done(w, client_data, call_data)
 /*--------------------------------------------------------------------*/
 
 void
-do_reverse(w, client_data, call_data)
- Widget w;
- XtPointer client_data;
- XtPointer call_data;
+do_reverse( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call_data;
 
@@ -1808,10 +1720,7 @@ do_reverse(w, client_data, call_data)
 /*--------------------------------------------------------------------*/
 
 void
-do_number_pings(w, client_data, call_data)
- Widget w;
- XtPointer client_data;
- XtPointer call_data;
+do_number_pings( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmScaleCallbackStruct *acs=(XmScaleCallbackStruct*)call_data;
 
@@ -1855,10 +1764,7 @@ do_number_pings(w, client_data, call_data)
 /*--------------------------------------------------------------------*/
 
 void
-do_goto_apply(w, client_data, call_data)
- Widget w;
- XtPointer client_data;
- XtPointer call_data;
+do_goto_apply( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call_data;
 
@@ -1965,8 +1871,7 @@ do_reset_filters( Widget w, XtPointer client_data, XtPointer call_data)
 /*--------------------------------------------------------------------*/
 
 int
-do_wait_until_viewed(app)
-XtAppContext app;
+do_wait_until_viewed(XtAppContext app)
 {
     Widget  topshell;
     Window  topwindow;
@@ -2007,8 +1912,7 @@ XtAppContext app;
 /*--------------------------------------------------------------------*/
 
 int
-do_message_on(message)
-char	*message;
+do_message_on(char *message)
 {
     Widget  diashell, topshell;
     Window  diawindow, topwindow;
@@ -2065,10 +1969,7 @@ do_message_off()
 /*--------------------------------------------------------------------*/
 
 int
-do_error_dialog(s1, s2, s3)
-char	*s1;
-char	*s2;
-char	*s3;
+do_error_dialog(char *s1, char *s2, char *s3)
 {
     set_label_string(label_error_one, s1);
     set_label_string(label_error_two, s2);

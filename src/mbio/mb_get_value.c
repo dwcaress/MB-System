@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_get_value.c	2/15/93
- *    $Id: mb_get_value.c,v 4.7 2000-09-30 06:26:58 caress Exp $
+ *    $Id: mb_get_value.c,v 4.8 2000-10-11 01:02:30 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	February 15, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.7  2000/09/30  06:26:58  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.6  1999/12/29  00:34:06  caress
  * Release 4.6.8
  *
@@ -84,16 +87,13 @@
 /* maximum line length in characters */
 #define MB_GET_VALUE_MAXLINE 200
 
-static char rcs_id[]="$Id: mb_get_value.c,v 4.7 2000-09-30 06:26:58 caress Exp $";
+static char rcs_id[]="$Id: mb_get_value.c,v 4.8 2000-10-11 01:02:30 caress Exp $";
 char	tmp[MB_GET_VALUE_MAXLINE];
 
 /*--------------------------------------------------------------------*/
 /*	function mb_get_double reads a double value from a string.
  */
-int mb_get_double(value,str,nchar)
-double *value;
-char *str;
-int nchar;
+int mb_get_double(double *value, char *str, int nchar)
 {
 	memset(tmp, 0, MB_GET_VALUE_MAXLINE);
 	*value = 0.0;
@@ -103,10 +103,7 @@ int nchar;
 /*--------------------------------------------------------------------*/
 /*	function mb_get_int reads a int value from a string.
  */
-int mb_get_int(value,str,nchar)
-int *value;
-char *str;
-int nchar;
+int mb_get_int(int *value, char *str, int nchar)
 {
 	memset(tmp, 0, MB_GET_VALUE_MAXLINE);
 	*value = atoi(strncpy(tmp,str,nchar));
@@ -116,10 +113,7 @@ int nchar;
 /*	function mb_get_binary_short copies a binary short from
  *	a buffer, swapping if necessary
  */
-int mb_get_binary_short(swapped, buffer, value)
-int	swapped;
-void	*buffer;
-short	*value;
+int mb_get_binary_short(int swapped, void *buffer, short *value)
 {
 	memcpy(value, buffer, sizeof(short));
 #ifdef BYTESWAPPED
@@ -135,10 +129,7 @@ short	*value;
 /*	function mb_get_binary_int copies a binary int from
  *	a buffer, swapping if necessary
  */
-int mb_get_binary_int(swapped, buffer, value)
-int	swapped;
-void	*buffer;
-int	*value;
+int mb_get_binary_int(int swapped, void *buffer, int *value)
 {
 	memcpy(value, buffer, sizeof(int));
 #ifdef BYTESWAPPED
@@ -154,10 +145,7 @@ int	*value;
 /*	function mb_get_binary_float copies a binary float from
  *	a buffer, swapping if necessary
  */
-int mb_get_binary_float(swapped, buffer, value)
-int	swapped;
-void	*buffer;
-float	*value;
+int mb_get_binary_float(int swapped, void *buffer, float *value)
 {
 	memcpy(value, buffer, sizeof(float));
 #ifdef BYTESWAPPED
@@ -173,10 +161,7 @@ float	*value;
 /*	function mb_get_binary_double copies a binary double from
  *	a buffer, swapping if necessary
  */
-int mb_get_binary_double(swapped, buffer, value)
-int	swapped;
-void	*buffer;
-double	*value;
+int mb_get_binary_double(int swapped, void *buffer, double *value)
 {
 	memcpy(value, buffer, sizeof(double));
 #ifdef BYTESWAPPED
@@ -192,10 +177,7 @@ double	*value;
 /*	function mb_put_binary_short copies a binary short to
  *	a buffer, swapping if necessary
  */
-int mb_put_binary_short(swapped, value, buffer)
-int	swapped;
-short	value;
-void	*buffer;
+int mb_put_binary_short(int swapped, short value, void *buffer)
 {
 #ifdef BYTESWAPPED
 	if (swapped == MB_NO)
@@ -211,10 +193,7 @@ void	*buffer;
 /*	function mb_put_binary_int copies a binary int to
  *	a buffer, swapping if necessary
  */
-int mb_put_binary_int(swapped, value, buffer)
-int	swapped;
-int	value;
-void	*buffer;
+int mb_put_binary_int(int swapped, int value, void *buffer)
 {
 #ifdef BYTESWAPPED
 	if (swapped == MB_NO)
@@ -230,10 +209,7 @@ void	*buffer;
 /*	function mb_put_binary_float copies a binary float to
  *	a buffer, swapping if necessary
  */
-int mb_put_binary_float(swapped, value, buffer)
-int	swapped;
-float	value;
-void	*buffer;
+int mb_put_binary_float(int swapped, float value, void *buffer)
 {
 #ifdef BYTESWAPPED
 	if (swapped == MB_NO)
@@ -249,10 +225,7 @@ void	*buffer;
 /*	function mb_put_binary_double copies a binary double to
  *	a buffer, swapping if necessary
  */
-int mb_put_binary_double(swapped, value, buffer)
-int	swapped;
-double	value;
-void	*buffer;
+int mb_put_binary_double(int swapped, double value, void *buffer)
 {
 #ifdef BYTESWAPPED
 	if (swapped == MB_NO)

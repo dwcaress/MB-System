@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsatlraw.c	2/11/93
- *	$Id: mbr_hsatlraw.c,v 4.16 2000-09-30 06:34:20 caress Exp $
+ *	$Id: mbr_hsatlraw.c,v 4.17 2000-10-11 01:03:21 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	February 11, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.16  2000/09/30  06:34:20  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.15  2000/03/06  21:54:21  caress
  * Added check for Hydrosweep Y2k problem - Ewing sonar
  * started putting out 1900 instead of 2000 in February 2000.
@@ -123,12 +126,9 @@
 #define ZERO_SOME   1
 
 /*--------------------------------------------------------------------*/
-int mbr_alm_hsatlraw(verbose,mbio_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-int	*error;
+int mbr_alm_hsatlraw(int verbose, char *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_hsatlraw.c,v 4.16 2000-09-30 06:34:20 caress Exp $";
+ static char res_id[]="$Id: mbr_hsatlraw.c,v 4.17 2000-10-11 01:03:21 caress Exp $";
 	char	*function_name = "mbr_alm_hsatlraw";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -183,10 +183,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_dem_hsatlraw(verbose,mbio_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-int	*error;
+int mbr_dem_hsatlraw(int verbose, char *mbio_ptr, int *error)
 {
 	char	*function_name = "mbr_dem_hsatlraw";
 	int	status = MB_SUCCESS;
@@ -224,11 +221,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_zero_hsatlraw(verbose,data_ptr,mode,error)
-int	verbose;
-char	*data_ptr;
-int	mode;
-int	*error;
+int mbr_zero_hsatlraw(int verbose, char *data_ptr, int mode, int *error)
 {
 	char	*function_name = "mbr_zero_hsatlraw";
 	int	status = MB_SUCCESS;
@@ -380,11 +373,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_rt_hsatlraw(verbose,mbio_ptr,store_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-char	*store_ptr;
-int	*error;
+int mbr_rt_hsatlraw(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 {
 	char	*function_name = "mbr_rt_hsatlraw";
 	int	status = MB_SUCCESS;
@@ -760,11 +749,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_wt_hsatlraw(verbose,mbio_ptr,store_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-char	*store_ptr;
-int	*error;
+int mbr_wt_hsatlraw(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 {
 	char	*function_name = "mbr_wt_hsatlraw";
 	int	status = MB_SUCCESS;
@@ -982,10 +967,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hsatlraw_rd_data(verbose,mbio_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-int	*error;
+int mbr_hsatlraw_rd_data(int verbose, char *mbio_ptr, int *error)
 {
 	char	*function_name = "mbr_hsatlraw_rd_data";
 	int	status = MB_SUCCESS;
@@ -1204,13 +1186,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int	mbr_hsatlraw_rd_label(verbose,mbfp,line,type,shift,error)
-int	verbose;
-FILE	*mbfp;
-char	*line;
-int	*type;
-int	*shift;
-int	*error;
+int	mbr_hsatlraw_rd_label(int verbose, char *mbfp, 
+		char *line, int *type, int *shift, int *error)
 {
 	char	*function_name = "mbr_hsatlraw_rd_label";
 	int	status = MB_SUCCESS;
@@ -1276,12 +1253,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int	mbr_hsatlraw_read_line(verbose,mbfp,minimum_size,line,error)
-int	verbose;
-FILE	*mbfp;
-int	minimum_size;
-char	*line;
-int	*error;
+int	mbr_hsatlraw_read_line(int verbose, FILE *mbfp, 
+		int minimum_size, char *line, int *error)
 {
 	char	*function_name = "mbr_hsatlraw_read_line";
 	int	status = MB_SUCCESS;
@@ -1353,12 +1326,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hsatlraw_rd_ergnhydi(verbose,mbfp,data,shift,error)
-int	verbose;
-FILE	*mbfp;
-struct mbf_hsatlraw_struct *data;
-int	shift;
-int	*error;
+int mbr_hsatlraw_rd_ergnhydi(int verbose, FILE *mbfp, 
+		struct mbf_hsatlraw_struct *data, int shift, int *error)
 {
 	char	*function_name = "mbr_hsatlraw_rd_ergnhydi";
 	int	status = MB_SUCCESS;
@@ -1441,12 +1410,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hsatlraw_rd_ergnpara(verbose,mbfp,data,shift,error)
-int	verbose;
-FILE	*mbfp;
-struct mbf_hsatlraw_struct *data;
-int	shift;
-int	*error;
+int mbr_hsatlraw_rd_ergnpara(int verbose, FILE *mbfp, 
+		struct mbf_hsatlraw_struct *data, int shift, int *error)
 {
 	char	*function_name = "mbr_hsatlraw_rd_ergnpara";
 	int	status = MB_SUCCESS;
@@ -1539,12 +1504,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hsatlraw_rd_ergnposi(verbose,mbfp,data,shift,error)
-int	verbose;
-FILE	*mbfp;
-struct mbf_hsatlraw_struct *data;
-int	shift;
-int	*error;
+int mbr_hsatlraw_rd_ergnposi(int verbose, FILE *mbfp, 
+		struct mbf_hsatlraw_struct *data, int shift, int *error)
 {
 	char	*function_name = "mbr_hsatlraw_rd_ergnposi";
 	int	status = MB_SUCCESS;
@@ -1625,12 +1586,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hsatlraw_rd_ergneich(verbose,mbfp,data,shift,error)
-int	verbose;
-FILE	*mbfp;
-struct mbf_hsatlraw_struct *data;
-int	shift;
-int	*error;
+int mbr_hsatlraw_rd_ergneich(int verbose, FILE *mbfp, 
+		struct mbf_hsatlraw_struct *data, int shift, int *error)
 {
 	char	*function_name = "mbr_hsatlraw_rd_ergneich";
 	int	status = MB_SUCCESS;
@@ -1804,12 +1761,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hsatlraw_rd_ergnmess(verbose,mbfp,data,shift,error)
-int	verbose;
-FILE	*mbfp;
-struct mbf_hsatlraw_struct *data;
-int	shift;
-int	*error;
+int mbr_hsatlraw_rd_ergnmess(int verbose, FILE *mbfp, 
+		struct mbf_hsatlraw_struct *data, int shift, int *error)
 {
 	char	*function_name = "mbr_hsatlraw_rd_ergnmess";
 	int	status = MB_SUCCESS;
@@ -1992,12 +1945,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hsatlraw_rd_ergnslzt(verbose,mbfp,data,shift,error)
-int	verbose;
-FILE	*mbfp;
-struct mbf_hsatlraw_struct *data;
-int	shift;
-int	*error;
+int mbr_hsatlraw_rd_ergnslzt(int verbose, FILE *mbfp, 
+		struct mbf_hsatlraw_struct *data, int shift, int *error)
 {
 	char	*function_name = "mbr_hsatlraw_rd_ergnslzt";
 	int	status = MB_SUCCESS;
@@ -2137,12 +2086,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hsatlraw_rd_ergnctds(verbose,mbfp,data,shift,error)
-int	verbose;
-FILE	*mbfp;
-struct mbf_hsatlraw_struct *data;
-int	shift;
-int	*error;
+int mbr_hsatlraw_rd_ergnctds(int verbose, FILE *mbfp, 
+		struct mbf_hsatlraw_struct *data, int shift, int *error)
 {
 	char	*function_name = "mbr_hsatlraw_rd_ergnctds";
 	int	status = MB_SUCCESS;
@@ -2247,12 +2192,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hsatlraw_rd_ergnampl(verbose,mbfp,data,shift,error)
-int	verbose;
-FILE	*mbfp;
-struct mbf_hsatlraw_struct *data;
-int	shift;
-int	*error;
+int mbr_hsatlraw_rd_ergnampl(int verbose, FILE *mbfp, 
+		struct mbf_hsatlraw_struct *data, int shift, int *error)
 {
 	char	*function_name = "mbr_hsatlraw_rd_ergnampl";
 	int	status = MB_SUCCESS;
@@ -2464,12 +2405,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hsatlraw_rd_ldeocmnt(verbose,mbfp,data,shift,error)
-int	verbose;
-FILE	*mbfp;
-struct mbf_hsatlraw_struct *data;
-int	shift;
-int	*error;
+int mbr_hsatlraw_rd_ldeocmnt(int verbose, FILE *mbfp, 
+		struct mbf_hsatlraw_struct *data, int shift, int *error)
 {
 	char	*function_name = "mbr_hsatlraw_rd_ldeocmnt";
 	int	status = MB_SUCCESS;
@@ -2522,11 +2459,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hsatlraw_wr_data(verbose,mbio_ptr,data_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-char	*data_ptr;
-int	*error;
+int mbr_hsatlraw_wr_data(int verbose, char *mbio_ptr, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_hsatlraw_wr_data";
 	int	status = MB_SUCCESS;
@@ -2617,11 +2550,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int	mbr_hsatlraw_wr_label(verbose,mbfp,type,error)
-int	verbose;
-FILE	*mbfp;
-char	type;
-int	*error;
+int	mbr_hsatlraw_wr_label(int verbose, char *mbfp, char type, int *error)
 {
 	char	*function_name = "mbr_hsatlraw_wr_label";
 	int	status = MB_SUCCESS;
@@ -2657,11 +2586,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int	mbr_hsatlraw_write_line(verbose,mbfp,line,error)
-int	verbose;
-FILE	*mbfp;
-char	*line;
-int	*error;
+int	mbr_hsatlraw_write_line(int verbose, FILE *mbfp, char *line, int *error)
 {
 	char	*function_name = "mbr_hsatlraw_write_line";
 	int	status = MB_SUCCESS;
@@ -2704,11 +2629,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hsatlraw_wr_rawline(verbose,mbfp,data_ptr,error)
-int	verbose;
-FILE	*mbfp;
-char	*data_ptr;
-int	*error;
+int mbr_hsatlraw_wr_rawline(int verbose, FILE *mbfp, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_hsatlraw_wr_rawline";
 	int	status = MB_SUCCESS;
@@ -2769,11 +2690,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hsatlraw_wr_ergnhydi(verbose,mbfp,data_ptr,error)
-int	verbose;
-FILE	*mbfp;
-char	*data_ptr;
-int	*error;
+int mbr_hsatlraw_wr_ergnhydi(int verbose, FILE *mbfp, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_hsatlraw_wr_ergnhydi";
 	int	status = MB_SUCCESS;
@@ -2872,11 +2789,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hsatlraw_wr_ergnpara(verbose,mbfp,data_ptr,error)
-int	verbose;
-FILE	*mbfp;
-char	*data_ptr;
-int	*error;
+int mbr_hsatlraw_wr_ergnpara(int verbose, FILE *mbfp, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_hsatlraw_wr_ergnpara";
 	int	status = MB_SUCCESS;
@@ -2985,11 +2898,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hsatlraw_wr_ergnposi(verbose,mbfp,data_ptr,error)
-int	verbose;
-FILE	*mbfp;
-char	*data_ptr;
-int	*error;
+int mbr_hsatlraw_wr_ergnposi(int verbose, FILE *mbfp, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_hsatlraw_wr_ergnposi";
 	int	status = MB_SUCCESS;
@@ -3086,11 +2995,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hsatlraw_wr_ergneich(verbose,mbfp,data_ptr,error)
-int	verbose;
-FILE	*mbfp;
-char	*data_ptr;
-int	*error;
+int mbr_hsatlraw_wr_ergneich(int verbose, FILE *mbfp, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_hsatlraw_wr_ergneich";
 	int	status = MB_SUCCESS;
@@ -3234,11 +3139,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hsatlraw_wr_ergnmess(verbose,mbfp,data_ptr,error)
-int	verbose;
-FILE	*mbfp;
-char	*data_ptr;
-int	*error;
+int mbr_hsatlraw_wr_ergnmess(int verbose, FILE *mbfp, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_hsatlraw_wr_ergnmess";
 	int	status = MB_SUCCESS;
@@ -3382,11 +3283,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hsatlraw_wr_ergnslzt(verbose,mbfp,data_ptr,error)
-int	verbose;
-FILE	*mbfp;
-char	*data_ptr;
-int	*error;
+int mbr_hsatlraw_wr_ergnslzt(int verbose, FILE *mbfp, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_hsatlraw_wr_ergnslzt";
 	int	status = MB_SUCCESS;
@@ -3533,11 +3430,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hsatlraw_wr_ergnctds(verbose,mbfp,data_ptr,error)
-int	verbose;
-FILE	*mbfp;
-char	*data_ptr;
-int	*error;
+int mbr_hsatlraw_wr_ergnctds(int verbose, FILE *mbfp, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_hsatlraw_wr_ergnctds";
 	int	status = MB_SUCCESS;
@@ -3652,11 +3545,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hsatlraw_wr_ergnampl(verbose,mbfp,data_ptr,error)
-int	verbose;
-FILE	*mbfp;
-char	*data_ptr;
-int	*error;
+int mbr_hsatlraw_wr_ergnampl(int verbose, FILE *mbfp, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_hsatlraw_wr_ergnampl";
 	int	status = MB_SUCCESS;
@@ -3858,11 +3747,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hsatlraw_wr_ldeocmnt(verbose,mbfp,data_ptr,error)
-int	verbose;
-FILE	*mbfp;
-char	*data_ptr;
-int	*error;
+int mbr_hsatlraw_wr_ldeocmnt(int verbose, FILE *mbfp, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_hsatlraw_wr_ldeocmnt";
 	int	status = MB_SUCCESS;

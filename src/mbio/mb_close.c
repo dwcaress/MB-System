@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_close.c	1/25/93
- *	$Id: mb_close.c,v 4.11 2000-09-30 06:26:58 caress Exp $
+ *	$Id: mb_close.c,v 4.12 2000-10-11 01:02:30 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	January 25, 1993
  *	
  * $Log: not supported by cvs2svn $
+ * Revision 4.11  2000/09/30  06:26:58  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.10  1998/10/05  17:46:15  caress
  * MB-System version 4.6beta
  *
@@ -113,12 +116,9 @@
 #include "../../include/mb_define.h"
 
 /*--------------------------------------------------------------------*/
-int mb_close(verbose,mbio_ptr,error)
-int	verbose;
-char	**mbio_ptr;
-int	*error;
+int mb_close(int verbose, char **mbio_ptr, int *error)
 {
-	static	char	rcs_id[]="$Id: mb_close.c,v 4.11 2000-09-30 06:26:58 caress Exp $";
+	static	char	rcs_id[]="$Id: mb_close.c,v 4.12 2000-10-11 01:02:30 caress Exp $";
 	char	*function_name = "mb_close";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

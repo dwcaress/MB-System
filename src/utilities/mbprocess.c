@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbprocess.c	3/31/93
- *    $Id: mbprocess.c,v 4.2 2000-09-30 07:06:28 caress Exp $
+ *    $Id: mbprocess.c,v 4.3 2000-10-11 01:06:15 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -63,6 +63,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  2000/09/30  07:06:28  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.1  2000/09/11  20:10:02  caress
  * Added suppport for merging edited sonar depth values.
  *
@@ -89,12 +92,10 @@
 
 /*--------------------------------------------------------------------*/
 
-main (argc, argv)
-int argc;
-char **argv; 
+main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbprocess.c,v 4.2 2000-09-30 07:06:28 caress Exp $";
+	static char rcs_id[] = "$Id: mbprocess.c,v 4.3 2000-10-11 01:06:15 caress Exp $";
 	static char program_name[] = "mbprocess";
 	static char help_message[] =  "mbprocess is a tool for processing swath sonar bathymetry data.\n\
 This program performs a number of functions, including:\n\
@@ -626,19 +627,6 @@ and mbedit edit save files.\n";
 	    else if (process.mbp_bathrecalc_mode == MBP_BATHRECALC_RAYTRACE)
 		{
 		fprintf(stderr,"     Bathymetry recalculated by raytracing.\n");
-		if (process.mbp_rollbias_mode == MBP_ROLLBIAS_OFF)
-		    fprintf(stderr,"     roll bias:       OFF\n");
-		else if (process.mbp_rollbias_mode == MBP_ROLLBIAS_SINGLE)
-		    fprintf(stderr,"     roll bias:       %f deg\n", process.mbp_rollbias);
-		else if (process.mbp_rollbias_mode == MBP_ROLLBIAS_DOUBLE)
-		    {
-		    fprintf(stderr,"     port roll bias:  %f deg\n", process.mbp_rollbias_port);
-		    fprintf(stderr,"     port roll stbd:  %f deg\n", process.mbp_rollbias_stbd);
-		    }
-		if (process.mbp_pitchbias_mode == MBP_PITCHBIAS_OFF)
-		    fprintf(stderr,"     pitch bias:      OFF\n");
-		else if (process.mbp_pitchbias_mode == MBP_PITCHBIAS_ON)
-		    fprintf(stderr,"     pitch bias:      %f deg\n", process.mbp_pitchbias);
 		if (process.mbp_ssv_mode == MBP_SSV_OFF)
 		    fprintf(stderr,"     ssv:             OFF\n");
 		else if (process.mbp_ssv_mode == MBP_SSV_OFFSET)
@@ -657,24 +645,37 @@ and mbedit edit save files.\n";
 	    else if (process.mbp_bathrecalc_mode == MBP_BATHRECALC_ROTATE)
 		{
 		fprintf(stderr,"     Bathymetry recalculated by rigid rotation.\n");
-		if (process.mbp_rollbias_mode == MBP_ROLLBIAS_OFF)
-		    fprintf(stderr,"     roll bias:       OFF\n");
-		else if (process.mbp_rollbias_mode == MBP_ROLLBIAS_SINGLE)
-		    fprintf(stderr,"     roll bias:       %f deg\n", process.mbp_rollbias);
-		else if (process.mbp_rollbias_mode == MBP_ROLLBIAS_DOUBLE)
-		    {
-		    fprintf(stderr,"     port roll bias:  %f deg\n", process.mbp_rollbias_port);
-		    fprintf(stderr,"     port roll stbd:  %f deg\n", process.mbp_rollbias_stbd);
-		    }
-		if (process.mbp_pitchbias_mode == MBP_PITCHBIAS_OFF)
-		    fprintf(stderr,"     pitch bias:      OFF\n");
-		else if (process.mbp_pitchbias_mode == MBP_PITCHBIAS_ON)
-		    fprintf(stderr,"     pitch bias:      %f deg\n", process.mbp_pitchbias);
 		}
 	    else if (process.mbp_bathrecalc_mode == MBP_BATHRECALC_OFFSET)
 		{
 		fprintf(stderr,"     Bathymetry recalculated by transducer depth shift.\n");
 		}
+	    if (process.mbp_rollbias_mode == MBP_ROLLBIAS_OFF)
+		fprintf(stderr,"     roll bias:       OFF\n");
+	    else if (process.mbp_rollbias_mode == MBP_ROLLBIAS_SINGLE)
+		fprintf(stderr,"     roll bias:       %f deg\n", process.mbp_rollbias);
+	    else if (process.mbp_rollbias_mode == MBP_ROLLBIAS_DOUBLE)
+		{
+		fprintf(stderr,"     port roll bias:  %f deg\n", process.mbp_rollbias_port);
+		fprintf(stderr,"     port roll stbd:  %f deg\n", process.mbp_rollbias_stbd);
+		}
+	    if (process.mbp_pitchbias_mode == MBP_PITCHBIAS_OFF)
+		fprintf(stderr,"     pitch bias:      OFF\n");
+	    else if (process.mbp_pitchbias_mode == MBP_PITCHBIAS_ON)
+		fprintf(stderr,"     pitch bias:      %f deg\n", process.mbp_pitchbias);
+	    if (process.mbp_draft_mode == MBP_DRAFT_OFF)
+		fprintf(stderr,"     draft modify:    OFF\n");
+	    else if (process.mbp_draft_mode == MBP_DRAFT_OFFSET)
+		fprintf(stderr,"     draft offset:         %f m\n", process.mbp_draft);
+	    else if (process.mbp_draft_mode == MBP_DRAFT_MULTIPLY)
+		fprintf(stderr,"     draft multiplier:%f m\n", process.mbp_draft_mult);
+	    else if (process.mbp_draft_mode == MBP_DRAFT_MULTIPLYOFFSET)
+		{
+		fprintf(stderr,"     draft multiplier:     %f m\n", process.mbp_draft_mult);
+		fprintf(stderr,"     draft offset:         %f m\n", process.mbp_draft);
+		}
+	    else if (process.mbp_draft_mode == MBP_DRAFT_SET)
+		fprintf(stderr,"     set draft:            %f m\n", process.mbp_draft);
 	    if (process.mbp_navadj_mode == MBP_NAV_OFF)
 		fprintf(stderr,"     merge adjusted navigation: OFF\n");
 	    else if (process.mbp_navadj_mode == MBP_NAV_ON)
@@ -708,19 +709,12 @@ and mbedit edit save files.\n";
 		else if (process.mbp_nav_algorithm == MBP_NAV_SPLINE)
 		    fprintf(stderr,"     navigation algorithm: spline interpolation\n");
 		}
-	    if (process.mbp_draft_mode == MBP_DRAFT_OFF)
-		fprintf(stderr,"     draft modify:    OFF\n");
-	    else if (process.mbp_draft_mode == MBP_DRAFT_OFFSET)
-		fprintf(stderr,"     draft offset:         %f m\n", process.mbp_draft);
-	    else if (process.mbp_draft_mode == MBP_DRAFT_MULTIPLY)
-		fprintf(stderr,"     draft multiplier:%f m\n", process.mbp_draft_mult);
-	    else if (process.mbp_draft_mode == MBP_DRAFT_MULTIPLYOFFSET)
-		{
-		fprintf(stderr,"     draft multiplier:     %f m\n", process.mbp_draft_mult);
-		fprintf(stderr,"     draft offset:         %f m\n", process.mbp_draft);
-		}
-	    else if (process.mbp_draft_mode == MBP_DRAFT_SET)
-		fprintf(stderr,"     set draft:            %f m\n", process.mbp_draft);
+	    if (process.mbp_heading_mode == MBP_HEADING_OFF)
+		fprintf(stderr,"     heading modify:  OFF\n");
+	    else if (process.mbp_heading_mode == MBP_HEADING_OFFSET)
+		fprintf(stderr,"     heading offset:       %f m\n", process.mbp_headingbias);
+	    else if (process.mbp_heading_mode == MBP_HEADING_CALC)
+		fprintf(stderr,"     heading modify:  COURSE MADE GOOD\n");
 	    if (process.mbp_edit_mode == MBP_EDIT_OFF)
 		fprintf(stderr,"     merge bath edit:      OFF\n");
 	    else if (process.mbp_edit_mode == MBP_EDIT_ON)
@@ -1812,6 +1806,46 @@ and mbedit edit save files.\n";
 		}
 	    }
 
+	if (process.mbp_rollbias_mode == MBP_ROLLBIAS_OFF)
+	    {
+	    strncpy(comment,"\0",MBP_FILENAMESIZE);
+	    fprintf(stderr,"  roll bias:       OFF\n");
+	    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+	    if (error == MB_ERROR_NO_ERROR) ocomment++;
+	    }
+	else if (process.mbp_rollbias_mode == MBP_ROLLBIAS_SINGLE)
+	    {
+	    strncpy(comment,"\0",MBP_FILENAMESIZE);
+	    fprintf(stderr,"  roll bias:       %f deg\n", process.mbp_rollbias);
+	    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+	    if (error == MB_ERROR_NO_ERROR) ocomment++;
+	    }
+	else if (process.mbp_rollbias_mode == MBP_ROLLBIAS_DOUBLE)
+	    {
+	    strncpy(comment,"\0",MBP_FILENAMESIZE);
+	    fprintf(stderr,"  port roll bias:  %f deg\n", process.mbp_rollbias_port);
+	    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+	    if (error == MB_ERROR_NO_ERROR) ocomment++;
+	    strncpy(comment,"\0",MBP_FILENAMESIZE);
+	    fprintf(stderr,"  port roll stbd:  %f deg\n", process.mbp_rollbias_stbd);
+	    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+	    if (error == MB_ERROR_NO_ERROR) ocomment++;
+	    }
+	if (process.mbp_pitchbias_mode == MBP_PITCHBIAS_OFF)
+	    {
+	    strncpy(comment,"\0",MBP_FILENAMESIZE);
+	    fprintf(stderr,"  pitch bias:      OFF\n");
+	    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+	    if (error == MB_ERROR_NO_ERROR) ocomment++;
+	    }
+	else if (process.mbp_pitchbias_mode == MBP_PITCHBIAS_ON)
+	    {
+	    strncpy(comment,"\0",MBP_FILENAMESIZE);
+	    fprintf(stderr,"  pitch bias:      %f deg\n", process.mbp_pitchbias);
+	    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+	    if (error == MB_ERROR_NO_ERROR) ocomment++;
+	    }
+
 	strncpy(comment,"\0",MBP_FILENAMESIZE);
 	sprintf(comment,"  Roll bias:    %f degrees (starboard: -, port: +)",
 		process.mbp_rollbias);
@@ -2169,6 +2203,10 @@ and mbedit edit save files.\n";
 			&& process.mbp_heading_mode == MBP_HEADING_OFFSET)
 			{
 			heading += process.mbp_headingbias;
+			if (heading > 360.0)
+			    heading -= 360.0;
+			else if (heading < 0.0)
+			    heading += 360.0;
 			}
 
 		/* if survey data encountered, 
@@ -2574,10 +2612,8 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 	exit(error);
 }
 /*--------------------------------------------------------------------*/
-int spline(x,y,n,yp1,ypn,y2)
 /* From Numerical Recipies */
-double x[],y[],yp1,ypn,y2[];
-int n;
+int spline(double *x, double *y, int n, double yp1, double ypn, double *y2)
 {
 	int i,k;
 	double p,qn,sig,un,*u,*vector();
@@ -2610,11 +2646,9 @@ int n;
 	return(0);
 }
 /*--------------------------------------------------------------------*/
-int splint(xa,ya,y2a,n,x,y,i)
 /* From Numerical Recipies */
-double xa[],ya[],y2a[],x,*y;
-int n;
-int *i;
+int splint(double *xa, double *ya, double *y2a,
+		int n, double x, double *y, int *i)
 {
 	int klo,khi,k;
 	double h,b,a;
@@ -2643,10 +2677,8 @@ int *i;
 	return(0);
 }
 /*--------------------------------------------------------------------*/
-int linint(xa,ya,n,x,y,i)
-double xa[],ya[],x,*y;
-int n;
-int *i;
+int linint(double *xa, double *ya,
+		int n, double x, double *y, int *i)
 {
 	int klo,khi,k;
 	double h,b;
@@ -2673,8 +2705,7 @@ int *i;
 	return(0);
 }
 /*--------------------------------------------------------------------*/
-double *vector(nl,nh)
-int nl,nh;
+double *vector(int nl, int nh)
 {
 	double *v;
 	v = (double *) malloc ((unsigned) (nh-nl+1)*sizeof(double));
@@ -2682,9 +2713,7 @@ int nl,nh;
 	return v-nl;
 }
 /*--------------------------------------------------------------------*/
-void free_vector(v,nl,nh)
-double *v;
-int nl,nh;
+void free_vector(double *v, int nl, int nh)
 {
 	free((char*) (v+nl));
 }

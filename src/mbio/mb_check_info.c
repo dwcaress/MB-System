@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_check_info.c	1/25/93
- *    $Id: mb_check_info.c,v 4.3 2000-09-30 06:26:58 caress Exp $
+ *    $Id: mb_check_info.c,v 4.4 2000-10-11 01:02:30 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	September 3, 1996
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  2000/09/30  06:26:58  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.2  1998/10/05  18:32:27  caress
  * MB-System version 4.6beta
  *
@@ -48,15 +51,11 @@
 #include "../../include/mb_status.h"
 
 /*--------------------------------------------------------------------*/
-int mb_check_info(verbose,file,lonflip,bounds,file_in_bounds,error)
-int	verbose;
-char	*file;
-int	lonflip;
-double	bounds[4];
-int	*file_in_bounds;
-int	*error;
+int mb_check_info(int verbose, char *file, int lonflip, 
+		    double bounds[4], int *file_in_bounds,
+		    int *error)
 {
-	static char rcs_id[]="$Id: mb_check_info.c,v 4.3 2000-09-30 06:26:58 caress Exp $";
+	static char rcs_id[]="$Id: mb_check_info.c,v 4.4 2000-10-11 01:02:30 caress Exp $";
 	char	*function_name = "mb_check_info";
 	int	status;
 	char	file_inf[128];

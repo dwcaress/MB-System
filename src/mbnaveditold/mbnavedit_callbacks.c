@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_callbacks.c	6/24/95
- *    $Id: mbnavedit_callbacks.c,v 4.13 2000-09-30 07:04:44 caress Exp $
+ *    $Id: mbnavedit_callbacks.c,v 4.14 2000-10-11 01:05:41 caress Exp $
  *
  *    Copyright (c) 1995, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	June 24,  1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.13  2000/09/30  07:04:44  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.12  2000/09/30  07:04:05  caress
  * Snapshot for Dale.
  *
@@ -511,9 +514,7 @@ Syntax Error - specify BxSetValuesCB data as\n\t\
 /*--------------------------------------------------------------------*/
 
 void
-do_mbnavedit_init(argc, argv)
- int argc;
- char **argv;
+do_mbnavedit_init(int argc, char **argv)
 {
     int	    i;
     
@@ -858,39 +859,30 @@ void do_set_controls()
 /*--------------------------------------------------------------------*/
 /* ARGSUSED */
 void
-do_openmb(w, client, call)
-Widget w;
-XtPointer client;
-XtPointer call;
+do_openmb( Widget w, XtPointer client_data, XtPointer call_data)
 {
-	/*SUPPRESS 594*/XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
 
 }
 
 /*--------------------------------------------------------------------*/
 /* ARGSUSED */
 void
-do_opennav(w, client, call)
-Widget w;
-XtPointer client;
-XtPointer call;
+do_opennav( Widget w, XtPointer client_data, XtPointer call_data)
 {
-	/*SUPPRESS 594*/XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
 
 }
 
 /*--------------------------------------------------------------------*/
 /* ARGSUSED */
 void
-do_nextbuffer(w, client, call)
-Widget w;
-XtPointer client;
-XtPointer call;
+do_nextbuffer( Widget w, XtPointer client_data, XtPointer call_data)
 {
 	int	status;
 	int	quit;
 	
-	/*SUPPRESS 594*/XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
 	    
 	/* turn off expose plots */
 	expose_plot_ok = False;
@@ -911,15 +903,12 @@ XtPointer call;
 /*--------------------------------------------------------------------*/
 /* ARGSUSED */
 void
-do_done(w, client, call)
-Widget w;
-XtPointer client;
-XtPointer call;
+do_done( Widget w, XtPointer client_data, XtPointer call_data)
 {
 	int	quit;
 	int	status;
 	
-	/*SUPPRESS 594*/XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
 	    
 	/* turn off expose plots */
 	expose_plot_ok = False;
@@ -934,20 +923,17 @@ XtPointer call;
 	
 	/* quit if required */
 	if (quit)
-		(void) BxExitCB(w, client, call);
+		(void) BxExitCB(w, client_data, call_data);
 }
 
 /*--------------------------------------------------------------------*/
 /* ARGSUSED */
 void
-do_forward(w, client, call)
-Widget w;
-XtPointer client;
-XtPointer call;
+do_forward( Widget w, XtPointer client_data, XtPointer call_data)
 {
 	int	status;
 	
-	/*SUPPRESS 594*/XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
 
 	/* step forward */
 	status = mbnavedit_action_step(data_step_size);
@@ -958,14 +944,11 @@ XtPointer call;
 /*--------------------------------------------------------------------*/
 /* ARGSUSED */
 void
-do_reverse(w, client, call)
-Widget w;
-XtPointer client;
-XtPointer call;
+do_reverse( Widget w, XtPointer client_data, XtPointer call_data)
 {
 	int	status;
 	
-	/*SUPPRESS 594*/XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
 
 	/* step back */
 	status = mbnavedit_action_step(-data_step_size);
@@ -976,12 +959,9 @@ XtPointer call;
 /*--------------------------------------------------------------------*/
 /* ARGSUSED */
 void
-do_timespan(w, client, call)
-Widget w;
-XtPointer client;
-XtPointer call;
+do_timespan( Widget w, XtPointer client_data, XtPointer call_data)
 {
-	/*SUPPRESS 594*/XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
 
 	/* get values */
 	XtVaGetValues(scale_timespan, 
@@ -1014,12 +994,9 @@ XtPointer call;
 /*--------------------------------------------------------------------*/
 /* ARGSUSED */
 void
-do_timestep(w, client, call)
-Widget w;
-XtPointer client;
-XtPointer call;
+do_timestep( Widget w, XtPointer client_data, XtPointer call_data)
 {
-	/*SUPPRESS 594*/XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
 
 	/* get values */
 	XtVaGetValues(scale_timestep, 
@@ -1049,12 +1026,9 @@ XtPointer call;
 /*--------------------------------------------------------------------*/
 /* ARGSUSED */
 void
-do_expose(w, client, call)
-Widget w;
-XtPointer client;
-XtPointer call;
+do_expose( Widget w, XtPointer client_data, XtPointer call_data)
 {
-	/*SUPPRESS 594*/XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
 
 	/* replot */
 	if (expose_plot_ok == True)
@@ -1064,10 +1038,7 @@ XtPointer call;
 /*--------------------------------------------------------------------*/
 /* ARGSUSED */
 void
-do_event(w, client, call)
-Widget w;
-XtPointer client;
-XtPointer call;
+do_event( Widget w, XtPointer client_data, XtPointer call_data)
 {
 	XmDrawingAreaCallbackStruct *cbs;
 	XEvent  *event;
@@ -1081,10 +1052,10 @@ XtPointer call;
 	int	repeat;
 	int	status;
 
-	/*SUPPRESS 594*/XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
 
 	/* get event */
-	cbs = (XmDrawingAreaCallbackStruct *) call;
+	cbs = (XmDrawingAreaCallbackStruct *) call_data;
 	event = cbs->event;
 
 	/* If there is input in the drawing area */
@@ -1296,26 +1267,20 @@ XtPointer call;
 /*--------------------------------------------------------------------*/
 /* ARGSUSED */
 void
-do_resize(w, client, call)
-Widget w;
-XtPointer client;
-XtPointer call;
+do_resize( Widget w, XtPointer client_data, XtPointer call_data)
 {
-	/*SUPPRESS 594*/XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
 
 }
 
 /*--------------------------------------------------------------------*/
 /* ARGSUSED */
 void
-do_toggle_time(w, client, call)
-Widget w;
-XtPointer client;
-XtPointer call;
+do_toggle_time( Widget w, XtPointer client_data, XtPointer call_data)
 {
 	int	screen_height;
 
-	/*SUPPRESS 594*/XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
 
 	plot_tint = XmToggleButtonGetState(toggleButton_time);
 	if (plot_tint == MB_YES)
@@ -1359,14 +1324,11 @@ XtPointer call;
 /*--------------------------------------------------------------------*/
 /* ARGSUSED */
 void
-do_toggle_lon(w, client, call)
-Widget w;
-XtPointer client;
-XtPointer call;
+do_toggle_lon( Widget w, XtPointer client_data, XtPointer call_data)
 {
 	int	screen_height;
 
-	/*SUPPRESS 594*/XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
 
 	plot_lon = XmToggleButtonGetState(toggleButton_lon);
 	if (plot_lon == MB_YES)
@@ -1414,14 +1376,11 @@ XtPointer call;
 /*--------------------------------------------------------------------*/
 /* ARGSUSED */
 void
-do_toggle_lat(w, client, call)
-Widget w;
-XtPointer client;
-XtPointer call;
+do_toggle_lat( Widget w, XtPointer client_data, XtPointer call_data)
 {
 	int	screen_height;
 
-	/*SUPPRESS 594*/XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
 
 	plot_lat = XmToggleButtonGetState(toggleButton_lat);
 	if (plot_lat == MB_YES)
@@ -1469,14 +1428,11 @@ XtPointer call;
 /*--------------------------------------------------------------------*/
 /* ARGSUSED */
 void
-do_toggle_heading(w, client, call)
-Widget w;
-XtPointer client;
-XtPointer call;
+do_toggle_heading( Widget w, XtPointer client_data, XtPointer call_data)
 {
 	int	screen_height;
 
-	/*SUPPRESS 594*/XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
 
 	plot_heading = XmToggleButtonGetState(toggleButton_heading);
 	if (plot_heading == MB_YES)
@@ -1526,14 +1482,11 @@ XtPointer call;
 /*--------------------------------------------------------------------*/
 /* ARGSUSED */
 void
-do_toggle_speed(w, client, call)
-Widget w;
-XtPointer client;
-XtPointer call;
+do_toggle_speed( Widget w, XtPointer client_data, XtPointer call_data)
 {
 	int	screen_height;
 
-	/*SUPPRESS 594*/XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
 
 	plot_speed = XmToggleButtonGetState(toggleButton_speed);
 	if (plot_speed == MB_YES)
@@ -1584,12 +1537,9 @@ XtPointer call;
 /*--------------------------------------------------------------------*/
 /* ARGSUSED */
 void
-do_toggle_org_time(w, client, call)
-Widget w;
-XtPointer client;
-XtPointer call;
+do_toggle_org_time( Widget w, XtPointer client_data, XtPointer call_data)
 {
-	/*SUPPRESS 594*/XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
 
 	plot_tint_org = XmToggleButtonGetState(toggleButton_org_time);
 
@@ -1600,12 +1550,9 @@ XtPointer call;
 /*--------------------------------------------------------------------*/
 /* ARGSUSED */
 void
-do_toggle_org_lon(w, client, call)
-Widget w;
-XtPointer client;
-XtPointer call;
+do_toggle_org_lon( Widget w, XtPointer client_data, XtPointer call_data)
 {
-	/*SUPPRESS 594*/XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
 
 	plot_lon_org = XmToggleButtonGetState(toggleButton_org_lon);
 
@@ -1616,12 +1563,9 @@ XtPointer call;
 /*--------------------------------------------------------------------*/
 /* ARGSUSED */
 void
-do_toggle_org_lat(w, client, call)
-Widget w;
-XtPointer client;
-XtPointer call;
+do_toggle_org_lat( Widget w, XtPointer client_data, XtPointer call_data)
 {
-	/*SUPPRESS 594*/XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
 
 	plot_lat_org = XmToggleButtonGetState(toggleButton_org_lat);
 
@@ -1632,12 +1576,9 @@ XtPointer call;
 /*--------------------------------------------------------------------*/
 /* ARGSUSED */
 void
-do_toggle_org_speed(w, client, call)
-Widget w;
-XtPointer client;
-XtPointer call;
+do_toggle_org_speed( Widget w, XtPointer client_data, XtPointer call_data)
 {
-	/*SUPPRESS 594*/XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
 
 	plot_speed_org = XmToggleButtonGetState(toggleButton_org_speed);
 
@@ -1707,12 +1648,9 @@ do_driftlat( Widget w, XtPointer client_data, XtPointer call_data)
 /*--------------------------------------------------------------------*/
 /* ARGSUSED */
 void
-do_toggle_show_smg(w, client, call)
-Widget w;
-XtPointer client;
-XtPointer call;
+do_toggle_show_smg( Widget w, XtPointer client_data, XtPointer call_data)
 {
-	/*SUPPRESS 594*/XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
 
 	plot_smg = XmToggleButtonGetState(toggleButton_show_smg);
 
@@ -1723,12 +1661,9 @@ XtPointer call;
 /*--------------------------------------------------------------------*/
 /* ARGSUSED */
 void
-do_toggle_org_heading(w, client, call)
-Widget w;
-XtPointer client;
-XtPointer call;
+do_toggle_org_heading( Widget w, XtPointer client_data, XtPointer call_data)
 {
-	/*SUPPRESS 594*/XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
 
 	plot_heading_org = XmToggleButtonGetState(toggleButton_org_heading);
 
@@ -1739,12 +1674,9 @@ XtPointer call;
 /*--------------------------------------------------------------------*/
 /* ARGSUSED */
 void
-do_toggle_show_cmg(w, client, call)
-Widget w;
-XtPointer client;
-XtPointer call;
+do_toggle_show_cmg( Widget w, XtPointer client_data, XtPointer call_data)
 {
-	/*SUPPRESS 594*/XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
 
 	plot_cmg = XmToggleButtonGetState(toggleButton_show_cmg);
 
@@ -1769,12 +1701,9 @@ do_button_use_dr( Widget w, XtPointer client_data, XtPointer call_data)
 /*--------------------------------------------------------------------*/
 /* ARGSUSED */
 void
-do_button_use_smg(w, client, call)
-Widget w;
-XtPointer client;
-XtPointer call;
+do_button_use_smg( Widget w, XtPointer client_data, XtPointer call_data)
 {
-	/*SUPPRESS 594*/XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
 
 	/* Use speed made good for selected speed values */
 	mbnavedit_action_use_smg();
@@ -1786,12 +1715,9 @@ XtPointer call;
 /*--------------------------------------------------------------------*/
 /* ARGSUSED */
 void
-do_button_use_cmg(w, client, call)
-Widget w;
-XtPointer client;
-XtPointer call;
+do_button_use_cmg( Widget w, XtPointer client_data, XtPointer call_data)
 {
-	/*SUPPRESS 594*/XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
 
 	/* Use course made good for selected heading values */
 	mbnavedit_action_use_cmg();
@@ -1802,12 +1728,9 @@ XtPointer call;
 /*--------------------------------------------------------------------*/
 /* ARGSUSED */
 void
-do_toggle_output_on(w, client, call)
-Widget w;
-XtPointer client;
-XtPointer call;
+do_toggle_output_on( Widget w, XtPointer client_data, XtPointer call_data)
 {
-	/*SUPPRESS 594*/XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
 
 	if (XmToggleButtonGetState(toggleButton_output_on))
 		{
@@ -1859,12 +1782,9 @@ do_toggle_output_nav( Widget w, XtPointer client_data, XtPointer call_data)
 /*--------------------------------------------------------------------*/
 /* ARGSUSED */
 void
-do_toggle_output_off(w, client, call)
-Widget w;
-XtPointer client;
-XtPointer call;
+do_toggle_output_off( Widget w, XtPointer client_data, XtPointer call_data)
 {
-	/*SUPPRESS 594*/XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
 
 	if (XmToggleButtonGetState(toggleButton_output_on))
 		{
@@ -1889,12 +1809,9 @@ XtPointer call;
 /*--------------------------------------------------------------------*/
 /* ARGSUSED */
 void
-do_fileselection_cancel(w, client, call)
-Widget w;
-XtPointer client;
-XtPointer call;
+do_fileselection_cancel( Widget w, XtPointer client_data, XtPointer call_data)
 {
-	/*SUPPRESS 594*/XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
 }
 
 /*--------------------------------------------------------------------*/
@@ -1920,17 +1837,14 @@ do_filebutton_off()
 /*--------------------------------------------------------------------*/
 /* ARGSUSED */
 void
-do_fileselection_ok(w, client, call)
-Widget w;
-XtPointer client;
-XtPointer call;
+do_fileselection_ok( Widget w, XtPointer client_data, XtPointer call_data)
 {
 	char	*suffix;
 	int	len;
 	int	form;
 	int	status;
 
-	/*SUPPRESS 594*/XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
 
 	/* get input filename */
 	get_text_string(fileSelectionBox_text, ifile);
@@ -1978,22 +1892,16 @@ XtPointer call;
 /*--------------------------------------------------------------------*/
 /* ARGSUSED */
 void
-do_fileselection_filter(w, client, call)
-Widget w;
-XtPointer client;
-XtPointer call;
+do_fileselection_filter( Widget w, XtPointer client_data, XtPointer call_data)
 {
-	/*SUPPRESS 594*/XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
 
 }
 
 /*--------------------------------------------------------------------*/
 /* ARGSUSED */
 void
-do_fileselection_list(w, client, call)
-Widget w;
-XtPointer client;
-XtPointer call;
+do_fileselection_list( Widget w, XtPointer client_data, XtPointer call_data)
 {
 	char	*mb_suffix;
 	char	*sb_suffix;
@@ -2003,7 +1911,7 @@ XtPointer call;
 	int	form;
 	char	value_text[10];
 
-	/*SUPPRESS 594*/XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
 
 	/* get selected text */
 	get_text_string(fileSelectionBox_text, string);
@@ -2089,23 +1997,17 @@ XtPointer call;
 /*--------------------------------------------------------------------*/
 /* ARGSUSED */
 void
-do_fileselection_nomatch(w, client, call)
-Widget w;
-XtPointer client;
-XtPointer call;
+do_fileselection_nomatch( Widget w, XtPointer client_data, XtPointer call_data)
 {
-	/*SUPPRESS 594*/XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
 
 }
 /*--------------------------------------------------------------------*/
 /* ARGSUSED */
 void
-do_toggle_pick(w, client, call)
-Widget w;
-XtPointer client;
-XtPointer call;
+do_toggle_pick( Widget w, XtPointer client_data, XtPointer call_data)
 {
-	/*SUPPRESS 594*/XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
 
 	mode_pick = PICK_MODE_PICK;
 	do_unset_interval();
@@ -2114,12 +2016,9 @@ XtPointer call;
 /*--------------------------------------------------------------------*/
 /* ARGSUSED */
 void
-do_toggle_select(w, client, call)
-Widget w;
-XtPointer client;
-XtPointer call;
+do_toggle_select( Widget w, XtPointer client_data, XtPointer call_data)
 {
-	/*SUPPRESS 594*/XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
 
 	mode_pick = PICK_MODE_SELECT;
 	do_unset_interval();
@@ -2128,12 +2027,9 @@ XtPointer call;
 /*--------------------------------------------------------------------*/
 /* ARGSUSED */
 void
-do_toggle_deselect(w, client, call)
-Widget w;
-XtPointer client;
-XtPointer call;
+do_toggle_deselect( Widget w, XtPointer client_data, XtPointer call_data)
 {
-	/*SUPPRESS 594*/XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
 
 	mode_pick = PICK_MODE_DESELECT;
 	do_unset_interval();
@@ -2142,12 +2038,9 @@ XtPointer call;
 /*--------------------------------------------------------------------*/
 /* ARGSUSED */
 void
-do_toggle_selectall(w, client, call)
-Widget w;
-XtPointer client;
-XtPointer call;
+do_toggle_selectall( Widget w, XtPointer client_data, XtPointer call_data)
 {
-	/*SUPPRESS 594*/XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
 
 	mode_pick = PICK_MODE_SELECTALL;
 	do_unset_interval();
@@ -2156,12 +2049,9 @@ XtPointer call;
 /*--------------------------------------------------------------------*/
 /* ARGSUSED */
 void
-do_toggle_deselectall(w, client, call)
-Widget w;
-XtPointer client;
-XtPointer call;
+do_toggle_deselectall( Widget w, XtPointer client_data, XtPointer call_data)
 {
-	/*SUPPRESS 594*/XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
 
 	mode_pick = PICK_MODE_DESELECTALL;
 	do_unset_interval();
@@ -2171,24 +2061,18 @@ XtPointer call;
 
 /* ARGSUSED */
 void
-do_quit(w, client, call)
-Widget w;
-XtPointer client;
-XtPointer call;
+do_quit( Widget w, XtPointer client_data, XtPointer call_data)
 {
-	/*SUPPRESS 594*/XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
 
-	(void) BxExitCB(w, client, call);
+	(void) BxExitCB(w, client_data, call_data);
 }
 /*--------------------------------------------------------------------*/
 /* ARGSUSED */
 void
-do_interpolation(w, client, call)
-Widget w;
-XtPointer client;
-XtPointer call;
+do_interpolation( Widget w, XtPointer client_data, XtPointer call_data)
 {
-	/*SUPPRESS 594*/XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
 
 	/* Interpolate any current selected data */
 	mbnavedit_action_interpolate();
@@ -2200,13 +2084,10 @@ XtPointer call;
 /*--------------------------------------------------------------------*/
 /* ARGSUSED */
 void
-do_scroll(w, client, call)
-Widget w;
-XtPointer client;
-XtPointer call;
+do_scroll( Widget w, XtPointer client_data, XtPointer call_data)
 {
 
-	/*SUPPRESS 594*/XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
 
 	/* replot */
 	mbnavedit_plot_all();
@@ -2216,12 +2097,9 @@ XtPointer call;
 
 /* ARGSUSED */
 void
-do_revert(w, client, call)
-Widget w;
-XtPointer client;
-XtPointer call;
+do_revert( Widget w, XtPointer client_data, XtPointer call_data)
 {
-	/*SUPPRESS 594*/XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
 
 	/* Revert to original values for all selected data */
 	mbnavedit_action_revert();
@@ -2233,12 +2111,9 @@ XtPointer call;
 /*--------------------------------------------------------------------*/
 /* ARGSUSED */
 void
-do_showall(w, client, call)
-Widget w;
-XtPointer client;
-XtPointer call;
+do_showall( Widget w, XtPointer client_data, XtPointer call_data)
 {
-	/*SUPPRESS 594*/XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
 
 	/* Show entire data buffer */
 	mbnavedit_action_showall();
@@ -2256,12 +2131,9 @@ XtPointer call;
 /*--------------------------------------------------------------------*/
 /* ARGSUSED */
 void
-do_set_interval(w, client, call)
-Widget w;
-XtPointer client;
-XtPointer call;
+do_set_interval( Widget w, XtPointer client_data, XtPointer call_data)
 {
-	/*SUPPRESS 594*/XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
 
 	/* turn on set interval mode */
 	mode_set_interval = MB_YES;
@@ -2294,10 +2166,7 @@ do_unset_interval()
 /*--------------------------------------------------------------------*/
 
 void
-do_toggle_vru(w, client_data, call_data)
- Widget w;
- XtPointer client_data;
- XtPointer call_data;
+do_toggle_vru( Widget w, XtPointer client_data, XtPointer call_data)
 {
 	int	screen_height;
 
@@ -2338,17 +2207,13 @@ do_toggle_vru(w, client_data, call_data)
 }
 /*--------------------------------------------------------------------*/
 void
-mbnavedit_bell(length)
-int	length;
+mbnavedit_bell(int length)
 {
 	XBell(display,length);
 }
 /*--------------------------------------------------------------------*/
 void
-mbnavedit_get_position(win_x, win_y, mask_return)
-int	*win_x;
-int	*win_y;
-unsigned int *mask_return;
+mbnavedit_get_position(int *win_x, int *win_y, unsigned int *mask_return)
 {
 	Window	root_return, child_return;
 	int	root_x_return, root_y_return;
@@ -2422,8 +2287,7 @@ mbnavedit_setintervalcursor()
 /*--------------------------------------------------------------------*/
 
 int
-do_wait_until_viewed(app)
-XtAppContext app;
+do_wait_until_viewed(XtAppContext app)
 {
     Widget  topshell;
     Window  topwindow;
@@ -2463,8 +2327,7 @@ XtAppContext app;
 /*--------------------------------------------------------------------*/
 
 int
-do_message_on(message)
-char	*message;
+do_message_on(char *message)
 {
     Widget  diashell, topshell;
     Window  diawindow, topwindow;
@@ -2521,10 +2384,7 @@ do_message_off()
 /*--------------------------------------------------------------------*/
 
 int
-do_error_dialog(s1, s2, s3)
-char	*s1;
-char	*s2;
-char	*s3;
+do_error_dialog(char *s1, char *s2, char *s3)
 {
     set_label_string(label_error_one, s1);
     set_label_string(label_error_two, s2);

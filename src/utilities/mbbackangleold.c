@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbbackangle.c	1/6/95
- *    $Id: mbbackangleold.c,v 4.11 2000-09-30 07:06:28 caress Exp $
+ *    $Id: mbbackangleold.c,v 4.12 2000-10-11 01:06:15 caress Exp $
  *
  *    Copyright (c) 1995, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	January 6, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.11  2000/09/30  07:06:28  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.10  2000/09/11  20:10:02  caress
  * Linked to new datalist parsing functions. Now supports recursive datalists
  * and comments in datalists.
@@ -80,11 +83,9 @@
 
 /*--------------------------------------------------------------------*/
 
-main (argc, argv)
-int argc;
-char **argv; 
+main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbbackangleold.c,v 4.11 2000-09-30 07:06:28 caress Exp $";
+	static char rcs_id[] = "$Id: mbbackangleold.c,v 4.12 2000-10-11 01:06:15 caress Exp $";
 	static char program_name[] = "mbbackangle";
 	static char help_message[] =  
 "mbbackangle reads a swath sonar data file and generates a table\n\t\
@@ -752,23 +753,11 @@ The results are dumped to stdout.";
 	exit(error);
 }
 /*--------------------------------------------------------------------*/
-int set_bathyslope(verbose,
-	nbath,beamflag,bath,bathacrosstrack,
-	ndepths,depths,depthacrosstrack, 
-	nslopes,slopes,slopeacrosstrack, 
-	error)
-int	verbose;
-int	nbath;
-char	*beamflag;
-double	*bath;
-double	*bathacrosstrack;
-int	*ndepths;
-double	*depths;
-double	*depthacrosstrack;
-int	*nslopes;
-double	*slopes;
-double	*slopeacrosstrack;
-int	*error;
+int set_bathyslope(int verbose,
+	int nbath, char *beamflag, double *bath, double *bathacrosstrack,
+	int *ndepths, double *depths, double *depthacrosstrack, 
+	int *nslopes, double *slopes, double *slopeacrosstrack, 
+	int *error)
 {
 	char	*function_name = "set_bathyslope";
 	int	status = MB_SUCCESS;
@@ -849,21 +838,11 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int get_bathyslope(verbose,
-	ndepths,depths,depthacrosstrack,
-	nslopes,slopes,slopeacrosstrack, 
-	acrosstrack,depth,slope,error)
-int	verbose;
-int	ndepths;
-double	*depths;
-double	*depthacrosstrack;
-int	nslopes;
-double	*slopes;
-double	*slopeacrosstrack;
-double	acrosstrack;
-double	*depth;
-double	*slope;
-int	*error;
+int get_bathyslope(int verbose,
+	int ndepths, double *depths, double *depthacrosstrack, 
+	int nslopes, double *slopes, double *slopeacrosstrack, 
+	double acrosstrack, double *depth,  double *slope, 
+	int *error)
 {
 	char	*function_name = "get_bathyslope";
 	int	status = MB_SUCCESS;

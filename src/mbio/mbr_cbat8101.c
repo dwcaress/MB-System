@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_cbat8101.c	8/8/94
- *	$Id: mbr_cbat8101.c,v 4.2 2000-09-30 06:34:20 caress Exp $
+ *	$Id: mbr_cbat8101.c,v 4.3 2000-10-11 01:02:30 caress Exp $
  *
  *    Copyright (c) 1998, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	December 10, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  2000/09/30  06:34:20  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.1  1999/03/31  18:11:35  caress
  * MB-System 4.6beta7
  *
@@ -51,12 +54,9 @@
 #include "../../include/mb_swap.h"
 
 /*--------------------------------------------------------------------*/
-int mbr_alm_cbat8101(verbose,mbio_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-int	*error;
+int mbr_alm_cbat8101(int verbose, char *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_cbat8101.c,v 4.2 2000-09-30 06:34:20 caress Exp $";
+	static char res_id[]="$Id: mbr_cbat8101.c,v 4.3 2000-10-11 01:02:30 caress Exp $";
 	char	*function_name = "mbr_alm_cbat8101";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -103,10 +103,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_dem_cbat8101(verbose,mbio_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-int	*error;
+int mbr_dem_cbat8101(int verbose, char *mbio_ptr, int *error)
 {
 	char	*function_name = "mbr_dem_cbat8101";
 	int	status = MB_SUCCESS;
@@ -144,10 +141,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_zero_cbat8101(verbose,data_ptr,error)
-int	verbose;
-char	*data_ptr;
-int	*error;
+int mbr_zero_cbat8101(int verbose, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_zero_cbat8101";
 	int	status = MB_SUCCESS;
@@ -297,11 +291,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_rt_cbat8101(verbose,mbio_ptr,store_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-char	*store_ptr;
-int	*error;
+int mbr_rt_cbat8101(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 {
 	char	*function_name = "mbr_rt_cbat8101";
 	int	status = MB_SUCCESS;
@@ -782,11 +772,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_wt_cbat8101(verbose,mbio_ptr,store_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-char	*store_ptr;
-int	*error;
+int mbr_wt_cbat8101(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 {
 	char	*function_name = "mbr_wt_cbat8101";
 	int	status = MB_SUCCESS;
@@ -1041,10 +1027,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_cbat8101_rd_data(verbose,mbio_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-int	*error;
+int mbr_cbat8101_rd_data(int verbose, char *mbio_ptr, int *error)
 {
 	char	*function_name = "mbr_cbat8101_rd_data";
 	int	status = MB_SUCCESS;
@@ -1264,11 +1247,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_cbat8101_rd_comment(verbose,mbfp,data,error)
-int	verbose;
-FILE	*mbfp;
-struct mbf_cbat8101_struct *data;
-int	*error;
+int mbr_cbat8101_rd_comment(int verbose, FILE *mbfp, 
+		struct mbf_cbat8101_struct *data, int *error)
 {
 	char	*function_name = "mbr_cbat8101_rd_comment";
 	int	status = MB_SUCCESS;
@@ -1326,11 +1306,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_cbat8101_rd_parameter(verbose,mbfp,data,error)
-int	verbose;
-FILE	*mbfp;
-struct mbf_cbat8101_struct *data;
-int	*error;
+int mbr_cbat8101_rd_parameter(int verbose, FILE *mbfp, 
+		struct mbf_cbat8101_struct *data, int *error)
 {
 	char	*function_name = "mbr_cbat8101_rd_parameter";
 	int	status = MB_SUCCESS;
@@ -1497,11 +1474,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_cbat8101_rd_nav(verbose,mbfp,data,error)
-int	verbose;
-FILE	*mbfp;
-struct mbf_cbat8101_struct *data;
-int	*error;
+int mbr_cbat8101_rd_nav(int verbose, FILE *mbfp, 
+		struct mbf_cbat8101_struct *data, int *error)
 {
 	char	*function_name = "mbr_cbat8101_rd_nav";
 	int	status = MB_SUCCESS;
@@ -1625,11 +1599,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_cbat8101_rd_svp(verbose,mbfp,data,error)
-int	verbose;
-FILE	*mbfp;
-struct mbf_cbat8101_struct *data;
-int	*error;
+int mbr_cbat8101_rd_svp(int verbose, FILE *mbfp, 
+		struct mbf_cbat8101_struct *data, int *error)
 {
 	char	*function_name = "mbr_cbat8101_rd_svp";
 	int	status = MB_SUCCESS;
@@ -1735,11 +1706,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_cbat8101_rd_short_svp(verbose,mbfp,data,error)
-int	verbose;
-FILE	*mbfp;
-struct mbf_cbat8101_struct *data;
-int	*error;
+int mbr_cbat8101_rd_short_svp(int verbose, FILE *mbfp, 
+		struct mbf_cbat8101_struct *data, int *error)
 {
 	char	*function_name = "mbr_cbat8101_rd_svp";
 	int	status = MB_SUCCESS;
@@ -1845,11 +1813,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_cbat8101_rd_bath(verbose,mbfp,data,error)
-int	verbose;
-FILE	*mbfp;
-struct mbf_cbat8101_struct *data;
-int	*error;
+int mbr_cbat8101_rd_bath(int verbose, FILE *mbfp, 
+		struct mbf_cbat8101_struct *data, int *error)
 {
 	char	*function_name = "mbr_cbat8101_rd_bath";
 	int	status = MB_SUCCESS;
@@ -2026,11 +1991,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_cbat8101_rd_heading(verbose,mbfp,data,error)
-int	verbose;
-FILE	*mbfp;
-struct mbf_cbat8101_struct *data;
-int	*error;
+int mbr_cbat8101_rd_heading(int verbose, FILE *mbfp, 
+		struct mbf_cbat8101_struct *data, int *error)
 {
 	char	*function_name = "mbr_cbat8101_rd_heading";
 	int	status = MB_SUCCESS;
@@ -2112,11 +2074,8 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_cbat8101_rd_attitude(verbose,mbfp,data,error)
-int	verbose;
-FILE	*mbfp;
-struct mbf_cbat8101_struct *data;
-int	*error;
+int mbr_cbat8101_rd_attitude(int verbose, FILE *mbfp, 
+		struct mbf_cbat8101_struct *data, int *error)
 {
 	char	*function_name = "mbr_cbat8101_rd_attitude";
 	int	status = MB_SUCCESS;
@@ -2206,11 +2165,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_cbat8101_wr_data(verbose,mbio_ptr,data_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-char	*data_ptr;
-int	*error;
+int mbr_cbat8101_wr_data(int verbose, char *mbio_ptr, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_cbat8101_wr_data";
 	int	status = MB_SUCCESS;
@@ -2293,11 +2248,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_cbat8101_wr_comment(verbose,mbfp,data_ptr,error)
-int	verbose;
-FILE	*mbfp;
-char	*data_ptr;
-int	*error;
+int mbr_cbat8101_wr_comment(int verbose, FILE *mbfp, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_cbat8101_wr_comment";
 	int	status = MB_SUCCESS;
@@ -2387,11 +2338,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_cbat8101_wr_parameter(verbose,mbfp,data_ptr,error)
-int	verbose;
-FILE	*mbfp;
-char	*data_ptr;
-int	*error;
+int mbr_cbat8101_wr_parameter(int verbose, FILE *mbfp, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_cbat8101_wr_parameter";
 	int	status = MB_SUCCESS;
@@ -2583,11 +2530,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_cbat8101_wr_nav(verbose,mbfp,data_ptr,error)
-int	verbose;
-FILE	*mbfp;
-char	*data_ptr;
-int	*error;
+int mbr_cbat8101_wr_nav(int verbose, FILE *mbfp, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_cbat8101_wr_nav";
 	int	status = MB_SUCCESS;
@@ -2736,11 +2679,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_cbat8101_wr_svp(verbose,mbfp,data_ptr,error)
-int	verbose;
-FILE	*mbfp;
-char	*data_ptr;
-int	*error;
+int mbr_cbat8101_wr_svp(int verbose, FILE *mbfp, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_cbat8101_wr_svp";
 	int	status = MB_SUCCESS;
@@ -2893,11 +2832,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_cbat8101_wr_bath(verbose,mbfp,data_ptr,error)
-int	verbose;
-FILE	*mbfp;
-char	*data_ptr;
-int	*error;
+int mbr_cbat8101_wr_bath(int verbose, FILE *mbfp, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_cbat8101_wr_bath";
 	int	status = MB_SUCCESS;
@@ -3102,11 +3037,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_cbat8101_wr_heading(verbose,mbfp,data_ptr,error)
-int	verbose;
-FILE	*mbfp;
-char	*data_ptr;
-int	*error;
+int mbr_cbat8101_wr_heading(int verbose, FILE *mbfp, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_cbat8101_wr_heading";
 	int	status = MB_SUCCESS;
@@ -3213,11 +3144,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_cbat8101_wr_attitude(verbose,mbfp,data_ptr,error)
-int	verbose;
-FILE	*mbfp;
-char	*data_ptr;
-int	*error;
+int mbr_cbat8101_wr_attitude(int verbose, FILE *mbfp, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_cbat8101_wr_attitude";
 	int	status = MB_SUCCESS;

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_get.c	1/26/93
- *    $Id: mb_get.c,v 4.10 2000-09-30 06:26:58 caress Exp $
+ *    $Id: mb_get.c,v 4.11 2000-10-11 01:02:30 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	January 26, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.10  2000/09/30  06:26:58  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.9  1999/08/08  04:12:45  caress
  * Added ELMK2XSE format.
  *
@@ -99,38 +102,17 @@
 #include "../../include/mb_define.h"
 
 /*--------------------------------------------------------------------*/
-int mb_get(verbose,mbio_ptr,kind,pings,time_i,time_d,
-		navlon,navlat,speed,heading,distance,
-		nbath,namp,nss,
-		beamflag,bath,amp,bathacrosstrack,bathalongtrack,
-		ss,ssacrosstrack,ssalongtrack,
-		comment,error)
-int	verbose;
-char	*mbio_ptr;
-int	*kind;
-int	*pings;
-int	time_i[7];
-double	*time_d;
-double	*navlon;
-double	*navlat;
-double	*speed;
-double	*heading;
-double	*distance;
-int	*nbath;
-int	*namp;
-int	*nss;
-char	*beamflag;
-double	*bath;
-double	*amp;
-double	*bathacrosstrack;
-double	*bathalongtrack;
-double	*ss;
-double	*ssacrosstrack;
-double	*ssalongtrack;
-char	*comment;
-int	*error;
+int mb_get(int verbose, char *mbio_ptr, int *kind, int *pings, 
+		int time_i[7], double *time_d,
+		double *navlon, double *navlat, double *speed, 
+		double *heading, double *distance,
+		int *nbath, int *namp, int *nss,
+		char *beamflag, double *bath, double *amp,
+		double *bathacrosstrack, double *bathalongtrack,
+		double *ss, double *ssacrosstrack, double *ssalongtrack,
+		char *comment, int *error)
 {
-  static char rcs_id[]="$Id: mb_get.c,v 4.10 2000-09-30 06:26:58 caress Exp $";
+  static char rcs_id[]="$Id: mb_get.c,v 4.11 2000-10-11 01:02:30 caress Exp $";
 	char	*function_name = "mb_get";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;

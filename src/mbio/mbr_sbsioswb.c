@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sbsioswb.c	9/18/93
- *	$Id: mbr_sbsioswb.c,v 4.11 2000-09-30 06:34:20 caress Exp $
+ *	$Id: mbr_sbsioswb.c,v 4.12 2000-10-11 01:03:21 caress Exp $
  *
  *    Copyright (c) 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	February 2, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.11  2000/09/30  06:34:20  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.10  1999/08/06  00:47:44  caress
  * Added code to handle case where fewer beams than listed are actually
  * in the data.
@@ -91,12 +94,9 @@
 #define	round(X)	X < 0.0 ? ceil(X - 0.5) : floor(X + 0.5)
 
 /*--------------------------------------------------------------------*/
-int mbr_alm_sbsioswb(verbose,mbio_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-int	*error;
+int mbr_alm_sbsioswb(int verbose, char *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_sbsioswb.c,v 4.11 2000-09-30 06:34:20 caress Exp $";
+ static char res_id[]="$Id: mbr_sbsioswb.c,v 4.12 2000-10-11 01:03:21 caress Exp $";
 	char	*function_name = "mbr_alm_sbsioswb";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -139,10 +139,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_dem_sbsioswb(verbose,mbio_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-int	*error;
+int mbr_dem_sbsioswb(int verbose, char *mbio_ptr, int *error)
 {
 	char	*function_name = "mbr_dem_sbsioswb";
 	int	status = MB_SUCCESS;
@@ -180,11 +177,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_rt_sbsioswb(verbose,mbio_ptr,store_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-char	*store_ptr;
-int	*error;
+int mbr_rt_sbsioswb(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 {
 	char	*function_name = "mbr_rt_sbsioswb";
 	int	status = MB_SUCCESS;
@@ -781,11 +774,7 @@ int	*error;
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_wt_sbsioswb(verbose,mbio_ptr,store_ptr,error)
-int	verbose;
-char	*mbio_ptr;
-char	*store_ptr;
-int	*error;
+int mbr_wt_sbsioswb(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 {
 	char	*function_name = "mbr_wt_sbsioswb";
 	int	status = MB_SUCCESS;

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_ttimes.c	4/9/94
- *    $Id: mb_ttimes.c,v 4.18 2000-09-30 06:32:11 caress Exp $
+ *    $Id: mb_ttimes.c,v 4.19 2000-10-11 01:02:30 caress Exp $
 
  *    Copyright (c) 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -183,6 +183,9 @@
  * Date:	April 9, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.18  2000/09/30  06:32:11  caress
+ * Snapshot for Dale.
+ *
  * Revision 4.17  1999/07/16  19:24:15  caress
  * Yet another version.
  *
@@ -262,25 +265,14 @@
 #include "../../include/mb_define.h"
 
 /*--------------------------------------------------------------------*/
-int mb_ttimes(verbose,mbio_ptr,store_ptr,kind,nbeams,
-	ttimes,angles,angles_forward,angles_null,
-	heave,alongtrack_offset,draft,ssv,error)
-int	verbose;
-char	*mbio_ptr;
-char	*store_ptr;
-int	*kind;
-int	*nbeams;
-double	*ttimes;
-double	*angles;
-double	*angles_forward;
-double	*angles_null;
-double	*heave;
-double	*alongtrack_offset;
-double	*draft;
-double	*ssv;
-int	*error;
+int mb_ttimes(int verbose, char *mbio_ptr, char *store_ptr,
+	int *kind, int *nbeams,
+	double *ttimes, double	*angles, 
+	double *angles_forward, double *angles_null,
+	double *heave, double *alongtrack_offset, 
+	double *draft, double *ssv, int *error)
 {
-  static char rcs_id[]="$Id: mb_ttimes.c,v 4.18 2000-09-30 06:32:11 caress Exp $";
+  static char rcs_id[]="$Id: mb_ttimes.c,v 4.19 2000-10-11 01:02:30 caress Exp $";
 	char	*function_name = "mb_ttimes";
 	int	status;
 	int	system;
