@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sb2100rw.c	3/3/94
- *	$Id: mbr_sb2100rw.c,v 4.8 1994-12-21 20:18:10 caress Exp $
+ *	$Id: mbr_sb2100rw.c,v 4.9 1995-01-16 12:32:15 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	March 3, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.8  1994/12/21  20:18:10  caress
+ * Not sure what changes have been made.
+ *
  * Revision 4.7  1994/11/07  14:04:33  caress
  * Fixed data flagging.
  *
@@ -80,7 +83,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_sb2100rw.c,v 4.8 1994-12-21 20:18:10 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2100rw.c,v 4.9 1995-01-16 12:32:15 caress Exp $";
 	char	*function_name = "mbr_alm_sb2100rw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -864,7 +867,7 @@ int	*error;
 		for (i=0;i<mb_io_ptr->pixels_ss;i++)
 			{
 			data->amplitude_ss[i]
-				= mb_io_ptr->new_ss[i];
+				= (int) mb_io_ptr->new_ss[i];
 			if (set_pixel_size == MB_YES
 			    && (data->frequency[0] == 'H' 
 			    && data->pixel_size_36khz <= 0)
@@ -1748,8 +1751,8 @@ int	*error;
                         tmp = (short) read_ss[2*i+1];
                         data->alongtrack_ss[i] = (int) mb_swap_short(tmp);
 #else
-			data->amplitude_ss[i] = read_ss[2*i];
-			data->alongtrack_ss[i] = (short) read_ss[2*i+1];
+			data->amplitude_ss[i] = (int) read_ss[2*i];
+			data->alongtrack_ss[i] = (int) read_ss[2*i+1];
 #endif
 	  		}
 		}
@@ -2349,7 +2352,7 @@ int	*error;
 			status = fprintf(mbfp,"%2.2d",data->ping_gain_12khz);
 			status = fprintf(mbfp,"%2.2d",
 				data->ping_pulse_width_12khz);
-			status = fprintf(mbfp,"%+02d",
+			status = fprintf(mbfp,"%02d",
 				data->transmitter_attenuation_12khz);
 			status = fprintf(mbfp,"%+06d",data->pitch_12khz);
 			status = fprintf(mbfp,"%+06d",data->roll_12khz);
@@ -2360,7 +2363,7 @@ int	*error;
 			status = fprintf(mbfp,"%2.2d",data->ping_gain_36khz);
 			status = fprintf(mbfp,"%2.2d",data->
 				ping_pulse_width_36khz);
-			status = fprintf(mbfp,"%+02d",
+			status = fprintf(mbfp,"%02d",
 				data->transmitter_attenuation_36khz);
 			status = fprintf(mbfp,"%+06d",data->pitch_36khz);
 			status = fprintf(mbfp,"%+06d",data->roll_36khz);
@@ -2615,7 +2618,7 @@ int	*error;
 			status = fprintf(mbfp,"%2.2d",data->ping_gain_12khz);
 			status = fprintf(mbfp,"%2.2d",
 				data->ping_pulse_width_12khz);
-			status = fprintf(mbfp,"%+02d",
+			status = fprintf(mbfp,"%02d",
 				data->transmitter_attenuation_12khz);
 			status = fprintf(mbfp,"%+06d",data->pitch_12khz);
 			status = fprintf(mbfp,"%+06d",data->roll_12khz);
@@ -2628,7 +2631,7 @@ int	*error;
 			status = fprintf(mbfp,"%2.2d",data->ping_gain_36khz);
 			status = fprintf(mbfp,"%2.2d",data->
 				ping_pulse_width_36khz);
-			status = fprintf(mbfp,"%+02d",
+			status = fprintf(mbfp,"%02d",
 				data->transmitter_attenuation_36khz);
 			status = fprintf(mbfp,"%+06d",data->pitch_36khz);
 			status = fprintf(mbfp,"%+06d",data->roll_36khz);
@@ -2648,6 +2651,10 @@ int	*error;
 #else
 			write_ss[2*i] = (unsigned short) data->amplitude_ss[i];
 			write_ss[2*i+1] = (short) data->alongtrack_ss[i];
+if (write_ss[2*i] > 60000)
+fprintf(stderr, "excess ss: i:%d ss:%d %d xt:%d %d\n", 
+i, data->amplitude_ss[i], write_ss[2*i], 
+data->alongtrack_ss[i], write_ss[2*i+1]);
 #endif
 	  		}
 		if ((status = fwrite(write_ss,1,data->ss_data_length,mbfp))
