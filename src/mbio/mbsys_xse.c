@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_xse.c	3/27/2000
- *	$Id: mbsys_xse.c,v 5.15 2003-04-17 21:05:23 caress Exp $
+ *	$Id: mbsys_xse.c,v 5.16 2003-12-24 06:51:21 caress Exp $
  *
  *    Copyright (c) 2000, 2001, 2002, 2003 by 
  *    D. W. Caress (caress@mbari.org)
@@ -28,6 +28,9 @@
  * Additional Authors:	P. A. Cohen and S. Dzurenko
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.15  2003/04/17 21:05:23  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.14  2002/09/18 23:32:59  caress
  * Release 5.0.beta23
  *
@@ -102,7 +105,7 @@
 int mbsys_xse_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_xse.c,v 5.15 2003-04-17 21:05:23 caress Exp $";
+ static char res_id[]="$Id: mbsys_xse.c,v 5.16 2003-12-24 06:51:21 caress Exp $";
 	char	*function_name = "mbsys_xse_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -775,11 +778,17 @@ int mbsys_xse_insert(int verbose, void *mbio_ptr, void *store_ptr,
 				}
 			    else 
 				store->beams[i].quality = 1;
-			    store->beams[i].depth 
-				    = bath[j] - store->beams[i].heave;
 			    store->beams[i].lateral = dsign * bathacrosstrack[j];
 			    store->beams[i].along = bathalongtrack[j];
 			    store->beams[i].amplitude = (int) (amp[j]);
+			    if (store->beams[i].lateral < 0.0)
+				store->beams[i].depth 
+				    = bath[j] - store->beams[i].heave
+				    	- store->par_trans_z_port;
+			    else
+				store->beams[i].depth 
+				    = bath[j] - store->beams[i].heave
+				    	- store->par_trans_z_stbd;
 			    }
 			}
 		    }
