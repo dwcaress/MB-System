@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbclean.c	2/26/93
- *    $Id: mbclean.c,v 4.16 1997-09-15 19:11:06 caress Exp $
+ *    $Id: mbclean.c,v 4.17 1997-10-03 18:44:36 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -26,6 +26,9 @@
  * by David Caress.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.16  1997/09/15  19:11:06  caress
+ * Real Version 4.5
+ *
  * Revision 4.15  1997/07/25  14:28:10  caress
  * Version 4.5beta2
  *
@@ -157,7 +160,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbclean.c,v 4.16 1997-09-15 19:11:06 caress Exp $";
+	static char rcs_id[] = "$Id: mbclean.c,v 4.17 1997-10-03 18:44:36 caress Exp $";
 	static char program_name[] = "MBCLEAN";
 	static char help_message[] =  "MBCLEAN identifies and flags artifacts in multibeam bathymetry data\nBad beams  are  indentified  based  on  one simple criterion only: \nexcessive bathymetric slopes.   The default input and output streams \nare stdin and stdout.";
 	static char usage_message[] = "mbclean [-Amax -Blow/high -Cslope -Dmin/max \n\t-Fformat -Gfraction_low/fraction_high \n\t-Iinfile -Llonflip -Mmode -Nbuffersize -Ooutfile -Q -Xzap_beams \n\t-V -H]";
@@ -1113,7 +1116,7 @@ char **argv;
 				    }
 				}
 			}
-			sort(nlist,list);
+			sort(nlist,list-1);
 			median = list[nlist/2];
 			if (verbose >= 2)
 				{
