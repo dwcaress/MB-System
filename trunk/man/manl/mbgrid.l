@@ -1,4 +1,4 @@
-.TH mbgrid l "16 March 2003" "MB-System 5.0" "MB-System 5.0"
+.TH mbgrid l "21 March 2003" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbgrid\fP - Grid bathymetry, amplitude, or sidescan data 
 from swath sonar data files.
@@ -144,17 +144,33 @@ option allows the user to force \fBmbgrid\fP to ignore data which
 overlies regions already covered by previous data (as defined by
 a time lag criterea). Alternatively, the user can force the program
 to use only the last data in a region, again as defined by a time
-lage. This option works best with the median
-filter scheme. 
+lag. This option works best with the median filter scheme. 
 
-If the \fB-C\fP option is used to set clipping to a value > 0, then a
-2D thin plate spline algorithm is applied to the successfully calculated 
-grid values to fill in, or interpolate, gaps in the data.  New values
-are assigned only at grid points within a specified distance from
-the nearest data points (this distance is specified in terms of 
-grid point spacing using the \fB-C\fP command).  Thus, small gaps
-in the data can be filled, or the whole grid can be filled in with
-a smooth interpolation.
+The gridding can be augmented by interpolation using a 2D thin plate
+spline algorithm with optional tension. The use of interpolation is
+set with the \fB-C\fP\fIclip/mode\fP option, and is only used to fill
+in grid cells left undefined after all of the swath data have been
+processed. The \fIclip\fP value sets the distance from swath data to
+which the interpolation is applied (this distance is specified as
+an integer number of grid cells, so the physical distance is
+\fIclip\fP times the grid cell interval). If 
+\fImode\fP = 1 (the default), undefined cells will be filled with interpolation
+only if cells filled with swath data are found within 
+\fIclip\fP cells in two opposite directions 
+(e.g east and west, or northeast and southwest). This approach serves
+to fill in data gaps while avoiding adding an interpolated band around
+the edges of a survey. A caution: a large value of \fIclip\fP 
+combined with \fImode\fP = 1 will be VERY slow. If \fImode\fP = 2, then
+undefined cells will be filled with the interpolation if they are within
+\fIclip\fP cells of swath data in any direction. This approach is faster,
+but can make a survey look larger and more complete than in reality.
+If \fImode\fP = 3 or \fIclip\fP is 
+set to a value greater than both dimensions of the output grid, then
+all grid cells not set by swath data will be filled by interpolation.
+The \fB-T\fP\fItension\fP option modulates the thin plate spline algorithm.
+Using the default \fItension\fP = 0.0 corresponds to a minimum curvature,
+pure Laplacian solution. If \fItension\fP is made large, the solution
+tends toward a thin plate spline and is effectively flattened.
 
 The \fB-K\fP\fIbackground\fP option is used to underlay a bathymetry or topography
 grid with a global or regional topography model. The background data
@@ -242,13 +258,19 @@ wherever no data exist, provided \fIborder\fP > 0.0.
 Default: \fIborder\fP = 0.0
 .TP
 .B \-C
-\fIclip\fP
+\fIclip/mode\fP
 .br
-Sets the clipping dimension for the spline interpolation. If \fIclip\fP=0
-no spline interpolation will be done.  If \fIclip\fP>0 then the spline
-interpolation will fill data gaps to a distance of \fIclip\fP times
-the grid spacing.
-Default: \fIclip\fP = 0.
+Controls the use of spline interpolation to fill grid cells not
+filled by swath data. The \fIclip\fP value sets the distance from
+swath data (in grid cells) that the spline interpolation may be 
+applied. If \fIclip\fP=0 no spline interpolation will be done. 
+If \fImode\fP=1 (the default), then the interpolation will fill
+data gaps up to two times \fIclip\fP grid cells in size. If \fImode\fP=2 
+then the spline interpolation will fill all undefined cells within
+a distance of \fIclip\fP cells from data. If \fImode\fP = 3 or \fIclip\fP is 
+set to a value greater than both dimensions of the output grid, then
+all grid cells not set by swath data will be filled by interpolation.
+Default: \fIclip\fP = 0 and \fImode\fP = 1.
 .TP
 .B \-D
 \fIxdim/ydim\fP
@@ -544,9 +566,9 @@ A \fItension\fP of 0 gives a minimum curvature surface with free edges;
 this is a pure Laplacian solution. A nonzero \fItension\fP tends to 
 suppress spurious oscillations and flatten
 the interpolation toward the edges; a \fItension\fP of infinity
-yields a pure spline solution. The \fItension\fP must be zero or
+yields a pure thin plate spline solution. The \fItension\fP must be zero or
 greater.  
-Default: \fItension\fP = 1.0e10 (pure spline solution).
+Default: \fItension\fP = 0.0 (minimum curvature solution).
 .TP
 .B \-U
 \fItime\fP
@@ -610,7 +632,7 @@ will be filled in through spine interpolation even in the areas
 not covered by data. The output looks like:
  
  Program MBGRID
- Version $Id: mbgrid.l,v 5.7 2003-03-16 18:05:40 caress Exp $
+ Version $Id: mbgrid.l,v 5.8 2003-03-22 03:09:09 caress Exp $
  MB-system Version 4.5
  
  MBGRID Parameters:
