@@ -1,9 +1,9 @@
-.TH mbvelocitytool l "18 November 1994"
+.TH mbvelocitytool l "14 February 1995"
 .SH NAME
 \fBmbvelocitytool\fP - Interactive water sound velocity profile editor.
 
 .SH VERSION
-Version 4.1
+Version 4.2
 
 .SH SYNOPSIS
 \fBmbvelocitytool\fP [\fBA\fIdangle\fP \fB-V -H\fP]
