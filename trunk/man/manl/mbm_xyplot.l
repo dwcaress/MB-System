@@ -1,4 +1,4 @@
-.TH mbm_xyplot l "14 August 1995"
+.TH mbm_xyplot l "14 August 1995" "MB-System 4.3" "MB-System 4.3"
 .SH NAME
 \fBmbm_xyplot\fP - Create an executable shellscript which will generate
 a GMT plot of xy data.

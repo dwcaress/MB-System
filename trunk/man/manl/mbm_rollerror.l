@@ -1,4 +1,4 @@
-.TH mbm_rollerror l "14 August 1995"
+.TH mbm_rollerror l "14 August 1995" "MB-System 4.3" "MB-System 4.3"
 .SH NAME
 \fBmbm_rollerror\fP - Macro to read a multibeam bathymetry file, calculate the noise in the vertical reference used by the sonar, and generate a file containing roll corrections which can be applied to the data.
 

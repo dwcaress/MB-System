@@ -1,4 +1,4 @@
-.TH mbm_xbt l "14 August 1995"
+.TH mbm_xbt l "14 August 1995" "MB-System 4.3" "MB-System 4.3"
 .SH NAME
 \fBmbm_xbt\fP - Calculate sound velocity from XBT data.
 

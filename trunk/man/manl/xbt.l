@@ -1,4 +1,4 @@
-.TH xbt l "14 August 1995"
+.TH xbt l "14 August 1995" "MB-System 4.3" "MB-System 4.3"
 .SH NAME
 \fBxbt\fP - Overview of \fBxbt\fP proceedures on the R/V Ewing.
 
