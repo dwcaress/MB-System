@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_sb2100.c	3/2/94
- *	$Id: mbsys_sb2100.c,v 4.5 1995-03-06 19:38:54 caress Exp $
+ *	$Id: mbsys_sb2100.c,v 4.6 1995-05-08 21:26:28 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -31,6 +31,9 @@
  * Author:	D. W. Caress
  * Date:	March 2, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.5  1995/03/06  19:38:54  caress
+ * Changed include strings.h to string.h for POSIX compliance.
+ *
  * Revision 4.4  1994/11/09  21:40:34  caress
  * Changed ttimes extraction routines to handle forward beam angles
  * so that alongtrack distances can be calculated.
@@ -76,7 +79,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_sb2100.c,v 4.5 1995-03-06 19:38:54 caress Exp $";
+ static char res_id[]="$Id: mbsys_sb2100.c,v 4.6 1995-05-08 21:26:28 caress Exp $";
 	char	*function_name = "mbsys_sb2100_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -263,6 +266,8 @@ int	*error;
 		*nss = mb_io_ptr->pixels_ss;
 		if (store->range_scale == 'S')
 			scale = 0.01;
+		else if (store->range_scale == 'I')
+			scale = 0.1;
 		else
 			scale = 1.0;
 		for (i=0;i<*nbath;i++)
@@ -530,6 +535,8 @@ int	*error;
 			into data structure */
 		if (store->range_scale == 'S')
 			scale = 100.0;
+		else if (store->range_scale == 'I')
+			scale = 10.0;
 		else
 			{
 			scale = 1.0;

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sb2100rw.c	3/3/94
- *	$Id: mbr_sb2100rw.c,v 4.13 1995-03-06 19:38:54 caress Exp $
+ *	$Id: mbr_sb2100rw.c,v 4.14 1995-05-08 21:26:28 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	March 3, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.13  1995/03/06  19:38:54  caress
+ * Changed include strings.h to string.h for POSIX compliance.
+ *
  * Revision 4.12  1995/02/15  14:37:51  caress
  * Changed "signed short" declarations to "short" in order to
  * placate the SunOS 4.1 compiler.
@@ -99,7 +102,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_sb2100rw.c,v 4.13 1995-03-06 19:38:54 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2100rw.c,v 4.14 1995-05-08 21:26:28 caress Exp $";
 	char	*function_name = "mbr_alm_sb2100rw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -227,6 +230,7 @@ int	*error;
 		data->roll_bias_port = 0;
 		data->roll_bias_starboard = 0;
 		data->pitch_bias = 0;
+		data->ship_draft = 0;
 		data->num_svp = 0;
 		for (i=0;i<MBF_SB2100RW_MAXVEL;i++)
 			{
@@ -237,7 +241,9 @@ int	*error;
 		/* DR and SS header info */
 		data->longitude = 0.0;
 		data->latitude = 0.0;
-		data->speed = 0.0;
+		data->speed = 0;
+		data->heave = 0;
+		data->range_scale = 'D';
 		data->surface_sound_velocity = 0;
 		data->ssv_source = 'U';
 		data->depth_gate_mode = 'U';
@@ -245,9 +251,8 @@ int	*error;
 		/* DR header info */
 		data->num_beams = 0;
 		data->svp_corr_beams = '0';
-		for (i=0;i<8;i++)
-			data->spare[i] = ' ';
-		data->range_scale = 'D';
+		for (i=0;i<2;i++)
+			data->spare_dr[i] = ' ';
 		data->num_algorithms = 1;
 		for (i=0;i<4;i++)
 			data->algorithm_order[i] = ' ';
@@ -256,11 +261,13 @@ int	*error;
 		data->num_pixels = 0;
 		data->ss_data_length = 0;
 		data->pixel_algorithm = 'D';
+		data->pixel_size_scale = 'D';
 		data->svp_corr_ss = '0';
 		data->num_pixels_12khz = 0;
-		data->pixel_size_12khz = 0;
+		data->pixel_size_12khz = 0.0;
 		data->num_pixels_36khz = 0;
-		data->pixel_size_36khz = 0;
+		data->pixel_size_36khz = 0.0;
+		data->spare_ss = ' ';
 
 		/* transmit parameters and navigation (DR and SS) */
 		data->frequency[0] = 'L';
@@ -337,7 +344,7 @@ int	*error;
 	struct mbf_sb2100rw_struct *data;
 	struct mbsys_sb2100_struct *store;
 	int	time_j[5];
-	double	scale;
+	double	scale,  pixel_size;
 	int	i, j, k;
 
 	/* print input debug statements */
@@ -480,6 +487,8 @@ int	*error;
 		mb_io_ptr->pixels_ss = data->num_pixels;
 		if (data->range_scale == 'S')
 			scale = 0.01;
+		else if (data->range_scale == 'I')
+			scale = 0.1;
 		else
 			scale = 1.0;
 		for (i=0;i<mb_io_ptr->beams_bath;i++)
@@ -496,12 +505,16 @@ int	*error;
 			mb_io_ptr->new_amp[i] 
 				= data->amplitude_beam[i];
 			}
+		if (data->frequency[0] == 'L')
+			pixel_size = data->pixel_size_12khz;
+		else
+			pixel_size = data->pixel_size_36khz;
 		for (i=0;i<mb_io_ptr->pixels_ss;i++)
 			{
 			mb_io_ptr->new_ss[i] 
 				= data->amplitude_ss[i];
 			mb_io_ptr->new_ss_acrosstrack[i] 
-				= scale*data->pixel_size_12khz*
+				= scale*pixel_size*
 					(i - MBF_SB2100RW_CENTER_PIXEL);
 			mb_io_ptr->new_ss_alongtrack[i] 
 				= scale*data->alongtrack_ss[i];
@@ -577,6 +590,7 @@ int	*error;
 		store->roll_bias_port = data->roll_bias_port;
 		store->roll_bias_starboard = data->roll_bias_starboard;
 		store->pitch_bias = data->pitch_bias;
+		store->ship_draft = data->ship_draft;
 		store->num_svp = data->num_svp;
 		for (i=0;i<MBF_SB2100RW_MAXVEL;i++)
 			{
@@ -588,6 +602,8 @@ int	*error;
 		store->longitude = data->longitude;
 		store->latitude = data->latitude;
 		store->speed = data->speed;
+		store->heave = data->heave;
+		store->range_scale = data->range_scale;
 		store->surface_sound_velocity = data->surface_sound_velocity;
 		store->ssv_source = data->ssv_source;
 		store->depth_gate_mode = data->depth_gate_mode;
@@ -595,9 +611,8 @@ int	*error;
 		/* DR header info */
 		store->num_beams = data->num_beams;
 		store->svp_corr_beams = data->svp_corr_beams;
-		for (i=0;i<8;i++)
-			store->spare[i] = data->spare[i];
-		store->range_scale = data->range_scale;
+		for (i=0;i<2;i++)
+			store->spare_dr[i] = data->spare_dr[i];
 		store->num_algorithms = data->num_algorithms;
 		for (i=0;i<4;i++)
 			store->algorithm_order[i] = data->algorithm_order[i];
@@ -606,11 +621,13 @@ int	*error;
 		store->ss_data_length = data->ss_data_length;
 		store->num_pixels = data->num_pixels;
 		store->pixel_algorithm = data->pixel_algorithm;
+		store->pixel_size_scale = data->pixel_size_scale;
 		store->svp_corr_ss = data->svp_corr_ss;
 		store->num_pixels_12khz = data->num_pixels_12khz;
 		store->pixel_size_12khz = data->pixel_size_12khz;
 		store->num_pixels_36khz = data->num_pixels_36khz;
 		store->pixel_size_36khz = data->pixel_size_36khz;
+		store->spare_ss = data->spare_ss;
 
 		/* transmit parameters and navigation (DR and SS) */
 		store->frequency[0] = data->frequency[0];
@@ -727,6 +744,7 @@ int	*error;
 		data->roll_bias_port = store->roll_bias_port;
 		data->roll_bias_starboard = store->roll_bias_starboard;
 		data->pitch_bias = store->pitch_bias;
+		data->ship_draft = store->ship_draft;
 		data->num_svp = store->num_svp;
 		for (i=0;i<MBF_SB2100RW_MAXVEL;i++)
 			{
@@ -738,6 +756,8 @@ int	*error;
 		data->longitude = store->longitude;
 		data->latitude = store->latitude;
 		data->speed = store->speed;
+		data->heave = store->heave;
+		data->range_scale = store->range_scale;
 		data->surface_sound_velocity = store->surface_sound_velocity;
 		data->ssv_source = store->ssv_source;
 		data->depth_gate_mode = store->depth_gate_mode;
@@ -745,9 +765,8 @@ int	*error;
 		/* DR header info */
 		data->num_beams = store->num_beams;
 		data->svp_corr_beams = store->svp_corr_beams;
-		for (i=0;i<8;i++)
-			data->spare[i] = store->spare[i];
-		data->range_scale = store->range_scale;
+		for (i=0;i<2;i++)
+			data->spare_dr[i] = store->spare_dr[i];
 		data->num_algorithms = store->num_algorithms;
 		for (i=0;i<4;i++)
 			data->algorithm_order[i] = store->algorithm_order[i];
@@ -756,11 +775,13 @@ int	*error;
 		data->ss_data_length = store->ss_data_length;
 		data->num_pixels = store->num_pixels;
 		data->pixel_algorithm = store->pixel_algorithm;
+		data->pixel_size_scale = store->pixel_size_scale;
 		data->svp_corr_ss = store->svp_corr_ss;
 		data->num_pixels_12khz = store->num_pixels_12khz;
 		data->pixel_size_12khz = store->pixel_size_12khz;
 		data->num_pixels_36khz = store->num_pixels_36khz;
 		data->pixel_size_36khz = store->pixel_size_36khz;
+		data->spare_ss = store->spare_ss;
 
 		/* transmit parameters and navigation (DR and SS) */
 		data->frequency[0] = store->frequency[0];
@@ -861,6 +882,8 @@ int	*error;
 		/* read beam and pixel values into storage arrays */
 		if (data->range_scale == 'S')
 			scale = 100.0;
+		else if (data->range_scale == 'I')
+			scale = 10.0;
 		else
 			{
 			scale = 1.0;
@@ -1256,10 +1279,22 @@ int	*error;
 		mb_get_int(&(data->hour),                 line+7,   2);
 		mb_get_int(&(data->minute),               line+9,   2);
 		mb_get_int(&(data->msec),                 line+11,  5);
-		mb_get_int(&(data->roll_bias_port),       line+16,  6);
-		mb_get_int(&(data->roll_bias_starboard),  line+22,  6);
-		mb_get_int(&(data->pitch_bias),           line+28,  6);
-		mb_get_int(&(data->num_svp),              line+34,  2);
+		if (strlen(line) >= 39)
+			{
+			mb_get_int(&(data->roll_bias_port),       line+16,  6);
+			data->roll_bias_starboard = data->roll_bias_port;
+			mb_get_int(&(data->pitch_bias),           line+22,  6);
+			mb_get_int(&(data->num_svp),              line+28,  2);
+			mb_get_int(&(data->ship_draft),           line+30,  7);
+			}
+		else
+			{
+			mb_get_int(&(data->roll_bias_port),       line+16,  6);
+			mb_get_int(&(data->roll_bias_starboard),  line+22,  6);
+			mb_get_int(&(data->pitch_bias),           line+28,  6);
+			mb_get_int(&(data->num_svp),              line+34,  2);
+			data->ship_draft = 0;
+			}
 		}
 
 	/* read and parse data from other lines of record */
@@ -1287,6 +1322,7 @@ int	*error;
 		fprintf(stderr,"dbg5       roll_bias_strbrd: %d\n",data->roll_bias_starboard);
 		fprintf(stderr,"dbg5       pitch_bias:       %d\n",data->pitch_bias);
 		fprintf(stderr,"dbg5       num_svp:          %d\n",data->num_svp);
+		fprintf(stderr,"dbg5       ship_draft:       %d\n",data->ship_draft);
 		fprintf(stderr,"dbg5       Sound Velocity Profile:\n");
 		for (i=0;i<data->num_svp;i++)
 			fprintf(stderr,"dbg5       %d  depth:%d  velocity:%d\n",
@@ -1420,8 +1456,9 @@ int	*error;
 		data->svp_corr_beams = line[46];
 		data->frequency[0] = line[47];
 		data->frequency[1] = line[48];
-		for (i=0;i<8;i++)
-			data->spare[i] = line[49+i];
+		mb_get_int(&(data->heave),                line+49,  6);
+		for (i=0;i<2;i++)
+			data->spare_dr[i] = line[55+i];
 		data->range_scale = line[57];
 		mb_get_int(&(data->surface_sound_velocity),line+58,6);
 		data->ssv_source = line[64];
@@ -1486,9 +1523,11 @@ int	*error;
 			data->svp_corr_beams);
 		fprintf(stderr,"dbg5       frequency:        %c%c\n",
 			data->frequency[0],data->frequency[1]);
+		fprintf(stderr,"dbg5       heave:            %d\n",
+			data->heave);
 		fprintf(stderr,"dbg5       spare:            ");
-		for (i=0;i<8;i++)
-			fprintf(stderr,"%c",data->spare[i]);
+		for (i=0;i<2;i++)
+			fprintf(stderr,"%c",data->spare_dr[i]);
 		fprintf(stderr,"\n");
 		fprintf(stderr,"dbg5       range_scale:      %c\n",
 			data->range_scale);
@@ -1652,9 +1691,10 @@ int	*error;
 		data->svp_corr_beams = line[46];
 		data->frequency[0] = line[47];
 		data->frequency[1] = line[48];
-		for (i=0;i<8;i++)
-			data->spare[i] = line[49+i];
-		data->range_scale = line[57];
+		mb_get_int(&(data->heave),                 line+49,  6);
+		data->range_scale = line[55];
+		data->spare_ss = line[56];
+		data->pixel_size_scale = line[57];
 		data->pixel_algorithm = line[58];
 		mb_get_int(&(data->surface_sound_velocity),line+59,6);
 		data->ssv_source = line[65];
@@ -1665,7 +1705,7 @@ int	*error;
 		if (data->frequency[0] != 'H')
 		  {
 		  mb_get_int(&(data->num_pixels_12khz),   line+shift,     4);
-		  mb_get_int(&(data->pixel_size_12khz),   line+4+shift,   4);
+		  mb_get_double(&(data->pixel_size_12khz),line+4+shift,   4);
 		  mb_get_int(&(data->ping_gain_12khz),    line+8+shift,   2);
 		  mb_get_int(&(data->ping_pulse_width_12khz),
 							  line+10+shift,   2);
@@ -1682,7 +1722,7 @@ int	*error;
 		if (data->frequency[0] != 'L')
 		  {
 		  mb_get_int(&(data->num_pixels_36khz),   line+shift,  4);
-		  mb_get_int(&(data->pixel_size_36khz),   line+4+shift,  4);
+		  mb_get_double(&(data->pixel_size_36khz),line+4+shift,  4);
 		  mb_get_int(&(data->ping_gain_36khz),    line+8+shift,2);
 		  mb_get_int(&(data->ping_pulse_width_36khz),
 							  line+10+shift,2);
@@ -1718,12 +1758,14 @@ int	*error;
 			data->svp_corr_beams);
 		fprintf(stderr,"dbg5       frequency:        %c%c\n",
 			data->frequency[0],data->frequency[1]);
-		fprintf(stderr,"dbg5       spare:            ");
-		for (i=0;i<8;i++)
-			fprintf(stderr,"%c",data->spare[i]);
-		fprintf(stderr,"\n");
+		fprintf(stderr,"dbg5       heave:            %d\n",
+			data->heave);
 		fprintf(stderr,"dbg5       range_scale:      %c\n",
 			data->range_scale);
+		fprintf(stderr,"dbg5       spare_ss:         %c\n", 
+			data->spare_ss);
+		fprintf(stderr,"dbg5       pixel_size_scale: %c\n",
+			data->pixel_size_scale);
 		fprintf(stderr,"dbg5       pixel_algorithm:  %c\n",
 			data->pixel_algorithm);
 		fprintf(stderr,"dbg5       surface_sound_velocity: %d\n",
@@ -1734,7 +1776,7 @@ int	*error;
 			data->depth_gate_mode);
 		fprintf(stderr,"dbg5       num_pixels_12khz: %d\n",
 			data->num_pixels_12khz);
-		fprintf(stderr,"dbg5       pixel_size_12khz: %d\n",
+		fprintf(stderr,"dbg5       pixel_size_12khz: %f\n",
 			data->pixel_size_12khz);
 		fprintf(stderr,"dbg5       ping_gain_12khz:  %d\n",
 			data->ping_gain_12khz);
@@ -1750,7 +1792,7 @@ int	*error;
 			data->heading_12khz);
 		fprintf(stderr,"dbg5       num_pixels_36khz: %d\n",
 			data->num_pixels_36khz);
-		fprintf(stderr,"dbg5       pixel_size_36khz: %d\n",
+		fprintf(stderr,"dbg5       pixel_size_36khz: %f\n",
 			data->pixel_size_36khz);
 		fprintf(stderr,"dbg5       ping_gain_36khz:  %d\n",
 			data->ping_gain_36khz);
@@ -2092,6 +2134,7 @@ int	*error;
 		fprintf(stderr,"dbg5       roll_bias_port:   %d\n",data->roll_bias_port);
 		fprintf(stderr,"dbg5       roll_bias_strbrd: %d\n",data->roll_bias_starboard);
 		fprintf(stderr,"dbg5       pitch_bias:       %d\n",data->pitch_bias);
+		fprintf(stderr,"dbg5       ship_draft:       %d\n",data->ship_draft);
 		fprintf(stderr,"dbg5       num_svp:          %d\n",data->num_svp);
 		fprintf(stderr,"dbg5       Sound Velocity Profile:\n");
 		for (i=0;i<data->num_svp;i++)
@@ -2116,6 +2159,7 @@ int	*error;
 		status = fprintf(mbfp,"%+06d",data->roll_bias_starboard);
 		status = fprintf(mbfp,"%+06d",data->pitch_bias);
 		status = fprintf(mbfp,"%2.2d",data->num_svp);
+		status = fprintf(mbfp,"%7.7d",data->ship_draft);
 		status = fprintf(mbfp,"\r\n");
 
 		/* output the second line */
@@ -2275,9 +2319,11 @@ int	*error;
 			data->svp_corr_beams);
 		fprintf(stderr,"dbg5       frequency:        %c%c\n",
 			data->frequency[0],data->frequency[1]);
+		fprintf(stderr,"dbg5       heave:            %d\n",
+			data->heave);
 		fprintf(stderr,"dbg5       spare:            ");
-		for (i=0;i<8;i++)
-			fprintf(stderr,"%c",data->spare[i]);
+		for (i=0;i<2;i++)
+			fprintf(stderr,"%c",data->spare_dr[i]);
 		fprintf(stderr,"\n");
 		fprintf(stderr,"dbg5       range_scale:      %c\n",
 			data->range_scale);
@@ -2382,8 +2428,9 @@ int	*error;
 		status = fprintf(mbfp,"%c",data->svp_corr_beams);
 		status = fprintf(mbfp,"%c%c",
 			data->frequency[0],data->frequency[1]);
-		for (i=0;i<8;i++)
-			status = fprintf(mbfp,"%c",data->spare[i]);
+		status = fprintf(mbfp,"%6.6d",data->heave);
+		for (i=0;i<2;i++)
+			status = fprintf(mbfp,"%c",data->spare_dr[i]);
 		status = fprintf(mbfp,"%c",data->range_scale);
 		status = fprintf(mbfp,"%6.6d",data->surface_sound_velocity);
 		status = fprintf(mbfp,"%c",data->ssv_source);
@@ -2544,12 +2591,14 @@ int	*error;
 			data->svp_corr_beams);
 		fprintf(stderr,"dbg5       frequency:        %c%c\n",
 			data->frequency[0],data->frequency[1]);
-		fprintf(stderr,"dbg5       spare:            ");
-		for (i=0;i<8;i++)
-			fprintf(stderr,"%c",data->spare[i]);
-		fprintf(stderr,"\n");
+		fprintf(stderr,"dbg5       heave:            %d\n",
+			data->heave);
 		fprintf(stderr,"dbg5       range_scale:      %c\n",
 			data->range_scale);
+		fprintf(stderr,"dbg5       spare_ss:         %c\n",
+			data->spare_ss);
+		fprintf(stderr,"dbg5       pixel_size_scale: %c\n",
+			data->pixel_size_scale);
 		fprintf(stderr,"dbg5       pixel_algorithm:  %c\n",
 			data->pixel_algorithm);
 		fprintf(stderr,"dbg5       surface_sound_velocity: %d\n",
@@ -2560,7 +2609,7 @@ int	*error;
 			data->depth_gate_mode);
 		fprintf(stderr,"dbg5       num_pixels_12khz: %d\n",
 			data->num_pixels_12khz);
-		fprintf(stderr,"dbg5       pixel_size_12khz: %d\n",
+		fprintf(stderr,"dbg5       pixel_size_12khz: %f\n",
 			data->pixel_size_12khz);
 		fprintf(stderr,"dbg5       ping_gain_12khz:  %d\n",
 			data->ping_gain_12khz);
@@ -2576,7 +2625,7 @@ int	*error;
 			data->heading_12khz);
 		fprintf(stderr,"dbg5       num_pixels_36khz: %d\n",
 			data->num_pixels_36khz);
-		fprintf(stderr,"dbg5       pixel_size_36khz: %d\n",
+		fprintf(stderr,"dbg5       pixel_size_36khz: %f\n",
 			data->pixel_size_36khz);
 		fprintf(stderr,"dbg5       ping_gain_36khz:  %d\n",
 			data->ping_gain_36khz);
@@ -2647,9 +2696,10 @@ int	*error;
 		status = fprintf(mbfp,"%c",data->svp_corr_beams);
 		status = fprintf(mbfp,"%c%c",
 			data->frequency[0],data->frequency[1]);
-		for (i=0;i<8;i++)
-			status = fprintf(mbfp,"%c",data->spare[i]);
+		status = fprintf(mbfp,"%6.6d",data->heave);
 		status = fprintf(mbfp,"%c",data->range_scale);
+		status = fprintf(mbfp,"%c",data->spare_ss);
+		status = fprintf(mbfp,"%c",data->pixel_size_scale);
 		status = fprintf(mbfp,"%c",data->pixel_algorithm);
 		status = fprintf(mbfp,"%6.6d",data->surface_sound_velocity);
 		status = fprintf(mbfp,"%c",data->ssv_source);
@@ -2657,7 +2707,7 @@ int	*error;
 		if (data->frequency[0] != 'H')
 			{
 			status = fprintf(mbfp,"%4.4d",data->num_pixels_12khz);
-			status = fprintf(mbfp,"%4.4d",data->pixel_size_12khz);
+			status = fprintf(mbfp,"%4g",data->pixel_size_12khz);
 			status = fprintf(mbfp,"%2.2d",data->ping_gain_12khz);
 			status = fprintf(mbfp,"%2.2d",
 				data->ping_pulse_width_12khz);
@@ -2670,7 +2720,7 @@ int	*error;
 		if (data->frequency[0] != 'L')
 			{
 			status = fprintf(mbfp,"%4.4d",data->num_pixels_36khz);
-			status = fprintf(mbfp,"%4.4d",data->pixel_size_36khz);
+			status = fprintf(mbfp,"%4g",data->pixel_size_36khz);
 			status = fprintf(mbfp,"%2.2d",data->ping_gain_36khz);
 			status = fprintf(mbfp,"%2.2d",data->
 				ping_pulse_width_36khz);
