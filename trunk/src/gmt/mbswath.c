@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbswath.c	5/30/93
- *    $Id: mbswath.c,v 4.8 1995-01-10 15:46:08 caress Exp $
+ *    $Id: mbswath.c,v 4.9 1995-01-18 22:14:49 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -26,6 +26,9 @@
  * Date:	May 30, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.8  1995/01/10  15:46:08  caress
+ * Made plotting using the fore-aft beam width the default.
+ *
  * Revision 4.7  1995/01/05  23:59:20  caress
  * Made it possible to read data from a single file or
  * from datalists.
@@ -184,7 +187,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbswath.c,v 4.8 1995-01-10 15:46:08 caress Exp $";
+	static char rcs_id[] = "$Id: mbswath.c,v 4.9 1995-01-18 22:14:49 caress Exp $";
 	static char program_name[] = "MBSWATH";
 	static char help_message[] =  "MBSWATH is a GMT compatible utility which creates a color postscript \nimage of multibeam swath bathymetry or backscatter data.  The image \nmay be shaded relief as well.  Complete maps are made by using \nMBSWATH in conjunction with the usual GMT programs.";
 	static char usage_message[] = "mbswath -Ccptfile -Jparameters -Rwest/east/south/north [-Afactor -Btickinfo -byr/mon/day/hour/min/sec -Dmode/ampscale/ampmin/ampmax -Eyr/mon/day/hour/min/sec -fformat -Fred/green/blue -Gmagnitude/azimuth -Idatalist -K -M -O -P -ppings -Qdpi -U -Xx-shift -Yy-shift -Zmode -#copies -V -H]";
@@ -252,6 +255,7 @@ char **argv;
 	int	footprint_mode = MBSWATH_FOOTPRINT_REAL;
 	double	rawfactor = 1.0;
 	double	factor;
+	double	default_depth = 3000.0;
 	int	mode = MBSWATH_BATH;
 	int	start;
 	int	plot;
@@ -364,7 +368,8 @@ char **argv;
 		{
 		case 'A':
 		case 'a':
-			sscanf (optarg,"%lf/%d", &factor, &footprint_mode);
+			sscanf (optarg,"%lf/%d/%lf", &factor, 
+				&footprint_mode, &default_depth);
 			flag++;
 			break;
 		case 'b':
@@ -511,6 +516,7 @@ char **argv;
 		fprintf(stderr,"dbg2       amplitude maximum:%f\n",ampmax);
 		fprintf(stderr,"dbg2       footprint mode:   %f\n",footprint_mode);
 		fprintf(stderr,"dbg2       footprint factor: %f\n",factor);
+		fprintf(stderr,"dbg2       default depth:    %f\n",default_depth);
 		fprintf(stderr,"dbg2       mode:             %d\n",mode);
 		}
 
@@ -888,8 +894,8 @@ char **argv;
 			{
 			/* get footprint locations */
 			status = get_footprints(verbose,mode,
-				footprint_mode,factor,swath_plot,
-				mtodeglon,mtodeglat,&error);
+				footprint_mode,factor,default_depth, 
+				swath_plot,mtodeglon,mtodeglat,&error);
 
 			/* get shading */
 			if (mode == MBSWATH_BATH_RELIEF 
@@ -1028,12 +1034,13 @@ char **argv;
 	gmt_end(argc, argv);
 }
 /*--------------------------------------------------------------------*/
-int get_footprints(verbose,mode,fp_mode,factor,
+int get_footprints(verbose,mode,fp_mode,factor,depth_def,
 			swath,mtodeglon,mtodeglat,error)
 int	verbose;
 int	mode;
 int	fp_mode;
 double	factor;
+double	depth_def;
 struct swath *swath;
 double	mtodeglon;
 double	mtodeglat;
@@ -1048,6 +1055,7 @@ int	*error;
 	double	headingx, headingy;
 	double	dx, dy, r, dlon1, dlon2, dlat1, dlat2, tt, x, y;
 	double	ddlonx, ddlaty, rfactor;
+	double	dddepth = 0.0;
 	int	setprint;
 	int	i, j, k;
 
@@ -1061,6 +1069,7 @@ int	*error;
 		fprintf(stderr,"dbg2       mode:        %d\n",mode);
 		fprintf(stderr,"dbg2       fp mode:     %d\n",fp_mode);
 		fprintf(stderr,"dbg2       factor:      %f\n",factor);
+		fprintf(stderr,"dbg2       depth_def:   %f\n",depth_def);
 		fprintf(stderr,"dbg2       swath:       %d\n",swath);
 		fprintf(stderr,"dbg2       mtodeglon:   %f\n",mtodeglon);
 		fprintf(stderr,"dbg2       mtodeglat:   %f\n",mtodeglat);
@@ -1316,9 +1325,13 @@ int	*error;
 					- pingcur->navlon)/mtodeglon;
 				ddlaty = (pingcur->sslat[j] 
 					- pingcur->navlat)/mtodeglat;
+				if (swath->beams_bath > 0 
+					&& pingcur->bath[swath->beams_bath] > 0.0)
+					dddepth = pingcur->bath[swath->beams_bath];
+				else if (dddepth <= 0.0)
+					dddepth = depth_def;
 				r = rfactor*sqrt(ddlonx*ddlonx 
-					+ ddlaty*ddlaty 
-					+ pingcur->ss[j]*pingcur->ss[j]);
+					+ ddlaty*ddlaty + dddepth*dddepth);
 				pingcur->lonaft = -r*headingx*mtodeglon;
 				pingcur->lataft = -r*headingy*mtodeglat;
 				pingcur->lonfor = r*headingx*mtodeglon;
@@ -1509,9 +1522,13 @@ int	*error;
 					- pingcur->navlon)/mtodeglon;
 				ddlaty = (pingcur->sslat[j] 
 					- pingcur->navlat)/mtodeglat;
+				if (swath->beams_bath > 0 
+					&& pingcur->bath[swath->beams_bath] > 0.0)
+					dddepth = pingcur->bath[swath->beams_bath];
+				else if (dddepth <= 0.0)
+					dddepth = depth_def;
 				r = rfactor*sqrt(ddlonx*ddlonx 
-					+ ddlaty*ddlaty 
-					+ pingcur->ss[j]*pingcur->ss[j]);
+					+ ddlaty*ddlaty + dddepth*dddepth);
 				pingcur->lonaft = -r*headingx*mtodeglon;
 				pingcur->lataft = -r*headingy*mtodeglat;
 				pingcur->lonfor = r*headingx*mtodeglon;

@@ -7,7 +7,7 @@ swath plots of multibeam data using Postscript.
 Version 4.1
 
 .SH SYNOPSIS
-\fBmbswath\fP \fB-C\fIcptfile \fB-J\fIparameters \fB-R\fIwest/east/south/north \fP[\fB-A\fIfactor/mode \fB-B\fItickinfo \fB-b\fIyr/mo/da/hr/mn/sc \fB-D\fImode/scale/min/max \fB-E\fIyr/mo/da/hr/mn/sc \fB-f\fIformat \fB-F\fIred/green/blue \fB-G\fImagnitude/azimuth \fB-I\fIdatalist \fB-K\fI \fB-M\fI \fB-O\fI \fB-P\fI \fB-p\fIpings \fB-Q\fIdpi \fB-U\fI \fB-X\fIx-shift \fB-Y\fIy-shift \fB-Z\fImode \fB-#\fIcopies \fB-V -H\fP]
+\fBmbswath\fP \fB-C\fIcptfile \fB-J\fIparameters \fB-R\fIwest/east/south/north \fP[\fB-A\fIfactor/mode/depth \fB-B\fItickinfo \fB-b\fIyr/mo/da/hr/mn/sc \fB-D\fImode/scale/min/max \fB-E\fIyr/mo/da/hr/mn/sc \fB-f\fIformat \fB-F\fIred/green/blue \fB-G\fImagnitude/azimuth \fB-I\fIdatalist \fB-K\fI \fB-M\fI \fB-O\fI \fB-P\fI \fB-p\fIpings \fB-Q\fIdpi \fB-U\fI \fB-X\fIx-shift \fB-Y\fIy-shift \fB-Z\fImode \fB-#\fIcopies \fB-V -H\fP]
 
 .SH DESCRIPTION
 \fBmbswath\fP is an utility for plotting multibeam swath data in color fill
@@ -27,7 +27,7 @@ Palisades, NY 10964
 
 .SH OPTIONS
 .TP
-.B \fB-A\fIfactor/mode\fP
+.B \fB-A\fIfactor/mode/depth\fP
 This option determines how the along-track dimension of the
 beam or pixel footprints is calculated. If \fImode\fP = 1,
 then the fore-aft beam angle width of the sonar is used so that
@@ -36,11 +36,14 @@ The fore-aft beam angle width (\fBMB-System\fP internally stores
 a value for each format/sonar) is multiplied by the \fIfactor\fP
 value; a \fIfactor\fP < 1.0 can be useful if the data highly
 oversamples the seafloor and a \fIfactor\fP > 1.0 can fill in
-plots of data which undersample the seafloor.
+plots of data which undersample the seafloor. If the data
+stream does not include depth values (e.g. one is plotting
+pure sidescan data), then the \fIdepth\fP value sets the
+depth value in meters used in the footprint calculations.
 If \fImode\fP = 2, then the along-track dimension of the beam
 or pixel footprints is just the along-track distance between
 pings multiplied by the \fIfactor\fP value.
-Default: \fIfactor\fP = 1.0, \fImode\fP = 1.
+Default: \fIfactor\fP = 1.0, \fImode\fP = 1, \fIdepth\fP = 3000.0.
 .TP
 .B \fB-B\fItickinfo\fP
 Sets map boundary tickmark intervals. See \fBpsbasemap\fP for details.
