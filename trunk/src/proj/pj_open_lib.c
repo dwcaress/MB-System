@@ -1,12 +1,48 @@
-/* standard location file open procedure */
-#ifndef lint
-static const char SCCSID[]="@(#)pj_open_lib.c	4.5   94/10/30 GIE REL";
-#endif
+/******************************************************************************
+ * $Id: pj_open_lib.c,v 5.3 2004-02-25 21:39:39 caress Exp $
+ *
+ * Project:  PROJ.4
+ * Purpose:  Implementation of pj_open_lib(), and pj_set_finder().  These
+ *           provide a standard interface for opening projections support
+ *           data files. 
+ * Author:   Gerald Evenden, Frank Warmerdam <warmerdam@pobox.com>
+ *
+ ******************************************************************************
+ * Copyright (c) 1995, Gerald Evenden
+ * Copyright (c) 2002, Frank Warmerdam <warmerdam@pobox.com>
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+ * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+ * DEALINGS IN THE SOFTWARE.
+ ******************************************************************************
+ *
+ * $Log: not supported by cvs2svn $
+ * Revision 1.5  2002/12/14 20:15:30  warmerda
+ * updated headers
+ *
+ */
+
 #define PJ_LIB__
 #include <projects.h>
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
+
+PJ_CVSID("$Id: pj_open_lib.c,v 5.3 2004-02-25 21:39:39 caress Exp $");
 
 static const char *(*pj_finder)(const char *) = NULL;
 static char * proj_lib_name =
@@ -32,7 +68,8 @@ void pj_set_finder( const char *(*new_finder)(const char *) )
 
 FILE *
 pj_open_lib(char *name, char *mode) {
-	char fname[MAX_PATH_FILENAME+1], *sysname;
+	char fname[MAX_PATH_FILENAME+1];
+        const char *sysname;
 	FILE *fid;
 	int n = 0;
 
@@ -66,11 +103,13 @@ pj_open_lib(char *name, char *mode) {
 	} else /* just try it bare bones */
 		sysname = name;
 
-        if( getenv( "PROJ_DEBUG" ) != NULL )
-            fprintf( stderr, "pj_open_lib(%s): call fopen(%s).\n",
-                     name, sysname);
-        
 	if (fid = fopen(sysname, mode))
 		errno = 0;
+
+        if( getenv( "PROJ_DEBUG" ) != NULL )
+            fprintf( stderr, "pj_open_lib(%s): call fopen(%s) - %s\n",
+                     name, sysname,
+                     fid == NULL ? "failed" : "succeeded" );
+        
 	return(fid);
 }
