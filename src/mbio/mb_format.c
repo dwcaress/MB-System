@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.c	2/18/94
- *    $Id: mb_format.c,v 5.9 2001-10-19 00:54:37 caress Exp $
+ *    $Id: mb_format.c,v 5.10 2001-10-24 21:15:30 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	Februrary 18, 1994
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.9  2001/10/19  00:54:37  caress
+ * Added mb_get_relative_path().
+ *
  * Revision 5.8  2001/09/17  23:22:51  caress
  * Added XTF format.
  *
@@ -129,7 +132,7 @@
 #include "../../include/mbsys_simrad.h"
 #include "../../include/mbsys_simrad2.h"
 
-static char rcs_id[]="$Id: mb_format.c,v 5.9 2001-10-19 00:54:37 caress Exp $";
+static char rcs_id[]="$Id: mb_format.c,v 5.10 2001-10-24 21:15:30 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_format_register(int verbose, 
@@ -1181,7 +1184,7 @@ int mb_format(int verbose, int *format, int *error)
 /*--------------------------------------------------------------------*/
 int mb_format_system(int verbose, int *format, int *system, int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.9 2001-10-19 00:54:37 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.10 2001-10-24 21:15:30 caress Exp $";
 	char	*function_name = "mb_format_system";
 	int	status;
 
@@ -1249,7 +1252,7 @@ int mb_format_dimensions(int verbose, int *format,
 		int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.9 2001-10-19 00:54:37 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.10 2001-10-24 21:15:30 caress Exp $";
 	char	*function_name = "mb_format_dimensions";
 	int	status;
 
@@ -1316,7 +1319,7 @@ int mb_format_dimensions(int verbose, int *format,
 /*--------------------------------------------------------------------*/
 int mb_format_description(int verbose, int *format, char *description, int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.9 2001-10-19 00:54:37 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.10 2001-10-24 21:15:30 caress Exp $";
 	char	*function_name = "mb_format_description";
 	int	status;
 
@@ -1380,7 +1383,7 @@ int mb_format_flags(int verbose, int *format,
 		int *variable_beams, int *traveltime, int *beam_flagging, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.9 2001-10-19 00:54:37 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.10 2001-10-24 21:15:30 caress Exp $";
 	char	*function_name = "mb_format_flags";
 	int	status;
 
@@ -1450,7 +1453,7 @@ int mb_format_source(int verbose, int *format,
 		int *nav_source, int *heading_source, int *vru_source, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.9 2001-10-19 00:54:37 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.10 2001-10-24 21:15:30 caress Exp $";
 	char	*function_name = "mb_format_source";
 	int	status;
 
@@ -1520,7 +1523,7 @@ int mb_format_beamwidth(int verbose, int *format,
 		double *beamwidth_xtrack, double *beamwidth_ltrack,
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.9 2001-10-19 00:54:37 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.10 2001-10-24 21:15:30 caress Exp $";
 	char	*function_name = "mb_format_beamwidth";
 	int	status;
 
@@ -2071,6 +2074,7 @@ int mb_datalist_read(int verbose,
 	struct mb_datalist_struct *datalist2_ptr;
 	char	buffer[MB_PATH_MAXLINE];
 	char	root[MB_PATH_MAXLINE];
+	char	pwd[MB_PATH_MAXLINE];
 	char	tmpstr[MB_PATH_MAXLINE];
 	char	pfile[MB_PATH_MAXLINE];
 	int	pfile_specified;
@@ -2172,6 +2176,15 @@ int mb_datalist_read(int verbose,
 				    {
 				    mb_pr_get_ofile(verbose, path, 
 					    &pfile_specified, pfile, error);
+				    if (strlen(pfile) > 0 && pfile[0] != '/'
+					    && (len = strrchr(path,'/') 
+							- path + 1) > 1)
+					{
+					strcpy(tmpstr,pfile);
+					strncpy(pfile,path,len);
+					pfile[len] = '\0';
+					strcat(pfile,tmpstr);
+					}
 
 				    if (pfile_specified == MB_YES)
 					{
