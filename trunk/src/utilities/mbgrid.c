@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrid.c	5/2/94
- *    $Id: mbgrid.c,v 5.25 2004-05-24 22:37:02 caress Exp $
+ *    $Id: mbgrid.c,v 5.26 2004-12-02 06:38:50 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -38,6 +38,9 @@
  * Rererewrite:	January 2, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.25  2004/05/24 22:37:02  caress
+ * Augmented the -Kbackground option by making it possible to obtain background data from GMT grids using grd2xyz as well as from raster datasets using grdraster.
+ *
  * Revision 5.24  2003/12/12 01:45:11  caress
  * Fixed setting output stream to stdout or stderr.
  *
@@ -380,7 +383,7 @@ double mbgrid_erf();
 FILE	*outfp;
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbgrid.c,v 5.25 2004-05-24 22:37:02 caress Exp $";
+static char rcs_id[] = "$Id: mbgrid.c,v 5.26 2004-12-02 06:38:50 caress Exp $";
 static char program_name[] = "mbgrid";
 static char help_message[] =  "mbgrid is an utility used to grid bathymetry, amplitude, or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbgrid -Ifilelist -Oroot \
@@ -660,7 +663,7 @@ main (int argc, char **argv)
 			else
 				{
 				sscanf (optarg,"%d", &gridkind);
-				if (gridkind = MBGRID_CDFGRD)
+				if (gridkind == MBGRID_CDFGRD)
 					{
 					gridkind = MBGRID_GMTGRD;
 					gridkindstring[0] = '\0';

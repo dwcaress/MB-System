@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmosaic.c	2/10/97
- *    $Id: mbmosaic.c,v 5.16 2003-12-12 01:39:06 caress Exp $
+ *    $Id: mbmosaic.c,v 5.17 2004-12-02 06:38:50 caress Exp $
  *
  *    Copyright (c) 1997, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	February 10, 1997
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.16  2003/12/12 01:39:06  caress
+ * Fixed designation of the output stream to stdout or stderr.
+ *
  * Revision 5.15  2003/04/17 21:18:57  caress
  * Release 5.0.beta30
  *
@@ -163,7 +166,7 @@
 #define	NO_DATA_FLAG	99999
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbmosaic.c,v 5.16 2003-12-12 01:39:06 caress Exp $";
+static char rcs_id[] = "$Id: mbmosaic.c,v 5.17 2004-12-02 06:38:50 caress Exp $";
 static char program_name[] = "mbmosaic";
 static char help_message[] =  "mbmosaic is an utility used to mosaic amplitude or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered by multibeam swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbmosaic -Ifilelist -Oroot \
@@ -427,7 +430,7 @@ main (int argc, char **argv)
 			else
 				{
 				sscanf (optarg,"%d", &gridkind);
-				if (gridkind = MBMOSAIC_CDFGRD)
+				if (gridkind == MBMOSAIC_CDFGRD)
 					{
 					gridkind = MBMOSAIC_GMTGRD;
 					gridkindstring[0] = '\0';
