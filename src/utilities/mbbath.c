@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbbath.c	3/31/93
- *    $Id: mbbath.c,v 4.10 1995-02-27 14:43:18 caress Exp $
+ *    $Id: mbbath.c,v 4.11 1995-03-02 13:49:21 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -20,6 +20,9 @@
  * Date:	March 31, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.10  1995/02/27  14:43:18  caress
+ * Fixed bug regarding closing a text input file.
+ *
  * Revision 4.9  1995/02/14  21:18:41  caress
  * Version 4.2
  *
@@ -113,7 +116,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbbath.c,v 4.10 1995-02-27 14:43:18 caress Exp $";
+	static char rcs_id[] = "$Id: mbbath.c,v 4.11 1995-03-02 13:49:21 caress Exp $";
 	static char program_name[] = "MBBATH";
 	static char help_message[] =  "MBBATH calculates bathymetry from \
 the travel time data by raytracing \nthrough a layered water velocity \
@@ -463,7 +466,7 @@ and stdout.";
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
 		{
-		mb_error(verbose,error,message);
+		mb_error(verbose,error,&message);
 		fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
@@ -641,7 +644,7 @@ and stdout.";
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
 		{
-		mb_error(verbose,error,message);
+		mb_error(verbose,error,&message);
 		fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
@@ -662,7 +665,7 @@ and stdout.";
 		status = mb_malloc(verbose,beams_bath*sizeof(double),&bath_corr,&error);
 		if (error != MB_ERROR_NO_ERROR)
 			{
-			mb_error(verbose,error,message);
+			mb_error(verbose,error,&message);
 			fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
 			fprintf(stderr,"\nProgram <%s> Terminated\n",
 				program_name);
