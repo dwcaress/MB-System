@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbview.h	10/9/2002
- *    $Id: mbview.h,v 5.7 2005-02-08 22:37:40 caress Exp $
+ *    $Id: mbview.h,v 5.8 2005-02-17 07:35:08 caress Exp $
  *
  *    Copyright (c) 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -18,6 +18,9 @@
  * Date:	October 10,  2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2005/02/08 22:37:40  caress
+ * Heading towards 5.0.6 release.
+ *
  * Revision 5.5  2004/09/16 21:44:40  caress
  * Many changes over the summer.
  *
@@ -380,6 +383,8 @@ struct mbview_struct {
 	int	height;
 	int	lorez_dimension;
 	int	hirez_dimension;
+	int	lorez_navdecimate;
+	int	hirez_navdecimate;
 
 	/* mode controls */
 	int	display_mode;
@@ -512,6 +517,8 @@ int mbview_setwindowparms(int verbose, int instance,
 			int	height,
 			int	lorez_dimension,
 			int	hirez_dimension,
+			int	lorez_navdecimate,
+			int	hirez_navdecimate,
 			int	*error);
 int mbview_setviewcontrols(int verbose, int instance,
 			int	display_mode,
