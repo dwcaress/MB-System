@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grid.perl	6/11/99
-#    $Id: mbm_grid.perl,v 5.6 2002-10-02 23:53:13 caress Exp $
+#    $Id: mbm_grid.perl,v 5.7 2003-03-16 18:05:01 caress Exp $
 #
 #    Copyright (c) 1999, 2002 by
 #    D. W. Caress (caress@mbari.org)
@@ -54,10 +54,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   June 11, 1999
 #
 # Version:
-#   $Id: mbm_grid.perl,v 5.6 2002-10-02 23:53:13 caress Exp $
+#   $Id: mbm_grid.perl,v 5.7 2003-03-16 18:05:01 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.6  2002/10/02 23:53:13  caress
+#   Release 5.0.beta24
+#
 #   Revision 5.5  2002/08/21 00:54:20  caress
 #   Release 5.0.beta22
 #
@@ -95,7 +98,7 @@ $program_name = "mbm_grid";
 
 # Deal with command line arguments
 $command_line = "@ARGV";
-&MBGetopts('A:a:B:b:C:c:D:d:E:e:F:f:G:g:HhI:i:J:j:L:l:MmO:o:P:p:R:r:S:s:T:t:U:u:VvW:w:X:x:Y:y:Z:z:');
+&MBGetopts('A:a:B:b:C:c:D:d:E:e:F:f:G:g:HhI:i:J:j:K:k:L:l:MmO:o:P:p:R:r:S:s:T:t:U:u:VvW:w:X:x:Y:y:Z:z:');
 
 $datatype = 		($opt_A || $opt_a || 1);
 $border = 		($opt_B || $opt_b);
@@ -108,6 +111,7 @@ $gridkind = 		($opt_G || $opt_g);
 $help =    		($opt_H || $opt_h);
 $file_data = 		($opt_I || $opt_i || "datalist.mb-1");
 $projection = 		($opt_J || $opt_j);
+$background = 		($opt_K || $opt_k);
 $lonflip =    		($opt_L || $opt_l);
 $more = 		($opt_M || $opt_m);
 $root =    		($opt_O || $opt_o);
@@ -584,6 +588,10 @@ if ($datatype <= 2)
 		{
 		printf FCMD "\t-f$priority_range \\\n";
 		}
+	if ($background)
+		{
+		printf FCMD "\t-K$background \\\n";
+		}
 	}
 # mbmosaic only options
 if ($datatype > 2)
@@ -659,6 +667,10 @@ if ($verbose)
 	if ($clip)
 		{
 		print "  Clip:         $clip\n";
+		}
+	if ($background && $datatype <= 2)
+		{
+		print "  Background:   $background\n";
 		}
 	if ($priority_range && $datatype <= 2)
 		{
