@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
- *    The MB-system:	mb_pslibface.c	5/15/94
- *    $Id: mb_penface.c,v 4.1 1994-05-25 15:10:39 caress Exp $
+ *    The MB-system:	mb_penface.c	5/15/94
+ *    $Id: mb_penface.c,v 4.2 1994-07-29 19:07:47 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -11,7 +11,7 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- * MB_PSLIBFACE is a set of functions which provide an interface
+ * MB_PENFACE is a set of functions which provide an interface
  * between the program MBCONTOUR and pen plotting calls. This code 
  * is separated from MBCONTOUR so that a similar set of interface 
  * functions for plotting using the PSLIB Postscript plotting 
@@ -21,6 +21,9 @@
  * Date:	May 15, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1994/05/25  15:10:39  caress
+ * Fixed plot_exit.
+ *
  * Revision 4.0  1994/05/17  14:03:36  caress
  * First cut at new contouring scheme.
  *
@@ -36,8 +39,13 @@
 /* MBIO include files */
 #include "../../include/mb_status.h"
 
+/* pen defines */
+#define IUP 3
+#define IDN 2
+
 /* global variables */
 double	inchtolon;
+double  eps_geo;
 
 /*--------------------------------------------------------------------------*/
 /* 	function plot_init initializes the plotting. */
@@ -50,7 +58,7 @@ double	*scale;
 double	*inch2lon;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_penface.c,v 4.1 1994-05-25 15:10:39 caress Exp $";
+  	static char rcs_id[]="$Id: mb_penface.c,v 4.2 1994-07-29 19:07:47 caress Exp $";
 	char	*function_name = "plot_init";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -68,7 +76,7 @@ int	*error;
 		fprintf(stderr,"dbg2       bounds[1]:        %f\n",bounds[1]);
 		fprintf(stderr,"dbg2       bounds[2]:        %f\n",bounds[2]);
 		fprintf(stderr,"dbg2       bounds[3]:        %f\n",bounds[3]);
-		fprintf(stderr,"dbg2       scale:            %f\n",scale);
+		fprintf(stderr,"dbg2       scale:            %f\n",*scale);
 		}
 
 	/* initialize plotting */
@@ -77,6 +85,9 @@ int	*error;
 	/* get inches to longitude scale */
 	*inch2lon = 1.0/(*scale);
 	inchtolon = *inch2lon;
+
+	/* set line width */
+	eps_geo = 0.0;
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -88,7 +99,7 @@ int	*error;
 		fprintf(stderr,"dbg2       bounds[1]:  %f\n",bounds[1]);
 		fprintf(stderr,"dbg2       bounds[2]:  %f\n",bounds[2]);
 		fprintf(stderr,"dbg2       bounds[3]:  %f\n",bounds[3]);
-		fprintf(stderr,"dbg2       scale:      %f\n",scale);
+		fprintf(stderr,"dbg2       scale:      %f\n",*scale);
 		fprintf(stderr,"dbg2       inchtolon:  %d\n",*inch2lon);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -103,7 +114,7 @@ int plot_end(verbose,error)
 int	verbose;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_penface.c,v 4.1 1994-05-25 15:10:39 caress Exp $";
+  	static char rcs_id[]="$Id: mb_penface.c,v 4.2 1994-07-29 19:07:47 caress Exp $";
 	char	*function_name = "plot_end";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -156,7 +167,39 @@ int plot(x,y,ipen)
 double x,y;
 int ipen;
 {
-	printf("plot %f %f %d\n",x,y,ipen);
+	double	xold, yold;
+	double	mag, dx, dy;
+
+	if (eps_geo <= 0.0 || ipen != IDN)
+		printf("plot %f %f %d\n",x,y,ipen);
+	else
+		{
+		printf("plot %f %f %d\n",x,y,ipen);
+
+		dx = x - xold;
+		dy = y - yold;
+		mag = sqrt(dx*dx + dy*dy);
+		if (mag > 0.0)
+			{
+			dx = eps_geo*dx/mag;
+			dy = eps_geo*dy/mag;
+			printf("plot %f %f %d\n",xold,yold,IUP);
+			printf("plot %f %f %d\n",x,y,IDN);
+			printf("plot %f %f %d\n",x+dy,y-dx,IDN);
+			printf("plot %f %f %d\n",xold+dy,yold-dx,IDN);
+			printf("plot %f %f %d\n",xold-dy,yold+dx,IDN);
+			printf("plot %f %f %d\n",x-dy,y+dx,IDN);
+			printf("plot %f %f %d\n",xold-dy,yold+dx,IDN);
+			printf("plot %f %f %d\n",x+dy,y-dx,IDN);
+			printf("plot %f %f %d\n",xold+dy,yold-dx,IDN);
+			printf("plot %f %f %d\n",x,y,IDN);
+			printf("plot %f %f %d\n",xold,yold,IDN);
+			printf("plot %f %f %d\n",x,y,IDN);
+			}	
+		}
+	xold = x;
+	yold = y;
+
 	return;
 }
 /*--------------------------------------------------------------------*/
@@ -173,6 +216,13 @@ int ipen;
 {
 	printf("newp %d\n",ipen);
 	return;
+}
+/*--------------------------------------------------------------------*/
+int setline(linewidth)
+int linewidth;
+{
+	eps_geo = inchtolon*0.02*linewidth;
+        return;
 }
 /*--------------------------------------------------------------------*/
 int justify_string(height,string,s)
