@@ -1,5 +1,8 @@
 Revision History:
 $Log: not supported by cvs2svn $
+# Revision 3.6  1993/11/06  21:24:39  caress
+# Added discussion of src/realtime directory.
+#
 # Revision 3.5  1993/11/05  21:25:02  caress
 # Added discussion of how to run make to generate the executables.
 #
@@ -21,15 +24,22 @@ $Log: not supported by cvs2svn $
 # *** empty log message ***
 #
 
-RCS ID: $Id: README,v 3.6 1993-11-06 21:24:39 caress Exp $
+RCS ID: $Id: README,v 3.7 1993-12-14 22:15:56 caress Exp $
 
-MBSYSTEM 3.30 RELEASE Notes:
+MBSYSTEM 3.40 RELEASE Notes:
 ----------------------------
 
 	This directory structure contains a release of the MBSYSTEM
 software package for processing and display of multibeam data.  There
 are undoubtably numerous bugs in this software - the user should
 beware (and let us know about it!).
+
+Authors:
+--------
+David W. Caress (caress@lamont.ldeo.columbia.edu)
+Dale N. Chayes (dale@lamont.ldeo.columbia.edu)
+Lamont-Doherty Earth Observatory of Columbia University
+Palisades, NY 10964
 
 Copyright:
 ----------
@@ -57,10 +67,10 @@ language. Some L-DEO extensions to GMT for handling underway data
 are also used. The source code for these required software packages
 is available as follows:
 
-	MB-System v 3.3
+	MB-System v 3.4
 	- available from L-DEO via anonymous ftp to
 	  lamont.ldgo.columbia.edu
-	- compressed tar file MB-System3.3.tar.Z
+	- compressed tar file MB-System3.4.tar.Z
 	  in directory pub/swath_data
 
 	GMT v 2.1r4 or later
@@ -89,8 +99,8 @@ Installing MB-System:
 --------------------
 	The MB-System source code is extracted by first uncompressing
 the tar file and then running tar:
-		% uncompress MB-System3.3.tar.Z
-		% tar xvf MB-System3.3.tar.Z
+		% uncompress MB-System3.4.tar.Z
+		% tar xvf MB-System3.4.tar.Z
 	This will create a directory structure called mbsystem. To
 generate the executable programs, change directories to mbsystem,
 and then give the command "make all":
@@ -162,7 +172,7 @@ re-market some commercial tool.
 with the intent of getting something soon and would be intersted in
 any suggestions based on experience at your organizaion.
         For the short term, we suggest that you run the binaries
-provided in the 3.3 distribution on Suns (if you can) while the GUI
+provided in the 3.4 distribution on Suns (if you can) while the GUI
 builder issue settles out.
 
 "Bugs": 
