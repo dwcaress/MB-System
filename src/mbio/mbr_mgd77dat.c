@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mgd77dat.c	5/18/99
- *	$Id: mbr_mgd77dat.c,v 5.8 2003-05-20 18:05:32 caress Exp $
+ *	$Id: mbr_mgd77dat.c,v 5.9 2004-09-24 20:44:44 caress Exp $
  *
- *    Copyright (c) 1999, 2000, 2002, 2003 by
+ *    Copyright (c) 1999, 2000, 2002, 2003, 2004 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -25,6 +25,9 @@
  * Date:	May 18, 1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2003/05/20 18:05:32  caress
+ * Added svp_source to data source parameters.
+ *
  * Revision 5.7  2003/04/17 21:05:23  caress
  * Release 5.0.beta30
  *
@@ -105,7 +108,7 @@ int mbr_dem_mgd77dat(int verbose, void *mbio_ptr, int *error);
 int mbr_rt_mgd77dat(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_mgd77dat(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
-static char res_id[]="$Id: mbr_mgd77dat.c,v 5.8 2003-05-20 18:05:32 caress Exp $";
+static char res_id[]="$Id: mbr_mgd77dat.c,v 5.9 2004-09-24 20:44:44 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_mgd77dat(int verbose, void *mbio_ptr, int *error)
@@ -670,6 +673,7 @@ int mbr_mgd77dat_rd_data(int verbose, void *mbio_ptr, int *error)
 	char	line[MBF_MGD77DAT_DATA_LEN];
 	int	read_len;
 	int	shift;
+	int 	neg_unit;
 	int	itmp;
 	double	dtmp;
 	int	i, j;
@@ -787,16 +791,31 @@ int mbr_mgd77dat_rd_data(int verbose, void *mbio_ptr, int *error)
 	    mb_get_int(&data->time_i[3], &line[shift], 2); shift += 2;
 	    mb_get_int(&itmp, &line[shift], 5); shift += 5;
 	    data->time_i[4] = 0.001 * itmp;
-	    dtmp = (itmp - 1000 * data->time_i[4]) / 60.0;
+	    dtmp = (itmp - 1000 * data->time_i[4]) * 0.06;
 	    data->time_i[5] = (int) dtmp;
 	    data->time_i[6] = 1000000 * (dtmp - data->time_i[5]);
 	    mb_get_time(verbose,data->time_i,&data->time_d);
 	    
 	    /* get nav */
-	    mb_get_int(&itmp, &line[shift], 8); shift += 8;
+	    neg_unit = 8;
+	    if (line[shift] == '-') {
+		    shift += 1;
+		    neg_unit = 7;
+	    }
+	    mb_get_int(&itmp, &line[shift], neg_unit); shift += neg_unit;
 	    data->latitude = 0.00001 * itmp;
-	    mb_get_int(&itmp, &line[shift], 9); shift += 9;
+	    if (neg_unit == 7)
+		    data->latitude = -data->latitude;
+
+	    neg_unit = 9;
+	    if (line[shift] == '-') {
+		    shift += 1;
+		    neg_unit = 8;
+	    }
+	    mb_get_int(&itmp, &line[shift], neg_unit); shift += neg_unit;
 	    data->longitude = 0.00001 * itmp;
+	    if (neg_unit == 8)
+		    data->longitude = -data->longitude;
 	    mb_get_int(&data->nav_type, &line[shift], 1); shift += 1;
 	    
 	    /* get bath */
@@ -860,16 +879,33 @@ int mbr_mgd77dat_rd_data(int verbose, void *mbio_ptr, int *error)
 	    mb_get_int(&data->time_i[3], &line[shift], 2); shift += 2;
 	    mb_get_int(&itmp, &line[shift], 5); shift += 5;
 	    data->time_i[4] = 0.001 * itmp;
-	    dtmp = (itmp - 1000 * data->time_i[4]) / 60.0;
+	    dtmp = (itmp - 1000 * data->time_i[4]) * 0.06;
 	    data->time_i[5] = (int) dtmp;
 	    data->time_i[6] = 1000000 * (dtmp - data->time_i[5]);
+
 	    mb_get_time(verbose,data->time_i,&data->time_d);
 	    
 	    /* get nav */
-	    mb_get_int(&itmp, &line[shift], 8); shift += 8;
+	    neg_unit = 8;
+	    if (line[shift] == '-') {
+		    shift += 1;
+		    neg_unit = 7;
+	    }
+	    mb_get_int(&itmp, &line[shift], neg_unit); shift += neg_unit;
 	    data->latitude = 0.00001 * itmp;
-	    mb_get_int(&itmp, &line[shift], 9); shift += 9;
+	    if (neg_unit == 7)
+		    data->latitude = -data->latitude;
+
+	    neg_unit = 9;
+	    if (line[shift] == '-') {
+		    shift += 1;
+		    neg_unit = 8;
+	    }
+	    mb_get_int(&itmp, &line[shift], neg_unit); shift += neg_unit;
 	    data->longitude = 0.00001 * itmp;
+	    if (neg_unit == 8)
+		    data->longitude = -data->longitude;
+
 	    mb_get_int(&data->nav_type, &line[shift], 1); shift += 1;
 	    
 	    /* get bath */
@@ -938,6 +974,7 @@ int mbr_mgd77dat_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 	struct mbf_mgd77dat_struct *data;
 	char	line[MBF_MGD77DAT_DATA_LEN+1];
 	int	itmp;
+	double 	dtmp;
 	int	write_len;
 	int	shift;
 	int	i;
@@ -988,16 +1025,26 @@ int mbr_mgd77dat_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 	    sprintf(&line[shift], "%2.2d", data->time_i[1]); shift += 2;
 	    sprintf(&line[shift], "%2.2d", data->time_i[2]); shift += 2;
 	    sprintf(&line[shift], "%2.2d", data->time_i[3]); shift += 2;
-	    itmp = 1000.0 * data->time_i[4] 
-		    + 1000.0 * (data->time_i[5] 
-			+ 1000000 * data->time_i[6])/ 60.0;
+	    itmp = (1000.0 * data->time_i[4])
+		    + (1000.0 * (data->time_i[5]/60.0))
+			+ (1000.0 * ((data->time_i[6]/1000000.0)/60.0));
 	    sprintf(&line[shift], "%5.5d", itmp); shift += 5;
 
 	    /* get nav */
 	    itmp = 100000 * data->latitude;
-	    sprintf(&line[shift], "%8.8d", itmp); shift += 8;
+	    if (itmp < 0) {
+		    sprintf(&line[shift], "-"); shift += 1;
+		    sprintf(&line[shift], "%7.7d", itmp*-1); shift += 7;
+	    } else {
+		    sprintf(&line[shift], "%8.8d", itmp); shift += 8;
+	    }
 	    itmp = 100000 * data->longitude;
-	    sprintf(&line[shift], "%9.9d", itmp); shift += 9;
+	    if (itmp < 0) {
+		    sprintf(&line[shift], "-"); shift += 1;
+		    sprintf(&line[shift], "%8.8d", itmp*-1); shift += 8;
+	    } else {
+		    sprintf(&line[shift], "%9.9d", itmp); shift += 9;
+	    }
 	    sprintf(&line[shift], "%1.1d", data->nav_type); shift += 1;
 	    
 	    /* get bath */
