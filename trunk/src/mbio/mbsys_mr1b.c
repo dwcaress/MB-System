@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_mr1b.c	7/19/94
- *	$Id: mbsys_mr1b.c,v 4.7 1998-10-05 17:46:15 caress Exp $
+ *	$Id: mbsys_mr1b.c,v 4.8 1999-05-12 00:29:23 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -34,6 +34,9 @@
  * Date:	July 19, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.7  1998/10/05  17:46:15  caress
+ * MB-System version 4.6beta
+ *
  * Revision 4.6  1997/09/15  19:06:40  caress
  * Real Version 4.5
  *
@@ -87,7 +90,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_mr1b.c,v 4.7 1998-10-05 17:46:15 caress Exp $";
+ static char res_id[]="$Id: mbsys_mr1b.c,v 4.8 1999-05-12 00:29:23 caress Exp $";
 	char	*function_name = "mbsys_mr1b_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -362,6 +365,7 @@ int	*error;
 			bathacrosstrack[j] = store->bath_acrosstrack_stbd[i];
 			bathalongtrack[j] = 0.0;
 			}
+
 		for (i=0;i<store->port_sscount;i++)
 			{
 			j = pixel_center - i - 2;
@@ -663,7 +667,6 @@ int	*error;
 			}
 
 		/* get starboard bathymetry */
-		store->stbd_btycount = 0;
 		for (i=0;i<store->stbd_btycount;i++)
 			{
 			j = beam_center + 2 + i;
