@@ -1,4 +1,4 @@
-.TH mbm_plot l "1 November 1995"
+.TH mbm_plot l "1 November 1995" "MB-System 4.3" "MB-System 4.3"
 .SH NAME
 \fBmbm_plot\fP - Create an executable shellscript which will generate
 a GMT plot of multibeam swath data.

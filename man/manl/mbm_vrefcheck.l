@@ -1,4 +1,4 @@
-.TH mbm_vrefcheck l "14 August 1995"
+.TH mbm_vrefcheck l "14 August 1995" "MB-System 4.3" "MB-System 4.3"
 .SH NAME
 \fBmbm_vrefcheck\fP - Macro to generate plot of crosstrack seafloor slope
 from a multibeam file.  The noise in this time series largely reflects
