@@ -74,6 +74,9 @@
  * bac          06-19-03  Added support for bathymetric receive beam time series intensity data (i.e., Simrad
  *                        "Seabed image" and Reson "snippets").  Inlcluded RWL updates of 12-19-02 for adding
  *                        sensor-specific singlebeam information to the MB sensor specific subrecords.
+ * bac          12-28-04  Added support for Navisound singlebeam, EM3000D, EM3002, and EM3002D.  Fixed
+ *                        encoding of 1-byte BRB intensity values.  Corrected the encode/decode of Reson
+ *                        projector angle.  Added beam_spacing to the gsfReson8100Specific subrecord.
  *
  * Classification : Unclassified
  *
@@ -145,6 +148,7 @@ static int      EncodeSBEchotracSpecific(unsigned char *sptr, t_gsfSBEchotracSpe
 static int      EncodeSBMGD77Specific(unsigned char *sptr, t_gsfSBMGD77Specific * sdata);
 static int      EncodeSBBDBSpecific(unsigned char *sptr, t_gsfSBBDBSpecific * sdata);
 static int      EncodeSBNOSHDBSpecific(unsigned char *sptr, t_gsfSBNOSHDBSpecific * sdata);
+static int      EncodeSBNavisoundSpecific(unsigned char *sptr, t_gsfSBNavisoundSpecific * sdata);
 
 /********************************************************************
  *
@@ -1348,6 +1352,9 @@ gsfEncodeSwathBathymetryPing(unsigned char *sptr, gsfSwathBathyPing * ping, GSF_
         case (GSF_SWATH_BATHY_SUBRECORD_EM1002_SPECIFIC):
         case (GSF_SWATH_BATHY_SUBRECORD_EM300_SPECIFIC):
         case (GSF_SWATH_BATHY_SUBRECORD_EM120_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_EM3002_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_EM3000D_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_EM3002D_SPECIFIC):
             sensor_size = EncodeEM3Specific(p, &ping->sensor_data, ft);
             break;
 
@@ -1382,6 +1389,10 @@ gsfEncodeSwathBathymetryPing(unsigned char *sptr, gsfSwathBathyPing * ping, GSF_
 
         case (GSF_SWATH_BATHY_SB_SUBRECORD_PDD_SPECIFIC):
             sensor_size = EncodeSBEchotracSpecific(p, &ping->sensor_data.gsfSBPDDSpecific);
+            break;
+
+        case (GSF_SWATH_BATHY_SB_SUBRECORD_NAVISOUND_SPECIFIC):
+            sensor_size = EncodeSBNavisoundSpecific(p, &ping->sensor_data.gsfSBNavisoundSpecific);
             break;
 
         default:
@@ -3707,8 +3718,8 @@ EncodeReson8100Specific(unsigned char *sptr, gsfSensorSpecific *sdata)
     *p = (unsigned char) (sdata->gsfReson8100Specific.projector_type);
     p += 1;
 
-    /* Next two byte integer contains the projector angle, in deg C * 100 */
-    stemp = htons((gsfuShort) sdata->gsfReson8100Specific.pulse_width);
+    /* Next two byte integer contains the projector angle, in deg * 100 */
+    stemp = htons((gsfuShort) sdata->gsfReson8100Specific.projector_angle);
     memcpy(p, &stemp, 2);
     p += 2;
 
@@ -3741,14 +3752,24 @@ EncodeReson8100Specific(unsigned char *sptr, gsfSensorSpecific *sdata)
     memcpy(p, &stemp, 2);
     p += 2;
 
-    /* Next four bytes are reserved as spare space. */
+    /* Next two byte integer contains the across track angular beam spacing * 10000 */
+    dtemp = sdata->gsfReson8100Specific.beam_spacing * 10000.0;
+    if (dtemp < 0.0)
+    {
+        dtemp -= 0.501;
+    }
+    else
+    {
+        dtemp += 0.501;
+    }
+    stemp = htons((gsfuShort) dtemp);
+    memcpy(p, &stemp, 2);
+    p += 2;
+
+    /* Next two bytes are reserved as spare space. */
     *p = (unsigned char) (sdata->gsfReson8100Specific.spare[0]);
     p += 1;
     *p = (unsigned char) (sdata->gsfReson8100Specific.spare[1]);
-    p += 1;
-    *p = (unsigned char) (sdata->gsfReson8100Specific.spare[2]);
-    p += 1;
-    *p = (unsigned char) (sdata->gsfReson8100Specific.spare[3]);
     p += 1;
 
     return (p - sptr);
@@ -3991,6 +4012,53 @@ EncodeSBNOSHDBSpecific(unsigned char *sptr, t_gsfSBNOSHDBSpecific * sdata)
 
 /********************************************************************
  *
+ * Function Name : EncodeSBNavisoundSpecific
+ *
+ * Description : This function encodes the Navisound
+ *  sensor specific data
+ *
+ * Inputs :
+ *    sptr = a pointer to an unsigned char buffer to write into
+ *    sdata = a pointer to a union of sensor specific data
+ *    major_version = the major version of GSF used to create the file.
+ *    minor_version = the minor version of GSF used to create the file.
+ *
+ * Returns : This function returns the number of bytes encoded.
+ *
+ * Error Conditions : none
+ *
+ ********************************************************************/
+
+static int
+EncodeSBNavisoundSpecific(unsigned char *sptr, t_gsfSBNavisoundSpecific * sdata)
+{
+    unsigned char  *p = sptr;
+    gsfuShort       stemp;
+    double          dtemp;
+
+    /* First two byte value contains the pulse length */
+    dtemp = sdata->pulse_length * 100.0;
+    if (dtemp < 0.0)
+    {
+        dtemp -= 0.501;
+    }
+    else
+    {
+        dtemp += 0.501;
+    }
+    stemp = htons((gsfuShort) dtemp);
+    memcpy(p, &stemp, 2);
+    p += 2;
+
+    /* write the spare bytes */
+    memcpy(p, sdata->spare, 8);
+    p += 8;
+
+    return (p - sptr);
+}
+
+/********************************************************************
+ *
  * Function Name : EncodeEM3ImagerySpecific
  *
  * Description : This function encodes the Simrad EM3000 series sensor
@@ -4155,6 +4223,9 @@ EncodeBRBIntensity(unsigned char *sptr, gsfBRBIntensity *idata, int num_beams, i
         case (GSF_SWATH_BATHY_SUBRECORD_EM1002_SPECIFIC):
         case (GSF_SWATH_BATHY_SUBRECORD_EM300_SPECIFIC):
         case (GSF_SWATH_BATHY_SUBRECORD_EM120_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_EM3002_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_EM3000D_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_EM3002D_SPECIFIC):
             sensor_size = EncodeEM3ImagerySpecific(ptr, &idata->sensor_imagery);
             break;
 
@@ -4227,7 +4298,12 @@ EncodeBRBIntensity(unsigned char *sptr, gsfBRBIntensity *idata, int num_beams, i
         {
             for (j=0; j < idata->time_series[i].sample_count; j++)
             {
-                if (bytes_per_sample == 2)
+                if (bytes_per_sample == 1)
+                {
+                    *ptr = (unsigned char) idata->time_series[i].samples[j];
+                    ptr++;;
+                }
+                else if (bytes_per_sample == 2)
                 {
                     stemp = htons ((gsfuShort) idata->time_series[i].samples[j]);
                     memcpy(ptr, &stemp, 2);

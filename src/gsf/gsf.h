@@ -108,6 +108,10 @@
  * bac 06-19-03  Added support for bathymetric receive beam time series intensity data (i.e., Simrad
  *               "Seabed image" and Reson "snippets").  Inlcluded RWL updates of 12-19-02 for adding
  *               sensor-specific singlebeam information to the MB sensor specific subrecords.
+ * bac 12-28-04  Added support for Reson Navisound, EM3000D, EM3002, and EM3002D.  Renumbered
+ *               singlebeam subrecord IDs to be less than 256, as previous version did not save
+ *               these sensors IDs correctly.  Added beam spacing to Reson 8100 sensor-specific
+ *               subrecord.  Added definitions for RTG position types in gsfHVNavigationError record.
  *
  *
  * Classification : Unclassified
@@ -144,7 +148,7 @@ extern          "C"
 #endif
 
 /* Define this version of the GSF library */
-#define GSF_VERSION       "GSF-v02.02"
+#define GSF_VERSION       "GSF-v02.03"
 
 /* Define largest ever expected record size */
 #define GSF_MAX_RECORD_SIZE    262144
@@ -174,11 +178,13 @@ typedef int            gsfsLong;       /* a signed 32 bit integer */
 #define GSF_SHORT_SIZE 2
 #define GSF_LONG_SIZE  4
 
-/* redefine gsfError for GCC applications using gsf.dll, harmless for other compilers */
-#ifdef __GNUC__
- #ifdef gsf_USE_DLL
-  #define gsfError *__imp_gsfError
- #endif
+/* redefine gsfError for MINGW applications using gsf.dll, harmless for other compilers */
+#ifdef __MINGW32__
+  #if __GNUC__ < 3
+     #ifdef gsf_USE_DLL
+      #define gsfError *__imp_gsfError
+     #endif
+  #endif
 #endif
 
 /* Define the gsf Data Identifier structure */
@@ -281,12 +287,9 @@ gsfDataID;
 #define GSF_SWATH_BATHY_SUBRECORD_RESON_8150_SPECIFIC       (unsigned)126
 #define GSF_SWATH_BATHY_SUBRECORD_RESON_8160_SPECIFIC       (unsigned)127
 #define GSF_SWATH_BATHY_SUBRECORD_EM120_SPECIFIC            (unsigned)128
-#define GSF_SWATH_BATHY_SB_SUBRECORD_ECHOTRAC_SPECIFIC      (unsigned)271
-#define GSF_SWATH_BATHY_SB_SUBRECORD_BATHY2000_SPECIFIC     (unsigned)272
-#define GSF_SWATH_BATHY_SB_SUBRECORD_MGD77_SPECIFIC         (unsigned)273
-#define GSF_SWATH_BATHY_SB_SUBRECORD_BDB_SPECIFIC           (unsigned)274
-#define GSF_SWATH_BATHY_SB_SUBRECORD_NOSHDB_SPECIFIC        (unsigned)275
-#define GSF_SWATH_BATHY_SB_SUBRECORD_PDD_SPECIFIC           (unsigned)276
+#define GSF_SWATH_BATHY_SUBRECORD_EM3002_SPECIFIC           (unsigned)129
+#define GSF_SWATH_BATHY_SUBRECORD_EM3000D_SPECIFIC          (unsigned)130
+#define GSF_SWATH_BATHY_SUBRECORD_EM3002D_SPECIFIC          (unsigned)131
 
 #define GSF_SINGLE_BEAM_SUBRECORD_UNKNOWN                   (unsigned)  0
 #define GSF_SINGLE_BEAM_SUBRECORD_ECHOTRAC_SPECIFIC         (unsigned)201
@@ -294,6 +297,13 @@ gsfDataID;
 #define GSF_SINGLE_BEAM_SUBRECORD_MGD77_SPECIFIC            (unsigned)203
 #define GSF_SINGLE_BEAM_SUBRECORD_BDB_SPECIFIC              (unsigned)204
 #define GSF_SINGLE_BEAM_SUBRECORD_NOSHDB_SPECIFIC           (unsigned)205
+#define GSF_SWATH_BATHY_SB_SUBRECORD_ECHOTRAC_SPECIFIC      (unsigned)206
+#define GSF_SWATH_BATHY_SB_SUBRECORD_BATHY2000_SPECIFIC     (unsigned)207
+#define GSF_SWATH_BATHY_SB_SUBRECORD_MGD77_SPECIFIC         (unsigned)208
+#define GSF_SWATH_BATHY_SB_SUBRECORD_BDB_SPECIFIC           (unsigned)209
+#define GSF_SWATH_BATHY_SB_SUBRECORD_NOSHDB_SPECIFIC        (unsigned)210
+#define GSF_SWATH_BATHY_SB_SUBRECORD_PDD_SPECIFIC           (unsigned)211
+#define GSF_SWATH_BATHY_SB_SUBRECORD_NAVISOUND_SPECIFIC     (unsigned)212
 
 /* Define null values to be used for missing data */
 #define GSF_NULL_LATITUDE               91.0
@@ -330,7 +340,6 @@ gsfDataID;
 #define GSF_NULL_ALONG_TRACK_ERROR     0.0
 #define GSF_NULL_NAV_POS_ERROR         0.0
 
-/* define Posix.4 proposed structure for internal storage of time */
 /* MB-System Modification
     Changed declaration of struct timespec to struct gsfTimespec to 
     avoid checking for timespec declaration.
@@ -343,7 +352,8 @@ gsfDataID;
     };
 
 /* define Posix.4 proposed structure for internal storage of time */
-/*#if (!defined (_STRUCT_TIMESPEC_) && !defined (_TIMESPEC_T) && !defined (_STRUCT_TIMESPEC) && !defined (_SYS_TIMESPEC_H) && !defined (__timespec_defined))
+/*
+#if (!defined (_STRUCT_TIMESPEC_) && !defined (_TIMESPEC_T) && !defined (_STRUCT_TIMESPEC) && !defined (_SYS_TIMESPEC_H) && !defined (__timespec_defined))
 #define _STRUCT_TIMESPEC_
 #define _TIMESPEC_T
 #define _STRUCT_TIMESPEC
@@ -695,7 +705,8 @@ typedef struct t_gsfReson8100Specific
     double          depth_filt_max;         /* depth filter, maximum value, meters */
     int             filters_active;         /* bit 0 - range filter, bit 1 - depth filter */
     int             temperature;            /* temperature at sonar head (deg C * 10) */
-    char            spare[8];               /* Eight bytes of spare space, for future use */
+    double          beam_spacing;           /* across track receive beam angular spacing */
+    char            spare[2];               /* Two remaining bytes of spare space, for future use */
 }
 t_gsfReson8100Specific;
 
@@ -768,6 +779,14 @@ typedef struct t_gsfSBNOSHDBSpecific
 }
 t_gsfSBNOSHDBSpecific;
 
+/* Define the Navisound sensor specific data structure */
+typedef struct t_gsfSBNavisoundSpecific
+{
+    double          pulse_length;    /*  pulse length in cm  */
+    char            spare[8];     /* eight bytes of reserved space */
+}
+t_gsfSBNavisoundSpecific;
+
 /* Define a union of the known sensor specific ping subrecords */
 typedef union t_gsfSensorSpecific
 {
@@ -803,6 +822,7 @@ typedef union t_gsfSensorSpecific
     t_gsfSBBDBSpecific        gsfSBBDBSpecific;
     t_gsfSBNOSHDBSpecific     gsfSBNOSHDBSpecific;
     t_gsfSBEchotracSpecific   gsfSBPDDSpecific;
+    t_gsfSBNavisoundSpecific  gsfSBNavisoundSpecific;
 } gsfSensorSpecific;
 
 /* Define the Echotrac Single-Beam sensor specific data structure. */
@@ -1125,9 +1145,11 @@ gsfHVNavigationError;
 #define GSF_POS_TYPE_PPSD "PPSD"               /* Precise positioning service - differential */
 #define GSF_POS_TYPE_PPSK "PPSK"               /* Precise positioning service - kinematic */
 #define GSF_POS_TYPE_PPSS "PPSS"               /* Precise positioning service - standalone */
+#define GSF_POS_TYPE_PPSG "PPSG"               /* Precise positioning service - gypsy */
 #define GSF_POS_TYPE_SPSD "SPSD"               /* Standard positioning service - differential */
 #define GSF_POS_TYPE_SPSK "SPSK"               /* Standard positioning service - kinematic */
 #define GSF_POS_TYPE_SPSS "SPSS"               /* Standard positioning service - standalone */
+#define GSF_POS_TYPE_SPSG "SPSG"               /* Standard positioning service - gypsy */
 
 /* Define the data structure for a ping from a swath bathymetric system */
 typedef struct t_gsfAttitude
