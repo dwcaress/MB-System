@@ -27,7 +27,7 @@ Version 5.0
 <A NAME="lbAD">&nbsp;</A>
 <H2>SYNOPSIS</H2>
 
-<B>mbcopy</B> [<B>-B</B><I>yr/mo/da/hr/mn/sc</I> <B>-C</B><I>commentfile</I> 
+<B>mbcopy</B> [<B>-B</B><I>yr/mo/da/hr/mn/sc</I> <B>-C</B><I>commentfile</I> <B>-D</B>
 <B>-E</B><I>yr/mo/da/hr/mn/sc</I> <B>-F</B><I>informat/outformat</I> 
 <B>-H</B> <B>-I</B><I>infilename</I> 
 <B>-L</B><I>lonflip</I> <B>-N</B> <B>-O</B><I>outfilename</I> 
@@ -85,6 +85,15 @@ Text file containing comments which are inserted into the
 beginning of the output data stream.  This option is typically
 used to insert a data pedigree statement at the beginning of
 data processing.
+<DT><B>-D</B>
+
+<DD>
+This option only works when the output format is MBLDEOIH (format 71).
+When <B>-D</B> is invoked, <B>mbcopy</B> only outputs swath bathymetry
+data (any amplitude and sidescan data found in the input are ignored).
+The <B>MB-System</B> program <B>mbdatalist</B> uses this option to 
+generate &quot;fast bathymetry&quot; or &quot;fbt&quot; files. See the <B>MB-System</B>
+manual page for information on the use and utility of &quot;fbt&quot; files.
 <DT><B>-E</B>
 
 <DD>
