@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_truecont.c	4/21/94
- *    $Id: mb_truecont.c,v 4.0 1994-05-16 22:09:29 caress Exp $
+ *    $Id: mb_truecont.c,v 4.1 1994-07-29 19:04:31 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -75,7 +75,7 @@ double	date_annot_int;
 double	time_tick_len;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_truecont.c,v 4.0 1994-05-16 22:09:29 caress Exp $";
+  	static char rcs_id[]="$Id: mb_truecont.c,v 4.1 1994-07-29 19:04:31 caress Exp $";
 	char	*function_name = "mb_contour_init";
 	int	status = MB_SUCCESS;
 	struct swath *dataptr;
@@ -174,6 +174,13 @@ int	*error;
 			dataptr->color_list[i] = i;
 			}
 		}
+	else
+		{
+		dataptr->level_list = NULL;
+		dataptr->label_list = NULL;
+		dataptr->tick_list = NULL;
+		dataptr->color_list = NULL;
+		}
 
 	/* set variables and allocate memory for track controls */
 	dataptr->time_tick_int = time_tick_int;
@@ -261,7 +268,7 @@ int	verbose;
 struct swath *data;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_truecont.c,v 4.0 1994-05-16 22:09:29 caress Exp $";
+  	static char rcs_id[]="$Id: mb_truecont.c,v 4.1 1994-07-29 19:04:31 caress Exp $";
 	char	*function_name = "mb_contour_deall";
 	int	status = MB_SUCCESS;
 	struct ping *ping;
@@ -351,7 +358,7 @@ int	verbose;
 struct swath *data;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_truecont.c,v 4.0 1994-05-16 22:09:29 caress Exp $";
+  	static char rcs_id[]="$Id: mb_truecont.c,v 4.1 1994-07-29 19:04:31 caress Exp $";
 	char	*function_name = "mb_contour";
 	int	status = MB_SUCCESS;
 	struct ping *ping;
@@ -452,13 +459,16 @@ int	*error;
 	/* get number of contour intervals */
 	if (data->nlevelset == MB_NO)
 		{
+		if (data->nlevel > 0)
+			{
+			mb_free(verbose,data->level_list,error);
+			mb_free(verbose,data->color_list,error);
+			mb_free(verbose,data->label_list,error);
+			mb_free(verbose,data->tick_list,error);
+			}
 		nci = bathmin/data->contour_int + 1;
 		ncf = bathmax/data->contour_int + 1;
 		data->nlevel = ncf - nci;
-		mb_free(verbose,data->level_list,error);
-		mb_free(verbose,data->color_list,error);
-		mb_free(verbose,data->label_list,error);
-		mb_free(verbose,data->tick_list,error);
 		status = mb_malloc(verbose,data->nlevel*sizeof(double),
 				&(data->level_list),error);
 		status = mb_malloc(verbose,data->nlevel*sizeof(int),
@@ -566,7 +576,7 @@ int	*error;
 	/* loop over all of the contour values */
 	data->nsave = 0;
 	data->nlabel = 0;
-	if (status == MB_SUCCESS)
+	if (status == MB_SUCCESS && data->plot_contours == MB_YES)
 	for (ival=0;ival<data->nlevel;ival++)
 		{
 		value = data->level_list[ival];

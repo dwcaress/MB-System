@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_track.c	8/15/93
- *    $Id: mb_track.c,v 4.0 1994-05-16 22:09:29 caress Exp $
+ *    $Id: mb_track.c,v 4.1 1994-07-29 19:04:31 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -17,6 +17,9 @@
  * Date:	August, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/05/16  22:09:29  caress
+ * First cut at new contouring scheme
+ *
  * Revision 4.0  1994/03/01  20:50:45  caress
  * First cut at new version.
  *
@@ -53,7 +56,7 @@ int	verbose;
 struct swath *data;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_track.c,v 4.0 1994-05-16 22:09:29 caress Exp $";
+  	static char rcs_id[]="$Id: mb_track.c,v 4.1 1994-07-29 19:04:31 caress Exp $";
 	char	*function_name = "mb_track";
 	int	status = MB_SUCCESS;
 	int	time_tick, time_annot, date_annot;
@@ -84,6 +87,7 @@ int	*error;
 		}
 
 	/* draw the shiptrack */
+	setline(3);
 	newpen(0);
 	for (i=1;i<data->npings;i++)
 		{
@@ -206,6 +210,9 @@ int	*error;
 			plot(x4,y4,IDN);
 			}
 		}
+
+	/* reset line width */
+	setline(0);
 
 	/* print output debug statements */
 	if (verbose >= 2)
