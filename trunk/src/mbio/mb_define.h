@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	4/21/96
- *    $Id: mb_define.h,v 5.6 2001-07-20 00:32:54 caress Exp $
+ *    $Id: mb_define.h,v 5.7 2001-09-17 23:25:13 caress Exp $
  *
  *    Copyright (c) 1996, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	April 21, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2001/07/20  00:32:54  caress
+ * Release 5.0.beta03
+ *
  * Revision 5.5  2001/06/08 21:44:01  caress
  * Version 5.0.beta01
  *
@@ -189,6 +192,7 @@ int mb_write_init(int verbose,
 		char *file, int format, void **mbio_ptr, 
 		int *beams_bath, int *beams_amp, int *pixels_ss,
 		int *error);
+int mb_close(int verbose, void **mbio_ptr, int *error);
 int mb_read_ping(int verbose, void *mbio_ptr, void *store_ptr, 
 		int *kind, int *error);
 int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind,
