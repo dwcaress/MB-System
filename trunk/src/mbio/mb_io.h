@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	1/19/93
- *    $Id: mb_io.h,v 4.10 2000-04-19 20:55:07 caress Exp $
+ *    $Id: mb_io.h,v 4.11 2000-04-19 21:06:32 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by 
  *    D. W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.10  2000/04/19  20:55:07  caress
+ * Added datalist parsing structure for use in code in mb_format.c
+ *
  * Revision 4.9  1998/12/17  23:01:15  caress
  * MB-System version 4.6beta4
  *
@@ -96,6 +99,9 @@
  
 /* declare buffer maximum */
 #define	MB_BUFFER_MAX	5000
+
+/* maximum path length in characters */
+#define MB_PATH_MAXLINE 256
 
 /* maximum comment length in characters */
 #define MB_COMMENT_MAXLINE 1944
