@@ -1,5 +1,8 @@
 Revision History:
 $Log: not supported by cvs2svn $
+# Revision 4.2  1994/10/20  21:30:31  caress
+# Release V4.0
+#
 # Revision 4.1  1994/08/03  21:00:43  dale
 # Update for Beta issues......
 #
@@ -33,7 +36,7 @@ $Log: not supported by cvs2svn $
 # *** empty log message ***
 #
 
-RCS ID: $Id: README,v 4.2 1994-10-20 21:30:31 caress Exp $
+RCS ID: $Id: README,v 4.3 1994-10-21 13:29:54 caress Exp $
 
 MBSYSTEM 4.BETA RELEASE Notes:
 ----------------------------
@@ -156,9 +159,10 @@ Examples of appropriate values for several different installations
 To execute install_makefiles, do the following:
 		% cd mbsystem
 		% install_makefiles
-
-	Once install_makefiles has been correctly configures and
-run,  give the command "make all" to generate the executable programs:
+	Because install_makefiles is a perl script, the executable
+perl must be available in the installer's path. Once install_makefiles 
+has been correctly configured and run,  give the command "make all" 
+to generate the executable programs:
 		% make all
 	The make command will descend recursively down through the
 directory structure, compiling source files, linking object files,
@@ -172,6 +176,20 @@ as an example for users who might wish to implement similar
 capabilities elsewhere.  The realtime code is not compiled during 
 general "make all" calls in the mbsystem directory because it depends
 on Calcomp related libraries not distributed with the MB-System.
+	Naturally, in order for users to use the MB-System utilities,
+the directory containing the executables must be included in their
+path (usually this is done by editing the .cshrc file in the user's
+home directory).  The executable perl must also be available in the
+user's path for most of the macros to work.
+	Most users will also wish to specify which program they
+generally use to view Postscript plots on their screen. This
+parameter can be set either with the mbdefaults program or
+using the PS_VIEWER environment variable - the former is
+recommended (see the mbdefaults manual page for details). On
+Sun workstations pageview is a popular Postscript viewer; on
+Silicon Graphics machines xpsview is commonly uses. A popular
+generic alternative to these platform specific programs is
+ghostview.
 
 "Supported" Platforms:
 ----------------------
