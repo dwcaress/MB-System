@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sb2100rw.c	3/3/94
- *	$Id: mbr_sb2100rw.c,v 4.16 1995-06-06 13:28:49 caress Exp $
+ *	$Id: mbr_sb2100rw.c,v 4.17 1995-07-13 19:13:36 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	March 3, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.16  1995/06/06  13:28:49  caress
+ * Explicit cast to int on line 1298 fixes warning under Solaris 2.4
+ *
  * Revision 4.15  1995/06/03  03:25:13  caress
  * Fixes to handling of changes to vendor SB2100 format
  *
@@ -108,7 +111,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_sb2100rw.c,v 4.16 1995-06-06 13:28:49 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2100rw.c,v 4.17 1995-07-13 19:13:36 caress Exp $";
 	char	*function_name = "mbr_alm_sb2100rw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -1055,7 +1058,7 @@ int	*error;
 		else if (expect != MBF_SB2100RW_NONE && expect != type)
 			{
 			done = MB_YES;
-				expect = MBF_SB2100RW_NONE;
+			expect = MBF_SB2100RW_NONE;
 			line_save_flag = MB_YES;
 			}
 		else if (type == MBF_SB2100RW_RAW_LINE)
@@ -1113,6 +1116,17 @@ int	*error;
 				*error = MB_ERROR_UNINTELLIGIBLE;
 				status = MB_FAILURE;
 				}
+			else if (status == MB_FAILURE
+				&& *error ==  MB_ERROR_UNINTELLIGIBLE
+				&& expect == MBF_SB2100RW_SS)
+				{
+				/* this preserves the bathymetry
+				   that has already been read */
+				done = MB_YES;
+				status = MB_SUCCESS;
+				*error = MB_ERROR_NO_ERROR;
+fprintf(stderr, "BROKEN RECORD!\n");
+				}
 			}
 		}
 
@@ -1140,7 +1154,8 @@ int	*error;
 {
 	char	*function_name = "mbr_sb2100rw_rd_label";
 	int	status = MB_SUCCESS;
-	int	i;
+	int	i, j;
+	char	*label;
 	int	icmp;
 
 	/* print input debug statements */
@@ -1163,6 +1178,18 @@ int	*error;
 		for (i=1;i<MBF_SB2100RW_RECORDS;i++)
 			{
 			icmp = strncmp(line,mbf_sb2100rw_labels[i],8);
+			if (icmp == 0) 
+				*type = i;
+			}
+
+		/* if it looks like a raw line, check for up to 
+		   four lost bytes */
+		if (*type == MBF_SB2100RW_RAW_LINE)
+		for (i=1;i<MBF_SB2100RW_RECORDS;i++)
+		    for (j=1;j<5;j++)
+			{
+			label = mbf_sb2100rw_labels[i];
+			icmp = strncmp(line,&label[j],8-j);
 			if (icmp == 0) 
 				*type = i;
 			}
@@ -1660,6 +1687,7 @@ int	*error;
 	int	shift;
 	char	ew, ns;
 	unsigned short	read_ss[2*MBF_SB2100RW_PIXELS+2];
+	char	*char_ptr;
 	short	*read_ss_ptr;
 	int	degrees, minutes;
 	int	i;
@@ -1838,6 +1866,21 @@ int	*error;
 		status = MB_SUCCESS;
 		*error = MB_ERROR_NO_ERROR;
 		}
+
+	/* check for CR LF end of record - if out of place
+	    we have a broken record */
+	if (status == MB_SUCCESS)
+		{
+		char_ptr = ((char *) &read_ss[0]) + data->ss_data_length;
+		if (char_ptr[0] != '\r'
+			|| char_ptr[1] != '\n')
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_UNINTELLIGIBLE;
+			}
+		}
+	    
+	/* get the data */
 	if (status == MB_SUCCESS)
 		{
 		read_ss_ptr = (short *) read_ss;
@@ -2444,7 +2487,7 @@ int	*error;
 		status = fprintf(mbfp,"%c",data->svp_corr_beams);
 		status = fprintf(mbfp,"%c%c",
 			data->frequency[0],data->frequency[1]);
-		status = fprintf(mbfp,"%6.6d",data->heave);
+		status = fprintf(mbfp,"%+06d",data->heave);
 		for (i=0;i<2;i++)
 			status = fprintf(mbfp,"%c",data->spare_dr[i]);
 		status = fprintf(mbfp,"%c",data->range_scale);
@@ -2712,7 +2755,7 @@ int	*error;
 		status = fprintf(mbfp,"%c",data->svp_corr_beams);
 		status = fprintf(mbfp,"%c%c",
 			data->frequency[0],data->frequency[1]);
-		status = fprintf(mbfp,"%6.6d",data->heave);
+		status = fprintf(mbfp,"%+06d",data->heave);
 		status = fprintf(mbfp,"%c",data->range_scale);
 		status = fprintf(mbfp,"%c",data->spare_ss);
 		status = fprintf(mbfp,"%c",data->pixel_size_scale);
@@ -2723,7 +2766,15 @@ int	*error;
 		if (data->frequency[0] != 'H')
 			{
 			status = fprintf(mbfp,"%4.4d",data->num_pixels_12khz);
-			status = fprintf(mbfp,"%4g",data->pixel_size_12khz);
+			if (data->pixel_size_12khz > 9.99)
+				status = fprintf(mbfp,"%4.1f",
+					data->pixel_size_12khz);
+			else if (data->pixel_size_12khz > 0.999)
+				status = fprintf(mbfp,"%4.2f",
+					data->pixel_size_12khz);
+			else
+				status = fprintf(mbfp,".%03d",
+					(int)(1000*data->pixel_size_12khz));
 			status = fprintf(mbfp,"%2.2d",data->ping_gain_12khz);
 			status = fprintf(mbfp,"%2.2d",
 				data->ping_pulse_width_12khz);
@@ -2736,7 +2787,15 @@ int	*error;
 		if (data->frequency[0] != 'L')
 			{
 			status = fprintf(mbfp,"%4.4d",data->num_pixels_36khz);
-			status = fprintf(mbfp,"%4g",data->pixel_size_36khz);
+			if (data->pixel_size_12khz > 9.99)
+				status = fprintf(mbfp,"%4.1f",
+					data->pixel_size_36khz);
+			else if (data->pixel_size_12khz > 0.999)
+				status = fprintf(mbfp,"%4.2f",
+					data->pixel_size_36khz);
+			else
+				status = fprintf(mbfp,".%03d",
+					(int)(1000*data->pixel_size_36khz));
 			status = fprintf(mbfp,"%2.2d",data->ping_gain_36khz);
 			status = fprintf(mbfp,"%2.2d",data->
 				ping_pulse_width_36khz);
