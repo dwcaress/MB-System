@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsmdldih.c	9/26/95
- *	$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbr_hsmdldih.c,v 5.6 2002-07-20 20:42:40 caress Exp $
+ *	$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbr_hsmdldih.c,v 5.7 2002-09-18 23:32:59 caress Exp $
  *
- *    Copyright (c) 1995, 2000 by
+ *    Copyright (c) 1995, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -25,6 +25,9 @@
  * Date:	September 26, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2002/07/20 20:42:40  caress
+ * Release 5.0.beta20
+ *
  * Revision 5.5  2001/08/10 22:41:19  dcaress
  * Release 5.0.beta07
  *
@@ -135,7 +138,7 @@ int mbr_wt_hsmdldih(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_hsmdldih(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_hsmdldih.c,v 5.6 2002-07-20 20:42:40 caress Exp $";
+	static char res_id[]="$Id: mbr_hsmdldih.c,v 5.7 2002-09-18 23:32:59 caress Exp $";
 	char	*function_name = "mbr_register_hsmdldih";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -265,7 +268,7 @@ int mbr_info_hsmdldih(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_hsmdldih.c,v 5.6 2002-07-20 20:42:40 caress Exp $";
+	static char res_id[]="$Id: mbr_hsmdldih.c,v 5.7 2002-09-18 23:32:59 caress Exp $";
 	char	*function_name = "mbr_info_hsmdldih";
 	int	status = MB_SUCCESS;
 
@@ -334,7 +337,7 @@ int mbr_info_hsmdldih(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_hsmdldih(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbr_hsmdldih.c,v 5.6 2002-07-20 20:42:40 caress Exp $";
+	static char res_id[]="$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbr_hsmdldih.c,v 5.7 2002-09-18 23:32:59 caress Exp $";
 	char	 *function_name = "mbr_alm_hsmdldih";
 	int	 status = MB_SUCCESS;
 	int	 i;

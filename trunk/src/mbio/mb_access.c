@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_access.c	11/1/00
- *    $Id: mb_access.c,v 5.5 2002-07-20 20:42:40 caress Exp $
+ *    $Id: mb_access.c,v 5.6 2002-09-18 23:32:59 caress Exp $
 
- *    Copyright (c) 2000 by
+ *    Copyright (c) 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -20,6 +20,9 @@
  * Date:	October 1, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2002/07/20 20:42:40  caress
+ * Release 5.0.beta20
+ *
  * Revision 5.4  2002/05/02 03:55:34  caress
  * Release 5.0.beta17
  *
@@ -49,7 +52,7 @@
 #include "../../include/mb_io.h"
 #include "../../include/mb_define.h"
 
-static char rcs_id[]="$Id: mb_access.c,v 5.5 2002-07-20 20:42:40 caress Exp $";
+static char rcs_id[]="$Id: mb_access.c,v 5.6 2002-09-18 23:32:59 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_alloc(int verbose, void *mbio_ptr,
@@ -200,6 +203,7 @@ int mb_extract(int verbose, void *mbio_ptr, void *store_ptr,
 	char	*function_name = "mb_extract";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
+	double	easting, northing;
 	int	i;
 
 	/* print input debug statements */
@@ -234,6 +238,44 @@ int mb_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		{
 		status = MB_FAILURE;
 		*error = MB_ERROR_BAD_SYSTEM;
+		}
+		
+	/* apply projection and lonflip if necessary */
+	if (status == MB_SUCCESS)
+		{
+		/* apply inverse projection if required */
+		if (mb_io_ptr->projection_initialized == MB_YES)
+			{
+			easting = *navlon;
+			northing = *navlat;
+			mb_proj_inverse(verbose, mb_io_ptr->pjptr, 
+							easting, northing,
+							navlon, navlat,
+							error);
+			}
+		
+		/* apply lonflip */
+		if (mb_io_ptr->lonflip < 0)
+			{
+			if (*navlon > 0.) 
+				*navlon = *navlon - 360.;
+			else if (*navlon < -360.)
+				*navlon = *navlon + 360.;
+			}
+		else if (mb_io_ptr->lonflip == 0)
+			{
+			if (*navlon > 180.) 
+				*navlon = *navlon - 360.;
+			else if (*navlon < -180.)
+				*navlon = *navlon + 360.;
+			}
+		else
+			{
+			if (*navlon > 360.) 
+				*navlon = *navlon - 360.;
+			else if (*navlon < 0.)
+				*navlon = *navlon + 360.;
+			}
 		}
 
 	/* print output debug statements */
@@ -310,6 +352,7 @@ int mb_insert(int verbose, void *mbio_ptr, void *store_ptr,
 	char	*function_name = "mb_insert";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
+	double	easting, northing;
 	int	i;
 
 	/* print input debug statements */
@@ -365,6 +408,17 @@ int mb_insert(int verbose, void *mbio_ptr, void *store_ptr,
 
 	/* get mbio descriptor */
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+		
+	/* apply inverse projection if required */
+	if (mb_io_ptr->projection_initialized == MB_YES)
+		{
+		mb_proj_forward(verbose, mb_io_ptr->pjptr, 
+						navlon, navlat,
+						&easting, &northing,
+						error);
+		navlon = easting;
+		navlat = northing;
+		}
 
 	/* call the appropriate mbsys_ insertion routine */
 	if (mb_io_ptr->mb_io_insert != NULL)
@@ -411,6 +465,7 @@ int mb_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 	char	*function_name = "mb_extract_nav";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
+	double	easting, northing;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -441,6 +496,44 @@ int mb_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 		{
 		status = MB_FAILURE;
 		*error = MB_ERROR_BAD_SYSTEM;
+		}
+		
+	/* apply projection and lonflip if necessary */
+	if (status == MB_SUCCESS)
+		{
+		/* apply inverse projection if required */
+		if (mb_io_ptr->projection_initialized == MB_YES)
+			{
+			easting = *navlon;
+			northing = *navlat;
+			mb_proj_inverse(verbose, mb_io_ptr->pjptr, 
+							easting, northing,
+							navlon, navlat,
+							error);
+			}
+		
+		/* apply lonflip */
+		if (mb_io_ptr->lonflip < 0)
+			{
+			if (*navlon > 0.) 
+				*navlon = *navlon - 360.;
+			else if (*navlon < -360.)
+				*navlon = *navlon + 360.;
+			}
+		else if (mb_io_ptr->lonflip == 0)
+			{
+			if (*navlon > 180.) 
+				*navlon = *navlon - 360.;
+			else if (*navlon < -180.)
+				*navlon = *navlon + 360.;
+			}
+		else
+			{
+			if (*navlon > 360.) 
+				*navlon = *navlon - 360.;
+			else if (*navlon < 0.)
+				*navlon = *navlon + 360.;
+			}
 		}
 
 	/* print output debug statements */
@@ -485,6 +578,7 @@ int mb_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 	char	*function_name = "mb_insert_nav";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
+	double	easting, northing;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -515,6 +609,17 @@ int mb_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 
 	/* get mbio descriptor */
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+		
+	/* apply inverse projection if required */
+	if (mb_io_ptr->projection_initialized == MB_YES)
+		{
+		mb_proj_forward(verbose, mb_io_ptr->pjptr, 
+						navlon, navlat,
+						&easting, &northing,
+						error);
+		navlon = easting;
+		navlat = northing;
+		}
 
 	/* call the appropriate mbsys_ insertion routine */
 	if (mb_io_ptr->mb_io_insert_nav != NULL)

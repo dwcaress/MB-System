@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_elac.c	3.00	8/20/94
- *	$Id: mbsys_elacmk2.c,v 5.5 2002-07-20 20:42:40 caress Exp $
+ *	$Id: mbsys_elacmk2.c,v 5.6 2002-09-18 23:32:59 caress Exp $
  *
- *    Copyright (c) 1994, 2000 by
+ *    Copyright (c) 1994, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -24,6 +24,9 @@
  * Date:	August 20, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2002/07/20 20:42:40  caress
+ * Release 5.0.beta20
+ *
  * Revision 5.4  2001/08/25 00:54:13  caress
  * Adding beamwidth values to extract functions.
  *
@@ -120,7 +123,7 @@
 int mbsys_elacmk2_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_elacmk2.c,v 5.5 2002-07-20 20:42:40 caress Exp $";
+ static char res_id[]="$Id: mbsys_elacmk2.c,v 5.6 2002-09-18 23:32:59 caress Exp $";
 	char	*function_name = "mbsys_elacmk2_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -367,27 +370,6 @@ int mbsys_elacmk2_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		/* get navigation */
 		*navlon = store->longitude;
 		*navlat = store->latitude;
-		if (mb_io_ptr->lonflip < 0)
-			{
-			if (*navlon > 0.) 
-				*navlon = *navlon - 360.;
-			else if (*navlon < -360.)
-				*navlon = *navlon + 360.;
-			}
-		else if (mb_io_ptr->lonflip == 0)
-			{
-			if (*navlon > 180.) 
-				*navlon = *navlon - 360.;
-			else if (*navlon < -180.)
-				*navlon = *navlon + 360.;
-			}
-		else
-			{
-			if (*navlon > 360.) 
-				*navlon = *navlon - 360.;
-			else if (*navlon < 0.)
-				*navlon = *navlon + 360.;
-			}
 
 		/* get heading */
 		*heading = 0.01*store->heading;
@@ -504,27 +486,6 @@ int mbsys_elacmk2_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		/* get navigation */
 		*navlon = 0.00000009 * store->pos_longitude;
 		*navlat = 0.00000009 * store->pos_latitude;
-		if (mb_io_ptr->lonflip < 0)
-			{
-			if (*navlon > 0.) 
-				*navlon = *navlon - 360.;
-			else if (*navlon < -360.)
-				*navlon = *navlon + 360.;
-			}
-		else if (mb_io_ptr->lonflip == 0)
-			{
-			if (*navlon > 180.) 
-				*navlon = *navlon - 360.;
-			else if (*navlon < -180.)
-				*navlon = *navlon + 360.;
-			}
-		else
-			{
-			if (*navlon > 360.) 
-				*navlon = *navlon - 360.;
-			else if (*navlon < 0.)
-				*navlon = *navlon + 360.;
-			}
 
 		/* get heading */
 		*heading = 0.01*store->heading;
@@ -1237,27 +1198,6 @@ int mbsys_elacmk2_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		/* get navigation */
 		*navlon = store->longitude;
 		*navlat = store->latitude;
-		if (mb_io_ptr->lonflip < 0)
-			{
-			if (*navlon > 0.) 
-				*navlon = *navlon - 360.;
-			else if (*navlon < -360.)
-				*navlon = *navlon + 360.;
-			}
-		else if (mb_io_ptr->lonflip == 0)
-			{
-			if (*navlon > 180.) 
-				*navlon = *navlon - 360.;
-			else if (*navlon < -180.)
-				*navlon = *navlon + 360.;
-			}
-		else
-			{
-			if (*navlon > 360.) 
-				*navlon = *navlon - 360.;
-			else if (*navlon < 0.)
-				*navlon = *navlon + 360.;
-			}
 
 		/* get heading */
 		*heading = 0.01*store->heading;
@@ -1348,27 +1288,6 @@ int mbsys_elacmk2_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		/* get navigation */
 		*navlon = 0.00000009 * store->pos_longitude;
 		*navlat = 0.00000009 * store->pos_latitude;
-		if (mb_io_ptr->lonflip < 0)
-			{
-			if (*navlon > 0.) 
-				*navlon = *navlon - 360.;
-			else if (*navlon < -360.)
-				*navlon = *navlon + 360.;
-			}
-		else if (mb_io_ptr->lonflip == 0)
-			{
-			if (*navlon > 180.) 
-				*navlon = *navlon - 360.;
-			else if (*navlon < -180.)
-				*navlon = *navlon + 360.;
-			}
-		else
-			{
-			if (*navlon > 360.) 
-				*navlon = *navlon - 360.;
-			else if (*navlon < 0.)
-				*navlon = *navlon + 360.;
-			}
 
 		/* get heading */
 		*heading = 0.01*store->heading;

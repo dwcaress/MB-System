@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	1/19/93
- *    $Id: mb_io.h,v 5.11 2002-07-25 19:09:04 caress Exp $
+ *    $Id: mb_io.h,v 5.12 2002-09-18 23:32:59 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000 by
+ *    Copyright (c) 1993, 1994, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -21,6 +21,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.11  2002/07/25 19:09:04  caress
+ * Release 5.0.beta21
+ *
  * Revision 5.10  2002/07/20 20:42:40  caress
  * Release 5.0.beta20
  *
@@ -287,11 +290,9 @@ struct mb_io_struct
 	double	*new_ss_acrosstrack;
 	double	*new_ss_alongtrack;
 	
-	/* variables for projections to and from UTM coordinates */
+	/* variables for projections to and from projected coordinates */
 	int	projection_initialized;
 	void 	*pjptr;
-	int	utm_zone;
-	char	ellipsoid[MB_NAME_LENGTH];
 
 	/* variables for interpolating/extrapolating navigation 
 		for formats containing nav as asynchronous

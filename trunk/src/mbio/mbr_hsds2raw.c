@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsds2raw.c	6/20/01
- *	$Id: mbr_hsds2raw.c,v 5.6 2002-07-20 20:42:40 caress Exp $
+ *	$Id: mbr_hsds2raw.c,v 5.7 2002-09-18 23:32:59 caress Exp $
  *
- *    Copyright (c) 2001 by
+ *    Copyright (c) 2001, 2002 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -25,6 +25,9 @@
  * 		D. N. Chayes
  * Date:	June 20, 2001
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2002/07/20 20:42:40  caress
+ * Release 5.0.beta20
+ *
  * Revision 5.5  2002/04/06 02:43:39  caress
  * Release 5.0.beta16
  *
@@ -91,7 +94,7 @@ int mbr_wt_hsds2raw(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_hsds2raw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
-static char res_id[]="$Id: mbr_hsds2raw.c,v 5.6 2002-07-20 20:42:40 caress Exp $";
+static char res_id[]="$Id: mbr_hsds2raw.c,v 5.7 2002-09-18 23:32:59 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_hsds2raw(int verbose, void *mbio_ptr, int *error)

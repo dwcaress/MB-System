@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_write_init.c	1/25/93
- *    $Id: mb_write_init.c,v 5.11 2002-07-20 20:42:40 caress Exp $
+ *    $Id: mb_write_init.c,v 5.12 2002-09-18 23:32:59 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000 by
+ *    Copyright (c) 1993, 1994, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -20,6 +20,9 @@
  * Date:	January 25, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.11  2002/07/20 20:42:40  caress
+ * Release 5.0.beta20
+ *
  * Revision 5.10  2002/05/29 23:36:53  caress
  * Release 5.0.beta18
  *
@@ -181,7 +184,7 @@ int mb_write_init(int verbose,
 		int *beams_bath, int *beams_amp, int *pixels_ss,
 		int *error)
 {
-	static char rcs_id[]="$Id: mb_write_init.c,v 5.11 2002-07-20 20:42:40 caress Exp $";
+	static char rcs_id[]="$Id: mb_write_init.c,v 5.12 2002-09-18 23:32:59 caress Exp $";
 	char	*function_name = "mb_write_init";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -321,11 +324,9 @@ int mb_write_init(int verbose,
 	mb_io_ptr->new_ss_acrosstrack = NULL;
 	mb_io_ptr->new_ss_alongtrack = NULL;
 	
-	/* initialize UTM projection parameters */
+	/* initialize projection parameters */
 	mb_io_ptr->projection_initialized = MB_NO;
 	mb_io_ptr->pjptr = NULL;
-	mb_io_ptr->utm_zone = 0;
-	strcpy(mb_io_ptr->ellipsoid, "WGS84");
 	
 	/* initialize ancillary variables used
 		to save information in certain cases */

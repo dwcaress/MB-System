@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_swap.c	7/6/94
- *    $Id: mb_swap.c,v 5.0 2000-12-01 22:48:41 caress Exp $
+ *    $Id: mb_swap.c,v 5.1 2002-09-18 23:32:59 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000 by
+ *    Copyright (c) 1993, 1994, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -28,6 +28,9 @@
  * Date:	July 6, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01 22:48:41  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.6  2000/10/11  01:02:30  caress
  * Convert to ANSI C
  *

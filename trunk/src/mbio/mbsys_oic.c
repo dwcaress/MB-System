@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_oic.c	3/1/99
- *	$Id: mbsys_oic.c,v 5.4 2001-08-25 00:54:13 caress Exp $
+ *	$Id: mbsys_oic.c,v 5.5 2002-09-18 23:32:59 caress Exp $
  *
- *    Copyright (c) 1999, 2000 by
+ *    Copyright (c) 1999, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -23,6 +23,9 @@
  * Date:	March 1, 1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2001/08/25 00:54:13  caress
+ * Adding beamwidth values to extract functions.
+ *
  * Revision 5.3  2001/07/20  00:32:54  caress
  * Release 5.0.beta03
  *
@@ -66,7 +69,7 @@
 int mbsys_oic_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_oic.c,v 5.4 2001-08-25 00:54:13 caress Exp $";
+ static char res_id[]="$Id: mbsys_oic.c,v 5.5 2002-09-18 23:32:59 caress Exp $";
 	char	*function_name = "mbsys_oic_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -299,27 +302,6 @@ int mbsys_oic_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		{
 		*navlon = 0.0;
 		*navlat = 0.0;
-		}
-	    if (mb_io_ptr->lonflip < 0)
-		{
-		if (*navlon > 0.) 
-			*navlon = *navlon - 360.;
-		else if (*navlon < -360.)
-			*navlon = *navlon + 360.;
-		}
-	    else if (mb_io_ptr->lonflip == 0)
-		{
-		if (*navlon > 180.) 
-			*navlon = *navlon - 360.;
-		else if (*navlon < -180.)
-			*navlon = *navlon + 360.;
-		}
-	    else
-		{
-		if (*navlon > 360.) 
-			*navlon = *navlon - 360.;
-		else if (*navlon < 0.)
-			*navlon = *navlon + 360.;
 		}
 
 	    /* get heading */
@@ -1006,27 +988,6 @@ int mbsys_oic_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		{
 		*navlon = 0.0;
 		*navlat = 0.0;
-		}
-	    if (mb_io_ptr->lonflip < 0)
-		{
-		if (*navlon > 0.) 
-			*navlon = *navlon - 360.;
-		else if (*navlon < -360.)
-			*navlon = *navlon + 360.;
-		}
-	    else if (mb_io_ptr->lonflip == 0)
-		{
-		if (*navlon > 180.) 
-			*navlon = *navlon - 360.;
-		else if (*navlon < -180.)
-			*navlon = *navlon + 360.;
-		}
-	    else
-		{
-		if (*navlon > 360.) 
-			*navlon = *navlon - 360.;
-		else if (*navlon < 0.)
-			*navlon = *navlon + 360.;
 		}
 
 	    /* get heading */

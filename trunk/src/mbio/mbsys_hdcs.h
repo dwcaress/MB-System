@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_hdcs.h	3/16/99
- *	$Id: mbsys_hdcs.h,v 5.2 2001-07-20 00:32:54 caress Exp $
+ *	$Id: mbsys_hdcs.h,v 5.3 2002-09-18 23:32:59 caress Exp $
  *
- *    Copyright (c) 1999, 2000 by
+ *    Copyright (c) 1999, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -21,6 +21,9 @@
  * Date:	March 16, 1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2001/07/20 00:32:54  caress
+ * Release 5.0.beta03
+ *
  * Revision 5.1  2001/01/22  07:43:34  caress
  * Version 5.0.beta01
  *

@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_surf.c	3.00	6/25/01
- *	$Id: mbsys_surf.c,v 5.8 2002-07-20 20:42:40 caress Exp $
+ *	$Id: mbsys_surf.c,v 5.9 2002-09-18 23:32:59 caress Exp $
  *
- *    Copyright (c) 2001 by
+ *    Copyright (c) 2001, 2002 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -27,6 +27,9 @@
  * Date:	June 20, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2002/07/20 20:42:40  caress
+ * Release 5.0.beta20
+ *
  *
  *
  *
@@ -44,7 +47,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_surf.h"
 
-static char res_id[]="$Id: mbsys_surf.c,v 5.8 2002-07-20 20:42:40 caress Exp $";
+static char res_id[]="$Id: mbsys_surf.c,v 5.9 2002-09-18 23:32:59 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_surf_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
@@ -189,27 +192,6 @@ int mbsys_surf_extract(int verbose, void *mbio_ptr, void *store_ptr,
 					+ store->GlobalData.referenceOfPositionX);
 		*navlat = RTD * ((double) store->CenterPosition.centerPositionY
 					+ store->GlobalData.referenceOfPositionY);
-		if (mb_io_ptr->lonflip < 0)
-			{
-			if (*navlon > 0.) 
-				*navlon = *navlon - 360.;
-			else if (*navlon < -360.)
-				*navlon = *navlon + 360.;
-			}
-		else if (mb_io_ptr->lonflip == 0)
-			{
-			if (*navlon > 180.) 
-				*navlon = *navlon - 360.;
-			else if (*navlon < -180.)
-				*navlon = *navlon + 360.;
-			}
-		else
-			{
-			if (*navlon > 360.) 
-				*navlon = *navlon - 360.;
-			else if (*navlon < 0.)
-				*navlon = *navlon + 360.;
-			}
 
 		/* get heading */
 		*heading = RTD * store->SoundingData.headingWhileTransmitting;
@@ -1050,27 +1032,6 @@ int mbsys_surf_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 					+ store->GlobalData.referenceOfPositionX);
 		*navlat = RTD * ((double) store->CenterPosition.centerPositionY
 					+ store->GlobalData.referenceOfPositionY);
-		if (mb_io_ptr->lonflip < 0)
-			{
-			if (*navlon > 0.) 
-				*navlon = *navlon - 360.;
-			else if (*navlon < -360.)
-				*navlon = *navlon + 360.;
-			}
-		else if (mb_io_ptr->lonflip == 0)
-			{
-			if (*navlon > 180.) 
-				*navlon = *navlon - 360.;
-			else if (*navlon < -180.)
-				*navlon = *navlon + 360.;
-			}
-		else
-			{
-			if (*navlon > 360.) 
-				*navlon = *navlon - 360.;
-			else if (*navlon < 0.)
-				*navlon = *navlon + 360.;
-			}
 
 		/* get heading */
 		*heading = RTD * store->SoundingData.headingWhileTransmitting;

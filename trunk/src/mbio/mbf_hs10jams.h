@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_hs10jams.h	12/4/00
- *	$Id: mbf_hs10jams.h,v 5.0 2000-12-10 20:24:25 caress Exp $
+ *	$Id: mbf_hs10jams.h,v 5.1 2002-09-18 23:32:59 caress Exp $
  *
- *    Copyright (c) 2000 by
+ *    Copyright (c) 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -21,6 +21,9 @@
  * Date:	December 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/10 20:24:25  caress
+ * Initial revision.
+ *
  *
  */
 /*

@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsatlraw.c	2/11/93
- *	$Id: mbr_hsatlraw.c,v 5.5 2002-08-21 00:55:46 caress Exp $
+ *	$Id: mbr_hsatlraw.c,v 5.6 2002-09-18 23:32:59 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000 by
+ *    Copyright (c) 1993, 1994, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	February 11, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2002/08/21 00:55:46  caress
+ * Release 5.0.beta22
+ *
  * Revision 5.4  2002/05/02 03:55:34  caress
  * Release 5.0.beta17
  *
@@ -170,7 +173,7 @@ int mbr_dem_hsatlraw(int verbose, void *mbio_ptr, int *error);
 int mbr_rt_hsatlraw(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_hsatlraw(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
-static char res_id[]="$Id: mbr_hsatlraw.c,v 5.5 2002-08-21 00:55:46 caress Exp $";
+static char res_id[]="$Id: mbr_hsatlraw.c,v 5.6 2002-09-18 23:32:59 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_hsatlraw(int verbose, void *mbio_ptr, int *error)

@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_angle.c	1/21/93
- *    $Id: mb_angle.c,v 5.2 2002-07-20 20:42:40 caress Exp $
+ *    $Id: mb_angle.c,v 5.3 2002-09-18 23:32:59 caress Exp $
  *
- *    Copyright (c) 1998, 2000 by
+ *    Copyright (c) 1998, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -175,6 +175,9 @@
  * Date:	December 30, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2002/07/20 20:42:40  caress
+ * Release 5.0.beta20
+ *
  * Revision 5.1  2002/04/06 02:43:39  caress
  * Release 5.0.beta16
  *

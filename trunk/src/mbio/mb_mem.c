@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_mem.c	3/1/93
- *    $Id: mb_mem.c,v 5.1 2002-05-29 23:36:53 caress Exp $
+ *    $Id: mb_mem.c,v 5.2 2002-09-18 23:32:59 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000 by
+ *    Copyright (c) 1993, 1994, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -22,6 +22,9 @@
  * Date:	March 1, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2002/05/29 23:36:53  caress
+ * Release 5.0.beta18
+ *
  * Revision 5.0  2000/12/01 22:48:41  caress
  * First cut at Version 5.0.
  *
@@ -98,7 +101,7 @@ static int	n_mb_alloc = 0;
 static char	*mb_alloc_ptr[MB_MEMORY_HEAP_MAX];
 static int	mb_alloc_size[MB_MEMORY_HEAP_MAX];
 
-static char rcs_id[]="$Id: mb_mem.c,v 5.1 2002-05-29 23:36:53 caress Exp $";
+static char rcs_id[]="$Id: mb_mem.c,v 5.2 2002-09-18 23:32:59 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_malloc(int verbose, int size, void **ptr, int *error)

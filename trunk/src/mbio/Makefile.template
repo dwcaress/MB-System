@@ -1,7 +1,7 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 5.10 2002-07-20 20:45:35 caress Exp $
+#	$Id: Makefile.template,v 5.11 2002-09-18 23:36:22 caress Exp $
 #
-#     Copyright (c) 1993, 1994, 2000 by
+#     Copyright (c) 1993, 1994, 2000, 2002 by
 #     David W. Caress (caress@mbari.org)
 #       Monterey Bay Aquarium Research Institute
 #       Moss Landing, CA 95039
@@ -16,6 +16,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.10  2002/07/20 20:45:35  caress
+# Release 5.0.beta20
+#
 # Revision 5.9  2002/05/02 04:00:41  caress
 # Release 5.0.beta17
 #
@@ -120,8 +123,11 @@
 
 # *** CHANGE THESE TO FIT YOUR LOCAL ENVIRONMENT ***
 # 
+# PROJ4 projection definitions
+PROJECTIONS = /usr/local/mbsystem/share/Projections.dat
+#
 # Netcdf include directory 
-NETCDFINCDIR = /ocean/mgg/netcdf/include
+NETCDFINCDIR = /usr/local/netcdf/include
 # 
 # Compilers 
 CC = cc 
@@ -327,7 +333,8 @@ mb_time.o:	mb_time.c $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mb_time.c
 mb_angle.o:	mb_angle.c $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mb_angle.c
-mb_proj.o:	mb_proj.c $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h $(INCDIR)/proj_api.h
+mb_proj.o:	mb_proj.c $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h $(INCDIR)/proj_api.h Makefile.template
+	echo "	char *projectionfile = "'"$(PROJECTIONS)"'";" > projections.h
 	$(CC) -c $(CFLAGS) mb_proj.c
 mb_get_value.o:	mb_get_value.c $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mb_get_value.c

@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sb2100b1.c	3/3/94
- *	$Id: mbr_sb2100b1.c,v 5.5 2002-07-20 20:42:40 caress Exp $
+ *	$Id: mbr_sb2100b1.c,v 5.6 2002-09-18 23:32:59 caress Exp $
  *
- *    Copyright (c) 1997, 2000 by
+ *    Copyright (c) 1997, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	March 3, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2002/07/20 20:42:40  caress
+ * Release 5.0.beta20
+ *
  * Revision 5.4  2001/07/27 19:07:16  caress
  * Added data cutting.
  *
@@ -144,7 +147,7 @@ int mbr_sb2100b1_wr_sr(int verbose, FILE *mbfp, char *data_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_sb2100b1(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_sb2100b1.c,v 5.5 2002-07-20 20:42:40 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2100b1.c,v 5.6 2002-09-18 23:32:59 caress Exp $";
 	char	*function_name = "mbr_register_sb2100b1";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -276,7 +279,7 @@ int mbr_info_sb2100b1(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_sb2100b1.c,v 5.5 2002-07-20 20:42:40 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2100b1.c,v 5.6 2002-09-18 23:32:59 caress Exp $";
 	char	*function_name = "mbr_info_sb2100b1";
 	int	status = MB_SUCCESS;
 
@@ -345,7 +348,7 @@ int mbr_info_sb2100b1(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_sb2100b1(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_sb2100b1.c,v 5.5 2002-07-20 20:42:40 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2100b1.c,v 5.6 2002-09-18 23:32:59 caress Exp $";
 	char	*function_name = "mbr_alm_sb2100b1";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

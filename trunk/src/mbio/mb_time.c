@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_time.c	1/21/93
- *    $Id: mb_time.c,v 5.1 2002-05-29 23:36:53 caress Exp $
+ *    $Id: mb_time.c,v 5.2 2002-09-18 23:32:59 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000 by
+ *    Copyright (c) 1993, 1994, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -20,6 +20,9 @@
  * Date:	January 21, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2002/05/29 23:36:53  caress
+ * Release 5.0.beta18
+ *
  * Revision 5.0  2000/12/01 22:48:41  caress
  * First cut at Version 5.0.
  *
@@ -112,7 +115,7 @@
 #define SECINMINUTE     60.0
 #define IMININHOUR 60
 int	yday[] = {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334};
-static char rcs_id[]="$Id: mb_time.c,v 5.1 2002-05-29 23:36:53 caress Exp $";
+static char rcs_id[]="$Id: mb_time.c,v 5.2 2002-09-18 23:32:59 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 /* 	function mb_get_time returns the number of seconds from

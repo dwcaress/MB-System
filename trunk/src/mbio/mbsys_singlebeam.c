@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_singlebeam.c	4/13/99
- *	$Id: mbsys_singlebeam.c,v 5.5 2002-02-22 09:03:43 caress Exp $
+ *	$Id: mbsys_singlebeam.c,v 5.6 2002-09-18 23:32:59 caress Exp $
  *
- *    Copyright (c) 1999, 2000 by
+ *    Copyright (c) 1999, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -28,6 +28,9 @@
  * Date:	April 13,  1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2002/02/22 09:03:43  caress
+ * Release 5.0.beta13
+ *
  * Revision 5.4  2001/08/25 00:54:13  caress
  * Adding beamwidth values to extract functions.
  *
@@ -71,7 +74,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_singlebeam.h"
 
-static char res_id[]="$Id: mbsys_singlebeam.c,v 5.5 2002-02-22 09:03:43 caress Exp $";
+static char res_id[]="$Id: mbsys_singlebeam.c,v 5.6 2002-09-18 23:32:59 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_singlebeam_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
@@ -246,27 +249,6 @@ int mbsys_singlebeam_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		/* get navigation */
 		*navlon = store->longitude;
 		*navlat = store->latitude;
-		if (mb_io_ptr->lonflip < 0)
-			{
-			if (*navlon > 0.) 
-				*navlon = *navlon - 360.;
-			else if (*navlon < -360.)
-				*navlon = *navlon + 360.;
-			}
-		else if (mb_io_ptr->lonflip == 0)
-			{
-			if (*navlon > 180.) 
-				*navlon = *navlon - 360.;
-			else if (*navlon < -180.)
-				*navlon = *navlon + 360.;
-			}
-		else
-			{
-			if (*navlon > 360.) 
-				*navlon = *navlon - 360.;
-			else if (*navlon < 0.)
-				*navlon = *navlon + 360.;
-			}
 
 		/* get heading */
 		*heading = store->heading;
@@ -786,27 +768,6 @@ int mbsys_singlebeam_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		/* get navigation */
 		*navlon = store->longitude;
 		*navlat = store->latitude;
-		if (mb_io_ptr->lonflip < 0)
-			{
-			if (*navlon > 0.) 
-				*navlon = *navlon - 360.;
-			else if (*navlon < -360.)
-				*navlon = *navlon + 360.;
-			}
-		else if (mb_io_ptr->lonflip == 0)
-			{
-			if (*navlon > 180.) 
-				*navlon = *navlon - 360.;
-			else if (*navlon < -180.)
-				*navlon = *navlon + 360.;
-			}
-		else
-			{
-			if (*navlon > 360.) 
-				*navlon = *navlon - 360.;
-			else if (*navlon < 0.)
-				*navlon = *navlon + 360.;
-			}
 
 		/* get heading */
 		*heading = store->heading;

@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	MBF_SB2100B1.h	1/16/94
- *	$Id: mbf_sb2100b1.h,v 5.0 2000-12-01 22:48:41 caress Exp $
+ *	$Id: mbf_sb2100b1.h,v 5.1 2002-09-18 23:32:59 caress Exp $
  *
- *    Copyright (c) 1997, 2000 by
+ *    Copyright (c) 1997, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -19,6 +19,9 @@
  * Author:	D. W. Caress
  * Date:	January 16, 1997
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01 22:48:41  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.3  2000/09/30  06:34:20  caress
  * Snapshot for Dale.
  *

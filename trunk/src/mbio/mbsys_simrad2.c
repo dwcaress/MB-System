@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad2.c	3.00	10/9/98
- *	$Id: mbsys_simrad2.c,v 5.14 2002-08-21 00:55:46 caress Exp $
+ *	$Id: mbsys_simrad2.c,v 5.15 2002-09-18 23:32:59 caress Exp $
  *
  *    Copyright (c) 1998, 2001, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -31,6 +31,9 @@
  * Date:	October 9, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.14  2002/08/21 00:55:46  caress
+ * Release 5.0.beta22
+ *
  * Revision 5.13  2002/07/20 20:42:40  caress
  * Release 5.0.beta20
  *
@@ -106,7 +109,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_simrad2.h"
 
-static char res_id[]="$Id: mbsys_simrad2.c,v 5.14 2002-08-21 00:55:46 caress Exp $";
+static char res_id[]="$Id: mbsys_simrad2.c,v 5.15 2002-09-18 23:32:59 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_simrad2_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
@@ -1314,27 +1317,6 @@ int mbsys_simrad2_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		    *navlat = 0.00000005 * ping->png_latitude;
 		else
 		    *navlat = 0.0;
-		if (mb_io_ptr->lonflip < 0)
-			{
-			if (*navlon > 0.) 
-				*navlon = *navlon - 360.;
-			else if (*navlon < -360.)
-				*navlon = *navlon + 360.;
-			}
-		else if (mb_io_ptr->lonflip == 0)
-			{
-			if (*navlon > 180.) 
-				*navlon = *navlon - 360.;
-			else if (*navlon < -180.)
-				*navlon = *navlon + 360.;
-			}
-		else
-			{
-			if (*navlon > 360.) 
-				*navlon = *navlon - 360.;
-			else if (*navlon < 0.)
-				*navlon = *navlon + 360.;
-			}
 
 		/* get heading */
 		*heading = 0.01 * ping->png_heading;
@@ -1535,27 +1517,6 @@ int mbsys_simrad2_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		    *navlat = 0.00000005 * store->pos_latitude;
 		else
 		    *navlat = 0.0;
-		if (mb_io_ptr->lonflip < 0)
-			{
-			if (*navlon > 0.) 
-				*navlon = *navlon - 360.;
-			else if (*navlon < -360.)
-				*navlon = *navlon + 360.;
-			}
-		else if (mb_io_ptr->lonflip == 0)
-			{
-			if (*navlon > 180.) 
-				*navlon = *navlon - 360.;
-			else if (*navlon < -180.)
-				*navlon = *navlon + 360.;
-			}
-		else
-			{
-			if (*navlon > 360.) 
-				*navlon = *navlon - 360.;
-			else if (*navlon < 0.)
-				*navlon = *navlon + 360.;
-			}
 
 		/* get heading */
 		*heading = 0.01 * store->pos_heading;
@@ -2505,27 +2466,6 @@ int mbsys_simrad2_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		    *navlat = 0.00000005 * ping->png_latitude;
 		else
 		    *navlat = 0.0;
-		if (mb_io_ptr->lonflip < 0)
-			{
-			if (*navlon > 0.) 
-				*navlon = *navlon - 360.;
-			else if (*navlon < -360.)
-				*navlon = *navlon + 360.;
-			}
-		else if (mb_io_ptr->lonflip == 0)
-			{
-			if (*navlon > 180.) 
-				*navlon = *navlon - 360.;
-			else if (*navlon < -180.)
-				*navlon = *navlon + 360.;
-			}
-		else
-			{
-			if (*navlon > 360.) 
-				*navlon = *navlon - 360.;
-			else if (*navlon < 0.)
-				*navlon = *navlon + 360.;
-			}
 
 		/* get heading */
 		*heading = 0.01 * ping->png_heading;
@@ -2622,27 +2562,6 @@ int mbsys_simrad2_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		    *navlat = 0.00000005 * store->pos_latitude;
 		else
 		    *navlat = 0.0;
-		if (mb_io_ptr->lonflip < 0)
-			{
-			if (*navlon > 0.) 
-				*navlon = *navlon - 360.;
-			else if (*navlon < -360.)
-				*navlon = *navlon + 360.;
-			}
-		else if (mb_io_ptr->lonflip == 0)
-			{
-			if (*navlon > 180.) 
-				*navlon = *navlon - 360.;
-			else if (*navlon < -180.)
-				*navlon = *navlon + 360.;
-			}
-		else
-			{
-			if (*navlon > 360.) 
-				*navlon = *navlon - 360.;
-			else if (*navlon < 0.)
-				*navlon = *navlon + 360.;
-			}
 
 		/* get heading */
 		if (store->pos_heading != EM2_INVALID_SHORT)

@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_dsl.h	8/5/94
- *	$Id: mbsys_dsl.h,v 5.3 2002-07-20 20:42:40 caress Exp $
+ *	$Id: mbsys_dsl.h,v 5.4 2002-09-18 23:32:59 caress Exp $
  *
- *    Copyright (c) 1996, 2000 by
+ *    Copyright (c) 1996, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -25,6 +25,9 @@
  * Date:	August 5, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2002/07/20 20:42:40  caress
+ * Release 5.0.beta20
+ *
  * Revision 5.2  2001/07/20 00:32:54  caress
  * Release 5.0.beta03
  *

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad.c	3.00	8/5/94
- *	$Id: mbsys_simrad.c,v 5.8 2002-08-21 00:55:46 caress Exp $
+ *	$Id: mbsys_simrad.c,v 5.9 2002-09-18 23:32:59 caress Exp $
  *
  *    Copyright (c) 1994, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -31,6 +31,9 @@
  * Date:	August 5, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2002/08/21 00:55:46  caress
+ * Release 5.0.beta22
+ *
  * Revision 5.7  2002/07/20 20:42:40  caress
  * Release 5.0.beta20
  *
@@ -146,7 +149,7 @@
 #define MBSYS_SIMRAD_C
 #include "../../include/mbsys_simrad.h"
 
-static char res_id[]="$Id: mbsys_simrad.c,v 5.8 2002-08-21 00:55:46 caress Exp $";
+static char res_id[]="$Id: mbsys_simrad.c,v 5.9 2002-09-18 23:32:59 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_simrad_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
@@ -490,27 +493,6 @@ int mbsys_simrad_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		/* get navigation */
 		*navlon = ping->longitude;
 		*navlat = ping->latitude;
-		if (mb_io_ptr->lonflip < 0)
-			{
-			if (*navlon > 0.) 
-				*navlon = *navlon - 360.;
-			else if (*navlon < -360.)
-				*navlon = *navlon + 360.;
-			}
-		else if (mb_io_ptr->lonflip == 0)
-			{
-			if (*navlon > 180.) 
-				*navlon = *navlon - 360.;
-			else if (*navlon < -180.)
-				*navlon = *navlon + 360.;
-			}
-		else
-			{
-			if (*navlon > 360.) 
-				*navlon = *navlon - 360.;
-			else if (*navlon < 0.)
-				*navlon = *navlon + 360.;
-			}
 
 		/* get heading */
 		if (store->sonar == MBSYS_SIMRAD_EM121)
@@ -725,27 +707,6 @@ int mbsys_simrad_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		mb_get_time(verbose,time_i,time_d);
 		*navlon = store->pos_longitude;
 		*navlat = store->pos_latitude;
-		if (mb_io_ptr->lonflip < 0)
-			{
-			if (*navlon > 0.) 
-				*navlon = *navlon - 360.;
-			else if (*navlon < -360.)
-				*navlon = *navlon + 360.;
-			}
-		else if (mb_io_ptr->lonflip == 0)
-			{
-			if (*navlon > 180.) 
-				*navlon = *navlon - 360.;
-			else if (*navlon < -180.)
-				*navlon = *navlon + 360.;
-			}
-		else
-			{
-			if (*navlon > 360.) 
-				*navlon = *navlon - 360.;
-			else if (*navlon < 0.)
-				*navlon = *navlon + 360.;
-			}
 
 		/* get heading */
 		*heading = store->line_heading;
@@ -1800,27 +1761,6 @@ int mbsys_simrad_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		/* get navigation */
 		*navlon = ping->longitude;
 		*navlat = ping->latitude;
-		if (mb_io_ptr->lonflip < 0)
-			{
-			if (*navlon > 0.) 
-				*navlon = *navlon - 360.;
-			else if (*navlon < -360.)
-				*navlon = *navlon + 360.;
-			}
-		else if (mb_io_ptr->lonflip == 0)
-			{
-			if (*navlon > 180.) 
-				*navlon = *navlon - 360.;
-			else if (*navlon < -180.)
-				*navlon = *navlon + 360.;
-			}
-		else
-			{
-			if (*navlon > 360.) 
-				*navlon = *navlon - 360.;
-			else if (*navlon < 0.)
-				*navlon = *navlon + 360.;
-			}
 
 		/* get heading */
 		if (store->sonar == MBSYS_SIMRAD_EM121)
@@ -1908,27 +1848,6 @@ int mbsys_simrad_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		mb_get_time(verbose,time_i,time_d);
 		*navlon = store->pos_longitude;
 		*navlat = store->pos_latitude;
-		if (mb_io_ptr->lonflip < 0)
-			{
-			if (*navlon > 0.) 
-				*navlon = *navlon - 360.;
-			else if (*navlon < -360.)
-				*navlon = *navlon + 360.;
-			}
-		else if (mb_io_ptr->lonflip == 0)
-			{
-			if (*navlon > 180.) 
-				*navlon = *navlon - 360.;
-			else if (*navlon < -180.)
-				*navlon = *navlon + 360.;
-			}
-		else
-			{
-			if (*navlon > 360.) 
-				*navlon = *navlon - 360.;
-			else if (*navlon < 0.)
-				*navlon = *navlon + 360.;
-			}
 
 		/* get heading */
 		*heading = store->line_heading;

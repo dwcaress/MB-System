@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_reson8k.c	3.00	8/20/94
- *	$Id: mbsys_reson8k.c,v 5.1 2001-11-16 01:32:31 caress Exp $
+ *	$Id: mbsys_reson8k.c,v 5.2 2002-09-18 23:32:59 caress Exp $
  *
- *    Copyright (c) 2001 by
+ *    Copyright (c) 2001, 2002 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -25,6 +25,9 @@
  * Date:	September 3, 2001
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2001/11/16 01:32:31  caress
+ * Working on it...
+ *
  * Revision 5.0  2001/09/17  23:24:10  caress
  * Added XTF format.
  *
@@ -47,7 +50,7 @@
 int mbsys_reson8k_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_reson8k.c,v 5.1 2001-11-16 01:32:31 caress Exp $";
+ static char res_id[]="$Id: mbsys_reson8k.c,v 5.2 2002-09-18 23:32:59 caress Exp $";
 	char	*function_name = "mbsys_reson8k_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -321,27 +324,6 @@ int mbsys_reson8k_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		/* get navigation */
 		*navlon = store->png_longitude;
 		*navlat = store->png_latitude;
-		if (mb_io_ptr->lonflip < 0)
-			{
-			if (*navlon > 0.) 
-				*navlon = *navlon - 360.;
-			else if (*navlon < -360.)
-				*navlon = *navlon + 360.;
-			}
-		else if (mb_io_ptr->lonflip == 0)
-			{
-			if (*navlon > 180.) 
-				*navlon = *navlon - 360.;
-			else if (*navlon < -180.)
-				*navlon = *navlon + 360.;
-			}
-		else
-			{
-			if (*navlon > 360.) 
-				*navlon = *navlon - 360.;
-			else if (*navlon < 0.)
-				*navlon = *navlon + 360.;
-			}
 
 		/* get heading */
 		*heading = store->png_heading;
@@ -440,27 +422,6 @@ int mbsys_reson8k_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		/* get navigation */
 		*navlon = store->nav_longitude;
 		*navlat = store->nav_latitude;
-		if (mb_io_ptr->lonflip < 0)
-			{
-			if (*navlon > 0.) 
-				*navlon = *navlon - 360.;
-			else if (*navlon < -360.)
-				*navlon = *navlon + 360.;
-			}
-		else if (mb_io_ptr->lonflip == 0)
-			{
-			if (*navlon > 180.) 
-				*navlon = *navlon - 360.;
-			else if (*navlon < -180.)
-				*navlon = *navlon + 360.;
-			}
-		else
-			{
-			if (*navlon > 360.) 
-				*navlon = *navlon - 360.;
-			else if (*navlon < 0.)
-				*navlon = *navlon + 360.;
-			}
 
 		/* get heading */
 		*heading = store->nav_heading;
@@ -1020,27 +981,6 @@ int mbsys_reson8k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		/* get navigation */
 		*navlon = store->png_longitude;
 		*navlat = store->png_latitude;
-		if (mb_io_ptr->lonflip < 0)
-			{
-			if (*navlon > 0.) 
-				*navlon = *navlon - 360.;
-			else if (*navlon < -360.)
-				*navlon = *navlon + 360.;
-			}
-		else if (mb_io_ptr->lonflip == 0)
-			{
-			if (*navlon > 180.) 
-				*navlon = *navlon - 360.;
-			else if (*navlon < -180.)
-				*navlon = *navlon + 360.;
-			}
-		else
-			{
-			if (*navlon > 360.) 
-				*navlon = *navlon - 360.;
-			else if (*navlon < 0.)
-				*navlon = *navlon + 360.;
-			}
 
 		/* get heading */
 		*heading = store->png_heading;
@@ -1114,27 +1054,6 @@ int mbsys_reson8k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		/* get navigation */
 		*navlon = store->nav_longitude;
 		*navlat = store->nav_latitude;
-		if (mb_io_ptr->lonflip < 0)
-			{
-			if (*navlon > 0.) 
-				*navlon = *navlon - 360.;
-			else if (*navlon < -360.)
-				*navlon = *navlon + 360.;
-			}
-		else if (mb_io_ptr->lonflip == 0)
-			{
-			if (*navlon > 180.) 
-				*navlon = *navlon - 360.;
-			else if (*navlon < -180.)
-				*navlon = *navlon + 360.;
-			}
-		else
-			{
-			if (*navlon > 360.) 
-				*navlon = *navlon - 360.;
-			else if (*navlon < 0.)
-				*navlon = *navlon + 360.;
-			}
 
 		/* get heading */
 		*heading = store->nav_heading;

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_samesurf.c	6/13/2002
- *	$Id: mbr_samesurf.c,v 5.2 2002-08-02 01:01:10 caress Exp $
+ *	$Id: mbr_samesurf.c,v 5.3 2002-09-18 23:32:59 caress Exp $
  *
  *    Copyright (c) 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	June 13, 2002
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2002/08/02 01:01:10  caress
+ * 5.0.beta22
+ *
  * Revision 5.1  2002/07/20 20:42:40  caress
  * Release 5.0.beta20
  *
@@ -77,7 +80,7 @@ int mbr_wt_samesurf(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_samesurf(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_samesurf.c,v 5.2 2002-08-02 01:01:10 caress Exp $";
+	static char res_id[]="$Id: mbr_samesurf.c,v 5.3 2002-09-18 23:32:59 caress Exp $";
 	char	*function_name = "mbr_register_samesurf";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -208,7 +211,7 @@ int mbr_info_samesurf(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_samesurf.c,v 5.2 2002-08-02 01:01:10 caress Exp $";
+	static char res_id[]="$Id: mbr_samesurf.c,v 5.3 2002-09-18 23:32:59 caress Exp $";
 	char	*function_name = "mbr_info_samesurf";
 	int	status = MB_SUCCESS;
 
@@ -277,7 +280,7 @@ int mbr_info_samesurf(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_samesurf(int verbose, void *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_samesurf.c,v 5.2 2002-08-02 01:01:10 caress Exp $";
+ static char res_id[]="$Id: mbr_samesurf.c,v 5.3 2002-09-18 23:32:59 caress Exp $";
 	char	*function_name = "mbr_alm_samesurf";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -378,6 +381,7 @@ int mbr_rt_samesurf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	SurfTxParameter			*MultibeamTransmitterParametersPtr;
 	SurfSidescanData		*SidescanDataPtr;
 	int	utm_zone;
+	char	projection[MB_NAME_LENGTH];
 	double	easting, northing, lon, lat;
 	double	*refeasting, *refnorthing;
 	int	i;
@@ -432,7 +436,8 @@ int mbr_rt_samesurf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			/* initialize UTM projection */
 			utm_zone = (int)(((RTD * store->GlobalData.referenceMeridian + 183.0)
 					/ 6.0) + 0.5);
-			mb_proj_init(verbose,utm_zone, "WGS84", &(mb_io_ptr->pjptr), error);
+			sprintf(projection,"UTM%2.2dN", utm_zone);
+			mb_proj_init(verbose, projection, &(mb_io_ptr->pjptr), error);
 			store->GlobalData.presentationOfPosition = 'E';
 			mb_io_ptr->projection_initialized = MB_YES;
 			

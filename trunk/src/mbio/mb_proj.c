@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_proj.c	7/16/2002
- *    $Id: mb_proj.c,v 5.1 2002-08-02 01:01:10 caress Exp $
+ *    $Id: mb_proj.c,v 5.2 2002-09-18 23:32:59 caress Exp $
  *
  *    Copyright (c) 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -31,6 +31,9 @@
  * Date:	July 16, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2002/08/02 01:01:10  caress
+ * 5.0.beta22
+ *
  * Revision 5.0  2002/07/20 20:41:59  caress
  * Initial Revision
  * l
@@ -47,17 +50,17 @@
 #include "../../include/mb_status.h"
 #include "../../include/mb_define.h"
 #include "../../include/proj_api.h"
+#include "projections.h"
 
 /*--------------------------------------------------------------------*/
 int mb_proj_init(int verbose,
-		int utm_zone,
-		char *ellipsoid,
+		char *projection,
 		void **pjptr,
 		int *error)
 {
 	char	*function_name = "mb_proj_init";
 	int	status = MB_SUCCESS;
-	char 	pj_init_args[MB_NAME_LENGTH];
+	char 	pj_init_args[MB_PATH_MAXLINE];
 	projPJ 	pj;
 	
 
@@ -68,13 +71,12 @@ int mb_proj_init(int verbose,
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       utm_zone:   %d\n",utm_zone);
-		fprintf(stderr,"dbg2       ellipsoid:  %s\n",ellipsoid);
+		fprintf(stderr,"dbg2       projection: %s\n",projection);
 		}
 		
 	/* initialize the projection */
-	sprintf(pj_init_args, "+proj=utm +zone=%d +ellps=%s",
-					utm_zone, ellipsoid);
+	sprintf(pj_init_args, "+init=%s:%s",
+			projectionfile,projection);
 	pj = pj_init_plus(pj_init_args);
 	*pjptr = (void *) pj;
 

@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_atlas.h	6/22/01
- *	$Id: mbsys_atlas.h,v 5.4 2002-07-20 20:42:40 caress Exp $
+ *	$Id: mbsys_atlas.h,v 5.5 2002-09-18 23:32:59 caress Exp $
  *
- *    Copyright (c) 2001 by
+ *    Copyright (c) 2001, 2002 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -30,6 +30,9 @@
  * Date:	June 22, 2001
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2002/07/20 20:42:40  caress
+ * Release 5.0.beta20
+ *
  * Revision 5.3  2001/12/18 04:27:45  caress
  * Release 5.0.beta11.
  *

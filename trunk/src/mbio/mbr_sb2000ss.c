@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sb2000ss.c	10/14/94
- *	$Id: mbr_sb2000ss.c,v 5.9 2002-04-08 21:29:49 caress Exp $
+ *	$Id: mbr_sb2000ss.c,v 5.10 2002-09-18 23:32:59 caress Exp $
  *
- *    Copyright (c) 1994, 2000 by
+ *    Copyright (c) 1994, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	October 14, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 5.9  2002/04/08 21:29:49  caress
+ * Removed errant debug message.
+ *
  * Revision 5.8  2002/04/08 20:59:38  caress
  * Release 5.0.beta17
  *
@@ -155,7 +158,7 @@ int mbr_dem_sb2000ss(int verbose, void *mbio_ptr, int *error);
 int mbr_rt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
-static char res_id[]="$Id: mbr_sb2000ss.c,v 5.9 2002-04-08 21:29:49 caress Exp $";
+static char res_id[]="$Id: mbr_sb2000ss.c,v 5.10 2002-09-18 23:32:59 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_sb2000ss(int verbose, void *mbio_ptr, int *error)

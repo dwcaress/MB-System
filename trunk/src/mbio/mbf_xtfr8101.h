@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_xtfr8101.h	8/24/01
- *	$Id: mbf_xtfr8101.h,v 5.0 2001-09-17 23:24:10 caress Exp $
+ *	$Id: mbf_xtfr8101.h,v 5.1 2002-09-18 23:32:59 caress Exp $
  *
- *    Copyright (c) 2001 by
+ *    Copyright (c) 2001, 2002 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -20,6 +20,9 @@
  * Date:	August 24, 2001
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2001/09/17 23:24:10  caress
+ * Added XTF format.
+ *
  *
  *
  *

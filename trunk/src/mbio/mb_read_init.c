@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_read_init.c	1/25/93
- *    $Id: mb_read_init.c,v 5.11 2002-07-20 20:42:40 caress Exp $
+ *    $Id: mb_read_init.c,v 5.12 2002-09-18 23:32:59 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000 by
+ *    Copyright (c) 1993, 1994, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -20,6 +20,9 @@
  * Date:	January 25, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.11  2002/07/20 20:42:40  caress
+ * Release 5.0.beta20
+ *
  * Revision 5.10  2002/05/29 23:36:53  caress
  * Release 5.0.beta18
  *
@@ -199,7 +202,7 @@ int mb_read_init(int verbose, char *file,
 		int *beams_bath, int *beams_amp, int *pixels_ss, 
 		int *error)
 {
-	static char rcs_id[]="$Id: mb_read_init.c,v 5.11 2002-07-20 20:42:40 caress Exp $";
+	static char rcs_id[]="$Id: mb_read_init.c,v 5.12 2002-09-18 23:32:59 caress Exp $";
 	char	*function_name = "mb_read_init";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
@@ -208,6 +211,10 @@ int mb_read_init(int verbose, char *file,
 	int	sapi_status;
 	char	*lastslash;
 	char	path[MB_PATH_MAXLINE], name[MB_PATH_MAXLINE];
+	char	prjfile[MB_PATH_MAXLINE];
+	char	projection_id[MB_NAME_LENGTH];
+	int	proj_status;
+	FILE	*pfp;
 	int	i;
 	char	*stdin_string = "stdin";
 
@@ -365,11 +372,9 @@ int mb_read_init(int verbose, char *file,
 	mb_io_ptr->new_ss_acrosstrack = NULL;
 	mb_io_ptr->new_ss_alongtrack = NULL;
 	
-	/* initialize UTM projection parameters */
+	/* initialize projection parameters */
 	mb_io_ptr->projection_initialized = MB_NO;
 	mb_io_ptr->pjptr = NULL;
-	mb_io_ptr->utm_zone = 0;
-	strcpy(mb_io_ptr->ellipsoid, "WGS84");
 	
 	/* initialize ancillary variables used
 		to save information in certain cases */
@@ -765,6 +770,31 @@ int mb_read_init(int verbose, char *file,
 	/* initialize notices */
 	for (i=0;i<MB_NOTICE_MAX;i++)
 		mb_io_ptr->notice_list[i] = 0;
+		
+	/* check for projection specification file */
+	sprintf(prjfile, "%s.prj", file);
+	if ((pfp = fopen(prjfile, "r")) != NULL)
+		{
+		fscanf(pfp,"%s", projection_id);
+		proj_status = mb_proj_init(verbose,projection_id, 
+			&(mb_io_ptr->pjptr), error);
+		if (proj_status == MB_SUCCESS)
+			{
+			mb_io_ptr->projection_initialized = MB_YES;
+			}
+		else
+			{
+			fprintf(stderr, "Unable to initialize projection %s from file %s\n\n",
+				projection_id, prjfile);
+			}
+		fclose(pfp);
+		}
+	else
+		{
+		*error = MB_ERROR_OPEN_FAIL;
+		status = MB_FAILURE;
+		}
+		
 
 	/* set error and status (if you got here you succeeded */
 	*error = MB_ERROR_NO_ERROR;

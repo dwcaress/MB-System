@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_hs10.h	12/4/00
- *	$Id: mbsys_hs10.h,v 5.2 2001-07-20 00:32:54 caress Exp $
+ *	$Id: mbsys_hs10.h,v 5.3 2002-09-18 23:32:59 caress Exp $
  *
- *    Copyright (c) 2000 by
+ *    Copyright (c) 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	December 4, 2000
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2001/07/20 00:32:54  caress
+ * Release 5.0.beta03
+ *
  * Revision 5.1  2001/01/22  07:43:34  caress
  * Version 5.0.beta01
  *

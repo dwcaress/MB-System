@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_get_all.c	1/26/93
- *    $Id: mb_get_all.c,v 5.4 2002-05-29 23:36:53 caress Exp $
+ *    $Id: mb_get_all.c,v 5.5 2002-09-18 23:32:59 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000 by
+ *    Copyright (c) 1993, 1994, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -24,6 +24,9 @@
  * Date:	January 26, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2002/05/29 23:36:53  caress
+ * Release 5.0.beta18
+ *
  * Revision 5.3  2001/07/20 00:31:11  caress
  * Release 5.0.beta03
  *
@@ -111,7 +114,7 @@
 #include "../../include/mb_io.h"
 #include "../../include/mb_define.h"
 
-static char rcs_id[]="$Id: mb_get_all.c,v 5.4 2002-05-29 23:36:53 caress Exp $";
+static char rcs_id[]="$Id: mb_get_all.c,v 5.5 2002-09-18 23:32:59 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind,
