@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcopy.c	2/4/93
- *    $Id: mbcopy.c,v 4.1 1994-03-12 01:44:37 caress Exp $
+ *    $Id: mbcopy.c,v 4.2 1994-07-29 19:02:56 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,14 @@
  * Date:	February 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1994/03/12  01:44:37  caress
+ * Added declarations of ctime and/or getenv for compatability
+ * with SGI compilers.
+ *
+ * Revision 4.1  1994/03/12  01:44:37  caress
+ * Added declarations of ctime and/or getenv for compatability
+ * with SGI compilers.
+ *
  * Revision 4.0  1994/03/06  00:13:22  caress
  * First cut at version 4.0
  *
@@ -59,7 +67,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbcopy.c,v 4.1 1994-03-12 01:44:37 caress Exp $";
+	static char rcs_id[] = "$Id: mbcopy.c,v 4.2 1994-07-29 19:02:56 caress Exp $";
 	static char program_name[] = "MBCOPY";
 	static char help_message[] =  "MBCOPY copies an input multibeam data file to an output \nmultibeam data file with the specified conversions.  Options include \nwindowing in time and space and ping averaging.  The input and \noutput data formats may differ, though not all possible combinations \nmake sense.  The default input and output streams are stdin and stdout.";
 	static char usage_message[] = "mbcopy [-Fiformat/oformat -Rw/e/s/n -Ppings -Sspeed -Llonflip\n\t-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc -Ccommentfile \n\t-N -V -H  -Iinfile -Ooutfile]";
@@ -791,7 +799,7 @@ char **argv;
 				obathacrosstrack[j] = ibathacrosstrack[i];
 				obathalongtrack[j] = ibathalongtrack[i];
 				}
-			for (j=iend_bath+offset_bath;j<ibeams_bath;j++)
+			for (j=iend_bath+offset_bath;j<obeams_bath;j++)
 				{
 				obath[j] = 0;
 				obathacrosstrack[j] = 0;
@@ -808,7 +816,7 @@ char **argv;
 				j = i + offset_amp;
 				oamp[j] = iamp[i];
 				}
-			for (j=iend_amp+offset_amp;j<ibeams_amp;j++)
+			for (j=iend_amp+offset_amp;j<obeams_amp;j++)
 				{
 				oamp[j] = 0;
 				}
@@ -827,7 +835,7 @@ char **argv;
 				ossacrosstrack[j] = issacrosstrack[i];
 				ossalongtrack[j] = issalongtrack[i];
 				}
-			for (j=iend_ss+offset_ss;j<ipixels_ss;j++)
+			for (j=iend_ss+offset_ss;j<opixels_ss;j++)
 				{
 				oss[j] = 0;
 				ossacrosstrack[j] = 0;

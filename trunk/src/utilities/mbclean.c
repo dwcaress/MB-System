@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbclean.c	2/26/93
- *    $Id: mbclean.c,v 4.3 1994-04-12 00:42:00 caress Exp $
+ *    $Id: mbclean.c,v 4.4 1994-07-29 19:02:56 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -26,6 +26,11 @@
  * by David Caress.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1994/04/12  00:42:00  caress
+ * Changed call to mb_buffer_close in accordance with change
+ * in mb_buffer source code.  The parameter list now includes
+ * mbio_ptr.
+ *
  * Revision 4.2  1994/03/25  14:01:31  caress
  * Added ability to check that depth values are within a specified
  * acceptable range.
@@ -62,8 +67,13 @@
 #include "../../include/mb_status.h"
 #include "../../include/mb_format.h"
 
+/* DTR define */
+#ifndef M_PI
+#define	M_PI	3.14159265358979323846
+#endif
+#define DTR	(M_PI/180.)
+
 /* local defines */
-#define DTR (M_PI/180.)
 #define	MBCLEAN_FLAG_ONE	1
 #define	MBCLEAN_FLAG_BOTH	2
 #define	MBCLEAN_ZERO_ONE	3
@@ -105,7 +115,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbclean.c,v 4.3 1994-04-12 00:42:00 caress Exp $";
+	static char rcs_id[] = "$Id: mbclean.c,v 4.4 1994-07-29 19:02:56 caress Exp $";
 	static char program_name[] = "MBCLEAN";
 	static char help_message[] =  "MBCLEAN identifies and flags artifacts in multibeam bathymetry data\nBad beams  are  indentified  based  on  one simple criterion only: \nexcessive bathymetric slopes.   The default input and output streams \nare stdin and stdout.";
 	static char usage_message[] = "mbclean [-Blow/high -Cslope -Ddistance -Fformat -Iinfile -Llonflip -Mmode -Ooutfile -Q -Xzap_beams \n\t-V -H]";

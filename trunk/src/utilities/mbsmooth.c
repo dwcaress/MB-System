@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsmooth.c	6/12/93
- *    $Id: mbsmooth.c,v 4.2 1994-04-12 00:42:00 caress Exp $
+ *    $Id: mbsmooth.c,v 4.3 1994-07-29 19:02:56 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -29,6 +29,11 @@
  * in the current version.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1994/04/12  00:42:00  caress
+ * Changed call to mb_buffer_close in accordance with change
+ * in mb_buffer source code.  The parameter list now includes
+ * mbio_ptr.
+ *
  * Revision 4.1  1994/03/12  01:44:37  caress
  * Added declarations of ctime and/or getenv for compatability
  * with SGI compilers.
@@ -59,7 +64,10 @@
 #include "../../include/mb_status.h"
 #include "../../include/mb_format.h"
 
-/* local defines */
+/* DTR define */
+#ifndef M_PI
+#define	M_PI	3.14159265358979323846
+#endif
 #define DTR (M_PI/180.)
 
 /* MBIO buffer structure pointer */
@@ -111,7 +119,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbsmooth.c,v 4.2 1994-04-12 00:42:00 caress Exp $";
+	static char rcs_id[] = "$Id: mbsmooth.c,v 4.3 1994-07-29 19:02:56 caress Exp $";
 	static char program_name[] = "MBSMOOTH";
 	static char help_message[] =  "MBSMOOTH applies a spatial \
 domain gaussian filter to multibeam \nbathymetry data in order to \

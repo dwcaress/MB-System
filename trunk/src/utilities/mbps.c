@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbps.c	11/4/93
- *    $Id: mbps.c,v 4.2 1994-03-08 12:51:05 caress Exp $
+ *    $Id: mbps.c,v 4.3 1994-07-29 19:02:56 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,10 @@
  * Date:	August 31, 1991 (original version)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1994/03/08  12:51:05  caress
+ * Really fixed mb_format_inf call.
+ * l
+ *
  * Revision 4.1  1994/03/08  12:44:33  caress
  * Fixed mb_format_info call.
  *
@@ -54,10 +58,15 @@
 /* GMT include files */
 #include "gmt.h"
 
+/* DTR define */
+#ifndef M_PI
+#define	M_PI	3.14159265358979323846
+#endif
+#define DTR	(M_PI/180.)
+
 /*--------------------------------------------------------------------*/
 
-/* Alberto's defines below */
-
+/* Global defines */
 #define 	BEAMS_MAX	200
 #define		PINGS_MAX	1000
 #define		PINGS_READ	1
@@ -68,17 +77,9 @@
 #define		VIEWDIR_DEF	'S'
 #define		ALPHA_DEF	70.0
 #define		ETA_DEF		45.0
-#define		M_PI		3.14159265358979323846
-#define		DEG2RAD		((M_PI) / (180.0))
 #define		BAD		(-32000.0)
 #define		VE_DEF		5.0
-
-char *progname;
-
-
-/* MBINFO define */
-
-#define		MBINFO_MAXPINGS 50
+#define		MBPS_MAXPINGS 50
 
 struct ping
 	{
@@ -96,7 +97,18 @@ int argc;
 char **argv; 
 {
 
-/*ALBERTO definitions */
+	static char rcs_id[] = "$Id: mbps.c,v 4.3 1994-07-29 19:02:56 caress Exp $";
+	static char program_name[] = "MBPS";
+	static char help_message[] =  "MBPS reads a multibeam bathymetry data file and creates a postscript 3-d mesh plot";
+	static char usage_message[] = "mbps [-Iinfile -Fformat -Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc -Aalpha -Keta -Dviewdir -Xvertexag -T\"title\" -Wmetersperinch -Sspeedmin -Ggap -Ydisplay_stats -Zdisplay_scales -V -H]";
+	extern char *optarg;
+	extern int optkind;
+	int	errflg = 0;
+	int	c;
+	int	help = 0;
+	int	flag = 0;
+
+	/*ALBERTO definitions */
 	int ib, jb, g, gap=1;
 	int xp[PINGS_MAX][BEAMS_MAX],yp[PINGS_MAX][BEAMS_MAX];
 	double xl[PINGS_MAX*BEAMS_MAX], yl[PINGS_MAX*BEAMS_MAX], xc[4], yc[4], bottom_yl;
@@ -117,19 +129,6 @@ char **argv;
 	double x,y,z;
 	int display_stats=1;	/* 1 if displaying stats (eg view angle, VE, Scale, ...) else 0 */
 	int display_scales=1;	/* 1 if displaying scales, ship direction arrow, and coor. axes else 0 */
-
-
-/* MBINFO.C definitions */
-	static char rcs_id[] = "$Id: mbps.c,v 4.2 1994-03-08 12:51:05 caress Exp $";
-	static char program_name[] = "MBPS";
-	static char help_message[] =  "MBPS reads a multibeam bathymetry data file and creates a postscript 3-d mesh plot";
-	static char usage_message[] = "mbps [-Iinfile -Fformat -Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc -Aalpha -Keta -Dviewdir -Xvertexag -T\"title\" -Wmetersperinch -Sspeedmin -Ggap -Ydisplay_stats -Zdisplay_scales -V -H]";
-	extern char *optarg;
-	extern int optkind;
-	int	errflg = 0;
-	int	c;
-	int	help = 0;
-	int	flag = 0;
 
 	/* MBIO status variables */
 	int	status = MB_SUCCESS;
@@ -158,7 +157,7 @@ char **argv;
 	/* MBIO read values */
 	char	*mbio_ptr;
 	int	kind;
-	struct ping *data[MBINFO_MAXPINGS];
+	struct ping *data[MBPS_MAXPINGS];
 	struct ping *datacur;
 	int	time_i[6];
 	double	time_d;
@@ -216,20 +215,9 @@ char **argv;
 	int	begin = 0;
 	int	nread = 0;
 
-/* pslib declarations-- RTA */
-	struct EPS {			/* Holds info for eps files */
-		int x0, x1, y0, y1;	/* Bounding box values in points (1/72 inch) */
-		char *font;		/* Pointers to font names used */
-		char *name;		/* User name */
-		char *title;		/* Plot title */
-	} *eps;
-
+	struct EPS *eps;
 	char title[128];
-
-	/* output stream for basic stuff (stdout if verbose <= 1,
-		output if verbose > 1) */
 	FILE	*output;
-
 	int i, j, k, l, m;
 
 	/* initialize some time variables */
@@ -546,10 +534,10 @@ char **argv;
 
 
 		i=done=0;
-		sin_alpha=sin(alpha*DEG2RAD);
-		cos_alpha=cos(alpha*DEG2RAD);
-		sin_eta=sin(eta*DEG2RAD);
-		cos_eta=cos(eta*DEG2RAD);
+		sin_alpha=sin(alpha*DTR);
+		cos_alpha=cos(alpha*DTR);
+		sin_eta=sin(eta*DTR);
+		cos_eta=cos(eta*DTR);
 		min_z=0.0;
 		max_z= -9999.0;
 			if (status==MB_SUCCESS) {
@@ -602,7 +590,7 @@ char **argv;
 				if (i>=(PINGS_MAX-3)) {
 					fprintf(stderr,
 					"%s: WARNING: Too many pings\n",
-					progname);
+					program_name);
 					done=1;
 				}
 
