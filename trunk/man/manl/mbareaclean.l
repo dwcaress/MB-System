@@ -1,4 +1,4 @@
-.TH mbareaclean l "16 April 2003" "MB-System 5.0" "MB-System 5.0"
+.TH mbareaclean l "28 November 2003" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbareaclean\fP - Tool to automatically flag bad beams in swath 
 sonar bathymetry data within a specified area.
@@ -37,7 +37,7 @@ already exist.
 
 At present only one algorithm for identifying good and bad beams is
 implemented. This is a simple median filter controlled by the 
-\fB-M\fP\FIthreshold/nmin option. Soundings that differ from the
+\fB-M\fP\fIthreshold/nmin\fP option. Soundings that differ from the
 median depth by a value greater than \fIthreshold\fP times the sonar 
 altitude will be considered "bad". So, if \fIthreshold\fP = 0.05, then
 any sounding that is 5% greater or less than the median depth will be
@@ -160,7 +160,7 @@ of the sonar altitude, and the minimum number of sounding required for
 filtering is 10. The results look like:
 
  Program MBAREACLEAN
- Version $Id: mbareaclean.l,v 5.1 2003-04-17 21:18:57 caress Exp $
+ Version $Id: mbareaclean.l,v 5.2 2003-11-29 05:38:59 caress Exp $
  MB-system Version 5.0.beta29
  Area of interest:
       Minimum Longitude: -122.425560 Maximum Longitude: -122.419740
