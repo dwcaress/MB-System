@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.h	1/19/93
- *    $Id: mb_format.h,v 5.11 2002-09-18 23:32:59 caress Exp $
+ *    $Id: mb_format.h,v 5.12 2002-09-19 22:19:00 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2001, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -19,6 +19,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.11  2002/09/18 23:32:59  caress
+ * Release 5.0.beta23
+ *
  * Revision 5.10  2002/07/20 20:42:40  caress
  * Release 5.0.beta20
  *
@@ -196,7 +199,7 @@
 #define MB_FORMAT_DEF
 
 /* define date of last format update */
-static char mb_format_updatedate[] = "$Date: 2002-09-18 23:32:59 $ $Revision: 5.11 $";
+static char mb_format_updatedate[] = "$Date: 2002-09-19 22:19:00 $ $Revision: 5.12 $";
 
 /* Supported swath sonar systems */
 #define	MB_SYS_NONE		0
@@ -227,7 +230,7 @@ static char mb_format_updatedate[] = "$Date: 2002-09-18 23:32:59 $ $Revision: 5.
 #define	MB_SYS_SURF		25
 
 /* Number of supported MBIO data formats */
-#define	MB_FORMATS	52
+#define	MB_FORMATS	53
 
 /* Data formats supported by MBIO */
 #define MBF_DATALIST	-1
@@ -391,6 +394,7 @@ static char mb_format_updatedate[] = "$Date: 2002-09-18 23:32:59 $ $Revision: 5.
 					ascii, NOAA NGDC */ 
 #define MBF_ASCIIXYZ    162     /* XYZ (lon lat depth) soundings, ascii, generic */ 
 #define MBF_ASCIIYXZ    163     /* YXZ (lat lon depth) soundings, ascii, generic */ 
+#define MBF_HYDROB93    164     /* NGDC hydrographic soundings, binary */ 
 #define MBF_MBARIROV    165     /* MBARI ROV navigation format, ascii, MBARI */ 
 #define MBF_MBPRONAV    166     /* MB-System simple navigation format, ascii, MBARI */ 
 #define MBF_NVNETCDF    167     /* CARAIBES CDF navigation, netCDF, IFREMER */ 
