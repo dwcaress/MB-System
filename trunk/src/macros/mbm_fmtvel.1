@@ -10,11 +10,12 @@ Version 3.00
 \fBmbm_fmtvel\fP [\fB-F\fIformat \fB-I\fIinfilename \fP]
 
 .SH DESCRIPTION
-\fBmbm_fmtvel\fP is a perl program that invokes hsveldump on type 5 or
-type 8 Hydrosweep-DS datafile and creates an output file in columnar
+\fBmbm_fmtvel\fP is a macro that scans a Hydrosweep multibeam data file
+using the program \fBhsdump\fP and generates a list in columnar
 format with time, date, latitude, longitude, C-mean, and C-keel
-entrys. Comment records (lines) at the top of the file begin with '#'.
-The columns are tab-delimited.
+entrys. Comment records (lines) at the top of the output begin with '#'.
+The columns are tab-delimited. The only allowed formats are 5 (raw 
+Hydrosweep data) and 8 (L-DEO in-house binary Hydrosweep data).
 
 .SH AUTHORSHIP
 David W. Caress (caress@lamont.ldeo.columbia.edu)
@@ -31,7 +32,7 @@ Palisades, NY 10964
 .TP
 .B \fB-F\fIformat\fP
 Sets the format for the input multibeam data using
-\fBMBIO\fP integer format identifiers. (Note: no spaces.)
+\fBMBIO\fP integer format identifiers.
 This program uses the \fBMBIO\fP library and will read any multibeam
 format supported by \fBMBIO\fP. A list of the multibeam data formats
 currently supported by \fBMBIO\fP and their identifier values
@@ -42,12 +43,7 @@ is given in the \fBMBIO\fP manual page.  However, only Hydrosweep type
 Data file from which the input data will be read. 
 
 .SH BUGS
-No spaces are allowed between the option flags and the arguments.
 Only one output format is currently supported and it is not compatible
 with pswiggle.
-.PP
-The output file name is fixed. This is dumb, it should probably be
-written to stdout, or have a name appended. Suggestions?
-
 
 
