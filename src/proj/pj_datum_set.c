@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: pj_datum_set.c,v 5.0 2002-07-20 20:47:57 caress Exp $
+ * $Id: pj_datum_set.c,v 5.1 2002-09-19 00:33:55 caress Exp $
  *
  * Project:  PROJ.4
  * Purpose:  Apply datum definition to PJ structure from initialization string.
