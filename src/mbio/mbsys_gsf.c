@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_gsf.c	3.00	8/20/94
- *	$Id: mbsys_gsf.c,v 4.3 2000-03-06 21:54:21 caress Exp $
+ *	$Id: mbsys_gsf.c,v 4.4 2000-06-08 22:20:16 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -37,6 +37,9 @@
  * Date:	March 5, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  2000/03/06  21:54:21  caress
+ * Distribution 4.6.10
+ *
  * Revision 4.2  1999/07/16  19:24:15  caress
  * Yet another version.
  *
@@ -75,7 +78,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_gsf.c,v 4.3 2000-03-06 21:54:21 caress Exp $";
+ static char res_id[]="$Id: mbsys_gsf.c,v 4.4 2000-06-08 22:20:16 caress Exp $";
 	char	*function_name = "mbsys_gsf_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -290,12 +293,14 @@ int	*error;
 			}
 
 		/* set beamflags if ping flag set */
-/*		if (mb_ping->ping_flags != 0)
+		if (mb_ping->ping_flags != 0)
+		    {
 		    for (i=0;i<*nbath;i++)
 			if (mb_beam_ok(beamflag[i]))
 			    beamflag[i] 
 				= mb_beam_set_flag_manual(beamflag[i]);
-*/
+		    }
+
 		/* read amplitude values into storage arrays */
 		if (mb_ping->mc_amplitude != NULL)
 		for (i=0;i<*namp;i++)
@@ -599,11 +604,13 @@ int	*error;
 		/* if ping flag set check for any unset
 		    beam flags - unset ping flag if any
 		    good beams found */
-/*		if (mb_ping->ping_flags != 0)
+		if (mb_ping->ping_flags != 0)
+		    {
 		    for (i=0;i<nbath;i++)
 			if (mb_beam_ok(beamflag[i]))
 			    mb_ping->ping_flags = 0;
-*/
+		    }
+
 		/* read depth and beam location values into storage arrays */
 		for (i=0;i<nbath;i++)
 			{
@@ -823,7 +830,11 @@ int	*error;
 			{
 			for (i=0;i<*nbeams;i++)
 			    {
-			    beta = 90.0 - mb_ping->beam_angle[i];
+			    if (mb_ping->across_track[i] < 0.0
+				&& mb_ping->beam_angle[i] > 0.0)
+				beta = 90.0 + mb_ping->beam_angle[i];
+			    else
+				beta = 90.0 - mb_ping->beam_angle[i];
 			    alpha = mb_ping->pitch;
 			    mb_rollpitch_to_takeoff(verbose, 
 				alpha, beta, &angles[i], 
@@ -866,7 +877,11 @@ int	*error;
 			{
 			for (i=0;i<*nbeams;i++)
 			    {
-			    beta = 90.0 - mb_ping->beam_angle[i];
+			    if (mb_ping->across_track[i] < 0.0
+				&& mb_ping->beam_angle[i] > 0.0)
+				beta = 90.0 + mb_ping->beam_angle[i];
+			    else
+				beta = 90.0 - mb_ping->beam_angle[i];
 			    alpha = mb_ping->pitch;
 			    mb_rollpitch_to_takeoff(verbose, 
 				alpha, beta, &angles[i], 
@@ -885,7 +900,11 @@ int	*error;
 			{
 			for (i=0;i<*nbeams;i++)
 			    {
-			    beta = 90.0 - mb_ping->beam_angle[i];
+			    if (mb_ping->across_track[i] < 0.0
+				&& mb_ping->beam_angle[i] > 0.0)
+				beta = 90.0 + mb_ping->beam_angle[i];
+			    else
+				beta = 90.0 - mb_ping->beam_angle[i];
 			    alpha = mb_ping->pitch;
 			    mb_rollpitch_to_takeoff(verbose, 
 				alpha, beta, &angles[i], 
