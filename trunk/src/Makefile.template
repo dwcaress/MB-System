@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template	5/24/94
-#	$Id: Makefile.template,v 4.2 1994-11-29 01:39:40 caress Exp $
+#	$Id: Makefile.template,v 4.3 1995-08-07 17:26:55 caress Exp $
 #
 #     Copyright (c) 1993, 1994 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,10 @@
 # Date:		January 21, 1993
 # 
 # $Log: not supported by cvs2svn $
+# Revision 4.2  1994/11/29  01:39:40  caress
+# Added "-" to make clean calls so rm failures
+# are ignored on SGI's.
+#
 # Revision 4.1  1994/10/21  11:29:42  caress
 # Release V4.0
 #
@@ -28,6 +32,7 @@ all:
 	cd utilities; make all
 	cd mbedit; make all
 	cd mbvelocitytool; make all
+	cd mbnavedit; make all
 	cd gmt; make all
 	cd macros; make all
 	cd realtime; make all
@@ -36,7 +41,7 @@ clean:
 	- cd mbio; make clean
 	- cd utilities; make clean
 	- cd mbedit; make clean
-	- cd mbvelocitytool; make clean
+	- cd mbnavedit; make clean
 	- cd gmt; make clean
 	- cd macros; make clean
 	- cd realtime; make clean
