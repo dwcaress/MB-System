@@ -1,4 +1,4 @@
-.TH mbedit l "17 December 1998" "MB-System 4.6" "MB-System 4.6"
+.TH mbedit l "16 July 1999" "MB-System 4.6" "MB-System 4.6"
 .SH NAME
 \fBmbedit\fP - Interactive editor used to flag bad bathymetry values in swath sonar bathymetry data.
 
@@ -68,9 +68,7 @@ and \fBReverse\fP buttons
 provide a duplicate stepping capability. 
 
 \fBMBedit\fP can hold up to 5000 data records at a time in memory.
-Users on memory limited machines may find it necessary to set the
-maximum buffer size to a smaller number using the
-\fBData Buffer Size\fP slider. Many data formats include data
+Many data formats include data
 records in addition to those containing bathymetry data (e.g.
 comment, sonar parameter, or navigation records). Thus, the number
 of bathymetry records to be edited at any time may be less than
@@ -80,7 +78,15 @@ a data file contains more data records than can be held in memory,
 users will find it necessary to step through multiple buffers of
 data. The \fBNext Buffer\fP button will cause \fBMBedit\fP to
 dump the current buffer contents and read in a new set of data.
-The \fBBuffer Retain Size\fP slider sets the number of data records
+The handling of buffered data is set 
+using the \fBBuffer Controls\fP dialog accessed by pulling down the
+\fBBuffer Controls...\fP menu item from the \fBControls\fP button.
+The \fBBuffer Controls\fP dialog includes two slider controls, one
+entitled \fBData Buffer Size\fP and the other \fBBuffer Retain Size\fP.
+Users on memory limited machines may find it necessary to set the
+maximum buffer size to a smaller number using the
+\fBData Buffer Size\fP slider.  The \fBBuffer Retain Size\fP 
+slider sets the number of data records
 retained from the old buffer when more data are loaded. Clicking on
 the \fBDone\fP button rather than the \fBNext Buffer\fP button will
 cause \fBMBedit\fP to dump the rest of the input data file directly
@@ -88,14 +94,15 @@ to the output file without making the bathymetry available for editing.
 The output data file always contains all of the data records in the
 input file, regardless of whether all the data was actually edited.
 
-The user can bring up
-a "Go To" dialog by clicking on the \fBGo To\fP button. This dialog
+The user can bring up a \fBGo To Specified Time\fP dialog
+by pulling down the \fBGo to a specified time...\fP menu item from the
+\fBControls\fP button. This dialog
 allows the user to specify the time of a particular ping to be viewed.
 The first ping with a time tag later than or equal to the specified time
 is then displayed, providing such a ping is available. If an appropriate
 ping is not available in the current buffer, \fBMBedit\fP will dump
 and load buffers of data until such a ping is found or the end of the
-file is reached. Thus, specifying an incorrect "Go To" time may cause
+file is reached. Thus, specifying an incorrect "go to" time may cause
 \fBMBedit\fP to close the file. Caution is advised in using this feature.
 
 \fBMBedit\fP creates "edit save" files containing a list of each
@@ -227,10 +234,62 @@ is clicked, as much data as will fit
 into the data buffer is read and several pings are displayed as 
 stacked bathymetry profiles.
 .TP
-.B Quit
-This button causes the program to exit gracefully.  If a data file
-has been read, all of the data will be written to the output file
-before exiting.
+.B Controls
+This button accesses a pulldown menu with three items: 
+\fBGo To Specified Time...\fP, \fBBuffer Controls...\fP, and
+\fBAnnotation...\fP. Each of these items brings up a dialog of
+the same name. These dialogs are discussed below.
+.TP
+.B Controls->Go To Specified Time...
+This menu item brings up a dialog which allows the user to
+specify the time of a particular ping to be displayed.  Once the
+year, month, day, hour, minute, and second values are entered, clicking
+the \fBApply\fP button causes \fBmbedit\fP to seek the specified
+target time.  If the current data buffer begins after the target
+time, an error is returned.  If the target time is later than the
+end of the current data buffer, then \fBmbedit\fP will dump and
+load buffers until the target time is reached or the data file ends.
+If the end of the file is reached during the search, the file will
+be closed.
+.TP
+.B Controls->Buffer Controls...
+This menu item brings up a dialog which allows the user
+to set the data buffer handling
+through two sliders discussed immediately below.
+.TP
+.B Controls->Buffer Controls->Data Buffer Size
+This slider on the \fBBuffer Controls\fP dialog
+sets the number of data records which can be held
+in the data buffer.  Any change becomes effective the next time
+that a data file is read in.
+.TP
+.B Controls->Buffer Controls->Buffer Retain Size
+This slider on the \fBBuffer Controls\fP dialog
+sets the number of data records which are held over in
+the buffer each time the old buffer is written out.
+.TP
+.B Controls->Annotation...
+This menu item brings up a dialog which
+allows the user to set the annotation intervals for
+the across track distance and depth axes through the two sliders
+discussed immediately below.
+.TP
+.B Controls->Annotation->X Axis Tick Interval
+This slider on the \fBAnnotation\fP dialog
+sets the tick interval in m for the across track
+distance axis.
+If a particular value is desired which cannot be
+obtained by dragging the slider, the slider
+can be changed by increments of 1 by clicking with the left button
+inside the slider area, but not on the slider itself.
+.TP
+.B Controls->Annotation->Y Axis Tick Interval
+This slider on the \fBAnnotation\fP dialog
+sets the tick interval in m for the depth axis.
+If a particular value is desired which cannot be
+obtained by dragging the slider, the slider
+can be changed by increments of 1 by clicking with the left button
+inside the slider area, but not on the slider itself.
 .TP
 .B Next Buffer
 This button causes the program to write out the data from the
@@ -252,6 +311,33 @@ This button causes the set of displayed pings to step \fInstep\fP
 pings backward in the current buffer.  The middle mouse button causes
 the same action.
 .TP
+.B Quit
+This button causes the program to exit gracefully.  If a data file
+has been read, all of the data will be written to the output file
+before exiting.
+.TP
+.B About
+This button causes the program to bring up a dialog showing the
+program's name, version, and authors.
+.TP
+.B Acrosstrack Width
+This slider sets the width of the plot in meters; in general this
+value should be slightly larger than the swath width of the data
+being edited. If a particular value is desired which cannot be
+obtained by dragging the slider (e.g., the user wants a plot
+width of 10 meters but the slider jumps from 1 to 47), the slider
+can be changed by increments of 1 by clicking with the left button
+inside the slider area, but not on the slider itself.
+.TP
+.B Vertical Exageration
+This slider sets the depth scale in terms of vertical exageration.
+The depth scale will change as the cross track distance scale is
+changed to maintain the same vertical exageration.
+If a particular value is desired which cannot be
+obtained by dragging the slider, the slider
+can be changed by increments of 0.01 by clicking with the left button
+inside the slider area, but not on the slider itself.
+.TP
 .B Mode
 This toggle allows the user to specify the edit mode.  If mode
 is set to \fIPick\fP, then clicking the left mouse button will cause
@@ -266,66 +352,12 @@ key macros (see the keyboard action section):
  	Erase:		'W', 'w', 'I', 'i' 
  	Restore:		'E', 'e', 'O', 'o' 
 .TP
-.B X Scale
-This slider sets the width of the plot in meters; in general this
-value should be slightly larger than the swath width of the data
-being edited. If a particular value is desired which cannot be
-obtained by dragging the slider (e.g., the user wants a plot
-width of 10 meters but the slider jumps from 1 to 47), the slider
-can be changed by increments of 1 by clicking with the left button
-inside the slider area, but not on the slider itself.
- .TP
-.B Vertical Exageration
-This slider sets the depth scale in terms of vertical exageration.
-The depth scale will change as the cross track distance scale is
-changed to maintain the same vertical exageration.
-If a particular value is desired which cannot be
-obtained by dragging the slider, the slider
-can be changed by increments of 0.01 by clicking with the left button
-inside the slider area, but not on the slider itself.
-.TP
 .B Number of pings shown
 This slider sets the number of pings shown at a time.
 .TP
 .B Number of pings to step
 This slider sets the number of pings to step when the \fBForward\fP
 or \fBReverse\fP buttons are pushed.
-.TP
-.B Go To
-This button brings up a popup window which allows the user to
-specify the time of a particular ping to be displayed.  Once the
-year, month, day, hour, minute, and second values are entered, clicking
-the \fBApply\fP button causes \fBmbedit\fP to seek the specified
-target time.  If the current data buffer begins after the target
-time, an error is returned.  If the target time is later than the
-end of the current data buffer, then \fBmbedit\fP will dump and
-load buffers until the target time is reached or the data file ends.
-If the end of the file is reached during the search, the file will
-be closed.
-.TP
-.B X Axis Tick Interval
-This slider sets the tick interval in m for the cross track 
-distance axis.
-If a particular value is desired which cannot be
-obtained by dragging the slider, the slider
-can be changed by increments of 1 by clicking with the left button
-inside the slider area, but not on the slider itself.
-.TP
-.B Y Axis Tick Interval
-This slider sets the tick interval in m for the depth axis.
-If a particular value is desired which cannot be
-obtained by dragging the slider, the slider
-can be changed by increments of 1 by clicking with the left button
-inside the slider area, but not on the slider itself.
-.TP
-.B Data Buffer Size
-This slider sets the number of data records which can be held 
-in the data buffer.  Any change becomes effective the next time
-that a data file is read in.
-.TP
-.B Buffer Retain Size
-This slider sets the number of data records which are held over in
-the buffer each time the old buffer is written out.
 .TP
 .B Show Flagged Profile
 This toggle allows the user to specify whether the acrosstrack
@@ -412,4 +444,6 @@ The edit mode can also be set using the \fBMode\fP button.
 \fBmbunclean\fP(l), \fBmbinfo\fP(l)
 
 .SH BUGS
-This program is only fun when the data are good.
+This program is only fun when the data are good. The main
+window for \fBmbedit\fP is too large for use on screens
+smaller than 1024 X 768 pixels.

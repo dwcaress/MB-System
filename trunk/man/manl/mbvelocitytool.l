@@ -1,4 +1,4 @@
-.TH mbvelocitytool l "17 December 1998" "MB-System 4.6" "MB-System 4.6"
+.TH mbvelocitytool l "16 July 1999" "MB-System 4.6" "MB-System 4.6"
 .SH NAME
 \fBmbvelocitytool\fP - Interactive water sound velocity profile editor.
 
@@ -161,6 +161,27 @@ swath data being analyzed. The travel time
 data will then be processed and displayed in the manner described
 below for the \fBReprocess\fP button.
 .TP
+.B Plot Scaling
+This button brings up a dialog containing the three controls
+discussed immediately below.
+.TP
+.B Plot Scaling->Maximum Depth
+This slider sets the maximum depth in meters of both the velocity profile 
+display and the raypath display. The minimum depths of these
+displays are always zero. The acrosstrack distance axis of the raypath
+display automatically adjusts so that the rays are plotted with
+no vertical exageration.
+.TP
+.B Plot Scaling->Velocity Range
+This slider sets the minimum and maximum velocity values of the velocity
+profile display.  The minimum value is 1490 m/s minus the velocity range;
+the maximum value is 1490 m/s plus the velocity range.
+.TP
+.B Plot Scaling->Residual Range
+This slider sets the minimum and maximum bathymetry residual values 
+of the bathymetry residual display.  The residual plot has a minimum
+value of -range and a maximum value of +range. 
+.TP
 .B Reprocess
 Selecting this button causes the swath sonar travel time data to be
 processed into bathymetry using the current editable velocity profile.
@@ -193,23 +214,6 @@ may be read in as display profiles to guide the editing process.
 This button causes the program to exit gracefully, but without asking
 any questions.  If you haven't already saved your edited velocity profile
 it will be lost when you quit.
-.TP
-.B Maximum Depth
-This slider sets the maximum depth in meters of both the velocity profile 
-display and the raypath display. The minimum depths of these
-displays are always zero. The acrosstrack distance axis of the raypath
-display automatically adjusts so that the rays are plotted with
-no vertical exageration.
-.TP
-.B Velocity Range
-This slider sets the minimum and maximum velocity values of the velocity
-profile display.  The minimum value is 1490 m/s minus the velocity range;
-the maximum value is 1490 m/s plus the velocity range.
-.TP
-.B Residual Range
-This slider sets the minimum and maximum bathymetry residual values 
-of the bathymetry residual display.  The residual plot has a minimum
-value of -range and a maximum value of +range. 
 
 .SH SEE ALSO
 \fBmbsystem\fP(l), \fBmbbath\fP(l), \fBmblevitus\fP(l), 
@@ -217,4 +221,6 @@ value of -range and a maximum value of +range.
 
 .SH BUGS
 Users cannot remove display sound velocity profiles from the screen
-once they are read in.
+once they are read in. The main window for mbvelocitytool 
+is too large for use on screens smaller than 1024 X 768 pixels.
+

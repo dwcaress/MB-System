@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit_callbacks.c	3/28/97
- *    $Id: mbedit_callbacks.c,v 4.3 1998-10-05 17:45:32 caress Exp $
+ *    $Id: mbedit_callbacks.c,v 4.4 1999-07-16 19:21:16 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Date:	March 28, 1997  GUI recast
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1998/10/05 17:45:32  caress
+ * MB-System version 4.6beta
+ *
  * Revision 4.2  1997/09/15  19:06:10  caress
  * Real Version 4.5
  *
@@ -185,7 +188,7 @@ XColor db_color;
 /* Set these to the dimensions of your canvas drawing */
 /* area, minus 1, located in mbedit.uil.              */
 static int mb_borders[4] =
-	{ 0, 1039, 0, 552 };
+	{ 0, 1016, 0, 525 };
 
 void do_filebutton_on();
 void do_filebutton_off();
@@ -1941,3 +1944,57 @@ void get_text_string(Widget w, String str)
     XtFree(str_tmp);
 }
 /*--------------------------------------------------------------------*/
+/*      Function Name:	BxPopupCB
+ *
+ *      Description:   	This function accepts a string of the form:
+ *			"(WL)[widgetName, widgetName, ...]"
+ *			It attempts to convert the widget names to Widget IDs
+ *			and then popup the widgets WITHOUT any grab.
+ *
+ *      Arguments:      Widget		w:	the activating widget.
+ *			XtPointer	client:	the string of widget names to
+ *						popup.
+ *			XtPointer	call:	the call data (unused).
+ *
+ *      Notes:        * This function expects that there is an application
+ *                      shell from which all other widgets are descended.
+ *		      * BxPopupCB can only work on Shell widgets.  It will not
+ *			work on other object types.  This is because popping up
+ *			can only be done to a shell.  A check is made using
+ *			XtIsShell() and an appropriate error is output if the
+ *			passed object is not a Shell.
+ */
+
+/* ARGSUSED */
+void
+BxPopupCB ARGLIST((w, client, call))
+ARG( Widget, w)
+ARG( XtPointer, client)
+GRAU( XtPointer, call)
+{
+    WidgetList		widgets;
+    int			i;
+
+    /*
+     * This function returns a NULL terminated WidgetList.  The memory for
+     * the list needs to be freed when it is no longer needed.
+     */
+    widgets = BxWidgetIdsFromNames(w, "BxPopupCB", (String)client);
+
+    i = 0;
+    while( widgets && widgets[i] != NULL )
+    {
+	if ( XtIsShell(widgets[i]) )
+	{
+	    XtPopup(widgets[i], XtGrabNone);
+	}
+	else
+	{
+	    printf("Callback Error (BxPopupCB):\n\t\
+Object %s is not a Shell\n", XtName(widgets[i]));
+	}
+	i++;
+    }
+    XtFree((char *)widgets);
+}
+
