@@ -25,6 +25,9 @@
  * Date:	May 30, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 3.1  1993/06/20  23:08:30  caress
+ * Fixed help message.
+ *
  * Revision 3.0  1993/06/19  01:16:43  caress
  * Initial version.
  *
@@ -117,7 +120,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbswath.c,v 3.1 1993-06-20 23:08:30 caress Exp $";
+	static char rcs_id[] = "$Id: mbswath.c,v 3.2 1993-11-03 21:09:10 caress Exp $";
 	static char program_name[] = "MBSWATH";
 	static char help_message[] =  "MBSWATH is a GMT compatible utility which creates a color postscript \nimage of multibeam swath bathymetry or backscatter data.  The image \nmay be shaded relief as well.  Complete maps are made by using \nMBSWATH in conjunction with the usual GMT programs.";
 	static char usage_message[] = "mbswath -Ccptfile -Idatalist -Jparameters -Rwest/east/south/north [-Afactor -Btickinfo -Fred/green/blue -Gmagnitude/azimuth -K -M -O -P -ppings -Qdpi -U -Xx-shift -Yy-shift -Zmode -#copies -V -H]";
@@ -460,7 +463,7 @@ char **argv;
 		gmtdefs.x_origin, gmtdefs.y_origin,
 		gmtdefs.global_x_scale, gmtdefs.global_y_scale, 
 		gmtdefs.n_copies, gmtdefs.dpi, gmtdefs.measure_unit, 
-		gmtdefs.paper_width, gmt_epsinfo (argv[0]));
+		gmtdefs.paper_width, gmtdefs.page_rgb, gmt_epsinfo (argv[0]));
 	echo_command (argc, argv);
 	if (gmtdefs.unix_time) 
 		timestamp (TIME_STAMP_X, TIME_STAMP_Y, argc, argv);
