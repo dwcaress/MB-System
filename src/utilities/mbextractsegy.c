@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbextractsegy.c	4/18/2004
- *    $Id: mbextractsegy.c,v 5.2 2004-07-15 19:33:57 caress Exp $
+ *    $Id: mbextractsegy.c,v 5.3 2004-07-27 19:48:35 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	April 18, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2004/07/15 19:33:57  caress
+ * Improvements to support for Reson 7k data.
+ *
  * Revision 5.1  2004/06/18 05:20:05  caress
  * Working on adding support for segy i/o and for Reson 7k format 88.
  *
@@ -42,7 +45,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mb_segy.h"
 
-static char rcs_id[] = "$Id: mbextractsegy.c,v 5.2 2004-07-15 19:33:57 caress Exp $";
+static char rcs_id[] = "$Id: mbextractsegy.c,v 5.3 2004-07-27 19:48:35 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
@@ -175,8 +178,8 @@ main (int argc, char **argv)
 	segyfileheader.amplitude = 0;
 	segyfileheader.units = 0;
 	segyfileheader.impulse_polarity = 0;
-	segyfileheader.vibrate_polarity = 0;
-	for (i=0;i<340;i++)
+	segyfileheader.domain = 0;
+	for (i=0;i<338;i++)
 		segyfileheader.extra[i] = 0;
 
 	/* process argument list */

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsegylist.c	6/2/2004
- *    $Id: mbsegyinfo.c,v 5.0 2004-06-18 04:06:05 caress Exp $
+ *    $Id: mbsegyinfo.c,v 5.1 2004-07-27 19:48:35 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -19,6 +19,9 @@
  * Date:	June 2, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2004/06/18 04:06:05  caress
+ * Adding support for segy i/o and working on support for Reson 7k format 88.
+ *
  *
  *
  *
@@ -28,6 +31,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
+#include <time.h>
 
 /* MBIO include files */
 #include "../../include/mb_status.h"
@@ -52,7 +56,7 @@
 /* NaN value */
 double	NaN;
 
-static char rcs_id[] = "$Id: mbsegyinfo.c,v 5.0 2004-06-18 04:06:05 caress Exp $";
+static char rcs_id[] = "$Id: mbsegyinfo.c,v 5.1 2004-07-27 19:48:35 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 

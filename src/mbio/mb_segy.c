@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_segy.c	5/25/2004
- *    $Id: mb_segy.c,v 5.0 2004-06-18 03:03:04 caress Exp $
+ *    $Id: mb_segy.c,v 5.1 2004-07-27 19:44:38 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	May 25, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2004/06/18 03:03:04  caress
+ * Adding support for segy i/o.
+ *
  *
  *
  *
@@ -35,7 +38,7 @@
 #include "../../include/mb_segy.h"
 #include "../../include/mb_swap.h"
 
-static char rcs_id[]="$Id: mb_segy.c,v 5.0 2004-06-18 03:03:04 caress Exp $";
+static char rcs_id[]="$Id: mb_segy.c,v 5.1 2004-07-27 19:44:38 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 /* 	function mb_segy_read_init opens an existing segy file for 
@@ -149,7 +152,8 @@ int mb_segy_read_init(int verbose, char *segyfile,
 			mb_get_binary_short(MB_NO, (void *) &(buffer[index]), &(fileheader->units)); index += 2;
 			mb_get_binary_short(MB_NO, (void *) &(buffer[index]), &(fileheader->impulse_polarity)); index += 2;
 			mb_get_binary_short(MB_NO, (void *) &(buffer[index]), &(fileheader->vibrate_polarity)); index += 2;
-			for (i=0;i<340;i++)
+			mb_get_binary_short(MB_NO, (void *) &(buffer[index]), &(fileheader->domain)); index += 2;
+			for (i=0;i<338;i++)
 				{
 				fileheader->extra[i] = buffer[index]; index++;
 				}
@@ -197,7 +201,8 @@ int mb_segy_read_init(int verbose, char *segyfile,
 		fprintf(stderr,"dbg2       units:               %d\n",fileheader->units);
 		fprintf(stderr,"dbg2       impulse_polarity:    %d\n",fileheader->impulse_polarity);
 		fprintf(stderr,"dbg2       vibrate_polarity:    %d\n",fileheader->vibrate_polarity);
-		for (i=0;i<340;i++)
+		fprintf(stderr,"dbg2       domain:              %d\n",fileheader->domain);
+		for (i=0;i<338;i++)
 			fprintf(stderr,"dbg2       extra[%d]:          %d\n",i,fileheader->extra[i]);
 		fprintf(stderr,"dbg2       fp:            %d\n",mb_segyio_ptr->fp);
 		fprintf(stderr,"dbg2       error:         %d\n",*error);
@@ -264,7 +269,8 @@ int mb_segy_write_init(int verbose, char *segyfile,
 		fprintf(stderr,"dbg2       units:               %d\n",fileheader->units);
 		fprintf(stderr,"dbg2       impulse_polarity:    %d\n",fileheader->impulse_polarity);
 		fprintf(stderr,"dbg2       vibrate_polarity:    %d\n",fileheader->vibrate_polarity);
-		for (i=0;i<340;i++)
+		fprintf(stderr,"dbg2       domain:              %d\n",fileheader->domain);
+		for (i=0;i<338;i++)
 			fprintf(stderr,"dbg2       extra[%d]::          %d",i,fileheader->extra[i]);
 		fprintf(stderr,"dbg2       mbsegyio_ptr:        %d\n",mbsegyio_ptr);
 		}
@@ -352,7 +358,8 @@ int mb_segy_write_init(int verbose, char *segyfile,
 		mb_put_binary_short(MB_NO, fileheader->units, (void *) &(buffer[index])); index += 2;
 		mb_put_binary_short(MB_NO, fileheader->impulse_polarity, (void *) &(buffer[index])); index += 2;
 		mb_put_binary_short(MB_NO, fileheader->vibrate_polarity, (void *) &(buffer[index])); index += 2;
-		for (i=0;i<340;i++)
+		mb_put_binary_short(MB_NO, fileheader->domain, (void *) &(buffer[index])); index += 2;
+		for (i=0;i<338;i++)
 			{
 			buffer[index] = fileheader->extra[i]; index++;
 			}

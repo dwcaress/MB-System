@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	1/19/93
- *    $Id: mb_segy.h,v 5.2 2004-06-18 05:22:32 caress Exp $
+ *    $Id: mb_segy.h,v 5.3 2004-07-27 19:44:38 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -26,6 +26,9 @@
  * Date:	April 13, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2004/06/18 05:22:32  caress
+ * Working on adding support for segy i/o and for Reson 7k format 88.
+ *
  * Revision 5.1  2004/05/21 23:44:49  caress
  * Progress supporting Reson 7k data, including support for extracing subbottom profiler data.
  *
@@ -77,7 +80,8 @@ struct mb_segyfileheader_struct
 	short	units;
 	short	impulse_polarity;
 	short	vibrate_polarity;
-	char	extra[340];
+	short	domain;
+	char	extra[338];
 	};
 struct mb_segytraceheader_struct 
 	{ 
