@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_time.c	1/21/93
- *    $Id: mb_time.c,v 4.6 1995-03-06 19:38:54 caress Exp $
+ *    $Id: mb_time.c,v 4.7 1996-03-11 15:33:52 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -18,6 +18,9 @@
  * Date:	January 21, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.6  1995/03/06  19:38:54  caress
+ * Changed include strings.h to string.h for POSIX compliance.
+ *
  * Revision 4.5  1995/02/14  21:59:53  caress
  * Initialize time_i[1] in mb_get_itime() to avoid core dump when
  * doing mbmerge on format 54 data.
@@ -72,7 +75,7 @@
 #define SECINMINUTE     60.0
 #define IMININHOUR 60
 int	yday[] = {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334};
-static char rcs_id[]="$Id: mb_time.c,v 4.6 1995-03-06 19:38:54 caress Exp $";
+static char rcs_id[]="$Id: mb_time.c,v 4.7 1996-03-11 15:33:52 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 /* 	function mb_get_time returns the number of seconds from
@@ -107,6 +110,8 @@ double *time_d;
 	yearday = yday[time_i[1]-1];
 	if (((time_i[0]%4) == 0) && (time_i[1] > 2)) yearday++;
 	leapday = (time_i[0] - 1969)/4;
+	if (time_i[0] >= 2000)
+		leapday = leapday - 1;
 	*time_d = (time_i[0] - 1970)*SECINYEAR 
 		+ (yearday - 1 + leapday + time_i[2])*SECINDAY 
 		+ time_i[3]*SECINHOUR + time_i[4]*SECINMINUTE 
@@ -167,17 +172,25 @@ int time_i[7];
 			- time_i[5]);
 	time_i[0] = (int) (time_d/SECINYEAR) + 1970;
 	leapday = (time_i[0] - 1969)/4;
+	if (time_i[0] >= 2000)
+		leapday = leapday - 1;
 	yearday = daytotal - 365*(time_i[0] - 1970) - leapday + 1;
 	if (yearday <= 0)
 		{
 		time_i[0]--;
 		leapday = (time_i[0] - 1969)/4;
+		if (time_i[0] >= 2000)
+			leapday = leapday - 1;
 		yearday = daytotal - 365*(time_i[0] - 1970) - leapday + 1;
 		}
 	leapday = 0;
-	if ((time_i[0]%4) == 0 && yearday > yday[2]) leapday = 1;
+	if (time_i[0]%4 == 0 
+		&& time_i[0]%100 != 0 
+		&& yearday > yday[2]) 
+		leapday = 1;
 	for (i=0;i<12;i++)
-		if (yearday > (yday[i] + leapday)) time_i[1] = i + 1;
+		if (yearday > (yday[i] + leapday)) 
+			time_i[1] = i + 1;
 	time_i[2] = yearday - yday[time_i[1]-1] - leapday;
 
 	/* assume success */
@@ -295,13 +308,18 @@ int time_i[7];
 	time_i[4] = time_j[2] - time_i[3]*IMININHOUR;
 	time_i[5] = time_j[3];
 	time_i[6] = time_j[4];
-	if ((time_j[0]%4) == 0 && time_j[1] > yday[2]) 
+	if (time_j[0]%4 == 0 
+		&& time_j[0]%100 != 0 
+		&& time_j[1] > yday[2]) 
 		leapday = 1;
 	else
 		leapday = 0;
 	time_i[1] = 0;
 	for (i=0;i<12;i++)
-		if (time_j[1] > (yday[i] + leapday)) time_i[1] = i + 1;
+		if (time_j[1] > (yday[i] + leapday)) 
+			time_i[1] = i + 1;
+	if(leapday==1 && time_j[1] == yday[2]+1) 
+		leapday=0;
 	time_i[2] = time_j[1] - yday[time_i[1]-1] - leapday;
 
 	/* assume success */
