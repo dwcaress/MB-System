@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_bchrtunb.c	8/8/94
- *	$Id: mbr_bchrtunb.c,v 4.2 1995-07-13 19:13:36 caress Exp $
+ *	$Id: mbr_bchrtunb.c,v 4.3 1996-04-22 10:57:09 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	August 8, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1995/07/13  19:13:36  caress
+ * Intermediate check-in during major bug-fixing flail.
+ *
  * Revision 4.1  1995/03/06  19:38:54  caress
  * Changed include strings.h to string.h for POSIX compliance.
  *
@@ -47,13 +50,6 @@
 #include "../../include/mbsys_elac.h"
 #include "../../include/mbf_bchrtunb.h"
 
-/* degrees to radians define */
-#ifndef M_PI
-#define	M_PI	3.14159265358979323846
-#endif
-#define DTR	(M_PI/180.)
-#define RTD	(180./M_PI)
-
 /* include for byte swapping */
 #include "../../include/mb_swap.h"
 
@@ -63,7 +59,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_bchrtunb.c,v 4.2 1995-07-13 19:13:36 caress Exp $";
+	static char res_id[]="$Id: mbr_bchrtunb.c,v 4.3 1996-04-22 10:57:09 caress Exp $";
 	char	*function_name = "mbr_alm_bchrtunb";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

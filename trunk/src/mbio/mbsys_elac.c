@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_elac.c	3.00	8/20/94
- *	$Id: mbsys_elac.c,v 4.6 1995-11-27 21:50:06 caress Exp $
+ *	$Id: mbsys_elac.c,v 4.7 1996-04-22 10:57:09 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -37,6 +37,9 @@
  * Date:	August 20, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.6  1995/11/27  21:50:06  caress
+ * New version of mb_ttimes with ssv and angles_null.
+ *
  * Revision 4.5  1995/09/28  18:10:48  caress
  * Various bug fixes working toward release 4.3.
  *
@@ -74,12 +77,6 @@
 #include "../../include/mb_io.h"
 #include "../../include/mbsys_elac.h"
 
-/* degrees to radians define */
-#ifndef M_PI
-#define	M_PI	3.14159265358979323846
-#endif
-#define DTR	(M_PI/180.)
-#define RTD	(180./M_PI)
 /*--------------------------------------------------------------------*/
 int mbsys_elac_alloc(verbose,mbio_ptr,store_ptr,error)
 int	verbose;
@@ -87,7 +84,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_elac.c,v 4.6 1995-11-27 21:50:06 caress Exp $";
+ static char res_id[]="$Id: mbsys_elac.c,v 4.7 1996-04-22 10:57:09 caress Exp $";
 	char	*function_name = "mbsys_elac_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

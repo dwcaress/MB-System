@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsmdaraw.c	2/11/93
- *	$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbr_hsmdaraw.c,v 4.1 1996-01-26 21:23:30 caress Exp $
+ *	$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbr_hsmdaraw.c,v 4.2 1996-04-22 10:57:09 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -24,6 +24,9 @@
  * Date:	August 11, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1996/01/26  21:23:30  caress
+ * Version 4.3 distribution
+ *
  * Revision 4.0  1995/09/28  18:14:11  caress
  * First cut.
  *
@@ -66,18 +69,13 @@
 #include "../../include/mbsys_hsmd.h"
 #include "../../include/mbf_hsmdaraw.h"
 
-#ifndef M_PI
-#define M_PI    3.14159265358979323846
-#endif
-#define DTR    ( M_PI/180. )
-
 /*--------------------------------------------------------------------*/
 int mbr_alm_hsmdaraw(verbose,mbio_ptr,error)
 int    verbose;
 char   *mbio_ptr;
 int    *error;
 {
-	static char res_id[]="$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbr_hsmdaraw.c,v 4.1 1996-01-26 21:23:30 caress Exp $";
+	static char res_id[]="$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbr_hsmdaraw.c,v 4.2 1996-04-22 10:57:09 caress Exp $";
 	char	 *function_name = "mbr_alm_hsmdaraw";
 	int	 status = MB_SUCCESS;
 	int	 i;
