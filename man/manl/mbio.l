@@ -746,7 +746,7 @@ The return values are:
  	\fInavlat\fP:		latitude
  	\fIspeed\fP:		ship speed in km/s
  	\fIheading\fP:		ship heading in degrees
- 	\fIdistance\fP:		distance along shiptrack since beginning of data in km
+ 	\fIdistance\fP:		distance along shiptrack since last ping in km
  	\fInbath\fP:		number of bathymetry values
  	\fInamp\fP:		number of amplitude values
  	\fInss\fP:		number of sidescan values
@@ -947,7 +947,7 @@ The return values are:
  	\fInavlat\fP:		latitude
  	\fIspeed\fP:		ship speed in km/s
  	\fIheading\fP:		ship heading in degrees
- 	\fIdistance\fP:	distance along shiptrack since beginning of data in km
+ 	\fIdistance\fP:	distance along shiptrack since last ping in km
  	\fInbath\fP:		number of bathymetry values
  	\fInamp\fP:		number of amplitude values
  	\fInss\fP:		number of sidescan values
@@ -1046,7 +1046,7 @@ The values to be output are:
  	\fInavlat\fP:		latitude
  	\fIspeed\fP:		ship speed in km/s
  	\fIheading\fP:		ship heading in degrees
- 	\fIdistance\fP:		distance along shiptrack since beginning of data in km
+ 	\fIdistance\fP:		distance along shiptrack since last ping in km
  	\fInbath\fP:		number of bathymetry values
  	\fInamp\fP:		number of amplitude values
  	\fInss\fP:		number of sidescan values
@@ -1161,7 +1161,7 @@ The return values are:
  	\fInavlat\fP:		latitude
  	\fIspeed\fP:		ship speed in km/s
  	\fIheading\fP:		ship heading in degrees
- 	\fIdistance\fP:		distance along shiptrack since beginning of data in km
+ 	\fIdistance\fP:		distance along shiptrack since last ping in km
  	\fInbath\fP:		number of bathymetry values
  	\fInamp\fP:		number of amplitude values
  	\fInss\fP:		number of sidescan values
@@ -1284,7 +1284,7 @@ The values to be output are:
  	\fInavlat\fP:		latitude
  	\fIspeed\fP:		ship speed in km/s
  	\fIheading\fP:		ship heading in degrees
- 	\fIdistance\fP:		distance along shiptrack since beginning of data in km
+ 	\fIdistance\fP:		distance along shiptrack since last ping in km
  	\fInbath\fP:		number of bathymetry values
  	\fInamp\fP:		number of amplitude values
  	\fInss\fP:		number of sidescan values
