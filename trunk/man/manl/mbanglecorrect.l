@@ -86,7 +86,7 @@ Default: \fIkind\fP = 2, \fIscale\fP = 1000.
 \fIyr/mo/da/hr/mn/sc\fP
 .br
 This option sets the starting time for data allowed in the input data.
-The \f-E\fP option sets the ending time for data. If the 
+The \fB-E\fP option sets the ending time for data. If the 
 starting time is before the ending time, then any data
 with a time stamp before the starting time or after the
 ending time is ignored. If instead the starting time is
@@ -119,7 +119,7 @@ along the shiptrack.
 \fIyr/mo/da/hr/mn/sc\fP
 .br
 This option sets the ending time for data allowed in the input data.
-The \f-B\fP option sets the starting time for data. If the 
+The \fB-B\fP option sets the starting time for data. If the 
 starting time is before the ending time, then any data
 with a time stamp before the starting time or after the
 ending time is ignored. If instead the starting time is
