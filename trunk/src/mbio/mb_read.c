@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_read.c	2/20/93
- *    $Id: mb_read.c,v 4.0 1994-03-06 00:01:56 caress Exp $
+ *    $Id: mb_read.c,v 4.1 1994-06-05 02:42:58 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,9 @@
  * Date:	February 20, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/03/06  00:01:56  caress
+ * First cut at version 4.0
+ *
  * Revision 4.6  1994/03/03  03:39:43  caress
  * Fixed copyright message.
  *
@@ -107,7 +110,7 @@ char	*comment;
 int	*error;
 {
 
-  static char rcs_id[]="$Id: mb_read.c,v 4.0 1994-03-06 00:01:56 caress Exp $";
+  static char rcs_id[]="$Id: mb_read.c,v 4.1 1994-06-05 02:42:58 caress Exp $";
 	char	*function_name = "mb_read";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
@@ -735,12 +738,12 @@ int	*error;
 				bathlon[i] = *navlon 
 					+ headingy*mtodeglon
 					*mb_io_ptr->bath_acrosstrack[i]
-					+ headingy*mtodeglon
+					+ headingx*mtodeglon
 					*mb_io_ptr->bath_alongtrack[i];
 				bathlat[i] = *navlat 
 					- headingx*mtodeglat
 					*mb_io_ptr->bath_acrosstrack[i]
-					- headingx*mtodeglat
+					+ headingy*mtodeglat
 					*mb_io_ptr->bath_alongtrack[i];
 				}
 			else
