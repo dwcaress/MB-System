@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em300mba.c	10/16/98
- *	$Id: mbr_em300mba.c,v 4.2 1999-04-07 20:38:24 caress Exp $
+ *	$Id: mbr_em300mba.c,v 4.3 1999-04-21 05:45:32 caress Exp $
  *
  *    Copyright (c) 1998 by 
  *    D. W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	October 16,  1998
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1999/04/07  20:38:24  caress
+ * Fixes related to building under Linux.
+ *
  * Revision 4.2  1999/04/03 07:36:16  caress
  * Fix bugs in byteswapped code.
  *
@@ -59,7 +62,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_em300mba.c,v 4.2 1999-04-07 20:38:24 caress Exp $";
+	static char res_id[]="$Id: mbr_em300mba.c,v 4.3 1999-04-21 05:45:32 caress Exp $";
 	char	*function_name = "mbr_alm_em300mba";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -7852,6 +7855,7 @@ int	*error;
 	write_len = fwrite(&write_size,1,4,mbfp);
 	if (write_len != 4)
 		{
+if (verbose > 2) fprintf(stderr, "write error 1\n");
 		status = MB_FAILURE;
 		*error = MB_ERROR_WRITE_FAIL;
 		}
@@ -7868,6 +7872,7 @@ int	*error;
 		write_len = fwrite(&label,1,2,mbfp);
 		if (write_len != 2)
 			{
+if (verbose > 2) fprintf(stderr, "write error 2\n");
 			status = MB_FAILURE;
 			*error = MB_ERROR_WRITE_FAIL;
 			}
@@ -7889,6 +7894,7 @@ int	*error;
 		if (write_len != 2)
 			{
 			status = MB_FAILURE;
+if (verbose > 2) fprintf(stderr, "write error 3\n");
 			*error = MB_ERROR_WRITE_FAIL;
 			}
 		else
@@ -7972,6 +7978,7 @@ int	*error;
 		write_len = fwrite(line,1,EM2_SS_MBA_HEADER_SIZE,mbfp);
 		if (write_len != EM2_SS_MBA_HEADER_SIZE)
 			{
+if (verbose > 2) fprintf(stderr, "write error 4\n");
 			*error = MB_ERROR_WRITE_FAIL;
 			status = MB_FAILURE;
 			}
@@ -8011,6 +8018,7 @@ int	*error;
 		write_len = fwrite(line,1,EM2_SS_MBA_BEAM_SIZE,mbfp);
 		if (write_len != EM2_SS_MBA_BEAM_SIZE)
 			{
+if (verbose > 2) fprintf(stderr, "write error 5\n");
 			*error = MB_ERROR_WRITE_FAIL;
 			status = MB_FAILURE;
 			}
@@ -8036,6 +8044,7 @@ int	*error;
 		write_len = fwrite(data->png_ssraw,1,write_size,mbfp);
 		if (write_len != write_size)
 			{
+if (verbose > 2) fprintf(stderr, "write error 6\n");
 			*error = MB_ERROR_WRITE_FAIL;
 			status = MB_FAILURE;
 			}
@@ -8068,9 +8077,12 @@ int	*error;
 		checksum += uchar_ptr[j];
     
 	    /* write out data */
+if (verbose > 2) fprintf(stderr, "write test 7  write_len:%d write_size:%d\n", write_len, write_size);
 	    write_len = fwrite(line,1,write_size,mbfp);
+if (verbose > 2) fprintf(stderr, "write test 7  write_len:%d write_size:%d\n", write_len, write_size);
 	    if (write_len != write_size)
 		    {
+if (verbose > 2) fprintf(stderr, "write error 7  write_len:%d write_size:%d\n", write_len, write_size);
 		    *error = MB_ERROR_WRITE_FAIL;
 		    status = MB_FAILURE;
 		    }
@@ -8106,6 +8118,7 @@ int	*error;
 	    write_len = fwrite(line,1,write_size,mbfp);
 	    if (write_len != write_size)
 		    {
+if (verbose > 2) fprintf(stderr, "write error 8\n");
 		    *error = MB_ERROR_WRITE_FAIL;
 		    status = MB_FAILURE;
 		    }
@@ -8133,6 +8146,7 @@ int	*error;
 		write_len = fwrite(&line[1],1,3,mbfp);
 		if (write_len != 3)
 			{
+if (verbose > 2) fprintf(stderr, "write error 9\n");
 			*error = MB_ERROR_WRITE_FAIL;
 			status = MB_FAILURE;
 			}

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em300raw.c	10/16/98
- *	$Id: mbr_em300raw.c,v 4.3 1999-04-07 20:38:24 caress Exp $
+ *	$Id: mbr_em300raw.c,v 4.4 1999-04-21 05:45:32 caress Exp $
  *
  *    Copyright (c) 1998 by 
  *    D. W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	October 16,  1998
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1999/04/07  20:38:24  caress
+ * Fixes related to building under Linux.
+ *
  * Revision 4.3  1999/04/03 07:36:16  caress
  * Fix bugs in byteswapped code.
  *
@@ -65,7 +68,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_em300raw.c,v 4.3 1999-04-07 20:38:24 caress Exp $";
+	static char res_id[]="$Id: mbr_em300raw.c,v 4.4 1999-04-21 05:45:32 caress Exp $";
 	char	*function_name = "mbr_alm_em300raw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -1248,20 +1251,24 @@ int	*error;
 		mb_io_ptr->beams_amp = mb_io_ptr->beams_bath;
 		
 		/* get median depth and sidescan pixel size */
-		qsort((char *)bathsort, nbathsort, sizeof(double),mb_double_compare);
-		swathwidth = 2.5 + MAX(90.0 - 0.01 * data->png_depression[0], 
-				    90.0 - 0.01 * data->png_depression[data->png_nbeams-1]);
-		pixel_size_calc = 2 * tan(DTR * swathwidth) * bathsort[nbathsort/2] 
-				    / MBSYS_SIMRAD2_MAXPIXELS;
-		pixel_size_calc = MAX(pixel_size_calc, bathsort[nbathsort/2] * sin(DTR * 0.1));
-		if (*pixel_size <= 0.0)
-		    *pixel_size = pixel_size_calc;
-		else if (0.95 * (*pixel_size) > pixel_size_calc)
-		    *pixel_size = 0.95 * (*pixel_size);
-		else if (1.05 * (*pixel_size) < pixel_size_calc)
-		    *pixel_size = 1.05 * (*pixel_size);
-		else
-		    *pixel_size = pixel_size_calc;
+		if (nbathsort > 0)
+		    {
+		    qsort((char *)bathsort, nbathsort, sizeof(double),mb_double_compare);
+		    swathwidth = 2.5 + MAX(90.0 - 0.01 * data->png_depression[0], 
+					90.0 - 0.01 * data->png_depression[data->png_nbeams-1]);
+		    swathwidth = MAX(swathwidth, 60.0);
+		    pixel_size_calc = 2 * tan(DTR * swathwidth) * bathsort[nbathsort/2] 
+					/ MBSYS_SIMRAD2_MAXPIXELS;
+		    pixel_size_calc = MAX(pixel_size_calc, bathsort[nbathsort/2] * sin(DTR * 0.1));
+		    if (*pixel_size <= 0.0)
+			*pixel_size = pixel_size_calc;
+		    else if (0.95 * (*pixel_size) > pixel_size_calc)
+			*pixel_size = 0.95 * (*pixel_size);
+		    else if (1.05 * (*pixel_size) < pixel_size_calc)
+			*pixel_size = 1.05 * (*pixel_size);
+		    else
+			*pixel_size = pixel_size_calc;
+		    }
 
 		/* get raw pixel size */
 		if (data->sonar == 300 || data->sonar == 3000)
@@ -1325,6 +1332,9 @@ int	*error;
 					    }
 					kk = MBSYS_SIMRAD2_MAXPIXELS / 2 
 					    + (int)(xtrack / *pixel_size);
+if (verbose > 2)
+fprintf(stderr, "i:%d kk:%d xtrack:%f pixel_size:%f\n", 
+i, kk, xtrack, *pixel_size);
 					if (kk > 0 && kk < MBSYS_SIMRAD2_MAXPIXELS)
 					    {
 					    mb_io_ptr->new_ss[kk] 
@@ -1820,6 +1830,7 @@ int	*error;
 			ping->png_pixel_size = 100 * (*pixel_size);
 			ping->png_pixels_ss = 2 * MAX(MBSYS_SIMRAD2_MAXPIXELS/2 - first, 
 							last - MBSYS_SIMRAD2_MAXPIXELS/2);
+			ping->png_pixels_ss = MAX(ping->png_pixels_ss, 0);
 			for (i=0;i<MBSYS_SIMRAD2_MAXPIXELS;i++)
 			    {
 			    ping->png_ss[i] = (short)(100 * mb_io_ptr->new_ss[i]);
