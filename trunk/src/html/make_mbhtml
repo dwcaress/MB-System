@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	make_mbhtml	8/19/97
-#    $Id: make_mbhtml,v 5.6 2002-01-02 20:20:08 caress Exp $
+#    $Id: make_mbhtml,v 5.7 2002-07-22 01:11:43 caress Exp $
 #
 #    Copyright (c) 1997 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -30,10 +30,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   August 19,  1997
 #
 # Version:
-#   $Id: make_mbhtml,v 5.6 2002-01-02 20:20:08 caress Exp $
+#   $Id: make_mbhtml,v 5.7 2002-07-22 01:11:43 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.6  2002/01/02 20:20:08  caress
+#   Fixed handling of operating system differences.
+#
 # Revision 5.5  2001/12/30  21:03:54  caress
 # Fixed handling of operating system parameter.
 #
@@ -111,6 +114,9 @@ foreach $man_page (@manual_pages) {
     chop($man_page);
     print "\nProcessing manual page for $man_page...\n";
 
+    # first generate a postscript version for mbsystem/ps
+    `$groff -man -Tps ../../man/manl/$man_page.l > ../../ps/$man_page.ps`;
+    
     # Generate an initial html file
     $raw_html_file = "./$man_page.html";
     $date = `head -1 ../../man/manl/$man_page.l | awk '{print \$4,\$5,\$6}'`;
