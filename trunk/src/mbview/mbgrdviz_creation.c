@@ -95,6 +95,7 @@ CreatemainWindow_mbgrdviz(Widget parent)
     Widget   cascadeButton_openroute;
     Widget   cascadeButton_opensite;
     Widget   cascadeButton_opennav;
+    Widget   cascadeButton_openswath;
     Widget   separator;
     Widget   cascadeButton_saveroute;
     Widget   cascadeButton_savesite;
@@ -180,8 +181,8 @@ CreatemainWindow_mbgrdviz(Widget parent)
     ac = 0;
     XtSetArg(args[ac], XmNx, 262); ac++;
     XtSetArg(args[ac], XmNy, 225); ac++;
-    XtSetArg(args[ac], XmNwidth, 200); ac++;
-    XtSetArg(args[ac], XmNheight, 200); ac++;
+    XtSetArg(args[ac], XmNwidth, 160); ac++;
+    XtSetArg(args[ac], XmNheight, 224); ac++;
     pulldownMenu_file = XmCreatePulldownMenu(XtParent(cascadeButton_file),
         "pulldownMenu_file",
         args, 
@@ -326,7 +327,7 @@ CreatemainWindow_mbgrdviz(Widget parent)
     {
         XmString    tmp0;
         
-        tmp0 = (XmString) BX_CONVERT(pulldownMenu_file, "Open Swath or Nav Data", 
+        tmp0 = (XmString) BX_CONVERT(pulldownMenu_file, "Open Nav Data", 
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList, 
@@ -346,7 +347,7 @@ CreatemainWindow_mbgrdviz(Widget parent)
     
     
     ac = 0;
-    XtSetArg(args[ac], XmNx, 456); ac++;
+    XtSetArg(args[ac], XmNx, 416); ac++;
     XtSetArg(args[ac], XmNy, 328); ac++;
     XtSetArg(args[ac], XmNwidth, 1); ac++;
     XtSetArg(args[ac], XmNheight, 1); ac++;
@@ -358,6 +359,43 @@ CreatemainWindow_mbgrdviz(Widget parent)
     ac = 0;
     XtSetArg(args[ac], XmNsubMenuId, pulldownMenu_opennav); ac++;
     XtSetValues(cascadeButton_opennav, args, ac);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(pulldownMenu_file, "Open Swath Data", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(pulldownMenu_file, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        cascadeButton_openswath = XmCreateCascadeButton(pulldownMenu_file,
+            "cascadeButton_openswath",
+            args, 
+            ac);
+        XtManageChild(cascadeButton_openswath);
+        
+        /*
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNx, 416); ac++;
+    XtSetArg(args[ac], XmNy, 352); ac++;
+    XtSetArg(args[ac], XmNwidth, 1); ac++;
+    XtSetArg(args[ac], XmNheight, 1); ac++;
+    pulldownMenu_openswath = XmCreatePulldownMenu(XtParent(cascadeButton_openswath),
+        "pulldownMenu_openswath",
+        args, 
+        ac);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNsubMenuId, pulldownMenu_openswath); ac++;
+    XtSetValues(cascadeButton_openswath, args, ac);
     
     ac = 0;
     separator = XmCreateSeparator(pulldownMenu_file,
@@ -553,8 +591,8 @@ CreatemainWindow_mbgrdviz(Widget parent)
     
     ac = 0;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNx, 124); ac++;
-    XtSetArg(args[ac], XmNy, 32); ac++;
+    XtSetArg(args[ac], XmNx, 66); ac++;
+    XtSetArg(args[ac], XmNy, 410); ac++;
     XtSetArg(args[ac], XmNwidth, 463); ac++;
     XtSetArg(args[ac], XmNheight, 528); ac++;
     bulletinBoard_about = XmCreateBulletinBoard(dialogShell_about,
@@ -792,8 +830,8 @@ CreatemainWindow_mbgrdviz(Widget parent)
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNpattern, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNautoUnmanage, True); ac++;
-        XtSetArg(args[ac], XmNx, 8); ac++;
-        XtSetArg(args[ac], XmNy, 32); ac++;
+        XtSetArg(args[ac], XmNx, 83); ac++;
+        XtSetArg(args[ac], XmNy, 440); ac++;
         XtSetArg(args[ac], XmNwidth, 334); ac++;
         XtSetArg(args[ac], XmNheight, 505); ac++;
         fileSelectionBox = XmCreateFileSelectionBox(dialogShell_open,

@@ -53,8 +53,9 @@ extern int isnanf(float x);
 #define MBGRDVIZ_OPENROUTE	2
 #define MBGRDVIZ_OPENSITE	3
 #define MBGRDVIZ_OPENNAV	4
-#define MBGRDVIZ_SAVEROUTE	5
-#define MBGRDVIZ_SAVESITE	6
+#define MBGRDVIZ_OPENSWATH	5
+#define MBGRDVIZ_SAVEROUTE	6
+#define MBGRDVIZ_SAVESITE	7
 
 /* Projection defines */
 #define ModelTypeProjected	     1
@@ -66,7 +67,7 @@ extern int isnanf(float x);
 #define MBGRDVIZ_ROUTE_VERSION "1.00"
 
 /* id variables */
-static char rcs_id[] = "$Id: mbgrdviz_callbacks.c,v 5.0 2003-12-02 20:26:31 caress Exp $";
+static char rcs_id[] = "$Id: mbgrdviz_callbacks.c,v 5.1 2003-12-10 03:18:57 caress Exp $";
 static char program_name[] = "MBgrdviz";
 static char help_message[] = "MBgrdviz is an interactive 2D/3D visualization tool for GMT grid files.";
 static char usage_message[] = "mbgrdviz [-H -T -V]";
@@ -84,6 +85,7 @@ Widget	pushButton_openoverlay[MBV_MAX_WINDOWS];
 Widget	pushButton_openroute[MBV_MAX_WINDOWS];
 Widget	pushButton_opensite[MBV_MAX_WINDOWS];
 Widget	pushButton_opennav[MBV_MAX_WINDOWS];
+Widget	pushButton_openswath[MBV_MAX_WINDOWS];
 Widget	pushButton_saveroute[MBV_MAX_WINDOWS];
 Widget	pushButton_savesite[MBV_MAX_WINDOWS];
 Widget	fileSelectionList;
@@ -531,6 +533,15 @@ fprintf(stderr,"do_mbgrdviz_openfile\n");
 		status = do_mbgrdviz_opennav(instance, MB_NO, file_ptr);
 		}
 	
+	/* else open swath data */
+	else if (mode == MBGRDVIZ_OPENSWATH)
+		{
+		/* read nav file and update mbview window */
+		do_mbview_message_on("Reading swath data...", instance);
+		fprintf(stderr, "call do_mbgrdviz_opennav\n");
+		status = do_mbgrdviz_opennav(instance, MB_YES, file_ptr);
+		}
+	
 	/* else write site data */
 	else if (mode == MBGRDVIZ_SAVESITE)
 		{
@@ -969,6 +980,23 @@ fprintf(stderr,"done opening mbview instance:%d  id:%d\n",instance, mbview_id[in
         		XtManageChild(pushButton_opennav[instance]);
 			actionid = MBGRDVIZ_OPENNAV * MBV_MAX_WINDOWS + instance;
 			XtAddCallback(pushButton_opennav[instance], XmNactivateCallback, do_mbgrdviz_fileSelectionBox, (XtPointer)actionid);
+
+			/* add pushbutton for opening swath file */
+    			ac = 0;
+        		tmp0 = (XmString) BX_CONVERT(pulldownMenu_openswath, button_name_ptr, 
+                		XmRXmString, 0, &argok);
+        		XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        		XtSetArg(args[ac], XmNfontList, 
+        		    BX_CONVERT(pulldownMenu_openswath, "-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+        		    XmRFontList, 0, &argok)); if (argok) ac++;
+        		pushButton_openswath[instance] = (Widget) XmCreatePushButton(pulldownMenu_openswath,
+        		    button_name_ptr,
+        		    args, 
+        		    ac);
+        		XmStringFree((XmString)tmp0);
+        		XtManageChild(pushButton_openswath[instance]);
+			actionid = MBGRDVIZ_OPENSWATH * MBV_MAX_WINDOWS + instance;
+			XtAddCallback(pushButton_openswath[instance], XmNactivateCallback, do_mbgrdviz_fileSelectionBox, (XtPointer)actionid);
 
 			/* add pushbutton for saving route file */
     			ac = 0;
@@ -1753,7 +1781,7 @@ int do_mbgrdviz_saveroute(int instance, char *output_file_ptr)
 }
 /*---------------------------------------------------------------------------------------*/
 
-int do_mbgrdviz_opennav(int instance, int nav_only, char *input_file_ptr)
+int do_mbgrdviz_opennav(int instance, int swathbounds, char *input_file_ptr)
 {
 	char function_name[] = "do_mbgrdviz_opennav";
 	int	status = MB_SUCCESS;
@@ -1784,7 +1812,7 @@ int do_mbgrdviz_opennav(int instance, int nav_only, char *input_file_ptr)
 
 					/* check for available nav file if that is
 					   all that is needed */
-					if (nav_only == MB_YES)
+					if (swathbounds == MB_NO)
 						mb_get_fnv(verbose, swathfile, &format, &error);
 
 					/* else check for available fbt file  */
