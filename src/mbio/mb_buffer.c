@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_buffer.c	3.00	2/25/93
- *    $Id: mb_buffer.c,v 3.1 1993-05-14 22:04:16 dale Exp $
+ *    $Id: mb_buffer.c,v 3.2 1993-06-10 05:43:19 caress Exp $
  *
  *    Copyright (c) 1993 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -32,6 +32,9 @@
  * Date:	February 25, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 3.1  1993/05/14  22:04:16  dale
+ * Fix rcsid declaration
+ *
  * Revision 3.0  1993/04/23  15:40:29  dale
  * Initial version
  *
@@ -53,7 +56,7 @@ int	verbose;
 char	**buff_ptr;
 int	*error;
 {
-  static char rcs_id[]="$Id: mb_buffer.c,v 3.1 1993-05-14 22:04:16 dale Exp $";
+  static char rcs_id[]="$Id: mb_buffer.c,v 3.2 1993-06-10 05:43:19 caress Exp $";
 	char	*function_name = "mb_buffer_init";
 	int	status = MB_SUCCESS;
 	struct mb_buffer_struct *buff;
@@ -99,7 +102,7 @@ int	*error;
 	char	*function_name = "mb_buffer_close";
 	int	status = MB_SUCCESS;
 	struct mb_buffer_struct *buff;
-	struct mb_io_struct *mb_io_ptr;
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -110,6 +113,16 @@ int	*error;
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       buff_ptr:   %d\n",buff_ptr);
 		}
+
+	/* get buffer structure */
+	buff = (struct mb_buffer_struct *) buff_ptr;
+
+	/* deal with any remaining records in the buffer */
+	if (buff->nbuffer > 0)
+		for (i=0;i<buff->nbuffer;i++);
+			status = mb_buffer_deall(verbose,buff_ptr,NULL,
+				buff->buffer[i],error);
+
 
 	/* deallocate memory for data structure */
 	status = mb_free(verbose,buff_ptr,error);
