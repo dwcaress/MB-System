@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 5.18 2004-04-27 01:46:11 caress Exp $
+#	$Id: Makefile.template,v 5.19 2004-06-18 03:07:15 caress Exp $
 #
 #     Copyright (c) 1993, 1994, 2000, 2002, 2003 by
 #     David W. Caress (caress@mbari.org)
@@ -16,6 +16,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.18  2004/04/27 01:46:11  caress
+# Various updates of April 26, 2004.
+#
 # Revision 5.17  2003/12/24 08:23:32  caress
 # Fixed problem with formats 42 and 43. Combined former files mbr_sb2100b1.c and mbr_sb2100b2.c into new file mbr_sb2100bi.c. Files mbf_sb2100b1.h and mbf_sb2100b2.h are no longer part of the archive.
 #
@@ -222,7 +225,7 @@ $(LIBDIR)/libmbio.a:	mb_format.o mb_error.o \
 		mb_put_all.o mb_put_comment.o \
 		mb_buffer.o \
 		mb_read_ping.o mb_write_ping.o \
-		mb_access.o \
+		mb_access.o mb_segy.o\
 		mbsys_sb.o mbsys_hsds.o \
 		mbsys_sb2100.o \
 		mbsys_simrad.o mbsys_simrad2.o \
@@ -281,7 +284,7 @@ $(LIBDIR)/libmbio.a:	mb_format.o mb_error.o \
 		mb_put_all.o mb_put_comment.o \
 		mb_buffer.o \
 		mb_read_ping.o mb_write_ping.o \
-		mb_access.o \
+		mb_access.o mb_segy.o \
 		mbsys_sb.o mbsys_hsds.o \
 		mbsys_sb2100.o \
 		mbsys_simrad.o mbsys_simrad2.o \
@@ -385,6 +388,8 @@ mb_write_ping.o:	mb_write_ping.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(I
 	$(CC) -c $(CFLAGS) mb_write_ping.c
 mb_access.o:	mb_access.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_segy.h
 	$(CC) -c $(CFLAGS) mb_access.c
+mb_segy.o:	mb_segy.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_segy.h
+	$(CC) -c $(CFLAGS) mb_segy.c
 mbsys_sb.o:	mbsys_sb.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mbsys_sb.h
 	$(CC) -c $(CFLAGS) mbsys_sb.c
 mbsys_hsds.o:	mbsys_hsds.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mbsys_hsds.h
