@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grd3dplot.perl	8/6/95
-#    $Id: mbm_grd3dplot.perl,v 4.1 1995-09-28 18:05:43 caress Exp $
+#    $Id: mbm_grd3dplot.perl,v 4.2 1995-09-28 19:52:25 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -61,10 +61,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   August 8, 1994
 #
 # Version:
-#   $Id: mbm_grd3dplot.perl,v 4.1 1995-09-28 18:05:43 caress Exp $
+#   $Id: mbm_grd3dplot.perl,v 4.2 1995-09-28 19:52:25 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.1  1995/09/28  18:05:43  caress
+# Various bug fixes working toward release 4.3.
+#
 # Revision 4.0  1995/08/17  14:51:59  caress
 # Revision for release 4.3.
 #
@@ -361,12 +364,15 @@ if ($misc)
 		# set grdview null plane level and color
 		if ($cmd =~ /^[Vv][Nn]./)
 			{
-			($grdview_null) = $cmd =~ 
-				/^[Vv][Nn](\S+)/;
-			if (!$grdview_null)
+			if ($cmd =~ /^[Vv][Nn]\S+/)
 				{
-				$grdview_null_no = 1;
+				($grdview_null) = $cmd =~ 
+					/^[Vv][Nn](\S+)/;
 				}
+			}
+		elsif ($cmd =~ /^[Vv][Nn]/)
+			{
+			$grdview_null_set = 1;
 			}
 
 		# set grdview contour pen attributes
@@ -1132,7 +1138,7 @@ elsif ($color_mode)
 	}
 
 # get null plane level
-if (!$grdview_null && !$grdview_null_no)
+if (!$grdview_null && $grdview_null_set)
 	{
 	$grdview_null = "$zmin/200/200/200";
 	}
