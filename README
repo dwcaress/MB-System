@@ -1,11 +1,11 @@
-MB-SYSTEM VERSION 4.6.10 RELEASE NOTES:
+MB-SYSTEM VERSION 5.0.BETA00 RELEASE NOTES:
 --------------------------------------
 
-This directory structure contains the version 4.6.10 release  
+This directory structure contains the version 5.0.beta00 release  
 of the MB-System software package for processing and display of 
 swath sonar data.  
 
-Release 4.6.10 Notes:
+Release 5.0.beta00 Notes:
 --------------------
 
 Version 4.6.10 incorporates fixes to several significant 
@@ -19,147 +19,20 @@ mbm_grdtiff. These images may be directly imported into GIS
 packages such as ArcView. Some new features have also been
 added to the graphical bathymetry editor mbedit.
 
-Release 4.6.6 Notes:
---------------------
-
-Version 4.6.6 incorporates support for a new data format and
-fixes to several bugs found in the version 4.6a and 4.6b 
-releases. The new data format (MBIO ID 94) supports data
-from the current generation of ELAC Bottomchart Mk II 
-multibeam sonars. The fixed problems involve the programs
-mbgrid, mbvelocitytool, and the handling of data from Atlas 
-Hydrosweep MD sonars (MBIO ID's 101 and 102) and SeaBeam 2100 
-sonars (MBIO ID's 41, 42, and 43).
-
-Release 4.6a Notes:
--------------------
-
-Version 4.6a incorporates fixes to several bugs found in the 
-original version 4.6 release. The fixed problems all involve 
-the handling of specific data formats. The affected formats are 
-the GSF format (MBIO ID 121), the HDCS format (MBIO ID 151), and
-all of the MR1 formats (MBIO ID's 61, 62, and 63).
-
-Release 4.6 Notes:
-------------------
-
-Version 4.6 includes significant enhancements relative to 
-version 4.5. The enhancements for version 4.6 include support
-for several new data formats, additional features added
-to several programs, one new program, and a large number 
-of bug fixes.
-
-The first newly supported format is the Generic Sensor 
-Format (GSF) developed by Science Applications International 
-Corporation (SAIC) and used by SAIC, the U.S. Navy, and other
-SAIC customers. This format (121) itself supports data from a
-number of different sonars. The code for libgsf version 1.07
-has been incorporated into MB-System.
-
-The second new format (131) is MSTIFF, a TIFF file variant used
-in conjunction with PC Sea Scan towed sidescan sonars.
-
-Two additional new formats involve data from Simrad
-EM300 and EM3000 sonars. The raw vendor format for the
-current generation of Simrad sonars is supported as MBIO 
-format 56. A similar, but enhanced processing/archiving format
-is supported as MBIO format 57.
-
-The OIC processed ping format developed by Oceanic Imaging
-Consultants (OIC) has been supported as MBIO format 141.
-A similar, but enhanced processing format is supported as
-MBIO format 142. Data from a number of sonars (mostly
-interferometry or sidescan sonars) are supported by the
-OIC format. In particular, The WHOI DSL group is using the
-OIC format for data collected using its deep-towed 
-AMS-120 sonar.
-
-The HDCS format developed by Dr. John Hughes Clarke of the
-University of New Brunswick has also been supported as MBIO
-format 151. Like the GSF and OIC formats, HDCS is a "super-format"
-encompassing data from a variety of sonars. Dr. Clarke's
-data processing software is now used by a number of academic
-and government research groups, and it works exclusively 
-with the HDCS format.
-
-The program mbsimradmakess is a new utility for regenerating 
-sidescan imagery from the raw amplitude samples contained in 
-data from  Simrad EM300 and EM3000 multibeam sonars. This 
-program ignores amplitude data associated with flagged 
-(bad) bathymetry data, thus removing one important source 
-of noise in the sidescan data.
-
-The program mbnavedit now includes a plot of the time interval
-between data points and enables users to fix some time
-tag problems. This program now operates on the asynchronous
-navigation data records in Simrad vendor formats
-(MBIO formats 51, 52, 53, 55, and 56), allowing
-the navigation to actually be edited.
-
-MB-System is now Y2K compliant. Surprisingly, a number of
-data formats associated with current commercial products
-still use two digits to represent the year. The internal
-handling of these years is as follows:
-        if (year_2d >= 62)
-            year_4d = year_2d + 1900;
-        else
-            year_4d = year_2d + 2000;
-        if (year_4d < 2000)
-            year_2d = year_4d - 1900;
-        else
-            year_2d = year_4d - 2000;
-The use of 1962 derives from the invention of the multibeam
-sonar in that year - there are no digital swath mapping
-data available from an earlier time.
-
-MB-System is compatible with versions 3.0, 3.1, and 3.2
-of the GMT package. The use of a GMT version prior to
-3.2 is set in the install_makefiles script described
-in the "Installing MB-System" section below.
-
-All MB-System programs now print out the MB-System version
-number when run with the -h option.
-
-The programs mbgrid and mbmosaic now handle longitude and
-latitude bounding values given in dd:mm:ss as well as in
-decimal degrees. This means that the -R option for these
-programs is fully compatible with GMT conventions.
-
-The program mbclean once again works properly with large
-data files.
-
-The program mbbath, which is used to recalculate swath
-bathymetry data, has been improved. This program now handles 
-the surface sound velocity in a more flexible (and in some
-cases more realistic) fashion. Users can also now use
-mbbath to apply changes to the roll and pitch bias values 
-without recalculating the bathymetry from travel times by
-raytracing. This allows users to correct roll bias problems
-in bathymetry data which does not include travel times and
-angles (e.g. SeaBeam 2000 data).
-
-The plotting macros (mbm_plot, mbm_grdplot, mbm_grd3dplot,
-and mbm_xyplot) now generate plotting shellscripts which
-have the major parameters defined at the beginning as 
-environment variables. This makes editing of the scripts
-easier.
 
 Of course, a large number of minor bug fixes are also 
 incorporated in the new release.
 
 RELEASE DATE:
 ------------
-April 14, 1999 		(Original release of version 4.6)
-May 6, 1999		(Release of version 4.6a)
-September 15, 1999	(Release of version 4.6.6)
-March 8, 2000		(Release of version 4.6.10)
+April 6, 2001 		(Release of version 5.0.beta00)
 
 Authors:
 --------
 David W. Caress (caress@mbari.org)
 Monterey Bay Aquarium Research Institute
-P.O. Box 628
-Moss Landing, CA 95039-0628
+7700 Sandholdt Road
+Moss Landing, CA 95039
 
 Dale N. Chayes (dale@ldeo.columbia.edu)
 Lamont-Doherty Earth Observatory of Columbia University
@@ -167,10 +40,33 @@ Rte 9W
 Palisades, NY 10964
 
 Copyright:
-----------
-MB-System Copyright 1993-2000
+COPYRIGHT AND LICENSING
+    ----------
+MB-System Copyright 1993-2001
 by David W. Caress and Dale N. Chayes
 All Rights Reserved.
+All Wrongs Remembered.
+          The MB-System source code is distributed under the GNU
+          General Public License as formulated by the GNU Project.
+          Previous MB-System distributions have been described as
+          "public domain", which meant there was no restrictions
+          whatsoever on the use of the code. We have now adopted the
+          more restrictive GNU GPL license in order to insure that
+          anyone who distributes software based in whole or in part on
+          MB-System also distributes the modified MB-System source
+          code and any additional source code.
+
+          The GNU GPL also prohibits the distribution of proprietary
+          executables linked with MB-System libraries unless the
+          source code is also distributed. We waive this restriction
+          on distributing proprietary compiled programs for specific
+          software products if and only if those software products
+          meet the following two conditions:
+               1) The software product was created, sold, and
+          delivered to customers using source code derived from MB-
+          System release 4.6 distributions.
+               2) The software product was sold and delivered to
+          customers prior to January 1, 2001.
 
 Caveat:
 -------
@@ -188,7 +84,7 @@ incorrect use of these programs.
 Other required software:
 ------------------------
 You will need some other readily available code to use
-MB-System fully.  MB-System uses the GMT 3.0 package plus extensions
+MB-System fully.  MB-System uses the GMT 3.3 package plus extensions
 for much of its graphics, and GMT requires NetCDF. Some of the 
 MB-System utilities (macros) are written in the Perl scripting
 language. The source code for these required software packages
@@ -200,7 +96,7 @@ is available as follows:
 	- compressed tar file MB-System4.6.10.tar.Z
 	  in directory pub/swath_data
 
-	GMT v 3.0 or later (v 3.2 strongly recommended)
+	GMT v 3.0 or later (v 3.3 strongly recommended)
 	- available from SOEST (U. Hawaii) via anonymous ftp to
 	  kiawe.soest.hawaii.edu
 	- compressed tar files in directory pub/gmt
@@ -351,8 +247,8 @@ the evolution of GUIs and WIMPS.
 Motif:
 ------
 The graphical tools mbedit, mbnavedit, and mbvelocitytool 
-now use the Motif widget set for their graphical user
-interface.  Motif libraries are required 
+now use the Motif widget set for their graphical user interface.
+Motif libraries or equivalent (e.g. Lesstif) are required 
 to successfully link and install these programs. 
  
 Web Based Documentation:
@@ -423,10 +319,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 4.22 2000-09-26 20:32:27 caress Exp $
+RCS ID: $Id: README,v 5.0 2001-04-06 22:17:58 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+# Revision 4.22  2000/09/26  20:32:27  caress
+# Fixed reference to ftp site.
+#
 # Revision 4.21  2000/03/08  01:19:08  caress
 # Release 4.6.10
 #
