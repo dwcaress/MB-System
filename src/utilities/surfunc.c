@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrid.c	5/2/94
- *    $Id: surfunc.c,v 4.0 1994-05-05 20:30:06 caress Exp $
+ *    $Id: surfunc.c,v 4.1 1994-06-04 02:02:01 caress Exp $
  *
  *    Inclusion in MB-System:
  *    Copyright (c) 1994 by 
@@ -55,6 +55,10 @@
  * Date:	May 2, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/05/05  20:30:06  caress
+ * First cut. This code derived from GMT program surface by
+ * Walter Smith and Paul Wessel.
+ *
  *
  */
 
@@ -164,13 +168,18 @@ float	*sgrid;
 	xinc = xxinc;
 	yinc = yyinc;
 	tension = ttension;
+
+	/* do some GMT initializing */
+	gmt_begin (0, NULL);
 	if (verbose > 0)
 		gmtdefs.verbose = TRUE;
 	if (verbose > 1)
 		long_verbose = TRUE;
-
-	/* do some GMT initializing */
-	gmt_begin (0, NULL);
+	if (verbose <= 0)
+		{
+		gmtdefs.verbose = FALSE;
+		long_verbose = FALSE;
+		}
 
 	/* New in v4.3:  Default to unconstrained:  */
 	set_low = set_high = 0; 
@@ -194,11 +203,13 @@ float	*sgrid;
 	/* New stuff here for v4.3:  Check out the grid dimensions:  */
 	grid = gcd_euclid(nx-1, ny-1);
 
+	/*
 	if (gmtdefs.verbose || size_query || grid == 1) fprintf (stderr, "W: %.3lf E: %.3lf S: %.3lf N: %.3lf nx: %d ny: %d\n",
 		xmin, xmax, ymin, ymax, nx, ny);
 	if (grid == 1) fprintf(stderr,"surface:  WARNING:  Your grid dimensions are mutually prime.\n");
 	if (grid == 1 || size_query) suggest_sizes_for_surface(nx-1, ny-1);
 	if (size_query) exit(0);
+	*/
 
 	/* New idea: set grid = 1, read data, setting index.  Then throw
 		away data that can't be used in end game, constraining
@@ -233,7 +244,9 @@ float	*sgrid;
 
 	if (radius > 0) initialize_grid(); /* Fill in nodes with a weighted avg in a search radius  */
 
+	/*
 	if (gmtdefs.verbose) fprintf(stderr,"Grid\tMode\tIteration\tMax Change\tConv Limit\tTotal Iterations\n");
+	*/
 	
 	set_coefficients();
 	
@@ -605,7 +618,9 @@ int initialize_grid()
 	 			}
 	 		}
 	 		if (sum_w == 0.0) {
+				/*
 	 			fprintf (stderr, "surface: Warning: no data inside search radius at: %.8lg %.8lg\n", x0, y0);
+				*/
 	 			u[ij_sw_corner + (i * my + j) * grid] = z_mean;
 	 		}
 	 		else {
@@ -704,25 +719,31 @@ float	*zdat;
 	if( converge_limit == 0.0 ) {
 		converge_limit = 0.001 * z_scale; /* c_l = 1 ppt of L2 scale */
 	}
+	/*
 	if (gmtdefs.verbose) {
 		fprintf(stderr, "surface: Minimum value of your dataset x,y,z at: %g %g %g\n",
 			data[kmin].x, data[kmin].y, data[kmin].z);
 		fprintf(stderr, "surface: Maximum value of your dataset x,y,z at: %g %g %g\n",
 			data[kmax].x, data[kmax].y, data[kmax].z);
 	}
+	*/
 	data = (struct DATA *) memory ((char *)data, npoints, sizeof(struct DATA), "surface");
 	
 	if (set_low == 1)
 		low_limit = data[kmin].z;
 	else if (set_low == 2 && low_limit > data[kmin].z) {
 	/*	low_limit = data[kmin].z;	*/
+		/*
 		fprintf (stderr, "surface: Warning:  Your lower value is > than min data value.\n");
+		*/
 	}
 	if (set_high == 1)
 		high_limit = data[kmax].z;
 	else if (set_high == 2 && high_limit < data[kmax].z) {
 	/*	high_limit = data[kmax].z;	*/
+		/*
 		fprintf (stderr, "surface: Warning:  Your upper value is < than max data value.\n");
+		*/
 	}
 
 }
@@ -972,13 +993,17 @@ int	iterate(mode)
 		iteration_count++;
 		total_iterations++;
 		max_change *= z_scale;	/* Put max_change into z units  */
+		/*
 		if (long_verbose) fprintf(stderr,"%4d\t%c\t%8d\t%10lg\t%10lg\t%10d\n",
 			grid, mode_type[mode], iteration_count, max_change, current_limit, total_iterations);
+		*/
 
 	} while (max_change > current_limit && iteration_count < max_iterations);
 	
+	/*
 	if (gmtdefs.verbose && !long_verbose) fprintf(stderr,"%4d\t%c\t%8d\t%10lg\t%10lg\t%10d\n",
 		grid, mode_type[mode], iteration_count, max_change, current_limit, total_iterations);
+	*/
 
 	return(iteration_count);
 }
@@ -1121,9 +1146,19 @@ int check_errors () {
 		}
 	}
 
+	 /*
 	 fprintf(stderr, "Fit info: N data points  N nodes\tmean error\trms error\tcurvature\n");
 	 fprintf (stderr,"\t%8d\t%8d\t%.8lg\t%.8lg\t%.8lg\n", npoints, n_nodes, mean_error, mean_squared_error,
 	 	curvature);
+	*/
+	if (gmtdefs.verbose)
+		{
+		fprintf(stderr,"\nSpline interpolation fit information:\n");
+		fprintf(stderr,"Data points   nodes    mean error     rms error     curvature\n");
+		fprintf(stderr,"%9d %9d   %10g   %10g  %10g\n",
+			npoints, n_nodes, mean_error, mean_squared_error,
+	 		curvature);
+		}
  }
 
 int	remove_planar_trend()
@@ -1228,10 +1263,12 @@ int	throw_away_unusables()
 	qsort ((char *)data, npoints, sizeof (struct DATA), compare_points);
 	npoints -= n_outside;
 	data = (struct DATA *) memory ((char *)data, npoints, sizeof(struct DATA), "surface");
+	/*
 	if (gmtdefs.verbose && (n_outside)) {
 		fprintf(stderr,"surface: %ld unusable points were supplied; these will be ignored.\n", n_outside);
 		fprintf(stderr,"\tYou should have pre-processed the data with blockmean or blockmedian.\n");
 	}
+	*/
 
 	return(0);
 }
