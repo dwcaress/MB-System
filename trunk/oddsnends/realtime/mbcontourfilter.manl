@@ -130,7 +130,7 @@ Default: \fIlonflip\fP = 0.
 Sets the number of pings to be read in before each contouring
 episode. See the description of the \fB-Z\fIalgorithm\fP option
 for advice on reasonable values
-Default: \fInplot\fP = 50 unless \fB-Z\fI1\fP is specified,
+Default: \fInplot\fP = 50 unless \fB-Z\fP\fI1\fP is specified,
 in which case the default is \fInplot\fP = 5.
 .TP
 .B \fB-p\fIpings\fP
@@ -145,7 +145,7 @@ Default: \fIpings\fP = 1 (no ping averaging).
 .B \fB-Q\fP
 Causes the program to plot the triangles constructed as part of the
 contouring if the "triangle algorithm" is specified using the
-\fB-Z\fI0\fP option. This allows the data distribution to be directly viewed.
+\fB-Z\fP\fI0\fP option. This allows the data distribution to be directly viewed.
 .TP
 .B \fB-R\fIwest/east/south/north\fP
 Sets the longitude and latitude bounds within which multibeam 
@@ -173,10 +173,10 @@ this algorithm is slow but produces good looking contours in
 most cases. It is important to note that the time required for
 "triangle" algorithm increases with the square of the number
 of beams to be contoured; thus it is sensible to keep the number
-of pings contoured at a time small (e.g. use \fB-N\fI5\fP).
+of pings contoured at a time small (e.g. use \fB-N\fP\fI5\fP).
 The time required for the "ping to ping" algorithm varies linearly
 with the number of pings contoured; thus larger numbers of pings
-may be reasonably contoured at a time (e.g. use \fB-N\fI50\fP). 
+may be reasonably contoured at a time (e.g. use \fB-N\fP\fI50\fP). 
 Default: \fIalgorithm\fP = 0.
 .TP
 .B \-#
