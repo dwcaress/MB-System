@@ -37,11 +37,15 @@ Password: your@email.address<BR>
 </UL>
 </P>
 
-If anonymous ftp fails with an error message like: "Sorry no DNS entry" after the email address is entered as the anonymous password, this means 
+If anonymous ftp fails with an error message like: "Sorry no DNS entry" after 
+the email address is entered as the anonymous password, this means 
 that the internet address (also called IP address) of the computer in use is
-not known to the Lamont network to be legitimate. The Lamont ftp server
-attempts to look up or resolve IP addresses using the primary Domain Name Service
-(DNS) servers associated with the internet as a whole. This situation sometimes
+not known to the Lamont network to be legitimate. As a security measure,
+illegitimate IP addresses are not allowed to connect to the Lamont network.
+The Lamont ftp server attempts to look up or resolve IP addresses using 
+the primary Domain Name Service (DNS) servers associated with the internet as a whole.  
+So, this problem arises when computers use IP addresses are not 
+properly registered with the global DNS servers. This situation sometimes
 exists for computers connecting through improperly configured firewalls or  
 Network Address Translation (NAT) devices. Users facing this issue can often
 succeed by running ftp from a "better connected" server in their 
@@ -63,7 +67,7 @@ also includes a detailed global coastline database. GMT has been developed
 by Professor Paul Wessel of SOEST (School of Ocean and Earth Science and
 Technology at the Univeristy of Hawaii) and Dr. Walter H. F. Smith of NOAA.
 The GMT source code is available from the <A HREF="http://gmt.soest.hawaii.edu/">GMT
-web page</A>. Use of GMT version 3.3 or later is strongly recommended.</LI>
+web page</A>. Use of GMT version 3.4 or later is strongly recommended.</LI>
 
 <LI><B>NetCDF</B> version 2.3r2 or later: Both GMT and MB-System require
 the <A HREF="ftp://unidata.ucar.edu/pub/netcdf/netcdf.tar.Z">NCAR netCDF
@@ -215,7 +219,7 @@ Graphics machines xpsview is commonly used. A popular generic alternative
 to these platform specific programs is ghostview.</P>
 
 <CENTER><P><BR>
-Last Updated: $Date: 2003-07-02 19:36:34 $ $Revision: 5.8 $</P></CENTER>
+Last Updated: $Date: 2003-07-02 19:53:51 $ $Revision: 5.9 $</P></CENTER>
 
 <P>
 <HR WIDTH="67%"></P>
