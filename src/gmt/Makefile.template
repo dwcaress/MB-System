@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 4.0 1994-05-24 02:31:58 caress Exp $
+#	$Id: Makefile.template,v 4.1 1994-06-13 20:18:05 caress Exp $
 #
 #     Copyright (c) 1993, 1994 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.0  1994/05/24  02:31:58  caress
+# First cut.
+#
 #
 
 # *** CHANGE THESE TO FIT YOUR LOCAL ENVIRONMENT ***
@@ -57,6 +60,8 @@ grdmakecmd.o:	grdmakecmd.c  $(INCDIR)/mb_status.h
 	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) grdmakecmd.c
 mbcontour.o:	mbcontour.c $(INCDIR)/mb_status.h $(INCDIR)/mb_contour.h
 	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) mbcontour.c
+mbcontourfilter.o:	mbcontour.c $(INCDIR)/mb_status.h $(INCDIR)/mb_contour.h
+	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) -DMBCONTOURFILTER mbcontour.c -o mbcontourfilter.o
 mb_truecont.o:	mb_truecont.c  $(INCDIR)/mb_status.h $(INCDIR)/mb_contour.h
 	$(CC) -c $(CFLAGS) mb_truecont.c
 mb_delaun.o:	mb_delaun.c  $(INCDIR)/mb_status.h
