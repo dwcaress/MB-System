@@ -4,7 +4,7 @@
 from swath mapping sonar data files.
 
 .SH VERSION
-Version 4.5
+Version 4.6
 
 .SH SYNOPSIS
 \fBmbmosaic\fP \fB-I\fIfilelist\fP \fB-O\fIroot\fP 
@@ -481,7 +481,7 @@ the mosaic to be filled in through spine interpolation .
 The output looks like:
  
  Program mbmosaic
- Version $Id: mbmosaic.l,v 4.3 1998-10-05 19:47:23 caress Exp $
+ Version $Id: mbmosaic.l,v 4.4 1998-10-05 22:20:21 caress Exp $
  MB-system Version 4.5
 
  MBMOSAIC Parameters:

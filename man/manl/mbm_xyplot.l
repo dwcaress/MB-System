@@ -4,7 +4,7 @@
 a GMT plot of xy data.
 
 .SH VERSION
-Version 4.5
+Version 4.6
 
 .SH SYNOPSIS
 \fBmbm_xyplot\fP \fB-I\fP\fI[filepars:]file\fP 

@@ -4,7 +4,7 @@
 from swath sonar data files.
 
 .SH VERSION
-Version 4.5
+Version 4.6
 
 .SH SYNOPSIS
 \fBmbgrid\fP \fB-I\fIfilelist\fP \fB-O\fIroot\fP 
@@ -413,7 +413,7 @@ will be filled in through spine interpolation even in the areas
 not covered by data. The output looks like:
  
  Program MBGRID
- Version $Id: mbgrid.l,v 4.16 1998-10-05 19:47:23 caress Exp $
+ Version $Id: mbgrid.l,v 4.17 1998-10-05 22:20:21 caress Exp $
  MB-system Version 4.5
  
  MBGRID Parameters:

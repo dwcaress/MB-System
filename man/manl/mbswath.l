@@ -4,7 +4,7 @@
 swath plots of swath sonar data using Postscript.
 
 .SH VERSION
-Version 4.5
+Version 4.6
 
 .SH SYNOPSIS
 \fBmbswath\fP \fB-C\fIcptfile\fP \fB-J\fIparameters\fP 

@@ -3,7 +3,7 @@
 \fBmbmerge\fP - Merges swath sonar data with new navigation.
 
 .SH VERSION
-Version 4.5
+Version 4.6
 
 .SH SYNOPSIS
 \fBmbmerge\fP [\fB-A\fIheading_offset\fP \fB-B\fP \fB-F\fIformat 

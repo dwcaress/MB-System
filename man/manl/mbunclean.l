@@ -3,7 +3,7 @@
 \fBmbunclean\fP - Unflags edited beams in swath sonar bathymetry data.
 
 .SH VERSION
-Version 4.5
+Version 4.6
 
 .SH SYNOPSIS
 \fBmbunclean\fP [\fB-B\fIlow/high \fB-F\fIformat \fB-L\fIlonflip\fP 

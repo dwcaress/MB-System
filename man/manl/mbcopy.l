@@ -3,7 +3,7 @@
 \fBmbcopy\fP - Copy swath sonar bathymetry data files.
 
 .SH VERSION
-Version 4.5
+Version 4.6
 
 .SH SYNOPSIS
 \fBmbcopy\fP [\fB-B\fIyr/mo/da/hr/mn/sc\fP \fB-C\fIcommentfile\fP 

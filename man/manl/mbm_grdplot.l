@@ -4,7 +4,7 @@
 a GMT map of gridded data in a GMT grd file.
 
 .SH VERSION
-Version 4.5
+Version 4.6
 
 .SH SYNOPSIS
 \fBmbm_grdplot\fP \fB-I\fP\fIfile\fP 

@@ -4,7 +4,7 @@
 new sound velocity profile, roll bias, pitch bias and draft values.
 
 .SH VERSION
-Version 4.5
+Version 4.6
 
 .SH SYNOPSIS
 \fBmbbath\fP [\fB-B\fIroll_bias\fP 

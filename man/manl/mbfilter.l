@@ -4,7 +4,7 @@
 amplitude, or bathymetry data from swath sonar data files.
 
 .SH VERSION
-Version 4.5
+Version 4.6
 
 .SH SYNOPSIS
 \fBmbfilter\fP [\fB-A\fIkind\fP \fB-B\fIyr/mo/da/hr/mn/sc 

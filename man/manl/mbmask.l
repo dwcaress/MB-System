@@ -4,7 +4,7 @@
 file and apply to another.
 
 .SH VERSION
-Version 4.5
+Version 4.6
 
 .SH SYNOPSIS
 \fBmbgetmask\fP [\fB-F\fPformat \fB-B\fPyr/mo/da/hr/mn/sc \fB-E\fPyr/mo/da/hr/mn/sc \fB-S\fPspeed \fB-I\fPinfile \fB-V -H\fP]

@@ -3,7 +3,7 @@
 \fBmbio\fP - Format independent input/output library for swath mapping sonar data.
 
 .SH VERSION
-Version 4.5
+Version 4.6
 
 .SH DESCRIPTION
 \fBMBIO\fP (\fBM\fPulti\fBB\fPeam \fBI\fPnput/\fBO\fPutput) is a library

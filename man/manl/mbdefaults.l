@@ -3,7 +3,7 @@
 \fBmbdefaults\fP - Set or list default mbio parameters for reading and writing swath sonar data
 
 .SH VERSION
-Version 4.5
+Version 4.6
 
 .SH SYNOPSIS
 \fBmbdefaults\fP [\fB-B\fIyr/mo/da/hr/mn/sc \fB-D\fIpsdisplay \fB-E\fIyr/mo/da/hr/mn/sc 

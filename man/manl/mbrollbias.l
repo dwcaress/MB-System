@@ -3,7 +3,7 @@
 \fBmbrollbias\fP - Assess roll bias of swath sonar sonar systems.
 
 .SH VERSION
-Version 4.5
+Version 4.6
 
 .SH SYNOPSIS
 \fBmbrollbias\fP \fB-F\fIformat1/format2 \fB-L\fIlonflip \fB-I\fIfile1 \fB-J\fIfile2 \fB-R\fIwest/east/south/north [\fB-D\fIxdim/ydim \fB-H -V\fI]
@@ -106,7 +106,7 @@ Run \fBmbrollbias\fP as follows:
 The output looks like:
 
  Program mbrollbias
- Version $Id: mbrollbias.l,v 4.10 1998-10-05 19:47:23 caress Exp $
+ Version $Id: mbrollbias.l,v 4.11 1998-10-05 22:20:21 caress Exp $
  MB-system Version 4.00
 
  mbrollbias Parameters:

@@ -3,7 +3,7 @@
 \fBmbvelocitytool\fP - Interactive water sound velocity profile editor.
 
 .SH VERSION
-Version 4.5
+Version 4.6
 
 .SH SYNOPSIS
 \fBmbvelocitytool\fP [\fB-B\fIyr/mo/da/hr/mn/sc\fP 

@@ -4,7 +4,7 @@
 a GMT plot of swath sonar swath data.
 
 .SH VERSION
-Version 4.5
+Version 4.6
 
 .SH SYNOPSIS
 \fBmbm_plot\fP \fB-F\fP\fIformat\fP \fB-I\fP\fIfile\fP 

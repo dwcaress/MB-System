@@ -3,7 +3,7 @@
 \fBmbm_xbt\fP - Calculate sound velocity from XBT data.
 
 .SH VERSION
-Version 4.5
+Version 4.6
 
 .SH SYNOPSIS
 \fBmbm_xbt\fP \fB-I\fIinfile\fP [\fB-F\fI\fIformat\fP 

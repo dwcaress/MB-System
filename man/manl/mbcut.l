@@ -4,7 +4,7 @@
 in swath sonar data.
 
 .SH VERSION
-Version 4.5
+Version 4.6
 
 .SH SYNOPSIS
 \fBmbcut\fP [\fB-A\fIkind/mode/min/max\fP \fB-B\fIyr/mo/da/hr/mn/sc 

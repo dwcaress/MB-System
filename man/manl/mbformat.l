@@ -4,7 +4,7 @@
 supported by the \fBMBIO\fP library.
 
 .SH VERSION
-Version 4.5
+Version 4.6
 
 .SH SYNOPSIS
 \fBmbformat\fP [\fB -A -F\fIformat \fB -L -V -H\fP]

@@ -3,7 +3,7 @@
 \fBhsdump\fP - hsdump lists the information contained in Hydrosweep DS data files.
 
 .SH VERSION
-Version 4.5
+Version 4.6
 
 .SH SYNOPSIS
 \fBhsdump\fP [\fB-F\fIformat \fB-I\fIinfile \fB-O\fIkind \fB-V -H\fP]

@@ -4,7 +4,7 @@
 a GMT 3D perspective plot of gridded data in a GMT grd file.
 
 .SH VERSION
-Version 4.5
+Version 4.6
 
 .SH SYNOPSIS
 \fBmbm_grd3dplot\fP \fB-I\fP\fIfile\fP 

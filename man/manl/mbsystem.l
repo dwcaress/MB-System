@@ -4,7 +4,7 @@
 processing swath sonar bathymetry, amplitude, and sidescan data.
 
 .SH VERSION
-Version 4.5
+Version 4.6
 
 .SH INTRODUCTION
 The \fBMB-System\fP is a software package consisting of programs which 

@@ -3,7 +3,7 @@
 \fBmbedit\fP - Interactive editor used to flag bad bathymetry values in swath sonar bathymetry data.
 
 .SH VERSION
-Version 4.5
+Version 4.6
 
 .SH SYNOPSIS
 \fBmbedit\fP [\fB-B\fIyr/mo/da/hr/mn/sc\fP 
