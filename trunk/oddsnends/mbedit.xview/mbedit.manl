@@ -207,6 +207,9 @@ clicking the left mouse button will cause any beam under the cursor
 while the left mouse button is held down to be unflagged.
 The edit mode can also be set using the \fBMode\fP button.
 
+.SH SEE ALSO
+\fBmbsystem\fP(l), \fBmbclean\fP(l), \fBmbunclean\fP(l), \fBmbinfo\fP(l)
+
 .SH BUGS
 There are many shortcomings to this program:
 

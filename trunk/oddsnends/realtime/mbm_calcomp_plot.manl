@@ -152,6 +152,9 @@ paper and then instruct the user how to set up the plotter.
 And the plot will come out slowly and noisily in all the low-tech
 glory of an ancient pen plotter...
 
+.SH SEE ALSO
+\fBmbsystem\fP(l), \fBmbcontourfilter\fP(l), \fBmbplotfilter\fP(l)
+
 .SH BUGS
 The realtime plotting dies occasionally for no apparent reason.  It
 is then necessary to restart the plotting using a new beginning
