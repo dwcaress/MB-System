@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	4/8/93
- *    $Id: mbedit_prog.c,v 5.2 2001-01-22 07:40:13 caress Exp $
+ *    $Id: mbedit_prog.c,v 5.3 2001-01-23 01:17:34 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -27,6 +27,9 @@
  * Date:	September 19, 2000 (New version - no buffered i/o)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2001/01/22  07:40:13  caress
+ * Version 5.0.0beta01
+ *
  * Revision 5.1  2000/12/10  20:29:13  caress
  * Version 5.0.alpha02
  *
@@ -254,7 +257,7 @@ struct mbedit_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbedit_prog.c,v 5.2 2001-01-22 07:40:13 caress Exp $";
+static char rcs_id[] = "$Id: mbedit_prog.c,v 5.3 2001-01-23 01:17:34 caress Exp $";
 static char program_name[] = "MBedit";
 static char help_message[] =  
 "MBedit is an interactive editor used to identify and flag\n\
@@ -284,7 +287,7 @@ double	timegap;
 int	beams_bath;
 int	beams_amp;
 int	pixels_ss;
-char	ifile[128];
+char	ifile[MB_PATH_MAXLINE];
 char	*imbio_ptr = NULL;
 char	*ombio_ptr = NULL;
 int	output_mode = MBEDIT_OUTPUT_EDIT;
@@ -333,19 +336,19 @@ int	nbuff = 0;
 int	current_id = 0;
 int	nload_total = 0;
 int	ndump_total = 0;
-char	last_ping[128];
+char	last_ping[MB_PATH_MAXLINE];
 
 /* save file control variables */
 int	sofile_open = MB_NO;
-char	sifile[128];
-char	sofile[128];
+char	sifile[MB_PATH_MAXLINE];
+char	sofile[MB_PATH_MAXLINE];
 FILE	*sifp;
 FILE	*sofp;
 int	neditsave;
 double	*editsave_time_d;
 int	*editsave_beam;
 int	*editsave_action;
-char	notice[128];
+char	notice[MB_PATH_MAXLINE];
 
 /* filter variables */
 int	filter_medianspike = MB_NO;
@@ -3345,7 +3348,7 @@ int mbedit_get_format(char *file, int *form)
 	/* local variables */
 	char	*function_name = "mbedit_get_format";
 	int	status = MB_SUCCESS;
-	char	tmp[128];
+	char	tmp[MB_PATH_MAXLINE];
 	int	tform;
 	int	i;
 
@@ -3389,10 +3392,6 @@ int mbedit_open_file(char *file, int form, int savemode)
 	/* local variables */
 	char	*function_name = "mbedit_open_file";
 	int	status = MB_SUCCESS;
-	char	*mb_suffix;
-	char	*sb_suffix;
-	int	mb_len;
-	int	sb_len;
 	struct stat file_status;
 	int	fstat;
 	char	command[MB_PATH_MAXLINE];
@@ -3403,7 +3402,7 @@ int mbedit_open_file(char *file, int form, int savemode)
 
 	/* time, user, host variables */
 	time_t	right_now;
-	char	date[25], user[128], *user_ptr, host[128];
+	char	date[25], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -4181,7 +4180,7 @@ int mbedit_plot_all(
 	int	swidth, sascent, sdescent;
 	int	xcen;
 	int	y, dy, first, xold, yold;
-	char	string[128];
+	char	string[MB_PATH_MAXLINE];
 	char	*string_ptr;
 	int	fpx, fpdx, fpy, fpdy;
 
