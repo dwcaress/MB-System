@@ -713,7 +713,7 @@ object label_about_version : XmLabel widget {
     arguments {
         XmNfontList = font_table(
 		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1'));
-        XmNlabelString = compound_string("MB-System Release 4.5");
+        XmNlabelString = compound_string("MB-System Release 4.6");
         XmNx = 10;
         XmNy = 350;
         XmNwidth = 450;
@@ -729,7 +729,7 @@ object label_about_date : XmLabel widget {
     arguments {
         XmNfontList = font_table(
 		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1'));
-        XmNlabelString = compound_string("April 4, 1997");
+        XmNlabelString = compound_string("October 9, 1998");
         XmNx = 10;
         XmNy = 370;
         XmNwidth = 450;

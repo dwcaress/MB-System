@@ -1562,7 +1562,7 @@ Widget parent;
         CONVERT(parent, "-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1", 
         XmRFontList, 0, &argok)); if (argok) ac++;
     XtSetArg(args[ac], XmNlabelString, 
-        CONVERT(parent, "April 4, 1997", 
+        CONVERT(parent, "October 9, 1998", 
         XmRXmString, 0, &argok)); if (argok) ac++;
     XtSetArg(args[ac], XmNx, 10); ac++;
     XtSetArg(args[ac], XmNy, 370); ac++;
@@ -1579,7 +1579,7 @@ Widget parent;
         CONVERT(parent, "-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1", 
         XmRFontList, 0, &argok)); if (argok) ac++;
     XtSetArg(args[ac], XmNlabelString, 
-        CONVERT(parent, "MB-System Release 4.5", 
+        CONVERT(parent, "MB-System Release 4.6", 
         XmRXmString, 0, &argok)); if (argok) ac++;
     XtSetArg(args[ac], XmNx, 10); ac++;
     XtSetArg(args[ac], XmNy, 350); ac++;
