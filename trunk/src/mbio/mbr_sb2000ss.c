@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sb2000ss.c	10/14/94
- *	$Id: mbr_sb2000ss.c,v 4.0 1994-10-21 12:34:58 caress Exp $
+ *	$Id: mbr_sb2000ss.c,v 4.1 1994-12-16 22:38:51 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	October 14, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/10/21  12:34:58  caress
+ * Release V4.0
+ *
  * Revision 1.1  1994/10/21  12:20:01  caress
  * Initial revision
  *
@@ -54,7 +57,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_sb2000ss.c,v 4.0 1994-10-21 12:34:58 caress Exp $";
+ static char res_id[]="$Id: mbr_sb2000ss.c,v 4.1 1994-12-16 22:38:51 caress Exp $";
 	char	*function_name = "mbr_alm_sb2000ss";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -975,8 +978,11 @@ int	*error;
 
 		/* put sidescan values 
 			into sb2000ss data structure */
-		set_pixel_size = MB_YES;
-		for (i=0;i<MBF_SB2000SS_PIXELS;i++)
+		if (store != NULL)
+			set_pixel_size = MB_YES;
+		else
+			set_pixel_size = MB_YES;
+		for (i=0;i<data->pixels_ss;i++)
 			{
 			data->ss[i+1] = mb_io_ptr->new_ss[i];;
 			if (set_pixel_size == MB_YES
@@ -984,7 +990,7 @@ int	*error;
 				{
 				data->pixel_size = 
 					mb_io_ptr->new_ss_acrosstrack[i]/
-					(i - MBF_SB2000SS_PIXELS/2);
+					(i - data->pixels_ss/2);
 				set_pixel_size = MB_NO;
 				}
 			}
