@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_xtfr8101.c	8/8/94
- *	$Id: mbr_xtfr8101.c,v 5.0 2001-09-17 23:24:10 caress Exp $
+ *	$Id: mbr_xtfr8101.c,v 5.1 2001-10-12 21:08:37 caress Exp $
  *
  *    Copyright (c) 2001 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	August 26, 2001
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2001/09/17  23:24:10  caress
+ * Added XTF format.
+ *
 *
  *
  */
@@ -72,7 +75,7 @@ int mbr_wt_xtfr8101(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_xtfr8101(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_xtfr8101.c,v 5.0 2001-09-17 23:24:10 caress Exp $";
+	static char res_id[]="$Id: mbr_xtfr8101.c,v 5.1 2001-10-12 21:08:37 caress Exp $";
 	char	*function_name = "mbr_register_xtfr8101";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -202,7 +205,7 @@ int mbr_info_xtfr8101(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_xtfr8101.c,v 5.0 2001-09-17 23:24:10 caress Exp $";
+	static char res_id[]="$Id: mbr_xtfr8101.c,v 5.1 2001-10-12 21:08:37 caress Exp $";
 	char	*function_name = "mbr_info_xtfr8101";
 	int	status = MB_SUCCESS;
 
@@ -224,7 +227,7 @@ int mbr_info_xtfr8101(int verbose,
 	*pixels_ss_max = MBSYS_RESON8K_MAXPIXELS;
 	strncpy(format_name, "XTFR8101", MB_NAME_LENGTH);
 	strncpy(system_name, "RESON8K", MB_NAME_LENGTH);
-	strncpy(format_description, "Format name:          MBF_XTFR8101\nInformal Description: Reson SeaBat 8101 shallow water multibeam\nAttributes:           101 beam bathymetry,\n                      ASCII, read-only, Coastal Oceanographics.\n", MB_DESCRIPTION_LENGTH);
+	strncpy(format_description, "Format name:          MBF_XTFR8101\nInformal Description: XTF format Reson SeaBat 81XX\nAttributes:           240 beam bathymetry and amplitude,\n		      1024 pixel sidescan\n                      binary, read-only,\n                      Triton-Elics.\n", MB_DESCRIPTION_LENGTH);
 	*numfile = 1;
 	*filetype = MB_FILETYPE_NORMAL;
 	*variable_beams = MB_NO;
@@ -271,7 +274,7 @@ int mbr_info_xtfr8101(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_xtfr8101(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_xtfr8101.c,v 5.0 2001-09-17 23:24:10 caress Exp $";
+	static char res_id[]="$Id: mbr_xtfr8101.c,v 5.1 2001-10-12 21:08:37 caress Exp $";
 	char	*function_name = "mbr_alm_xtfr8101";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -422,7 +425,7 @@ int mbr_rt_xtfr8101(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	struct mbsys_reson8k_struct *store;
 	int	nchan;
 	int	time_i[7];
-	double	time_d, ntime_d, dtime;
+	double	time_d, ntime_d, dtime, timetag;
 	double	ttscale, angscale;
 	int	icenter, istart, quality;
 	int	intensity_max;
@@ -531,6 +534,7 @@ int mbr_rt_xtfr8101(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			store->comment[i] = data->comment[i];
 
 		/* survey data */
+		store->png_latency = 0.001 * data->reson8100rit.latency;
 		time_i[0] = data->bathheader.Year;
 		time_i[1] = data->bathheader.Month;
 		time_i[2] = data->bathheader.Day;
@@ -539,19 +543,43 @@ int mbr_rt_xtfr8101(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		time_i[5] = data->bathheader.Second;
 		time_i[6] = 10000 * data->bathheader.HSeconds;
 		mb_get_time(verbose, time_i,  &(store->png_time_d));
-		store->png_latency = 0.0;
+		store->png_time_d -= store->png_latency;
 		store->png_latitude = data->bathheader.SensorYcoordinate;
 		store->png_longitude = data->bathheader.SensorXcoordinate;
 		store->png_speed = 0.0;
-		store->png_roll = data->bathheader.SensorRoll;
-		store->png_pitch = data->bathheader.SensorPitch;
-		store->png_heading = data->bathheader.SensorHeading;
-		store->png_heave = data->bathheader.Heave;
+		
+		/* interpolate attitude if possible */
+		if (mb_io_ptr->nattitude > 1)
+		    {
+		    timetag = 0.001 * data->bathheader.AttitudeTimeTag 
+				    - store->png_latency 
+				    + 2.0 * ((double)data->reson8100rit.range_set) 
+					    / ((double)data->reson8100rit.velocity);
+		    mb_attint_interp(verbose, mbio_ptr, timetag,  
+			    &(store->png_heave), &(store->png_roll), 
+			    &(store->png_pitch), error);
+		    mb_hedint_interp(verbose, mbio_ptr, timetag,  
+			    &(store->png_heading), error);
+fprintf(stderr, "roll: %d %f %f %f %f   latency:%f time:%f %f roll:%f\n", 
+mb_io_ptr->nattitude, 
+mb_io_ptr->attitude_time_d[0], 
+mb_io_ptr->attitude_time_d[mb_io_ptr->nattitude-1], 
+mb_io_ptr->attitude_roll[0], 
+mb_io_ptr->attitude_roll[mb_io_ptr->nattitude-1], 
+store->png_latency, (double)(0.001 * data->bathheader.AttitudeTimeTag), 
+timetag, store->png_roll);
+		    }
+		else
+		    {
+		    store->png_roll = data->bathheader.SensorRoll;
+		    store->png_pitch = data->bathheader.SensorPitch;
+		    store->png_heading = data->bathheader.SensorHeading;
+		    store->png_heave = data->bathheader.Heave;
+		    }
 		
 		/* interpolate nav if possible */
 		mb_navint_interp(verbose, mbio_ptr, store->png_time_d, store->png_heading, 0.0, 
 		    &(store->png_longitude), &(store->png_latitude), &(store->png_speed), error);
-
 	
 		store->packet_type = data->reson8100rit.packet_type;      		/* identifier for packet type  */
 		store->packet_subtype = data->reson8100rit.packet_subtype;   		/* identifier for packet subtype */
@@ -769,6 +797,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error)
 	int	skip;
 	int	quality;
 	mb_u_char *mb_u_char_ptr;
+	double	timetag, heave, roll, pitch, heading;
 	int	i;
 
 	/* print input debug statements */
@@ -1107,7 +1136,21 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error)
 			attitudeheader->Reserved3[i] = line[index];
 			index++;
 			}
-    
+			
+		    /* add attitude to list for interpolation */
+		    timetag = 0.001 *  attitudeheader->TimeTag;
+		    heave = attitudeheader->Heave;
+		    roll = attitudeheader->Roll;
+		    pitch = attitudeheader->Pitch;
+		    heading = attitudeheader->Heading;
+
+		    /* add latest attitude to list */
+		    mb_attint_add(verbose, mbio_ptr, 
+				    timetag, heave, roll, pitch, 
+				    error);
+		    mb_hedint_add(verbose, mbio_ptr, 
+				    timetag, heading, error);
+	
 		    /* print debug statements */
 		    if (verbose >= 5)
 			{

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	4/21/96
- *    $Id: mb_define.h,v 5.7 2001-09-17 23:25:13 caress Exp $
+ *    $Id: mb_define.h,v 5.8 2001-10-12 21:10:41 caress Exp $
  *
  *    Copyright (c) 1996, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	April 21, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2001/09/17 23:25:13  caress
+ * Added format 84
+ *
  * Revision 5.6  2001/07/20  00:32:54  caress
  * Release 5.0.beta03
  *
@@ -76,8 +79,8 @@
 #define MB_NAME_LENGTH		32
 #define MB_DESCRIPTION_LENGTH	2048
 
-/* maximum number of navigation points saved */
-#define MB_NAV_SAVE_MAX 30
+/* maximum number of asynchronous data saved */
+#define MB_ASYNCH_SAVE_MAX 40
 
 /* maximum size of SVP profiles */
 #define MB_SVP_MAX 1024
@@ -384,6 +387,18 @@ int mb_navint_add(int verbose, void *mbio_ptr,
 int mb_navint_interp(int verbose, void *mbio_ptr, 
 		double time_d, double heading, double rawspeed, 
 		double *lon, double *lat, double *speed, 
+		int *error);
+int mb_attint_add(int verbose, void *mbio_ptr, 
+		double time_d, double heave, 
+		double roll, double pitch, int *error);
+int mb_attint_interp(int verbose, void *mbio_ptr, 
+		double time_d, double *heave, 
+		double *roll, double *pitch, 
+		int *error);
+int mb_hedint_add(int verbose, void *mbio_ptr, 
+		double time_d, double heading, int *error);
+int mb_hedint_interp(int verbose, void *mbio_ptr, 
+		double time_d, double *heading, 
 		int *error);
 int mb_get_double(double *, char *, int);
 int mb_get_int(int *, char *, int);
