@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.h	1/19/93
- *    $Id: mb_format.h,v 5.2 2001-03-22 20:50:02 caress Exp $
+ *    $Id: mb_format.h,v 5.3 2001-04-06 22:05:59 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -19,6 +19,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2001/03/22  20:50:02  caress
+ * Trying to make version 5.0.beta0
+ *
  * Revision 5.1  2000/12/10  20:26:50  caress
  * Version 5.0.alpha02
  *
@@ -251,11 +254,6 @@
 					151 beam bathymetry and amplitude,
 					binary, centered,
 					SeaBeam Instruments and L-DEO */ 
-#define	MBF_SB2120XS	44	/* SeaBeam 2120 series vendor format, 
-					151 beam bathymetry and amplitude,
-					2000 pixel sidescan, centered, 
-					20 KHZ, binary XSE Format
-					SeaBeam Instruments and ELAC */ 
 #define	MBF_EMOLDRAW	51	/* Old Simrad vendor multibeam format,
 					Simrad EM1000, EM12S, EM12D, 
 					EM121 multibeam sonars,
@@ -309,9 +307,13 @@
 #define	MBF_BCHRXUNB	93	/* Elac BottomChart multibeam, 56 beams
  					bathymetry and amplitude,
  					binary, University of New Brunswick. */
-#define	MBF_ELMK2XSE	94	/* ELAC and SeaBeam multibeam, 126 beams
- 					bathymetry and amplitude, 2000 pixels sidescan, 
- 					binary, L-3 Communications ELAC Nautik. */
+#define	MBF_L3XSERAW	94	/* ELAC/SeaBeam XSE vendor format
+					Bottomchart MkII 50 kHz and 180 kHz multibeam, 
+					SeaBeam 2120 20 KHz multibeam,
+					bathymetry, amplitude and sidescan,
+					variable beams and pixels, binary, 
+					L3 Communications (Elac Nautik 
+					and SeaBeam Instruments). */
 #define MBF_HSMDARAW    101     /* Hydroseep MD multibeam raw format, 40 beam 
 					bathymetry, 160 pixel sidescan,
 					xdr binary, Atlas Electronik. */

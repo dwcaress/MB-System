@@ -1,31 +1,36 @@
 /*--------------------------------------------------------------------
- *    The MB-system:	mbsys_xse.c	3.00	9/1/99
- *	$Id: mbsys_xse.c,v 5.2 2001-01-22 07:43:34 caress Exp $
+ *    The MB-system:	mbsys_xse.c	3/27/2000
+ *	$Id: mbsys_xse.c,v 5.3 2001-04-06 22:05:59 caress Exp $
  *
- *    Copyright (c) 1994, 2000 by
- *    David W. Caress (caress@mbari.org)
+ *    Copyright (c) 2000 by 
+ *    D. W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
- *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
  *      Lamont-Doherty Earth Observatory
- *      Palisades, NY 10964
+ *      Palisades, NY  10964
  *
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- * mbsys_xse.h contains the functions for handling the data structure
- * used by MBIO functions to store swath sonar data in the 
- * XSE Data Exchange Format developed by L-3 Communications ELAC Nautik.
+ * mbsys_xse.h contains the functions for handling 
+ * the data structure used by MBIO functions 
+ * to store swath sonar data in the XSE Data Exchange Format
+ * developed by L-3 Communications ELAC Nautik.
  * This format is used for data from ELAC Bottomchart multibeam sonars
  * and SeaBeam 2100 multibeam sonars (made by L-3 Communications
  * SeaBeam Instruments).
  * The data format associated with XSE is:
- *      MBF_ELMK2XSE : MBIO ID 94
+ *      MBF_L3XSERAW : MBIO ID 94
  *
  * Author:	D. W. Caress
  * Date:	August 1,  1999
+ * Additional Authors:	P. A. Cohen and S. Dzurenko
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2001/01/22  07:43:34  caress
+ * Version 5.0.beta01
+ *
  * Revision 5.1  2000/12/10  20:26:50  caress
  * Version 5.0.alpha02
  *
@@ -40,6 +45,7 @@
  *
  * Revision 4.0  1999/08/08  04:14:35  caress
  * Initial revision.
+ *
  *
  *
  */
@@ -60,7 +66,7 @@
 int mbsys_xse_alloc(int verbose, char *mbio_ptr, char **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_xse.c,v 5.2 2001-01-22 07:43:34 caress Exp $";
+ static char res_id[]="$Id: mbsys_xse.c,v 5.3 2001-04-06 22:05:59 caress Exp $";
 	char	*function_name = "mbsys_xse_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -210,6 +216,35 @@ int mbsys_xse_alloc(int verbose, char *mbio_ptr, char **store_ptr,
 	store->sid_num_pixels = 0;		/* number of pixels */
 	for (i=0;i<MBSYS_XSE_MAXPIXELS;i++)
 	    store->ss[i] = 0; /* sidescan amplitude in dB */
+
+	/* seabeam (seabeam frames) */
+	store->sbm_properties = MB_NO;		/* boolean flag - sbm properties group read */
+	store->sbm_hrp = MB_NO;			/* boolean flag - sbm hrp group read */
+	store->sbm_center = MB_NO;		/* boolean flag - sbm center group read */
+	store->sbm_message = MB_NO;		/* boolean flag - sbm message group read */
+	store->sbm_source = 0;			/* sensor id */
+	store->sbm_sec = 0;			/* sec since 1/1/1901 00:00 */
+	store->sbm_usec = 0;			/* microseconds */
+	store->sbm_ping = 0;			/* ping number */
+	store->sbm_ping_gain = 0.0;		/* ping gain (dB) */
+	store->sbm_pulse_width = 0.0;		/* pulse width (s) */
+	store->sbm_transmit_power = 0.0;	/* transmit power (dB) */
+	store->sbm_pixel_width = 0.0;		/* pixel width (m) */
+	store->sbm_swath_width = 0.0;		/* swath width (radians) */
+	store->sbm_time_slice = 0.0;		/* time slice (s) */
+	store->sbm_depth_mode = 0;		/* depth mode (1=shallow, 2=deep) */
+	store->sbm_beam_mode = 0;		/* focused beam mode (0=off, 1=on) */
+	store->sbm_heave = 0.0;			/* heave (m) */
+	store->sbm_roll = 0.0;			/* roll (radians) */
+	store->sbm_pitch = 0.0;			/* pitch (radians) */
+	store->sbm_center_beam = 0;		/* beam number for center beam profile */
+	store->sbm_center_count = 0;		/* number of samples in center beam profile */
+	for (i=0;i<MBSYS_XSE_MAXPIXELS;i++)
+	    store->sbm_center_amp[i] = 0.0;	/* center beam profile values */
+	store->sbm_message_id = 0;			/* seabeam message id */
+	store->sbm_message_len = 0;			/* seabeam message length */
+	for (i=0;i<MBSYS_XSE_COMMENT_LENGTH;i++)
+	    store->sbm_message_txt[i] = 0; /* seabeam message */
 
 	/* comment */
 	for (i=0;i<MBSYS_XSE_COMMENT_LENGTH;i++)
@@ -409,59 +444,11 @@ int mbsys_xse_extract(int verbose, char *mbio_ptr, char *store_ptr,
 			}
 		    }
 
-		/* print debug statements */
-		if (verbose >= 5)
-			{
-			fprintf(stderr,"\ndbg4  Data extracted by MBIO function <%s>\n",
-				function_name);
-			fprintf(stderr,"dbg4  Extracted values:\n");
-			fprintf(stderr,"dbg4       kind:       %d\n",
-				*kind);
-			fprintf(stderr,"dbg4       error:      %d\n",
-				*error);
-			fprintf(stderr,"dbg4       time_i[0]:  %d\n",
-				time_i[0]);
-			fprintf(stderr,"dbg4       time_i[1]:  %d\n",
-				time_i[1]);
-			fprintf(stderr,"dbg4       time_i[2]:  %d\n",
-				time_i[2]);
-			fprintf(stderr,"dbg4       time_i[3]:  %d\n",
-				time_i[3]);
-			fprintf(stderr,"dbg4       time_i[4]:  %d\n",
-				time_i[4]);
-			fprintf(stderr,"dbg4       time_i[5]:  %d\n",
-				time_i[5]);
-			fprintf(stderr,"dbg4       time_i[6]:  %d\n",
-				time_i[6]);
-			fprintf(stderr,"dbg4       time_d:     %f\n",
-				*time_d);
-			fprintf(stderr,"dbg4       longitude:  %f\n",
-				*navlon);
-			fprintf(stderr,"dbg4       latitude:   %f\n",
-				*navlat);
-			fprintf(stderr,"dbg4       speed:      %f\n",
-				*speed);
-			fprintf(stderr,"dbg4       heading:    %f\n",
-				*heading);
-			fprintf(stderr,"dbg4       nbath:      %d\n",
-				*nbath);
-			for (i=0;i<*nbath;i++)
-			  fprintf(stderr,"dbg4       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n",
-				i,beamflag[i],bath[i],bathacrosstrack[i],bathalongtrack[i]);
-			fprintf(stderr,"dbg4       namp:       %d\n",
-				*namp);
-			for (i=0;i<*namp;i++)
-			  fprintf(stderr,"dbg4        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n",
-				i,amp[i],bathacrosstrack[i],bathalongtrack[i]);
-			fprintf(stderr,"dbg4       nss:        %d\n",
-				*nss);
-			for (i=0;i<*nss;i++)
-			  fprintf(stderr,"dbg4        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n",
-				i,ss[i],ssacrosstrack[i],ssalongtrack[i]);
-			}
+		/* done translating values */
+
 		}
 
-	/* extract nav from structure */
+	/* extract data from structure */
 	else if (*kind == MB_DATA_NAV)
 		{
 		/* get time */
@@ -471,8 +458,8 @@ int mbsys_xse_extract(int verbose, char *mbio_ptr, char *store_ptr,
 		mb_get_date(verbose,*time_d,time_i);
 
 		/* get navigation */
-		*navlon = store->nav_x;
-		*navlat = store->nav_y;
+		*navlon = RTD * store->nav_x;
+		*navlat = RTD * store->nav_y;
 		if (mb_io_ptr->lonflip < 0)
 			{
 			if (*navlon > 0.) 
@@ -505,6 +492,9 @@ int mbsys_xse_extract(int verbose, char *mbio_ptr, char *store_ptr,
 		*nbath = 0;
 		*namp = 0;
 		*nss = 0;
+
+		/* done translating values */
+
 		}
 
 	/* extract comment from structure */
@@ -662,7 +652,7 @@ int mbsys_xse_insert(int verbose, char *mbio_ptr, char *store_ptr,
 	/* set data kind */
 	store->kind = kind;
 
-	/* insert survey data in structure */
+	/* insert data in structure */
 	if (store->kind == MB_DATA_DATA)
 		{
 		/* get time */
@@ -737,8 +727,6 @@ int mbsys_xse_insert(int verbose, char *mbio_ptr, char *store_ptr,
 			}
 		    }
 		}
-
-	/* insert nav in structure */
 	else if (store->kind == MB_DATA_NAV)
 		{
 		/* get time */
@@ -851,18 +839,25 @@ int mbsys_xse_ttimes(int verbose, char *mbio_ptr, char *store_ptr,
 			mb_rollpitch_to_takeoff(verbose, 
 			    alpha, beta, &angles[j], 
 			    &angles_forward[j], error);
-			if (store->beams[j].angle < 0.0)
+			if (store->mul_frequency >= 50.0)
+			    {
+			    if (store->beams[j].angle < 0.0)
 				{
 				angles_null[j] = 37.5 
 					+ RTD 
 					* store->par_trans_err_port;
 				}
-			else
+			    else
 				{
 				angles_null[j] = 37.5 
 					+ RTD 
 					* store->par_trans_err_stbd;
 				}
+			    }
+			else
+			    {
+			    angles_null[j] = 0.0;
+			    }
 			heave[j] = store->beams[i].heave;
 			alongtrack_offset[j] 
 			    = 0.5 * store->nav_speed_ground 
@@ -1110,10 +1105,6 @@ int mbsys_xse_extract_nav(int verbose, char *mbio_ptr, char *store_ptr,
 		/* get speed  */
 		*speed  = 1.8 * store->nav_speed_ground;
 
-		/* get draft */
-		*draft = 0.5 * (store->par_trans_z_port
-				    + store->par_trans_z_stbd);
-
 		/* get roll pitch and heave */
 		if (store->mul_num_beams > 0)
 			{
@@ -1126,50 +1117,6 @@ int mbsys_xse_extract_nav(int verbose, char *mbio_ptr, char *store_ptr,
 			*roll = 0.0;
 			*pitch = 0.0;
 			*heave = 0.0;
-			}
-
-		/* print debug statements */
-		if (verbose >= 5)
-			{
-			fprintf(stderr,"\ndbg4  Data extracted by MBIO function <%s>\n",
-				function_name);
-			fprintf(stderr,"dbg4  Extracted values:\n");
-			fprintf(stderr,"dbg4       kind:       %d\n",
-				*kind);
-			fprintf(stderr,"dbg4       error:      %d\n",
-				*error);
-			fprintf(stderr,"dbg4       time_i[0]:  %d\n",
-				time_i[0]);
-			fprintf(stderr,"dbg4       time_i[1]:  %d\n",
-				time_i[1]);
-			fprintf(stderr,"dbg4       time_i[2]:  %d\n",
-				time_i[2]);
-			fprintf(stderr,"dbg4       time_i[3]:  %d\n",
-				time_i[3]);
-			fprintf(stderr,"dbg4       time_i[4]:  %d\n",
-				time_i[4]);
-			fprintf(stderr,"dbg4       time_i[5]:  %d\n",
-				time_i[5]);
-			fprintf(stderr,"dbg4       time_i[6]:  %d\n",
-				time_i[6]);
-			fprintf(stderr,"dbg4       time_d:     %f\n",
-				*time_d);
-			fprintf(stderr,"dbg4       longitude:  %f\n",
-				*navlon);
-			fprintf(stderr,"dbg4       latitude:   %f\n",
-				*navlat);
-			fprintf(stderr,"dbg4       speed:      %f\n",
-				*speed);
-			fprintf(stderr,"dbg4       heading:    %f\n",
-				*heading);
-			fprintf(stderr,"dbg4       draft:      %f\n",
-				*draft);
-			fprintf(stderr,"dbg4       roll:       %f\n",
-				*roll);
-			fprintf(stderr,"dbg4       pitch:      %f\n",
-				*pitch);
-			fprintf(stderr,"dbg4       heave:      %f\n",
-				*heave);
 			}
 
 		/* done translating values */
@@ -1216,10 +1163,6 @@ int mbsys_xse_extract_nav(int verbose, char *mbio_ptr, char *store_ptr,
 		/* get speed  */
 		*speed  = 1.8 * store->nav_speed_ground;
 
-		/* get draft */
-		*draft = 0.5 * (store->par_trans_z_port
-				    + store->par_trans_z_stbd);
-
 		/* get roll pitch and heave */
 		if (store->mul_num_beams > 0)
 			{
@@ -1232,50 +1175,6 @@ int mbsys_xse_extract_nav(int verbose, char *mbio_ptr, char *store_ptr,
 			*roll = 0.0;
 			*pitch = 0.0;
 			*heave = 0.0;
-			}
-
-		/* print debug statements */
-		if (verbose >= 5)
-			{
-			fprintf(stderr,"\ndbg4  Data extracted by MBIO function <%s>\n",
-				function_name);
-			fprintf(stderr,"dbg4  Extracted values:\n");
-			fprintf(stderr,"dbg4       kind:       %d\n",
-				*kind);
-			fprintf(stderr,"dbg4       error:      %d\n",
-				*error);
-			fprintf(stderr,"dbg4       time_i[0]:  %d\n",
-				time_i[0]);
-			fprintf(stderr,"dbg4       time_i[1]:  %d\n",
-				time_i[1]);
-			fprintf(stderr,"dbg4       time_i[2]:  %d\n",
-				time_i[2]);
-			fprintf(stderr,"dbg4       time_i[3]:  %d\n",
-				time_i[3]);
-			fprintf(stderr,"dbg4       time_i[4]:  %d\n",
-				time_i[4]);
-			fprintf(stderr,"dbg4       time_i[5]:  %d\n",
-				time_i[5]);
-			fprintf(stderr,"dbg4       time_i[6]:  %d\n",
-				time_i[6]);
-			fprintf(stderr,"dbg4       time_d:     %f\n",
-				*time_d);
-			fprintf(stderr,"dbg4       longitude:  %f\n",
-				*navlon);
-			fprintf(stderr,"dbg4       latitude:   %f\n",
-				*navlat);
-			fprintf(stderr,"dbg4       speed:      %f\n",
-				*speed);
-			fprintf(stderr,"dbg4       heading:    %f\n",
-				*heading);
-			fprintf(stderr,"dbg4       draft:      %f\n",
-				*draft);
-			fprintf(stderr,"dbg4       roll:       %f\n",
-				*roll);
-			fprintf(stderr,"dbg4       pitch:      %f\n",
-				*pitch);
-			fprintf(stderr,"dbg4       heave:      %f\n",
-				*heave);
 			}
 
 		/* done translating values */
@@ -1321,7 +1220,6 @@ int mbsys_xse_extract_nav(int verbose, char *mbio_ptr, char *store_ptr,
 		fprintf(stderr,"dbg2       latitude:      %f\n",*navlat);
 		fprintf(stderr,"dbg2       speed:         %f\n",*speed);
 		fprintf(stderr,"dbg2       heading:       %f\n",*heading);
-		fprintf(stderr,"dbg2       draft:         %f\n",*draft);
 		fprintf(stderr,"dbg2       roll:          %f\n",*roll);
 		fprintf(stderr,"dbg2       pitch:         %f\n",*pitch);
 		fprintf(stderr,"dbg2       heave:         %f\n",*heave);
@@ -1372,7 +1270,6 @@ int mbsys_xse_insert_nav(int verbose, char *mbio_ptr, char *store_ptr,
 		fprintf(stderr,"dbg2       navlat:     %f\n",navlat);
 		fprintf(stderr,"dbg2       speed:      %f\n",speed);
 		fprintf(stderr,"dbg2       heading:    %f\n",heading);
-		fprintf(stderr,"dbg2       draft:      %f\n",draft);
 		fprintf(stderr,"dbg2       roll:       %f\n",roll);
 		fprintf(stderr,"dbg2       pitch:      %f\n",pitch);
 		fprintf(stderr,"dbg2       heave:      %f\n",heave);
@@ -1404,10 +1301,6 @@ int mbsys_xse_insert_nav(int verbose, char *mbio_ptr, char *store_ptr,
 		/* get speed */
 		store->nav_speed_ground = speed / 1.8;
 
-		/* get draft */
-		store->par_trans_z_port = draft;
-		store->par_trans_z_stbd = draft;
-		
 		/* get roll pitch and heave */
 		}
 
@@ -1428,10 +1321,6 @@ int mbsys_xse_insert_nav(int verbose, char *mbio_ptr, char *store_ptr,
 
 		/* get speed */
 		store->nav_speed_ground = speed / 1.8;
-
-		/* get draft */
-		store->par_trans_z_port = draft;
-		store->par_trans_z_stbd = draft;
 
 		/* get roll pitch and heave */
 		}

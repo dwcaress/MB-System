@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sb2000ss.c	10/14/94
- *	$Id: mbr_sb2000ss.c,v 5.3 2001-03-22 20:50:02 caress Exp $
+ *	$Id: mbr_sb2000ss.c,v 5.4 2001-04-06 22:05:59 caress Exp $
  *
  *    Copyright (c) 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	October 14, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2001/03/22  20:50:02  caress
+ * Trying to make version 5.0.beta0
+ *
  * Revision 5.1  2001/01/22  07:43:34  caress
  * Version 5.0.beta01
  *
@@ -140,7 +143,7 @@ int mbr_wt_sb2000ss(int verbose, char *mbio_ptr, char *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_sb2000ss(int verbose, char *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_sb2000ss.c,v 5.3 2001-03-22 20:50:02 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2000ss.c,v 5.4 2001-04-06 22:05:59 caress Exp $";
 	char	*function_name = "mbr_register_sb2000ss";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -270,7 +273,7 @@ int mbr_info_sb2000ss(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_sb2000ss.c,v 5.3 2001-03-22 20:50:02 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2000ss.c,v 5.4 2001-04-06 22:05:59 caress Exp $";
 	char	*function_name = "mbr_info_sb2000ss";
 	int	status = MB_SUCCESS;
 
@@ -339,7 +342,7 @@ int mbr_info_sb2000ss(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_sb2000ss(int verbose, char *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_sb2000ss.c,v 5.3 2001-03-22 20:50:02 caress Exp $";
+ static char res_id[]="$Id: mbr_sb2000ss.c,v 5.4 2001-04-06 22:05:59 caress Exp $";
 	char	*function_name = "mbr_alm_sb2000ss";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -613,54 +616,17 @@ int mbr_rt_sb2000ss(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 	if (status == MB_SUCCESS && store->sensor_size > 0)
 		{
 		/* extract the values */
-		mb_get_binary_short(MB_NO, &buffer[0], &store->ping_number);
-		mb_get_binary_short(MB_NO, &buffer[2], &store->ping_length);
-		mb_get_binary_short(MB_NO, &buffer[4], &store->pixel_size);
-		mb_get_binary_short(MB_NO, &buffer[6], &store->ss_min);
-		mb_get_binary_short(MB_NO, &buffer[8], &store->ss_max);
-		mb_get_binary_short(MB_NO, &buffer[10], &store->sample_rate);
-		mb_get_binary_short(MB_NO, &buffer[12], &store->start_time);
-		mb_get_binary_short(MB_NO, &buffer[14], &store->tot_slice);
-		mb_get_binary_short(MB_NO, &buffer[16], &store->pixels_ss);
-		for (i=0;i<store->sensor_size - 18;i++)
+		mb_get_binary_int(MB_NO, &buffer[0], &store->ping_number);
+		mb_get_binary_short(MB_NO, &buffer[4], &store->ping_length);
+		mb_get_binary_short(MB_NO, &buffer[6], &store->pixel_size);
+		mb_get_binary_short(MB_NO, &buffer[8], &store->ss_min);
+		mb_get_binary_short(MB_NO, &buffer[10], &store->ss_max);
+		mb_get_binary_short(MB_NO, &buffer[12], &store->sample_rate);
+		mb_get_binary_short(MB_NO, &buffer[14], &store->start_time);
+		mb_get_binary_short(MB_NO, &buffer[16], &store->tot_slice);
+		mb_get_binary_short(MB_NO, &buffer[18], &store->pixels_ss);
+		for (i=0;i<store->sensor_size - 20;i++)
 			store->spare_ss[i] = buffer[18+i];
-
-		/* fix some files with incorrect sensor records */
-		if (status == MB_SUCCESS 
-			&& store->kind == MB_DATA_DATA 
-			&& store->data_size == 1001)
-			{
-			store->pixels_ss = 1000;
-			}
-		/* print debug statements */
-		if (status == MB_SUCCESS && verbose >= 5)
-			{
-			fprintf(stderr,"\ndbg5  New sensor record read by MBIO function <%s>\n",
-				function_name);
-			fprintf(stderr,"dbg5  New sensor values:\n");
-			fprintf(stderr,"dbg5       ping_number:     %d\n",
-				store->ping_number);
-			fprintf(stderr,"dbg5       ping_length:     %d\n",
-				store->ping_length);
-			fprintf(stderr,"dbg5       pixel_size:      %d\n",
-				store->pixel_size);
-			fprintf(stderr,"dbg5       ss_min:          %d\n",
-				store->ss_min);
-			fprintf(stderr,"dbg5       ss_max:          %d\n",
-				store->ss_max);
-			fprintf(stderr,"dbg5       sample_rate:     %d\n",
-				store->sample_rate);
-			fprintf(stderr,"dbg5       start_time:      %d\n",
-				store->start_time);
-			fprintf(stderr,"dbg5       tot_slice:       %d\n",
-				store->tot_slice);
-			fprintf(stderr,"dbg5       pixels_ss:       %d\n",
-				store->pixels_ss);
-			fprintf(stderr,"dbg5       spare_ss:        ");
-			for (i=0;i<12;i++)
-				fprintf(stderr,"%c", store->spare_ss[i]);
-			fprintf(stderr, "\n");
-			}
 		}
 
 	/* read data record from file */
@@ -686,14 +652,32 @@ int mbr_rt_sb2000ss(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 	if (status == MB_SUCCESS 
 		&& store->kind == MB_DATA_DATA)
 		{
+
+		/* fix some files with incorrect sensor records */
+		if (buffer[0] == 'G'
+			&& (store->data_size == 1001
+			    || store->data_size == 1004)
+			&& store->pixels_ss != 1000)
+			{
+			store->pixels_ss = 1000;
+			}
+
 		/* correct data size if needed */
-		if (store->data_size == 1001)
+		if (buffer[0] == 'G' && store->data_size == 1001)
 		    {
 		    store->data_size = 1004;
 		    store->ss[1001] = 'G';
 		    store->ss[1002] = 'G';
 		    store->ss[1003] = 'G';
 		    }
+
+		/* fix some files with incorrect data size id's */
+		if (buffer[0] == 'R'
+			&& (2 * store->pixels_ss) > store->data_size
+			&& store->pixels_ss <= MBSYS_SB2000_PIXELS)
+			{
+			buffer[0] = 'G';
+			}
 		    
 		/* deal with 1-byte data */
 		if (buffer[0] == 'G')
@@ -722,6 +706,27 @@ int mbr_rt_sb2000ss(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 			fprintf(stderr,"\ndbg5  New data record read by MBIO function <%s>\n",
 				function_name);
 			fprintf(stderr,"dbg5  New data values:\n");
+			fprintf(stderr,"dbg5       ping_number:     %d\n",
+				store->ping_number);
+			fprintf(stderr,"dbg5       ping_length:     %d\n",
+				store->ping_length);
+			fprintf(stderr,"dbg5       pixel_size:      %d\n",
+				store->pixel_size);
+			fprintf(stderr,"dbg5       ss_min:          %d\n",
+				store->ss_min);
+			fprintf(stderr,"dbg5       ss_max:          %d\n",
+				store->ss_max);
+			fprintf(stderr,"dbg5       sample_rate:     %d\n",
+				store->sample_rate);
+			fprintf(stderr,"dbg5       start_time:      %d\n",
+				store->start_time);
+			fprintf(stderr,"dbg5       tot_slice:       %d\n",
+				store->tot_slice);
+			fprintf(stderr,"dbg5       pixels_ss:       %d\n",
+				store->pixels_ss);
+			fprintf(stderr,"dbg5       spare_ss:        ");
+			for (i=0;i<12;i++)
+				fprintf(stderr,"%c", store->spare_ss[i]);
 			fprintf(stderr,"dbg5       sidescan_type:%c\n",
 				store->ss_type);
 			if (store->ss_type == 'G')
@@ -1063,16 +1068,16 @@ int mbr_wt_sb2000ss(int verbose, char *mbio_ptr, char *store_ptr, int *error)
 		&& store->sensor_size > 0)
 		{
 		/* put sensor values */
-		mb_put_binary_short(MB_NO, store->ping_number, &buffer[0]);
-		mb_put_binary_short(MB_NO, store->ping_length, &buffer[2]);
-		mb_put_binary_short(MB_NO, store->pixel_size, &buffer[4]);
-		mb_put_binary_short(MB_NO, store->ss_min, &buffer[6]);
-		mb_put_binary_short(MB_NO, store->ss_max, &buffer[8]);
-		mb_put_binary_short(MB_NO, store->sample_rate, &buffer[10]);
-		mb_put_binary_short(MB_NO, store->start_time, &buffer[12]);
-		mb_put_binary_short(MB_NO, store->tot_slice, &buffer[14]);
-		mb_put_binary_short(MB_NO, store->pixels_ss, &buffer[16]);
-		for (i=0;i<store->sensor_size - 18;i++)
+		mb_put_binary_int(MB_NO, store->ping_number, &buffer[0]);
+		mb_put_binary_short(MB_NO, store->ping_length, &buffer[4]);
+		mb_put_binary_short(MB_NO, store->pixel_size, &buffer[6]);
+		mb_put_binary_short(MB_NO, store->ss_min, &buffer[8]);
+		mb_put_binary_short(MB_NO, store->ss_max, &buffer[10]);
+		mb_put_binary_short(MB_NO, store->sample_rate, &buffer[12]);
+		mb_put_binary_short(MB_NO, store->start_time, &buffer[14]);
+		mb_put_binary_short(MB_NO, store->tot_slice, &buffer[16]);
+		mb_put_binary_short(MB_NO, store->pixels_ss, &buffer[18]);
+		for (i=0;i<store->sensor_size - 20;i++)
 			buffer[18+i] = store->spare_ss[i];
 
 		/* write sensor record to file */
