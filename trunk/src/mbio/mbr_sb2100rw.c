@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sb2100rw.c	3/3/94
- *	$Id: mbr_sb2100rw.c,v 5.6 2001-12-18 04:27:45 caress Exp $
+ *	$Id: mbr_sb2100rw.c,v 5.7 2002-04-30 17:41:29 caress Exp $
  *
  *    Copyright (c) 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	March 3, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2001/12/18 04:27:45  caress
+ * Release 5.0.beta11.
+ *
  * Revision 5.5  2001/07/27  19:07:16  caress
  * Added data cutting.
  *
@@ -202,7 +205,7 @@ int mbr_wt_sb2100rw(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_sb2100rw(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_sb2100rw.c,v 5.6 2001-12-18 04:27:45 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2100rw.c,v 5.7 2002-04-30 17:41:29 caress Exp $";
 	char	*function_name = "mbr_register_sb2100rw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -332,7 +335,7 @@ int mbr_info_sb2100rw(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_sb2100rw.c,v 5.6 2001-12-18 04:27:45 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2100rw.c,v 5.7 2002-04-30 17:41:29 caress Exp $";
 	char	*function_name = "mbr_info_sb2100rw";
 	int	status = MB_SUCCESS;
 
@@ -401,7 +404,7 @@ int mbr_info_sb2100rw(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_sb2100rw(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_sb2100rw.c,v 5.6 2001-12-18 04:27:45 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2100rw.c,v 5.7 2002-04-30 17:41:29 caress Exp $";
 	char	*function_name = "mbr_alm_sb2100rw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -1016,12 +1019,16 @@ int mbr_wt_sb2100rw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    data->svp_corr_ss = store->svp_corr_ss;
 		    if (data->frequency[0] != 'H')
 			{
+			data->num_pixels_12khz = store->npixels;
 			data->pixel_size_12khz = store->pixel_size;
+			data->num_pixels_36khz = 0;
 			data->pixel_size_36khz = 0.0;
 			}
 		    else
 			{
+			data->num_pixels_12khz = 0;
 			data->pixel_size_12khz = 0.0;
+			data->num_pixels_36khz = store->npixels;
 			data->pixel_size_36khz = store->pixel_size;
 			}
 		    store->spare_ss = data->spare_ss;
