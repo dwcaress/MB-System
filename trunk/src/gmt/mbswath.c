@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbswath.c	5/30/93
- *    $Id: mbswath.c,v 4.30 1999-04-16 01:24:27 caress Exp $
+ *    $Id: mbswath.c,v 4.31 2000-09-11 20:09:14 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -27,6 +27,9 @@
  * Date:	May 30, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.30  1999/04/16  01:24:27  caress
+ * Final version 4.6 release?
+ *
  * Revision 4.29  1999/02/04  23:41:29  caress
  * MB-System version 4.6beta7
  *
@@ -260,7 +263,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbswath.c,v 4.30 1999-04-16 01:24:27 caress Exp $";
+	static char rcs_id[] = "$Id: mbswath.c,v 4.31 2000-09-11 20:09:14 caress Exp $";
 	static char program_name[] = "MBSWATH";
 	static char help_message[] =  "MBSWATH is a GMT compatible utility which creates a color postscript \nimage of multibeam swath bathymetry or backscatter data.  The image \nmay be shaded relief as well.  Complete maps are made by using \nMBSWATH in conjunction with the usual GMT programs.";
 	static char usage_message[] = "mbswath -Ccptfile -Jparameters -Rwest/east/south/north \n\t[-Afactor -Btickinfo -byr/mon/day/hour/min/sec \n\t-ccopies -Dmode/ampscale/ampmin/ampmax \n\t-Eyr/mon/day/hour/min/sec -fformat \n\t-Fred/green/blue -Gmagnitude/azimuth -Idatalist \n\t-K -Ncptfile -O -P -ppings -Qdpi -Ttimegap -U -W -Xx-shift -Yy-shift \n\t-Zmode -V -H]";
@@ -282,6 +285,8 @@ char **argv;
 	char	read_file[128];
         int     read_datalist = MB_NO;
 	int	read_data;
+	struct mb_datalist_struct *datalist;
+	double	file_weight;
 	FILE	*fp;
 	int	format;
 	int	format_num;
@@ -884,7 +889,8 @@ char **argv;
 	/* open file list */
 	if (read_datalist == MB_YES)
 	    {
-	    if ((fp = fopen(read_file,"r")) == NULL)
+	    if ((status = mb_datalist_open(verbose,&datalist,
+					    read_file,&error)) != MB_SUCCESS)
 		{
 		error = MB_ERROR_OPEN_FAIL;
 		fprintf(stderr,"\nUnable to open data list file: %s\n",
@@ -893,8 +899,9 @@ char **argv;
 			program_name);
 		exit(error);
 		}
-	    if (fgets(line,128,fp) != NULL
-		&& sscanf(line,"%s %d",file,&format) == 2)
+	    if (status = mb_datalist_read(verbose,datalist,
+			    file,&format,&file_weight,&error)
+			    == MB_SUCCESS)
 		read_data = MB_YES;
 	    else
 		read_data = MB_NO;
@@ -1290,8 +1297,9 @@ char **argv;
 	    /* figure out whether and what to read next */
 	    if (read_datalist == MB_YES)
                 {
-                if (fgets(line,128,fp) != NULL
-                        && sscanf(line,"%s %d",file,&format) == 2)
+		if (status = mb_datalist_read(verbose,datalist,
+			    file,&format,&file_weight,&error)
+			    == MB_SUCCESS)
                         read_data = MB_YES;
                 else
                         read_data = MB_NO;
@@ -1304,7 +1312,7 @@ char **argv;
 	    /* end loop over files in list */
 	    }
 	if (read_datalist == MB_YES)
-		fclose (fp);
+		mb_datalist_close(verbose,&datalist,&error);
 
 	/* turn off clipping */
 	ps_clipoff();

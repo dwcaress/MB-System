@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbbackangle.c	1/6/95
- *    $Id: mbbackangleold.c,v 4.9 2000-06-06 20:32:46 caress Exp $
+ *    $Id: mbbackangleold.c,v 4.10 2000-09-11 20:10:02 caress Exp $
  *
  *    Copyright (c) 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -23,6 +23,9 @@
  * Date:	January 6, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.9  2000/06/06  20:32:46  caress
+ * Now handles amplitude flagging using beamflags.
+ *
  * Revision 4.8  1998/10/05  19:19:24  caress
  * MB-System version 4.6beta
  *
@@ -75,7 +78,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbbackangleold.c,v 4.9 2000-06-06 20:32:46 caress Exp $";
+	static char rcs_id[] = "$Id: mbbackangleold.c,v 4.10 2000-09-11 20:10:02 caress Exp $";
 	static char program_name[] = "mbbackangle";
 	static char help_message[] =  
 "mbbackangle reads a swath sonar data file and generates a table\n\t\
@@ -102,7 +105,8 @@ The results are dumped to stdout.";
 	/* MBIO read control parameters */
 	int	read_datalist = MB_NO;
 	char	read_file[128];
-	FILE	*fp;
+	struct mb_datalist_struct *datalist;
+	double	file_weight;
 	int	format;
 	int	format_num;
 	int	pings;
@@ -381,7 +385,8 @@ The results are dumped to stdout.";
 	/* open file list */
 	if (read_datalist == MB_YES)
 	    {
-	    if ((fp = fopen(read_file,"r")) == NULL)
+	    if ((status = mb_datalist_open(verbose,&datalist,
+					    read_file,&error)) != MB_SUCCESS)
 		{
 		error = MB_ERROR_OPEN_FAIL;
 		fprintf(stderr,"\nUnable to open data list file: %s\n",
@@ -390,8 +395,9 @@ The results are dumped to stdout.";
 			program_name);
 		exit(error);
 		}
-	    if (fgets(line,128,fp) != NULL
-		&& sscanf(line,"%s %d",file,&format) == 2)
+	    if (status = mb_datalist_read(verbose,datalist,
+			    file,&format,&file_weight,&error)
+			    == MB_SUCCESS)
 		read_data = MB_YES;
 	    else
 		read_data = MB_NO;
@@ -473,6 +479,7 @@ The results are dumped to stdout.";
 			program_name);
 		exit(error);
 		}
+
 	/* output information */
 	if (error == MB_ERROR_NO_ERROR && verbose > 0)
 	    {
@@ -641,8 +648,9 @@ The results are dumped to stdout.";
 	/* figure out whether and what to read next */
         if (read_datalist == MB_YES)
                 {
-                if (fgets(line,128,fp) != NULL
-                        && sscanf(line,"%s %d",file,&format) == 2)
+		if (status = mb_datalist_read(verbose,datalist,
+			    file,&format,&file_weight,&error)
+			    == MB_SUCCESS)
                         read_data = MB_YES;
                 else
                         read_data = MB_NO;
@@ -655,7 +663,7 @@ The results are dumped to stdout.";
 	/* end loop over files in list */
 	}
         if (read_datalist == MB_YES)
-		fclose (fp);
+		mb_datalist_close(verbose,&datalist,&error);
 
 	/* output information */
 	if (error == MB_ERROR_NO_ERROR && verbose > 0)
