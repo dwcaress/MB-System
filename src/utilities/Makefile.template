@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 4.9 1995-03-23 16:29:34 caress Exp $
+#	$Id: Makefile.template,v 4.10 1995-04-25 20:03:07 caress Exp $
 #
 #     Copyright (c) 1993, 1994 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.9  1995/03/23  16:29:34  caress
+# Added -Olimit flag for compiling mbgrid.c under IRIX
+#
 # Revision 4.8  1995/02/14  21:20:26  caress
 # Added new sidescan processing programs.
 #
@@ -126,8 +129,8 @@ $(BINDIR)/mbclean:	mbclean.o $(LIBDIR)/libmbio.a
 $(BINDIR)/mbunclean:	mbunclean.o $(LIBDIR)/libmbio.a
 	$(CC) $(CFLAGS) mbunclean.o $(LIBDIR)/libmbio.a $(LFLAGS) \
 		-o $(BINDIR)/mbunclean
-$(BINDIR)/mbgrid:	mbgrid.o surfunc.o $(LIBDIR)/libmbio.a
-	$(CC) $(CFLAGS) mbgrid.o surfunc.o $(LIBDIR)/libmbio.a \
+$(BINDIR)/mbgrid:	mbgrid.o zgrid.o $(LIBDIR)/libmbio.a
+	$(CC) $(CFLAGS) mbgrid.o zgrid.o $(LIBDIR)/libmbio.a \
 		$(GMTLIBDIR)/libgmt.a $(NETCDFDIR)/libnetcdf.a \
 		$(LFLAGS) -o $(BINDIR)/mbgrid
 $(BINDIR)/mblevitus:	mblevitus.o $(LIBDIR)/libmbio.a
@@ -194,8 +197,8 @@ mbgrid.o:	mbgrid.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
 mblevitus.o:	mblevitus.c $(INCDIR)/mb_status.h Makefile
 	echo "	char *ifile = "'"$(LEVITUS)"'";" > levitus.h
 	$(CC) -c $(CFLAGS) mblevitus.c
-surfunc.o:	surfunc.c
-	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) surfunc.c
+zgrid.o:	zgrid.c
+	$(CC) -c $(CFLAGS) zgrid.c
 mbbath.o:	mbbath.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
 	$(CC) -c $(CFLAGS) mbbath.c
 mb_rt.o:	mb_rt.c
