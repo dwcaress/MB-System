@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmerge.c	2/20/93
  *
- *    $Id: mbmerge.c,v 4.9 1995-03-02 13:49:21 caress Exp $
+ *    $Id: mbmerge.c,v 4.10 1995-03-06 19:37:59 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,9 @@
  * Date:	February 20, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.9  1995/03/02  13:49:21  caress
+ * Fixed bug related to error messages.
+ *
  * Revision 4.8  1995/02/24  16:53:43  caress
  * Added NMEA 0183 navigation formats.
  *
@@ -70,7 +73,7 @@
 /* standard include files */
 #include <stdio.h>
 #include <math.h>
-#include <strings.h>
+#include <string.h>
 
 /* mbio include files */
 #include "../../include/mb_status.h"
@@ -90,7 +93,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbmerge.c,v 4.9 1995-03-02 13:49:21 caress Exp $";
+	static char rcs_id[] = "$Id: mbmerge.c,v 4.10 1995-03-06 19:37:59 caress Exp $";
 	static char program_name[] = "MBMERGE";
 	static char help_message[] =  "MBMERGE merges new navigation with multibeam data from an \ninput file and then writes the merged data to an output \nmultibeam data file. The default input \nand output streams are stdin and stdout.";
 	static char usage_message[] = "mbmerge [-Fformat -Llonflip -V -H  -Iinfile -Ooutfile -Mnavformat -Nnavfile]";

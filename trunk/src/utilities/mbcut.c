@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcut.c	1/26/95
  *
- *    $Id: mbcut.c,v 4.1 1995-03-02 13:49:21 caress Exp $
+ *    $Id: mbcut.c,v 4.2 1995-03-06 19:37:59 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,9 @@
  * Date:	January 26, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1995/03/02  13:49:21  caress
+ * Fixed bug related to error messages.
+ *
  * Revision 4.0  1995/02/14  21:17:15  caress
  * Version 4.2
  *
@@ -30,7 +33,7 @@
 /* standard include files */
 #include <stdio.h>
 #include <math.h>
-#include <strings.h>
+#include <string.h>
 
 /* mbio include files */
 #include "../../include/mb_status.h"
@@ -63,7 +66,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbcut.c,v 4.1 1995-03-02 13:49:21 caress Exp $";
+	static char rcs_id[] = "$Id: mbcut.c,v 4.2 1995-03-06 19:37:59 caress Exp $";
 	static char program_name[] = "mbcut";
 	static char help_message[] = 
 "MBCUT removes swath data values that lie outside ranges\n\t\

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	hsdump.c	6/16/93
- *    $Id: hsdump.c,v 4.4 1995-03-02 13:49:21 caress Exp $
+ *    $Id: hsdump.c,v 4.5 1995-03-06 19:37:59 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,9 @@
  * Date:	June 16, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.4  1995/03/02  13:49:21  caress
+ * Fixed bug related to error messages.
+ *
  * Revision 4.3  1994/10/21  13:02:31  caress
  * Release V4.0
  *
@@ -49,7 +52,7 @@
 /* standard include files */
 #include <stdio.h>
 #include <math.h>
-#include <strings.h>
+#include <string.h>
 
 /* mbio include files */
 #include "../../include/mb_status.h"
@@ -63,7 +66,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: hsdump.c,v 4.4 1995-03-02 13:49:21 caress Exp $";
+	static char rcs_id[] = "$Id: hsdump.c,v 4.5 1995-03-06 19:37:59 caress Exp $";
 	static char program_name[] = "HSDUMP";
 	static char help_message[] =  "HSDUMP lists the information contained in data records on\n\tHydrosweep DS data files, including survey, calibrate, water \n\tvelocity and comment records. The default input stream is stdin.";
 	static char usage_message[] = "hsdump [-Fformat -V -H -Iinfile -Okind]";

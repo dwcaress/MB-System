@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbbath.c	3/31/93
- *    $Id: mbbath.c,v 4.11 1995-03-02 13:49:21 caress Exp $
+ *    $Id: mbbath.c,v 4.12 1995-03-06 19:37:59 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -20,6 +20,9 @@
  * Date:	March 31, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.11  1995/03/02  13:49:21  caress
+ * Fixed bug related to error messages.
+ *
  * Revision 4.10  1995/02/27  14:43:18  caress
  * Fixed bug regarding closing a text input file.
  *
@@ -96,7 +99,7 @@
 /* standard include files */
 #include <stdio.h>
 #include <math.h>
-#include <strings.h>
+#include <string.h>
 
 /* mbio include files */
 #include "../../include/mb_status.h"
@@ -116,7 +119,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbbath.c,v 4.11 1995-03-02 13:49:21 caress Exp $";
+	static char rcs_id[] = "$Id: mbbath.c,v 4.12 1995-03-06 19:37:59 caress Exp $";
 	static char program_name[] = "MBBATH";
 	static char help_message[] =  "MBBATH calculates bathymetry from \
 the travel time data by raytracing \nthrough a layered water velocity \

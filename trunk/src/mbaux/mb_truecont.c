@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_truecont.c	4/21/94
- *    $Id: mb_truecont.c,v 4.4 1994-12-28 13:35:14 caress Exp $
+ *    $Id: mb_truecont.c,v 4.5 1995-03-06 19:39:52 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -23,7 +23,7 @@
 /* standard global include files */
 #include <stdio.h>
 #include <math.h>
-#include <strings.h>
+#include <string.h>
 
 /* mbio include files */
 #include "../../include/mb_status.h"
@@ -77,7 +77,7 @@ double	date_annot_int;
 double	time_tick_len;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_truecont.c,v 4.4 1994-12-28 13:35:14 caress Exp $";
+  	static char rcs_id[]="$Id: mb_truecont.c,v 4.5 1995-03-06 19:39:52 caress Exp $";
 	char	*function_name = "mb_contour_init";
 	int	status = MB_SUCCESS;
 	struct swath *dataptr;
@@ -333,7 +333,7 @@ int	verbose;
 struct swath *data;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_truecont.c,v 4.4 1994-12-28 13:35:14 caress Exp $";
+  	static char rcs_id[]="$Id: mb_truecont.c,v 4.5 1995-03-06 19:39:52 caress Exp $";
 	char	*function_name = "mb_contour_deall";
 	int	status = MB_SUCCESS;
 	struct ping *ping;
@@ -468,7 +468,7 @@ int	verbose;
 struct swath *data;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_truecont.c,v 4.4 1994-12-28 13:35:14 caress Exp $";
+  	static char rcs_id[]="$Id: mb_truecont.c,v 4.5 1995-03-06 19:39:52 caress Exp $";
 	char	*function_name = "mb_tcontour";
 	int	status = MB_SUCCESS;
 	struct ping *ping;
@@ -1155,7 +1155,7 @@ int	verbose;
 struct swath *data;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_truecont.c,v 4.4 1994-12-28 13:35:14 caress Exp $";
+  	static char rcs_id[]="$Id: mb_truecont.c,v 4.5 1995-03-06 19:39:52 caress Exp $";
 	char	*function_name = "mb_ocontour";
 	int	status = MB_SUCCESS;
 	struct ping *ping;

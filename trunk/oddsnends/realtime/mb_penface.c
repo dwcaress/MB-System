@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_penface.c	5/15/94
- *    $Id: mb_penface.c,v 4.6 1995-02-17 16:48:57 caress Exp $
+ *    $Id: mb_penface.c,v 4.7 1995-03-06 19:42:54 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,9 @@
  * Date:	May 15, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.6  1995/02/17  16:48:57  caress
+ * Removed debug messages.
+ *
  * Revision 4.5  1995/02/17  16:03:31  caress
  * Fixed bug in saving xold and yold values which had caused fits
  * when plotting the shiptrack.
@@ -47,7 +50,7 @@
 /* standard include files */
 #include <stdio.h>
 #include <math.h>
-#include <strings.h>
+#include <string.h>
 #include <time.h>
 
 /* MBIO include files */
@@ -74,7 +77,7 @@ double	*scale;
 double	*inch2lon;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_penface.c,v 4.6 1995-02-17 16:48:57 caress Exp $";
+  	static char rcs_id[]="$Id: mb_penface.c,v 4.7 1995-03-06 19:42:54 caress Exp $";
 	char	*function_name = "plot_init";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -134,7 +137,7 @@ int plot_end(verbose,error)
 int	verbose;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_penface.c,v 4.6 1995-02-17 16:48:57 caress Exp $";
+  	static char rcs_id[]="$Id: mb_penface.c,v 4.7 1995-03-06 19:42:54 caress Exp $";
 	char	*function_name = "plot_end";
 	int	status = MB_SUCCESS;
 	int	i;

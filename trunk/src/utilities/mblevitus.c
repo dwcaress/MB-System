@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mblevitus.c	4/15/93
- *    $Id: mblevitus.c,v 4.3 1994-10-21 13:02:31 caress Exp $
+ *    $Id: mblevitus.c,v 4.4 1995-03-06 19:37:59 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,9 @@
  * Date:	April 15, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1994/10/21  13:02:31  caress
+ * Release V4.0
+ *
  * Revision 4.2  1994/07/29  19:02:56  caress
  * Changes associated with supporting byte swapped Lynx OS and
  * using unix second time base.
@@ -64,7 +67,7 @@
 /* standard include files */
 #include <stdio.h>
 #include <math.h>
-#include <strings.h>
+#include <string.h>
 
 /* mbio include files */
 #include "../../include/mb_status.h"
@@ -85,7 +88,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mblevitus.c,v 4.3 1994-10-21 13:02:31 caress Exp $";
+	static char rcs_id[] = "$Id: mblevitus.c,v 4.4 1995-03-06 19:37:59 caress Exp $";
 	static char program_name[] = "MBLEVITUS";
 	static char help_message[] = "MBLEVITUS generates an average water velocity profile for a \nspecified location from the Levitus temperature and salinity database.";
 	static char usage_message[] = "mblevitus [-Rlon/lat -Ooutfile -V -H]";

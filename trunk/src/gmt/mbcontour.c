@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcontour.c	6/4/93
- *    $Id: mbcontour.c,v 4.7 1995-01-05 23:59:20 caress Exp $
+ *    $Id: mbcontour.c,v 4.8 1995-03-06 19:39:52 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,10 @@
  * Date:	June 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.7  1995/01/05  23:59:20  caress
+ * Made it possible to read data from a single file or
+ * from datalists.
+ *
  * Revision 4.6  1994/12/21  20:23:30  caress
  * Allows plotting in triangle mode when ship's lon and lat
  * doesn't change.
@@ -86,7 +90,7 @@
 /* standard include files */
 #include <stdio.h>
 #include <math.h>
-#include <strings.h>
+#include <string.h>
 #include <time.h>
 
 /* MBIO include files */
@@ -106,7 +110,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbcontour.c,v 4.7 1995-01-05 23:59:20 caress Exp $";
+	static char rcs_id[] = "$Id: mbcontour.c,v 4.8 1995-03-06 19:39:52 caress Exp $";
 #ifdef MBCONTOURFILTER
 	static char program_name[] = "MBCONTOURFILTER";
 	static char help_message[] =  "MBCONTOURFILTER is a utility which creates a pen plot \ncontour map of multibeam swath bathymetry.  \nThe primary purpose of this program is to serve as \npart of a real-time plotting system.  The contour \nlevels and colors can be controlled \ndirectly or set implicitly using contour and color change intervals. \nContours can also be set to have ticks pointing downhill.";

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_pslibface.c	5/15/94
- *    $Id: mb_pslibface.c,v 4.2 1994-07-29 19:04:31 caress Exp $
+ *    $Id: mb_pslibface.c,v 4.3 1995-03-06 19:39:52 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,10 @@
  * Date:	May 15, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1994/07/29  19:04:31  caress
+ * Changes associated with supporting byte swapped Lynx OS and
+ * >> using unix second time base.
+ *
  * Revision 4.1  1994/05/25  15:08:49  caress
  * Fixed plot_exit.
  *
@@ -33,7 +37,7 @@
 /* standard include files */
 #include <stdio.h>
 #include <math.h>
-#include <strings.h>
+#include <string.h>
 #include <time.h>
 
 /* MBIO include files */
@@ -60,7 +64,7 @@ double	*scale;
 double	*inch2lon;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_pslibface.c,v 4.2 1994-07-29 19:04:31 caress Exp $";
+  	static char rcs_id[]="$Id: mb_pslibface.c,v 4.3 1995-03-06 19:39:52 caress Exp $";
 	char	*function_name = "plot_init";
 	int	status = MB_SUCCESS;
 	int	errflg = 0;
@@ -194,7 +198,7 @@ int plot_end(verbose,error)
 int	verbose;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_pslibface.c,v 4.2 1994-07-29 19:04:31 caress Exp $";
+  	static char rcs_id[]="$Id: mb_pslibface.c,v 4.3 1995-03-06 19:39:52 caress Exp $";
 	char	*function_name = "plot_end";
 	int	status = MB_SUCCESS;
 	int	i;

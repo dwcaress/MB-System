@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_track.c	8/15/93
- *    $Id: mb_track.c,v 4.2 1994-10-21 11:34:20 caress Exp $
+ *    $Id: mb_track.c,v 4.3 1995-03-06 19:39:52 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -17,6 +17,9 @@
  * Date:	August, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1994/10/21  11:34:20  caress
+ * Release V4.0
+ *
  * Revision 4.1  1994/07/29  19:04:31  caress
  * Changes associated with supporting byte swapped Lynx OS and
  * >> using unix second time base.
@@ -39,7 +42,7 @@
 /* standard global include files */
 #include <stdio.h>
 #include <math.h>
-#include <strings.h>
+#include <string.h>
 
 /* mbio include files */
 #include "../../include/mb_status.h"
@@ -60,7 +63,7 @@ int	verbose;
 struct swath *data;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_track.c,v 4.2 1994-10-21 11:34:20 caress Exp $";
+  	static char rcs_id[]="$Id: mb_track.c,v 4.3 1995-03-06 19:39:52 caress Exp $";
 	char	*function_name = "mb_track";
 	int	status = MB_SUCCESS;
 	int	time_tick, time_annot, date_annot;

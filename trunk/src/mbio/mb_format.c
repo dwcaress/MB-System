@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.c	2/18/94
- *    $Id: mb_format.c,v 4.2 1994-10-21 12:11:53 caress Exp $
+ *    $Id: mb_format.c,v 4.3 1995-03-06 19:38:54 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -18,6 +18,9 @@
  * Date:	Februrary 18, 1994
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1994/10/21  12:11:53  caress
+ * Release V4.0
+ *
  * Revision 4.1  1994/04/22  17:49:13  caress
  * Removed output messages which went to stdout, messing up
  * Postscript output from mbswath and mbcontour.
@@ -55,7 +58,7 @@
 /* standard include files */
 #include <stdio.h>
 #include <math.h>
-#include <strings.h>
+#include <string.h>
 
 /* mbio include files */
 #include "../../include/mb_format.h"
@@ -68,7 +71,7 @@ int	*format;
 int	*format_num;
 int	*error;
 {
-  static char rcs_id[]="$Id: mb_format.c,v 4.2 1994-10-21 12:11:53 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 4.3 1995-03-06 19:38:54 caress Exp $";
 	char	*function_name = "mb_format";
 	int	status;
 	int	i;

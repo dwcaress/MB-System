@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_delaun.c	4/19/94
- *    $Id: mb_delaun.c,v 4.2 1994-10-21 11:34:20 caress Exp $
+ *    $Id: mb_delaun.c,v 4.3 1995-03-06 19:39:52 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -95,6 +95,9 @@
  * Date:	April, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1994/10/21  11:34:20  caress
+ * Release V4.0
+ *
  * Revision 4.1  1994/05/24  03:11:40  caress
  * Fixed include.
  *
@@ -107,7 +110,7 @@
 /* standard global include files */
 #include <stdio.h>
 #include <math.h>
-#include <strings.h>
+#include <string.h>
 
 /* mbio include files */
 #include "../../include/mb_status.h"
@@ -147,7 +150,7 @@ int	*kv1;
 int	*kv2;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_delaun.c,v 4.2 1994-10-21 11:34:20 caress Exp $";
+  	static char rcs_id[]="$Id: mb_delaun.c,v 4.3 1995-03-06 19:39:52 caress Exp $";
 	char	*function_name = "mb_delaun";
 	int	status = MB_SUCCESS;
 	int	itemp[2][3];

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_defaults.c	10/7/94
- *    $Id: mb_defaults.c,v 4.2 1995-01-25 18:17:24 caress Exp $
+ *    $Id: mb_defaults.c,v 4.3 1995-03-06 19:38:54 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,10 @@
  * Date:	January 23, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1995/01/25  18:17:24  caress
+ * Let the operating system define determine the
+ * system default postscript viewer.
+ *
  * Revision 4.1  1994/10/21  12:11:53  caress
  * Release V4.0
  *
@@ -51,7 +55,7 @@
 /* standard include files */
 #include <stdio.h>
 #include <math.h>
-#include <strings.h>
+#include <string.h>
 
 /* mbio include files */
 #include "../../include/mb_status.h"
@@ -69,7 +73,7 @@ int *etime_i;
 double *speedmin;
 double *timegap;
 {
-  static char rcs_id[]="$Id: mb_defaults.c,v 4.2 1995-01-25 18:17:24 caress Exp $";
+  static char rcs_id[]="$Id: mb_defaults.c,v 4.3 1995-03-06 19:38:54 caress Exp $";
 	char	*function_name = "mb_defaults";
 	int	status;
 	FILE	*fp;
@@ -192,7 +196,7 @@ int verbose;
 char *psdisplay;
 char *mbproject;
 {
-  static char rcs_id[]="$Id: mb_defaults.c,v 4.2 1995-01-25 18:17:24 caress Exp $";
+  static char rcs_id[]="$Id: mb_defaults.c,v 4.3 1995-03-06 19:38:54 caress Exp $";
 	char	*function_name = "mbenv";
 	int	status;
 	FILE	*fp;

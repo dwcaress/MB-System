@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbanglecorrect.c	1/12/95
- *    $Id: mbanglecorrect.c,v 4.2 1995-03-02 13:49:21 caress Exp $
+ *    $Id: mbanglecorrect.c,v 4.3 1995-03-06 19:37:59 caress Exp $
  *
  *    Copyright (c) 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -29,6 +29,9 @@
  * Date:	January 12, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1995/03/02  13:49:21  caress
+ * Fixed bug related to error messages.
+ *
  * Revision 4.1  1995/02/22  21:53:14  caress
  * Fixed bug in handling of buffered io.
  *
@@ -41,7 +44,7 @@
 /* standard include files */
 #include <stdio.h>
 #include <math.h>
-#include <strings.h>
+#include <string.h>
 
 /* mbio include files */
 #include "../../include/mb_status.h"
@@ -97,7 +100,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbanglecorrect.c,v 4.2 1995-03-02 13:49:21 caress Exp $";
+	static char rcs_id[] = "$Id: mbanglecorrect.c,v 4.3 1995-03-06 19:37:59 caress Exp $";
 	static char program_name[] = "MBANGLECORRECT";
 	static char help_message[] =  
 "mbanglecorrect is a tool for processing sidescan data.  This program\n\t\
