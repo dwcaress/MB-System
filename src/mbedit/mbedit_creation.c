@@ -1868,7 +1868,7 @@ Createwindow_mbedit(Widget parent)
     {
         XmString    tmp0;
         
-        tmp0 = (XmString) BX_CONVERT(bulletinBoard_about, "A Public Domain Software Package", 
+        tmp0 = (XmString) BX_CONVERT(bulletinBoard_about, "An Open Source Software Package", 
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList, 

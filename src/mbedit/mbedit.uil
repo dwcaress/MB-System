@@ -1229,7 +1229,7 @@ object label_about_mbpub : XmLabel widget {
     arguments {
         XmNfontList = font_table(
 		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1'));
-        XmNlabelString = compound_string("A Public Domain Software Package" &
+        XmNlabelString = compound_string("An Open Software Package" &
  "");
         XmNx = 10;
         XmNy = 160;
