@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrid.c	5/2/94
- *    $Id: mbgrid.c,v 4.41 1999-04-16 01:29:39 caress Exp $
+ *    $Id: mbgrid.c,v 4.42 1999-08-08 04:17:40 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -38,6 +38,9 @@
  * Rererewrite:	January 2, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.41  1999/04/16  01:29:39  caress
+ * Version 4.6 final release?
+ *
  * Revision 4.40  1999/02/04  23:55:08  caress
  * MB-System version 4.6beta7
  *
@@ -237,6 +240,7 @@
 #define	MBGRID_ASCII	1
 #define	MBGRID_OLDGRD	2
 #define	MBGRID_CDFGRD	3
+#define	MBGRID_ARCASCII	4
 
 /* gridded data type */
 #define	MBGRID_DATA_BATHYMETRY	1
@@ -245,7 +249,7 @@
 #define	MBGRID_DATA_SIDESCAN	4
 
 /* flag for no data in grid */
-#define	NO_DATA_FLAG	99999.9
+#define	NO_DATA_FLAG	99999
 
 /* number of data to be allocated at a time */
 #define	REALLOC_STEP_SIZE	25
@@ -254,7 +258,7 @@
 int mb_double_compare();
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbgrid.c,v 4.41 1999-04-16 01:29:39 caress Exp $";
+static char rcs_id[] = "$Id: mbgrid.c,v 4.42 1999-08-08 04:17:40 caress Exp $";
 static char program_name[] = "MBGRID";
 static char help_message[] =  "MBGRID is an utility used to grid bathymetry, amplitude, or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbgrid -Ifilelist -Oroot -Rwest/east/south/north [-Adatatype\n          -Bborder  -Cclip -Dxdim/ydim -Edx/dy/units -F\n          -Ggridkind -Llonflip -M -N -Ppings -Sspeed\n          -Ttension -Utime -V -Wscale -Xextend]";
@@ -301,6 +305,7 @@ char **argv;
 	char	fileroot[128];
 	int	xdim = 0;
 	int	ydim = 0;
+	int	spacing_priority = MB_NO;
 	int	set_spacing = MB_NO;
 	double	dx_set = 0.0;
 	double	dy_set = 0.0;
@@ -525,6 +530,11 @@ char **argv;
 			break;
 		case 'E':
 		case 'e':
+			if (optarg[strlen(optarg)-1] == '!')
+			    {
+			    spacing_priority = MB_YES;
+			    optarg[strlen(optarg)-1] = '\0';
+			    }
 			n = sscanf (optarg,"%lf/%lf/%s", &dx_set, &dy_set, units);
 			if (n > 1)
 				set_spacing = MB_YES;
@@ -758,6 +768,12 @@ char **argv;
 		    || grid_mode == MBGRID_MAXIMUM_FILTER))
 		more = MB_NO;
 
+	/* NaN cannot be used for ASCII grids */
+	if (use_NaN == MB_YES 
+		&& (gridkind == MBGRID_ASCII
+		    || gridkind == MBGRID_ARCASCII))
+		use_NaN = MB_NO;
+
 	/* define NaN in case it's needed */
 	if (use_NaN == MB_YES)
 		{
@@ -821,6 +837,11 @@ char **argv;
 			{
 			xdim = (gbnd[1] - gbnd[0])/dx_set + 1;
 			ydim = (gbnd[3] - gbnd[2])/dy_set + 1;
+			if (spacing_priority == MB_YES)
+				{
+				gbnd[1] = gbnd[0] + dx_set * (xdim - 1);
+				gbnd[3] = gbnd[2] + dy_set * (ydim - 1);
+				}
 			if (units[0] == 'M' || units[0] == 'm')
 				strcpy(units, "meters");
 			else if (units[0] == 'K' || units[0] == 'k')
@@ -845,6 +866,11 @@ char **argv;
 			{
 			xdim = (gbnd[1] - gbnd[0])/(mtodeglon*dx_set) + 1;
 			ydim = (gbnd[3] - gbnd[2])/(mtodeglat*dy_set) + 1;
+			if (spacing_priority == MB_YES)
+				{
+				gbnd[1] = gbnd[0] + mtodeglon * dx_set * (xdim - 1);
+				gbnd[3] = gbnd[2] + mtodeglat * dy_set * (ydim - 1);
+				}
 			strcpy(units, "meters");
 			}
 		else if (set_spacing == MB_YES 
@@ -852,6 +878,11 @@ char **argv;
 			{
 			xdim = (gbnd[1] - gbnd[0])*deglontokm/dx_set + 1;
 			ydim = (gbnd[3] - gbnd[2])*deglattokm/dy_set + 1;
+			if (spacing_priority == MB_YES)
+				{
+				gbnd[1] = gbnd[0] + dx_set * (xdim - 1) / deglontokm;
+				gbnd[3] = gbnd[2] + dy_set * (ydim - 1) / deglattokm;
+				}
 			strcpy(units, "km");
 			}
 		else if (set_spacing == MB_YES 
@@ -859,12 +890,22 @@ char **argv;
 			{
 			xdim = (gbnd[1] - gbnd[0])/(mtodeglon*0.3048*dx_set) + 1;
 			ydim = (gbnd[3] - gbnd[2])/(mtodeglat*0.3048*dy_set) + 1;
+			if (spacing_priority == MB_YES)
+				{
+				gbnd[1] = gbnd[0] + mtodeglon * 0.3048 * dx_set * (xdim - 1);
+				gbnd[3] = gbnd[2] + mtodeglat * 0.3048 * dy_set * (ydim - 1);
+				}
 			strcpy(units, "feet");
 			}
 		else if (set_spacing == MB_YES)
 			{
 			xdim = (gbnd[1] - gbnd[0])/dx_set + 1;
 			ydim = (gbnd[3] - gbnd[2])/dy_set + 1;
+			if (spacing_priority == MB_YES)
+				{
+				gbnd[1] = gbnd[0] + dx_set * (xdim - 1);
+				gbnd[3] = gbnd[2] + dy_set * (ydim - 1);
+				}
 			strcpy(units, "degrees");
 			}
 		}
@@ -1076,8 +1117,10 @@ char **argv;
 			fprintf(outfp,"Grid format %d:  ascii table\n",gridkind);
 		else if (gridkind == MBGRID_CDFGRD)
 			fprintf(outfp,"Grid format %d:  GMT version 2 grd (netCDF)\n",gridkind);
-		else
+		else if (gridkind == MBGRID_OLDGRD)
 			fprintf(outfp,"Grid format %d:  GMT version 1 grd (binary)\n",gridkind);
+		else if (gridkind == MBGRID_ARCASCII)
+			fprintf(outfp,"Grid format %d:  Arc/Info ascii table\n",gridkind);
 		if (use_NaN == MB_YES) 
 			fprintf(outfp,"NaN values used to flag regions with no data\n");
 		else
@@ -2591,6 +2634,7 @@ char **argv;
 			kout = i*ydim + j;
 			output[kout] = (float) grid[kgrid];
 			if (gridkind != MBGRID_ASCII
+				&& gridkind != MBGRID_ARCASCII
 				&& grid[kgrid] == clipvalue)
 				output[kout] = outclipvalue;
 			}
@@ -2601,6 +2645,14 @@ char **argv;
 		status = write_ascii(verbose,ofile,output,xdim,ydim,
 			gbnd[0],gbnd[1],gbnd[2],gbnd[3],
 			dx,dy,&error);
+		}
+	else if (gridkind == MBGRID_ARCASCII)
+		{
+		strcpy(ofile,fileroot);
+		strcat(ofile,".asc");
+		status = write_arcascii(verbose,ofile,output,xdim,ydim,
+			gbnd[0],gbnd[1],gbnd[2],gbnd[3],
+			dx,dy,outclipvalue,&error);
 		}
 	else if (gridkind == MBGRID_OLDGRD)
 		{
@@ -2673,6 +2725,7 @@ char **argv;
 				if (output[kout] < 0.0)
 					output[kout] = 0.0;
 				if (gridkind != MBGRID_ASCII
+					&& gridkind != MBGRID_ARCASCII
 					&& cnt[kgrid] <= 0)
 					output[kout] = outclipvalue;
 				}
@@ -2683,6 +2736,14 @@ char **argv;
 			status = write_ascii(verbose,ofile,output,xdim,ydim,
 				gbnd[0],gbnd[1],gbnd[2],gbnd[3],
 				dx,dy,&error);
+			}
+		else if (gridkind == MBGRID_ARCASCII)
+			{
+			strcpy(ofile,fileroot);
+			strcat(ofile,"_num.asc");
+			status = write_arcascii(verbose,ofile,output,xdim,ydim,
+				gbnd[0],gbnd[1],gbnd[2],gbnd[3],
+				dx,dy,outclipvalue,&error);
 			}
 		else if (gridkind == MBGRID_OLDGRD)
 			{
@@ -2736,6 +2797,7 @@ char **argv;
 				if (output[kout] < 0.0)
 					output[kout] = 0.0;
 				if (gridkind != MBGRID_ASCII
+					&& gridkind != MBGRID_ARCASCII
 					&& cnt[kgrid] <= 0)
 					output[kout] = outclipvalue;
 				}
@@ -2746,6 +2808,14 @@ char **argv;
 			status = write_ascii(verbose,ofile,output,xdim,ydim,
 				gbnd[0],gbnd[1],gbnd[2],gbnd[3],
 				dx,dy,&error);
+			}
+		else if (gridkind == MBGRID_ARCASCII)
+			{
+			strcpy(ofile,fileroot);
+			strcat(ofile,"_sd.asc");
+			status = write_arcascii(verbose,ofile,output,xdim,ydim,
+				gbnd[0],gbnd[1],gbnd[2],gbnd[3],
+				dx,dy,outclipvalue,&error);
 			}
 		else if (gridkind == MBGRID_OLDGRD)
 			{
@@ -2888,6 +2958,95 @@ int	*error;
 			if ((i+1) % 6 == 0) fprintf(fp,"\n");
 			}
 		if ((nx*ny) % 6 != 0) fprintf(fp,"\n");
+		fclose(fp);
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+/*
+ * function write_arcascii writes output grid to an Arc/Info ascii file 
+ */
+int write_arcascii(verbose,outfile,grid,
+			nx,ny,xmin,xmax,ymin,ymax,
+			dx,dy,nodata,error)
+int	verbose;
+char	*outfile;
+float	*grid;
+int	nx, ny;
+double	xmin, xmax, ymin, ymax, dx, dy;
+float	nodata;
+int	*error;
+{
+	char	*function_name = "write_ascii";
+	int	status = MB_SUCCESS;
+	FILE	*fp;
+	int	i, j, k;
+	time_t	right_now;
+	char	date[25], user[128], *user_ptr, host[128];
+	char	*ctime();
+	char	*getenv();
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  Function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       outfile:    %s\n",outfile);
+		fprintf(stderr,"dbg2       grid:       %d\n",grid);
+		fprintf(stderr,"dbg2       nx:         %d\n",nx);
+		fprintf(stderr,"dbg2       ny:         %d\n",ny);
+		fprintf(stderr,"dbg2       xmin:       %f\n",xmin);
+		fprintf(stderr,"dbg2       xmax:       %f\n",xmax);
+		fprintf(stderr,"dbg2       ymin:       %f\n",ymin);
+		fprintf(stderr,"dbg2       ymax:       %f\n",ymax);
+		fprintf(stderr,"dbg2       dx:         %f\n",dx);
+		fprintf(stderr,"dbg2       dy:         %f\n",dy);
+		fprintf(stderr,"dbg2       nodata:     %f\n",nodata);
+		}
+
+	/* open the file */
+	if ((fp = fopen(outfile,"w")) == NULL)
+		{
+		*error = MB_ERROR_OPEN_FAIL;
+		status = MB_FAILURE;
+		}
+
+	/* output grid */
+	if (status == MB_SUCCESS)
+		{
+		fprintf(fp, "ncols %d\n", nx);
+		fprintf(fp, "nrows %d\n", ny);
+		fprintf(fp, "xllcorner %f\n", xmin);
+		fprintf(fp, "yllcorner %f\n", ymin);
+		fprintf(fp, "cellsize %f\n", dx);
+		fprintf(fp, "nodata_value -99999\n");
+		for (j=0;j<ny;j++)
+		    {
+		    for (i=0;i<nx;i++)
+			{
+			k = i * ny + (ny - 1 - j);
+			if (grid[k] == nodata)
+			    fprintf(fp, "-99999 ");
+			else
+			    fprintf(fp,"%f ",grid[k]);
+			}
+		    fprintf(fp, "\n");
+		    }
 		fclose(fp);
 		}
 

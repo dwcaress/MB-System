@@ -1,4 +1,4 @@
-.TH mbgrid l "17 December 1998" "MB-System 4.6" "MB-System 4.6"
+.TH mbgrid l "2 August 1999" "MB-System 4.6" "MB-System 4.6"
 .SH NAME
 \fBmbgrid\fP - Grid bathymetry, amplitude, or sidescan data 
 from swath sonar data files.
@@ -10,7 +10,7 @@ Version 4.6
 \fBmbgrid\fP \fB-I\fIfilelist\fP \fB-O\fIroot\fP 
 \fB-R\fIwest/east/south/north\fP [\fB-A\fIdatatype\fP 
 \fB-B\fIborder\fP -C\fIclip\fP \fB-D\fIxdim/ydim\fP 
-\fB-E\fIdx/dy/units\fP \fB-F\fImode\fP \fB-G\fIgridkind\fP 
+\fB-E\fIdx/dy/units[!]\fP \fB-F\fImode\fP \fB-G\fIgridkind\fP 
 \fB-L\fIlonflip\fP \fB-M -N -P\fIpings\fP \fB-Q\fP
 \fB-S\fIspeed\fP \fB-T\fItension\fP \fB-U\fItime\fP 
 \fB-V\fP -W\fIscale\fP \fB-X\fIextend\fP]
@@ -209,7 +209,7 @@ if the user specifies the grid spacing with the \fB-E\fP option.
 Default:  \fIxdim\fP = \fIydim\fP = 101.
 .TP
 .B \-E
-\fIdx/dy/units\fP
+\fIdx/dy/units[!]\fP
 .br
 Sets the grid cell spacing to \fIdx\fP in longitude and \fIdy\fP
 in latitude. If \fIunits\fP is not specified, the \fIdx\fP 
@@ -221,7 +221,10 @@ uses the \fB-E\fP option to set the grid spacing, the
 grid dimensions are calculated using the grid bounds and
 grid cell spacings. However, slight adjustments to the
 grid cell spacing values are usually required to keep
-the grid bounds as specified.
+the grid bounds as specified. Appending an ! to the end of 
+the \fB-E\fP arguments forces \fBmbgrid\fP to use the
+exact grid spacing values specified by adjusting the 
+grid bounds.
 .TP
 .B \-F
 \fImode\fP
@@ -237,9 +240,10 @@ The default is \fImode\fP = 1 (Gaussian Weighted Mean).
 \fIgridkind\fP
 .br
 Sets the format of the output grid file.
- 	\fIgridkind\fP = 1:	Ascii table
+ 	\fIgridkind\fP = 1:	ASCII table
  	\fIgridkind\fP = 2:	binary file (GMT version 1 GRD file)
  	\fIgridkind\fP = 3:	netCDF file (GMT version 2 GRD file)
+ 	\fIgridkind\fP = 4:	Arc/Info ASCII grid
 .br
 If \fIgridkind\fP = 3, \fBmbgrid\fP also outputs shellscripts 
 which run GMT version 3 programs to provide preliminary color
@@ -413,7 +417,7 @@ will be filled in through spine interpolation even in the areas
 not covered by data. The output looks like:
  
  Program MBGRID
- Version $Id: mbgrid.l,v 4.18 1998-12-17 22:50:20 caress Exp $
+ Version $Id: mbgrid.l,v 4.19 1999-08-08 04:17:40 caress Exp $
  MB-system Version 4.5
  
  MBGRID Parameters:

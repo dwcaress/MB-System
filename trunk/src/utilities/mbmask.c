@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmask.c	6/15/93
- *    $Id: mbmask.c,v 4.12 1999-03-31 18:33:06 caress Exp $
+ *    $Id: mbmask.c,v 4.13 1999-08-08 04:17:40 caress Exp $
  *
  *    Copyright (c) 1993,1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -25,6 +25,9 @@
  * Date:	June 15, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 4.12  1999/03/31  18:33:06  caress
+ * MB-System 4.6beta7
+ *
  * Revision 4.11  1998/12/17  22:50:20  caress
  * MB-System version 4.6beta4
  *
@@ -100,7 +103,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbmask.c,v 4.12 1999-03-31 18:33:06 caress Exp $";
+	static char rcs_id[] = "$Id: mbmask.c,v 4.13 1999-08-08 04:17:40 caress Exp $";
 	static char program_name[] = "MBMASK";
 	static char help_message[] = "MBMASK reads a flagging mask file and applies it to the input \nmultibeam data file.  Flagging mask files are created from  \nmultibeam data files using the program MBGETMASK.  If the time \ntag of a mask record matches that of a data ping, then any \nbeams marked as flagged in the mask are flagged in the data. \nThe utilities MBGETMASK and MBMASK provide a means for transferring \nediting information from one file to another, provided the files \ncontain versions of the same data. \nThe default input and output multibeam streams are stdin and stdout.";
 	static char usage_message[] = "mbmask [-Fformat -Mmaskfile -Iinfile -Ooutfile -V -H]";
@@ -160,10 +163,18 @@ char **argv;
 	double	*ssalongtrack = NULL;
 	int	idata = 0;
 	int	icomment = 0;
+	int	imask = 0;
+	int	imatch = 0;
 	int	odata = 0;
 	int	ocomment = 0;
 	int	flagged = 0;
 	int	unflagged = 0;
+	int	beam_ok = 0;
+	int	beam_null = 0;
+	int	beam_flag = 0;
+	int	beam_flag_manual = 0;
+	int	beam_flag_filter = 0;
+	int	beam_flag_sonar = 0;
 	int	data_use;
 	char	comment[256];
 
@@ -227,7 +238,7 @@ char **argv;
 	strcpy (mfile, "\0");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhF:f:I:i:M:m:O:o:")) != -1)
+	while ((c = getopt(argc, argv, "VvHhF:f:I:i:M:m:O:o:T:t:")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -394,7 +405,10 @@ char **argv;
 		exit(error);
 		}
 	else
+		{
 		mask_done = MB_NO;
+		imask++;
+		}
 
 	/* initialize reading the input multibeam file */
 	if ((status = mb_read_init(
@@ -522,6 +536,20 @@ char **argv;
 			error = MB_ERROR_NO_ERROR;
 			}
 
+		/* time bounds do not matter to mbmask */
+		if (error == MB_ERROR_OUT_TIME)
+			{
+			status = MB_SUCCESS;
+			error = MB_ERROR_NO_ERROR;
+			}
+
+		/* space bounds do not matter to mbmask */
+		if (error == MB_ERROR_OUT_BOUNDS)
+			{
+			status = MB_SUCCESS;
+			error = MB_ERROR_NO_ERROR;
+			}
+
 		/* output error messages */
 		if (verbose >= 1 && error == MB_ERROR_COMMENT)
 			{
@@ -578,8 +606,9 @@ char **argv;
 					error = MB_ERROR_NO_ERROR;
 					status = MB_SUCCESS;	
 					}
+				else
+					imask++;
 				}
-
 
 			/* if the mask fits apply it */
 			data_use = MB_NO;
@@ -587,6 +616,7 @@ char **argv;
 				&& time_d >= mask_time_d - eps 
 				&& time_d <= mask_time_d + eps)
 				{
+				imatch++;
 				for (j=0;j<MIN(beams_bath, nbath);j++)
 					{
 					if (beamflag[j] == MB_FLAG_NULL
@@ -609,6 +639,29 @@ char **argv;
 					beamflag[j] = bath_mask[j];
 					}
 				}
+			    
+			/* count the flags */
+			for (i=0;i<nbath;i++)
+			    {
+			    if (mb_beam_ok(beamflag[i]))
+				{
+				beam_ok++;
+				}
+			    else if (mb_beam_check_flag_null(beamflag[i]))
+				{
+				beam_null++;
+				}
+			    else
+				{
+				beam_flag++;
+				if (mb_beam_check_flag_manual(beamflag[i]))
+				    beam_flag_manual++;
+				if (mb_beam_check_flag_filter(beamflag[i]))
+				    beam_flag_filter++;
+				if (mb_beam_check_flag_sonar(beamflag[i]))
+				    beam_flag_sonar++;
+				}
+			    }
 			  }
 
 		/* write some data */
@@ -670,12 +723,23 @@ char **argv;
 	/* give the statistics */
 	if (verbose >= 1)
 		{
-		fprintf(stderr,"\n%d input data records\n",idata);
-		fprintf(stderr,"%d input comment records\n",icomment);
-		fprintf(stderr,"%d output data records\n",odata);
-		fprintf(stderr,"%d output comment records\n",ocomment);
-		fprintf(stderr,"%d beams flagged\n",flagged);
-		fprintf(stderr,"%d beams unflagged\n",unflagged);
+		fprintf(stderr,"\nData records:\n");
+		fprintf(stderr,"\t%d input data records\n",idata);
+		fprintf(stderr,"\t%d input comment records\n",icomment);
+		fprintf(stderr,"\t%d input mask records\n",imask);
+		fprintf(stderr,"\t%d input data/mask matches\n",imatch);
+		fprintf(stderr,"\t%d output data records\n",odata);
+		fprintf(stderr,"\t%d output comment records\n",ocomment);
+		fprintf(stderr,"\nBeam flags changed:\n");
+		fprintf(stderr,"\t%d beams flagged\n",flagged);
+		fprintf(stderr,"\t%d beams unflagged\n",unflagged);
+		fprintf(stderr,"\nBeam flag totals:\n");
+		fprintf(stderr,"\t%d beams ok\n",beam_ok);
+		fprintf(stderr,"\t%d beams null\n",beam_null);
+		fprintf(stderr,"\t%d beams flagged\n",beam_flag);
+		fprintf(stderr,"\t%d beams flagged manually\n",beam_flag_manual);
+		fprintf(stderr,"\t%d beams flagged by filter\n",beam_flag_filter);
+		fprintf(stderr,"\t%d beams flagged by sonar\n",beam_flag_sonar);
 		}
 
 	/* end it all */
@@ -700,6 +764,7 @@ int	*error;
 	char	line1[512], line2[512], line3[512];
 	char	*result;
 	int	len;
+	int	read_len;
 	int	i, j;
 	
 
@@ -720,11 +785,12 @@ int	*error;
 	    {
 	    if ((result = fgets(line1,512,fp)) != line1)
 		    status = MB_FAILURE;
-	    if ((result = fgets(line2,512,fp)) != line2)
+	    if (status == MB_SUCCESS)
+		if ((result = fgets(line2,512,fp)) != line2)
 		    status = MB_FAILURE;
 	    
 	    /* amplitude mask will be ignored */
-	    if (mask_version == 1)
+	    if (status == MB_SUCCESS)
 		if ((result = fgets(line3,512,fp)) != line3)
 		    status = MB_FAILURE;
     
@@ -758,7 +824,7 @@ int	*error;
 	    full flagging and selecting of beams */
 	else if (mask_version == 2)
 	    {
-	    if ((status = fread(time_i,1,7*sizeof(int),fp)) 
+	    if ((read_len = fread(time_i,1,7*sizeof(int),fp)) 
 		    == 7 * sizeof(int))
 		    {
 		    mb_get_time(verbose,time_i,time_d,error);
@@ -766,18 +832,21 @@ int	*error;
 		    }
 	    else
 		    status = MB_FAILURE;
-	    if ((status = fread(mask_bath,1,beams_bath,fp)) 
+	    if (status == MB_SUCCESS)
+		{
+		if ((read_len = fread(mask_bath,1,beams_bath,fp)) 
 		    == beams_bath)
 		    status = MB_SUCCESS;
-	    else
+		else
 		    status = MB_FAILURE;
+		}
 	    }
 	    
 	/* else read newer binary version 3 which supports
 	    full flagging and selecting of beams */
 	else
 	    {
-	    if ((status = fread(time_i,1,7*sizeof(int),fp)) 
+	    if ((read_len = fread(time_i,1,7*sizeof(int),fp)) 
 		    == 7 * sizeof(int))
 		    {
 		    mb_get_time(verbose,time_i,time_d,error);
@@ -785,18 +854,24 @@ int	*error;
 		    }
 	    else
 		    status = MB_FAILURE;
-	    if ((status = fread(nbath,1,sizeof(int),fp)) 
+	    if (status == MB_SUCCESS)
+		{
+		if ((read_len = fread(nbath,1,sizeof(int),fp)) 
 		    == sizeof(int))
 		    {
 		    status = MB_SUCCESS;
 		    }
-	    else
+		else
 		    status = MB_FAILURE;
-	    if ((status = fread(mask_bath,1,*nbath,fp)) 
+		}
+	    if (status == MB_SUCCESS)
+		{
+		if ((read_len = fread(mask_bath,1,*nbath,fp)) 
 		    == *nbath)
 		    status = MB_SUCCESS;
-	    else
+		else
 		    status = MB_FAILURE;
+		}
 	    }
 
 	/* check success */
