@@ -4,7 +4,7 @@ MB-SYSTEM VERSION 4.5 RELEASE NOTES:
 This directory structure contains the version 4.5 release  
 of the MB-System software package for processing and display of 
 swath sonar data. Version 4.5 includes significant enhancements
-and bug fixes relative to version 4.5. 
+and bug fixes relative to version 4.4. 
 
 The primary enhancements for version 4.5 include a new
 program, called mbmosaic, for mosaicing of sidescan
@@ -331,10 +331,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 4.13 1997-09-15 19:02:15 caress Exp $
+RCS ID: $Id: README,v 4.14 1997-09-15 21:33:33 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+# Revision 4.13  1997/09/15  19:02:15  caress
+# Real Version 4.5
+#
 # Revision 4.12  1997/04/21  16:51:19  caress
 # MB-System 4.5 Beta Release.
 #
