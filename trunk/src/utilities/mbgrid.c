@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrid.c	5/2/94
- *    $Id: mbgrid.c,v 5.11 2002-10-02 23:56:06 caress Exp $
+ *    $Id: mbgrid.c,v 5.12 2002-10-04 21:22:02 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -38,6 +38,9 @@
  * Rererewrite:	January 2, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.11  2002/10/02 23:56:06  caress
+ * Release 5.0.beta24
+ *
  * Revision 5.10  2002/09/25 20:12:30  caress
  * Have it use fbt files again for footprint gridding algorithm.
  *
@@ -327,7 +330,7 @@ double erfcc();
 double mbgrid_erf();
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbgrid.c,v 5.11 2002-10-02 23:56:06 caress Exp $";
+static char rcs_id[] = "$Id: mbgrid.c,v 5.12 2002-10-04 21:22:02 caress Exp $";
 static char program_name[] = "mbgrid";
 static char help_message[] =  "mbgrid is an utility used to grid bathymetry, amplitude, or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbgrid -Ifilelist -Oroot \
@@ -1127,6 +1130,16 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 	bounds[1] = bounds[1] + xx;
 	bounds[2] = bounds[2] - yy;
 	bounds[3] = bounds[3] + yy;
+	
+	/* figure out lonflip for data bounds */
+	if (bounds[0] < -180.0)
+		lonflip = -1;
+	else if (bounds[1] > 180.0)
+		lonflip = 1;
+	else if (lonflip == -1 && bounds[1] > 0.0)
+		lonflip = 0;
+	else if (lonflip == 1 && bounds[0] < 0.0)
+		lonflip = 0;
 
 	/* output info */
 	if (verbose >= 0)
