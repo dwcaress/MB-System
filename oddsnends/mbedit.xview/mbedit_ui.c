@@ -113,7 +113,7 @@ mbedit_window_mbedit_window_mbedit_create(ip, owner)
 		XV_KEY_DATA, INSTANCE, ip,
 		XV_WIDTH, 897,
 		XV_HEIGHT, 764,
-		XV_LABEL, "MBEDIT Version $Id: mbedit_ui.c,v 4.1 1994-10-21 12:00:33 caress Exp $",
+		XV_LABEL, "MBEDIT Version $Id: mbedit_ui.c,v 4.2 1994-11-09 20:37:24 caress Exp $",
 		FRAME_SHOW_FOOTER, TRUE,
 		FRAME_SHOW_RESIZE_CORNER, TRUE,
 		NULL);
@@ -707,7 +707,7 @@ mbedit_popup_load_textfield_format_create(ip, owner)
 		PANEL_VALUE_STORED_LENGTH, 80,
 		PANEL_LABEL_STRING, "MBIO Format ID:",
 		PANEL_LAYOUT, PANEL_HORIZONTAL,
-		PANEL_MAX_VALUE, 20,
+		PANEL_MAX_VALUE, 999,
 		PANEL_MIN_VALUE, 1,
 		PANEL_VALUE, 1,
 		PANEL_READ_ONLY, FALSE,
