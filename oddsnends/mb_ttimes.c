@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_ttimes.c	4/9/94
- *    $Id: mb_ttimes.c,v 4.1 1994-07-29 18:46:51 caress Exp $
+ *    $Id: mb_ttimes.c,v 4.2 1994-10-21 12:11:53 caress Exp $
 
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,10 @@
  * Date:	April 9, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1994/07/29  18:46:51  caress
+ * Changes associated with supporting Lynx OS (byte swapped) and
+ * using unix second time base (for time_d values).
+ *
  * Revision 4.0  1994/04/11  23:37:14  caress
  * Setting version number properly.
  *
@@ -52,7 +56,7 @@ double	*angles;
 int	*flags;
 int	*error;
 {
-  static char rcs_id[]="$Id: mb_ttimes.c,v 4.1 1994-07-29 18:46:51 caress Exp $";
+  static char rcs_id[]="$Id: mb_ttimes.c,v 4.2 1994-10-21 12:11:53 caress Exp $";
 	char	*function_name = "mb_ttimes";
 	int	status;
 	int	system;
@@ -86,14 +90,19 @@ int	*error;
 		status = mbsys_hsds_ttimes(verbose,mbio_ptr,store_ptr,
 				kind,nbeams,ttimes,angles,flags,error);
 		}
+	else if (system == MB_SYS_SB2000)
+		{
+		status = mbsys_sb2000_ttimes(verbose,mbio_ptr,store_ptr,
+				kind,nbeams,ttimes,angles,flags,error);
+		}
 	else if (system == MB_SYS_SB2100)
 		{
 		status = mbsys_sb2100_ttimes(verbose,mbio_ptr,store_ptr,
 				kind,nbeams,ttimes,angles,flags,error);
 		}
-	else if (system == MB_SYS_EM12)
+	else if (system == MB_SYS_SIMRAD)
 		{
-		status = mbsys_em12_ttimes(verbose,mbio_ptr,store_ptr,
+		status = mbsys_simrad_ttimes(verbose,mbio_ptr,store_ptr,
 				kind,nbeams,ttimes,angles,flags,error);
 		}
 	else if (system == MB_SYS_MR1)
@@ -104,6 +113,16 @@ int	*error;
 	else if (system == MB_SYS_LDEOIH)
 		{
 		status = mbsys_ldeoih_ttimes(verbose,mbio_ptr,store_ptr,
+				kind,nbeams,ttimes,angles,flags,error);
+		}
+	else if (system == MB_SYS_RESON)
+		{
+		status = mbsys_reson_ttimes(verbose,mbio_ptr,store_ptr,
+				kind,nbeams,ttimes,angles,flags,error);
+		}
+	else if (system == MB_SYS_ELAC)
+		{
+		status = mbsys_elac_ttimes(verbose,mbio_ptr,store_ptr,
 				kind,nbeams,ttimes,angles,flags,error);
 		}
 	else

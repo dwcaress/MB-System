@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_coor_scale.c	1/21/93
- *    $Id: mb_coor_scale.c,v 4.1 1994-07-29 18:46:51 caress Exp $
+ *    $Id: mb_coor_scale.c,v 4.2 1994-10-21 12:11:53 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -20,6 +20,10 @@
  * Date:	January 21, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1994/07/29  18:46:51  caress
+ * Changes associated with supporting Lynx OS (byte swapped) and
+ * using unix second time base (for time_d values).
+ *
  * Revision 4.0  1994/03/05  23:55:38  caress
  * First cut at version 4.0
  *
@@ -71,7 +75,7 @@ double	latitude;
 double	*mtodeglon;
 double	*mtodeglat;
 {
-  static char rcs_id[]="$Id: mb_coor_scale.c,v 4.1 1994-07-29 18:46:51 caress Exp $";
+  static char rcs_id[]="$Id: mb_coor_scale.c,v 4.2 1994-10-21 12:11:53 caress Exp $";
 	char	*function_name = "mb_coor_scale";
 	int	status;
 	double	radlat;

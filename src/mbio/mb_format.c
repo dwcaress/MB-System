@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.c	2/18/94
- *    $Id: mb_format.c,v 4.1 1994-04-22 17:49:13 caress Exp $
+ *    $Id: mb_format.c,v 4.2 1994-10-21 12:11:53 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -18,6 +18,14 @@
  * Date:	Februrary 18, 1994
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1994/04/22  17:49:13  caress
+ * Removed output messages which went to stdout, messing up
+ * Postscript output from mbswath and mbcontour.
+ *
+ * Revision 4.1  1994/04/22  17:49:13  caress
+ * Removed output messages which went to stdout, messing up
+ * Postscript output from mbswath and mbcontour.
+ *
  * Revision 4.0  1994/03/06  00:01:56  caress
  * First cut at version 4.0
  *
@@ -60,7 +68,7 @@ int	*format;
 int	*format_num;
 int	*error;
 {
-  static char rcs_id[]="$Id: mb_format.c,v 4.1 1994-04-22 17:49:13 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 4.2 1994-10-21 12:11:53 caress Exp $";
 	char	*function_name = "mb_format";
 	int	status;
 	int	i;
@@ -101,6 +109,10 @@ int	*error;
 	for (i=1;i<=MB_FORMATS;i++)
 		if (format_table[i] == *format)
 			*format_num = i;
+
+	/* check to be sure format is actually supported */
+	if (supported_format_table[*format_num] == MB_NO)
+		*format_num = 0;
 
 	/* set flags */
 	if (*format_num > 0)

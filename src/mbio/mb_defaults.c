@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
- *    The MB-system:	mb_defaults.c	1/21/93
- *    $Id: mb_defaults.c,v 4.0 1994-03-05 23:55:38 caress Exp $
+ *    The MB-system:	mb_defaults.c	10/7/94
+ *    $Id: mb_defaults.c,v 4.1 1994-10-21 12:11:53 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -11,15 +11,23 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- * mb_defaults.c returns the default MBIO control parameters - the
- * values are read from ~/.mbio_defaults if this file exists.
- * The return value is MB_SUCCESS if the file exists and MB_FAILURE
+ * mb_defaults.c contains two functions - mb_defaults() and mb_env().
+ * mb_defaults() returns the default MBIO control parameters and 
+ * mb_env() returns the default MB-System environment variables - all
+ * values are read from ~/.mbio_defaults providing this file exists.
+ * The return values are MB_SUCCESS if the file exists and MB_FAILURE
  * if it does not exist.
  *
  * Author:	D. W. Caress
  * Date:	January 23, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/03/05  23:55:38  caress
+ * First cut at version 4.0
+ *
+ * Revision 4.0  1994/03/05  23:55:38  caress
+ * First cut at version 4.0
+ *
  * Revision 4.1  1994/03/03  03:39:43  caress
  * Fixed copyright message.
  *
@@ -58,7 +66,7 @@ int *etime_i;
 double *speedmin;
 double *timegap;
 {
-  static char rcs_id[]="$Id: mb_defaults.c,v 4.0 1994-03-05 23:55:38 caress Exp $";
+  static char rcs_id[]="$Id: mb_defaults.c,v 4.1 1994-10-21 12:11:53 caress Exp $";
 	char	*function_name = "mb_defaults";
 	int	status;
 	FILE	*fp;
@@ -91,12 +99,14 @@ double *timegap;
 	btime_i[3] = 10;
 	btime_i[4] = 30;
 	btime_i[5] = 0;
+	btime_i[6] = 0;
 	etime_i[0] = 2062;
 	etime_i[1] = 2;
 	etime_i[2] = 21;
 	etime_i[3] = 10;
 	etime_i[4] = 30;
 	etime_i[5] = 0;
+	etime_i[6] = 0;
 	*speedmin = 0.0;
 	*timegap = 1.0;
 
@@ -126,10 +136,13 @@ double *timegap;
 		sscanf(&dummy[12],"%d %d %d %d %d %d",
 			&btime_i[0],&btime_i[1],&btime_i[2],
 			&btime_i[3],&btime_i[4],&btime_i[5]);
+		btime_i[6] = 0;
 		fgets(dummy,sizeof(dummy),fp);
 		sscanf(&dummy[12],"%d %d %d %d %d %d",
 			&etime_i[0],&etime_i[1],&etime_i[2],
 			&etime_i[3],&etime_i[4],&etime_i[5]);
+		etime_i[6] = 0;
+		fclose(fp);
 		}
 	else
 		status = MB_FAILURE;
@@ -153,14 +166,86 @@ double *timegap;
 		fprintf(stderr,"dbg2       btime_i[3]: %d\n",btime_i[3]);
 		fprintf(stderr,"dbg2       btime_i[4]: %d\n",btime_i[4]);
 		fprintf(stderr,"dbg2       btime_i[5]: %d\n",btime_i[5]);
+		fprintf(stderr,"dbg2       btime_i[6]: %d\n",btime_i[6]);
 		fprintf(stderr,"dbg2       etime_i[0]: %d\n",etime_i[0]);
 		fprintf(stderr,"dbg2       etime_i[1]: %d\n",etime_i[1]);
 		fprintf(stderr,"dbg2       etime_i[2]: %d\n",etime_i[2]);
 		fprintf(stderr,"dbg2       etime_i[3]: %d\n",etime_i[3]);
 		fprintf(stderr,"dbg2       etime_i[4]: %d\n",etime_i[4]);
 		fprintf(stderr,"dbg2       etime_i[5]: %d\n",etime_i[5]);
+		fprintf(stderr,"dbg2       etime_i[6]: %d\n",etime_i[6]);
 		fprintf(stderr,"dbg2       speedmin:   %f\n",*speedmin);
 		fprintf(stderr,"dbg2       timegap:    %f\n",*timegap);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_env(verbose,psdisplay,mbproject)
+int verbose;
+char *psdisplay;
+char *mbproject;
+{
+  static char rcs_id[]="$Id: mb_defaults.c,v 4.1 1994-10-21 12:11:53 caress Exp $";
+	char	*function_name = "mbenv";
+	int	status;
+	FILE	*fp;
+	char	file[128];
+	char	home[128];
+	char	dummy[128];
+	char	*HOME = "HOME";
+	char	*getenv();
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose: %d\n",verbose);
+		}
+
+	/* set system default values */
+	strcpy(psdisplay, "ghostview");
+	strcpy(mbproject, "none");
+
+	/* set the filename */
+	strcpy(file,getenv(HOME));
+	strcat(file,"/.mbio_defaults");
+
+	/* open and read values from file if possible */
+	if ((fp = fopen(file, "r")) != NULL)
+		{
+		status = MB_SUCCESS;
+		fgets(dummy,sizeof(dummy),fp);
+		fgets(dummy,sizeof(dummy),fp);
+		fgets(dummy,sizeof(dummy),fp);
+		fgets(dummy,sizeof(dummy),fp);
+		fgets(dummy,sizeof(dummy),fp);
+		fgets(dummy,sizeof(dummy),fp);
+		fgets(dummy,sizeof(dummy),fp);
+		fgets(dummy,sizeof(dummy),fp);
+		fgets(dummy,sizeof(dummy),fp);
+		fgets(dummy,sizeof(dummy),fp);
+		sscanf(&dummy[12], "%s", psdisplay);
+		fgets(dummy,sizeof(dummy),fp);
+		sscanf(&dummy[12], "%s", mbproject);
+		fclose(fp);
+		}
+	else
+		status = MB_FAILURE;
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       psdisplay:  %s\n",psdisplay);
+		fprintf(stderr,"dbg2       mbproject:  %s\n",mbproject);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:  %d\n",status);
 		}

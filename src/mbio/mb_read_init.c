@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_read_init.c	1/25/93
- *    $Id: mb_read_init.c,v 4.2 1994-07-29 18:46:51 caress Exp $
+ *    $Id: mb_read_init.c,v 4.3 1994-10-21 12:11:53 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -18,6 +18,10 @@
  * Date:	January 25, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1994/07/29  18:46:51  caress
+ * Changes associated with supporting Lynx OS (byte swapped) and
+ * using unix second time base (for time_d values).
+ *
  * Revision 4.1  1994/04/21  21:02:39  caress
  * Fixed bug so file open errors are passed back to calling function.
  *
@@ -67,7 +71,18 @@
 #include <strings.h>
 
 /* XDR i/o include file */
+#ifdef IRIX
+#include <rpc/rpc.h>
+#endif
+#ifdef LYNX
+#include <rpc/rpc.h>
+#endif
+#ifdef SUN
 #include <rpc/xdr.h>
+#endif
+#ifdef OTHER
+#include <rpc/xdr.h>
+#endif
 
 /* mbio include files */
 #include "../../include/mb_status.h"
@@ -85,8 +100,8 @@ int	format;
 int	pings;
 int	lonflip;
 double	bounds[4];
-int	btime_i[6];
-int	etime_i[6];
+int	btime_i[7];
+int	etime_i[7];
 double	speedmin;
 double	timegap;
 char	**mbio_ptr;
@@ -97,7 +112,7 @@ int	*beams_amp;
 int	*pixels_ss;
 int	*error;
 {
-	static char rcs_id[]="$Id: mb_read_init.c,v 4.2 1994-07-29 18:46:51 caress Exp $";
+	static char rcs_id[]="$Id: mb_read_init.c,v 4.3 1994-10-21 12:11:53 caress Exp $";
 	char	*function_name = "mb_read_init";
 	int	status;
 	int	format_num;
@@ -126,12 +141,14 @@ int	*error;
 		fprintf(stderr,"dbg2       btime_i[3]: %d\n",btime_i[3]);
 		fprintf(stderr,"dbg2       btime_i[4]: %d\n",btime_i[4]);
 		fprintf(stderr,"dbg2       btime_i[5]: %d\n",btime_i[5]);
+		fprintf(stderr,"dbg2       btime_i[6]: %d\n",btime_i[6]);
 		fprintf(stderr,"dbg2       etime_i[0]: %d\n",etime_i[0]);
 		fprintf(stderr,"dbg2       etime_i[1]: %d\n",etime_i[1]);
 		fprintf(stderr,"dbg2       etime_i[2]: %d\n",etime_i[2]);
 		fprintf(stderr,"dbg2       etime_i[3]: %d\n",etime_i[3]);
 		fprintf(stderr,"dbg2       etime_i[4]: %d\n",etime_i[4]);
 		fprintf(stderr,"dbg2       etime_i[5]: %d\n",etime_i[5]);
+		fprintf(stderr,"dbg2       etime_i[6]: %d\n",etime_i[6]);
 		fprintf(stderr,"dbg2       speedmin:   %f\n",speedmin);
 		fprintf(stderr,"dbg2       timegap:    %f\n",timegap);
 		}
@@ -142,7 +159,7 @@ int	*error;
 	/* allocate memory for mbio descriptor */
 	if (status == MB_SUCCESS)
 		status = mb_malloc(verbose,sizeof(struct mb_io_struct),
-				&mb_io_ptr,error);
+				mbio_ptr,error);
 	if (status == MB_FAILURE)
 		{
 		if (verbose >= 2)
@@ -156,7 +173,7 @@ int	*error;
 			}
 		return(status);
 		}
-	*mbio_ptr = (char *) mb_io_ptr;
+	mb_io_ptr = (struct mb_io_struct *) *mbio_ptr;
 
 	/* load control parameters into the mbio descriptor */
 	strcpy(mb_io_ptr->file,file);
@@ -166,7 +183,7 @@ int	*error;
 	mb_io_ptr->lonflip = lonflip;
 	for (i=0;i<4;i++)
 		mb_io_ptr->bounds[i] = bounds[i];
-	for (i=0;i<6;i++)
+	for (i=0;i<7;i++)
 		{
 		mb_io_ptr->btime_i[i] = btime_i[i];
 		mb_io_ptr->etime_i[i] = etime_i[i];
@@ -183,21 +200,55 @@ int	*error;
 	/* set the number of beams and allocate storage arrays */	
 	*beams_bath = beams_bath_table[format_num];
 	*beams_amp = beams_amp_table[format_num];
-	*pixels_ss = beams_ss_table[format_num];
+	*pixels_ss = pixels_ss_table[format_num];
 	mb_io_ptr->beams_bath = *beams_bath;
 	mb_io_ptr->beams_amp = *beams_amp;
 	mb_io_ptr->pixels_ss = *pixels_ss;
+	if (verbose >= 4)
+		{
+		fprintf(stderr,"\ndbg4  Beam and pixel dimensions set in MBIO function <%s>\n",
+				function_name);
+		fprintf(stderr,"dbg4       beams_bath: %d\n",
+			mb_io_ptr->beams_bath);
+		fprintf(stderr,"dbg4       beams_amp:  %d\n",
+			mb_io_ptr->beams_amp);
+		fprintf(stderr,"dbg4       pixels_ss:  %d\n",
+			mb_io_ptr->pixels_ss);
+		}
+
+	/* initialize pointers */
+	mb_io_ptr->raw_data = NULL;
+	mb_io_ptr->store_data = NULL;
+	mb_io_ptr->bath = NULL;
+	mb_io_ptr->amp = NULL;
+	mb_io_ptr->bath_acrosstrack = NULL;
+	mb_io_ptr->bath_alongtrack = NULL;
+	mb_io_ptr->bath_num = NULL;
+	mb_io_ptr->amp_num = NULL;
+	mb_io_ptr->ss = NULL;
+	mb_io_ptr->ss_acrosstrack = NULL;
+	mb_io_ptr->ss_alongtrack = NULL;
+	mb_io_ptr->ss_num = NULL;
+	mb_io_ptr->new_bath = NULL;
+	mb_io_ptr->new_amp = NULL;
+	mb_io_ptr->new_bath_acrosstrack = NULL;
+	mb_io_ptr->new_bath_alongtrack = NULL;
+	mb_io_ptr->new_ss = NULL;
+	mb_io_ptr->new_ss_acrosstrack = NULL;
+	mb_io_ptr->new_ss_alongtrack = NULL;
+
+	/* allocate arrays */
 	if (status == MB_SUCCESS)
-		status = mb_malloc(verbose,mb_io_ptr->beams_bath*sizeof(int),
+		status = mb_malloc(verbose,mb_io_ptr->beams_bath*sizeof(double),
 				&mb_io_ptr->bath,error);
 	if (status == MB_SUCCESS)
-		status = mb_malloc(verbose,mb_io_ptr->beams_amp*sizeof(int),
+		status = mb_malloc(verbose,mb_io_ptr->beams_amp*sizeof(double),
 				&mb_io_ptr->amp,error);
 	if (status == MB_SUCCESS)
-		status = mb_malloc(verbose,mb_io_ptr->beams_bath*sizeof(int),
+		status = mb_malloc(verbose,mb_io_ptr->beams_bath*sizeof(double),
 				&mb_io_ptr->bath_acrosstrack,error);
 	if (status == MB_SUCCESS)
-		status = mb_malloc(verbose,mb_io_ptr->beams_bath*sizeof(int),
+		status = mb_malloc(verbose,mb_io_ptr->beams_bath*sizeof(double),
 				&mb_io_ptr->bath_alongtrack,error);
 	if (status == MB_SUCCESS)
 		status = mb_malloc(verbose,mb_io_ptr->beams_bath*sizeof(int),
@@ -206,37 +257,37 @@ int	*error;
 		status = mb_malloc(verbose,mb_io_ptr->beams_amp*sizeof(int),
 				&mb_io_ptr->amp_num,error);
 	if (status == MB_SUCCESS)
-		status = mb_malloc(verbose,mb_io_ptr->pixels_ss*sizeof(int),
+		status = mb_malloc(verbose,mb_io_ptr->pixels_ss*sizeof(double),
 				&mb_io_ptr->ss,error);
 	if (status == MB_SUCCESS)
-		status = mb_malloc(verbose,mb_io_ptr->pixels_ss*sizeof(int),
+		status = mb_malloc(verbose,mb_io_ptr->pixels_ss*sizeof(double),
 				&mb_io_ptr->ss_acrosstrack,error);
 	if (status == MB_SUCCESS)
-		status = mb_malloc(verbose,mb_io_ptr->pixels_ss*sizeof(int),
+		status = mb_malloc(verbose,mb_io_ptr->pixels_ss*sizeof(double),
 				&mb_io_ptr->ss_alongtrack,error);
 	if (status == MB_SUCCESS)
 		status = mb_malloc(verbose,mb_io_ptr->pixels_ss*sizeof(int),
 				&mb_io_ptr->ss_num,error);
 	if (status == MB_SUCCESS)
-		status = mb_malloc(verbose,mb_io_ptr->beams_bath*sizeof(int),
+		status = mb_malloc(verbose,mb_io_ptr->beams_bath*sizeof(double),
 				&mb_io_ptr->new_bath,error);
 	if (status == MB_SUCCESS)
-		status = mb_malloc(verbose,mb_io_ptr->beams_amp*sizeof(int),
+		status = mb_malloc(verbose,mb_io_ptr->beams_amp*sizeof(double),
 				&mb_io_ptr->new_amp,error);
 	if (status == MB_SUCCESS)
-		status = mb_malloc(verbose,mb_io_ptr->beams_bath*sizeof(int),
+		status = mb_malloc(verbose,mb_io_ptr->beams_bath*sizeof(double),
 				&mb_io_ptr->new_bath_acrosstrack,error);
 	if (status == MB_SUCCESS)
-		status = mb_malloc(verbose,mb_io_ptr->beams_bath*sizeof(int),
+		status = mb_malloc(verbose,mb_io_ptr->beams_bath*sizeof(double),
 				&mb_io_ptr->new_bath_alongtrack,error);
 	if (status == MB_SUCCESS)
-		status = mb_malloc(verbose,mb_io_ptr->pixels_ss*sizeof(int),
+		status = mb_malloc(verbose,mb_io_ptr->pixels_ss*sizeof(double),
 				&mb_io_ptr->new_ss,error);
 	if (status == MB_SUCCESS)
-		status = mb_malloc(verbose,mb_io_ptr->pixels_ss*sizeof(int),
+		status = mb_malloc(verbose,mb_io_ptr->pixels_ss*sizeof(double),
 				&mb_io_ptr->new_ss_acrosstrack,error);
 	if (status == MB_SUCCESS)
-		status = mb_malloc(verbose,mb_io_ptr->pixels_ss*sizeof(int),
+		status = mb_malloc(verbose,mb_io_ptr->pixels_ss*sizeof(double),
 				&mb_io_ptr->new_ss_alongtrack,error);
 
 	/* call routine to allocate memory for format dependent i/o */
@@ -246,24 +297,24 @@ int	*error;
 	/* deal with a memory allocation failure */
 	if (status == MB_FAILURE)
 		{
-		status = mb_free(verbose,mb_io_ptr->bath,error);
-		status = mb_free(verbose,mb_io_ptr->amp,error);
-		status = mb_free(verbose,mb_io_ptr->bath_acrosstrack,error);
-		status = mb_free(verbose,mb_io_ptr->bath_alongtrack,error);
-		status = mb_free(verbose,mb_io_ptr->bath_num,error);
-		status = mb_free(verbose,mb_io_ptr->amp_num,error);
-		status = mb_free(verbose,mb_io_ptr->ss,error);
-		status = mb_free(verbose,mb_io_ptr->ss_acrosstrack,error);
-		status = mb_free(verbose,mb_io_ptr->ss_alongtrack,error);
-		status = mb_free(verbose,mb_io_ptr->ss_num,error);
-		status = mb_free(verbose,mb_io_ptr->new_bath,error);
-		status = mb_free(verbose,mb_io_ptr->new_amp,error);
-		status = mb_free(verbose,mb_io_ptr->new_bath_acrosstrack,error);
-		status = mb_free(verbose,mb_io_ptr->new_bath_alongtrack,error);
-		status = mb_free(verbose,mb_io_ptr->new_ss,error);
-		status = mb_free(verbose,mb_io_ptr->new_ss_acrosstrack,error);
-		status = mb_free(verbose,mb_io_ptr->new_ss_alongtrack,error);
-		status = mb_free(verbose,mb_io_ptr,error);
+		status = mb_free(verbose,&mb_io_ptr->bath,error);
+		status = mb_free(verbose,&mb_io_ptr->amp,error);
+		status = mb_free(verbose,&mb_io_ptr->bath_acrosstrack,error);
+		status = mb_free(verbose,&mb_io_ptr->bath_alongtrack,error);
+		status = mb_free(verbose,&mb_io_ptr->bath_num,error);
+		status = mb_free(verbose,&mb_io_ptr->amp_num,error);
+		status = mb_free(verbose,&mb_io_ptr->ss,error);
+		status = mb_free(verbose,&mb_io_ptr->ss_acrosstrack,error);
+		status = mb_free(verbose,&mb_io_ptr->ss_alongtrack,error);
+		status = mb_free(verbose,&mb_io_ptr->ss_num,error);
+		status = mb_free(verbose,&mb_io_ptr->new_bath,error);
+		status = mb_free(verbose,&mb_io_ptr->new_amp,error);
+		status = mb_free(verbose,&mb_io_ptr->new_bath_acrosstrack,error);
+		status = mb_free(verbose,&mb_io_ptr->new_bath_alongtrack,error);
+		status = mb_free(verbose,&mb_io_ptr->new_ss,error);
+		status = mb_free(verbose,&mb_io_ptr->new_ss_acrosstrack,error);
+		status = mb_free(verbose,&mb_io_ptr->new_ss_alongtrack,error);
+		status = mb_free(verbose,&mb_io_ptr,error);
 		status = MB_FAILURE;
 		*error = MB_ERROR_MEMORY_FAIL;
 		if (verbose >= 2)
@@ -295,7 +346,7 @@ int	*error;
 				&mb_io_ptr->xdrs,error);
 		if (status == MB_SUCCESS)
 			{
-			xdrstdio_create(mb_io_ptr->xdrs, 
+			xdrstdio_create((XDR *)mb_io_ptr->xdrs, 
 				mb_io_ptr->mbfp, XDR_DECODE);
 			}
 		else
@@ -309,25 +360,25 @@ int	*error;
 	if (status == MB_FAILURE)
 		{
 		if (mb_xdr_table[format_num] == MB_YES)
-			status = mb_free(verbose,mb_io_ptr->xdrs,error);
-		status = mb_free(verbose,mb_io_ptr->bath,error);
-		status = mb_free(verbose,mb_io_ptr->amp,error);
-		status = mb_free(verbose,mb_io_ptr->bath_acrosstrack,error);
-		status = mb_free(verbose,mb_io_ptr->bath_alongtrack,error);
-		status = mb_free(verbose,mb_io_ptr->bath_num,error);
-		status = mb_free(verbose,mb_io_ptr->amp_num,error);
-		status = mb_free(verbose,mb_io_ptr->ss,error);
-		status = mb_free(verbose,mb_io_ptr->ss_acrosstrack,error);
-		status = mb_free(verbose,mb_io_ptr->ss_alongtrack,error);
-		status = mb_free(verbose,mb_io_ptr->ss_num,error);
-		status = mb_free(verbose,mb_io_ptr->new_bath,error);
-		status = mb_free(verbose,mb_io_ptr->new_amp,error);
-		status = mb_free(verbose,mb_io_ptr->new_bath_acrosstrack,error);
-		status = mb_free(verbose,mb_io_ptr->new_bath_alongtrack,error);
-		status = mb_free(verbose,mb_io_ptr->new_ss,error);
-		status = mb_free(verbose,mb_io_ptr->new_ss_acrosstrack,error);
-		status = mb_free(verbose,mb_io_ptr->new_ss_alongtrack,error);
-		status = mb_free(verbose,mb_io_ptr,error);
+			status = mb_free(verbose,&mb_io_ptr->xdrs,error);
+		status = mb_free(verbose,&mb_io_ptr->bath,error);
+		status = mb_free(verbose,&mb_io_ptr->amp,error);
+		status = mb_free(verbose,&mb_io_ptr->bath_acrosstrack,error);
+		status = mb_free(verbose,&mb_io_ptr->bath_alongtrack,error);
+		status = mb_free(verbose,&mb_io_ptr->bath_num,error);
+		status = mb_free(verbose,&mb_io_ptr->amp_num,error);
+		status = mb_free(verbose,&mb_io_ptr->ss,error);
+		status = mb_free(verbose,&mb_io_ptr->ss_acrosstrack,error);
+		status = mb_free(verbose,&mb_io_ptr->ss_alongtrack,error);
+		status = mb_free(verbose,&mb_io_ptr->ss_num,error);
+		status = mb_free(verbose,&mb_io_ptr->new_bath,error);
+		status = mb_free(verbose,&mb_io_ptr->new_amp,error);
+		status = mb_free(verbose,&mb_io_ptr->new_bath_acrosstrack,error);
+		status = mb_free(verbose,&mb_io_ptr->new_bath_alongtrack,error);
+		status = mb_free(verbose,&mb_io_ptr->new_ss,error);
+		status = mb_free(verbose,&mb_io_ptr->new_ss_acrosstrack,error);
+		status = mb_free(verbose,&mb_io_ptr->new_ss_alongtrack,error);
+		status = mb_free(verbose,&mb_io_ptr,error);
 		*error = MB_ERROR_OPEN_FAIL;
 		status = MB_FAILURE;
 		if (verbose >= 2)
@@ -366,24 +417,33 @@ int	*error;
 	mb_io_ptr->heading = 0.0;
 	for (i=0;i<mb_io_ptr->beams_bath;i++)
 		{
-		mb_io_ptr->bath[i] = 0;
-		mb_io_ptr->bath_acrosstrack[i] = 0;
-		mb_io_ptr->bath_alongtrack[i] = 0;
+		mb_io_ptr->bath[i] = 0.0;
+		mb_io_ptr->bath_acrosstrack[i] = 0.0;
+		mb_io_ptr->bath_alongtrack[i] = 0.0;
 		mb_io_ptr->bath_num[i] = 0;
 		}
 	for (i=0;i<mb_io_ptr->beams_amp;i++)
 		{
-		mb_io_ptr->amp[i] = 0;
+		mb_io_ptr->amp[i] = 0.0;
 		mb_io_ptr->amp_num[i] = 0;
 		}
 	for (i=0;i<mb_io_ptr->pixels_ss;i++)
 		{
-		mb_io_ptr->ss[i] = 0;
-		mb_io_ptr->ss_acrosstrack[i] = 0;
-		mb_io_ptr->ss_alongtrack[i] = 0;
+		mb_io_ptr->ss[i] = 0.0;
+		mb_io_ptr->ss_acrosstrack[i] = 0.0;
+		mb_io_ptr->ss_alongtrack[i] = 0.0;
 		mb_io_ptr->ss_num[i] = 0;
 		}
 	mb_io_ptr->need_new_ping = MB_YES;
+
+	/* initialize variables for extrapolating navigation */
+	mb_io_ptr->nfix = 0;
+	for (i=0;i<5;i++)
+		{
+		mb_io_ptr->fix_time_d[i] = 0.0;
+		mb_io_ptr->fix_lon[i] = 0.0;
+		mb_io_ptr->fix_lat[i] = 0.0;
+		}
 
 	/* set error and status (if you got here you succeeded */
 	*error = MB_ERROR_NO_ERROR;

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format_inf.c	1/21/93
- *    $Id: mb_format_inf.c,v 4.0 1994-03-06 00:01:56 caress Exp $
+ *    $Id: mb_format_inf.c,v 4.1 1994-10-21 12:11:53 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -18,6 +18,12 @@
  * Date:	January 21, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/03/06  00:01:56  caress
+ * First cut at version 4.0
+ *
+ * Revision 4.0  1994/03/06  00:01:56  caress
+ * First cut at version 4.0
+ *
  * Revision 4.2  1994/03/03  03:39:43  caress
  * Fixed copyright message.
  *
@@ -50,7 +56,7 @@ int	verbose;
 int	format_num;
 char	**message;
 {
-  static char rcs_id[]="$Id: mb_format_inf.c,v 4.0 1994-03-06 00:01:56 caress Exp $";
+  static char rcs_id[]="$Id: mb_format_inf.c,v 4.1 1994-10-21 12:11:53 caress Exp $";
 	char	*function_name = "mb_format_inf";
 	int	status;
 

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_mem.c	3/1/93
- *    $Id: mb_mem.c,v 4.2 1994-07-29 18:46:51 caress Exp $
+ *    $Id: mb_mem.c,v 4.3 1994-10-21 12:11:53 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -20,6 +20,10 @@
  * Date:	March 1, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1994/07/29  18:46:51  caress
+ * Changes associated with supporting Lynx OS (byte swapped) and
+ * using unix second time base (for time_d values).
+ *
  * Revision 4.1  1994/03/23  22:19:33  caress
  * Previous versions of mb_malloc returned an error if the
  * pointer returned by malloc() was NULL, even if the size
@@ -57,7 +61,7 @@
 #include "../../include/mb_status.h"
 
 /* memory allocation list variables */
-#define	MB_MEMORY_HEAP_MAX	1000
+#define	MB_MEMORY_HEAP_MAX	10000
 static int	n_mb_alloc = 0;
 static char	*mb_alloc_ptr[MB_MEMORY_HEAP_MAX];
 static int	mb_alloc_size[MB_MEMORY_HEAP_MAX];
@@ -69,9 +73,10 @@ int	size;
 char	**ptr;
 int	*error;
 {
-  static char rcs_id[]="$Id: mb_mem.c,v 4.2 1994-07-29 18:46:51 caress Exp $";
+  static char rcs_id[]="$Id: mb_mem.c,v 4.3 1994-10-21 12:11:53 caress Exp $";
 	char	*function_name = "mb_malloc";
 	int	status = MB_SUCCESS;
+	int	iptr;
 	int	i;
 
 	/* print input debug statements */
@@ -82,12 +87,23 @@ int	*error;
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       size:       %d\n",size);
+		fprintf(stderr,"dbg2       ptr:        %d\n",ptr);
+		fprintf(stderr,"dbg2       *ptr:       %d\n",*ptr);
 		}
 
+	/* check if pointer is in list */
+/*	iptr = -1;
+	for (i=0;i<n_mb_alloc;i++)
+		if (mb_alloc_ptr[i] == *ptr)
+			iptr = i;
+	fprintf(stderr, "ptr:%d iptr:%d\n", *ptr, iptr);
+*/
+
 	/* allocate memory */
+	*ptr = NULL;
 	if (size > 0)
 		{
-		if ((*ptr = (char *) malloc(size)) == NULL)
+		if ((*ptr = (char *) realloc(*ptr, size)) == NULL)
 			{
 			*error = MB_ERROR_MEMORY_FAIL;
 			status = MB_FAILURE;
@@ -103,6 +119,15 @@ int	*error;
 		*ptr = NULL;
 		*error = MB_ERROR_NO_ERROR;
 		status = MB_SUCCESS;
+		}
+
+	/* print debug statements */
+	if (verbose >= 5 && size > 0)
+		{
+		fprintf(stderr,"\ndbg5  Memory allocated in MBIO function <%s>\n",
+			function_name);
+		fprintf(stderr,"dbg5       i:%d  ptr:%d  size:%d\n",
+			n_mb_alloc,*ptr,size);
 		}
 
 	/* add to list if size > 0 */
@@ -141,7 +166,7 @@ int	*error;
 /*--------------------------------------------------------------------*/
 int mb_free(verbose,ptr,error)
 int	verbose;
-char	*ptr;
+char	**ptr;
 int	*error;
 {
 	char	*function_name = "mb_free";
@@ -156,16 +181,16 @@ int	*error;
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       ptr:        %d\n",ptr);
+		fprintf(stderr,"dbg2       ptr:        %d\n",*ptr);
 		}
 
 	/* check if pointer is in list */
 	iptr = -1;
 	for (i=0;i<n_mb_alloc;i++)
-		if (mb_alloc_ptr[i] == ptr)
+		if (mb_alloc_ptr[i] == *ptr)
 			iptr = i;
 
-	/* if pointer is in list remove it from list 
+	/* if pointer is in list remove it from list
 		and deallocate the memory */
 	if (iptr > -1)
 		{
@@ -180,15 +205,16 @@ int	*error;
 		n_mb_alloc--;
 
 		/* free the memory */
-		free(ptr);
+		free(*ptr);
+		*ptr = NULL;
 		}
 
 	/* print debug statements */
-	if (verbose >= 6 && iptr > -1)
+	if (verbose >= 5 && iptr > -1)
 		{
-		fprintf(stderr,"\ndbg6  Allocated memory freed in MBIO function <%s>\n",
+		fprintf(stderr,"\ndbg5  Allocated memory freed in MBIO function <%s>\n",
 			function_name);
-		fprintf(stderr,"dbg6       i:%d  ptr:%d  size:%d\n",
+		fprintf(stderr,"dbg5       i:%d  ptr:%d  size:%d\n",
 			iptr,ptrvalue,ptrsize);
 		}
 

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_close.c	1/25/93
- *	$Id: mb_close.c,v 4.1 1994-07-29 18:46:51 caress Exp $
+ *	$Id: mb_close.c,v 4.2 1994-10-21 12:11:53 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -17,6 +17,10 @@
  * Author:	D. W. Caress
  * Date:	January 25, 1993
  *	$Log: not supported by cvs2svn $
+ * Revision 4.1  1994/07/29  18:46:51  caress
+ * Changes associated with supporting Lynx OS (byte swapped) and
+ * using unix second time base (for time_d values).
+ *
  * Revision 4.0  1994/03/05  23:55:38  caress
  * First cut at version 4.0
  *
@@ -44,7 +48,18 @@
 #include <strings.h>
 
 /* XDR i/o include file */
+#ifdef IRIX
+#include <rpc/rpc.h>
+#endif
+#ifdef LYNX
+#include <rpc/rpc.h>
+#endif
+#ifdef SUN
 #include <rpc/xdr.h>
+#endif
+#ifdef OTHER
+#include <rpc/xdr.h>
+#endif
 
 /* mbio include files */
 #include "../../include/mb_status.h"
@@ -54,10 +69,10 @@
 /*--------------------------------------------------------------------*/
 int mb_close(verbose,mbio_ptr,error)
 int	verbose;
-char	*mbio_ptr;
+char	**mbio_ptr;
 int	*error;
 {
-	static	char	rcs_id[]="$Id: mb_close.c,v 4.1 1994-07-29 18:46:51 caress Exp $";
+	static	char	rcs_id[]="$Id: mb_close.c,v 4.2 1994-10-21 12:11:53 caress Exp $";
 	char	*function_name = "mb_close";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -70,41 +85,41 @@ int	*error;
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",*mbio_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+	mb_io_ptr = (struct mb_io_struct *) *mbio_ptr;
 
 	/* deallocate format dependent structures */
-	status = mb_mem_deall(verbose,mbio_ptr,error);
+	status = mb_mem_deall(verbose,*mbio_ptr,error);
 
 	/* deallocate memory for arrays within the mbio descriptor */
 	if (mb_xdr_table[mb_io_ptr->format_num] == MB_YES)
-		status = mb_free(verbose,mb_io_ptr->xdrs,error);
-	status = mb_free(verbose,mb_io_ptr->bath,error);
-	status = mb_free(verbose,mb_io_ptr->amp,error);
-	status = mb_free(verbose,mb_io_ptr->bath_acrosstrack,error);
-	status = mb_free(verbose,mb_io_ptr->bath_alongtrack,error);
-	status = mb_free(verbose,mb_io_ptr->bath_num,error);
-	status = mb_free(verbose,mb_io_ptr->amp_num,error);
-	status = mb_free(verbose,mb_io_ptr->ss,error);
-	status = mb_free(verbose,mb_io_ptr->ss_acrosstrack,error);
-	status = mb_free(verbose,mb_io_ptr->ss_alongtrack,error);
-	status = mb_free(verbose,mb_io_ptr->ss_num,error);
-	status = mb_free(verbose,mb_io_ptr->new_bath,error);
-	status = mb_free(verbose,mb_io_ptr->new_amp,error);
-	status = mb_free(verbose,mb_io_ptr->new_bath_acrosstrack,error);
-	status = mb_free(verbose,mb_io_ptr->new_bath_alongtrack,error);
-	status = mb_free(verbose,mb_io_ptr->new_ss,error);
-	status = mb_free(verbose,mb_io_ptr->new_ss_acrosstrack,error);
-	status = mb_free(verbose,mb_io_ptr->new_ss_alongtrack,error);
+		status = mb_free(verbose,&mb_io_ptr->xdrs,error);
+	status = mb_free(verbose,&mb_io_ptr->bath,error);
+	status = mb_free(verbose,&mb_io_ptr->amp,error);
+	status = mb_free(verbose,&mb_io_ptr->bath_acrosstrack,error);
+	status = mb_free(verbose,&mb_io_ptr->bath_alongtrack,error);
+	status = mb_free(verbose,&mb_io_ptr->bath_num,error);
+	status = mb_free(verbose,&mb_io_ptr->amp_num,error);
+	status = mb_free(verbose,&mb_io_ptr->ss,error);
+	status = mb_free(verbose,&mb_io_ptr->ss_acrosstrack,error);
+	status = mb_free(verbose,&mb_io_ptr->ss_alongtrack,error);
+	status = mb_free(verbose,&mb_io_ptr->ss_num,error);
+	status = mb_free(verbose,&mb_io_ptr->new_bath,error);
+	status = mb_free(verbose,&mb_io_ptr->new_amp,error);
+	status = mb_free(verbose,&mb_io_ptr->new_bath_acrosstrack,error);
+	status = mb_free(verbose,&mb_io_ptr->new_bath_alongtrack,error);
+	status = mb_free(verbose,&mb_io_ptr->new_ss,error);
+	status = mb_free(verbose,&mb_io_ptr->new_ss_acrosstrack,error);
+	status = mb_free(verbose,&mb_io_ptr->new_ss_alongtrack,error);
 
 	/* close the file */
 	fclose(mb_io_ptr->mbfp);
 
 	/* deallocate the mbio descriptor */
-	status = mb_free(verbose,mb_io_ptr,error);
+	status = mb_free(verbose,mbio_ptr,error);
 
 	/* print output debug statements */
 	if (verbose >= 2)

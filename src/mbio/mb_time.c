@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_time.c	1/21/93
- *    $Id: mb_time.c,v 4.2 1994-07-29 18:46:51 caress Exp $
+ *    $Id: mb_time.c,v 4.3 1994-10-21 12:11:53 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -18,6 +18,10 @@
  * Date:	January 21, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1994/07/29  18:46:51  caress
+ * Changes associated with supporting Lynx OS (byte swapped) and
+ * using unix second time base (for time_d values).
+ *
  * Revision 4.1  1994/04/27  23:37:06  caress
  * Changed reference to time_d value; time_d now defined as
  * minutes since 1/1/1971 00:00:00.
@@ -57,20 +61,20 @@
 #define SECINHOUR     3600.0
 #define SECINMINUTE     60.0
 #define IMININHOUR 60
-int	jday[] = {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334};
-static char rcs_id[]="$Id: mb_time.c,v 4.2 1994-07-29 18:46:51 caress Exp $";
+int	yday[] = {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334};
+static char rcs_id[]="$Id: mb_time.c,v 4.3 1994-10-21 12:11:53 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 /* 	function mb_get_time returns the number of seconds from
  * 	1/1/70 00:00:00 calculated from (yy/mm/dd/hr/mi/sc). */
 int mb_get_time(verbose,time_i,time_d)
 int verbose;
-int time_i[6];
+int time_i[7];
 double *time_d;
 {
   char	*function_name = "mb_get_time";
 	int	status;
-	int	julday;
+	int	yearday;
 	int	leapday;
 
 	/* print input debug statements */
@@ -86,15 +90,17 @@ double *time_d;
 		fprintf(stderr,"dbg2       hour:    %d\n",time_i[3]);
 		fprintf(stderr,"dbg2       minute:  %d\n",time_i[4]);
 		fprintf(stderr,"dbg2       second:  %d\n",time_i[5]);
+		fprintf(stderr,"dbg2       microsec:%d\n",time_i[6]);
 		}
 
 	/* get time */
-	julday = jday[time_i[1]-1];
-	if (((time_i[0]%4) == 0) && (time_i[1] > 2)) julday++;
+	yearday = yday[time_i[1]-1];
+	if (((time_i[0]%4) == 0) && (time_i[1] > 2)) yearday++;
 	leapday = (time_i[0] - 1969)/4;
 	*time_d = (time_i[0] - 1970)*SECINYEAR 
-		+ (julday + leapday + time_i[2])*SECINDAY 
-		+ time_i[3]*SECINHOUR + time_i[4]*SECINMINUTE + time_i[5];
+		+ (yearday - 1 + leapday + time_i[2])*SECINDAY 
+		+ time_i[3]*SECINHOUR + time_i[4]*SECINMINUTE 
+		+ time_i[5] + 0.000001*time_i[6];
 
 	/* assume success */
 	status = MB_SUCCESS;
@@ -118,14 +124,14 @@ double *time_d;
  * 	from the number of seconds after 1/1/70 00:00:0 */
 int mb_get_date(verbose,time_d,time_i)
 double time_d;
-int time_i[6];
+int time_i[7];
 {
 
 	char	*function_name = "mb_get_date";
 	int	status;
 	int	i;
 	int	daytotal;
-	int	julday;
+	int	yearday;
 	int	leapday;
 
 	/* print input debug statements */
@@ -145,20 +151,23 @@ int time_i[6];
 			- time_i[3]*SECINHOUR)/SECINMINUTE);
 	time_i[5] = (int) (time_d - daytotal*SECINDAY 
 			- time_i[3]*SECINHOUR - time_i[4]*SECINMINUTE);
+	time_i[6] = (int) 1000000*(time_d - daytotal*SECINDAY 
+			- time_i[3]*SECINHOUR - time_i[4]*SECINMINUTE
+			- time_i[5]);
 	time_i[0] = (int) (time_d/SECINYEAR) + 1970;
 	leapday = (time_i[0] - 1969)/4;
-	julday = daytotal - 365*(time_i[0] - 1970) - leapday + 1;
-	if (julday < 0)
+	yearday = daytotal - 365*(time_i[0] - 1970) - leapday + 1;
+	if (yearday < 0)
 		{
 		time_i[0]--;
 		leapday = (time_i[0] - 1969)/4;
-		julday = daytotal - 365*(time_i[0] - 1970) - leapday + 1;
+		yearday = daytotal - 365*(time_i[0] - 1970) - leapday + 1;
 		}
 	leapday = 0;
-	if ((time_i[0]%4) == 0 && julday > jday[2]) leapday = 1;
+	if ((time_i[0]%4) == 0 && yearday > yday[2]) leapday = 1;
 	for (i=0;i<12;i++)
-		if (julday > (jday[i] + leapday)) time_i[1] = i + 1;
-	time_i[2] = julday - jday[time_i[1]-1] - leapday;
+		if (yearday > (yday[i] + leapday)) time_i[1] = i + 1;
+	time_i[2] = yearday - yday[time_i[1]-1] - leapday;
 
 	/* assume success */
 	status = MB_SUCCESS;
@@ -175,6 +184,7 @@ int time_i[6];
 		fprintf(stderr,"dbg2       hour:    %d\n",time_i[3]);
 		fprintf(stderr,"dbg2       minute:  %d\n",time_i[4]);
 		fprintf(stderr,"dbg2       second:  %d\n",time_i[5]);
+		fprintf(stderr,"dbg2       microsec:%d\n",time_i[6]);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:  %d\n",status);
 		}
@@ -183,12 +193,12 @@ int time_i[6];
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-/* 	function mb_get_jtime returns the julian days calculated 
+/* 	function mb_get_jtime returns the day of year calculated 
  *	from (yy/mm/dd/hr/mi/sc). */
 int mb_get_jtime(verbose,time_i,time_j)
 int verbose;
-int time_i[6];
-int time_j[4];
+int time_i[7];
+int time_j[5];
 {
 	char	*function_name = "mb_get_jtime";
 	int	status;
@@ -207,14 +217,16 @@ int time_j[4];
 		fprintf(stderr,"dbg2       hour:       %d\n",time_i[3]);
 		fprintf(stderr,"dbg2       minute:     %d\n",time_i[4]);
 		fprintf(stderr,"dbg2       second:     %d\n",time_i[5]);
+		fprintf(stderr,"dbg2       microsecond:%d\n",time_i[6]);
 		}
 
-	/* get time with julian day */
+	/* get time with day of year */
 	time_j[0] = time_i[0];
-	time_j[1] = jday[time_i[1]-1] + time_i[2];
+	time_j[1] = yday[time_i[1]-1] + time_i[2];
 	if (((time_i[0]%4) == 0) && (time_i[1] > 2)) time_j[1]++;
 	time_j[2] = time_i[3]*IMININHOUR + time_i[4];
 	time_j[3] = time_i[5];
+	time_j[4] = time_i[6];
 
 	/* assume success */
 	status = MB_SUCCESS;
@@ -226,9 +238,10 @@ int time_j[4];
 			function_name);
 		fprintf(stderr,"dbg2  Return value:\n");
 		fprintf(stderr,"dbg2       year:       %d\n",time_j[0]);
-		fprintf(stderr,"dbg2       julian day: %d\n",time_j[1]);
+		fprintf(stderr,"dbg2       day of year:%d\n",time_j[1]);
 		fprintf(stderr,"dbg2       minute:     %d\n",time_j[2]);
 		fprintf(stderr,"dbg2       second:     %d\n",time_j[3]);
+		fprintf(stderr,"dbg2       microsecond:%d\n",time_j[4]);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:     %d\n",status);
 		}
@@ -238,13 +251,13 @@ int time_j[4];
 }
 /*--------------------------------------------------------------------*/
 /* 	function mb_get_itime returns the time in (yy/mm/dd/hr/mi/sc)
- *	calculated from the time in (yy/jd/hr/mi/sc) where jd is the
- *	julian day of the year.
+ *	calculated from the time in (yy/yd/hr/mi/sc) where yd is the
+ *	day of the year.
  */
 int mb_get_itime(verbose,time_j,time_i)
 int verbose;
-int time_j[4];
-int time_i[6];
+int time_j[5];
+int time_i[7];
 {
 	char	*function_name = "mb_get_itime";
 	int	status;
@@ -259,9 +272,10 @@ int time_i[6];
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       year:       %d\n",time_j[0]);
-		fprintf(stderr,"dbg2       julian day: %d\n",time_j[1]);
+		fprintf(stderr,"dbg2       day of year:%d\n",time_j[1]);
 		fprintf(stderr,"dbg2       minute:     %d\n",time_j[2]);
 		fprintf(stderr,"dbg2       second:     %d\n",time_j[3]);
+		fprintf(stderr,"dbg2       microsecond:%d\n",time_j[4]);
 		}
 
 	/* get the date */
@@ -269,13 +283,14 @@ int time_i[6];
 	time_i[3] = time_j[2]/IMININHOUR;
 	time_i[4] = time_j[2] - time_i[3]*IMININHOUR;
 	time_i[5] = time_j[3];
-	if ((time_j[0]%4) == 0 && time_j[1] > jday[2]) 
+	time_i[6] = time_j[4];
+	if ((time_j[0]%4) == 0 && time_j[1] > yday[2]) 
 		leapday = 1;
 	else
 		leapday = 0;
 	for (i=0;i<12;i++)
-		if (time_j[1] > (jday[i] + leapday)) time_i[1] = i + 1;
-	time_i[2] = time_j[1] - jday[time_i[1]-1] - leapday;
+		if (time_j[1] > (yday[i] + leapday)) time_i[1] = i + 1;
+	time_i[2] = time_j[1] - yday[time_i[1]-1] - leapday;
 
 	/* assume success */
 	status = MB_SUCCESS;
@@ -292,6 +307,7 @@ int time_i[6];
 		fprintf(stderr,"dbg2       hour:       %d\n",time_i[3]);
 		fprintf(stderr,"dbg2       minute:     %d\n",time_i[4]);
 		fprintf(stderr,"dbg2       second:     %d\n",time_i[5]);
+		fprintf(stderr,"dbg2       microsecond:%d\n",time_i[6]);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:     %d\n",status);
 		}

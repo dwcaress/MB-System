@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_read.c	2/20/93
- *    $Id: mb_read.c,v 4.2 1994-07-29 18:46:51 caress Exp $
+ *    $Id: mb_read.c,v 4.3 1994-10-21 12:11:53 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,10 @@
  * Date:	February 20, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1994/07/29  18:46:51  caress
+ * Changes associated with supporting Lynx OS (byte swapped) and
+ * using unix second time base (for time_d values).
+ *
  * Revision 4.1  1994/06/05  02:42:58  caress
  * Fixed xtrack/ltrack to/from lon/lat conversions.
  *
@@ -95,7 +99,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*kind;
 int	*pings;
-int	time_i[6];
+int	time_i[7];
 double	*time_d;
 double	*navlon;
 double	*navlat;
@@ -116,7 +120,7 @@ char	*comment;
 int	*error;
 {
 
-  static char rcs_id[]="$Id: mb_read.c,v 4.2 1994-07-29 18:46:51 caress Exp $";
+  static char rcs_id[]="$Id: mb_read.c,v 4.3 1994-10-21 12:11:53 caress Exp $";
 	char	*function_name = "mb_read";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
@@ -338,6 +342,8 @@ int	*error;
 				mb_io_ptr->new_time_i[4]);
 			fprintf(stderr,"dbg4       time_i[5]:     %d\n",
 				mb_io_ptr->new_time_i[5]);
+			fprintf(stderr,"dbg4       time_i[6]:     %d\n",
+				mb_io_ptr->new_time_i[6]);
 			fprintf(stderr,"dbg4       time_d:        %f\n",
 				mb_io_ptr->new_time_d);
 			fprintf(stderr,"dbg4       longitude:     %f\n",
@@ -354,7 +360,7 @@ int	*error;
 			  {
 			  fprintf(stderr,"dbg4       beam   bath  crosstrack alongtrack\n");
 			  for (i=0;i<mb_io_ptr->beams_bath;i++)
-			    fprintf(stderr,"dbg4       %4d   %5d    %5d     %5d\n",
+			    fprintf(stderr,"dbg4       %4d   %f    %f     %f\n",
 				i,mb_io_ptr->new_bath[i],
 				mb_io_ptr->new_bath_acrosstrack[i],
 				mb_io_ptr->new_bath_alongtrack[i]);
@@ -365,7 +371,7 @@ int	*error;
 			  {
 			  fprintf(stderr,"dbg4       beam    amp  crosstrack alongtrack\n");
 			  for (i=0;i<mb_io_ptr->beams_bath;i++)
-			    fprintf(stderr,"dbg4       %4d   %5d    %5d     %5d\n",
+			    fprintf(stderr,"dbg4       %4d   %f    %f     %f\n",
 				i,mb_io_ptr->new_amp[i],
 				mb_io_ptr->new_bath_acrosstrack[i],
 				mb_io_ptr->new_bath_alongtrack[i]);
@@ -376,7 +382,7 @@ int	*error;
 			  {
 			  fprintf(stderr,"dbg4       pixel sidescan crosstrack alongtrack\n");
 			  for (i=0;i<mb_io_ptr->pixels_ss;i++)
-			    fprintf(stderr,"dbg4       %4d   %5d    %5d     %5d\n",
+			    fprintf(stderr,"dbg4       %4d   %f    %f     %f\n",
 				i,mb_io_ptr->new_ss[i],
 				mb_io_ptr->new_ss_acrosstrack[i],mb_io_ptr->new_ss_alongtrack[i]);
 			  }
@@ -479,7 +485,7 @@ int	*error;
 			  {
 			  fprintf(stderr,"dbg4       beam   nbath bath  crosstrack alongtrack\n");
 			  for (i=0;i<mb_io_ptr->beams_bath;i++)
-			    fprintf(stderr,"dbg4       %4d   %4d  %5d    %5d     %5d\n",
+			    fprintf(stderr,"dbg4       %4d   %4d  %f    %f     %f\n",
 				i,mb_io_ptr->bath_num[i],mb_io_ptr->bath[i],
 				mb_io_ptr->bath_acrosstrack[i],
 				mb_io_ptr->bath_alongtrack[i]);
@@ -490,7 +496,7 @@ int	*error;
 			  {
 			  fprintf(stderr,"dbg4       beam    namp  amp  crosstrack alongtrack\n");
 			  for (i=0;i<mb_io_ptr->beams_amp;i++)
-			    fprintf(stderr,"dbg4       %4d   %4d  %5d    %5d     %5d\n",
+			    fprintf(stderr,"dbg4       %4d   %4d  %f    %f     %f\n",
 				i,mb_io_ptr->amp_num[i],mb_io_ptr->amp[i],
 				mb_io_ptr->bath_acrosstrack[i],
 				mb_io_ptr->bath_alongtrack[i]);
@@ -501,7 +507,7 @@ int	*error;
 			  {
 			  fprintf(stderr,"dbg4       pixel nss  sidescan crosstrack alongtrack\n");
 			  for (i=0;i<mb_io_ptr->pixels_ss;i++)
-			    fprintf(stderr,"dbg4       %4d   %4d   %5d    %5d     %5d\n",
+			    fprintf(stderr,"dbg4       %4d   %4d   %f    %f     %f\n",
 				i,mb_io_ptr->ss_num[i],mb_io_ptr->ss[i],
 				mb_io_ptr->ss_acrosstrack[i],
 				mb_io_ptr->ss_alongtrack[i]);
@@ -562,7 +568,11 @@ int	*error;
 			{
 			done = MB_YES;
 			mb_io_ptr->need_new_ping = MB_YES;
-			reset_last = MB_NO;
+			if (*error == MB_ERROR_TIME_GAP
+				|| *error == MB_ERROR_OUT_BOUNDS)
+				reset_last = MB_YES;
+			else
+				reset_last = MB_NO;
 			}
 
 		/* if error and more than one ping read, 
@@ -616,7 +626,7 @@ int	*error;
 		{
 		if (mb_io_ptr->pings_binned == 1)
 			{
-			for (i=0;i<6;i++)
+			for (i=0;i<7;i++)
 				time_i[i] = mb_io_ptr->new_time_i[i];
 			*time_d = mb_io_ptr->new_time_d;
 			}
@@ -674,7 +684,7 @@ int	*error;
 			*speed = mb_io_ptr->speed/mb_io_ptr->pings_binned;
 		else if (mb_io_ptr->old_time_d > 0.0)
 			{
-			delta_time = 0.0166667*
+			delta_time = 0.000277778*
 				(*time_d - mb_io_ptr->old_time_d); /* hours */
 			if (delta_time > 0.0)
 				*speed = *distance/delta_time; /* km/hr */
@@ -838,6 +848,7 @@ int	*error;
 		fprintf(stderr,"dbg2       time_i[3]:  %d\n",time_i[3]);
 		fprintf(stderr,"dbg2       time_i[4]:  %d\n",time_i[4]);
 		fprintf(stderr,"dbg2       time_i[5]:  %d\n",time_i[5]);
+		fprintf(stderr,"dbg2       time_i[6]:  %d\n",time_i[6]);
 		fprintf(stderr,"dbg2       navlon:     %f\n",*navlon);
 		fprintf(stderr,"dbg2       navlat:     %f\n",*navlat);
 		fprintf(stderr,"dbg2       speed:      %f\n",*speed);
