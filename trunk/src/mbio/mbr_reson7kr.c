@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_reson7kr.c	4/4/2004
- *	$Id: mbr_reson7kr.c,v 5.4 2004-11-06 03:55:16 caress Exp $
+ *	$Id: mbr_reson7kr.c,v 5.5 2004-11-08 05:47:19 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	April 4,2004
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2004/11/06 03:55:16  caress
+ * Working to support the Reson 7k format.
+ *
  * Revision 5.3  2004/07/15 19:25:05  caress
  * Progress in supporting Reson 7k data.
  *
@@ -174,7 +177,7 @@ int mbr_reson7kr_wr_soundvelocity(int verbose, int *bufferalloc, char **bufferpt
 int mbr_reson7kr_wr_absorptionloss(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 int mbr_reson7kr_wr_spreadingloss(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 
-static char res_id[]="$Id: mbr_reson7kr.c,v 5.4 2004-11-06 03:55:16 caress Exp $";
+static char res_id[]="$Id: mbr_reson7kr.c,v 5.5 2004-11-08 05:47:19 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_reson7kr(int verbose, void *mbio_ptr, int *error)
@@ -407,6 +410,8 @@ int mbr_alm_reson7kr(int verbose, void *mbio_ptr, int *error)
 	int	*deviceid;
 	unsigned short	*enumerator;
 	int	*fileheaders;
+	double	*pixel_size;
+	double	*swath_width;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -446,6 +451,8 @@ int mbr_alm_reson7kr(int verbose, void *mbio_ptr, int *error)
 	deviceid = (int *) &mb_io_ptr->save10;
 	enumerator = (unsigned short *) &mb_io_ptr->save11;
 	fileheaders = (int *) &mb_io_ptr->save12;
+	pixel_size = (double *) &mb_io_ptr->saved1;
+	swath_width = (double *) &mb_io_ptr->saved2;
 	*current_ping = -1;
 	*last_ping = -1;
 	*save_flag = MB_NO;
@@ -458,6 +465,8 @@ int mbr_alm_reson7kr(int verbose, void *mbio_ptr, int *error)
 	*deviceid = 0;
 	*enumerator = 0;
 	*fileheaders = 0;
+	*pixel_size = 0.0;
+	*swath_width = 0.0;
 	
 	/* allocate memory if necessary */
 	if (status == MB_SUCCESS)
@@ -660,8 +669,20 @@ int mbr_rt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			}
 		}
 #ifdef MBR_RESON7KR_DEBUG
+if (verbose > 0)
 fprintf(stderr,"Record returned: type:%d status:%d error:%d\n\n",store->kind, status, *error);
 #endif
+
+	/* kluge to reset quality flags */
+	if (status == MB_SUCCESS
+		&& store->kind == MB_DATA_DATA)
+		{
+		for (i=0;i<bathymetry->number_beams;i++)
+			{
+			if ((bathymetry->quality[i] & 15) < 2)
+				bathymetry->quality[i] = (bathymetry->quality[i] & 240) + 15;
+			}
+		}
 
 	/* get optional values in bathymetry record if needed */
 	if (status == MB_SUCCESS
@@ -699,10 +720,6 @@ fprintf(stderr,"Record returned: type:%d status:%d error:%d\n\n",store->kind, st
 			soundspeed = 1500.0;
 		for (i=0;i<bathymetry->number_beams;i++)
 			{
-/* kluge to set quality values in test data */
-if ((bathymetry->quality[i] & 15) <= 3 && bathymetry->range[i] > 0.0)
-bathymetry->quality[i] = bathymetry->quality[i] | 15;
-			
 			if ((bathymetry->quality[i] & 15) > 0)
 				{
 				beamgeometry->angle_alongtrack[MBSYS_RESON7K_MAX_BEAMS];
@@ -715,7 +732,7 @@ bathymetry->quality[i] = bathymetry->quality[i] | 15;
 					alpha, beta, 
 					&theta, &phi, 
 					error);
-				rr = soundspeed * bathymetry->range[i];
+				rr = 0.5 * soundspeed * bathymetry->range[i];
 				xx = rr * sin(DTR * theta);
 				zz = rr * cos(DTR * theta);
 				bathymetry->acrosstrack[i] = xx * cos(DTR * phi);
@@ -963,12 +980,12 @@ Have a nice day...\n");
 			
 #ifndef MBR_RESON7KR_DEBUG
 if (skip > 0)
-#endif
 fprintf(stderr,"RESON7KR record:skip:%d recordid:%x %d deviceid:%x %d enumerator:%x %d size:%d done:%d\n",
 skip, *recordid, *recordid, 
 *deviceid, *deviceid, 
 *enumerator, *enumerator, 
 *size, done);
+#endif
 			}
 		
 		/* else use saved record */
@@ -1058,7 +1075,7 @@ skip, *recordid, *recordid,
 			}
 
 #ifdef MBR_RESON7KR_DEBUG
-if (status == MB_SUCCESS)
+if (status == MB_SUCCESS && *save_flag == MB_NO)
 {
 fprintf(stderr, "Reading record id: %4.4hX | %d", *recordid, *recordid);
 if (*recordid == R7KRECID_ReferencePoint) fprintf(stderr," R7KRECID_ReferencePoint\n");
@@ -1381,6 +1398,11 @@ store->read_beam,store->read_verticaldepth,store->read_image);
 }*/
 #endif
 		}
+#ifdef MBR_RESON7KR_DEBUG
+	if (status == MB_SUCCESS)
+		fprintf(stderr,"RESON7KR DATA READ: type:%d status:%d error:%d\n\n", 
+			store->kind, status, *error);
+#endif
 		
 	/* get file position */
 	if (*save_flag == MB_YES)
@@ -6541,11 +6563,6 @@ int mbr_reson7kr_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	bufferalloc = (int *) &mb_io_ptr->save6;
 	fileheaders = (int *) &mb_io_ptr->save12;
 
-#ifdef MBR_RESON7KR_DEBUG
-	fprintf(stderr,"\nstart of mbr_reson7kr_wr_data:\n");
-	fprintf(stderr,"kind:%d %d type:%x ", store->kind, mb_io_ptr->new_kind, store->type);
-#endif
-			
 	/* write fileheader if needed */
 	if (status == MB_SUCCESS 
 		&& (store->type == R7KRECID_7kFileHeader || *fileheaders == 0))
@@ -6913,8 +6930,8 @@ if (store->type == R7KRECID_8100SonarData) fprintf(stderr," R7KRECID_8100SonarDa
 		}
 
 #ifdef MBR_RESON7KR_DEBUG
-	fprintf(stderr,"status:%d error:%d\n", status, *error);
-	fprintf(stderr,"end of mbr_reson7kr_wr_data:\n");
+	fprintf(stderr,"RESON7KR DATA WRITTEN: type:%d status:%d error:%d\n\n", 
+	store->kind, status, *error);
 #endif
 
 	/* print output debug statements */

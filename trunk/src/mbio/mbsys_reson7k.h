@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_reson7k.h	3/3/2004
- *	$Id: mbsys_reson7k.h,v 5.5 2004-11-06 03:55:15 caress Exp $
+ *	$Id: mbsys_reson7k.h,v 5.6 2004-11-08 05:47:20 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	March 3, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2004/11/06 03:55:15  caress
+ * Working to support the Reson 7k format.
+ *
  * Revision 5.4  2004/09/16 19:02:34  caress
  * Changes to better support segy data.
  *
@@ -288,7 +291,7 @@
 #define	MBSYS_RESON7K_MAX_DEVICE	10
 #define MBSYS_RESON7K_MAX_RECEIVERS	1024
 #define	MBSYS_RESON7K_MAX_BEAMS		240
-#define	MBSYS_RESON7K_MAX_PIXELS	4096
+#define	MBSYS_RESON7K_MAX_PIXELS	1024
 
 typedef struct s7k_time_struct
 {
@@ -1774,6 +1777,12 @@ int mbsys_reson7k_copy(int verbose, void *mbio_ptr,
 			void *store_ptr, void *copy_ptr,
 			int *error);
 int mbsys_reson7k_checkheader(s7k_header header);
+int mbsys_reson7k_makess(int verbose, void *mbio_ptr, void *store_ptr,
+		int pixel_size_set, double *pixel_size, 
+		int swath_width_set, double *swath_width, 
+		int pixel_int, 
+		int *nss, double *ss, double *ssacrosstrack, double *ssalongtrack,
+		int *error);
 int mbsys_reson7k_print_header(int verbose, 
 			s7k_header *header,
 			int *error);
