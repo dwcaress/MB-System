@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.h	1/19/93
- *    $Id: mb_format.h,v 5.5 2001-07-20 00:32:54 caress Exp $
+ *    $Id: mb_format.h,v 5.6 2001-07-20 17:00:20 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000 by
+ *    Copyright (c) 1993, 1994, 2001 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -19,6 +19,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2001/07/20  00:32:54  caress
+ * Release 5.0.beta03
+ *
  * Revision 5.4  2001/06/30 17:40:14  caress
  * Release 5.0.beta02
  *
@@ -176,6 +179,9 @@
 /* include this code only once */
 #ifndef MB_FORMAT_DEF
 #define MB_FORMAT_DEF
+
+/* define date of last format update */
+static char mb_format_updatedate[] = "$Date: 2001-07-20 17:00:20 $ $Revision: 5.6 $";
 
 /* Supported swath sonar systems */
 #define	MB_SYS_NONE		0
