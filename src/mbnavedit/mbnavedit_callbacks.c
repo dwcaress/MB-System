@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_callbacks.c	6/24/95
- *    $Id: mbnavedit_callbacks.c,v 4.10 1999-09-15 21:01:04 caress Exp $
+ *    $Id: mbnavedit_callbacks.c,v 4.11 2000-08-28 22:45:11 caress Exp $
  *
  *    Copyright (c) 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,9 @@
  * Date:	June 24,  1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.10  1999/09/15 21:01:04  caress
+ * Version label now set from mb_format.h
+ *
  * Revision 4.9  1999/04/14  04:33:10  caress
  * Final (?) version 4.6 release
  *
@@ -670,9 +673,16 @@ void do_set_controls()
 	    XtManageChild(label_filename);
 	    XtManageChild(textField_output_file);
 	    }
+	else if (output_mode == OUTPUT_MODE_NAV)
+	    {
+	    XmToggleButtonSetState(toggleButton_output_nav,
+			TRUE, TRUE);
+	    XtUnmanageChild(label_filename);
+	    XtUnmanageChild(textField_output_file);
+	    }
 	else
 	    {
-	    XmToggleButtonSetState(toggleButton_output_off,  
+	    XmToggleButtonSetState(toggleButton_output_off,
 			TRUE, TRUE);
 	    XtUnmanageChild(label_filename);
 	    XtUnmanageChild(textField_output_file);
@@ -701,6 +711,16 @@ void do_set_controls()
 			XtVaTypedArg, XmNlabelString, 
 			    XmRString, string, (strlen(string) + 1), 
 			NULL);	
+			
+	/* set values of dr lon drift */
+	XtVaSetValues(scale_driftlon, 
+			XmNvalue, drift_lon, 
+			NULL);
+			
+	/* set values of dr lat drift */
+	XtVaSetValues(scale_driftlat, 
+			XmNvalue, drift_lat, 
+			NULL);
 
 	/* set the pick mode */
 	if (mode_pick == PICK_MODE_PICK)
@@ -728,10 +748,14 @@ void do_set_controls()
 			plot_lon, TRUE);
 	XmToggleButtonSetState(toggleButton_org_lon, 
 			plot_lon_org, TRUE);
+	XmToggleButtonSetState(toggleButton_dr_lon, 
+			plot_lon_dr, TRUE);
 	XmToggleButtonSetState(toggleButton_lat, 
 			plot_lat, TRUE);
 	XmToggleButtonSetState(toggleButton_org_lat, 
 			plot_lat_org, TRUE);
+	XmToggleButtonSetState(toggleButton_dr_lat, 
+			plot_lat_dr, TRUE);
 	XmToggleButtonSetState(toggleButton_speed, 
 			plot_speed, TRUE);
 	XmToggleButtonSetState(toggleButton_org_speed, 
@@ -751,13 +775,25 @@ void do_set_controls()
 	else
 		XtUnmanageChild(toggleButton_org_time);
 	if (plot_lon == MB_YES)
+		{
 		XtManageChild(toggleButton_org_lon);
+		XtManageChild(toggleButton_dr_lon);
+		}
 	else
+		{
 		XtUnmanageChild(toggleButton_org_lon);
+		XtUnmanageChild(toggleButton_dr_lon);
+		}
 	if (plot_lat == MB_YES)
+		{
 		XtManageChild(toggleButton_org_lat);
+		XtManageChild(toggleButton_dr_lat);
+		}
 	else
+		{
 		XtUnmanageChild(toggleButton_org_lat);
+		XtUnmanageChild(toggleButton_dr_lat);
+		}
 	if (plot_speed == MB_YES)
 		{
 		XtManageChild(toggleButton_org_speed);
@@ -1323,10 +1359,14 @@ XtPointer call;
 
 	plot_lon = XmToggleButtonGetState(toggleButton_lon);
 	if (plot_lon == MB_YES)
+		{
 		XtManageChild(toggleButton_org_lon);
+		XtManageChild(toggleButton_dr_lon);
+		}
 	else
 		{
 		XtUnmanageChild(toggleButton_org_lon);
+		XtUnmanageChild(toggleButton_dr_lon);
 		mbnavedit_action_deselect_all(PLOT_LONGITUDE);
 		}
 
@@ -1374,10 +1414,14 @@ XtPointer call;
 
 	plot_lat = XmToggleButtonGetState(toggleButton_lat);
 	if (plot_lat == MB_YES)
+		{
 		XtManageChild(toggleButton_org_lat);
+		XtManageChild(toggleButton_dr_lat);
+		}
 	else
 		{
 		XtUnmanageChild(toggleButton_org_lat);
+		XtUnmanageChild(toggleButton_dr_lat);
 		mbnavedit_action_deselect_all(PLOT_LATITUDE);
 		}
 
@@ -1589,6 +1633,65 @@ XtPointer call;
 	/* replot */
 	mbnavedit_plot_all();
 }
+/*--------------------------------------------------------------------*/
+
+void
+do_toggle_dr_lat( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+
+	plot_lat_dr = XmToggleButtonGetState(toggleButton_dr_lat);
+
+	/* replot */
+	mbnavedit_plot_all();
+}
+/*--------------------------------------------------------------------*/
+
+void
+do_toggle_dr_lon( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+
+	plot_lon_dr = XmToggleButtonGetState(toggleButton_dr_lon);
+
+	/* replot */
+	mbnavedit_plot_all();
+}
+
+/*--------------------------------------------------------------------*/
+
+void
+do_driftlon( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+
+	XtVaGetValues(scale_driftlon, 
+			XmNvalue, &drift_lon, 
+			NULL);
+	
+	/* recalculate dr */
+	mbnavedit_get_dr();
+
+	/* replot */
+	mbnavedit_plot_all();
+}
+/*--------------------------------------------------------------------*/
+
+void
+do_driftlat( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+
+	XtVaGetValues(scale_driftlat, 
+			XmNvalue, &drift_lat, 
+			NULL);
+	
+	/* recalculate dr */
+	mbnavedit_get_dr();
+	
+	/* replot */
+	mbnavedit_plot_all();
+}
 
 /*--------------------------------------------------------------------*/
 /* ARGSUSED */
@@ -1641,6 +1744,20 @@ XtPointer call;
 /*--------------------------------------------------------------------*/
 /* ARGSUSED */
 void
+do_button_use_dr( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+
+	/* Use dr for selected lonlat values */
+	mbnavedit_action_use_dr();
+
+	/* replot */
+	mbnavedit_plot_all();
+}
+
+/*--------------------------------------------------------------------*/
+/* ARGSUSED */
+void
 do_button_use_smg(w, client, call)
 Widget w;
 XtPointer client;
@@ -1671,7 +1788,6 @@ XtPointer call;
 	/* replot */
 	mbnavedit_plot_all();
 }
-
 /*--------------------------------------------------------------------*/
 /* ARGSUSED */
 void
@@ -1687,6 +1803,39 @@ XtPointer call;
 		output_mode = OUTPUT_MODE_OUTPUT;
 		XtManageChild(textField_output_file);
 		XtManageChild(label_filename);
+		}
+	else if (XmToggleButtonGetState(toggleButton_output_nav))
+		{
+		output_mode = OUTPUT_MODE_NAV;
+		XtUnmanageChild(textField_output_file);
+		XtUnmanageChild(label_filename);
+		}
+	else
+		{
+		output_mode = OUTPUT_MODE_BROWSE;
+		XtUnmanageChild(textField_output_file);
+		XtUnmanageChild(label_filename);
+		}
+}
+
+/*--------------------------------------------------------------------*/
+
+void
+do_toggle_output_nav( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+
+	if (XmToggleButtonGetState(toggleButton_output_on))
+		{
+		output_mode = OUTPUT_MODE_OUTPUT;
+		XtManageChild(textField_output_file);
+		XtManageChild(label_filename);
+		}
+	else if (XmToggleButtonGetState(toggleButton_output_nav))
+		{
+		output_mode = OUTPUT_MODE_NAV;
+		XtUnmanageChild(textField_output_file);
+		XtUnmanageChild(label_filename);
 		}
 	else
 		{
@@ -1706,17 +1855,23 @@ XtPointer call;
 {
 	/*SUPPRESS 594*/XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call;
 
-	if (XmToggleButtonGetState(toggleButton_output_off))
+	if (XmToggleButtonGetState(toggleButton_output_on))
 		{
-		output_mode = OUTPUT_MODE_BROWSE;
+		output_mode = OUTPUT_MODE_OUTPUT;
+		XtManageChild(textField_output_file);
+		XtManageChild(label_filename);
+		}
+	else if (XmToggleButtonGetState(toggleButton_output_nav))
+		{
+		output_mode = OUTPUT_MODE_NAV;
 		XtUnmanageChild(textField_output_file);
 		XtUnmanageChild(label_filename);
 		}
 	else
 		{
-		output_mode = OUTPUT_MODE_OUTPUT;
-		XtManageChild(textField_output_file);
-		XtManageChild(label_filename);
+		output_mode = OUTPUT_MODE_BROWSE;
+		XtUnmanageChild(textField_output_file);
+		XtUnmanageChild(label_filename);
 		}
 }
 
