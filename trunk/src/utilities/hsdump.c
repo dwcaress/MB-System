@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	hsdump.c	3.00	6/16/93
- *    $Id: hsdump.c,v 3.0 1993-06-16 23:07:10 caress Exp $
+ *    $Id: hsdump.c,v 3.1 1993-06-30 21:51:31 caress Exp $
  *
  *    Copyright (c) 1993 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,9 @@
  * Date:	June 16, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 3.0  1993/06/16  23:07:10  caress
+ * Initial version derived from old program hsveldump.
+ *
  *
  */
 
@@ -39,7 +42,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: hsdump.c,v 3.0 1993-06-16 23:07:10 caress Exp $";
+	static char rcs_id[] = "$Id: hsdump.c,v 3.1 1993-06-30 21:51:31 caress Exp $";
 	static char program_name[] = "HSDUMP";
 	static char help_message[] =  "HSDUMP lists the information contained in data records on\n\tHydrosweep DS data files, including survey, calibrate, water \n\tvelocity and comment records. The default input stream is stdin.";
 	static char usage_message[] = "hsdump [-Fformat -V -H -Iinfile -Okind]";
@@ -248,7 +251,6 @@ char **argv;
 		fprintf(output,"dbg2       speedmin:        %f\n",speedmin);
 		fprintf(output,"dbg2       timegap:         %f\n",timegap);
 		fprintf(output,"dbg2       input file:      %s\n",file);
-		}
 		fprintf(output,"dbg2       mb_data_data_list:             %d\n",
 			mb_data_data_list);
 		fprintf(output,"dbg2       mb_data_comment_list:          %d\n",
@@ -263,6 +265,7 @@ char **argv;
 			mb_data_standby_list);
 		fprintf(output,"dbg2       mb_data_nav_source_list:       %d\n",
 			mb_data_nav_source_list);
+		}
 
 	/* if help desired then print it and exit */
 	if (help)
