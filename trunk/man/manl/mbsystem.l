@@ -1,10 +1,10 @@
-.TH mbsystem l "31 October 1994"
+.TH mbsystem l "14 February 1995"
 .SH NAME
 \fBmbsystem\fP - A set of utilities for manipulating and processing multibeam
 bathymetry data.
 
 .SH VERSION
-Version 4.1
+Version 4.2
 
 .SH INTRODUCTION
 The \fBMB-System\fP is a software package consisting of programs which 
@@ -32,8 +32,9 @@ related to the new SeaBeam 2100 series of sonars.
 The source code for \fBMB-System\fP is written in C and should be portable
 to a wide variety of Unix platforms. Graphical utilities are based 
 on the Motif widget set.  To date, \fBMB-System\fP has been successfully
-installed on Sun workstations running under SunOS4.1, Silicon Graphics (SGI)
-workstations running under IRIX 5.2, and 486 PC's running under the Lynx 
+installed on Sun workstations running under SunOS4.1 and Solaris, 
+Silicon Graphics (SGI)
+workstations running under IRIX, and 486 PC's running under the Lynx 
 operating system.
 
 .SH AUTHORSHIP
@@ -54,6 +55,12 @@ i/o library and the multibeam data formats supported by \fBMBIO\fP.
 These are the current MB-system programs:
  \fBhsdump\fP:  Lists contents of the various sorts of 
  		data records in Hydrosweep DS data. 
+ \fBmbanglecorrect\fP:  Apply a grazing angle correction 
+ 		to beam amplitude or sidescan data. 
+ \fBmbbackangle\fP:  Generates a table of the average 
+ 		amplitude or sidescan values as a 
+ 		function of the grazing angle with 
+ 		the seafloor.
  \fBmbbath\fP:  Generates bathymetry from travel times 
  		in multibeam data. 
  \fBmbclean\fP:  Identifies and flags bad beams in 
@@ -61,10 +68,15 @@ These are the current MB-system programs:
  \fBmbcontour\fP:  Generate GMT compatible Postscript 
  		color swath contour plots.
  \fBmbcopy\fP:  Copy multibeam data files. 
+ \fBmbcut\fP:  Removes data from portions of swath
+ 		as specified by the user. 
  \fBmbdefaults\fP:  Set or list default mbio parameters 
  		for reading and writing multibeam data 
  \fBmbedit\fP:  Interactive editor used to flag bad 
  		beams in multibeam bathymetry data. 
+ \fBmbfilter\fP:   Apply some simple filter functions 
+ 		to sidescan, beam amplitude, or 
+ 		bathymetry data. 
  \fBmbformat\fP:   List information about multibeam 
  		data formats supported by the MBIO library. 
  \fBmbgetmask\fP:  Extract list of flagged or edited 

@@ -1,10 +1,10 @@
-.TH mbm_calcomp_plot l "31 October 1994"
+.TH mbm_calcomp_plot l "14 February 1995"
 .SH NAME
 mbm_calcomp_plot - MB-System macro used for real time pen plotting
 on the R/V Maurice Ewing.
 
 .SH VERSION
-Version 4.1
+Version 4.2
 
 .SH SYNOPSIS
 \fBmbm_calcomp_plot\fP \fB-I\fIfile\fP \fB-R\fIwest/east/south/north \fB-S\fIscale\fP [\fB-B\fIyr/mo/da/hr/mn/sc \fB-E\fIyr/mo/da/hr/mn/sc \fB-F\fIformat \fB-N\fP \fB-P\fIport \fB-Q\fP \fB-T\fItitle \fB-H\fP]

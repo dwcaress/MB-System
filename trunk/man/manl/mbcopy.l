@@ -1,9 +1,9 @@
-.TH mbcopy l "31 October 1994"
+.TH mbcopy l "14 February 1995"
 .SH NAME
 \fBmbcopy\fP - Copy multibeam bathymetry data files.
 
 .SH VERSION
-Version 4.1
+Version 4.2
 
 .SH SYNOPSIS
 \fBmbcopy\fP [\fB-F\fIinformat/outformat \fB-R\fIwest/east/south/north \fB-P\fIpings 

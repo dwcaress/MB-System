@@ -1,9 +1,9 @@
-.TH mbinfo l "5 January 1995"
+.TH mbinfo l "14 February 1995"
 .SH NAME
 \fBmbinfo\fP - Output some basic statistics of multibeam bathymetry data files.
 
 .SH VERSION
-Version 4.1
+Version 4.2
 
 .SH SYNOPSIS
 \fBmbinfo\fP [\fB-B\fIyr/mo/da/hr/mn/sc \fB-C -E\fIyr/mo/da/hr/mn/sc 

@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmerge.c	2/20/93
  *
- *    $Id: mbmerge.c,v 4.6 1994-11-01 21:52:08 caress Exp $
+ *    $Id: mbmerge.c,v 4.7 1995-02-14 21:18:41 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,10 @@
  * Date:	February 20, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.6  1994/11/01  21:52:08  caress
+ * Added ability to create heading and speed from nav if required.
+ * This is the "-Z" option.
+ *
  * Revision 4.5  1994/10/21  13:02:31  caress
  * Release V4.0
  *
@@ -80,7 +84,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbmerge.c,v 4.6 1994-11-01 21:52:08 caress Exp $";
+	static char rcs_id[] = "$Id: mbmerge.c,v 4.7 1995-02-14 21:18:41 caress Exp $";
 	static char program_name[] = "MBMERGE";
 	static char help_message[] =  "MBMERGE merges new navigation with multibeam data from an \ninput file and then writes the merged data to an output \nmultibeam data file. The default input \nand output streams are stdin and stdout.";
 	static char usage_message[] = "mbmerge [-Fformat -Llonflip -V -H  -Iinfile -Ooutfile -Mnavformat -Nnavfile]";
@@ -160,6 +164,7 @@ char **argv;
 	double	*nlatspl = NULL;
 	int	nav_ok;
 	int	make_heading = MB_NO;
+	int	make_heading_now;
 	int	nget;
 	int	time_j[5], hr;
 	double	sec;
@@ -814,6 +819,15 @@ char **argv;
 				time_i[6]);
 			}
 
+		/* figure out if heading should be recalculated */
+		if (error == MB_ERROR_NO_ERROR 
+			&& make_heading == MB_YES
+			&& navlon == 0.0 && navlat == 0.0 
+			&& heading == 0.0)
+			make_heading_now = MB_YES;
+		else
+			make_heading_now = MB_NO;
+
 		/* interpolate the navigation */
 		if (error == MB_ERROR_NO_ERROR
 			|| kind == MB_DATA_COMMENT)
@@ -826,7 +840,7 @@ char **argv;
 
 		/* make up heading and speed if required */
 		if (error == MB_ERROR_NO_ERROR
-			&& make_heading == MB_YES)
+			&& make_heading_now == MB_YES)
 			{
 			mb_coor_scale(verbose,nlat[itime],&mtodeglon,&mtodeglat);
 			del_time = ntime[itime+1] - ntime[itime];

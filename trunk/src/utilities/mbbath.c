@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbbath.c	3/31/93
- *    $Id: mbbath.c,v 4.8 1994-11-29 00:42:55 caress Exp $
+ *    $Id: mbbath.c,v 4.9 1995-02-14 21:18:41 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -20,6 +20,9 @@
  * Date:	March 31, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.8  1994/11/29  00:42:55  caress
+ * Fixed errors in data comments and verbose messages.
+ *
  * Revision 4.7  1994/11/24  01:56:52  caress
  * First cut at gradient raytracing version of mbbath.
  *
@@ -107,7 +110,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbbath.c,v 4.8 1994-11-29 00:42:55 caress Exp $";
+	static char rcs_id[] = "$Id: mbbath.c,v 4.9 1995-02-14 21:18:41 caress Exp $";
 	static char program_name[] = "MBBATH";
 	static char help_message[] =  "MBBATH calculates bathymetry from \
 the travel time data by raytracing \nthrough a layered water velocity \
@@ -1385,7 +1388,7 @@ int	*error;
 		*roll_correction = roll_corr[iroll] 
 			+ (roll_corr[iroll+1] - roll_corr[iroll])
 			*(time_d - roll_time[iroll])
-			/(roll_time[i+1] - roll_time[iroll]);
+			/(roll_time[iroll+1] - roll_time[iroll]);
 		}
 	else
 		*roll_correction = 0.0;
