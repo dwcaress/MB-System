@@ -20,7 +20,7 @@ Version 4.4
 \fB-V -H\fP]
 
 .SH DESCRIPTION
-\fBmbcontour\fP is an utility for swath contouring of multibeam bathymetry 
+\fBmbcontour\fP is an utility for swath contouring of swath bathymetry 
 data using Postscript.  Like \fBmbswath\fP, \fBmbcontour\fP
 is fully compatible with the GMT package version 3. Two contouring
 algorithms are available. The first draws contours between successive
@@ -35,6 +35,23 @@ conditions. The contour levels
 and colors can be controlled directly or set implicitly using contour 
 and color change intervals. Contours can also be set to have ticks 
 pointing downhill.
+
+Before opening an input swath data file, \fBmbcontour\fP checks for
+an ascii file in the same directory having the same name except
+that ".inf" is appended to the end. The program assumes that this
+ascii file contains the output of the program \fBmbinfo\fP run on
+the input data file. If the ".inf" file exists, \fBmbcontour\fP reads
+the minimum and maximum longitude and latitude bounds from the 
+\fBmbinfo\fP output and compares those to the bounds
+for the plot. If the ".inf" file indicates that none of the data
+in the input file lies inside the plot bounds, that input
+file is skipped. This allows users to maintain a single master list
+of data files for use in all plotting without the performance penalty
+of \fBmbcontour\fP reading through all the data files, even those
+with no relevent data. We recommend that users maintain a ".inf"
+file for each swath data file used for gridding or plotting. The
+programs \fBmbswath\fP and \fBmbgrid\fP also use ".inf" files
+in the same fashion.
 
 .SH AUTHORSHIP
 David W. Caress (caress@lamont.ldeo.columbia.edu)

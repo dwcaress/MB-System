@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcontour.c	6/4/93
- *    $Id: mbcontour.c,v 4.16 1996-04-22 13:18:44 caress Exp $
+ *    $Id: mbcontour.c,v 4.17 1996-09-05 13:58:27 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Date:	June 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.16  1996/04/22  13:18:44  caress
+ * Now have DTR and MIN/MAX defines in mb_define.h
+ *
  * Revision 4.15  1995/11/28  21:06:16  caress
  * Fixed scaling for meters to feet.
  *
@@ -131,7 +134,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbcontour.c,v 4.16 1996-04-22 13:18:44 caress Exp $";
+	static char rcs_id[] = "$Id: mbcontour.c,v 4.17 1996-09-05 13:58:27 caress Exp $";
 #ifdef MBCONTOURFILTER
 	static char program_name[] = "MBCONTOURFILTER";
 	static char help_message[] =  "MBCONTOURFILTER is a utility which creates a pen plot \ncontour map of multibeam swath bathymetry.  \nThe primary purpose of this program is to serve as \npart of a real-time plotting system.  The contour \nlevels and colors can be controlled \ndirectly or set implicitly using contour and color change intervals. \nContours can also be set to have ticks pointing downhill.";
@@ -172,6 +175,7 @@ char **argv;
 	double	speedmin;
 	double	timegap;
 	char	file[128];
+	int	file_in_bounds;
 	int	beams_bath;
 	int	beams_amp;
 	int	pixels_ss;
@@ -673,229 +677,243 @@ char **argv;
 	if (verbose == 1) 
 		fprintf(stderr,"\n");
 	while (read_data == MB_YES)
-	{
+	    {
+	    /* check for mbinfo file - get file bounds if possible */
+	    status = mb_check_info(verbose, file, lonflip, bounds, 
+			    &file_in_bounds, &error);
+	    if (status == MB_FAILURE)
+		    {
+		    file_in_bounds = MB_YES;
+		    status = MB_SUCCESS;
+		    error = MB_ERROR_NO_ERROR;
+		    }
 
-	/* initialize reading the multibeam file */
-	if ((status = mb_read_init(
-		verbose,file,format,pings,lonflip,mb_bounds,
-		btime_i,etime_i,speedmin,timegap,
-		&mbio_ptr,&btime_d,&etime_d,
-		&beams_bath,&beams_amp,&pixels_ss,&error)) != MB_SUCCESS)
+	    /* read if data may be in bounds */
+	    if (file_in_bounds == MB_YES)
 		{
-		mb_error(verbose,error,&message);
-		fprintf(stderr,"\nMBIO Error returned from function <mb_read_init>:\n%s\n",message);
-		fprintf(stderr,"\nMultibeam File <%s> not initialized for reading\n",file);
-		fprintf(stderr,"\nProgram <%s> Terminated\n",
-			program_name);
-		exit(error);
-		}
 
-	/* allocate memory for data arrays */
-	status = mb_malloc(verbose,beams_amp*sizeof(double),&amp,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(double),&ss,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(double),&sslon,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(double),&sslat,&error);
-
-	/* if error initializing memory then quit */
-	if (error != MB_ERROR_NO_ERROR)
-		{
-		mb_error(verbose,error,&message);
-		fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
-		fprintf(stderr,"\nProgram <%s> Terminated\n",
-			program_name);
-		exit(error);
-		}
-
-	/* initialize contour controls */
-	status = mb_contour_init(verbose,&swath_plot,nplot,beams_bath,
-				contour_algorithm,
-				plot_contours,plot_triangles,plot_track,
-				cont_int,col_int,tick_int,label_int,
-				tick_len_map,label_hgt_map,
-				ncolor,nlevel,level,label,tick,
-				time_tick_int,time_annot_int,
-				date_annot_int,time_tick_len_map,
-				&error);
-
-	/* if error initializing memory then quit */
-	if (error != MB_ERROR_NO_ERROR)
-		{
-		mb_error(verbose,error,&message);
-		fprintf(stderr,"\nMBIO Error allocating contour control structure:\n%s\n",message);
-		fprintf(stderr,"\nProgram <%s> Terminated\n",
-			program_name);
-		exit(error);
-		}
-
-	/* print message */
-	if (verbose >= 2) 
-		fprintf(stderr,"\n");
-	if (verbose >= 1)
-		fprintf(stderr,"processing data in %s...\n",file);
-
-	/* loop over reading */
-	npings = &swath_plot->npings;
-	*npings = 0;
-	done = MB_NO;
-	while (done == MB_NO)
-		{
-		pingcur = &swath_plot->pings[*npings];
-		time_i = &pingcur->time_i[0];
-		time_d = &pingcur->time_d;
-		navlon = &pingcur->navlon;
-		navlat = &pingcur->navlat;
-		heading = &pingcur->heading;
-		bath = pingcur->bath;
-		bathlon = pingcur->bathlon;
-		bathlat = pingcur->bathlat;
-		status = mb_read(verbose,mbio_ptr,&kind,
-			&pings_read,time_i,time_d,
-			navlon,navlat,&speed,
-			heading,&distance,
-			&beams_bath,&beams_amp,&pixels_ss,
-			bath,amp,bathlon,bathlat,
-			ss,sslon,sslat,
-			comment,&error);
-		swath_plot->beams_bath = beams_bath;
-
-		/* print debug statements */
-		if (verbose >= 2)
-			{
-			fprintf(stderr,"\ndbg2  Ping read in program <%s>\n",
-				program_name);
-			fprintf(stderr,"dbg2       kind:           %d\n",
-				kind);
-			fprintf(stderr,"dbg2       npings:         %d\n",
-				*npings);
-			fprintf(stderr,"dbg2       time:           %4d %2d %2d %2d %2d %2d %6.6d\n",
-				time_i[0],time_i[1],time_i[2],
-				time_i[3],time_i[4],time_i[5],time_i[6]);
-			fprintf(stderr,"dbg2       navigation:     %f  %f\n",
-				*navlon, *navlat);
-			fprintf(stderr,"dbg2       beams_bath:     %d\n",
-				beams_bath);
-			fprintf(stderr,"dbg2       beams_amp:      %d\n",
-					beams_amp);
-			fprintf(stderr,"dbg2       pixels_ss:      %d\n",
-					pixels_ss);
-			fprintf(stderr,"dbg2       error:          %d\n",
-				error);
-			fprintf(stderr,"dbg2       status:         %d\n",
-				status);
-			}
-
-		/* scale bathymetry if necessary */
-		if (error == MB_ERROR_NO_ERROR
-			&& bathy_in_feet == MB_YES)
-			{
-			for (i=0;i<beams_bath;i++)
-				{
-				bath[i] = 3.2808399 * bath[i];
-				}
-			}
-
-		/* update bookkeeping */
-		if (error == MB_ERROR_NO_ERROR)
-			{
-			if (*npings == 0 || 
-				(*npings > 0 
-				&& contour_algorithm == MB_CONTOUR_TRIANGLES)
-				|| (*npings > 0 
-				&& (*navlon != navlon_old 
-				|| *navlat != navlat_old)))
-				{
-				nping_read += pings_read;
-				(*npings)++;
-				navlon_old = *navlon;
-				navlat_old = *navlat;
-				}
-			}
-
-		/* decide whether to plot, whether to 
-			save the new ping, and if done */
-		plot = MB_NO; 
-		flush = MB_NO;
-		if (*npings >= nplot)
-			plot = MB_YES;
-		if (*npings > 0 
-			&& (error > MB_ERROR_NO_ERROR
-			|| error == MB_ERROR_TIME_GAP
-			|| error == MB_ERROR_OUT_BOUNDS
-			|| error == MB_ERROR_OUT_TIME
-			|| error == MB_ERROR_SPEED_TOO_SMALL))
-			{
-			plot = MB_YES;
-			flush = MB_YES;
-			}
-		save_new = MB_NO;
-		if (error == MB_ERROR_TIME_GAP)
-			save_new = MB_YES;
-		if (error > MB_ERROR_NO_ERROR)
-			done = MB_YES;
-
-		/* if enough pings read in, plot them */
-		if (plot == MB_YES)
-			{
-
-			/* print debug statements */
-			if (verbose >= 2)
-				{
-				fprintf(stderr,"\ndbg2  Plotting %d pings in program <%s>\n",
-					*npings,program_name);
-				for (i=0;i<*npings;i++)
-					{
-					pingcur = &swath_plot->pings[i];
-					fprintf(stderr,"dbg2       %4d  %4d %2d %2d %2d %2d %2d %6.6d\n",
-						i,pingcur->time_i[0],
-						pingcur->time_i[1],
-						pingcur->time_i[2],
-						pingcur->time_i[3],
-						pingcur->time_i[4],
-						pingcur->time_i[5],
-						pingcur->time_i[6]);
-					}
-				}
-
-			/* plot data */
-			if (plot_contours == MB_YES
-				|| plot_triangles == MB_YES)
-				mb_contour(verbose,swath_plot,&error);
-
-			/* plot shiptrack */
-			if (plot_track == MB_YES)
-				mb_track(verbose,swath_plot,&error);
-
-			/* reorganize data */
-			if (flush == MB_YES && save_new == MB_YES)
-				{
-				status = ping_copy(verbose,0,*npings,
-					swath_plot,&error);
-				*npings = 1;
-				}
-			else if (flush == MB_YES)
-				{
-				*npings = 0;
-				}
-			else if (*npings > 1)
-				{
-				status = ping_copy(verbose,0,*npings-1,
-						swath_plot,&error);
-				*npings = 1;
-				}
-
-			}
-		}
-	status = mb_close(verbose,&mbio_ptr,&error);
-
-	/* deallocate memory for data arrays */
-	mb_free(verbose,&amp,&error);
-	mb_free(verbose,&ss,&error);
-	mb_free(verbose,&sslon,&error);
-	mb_free(verbose,&sslat,&error);
-	status = mb_contour_deall(verbose,swath_plot,&error);
-
-	/* figure out whether and what to read next */
-        if (read_datalist == MB_YES)
+		/* initialize reading the multibeam file */
+		if ((status = mb_read_init(
+		    verbose,file,format,pings,lonflip,mb_bounds,
+		    btime_i,etime_i,speedmin,timegap,
+		    &mbio_ptr,&btime_d,&etime_d,
+		    &beams_bath,&beams_amp,&pixels_ss,&error)) != MB_SUCCESS)
+		    {
+		    mb_error(verbose,error,&message);
+		    fprintf(stderr,"\nMBIO Error returned from function <mb_read_init>:\n%s\n",message);
+		    fprintf(stderr,"\nMultibeam File <%s> not initialized for reading\n",file);
+		    fprintf(stderr,"\nProgram <%s> Terminated\n",
+			    program_name);
+		    exit(error);
+		    }
+    
+		/* allocate memory for data arrays */
+		status = mb_malloc(verbose,beams_amp*sizeof(double),&amp,&error);
+		status = mb_malloc(verbose,pixels_ss*sizeof(double),&ss,&error);
+		status = mb_malloc(verbose,pixels_ss*sizeof(double),&sslon,&error);
+		status = mb_malloc(verbose,pixels_ss*sizeof(double),&sslat,&error);
+	
+		/* if error initializing memory then quit */
+		if (error != MB_ERROR_NO_ERROR)
+		    {
+		    mb_error(verbose,error,&message);
+		    fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
+		    fprintf(stderr,"\nProgram <%s> Terminated\n",
+			    program_name);
+		    exit(error);
+		    }
+    
+		/* initialize contour controls */
+		status = mb_contour_init(verbose,&swath_plot,nplot,beams_bath,
+				    contour_algorithm,
+				    plot_contours,plot_triangles,plot_track,
+				    cont_int,col_int,tick_int,label_int,
+				    tick_len_map,label_hgt_map,
+				    ncolor,nlevel,level,label,tick,
+				    time_tick_int,time_annot_int,
+				    date_annot_int,time_tick_len_map,
+				    &error);
+    
+		/* if error initializing memory then quit */
+		if (error != MB_ERROR_NO_ERROR)
+		    {
+		    mb_error(verbose,error,&message);
+		    fprintf(stderr,"\nMBIO Error allocating contour control structure:\n%s\n",message);
+		    fprintf(stderr,"\nProgram <%s> Terminated\n",
+			    program_name);
+		    exit(error);
+		    }
+    
+		/* print message */
+		if (verbose >= 2) 
+		    fprintf(stderr,"\n");
+		if (verbose >= 1)
+		    fprintf(stderr,"processing data in %s...\n",file);
+    
+		/* loop over reading */
+		npings = &swath_plot->npings;
+		*npings = 0;
+		done = MB_NO;
+		while (done == MB_NO)
+		    {
+		    pingcur = &swath_plot->pings[*npings];
+		    time_i = &pingcur->time_i[0];
+		    time_d = &pingcur->time_d;
+		    navlon = &pingcur->navlon;
+		    navlat = &pingcur->navlat;
+		    heading = &pingcur->heading;
+		    bath = pingcur->bath;
+		    bathlon = pingcur->bathlon;
+		    bathlat = pingcur->bathlat;
+		    status = mb_read(verbose,mbio_ptr,&kind,
+			    &pings_read,time_i,time_d,
+			    navlon,navlat,&speed,
+			    heading,&distance,
+			    &beams_bath,&beams_amp,&pixels_ss,
+			    bath,amp,bathlon,bathlat,
+			    ss,sslon,sslat,
+			    comment,&error);
+		    swath_plot->beams_bath = beams_bath;
+    
+		    /* print debug statements */
+		    if (verbose >= 2)
+			    {
+			    fprintf(stderr,"\ndbg2  Ping read in program <%s>\n",
+				    program_name);
+			    fprintf(stderr,"dbg2       kind:           %d\n",
+				    kind);
+			    fprintf(stderr,"dbg2       npings:         %d\n",
+				    *npings);
+			    fprintf(stderr,"dbg2       time:           %4d %2d %2d %2d %2d %2d %6.6d\n",
+				    time_i[0],time_i[1],time_i[2],
+				    time_i[3],time_i[4],time_i[5],time_i[6]);
+			    fprintf(stderr,"dbg2       navigation:     %f  %f\n",
+				    *navlon, *navlat);
+			    fprintf(stderr,"dbg2       beams_bath:     %d\n",
+				    beams_bath);
+			    fprintf(stderr,"dbg2       beams_amp:      %d\n",
+					    beams_amp);
+			    fprintf(stderr,"dbg2       pixels_ss:      %d\n",
+					    pixels_ss);
+			    fprintf(stderr,"dbg2       error:          %d\n",
+				    error);
+			    fprintf(stderr,"dbg2       status:         %d\n",
+				    status);
+			    }
+    
+		    /* scale bathymetry if necessary */
+		    if (error == MB_ERROR_NO_ERROR
+			    && bathy_in_feet == MB_YES)
+			    {
+			    for (i=0;i<beams_bath;i++)
+				    {
+				    bath[i] = 3.2808399 * bath[i];
+				    }
+			    }
+    
+		    /* update bookkeeping */
+		    if (error == MB_ERROR_NO_ERROR)
+			    {
+			    if (*npings == 0 || 
+				    (*npings > 0 
+				    && contour_algorithm == MB_CONTOUR_TRIANGLES)
+				    || (*npings > 0 
+				    && (*navlon != navlon_old 
+				    || *navlat != navlat_old)))
+				    {
+				    nping_read += pings_read;
+				    (*npings)++;
+				    navlon_old = *navlon;
+				    navlat_old = *navlat;
+				    }
+			    }
+    
+		    /* decide whether to plot, whether to 
+			    save the new ping, and if done */
+		    plot = MB_NO; 
+		    flush = MB_NO;
+		    if (*npings >= nplot)
+			    plot = MB_YES;
+		    if (*npings > 0 
+			    && (error > MB_ERROR_NO_ERROR
+			    || error == MB_ERROR_TIME_GAP
+			    || error == MB_ERROR_OUT_BOUNDS
+			    || error == MB_ERROR_OUT_TIME
+			    || error == MB_ERROR_SPEED_TOO_SMALL))
+			    {
+			    plot = MB_YES;
+			    flush = MB_YES;
+			    }
+		    save_new = MB_NO;
+		    if (error == MB_ERROR_TIME_GAP)
+			    save_new = MB_YES;
+		    if (error > MB_ERROR_NO_ERROR)
+			    done = MB_YES;
+    
+		    /* if enough pings read in, plot them */
+		    if (plot == MB_YES)
+			    {
+    
+			    /* print debug statements */
+			    if (verbose >= 2)
+				    {
+				    fprintf(stderr,"\ndbg2  Plotting %d pings in program <%s>\n",
+					    *npings,program_name);
+				    for (i=0;i<*npings;i++)
+					    {
+					    pingcur = &swath_plot->pings[i];
+					    fprintf(stderr,"dbg2       %4d  %4d %2d %2d %2d %2d %2d %6.6d\n",
+						    i,pingcur->time_i[0],
+						    pingcur->time_i[1],
+						    pingcur->time_i[2],
+						    pingcur->time_i[3],
+						    pingcur->time_i[4],
+						    pingcur->time_i[5],
+						    pingcur->time_i[6]);
+					    }
+				    }
+    
+			    /* plot data */
+			    if (plot_contours == MB_YES
+				    || plot_triangles == MB_YES)
+				    mb_contour(verbose,swath_plot,&error);
+    
+			    /* plot shiptrack */
+			    if (plot_track == MB_YES)
+				    mb_track(verbose,swath_plot,&error);
+    
+			    /* reorganize data */
+			    if (flush == MB_YES && save_new == MB_YES)
+				    {
+				    status = ping_copy(verbose,0,*npings,
+					    swath_plot,&error);
+				    *npings = 1;
+				    }
+			    else if (flush == MB_YES)
+				    {
+				    *npings = 0;
+				    }
+			    else if (*npings > 1)
+				    {
+				    status = ping_copy(verbose,0,*npings-1,
+						    swath_plot,&error);
+				    *npings = 1;
+				    }
+    
+			    }
+		    }
+		status = mb_close(verbose,&mbio_ptr,&error);
+    
+		/* deallocate memory for data arrays */
+		mb_free(verbose,&amp,&error);
+		mb_free(verbose,&ss,&error);
+		mb_free(verbose,&sslon,&error);
+		mb_free(verbose,&sslat,&error);
+		status = mb_contour_deall(verbose,swath_plot,&error);
+		} /* end if file in bounds */
+    
+	    /* figure out whether and what to read next */
+	    if (read_datalist == MB_YES)
                 {
                 if (fgets(line,128,fp) != NULL
                         && sscanf(line,"%s %d",file,&format) == 2)
@@ -903,13 +921,13 @@ char **argv;
                 else
                         read_data = MB_NO;
                 }
-        else
+	    else
                 {
                 read_data = MB_NO;
                 }
 
-	/* end loop over files in list */
-	}
+	    /* end loop over files in list */
+	    }
 	if (read_datalist == MB_YES)
 		fclose (fp);
 

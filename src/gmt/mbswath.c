@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbswath.c	5/30/93
- *    $Id: mbswath.c,v 4.22 1996-08-26 17:31:55 caress Exp $
+ *    $Id: mbswath.c,v 4.23 1996-09-05 13:58:27 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -27,6 +27,9 @@
  * Date:	May 30, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.22  1996/08/26  17:31:55  caress
+ * Release 4.4 revision.
+ *
  * Revision 4.21  1996/08/13  18:32:53  caress
  * Fixed bug in getting footprints of outer beams.
  *
@@ -226,7 +229,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbswath.c,v 4.22 1996-08-26 17:31:55 caress Exp $";
+	static char rcs_id[] = "$Id: mbswath.c,v 4.23 1996-09-05 13:58:27 caress Exp $";
 	static char program_name[] = "MBSWATH";
 	static char help_message[] =  "MBSWATH is a GMT compatible utility which creates a color postscript \nimage of multibeam swath bathymetry or backscatter data.  The image \nmay be shaded relief as well.  Complete maps are made by using \nMBSWATH in conjunction with the usual GMT programs.";
 	static char usage_message[] = "mbswath -Ccptfile -Jparameters -Rwest/east/south/north \n\t[-Afactor -Btickinfo -byr/mon/day/hour/min/sec \n\t-ccopies -Dmode/ampscale/ampmin/ampmax \n\t-Eyr/mon/day/hour/min/sec -fformat \n\t-Fred/green/blue -Gmagnitude/azimuth -Idatalist \n\t-K -Ncptfile -O -P -ppings -Qdpi -Ttimegap -U -W -Xx-shift -Yy-shift \n\t-Zmode -V -H]";
@@ -261,6 +264,7 @@ char **argv;
 	double	speedmin;
 	double	timegap;
 	char	file[128];
+	int	file_in_bounds;
 	int	beams_bath;
 	int	beams_amp;
 	int	pixels_ss;
@@ -822,366 +826,377 @@ char **argv;
 	if (verbose == 1) 
 		fprintf(stderr,"\n");
 	while (read_data == MB_YES)
-	{
-	/* initialize reading the multibeam file */
-	if ((status = mb_read_init(
-		verbose,file,format,pings,lonflip,bounds,
-		btime_i,etime_i,speedmin,timegap,
-		&mbio_ptr,&btime_d,&etime_d,
-		&beams_bath,&beams_amp,&pixels_ss,&error)) != MB_SUCCESS)
-		{
-		mb_error(verbose,error,&message);
-		fprintf(stderr,"\nMBIO Error returned from function <mb_read_init>:\n%s\n",message);
-		fprintf(stderr,"\nMultibeam File <%s> not initialized for reading\n",file);
-		fprintf(stderr,"\nProgram <%s> Terminated\n",
-			program_name);
-		exit(error);
-		}
+	    {
+	    /* check for mbinfo file - get file bounds if possible */
+	    status = mb_check_info(verbose, file, lonflip, borders_use, 
+			    &file_in_bounds, &error);
+	    if (status == MB_FAILURE)
+		    {
+		    file_in_bounds = MB_YES;
+		    status = MB_SUCCESS;
+		    error = MB_ERROR_NO_ERROR;
+		    }
 
-	/* get fore-aft beam_width */
-	status = mb_format(verbose,&format,&format_num,&error);
-	if (footprint_mode == MBSWATH_FOOTPRINT_REAL)
-		factor = rawfactor*mb_foreaft_beamwidth_table[format_num];
-	else
-		factor = rawfactor;
+	    /* read if data may be in bounds */
+	    if (file_in_bounds == MB_YES)
+		{
 		
-	/* set default depth, checking for deep-tow data */
-	if ((format == 111 || format == 112)
-		&& default_depth <= 0.0)
-		default_depth_use = 100.0;
-	else
-		default_depth_use = default_depth;
-
-	/* allocate memory for data arrays */
-	status = mb_malloc(verbose,sizeof(struct swath),
-			&swath_plot,&error);
-	npings = &swath_plot->npings;
-	swath_plot->beams_bath = beams_bath;
-	swath_plot->beams_amp = beams_amp;
-	swath_plot->pixels_ss = pixels_ss;
-	for (i=0;i<MAXPINGS;i++)
-		{
-		pingcur = &(swath_plot->data[i]);
-		pingcur->bath = NULL;
-		pingcur->amp = NULL;
-		pingcur->bathlon = NULL;
-		pingcur->bathlat = NULL;
-		pingcur->ss = NULL;
-		pingcur->sslon = NULL;
-		pingcur->sslat = NULL;
-		pingcur->bathflag = NULL;
-		pingcur->bathfoot = NULL;
-		pingcur->ssflag = NULL;
-		pingcur->ssfoot = NULL;
-		pingcur->bathshade = NULL;
-		status = mb_malloc(verbose,beams_bath*sizeof(double),
-			&(pingcur->bath),&error);
-		status = mb_malloc(verbose,beams_amp*sizeof(double),
-			&(pingcur->amp),&error);
-		status = mb_malloc(verbose,beams_bath*sizeof(double),
-			&(pingcur->bathlon),&error);
-		status = mb_malloc(verbose,beams_bath*sizeof(double),
-			&(pingcur->bathlat),&error);
-		status = mb_malloc(verbose,pixels_ss*sizeof(double),
-			&(pingcur->ss),&error);
-		status = mb_malloc(verbose,pixels_ss*sizeof(double),
-			&(pingcur->sslon),&error);
-		status = mb_malloc(verbose,pixels_ss*sizeof(double),
-			&(pingcur->sslat),&error);
-		status = mb_malloc(verbose,beams_bath*sizeof(int),
-			&(pingcur->bathflag),&error);
-		status = mb_malloc(verbose,
-			(beams_bath)*sizeof(struct footprint),
-			&(pingcur->bathfoot),&error);
-		status = mb_malloc(verbose,pixels_ss*sizeof(int),
-			&(pingcur->ssflag),&error);
-		status = mb_malloc(verbose,
-			(pixels_ss)*sizeof(struct footprint),
-			&(pingcur->ssfoot),&error);
-		status = mb_malloc(verbose,beams_bath*sizeof(double),
-			&(pingcur->bathshade),&error);
-		}
-
-	/* if error initializing memory then quit */
-	if (error != MB_ERROR_NO_ERROR)
-		{
-		mb_error(verbose,error,&message);
-		fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
-		fprintf(stderr,"\nProgram <%s> Terminated\n",
-			program_name);
-		exit(error);
-		}
-
-	/* print message */
-	if (verbose >= 2) 
-		fprintf(stderr,"\n");
-	if (verbose >= 1)
-		fprintf(stderr,"processing data in %s...\n",file);
-
-	/* loop over reading */
-	*npings = 0;
-	start = MB_YES;
-	done = MB_NO;
-	while (done == MB_NO)
-		{
-		pingcur = &swath_plot->data[*npings];
-		bath = pingcur->bath;
-		amp = pingcur->amp;
-		bathlon = pingcur->bathlon;
-		bathlat = pingcur->bathlat;
-		ss = pingcur->ss;
-		sslon = pingcur->sslon;
-		sslat = pingcur->sslat;
-		status = mb_read(verbose,mbio_ptr,&(pingcur->kind),
-			&(pingcur->pings),pingcur->time_i,&(pingcur->time_d),
-			&(pingcur->navlon),&(pingcur->navlat),&(pingcur->speed),
-			&(pingcur->heading),&(pingcur->distance),
-			&(pingcur->beams_bath),
-			&(pingcur->beams_amp),
-			&(pingcur->pixels_ss),
-			bath,amp,bathlon,bathlat,
-			ss,sslon,sslat,
-			pingcur->comment,&error);
-
-		/* print debug statements */
-		if (verbose >= 2)
-			{
-			fprintf(stderr,"\ndbg2  Ping read in program <%s>\n",
-				program_name);
-			fprintf(stderr,"dbg2       kind:           %d\n",
-				pingcur->kind);
-			fprintf(stderr,"dbg2       beams_bath:     %d\n",
-				pingcur->beams_bath);
-			fprintf(stderr,"dbg2       beams_amp:      %d\n",
-				pingcur->beams_amp);
-			fprintf(stderr,"dbg2       pixels_ss:      %d\n",
-				pingcur->pixels_ss);
-			fprintf(stderr,"dbg2       error:          %d\n",
-				error);
-			fprintf(stderr,"dbg2       status:         %d\n",
-				status);
-			for (i=0;i<pingcur->beams_bath;i++)
-				{
-				fprintf(stderr, "bath[%4d]:  %f  %f  %f\n", 
-					i, bath[i], bathlon[i], bathlat[i]);
-				}
-			for (i=0;i<pingcur->beams_amp;i++)
-				{
-				fprintf(stderr, "amp[%4d]:  %f  %f  %f\n", 
-					i, amp[i], bathlon[i], bathlat[i]);
-				}
-			for (i=0;i<pingcur->pixels_ss;i++)
-				{
-				fprintf(stderr, "ss[%4d]:  %f  %f  %f\n", 
-					i, ss[i], sslon[i], sslat[i]);
-				}
-			}
-
-		/* update bookkeeping */
-		if (error == MB_ERROR_NO_ERROR)
-			{
-			nping_read += pingcur->pings;
-			(*npings)++;
-			}
-
-		/* scale amplitudes if necessary */
-		if (error == MB_ERROR_NO_ERROR
-			&& (mode == MBSWATH_BATH_AMP
-			|| mode == MBSWATH_BATH_AMP_CPT
-			|| mode == MBSWATH_AMP)
-			&& ampscale_mode > 0)
-			{
-			for (i=0;i<pingcur->beams_amp;i++)
-				{
-				if (amp[i] > 0 && ampscale_mode == 1)
+		/* initialize reading the multibeam file */
+		if ((status = mb_read_init(
+		    verbose,file,format,pings,lonflip,bounds,
+		    btime_i,etime_i,speedmin,timegap,
+		    &mbio_ptr,&btime_d,&etime_d,
+		    &beams_bath,&beams_amp,&pixels_ss,&error)) != MB_SUCCESS)
+		    {
+		    mb_error(verbose,error,&message);
+		    fprintf(stderr,"\nMBIO Error returned from function <mb_read_init>:\n%s\n",message);
+		    fprintf(stderr,"\nMultibeam File <%s> not initialized for reading\n",file);
+		    fprintf(stderr,"\nProgram <%s> Terminated\n",
+			    program_name);
+		    exit(error);
+		    }
+    
+		/* get fore-aft beam_width */
+		status = mb_format(verbose,&format,&format_num,&error);
+		if (footprint_mode == MBSWATH_FOOTPRINT_REAL)
+		    factor = rawfactor*mb_foreaft_beamwidth_table[format_num];
+		else
+		    factor = rawfactor;
+		    
+		/* set default depth, checking for deep-tow data */
+		if ((format == 111 || format == 112)
+		    && default_depth <= 0.0)
+		    default_depth_use = 100.0;
+		else
+		    default_depth_use = default_depth;
+    
+		/* allocate memory for data arrays */
+		status = mb_malloc(verbose,sizeof(struct swath),
+				&swath_plot,&error);
+		npings = &swath_plot->npings;
+		swath_plot->beams_bath = beams_bath;
+		swath_plot->beams_amp = beams_amp;
+		swath_plot->pixels_ss = pixels_ss;
+		for (i=0;i<MAXPINGS;i++)
+		    {
+		    pingcur = &(swath_plot->data[i]);
+		    pingcur->bath = NULL;
+		    pingcur->amp = NULL;
+		    pingcur->bathlon = NULL;
+		    pingcur->bathlat = NULL;
+		    pingcur->ss = NULL;
+		    pingcur->sslon = NULL;
+		    pingcur->sslat = NULL;
+		    pingcur->bathflag = NULL;
+		    pingcur->bathfoot = NULL;
+		    pingcur->ssflag = NULL;
+		    pingcur->ssfoot = NULL;
+		    pingcur->bathshade = NULL;
+		    status = mb_malloc(verbose,beams_bath*sizeof(double),
+			    &(pingcur->bath),&error);
+		    status = mb_malloc(verbose,beams_amp*sizeof(double),
+			    &(pingcur->amp),&error);
+		    status = mb_malloc(verbose,beams_bath*sizeof(double),
+			    &(pingcur->bathlon),&error);
+		    status = mb_malloc(verbose,beams_bath*sizeof(double),
+			    &(pingcur->bathlat),&error);
+		    status = mb_malloc(verbose,pixels_ss*sizeof(double),
+			    &(pingcur->ss),&error);
+		    status = mb_malloc(verbose,pixels_ss*sizeof(double),
+			    &(pingcur->sslon),&error);
+		    status = mb_malloc(verbose,pixels_ss*sizeof(double),
+			    &(pingcur->sslat),&error);
+		    status = mb_malloc(verbose,beams_bath*sizeof(int),
+			    &(pingcur->bathflag),&error);
+		    status = mb_malloc(verbose,
+			    (beams_bath)*sizeof(struct footprint),
+			    &(pingcur->bathfoot),&error);
+		    status = mb_malloc(verbose,pixels_ss*sizeof(int),
+			    &(pingcur->ssflag),&error);
+		    status = mb_malloc(verbose,
+			    (pixels_ss)*sizeof(struct footprint),
+			    &(pingcur->ssfoot),&error);
+		    status = mb_malloc(verbose,beams_bath*sizeof(double),
+			    &(pingcur->bathshade),&error);
+		    }
+    
+		/* if error initializing memory then quit */
+		if (error != MB_ERROR_NO_ERROR)
+		    {
+		    mb_error(verbose,error,&message);
+		    fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
+		    fprintf(stderr,"\nProgram <%s> Terminated\n",
+			    program_name);
+		    exit(error);
+		    }
+    
+		/* print message */
+		if (verbose >= 2) 
+		    fprintf(stderr,"\n");
+		if (verbose >= 1)
+		    fprintf(stderr,"processing data in %s...\n",file);
+    
+		/* loop over reading */
+		*npings = 0;
+		start = MB_YES;
+		done = MB_NO;
+		while (done == MB_NO)
+		    {
+		    pingcur = &swath_plot->data[*npings];
+		    bath = pingcur->bath;
+		    amp = pingcur->amp;
+		    bathlon = pingcur->bathlon;
+		    bathlat = pingcur->bathlat;
+		    ss = pingcur->ss;
+		    sslon = pingcur->sslon;
+		    sslat = pingcur->sslat;
+		    status = mb_read(verbose,mbio_ptr,&(pingcur->kind),
+			    &(pingcur->pings),pingcur->time_i,&(pingcur->time_d),
+			    &(pingcur->navlon),&(pingcur->navlat),&(pingcur->speed),
+			    &(pingcur->heading),&(pingcur->distance),
+			    &(pingcur->beams_bath),
+			    &(pingcur->beams_amp),
+			    &(pingcur->pixels_ss),
+			    bath,amp,bathlon,bathlat,
+			    ss,sslon,sslat,
+			    pingcur->comment,&error);
+    
+		    /* print debug statements */
+		    if (verbose >= 2)
+			    {
+			    fprintf(stderr,"\ndbg2  Ping read in program <%s>\n",
+				    program_name);
+			    fprintf(stderr,"dbg2       kind:           %d\n",
+				    pingcur->kind);
+			    fprintf(stderr,"dbg2       beams_bath:     %d\n",
+				    pingcur->beams_bath);
+			    fprintf(stderr,"dbg2       beams_amp:      %d\n",
+				    pingcur->beams_amp);
+			    fprintf(stderr,"dbg2       pixels_ss:      %d\n",
+				    pingcur->pixels_ss);
+			    fprintf(stderr,"dbg2       error:          %d\n",
+				    error);
+			    fprintf(stderr,"dbg2       status:         %d\n",
+				    status);
+			    for (i=0;i<pingcur->beams_bath;i++)
 				    {
-				    amp[i] = ampscale*(amp[i] - ampmin)
-					/(ampmax - ampmin);
+				    fprintf(stderr, "bath[%4d]:  %f  %f  %f\n", 
+					    i, bath[i], bathlon[i], bathlat[i]);
 				    }
-				else if (amp[i] > 0 && ampscale_mode == 2)
+			    for (i=0;i<pingcur->beams_amp;i++)
 				    {
-				    amp[i] = MIN(amp[i],ampmax);
-				    amp[i] = MAX(amp[i],ampmin);
-				    amp[i] = ampscale*(amp[i] - ampmin)
-					/(ampmax - ampmin);
+				    fprintf(stderr, "amp[%4d]:  %f  %f  %f\n", 
+					    i, amp[i], bathlon[i], bathlat[i]);
 				    }
-				else if (amp[i] > 0 && ampscale_mode == 3)
+			    for (i=0;i<pingcur->pixels_ss;i++)
 				    {
-				    amplog = 20.0*log10(amp[i]);
-				    amp[i] = ampscale*(amplog - ampmin)
-					/(ampmax - ampmin);
+				    fprintf(stderr, "ss[%4d]:  %f  %f  %f\n", 
+					    i, ss[i], sslon[i], sslat[i]);
 				    }
-				else if (amp[i] > 0 && ampscale_mode == 4)
+			    }
+    
+		    /* update bookkeeping */
+		    if (error == MB_ERROR_NO_ERROR)
+			    {
+			    nping_read += pingcur->pings;
+			    (*npings)++;
+			    }
+    
+		    /* scale amplitudes if necessary */
+		    if (error == MB_ERROR_NO_ERROR
+			    && (mode == MBSWATH_BATH_AMP
+			    || mode == MBSWATH_BATH_AMP_CPT
+			    || mode == MBSWATH_AMP)
+			    && ampscale_mode > 0)
+			    {
+			    for (i=0;i<pingcur->beams_amp;i++)
 				    {
-				    amplog = 20.0*log10(amp[i]);
-				    amplog = MIN(amplog,ampmax);
-				    amplog = MAX(amplog,ampmin);
-				    amp[i] = ampscale*(amplog - ampmin)
-					   /(ampmax - ampmin);
+				    if (amp[i] > 0 && ampscale_mode == 1)
+					{
+					amp[i] = ampscale*(amp[i] - ampmin)
+					    /(ampmax - ampmin);
+					}
+				    else if (amp[i] > 0 && ampscale_mode == 2)
+					{
+					amp[i] = MIN(amp[i],ampmax);
+					amp[i] = MAX(amp[i],ampmin);
+					amp[i] = ampscale*(amp[i] - ampmin)
+					    /(ampmax - ampmin);
+					}
+				    else if (amp[i] > 0 && ampscale_mode == 3)
+					{
+					amplog = 20.0*log10(amp[i]);
+					amp[i] = ampscale*(amplog - ampmin)
+					    /(ampmax - ampmin);
+					}
+				    else if (amp[i] > 0 && ampscale_mode == 4)
+					{
+					amplog = 20.0*log10(amp[i]);
+					amplog = MIN(amplog,ampmax);
+					amplog = MAX(amplog,ampmin);
+					amp[i] = ampscale*(amplog - ampmin)
+					       /(ampmax - ampmin);
+					}
 				    }
-				}
-			}
-
-		/* scale bathymetry if necessary */
-		if (error == MB_ERROR_NO_ERROR
-			&& bathy_in_feet == MB_YES)
-			{
-			for (i=0;i<pingcur->beams_bath;i++)
-				{
-				bath[i] = 3.2808399 * bath[i];
-				}
-			}
-
-		/* scale sidescan if necessary */
-		if (error == MB_ERROR_NO_ERROR
-			&& mode == MBSWATH_SS
-			&& ampscale_mode > 0)
-			{
-			for (i=0;i<pingcur->pixels_ss;i++)
-				{
-				if (ss[i] > 0 && ampscale_mode == 1)
+			    }
+    
+		    /* scale bathymetry if necessary */
+		    if (error == MB_ERROR_NO_ERROR
+			    && bathy_in_feet == MB_YES)
+			    {
+			    for (i=0;i<pingcur->beams_bath;i++)
 				    {
-				    ss[i] = ampscale*(ss[i] - ampmin)
-					/(ampmax - ampmin);
+				    bath[i] = 3.2808399 * bath[i];
 				    }
-				else if (ss[i] > 0 && ampscale_mode == 2)
+			    }
+    
+		    /* scale sidescan if necessary */
+		    if (error == MB_ERROR_NO_ERROR
+			    && mode == MBSWATH_SS
+			    && ampscale_mode > 0)
+			    {
+			    for (i=0;i<pingcur->pixels_ss;i++)
 				    {
-				    ss[i] = MIN(ss[i],ampmax);
-				    ss[i] = MAX(ss[i],ampmin);
-				    ss[i] = ampscale*(ss[i] - ampmin)
-					/(ampmax - ampmin);
+				    if (ss[i] > 0 && ampscale_mode == 1)
+					{
+					ss[i] = ampscale*(ss[i] - ampmin)
+					    /(ampmax - ampmin);
+					}
+				    else if (ss[i] > 0 && ampscale_mode == 2)
+					{
+					ss[i] = MIN(ss[i],ampmax);
+					ss[i] = MAX(ss[i],ampmin);
+					ss[i] = ampscale*(ss[i] - ampmin)
+					    /(ampmax - ampmin);
+					}
+				    else if (ss[i] > 0 && ampscale_mode == 3)
+					{
+					amplog = 20.0*log10(ss[i]);
+					ss[i] = ampscale*(amplog - ampmin)
+					    /(ampmax - ampmin);
+					}
+				    else if (ss[i] > 0 && ampscale_mode == 4)
+					{
+					amplog = 20.0*log10(ss[i]);
+					amplog = MIN(amplog,ampmax);
+					amplog = MAX(amplog,ampmin);
+					ss[i] = ampscale*(amplog - ampmin)
+					       /(ampmax - ampmin);
+					}
 				    }
-				else if (ss[i] > 0 && ampscale_mode == 3)
+			    }
+    
+		    /* decide whether to plot, whether to 
+			    save the new ping, and if done */
+		    plot = MB_NO; 
+		    flush = MB_NO;
+		    if (*npings >= MAXPINGS)
+			    plot = MB_YES;
+		    if (*npings > 0 
+			    && (error > MB_ERROR_NO_ERROR
+			    || error == MB_ERROR_TIME_GAP
+			    || error == MB_ERROR_OUT_BOUNDS
+			    || error == MB_ERROR_OUT_TIME
+			    || error == MB_ERROR_SPEED_TOO_SMALL))
+			    {
+			    plot = MB_YES;
+			    flush = MB_YES;
+			    }
+		    save_new = MB_NO;
+		    if (error == MB_ERROR_TIME_GAP)
+			    save_new = MB_YES;
+		    if (error > MB_ERROR_NO_ERROR)
+			    done = MB_YES;
+    
+		    /* if enough pings read in, plot them */
+		    if (plot == MB_YES)
+			    {
+			    /* get footprint locations */
+			    if (footprint_mode != MBSWATH_FOOTPRINT_POINT)
+			    status = get_footprints(verbose,mode,
+				    footprint_mode,factor,default_depth_use, 
+				    swath_plot,mtodeglon,mtodeglat,&error);
+    
+			    /* get shading */
+			    if (mode == MBSWATH_BATH_RELIEF 
+				    || mode == MBSWATH_BATH_AMP
+				    || mode == MBSWATH_BATH_AMP_CPT)
+				    status = get_shading(verbose,mode,swath_plot,
+					    mtodeglon,mtodeglat,
+					    magnitude,azimuth,
+					    nshadelevel, shadelevel, 
+					    shadelevelgray,
+					    &error);
+    
+			    /* plot data */
+			    if (start == MB_YES)
 				    {
-				    amplog = 20.0*log10(ss[i]);
-				    ss[i] = ampscale*(amplog - ampmin)
-					/(ampmax - ampmin);
+				    first = 0;
+				    start = MB_NO;
 				    }
-				else if (ss[i] > 0 && ampscale_mode == 4)
+			    else
+				    first = 1;
+			    if (done == MB_YES)
+				    nplot = *npings - first;
+			    else
+				    nplot = *npings - first - 1;
+			    if (footprint_mode == MBSWATH_FOOTPRINT_POINT)
+				    status = plot_data_point(verbose,
+					    mode,swath_plot,
+					    first,nplot,&error);
+			    else 
+				    status = plot_data_footprint(verbose,
+					    mode,swath_plot,
+					    first,nplot,&error);
+    
+			    /* reorganize data */
+			    if (flush == MB_YES && save_new == MB_YES)
 				    {
-				    amplog = 20.0*log10(ss[i]);
-				    amplog = MIN(amplog,ampmax);
-				    amplog = MAX(amplog,ampmin);
-				    ss[i] = ampscale*(amplog - ampmin)
-					   /(ampmax - ampmin);
+				    status = ping_copy(verbose,0,*npings,
+					    swath_plot,&error);
+				    *npings = 1;
+				    start = MB_YES;
 				    }
-				}
-			}
-
-		/* decide whether to plot, whether to 
-			save the new ping, and if done */
-		plot = MB_NO; 
-		flush = MB_NO;
-		if (*npings >= MAXPINGS)
-			plot = MB_YES;
-		if (*npings > 0 
-			&& (error > MB_ERROR_NO_ERROR
-			|| error == MB_ERROR_TIME_GAP
-			|| error == MB_ERROR_OUT_BOUNDS
-			|| error == MB_ERROR_OUT_TIME
-			|| error == MB_ERROR_SPEED_TOO_SMALL))
-			{
-			plot = MB_YES;
-			flush = MB_YES;
-			}
-		save_new = MB_NO;
-		if (error == MB_ERROR_TIME_GAP)
-			save_new = MB_YES;
-		if (error > MB_ERROR_NO_ERROR)
-			done = MB_YES;
-
-		/* if enough pings read in, plot them */
-		if (plot == MB_YES)
-			{
-			/* get footprint locations */
-			if (footprint_mode != MBSWATH_FOOTPRINT_POINT)
-			status = get_footprints(verbose,mode,
-				footprint_mode,factor,default_depth_use, 
-				swath_plot,mtodeglon,mtodeglat,&error);
-
-			/* get shading */
-			if (mode == MBSWATH_BATH_RELIEF 
-				|| mode == MBSWATH_BATH_AMP
-				|| mode == MBSWATH_BATH_AMP_CPT)
-				status = get_shading(verbose,mode,swath_plot,
-					mtodeglon,mtodeglat,
-					magnitude,azimuth,
-					nshadelevel, shadelevel, 
-					shadelevelgray,
-					&error);
-
-			/* plot data */
-			if (start == MB_YES)
-				{
-				first = 0;
-				start = MB_NO;
-				}
-			else
-				first = 1;
-			if (done == MB_YES)
-				nplot = *npings - first;
-			else
-				nplot = *npings - first - 1;
-			if (footprint_mode == MBSWATH_FOOTPRINT_POINT)
-				status = plot_data_point(verbose,
-					mode,swath_plot,
-					first,nplot,&error);
-			else 
-				status = plot_data_footprint(verbose,
-					mode,swath_plot,
-					first,nplot,&error);
-
-			/* let the world know */
-			if (verbose >= 1)
-			    fprintf(stderr,"processed %d pings so far...\n",nping_read);
-
-			/* reorganize data */
-			if (flush == MB_YES && save_new == MB_YES)
-				{
-				status = ping_copy(verbose,0,*npings,
-					swath_plot,&error);
-				*npings = 1;
-				start = MB_YES;
-				}
-			else if (flush == MB_YES)
-				{
-				*npings = 0;
-				start = MB_YES;
-				}
-			else if (*npings > 1)
-				{
-				for (i=0;i<2;i++)
-					status = ping_copy(verbose,i,
-						*npings-2+i,
-						swath_plot,&error);
-				*npings = 2;
-				}
-
-			}
-		}
-	status = mb_close(verbose,&mbio_ptr,&error);
-
-	/* deallocate memory for data arrays */
-	for (i=0;i<MAXPINGS;i++)
-		{
-		pingcur = &swath_plot->data[i];
-		mb_free(verbose,&pingcur->bath,&error);
-		mb_free(verbose,&pingcur->amp,&error);
-		mb_free(verbose,&pingcur->bathlon,&error);
-		mb_free(verbose,&pingcur->bathlat,&error);
-		mb_free(verbose,&pingcur->ss,&error);
-		mb_free(verbose,&pingcur->sslon,&error);
-		mb_free(verbose,&pingcur->sslat,&error);
-		mb_free(verbose,&pingcur->bathflag,&error);
-		mb_free(verbose,&pingcur->bathfoot,&error);
-		mb_free(verbose,&pingcur->ssflag,&error);
-		mb_free(verbose,&pingcur->ssfoot,&error);
-		mb_free(verbose,&pingcur->bathshade,&error);
-		}
-	mb_free(verbose,&swath_plot,&error);
-
-	/* figure out whether and what to read next */
-        if (read_datalist == MB_YES)
+			    else if (flush == MB_YES)
+				    {
+				    *npings = 0;
+				    start = MB_YES;
+				    }
+			    else if (*npings > 1)
+				    {
+				    for (i=0;i<2;i++)
+					    status = ping_copy(verbose,i,
+						    *npings-2+i,
+						    swath_plot,&error);
+				    *npings = 2;
+				    }
+    
+			    }
+		    }
+		status = mb_close(verbose,&mbio_ptr,&error);
+    
+		/* deallocate memory for data arrays */
+		for (i=0;i<MAXPINGS;i++)
+		    {
+		    pingcur = &swath_plot->data[i];
+		    mb_free(verbose,&pingcur->bath,&error);
+		    mb_free(verbose,&pingcur->amp,&error);
+		    mb_free(verbose,&pingcur->bathlon,&error);
+		    mb_free(verbose,&pingcur->bathlat,&error);
+		    mb_free(verbose,&pingcur->ss,&error);
+		    mb_free(verbose,&pingcur->sslon,&error);
+		    mb_free(verbose,&pingcur->sslat,&error);
+		    mb_free(verbose,&pingcur->bathflag,&error);
+		    mb_free(verbose,&pingcur->bathfoot,&error);
+		    mb_free(verbose,&pingcur->ssflag,&error);
+		    mb_free(verbose,&pingcur->ssfoot,&error);
+		    mb_free(verbose,&pingcur->bathshade,&error);
+		    }
+		mb_free(verbose,&swath_plot,&error);
+		} /* end if file in bounds */
+		
+	    /* figure out whether and what to read next */
+	    if (read_datalist == MB_YES)
                 {
                 if (fgets(line,128,fp) != NULL
                         && sscanf(line,"%s %d",file,&format) == 2)
@@ -1189,13 +1204,13 @@ char **argv;
                 else
                         read_data = MB_NO;
                 }
-        else
+	    else
                 {
                 read_data = MB_NO;
                 }
 
-	/* end loop over files in list */
-	}
+	    /* end loop over files in list */
+	    }
 	if (read_datalist == MB_YES)
 		fclose (fp);
 

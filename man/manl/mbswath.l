@@ -31,6 +31,23 @@ color image produced covers the entire plot space.
 The program can read data from stdin (the default) or from one 
 or more multibeam files.
 
+Before opening an input swath data file, \fBmbmbswath\fP checks for
+an ascii file in the same directory having the same name except
+that ".inf" is appended to the end. The program assumes that this
+ascii file contains the output of the program \fBmbinfo\fP run on
+the input data file. If the ".inf" file exists, \fBmbswath\fP reads
+the minimum and maximum longitude and latitude bounds from the 
+\fBmbinfo\fP output and compares those to the bounds
+for the plot. If the ".inf" file indicates that none of the data
+in the input file lies inside the plot bounds, that input
+file is skipped. This allows users to maintain a single master list
+of data files for use in all plotting without the performance penalty
+of \fBmbswath\fP reading through all the data files, even those
+with no relevent data. We recommend that users maintain a ".inf"
+file for each swath data file used for gridding or plotting. The
+programs \fBmbcontour\fP and \fBmbgrid\fP also use ".inf" files
+in the same fashion.
+
 .SH AUTHORSHIP
 David W. Caress (caress@lamont.ldeo.columbia.edu)
 .br
