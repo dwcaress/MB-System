@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_callbacks.c	6/24/95
- *    $Id: mbnavedit_callbacks.c,v 5.4 2001-04-06 22:16:01 caress Exp $
+ *    $Id: mbnavedit_callbacks.c,v 5.5 2001-06-30 17:41:04 caress Exp $
  *
  *    Copyright (c) 1995, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	August 28, 2000 (New version - no buffered i/o)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2001/04/06  22:16:01  caress
+ * Fixed unflagging.
+ *
  * Revision 5.3  2001/03/22  21:10:37  caress
  * Trying to make release 5.0.beta0.
  *
@@ -155,8 +158,6 @@ XGCValues	xgcv;
 XFontStruct	*fontStruct;
 
 /* file opening parameters */
-int	startup_file = 0;
-
 int	expose_plot_ok = True;
 
 static char	*input_file;
@@ -643,7 +644,7 @@ do_mbnavedit_init(int argc, char **argv)
 		    NCOLORS, mpixel_values);
 
     /* initialize mbnavedit proper */
-    status = mbnavedit_init(argc,argv,&startup_file);
+    status = mbnavedit_init(argc,argv);
     
     do_set_controls();
 }
@@ -2070,8 +2071,15 @@ do_fileselection_ok( Widget w, XtPointer client_data, XtPointer call_data)
 	    }
 	else
 	    {
-	     XtManageChild(bulletinBoard_useprevious);
+	    do_checkuseprevious();
 	    }
+}
+
+/*--------------------------------------------------------------------*/
+int
+do_checkuseprevious()
+{
+	     XtManageChild(bulletinBoard_useprevious);
 }
 
 /*--------------------------------------------------------------------*/
