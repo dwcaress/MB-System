@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_reson.c	3.00	8/20/94
- *	$Id: mbsys_reson.c,v 4.14 1999-03-31 18:11:35 caress Exp $
+ *	$Id: mbsys_reson.c,v 4.15 1999-08-16 23:14:41 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -38,6 +38,9 @@
  * Date:	August 20, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.14  1999/03/31  18:11:35  caress
+ * MB-System 4.6beta7
+ *
  * Revision 4.13  1999/01/01  23:41:06  caress
  * MB-System version 4.6beta6
  *
@@ -111,7 +114,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_reson.c,v 4.14 1999-03-31 18:11:35 caress Exp $";
+ static char res_id[]="$Id: mbsys_reson.c,v 4.15 1999-08-16 23:14:41 caress Exp $";
 	char	*function_name = "mbsys_reson_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -420,7 +423,7 @@ int	*error;
 			    beamflag[i] = MB_FLAG_NULL;
 			    bath[i] = depthscale*store->bath[i];
 			    }
-			else if (store->quality[i] == 3)
+			else if (store->quality[i] >= 3)
 			    {
 			    beamflag[i] = MB_FLAG_NONE;
 			    bath[i] = depthscale*store->bath[i];
@@ -1016,7 +1019,7 @@ int	*error;
 		depthscale = 0.01;
 		dacrscale  = 0.01;
 		if (store->bath[store->beams_bath/2] != 0
-		    && store->quality[store->beams_bath/2] == 3)
+		    && store->quality[store->beams_bath/2] >= 3)
 		    bath_best = depthscale 
 				* store->bath[store->beams_bath/2];
 		else
@@ -1025,7 +1028,7 @@ int	*error;
 		    for (i=0;i<store->beams_bath;i++)
 			{
 			if (store->bath[i] != 0 
-			    && store->quality[i] == 3
+			    && store->quality[i] >= 3
 			    && fabs(store->bath_acrosstrack[i]) < xtrack_min)
 			    {
 			    xtrack_min = fabs(dacrscale * store->bath_acrosstrack[i]);

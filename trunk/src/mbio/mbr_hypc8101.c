@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hypc8101.c	8/8/94
- *	$Id: mbr_hypc8101.c,v 4.1 1999-03-31 18:11:35 caress Exp $
+ *	$Id: mbr_hypc8101.c,v 4.2 1999-08-16 23:14:41 caress Exp $
  *
  *    Copyright (c) 1998 by 
  *    D. W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	December 10, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1999/03/31  18:11:35  caress
+ * MB-System 4.6beta7
+ *
  * Revision 4.0  1999/01/01  23:38:01  caress
  * MB-System version 4.6beta6
  *
@@ -50,7 +53,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_hypc8101.c,v 4.1 1999-03-31 18:11:35 caress Exp $";
+	static char res_id[]="$Id: mbr_hypc8101.c,v 4.2 1999-08-16 23:14:41 caress Exp $";
 	char	*function_name = "mbr_alm_hypc8101";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -165,7 +168,7 @@ int	*error;
 	if (data != NULL)
 		{
 		data->kind = MB_DATA_NONE;
-		data->sonar = MBSYS_RESON_SEABAT8101;
+		data->sonar = MBSYS_RESON_UNKNOWN;
 		data->par_year = 0;
 		data->par_month = 0;
 		data->par_day = 0;
@@ -412,7 +415,7 @@ int	*error;
 		else if (data->kind == MB_DATA_NAV)
 			{
 			mb_fix_y2k(verbose, data->pos_year, 
-				    mb_io_ptr->new_time_i[0]);
+				    &mb_io_ptr->new_time_i[0]);
 			mb_io_ptr->new_time_i[1] = data->pos_month;
 			mb_io_ptr->new_time_i[2] = data->pos_day;
 			mb_io_ptr->new_time_i[3] = data->pos_hour;
@@ -508,7 +511,7 @@ int	*error;
 			    mb_io_ptr->new_bath[i] 
 				= depthscale*data->bath[i];
 			    }
-			else if (data->quality[i] == 3)
+			else if (data->quality[i] >= 3)
 			    {
 			    mb_io_ptr->new_beamflag[i] = MB_FLAG_NONE;
 			    mb_io_ptr->new_bath[i] 
@@ -804,6 +807,7 @@ int	*error;
 	double	angle0, angle_inc;
 	int	device_type, device_nav, device_hcp;
 	int	device_gyro, device_sb2;
+	char	device_name[32];
 	double	sb2_clock, sb2_ssv;
 	int	sb2_nvalues;
 	int	sb2_nbeams, sb2_nbeams_read;
@@ -1447,6 +1451,13 @@ fprintf(stderr, "theta:%f phi:%f\n", theta, phi);
 fprintf(stderr, "rr:%f xx:%f zz:%f\n", rr, xx, zz);
 fprintf(stderr, "bath: %d %d %d\n\n", 
 data->bath[i], data->bath_acrosstrack[i], data->bath_alongtrack[i]);*/
+
+				/* deal with Mesotech SM2000 quality values */
+				if (data->sonar == MBSYS_RESON_MESOTECHSM2000)
+				    {
+				    if (data->quality[i] != 0)
+					data->quality[i] = 3;
+				    }
 				}
 			    
 			    /* get time tag */
@@ -1548,9 +1559,9 @@ data->bath[i], data->bath_acrosstrack[i], data->bath_alongtrack[i]);*/
 		    /* deal with device data */
 		    else if (strncmp(line, "DEV", 3) == 0)
 			{
-			nscan = sscanf(line+4, "%d %d", 
-					&ndevice, &device_type);
-			if (nscan == 2)
+			nscan = sscanf(line+4, "%d %d %s", 
+					&ndevice, &device_type, device_name);
+			if (nscan == 3)
 			    {
 			    if (device_type == 4)
 				device_nav = ndevice;
@@ -1597,7 +1608,7 @@ data->bath[i], data->bath_acrosstrack[i], data->bath_alongtrack[i]);*/
 		    else if (strncmp(line, "PRD", 3) == 0)
 			{
 			nscan = sscanf(line+4, "%d %s %lf %lf %d", 
-					&ndevice, sdummy, 
+					&ndevice, device_name, 
 					&angle0, &angle_inc, 
 					&sb2_nbeams);
 			if (nscan == 5)
@@ -1607,6 +1618,10 @@ data->bath[i], data->bath_acrosstrack[i], data->bath_alongtrack[i]);*/
 				data->beams_bath = sb2_nbeams;
 				data->angle0 = angle0;
 				data->angle_inc = angle_inc;
+				if (strcmp(device_name, "SEA8101") == 0)
+				    data->sonar = MBSYS_RESON_SEABAT8101;
+				else if (strcmp(device_name, "SM2000") == 0)
+				    data->sonar = MBSYS_RESON_MESOTECHSM2000;
 				}
 			    }
 			}
