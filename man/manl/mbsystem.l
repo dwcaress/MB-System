@@ -1,4 +1,4 @@
-.TH mbsystem l "17 December 1998" "MB-System 4.6" "MB-System 4.6"
+.TH mbsystem l "14 April 1999" "MB-System 4.6" "MB-System 4.6"
 .SH NAME
 \fBmbsystem\fP - A set of utilities for manipulating and 
 processing swath sonar bathymetry, amplitude, and sidescan data.
@@ -731,11 +731,11 @@ that are not supported by the Atlas software. For example:
   	mbcopy -F102/101 -Iys9409040607.mb102 \\
  		-Oys9409040607.R -N
 
-.SH PROCESSING WHOI DSL AMS-120 DATA
+.SH PROCESSING OLD WHOI DSL AMS-120 DATA
 
-The WHOI DSL group typically provides processed AMS-120
-data as a set of parallel files. An example of the filenames
-used is:
+The WHOI DSL group used to provide processed AMS-120
+data as a set of parallel files in a DSL specific format. 
+An example of the filenames used is:
 .br
  	DSL120.940630_1100.amp.dat 	(sidescan)
  	DSL120.940630_1100.bat.dat 	(bathymetry)
@@ -761,7 +761,7 @@ and processing will be slow relative to data from multibeam
 sonars.
 
 We recommend the following initial procedure when
-processing WHOI DSL AMS-120 data with MB-System:
+processing old WHOI DSL AMS-120 data with MB-System:
 
 \fBStep 1\fP: Concatenate all of the processed navigation
 files into a single file.
@@ -769,11 +769,13 @@ files into a single file.
  	cat *.nav > cruise.rnav
 
 \fBStep 2\fP: Translate the DSL UTM navigation into geographic
-coordinates. Note that you must know the UTM zone
+coordinates. The input navigation is in the "old" navigation
+format, as specified by \fB-F\fP\fI1\fP. 
+Note that you must know the UTM zone
 used - here we assume the zone is +27.
 
  	mbm_dslnavfix -Icruise.rnav \\
- 		-Ocruise.mrg2 -J27 -V
+ 		-Ocruise.mrg2 -F1 -J27 -V
 
 \fBStep 3\fP: Copy the bathymetry and sidescan data in each
 file from format 111 to format 112. Note that it does not
@@ -799,6 +801,81 @@ bathymetry using different water sound velocity models
 than that used originally. Adding such a capability would
 require defining a new data format and seems 
 unnecessary for any of the data we have examined.
+
+The large number of bathymetry values (2048) per ping and
+the high (> 1/second) ping rate make interactive editing
+of the bathymetry extremely time consuming. It is 
+probably more realistic to use auto-editing (e.g. \fBmbclean\fP)
+to clean up the worst artifacts. One may also find it
+necessary to use median filtering rather than weighted
+mean filtering in the gridding process (\fBmbgrid\fP).
+Other than the above, the generation of grids and maps 
+can proceed in the same
+fashion as outlined above for SeaBeam 2112 data.
+
+.SH PROCESSING NEW WHOI DSL AMS-120 DATA
+
+The WHOI DSL group now provides processed AMS-120
+data in a data format defined by Ocean Imaging Consultants. 
+\fBMB-System\fP supports the OIC data as \fBMBIO\fP format 141.
+An example of a typical filename is:
+.br
+ 	DSL120.98.227.2020.tmp.oicp
+.br
+The OIC format files generally contain no navigation (the 
+position values are zero).
+The processed navigation resides in a separate file,
+but it is sampled less frequently than the sonar
+pings, and is reported in UTM easting and northing meters.
+The \fBmbm_dslnavfix\fP macro is used to translate the
+eastings and northings into the geographic coordinates
+(longitude and latitude) used by MB-System programs. The
+program \fBmbmerge\fP can be used to merge the translated
+navigation in with the bathymetry and sidescan.
+
+\fBMB-System\fP also supports an "enhanced" data format (142) 
+similar to the OIC format. Format 142 adds a beam flag 
+array to the data, allowing bathymetry editing.
+Since interferometry derived bathymetry tends to be noisy and
+to require editing, we recommend converting the AMS-120 
+data to format 142 before proceeding with processing.
+In either case, the data is voluminous (~75 MB/hour)
+and processing will be slow relative to data from multibeam
+sonars.
+
+We recommend the following initial procedure when
+processing new WHOI DSL AMS-120 data with MB-System:
+
+\fBStep 1\fP: Concatenate all of the processed navigation
+files into a single file.
+
+ 	cat *.nav > cruise.rnav
+
+\fBStep 2\fP: Translate the DSL UTM navigation into geographic
+coordinates. The input navigation is in the "new" navigation
+format, as specified using \fB-F\fP\fI2\fP. 
+Note that you must know the UTM zone
+used - here we assume the zone is +9. 
+
+ 	mbm_dslnavfix -F2 -Icruise.rnav \\
+ 		-Ocruise.mrg2 -J9 -V
+
+\fBStep 3\fP: Copy the bathymetry and sidescan data in each
+file from format 141 to format 142.
+
+ 	mbcopy -F141/142 \\
+ 		-IDSL120.98.227.2020.tmp.oicp \\
+ 		-ODSL120.98.227.2020.mb142
+
+\fBStep 4\fP: Merge the translated navigation with each of the 
+format 112 data files. Note that \fBmbm_dslnavfix\fP
+produces navigation in \fBmbmerge\fP format 2
+so that the \fB-M\fP\fI2\fP option is used.
+
+ 	mbmerge -F112 \\
+ 		-IDSL120.98.227.2020.mb112 \\
+ 		-ODSL120.98.227.2020_n.mb112 \\
+ 		-M2 -Ncruise.mrg2 -V
 
 The large number of bathymetry values (2048) per ping and
 the high (> 1/second) ping rate make interactive editing
