@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile	3.00  1/21/93
-#	$Id: Makefile,v 1.8 1993-11-04 19:35:01 caress Exp $
+#	$Id: Makefile,v 1.9 1993-11-05 16:02:14 caress Exp $
 #
 #     Copyright (c) 1993 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,9 @@
 # Date:		January 21, 1993
 #
 # $Log: not supported by cvs2svn $
+# Revision 1.8  1993/11/04  19:35:01  caress
+# Added mbps.
+#
 # Revision 1.1  1993/08/17  02:32:19  caress
 # Initial revision
 #
@@ -39,17 +42,23 @@
 #
 #
 
-CFLAGS = -O2
-FFLAGS = -O2
-FWITHCFLAGS = -lF77
-LFLAGS = -lm
+# *** CHANGE THESE TO FIT YOUR LOCAL ENVIRONMENT ***
+#     - locations of GMT libraries and include files
+GMTLIBDIR = /ocean/mgg/gmt2/sun4/lib
+GMTINCDIR = /ocean/mgg/gmt2/src
+#     - location of Levitus annual database file
+LEVITUS = /mcscon/turf/caress/Levitus/annual
+# *** LEAVE EVERYTHING ELSE BELOW ALONE ***
 
 BINDIR = ../../bin
 LIBDIR = ../../lib
 INCDIR = ../../include
 MANDIR = ../../man/man1
-GMTLIBDIR = /ocean/mgg/gmt2/sun4/lib
-GMTINCDIR = /ocean/mgg/gmt2/src
+
+CFLAGS = -O2
+FFLAGS = -O2
+FWITHCFLAGS = -lF77
+LFLAGS = -lm
 
 ### make all makes the MB-system utilites and man pages
 all:	$(MANDIR)/mbsystem.1 \
@@ -131,6 +140,7 @@ mbunclean.o:	mbunclean.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
 mbgrid.o:	mbgrid.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h
 	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) mbgrid.c
 mblevitus.o:	mblevitus.c $(INCDIR)/mb_status.h
+	echo "	char *ifile = \"$(LEVITUS)\";" > levitus.h
 	$(CC) -c $(CFLAGS) mblevitus.c
 zgrid.o:	zgrid.f
 	$(FC) -c $(FFLAGS) zgrid.f
