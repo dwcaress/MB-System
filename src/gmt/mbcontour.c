@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcontour.c	6/4/93
- *    $Id: mbcontour.c,v 4.18 1997-04-21 16:53:56 caress Exp $
+ *    $Id: mbcontour.c,v 4.19 1997-10-07 20:10:51 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Date:	June 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.18  1997/04/21  16:53:56  caress
+ * MB-System 4.5 Beta Release.
+ *
  * Revision 4.18  1997/04/17  15:05:49  caress
  * MB-System 4.5 Beta Release
  *
@@ -140,7 +143,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbcontour.c,v 4.18 1997-04-21 16:53:56 caress Exp $";
+	static char rcs_id[] = "$Id: mbcontour.c,v 4.19 1997-10-07 20:10:51 caress Exp $";
 #ifdef MBCONTOURFILTER
 	static char program_name[] = "MBCONTOURFILTER";
 	static char help_message[] =  "MBCONTOURFILTER is a utility which creates a pen plot \ncontour map of multibeam swath bathymetry.  \nThe primary purpose of this program is to serve as \npart of a real-time plotting system.  The contour \nlevels and colors can be controlled \ndirectly or set implicitly using contour and color change intervals. \nContours can also be set to have ticks pointing downhill.";
@@ -604,7 +607,7 @@ char **argv;
 			if (count >= 3 && tickstr[0] == 't')
 				tick[nlevel] = 1;
 			else if (count >= 3 && tickstr[0] == 'n')
-				tick[nlevel] = 1;
+				tick[nlevel] = 0;
 			else
 				{
 				tick[nlevel] = 0;
