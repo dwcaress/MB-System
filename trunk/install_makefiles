@@ -3,9 +3,9 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	install_makefiles	5/20/94
-#    $Id: install_makefiles,v 4.20 2000-10-25 20:31:20 caress Exp $
+#    $Id: install_makefiles,v 5.0 2001-01-22 05:02:30 caress Exp $
 #
-#    Copyright (c) 1993, 1994, 1995, 1996, 1997 by 
+#    Copyright (c) 1993, 1994, 1995, 1996, 1997, 2001 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
 #    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
 #    Lamont-Doherty Earth Observatory
@@ -41,10 +41,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   May 20, 1994
 #
 # Version:
-#   $Id: install_makefiles,v 4.20 2000-10-25 20:31:20 caress Exp $
+#   $Id: install_makefiles,v 5.0 2001-01-22 05:02:30 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+# Revision 4.20  2000/10/25  20:31:20  caress
+# Added references to GMT version 3.3
+#
 # Revision 4.19  2000/09/30  05:07:19  caress
 # Snapshot for Dale.
 #
@@ -180,11 +183,29 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #	$LEVITUS = "/net/heezen/packages/levitus/annual";
 #
 # Example for installing on Sun workstations running Solaris 2.4:
+#
 #	$MBSYSTEM_HOME = "/usr/local/mbsystem";
 #	$OS = "SOLARIS";
 #	$BYTESWAPPED = "NO";
 #	$CFLAGS = "-O -I/usr/openwin/include -I/usr/ucbinclude";
 #	$LFLAGS = "-lnsl -lm";
+#	$GRAPHICAL = "YES";
+#	$MOTIFINCDIR = "/usr/dt/include";
+#	$MOTIFLIBS = "-L/usr/openwin/lib -L/usr/dt/lib -lXm -lXt -lX11";
+#	$GMTLIBDIR = "/usr/local/gmt/src";
+#	$GMTINCDIR = "/usr/local/gmt/src";
+#	$NETCDFLIBDIR = "/usr/local/netcdf/lib";
+#	$NETCDFINCDIR = "/usr/local/netcdf/include";
+#	$LEVITUS = "/usr/local/levitus/annual";
+#
+# Example for installing on Sun workstations running Solaris 2.6
+#   with GMT built to utilize sincos() - add -lsunmath to $LFLAGS:
+#
+#	$MBSYSTEM_HOME = "/usr/local/mbsystem";
+#	$OS = "SOLARIS";
+#	$BYTESWAPPED = "NO";
+#	$CFLAGS = "-O -I/usr/openwin/include -I/usr/ucbinclude";
+#	$LFLAGS = "-lnsl -lm -lsunmath";
 #	$GRAPHICAL = "YES";
 #	$MOTIFINCDIR = "/usr/dt/include";
 #	$MOTIFLIBS = "-L/usr/openwin/lib -L/usr/dt/lib -lXm -lXt -lX11";
@@ -283,10 +304,10 @@ $GRAPHICAL = "YES";
 $MOTIFINCDIR = "/usr/include/Xm";
 $MOTIFLIBS = "-lXm -lXt -lX11";
 $GMTVERSION = "3.3";
-$GMTLIBDIR = "/mbari/local/gmt/src";
-$GMTINCDIR = "/mbari/local/gmt/src";
-$NETCDFLIBDIR = "/mbari/local/netcdf/lib";
-$NETCDFINCDIR = "/mbari/local/netcdf/include";
+$GMTLIBDIR = "/usr/local/gmt/src";
+$GMTINCDIR = "/usr/local/gmt/src";
+$NETCDFLIBDIR = "/usr/local/netcdf/lib";
+$NETCDFINCDIR = "/usr/local/netcdf/include";
 $LEVITUS = "/usr/local/levitus/annual";
 #
 # **** LEAVE EVERYTHING ELSE BELOW ALONE ****
