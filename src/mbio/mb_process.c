@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_process.c	9/11/00
- *    $Id: mb_process.c,v 5.26 2003-04-18 00:35:42 caress Exp $
+ *    $Id: mb_process.c,v 5.27 2004-09-16 01:11:48 caress Exp $
  *
  *    Copyright (c) 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	September 11, 2000
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.26  2003/04/18 00:35:42  caress
+ * Added capability to look for svp files with lookforfiles=2.
+ *
  * Revision 5.25  2003/04/17 21:05:23  caress
  * Release 5.0.beta30
  *
@@ -128,7 +131,7 @@
 #include "../../include/mb_format.h"
 #include "../../include/mb_process.h"
 
-static char rcs_id[]="$Id: mb_process.c,v 5.26 2003-04-18 00:35:42 caress Exp $";
+static char rcs_id[]="$Id: mb_process.c,v 5.27 2004-09-16 01:11:48 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_pr_readpar(int verbose, char *file, int lookforfiles, 
@@ -3054,6 +3057,7 @@ int mb_pr_update_edit(int verbose, char *file,
 	char	*function_name = "mb_pr_update_edit";
 	struct mb_process_struct process;
 	int	status = MB_SUCCESS;
+	char	*lastslash;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -3073,7 +3077,13 @@ int mb_pr_update_edit(int verbose, char *file,
 	/* set edit values */
 	process.mbp_edit_mode = mbp_edit_mode;
 	if (mbp_editfile != NULL)
-	    strcpy(process.mbp_editfile, mbp_editfile);
+		{
+		if ((lastslash = strrchr(mbp_editfile,'/')) != NULL
+			&& strlen(lastslash) > 1)
+			strcpy(process.mbp_editfile, &(lastslash[1]));
+		else
+			strcpy(process.mbp_editfile, mbp_editfile);
+		}
 
 	/* write new process parameter file */
 	status = mb_pr_writepar(verbose, file, &process, error);
