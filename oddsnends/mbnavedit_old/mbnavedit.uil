@@ -339,7 +339,7 @@ object textField_output_file : XmTextField widget {
 object bulletinBoard_fileselection : XmBulletinBoardDialog widget {
     arguments {
         XmNresizePolicy = XmRESIZE_NONE;
-        XmNx = 518;
+        XmNx = 8;
         XmNy = 289;
         XmNwidth = 737;
         XmNheight = 727;
@@ -460,8 +460,8 @@ object bulletinBoard_error : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNdialogStyle = XmDIALOG_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 731;
-        XmNy = 591;
+        XmNx = 8;
+        XmNy = 32;
         XmNwidth = 311;
         XmNheight = 161;
     };
@@ -541,8 +541,8 @@ object bulletinBoard_message : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNdialogStyle = XmDIALOG_FULL_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_NONE;
-        XmNx = 697;
-        XmNy = 629;
+        XmNx = 8;
+        XmNy = 32;
         XmNwidth = 379;
         XmNheight = 86;
     };
@@ -616,7 +616,7 @@ object label_about_version : XmLabel widget {
         XmNfontList = font_table(
 		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1'));
         XmNlabelString = compound_string("MB-System Release 4.6", separate=true) &
- compound_string("April 10, 1999");
+ compound_string("April 14, 1999");
         XmNx = 10;
         XmNy = 390;
         XmNwidth = 450;
@@ -793,8 +793,8 @@ object separator1 : XmSeparator widget {
 object bulletinBoard_about : XmBulletinBoardDialog widget {
     arguments {
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 646;
-        XmNy = 424;
+        XmNx = 466;
+        XmNy = 338;
         XmNwidth = 481;
         XmNheight = 496;
     };

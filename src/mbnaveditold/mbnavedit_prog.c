@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_prog.c	6/23/95
- *    $Id: mbnavedit_prog.c,v 4.14 1999-04-09 22:34:08 caress Exp $
+ *    $Id: mbnavedit_prog.c,v 4.15 1999-04-14 04:33:10 caress Exp $
  *
  *    Copyright (c) 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,9 @@
  * Date:	June 23,  1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.14  1999/04/09  22:34:08  caress
+ * Added time interval plot.
+ *
  * Revision 4.13  1999/02/04  23:54:13  caress
  * MB-System version 4.6beta7
  *
@@ -152,7 +155,7 @@ struct mbnavedit_plot_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbnavedit_prog.c,v 4.14 1999-04-09 22:34:08 caress Exp $";
+static char rcs_id[] = "$Id: mbnavedit_prog.c,v 4.15 1999-04-14 04:33:10 caress Exp $";
 static char program_name[] = "MBNAVEDIT";
 static char help_message[] =  "MBNAVEDIT is an interactive navigation editor for swath sonar data.\n\tIt can work with any data format supported by the MBIO library.\n";
 static char usage_message[] = "mbnavedit [-Byr/mo/da/hr/mn/sc -D  -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ooutfile -V -H]";
@@ -222,7 +225,7 @@ int	ndump_total = 0;
 int	first_read = MB_NO;
 
 /* plotting control variables */
-#define	NUMBER_PLOTS_MAX	7
+#define	NUMBER_PLOTS_MAX	8
 #define	DEFAULT_PLOT_WIDTH	837
 #define	DEFAULT_PLOT_HEIGHT	300
 #define	MBNAVEDIT_PICK_DISTANCE		50
@@ -233,7 +236,7 @@ double	plot_start_time;
 double	plot_end_time;
 int	nplot;
 int	mbnavedit_xgid;
-struct mbnavedit_plot_struct plot[7];
+struct mbnavedit_plot_struct plot[NUMBER_PLOTS_MAX];
 int	data_save;
 double	file_start_time_d;
 
@@ -282,6 +285,9 @@ int mbnavedit_init_globals()
 	plot_heading = MB_YES;
 	plot_heading_org = MB_YES;
 	plot_cmg = MB_YES;
+	plot_roll = MB_NO;
+	plot_pitch = MB_NO;
+	plot_heave = MB_NO;
 	strcpy(ifile,"\0");
 	strcpy(ofile,"\0");
 	ofile_defined = MB_NO;	
