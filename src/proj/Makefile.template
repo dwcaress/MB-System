@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  7/16/2002
-#	$Id: Makefile.template,v 5.3 2003-07-27 20:50:22 caress Exp $
+#	$Id: Makefile.template,v 5.4 2004-02-25 21:39:36 caress Exp $
 #
 #     Copyright (c) 2002, 2003 by
 #     David W. Caress (caress@mbari.org)
@@ -16,6 +16,9 @@
 # Date:		July 16, 2002
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.3  2003/07/27 20:50:22  caress
+# Release 5.0.0
+#
 # Revision 5.2  2002/10/02 23:55:08  caress
 # Release 5.0.beta24
 #
@@ -94,12 +97,14 @@ $(LIBDIR)/libproj.a: \
 		PJ_hammer.o \
 		PJ_hatano.o \
 		PJ_imw_p.o \
+		PJ_krovak.o \
 		PJ_labrd.o \
 		PJ_laea.o \
 		PJ_lagrng.o \
 		PJ_larr.o \
 		PJ_lask.o \
 		PJ_lcc.o \
+		PJ_lcca.o \
 		PJ_loxim.o \
 		PJ_lsat.o \
 		PJ_mbt_fps.o \
@@ -173,6 +178,9 @@ $(LIBDIR)/libproj.a: \
 		pj_errno.o \
 		pj_factors.o \
 		pj_fwd.o \
+		pj_geocent.o \
+		pj_gridinfo.o \
+		pj_gridlist.o \
 		pj_init.o \
 		pj_inv.o \
 		pj_latlong.o \
@@ -229,12 +237,14 @@ $(LIBDIR)/libproj.a: \
 		PJ_hammer.o \
 		PJ_hatano.o \
 		PJ_imw_p.o \
+		PJ_krovak.o \
 		PJ_labrd.o \
 		PJ_laea.o \
 		PJ_lagrng.o \
 		PJ_larr.o \
 		PJ_lask.o \
 		PJ_lcc.o \
+		PJ_lcca.o \
 		PJ_loxim.o \
 		PJ_lsat.o \
 		PJ_mbt_fps.o \
@@ -308,6 +318,9 @@ $(LIBDIR)/libproj.a: \
 		pj_errno.o \
 		pj_factors.o \
 		pj_fwd.o \
+		pj_geocent.o \
+		pj_gridinfo.o \
+		pj_gridlist.o \
 		pj_init.o \
 		pj_inv.o \
 		pj_latlong.o \
@@ -465,6 +478,10 @@ PJ_imw_p.o:	PJ_imw_p.c \
 		emess.h  geocent.h  geodesic.h \
 		nad_list.h  pj_list.h  proj_api.h  projects.h
 	$(CC) -c $(CFLAGS) -I. PJ_imw_p.c
+PJ_krovak.o:	PJ_krovak.c \
+		emess.h  geocent.h  geodesic.h \
+		nad_list.h  pj_list.h  proj_api.h  projects.h
+	$(CC) -c $(CFLAGS) -I. PJ_krovak.c
 PJ_labrd.o:	PJ_labrd.c \
 		emess.h  geocent.h  geodesic.h \
 		nad_list.h  pj_list.h  proj_api.h  projects.h
@@ -489,6 +506,10 @@ PJ_lcc.o:	PJ_lcc.c \
 		emess.h  geocent.h  geodesic.h \
 		nad_list.h  pj_list.h  proj_api.h  projects.h
 	$(CC) -c $(CFLAGS) -I. PJ_lcc.c
+PJ_lcca.o:	PJ_lcca.c \
+		emess.h  geocent.h  geodesic.h \
+		nad_list.h  pj_list.h  proj_api.h  projects.h
+	$(CC) -c $(CFLAGS) -I. PJ_lcca.c
 PJ_loxim.o:	PJ_loxim.c \
 		emess.h  geocent.h  geodesic.h \
 		nad_list.h  pj_list.h  proj_api.h  projects.h
@@ -797,6 +818,18 @@ pj_fwd.o:	pj_fwd.c \
 		emess.h  geocent.h  geodesic.h \
 		nad_list.h  pj_list.h  proj_api.h  projects.h
 	$(CC) -c $(CFLAGS) -I. pj_fwd.c
+pj_geocent.o:	pj_geocent.c \
+		emess.h  geocent.h  geodesic.h \
+		nad_list.h  pj_list.h  proj_api.h  projects.h
+	$(CC) -c $(CFLAGS) -I. pj_geocent.c
+pj_gridinfo.o:	pj_gridinfo.c \
+		emess.h  geocent.h  geodesic.h \
+		nad_list.h  pj_list.h  proj_api.h  projects.h
+	$(CC) -c $(CFLAGS) -I. pj_gridinfo.c
+pj_gridlist.o:	pj_gridlist.c \
+		emess.h  geocent.h  geodesic.h \
+		nad_list.h  pj_list.h  proj_api.h  projects.h
+	$(CC) -c $(CFLAGS) -I. pj_gridlist.c
 pj_init.o:	pj_init.c \
 		emess.h  geocent.h  geodesic.h \
 		nad_list.h  pj_list.h  proj_api.h  projects.h

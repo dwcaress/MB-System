@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: pj_latlong.c,v 5.1 2002-09-19 00:33:55 caress Exp $
+ * $Id: pj_latlong.c,v 5.2 2004-02-25 21:39:39 caress Exp $
  *
  * Project:  PROJ.4
  * Purpose:  Stub projection implementation for lat/long coordinates. We 

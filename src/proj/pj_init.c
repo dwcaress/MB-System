@@ -1,45 +1,98 @@
-/* projection initialization and closure */
-#ifndef lint
-static const char SCCSID[]="@(#)pj_init.c	4.13   95/09/05 GIE REL";
-#endif
+/******************************************************************************
+ * $Id: pj_init.c,v 5.1 2004-02-25 21:39:39 caress Exp $
+ *
+ * Project:  PROJ.4
+ * Purpose:  Initialize projection object from string definition.  Includes
+ *           pj_init(), pj_init_plus() and pj_free() function.
+ * Author:   Gerald Evenden, Frank Warmerdam <warmerdam@pobox.com>
+ *
+ ******************************************************************************
+ * Copyright (c) 1995, Gerald Evenden
+ * Copyright (c) 2002, Frank Warmerdam <warmerdam@pobox.com>
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+ * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+ * DEALINGS IN THE SOFTWARE.
+ ******************************************************************************
+ *
+ * $Log: not supported by cvs2svn $
+ * Revision 1.10  2003/03/16 16:38:24  warmerda
+ * Modified get_opt() to terminate reading the definition when a new
+ * definition (a word starting with '<') is encountered, in addition to when
+ * the definition terminator '<>' is encountered, so that unterminated
+ * definitions like those in the distributed esri file will work properly.
+ * http://bugzilla.remotesensing.org/show_bug.cgi?id=302
+ *
+ * Revision 1.9  2002/12/14 20:15:02  warmerda
+ * added geocentric support, updated headers
+ *
+ */
+
 #define PJ_LIB__
 #include <projects.h>
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
-	static paralist
-*start;
+
+PJ_CVSID("$Id: pj_init.c,v 5.1 2004-02-25 21:39:39 caress Exp $");
+
+static paralist *start;
 extern FILE *pj_open_lib(char *, char *);
 
-	static paralist *
+/************************************************************************/
+/*                              get_opt()                               */
+/************************************************************************/
+static paralist *
 get_opt(FILE *fid, char *name, paralist *next) {
-	char sword[52], *word = sword+1;
-	int first = 1, len, c;
+    char sword[52], *word = sword+1;
+    int first = 1, len, c;
 
-	len = strlen(name);
-	*sword = 't';
-	while (fscanf(fid, "%50s", word) == 1)
-		if (*word == '#') /* skip comments */
-			while((c = fgetc(fid)) != EOF && c != '\n') ;
-		else if (*word == '<') { /* control name */
-			if (first && !strncmp(name, word + 1, len)
-				&& word[len + 1] == '>')
-				first = 0;
-			else if (!first && word[1] == '>')
-				break;
-		} else if (!first && !pj_param(start, sword).i) {
-                        /* don't default ellipse if datum is set */
-                        if( strncmp(word,"ellps=",6) != 0 
-                            || !pj_param(start, "tdatum").i )
-                        {
-                            next = next->next = pj_mkparam(word);
-                        }
-                }
-	if (errno == 25)
-		errno = 0;
-	return next;
+    len = strlen(name);
+    *sword = 't';
+    while (fscanf(fid, "%50s", word) == 1) {
+        if (*word == '#') /* skip comments */
+            while((c = fgetc(fid)) != EOF && c != '\n') ;
+        else if (*word == '<') { /* control name */
+            if (first && !strncmp(name, word + 1, len)
+                && word[len + 1] == '>')
+                first = 0;
+            else if (!first && *word == '<') {
+                while((c = fgetc(fid)) != EOF && c != '\n') ;
+                break;
+            }
+        } else if (!first && !pj_param(start, sword).i) {
+            /* don't default ellipse if datum is set */
+            if( strncmp(word,"ellps=",6) != 0 
+                || !pj_param(start, "tdatum").i )
+            {
+                next = next->next = pj_mkparam(word);
+            }
+        }
+    }
+
+    if (errno == 25)
+        errno = 0;
+    return next;
 }
-	static paralist *
+
+/************************************************************************/
+/*                            get_defaults()                            */
+/************************************************************************/
+static paralist *
 get_defaults(paralist *next, char *name) {
 	FILE *fid;
 
@@ -53,7 +106,11 @@ get_defaults(paralist *next, char *name) {
 		errno = 0; /* don't care if can't open file */
 	return next;
 }
-	static paralist *
+
+/************************************************************************/
+/*                              get_init()                              */
+/************************************************************************/
+static paralist *
 get_init(paralist *next, char *name) {
 	char fname[MAX_PATH_FILENAME+ID_TAG_MAX+3], *opt;
 	FILE *fid;
@@ -91,7 +148,7 @@ pj_init_plus( const char *definition )
     PJ	        *result;
     
     /* make a copy that we can manipulate */
-    defn_copy = pj_malloc( strlen(definition)+1 );
+    defn_copy = (char *) pj_malloc( strlen(definition)+1 );
     strcpy( defn_copy, definition );
 
     /* split into arguments based on '+' and trim white space */
@@ -141,7 +198,7 @@ pj_init_plus( const char *definition )
 PJ *
 pj_init(int argc, char **argv) {
 	char *s, *name;
-	void *(*proj)(PJ *);
+	PJ *(*proj)(PJ *);
 	paralist *curr;
 	int i;
 	PJ *PIN = 0;
@@ -175,12 +232,13 @@ pj_init(int argc, char **argv) {
 	/* set defaults, unless inhibited */
 	if (!pj_param(start, "bno_defs").i)
 		curr = get_defaults(curr, name);
-	proj = pj_list[i].proj;
+	proj = (PJ *(*)(PJ *)) pj_list[i].proj;
 
 	/* allocate projection structure */
 	if (!(PIN = (*proj)(0))) goto bum_call;
 	PIN->params = start;
         PIN->is_latlong = 0;
+        PIN->is_geocent = 0;
 
         /* set datum parameters */
         if (pj_datum_set(start, PIN)) goto bum_call;
@@ -247,6 +305,32 @@ pj_init(int argc, char **argv) {
 		PIN->fr_meter = 1. / PIN->to_meter;
 	} else
 		PIN->to_meter = PIN->fr_meter = 1.;
+
+	/* prime meridian */
+	s = 0;
+	if (name = pj_param(start, "spm").s) { 
+            const char *value = NULL;
+            char *next_str = NULL;
+
+            for (i = 0; pj_prime_meridians[i].id != NULL; ++i )
+            {
+                if( strcmp(name,pj_prime_meridians[i].id) == 0 )
+                {
+                    value = pj_prime_meridians[i].defn;
+                    break;
+                }
+            }
+            
+            if( value == NULL 
+                && dmstor(name,&next_str) != 0.0 
+                && *next_str == '\0' )
+                value = name;
+
+            if (!value) { pj_errno = -7; goto bum_call; }
+            PIN->from_greenwich = dmstor(value,NULL);
+	}
+        else
+            PIN->from_greenwich = 0.0;
 
 	/* projection specific initialization */
 	if (!(PIN = (*proj)(PIN)) || errno || pj_errno) {
