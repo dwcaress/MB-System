@@ -1,4 +1,4 @@
-.TH mbmosaic l "3 April 2002" "MB-System 5.0" "MB-System 5.0"
+.TH mbmosaic l "1 August 2002" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbmosaic\fP - Mosaic amplitude or sidescan data 
 from swath mapping sonar data files.
@@ -10,7 +10,8 @@ Version 5.0
 \fBmbmosaic\fP \fB-I\fIfilelist\fP \fB-O\fIroot\fP 
 \fB-R\fIwest/east/south/north\fP [\fB-A\fIdatatype\fP 
 \fB-B\fIborder\fP -C\fIclip\fP \fB-D\fIxdim/ydim\fP 
-\fB-E\fIdx/dy/units[!]\fP \fB-F\fIpriority_range\fP \fB-G\fIgridkind\fP 
+\fB-E\fIdx/dy/units[!]\fP \fB-F\fIpriority_range\fP 
+\fB-G\fIgridkind\fP  \fB-J\fIprojection/fP[\fI/zone/ellipsoid\fP]
 \fB-H -L\fIlonflip\fP \fB-M -N -P\fIpings\fP
 \fB-S\fIspeed\fP \fB-T\fItension\fP \fB-U\fIazimuth/factor\fP 
 \fB-V\fP -W\fIscale\fP \fB-X\fIextend\fP 
@@ -44,6 +45,9 @@ preferred look azimuth (\fB-U\fP), the
 maximum distance from data points that the spline 
 interpolation is used (\fB-C\fP), the format of the output 
 files, and other parameters.
+The \fB-J\fP option can be used to specify mosaics in UTM eastings
+and northings (meters) rather than in geographic coordinates
+(longitude and latitude degrees).
 
 Before opening an input swath data file, \fBmbmosaic\fP checks for
 an ascii file in the same directory having the same name except
@@ -175,7 +179,9 @@ Dale N. Chayes (dale@ldeo.columbia.edu)
 .B \-A
 \fIdatatype\fP
 .br
-Sets the type of data to be read and mosaiced.  
+Sets the type of data to be read and moThe \fB-J\fP option can be used to specify grids in UTM eastings
+and northings (meters) rather than in geographic coordinates
+(longitude and latitude degrees).saiced.  
 If \fIdatatype\fP = 3,
 amplitude data will be gridded.  If \fIdatatype\fP = 4,
 sidescan data will be gridded.  
@@ -280,6 +286,28 @@ format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page.
 Default: \fIdatalist\fP = datalist.mb-1
+.TP
+.B \-J
+\fIprojection/fP[\fI/zone/ellipsoid\fP]
+This option causes \fBmbmosaic\fP to generate a mosaic in UTM projected
+coordinates (eastings and northings in meters) rather than in
+the default geographic coordinates (longitude and latitude in degrees).
+If \fB-J\fP\fIu\fP is given, then the longitude and latitude bounds
+given with the \fB-fR\fP option are translated to UTM eastings and northings.
+In this case, the UTM zone parameter \fIzone\fP is optional, and by default
+the zone will be inferred from the midpoint of the specified longitude
+bounds.
+If \fB-J\fP\fIU\fP is given, then the bounds provided with \fB-R\fP must
+already be in eastings and northings. In this case the UTM zone parameter
+\fIzone\fP must be provided so that the specified bounds can be related
+to the data's geographic coordinates. The default ellipsoid is WGS84.
+UTM grids and mosaics
+produced by \fBMB-System\fP programs contain identifiers that are recognized
+by the plotting macros \fBmbm_grdplot\fP, \fBmbm_grd3dplot\fP, and \fBmbm_grdtiff\fP.
+These plotting macros automatically use a linear map projection whenever they
+encounter grids and mosaics that are already in a projected coordinate system.
+The underlying projection functions derive from the PROJ4 library, originally
+written by Gerald Evenden of the U.S. Geological Survey. 
 .TP
 .B \-L
 \fIlonflip\fP
@@ -497,7 +525,7 @@ the mosaic to be filled in through spine interpolation .
 The output looks like:
  
  Program mbmosaic
- Version $Id: mbmosaic.l,v 5.2 2002-04-06 02:53:45 caress Exp $
+ Version $Id: mbmosaic.l,v 5.3 2002-08-02 01:00:25 caress Exp $
  MB-system Version 4.5
 
  MBMOSAIC Parameters:
