@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_write_init.c	1/25/93
- *    $Id: mb_write_init.c,v 4.5 1995-03-06 19:38:54 caress Exp $
+ *    $Id: mb_write_init.c,v 4.6 1995-03-22 19:14:25 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -18,6 +18,9 @@
  * Date:	January 25, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.5  1995/03/06  19:38:54  caress
+ * Changed include strings.h to string.h for POSIX compliance.
+ *
  * Revision 4.4  1995/01/25  17:13:46  caress
  * Added ifdef for SOLARIS.
  *
@@ -74,6 +77,9 @@
 #ifdef SUN
 #include <rpc/xdr.h>
 #endif
+#ifdef HPUX
+#include <rpc/rpc.h>
+#endif
 #ifdef OTHER
 #include <rpc/xdr.h>
 #endif
@@ -95,7 +101,7 @@ int	*beams_amp;
 int	*pixels_ss;
 int	*error;
 {
-	static char rcs_id[]="$Id: mb_write_init.c,v 4.5 1995-03-06 19:38:54 caress Exp $";
+	static char rcs_id[]="$Id: mb_write_init.c,v 4.6 1995-03-22 19:14:25 caress Exp $";
 	char	*function_name = "mb_write_init";
 	int	status = MB_SUCCESS;
 	int	format_num;

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_defaults.c	10/7/94
- *    $Id: mb_defaults.c,v 4.3 1995-03-06 19:38:54 caress Exp $
+ *    $Id: mb_defaults.c,v 4.4 1995-03-22 19:14:25 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Date:	January 23, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1995/03/06  19:38:54  caress
+ * Changed include strings.h to string.h for POSIX compliance.
+ *
  * Revision 4.2  1995/01/25  18:17:24  caress
  * Let the operating system define determine the
  * system default postscript viewer.
@@ -73,7 +76,7 @@ int *etime_i;
 double *speedmin;
 double *timegap;
 {
-  static char rcs_id[]="$Id: mb_defaults.c,v 4.3 1995-03-06 19:38:54 caress Exp $";
+  static char rcs_id[]="$Id: mb_defaults.c,v 4.4 1995-03-22 19:14:25 caress Exp $";
 	char	*function_name = "mb_defaults";
 	int	status;
 	FILE	*fp;
@@ -196,7 +199,7 @@ int verbose;
 char *psdisplay;
 char *mbproject;
 {
-  static char rcs_id[]="$Id: mb_defaults.c,v 4.3 1995-03-06 19:38:54 caress Exp $";
+  static char rcs_id[]="$Id: mb_defaults.c,v 4.4 1995-03-22 19:14:25 caress Exp $";
 	char	*function_name = "mbenv";
 	int	status;
 	FILE	*fp;
@@ -227,6 +230,9 @@ char *mbproject;
 #endif
 #ifdef SUN
 	strcpy(psdisplay, "pageview");
+#endif
+#ifdef HPUX
+	strcpy(psdisplay, "ghostview");
 #endif
 #ifdef OTHER
 	strcpy(psdisplay, "ghostview");
