@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em300mba.c	10/16/98
- *	$Id: mbr_em300mba.c,v 4.6 2000-07-20 20:24:59 caress Exp $
+ *	$Id: mbr_em300mba.c,v 4.7 2000-09-19 23:13:26 caress Exp $
  *
  *    Copyright (c) 1998 by 
  *    D. W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	October 16,  1998
  * $Log: not supported by cvs2svn $
+ * Revision 4.6  2000/07/20  20:24:59  caress
+ * First cut at supporting both EM120 and EM1002.
+ *
  * Revision 4.5  2000/07/17  23:36:24  caress
  * Added support for EM120.
  *
@@ -71,7 +74,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_em300mba.c,v 4.6 2000-07-20 20:24:59 caress Exp $";
+	static char res_id[]="$Id: mbr_em300mba.c,v 4.7 2000-09-19 23:13:26 caress Exp $";
 	char	*function_name = "mbr_alm_em300mba";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -5837,9 +5840,9 @@ int	*error;
 	/* get size of record */
 	write_size = 25 + buff_len;
 	int_ptr = (int *) &line[0];
-	*int_ptr = write_size;
+	*int_ptr = write_size - 4;
 #ifdef BYTESWAPPED
-	*int_ptr = (short) mb_swap_int(*int_ptr);
+	*int_ptr = (int) mb_swap_int(*int_ptr);
 #endif
 		
 	/* compute checksum */
