@@ -1,4 +1,4 @@
-.TH mbtide l "25 March 1997" "MB-System 4.5" "MB-System 4.5"
+.TH mbtide l "17 September 1997" "MB-System 4.5" "MB-System 4.5"
 .SH NAME
 \fBmbtide\fP - MBTIDE corrects swath sonar bathymetry data for tides.
 
@@ -31,7 +31,9 @@ Palisades, NY 10964
 
 .SH OPTIONS
 .TP
-.B \fB-F\fIformat\fP
+.B \-F
+\fIformat\fP
+.br
 Sets the format for the input and output swath sonar data using 
 \fBMBIO\fP integer format identifiers. 
 This program uses the \fBMBIO\fP library and will read or write any swath sonar
@@ -40,16 +42,20 @@ currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page.
 Default: \fIformat\fP = 11.
 .TP
-.B \fB-H\fP
+.B \-H
 This "help" flag causes the program to print out a description
 of its operation and then exit immediately.
 .TP
-.B \fB-I\fIinfile\fP
+.B \-I
+\fIinfile\fP
+.br
 Data file from which the input data will be read. If
 no input file is specified, the input will be read
 from stdin. Default: \fIinfile\fP = stdin.
 .TP
-.B \fB-M\fItideformat\fP
+.B \-M
+\fItideformat\fP
+.br
 Defines the format of the tide data to be read.  Currently,
 four formats are allowed, all consisting of ascii records:
 
@@ -107,15 +113,19 @@ Some representative lines are:
 
 Default: \fItideformat\fP = 2.
 .TP
-.B \fB-O\fIoutfile\fP
+.B \-O
+\fIoutfile\fP
+.br
 Data file to which the output data will be written. If
 no output file is specified, the output will be written to
 stdout. Default: \fIoutfile\fP = stdout.
 .TP
-.B \fB-N\fItidefile\fP
+.B \-N
+\fItidefile\fP
+.br
 Data file from which the tide data will be read.
 .TP
-.B \fB-V\fP
+.B \-V
 Normally, \fBmbtide\fP works "silently" without outputting
 anything to the stderr stream.  If the
 \fB-V\fP flag is given, then \fBmbtide\fP works in a "verbose" mode and

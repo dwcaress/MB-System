@@ -1,4 +1,4 @@
-.TH MBPS l "25 March 1997" "MB-System 4.5" "MB-System 4.5"
+.TH MBPS l "17 September 1997" "MB-System 4.5" "MB-System 4.5"
 .SH NAME
 \fBmbps\fP - Generates a PostScript perspective plot of a piece of swath sonar data.
 
@@ -33,9 +33,9 @@ information identifying the piece of data being plotted.
 Now change some of the options, and things should get clearer.
 
 .SH AUTHORSHIP
-Russ T. Alexander (alex@rapa.geol.ucsb.edu)
+Russ T. Alexander
 .br
-University of California at Santa Barbara
+Formerly at University of California at Santa Barbara
 .br
 Santa Barbara, Ca 93106
 .br
@@ -47,26 +47,36 @@ Palisades, NY 10964
 
 .SH OPTIONS
 .TP
-.B \fB-A\fIalpha\fP
+.B \-A
+\fIalpha\fP
+.br
 Sets the angle alpha (degrees) between the y-axis (shiptrack direction) and
 the x-axis (across-track). Default = \fIalpha = 70.
 .TP
-.B \fB-B\fIyr/mo/da/hr/mn/sc\fP
+.B \-B
+\fIyr/mo/da/hr/mn/sc\fP
+.br
 Sets the starting time for data allowed in the input data; pings
 with times before the starting time will be ignored. 
 Default: \fIyr/mo/da/hr/mn/sc\fP = 1962/2/21/10/30/0.
 .TP
-.B \fB-D\fIview_direction\fP
+.B \-D
+\fIview_direction\fP
+.br
 Sets the viewing direction; \fIviewdir\fP is a single character, either
 P/p (view from the port side), S/s (starboard), or B/b (back). Default
 \fIview_direction = S.
 .TP
-.B \fB-E\fIyr/mo/da/hr/mn/sc\fP
+.B \-E
+\fIyr/mo/da/hr/mn/sc\fP
+.br
 Sets the ending time for data allowed in the input data; pings
 with times after the ending time will be ignored. 
 Default: \fIyr/mo/da/hr/mn/sc\fP = 2062/2/21/10/30/0.
 .TP
-.B \fB-F\fIformat\fP
+.B \-F
+\fIformat\fP
+.br
 Sets the format for the input swath sonar data using 
 \fBMBIO\fP integer format identifiers. 
 This program uses the \fBMBIO\fP library and will read any swath sonar
@@ -74,46 +84,64 @@ format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page. Default: \fIformat\fP = 11.
 .TP
-.B \fB-G\fIgap\fP
+.B \-G
+\fIgap\fP
+.br
 Sets the manner in which data gaps are displayed.  If \fIgap \fP= 1 then 
 gaps are filled with black.  If \fIgap \fP= 0 then gaps are not filled and appear the same as the background color of the paper. 
 Default: \fIgap \fP= 1.
 .TP
-.B \fB-H\fP
+.B \-H
 This "help" flag cause the program to print out a description
 of its operation and then exit immediately.
 .TP
-.B \fB-I\fIfilename\fP
+.B \-I
+\fIfilename\fP
+.br
 File from which the input data will be read. If
 no input file is specified, the input will be read
 from stdin. Default: \fIfilename\fP = stdin.
 .TP
-.B \fB-K\fIeta\fP
+.B \-K
+\fIeta\fP
+.br
 Sets the angle eta (degrees) that is the elevation of the observer over
 the plane defined by the mean depth. Default \fIeta = 45.
 .TP
-.B \fB-S\fIspeedmin\fP
+.B \-S
+\fIspeedmin\fP
+.br
 Sets the minimum speed in km/hr (5.5 kts ~ 10 km/hr) allowed in 
 the input data; pings associated with a smaller ship speed will not be used. Default: \fIspeed\fP = 0.
 .TP
-.B \fB-T \fI"title"
+.B \-T 
+\fI"title"\fP
+.br
 Sets the title printed at the top of the plot.  The title should be enclosed within double quotes.  Default: no title.
 .TP
-.B \fB-V\fP
+.B \-V
 If the \fB-V\fP flag is given, then \fBmbps\fP works in a "verbose" mode and
 outputs the program version being used and all read error status messages.
 .TP
-.B \fB-W\fImeters_per_inch\fP
+.B \-W
+\fImeters_per_inch\fP
+.br
 Sets the horizontal plotting scale.  Default: automatically calculates
 a scale such that the plot fits on a page.
 .TP
-.B \fB-X\fIve\fP
+.B \-X
+\fIve\fP
+.br
 Sets the vertical exaggeration. Default \fIve\fP = 5.
 .TP
-.B \fB-Y\fIdisplay_stats\fP
+.B \-Y
+\fIdisplay_stats\fP
+.br
 Sets whether the final plot includes info such as mean latitude, mean longitude, mean heading, \fIalpha\fP, \fIeta\fP, \fIve\fP, scale, track length, begin time, and end time. if \fIdisplay_stats \fP= 1 then the above info is plotted; if \fIdispaly_stats \fP= 0 then it is not plotted.  Default: \fIdisplay_stats  \fP= 1.
 .TP
-.B \fB-Z\fIdisplay_scales\fP
+.B \-Z
+\fIdisplay_scales\fP
+.br
 Sets whether the final plot includes a horizontal scale, a vertical scale, an arrow pointing in the ship heading direction, and coordinate axes.  if \fIdisplay_scales \fP= 1 then the above info is plotted; if \fIdispaly_scales \fP= 0 then it is not plotted.  Default: \fIdisplay_scales  \fP= 1.
 
 .SH EXAMPLES

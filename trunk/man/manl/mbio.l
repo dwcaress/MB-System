@@ -1,4 +1,4 @@
-.TH mbio l "25 March 1997" "MB-System 4.5" "MB-System 4.5"
+.TH mbio l "16 September 1997" "MB-System 4.5" "MB-System 4.5"
 .SH NAME
 \fBmbio\fP - Format independent input/output library for swath mapping sonar data.
 
@@ -245,25 +245,28 @@ The following swath mapping sonar data formats are supported in this version of
     MBIO Data Format ID:  41
     Format name:          MBF_SB2100RW
     Informal Description: SeaBeam 2100 series vender format
-    Attributes:           SeaBeam 2100, bathymetry, amplitude 
-                          and sidescan, 151 beams and 2000 pixels, ascii 
-                          with binary sidescan, SeaBeam Instruments.
+    Attributes:           SeaBeam 2100, bathymetry, 
+                          amplitude and sidescan, 151 
+                          beams and 2000 pixels, ascii 
+                          with binary sidescan, SeaBeam 
+                          Instruments.
 
     MBIO Data Format ID:  42
     Format name:          MBF_SB2100B1
     Informal Description: SeaBeam 2100 series vender format
-    Attributes:           SeaBeam 2100, bathymetry, amplitude 
-                          and sidescan, 151 beams bathymetry,
-                          2000 pixels sidescan, binary,
-                          SeaBeam Instruments and L-DEO.
+    Attributes:           SeaBeam 2100, bathymetry, 
+                          amplitude and sidescan, 151 
+                          beams bathymetry, 2000 pixels 
+                          sidescan, binary, SeaBeam 
+                          Instruments and L-DEO.
 
     MBIO Data Format ID:  43
     Format name:          MBF_SB2100B2
     Informal Description: SeaBeam 2100 series vender format
-    Attributes:           SeaBeam 2100, bathymetry and amplitude,  
-                          151 beams bathymetry,
-                          binary,
-                          SeaBeam Instruments and L-DEO.
+    Attributes:           SeaBeam 2100, bathymetry and 
+                          amplitude, 151 beams bathymetry,
+                          binary, SeaBeam Instruments 
+                          and L-DEO.
 
     MBIO Data Format ID:  51
     Format name:          MBF_EM1000RW
@@ -459,7 +462,7 @@ using \fBMBIO\fP functions should adopt the following verbosity conventions:
 .RE
 .IP
 int \fBmb_read_init\fP(\fIverbose\fP, \fIfile\fP, 
-\fIformat\fP, \fIpings, \fIlonflip, 
+\fIformat\fP, \fIpings\fP, \fIlonflip\fP, 
 \fIbounds\fP, \fIbtime_i\fP, \fIetime_i\fP, \fIspeedmin\fP, 
 \fItimegap\fP,
 \fImbio_ptr\fP, \fIbtime_d\fP, \fIetime_d\fP, 

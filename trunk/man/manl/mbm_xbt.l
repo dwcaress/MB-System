@@ -1,4 +1,4 @@
-.TH mbm_xbt l "25 March 1997" "MB-System 4.5" "MB-System 4.5"
+.TH mbm_xbt l "16 September 1997" "MB-System 4.5" "MB-System 4.5"
 .SH NAME
 \fBmbm_xbt\fP - Calculate sound velocity from XBT data.
 
@@ -28,34 +28,37 @@ Suzanne H. O'Hara (sohara@lamont.ldeo.columbia.edu)
 .br
 Palisades, NY 10964
 .br
-David Brock (brockda.asa@ass.org)
-.br
- Antarctic Support Associates
-.br
-Denver, CO 
 
 .SH OPTIONS
 .TP
-.B \fB-F\fIformat\fP
+.B \-F
+\fIformat\fP
+.br
 Allows the user to select the type of XBT data. Currently supported
-formats are: 1 = Sparton XBT, 2 = MK12 XBT. Default: \fIformat\fp = 1.
+formats are: 1 = Sparton XBT, 2 = MK12 XBT. Default: \fIformat\fP = 1.
 .TP
-.B \fB-H\fP
+.B \-H
 This "help" flag cause the program to print out a description
 of its operation and then exit immediately.
 .TP
-.B \fB-I\fIfile\fP
+.B \-I
+\fIfile\fP
+.br
 Data file from which the input data will be read.
 .TP
-.B \fB-L\fIlatitude\fP
+.B \-L
+\fIlatitude\fP
+.br
 Latitude of the XBT cast.
 .TP
-.B \fB-S\fIsalinity\fP
+.B \-S
+\fIsalinity\fP
+.br
 Sets the salinity used to calculate velocity from temperature
 and depth. The default value of 35 ppt may be significantly
 in error in some areas.  Default: \fIsalinity\fP = 35.
 .TP
-.B \fB-V\fP
+.B \-V
 Causes \fBmbm_xbt\fP to operate in "verbose" mode so that it outputs
 more information than usual.
 

@@ -1,4 +1,4 @@
-.TH mbbath l "25 March 1997" "MB-System 4.5" "MB-System 4.5"
+.TH mbbath l "17 September 1997" "MB-System 4.5" "MB-System 4.5"
 .SH NAME
 \fBmbbath\fP - Generates bathymetry from travel times in swath sonar data.
 
@@ -52,13 +52,17 @@ Palisades, NY 10964
 
 .SH OPTIONS
 .TP
-.B \fB-A\fIangle\fP
+.B \-A
+\fIangle\fP
+.br
 Sets the angle interval of adjacent beams.  The default value
 for the appropriate swath sonar system is internal to MB-System,
 but could be different on different installations of the
 same sonar.
 .TP
-.B \fB-B\fIroll_bias\fP
+.B \-B
+\fIroll_bias\fP
+.br
 Sets the roll bias (in degrees) used in calculating 
 beam locations.  The roll bias is
 added to the acrosstrack component of the beam takeoff angles prior to
@@ -66,7 +70,9 @@ the raytracing.  Ship roll is measured with starboard negative and
 port positive.
 Default: \fIroll_bias\fP = 0.0
 .TP
-.B \fB-D\fIdraught\fP
+.B \-D
+\fIdraught\fP
+.br
 Sets the \fIdraught\fP in meters of the ship used to collect the swath sonar data.
 This value will be added to the depth values determined by raytracing.
 Note that if the data stream includes a \fIdraught\fP value, it will
@@ -75,27 +81,35 @@ Thus, this option should only be used when the \fIdraught\fP value is
 not included in the data stream or is in error.
 Default: \fIdraught\fP = 0.0.
 .TP
-.B \fB-F\fIformat\fP
+.B \-F
+\fIformat\fP
+.br
 Sets the format for the input and output swath sonar data using 
 \fBMBIO\fP integer format identifiers. 
 This program only works with data formats which store travel time
 data for each beam.
 .TP
-.B \fB-H\fP
+.B \-H
 This "help" flag causes the program to print out a description
 of its operation and then exit immediately.
 .TP
-.B \fB-I\fIinfile\fP
+.B \-I
+\fIinfile\fP
+.br
 Data file from which the input data will be read. If
 no input file is specified, the input will be read
 from stdin. Default: \fIinfile\fP = stdin.
 .TP
-.B \fB-O\fIoutfile\fP
+.B \-O
+\fIoutfile\fP
+.br
 Data file to which the output data will be written. If
 no output file is specified, the output will be written to
 stdout. Default: \fIoutfile\fP = stdout.
 .TP
-.B \fB-P\fIpitch_bias\fP
+.B \-P
+\fIpitch_bias\fP
+.br
 Sets the pitch bias (in degrees) used in calculating beam 
 locations.  The pitch bias is
 added to the fore-aft component of the beam takeoff angles prior to
@@ -103,7 +117,9 @@ the raytracing.  Ship pitch is measured with aft (bow down) negative and
 fore (bow up) positive.
 Default: \fIpitch_bias\fP = 0.0
 .TP
-.B \fB-R\fIrollfile\fP
+.B \-R
+\fIrollfile\fP
+.br
 Data file from which roll corrections as a function of time are 
 read. The roll corrections should be in the form
 .br
@@ -113,7 +129,9 @@ where the time is in seconds since 1/1/71 00:00:0 (Unix time) and the
 roll correction is in degrees with starboard negative and
 port positive.
 .TP
-.B \fB-S\fIstaticfile\fP
+.B \-S
+\fIstaticfile\fP
+.br
 Data file from which static depth corrections as a function of
 beam number are read.  The depth corrections should be in the form
 .br
@@ -122,7 +140,7 @@ beam number are read.  The depth corrections should be in the form
 where the beam number starts at 0 and the correction value should
 be in meters.
 .TP
-.B \fB-U\fP
+.B \-U
 This flag causes the program to adjust the depth values to correspond
 to a vertical mean water velocity of 1500 m/s, effectively giving
 depth values in the traditional "uncorrected meters" units.  Crosstrack
@@ -132,13 +150,15 @@ values have units of "corrected meters" meters because they are
 accurate with respect to a presumably realistic SVP.
 Default: meters calculated in corrected meters.
 .TP
-.B \fB-V\fP
+.B \-V
 Normally, \fBmbbath\fP works "silently" without outputting
 anything to the stderr stream.  If the
 \fB-V\fP flag is given, then \fBmbbath\fP works in a "verbose" mode and
 outputs the program version being used and all error status messages.
 .TP
-.B \fB-W\fIvelfile\fP
+.B \-W
+\fIvelfile\fP
+.br
 Data file from which the water SVP will be read. The 
 SVP must be specified as a set of
 depth-velocity pairs which can be read in free format.  An example

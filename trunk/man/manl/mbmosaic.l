@@ -1,4 +1,4 @@
-.TH mbmosaic l "12 September 1997" "MB-System 4.5" "MB-System 4.5"
+.TH mbmosaic l "17 September 1997" "MB-System 4.5" "MB-System 4.5"
 .SH NAME
 \fBmbmosaic\fP - Mosaic amplitude or sidescan data 
 from swath mapping sonar data files.
@@ -172,31 +172,41 @@ Palisades, NY 10964
 
 .SH OPTIONS
 .TP
-.B \fB-A\fIdatatype\fP
+.B \-A
+\fIdatatype\fP
+.br
 Sets the type of data to be read and mosaiced.  
 If \fIdatatype\fP = 3,
 amplitude data will be gridded.  If \fIdatatype\fP = 4,
 sidescan data will be gridded.  
 Default: \fIdatatype\fP = 4 (sidescan).
 .TP
-.B \fB-B\fIborder\fP
+.B \-B
+\fIborder\fP
+.br
 Sets the border of a smoothly interpolated grid to the value \fIborder\fP
 wherever no data exist, provided \fIborder\fP > 0.0.
 Default: \fIborder\fP = 0.0
 .TP
-.B \fB-C\fIclip\fP
+.B \-C
+\fIclip\fP
+.br
 Sets the clipping dimension for the spline interpolation. If \fIclip\fP=0
 no spline interpolation will be done.  If \fIclip\fP>0 then the spline
 interpolation will fill data gaps to a distance of \fIclip\fP times
 the grid spacing.
 Default: \fIclip\fP = 0.
 .TP
-.B \fB-D\fIxdim/ydim\fP
+.B \-D
+\fIxdim/ydim\fP
+.br
 Sets the dimensions of the output grid.  This option is superceded
 if the user specifies the grid spacing with the \fB-E\fP option.
 Default:  \fIxdim\fP = \fIydim\fP = 101.
 .TP
-.B \fB-E\fIdx/dy/units\fP
+.B \-E
+\fIdx/dy/units\fP
+.br
 Sets the grid cell spacing to \fIdx\fP in longitude and \fIdy\fP
 in latitude. If \fIunits\fP is not specified, the \fIdx\fP 
 and \fIdy\fP values are assumed to be in meters. Valid values
@@ -209,7 +219,9 @@ grid cell spacings. However, slight adjustments to the
 grid cell spacing values are usually required to keep
 the grid bounds as specified.
 .TP
-.B \fB-F\fIpriority_range\fP
+.B \-F
+\fIpriority_range\fP
+.br
 Turns on Gaussian weighted mean mosaicing. The 
 \fIpriority_range\fP value determines which data points are
 used in the mosaicing. The minimum priority threshold for
@@ -220,7 +232,9 @@ are used in the Gaussian weighted mean mosaicing.
 The default is to simply set each bin's value equal to the
 value of the highest priority sample in that bin.
 .TP
-.B \fB-G\fIgridkind\fP
+.B \-G
+\fIgridkind\fP
+.br
 Sets the format of the output grid file.
  	\fIgridkind\fP = 1:	Ascii table
  	\fIgridkind\fP = 2:	binary file (GMT version 1 GRD file)
@@ -232,11 +246,13 @@ fill maps of the gridded data. These shellscripts are
 generated using the \fBmbm_grdplot\fP macro.
 Default: \fIgridkind\fP = 3.
 .TP
-.B \fB-H\fP
+.B \-H
 This "help" flag cause the program to print out a description
 of its operation and then exit immediately.
 .TP
-.B \fB-I\fIdatalist\fP
+.B \-I
+\fIdatalist\fP
+.br
 Sets the filename of the file containing a list of the input swath sonar
 data files and their formats.  In the \fIdatalist\fP file, each
 data file should be followed by a data format identifier, e.g.:
@@ -249,7 +265,9 @@ currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page.
 Default: \fIdatalist\fP = data.list
 .TP
-.B \fB-L\fIlonflip\fP
+.B \-L
+\fIlonflip\fP
+.br
 Sets the range of the longitude values returned.
 If \fIlonflip\fP=-1 then the longitude values will be in
 the range from -360 to 0 degrees. If \fIlonflip\fP=0 
@@ -259,19 +277,21 @@ then the longitude values will be in
 the range from 0 to 360 degrees.
 Default: \fIlonflip\fP = 0.
 .TP
-.B \fB-M\fP
+.B \-M
 Causes two additional grids to be output. One is a grid containing
 the standard deviation of the data within each grid cell relative
 to the grid value, the other contains the number of data 
 points in each grid cell. This option is ignored unless the
 Gaussian weighted mean mosaicing is enabled with the \fP-F\fP option.
 .TP
-.B \fB-N\fP
+.B \-N
 Causes grid cells with no data and no interpolation to be set to a
 value of NaN instead of the default value of 99999.9.  The NaN value
 is expected by \fBGMT\fP programs such \fBgrdview\fP.
 .TP
-.B \fB-O\fIroot\fP
+.B \-O
+\fIroot\fP
+.br
 Sets the character string to be used as the root of the
 output filenames. For example, if the grid is output as a GMT 
 version 2 GRD format (netCDF) file (the default), 
@@ -285,14 +305,18 @@ in the GMT version 2 GRD format, a shellscript
 which will allow the contents of the grid to viewed using GMT programs
 is also output with the filename "root.grd.cmd".
 .TP
-.B \fB-P\fIpings\fP
+.B \-P
+\fIpings\fP
+.br
 Sets the ping averaging of the input data. If \fIpings\fP > 0, then
 that number of input pings will be averaged to produce one output
 ping.  If \fIpings\fP = 0, then the ping averaging will automatically
 be done so that the along-track ping spacing is equal to the across-track
 beam spacing. Default: \fIpings\fP = 1.
 .TP
-.B \fB-R\fIwest/east/south/north\fP
+.B \-R
+\fIwest/east/south/north\fP
+.br
 Sets the longitude and latitude bounds of the output grid. If the user
 uses the \fB-E\fP option to set the grid spacing, then the dimensions
 will be calculated from the grid bounds and spacing. In these
@@ -300,14 +324,17 @@ circumstances rounding errors will usually require that the eastern
 and northern bounds be adjusted to fit exactly with the 
 grid dimensions and spacing.
 .TP
-.B \fB-S\fIspeed\fP
+.B \-S
+\fIspeed\fP
+.br
 Sets the minimum speed in km/hr (5.5 kts ~ 10 km/hr) allowed in 
 the input data; pings associated with a smaller ship speed will not be
 output. Default: \fIspeed\fP = 0.
 .TP
-.B \fB-T\fItension\fP
+.B \-T
+\fItension\fP
+.br
 Sets the \fItension\fP value used in the thin plate spline interpolation.
- 
 A \fItension\fP of 0 gives a minimum curvature surface with free edges;
 this is a pure Laplacian solution. A nonzero \fItension\fP tends to 
 suppress spurious oscillations and flatten
@@ -316,7 +343,9 @@ yields a pure spline solution. The \fItension\fP must be zero or
 greater.  
 Default: \fItension\fP = 1.0e10 (pure spline solution).
 .TP
-.B \fB-U\fIazimuth/factor\fP
+.B \-U
+\fIazimuth/factor\fP
+.br
 Enables prioritizing data points according to their look azimuth
 (data on the port side of the swath have
 a look azimuth equal to the heading - 90 degrees, and data on the
@@ -342,19 +371,23 @@ range of nonzero priorities will expand (e.g. if \fIfactor\fP = 0.5, only
 look azimuths 180 degrees away from \fIazimuth\fP
 will have a zero priority).
 .TP
-.B \fB-V\fP
+.B \-V
 Normally, \fBmbmosaic\fP prints out information regarding its
 controlling parameters during execution; the 
 \fB-V\fP option causes the program to also print out statements
 indicating its progress.
 .TP
-.B \fB-W\fIscale\fP
+.B \-W
+\fIscale\fP
+.br
 Sets the width of the gaussian weighting function in terms of
 the grid spacing.  The distance to the 1/e point of the weighting
 function is given by half of the grid spacing times \fIscale\fP.
 Default: \fIscale\fP = 1.0
 .TP
-.B \fB-X\fIextend\fP
+.B \-X
+\fIextend\fP
+.br
 Extends the size of the internal grid so that the output grid is a
 subset from the center of a larger grid.   This allows data outside
 the output grid to guide the spline interpolation of data gaps which
@@ -364,7 +397,9 @@ Thus, if \fIextend\fP=1.0, then the internal grid will have dimensions
 three times the output grid.
 Default: \fIextend\fP = 0.0
 .TP
-.B \fB-Y\fIpriority_file\fP
+.B \-Y
+\fIpriority_file\fP
+.br
 Enables priortization of data points based on their apparent
 grazing angle (this angle is the
 arctan(x/z) where x is acrosstrack distance and z is depth, so
@@ -382,7 +417,9 @@ Priorities for grazing angles less than the minimum or greater
 than the maximum will be zero. See the examples below for a
 further explanation of the use of \fIpriority_file\fP.
 .TP
-.B \fB-Z\fIbath_default\fP
+.B \-Z
+\fIbath_default\fP
+.br
 Sets the default depth used for calculating grazing angles for
 amplitude or sidescan values where depths are not available.
 Default: \fIscale\fP = 1000.0
@@ -444,7 +481,7 @@ the mosaic to be filled in through spine interpolation .
 The output looks like:
  
  Program mbmosaic
- Version $Id: mbmosaic.l,v 4.1 1997-09-12 15:02:35 caress Exp $
+ Version $Id: mbmosaic.l,v 4.2 1997-09-17 19:22:06 caress Exp $
  MB-system Version 4.5
 
  MBMOSAIC Parameters:

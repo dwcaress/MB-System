@@ -1,4 +1,4 @@
-.TH mbgrid l "25 March 1997" "MB-System 4.5" "MB-System 4.5"
+.TH mbgrid l "17 September 1997" "MB-System 4.5" "MB-System 4.5"
 .SH NAME
 \fBmbgrid\fP - Grid bathymetry, amplitude, or sidescan data 
 from swath sonar data files.
@@ -174,7 +174,9 @@ Palisades, NY 10964
 
 .SH OPTIONS
 .TP
-.B \fB-A\fIdatatype\fP
+.B \-A
+\fIdatatype\fP
+.br
 Sets the type of data to be read and gridded. If \fIdatatype\fP = 1,
 bathymetry data will be gridded (positive downwards). If \fIdatatype\fP = 2,
 bathymetry data will be gridded as topography (positive upwards).  
@@ -183,24 +185,32 @@ amplitude data will be gridded.  If \fIdatatype\fP = 4,
 sidescan data will be gridded.  
 Default: \fIdatatype\fP = 1 (bathymetry).
 .TP
-.B \fB-B\fIborder\fP
+.B \-B
+\fIborder\fP
+.br
 Sets the border of a smoothly interpolated grid to the value \fIborder\fP
 wherever no data exist, provided \fIborder\fP > 0.0.
 Default: \fIborder\fP = 0.0
 .TP
-.B \fB-C\fIclip\fP
+.B \-C
+\fIclip\fP
+.br
 Sets the clipping dimension for the spline interpolation. If \fIclip\fP=0
 no spline interpolation will be done.  If \fIclip\fP>0 then the spline
 interpolation will fill data gaps to a distance of \fIclip\fP times
 the grid spacing.
 Default: \fIclip\fP = 0.
 .TP
-.B \fB-D\fIxdim/ydim\fP
+.B \-D
+\fIxdim/ydim\fP
+.br
 Sets the dimensions of the output grid.  This option is superceded
 if the user specifies the grid spacing with the \fB-E\fP option.
 Default:  \fIxdim\fP = \fIydim\fP = 101.
 .TP
-.B \fB-E\fIdx/dy/units\fP
+.B \-E
+\fIdx/dy/units\fP
+.br
 Sets the grid cell spacing to \fIdx\fP in longitude and \fIdy\fP
 in latitude. If \fIunits\fP is not specified, the \fIdx\fP 
 and \fIdy\fP values are assumed to be in meters. Valid values
@@ -213,7 +223,9 @@ grid cell spacings. However, slight adjustments to the
 grid cell spacing values are usually required to keep
 the grid bounds as specified.
 .TP
-.B \fB-F\fImode\fP
+.B \-F
+\fImode\fP
+.br
 Sets the gridding algorithm to be used.
  	\fImode\fP = 1:         Gaussian Weighted Mean
  	\fImode\fP = 2:         Median Filter
@@ -221,7 +233,9 @@ Sets the gridding algorithm to be used.
  	\fImode\fP = 4:         Maximum Filter
 The default is \fImode\fP = 1 (Gaussian Weighted Mean).
 .TP
-.B \fB-G\fIgridkind\fP
+.B \-G
+\fIgridkind\fP
+.br
 Sets the format of the output grid file.
  	\fIgridkind\fP = 1:	Ascii table
  	\fIgridkind\fP = 2:	binary file (GMT version 1 GRD file)
@@ -233,11 +247,13 @@ fill maps of the gridded data. These shellscripts are
 generated using the \fBmbm_grdplot\fP macro.
 Default: \fIgridkind\fP = 3.
 .TP
-.B \fB-H\fP
+.B \-H
 This "help" flag cause the program to print out a description
 of its operation and then exit immediately.
 .TP
-.B \fB-I\fIdatalist\fP
+.B \-I
+\fIdatalist\fP
+.br
 Sets the filename of the file containing a list of the input swath sonar
 data files and their formats.  In the \fIdatalist\fP file, each
 data file should be followed by a data format identifier, e.g.:
@@ -252,7 +268,9 @@ that the file contains lines of (lon, lat, depth) triples which can be read
 in free format.
 Default: \fIdatalist\fP = data.list
 .TP
-.B \fB-L\fIlonflip\fP
+.B \-L
+\fIlonflip\fP
+.br
 Sets the range of the longitude values returned.
 If \fIlonflip\fP=-1 then the longitude values will be in
 the range from -360 to 0 degrees. If \fIlonflip\fP=0 
@@ -262,19 +280,21 @@ then the longitude values will be in
 the range from 0 to 360 degrees.
 Default: \fIlonflip\fP = 0.
 .TP
-.B \fB-M\fP
+.B \-M
 Causes two additional grids to be output. One is a grid containing
 the standard deviation of the data within each grid cell relative
 to the grid value, the other contains the number of data 
 points in each grid cell. This option is ignored when the minimum
 or maximum filter gridding algorithms are used (see the \fP-F\fP option).
 .TP
-.B \fB-N\fP
+.B \-N
 Causes grid cells with no data and no interpolation to be set to a
 value of NaN instead of the default value of 99999.9.  The NaN value
 is expected by \fBGMT\fP programs such \fBgrdview\fP.
 .TP
-.B \fB-O\fIroot\fP
+.B \-O
+\fIroot\fP
+.br
 Sets the character string to be used as the root of the
 output filenames. For example, if the grid is output as a GMT 
 version 2 GRD format (netCDF) file (the default), 
@@ -288,19 +308,22 @@ in the GMT version 2 GRD format, a shellscript
 which will allow the contents of the grid to viewed using GMT programs
 is also output with the filename "root.grd.cmd".
 .TP
-.B \fB-P\fIpings\fP
+.B \-P
+\fIpings\fP
 Sets the ping averaging of the input data. If \fIpings\fP > 0, then
 that number of input pings will be averaged to produce one output
 ping.  If \fIpings\fP = 0, then the ping averaging will automatically
 be done so that the along-track ping spacing is equal to the across-track
 beam spacing. Default: \fIpings\fP = 1.
 .TP
-.B \fB-Q\fP
+.B \-Q
 Normally, bathymetry or topography data is gridded in meters. If
 this option is used, bathymetry or topography data is gridded
 in feet.
 .TP
-.B \fB-R\fIwest/east/south/north\fP
+.B \-R
+\fIwest/east/south/north\fP
+.br
 Sets the longitude and latitude bounds of the output grid. If the user
 uses the \fB-E\fP option to set the grid spacing, then the dimensions
 will be calculated from the grid bounds and spacing. In these
@@ -308,12 +331,16 @@ circumstances rounding errors will usually require that the eastern
 and northern bounds be adjusted to fit exactly with the 
 grid dimensions and spacing.
 .TP
-.B \fB-S\fIspeed\fP
+.B \-S
+\fIspeed\fP
+.br
 Sets the minimum speed in km/hr (5.5 kts ~ 10 km/hr) allowed in 
 the input data; pings associated with a smaller ship speed will not be
 output. Default: \fIspeed\fP = 0.
 .TP
-.B \fB-T\fItension\fP
+.B \-T
+\fItension\fP
+.br
 Sets the \fItension\fP value used in the thin plate spline interpolation.
  
 A \fItension\fP of 0 gives a minimum curvature surface with free edges;
@@ -324,7 +351,9 @@ yields a pure spline solution. The \fItension\fP must be zero or
 greater.  
 Default: \fItension\fP = 1.0e10 (pure spline solution).
 .TP
-.B \fB-U\fItime\fP
+.B \-U
+\fItime\fP
+.br
 Forces \fBmbgrid\fP to avoid averaging overlapping swaths by
 ignoring the data from later swaths. "Later" data is identified
 using the \fItime\fP value. The time of the first data point
@@ -334,19 +363,23 @@ data point in the relevent bin are ignored. If \fItime\fP is
 negative, the last data in a bin (within the time lag criterea)
 will be saved and used instead of the first data.
 .TP
-.B \fB-V\fP
+.B \-V-
 Normally, \fBmbgrid\fP prints out information regarding its
 controlling parameters during execution; the 
 \fB-V\fP option causes the program to also print out statements
 indicating its progress.
 .TP
-.B \fB-W\fIscale\fP
+.B \-W
+\fIscale\fP
+.br
 Sets the width of the gaussian weighting function in terms of
 the grid spacing.  The distance to the 1/e point of the weighting
 function is given by half of the grid spacing times \fIscale\fP.
 Default: \fIscale\fP = 1.0
 .TP
-.B \fB-X\fIextend\fP
+.B \-X
+\fIextend\fP
+.br
 Extends the size of the internal grid so that the output grid is a
 subset from the center of a larger grid.   This allows data outside
 the output grid to guide the spline interpolation of data gaps which
@@ -380,7 +413,7 @@ will be filled in through spine interpolation even in the areas
 not covered by data. The output looks like:
  
  Program MBGRID
- Version $Id: mbgrid.l,v 4.14 1997-04-21 17:19:14 caress Exp $
+ Version $Id: mbgrid.l,v 4.15 1997-09-17 19:22:06 caress Exp $
  MB-system Version 4.5
  
  MBGRID Parameters:

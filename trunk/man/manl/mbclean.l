@@ -1,4 +1,4 @@
-.TH mbclean l "25 March 1997" "MB-System 4.5" "MB-System 4.5"
+.TH mbclean l "17 September 1997" "MB-System 4.5" "MB-System 4.5"
 .SH NAME
 \fBmbclean\fP - Identifies and flags bad beams in swath sonar bathymetry data.
 
@@ -42,7 +42,9 @@ Palisades, NY 10964
 
 .SH OPTIONS
 .TP
-.B \fB-A\fImax\fP
+.B \-A
+\fImax\fP
+.br
 This option sets the range of acceptable depth values relative to
 the local median depth. The median depth is obtained from the
 current ping and the pings immediately before and after that
@@ -52,13 +54,17 @@ will be flagged. No deviation from the median depth checking is
 done if the \fB-A\fP option
 is not used.
 .TP
-.B \fB-B\fIlow/high\fP
+.B \-B
+\fIlow/high\fP
+.br
 This option sets the range of acceptable depth values.  If a depth
 value is less than \fIlow\fP or more than \fIhigh\fP then it
 will be flagged. No depth range checking is done if the \fB-B\fP option
 is not used.
 .TP
-.B \fB-C\fIslope\fP
+.B \-C
+\fIslope\fP
+.br
 The value \fIslope\fP is the maximum acceptable slope. Beams associated
 with excessive slopes will be flagged or removed according to the
 operational mode specified using the \fB-M\fP option. This method will
@@ -66,7 +72,9 @@ be used if no other algorithms are specified; if other algorithms are
 specified but \fB-C\fP is not used then no slope checking will occur.
 Default: \fIslope\fP = 1.0
 .TP
-.B \fB-D\fImin/max\fP
+.B \-D
+\fImin/max\fP
+.br
 Sets the minimum and maximum allowed distances between beams used for
 some of the flagging algorithms.  Both values are expressed in terms
 of fractions of the local median depth. Thus, \fB-D\fP\fI0.01/0.25\fP
@@ -86,7 +94,9 @@ maximum distance are used to calculate the local median depth, and only
 beams within the maximum distance are used to check for excessive slopes.
 Default: \fImin/max\fP = 0.01/0.25.
 .TP
-.B \fB-F\fIformat\fP
+.B \-F
+\fIformat\fP
+.br
 Sets the format for the input and output swath sonar data using 
 \fBMBIO\fP integer format identifiers. 
 This program uses the \fBMBIO\fP library and will read or write any swath sonar
@@ -95,7 +105,9 @@ currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page.
 Default: \fIformat\fP = 11.
 .TP
-.B \fB-G\fIfraction_low/fraction_high\fP
+.B \-G
+\fIfraction_low/fraction_high\fP
+.br
 This option sets the range of acceptable depth values relative to
 low and high fractions of the local median depth. 
 The median depth is obtained from the
@@ -108,16 +120,20 @@ will be flagged. No fractional depth range checking is
 done if the \fB-G\fP option
 is not used.
 .TP
-.B \fB-H\fP
+.B \-H
 This "help" flag cause the program to print out a description
 of its operation and then exit immediately.
 .TP
-.B \fB-I\fIinfile\fP
+.B \-I
+\fIinfile\fP
+.br
 Data file from which the input data will be read. If
 no input file is specified, the input will be read
 from stdin. Default: \fIinfile\fP = stdin.
 .TP
-.B \fB-L\fIlonflip\fP
+.B \-L
+\fIlonflip\fP
+.br
 Sets the range of the longitude values used.
 If \fIlonflip\fP=-1 then the longitude values will be in
 the range from -360 to 0 degrees. If \fIlonflip\fP=0 
@@ -127,7 +143,9 @@ then the longitude values will be in
 the range from 0 to 360 degrees.
 Default: \fIlonflip\fP = 0.
 .TP
-.B \fB-M\fImode\fP
+.B \-M
+\fImode\fP
+.br
 Sets the manner in which bad beams identified by excessive slope
 are handled.
  	\fImode\fP = 1:	Flags one beam associated with each outlier slope.
@@ -142,7 +160,9 @@ If the data format of the input file
 prohibits storage of negative depths, an error message will be output
 and the program will exit. Default: \fImode\fP = 1.
 .TP
-.B \fB-N\fIbuffersize\fP
+.B \-N
+\fIbuffersize\fP
+.br
 Sets the maximum number of data records which can be
 read into the buffer. In general, data records may be
 of several different types (e.g. parameter, position, 
@@ -157,12 +177,14 @@ for most cases, but users can set the buffer size as required.
 The absolute maximum buffer size is 5000. 
 Default: \fIbuffersize\fP = 500.
 .TP
-.B \fB-O\fIoutfile\fP
+.B \-O
+\fIoutfile\fP
+.br
 Data file to which the output data will be written. If
 no output file is specified, the output will be written to
 stdout. Default: \fIoutfile\fP = stdout.
 .TP
-.B \fB-Q\fP
+.B \-Q
 This flag causes \fBmbclean\fP to search for bad "rails" in the
 swath sonar swath; the "rails" refer to groups of outer beams which
 have crosstrack distances (and depths) much less than they should 
@@ -170,18 +192,22 @@ have.  These are identified when one or more outer beams lies
 inboard of a more inner beam; all beams outboard of the first
 offending beam are flagged.
 .TP
-.B \fB-U\fInmin\fP
+.B \-U
+\fInmin\fP
+.br
 This flag causes \fBmbclean\fP to search for port or starboard
 halves of pings which contain fewer than \fInmin\fP good bathymetry
 values. All bathymetry values in the affected half-pings are
 flagged.
 .TP
-.B \fB-X\fIzap_beams\fP
+.B \-X
+\fIzap_beams\fP
+.br
 If this option is used, the outermost \fIzap_beams\fP at both ends
 of the swath are flagged as bad; this is useful if the outer beams 
 are known to be unreliable. Default: \fIzap_beams\fP = 0.
 .TP
-.B \fB-V\fP
+.B \-V
 Normally, \fBmbclean\fP works "silently" without outputting
 anything to the stderr stream.  If the
 \fB-V\fP flag is given, then \fBmbclean\fP works in a "verbose" mode and
@@ -204,7 +230,7 @@ The program will output some information because of the
 \fB-V\fP option:
 .br
  	Program MBCLEAN
- 	Version $Id: mbclean.l,v 4.10 1997-09-15 19:11:06 caress Exp $
+ 	Version $Id: mbclean.l,v 4.11 1997-09-17 19:22:06 caress Exp $
  	MB-system Version 4.3
 .br
  	132 records loaded into buffer

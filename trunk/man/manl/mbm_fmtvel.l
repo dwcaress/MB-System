@@ -1,4 +1,4 @@
-.TH mbm_fmtvel l "25 March 1997" "MB-System 4.5" "MB-System 4.5"
+.TH mbm_fmtvel l "16 September 1997" "MB-System 4.5" "MB-System 4.5"
 .SH NAME
 \fBmbm_fmtvel\fP - Extract sound velocity info from Hydrosweep data
 files and create output in tabular format.
@@ -30,13 +30,17 @@ Palisades, NY 10964
 
 .SH OPTIONS
 .TP
-.B \fB-F\fIformat\fP
+.B -F
+\fIformat\fP
+.br
 Sets the format for the input swath sonar data using
 \fBMBIO\fP integer format identifiers. The only allowed 
 formats are 21 (raw 
 Hydrosweep data) and 24 (L-DEO in-house binary Hydrosweep data).
 .TP
-.B \fB-I\fIinfilename\fP
+.B -I
+\fIinfilename\fP
+.br
 Data file from which the input data will be read. 
 
 .SH SEE ALSO

@@ -1,4 +1,4 @@
-.TH mblist l "25 March 1997" "MB-System 4.5" "MB-System 4.5"
+.TH mblist l "17 September 1997" "MB-System 4.5" "MB-System 4.5"
 .SH NAME
 \fBmblist\fP - List data in multibeam bathymetry data files.
 
@@ -36,12 +36,16 @@ Palisades, NY 10964
 
 .SH OPTIONS
 .TP
-.B \fB-B\fIyr/mo/da/hr/mn/sc\fP
+.B \-B
+\fIyr/mo/da/hr/mn/sc\fP
+.br
 Sets the starting time for data allowed in the input data; pings
 with times before the starting time will be ignored. 
 Default: \fIyr/mo/da/hr/mn/sc\fP = 1962/2/21/10/30/0.
 .TP
-.B \fB-D\fIdumpmode\fP
+.B \-D
+\fIdumpmode\fP
+.br
 Normally, the output format is controlled by the \fB-O\fP option and
 the number of beams or pixels which are output is controlled by
 the \fB-M\fP and \fB-N\fP options.  The \fB-D\fP option provides
@@ -63,12 +67,16 @@ Use of the \fB-D\fP option supercedes the \fB-O\fP, \fB-M\fP,
 and \fB-N\fP options.
 Default: \fImode\fP = 1.
 .TP
-.B \fB-E\fIyr/mo/da/hr/mn/sc\fP
+.B \-E
+\fIyr/mo/da/hr/mn/sc\fP
+.br
 Sets the ending time for data allowed in the input data; pings
 with times after the ending time will be ignored. 
 Default: \fIyr/mo/da/hr/mn/sc\fP = 2062/2/21/10/30/0.
 .TP
-.B \fB-F\fIformat\fP
+.B \-F
+\fIformat\fP
+.br
 Sets the format for the input multibeam data using 
 \fBMBIO\fP integer format identifiers. 
 This program uses the \fBMBIO\fP library and will read any multibeam
@@ -76,11 +84,13 @@ format supported by \fBMBIO\fP. A list of the multibeam data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page. Default: \fIformat\fP = 11.
 .TP
-.B \fB-H\fP
+.B \-H
 This "help" flag cause the program to print out a description
 of its operation and then exit immediately.
 .TP
-.B \fB-I\fIfilename\fP
+.B \-I
+\fIfilename\fP
+.br
 Sets the input filename. If \fIformat\fP > 0 (set with the 
 \fB-F\fP option) then the multibeam data contained in \fIinfile\fP 
 is read and processed. If \fIformat\fP < 0, then \fIinfile\fP
@@ -97,7 +107,9 @@ format supported by \fBMBIO\fP. A list of the multibeam data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page. Default: \fIinfile\fP = "stdin".
 .TP
-.B \fB-L\fIlonflip\fP
+.B \-L
+\fIlonflip\fP
+.br
 Sets the range of the longitude values returned.
 If \fIlonflip\fP=-1 then the longitude values will be in
 the range from -360 to 0 degrees. If \fIlonflip\fP=0 
@@ -107,20 +119,26 @@ then the longitude values will be in
 the range from 0 to 360 degrees.
 Default: \fIlonflip\fP = 0.
 .TP
-.B \fB-M\fIstart_beam/end_beam\fP
+.B \-M
+\fIstart_beam/end_beam\fP
+.br
 Determines the range of bathymetry beams for which records will be output.
 Beam numbers start with zero on the port side. The default is 
 to output a single record for each ping corresponding to the
 center beam.
 .TP
-.B \fB-N\fIstart_pixel/end_pixel\fP
+.B \-N
+\fIstart_pixel/end_pixel\fP
+.br
 Determines the range of sidescan pixels for which records will be output.
 Pixel numbers start with zero on the port side. The default is 
 to not output records associated with sidescan pixels. Instead, by
 default a single record is outputted for each ping corresponding to the
 center bathymetry beam; 
 .TP
-.B \fB-O\fIoutput_format\fP
+.B \-O
+\fIoutput_format\fP
+.br
 Determines the form of the output. \fIOutput_format\fP is a string composed
 of one or more of the following characters:
 
@@ -164,7 +182,9 @@ of one or more of the following characters:
 Default \fIoutput_format\fP = \fBYXLZ\fP (latitude, longitude, cumulative
 along-track distance, and depth).
 .TP
-.B \fB-P\fIpings\fP
+.B \-P
+\fIpings\fP
+.br
 Sets the ping averaging of the input data. If \fIpings\fP = 1, then
 no ping averaging is performed. If \fIpings\fP > 0, then
 that number of input pings will be averaged to produce one output
@@ -173,33 +193,39 @@ be done so that the along-track ping spacing is equal to the across-track
 beam spacing.
 Default: \fIpings\fP = 1 (no ping averaging).
 .TP
-.B \fB-Q\fP
+.B \-Q
 Disables value checking for validity (only positive bathymetry,
 amplitude, and sidescan values are valid).  This allows dumps
 of all of the data, including zero or flagged beams and pixels.
 .TP
-.B \fB-R\fIwest/east/south/north\fP
+.B \-R
+\fIwest/east/south/north\fP
+.br
 Sets the longitude and latitude bounds within which multibeam 
 data will be read. Only the data which lies within these bounds will
 be read. 
 Default: \fIwest\fP=-360, east\fI=360\fP, \fIsouth\fP=-90, \fInorth\fP=90.
 .TP
-.B \fB-S\fIspeed\fP
+.B \-S
+\fIspeed\fP
+.br
 Sets the minimum speed in km/hr (5.5 kts ~ 10 km/hr) allowed in 
 the input data; pings associated with a smaller ship speed will not be
 copied. Default: \fIspeed\fP = 0.
 .TP
-.B \fB-T\fItimegap\fP
+.B \-T
+\fItimegap\fP
+.br
 Sets the maximum time gap in minutes between adjacent pings allowed before
 the data is considered to have a gap. Default: \fItimegap\fP = 1.
 .TP
-.B \fB-V\fP
+.B \-V
 Normally, \fBmblist\fP works "silently" without outputting
 anything to the stderr stream.  If the
 \fB-V\fP flag is given, then \fBmblist\fP works in a "verbose" mode and
 outputs the program version being used and all error status messages.
 .TP
-.B \fB-W\fP
+.B \-W
 Normally, \fBmblist\fP outputs bathymetry and across and along
 track distances in meters.  If the
 \fB-W\fP flag is given, then \fBmblist\fP outputs these values

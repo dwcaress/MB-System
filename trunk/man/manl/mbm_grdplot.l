@@ -1,4 +1,4 @@
-.TH mbm_grdplot l "25 March 1997" "MB-System 4.5" "MB-System 4.5"
+.TH mbm_grdplot l "16 September 1997" "MB-System 4.5" "MB-System 4.5"
 .SH NAME
 \fBmbm_grdplot\fP - Create an executable shellscript which will generate
 a GMT map of gridded data in a GMT grd file.
@@ -70,7 +70,9 @@ Palisades, NY 10964
 
 .SH SIMPLE DESCRIPTION OF BASIC OPTIONS
 .TP
-.B \fB-A\fP\fImagnitude[/azimuth]\fP
+.B \-A
+\fImagnitude[/azimuth]\fP
+.br
 Sets the parameters which control the
 synthetic illumination of the gridded data (shaded relief).
 The value \fImagnitude\fP
@@ -80,14 +82,18 @@ The value \fIazimuth\fP
 is the azimuth from which the data is illuminated.
 Defaults: \fImagnitude\fP = 0.2; \fIazimuth\fP = 0.0;
 .TP
-.B \fB-C\fP\fIcontour_control\fP
+.B \-C
+\fIcontour_control\fP
+.br
 If \fB-C\fP is given alone, it causes unannotated contours
 to be drawn using a contour interval calculated from the
 data. The user may also use \fIcontour_control\fP 
 to specify the contour interval. See the COMPLETE DESCRIPTION OF OPTIONS
 section below for a more complete discussion.
 .TP
-.B \fB-D\fP\fI[flipcolor/flipshade]\fP
+.B \-D
+\fI[flipcolor/flipshade]\fP
+.br
 Normally, the color or grayscale tables used for color maps run from
 cool colors (or dark grays) for low grid values 
 to hot colors (or light grays) for high grid values.
@@ -102,7 +108,9 @@ to be reversed (e.g. high intensities overlaid as light shading).
 Using \fB-D\fP\fI0/1\fP will flip the shading convention
 but leave the default color convention.
 .TP
-.B \fB-G\fP\fIcolor_mode\fP
+.B \-G
+\fIcolor_mode\fP
+.br
 Turns on color fill plot and sets the style of the plot.
 .br
         \fIcolor_mode\fP = 1: Color/gray fill.
@@ -113,16 +121,20 @@ Turns on color fill plot and sets the style of the plot.
                         option must be used to specify
  			the intensity file.
 .TP
-.B \fB-H\fP
+.B \-H
 This "help" flag cause the program to print out a description
 of its operation and then exit immediately.
 .TP
-.B \fB-I\fP\fIgrdfile\fP
+.B \-I
+\fIgrdfile\fP
+.br
 Sets the name of the gridded data file to be plotted.  
 Alternatively, \fIgrdfile\fP may be a list of grid files
 (one filename on each line) to be plotted together.
 .TP
-.B \fB-K\fP\fIintensity_file\fP
+.B \-K
+\fIintensity_file\fP
+.br
 Sets the name of the gridded data file containing
 instensity values to be used for shading the map.  
 Alternatively, \fIgrdfile\fP may be a list of grid files
@@ -130,14 +142,18 @@ Alternatively, \fIgrdfile\fP may be a list of grid files
 list of file is supplied, the intensity files must
 conform in order to the data grid files they will shade.
 .TP
-.B \fB-O\fP\fIroot\fP
+.B \-O
+\fIroot\fP
+.br
 Sets the root used to construct the filename of the output shellscript
 (\fIroot\fP.cmd) and names of files created when the shellscript is 
 run.  Normally the 
 name of the input grid file or grid file list is 
 used as the \fIroot\fP. 
 .TP
-.B \fB-P\fP\fIpagesize\fP
+.B \-P
+\fIpagesize\fP
+.br
 This option sets the size of the page the plot will be centered
 on. If the user does not set the plot scale, the plot will be
 sized as large as will fit on the designated page. If the user
@@ -149,7 +165,9 @@ COMPLETE DESCRIPTION OF OPTIONS section
 below for a complete list of 
 the supported page sizes. The default page size is A.
 .TP
-.B \fB-S\fP\fI[color/shade]\fP
+.B \-S
+\fI[color/shade]\fP
+.br
 This option enables effective histogram equalization of the
 color and/or shading of the gridded data. The equalization is
 not achieved by changing the data values, but rather by
@@ -166,19 +184,23 @@ setting \fIshade\fP = 1 will cause the shading to be equalized.
 Using \fB-S\fP\fI0/1\fP will equalize the shading without
 equalizing the color table.
 .TP
-.B \fB-U\fP\fIorientation\fP
+.B \-U
+\fIorientation\fP
+.br
 Normally the orientation of the plot (portrait or landscape)
 is selected automatically so as to maximize the plot scale.
 The \fB-U\fP option allows the user to set the plot orientation. If
 \fIorientation\fP = 1, a portrait plot will be produced; if
 \fIorientation\fP = 2, a landscape plot will be produced.
 .TP
-.B \fB-V\fP
+.B \-V
 Causes \fBmbm_grdplot\fP to operate in "verbose" mode 
 so that it outputs
 more information than usual.
 .TP
-.B \fB-W\fP\fIcolor_style\fP[\fI/pallette\fP[\fIncolors\fP]]
+.B \-W
+\fIcolor_style\fP[\fI/pallette\fP[\fIncolors\fP]]
+.br
 This option controls the color scheme used for color
 fill plots. If \fIcolor_style\fP = 1 [default], then
 the color scheme used will be a continuous grading
@@ -202,7 +224,9 @@ stepped, discrete color scale [default is 11].
 
 .SH COMPLETE DESCRIPTION OF OPTIONS
 .TP
-.B \fB-A\fImagnitude[/azimuth]\fP
+.B \-A
+\fImagnitude[/azimuth]\fP
+.br
 Sets the parameters which control the
 synthetic illumination of the gridded data (shaded relief).
 The value \fImagnitude\fP
@@ -212,12 +236,16 @@ The value \fIazimuth\fP
 is the azimuth from which the data is illuminated.
 Defaults: \fImagnitude\fP = 0.2; \fIazimuth\fP = 0.0;
 .TP
-.B \fB-B\fItickinfo\fP
+.B \-B
+\fItickinfo\fP
+.br
 Sets map boundary tickmark intervals. See the \fBpsbasemap\fP
 manual page for details. By default the program chooses
 basemap annotations based on the map boundaries.
 .TP
-.B \fB-C\fIcontour_control\fP
+.B \-C
+\fIcontour_control\fP
+.br
 If \fB-C\fP is given alone, it causes unannotated contours
 to be drawn using a contour interval calculated from the
 data. If \fIcontour_control\fP is given, it specifies
@@ -249,7 +277,9 @@ If a file is given and \fB\-MCT\fP is set,
 then only contours marked with upper case 
 C or A will have tickmarks.
 .TP
-.B \fB-D\fP\fI[flipcolor/flipshade]\fP
+.B \-D
+\fI[flipcolor/flipshade]\fP
+.br
 Normally, the color or grayscale tables used for color maps run from
 cool colors (or dark grays) for low grid values 
 to hot colors (or light grays) for high grid values.
@@ -264,7 +294,9 @@ to be reversed (e.g. high intensities overlaid as light shading).
 Using \fB-D\fP\fI0/1\fP will flip the shading convention
 but leave the default color convention.
 .TP
-.B \fB-G\fP\fIcolor_mode\fP
+.B \-G
+\fIcolor_mode\fP
+.br
 Turns on color fill plot and sets the style of the plot.
 .br
         \fIcolor_mode\fP = 1: Color/gray fill.
@@ -278,11 +310,13 @@ Turns on color fill plot and sets the style of the plot.
 See the \fBgrdimage\fP manual page for information on shading
 with intensity files
 .TP
-.B \fB-H\fP
+.B \-H
 This "help" flag cause the program to print out a description
 of its operation and then exit immediately.
 .TP
-.B \fB-I\fIgrdfile\fP
+.B \-I
+\fIgrdfile\fP
+.br
 Sets the name of the gridded data file to be plotted.  
 The data must be in a form acceptable to \fBGMT\fP version 3
 programs (see the \fBGMT\fP Cookbook & Technical Reference).
@@ -291,7 +325,9 @@ Alternatively, \fIgrdfile\fP may be a list of grid files
 is useful when data from a region is broken up into several
 grid files rather than a single very large grid file.
 .TP
-.B \fB-J\fIprojection\fP[\fI/scale | /width\fP]
+.B \-J
+\fIprojection\fP[\fI/scale | /width\fP]
+.br
 Selects the map projection. By default the map projection is
 Mercator and the plot scale is chosen to fit on the selected
 page size (see \fB-P\fP option). The user may specify a
@@ -374,7 +410,9 @@ size will be chosen.
 .br
 More details can be found in the \fBpsbasemap\fP manpages.
 .TP
-.B \fB-K\fP\fIintensity_file\fP
+.B \-K
+\fIintensity_file\fP
+.br
 Sets the name of the gridded data file containing
 instensity values to be used for shading the map.  
 Alternatively, \fIgrdfile\fP may be a list of grid files
@@ -382,7 +420,9 @@ Alternatively, \fIgrdfile\fP may be a list of grid files
 list of files is supplied, the intensity files must
 conform in order to the list of data grid files they will shade.
 .TP
-.B \fB-L\fItitle:scalelabel\fP
+.B \-L
+\fItitle:scalelabel\fP
+.br
 Sets the title and the label for the colorscale (if used) of
 the plot. Note that a colon (:) rather than a slash (/) is
 used to separate the labels. Colons cannot be used in the
@@ -392,7 +432,7 @@ alone, a default colorscale label will be provided. To force
 no title use \fB-L\fP" "; to force no title or colorscale
 label use \fB-L\fP" : ".
 .TP
-.B \fB-M\fP
+.B \-M
 A series of "miscellaneous" options are provided which are
 given as \fB-M\fP followed by a two character identifier, followed
 by any other parameters associated with that option.
@@ -400,14 +440,18 @@ The \fB-M\fP options may be strung together separated by
 colons, e.g. "-MGQ100:GU:CA200/10", which is equivalent to
 "-MGQ -MGU -MCA200/10". 
 .TP
-.B \fB-MGD\fIgmtdef/value\fP
+.B \-MGD
+\fIgmtdef/value\fP
+.br
 Allows the user to set the \fBGMT\fP default values used as
 the plot is constructed. This command may be given repeatedly
 to set as many \fBGMT\fP defaults as required. For example, to
 set the basemap annotation font to Courier, use 
 "-MGDANOT_FONT/Courier".
 .TP
-.B \fB-MGF\fP\fIscale_loc\fP
+.B \-MGF
+\fIscale_loc\fP
+.br
 Sets the location of the color scale. The possible values
 of \fIscale_loc\fP are:
  	\fIscale_loc\fP = b:	bottom of plot
@@ -417,22 +461,30 @@ of \fIscale_loc\fP are:
 .br
 [Default \fIscale_loc\fP = b]
 .TP
-.B \fB-MGL\fP[\fIf\fP][\fIx\fP]\fIlon0/lat0/slat/length\fP[\fIm\fP]
+.B \-MGL
+[\fIf\fP][\fIx\fP]\fIlon0/lat0/slat/length\fP[\fIm\fP]
+.br
 Draws a simple map scale centered on \fIlon0/lat0\fP.  Use \fB\-Lx\fP to specify position in inch instead.
 Scale is calculated at latitude \fIslat\fP, \fIlength\fP is in km [miles if m is appended].
 Use \fB\-Lf\fP to get a "fancy" scale [Default is plain].
 .TP
-.B \fB-MGQ\fIdpi\fP
+.B \-MGQ
+\fIdpi\fP
+.br
 Sets the resolution in dots per inch of the raster image used
 for color fill maps. Larger values of \fIdpi\fP produce larger
 Postscript plot files. [Default is 100].
 .TP
-.B \fB-MGS\fP\fIscalefactor\fP
+.B \-MGS
+\fIscalefactor\fP
+.br
 The gridded data is multiplied by \fIscalefactor\fP.
 This option is most often used flip the sign of the
 data (\fIscalefactor\fP = -1). [Default no scaling]
 .TP
-.B \fB-MGT\fP\fIx/y/size/angle/font/just/text\fP
+.B \-MGT
+\fIx/y/size/angle/font/just/text\fP
+.br
 Causes a text label to plotted on the map.
 \fIsize\fP is text size in points, \fIangle\fP is 
 measured in degrees counter-clockwise from horizontal, 
@@ -449,12 +501,16 @@ onto the (\fIx,y\fP) point: 1 = Lower Left corner,
 11 = Upper Right. This option may be given as many times as
 needed.
 .TP
-.B \fB-MGU\fP\fP[\fI/dx/dy/\fP][\fIlabel\fP]
+.B \-MGU
+\fP[\fI/dx/dy/\fP][\fIlabel\fP]
+.br
 Draw Unix System time stamp on plot.  User may specify where the lower left corner
 of the stamp should fall on the page relative to lower left corner of plot in inch [Default is (-0.75,-0.75)].  Optionally,
 append a label, or \fBc\fP (which will plot the command string.)
 .TP
-.B \fB-MCA\fP\fIanot_int/\fP[\fIffont_size\fP][\fIaangle\fP][\fI/r/g/b\fP][\fIo\fP]]
+.B \-MCA
+\fIanot_int/\fP[\fIffont_size\fP][\fIaangle\fP][\fI/r/g/b\fP][\fIo\fP]]
+.br
 \fIanot_int\fP is annotation interval in data units.  
 Ignored if contour levels are given in a file.
 [Default is no annotations].  Several options 
@@ -466,30 +522,40 @@ annotation angle [Default follows contour],
 and append 'o' to draw the outline of the 
 surrounding text box [Default is no outline].
 .TP
-.B \fB-MCG\fP\fIgap/width\fP \fB-MCQ\fP\fIcut \fP
+.B \-MCG
+\fIgap/width\fP \fB-MCQ\fP\fIcut \fP
+.br
 \fIgap\fP is distance in inch between each 
 annotation along the same contour.
 \fIwidth\fP is number of points over which to 
 estimate the best fitting slope
 for contour labels  [Default is 4/10].
 .TP
-.B -MCQcut
+.B -MCQ
+\fIcut\fP
+.br
 Do not draw contours with less than \fIcut\fP number 
 of points [Draw all contours].
 .TP
-.B \fB-MCT\fP[\fI+|-\fP][\fIgap/length\fP][\fI:LH\fP] 
+.B \-MCT
+[\fI+|-\fP][\fIgap/length\fP][\fI:LH\fP] 
+.br
 Will draw tickmarks pointing in the downward direction every \fIgap\fP along the innermost closed contours.  Append \fIgap\fP and tickmark length (in inch) or use defaults [0.2/0.05].
 User may choose to tick only local highs or local lows by specifying \fB\-T+\fP or \fB\-T-\fP, respectively.  Appending :LH will plot the characters L and H at the center of closed
 innermost contours (local lows and highs).  L and H can be any single character (e.g., LH, -+, etc.)
 If a file is given by \fB\-C\fP and \fB\-T\fP is set, 
 then only contours marked with upper case C or A will have tickmarks [and anotation].
 .TP
-.B \fB-MCW\fP\fItype\fP[\fIpen\fP]
+.B \-MCW
+\fItype\fP[\fIpen\fP]
+.br
 \fItype\fP, if present, can be 'a' for annotated contours or 'c' for regular contours [Default].
 \fIpen\fP sets the attributes for the particular line.  Default values for annotated contours:
 width = 3, color = black, texture = solid.  Regular contours have default width = 1.
 .TP
-.B \fB-MXG\fP\fIfill\fP 
+.B \-MXG
+\fIfill\fP 
+.br
 Select filling of symbols for xy plotting.  
 Set the shade (0\-255) or color 
 (r/g/b) [Default is no fill]. To reset no fill,
@@ -505,7 +571,9 @@ To invert black and white pixels, use
 \fBGMTs\fP Cookbook & Technical Reference
 Appendix E for information on individual patterns.
 .TP
-.B \fB-MXI\fP\fIxy_file \fP
+.B \-MXI
+\fIxy_file \fP
+.br
 Specifies a file containing (x,y) pairs to be plotted
 as lines or symbols. The line and symbol characteristics
 are set using the last \fB-MXG\fP, \fB-MXS\fP, and \fB-MXW\fP
@@ -515,7 +583,9 @@ commands together the user can plot different files
 using different line or symbol characteristics.
 [Default is a solid black line].
 .TP
-.B \fB-MXS\fP\fIsymbol/size\fP 
+.B \-MXS
+\fIsymbol/size\fP 
+.br
 Selects symbol to be used for plotting the next xy data
 file. Setting \fIsymbol\fP = "N" causes line plotting.
 Choose between:
@@ -578,18 +648,26 @@ unchanged.)
 .B \-MXSx
 cross.  Give length in inch.
 .TP
-.B \fB-MXW\fP\fIpen\fP]
-Set pen attributes for xy plotting.  [Defaults: width = 1, color = 0/0/0, 
+.B \-MXW
+\fIpen\fP
+.br
+Set pen attributes for xy plotting. See chapter 4.12 in the
+GMT Technical reference for a discussion of GMT pen values.  
+[Defaults: width = 1, color = 0/0/0, 
 texture = solid]. 
 .TP
-.B \fB-O\fIroot\fP
+.B \-O
+\fIroot\fP
+.br
 Sets the root used to construct the filename of the output shellscript
 (\fIroot\fP.cmd) and names of files created when the shellscript is 
 run.  Normally the 
 name of the input grid file or grid file list is 
 used as the \fIroot\fP. 
 .TP
-.B \fB-P\fIpagesize\fP
+.B \-P
+\fIpagesize\fP
+.br
 This option sets the size of the page the plot will be centered
 on. If the user does not set the plot scale, the plot will be
 sized as large as will fit on the designated page. If the user
@@ -644,7 +722,7 @@ The supported page sizes are:
 
 The default page size is A.
 .TP
-.B \fB-Q\fP
+.B \-Q
 Normally, the output plot generation shellscript 
 includes lines which execute
 a program to display the Postscript image on the screen.  
@@ -657,7 +735,9 @@ using \fBmbdefaults\fP;
 the default value can be overridden by setting the environment
 variable $MB_PS_VIEWER. 
 .TP
-.B \fB-R\fIwest/east/south/north\fP
+.B \-R
+\fIwest/east/south/north\fP
+.br
 \fIwest, east, south,\fP and \fInorth\fP specify the Region of interest.  To specify boundaries
 in degrees and minutes [and seconds], use the dd:mm[:ss] format.  Append \fBr\fP if lower left and upper right
 map coordinates are given instead of wesn.
@@ -665,7 +745,9 @@ You may ask for a larger \fIw/e/s/n\fP region to have more room between the imag
 A smaller region than specified in the grdfile will result in a subset of the grid [Default is
 region given by the grdfile].
 .TP
-.B \fB-S\fP\fI[color/shade]\fP
+.B \-S
+\fI[color/shade]\fP
+.br
 This option enables effective histogram equalization of the
 color and/or shading of the gridded data. The equalization is
 not achieved by changing the data values, but rather by
@@ -682,19 +764,23 @@ setting \fIshade\fP = 1 will cause the shading to be equalized.
 Using \fB-S\fP\fI0/1\fP will equalize the shading without
 equalizing the color table.
 .TP
-.B \fB-U\fIorientation\fP
+.B \-U
+\fIorientation\fP
+.br
 Normally the orientation of the plot (portrait or landscape)
 is selected automatically so as to maximize the plot scale.
 The \fB-U\fP option allows the user to set the plot orientation. If
 \fIorientation\fP = 1, a portrait plot will be produced; if
 \fIorientation\fP = 2, a landscape plot will be produced.
 .TP
-.B \fB-V\fP
+.B \-V
 Causes \fBmbm_grdplot\fP to operate in "verbose" mode 
 so that it outputs
 more information than usual.
 .TP
-.B \fB-W\fP\fIcolor_style\fP[\fI/pallette\fP[\fIncolors\fP]]
+.B \-W
+\fIcolor_style\fP[\fI/pallette\fP[\fIncolors\fP]]
+.br
 This option controls the color scheme used for color
 fill plots. If \fIcolor_style\fP = 1 [default], then
 the color scheme used will be a continuous grading
@@ -766,12 +852,12 @@ values used in plotting, whether the colors are
 represented in a continuous color scale or a
 stepped, discrete color scale [default is 11].
 .TP
-.B \fB-X\fP
+.B \-X
 Normally, \fBmbm_grdplot\fP creates an executable shellscript and
 then exits.  This option will cause the shellscript to be executed
 in the background before \fBmbm_grdplot\fP exits.
 .TP
-.B \fB-Y\fP
+.B \-Y
 Normally, \fBmbm_grdplot\fP generates nicely rounded numbers
 for the boundaries of the color pallette. Often, the resulting
 color bounds extend well outside the range of the gridded data.
@@ -779,7 +865,9 @@ This option causes
 the color boundaries to be uniformly distributed between the
 minimum and maximum values of the grid.
 .TP
-.B \fB-Z\fP\fImin/max\fP
+.B \-Z
+\fImin/max\fP
+.br
 This option overrides the minimum and maximum values of
 the gridded data, affecting the color pallette and the
 contour interval if those parameters are not specified

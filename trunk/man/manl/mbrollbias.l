@@ -1,4 +1,4 @@
-.TH mbrollbias l "25 March 1997" "MB-System 4.5" "MB-System 4.5"
+.TH mbrollbias l "17 September 1997" "MB-System 4.5" "MB-System 4.5"
 .SH NAME
 \fBmbrollbias\fP - Assess roll bias of swath sonar sonar systems.
 
@@ -40,7 +40,9 @@ Palisades, NY 10964
 
 .SH OPTIONS
 .TP
-.B \fB-F\fIformat1/format2\fP
+.B \-F
+\fIformat1/format2\fP
+.br
 Sets the \fBMBIO\fP format identifiers for the first and
 second data files, respectively.
 This program uses the \fBMBIO\fP library and will read or write any swath sonar
@@ -48,7 +50,9 @@ format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page.
 .TP
-.B \fB-D\fIxdim/ydim\fP
+.B \-D
+\fIxdim/ydim\fP
+.br
 The area specified using the \fB-R\fP option is divided up into
 a grid of rectangular regions; roll bias calculations are done
 in each of these regions providing sufficient data is available
@@ -57,17 +61,23 @@ region grid.  Use \fIxdim\fP = \fIydim\fP = 1 to make one
 calculation for the entire area.
 Default:  \fIxdim\fP = \fIydim\fP = 1.
 .TP
-.B \fB-H\fP
+.B \-H
 This "help" flag cause the program to print out a description
 of its operation and then exit immediately.
 .TP
-.B \fB-I\fIfile1\fP
+.B \-I
+\fIfile1\fP
+.br
 Sets the filename of the first data file to be analyzed.
 .TP
-.B \fB-J\fIfile2\fP
+.B \-J
+\fIfile2\fP
+.br
 Sets the filename of the second data file to be analyzed.
 .TP
-.B \fB-L\fIlonflip\fP
+.B \-L
+\fIlonflip\fP
+.br
 Sets the range of the longitude values returned.
 If \fIlonflip\fP=-1 then the longitude values will be in
 the range from -360 to 0 degrees. If \fIlonflip\fP=0 
@@ -77,10 +87,12 @@ then the longitude values will be in
 the range from 0 to 360 degrees.
 Default: \fIlonflip\fP = 0.
 .TP
-.B \fB-R\fIwest/east/south/north\fP
+.B \-R
+\fIwest/east/south/north\fP
+.br
 Sets the longitude and latitude bounds of the area of the roll bias test.
 .TP
-.B \fB-V\fP
+.B \-V
 The \fB-V\fP option causes the program to print out the program name
 and version during execution.
 .SH EXAMPLE
@@ -94,7 +106,7 @@ Run \fBmbrollbias\fP as follows:
 The output looks like:
 
  Program mbrollbias
- Version $Id: mbrollbias.l,v 4.8 1997-04-21 17:19:14 caress Exp $
+ Version $Id: mbrollbias.l,v 4.9 1997-09-17 19:22:06 caress Exp $
  MB-system Version 4.00
 
  mbrollbias Parameters:

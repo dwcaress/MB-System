@@ -1,4 +1,4 @@
-.TH mbsystem l "25 March 1997" "MB-System 4.5" "MB-System 4.5"
+.TH mbsystem l "17 September 1997" "MB-System 4.5" "MB-System 4.5"
 .SH NAME
 \fBmbsystem\fP - A set of utilities for manipulating and 
 processing swath sonar bathymetry, amplitude, and sidescan data.
@@ -44,7 +44,7 @@ installed on Sun workstations running under SunOS4.1 and Solaris,
 Silicon Graphics (SGI)
 workstations running under IRIX, Hewlett Packard workstations,
 486 and Pentium PC's running under the Lynx 
-operating system, PC's running under the public domain
+operating system, and PC's running under the public domain
 LINUX operatings system.
 
 .SH AUTHORSHIP

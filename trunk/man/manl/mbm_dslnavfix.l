@@ -1,4 +1,4 @@
-.TH mbm_dslnavfix l "25 July 1997" "MB-System 4.5" "MB-System 4.5"
+.TH mbm_dslnavfix l "16 September 1997" "MB-System 4.5" "MB-System 4.5"
 .SH NAME
 \fBmbm_dslnavfix\fP - Translate WHOI DSL AMS-120 navigation from
 UTM eastings and northings to longitude and latitude.
@@ -71,7 +71,9 @@ Palisades, NY 10964
 
 .SH OPTIONS
 .TP
-.B \fB-E\fIellipsoid\fP
+.B \-E
+\fIellipsoid\fP
+.br
 This option sets the ellipsoid used in the UTM projection.
 The choices are:
  	WGS-84		1984 World Geodetic System
@@ -90,24 +92,30 @@ The choices are:
 .br
 Default: Clarke-1866 as per USGS standard.
 .TP
-.B \fB-H\fP
+.B \-H
 This "help" flag cause the program to print out a description
 of its operation and then exit immediately.
 .TP
-.B \fB-I\fIfilename\fP
+.B \-I
+\fIfilename\fP
+.br
 Sets the input WHOI DSL AMS-120 navigation filename.
 .TP
-.B \fB-J\fIutm_zone\fP
+.B \-J
+\fIutm_zone\fP
+.br
 Sets the UTM zone used for the translation. The UTM zones
 are 6 degrees wide in longitude and begin with zone 1 extending
 from 180 W to 174 W, zone 2 extending from 174 W to 168 W, and
 so on through zone 60. Negative zone
 values are used for the Southern Hemisphere. 
 .TP
-.B \fB-O\fIoutfile\fP
+.B \-O
+\fIoutfile\fP
+.br
 Sets the output filename for the translated navigation. 
 .TP
-.B \fB-V\fP
+.B \-V
 Causes \fBmbm_plot\fP to operate in "verbose" mode 
 so that it outputs
 more information than usual.
@@ -149,11 +157,6 @@ The output will appear as follows:
  Done...
 
 .SH BUGS
-This macro assumes that the WHOI DSL navigation is
-always eastings and northings in meters obtained by 
-a UTM projection using the Clarke-1866 ellipsoid
-(as specified by the USGS standard). Use of different
-ellipsoids or projections by WHOI DSL will cause this
-program to output plausible but erroneous results.
+Let us know...
 
 

@@ -1,4 +1,4 @@
-.TH mbanglecorrect l "25 March 1997" "MB-System 4.5" "MB-System 4.5"
+.TH mbanglecorrect l "17 September 1997" "MB-System 4.5" "MB-System 4.5"
 .SH NAME
 \fBmbanglecorrect\fP - Apply a grazing angle correction to beam
 amplitude or sidescan data in swath sonar data.
@@ -63,7 +63,9 @@ Palisades, NY 10964
 
 .SH OPTIONS
 .TP
-.B \fB-A\fIkind/scale\fP
+.B \-A
+\fIkind/scale\fP
+.br
 Determines whether beam amplitude (\fIkind\fP = 1) 
 or sidescan (\fIkind\fP = 2) data will be processed. 
 Also determines the scaling factor \fIscale\fP which
@@ -80,19 +82,23 @@ short integers so that possible values range from 0 to
 65535, a choice of \fIscale\fP = 1000 works well). 
 Default: \fIkind\fP = 2, \fIscale\fP = 1000.
 .TP
-.B \fB-B\fIyr/mo/da/hr/mn/sc\fP
+.B \-B
+\fIyr/mo/da/hr/mn/sc\fP
+.br
 Sets the starting time for data allowed in the input data; pings
 with times before the starting time will be ignored. 
 Default: \fIyr/mo/da/hr/mn/sc\fP = 1962/2/21/10/30/0.
 .TP
-.B \fB-C\fP
+.B \-C
 Normally, if \fBmbbackangle\fP generates the grazing angle
 correction locally, the correction is forced to be symmetric 
 about the vertical
 (zero angle) axis. If \fB-C\fP is specified, the local amplitude
 vs grazing angle function will not be forced to be symmetric.
 .TP
-.B \fB-D\fImode/length\fP
+.B \-D
+\fImode/length\fP
+.br
 Sets the manner in which the local grazing angle correction
 is calculated. If \fImode\fP = 1, then the local correction
 function will be calculated for the current ping using the
@@ -103,12 +109,16 @@ correction will be calculated for the current ping using all
 pings which are within \fIlength\fP km of the current ping
 along the shiptrack.
 .TP
-.B \fB-E\fIyr/mo/da/hr/mn/sc\fP
+.B \-E
+\fIyr/mo/da/hr/mn/sc\fP
+.br
 Sets the ending time for data allowed in the input data; pings
 with times after the ending time will be ignored. 
 Default: \fIyr/mo/da/hr/mn/sc\fP = 2062/2/21/10/30/0.
 .TP
-.B \fB-F\fIformat\fP
+.B \-F
+\fIformat\fP
+.br
 Sets the data format used in reading the input from stdin
 or from a file. This program uses the \fBMBIO\fP library 
 and will read or write any swath sonar
@@ -116,30 +126,34 @@ format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page. Default: \fIformat\fP = 11.
 .TP
-.B \fB-G\fP
+.B \-G
 This option forces the grazing angle correction to be made using
 a flat seafloor assumption, so that seafloor slopes are ignored
 even if bathymetry is available. 
 .TP
-.B \fB-H\fP
+.B \-H
 This "help" flag causes the program to print out a description
 of its operation and then exit immediately.
 .TP
-.B \fB-I\fIinfile\fP
+.B \-I
+\fIinfile\fP
+.br
 Sets the input swath sonar data filename. 
 This program uses the \fBMBIO\fP library and will read or write any swath sonar
 format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page. Default: \fIinfile\fP = "stdin".
 .TP
-.B \fB-K\fP
+.B \-K
 This option causes the correction to be made by subtracting
 the modeled value from the observed and then adding the \fIscale\fP 
 value defined with the \fB-A\fP option. The "subtraction" mode
 of correction is appropriate for log scaled data (e.g. amplitude
 or backscatter values reported in dB).
 .TP
-.B \fB-L\fIbuffersize\fP
+.B \-L
+\fIbuffersize\fP
+.br
 Sets the maximum number of data records which can be
 read into the buffer. In general, data records may be
 of several different types (e.g. parameter, position, 
@@ -154,13 +168,17 @@ for most cases, but users can set the buffer size as required.
 The absolute maximum buffer size is 5000. 
 Default: \fIbuffersize\fP = 500.
 .TP
-.B \fB-M\fInsmooth\fP
+.B \-M
+\fInsmooth\fP
+.br
 Causes the bathymetry to be smoothed prior to the calculation
 of seafloor slopes. An acrosstrack boxcar mean filter is applied
 extending \fInsmooth\fP beams to either side of each beam
 (2 * \fInsmooth\fP + 1).
 .TP
-.B \fB-N\fInangle/angle\fP
+.B \-N
+\fInangle/angle\fP
+.br
 The amplitude vs grazing angle table is calculated by binning the
 amplitude values according to their grazing angles and averaging
 the amplitudes within each bin. This option sets the number of
@@ -171,25 +189,31 @@ grazing angle bins (\fInangle\fP) and the maximum angle considered
 so that the middle bin is centered on the angle 0.0.
 Default: \fInangle\fP = 161, \fIangle\fP = 80.0.
 .TP
-.B \fB-O\fIoutfile\fP
+.B \-O
+\fIoutfile\fP
+.br
 Data file to which the output data will be written. The \fBMBIO\fP
 format id used is the same as for the input data. If
 no output file is specified, the output will be written to
 stdout. Default: \fIoutfile\fP = stdout.
 .TP
-.B \fB-R\fIwest/east/south/north\fP
+.B \-R
+\fIwest/east/south/north\fP
+.br
 Sets the longitude and latitude bounds within which swath sonar 
 data will be read. Only the data which lies within these bounds will
 be copied. 
 Default: \fIwest\fP=-360, east\fI=360\fP, \fIsouth\fP=-90, \fInorth\fP=90.
 .TP
-.B \fB-S\fIcorrectionfile\fP
+.B \-S
+\fIcorrectionfile\fP
+.br
 Data file from which a global grazing angle correction function
 is read. If the \fB-S\fP option is not used, then local corrections
 will be calculated using the parameters specified with the
 \fB-D\fP and \fB-N\fP options.
 .TP
-.B \fB-V\fP
+.B \-V
 Normally, \fBmbanglecorrect\fP works "silently" without outputting
 anything to the stderr stream.  If the
 \fB-V\fP flag is given, then \fBmbanglecorrect\fP works in a "verbose" 
@@ -197,7 +221,9 @@ mode and outputs the program version being used, the values
 of some important control parameters, and 
 all error status messages.
 .TP
-.B \fB-Z\fIdepth\fP
+.B \-Z
+\fIdepth\fP
+.br
 This option specifies a default depth value in meters to be
 used whenever bathymetry values are unavailable. A flat seafloor
 (zero slope) will be assumed wherever the default depth needs

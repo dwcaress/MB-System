@@ -1,4 +1,4 @@
-.TH mbmask l "25 March 1997" "MB-System 4.5" "MB-System 4.5"
+.TH mbmask l "17 September 1997" "MB-System 4.5" "MB-System 4.5"
 .SH NAME
 \fBmbmask\fP, \fBmbgetmask\fP - Extract multibeam data flags from one
 file and apply to another.
@@ -9,7 +9,7 @@ Version 4.5
 .SH SYNOPSIS
 \fBmbgetmask\fP [\fB-F\fPformat \fB-B\fPyr/mo/da/hr/mn/sc \fB-E\fPyr/mo/da/hr/mn/sc \fB-S\fPspeed \fB-I\fPinfile \fB-V -H\fP]
 .br
-\fBmbmask\fP [\fB-F\fIformat \fB-M\fMmaskfile\fP \fB-I\fIinfile \fB-O\fIoutfile \fB-V -H\fP]
+\fBmbmask\fP [\fB-F\fIformat \fB-M\fPmaskfile\fP \fB-I\fIinfile \fB-O\fIoutfile \fB-V -H\fP]
 
 .SH DESCRIPTION
 Multibeam bathymetry data is typically edited either with interactive
@@ -46,17 +46,23 @@ Palisades, NY 10964
 
 .SH MBGETMASK OPTIONS
 .TP
-.B \fB-B\fIyr/mo/da/hr/mn/sc\fP
+.B \-B
+\fIyr/mo/da/hr/mn/sc\fP
+.br
 Sets the starting time for data allowed in the input data; pings
 with times before the starting time will be ignored. 
 Default: \fIyr/mo/da/hr/mn/sc\fP = 1962/2/21/10/30/0.
 .TP
-.B \fB-E\fIyr/mo/da/hr/mn/sc\fP
+.B \-E
+\fIyr/mo/da/hr/mn/sc\fP
+.br
 Sets the ending time for data allowed in the input data; pings
 with times after the ending time will be ignored. 
 Default: \fIyr/mo/da/hr/mn/sc\fP = 2062/2/21/10/30/0.
 .TP
-.B \fB-F\fIformat\fP
+.B \-F
+\fIformat\fP
+.br
 Sets the format for the input and output multibeam data using 
 \fBMBIO\fP integer format identifiers. 
 These utilities uses the \fBMBIO\fP library and will read any multibeam
@@ -64,21 +70,25 @@ format supported by \fBMBIO\fP. A list of the multibeam data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page.
 .TP
-.B \fB-H\fP
+.B \-H
 This "help" flag causes the program to print out a description
 of its operation and then exit immediately.
 .TP
-.B \fB-I\fIinfile\fP
+.B \-I
+\fIinfile\fP
+.br
 Data file from which the input data will be read. If
 no input file is specified, the input will be read
 from stdin. Default: \fIinfile\fP = stdin.
 .TP
-.B \fB-S\fIspeed\fP
+.B \-S
+\fIspeed\fP
+.br
 Sets the minimum speed in km/hr (5.5 kts ~ 10 km/hr) allowed in 
 the input data; pings associated with a smaller ship speed will not be
 copied. Default: \fIspeed\fP = 0.
 .TP
-.B \fB-V\fP
+.B \-V
 Normally, \fBmbgetmask\fP works "silently" without outputting
 anything to the stderr stream.  If the
 \fB-V\fP flag is given, then \fBmbmask\fP works in a "verbose" mode and
@@ -86,11 +96,13 @@ outputs the program version being used and all error status messages.
 
 .SH MBMASK OPTIONS
 .TP
-.B \fB-H\fP
+.B \-H
 This "help" flag causes the program to print out a description
 of its operation and then exit immediately.
 .TP
-.B \fB-F\fIformat\fP
+.B \-F
+\fIformat\fP
+.br
 Sets the format for the input and output multibeam data using 
 \fBMBIO\fP integer format identifiers. 
 These utilities uses the \fBMBIO\fP library and will read any multibeam
@@ -98,20 +110,26 @@ format supported by \fBMBIO\fP. A list of the multibeam data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page.
 .TP
-.B \fB-I\fIinfile\fP
+.B \-I
+\fIinfile\fP
+.br
 Data file from which the input data will be read. If
 no input file is specified, the input will be read
 from stdin. Default: \fIinfile\fP = stdin.
 .TP
-.B \fB-M\fImaskfile\fP
+.B \-M
+\fImaskfile\fP
+.br
 Input file containing a data flagging mask created by \fBmbgetmask\fP.
 .TP
-.B \fB-O\fIoutfile\fP
+.B \-O
+\fIoutfile\fP
+.br
 Data file to which the output data will be written. If
 no output file is specified, the output will be written to
 stdout. Default: \fIoutfile\fP = stdout.
 .TP
-.B \fB-V\fP
+.B \-V
 Normally, \fBmbmask\fP works "silently" without outputting
 anything to the stderr stream.  If the
 \fB-V\fP flag is given, then \fBmbmask\fP works in a "verbose" mode and
