@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbfilter.c	1/16/95
- *    $Id: mbfilter.c,v 4.8 1997-07-25 14:28:10 caress Exp $
+ *    $Id: mbfilter.c,v 4.9 1997-10-03 18:59:04 caress Exp $
  *
  *    Copyright (c) 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -30,6 +30,9 @@
  * Date:	January 16, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.8  1997/07/25  14:28:10  caress
+ * Version 4.5beta2
+ *
  * Revision 4.7  1997/04/21  17:19:14  caress
  * MB-System 4.5 Beta Release.
  *
@@ -122,7 +125,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbfilter.c,v 4.8 1997-07-25 14:28:10 caress Exp $";
+	static char rcs_id[] = "$Id: mbfilter.c,v 4.9 1997-10-03 18:59:04 caress Exp $";
 	static char program_name[] = "MBFILTER";
 	static char help_message[] =  
 "mbfilter applies one or more simple filters to the specified\n\t\
@@ -474,8 +477,8 @@ The default input and output streams are stdin and stdout.\n";
 	if (datakind == MBFILTER_BATH 
 		&& beams_bath_table[format_num] <= 0)
 		{
-		fprintf(stderr,"\nProgram <%s> requires bathymetry data.\n",program_name);
-		fprintf(stderr,"Format %d is unacceptable because it does not inlude sidescan data.\n",format);
+		fprintf(stderr,"\nProgram <%s> is in bathymetry mode.\n",program_name);
+		fprintf(stderr,"Format %d is unacceptable because it does not include sidescan data.\n",format);
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
 		error = MB_ERROR_BAD_FORMAT;
@@ -484,8 +487,8 @@ The default input and output streams are stdin and stdout.\n";
 	if (datakind == MBFILTER_SS 
 		&& pixels_ss_table[format_num] <= 0)
 		{
-		fprintf(stderr,"\nProgram <%s> requires sidescan data.\n",program_name);
-		fprintf(stderr,"Format %d is unacceptable because it does not inlude sidescan data.\n",format);
+		fprintf(stderr,"\nProgram <%s> is in sidescan mode.\n",program_name);
+		fprintf(stderr,"Format %d is unacceptable because it does not include sidescan data.\n",format);
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
 		error = MB_ERROR_BAD_FORMAT;
@@ -494,8 +497,8 @@ The default input and output streams are stdin and stdout.\n";
 	if (datakind == MBFILTER_AMP 
 		&& beams_amp_table[format_num] <= 0)
 		{
-		fprintf(stderr,"\nProgram <%s> requires amplitude data.\n",program_name);
-		fprintf(stderr,"Format %d is unacceptable because it does not inlude amplitude data.\n",format);
+		fprintf(stderr,"\nProgram <%s> is in amplitude mode.\n",program_name);
+		fprintf(stderr,"Format %d is unacceptable because it does not include amplitude data.\n",format);
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
 		error = MB_ERROR_BAD_FORMAT;
@@ -1488,7 +1491,7 @@ int	*error;
 	/* sort values and get median value */
 	if (n > 0)
 		{
-		sort(n, val);
+		sort(n, val-1);
 		*hipass = val[0] - val[n/2] + off;
 		}
 
@@ -1678,7 +1681,7 @@ int	*error;
 	/* sort values and get median value */
 	if (n > 0)
 		{
-		sort(n, val);
+		sort(n, val-1);
 		*smooth = val[n/2];
 		}
 
@@ -1964,7 +1967,7 @@ double *r;
 			r[i+m] = tr;
 			}
 		}
-
+		
 	return(status);
 }
 /*--------------------------------------------------------------------*/
