@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad.h	8/5/94
- *	$Id: mbsys_simrad.h,v 4.0 1994-10-21 12:35:09 caress Exp $
+ *	$Id: mbsys_simrad.h,v 4.1 1996-07-26 21:06:00 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -15,16 +15,21 @@
  * to store data from Simrad EM-1000 and EM-12 multibeam sonar systems.
  * The data formats which are commonly used to store Simrad 
  * data in files include
- *      MBF_EM1000   : MBIO ID 51
- *      MBF_EM12S    : MBIO ID 52
- *      MBF_EM12D    : MBIO ID 53
+ *      MBF_EM1000RW : MBIO ID 51
+ *      MBF_EM12SRAW : MBIO ID 52
+ *      MBF_EM12DRAW : MBIO ID 53 - not supported yet
  *      MBF_EM12DARW : MBIO ID 54
+ *      MBF_EM121RAW : MBIO ID 55
+ *      MBF_EM3000RW : MBIO ID 56 - not supported yet
  *
  *
  * Author:	D. W. Caress (L-DEO)
  * Date:	August 5, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.0  1994/10/21  12:35:09  caress
+ * Release V4.0
+ *
  * Revision 1.1  1994/10/21  12:20:01  caress
  * Initial revision
  *
@@ -35,10 +40,10 @@
  * Notes on the MBSYS_SIMRAD data structure:
  *   1. Simrad multibeam systems output datagrams which are
  *      a combination of ascii and binary.
- *   2. Simrad EM-1000 and EM-12 systems output both bathymetry
+ *   2. Simrad multibeam sonars output both bathymetry
  *      and amplitude information for beams and sidescan information
  *      with a higher resolution than the bathymetry and amplitude.
- *   3. There are three systems of interest:
+ *   3. There are five systems of interest:
  *         EM-1000:  Shallow water system with up to 60 beams of
  *                   bathymetry and up to 523 sidescan samples per
  *                   bathymetry beam.
@@ -50,6 +55,12 @@
  *                   calculated and recorded separately) and up
  *                   to 523 sidescan samples per bathymetry beam.
  *                   *** At present, the EM-12D is not supported! **
+ *         EM-121:   Single array deep water system with up to 121
+ *                   beams of bathymetry and up to 523 sidescan
+ *                   samples per bathymetry beam.
+ *         EM-3000:  Single array shallow water system with up to 81
+ *                   beams of bathymetry and up to 523 sidescan
+ *                   samples per bathymetry beam.
  *   4. Each telegram is preceded by a two byte start code and
  *      followed by a three byte end code consisting of 0x03
  *      followed by two bytes representing the checksum for
@@ -64,6 +75,7 @@
  *         0x0294: EM-12D starboard bathymetry            923 data bytes
  *         0x0295: EM-12D port bathymetry                 923 data bytes
  *         0x0296: EM-12S bathymetry                      923 data bytes
+ *         0x0288: EM-121 bathymetry                      1375 data bytes
  *         0x0297: EM-1000 bathymetry                     692 data bytes
  *         0x02C8: EM-12D port sidescan                   551 data bytes
  *         0x02C9: EM-12D starboard sidescan              551 data bytes
@@ -90,10 +102,12 @@
 #define	MBSYS_SIMRAD_EM12D	2
 #define	MBSYS_SIMRAD_EM100	3
 #define	MBSYS_SIMRAD_EM1000	4
+#define	MBSYS_SIMRAD_EM121	5
+#define	MBSYS_SIMRAD_EM3000	6
 
 /* maximum number of beams and pixels */
 #define	MBSYS_SIMRAD_MAXBEAMS	162
-#define	MBSYS_SIMRAD_MAXPIXELS	50*MBSYS_SIMRAD_MAXBEAMS
+#define	MBSYS_SIMRAD_MAXPIXELS	100*MBSYS_SIMRAD_MAXBEAMS
 #define	MBSYS_SIMRAD_COMMENT_LENGTH	80
 
 /* datagram types */
@@ -106,6 +120,7 @@
 #define	EM_12DS_BATH		0x0294
 #define	EM_12DP_BATH		0x0295
 #define	EM_12S_BATH		0x0296
+#define	EM_121_BATH		0x0288
 #define	EM_1000_BATH		0x0297
 #define	EM_12DP_SS		0x02C8
 #define	EM_12DS_SS		0x02C9
@@ -123,6 +138,7 @@
 #define	EM_12DS_BATH_SIZE	923
 #define	EM_12DP_BATH_SIZE	923
 #define	EM_12S_BATH_SIZE	923
+#define	EM_121_BATH_SIZE	1375
 #define	EM_1000_BATH_SIZE	692
 #define	EM_12DP_SS_SIZE		551
 #define	EM_12DS_SS_SIZE		551
@@ -216,6 +232,7 @@ struct mbsys_simrad_struct
 	/* bathymetry */
 	int	beams_bath;	/* EM-1000:  60
 				   EM12S:    81
+				   EM121:   121 
 				   EM12D:   162 */
 	int	bath_mode;	/* EM-1000: 1=deep; 2=medium; 3=shallow 
 				   EM-12S:  1=shallow equiangle spacing
@@ -235,11 +252,25 @@ struct mbsys_simrad_struct
 	int	bath_res;	/* EM-12 only: 1=high res; 2=low res */
 	int	bath_quality;	/* number of good beams, 
 					negative if ping rejected */
+	int	bath_num;	/* number of beams, EM-121 only, 61 or 121 */
+	int	pulse_length;	/* pulse length in ms, EM-121 only */
+	int	beam_width;	/* beam width in degree, 1, 2 or 4, EM-121 only */
+	int	power_level;	/* power level, 0-5, EM-121 only */
+	int	tx_status;	/* 0-58, EM-121 only */
+	int	rx_status;	/* 0-144, EM-121 only */
+	int	along_res;	/* alongtrack resolution, 0.01 m, EM-121 only */
+	int	across_res;	/* acrosstrack resolution, 0.01 m, EM-121 only */
+	int	depth_res;	/* depth resolution, 0.01 m, EM-121 only */
+	int	range_res;	/* range resolution, 0.1 ms, EM-121 only */
 	int	keel_depth;	/* depth of most vertical beam:
 					EM-1000:        0.02 meters 
 					EM-12 high res: 0.10 meters 
-					EM-12 low res:  0.20 meters */
-	int	heading;	/* 0.1 degrees */
+					EM-12 low res:  0.20 meters
+					EM-121          depth_res meters */
+	int	heading;	/* heading:
+					EM-1000:        0.1 degrees
+					EM-12:          0.1 degrees
+					EM-121:		0.01 degrees */
 	int	roll;		/* 0.01 degrees */
 	int	pitch;		/* 0.01 degrees */
 	int	xducer_pitch;	/* 0.01 degrees */
@@ -249,25 +280,29 @@ struct mbsys_simrad_struct
 				/* depths:
 					EM-1000:        0.02 meters 
 					EM-12 high res: 0.10 meters 
-					EM-12 low res:  0.20 meters */
+					EM-12 low res:  0.20 meters
+					EM-121:         depth_res meters */
 	short int bath_acrosstrack[MBSYS_SIMRAD_MAXBEAMS];
 				/* acrosstrack distances:
 					EM-1000:         0.1 meters 
 					EM-12 high res:  0.2 meters 
-					EM-12 low res:   0.5 meters */
+					EM-12 low res:   0.5 meters
+					EM-121:          across_res meters */
 	short int bath_alongtrack[MBSYS_SIMRAD_MAXBEAMS];
 				/* alongtrack distances:
 					EM-1000:         0.1 meters 
 					EM-12 high res:  0.2 meters 
-					EM-12 low res:   0.5 meters */
+					EM-12 low res:   0.5 meters
+					EM-121:          along_res meters */
 	short int tt[MBSYS_SIMRAD_MAXBEAMS];	/* meters */
 				/* travel times:
 					EM-1000:         0.05 msec 
 					EM-12 high res:  0.20 msec 
-					EM-12 low res:   0.80 msec */
-	short int amp[MBSYS_SIMRAD_MAXBEAMS];		/* 0.5 dB */
-	short int quality[MBSYS_SIMRAD_MAXBEAMS];	/* meters */
-	short int heave[MBSYS_SIMRAD_MAXBEAMS];		/* 0.1 meters */
+					EM-12 low res:   0.80 msec
+					EM-121:          range_res meters */
+	signed char	amp[MBSYS_SIMRAD_MAXBEAMS];	/* 0.5 dB */
+	unsigned char	quality[MBSYS_SIMRAD_MAXBEAMS];	/* meters */
+	signed char	heave[MBSYS_SIMRAD_MAXBEAMS];	/* 0.1 meters */
 	
 	/* sidescan */
 	int	pixels_ss;	/* total number of samples for this ping */
@@ -290,6 +325,7 @@ struct mbsys_simrad_struct
 	short int beam_start_sample[MBSYS_SIMRAD_MAXBEAMS];
 				/* start beam sample number among samples
 					from entire ping */
-	short int ss[MBSYS_SIMRAD_MAXPIXELS];
+	signed char ss[MBSYS_SIMRAD_MAXPIXELS];
+	short int ssp[MBSYS_SIMRAD_MAXPIXELS];
 
 	};

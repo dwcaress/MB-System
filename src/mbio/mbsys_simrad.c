@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad.c	3.00	8/5/94
- *	$Id: mbsys_simrad.c,v 4.8 1996-04-22 13:21:19 caress Exp $
+ *	$Id: mbsys_simrad.c,v 4.9 1996-07-26 21:06:00 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -16,10 +16,12 @@
  * multibeam sonar systems.
  * The data formats which are commonly used to store EM-12
  * data in files include
- *      MBF_EM1000   : MBIO ID 51
- *      MBF_EM12S    : MBIO ID 52
- *      MBF_EM12D    : MBIO ID 53
+ *      MBF_EM1000RW : MBIO ID 51
+ *      MBF_EM12SRAW : MBIO ID 52
+ *      MBF_EM12DRAW : MBIO ID 53 - not supported yet
  *      MBF_EM12DARW : MBIO ID 54
+ *      MBF_EM121RAW : MBIO ID 55
+ *      MBF_EM3000RW : MBIO ID 56 - not supported yet
  *
  * These functions include:
  *   mbsys_simrad_alloc	  - allocate memory for mbsys_simrad_struct structure
@@ -40,6 +42,9 @@
  * Date:	August 5, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.8  1996/04/22  13:21:19  caress
+ * Now have DTR and MIN/MAX defines in mb_define.h
+ *
  * Revision 4.7  1996/04/22  10:57:09  caress
  * DTR define now in mb_io.h
  *
@@ -91,7 +96,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_simrad.c,v 4.8 1996-04-22 13:21:19 caress Exp $";
+ static char res_id[]="$Id: mbsys_simrad.c,v 4.9 1996-07-26 21:06:00 caress Exp $";
 	char	*function_name = "mbsys_simrad_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -198,11 +203,23 @@ int	*error;
 	store->minute = 0;
 	store->second = 0;
 	store->centisecond = 0;
+	
+	/* bathymetry and sidescan */
 	store->ping_number = 0;
 	store->beams_bath = MBSYS_SIMRAD_MAXBEAMS;
 	store->bath_mode = 0;
 	store->bath_res = 0;
 	store->bath_quality = 0;
+	store->bath_num = 0;
+	store->pulse_length = 0;
+	store->beam_width = 0;
+	store->power_level = 0;
+	store->tx_status = 0;
+	store->rx_status = 0;
+	store->along_res = 0;
+	store->across_res = 0;
+	store->depth_res = 0;
+	store->range_res = 0;
 	store->keel_depth = 0;
 	store->heading = 0;
 	store->roll = 0;
@@ -229,6 +246,7 @@ int	*error;
 	for (i=0;i<MBSYS_SIMRAD_MAXPIXELS;i++)
 		{
 		store->ss[i] = 0;
+		store->ssp[i] = 0;
 		}
 
 	/* print output debug statements */
@@ -321,7 +339,7 @@ int	*error;
 	struct mbsys_simrad_struct *store;
 	int	ntime_i[7];
 	double	ntime_d;
-	short int *beam_ss;
+	signed char *beam_ss;
 	double	ss_spacing;
 	double	dd;
 	double	mtodeglon, mtodeglat;
@@ -400,7 +418,10 @@ int	*error;
 			}
 
 		/* get heading */
-		*heading = 0.1*store->heading;
+		if (store->sonar == MBSYS_SIMRAD_EM121)
+			*heading = 0.01 * store->heading;
+		else
+			*heading = 0.1 * store->heading;
 
 		/* get speed  */
 		*speed = 3.6*store->speed;
@@ -418,7 +439,8 @@ int	*error;
 			ttscale    = 0.05;
 			reflscale  = 0.5;
 			}
-		else if (store->bath_res == 1)
+		else if (store->sonar == MBSYS_SIMRAD_EM12S 
+			&& store->bath_res == 1)
 			{
 			depthscale = 0.1;
 			dacrscale  = 0.2;
@@ -426,12 +448,21 @@ int	*error;
 			ttscale    = 0.2;
 			reflscale  = 0.5;
 			}
-		else if (store->bath_res == 2)
+		else if (store->sonar == MBSYS_SIMRAD_EM12S 
+			&& store->bath_res == 2)
 			{
 			depthscale = 0.2;
 			dacrscale  = 0.5;
 			daloscale  = 0.5;
 			ttscale    = 0.8;
+			reflscale  = 0.5;
+			}
+		else if (store->sonar == MBSYS_SIMRAD_EM121)
+			{
+			depthscale = 0.01 * store->depth_res;
+			dacrscale  = 0.01 * store->across_res;
+			daloscale  = 0.01 * store->along_res;
+			ttscale    = 0.1 * store->range_res;
 			reflscale  = 0.5;
 			}
 		else
@@ -462,7 +493,10 @@ int	*error;
 			}
 		for (i=0;i<*namp;i++)
 			{
-			amp[i] = reflscale*store->amp[i] + 200;
+			if (store->bath[i] != 0)
+				amp[i] = reflscale*store->amp[i] + 64;
+			else
+				amp[i] = 0;
 			}
 		*nss = 0;
 		for (i=0;i<*nbath;i++)
@@ -470,7 +504,7 @@ int	*error;
 			beam_ss = &store->ss[store->beam_start_sample[i]];
 			for (j=0;j<store->beam_samples[i];j++)
 				{
-				ss[*nss] = beam_ss[j];
+				ss[*nss] = reflscale*beam_ss[j] + 64;
 				ssacrosstrack[*nss] = dacrscale*bathacrosstrack[i] 
 					+ ss_spacing*
 					(j - store->beam_center_sample[i]);
@@ -706,7 +740,10 @@ int	*error;
 		store->centisecond = time_i[6]/10000;
 
 		/* get heading */
-		store->heading = (int) (heading * 10);
+		if (store->sonar == MBSYS_SIMRAD_EM121)
+			store->heading = (int) (heading * 100);
+		else
+			store->heading = (int) (heading * 10);
 
 		/* get speed  */
 		store->speed = speed/3.6;
@@ -723,6 +760,12 @@ int	*error;
 			else if (nbath <= 81)
 				{
 				store->sonar = MBSYS_SIMRAD_EM12S;
+				store->bath_mode = 0;
+				store->bath_res = 2;
+				}
+			else if (nbath <= 121)
+				{
+				store->sonar = MBSYS_SIMRAD_EM121;
 				store->bath_mode = 0;
 				store->bath_res = 2;
 				}
@@ -746,7 +789,8 @@ int	*error;
 			ttscale    = 0.05;
 			reflscale  = 0.5;
 			}
-		else if (store->bath_res == 1)
+		else if (store->sonar == MBSYS_SIMRAD_EM12S 
+			&& store->bath_res == 1)
 			{
 			depthscale = 0.1;
 			dacrscale  = 0.2;
@@ -754,12 +798,21 @@ int	*error;
 			ttscale    = 0.2;
 			reflscale  = 0.5;
 			}
-		else if (store->bath_res == 2)
+		else if (store->sonar == MBSYS_SIMRAD_EM12S 
+			&& store->bath_res == 2)
 			{
 			depthscale = 0.2;
 			dacrscale  = 0.5;
 			daloscale  = 0.5;
 			ttscale    = 0.8;
+			reflscale  = 0.5;
+			}
+		else if (store->sonar == MBSYS_SIMRAD_EM121)
+			{
+			depthscale = 0.01 * store->depth_res;
+			dacrscale  = 0.01 * store->across_res;
+			daloscale  = 0.01 * store->along_res;
+			ttscale    = 0.1 * store->range_res;
 			reflscale  = 0.5;
 			}
 		else
@@ -779,14 +832,18 @@ int	*error;
 				}
 			for (i=0;i<namp;i++)
 				{
-				store->amp[i] = amp[i]/reflscale - 200;
+				if (store->bath[i] != 0)
+					store->amp[i] = (amp[i] - 64) 
+						/ reflscale;
+				else
+					store->amp[i] = 0;
 				}
 			}
 		if (status == MB_SUCCESS && nss == store->pixels_ss)
 			{
 			for (i=0;i<store->pixels_ss;i++)
 				{
-				store->ss[i] = ss[i];
+				store->ss[i] = (ss[i] - 64) / reflscale;
 				}
 			}
 		}
@@ -870,10 +927,16 @@ int	*error;
 		/* get travel times, angles, and flags */
 		if (store->sonar == MBSYS_SIMRAD_EM1000)
 			ttscale = 0.05;
-		else if (store->bath_res == 1)
-			ttscale = 0.2;
-		else if (store->bath_res == 2)
-			ttscale = 0.8;
+		else if (store->sonar == MBSYS_SIMRAD_EM12S 
+			&& store->bath_res == 1)
+			ttscale    = 0.2;
+		else if (store->sonar == MBSYS_SIMRAD_EM12S 
+			&& store->bath_res == 2)
+			ttscale    = 0.8;
+		else if (store->sonar == MBSYS_SIMRAD_EM121)
+			ttscale    = 0.1 * store->range_res;
+		else
+			ttscale    = 0.2;
 		for (i=0;i<mb_io_ptr->beams_bath;i++)
 			{
 			ttimes[i] = ttscale*store->tt[i];
@@ -974,7 +1037,7 @@ int	*error;
 	struct mbsys_simrad_struct *store;
 	int	ntime_i[7];
 	double	ntime_d;
-	short int *beam_ss;
+	signed char *beam_ss;
 	double	ss_spacing;
 	double	dd;
 	double	mtodeglon, mtodeglat;
@@ -1053,7 +1116,10 @@ int	*error;
 			}
 
 		/* get heading */
-		*heading = 0.1*store->heading;
+		if (store->sonar == MBSYS_SIMRAD_EM121)
+			*heading = 0.01 * store->heading;
+		else
+			*heading = 0.1 * store->heading;
 
 		/* get speed  */
 		*speed = 3.6*store->speed;
@@ -1234,7 +1300,10 @@ int	*error;
 		store->centisecond = time_i[6]/10000;
 
 		/* get heading */
-		store->heading = (int) (heading * 10);
+		if (store->sonar == MBSYS_SIMRAD_EM121)
+			store->heading = (int) (heading * 100);
+		else
+			store->heading = (int) (heading * 10);
 
 		/* get speed  */
 		store->speed = speed/3.6;

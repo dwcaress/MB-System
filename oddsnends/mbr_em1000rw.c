@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em1000rw.c	8/8/94
- *	$Id: mbr_em1000rw.c,v 4.3 1996-04-22 13:21:19 caress Exp $
+ *	$Id: mbr_em1000rw.c,v 4.4 1996-07-26 21:06:00 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	August 8, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1996/04/22  13:21:19  caress
+ * Now have DTR and MIN/MAX defines in mb_define.h
+ *
  * Revision 4.2  1996/04/22  10:57:09  caress
  * DTR define now in mb_io.h
  *
@@ -60,7 +63,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_em1000rw.c,v 4.3 1996-04-22 13:21:19 caress Exp $";
+	static char res_id[]="$Id: mbr_em1000rw.c,v 4.4 1996-07-26 21:06:00 caress Exp $";
 	char	*function_name = "mbr_alm_em1000rw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -317,10 +320,10 @@ int	*error;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbf_em1000rw_struct *data;
 	struct mbsys_simrad_struct *store;
-	short int *data_ss, *store_ss;
+	signed char *data_ss;
+	signed char *store_ss;
 	int	ntime_i[7];
 	double	ntime_d;
-	short int *beam_ss;
 	double	ss_spacing;
 	double	dd;
 	double	mtodeglon, mtodeglat;
@@ -545,7 +548,7 @@ int	*error;
 			}
 		for (i=0;i<mb_io_ptr->beams_amp;i++)
 			{
-			mb_io_ptr->new_amp[i] = reflscale*data->amp[i] + 200;
+			mb_io_ptr->new_amp[i] = reflscale * data->amp[i] + 64;
 			}
 		mb_io_ptr->pixels_ss = 0;
 		for (i=0;i<mb_io_ptr->beams_bath;i++)
@@ -554,7 +557,7 @@ int	*error;
 			for (j=0;j<data->beam_samples[i];j++)
 				{
 				mb_io_ptr->new_ss[mb_io_ptr->pixels_ss] 
-					= data_ss[j];
+					= reflscale * data_ss[j] + 64;
 				mb_io_ptr->new_ss_acrosstrack[mb_io_ptr->pixels_ss] 
 					= dacrscale*data->bath_acrosstrack[i] 
 					+ ss_spacing*
@@ -800,9 +803,8 @@ int	*error;
 	int	time_j[5];
 	double	depthscale, dacrscale, daloscale, ttscale, reflscale;
 	int	iss;
-	short int *data_ss;
-	short int *store_ss;
-	short int *beam_ss;
+	signed char *data_ss;
+	signed char *store_ss;
 	int	i, j;
 
 	/* print input debug statements */
@@ -994,14 +996,14 @@ int	*error;
 				}
 			for (i=0;i<mb_io_ptr->beams_bath;i++)
 				{
-				data->amp[i] = mb_io_ptr->new_amp[i]/reflscale - 200;
+				data->amp[i] = (mb_io_ptr->new_amp[i] - 64) / reflscale;
 				}
 			}
 		if (status == MB_SUCCESS && mb_io_ptr->pixels_ss == data->pixels_ss)
 			{
 			for (i=0;i<data->pixels_ss;i++)
 				{
-				data->ss[i] = mb_io_ptr->new_ss[i];
+				data->ss[i] = (mb_io_ptr->new_ss[i] -64) / reflscale;
 				}
 			}
 		}
@@ -1112,6 +1114,17 @@ int	*error;
 			*error = MB_ERROR_NO_ERROR;
 			status = MB_SUCCESS;
 			}
+		else if (*type != EM_START
+			&& *type != EM_STOP
+			&& *type != EM_PARAMETER
+			&& *type != EM_POS
+			&& *type != EM_SVP
+			&& *type != EM_1000_BATH
+			&& *type != EM_12S_SS)
+			{
+	/*fprintf(stderr,"call nothing, try again\n");*/
+			done = MB_NO;
+			}
 		else if (expect != EM_NONE && expect != *type)
 			{
 	/*fprintf(stderr,"call nothing, expect %x but got type %x\n",expect,*type);*/
@@ -1215,7 +1228,7 @@ int	*error;
 
 		/* bail out if there is an error */
 		if (status == MB_FAILURE)
-			done == MB_YES;
+			done = MB_YES;
 
 /*		fprintf(stderr,"end of mbr_em1000rw_rd_data loop:\n");
 		fprintf(stderr,"done:%d\n",done);
@@ -1851,11 +1864,11 @@ int	*error;
 			short_ptr = ((short int *) beamarray) + 3; 
 			data->tt[i] = *short_ptr;
 			char_ptr = beamarray + 8; 
-			data->amp[i] = (short int) *char_ptr;
+			data->amp[i] = *char_ptr;
 			char_ptr = beamarray + 9; 
-			data->quality[i] = (short int) *char_ptr;
+			data->quality[i] = *char_ptr;
 			char_ptr = beamarray + 10; 
-			data->heave[i] = (short int) *char_ptr;
+			data->heave[i] = *char_ptr;
 			}
 #else
 		short_ptr = (short int *) &line[14]; 
@@ -1896,11 +1909,11 @@ int	*error;
 			short_ptr = ((short int *) beamarray) + 3; 
 			data->tt[i] = (short int) mb_swap_short(*short_ptr);
 			char_ptr = beamarray + 8; 
-			data->amp[i] = (short int) *char_ptr;
+			data->amp[i] = *char_ptr;
 			char_ptr = beamarray + 9; 
-			data->quality[i] = (short int) *char_ptr;
+			data->quality[i] = *char_ptr;
 			char_ptr = beamarray + 10; 
-			data->heave[i] = (short int) *char_ptr;
+			data->heave[i] = *char_ptr;
 			}
 #endif
 		}
@@ -1969,7 +1982,7 @@ int	*error;
 	int	datagram;
 	int	num_beams;
 	int	beamlist[MBF_EM1000RW_MAXBEAMS];
-	short int *beam_ss;
+	signed char *beam_ss;
 	int	ioffset;
 	int	i, j;
 
@@ -2046,7 +2059,7 @@ int	*error;
 			for (j=0;j<data->beam_samples[beamlist[i]];j++)
 				{
 				data->ss[data->pixels_ss] = 
-					((int) line[ioffset]) + 200;
+					line[ioffset]);
 				data->pixels_ss++;
 				ioffset++;
 				}
@@ -2085,7 +2098,7 @@ int	*error;
 			for (j=0;j<data->beam_samples[beamlist[i]];j++)
 				{
 				data->ss[data->pixels_ss] = 
-					((int) line[ioffset]) + 200;
+					line[ioffset];
 				data->pixels_ss++;
 				ioffset++;
 				}
@@ -2274,18 +2287,18 @@ int	*error;
 		fprintf(stderr,"dbg5       centisecond:      %d\n",data->par_centisecond);
 		fprintf(stderr,"dbg5       pos_type:         %d\n",data->pos_type);
 		fprintf(stderr,"dbg5       pos_delay:        %f\n",data->pos_delay);
-		fprintf(stderr,"dbg5       roll_offset:      %f\n",data->pos_delay);
-		fprintf(stderr,"dbg5       pitch_offset:     %f\n",data->pos_delay);
-		fprintf(stderr,"dbg5       heading_offset:   %f\n",data->pos_delay);
-		fprintf(stderr,"dbg5       em100_td:         %f\n",data->pos_delay);
-		fprintf(stderr,"dbg5       em100_tx:         %f\n",data->pos_delay);
-		fprintf(stderr,"dbg5       em100_ty:         %f\n",data->pos_delay);
-		fprintf(stderr,"dbg5       em12_td:          %f\n",data->pos_delay);
-		fprintf(stderr,"dbg5       em12_tx:          %f\n",data->pos_delay);
-		fprintf(stderr,"dbg5       em12_ty:          %f\n",data->pos_delay);
-		fprintf(stderr,"dbg5       em1000_td:        %f\n",data->pos_delay);
-		fprintf(stderr,"dbg5       em1000_tx:        %f\n",data->pos_delay);
-		fprintf(stderr,"dbg5       em1000_ty:        %f\n",data->pos_delay);
+		fprintf(stderr,"dbg5       roll_offset:      %f\n",data->roll_offset);
+		fprintf(stderr,"dbg5       pitch_offset:     %f\n",data->pitch_offset);
+		fprintf(stderr,"dbg5       heading_offset:   %f\n",data->heading_offset);
+		fprintf(stderr,"dbg5       em100_td:         %f\n",data->em100_td);
+		fprintf(stderr,"dbg5       em100_tx:         %f\n",data->em100_tx);
+		fprintf(stderr,"dbg5       em100_ty:         %f\n",data->em100_ty);
+		fprintf(stderr,"dbg5       em12_td:          %f\n",data->em12_td);
+		fprintf(stderr,"dbg5       em12_tx:          %f\n",data->em12_tx);
+		fprintf(stderr,"dbg5       em12_ty:          %f\n",data->em12_ty);
+		fprintf(stderr,"dbg5       em1000_td:        %f\n",data->em1000_td);
+		fprintf(stderr,"dbg5       em1000_tx:        %f\n",data->em1000_tx);
+		fprintf(stderr,"dbg5       em1000_ty:        %f\n",data->em1000_ty);
 		fprintf(stderr,"dbg5       survey_line:      %d\n",data->survey_line);
 		fprintf(stderr,"dbg5       comment:          %s\n",data->comment);
 		}
@@ -3043,11 +3056,11 @@ int	*error;
 			short_ptr = ((short int *) beamarray) + 3; 
 			*short_ptr = (short int) data->tt[i];
 			char_ptr = beamarray + 8; 
-			*char_ptr = (char) data->amp[i];
+			*char_ptr = data->amp[i];
 			char_ptr = beamarray + 9; 
-			*char_ptr = (char) data->quality[i];
+			*char_ptr = data->quality[i];
 			char_ptr = beamarray + 10; 
-			*char_ptr = (char) data->heave[i];
+			*char_ptr = data->heave[i];
 			for (j=0;j<11;j++)
 				line[32+11*i+j] = beamarray[j];
 			}
@@ -3087,11 +3100,11 @@ int	*error;
 			*short_ptr = (short int) 
 				mb_swap_short((short int)data->tt[i]);
 			char_ptr = beamarray + 8; 
-			*char_ptr = (char) data->amp[i];
+			*char_ptr = data->amp[i];
 			char_ptr = beamarray + 9; 
-			*char_ptr = (char) data->quality[i];
+			*char_ptr = data->quality[i];
 			char_ptr = beamarray + 10; 
-			*char_ptr = (char) data->heave[i];
+			*char_ptr = data->heave[i];
 			for (j=0;j<11;j++)
 				line[32+11*i+j] = beamarray[j];
 			}
@@ -3149,7 +3162,7 @@ int	*error;
 	int	datagram_end[MBF_EM1000RW_MAXBEAMS+1];
 	int	datagram_size[MBF_EM1000RW_MAXBEAMS+1];
 	int	new_datagram_size;
-	short int *beam_ss;
+	signed char *beam_ss;
 	int	ioffset;
 	int	odatagram, obeam;
 	short int oss;
@@ -3364,8 +3377,7 @@ int	*error;
 			for (j=0;j<data->beam_samples[i];j++)
 				{
 				char_ptr = &line[ioffset+j];
-				oss = beam_ss[j] - 200;
-				*char_ptr = (char) oss;
+				*char_ptr = beam_ss[j];
 				}
 			ioffset = ioffset + data->beam_samples[i];
 			}
@@ -3412,8 +3424,7 @@ int	*error;
 			for (j=0;j<data->beam_samples[i];j++)
 				{
 				char_ptr = line + ioffset + j;
-				oss = beam_ss[j] - 200;
-				*char_ptr = (char) oss;
+				*char_ptr = beam_ss[j];
 				}
 			ioffset = ioffset + data->beam_samples[i];
 			}
