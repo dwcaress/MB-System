@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrid.c	5/2/94
- *    $Id: mbgrid.c,v 5.12 2002-10-04 21:22:02 caress Exp $
+ *    $Id: mbgrid.c,v 5.13 2002-10-15 18:20:12 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
@@ -38,6 +38,9 @@
  * Rererewrite:	January 2, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.12  2002/10/04 21:22:02  caress
+ * Now resets lonflip to specified bounds. Release 5.0.beta24.
+ *
  * Revision 5.11  2002/10/02 23:56:06  caress
  * Release 5.0.beta24
  *
@@ -330,7 +333,7 @@ double erfcc();
 double mbgrid_erf();
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbgrid.c,v 5.12 2002-10-04 21:22:02 caress Exp $";
+static char rcs_id[] = "$Id: mbgrid.c,v 5.13 2002-10-15 18:20:12 caress Exp $";
 static char program_name[] = "mbgrid";
 static char help_message[] =  "mbgrid is an utility used to grid bathymetry, amplitude, or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbgrid -Ifilelist -Oroot \
@@ -2215,7 +2218,6 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 		    mb_free(verbose,&amp,&error); 
 		    mb_free(verbose,&ss,&error); 
 		    mb_free(verbose,&sslon,&error); 
-		    mb_free(verbose,&sslat,&error); 
 		    status = MB_SUCCESS;
 		    error = MB_ERROR_NO_ERROR;
 		    }
