@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbbath.c	3/31/93
- *    $Id: mbbath.c,v 4.19 1996-01-26 21:25:58 caress Exp $
+ *    $Id: mbbath.c,v 4.20 1996-04-22 13:23:05 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -20,6 +20,9 @@
  * Date:	March 31, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.19  1996/01/26  21:25:58  caress
+ * Version 4.3 distribution
+ *
  * Revision 4.18  1995/10/23  19:32:03  caress
  * Now user specified draught is added to depth offset rather
  * than replacing it.
@@ -127,18 +130,10 @@
 #include <string.h>
 
 /* mbio include files */
-#include "../../include/mb_status.h"
 #include "../../include/mb_format.h"
+#include "../../include/mb_status.h"
+#include "../../include/mb_define.h"
 #include "../../include/mbsys_sb2100.h"
-
-/* DTR define */
-#ifndef M_PI
-#define	M_PI	3.14159265358979323846
-#endif
-#define DTR	(M_PI/180.)
-
-/* max define */
-#define	max(A, B)	((A) > (B) ? (A) : (B))
 
 /*--------------------------------------------------------------------*/
 
@@ -147,7 +142,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbbath.c,v 4.19 1996-01-26 21:25:58 caress Exp $";
+	static char rcs_id[] = "$Id: mbbath.c,v 4.20 1996-04-22 13:23:05 caress Exp $";
 	static char program_name[] = "MBBATH";
 	static char help_message[] =  "MBBATH calculates bathymetry from \
 the travel time data by raytracing \nthrough a layered water velocity \
@@ -1245,8 +1240,8 @@ and stdout.";
 					{
 					if (fabs(bath[i]) > 0.0)
 						{
-						value_max = max(fabs(bath[i]),value_max);
-						value_max = max(fabs(bathacrosstrack[i]),value_max);
+						value_max = MAX(fabs(bath[i]),value_max);
+						value_max = MAX(fabs(bathacrosstrack[i]),value_max);
 						}
 					}
 

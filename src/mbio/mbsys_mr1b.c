@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_mr1b.c	7/19/94
- *	$Id: mbsys_mr1b.c,v 4.1 1996-04-22 11:16:30 caress Exp $
+ *	$Id: mbsys_mr1b.c,v 4.2 1996-04-22 13:21:19 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -34,6 +34,9 @@
  * Date:	July 19, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.1  1996/04/22  11:16:30  caress
+ * DTR define now in mb_io.h
+ *
  * Revision 4.0  1996/03/12  17:23:04  caress
  * initial version.
  *
@@ -55,6 +58,7 @@
 #include "../../include/mb_status.h"
 #include "../../include/mb_format.h"
 #include "../../include/mb_io.h"
+#include "../../include/mb_define.h"
 #include "../../include/mbsys_mr1b.h"
 
 /*--------------------------------------------------------------------*/
@@ -64,7 +68,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_mr1b.c,v 4.1 1996-04-22 11:16:30 caress Exp $";
+ static char res_id[]="$Id: mbsys_mr1b.c,v 4.2 1996-04-22 13:21:19 caress Exp $";
 	char	*function_name = "mbsys_mr1b_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

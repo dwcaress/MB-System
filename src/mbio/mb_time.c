@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_time.c	1/21/93
- *    $Id: mb_time.c,v 4.7 1996-03-11 15:33:52 caress Exp $
+ *    $Id: mb_time.c,v 4.8 1996-04-22 13:21:19 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -18,6 +18,10 @@
  * Date:	January 21, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.7  1996/03/11  15:33:52  caress
+ * Fixed handling of leap days as per note from Suzanne O'Hara
+ * on the R/V Palmer.
+ *
  * Revision 4.6  1995/03/06  19:38:54  caress
  * Changed include strings.h to string.h for POSIX compliance.
  *
@@ -67,6 +71,7 @@
 
 /* mbio include files */
 #include "../../include/mb_status.h"
+#include "../../include/mb_define.h"
 
 /* time conversion constants and variables */
 #define SECINYEAR 31536000.0
@@ -75,7 +80,7 @@
 #define SECINMINUTE     60.0
 #define IMININHOUR 60
 int	yday[] = {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334};
-static char rcs_id[]="$Id: mb_time.c,v 4.7 1996-03-11 15:33:52 caress Exp $";
+static char rcs_id[]="$Id: mb_time.c,v 4.8 1996-04-22 13:21:19 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 /* 	function mb_get_time returns the number of seconds from

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbswath.c	5/30/93
- *    $Id: mbswath.c,v 4.17 1995-11-28 21:06:16 caress Exp $
+ *    $Id: mbswath.c,v 4.18 1996-04-22 13:20:25 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -27,6 +27,9 @@
  * Date:	May 30, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.17  1995/11/28  21:06:16  caress
+ * Fixed scaling for meters to feet.
+ *
  * Revision 4.16  1995/11/22  22:13:02  caress
  * Now handles bathymetry in feet with -W option.
  *
@@ -126,13 +129,10 @@
 /* MBIO include files */
 #include "../../include/mb_status.h"
 #include "../../include/mb_format.h"
+#include "../../include/mb_define.h"
 
 /* GMT include files */
 #include "gmt.h"
-
-/* min max defines */
-#define      min(A, B)       ((A) < (B) ? (A) : (B))
-#define      max(A, B)       ((A) > (B) ? (A) : (B))
 
 /* MBSWATH MODE DEFINES */
 #define	MBSWATH_BATH		1
@@ -144,12 +144,6 @@
 #define MBSWATH_FOOTPRINT_REAL	1
 #define MBSWATH_FOOTPRINT_FAKE	2
 #define MBSWATH_FOOTPRINT_POINT	3
-
-/* DTR define */
-#ifndef M_PI
-#define	M_PI	3.14159265358979323846
-#endif
-#define DTR	(M_PI/180.)
 
 /* global structure definitions */
 #define MAXPINGS 50
@@ -217,7 +211,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbswath.c,v 4.17 1995-11-28 21:06:16 caress Exp $";
+	static char rcs_id[] = "$Id: mbswath.c,v 4.18 1996-04-22 13:20:25 caress Exp $";
 	static char program_name[] = "MBSWATH";
 	static char help_message[] =  "MBSWATH is a GMT compatible utility which creates a color postscript \nimage of multibeam swath bathymetry or backscatter data.  The image \nmay be shaded relief as well.  Complete maps are made by using \nMBSWATH in conjunction with the usual GMT programs.";
 	static char usage_message[] = "mbswath -Ccptfile -Jparameters -Rwest/east/south/north \n\t[-Afactor -Btickinfo -byr/mon/day/hour/min/sec \n\t-ccopies -Dmode/ampscale/ampmin/ampmax \n\t-Eyr/mon/day/hour/min/sec -fformat \n\t-Fred/green/blue -Gmagnitude/azimuth -Idatalist \n\t-K -Ncptfile -O -P -ppings -Qdpi -Ttimegap -U -W -Xx-shift -Yy-shift \n\t-Zmode -V -H]";
@@ -693,14 +687,14 @@ char **argv;
 				&shadelevel[nshadelevel+1], &r2, &g2, &b2);
 			shadelevelgray[nshadelevel] = (int)(r1 + g1 + b1)/3;
 			shadelevelgray[nshadelevel] = 
-				min(255, shadelevelgray[nshadelevel]);
+				MIN(255, shadelevelgray[nshadelevel]);
 			shadelevelgray[nshadelevel] = 
-				max(0, shadelevelgray[nshadelevel]);
+				MAX(0, shadelevelgray[nshadelevel]);
 			shadelevelgray[nshadelevel+1] = (int)(r2 + g2 + b2)/3;
 			shadelevelgray[nshadelevel+1] = 
-				min(255, shadelevelgray[nshadelevel+1]);
+				MIN(255, shadelevelgray[nshadelevel+1]);
 			shadelevelgray[nshadelevel+1] = 
-				max(0, shadelevelgray[nshadelevel+1]);
+				MAX(0, shadelevelgray[nshadelevel+1]);
 			if (count == 8)
 				nshadelevel++;
 			}
@@ -966,8 +960,8 @@ char **argv;
 				    }
 				else if (amp[i] > 0 && ampscale_mode == 2)
 				    {
-				    amp[i] = min(amp[i],ampmax);
-				    amp[i] = max(amp[i],ampmin);
+				    amp[i] = MIN(amp[i],ampmax);
+				    amp[i] = MAX(amp[i],ampmin);
 				    amp[i] = ampscale*(amp[i] - ampmin)
 					/(ampmax - ampmin);
 				    }
@@ -980,8 +974,8 @@ char **argv;
 				else if (amp[i] > 0 && ampscale_mode == 4)
 				    {
 				    amplog = 20.0*log10(amp[i]);
-				    amplog = min(amplog,ampmax);
-				    amplog = max(amplog,ampmin);
+				    amplog = MIN(amplog,ampmax);
+				    amplog = MAX(amplog,ampmin);
 				    amp[i] = ampscale*(amplog - ampmin)
 					   /(ampmax - ampmin);
 				    }
@@ -1012,8 +1006,8 @@ char **argv;
 				    }
 				else if (ss[i] > 0 && ampscale_mode == 2)
 				    {
-				    ss[i] = min(ss[i],ampmax);
-				    ss[i] = max(ss[i],ampmin);
+				    ss[i] = MIN(ss[i],ampmax);
+				    ss[i] = MAX(ss[i],ampmin);
 				    ss[i] = ampscale*(ss[i] - ampmin)
 					/(ampmax - ampmin);
 				    }
@@ -1026,8 +1020,8 @@ char **argv;
 				else if (ss[i] > 0 && ampscale_mode == 4)
 				    {
 				    amplog = 20.0*log10(ss[i]);
-				    amplog = min(amplog,ampmax);
-				    amplog = max(amplog,ampmin);
+				    amplog = MIN(amplog,ampmax);
+				    amplog = MAX(amplog,ampmin);
 				    ss[i] = ampscale*(amplog - ampmin)
 					   /(ampmax - ampmin);
 				    }

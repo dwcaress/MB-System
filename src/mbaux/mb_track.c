@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_track.c	8/15/93
- *    $Id: mb_track.c,v 4.3 1995-03-06 19:39:52 caress Exp $
+ *    $Id: mb_track.c,v 4.4 1996-04-22 13:18:44 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -17,6 +17,9 @@
  * Date:	August, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1995/03/06  19:39:52  caress
+ * Changed include strings.h to string.h for POSIX compliance.
+ *
  * Revision 4.2  1994/10/21  11:34:20  caress
  * Release V4.0
  *
@@ -47,11 +50,9 @@
 /* mbio include files */
 #include "../../include/mb_status.h"
 #include "../../include/mb_contour.h"
+#include "../../include/mb_define.h"
 
 /* global array dimensions etc */
-#define PI 3.1415926
-#define DTR PI/180.
-#define RTD 180./PI
 #define IUP 3
 #define IDN 2
 #define IOR -3
@@ -63,7 +64,7 @@ int	verbose;
 struct swath *data;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_track.c,v 4.3 1995-03-06 19:39:52 caress Exp $";
+  	static char rcs_id[]="$Id: mb_track.c,v 4.4 1996-04-22 13:18:44 caress Exp $";
 	char	*function_name = "mb_track";
 	int	status = MB_SUCCESS;
 	int	time_tick, time_annot, date_annot;

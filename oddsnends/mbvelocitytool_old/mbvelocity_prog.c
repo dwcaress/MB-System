@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbvelocitytool.c	6/6/93
- *    $Id: mbvelocity_prog.c,v 4.13 1996-02-16 18:27:11 caress Exp $
+ *    $Id: mbvelocity_prog.c,v 4.14 1996-04-22 13:22:47 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -23,6 +23,9 @@
  * Date:	June 6, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.13  1996/02/16  18:27:11  caress
+ * Changed labels from Water Velocity to Water Sound Velocity.
+ *
  * Revision 4.12  1996/02/12  18:09:25  caress
  * Added command line arguments to specify input files at startup time.
  *
@@ -103,10 +106,8 @@
 /* MBIO include files */
 #include "../../include/mb_format.h"
 #include "../../include/mb_status.h"
+#include "../../include/mb_define.h"
 #include "../../include/mb_io.h"
-
-/* DTR define */
-#define DTR (M_PI/180.)
 
 /* velocity profile structure definition */
 struct profile
@@ -118,7 +119,7 @@ struct profile
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbvelocity_prog.c,v 4.13 1996-02-16 18:27:11 caress Exp $";
+static char rcs_id[] = "$Id: mbvelocity_prog.c,v 4.14 1996-04-22 13:22:47 caress Exp $";
 static char program_name[] = "MBVELOCITYTOOL";
 static char help_message[] = "MBVELOCITYTOOL is an interactive water velocity profile editor  \nused to examine multiple water velocity profiles and to create  \nnew water velocity profiles which can be used for the processing  \nof multibeam sonar data.  In general, this tool is used to  \nexamine water velocity profiles obtained from XBTs, CTDs, or  \ndatabases, and to construct new profiles consistent with these  \nvarious sources of information.";
 static char usage_message[] = "mbvelocitytool [-Byr/mo/da/hr/mn/sc -Ddraft -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ssvpfile -Wsvpfile -V -H]";

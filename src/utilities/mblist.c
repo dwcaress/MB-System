@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mblist.c	2/1/93
- *    $Id: mblist.c,v 4.20 1995-11-28 21:03:36 caress Exp $
+ *    $Id: mblist.c,v 4.21 1996-04-22 13:23:05 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -26,6 +26,9 @@
  *		in 1990.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.20  1995/11/28  21:03:36  caress
+ * Fixed scaling for meters to feet.
+ *
  * Revision 4.19  1995/11/22  22:21:36  caress
  * Now handles bathymetry in feet with -W option.
  *
@@ -145,13 +148,7 @@
 /* MBIO include files */
 #include "../../include/mb_status.h"
 #include "../../include/mb_format.h"
-
-/* DTR define */
-#ifndef M_PI
-#define	M_PI	3.14159265358979323846
-#endif
-#define DTR	(M_PI/180.)
-#define RTD	(180./M_PI)
+#include "../../include/mb_define.h"
 
 /* local options */
 #define	MAX_OPTIONS	25
@@ -167,7 +164,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mblist.c,v 4.20 1995-11-28 21:03:36 caress Exp $";
+	static char rcs_id[] = "$Id: mblist.c,v 4.21 1996-04-22 13:23:05 caress Exp $";
 	static char program_name[] = "MBLIST";
 	static char help_message[] =  "MBLIST prints the specified contents of a multibeam data \nfile to stdout. The form of the output is quite flexible; \nMBLIST is tailored to produce ascii files in spreadsheet \nstyle with data columns separated by tabs.";
 	static char usage_message[] = "mblist [-Byr/mo/da/hr/mn/sc -Ddump_mode -Eyr/mo/da/hr/mn/sc \n-Fformat -H -Ifile -Llonflip -Mbeam_start/beam_end -Npixel_start/pixel_end \n-Ooptions -Ppings -Rw/e/s/n -Sspeed -Ttimegap -V -W]";

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_ttimes.c	4/9/94
- *    $Id: mb_ttimes.c,v 4.7 1996-03-12 17:21:55 caress Exp $
+ *    $Id: mb_ttimes.c,v 4.8 1996-04-22 13:21:19 caress Exp $
 
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,9 @@
  * Date:	April 9, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.7  1996/03/12  17:21:55  caress
+ * Added format 63, short HMR1 processing format.
+ *
  * Revision 4.6  1995/11/27  21:49:01  caress
  * New version of mb_ttimes with ssv and angles_null.
  *
@@ -58,6 +61,7 @@
 #include "../../include/mb_status.h"
 #include "../../include/mb_format.h"
 #include "../../include/mb_io.h"
+#include "../../include/mb_define.h"
 
 /*--------------------------------------------------------------------*/
 int mb_ttimes(verbose,mbio_ptr,store_ptr,kind,nbeams,ttimes,
@@ -77,7 +81,7 @@ double	*depthadd;
 double	*ssv;
 int	*error;
 {
-  static char rcs_id[]="$Id: mb_ttimes.c,v 4.7 1996-03-12 17:21:55 caress Exp $";
+  static char rcs_id[]="$Id: mb_ttimes.c,v 4.8 1996-04-22 13:21:19 caress Exp $";
 	char	*function_name = "mb_ttimes";
 	int	status;
 	int	system;

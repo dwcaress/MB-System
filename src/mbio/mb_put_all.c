@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_put_all.c	2/4/93
- *    $Id: mb_put_all.c,v 4.3 1995-03-06 19:38:54 caress Exp $
+ *    $Id: mb_put_all.c,v 4.4 1996-04-22 13:21:19 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Date:	February 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  1995/03/06  19:38:54  caress
+ * Changed include strings.h to string.h for POSIX compliance.
+ *
  * Revision 4.2  1994/10/21  12:11:53  caress
  * Release V4.0
  *
@@ -76,6 +79,7 @@
 #include "../../include/mb_status.h"
 #include "../../include/mb_format.h"
 #include "../../include/mb_io.h"
+#include "../../include/mb_define.h"
 
 /*--------------------------------------------------------------------*/
 int mb_put_all(verbose,mbio_ptr,store_ptr,usevalues,kind,time_i,time_d,
@@ -108,7 +112,7 @@ double	*ssalongtrack;
 char	*comment;
 int	*error;
 {
-  static char rcs_id[]="$Id: mb_put_all.c,v 4.3 1995-03-06 19:38:54 caress Exp $";
+  static char rcs_id[]="$Id: mb_put_all.c,v 4.4 1996-04-22 13:21:19 caress Exp $";
 	char	*function_name = "mb_put_all";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

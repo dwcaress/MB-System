@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_truecont.c	4/21/94
- *    $Id: mb_truecont.c,v 4.5 1995-03-06 19:39:52 caress Exp $
+ *    $Id: mb_truecont.c,v 4.6 1996-04-22 13:18:44 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -28,17 +28,13 @@
 /* mbio include files */
 #include "../../include/mb_status.h"
 #include "../../include/mb_contour.h"
+#include "../../include/mb_define.h"
 
 /* global defines */
-#define PI 3.1415926
-#define DTR PI/180.
-#define RTD 180./PI
 #define IUP 3
 #define IDN 2
 #define IOR -3
 #define EPS 0.0001
-#define	min(A, B)	((A) < (B) ? (A) : (B))
-#define	max(A, B)	((A) > (B) ? (A) : (B))
 
 /*--------------------------------------------------------------------------*/
 /* 	function mb_contour_init initializes the memory required to
@@ -77,7 +73,7 @@ double	date_annot_int;
 double	time_tick_len;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_truecont.c,v 4.5 1995-03-06 19:39:52 caress Exp $";
+  	static char rcs_id[]="$Id: mb_truecont.c,v 4.6 1996-04-22 13:18:44 caress Exp $";
 	char	*function_name = "mb_contour_init";
 	int	status = MB_SUCCESS;
 	struct swath *dataptr;
@@ -333,7 +329,7 @@ int	verbose;
 struct swath *data;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_truecont.c,v 4.5 1995-03-06 19:39:52 caress Exp $";
+  	static char rcs_id[]="$Id: mb_truecont.c,v 4.6 1996-04-22 13:18:44 caress Exp $";
 	char	*function_name = "mb_contour_deall";
 	int	status = MB_SUCCESS;
 	struct ping *ping;
@@ -468,7 +464,7 @@ int	verbose;
 struct swath *data;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_truecont.c,v 4.5 1995-03-06 19:39:52 caress Exp $";
+  	static char rcs_id[]="$Id: mb_truecont.c,v 4.6 1996-04-22 13:18:44 caress Exp $";
 	char	*function_name = "mb_tcontour";
 	int	status = MB_SUCCESS;
 	struct ping *ping;
@@ -539,12 +535,12 @@ int	*error;
 			else
 				data->edge[data->npts] = 0;
 			data->pingid[data->npts] = i;
-			bathmin = min(bathmin, data->z[data->npts]);
-			bathmax = max(bathmax, data->z[data->npts]);
-			xmin = min(xmin, data->x[data->npts]);
-			xmax = max(xmax, data->x[data->npts]);
-			ymin = min(ymin, data->y[data->npts]);
-			ymax = max(ymax, data->y[data->npts]);
+			bathmin = MIN(bathmin, data->z[data->npts]);
+			bathmax = MAX(bathmax, data->z[data->npts]);
+			xmin = MIN(xmin, data->x[data->npts]);
+			xmax = MAX(xmax, data->x[data->npts]);
+			ymin = MIN(ymin, data->y[data->npts]);
+			ymax = MAX(ymax, data->y[data->npts]);
 			data->npts++;
 			}
 		}
@@ -1155,7 +1151,7 @@ int	verbose;
 struct swath *data;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_truecont.c,v 4.5 1995-03-06 19:39:52 caress Exp $";
+  	static char rcs_id[]="$Id: mb_truecont.c,v 4.6 1996-04-22 13:18:44 caress Exp $";
 	char	*function_name = "mb_ocontour";
 	int	status = MB_SUCCESS;
 	struct ping *ping;
@@ -1214,8 +1210,8 @@ int	*error;
 			}
 		if (ping->bath[j] > 0)
 			{
-			bathmin = min(bathmin, ping->bath[j]);
-			bathmax = max(bathmax, ping->bath[j]);
+			bathmin = MIN(bathmin, ping->bath[j]);
+			bathmax = MAX(bathmax, ping->bath[j]);
 			}
 		}
 	  }

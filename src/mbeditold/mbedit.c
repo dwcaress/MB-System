@@ -66,10 +66,6 @@
 #define	OUTPUT_MODE_OUTPUT	0
 #define	OUTPUT_MODE_BROWSE	1
 
-/* min max define */
-#define	min(A, B)	((A) < (B) ? (A) : (B))
-#define	max(A, B)	((A) > (B) ? (A) : (B))
-
 /************************************************************/
 /* GLOBAL VARIABLES                                         */
 /************************************************************/

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_buffer.c	2/25/93
- *    $Id: mb_buffer.c,v 4.8 1996-03-12 17:21:55 caress Exp $
+ *    $Id: mb_buffer.c,v 4.9 1996-04-22 13:21:19 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -35,6 +35,9 @@
  * Date:	February 25, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.8  1996/03/12  17:21:55  caress
+ * Added format 63, short HMR1 processing format.
+ *
  * Revision 4.7  1995/09/28  18:10:48  caress
  * Various bug fixes working toward release 4.3.
  *
@@ -106,6 +109,7 @@
 #include "../../include/mb_status.h"
 #include "../../include/mb_format.h"
 #include "../../include/mb_io.h"
+#include "../../include/mb_define.h"
 
 /*--------------------------------------------------------------------*/
 int mb_buffer_init(verbose,buff_ptr,error)
@@ -113,7 +117,7 @@ int	verbose;
 char	**buff_ptr;
 int	*error;
 {
-  static char rcs_id[]="$Id: mb_buffer.c,v 4.8 1996-03-12 17:21:55 caress Exp $";
+  static char rcs_id[]="$Id: mb_buffer.c,v 4.9 1996-04-22 13:21:19 caress Exp $";
 	char	*function_name = "mb_buffer_init";
 	int	status = MB_SUCCESS;
 	struct mb_buffer_struct *buff;

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_write_ping.c	2/3/93
- *	$Id: mb_write_ping.c,v 4.7 1996-04-22 10:57:09 caress Exp $
+ *	$Id: mb_write_ping.c,v 4.8 1996-04-22 13:21:19 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,9 @@
  * Author:	D. W. Caress
  * Date:	Febrary 3, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.7  1996/04/22  10:57:09  caress
+ * DTR define now in mb_io.h
+ *
  * Revision 4.6  1996/03/12  17:21:55  caress
  * Added format 63, short HMR1 processing format.
  *
@@ -68,6 +71,7 @@
 #include "../../include/mb_status.h"
 #include "../../include/mb_format.h"
 #include "../../include/mb_io.h"
+#include "../../include/mb_define.h"
 
 /*--------------------------------------------------------------------*/
 int mb_write_ping(verbose,mbio_ptr,store_ptr,error)
@@ -76,7 +80,7 @@ char	*mbio_ptr;
 char	*store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mb_write_ping.c,v 4.7 1996-04-22 10:57:09 caress Exp $";
+ static char res_id[]="$Id: mb_write_ping.c,v 4.8 1996-04-22 13:21:19 caress Exp $";
 	char	*function_name = "mb_write_ping";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;

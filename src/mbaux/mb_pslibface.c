@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_pslibface.c	5/15/94
- *    $Id: mb_pslibface.c,v 4.5 1995-11-15 22:34:22 caress Exp $
+ *    $Id: mb_pslibface.c,v 4.6 1996-04-22 13:18:44 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -21,6 +21,10 @@
  * Date:	May 15, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.5  1995/11/15  22:34:22  caress
+ * Now handles non-region bounds (lower left point
+ * + upper right point) properly.
+ *
  * Revision 4.4  1995/08/07  17:31:39  caress
  * Moved to GMT V3.
  *
@@ -48,6 +52,7 @@
 
 /* MBIO include files */
 #include "../../include/mb_status.h"
+#include "../../include/mb_define.h"
 
 /* GMT include files */
 #include "gmt.h"
@@ -72,7 +77,7 @@ double	*scale;
 double	*inch2lon;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_pslibface.c,v 4.5 1995-11-15 22:34:22 caress Exp $";
+  	static char rcs_id[]="$Id: mb_pslibface.c,v 4.6 1996-04-22 13:18:44 caress Exp $";
 	char	*function_name = "plot_init";
 	int	status = MB_SUCCESS;
 	int	errflg = 0;
@@ -221,7 +226,7 @@ int plot_end(verbose,error)
 int	verbose;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_pslibface.c,v 4.5 1995-11-15 22:34:22 caress Exp $";
+  	static char rcs_id[]="$Id: mb_pslibface.c,v 4.6 1996-04-22 13:18:44 caress Exp $";
 	char	*function_name = "plot_end";
 	int	status = MB_SUCCESS;
 	int	i;

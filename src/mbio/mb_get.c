@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_get.c	1/26/93
- *    $Id: mb_get.c,v 4.5 1996-04-22 10:57:09 caress Exp $
+ *    $Id: mb_get.c,v 4.6 1996-04-22 13:21:19 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,9 @@
  * Date:	January 26, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.5  1996/04/22  10:57:09  caress
+ * DTR define now in mb_io.h
+ *
  * Revision 4.4  1995/04/06  15:03:23  caress
  * Reset mb_io_ptr->error_save to MB_ERROR_NO_ERROR after it is
  * used to fix bug where time gap errors were perpetuated after
@@ -76,6 +79,7 @@
 #include "../../include/mb_status.h"
 #include "../../include/mb_format.h"
 #include "../../include/mb_io.h"
+#include "../../include/mb_define.h"
 
 /*--------------------------------------------------------------------*/
 int mb_get(verbose,mbio_ptr,kind,pings,time_i,time_d,
@@ -108,7 +112,7 @@ double	*ssalongtrack;
 char	*comment;
 int	*error;
 {
-  static char rcs_id[]="$Id: mb_get.c,v 4.5 1996-04-22 10:57:09 caress Exp $";
+  static char rcs_id[]="$Id: mb_get.c,v 4.6 1996-04-22 13:21:19 caress Exp $";
 	char	*function_name = "mb_get";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;

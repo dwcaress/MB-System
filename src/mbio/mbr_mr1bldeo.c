@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mr1bldeo.c	10/24/95
- *	$Id: mbr_mr1bldeo.c,v 1.2 1996-04-22 11:16:30 caress Exp $
+ *	$Id: mbr_mr1bldeo.c,v 1.3 1996-04-22 13:21:19 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	October 24, 1995
  * $Log: not supported by cvs2svn $
+ * Revision 1.2  1996/04/22  11:16:30  caress
+ * DTR define now in mb_io.h
+ *
  * Revision 1.1  1996/03/12  17:18:14  caress
  * Initial revision
  *
@@ -41,6 +44,7 @@
 #include "../../include/mb_status.h"
 #include "../../include/mb_format.h"
 #include "../../include/mb_io.h"
+#include "../../include/mb_define.h"
 #include "../../include/mbsys_mr1b.h"
 #include "../../include/mbf_mr1bldeo.h"
 
@@ -50,7 +54,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_mr1bldeo.c,v 1.2 1996-04-22 11:16:30 caress Exp $";
+	static char res_id[]="$Id: mbr_mr1bldeo.c,v 1.3 1996-04-22 13:21:19 caress Exp $";
 	char	*function_name = "mbr_alm_mr1bldeo";
 	int	status = MB_SUCCESS;
 	int	i;

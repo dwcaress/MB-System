@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsatlraw.c	2/11/93
- *	$Id: mbr_hsatlraw.c,v 4.8 1995-07-26 14:45:39 caress Exp $
+ *	$Id: mbr_hsatlraw.c,v 4.9 1996-04-22 13:21:19 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	February 11, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 4.8  1995/07/26  14:45:39  caress
+ * Fixed problems related to shallow water data.
+ *
  * Revision 4.7  1995/07/13  21:40:28  caress
  * Fixed problem with scaling of center beam depths.
  *
@@ -81,6 +84,7 @@
 #include "../../include/mb_status.h"
 #include "../../include/mb_format.h"
 #include "../../include/mb_io.h"
+#include "../../include/mb_define.h"
 #include "../../include/mbsys_hsds.h"
 #include "../../include/mbf_hsatlraw.h"
 
@@ -90,7 +94,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbr_hsatlraw.c,v 4.8 1995-07-26 14:45:39 caress Exp $";
+ static char res_id[]="$Id: mbr_hsatlraw.c,v 4.9 1996-04-22 13:21:19 caress Exp $";
 	char	*function_name = "mbr_alm_hsatlraw";
 	int	status = MB_SUCCESS;
 	int	i;

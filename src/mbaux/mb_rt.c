@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_rt.c	11/14/94
- *    $Id: mb_rt.c,v 4.3 1995-11-27 21:56:45 caress Exp $
+ *    $Id: mb_rt.c,v 4.4 1996-04-22 13:22:47 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -28,13 +28,7 @@
 
 /* mbio include files */
 #include "../../include/mb_status.h"
-
-/* global defines */
-#define PI 3.1415926
-#define DTR PI/180.
-#define RTD 180./PI
-#define	min(A, B)	((A) < (B) ? (A) : (B))
-#define	max(A, B)	((A) > (B) ? (A) : (B))
+#include "../../include/mb_define.h"
 
 /* raytracing defines */
 #define	MB_RT_GRADIENT_TOLERANCE    0.00001
@@ -99,7 +93,7 @@ double	*velocity;
 char	**modelptr;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_rt.c,v 4.3 1995-11-27 21:56:45 caress Exp $";
+  	static char rcs_id[]="$Id: mb_rt.c,v 4.4 1996-04-22 13:22:47 caress Exp $";
 	char	*function_name = "mb_rt_init";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -191,7 +185,7 @@ int	verbose;
 char	**modelptr;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_rt.c,v 4.3 1995-11-27 21:56:45 caress Exp $";
+  	static char rcs_id[]="$Id: mb_rt.c,v 4.4 1996-04-22 13:22:47 caress Exp $";
 	char	*function_name = "mb_rt";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -250,7 +244,7 @@ double	*travel_time;
 int	*ray_stat;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_rt.c,v 4.3 1995-11-27 21:56:45 caress Exp $";
+  	static char rcs_id[]="$Id: mb_rt.c,v 4.4 1996-04-22 13:22:47 caress Exp $";
 	char	*function_name = "mb_rt";
 	int	status = MB_SUCCESS;
 	double	diff_angle;
@@ -459,7 +453,7 @@ mb_rt_circular(verbose, error)
 int	verbose;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_rt.c,v 4.3 1995-11-27 21:56:45 caress Exp $";
+  	static char rcs_id[]="$Id: mb_rt.c,v 4.4 1996-04-22 13:22:47 caress Exp $";
 	char	*function_name = "mb_rt_circular";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -505,7 +499,7 @@ mb_rt_quad1(verbose, error)
 int	verbose;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_rt.c,v 4.3 1995-11-27 21:56:45 caress Exp $";
+  	static char rcs_id[]="$Id: mb_rt.c,v 4.4 1996-04-22 13:22:47 caress Exp $";
 	char	*function_name = "mb_rt_quad1";
 	int	status = MB_SUCCESS;
 	double	vi;
@@ -634,7 +628,7 @@ mb_rt_quad2(verbose, error)
 int	verbose;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_rt.c,v 4.3 1995-11-27 21:56:45 caress Exp $";
+  	static char rcs_id[]="$Id: mb_rt.c,v 4.4 1996-04-22 13:22:47 caress Exp $";
 	char	*function_name = "mb_rt_quad2";
 	int	status = MB_SUCCESS;
 	double	vi;
@@ -707,7 +701,7 @@ mb_rt_quad3(verbose, error)
 int	verbose;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_rt.c,v 4.3 1995-11-27 21:56:45 caress Exp $";
+  	static char rcs_id[]="$Id: mb_rt.c,v 4.4 1996-04-22 13:22:47 caress Exp $";
 	char	*function_name = "mb_rt_quad3";
 	int	status = MB_SUCCESS;
 	double	vi;
@@ -780,7 +774,7 @@ mb_rt_quad4(verbose, error)
 int	verbose;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_rt.c,v 4.3 1995-11-27 21:56:45 caress Exp $";
+  	static char rcs_id[]="$Id: mb_rt.c,v 4.4 1996-04-22 13:22:47 caress Exp $";
 	char	*function_name = "mb_rt_quad4";
 	int	status = MB_SUCCESS;
 	double	vi;
@@ -913,7 +907,7 @@ int	turn_sign;
 double	*depth;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_rt.c,v 4.3 1995-11-27 21:56:45 caress Exp $";
+  	static char rcs_id[]="$Id: mb_rt.c,v 4.4 1996-04-22 13:22:47 caress Exp $";
 	char	*function_name = "mb_rt_get_depth";
 	int	status = MB_SUCCESS;
 	double	alpha;
@@ -960,7 +954,7 @@ mb_rt_plot_circular(verbose, error)
 int	verbose;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_rt.c,v 4.3 1995-11-27 21:56:45 caress Exp $";
+  	static char rcs_id[]="$Id: mb_rt.c,v 4.4 1996-04-22 13:22:47 caress Exp $";
 	char	*function_name = "mb_rt_plot_circular";
 	int	status = MB_SUCCESS;
 	double	ai;
@@ -1013,7 +1007,7 @@ mb_rt_line(verbose, error)
 int	verbose;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_rt.c,v 4.3 1995-11-27 21:56:45 caress Exp $";
+  	static char rcs_id[]="$Id: mb_rt.c,v 4.4 1996-04-22 13:22:47 caress Exp $";
 	char	*function_name = "mb_rt_line";
 	int	status = MB_SUCCESS;
 	double	theta;
@@ -1038,7 +1032,7 @@ int	*error;
 		}
 	else
 		{
-		theta = theta + PI;
+		theta = theta + M_PI;
 		zf = model->layer_depth_top[layer];
 		}
 	xvel = model->layer_vel_top[layer] * sin(theta);
@@ -1095,7 +1089,7 @@ mb_rt_vertical(verbose, error)
 int	verbose;
 int	*error;
 {
-  	static char rcs_id[]="$Id: mb_rt.c,v 4.3 1995-11-27 21:56:45 caress Exp $";
+  	static char rcs_id[]="$Id: mb_rt.c,v 4.4 1996-04-22 13:22:47 caress Exp $";
 	char	*function_name = "mb_rt_vertical";
 	int	status = MB_SUCCESS;
 	double	vi;

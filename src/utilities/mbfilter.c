@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbfilter.c	1/16/95
- *    $Id: mbfilter.c,v 4.5 1995-11-17 22:33:12 caress Exp $
+ *    $Id: mbfilter.c,v 4.6 1996-04-22 13:23:05 caress Exp $
  *
  *    Copyright (c) 1995 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -30,6 +30,10 @@
  * Date:	January 16, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.5  1995/11/17  22:33:12  caress
+ * Fixed bug using bath data when no amp present.
+ * Bug fix provided by Dan Scheirer.
+ *
  * Revision 4.4  1995/08/17  15:04:52  caress
  * Revision for release 4.3.
  *
@@ -57,15 +61,7 @@
 /* mbio include files */
 #include "../../include/mb_status.h"
 #include "../../include/mb_format.h"
-
-/* DTR define */
-#ifndef M_PI
-#define	M_PI	3.14159265358979323846
-#endif
-#define DTR (M_PI/180.)
-#define RTD (180./M_PI)
-#define max(A, B)   ((A) > (B) ? (A) : (B))
-#define max(A, B)   ((A) > (B) ? (A) : (B))
+#include "../../include/mb_define.h"
 
 /* mode defines */
 #define	MBFILTER_BATH			0
@@ -114,7 +110,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbfilter.c,v 4.5 1995-11-17 22:33:12 caress Exp $";
+	static char rcs_id[] = "$Id: mbfilter.c,v 4.6 1996-04-22 13:23:05 caress Exp $";
 	static char program_name[] = "MBFILTER";
 	static char help_message[] =  
 "mbfilter applies one or more simple filters to the specified\n\t\
@@ -602,8 +598,8 @@ The default input and output streams are stdin and stdout.\n";
 		}
 
 	/* allocate memory for weights */
-	nweightmax = 2*max(hipass_xdim*hipass_ldim, 
-	    max(smooth_xdim*smooth_ldim, contrast_xdim*contrast_ldim) );
+	nweightmax = 2*MAX(hipass_xdim*hipass_ldim, 
+	    MAX(smooth_xdim*smooth_ldim, contrast_xdim*contrast_ldim) );
 	hipass_ndx = hipass_xdim/2;
 	hipass_ndl = hipass_ldim/2;
 	smooth_ndx = smooth_xdim/2;

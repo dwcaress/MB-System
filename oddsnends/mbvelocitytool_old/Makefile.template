@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  8/2/94
-#	$Id: Makefile.template,v 4.3 1994-11-18 18:58:19 caress Exp $
+#	$Id: Makefile.template,v 4.4 1996-04-22 13:22:47 caress Exp $
 #
 #     Copyright (c) 1993, 1994 by 
 #     D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -14,6 +14,9 @@
 # Date:		September 14, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 4.3  1994/11/18  18:58:19  caress
+# First gradient raytracing version.
+#
 # Revision 4.2  1994/10/31  20:06:09  caress
 # Change man pages from section 1 to l.
 #
@@ -69,7 +72,7 @@ mbvelocity.o: mbvelocity.c mbvelocity_define.c $(INCDIR)/mb_format.h \
 		mbvelocity_uid_loc.h
 	$(CC) $(CFLAGS) -I$(INCDIR) -I$(MOTIFINCDIR) -c mbvelocity.c
 mbvelocity_prog.o: mbvelocity_prog.c  $(INCDIR)/mb_format.h \
-		$(INCDIR)/mb_io.h $(INCDIR)/mb_status.h
+		$(INCDIR)/mb_io.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) $(CFLAGS) -I$(INCDIR) -c mbvelocity_prog.c
 mb_rt.o: mb_rt.c $(INCDIR)/mb_status.h
 	$(CC) $(CFLAGS) -I$(INCDIR) -c mb_rt.c

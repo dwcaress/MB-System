@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbunclean.c	3/10/93
- *    $Id: mbunclean.c,v 4.6 1995-05-12 17:12:32 caress Exp $
+ *    $Id: mbunclean.c,v 4.7 1996-04-22 13:23:05 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -19,6 +19,10 @@
  * Date:	March 10, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 4.6  1995/05/12  17:12:32  caress
+ * Made exit status values consistent with Unix convention.
+ * 0: ok  nonzero: error
+ *
  * Revision 4.5  1995/03/06  19:37:59  caress
  * Changed include strings.h to string.h for POSIX compliance.
  *
@@ -46,6 +50,10 @@
  *
  * Revision 3.1  1993/05/14  23:49:32  sohara
  * fixed $Log: not supported by cvs2svn $
+ * Revision 4.6  1995/05/12  17:12:32  caress
+ * Made exit status values consistent with Unix convention.
+ * 0: ok  nonzero: error
+ *
  * Revision 4.5  1995/03/06  19:37:59  caress
  * Changed include strings.h to string.h for POSIX compliance.
  *
@@ -83,6 +91,7 @@
 /* mbio include files */
 #include "../../include/mb_status.h"
 #include "../../include/mb_format.h"
+#include "../../include/mb_define.h"
 
 /*--------------------------------------------------------------------*/
 
@@ -91,7 +100,7 @@ int argc;
 char **argv; 
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbunclean.c,v 4.6 1995-05-12 17:12:32 caress Exp $";
+	static char rcs_id[] = "$Id: mbunclean.c,v 4.7 1996-04-22 13:23:05 caress Exp $";
 	static char program_name[] = "MBUNCLEAN";
 	static char help_message[] =  "MBUNCLEAN unflags multibeam bathymetry and amplitude data \nwhich has been flagged as bad by being set negative. \nThe default input and output streams are stdin and stdout.";
 	static char usage_message[] = "mbunclean [-Blow/high -Fformat -Llonflip -V -H  -Iinfile -Ooutfile]";

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_elac.c	3.00	8/20/94
- *	$Id: mbsys_elac.c,v 4.7 1996-04-22 10:57:09 caress Exp $
+ *	$Id: mbsys_elac.c,v 4.8 1996-04-22 13:21:19 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -37,6 +37,9 @@
  * Date:	August 20, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.7  1996/04/22  10:57:09  caress
+ * DTR define now in mb_io.h
+ *
  * Revision 4.6  1995/11/27  21:50:06  caress
  * New version of mb_ttimes with ssv and angles_null.
  *
@@ -75,6 +78,7 @@
 #include "../../include/mb_status.h"
 #include "../../include/mb_format.h"
 #include "../../include/mb_io.h"
+#include "../../include/mb_define.h"
 #include "../../include/mbsys_elac.h"
 
 /*--------------------------------------------------------------------*/
@@ -84,7 +88,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_elac.c,v 4.7 1996-04-22 10:57:09 caress Exp $";
+ static char res_id[]="$Id: mbsys_elac.c,v 4.8 1996-04-22 13:21:19 caress Exp $";
 	char	*function_name = "mbsys_elac_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbinfo.c	2/1/93
- *    $Id: mbinfo.c,v 4.14 1995-11-28 21:03:36 caress Exp $
+ *    $Id: mbinfo.c,v 4.15 1996-04-22 13:23:05 caress Exp $
  *
  *    Copyright (c) 1993, 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -24,6 +24,9 @@
  * Date:	February 1, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.14  1995/11/28  21:03:36  caress
+ * Fixed scaling for meters to feet.
+ *
  * Revision 4.13  1995/11/22  22:21:36  caress
  * Now handles bathymetry in feet with -W option.
  *
@@ -105,10 +108,7 @@
 
 /* MBIO include files */
 #include "../../include/mb_status.h"
-
-/* min max defines */
-#define	min(A, B)	((A) < (B) ? (A) : (B))
-#define	max(A, B)	((A) > (B) ? (A) : (B))
+#include "../../include/mb_define.h"
 
 #define MBINFO_MAXPINGS 50
 struct ping
@@ -128,7 +128,7 @@ main (argc, argv)
 int argc;
 char **argv; 
 {
-	static char rcs_id[] = "$Id: mbinfo.c,v 4.14 1995-11-28 21:03:36 caress Exp $";
+	static char rcs_id[] = "$Id: mbinfo.c,v 4.15 1996-04-22 13:23:05 caress Exp $";
 	static char program_name[] = "MBINFO";
 	static char help_message[] =  "MBINFO reads a multibeam data file and outputs \nsome basic statistics.  If pings are averaged (pings > 2) \nMBINFO estimates the variance for each of the multibeam \nbeams by reading a set number of pings (>2) and then finding \nthe variance of the detrended values for each beam. \nThe results are dumped to stdout.";
 	static char usage_message[] = "mbinfo [-Byr/mo/da/hr/mn/sc -C -Eyr/mo/da/hr/mn/sc -Fformat -Ifile -Llonflip -Ppings -Rw/e/s/n -Sspeed -V -H]";
@@ -789,10 +789,10 @@ char **argv;
 				/* get mins and maxs */
 				if (good_nav == MB_YES && beginnav == MB_YES)
 					{
-					lonmin = min(lonmin, navlon);
-					lonmax = max(lonmax, navlon);
-					latmin = min(latmin, navlat);
-					latmax = max(latmax, navlat);
+					lonmin = MIN(lonmin, navlon);
+					lonmax = MAX(lonmax, navlon);
+					latmin = MIN(latmin, navlat);
+					latmax = MAX(latmax, navlat);
 					}
 				for (i=0;i<beams_bath;i++)
 					{
@@ -800,13 +800,13 @@ char **argv;
 						{
 						if (good_nav == MB_YES && beginnav == MB_YES)
 							{
-							lonmin = min(lonmin, bathlon[i]);
-							lonmax = max(lonmax, bathlon[i]);
-							latmin = min(latmin, bathlat[i]);
-							latmax = max(latmax, bathlat[i]);
+							lonmin = MIN(lonmin, bathlon[i]);
+							lonmax = MAX(lonmax, bathlon[i]);
+							latmin = MIN(latmin, bathlat[i]);
+							latmax = MAX(latmax, bathlat[i]);
 							}
-						bathmin = min(bathmin, bath[i]);
-						bathmax = max(bathmax, bath[i]);
+						bathmin = MIN(bathmin, bath[i]);
+						bathmax = MAX(bathmax, bath[i]);
 						ngdbeams++;
 						}
 					else if (bath[i] == 0.0)
@@ -818,8 +818,8 @@ char **argv;
 					{
 					if (amp[i] > 0)
 						{
-						ampmin = min(ampmin, amp[i]);
-						ampmax = max(ampmax, amp[i]);
+						ampmin = MIN(ampmin, amp[i]);
+						ampmax = MAX(ampmax, amp[i]);
 						ngabeams++;
 						}
 					else if (amp[i] == 0.0)
@@ -833,13 +833,13 @@ char **argv;
 						{
 						if (good_nav == MB_YES && beginnav == MB_YES)
 							{
-							lonmin = min(lonmin, sslon[i]);
-							lonmax = max(lonmax, sslon[i]);
-							latmin = min(latmin, sslat[i]);
-							latmax = max(latmax, sslat[i]);
+							lonmin = MIN(lonmin, sslon[i]);
+							lonmax = MAX(lonmax, sslon[i]);
+							latmin = MIN(latmin, sslat[i]);
+							latmax = MAX(latmax, sslat[i]);
 							}
-						ssmin = min(ssmin, ss[i]);
-						ssmax = max(ssmax, ss[i]);
+						ssmin = MIN(ssmin, ss[i]);
+						ssmax = MAX(ssmax, ss[i]);
 						ngsbeams++;
 						}
 					else if (ss[i] == 0.0)

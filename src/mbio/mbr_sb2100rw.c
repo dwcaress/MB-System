@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sb2100rw.c	3/3/94
- *	$Id: mbr_sb2100rw.c,v 4.21 1996-01-26 21:23:30 caress Exp $
+ *	$Id: mbr_sb2100rw.c,v 4.22 1996-04-22 13:21:19 caress Exp $
  *
  *    Copyright (c) 1994 by 
  *    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	March 3, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 4.21  1996/01/26  21:23:30  caress
+ * Version 4.3 distribution
+ *
  * Revision 4.20  1995/09/28  18:10:48  caress
  * Various bug fixes working toward release 4.3.
  *
@@ -109,6 +112,7 @@
 #include "../../include/mb_status.h"
 #include "../../include/mb_format.h"
 #include "../../include/mb_io.h"
+#include "../../include/mb_define.h"
 #include "../../include/mbsys_sb2100.h"
 #include "../../include/mbf_sb2100rw.h"
 
@@ -123,7 +127,7 @@ int	verbose;
 char	*mbio_ptr;
 int	*error;
 {
-	static char res_id[]="$Id: mbr_sb2100rw.c,v 4.21 1996-01-26 21:23:30 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2100rw.c,v 4.22 1996-04-22 13:21:19 caress Exp $";
 	char	*function_name = "mbr_alm_sb2100rw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
