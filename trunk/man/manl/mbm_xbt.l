@@ -54,8 +54,11 @@ Allows the user to select the type of XBT data. Currently supported
 formats are: 1 = Sparton XBT, 2 = MK12 XBT. Default: \fIformat\fp = 1.
 .TP
 .B \fB-V\fP
-Causes \fBmbm_plot\fP to operate in "verbose" mode so that it outputs
+Causes \fBmbm_xbt\fP to operate in "verbose" mode so that it outputs
 more information than usual.
+
+.SH SEE ALSO
+\fBmbvelocitytool\fP(l), \fBmblevitus\fP(l)
 
 .SH BUGS
 Perhaps the output should be sent to written to stdout. Suggestions?
