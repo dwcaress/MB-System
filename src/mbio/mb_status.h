@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbio_status.h	2/1/93
- *    $Id: mb_status.h,v 5.54 2005-02-20 07:32:12 caress Exp $
+ *    $Id: mb_status.h,v 5.55 2005-03-26 22:05:17 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
+ *    Copyright (c) 1993, 1994, 2000, 2002, 2003, 2004, 2005 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -20,6 +20,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.54  2005/02/20 07:32:12  caress
+ * Release 5.0.6
+ *
  * Revision 5.53  2005/02/19 07:03:14  caress
  * Release 5.0.6
  *
@@ -273,8 +276,8 @@
 #define MB_STATUS_DEF
 
 /* MB-system version id */
-#define	MB_VERSION	"5.0.6"
-#define	MB_BUILD_DATE	"February 20, 2005"
+#define	MB_VERSION	"5.0.7"
+#define	MB_BUILD_DATE	"March 27, 2005"
 
 /* MBIO function boolean convention */
 #define	MB_YES	1

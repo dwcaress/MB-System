@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_esf.c	4/10/2003
- *    $Id: mb_esf.c,v 5.6 2004-12-02 06:33:30 caress Exp $
+ *    $Id: mb_esf.c,v 5.7 2005-03-26 22:05:18 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	April 10, 2003
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2004/12/02 06:33:30  caress
+ * Fixes while supporting Reson 7k data.
+ *
  * Revision 5.5  2004/04/27 01:46:12  caress
  * Various updates of April 26, 2004.
  *
@@ -55,7 +58,7 @@
 #include "../../include/mb_process.h"
 #include "../../include/mb_swap.h"
 
-static char rcs_id[]="$Id: mb_esf.c,v 5.6 2004-12-02 06:33:30 caress Exp $";
+static char rcs_id[]="$Id: mb_esf.c,v 5.7 2005-03-26 22:05:18 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 /* 	function mb_esf_check checks for an existing esf file. */
@@ -427,6 +430,7 @@ int mb_esf_apply(int verbose, struct mb_esf_struct *esf,
 		    lastedit = j;
 		    }
 		}
+/*fprintf(stderr,"firstedit:%d lastedit:%d\n",firstedit,lastedit);*/
 			
 	/* apply edits */
 	if (lastedit >= firstedit)
@@ -461,15 +465,18 @@ int mb_esf_apply(int verbose, struct mb_esf_struct *esf,
 			    if (esf->edit[j].action == MBP_EDIT_FLAG
 				&& beamflag[i] != MB_FLAG_NULL)
 				{
+/*fprintf(stderr,"edit:%d beam:%d MBP_EDIT_FLAG  flag:%d ",j,i,beamflag[i]);*/
 				beamflag[i] 
 				    = MB_FLAG_FLAG + MB_FLAG_MANUAL;
 				esf->edit[j].use++;
 				apply = MB_YES;
 				action = esf->edit[j].action;
+/*fprintf(stderr," %d\n",beamflag[i]);*/
 				}
 			    else if (esf->edit[j].action == MBP_EDIT_FILTER
 				&& beamflag[i] != MB_FLAG_NULL)
 				{
+/*fprintf(stderr,"edit:%d beam:%d MBP_EDIT_FILTER\n",j,i);*/
 				beamflag[i] 
 				    = MB_FLAG_FLAG + MB_FLAG_FILTER;
 				esf->edit[j].use++;
@@ -479,6 +486,7 @@ int mb_esf_apply(int verbose, struct mb_esf_struct *esf,
 			    else if (esf->edit[j].action == MBP_EDIT_UNFLAG
 				&& beamflag[i] != MB_FLAG_NULL)
 				{
+/*fprintf(stderr,"edit:%d beam:%d MBP_EDIT_UNFLAG\n",j,i);*/
 				beamflag[i] = MB_FLAG_NONE;
 				esf->edit[j].use++;
 				apply = MB_YES;
@@ -486,6 +494,7 @@ int mb_esf_apply(int verbose, struct mb_esf_struct *esf,
 				}
 			    else if (esf->edit[j].action == MBP_EDIT_ZERO)
 				{
+/*fprintf(stderr,"edit:%d beam:%d MBP_EDIT_ZERO\n",j,i);*/
 				beamflag[i] = MB_FLAG_NULL;
 				esf->edit[j].use++;
 				apply = MB_YES;
@@ -493,6 +502,7 @@ int mb_esf_apply(int verbose, struct mb_esf_struct *esf,
 				}
 			    else
 				{
+/*fprintf(stderr,"edit:%d beam:%d NOT USED\n",j,i);*/
 				esf->edit[j].use += 1000;
 /*fprintf(stderr,"Dup Edit[%d]?: ping:%f beam:%d flag:%d action:%d\n",
 j, time_d, i, beamflag[i], esf->edit[j].action);*/
@@ -507,7 +517,7 @@ j, time_d, i, beamflag[i], esf->edit[j].action);*/
 		}
 
 	/* print output debug statements */
-	if (verbose >= 2)
+	if (verbose >= 0)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
