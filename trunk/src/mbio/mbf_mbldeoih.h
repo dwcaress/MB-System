@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_mbldeoih.h	1/20/93
- *	$Id: mbf_mbldeoih.h,v 5.1 2000-12-10 20:26:50 caress Exp $
+ *	$Id: mbf_mbldeoih.h,v 5.2 2002-04-06 02:43:39 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000 by
+ *    Copyright (c) 1993, 1994, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -14,11 +14,15 @@
  *--------------------------------------------------------------------*/
 /*
  * mbf_mbldeoih.h defines the data structures used by MBIO functions
- * to store multibeam data read from the  MBF_MBLDEOIH format (MBIO id 61).  
+ * to store swath data read from the MBF_MBLDEOIH format (MBIO id 61)
+ * or the MBF_MBLDEOBT format (MBIO id 62).  
  *
  * Author:	D. W. Caress
  * Date:	January 20, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2000/12/10 20:26:50  caress
+ * Version 5.0.alpha02
+ *
  * Revision 5.0  2000/12/01  22:48:41  caress
  * First cut at Version 5.0.
  *
@@ -58,82 +62,49 @@
  *
  */
 /*
- * Notes on the MBF_MBLDEOIH data format:
- *   1. This data format is used to store multibeam bathymetry
- *      and/or backscatter data with arbitrary numbers of beams.
- *	This format was created by the Lamont-Doherty Earth
- *	Observatory to serve as a general purpose archive format for
- *	processed multibeam data.
- *   2. The data consist of variable length binary records encoded
+ * Notes on the MBF_MBLDEOIH and MBF_MBLDEOBT data formats:
+ *   1. These data formats are used to store swath bathymetry
+ *      and/or backscatter data with arbitrary numbers of beams
+ *      and pixels. These formats were created by the 
+ *      Lamont-Doherty Earth Observatory and the Monterey Bay  
+ *      Aquarium Research Institute to serve as general  
+ *      purpose archive formats for processed swath data.
+ *   2. The original format (MBF_MBLDEOIH) stores bathymetry, 
+ *      amplitude, and sidescan data. The newer format 
+ *      (MBF_MBLDEOBT) is identical to MBF_MBLDEOIH when reading, 
+ *      but only bathymetry can be written. This provides an
+ *      easy means to strip bathymetry out of more voluminous
+ *      swath data and to store it in a relatively compressed
+ *      form that is fast to read.
+ *   3. Each data record has a header section and a data section.
+ *      The beginning of each header is a two byte identifier.
+ *      The size of the header depends on the identifier:
+ *           "##" =  8995 : Old comment - 30 byte header
+ *           "dd" = 25700 : Old data - 30 byte header
+ *           "cc" = 25443 : New comment - 36 byte header
+ *           "nn" = 28270 : New data - 2 byte header
+ *      In the case of data records, the header contains the time stamp,
+ *      navigation, and the numbers of depth, beam amplitude, and
+ *      sidescan values.  The data section contains the depth and
+ *      backscatter values.  The number of depth and beam amplitude
+ *      values is generally different from the number of sidescan
+ *      values, so the length of the data section must be calculated
+ *      from the numbers of beams and pixels. In the case of comment
+ *      records, the header contains no information other than the
+ *      identifier whether it is old (30 byte) or new (2 byte). The
+ *      data section of the comment record is always 128 bytes. 
+ *   4. The data headers have changed and now include beam angle
+ *      widths to allow beam footprint calculation. Older data 
+ *      is read without complaint, and the beam widths are passed
+ *      as zero.
+ *   5. The data consist of variable length binary records encoded
  *	entirely in 2-byte integers.
- *   3. Each data record has two parts.  First there is a 30-byte
- *      header section containing the time stamp, navigation, and
- *      the numbers of depth, beam amplitude, and sidescan values.  The 
- *      second part contains the depth and backscatter values.  The number 
- *      of depth and beam amplitude values is generally different 
- *      from the number of sidescan values.  
- *   4. All data arrays are centered.
- *   5. Comments can be embedded in the data as 128 byte ascii strings,
- *	where the first two characters of the associated header
- *      must be set to "##" (the other 28 bytes of the header are
- *      unused in a comment record) .
+ *   6. All data arrays are centered.
  *
- * The kind value in the mbf_sbsiocen_struct indicates whether the
+ * The kind value in the mbf_mbldeoih_struct indicates whether the
  * mbf_sbsiocen_data_struct structure holds data (kind = 1) or an
  * ascii comment record (kind = 0).
  *
  * These two structures are direct representations of the binary data 
  * structures used in the MBF_MBLDEOIH format.
  */
-
-/* define maximum number of beams */
-#define	MBF_MBLDEOIH_MAX_BEAMS	250
-#define	MBF_MBLDEOIH_MAX_PIXELS	10000
-
-struct mbf_mbldeoih_header_struct
-	{
-	unsigned short	flag;	/* data ('dd'=25700) or comment ('##'=8995) */
-	short	year;		/* year (4 digits) */
-	short	day;		/* julian day (1-366) */
-	short	min;		/* minutes from beginning of day (0-1439) */
-	short	sec;		/* seconds from beginning of minute (0-59) */
-	short	msec;		/* milliseconds */
-	unsigned short	lon2u;	/* minutes east of prime meridian */
-	unsigned short	lon2b;	/* fraction of minute times 10000 */
-	unsigned short	lat2u;	/* number of minutes north of 90S */
-	unsigned short	lat2b;	/* fraction of minute times 10000 */
-	unsigned short	heading;/* heading:
-					0 = 0 degrees
-					1 = 0.0055 degrees
-					16384 = 90 degrees
-					65535 = 359.9945 degrees
-					0 = 360 degrees */
-	unsigned short	speed;	/* km/s X100 */
-	short	beams_bath;	/* number of depth values */
-	short	beams_amp;	/* number of amplitude values */
-	short	pixels_ss;	/* number of sidescan pixels */
-	short	depth_scale;	/* 1000 X scale where depth = bath X scale */
-	short	distance_scale;	/* 1000 X scale where distance = dist X scale */
-	short	transducer_depth; /* scaled by depth_scale */
-	short	altitude;	/* scaled by depth_scale */
-	};
-
-struct mbf_mbldeoih_data_struct
-	{
-	unsigned char	beamflag[MBF_MBLDEOIH_MAX_BEAMS];
-	short	bath[MBF_MBLDEOIH_MAX_BEAMS];
-	short	bath_acrosstrack[MBF_MBLDEOIH_MAX_BEAMS];
-	short	bath_alongtrack[MBF_MBLDEOIH_MAX_BEAMS];
-	short	amp[MBF_MBLDEOIH_MAX_BEAMS];
-	short	ss[MBF_MBLDEOIH_MAX_PIXELS];
-	short	ss_acrosstrack[MBF_MBLDEOIH_MAX_PIXELS];
-	short	ss_alongtrack[MBF_MBLDEOIH_MAX_PIXELS];
-	};
-
-struct mbf_mbldeoih_struct
-	{
-	int	kind;
-	struct mbf_mbldeoih_header_struct header;
-	struct mbf_mbldeoih_data_struct data;
-	char	comment[128];
-	};

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmosaic.c	2/10/97
- *    $Id: mbmosaic.c,v 5.4 2001-07-20 00:34:38 caress Exp $
+ *    $Id: mbmosaic.c,v 5.5 2002-04-06 02:53:45 caress Exp $
  *
  *    Copyright (c) 1997, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	February 10, 1997
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2001/07/20 00:34:38  caress
+ * Release 5.0.beta03
+ *
  * Revision 5.3  2001/06/29 22:50:23  caress
  * Atlas Hydrosweep DS2 raw data and SURF data formats.
  *
@@ -126,7 +129,7 @@
 #define	NO_DATA_FLAG	99999
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbmosaic.c,v 5.4 2001-07-20 00:34:38 caress Exp $";
+static char rcs_id[] = "$Id: mbmosaic.c,v 5.5 2002-04-06 02:53:45 caress Exp $";
 static char program_name[] = "mbmosaic";
 static char help_message[] =  "mbmosaic is an utility used to mosaic amplitude or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered by multibeam swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbmosaic -Ifilelist -Oroot \
@@ -258,14 +261,10 @@ main (int argc, char **argv)
 	float	*work1 = NULL;
 	float	*work2 = NULL;
 	float	*work3 = NULL;
-	double	**data;
-	double	*value = NULL;
 	int	ndata, ndatafile;
-	double	plotscale, tick, dlon, contour;
 	double	zmin, zmax, zclip;
-	int	nmin, nmax;
+	int	nmax;
 	double	smin, smax;
-	double	dd, d1, d2;
 	int	nbinset, nbinzero, nbinspline;
 
 	/* projected grid parameters */
@@ -295,55 +294,6 @@ main (int argc, char **argv)
 	char	nlabel[128];
 	char	sdlabel[128];
 
-	/* old color table - bright standard path through rgb space */
-/*	static int ncpt = 5;
- 	static int cptr[] = {255, 255, 120,   0,   0};
- 	static int cptg[] = {  0, 220, 255, 255,   0};
- 	static int cptb[] = {  0,   0,   0, 255, 255};*/
-
-	/* Bill Haxby color table - what a clever guy! */
-	/* color table for bathymetry map */
-	static int ncptb = 15;
-	static int cptbr[] = {
-		255, 255, 255, 255, 255,
-		240, 205, 138, 106,  87,
-		 50,   0,  40,  21,  37 };
-	static int cptbg[] = {
-		255, 221, 186, 161, 189,
-		236, 255, 236, 235, 215,
-		190, 160, 127,  92,  57 };
-	static int cptbb[] = {
-		255, 171, 133,  68,  87,
-		121, 162, 174, 255, 255,
-		255, 255, 251, 236, 175 };
-
-	/* gray scale color table */
-	/* color table for bathymetry map */
-	static int ncptg = 9;
-	static int cptg[] = {
-		255, 223, 191, 159, 127, 
-		 95,  63,  31,   0 };
-
-	/* color table for other maps */
-	static int ncpto = 13;
-	static int cptor[] = { 255,
-		 37,  21,  40,   0,  50,
-		 87, 106, 138, 205, 240,
-		255, 255 };
-	static int cptog[] = { 255,
-		 57,  92, 127, 160, 190,
-		215, 235, 236, 255, 236,
-		189, 161 };
-	static int cptob[] = { 255,
-		175, 236, 251, 255, 255,
-		255, 255, 174, 162, 121,
-		 87,  68 };
-
-	/* list of standard standard deviation values for color table */
-	static double cptsd[] = {
-		0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 
-		6.0, 7.5, 10.0, 15.0, 20.0, 30.0, 40.0 };
-
 	/* output stream for basic stuff (stdout if verbose <= 1,
 		stderr if verbose > 1) */
 	FILE	*outfp;
@@ -353,9 +303,9 @@ main (int argc, char **argv)
 	float	NaN;
 
 	/* other variables */
-	FILE	*fp, *dfp;
+	FILE	*fp;
 	char	buffer[128], *result;
-	int	i, j, k, ii, jj, kk, n;
+	int	i, j, ii, jj, n;
 	int	kgrid, kout, kint, ib, ix, iy;
 	int	ix1, ix2, iy1, iy2;
 	double	norm_weight;
@@ -368,7 +318,7 @@ main (int argc, char **argv)
 		btime_i,etime_i,&speedmin,&timegap);
 
 	/* set default input and output */
-	strcpy (filelist, "data.list");
+	strcpy (filelist, "datalist.mb-1");
 
 	/* initialize some values */
 	strcpy(fileroot,"grid");
@@ -1976,7 +1926,6 @@ main (int argc, char **argv)
 		zmax = 0.0;
 
 	/* get min max of data distribution */
-	nmin = 0;
 	nmax = 0;
 	for (i=0;i<gxdim;i++)
 		for (j=0;j<gydim;j++)
@@ -2410,10 +2359,6 @@ int write_arcascii(int verbose, char *outfile, float *grid,
 	int	status = MB_SUCCESS;
 	FILE	*fp;
 	int	i, j, k;
-	time_t	right_now;
-	char	date[25], user[128], *user_ptr, host[128];
-	char	*ctime();
-	char	*getenv();
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -2571,9 +2516,7 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 	float	*a;
 	time_t	right_now;
 	char	date[128], user[128], *user_ptr, host[128];
-	char	*message;
 	int	i, j, kg, ka;
-	int	grdstatus;
 	char	*ctime();
 	char	*getenv();
 
@@ -2640,7 +2583,7 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 	else
 		strcpy(user, "unknown");
 	gethostname(host,128);
-	sprintf(grd.remark,"\n\tProjection: %s\n\tThis grid created by program %s\n\tMB-system Version %s\n\tRun by user <%s> on cpu <%s> at <%s>",
+	sprintf(grd.remark,"\n\tProjection: %s\n\tGrid created by %s\n\tMB-system Version %s\n\tRun by <%s> on <%s> at <%s>",
 		projection,program_name,MB_VERSION,user,host,date);
 
 	/* set extract wesn,pad and complex */

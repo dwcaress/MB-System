@@ -38,7 +38,6 @@ names = case_sensitive
 !(BX) bx_info("c_dirpath", "")
 !(BX) bx_info("include_path", ".", false)
 !(BX) bx_info("xrunner_command", "$(M_ROOT)/arch/X11.5/Xm1.2/mic_xm.o", false)
-!(BX) bx_info("purify_command", "purify", false)
 !(BX) bx_info("system_directory", "/usr/bx50")
 !(BX) bx_info("builder_version", "Builder Xcessory Version 5.0.3")
 !(BX) bx_info("build_lang", "C")
@@ -51,7 +50,11 @@ names = case_sensitive
 !(BX) bx_info("integrate_xrunner", "false")
 
 procedure BxGlobalWidgetId;
+identifier BXG_pushButton_save_residuals;
 identifier BXG_pushButton_save_svpfile;
+identifier BXG_pushButton_open_mb;
+identifier BXG_pushButton_save_svp;
+identifier BXG_pushButton_process;
 identifier BXG_drawingArea;
 identifier BXG_label_status_display;
 identifier BXG_label_status_edit;
@@ -94,6 +97,7 @@ procedure do_io_mode_open_svp_edit();
 procedure do_io_mode_open_svp_display();
 procedure do_save_swath_svp();
 procedure do_anglemode();
+procedure do_save_residuals();
 !(BX) "Widget" "bulletinBoard_mode"
 identifier bulletinBoard_mode;
 
@@ -227,8 +231,8 @@ object bulletinBoard_mode : XmBulletinBoardDialog widget {
         XmNdialogTitle = compound_string("Beam Angle Mode");
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 268;
-        XmNy = 461;
+        XmNx = 463;
+        XmNy = 557;
         XmNwidth = 348;
         XmNheight = 172;
     };
@@ -519,8 +523,8 @@ object bulletinBoard_scaling : XmBulletinBoardDialog widget {
     arguments {
         arguments Style_use;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 176;
-        XmNy = 465;
+        XmNx = 371;
+        XmNy = 561;
         XmNwidth = 532;
         XmNheight = 164;
     };
@@ -649,8 +653,8 @@ object bulletinBoard_error : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNdialogStyle = XmDIALOG_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 286;
-        XmNy = 466;
+        XmNx = 481;
+        XmNy = 562;
         XmNwidth = 311;
         XmNheight = 161;
     };
@@ -910,8 +914,8 @@ object bulletinBoard_fileselect : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 146;
-        XmNy = 278;
+        XmNx = 341;
+        XmNy = 374;
         XmNwidth = 591;
         XmNheight = 537;
     };
@@ -995,8 +999,8 @@ object bulletinBoard_message : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNdialogStyle = XmDIALOG_FULL_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_NONE;
-        XmNx = 252;
-        XmNy = 503;
+        XmNx = 447;
+        XmNy = 599;
         XmNwidth = 379;
         XmNheight = 88;
     };
@@ -1165,8 +1169,7 @@ object label_about_mbpub : XmLabel widget {
         arguments Style_use;
         XmNfontList = font_table(
 		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1'));
-        XmNlabelString = compound_string("An Open Source Software Package" &
- "");
+        XmNlabelString = compound_string("An Open Source Software Package");
         XmNx = 10;
         XmNy = 160;
         XmNwidth = 450;
@@ -1315,8 +1318,8 @@ object bulletinBoard_about : XmBulletinBoardDialog widget {
     arguments {
         arguments Style_use;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 201;
-        XmNy = 322;
+        XmNx = 396;
+        XmNy = 418;
         XmNwidth = 481;
         XmNheight = 449;
     };
@@ -1460,6 +1463,7 @@ object pushButton_process : XmPushButton widget {
     };
     callbacks {
         callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_process);
         XmNactivateCallback = procedure do_process_mb();
     };
 !(BX)    handlers {
@@ -1578,6 +1582,7 @@ object pushButton_save_svp : XmPushButton widget {
     };
     callbacks {
         callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_save_svp);
        XmNactivateCallback = procedures {
                  BxManageCB("bulletinBoard_fileselect");
                  do_io_mode_save_svp();
@@ -1615,6 +1620,7 @@ object pushButton_open_mb : XmPushButton widget {
     };
     callbacks {
         callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_open_mb);
        XmNactivateCallback = procedures {
                  BxManageCB("bulletinBoard_fileselect");
                  do_io_mode_mb();
@@ -1627,6 +1633,15 @@ object pushButton_open_mb : XmPushButton widget {
 !(BX)    handlers {
 !(BX)        handlers Style_useHandlers;
 !(BX)    };
+};
+
+object separator3 : XmSeparator widget {
+    arguments {
+    };
+    controls {
+    };
+    callbacks {
+    };
 };
 
 object pushButton_save_svpfile : XmPushButton widget {
@@ -1647,13 +1662,30 @@ object pushButton_save_svpfile : XmPushButton widget {
 !(BX)    };
 };
 
+object pushButton_save_residuals : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Save residuals as offsets");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_save_residuals);
+        XmNactivateCallback = procedure do_save_residuals();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
 object pulldownMenu_file : XmPulldownMenu widget {
     arguments {
         arguments Style_use;
-        XmNx = 0;
-        XmNy = 0;
-        XmNwidth = 172;
-        XmNheight = 150;
+        XmNx = 134;
+        XmNy = 338;
+        XmNwidth = 184;
+        XmNheight = 176;
     };
     controls {
          managed XmPushButton pushButton_open_svp_display;
@@ -1662,7 +1694,9 @@ object pulldownMenu_file : XmPulldownMenu widget {
          managed XmPushButton pushButton_save_svp;
          managed XmSeparator separator1;
          managed XmPushButton pushButton_open_mb;
+         managed XmSeparator separator3;
          managed XmPushButton pushButton_save_svpfile;
+         managed XmPushButton pushButton_save_residuals;
     };
     callbacks {
         callbacks Style_useReasons;
@@ -1802,8 +1836,8 @@ object input_screen : XmBulletinBoard widget {
 object window_mbvelocity : XmMainWindow widget {
     arguments {
         arguments Style_use;
-        XmNx = 8;
-        XmNy = 213;
+        XmNx = 129;
+        XmNy = 309;
         XmNwidth = 1016;
         XmNheight = 668;
     };
@@ -1862,8 +1896,8 @@ object window_mbvelocity : XmMainWindow widget {
 !(BX)        arguments Style_use;
 !(BX)        XmNtitle = "MBvelocityTool";
 !(BX)        XmNiconName = "MBvelocitytool";
-!(BX)        XmNx = -66;
-!(BX)        XmNy = 213;
+!(BX)        XmNx = 129;
+!(BX)        XmNy = 309;
 !(BX)        XmNwidth = 1016;
 !(BX)        XmNheight = 668;
 !(BX)    };

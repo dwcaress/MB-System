@@ -8,7 +8,7 @@ Version 5.0
 .SH SYNOPSIS
 \fBmbinfo\fP [\fB-B\fIyr/mo/da/hr/mn/sc\fP \fB-C -E\fIyr/mo/da/hr/mn/sc\fP 
 \fB-F\fIformat\fP \fB-G\fP \fB-I\fIfilename\fP 
-\fB-L\fIlonflip\fP \fB-M\fIlondim/latdim\fP \fB-OfP \fB-P\fIping\fP 
+\fB-L\fIlonflip\fP \fB-M\fIlondim/latdim\fP \fB-O\fP \fB-P\fIping\fP 
 \fB-R\fIwest/east/south/norths\fP \fB-S\fIspeed\fP \fB-W -V -H\fP]
 
 .SH DESCRIPTION

@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_check_info.c	1/25/93
- *    $Id: mb_check_info.c,v 5.3 2002-03-18 18:28:46 caress Exp $
+ *    $Id: mb_check_info.c,v 5.4 2002-04-06 02:43:39 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000 by
+ *    Copyright (c) 1993, 1994, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -24,6 +24,9 @@
  * Date:	September 3, 1996
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2002/03/18 18:28:46  caress
+ * Fixed handling of data bounds that cross the current lonflip setting.
+ *
  * Revision 5.2  2002/02/22 09:03:43  caress
  * Release 5.0.beta13
  *
@@ -58,17 +61,21 @@
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
+#include <time.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 /* mbio include files */
 #include "../../include/mb_status.h"
 #include "../../include/mb_define.h"
+#include "../../include/mb_format.h"
 
 /*--------------------------------------------------------------------*/
 int mb_check_info(int verbose, char *file, int lonflip, 
 		    double bounds[4], int *file_in_bounds,
 		    int *error)
 {
-	static char rcs_id[]="$Id: mb_check_info.c,v 5.3 2002-03-18 18:28:46 caress Exp $";
+	static char rcs_id[]="$Id: mb_check_info.c,v 5.4 2002-04-06 02:43:39 caress Exp $";
 	char	*function_name = "mb_check_info";
 	int	status;
 	char	file_inf[128];
@@ -280,6 +287,241 @@ int mb_check_info(int verbose, char *file, int lonflip,
 		fprintf(stderr,"dbg2       error:          %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_make_info(int verbose, 
+		    char *file, int format, int *error)
+{
+	char	*function_name = "mb_make_info";
+	int	status = MB_SUCCESS;
+	char	inffile[MB_PATH_MAXLINE];
+	char	fbtfile[MB_PATH_MAXLINE];
+	char	fnvfile[MB_PATH_MAXLINE];
+	char	command[MB_PATH_MAXLINE];
+	int	datmodtime = 0;
+	int	infmodtime = 0;
+	int	fbtmodtime = 0;
+	int	fnvmodtime = 0;
+	struct stat file_status;
+	int	fstat;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBcopy function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       file:       %s\n",file);
+		fprintf(stderr,"dbg2       format:     %d\n",format);
+		}
+		
+	/* check for existing ancillary files */
+	sprintf(inffile, "%s.inf", file);
+	sprintf(fbtfile, "%s.fbt", file);
+	sprintf(fnvfile, "%s.fnv", file);
+	if ((fstat = stat(file, &file_status)) == 0
+		&& (file_status.st_mode & S_IFMT) != S_IFDIR)
+		{
+		datmodtime = file_status.st_mtime;
+		}
+	if ((fstat = stat(inffile, &file_status)) == 0
+		&& (file_status.st_mode & S_IFMT) != S_IFDIR)
+		{
+		infmodtime = file_status.st_mtime;
+		}
+	if ((fstat = stat(fbtfile, &file_status)) == 0
+		&& (file_status.st_mode & S_IFMT) != S_IFDIR)
+		{
+		fbtmodtime = file_status.st_mtime;
+		}
+	if ((fstat = stat(fnvfile, &file_status)) == 0
+		&& (file_status.st_mode & S_IFMT) != S_IFDIR)
+		{
+		fnvmodtime = file_status.st_mtime;
+		}
+		
+	/* make new inf file if not there or out of date */
+	if (datmodtime > 0 && datmodtime > infmodtime)
+		{
+		if (verbose >= 1)
+			fprintf(stderr,"\nGenerating inf file for %s\n",file);
+		sprintf(command, "mbinfo -F %d -I %s -G -O -M10/10", 
+			format, file);
+		system(command);
+		}
+		
+	/* make new fbt file if not there or out of date */
+	if (datmodtime > 0 
+	    && datmodtime > fbtmodtime
+	    && format != MBF_SBSIOMRG
+	    && format != MBF_SBSIOCEN
+	    && format != MBF_SBSIOLSI
+	    && format != MBF_SBURICEN
+	    && format != MBF_SBURIVAX
+	    && format != MBF_SBSIOSWB
+	    && format != MBF_HSLDEDMB
+	    && format != MBF_HSURICEN
+	    && format != MBF_HSURIVAX
+	    && format != MBF_SB2000SS
+	    && format != MBF_MSTIFFSS
+	    && format != MBF_MBLDEOIH
+	    && format != MBF_MGD77DAT
+	    && format != MBF_MBARIROV
+	    && format != MBF_MBPRONAV)
+		{
+		if (verbose >= 1)
+			fprintf(stderr,"Generating fbt file for %s\n",file);
+		sprintf(command, "mbcopy -F %d/71 -I %s -D -O %s.fbt", 
+			format, file, file);
+		system(command);
+		}
+		
+	/* make new nv file if not there or out of date */
+	if (datmodtime > 0 
+	    && datmodtime > fnvmodtime
+	    && format != MBF_MGD77DAT
+	    && format != MBF_MBARIROV
+	    && format != MBF_MBPRONAV)
+		{
+		if (verbose >= 1)
+			fprintf(stderr,"Generating fnv file for %s\n",file);
+		sprintf(command, "mblist -F %d -I %s -O tMXYHSc > %s.fnv", 
+			format, file, file);
+		system(command);
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBcopy function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_get_fbt(int verbose, 
+		    char *file, int *format, int *error)
+{
+	char	*function_name = "mb_get_fbt";
+	int	status = MB_SUCCESS;
+	char	fbtfile[MB_PATH_MAXLINE];
+	int	datmodtime = 0;
+	int	fbtmodtime = 0;
+	struct stat file_status;
+	int	fstat;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBcopy function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       file:       %s\n",file);
+		fprintf(stderr,"dbg2       format:     %d\n",*format);
+		}
+		
+	/* check for existing fbt file */
+	sprintf(fbtfile, "%s.fbt", file);
+	if ((fstat = stat(file, &file_status)) == 0
+		&& (file_status.st_mode & S_IFMT) != S_IFDIR)
+		{
+		datmodtime = file_status.st_mtime;
+		}
+	if ((fstat = stat(fbtfile, &file_status)) == 0
+		&& (file_status.st_mode & S_IFMT) != S_IFDIR)
+		{
+		fbtmodtime = file_status.st_mtime;
+		}
+		
+	/* replace file with fbt file if fbt file exists and is up to date */
+	if (datmodtime > 0 && datmodtime < fbtmodtime)
+	    {
+	    strcpy(file, fbtfile);
+	    *format = 71;
+	    }
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBcopy function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       file:       %s\n",file);
+		fprintf(stderr,"dbg2       format:     %d\n",*format);
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_get_fnv(int verbose, 
+		    char *file, int *format, int *error)
+{
+	char	*function_name = "mb_get_fnv";
+	int	status = MB_SUCCESS;
+	char	fnvfile[MB_PATH_MAXLINE];
+	int	datmodtime = 0;
+	int	fnvmodtime = 0;
+	struct stat file_status;
+	int	fstat;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBcopy function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       file:       %s\n",file);
+		fprintf(stderr,"dbg2       format:     %d\n",*format);
+		}
+		
+	/* check for existing fnv file */
+	sprintf(fnvfile, "%s.fnv", file);
+	if ((fstat = stat(file, &file_status)) == 0
+		&& (file_status.st_mode & S_IFMT) != S_IFDIR)
+		{
+		datmodtime = file_status.st_mtime;
+		}
+	if ((fstat = stat(fnvfile, &file_status)) == 0
+		&& (file_status.st_mode & S_IFMT) != S_IFDIR)
+		{
+		fnvmodtime = file_status.st_mtime;
+		}
+		
+	/* replace file with fnv file if fnv file exists and is up to date */
+	if (datmodtime > 0 && datmodtime < fnvmodtime)
+	    {
+	    strcpy(file, fnvfile);
+	    *format = 166;
+	    }
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBcopy function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       file:       %s\n",file);
+		fprintf(stderr,"dbg2       format:     %d\n",*format);
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
 		}
 
 	/* return status */

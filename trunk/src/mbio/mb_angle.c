@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_angle.c	1/21/93
- *    $Id: mb_angle.c,v 5.0 2000-12-01 22:48:41 caress Exp $
+ *    $Id: mb_angle.c,v 5.1 2002-04-06 02:43:39 caress Exp $
  *
  *    Copyright (c) 1998, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -175,6 +175,9 @@
  * Date:	December 30, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01 22:48:41  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.2  2000/10/11  01:02:30  caress
  * Convert to ANSI C
  *
@@ -204,7 +207,6 @@ int mb_takeoff_to_rollpitch(int verbose,
 	char	*function_name = "mb_takeoff_to_rollpitch";
 	int	status = MB_SUCCESS;
 	double	x, y, z;
-	int	i, j;
 	
 
 	/* print input debug statements */
@@ -258,9 +260,7 @@ int mb_rollpitch_to_takeoff(int verbose,
 	char	*function_name = "mb_rollpitch_to_takeoff";
 	int	status = MB_SUCCESS;
 	double	x, y, z;
-	double	aa;
-	int	i, j;
-	
+	double	aa;	
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -280,7 +280,10 @@ int mb_rollpitch_to_takeoff(int verbose,
 
 	/* convert to takeoff angle coordinates */
 	*theta = acos(z);
-	aa = y / sin(*theta);
+	if (z < 1.0)
+	    aa = y / sin(*theta);
+	else 
+	    aa = 0.0;
 	if (aa > 1.0)
 	    *phi = 0.5 * M_PI;
 	else if (aa < -1.0)
@@ -290,6 +293,72 @@ int mb_rollpitch_to_takeoff(int verbose,
 	*theta *= RTD;
 	*phi *= RTD;
 	if (x < 0.0)
+		*phi = 180.0 - *phi;
+
+	/* assume success */
+	*error = MB_ERROR_NO_ERROR;
+	status = MB_SUCCESS;
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBBATH function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       theta:           %f\n",*theta);
+		fprintf(stderr,"dbg2       phi:             %f\n",*phi);
+		fprintf(stderr,"dbg2       error:           %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:          %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_xyz_to_takeoff(int verbose,
+		double x, double y, double z,
+		double *theta, double *phi,
+		int *error)
+{
+	char	*function_name = "mb_xyz_to_takeoff";
+	int	status = MB_SUCCESS;
+	double	aa, xx, yy, zz, rr;
+	
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBBATH function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       x:          %f\n",x);
+		fprintf(stderr,"dbg2       y:          %f\n",y);
+		fprintf(stderr,"dbg2       z:          %f\n",z);
+		}
+		
+	/* normalize cartesian coordinates */
+	rr = sqrt(x * x + y * y + z * z);
+	xx = x / rr;
+	yy = y / rr;
+	zz = z / rr;
+
+	/* convert to takeoff angle coordinates */
+	*theta = acos(zz);
+	if (zz < 1.0)
+	    aa = yy / sin(*theta);
+	else 
+	    aa = 0.0;
+	if (aa > 1.0)
+	    *phi = 0.5 * M_PI;
+	else if (aa < -1.0)
+	    *phi = -0.5 * M_PI;
+	else
+	    *phi = asin(aa);
+	*theta *= RTD;
+	*phi *= RTD;
+	if (xx < 0.0)
 		*phi = 180.0 - *phi;
 
 	/* assume success */

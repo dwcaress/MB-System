@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsds2raw.c	6/20/01
- *	$Id: mbr_hsds2raw.c,v 5.4 2001-12-18 04:27:45 caress Exp $
+ *	$Id: mbr_hsds2raw.c,v 5.5 2002-04-06 02:43:39 caress Exp $
  *
  *    Copyright (c) 2001 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * 		D. N. Chayes
  * Date:	June 20, 2001
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2001/12/18 04:27:45  caress
+ * Release 5.0.beta11.
+ *
  * Revision 5.3  2001/08/10 22:41:19  dcaress
  * Release 5.0.beta07
  *
@@ -88,7 +91,7 @@ int mbr_hsds2raw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 /*--------------------------------------------------------------------*/
 int mbr_register_hsds2raw(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_hsds2raw.c,v 5.4 2001-12-18 04:27:45 caress Exp $";
+	static char res_id[]="$Id: mbr_hsds2raw.c,v 5.5 2002-04-06 02:43:39 caress Exp $";
 	char	*function_name = "mbr_register_hsds2raw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -218,7 +221,7 @@ int mbr_info_hsds2raw(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_hsds2raw.c,v 5.4 2001-12-18 04:27:45 caress Exp $";
+	static char res_id[]="$Id: mbr_hsds2raw.c,v 5.5 2002-04-06 02:43:39 caress Exp $";
 	char	*function_name = "mbr_info_hsds2raw";
 	int	status = MB_SUCCESS;
 
@@ -287,7 +290,7 @@ int mbr_info_hsds2raw(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_hsds2raw(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_hsds2raw.c,v 5.4 2001-12-18 04:27:45 caress Exp $";
+	static char res_id[]="$Id: mbr_hsds2raw.c,v 5.5 2002-04-06 02:43:39 caress Exp $";
 	char	*function_name = "mbr_alm_hsds2raw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -590,7 +593,6 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	
 	/* get start telegram */
 	xdr_status = xdr_long(mb_io_ptr->xdrs, &telegram_id);
-fprintf(stderr,"telegram_id:%d\n",telegram_id);
 
 	/* telegram id ok - just read send and receive strings */
 	if (xdr_status == MB_YES && telegram_id == MBSYS_SURF_TELEGRAM_START)

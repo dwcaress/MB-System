@@ -1,4 +1,4 @@
-.TH mbprocess l "14 December 2001" "MB-System 5.0" "MB-System 5.0"
+.TH mbprocess l "5 April 2002" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbprocess\fP - this program performs a 
 variety of swath data processing 
@@ -9,6 +9,7 @@ bathymetry from travel time
 and angle data by raytracing through a 
 layered water sound velocity model,
 applying changes to ship draft, roll bias and pitch bias,
+applying tides,
 and applying bathymetry edits from edit save files.
 
 .SH VERSION
@@ -43,6 +44,9 @@ parameter files. Each \fBmbprocess\fP parameter file
 contains single line commands that set 
 processing modes and parameters. The program \fBmbset\fP 
 can be used to create and modify \fBmbprocess\fP parameter files.
+Other programs such as \fBmbedit\fP, \fbmbnavedit\fP,
+\fBmbvelocitytool\fP, \fBmbnavadjust\fP, and \fBmbclean\fP
+modify or create (if needed) \fBmbprocess\fP parameter files.
 
 The input file "infile"  must be specified with the \fB-I\fP option. 
 If "infile" is a datalist, then \fBmbprocess\fP will 
@@ -59,6 +63,19 @@ can also be specified, though the program can
 infer the format if the standard MB-System suffix convention
 is used (*.mbXX where XX is the MB-System format id number).
 
+The processed output swath files produced by \fBmbprocess\fP
+are named using a convention based on the data format id. 
+\fBMB-System\fP data formats are specified
+using two-digit or three-digit numbers (see the \fBMBIO\fP manual page).
+If an input swath data file is named "root.mbXX", where XX is the format
+id, then the default processed output file will be "rootp.mbXX"
+(e.g. mydata.mb71 -> mydatap.mb71).
+The "p" inserted before the ".mbXX" suffix indicates the output
+file has been created by \fBmbprocess\fP.
+If the input file does not follow the *.mbXX naming convention,
+then the output filename will just consist of the input name
+with "p.mbXX" added as a suffix (e.g. mydata -> mydatap.mb71)
+
 By default, \fBmbprocess\fP will only process a swath data
 file if the processed output file is either missing or out
 of date relative to the input swath data file, the parameter
@@ -66,6 +83,8 @@ file, or any of the ancillary data files referred to in
 the parameter file (e.g. navigation files, edit save files,
 svp files). If the \fB-P\fP option is specified, \fBmbprocess\fP
 will process every file, whether it needs it or not.
+
+.SH MBPROCESS PARAMETER FILE COMMANDS
 
 The \fBmbprocess\fP commands found in parameter files are:
 
@@ -249,6 +268,18 @@ The \fBmbprocess\fP commands found in parameter files are:
             referenced to a realistic water 
             sound speed model.
 
+ STATIC BEAM BATHYMETRY OFFSETS:
+   STATICMODE mode
+        sets offsetting of bathymetry by 
+        per-beam statics [0]
+          0: static correction off
+          1: static correction on
+   STATICFILE filename
+        sets static per-beam file path [no default]
+        - static files are two-column ascii tables
+          with the beam # in column 1 and
+          the depth offset in m in column 2
+
  DRAFT CORRECTION:
    DRAFTMODE mode
         sets draft correction [0]
@@ -348,6 +379,35 @@ The \fBmbprocess\fP commands found in parameter files are:
    HEADINGOFFSET offset
         sets value added to heading (degrees)
 
+ TIDE CORRECTION:
+   TIDEMODE mode
+        sets tide correction [0]
+        - note: tide added to bathymetry after
+          all other calculations and corrections
+          0: tide correction off
+          1: tide correction on
+   TIDEFILE filename
+        sets tide file path
+   TIDEFORMAT constan
+        sets tide file format [1]
+        - tide files can be in one of four ASCII
+          table formats
+          1: format is <time_d tide>
+          2: format is <yr mon day hour min sec tide>
+          3: format is <yr jday hour min sec tide>
+          4: format is <yr jday daymin sec tide>
+        - time_d = decimal seconds since 1/1/1970
+        - daymin = decimal minutes start of day
+
+ SIDESCAN CORRECTION:
+   SSCORRMODE  boolean
+        sets correction of sidescan for  
+        amplitude vs grazing angle function
+          0: sidescan correction off
+          1: sidescan correction on
+   SSCORRFILE filename
+        sets sidescan correction file path [no default]
+
  SIDESCAN RECALCULATION:
    SSRECALCMODE  boolean
         sets recalculation of sidescan for 
@@ -438,48 +498,92 @@ The \fBmbprocess\fP commands found in parameter files are:
    KLUGE005 boolean
         processing kluge 005 (not yet defined)
 
-The file naming convention for parameter files, processing
-files (e.g. bathymery edit, navigation, and svp files) and output
-swath data files follows some simple rules based on suffixes
-and the data format id. \fBMB-System\fP data formats are specified
-using two-digit or three-digit numbers (see the \fBMBIO\fP manual page).
-If an input swath data file is named "root.mbXX", where XX is the format
-id, then the default processed output file will be "rootp.mbXX".
-The "p" inserted before the ".mbXX" suffix indicates the output
-file has been created by \fBmbprocess\fP.
-If the input file does not follow the *.mbXX naming convention,
-then the output filename will just consist of the input name
-with "p.mbXX" added as a suffix. 
+.SH ANCILLARY DATA FILES
 
-The default names for processing
-files depends on their source and use. Typical examples include:
+\fBMB-System\fP also uses a number of ancillary data files, most
+of which relate to \fBmbprocess\fP in some way. By default,
+these ancillary data files are named by adding a short suffix
+to the primary data file name (e.g. ".par", ".svp", ".esf", ".nve")
 
-Bathymetry edit save file generated by \fBmbedit\fP and 
-\fBmbclean\fP have an ".esf" suffix.
- 	inputname.esf 
+The common ancillary files are listed below. The example names
+given here follow from an input swath data file name of mydata.mb71.
 
-Water sound velocity profile (SVP) files generated 
-by \fBmbvelocitytool\fP use a ".svp" suffix by default.
- 	inputname.svp
+The processing parameter file used by \fBmbprocess\fP has
+an ".par" suffix. These files are generated
+or modified by \fBmbset\fP, \fBmbedit\fP, \fbmbnavedit\fP,
+\fBmbvelocitytool\fP, \fBmbnavadjust\fP, and \fBmbclean\fP.
+ 	mydata.mb71.par
+
+The most prominent ancillary files are metadata or
+"inf" files (created from the output of \fBmbinfo\fP). 
+Programs such as \fBmbgrid\fP and \fBmbm_plot\fP try to check "inf" 
+files to see if the corresponding data files include data within
+desired areas. The program \fBmbprocess\fP automatically generates
+an "inf" file for any processed output swath file.
+Also, the program \fBmbdatalist\fP is often used to
+create or update "inf" files for large groups of swath data files. 
+ 	mydata.mb71.inf 
+
+The "fast bath" or "fbt" files
+are generated by copying the swath bathymetry to a sparse,
+quickly read format (format 71). Programs such as \fBmbgrid\fP,
+\fBmbswath\fP, and \fBmbcontour\fP will try to read "fbt" files
+instead of the full data files whenever only bathymetry 
+information are required. The program \fBmbprocess\fP 
+automatically generates
+an "fbt" file for any processed output swath file.
+Also, the program \fBmbdatalist\fP is often used to
+create or update "fbt" files for large groups of swath data files.
+These files are not generated or used 
+when the original swath data is already
+in a compact bathymetry-only data format.
+ 	mydata.mb71.fbt 
+
+The "fast nav" or "fnv" files
+are just ASCII lists of navigation generated using \fBmblist\fP
+with a \fB-O\fP\fItMXYHSc\fP option. Programs such as \fBmbgrid\fP,
+\fBmbswath\fP, and \fBmbcontour\fP will try to read "fnv" files
+instead of the full data files whenever only 
+navigation information are required. These files are not generated or used 
+when the original data is already
+in a single-beam or navigation data format.
+ 	mydata.mb71.fnv 
+
+The bathymetry edit save file generated by \fBmbedit\fP and 
+\fBmbclean\fP has an ".esf" suffix.
+ 	mydata.mb71.esf 
+
+A water sound velocity profile (SVP) file generated 
+by \fBmbvelocitytool\fP has an ".svp" suffix unless
+the user specifies otherwise.
+ 	mydata.mb71.svp
 
 Water sound velocity profile (SVP) files generated 
 by \fBmbsvplist\fP also use the ".svp" suffix. 
 However, multiple SVP files may be
 extracted from each input swath file, so the files are
-numbered. Here, "YYY" is the SVP number, incrementing from
-"001":
- 	inputname_YYY.svp
+numbered using a "_YYY.svp" suffix, where YYY increments
+from 001.
+ 	mydata.mb71_001.svp
+ 	mydata.mb71_002.svp
+ 	mydata.mb71_003.svp
 
 Edited navigation files generated by \fBmbnavedit\fP have 
 an ".nve" suffix:
- 	inputname.nve
+ 	mydata.mb71.nve
+.br
+These navigation files can be read independently using format 166.
 
 Adjusted navigation files generated by \fBmbnavadjust\fP
 have an ".naY" suffix, where "Y" is a number between 0-9.
 The \fBmbnavadjust\fP package may be used multiple times
 for a survey; the adjustments are numbered sequentially from
 "0":
- 	inputname.naY
+ 	mydata.mb71.na0
+ 	mydata.mb71.na1
+ 	mydata.mb71.na2
+.br
+and so on. These navigation files can be read independently using format 166.
 
 .SH AUTHORSHIP
 David W. Caress (caress@mbari.org)
@@ -574,7 +678,7 @@ an mbprocess parameter file "0051_20010829_223755.mb57.par".
 The contents of the parameter file are:
 
  ## MB-System processing parameter file
- ## Written by mb_pr_writepar version $Id: mbprocess.l,v 5.9 2001-12-18 04:29:57 caress Exp $
+ ## Written by mb_pr_writepar version $Id: mbprocess.l,v 5.10 2002-04-06 02:53:45 caress Exp $
  ## MB-system Version 5.0.beta07
  ## Generated by user <caress> on cpu <menard> at <Thu Sep 13 12:42:01 2001>
  ##
@@ -751,11 +855,11 @@ To process the data, run mbprocess:
 
  The output to the terminal is:
  Program mbprocess
- Version $Id: mbprocess.l,v 5.9 2001-12-18 04:29:57 caress Exp $
+ Version $Id: mbprocess.l,v 5.10 2002-04-06 02:53:45 caress Exp $
  MB-System Version 5.0.beta07
  
  Program <mbprocess>
- Version $Id: mbprocess.l,v 5.9 2001-12-18 04:29:57 caress Exp $
+ Version $Id: mbprocess.l,v 5.10 2002-04-06 02:53:45 caress Exp $
  MB-system Version 5.0.beta07
  
  Program Operation:
@@ -880,6 +984,8 @@ To process the data, run mbprocess:
  6617 output other records
  
  Generating inf file for /u/caress/dev/mbbugs/mb_bug_025/test/0051_20010829_223755p.mb57
+ Generating fbt file for /u/caress/dev/mbbugs/mb_bug_025/test/0051_20010829_223755p.mb57
+ Generating fnv file for /u/caress/dev/mbbugs/mb_bug_025/test/0051_20010829_223755p.mb57
 
 .SH SEE ALSO
 \fBmbsystem\fP(l), \fBmbset\fP(l), 

@@ -1,4 +1,4 @@
-.TH mbmosaic l "13 July 2001" "MB-System 5.0" "MB-System 5.0"
+.TH mbmosaic l "3 April 2002" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbmosaic\fP - Mosaic amplitude or sidescan data 
 from swath mapping sonar data files.
@@ -272,14 +272,14 @@ of its operation and then exit immediately.
 Sets the filename of the file containing a list of the input swath sonar
 data files and their formats.  In the \fIdatalist\fP file, each
 data file should be followed by a data format identifier, e.g.:
- 	datafile1 1
- 	datafile2 8
+ 	datafile1 11
+ 	datafile2 24
 .br
 This program uses the \fBMBIO\fP library and will read or write any swath sonar
 format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page.
-Default: \fIdatalist\fP = data.list
+Default: \fIdatalist\fP = datalist.mb-1
 .TP
 .B \-L
 \fIlonflip\fP
@@ -497,7 +497,7 @@ the mosaic to be filled in through spine interpolation .
 The output looks like:
  
  Program mbmosaic
- Version $Id: mbmosaic.l,v 5.1 2001-07-13 19:52:33 caress Exp $
+ Version $Id: mbmosaic.l,v 5.2 2002-04-06 02:53:45 caress Exp $
  MB-system Version 4.5
 
  MBMOSAIC Parameters:

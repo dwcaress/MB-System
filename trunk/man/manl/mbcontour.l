@@ -1,4 +1,4 @@
-.TH mbcontour l "13 July 2001" "MB-System 5.0" "MB-System 5.0"
+.TH mbcontour l "3 April 2002" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbcontour\fP - GMT compatible utility for color fill or color shaded relief
 swath plots of swath sonar data using Postscript.
@@ -176,10 +176,28 @@ data file should be followed by a data format identifier, e.g.:
  	datafile1 11
  	datafile2 24
 .br
-This program uses the \fBMBIO\fP library and will read or write any swath sonar
+This program uses the \fBMBIO\fP library and will read any swath sonar
 format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
-is given in the \fBMBIO\fP manual page. Default: \fIinfile\fP = "stdin".
+is given in the \fBMBIO\fP manual page. 
+.br
+An input datafile may be accompanied by a "fast bathymetry" or "fbt" file
+and by a "fast navigation" or "fnv" file. The "fbt" and "fnv" file naming 
+convention is to add the 
+".fbt" or ".fbt" suffix to the original swath
+data filename. 
+An "fbt" file contains only swath bathymetry information 
+in a compact format (format 71),
+and is thus quick to read. In the
+event that bathymetry contours 
+is being generated, \fBmbcontour\fP
+will attempt to read an "fbt" file in lieu of the original data.
+An "fnv" file contains only navigation information in a compact
+ASCII format (format 166), and is thus even quicker to read. 
+When \fBmbcontour is only generating a shiptrack plot, it will
+attempt to read an "fnv" file in lieu of the original data.
+.br
+Default: \fIinfile\fP = "stdin".
 .TP
 .B \-J
 Selects the map projection. Scale is inch/degree, 1:xxxxx. 

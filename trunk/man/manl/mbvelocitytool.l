@@ -1,4 +1,4 @@
-.TH mbvelocitytool l "18 January 2001" "MB-System 5.0" "MB-System 5.0"
+.TH mbvelocitytool l "5 April 2002" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbvelocitytool\fP - Interactive water sound velocity profile editor.
 
@@ -58,15 +58,39 @@ analytically as pieces of circular arcs. This raytracing algorithm
 is the same used in the program \fBmbprocess\fP.
 
 \fBMBvelocitytool\fP can be used in conjunction with \fBmbprocess\fP.
-If the user uses the \fBSave swath SVP file\fP option to 
+If the user uses the \fBSave swath svp file\fP option to 
 save an SVP model developed through the analysis of a
 particular swath data file,\fBMBvelocitytool\fP also sets
 the associated \fBmbprocess\fP parameter file so that \fBmbprocess\fP
 recalculates the bathymetry using the new SVP model. The program
 \fBmbset\fP may be used to set the SVP file in the parameter file for
 any swath data file. Users may also save SVP models without setting
-any \fBmbprocess\fP parameters by using the \fBSave Editable SVP\fP
+any \fBmbprocess\fP parameters by using the \fBSave editable profile\fP
 option.
+
+Sometimes the bathymetry residuals show structure indicative of
+persistent artifacts in the bathymetry (e.g. certain parts of
+the swath may be persistently shallower or deeper than the
+rest of the swath). In this situation, it is possible to export
+the residuals and to then apply them in \fBmbprocess\fP
+as static corrections to the bathymetry. This is accomplished by
+using the \fBSave residuals as offsets\fP option under the \fBFile\fP
+menu. 
+
+If a user attempts to read in swath bathymetry that does not
+contain the travel time and beam angle data required for bathymetry
+recalculation, \fBMBvelocitytool\fP will estimate the travel times
+and angles from the bathymetry by assuming a 1500 m/s half-space 
+(and then post a warning dialog).
+Although the user can proceed to model bathymetry recalculation
+by modifying the active SVP just as with proper data, the
+travel times and angles are not in general correct and so the
+modeling and any results it gives are, well, bogus. A more
+useful approach is to leave the SVP alone and simply export the
+residuals to be applied as static corrections in mbprocess.
+This approach allows users a practical means of correcting
+older multibeam bathymetry that was originally calculated with
+an incorrect SVP but which contains no travel time or angle data.
 
 .SH AUTHORSHIP
 David W. Caress (caress@mbari.org)
@@ -210,6 +234,14 @@ profile as a file. The SVP filename is that of the current
 swath data input file with a ".svp" suffix added. \fBMBvelocitytool\fP
 also sets the swath data file's \fBmbprocess\fP parameter file
 to recalculate bathymetry using the new SVP file.
+.TP
+.B File->Save Residuals As Offsets
+Selecting this menu item saves the current bathymetry residuals 
+as a "static bathymetry offset" file. 
+The filename is that of the current
+swath data input file with a ".sbo" suffix added. \fBMBvelocitytool\fP
+also sets the swath data file's \fBmbprocess\fP parameter file
+to apply these residuals as static corrections to the bathymetry.
 .TP
 .B Plot Scaling
 This button brings up a dialog containing the three controls

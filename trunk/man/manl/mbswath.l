@@ -1,4 +1,4 @@
-.TH mbswath l "13 July 2001" "MB-System 5.0" "MB-System 5.0"
+.TH mbswath l "3 April 2002" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbswath\fP - GMT compatible utility for color fill or color shaded relief
 swath plots of swath sonar data using Postscript.
@@ -180,10 +180,25 @@ data file should be followed by a data format identifier, e.g.:
  	datafile1 11
  	datafile2 24
 .br
-This program uses the \fBMBIO\fP library and will read or write any swath sonar
+This program uses the \fBMBIO\fP library and will read any swath sonar
 format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
-is given in the \fBMBIO\fP manual page. Default: \fIinfile\fP = "stdin".
+is given in the \fBMBIO\fP manual page. 
+.br
+An input datafile may be accompanied by a "fast bathymetry" or "fbt" file. 
+The "fbt" fine naming 
+convention is to add the 
+".fbt" suffix to the original swath
+data filename. 
+An "fbt" file contains only swath bathymetry information 
+in a compact format (format 71),
+and is thus quick to read. If \fBmbswath\fP is 
+generating a plot containing only bathymetry 
+(\fB-Z\fP\fI1\fP and \fB-Z\fP\fI2\fP).
+the program
+will attempt to read an "fbt" file in lieu of the original data.
+.br
+Default: \fIinfile\fP = "stdin".
 .TP
 .B \-J
 Selects the map projection. Scale is inch/degree, 1:xxxxx. 

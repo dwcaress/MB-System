@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	4/21/96
- *    $Id: mb_define.h,v 5.13 2002-02-22 09:03:43 caress Exp $
+ *    $Id: mb_define.h,v 5.14 2002-04-06 02:43:39 caress Exp $
  *
- *    Copyright (c) 1996, 2000 by
+ *    Copyright (c) 1996, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -20,6 +20,9 @@
  * Date:	April 21, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.13  2002/02/22 09:03:43  caress
+ * Release 5.0.beta13
+ *
  * Revision 5.12  2002/01/24 02:28:29  caress
  * Added DARWIN.
  *
@@ -210,6 +213,11 @@ int mb_get_relative_path(int verbose,
 int mb_get_shortest_path(int verbose,
 		char *path,
 		int *error);
+int mb_check_info(int verbose, char *file, int lonflip, 
+		    double bounds[4], int *file_in_bounds,
+		    int *error);
+int mb_make_info(int verbose, 
+		    char *file, int format, int *error);
 int mb_read_init(int verbose, char *file, 
 		int format, int pings, int lonflip, double bounds[4],
 		int btime_i[7], int etime_i[7], 
@@ -438,8 +446,18 @@ int mb_put_binary_float(int, float, void *);
 int mb_put_binary_double(int, double, void *);
 int mb_get_bounds (char *text, double *bounds);
 double mb_ddmmss_to_degree (char *text);
-int mb_takeoff_to_rollpitch(int, double, double, double *, double *, int *);
-int mb_rollpitch_to_takeoff(int, double, double, double *, double *, int *);
+int mb_takeoff_to_rollpitch(int verbose,
+		double theta, double phi,
+		double *alpha, double *beta,
+		int *error);
+int mb_rollpitch_to_takeoff(int verbose,
+		double alpha, double beta,
+		double *theta, double *phi,
+		int *error);
+int mb_xyz_to_takeoff(int verbose,
+		double x, double y, double z,
+		double *theta, double *phi,
+		int *error);
 int mb_double_compare(void *a, void *b);
 int mb_int_compare(void *a, void *b);
 

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_process.c	9/11/00
- *    $Id: mb_process.c,v 5.17 2001-12-20 21:03:18 caress Exp $
+ *    $Id: mb_process.c,v 5.18 2002-04-06 02:43:39 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	September 11, 2000
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.17  2001/12/20 21:03:18  caress
+ * Release 5.0.beta11
+ *
  * Revision 5.16  2001/12/18  04:27:45  caress
  * Release 5.0.beta11.
  *
@@ -101,7 +104,7 @@
 #include "../../include/mb_format.h"
 #include "../../include/mb_process.h"
 
-static char rcs_id[]="$Id: mb_process.c,v 5.17 2001-12-20 21:03:18 caress Exp $";
+static char rcs_id[]="$Id: mb_process.c,v 5.18 2002-04-06 02:43:39 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_pr_readpar(int verbose, char *file, int lookforfiles, 
@@ -109,12 +112,10 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 			int *error)
 {
 	char	*function_name = "mb_pr_readpar";
-	char	parfile[MBP_FILENAMESIZE], fileroot[MBP_FILENAMESIZE];
+	char	parfile[MBP_FILENAMESIZE];
 	char	buffer[MBP_FILENAMESIZE], dummy[MBP_FILENAMESIZE], *result;
 	char	*lastslash;
-	int	format;
 	FILE	*fp;
-	int	stat_status;
 	struct	stat statbuf;
 	int	status = MB_SUCCESS;
 	int	len;
@@ -190,6 +191,8 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 	process->mbp_tt_mult = 1.0;
 	process->mbp_angle_mode = MBP_ANGLES_OK;
 	process->mbp_corrected = MB_YES;
+	process->mbp_static_mode = MBP_STATIC_OFF;
+	process->mbp_staticfile[0] = '\0';
 	
 	/* draft correction */
 	process->mbp_draft_mode = MBP_DRAFT_OFF;
@@ -229,6 +232,10 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 	process->mbp_tide_mode = MBP_TIDE_OFF;
 	process->mbp_tidefile[0] = '\0';
 	process->mbp_tide_format = 1;
+	
+	/* sidescan correction */
+	process->mbp_sscorr_mode = MBP_SSCORR_OFF;
+	process->mbp_sscorrfile[0] = '\0';
 	
 	/* sidescan recalculation */
 	process->mbp_ssrecalc_mode = MBP_SSRECALC_OFF;
@@ -568,6 +575,20 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 			{
 			sscanf(buffer, "%s %d", dummy, &process->mbp_corrected);
 			}
+		    
+		    /* static beam bathymetry correction */
+		    else if (strncmp(buffer, "STATICMODE", 10) == 0)
+			{
+			sscanf(buffer, "%s %d", dummy, &process->mbp_static_mode);
+			}
+		    else if (strncmp(buffer, "STATICFILE", 10) == 0)
+			{
+			sscanf(buffer, "%s %s", dummy, process->mbp_staticfile);
+			if (explicit == MB_NO)
+			    {
+			    process->mbp_static_mode = MBP_SVP_ON;
+			    }
+			}
 	
 		    /* draft correction */
 		    else if (strncmp(buffer, "DRAFTMODE", 9) == 0)
@@ -674,7 +695,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 			{
 			sscanf(buffer, "%s %d", dummy, &process->mbp_tide_mode);
 			}
-		    else if (strncmp(buffer, "TIDEFILE", 10) == 0)
+		    else if (strncmp(buffer, "TIDEFILE", 8) == 0)
 			{
 			sscanf(buffer, "%s %s", dummy, process->mbp_tidefile);
 			if (explicit == MB_NO)
@@ -685,6 +706,20 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 		    else if (strncmp(buffer, "TIDEFORMAT", 10) == 0)
 			{
 			sscanf(buffer, "%s %d", dummy, &process->mbp_tide_format);
+			}
+	
+		    /* sidescan correction */
+		    else if (strncmp(buffer, "SSCORRMODE", 10) == 0)
+			{
+			sscanf(buffer, "%s %d", dummy, &process->mbp_sscorr_mode);
+			}
+		    else if (strncmp(buffer, "SSCORRFILE", 10) == 0)
+			{
+			sscanf(buffer, "%s %s", dummy, process->mbp_sscorrfile);
+			if (explicit == MB_NO)
+			    {
+			    process->mbp_sscorr_mode = MBP_SSCORR_ON;
+			    }
 			}
 	
 		    /* sidescan recalculation */
@@ -969,13 +1004,48 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 	    process->mbp_editfile[len] = '\0';
 	    strcat(process->mbp_editfile, dummy);
 	    }
+
+	/* reset static file */
+	if (len > 1
+	    && strlen(process->mbp_staticfile) > 1
+	    && process->mbp_staticfile[0] != '/')
+	    {
+	    strcpy(dummy, process->mbp_staticfile);
+	    strncpy(process->mbp_staticfile, process->mbp_ifile, len);
+	    process->mbp_staticfile[len] = '\0';
+	    strcat(process->mbp_staticfile, dummy);
+	    }
+
+	/* reset tide file */
+	if (len > 1
+	    && strlen(process->mbp_tidefile) > 1
+	    && process->mbp_tidefile[0] != '/')
+	    {
+	    strcpy(dummy, process->mbp_tidefile);
+	    strncpy(process->mbp_tidefile, process->mbp_ifile, len);
+	    process->mbp_tidefile[len] = '\0';
+	    strcat(process->mbp_tidefile, dummy);
+	    }
+
+	/* reset sidescan correction file */
+	if (len > 1
+	    && strlen(process->mbp_sscorrfile) > 1
+	    && process->mbp_sscorrfile[0] != '/')
+	    {
+	    strcpy(dummy, process->mbp_sscorrfile);
+	    strncpy(process->mbp_sscorrfile, process->mbp_ifile, len);
+	    process->mbp_sscorrfile[len] = '\0';
+	    strcat(process->mbp_sscorrfile, dummy);
+	    }
 	    
 	/* make sure all global paths are as short as possible */
 	mb_get_shortest_path(verbose, process->mbp_navadjfile, error);
 	mb_get_shortest_path(verbose, process->mbp_navfile, error);
 	mb_get_shortest_path(verbose, process->mbp_svpfile, error);
 	mb_get_shortest_path(verbose, process->mbp_editfile, error);
-
+	mb_get_shortest_path(verbose, process->mbp_staticfile, error);
+	mb_get_shortest_path(verbose, process->mbp_tidefile, error);
+	mb_get_shortest_path(verbose, process->mbp_sscorrfile, error);
 	    
 	/* check for error */
 	if (process->mbp_ifile_specified == MB_NO
@@ -1051,6 +1121,8 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 		fprintf(stderr,"dbg2       mbp_tt_mode:            %d\n",process->mbp_tt_mode);
 		fprintf(stderr,"dbg2       mbp_tt_mult:            %f\n",process->mbp_tt_mult);
 		fprintf(stderr,"dbg2       mbp_angle_mode:         %d\n",process->mbp_angle_mode);
+		fprintf(stderr,"dbg2       mbp_static_mode:        %d\n",process->mbp_static_mode);
+		fprintf(stderr,"dbg2       mbp_staticfile:         %s\n",process->mbp_staticfile);
 		fprintf(stderr,"dbg2       mbp_heading_mode:       %d\n",process->mbp_heading_mode);
 		fprintf(stderr,"dbg2       mbp_headingbias:        %f\n",process->mbp_headingbias);
 		fprintf(stderr,"dbg2       mbp_edit_mode:          %d\n",process->mbp_edit_mode);
@@ -1058,6 +1130,8 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 		fprintf(stderr,"dbg2       mbp_tide_mode:          %d\n",process->mbp_tide_mode);
 		fprintf(stderr,"dbg2       mbp_tidefile:           %s\n",process->mbp_tidefile);
 		fprintf(stderr,"dbg2       mbp_tide_format:        %d\n",process->mbp_tide_format);
+		fprintf(stderr,"dbg2       mbp_sscorr_mode:        %d\n",process->mbp_sscorr_mode);
+		fprintf(stderr,"dbg2       mbp_sscorrfile:         %s\n",process->mbp_sscorrfile);
 		fprintf(stderr,"dbg2       mbp_ssrecalc_mode:      %d\n",process->mbp_ssrecalc_mode);
 		fprintf(stderr,"dbg2       mbp_ssrecalc_pixelsize: %f\n",process->mbp_ssrecalc_pixelsize);
 		fprintf(stderr,"dbg2       mbp_ssrecalc_swathwidth:%f\n",process->mbp_ssrecalc_swathwidth);
@@ -1175,6 +1249,8 @@ int mb_pr_writepar(int verbose, char *file,
 		fprintf(stderr,"dbg2       mbp_tt_mode:            %d\n",process->mbp_tt_mode);
 		fprintf(stderr,"dbg2       mbp_tt_mult:            %f\n",process->mbp_tt_mult);
 		fprintf(stderr,"dbg2       mbp_angle_mode:         %d\n",process->mbp_angle_mode);
+		fprintf(stderr,"dbg2       mbp_static_mode:        %d\n",process->mbp_static_mode);
+		fprintf(stderr,"dbg2       mbp_staticfile:         %s\n",process->mbp_staticfile);
 		fprintf(stderr,"dbg2       mbp_heading_mode:       %d\n",process->mbp_heading_mode);
 		fprintf(stderr,"dbg2       mbp_headingbias:        %f\n",process->mbp_headingbias);
 		fprintf(stderr,"dbg2       mbp_edit_mode:          %d\n",process->mbp_edit_mode);
@@ -1182,6 +1258,8 @@ int mb_pr_writepar(int verbose, char *file,
 		fprintf(stderr,"dbg2       mbp_tide_mode:          %d\n",process->mbp_tide_mode);
 		fprintf(stderr,"dbg2       mbp_tidefile:           %s\n",process->mbp_tidefile);
 		fprintf(stderr,"dbg2       mbp_tide_format:        %d\n",process->mbp_tide_format);
+		fprintf(stderr,"dbg2       mbp_sscorr_mode:        %d\n",process->mbp_sscorr_mode);
+		fprintf(stderr,"dbg2       mbp_sscorrfile:         %s\n",process->mbp_sscorrfile);
 		fprintf(stderr,"dbg2       mbp_ssrecalc_mode:      %d\n",process->mbp_ssrecalc_mode);
 		fprintf(stderr,"dbg2       mbp_ssrecalc_pixelsize: %f\n",process->mbp_ssrecalc_pixelsize);
 		fprintf(stderr,"dbg2       mbp_ssrecalc_swathwidth:%f\n",process->mbp_ssrecalc_swathwidth);
@@ -1210,6 +1288,7 @@ int mb_pr_writepar(int verbose, char *file,
 		fprintf(stderr,"dbg2       mbp_kluge004:           %d\n",process->mbp_kluge004);
 		fprintf(stderr,"dbg2       mbp_kluge005:           %d\n",process->mbp_kluge005);
 		}
+fprintf(stderr,"Tide file1:%s\n", process->mbp_tidefile);
 		
 	/* try to avoid absolute pathnames - get pwd */
 	lastslash = strrchr(file, '/');
@@ -1241,6 +1320,9 @@ int mb_pr_writepar(int verbose, char *file,
 	status = mb_get_relative_path(verbose, process->mbp_editfile, pwd, error);
 	status = mb_get_relative_path(verbose, process->mbp_svpfile, pwd, error);
 	status = mb_get_relative_path(verbose, process->mbp_tidefile, pwd, error);
+	status = mb_get_relative_path(verbose, process->mbp_staticfile, pwd, error);
+	status = mb_get_relative_path(verbose, process->mbp_sscorrfile, pwd, error);
+fprintf(stderr,"Tide file2:%s\n", process->mbp_tidefile);
 
 	/* get expected process parameter file name */
 	strcpy(parfile, file);
@@ -1344,6 +1426,8 @@ int mb_pr_writepar(int verbose, char *file,
 	    fprintf(fp, "TTMULTIPLY %f\n", process->mbp_tt_mult);
 	    fprintf(fp, "ANGLEMODE %d\n", process->mbp_angle_mode);
 	    fprintf(fp, "SOUNDSPEEDREF %d\n", process->mbp_corrected);
+	    fprintf(fp, "STATICMODE %d\n", process->mbp_static_mode);
+	    fprintf(fp, "STATICFILE %s\n", process->mbp_staticfile);
 	    
 	    /* draft correction */
 	    fprintf(fp, "##\n## Draft Correction:\n");
@@ -1390,6 +1474,11 @@ int mb_pr_writepar(int verbose, char *file,
 	    fprintf(fp, "TIDEMODE %d\n", process->mbp_tide_mode);
 	    fprintf(fp, "TIDEFILE %s\n", process->mbp_tidefile);
 	    fprintf(fp, "TIDEFORMAT %d\n", process->mbp_tide_format);
+	    
+	    /* sidescan correction */
+	    fprintf(fp, "##\n## Sidescan Correction:\n");
+	    fprintf(fp, "SSCORRMODE %d\n", process->mbp_sscorr_mode);
+	    fprintf(fp, "SSCORRFILE %s\n", process->mbp_sscorrfile);
 	    
 	    /* sidescan recalculation */
 	    fprintf(fp, "##\n## Sidescan Recalculation:\n");
@@ -2165,6 +2254,53 @@ int mb_pr_update_svp(int verbose, char *file,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+int mb_pr_update_static(int verbose, char *file, 
+			int	mbp_static_mode, 
+			char	*mbp_staticfile, 
+			int *error)
+{
+	char	*function_name = "mb_pr_update_static";
+	struct mb_process_struct process;
+	int	status = MB_SUCCESS;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
+		fprintf(stderr,"dbg2       file:              %s\n",file);
+		fprintf(stderr,"dbg2       mbp_static_mode:   %d\n",mbp_static_mode);
+		fprintf(stderr,"dbg2       mbp_staticfile:    %s\n",mbp_staticfile);
+		}
+
+	/* get known process parameters */
+	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+
+	/* set svp values */
+	process.mbp_static_mode = mbp_static_mode;
+	if (mbp_staticfile != NULL)
+	    strcpy(process.mbp_staticfile, mbp_staticfile);
+
+	/* write new process parameter file */
+	status = mb_pr_writepar(verbose, file, &process, error);
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
 int mb_pr_update_navadj(int verbose, char *file, 
 			int	mbp_navadj_mode, 
 			char	*mbp_navadjfile, 
@@ -2487,6 +2623,53 @@ int mb_pr_update_edit(int verbose, char *file,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+int mb_pr_update_sscorr(int verbose, char *file, 
+			int	mbp_sscorr_mode,
+			char	*mbp_sscorrfile,
+			int *error)
+{
+	char	*function_name = "mb_pr_update_sscorr";
+	struct mb_process_struct process;
+	int	status = MB_SUCCESS;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:                  %d\n",verbose);
+		fprintf(stderr,"dbg2       file:                     %s\n",file);
+		fprintf(stderr,"dbg2       mbp_sscorr_mode:          %d\n",mbp_sscorr_mode);
+		fprintf(stderr,"dbg2       mbp_sscorrfile:           %s\n",mbp_sscorrfile);
+		}
+
+	/* get known process parameters */
+	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+
+	/* set ssrecalc values */
+	process.mbp_sscorr_mode = mbp_sscorr_mode;
+	if (mbp_sscorrfile != NULL)
+	    strcpy(process.mbp_sscorrfile, mbp_sscorrfile);
+
+	/* write new process parameter file */
+	status = mb_pr_writepar(verbose, file, &process, error);
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       error:                    %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:                   %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
 int mb_pr_update_ssrecalc(int verbose, char *file, 
 			int		mbp_ssrecalc_mode,
 			double	mbp_ssrecalc_pixelsize,
@@ -2694,9 +2877,8 @@ int mb_pr_get_ofile(int verbose, char *file,
 			int	*error)
 {
 	char	*function_name = "mb_pr_get_ofile";
-	struct mb_process_struct process;
 	int	status = MB_SUCCESS;
-	char	parfile[MBP_FILENAMESIZE], fileroot[MBP_FILENAMESIZE];
+	char	parfile[MBP_FILENAMESIZE];
 	char	buffer[MBP_FILENAMESIZE], dummy[MBP_FILENAMESIZE], *result;
 	FILE	*fp;
 
@@ -3228,6 +3410,50 @@ int mb_pr_get_svp(int verbose, char *file,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+int mb_pr_get_static(int verbose, char *file, 
+			int	*mbp_static_mode, 
+			char	*mbp_staticfile, 
+			int *error)
+{
+	char	*function_name = "mb_pr_get_static";
+	struct mb_process_struct process;
+	int	status = MB_SUCCESS;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
+		fprintf(stderr,"dbg2       file:              %s\n",file);
+		}
+
+	/* get known process parameters */
+	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+
+	/* set svp values */
+	*mbp_static_mode = process.mbp_static_mode;
+	if (mbp_staticfile != NULL)
+	    strcpy(mbp_staticfile, process.mbp_staticfile);
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       mbp_static_mode:   %d\n",*mbp_static_mode);
+		fprintf(stderr,"dbg2       mbp_staticfile:    %s\n",mbp_staticfile);
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
 int mb_pr_get_navadj(int verbose, char *file, 
 			int	*mbp_navadj_mode, 
 			char	*mbp_navadjfile, 
@@ -3528,6 +3754,50 @@ int mb_pr_get_edit(int verbose, char *file,
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_pr_get_sscorr(int verbose, char *file, 
+			int	*mbp_sscorr_mode,
+			char	*mbp_sscorrfile,
+			int *error)
+{
+	char	*function_name = "mb_pr_get_sscorr";
+	struct mb_process_struct process;
+	int	status = MB_SUCCESS;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
+		fprintf(stderr,"dbg2       file:              %s\n",file);
+		}
+
+	/* get known process parameters */
+	status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+
+	/* set ssrecalc values */
+	*mbp_sscorr_mode = process.mbp_sscorr_mode;
+	if (mbp_sscorrfile != NULL)
+	    strcpy(mbp_sscorrfile, process.mbp_sscorrfile);
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       mbp_sscorr_mode:          %d\n",*mbp_sscorr_mode);
+		fprintf(stderr,"dbg2       mbp_sscorrfile:           %s\n",mbp_sscorrfile);
+		fprintf(stderr,"dbg2       error:                    %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:                   %d\n",status);
 		}
 
 	/* return status */

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcontour.c	6/4/93
- *    $Id: mbcontour.c,v 5.4 2001-08-10 22:40:02 dcaress Exp $
+ *    $Id: mbcontour.c,v 5.5 2002-04-06 02:45:59 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	June 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2001/08/10 22:40:02  dcaress
+ * Release 5.0.beta07
+ *
  * Revision 5.3  2001-07-19 17:29:41-07  caress
  * Release 5.0.beta03
  *
@@ -177,7 +180,7 @@
 
 main (int argc, char **argv) 
 {
-	static char rcs_id[] = "$Id: mbcontour.c,v 5.4 2001-08-10 22:40:02 dcaress Exp $";
+	static char rcs_id[] = "$Id: mbcontour.c,v 5.5 2002-04-06 02:45:59 caress Exp $";
 #ifdef MBCONTOURFILTER
 	static char program_name[] = "MBCONTOURFILTER";
 	static char help_message[] =  "MBCONTOURFILTER is a utility which creates a pen plot \ncontour map of multibeam swath bathymetry.  \nThe primary purpose of this program is to serve as \npart of a real-time plotting system.  The contour \nlevels and colors can be controlled \ndirectly or set implicitly using contour and color change intervals. \nContours can also be set to have ticks pointing downhill.";
@@ -260,7 +263,6 @@ main (int argc, char **argv)
 	int	done;
 	int	flush;
 	int	save_new;
-	int	first;
 	int	*npings = NULL;
 	int	nping_read;
 	int	nplot;
@@ -803,8 +805,19 @@ main (int argc, char **argv)
 	    /* read if data may be in bounds */
 	    if (file_in_bounds == MB_YES)
 		{
+		/* check for "fast bathymetry" or "fbt" file */
+		if (plot_contours == MB_YES)
+		    {
+		    mb_get_fbt(verbose, file, &format, &error);
+		    }
 
-		/* initialize reading the multibeam file */
+		/* else check for "fast nav" or "fnv" file */
+		else if (plot_track == MB_YES)
+		    {
+		    mb_get_fnv(verbose, file, &format, &error);
+		    }
+	    
+		/* call mb_read_init() */
 		if ((status = mb_read_init(
 		    verbose,file,format,pings,lonflip,mb_bounds,
 		    btime_i,etime_i,speedmin,timegap,
@@ -818,7 +831,7 @@ main (int argc, char **argv)
 			    program_name);
 		    exit(error);
 		    }
-    
+
 		/* allocate memory for data arrays */
 		status = mb_malloc(verbose,beams_amp*sizeof(double),&amp,&error);
 		status = mb_malloc(verbose,pixels_ss*sizeof(double),&ss,&error);
@@ -1092,7 +1105,7 @@ int ping_copy(int verbose, int one, int two, struct swath *swath, int *error)
 
 	struct ping	*ping1;
 	struct ping	*ping2;
-	int	i, j;
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)

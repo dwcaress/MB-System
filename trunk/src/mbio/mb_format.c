@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.c	2/18/94
- *    $Id: mb_format.c,v 5.14 2002-02-22 09:03:43 caress Exp $
+ *    $Id: mb_format.c,v 5.15 2002-04-06 02:43:39 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000 by
+ *    Copyright (c) 1993, 1994, 2000, 2002 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -20,6 +20,9 @@
  * Date:	Februrary 18, 1994
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.14  2002/02/22 09:03:43  caress
+ * Release 5.0.beta13
+ *
  * Revision 5.13  2001/12/20  20:48:51  caress
  * Release 5.0.beta11
  *
@@ -144,7 +147,7 @@
 #include "../../include/mbsys_simrad.h"
 #include "../../include/mbsys_simrad2.h"
 
-static char rcs_id[]="$Id: mb_format.c,v 5.14 2002-02-22 09:03:43 caress Exp $";
+static char rcs_id[]="$Id: mb_format.c,v 5.15 2002-04-06 02:43:39 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_format_register(int verbose, 
@@ -1214,7 +1217,7 @@ int mb_format(int verbose, int *format, int *error)
 /*--------------------------------------------------------------------*/
 int mb_format_system(int verbose, int *format, int *system, int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.14 2002-02-22 09:03:43 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.15 2002-04-06 02:43:39 caress Exp $";
 	char	*function_name = "mb_format_system";
 	int	status;
 
@@ -1283,7 +1286,7 @@ int mb_format_dimensions(int verbose, int *format,
 		int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.14 2002-02-22 09:03:43 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.15 2002-04-06 02:43:39 caress Exp $";
 	char	*function_name = "mb_format_dimensions";
 	int	status;
 
@@ -1351,7 +1354,7 @@ int mb_format_dimensions(int verbose, int *format,
 /*--------------------------------------------------------------------*/
 int mb_format_description(int verbose, int *format, char *description, int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.14 2002-02-22 09:03:43 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.15 2002-04-06 02:43:39 caress Exp $";
 	char	*function_name = "mb_format_description";
 	int	status;
 
@@ -1416,7 +1419,7 @@ int mb_format_flags(int verbose, int *format,
 		int *variable_beams, int *traveltime, int *beam_flagging, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.14 2002-02-22 09:03:43 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.15 2002-04-06 02:43:39 caress Exp $";
 	char	*function_name = "mb_format_flags";
 	int	status;
 
@@ -1487,7 +1490,7 @@ int mb_format_source(int verbose, int *format,
 		int *nav_source, int *heading_source, int *vru_source, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.14 2002-02-22 09:03:43 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.15 2002-04-06 02:43:39 caress Exp $";
 	char	*function_name = "mb_format_source";
 	int	status;
 
@@ -1558,7 +1561,7 @@ int mb_format_beamwidth(int verbose, int *format,
 		double *beamwidth_xtrack, double *beamwidth_ltrack,
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.14 2002-02-22 09:03:43 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.15 2002-04-06 02:43:39 caress Exp $";
 	char	*function_name = "mb_format_beamwidth";
 	int	status;
 
@@ -1680,6 +1683,52 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 	    else
 		i = 0;
 	    if ((suffix = strstr(&filename[i],".nv")) != NULL)
+		{
+		suffix_len = strlen(suffix);
+		if (suffix_len == 4)
+		    {
+		    if (fileroot != NULL)
+			{
+			strncpy(fileroot, filename, strlen(filename)-suffix_len);
+			fileroot[strlen(filename)-suffix_len] = '\0';
+			}
+		    *format = MBF_MBPRONAV;
+		    found = MB_YES;
+		    }
+		}
+	    }
+
+	/* look for "fast bath" or .fbt suffix */
+	if (found == MB_NO)
+	    {
+	    if (strlen(filename) > 4)
+		i = strlen(filename) - 4;
+	    else
+		i = 0;
+	    if ((suffix = strstr(&filename[i],".fbt")) != NULL)
+		{
+		suffix_len = strlen(suffix);
+		if (suffix_len == 4)
+		    {
+		    if (fileroot != NULL)
+			{
+			strncpy(fileroot, filename, strlen(filename)-suffix_len);
+			fileroot[strlen(filename)-suffix_len] = '\0';
+			}
+		    *format = MBF_MBLDEOIH;
+		    found = MB_YES;
+		    }
+		}
+	    }
+
+	/* look for "fast nav" or .fnv suffix */
+	if (found == MB_NO)
+	    {
+	    if (strlen(filename) > 4)
+		i = strlen(filename) - 4;
+	    else
+		i = 0;
+	    if ((suffix = strstr(&filename[i],".fnv")) != NULL)
 		{
 		suffix_len = strlen(suffix);
 		if (suffix_len == 4)

@@ -1,4 +1,4 @@
-.TH mbgrid l "13 July 2001" "MB-System 5.0" "MB-System 5.0"
+.TH mbgrid l "3 April 2002" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbgrid\fP - Grid bathymetry, amplitude, or sidescan data 
 from swath sonar data files.
@@ -288,16 +288,24 @@ of its operation and then exit immediately.
 Sets the filename of the file containing a list of the input swath sonar
 data files and their formats.  In the \fIdatalist\fP file, each
 data file should be followed by a data format identifier, e.g.:
- 	datafile1 1
- 	datafile2 8
+ 	datafile1 11
+ 	datafile2 24
 .br
-This program uses the \fBMBIO\fP library and will read or write any swath sonar
+This program uses the \fBMBIO\fP library and will read any swath sonar
 format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page.  A format identifier of 0 indicates
 that the file contains lines of (lon, lat, depth) triples which can be read
 in free format.
-Default: \fIdatalist\fP = data.list
+.br
+An input datafile may be accompanied by a "fast bathymetry" or "fbt" file. 
+An "fbt" file contains only swath bathymetry information in a compact format (format 71),
+and is thus quick to read. The "fbt" fine naming convention is to add the 
+".fbt" suffix to the original swath
+data filename. In the
+event that a bathymetry or topography grid is being generated, \fBmbgrid\fP
+will attempt to read an "fbt" file in lieu of the original data.
+Default: \fIdatalist\fP = datalist.mb-1
 .TP
 .B \-L
 \fIlonflip\fP
@@ -444,7 +452,7 @@ will be filled in through spine interpolation even in the areas
 not covered by data. The output looks like:
  
  Program MBGRID
- Version $Id: mbgrid.l,v 5.2 2001-07-13 19:52:33 caress Exp $
+ Version $Id: mbgrid.l,v 5.3 2002-04-06 02:53:45 caress Exp $
  MB-system Version 4.5
  
  MBGRID Parameters:

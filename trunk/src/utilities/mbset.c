@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbset.c	3/31/93
- *    $Id: mbset.c,v 5.14 2001-12-18 04:29:57 caress Exp $
+ *    $Id: mbset.c,v 5.15 2002-04-06 02:53:45 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -30,6 +30,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.14  2001/12/18 04:29:57  caress
+ * Release 5.0.beta11.
+ *
  * Revision 5.13  2001/11/15  22:58:02  caress
  * Added datalist parsing to mbset, fixed file path handling.
  *
@@ -99,7 +102,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbset.c,v 5.14 2001-12-18 04:29:57 caress Exp $";
+	static char rcs_id[] = "$Id: mbset.c,v 5.15 2002-04-06 02:53:45 caress Exp $";
 	static char program_name[] = "mbset";
 	static char help_message[] = "MBset is a tool for setting values in an mbprocess parameter file.\n\
 MBprocess is a tool for processing swath sonar bathymetry data  \n\
@@ -123,13 +126,11 @@ the manual pages for mbprocess and mbset. \n\n";
 	int	flag = 0;
 	int	pargc = 0;
 	char	**pargv = NULL;
-	char	*parg = NULL;
 	
 	/* MBIO status variables */
 	int	status = MB_SUCCESS;
 	int	verbose = 0;
 	int	error = MB_ERROR_NO_ERROR;
-	char	*message = NULL;
 	
 	/* parameter controls */
 	struct mb_process_struct process;
@@ -146,10 +147,9 @@ the manual pages for mbprocess and mbset. \n\n";
  	int	format = 0;
 	int	mbp_ifile_specified;
 	char	mbp_ifile[MBP_FILENAMESIZE];
-	int	mbp_format_specified;
 	int	mbp_format;
-	int	nscan, toggle;
-	int	i, j;
+	int	nscan;
+	int	i;
 	
 	char	*ctime();
 	char	*getenv();
@@ -158,7 +158,6 @@ the manual pages for mbprocess and mbset. \n\n";
 	mbp_ifile_specified = MB_NO;
 	strcpy (mbp_ifile, "\0");
 	strcpy (read_file, "\0");
-	mbp_format_specified = MB_NO;
 	
 	/* process argument list */
 	while ((c = getopt(argc, argv, "VvHhEeF:f:I:i:LlP:p:")) != -1)
@@ -180,7 +179,6 @@ the manual pages for mbprocess and mbset. \n\n";
 		case 'F':
 		case 'f':
 			sscanf (optarg,"%d", &format);
-			mbp_format_specified = MB_YES;
 			flag++;
 			break;
 		case 'I':
@@ -551,6 +549,20 @@ the manual pages for mbprocess and mbset. \n\n";
 		    {
 		    sscanf(pargv[i], "ANGLEMODE:%d", &process.mbp_angle_mode);
 		    }
+		    
+		/* static beam bathymetry correction */
+		else if (strncmp(pargv[i], "STATICMODE", 10) == 0)
+		    {
+		    sscanf(pargv[i], "STATICMODE:%d", &process.mbp_static_mode);
+		    }
+		else if (strncmp(pargv[i], "STATICFILE", 10) == 0)
+		    {
+		    sscanf(pargv[i], "STATICFILE:%s", process.mbp_staticfile);
+		    if (explicit == MB_NO)
+			{
+			process.mbp_static_mode = MBP_SVP_ON;
+			}
+		    }
  
 		/* draft correction */
 		else if (strncmp(pargv[i], "DRAFTMODE", 9) == 0)
@@ -763,7 +775,21 @@ the manual pages for mbprocess and mbset. \n\n";
 		    {
 		    sscanf(pargv[i], "TIDEFORMAT:%d", &process.mbp_tide_format);
 		    }
-    
+	
+		/* sidescan correction */
+		else if (strncmp(pargv[i], "SSCORRMODE", 10) == 0)
+		    {
+		    sscanf(pargv[i], "SSCORRMODE:%d", &process.mbp_sscorr_mode);
+		    }
+		else if (strncmp(pargv[i], "SSCORRFILE", 10) == 0)
+		    {
+		    sscanf(pargv[i], "SSCORRFILE:%s", process.mbp_sscorrfile);
+		    if (explicit == MB_NO)
+			{
+			process.mbp_sscorr_mode = MBP_SSCORR_ON;
+			}
+		    }
+
 		/* sidescan recalculation */
 		else if (strncmp(pargv[i], "SSRECALCMODE", 12) == 0)
 		    {
@@ -1079,8 +1105,8 @@ the manual pages for mbprocess and mbset. \n\n";
 	    else
 		{
 		fprintf(stderr,"  Tide correction applied to bathymetry.\n");
-	    	fprintf(stderr,"  Tide file:                     %s m\n", process.mbp_tidefile);
-	    	fprintf(stderr,"  Tide format:                   %d m\n", process.mbp_tide_format);
+	    	fprintf(stderr,"  Tide file:                     %s\n", process.mbp_tidefile);
+	    	fprintf(stderr,"  Tide format:                   %d\n", process.mbp_tide_format);
  		}
 
 	    fprintf(stderr,"\nRoll Correction:\n");
@@ -1150,8 +1176,19 @@ the manual pages for mbprocess and mbset. \n\n";
 	    }
 
 	/* write parameters */
+fprintf(stderr,"Tide file:%s\n", process.mbp_tidefile);
 	status = mb_pr_writepar(verbose, mbp_ifile, 
 			&process, &error);
+			
+	/* output results */
+	if (status == MB_SUCCESS)
+		{
+		fprintf(stderr, "Success updating parameter file for %s...\n", mbp_ifile);
+		}
+	else
+		{
+		fprintf(stderr, "Failure to update parameter file for %s!!!\n", mbp_ifile);
+		}
 
 	/* figure out whether and what to read next */
         if (read_datalist == MB_YES)

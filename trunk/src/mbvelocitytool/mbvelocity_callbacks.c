@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbvelocity_callbacks.c	4/7/97
- *    $Id: mbvelocity_callbacks.c,v 5.3 2001-06-02 00:10:04 caress Exp $
+ *    $Id: mbvelocity_callbacks.c,v 5.4 2002-04-06 02:53:15 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -26,6 +26,9 @@
  * Date:	April 7, 1997  GUI recast
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2001/06/02 00:10:04  caress
+ * Now use mb_get_format()
+ *
  * Revision 5.2  2001/03/22  21:12:42  caress
  * Trying to make release 5.0.beta0.
  *
@@ -137,7 +140,6 @@ int	status;
 
 static char message_str[256];
 static char	input_file[128];
-static char	output_file[128];
 int selected = 0; /* indicates an input file is selected */
 
 int	can_xgid;		/* XG graphics id */
@@ -583,16 +585,60 @@ do_mbvelocity_init(int argc, char **argv)
 
 void do_set_controls()
 {
-	char	value_text[128];
-
 	/* get some values from mbvelocitytool */
 	mbvt_get_values(&edit_gui,&ndisplay_gui,&maxdepth_gui,
 		&velrange_gui,&resrange_gui,&anglemode_gui,&format_gui);
 			
 	/* set about version label */
-	sprintf(value_text, ":::t\"MB-System Release %s\":t\"%s\"", 
+	sprintf(message_str, ":::t\"MB-System Release %s\":t\"%s\"", 
 		MB_VERSION, MB_BUILD_DATE);
-	set_label_multiline_string(label_about_version, value_text);
+	set_label_multiline_string(label_about_version, message_str);
+
+	if (ndisplay_gui < 1)
+	    strcpy(message_str, "No display SVPs loaded...");
+	else if (ndisplay_gui == 1)
+	    sprintf(message_str, "Loaded %d display SVP", ndisplay_gui);
+	else
+	    sprintf(message_str, "Loaded %d display SVPs", ndisplay_gui);
+	set_label_string(label_status_display, message_str);
+			
+	/* set pushbuttons */
+	if (edit_gui == 1)
+	    {
+	    XtVaSetValues(pushButton_save_svp, 
+			XmNsensitive, True,
+			NULL);
+	    XtVaSetValues(pushButton_save_svpfile, 
+			XmNsensitive, True,
+			NULL);
+	    }
+	else
+	    {
+	    XtVaSetValues(pushButton_save_svp, 
+			XmNsensitive, False,
+			NULL);
+	    XtVaSetValues(pushButton_save_svpfile, 
+			XmNsensitive, False,
+			NULL);
+	    }
+	if (nload > 0)
+	    {
+	    XtVaSetValues(pushButton_process, 
+			XmNsensitive, True,
+			NULL);
+	    XtVaSetValues(pushButton_save_residuals, 
+			XmNsensitive, True,
+			NULL);
+	    }
+	else
+	    {
+	    XtVaSetValues(pushButton_process, 
+			XmNsensitive, False,
+			NULL);
+	    XtVaSetValues(pushButton_save_residuals, 
+			XmNsensitive, False,
+			NULL);
+	    }
 
 	/* set values of maximum depth slider */
 	XtVaSetValues(slider_maxdepth, 
@@ -621,8 +667,8 @@ void do_set_controls()
 			TRUE, TRUE);
 
 	/* set value of format text item */
-	sprintf(value_text,"%2.2d",format_gui);
-	XmTextFieldSetString(textField_mbformat, value_text);
+	sprintf(message_str,"%2.2d",format_gui);
+	XmTextFieldSetString(textField_mbformat, message_str);
 }
 
 /*--------------------------------------------------------------------*/
@@ -735,12 +781,7 @@ do_fileselection_list( Widget w, XtPointer client_data, XtPointer call_data)
     XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call_data;
 
     static char selection_text[128];
-    char	*mb_suffix;
-    char	*sb_suffix;
-    int	mb_len;
-    int	sb_len;
     int	form;
-    char	value_text[10];
 
     /* get selected text */
     get_text_string(fileSelectionText, selection_text);
@@ -754,10 +795,10 @@ do_fileselection_list( Widget w, XtPointer client_data, XtPointer call_data)
 			    &form)) == MB_SUCCESS)
 		{
 		format_gui = form;
-		sprintf(value_text,"%d",format_gui);
+		sprintf(message_str,"%d",format_gui);
 		XmTextFieldSetString(
 		    textField_mbformat, 
-		    value_text);
+		    message_str);
 		}
 	    }
 }
@@ -851,9 +892,6 @@ do_open( Widget w, XtPointer client_data, XtPointer call_data)
 			    nload, input_file);
 	      set_label_string(label_status_mb, 
 			message_str);
-	      XtVaSetValues(pushButton_save_svpfile, 
-			XmNsensitive, True,
-			NULL);
 	      }
 	    if (status == 1 && edit_gui != 1)
 	      {
@@ -900,9 +938,6 @@ do_open_commandline(char *file, int format)
 			nload, input_file);
 	  set_label_string(label_status_mb, 
 		    message_str);
-	  XtVaSetValues(pushButton_save_svpfile, 
-		    XmNsensitive, True,
-		    NULL);
 	  }
 	if (status == 1 && edit_gui != 1)
 	  {
@@ -970,7 +1005,6 @@ do_canvas_event( Widget w, XtPointer client_data, XtPointer call_data)
     XEvent  *event = acs->event;
 
     static Position x_loc, y_loc;
-    int *x, *y;
     int root_x_return, root_y_return,win_x,win_y;
     unsigned int mask_return;
     int	    doit;
@@ -1091,6 +1125,35 @@ do_save_swath_svp( Widget w, XtPointer client_data, XtPointer call_data)
 	    if (status == 1)
 	      {
 	       strcpy(message_str, "Saved Editable Sound Velocity Profile: ");
+	       strcat(message_str, input_file);
+	       set_label_string(label_status_edit, message_str);
+	      }
+	    }
+
+       if (status != 1)
+	    XBell(display,100);
+
+       /* replot everything */
+       do_set_controls();
+       mbvt_plot();
+}
+
+/*--------------------------------------------------------------------*/
+
+void
+do_save_residuals( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+
+       if (edit_gui == 1 && nload > 0)
+	    {
+	    /* save file */
+	    status = mbvt_save_residuals(input_file);
+
+	    /* reset status message */
+	    if (status == 1)
+	      {
+	       strcpy(message_str, "Saved Residuals as Beam Offsets: ");
 	       strcat(message_str, input_file);
 	       set_label_string(label_status_edit, message_str);
 	      }
