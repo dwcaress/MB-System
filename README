@@ -1,9 +1,9 @@
-MB-SYSTEM VERSION 5.0.BETA30 README FILE:
+MB-SYSTEM VERSION 5.0.BETA31 README FILE:
 ----------------------------------------
 
 This file is located at the top of the MB-System directory
 structure. This directory structure contains the version 
-5.0.beta30 release of the MB-System software package for 
+5.0.beta31 release of the MB-System software package for 
 processing and display of swath sonar data.  
 
 MB-SYSTEM VERSION 5 DESCRIPTION:
@@ -26,6 +26,7 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
+Version 5.0.beta31     April 29, 2003
 Version 5.0.beta30     April 25, 2003
 Version 5.0.beta29     March 10, 2003
 Version 5.0.beta28     January 14, 2003
@@ -112,6 +113,14 @@ Aquarium Research Institute, or any other individuals or
 organizations involved in the design and maintenance of the 
 MB-System software package are NOT responsible for any damage 
 that may follow from correct or incorrect use of these programs.
+
+MB-SYSTEM VERSION 5.0.BETA31 RELEASE NOTES:
+
+The version 5.0.beta31 release of MB-System includes
+one significant bug fix:
+  - A conflict due to multiple definitions of a variable 
+    called "error" in src/mbaux/mb_surface.c
+    has been fixed.
 
 MB-SYSTEM VERSION 5.0.BETA30 RELEASE NOTES:
 
@@ -1129,10 +1138,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.35 2003-04-25 23:18:57 caress Exp $
+RCS ID: $Id: README,v 5.36 2003-04-29 20:31:08 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.35  2003/04/25 23:18:57  caress
+Release 5.0.beta30
+
 Revision 5.34  2003/04/23 06:26:52  caress
 Release 5.0.beta30
 
