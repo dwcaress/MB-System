@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_esf.c	4/10/2003
- *    $Id: mb_esf.c,v 5.7 2005-03-26 22:05:18 caress Exp $
+ *    $Id: mb_esf.c,v 5.8 2005-04-07 04:24:33 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	April 10, 2003
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2005/03/26 22:05:18  caress
+ * Release 5.0.7.
+ *
  * Revision 5.6  2004/12/02 06:33:30  caress
  * Fixes while supporting Reson 7k data.
  *
@@ -58,7 +61,7 @@
 #include "../../include/mb_process.h"
 #include "../../include/mb_swap.h"
 
-static char rcs_id[]="$Id: mb_esf.c,v 5.7 2005-03-26 22:05:18 caress Exp $";
+static char rcs_id[]="$Id: mb_esf.c,v 5.8 2005-04-07 04:24:33 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 /* 	function mb_esf_check checks for an existing esf file. */
@@ -517,7 +520,7 @@ j, time_d, i, beamflag[i], esf->edit[j].action);*/
 		}
 
 	/* print output debug statements */
-	if (verbose >= 0)
+	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
