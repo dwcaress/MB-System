@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system: mbm_route2mission.perl   7/18/2004
-#    $Id: mbm_route2mission.perl,v 5.2 2004-12-02 06:27:45 caress Exp $
+#    $Id: mbm_route2mission.perl,v 5.3 2005-04-07 04:14:12 caress Exp $
 #
 #    Copyright (c) 2004 by 
 #    D. W. Caress (caress@mbari.org)
@@ -34,10 +34,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #      Moss Landing, CA
 #
 # Version:
-# $Id: mbm_route2mission.perl,v 5.2 2004-12-02 06:27:45 caress Exp $
+# $Id: mbm_route2mission.perl,v 5.3 2005-04-07 04:14:12 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.2  2004/12/02 06:27:45  caress
+#   Fixes to support MBARI AUV program.
+#
 #   Revision 5.1  2004/09/16 19:29:11  caress
 #   Development to support for MBARI Mapping AUV.
 #
@@ -98,16 +101,18 @@ $forwarddist = 400.0;
 $waypointdist = 200.0;
 
 # Deal with command line arguments
-&Getopts('A:a:D:d:F:f:G:g:HhI:i:O:o:P:p:S:s:W:w:V*v*Zz');
+&Getopts('A:a:D:d:F:f:G:g:HhI:i:MmO:o:P:p:S:s:T:t:W:w:V*v*Zz');
 $altitudearg =		($opt_A || $opt_a);
 $deptharg =		($opt_D || $opt_d);
 $forwarddist =		($opt_F || $opt_f || $forwarddist);
 $gpsmode =		($opt_G || $opt_g);
 $help =			($opt_H || $opt_h);
 $routefile =		($opt_I || $opt_i);
+$mappingsonar =		($opt_M || $opt_m);
 $missionfile =		($opt_O || $opt_o);
 $startposition =	($opt_P || $opt_p);
-$starttime =		($opt_S || $opt_s);
+$mission_speed =	($opt_S || $opt_s || $mission_speed);
+$starttime =		($opt_T || $opt_t);
 $waypointdist =		($opt_W || $opt_w || $waypointdist);
 $verbose =		($opt_V || $opt_v);
 $outputoff =		($opt_Z || $opt_z);
@@ -287,6 +292,7 @@ for ($i = 0; $i < $npoints; $i++)
 			{
 			print "$i $waypoints[$i] $lons[$i] $lats[$i] $topos[$i] $topomax $distances[$i] $bearings[$i]\r\n";
 			}
+print "$nmissionpoints $waypoints[$i] $lons[$i] $lats[$i] $topos[$i] $topomax $distances[$i] $bearings[$i]\r\n";
 
 		# reset distance from last mission point
 		$distancelastmpoint = $distances[$i];
@@ -368,7 +374,6 @@ $missiontime += $startdistance / $mission_speed;
 $missiontime += $gpsduration + $descendtime;
 
 # add time for each ascent, gps, descent event
-$missiontime += $distancelastmpoint / $mission_speed;
 for ($i = 1; $i < $nmissionpoints - 1; $i++)
 	{
 	if (($gpsmode == 1 && $mwaypoints[$i] == 3) 
@@ -380,7 +385,7 @@ for ($i = 1; $i < $nmissionpoints - 1; $i++)
 	}
 
 # add time for final ascent and gps
-$missiontime += ($mmissiondepths[$nmissionpoints - 1] / $ascendrate) 
+$missiontime += (-$mmissiondepths[$nmissionpoints - 1] / $ascendrate) 
 		+ $gpsduration;
 		
 # calculate abort time using safety factor of 1.2
@@ -406,8 +411,17 @@ elsif ($verbose)
 	printf "    Abort Time:               %d (s)\r\n", $aborttime;
 	printf "    Way Points:               $nwaypoints\r\n";
 	printf "    Route Points:             $nmissionpoints\r\n";
+	if ($mappingsonars)
+		{
+		printf "    Mapping sonar control enabled:          \r\n";
+		}
+	else
+		{
+		printf "    Mapping sonar control disabled:          \r\n";
+		}
 	printf "\r\n";
 	printf "Mission Parameters:\r\n";
+	printf "    Vehicle Speed:            %f (m/s) %f (knots)\r\n", $mission_speed, 1.943846 * $mission_speed;
 	printf "    Minimum Vehicle Altitude: $altitudemin (m)\r\n";
 	printf "    Abort Vehicle Altitude:   $altitudeabort (m)\r\n";
 	printf "    Maximum Vehicle Depth:    $depthmax (m)\r\n";
@@ -475,10 +489,18 @@ if (!$outputoff)
 	printf MFILE "#     Route File:               $routefile\r\n";
 	printf MFILE "#     Mission File:             $missionfile\r\n";
 	printf MFILE "#     Distance:                 $distancelastmpoint (m)\r\n";
-	printf MFILE "#     Estimated Time:           %d (s)\r\n", $missiontime;
+	printf MFILE "#     Estimated Time:           %d (s)  %.3f (hr)\r\n", $missiontime, $missiontime / 3600.0;
 	printf MFILE "#     Abort Time:               %d (s)\r\n", $aborttime;
 	printf MFILE "#     Way Points:               $nwaypoints\r\n";
 	printf MFILE "#     Route Points:             $nmissionpoints\r\n";
+	if ($mappingsonars)
+		{
+		printf "MFILE "#     Mapping sonar control enabled:          \r\n";
+		}
+	else
+		{
+		printf "MFILE "#     Mapping sonar control disabled:          \r\n";
+		}
 	printf MFILE "# \r\n";
 	printf MFILE "# Mission Parameters:\r\n";
 	printf MFILE "#     Minimum Vehicle Altitude: $altitudemin (m)\r\n";
@@ -578,16 +600,19 @@ if (!$outputoff)
 	print MFILE "endDepth         = ASCENDENDDEPTH; \r\n";
 	print MFILE "} \r\n";
 	print MFILE "# \r\n";
-	print MFILE "# Turn off power to sonars and stop logging on the PLC \r\n";
-	print MFILE "# by setting the value of the mode attribute to 0 (used to be False). \r\n";
-	print MFILE "behavior reson \r\n";
-	print MFILE "{ \r\n";
-	print MFILE "duration  = RESON_DURATION; \r\n";
-	print MFILE "SBP_Mode  = 0; \r\n";
-	print MFILE "LoSS_Mode = 0; \r\n";
-	print MFILE "HiSS_Mode = 0; \r\n";
-	print MFILE "Log_Mode  = 0; \r\n";
-	print MFILE "} \r\n";
+	if ($mappingsonars)
+		{
+		print MFILE "# Turn off power to sonars and stop logging on the PLC \r\n";
+		print MFILE "# by setting the value of the mode attribute to 0 (used to be False). \r\n";
+		print MFILE "behavior reson \r\n";
+		print MFILE "{ \r\n";
+		print MFILE "duration  = RESON_DURATION; \r\n";
+		print MFILE "SBP_Mode  = 0; \r\n";
+		print MFILE "LoSS_Mode = 0; \r\n";
+		print MFILE "HiSS_Mode = 0; \r\n";
+		print MFILE "Log_Mode  = 0; \r\n";
+		print MFILE "} \r\n";
+		}
 
 	# output mission points in reverse order
 	$iwaypoint = $nwaypoints;
@@ -725,31 +750,39 @@ if (!$outputoff)
 	# output beginning of mission
 	print MFILE "#######################################################\r\n";
 	print MFILE "# \r\n";
-	print MFILE "# Set power levels and high-freq rate \r\n";
-	print MFILE "# \r\n";
-	print MFILE "behavior reson \r\n";
-	print MFILE "{ \r\n";
-	print MFILE "duration  = RESON_DURATION; \r\n";	
-	print MFILE "SBP_Power = 100.0; \r\n";
-	print MFILE "LoSS_Power = 100.0; \r\n";
-	print MFILE "LoSS_Range = 400.0; \r\n";
-	print MFILE "LoSS_Rate  = 1.0; \r\n";
-	print MFILE "HiSS_Power = 100.0; \r\n";
-	print MFILE "HiSS_Range = 400.0; \r\n";
-	print MFILE "HiSS_Rate  = 1.0; \r\n";
-	print MFILE "} \r\n";
-	print MFILE "# \r\n";
-	print MFILE "# Turn on power to sonars and start logging on the PLC \r\n";
-	print MFILE "# by setting the value of the mode attribute to 1 (used to be True). \r\n";
-	print MFILE "# \r\n";
-	print MFILE "behavior reson \r\n";
-	print MFILE "{ \r\n";
-	print MFILE "duration  = RESON_DURATION; \r\n";
-	print MFILE "SBP_Mode  = 1; \r\n";
-	print MFILE "LoSS_Mode = 1; \r\n";
-	print MFILE "HiSS_Mode = 0; \r\n";
-	print MFILE "Log_Mode  = 1; \r\n";
-	print MFILE "} \r\n";
+	if ($mappingsonars)
+		{
+		print MFILE "# Set power levels and high-freq rate \r\n";
+		print MFILE "# \r\n";
+		print MFILE "behavior reson \r\n";
+		print MFILE "{ \r\n";
+		print MFILE "duration  = RESON_DURATION; \r\n";	
+		print MFILE "Reson_Power = 100.0; \r\n";
+		print MFILE "Reson_Range = 450.0; \r\n";
+		print MFILE "Reson_Rate = 1.0; \r\n";
+		print MFILE "SBP_Power = 100.0; \r\n";
+		print MFILE "SBP_Range = 450.0; \r\n";
+		print MFILE "LoSS_Power = 100.0; \r\n";
+		print MFILE "LoSS_Range = 450.0; \r\n";
+		print MFILE "LoSS_Rate  = 1.0; \r\n";
+		print MFILE "HiSS_Power = 100.0; \r\n";
+		print MFILE "HiSS_Range = 450.0; \r\n";
+		print MFILE "HiSS_Rate  = 1.0; \r\n";
+		print MFILE "} \r\n";
+		print MFILE "# \r\n";
+		print MFILE "# Turn on power to sonars and start logging on the PLC \r\n";
+		print MFILE "# by setting the value of the mode attribute to 1 (used to be True). \r\n";
+		print MFILE "# \r\n";
+		print MFILE "behavior reson \r\n";
+		print MFILE "{ \r\n";
+		print MFILE "duration  = RESON_DURATION; \r\n";
+		print MFILE "Reson_Mode  = 1; \r\n";
+		print MFILE "SBP_Mode  = 1; \r\n";
+		print MFILE "LoSS_Mode = 1; \r\n";
+		print MFILE "HiSS_Mode = 1; \r\n";
+		print MFILE "Log_Mode  = 1; \r\n";
+		print MFILE "} \r\n";
+		}
 	print MFILE "# \r\n";
 	print MFILE "# Descend behavior \r\n";
 	print MFILE "behavior descend  \r\n";
