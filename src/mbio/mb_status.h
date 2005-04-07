@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbio_status.h	2/1/93
- *    $Id: mb_status.h,v 5.55 2005-03-26 22:05:17 caress Exp $
+ *    $Id: mb_status.h,v 5.56 2005-04-07 04:25:55 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003, 2004, 2005 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.55  2005/03/26 22:05:17  caress
+ * Release 5.0.7.
+ *
  * Revision 5.54  2005/02/20 07:32:12  caress
  * Release 5.0.6
  *
@@ -277,7 +280,7 @@
 
 /* MB-system version id */
 #define	MB_VERSION	"5.0.7"
-#define	MB_BUILD_DATE	"March 27, 2005"
+#define	MB_BUILD_DATE	"April 7, 2005"
 
 /* MBIO function boolean convention */
 #define	MB_YES	1

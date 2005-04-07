@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad2.h	10/9/98
- *	$Id: mbsys_simrad2.h,v 5.12 2003-11-24 19:04:21 caress Exp $
+ *	$Id: mbsys_simrad2.h,v 5.13 2005-04-07 04:24:34 caress Exp $
  *
  *    Copyright (c) 1998, 2001, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -32,6 +32,9 @@
  * Date:	October 9, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.12  2003/11/24 19:04:21  caress
+ * Added remaining unsupported Simrad datagrams to defines so that all are listed and can be recognized by the parsing code.
+ *
  * Revision 5.11  2003/04/17 21:05:23  caress
  * Release 5.0.beta30
  *
@@ -150,6 +153,7 @@
  *        *0x0256: Sound velocity profile (old)           variable size
  *         0x0257: SSP input                              variable size
  *        *0x0265: Raw range and beam angle               112-1658 bytes
+ *        *0x0266: Raw range and beam angle               44-1658 bytes
  *        *0x0268: Height Output                          24 bytes
  *        *0x0269: Parameter - Stop                       variable size
  *         0x0270: Parameter - Remote                     variable size
