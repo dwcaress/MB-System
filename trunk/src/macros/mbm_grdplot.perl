@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grdplot.perl	8/6/95
-#    $Id: mbm_grdplot.perl,v 5.14 2005-03-25 04:05:39 caress Exp $
+#    $Id: mbm_grdplot.perl,v 5.15 2005-04-07 04:12:39 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 2000, 2003 by 
 #    D. W. Caress (caress@mbari.org)
@@ -45,7 +45,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #            -Wcolor_style[/pallette[/ncolors]] ]
 #
 # Additional Options:
-#            [-Btickinfo -Dflipcolor/flipshade 
+#            [-Btickinfo -Dflipcolor/flipshade -Fcontour_file
 #            -Jprojection[/scale | width] -Ltitle[:scale_label]
 #            -Mmisc -Q -Rw/e/s/n -X -Y -Zmin/max]
 #
@@ -66,10 +66,14 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   October 19, 1994
 #
 # Version:
-#   $Id: mbm_grdplot.perl,v 5.14 2005-03-25 04:05:39 caress Exp $
+#   $Id: mbm_grdplot.perl,v 5.15 2005-04-07 04:12:39 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.14  2005/03/25 04:05:39  caress
+#   Fixed handling of tickinfo string.
+#   For mbm_plot only, added control on filename annotation direction.
+#
 #   Revision 5.13  2004/12/18 01:31:26  caress
 #   Working towards release 5.0.6.
 #
@@ -320,13 +324,14 @@ while (@grdinfo)
 
 # Deal with command line arguments
 $command_line = "@ARGV";
-&MBGetopts('A:a:B:b:C%c%D%d%G%g%HhI:i:J:j:K:k:L:l:M+m+O:o:P:p:QqR:r:S%s%TtU:u:VvW:w:XxYyZ:z:');
+&MBGetopts('A:a:B:b:C%c%D%d%F:f:G%g%HhI:i:J:j:K:k:L:l:M+m+O:o:P:p:QqR:r:S%s%TtU:u:VvW:w:XxYyZ:z:');
 $shade_control = 	($opt_A || $opt_a);
 $tick_info = 		($opt_B || $opt_b);
 $contour_mode = 	($flg_C || $flg_c);
 $contour_control = 	($opt_C || $opt_c);
 $color_flip_mode = 	($flg_D || $flg_d);
 $color_flip_control = 	($opt_D || $opt_d);
+$contour_file=		($opt_F || $opt_f);
 $color_mode =   	($opt_G || $opt_g || $flg_G || $flg_g);
 $help =    		($opt_H || $opt_h);
 $file_data =    	($opt_I || $opt_i);
@@ -373,7 +378,7 @@ if ($help)
 	print "\t\t-Gcolor_mode -H -Kintensity_file -Oroot -Ppagesize -S[color/shade] -T\n";
 	print "\t\t-Uorientation -V -Wcolor_style[/pallette[/ncolors]] ]\n";
 	print "Additional Options:\n";
-	print "\t\t[-Btickinfo -Dflipcolor/flipshade \n";
+	print "\t\t[-Btickinfo -Dflipcolor/flipshade -Fcontour_file\n";
 	print "\t\t-Jprojection[/scale | width] -Ltitle[:scale_label]\n";
 	print "\t\t-Mmisc -Q -Rw/e/s/n -X -Y -Zmin/max]\n";
 	print "Miscellaneous Options:\n";
@@ -431,6 +436,22 @@ if ($color_mode == 3 && !$file_intensity)
 	print "\a";
 	die "\nShading with intensity file set but no intensity input file specified!\n$program_name aborted\n";
 	}
+if ($contour_file)
+        {
+        if ($contour_file =~ /\S+=.+/)
+                {
+                ($file_check) = $contour_file =~ /(\S+)=.+/;
+                }
+        else
+                {
+                $file_check = $contour_file;
+                }
+        if (! -r $file_check)
+                {
+                print "\a";
+                die "\nSpecified contour input file $file_check cannot be opened!\n$program_name aborted\n";
+                }
+        }
 
 # parse misc commands
 if ($misc)
@@ -822,6 +843,10 @@ if ($stretch_control)
 elsif ($stretch_mode)
 	{
 	$stretch_color = 1;
+	}
+if ($contour_file && !$contour_mode)
+	{
+	$contour_mode = 1;
 	}
 
 # set page size
@@ -1521,6 +1546,53 @@ if ($color_mode)
 		}
 	}
 
+# get info from contour_file
+if ($contour_file)
+	{
+	if ($bounds)
+		{
+		@grdinfo = `mbm_grdinfo -I$contour_file -R$bounds`;
+		}
+	else
+		{
+		@grdinfo = `grdinfo $contour_file`;
+		}
+	while (@grdinfo)
+		{
+		$line = shift @grdinfo;
+		if ($line =~ /\S+\s+zmin:\s+(\S+)\s+zmax:\s+(\S+)\s+units:/)
+			{
+			($czmin,$czmax) = $line =~ 
+				/\S+\s+zmin:\s+(\S+)\s+zmax:\s+(\S+)\s+units:/;
+			}
+		if ($line =~ /\S+\s+z_min:\s+(\S+)\s+z_max:\s+(\S+)\s+units:/)
+			{
+			($czmin,$czmax,$czunits) = $line =~ 
+				/\S+\s+z_min:\s+(\S+)\s+z_max:\s+(\S+)\s+units:\s+(\S+)/;
+			}
+		}
+	$cdzz = ($czmax - $czmin); 
+	$contour_int = 0.0;
+		if ($cdzz > 0)
+		{
+		$cbase = int((log($cdzz) / log(10.)) + 0.5);
+		$contour_int = (10 ** $cbase) / 10.0;
+		if ($cdzz / $contour_int < 10)
+			{
+			$contour_int = $contour_int / 4;
+			}
+		elsif ($cdzz / $contour_int < 20)
+			{
+			$contour_int = $contour_int / 2;
+			}
+		}
+	}
+else
+	{
+	$czmin = $zmin;
+	$czmax = $zmax;
+	}
+
 # set contour control
 if (!$contour_control && $contour_mode)
 	{
@@ -2016,16 +2088,20 @@ if ($color_mode)
 # do grdcontour plot
 if ($contour_mode)
 	{
+	if (!$contour_file) 
+		{
+		$contour_file = $file_use
+		}
 	printf FCMD "#\n# Make contour plot\n";
 	printf FCMD "echo Running grdcontour...\n";
-	printf FCMD "grdcontour $file_use -J\$MAP_PROJECTION\$MAP_SCALE \\\n\t";
+	printf FCMD "grdcontour $contour_file -J\$MAP_PROJECTION\$MAP_SCALE \\\n\t";
 	printf FCMD "-R\$MAP_REGION \\\n\t";
 	printf FCMD "-C$contour_control \\\n\t";
 	if (!$contour_pen)
 		{
 		$contour_pen = "c1p";
 		}
-	printf FCMD "-L$zmin/$zmax -W$contour_pen\\\n\t";
+	printf FCMD "-L$czmin/$czmax -W$contour_pen\\\n\t";
 	if ($contour_anot_int)
 		{
 		printf FCMD "-A$contour_anot_int \\\n\t";
