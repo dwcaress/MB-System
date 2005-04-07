@@ -21,6 +21,7 @@ Version 5.0
 Additional Options:
 .br
 [\fB-B\fP\fItickinfo\fP \fP
+\fB-F\fP\fIcontour_file\fP
 \fB-J\fP\fIprojection\fP[\fI/scale | width\fP]
 \fB-L\fP\fItitle\fP[\fI:scale_label\fP] \fB-M\fP\fImisc\fP 
 \fB-Q\fP \fB-R\fP\fIw/e/s/n\fP \fB-X\fP \fB-Y\fP 
@@ -321,6 +322,15 @@ setting \fIflipshade\fP = 1 will cause the shading convention
 to be reversed (e.g. high intensities overlaid as light shading).
 Using \fB-D\fP\fI0/1\fP will flip the shading convention
 but leave the default color convention.
+.TP
+.B \-F
+\fIcontour_file\fP
+.br
+Sets the name of the file to use for generating contour lines. 
+The default is to use the file being plotted, but in some situations,
+it can be useful to specify a separate file for contouring. For example,
+one might wish to overlay a backscatter mosaic with bathymetry contours,
+or a shaded bathymetry map with gravity anomaly contours.
 .TP
 .B \-G
 \fIcolor_mode\fP
