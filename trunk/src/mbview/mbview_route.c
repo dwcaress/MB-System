@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_route.c	9/25/2003
- *    $Id: mbview_route.c,v 5.8 2005-03-25 04:46:15 caress Exp $
+ *    $Id: mbview_route.c,v 5.9 2005-04-07 04:16:31 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  *		begun on October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2005/03/25 04:46:15  caress
+ * Fixed MBgrdviz crashes related to route data by fixing problem with allocation and deallocation of route arrays in the mbview library.
+ *
  * Revision 5.7  2005/02/08 22:37:43  caress
  * Heading towards 5.0.6 release.
  *
@@ -95,7 +98,7 @@ Arg      	args[256];
 char		value_text[MB_PATH_MAXLINE];
 char		value_string[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_route.c,v 5.8 2005-03-25 04:46:15 caress Exp $";
+static char rcs_id[]="$Id: mbview_route.c,v 5.9 2005-04-07 04:16:31 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_getroutecount(int verbose, int instance,
@@ -749,7 +752,7 @@ int mbview_getroute(int verbose, int instance,
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 	double	dx, dy, range, bearing;
-	double	xx0, yy0, zz0, xx1, yy1, zz1, xx2, yy2, zz2;
+	double	xx1, yy1, xx2, yy2;
 	double	dxx, dyy, dzz;
 	double	dll, doo;
 	int	i, j;
@@ -803,10 +806,16 @@ int mbview_getroute(int verbose, int instance,
 			/* get bearing of segment */
 			if (data->display_projection_mode != MBV_PROJECTION_SPHEROID)
 				{
-				dx = shared.shareddata.routes[route].points[i+1].xdisplay
-						- shared.shareddata.routes[route].points[i].xdisplay;
-				dy = shared.shareddata.routes[route].points[i+1].ydisplay
-						- shared.shareddata.routes[route].points[i].ydisplay;
+				xx1 = shared.shareddata.routes[route].points[i].xdisplay[instance];
+				yy1 = shared.shareddata.routes[route].points[i].ydisplay[instance];
+				xx2 = shared.shareddata.routes[route].points[i+1].xdisplay[instance];
+				yy2 = shared.shareddata.routes[route].points[i+1].ydisplay[instance];
+				dx = (double)(shared.shareddata.routes[route].points[i+1].xdisplay[instance]
+						- shared.shareddata.routes[route].points[i].xdisplay[instance]);
+				dy = (double)(shared.shareddata.routes[route].points[i+1].ydisplay[instance]
+						- shared.shareddata.routes[route].points[i].ydisplay[instance]);
+				dx = xx2 - xx1;
+				dy = yy2 - yy1;
 				range = sqrt(dx * dx + dy * dy) / view->scale ;
 				bearing = RTD * atan2(dx, dy);
 				}
