@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mbnetcdf.c	1/25/02
- *	$Id: mbr_mbnetcdf.c,v 5.3 2003-05-20 18:05:32 caress Exp $
+ *	$Id: mbr_mbnetcdf.c,v 5.4 2005-05-02 19:02:40 caress Exp $
  *
  *    Copyright (c) 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	January 25, 2002
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2003/05/20 18:05:32  caress
+ * Added svp_source to data source parameters.
+ *
  * Revision 5.2  2003/04/17 21:05:23  caress
  * Release 5.0.beta30
  *
@@ -56,6 +59,7 @@
 #include "../../include/mb_format.h"
 #include "../../include/mb_io.h"
 #include "../../include/mb_define.h"
+#include "../../include/mb_process.h"
 #include "../../include/mbsys_netcdf.h"
 
 /* essential function prototypes */
@@ -86,7 +90,7 @@ int mbr_dem_mbnetcdf(int verbose, void *mbio_ptr, int *error);
 int mbr_rt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
-static char res_id[]="$Id: mbr_mbnetcdf.c,v 5.3 2003-05-20 18:05:32 caress Exp $";
+static char res_id[]="$Id: mbr_mbnetcdf.c,v 5.4 2005-05-02 19:02:40 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_mbnetcdf(int verbose, void *mbio_ptr, int *error)
@@ -297,6 +301,8 @@ int mbr_alm_mbnetcdf(int verbose, void *mbio_ptr, int *error)
 	int	*dataread;
 	int	*commentread;
 	int	*recread;
+	double	*lastrawtime;
+	int	*nrawtimerepeat;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -322,9 +328,13 @@ int mbr_alm_mbnetcdf(int verbose, void *mbio_ptr, int *error)
 	dataread = (int *) &mb_io_ptr->save1;
 	commentread = (int *) &mb_io_ptr->save2;
 	recread = (int *) &mb_io_ptr->save4;
+	lastrawtime = (double *) &mb_io_ptr->saved1;
+	nrawtimerepeat = (int *) &mb_io_ptr->save5;
 	*dataread = MB_NO;
 	*commentread = 0;
 	*recread = 0;
+	*lastrawtime = 0.0;
+	*nrawtimerepeat = 0;
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -388,6 +398,9 @@ int mbr_rt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	int	*dataread;
 	int	*commentread;
 	int	*recread;
+	double	*lastrawtime;
+	int	*nrawtimerepeat;
+	double	time_d;
 	int	dim_id;
 	size_t	index[2], count[2];
 	int nc_status;
@@ -415,6 +428,8 @@ int mbr_rt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	dataread = (int *) &mb_io_ptr->save1;
 	commentread = (int *) &mb_io_ptr->save2;
 	recread = (int *) &mb_io_ptr->save4;
+	lastrawtime = (double *) &mb_io_ptr->saved1;
+	nrawtimerepeat = (int *) &mb_io_ptr->save5;
 	
 	/* set file position */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
@@ -3185,6 +3200,31 @@ int mbr_rt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    /* set counters */
 	    (*recread)++;
 	    (*dataread)++;
+	    
+	    /* KLUGE to handle multiple pings with the same time stamp
+	    	- this is a problem because the edit save file scheme differentiates between
+			pings based on the time stamp.
+		- this code detects multiple pings with the same time stamp and adds a small
+			amount of time to subsequent pings
+		David W. Caress 
+		2 May 2005 */
+	    if (store->mbDate_id >= 0 && store->mbTime_id >= 0)
+		{
+		time_d = store->mbDate[0] * SECINDAY
+			    + store->mbTime[0] * 0.001;
+		if (time_d != *lastrawtime)
+			{
+			*nrawtimerepeat = 0;
+			*lastrawtime = time_d;
+			}
+		else
+			{
+			(*nrawtimerepeat)++;
+			time_d += (*nrawtimerepeat) * 2 * MB_ESF_MAXTIMEDIFF;
+		    	store->mbDate[0] = (int)(time_d / SECINDAY);
+		    	store->mbTime[0] = (int)(1000 * (time_d - store->mbDate[0] * SECINDAY));
+			}
+		}
 		
 	    /* print input debug statements */
 	    if (verbose >= 2)
