@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	1/19/93
- *    $Id: mb_segy.h,v 5.4 2004-09-16 19:02:33 caress Exp $
+ *    $Id: mb_segy.h,v 5.5 2005-05-05 23:53:01 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -26,6 +26,9 @@
  * Date:	April 13, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2004/09/16 19:02:33  caress
+ * Changes to better support segy data.
+ *
  * Revision 5.3  2004/07/27 19:44:38  caress
  * Working on handling subbottom data.
  *
@@ -166,7 +169,7 @@ struct mb_segytraceheader_struct
         float   	emute_sec;      /* bytes 188-191, end mute time in seconds  */
         float   	si_secs;        /* bytes 192-195, sample interval in seconds */
         float   	wbt_secs;       /* bytes 196-199, water bottom time in seconds */
-        int            end_of_rp; 	/* bytes 200-203, <0, indicates the end of a gather
+        int             end_of_rp; 	/* bytes 200-203, <0, indicates the end of a gather
                                                         >0, the number of traces stacked
                                                         Also EdgeTech's Trace Scalar.  */
         float   	dummy1; 	/* bytes 204-207 */
