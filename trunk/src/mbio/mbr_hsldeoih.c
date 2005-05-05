@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsldeoih.c	2/11/93
- *	$Id: mbr_hsldeoih.c,v 5.6 2003-05-20 18:05:32 caress Exp $
+ *	$Id: mbr_hsldeoih.c,v 5.7 2005-05-05 23:51:32 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	February 11, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2003/05/20 18:05:32  caress
+ * Added svp_source to data source parameters.
+ *
  * Revision 5.5  2003/04/17 21:05:23  caress
  * Release 5.0.beta30
  *
@@ -172,7 +175,7 @@ int mbr_wt_hsldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_hsldeoih(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_hsldeoih.c,v 5.6 2003-05-20 18:05:32 caress Exp $";
+	static char res_id[]="$Id: mbr_hsldeoih.c,v 5.7 2005-05-05 23:51:32 caress Exp $";
 	char	*function_name = "mbr_register_hsldeoih";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -304,7 +307,7 @@ int mbr_info_hsldeoih(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_hsldeoih.c,v 5.6 2003-05-20 18:05:32 caress Exp $";
+	static char res_id[]="$Id: mbr_hsldeoih.c,v 5.7 2005-05-05 23:51:32 caress Exp $";
 	char	*function_name = "mbr_info_hsldeoih";
 	int	status = MB_SUCCESS;
 
@@ -374,7 +377,7 @@ int mbr_info_hsldeoih(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_hsldeoih(int verbose, void *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_hsldeoih.c,v 5.6 2003-05-20 18:05:32 caress Exp $";
+ static char res_id[]="$Id: mbr_hsldeoih.c,v 5.7 2005-05-05 23:51:32 caress Exp $";
 	char	*function_name = "mbr_alm_hsldeoih";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -1859,6 +1862,12 @@ int mbr_hsldeoih_rd_survey(int verbose, FILE *mbfp,
 		for (i=0;i<MBF_HSLDEOIH_BEAMS;i++)
 			data->back[i] = read_data.back[i];
 		}
+		
+	/* now fix possible problem with depth_center 
+		- early versions of the i/o module stored the
+		center depth with a value scaled 100 times too large */
+	if (fabs(data->depth_center) > 12000.0)
+		data->depth_center *= 0.01;
 
 	/* now fix some possible problems with processed 
 		beam amplitudes */
@@ -1967,7 +1976,7 @@ int mbr_hsldeoih_rd_survey(int verbose, FILE *mbfp,
 		fprintf(stderr,"dbg5       roll:             %f\n",
 			data->roll);
 		fprintf(stderr,"dbg5       time_center:      %f\n",
-			data->depth_center);
+			data->time_center);
 		fprintf(stderr,"dbg5       time_scale:       %f\n",
 			data->time_scale);
 		fprintf(stderr,"dbg5       travel times:\n");
@@ -3641,7 +3650,7 @@ int mbr_hsldeoih_wr_calibrate(int verbose, FILE *mbfp,
 		fprintf(stderr,"dbg5       roll:             %f\n",
 			data->roll);
 		fprintf(stderr,"dbg5       time_center:      %f\n",
-			data->depth_center);
+			data->time_center);
 		fprintf(stderr,"dbg5       time_scale:       %f\n",
 			data->time_scale);
 		fprintf(stderr,"dbg5       travel times:\n");
