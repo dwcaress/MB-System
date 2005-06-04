@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	install_makefiles	5/20/94
-#    $Id: install_makefiles,v 5.17 2005-03-25 04:01:02 caress Exp $
+#    $Id: install_makefiles,v 5.18 2005-06-04 03:32:26 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 1996, 1997, 2001, 2002, 2003, 2005 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -57,10 +57,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   May 20, 1994
 #
 # Version:
-#   $Id: install_makefiles,v 5.17 2005-03-25 04:01:02 caress Exp $
+#   $Id: install_makefiles,v 5.18 2005-06-04 03:32:26 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.17  2005/03/25 04:01:02  caress
+#   Fixes to 5.0.6.
+#
 #   Revision 5.16  2005/02/20 07:25:08  caress
 #   Release 5.0.6
 #
@@ -292,21 +295,22 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #
 # Example for installing on Sun workstations running Solaris 2.7
 #
-#	$MBSYSTEM_HOME = "/big/sys/mbsystem-5.0.2";
-#	$OS = "SUN";
+#	$MBSYSTEM_HOME = "/usr/local/mbsystem";
+#	$OS = "SOLARIS";
 #	$CC = "gcc";
 #	$BYTESWAPPED = "NO";
 #	$GRAPHICAL = "YES";
-#	$MOTIFINCDIR = "/usr/include/Xm";
-#	$MOTIFLIBS = "-lXm -lXt -lX11";
-#	$GMTLIBDIR = "/big/sys/GMT3.1/src";
-#	$GMTINCDIR = "/big/sys/GMT3.1/src";
-#	$NETCDFLIBDIR = "/big/sys/netcdf-3.4/lib";
-#	$NETCDFINCDIR = "/big/sys/netcdf-3.4/include";
-#	$LEVITUS = "$MBSYSTEM_HOME/annual";
+#	$MOTIFINCDIR = "/usr/dt/include/Xm";
+#	$MOTIFLIBS = "-L/usr/dt/lib -lXm -lXt -lX11";
+#	$OPENGLLIBS = "-lGLw -lGLU -lGL";
+#	$GMTLIBDIR = "/usr/local/GMT4.0/lib";
+#	$GMTINCDIR = "/usr/local/GMT4.0/include";
+#	$NETCDFLIBDIR = "/usr/local/netcdf-3.4/lib";
+#	$NETCDFINCDIR = "/usr/local/netcdf-3.4/include";
+#	$LEVITUS = "/usr/local/mbsystem/annual";
 #	$PROJECTIONS = "$MBSYSTEM_HOME/share/Projections.dat";
-#	$CFLAGS = "-O";
-#	$LFLAGS = "-lm -lnsl";
+#	$CFLAGS = "-O -I/usr/openwin/share/include";
+#	$LFLAGS = "-lnsl -lm";
 #
 # Example for installing on SeaBeam Instruments SGI IRIX workstations:
 #	$MBSYSTEM_HOME = "/usr/local/mbsystem";
@@ -462,8 +466,8 @@ else
 	$MOTIFINCDIR = "/sw/include";
 	$MOTIFLIBS = "-L/sw/lib -L/usr/X11R6/lib -lXm -lXt -lX11";
 	$OPENGLLIBS = "-lGLw -lGLU -lGL";
-	$GMTLIBDIR = "/usr/local/gmt4/lib";
-	$GMTINCDIR = "/usr/local/gmt4/include";
+	$GMTLIBDIR = "/usr/local/geoware/PROGS/GMT/GMT4.0/lib";
+	$GMTINCDIR = "/usr/local/geoware/PROGS/GMT/GMT4.0/include";
 	$NETCDFLIBDIR = "/sw/lib";
 	$NETCDFINCDIR = "/sw/include";
 	$LEVITUS = "$MBSYSTEM_HOME/share/LevitusAnnual82.dat";
