@@ -1,4 +1,4 @@
-.TH mblist l "29 July 2003" "MB-System 5.0" "MB-System 5.0"
+.TH mblist l "3 June 2005" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmblist\fP - List data in swath data files.
 
@@ -7,6 +7,7 @@ Version 5.0
 
 .SH SYNOPSIS
 \fBmblist\fP [\fB-A\fP \fB-B\fP\fIyr/mo/da/hr/mn/sc\fP 
+\fB-C\fP 
 \fB-D\fP\fIdumpmode\fP 
 \fB-E\fP\fIyr/mo/da/hr/mn/sc\fP \fB-F\fP\fIformat\fP 
 \fB-H\fP \fB-I\fP\fIinfilename\fP 
@@ -16,6 +17,7 @@ Version 5.0
 \fB-R\fP\fIwest/east/south/north\fP 
 \fB-S\fP\fIspeed\fP \fB-T\fP\fItimegap\fP 
 \fB-U\fP\fIcheck\fP \fB-V\fP \fB-W\fP 
+\fB-X\fP\fIoutfile\fP
 \fB-Z\fP\fIsegment\fP]
 
 .SH DESCRIPTION
@@ -24,7 +26,10 @@ data file or files to stdout. By default, \fBmblist\fP
 produces ASCII files in
 spreadsheet style, with data columns separated by tabs. Alternatively,
 the output can be binary, with each field represented 
-as a double precision float (\fB-A\fP option). The output of
+as a double precision float (\fB-A\fP option). 
+Output can also be in netCDF CDL (\fB-C\fP option) format,
+or as a binary netCDF file (\fB-C -A\fP).
+The output of
 \fBmblist\fP can be piped to plotting and data analysis programs. The
 option \fB-O\fP\fIoutput_format\fP can be 
 used to control the data types that
@@ -79,6 +84,13 @@ after the ending time, then any data between the ending
 and starting time will be ignored. This scheme allows time
 windowing both inside and outside a specified interval.
 Default: \fIyr/mo/da/hr/mn/sc\fP = 1962/2/21/10/30/0.
+.TP
+.B \-C
+.br
+Causes netCDF CDL format output to be generated (see \fBncgen\fP).
+When the \fB-A\fP (binary) option is also set \fBmblist\fP will call \fBncgen\fP to 
+convert the CDL file to a binary netCDF file (default name is \fmblist.nc\fP.
+If the conversion fails for any reason the CDL file will remain.
 .TP
 .B \-D
 \fIdumpmode\fP
@@ -406,6 +418,14 @@ Normally, \fBmblist\fP outputs bathymetry and across and along
 track distances in meters.  If the
 \fB-W\fP flag is given, then \fBmblist\fP outputs these values
 in feet.
+.TP
+.B \-X
+\fIoutfile\fP
+.br
+Normally, \fBmblist\fP outputs to stdout.
+If the \fB-X\fP flag is given, then \fBmblist\fP creates a new file 
+\fIoutfile\fP and outputs to it.
+An output file must be specified if a netCDF file (\fB-C -A\fP) is required.
 .TP
 .B \-Z
 \fIsegment\fP

@@ -1,4 +1,4 @@
-.TH mbnavedit l "6 March 2004" "MB-System 5.0" "MB-System 5.0"
+.TH mbnavedit l "3 June 2005" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbnavedit\fP - Interactive navigation editor for swath sonar data.
 
@@ -261,9 +261,9 @@ is read and the navigition times series
 plots are displayed.
 .TP
 .B Controls
-This button activates a pulldown menu with four buttons:
+This button activates a pulldown menu with five buttons:
 \fBTime Stepping\fP, \fBNav Modeling\fP, \fBTime Interpolation\fP, 
-and \fBDelete Bad Times\fP. Each
+\fBDelete Bad Times\fP, and \fBPosition Offset\fP. Each
 of these buttons brings up a dialog window containing widgets
 that set parameters or perform actions.
 .TP
@@ -364,6 +364,24 @@ The \fBDelete Bad Times\fP
 dialog disappears after this action is taken.
 .TP
 .B Controls->Delete Bad Times->Dismiss
+This button causes the \fBDelete Bad Times\fP dialog
+to disappear.
+.TP
+.B Controls->Position Offset->Longitude Offset
+This text widget allows the user to set the desired
+longitude offset in degrees.
+.TP
+.B Controls->Position Offset->Latitude Offset
+This text widget allows the user to set the desired
+latitude offset in degrees.
+.TP
+.B Controls->Position Offset->Apply
+This button applies the current longitude and latitude
+offsets to all of the navigation data. 
+The \fBPosition Offset\fP
+dialog disappears after this action is taken.
+.TP
+.B Controls->Position Offset->Dismiss
 This button causes the \fBDelete Bad Times\fP dialog
 to disappear.
 .TP

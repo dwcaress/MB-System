@@ -1,4 +1,4 @@
-.TH mbextractsegy l "23 September 2004" "MB-System 5.0" "MB-System 5.0"
+.TH mbextractsegy l "3 June 2004" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbextractsegy\fP - extracts subbottom profiler, center beam reflection,
 or seismic reflection data from swath data supported by MB-System and
@@ -29,8 +29,9 @@ output in a form used by the seismic reflection processing package
 of the SEGY file is created automatically by \fBMBextractsegy\fP; this
 file is named by adding a ".sinf" suffix to the SEGY filename.
 
-At present, the only swath data format from which subbottom data
-can be extracted is format 88 (Reson 7k format).
+At present, the only swath data formats from which subbottom data
+can be extracted are format 88 (Reson 7k format), format 132 
+(Edgetech Jstar format), and format 133 (Edgetech Jstar format).
 
 .SH AUTHORSHIP
 David W. Caress (caress@mbari.org)

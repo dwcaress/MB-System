@@ -1,4 +1,4 @@
-.TH mbsegygrid l "21 October 2004" "MB-System 5.0" "MB-System 5.0"
+.TH mbsegygrid l "3 June 2005" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbsegygrid\fP - Generate time vs. trace number grids of seismic data from segy files.
 
@@ -6,7 +6,8 @@
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbsegygrid\fP \fB-I\fIsegyfile\fP \fB-O\fIgridfile\fP [\fB-D\fIdecimatex/decimatey\fP \fB-R\fP
+\fBmbsegygrid\fP \fB-I\fIsegyfile\fP \fB-O\fIgridfile\fP [\fB-D\fIdecimatex/decimatey\fP 
+\fB-G\fImode/gain[/window]\fP \fB-R\fP
 \fB-S\fImode[/start/end[/schan/echan]]\fP \fB-T\fIsweep[/delay]\fP 
 \fB-W\fImode/start/end\fP \fB-H \fB-V\fP]";
 
@@ -28,6 +29,10 @@ will be gridded. If the time sweep and delay (if any) are not specified using
 the \fB-T\fP option, then the sweep and delay will be set so that all trace samples
 are incorporated into the grid.
 
+A simple time-varying gain can be applied to the traces before gridding using
+the \fB-G\fP option. The start time for the gain may be either the start 
+of the trace or the seafloor arrival time. 
+
 Regions of the grid without data are indicated in the output by NaN values.
 
 .SH AUTHORSHIP
@@ -47,6 +52,20 @@ Dale N. Chayes (dale@ldeo.columbia.edu)
 Sets the decimation of traces (\fIdecimatex\fP) and samples (\fIdecimatey\fP) used in
 generating the output grid. The downsampling of the data is actually accomplished by averaging
 the values within each grid bin rather than omitting traces or samples.
+.TP
+.B \-G
+\fImode/gain[/window]\fP
+.br
+Sets the application of gain to the trace data. The \fImode\fP value determines how
+the gain is applied. If \fImode\fP = 0, no gain is applied.If \fImode\fP = 1, 
+the gain is applied starting from the beginning of the trace. If  \fImode\fP = 2,
+the gain is applied starting at the seafloor (assuming that a seafloor pick has
+been defined in the segy data file). The \fIgain\fP value sets the gain applied
+as follows. If G = \fIgain\fP and t is the time in seconds since the start of 
+gain application, then each sample is multiplied by a factor of (1 + (G * t)). 
+The parameter \fIwindow\fP, if given, sets the length of the time interval
+in seconds that gain is applied. When the gain is windowed, trace values after
+the end of the gain window are zeroed.
 .TP
 .B \-H
 This "help" flag cause the program to print out a description
