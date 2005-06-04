@@ -30,6 +30,10 @@
 /**
  * Start Global Widget Declarations.
  */
+EXTERNAL Widget   pushButton_offset_dismiss;
+EXTERNAL Widget   pushButton_offset_apply;
+EXTERNAL Widget   textField_lat_offset;
+EXTERNAL Widget   textField_lon_offset;
 EXTERNAL Widget   bulletinBoard_deletebadtimetag;
 EXTERNAL Widget   bulletinBoard_timeinterpolation;
 EXTERNAL Widget   bulletinBoard_useprevious;

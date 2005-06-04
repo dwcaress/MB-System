@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_callbacks.c	6/24/95
- *    $Id: mbnavedit_callbacks.c,v 5.9 2005-03-25 04:35:56 caress Exp $
+ *    $Id: mbnavedit_callbacks.c,v 5.10 2005-06-04 04:45:50 caress Exp $
  *
  *    Copyright (c) 1995, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	August 28, 2000 (New version - no buffered i/o)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.9  2005/03/25 04:35:56  caress
+ * Added capability to interpolate over repeated values.
+ *
  * Revision 5.8  2004/05/21 23:33:03  caress
  * Moved to new version of BX GUI builder
  *
@@ -612,7 +615,7 @@ do_mbnavedit_init(int argc, char **argv)
     XtAddEventHandler(XtParent(bulletinBoard), 
 			    StructureNotifyMask, 
 			    False, 
-			    do_resize, 
+			    (XtEventHandler) do_resize, 
 			    (XtPointer)NULL);
 
     /* Load the colors that will be used in this program. */
@@ -948,6 +951,16 @@ void do_set_controls()
 		XtUnmanageChild(bulletinBoard_deletebadtimetag);
 		XtUnmanageChild(bulletinBoard_timeinterpolation);
 		}
+		
+	/* set offset values */
+	sprintf(value_text,"%.5f",offset_lon);
+	XmTextFieldSetString(
+	    textField_lon_offset, 
+	    value_text);
+	sprintf(value_text,"%.5f",offset_lat);
+	XmTextFieldSetString(
+	    textField_lat_offset, 
+	    value_text);
 	    
 }
 
@@ -1947,6 +1960,40 @@ do_driftlat( Widget w, XtPointer client_data, XtPointer call_data)
 /*--------------------------------------------------------------------*/
 
 void
+do_offset_apply( Widget w, XtPointer client_data, XtPointer call_data)
+{
+	char	value_text[128];
+    	double  dvalue;
+	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+
+	/* get values from widgets */
+	get_text_string(textField_lon_offset, string);
+	if (sscanf(string, "%lf", &dvalue) == 1)
+		offset_lon = dvalue;
+	get_text_string(textField_lat_offset, string);
+	if (sscanf(string, "%lf", &dvalue) == 1)
+		offset_lat = dvalue;
+		
+	/* reset widgets so user sees what got applied */
+	sprintf(value_text,"%.5f",offset_lon);
+	XmTextFieldSetString(
+	    textField_lon_offset, 
+	    value_text);
+	sprintf(value_text,"%.5f",offset_lat);
+	XmTextFieldSetString(
+	    textField_lat_offset, 
+	    value_text);
+	
+	/* apply offsets */
+	mbnavedit_action_offset();
+	
+	/* replot */
+	mbnavedit_plot_all();
+}
+
+/*--------------------------------------------------------------------*/
+
+void
 do_toggle_show_smg( Widget w, XtPointer client_data, XtPointer call_data)
 {
 	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
@@ -2207,6 +2254,8 @@ do_open_file(int useprevious)
 	    
 	/* turn on expose plots */
 	expose_plot_ok = True;
+	
+	do_set_controls();
 }
 
 

@@ -23,11 +23,12 @@
 #include <Xm/MainW.h>
 #include <Xm/DialogS.h>
 #include <Xm/MwmUtil.h>
-#include <Xm/BulletinB.h>
-#include <Xm/Label.h>
+#include <Xm/Form.h>
 #include <Xm/PushB.h>
-#include <Xm/Separator.h>
 #include <Xm/TextF.h>
+#include <Xm/Label.h>
+#include <Xm/BulletinB.h>
+#include <Xm/Separator.h>
 #include <Xm/Scale.h>
 #include <Xm/RowColumn.h>
 #include <Xm/ToggleB.h>
@@ -38,11 +39,12 @@
 #include <Xm/MainW.h>
 #include <Xm/DialogS.h>
 #include <Xm/MwmUtil.h>
-#include <Xm/BulletinB.h>
-#include <Xm/Label.h>
+#include <Xm/Form.h>
 #include <Xm/PushB.h>
-#include <Xm/Separator.h>
 #include <Xm/TextF.h>
+#include <Xm/Label.h>
+#include <Xm/BulletinB.h>
+#include <Xm/Separator.h>
 #include <Xm/Scale.h>
 #include <Xm/RowColumn.h>
 #include <Xm/ToggleB.h>
@@ -85,6 +87,7 @@ extern void BX_SET_BACKGROUND_COLOR(Widget, ArgList, Cardinal *, Pixel);
  */
 extern void BxExitCB(Widget, XtPointer, XtPointer);
 extern void BxUnmanageCB(Widget, XtPointer, XtPointer);
+extern void do_offset_apply(Widget, XtPointer, XtPointer);
 extern void do_deletebadtimetag_apply(Widget, XtPointer, XtPointer);
 extern void do_timeinterpolation_apply(Widget, XtPointer, XtPointer);
 extern void do_useprevious_no(Widget, XtPointer, XtPointer);
@@ -154,6 +157,10 @@ CreatemainWindow(Widget parent)
     Cardinal cdc = 0;
     Boolean  argok = False;
     Widget   mainWindow;
+    Widget   xmDialogShell_offset;
+    Widget   form_offset;
+    Widget   label_offset_lat;
+    Widget   label_offset_lon;
     Widget   dialogShell_deletebadtimetag;
     Widget   label_deletetimetag;
     Widget   pushButton_deletebadtimetag_dismiss;
@@ -205,6 +212,7 @@ CreatemainWindow(Widget parent)
     Widget   pulldownMenu_controls;
     Widget   pushButton_controls_timespan;
     Widget   pushButton_controls_modeling;
+    Widget   pushButton_controls_offset;
     Widget   pushButton_nextbuffer;
     Widget   pushButton_done;
     Widget   pushButton_forward;
@@ -220,11 +228,12 @@ CreatemainWindow(Widget parent)
     RegisterBxConverters(XtWidgetToApplicationContext(parent));
     XtInitializeWidgetClass((WidgetClass)xmMainWindowWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmDialogShellWidgetClass);
-    XtInitializeWidgetClass((WidgetClass)xmBulletinBoardWidgetClass);
-    XtInitializeWidgetClass((WidgetClass)xmLabelWidgetClass);
+    XtInitializeWidgetClass((WidgetClass)xmFormWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmPushButtonWidgetClass);
-    XtInitializeWidgetClass((WidgetClass)xmSeparatorWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmTextFieldWidgetClass);
+    XtInitializeWidgetClass((WidgetClass)xmLabelWidgetClass);
+    XtInitializeWidgetClass((WidgetClass)xmBulletinBoardWidgetClass);
+    XtInitializeWidgetClass((WidgetClass)xmSeparatorWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmScaleWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmRowColumnWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmToggleButtonWidgetClass);
@@ -237,8 +246,8 @@ CreatemainWindow(Widget parent)
     XtInitializeWidgetClass((WidgetClass)xmDrawingAreaWidgetClass);
     
     ac = 0;
-    XtSetArg(args[ac], XmNx, 82); ac++;
-    XtSetArg(args[ac], XmNy, 251); ac++;
+    XtSetArg(args[ac], XmNx, 237); ac++;
+    XtSetArg(args[ac], XmNy, 308); ac++;
     XtSetArg(args[ac], XmNwidth, 1018); ac++;
     XtSetArg(args[ac], XmNheight, 695); ac++;
     mainWindow = XmCreateMainWindow(parent,
@@ -344,8 +353,8 @@ CreatemainWindow(Widget parent)
     ac = 0;
     XtSetArg(args[ac], XmNx, 120); ac++;
     XtSetArg(args[ac], XmNy, 10); ac++;
-    XtSetArg(args[ac], XmNwidth, 90); ac++;
-    XtSetArg(args[ac], XmNheight, 30); ac++;
+    XtSetArg(args[ac], XmNwidth, 87); ac++;
+    XtSetArg(args[ac], XmNheight, 34); ac++;
     menuBar_controls = XmCreateMenuBar(bulletinBoard,
         (char *)"menuBar_controls",
         args, 
@@ -362,7 +371,7 @@ CreatemainWindow(Widget parent)
         XtSetArg(args[ac], XmNx, 5); ac++;
         XtSetArg(args[ac], XmNy, 5); ac++;
         XtSetArg(args[ac], XmNwidth, 77); ac++;
-        XtSetArg(args[ac], XmNheight, 20); ac++;
+        XtSetArg(args[ac], XmNheight, 24); ac++;
         XtSetArg(args[ac], XmNfontList, 
             BX_CONVERT(menuBar_controls, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
@@ -380,10 +389,10 @@ CreatemainWindow(Widget parent)
     
     
     ac = 0;
-    XtSetArg(args[ac], XmNx, 207); ac++;
-    XtSetArg(args[ac], XmNy, 286); ac++;
+    XtSetArg(args[ac], XmNx, 362); ac++;
+    XtSetArg(args[ac], XmNy, 347); ac++;
     XtSetArg(args[ac], XmNwidth, 137); ac++;
-    XtSetArg(args[ac], XmNheight, 100); ac++;
+    XtSetArg(args[ac], XmNheight, 124); ac++;
     pulldownMenu_controls = XmCreatePulldownMenu(XtParent(cascadeButton_controls),
         (char *)"pulldownMenu_controls",
         args, 
@@ -484,6 +493,30 @@ CreatemainWindow(Widget parent)
     }
     
     XtAddCallback(pushButton_controls_deletebadtimetag, XmNactivateCallback, BxManageCB, (XtPointer)"bulletinBoard_deletebadtimetag");
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(pulldownMenu_controls, (char *)"Position Offset", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(pulldownMenu_controls, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        pushButton_controls_offset = XmCreatePushButton(pulldownMenu_controls,
+            (char *)"pushButton_controls_offset",
+            args, 
+            ac);
+        XtManageChild(pushButton_controls_offset);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(pushButton_controls_offset, XmNactivateCallback, BxManageCB, (XtPointer)"form_offset");
     
     ac = 0;
     XtSetArg(args[ac], XmNsubMenuId, pulldownMenu_controls); ac++;
@@ -1621,8 +1654,8 @@ CreatemainWindow(Widget parent)
     
     ac = 0;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNx, 1200); ac++;
-    XtSetArg(args[ac], XmNy, 390); ac++;
+    XtSetArg(args[ac], XmNx, 813); ac++;
+    XtSetArg(args[ac], XmNy, 711); ac++;
     XtSetArg(args[ac], XmNwidth, 481); ac++;
     XtSetArg(args[ac], XmNheight, 466); ac++;
     bulletinBoard_about = XtCreateWidget((char *)"bulletinBoard_about",
@@ -1993,8 +2026,8 @@ CreatemainWindow(Widget parent)
     ac = 0;
     XtSetArg(args[ac], XmNdialogStyle, XmDIALOG_FULL_APPLICATION_MODAL); ac++;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_NONE); ac++;
-    XtSetArg(args[ac], XmNx, 1251); ac++;
-    XtSetArg(args[ac], XmNy, 580); ac++;
+    XtSetArg(args[ac], XmNx, 843); ac++;
+    XtSetArg(args[ac], XmNy, 771); ac++;
     XtSetArg(args[ac], XmNwidth, 379); ac++;
     XtSetArg(args[ac], XmNheight, 86); ac++;
     bulletinBoard_message = XtCreateWidget((char *)"bulletinBoard_message",
@@ -2072,8 +2105,8 @@ CreatemainWindow(Widget parent)
     ac = 0;
     XtSetArg(args[ac], XmNdialogStyle, XmDIALOG_APPLICATION_MODAL); ac++;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNx, 1285); ac++;
-    XtSetArg(args[ac], XmNy, 542); ac++;
+    XtSetArg(args[ac], XmNx, 898); ac++;
+    XtSetArg(args[ac], XmNy, 824); ac++;
     XtSetArg(args[ac], XmNwidth, 311); ac++;
     XtSetArg(args[ac], XmNheight, 161); ac++;
     bulletinBoard_error = XtCreateWidget((char *)"bulletinBoard_error",
@@ -2205,8 +2238,8 @@ CreatemainWindow(Widget parent)
     
     ac = 0;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_NONE); ac++;
-    XtSetArg(args[ac], XmNx, 1134); ac++;
-    XtSetArg(args[ac], XmNy, 320); ac++;
+    XtSetArg(args[ac], XmNx, 762); ac++;
+    XtSetArg(args[ac], XmNy, 698); ac++;
     XtSetArg(args[ac], XmNwidth, 614); ac++;
     XtSetArg(args[ac], XmNheight, 606); ac++;
     bulletinBoard_fileselection = XtCreateWidget((char *)"bulletinBoard_fileselection",
@@ -2455,8 +2488,8 @@ CreatemainWindow(Widget parent)
         XtSetArg(args[ac], XmNdialogTitle, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNautoUnmanage, False); ac++;
         XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-        XtSetArg(args[ac], XmNx, 1195); ac++;
-        XtSetArg(args[ac], XmNy, 525); ac++;
+        XtSetArg(args[ac], XmNx, 888); ac++;
+        XtSetArg(args[ac], XmNy, 755); ac++;
         XtSetArg(args[ac], XmNwidth, 491); ac++;
         XtSetArg(args[ac], XmNheight, 195); ac++;
         bulletinBoard_timestepping = XtCreateWidget((char *)"bulletinBoard_timestepping",
@@ -2680,8 +2713,8 @@ CreatemainWindow(Widget parent)
         XtSetArg(args[ac], XmNdialogTitle, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNautoUnmanage, False); ac++;
         XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-        XtSetArg(args[ac], XmNx, 1193); ac++;
-        XtSetArg(args[ac], XmNy, 397); ac++;
+        XtSetArg(args[ac], XmNx, 801); ac++;
+        XtSetArg(args[ac], XmNy, 766); ac++;
         XtSetArg(args[ac], XmNwidth, 496); ac++;
         XtSetArg(args[ac], XmNheight, 451); ac++;
         bulletinBoard_modeling = XtCreateWidget((char *)"bulletinBoard_modeling",
@@ -3409,6 +3442,237 @@ CreatemainWindow(Widget parent)
     
     XtAddCallback(pushButton_deletebadtimetag_apply, XmNactivateCallback, do_deletebadtimetag_apply, (XtPointer)0);
     XtAddCallback(pushButton_deletebadtimetag_apply, XmNactivateCallback, BxUnmanageCB, (XtPointer)"bulletinBoard_timeinterpolation");
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNwidth, 401); ac++;
+    XtSetArg(args[ac], XmNheight, 174); ac++;
+    xmDialogShell_offset = XmCreateDialogShell(mainWindow,
+        (char *)"xmDialogShell_offset",
+        args, 
+        ac);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(xmDialogShell_offset, (char *)"Position Offset", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNdialogTitle, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
+        XtSetArg(args[ac], XmNx, 278); ac++;
+        XtSetArg(args[ac], XmNy, 622); ac++;
+        XtSetArg(args[ac], XmNwidth, 401); ac++;
+        XtSetArg(args[ac], XmNheight, 174); ac++;
+        form_offset = XtCreateWidget((char *)"form_offset",
+            xmFormWidgetClass,
+            xmDialogShell_offset,
+            args, 
+            ac);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(form_offset, (char *)"Dismiss", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNx, 210); ac++;
+        XtSetArg(args[ac], XmNy, 120); ac++;
+        XtSetArg(args[ac], XmNwidth, 118); ac++;
+        XtSetArg(args[ac], XmNheight, 40); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(form_offset, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        pushButton_offset_dismiss = XmCreatePushButton(form_offset,
+            (char *)"pushButton_offset_dismiss",
+            args, 
+            ac);
+        XtManageChild(pushButton_offset_dismiss);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(pushButton_offset_dismiss, XmNactivateCallback, BxUnmanageCB, (XtPointer)"form_offset");
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(form_offset, (char *)"Apply", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNx, 50); ac++;
+        XtSetArg(args[ac], XmNy, 120); ac++;
+        XtSetArg(args[ac], XmNwidth, 110); ac++;
+        XtSetArg(args[ac], XmNheight, 40); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(form_offset, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        pushButton_offset_apply = XmCreatePushButton(form_offset,
+            (char *)"pushButton_offset_apply",
+            args, 
+            ac);
+        XtManageChild(pushButton_offset_apply);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(pushButton_offset_apply, XmNactivateCallback, do_offset_apply, (XtPointer)0);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNx, 240); ac++;
+    XtSetArg(args[ac], XmNy, 60); ac++;
+    XtSetArg(args[ac], XmNwidth, 149); ac++;
+    XtSetArg(args[ac], XmNheight, 40); ac++;
+    XtSetArg(args[ac], XmNfontList, 
+        BX_CONVERT(form_offset, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+        XmRFontList, 0, &argok)); if (argok) ac++;
+    textField_lat_offset = XmCreateTextField(form_offset,
+        (char *)"textField_lat_offset",
+        args, 
+        ac);
+    XtManageChild(textField_lat_offset);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNx, 240); ac++;
+    XtSetArg(args[ac], XmNy, 10); ac++;
+    XtSetArg(args[ac], XmNwidth, 149); ac++;
+    XtSetArg(args[ac], XmNheight, 40); ac++;
+    XtSetArg(args[ac], XmNfontList, 
+        BX_CONVERT(form_offset, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+        XmRFontList, 0, &argok)); if (argok) ac++;
+    textField_lon_offset = XmCreateTextField(form_offset,
+        (char *)"textField_lon_offset",
+        args, 
+        ac);
+    XtManageChild(textField_lon_offset);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(form_offset, (char *)"Latitude Offset (degrees):", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_END); ac++;
+        XtSetArg(args[ac], XmNx, 0); ac++;
+        XtSetArg(args[ac], XmNy, 60); ac++;
+        XtSetArg(args[ac], XmNwidth, 230); ac++;
+        XtSetArg(args[ac], XmNheight, 40); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(form_offset, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        label_offset_lat = XmCreateLabel(form_offset,
+            (char *)"label_offset_lat",
+            args, 
+            ac);
+        XtManageChild(label_offset_lat);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(form_offset, (char *)"Longitude Offset (degrees):", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_END); ac++;
+        XtSetArg(args[ac], XmNx, 10); ac++;
+        XtSetArg(args[ac], XmNy, 10); ac++;
+        XtSetArg(args[ac], XmNwidth, 220); ac++;
+        XtSetArg(args[ac], XmNheight, 40); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(form_offset, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        label_offset_lon = XmCreateLabel(form_offset,
+            (char *)"label_offset_lon",
+            args, 
+            ac);
+        XtManageChild(label_offset_lon);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNtopAttachment, XmATTACH_NONE); ac++;
+    XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNbottomOffset, 14); ac++;
+    XtSetArg(args[ac], XmNleftOffset, 210); ac++;
+    XtSetArg(args[ac], XmNrightOffset, 73); ac++;
+    XtSetValues(pushButton_offset_dismiss, args, ac);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNtopAttachment, XmATTACH_NONE); ac++;
+    XtSetArg(args[ac], XmNrightAttachment, XmATTACH_WIDGET); ac++;
+    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNbottomOffset, 14); ac++;
+    XtSetArg(args[ac], XmNleftOffset, 50); ac++;
+    XtSetArg(args[ac], XmNrightOffset, 50); ac++;
+    XtSetArg(args[ac], XmNrightWidget, pushButton_offset_dismiss); ac++;
+    XtSetValues(pushButton_offset_apply, args, ac);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNtopAttachment, XmATTACH_WIDGET); ac++;
+    XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_NONE); ac++;
+    XtSetArg(args[ac], XmNbottomOffset, 0); ac++;
+    XtSetArg(args[ac], XmNleftOffset, 240); ac++;
+    XtSetArg(args[ac], XmNrightOffset, 12); ac++;
+    XtSetArg(args[ac], XmNtopOffset, 10); ac++;
+    XtSetArg(args[ac], XmNtopWidget, textField_lon_offset); ac++;
+    XtSetValues(textField_lat_offset, args, ac);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_WIDGET); ac++;
+    XtSetArg(args[ac], XmNleftOffset, 10); ac++;
+    XtSetArg(args[ac], XmNrightOffset, 12); ac++;
+    XtSetArg(args[ac], XmNtopOffset, 10); ac++;
+    XtSetArg(args[ac], XmNleftWidget, label_offset_lon); ac++;
+    XtSetValues(textField_lon_offset, args, ac);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNtopAttachment, XmATTACH_WIDGET); ac++;
+    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_NONE); ac++;
+    XtSetArg(args[ac], XmNbottomOffset, 0); ac++;
+    XtSetArg(args[ac], XmNleftOffset, 0); ac++;
+    XtSetArg(args[ac], XmNtopOffset, 10); ac++;
+    XtSetArg(args[ac], XmNtopWidget, label_offset_lon); ac++;
+    XtSetValues(label_offset_lat, args, ac);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNleftOffset, 10); ac++;
+    XtSetArg(args[ac], XmNtopOffset, 10); ac++;
+    XtSetValues(label_offset_lon, args, ac);
+    
     
     
     /* Begin user code block <end_CreatemainWindow> */

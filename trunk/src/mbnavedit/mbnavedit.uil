@@ -126,6 +126,10 @@ identifier BXG_toggleButton_modeling_off;
 identifier BXG_bulletinBoard_useprevious;
 identifier BXG_bulletinBoard_timeinterpolation;
 identifier BXG_bulletinBoard_deletebadtimetag;
+identifier BXG_pushButton_offset_dismiss;
+identifier BXG_pushButton_offset_apply;
+identifier BXG_textField_lat_offset;
+identifier BXG_textField_lon_offset;
 procedure BxExitCB(integer);
 procedure BxManageCB(string);
 procedure BxSetValuesCB(string);
@@ -150,6 +154,7 @@ procedure do_interpolationrepeats();
 procedure do_model_mode();
 procedure do_modeling_apply();
 procedure do_nextbuffer();
+procedure do_offset_apply();
 procedure do_resize();
 procedure do_reverse();
 procedure do_revert();
@@ -209,6 +214,209 @@ list Style_useReasons : callbacks {
 !(BX)    handlers BaseStyleHandlers;
 !(BX)};
 
+
+object label_offset_lon : XmLabel widget {
+    arguments {
+        arguments Style_use;
+        XmNalignment = XmALIGNMENT_END;
+        XmNlabelString = compound_string("Longitude Offset (degrees):");
+        XmNleftAttachment = XmATTACH_FORM;
+        XmNleftOffset = 10;
+        XmNtopOffset = 10;
+        XmNx = 10;
+        XmNy = 10;
+        XmNwidth = 220;
+        XmNheight = 40;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object label_offset_lat : XmLabel widget {
+    arguments {
+        arguments Style_use;
+        XmNalignment = XmALIGNMENT_END;
+        XmNlabelString = compound_string("Latitude Offset (degrees):");
+        XmNtopAttachment = XmATTACH_WIDGET;
+        XmNleftAttachment = XmATTACH_FORM;
+        XmNbottomAttachment = XmATTACH_NONE;
+        XmNbottomOffset = 0;
+        XmNleftOffset = 0;
+        XmNtopOffset = 10;
+        XmNtopWidget = XmLabel label_offset_lon;
+        XmNx = 0;
+        XmNy = 60;
+        XmNwidth = 230;
+        XmNheight = 40;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object textField_lon_offset : XmTextField widget {
+    arguments {
+        arguments Style_use;
+        XmNrightAttachment = XmATTACH_FORM;
+        XmNleftAttachment = XmATTACH_WIDGET;
+        XmNleftOffset = 10;
+        XmNrightOffset = 12;
+        XmNtopOffset = 10;
+        XmNleftWidget = XmLabel label_offset_lon;
+        XmNx = 240;
+        XmNy = 10;
+        XmNwidth = 149;
+        XmNheight = 40;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_textField_lon_offset);
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object textField_lat_offset : XmTextField widget {
+    arguments {
+        arguments Style_use;
+        XmNtopAttachment = XmATTACH_WIDGET;
+        XmNrightAttachment = XmATTACH_FORM;
+        XmNleftAttachment = XmATTACH_FORM;
+        XmNbottomAttachment = XmATTACH_NONE;
+        XmNbottomOffset = 0;
+        XmNleftOffset = 240;
+        XmNrightOffset = 12;
+        XmNtopOffset = 10;
+        XmNtopWidget = XmTextField textField_lon_offset;
+        XmNx = 240;
+        XmNy = 60;
+        XmNwidth = 149;
+        XmNheight = 40;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_textField_lat_offset);
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object pushButton_offset_apply : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Apply");
+        XmNtopAttachment = XmATTACH_NONE;
+        XmNrightAttachment = XmATTACH_WIDGET;
+        XmNleftAttachment = XmATTACH_FORM;
+        XmNbottomAttachment = XmATTACH_FORM;
+        XmNbottomOffset = 14;
+        XmNleftOffset = 50;
+        XmNrightOffset = 50;
+        XmNrightWidget = XmPushButton pushButton_offset_dismiss;
+        XmNx = 50;
+        XmNy = 120;
+        XmNwidth = 110;
+        XmNheight = 40;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_offset_apply);
+        XmNactivateCallback = procedure do_offset_apply();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object pushButton_offset_dismiss : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Dismiss");
+        XmNtopAttachment = XmATTACH_NONE;
+        XmNrightAttachment = XmATTACH_FORM;
+        XmNleftAttachment = XmATTACH_FORM;
+        XmNbottomAttachment = XmATTACH_FORM;
+        XmNbottomOffset = 14;
+        XmNleftOffset = 210;
+        XmNrightOffset = 73;
+        XmNx = 210;
+        XmNy = 120;
+        XmNwidth = 118;
+        XmNheight = 40;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_offset_dismiss);
+        XmNactivateCallback = procedure BxUnmanageCB("form_offset");
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object form_offset : XmFormDialog widget {
+    arguments {
+        arguments Style_use;
+        XmNdialogTitle = compound_string("Position Offset");
+        XmNresizePolicy = XmRESIZE_GROW;
+        XmNx = 278;
+        XmNy = 622;
+        XmNwidth = 401;
+        XmNheight = 174;
+    };
+    controls {
+         managed XmPushButton pushButton_offset_dismiss;
+         managed XmPushButton pushButton_offset_apply;
+         managed XmTextField textField_lat_offset;
+         managed XmTextField textField_lon_offset;
+         managed XmLabel label_offset_lat;
+         managed XmLabel label_offset_lon;
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+!(BX)object xmDialogShell_offset : XmDialogShell widget {
+!(BX)    arguments {
+!(BX)        arguments Style_use;
+!(BX)        XmNwidth = 401;
+!(BX)        XmNheight = 174;
+!(BX)    };
+!(BX)    controls {
+!(BX)         managed XmFormDialog form_offset;
+!(BX)    };
+!(BX)    callbacks {
+!(BX)        callbacks Style_useReasons;
+!(BX)    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+!(BX)};
 
 object pushButton_deletebadtimetag_apply : XmPushButton widget {
     arguments {
@@ -865,8 +1073,8 @@ object bulletinBoard_modeling : XmBulletinBoardDialog widget {
         XmNdialogTitle = compound_string("Navigation Modeling");
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 1193;
-        XmNy = 397;
+        XmNx = 801;
+        XmNy = 766;
         XmNwidth = 496;
         XmNheight = 451;
     };
@@ -1104,8 +1312,8 @@ object bulletinBoard_timestepping : XmBulletinBoardDialog widget {
         XmNdialogTitle = compound_string("Time Stepping");
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 1195;
-        XmNy = 525;
+        XmNx = 888;
+        XmNy = 755;
         XmNwidth = 491;
         XmNheight = 195;
     };
@@ -1319,8 +1527,8 @@ object textField_output_file : XmTextField widget {
 object bulletinBoard_fileselection : XmBulletinBoardDialog widget {
     arguments {
         XmNresizePolicy = XmRESIZE_NONE;
-        XmNx = 1134;
-        XmNy = 320;
+        XmNx = 762;
+        XmNy = 698;
         XmNwidth = 614;
         XmNheight = 606;
     };
@@ -1440,8 +1648,8 @@ object bulletinBoard_error : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNdialogStyle = XmDIALOG_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 1285;
-        XmNy = 542;
+        XmNx = 898;
+        XmNy = 824;
         XmNwidth = 311;
         XmNheight = 161;
     };
@@ -1521,8 +1729,8 @@ object bulletinBoard_message : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNdialogStyle = XmDIALOG_FULL_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_NONE;
-        XmNx = 1251;
-        XmNy = 580;
+        XmNx = 843;
+        XmNy = 771;
         XmNwidth = 379;
         XmNheight = 86;
     };
@@ -1790,8 +1998,8 @@ object label_about_create1 : XmLabel widget {
 object bulletinBoard_about : XmBulletinBoardDialog widget {
     arguments {
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 1200;
-        XmNy = 390;
+        XmNx = 813;
+        XmNy = 711;
         XmNwidth = 481;
         XmNheight = 466;
     };
@@ -2846,19 +3054,36 @@ object pushButton_controls_deletebadtimetag : XmPushButton widget {
 !(BX)    };
 };
 
+object pushButton_controls_offset : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Position Offset");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        XmNactivateCallback = procedure BxManageCB("form_offset");
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
 object pulldownMenu_controls : XmPulldownMenu widget {
     arguments {
         arguments Style_use;
-        XmNx = 207;
-        XmNy = 286;
+        XmNx = 362;
+        XmNy = 347;
         XmNwidth = 137;
-        XmNheight = 100;
+        XmNheight = 124;
     };
     controls {
          managed XmPushButton pushButton_controls_timespan;
          managed XmPushButton pushButton_controls_modeling;
          managed XmPushButton pushButton_controls_timeinterpolation;
          managed XmPushButton pushButton_controls_deletebadtimetag;
+         managed XmPushButton pushButton_controls_offset;
     };
     callbacks {
         callbacks Style_useReasons;
@@ -2875,7 +3100,7 @@ object cascadeButton_controls : XmCascadeButton widget {
         XmNx = 5;
         XmNy = 5;
         XmNwidth = 77;
-        XmNheight = 20;
+        XmNheight = 24;
     };
     controls {
          unmanaged XmPulldownMenu pulldownMenu_controls;
@@ -2893,8 +3118,8 @@ object menuBar_controls : XmMenuBar widget {
         arguments Style_use;
         XmNx = 120;
         XmNy = 10;
-        XmNwidth = 90;
-        XmNheight = 30;
+        XmNwidth = 87;
+        XmNheight = 34;
     };
     controls {
          managed XmCascadeButton cascadeButton_controls;
@@ -3031,12 +3256,13 @@ object bulletinBoard : XmBulletinBoard widget {
 object mainWindow : XmMainWindow widget {
     arguments {
         arguments Style_use;
-        XmNx = 82;
-        XmNy = 251;
+        XmNx = 237;
+        XmNy = 308;
         XmNwidth = 1018;
         XmNheight = 695;
     };
     controls {
+!(BX)         unmanaged XmDialogShell xmDialogShell_offset;
 !(BX)         unmanaged XmDialogShell dialogShell_deletebadtimetag;
 !(BX)         unmanaged XmDialogShell xmDialogShell_timeinterpolation;
 !(BX)         unmanaged XmDialogShell xmDialogShell_useprevious;
@@ -3062,8 +3288,8 @@ object mainWindow : XmMainWindow widget {
 !(BX)        XmNtitle = "MBnavedit";
 !(BX)        XmNiconName = "MBnavedit";
 !(BX)        XmNallowShellResize = true;
-!(BX)        XmNx = 82;
-!(BX)        XmNy = 251;
+!(BX)        XmNx = 237;
+!(BX)        XmNy = 308;
 !(BX)        XmNwidth = 1018;
 !(BX)        XmNheight = 695;
 !(BX)    };
