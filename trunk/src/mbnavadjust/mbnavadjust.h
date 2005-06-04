@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavadjust.h	6/24/95
- *    $Id: mbnavadjust.h,v 5.5 2004-12-02 06:34:27 caress Exp $
+ *    $Id: mbnavadjust.h,v 5.6 2005-06-04 04:34:07 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	March 22, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2004/12/02 06:34:27  caress
+ * Fixes while supporting Reson 7k data.
+ *
  * Revision 5.4  2004/05/21 23:31:28  caress
  * Moved to new version of BX GUI builder
  *
@@ -81,7 +84,8 @@
 #define MBNA_TIME_GAP_MAX		120.0
 #define MBNA_VIEW_LIST_FILES		0
 #define MBNA_VIEW_LIST_CROSSINGS	1
-#define MBNA_VIEW_LIST_TIES		2
+#define MBNA_VIEW_LIST_TRUECROSSINGS	2
+#define MBNA_VIEW_LIST_TIES		3
 #define MBNA_SELECT_NONE		-1
 #define MBNA_VECTOR_ALLOC_INC		1000
 #define MBNA_PEN_UP			3
@@ -157,6 +161,7 @@ struct mbna_tie {
 };
 struct mbna_crossing {
 	int	status;
+	int	truecrossing;
 	int	file_id_1;
 	int	section_1;
 	int	file_id_2;
@@ -178,6 +183,9 @@ struct mbna_project {
 	int	num_crossings_good;
 	int	num_crossings_alloc;
 	int	num_crossings_analyzed;
+	int	num_truecrossings;
+	int	num_truecrossings_good;
+	int	num_truecrossings_analyzed;
 	struct mbna_crossing *crossings;
 	int	num_ties;
 	double	section_length;
@@ -292,9 +300,9 @@ int	do_error_dialog(char *s1, char *s2, char *s3);
 void    do_bell();
 int	mbnavadjust_init_globals();
 int	mbnavadjust_init(int argc,char **argv,int *startup_file);
+int	mbnavadjust_set_colors(int ncol, int *pixels);
 int	mbnavadjust_set_graphics(int cn_xgid, int cr_xgid, 
-				int *cn_brdr, int *cr_brdr,  
-				int ncol, int *pixels);
+				int *cn_brdr, int *cr_brdr);
 int	mbnavadjust_file_new(char *projectname);
 int	mbnavadjust_file_open(char *projectname);
 int	mbnavadjust_close_project();

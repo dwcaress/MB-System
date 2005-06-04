@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavadjust_prog.c	3/23/00
- *    $Id: mbnavadjust_prog.c,v 5.15 2004-12-18 01:35:42 caress Exp $
+ *    $Id: mbnavadjust_prog.c,v 5.16 2005-06-04 04:34:07 caress Exp $
  *
  *    Copyright (c) 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	March 23, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.15  2004/12/18 01:35:42  caress
+ * Working towards release 5.0.6.
+ *
  * Revision 5.14  2004/12/02 06:34:27  caress
  * Fixes while supporting Reson 7k data.
  *
@@ -125,7 +128,7 @@ struct swathraw
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbnavadjust_prog.c,v 5.15 2004-12-18 01:35:42 caress Exp $";
+static char rcs_id[] = "$Id: mbnavadjust_prog.c,v 5.16 2005-06-04 04:34:07 caress Exp $";
 static char program_name[] = "mbnavadjust";
 static char help_message[] =  "mbnavadjust is an interactive navigation adjustment package for swath sonar data.\n";
 static char usage_message[] = "mbnavadjust [-Iproject -V -H]";
@@ -263,8 +266,12 @@ int mbnavadjust_init_globals()
 	project.num_files_alloc = 0;
 	project.files = NULL;
 	project.num_crossings = 0;
+	project.num_crossings_good = 0;
 	project.num_crossings_alloc = 0;
  	project.num_crossings_analyzed = 0;
+	project.num_truecrossings = 0;
+	project.num_truecrossings_good = 0;
+ 	project.num_truecrossings_analyzed = 0;
  	project.crossings = NULL;
 	project.num_ties = 0;
 	project.logfp = NULL;
@@ -462,9 +469,46 @@ int mbnavadjust_init(int argc,char **argv,int *startup_file)
 }
 
 /*--------------------------------------------------------------------*/
+int mbnavadjust_set_colors(int ncol, int *pixels)
+{
+	/* local variables */
+	char	*function_name = "mbnavadjust_set_graphics";
+	int	status = MB_SUCCESS;
+	int	i;
+
+	/* print input debug statements */
+	if (mbna_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       ncolors:      %d\n",ncol);
+		for (i=0;i<ncol;i++)
+			fprintf(stderr,"dbg2       pixel[%d]:     %d\n",
+				i, pixels[i]);
+		}
+
+	/* set colors */
+	ncolors = ncol;
+	for (i=0;i<ncolors;i++)
+		pixel_values[i] = pixels[i];
+
+	/* print output debug statements */
+	if (mbna_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBnavadjust function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:       %d\n",error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:      %d\n",status);
+		}
+
+	return(status);
+}
+/*--------------------------------------------------------------------*/
 int mbnavadjust_set_graphics(int cn_xgid, int cr_xgid, 
-				int *cn_brdr, int *cr_brdr, 
-				int ncol, int *pixels)
+				int *cn_brdr, int *cr_brdr)
 {
 	/* local variables */
 	char	*function_name = "mbnavadjust_set_graphics";
@@ -483,10 +527,6 @@ int mbnavadjust_set_graphics(int cn_xgid, int cr_xgid,
 			cn_brdr[0], cn_brdr[1], cn_brdr[2], cn_brdr[3]);
 		fprintf(stderr,"dbg2       cr_brdr:      %d %d %d %d\n",
 			cr_brdr[0], cr_brdr[1], cr_brdr[2], cr_brdr[3]);
-		fprintf(stderr,"dbg2       ncolors:      %d\n",ncol);
-		for (i=0;i<ncol;i++)
-			fprintf(stderr,"dbg2       pixel[%d]:     %d\n",
-				i, pixels[i]);
 		}
 
 	/* set graphics id */
@@ -499,11 +539,6 @@ int mbnavadjust_set_graphics(int cn_xgid, int cr_xgid,
 		cont_borders[i] = cn_brdr[i];
 		corr_borders[i] = cr_brdr[i];
 		}
-
-	/* set colors */
-	ncolors = ncol;
-	for (i=0;i<ncolors;i++)
-		pixel_values[i] = pixels[i];
 
 	/* print output debug statements */
 	if (mbna_verbose >= 2)
@@ -597,7 +632,12 @@ int mbnavadjust_file_new(char *projectname)
 				project.num_files_alloc = 0;
 				project.files = NULL;
 				project.num_crossings = 0;
+				project.num_crossings_good = 0;
 				project.num_crossings_alloc = 0;
+				project.num_crossings_analyzed = 0;
+				project.num_truecrossings = 0;
+				project.num_truecrossings_good = 0;
+				project.num_truecrossings_analyzed = 0;
 				project.crossings = NULL;
 				project.num_ties = 0;
 				project.inversion = MBNA_INVERSION_NONE;
@@ -880,6 +920,8 @@ int mbnavadjust_close_project()
 	project.num_files = 0;
 	project.num_crossings = 0;
  	project.num_crossings_analyzed = 0;
+	project.num_truecrossings = 0;
+ 	project.num_truecrossings_analyzed = 0;
 	project.num_ties = 0;
  	project.inversion = MBNA_INVERSION_NONE;
 	mbna_total_num_pings = 0;
@@ -909,6 +951,7 @@ int mbnavadjust_write_project()
 	struct mbna_section *section;
 	struct mbna_crossing *crossing;
 	struct mbna_tie *tie;
+	int	crossingstatus;
 	int	i, j, k, l;
 
 	/* print input debug statements */
@@ -924,7 +967,7 @@ int mbnavadjust_write_project()
 		fprintf(hfp,"##MBNAVADJUST PROJECT\n");
 		fprintf(hfp,"MB-SYSTEM_VERSION\t%s\n",MB_VERSION);
 		fprintf(hfp,"PROGRAM_VERSION\t%s\n",rcs_id);
-		fprintf(hfp,"FILE_VERSION\t1.01\n");
+		fprintf(hfp,"FILE_VERSION\t1.02\n");
 		fprintf(hfp,"NAME\t%s\n",project.name);
 		fprintf(hfp,"PATH\t%s\n",project.path);
 		fprintf(hfp,"HOME\t%s\n",project.home);
@@ -1003,9 +1046,10 @@ int mbnavadjust_write_project()
 			{
 			/* write out basic crossing info */
 			crossing = &project.crossings[i];
-			fprintf(hfp,"CROSSING %5d %1d %5d %3d %5d %3d %2d\n",
+			fprintf(hfp,"CROSSING %5d %d %d %5d %3d %5d %3d %2d\n",
 				i,
 				crossing->status,
+				crossing->truecrossing,
 				crossing->file_id_1,
 				crossing->section_1,
 				crossing->file_id_2,
@@ -1341,28 +1385,60 @@ fprintf(stderr, "read failed on snav: %s\n", buffer);
 			
 		/* read crossings */
  		project.num_crossings_analyzed = 0;
+		project.num_truecrossings = 0;
+		project.num_truecrossings_analyzed = 0;
  		project.num_ties = 0;
 		for (i=0;i<project.num_crossings;i++)
 			{
 			/* read each crossing */
 			crossing = &project.crossings[i];
 			if (status == MB_SUCCESS
-				&& ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
-					|| (nscan = sscanf(buffer,"CROSSING %d %d %d %d %d %d %d",
- 					&idummy,
-					&crossing->status,
-					&crossing->file_id_1,
-					&crossing->section_1,
-					&crossing->file_id_2,
-					&crossing->section_2,
-					&crossing->num_ties)) != 7))
-					{
-					status = MB_FAILURE;
+				&& ((100*versionmajor + versionminor) > 101))
+				{
+				if (status == MB_SUCCESS
+					&& ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
+						|| (nscan = sscanf(buffer,"CROSSING %d %d %d %d %d %d %d %d",
+ 						&idummy,
+						&crossing->status,
+						&crossing->truecrossing,
+						&crossing->file_id_1,
+						&crossing->section_1,
+						&crossing->file_id_2,
+						&crossing->section_2,
+						&crossing->num_ties)) != 8))
+						{
+						status = MB_FAILURE;
 fprintf(stderr, "read failed on crossing: %s\n", buffer);
-					}
+						}
+				}
+			else if (status == MB_SUCCESS)
+				{
+				crossing->truecrossing = MB_NO;
+				if (status == MB_SUCCESS
+					&& ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
+						|| (nscan = sscanf(buffer,"CROSSING %d %d %d %d %d %d %d",
+ 						&idummy,
+						&crossing->status,
+						&crossing->file_id_1,
+						&crossing->section_1,
+						&crossing->file_id_2,
+						&crossing->section_2,
+						&crossing->num_ties)) != 7))
+						{
+						status = MB_FAILURE;
+fprintf(stderr, "read failed on old format crossing: %s\n", buffer);
+						}
+				}
 			if (status == MB_SUCCESS
 			    && crossing->status != MBNA_CROSSING_STATUS_NONE)
- 				project.num_crossings_analyzed++;
+				project.num_crossings_analyzed++;
+			if (status == MB_SUCCESS
+			    && crossing->truecrossing == MB_YES)
+			    {
+			    project.num_truecrossings++;
+			    if (crossing->status != MBNA_CROSSING_STATUS_NONE)
+ 				project.num_truecrossings_analyzed++;
+			    }
 				
 			/* read ties */
 			if (status == MB_SUCCESS)
@@ -1467,6 +1543,8 @@ fprintf(stderr,"Reset tie snav_2 on read:%d\n",tie->snav_2);
 			project.num_crossings = 0;
 			project.num_crossings_alloc = 0;
  			project.num_crossings_analyzed = 0;
+			project.num_truecrossings = 0;
+			project.num_truecrossings_analyzed = 0;
 			project.num_ties = 0;
  			}
 		}	
@@ -2031,7 +2109,7 @@ section->distance, distance, project.section_length);*/
 				&& section->num_pings > 1)
 				section->distance += distance;
 				
-			/* handle good bathymetry when decimation satisfied */
+			/* handle good bathymetry */
 			if (good_bath == MB_YES)
 				{
 				/* get statistics */
@@ -2425,10 +2503,11 @@ fprintf(stderr, "\n");
 						    error = MB_ERROR_MEMORY_FAIL;
 						    }
 						}
-					    
+					    					    
 					    /* add crossing to list */
 					    crossing = (struct mbna_crossing *) &project.crossings[project.num_crossings];
 					    crossing->status = MBNA_CROSSING_STATUS_NONE;
+					    crossing->truecrossing = MB_NO;
 					    crossing->file_id_1 = file->id;
 					    crossing->section_1 = k;
 					    crossing->file_id_2 = cfile->id;
@@ -2436,6 +2515,13 @@ fprintf(stderr, "\n");
 					    crossing->num_ties = 0;
 					    project.num_crossings++;
 					    new_crossings++;
+						
+					    /* check if this is a true crossing */
+					    if (mbnavadjust_sections_intersect(project.num_crossings-1) == MB_YES)
+					    	{
+						crossing->truecrossing = MB_YES;
+						project.num_truecrossings++;
+						}
 /*fprintf(stderr,"added crossing:%d  %4d %4d   %4d %4d\n",
 project.num_crossings-1,
 crossing->file_id_1,crossing->section_1,
@@ -2520,7 +2606,11 @@ int mbnavadjust_fix_file()
 				    == MBNA_FILE_FIXED)))
 			{
 			if (crossing->status == MBNA_CROSSING_STATUS_NONE)
-			    project.num_crossings_analyzed++;
+			    	{
+				project.num_crossings_analyzed++;
+				if (crossing->truecrossing == MB_YES)
+ 					project.num_truecrossings_analyzed++;
+				}
 			crossing->status = MBNA_CROSSING_STATUS_SKIP;
 			}
 		    }
@@ -2777,6 +2867,7 @@ int mbnavadjust_naverr_next()
 	int	status = MB_SUCCESS;
 	struct mbna_crossing *crossing;
 	struct mbna_tie *tie;
+	int	i, j, k;
 
  	/* print input debug statements */
 	if (mbna_verbose >= 2)
@@ -2787,7 +2878,8 @@ int mbnavadjust_naverr_next()
 		
      	/* get current crossing */
     	if (project.open == MB_YES
-    		&& project.num_crossings > 0)
+    		&& project.num_crossings > 0
+		&& mbna_view_list != MBNA_VIEW_LIST_TRUECROSSINGS)
     		{
     		/* get next crossing */
     		if (mbna_current_crossing >= project.num_crossings - 1)
@@ -2795,6 +2887,63 @@ int mbnavadjust_naverr_next()
     		else
     		 	mbna_current_crossing++;
     		 	
+    		/* retrieve crossing parameters */
+    		if (mbna_current_crossing >= 0)
+    			{
+    			crossing = &project.crossings[mbna_current_crossing];
+    			mbna_file_id_1 = crossing->file_id_1;
+    			mbna_section_1 = crossing->section_1;
+     			mbna_file_id_2 = crossing->file_id_2;
+    			mbna_section_2 = crossing->section_2;
+			if (crossing->num_ties > 0)
+			    {
+			    mbna_current_tie = 0;
+			    tie = &crossing->ties[0];
+			    mbna_snav_1 = tie->snav_1;
+			    mbna_snav_1_time_d = tie->snav_1_time_d;
+			    mbna_snav_2 = tie->snav_2;
+			    mbna_snav_2_time_d = tie->snav_2_time_d;
+			    mbna_offset_x = tie->offset_x;
+			    mbna_offset_y = tie->offset_y;
+			    }
+			else
+			    {
+			    mbna_current_tie = -1;
+			    }
+  			}
+  			
+  		/* load the crossing */
+  		if (mbna_current_crossing >= 0)
+  			{
+  			mbnavadjust_crossing_load();
+  			}
+   		}
+		
+     	/* else get current true crossing */
+    	else if (project.open == MB_YES
+    		&& project.num_crossings > 0
+		&& mbna_view_list == MBNA_VIEW_LIST_TRUECROSSINGS)
+    		{
+    		/* get next true crossing */
+		j = -1;
+		k = -1;
+		for (i=0;i<project.num_crossings;i++)
+			{
+			if (project.crossings[i].truecrossing == MB_YES)
+				{
+				if (j < 0)
+					j = i;
+				if (k < 0 && i > mbna_current_crossing)
+					k = i;
+				}
+			}
+		if (k >= 0)
+			mbna_current_crossing = k;
+		else if (j >= 0)
+			mbna_current_crossing = j;
+		else
+			mbna_current_crossing = -1;
+
     		/* retrieve crossing parameters */
     		if (mbna_current_crossing >= 0)
     			{
@@ -2849,6 +2998,7 @@ int mbnavadjust_naverr_previous()
 	int	status = MB_SUCCESS;
 	struct mbna_crossing *crossing;
 	struct mbna_tie *tie;
+	int	i, j, k;
 
  	/* print input debug statements */
 	if (mbna_verbose >= 2)
@@ -2859,13 +3009,76 @@ int mbnavadjust_naverr_previous()
 		
      	/* get current crossing */
     	if (project.open == MB_YES
-    		&& project.num_crossings > 0)
+    		&& project.num_crossings > 0
+		&& mbna_view_list != MBNA_VIEW_LIST_TRUECROSSINGS)
     		{
     		/* get previous crossing */
     		if (mbna_current_crossing <= 0)
     			mbna_current_crossing = project.num_crossings - 1;
     		else
     		 	mbna_current_crossing--;
+    		 	
+    		/* retrieve crossing parameters */
+    		if (mbna_current_crossing >= 0)
+    			{
+    			crossing = &project.crossings[mbna_current_crossing];
+    			mbna_file_id_1 = crossing->file_id_1;
+    			mbna_section_1 = crossing->section_1;
+     			mbna_file_id_2 = crossing->file_id_2;
+    			mbna_section_2 = crossing->section_2;
+			if (crossing->num_ties > 0)
+			    {
+			    mbna_current_tie = 0;
+			    tie = &crossing->ties[0];
+			    mbna_snav_1 = tie->snav_1;
+			    mbna_snav_1_time_d = tie->snav_1_time_d;
+			    mbna_snav_2 = tie->snav_2;
+			    mbna_snav_2_time_d = tie->snav_2_time_d;
+			    mbna_offset_x = tie->offset_x;
+			    mbna_offset_y = tie->offset_y;
+			    }
+			else
+			    {
+			    mbna_current_tie = -1;
+			    }
+  			}
+  			
+  		/* load the crossing */
+  		if (mbna_current_crossing >= 0)
+  			{
+  			mbnavadjust_crossing_load();
+  			}
+   		}
+		
+     	/* else get current true crossing */
+    	else if (project.open == MB_YES
+    		&& project.num_crossings > 0
+		&& mbna_view_list == MBNA_VIEW_LIST_TRUECROSSINGS)
+    		{
+    		/* get previous true crossing */
+    		if (mbna_current_crossing <= 0)
+    			mbna_current_crossing = project.num_crossings - 1;
+    		else
+    		 	mbna_current_crossing--;
+
+   		/* get previous true crossing */
+		j = -1;
+		k = -1;
+		for (i=0;i<project.num_crossings;i++)
+			{
+			if (project.crossings[i].truecrossing == MB_YES)
+				{
+				if (i < mbna_current_crossing)
+					j = i;
+				k = i;
+				}
+			}
+		if (j >= 0)
+			mbna_current_crossing = j;
+		else if (k >= 0)
+			mbna_current_crossing = k;
+		else
+			mbna_current_crossing = -1;
     		 	
     		/* retrieve crossing parameters */
     		if (mbna_current_crossing >= 0)
@@ -2946,7 +3159,9 @@ int mbnavadjust_naverr_nextunset()
     			i++)
     			{
     			crossing = &project.crossings[i];
-    			if (crossing->status == MBNA_CROSSING_STATUS_NONE)
+    			if (crossing->status == MBNA_CROSSING_STATUS_NONE
+				&& (mbna_view_list != MBNA_VIEW_LIST_TRUECROSSINGS
+					|| crossing->truecrossing == MB_YES))
     				{
     				mbna_current_crossing = i;
     				found = MB_YES;
@@ -2959,7 +3174,9 @@ int mbnavadjust_naverr_nextunset()
     				i++)
     				{
     				crossing = &project.crossings[i];
-    				if (crossing->status == MBNA_CROSSING_STATUS_NONE)
+    				if (crossing->status == MBNA_CROSSING_STATUS_NONE
+					&& (mbna_view_list != MBNA_VIEW_LIST_TRUECROSSINGS
+						|| crossing->truecrossing == MB_YES))
     					{
     					mbna_current_crossing = i;
     					found = MB_YES;
@@ -3145,7 +3362,11 @@ int mbnavadjust_naverr_addtie()
     			tie = &crossing->ties[mbna_current_tie];
 			
 			if (crossing->status == MBNA_CROSSING_STATUS_NONE)
+				{
 				project.num_crossings_analyzed++;
+				if (crossing->truecrossing == MB_YES)
+ 					project.num_truecrossings_analyzed++;
+				}
     			crossing->status = MBNA_CROSSING_STATUS_SET;
 			
 			/* look for unused pair of nav points */
@@ -3550,7 +3771,11 @@ int mbnavadjust_naverr_skip()
 			project.num_ties -= crossing->num_ties;
 			crossing->num_ties = 0;
 			if (crossing->status == MBNA_CROSSING_STATUS_NONE)
+				{
 				project.num_crossings_analyzed++;
+				if (crossing->truecrossing == MB_YES)
+ 					project.num_truecrossings_analyzed++;
+				}
     			crossing->status = MBNA_CROSSING_STATUS_SKIP;
    			if (project.inversion == MBNA_INVERSION_CURRENT)
     				project.inversion = MBNA_INVERSION_OLD;
@@ -4169,7 +4394,7 @@ int mbnavadjust_section_translate(int file_id, void *swathraw_ptr, void *swath_p
 		
 		/* relocate soundings based on heading bias */
 		swath->npings = 0;
-		for (iping=0;iping<swathraw->npings;iping+=project.decimation)
+		for (iping=0;iping<swathraw->npings;iping++)
 		    {
 		    swath->npings++;
 		    pingraw = &swathraw->pingraws[iping];
@@ -4520,6 +4745,78 @@ int mbnavadjust_naverr_snavpoints(int ix, int iy)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+int mbnavadjust_sections_intersect(int crossing_id)
+{
+	/* local variables */
+	char	*function_name = "mbnavadjust_sections_intersect";
+	struct mbna_file *file;
+	struct mbna_crossing *crossing;
+	struct mbna_section *section;
+	int	answer = MB_NO;
+	double	xa1, ya1, xa2, ya2;
+	double	xb1, yb1, xb2, yb2;
+	double	dxa, dya, dxb, dyb;
+	double	s, t;
+
+ 	/* print input debug statements */
+	if (mbna_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       crossing_id:  %d\n",crossing_id);
+		}
+
+	/* get crossing */
+	crossing = (struct mbna_crossing *) &project.crossings[crossing_id];
+	
+	/* get section endpoints */
+	file = &project.files[crossing->file_id_1];
+	section = &file->sections[crossing->section_1];
+	xa1 = section->snav_lon[0];
+	ya1 = section->snav_lat[0];
+	xa2 = section->snav_lon[section->num_snav - 1];
+	ya2 = section->snav_lat[section->num_snav - 1];
+	file = &project.files[crossing->file_id_2];
+	section = &file->sections[crossing->section_2];
+	xb1 = section->snav_lon[0];
+	yb1 = section->snav_lat[0];
+	xb2 = section->snav_lon[section->num_snav - 1];
+	yb2 = section->snav_lat[section->num_snav - 1];
+	
+	/* check for parallel sections */
+	dxa = xa2 - xa1;
+	dya = ya2 - ya1;
+	dxb = xb2 - xb1;
+	dyb = yb2 - yb1;
+	if ((dxb * dya - dyb * dxa) == 0.0)
+		{
+		answer = MB_NO;
+		}
+	else
+		{
+		/* check for crossing sections */
+		s = (dxa * (yb1 - ya1) + dya * (xa1 - xb1)) / (dxb * dya - dyb * dxa);
+		t = (dxb * (ya1 - yb1) + dyb * (xb1 - xa1)) / (dyb * dxa - dxb * dya);
+		if (s >= 0.0 && s <= 1.0 && t >= 0.0 && t <= 1.0)
+			answer = MB_YES;
+		else
+			answer = MB_NO;
+		}
+			
+ 	/* print output debug statements */
+	if (mbna_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBnavadjust function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       answer:      %d\n",answer);
+		}
+
+	return(answer);
+}
+
+/*--------------------------------------------------------------------*/
 int mbnavadjust_get_misfit()
 {
 	/* local variables */
@@ -4860,7 +5157,6 @@ void newpen(int icolor)
 	    /* save pen change in vector array */
 	    v = &mbna_contour->vector[mbna_contour->nvector];
  	    v->command = MBNA_PEN_COLOR;
-	    v->color = pixel_values[icolor + 1];
 	    v->color = pixel_values[icolor * 8 + 7];
 	    mbna_contour->nvector++;
 	    }
@@ -5331,25 +5627,35 @@ mbnavadjust_makecontours()
 		for (i=0;i<project.num_crossings;i++)
 			{
 			/* set up crossing parameters */
-			mbna_current_crossing = i;
-    			crossing = &project.crossings[mbna_current_crossing];
-    			mbna_file_id_1 = crossing->file_id_1;
-    			mbna_section_1 = crossing->section_1;
-     			mbna_file_id_2 = crossing->file_id_2;
-    			mbna_section_2 = crossing->section_2;
-			mbna_current_tie = -1;
-			
-			/* set message dialog on */
-			sprintf(message,"Loading crossing %d...", mbna_current_crossing);
-			fprintf(stderr,"%s: %s\n",function_name,message);
-			do_message_on(message);
+    			crossing = &project.crossings[i];
+			if (crossing->truecrossing == MB_YES
+				|| mbna_view_list != MBNA_VIEW_LIST_TRUECROSSINGS)
+				{
+				mbna_current_crossing = i;
+    				mbna_file_id_1 = crossing->file_id_1;
+    				mbna_section_1 = crossing->section_1;
+     				mbna_file_id_2 = crossing->file_id_2;
+    				mbna_section_2 = crossing->section_2;
+				mbna_current_tie = -1;
+				
+				/* update status */
+				do_update_status();
 
-    			/* load crossing */
-  			mbnavadjust_crossing_load();
-			
-    			/* unload crossing */
-  			mbnavadjust_crossing_unload();
+				/* set message dialog on */
+				sprintf(message,"Loading crossing %d...", mbna_current_crossing);
+				fprintf(stderr,"%s: %s\n",function_name,message);
+				do_message_on(message);
+
+    				/* load crossing */
+  				mbnavadjust_crossing_load();
+
+    				/* unload crossing */
+  				mbnavadjust_crossing_unload();
+				}
 			}
+			
+		/* write updated project */
+		mbnavadjust_write_project();
 		
 		/* turn off message dialog */
 		do_message_off();
@@ -5435,7 +5741,9 @@ mbnavadjust_invertnav()
 	/* invert if there is a project and all crossings have been analyzed */
     	if (project.open == MB_YES
     		&& project.num_crossings > 0
-		&& project.num_crossings_analyzed >= project.num_crossings / 2)
+		&& (project.num_crossings_analyzed == project.num_crossings
+			|| project.num_truecrossings_analyzed == project.num_truecrossings))
+			
     		{
      		/* retrieve crossing parameters */
 		/* count up the unknowns and constraints to get size of
@@ -5538,7 +5846,8 @@ do_message_on(message);
 	/* proceed with construction of inverse problems */
     	if (project.open == MB_YES
     		&& project.num_crossings > 0
-		&& project.num_crossings_analyzed >= project.num_crossings / 2
+		&& (project.num_crossings_analyzed == project.num_crossings
+			|| project.num_truecrossings_analyzed == project.num_truecrossings)
 		&& error == MB_ERROR_NO_ERROR)
     		{
 		/* add info text */
@@ -5636,12 +5945,13 @@ do_message_on(message);
 				    nia[nr] = 1;
 				    nr++;
 				    }
+				    
+				/* get time difference between current and previous nav point */
+				dtime_d = section->snav_time_d[isnav] - time_d_old;
 				
-				/* add first derivative constraint if nseq > 1 */
-				if (nseq > 1)
+				/* add first derivative constraint if nseq > 1 AND dtime_d > 0.0 */
+				if (nseq > 1 && dtime_d > 0.0)
 				    {
-				    dtime_d = section->snav_time_d[isnav] - time_d_old;
-				
 				    /* longitude component */
 				    k = nnz * nr;
 				    a[k] = -smoothweight_old / dtime_d;
@@ -5663,11 +5973,9 @@ do_message_on(message);
 				    nr++;
 				    }
 				
-				/* add second derivative constraint if nseq > 2 */
-				if (nseq > 2)
+				/* add second derivative constraint if nseq > 2  AND dtime_d > 0.0 */
+				if (nseq > 2 && dtime_d > 0.0)
 				    {
-				    dtime_d = section->snav_time_d[isnav] - time_d_older;
-				
 				    /* longitude component */
 				    k = nnz * nr;
 				    a[k] = smoothweight_old / dtime_d;
@@ -5756,6 +6064,32 @@ fprintf(stderr, "BAD snav ID: %d %d %d\n", nc1, nc2, nsnav);
 			nr++;
 			}
 		    }
+		    
+/* print out matrix problem & calculate error */
+/*sigma_total = 0.0;
+sigma_crossing = 0.0;
+fprintf(stderr,"START PROBLEM: smoothweight:%g avg_dtime_d:%g avg_offset:%g\n",
+smoothweight,avg_dtime_d,avg_offset);
+
+for (i=0;i<nr;i++)
+{
+fprintf(stderr,"row %d with %d elements\n", i, nia[i]);
+s = 0.0;
+for (j=0;j<nia[i];j++)
+    {
+    k = nnz * i + j;
+    s += x[ia[k]] * a[k];
+fprintf(stderr,"element %d column %d    a:%g  x:%g  s:%g\n", j, ia[k], a[k], x[ia[k]], x[ia[k]] * a[k]);
+    }
+sigma_total += (d[i] - s) * (d[i] - s);
+fprintf(stderr,"row %d result:  s:%g d:%g sigma_total:%g %g\n\n", i, s, d[i], (d[i] - s) * (d[i] - s), sigma_total);
+if (i >= (nr - 2 * ncrossing))
+    sigma_crossing += (d[i] - s) * (d[i] - s);
+}
+sigma_total = sqrt(sigma_total) / nr;
+sigma_crossing = sqrt(sigma_crossing) / ncrossing;
+fprintf(stderr,"INITIAL SIGMA: sigma_total:%g sigma_crossing:%g\n", sigma_total, sigma_crossing);
+*/
 
 		/* now do a bunch of test solutions to find what level of smoothing
 		 * starts to impact the solution - we want to use this much and no more
@@ -5906,8 +6240,6 @@ fprintf(stderr, "BAD snav ID: %d %d %d\n", nc1, nc2, nsnav);
 			{
 			smoothweight_old = smoothweight;
 			}
-fprintf(stderr,"smoothing: min:%f max:%f current:%f\n",
-smoothmin,smoothmax,smoothweight_old);
 		
 		    /* do message */
 		    sprintf(message, " >   %d %12g %12g %12g %12g\n",
@@ -5915,10 +6247,10 @@ smoothmin,smoothmax,smoothweight_old);
 			    sigma_crossing/ mbna_mtodeglat, 
 			    (sigma_crossing / sigma_crossing_first));
 		    do_info_add(message, MB_NO);
-fprintf(stderr,"iteration:%3d smooth:%12g sigmatot:%12g sigmacrossing:%12g ratio:%12g\n",
+/* fprintf(stderr,"iteration:%3d smooth:%12g sigmatot:%12g sigmacrossing:%12g ratio:%12g\n",
 iter,smoothweight,sigma_total / mbna_mtodeglat, 
 sigma_crossing / mbna_mtodeglat,
-(sigma_crossing / sigma_crossing_first));
+(sigma_crossing / sigma_crossing_first));*/
 		    }
 
 		/* save solution */
@@ -5943,7 +6275,8 @@ sigma_crossing / mbna_mtodeglat,
 	/* output results from navigation solution */
     	if (project.open == MB_YES
     		&& project.num_crossings > 0
-		&& project.num_crossings_analyzed >= project.num_crossings / 2
+		&& (project.num_crossings_analyzed == project.num_crossings
+			|| project.num_truecrossings_analyzed == project.num_truecrossings)
 		&& error == MB_ERROR_NO_ERROR)
     		{
 		
