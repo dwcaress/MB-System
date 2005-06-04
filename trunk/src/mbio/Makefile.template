@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 5.19 2004-06-18 03:07:15 caress Exp $
+#	$Id: Makefile.template,v 5.20 2005-06-04 04:15:59 caress Exp $
 #
 #     Copyright (c) 1993, 1994, 2000, 2002, 2003 by
 #     David W. Caress (caress@mbari.org)
@@ -16,6 +16,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.19  2004/06/18 03:07:15  caress
+# Adding support for segy i/o and working on support for Reson 7k format 88.
+#
 # Revision 5.18  2004/04/27 01:46:11  caress
 # Various updates of April 26, 2004.
 #
@@ -184,7 +187,7 @@ all:	$(INCDIR)/mb_format.h $(INCDIR)/mb_status.h \
 	$(INCDIR)/mbsys_atlas.h $(INCDIR)/mbsys_surf.h \
 	$(INCDIR)/mbsys_reson8k.h \
 	$(INCDIR)/mbsys_netcdf.h $(INCDIR)/mbsys_navnetcdf.h \
-	$(INCDIR)/mbsys_reson7k.h \
+	$(INCDIR)/mbsys_reson7k.h $(INCDIR)/mbsys_jstar.h \
 	$(INCDIR)/mbf_sbsiomrg.h $(INCDIR)/mbf_sbsiocen.h \
 	$(INCDIR)/mbf_sbsiolsi.h $(INCDIR)/mbf_sburicen.h \
 	$(INCDIR)/mbf_sbifremr.h $(INCDIR)/mbf_hsatlraw.h \
@@ -240,7 +243,7 @@ $(LIBDIR)/libmbio.a:	mb_format.o mb_error.o \
 		mbsys_atlas.o mbsys_surf.o \
 		mbsys_reson8k.o \
 		mbsys_netcdf.o mbsys_navnetcdf.o \
-		mbsys_reson7k.o \
+		mbsys_reson7k.o mbsys_jstar.o \
 		mbr_sbsiomrg.o mbr_sbsiocen.o \
 		mbr_sbsiolsi.o mbr_sburicen.o \
 		mbr_sburivax.o mbr_sbifremr.o \
@@ -270,7 +273,8 @@ $(LIBDIR)/libmbio.a:	mb_format.o mb_error.o \
 		mbr_hsds2raw.o mbr_hsds2lam.o \
  		mbr_xtfr8101.o \
 		mbr_mbnetcdf.o mbr_nvnetcdf.o \
-		mbr_samesurf.o mbr_reson7kr.o
+		mbr_samesurf.o mbr_reson7kr.o \
+		mbr_edgjstar.o
 	$(ARCHIVE) $(LIBDIR)/libmbio.a \
 		mb_format.o mb_error.o \
 		mb_swap.o mb_compare.o mb_navint.o \
@@ -299,7 +303,7 @@ $(LIBDIR)/libmbio.a:	mb_format.o mb_error.o \
 		mbsys_atlas.o mbsys_surf.o \
 		mbsys_reson8k.o \
 		mbsys_netcdf.o mbsys_navnetcdf.o \
-		mbsys_reson7k.o \
+		mbsys_reson7k.o mbsys_jstar.o \
 		mbr_sbsiomrg.o mbr_sbsiocen.o \
 		mbr_sbsiolsi.o mbr_sburicen.o \
 		mbr_sburivax.o mbr_sbifremr.o \
@@ -329,7 +333,8 @@ $(LIBDIR)/libmbio.a:	mb_format.o mb_error.o \
 		mbr_hsds2raw.o mbr_hsds2lam.o \
  		mbr_xtfr8101.o \
 		mbr_mbnetcdf.o mbr_nvnetcdf.o \
-		mbr_samesurf.o mbr_reson7kr.o
+		mbr_samesurf.o mbr_reson7kr.o \
+		mbr_edgjstar.o
 	ranlib $(LIBDIR)/libmbio.a
 
 ### compile the source files
@@ -446,6 +451,8 @@ mbsys_navnetcdf.o:	mbsys_navnetcdf.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h
 	$(CC) -c $(CFLAGS) mbsys_navnetcdf.c
 mbsys_reson7k.o:	mbsys_reson7k.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mbsys_reson7k.h $(INCDIR)/mb_segy.h
 	$(CC) -c $(CFLAGS) mbsys_reson7k.c
+mbsys_jstar.o:	mbsys_jstar.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mbsys_jstar.h $(INCDIR)/mb_segy.h
+	$(CC) -c $(CFLAGS) mbsys_jstar.c
 mbr_sbsiomrg.o:	mbr_sbsiomrg.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbsys_sb.h $(INCDIR)/mbf_sbsiomrg.h
 	$(CC) -c $(CFLAGS) mbr_sbsiomrg.c
 mbr_sbsiocen.o: mbr_sbsiocen.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbsys_sb.h $(INCDIR)/mbf_sbsiocen.h
@@ -556,6 +563,8 @@ mbr_samesurf.o: mbr_samesurf.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INC
 	$(CC) -c $(CFLAGS) -I$(NETCDFINCDIR) mbr_samesurf.c
 mbr_reson7kr.o: mbr_reson7kr.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbsys_reson7k.h $(INCDIR)/mb_segy.h
 	$(CC) -c $(CFLAGS) -I$(NETCDFINCDIR) mbr_reson7kr.c
+mbr_edgjstar.o: mbr_edgjstar.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbsys_jstar.h $(INCDIR)/mb_segy.h
+	$(CC) -c $(CFLAGS) -I$(NETCDFINCDIR) mbr_edgjstar.c
 
 ### copy the include files to the include file directory
 $(INCDIR)/mb_format.h:	mb_format.h
@@ -663,6 +672,9 @@ $(INCDIR)/mbsys_surf.h:	mbsys_surf.h
 $(INCDIR)/mbsys_reson7k.h:	mbsys_reson7k.h
 	cp mbsys_reson7k.h $(INCDIR)/mbsys_reson7k.h
 	chmod 664 $(INCDIR)/mbsys_reson7k.h
+$(INCDIR)/mbsys_jstar.h:	mbsys_jstar.h
+	cp mbsys_jstar.h $(INCDIR)/mbsys_jstar.h
+	chmod 664 $(INCDIR)/mbsys_jstar.h
 $(INCDIR)/mbf_sbsiomrg.h:	mbf_sbsiomrg.h
 	cp mbf_sbsiomrg.h $(INCDIR)/mbf_sbsiomrg.h
 	chmod 664 $(INCDIR)/mbf_sbsiomrg.h

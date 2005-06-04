@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_reson7kr.c	4/4/2004
- *	$Id: mbr_reson7kr.c,v 5.8 2005-04-07 04:24:33 caress Exp $
+ *	$Id: mbr_reson7kr.c,v 5.9 2005-06-04 04:15:59 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	April 4,2004
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2005/04/07 04:24:33  caress
+ * 5.0.7 Release.
+ *
  * Revision 5.7  2005/03/25 04:33:30  caress
  * Improved handling of interpolated asynchronous data, particularly sonar depth.
  *
@@ -186,7 +189,7 @@ int mbr_reson7kr_wr_soundvelocity(int verbose, int *bufferalloc, char **bufferpt
 int mbr_reson7kr_wr_absorptionloss(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 int mbr_reson7kr_wr_spreadingloss(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 
-static char res_id[]="$Id: mbr_reson7kr.c,v 5.8 2005-04-07 04:24:33 caress Exp $";
+static char res_id[]="$Id: mbr_reson7kr.c,v 5.9 2005-06-04 04:15:59 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_reson7kr(int verbose, void *mbio_ptr, int *error)
@@ -3883,7 +3886,7 @@ index, header->OffsetToOptionalData);
 	if (status == MB_SUCCESS)
 		{
 		/* set kind */
-		store->kind = MB_DATA_SIDESCAN3;
+		store->kind = MB_DATA_SIDESCAN2;
 		store->type = R7KRECID_FSDWsidescan;
 		store->sstype = R7KRECID_FSDWsidescanLo;
 		
@@ -4153,7 +4156,7 @@ index, header->OffsetToOptionalData);
 	if (status == MB_SUCCESS)
 		{
 		/* set kind */
-		store->kind = MB_DATA_SIDESCAN2;
+		store->kind = MB_DATA_SIDESCAN3;
 		store->type = R7KRECID_FSDWsidescan;
 		store->sstype = R7KRECID_FSDWsidescanHi;
 		
