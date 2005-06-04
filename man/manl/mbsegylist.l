@@ -1,4 +1,4 @@
-.TH mbsegylist l "24 September 2004" "MB-System 5.0" "MB-System 5.0"
+.TH mbsegylist l "27 April 2005" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbsegylist\fP - List selected header values in segy format seismic data files.
 
@@ -153,8 +153,6 @@ for trace counter (starts from 0)
 .\fBz\fP  for depth (positive downwards) (m)
 .br
 
-Default \fIoutput_format\fP = \fBYXLZ\fP (latitude, longitude, cumulative
-along-track distance, and depth).
 Default \fIoutput_format\fP = \fBTiXYSsCcDINL\fP 
 (time, time interval, lon, lat, shot, shot trace #, cmp, cmp trace #, 
 delay, sample length, number samples, trace length)
