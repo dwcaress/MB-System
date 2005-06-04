@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavadjust_callbacks.c	2/22/2000
- *    $Id: mbnavadjust_callbacks.c,v 5.7 2004-12-02 06:34:27 caress Exp $
+ *    $Id: mbnavadjust_callbacks.c,v 5.8 2005-06-04 04:34:06 caress Exp $
  *
  *    Copyright (c) 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	March 22, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2004/12/02 06:34:27  caress
+ * Fixes while supporting Reson 7k data.
+ *
  * Revision 5.6  2004/05/21 23:31:28  caress
  * Moved to new version of BX GUI builder
  *
@@ -553,7 +556,7 @@ do_mbnavadjust_init(int argc, char **argv)
 			NULL);
 				
     /* Setup the entire screen. */
-    display = XtDisplay(bulletinBoard_mbnavadjust);
+    display = XtDisplay(form_mbnavadjust);
     colormap = DefaultColormap(display,XDefaultScreen(display));
     
     /* Load the colors that will be used in this program. */
@@ -669,6 +672,7 @@ do_mbnavadjust_init(int argc, char **argv)
 	    {
 	    mpixel_values[i] = colors[i].pixel;
 	    }
+    status = mbnavadjust_set_colors(NCOLORS, (int *) mpixel_values);
 
     /* set verbose */
     mbna_verbose = 0;
@@ -710,14 +714,16 @@ void do_update_status()
     	struct mbna_crossing *crossing;
     	struct mbna_tie *tie;
     	char	status_char;
+    	char	truecrossing;
 	int	ivalue, imax;
 	int	tie_pos;
     	int	i, j, k;
 
 	/* set status label */
-        sprintf(string,":::t\"Project:                                       %s\":t\"Number of Files:                           %d\":t\"Number of Crossings Found:         %d\":t\"Number of Crossings Analyzed:     %d\":t\"Number of Ties Set:                      %d\"",
+        sprintf(string,":::t\"Project:                                       %s\":t\"Number of Files:                           %d\":t\"Number of Crossings Found:         %d\":t\"Number of Crossings Analyzed:     %d\":t\"Number of True Crossings:          %d\":t\"Number of True Crossings Analyzed:%d\":t\"Number of Ties Set:                      %d\"",
                 project.name,project.num_files,
 		project.num_crossings,project.num_crossings_analyzed, 
+		project.num_truecrossings,project.num_truecrossings_analyzed, 
 		project.num_ties);
         if (project.inversion == MBNA_INVERSION_CURRENT)
         	strcat(string,":t\"Inversion Performed:                    Current\"");
@@ -728,9 +734,10 @@ void do_update_status()
 	set_label_multiline_string(label_status, string);
 	if (mbna_verbose > 0)
 		{
-        	sprintf(string,"Project:                                       %s\nNumber of Files:                           %d\nNumber of Crossings Found:         %d\nNumber of Crossings Analyzed:     %d\nNumber of Ties Set:                     %d\n",
+        	sprintf(string,"Project:                                       %s\nNumber of Files:                           %d\nNumber of Crossings Found:         %d\nNumber of Crossings Analyzed:     %d\nNumber of True Crossings:        %d\nNumber of True Crossings Analyzed:%d\nNumber of Ties Set:                     %d\n",
                 	project.name,project.num_files,
 			project.num_crossings,project.num_crossings_analyzed, 
+			project.num_truecrossings,project.num_truecrossings_analyzed, 
 			project.num_ties);
         	if (project.inversion == MBNA_INVERSION_CURRENT)
         		strcat(string,"Inversion Performed:                    Current\n");
@@ -799,8 +806,12 @@ void do_update_status()
 					status_char = '*';
 				else
 					status_char = '-';
-				sprintf(string,"%c %4d %3.3d:%3.3d %3.3d:%3.3d %2d",
-					status_char, i,
+				if (crossing->truecrossing == MB_NO)
+					truecrossing = ' ';
+				else
+					truecrossing = 'X';
+				sprintf(string,"%c%c %4d %3.3d:%3.3d %3.3d:%3.3d %2d",
+					status_char, truecrossing, i,
 					crossing->file_id_1,
 					crossing->section_1,
 					crossing->file_id_2,
@@ -822,6 +833,67 @@ void do_update_status()
 			XmListSelectPos(list_data,mbna_crossing_select+1,0);
 			XmListSetPos(list_data,
 				MAX(mbna_crossing_select+1-5, 1));
+			}
+		}
+ 	else if (mbna_view_list == MBNA_VIEW_LIST_TRUECROSSINGS)
+		{
+		set_label_string(label_listdata,"True Crossings:");
+		if (mbna_verbose > 0)
+			fprintf(stderr,"True Crossings:\n");
+		if (project.num_files > 0)
+			{
+			xstr = (XmString *) malloc(project.num_truecrossings * sizeof(XmString));
+			j = 0;
+			for (i=0;i<project.num_crossings;i++)
+				{
+				crossing = &(project.crossings[i]);
+				if (crossing->truecrossing == MB_YES)
+					{
+					if (crossing->status == MBNA_CROSSING_STATUS_NONE)
+						status_char = 'U';
+					else if (crossing->status == MBNA_CROSSING_STATUS_SET)
+						status_char = '*';
+					else
+						status_char = '-';
+					truecrossing = 'X';
+					sprintf(string,"%c%c %4d %3.3d:%3.3d %3.3d:%3.3d %2d",
+						status_char, truecrossing, i,
+						crossing->file_id_1,
+						crossing->section_1,
+						crossing->file_id_2,
+						crossing->section_2,
+						crossing->num_ties);
+    					xstr[j] = XmStringCreateLocalized(string);
+					if (mbna_verbose > 0)
+						fprintf(stderr,"%s\n",string);
+					j++;
+					}
+				}
+    			XmListAddItems(list_data,xstr,project.num_truecrossings,0);
+			for (i=0;i<j;i++)
+				{
+    				XmStringFree(xstr[i]);
+    				}
+    			free(xstr);
+			}
+		if (mbna_crossing_select != MBNA_SELECT_NONE
+			&& project.crossings[mbna_crossing_select].truecrossing == MB_YES)
+			{
+			j = 0;
+			for (i=0;i<=mbna_crossing_select;i++)
+				{
+				crossing = &(project.crossings[i]);
+				if (crossing->truecrossing == MB_YES)
+					{
+					j++;
+					}
+				}
+			if (j > 0)
+				{
+				XmListSelectPos(list_data,j,0);
+				XmListSetPos(list_data,
+					MAX(j-5, 1));
+				}
 			}
 		}
  	else if (mbna_view_list == MBNA_VIEW_LIST_TIES)
@@ -998,6 +1070,9 @@ void do_update_status()
 			XtVaSetValues(pushButton_showcrossings,
 				XmNsensitive, True,
 				NULL);
+			XtVaSetValues(pushButton_showtruecrossings,
+				XmNsensitive, True,
+				NULL);
 			XtVaSetValues(pushButton_showties,
 				XmNsensitive, True,
 				NULL);
@@ -1010,16 +1085,37 @@ void do_update_status()
 			XtVaSetValues(pushButton_showcrossings,
 				XmNsensitive, False,
 				NULL);
+			XtVaSetValues(pushButton_showtruecrossings,
+				XmNsensitive, True,
+				NULL);
 			XtVaSetValues(pushButton_showties,
 				XmNsensitive, True,
 				NULL);
 			}
-		else
+		else if (mbna_view_list == MBNA_VIEW_LIST_TRUECROSSINGS)
 			{
 			XtVaSetValues(pushButton_showdata,
 				XmNsensitive, True,
 				NULL);
 			XtVaSetValues(pushButton_showcrossings,
+				XmNsensitive, True,
+				NULL);
+			XtVaSetValues(pushButton_showtruecrossings,
+				XmNsensitive, False,
+				NULL);
+			XtVaSetValues(pushButton_showties,
+				XmNsensitive, True,
+				NULL);
+			}
+		else if (mbna_view_list == MBNA_VIEW_LIST_TIES)
+			{
+			XtVaSetValues(pushButton_showdata,
+				XmNsensitive, True,
+				NULL);
+			XtVaSetValues(pushButton_showcrossings,
+				XmNsensitive, True,
+				NULL);
+			XtVaSetValues(pushButton_showtruecrossings,
 				XmNsensitive, True,
 				NULL);
 			XtVaSetValues(pushButton_showties,
@@ -1035,6 +1131,9 @@ void do_update_status()
 		XtVaSetValues(pushButton_showcrossings,
 			XmNsensitive, False,
 			NULL);
+		XtVaSetValues(pushButton_showtruecrossings,
+			XmNsensitive, False,
+			NULL);
 		XtVaSetValues(pushButton_showties,
 			XmNsensitive, False,
 			NULL);
@@ -1047,11 +1146,23 @@ void do_update_status()
 		XtVaSetValues(pushButton_makecontours,
 			XmNsensitive, True,
 			NULL);
+		XtVaSetValues(pushButton_makegrid,
+			XmNsensitive, False,
+			NULL);
 		XtVaSetValues(pushButton_analyzecrossings,
 			XmNsensitive, True,
 			NULL);
-		XtVaSetValues(pushButton_invertnav,
-			XmNsensitive, True,
+		if (project.num_truecrossings == project.num_truecrossings_analyzed
+			|| project.num_crossings == project.num_truecrossings_analyzed)
+			XtVaSetValues(pushButton_invertnav,
+				XmNsensitive, True,
+				NULL);
+		else
+			XtVaSetValues(pushButton_invertnav,
+				XmNsensitive, False,
+				NULL);
+		XtVaSetValues(pushButton_updateproject,
+			XmNsensitive, False,
 			NULL);
 		}
 	else
@@ -1059,10 +1170,16 @@ void do_update_status()
 		XtVaSetValues(pushButton_makecontours,
 			XmNsensitive, False,
 			NULL);
+		XtVaSetValues(pushButton_makegrid,
+			XmNsensitive, False,
+			NULL);
 		XtVaSetValues(pushButton_analyzecrossings,
 			XmNsensitive, False,
 			NULL);
 		XtVaSetValues(pushButton_invertnav,
+			XmNsensitive, False,
+			NULL);
+		XtVaSetValues(pushButton_updateproject,
 			XmNsensitive, False,
 			NULL);
 		}
@@ -1175,8 +1292,7 @@ do_naverr_init()
     cont_xgid = xg_init(display, cont_xid, cont_borders, xgfont);
     corr_xgid = xg_init(display, corr_xid, corr_borders, xgfont);
     status = mbnavadjust_set_graphics(cont_xgid,corr_xgid,
-		    cont_borders, corr_borders, 
-		    NCOLORS, (int *) mpixel_values);
+		    cont_borders, corr_borders);
 		
     /* set status flag */
     mbna_status = MBNA_STATUS_NAVERR;
@@ -1374,6 +1490,7 @@ void
 do_list_data_select( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    struct mbna_crossing *crossing;
     int	*position_list = NULL;
     int position_count = 0;
     int	i, j, k;
@@ -1391,6 +1508,43 @@ do_list_data_select( Widget w, XtPointer client_data, XtPointer call_data)
 		mbna_file_select = MBNA_SELECT_NONE;
 		mbna_crossing_select = position_list[0] - 1;
 		mbna_tie_select = MBNA_SELECT_NONE;
+		
+		/* bring up naverr window if required */
+		if (mbna_naverr_load == MB_NO)
+		    {
+		    XtManageChild(bulletinBoard_naverr);
+		    do_naverr_init();
+		    }
+		    
+		/* else if naverr window is up, load selected crossing */
+		else
+		    {
+		    mbnavadjust_naverr_specific(mbna_crossing_select, mbna_tie_select);
+		    mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
+		    do_update_naverr();
+		    do_update_status();
+		    }
+		}
+	else if (mbna_view_list == MBNA_VIEW_LIST_TRUECROSSINGS)
+		{
+		mbna_file_select = MBNA_SELECT_NONE;
+		mbna_crossing_select = MBNA_SELECT_NONE;
+		mbna_tie_select = MBNA_SELECT_NONE;
+		
+		/* get crossing and tie from list */
+		k = 0;
+		for (i=0;i<project.num_crossings && mbna_crossing_select == MBNA_SELECT_NONE;i++)
+			{
+			crossing = &(project.crossings[i]);
+			if (crossing->truecrossing == MB_YES)
+			    {
+			    if (k == position_list[0] - 1)
+				{
+				mbna_crossing_select = i;
+				}
+			    k++;
+			    }
+			}
 		
 		/* bring up naverr window if required */
 		if (mbna_naverr_load == MB_NO)
@@ -2484,6 +2638,16 @@ do_view_showcrossings( Widget w, XtPointer client_data, XtPointer call_data)
 
 /*--------------------------------------------------------------------*/
 void
+do_view_showtruecrossings( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+
+    mbna_view_list = MBNA_VIEW_LIST_TRUECROSSINGS;
+    do_update_status();
+}
+
+/*--------------------------------------------------------------------*/
+void
 do_view_showties( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
@@ -2620,7 +2784,7 @@ do_wait_until_viewed(XtAppContext app)
 	
 	/* wait for the window to be mapped */
 	while (XGetWindowAttributes(
-			XtDisplay(bulletinBoard_mbnavadjust),
+			XtDisplay(form_mbnavadjust),
 			topwindow, &xwa)
 		&& xwa.map_state != IsViewable)
 	    {
@@ -2643,6 +2807,9 @@ do_message_on(char *message)
     Window  diawindow, topwindow;
     XWindowAttributes	xwa;
     XEvent  event;
+    
+    if (mbna_verbose >= 1)
+    	fprintf(stderr,"%s\n",message);
 
     set_label_string(label_message, message);
     XtManageChild(bulletinBoard_message);
@@ -2755,7 +2922,7 @@ do_error_dialog(char *s1, char *s2, char *s3)
     set_label_string(label_error_two, s2);
     set_label_string(label_error_three, s3);
     XtManageChild(bulletinBoard_error);
-    XBell(XtDisplay(bulletinBoard_mbnavadjust),100);
+    XBell(XtDisplay(form_mbnavadjust),100);
 		
     return(MB_SUCCESS);
 }
@@ -2819,3 +2986,15 @@ void get_text_string(Widget w, String str)
 }
 
 /*--------------------------------------------------------------------*/
+
+void
+do_update_project( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+}
+
+void
+do_make_grid( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+}
