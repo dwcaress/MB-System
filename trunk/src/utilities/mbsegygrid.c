@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsegygrid.c	6/12/2004
- *    $Id: mbsegygrid.c,v 5.4 2004-11-08 05:49:17 caress Exp $
+ *    $Id: mbsegygrid.c,v 5.5 2005-06-04 05:59:26 caress Exp $
  *
- *    Copyright (c) 2004 by
+ *    Copyright (c) 2004, 2005 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -21,6 +21,9 @@
  * Date:	June 12, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2004/11/08 05:49:17  caress
+ * Fixed problem with decimation.
+ *
  * Revision 5.3  2004/10/06 19:10:52  caress
  * Release 5.0.5 update.
  *
@@ -85,14 +88,14 @@ char	*ctime();
 char	*getenv();
 
 /* output stream for basic stuff (stdout if verbose <= 1,
-	outfp if verbose > 1) */
+	stderr if verbose > 1) */
 FILE	*outfp;
 
-static char rcs_id[] = "$Id: mbsegygrid.c,v 5.4 2004-11-08 05:49:17 caress Exp $";
+static char rcs_id[] = "$Id: mbsegygrid.c,v 5.5 2005-06-04 05:59:26 caress Exp $";
 static char program_name[] = "MBsegygrid";
 static char help_message[] =  "MBsegygrid grids trace data from segy data files.";
 static char usage_message[] = "MBsegygrid -Ifile -Oroot [-Ddecimatex/decimatey\n\
-          -R -Smode[/start/end[/schan/echan]] -Tsweep[/delay] \n\
+          -Gmode/gain[/window] -R -Smode[/start/end[/schan/echan]] -Tsweep[/delay] \n\
           -Wmode/start/end -H -V]";
 
 /*--------------------------------------------------------------------*/
@@ -139,6 +142,7 @@ main (int argc, char **argv)
 	double	windowstart, windowend;
 	int	gainmode = MBSEGYGRID_GAIN_OFF;
 	double	gain = 0.0;
+	double	gainwindow = 0.0;
 	int	nsamples;
 	int	ntraces;
 	int	ngridx = 0;
@@ -170,7 +174,7 @@ main (int argc, char **argv)
 	int	tracecount, tracenum, channum, traceok;
 	double	tracemin, tracemax;
 	double	xwidth, ywidth;
-	int	ix, iy, iys, igainstart;
+	int	ix, iy, iys, igainstart, igainend;
 	int	iystart, iyend;
 	double	factor, gtime, btime, stime, dtime;
 	double	btimesave = 0.0;
@@ -214,7 +218,9 @@ main (int argc, char **argv)
 			break;
 		case 'G':
 		case 'g':
-			n = sscanf (optarg,"%d/%lf", &gainmode, &gain);
+			n = sscanf (optarg,"%d/%lf/%lf", &gainmode, &gain, &gainwindow);
+			if (n < 3)
+				gainwindow = 0.0;
 			flag++;
 			break;
 		case 'I':
@@ -267,9 +273,9 @@ main (int argc, char **argv)
 			errflg++;
 		}
 
-	/* set output stream to stdout or outfp */
+	/* set output stream to stdout or stderr */
 	if (verbose >= 2)
-	    outfp = outfp;
+	    outfp = stderr;
 	else
 	    outfp = stdout;
 
@@ -319,6 +325,7 @@ main (int argc, char **argv)
 		fprintf(outfp,"dbg2       windowend:      %f\n",windowend);
 		fprintf(outfp,"dbg2       gainmode:       %d\n",gainmode);
 		fprintf(outfp,"dbg2       gain:           %f\n",gain);
+		fprintf(outfp,"dbg2       gainwindow:     %f\n",gainwindow);
 		fprintf(outfp,"dbg2       rmsmode:        %d\n",rmsmode);
 		}
 
@@ -440,6 +447,7 @@ main (int argc, char **argv)
 		fprintf(outfp,"     window end:         %f seconds\n",windowend);
 		fprintf(outfp,"     gain mode:          %d\n",gainmode);
 		fprintf(outfp,"     gain:               %f\n",gain);
+		fprintf(outfp,"     gainwindow:         %f\n",gainwindow);
 		fprintf(outfp,"     rmsmode:            %d\n",rmsmode);
 		fprintf(outfp,"Output Parameters:\n");
 		fprintf(outfp,"     grid filename:      %s\n",gridfile);
@@ -592,22 +600,40 @@ main (int argc, char **argv)
 					if (gainmode != MBSEGYGRID_GAIN_OFF)
 						{
 						if (gainmode == MBSEGYGRID_GAIN_TZERO)
-							igainstart = btime / sampleinterval;
+							igainstart = (dtime - btime) / sampleinterval;
 						else if (gainmode == MBSEGYGRID_GAIN_SEAFLOOR)
-							igainstart = stime / sampleinterval;
+							igainstart = (stime - btime) / sampleinterval;
 						igainstart = MAX(0, igainstart);
-						for (i=igainstart;i<=((iyend-iys)*decimatey);i++)
+						if (gainwindow <= 0.0)
+							{
+							igainend = traceheader.nsamps - 1;
+							}
+						else
+							{
+							igainend = igainstart + gainwindow / sampleinterval;
+							igainend = MIN(traceheader.nsamps - 1, igainend);
+							}
+/*fprintf(stderr,"gainmode:%d btime:%f stime:%f igainstart:%d igainend:%d\n",gainmode,btime,stime,igainstart,igainend);*/
+						for (i=igainstart;i<=igainend;i++)
 							{
 							iy = iys + i / decimatey;
+/*fprintf(stderr,"i:%d iy:%d iystart:%d iyend:%d\n",i,iy,iystart,iyend);*/
 							if (iy >= iystart && iy <= iyend)
 								{
 								gtime = (i - igainstart) * sampleinterval;
 								factor = 1.0 + gain * gtime;
-								factor = pow(10.0, gtime * gain);
-/*fprintf(outfp,"i:%d iy:%d factor:%f trace[%d]: %f",
+/*fprintf(stderr,"i:%d iy:%d factor:%f trace[%d]: %f",
 i,iy,factor,i,trace[i]);*/
 								trace[i] = trace[i] * factor;
-/*fprintf(outfp," %f\n",trace[i]);*/
+/*fprintf(stderr," %f\n",trace[i]);*/
+								}
+							}
+						for (i=igainend+1;i<=traceheader.nsamps;i++)
+							{
+							iy = iys + i / decimatey;
+							if (iy >= iystart && iy <= iyend)
+								{
+								trace[i] = 0.0;
 								}
 							}
 						}
