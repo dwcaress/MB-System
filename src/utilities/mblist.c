@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mblist.c	2/1/93
- *    $Id: mblist.c,v 5.15 2004-12-02 06:38:10 caress Exp $
+ *    $Id: mblist.c,v 5.16 2005-06-04 06:17:38 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -28,6 +28,9 @@
  *		in 1990.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.15  2004/12/02 06:38:10  caress
+ * Fixes while supporting Reson 7k data.
+ *
  * Revision 5.14  2004/06/18 04:11:57  caress
  * Adding support for segy i/o and working on support for Reson 7k format 88.
  *
@@ -269,15 +272,15 @@ int get_bathyslope(int verbose,
 	int nslopes, double *slopes, double *slopeacrosstrack, 
 	double acrosstrack, double *depth,  double *slope, 
 	int *error);
-int printsimplevalue(int verbose, 
+int printsimplevalue(int verbose, FILE *output, 
 	double value, int width, int precision, 
 	int ascii, int *invert, int *flipsign, int *error);
-int printNaN(int verbose, int ascii, int *invert, int *flipsign, int *error);
+int printNaN(int verbose, FILE *output, int ascii, int *invert, int *flipsign, int *error);
 
 /* NaN value */
 double	NaN;
 
-static char rcs_id[] = "$Id: mblist.c,v 5.15 2004-12-02 06:38:10 caress Exp $";
+static char rcs_id[] = "$Id: mblist.c,v 5.16 2005-06-04 06:17:38 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
@@ -285,7 +288,7 @@ main (int argc, char **argv)
 {
 	static char program_name[] = "MBLIST";
 	static char help_message[] =  "MBLIST prints the specified contents of a swath data \nfile to stdout. The form of the output is quite flexible; \nMBLIST is tailored to produce ascii files in spreadsheet \nstyle with data columns separated by tabs.";
-	static char usage_message[] = "mblist [-Byr/mo/da/hr/mn/sc -Ddump_mode -Eyr/mo/da/hr/mn/sc \n-Fformat -H -Ifile -Llonflip -Mbeam_start/beam_end -Npixel_start/pixel_end \n-Ooptions -Ppings -Rw/e/s/n -Sspeed -Ttimegap -Ucheck -V -W -Zsegment]";
+	static char usage_message[] = "mblist [-Byr/mo/da/hr/mn/sc -C -Ddump_mode -Eyr/mo/da/hr/mn/sc \n-Fformat -H -Ifile -Llonflip -Mbeam_start/beam_end -Npixel_start/pixel_end \n-Ooptions -Ppings -Rw/e/s/n -Sspeed -Ttimegap -Ucheck -Xoutfile -V -W -Zsegment]";
 	extern char *optarg;
 	extern int optkind;
 	int	errflg = 0;
@@ -351,6 +354,8 @@ main (int argc, char **argv)
 	int	signflip_next_value = MB_NO;
 	int	first = MB_YES;
 	int	ascii = MB_YES;
+	int	netcdf = MB_NO;
+	int	netcdf_cdl = MB_YES;
 	int	segment = MB_NO;
 	char	segment_tag[MB_PATH_MAXLINE];
 
@@ -425,6 +430,19 @@ main (int argc, char **argv)
 	int	found;
 	int	i, j, k;
 
+	/* output files */
+	FILE	**output;
+	FILE	*outfile;
+	char	output_file[MB_PATH_MAXLINE];
+	char	output_file_temp[MB_PATH_MAXLINE];
+	char	buffer[MB_BUFFER_MAX];
+
+	/* netcdf variables */
+	char	variable[MB_PATH_MAXLINE];
+	int	lcount = 0;
+	time_t	right_now;
+	char	date[128], user[128], *user_ptr, host[128];
+
 	/* get current default values */
 	status = mb_defaults(verbose,&format,&pings,&lonflip,bounds,
 		btime_i,etime_i,&speedmin,&timegap);
@@ -453,8 +471,10 @@ main (int argc, char **argv)
 	GMT_make_dnan(NaN);
 #endif
 
+	strcpy(output_file, "-");
+
 	/* process argument list */
-	while ((c = getopt(argc, argv, "AaB:b:D:d:E:e:F:f:I:i:L:l:M:m:N:n:O:o:P:p:QqR:r:S:s:T:t:U:u:Z:z:VvWwHh")) != -1)
+	while ((c = getopt(argc, argv, "AaB:b:CcD:d:E:e:F:f:I:i:L:l:M:m:N:n:O:o:P:p:QqR:r:S:s:T:t:U:u:X:x:Z:z:VvWwHh")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -468,6 +488,7 @@ main (int argc, char **argv)
 		case 'A':
 		case 'a':
 			ascii = MB_NO;
+			netcdf_cdl = MB_NO;
 			flag++;
 			break;
 		case 'B':
@@ -476,6 +497,11 @@ main (int argc, char **argv)
 				&btime_i[0],&btime_i[1],&btime_i[2],
 				&btime_i[3],&btime_i[4],&btime_i[5]);
 			btime_i[6] = 0;
+			flag++;
+			break;
+		case 'C':
+		case 'c':
+			netcdf = MB_YES;
 			flag++;
 			break;
 		case 'D':
@@ -584,6 +610,10 @@ main (int argc, char **argv)
 		case 'w':
 			bathy_in_feet = MB_YES;
 			break;
+		case 'X':
+		case 'x':
+			sscanf(optarg,"%s", output_file);
+			break;
 		case 'Z':
 		case 'z':
 			segment = MB_YES;
@@ -644,8 +674,11 @@ main (int argc, char **argv)
 		fprintf(stderr,"dbg2       etime_i[6]:     %d\n",etime_i[6]);
 		fprintf(stderr,"dbg2       speedmin:       %f\n",speedmin);
 		fprintf(stderr,"dbg2       timegap:        %f\n",timegap);
-		fprintf(stderr,"dbg2       file:           %s\n",file);
+		fprintf(stderr,"dbg2       file:           %s\n",file);		
+		fprintf(stderr,"dbg2       output_file:    %s\n",output_file);		
 		fprintf(stderr,"dbg2       ascii:          %d\n",ascii);
+		fprintf(stderr,"dbg2       netcdf:         %d\n",netcdf);
+		fprintf(stderr,"dbg2       netcdf_cdl:     %d\n",netcdf_cdl);
 		fprintf(stderr,"dbg2       segment:        %d\n",segment);
 		fprintf(stderr,"dbg2       segment_tag:    %s\n",segment_tag);
 		fprintf(stderr,"dbg2       beam_set:       %d\n",beam_set);
@@ -715,6 +748,838 @@ main (int argc, char **argv)
 	/* it's cummulative over multiple files*/
 	distance_total = 0.0;
 	
+	/* initialize output files */
+	status = mb_malloc(verbose, n_list*sizeof(FILE*), &output, &error);
+	
+	if (netcdf == MB_NO)
+	    { 
+	    /* open output file */
+	    if (0 == strncmp("-",output_file,2))
+	      outfile = stdout;
+	    else
+	      outfile = fopen(output_file, "w");
+	    if (NULL == outfile)
+	      {
+		fprintf(stderr,"Could not open file: %s\n", output_file);
+		exit(1);
+	      }
+
+	    /* for non netcdf all output goes to the same file */
+	    for ( i=0; i < n_list; i++)
+	      output[i] = outfile;
+	    }
+	else
+	    {
+	    /* netcdf must be ascii and must not be segmented */
+	    ascii = MB_YES;
+	    segment = MB_NO;
+	    
+	    /* open CDL file */
+	    if (0 == strncmp("-",output_file,2) && netcdf_cdl == MB_NO)
+	      strcpy(output_file, "mblist.nc");
+	    if (0 == strncmp("-",output_file,2))
+	      {
+		outfile = stdout;
+	      }
+	    else 
+	      {
+		strncpy(output_file_temp, output_file, MB_PATH_MAXLINE - 5);
+		if (netcdf_cdl == MB_NO)
+		  strcat(output_file_temp, ".cdl");
+		outfile = fopen(output_file_temp, "w+");
+		if (outfile == NULL)
+		  {
+		    fprintf(stderr, "Unable to open file: %s\n", output_file_temp);
+		    exit(1);
+		  }
+	      }
+
+	    /* output CDL headers */
+	    fprintf(outfile, "netcdf mlist {\n\n\t// ");
+	    for ( i=0; i < argc; i++)
+	      fprintf(outfile, "%s ", argv[i]);
+	    fprintf(outfile, "\n\t// %s\n\n", rcs_id);
+	    fprintf(outfile, "dimensions:\n\ttimestring = 26, timestring_J = 24, timestring_j = 23, \n\t");
+	    fprintf(outfile, "timefields_J = 6,  timefields_j = 5, timefields_t = 7, latm = 13, \n\tdata = unlimited ;\n\n");
+	    fprintf(outfile, "variables:\n\t");
+	    fprintf(outfile, ":command_line = \"");
+	    for ( i=0; i < argc; i++)
+	      fprintf(outfile, "%s ", argv[i]);
+	    fprintf(outfile, "\";\n\t:program_version = \"%s\";\n", rcs_id);
+	    fprintf(outfile, "\t:mbsystem_version = \"%s\";\n", MB_VERSION);
+
+	    right_now = time((time_t *)0);
+	    strncpy(date,ctime(&right_now),128);
+	    if ((user_ptr = (char *) getenv("USER")) == NULL)
+	      user_ptr = (char *) getenv("LOGNAME");
+	    if (user_ptr != NULL)
+	      strcpy(user,user_ptr);
+	    else
+	      strcpy(user, "unknown");
+	    gethostname(host,128);
+fprintf(stderr,"DATE: %s\n",ctime(&right_now));
+fprintf(stderr,"DATE: %s\n",date);
+	    
+	    fprintf(outfile, "\t:run = \"by <%s> on cpu <%s> at <%s>\";\n\n", user, host, date);
+	    
+
+	    /* get temporary output file for each variable */
+	    for (i=0; i<n_list; i++) 
+	      {
+		output[i] = tmpfile();
+		if (output[i] == NULL)
+		  {
+		    fprintf(stderr, "Unable to open temp files\n");
+		    exit(1);
+		  }
+
+		switch (list[i]) 
+		  {
+		  case '/': /* Inverts next simple value */
+		    invert_next_value = MB_YES;
+		    break;
+
+		  case '-': /* Flip sign on next simple value */
+		    signflip_next_value = MB_YES;
+		    break;
+		    
+		  case 'A': /* Average seafloor crosstrack slope */
+		    strcpy(variable, "aslope");
+		    if (signflip_next_value == MB_YES)
+		      strcat(variable, "-");
+		    if (invert_next_value == MB_YES)
+		      strcat(variable, "_");
+
+		    fprintf(output[i], "\t%s = ", variable);
+
+		    fprintf(outfile, "\tfloat %s(data);\n", variable);
+		    fprintf(outfile, "\t\t%s:long_name = \"Average seafloor crosstrack slope\";\n", variable);
+		    fprintf(outfile, "\t\t%s:units = \"", variable);
+		    if (signflip_next_value == MB_YES)
+		      fprintf(outfile, "-");
+		    if (invert_next_value == MB_YES)
+		      fprintf(outfile, "tangent of angle from seafloor to vertical\";\n");
+		    else
+		      fprintf(outfile, "tangent of angle from seafloor to horizontal\";\n");
+
+		    signflip_next_value = MB_NO;
+		    invert_next_value = MB_NO;
+		    break;
+
+		  case 'a': /* Per-beam seafloor crosstrack slope */
+		    strcpy(variable, "bslope");
+		    if (signflip_next_value == MB_YES)
+		      strcat(variable, "-");
+		    if (invert_next_value == MB_YES)
+		      strcat(variable, "_");
+
+		    fprintf(output[i], "\t%s = ", variable);
+
+		    fprintf(outfile, "\tfloat %s(data);\n", variable);
+		    fprintf(outfile, "\t\t%s:long_name = \"Per-beam seafloor crosstrack slope\";\n", variable);
+		    fprintf(outfile, "\t\t%s:units = \"", variable);
+		    if (signflip_next_value == MB_YES)
+		      fprintf(outfile, "-");
+		    if (invert_next_value == MB_YES)
+		      fprintf(outfile, "tangent of angle from seafloor to vertical\";\n");
+		    else
+		      fprintf(outfile, "tangent of angle from seafloor to horizontal\";\n");
+
+		    signflip_next_value = MB_NO;
+		    invert_next_value = MB_NO;
+		    break;
+
+		  case 'B': /* amplitude */
+		    strcpy(variable, "amplitude");
+		    if (signflip_next_value == MB_YES)
+		      strcat(variable, "-");
+		    if (invert_next_value == MB_YES)
+		      strcat(variable, "_");
+
+		    fprintf(output[i], "\t%s = ", variable);
+
+		    fprintf(outfile, "\tfloat %s(data);\n", variable);
+		    fprintf(outfile, "\t\t%s:long_name = \"Amplitude\";\n", variable);
+		    fprintf(outfile, "\t\t%s:units = \"", variable);
+		    if (signflip_next_value == MB_YES)
+		      fprintf(outfile, "-");
+		    if (invert_next_value == MB_YES)
+		      fprintf(outfile, "1/");
+		    if (format == MBF_EM300RAW || format == MBF_EM300MBA)
+		      fprintf(outfile, "dB + 64\";\n");
+		    else
+		      fprintf(outfile, "backscatter\";\n");
+
+		    signflip_next_value = MB_NO;
+		    invert_next_value = MB_NO;
+		    
+		    break;
+
+		  case 'b': /* sidescan */
+		    strcpy(variable, "sidescan");
+		    if (signflip_next_value == MB_YES)
+		      strcat(variable, "-");
+		    if (invert_next_value == MB_YES)
+		      strcat(variable, "_");
+
+		    fprintf(output[i], "\t%s = ", variable);
+
+		    fprintf(outfile, "\tfloat %s(data);\n", variable);
+		    fprintf(outfile, "\t\t%s:long_name = \"sidescan\";\n", variable);
+		    fprintf(outfile, "\t\t%s:units = \"", variable);
+		    if (signflip_next_value == MB_YES)
+		      fprintf(outfile, "-");
+		    if (invert_next_value == MB_YES)
+		      fprintf(outfile, "1/");
+		    if (format == MBF_EM300RAW || format == MBF_EM300MBA)
+		      fprintf(outfile, "dB + 64\";\n");
+		    else
+		      fprintf(outfile, "backscatter\";\n");
+
+		    signflip_next_value = MB_NO;
+		    invert_next_value = MB_NO;
+
+		    break;
+
+		  case 'C': /* Sonar altitude (m) */
+		    strcpy(variable, "altitude");
+		    if (signflip_next_value == MB_YES)
+		      strcat(variable, "-");
+		    if (invert_next_value == MB_YES)
+		      strcat(variable, "_");
+
+		    fprintf(output[i], "\t%s = ", variable);
+
+		    fprintf(outfile, "\tfloat %s(data);\n", variable);
+		    fprintf(outfile, "\t\t%s:long_name = \"Sonar altitude\";\n", variable);
+		    fprintf(outfile, "\t\t%s:units = \"", variable);
+		    if (signflip_next_value == MB_YES)
+		      fprintf(outfile, "-");
+		    if (invert_next_value == MB_YES)
+		      fprintf(outfile, "1/");
+		    fprintf(outfile, "m\";\n");
+
+		    signflip_next_value = MB_NO;
+		    invert_next_value = MB_NO;
+
+		    break;
+
+		  case 'c': /* Sonar transducer depth (m) */
+		    strcpy(variable, "transducer");
+		    if (signflip_next_value == MB_YES)
+		      strcat(variable, "-");
+		    if (invert_next_value == MB_YES)
+		      strcat(variable, "_");
+
+		    fprintf(output[i], "\t%s = ", variable);
+
+		    fprintf(outfile, "\tfloat %s(data);\n", variable);
+		    fprintf(outfile, "\t\t%s:long_name = \"Sonar transducer depth\";\n", variable);
+		    fprintf(outfile, "\t\t%s:units = \"", variable);
+		    if (signflip_next_value == MB_YES)
+		      fprintf(outfile, "-");
+		    if (invert_next_value == MB_YES)
+		      fprintf(outfile, "1/");
+		    fprintf(outfile, "m\";\n");
+
+		    signflip_next_value = MB_NO;
+		    invert_next_value = MB_NO;
+		    break;
+
+		  case 'D': /* acrosstrack dist. */
+		  case 'd':
+		    strcpy(variable, "acrosstrack");
+		    if (signflip_next_value == MB_YES)
+		      strcat(variable, "-");
+		    if (invert_next_value == MB_YES)
+		      strcat(variable, "_");
+
+		    fprintf(output[i], "\t%s = ", variable);
+
+		    fprintf(outfile, "\tfloat %s(data);\n", variable);
+		    fprintf(outfile, "\t\t%s:long_name = \"Acrosstrack distance\";\n", variable);
+		    fprintf(outfile, "\t\t%s:units = \"", variable);
+		    if (signflip_next_value == MB_YES)
+		      fprintf(outfile, "-");
+		    if (invert_next_value == MB_YES)
+		      fprintf(outfile, "1/");
+		    if (bathy_in_feet == MB_YES)
+		      fprintf(outfile, "f\";\n");
+		    else
+		      fprintf(outfile, "m\";\n");
+
+		    signflip_next_value = MB_NO;
+		    invert_next_value = MB_NO;
+		    break;
+
+		  case 'E': /* alongtrack dist. */
+		  case 'e':
+		    strcpy(variable, "alongtrack");
+		    if (signflip_next_value == MB_YES)
+		      strcat(variable, "-");
+		    if (invert_next_value == MB_YES)
+		      strcat(variable, "_");
+
+		    fprintf(output[i], "\t%s = ", variable);
+
+		    fprintf(outfile, "\tfloat %s(data);\n", variable);
+		    fprintf(outfile, "\t\t%s:long_name = \"Alongtrack distance\";\n", variable);
+		    fprintf(outfile, "\t\t%s:units = \"", variable);
+		    if (signflip_next_value == MB_YES)
+		      fprintf(outfile, "-");
+		    if (invert_next_value == MB_YES)
+		      fprintf(outfile, "1/");
+		    if (bathy_in_feet == MB_YES)
+		      fprintf(outfile, "f\";\n");
+		    else
+		      fprintf(outfile, "m\";\n");
+
+		    signflip_next_value = MB_NO;
+		    invert_next_value = MB_NO;
+
+		    break;
+
+		  case 'G': /* flat bottom grazing angle */
+		    strcpy(variable, "flatgrazing");
+		    if (signflip_next_value == MB_YES)
+		      strcat(variable, "-");
+		    if (invert_next_value == MB_YES)
+		      strcat(variable, "_");
+
+		    fprintf(output[i], "\t%s = ", variable);
+
+		    fprintf(outfile, "\tfloat %s(data);\n", variable);
+		    fprintf(outfile, "\t\t%s:long_name = \"Flat bottom grazing angle\";\n", variable);
+		    fprintf(outfile, "\t\t%s:units = \"", variable);
+		    if (signflip_next_value == MB_YES)
+		      fprintf(outfile, "-");
+		    if (invert_next_value == MB_YES)
+		      fprintf(outfile, "tangent of angle from beam to vertical\";\n");
+		    else
+		      fprintf(outfile, "tangent of angle from beam to horizontal\";\n");
+
+		    signflip_next_value = MB_NO;
+		    invert_next_value = MB_NO;
+		    break;
+
+		  case 'g': /* grazing angle using slope */
+		    strcpy(variable, "grazing");
+		    if (signflip_next_value == MB_YES)
+		      strcat(variable, "-");
+		    if (invert_next_value == MB_YES)
+		      strcat(variable, "_");
+
+		    fprintf(output[i], "\t%s = ", variable);
+
+		    fprintf(outfile, "\tfloat %s(data);\n", variable);
+		    fprintf(outfile, "\t\t%s:long_name = \"Grazing angle using slope\";\n", variable);
+		    fprintf(outfile, "\t\t%s:units = \"", variable);
+		    if (signflip_next_value == MB_YES)
+		      fprintf(outfile, "-");
+		    if (invert_next_value == MB_YES)
+		      fprintf(outfile, "tangent of angle from beam to perpendicular to seafloor\";\n");
+		    else
+		      fprintf(outfile, "tangent of angle from beam to seafloor\";\n");
+
+		    signflip_next_value = MB_NO;
+		    invert_next_value = MB_NO;
+		    break;
+
+		  case 'H': /* heading */
+		    strcpy(variable, "heading");
+		    if (signflip_next_value == MB_YES)
+		      strcat(variable, "-");
+		    if (invert_next_value == MB_YES)
+		      strcat(variable, "_");
+
+		    fprintf(output[i], "\t%s = ", variable);
+
+		    fprintf(outfile, "\tfloat %s(data);\n", variable);
+		    fprintf(outfile, "\t\t%s:long_name = \"Heading\";\n", variable);
+		    fprintf(outfile, "\t\t%s:units = \"", variable);
+		    if (signflip_next_value == MB_YES)
+		      fprintf(outfile, "-");
+		    if (invert_next_value == MB_YES)
+		      fprintf(outfile, "1/");
+		    fprintf(outfile, "degrees true\";\n");
+
+		    signflip_next_value = MB_NO;
+		    invert_next_value = MB_NO;
+		    break;
+
+		  case 'h': /* course */
+		    strcpy(variable, "course");
+		    if (signflip_next_value == MB_YES)
+		      strcat(variable, "-");
+		    if (invert_next_value == MB_YES)
+		      strcat(variable, "_");
+
+		    fprintf(output[i], "\t%s = ", variable);
+
+		    fprintf(outfile, "\tfloat %s(data);\n", variable);
+		    fprintf(outfile, "\t\t%s:long_name = \"Course\";\n", variable);
+		    fprintf(outfile, "\t\t%s:units = \"", variable);
+		    if (signflip_next_value == MB_YES)
+		      fprintf(outfile, "-");
+		    if (invert_next_value == MB_YES)
+		      fprintf(outfile, "1/");
+		    fprintf(outfile, "degrees true\";\n");
+
+		    signflip_next_value = MB_NO;
+		    invert_next_value = MB_NO;
+		    break;
+
+		  case 'J': /* time string */
+		    strcpy(variable, "time_J");
+
+		    fprintf(output[i], "\t%s = ", variable);
+
+		    fprintf(outfile, "\tlong %s(data,timefields_J);\n", variable);
+		    fprintf(outfile, "\t\t%s:long_name = \"Time - year julian_day hour minute seconds\";\n", variable);
+		    fprintf(outfile, "\t\t%s:units = \"", variable);
+
+		    fprintf(outfile, "year, julian day, hour, minute, second, nanosecond\";\n");
+		    break;
+
+		  case 'j': /* time string */
+		    strcpy(variable, "time_j");
+
+		    fprintf(output[i], "\t%s = ", variable);
+
+		    fprintf(outfile, "\tlong %s(data,timefields_j);\n", variable);
+		    fprintf(outfile, "\t\t%s:long_name = \"Time - year julian_day minute seconds\";\n", variable);
+		    fprintf(outfile, "\t\t%s:units = \"", variable);
+
+		    fprintf(outfile, "year, julian day, minute, second, nanosecond\";\n");
+
+		    break;
+
+		  case 'L': /* along-track distance (km) */
+		    strcpy(variable, "along_track");
+		    if (signflip_next_value == MB_YES)
+		      strcat(variable, "-");
+		    if (invert_next_value == MB_YES)
+		      strcat(variable, "_");
+
+		    fprintf(output[i], "\t%s = ", variable);
+
+		    fprintf(outfile, "\tfloat %s(data);\n", variable);
+		    fprintf(outfile, "\t\t%s:long_name = \"Alongtrack distance\";\n", variable);
+		    fprintf(outfile, "\t\t%s:units = \"", variable);
+		    if (signflip_next_value == MB_YES)
+		      fprintf(outfile, "-");
+		    if (invert_next_value == MB_YES)
+		      fprintf(outfile, "1/");
+		    fprintf(outfile, "km\";\n");
+
+		    signflip_next_value = MB_NO;
+		    invert_next_value = MB_NO;
+
+		    break;
+
+		  case 'l': /* along-track distance (m) */
+		    strcpy(variable, "along_track_m");
+		    if (signflip_next_value == MB_YES)
+		      strcat(variable, "-");
+		    if (invert_next_value == MB_YES)
+		      strcat(variable, "_");
+
+		    fprintf(output[i], "\t%s = ", variable);
+
+		    fprintf(outfile, "\tfloat %s(data);\n", variable);
+		    fprintf(outfile, "\t\t%s:long_name = \"Alongtrack distance\";\n", variable);
+		    fprintf(outfile, "\t\t%s:units = \"", variable);
+		    if (signflip_next_value == MB_YES)
+		      fprintf(outfile, "-");
+		    if (invert_next_value == MB_YES)
+		      fprintf(outfile, "1/");
+		    fprintf(outfile, "m\";\n");
+
+		    signflip_next_value = MB_NO;
+		    invert_next_value = MB_NO;
+		    break;
+
+		  case 'M': /* Decimal unix seconds since 
+						1/1/70 00:00:00 */
+		    strcpy(variable, "unix_time");
+		    if (signflip_next_value == MB_YES)
+		      strcat(variable, "-");
+		    if (invert_next_value == MB_YES)
+		      strcat(variable, "_");
+
+		    fprintf(output[i], "\t%s = ", variable);
+
+		    fprintf(outfile, "\tdouble %s(data);\n", variable);
+		    fprintf(outfile, "\t\t%s:long_name = \"Seconds since 1/1/70 00:00:00\";\n", variable);
+		    fprintf(outfile, "\t\t%s:units = \"", variable);
+		    if (signflip_next_value == MB_YES)
+		      fprintf(outfile, "-");
+		    if (invert_next_value == MB_YES)
+		      fprintf(outfile, "1/");
+		    fprintf(outfile, "s\";\n");
+
+		    signflip_next_value = MB_NO;
+		    invert_next_value = MB_NO;
+		    break;
+
+		  case 'm': /* time in decimal seconds since 
+						first record */
+
+		    strcpy(variable, "survey_time");
+		    if (signflip_next_value == MB_YES)
+		      strcat(variable, "-");
+		    if (invert_next_value == MB_YES)
+		      strcat(variable, "_");
+
+		    fprintf(output[i], "\t%s = ", variable);
+
+		    fprintf(outfile, "\tdouble %s(data);\n", variable);
+		    fprintf(outfile, "\t\t%s:long_name = \"Seconds since first record\";\n", variable);
+		    fprintf(outfile, "\t\t%s:units = \"", variable);
+		    if (signflip_next_value == MB_YES)
+		      fprintf(outfile, "-");
+		    if (invert_next_value == MB_YES)
+		      fprintf(outfile, "1/");
+		    fprintf(outfile, "s\";\n");
+
+		    signflip_next_value = MB_NO;
+		    invert_next_value = MB_NO;
+		    break;
+
+		  case 'N': /* ping counter */
+		    strcpy(variable, "ping");
+
+		    fprintf(output[i], "\t%s = ", variable);
+
+		    fprintf(outfile, "\tlong %s(data);\n", variable);
+		    fprintf(outfile, "\t\t%s:long_name = \"Ping counter\";\n", variable);
+		    fprintf(outfile, "\t\t%s:units = \"", variable);
+		    fprintf(outfile, "pings\";\n");
+		    break;
+
+		  case 'P': /* pitch */
+		    strcpy(variable, "pitch");
+		    if (signflip_next_value == MB_YES)
+		      strcat(variable, "-");
+		    if (invert_next_value == MB_YES)
+		      strcat(variable, "_");
+
+		    fprintf(output[i], "\t%s = ", variable);
+
+		    fprintf(outfile, "\tfloat %s(data);\n", variable);
+		    fprintf(outfile, "\t\t%s:long_name = \"Pitch\";\n", variable);
+		    fprintf(outfile, "\t\t%s:units = \"", variable);
+		    if (signflip_next_value == MB_YES)
+		      fprintf(outfile, "-");
+		    if (invert_next_value == MB_YES)
+		      fprintf(outfile, "1/");
+		    fprintf(outfile, "degrees from horizontal\";\n");
+
+		    signflip_next_value = MB_NO;
+		    invert_next_value = MB_NO;
+		    break;
+
+		  case 'p': /* draft */
+		    strcpy(variable, "draft");
+		    if (signflip_next_value == MB_YES)
+		      strcat(variable, "-");
+		    if (invert_next_value == MB_YES)
+		      strcat(variable, "_");
+
+		    fprintf(output[i], "\t%s = ", variable);
+
+		    fprintf(outfile, "\tfloat %s(data);\n", variable);
+		    fprintf(outfile, "\t\t%s:long_name = \"Draft\";\n", variable);
+		    fprintf(outfile, "\t\t%s:units = \"", variable);
+		    if (signflip_next_value == MB_YES)
+		      fprintf(outfile, "-");
+		    if (invert_next_value == MB_YES)
+		      fprintf(outfile, "1/");
+		    fprintf(outfile, "m\";\n");
+
+		    signflip_next_value = MB_NO;
+		    invert_next_value = MB_NO;
+		    break;
+
+		  case 'R': /* roll */
+		    strcpy(variable, "roll");
+		    if (signflip_next_value == MB_YES)
+		      strcat(variable, "-");
+		    if (invert_next_value == MB_YES)
+		      strcat(variable, "_");
+
+		    fprintf(output[i], "\t%s = ", variable);
+
+		    fprintf(outfile, "\tfloat %s(data);\n", variable);
+		    fprintf(outfile, "\t\t%s:long_name = \"Roll\";\n", variable);
+		    fprintf(outfile, "\t\t%s:units = \"", variable);
+		    if (signflip_next_value == MB_YES)
+		      fprintf(outfile, "-");
+		    if (invert_next_value == MB_YES)
+		      fprintf(outfile, "1/");
+		    fprintf(outfile, "degrees from horizontal\";\n");
+
+		    signflip_next_value = MB_NO;
+		    invert_next_value = MB_NO;
+		    break;
+
+		  case 'r': /* heave */
+		    strcpy(variable, "heave");
+		    if (signflip_next_value == MB_YES)
+		      strcat(variable, "-");
+		    if (invert_next_value == MB_YES)
+		      strcat(variable, "_");
+
+		    fprintf(output[i], "\t%s = ", variable);
+
+		    fprintf(outfile, "\tfloat %s(data);\n", variable);
+		    fprintf(outfile, "\t\t%s:long_name = \"Heave\";\n", variable);
+		    fprintf(outfile, "\t\t%s:units = \"", variable);
+		    if (signflip_next_value == MB_YES)
+		      fprintf(outfile, "-");
+		    if (invert_next_value == MB_YES)
+		      fprintf(outfile, "1/");
+		    fprintf(outfile, "m\";\n");
+
+		    signflip_next_value = MB_NO;
+		    invert_next_value = MB_NO;
+		    break;
+
+		  case 'S': /* speed */
+		    strcpy(variable, "speed");
+		    if (signflip_next_value == MB_YES)
+		      strcat(variable, "-");
+		    if (invert_next_value == MB_YES)
+		      strcat(variable, "_");
+
+		    fprintf(output[i], "\t%s = ", variable);
+
+		    fprintf(outfile, "\tfloat %s(data);\n", variable);
+		    fprintf(outfile, "\t\t%s:long_name = \"Speed\";\n", variable);
+		    fprintf(outfile, "\t\t%s:units = \"", variable);
+		    if (signflip_next_value == MB_YES)
+		      fprintf(outfile, "-");
+		    if (invert_next_value == MB_YES)
+		      fprintf(outfile, "1/");
+		    fprintf(outfile, "km/hr\";\n");
+
+		    signflip_next_value = MB_NO;
+		    invert_next_value = MB_NO;
+		    break;
+
+		  case 's': /* speed made good */
+		    strcpy(variable, "speed_made_good");
+		    if (signflip_next_value == MB_YES)
+		      strcat(variable, "-");
+		    if (invert_next_value == MB_YES)
+		      strcat(variable, "_");
+
+		    fprintf(output[i], "\t%s = ", variable);
+
+		    fprintf(outfile, "\tfloat %s(data);\n", variable);
+		    fprintf(outfile, "\t\t%s:long_name = \"Speed made good\";\n", variable);
+		    fprintf(outfile, "\t\t%s:units = \"", variable);
+		    if (signflip_next_value == MB_YES)
+		      fprintf(outfile, "-");
+		    if (invert_next_value == MB_YES)
+		      fprintf(outfile, "1/");
+		    fprintf(outfile, "km/hr\";\n");
+
+		    signflip_next_value = MB_NO;
+		    invert_next_value = MB_NO;
+		    break;
+
+		  case 'T': /* yyyy/mm/dd/hh/mm/ss time string */
+		    strcpy(variable, "time_T");
+
+		    fprintf(output[i], "\t%s = ", variable);
+
+		    fprintf(outfile, "\tchar %s(data,timestring);\n", variable);
+		    fprintf(outfile, "\t\t%s:long_name = \"Time string - year/month/day/hour/minute/seconds\";\n", variable);
+		    fprintf(outfile, "\t\t%s:units = \"", variable);
+
+		    fprintf(outfile, "yyyy/MM/dd/hh/mm/ss.ssssss\";\n");
+		    break;
+
+		  case 't': /* yyyy mm dd hh mm ss time string */
+		    strcpy(variable, "time_t");
+
+		    fprintf(output[i], "\t%s = ", variable);
+
+		    fprintf(outfile, "\tlong %s(data,timefields_t);\n", variable);
+		    fprintf(outfile, "\t\t%s:long_name = \"Time - year month day hour minute seconds\";\n", variable);
+		    fprintf(outfile, "\t\t%s:units = \"", variable);
+
+		    fprintf(outfile, "year, month, day, hour, minute, second, nanosecond\";\n");
+		    break;
+
+		  case 'U': /* unix time in seconds since 1/1/70 00:00:00 */
+		    strcpy(variable, "unix_time_s");
+
+		    fprintf(output[i], "\t%s = ", variable);
+
+		    fprintf(outfile, "\tlong %s(data);\n", variable);
+		    fprintf(outfile, "\t\t%s:long_name = \"Integer seconds since 1/1/70 00:00:00\";\n", variable);
+		    fprintf(outfile, "\t\t%s:units = \"", variable);
+		    fprintf(outfile, "s\";\n");
+		    break;
+
+		  case 'u': /* time in seconds since first record */
+		    strcpy(variable, "survey_time_s");
+
+		    fprintf(output[i], "\t%s = ", variable);
+
+		    fprintf(outfile, "\tlong %s(data);\n", variable);
+		    fprintf(outfile, "\t\t%s:long_name = \"Integer seconds since first record\";\n", variable);
+		    fprintf(outfile, "\t\t%s:units = \"", variable);
+		    fprintf(outfile, "s\";\n");
+		    break;
+
+		  case 'V': /* time in seconds since last ping */
+		  case 'v': 
+		    strcpy(variable, "ping_time");
+
+		    fprintf(output[i], "\t%s = ", variable);
+
+		    fprintf(outfile, "\tfloat %s(data);\n", variable);
+		    fprintf(outfile, "\t\t%s:long_name = \"Seconds since last ping\";\n", variable);
+		    fprintf(outfile, "\t\t%s:units = \"", variable);
+		    fprintf(outfile, "s\";\n");
+		    break;
+
+		  case 'X': /* longitude decimal degrees */
+		    strcpy(variable, "longitude");
+		    if (signflip_next_value == MB_YES)
+		      strcat(variable, "-");
+		    if (invert_next_value == MB_YES)
+		      strcat(variable, "_");
+
+		    fprintf(output[i], "\t%s = ", variable);
+
+		    fprintf(outfile, "\tdouble %s(data);\n", variable);
+		    fprintf(outfile, "\t\t%s:long_name = \"Longitude\";\n", variable);
+		    fprintf(outfile, "\t\t%s:units = \"", variable);
+		    if (signflip_next_value == MB_YES)
+		      fprintf(outfile, "-");
+		    if (invert_next_value == MB_YES)
+		      fprintf(outfile, "1/");
+		    fprintf(outfile, "degrees\";\n");
+
+		    signflip_next_value = MB_NO;
+		    invert_next_value = MB_NO;
+		    break;
+
+		  case 'x': /* longitude degress + decimal minutes */
+		    strcpy(variable, "longitude_minutes");
+
+		    fprintf(output[i], "\t%s = ", variable);
+
+		    fprintf(outfile, "\tchar %s(data,latm);\n", variable);
+		    fprintf(outfile, "\t\t%s:long_name = \"Longitude - decimal minutes\";\n", variable);
+		    fprintf(outfile, "\t\t%s:units = \"", variable);
+
+		    fprintf(outfile, "ddd mm.mmmmmH\";\n");
+		    break;
+
+		  case 'Y': /* latitude decimal degrees */
+		    strcpy(variable, "latitude");
+		    if (signflip_next_value == MB_YES)
+		      strcat(variable, "-");
+		    if (invert_next_value == MB_YES)
+		      strcat(variable, "_");
+
+		    fprintf(output[i], "\t%s = ", variable);
+
+		    fprintf(outfile, "\tdouble %s(data);\n", variable);
+		    fprintf(outfile, "\t\t%s:long_name = \"Latitude\";\n", variable);
+		    fprintf(outfile, "\t\t%s:units = \"", variable);
+		    if (signflip_next_value == MB_YES)
+		      fprintf(outfile, "-");
+		    if (invert_next_value == MB_YES)
+		      fprintf(outfile, "1/");
+		    fprintf(outfile, "degrees\";\n");
+
+		    signflip_next_value = MB_NO;
+		    invert_next_value = MB_NO;
+		    break;
+
+		  case 'y': /* latitude degrees + decimal minutes */
+		    strcpy(variable, "latitude_minutes");
+
+		    fprintf(output[i], "\t%s = ", variable);
+
+		    fprintf(outfile, "\tchar %s(data,latm);\n", variable);
+		    fprintf(outfile, "\t\t%s:long_name = \"Latitude - decimal minutes\";\n", variable);
+		    fprintf(outfile, "\t\t%s:units = \"", variable);
+
+		    fprintf(outfile, "ddd mm.mmmmmH\";\n");
+		    break;
+
+		  case 'Z': /* topography */
+		    strcpy(variable, "topography");
+		    if (signflip_next_value == MB_YES)
+		      strcat(variable, "-");
+		    if (invert_next_value == MB_YES)
+		      strcat(variable, "_");
+
+		    fprintf(output[i], "\t%s = ", variable);
+
+		    fprintf(outfile, "\tfloat %s(data);\n", variable);
+		    fprintf(outfile, "\t\t%s:long_name = \"Topography\";\n", variable);
+		    fprintf(outfile, "\t\t%s:units = \"", variable);
+		    if (signflip_next_value == MB_YES)
+		      fprintf(outfile, "-");
+		    if (invert_next_value == MB_YES)
+		      fprintf(outfile, "1/");
+		    if (bathy_in_feet == MB_YES)
+		      fprintf(outfile, "f\";\n");
+		    else
+		      fprintf(outfile, "m\";\n");
+
+		    signflip_next_value = MB_NO;
+		    invert_next_value = MB_NO;
+		    break;
+
+		  case 'z': /* depth */
+		    strcpy(variable, "depth");
+		    if (signflip_next_value == MB_YES)
+		      strcat(variable, "-");
+		    if (invert_next_value == MB_YES)
+		      strcat(variable, "_");
+
+		    fprintf(output[i], "\t%s = ", variable);
+
+		    fprintf(outfile, "\tfloat %s(data);\n", variable);
+		    fprintf(outfile, "\t\t%s:long_name = \"Depth\";\n", variable);
+		    fprintf(outfile, "\t\t%s:units = \"", variable);
+		    if (signflip_next_value == MB_YES)
+		      fprintf(outfile, "-");
+		    if (invert_next_value == MB_YES)
+		      fprintf(outfile, "1/");
+		    if (bathy_in_feet == MB_YES)
+		      fprintf(outfile, "f\";\n");
+		    else
+		      fprintf(outfile, "m\";\n");
+
+		    signflip_next_value = MB_NO;
+		    invert_next_value = MB_NO;
+		    break;
+
+		  case '#': /* beam number */
+		    strcpy(variable, "beam");
+
+		    fprintf(output[i], "\t%s = ", variable);
+
+		    fprintf(outfile, "\tlong %s(data);\n", variable);
+		    fprintf(outfile, "\t\t%s:long_name = \"Beam number\";\n", variable);
+		    fprintf(outfile, "\t\t%s:units = \"", variable);
+		    fprintf(outfile, "number\";\n");
+		    break;
+		  }
+	      }
+	    fprintf(outfile, "\n\ndata:\n");
+	  }
+
 	/* loop over all files to be read */
 	while (read_data == MB_YES)
 	{
@@ -806,9 +1671,9 @@ main (int argc, char **argv)
 		}
 		
 	/* output separator for GMT style segment file output */
-	if (segment == MB_YES && ascii == MB_YES)
+	if (segment == MB_YES && ascii == MB_YES && netcdf == MB_NO)
 		{
-		printf("%s\n", segment_tag);
+		fprintf(output[0],"%s\n", segment_tag);
 		}
 
 	/* read and print data */
@@ -1142,6 +2007,9 @@ main (int argc, char **argv)
 		    {
 		    for (i=0; i<n_list; i++) 
 			{
+			if (netcdf == MB_YES && lcount > 0)
+			  fprintf(output[i], ", ");
+
 			switch (list[i]) 
 				{
 				case '/': /* Inverts next simple value */
@@ -1151,7 +2019,7 @@ main (int argc, char **argv)
 					signflip_next_value = MB_YES;
 					break;
 				case 'A': /* Average seafloor crosstrack slope */
-					printsimplevalue(verbose, avgslope, 0, 4, ascii, 
+					printsimplevalue(verbose, output[i], avgslope, 0, 4, ascii, 
 							    &invert_next_value, 
 							    &signflip_next_value, &error);
 					break;
@@ -1160,13 +2028,13 @@ main (int argc, char **argv)
 					    && (check_values == MBLIST_CHECK_OFF_NAN
 						|| check_values == MBLIST_CHECK_OFF_FLAGNAN))
 					    {
-					    printNaN(verbose, ascii, &invert_next_value, 
+					    printNaN(verbose, output[i], ascii, &invert_next_value, 
 							    &signflip_next_value, &error);
 					    }
 					else if (!mb_beam_ok(beamflag[j])
 					    && check_values == MBLIST_CHECK_OFF_FLAGNAN)
 					    {
-					    printNaN(verbose, ascii, &invert_next_value, 
+					    printNaN(verbose, output[i], ascii, &invert_next_value, 
 							    &signflip_next_value, &error);
 					    }
 					else
@@ -1176,7 +2044,7 @@ main (int argc, char **argv)
 						nslopes,slopes,slopeacrosstrack,
 						bathacrosstrack[j],
 						&depth,&slope,&error);
-					    printsimplevalue(verbose, slope, 0, 4, ascii, 
+					    printsimplevalue(verbose, output[i], slope, 0, 4, ascii, 
 							    &invert_next_value, 
 							    &signflip_next_value, &error);
 					    }
@@ -1186,34 +2054,34 @@ main (int argc, char **argv)
 					    && (check_values == MBLIST_CHECK_OFF_NAN
 						|| check_values == MBLIST_CHECK_OFF_FLAGNAN))
 					    {
-					    printNaN(verbose, ascii, &invert_next_value, 
+					    printNaN(verbose, output[i], ascii, &invert_next_value, 
 							    &signflip_next_value, &error);
 					    }
 					else if (!mb_beam_ok(beamflag[j])
 					    && check_values == MBLIST_CHECK_OFF_FLAGNAN)
 					    {
-					    printNaN(verbose, ascii, &invert_next_value, 
+					    printNaN(verbose, output[i], ascii, &invert_next_value, 
 							    &signflip_next_value, &error);
 					    }
 					else
 					    {
-					    printsimplevalue(verbose, amp[j], 0, 3, ascii, 
+					    printsimplevalue(verbose, output[i], amp[j], 0, 3, ascii, 
 							    &invert_next_value, 
 							    &signflip_next_value, &error);
 					    }
 					break;
 				case 'b': /* sidescan */
-					printsimplevalue(verbose, ss[pixel_vertical], 0, 3, ascii, 
+					printsimplevalue(verbose, output[i], ss[pixel_vertical], 0, 3, ascii, 
 							    &invert_next_value, 
 							    &signflip_next_value, &error);
 					break;
 				case 'C': /* Sonar altitude (m) */
-					printsimplevalue(verbose, altitude, 0, 3, ascii, 
+					printsimplevalue(verbose, output[i], altitude, 0, 3, ascii, 
 							    &invert_next_value, 
 							    &signflip_next_value, &error);
 					break;
 				case 'c': /* Sonar transducer depth (m) */
-					printsimplevalue(verbose, sonardepth, 0, 3, ascii, 
+					printsimplevalue(verbose, output[i], sonardepth, 0, 3, ascii, 
 							    &invert_next_value, 
 							    &signflip_next_value, &error);
 					break;
@@ -1223,19 +2091,19 @@ main (int argc, char **argv)
 					    && (check_values == MBLIST_CHECK_OFF_NAN
 						|| check_values == MBLIST_CHECK_OFF_FLAGNAN))
 					    {
-					    printNaN(verbose, ascii, &invert_next_value, 
+					    printNaN(verbose, output[i], ascii, &invert_next_value, 
 							    &signflip_next_value, &error);
 					    }
 					else if (!mb_beam_ok(beamflag[j])
 					    && check_values == MBLIST_CHECK_OFF_FLAGNAN)
 					    {
-					    printNaN(verbose, ascii, &invert_next_value, 
+					    printNaN(verbose, output[i], ascii, &invert_next_value, 
 							    &signflip_next_value, &error);
 					    }
 					else
 					    {
 					    b = bathy_scale * bathacrosstrack[j];
-					    printsimplevalue(verbose, b, 0, 3, ascii, 
+					    printsimplevalue(verbose, output[i], b, 0, 3, ascii, 
 							    &invert_next_value, 
 							    &signflip_next_value, &error);
 					    }
@@ -1246,19 +2114,19 @@ main (int argc, char **argv)
 					    && (check_values == MBLIST_CHECK_OFF_NAN
 						|| check_values == MBLIST_CHECK_OFF_FLAGNAN))
 					    {
-					    printNaN(verbose, ascii, &invert_next_value, 
+					    printNaN(verbose, output[i], ascii, &invert_next_value, 
 							    &signflip_next_value, &error);
 					    }
 					else if (!mb_beam_ok(beamflag[j])
 					    && check_values == MBLIST_CHECK_OFF_FLAGNAN)
 					    {
-					    printNaN(verbose, ascii, &invert_next_value, 
+					    printNaN(verbose, output[i], ascii, &invert_next_value, 
 							    &signflip_next_value, &error);
 					    }
 					else
 					    {
 					    b = bathy_scale * bathalongtrack[j];
-					    printsimplevalue(verbose, b, 0, 3, ascii, 
+					    printsimplevalue(verbose, output[i], b, 0, 3, ascii, 
 							    &invert_next_value, 
 							    &signflip_next_value, &error);
 					    }
@@ -1268,19 +2136,19 @@ main (int argc, char **argv)
 					    && (check_values == MBLIST_CHECK_OFF_NAN
 						|| check_values == MBLIST_CHECK_OFF_FLAGNAN))
 					    {
-					    printNaN(verbose, ascii, &invert_next_value, 
+					    printNaN(verbose, output[i], ascii, &invert_next_value, 
 							    &signflip_next_value, &error);
 					    }
 					else if (!mb_beam_ok(beamflag[j])
 					    && check_values == MBLIST_CHECK_OFF_FLAGNAN)
 					    {
-					    printNaN(verbose, ascii, &invert_next_value, 
+					    printNaN(verbose, output[i], ascii, &invert_next_value, 
 							    &signflip_next_value, &error);
 					    }
 					else
 					    {
 					    angle = RTD*(atan(bathacrosstrack[j] / bath[j]));
-					    printsimplevalue(verbose, angle, 0, 2, ascii, 
+					    printsimplevalue(verbose, output[i], angle, 0, 2, ascii, 
 							    &invert_next_value, 
 							    &signflip_next_value, &error);
 					    }
@@ -1290,13 +2158,13 @@ main (int argc, char **argv)
 					    && (check_values == MBLIST_CHECK_OFF_NAN
 						|| check_values == MBLIST_CHECK_OFF_FLAGNAN))
 					    {
-					    printNaN(verbose, ascii, &invert_next_value, 
+					    printNaN(verbose, output[i], ascii, &invert_next_value, 
 							    &signflip_next_value, &error);
 					    }
 					else if (!mb_beam_ok(beamflag[j])
 					    && check_values == MBLIST_CHECK_OFF_FLAGNAN)
 					    {
-					    printNaN(verbose, ascii, &invert_next_value, 
+					    printNaN(verbose, output[i], ascii, &invert_next_value, 
 							    &signflip_next_value, &error);
 					    }
 					else
@@ -1308,18 +2176,18 @@ main (int argc, char **argv)
 						&depth,&slope,&error);
 					    angle = RTD * (atan(bathacrosstrack[j] / bath[j]))
 						+ slope;
-					    printsimplevalue(verbose, angle, 0, 2, ascii, 
+					    printsimplevalue(verbose, output[i], angle, 0, 2, ascii, 
 							    &invert_next_value, 
 							    &signflip_next_value, &error);
 					    }
 					break;
 				case 'H': /* heading */
-					printsimplevalue(verbose, heading, 6, 2, ascii, 
+					printsimplevalue(verbose, output[i], heading, 6, 2, ascii, 
 							    &invert_next_value, 
 							    &signflip_next_value, &error);
 					break;
 				case 'h': /* course */
-					printsimplevalue(verbose, course, 6, 2, ascii, 
+					printsimplevalue(verbose, output[i], course, 6, 2, ascii, 
 							    &invert_next_value, 
 							    &signflip_next_value, &error);
 					break;
@@ -1327,62 +2195,74 @@ main (int argc, char **argv)
 					mb_get_jtime(verbose,time_i,time_j);
 					if (ascii == MB_YES)
 					    {
-					    printf("%.4d %.3d %.2d %.2d %.2d.%6.6d",
+					    if (netcdf == MB_YES) 
+					    fprintf(output[i],"%d, %d, %d, %d, %d, %d",
 						time_j[0],time_j[1],
 						time_i[3],time_i[4],
 						time_i[5],time_i[6]);
+					    else
+					    fprintf(output[i],"%.4d %.3d %.2d %.2d %.2d.%6.6d",
+						time_j[0],time_j[1],
+						time_i[3],time_i[4],
+						time_i[5],time_i[6]);
+
 					    }
 					else
 					    {
 					    b = time_j[0];
-					    fwrite(&b, sizeof(double), 1, stdout);
+					    fwrite(&b, sizeof(double), 1, outfile);
 					    b = time_j[1];
-					    fwrite(&b, sizeof(double), 1, stdout);
+					    fwrite(&b, sizeof(double), 1, outfile);
 					    b = time_i[3];
-					    fwrite(&b, sizeof(double), 1, stdout);
+					    fwrite(&b, sizeof(double), 1, outfile);
 					    b = time_i[4];
-					    fwrite(&b, sizeof(double), 1, stdout);
+					    fwrite(&b, sizeof(double), 1, outfile);
 					    b = time_i[5];
-					    fwrite(&b, sizeof(double), 1, stdout);
+					    fwrite(&b, sizeof(double), 1, outfile);
 					    b = time_i[6];
-					    fwrite(&b, sizeof(double), 1, stdout);
+					    fwrite(&b, sizeof(double), 1, outfile);
 					    }
 					break;
 				case 'j': /* time string */
 					mb_get_jtime(verbose,time_i,time_j);
 					if (ascii == MB_YES)
 					    {
-					    printf("%.4d %.3d %.4d %.2d.%6.6d",
+					    if (netcdf == MB_YES)
+					    fprintf(output[i],"%d, %d, %d, %d, %d",
+						time_j[0],time_j[1],
+						time_j[2],time_j[3],time_j[4]);
+					    else
+					    fprintf(output[i],"%.4d %.3d %.4d %.2d.%6.6d",
 						time_j[0],time_j[1],
 						time_j[2],time_j[3],time_j[4]);
 					    }
 					else
 					    {
 					    b = time_j[0];
-					    fwrite(&b, sizeof(double), 1, stdout);
+					    fwrite(&b, sizeof(double), 1, outfile);
 					    b = time_j[1];
-					    fwrite(&b, sizeof(double), 1, stdout);
+					    fwrite(&b, sizeof(double), 1, outfile);
 					    b = time_j[2];
-					    fwrite(&b, sizeof(double), 1, stdout);
+					    fwrite(&b, sizeof(double), 1, outfile);
 					    b = time_j[3];
-					    fwrite(&b, sizeof(double), 1, stdout);
+					    fwrite(&b, sizeof(double), 1, outfile);
 					    b = time_j[4];
-					    fwrite(&b, sizeof(double), 1, stdout);
+					    fwrite(&b, sizeof(double), 1, outfile);
 					    }
 					break;
 				case 'L': /* along-track distance (km) */
-					printsimplevalue(verbose, distance_total, 7, 3, ascii, 
+					printsimplevalue(verbose, output[i], distance_total, 7, 3, ascii, 
 							    &invert_next_value, 
 							    &signflip_next_value, &error);
 					break;
 				case 'l': /* along-track distance (m) */
-					printsimplevalue(verbose, 1000.0 * distance_total, 7, 3, ascii, 
+					printsimplevalue(verbose, output[i], 1000.0 * distance_total, 7, 3, ascii, 
 							    &invert_next_value, 
 							    &signflip_next_value, &error);
 					break;
 				case 'M': /* Decimal unix seconds since 
 						1/1/70 00:00:00 */
-					printsimplevalue(verbose, time_d, 0, 6, ascii, 
+					printsimplevalue(verbose, output[i], time_d, 0, 6, ascii, 
 							    &invert_next_value, 
 							    &signflip_next_value, &error);
 					break;
@@ -1394,101 +2274,114 @@ main (int argc, char **argv)
 						first_m = MB_NO;
 						}
 					b = time_d - time_d_ref;
-					printsimplevalue(verbose, b, 0, 6, ascii, 
+					printsimplevalue(verbose, output[i], b, 0, 6, ascii, 
 							    &invert_next_value, 
 							    &signflip_next_value, &error);
 					break;
 				case 'N': /* ping counter */
 					if (ascii == MB_YES)
-					    printf("%6d",nread);
+					    fprintf(output[i],"%6d",nread);
 					else
 					    {
 					    b = nread;
-					    fwrite(&b, sizeof(double), 1, stdout);
+					    fwrite(&b, sizeof(double), 1, outfile);
 					    }
 					break;
 				case 'P': /* pitch */
-					printsimplevalue(verbose, pitch, 5, 2, ascii, 
+					printsimplevalue(verbose, output[i], pitch, 5, 2, ascii, 
 							    &invert_next_value, 
 							    &signflip_next_value, &error);
 					break;
 				case 'p': /* draft */
-					printsimplevalue(verbose, draft, 5, 2, ascii, 
+					printsimplevalue(verbose, output[i], draft, 5, 2, ascii, 
 							    &invert_next_value, 
 							    &signflip_next_value, &error);
 					break;
 				case 'R': /* roll */
-					printsimplevalue(verbose, roll, 5, 2, ascii, 
+					printsimplevalue(verbose, output[i], roll, 5, 2, ascii, 
 							    &invert_next_value, 
 							    &signflip_next_value, &error);
 					break;
 				case 'r': /* heave */
-					printsimplevalue(verbose, heave, 5, 2, ascii, 
+					printsimplevalue(verbose, output[i], heave, 5, 2, ascii, 
 							    &invert_next_value, 
 							    &signflip_next_value, &error);
 					break;
 				case 'S': /* speed */
-					printsimplevalue(verbose, speed, 5, 2, ascii, 
+					printsimplevalue(verbose, output[i], speed, 5, 2, ascii, 
 							    &invert_next_value, 
 							    &signflip_next_value, &error);
 					break;
 				case 's': /* speed made good */
-					printsimplevalue(verbose, speed_made_good, 5, 2, ascii, 
+					printsimplevalue(verbose, output[i], speed_made_good, 5, 2, ascii, 
 							    &invert_next_value, 
 							    &signflip_next_value, &error);
 					break;
 				case 'T': /* yyyy/mm/dd/hh/mm/ss time string */
 					if (ascii == MB_YES)
-					    printf("%.4d/%.2d/%.2d/%.2d/%.2d/%.2d.%.6d",
+					    {
+					    if (netcdf == MB_YES) fprintf(output[i], "\"");
+
+					    fprintf(output[i],"%.4d/%.2d/%.2d/%.2d/%.2d/%.2d.%.6d",
 						time_i[0],time_i[1],time_i[2],
 						time_i[3],time_i[4],time_i[5],
 						time_i[6]);
+					    if (netcdf == MB_YES) fprintf(output[i], "\"");
+					    }
 					else
 					    {
 					    b = time_i[0];
-					    fwrite(&b, sizeof(double), 1, stdout);
+					    fwrite(&b, sizeof(double), 1, outfile);
 					    b = time_i[1];
-					    fwrite(&b, sizeof(double), 1, stdout);
+					    fwrite(&b, sizeof(double), 1, outfile);
 					    b = time_i[2];
-					    fwrite(&b, sizeof(double), 1, stdout);
+					    fwrite(&b, sizeof(double), 1, outfile);
 					    b = time_i[3];
-					    fwrite(&b, sizeof(double), 1, stdout);
+					    fwrite(&b, sizeof(double), 1, outfile);
 					    b = time_i[4];
-					    fwrite(&b, sizeof(double), 1, stdout);
+					    fwrite(&b, sizeof(double), 1, outfile);
 					    b = time_i[5] + 1e-6 * time_i[6];
-					    fwrite(&b, sizeof(double), 1, stdout);
+					    fwrite(&b, sizeof(double), 1, outfile);
 					    }
 					break;
 				case 't': /* yyyy mm dd hh mm ss time string */
 					if (ascii == MB_YES)
-					    printf("%.4d %.2d %.2d %.2d %.2d %.2d.%.6d",
+					    {
+					    if (netcdf == MB_YES)
+					    fprintf(output[i],"%d, %d, %d, %d, %d, %d, %d",
 						time_i[0],time_i[1],time_i[2],
 						time_i[3],time_i[4],time_i[5],
 						time_i[6]);
+					    else
+					    fprintf(output[i],"%.4d %.2d %.2d %.2d %.2d %.2d.%.6d",
+						time_i[0],time_i[1],time_i[2],
+						time_i[3],time_i[4],time_i[5],
+						time_i[6]);
+					    }
 					else
 					    {
 					    b = time_i[0];
-					    fwrite(&b, sizeof(double), 1, stdout);
+					    fwrite(&b, sizeof(double), 1, outfile);
 					    b = time_i[1];
-					    fwrite(&b, sizeof(double), 1, stdout);
+					    fwrite(&b, sizeof(double), 1, outfile);
 					    b = time_i[2];
-					    fwrite(&b, sizeof(double), 1, stdout);
+					    fwrite(&b, sizeof(double), 1, outfile);
 					    b = time_i[3];
-					    fwrite(&b, sizeof(double), 1, stdout);
+					    fwrite(&b, sizeof(double), 1, outfile);
 					    b = time_i[4];
-					    fwrite(&b, sizeof(double), 1, stdout);
+					    fwrite(&b, sizeof(double), 1, outfile);
 					    b = time_i[5] + 1e-6 * time_i[6];
-					    fwrite(&b, sizeof(double), 1, stdout);
+					    fwrite(&b, sizeof(double), 1, outfile);
 					    }
 					break;
 				case 'U': /* unix time in seconds since 1/1/70 00:00:00 */
 					time_u = (int) time_d;
 					if (ascii == MB_YES)
-					    printf("%d",time_u);
+					    fprintf(output[i],"%d",time_u);
 					else
 					    {
 					    b = time_u;
-					    fwrite(&b, sizeof(double), 1, stdout);
+					    fwrite(&b, sizeof(double), 1, outfile);
 					    }
 					break;
 				case 'u': /* time in seconds since first record */
@@ -1499,11 +2392,11 @@ main (int argc, char **argv)
 						first_u = MB_NO;
 						}
 					if (ascii == MB_YES)
-					    printf("%d",time_u - time_u_ref);
+					    fprintf(output[i],"%d",time_u - time_u_ref);
 					else
 					    {
 					    b = time_u - time_u_ref;
-					    fwrite(&b, sizeof(double), 1, stdout);
+					    fwrite(&b, sizeof(double), 1, outfile);
 					    }
 					break;
 				case 'V': /* time in seconds since last ping */
@@ -1511,13 +2404,13 @@ main (int argc, char **argv)
 					if (ascii == MB_YES)
 					    {
 					    if ( fabs(time_interval) > 100. )
-						printf("%g",time_interval); 
+						fprintf(output[i],"%g",time_interval); 
 					    else
-						printf("%7.3f",time_interval);
+						fprintf(output[i],"%7.3f",time_interval);
 					    }
 					else
 					    {
-					    fwrite(&time_interval, sizeof(double), 1, stdout);
+					    fwrite(&time_interval, sizeof(double), 1, outfile);
 					    }
 					break;
 				case 'X': /* longitude decimal degrees */
@@ -1527,7 +2420,7 @@ main (int argc, char **argv)
 							*bathacrosstrack[j]
 						    + headingx*mtodeglon
 							*bathalongtrack[j];
-					printsimplevalue(verbose, dlon, 11, 6, ascii, 
+					printsimplevalue(verbose, output[i], dlon, 11, 6, ascii, 
 							    &invert_next_value, 
 							    &signflip_next_value, &error);
 					break;
@@ -1549,16 +2442,18 @@ main (int argc, char **argv)
 					minutes = 60.0*(dlon - degrees);
 					if (ascii == MB_YES)
 					    {
-					    printf("%3d %8.5f%c",
+					    if (netcdf == MB_YES) fprintf(output[i], "\"");
+					    fprintf(output[i],"%3d %8.5f%c",
 						degrees, minutes, hemi);
+					    if (netcdf == MB_YES) fprintf(output[i], "\"");
 					    }
 					else
 					    {
 					    b = degrees;
 					    if (hemi == 'W') b = -b;
-					    fwrite(&b, sizeof(double), 1, stdout);
+					    fwrite(&b, sizeof(double), 1, outfile);
 					    b = minutes;
-					    fwrite(&b, sizeof(double), 1, stdout);
+					    fwrite(&b, sizeof(double), 1, outfile);
 					    }
 					break;
 				case 'Y': /* latitude decimal degrees */
@@ -1568,7 +2463,7 @@ main (int argc, char **argv)
 							*bathacrosstrack[j]
 						    + headingy*mtodeglat
 							*bathalongtrack[j];
-					printsimplevalue(verbose, dlat, 11, 6, ascii, 
+					printsimplevalue(verbose, output[i], dlat, 11, 6, ascii, 
 							    &invert_next_value, 
 							    &signflip_next_value, &error);
 					break;
@@ -1590,16 +2485,18 @@ main (int argc, char **argv)
 					minutes = 60.0*(dlat - degrees);
 					if (ascii == MB_YES)
 					    {
-					    printf("%3d %8.5f%c",
+					    if (netcdf == MB_YES) fprintf(output[i], "\"");
+					    fprintf(output[i],"%3d %8.5f%c",
 						degrees, minutes, hemi);
+					    if (netcdf == MB_YES) fprintf(output[i], "\"");
 					    }
 					else
 					    {
 					    b = degrees;
 					    if (hemi == 'S') b = -b;
-					    fwrite(&b, sizeof(double), 1, stdout);
+					    fwrite(&b, sizeof(double), 1, outfile);
 					    b = minutes;
-					    fwrite(&b, sizeof(double), 1, stdout);
+					    fwrite(&b, sizeof(double), 1, outfile);
 					    }
 					break;
 				case 'Z': /* topography */
@@ -1607,19 +2504,19 @@ main (int argc, char **argv)
 					    && (check_values == MBLIST_CHECK_OFF_NAN
 						|| check_values == MBLIST_CHECK_OFF_FLAGNAN))
 					    {
-					    printNaN(verbose, ascii, &invert_next_value, 
+					    printNaN(verbose, output[i], ascii, &invert_next_value, 
 							    &signflip_next_value, &error);
 					    }
 					else if (!mb_beam_ok(beamflag[j])
 					    && check_values == MBLIST_CHECK_OFF_FLAGNAN)
 					    {
-					    printNaN(verbose, ascii, &invert_next_value, 
+					    printNaN(verbose, output[i], ascii, &invert_next_value, 
 							    &signflip_next_value, &error);
 					    }
 					else
 					    {
 					    b = -bathy_scale * bath[j];
-					    printsimplevalue(verbose, b, 0, 3, ascii, 
+					    printsimplevalue(verbose, output[i], b, 0, 3, ascii, 
 							    &invert_next_value, 
 							    &signflip_next_value, &error);
 					    }
@@ -1629,42 +2526,42 @@ main (int argc, char **argv)
 					    && (check_values == MBLIST_CHECK_OFF_NAN
 						|| check_values == MBLIST_CHECK_OFF_FLAGNAN))
 					    {
-					    printNaN(verbose, ascii, &invert_next_value, 
+					    printNaN(verbose, output[i], ascii, &invert_next_value, 
 							    &signflip_next_value, &error);
 					    }
 					else if (!mb_beam_ok(beamflag[j])
 					    && check_values == MBLIST_CHECK_OFF_FLAGNAN)
 					    {
-					    printNaN(verbose, ascii, &invert_next_value, 
+					    printNaN(verbose, output[i], ascii, &invert_next_value, 
 							    &signflip_next_value, &error);
 					    }
 					else
 					    {
 					    b = bathy_scale * bath[j];
-					    printsimplevalue(verbose, b, 0, 3, ascii, 
+					    printsimplevalue(verbose, output[i], b, 0, 3, ascii, 
 							    &invert_next_value, 
 							    &signflip_next_value, &error);
 					    }
 					break;
 				case '#': /* beam number */
 					if (ascii == MB_YES)
-					    printf("%6d",j);
+					    fprintf(output[i],"%6d",j);
 					else
 					    {
 					    b = j;
-					    fwrite(&b, sizeof(double), 1, stdout);
+					    fwrite(&b, sizeof(double), 1, outfile);
 					    }
 					break;
 				default:
 					if (ascii == MB_YES)
-					    printf("<Invalid Option: %c>",
+					    fprintf(output[i],"<Invalid Option: %c>",
 						list[i]);
 					break;
 				}
 			if (ascii == MB_YES)
 			    {
-			    if (i<(n_list-1)) printf ("\t");
-			    else printf ("\n");
+			    if (i<(n_list-1)) fprintf(output[i], "\t");
+			    else fprintf (output[lcount++ % n_list], "\n");
 			    }
 			}
 		    }
@@ -1708,6 +2605,9 @@ main (int argc, char **argv)
 		    {
 		    for (i=0; i<n_list; i++) 
 			{
+			if (netcdf == MB_YES && lcount > 0)
+			  fprintf(output[i], ", ");
+
 			switch (list[i]) 
 				{
 				case '/': /* Inverts next simple value */
@@ -1717,7 +2617,7 @@ main (int argc, char **argv)
 					signflip_next_value = MB_YES;
 					break;
 				case 'A': /* Average seafloor crosstrack slope */
-					printsimplevalue(verbose, avgslope, 0, 4, ascii, 
+					printsimplevalue(verbose, output[i], avgslope, 0, 4, ascii, 
 							    &invert_next_value, 
 							    &signflip_next_value, &error);
 					break;
@@ -1727,41 +2627,41 @@ main (int argc, char **argv)
 						nslopes,slopes,slopeacrosstrack,
 						ssacrosstrack[j],
 						&depth,&slope,&error);
-					printsimplevalue(verbose, slope, 0, 4, ascii, 
+					printsimplevalue(verbose, output[i], slope, 0, 4, ascii, 
 							    &invert_next_value, 
 							    &signflip_next_value, &error);
 					break;
 				case 'B': /* amplitude */
-					printsimplevalue(verbose, amp[beam_vertical], 0, 3, ascii, 
+					printsimplevalue(verbose, output[i], amp[beam_vertical], 0, 3, ascii, 
 							    &invert_next_value, 
 							    &signflip_next_value, &error);
 					break;
 				case 'b': /* sidescan */
-					printsimplevalue(verbose, ss[j], 0, 3, ascii, 
+					printsimplevalue(verbose, output[i], ss[j], 0, 3, ascii, 
 							    &invert_next_value, 
 							    &signflip_next_value, &error);
 					break;
 				case 'C': /* Sonar altitude (m) */
-					printsimplevalue(verbose, altitude, 0, 3, ascii, 
+					printsimplevalue(verbose, output[i], altitude, 0, 3, ascii, 
 							    &invert_next_value, 
 							    &signflip_next_value, &error);
 					break;
 				case 'c': /* Sonar transducer depth (m) */
-					printsimplevalue(verbose, sonardepth, 0, 3, ascii, 
+					printsimplevalue(verbose, output[i], sonardepth, 0, 3, ascii, 
 							    &invert_next_value, 
 							    &signflip_next_value, &error);
 					break;
 				case 'D': /* acrosstrack dist. */
 				case 'd':
 					b = bathy_scale * ssacrosstrack[j];
-					printsimplevalue(verbose, b, 0, 3, ascii, 
+					printsimplevalue(verbose, output[i], b, 0, 3, ascii, 
 							&invert_next_value, 
 							    &signflip_next_value, &error);
 					break;
 				case 'E': /* alongtrack dist. */
 				case 'e':
 					b = bathy_scale * ssalongtrack[j];
-					printsimplevalue(verbose, b, 0, 3, ascii, 
+					printsimplevalue(verbose, output[i], b, 0, 3, ascii, 
 							&invert_next_value, 
 							    &signflip_next_value, &error);
 					break;
@@ -1772,7 +2672,7 @@ main (int argc, char **argv)
 					    ssacrosstrack[j],
 					    &depth,&slope,&error);
 					angle = RTD*(atan(ssacrosstrack[j] / depth));
-					printsimplevalue(verbose, angle, 0, 2, ascii, 
+					printsimplevalue(verbose, output[i], angle, 0, 2, ascii, 
 							    &invert_next_value, 
 							    &signflip_next_value, &error);
 					break;
@@ -1784,17 +2684,17 @@ main (int argc, char **argv)
 					    &depth,&slope,&error);
 					angle = RTD * (atan(bathacrosstrack[j] / depth))
 					    + slope;
-					printsimplevalue(verbose, angle, 0, 2, ascii, 
+					printsimplevalue(verbose, output[i], angle, 0, 2, ascii, 
 							    &invert_next_value, 
 							    &signflip_next_value, &error);
 					break;
 				case 'H': /* heading */
-					printsimplevalue(verbose, heading, 6, 2, ascii, 
+					printsimplevalue(verbose, output[i], heading, 6, 2, ascii, 
 							    &invert_next_value, 
 							    &signflip_next_value, &error);
 					break;
 				case 'h': /* course */
-					printsimplevalue(verbose, course, 6, 2, ascii, 
+					printsimplevalue(verbose, output[i], course, 6, 2, ascii, 
 							    &invert_next_value, 
 							    &signflip_next_value, &error);
 					break;
@@ -1802,7 +2702,13 @@ main (int argc, char **argv)
 					mb_get_jtime(verbose,time_i,time_j);
 					if (ascii == MB_YES)
 					    {
-					    printf("%.4d %.3d %.2d %.2d %.2d.%6.6d",
+					    if (netcdf == MB_YES) 
+					    fprintf(output[i],"%d, %d, %d, %d, %d, %d",
+						time_j[0],time_j[1],
+						time_i[3],time_i[4],
+						time_i[5],time_i[6]);
+					    else
+					    fprintf(output[i],"%.4d %.3d %.2d %.2d %.2d.%6.6d",
 						time_j[0],time_j[1],
 						time_i[3],time_i[4],
 						time_i[5],time_i[6]);
@@ -1810,54 +2716,59 @@ main (int argc, char **argv)
 					else
 					    {
 					    b = time_j[0];
-					    fwrite(&b, sizeof(double), 1, stdout);
+					    fwrite(&b, sizeof(double), 1, outfile);
 					    b = time_j[1];
-					    fwrite(&b, sizeof(double), 1, stdout);
+					    fwrite(&b, sizeof(double), 1, outfile);
 					    b = time_i[3];
-					    fwrite(&b, sizeof(double), 1, stdout);
+					    fwrite(&b, sizeof(double), 1, outfile);
 					    b = time_i[4];
-					    fwrite(&b, sizeof(double), 1, stdout);
+					    fwrite(&b, sizeof(double), 1, outfile);
 					    b = time_i[5];
-					    fwrite(&b, sizeof(double), 1, stdout);
+					    fwrite(&b, sizeof(double), 1, outfile);
 					    b = time_i[6];
-					    fwrite(&b, sizeof(double), 1, stdout);
+					    fwrite(&b, sizeof(double), 1, outfile);
 					    }
 					break;
 				case 'j': /* time string */
 					mb_get_jtime(verbose,time_i,time_j);
 					if (ascii == MB_YES)
 					    {
-					    printf("%.4d %.3d %.4d %.2d.%6.6d",
+					    if (netcdf == MB_YES)
+					    fprintf(output[i],"%d, %d, %d, %d, %d",
+						time_j[0],time_j[1],
+						time_j[2],time_j[3],time_j[4]);
+					    else
+					    fprintf(output[i],"%.4d %.3d %.4d %.2d.%6.6d",
 						time_j[0],time_j[1],
 						time_j[2],time_j[3],time_j[4]);
 					    }
 					else
 					    {
 					    b = time_j[0];
-					    fwrite(&b, sizeof(double), 1, stdout);
+					    fwrite(&b, sizeof(double), 1, outfile);
 					    b = time_j[1];
-					    fwrite(&b, sizeof(double), 1, stdout);
+					    fwrite(&b, sizeof(double), 1, outfile);
 					    b = time_j[2];
-					    fwrite(&b, sizeof(double), 1, stdout);
+					    fwrite(&b, sizeof(double), 1, outfile);
 					    b = time_j[3];
-					    fwrite(&b, sizeof(double), 1, stdout);
+					    fwrite(&b, sizeof(double), 1, outfile);
 					    b = time_j[4];
-					    fwrite(&b, sizeof(double), 1, stdout);
+					    fwrite(&b, sizeof(double), 1, outfile);
 					    }
 					break;
 				case 'L': /* along-track distance (km) */
-					printsimplevalue(verbose, distance_total, 7, 3, ascii, 
+					printsimplevalue(verbose, output[i], distance_total, 7, 3, ascii, 
 							    &invert_next_value, 
 							    &signflip_next_value, &error);
 					break;
 				case 'l': /* along-track distance (m) */
-					printsimplevalue(verbose, 1000.0 * distance_total, 7, 3, ascii, 
+					printsimplevalue(verbose, output[i], 1000.0 * distance_total, 7, 3, ascii, 
 							    &invert_next_value, 
 							    &signflip_next_value, &error);
 					break;
 				case 'M': /* Decimal unix seconds since 
 						1/1/70 00:00:00 */
-					printsimplevalue(verbose, time_d, 0, 6, ascii, 
+					printsimplevalue(verbose, output[i], time_d, 0, 6, ascii, 
 							    &invert_next_value, 
 							    &signflip_next_value, &error);
 					break;
@@ -1869,101 +2780,113 @@ main (int argc, char **argv)
 						first_m = MB_NO;
 						}
 					b = time_d - time_d_ref;
-					printsimplevalue(verbose, b, 0, 6, ascii, 
+					printsimplevalue(verbose, output[i], b, 0, 6, ascii, 
 							    &invert_next_value, 
 							    &signflip_next_value, &error);
 					break;
 				case 'N': /* ping counter */
 					if (ascii == MB_YES)
-					    printf("%6d",nread);
+					    fprintf(output[i],"%6d",nread);
 					else
 					    {
 					    b = nread;
-					    fwrite(&b, sizeof(double), 1, stdout);
+					    fwrite(&b, sizeof(double), 1, outfile);
 					    }
 					break;
 				case 'P': /* pitch */
-					printsimplevalue(verbose, pitch, 5, 2, ascii, 
+					printsimplevalue(verbose, output[i], pitch, 5, 2, ascii, 
 							    &invert_next_value, 
 							    &signflip_next_value, &error);
 					break;
 				case 'p': /* draft */
-					printsimplevalue(verbose, draft, 5, 2, ascii, 
+					printsimplevalue(verbose, output[i], draft, 5, 2, ascii, 
 							    &invert_next_value, 
 							    &signflip_next_value, &error);
 					break;
 				case 'R': /* roll */
-					printsimplevalue(verbose, roll, 5, 2, ascii, 
+					printsimplevalue(verbose, output[i], roll, 5, 2, ascii, 
 							    &invert_next_value, 
 							    &signflip_next_value, &error);
 					break;
 				case 'r': /* heave */
-					printsimplevalue(verbose, heave, 5, 2, ascii, 
+					printsimplevalue(verbose, output[i], heave, 5, 2, ascii, 
 							    &invert_next_value, 
 							    &signflip_next_value, &error);
 					break;
 				case 'S': /* speed */
-					printsimplevalue(verbose, speed, 5, 2, ascii, 
+					printsimplevalue(verbose, output[i], speed, 5, 2, ascii, 
 							    &invert_next_value, 
 							    &signflip_next_value, &error);
 					break;
 				case 's': /* speed made good */
-					printsimplevalue(verbose, speed_made_good, 5, 2, ascii, 
+					printsimplevalue(verbose, output[i], speed_made_good, 5, 2, ascii, 
 							    &invert_next_value, 
 							    &signflip_next_value, &error);
 					break;
 				case 'T': /* yyyy/mm/dd/hh/mm/ss time string */
 					if (ascii == MB_YES)
-					    printf("%.4d/%.2d/%.2d/%.2d/%.2d/%.2d.%.6d",
+					    {
+					    if (netcdf == MB_YES) fprintf(output[i], "\"");
+					    fprintf(output[i],"%.4d/%.2d/%.2d/%.2d/%.2d/%.2d.%.6d",
 						time_i[0],time_i[1],time_i[2],
 						time_i[3],time_i[4],time_i[5],
 						time_i[6]);
+					    if (netcdf == MB_YES) fprintf(output[i], "\"");
+					    }
 					else
 					    {
 					    b = time_i[0];
-					    fwrite(&b, sizeof(double), 1, stdout);
+					    fwrite(&b, sizeof(double), 1, outfile);
 					    b = time_i[1];
-					    fwrite(&b, sizeof(double), 1, stdout);
+					    fwrite(&b, sizeof(double), 1, outfile);
 					    b = time_i[2];
-					    fwrite(&b, sizeof(double), 1, stdout);
+					    fwrite(&b, sizeof(double), 1, outfile);
 					    b = time_i[3];
-					    fwrite(&b, sizeof(double), 1, stdout);
+					    fwrite(&b, sizeof(double), 1, outfile);
 					    b = time_i[4];
-					    fwrite(&b, sizeof(double), 1, stdout);
+					    fwrite(&b, sizeof(double), 1, outfile);
 					    b = time_i[5] + 1e-6 * time_i[6];
-					    fwrite(&b, sizeof(double), 1, stdout);
+					    fwrite(&b, sizeof(double), 1, outfile);
 					    }
 					break;
 				case 't': /* yyyy mm dd hh mm ss time string */
 					if (ascii == MB_YES)
-					    printf("%.4d %.2d %.2d %.2d %.2d %.2d.%.6d",
+					    {
+					    if (netcdf == MB_YES)
+					    fprintf(output[i],"%d, %d, %d, %d, %d, %d, %d",
 						time_i[0],time_i[1],time_i[2],
 						time_i[3],time_i[4],time_i[5],
 						time_i[6]);
+					    else
+					    fprintf(output[i],"%.4d %.2d %.2d %.2d %.2d %.2d.%.6d",
+						time_i[0],time_i[1],time_i[2],
+						time_i[3],time_i[4],time_i[5],
+						time_i[6]);
+					    }
 					else
 					    {
 					    b = time_i[0];
-					    fwrite(&b, sizeof(double), 1, stdout);
+					    fwrite(&b, sizeof(double), 1, outfile);
 					    b = time_i[1];
-					    fwrite(&b, sizeof(double), 1, stdout);
+					    fwrite(&b, sizeof(double), 1, outfile);
 					    b = time_i[2];
-					    fwrite(&b, sizeof(double), 1, stdout);
+					    fwrite(&b, sizeof(double), 1, outfile);
 					    b = time_i[3];
-					    fwrite(&b, sizeof(double), 1, stdout);
+					    fwrite(&b, sizeof(double), 1, outfile);
 					    b = time_i[4];
-					    fwrite(&b, sizeof(double), 1, stdout);
+					    fwrite(&b, sizeof(double), 1, outfile);
 					    b = time_i[5] + 1e-6 * time_i[6];
-					    fwrite(&b, sizeof(double), 1, stdout);
+					    fwrite(&b, sizeof(double), 1, outfile);
 					    }
 					break;
 				case 'U': /* unix time in seconds since 1/1/70 00:00:00 */
 					time_u = (int) time_d;
 					if (ascii == MB_YES)
-					    printf("%d",time_u);
+					    fprintf(output[i],"%d",time_u);
 					else
 					    {
 					    b = time_u;
-					    fwrite(&b, sizeof(double), 1, stdout);
+					    fwrite(&b, sizeof(double), 1, outfile);
 					    }
 					break;
 				case 'u': /* time in seconds since first record */
@@ -1974,11 +2897,11 @@ main (int argc, char **argv)
 						first_u = MB_NO;
 						}
 					if (ascii == MB_YES)
-					    printf("%d",time_u - time_u_ref);
+					    fprintf(output[i],"%d",time_u - time_u_ref);
 					else
 					    {
 					    b = time_u - time_u_ref;
-					    fwrite(&b, sizeof(double), 1, stdout);
+					    fwrite(&b, sizeof(double), 1, outfile);
 					    }
 					break;
 				case 'V': /* time in seconds since last ping */
@@ -1986,13 +2909,13 @@ main (int argc, char **argv)
 					if (ascii == MB_YES)
 					    {
 					    if ( fabs(time_interval) > 100. )
-						printf("%g",time_interval); 
+						fprintf(output[i],"%g",time_interval); 
 					    else
-						printf("%7.3f",time_interval);
+						fprintf(output[i],"%7.3f",time_interval);
 					    }
 					else
 					    {
-					    fwrite(&time_interval, sizeof(double), 1, stdout);
+					    fwrite(&time_interval, sizeof(double), 1, outfile);
 					    }
 					break;
 				case 'X': /* longitude decimal degrees */
@@ -2002,7 +2925,7 @@ main (int argc, char **argv)
 							*ssacrosstrack[j]
 						    + headingx*mtodeglon
 							*ssalongtrack[j];
-					printsimplevalue(verbose, dlon, 11, 6, ascii, 
+					printsimplevalue(verbose, output[i], dlon, 11, 6, ascii, 
 							    &invert_next_value, 
 							    &signflip_next_value, &error);
 					break;
@@ -2024,16 +2947,18 @@ main (int argc, char **argv)
 					minutes = 60.0*(dlon - degrees);
 					if (ascii == MB_YES)
 					    {
-					    printf("%3d %8.5f%c",
+					    if (netcdf == MB_YES) fprintf(output[i], "\"");
+					    fprintf(output[i],"%3d %8.5f%c",
 						degrees, minutes, hemi);
+					    if (netcdf == MB_YES) fprintf(output[i], "\"");
 					    }
 					else
 					    {
 					    b = degrees;
 					    if (hemi == 'W') b = -b;
-					    fwrite(&b, sizeof(double), 1, stdout);
+					    fwrite(&b, sizeof(double), 1, outfile);
 					    b = minutes;
-					    fwrite(&b, sizeof(double), 1, stdout);
+					    fwrite(&b, sizeof(double), 1, outfile);
 					    }
 					break;
 				case 'Y': /* latitude decimal degrees */
@@ -2043,7 +2968,7 @@ main (int argc, char **argv)
 							*ssacrosstrack[j]
 						    + headingy*mtodeglat
 							*ssalongtrack[j];
-					printsimplevalue(verbose, dlat, 11, 6, ascii, 
+					printsimplevalue(verbose, output[i], dlat, 11, 6, ascii, 
 							    &invert_next_value, 
 							    &signflip_next_value, &error);
 					break;
@@ -2065,16 +2990,18 @@ main (int argc, char **argv)
 					minutes = 60.0*(dlat - degrees);
 					if (ascii == MB_YES)
 					    {
-					    printf("%3d %8.5f%c",
+					    if (netcdf == MB_YES) fprintf(output[i], "\"");
+					    fprintf(output[i],"%3d %8.5f%c",
 						degrees, minutes, hemi);
+					    if (netcdf == MB_YES) fprintf(output[i], "\"");
 					    }
 					else
 					    {
 					    b = degrees;
 					    if (hemi == 'S') b = -b;
-					    fwrite(&b, sizeof(double), 1, stdout);
+					    fwrite(&b, sizeof(double), 1, outfile);
 					    b = minutes;
-					    fwrite(&b, sizeof(double), 1, stdout);
+					    fwrite(&b, sizeof(double), 1, outfile);
 					    }
 					break;
 				case 'Z': /* topography */
@@ -2082,19 +3009,19 @@ main (int argc, char **argv)
 					    && (check_values == MBLIST_CHECK_OFF_NAN
 						|| check_values == MBLIST_CHECK_OFF_FLAGNAN))
 					    {
-					    printNaN(verbose, ascii, &invert_next_value, 
+					    printNaN(verbose, output[i], ascii, &invert_next_value, 
 							    &signflip_next_value, &error);
 					    }
 					else if (!mb_beam_ok(beamflag[beam_vertical])
 					    && check_values == MBLIST_CHECK_OFF_FLAGNAN)
 					    {
-					    printNaN(verbose, ascii, &invert_next_value, 
+					    printNaN(verbose, output[i], ascii, &invert_next_value, 
 							    &signflip_next_value, &error);
 					    }
 					else
 					    {
 					    b = -bathy_scale * bath[beam_vertical];
-					    printsimplevalue(verbose, b, 0, 3, ascii, 
+					    printsimplevalue(verbose, output[i], b, 0, 3, ascii, 
 							    &invert_next_value, 
 							    &signflip_next_value, &error);
 					    }
@@ -2104,42 +3031,42 @@ main (int argc, char **argv)
 					    && (check_values == MBLIST_CHECK_OFF_NAN
 						|| check_values == MBLIST_CHECK_OFF_FLAGNAN))
 					    {
-					    printNaN(verbose, ascii, &invert_next_value, 
+					    printNaN(verbose, output[i], ascii, &invert_next_value, 
 							    &signflip_next_value, &error);
 					    }
 					else if (!mb_beam_ok(beamflag[beam_vertical])
 					    && check_values == MBLIST_CHECK_OFF_FLAGNAN)
 					    {
-					    printNaN(verbose, ascii, &invert_next_value, 
+					    printNaN(verbose, output[i], ascii, &invert_next_value, 
 							    &signflip_next_value, &error);
 					    }
 					else
 					    {
 					    b = bathy_scale * bath[beam_vertical];
-					    printsimplevalue(verbose, b, 0, 3, ascii, 
+					    printsimplevalue(verbose, output[i], b, 0, 3, ascii, 
 							    &invert_next_value, 
 							    &signflip_next_value, &error);
 					    }
 					break;
 				case '#': /* pixel number */
 					if (ascii == MB_YES)
-					    printf("%6d",j);
+					    fprintf(output[i],"%6d",j);
 					else
 					    {
 					    b = j;
-					    fwrite(&b, sizeof(double), 1, stdout);
+					    fwrite(&b, sizeof(double), 1, outfile);
 					    }
 					break;
 				default:
-					printf("<Invalid Option: %c>",
+					fprintf(output[i],"<Invalid Option: %c>",
 						list[i]);
 					break;
 				}
-                        if (ascii == MB_YES)
-                            {
-                            if (i<(n_list-1)) printf ("\t");
-                            else printf ("\n");
-                            }
+			if (ascii == MB_YES)
+			    {
+			    if (i<(n_list-1)) fprintf(output[i], "\t");
+			    else fprintf (output[lcount++ % n_list], "\n");
+			    }
 			}
 		    }
 		  }
@@ -2189,6 +3116,49 @@ main (int argc, char **argv)
 	if (read_datalist == MB_YES)
 		mb_datalist_close(verbose,&datalist,&error);
 
+	/* compile CDL file */
+	if (netcdf == MB_YES) 
+	    {
+	    for (i=0; i<n_list; i++) 
+	        {
+		if(list[i] != '/' && list[i] != '-')
+		    {
+		    fprintf(output[i], " ;\n\n");
+		    rewind(output[i]);
+
+		    /* copy data to CDL file */
+		    for (j = fread(buffer, sizeof(char), MB_BUFFER_MAX, output[i]);
+			 j > 0;
+			 j = fread(buffer, sizeof(char), MB_BUFFER_MAX, output[i])) 
+		        {
+			if (j != fwrite(buffer, sizeof(char), j, outfile))
+			    {
+			    fprintf(stderr, "Error writing to CDL file");
+			    }
+			}
+		    }
+		fclose(output[i]);
+		}
+
+	    fprintf(outfile, "}\n");
+	    fclose(outfile);
+
+	    /* convert cdl to netcdf */
+	    if (netcdf_cdl == MB_NO)
+	        {
+		sprintf(output_file_temp, "ncgen -o %s %s.cdl", output_file, output_file);
+		if (0 == system(output_file_temp))
+		    {
+		    sprintf(output_file_temp, "rm %s.cdl", output_file);
+		    system(output_file_temp);
+		    }
+		}
+	    } 
+	else
+	    {
+	    fclose(outfile);
+	    }
+	  
 	/* check memory */
 	if (verbose >= 4)
 		status = mb_memory_list(verbose,&error);
@@ -2612,7 +3582,7 @@ int get_bathyslope(int verbose,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int printsimplevalue(int verbose, 
+int printsimplevalue(int verbose, FILE *output,
 	double value, int width, int precision, 
 	int ascii, int *invert, int *flipsign, int *error)
 {
@@ -2661,9 +3631,9 @@ int printsimplevalue(int verbose,
 	    
 	/* print value */
 	if (ascii == MB_YES)
-	    printf(format, value);
+	    fprintf(output,format, value);
 	else
-	    fwrite(&value, sizeof(double), 1, stdout);
+	    fwrite(&value, sizeof(double), 1, output);
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -2681,7 +3651,7 @@ int printsimplevalue(int verbose,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int printNaN(int verbose, int ascii, int *invert, int *flipsign, int *error)
+int printNaN(int verbose, FILE *output, int ascii, int *invert, int *flipsign, int *error)
 {
 	char	*function_name = "printNaN";
 	int	status = MB_SUCCESS;
@@ -2708,9 +3678,9 @@ int printNaN(int verbose, int ascii, int *invert, int *flipsign, int *error)
 	    
 	/* print value */
 	if (ascii == MB_YES)
-	    printf("NaN");
+	    fprintf(output,"NaN");
 	else
-	    fwrite(&NaN, sizeof(double), 1, stdout);
+	    fwrite(&NaN, sizeof(double), 1, output);
 
 	/* print output debug statements */
 	if (verbose >= 2)
