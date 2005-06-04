@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.h	1/19/93
- *    $Id: mb_format.h,v 5.17 2004-11-06 03:55:15 caress Exp $
+ *    $Id: mb_format.h,v 5.18 2005-06-04 04:15:59 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2001, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -19,6 +19,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.17  2004/11/06 03:55:15  caress
+ * Working to support the Reson 7k format.
+ *
  * Revision 5.16  2004/04/27 01:46:13  caress
  * Various updates of April 26, 2004.
  *
@@ -214,7 +217,7 @@
 #define MB_FORMAT_DEF
 
 /* define date of last format update */
-static char mb_format_updatedate[] = "$Date: 2004-11-06 03:55:15 $ $Revision: 5.17 $";
+static char mb_format_updatedate[] = "$Date: 2005-06-04 04:15:59 $ $Revision: 5.18 $";
 
 /* Supported swath sonar systems */
 #define	MB_SYS_NONE		0
@@ -245,9 +248,10 @@ static char mb_format_updatedate[] = "$Date: 2004-11-06 03:55:15 $ $Revision: 5.
 #define	MB_SYS_NAVNETCDF	25
 #define	MB_SYS_SURF		26
 #define	MB_SYS_RESON7K		27
+#define	MB_SYS_JSTAR		28
 
 /* Number of supported MBIO data formats */
-#define	MB_FORMATS	57
+#define	MB_FORMATS	59
 
 /* Data formats supported by MBIO */
 #define MBF_DATALIST	-1
@@ -399,6 +403,14 @@ static char mb_format_updatedate[] = "$Date: 2004-11-06 03:55:15 $ $Revision: 5.
 #define MBF_MSTIFFSS    131     /* MSTIFF sidescan format,
 					variable pixels,  sidescan, 
 					binary TIFF variant, single files, Sea Scan */
+#define MBF_EDGJSTAR    132     /* Edgetech Jstar format
+					variable pixels, dual frequency sidescan and subbottom,
+                      			binary SEGY variant, single files, low frequency sidescan
+					returned as survey data, Edgetech. */
+#define MBF_EDGJSTR2    133     /* Edgetech Jstar format
+					variable pixels, dual frequency sidescan and subbottom,
+                      			binary SEGY variant, single files, high frequency sidescan
+					returned as survey data, Edgetech. */
 #define MBF_OICGEODA    141     /* OIC swath sonar format, variable beam 
 					bathymetry and amplitude, variable
 					pixel sidescan, binary, Oceanic Imaging 

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_reson7k.c	3.00	3/23/2004
- *	$Id: mbsys_reson7k.c,v 5.7 2004-12-02 06:33:31 caress Exp $
+ *	$Id: mbsys_reson7k.c,v 5.8 2005-06-04 04:16:00 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -26,6 +26,9 @@
  * Date:	March 23, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2004/12/02 06:33:31  caress
+ * Fixes while supporting Reson 7k data.
+ *
  * Revision 5.6  2004/11/08 05:47:20  caress
  * Now gets sidescan from snippet data, maybe even properly...
  *
@@ -67,7 +70,7 @@
 /* turn on debug statements here */
 /* #define MSYS_RESON7KR_DEBUG 1 */
 
-static char res_id[]="$Id: mbsys_reson7k.c,v 5.7 2004-12-02 06:33:31 caress Exp $";
+static char res_id[]="$Id: mbsys_reson7k.c,v 5.8 2005-06-04 04:16:00 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_zero7kheader(int verbose, s7k_header	*header, 
@@ -6001,7 +6004,7 @@ int mbsys_reson7k_extract_segytraceheader(int verbose, void *mbio_ptr, void *sto
 		mb_segytraceheader_ptr->min		= store->time_i[4];
 		mb_segytraceheader_ptr->sec		= store->time_i[5];
 		mb_segytraceheader_ptr->mils		= store->time_i[6] / 1000;
-		mb_segytraceheader_ptr->tr_weight	= fsdwsegyheader->weightingFactor;
+		mb_segytraceheader_ptr->tr_weight	= 1;
 		for (i=0;i<5;i++)
 			mb_segytraceheader_ptr->other_2[i]	= 0;
 		mb_segytraceheader_ptr->delay	= 0.0;
@@ -6135,6 +6138,7 @@ int mbsys_reson7k_extract_segy(int verbose, void *mbio_ptr, void *store_ptr,
 	s7k_fsdwsegyheader *fsdwsegyheader;
 	short	*shortptr;
 	unsigned short	*ushortptr;
+	double	weight;
 	int	i;
 
 	/* print input debug statements */
@@ -6178,6 +6182,10 @@ int mbsys_reson7k_extract_segy(int verbose, void *mbio_ptr, void *store_ptr,
 		fsdwsegyheader = &(fsdwsb->segyheader);
 		shortptr = (short *) fsdwchannel->data;
 		ushortptr = (unsigned short *) fsdwchannel->data;
+								
+		/* get the trace weight */
+		weight = exp2((double)fsdwsegyheader->weightingFactor);
+/*fprintf(stderr, "Subbottom: Weight: %d %f\n",fsdwsegyheader->weightingFactor,weight);*/
 			
 		/* extract the data */
 		if (fsdwsb->data_format == EDGETECH_TRACEFORMAT_ENVELOPE)
@@ -6185,7 +6193,7 @@ int mbsys_reson7k_extract_segy(int verbose, void *mbio_ptr, void *store_ptr,
 			*sampleformat = MB_SEGY_SAMPLEFORMAT_ENVELOPE;
 			for (i=0;i<fsdwchannel->number_samples;i++)
 				{
-				segydata[i] = (float) ushortptr[i];
+				segydata[i] = (float) (((double)ushortptr[i]) / weight);
 				}
 			}
 		else if (fsdwsb->data_format == EDGETECH_TRACEFORMAT_ANALYTIC)
@@ -6199,8 +6207,9 @@ int mbsys_reson7k_extract_segy(int verbose, void *mbio_ptr, void *store_ptr,
 				{
 				for (i=0;i<fsdwchannel->number_samples;i++)
 					{
-					segydata[i] = (float) sqrt((float) (shortptr[2*i] * shortptr[2*i] 
-								+ shortptr[2*i+1] * shortptr[2*i+1]));
+					segydata[i] = (float) (sqrt((double) (shortptr[2*i] * shortptr[2*i] 
+								+ shortptr[2*i+1] * shortptr[2*i+1]))
+								/ weight);
 					}
 				}
 			
@@ -6209,8 +6218,8 @@ int mbsys_reson7k_extract_segy(int verbose, void *mbio_ptr, void *store_ptr,
 				{
 				for (i=0;i<fsdwchannel->number_samples;i++)
 					{
-					segydata[2*i]   = (float) shortptr[2*i];
-					segydata[2*i+1] = (float) shortptr[2*i+1];
+					segydata[2*i]   = (float) (((double)shortptr[2*i]) / weight);
+					segydata[2*i+1] = (float) (((double)shortptr[2*i+1]) / weight);
 					}
 				}
 			
@@ -6219,7 +6228,7 @@ int mbsys_reson7k_extract_segy(int verbose, void *mbio_ptr, void *store_ptr,
 				{
 				for (i=0;i<fsdwchannel->number_samples;i++)
 					{
-					segydata[i] = (float) shortptr[2*i];
+					segydata[i] = (float) (((double)shortptr[2*i]) / weight);
 					}
 				}
 			}
@@ -6228,7 +6237,7 @@ int mbsys_reson7k_extract_segy(int verbose, void *mbio_ptr, void *store_ptr,
 			*sampleformat = MB_SEGY_SAMPLEFORMAT_TRACE;
 			for (i=0;i<fsdwchannel->number_samples;i++)
 				{
-				segydata[i] = (float) ushortptr[i];
+				segydata[i] = (float) (((double)ushortptr[i]) / weight);
 				}
 			}
 		else if (fsdwsb->data_format == EDGETECH_TRACEFORMAT_REALANALYTIC)
@@ -6236,7 +6245,7 @@ int mbsys_reson7k_extract_segy(int verbose, void *mbio_ptr, void *store_ptr,
 			*sampleformat = MB_SEGY_SAMPLEFORMAT_TRACE;
 			for (i=0;i<fsdwchannel->number_samples;i++)
 				{
-				segydata[i] = (float) ushortptr[i];
+				segydata[i] = (float) (((double)ushortptr[i]) / weight);
 				}
 			}
 		else if (fsdwsb->data_format == EDGETECH_TRACEFORMAT_PIXEL)
@@ -6244,7 +6253,7 @@ int mbsys_reson7k_extract_segy(int verbose, void *mbio_ptr, void *store_ptr,
 			*sampleformat = MB_SEGY_SAMPLEFORMAT_TRACE;
 			for (i=0;i<fsdwchannel->number_samples;i++)
 				{
-				segydata[i] = (float) ushortptr[i];
+				segydata[i] = (float) (((double)ushortptr[i]) / weight);
 				}
 			}
 		
@@ -6373,10 +6382,9 @@ int mbsys_reson7k_insert_segy(int verbose, void *mbio_ptr, void *store_ptr,
 	int	time_j[5];
 	float	factor;
 	float	datamax;
+	double	weight;
 	int	data_size;
-	mb_s_char	*mb_s_charptr;
 	short	*shortptr;
-	int	*intptr;
 	int	i;
 
 	/* print input debug statements */
@@ -6485,12 +6493,14 @@ int mbsys_reson7k_insert_segy(int verbose, void *mbio_ptr, void *store_ptr,
 			if (fabs(segydata[i]) > datamax)
 				datamax = fabs(segydata[i]);
 			}
-		if (datamax <= 128.0)
-			fsdwchannel->bytespersample = 1;
-		else if (datamax <= 32768.0)
-			fsdwchannel->bytespersample = 2;
+		if (datamax > 0.0)
+			{
+			fsdwsegyheader->weightingFactor = (short) log2(datamax) - 15;
+			}
 		else
-			fsdwchannel->bytespersample = 4;
+			fsdwsegyheader->weightingFactor = 0;
+		weight = pow(2.0, (double)fsdwsegyheader->weightingFactor);
+		fsdwchannel->bytespersample = 2;
 		
 		/* make sure enough memory is allocated for channel data */
 		data_size = fsdwchannel->bytespersample * fsdwchannel->number_samples;
@@ -6511,29 +6521,10 @@ int mbsys_reson7k_insert_segy(int verbose, void *mbio_ptr, void *store_ptr,
 		/* copy over the data */
 		if (fsdwchannel->data_alloc >= data_size)
 			{
-			if (fsdwchannel->bytespersample == 1)
+			shortptr = (short *) fsdwchannel->data;
+			for (i=0;i<fsdwchannel->number_samples;i++)
 				{
-				mb_s_charptr = (mb_s_char *) fsdwchannel->data;
-				for (i=0;i<fsdwchannel->number_samples;i++)
-					{
-					mb_s_charptr[i] = segydata[i];
-					}
-				}
-			else if (fsdwchannel->bytespersample == 2)
-				{
-				shortptr = (short *) fsdwchannel->data;
-				for (i=0;i<fsdwchannel->number_samples;i++)
-					{
-					shortptr[i] = segydata[i];
-					}
-				}
-			else if (fsdwchannel->bytespersample == 4)
-				{
-				intptr = (int *) fsdwchannel->data;
-				for (i=0;i<fsdwchannel->number_samples;i++)
-					{
-					intptr[i] = segydata[i];
-					}
+				shortptr[i] = (short) (segydata[i] * weight);
 				}
 			}
 		
