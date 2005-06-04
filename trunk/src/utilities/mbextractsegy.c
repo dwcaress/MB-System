@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbextractsegy.c	4/18/2004
- *    $Id: mbextractsegy.c,v 5.5 2004-10-06 19:10:52 caress Exp $
+ *    $Id: mbextractsegy.c,v 5.6 2005-06-04 06:07:02 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	April 18, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2004/10/06 19:10:52  caress
+ * Release 5.0.5 update.
+ *
  * Revision 5.4  2004/09/16 01:01:12  caress
  * Fixed many things.
  *
@@ -51,7 +54,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mb_segy.h"
 
-static char rcs_id[] = "$Id: mbextractsegy.c,v 5.5 2004-10-06 19:10:52 caress Exp $";
+static char rcs_id[] = "$Id: mbextractsegy.c,v 5.6 2005-06-04 06:07:02 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
@@ -410,23 +413,6 @@ main (int argc, char **argv)
 			&& ofp == NULL)
 			|| output_file_set == MB_NO)
 			{
-			/* close any old output file unless a single file has been specified */
-			if (ofp != NULL)
-				{
-				/* output count of segy records */
-				fprintf(stderr,"%d records output to segy file %s\n",
-					nwrite, output_file);
-			if (verbose > 0)
-				fprintf(stderr,"\n");
-
-				/* close the file */
-				fclose(ofp);
-
-				/* use mbsegyinfo to generate a sinf file */
-				sprintf(mbsegyinfo_cmd, "mbsegyinfo -I %s -O", output_file);
-				system(mbsegyinfo_cmd);
-				}
-				
 			/* open the new file */
 			nwrite = 0;
 			if ((ofp = fopen(output_file, "w")) == NULL) 
@@ -723,25 +709,32 @@ main (int argc, char **argv)
                 read_data = MB_NO;
                 }
 
+	/* close output file unless a single file has been specified and there is more to read */
+	if ((output_file_set == MB_YES
+		&& read_data == MB_NO)
+		|| output_file_set == MB_NO)
+		{			
+		/* output count of segy records */
+		fprintf(stderr,"%d records output to segy file %s\n",
+			nwrite, output_file);
+		if (verbose > 0)
+			fprintf(stderr,"\n");
+
+		/* close the file */
+		fclose(ofp);
+
+		/* use mbsegyinfo to generate a sinf file */
+		if (nwrite > 0)
+			{
+			sprintf(mbsegyinfo_cmd, "mbsegyinfo -I %s -O", output_file);
+			system(mbsegyinfo_cmd);
+			}
+		}
+
 	/* end loop over files in list */
 	}
 	if (read_datalist == MB_YES)
 		mb_datalist_close(verbose,&datalist,&error);
-
-	/* close any old output file unless a single file has been specified */
-	if (ofp != NULL)
-		{
-		/* output count of segy records */
-		fprintf(stderr,"%d records output to segy file %s\n",
-			nwrite, output_file);
-
-		/* close the file */
-		fclose(ofp);
-		
-		/* use mbsegyinfo to generate a sinf file */
-		sprintf(mbsegyinfo_cmd, "mbsegyinfo -I %s -O", output_file);
-		system(mbsegyinfo_cmd);
-		}
 
 	/* check memory */
 	if (verbose >= 4)
