@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_arc2grd.perl	4/21/01
-#    $Id: mbm_arc2grd.perl,v 5.5 2003-09-23 21:13:51 caress Exp $
+#    $Id: mbm_arc2grd.perl,v 5.6 2005-06-04 04:25:57 caress Exp $
 #
 #    Copyright (c) 2001, 2003 by
 #    D. W. Caress (caress@mbari.org)
@@ -37,10 +37,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #    10 km off the windward side of Oahu)
 #
 # Version:
-#   $Id: mbm_arc2grd.perl,v 5.5 2003-09-23 21:13:51 caress Exp $
+#   $Id: mbm_arc2grd.perl,v 5.6 2005-06-04 04:25:57 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.5  2003/09/23 21:13:51  caress
+#   Fixed bug in applying xyz2grd to temporary file of xyz triples.
+#
 #   Revision 5.4  2003/08/28 18:39:37  caress
 #   Fixed problems parsing Arc grid files on MBARI CD's..
 #
@@ -112,24 +115,24 @@ $cnt = 0;
 $nodata = "NaN";
 while (<INP>) {
 	$cnt++;
-	lc($_);
+	$line = lc($_);
 	if ($cnt == 1) {
-		($ncols) = $_ =~ /ncols\s+(\S+)/;
+		($ncols) = $line =~ /ncols\s+(\S+)/;
 	}
 	elsif ($cnt == 2) {
-		($nrows) = $_ =~ /nrows\s+(\S+)/;
+		($nrows) = $line =~ /nrows\s+(\S+)/;
 	}
 	elsif ($cnt == 3) {
-		($xllcorner) = $_ =~ /xllcorner\s+(\S+)/;
+		($xllcorner) = $line =~ /xllcorner\s+(\S+)/;
 	}
 	elsif ($cnt == 4) {
-		($yllcorner) = $_ =~ /yllcorner\s+(\S+)/;
+		($yllcorner) = $line =~ /yllcorner\s+(\S+)/;
 	}
 	elsif ($cnt == 5) {
-		($cellsize) = $_ =~ /cellsize\s+(\S+)/;
+		($cellsize) = $line =~ /cellsize\s+(\S+)/;
 	}
 	elsif ($cnt == 6) {
-		($nodata) = $_ =~ /nodata_value\s+(\S+)/;
+		($nodata) = $line =~ /nodata_value\s+(\S+)/i;
 		$xmin_f = $xllcorner + 0.5 * $cellsize;
 		$xmax_f = $xllcorner + $cellsize * ($ncols - 0.5);
 		$ymin_f = $yllcorner + 0.5 * $cellsize;
