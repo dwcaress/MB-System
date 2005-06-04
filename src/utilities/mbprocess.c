@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbprocess.c	3/31/93
- *    $Id: mbprocess.c,v 5.37 2005-04-06 17:29:40 caress Exp $
+ *    $Id: mbprocess.c,v 5.38 2005-06-04 05:17:28 caress Exp $
  *
  *    Copyright (c) 2000, 2002, 2003, 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -36,6 +36,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.37  2005/04/06 17:29:40  caress
+ * Moved tide correction to end of processing tasks so that it doesn't mess up grazing angle calculations for amplitude and sidescan correction.
+ *
  * Revision 5.36  2005/03/25 04:39:01  caress
  * Sonar depth merging has been added to mbprocess and mbset. This is controlled by the SONARDEPTHMODE, SONARDEPTHFILE, and SONARDEPTHFORMAT mbprocess parameters.
  *
@@ -210,7 +213,7 @@ int get_anglecorr(int verbose,
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbprocess.c,v 5.37 2005-04-06 17:29:40 caress Exp $";
+	static char rcs_id[] = "$Id: mbprocess.c,v 5.38 2005-06-04 05:17:28 caress Exp $";
 	static char program_name[] = "mbprocess";
 	static char help_message[] =  "mbprocess is a tool for processing swath sonar bathymetry data.\n\
 This program performs a number of functions, including:\n\
@@ -4131,6 +4134,18 @@ and mbedit edit save files.\n";
 			if (process.mbp_kluge002 == MB_YES 
 			    && kind == MB_DATA_DATA)
 			    draft -= heave;
+			}
+			
+		/* apply kluge005 - take timestamps from navigation data */
+		if (process.mbp_kluge005 == MB_YES
+			&& error == MB_ERROR_NO_ERROR 
+			&& kind == MB_DATA_DATA
+			&& nnav > 0)
+			{
+fprintf(stderr,"time_d:%f ntime[%d]:%f kluge005:%d\n",
+time_d,idata-1,ntime[idata-1],process.mbp_kluge005);
+			time_d = ntime[idata-1];
+			mb_get_date(verbose,time_d,time_i);
 			}
 
 		/* interpolate the navigation if desired */
