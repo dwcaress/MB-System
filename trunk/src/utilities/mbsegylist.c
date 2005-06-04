@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsegylist.c	5/29/2004
- *    $Id: mbsegylist.c,v 5.2 2004-10-06 19:10:53 caress Exp $
+ *    $Id: mbsegylist.c,v 5.3 2005-06-04 05:19:04 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	May 29, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2004/10/06 19:10:53  caress
+ * Release 5.0.5 update.
+ *
  * Revision 5.1  2004/07/27 19:48:35  caress
  * Working on handling subbottom data.
  *
@@ -62,7 +65,7 @@
 /* NaN value */
 double	NaN;
 
-static char rcs_id[] = "$Id: mbsegylist.c,v 5.2 2004-10-06 19:10:53 caress Exp $";
+static char rcs_id[] = "$Id: mbsegylist.c,v 5.3 2005-06-04 05:19:04 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
@@ -696,9 +699,9 @@ main (int argc, char **argv)
 						else
 							factor = (float) traceheader.elev_scalar;
 						if (traceheader.src_wbd != 0)
-							waterdepth = -factor * traceheader.grp_elev;
+							waterdepth = -factor * traceheader.src_wbd;
 						else if (traceheader.grp_wbd != 0)
-							waterdepth = -factor * traceheader.src_elev;
+							waterdepth = -factor * traceheader.grp_wbd;
 						else
 							waterdepth = 0.0;
 						printsimplevalue(verbose, waterdepth, 11, 6, ascii, 
