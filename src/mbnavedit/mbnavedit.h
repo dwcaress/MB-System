@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit.h	6/24/95
- *    $Id: mbnavedit.h,v 5.4 2004-05-21 23:33:03 caress Exp $
+ *    $Id: mbnavedit.h,v 5.5 2005-06-04 04:45:50 caress Exp $
  *
  *    Copyright (c) 1995, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	August 28, 2000 (New version - no buffered i/o)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2004/05/21 23:33:03  caress
+ * Moved to new version of BX GUI builder
+ *
  * Revision 5.3  2003/04/17 21:09:06  caress
  * Release 5.0.beta30
  *
@@ -125,6 +128,10 @@ EXTERNAL int	model_mode;
 EXTERNAL double	weight_speed;
 EXTERNAL double	weight_acceleration;
 EXTERNAL int	scrollcount;
+EXTERNAL double	offset_lon;
+EXTERNAL double	offset_lat;
+EXTERNAL double	offset_lon_applied;
+EXTERNAL double	offset_lat_applied;
 
 /* mbnavedit plot size parameters */
 EXTERNAL int	plot_width;

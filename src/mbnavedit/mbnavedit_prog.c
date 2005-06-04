@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_prog.c	6/23/95
- *    $Id: mbnavedit_prog.c,v 5.14 2005-03-25 04:35:55 caress Exp $
+ *    $Id: mbnavedit_prog.c,v 5.15 2005-06-04 04:45:50 caress Exp $
  *
  *    Copyright (c) 1995, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	August 28, 2000 (New version - no buffered i/o)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.14  2005/03/25 04:35:55  caress
+ * Added capability to interpolate over repeated values.
+ *
  * Revision 5.13  2004/12/18 01:36:40  caress
  * Working towards release 5.0.6.
  *
@@ -235,7 +238,7 @@ struct mbnavedit_plot_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbnavedit_prog.c,v 5.14 2005-03-25 04:35:55 caress Exp $";
+static char rcs_id[] = "$Id: mbnavedit_prog.c,v 5.15 2005-06-04 04:45:50 caress Exp $";
 static char program_name[] = "MBNAVEDIT";
 static char help_message[] =  "MBNAVEDIT is an interactive navigation editor for swath sonar data.\n\tIt can work with any data format supported by the MBIO library.\n";
 static char usage_message[] = "mbnavedit [-Byr/mo/da/hr/mn/sc -D  -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ooutfile -X -V -H]";
@@ -393,6 +396,10 @@ int mbnavedit_init_globals()
 	weight_speed = 100.0;
 	weight_acceleration = 100.0;
 	scrollcount = 0;
+	offset_lon = 0.0;
+	offset_lat = 0.0;
+	offset_lon_applied = 0.0;
+	offset_lat_applied = 0.0;
 	
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -1003,6 +1010,13 @@ fprintf(stderr, "command:%s\n", command);
 	nload_total = 0;
 	ndump_total = 0;
 	
+	/* reset offsets */
+	offset_lon = 0.0;
+	offset_lat = 0.0;
+	offset_lon_applied = offset_lon;
+	offset_lat_applied = offset_lat;
+
+	
 	/* turn file button on */
 	do_filebutton_on();
 
@@ -1213,6 +1227,12 @@ int mbnavedit_load_data()
 			ping[nbuff].draft_org = ping[nbuff].draft;
 			ping[nbuff].file_time_d = 
 				ping[nbuff].time_d - file_start_time_d;
+			
+			/* apply offsets */
+			ping[nbuff].lon += offset_lon;
+			ping[nbuff].lat += offset_lat;
+			
+			/* set starting dr */
 			ping[nbuff].lon_dr = ping[nbuff].lon;
 			ping[nbuff].lat_dr = ping[nbuff].lat;
 
@@ -1467,6 +1487,48 @@ int mbnavedit_action_next_buffer(int *quit)
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       quit:        %d\n",*quit);
+		fprintf(stderr,"dbg2       error:       %d\n",error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:      %d\n",status);
+		}
+
+	/* return */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbnavedit_action_offset()
+{
+	/* local variables */
+	char	*function_name = "mbnavedit_action_offset";
+	int	status = MB_SUCCESS;
+	int 	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		}
+
+	/* check if a file has been opened */
+	if (file_open == MB_YES)
+		{		
+		/* apply position offsets to the data */
+		for (i=0;i<nbuff;i++)
+			{
+			ping[i].lon += offset_lon - offset_lon_applied;
+			ping[i].lat += offset_lat - offset_lat_applied;
+			}
+		}
+	offset_lon_applied = offset_lon;
+	offset_lat_applied = offset_lat;
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:       %d\n",error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:      %d\n",status);
