@@ -1,9 +1,9 @@
-MB-SYSTEM VERSION 5.0.7 README FILE:
+MB-SYSTEM VERSION 5.0.8 README FILE:
 ----------------------------------------
 
 This file is located at the top of the MB-System directory
 structure. This directory structure contains the version 
-5.0.7 release of the MB-System software package for 
+5.0.8 release of the MB-System software package for 
 processing and display of swath sonar data.  
 
 MB-SYSTEM VERSION 5 DESCRIPTION:
@@ -26,6 +26,7 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
+Version 5.0.8          ??????
 Version 5.0.7          April 7, 2005
 Version 5.0.6          February 19, 2005
 Version 5.0.5          October 6, 2004
@@ -124,6 +125,45 @@ Aquarium Research Institute, or any other individuals or
 organizations involved in the design and maintenance of the 
 MB-System software package are NOT responsible for any damage 
 that may follow from correct or incorrect use of these programs.
+
+MB-SYSTEM VERSION 5.0.8 RELEASE NOTES:
+------------------------------------------
+
+The version 5.0.8 release of MB-System includes several changes
+relative to the 5.0.7 release.
+
+The format 75 (MBF_MBNETCDF) i/o module has been altered to 
+handle multiple pings with the same time stamp without breaking
+the beam edit (edit save file) scheme, which depends upon
+unique time stamps. When multiple pings with the same time
+stamp are encountered, the subsequent pings have multiples
+of 2 msec added so that each has a detectably unique time
+stamp. This issue relates to Thompson Seafalcon II multibeam
+data; this sonar collects five simultaneous acrosstrack swathes.
+Since this is a deep water sonar, the maximum 10 msec time
+addition should not introduce excessive error in navigation
+or other aspects of the data.
+
+The Edgetech Jstar format is now supported through the new
+MB-System formats 132 and 133. The Jstar format is relevant
+to Edgetech FSDW systems (and related sonar products). The
+FSDW systems include chirp subbottom profiler and dual
+frequency chirp sidescan sonar. Format 132 treats the low
+frequency sidescan as survey data, and format 133 treats 
+the high frequency sidescan as survey data.
+
+Incorrect trace scaling of subbottom and sidescan data
+in the Reson 7k format (format 88) has been fixed.
+
+A new program called mb7k2jstar has been added that extracts
+Edgetech subbottom and sidescan data from Reson 7k format (88)
+files and writes that data in Edgetech Jstar (132/133) format
+files.
+
+The comments in the install_makefiles script has been updated 
+to show the correct parameters needed to build MB-System on
+a current Solaris system.
+
 
 MB-SYSTEM VERSION 5.0.7 RELEASE NOTES:
 ------------------------------------------
@@ -1009,10 +1049,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.61 2005-04-07 04:32:19 caress Exp $
+RCS ID: $Id: README,v 5.62 2005-06-04 03:32:27 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.61  2005/04/07 04:32:19  caress
+5.0.7 Release.
+
 Revision 5.60  2005/03/26 23:58:34  caress
 Release 5.0.7.
 
