@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_time.c	10/30/2000
- *    $Id: mb_navint.c,v 5.11 2005-03-25 04:31:23 caress Exp $
+ *    $Id: mb_navint.c,v 5.12 2005-06-15 15:17:51 caress Exp $
  *
  *    Copyright (c) 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	October 30, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.11  2005/03/25 04:31:23  caress
+ * Minor changes to code comments.
+ *
  * Revision 5.10  2004/07/15 19:25:04  caress
  * Progress in supporting Reson 7k data.
  *
@@ -75,7 +78,7 @@
     #define MB_ALTINT_DEBUG 1*/
 
 
-static char rcs_id[]="$Id: mb_navint.c,v 5.11 2005-03-25 04:31:23 caress Exp $";
+static char rcs_id[]="$Id: mb_navint.c,v 5.12 2005-06-15 15:17:51 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 /* 	function mb_navint_add adds a nav fix to the internal
@@ -103,6 +106,17 @@ int mb_navint_add(int verbose, void *mbio_ptr, double time_d, double lon, double
 
 	/* get pointers to mbio descriptor and data structures */
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  Current nav fix values:\n");
+		for (i=0;i<mb_io_ptr->nfix;i++)
+			fprintf(stderr,"dbg2       nav fix[%2d]:   %f %f %f\n",
+						i, mb_io_ptr->fix_time_d[i],
+						mb_io_ptr->fix_lon[i],
+						mb_io_ptr->fix_lat[i]);
+		}
 	
 	/* add another fix only if time stamp has changed */
 	if (mb_io_ptr->nfix == 0
@@ -159,6 +173,12 @@ int mb_navint_add(int verbose, void *mbio_ptr, double time_d, double lon, double
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:     %d\n",status);
+		fprintf(stderr,"\ndbg2  Current nav fix values:\n");
+		for (i=0;i<mb_io_ptr->nfix;i++)
+			fprintf(stderr,"dbg2       nav fix[%2d]:   %f %f %f\n",
+						i, mb_io_ptr->fix_time_d[i],
+						mb_io_ptr->fix_lon[i],
+						mb_io_ptr->fix_lat[i]);
 		}
 
 	/* return success */
@@ -198,6 +218,17 @@ int mb_navint_interp(int verbose, void *mbio_ptr,
 
 	/* get pointers to mbio descriptor and data structures */
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  Current nav fix values:\n");
+		for (i=0;i<mb_io_ptr->nfix;i++)
+			fprintf(stderr,"dbg2       nav fix[%2d]:   %f %f %f\n",
+						i, mb_io_ptr->fix_time_d[i],
+						mb_io_ptr->fix_lon[i],
+						mb_io_ptr->fix_lat[i]);
+		}
 	
 	/* get degrees to meters conversion if fix available */
 	if (mb_io_ptr->nfix > 0)
