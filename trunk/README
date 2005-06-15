@@ -164,6 +164,24 @@ The comments in the install_makefiles script has been updated
 to show the correct parameters needed to build MB-System on
 a current Solaris system.
 
+A feature to apply longitude and latitude offsets to navigation
+data has been added to MBnavedit.
+
+The program mbextractsegy can now extract subbottom profiler
+data in segy format from both Reson 7k files (format 88) and
+Edgetech Jstar files (formats 132 and 133).
+
+MBprocess kluge005 has been defined to cause survey data 
+timestamps to be replaced by the timestamps of the corresponding 
+merged navigation records. This allows timestamps fixed using
+MBnavedit to be inserted into processed data.
+
+The program mbsegygrid can now apply a simple time-varying
+gain to traces before gridding. This gain may begin at either
+the start of each trace or at the seafloor arrival time. The
+user may also set the length of time the gain is applied; 
+samples after the end of the gain window are zeroed.
+
 
 MB-SYSTEM VERSION 5.0.7 RELEASE NOTES:
 ------------------------------------------
@@ -1049,10 +1067,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.62 2005-06-04 03:32:27 caress Exp $
+RCS ID: $Id: README,v 5.63 2005-06-15 15:05:42 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.62  2005/06/04 03:32:27  caress
+Updates during 5.0.8 development.
+
 Revision 5.61  2005/04/07 04:32:19  caress
 5.0.7 Release.
 
