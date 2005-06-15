@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_jstar.c	10/4/94
- *	$Id: mbsys_jstar.c,v 5.0 2005-06-04 04:11:35 caress Exp $
+ *	$Id: mbsys_jstar.c,v 5.1 2005-06-15 15:20:17 caress Exp $
  *
  *    Copyright (c) 2005 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Author:	D. W. Caress
  * Date:	May 4, 2005
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2005/06/04 04:11:35  caress
+ * Support for Edgetech Jstar format (id 132 and 133).
+ *
  *
  *
  */
@@ -44,7 +47,7 @@
 int mbsys_jstar_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_jstar.c,v 5.0 2005-06-04 04:11:35 caress Exp $";
+ static char res_id[]="$Id: mbsys_jstar.c,v 5.1 2005-06-15 15:20:17 caress Exp $";
 	char	*function_name = "mbsys_jstar_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -620,8 +623,8 @@ int mbsys_jstar_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		sbp->hour = time_i[3];
 		sbp->minute = time_i[4];
 		sbp->second = time_i[5];
-		sbp->millisecondsToday = 1000 * time_i[6]
-					+ 0.001 * (time_i[5] 
+		sbp->millisecondsToday = 0.001 * time_i[6]
+					+ 1000 * (time_i[5] 
 						+ 60.0 * (time_i[4] 
 							+ 60.0 * time_i[3]));
 
@@ -699,8 +702,8 @@ int mbsys_jstar_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		ssport->hour = time_i[3];
 		ssport->minute = time_i[4];
 		ssport->second = time_i[5];
-		ssport->millisecondsToday = 1000 * time_i[6]
-					+ 0.001 * (time_i[5] 
+		ssport->millisecondsToday = 0.001 * time_i[6]
+					+ 1000 * (time_i[5] 
 						+ 60.0 * (time_i[4] 
 							+ 60.0 * time_i[3]));
 		ssstbd->year = time_i[0];
@@ -708,8 +711,8 @@ int mbsys_jstar_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		ssstbd->hour = time_i[3];
 		ssstbd->minute = time_i[4];
 		ssstbd->second = time_i[5];
-		ssstbd->millisecondsToday = 1000 * time_i[6]
-					+ 0.001 * (time_i[5] 
+		ssstbd->millisecondsToday = 0.001 * time_i[6]
+					+ 1000 * (time_i[5] 
 						+ 60.0 * (time_i[4] 
 							+ 60.0 * time_i[3]));
 
@@ -1338,8 +1341,8 @@ int mbsys_jstar_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		sbp->hour = time_i[3];
 		sbp->minute = time_i[4];
 		sbp->second = time_i[5];
-		sbp->millisecondsToday = 1000 * time_i[6]
-					+ 0.001 * (time_i[5] 
+		sbp->millisecondsToday = 0.001 * time_i[6]
+					+ 1000 * (time_i[5] 
 						+ 60.0 * (time_i[4] 
 							+ 60.0 * time_i[3]));
 
@@ -1404,8 +1407,8 @@ int mbsys_jstar_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		ssport->hour = time_i[3];
 		ssport->minute = time_i[4];
 		ssport->second = time_i[5];
-		ssport->millisecondsToday = 1000 * time_i[6]
-					+ 0.001 * (time_i[5] 
+		ssport->millisecondsToday = 0.001 * time_i[6]
+					+ 1000 * (time_i[5] 
 						+ 60.0 * (time_i[4] 
 							+ 60.0 * time_i[3]));
 		ssstbd->year = time_i[0];
@@ -1413,8 +1416,8 @@ int mbsys_jstar_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		ssstbd->hour = time_i[3];
 		ssstbd->minute = time_i[4];
 		ssstbd->second = time_i[5];
-		ssstbd->millisecondsToday = 1000 * time_i[6]
-					+ 0.001 * (time_i[5] 
+		ssstbd->millisecondsToday = 0.001 * time_i[6]
+					+ 1000 * (time_i[5] 
 						+ 60.0 * (time_i[4] 
 							+ 60.0 * time_i[3]));
 
@@ -2038,7 +2041,11 @@ int mbsys_jstar_insert_segy(int verbose, void *mbio_ptr, void *store_ptr,
 		sbp->second = 0.000001 * time_i[6] + time_i[5];
 		sbp->hour = time_i[3];
 		sbp->minute = time_i[4];
-		sbp->millisecondsToday = 1000 * time_i[6];
+		sbp->millisecondsToday = 0.001 * time_i[6]
+					+ 1000 * (time_i[5] 
+						+ 60.0 * (time_i[4] 
+							+ 60.0 * time_i[3]));
+
 		sbp->depth = 1000 * waterdepth;
 		sbp->sonardepth = 1000 * sonardepth;
 		sbp->sonaraltitude = 1000 * (waterdepth - sonardepth);
