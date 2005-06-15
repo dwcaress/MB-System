@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_reson7k.c	3.00	3/23/2004
- *	$Id: mbsys_reson7k.c,v 5.8 2005-06-04 04:16:00 caress Exp $
+ *	$Id: mbsys_reson7k.c,v 5.9 2005-06-15 15:20:17 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -26,6 +26,9 @@
  * Date:	March 23, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2005/06/04 04:16:00  caress
+ * Support for Edgetech Jstar format (id 132 and 133).
+ *
  * Revision 5.7  2004/12/02 06:33:31  caress
  * Fixes while supporting Reson 7k data.
  *
@@ -70,7 +73,7 @@
 /* turn on debug statements here */
 /* #define MSYS_RESON7KR_DEBUG 1 */
 
-static char res_id[]="$Id: mbsys_reson7k.c,v 5.8 2005-06-04 04:16:00 caress Exp $";
+static char res_id[]="$Id: mbsys_reson7k.c,v 5.9 2005-06-15 15:20:17 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_zero7kheader(int verbose, s7k_header	*header, 
@@ -4397,6 +4400,11 @@ int mbsys_reson7k_extract(int verbose, void *mbio_ptr, void *store_ptr,
 	/* extract comment from structure */
 	else if (*kind == MB_DATA_COMMENT)
 		{
+		/* get time */
+		for (i=0;i<7;i++)
+			time_i[i] = store->time_i[i];
+		*time_d = store->time_d;
+		
 		/* copy comment */
 		if (systemeventmessage->message_length > 0)
 			strncpy(comment, systemeventmessage->message, MB_COMMENT_MAXLINE);
@@ -4406,11 +4414,68 @@ int mbsys_reson7k_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		/* print debug statements */
 		if (verbose >= 4)
 			{
-			fprintf(stderr,"\ndbg4  New ping read by MBIO function <%s>\n",
+			fprintf(stderr,"\ndbg4  Comment extracted by MBIO function <%s>\n",
 				function_name);
 			fprintf(stderr,"dbg4  New ping values:\n");
+			fprintf(stderr,"dbg4       kind:       %d\n",
+				*kind);
 			fprintf(stderr,"dbg4       error:      %d\n",
-				error);
+				*error);
+			fprintf(stderr,"dbg4       time_i[0]:  %d\n",
+				time_i[0]);
+			fprintf(stderr,"dbg4       time_i[1]:  %d\n",
+				time_i[1]);
+			fprintf(stderr,"dbg4       time_i[2]:  %d\n",
+				time_i[2]);
+			fprintf(stderr,"dbg4       time_i[3]:  %d\n",
+				time_i[3]);
+			fprintf(stderr,"dbg4       time_i[4]:  %d\n",
+				time_i[4]);
+			fprintf(stderr,"dbg4       time_i[5]:  %d\n",
+				time_i[5]);
+			fprintf(stderr,"dbg4       time_i[6]:  %d\n",
+				time_i[6]);
+			fprintf(stderr,"dbg4       time_d:     %f\n",
+				*time_d);
+			fprintf(stderr,"dbg4       comment:    %s\n",
+				comment);
+			}
+		}
+
+	/* set time for other data records */
+	else
+		{
+		/* get time */
+		for (i=0;i<7;i++)
+			time_i[i] = store->time_i[i];
+		*time_d = store->time_d;
+
+		/* print debug statements */
+		if (verbose >= 4)
+			{
+			fprintf(stderr,"\ndbg4  Data extracted by MBIO function <%s>\n",
+				function_name);
+			fprintf(stderr,"dbg4  Extracted values:\n");
+			fprintf(stderr,"dbg4       kind:       %d\n",
+				*kind);
+			fprintf(stderr,"dbg4       error:      %d\n",
+				*error);
+			fprintf(stderr,"dbg4       time_i[0]:  %d\n",
+				time_i[0]);
+			fprintf(stderr,"dbg4       time_i[1]:  %d\n",
+				time_i[1]);
+			fprintf(stderr,"dbg4       time_i[2]:  %d\n",
+				time_i[2]);
+			fprintf(stderr,"dbg4       time_i[3]:  %d\n",
+				time_i[3]);
+			fprintf(stderr,"dbg4       time_i[4]:  %d\n",
+				time_i[4]);
+			fprintf(stderr,"dbg4       time_i[5]:  %d\n",
+				time_i[5]);
+			fprintf(stderr,"dbg4       time_i[6]:  %d\n",
+				time_i[6]);
+			fprintf(stderr,"dbg4       time_d:     %f\n",
+				*time_d);
 			fprintf(stderr,"dbg4       comment:    %s\n",
 				comment);
 			}
@@ -5294,6 +5359,11 @@ int mbsys_reson7k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		/* set status */
 		*error = MB_ERROR_COMMENT;
 		status = MB_FAILURE;
+
+		/* get time */
+		for (i=0;i<7;i++)
+			time_i[i] = store->time_i[i];
+		*time_d = store->time_d;
 		}
 
 	/* deal with other record type */
@@ -5302,6 +5372,11 @@ int mbsys_reson7k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		/* set status */
 		*error = MB_ERROR_OTHER;
 		status = MB_FAILURE;
+
+		/* get time */
+		for (i=0;i<7;i++)
+			time_i[i] = store->time_i[i];
+		*time_d = store->time_d;
 		}
 
 	/* print output debug statements */
@@ -5541,6 +5616,11 @@ int mbsys_reson7k_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr,
 		/* set status */
 		*error = MB_ERROR_COMMENT;
 		status = MB_FAILURE;
+
+		/* get time */
+		for (i=0;i<7;i++)
+			time_i[i] = store->time_i[i];
+		*time_d = store->time_d;
 		}
 
 	/* deal with other record type */
@@ -5549,6 +5629,11 @@ int mbsys_reson7k_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr,
 		/* set status */
 		*error = MB_ERROR_OTHER;
 		status = MB_FAILURE;
+
+		/* get time */
+		for (i=0;i<7;i++)
+			time_i[i] = store->time_i[i];
+		*time_d = store->time_d;
 		}
 
 	/* print output debug statements */

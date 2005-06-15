@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_reson7kr.c	4/4/2004
- *	$Id: mbr_reson7kr.c,v 5.9 2005-06-04 04:15:59 caress Exp $
+ *	$Id: mbr_reson7kr.c,v 5.10 2005-06-15 15:20:16 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	April 4,2004
  * $Log: not supported by cvs2svn $
+ * Revision 5.9  2005/06/04 04:15:59  caress
+ * Support for Edgetech Jstar format (id 132 and 133).
+ *
  * Revision 5.8  2005/04/07 04:24:33  caress
  * 5.0.7 Release.
  *
@@ -71,7 +74,7 @@
 #include "../../include/mb_swap.h"
 	
 /* turn on debug statements here */
-/* #define MBR_RESON7KR_DEBUG 1 */
+/*#define MBR_RESON7KR_DEBUG 1*/
 	
 /* essential function prototypes */
 int mbr_register_reson7kr(int verbose, void *mbio_ptr, 
@@ -189,7 +192,7 @@ int mbr_reson7kr_wr_soundvelocity(int verbose, int *bufferalloc, char **bufferpt
 int mbr_reson7kr_wr_absorptionloss(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 int mbr_reson7kr_wr_spreadingloss(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 
-static char res_id[]="$Id: mbr_reson7kr.c,v 5.9 2005-06-04 04:15:59 caress Exp $";
+static char res_id[]="$Id: mbr_reson7kr.c,v 5.10 2005-06-15 15:20:16 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_reson7kr(int verbose, void *mbio_ptr, int *error)
@@ -4365,8 +4368,6 @@ int mbr_reson7kr_rd_bluefin(int verbose, char *buffer, void *store_ptr, int *err
 	int	time_i[7];
 	double	time_d;
 	int	timeproblem;
-	int	timechange;
-	double	dtime;
 	int	i, j;
 
 	/* print input debug statements */
@@ -4389,8 +4390,17 @@ int mbr_reson7kr_rd_bluefin(int verbose, char *buffer, void *store_ptr, int *err
 	/* extract the header */
 	index = 0;
 	status = mbr_reson7kr_rd_header(verbose, buffer, &index, header, error);
+
+	/* get the first cut time from the 6046 datalogger header */
+	time_j[0] = header->s7kTime.Year;
+	time_j[1] = header->s7kTime.Day;
+	time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+	time_j[3] = (int) header->s7kTime.Seconds;
+	time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+	mb_get_itime(verbose, time_j, store->time_i);
+	mb_get_time(verbose, store->time_i, &(store->time_d));
 		
-	/* extract the data */
+	/* extract the start of the data */
 	index = header->Offset + 4;
 	mb_get_binary_int(MB_YES, &buffer[index], &(bluefin->msec_timestamp)); index += 4;
 	mb_get_binary_int(MB_YES, &buffer[index], &(bluefin->number_frames)); index += 4;
@@ -4400,6 +4410,22 @@ int mbr_reson7kr_rd_bluefin(int verbose, char *buffer, void *store_ptr, int *err
 		{
 		bluefin->reserved[i] = buffer[index]; index++;
 		}
+
+	/* print out the results */
+#ifdef MBR_RESON7KR_DEBUG
+if (bluefin->data_format == R7KRECID_BluefinNav)
+fprintf(stderr,"R7KRECID_BluefinNav:               7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+store->time_i[0],store->time_i[1],store->time_i[2],
+store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
+header->RecordNumber);
+else
+fprintf(stderr,"R7KRECID_BluefinEnvironmental:     7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+store->time_i[0],store->time_i[1],store->time_i[2],
+store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
+header->RecordNumber);
+#endif
+		
+	/* extract the nav or environmental data */
 	if (bluefin->data_format == R7KRECID_BluefinNav)
 		{
 		for (i=0;i<bluefin->number_frames;i++)
@@ -4434,6 +4460,20 @@ int mbr_reson7kr_rd_bluefin(int verbose, char *buffer, void *store_ptr, int *err
 			mb_get_binary_float(MB_YES, &buffer[index], &(bluefin->nav[i].yaw_rate)); index += 4;
 			mb_get_binary_double(MB_YES, &buffer[index], &(bluefin->nav[i].position_time)); index += 8;
 			mb_get_binary_double(MB_YES, &buffer[index], &(bluefin->nav[i].altitude_time)); index += 8;
+
+/* print out the nav point time stamp */
+#ifdef MBR_RESON7KR_DEBUG
+time_j[0] = bluefin->nav[i].s7kTime.Year;
+time_j[1] = bluefin->nav[i].s7kTime.Day;
+time_j[2] = 60 * bluefin->nav[i].s7kTime.Hours + bluefin->nav[i].s7kTime.Minutes;
+time_j[3] = (int) bluefin->nav[i].s7kTime.Seconds;
+time_j[4] = (int) (1000000 * (bluefin->nav[i].s7kTime.Seconds - time_j[3]));
+mb_get_itime(verbose, time_j, time_i);
+fprintf(stderr,"                       %2.2d          7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) Pos_time:%f\n",
+i,time_i[0],time_i[1],time_i[2],
+time_i[3],time_i[4],time_i[5],time_i[6],
+bluefin->nav[i].position_time);
+#endif
 			}
 			
 		/* The Reson 6046 datalogger has been placing the same time tag in each of the frames
@@ -4451,43 +4491,30 @@ int mbr_reson7kr_rd_bluefin(int verbose, char *buffer, void *store_ptr, int *err
 			/* figure out if the time changes anywhere */
 			if (timeproblem == MB_YES)
 				{
-				timechange = 0;
-				dtime = 0.2;
-				for (i=1;i<bluefin->number_frames;i++)
-					{
-					if (bluefin->nav[i].position_time != bluefin->nav[i-1].position_time)
-						timechange = i;
-	/*fprintf(stderr,"Time: %f timechange:%d\n",bluefin->nav[i].s7kTime.Seconds,timechange);*/
-					}
-
-				/* change times assuming a 5 Hz data rate */
-				dtime = 0.2;
+				/* change unix times to use 7k time */
 				for (i=0;i<bluefin->number_frames;i++)
 					{
 					/* get the time  */
-					time_d = bluefin->nav[timechange].position_time + (i - timechange) * dtime;
-	/*fprintf(stderr,"CHANGE TIMESTAMP: %d %2.2d:%2.2d:%6.3f %12f",
-	i,bluefin->nav[i].s7kTime.Hours,bluefin->nav[i].s7kTime.Minutes,bluefin->nav[i].s7kTime.Seconds,time_d);*/
+#ifdef MBR_RESON7KR_DEBUG
+fprintf(stderr,"CHANGE TIMESTAMP: %d %2.2d:%2.2d:%6.3f %12f",
+i,bluefin->nav[i].s7kTime.Hours,bluefin->nav[i].s7kTime.Minutes,bluefin->nav[i].s7kTime.Seconds,time_d);
+#endif
+					time_j[0] = bluefin->nav[i].s7kTime.Year;
+					time_j[1] = bluefin->nav[i].s7kTime.Day;
+					time_j[2] = 60 * bluefin->nav[i].s7kTime.Hours + bluefin->nav[i].s7kTime.Minutes;
+					time_j[3] = (int) bluefin->nav[i].s7kTime.Seconds;
+					time_j[4] = (int) (1000000 * (bluefin->nav[i].s7kTime.Seconds - time_j[3]));
+					mb_get_itime(verbose, time_j, store->time_i);
+					mb_get_time(verbose, store->time_i, &time_d);
 					bluefin->nav[i].position_time = time_d;
 					bluefin->nav[i].altitude_time = time_d;
-					mb_get_date(verbose, time_d, time_i);
-					mb_get_jtime(verbose, time_i, time_j);
-					bluefin->nav[i].s7kTime.Seconds = 0.000001 * time_j[4] + time_j[3];
-					bluefin->nav[i].s7kTime.Hours = (int)(time_j[2] / 60.0);
-					bluefin->nav[i].s7kTime.Minutes = (int)(time_j[2] - 60.0 * bluefin->nav[i].s7kTime.Hours);
-					bluefin->nav[i].s7kTime.Day = time_j[1];
-					bluefin->nav[i].s7kTime.Year = time_j[0];
-	/*fprintf(stderr,"    %12f  %2.2d:%2.2d:%6.3f\n",
-	time_d, bluefin->nav[i].s7kTime.Hours,bluefin->nav[i].s7kTime.Minutes,bluefin->nav[i].s7kTime.Seconds);*/
+#ifdef MBR_RESON7KR_DEBUG
+fprintf(stderr,"    %12f\n",
+time_d);
+#endif
 					}
 				}
 			}
-for (i=0;i<bluefin->number_frames;i++)
-{
-/*bluefin->nav[i].depth = 0.0;
-bluefin->nav[i].roll = 0.0;
-bluefin->nav[i].pitch = 0.0;*/
-}
 		}
 	else if (bluefin->data_format == R7KRECID_BluefinEnvironmental)
 		{
@@ -4516,6 +4543,62 @@ bluefin->nav[i].pitch = 0.0;*/
 			for (j=0;j<56;j++)
 				{
 				bluefin->environmental[i].reserved2[j] = buffer[index]; index++;
+				}
+
+/* print out the environmental point time stamp */
+#ifdef MBR_RESON7KR_DEBUG
+time_j[0] = bluefin->environmental[i].s7kTime.Year;
+time_j[1] = bluefin->environmental[i].s7kTime.Day;
+time_j[2] = 60 * bluefin->environmental[i].s7kTime.Hours + bluefin->environmental[i].s7kTime.Minutes;
+time_j[3] = (int) bluefin->environmental[i].s7kTime.Seconds;
+time_j[4] = (int) (1000000 * (bluefin->environmental[i].s7kTime.Seconds - time_j[3]));
+mb_get_itime(verbose, time_j, time_i);
+fprintf(stderr,"                       %2.2d          7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) CTD_time:%f T_time:%f\n",
+i,time_i[0],time_i[1],time_i[2],
+time_i[3],time_i[4],time_i[5],time_i[6],
+bluefin->environmental[i].ctd_time,
+bluefin->environmental[i].temperature_time);
+#endif
+			}
+			
+		/* The Reson 6046 datalogger has been placing the same time tag in each of the frames
+			- check if this is the case, if it is kluge new time tags spread over a one second interval */
+		if (bluefin->number_frames > 1)
+			{
+			/* figure out if there is a time problem */
+			timeproblem = MB_NO;
+			for (i=1;i<bluefin->number_frames;i++)
+				{
+				if (bluefin->environmental[i].ctd_time == bluefin->environmental[i-1].ctd_time
+					|| bluefin->environmental[i].ctd_time < 10000000.0)
+					timeproblem = MB_YES;
+				}
+			
+			/* figure out if the time changes anywhere */
+			if (timeproblem == MB_YES)
+				{
+				/* change unix times to use 7k time */
+				for (i=0;i<bluefin->number_frames;i++)
+					{
+					/* get the time  */
+#ifdef MBR_RESON7KR_DEBUG
+fprintf(stderr,"CHANGE TIMESTAMP: %d %2.2d:%2.2d:%6.3f %12f",
+i,bluefin->environmental[i].s7kTime.Hours,bluefin->environmental[i].s7kTime.Minutes,bluefin->environmental[i].s7kTime.Seconds,time_d);
+#endif
+					time_j[0] = bluefin->environmental[i].s7kTime.Year;
+					time_j[1] = bluefin->environmental[i].s7kTime.Day;
+					time_j[2] = 60 * bluefin->environmental[i].s7kTime.Hours + bluefin->environmental[i].s7kTime.Minutes;
+					time_j[3] = (int) bluefin->environmental[i].s7kTime.Seconds;
+					time_j[4] = (int) (1000000 * (bluefin->environmental[i].s7kTime.Seconds - time_j[3]));
+					mb_get_itime(verbose, time_j, store->time_i);
+					mb_get_time(verbose, store->time_i, &time_d);
+					bluefin->environmental[i].ctd_time = time_d;
+					bluefin->environmental[i].temperature_time = time_d;
+#ifdef MBR_RESON7KR_DEBUG
+fprintf(stderr,"    %12f\n",
+time_d);
+#endif
+					}
 				}
 			}
 		}
@@ -10068,8 +10151,8 @@ int mbr_reson7kr_wr_bluefin(int verbose, int *bufferalloc, char **bufferptr, voi
 				mb_put_binary_short(MB_YES, bluefin->nav[i].s7kTime.Year, &buffer[index]); index += 2;
 				mb_put_binary_short(MB_YES, bluefin->nav[i].s7kTime.Day, &buffer[index]); index += 2;
 				mb_put_binary_float(MB_YES, bluefin->nav[i].s7kTime.Seconds, &buffer[index]); index += 4;
-				bluefin->nav[i].s7kTime.Hours = (mb_u_char) buffer[index]; (index)++;
-				bluefin->nav[i].s7kTime.Minutes = (mb_u_char) buffer[index]; (index)++;
+				buffer[index] = bluefin->nav[i].s7kTime.Hours; (index)++;
+				buffer[index] = bluefin->nav[i].s7kTime.Minutes; (index)++;
 				mb_put_binary_int(MB_YES, bluefin->nav[i].checksum, &buffer[index]); index += 4;
 				mb_put_binary_short(MB_YES, bluefin->nav[i].reserved, &buffer[index]); index += 2;
 				mb_put_binary_int(MB_YES, bluefin->nav[i].quality, &buffer[index]); index += 4;
@@ -10104,8 +10187,8 @@ int mbr_reson7kr_wr_bluefin(int verbose, int *bufferalloc, char **bufferptr, voi
 				mb_put_binary_short(MB_YES, bluefin->environmental[i].s7kTime.Year, &buffer[index]); index += 2;
 				mb_put_binary_short(MB_YES, bluefin->environmental[i].s7kTime.Day, &buffer[index]); index += 2;
 				mb_put_binary_float(MB_YES, bluefin->environmental[i].s7kTime.Seconds, &buffer[index]); index += 4;
-				bluefin->environmental[i].s7kTime.Hours = (mb_u_char) buffer[index]; (index)++;
-				bluefin->environmental[i].s7kTime.Minutes = (mb_u_char) buffer[index]; (index)++;
+				buffer[index] = bluefin->environmental[i].s7kTime.Hours; (index)++;
+				buffer[index] = bluefin->environmental[i].s7kTime.Minutes; (index)++;
 				mb_put_binary_int(MB_YES, bluefin->environmental[i].checksum, &buffer[index]); index += 4;
 				mb_put_binary_short(MB_YES, bluefin->environmental[i].reserved1, &buffer[index]); index += 2;
 				mb_put_binary_int(MB_YES, bluefin->environmental[i].quality, &buffer[index]); index += 4;
