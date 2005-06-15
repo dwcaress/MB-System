@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbio_status.h	2/1/93
- *    $Id: mb_status.h,v 5.56 2005-04-07 04:25:55 caress Exp $
+ *    $Id: mb_status.h,v 5.57 2005-06-15 15:19:00 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003, 2004, 2005 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.56  2005/04/07 04:25:55  caress
+ * 5.0.7 Release.
+ *
  * Revision 5.55  2005/03/26 22:05:17  caress
  * Release 5.0.7.
  *
@@ -457,7 +460,7 @@ static char *notice_msg[] =
 	"MB_DATA_NAV (ID=12): Navigation record", 
 	"MB_DATA_RUN_PARAMETER (ID=13): Simrad runtime parameter datagram", 
 	"MB_DATA_CLOCK (ID=14): Simrad clock datagram", 
-	"MB_DATA_TIDE (ID=15): TIde record", 
+	"MB_DATA_TIDE (ID=15): Tide record", 
 	"MB_DATA_HEIGHT (ID=16): Simrad height datagram", 
 	"MB_DATA_HEADING (ID=17): Heading record", 
 	"MB_DATA_ATTITUDE (ID=18): Attitude record", 
