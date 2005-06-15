@@ -1,4 +1,4 @@
-.TH mbsegygrid l "3 June 2005" "MB-System 5.0" "MB-System 5.0"
+.TH mbsegygrid l "5 June 2005" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbsegygrid\fP - Generate time vs. trace number grids of seismic data from segy files.
 
@@ -6,7 +6,8 @@
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbsegygrid\fP \fB-I\fIsegyfile\fP \fB-O\fIgridfile\fP [\fB-D\fIdecimatex/decimatey\fP 
+\fBmbsegygrid\fP \fB-I\fIsegyfile\fP \fB-O\fIgridfile\fP 
+[\fB-A\fIshotscale/timescale\fP \fB-D\fIdecimatex/decimatey\fP
 \fB-G\fImode/gain[/window]\fP \fB-R\fP
 \fB-S\fImode[/start/end[/schan/echan]]\fP \fB-T\fIsweep[/delay]\fP 
 \fB-W\fImode/start/end\fP \fB-H \fB-V\fP]";
@@ -45,6 +46,15 @@ Dale N. Chayes (dale@ldeo.columbia.edu)
   Lamont-Doherty Earth Observatory
 
 .SH OPTIONS
+.TP
+.B \-A
+\fIshotscale/timescale\fP
+.br
+This option causes the x-axis to be rescaled from shot number to distance in meters
+and the y-axis to be rescaled from time in seconds to depth in meters.
+The \fIshotscale\fP value represents the shot spacing in meters and the
+\fItimescale\fP value is the scaling from time to depth (typically 750 m/s
+for the water column).
 .TP
 .B \-D
 \fIdecimatex/decimatey\fP
