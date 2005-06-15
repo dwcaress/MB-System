@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsegygrid.c	6/12/2004
- *    $Id: mbsegygrid.c,v 5.5 2005-06-04 05:59:26 caress Exp $
+ *    $Id: mbsegygrid.c,v 5.6 2005-06-15 15:35:01 caress Exp $
  *
  *    Copyright (c) 2004, 2005 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	June 12, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2005/06/04 05:59:26  caress
+ * Added a time-varying gain option.
+ *
  * Revision 5.4  2004/11/08 05:49:17  caress
  * Fixed problem with decimation.
  *
@@ -91,11 +94,12 @@ char	*getenv();
 	stderr if verbose > 1) */
 FILE	*outfp;
 
-static char rcs_id[] = "$Id: mbsegygrid.c,v 5.5 2005-06-04 05:59:26 caress Exp $";
+static char rcs_id[] = "$Id: mbsegygrid.c,v 5.6 2005-06-15 15:35:01 caress Exp $";
 static char program_name[] = "MBsegygrid";
 static char help_message[] =  "MBsegygrid grids trace data from segy data files.";
-static char usage_message[] = "MBsegygrid -Ifile -Oroot [-Ddecimatex/decimatey\n\
-          -Gmode/gain[/window] -R -Smode[/start/end[/schan/echan]] -Tsweep[/delay] \n\
+static char usage_message[] = "MBsegygrid -Ifile -Oroot [-Ashotscale/timescale \n\
+          -Ddecimatex/decimatey -Gmode/gain[/window] -R \n\
+          -Smode[/start/end[/schan/echan]] -Tsweep[/delay] \n\
           -Wmode/start/end -H -V]";
 
 /*--------------------------------------------------------------------*/
@@ -153,6 +157,8 @@ main (int argc, char **argv)
 	double	xmax;
 	double	ymin;
 	double	ymax;
+	double	dx;
+	double	dy;
 	double	gridmintot = 0.0;
 	double	gridmaxtot = 0.0;
 	char	projection[MB_PATH_MAXLINE];
@@ -161,6 +167,9 @@ main (int argc, char **argv)
 	char	zlabel[MB_PATH_MAXLINE];
 	char	title[MB_PATH_MAXLINE];
 	char	plot_cmd[MB_PATH_MAXLINE];
+	int	scale2distance = MB_NO;
+	double	shotscale = 1.0;
+	double	timescale = 1.0;
 
 	int	sinftracemode = MBSEGYGRID_USESHOT;
 	int	sinftracestart = 0;
@@ -200,7 +209,7 @@ main (int argc, char **argv)
 #endif
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "D:d:G:g:I:i:O:o:RrS:s:T:t:VvW:w:Hh")) != -1)
+	while ((c = getopt(argc, argv, "A:a:D:d:G:g:I:i:O:o:RrS:s:T:t:VvW:w:Hh")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -210,6 +219,13 @@ main (int argc, char **argv)
 		case 'V':
 		case 'v':
 			verbose++;
+			break;
+		case 'A':
+		case 'a':
+			n = sscanf (optarg,"%lf/%lf", &shotscale, &timescale);
+			if (n == 2)
+				scale2distance = MB_YES;
+			flag++;
 			break;
 		case 'D':
 		case 'd':
@@ -327,6 +343,9 @@ main (int argc, char **argv)
 		fprintf(outfp,"dbg2       gain:           %f\n",gain);
 		fprintf(outfp,"dbg2       gainwindow:     %f\n",gainwindow);
 		fprintf(outfp,"dbg2       rmsmode:        %d\n",rmsmode);
+		fprintf(outfp,"dbg2       scale2distance: %d\n",scale2distance);
+		fprintf(outfp,"dbg2       shotscale:      %f\n",shotscale);
+		fprintf(outfp,"dbg2       timescale:      %f\n",timescale);
 		}
 
 	/* if help desired then print it and exit */
@@ -448,7 +467,7 @@ main (int argc, char **argv)
 		fprintf(outfp,"     gain mode:          %d\n",gainmode);
 		fprintf(outfp,"     gain:               %f\n",gain);
 		fprintf(outfp,"     gainwindow:         %f\n",gainwindow);
-		fprintf(outfp,"     rmsmode:            %d\n",rmsmode);
+		fprintf(outfp,"     rmsmode:            %d\n",rmsmode);		
 		fprintf(outfp,"Output Parameters:\n");
 		fprintf(outfp,"     grid filename:      %s\n",gridfile);
 		fprintf(outfp,"     x grid dimension:   %d\n",ngridx);
@@ -458,6 +477,16 @@ main (int argc, char **argv)
 		fprintf(outfp,"     grid ymin:          %f\n",ymin);
 		fprintf(outfp,"     grid ymax:          %f\n",ymax);
 		fprintf(outfp,"     NaN values used to flag regions with no data\n");
+		if (scale2distance == MB_YES)
+			{
+			fprintf(outfp,"     shot and time scaled to distance in meters\n");
+			fprintf(outfp,"     shotscale:          %f\n",shotscale);
+			fprintf(outfp,"     timescale:          %f\n",timescale);
+			fprintf(outfp,"     scaled grid xmin    %f\n",0.0);
+			fprintf(outfp,"     scaled grid xmax:   %f\n",shotscale * (xmax - xmin));
+			fprintf(outfp,"     scaled grid ymin:   %f\n",0.0);
+			fprintf(outfp,"     scaled grid ymax:   %f\n",timescale * (ymax - ymin));
+			}
 		}
 	if (verbose > 0)
 		fprintf(outfp,"\n");
@@ -696,14 +725,30 @@ i,iy,factor,i,trace[i]);*/
 	error = MB_ERROR_NO_ERROR;
 	status = MB_SUCCESS;
 	strcpy(projection, "SeismicProfile");
-	strcpy(xlabel, "Trace Number");
-	strcpy(ylabel, "Time (seconds)");
+	if (scale2distance == MB_YES)
+		{
+		strcpy(xlabel, "Distance (m)");
+		strcpy(ylabel, "Depth (m)");
+		xmax = shotscale * (xmax - xmin);
+		xmin = 0.0;
+		ymin = timescale * ymin;
+		ymax = timescale * ymax;
+		dx = shotscale * decimatex;
+		dy = timescale * sampleinterval / decimatey;
+		}
+	else
+		{
+		strcpy(xlabel, "Trace Number");
+		strcpy(ylabel, "Time (seconds)");
+		dx = (double) decimatex;
+		dy = sampleinterval / decimatey;
+		}
 	strcpy(zlabel, "Trace Signal");
 	sprintf(title, "Seismic Grid from %s", segyfile);
 	status = write_cdfgrd(verbose, gridfile, grid,
 		ngridx, ngridy, 
 		xmin, xmax, ymin, ymax,
-		gridmintot, gridmaxtot, (double) decimatex, sampleinterval / decimatey, 
+		gridmintot, gridmaxtot, dx, dy, 
 		xlabel, ylabel, zlabel, title, 
 		projection, argc, argv, &error);
 	
@@ -719,7 +764,7 @@ i,iy,factor,i,trace[i]);*/
 	/* run mbm_grdplot */
 	xwidth = 0.01 * (double) ngridx;
 	ywidth = 6.0;
-	sprintf(plot_cmd, "mbm_grdplot -I%s -JX%f/%f -G1 -V -L\"File %s - %s:%s\"", 
+	sprintf(plot_cmd, "mbm_grdplot -I%s -JX%f/%f -G1 -MGQ100 -V -L\"File %s - %s:%s\"", 
 			gridfile, xwidth, ywidth, gridfile, title, zlabel);
 	if (verbose)
 		{
