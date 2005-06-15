@@ -25,7 +25,7 @@ Additional Options:
 \fB-J\fP\fIprojection\fP[\fI/scale | width\fP]
 \fB-L\fP\fItitle\fP[\fI:scale_label\fP] \fB-M\fP\fImisc\fP 
 \fB-Q\fP \fB-R\fP\fIw/e/s/n\fP \fB-X\fP \fB-Y\fP 
-\fB-Z\fP\fImin/max\fP ]
+\fB-Z\fP\fImin/max[/mode]\fP ]
 
 Miscellaneous Options:
 .br
@@ -1016,12 +1016,19 @@ the color boundaries to be uniformly distributed between the
 minimum and maximum values of the grid.
 .TP
 .B \-Z
-\fImin/max\fP
+\fImin/max[/mode]\fP
 .br
 This option overrides the minimum and maximum values of
 the gridded data, affecting the color pallette and the
 contour interval if those parameters are not specified
-by the user.
+by the user. If \fImode\fP is omitted or equal to 0, then
+the color pallette will end at
+\fImin\fP and \fImax\fP whether it is linear stretched or
+histogram equalized. If \fImode\fP = 1, then the color
+stretching calculations will be done using 
+\fImin\fP and \fImax\fP, but then the first and last
+values in the color pallette will be set to the actual minimum and
+maximum values.so that all the data are displayed.
 
 .SH EXAMPLES
 Suppose we have obtained two GRD files with dimensions of
