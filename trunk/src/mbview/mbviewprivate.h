@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbviewprivate.h	9/24/2003
- *    $Id: mbviewprivate.h,v 5.7 2005-02-18 07:32:57 caress Exp $
+ *    $Id: mbviewprivate.h,v 5.8 2005-08-09 16:33:00 caress Exp $
  *
  *    Copyright (c) 2003, 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -18,6 +18,9 @@
  * Date:	September 24,  2003
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2005/02/18 07:32:57  caress
+ * Fixed nav display and button sensitivity.
+ *
  * Revision 5.6  2005/02/08 22:37:43  caress
  * Heading towards 5.0.6 release.
  *
@@ -101,149 +104,6 @@
 
 /* Spheroid parameters */
 #define	MBV_SPHEROID_RADIUS   6371000.0
-
-
-/* library variables */
-/*   note that global mbview variables will only be defined when
-     this code is included in mbview_callbacks.c where the
-     MBVIEWGLOBAL flag is defined - other blocks of code will
-     have these variables declared as extern  */
-#ifdef MBVIEWGLOBAL
-/* general library global variables */
-int	mbv_verbose;
-int	mbv_ninstance;
-Widget	parent_widget;
-XtAppContext	app_context;
-int	work_function_set;
-int	timer_count;
-struct mbview_world_struct mbviews[MBV_MAX_WINDOWS];
-struct mbview_shared_struct shared;
-char	*mbsystem_library_name;
-
-/* library colortables */
-float	colortable_haxby_red[MBV_NUM_COLORS] =
-                { 0.950, 1.000, 1.000, 1.000, 0.941, 0.804, 
-                  0.541, 0.416, 0.196, 0.157, 0.145 };
-float	colortable_haxby_green[MBV_NUM_COLORS] =
-                { 0.950, 0.729, 0.631, 0.741, 0.925, 1.000, 
-                  0.925, 0.922, 0.745, 0.498, 0.224 };
-float	colortable_haxby_blue[MBV_NUM_COLORS] =
-                { 0.950, 0.522, 0.267, 0.341, 0.475, 0.635, 
-                  0.682, 1.000, 1.000, 0.984, 0.686 };
-float	colortable_bright_red[MBV_NUM_COLORS] =
-                { 1.000, 1.000, 1.000, 1.000, 0.500, 0.000, 
-                  0.000, 0.000, 0.000, 0.500, 1.000 };
-float	colortable_bright_green[MBV_NUM_COLORS] =
-                { 0.000, 0.250, 0.500, 1.000, 1.000, 1.000, 
-                  1.000, 0.500, 0.000, 0.000, 0.000 };
-float	colortable_bright_blue[MBV_NUM_COLORS] =
-                { 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 
-                  1.000, 1.000, 1.000, 1.000, 1.000 };
-float	colortable_muted_red[MBV_NUM_COLORS] =
-                { 0.784, 0.761, 0.702, 0.553, 0.353, 0.000, 
-                  0.000, 0.000, 0.000, 0.353, 0.553 };
-float	colortable_muted_green[MBV_NUM_COLORS] =
-                { 0.000, 0.192, 0.353, 0.553, 0.702, 0.784, 
-                  0.553, 0.353, 0.000, 0.000, 0.000 };
-float	colortable_muted_blue[MBV_NUM_COLORS] =
-                { 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 
-                  0.553, 0.702, 0.784, 0.702, 0.553 };
-float	colortable_gray_red[MBV_NUM_COLORS] =
-                { 0.000, 0.100, 0.200, 0.300, 0.400, 0.500, 
-                  0.600, 0.700, 0.800, 0.900, 1.000 };
-float	colortable_gray_green[MBV_NUM_COLORS] =
-                { 0.000, 0.100, 0.200, 0.300, 0.400, 0.500, 
-                  0.600, 0.700, 0.800, 0.900, 1.000 };
-float	colortable_gray_blue[MBV_NUM_COLORS] =
-                { 0.000, 0.100, 0.200, 0.300, 0.400, 0.500, 
-                  0.600, 0.700, 0.800, 0.900, 1.000 };
-float	colortable_flat_red[MBV_NUM_COLORS] =
-                { 0.500, 0.500, 0.500, 0.500, 0.500, 0.500, 
-                  0.500, 0.500, 0.500, 0.500, 0.500 };
-float	colortable_flat_green[MBV_NUM_COLORS] =
-                { 0.500, 0.500, 0.500, 0.500, 0.500, 0.500, 
-                  0.500, 0.500, 0.500, 0.500, 0.500 };
-float	colortable_flat_blue[MBV_NUM_COLORS] =
-                { 0.500, 0.500, 0.500, 0.500, 0.500, 0.500, 
-                  0.500, 0.500, 0.500, 0.500, 0.500 };
-float	colortable_abovesealevel_red[MBV_NUM_COLORS+1] =
-                { 0.980, 0.960, 0.941, 0.921, 0.902, 0.882, 
-		  0.862, 0.843, 0.823, 0.804, 0.784};
-float	colortable_abovesealevel_green[MBV_NUM_COLORS+1] =
-                { 0.980, 0.940, 0.901, 0.862, 0.823, 0.784, 
-		  0.744, 0.705, 0.666, 0.627, 0.588};
-float	colortable_abovesealevel_blue[MBV_NUM_COLORS+1] =
-                { 0.471, 0.440, 0.408, 0.376, 0.345, 0.314, 
-		  0.282, 0.250, 0.219, 0.188, 0.157};
-
-float	colortable_object_red[MBV_NUM_COLORS] =
-                { 0.000, 1.000, 1.000, 1.000, 0.000, 0.000, 
-                  0.000, 1.000, 0.000, 0.000, 0.000 };
-float	colortable_object_green[MBV_NUM_COLORS] =
-                { 0.000, 1.000, 0.000, 1.000, 1.000, 1.000, 
-                  0.000, 0.000, 0.000, 0.000, 0.000 };
-float	colortable_object_blue[MBV_NUM_COLORS] =
-                { 0.000, 1.000, 0.000, 0.000, 0.000, 1.000, 
-                  1.000, 1.000, 0.000, 0.000, 0.000 };
-		  
-char	*mbview_colorname[MBV_NUM_COLORS] = 
-		{ "Black",
-		  "White",
-		  "Red",
-		  "Yellow",
-		  "Green",
-		  "Blue-Green",
-		  "Blue",
-		  "Purple" };
-		  
-/* status mask arrays */
-char	statmask[8] = { MBV_STATMASK0,
-			MBV_STATMASK1,
-			MBV_STATMASK2,
-			MBV_STATMASK3,
-			MBV_STATMASK4,
-			MBV_STATMASK5,
-			MBV_STATMASK6,
-			MBV_STATMASK7};
-
-/* extern declarations */
-#else
-extern int	mbv_verbose;
-extern int	mbv_ninstance;
-extern Widget	parent_widget;
-extern XtAppContext	app_context;
-extern int	work_function_set;
-extern struct mbview_world_struct mbviews[MBV_MAX_WINDOWS];
-extern struct mbview_shared_struct shared;
-extern char	*mbsystem_library_name;
-
-/* library colortables */
-extern float	colortable_haxby_red[MBV_NUM_COLORS];
-extern float	colortable_haxby_green[MBV_NUM_COLORS];
-extern float	colortable_haxby_blue[MBV_NUM_COLORS];
-extern float	colortable_bright_red[MBV_NUM_COLORS];
-extern float	colortable_bright_green[MBV_NUM_COLORS];
-extern float	colortable_bright_blue[MBV_NUM_COLORS];
-extern float	colortable_muted_red[MBV_NUM_COLORS];
-extern float	colortable_muted_green[MBV_NUM_COLORS];
-extern float	colortable_muted_blue[MBV_NUM_COLORS];
-extern float	colortable_gray_red[MBV_NUM_COLORS];
-extern float	colortable_gray_green[MBV_NUM_COLORS];
-extern float	colortable_gray_blue[MBV_NUM_COLORS];
-extern float	colortable_flat_red[MBV_NUM_COLORS];
-extern float	colortable_flat_green[MBV_NUM_COLORS];
-extern float	colortable_flat_blue[MBV_NUM_COLORS];
-extern float	colortable_abovesealevel_red[MBV_NUM_COLORS+1];
-extern float	colortable_abovesealevel_green[MBV_NUM_COLORS+1];
-extern float	colortable_abovesealevel_blue[MBV_NUM_COLORS+1];
-extern float	colortable_object_red[MBV_NUM_COLORS+1];
-extern float	colortable_object_green[MBV_NUM_COLORS+1];
-extern float	colortable_object_blue[MBV_NUM_COLORS+1];
-extern char	*mbview_colorname[MBV_NUM_COLORS];
-		  
-/* status mask arrays */
-extern char	statmask[8];
-#endif
 
 /* structure to hold single mbview windows */
 struct mbview_shared_struct
@@ -415,6 +275,148 @@ struct mbview_world_struct
     int button_up_x;
     int button_up_y;
     };
+
+/* library variables */
+/*   note that global mbview variables will only be defined when
+     this code is included in mbview_callbacks.c where the
+     MBVIEWGLOBAL flag is defined - other blocks of code will
+     have these variables declared as extern  */
+#ifdef MBVIEWGLOBAL
+#define EXTERNAL
+#else
+#define EXTERNAL extern
+#endif
+
+/* general library global variables */
+EXTERNAL int	mbv_verbose;
+EXTERNAL int	mbv_ninstance;
+EXTERNAL Widget	parent_widget;
+EXTERNAL XtAppContext	app_context;
+EXTERNAL int	work_function_set;
+EXTERNAL int	timer_count;
+EXTERNAL struct mbview_world_struct mbviews[MBV_MAX_WINDOWS];
+EXTERNAL struct mbview_shared_struct shared;
+EXTERNAL char	*mbsystem_library_name;
+
+/* global declarations */
+#ifdef MBVIEWGLOBAL
+
+/* library colortables */
+float	colortable_haxby_red[MBV_NUM_COLORS] =
+                { 0.950, 1.000, 1.000, 1.000, 0.941, 0.804, 
+                  0.541, 0.416, 0.196, 0.157, 0.145 };
+float	colortable_haxby_green[MBV_NUM_COLORS] =
+                { 0.950, 0.729, 0.631, 0.741, 0.925, 1.000, 
+                  0.925, 0.922, 0.745, 0.498, 0.224 };
+float	colortable_haxby_blue[MBV_NUM_COLORS] =
+                { 0.950, 0.522, 0.267, 0.341, 0.475, 0.635, 
+                  0.682, 1.000, 1.000, 0.984, 0.686 };
+float	colortable_bright_red[MBV_NUM_COLORS] =
+                { 1.000, 1.000, 1.000, 1.000, 0.500, 0.000, 
+                  0.000, 0.000, 0.000, 0.500, 1.000 };
+float	colortable_bright_green[MBV_NUM_COLORS] =
+                { 0.000, 0.250, 0.500, 1.000, 1.000, 1.000, 
+                  1.000, 0.500, 0.000, 0.000, 0.000 };
+float	colortable_bright_blue[MBV_NUM_COLORS] =
+                { 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 
+                  1.000, 1.000, 1.000, 1.000, 1.000 };
+float	colortable_muted_red[MBV_NUM_COLORS] =
+                { 0.784, 0.761, 0.702, 0.553, 0.353, 0.000, 
+                  0.000, 0.000, 0.000, 0.353, 0.553 };
+float	colortable_muted_green[MBV_NUM_COLORS] =
+                { 0.000, 0.192, 0.353, 0.553, 0.702, 0.784, 
+                  0.553, 0.353, 0.000, 0.000, 0.000 };
+float	colortable_muted_blue[MBV_NUM_COLORS] =
+                { 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 
+                  0.553, 0.702, 0.784, 0.702, 0.553 };
+float	colortable_gray_red[MBV_NUM_COLORS] =
+                { 0.000, 0.100, 0.200, 0.300, 0.400, 0.500, 
+                  0.600, 0.700, 0.800, 0.900, 1.000 };
+float	colortable_gray_green[MBV_NUM_COLORS] =
+                { 0.000, 0.100, 0.200, 0.300, 0.400, 0.500, 
+                  0.600, 0.700, 0.800, 0.900, 1.000 };
+float	colortable_gray_blue[MBV_NUM_COLORS] =
+                { 0.000, 0.100, 0.200, 0.300, 0.400, 0.500, 
+                  0.600, 0.700, 0.800, 0.900, 1.000 };
+float	colortable_flat_red[MBV_NUM_COLORS] =
+                { 0.500, 0.500, 0.500, 0.500, 0.500, 0.500, 
+                  0.500, 0.500, 0.500, 0.500, 0.500 };
+float	colortable_flat_green[MBV_NUM_COLORS] =
+                { 0.500, 0.500, 0.500, 0.500, 0.500, 0.500, 
+                  0.500, 0.500, 0.500, 0.500, 0.500 };
+float	colortable_flat_blue[MBV_NUM_COLORS] =
+                { 0.500, 0.500, 0.500, 0.500, 0.500, 0.500, 
+                  0.500, 0.500, 0.500, 0.500, 0.500 };
+float	colortable_abovesealevel_red[MBV_NUM_COLORS+1] =
+                { 0.980, 0.960, 0.941, 0.921, 0.902, 0.882, 
+		  0.862, 0.843, 0.823, 0.804, 0.784};
+float	colortable_abovesealevel_green[MBV_NUM_COLORS+1] =
+                { 0.980, 0.940, 0.901, 0.862, 0.823, 0.784, 
+		  0.744, 0.705, 0.666, 0.627, 0.588};
+float	colortable_abovesealevel_blue[MBV_NUM_COLORS+1] =
+                { 0.471, 0.440, 0.408, 0.376, 0.345, 0.314, 
+		  0.282, 0.250, 0.219, 0.188, 0.157};
+
+float	colortable_object_red[MBV_NUM_COLORS] =
+                { 0.000, 1.000, 1.000, 1.000, 0.000, 0.000, 
+                  0.000, 1.000, 0.000, 0.000, 0.000 };
+float	colortable_object_green[MBV_NUM_COLORS] =
+                { 0.000, 1.000, 0.000, 1.000, 1.000, 1.000, 
+                  0.000, 0.000, 0.000, 0.000, 0.000 };
+float	colortable_object_blue[MBV_NUM_COLORS] =
+                { 0.000, 1.000, 0.000, 0.000, 0.000, 1.000, 
+                  1.000, 1.000, 0.000, 0.000, 0.000 };
+		  
+char	*mbview_colorname[MBV_NUM_COLORS] = 
+		{ "Black",
+		  "White",
+		  "Red",
+		  "Yellow",
+		  "Green",
+		  "Blue-Green",
+		  "Blue",
+		  "Purple" };
+		  
+/* status mask arrays */
+char	statmask[8] = { MBV_STATMASK0,
+			MBV_STATMASK1,
+			MBV_STATMASK2,
+			MBV_STATMASK3,
+			MBV_STATMASK4,
+			MBV_STATMASK5,
+			MBV_STATMASK6,
+			MBV_STATMASK7};
+
+/* extern declarations */
+#else
+
+/* library colortables */
+extern float	colortable_haxby_red[MBV_NUM_COLORS];
+extern float	colortable_haxby_green[MBV_NUM_COLORS];
+extern float	colortable_haxby_blue[MBV_NUM_COLORS];
+extern float	colortable_bright_red[MBV_NUM_COLORS];
+extern float	colortable_bright_green[MBV_NUM_COLORS];
+extern float	colortable_bright_blue[MBV_NUM_COLORS];
+extern float	colortable_muted_red[MBV_NUM_COLORS];
+extern float	colortable_muted_green[MBV_NUM_COLORS];
+extern float	colortable_muted_blue[MBV_NUM_COLORS];
+extern float	colortable_gray_red[MBV_NUM_COLORS];
+extern float	colortable_gray_green[MBV_NUM_COLORS];
+extern float	colortable_gray_blue[MBV_NUM_COLORS];
+extern float	colortable_flat_red[MBV_NUM_COLORS];
+extern float	colortable_flat_green[MBV_NUM_COLORS];
+extern float	colortable_flat_blue[MBV_NUM_COLORS];
+extern float	colortable_abovesealevel_red[MBV_NUM_COLORS+1];
+extern float	colortable_abovesealevel_green[MBV_NUM_COLORS+1];
+extern float	colortable_abovesealevel_blue[MBV_NUM_COLORS+1];
+extern float	colortable_object_red[MBV_NUM_COLORS+1];
+extern float	colortable_object_green[MBV_NUM_COLORS+1];
+extern float	colortable_object_blue[MBV_NUM_COLORS+1];
+extern char	*mbview_colorname[MBV_NUM_COLORS];
+		  
+/* status mask arrays */
+extern char	statmask[8];
+#endif
 	
 /*--------------------------------------------------------------------*/
 

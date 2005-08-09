@@ -91,7 +91,7 @@ int	survey_color = MBV_COLOR_BLACK;
 char	survey_name[MB_PATH_MAXLINE];
 
 /* id variables */
-static char rcs_id[] = "$Id: mbgrdviz_callbacks.c,v 5.12 2005-02-18 07:32:54 caress Exp $";
+static char rcs_id[] = "$Id: mbgrdviz_callbacks.c,v 5.13 2005-08-09 16:32:59 caress Exp $";
 static char program_name[] = "MBgrdviz";
 static char help_message[] = "MBgrdviz is an interactive 2D/3D visualization tool for GMT grid files.";
 static char usage_message[] = "mbgrdviz [-H -T -V]";
@@ -2050,13 +2050,14 @@ int do_mbgrdviz_opennav(int instance, int swathbounds, char *input_file_ptr)
 					/* check for available nav file if that is
 					   all that is needed */
 					if (swathbounds == MB_NO)
-						mb_get_fnv(verbose, swathfile, &format, &error);
+						mb_get_fnv(5, swathfile, &format, &error);
 
 					/* else check for available fbt file  */
 					else
-						mb_get_fbt(verbose, swathfile, &format, &error);
+						mb_get_fbt(5, swathfile, &format, &error);
 
 					/* read the swath or nav data using mbio calls */
+fprintf(stderr,"Reading navigation from %s\n",swathfile);
 					do_mbgrdviz_readnav(instance, swathfile, 
 								format, weight, &error);
 					}
@@ -3248,6 +3249,7 @@ void do_mbgrdviz_generate_survey( Widget w, XtPointer client_data, XtPointer cal
 	int	color;
 	double	line_spacing;
 	double	line_spacing_use;
+	double	crossline_spacing;
 	int	nlines;
 	int	nlinegroups, npoints;
 	double xgrid, ygrid;
@@ -3259,8 +3261,10 @@ void do_mbgrdviz_generate_survey( Widget w, XtPointer client_data, XtPointer cal
 	double	dsigna[4] = {1.0, -1.0, 1.0, -1.0};
 	int	jendpointa[4] = {0, 0, 1, 1};
 	
-	double	xx, dx, dy, r, dxuse, dyuse, dxextra, dyextra;
+	double	xx, dx, dy, r, dxuse, dyuse, dxd, dyd, dxextra, dyextra;
+	double	rrr[4], xxx, yyy;
 	int	iline, jendpoint, ok;
+	int	endcorner, jstart, kend;
 	int	i, j, k;
 
     	/* get source mbview instance */
@@ -3374,19 +3378,6 @@ data->area.width,line_spacing_use,nlines,r,dx,dy);
 
 			/* work in display coordinates */
 			
-			/* generate crossing lines */
-			/*if (survey_crosslines > 0)
-				{
-				crossline_spacing = 0.5 * data->area.length * r 
-							/ survey_crosslines / data->area.width;
-				/* odd number of crosslines start on the opposite
-					side as the first line */
-				/*firstcross = survey_crosslines %2;
-				for (i=0;i<survey_crosslines;i++)
-					{
-					}
-				}*/
-
 			/* generate points */
 			npoints = 0;
 			for (j=0;j<survey_interleaving;j++)
@@ -3400,72 +3391,27 @@ data->area.width,line_spacing_use,nlines,r,dx,dy);
 					/* get line position in survey area */
 					xx = dsign * line_spacing_use * (((double)iline) 
 								- 0.5 * (nlines - 1.0));
-					/* xx = -0.5 * line_spacing_use * (nlines - 1)
-						+ iline * line_spacing_use; */
 					dxuse = dx * xx;
 					dyuse = dy * xx;
 					
 					/* add a bit of transit before later interleaved lines */
-					if (j > 0)
+					if (jendpoint == 1)
 						{
-						if (jendpoint == 1)
-							{
-							dxextra = -dy * j * 0.25 * line_spacing_use;
-							dyextra = dx * j * 0.25 * line_spacing_use;
-							}
-						else
-							{
-							dxextra = dy * j * 0.25 * line_spacing_use;
-							dyextra = -dx * j * 0.25 * line_spacing_use;
-							}
-						waypoint = MBV_ROUTE_WAYPOINT_TRANSIT;
-						xdisplay = data->area.endpoints[jendpoint].xdisplay
-							+ dxuse + dxextra;
-						ydisplay = data->area.endpoints[jendpoint].ydisplay
-							+ dyuse + dyextra;
-						zdisplay = data->area.endpoints[jendpoint].zdisplay;
-						mbview_projectinverse(instance, MB_YES,
-								xdisplay, ydisplay, zdisplay, 
-								&xlon, &ylat,
-								&xgrid, &ygrid);
-						mbview_getzdata(instance, 
-								xgrid, ygrid, 
-								&ok, &zdata);
-						if (ok == MB_NO)
-							zdata = data->area.endpoints[jendpoint].zdata;
-						mbview_projectll2display(instance,
-							xlon, ylat, zdata, 
-							&xdisplay, &ydisplay, &zdisplay);
-fprintf(stderr,"\nTransit Point: Line:%d Point:%d  Position: %f %f %f  %f %f   %f %f %f\n",
-iline, jendpoint, xlon, ylat, zdata, xgrid, ygrid, xdisplay, ydisplay, zdisplay);
-
-						/* add new route for first point, just add single point
-							after that */
-						if (first == MB_YES)
-							{
-							mbview_addroute(verbose, instance,
-									1, &xlon, &ylat, &waypoint,
-									color, 2,
-									survey_name, 
-									&working_route, &error);
-							first = MB_NO;
-							}
-						else
-							{
-							mbview_route_add(instance, working_route, npoints, waypoint,
-									xgrid, ygrid,
-									xlon, ylat, zdata,
-									xdisplay, ydisplay, zdisplay);
-							}
-						npoints++;
+						dxextra = -dy * j * 0.25 * line_spacing_use;
+						dyextra = dx * j * 0.25 * line_spacing_use;
+						}
+					else
+						{
+						dxextra = dy * j * 0.25 * line_spacing_use;
+						dyextra = -dx * j * 0.25 * line_spacing_use;
 						}
 
 					/* get first point */
 					waypoint = MBV_ROUTE_WAYPOINT_STARTLINE;
 					xdisplay = data->area.endpoints[jendpoint].xdisplay
-						+ dxuse;
+						+ dxuse + dxextra;
 					ydisplay = data->area.endpoints[jendpoint].ydisplay
-						+ dyuse;
+						+ dyuse + dyextra;
 					zdisplay = data->area.endpoints[jendpoint].zdisplay;
 					mbview_projectinverse(instance, MB_YES,
 							xdisplay, ydisplay, zdisplay, 
@@ -3504,13 +3450,25 @@ iline, jendpoint, xlon, ylat, zdata, xgrid, ygrid, xdisplay, ydisplay, zdisplay)
 
 					/* switch endpoint */
 					jendpoint = ++jendpoint % 2;
+					
+					/* add a bit of transit before interleaved lines */
+					if (jendpoint == 1)
+						{
+						dxextra = -dy * j * 0.25 * line_spacing_use;
+						dyextra = dx * j * 0.25 * line_spacing_use;
+						}
+					else
+						{
+						dxextra = dy * j * 0.25 * line_spacing_use;
+						dyextra = -dx * j * 0.25 * line_spacing_use;
+						}
 
 					/* get second point */
 					waypoint = MBV_ROUTE_WAYPOINT_ENDLINE;
 					xdisplay = data->area.endpoints[jendpoint].xdisplay
-						+ dxuse;
+						+ dxuse + dxextra;
 					ydisplay = data->area.endpoints[jendpoint].ydisplay
-						+ dyuse;
+						+ dyuse + dyextra;
 					zdisplay = data->area.endpoints[jendpoint].zdisplay;			
 					mbview_projectinverse(instance, MB_YES,
 							xdisplay, ydisplay, zdisplay, 
@@ -3533,50 +3491,148 @@ iline, jendpoint, xlon, ylat, zdata, xgrid, ygrid, xdisplay, ydisplay, zdisplay)
 							xlon, ylat, zdata,
 							xdisplay, ydisplay, zdisplay);
 					npoints++;
-					
-					/* add a bit of transit after later interleaved lines */
-					if (j > 0)
-						{
-						if (jendpoint == 1)
-							{
-							dxextra = -dy * j * 0.25 * line_spacing_use;
-							dyextra = dx * j * 0.25 * line_spacing_use;
-							}
-						else
-							{
-							dxextra = dy * j * 0.25 * line_spacing_use;
-							dyextra = -dx * j * 0.25 * line_spacing_use;
-							}
-						waypoint = MBV_ROUTE_WAYPOINT_TRANSIT;
-						xdisplay = data->area.endpoints[jendpoint].xdisplay
-							+ dxuse + dxextra;
-						ydisplay = data->area.endpoints[jendpoint].ydisplay
-							+ dyuse + dyextra;
-						zdisplay = data->area.endpoints[jendpoint].zdisplay;
-						mbview_projectinverse(instance, MB_YES,
-								xdisplay, ydisplay, zdisplay, 
-								&xlon, &ylat,
-								&xgrid, &ygrid);
-						mbview_getzdata(instance, 
-								xgrid, ygrid, 
-								&ok, &zdata);
-						if (ok == MB_NO)
-							zdata = data->area.endpoints[jendpoint].zdata;
-						mbview_projectll2display(instance,
-							xlon, ylat, zdata, 
-							&xdisplay, &ydisplay, &zdisplay);
-fprintf(stderr,"\nTransit Point: Line:%d Point:%d  Position: %f %f %f  %f %f   %f %f %f\n",
-iline, jendpoint, xlon, ylat, zdata, xgrid, ygrid, xdisplay, ydisplay, zdisplay);
-
-						/* add single point */
-						mbview_route_add(instance, working_route, npoints, waypoint,
-									xgrid, ygrid,
-									xlon, ylat, zdata,
-									xdisplay, ydisplay, zdisplay);
-						npoints++;
-						}
 					}
 				}
+			}
+			
+		/* do crosslines if requested */
+		if (survey_crosslines > 0)
+			{
+			/* figure out which corner the mail lines ended at */
+			for (i=0;i<4;i++)
+				{
+				xxx = xdisplay - data->area.cornerpoints[i].xdisplay;
+				yyy = ydisplay - data->area.cornerpoints[i].ydisplay;
+				rrr[i] = sqrt(xxx * xxx + yyy * yyy);
+				}
+			endcorner = 0;
+			for (i=1;i<4;i++)
+				{
+				if (rrr[i] < rrr[endcorner])
+					endcorner = i;
+				}
+					
+			/* get crossline vector */
+			if (endcorner == 0 || endcorner == 3)
+				{
+				dx = data->area.cornerpoints[1].xdisplay 
+					- data->area.cornerpoints[0].xdisplay;
+				dy = data->area.cornerpoints[1].ydisplay 
+					- data->area.cornerpoints[0].ydisplay;
+				}
+			else
+				{
+				dx = data->area.cornerpoints[0].xdisplay 
+					- data->area.cornerpoints[1].xdisplay;
+				dy = data->area.cornerpoints[0].ydisplay 
+					- data->area.cornerpoints[1].ydisplay;
+				}
+			r = sqrt(dx * dx + dy * dy);
+			dxd = dx / r;
+			dyd = dy / r;
+
+			/* get crossline spacing */
+			crossline_spacing = (data->area.length / (crossline_spacing + 1)) * (r / data->area.width);
+			
+			/* generate cross lines */
+			jstart = endcorner;
+			if (endcorner == 0 || endcorner == 2)
+				kend = jstart + 1;
+			else
+				kend = jstart - 1;
+			dx = (data->area.endpoints[1].xdisplay 
+				- data->area.endpoints[0].xdisplay) / (survey_crosslines + 1);
+			dy = (data->area.endpoints[1].ydisplay 
+				- data->area.endpoints[0].ydisplay) / (survey_crosslines + 1);
+			if (endcorner >= 2)
+				{
+				dx = -dx;
+				dy = -dy;
+				}
+			j = jstart;
+			for (i=0;i<survey_crosslines;i++)
+				{
+				/* get offset from corners */
+				dxuse = (i + 1) * dx;
+				dyuse = (i + 1) * dy;
+				if (j == jstart)
+					{
+					dxextra = -dxd * line_spacing_use;
+					dyextra = -dyd * line_spacing_use;
+					}
+				else
+					{
+					dxextra = dxd * line_spacing_use;
+					dyextra = dyd * line_spacing_use;
+					}
+				
+				/* get first point */
+				waypoint = MBV_ROUTE_WAYPOINT_STARTLINE;
+				xdisplay = data->area.cornerpoints[j].xdisplay
+					+ dxuse + dxextra;
+				ydisplay = data->area.cornerpoints[j].ydisplay
+					+ dyuse + dyextra;
+				zdisplay = data->area.cornerpoints[j].zdisplay;
+				mbview_projectinverse(instance, MB_YES,
+						xdisplay, ydisplay, zdisplay, 
+						&xlon, &ylat,
+						&xgrid, &ygrid);
+				mbview_getzdata(instance, 
+						xgrid, ygrid, 
+						&ok, &zdata);
+				if (ok == MB_NO)
+					zdata = data->area.cornerpoints[jendpoint].zdata;
+				mbview_projectll2display(instance,
+					xlon, ylat, zdata, 
+					&xdisplay, &ydisplay, &zdisplay);
+				mbview_route_add(instance, working_route, npoints, waypoint,
+						xgrid, ygrid,
+						xlon, ylat, zdata,
+						xdisplay, ydisplay, zdisplay);
+				npoints++;
+				
+				/* get second point */
+				if (j == jstart)
+					j = kend;
+				else
+					j = jstart;
+				if (j == jstart)
+					{
+					dxextra = -dxd * line_spacing_use;
+					dyextra = -dyd * line_spacing_use;
+					}
+				else
+					{
+					dxextra = dxd * line_spacing_use;
+					dyextra = dyd * line_spacing_use;
+					}
+				
+				/* get second point */
+				waypoint = MBV_ROUTE_WAYPOINT_ENDLINE;
+				xdisplay = data->area.cornerpoints[j].xdisplay
+					+ dxuse + dxextra;
+				ydisplay = data->area.cornerpoints[j].ydisplay
+					+ dyuse + dyextra;
+				zdisplay = data->area.cornerpoints[j].zdisplay;
+				mbview_projectinverse(instance, MB_YES,
+						xdisplay, ydisplay, zdisplay, 
+						&xlon, &ylat,
+						&xgrid, &ygrid);
+				mbview_getzdata(instance, 
+						xgrid, ygrid, 
+						&ok, &zdata);
+				if (ok == MB_NO)
+					zdata = data->area.cornerpoints[jendpoint].zdata;
+				mbview_projectll2display(instance,
+					xlon, ylat, zdata, 
+					&xdisplay, &ydisplay, &zdisplay);
+				mbview_route_add(instance, working_route, npoints, waypoint,
+						xgrid, ygrid,
+						xlon, ylat, zdata,
+						xdisplay, ydisplay, zdisplay);
+				npoints++;
+				}
+			
 			}
 
 		/* update widgets */
