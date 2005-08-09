@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbview.h	10/9/2002
- *    $Id: mbview.h,v 5.9 2005-02-18 07:32:56 caress Exp $
+ *    $Id: mbview.h,v 5.10 2005-08-09 16:32:59 caress Exp $
  *
  *    Copyright (c) 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -18,6 +18,9 @@
  * Date:	October 10,  2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.9  2005/02/18 07:32:56  caress
+ * Fixed nav display and button sensitivity.
+ *
  * Revision 5.8  2005/02/17 07:35:08  caress
  * Moving towards 5.0.6 release.
  *
@@ -59,12 +62,6 @@
 
 #ifndef MB_DEFINE_DEF
 #include "../../include/mb_define.h"
-#endif
-
-#ifdef MBVIEW_DECLARE_GLOBALS
-#define EXTERNAL
-#else
-#define EXTERNAL extern
 #endif
 
 /* maximum number of mbview windows */
