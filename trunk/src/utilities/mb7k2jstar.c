@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb7k2jstar.c	5/19/2005
- *    $Id: mb7k2jstar.c,v 5.1 2005-06-15 15:35:37 caress Exp $
+ *    $Id: mb7k2jstar.c,v 5.2 2005-08-17 17:27:02 caress Exp $
  *
  *    Copyright (c) 2005 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	May 19, 2005
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2005/06/15 15:35:37  caress
+ * Fixed issues.
+ *
  * Revision 5.0  2005/06/04 05:00:05  caress
  * Program to extract subbottom and sidescan data from Reson 7k files into Edgetech Jstar files.
  *
@@ -47,7 +50,7 @@
 #define	MB7K2JSTAR_SBP		3
 #define	MB7K2JSTAR_ALL		4
 
-static char rcs_id[] = "$Id: mb7k2jstar.c,v 5.1 2005-06-15 15:35:37 caress Exp $";
+static char rcs_id[] = "$Id: mb7k2jstar.c,v 5.2 2005-08-17 17:27:02 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
@@ -761,13 +764,13 @@ imb_io_ptr->fix_lat[i]);*/
 				channel->groupCoordX = (int) (360000.0 * navlon);
 				channel->groupCoordY = (int) (360000.0 * navlat);
 				channel->coordUnits = 2;
-				channel->heading = (short) (100.0 * heading);
+				channel->heading = (short) (60.0 * heading);
 				channel->startDepth = sonardepth / channel->sampleInterval / 0.00000075; 
 				channel->sonardepth = 1000 * sonardepth;
 				channel->sonaraltitude = 1000 * altitude;
 				channel->depth = channel->sonardepth + channel->sonaraltitude;
-				channel->roll = 0.01 * roll; 
-				channel->pitch = 0.01 * pitch; 
+				channel->roll = (short) (60.0 * roll); 
+				channel->pitch = (short) (60.0 * pitch); 
 				channel->heaveCompensation = heave /
 						channel->sampleInterval / 0.00000075; 
 
@@ -944,13 +947,13 @@ imb_io_ptr->fix_lat[i]);*/
 				channel->groupCoordX = (int) (360000.0 * navlon);
 				channel->groupCoordY = (int) (360000.0 * navlat);
 				channel->coordUnits = 2;
-				channel->heading = (short) (100.0 * heading);
+				channel->heading = (short) (60.0 * heading);
 				channel->startDepth = sonardepth / channel->sampleInterval / 0.00000075; 
 				channel->depth = channel->sonardepth + channel->sonaraltitude;
 				channel->sonardepth = 1000 * sonardepth;
 				channel->sonaraltitude = 1000 * altitude;
-				channel->roll = 0.01 * roll; 
-				channel->pitch = 0.01 * pitch; 
+				channel->roll = (short) (60.0 * roll); 
+				channel->pitch = (short) (60.0 * pitch); 
 				channel->heaveCompensation = heave /
 						channel->sampleInterval / 0.00000075; 
 
@@ -1108,13 +1111,13 @@ imb_io_ptr->fix_lat[i]);*/
 				channel->groupCoordX = (int) (360000.0 * navlon);
 				channel->groupCoordY = (int) (360000.0 * navlat);
 				channel->coordUnits = 2;
-				channel->heading = (short) (100.0 * heading);
+				channel->heading = (short) (60.0 * heading);
 				channel->startDepth = sonardepth / channel->sampleInterval / 0.00000075; 
 				channel->sonardepth = 1000 * sonardepth;
 				channel->sonaraltitude = 1000 * altitude;
 				channel->depth = channel->sonardepth + channel->sonaraltitude;
-				channel->roll = 0.01 * roll; 
-				channel->pitch = 0.01 * pitch; 
+				channel->roll = (short) (60.0 * roll); 
+				channel->pitch = (short) (60.0 * pitch); 
 				channel->heaveCompensation = heave /
 						channel->sampleInterval / 0.00000075; 
 
@@ -1291,13 +1294,13 @@ imb_io_ptr->fix_lat[i]);*/
 				channel->groupCoordX = (int) (360000.0 * navlon);
 				channel->groupCoordY = (int) (360000.0 * navlat);
 				channel->coordUnits = 2;
-				channel->heading = (short) (100.0 * heading);
+				channel->heading = (short) (60.0 * heading);
 				channel->startDepth = sonardepth / channel->sampleInterval / 0.00000075; 
 				channel->sonardepth = 1000 * sonardepth;
 				channel->sonaraltitude = 1000 * altitude;
 				channel->depth = channel->sonardepth + channel->sonaraltitude;
-				channel->roll = 0.01 * roll; 
-				channel->pitch = 0.01 * pitch; 
+				channel->roll = (short) (60.0 * roll); 
+				channel->pitch = (short) (60.0 * pitch); 
 				channel->heaveCompensation = heave /
 						channel->sampleInterval / 0.00000075; 
 
@@ -1455,13 +1458,13 @@ imb_io_ptr->fix_lat[i]);*/
 				channel->groupCoordX = (int) (360000.0 * navlon);
 				channel->groupCoordY = (int) (360000.0 * navlat);
 				channel->coordUnits = 2;
-				channel->heading = (short) (100.0 * heading);
+				channel->heading = (short) (60.0 * heading);
 				channel->startDepth = sonardepth / channel->sampleInterval / 0.00000075; 
 				channel->sonardepth = 1000 * sonardepth;
 				channel->sonaraltitude = 1000 * altitude;
 				channel->depth = channel->sonardepth + channel->sonaraltitude;
-				channel->roll = 0.01 * roll; 
-				channel->pitch = 0.01 * pitch; 
+				channel->roll = (short) (60.0 * roll);
+				channel->pitch = (short) (60.0 * pitch); 
 				channel->heaveCompensation = heave /
 						channel->sampleInterval / 0.00000075; 
 
