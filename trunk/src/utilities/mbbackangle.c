@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbbackangle.c	1/6/95
- *    $Id: mbbackangle.c,v 5.9 2005-03-25 04:43:00 caress Exp $
+ *    $Id: mbbackangle.c,v 5.10 2005-08-17 17:28:54 caress Exp $
  *
  *    Copyright (c) 1995, 2000, 2002, 2003, 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	January 6, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.9  2005/03/25 04:43:00  caress
+ * Standardized the string lengths used for filenames and comment data.
+ *
  * Revision 5.8  2004/10/06 19:10:52  caress
  * Release 5.0.5 update.
  *
@@ -124,7 +127,7 @@ int output_table(int verbose, FILE *tfp, int ntable, int nping, double time_d,
 	int *nmean, double *mean, double *sigma, 
 	int *error);
 
-static char rcs_id[] = "$Id: mbbackangle.c,v 5.9 2005-03-25 04:43:00 caress Exp $";
+static char rcs_id[] = "$Id: mbbackangle.c,v 5.10 2005-08-17 17:28:54 caress Exp $";
 static char program_name[] = "mbbackangle";
 
 /*--------------------------------------------------------------------*/
@@ -931,7 +934,6 @@ by MBprocess.";
 				&nslopes,slopes,slopeacrosstrack,
 				depthsmooth,
 				&error);
-
 		    /* do the amplitude */
 		    if (amplitude_on == MB_YES)
 		    for (i=0;i<beams_amp;i++)
@@ -941,7 +943,10 @@ by MBprocess.";
 			    namp++;
 			    if (beams_bath != beams_amp)
 				{
-				bathy = altitude_default;
+				if (altitude > 0.0)
+				    bathy = altitude + sonardepth;
+				else
+				    bathy = altitude_default + sonardepth;
 				slope = 0.0;
 				}
 			    else
@@ -953,7 +958,10 @@ by MBprocess.";
 				    &bathy,&slope,&error);
 				if (status != MB_SUCCESS)
 				    {
-				    bathy = altitude_default;
+				    if (altitude > 0.0)
+				    	bathy = altitude + sonardepth;
+				    else
+				    	bathy = altitude_default + sonardepth;
 				    slope = 0.0;
 				    status = MB_SUCCESS;
 				    error = MB_ERROR_NO_ERROR;
@@ -1011,9 +1019,13 @@ by MBprocess.";
 				    nslopes,slopes,slopeacrosstrack,
 				    ssacrosstrack[i],
 				    &bathy,&slope,&error);
-				if (status != MB_SUCCESS)
+				if (status != MB_SUCCESS
+					|| bathy <= 0.0)
 				    {
-				    bathy = altitude_default;
+				    if (altitude > 0.0)
+				    	bathy = altitude + sonardepth;
+				    else
+				    	bathy = altitude_default;
 				    slope = 0.0;
 				    status = MB_SUCCESS;
 				    error = MB_ERROR_NO_ERROR;
@@ -1021,14 +1033,17 @@ by MBprocess.";
 				}
 			    else
 				{
-				bathy = altitude_default;
+				if (altitude > 0.0)
+				    	bathy = altitude + sonardepth;
+				else
+				    	bathy = altitude_default;
 				slope = 0.0;
 				}
 			    if (bathy > 0.0)
 				{
 				altitude_use = bathy - sonardepth;
 				angle = RTD * atan(ssacrosstrack[i] / altitude_use);
-/*fprintf(stderr,"time_d:%f i:%d xtrack:%f altitude:%f angle:%f\n",
+/*if (altitude > 0.0) fprintf(stderr,"time_d:%f i:%d xtrack:%f altitude:%f angle:%f\n",
 time_d, i, ssacrosstrack[i], altitude_use, angle);*/
 				if (useslope == MB_YES)
 					{

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbprocess.c	3/31/93
- *    $Id: mbprocess.c,v 5.38 2005-06-04 05:17:28 caress Exp $
+ *    $Id: mbprocess.c,v 5.39 2005-08-17 17:31:56 caress Exp $
  *
  *    Copyright (c) 2000, 2002, 2003, 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -36,6 +36,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.38  2005/06/04 05:17:28  caress
+ * Added KLUGE005 feature to insert navigation record timestamps into processed survey records. This allows timestamp fixes made using MBnavedit to be applied during processing.
+ *
  * Revision 5.37  2005/04/06 17:29:40  caress
  * Moved tide correction to end of processing tasks so that it doesn't mess up grazing angle calculations for amplitude and sidescan correction.
  *
@@ -213,7 +216,7 @@ int get_anglecorr(int verbose,
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbprocess.c,v 5.38 2005-06-04 05:17:28 caress Exp $";
+	static char rcs_id[] = "$Id: mbprocess.c,v 5.39 2005-08-17 17:31:56 caress Exp $";
 	static char program_name[] = "mbprocess";
 	static char help_message[] =  "mbprocess is a tool for processing swath sonar bathymetry data.\n\
 This program performs a number of functions, including:\n\
@@ -5145,6 +5148,7 @@ i,ampcorrtableuse.angle[i],ampcorrtableuse.amplitude[i],ampcorrtableuse.sigma[i]
 				{
 				if (mb_beam_ok(beamflag[i]))
 			    		{
+					bathy = 0.0;
 			    		if (ndepths > 1)
 						{
 						status = mb_pr_get_bathyslope(verbose,
@@ -5158,15 +5162,18 @@ i,ampcorrtableuse.angle[i],ampcorrtableuse.amplitude[i],ampcorrtableuse.sigma[i]
 				    				&bathy,&slope,&error);
 						if (status != MB_SUCCESS)
 				    			{
-				    			bathy = altitude_default;
+				    			bathy = 0.0;
 				    			slope = 0.0;
 				    			status = MB_SUCCESS;
 				    			error = MB_ERROR_NO_ERROR;
 				    			}
 						}
-			    		else
+			    		if (bathy <= 0.0)
 						{
-						bathy = altitude_default;
+						if (altitude > 0.0)
+							bathy = altitude + sonardepth;
+						else
+							bathy = altitude_default + sonardepth;
 						slope = 0.0;
 						}
 				
@@ -5239,9 +5246,10 @@ i,sscorrtableuse.angle[i],sscorrtableuse.amplitude[i],sscorrtableuse.sigma[i]);*
 				{
 				if (ss[i] > 0.0)
 			    		{
+					bathy = 0.0;
 			    		if (ndepths > 1)
 						{
-						status = mb_pr_get_bathyslope(verbose,
+						status = mb_pr_get_bathyslope(5,
 				    				ndepths,
 				    				depths,
 				    				depthacrosstrack,
@@ -5252,15 +5260,18 @@ i,sscorrtableuse.angle[i],sscorrtableuse.amplitude[i],sscorrtableuse.sigma[i]);*
 				    				&bathy,&slope,&error);
 						if (status != MB_SUCCESS)
 				    			{
-				    			bathy = altitude_default;
+				    			bathy = 0.0;
 				    			slope = 0.0;
 				    			status = MB_SUCCESS;
 				    			error = MB_ERROR_NO_ERROR;
 				    			}
 						}
-			    		else
+			    		if (bathy <= 0.0)
 						{
-						bathy = altitude_default;
+						if (altitude > 0.0)
+							bathy = altitude + sonardepth;
+						else
+							bathy = altitude_default + sonardepth;
 						slope = 0.0;
 						}
 				
@@ -5268,8 +5279,8 @@ i,sscorrtableuse.angle[i],sscorrtableuse.amplitude[i],sscorrtableuse.sigma[i]);*
 						{
 						altitude_use = bathy - sonardepth;
 						angle = RTD * atan(ssacrosstrack[i] / altitude_use);
-/*fprintf(stderr,"time_d:%f i:%d xtrack:%f altitude:%f angle:%f\n",
-time_d, i, ssacrosstrack[i], altitude_use, angle);*/
+/*fprintf(stderr,"time_d:%f i:%d xtrack:%f altitude:%f sonardepth:%f bathy:%f altitude_use:%f angle:%f\n",
+time_d, i, ssacrosstrack[i], altitude, sonardepth, bathy, altitude_use, angle);*/
 						if (process.mbp_sscorr_slope != MBP_SSCORR_IGNORESLOPE)
 						    {
 /*fprintf(stderr,"SLOPECALC: time_d:%f i:%d angle:%f ",time_d,i,angle);*/
@@ -5281,13 +5292,13 @@ time_d, i, ssacrosstrack[i], altitude_use, angle);*/
 								sscorrtableuse.angle, 
 								sscorrtableuse.amplitude, 
 								angle, &correction, &error);
-/*fprintf(stderr, "ping:%d pixel:%d slope:%f angle:%f corr:%f reference:%f ss: %f", 
-idata, i, slope, angle, correction, reference_amp, ss[i]);*/
+fprintf(stderr, "ping:%d pixel:%d altitude_use:%f slope:%f angle:%f corr:%f reference:%f ss: %f", 
+idata, i, altitude_use, slope, angle, correction, reference_amp, ss[i]);
 						if (process.mbp_sscorr_type == MBP_SSCORR_SUBTRACTION)
 				    			ss[i] = ss[i] - correction + reference_amp;
 						else
 				    			ss[i] = ss[i] / correction * reference_amp;
-/*fprintf(stderr, " ss: %f\n", ss[i]);*/
+fprintf(stderr, " ss: %f\n", ss[i]);
 						if (ss[i] < 0.0)
 				    			ss[i] = 0.0;
 						}
@@ -5328,7 +5339,7 @@ idata, i, slope, angle, correction, reference_amp, ss[i]);*/
 			&& (kind == MB_DATA_DATA
 			    || kind == MB_DATA_COMMENT))
 			{
-			status = mb_insert(verbose,imbio_ptr,
+			status = mb_insert(5,imbio_ptr,
 					store_ptr,kind, 
 					time_i,time_d,
 					navlon,navlat,speed,heading,
@@ -5347,7 +5358,7 @@ idata, i, slope, angle, correction, reference_amp, ss[i]);*/
 			|| (kind == MB_DATA_COMMENT 
 				&& strip_comments == MB_NO))
 			{
-			status = mb_put_all(verbose,ombio_ptr,
+			status = mb_put_all(5,ombio_ptr,
 					store_ptr,MB_NO,kind,
 					time_i,time_d,
 					navlon,navlat,speed,heading,
