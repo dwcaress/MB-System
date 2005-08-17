@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrid.c	5/2/94
- *    $Id: mbgrid.c,v 5.28 2005-03-25 04:41:30 caress Exp $
+ *    $Id: mbgrid.c,v 5.29 2005-08-17 17:25:36 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -38,6 +38,9 @@
  * Rererewrite:	January 2, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.28  2005/03/25 04:41:30  caress
+ * Fixed a problem with the beam footprint gridding algorithm in mbgrid that caused beam footprints to be miscalculated for submerged sonars.
+ *
  * Revision 5.27  2005/02/17 07:37:10  caress
  * Improved the background data capability. Moved interpolation back to surface algorithm.
  *
@@ -380,6 +383,18 @@
 #define MBGRID_INTERP_NEAR	2
 #define MBGRID_INTERP_ALL	3
 
+/* interpolation algorithm 
+	The code is set to use either of two
+	algorithms for 2D thin plate spline
+	interpolation. If the USESURFACE preprocessor
+	define is defined then
+	the code will use the surface algorithm
+	from GMT. If not, then the zgrid
+	algorithm will be used. 
+	- The default is to use zgrid - to
+	change this uncomment the define below. */
+/* #define USESURFACE *?
+
 /* approximate complementary error function */
 double erfcc();
 double mbgrid_erf();
@@ -389,7 +404,7 @@ double mbgrid_erf();
 FILE	*outfp;
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbgrid.c,v 5.28 2005-03-25 04:41:30 caress Exp $";
+static char rcs_id[] = "$Id: mbgrid.c,v 5.29 2005-08-17 17:25:36 caress Exp $";
 static char program_name[] = "mbgrid";
 static char help_message[] =  "mbgrid is an utility used to grid bathymetry, amplitude, or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbgrid -Ifilelist -Oroot \
@@ -461,7 +476,11 @@ main (int argc, char **argv)
 	double	scale = 1.0;
 	double	border = 0.0;
 	double	extend = 0.0;
+#ifdef USESURFACE
 	double	tension = 0.35;
+#else
+	double	tension = 0.0;
+#endif
 	int	check_time = MB_NO;
 	int	first_in_stays = MB_YES;
 	double	timediff = 300.0;
@@ -515,12 +534,20 @@ main (int argc, char **argv)
 	double	*norm = NULL;
 	double	*sigma = NULL;
 	double	*firsttime = NULL;
+#ifdef USESURFACE
 	float	*bxdata = NULL;
 	float	*bydata = NULL;
 	float	*bzdata = NULL;
 	float	*sxdata = NULL;
 	float	*sydata = NULL;
 	float	*szdata = NULL;
+#else
+	float	*bdata = NULL;
+	float	*sdata = NULL;
+	float	*work1 = NULL;
+	int	*work2 = NULL;
+	int	*work3 = NULL;
+#endif
 	float	*output = NULL;
 	float	*sgrid = NULL;
 	int	*num = NULL;
@@ -3250,6 +3277,7 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 				if (grid[kgrid] < clipvalue) ndata++;
 				}
 
+#ifdef USESURFACE
 		/* allocate and initialize sgrid */
 		status = mb_malloc(verbose,ndata*sizeof(float),&sxdata,&error);
 		if (status == MB_SUCCESS)
@@ -3339,19 +3367,108 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 			}
 
 		/* do the interpolation */
-		fprintf(outfp,"\nDoing spline interpolation with %d data points...\n",ndata);
+		fprintf(outfp,"\nDoing Surface spline interpolation with %d data points...\n",ndata);
 		mb_surface(verbose,ndata,sxdata,sydata,szdata,
 			sxmin,sxmax,symin,symax,dx,dy,
 			tension,sgrid);
-		/*
+#else
+		/* allocate and initialize sgrid */
+		status = mb_malloc(verbose,3*ndata*sizeof(float),&sdata,&error);
+		if (status == MB_SUCCESS)
+			status = mb_malloc(verbose,gxdim*gydim*sizeof(float),&sgrid,&error);
+		if (status == MB_SUCCESS)
+			status = mb_malloc(verbose,ndata*sizeof(float),&work1,&error);
+		if (status == MB_SUCCESS)
+			status = mb_malloc(verbose,ndata*sizeof(int),&work2,&error);
+		if (status == MB_SUCCESS)
+			status = mb_malloc(verbose,(gxdim+gydim)*sizeof(int),&work3,&error);
+		if (error != MB_ERROR_NO_ERROR)
+			{
+			mb_error(verbose,MB_ERROR_MEMORY_FAIL,&message);
+			fprintf(outfp,"\nMBIO Error allocating interpolation work arrays:\n%s\n",
+				message);
+			fprintf(outfp,"\nProgram <%s> Terminated\n",
+				program_name);
+			mb_memory_clear(verbose, &error);
+			exit(error);
+			}
+		memset((char *)sgrid,0,gxdim*gydim*sizeof(float));
+		memset((char *)sdata,0,3*ndata*sizeof(float));
+		memset((char *)work1,0,ndata*sizeof(float));
+		memset((char *)work2,0,ndata*sizeof(int));
+		memset((char *)work3,0,(gxdim+gydim)*sizeof(int));
+
+		/* get points from grid */
+		sxmin = gbnd[0];
+		symin = gbnd[2];
+		ndata = 0;
+		for (i=0;i<gxdim;i++)
+			for (j=0;j<gydim;j++)
+				{
+				kgrid = i * gydim + j;
+				if (grid[kgrid] < clipvalue)
+					{
+					sdata[ndata++] = sxmin + dx*i;
+					sdata[ndata++] = symin + dy*j;
+					sdata[ndata++] = grid[kgrid];
+					}
+				}
+		/* if desired set border */
+		if (border > 0.0)
+			{
+			for (i=0;i<gxdim;i++)
+				{
+				j = 0;
+				kgrid = i * gydim + j;
+				if (grid[kgrid] >= clipvalue)
+					{
+					sdata[ndata++] = sxmin + dx*i;
+					sdata[ndata++] = symin + dy*j;
+					sdata[ndata++] = border;
+					}
+				j = gydim - 1;
+				kgrid = i * gydim + j;
+				if (grid[kgrid] >= clipvalue)
+					{
+					sdata[ndata++] = sxmin + dx*i;
+					sdata[ndata++] = symin + dy*j;
+					sdata[ndata++] = border;
+					}
+				}
+			for (j=1;j<gydim-1;j++)
+				{
+				i = 0;
+				kgrid = i * gydim + j;
+				if (grid[kgrid] >= clipvalue)
+					{
+					sdata[ndata++] = sxmin + dx*i;
+					sdata[ndata++] = symin + dy*j;
+					sdata[ndata++] = border;
+					}
+				i = gxdim - 1;
+				kgrid = i * gydim + j;
+				if (grid[kgrid] >= clipvalue)
+					{
+					sdata[ndata++] = sxmin + dx*i;
+					sdata[ndata++] = symin + dy*j;
+					sdata[ndata++] = border;
+					}
+				}
+			}
+		ndata = ndata/3;
+
+		/* do the interpolation */
 		cay = tension;
 		xmin = sxmin;
 		ymin = symin;
 		ddx = dx;
 		ddy = dy;
+		fprintf(outfp,"\nDoing Zgrid spline interpolation with %d data points...\n",ndata);
 		mb_zgrid(sgrid,&gxdim,&gydim,&xmin,&ymin,
 			&ddx,&ddy,sdata,&ndata,
-			work1,work2,work3,&cay,&clip);*/
+			work1,work2,work3,&cay,&clip);
+#endif
+
 		if (clipmode == MBGRID_INTERP_GAP)
 		    fprintf(outfp,"Applying spline interpolation to fill gaps of %d cells or less...\n",clip);
 		else if (clipmode == MBGRID_INTERP_NEAR)
@@ -3368,7 +3485,11 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 			    for (j=0;j<gydim;j++)
 				{
 				kgrid = i * gydim + j;
+#ifdef USESURFACE
 				kint = i + (gydim -j - 1) * gxdim;
+#else
+				kint = i + j*gxdim;
+#endif
 				num[kgrid] = MB_NO;
 				if (grid[kgrid] >= clipvalue 
 				    && sgrid[kint] < zflag)
@@ -3464,7 +3585,11 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 			    for (j=0;j<gydim;j++)
 				{
 				kgrid = i * gydim + j;
+#ifdef USESURFACE
 				kint = i + (gydim -j - 1) * gxdim;
+#else
+				kint = i + j*gxdim;
+#endif
 				if (num[kgrid] == MB_YES)
 					{
 					grid[kgrid] = sgrid[kint];
@@ -3474,7 +3599,7 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 			}
 
 		/* translate the interpolation into the grid array 
-		    filling only data gaps */
+		    filling by proximity */
 		else if (clipmode == MBGRID_INTERP_NEAR)
 			{
 			zflag = 5.0e34;
@@ -3482,7 +3607,11 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 			    for (j=0;j<gydim;j++)
 				{
 				kgrid = i * gydim + j;
+#ifdef USESURFACE
 				kint = i + (gydim -j - 1) * gxdim;
+#else
+				kint = i + j*gxdim;
+#endif
 
 				num[kgrid] = MB_NO;
 				if (grid[kgrid] >= clipvalue 
@@ -3539,7 +3668,11 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 			    for (j=0;j<gydim;j++)
 				{
 				kgrid = i * gydim + j;
+#ifdef USESURFACE
 				kint = i + (gydim -j - 1) * gxdim;
+#else
+				kint = i + j*gxdim;
+#endif
 				if (num[kgrid] == MB_YES)
 					{
 					grid[kgrid] = sgrid[kint];
@@ -3549,14 +3682,18 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 			}
 
 		/* translate the interpolation into the grid array 
-		    filling to clip bounds */
+		    filling all empty bins */
 		else
 			{
 			for (i=0;i<gxdim;i++)
 			    for (j=0;j<gydim;j++)
 				{
 				kgrid = i * gydim + j;
+#ifdef USESURFACE
 				kint = i + (gydim -j - 1) * gxdim;
+#else
+				kint = i + j*gxdim;
+#endif
 				if (grid[kgrid] >= clipvalue 
 				    && sgrid[kint] < zflag)
 					{
@@ -3567,9 +3704,16 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 			}
 			
 		/* deallocate the interpolation arrays */
+#ifdef USESURFACE
 		mb_free(verbose,&sxdata,&error);
 		mb_free(verbose,&sydata,&error);
 		mb_free(verbose,&szdata,&error);
+#else
+		mb_free(verbose,&sdata,&error);
+		mb_free(verbose,&work1,&error);
+		mb_free(verbose,&work2,&error);
+		mb_free(verbose,&work3,&error);
+#endif
 		mb_free(verbose,&sgrid,&error);
 		}
 
@@ -3587,6 +3731,7 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 			nbackground = gxdim * gydim;
 
 		/* allocate and initialize background data arrays */
+#ifdef USESURFACE
 		status = mb_malloc(verbose,nbackground*sizeof(float),&bxdata,&error);
 		if (status == MB_SUCCESS) 
 		status = mb_malloc(verbose,nbackground*sizeof(float),&bydata,&error);
@@ -3605,6 +3750,32 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 		memset((char *)bxdata,0,nbackground*sizeof(float));
 		memset((char *)bydata,0,nbackground*sizeof(float));
 		memset((char *)bzdata,0,nbackground*sizeof(float));
+#else
+		status = mb_malloc(verbose,3*nbackground*sizeof(float),&bdata,&error);
+		if (status == MB_SUCCESS)
+			status = mb_malloc(verbose,gxdim*gydim*sizeof(float),&sgrid,&error);
+		if (status == MB_SUCCESS)
+			status = mb_malloc(verbose,nbackground*sizeof(float),&work1,&error);
+		if (status == MB_SUCCESS)
+			status = mb_malloc(verbose,nbackground*sizeof(int),&work2,&error);
+		if (status == MB_SUCCESS)
+			status = mb_malloc(verbose,(gxdim+gydim)*sizeof(int),&work3,&error);
+		if (error != MB_ERROR_NO_ERROR)
+			{
+			mb_error(verbose,MB_ERROR_MEMORY_FAIL,&message);
+			fprintf(outfp,"\nMBIO Error allocating background interpolation work arrays:\n%s\n",
+				message);
+			fprintf(outfp,"\nProgram <%s> Terminated\n",
+				program_name);
+			mb_memory_clear(verbose, &error);
+			exit(error);
+			}
+		memset((char *)bdata,0,3*nbackground*sizeof(float));
+		memset((char *)sgrid,0,gxdim*gydim*sizeof(float));
+		memset((char *)work1,0,ndata*sizeof(float));
+		memset((char *)work2,0,ndata*sizeof(int));
+		memset((char *)work3,0,(gxdim+gydim)*sizeof(int));
+#endif
 
 		/* get initial grid using grdraster */
 		if (grdrasterid > 0)
@@ -3714,9 +3885,15 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 				if (use_projection == MB_YES)
 					mb_proj_forward(verbose, pjptr, tlon, tlat,
 					&tlon, &tlat, &error);
+#ifdef USESURFACE
 				bxdata[nbackground] = (float) tlon;
 				bydata[nbackground] = (float) tlat;
 				bzdata[nbackground] = (float) tvalue;
+#else
+				bdata[nbackground*3] = (float) tlon;
+				bdata[nbackground*3+1] = (float) tlat;
+				bdata[nbackground*3+2] = (float) tvalue;
+#endif
 				nbackground++;
 				}
 			pclose(rfp);
@@ -3761,6 +3938,7 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 
 		/* do the interpolation */
 		fprintf(outfp,"\nDoing spline interpolation with %d data points from background...\n",nbackground);
+#ifdef USESURFACE
 		sxmin = gbnd[0];
 		sxmax = gbnd[1];
 		symin = gbnd[2];
@@ -3768,16 +3946,18 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 		mb_surface(verbose,nbackground,bxdata,bydata,bzdata,
 			sxmin,sxmax,symin,symax,dx,dy,
 			tension,sgrid);
-		/*
+#else
 		cay = tension;
 		xmin = sxmin;
 		ymin = symin;
 		ddx = dx;
 		ddy = dy;
 		clip = MAX(gxdim,gydim);
+fprintf(stderr,"Calling mb_zgrid\n");
 		mb_zgrid(sgrid,&gxdim,&gydim,&xmin,&ymin,
 			&ddx,&ddy,bdata,&nbackground,
-			work1,work2,work3,&cay,&clip);*/
+			work1,work2,work3,&cay,&clip);
+#endif
 
 		/* translate the interpolation into the grid array 
 		    - interpolate only to fill a data gap */
@@ -3786,7 +3966,11 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 		    for (j=0;j<gydim;j++)
 			{
 			kgrid = i * gydim + j;
+#ifdef USESURFACE
 			kint = i + (gydim -j - 1) * gxdim;
+#else
+			kint = i + j*gxdim;
+#endif
 			if (grid[kgrid] >= clipvalue 
 			    && sgrid[kint] < zflag)
 				{
@@ -3794,9 +3978,16 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 				nbinbackground++;
 				}
 			}
+#ifdef USESURFACE
 		mb_free(verbose,&bxdata,&error);
 		mb_free(verbose,&bydata,&error);
 		mb_free(verbose,&bzdata,&error);
+#else
+		mb_free(verbose,&bdata,&error);
+		mb_free(verbose,&work1,&error);
+		mb_free(verbose,&work2,&error);
+		mb_free(verbose,&work3,&error);
+#endif
 		mb_free(verbose,&sgrid,&error);
 		}
 
