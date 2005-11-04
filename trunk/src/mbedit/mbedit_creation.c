@@ -3544,7 +3544,9 @@ Createwindow_mbedit(Widget parent)
         XtSetArg(args[ac], XmNdecimalPoints, 2); ac++;
         XtSetArg(args[ac], XmNvalue, 1000); ac++;
         XtSetArg(args[ac], XmNmaximum, 10000); ac++;
-        XtSetArg(args[ac], XmNscaleMultiple, 1); ac++;
+        XtSetArg(args[ac], XmNshowArrows, TRUE); ac++;
+	XtSetArg(args[ac], XmNscaleMultiple, 1); ac++;
+	XtSetArg(args[ac], XmNshowValue, TRUE); ac++;
         XtSetArg(args[ac], XmNorientation, XmHORIZONTAL); ac++;
         XtSetArg(args[ac], XmNx, 100); ac++;
         XtSetArg(args[ac], XmNy, 580); ac++;
@@ -3576,7 +3578,9 @@ Createwindow_mbedit(Widget parent)
         XtSetArg(args[ac], XmNdecimalPoints, 2); ac++;
         XtSetArg(args[ac], XmNvalue, 1000); ac++;
         XtSetArg(args[ac], XmNmaximum, 10000); ac++;
+        XtSetArg(args[ac], XmNshowArrows, TRUE); ac++;
         XtSetArg(args[ac], XmNscaleMultiple, 1); ac++;
+        XtSetArg(args[ac], XmNshowValue, TRUE); ac++;
         XtSetArg(args[ac], XmNorientation, XmHORIZONTAL); ac++;
         XtSetArg(args[ac], XmNx, 100); ac++;
         XtSetArg(args[ac], XmNy, 520); ac++;
@@ -3647,7 +3651,9 @@ Createwindow_mbedit(Widget parent)
         XtSetArg(args[ac], XmNdecimalPoints, 2); ac++;
         XtSetArg(args[ac], XmNvalue, 1000); ac++;
         XtSetArg(args[ac], XmNmaximum, 10000); ac++;
+        XtSetArg(args[ac], XmNshowArrows, TRUE); ac++;
         XtSetArg(args[ac], XmNscaleMultiple, 1); ac++;
+        XtSetArg(args[ac], XmNshowValue, TRUE); ac++;
         XtSetArg(args[ac], XmNorientation, XmHORIZONTAL); ac++;
         XtSetArg(args[ac], XmNx, 100); ac++;
         XtSetArg(args[ac], XmNy, 440); ac++;
@@ -3679,7 +3685,9 @@ Createwindow_mbedit(Widget parent)
         XtSetArg(args[ac], XmNdecimalPoints, 2); ac++;
         XtSetArg(args[ac], XmNvalue, 1000); ac++;
         XtSetArg(args[ac], XmNmaximum, 10000); ac++;
+        XtSetArg(args[ac], XmNshowArrows, TRUE); ac++;
         XtSetArg(args[ac], XmNscaleMultiple, 1); ac++;
+        XtSetArg(args[ac], XmNshowValue, TRUE); ac++;
         XtSetArg(args[ac], XmNorientation, XmHORIZONTAL); ac++;
         XtSetArg(args[ac], XmNx, 100); ac++;
         XtSetArg(args[ac], XmNy, 380); ac++;

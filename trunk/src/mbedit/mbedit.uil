@@ -351,6 +351,8 @@ object scale_filters_wrongside : XmScale widget {
         XmNvalue = 10;
         XmNtitleString = compound_string("Beams from Center Threshold");
         XmNmaximum = 100;
+        XmNshowArrows = TRUE;
+        XmNshowValue = TRUE;
         XmNorientation = XmHORIZONTAL;
         XmNx = 100;
         XmNy = 670;
@@ -410,6 +412,8 @@ object scale_filters_cutbeamstart : XmScale widget {
         XmNvalue = 10;
         XmNtitleString = compound_string("Start Flagging Beam Number");
         XmNmaximum = 100;
+        XmNshowArrows = TRUE;
+        XmNshowValue = TRUE;
         XmNorientation = XmHORIZONTAL;
         XmNx = 100;
         XmNy = 230;
@@ -433,6 +437,8 @@ object scale_filters_cutbeamend : XmScale widget {
         XmNvalue = 10;
         XmNtitleString = compound_string("End Flagging Beam Number");
         XmNmaximum = 100;
+        XmNshowArrows = TRUE;
+        XmNshowValue = TRUE;
         XmNorientation = XmHORIZONTAL;
         XmNx = 100;
         XmNy = 290;
@@ -493,6 +499,8 @@ object scale_filters_cutdistancestart : XmScale widget {
         XmNtitleString = compound_string("Start Flagging Distance (m)");
         XmNmaximum = 10000;
         XmNscaleMultiple = 1;
+        XmNshowArrows = TRUE;
+        XmNshowValue = TRUE;
         XmNorientation = XmHORIZONTAL;
         XmNx = 100;
         XmNy = 380;
@@ -518,6 +526,8 @@ object scale_filters_cutdistanceend : XmScale widget {
         XmNtitleString = compound_string("End Flagging Distance (m)");
         XmNmaximum = 10000;
         XmNscaleMultiple = 1;
+        XmNshowArrows = TRUE;
+        XmNshowValue = TRUE;
         XmNorientation = XmHORIZONTAL;
         XmNx = 100;
         XmNy = 440;
@@ -578,7 +588,9 @@ object scale_filters_cutanglestart : XmScale widget {
         XmNvalue = 1000;
         XmNtitleString = compound_string("Start Flagging Angle (deg)");
         XmNmaximum = 10000;
+        XmNshowArrows = TRUE;
         XmNscaleMultiple = 1;
+        XmNshowValue = TRUE;
         XmNorientation = XmHORIZONTAL;
         XmNx = 100;
         XmNy = 520;
@@ -603,7 +615,9 @@ object scale_filters_cutangleend : XmScale widget {
         XmNvalue = 1000;
         XmNtitleString = compound_string("End Flagging Angle (deg)");
         XmNmaximum = 10000;
+        XmNshowArrows = TRUE;
         XmNscaleMultiple = 1;
+        XmNshowValue = TRUE;
         XmNorientation = XmHORIZONTAL;
         XmNx = 100;
         XmNy = 580;
