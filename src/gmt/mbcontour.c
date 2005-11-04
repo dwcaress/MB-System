@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcontour.c	6/4/93
- *    $Id: mbcontour.c,v 5.9 2005-03-25 04:03:10 caress Exp $
+ *    $Id: mbcontour.c,v 5.10 2005-11-04 20:50:19 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2003, 2004, 2005 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	June 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.9  2005/03/25 04:03:10  caress
+ * Added control on filename annotation direction.
+ *
  * Revision 5.8  2004/12/18 01:26:43  caress
  * Added filename annotation.
  *
@@ -195,7 +198,7 @@
 
 main (int argc, char **argv) 
 {
-	static char rcs_id[] = "$Id: mbcontour.c,v 5.9 2005-03-25 04:03:10 caress Exp $";
+	static char rcs_id[] = "$Id: mbcontour.c,v 5.10 2005-11-04 20:50:19 caress Exp $";
 #ifdef MBCONTOURFILTER
 	static char program_name[] = "MBCONTOURFILTER";
 	static char help_message[] =  "MBCONTOURFILTER is a utility which creates a pen plot \ncontour map of multibeam swath bathymetry.  \nThe primary purpose of this program is to serve as \npart of a real-time plotting system.  The contour \nlevels and colors can be controlled \ndirectly or set implicitly using contour and color change intervals. \nContours can also be set to have ticks pointing downhill.";
@@ -253,12 +256,12 @@ main (int argc, char **argv)
 	struct ping *pingcur = NULL;
 	int	kind;
 	int	pings_read;
-	int	*time_i = NULL;
-	double	*time_d = NULL;
-	double	*navlon = NULL;
-	double	*navlat = NULL;
+	int	time_i[7];
+	double	time_d;
+	double	navlon;
+	double	navlat;
 	double	speed;
-	double	*heading = NULL;
+	double	heading;
 	double	distance;
 	double	altitude;
 	double	sonardepth;
@@ -877,10 +880,30 @@ main (int argc, char **argv)
 		    }
 
 		/* allocate memory for data arrays */
-		status = mb_malloc(verbose,beams_amp*sizeof(double),&amp,&error);
-		status = mb_malloc(verbose,pixels_ss*sizeof(double),&ss,&error);
-		status = mb_malloc(verbose,pixels_ss*sizeof(double),&sslon,&error);
-		status = mb_malloc(verbose,pixels_ss*sizeof(double),&sslat,&error);
+		if (error == MB_ERROR_NO_ERROR)
+		    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						    sizeof(char), (void **)&beamflag, &error);
+		if (error == MB_ERROR_NO_ERROR)
+		    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						    sizeof(double), (void **)&bath, &error);
+		if (error == MB_ERROR_NO_ERROR)
+		    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_AMPLITUDE,
+						    sizeof(double), (void **)&amp, &error);
+		if (error == MB_ERROR_NO_ERROR)
+		    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						    sizeof(double), (void **)&bathlon, &error);
+		if (error == MB_ERROR_NO_ERROR)
+		    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						    sizeof(double), (void **)&bathlat, &error);
+		if (error == MB_ERROR_NO_ERROR)
+		    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+						    sizeof(double), (void **)&ss, &error);
+		if (error == MB_ERROR_NO_ERROR)
+		    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+						    sizeof(double), (void **)&sslon, &error);
+		if (error == MB_ERROR_NO_ERROR)
+		    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+						    sizeof(double), (void **)&sslat, &error);
 	
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR)
@@ -930,25 +953,51 @@ main (int argc, char **argv)
 		while (done == MB_NO)
 		    {
 		    /* read the next ping */
-		    pingcur = &swath_plot->pings[*npings];
-		    time_i = &pingcur->time_i[0];
-		    time_d = &pingcur->time_d;
-		    navlon = &pingcur->navlon;
-		    navlat = &pingcur->navlat;
-		    heading = &pingcur->heading;
-		    beamflag = pingcur->beamflag;
-		    bath = pingcur->bath;
-		    bathlon = pingcur->bathlon;
-		    bathlat = pingcur->bathlat;
 		    status = mb_read(verbose,mbio_ptr,&kind,
-			    &pings_read,time_i,time_d,
-			    navlon,navlat,
-			    &speed,heading,
+			    &pings_read,time_i,&time_d,
+			    &navlon,&navlat,
+			    &speed,&heading,
 			    &distance,&altitude,&sonardepth,
 			    &beams_bath,&beams_amp,&pixels_ss,
 			    beamflag,bath,amp,bathlon,bathlat,
 			    ss,sslon,sslat,
 			    comment,&error);
+			    
+		    /* copy data to swath_plot */
+		    if (status == MB_SUCCESS)
+		    	{
+		        pingcur = &swath_plot->pings[*npings];
+			
+			/* make sure enough memory is allocated */
+			if (pingcur->beams_bath_alloc < beams_bath)
+				{
+				status = mb_realloc(verbose,beams_bath*sizeof(char),
+						&(pingcur->beamflag),&error);
+				status = mb_realloc(verbose,beams_bath*sizeof(double),
+						&(pingcur->bath),&error);
+				status = mb_realloc(verbose,beams_bath*sizeof(double),
+						&(pingcur->bathlon),&error);
+				status = mb_realloc(verbose,beams_bath*sizeof(double),
+						&(pingcur->bathlat),&error);
+				pingcur->beams_bath_alloc = beams_bath;
+				}
+			
+			/* insert the data */
+			for (i=0;i<7;i++)
+				pingcur->time_i[i] = time_i[i];
+			pingcur->time_d = time_d;
+			pingcur->navlon = navlon;
+			pingcur->navlat = navlat;
+			pingcur->heading = heading;
+			pingcur->beams_bath = beams_bath;
+			for (i=0;i<beams_bath;i++)
+				{
+				pingcur->beamflag[i] = beamflag[i];
+				pingcur->bath[i] = bath[i];
+				pingcur->bathlon[i] = bathlon[i];
+				pingcur->bathlat[i] = bathlat[i];
+				}
+			}
 
 		    /* null out any unused beams for formats with
 			variable numbers of beams */
@@ -968,7 +1017,7 @@ main (int argc, char **argv)
 				    time_i[0],time_i[1],time_i[2],
 				    time_i[3],time_i[4],time_i[5],time_i[6]);
 			    fprintf(stderr,"dbg2       navigation:     %f  %f\n",
-				    *navlon, *navlat);
+				    navlon, navlat);
 			    fprintf(stderr,"dbg2       beams_bath:     %d\n",
 				    beams_bath);
 			    fprintf(stderr,"dbg2       beams_amp:      %d\n",
@@ -998,13 +1047,13 @@ main (int argc, char **argv)
 				    (*npings > 0 
 				    && contour_algorithm == MB_CONTOUR_TRIANGLES)
 				    || (*npings > 0 
-				    && (*navlon != navlon_old 
-				    || *navlat != navlat_old)))
+				    && (navlon != navlon_old 
+				    || navlat != navlat_old)))
 				    {
 				    nping_read += pings_read;
 				    (*npings)++;
-				    navlon_old = *navlon;
-				    navlat_old = *navlat;
+				    navlon_old = navlon;
+				    navlat_old = navlat;
 				    }
 			    }
     
@@ -1091,10 +1140,6 @@ main (int argc, char **argv)
 		status = mb_close(verbose,&mbio_ptr,&error);
     
 		/* deallocate memory for data arrays */
-		mb_free(verbose,&amp,&error);
-		mb_free(verbose,&ss,&error);
-		mb_free(verbose,&sslon,&error);
-		mb_free(verbose,&sslat,&error);
 		status = mb_contour_deall(verbose,swath_plot,&error);
 		} /* end if file in bounds */
     

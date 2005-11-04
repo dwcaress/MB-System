@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbswath.c	5/30/93
- *    $Id: mbswath.c,v 5.9 2004-05-21 23:13:35 caress Exp $
+ *    $Id: mbswath.c,v 5.10 2005-11-04 20:50:19 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -29,6 +29,9 @@
  * Date:	May 30, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.9  2004/05/21 23:13:35  caress
+ * Changes to support GMT 4.0
+ *
  * Revision 5.8  2003/04/17 20:43:37  caress
  * Release 5.0.beta30
  *
@@ -305,7 +308,7 @@ unsigned char r, g, b, gray;
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbswath.c,v 5.9 2004-05-21 23:13:35 caress Exp $";
+	static char rcs_id[] = "$Id: mbswath.c,v 5.10 2005-11-04 20:50:19 caress Exp $";
 	static char program_name[] = "MBSWATH";
 	static char help_message[] =  "MBSWATH is a GMT compatible utility which creates a color postscript \nimage of swath bathymetry or backscatter data.  The image \nmay be shaded relief as well.  Complete maps are made by using \nMBSWATH in conjunction with the usual GMT programs.";
 	static char usage_message[] = "mbswath -Ccptfile -Jparameters -Rwest/east/south/north \n\t[-Afactor -Btickinfo -byr/mon/day/hour/min/sec \n\t-ccopies -Dmode/ampscale/ampmin/ampmax \n\t-Eyr/mon/day/hour/min/sec -fformat \n\t-Fred/green/blue -Gmagnitude/azimuth -Idatalist \n\t-K -Ncptfile -O -P -ppings -Qdpi -Ttimegap -U -W -Xx-shift -Yy-shift \n\t-Zmode -V -H]";
@@ -1104,34 +1107,45 @@ main (int argc, char **argv)
 		    pingcur->ssflag = NULL;
 		    pingcur->ssfoot = NULL;
 		    pingcur->bathshade = NULL;
-		    status = mb_malloc(verbose,beams_bath_max*sizeof(char),
-			    &(pingcur->beamflag),&error);
-		    status = mb_malloc(verbose,beams_bath_max*sizeof(double),
-			    &(pingcur->bath),&error);
-		    status = mb_malloc(verbose,beams_amp_max*sizeof(double),
-			    &(pingcur->amp),&error);
-		    status = mb_malloc(verbose,beams_bath_max*sizeof(double),
-			    &(pingcur->bathlon),&error);
-		    status = mb_malloc(verbose,beams_bath_max*sizeof(double),
-			    &(pingcur->bathlat),&error);
-		    status = mb_malloc(verbose,pixels_ss_max*sizeof(double),
-			    &(pingcur->ss),&error);
-		    status = mb_malloc(verbose,pixels_ss_max*sizeof(double),
-			    &(pingcur->sslon),&error);
-		    status = mb_malloc(verbose,pixels_ss_max*sizeof(double),
-			    &(pingcur->sslat),&error);
-		    status = mb_malloc(verbose,beams_bath_max*sizeof(int),
-			    &(pingcur->bathflag),&error);
-		    status = mb_malloc(verbose,
-			    (beams_bath_max)*sizeof(struct footprint),
-			    &(pingcur->bathfoot),&error);
-		    status = mb_malloc(verbose,pixels_ss_max*sizeof(int),
-			    &(pingcur->ssflag),&error);
-		    status = mb_malloc(verbose,
-			    (pixels_ss_max)*sizeof(struct footprint),
-			    &(pingcur->ssfoot),&error);
-		    status = mb_malloc(verbose,beams_bath_max*sizeof(double),
-			    &(pingcur->bathshade),&error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							    sizeof(char), (void **)&(pingcur->beamflag), &error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							    sizeof(double), (void **)&(pingcur->bath), &error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_AMPLITUDE,
+							    sizeof(double), (void **)&(pingcur->amp), &error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							    sizeof(double), (void **)&(pingcur->bathlon), &error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							    sizeof(double), (void **)&(pingcur->bathlat), &error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+							    sizeof(double), (void **)&(pingcur->ss), &error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+							    sizeof(double), (void **)&(pingcur->sslon), &error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+							    sizeof(double), (void **)&(pingcur->sslat), &error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, 
+							    sizeof(int), (void **)&(pingcur->bathflag), &error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, 
+							    sizeof(struct footprint), (void **)&(pingcur->bathfoot), &error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+							    sizeof(int), (void **)&(pingcur->ssflag), &error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+							    sizeof(struct footprint), (void **)&(pingcur->ssfoot), &error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							    sizeof(double), (void **)&(pingcur->bathshade), &error);
 		    }
     
 		/* if error initializing memory then quit */
@@ -1157,14 +1171,6 @@ main (int argc, char **argv)
 		while (done == MB_NO)
 		    {
 		    pingcur = &swath_plot->data[*npings];
-		    beamflag = pingcur->beamflag;
-		    bath = pingcur->bath;
-		    amp = pingcur->amp;
-		    bathlon = pingcur->bathlon;
-		    bathlat = pingcur->bathlat;
-		    ss = pingcur->ss;
-		    sslon = pingcur->sslon;
-		    sslat = pingcur->sslat;
 		    status = mb_read(verbose,mbio_ptr,&(pingcur->kind),
 			    &(pingcur->pings),pingcur->time_i,&(pingcur->time_d),
 			    &(pingcur->navlon),&(pingcur->navlat),
@@ -1174,9 +1180,18 @@ main (int argc, char **argv)
 			    &(pingcur->beams_bath),
 			    &(pingcur->beams_amp),
 			    &(pingcur->pixels_ss),
-			    beamflag,bath,amp,bathlon,bathlat,
-			    ss,sslon,sslat,
+			    pingcur->beamflag,pingcur->bath,pingcur->amp,
+			    pingcur->bathlon,pingcur->bathlat,
+			    pingcur->ss,pingcur->sslon,pingcur->sslat,
 			    pingcur->comment,&error);
+		    beamflag = pingcur->beamflag;
+		    bath = pingcur->bath;
+		    amp = pingcur->amp;
+		    bathlon = pingcur->bathlon;
+		    bathlat = pingcur->bathlat;
+		    ss = pingcur->ss;
+		    sslon = pingcur->sslon;
+		    sslat = pingcur->sslat;
 
 		    /* print debug statements */
 		    if (verbose >= 2)
@@ -1397,23 +1412,6 @@ main (int argc, char **argv)
 		status = mb_close(verbose,&mbio_ptr,&error);
     
 		/* deallocate memory for data arrays */
-		for (i=0;i<MAXPINGS;i++)
-		    {
-		    pingcur = &swath_plot->data[i];
-		    mb_free(verbose,&pingcur->beamflag,&error);
-		    mb_free(verbose,&pingcur->bath,&error);
-		    mb_free(verbose,&pingcur->amp,&error);
-		    mb_free(verbose,&pingcur->bathlon,&error);
-		    mb_free(verbose,&pingcur->bathlat,&error);
-		    mb_free(verbose,&pingcur->ss,&error);
-		    mb_free(verbose,&pingcur->sslon,&error);
-		    mb_free(verbose,&pingcur->sslat,&error);
-		    mb_free(verbose,&pingcur->bathflag,&error);
-		    mb_free(verbose,&pingcur->bathfoot,&error);
-		    mb_free(verbose,&pingcur->ssflag,&error);
-		    mb_free(verbose,&pingcur->ssfoot,&error);
-		    mb_free(verbose,&pingcur->bathshade,&error);
-		    }
 		mb_free(verbose,&swath_plot,&error);
 		} /* end if file in bounds */
 		
