@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_truecont.c	4/21/94
- *    $Id: mb_truecont.c,v 5.3 2004-12-18 01:32:50 caress Exp $
+ *    $Id: mb_truecont.c,v 5.4 2005-11-04 22:49:51 caress Exp $
  *
  *    Copyright (c) 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -40,7 +40,10 @@
 
 /*--------------------------------------------------------------------------*/
 /* 	function mb_contour_init initializes the memory required to
-	contour multibeam bathymetry data. */
+	contour multibeam bathymetry data. 
+	if mbio_ptr is null, the arrays are allocated using mb_malloc. If
+	mbio_ptr is a valid mbio structure, then the arrays tied to
+	beams_bath will be registered using mb_register_array */
 int mb_contour_init(
 		int	verbose, 
 		struct swath **data,
@@ -70,7 +73,7 @@ int mb_contour_init(
 		double	name_hgt,
 		int	*error)
 {
-  	static char rcs_id[]="$Id: mb_truecont.c,v 5.3 2004-12-18 01:32:50 caress Exp $";
+  	static char rcs_id[]="$Id: mb_truecont.c,v 5.4 2005-11-04 22:49:51 caress Exp $";
 	char	*function_name = "mb_contour_init";
 	int	status = MB_SUCCESS;
 	struct swath *dataptr;
@@ -125,6 +128,8 @@ int mb_contour_init(
 	for (i=0;i<npings_max;i++)
 		{
 		ping = &dataptr->pings[i];
+		ping->beams_bath = 0;
+		ping->beams_bath_alloc = beams_bath;
 		ping->beamflag = NULL;
 		ping->bath = NULL;
 		ping->bathlon = NULL;
@@ -230,18 +235,20 @@ int mb_contour_init(
 	if (contour_algorithm == MB_CONTOUR_TRIANGLES)
 	  {
 	  dataptr->npts = 0;
-	  status = mb_malloc(verbose,(npings_max*beams_bath+3)*sizeof(double),
+	  dataptr->npts_alloc = npings_max*beams_bath+3;
+	  status = mb_malloc(verbose,dataptr->npts_alloc*sizeof(double),
 			&(dataptr->x),error);
-	  status = mb_malloc(verbose,(npings_max*beams_bath+3)*sizeof(double),
+	  status = mb_malloc(verbose,dataptr->npts_alloc*sizeof(double),
 			&(dataptr->y),error);
-	  status = mb_malloc(verbose,(npings_max*beams_bath+3)*sizeof(double),
+	  status = mb_malloc(verbose,dataptr->npts_alloc*sizeof(double),
 			&(dataptr->z),error);
-	  status = mb_malloc(verbose,(npings_max*beams_bath+3)*sizeof(int),
+	  status = mb_malloc(verbose,dataptr->npts_alloc*sizeof(int),
 			&(dataptr->edge),error);
-	  status = mb_malloc(verbose,(npings_max*beams_bath+3)*sizeof(int),
+	  status = mb_malloc(verbose,dataptr->npts_alloc*sizeof(int),
 			&(dataptr->pingid),error);
-	  dataptr->ntri = 0;
 	  ntri_max = 3*npings_max*beams_bath + 1;
+	  dataptr->ntri = 0;
+	  dataptr->ntri_alloc = ntri_max;
 	  for (i=0;i<3;i++)
 		{
 		status = mb_malloc(verbose,ntri_max*sizeof(int),
@@ -284,13 +291,15 @@ int mb_contour_init(
 		}
 	else
 		{
-		status = mb_malloc(verbose,npings_max*beams_bath*sizeof(double),
+		dataptr->npts = 0;
+		dataptr->npts_alloc = npings_max * beams_bath;
+		status = mb_malloc(verbose,dataptr->npts_alloc*sizeof(double),
 				&(dataptr->xsave),error);
-		status = mb_malloc(verbose,npings_max*beams_bath*sizeof(double),
+		status = mb_malloc(verbose,dataptr->npts_alloc*sizeof(double),
 				&(dataptr->ysave),error);
-		status = mb_malloc(verbose,npings_max*beams_bath*sizeof(int),
+		status = mb_malloc(verbose,dataptr->npts_alloc*sizeof(int),
 				&(dataptr->isave),error);
-		status = mb_malloc(verbose,npings_max*beams_bath*sizeof(int),
+		status = mb_malloc(verbose,dataptr->npts_alloc*sizeof(int),
 				&(dataptr->jsave),error);
 		}
 
@@ -331,7 +340,7 @@ int mb_contour_deall(
 		struct swath *data, 
 		int	*error)
 {
-  	static char rcs_id[]="$Id: mb_truecont.c,v 5.3 2004-12-18 01:32:50 caress Exp $";
+  	static char rcs_id[]="$Id: mb_truecont.c,v 5.4 2005-11-04 22:49:51 caress Exp $";
 	char	*function_name = "mb_contour_deall";
 	int	status = MB_SUCCESS;
 	struct ping *ping;
@@ -467,10 +476,12 @@ int mb_tcontour(
 		struct swath *data, 
 		int	*error)
 {
-  	static char rcs_id[]="$Id: mb_truecont.c,v 5.3 2004-12-18 01:32:50 caress Exp $";
+  	static char rcs_id[]="$Id: mb_truecont.c,v 5.4 2005-11-04 22:49:51 caress Exp $";
 	char	*function_name = "mb_tcontour";
 	int	status = MB_SUCCESS;
 	struct ping *ping;
+	int	npt_cnt;
+	int	ntri_cnt;
 	int	extreme_start;
 	int	left, right;
 	double	bathmin, bathmax, xmin, xmax, ymin, ymax;
@@ -521,11 +532,12 @@ int mb_tcontour(
 		fprintf(stderr,"dbg2       data->beams_bath: %d\n",data->beams_bath);
 		for (i=0;i<data->npings;i++)
 			{
-			fprintf(stderr,"dbg2          ping[%4d]: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d:%6.6d %f %f %f %f\n",
+			fprintf(stderr,"dbg2          ping[%4d]: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d:%6.6d %f %f %f %f %d\n",
 				i,data->pings[i].time_i[0],data->pings[i].time_i[1],data->pings[i].time_i[2],
 				data->pings[i].time_i[3],data->pings[i].time_i[4],data->pings[i].time_i[5],data->pings[i].time_i[6],
-				data->pings[i].time_d,data->pings[i].navlon,data->pings[i].navlat,data->pings[i].heading);
-			for (j=0;j<data->beams_bath;j++)
+				data->pings[i].time_d,data->pings[i].navlon,data->pings[i].navlat,data->pings[i].heading,
+				data->pings[i].beams_bath);
+			for (j=0;j<data->pings[i].beams_bath;j++)
 				{
 				if (mb_beam_ok(data->pings[i].beamflag[j]))
 				fprintf(stderr,"dbg2          beam[%4d:%3d]:  %2d %f %f %f\n",
@@ -533,6 +545,66 @@ int mb_tcontour(
 					data->pings[i].bathlon[j],data->pings[i].bathlat[j]);
 				}
 			}
+		}
+		
+	/* count number of points and verify that enough memory is allocated */
+	npt_cnt = 0;
+	for (i=0;i<data->npings;i++)
+		{
+		ping = &data->pings[i];
+		for (j=0;j<ping->beams_bath;j++)
+			{
+			if (mb_beam_ok(ping->beamflag[j]))
+				npt_cnt++;
+			}
+		}
+	ntri_cnt = 3 * npt_cnt + 1;
+	if (npt_cnt > data->npts_alloc)
+		{
+		data->npts_alloc = npt_cnt;
+		status = mb_realloc(verbose,data->npts_alloc*sizeof(double),
+			&(data->x),error);
+		status = mb_realloc(verbose,data->npts_alloc*sizeof(double),
+			&(data->y),error);
+		status = mb_realloc(verbose,data->npts_alloc*sizeof(double),
+			&(data->z),error);
+		status = mb_realloc(verbose,data->npts_alloc*sizeof(int),
+			&(data->edge),error);
+		status = mb_realloc(verbose,data->npts_alloc*sizeof(int),
+			&(data->pingid),error);
+		}
+	if (ntri_cnt > data->ntri_alloc)
+		{
+		data->ntri_alloc = ntri_cnt;
+		for (i=0;i<3;i++)
+			{
+			status = mb_realloc(verbose,ntri_cnt*sizeof(int),
+				 	&(data->iv[i]),error);
+			status = mb_realloc(verbose,ntri_cnt*sizeof(int),
+				 	&(data->ct[i]),error);
+			status = mb_realloc(verbose,ntri_cnt*sizeof(int),
+				 	&(data->cs[i]),error);
+			status = mb_realloc(verbose,ntri_cnt*sizeof(int),
+				 	&(data->ed[i]),error);
+			status = mb_realloc(verbose,ntri_cnt*sizeof(int),
+					&(data->flag[i]),error);
+			}
+		status = mb_realloc(verbose,ntri_cnt*sizeof(double),
+					&(data->v1),error);
+		status = mb_realloc(verbose,ntri_cnt*sizeof(double),
+		 			&(data->v2),error);
+		status = mb_realloc(verbose,ntri_cnt*sizeof(double),
+		 			&(data->v3),error);
+		status = mb_realloc(verbose,ntri_cnt*sizeof(int),
+		 			&(data->istack),error);
+		status = mb_realloc(verbose,3*ntri_cnt*sizeof(int),
+		 			&(data->kv1),error);
+		status = mb_realloc(verbose,3*ntri_cnt*sizeof(int),
+		 			&(data->kv2),error);
+		status = mb_realloc(verbose,(4*ntri_cnt+1)*sizeof(double),
+				&(data->xsave),error);
+		status = mb_realloc(verbose,(4*ntri_cnt+1)*sizeof(double),
+				&(data->ysave),error);
 		}
 
 	/* put good bathymetry data into x arrays */
@@ -543,16 +615,16 @@ int mb_tcontour(
 	  ping = &data->pings[i];
 
 	  /* find edges of ping */
-	  left = data->beams_bath/2;
+	  left = ping->beams_bath/2;
 	  right = left;
-	  for (j=0;j<data->beams_bath;j++)
+	  for (j=0;j<ping->beams_bath;j++)
 		{
 		if (mb_beam_ok(ping->beamflag[j]) && j < left) left = j;
 		if (mb_beam_ok(ping->beamflag[j]) && j > right) right = j;
 		}
 
 	  /* deal with data */
-	  for (j=0;j<data->beams_bath;j++)
+	  for (j=0;j<ping->beams_bath;j++)
 		{
 		if (extreme_start == MB_NO && mb_beam_ok(ping->beamflag[j]))
 			{
@@ -1186,11 +1258,13 @@ int dump_contour(struct swath *data, double value)
 /* 	function mb_ocontour contours multibeam data. */
 int mb_ocontour(int verbose, struct swath *data, int *error)
 {
-  	static char rcs_id[]="$Id: mb_truecont.c,v 5.3 2004-12-18 01:32:50 caress Exp $";
+  	static char rcs_id[]="$Id: mb_truecont.c,v 5.4 2005-11-04 22:49:51 caress Exp $";
 	char	*function_name = "mb_ocontour";
 	int	status = MB_SUCCESS;
 	struct ping *ping;
+	int	npt_cnt;
 	int	extreme_start;
+	int	beams_bath_use;
 	int	left, right;
 	char	*beamflag1, *beamflag2;
 	double	*bath1, *bath2;
@@ -1244,11 +1318,12 @@ int mb_ocontour(int verbose, struct swath *data, int *error)
 		fprintf(stderr,"dbg2       data->beams_bath: %d\n",data->beams_bath);
 		for (i=0;i<data->npings;i++)
 			{
-			fprintf(stderr,"dbg2          ping[%4d]: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d:%6.6d %f %f %f %f\n",
+			fprintf(stderr,"dbg2          ping[%4d]: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d:%6.6d %f %f %f %f %d\n",
 				i,data->pings[i].time_i[0],data->pings[i].time_i[1],data->pings[i].time_i[2],
 				data->pings[i].time_i[3],data->pings[i].time_i[4],data->pings[i].time_i[5],data->pings[i].time_i[6],
-				data->pings[i].time_d,data->pings[i].navlon,data->pings[i].navlat,data->pings[i].heading);
-			for (j=0;j<data->beams_bath;j++)
+				data->pings[i].time_d,data->pings[i].navlon,data->pings[i].navlat,data->pings[i].heading,
+				data->pings[i].beams_bath);
+			for (j=0;j<data->pings[i].beams_bath;j++)
 				{
 				if (mb_beam_ok(data->pings[i].beamflag[j]))
 				fprintf(stderr,"dbg2          beam[%4d:%3d]:  %2d %f %f %f\n",
@@ -1257,12 +1332,36 @@ int mb_ocontour(int verbose, struct swath *data, int *error)
 				}
 			}
 		}
+		
+	/* count number of points and verify that enough memory is allocated */
+	npt_cnt = 0;
+	for (i=0;i<data->npings;i++)
+		{
+		ping = &data->pings[i];
+		for (j=0;j<ping->beams_bath;j++)
+			{
+			if (mb_beam_ok(ping->beamflag[j]))
+				npt_cnt++;
+			}
+		}
+	if (npt_cnt > data->npts_alloc)
+		{
+		data->npts_alloc = npt_cnt;
+		status = mb_realloc(verbose,data->npts_alloc*sizeof(double),
+				&(data->xsave),error);
+		status = mb_realloc(verbose,data->npts_alloc*sizeof(double),
+				&(data->ysave),error);
+		status = mb_realloc(verbose,data->npts_alloc*sizeof(int),
+				&(data->isave),error);
+		status = mb_realloc(verbose,data->npts_alloc*sizeof(int),
+				&(data->jsave),error);
+		}
 
 	/* zero flags */
 	for (i=0;i<data->npings;i++)
 		{
 		ping = &data->pings[i];
-		for (j=0;j<data->beams_bath;j++)
+		for (j=0;j<ping->beams_bath;j++)
 			{
 			ping->bflag[0][j] = 0;
 			ping->bflag[1][j] = 0;
@@ -1274,7 +1373,7 @@ int mb_ocontour(int verbose, struct swath *data, int *error)
 	for (i=0;i<data->npings;i++)
 	  {
 	  ping = &data->pings[i];
-	  for (j=0;j<data->beams_bath;j++)
+	  for (j=0;j<ping->beams_bath;j++)
 		{
 		if (extreme_start == MB_NO && mb_beam_ok(ping->beamflag[j]))
 			{
@@ -1388,15 +1487,17 @@ int mb_ocontour(int verbose, struct swath *data, int *error)
 			{
 			beamflag1 = data->pings[i].beamflag;
 			bath1 = data->pings[i].bath;
+			beams_bath_use = data->pings[i].beams_bath;
 			if (i<data->npings-1) 
 			    {
 			    beamflag2 = data->pings[i+1].beamflag;
 			    bath2 = data->pings[i+1].bath;
+			    beams_bath_use = MIN(beams_bath_use, data->pings[i+1].beams_bath);
 			    }
-			for (j=0;j<data->beams_bath;j++)
+			for (j=0;j<beams_bath_use;j++)
 				{
 				/* check for across track intersection */
-				if (j < data->beams_bath-1)
+				if (j < beams_bath_use-1)
 					if ((mb_beam_ok(beamflag1[j]) && mb_beam_ok(beamflag1[j+1])) 
 					&& ((bath1[j]<value && bath1[j+1]>value)
 					|| (bath1[j]>value && bath1[j+1]<value)))
@@ -1514,8 +1615,8 @@ int mb_ocontour(int verbose, struct swath *data, int *error)
 			if (data->nsave > 0 && label && !closed)
 				{
 				/* check beginning of contour */
-				left = data->beams_bath/2;
-				right = data->beams_bath/2;
+				left = data->pings[data->isave[0]].beams_bath/2;
+				right = data->pings[data->isave[0]].beams_bath/2;
 				for (jj=0;jj<data->beams_bath;jj++)
 					{
 					if (mb_beam_ok(data->pings[data->isave[0]].beamflag[jj]))
@@ -1548,9 +1649,9 @@ int mb_ocontour(int verbose, struct swath *data, int *error)
 					}
 
 				/* check end of contour */
-				left = data->beams_bath/2;
-				right = data->beams_bath/2;
-				for (jj=0;jj<data->beams_bath;jj++)
+				left = data->pings[data->isave[data->nsave-1]].beams_bath/2;
+				right = data->pings[data->isave[data->nsave-1]].beams_bath/2;
+				for (jj=0;jj<data->pings[data->isave[data->nsave-1]].beams_bath;jj++)
 					{
 					if (mb_beam_ok(data->pings[data->isave[data->nsave-1]].beamflag[jj]))
 						{
@@ -1623,7 +1724,7 @@ int get_start_old(struct swath *data,
 	*closed = 0;
 
 	/* search bottom (i = 0) */
-	for (jj=0;jj<data->beams_bath-1;jj++)
+	for (jj=0;jj<data->pings[0].beams_bath-1;jj++)
 		if (data->pings[0].bflag[0][jj])
 			{
 			*k = 0;
@@ -1634,7 +1735,7 @@ int get_start_old(struct swath *data,
 			}
 
 	/* search top (i = npings-1) */
-	for (jj=0;jj<data->beams_bath-1;jj++)
+	for (jj=0;jj<data->pings[data->npings-1].beams_bath-1;jj++)
 		if (data->pings[data->npings-1].bflag[0][jj])
 			{
 			*k = 0;
@@ -1657,11 +1758,11 @@ int get_start_old(struct swath *data,
 
 	/* search right (j = beams_bath-1) */
 	for (ii=0;ii<data->npings-1;ii++)
-		if (data->pings[ii].bflag[1][data->beams_bath-1])
+		if (data->pings[ii].bflag[1][data->pings[ii].beams_bath-1])
 			{
 			*k = 1;
 			*i = ii;
-			*j = data->beams_bath - 1;
+			*j = data->pings[ii].beams_bath - 1;
 			*d = 1;
 			return(1);
 			}
@@ -1669,7 +1770,7 @@ int get_start_old(struct swath *data,
 	/* search interior */
 	*closed = 1;
 	for (ii=0;ii<data->npings-1;ii++)
-		for (jj=0;jj<data->beams_bath-1;jj++)
+		for (jj=0;jj<data->pings[ii].beams_bath-1;jj++)
 			{
 			if (data->pings[ii].bflag[0][jj])
 				{
@@ -1736,7 +1837,7 @@ int get_next_old(struct swath *data, int *nk, int *ni, int *nj, int *nd,
 		jt[edge] = j + joff[edge][k][d];
 		dt[edge] = doff[edge][k][d];
 		if (it[edge] < 0 || it[edge] >= data->npings 
-			|| jt[edge] < 0 || jt[edge] >= data->beams_bath)
+			|| jt[edge] < 0 || jt[edge] >= data->pings[i].beams_bath)
 			ifedge[edge] = 0;
 		else
 			ifedge[edge] = 

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	4/8/93
- *    $Id: mbedit_prog.c,v 5.25 2005-03-25 04:12:24 caress Exp $
+ *    $Id: mbedit_prog.c,v 5.26 2005-11-04 22:51:11 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -27,6 +27,9 @@
  * Date:	September 19, 2000 (New version - no buffered i/o)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.25  2005/03/25 04:12:24  caress
+ * MBedit now allows alongtrack and acrosstrack views as well as the traditional waterfall display of profiles.
+ *
  * Revision 5.24  2004/12/02 06:31:02  caress
  * First cut at adding stacked views from along and across track.
  *
@@ -349,7 +352,7 @@ struct mbedit_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbedit_prog.c,v 5.25 2005-03-25 04:12:24 caress Exp $";
+static char rcs_id[] = "$Id: mbedit_prog.c,v 5.26 2005-11-04 22:51:11 caress Exp $";
 static char program_name[] = "MBedit";
 static char help_message[] =  
 "MBedit is an interactive editor used to identify and flag\n\
@@ -4360,21 +4363,39 @@ int mbedit_open_file(char *file, int form, int savemode)
 		}
 
 	/* allocate memory for data arrays */
-	status = mb_malloc(verbose,beams_bath*sizeof(char),&beamflag,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),&bath,&error);
-	status = mb_malloc(verbose,beams_amp*sizeof(double),&amp,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),
-			&bathacrosstrack,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),
-			&bathalongtrack,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(double),&ss,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(double),
-			&ssacrosstrack,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(double),
-			&ssalongtrack,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(int),
-			&detect,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(int),&editcount,&error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(char), (void **)&beamflag, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(double), (void **)&bath, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_AMPLITUDE,
+						sizeof(double), (void **)&amp, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(double), (void **)&bathacrosstrack, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(double), (void **)&bathalongtrack, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN,
+						sizeof(double), (void **)&ss, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN,
+						sizeof(double), (void **)&ssacrosstrack, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN,
+						sizeof(double), (void **)&ssalongtrack, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(int), (void **)&detect, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(int), (void **)&editcount, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						MBEDIT_MAX_PINGS*sizeof(double), (void **)&bathlist, &error);
 	for (i=0;i<MBEDIT_BUFFER_SIZE;i++)
 		{
 		ping[i].allocated = 0;
@@ -4386,8 +4407,6 @@ int mbedit_open_file(char *file, int form, int savemode)
 		ping[i].bath_x = NULL;
 		ping[i].bath_y = NULL;
 		}
-	status = mb_malloc(verbose,beams_bath*MBEDIT_MAX_PINGS*sizeof(double),
-			&bathlist,&error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
@@ -4489,16 +4508,6 @@ int mbedit_close_file()
 	do_message_on("MBedit is closing a data file...");	
 
 	/* deallocate memory for data arrays */
-	mb_free(verbose,&beamflag,&error);
-	mb_free(verbose,&bath,&error);
-	mb_free(verbose,&amp,&error);
-	mb_free(verbose,&bathacrosstrack,&error);
-	mb_free(verbose,&bathalongtrack,&error);
-	mb_free(verbose,&ss,&error);
-	mb_free(verbose,&ssacrosstrack,&error);
-	mb_free(verbose,&ssalongtrack,&error);
-	mb_free(verbose,&detect,&error);
-	mb_free(verbose,&editcount,&error);
 	for (i=0;i<MBEDIT_BUFFER_SIZE;i++)
 		{
 		if (ping[i].allocated > 0)
@@ -4520,7 +4529,6 @@ int mbedit_close_file()
 			}
 		    }
 		}
-	mb_free(verbose, &bathlist, &error);
 
 	/* check memory */
 	if (verbose >= 4)
@@ -5414,6 +5422,25 @@ int mbedit_plot_all(
 				pixel_values[BLACK],XG_SOLIDLINE);
 			x0 = x;
 			y0 = y;
+			}
+			
+		/* if plotting roll, also plot acrosstrack slope */
+		if (show_time == MBEDIT_PLOT_ROLL)
+			{
+			mbedit_xtrackslope(current_id, &tsvalue);
+			x0 = margin/2 + (int) ((tsvalue - tsmin) * tsscale);
+			y0 = ymax - dy / 2;
+			for (i=current_id;i<current_id+nplot;i++)
+				{
+				/*x = margin/2 + ping[i].heading / 360.0 * 2 * margin;*/
+				mbedit_xtrackslope(i, &tsvalue);
+				x = margin/2 + (int) ((tsvalue - tsmin) * tsscale);
+				y = ymax - dy / 2 - (i - current_id) * dy;
+				xg_drawline(mbedit_xgid,x0,y0,x,y,
+					pixel_values[RED],XG_SOLIDLINE);
+				x0 = x;
+				y0 = y;
+				}
 			}
 		}
 
@@ -6566,6 +6593,75 @@ int mbedit_tsminmax(int iping, int nping, int data_id, double *tsmin, double *ts
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       tsmin:       %f\n",*tsmin);
 		fprintf(stderr,"dbg2       tsmax:       %f\n",*tsmax);
+		fprintf(stderr,"dbg2       error:       %d\n",error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:      %d\n",status);
+		}
+
+	/* return */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbedit_xtrackslope(int iping, double *slope)
+{
+	/* local variables */
+	char	*function_name = "mbedit_tsvalue";
+	int	status = MB_SUCCESS;
+	int	jbeam;
+	int	ns;
+	double	sx, sy, sxx, sxy, delta, b;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       iping:           %d\n",iping);
+		}
+
+	/* initialize linear fit variables */
+	sx = 0.0;
+	sy = 0.0;
+	sxx = 0.0;
+	sxy = 0.0;
+	ns = 0;
+	*slope = 0.0;
+		
+	/* get the slope value */
+	if (iping >= 0 && nbuff > iping)
+		{
+		ns = 0;
+		for (jbeam=0;jbeam<ping[iping].beams_bath;jbeam++)
+		    	{
+			/* use valid beams to calculate slope */
+			if (mb_beam_ok(ping[iping].beamflag[jbeam]))
+				{
+				sx += ping[iping].bathacrosstrack[jbeam];
+				sy += ping[iping].bath[jbeam];
+				sxx += ping[iping].bathacrosstrack[jbeam] * ping[iping].bathacrosstrack[jbeam];
+				sxy += ping[iping].bathacrosstrack[jbeam] * ping[iping].bath[jbeam];
+				ns++;
+				}
+			}
+
+		/* get linear fit to ping */
+		if (ns > 0)
+			{
+			delta = ns*sxx - sx*sx;
+			/* a = (sxx*sy - sx*sxy)/delta; */
+			b = (ns*sxy - sx*sy)/delta;
+			*slope = -RTD * atan(b);;
+			}
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       slope:       %f\n",*slope);
 		fprintf(stderr,"dbg2       error:       %d\n",error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:      %d\n",status);
