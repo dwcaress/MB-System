@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrdtiff.c	5/30/93
- *    $Id: mbgrdtiff.c,v 5.9 2004-05-21 23:13:35 caress Exp $
+ *    $Id: mbgrdtiff.c,v 5.10 2005-11-04 20:18:04 caress Exp $
  *
  *    Copyright (c) 1999, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -215,6 +215,9 @@
  *
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.9  2004/05/21 23:13:35  caress
+ * Changes to support GMT 4.0
+ *
  * Revision 5.8  2003/04/17 20:43:37  caress
  * Release 5.0.beta30
  *
@@ -379,7 +382,7 @@ int              tiff_offset[] =
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbgrdtiff.c,v 5.9 2004-05-21 23:13:35 caress Exp $";
+	static char rcs_id[] = "$Id: mbgrdtiff.c,v 5.10 2005-11-04 20:18:04 caress Exp $";
 	static char program_name[] = "mbgrdtiff";
 	static char help_message[] = "mbgrdtiff generates a tiff image from a GMT grid. The \nimage generation is similar to that of the GMT program \ngrdimage. In particular, the color map is applied from \na GMT CPT file, and shading overlay grids may be applied. \nThe output TIFF file contains information allowing\nthe ArcView and ArcInfo GIS packages to import the image\nas a geographically located coverage.";
 	static char usage_message[] = "mbgrdtiff -Ccptfile -Igrdfile -Otiff_file [-H -Kintensfile -V]";
@@ -1088,7 +1091,7 @@ main (int argc, char **argv)
 		value_short = GeoAsciiParamsTag;
 		mb_put_binary_short(MB_NO, value_short, &tiff_header[keyindex]);
 		keyindex += 2;
-		value_short = 64;
+		value_short = strlen(tiff_comment);
 		mb_put_binary_short(MB_NO, value_short, &tiff_header[keyindex]);
 		keyindex += 2;
 		value_short = 0;
@@ -1130,7 +1133,7 @@ main (int argc, char **argv)
 			}
 		break;
 	      case GeoDoubleParamsTag:
-		value_int = 0;
+		value_int = 1;
 		mb_put_binary_int(MB_NO, value_int, &tiff_header[index]);
 		index += 4;
 		value_int = tiff_offset[i];
@@ -1138,7 +1141,7 @@ main (int argc, char **argv)
 		index += 4;
 		break;
 	      case GeoAsciiParamsTag:
-		value_int = 64;
+		value_int = strlen(tiff_comment);
 		mb_put_binary_int(MB_NO, value_int, &tiff_header[index]);
 		index += 4;
 		value_int = tiff_offset[i];
