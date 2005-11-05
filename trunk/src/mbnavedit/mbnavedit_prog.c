@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_prog.c	6/23/95
- *    $Id: mbnavedit_prog.c,v 5.15 2005-06-04 04:45:50 caress Exp $
+ *    $Id: mbnavedit_prog.c,v 5.16 2005-11-05 00:58:10 caress Exp $
  *
  *    Copyright (c) 1995, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	August 28, 2000 (New version - no buffered i/o)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.15  2005/06/04 04:45:50  caress
+ * Added feature to apply longitude and latitude offsets to the navigation.
+ *
  * Revision 5.14  2005/03/25 04:35:55  caress
  * Added capability to interpolate over repeated values.
  *
@@ -238,77 +241,77 @@ struct mbnavedit_plot_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbnavedit_prog.c,v 5.15 2005-06-04 04:45:50 caress Exp $";
+static char rcs_id[] = "$Id: mbnavedit_prog.c,v 5.16 2005-11-05 00:58:10 caress Exp $";
 static char program_name[] = "MBNAVEDIT";
 static char help_message[] =  "MBNAVEDIT is an interactive navigation editor for swath sonar data.\n\tIt can work with any data format supported by the MBIO library.\n";
 static char usage_message[] = "mbnavedit [-Byr/mo/da/hr/mn/sc -D  -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ooutfile -X -V -H]";
 
 /* status variables */
-int	error = MB_ERROR_NO_ERROR;
-int	verbose = 0;
-char	*message = NULL;
+static int	error = MB_ERROR_NO_ERROR;
+static int	verbose = 0;
+static char	*message = NULL;
 
 /* MBIO control parameters */
-int	nav_source;
-int	heading_source;
-int	vru_source;
-int	svp_source;
-int	pings;
-int	lonflip;
-double	bounds[4];
-int	btime_i[7];
-int	etime_i[7];
-double	btime_d;
-double	etime_d;
-double	speedmin;
-double	timegap;
-int	beams_bath;
-int	beams_amp;
-int	pixels_ss;
-void	*imbio_ptr = NULL;
+static int	nav_source;
+static int	heading_source;
+static int	vru_source;
+static int	svp_source;
+static int	pings;
+static int	lonflip;
+static double	bounds[4];
+static int	btime_i[7];
+static int	etime_i[7];
+static double	btime_d;
+static double	etime_d;
+static double	speedmin;
+static double	timegap;
+static int	beams_bath;
+static int	beams_amp;
+static int	pixels_ss;
+static void	*imbio_ptr = NULL;
 
 /* mbio read and write values */
-void	*store_ptr = NULL;
-int	kind;
-int	time_i[7];
-double	time_d;
-double	navlon;
-double	navlat;
-double	speed;
-double	heading;
-double	distance;
-double	altitude;
-double	sonardepth;
-int	nbath;
-int	namp;
-int	nss;
-char	*beamflag = NULL;
-double	*bath = NULL;
-double	*bathacrosstrack = NULL;
-double	*bathalongtrack = NULL;
-double	*amp = NULL;
-double	*ss = NULL;
-double	*ssacrosstrack = NULL;
-double	*ssalongtrack = NULL;
-int	idata = 0;
-int	icomment = 0;
-int	odata = 0;
-int	ocomment = 0;
-char	comment[256];
+static void	*store_ptr = NULL;
+static int	kind;
+static int	time_i[7];
+static double	time_d;
+static double	navlon;
+static double	navlat;
+static double	speed;
+static double	heading;
+static double	distance;
+static double	altitude;
+static double	sonardepth;
+static int	nbath;
+static int	namp;
+static int	nss;
+static char	*beamflag = NULL;
+static double	*bath = NULL;
+static double	*bathacrosstrack = NULL;
+static double	*bathalongtrack = NULL;
+static double	*amp = NULL;
+static double	*ss = NULL;
+static double	*ssacrosstrack = NULL;
+static double	*ssalongtrack = NULL;
+static int	idata = 0;
+static int	icomment = 0;
+static int	odata = 0;
+static int	ocomment = 0;
+static char	comment[256];
 
 /* buffer control variables */
 #define	MBNAVEDIT_BUFFER_SIZE	25000
-int	file_open = MB_NO;
-int	nfile_open = MB_NO;
-FILE	*nfp;
-int	hold_size = 100;
-int	nload = 0;
-int	ndump = 0;
-int	nbuff = 0;
-int	current_id = 0;
-int	nload_total = 0;
-int	ndump_total = 0;
-int	first_read = MB_NO;
+static int	file_open = MB_NO;
+static int	nfile_open = MB_NO;
+static FILE	*nfp;
+static int	hold_size = 100;
+static int	nload = 0;
+static int	ndump = 0;
+static int	nbuff = 0;
+static int	current_id = 0;
+static int	nload_total = 0;
+static int	ndump_total = 0;
+static int	first_read = MB_NO;
 
 /* plotting control variables */
 #define	NUMBER_PLOTS_MAX	9
@@ -316,14 +319,14 @@ int	first_read = MB_NO;
 #define	DEFAULT_PLOT_HEIGHT	300
 #define	MBNAVEDIT_PICK_DISTANCE		50
 #define	MBNAVEDIT_ERASE_DISTANCE	10
-struct mbnavedit_ping_struct	ping[MBNAVEDIT_BUFFER_SIZE];
-double	plot_start_time;
-double	plot_end_time;
-int	nplot;
-int	mbnavedit_xgid;
-struct mbnavedit_plot_struct plot[NUMBER_PLOTS_MAX];
-int	data_save;
-double	file_start_time_d;
+static struct mbnavedit_ping_struct	ping[MBNAVEDIT_BUFFER_SIZE];
+static double	plot_start_time;
+static double	plot_end_time;
+static int	nplot;
+static int	mbnavedit_xgid;
+static struct mbnavedit_plot_struct plot[NUMBER_PLOTS_MAX];
+static int	data_save;
+static double	file_start_time_d;
 
 /* color control values */
 #define	WHITE		0	
@@ -337,8 +340,8 @@ double	file_start_time_d;
 #define LIGHTGREY	8
 #define	XG_SOLIDLINE	0
 #define	XG_DASHLINE	1
-int	ncolors;
-int	pixel_values[256];
+static int	ncolors;
+static int	pixel_values[256];
 
 /*--------------------------------------------------------------------*/
 int mbnavedit_init_globals()
@@ -818,7 +821,7 @@ int mbnavedit_open_file(int useprevious)
 	    }
 
 	/* initialize reading the input multibeam file */
-	status = mb_format_source(verbose, &format_use, 
+	status = mb_format_source(5, &format_use, 
 			&nav_source, &heading_source, 
 			&vru_source, &svp_source, 
 			&error);
@@ -839,18 +842,38 @@ int mbnavedit_open_file(int useprevious)
 		}
 
 	/* allocate memory for data arrays */
-	status = mb_malloc(verbose,beams_bath*sizeof(char),&beamflag,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),&bath,&error);
-	status = mb_malloc(verbose,beams_amp*sizeof(double),&amp,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),
-			&bathacrosstrack,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),
-			&bathalongtrack,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(double),&ss,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(double),
-			&ssacrosstrack,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(double),
-			&ssalongtrack,&error);
+	beamflag = NULL;
+	bath = NULL;
+	amp = NULL;
+	bathacrosstrack = NULL;
+	bathalongtrack = NULL;
+	ss = NULL;
+	ssacrosstrack = NULL;
+	ssalongtrack = NULL;
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(char), (void **)&beamflag, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(double), (void **)&bath, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_AMPLITUDE,
+						sizeof(double), (void **)&amp, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(double), (void **)&bathacrosstrack, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(double), (void **)&bathalongtrack, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+						sizeof(double), (void **)&ss, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+						sizeof(double), (void **)&ssacrosstrack, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+						sizeof(double), (void **)&ssalongtrack, &error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
@@ -944,20 +967,6 @@ int mbnavedit_close_file()
 			function_name);
 		}
 
-	/* deallocate memory for data arrays */
-	mb_free(verbose,&beamflag,&error);
-	mb_free(verbose,&bath,&error);
-	mb_free(verbose,&amp,&error);
-	mb_free(verbose,&bathacrosstrack,&error);
-	mb_free(verbose,&bathalongtrack,&error);
-	mb_free(verbose,&ss,&error);
-	mb_free(verbose,&ssacrosstrack,&error);
-	mb_free(verbose,&ssalongtrack,&error);
-
-	/* check memory */
-	if (verbose >= 4)
-		status = mb_memory_list(verbose,&error);
-
 	/* close the files */
 	status = mb_close(verbose,&imbio_ptr,&error);
 	if (nfile_open == MB_YES)
@@ -988,13 +997,16 @@ int mbnavedit_close_file()
 			sprintf(command, "mbprocess -I %s -N\n",ifile);
 		    else
 			sprintf(command, "mbprocess -I %s\n",ifile);
-fprintf(stderr, "command:%s\n", command);
 		    system(command);
 
 		    /* turn message off */
 		    do_message_off();
 		    }
 	    }
+
+	/* check memory */
+	if (verbose >= 4)
+		status = mb_memory_list(verbose,&error);
 
 	/* if we got here we must have succeeded */
 	if (verbose >= 1)
@@ -1016,7 +1028,6 @@ fprintf(stderr, "command:%s\n", command);
 	offset_lon_applied = offset_lon;
 	offset_lat_applied = offset_lat;
 
-	
 	/* turn file button on */
 	do_filebutton_on();
 
