@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad2.h	10/9/98
- *	$Id: mbsys_simrad2.h,v 5.13 2005-04-07 04:24:34 caress Exp $
+ *	$Id: mbsys_simrad2.h,v 5.14 2005-11-05 00:48:04 caress Exp $
  *
  *    Copyright (c) 1998, 2001, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -32,6 +32,9 @@
  * Date:	October 9, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.13  2005/04/07 04:24:34  caress
+ * 5.0.7 Release.
+ *
  * Revision 5.12  2003/11/24 19:04:21  caress
  * Added remaining unsupported Simrad datagrams to defines so that all are listed and can be recognized by the parsing code.
  *
@@ -968,6 +971,8 @@ int mbsys_simrad2_tlt_alloc(int verbose,
 int mbsys_simrad2_deall(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error);
 int mbsys_simrad2_zero_ss(int verbose, void *store_ptr, int *error);
+int mbsys_simrad2_dimensions(int verbose, void *mbio_ptr, void *store_ptr, 
+			int *kind, int *nbath, int *namp, int *nss, int *error);
 int mbsys_simrad2_extract(int verbose, void *mbio_ptr, void *store_ptr, 
 			int *kind, int time_i[7], double *time_d,
 			double *navlon, double *navlat,

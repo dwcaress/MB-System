@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_netcdf.h	4/8/2002
- *	$Id: mbsys_netcdf.h,v 5.2 2003-04-17 21:05:23 caress Exp $
+ *	$Id: mbsys_netcdf.h,v 5.3 2005-11-05 00:48:04 caress Exp $
  *
  *    Copyright (c) 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	April 8, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2003/04/17 21:05:23  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.1  2002/05/29 23:41:49  caress
  * Release 5.0.beta18
  *
@@ -787,6 +790,8 @@ int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error);
 int mbsys_netcdf_deall(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error);
+int mbsys_netcdf_dimensions(int verbose, void *mbio_ptr, void *store_ptr, 
+			int *kind, int *nbath, int *namp, int *nss, int *error);
 int mbsys_netcdf_extract(int verbose, void *mbio_ptr, void *store_ptr, 
 			int *kind, int time_i[7], double *time_d,
 			double *navlon, double *navlat,

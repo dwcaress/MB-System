@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	1/19/93
- *    $Id: mb_io.h,v 5.20 2004-12-02 06:33:30 caress Exp $
+ *    $Id: mb_io.h,v 5.21 2005-11-05 00:48:04 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.20  2004/12/02 06:33:30  caress
+ * Fixes while supporting Reson 7k data.
+ *
  * Revision 5.19  2004/09/16 19:02:34  caress
  * Changes to better support segy data.
  *
@@ -181,6 +184,9 @@ struct mb_io_struct
 	int	beams_amp_max;	/* maximum number of amplitude beams
 					- either 0 or = beams_bath */
 	int	pixels_ss_max;	/* maximum number of sidescan pixels */
+	int	beams_bath_alloc;	/* allocated number of bathymetry beams */
+	int	beams_amp_alloc;	/* allocated number of amplitude beams */
+	int	pixels_ss_alloc;	/* allocated number of sidescan pixels */
 	char	format_name[MB_NAME_LENGTH];
 	char	system_name[MB_NAME_LENGTH];
 	char	format_description[MB_DESCRIPTION_LENGTH];
@@ -360,6 +366,18 @@ struct mb_io_struct
 	/* variables for accumulating MBIO notices */
 	int	notice_list[MB_NOTICE_MAX];
 	
+	/* variable for registering and maintaining application i/o arrays */
+	int	bath_arrays_reallocated;
+	int	amp_arrays_reallocated;
+	int	ss_arrays_reallocated;
+	int	n_regarray;
+	int	n_regarray_alloc;
+	void	**regarray_handle;
+	void	**regarray_ptr;
+	void	**regarray_oldptr;
+	int	*regarray_type;
+	int	*regarray_size;
+	
 	/* variables for saving information */
 	char	save_label[12];
 	int	save_label_flag;
@@ -380,6 +398,9 @@ struct mb_io_struct
 	int	save14;
 	double	saved1;
 	double	saved2;
+	double	saved3;
+	double	saved4;
+	double	saved5;
 
 	/* function pointers for allocating and deallocating format
 		specific structures */
@@ -397,6 +418,8 @@ struct mb_io_struct
 		void *store_ptr, int *error);
 		
 	/* function pointers for extracting and inserting data */
+	int (*mb_io_dimensions)(int verbose, void *mbio_ptr, void *store_ptr, 
+		int *kind, int *nbath, int *namp, int *nss, int *error);
 	int (*mb_io_extract)(int verbose, void *mbio_ptr, void *store_ptr, 
 		int *kind, int time_i[7], double *time_d,
 		double *navlon, double *navlat,

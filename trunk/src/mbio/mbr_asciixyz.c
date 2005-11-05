@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_asciixyz.c	5/8/2002
- *	$Id: mbr_asciixyz.c,v 5.3 2003-09-23 21:05:12 caress Exp $
+ *	$Id: mbr_asciixyz.c,v 5.4 2005-11-05 00:48:03 caress Exp $
  *
  *    Copyright (c) 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -29,6 +29,9 @@
  * Date:	May 8, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2003/09/23 21:05:12  caress
+ * Added formats 168 and 169 for reading xyt and yxt triples (topography instead of depth).
+ *
  * Revision 5.2  2003/05/20 18:05:32  caress
  * Added svp_source to data source parameters.
  *
@@ -82,7 +85,7 @@ int mbr_dem_asciixyz(int verbose, void *mbio_ptr, int *error);
 int mbr_rt_asciixyz(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_asciixyz(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
-static char res_id[]="$Id: mbr_asciixyz.c,v 5.3 2003-09-23 21:05:12 caress Exp $";
+static char res_id[]="$Id: mbr_asciixyz.c,v 5.4 2005-11-05 00:48:03 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_asciixyz(int verbose, void *mbio_ptr, int *error)
@@ -132,6 +135,7 @@ int mbr_register_asciixyz(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr->mb_io_store_free = &mbsys_singlebeam_deall; 
 	mb_io_ptr->mb_io_read_ping = &mbr_rt_asciixyz; 
 	mb_io_ptr->mb_io_write_ping = &mbr_wt_asciixyz; 
+	mb_io_ptr->mb_io_dimensions = &mbsys_singlebeam_dimensions; 
 	mb_io_ptr->mb_io_extract = &mbsys_singlebeam_extract; 
 	mb_io_ptr->mb_io_insert = &mbsys_singlebeam_insert; 
 	mb_io_ptr->mb_io_extract_nav = &mbsys_singlebeam_extract_nav; 

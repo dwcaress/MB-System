@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_process.c	9/11/00
- *    $Id: mb_process.c,v 5.32 2005-03-25 04:16:41 caress Exp $
+ *    $Id: mb_process.c,v 5.33 2005-11-05 00:48:04 caress Exp $
  *
  *    Copyright (c) 2000, 2002, 2003, 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	September 11, 2000
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.32  2005/03/25 04:16:41  caress
+ * Added sonar depth merging to mbprocess.
+ *
  * Revision 5.31  2005/02/08 22:37:38  caress
  * Heading towards 5.0.6 release.
  *
@@ -146,7 +149,7 @@
 #include "../../include/mb_format.h"
 #include "../../include/mb_process.h"
 
-static char rcs_id[]="$Id: mb_process.c,v 5.32 2005-03-25 04:16:41 caress Exp $";
+static char rcs_id[]="$Id: mb_process.c,v 5.33 2005-11-05 00:48:04 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_pr_readpar(int verbose, char *file, int lookforfiles, 
@@ -5039,7 +5042,7 @@ int mb_pr_set_bathyslopenew(int verbose,
 	double *depthsmooth, 
 	int *error)
 {
-	char	*function_name = "set_bathyslope";
+	char	*function_name = "mb_pr_set_bathyslopenew";
 	int	status = MB_SUCCESS;
 	int	first, next, last;
 	double	dxtrack;
@@ -5054,6 +5057,7 @@ int mb_pr_set_bathyslopenew(int verbose,
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
+		fprintf(stderr,"dbg2       nsmooth:         %d\n",nsmooth);
 		fprintf(stderr,"dbg2       nbath:           %d\n",nbath);
 		fprintf(stderr,"dbg2       bath:            %d\n",bath);
 		fprintf(stderr,"dbg2       bathacrosstrack: %d\n",
@@ -5158,7 +5162,7 @@ int mb_pr_set_bathyslope(int verbose,
 	double *depthsmooth, 
 	int *error)
 {
-	char	*function_name = "set_bathyslope";
+	char	*function_name = "mb_pr_set_bathyslope";
 	int	status = MB_SUCCESS;
 	int	first, next, last;
 	int	nbathgood;

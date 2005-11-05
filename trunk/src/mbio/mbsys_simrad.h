@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad.h	8/5/94
- *	$Id: mbsys_simrad.h,v 5.8 2003-12-04 23:10:24 caress Exp $
+ *	$Id: mbsys_simrad.h,v 5.9 2005-11-05 00:48:03 caress Exp $
  *
  *    Copyright (c) 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -32,6 +32,9 @@
  * Date:	August 5, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2003/12/04 23:10:24  caress
+ * Fixed problems with format 54 EM12DARW due to old code assuming how internal structure was packed. Also changed handling of beamflags for formats that don't support beamflags. Now flagged beams will always be nulled in such cases.
+ *
  * Revision 5.7  2003/04/17 21:05:23  caress
  * Release 5.0.beta30
  *
@@ -1381,6 +1384,8 @@ int mbsys_simrad_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error);
 int mbsys_simrad_deall(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error);
+int mbsys_simrad_dimensions(int verbose, void *mbio_ptr, void *store_ptr, 
+			int *kind, int *nbath, int *namp, int *nss, int *error);
 int mbsys_simrad_extract(int verbose, void *mbio_ptr, void *store_ptr, 
 			int *kind, int time_i[7], double *time_d,
 			double *navlon, double *navlat,

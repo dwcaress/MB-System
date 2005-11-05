@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_emoldraw.c	3/4/2001
- *	$Id: mbr_emoldraw.c,v 5.8 2003-12-04 23:10:23 caress Exp $
+ *	$Id: mbr_emoldraw.c,v 5.9 2005-11-05 00:48:04 caress Exp $
  *
  *    Copyright (c) 2001, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	March 4, 2001
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2003/12/04 23:10:23  caress
+ * Fixed problems with format 54 EM12DARW due to old code assuming how internal structure was packed. Also changed handling of beamflags for formats that don't support beamflags. Now flagged beams will always be nulled in such cases.
+ *
  * Revision 5.7  2003/05/20 18:05:32  caress
  * Added svp_source to data source parameters.
  *
@@ -103,7 +106,7 @@ int mbr_emoldraw_chk_label(int verbose, void *mbio_ptr, short type);
 /*--------------------------------------------------------------------*/
 int mbr_register_emoldraw(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_emoldraw.c,v 5.8 2003-12-04 23:10:23 caress Exp $";
+	static char res_id[]="$Id: mbr_emoldraw.c,v 5.9 2005-11-05 00:48:04 caress Exp $";
 	char	*function_name = "mbr_register_emoldraw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -149,6 +152,7 @@ int mbr_register_emoldraw(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr->mb_io_store_free = &mbsys_simrad_deall; 
 	mb_io_ptr->mb_io_read_ping = &mbr_rt_emoldraw; 
 	mb_io_ptr->mb_io_write_ping = &mbr_wt_emoldraw; 
+	mb_io_ptr->mb_io_dimensions = &mbsys_simrad_dimensions; 
 	mb_io_ptr->mb_io_extract = &mbsys_simrad_extract; 
 	mb_io_ptr->mb_io_insert = &mbsys_simrad_insert; 
 	mb_io_ptr->mb_io_extract_nav = &mbsys_simrad_extract_nav; 
@@ -236,7 +240,7 @@ int mbr_info_emoldraw(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_emoldraw.c,v 5.8 2003-12-04 23:10:23 caress Exp $";
+	static char res_id[]="$Id: mbr_emoldraw.c,v 5.9 2005-11-05 00:48:04 caress Exp $";
 	char	*function_name = "mbr_info_emoldraw";
 	int	status = MB_SUCCESS;
 
@@ -306,7 +310,7 @@ int mbr_info_emoldraw(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_emoldraw(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_emoldraw.c,v 5.8 2003-12-04 23:10:23 caress Exp $";
+	static char res_id[]="$Id: mbr_emoldraw.c,v 5.9 2005-11-05 00:48:04 caress Exp $";
 	char	*function_name = "mbr_alm_emoldraw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

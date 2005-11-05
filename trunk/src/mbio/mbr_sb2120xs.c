@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sb2120xs.c	3/27/2000
- *	$Id: mbr_sb2120xs.c,v 5.2 2001-03-22 20:50:02 caress Exp $
+ *	$Id: mbr_sb2120xs.c,v 5.3 2005-11-05 00:48:04 caress Exp $
  *
  *    Copyright (c) 2000 by 
  *    D. W. Caress (caress@mbari.org)
@@ -27,6 +27,9 @@
  * Date:	December 8,  2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2001/03/22 20:50:02  caress
+ * Trying to make version 5.0.beta0
+ *
  * Revision 5.1  2001/01/22  07:43:34  caress
  * Version 5.0.beta01
  *
@@ -102,7 +105,7 @@ int mbr_wt_sb2120xs(int verbose, char *mbio_ptr, char *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_sb2120xs(int verbose, char *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_sb2120xs.c,v 5.2 2001-03-22 20:50:02 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2120xs.c,v 5.3 2005-11-05 00:48:04 caress Exp $";
 	char	*function_name = "mbr_register_sb2120xs";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -147,6 +150,7 @@ int mbr_register_sb2120xs(int verbose, char *mbio_ptr, int *error)
 	mb_io_ptr->mb_io_store_free = &mbsys_sb2120_deall; 
 	mb_io_ptr->mb_io_read_ping = &mbr_rt_sb2120xs; 
 	mb_io_ptr->mb_io_write_ping = &mbr_wt_sb2120xs; 
+	mb_io_ptr->mb_io_dimensions = &mbsys_sb2120_dimensions; 
 	mb_io_ptr->mb_io_extract = &mbsys_sb2120_extract; 
 	mb_io_ptr->mb_io_insert = &mbsys_sb2120_insert; 
 	mb_io_ptr->mb_io_extract_nav = &mbsys_sb2120_extract_nav; 
@@ -232,7 +236,7 @@ int mbr_info_sb2120xs(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_sb2120xs.c,v 5.2 2001-03-22 20:50:02 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2120xs.c,v 5.3 2005-11-05 00:48:04 caress Exp $";
 	char	*function_name = "mbr_info_sb2120xs";
 	int	status = MB_SUCCESS;
 
@@ -301,7 +305,7 @@ int mbr_info_sb2120xs(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_sb2120xs(int verbose, char *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_sb2120xs.c,v 5.2 2001-03-22 20:50:02 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2120xs.c,v 5.3 2005-11-05 00:48:04 caress Exp $";
 	char	*function_name = "mbr_alm_sb2120xs";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

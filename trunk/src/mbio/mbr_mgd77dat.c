@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mgd77dat.c	5/18/99
- *	$Id: mbr_mgd77dat.c,v 5.9 2004-09-24 20:44:44 caress Exp $
+ *	$Id: mbr_mgd77dat.c,v 5.10 2005-11-05 00:48:03 caress Exp $
  *
  *    Copyright (c) 1999, 2000, 2002, 2003, 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	May 18, 1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.9  2004/09/24 20:44:44  caress
+ * Implemented code fixes provided by Bob Covill.
+ *
  * Revision 5.8  2003/05/20 18:05:32  caress
  * Added svp_source to data source parameters.
  *
@@ -108,7 +111,7 @@ int mbr_dem_mgd77dat(int verbose, void *mbio_ptr, int *error);
 int mbr_rt_mgd77dat(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_mgd77dat(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
-static char res_id[]="$Id: mbr_mgd77dat.c,v 5.9 2004-09-24 20:44:44 caress Exp $";
+static char res_id[]="$Id: mbr_mgd77dat.c,v 5.10 2005-11-05 00:48:03 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_mgd77dat(int verbose, void *mbio_ptr, int *error)
@@ -159,6 +162,7 @@ int mbr_register_mgd77dat(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr->mb_io_store_free = &mbsys_singlebeam_deall; 
 	mb_io_ptr->mb_io_read_ping = &mbr_rt_mgd77dat; 
 	mb_io_ptr->mb_io_write_ping = &mbr_wt_mgd77dat; 
+	mb_io_ptr->mb_io_dimensions = &mbsys_singlebeam_dimensions; 
 	mb_io_ptr->mb_io_extract = &mbsys_singlebeam_extract; 
 	mb_io_ptr->mb_io_insert = &mbsys_singlebeam_insert; 
 	mb_io_ptr->mb_io_extract_nav = &mbsys_singlebeam_extract_nav; 

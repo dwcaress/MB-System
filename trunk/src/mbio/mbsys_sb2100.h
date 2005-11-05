@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_sb2100.h	2/4/94
- *	$Id: mbsys_sb2100.h,v 5.6 2003-12-24 06:56:34 caress Exp $
+ *	$Id: mbsys_sb2100.h,v 5.7 2005-11-05 00:48:04 caress Exp $
  *
  *    Copyright (c) 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Author:	D. W. Caress
  * Date:	February 4, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2003/12/24 06:56:34  caress
+ * Fixed problem with formats 42 and 43. Combined former files mbr_sb2100b1.c and mbr_sb2100b2.c into new file mbr_sb2100bi.c. Files mbf_sb2100b1.h and mbf_sb2100b2.h are no longer part of the archive.
+ *
  * Revision 5.5  2003/04/17 21:05:23  caress
  * Release 5.0.beta30
  *
@@ -349,6 +352,8 @@ int mbsys_sb2100_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error);
 int mbsys_sb2100_deall(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error);
+int mbsys_sb2100_dimensions(int verbose, void *mbio_ptr, void *store_ptr, 
+			int *kind, int *nbath, int *namp, int *nss, int *error);
 int mbsys_sb2100_extract(int verbose, void *mbio_ptr, void *store_ptr, 
 			int *kind, int time_i[7], double *time_d,
 			double *navlon, double *navlat,

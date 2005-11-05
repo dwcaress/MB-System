@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_dsl.h	8/5/94
- *	$Id: mbsys_dsl.h,v 5.5 2003-04-17 21:05:23 caress Exp $
+ *	$Id: mbsys_dsl.h,v 5.6 2005-11-05 00:48:03 caress Exp $
  *
  *    Copyright (c) 1996, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	August 5, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2003/04/17 21:05:23  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.4  2002/09/18 23:32:59  caress
  * Release 5.0.beta23
  *
@@ -203,6 +206,8 @@ int mbsys_dsl_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error);
 int mbsys_dsl_deall(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error);
+int mbsys_dsl_dimensions(int verbose, void *mbio_ptr, void *store_ptr, 
+			int *kind, int *nbath, int *namp, int *nss, int *error);
 int mbsys_dsl_extract(int verbose, void *mbio_ptr, void *store_ptr, 
 			int *kind, int time_i[7], double *time_d,
 			double *navlon, double *navlat,

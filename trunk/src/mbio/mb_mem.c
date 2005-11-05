@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_mem.c	3/1/93
- *    $Id: mb_mem.c,v 5.7 2004-12-18 01:34:43 caress Exp $
+ *    $Id: mb_mem.c,v 5.8 2005-11-05 00:48:04 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	March 1, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2004/12/18 01:34:43  caress
+ * Working towards release 5.0.6.
+ *
  * Revision 5.6  2003/04/17 21:05:23  caress
  * Release 5.0.beta30
  *
@@ -109,8 +112,10 @@
 /* mbio include files */
 #include "../../include/mb_status.h"
 #include "../../include/mb_define.h"
+#include "../../include/mb_io.h"
 
 /* memory allocation list variables */
+#define	MB_MEMORY_ALLOC_STEP	100
 #define	MB_MEMORY_HEAP_MAX	10000
 static int	n_mb_alloc = 0;
 static char	*mb_alloc_ptr[MB_MEMORY_HEAP_MAX];
@@ -120,7 +125,7 @@ static int	mb_alloc_overflow = MB_NO;
 /* Local debug define */
 /* #define MB_MEM_DEBUG 1 */
 
-static char rcs_id[]="$Id: mb_mem.c,v 5.7 2004-12-18 01:34:43 caress Exp $";
+static char rcs_id[]="$Id: mb_mem.c,v 5.8 2005-11-05 00:48:04 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_malloc(int verbose, size_t size, void **ptr, int *error)
@@ -528,6 +533,538 @@ int mb_memory_list(int verbose, int *error)
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_register_array(int verbose, void *mbio_ptr, 
+		int type, int size, void **handle, int *error)
+{
+	static char rcs_id[]="$Id: mb_mem.c,v 5.8 2005-11-05 00:48:04 caress Exp $";
+	char	*function_name = "mb_update_arrays";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	int	nalloc;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mb_ptr:     %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       type:       %d\n",type);
+		fprintf(stderr,"dbg2       size:       %d\n",size);
+		fprintf(stderr,"dbg2       handle:     %x\n",handle);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+	
+	/* allocate larger array for register if necessary */
+	if (mb_io_ptr->n_regarray >= mb_io_ptr->n_regarray_alloc)
+		{
+		mb_io_ptr->n_regarray_alloc += MB_MEMORY_ALLOC_STEP;
+		status = mb_realloc(verbose, mb_io_ptr->n_regarray_alloc * sizeof(void *),
+					(void **)&(mb_io_ptr->regarray_handle), error);
+		if (status == MB_SUCCESS)
+		status = mb_realloc(verbose, mb_io_ptr->n_regarray_alloc * sizeof(void *),
+					(void **)&(mb_io_ptr->regarray_ptr), error);
+		if (status == MB_SUCCESS)
+		status = mb_realloc(verbose, mb_io_ptr->n_regarray_alloc * sizeof(void *),
+					(void **)&(mb_io_ptr->regarray_oldptr), error);
+		if (status == MB_SUCCESS)
+		status = mb_realloc(verbose, mb_io_ptr->n_regarray_alloc * sizeof(int),
+					(void **)&(mb_io_ptr->regarray_type), error);
+		if (status == MB_SUCCESS)
+		status = mb_realloc(verbose, mb_io_ptr->n_regarray_alloc * sizeof(int),
+					(void **)&(mb_io_ptr->regarray_size), error);
+		for (i=mb_io_ptr->n_regarray;i<mb_io_ptr->n_regarray_alloc;i++)
+			{
+			mb_io_ptr->regarray_handle[i] = NULL;
+			mb_io_ptr->regarray_ptr[i] = NULL;
+			mb_io_ptr->regarray_oldptr[i] = NULL;
+			mb_io_ptr->regarray_type[i] = MB_MEM_TYPE_NONE;
+			mb_io_ptr->regarray_size[i] = 0;
+			}
+		}
+		
+	/* register the array */
+	if (status == MB_SUCCESS)
+		{
+		/* get dimension of desired array */
+		if (type == MB_MEM_TYPE_BATHYMETRY)
+			nalloc = mb_io_ptr->beams_bath_max;
+		else if (type == MB_MEM_TYPE_AMPLITUDE)
+			nalloc = mb_io_ptr->beams_amp_max;
+		else if (type == MB_MEM_TYPE_SIDESCAN)
+			nalloc = mb_io_ptr->pixels_ss_max;
+		else
+			nalloc = 0;
+			
+		/* allocate the array - always allocate at least one dimension so the pointer is non-null */
+		if (nalloc <= 0)
+			nalloc = 1;
+		status = mb_realloc(verbose, nalloc * size,
+					handle, error);
+		if (status == MB_SUCCESS)
+			{
+			mb_io_ptr->regarray_handle[mb_io_ptr->n_regarray] = (void *) (handle);
+			mb_io_ptr->regarray_ptr[mb_io_ptr->n_regarray] = (void *) (*handle);
+			mb_io_ptr->regarray_oldptr[mb_io_ptr->n_regarray] = NULL;
+			mb_io_ptr->regarray_type[mb_io_ptr->n_regarray] = type;
+			mb_io_ptr->regarray_size[mb_io_ptr->n_regarray] = size;
+			mb_io_ptr->n_regarray++;
+/* fprintf(stderr,"Array registered: handle:%x ptr:%x  stored handle:%x ptr:%x\n", 
+handle, *handle,  
+mb_io_ptr->regarray_handle[mb_io_ptr->n_regarray-1],
+mb_io_ptr->regarray_ptr[mb_io_ptr->n_regarray-1]);*/
+			}
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       *handle:    %x\n",*handle);
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_update_arrays(int verbose, void *mbio_ptr, 
+		int nbath, int namp, int nss, int *error)
+{
+	static char rcs_id[]="$Id: mb_mem.c,v 5.8 2005-11-05 00:48:04 caress Exp $";
+	char	*function_name = "mb_update_arrays";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	void	**handle;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mb_ptr:     %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       nbath:      %d\n",nbath);
+		fprintf(stderr,"dbg2       namp:       %d\n",namp);
+		fprintf(stderr,"dbg2       nss:        %d\n",nss);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+/*fprintf(stderr,"START mb_update_arrays: nbath:%d %d  namp:%d %d  nss:%d %d\n",
+nbath,mb_io_ptr->beams_bath_alloc,
+namp,mb_io_ptr->beams_amp_alloc,
+nss,mb_io_ptr->pixels_ss_alloc);*/
+	
+	/* reallocate larger arrays if necessary */
+	if (nbath > mb_io_ptr->beams_bath_alloc)
+		{
+		/* set allocation size */
+		if (nbath < 1024)
+			{
+			mb_io_ptr->beams_bath_alloc = (nbath / 256) * 256;
+			if (nbath % 256 > 0)
+				mb_io_ptr->beams_bath_alloc += 256;
+			}
+		else
+			{
+			mb_io_ptr->beams_bath_alloc = (nbath / 1024) * 1024;
+			if (nbath % 1024 > 0)
+				mb_io_ptr->beams_bath_alloc += 1024;
+			}
+			
+		/* allocate mb_io_ptr arrays */
+		if (status == MB_SUCCESS)
+			status = mb_realloc(verbose,mb_io_ptr->beams_bath_alloc*sizeof(char),
+					(void **)&mb_io_ptr->beamflag,error);
+		if (status == MB_SUCCESS)
+			status = mb_realloc(verbose,mb_io_ptr->beams_bath_alloc*sizeof(double),
+					(void **)&mb_io_ptr->bath,error);
+		if (status == MB_SUCCESS)
+			status = mb_realloc(verbose,mb_io_ptr->beams_bath_alloc*sizeof(double),
+					(void **)&mb_io_ptr->bath_acrosstrack,error);
+		if (status == MB_SUCCESS)
+			status = mb_realloc(verbose,mb_io_ptr->beams_bath_alloc*sizeof(double),
+					(void **)&mb_io_ptr->bath_alongtrack,error);
+		if (status == MB_SUCCESS)
+			status = mb_realloc(verbose,mb_io_ptr->beams_bath_alloc*sizeof(int),
+					(void **)&mb_io_ptr->bath_num,error);
+		if (status == MB_SUCCESS)
+			status = mb_realloc(verbose,mb_io_ptr->beams_bath_alloc*sizeof(char),
+					(void **)&mb_io_ptr->new_beamflag,error);
+		if (status == MB_SUCCESS)
+			status = mb_realloc(verbose,mb_io_ptr->beams_bath_alloc*sizeof(double),
+					(void **)&mb_io_ptr->new_bath,error);
+		if (status == MB_SUCCESS)
+			status = mb_realloc(verbose,mb_io_ptr->beams_bath_alloc*sizeof(double),
+					(void **)&mb_io_ptr->new_bath_acrosstrack,error);
+		if (status == MB_SUCCESS)
+			status = mb_realloc(verbose,mb_io_ptr->beams_bath_alloc*sizeof(double),
+					(void **)&mb_io_ptr->new_bath_alongtrack,error);
+		for (i=mb_io_ptr->beams_bath_max;i<mb_io_ptr->beams_bath_alloc;i++)
+			{
+			mb_io_ptr->beamflag[i] = 0;
+			mb_io_ptr->bath[i] = 0.0;
+			mb_io_ptr->bath_acrosstrack[i] = 0.0;
+			mb_io_ptr->bath_alongtrack[i] = 0.0;
+			mb_io_ptr->bath_num[i] = 0;
+			mb_io_ptr->new_beamflag[i] = 0;
+			mb_io_ptr->new_bath[i] = 0.0;
+			mb_io_ptr->new_bath_acrosstrack[i] = 0.0;
+			mb_io_ptr->new_bath_alongtrack[i] = 0.0;
+			}
+		mb_io_ptr->beams_bath_max = nbath;
+			
+		/* allocate registered arrays */
+		for (i=0;i<mb_io_ptr->n_regarray;i++)
+			{
+			/* allocate the bathymetry dimensioned arrays */
+			if (mb_io_ptr->regarray_type[i] == MB_MEM_TYPE_BATHYMETRY
+				&& mb_io_ptr->beams_bath_alloc > 0)
+				{
+				mb_io_ptr->regarray_oldptr[i] = mb_io_ptr->regarray_ptr[i];
+				handle = (void **)(mb_io_ptr->regarray_handle[i]);
+				status = mb_realloc(verbose, 
+						mb_io_ptr->beams_bath_alloc * mb_io_ptr->regarray_size[i],
+						handle, error);
+				mb_io_ptr->regarray_ptr[i] = *handle;
+				}
+			}
+			
+		/* set reallocation flag */
+		mb_io_ptr->bath_arrays_reallocated = MB_YES;
+		}
+	if (namp > mb_io_ptr->beams_amp_alloc)
+		{
+		/* set allocation size */
+		if (namp < 1024)
+			{
+			mb_io_ptr->beams_amp_alloc = (namp / 256) * 256;
+			if (namp % 256 > 0)
+				mb_io_ptr->beams_amp_alloc += 256;
+			}
+		else
+			{
+			mb_io_ptr->beams_amp_alloc = (namp / 1024) * 1024;
+			if (namp % 1024 > 0)
+				mb_io_ptr->beams_amp_alloc += 1024;
+			}
+			
+		if (status == MB_SUCCESS)
+			status = mb_realloc(verbose,mb_io_ptr->beams_amp_alloc*sizeof(double),
+					(void **)&mb_io_ptr->amp,error);
+		if (status == MB_SUCCESS)
+			status = mb_realloc(verbose,mb_io_ptr->beams_amp_alloc*sizeof(int),
+					(void **)&mb_io_ptr->amp_num,error);
+		if (status == MB_SUCCESS)
+			status = mb_realloc(verbose,mb_io_ptr->beams_amp_alloc*sizeof(double),
+					(void **)&mb_io_ptr->new_amp,error);
+		for (i=mb_io_ptr->beams_amp_max;i<mb_io_ptr->beams_amp_alloc;i++)
+			{
+			mb_io_ptr->amp[i] = 0.0;
+			mb_io_ptr->amp_num[i] = 0;
+			mb_io_ptr->new_amp[i] = 0.0;
+			}
+		mb_io_ptr->beams_amp_max = namp;
+			
+		/* allocate registered arrays */
+		for (i=0;i<mb_io_ptr->n_regarray;i++)
+			{
+			/* allocate the amplitude dimensioned arrays */
+			if (mb_io_ptr->regarray_type[i] == MB_MEM_TYPE_AMPLITUDE
+				&& mb_io_ptr->beams_amp_alloc > 0)
+				{
+				mb_io_ptr->regarray_oldptr[i] = mb_io_ptr->regarray_ptr[i];
+				handle = (void **)(mb_io_ptr->regarray_handle[i]);
+				status = mb_realloc(verbose, 
+						mb_io_ptr->beams_amp_alloc * mb_io_ptr->regarray_size[i],
+						handle, error);
+				mb_io_ptr->regarray_ptr[i] = *handle;
+				}
+			}
+			
+		/* set reallocation flag */
+		mb_io_ptr->amp_arrays_reallocated = MB_YES;
+		}
+	if (nss > mb_io_ptr->pixels_ss_alloc)
+		{
+		/* set allocation size */
+		if (nss < 1024)
+			{
+			mb_io_ptr->pixels_ss_alloc = (nss / 256) * 256;
+			if (namp % 256 > 0)
+				mb_io_ptr->pixels_ss_alloc += 256;
+			}
+		else
+			{
+			mb_io_ptr->pixels_ss_alloc = (nss / 1024) * 1024;
+			if (namp % 1024 > 0)
+				mb_io_ptr->pixels_ss_alloc += 1024;
+			}
+			
+		if (status == MB_SUCCESS)
+			status = mb_realloc(verbose,mb_io_ptr->pixels_ss_alloc*sizeof(double),
+					(void **)&mb_io_ptr->ss,error);
+		if (status == MB_SUCCESS)
+			status = mb_realloc(verbose,mb_io_ptr->pixels_ss_alloc*sizeof(double),
+					(void **)&mb_io_ptr->ss_acrosstrack,error);
+		if (status == MB_SUCCESS)
+			status = mb_realloc(verbose,mb_io_ptr->pixels_ss_alloc*sizeof(double),
+					(void **)&mb_io_ptr->ss_alongtrack,error);
+		if (status == MB_SUCCESS)
+			status = mb_realloc(verbose,mb_io_ptr->pixels_ss_alloc*sizeof(int),
+					(void **)&mb_io_ptr->ss_num,error);
+		if (status == MB_SUCCESS)
+			status = mb_realloc(verbose,mb_io_ptr->pixels_ss_alloc*sizeof(double),
+					(void **)&mb_io_ptr->new_ss,error);
+		if (status == MB_SUCCESS)
+			status = mb_realloc(verbose,mb_io_ptr->pixels_ss_alloc*sizeof(double),
+					(void **)&mb_io_ptr->new_ss_acrosstrack,error);
+		if (status == MB_SUCCESS)
+			status = mb_realloc(verbose,mb_io_ptr->pixels_ss_alloc*sizeof(double),
+					(void **)&mb_io_ptr->new_ss_alongtrack,error);
+		for (i=mb_io_ptr->pixels_ss_max;i<mb_io_ptr->pixels_ss_alloc;i++)
+			{
+			mb_io_ptr->ss[i] = 0.0;
+			mb_io_ptr->ss_acrosstrack[i] = 0.0;
+			mb_io_ptr->ss_alongtrack[i] = 0.0;
+			mb_io_ptr->ss_num[i] = 0;
+			mb_io_ptr->new_ss[i] = 0.0;
+			mb_io_ptr->new_ss_acrosstrack[i] = 0.0;
+			mb_io_ptr->new_ss_alongtrack[i] = 0.0;
+			}
+		mb_io_ptr->pixels_ss_max = nss;
+			
+		/* allocate registered arrays */
+		for (i=0;i<mb_io_ptr->n_regarray;i++)
+			{
+			/* allocate the sidescan dimensioned arrays */
+			if (mb_io_ptr->regarray_type[i] == MB_MEM_TYPE_SIDESCAN
+				&& mb_io_ptr->pixels_ss_alloc > 0)
+				{
+				mb_io_ptr->regarray_oldptr[i] = mb_io_ptr->regarray_ptr[i];
+				handle = (void **)(mb_io_ptr->regarray_handle[i]);
+				status = mb_realloc(verbose, 
+						mb_io_ptr->pixels_ss_alloc * mb_io_ptr->regarray_size[i],
+						handle, error);
+				mb_io_ptr->regarray_ptr[i] = *handle;
+				}
+			}
+			
+		/* set reallocation flag */
+		mb_io_ptr->ss_arrays_reallocated = MB_YES;
+		}
+
+	/* deal with a memory allocation failure */
+	if (status == MB_FAILURE)
+		{
+		/* free the registered arrays */
+		for (i=0;i<mb_io_ptr->n_regarray;i++)
+			{
+			/* free all arrays */
+			if (mb_io_ptr->regarray_handle[i] != NULL)
+				{
+				status = mb_free(verbose, (void **)(mb_io_ptr->regarray_handle[i]), error);
+				}
+			}
+		
+		/* free the standard arrays */
+		status = mb_free(verbose,(void **)&mb_io_ptr->beamflag,error);
+		status = mb_free(verbose,(void **)&mb_io_ptr->bath,error);
+		status = mb_free(verbose,(void **)&mb_io_ptr->amp,error);
+		status = mb_free(verbose,(void **)&mb_io_ptr->bath_acrosstrack,error);
+		status = mb_free(verbose,(void **)&mb_io_ptr->bath_alongtrack,error);
+		status = mb_free(verbose,(void **)&mb_io_ptr->bath_num,error);
+		status = mb_free(verbose,(void **)&mb_io_ptr->amp_num,error);
+		status = mb_free(verbose,(void **)&mb_io_ptr->ss,error);
+		status = mb_free(verbose,(void **)&mb_io_ptr->ss_acrosstrack,error);
+		status = mb_free(verbose,(void **)&mb_io_ptr->ss_alongtrack,error);
+		status = mb_free(verbose,(void **)&mb_io_ptr->ss_num,error);
+		status = mb_free(verbose,(void **)&mb_io_ptr->beamflag,error);
+		status = mb_free(verbose,(void **)&mb_io_ptr->new_bath,error);
+		status = mb_free(verbose,(void **)&mb_io_ptr->new_amp,error);
+		status = mb_free(verbose,(void **)&mb_io_ptr->new_bath_acrosstrack,error);
+		status = mb_free(verbose,(void **)&mb_io_ptr->new_bath_alongtrack,error);
+		status = mb_free(verbose,(void **)&mb_io_ptr->new_ss,error);
+		status = mb_free(verbose,(void **)&mb_io_ptr->new_ss_acrosstrack,error);
+		status = mb_free(verbose,(void **)&mb_io_ptr->new_ss_alongtrack,error);
+		
+		/* free the mb_io structure */
+		status = mb_free(verbose,(void **)&mb_io_ptr,error);
+		mb_io_ptr->beams_bath_alloc = 0;
+		mb_io_ptr->beams_amp_alloc = 0;
+		mb_io_ptr->pixels_ss_alloc = 0;
+		status = MB_FAILURE;
+		*error = MB_ERROR_MEMORY_FAIL;
+		}
+/*fprintf(stderr,"END   mb_update_arrays: nbath:%d %d  namp:%d %d  nss:%d %d\n\n",
+nbath,mb_io_ptr->beams_bath_alloc,
+namp,mb_io_ptr->beams_amp_alloc,
+nss,mb_io_ptr->pixels_ss_alloc);*/
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_update_arrayptr(int verbose, void *mbio_ptr, 
+		void **handle, int *error)
+{
+	static char rcs_id[]="$Id: mb_mem.c,v 5.8 2005-11-05 00:48:04 caress Exp $";
+	char	*function_name = "mb_update_arrayptr";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	int	found;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       handle:     %x\n",handle);
+		fprintf(stderr,"dbg2       *handle:    %x\n",*handle);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* look for handle in registered arrays */
+	found = MB_NO;
+	for (i=0;i<mb_io_ptr->n_regarray && found == MB_NO;i++)
+		{
+		if (*handle == mb_io_ptr->regarray_oldptr[i])
+			{
+			*handle = mb_io_ptr->regarray_ptr[i];
+/*fprintf(stderr,"check handle:%x old ptrs:%x %x",handle,*handle,mb_io_ptr->regarray_oldptr[i]);
+fprintf(stderr," found : new ptr:%x",*handle);
+fprintf(stderr,"\n");*/
+			found = MB_YES;
+			}
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       *handle:    %d\n",*handle);
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_deall_ioarrays(int verbose, void *mbio_ptr, int *error)
+{
+	static char rcs_id[]="$Id: mb_mem.c,v 5.8 2005-11-05 00:48:04 caress Exp $";
+	char	*function_name = "mb_deall_ioarrays";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mb_ptr:     %d\n",mbio_ptr);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* deallocate mb_io_ptr arrays */
+	status = mb_free(verbose, (void **)&mb_io_ptr->beamflag,error);
+	status = mb_free(verbose, (void **)&mb_io_ptr->bath,error);
+	status = mb_free(verbose, (void **)&mb_io_ptr->bath_acrosstrack,error);
+	status = mb_free(verbose, (void **)&mb_io_ptr->bath_alongtrack,error);
+	status = mb_free(verbose, (void **)&mb_io_ptr->bath_num,error);
+	status = mb_free(verbose, (void **)&mb_io_ptr->new_beamflag,error);
+	status = mb_free(verbose, (void **)&mb_io_ptr->new_bath,error);
+	status = mb_free(verbose, (void **)&mb_io_ptr->new_bath_acrosstrack,error);
+	status = mb_free(verbose, (void **)&mb_io_ptr->new_bath_alongtrack,error);
+	status = mb_free(verbose, (void **)&mb_io_ptr->amp,error);
+	status = mb_free(verbose, (void **)&mb_io_ptr->amp_num,error);
+	status = mb_free(verbose, (void **)&mb_io_ptr->new_amp,error);
+	status = mb_free(verbose, (void **)&mb_io_ptr->ss,error);
+	status = mb_free(verbose, (void **)&mb_io_ptr->ss_acrosstrack,error);
+	status = mb_free(verbose, (void **)&mb_io_ptr->ss_alongtrack,error);
+	status = mb_free(verbose, (void **)&mb_io_ptr->ss_num,error);
+	status = mb_free(verbose, (void **)&mb_io_ptr->new_ss,error);
+	status = mb_free(verbose, (void **)&mb_io_ptr->new_ss_acrosstrack,error);
+	status = mb_free(verbose, (void **)&mb_io_ptr->new_ss_alongtrack,error);
+	mb_io_ptr->beams_bath_max = 0;
+	mb_io_ptr->beams_bath_alloc = 0;
+	mb_io_ptr->beams_amp_max = 0;
+	mb_io_ptr->beams_amp_alloc = 0;
+	mb_io_ptr->pixels_ss_max = 0;
+	mb_io_ptr->pixels_ss_alloc = 0;
+
+	/* deallocate registered arrays */
+	for (i=0;i<mb_io_ptr->n_regarray;i++)
+		{
+		if (status == MB_SUCCESS)
+			status = mb_free(verbose, (void **)(mb_io_ptr->regarray_handle[i]), error);
+		}
+	mb_io_ptr->n_regarray = 0;
+	mb_io_ptr->n_regarray_alloc = 0;
+
+	/* deallocate registry itself */
+	if (status == MB_SUCCESS)
+		status = mb_free(verbose, (void **)&(mb_io_ptr->regarray_handle), error);
+	if (status == MB_SUCCESS)
+		status = mb_free(verbose, (void **)&(mb_io_ptr->regarray_ptr), error);
+	if (status == MB_SUCCESS)
+		status = mb_free(verbose, (void **)&(mb_io_ptr->regarray_oldptr), error);
+	if (status == MB_SUCCESS)
+		status = mb_free(verbose, (void **)&(mb_io_ptr->regarray_type), error);
+	if (status == MB_SUCCESS)
+		status = mb_free(verbose, (void **)&(mb_io_ptr->regarray_size), error);
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:  %d\n",status);

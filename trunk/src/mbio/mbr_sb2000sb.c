@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sb2000sb.c	10/11/94
- *	$Id: mbr_sb2000sb.c,v 5.9 2003-08-07 22:32:59 caress Exp $
+ *	$Id: mbr_sb2000sb.c,v 5.10 2005-11-05 00:48:05 caress Exp $
  *
  *    Copyright (c) 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	October 11, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 5.9  2003/08/07 22:32:59  caress
+ * Fixed problem with broken SB2000 records in data sample supplied by Mike Sexton.
+ *
  * Revision 5.8  2003/05/20 18:05:32  caress
  * Added svp_source to data source parameters.
  *
@@ -156,7 +159,7 @@ int mbr_dem_sb2000sb(int verbose, void *mbio_ptr, int *error);
 int mbr_rt_sb2000sb(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_sb2000sb(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
-static char res_id[]="$Id: mbr_sb2000sb.c,v 5.9 2003-08-07 22:32:59 caress Exp $";
+static char res_id[]="$Id: mbr_sb2000sb.c,v 5.10 2005-11-05 00:48:05 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_sb2000sb(int verbose, void *mbio_ptr, int *error)
@@ -207,6 +210,7 @@ int mbr_register_sb2000sb(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr->mb_io_store_free = &mbsys_sb2000_deall; 
 	mb_io_ptr->mb_io_read_ping = &mbr_rt_sb2000sb; 
 	mb_io_ptr->mb_io_write_ping = &mbr_wt_sb2000sb; 
+	mb_io_ptr->mb_io_dimensions = &mbsys_sb2000_dimensions; 
 	mb_io_ptr->mb_io_extract = &mbsys_sb2000_extract; 
 	mb_io_ptr->mb_io_insert = &mbsys_sb2000_insert; 
 	mb_io_ptr->mb_io_extract_nav = &mbsys_sb2000_extract_nav; 
@@ -363,7 +367,7 @@ int mbr_info_sb2000sb(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_sb2000sb(int verbose, void *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_sb2000sb.c,v 5.9 2003-08-07 22:32:59 caress Exp $";
+ static char res_id[]="$Id: mbr_sb2000sb.c,v 5.10 2005-11-05 00:48:05 caress Exp $";
 	char	*function_name = "mbr_alm_sb2000sb";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

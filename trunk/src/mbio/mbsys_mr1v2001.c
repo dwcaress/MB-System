@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_mr1v2001.c	3/6/2003
- *	$Id: mbsys_mr1v2001.c,v 5.0 2003-03-10 20:03:59 caress Exp $
+ *	$Id: mbsys_mr1v2001.c,v 5.1 2005-11-05 00:48:05 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	March 6, 2003
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2003/03/10 20:03:59  caress
+ * Initial version.
+ *
  *
  *
  */
@@ -45,7 +48,7 @@
 int mbsys_mr1v2001_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_mr1v2001.c,v 5.0 2003-03-10 20:03:59 caress Exp $";
+ static char res_id[]="$Id: mbsys_mr1v2001.c,v 5.1 2005-11-05 00:48:05 caress Exp $";
 	char	*function_name = "mbsys_mr1v2001_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -112,6 +115,81 @@ int mbsys_mr1v2001_deall(int verbose, void *mbio_ptr, void **store_ptr,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbsys_mr1v2001_dimensions(int verbose, void *mbio_ptr, void *store_ptr, 
+		int *kind, int *nbath, int *namp, int *nss, int *error)
+{
+	char	*function_name = "mbsys_mr1v2001_dimensions";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	struct mbsys_mr1v2001_struct *store;
+	MR1File *header;
+	Ping *ping;
+	PingSide *pingport;
+	PingSide *pingstbd;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mb_ptr:     %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* get data structure pointer */
+	store = (struct mbsys_mr1v2001_struct *) store_ptr;
+
+	/* get pointers */
+	header = &(store->header);
+	ping = &(store->ping);
+	pingport = &(ping->png_sides[0]);
+	pingstbd = &(ping->png_sides[1]);
+
+	/* get data kind */
+	*kind = store->kind;
+
+	/* extract data from structure */
+	if (*kind == MB_DATA_DATA)
+		{
+		/* get beam and pixel numbers */
+		*nbath = 2 * MAX(pingport->ps_btycount, pingstbd->ps_btycount) + 3;
+		*namp = 0;
+		*nss = 2 * MAX(pingport->ps_sscount, pingstbd->ps_sscount);
+		}
+
+	/* extract data from structure */
+	else
+		{
+		/* get beam and pixel numbers */
+		*nbath = 0;
+		*namp = 0;
+		*nss = 0;
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
+		fprintf(stderr,"dbg2       nbath:      %d\n",*nbath);
+		fprintf(stderr,"dbg2        namp:      %d\n",*namp);
+		fprintf(stderr,"dbg2        nss:       %d\n",*nss);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:     %d\n",status);

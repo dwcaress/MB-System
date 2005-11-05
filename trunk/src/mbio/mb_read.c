@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_read.c	2/20/93
- *    $Id: mb_read.c,v 5.7 2004-04-27 01:46:13 caress Exp $
+ *    $Id: mb_read.c,v 5.8 2005-11-05 00:48:05 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	February 20, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2004/04/27 01:46:13  caress
+ * Various updates of April 26, 2004.
+ *
  * Revision 5.6  2003/04/17 21:05:23  caress
  * Release 5.0.beta30
  *
@@ -143,7 +146,7 @@
 #include "../../include/mb_io.h"
 #include "../../include/mb_define.h"
 
-static char rcs_id[]="$Id: mb_read.c,v 5.7 2004-04-27 01:46:13 caress Exp $";
+static char rcs_id[]="$Id: mb_read.c,v 5.8 2005-11-05 00:48:05 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_read(int verbose, void *mbio_ptr,
@@ -163,6 +166,7 @@ int mb_read(int verbose, void *mbio_ptr,
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	char	*store_ptr;
+	int	beams_bath, beams_amp, pixels_ss;
 	int	i;
 	int	done;
 	int	reset_last;
@@ -246,7 +250,35 @@ int mb_read(int verbose, void *mbio_ptr,
 			/* log errors */
 			if (*error < MB_ERROR_NO_ERROR)
 				mb_notice_log_error(verbose, mbio_ptr, *error);
-			
+				
+			/* if io arrays have been reallocated, update the
+				pointers of arrays passed into this function,
+				as these pointers may have changed */
+			if (status == MB_SUCCESS
+				&& mb_io_ptr->new_kind == MB_DATA_DATA)
+				{
+				if (mb_io_ptr->bath_arrays_reallocated == MB_YES)
+					{
+					status = mb_update_arrayptr(verbose, mbio_ptr, (void **) &beamflag, error);
+					status = mb_update_arrayptr(verbose, mbio_ptr, (void **) &bath, error);
+					status = mb_update_arrayptr(verbose, mbio_ptr, (void **) &bathlon, error);
+					status = mb_update_arrayptr(verbose, mbio_ptr, (void **) &bathlat, error);
+					mb_io_ptr->bath_arrays_reallocated = MB_NO;
+					}
+				if (mb_io_ptr->amp_arrays_reallocated == MB_YES)
+					{
+					status = mb_update_arrayptr(verbose, mbio_ptr, (void **) &amp, error);
+					mb_io_ptr->amp_arrays_reallocated = MB_NO;
+					}
+				if (mb_io_ptr->ss_arrays_reallocated == MB_YES)
+					{
+					status = mb_update_arrayptr(verbose, mbio_ptr, (void **) &ss, error);
+					status = mb_update_arrayptr(verbose, mbio_ptr, (void **) &sslon, error);
+					status = mb_update_arrayptr(verbose, mbio_ptr, (void **) &sslat, error);
+					mb_io_ptr->ss_arrays_reallocated = MB_NO;
+					}
+				}
+
 			/* if survey data read into storage array */
 			if (status == MB_SUCCESS
 				&& (mb_io_ptr->new_kind == MB_DATA_DATA

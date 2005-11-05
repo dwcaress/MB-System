@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsldeoih.c	2/11/93
- *	$Id: mbr_hsldeoih.c,v 5.7 2005-05-05 23:51:32 caress Exp $
+ *	$Id: mbr_hsldeoih.c,v 5.8 2005-11-05 00:48:04 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	February 11, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2005/05/05 23:51:32  caress
+ * Added code to detect bad scaling of the depth_center value found in some early (e.g 1995-1996) format 24 data files. In these cases, the center depth value is 100 times the correct value. This is detected and fixed when the depth value is > 12000.0.
+ *
  * Revision 5.6  2003/05/20 18:05:32  caress
  * Added svp_source to data source parameters.
  *
@@ -175,7 +178,7 @@ int mbr_wt_hsldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_hsldeoih(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_hsldeoih.c,v 5.7 2005-05-05 23:51:32 caress Exp $";
+	static char res_id[]="$Id: mbr_hsldeoih.c,v 5.8 2005-11-05 00:48:04 caress Exp $";
 	char	*function_name = "mbr_register_hsldeoih";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -221,6 +224,7 @@ int mbr_register_hsldeoih(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr->mb_io_store_free = &mbsys_hsds_deall; 
 	mb_io_ptr->mb_io_read_ping = &mbr_rt_hsldeoih; 
 	mb_io_ptr->mb_io_write_ping = &mbr_wt_hsldeoih; 
+	mb_io_ptr->mb_io_dimensions = &mbsys_hsds_dimensions; 
 	mb_io_ptr->mb_io_extract = &mbsys_hsds_extract; 
 	mb_io_ptr->mb_io_insert = &mbsys_hsds_insert; 
 	mb_io_ptr->mb_io_extract_nav = &mbsys_hsds_extract_nav; 
@@ -307,7 +311,7 @@ int mbr_info_hsldeoih(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_hsldeoih.c,v 5.7 2005-05-05 23:51:32 caress Exp $";
+	static char res_id[]="$Id: mbr_hsldeoih.c,v 5.8 2005-11-05 00:48:04 caress Exp $";
 	char	*function_name = "mbr_info_hsldeoih";
 	int	status = MB_SUCCESS;
 
@@ -377,7 +381,7 @@ int mbr_info_hsldeoih(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_hsldeoih(int verbose, void *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_hsldeoih.c,v 5.7 2005-05-05 23:51:32 caress Exp $";
+ static char res_id[]="$Id: mbr_hsldeoih.c,v 5.8 2005-11-05 00:48:04 caress Exp $";
 	char	*function_name = "mbr_alm_hsldeoih";
 	int	status = MB_SUCCESS;
 	int	i;

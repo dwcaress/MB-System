@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mbnetcdf.c	1/25/02
- *	$Id: mbr_mbnetcdf.c,v 5.4 2005-05-02 19:02:40 caress Exp $
+ *	$Id: mbr_mbnetcdf.c,v 5.5 2005-11-05 00:48:05 caress Exp $
  *
  *    Copyright (c) 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,19 @@
  * Date:	January 25, 2002
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2005/05/02 19:02:40  caress
+ * The format 75 (MBF_MBNETCDF) i/o module has been altered to
+ * handle multiple pings with the same time stamp without breaking
+ * the beam edit (edit save file) scheme, which depends upon
+ * unique time stamps. When multiple pings with the same time
+ * stamp are encountered, the subsequent pings have multiples
+ * of 2 msec added so that each has a detectably unique time
+ * stamp. This issue relates to Thompson Seafalcon II multibeam
+ * data; this sonar collects five simultaneous acrosstrack swathes.
+ * Since this is a deep water sonar, the maximum 10 msec time
+ * addition should not introduce excessive error in navigation
+ * or other aspects of the data.
+ *
  * Revision 5.3  2003/05/20 18:05:32  caress
  * Added svp_source to data source parameters.
  *
@@ -90,7 +103,7 @@ int mbr_dem_mbnetcdf(int verbose, void *mbio_ptr, int *error);
 int mbr_rt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
-static char res_id[]="$Id: mbr_mbnetcdf.c,v 5.4 2005-05-02 19:02:40 caress Exp $";
+static char res_id[]="$Id: mbr_mbnetcdf.c,v 5.5 2005-11-05 00:48:05 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_mbnetcdf(int verbose, void *mbio_ptr, int *error)
@@ -140,6 +153,7 @@ int mbr_register_mbnetcdf(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr->mb_io_store_free = &mbsys_netcdf_deall; 
 	mb_io_ptr->mb_io_read_ping = &mbr_rt_mbnetcdf; 
 	mb_io_ptr->mb_io_write_ping = &mbr_wt_mbnetcdf; 
+	mb_io_ptr->mb_io_dimensions = &mbsys_netcdf_dimensions; 
 	mb_io_ptr->mb_io_extract = &mbsys_netcdf_extract; 
 	mb_io_ptr->mb_io_insert = &mbsys_netcdf_insert; 
 	mb_io_ptr->mb_io_extract_nav = &mbsys_netcdf_extract_nav; 
@@ -242,7 +256,7 @@ int mbr_info_mbnetcdf(int verbose,
 	status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 	*system = MB_SYS_NETCDF;
-	*beams_bath_max = 500;
+	*beams_bath_max = 0;
 	*beams_amp_max = 0;
 	*pixels_ss_max = 0;
 	strncpy(format_name, "MBNETCDF", MB_NAME_LENGTH);

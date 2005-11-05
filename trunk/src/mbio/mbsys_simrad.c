@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad.c	3.00	8/5/94
- *	$Id: mbsys_simrad.c,v 5.11 2003-12-04 23:10:24 caress Exp $
+ *	$Id: mbsys_simrad.c,v 5.12 2005-11-05 00:48:04 caress Exp $
  *
  *    Copyright (c) 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -31,6 +31,9 @@
  * Date:	August 5, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.11  2003/12/04 23:10:24  caress
+ * Fixed problems with format 54 EM12DARW due to old code assuming how internal structure was packed. Also changed handling of beamflags for formats that don't support beamflags. Now flagged beams will always be nulled in such cases.
+ *
  * Revision 5.10  2003/04/17 21:05:23  caress
  * Release 5.0.beta30
  *
@@ -155,7 +158,7 @@
 #define MBSYS_SIMRAD_C
 #include "../../include/mbsys_simrad.h"
 
-static char res_id[]="$Id: mbsys_simrad.c,v 5.11 2003-12-04 23:10:24 caress Exp $";
+static char res_id[]="$Id: mbsys_simrad.c,v 5.12 2005-11-05 00:48:04 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_simrad_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
@@ -431,6 +434,71 @@ int mbsys_simrad_deall(int verbose, void *mbio_ptr, void **store_ptr,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbsys_simrad_dimensions(int verbose, void *mbio_ptr, void *store_ptr, 
+		int *kind, int *nbath, int *namp, int *nss, int *error)
+{
+	char	*function_name = "mbsys_simrad_dimensions";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	struct mbsys_simrad_struct *store;
+	struct mbsys_simrad_survey_struct *ping;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mb_ptr:     %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* get data structure pointer */
+	store = (struct mbsys_simrad_struct *) store_ptr;
+
+	/* get data kind */
+	*kind = store->kind;
+
+	/* extract data from structure */
+	if (*kind == MB_DATA_DATA)
+		{
+		/* get beam and pixel numbers */
+		ping = (struct mbsys_simrad_survey_struct *) store->ping;
+		*nbath = ping->beams_bath;
+		*namp = ping->beams_bath;
+		*nss = MBSYS_SIMRAD_MAXPIXELS;
+		}
+	else
+		{
+		/* get beam and pixel numbers */
+		*nbath = 0;
+		*namp = 0;
+		*nss = 0;
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
+		fprintf(stderr,"dbg2       nbath:      %d\n",*nbath);
+		fprintf(stderr,"dbg2        namp:      %d\n",*namp);
+		fprintf(stderr,"dbg2        nss:       %d\n",*nss);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:     %d\n",status);

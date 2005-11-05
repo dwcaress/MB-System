@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em300raw.c	10/16/98
- *	$Id: mbr_em300raw.c,v 5.25 2005-03-25 04:18:14 caress Exp $
+ *	$Id: mbr_em300raw.c,v 5.26 2005-11-05 00:48:04 caress Exp $
  *
  *    Copyright (c) 1998, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	October 16,  1998
  * $Log: not supported by cvs2svn $
+ * Revision 5.25  2005/03/25 04:18:14  caress
+ * Fixed problems with the debug mode being on in mbr_em300raw.c and problems with the debug output in both mbr_em300raw.c and mbr_em300mba.c.
+ *
  * Revision 5.24  2005/02/08 22:37:38  caress
  * Heading towards 5.0.6 release.
  *
@@ -270,7 +273,7 @@ int mbr_em300raw_wr_rawbeam2(int verbose, FILE *mbfp,
 int mbr_em300raw_wr_ss(int verbose, FILE *mbfp, 
 		struct mbsys_simrad2_struct *store, int *error);
 
-static char res_id[]="$Id: mbr_em300raw.c,v 5.25 2005-03-25 04:18:14 caress Exp $";
+static char res_id[]="$Id: mbr_em300raw.c,v 5.26 2005-11-05 00:48:04 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_em300raw(int verbose, void *mbio_ptr, int *error)
@@ -321,6 +324,7 @@ int mbr_register_em300raw(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr->mb_io_store_free = &mbsys_simrad2_deall; 
 	mb_io_ptr->mb_io_read_ping = &mbr_rt_em300raw; 
 	mb_io_ptr->mb_io_write_ping = &mbr_wt_em300raw; 
+	mb_io_ptr->mb_io_dimensions = &mbsys_simrad2_dimensions; 
 	mb_io_ptr->mb_io_extract = &mbsys_simrad2_extract; 
 	mb_io_ptr->mb_io_insert = &mbsys_simrad2_insert; 
 	mb_io_ptr->mb_io_extract_nav = &mbsys_simrad2_extract_nav; 

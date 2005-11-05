@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_read_ping.c	2/3/93
- *    $Id: mb_read_ping.c,v 5.4 2003-04-17 21:05:23 caress Exp $
+ *    $Id: mb_read_ping.c,v 5.5 2005-11-05 00:48:03 caress Exp $
 
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	February 3, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2003/04/17 21:05:23  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.3  2002/09/18 23:32:59  caress
  * Release 5.0.beta23
  *
@@ -147,10 +150,14 @@
 /*--------------------------------------------------------------------*/
 int mb_read_ping(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *error)
 {
-  static char rcs_id[]="$Id: mb_read_ping.c,v 5.4 2003-04-17 21:05:23 caress Exp $";
+  static char rcs_id[]="$Id: mb_read_ping.c,v 5.5 2005-11-05 00:48:03 caress Exp $";
 	char	*function_name = "mb_read_ping";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
+	int	localkind;
+	int	beams_bath;
+	int	beams_amp;
+	int	pixels_ss;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -184,6 +191,29 @@ int mb_read_ping(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *e
 		}
 	else
 		*kind = MB_DATA_NONE;
+
+	/* check that io arrays are large enough, allocate larger arrays if necessary */
+	if (status == MB_SUCCESS
+		&& mb_io_ptr->new_kind == MB_DATA_DATA)
+		{
+		/* check size of arrays needed for newly read data */
+		status = mb_dimensions(verbose,mbio_ptr,store_ptr,&localkind,
+					&beams_bath,&beams_amp,&pixels_ss,error);
+
+		/* if existing allocations are insufficient, allocate larger arrays 
+			- this includes both arrays hidden within the mbio_ptr structure
+			and arrays registered by the application */
+		if (beams_bath > mb_io_ptr->beams_bath_alloc
+			|| beams_amp > mb_io_ptr->beams_amp_alloc
+			|| pixels_ss > mb_io_ptr->pixels_ss_alloc)
+			{
+			status = mb_update_arrays(verbose, mbio_ptr,
+				beams_bath, beams_amp, pixels_ss, error);
+			}
+		mb_io_ptr->beams_bath_max = MAX(mb_io_ptr->beams_bath_max, beams_bath);
+		mb_io_ptr->beams_amp_max = MAX(mb_io_ptr->beams_amp_max, beams_amp);
+		mb_io_ptr->pixels_ss_max = MAX(mb_io_ptr->pixels_ss_max, pixels_ss);
+		}
 
 	/* print output debug statements */
 	if (verbose >= 2)

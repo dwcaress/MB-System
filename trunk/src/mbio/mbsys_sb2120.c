@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_sb2120.c	3/27/2000
- *	$Id: mbsys_sb2120.c,v 5.2 2001-01-22 07:43:34 caress Exp $
+ *	$Id: mbsys_sb2120.c,v 5.3 2005-11-05 00:48:04 caress Exp $
  *
  *    Copyright (c) 2000 by 
  *    D. W. Caress (caress@mbari.org)
@@ -28,6 +28,9 @@
  * Date:	December 7,  2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2001/01/22 07:43:34  caress
+ * Version 5.0.beta01
+ *
  * Revision 5.1  2000/12/13  17:47:32  caress
  * Fixed references to mbsys_xse.
  *
@@ -57,7 +60,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_sb2120.c,v 5.2 2001-01-22 07:43:34 caress Exp $";
+ static char res_id[]="$Id: mbsys_sb2120.c,v 5.3 2005-11-05 00:48:04 caress Exp $";
 	char	*function_name = "mbsys_sb2120_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -263,6 +266,84 @@ int	*error;
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbsys_sb2120_dimensions(int verbose, void *mbio_ptr, void *store_ptr, 
+		int *kind, int *nbath, int *namp, int *nss, int *error)
+{
+	char	*function_name = "mbsys_sb2120_dimensions";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	struct mbsys_sb2120_struct *store;
+	int	i,j;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mb_ptr:     %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* get data structure pointer */
+	store = (struct mbsys_sb2120_struct *) store_ptr;
+
+	/* get data kind */
+	*kind = store->kind;
+
+	/* extract data from structure */
+	if (*kind == MB_DATA_DATA)
+		{
+		/* get beam and pixel numbers */
+		*nbath = 0;
+		*namp = 0;
+		*nss = 0;
+		if (store->mul_frame == MB_YES)
+		    {
+		    for (i=0;i<store->mul_num_beams;i++)
+			{
+			j = store->beams[i].beam - 1;
+			*nbath = j + 1;
+			if (store->mul_group_amp == MB_YES)
+			    *namp = j + 1;
+			}
+		    }
+		if (store->sid_frame == MB_YES)
+		    {
+		    *nss = store->sid_num_pixels;
+		    }
+		}
+	else
+		{
+		/* get beam and pixel numbers */
+		*nbath = 0;
+		*namp = 0;
+		*nss = 0;
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
+		fprintf(stderr,"dbg2       nbath:      %d\n",*nbath);
+		fprintf(stderr,"dbg2        namp:      %d\n",*namp);
+		fprintf(stderr,"dbg2        nss:       %d\n",*nss);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:     %d\n",status);

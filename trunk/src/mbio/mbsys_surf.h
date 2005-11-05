@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_surf.h	6/13/02
- *	$Id: mbsys_surf.h,v 5.8 2003-11-24 21:09:09 caress Exp $
+ *	$Id: mbsys_surf.h,v 5.9 2005-11-05 00:48:04 caress Exp $
  *
  *    Copyright (c) 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -28,6 +28,9 @@
  * Date:	June 13, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2003/11/24 21:09:09  caress
+ * Implement Reinhard Holtkamp's suggested mods for better SURF format support.
+ *
  * Revision 5.7  2003/04/17 21:05:23  caress
  * Release 5.0.beta30
  *
@@ -149,6 +152,8 @@ int mbsys_surf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error);
 int mbsys_surf_deall(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error);
+int mbsys_surf_dimensions(int verbose, void *mbio_ptr, void *store_ptr, 
+			int *kind, int *nbath, int *namp, int *nss, int *error);
 int mbsys_surf_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int time_i[7], double *time_d,
 			double *navlon, double *navlat,

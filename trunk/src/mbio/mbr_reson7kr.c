@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_reson7kr.c	4/4/2004
- *	$Id: mbr_reson7kr.c,v 5.10 2005-06-15 15:20:16 caress Exp $
+ *	$Id: mbr_reson7kr.c,v 5.11 2005-11-05 00:48:05 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	April 4,2004
  * $Log: not supported by cvs2svn $
+ * Revision 5.10  2005/06/15 15:20:16  caress
+ * Fixed problems with writing Bluefin records in 7k data and improved support for Edgetech Jstar data.
+ *
  * Revision 5.9  2005/06/04 04:15:59  caress
  * Support for Edgetech Jstar format (id 132 and 133).
  *
@@ -129,8 +132,8 @@ int mbr_reson7kr_rd_attitude(int verbose, char *buffer, void *store_ptr, int *er
 int mbr_reson7kr_rd_fsdwchannel(int verbose, int data_format, char *buffer, int *index, s7k_fsdwchannel *fsdwchannel, int *error);
 int mbr_reson7kr_rd_fsdwssheader(int verbose, char *buffer, int *index, s7k_fsdwssheader *fsdwssheader, int *error);
 int mbr_reson7kr_rd_fsdwsegyheader(int verbose, char *buffer, int *index, s7k_fsdwsegyheader *fsdwsegyheader, int *error);
-int mbr_reson7kr_rd_fsdwsslo(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7kr_rd_fsdwsshi(int verbose, char *buffer, void *store_ptr, int *error);
+int mbr_reson7kr_rd_fsdwsslo(int verbose, char *buffer, void *store_ptr,  int *error);
+int mbr_reson7kr_rd_fsdwsshi(int verbose, char *buffer, void *store_ptr,  int *error);
 int mbr_reson7kr_rd_fsdwsb(int verbose, char *buffer, void *store_ptr, int *error);
 int mbr_reson7kr_rd_bluefin(int verbose, char *buffer, void *store_ptr, int *error);
 int mbr_reson7kr_rd_volatilesonarsettings(int verbose, char *buffer, void *store_ptr, int *error);
@@ -192,7 +195,7 @@ int mbr_reson7kr_wr_soundvelocity(int verbose, int *bufferalloc, char **bufferpt
 int mbr_reson7kr_wr_absorptionloss(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 int mbr_reson7kr_wr_spreadingloss(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 
-static char res_id[]="$Id: mbr_reson7kr.c,v 5.10 2005-06-15 15:20:16 caress Exp $";
+static char res_id[]="$Id: mbr_reson7kr.c,v 5.11 2005-11-05 00:48:05 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_reson7kr(int verbose, void *mbio_ptr, int *error)
@@ -243,6 +246,8 @@ int mbr_register_reson7kr(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr->mb_io_store_free = &mbsys_reson7k_deall; 
 	mb_io_ptr->mb_io_read_ping = &mbr_rt_reson7kr; 
 	mb_io_ptr->mb_io_write_ping = &mbr_wt_reson7kr; 
+	mb_io_ptr->mb_io_dimensions = &mbsys_reson7k_dimensions; 
+	mb_io_ptr->mb_io_dimensions = &mbsys_reson7k_dimensions; 
 	mb_io_ptr->mb_io_extract = &mbsys_reson7k_extract; 
 	mb_io_ptr->mb_io_insert = &mbsys_reson7k_insert; 
 	mb_io_ptr->mb_io_extract_nav = &mbsys_reson7k_extract_nav; 
@@ -355,9 +360,9 @@ int mbr_info_reson7kr(int verbose,
 	status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 	*system = MB_SYS_RESON7K;
-	*beams_bath_max = 254;
-	*beams_amp_max = 254;
-	*pixels_ss_max = 4096;
+	*beams_bath_max = MBSYS_RESON7K_MAX_BEAMS;
+	*beams_amp_max = MBSYS_RESON7K_MAX_BEAMS;
+	*pixels_ss_max = MBSYS_RESON7K_MAX_PIXELS;
 	strncpy(format_name, "RESON7KR", MB_NAME_LENGTH);
 	strncpy(system_name, "RESON7K", MB_NAME_LENGTH);
 	strncpy(format_description, "Format name:          MBF_RESON7KR\nInformal Description: Reson 7K multibeam vendor format\nAttributes:           Reson 7K series multibeam sonars, \n                      bathymetry, amplitude, three channels sidescan, and subbottom\n                      up to 254 beams, variable pixels, binary, Reson.\n", MB_DESCRIPTION_LENGTH);
@@ -366,9 +371,9 @@ int mbr_info_reson7kr(int verbose,
 	*variable_beams = MB_YES;
 	*traveltime = MB_YES;
 	*beam_flagging = MB_YES;
-	*nav_source = MB_DATA_NAV;
-	*heading_source = MB_DATA_NAV;
-	*vru_source = MB_DATA_NAV;
+	*nav_source = MB_DATA_DATA;
+	*heading_source = MB_DATA_DATA;
+	*vru_source = MB_DATA_DATA;
 	*svp_source = MB_DATA_VELOCITY_PROFILE;
 	*beamwidth_xtrack = 1.0;
 	*beamwidth_ltrack = 1.0;
@@ -579,6 +584,9 @@ int mbr_rt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	s7kr_volatilesettings	*volatilesettings;
 	s7kr_beamgeometry	*beamgeometry;
 	s7kr_bathymetry		*bathymetry;
+	s7kr_backscatter	*backscatter;
+	s7kr_beam		*beam;
+	s7kr_image		*image;
 	s7kr_bluefin		*bluefin;
 	int	*current_ping;
 	double	speed, heading, longitude, latitude;
@@ -613,12 +621,24 @@ int mbr_rt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	volatilesettings = &store->volatilesettings;
 	beamgeometry = &store->beamgeometry;
 	bathymetry = &store->bathymetry;
+	backscatter = &store->backscatter;
+	beam = &store->beam;
+	image = &store->image;
 	bluefin = &store->bluefin;
 	current_ping = (int *) &mb_io_ptr->save14;
 
+	/* throw away multibeam data if the time stamp makes no sense */
+	if (status == MB_SUCCESS
+		&& store->kind == MB_DATA_DATA
+		&& store->time_i[0] < 2004)
+		{
+		status = MB_FAILURE;
+		*error = MB_ERROR_UNINTELLIGIBLE;
+		}
+
 	/* save fix if nav data */
 	if (status == MB_SUCCESS
-		&& store->kind == MB_DATA_NAV)
+		&& store->kind == MB_DATA_NAV1)
 		{
 		/* add latest fix */
 		position = &(store->position);
@@ -631,7 +651,7 @@ int mbr_rt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 
 	/* save nav and attitude if bluefin data */
 	if (status == MB_SUCCESS
-		&& store->kind == MB_DATA_NAV1)
+		&& store->kind == MB_DATA_NAV2)
 		{
 		/* add latest fix */
 		bluefin = &(store->bluefin);
@@ -694,8 +714,9 @@ fprintf(stderr,"Record returned: type:%d status:%d error:%d\n\n",store->kind, st
 #endif
 
 	/* kluge to reset quality flags */
-	if (status == MB_SUCCESS
-		&& store->kind == MB_DATA_DATA)
+/*	if (status == MB_SUCCESS
+		&& store->kind == MB_DATA_DATA
+		&& bathymetry->header.Version < 5)
 		{
 		for (i=0;i<bathymetry->number_beams;i++)
 			{
@@ -712,7 +733,7 @@ fprintf(stderr,"Record returned: type:%d status:%d error:%d\n\n",store->kind, st
 				}
 			}
 		}
-
+*/
 	/* get optional values in bathymetry record if needed */
 	if (status == MB_SUCCESS
 		&& store->kind == MB_DATA_DATA
@@ -872,7 +893,20 @@ int mbr_reson7kr_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_reson7k_struct *store;
 	s7k_header *header;
+	s7kr_fsdwss *fsdwsslo;
+	s7kr_fsdwss *fsdwsshi;
+	s7kr_fsdwsb *fsdwsb;
+	s7k_fsdwchannel *fsdwchannel;
+	s7k_fsdwsegyheader *fsdwsegyheader;
+	s7k_fsdwssheader *fsdwssheader;
 	s7kr_bathymetry *bathymetry;
+	s7kr_backscatter	*backscatter;
+	s7kr_beam		*beam;
+	s7kr_image		*image;
+	s7kr_bluefin		*bluefin;
+	double	*edgetech_time_d;
+	double	*edgetech_dt;
+	double	*last_7k_time_d;
 	FILE	*mbfp;
 	int	done;
 	int	*current_ping;
@@ -895,7 +929,8 @@ int mbr_reson7kr_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	int	skip;
 	int	ping_record;
 double klugelon, klugelat;
-	int	time_j[5];
+	int	time_j[5], time_i[7];
+	double	time_d;
 	int	i;
 
 	/* print input debug statements */
@@ -934,6 +969,9 @@ double klugelon, klugelat;
 	deviceid = (int *) &mb_io_ptr->save10;
 	enumerator = (unsigned short *) &mb_io_ptr->save11;
 	fileheaders = (int *) &mb_io_ptr->save12;
+	edgetech_time_d = (double *) &mb_io_ptr->saved3;
+	edgetech_dt = (double *) &mb_io_ptr->saved4;
+	last_7k_time_d = (double *) &mb_io_ptr->saved5;
 
 	/* set file position */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
@@ -1082,30 +1120,32 @@ skip, *recordid, *recordid,
 					&& *new_ping >= 0
 					&& *last_ping != *new_ping)
 					{
-					done = MB_YES;
-					store->kind = MB_DATA_DATA;
-					*save_flag = MB_YES;
-					*current_ping = *last_ping;
-					*last_ping = -1;
-					for (i=0;i<*size;i++)
-						buffersave[i] = buffer[i];
+					if (store->read_bathymetry == MB_YES)
+						{
+						done = MB_YES;
+						store->kind = MB_DATA_DATA;
+						*save_flag = MB_YES;
+						*current_ping = *last_ping;
+						*last_ping = -1;
+						for (i=0;i<*size;i++)
+							buffersave[i] = buffer[i];
 
-					/* get the time */
-					bathymetry = &(store->bathymetry);
-					header = &(bathymetry->header);
-					time_j[0] = header->s7kTime.Year;
-					time_j[1] = header->s7kTime.Day;
-					time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
-					time_j[3] = (int) header->s7kTime.Seconds;
-					time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
-					mb_get_itime(verbose, time_j, store->time_i);
-					mb_get_time(verbose, store->time_i, &(store->time_d));
+						/* get the time */
+						bathymetry = &(store->bathymetry);
+						header = &(bathymetry->header);
+						time_j[0] = header->s7kTime.Year;
+						time_j[1] = header->s7kTime.Day;
+						time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+						time_j[3] = (int) header->s7kTime.Seconds;
+						time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+						mb_get_itime(verbose, time_j, store->time_i);
+						mb_get_time(verbose, store->time_i, &(store->time_d));
+						}
 					
 					/* not a complete record unless there is bathymetry */
-					if (store->read_bathymetry == MB_NO)
+					else
 						{
-						status = MB_FAILURE;
-						*error = MB_ERROR_UNINTELLIGIBLE;
+						done = MB_NO;
 						}
 
 					}
@@ -1310,12 +1350,50 @@ mb_navint_add(verbose, mbio_ptr,
 				{
 				status = mbr_reson7kr_rd_fsdwsslo(verbose, buffer, store_ptr, error);
 				done = MB_YES;
+				
+				/* store the Edgetech timestamp for possible use in fixing 7k time */
+				fsdwsslo = &(store->fsdwsslo);
+				header = &(fsdwsslo->header);
+				fsdwssheader = &(fsdwsslo->ssheader[0]);
+				time_j[0] = fsdwssheader->year;
+				time_j[1] = fsdwssheader->day;
+				time_j[2] = 60 * fsdwssheader->hour + fsdwssheader->minute;
+				time_j[3] = fsdwssheader->second;
+				time_j[4] = 1000 * (fsdwssheader->millisecondsToday 
+							- 1000 * ((int)(0.001 * fsdwssheader->millisecondsToday)));
+				mb_get_itime(verbose, time_j, time_i);
+				mb_get_time(verbose, time_i, &time_d);
+				if (*edgetech_time_d > 0.0 && time_d - *edgetech_time_d > 0.002)
+					*edgetech_dt = time_d - *edgetech_time_d;
+				*edgetech_time_d = time_d;
+#ifdef MBR_RESON7KR_DEBUG
+fprintf(stderr,"mbr_reson7kr_rd_fsdwsslo: EDGETECH TIME: %f %f\n", *edgetech_time_d, *edgetech_dt);
+#endif
 				}
 			else if (*recordid == R7KRECID_FSDWsidescan
 				&& *deviceid == R7KDEVID_EdgetechFSDWSSLF)
 				{
 				status = mbr_reson7kr_rd_fsdwsslo(verbose, buffer, store_ptr, error);
 				done = MB_YES;
+				
+				/* store the Edgetech timestamp for possible use in fixing 7k time */
+				fsdwsslo = &(store->fsdwsslo);
+				header = &(fsdwsslo->header);
+				fsdwssheader = &(fsdwsslo->ssheader[0]);
+				time_j[0] = fsdwssheader->year;
+				time_j[1] = fsdwssheader->day;
+				time_j[2] = 60 * fsdwssheader->hour + fsdwssheader->minute;
+				time_j[3] = fsdwssheader->second;
+				time_j[4] = 1000 * (fsdwssheader->millisecondsToday 
+							- 1000 * ((int)(0.001 * fsdwssheader->millisecondsToday)));
+				mb_get_itime(verbose, time_j, time_i);
+				mb_get_time(verbose, time_i, &time_d);
+				if (*edgetech_time_d > 0.0 && time_d - *edgetech_time_d > 0.002)
+					*edgetech_dt = time_d - *edgetech_time_d;
+				*edgetech_time_d = time_d;
+#ifdef MBR_RESON7KR_DEBUG
+fprintf(stderr,"mbr_reson7kr_rd_fsdwsslo: EDGETECH TIME: %f %f\n", *edgetech_time_d, *edgetech_dt);
+#endif
 				}
 			else if (*recordid == R7KRECID_FSDWsidescan
 				&& *deviceid == R7KDEVID_EdgetechFSDW
@@ -1323,17 +1401,74 @@ mb_navint_add(verbose, mbio_ptr,
 				{
 				status = mbr_reson7kr_rd_fsdwsshi(verbose, buffer, store_ptr, error);
 				done = MB_YES;
+				
+				/* store the Edgetech timestamp for possible use in fixing 7k time */
+				fsdwsshi = &(store->fsdwsshi);
+				header = &(fsdwsshi->header);
+				fsdwssheader = &(fsdwsshi->ssheader[0]);
+				time_j[0] = fsdwssheader->year;
+				time_j[1] = fsdwssheader->day;
+				time_j[2] = 60 * fsdwssheader->hour + fsdwssheader->minute;
+				time_j[3] = fsdwssheader->second;
+				time_j[4] = 1000 * (fsdwssheader->millisecondsToday 
+							- 1000 * ((int)(0.001 * fsdwssheader->millisecondsToday)));
+				mb_get_itime(verbose, time_j, time_i);
+				mb_get_time(verbose, time_i, &time_d);
+				if (*edgetech_time_d > 0.0 && time_d - *edgetech_time_d > 0.002)
+					*edgetech_dt = time_d - *edgetech_time_d;
+				*edgetech_time_d = time_d;
+#ifdef MBR_RESON7KR_DEBUG
+fprintf(stderr,"mbr_reson7kr_rd_fsdwsshi: EDGETECH TIME: %f %f\n", *edgetech_time_d, *edgetech_dt);
+#endif
 				}
 			else if (*recordid == R7KRECID_FSDWsidescan
 				&& *deviceid == R7KDEVID_EdgetechFSDWSSHF)
 				{
 				status = mbr_reson7kr_rd_fsdwsshi(verbose, buffer, store_ptr, error);
 				done = MB_YES;
+				
+				/* store the Edgetech timestamp for possible use in fixing 7k time */
+				fsdwsshi = &(store->fsdwsshi);
+				header = &(fsdwsshi->header);
+				fsdwssheader = &(fsdwsshi->ssheader[0]);
+				time_j[0] = fsdwssheader->year;
+				time_j[1] = fsdwssheader->day;
+				time_j[2] = 60 * fsdwssheader->hour + fsdwssheader->minute;
+				time_j[3] = fsdwssheader->second;
+				time_j[4] = 1000 * (fsdwssheader->millisecondsToday 
+							- 1000 * ((int)(0.001 * fsdwssheader->millisecondsToday)));
+				mb_get_itime(verbose, time_j, time_i);
+				mb_get_time(verbose, time_i, &time_d);
+				if (*edgetech_time_d > 0.0 && time_d - *edgetech_time_d > 0.002)
+					*edgetech_dt = time_d - *edgetech_time_d;
+				*edgetech_time_d = time_d;
+#ifdef MBR_RESON7KR_DEBUG
+fprintf(stderr,"mbr_reson7kr_rd_fsdwsshi: EDGETECH TIME: %f %f\n", *edgetech_time_d, *edgetech_dt);
+#endif
 				}
 			else if (*recordid == R7KRECID_FSDWsubbottom)
 				{
 				status = mbr_reson7kr_rd_fsdwsb(verbose, buffer, store_ptr, error);
 				done = MB_YES;
+				
+				/* store the Edgetech timestamp for possible use in fixing 7k time */
+				/*fsdwsb = &(store->fsdwsb);
+				header = &(fsdwsb->header);
+				fsdwsegyheader = &(fsdwsb->segyheader);
+				time_j[0] = fsdwsegyheader->year;
+				time_j[1] = fsdwsegyheader->day;
+				time_j[2] = 60 * fsdwsegyheader->hour + fsdwsegyheader->minute;
+				time_j[3] = fsdwsegyheader->second;
+				time_j[4] = 1000 * (fsdwsegyheader->millisecondsToday 
+							- 1000 * ((int)(0.001 * fsdwsegyheader->millisecondsToday)));
+				mb_get_itime(verbose, time_j, time_i);
+				mb_get_time(verbose, time_i, &time_d);
+				if (*edgetech_time_d > 0.0 && time_d - *edgetech_time_d > 0.002)
+					*edgetech_dt = time_d - *edgetech_time_d;
+				*edgetech_time_d = time_d;
+#ifdef MBR_RESON7KR_DEBUG
+fprintf(stderr,"mbr_reson7kr_rd_fsdwsb:    EDGETECH TIME: %f %f\n", *edgetech_time_d, *edgetech_dt);
+#endif*/
 				}
 			else if (*recordid == R7KRECID_Bluefin)
 				{
@@ -1370,16 +1505,112 @@ mb_navint_add(verbose, mbio_ptr,
 				{
 				status = mbr_reson7kr_rd_bathymetry(verbose, buffer, store_ptr, error);
 				store->read_bathymetry = MB_YES;
+				
+				/* if needed use most recent Edgetech timestamp to fix 7k time */
+				bathymetry = &(store->bathymetry);
+				header = &(bathymetry->header);
+				if (header->s7kTime.Year < 2004
+					&& *edgetech_time_d > 0.0
+					&& *edgetech_dt > 0.0
+					&& *edgetech_dt < 2.0)
+					{
+					if (*edgetech_time_d + *edgetech_dt > *last_7k_time_d + 0.002)
+						{
+						store->time_d = *edgetech_time_d + *edgetech_dt;
+						}
+					else
+						{
+						store->time_d = *edgetech_time_d + 2 * (*edgetech_dt);
+						}
+					*last_7k_time_d = store->time_d;
+					mb_get_date(verbose, store->time_d, store->time_i);
+					mb_get_jtime(verbose, store->time_i, time_j);
+					header->s7kTime.Year = store->time_i[0];
+					header->s7kTime.Day = time_j[1];
+					header->s7kTime.Hours = store->time_i[3];
+					header->s7kTime.Minutes = store->time_i[4];
+					header->s7kTime.Seconds = store->time_i[5] + 0.000001 * store->time_i[6];
+#ifdef MBR_RESON7KR_DEBUG
+fprintf(stderr,"TIME CORRECTION: R7KRECID_7kBathymetricData:        7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d ping:%d\n",
+store->time_i[0],store->time_i[1],store->time_i[2],
+store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
+header->RecordNumber,bathymetry->ping_number);
+#endif
+					}
 				}
 			else if (*recordid == R7KRECID_7kBackscatterImageData)
 				{
 				status = mbr_reson7kr_rd_backscatter(verbose, buffer, store_ptr, error);
 				store->read_backscatter = MB_YES;
+				
+				/* if needed use most recent Edgetech timestamp to fix 7k time */
+				backscatter = &(store->backscatter);
+				header = &(backscatter->header);
+				if (header->s7kTime.Year < 2004
+					&& *edgetech_time_d > 0.0
+					&& *edgetech_dt > 0.0
+					&& *edgetech_dt < 2.0)
+					{
+					if (*edgetech_time_d + *edgetech_dt > *last_7k_time_d + 0.002)
+						{
+						store->time_d = *edgetech_time_d + *edgetech_dt;
+						}
+					else
+						{
+						store->time_d = *edgetech_time_d + 2 * (*edgetech_dt);
+						}
+					*last_7k_time_d = store->time_d;
+					mb_get_date(verbose, store->time_d, store->time_i);
+					mb_get_jtime(verbose, store->time_i, time_j);
+					header->s7kTime.Year = store->time_i[0];
+					header->s7kTime.Day = time_j[1];
+					header->s7kTime.Hours = store->time_i[3];
+					header->s7kTime.Minutes = store->time_i[4];
+					header->s7kTime.Seconds = store->time_i[5] + 0.000001 * store->time_i[6];
+#ifdef MBR_RESON7KR_DEBUG
+fprintf(stderr,"TIME CORRECTION: R7KRECID_7kBackscatterImageData:   7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d ping:%d\n",
+store->time_i[0],store->time_i[1],store->time_i[2],
+store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
+header->RecordNumber,backscatter->ping_number);
+#endif
+					}
 				}
 			else if (*recordid == R7KRECID_7kBeamData)
 				{
 				status = mbr_reson7kr_rd_beam(verbose, buffer, store_ptr, error);
 				store->read_beam = MB_YES;
+				
+				/* if needed use most recent Edgetech timestamp to fix 7k time */
+				beam = &(store->beam);
+				header = &(beam->header);
+				if (header->s7kTime.Year < 2004
+					&& *edgetech_time_d > 0.0
+					&& *edgetech_dt > 0.0
+					&& *edgetech_dt < 2.0)
+					{
+					if (*edgetech_time_d + *edgetech_dt > *last_7k_time_d + 0.002)
+						{
+						store->time_d = *edgetech_time_d + *edgetech_dt;
+						}
+					else
+						{
+						store->time_d = *edgetech_time_d + 2 * (*edgetech_dt);
+						}
+					*last_7k_time_d = store->time_d;
+					mb_get_date(verbose, store->time_d, store->time_i);
+					mb_get_jtime(verbose, store->time_i, time_j);
+					header->s7kTime.Year = store->time_i[0];
+					header->s7kTime.Day = time_j[1];
+					header->s7kTime.Hours = store->time_i[3];
+					header->s7kTime.Minutes = store->time_i[4];
+					header->s7kTime.Seconds = store->time_i[5] + 0.000001 * store->time_i[6];
+#ifdef MBR_RESON7KR_DEBUG
+fprintf(stderr,"TIME CORRECTION: R7KHDRSIZE_7kBeamData: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d ping:%d\n",
+store->time_i[0],store->time_i[1],store->time_i[2],
+store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
+header->RecordNumber,beam->ping_number);
+#endif
+					}
 				}
 			else if (*recordid == R7KRECID_7kVerticalDepth)
 				{
@@ -1390,6 +1621,38 @@ mb_navint_add(verbose, mbio_ptr,
 				{
 				status = mbr_reson7kr_rd_image(verbose, buffer, store_ptr, error);
 				store->read_image = MB_YES;
+				
+				/* if needed use most recent Edgetech timestamp to fix 7k time */
+				image = &(store->image);
+				header = &(image->header);
+				if (header->s7kTime.Year < 2004
+					&& *edgetech_time_d > 0.0
+					&& *edgetech_dt > 0.0
+					&& *edgetech_dt < 2.0)
+					{
+					if (*edgetech_time_d + *edgetech_dt > *last_7k_time_d + 0.002)
+						{
+						store->time_d = *edgetech_time_d + *edgetech_dt;
+						}
+					else
+						{
+						store->time_d = *edgetech_time_d + 2 * (*edgetech_dt);
+						}
+					*last_7k_time_d = store->time_d;
+					mb_get_date(verbose, store->time_d, store->time_i);
+					mb_get_jtime(verbose, store->time_i, time_j);
+					header->s7kTime.Year = store->time_i[0];
+					header->s7kTime.Day = time_j[1];
+					header->s7kTime.Hours = store->time_i[3];
+					header->s7kTime.Minutes = store->time_i[4];
+					header->s7kTime.Seconds = store->time_i[5] + 0.000001 * store->time_i[6];
+#ifdef MBR_RESON7KR_DEBUG
+fprintf(stderr,"TIME CORRECTION: R7KRECID_7kImageData:              7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d ping:%d\n",
+store->time_i[0],store->time_i[1],store->time_i[2],
+store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
+header->RecordNumber,image->ping_number);
+#endif
+					}
 				}
 			else if (*recordid == R7KRECID_7kInstallationParameters)
 				{
@@ -1844,7 +2107,7 @@ int mbr_reson7kr_rd_header(int verbose, char *buffer, int *index,
 		mb_get_binary_int(MB_YES, &buffer[*index], &(header->FragmentedTotal)); *index += 4;
 		mb_get_binary_int(MB_YES, &buffer[*index], &(header->FragmentNumber)); *index += 4;
 		}
-	
+
 	/* print out the results */
 	/* mbsys_reson7k_print_header(verbose, header, error); */
 
@@ -2183,7 +2446,7 @@ int mbr_reson7kr_rd_position(int verbose, char *buffer, void *store_ptr, int *er
 	if (status == MB_SUCCESS)
 		{
 		/* set kind */
-		store->kind = MB_DATA_NAV;
+		store->kind = MB_DATA_NAV1;
 		store->type = R7KRECID_Position;
 		
 		/* get the time */
@@ -3828,7 +4091,8 @@ int mbr_reson7kr_rd_fsdwsslo(int verbose, char *buffer, void *store_ptr, int *er
 	double	bin[MBSYS_RESON7K_MAX_PIXELS];
 	int	nbin[MBSYS_RESON7K_MAX_PIXELS];
 	int	index;
-	int	time_j[5];
+	int	time_i[7], time_j[5];
+	double	edgetech_time_d, s7k_time_d, bathy_time_d;
 	int 	bottompick;
 	double	range, sign, sound_speed, half_sound_speed;
 	double	tracemax;
@@ -3893,11 +4157,49 @@ index, header->OffsetToOptionalData);
 		store->type = R7KRECID_FSDWsidescan;
 		store->sstype = R7KRECID_FSDWsidescanLo;
 		
+		/* get the time from the original Edgetech header */
+		time_j[0] = fsdwssheader->year;
+		time_j[1] = fsdwssheader->day;
+		time_j[2] = 60 * fsdwssheader->hour + fsdwssheader->minute;
+		time_j[3] = fsdwssheader->second;
+		time_j[4] = 1000 * (fsdwssheader->millisecondsToday 
+					- 1000 * ((int)(0.001 * fsdwssheader->millisecondsToday)));
+		mb_get_itime(verbose, time_j, time_i);
+		mb_get_time(verbose, time_i, &(edgetech_time_d));
+		
+		/* get the time from the 6046 datalogger header */
+		time_j[0] = header->s7kTime.Year;
+		time_j[1] = header->s7kTime.Day;
+		time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+		time_j[3] = (int) header->s7kTime.Seconds;
+		time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+		mb_get_itime(verbose, time_j, time_i);
+		mb_get_time(verbose, time_i, &(s7k_time_d));
+
+		/* get the time from the last bathymetry record */
+		time_j[0] = bathymetry->header.s7kTime.Year;
+		time_j[1] = bathymetry->header.s7kTime.Day;
+		time_j[2] = 60 * bathymetry->header.s7kTime.Hours + bathymetry->header.s7kTime.Minutes;
+		time_j[3] = (int) bathymetry->header.s7kTime.Seconds;
+		time_j[4] = (int) (1000000 * (bathymetry->header.s7kTime.Seconds - time_j[3]));
+		mb_get_itime(verbose, time_j, time_i);
+		mb_get_time(verbose, time_i, &(bathy_time_d));
+
+		/* figure out offset between 7k timestamp and Edgetech timestamp */
+#ifdef MBR_RESON7KR_DEBUG
+fprintf(stderr,"%s: 7k time offset: %f    7ktime:%f Edgetech:%f Bathymetry:%f\n",
+function_name, edgetech_time_d - bathy_time_d, s7k_time_d, edgetech_time_d, bathy_time_d);
+#endif
+
+		/* Use the Edgetech timestamp */
+		store->time_d = edgetech_time_d;
+		mb_get_date(verbose, store->time_d, store->time_i);
+		
 		/* use Edgetech time for early MBARI SBP missions with
 			bad time synching, otherwise use 7K timestamp */
-		if (header->s7kTime.Year == 2004)
+		/*if (header->s7kTime.Year == 2004)
 			{
-			/* get the time from the original Edgetech header */
+			/* get the time from the original Edgetech header *\/
 			time_j[0] = fsdwssheader->year;
 			time_j[1] = fsdwssheader->day;
 			time_j[2] = 60 * fsdwssheader->hour + fsdwssheader->minute;
@@ -3908,7 +4210,7 @@ index, header->OffsetToOptionalData);
 
 		else
 			{
-			/* get the time from the 6046 datalogger header */
+			/* get the time from the 6046 datalogger header *\/
 			time_j[0] = header->s7kTime.Year;
 			time_j[1] = header->s7kTime.Day;
 			time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
@@ -3917,7 +4219,7 @@ index, header->OffsetToOptionalData);
 			}
 
 		mb_get_itime(verbose, time_j, store->time_i);
-		mb_get_time(verbose, store->time_i, &(store->time_d));
+		mb_get_time(verbose, store->time_i, &(store->time_d));*/
 		}
 	else
 		{
@@ -3934,11 +4236,12 @@ index, header->OffsetToOptionalData);
 #ifdef MBR_RESON7KR_DEBUG
 for (i=0;i<fsdwsslo->number_channels;i++)
 {
+mb_get_date(verbose, s7k_time_d, time_i);
 fsdwchannel = &(fsdwsslo->channel[i]);
 fsdwssheader = &(fsdwsslo->ssheader[i]);
 fprintf(stderr,"R7KRECID_FSDWsidescanLo:           7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) FSDWtime(%4.4d-%3.3d %2.2d:%2.2d:%2.2d.%3.3d) ping:%d %d chan:%d %d sampint:%d %d\n",
-store->time_i[0],store->time_i[1],store->time_i[2],
-store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
+time_i[0],time_i[1],time_i[2],
+time_i[3],time_i[4],time_i[5],time_i[6],
 fsdwssheader->year,fsdwssheader->day,fsdwssheader->hour,fsdwssheader->minute,fsdwssheader->second,
 fsdwssheader->millisecondsToday - 1000 * (int)(0.001 * fsdwssheader->millisecondsToday),
 fsdwsslo->ping_number,fsdwssheader->pingNum,
@@ -4108,8 +4411,10 @@ int mbr_reson7kr_rd_fsdwsshi(int verbose, char *buffer, void *store_ptr, int *er
 	s7kr_fsdwss *fsdwsshi;
 	s7k_fsdwchannel *fsdwchannel;
 	s7k_fsdwssheader *fsdwssheader;
+	s7kr_bathymetry *bathymetry;
 	int	index;
-	int	time_j[5];
+	int	time_i[7], time_j[5];
+	double	edgetech_time_d, s7k_time_d, bathy_time_d;
 	int	i;
 
 	/* print input debug statements */
@@ -4128,6 +4433,7 @@ int mbr_reson7kr_rd_fsdwsshi(int verbose, char *buffer, void *store_ptr, int *er
 	store = (struct mbsys_reson7k_struct *) store_ptr;
 	fsdwsshi = &(store->fsdwsshi);
 	header = &(fsdwsshi->header);
+	bathymetry = &(store->bathymetry);
 	
 	/* extract the header */
 	index = 0;
@@ -4163,11 +4469,49 @@ index, header->OffsetToOptionalData);
 		store->type = R7KRECID_FSDWsidescan;
 		store->sstype = R7KRECID_FSDWsidescanHi;
 		
+		/* get the time from the original Edgetech header */
+		time_j[0] = fsdwssheader->year;
+		time_j[1] = fsdwssheader->day;
+		time_j[2] = 60 * fsdwssheader->hour + fsdwssheader->minute;
+		time_j[3] = fsdwssheader->second;
+		time_j[4] = 1000 * (fsdwssheader->millisecondsToday 
+					- 1000 * ((int)(0.001 * fsdwssheader->millisecondsToday)));
+		mb_get_itime(verbose, time_j, time_i);
+		mb_get_time(verbose, time_i, &(edgetech_time_d));
+		
+		/* get the time from the 6046 datalogger header */
+		time_j[0] = header->s7kTime.Year;
+		time_j[1] = header->s7kTime.Day;
+		time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+		time_j[3] = (int) header->s7kTime.Seconds;
+		time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+		mb_get_itime(verbose, time_j, time_i);
+		mb_get_time(verbose, time_i, &(s7k_time_d));
+		
+		/* get the time from the last bathymetry record */
+		time_j[0] = bathymetry->header.s7kTime.Year;
+		time_j[1] = bathymetry->header.s7kTime.Day;
+		time_j[2] = 60 * bathymetry->header.s7kTime.Hours + bathymetry->header.s7kTime.Minutes;
+		time_j[3] = (int) bathymetry->header.s7kTime.Seconds;
+		time_j[4] = (int) (1000000 * (bathymetry->header.s7kTime.Seconds - time_j[3]));
+		mb_get_itime(verbose, time_j, time_i);
+		mb_get_time(verbose, time_i, &(bathy_time_d));
+
+		/* figure out offset between 7k timestamp and Edgetech timestamp */
+#ifdef MBR_RESON7KR_DEBUG
+fprintf(stderr,"%s: 7k time offset: %f    7ktime:%f Edgetech:%f Bathymetry:%f\n",
+function_name, edgetech_time_d - bathy_time_d, s7k_time_d, edgetech_time_d, bathy_time_d);
+#endif
+		
+		/* use Edgetech time */
+		store->time_d = edgetech_time_d;
+		mb_get_date(verbose, edgetech_time_d, store->time_i);
+		
 		/* use Edgetech time for early MBARI SBP missions with
 			bad time synching, otherwise use 7K timestamp */
-		if (header->s7kTime.Year == 2004)
+		/*if (header->s7kTime.Year == 2004)
 			{
-			/* get the time from the original Edgetech header */
+			/* get the time from the original Edgetech header *\/
 			time_j[0] = fsdwssheader->year;
 			time_j[1] = fsdwssheader->day;
 			time_j[2] = 60 * fsdwssheader->hour + fsdwssheader->minute;
@@ -4178,7 +4522,7 @@ index, header->OffsetToOptionalData);
 
 		else
 			{
-			/* get the time from the 6046 datalogger header */
+			/* get the time from the 6046 datalogger header *\/
 			time_j[0] = header->s7kTime.Year;
 			time_j[1] = header->s7kTime.Day;
 			time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
@@ -4187,7 +4531,7 @@ index, header->OffsetToOptionalData);
 			}
 
 		mb_get_itime(verbose, time_j, store->time_i);
-		mb_get_time(verbose, store->time_i, &(store->time_d));
+		mb_get_time(verbose, store->time_i, &(store->time_d));*/
 		}
 	else
 		{
@@ -4204,11 +4548,12 @@ index, header->OffsetToOptionalData);
 #ifdef MBR_RESON7KR_DEBUG
 for (i=0;i<fsdwsshi->number_channels;i++)
 {
+mb_get_date(verbose, s7k_time_d, time_i);
 fsdwchannel = &(fsdwsshi->channel[i]);
 fsdwssheader = &(fsdwsshi->ssheader[i]);
 fprintf(stderr,"R7KRECID_FSDWsidescanHi:           7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) FSDWtime(%4.4d-%3.3d %2.2d:%2.2d:%2.2d.%3.3d) ping:%d %d chan:%d %d sampint:%d %d\n",
-store->time_i[0],store->time_i[1],store->time_i[2],
-store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
+time_i[0],time_i[1],time_i[2],
+time_i[3],time_i[4],time_i[5],time_i[6],
 fsdwssheader->year,fsdwssheader->day,fsdwssheader->hour,fsdwssheader->minute,fsdwssheader->second,
 fsdwssheader->millisecondsToday - 1000 * (int)(0.001 * fsdwssheader->millisecondsToday),
 fsdwsshi->ping_number,fsdwssheader->pingNum,
@@ -4241,8 +4586,10 @@ int mbr_reson7kr_rd_fsdwsb(int verbose, char *buffer, void *store_ptr, int *erro
 	s7kr_fsdwsb *fsdwsb;
 	s7k_fsdwchannel *fsdwchannel;
 	s7k_fsdwsegyheader *fsdwsegyheader;
+	s7kr_bathymetry		*bathymetry;
 	int	index;
-	int	time_j[5];
+	int	time_i[7], time_j[5];
+	double	edgetech_time_d, s7k_time_d, bathy_time_d;
 	int	i;
 
 	/* print input debug statements */
@@ -4261,6 +4608,7 @@ int mbr_reson7kr_rd_fsdwsb(int verbose, char *buffer, void *store_ptr, int *erro
 	store = (struct mbsys_reson7k_struct *) store_ptr;
 	fsdwsb = &(store->fsdwsb);
 	header = &(fsdwsb->header);
+	bathymetry = &store->bathymetry;
 	
 	/* extract the header */
 	index = 0;
@@ -4287,11 +4635,53 @@ int mbr_reson7kr_rd_fsdwsb(int verbose, char *buffer, void *store_ptr, int *erro
 		store->kind = MB_DATA_SUBBOTTOM_SUBBOTTOM;
 		store->type = R7KRECID_FSDWsubbottom;
 		
+		/* get the time from the original Edgetech header */
+		time_j[0] = fsdwsegyheader->year;
+		time_j[1] = fsdwsegyheader->day;
+		time_j[2] = 60 * fsdwsegyheader->hour + fsdwsegyheader->minute;
+		time_j[3] = fsdwsegyheader->second;
+		time_j[4] = 1000 * (fsdwsegyheader->millisecondsToday 
+					- 1000 * ((int)(0.001 * fsdwsegyheader->millisecondsToday)));
+		mb_get_itime(verbose, time_j, time_i);
+		mb_get_time(verbose, time_i, &(edgetech_time_d));
+		
+		/* get the time from the 6046 datalogger header */
+		time_j[0] = header->s7kTime.Year;
+		time_j[1] = header->s7kTime.Day;
+		time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+		time_j[3] = (int) header->s7kTime.Seconds;
+		time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+		mb_get_itime(verbose, time_j, time_i);
+		mb_get_time(verbose, time_i, &(s7k_time_d));
+		
+		/* get the time from the last bathymetry record */
+		time_j[0] = bathymetry->header.s7kTime.Year;
+		time_j[1] = bathymetry->header.s7kTime.Day;
+		time_j[2] = 60 * bathymetry->header.s7kTime.Hours + bathymetry->header.s7kTime.Minutes;
+		time_j[3] = (int) bathymetry->header.s7kTime.Seconds;
+		time_j[4] = (int) (1000000 * (bathymetry->header.s7kTime.Seconds - time_j[3]));
+		mb_get_itime(verbose, time_j, time_i);
+		mb_get_time(verbose, time_i, &(bathy_time_d));
+
+		/* figure out offset between 7k timestamp and Edgetech timestamp */
+#ifdef MBR_RESON7KR_DEBUG
+fprintf(stderr,"%s: 7k time offset: %f    7ktime:%f Edgetech:%f Bathymetry:%f\n",
+function_name, edgetech_time_d - bathy_time_d, s7k_time_d, edgetech_time_d, bathy_time_d);
+#endif
+
+		/* Use the Edgetech timestamp */
+		store->time_d = edgetech_time_d;
+		mb_get_date(verbose, store->time_d, store->time_i);
+		
+		/* use Edgetech time */
+		store->time_d = edgetech_time_d;
+		mb_get_date(verbose, edgetech_time_d, store->time_i);
+
 		/* use Edgetech time for early MBARI SBP missions with
 			bad time synching, otherwise use 7K timestamp */
-		if (header->s7kTime.Year == 2004)
+		/*if (header->s7kTime.Year == 2004)
 			{
-			/* get the time from the original Edgetech header */
+			/* get the time from the original Edgetech header *\/
 			time_j[0] = fsdwsegyheader->year;
 			time_j[1] = fsdwsegyheader->day;
 			time_j[2] = 60 * fsdwsegyheader->hour + fsdwsegyheader->minute;
@@ -4302,7 +4692,7 @@ int mbr_reson7kr_rd_fsdwsb(int verbose, char *buffer, void *store_ptr, int *erro
 
 		else
 			{
-			/* get the time from the 6046 datalogger header */
+			/* get the time from the 6046 datalogger header *\/
 			time_j[0] = header->s7kTime.Year;
 			time_j[1] = header->s7kTime.Day;
 			time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
@@ -4311,13 +4701,13 @@ int mbr_reson7kr_rd_fsdwsb(int verbose, char *buffer, void *store_ptr, int *erro
 			}
 
 		mb_get_itime(verbose, time_j, store->time_i);
-		mb_get_time(verbose, store->time_i, &(store->time_d));
+		mb_get_time(verbose, store->time_i, &(store->time_d));*/
 		}
 	else
 		{
 		store->kind = MB_DATA_NONE;
 		}
-
+		
 	/* print out the results */
 #ifdef MBR_RESON7KR_DEBUG
 	if (verbose > 0)
@@ -4328,11 +4718,12 @@ int mbr_reson7kr_rd_fsdwsb(int verbose, char *buffer, void *store_ptr, int *erro
 #ifdef MBR_RESON7KR_DEBUG
 for (i=0;i<fsdwsb->number_channels;i++)
 {
+mb_get_date(verbose, s7k_time_d, time_i);
 fsdwchannel = &(fsdwsb->channel);
 fsdwsegyheader = &(fsdwsb->segyheader);
 fprintf(stderr,"R7KRECID_FSDWsubbottom:            7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) FSDWtime(%4.4d-%3.3d %2.2d:%2.2d:%2.2d.%3.3d) ping:%d %d chan:%d %d sampint:%d %d\n",
-store->time_i[0],store->time_i[1],store->time_i[2],
-store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
+time_i[0],time_i[1],time_i[2],
+time_i[3],time_i[4],time_i[5],time_i[6],
 fsdwsegyheader->year,fsdwsegyheader->day,fsdwsegyheader->hour,fsdwsegyheader->minute,fsdwsegyheader->second,
 fsdwsegyheader->millisecondsToday - 1000 * (int)(0.001 * fsdwsegyheader->millisecondsToday),
 fsdwsb->ping_number,fsdwsegyheader->pingNum,
@@ -4340,7 +4731,7 @@ fsdwchannel->number,fsdwsegyheader->channelNum,
 fsdwchannel->sample_interval,fsdwsegyheader->sampleInterval);
 }
 #endif
-
+		
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
@@ -4487,6 +4878,7 @@ bluefin->nav[i].position_time);
 				if (bluefin->nav[i].position_time == bluefin->nav[i-1].position_time)
 					timeproblem = MB_YES;
 				}
+			timeproblem = MB_NO;
 			
 			/* figure out if the time changes anywhere */
 			if (timeproblem == MB_YES)
@@ -4573,6 +4965,7 @@ bluefin->environmental[i].temperature_time);
 					|| bluefin->environmental[i].ctd_time < 10000000.0)
 					timeproblem = MB_YES;
 				}
+			timeproblem = MB_NO;
 			
 			/* figure out if the time changes anywhere */
 			if (timeproblem == MB_YES)
@@ -4609,7 +5002,7 @@ time_d);
 		/* set kind */
 		if (bluefin->data_format == R7KRECID_BluefinNav)
 			{
-			store->kind = MB_DATA_NAV1;
+			store->kind = MB_DATA_NAV2;
 			store->type = R7KRECID_Bluefin;
 		
 			/* get the time from the 6046 datalogger header */
@@ -5264,6 +5657,20 @@ int mbr_reson7kr_rd_bathymetry(int verbose, char *buffer, void *store_ptr, int *
 	mb_get_binary_int(MB_YES, &buffer[index], &(bathymetry->ping_number)); index += 4;
 	mb_get_binary_short(MB_YES, &buffer[index], &(bathymetry->multi_ping)); index += 2;
 	mb_get_binary_int(MB_YES, &buffer[index], &(bathymetry->number_beams)); index += 4;
+	
+	/* deal with version 5 records */
+	if (header->Version >= 5)
+		{
+		bathymetry->layer_comp_flag = buffer[index]; index++;
+		bathymetry->sound_vel_flag = buffer[index]; index++;
+		mb_get_binary_float(MB_YES, &buffer[index], &(bathymetry->sound_velocity)); index += 4;
+		}
+	else
+		{
+		bathymetry->layer_comp_flag = 0;
+		bathymetry->sound_vel_flag = 0;
+		bathymetry->sound_velocity = 0.0;
+		}
 	
 	/* extract the data */
 	for (i=0;i<bathymetry->number_beams;i++)
@@ -7386,7 +7793,7 @@ int mbr_reson7kr_wr_header(int verbose, char *buffer, int *index,
 		}
 	
 	/* set some important values */
-	header->Version = 4;
+	header->Version = 5;
 	header->Offset = 60;
 	header->SyncPattern = 0x0000ffff;
 	header->Reserved = 0;
@@ -10934,6 +11341,9 @@ int mbr_reson7kr_wr_bathymetry(int verbose, int *bufferalloc, char **bufferptr, 
 	if (bathymetry->optionaldata == MB_YES)
 		{
 		*size += 45 + bathymetry->number_beams * 20;
+		header->OffsetToOptionalData = MBSYS_RESON7K_RECORDHEADER_SIZE 
+								+ R7KHDRSIZE_7kBathymetricData
+								+ bathymetry->number_beams * 9;
 		}
 	
 	/* allocate memory to read rest of record if necessary */
@@ -10957,6 +11367,10 @@ int mbr_reson7kr_wr_bathymetry(int verbose, int *bufferalloc, char **bufferptr, 
 		/* get buffer for writing */
 		buffer = (char *) *bufferptr;
 		
+		/* make sure the version number is right */
+		if (header->Version < 5)
+			header->Version = 5;
+		
 		/* insert the header */
 		index = 0;
 		status = mbr_reson7kr_wr_header(verbose, buffer, &index, header, error);
@@ -10967,6 +11381,9 @@ int mbr_reson7kr_wr_bathymetry(int verbose, int *bufferalloc, char **bufferptr, 
 		mb_put_binary_int(MB_YES, bathymetry->ping_number, &buffer[index]); index += 4;
 		mb_put_binary_short(MB_YES, bathymetry->multi_ping, &buffer[index]); index += 2;
 		mb_put_binary_int(MB_YES, bathymetry->number_beams, &buffer[index]); index += 4;
+		buffer[index] = bathymetry->layer_comp_flag; index++;
+		buffer[index] = bathymetry->sound_vel_flag; index++;
+		mb_put_binary_float(MB_YES, bathymetry->sound_velocity, &buffer[index]); index += 4;
 
 		/* insert the data */
 		for (i=0;i<bathymetry->number_beams;i++)

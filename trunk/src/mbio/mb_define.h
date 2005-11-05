@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	4/21/96
- *    $Id: mb_define.h,v 5.27 2004-12-18 01:34:43 caress Exp $
+ *    $Id: mb_define.h,v 5.28 2005-11-05 00:48:04 caress Exp $
  *
  *    Copyright (c) 1996, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	April 21, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.27  2004/12/18 01:34:43  caress
+ * Working towards release 5.0.6.
+ *
  * Revision 5.26  2004/12/02 06:33:30  caress
  * Fixes while supporting Reson 7k data.
  *
@@ -158,6 +161,12 @@
 #define MB_DATALIST_LOOK_NO 		1
 #define MB_DATALIST_LOOK_YES		2
 
+/* settings of i/o array dimension types */
+#define MB_MEM_TYPE_NONE		0
+#define MB_MEM_TYPE_BATHYMETRY		1
+#define MB_MEM_TYPE_AMPLITUDE		2
+#define MB_MEM_TYPE_SIDESCAN		3
+
 /* type definitions of signed and unsigned char */
 typedef unsigned char	mb_u_char;
 #ifdef IRIX
@@ -285,6 +294,12 @@ int mb_write_init(int verbose,
 		int *beams_bath, int *beams_amp, int *pixels_ss,
 		int *error);
 int mb_close(int verbose, void **mbio_ptr, int *error);
+int mb_register_array(int verbose, void *mbio_ptr, 
+		int type, int size, void **handle, int *error);
+int mb_update_arrays(int verbose, void *mbio_ptr, 
+		int nbath, int namp, int nss, int *error);
+int mb_update_arrayptr(int verbose, void *mbio_ptr, 
+		void **handle, int *error);
 int mb_read_ping(int verbose, void *mbio_ptr, void *store_ptr, 
 		int *kind, int *error);
 int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind,
@@ -336,20 +351,22 @@ int mb_alloc(int verbose, void *mbio_ptr,
 		void **store_ptr, int *error);
 int mb_deall(int verbose, void *mbio_ptr,
 		void **store_ptr, int *error);
-int mb_insert(int verbose, void *mbio_ptr, void *store_ptr, 
-		int kind, int time_i[7], double time_d,
-		double navlon, double navlat,
-		double speed, double heading,
-		int nbath, int namp, int nss,
-		char *beamflag, double *bath, double *amp, 
-		double *bathacrosstrack, double *bathalongtrack,
-		double *ss, double *ssacrosstrack, double *ssalongtrack,
-		char *comment, int *error);
+int mb_dimensions(int verbose, void *mbio_ptr, void *store_ptr, 
+		int *kind, int *nbath, int *namp, int *nss, int *error);
 int mb_extract(int verbose, void *mbio_ptr, void *store_ptr, 
 		int *kind, int time_i[7], double *time_d,
 		double *navlon, double *navlat,
 		double *speed, double *heading,
 		int *nbath, int *namp, int *nss,
+		char *beamflag, double *bath, double *amp, 
+		double *bathacrosstrack, double *bathalongtrack,
+		double *ss, double *ssacrosstrack, double *ssalongtrack,
+		char *comment, int *error);
+int mb_insert(int verbose, void *mbio_ptr, void *store_ptr, 
+		int kind, int time_i[7], double time_d,
+		double navlon, double navlat,
+		double speed, double heading,
+		int nbath, int namp, int nss,
 		char *beamflag, double *bath, double *amp, 
 		double *bathacrosstrack, double *bathalongtrack,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,

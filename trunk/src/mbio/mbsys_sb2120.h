@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_sb2120.h	3/27/2000
- *	$Id: mbsys_sb2120.h,v 5.1 2001-01-22 07:43:34 caress Exp $
+ *	$Id: mbsys_sb2120.h,v 5.2 2005-11-05 00:48:05 caress Exp $
  *
  *    Copyright (c) 2000 by 
  *    D. W. Caress (caress@mbari.org)
@@ -29,6 +29,9 @@
  * Date:	December 7,  2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2001/01/22 07:43:34  caress
+ * Version 5.0.beta01
+ *
  * Revision 5.0  2000/12/10  20:24:25  caress
  * Initial revision.
  *
@@ -270,6 +273,8 @@ int mbsys_sb2120_alloc(int verbose, char *mbio_ptr, char **store_ptr,
 			int *error);
 int mbsys_sb2120_deall(int verbose, char *mbio_ptr, char **store_ptr, 
 			int *error);
+int mbsys_sb2120_dimensions(int verbose, void *mbio_ptr, void *store_ptr, 
+			int *kind, int *nbath, int *namp, int *nss, int *error);
 int mbsys_sb2120_extract(int verbose, char *mbio_ptr, char *store_ptr, 
 			int *kind, int time_i[7], double *time_d,
 			double *navlon, double *navlat,

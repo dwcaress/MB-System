@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_xse.h	3/27/2000
- *	$Id: mbsys_xse.h,v 5.8 2003-04-17 21:05:23 caress Exp $
+ *	$Id: mbsys_xse.h,v 5.9 2005-11-05 00:48:03 caress Exp $
  *
  *    Copyright (c) 2000, 2001, 2002, 2003 by 
  *    D. W. Caress (caress@mbari.org)
@@ -28,6 +28,9 @@
  * Additional Authors:	P. A. Cohen and S. Dzurenko
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2003/04/17 21:05:23  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.7  2002/09/18 23:32:59  caress
  * Release 5.0.beta23
  *
@@ -473,6 +476,8 @@ int mbsys_xse_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error);
 int mbsys_xse_deall(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error);
+int mbsys_xse_dimensions(int verbose, void *mbio_ptr, void *store_ptr, 
+			int *kind, int *nbath, int *namp, int *nss, int *error);
 int mbsys_xse_extract(int verbose, void *mbio_ptr, void *store_ptr, 
 			int *kind, int time_i[7], double *time_d,
 			double *navlon, double *navlat,

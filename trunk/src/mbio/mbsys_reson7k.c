@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_reson7k.c	3.00	3/23/2004
- *	$Id: mbsys_reson7k.c,v 5.9 2005-06-15 15:20:17 caress Exp $
+ *	$Id: mbsys_reson7k.c,v 5.10 2005-11-05 00:48:04 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -26,6 +26,9 @@
  * Date:	March 23, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.9  2005/06/15 15:20:17  caress
+ * Fixed problems with writing Bluefin records in 7k data and improved support for Edgetech Jstar data.
+ *
  * Revision 5.8  2005/06/04 04:16:00  caress
  * Support for Edgetech Jstar format (id 132 and 133).
  *
@@ -73,7 +76,7 @@
 /* turn on debug statements here */
 /* #define MSYS_RESON7KR_DEBUG 1 */
 
-static char res_id[]="$Id: mbsys_reson7k.c,v 5.9 2005-06-15 15:20:17 caress Exp $";
+static char res_id[]="$Id: mbsys_reson7k.c,v 5.10 2005-11-05 00:48:04 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_zero7kheader(int verbose, s7k_header	*header, 
@@ -3059,6 +3062,9 @@ int mbsys_reson7k_print_bathymetry(int verbose,
 	fprintf(stderr,"%s     ping_number:                %d\n",first,bathymetry->ping_number);
 	fprintf(stderr,"%s     multi_ping:                 %d\n",first,bathymetry->multi_ping);
 	fprintf(stderr,"%s     number_beams:               %d\n",first,bathymetry->number_beams);
+	fprintf(stderr,"%s     layer_comp_flag:            %d\n",first,bathymetry->layer_comp_flag);
+	fprintf(stderr,"%s     sound_vel_flag:             %d\n",first,bathymetry->sound_vel_flag);
+	fprintf(stderr,"%s     sound_velocity:             %f\n",first,bathymetry->sound_velocity);
 	for (i=0;i<bathymetry->number_beams;i++)
 		fprintf(stderr,"%s     beam[%d]:  range:%f quality:%d intensity:%f\n",
 				first,i,bathymetry->range[i],bathymetry->quality[i],bathymetry->intensity[i]);
@@ -4082,6 +4088,71 @@ int mbsys_reson7k_print_spreadingloss(int verbose,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+int mbsys_reson7k_dimensions(int verbose, void *mbio_ptr, void *store_ptr, 
+		int *kind, int *nbath, int *namp, int *nss, int *error)
+{
+	char	*function_name = "mbsys_reson7k_dimensions";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	struct mbsys_reson7k_struct *store;
+	s7kr_bathymetry *bathymetry;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mb_ptr:     %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* get data structure pointer */
+	store = (struct mbsys_reson7k_struct *) store_ptr;
+
+	/* get data kind */
+	*kind = store->kind;
+
+	/* extract data from structure */
+	if (*kind == MB_DATA_DATA)
+		{
+		/* get beam and pixel numbers */
+		bathymetry = (s7kr_bathymetry *) &store->bathymetry;
+		*nbath = bathymetry->number_beams;
+		*namp = *nbath;
+		*nss = 0;
+		}
+	else
+		{
+		/* get beam and pixel numbers */
+		*nbath = 0;
+		*namp = 0;
+		*nss = 0;
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
+		fprintf(stderr,"dbg2       nbath:      %d\n",*nbath);
+		fprintf(stderr,"dbg2        namp:      %d\n",*namp);
+		fprintf(stderr,"dbg2        nss:       %d\n",*nss);
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
 int mbsys_reson7k_extract(int verbose, void *mbio_ptr, void *store_ptr, 
 		int *kind, int time_i[7], double *time_d,
 		double *navlon, double *navlat,
@@ -4165,8 +4236,8 @@ int mbsys_reson7k_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			}
 			
 		/* set beamwidths in mb_io structure */
-		mb_io_ptr->beamwidth_xtrack = RTD * volatilesettings->beamwidth_horizontal;
-		mb_io_ptr->beamwidth_ltrack = RTD * volatilesettings->beamwidth_vertical;
+		mb_io_ptr->beamwidth_xtrack = 2.0 * volatilesettings->beamwidth_horizontal;
+		mb_io_ptr->beamwidth_ltrack = 2.0 * volatilesettings->beamwidth_vertical;
 
 		/* read distance and depth values into storage arrays */
 		*nbath = bathymetry->number_beams;
@@ -4174,7 +4245,7 @@ int mbsys_reson7k_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		for (i=0;i<*nbath;i++)
 			{
 			bath[i] = bathymetry->depth[i];
-			if ((bathymetry->quality[i] & 15) == 15)
+			if ((bathymetry->quality[i] & 15) > 7)
 				{
 				beamflag[i] = MB_FLAG_NONE;
 				}
@@ -4267,7 +4338,7 @@ int mbsys_reson7k_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		}
 
 	/* extract data from structure */
-	else if (*kind == MB_DATA_NAV)
+	else if (*kind == MB_DATA_NAV1)
 		{
 		/* get time */
 		for (i=0;i<7;i++)
@@ -4333,7 +4404,7 @@ int mbsys_reson7k_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		}
 
 	/* extract data from structure */
-	else if (*kind == MB_DATA_NAV1)
+	else if (*kind == MB_DATA_NAV2)
 		{
 		/* get time */
 		for (i=0;i<7;i++)
@@ -4575,7 +4646,7 @@ int mbsys_reson7k_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
 		fprintf(stderr,"dbg2       kind:       %d\n",kind);
 		}
-	if (verbose >= 2 && (kind == MB_DATA_DATA || kind == MB_DATA_NAV))
+	if (verbose >= 2 && (kind == MB_DATA_DATA || kind == MB_DATA_NAV1 || kind == MB_DATA_NAV2))
 		{
 		fprintf(stderr,"dbg2       time_i[0]:  %d\n",time_i[0]);
 		fprintf(stderr,"dbg2       time_i[1]:  %d\n",time_i[1]);
@@ -4665,7 +4736,7 @@ int mbsys_reson7k_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		}
 
 	/* insert data in nav structure */
-	else if (store->kind == MB_DATA_NAV)
+	else if (store->kind == MB_DATA_NAV1)
 		{
 		/* get time */
 		for (i=0;i<7;i++)
@@ -4968,7 +5039,7 @@ int mbsys_reson7k_detects(int verbose, void *mbio_ptr, void *store_ptr,
 		*nbeams = bathymetry->number_beams;
 		for (i=0;i<*nbeams;i++)
 			{
-			detect = (bathymetry->quality[i] & 48) << 4;
+			detect = (bathymetry->quality[i] & 48) >> 4;
 			if (detect == 0)
 				detects[i] = MB_DETECT_UNKNOWN;
 			else if (detect == 1)
@@ -5100,7 +5171,14 @@ int mbsys_reson7k_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 
 		/* get altitude */
 		altitude_found = MB_NO;
-		if (bathymetry->optionaldata == MB_YES)
+		if (mb_io_ptr->naltitude > 0)
+			{
+			mb_altint_interp(verbose, mbio_ptr, store->time_d,  
+				    altitudev, error);
+			altitude_found = MB_YES;
+			}
+		if (altitude_found == MB_NO
+			&& bathymetry->optionaldata == MB_YES)
 			{
 			/* get depth closest to nadir */
 			xtrackmin = 999999.9;
@@ -5119,13 +5197,7 @@ int mbsys_reson7k_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 			{
 			*altitudev = altitude->altitude;
 			}
-		else if (altitude_found == MB_NO
-			&& mb_io_ptr->naltitude > 0)
-			{
-			mb_altint_interp(verbose, mbio_ptr, store->time_d,  
-				    altitudev, error);
-			}
-		else
+		else if (altitude_found == MB_NO)
 			{
 			*altitudev = 0.0;
 			}
@@ -5277,7 +5349,7 @@ int mbsys_reson7k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		}
 
 	/* extract data from nav structure */
-	else if (*kind == MB_DATA_NAV)
+	else if (*kind == MB_DATA_NAV1)
 		{
 		/* get position data structure */
 		position = (s7kr_position *) &store->position;
@@ -5322,7 +5394,7 @@ int mbsys_reson7k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		}
 
 	/* extract data from structure */
-	else if (*kind == MB_DATA_NAV1)
+	else if (*kind == MB_DATA_NAV2)
 		{
 		/* get time */
 		for (i=0;i<7;i++)
@@ -5525,7 +5597,7 @@ int mbsys_reson7k_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr,
 		}
 
 	/* extract data from nav structure */
-	else if (*kind == MB_DATA_NAV)
+	else if (*kind == MB_DATA_NAV1)
 		{
 		/* just one navigation value */
 		*n = 1;
@@ -5570,7 +5642,7 @@ int mbsys_reson7k_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr,
 		}
 
 	/* extract data from structure */
-	else if (*kind == MB_DATA_NAV1)
+	else if (*kind == MB_DATA_NAV2)
 		{
 		/* get number of available navigation values */
 		if (bluefin->data_format ==  0 && bluefin->number_frames > 0)
@@ -5751,7 +5823,7 @@ int mbsys_reson7k_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		}
 
 	/* insert data in nav structure */
-	else if (store->kind == MB_DATA_NAV)
+	else if (store->kind == MB_DATA_NAV1)
 		{
 		/* get time */
 		for (i=0;i<7;i++)

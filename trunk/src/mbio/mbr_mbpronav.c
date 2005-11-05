@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mbpronav.c	5/20/99
- *	$Id: mbr_mbpronav.c,v 5.9 2005-03-25 04:23:10 caress Exp $
+ *	$Id: mbr_mbpronav.c,v 5.10 2005-11-05 00:48:03 caress Exp $
  *
  *    Copyright (c) 1999, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	October 18, 1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.9  2005/03/25 04:23:10  caress
+ * Now zeros unused parts of mbsys_singlebeam data.
+ *
  * Revision 5.8  2004/06/18 03:15:51  caress
  * Adding support for segy i/o and working on support for Reson 7k format 88.
  *
@@ -111,7 +114,7 @@ int mbr_wt_mbpronav(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_mbpronav(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_mbpronav.c,v 5.9 2005-03-25 04:23:10 caress Exp $";
+	static char res_id[]="$Id: mbr_mbpronav.c,v 5.10 2005-11-05 00:48:03 caress Exp $";
 	char	*function_name = "mbr_register_mbpronav";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -157,6 +160,7 @@ int mbr_register_mbpronav(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr->mb_io_store_free = &mbsys_singlebeam_deall; 
 	mb_io_ptr->mb_io_read_ping = &mbr_rt_mbpronav; 
 	mb_io_ptr->mb_io_write_ping = &mbr_wt_mbpronav; 
+	mb_io_ptr->mb_io_dimensions = &mbsys_singlebeam_dimensions; 
 	mb_io_ptr->mb_io_extract = &mbsys_singlebeam_extract; 
 	mb_io_ptr->mb_io_insert = &mbsys_singlebeam_insert; 
 	mb_io_ptr->mb_io_extract_nav = &mbsys_singlebeam_extract_nav; 
@@ -243,7 +247,7 @@ int mbr_info_mbpronav(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_mbpronav.c,v 5.9 2005-03-25 04:23:10 caress Exp $";
+	static char res_id[]="$Id: mbr_mbpronav.c,v 5.10 2005-11-05 00:48:03 caress Exp $";
 	char	*function_name = "mbr_info_mbpronav";
 	int	status = MB_SUCCESS;
 
@@ -313,7 +317,7 @@ int mbr_info_mbpronav(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_mbpronav(int verbose, void *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_mbpronav.c,v 5.9 2005-03-25 04:23:10 caress Exp $";
+ static char res_id[]="$Id: mbr_mbpronav.c,v 5.10 2005-11-05 00:48:03 caress Exp $";
 	char	*function_name = "mbr_alm_mbpronav";
 	int	status = MB_SUCCESS;
 	int	i;
