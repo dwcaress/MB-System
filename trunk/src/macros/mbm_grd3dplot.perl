@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grd3dplot.perl	8/6/95
-#    $Id: mbm_grd3dplot.perl,v 5.12 2005-03-25 04:05:40 caress Exp $
+#    $Id: mbm_grd3dplot.perl,v 5.13 2005-11-05 01:34:20 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 2000, 2003 by 
 #    D. W. Caress (caress@mbari.org)
@@ -63,10 +63,14 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   August 8, 1994
 #
 # Version:
-#   $Id: mbm_grd3dplot.perl,v 5.12 2005-03-25 04:05:40 caress Exp $
+#   $Id: mbm_grd3dplot.perl,v 5.13 2005-11-05 01:34:20 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.12  2005/03/25 04:05:40  caress
+#   Fixed handling of tickinfo string.
+#   For mbm_plot only, added control on filename annotation direction.
+#
 #   Revision 5.11  2004/10/06 18:56:11  caress
 #   Release 5.0.5 update.
 #
@@ -1627,9 +1631,21 @@ if ($color_mode && !$file_cpt)
 		@grdhisteq = `grdhisteq $files_data[0] -C$ncolors_minus -D`;
 		foreach $d (@grdhisteq) {
 			($d1, $d2) = $d =~ /(\S+)\s+(\S+).*/;
-			push(@hist, $d1);
+			if ($d2 > $d1)
+				{
+				push(@hist, $d1);
+				}
 			}
-		push(@hist, $d2);
+		if ($d2 > $d1)
+			{
+			push(@hist, $d2);
+			}
+		
+		# reset number of colors if grdhisteq returned fewer intervals 
+		if (scalar(@hist) < $ncolors)
+			{
+			$ncolors = scalar(@hist);
+			}
 
 		# rescale hist values if needed
 		if ($data_scale)
@@ -2205,7 +2221,7 @@ elsif ($ps_viewer eq "pageview")
 		$view_pageflag = "-w $page_height_in{$pagesize} -h $page_width_in{$pagesize}";
 		}
 	}
-elsif ($ps_viewer eq "ghostview" || $ps_viewer eq "gv")
+elsif ($ps_viewer eq "ghostview")
 	{
 	if ($portrait)
 		{
@@ -2214,6 +2230,17 @@ elsif ($ps_viewer eq "ghostview" || $ps_viewer eq "gv")
 	elsif ($landscape)
 		{
 		$view_pageflag = "-landscape -media BBox";
+		}
+	}
+elsif ($ps_viewer eq "gv")
+	{
+	if ($portrait)
+		{
+		$view_pageflag = "--orientation=portrait --media=BBox";
+		}
+	elsif ($landscape)
+		{
+		$view_pageflag = "--orientation=landscape --media=BBox";
 		}
 	}
 elsif ($ps_viewer eq "ggv")

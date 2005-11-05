@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_plot.perl	1/17/2003
-#    $Id: mbm_copy.perl,v 5.0 2003-03-10 19:54:43 caress Exp $
+#    $Id: mbm_copy.perl,v 5.1 2005-11-05 01:34:20 caress Exp $
 #
 #    Copyright (c) 2003 by 
 #    D. W. Caress (caress@mbari.org)
@@ -34,10 +34,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   January 17, 2003
 #
 # Version:
-#   $Id: mbm_copy.perl,v 5.0 2003-03-10 19:54:43 caress Exp $
+#   $Id: mbm_copy.perl,v 5.1 2005-11-05 01:34:20 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.0  2003/03/10 19:54:43  caress
+#   Initial version.
+#
 #
 #
 $program_name = "mbm_copy";
@@ -106,6 +109,7 @@ foreach $file_mb (@files_data)
 	# get file root
 	$line = `mbformat -K -I$file_mb`;
 	($root,$format_mb) = $line =~ /(\S+)\s+(\S+)/;
+	$iformat = $formats[$cnt];
 	if ($oformat)
 		{
 		$outformat = $oformat;
@@ -122,7 +126,7 @@ foreach $file_mb (@files_data)
 		}
 	
 	# copy to output format using mbcopy
-	$mbcopy = "mbcopy -F$formats[$cnt]/$outformat -I$file_mb -O$root.mb$outformat";
+	$mbcopy = "mbcopy -F$iformat/$outformat -I$file_mb -O$root.mb$outformat";
 	if (!$test)
 		{
 		print "Running: $mbcopy\n";
@@ -132,6 +136,9 @@ foreach $file_mb (@files_data)
 		{
 		print "Testing: $mbcopy\n";
 		}
+		
+	# increment counter
+	$cnt++;
 	}
 
 # exit
