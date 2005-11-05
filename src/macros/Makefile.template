@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 5.1 2004-07-27 19:58:11 caress Exp $
+#	$Id: Makefile.template,v 5.2 2005-11-05 01:34:20 caress Exp $
 #
 #     Copyright (c) 1993, 1994, 2000, 2003 by
 #     David W. Caress (caress@mbari.org)
@@ -16,6 +16,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.1  2004/07/27 19:58:11  caress
+# Added macro mbm_route2mission.perl
+#
 # Revision 5.0  2003/07/27 20:52:57  caress
 # Release 5.0.0
 #
@@ -95,7 +98,8 @@ all:	$(BINDIR)/mbm_xbt \
 	$(BINDIR)/mbm_utm \
 	$(BINDIR)/mbm_grd2geovrml \
 	$(BINDIR)/mbm_copy \
-	$(BINDIR)/mbm_route2mission
+	$(BINDIR)/mbm_route2mission \
+	$(BINDIR)/mbm_rolltimelag	
 
 ### make clean does nothing
 clean:
@@ -161,3 +165,6 @@ $(BINDIR)/mbm_copy:	mbm_copy.perl
 $(BINDIR)/mbm_route2mission:	mbm_route2mission.perl
 	cp mbm_route2mission.perl $(BINDIR)/mbm_route2mission
 	chmod 775 $(BINDIR)/mbm_route2mission
+$(BINDIR)/mbm_rolltimelag:	mbm_rolltimelag.perl
+	cp mbm_rolltimelag.perl $(BINDIR)/mbm_rolltimelag
+	chmod 775 $(BINDIR)/mbm_rolltimelag

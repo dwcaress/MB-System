@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_xyplot.perl	8/6/95
-#    $Id: mbm_xyplot.perl,v 5.9 2005-03-25 04:05:40 caress Exp $
+#    $Id: mbm_xyplot.perl,v 5.10 2005-11-05 01:34:20 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 2000, 2003 by 
 #    D. W. Caress (caress@mbari.org)
@@ -56,10 +56,14 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   August 9, 1995
 #
 # Version:
-#   $Id: mbm_xyplot.perl,v 5.9 2005-03-25 04:05:40 caress Exp $
+#   $Id: mbm_xyplot.perl,v 5.10 2005-11-05 01:34:20 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.9  2005/03/25 04:05:40  caress
+#   Fixed handling of tickinfo string.
+#   For mbm_plot only, added control on filename annotation direction.
+#
 #   Revision 5.8  2004/09/16 19:12:55  caress
 #   Supports postscript viewer ggv.
 #
@@ -544,17 +548,18 @@ foreach $xyfile(@xyfiles){
     $linecnt=1;
     while (<INFILE>) {
 	chomp;
-	@line=split /$delimiters[$i]/, $_;
+($xval, $yval) = $line =~ /(\S+)\s+(\S+)/;
+#	@line=split /$delimiters[$i]/, $_;
 
-	# Evaluate the perl/math expressions but quit if there's an error.
-	$xval=eval $xmath[$i];
-	if(!$xval) {
-	    die "\nAn error occurred evaluating\n$xmath[$i].\nThis is likely a syntax error, but if this error occurred in the middle\nof processing it may be a divide by zero error. \nAborting...\n";
-	}
-	$yval=eval $ymath[$i];
-	if(!$yval) {
-	    die "\nAn error occurred evaluating:\n$ymath[$i].\nThis is likely a syntax error, but if this error occurred in the middle\nof processing it may be a divide by zero error. \nAborting...\n";
-	}
+#	# Evaluate the perl/math expressions but quit if there's an error.
+#	$xval=eval $xmath[$i];
+#	if(!$xval) {
+#	    die "\nAn error occurred evaluating\n$xmath[$i].\nThis is likely a syntax error, but if this error occurred in the middle\nof processing it may be a divide by zero error. \nAborting...\n";
+#	}
+#	$yval=eval $ymath[$i];
+#	if(!$yval) {
+#	    die "\nAn error occurred evaluating:\n$ymath[$i].\nThis is likely a syntax error, but if this error occurred in the middle\nof processing it may be a divide by zero error. \nAborting...\n";
+#	}
     
 	push(@xvalues, $xval);
 	push(@yvalues, $yval);
@@ -1358,7 +1363,7 @@ elsif ($ps_viewer eq "pageview")
 		$view_pageflag = "-w $page_height_in{$pagesize} -h $page_width_in{$pagesize}";
 		}
 	}
-elsif ($ps_viewer eq "ghostview" || $ps_viewer eq "gv")
+elsif ($ps_viewer eq "ghostview")
 	{
 	if ($portrait)
 		{
@@ -1367,6 +1372,17 @@ elsif ($ps_viewer eq "ghostview" || $ps_viewer eq "gv")
 	elsif ($landscape)
 		{
 		$view_pageflag = "-landscape -media BBox";
+		}
+	}
+elsif ($ps_viewer eq "gv")
+	{
+	if ($portrait)
+		{
+		$view_pageflag = "--orientation=portrait --media=BBox";
+		}
+	elsif ($landscape)
+		{
+		$view_pageflag = "--orientation=landscape --media=BBox";
 		}
 	}
 elsif ($ps_viewer eq "ggv")

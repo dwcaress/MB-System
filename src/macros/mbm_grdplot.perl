@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grdplot.perl	8/6/95
-#    $Id: mbm_grdplot.perl,v 5.15 2005-04-07 04:12:39 caress Exp $
+#    $Id: mbm_grdplot.perl,v 5.16 2005-11-05 01:34:20 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 2000, 2003 by 
 #    D. W. Caress (caress@mbari.org)
@@ -55,6 +55,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #            -MGQdpi -MGSscalefactor -MGTx/y/size/angle/font/just/text
 #            -MGU[/dx/dy/][label] -MCAanot_int/[ffont_size][aangle][/r/g/b][o]]
 #            -MCGgap/width -MCQcut -MCT[+|-][gap/length][:LH] -MCWtype[pen]
+#            -MNIdatalist
 #            -MTCfill -MTDresolution -MTGfill -MTIriver[/pen] 
 #            -MTNborder[/pen] -MTSfill -MTWpen
 #            -MXGfill -MXIxy_file -MXSsymbol/size -MXWpen]
@@ -66,10 +67,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   October 19, 1994
 #
 # Version:
-#   $Id: mbm_grdplot.perl,v 5.15 2005-04-07 04:12:39 caress Exp $
+#   $Id: mbm_grdplot.perl,v 5.16 2005-11-05 01:34:20 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.15  2005/04/07 04:12:39  caress
+#   Implemented feature to generate contours from a separate grid file. Contributed by Gordon Keith.
+#
 #   Revision 5.14  2005/03/25 04:05:39  caress
 #   Fixed handling of tickinfo string.
 #   For mbm_plot only, added control on filename annotation direction.
@@ -380,13 +384,14 @@ if ($help)
 	print "Additional Options:\n";
 	print "\t\t[-Btickinfo -Dflipcolor/flipshade -Fcontour_file\n";
 	print "\t\t-Jprojection[/scale | width] -Ltitle[:scale_label]\n";
-	print "\t\t-Mmisc -Q -Rw/e/s/n -X -Y -Zmin/max]\n";
+	print "\t\t-Mmisc -Q -Rw/e/s/n -X -Y -Zmin/max[/mode] ]\n";
 	print "Miscellaneous Options:\n";
 	print "\t\t[-MGDgmtdef/value  -MGFscale_loc\n";
 	print "\t\t-MGL[f][x]lon0/lat0/slat/length[m]\n";
 	print "\t\t-MGQdpi -MGSscalefactor -MGTx/y/size/angle/font/just/text\n";
 	print "\t\t-MGU[/dx/dy/][label] -MCAanot_int/[ffont_size][aangle][/r/g/b][o]]\n";
 	print "\t\t-MCGgap/width -MCQcut -MCT[+|-][gap/length][:LH] -MCWtype[pen]\n";
+	print "\t\t-MNIdatalist\n";
 	print "\t\t-MTCfill -MTDresolution -MTGfill -MTIriver[/pen]\n";
 	print "\t\t-MTNborder[/pen] -MTSfill -MTWpen\n";
 	print "\t\t-MXGfill -MXIxy_file -MXM -MXSsymbol/size -MXWpen]\n";
@@ -568,6 +573,17 @@ if ($misc)
 			($contour_pen) = $cmd =~ 
 				/^[Cc][Ww](\S+)/;
 			}
+
+		# deal with swath navigation options
+		##############################
+
+		# set swath file datalist of which to plot navigation
+		if ($cmd =~ /^[Nn][Ii]./)
+			{
+			($swathnavdatalist) = $cmd =~ 
+				/^[Nn][Ii](\S+)/;
+			}
+
 
 		# deal with pscoast options
 		##############################
@@ -950,7 +966,7 @@ if ($file_intensity)
 	}
 
 # get limits of files using grdinfo
-if (!$bounds || !$zbounds)
+if (!$bounds || !$zbounds || $zmode == 1)
 	{
 	foreach $file_grd (@files_data) {
 
@@ -1028,8 +1044,8 @@ if (!$bounds || !$zbounds)
 		$xmax = $xmax_f;
 		$ymin = $ymin_f;
 		$ymax = $ymax_f;
-		$zmin = $zmin_f;
-		$zmax = $zmax_f;
+		$zmin_t = $zmin_f;
+		$zmax_t = $zmax_f;
 		}
 	else
 		{
@@ -1037,8 +1053,8 @@ if (!$bounds || !$zbounds)
 		$xmax = &max($xmax, $xmax_f);
 		$ymin = &min($ymin, $ymin_f);
 		$ymax = &max($ymax, $ymax_f);
-		$zmin = &min($zmin, $zmin_f);
-		$zmax = &max($zmax, $zmax_f);
+		$zmin_t = &min($zmin, $zmin_f);
+		$zmax_t = &max($zmax, $zmax_f);
 		}
 
 	# check that there is data
@@ -1101,7 +1117,21 @@ if (!$bounds_plot)
 # use user defined data limits
 if ($zbounds)
 	{
-	($zmin,$zmax) = $zbounds =~ /(\S+)\/(\S+)/;
+	if ($zbounds =~ /(\S+)\/(\S+)\/(\S+)/)
+		{
+		($zmin,$zmax,$zmode) = $zbounds =~ /(\S+)\/(\S+)\/(\S+)/;
+		}
+	elsif ($zbounds =~ /(\S+)\/(\S+)/)
+		{
+		($zmin,$zmax) = $zbounds =~ /(\S+)\/(\S+)/;
+		$zmode = 0;
+		}
+	}
+else
+	{
+	$zmode = 0;
+	$zmin = $zmin_t;
+	$zmax = $zmax_t;
 	}
 
 # check that there is data
@@ -1746,9 +1776,21 @@ if ($color_mode && !$file_cpt)
 		@grdhisteq = `grdhisteq $files_data[0] -C$ncolors_minus -D`;
 		foreach $d (@grdhisteq) {
 			($d1, $d2) = $d =~ /(\S+)\s+(\S+).*/;
-			push(@hist, $d1);
+			if ($d2 > $d1)
+				{
+				push(@hist, $d1);
+				}
 			}
-		push(@hist, $d2);
+		if ($d2 > $d1)
+			{
+			push(@hist, $d2);
+			}
+		
+		# reset number of colors if grdhisteq returned fewer intervals 
+		if (scalar(@hist) < $ncolors)
+			{
+			$ncolors = scalar(@hist);
+			}
 
 		# rescale hist values if needed
 		if ($data_scale)
@@ -1763,13 +1805,13 @@ if ($color_mode && !$file_cpt)
 			{
 			$hist[0] = $zmin;
 			}
-		if ($zmax > $hist[scalar(@hist)-1])
+		if ($zmax > $hist[$ncolors-1])
 			{
-			$hist[scalar(@hist)-1] = $zmax;
+			$hist[$ncolors-1] = $zmax;
 			}
 		$hist[0] = $hist[0] - 0.01*$dzz;
-		$hist[scalar(@hist)-1] = 
-			$hist[scalar(@hist)-1] + 0.01*$dzz;
+		$hist[$ncolors-1] = 
+			$hist[$ncolors-1] + 0.01*$dzz;
 		}
 
 	# generate cpt file
@@ -1783,6 +1825,20 @@ if ($color_mode && !$file_cpt)
 		{
 		$d1 = $color_start;
 		}
+	if ($zmode == 1)
+		{
+		if ($color_mode == 4)
+			{
+			if ($d1 > 0.0)
+				{
+				$d1 = 0.0;
+				}
+			}
+		else
+			{
+			$d1 = $zmin_t;
+			}
+		}
 	if ($color_style == 1 && $color_flip)
 		{
 		foreach $i (0 .. $ncolors - 2)
@@ -1795,10 +1851,14 @@ if ($color_mode && !$file_cpt)
 				{
 				$d2 = $d1 + $color_int;
 				}
+			if ($i == $ncolors - 2)
+				{
+				$d2 = $zmax_t;
+				}
 			printf FCMD "echo %6g %3d %3d %3d %6g %3d %3d %3d",
 				$d1,@cptr[$i],@cptg[$i],@cptb[$i],
 				$d2,@cptr[$i+1],@cptg[$i+1],@cptb[$i+1];
-			if ($i == 0)
+			if ($zmode == 1 && $i == 0)
 				{
 				print FCMD " >";
 				}
@@ -1821,6 +1881,10 @@ if ($color_mode && !$file_cpt)
 			else
 				{
 				$d2 = $d1 + $color_int;
+				}
+			if ($zmode == 1 && $i == 0)
+				{
+				$d2 = $zmax_t;
 				}
 			printf FCMD "echo %6g %3d %3d %3d %6g %3d %3d %3d",
 				$d1,@cptr[$i+1],@cptg[$i+1],@cptb[$i+1],
@@ -1849,6 +1913,10 @@ if ($color_mode && !$file_cpt)
 				{
 				$d2 = $d1 + $color_int;
 				}
+			if ($zmode == 1 && $i == $ncolors - 1)
+				{
+				$d2 = $zmax_t;
+				}
 			printf FCMD "echo %6g %3d %3d %3d %6g %3d %3d %3d",
 				$d1,@cptr[$i],@cptg[$i],@cptb[$i],
 				$d2,@cptr[$i],@cptg[$i],@cptb[$i];
@@ -1875,6 +1943,10 @@ if ($color_mode && !$file_cpt)
 			else
 				{
 				$d2 = $d1 + $color_int;
+				}
+			if ($zmode == 1 && $i == 0)
+				{
+				$d2 = $zmax_t;
 				}
 			printf FCMD "echo %6g %3d %3d %3d %6g %3d %3d %3d",
 				$d1,@cptr[$i],@cptg[$i],@cptb[$i],
@@ -2277,6 +2349,35 @@ for ($i = 0; $i < scalar(@xyfiles); $i++)
 		}
 	}
 
+# do swath nav plots
+if ($swathnavdatalist) 
+	{
+	$navigation_mode = 1;
+	$name_mode = 1;
+	$name_perp = 1;
+	$navigation_control = "0.25/1/4/0.15";
+
+	printf FCMD "#\n# Make swath nav plot\n";
+	printf FCMD "echo Running mbcontour...\n";
+	printf FCMD "mbcontour -F-1 -I $swathnavdatalist \\\n\t";
+	printf FCMD "-J\$MAP_PROJECTION\$MAP_SCALE \\\n\t";
+	printf FCMD "-R\$MAP_REGION \\\n\t";
+	printf FCMD "-D$navigation_control \\\n\t";
+	if ($portrait)
+		{
+		printf FCMD "-P ";
+		}
+	if ($first_gmt == 1)
+		{
+		$first_gmt = 0;
+		printf FCMD "$first\n";
+		}
+	else
+		{
+		printf FCMD "$middle\n";
+		}
+	}
+
 # do psscale plot
 if ($color_mode && $color_pallette < 5)
 	{
@@ -2389,7 +2490,7 @@ elsif ($ps_viewer eq "pageview")
 		$view_pageflag = "-w $page_height_in{$pagesize} -h $page_width_in{$pagesize}";
 		}
 	}
-elsif ($ps_viewer eq "ghostview" || $ps_viewer eq "gv")
+elsif ($ps_viewer eq "ghostview")
 	{
 	if ($portrait)
 		{
@@ -2398,6 +2499,17 @@ elsif ($ps_viewer eq "ghostview" || $ps_viewer eq "gv")
 	elsif ($landscape)
 		{
 		$view_pageflag = "-landscape -media BBox";
+		}
+	}
+elsif ($ps_viewer eq "gv")
+	{
+	if ($portrait)
+		{
+		$view_pageflag = "--orientation=portrait --media=BBox";
+		}
+	elsif ($landscape)
+		{
+		$view_pageflag = "--orientation=landscape --media=BBox";
 		}
 	}
 elsif ($ps_viewer eq "ggv")
@@ -2522,6 +2634,10 @@ if ($verbose)
 		print "    Intensity GRD List File:   $file_intensity\n";
 		foreach $file_int (@files_intensity) {
 			print "    Data GRD File:            $file_int\n";
+		}
+	if ($swathnavdatalist)
+		{
+		print "    Swath Nav Datalist:        $swathnavdatalist\n";
 		}
 		}
 	foreach $xyfile (@xyfiles) {
@@ -3221,7 +3337,7 @@ sub GetBaseTick {
 		}
 	else
 		{
-		$base_tick_x = ($ymax - $ymin) / 5;
+		$base_tick_x = ($xmax - $xmin) / 5;
 		}
 	$base_tick_y = ($ymax - $ymin) / 5;
 	

@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_plot.perl	6/18/93
-#    $Id: mbm_plot.perl,v 5.17 2005-03-25 04:05:40 caress Exp $
+#    $Id: mbm_plot.perl,v 5.18 2005-11-05 01:34:20 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 2000, 2003, 2005 by 
 #    D. W. Caress (caress@mbari.org)
@@ -72,10 +72,14 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   June 17, 1993
 #
 # Version:
-#   $Id: mbm_plot.perl,v 5.17 2005-03-25 04:05:40 caress Exp $
+#   $Id: mbm_plot.perl,v 5.18 2005-11-05 01:34:20 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.17  2005/03/25 04:05:40  caress
+#   Fixed handling of tickinfo string.
+#   For mbm_plot only, added control on filename annotation direction.
+#
 #   Revision 5.16  2004/12/18 01:31:26  caress
 #   Working towards release 5.0.6.
 #
@@ -2630,7 +2634,7 @@ elsif ($ps_viewer eq "pageview")
 		$view_pageflag = "-w $page_height_in{$pagesize} -h $page_width_in{$pagesize}";
 		}
 	}
-elsif ($ps_viewer eq "ghostview" || $ps_viewer eq "gv")
+elsif ($ps_viewer eq "ghostview")
 	{
 	if ($portrait)
 		{
@@ -2639,6 +2643,17 @@ elsif ($ps_viewer eq "ghostview" || $ps_viewer eq "gv")
 	elsif ($landscape)
 		{
 		$view_pageflag = "-landscape -media BBox";
+		}
+	}
+elsif ($ps_viewer eq "gv")
+	{
+	if ($portrait)
+		{
+		$view_pageflag = "--orientation=portrait --media=BBox";
+		}
+	elsif ($landscape)
+		{
+		$view_pageflag = "--orientation=landscape --media=BBox";
 		}
 	}
 elsif ($ps_viewer eq "ggv")
