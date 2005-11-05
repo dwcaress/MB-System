@@ -23,26 +23,32 @@
 #include <Xm/MainW.h>
 #include <Xm/DialogS.h>
 #include <Xm/MwmUtil.h>
-#include <Xm/BulletinB.h>
-#include <Xm/TextF.h>
+#include <Xm/Form.h>
 #include <Xm/Label.h>
-#include <Xm/SpinB.h>
-#include <Xm/PushB.h>
-#include <Xm/FileSB.h>
-#include <Xm/Separator.h>
 #include <Xm/RowColumn.h>
+#include <Xm/ToggleB.h>
+#include <Xm/PushB.h>
+#include <Xm/Separator.h>
+#include <Xm/SpinB.h>
+#include <Xm/TextF.h>
+#include <Xm/Scale.h>
+#include <Xm/BulletinB.h>
+#include <Xm/FileSB.h>
 #include <Xm/CascadeB.h>
 #include <Xm/MainW.h>
 #include <Xm/DialogS.h>
 #include <Xm/MwmUtil.h>
-#include <Xm/BulletinB.h>
-#include <Xm/TextF.h>
+#include <Xm/Form.h>
 #include <Xm/Label.h>
-#include <Xm/SpinB.h>
-#include <Xm/PushB.h>
-#include <Xm/FileSB.h>
-#include <Xm/Separator.h>
 #include <Xm/RowColumn.h>
+#include <Xm/ToggleB.h>
+#include <Xm/PushB.h>
+#include <Xm/Separator.h>
+#include <Xm/SpinB.h>
+#include <Xm/TextF.h>
+#include <Xm/Scale.h>
+#include <Xm/BulletinB.h>
+#include <Xm/FileSB.h>
 #include <Xm/CascadeB.h>
 
 /*
@@ -79,9 +85,14 @@ extern void BX_SET_BACKGROUND_COLOR(Widget, ArgList, Cardinal *, Pixel);
  */
 extern void do_mbgrdviz_quit(Widget, XtPointer, XtPointer);
 extern void BxExitCB(Widget, XtPointer, XtPointer);
+extern void BxUnmanageCB(Widget, XtPointer, XtPointer);
+extern void do_mbgrdviz_realtimesetup_icon(Widget, XtPointer, XtPointer);
+extern void do_mbgrdviz_realtimesetup_path_browse(Widget, XtPointer, XtPointer);
+extern void do_mbgrdviz_realtimesetup_path_test(Widget, XtPointer, XtPointer);
+extern void do_mbgrdviz_realtimesetup_updaterate(Widget, XtPointer, XtPointer);
+extern void do_mbgrdviz_realtimesetup_pathmode(Widget, XtPointer, XtPointer);
 extern void do_mbgrdviz_arearoute_parameterchange(Widget, XtPointer, XtPointer);
 extern void do_mbgrdviz_generate_survey(Widget, XtPointer, XtPointer);
-extern void BxUnmanageCB(Widget, XtPointer, XtPointer);
 extern void do_mbgrdviz_arearoute_dismiss(Widget, XtPointer, XtPointer);
 extern void do_mbgrdviz_arearoute_linespacing_increment(Widget, XtPointer, XtPointer);
 extern void do_mbgrdviz_arearoute_altitude_increment(Widget, XtPointer, XtPointer);
@@ -95,6 +106,10 @@ extern void do_mbgrdviz_fileSelectionBox_openswath(Widget, XtPointer, XtPointer)
 extern void do_mbgrdviz_fileSelectionBox_savesite(Widget, XtPointer, XtPointer);
 extern void do_mbgrdviz_fileSelectionBox_saveroute(Widget, XtPointer, XtPointer);
 extern void BxManageCB(Widget, XtPointer, XtPointer);
+extern void do_mbgrdviz_realtime_start(Widget, XtPointer, XtPointer);
+extern void do_mbgrdviz_realtime_stop(Widget, XtPointer, XtPointer);
+extern void do_mbgrdviz_realtime_pause(Widget, XtPointer, XtPointer);
+extern void do_mbgrdviz_realtime_resume(Widget, XtPointer, XtPointer);
 
 /**
  * Create the mainWindow_mbgrdviz hierarchy of widgets.
@@ -107,18 +122,24 @@ CreatemainWindow_mbgrdviz(Widget parent)
     Cardinal cdc = 0;
     Boolean  argok = False;
     Widget   mainWindow_mbgrdviz;
+    Widget   dialogShell_realtimesetup;
+    Widget   form_realtime_setup;
+    Widget   toggleButton;
+    Widget   pushButton_realtimesetup_dismiss;
+    Widget   separator6;
+    Widget   spinBox_realtimesetup_icon;
+    Widget   label_realtime_setup_icon;
+    Widget   separator5;
+    Widget   label_realtimesetup_update;
+    Widget   separator4;
+    Widget   label_realtimesetup_path;
     Widget   dialogShell_arearoute;
     Widget   label_arearoute_name;
     Widget   label_arearoute_color;
     Widget   label_arearoute_depth1;
-    Widget   label_arearoute_depth;
-    Widget   label_arearoute_altitude;
     Widget   label_arearoute_direction;
-    Widget   label_arearoute_swathwidth;
-    Widget   label_arearoute_platform;
     Widget   label_arearoute_interleaving;
     Widget   label_arearoute_linecontrol;
-    Widget   label_arearoute_linespacing;
     Widget   pushButton_arearoute_dismiss;
     Widget   dialogShell_about;
     Widget   bulletinBoard_about;
@@ -140,6 +161,8 @@ CreatemainWindow_mbgrdviz(Widget parent)
     Widget   cascadeButton_help;
     Widget   pulldownMenu_help;
     Widget   pushButton_help_about;
+    Widget   cascadeButton_realtime;
+    Widget   pulldownMenu_realtime;
     
     /**
      * Register the converters for the widgets.
@@ -147,13 +170,17 @@ CreatemainWindow_mbgrdviz(Widget parent)
     RegisterBxConverters(XtWidgetToApplicationContext(parent));
     XtInitializeWidgetClass((WidgetClass)xmMainWindowWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmDialogShellWidgetClass);
-    XtInitializeWidgetClass((WidgetClass)xmBulletinBoardWidgetClass);
-    XtInitializeWidgetClass((WidgetClass)xmTextFieldWidgetClass);
+    XtInitializeWidgetClass((WidgetClass)xmFormWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmLabelWidgetClass);
-    XtInitializeWidgetClass((WidgetClass)xmSpinBoxWidgetClass);
+    XtInitializeWidgetClass((WidgetClass)xmRowColumnWidgetClass);
+    XtInitializeWidgetClass((WidgetClass)xmToggleButtonWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmPushButtonWidgetClass);
-    XtInitializeWidgetClass((WidgetClass)xmFileSelectionBoxWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmSeparatorWidgetClass);
+    XtInitializeWidgetClass((WidgetClass)xmSpinBoxWidgetClass);
+    XtInitializeWidgetClass((WidgetClass)xmTextFieldWidgetClass);
+    XtInitializeWidgetClass((WidgetClass)xmScaleWidgetClass);
+    XtInitializeWidgetClass((WidgetClass)xmBulletinBoardWidgetClass);
+    XtInitializeWidgetClass((WidgetClass)xmFileSelectionBoxWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmBulletinBoardWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmRowColumnWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmCascadeButtonWidgetClass);
@@ -162,8 +189,8 @@ CreatemainWindow_mbgrdviz(Widget parent)
     ac = 0;
     XtSetArg(args[ac], XmNx, 108); ac++;
     XtSetArg(args[ac], XmNy, 87); ac++;
-    XtSetArg(args[ac], XmNwidth, 197); ac++;
-    XtSetArg(args[ac], XmNheight, 214); ac++;
+    XtSetArg(args[ac], XmNwidth, 260); ac++;
+    XtSetArg(args[ac], XmNheight, 215); ac++;
     mainWindow_mbgrdviz = XmCreateMainWindow(parent,
         (char *)"mainWindow_mbgrdviz",
         args, 
@@ -171,8 +198,8 @@ CreatemainWindow_mbgrdviz(Widget parent)
     
     ac = 0;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNwidth, 197); ac++;
-    XtSetArg(args[ac], XmNheight, 180); ac++;
+    XtSetArg(args[ac], XmNwidth, 260); ac++;
+    XtSetArg(args[ac], XmNheight, 181); ac++;
     bulletinBoard_mbgrdviz = XmCreateBulletinBoard(mainWindow_mbgrdviz,
         (char *)"bulletinBoard_mbgrdviz",
         args, 
@@ -181,7 +208,7 @@ CreatemainWindow_mbgrdviz(Widget parent)
     
     ac = 0;
     XtSetArg(args[ac], XmNpacking, XmPACK_TIGHT); ac++;
-    XtSetArg(args[ac], XmNwidth, 197); ac++;
+    XtSetArg(args[ac], XmNwidth, 260); ac++;
     XtSetArg(args[ac], XmNheight, 34); ac++;
     menuBar_mbgrdviz = XmCreateMenuBar(mainWindow_mbgrdviz,
         (char *)"menuBar_mbgrdviz",
@@ -217,8 +244,8 @@ CreatemainWindow_mbgrdviz(Widget parent)
     
     
     ac = 0;
-    XtSetArg(args[ac], XmNx, 113); ac++;
-    XtSetArg(args[ac], XmNy, 116); ac++;
+    XtSetArg(args[ac], XmNx, 0); ac++;
+    XtSetArg(args[ac], XmNy, 0); ac++;
     XtSetArg(args[ac], XmNwidth, 142); ac++;
     XtSetArg(args[ac], XmNheight, 200); ac++;
     pulldownMenu_file = XmCreatePulldownMenu(XtParent(cascadeButton_file),
@@ -444,7 +471,7 @@ CreatemainWindow_mbgrdviz(Widget parent)
         tmp0 = (XmString) BX_CONVERT(menuBar_mbgrdviz, (char *)"Help", 
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 145); ac++;
+        XtSetArg(args[ac], XmNx, 208); ac++;
         XtSetArg(args[ac], XmNy, 5); ac++;
         XtSetArg(args[ac], XmNwidth, 47); ac++;
         XtSetArg(args[ac], XmNheight, 24); ac++;
@@ -465,8 +492,8 @@ CreatemainWindow_mbgrdviz(Widget parent)
     
     
     ac = 0;
-    XtSetArg(args[ac], XmNx, 253); ac++;
-    XtSetArg(args[ac], XmNy, 116); ac++;
+    XtSetArg(args[ac], XmNx, 0); ac++;
+    XtSetArg(args[ac], XmNy, 0); ac++;
     XtSetArg(args[ac], XmNwidth, 54); ac++;
     XtSetArg(args[ac], XmNheight, 28); ac++;
     pulldownMenu_help = XmCreatePulldownMenu(XtParent(cascadeButton_help),
@@ -503,9 +530,170 @@ CreatemainWindow_mbgrdviz(Widget parent)
     XtSetValues(cascadeButton_help, args, ac);
     
     ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(menuBar_mbgrdviz, (char *)"Realtime", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNx, 46); ac++;
+        XtSetArg(args[ac], XmNy, 5); ac++;
+        XtSetArg(args[ac], XmNwidth, 76); ac++;
+        XtSetArg(args[ac], XmNheight, 24); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(menuBar_mbgrdviz, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        cascadeButton_realtime = XmCreateCascadeButton(menuBar_mbgrdviz,
+            (char *)"cascadeButton_realtime",
+            args, 
+            ac);
+        XtManageChild(cascadeButton_realtime);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNx, 0); ac++;
+    XtSetArg(args[ac], XmNy, 0); ac++;
+    XtSetArg(args[ac], XmNwidth, 68); ac++;
+    XtSetArg(args[ac], XmNheight, 124); ac++;
+    pulldownMenu_realtime = XmCreatePulldownMenu(XtParent(cascadeButton_realtime),
+        (char *)"pulldownMenu_realtime",
+        args, 
+        ac);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(pulldownMenu_realtime, (char *)"Setup", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(pulldownMenu_realtime, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        pushButton_realtime_setup = XmCreatePushButton(pulldownMenu_realtime,
+            (char *)"pushButton_realtime_setup",
+            args, 
+            ac);
+        XtManageChild(pushButton_realtime_setup);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(pushButton_realtime_setup, XmNactivateCallback, BxManageCB, (XtPointer)"form_realtime_setup");
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(pulldownMenu_realtime, (char *)"Start", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(pulldownMenu_realtime, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        pushButton_realtime_start = XmCreatePushButton(pulldownMenu_realtime,
+            (char *)"pushButton_realtime_start",
+            args, 
+            ac);
+        XtManageChild(pushButton_realtime_start);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(pushButton_realtime_start, XmNactivateCallback, do_mbgrdviz_realtime_start, (XtPointer)0);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(pulldownMenu_realtime, (char *)"Stop", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(pulldownMenu_realtime, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        pushButton_realtime_stop = XmCreatePushButton(pulldownMenu_realtime,
+            (char *)"pushButton_realtime_stop",
+            args, 
+            ac);
+        XtManageChild(pushButton_realtime_stop);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(pushButton_realtime_stop, XmNactivateCallback, do_mbgrdviz_realtime_stop, (XtPointer)0);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(pulldownMenu_realtime, (char *)"Pause", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(pulldownMenu_realtime, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        pushButton_realtime_pause = XmCreatePushButton(pulldownMenu_realtime,
+            (char *)"pushButton_realtime_pause",
+            args, 
+            ac);
+        XtManageChild(pushButton_realtime_pause);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(pushButton_realtime_pause, XmNactivateCallback, do_mbgrdviz_realtime_pause, (XtPointer)0);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(pulldownMenu_realtime, (char *)"Resume", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(pulldownMenu_realtime, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        pushButton_realtime_resume = XmCreatePushButton(pulldownMenu_realtime,
+            (char *)"pushButton_realtime_resume",
+            args, 
+            ac);
+        XtManageChild(pushButton_realtime_resume);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(pushButton_realtime_resume, XmNactivateCallback, do_mbgrdviz_realtime_resume, (XtPointer)0);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNsubMenuId, pulldownMenu_realtime); ac++;
+    XtSetValues(cascadeButton_realtime, args, ac);
+    
+    ac = 0;
     XtSetArg(args[ac], XmNtitle, "About MBgrdviz..."); ac++;
     XtSetArg(args[ac], XmNwidth, 463); ac++;
-    XtSetArg(args[ac], XmNheight, 528); ac++;
+    XtSetArg(args[ac], XmNheight, 531); ac++;
     dialogShell_about = XmCreateDialogShell(mainWindow_mbgrdviz,
         (char *)"dialogShell_about",
         args, 
@@ -516,7 +704,7 @@ CreatemainWindow_mbgrdviz(Widget parent)
     XtSetArg(args[ac], XmNx, 8); ac++;
     XtSetArg(args[ac], XmNy, 32); ac++;
     XtSetArg(args[ac], XmNwidth, 463); ac++;
-    XtSetArg(args[ac], XmNheight, 528); ac++;
+    XtSetArg(args[ac], XmNheight, 531); ac++;
     bulletinBoard_about = XtCreateWidget((char *)"bulletinBoard_about",
         xmBulletinBoardWidgetClass,
         dialogShell_about,
@@ -531,7 +719,7 @@ CreatemainWindow_mbgrdviz(Widget parent)
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(bulletinBoard_about, (char *)"-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14", 
+            BX_CONVERT(bulletinBoard_about, (char *)"-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14", 
             XmRFontList, 0, &argok)); if (argok) ac++;
         XtSetArg(args[ac], XmNrecomputeSize, False); ac++;
         XtSetArg(args[ac], XmNx, 10); ac++;
@@ -559,7 +747,7 @@ CreatemainWindow_mbgrdviz(Widget parent)
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(bulletinBoard_about, (char *)"-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12", 
+            BX_CONVERT(bulletinBoard_about, (char *)"-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12", 
             XmRFontList, 0, &argok)); if (argok) ac++;
         XtSetArg(args[ac], XmNx, 10); ac++;
         XtSetArg(args[ac], XmNy, 280); ac++;
@@ -586,7 +774,7 @@ CreatemainWindow_mbgrdviz(Widget parent)
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(bulletinBoard_about, (char *)"-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12", 
+            BX_CONVERT(bulletinBoard_about, (char *)"-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12", 
             XmRFontList, 0, &argok)); if (argok) ac++;
         XtSetArg(args[ac], XmNx, 70); ac++;
         XtSetArg(args[ac], XmNy, 340); ac++;
@@ -613,7 +801,7 @@ CreatemainWindow_mbgrdviz(Widget parent)
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(bulletinBoard_about, (char *)"-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12", 
+            BX_CONVERT(bulletinBoard_about, (char *)"-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12", 
             XmRFontList, 0, &argok)); if (argok) ac++;
         XtSetArg(args[ac], XmNx, 230); ac++;
         XtSetArg(args[ac], XmNy, 340); ac++;
@@ -651,7 +839,7 @@ CreatemainWindow_mbgrdviz(Widget parent)
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(bulletinBoard_about, (char *)"-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24", 
+            BX_CONVERT(bulletinBoard_about, (char *)"-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24", 
             XmRFontList, 0, &argok)); if (argok) ac++;
         XtSetArg(args[ac], XmNx, 10); ac++;
         XtSetArg(args[ac], XmNy, 120); ac++;
@@ -689,7 +877,7 @@ CreatemainWindow_mbgrdviz(Widget parent)
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(bulletinBoard_about, (char *)"-*-times-bold-r-*-*-*-180-*-*-*-*-iso8859-1=TimesBold18,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24", 
+            BX_CONVERT(bulletinBoard_about, (char *)"-*-times-bold-r-*-*-*-180-*-*-*-*-iso8859-1=TimesBold18,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24", 
             XmRFontList, 0, &argok)); if (argok) ac++;
         XtSetArg(args[ac], XmNx, 10); ac++;
         XtSetArg(args[ac], XmNy, 10); ac++;
@@ -772,8 +960,8 @@ CreatemainWindow_mbgrdviz(Widget parent)
     XtAddCallback(fileSelectionBox, XmNokCallback, do_mbgrdviz_openfile, (XtPointer)0);
     
     ac = 0;
-    XtSetArg(args[ac], XmNwidth, 486); ac++;
-    XtSetArg(args[ac], XmNheight, 654); ac++;
+    XtSetArg(args[ac], XmNwidth, 476); ac++;
+    XtSetArg(args[ac], XmNheight, 641); ac++;
     dialogShell_arearoute = XmCreateDialogShell(mainWindow_mbgrdviz,
         (char *)"dialogShell_arearoute",
         args, 
@@ -788,10 +976,10 @@ CreatemainWindow_mbgrdviz(Widget parent)
         XtSetArg(args[ac], XmNdialogTitle, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNautoUnmanage, False); ac++;
         XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-        XtSetArg(args[ac], XmNx, 398); ac++;
-        XtSetArg(args[ac], XmNy, 186); ac++;
-        XtSetArg(args[ac], XmNwidth, 486); ac++;
-        XtSetArg(args[ac], XmNheight, 654); ac++;
+        XtSetArg(args[ac], XmNx, 8); ac++;
+        XtSetArg(args[ac], XmNy, 32); ac++;
+        XtSetArg(args[ac], XmNwidth, 476); ac++;
+        XtSetArg(args[ac], XmNheight, 641); ac++;
         bulletinBoard_arearoute = XtCreateWidget((char *)"bulletinBoard_arearoute",
             xmBulletinBoardWidgetClass,
             dialogShell_arearoute,
@@ -851,10 +1039,10 @@ CreatemainWindow_mbgrdviz(Widget parent)
     ac = 0;
     XtSetArg(args[ac], XmNarrowLayout, XmARROWS_END); ac++;
     XtSetArg(args[ac], XmNlayoutDirection, XmLEFT_TO_RIGHT); ac++;
-    XtSetArg(args[ac], XmNx, 240); ac++;
+    XtSetArg(args[ac], XmNx, 10); ac++;
     XtSetArg(args[ac], XmNy, 510); ac++;
     XtSetArg(args[ac], XmNwidth, 230); ac++;
-    XtSetArg(args[ac], XmNheight, 36); ac++;
+    XtSetArg(args[ac], XmNheight, 40); ac++;
     spinBox_arearoute_color = XmCreateSpinBox(bulletinBoard_arearoute,
         (char *)"spinBox_arearoute_color",
         args, 
@@ -863,11 +1051,13 @@ CreatemainWindow_mbgrdviz(Widget parent)
     XtAddCallback(spinBox_arearoute_color, XmNvalueChangedCallback, do_mbgrdviz_arearoute_parameterchange, (XtPointer)0);
     
     ac = 0;
+    XtSetArg(args[ac], XmNcursorPositionVisible, False); ac++;
     XtSetArg(args[ac], XmNvalue, ""); ac++;
     XtSetArg(args[ac], XmNeditable, False); ac++;
     XtSetArg(args[ac], XmNx, 2); ac++;
     XtSetArg(args[ac], XmNy, 0); ac++;
     XtSetArg(args[ac], XmNwidth, 200); ac++;
+    XtSetArg(args[ac], XmNheight, 40); ac++;
     XtSetArg(args[ac], XmNfontList, 
         BX_CONVERT(spinBox_arearoute_color, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
         XmRFontList, 0, &argok)); if (argok) ac++;
@@ -885,7 +1075,7 @@ CreatemainWindow_mbgrdviz(Widget parent)
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
-        XtSetArg(args[ac], XmNx, 240); ac++;
+        XtSetArg(args[ac], XmNx, 10); ac++;
         XtSetArg(args[ac], XmNy, 480); ac++;
         XtSetArg(args[ac], XmNwidth, 180); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
@@ -914,7 +1104,7 @@ CreatemainWindow_mbgrdviz(Widget parent)
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
         XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 480); ac++;
+        XtSetArg(args[ac], XmNy, 320); ac++;
         XtSetArg(args[ac], XmNwidth, 140); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList, 
@@ -935,7 +1125,7 @@ CreatemainWindow_mbgrdviz(Widget parent)
     
     ac = 0;
     XtSetArg(args[ac], XmNx, 10); ac++;
-    XtSetArg(args[ac], XmNy, 510); ac++;
+    XtSetArg(args[ac], XmNy, 350); ac++;
     XtSetArg(args[ac], XmNwidth, 230); ac++;
     XtSetArg(args[ac], XmNheight, 40); ac++;
     spinBox_arearoute_crosslines = XmCreateSpinBox(bulletinBoard_arearoute,
@@ -946,6 +1136,8 @@ CreatemainWindow_mbgrdviz(Widget parent)
     XtAddCallback(spinBox_arearoute_crosslines, XmNvalueChangedCallback, do_mbgrdviz_arearoute_parameterchange, (XtPointer)0);
     
     ac = 0;
+    XtSetArg(args[ac], XmNcursorPositionVisible, False); ac++;
+    XtSetArg(args[ac], XmNeditable, False); ac++;
     XtSetArg(args[ac], XmNx, 2); ac++;
     XtSetArg(args[ac], XmNy, 0); ac++;
     XtSetArg(args[ac], XmNwidth, 200); ac++;
@@ -968,8 +1160,8 @@ CreatemainWindow_mbgrdviz(Widget parent)
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 400); ac++;
+        XtSetArg(args[ac], XmNx, 240); ac++;
+        XtSetArg(args[ac], XmNy, 480); ac++;
         XtSetArg(args[ac], XmNwidth, 140); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList, 
@@ -1020,7 +1212,7 @@ CreatemainWindow_mbgrdviz(Widget parent)
     XtSetArg(args[ac], XmNx, 240); ac++;
     XtSetArg(args[ac], XmNy, 430); ac++;
     XtSetArg(args[ac], XmNwidth, 230); ac++;
-    XtSetArg(args[ac], XmNheight, 40); ac++;
+    XtSetArg(args[ac], XmNheight, 50); ac++;
     spinBox_arearoute_altitude = XmCreateSpinBox(bulletinBoard_arearoute,
         (char *)"spinBox_arearoute_altitude",
         args, 
@@ -1029,7 +1221,9 @@ CreatemainWindow_mbgrdviz(Widget parent)
     XtAddCallback(spinBox_arearoute_altitude, XmNvalueChangedCallback, do_mbgrdviz_arearoute_parameterchange, (XtPointer)0);
     
     ac = 0;
-    XtSetArg(args[ac], XmNy, 0); ac++;
+    XtSetArg(args[ac], XmNcursorPositionVisible, False); ac++;
+    XtSetArg(args[ac], XmNeditable, False); ac++;
+    XtSetArg(args[ac], XmNy, 5); ac++;
     XtSetArg(args[ac], XmNwidth, 200); ac++;
     XtSetArg(args[ac], XmNheight, 40); ac++;
     XtSetArg(args[ac], XmNfontList, 
@@ -1043,10 +1237,10 @@ CreatemainWindow_mbgrdviz(Widget parent)
     XtAddCallback(spinText_arearoute_altitude, XmNvalueChangedCallback, do_mbgrdviz_arearoute_altitude_increment, (XtPointer)0);
     
     ac = 0;
-    XtSetArg(args[ac], XmNx, 10); ac++;
-    XtSetArg(args[ac], XmNy, 430); ac++;
+    XtSetArg(args[ac], XmNx, 240); ac++;
+    XtSetArg(args[ac], XmNy, 510); ac++;
     XtSetArg(args[ac], XmNwidth, 230); ac++;
-    XtSetArg(args[ac], XmNheight, 40); ac++;
+    XtSetArg(args[ac], XmNheight, 50); ac++;
     spinBox_arearoute_depth = XmCreateSpinBox(bulletinBoard_arearoute,
         (char *)"spinBox_arearoute_depth",
         args, 
@@ -1055,7 +1249,10 @@ CreatemainWindow_mbgrdviz(Widget parent)
     XtAddCallback(spinBox_arearoute_depth, XmNvalueChangedCallback, do_mbgrdviz_arearoute_parameterchange, (XtPointer)0);
     
     ac = 0;
-    XtSetArg(args[ac], XmNy, 0); ac++;
+    XtSetArg(args[ac], XmNcursorPositionVisible, False); ac++;
+    XtSetArg(args[ac], XmNeditable, False); ac++;
+    XtSetArg(args[ac], XmNx, 2); ac++;
+    XtSetArg(args[ac], XmNy, 5); ac++;
     XtSetArg(args[ac], XmNwidth, 200); ac++;
     XtSetArg(args[ac], XmNheight, 40); ac++;
     XtSetArg(args[ac], XmNfontList, 
@@ -1071,10 +1268,10 @@ CreatemainWindow_mbgrdviz(Widget parent)
     ac = 0;
     XtSetArg(args[ac], XmNarrowLayout, XmARROWS_END); ac++;
     XtSetArg(args[ac], XmNlayoutDirection, XmLEFT_TO_RIGHT); ac++;
-    XtSetArg(args[ac], XmNx, 240); ac++;
+    XtSetArg(args[ac], XmNx, 10); ac++;
     XtSetArg(args[ac], XmNy, 270); ac++;
     XtSetArg(args[ac], XmNwidth, 230); ac++;
-    XtSetArg(args[ac], XmNheight, 36); ac++;
+    XtSetArg(args[ac], XmNheight, 40); ac++;
     spinBox_arearoute_direction = XmCreateSpinBox(bulletinBoard_arearoute,
         (char *)"spinBox_arearoute_direction",
         args, 
@@ -1083,11 +1280,13 @@ CreatemainWindow_mbgrdviz(Widget parent)
     XtAddCallback(spinBox_arearoute_direction, XmNvalueChangedCallback, do_mbgrdviz_arearoute_parameterchange, (XtPointer)0);
     
     ac = 0;
+    XtSetArg(args[ac], XmNcursorPositionVisible, False); ac++;
     XtSetArg(args[ac], XmNvalue, ""); ac++;
     XtSetArg(args[ac], XmNeditable, False); ac++;
     XtSetArg(args[ac], XmNx, 2); ac++;
     XtSetArg(args[ac], XmNy, 0); ac++;
     XtSetArg(args[ac], XmNwidth, 200); ac++;
+    XtSetArg(args[ac], XmNheight, 40); ac++;
     XtSetArg(args[ac], XmNfontList, 
         BX_CONVERT(spinBox_arearoute_direction, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
         XmRFontList, 0, &argok)); if (argok) ac++;
@@ -1105,7 +1304,7 @@ CreatemainWindow_mbgrdviz(Widget parent)
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
-        XtSetArg(args[ac], XmNx, 240); ac++;
+        XtSetArg(args[ac], XmNx, 10); ac++;
         XtSetArg(args[ac], XmNy, 240); ac++;
         XtSetArg(args[ac], XmNwidth, 180); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
@@ -1129,7 +1328,7 @@ CreatemainWindow_mbgrdviz(Widget parent)
     XtSetArg(args[ac], XmNx, 240); ac++;
     XtSetArg(args[ac], XmNy, 350); ac++;
     XtSetArg(args[ac], XmNwidth, 230); ac++;
-    XtSetArg(args[ac], XmNheight, 40); ac++;
+    XtSetArg(args[ac], XmNheight, 50); ac++;
     spinBox_arearoute_swathwidth = XmCreateSpinBox(bulletinBoard_arearoute,
         (char *)"spinBox_arearoute_swathwidth",
         args, 
@@ -1138,7 +1337,9 @@ CreatemainWindow_mbgrdviz(Widget parent)
     XtAddCallback(spinBox_arearoute_swathwidth, XmNvalueChangedCallback, do_mbgrdviz_arearoute_parameterchange, (XtPointer)0);
     
     ac = 0;
-    XtSetArg(args[ac], XmNy, 0); ac++;
+    XtSetArg(args[ac], XmNcursorPositionVisible, False); ac++;
+    XtSetArg(args[ac], XmNeditable, False); ac++;
+    XtSetArg(args[ac], XmNy, 5); ac++;
     XtSetArg(args[ac], XmNwidth, 200); ac++;
     XtSetArg(args[ac], XmNheight, 40); ac++;
     XtSetArg(args[ac], XmNfontList, 
@@ -1188,7 +1389,7 @@ CreatemainWindow_mbgrdviz(Widget parent)
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
         XtSetArg(args[ac], XmNx, 240); ac++;
-        XtSetArg(args[ac], XmNy, 160); ac++;
+        XtSetArg(args[ac], XmNy, 240); ac++;
         XtSetArg(args[ac], XmNwidth, 180); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList, 
@@ -1211,9 +1412,9 @@ CreatemainWindow_mbgrdviz(Widget parent)
     XtSetArg(args[ac], XmNarrowLayout, XmARROWS_END); ac++;
     XtSetArg(args[ac], XmNlayoutDirection, XmLEFT_TO_RIGHT); ac++;
     XtSetArg(args[ac], XmNx, 240); ac++;
-    XtSetArg(args[ac], XmNy, 190); ac++;
+    XtSetArg(args[ac], XmNy, 270); ac++;
     XtSetArg(args[ac], XmNwidth, 230); ac++;
-    XtSetArg(args[ac], XmNheight, 36); ac++;
+    XtSetArg(args[ac], XmNheight, 50); ac++;
     spinBox_arearoute_platform = XmCreateSpinBox(bulletinBoard_arearoute,
         (char *)"spinBox_arearoute_platform",
         args, 
@@ -1222,11 +1423,13 @@ CreatemainWindow_mbgrdviz(Widget parent)
     XtAddCallback(spinBox_arearoute_platform, XmNvalueChangedCallback, do_mbgrdviz_arearoute_parameterchange, (XtPointer)0);
     
     ac = 0;
+    XtSetArg(args[ac], XmNcursorPositionVisible, False); ac++;
     XtSetArg(args[ac], XmNvalue, ""); ac++;
     XtSetArg(args[ac], XmNeditable, False); ac++;
     XtSetArg(args[ac], XmNx, 2); ac++;
-    XtSetArg(args[ac], XmNy, 0); ac++;
+    XtSetArg(args[ac], XmNy, 5); ac++;
     XtSetArg(args[ac], XmNwidth, 200); ac++;
+    XtSetArg(args[ac], XmNheight, 40); ac++;
     XtSetArg(args[ac], XmNfontList, 
         BX_CONVERT(spinBox_arearoute_platform, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
         XmRFontList, 0, &argok)); if (argok) ac++;
@@ -1237,10 +1440,10 @@ CreatemainWindow_mbgrdviz(Widget parent)
     XtManageChild(spinText_arearoute_platform);
     
     ac = 0;
-    XtSetArg(args[ac], XmNx, 10); ac++;
-    XtSetArg(args[ac], XmNy, 350); ac++;
+    XtSetArg(args[ac], XmNx, 240); ac++;
+    XtSetArg(args[ac], XmNy, 190); ac++;
     XtSetArg(args[ac], XmNwidth, 230); ac++;
-    XtSetArg(args[ac], XmNheight, 40); ac++;
+    XtSetArg(args[ac], XmNheight, 50); ac++;
     spinBox_arearoute_linespacing = XmCreateSpinBox(bulletinBoard_arearoute,
         (char *)"spinBox_arearoute_linespacing",
         args, 
@@ -1249,7 +1452,10 @@ CreatemainWindow_mbgrdviz(Widget parent)
     XtAddCallback(spinBox_arearoute_linespacing, XmNvalueChangedCallback, do_mbgrdviz_arearoute_parameterchange, (XtPointer)0);
     
     ac = 0;
-    XtSetArg(args[ac], XmNy, 0); ac++;
+    XtSetArg(args[ac], XmNcursorPositionVisible, False); ac++;
+    XtSetArg(args[ac], XmNeditable, False); ac++;
+    XtSetArg(args[ac], XmNx, 2); ac++;
+    XtSetArg(args[ac], XmNy, 5); ac++;
     XtSetArg(args[ac], XmNwidth, 200); ac++;
     XtSetArg(args[ac], XmNheight, 40); ac++;
     XtSetArg(args[ac], XmNfontList, 
@@ -1271,7 +1477,7 @@ CreatemainWindow_mbgrdviz(Widget parent)
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
         XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 240); ac++;
+        XtSetArg(args[ac], XmNy, 400); ac++;
         XtSetArg(args[ac], XmNwidth, 210); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList, 
@@ -1292,7 +1498,7 @@ CreatemainWindow_mbgrdviz(Widget parent)
     
     ac = 0;
     XtSetArg(args[ac], XmNx, 10); ac++;
-    XtSetArg(args[ac], XmNy, 270); ac++;
+    XtSetArg(args[ac], XmNy, 430); ac++;
     XtSetArg(args[ac], XmNwidth, 230); ac++;
     XtSetArg(args[ac], XmNheight, 40); ac++;
     spinBox_arearoute_interleaving = XmCreateSpinBox(bulletinBoard_arearoute,
@@ -1303,7 +1509,11 @@ CreatemainWindow_mbgrdviz(Widget parent)
     XtAddCallback(spinBox_arearoute_interleaving, XmNvalueChangedCallback, do_mbgrdviz_arearoute_parameterchange, (XtPointer)0);
     
     ac = 0;
+    XtSetArg(args[ac], XmNcursorPositionVisible, False); ac++;
     XtSetArg(args[ac], XmNeditable, False); ac++;
+    XtSetArg(args[ac], XmNx, 2); ac++;
+    XtSetArg(args[ac], XmNy, 0); ac++;
+    XtSetArg(args[ac], XmNheight, 40); ac++;
     XtSetArg(args[ac], XmNfontList, 
         BX_CONVERT(spinBox_arearoute_interleaving, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
         XmRFontList, 0, &argok)); if (argok) ac++;
@@ -1352,7 +1562,7 @@ CreatemainWindow_mbgrdviz(Widget parent)
     XtSetArg(args[ac], XmNx, 10); ac++;
     XtSetArg(args[ac], XmNy, 190); ac++;
     XtSetArg(args[ac], XmNwidth, 230); ac++;
-    XtSetArg(args[ac], XmNheight, 36); ac++;
+    XtSetArg(args[ac], XmNheight, 50); ac++;
     spinBox_arearoute_linecontrol = XmCreateSpinBox(bulletinBoard_arearoute,
         (char *)"spinBox_arearoute_linecontrol",
         args, 
@@ -1361,11 +1571,13 @@ CreatemainWindow_mbgrdviz(Widget parent)
     XtAddCallback(spinBox_arearoute_linecontrol, XmNvalueChangedCallback, do_mbgrdviz_arearoute_parameterchange, (XtPointer)0);
     
     ac = 0;
+    XtSetArg(args[ac], XmNcursorPositionVisible, False); ac++;
     XtSetArg(args[ac], XmNvalue, ""); ac++;
     XtSetArg(args[ac], XmNeditable, False); ac++;
     XtSetArg(args[ac], XmNx, 2); ac++;
-    XtSetArg(args[ac], XmNy, 0); ac++;
+    XtSetArg(args[ac], XmNy, 5); ac++;
     XtSetArg(args[ac], XmNwidth, 200); ac++;
+    XtSetArg(args[ac], XmNheight, 40); ac++;
     XtSetArg(args[ac], XmNfontList, 
         BX_CONVERT(spinBox_arearoute_linecontrol, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
         XmRFontList, 0, &argok)); if (argok) ac++;
@@ -1411,8 +1623,8 @@ CreatemainWindow_mbgrdviz(Widget parent)
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 320); ac++;
+        XtSetArg(args[ac], XmNx, 240); ac++;
+        XtSetArg(args[ac], XmNy, 160); ac++;
         XtSetArg(args[ac], XmNwidth, 140); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList, 
@@ -1487,6 +1699,566 @@ CreatemainWindow_mbgrdviz(Widget parent)
     
     XtAddCallback(pushButton_arearoute_dismiss, XmNactivateCallback, BxUnmanageCB, (XtPointer)"bulletinBoard_arearoute");
     XtAddCallback(pushButton_arearoute_dismiss, XmNactivateCallback, do_mbgrdviz_arearoute_dismiss, (XtPointer)0);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNtitle, "Realtime Setup"); ac++;
+    XtSetArg(args[ac], XmNwidth, 497); ac++;
+    XtSetArg(args[ac], XmNheight, 540); ac++;
+    dialogShell_realtimesetup = XmCreateDialogShell(mainWindow_mbgrdviz,
+        (char *)"dialogShell_realtimesetup",
+        args, 
+        ac);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNautoUnmanage, False); ac++;
+    XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
+    XtSetArg(args[ac], XmNx, 307); ac++;
+    XtSetArg(args[ac], XmNy, 216); ac++;
+    XtSetArg(args[ac], XmNwidth, 497); ac++;
+    XtSetArg(args[ac], XmNheight, 540); ac++;
+    form_realtime_setup = XtCreateWidget((char *)"form_realtime_setup",
+        xmFormWidgetClass,
+        dialogShell_realtimesetup,
+        args, 
+        ac);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(form_realtime_setup, (char *)":::t\"Test Status: No realtime data available\"\"Path: Unknown\"", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
+        XtSetArg(args[ac], XmNx, 10); ac++;
+        XtSetArg(args[ac], XmNy, 162); ac++;
+        XtSetArg(args[ac], XmNwidth, 480); ac++;
+        XtSetArg(args[ac], XmNheight, 60); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(form_realtime_setup, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        label_realtimesetup_teststatus = XmCreateLabel(form_realtime_setup,
+            (char *)"label_realtimesetup_teststatus",
+            args, 
+            ac);
+        XtManageChild(label_realtimesetup_teststatus);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNx, 210); ac++;
+    XtSetArg(args[ac], XmNy, 92); ac++;
+    XtSetArg(args[ac], XmNwidth, 237); ac++;
+    XtSetArg(args[ac], XmNheight, 65); ac++;
+    XtSetArg(args[ac], XmNisHomogeneous, False); ac++;
+    radioBox_realtimesetup_pathmode = XmCreateRadioBox(form_realtime_setup,
+        (char *)"radioBox_realtimesetup_pathmode",
+        args, 
+        ac);
+    XtManageChild(radioBox_realtimesetup_pathmode);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(radioBox_realtimesetup_pathmode, (char *)"Most Recent File in Directory", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
+        XtSetArg(args[ac], XmNwidth, 231); ac++;
+        XtSetArg(args[ac], XmNheight, 28); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(radioBox_realtimesetup_pathmode, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        toggleButton_realtimesetup_recent = XmCreateToggleButton(radioBox_realtimesetup_pathmode,
+            (char *)"toggleButton_realtimesetup_recent",
+            args, 
+            ac);
+        XtManageChild(toggleButton_realtimesetup_recent);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(toggleButton_realtimesetup_recent, XmNvalueChangedCallback, do_mbgrdviz_realtimesetup_pathmode, (XtPointer)0);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(radioBox_realtimesetup_pathmode, (char *)"Use Pointer File", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
+        XtSetArg(args[ac], XmNwidth, 231); ac++;
+        XtSetArg(args[ac], XmNheight, 28); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(radioBox_realtimesetup_pathmode, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        toggleButton_realtimesetup_pointer = XmCreateToggleButton(radioBox_realtimesetup_pathmode,
+            (char *)"toggleButton_realtimesetup_pointer",
+            args, 
+            ac);
+        XtManageChild(toggleButton_realtimesetup_pointer);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNx, -700); ac++;
+    XtSetArg(args[ac], XmNy, -200); ac++;
+    XtSetArg(args[ac], XmNwidth, 100); ac++;
+    XtSetArg(args[ac], XmNheight, 30); ac++;
+    toggleButton = XmCreateToggleButton(form_realtime_setup,
+        (char *)"toggleButton",
+        args, 
+        ac);
+    XtManageChild(toggleButton);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(form_realtime_setup, (char *)"Dismiss", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNx, 200); ac++;
+        XtSetArg(args[ac], XmNy, 471); ac++;
+        XtSetArg(args[ac], XmNwidth, 100); ac++;
+        XtSetArg(args[ac], XmNheight, 52); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(form_realtime_setup, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        pushButton_realtimesetup_dismiss = XmCreatePushButton(form_realtime_setup,
+            (char *)"pushButton_realtimesetup_dismiss",
+            args, 
+            ac);
+        XtManageChild(pushButton_realtimesetup_dismiss);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(pushButton_realtimesetup_dismiss, XmNactivateCallback, BxUnmanageCB, (XtPointer)"form_realtime_setup");
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNx, 10); ac++;
+    XtSetArg(args[ac], XmNy, 442); ac++;
+    XtSetArg(args[ac], XmNwidth, 476); ac++;
+    XtSetArg(args[ac], XmNheight, 20); ac++;
+    separator6 = XmCreateSeparator(form_realtime_setup,
+        (char *)"separator6",
+        args, 
+        ac);
+    XtManageChild(separator6);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNx, 10); ac++;
+    XtSetArg(args[ac], XmNy, 392); ac++;
+    XtSetArg(args[ac], XmNwidth, 480); ac++;
+    XtSetArg(args[ac], XmNheight, 50); ac++;
+    spinBox_realtimesetup_icon = XmCreateSpinBox(form_realtime_setup,
+        (char *)"spinBox_realtimesetup_icon",
+        args, 
+        ac);
+    XtManageChild(spinBox_realtimesetup_icon);
+    XtAddCallback(spinBox_realtimesetup_icon, XmNvalueChangedCallback, do_mbgrdviz_realtimesetup_icon, (XtPointer)0);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNeditable, False); ac++;
+    XtSetArg(args[ac], XmNx, 2); ac++;
+    XtSetArg(args[ac], XmNy, 5); ac++;
+    XtSetArg(args[ac], XmNwidth, 410); ac++;
+    XtSetArg(args[ac], XmNheight, 40); ac++;
+    XtSetArg(args[ac], XmNfontList, 
+        BX_CONVERT(spinBox_realtimesetup_icon, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+        XmRFontList, 0, &argok)); if (argok) ac++;
+    spinText_realtimesetup_icon = XmCreateTextField(spinBox_realtimesetup_icon,
+        (char *)"spinText_realtimesetup_icon",
+        args, 
+        ac);
+    XtManageChild(spinText_realtimesetup_icon);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(form_realtime_setup, (char *)"Realtime Display Icon:", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNx, 10); ac++;
+        XtSetArg(args[ac], XmNy, 362); ac++;
+        XtSetArg(args[ac], XmNwidth, 480); ac++;
+        XtSetArg(args[ac], XmNheight, 30); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(form_realtime_setup, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        label_realtime_setup_icon = XmCreateLabel(form_realtime_setup,
+            (char *)"label_realtime_setup_icon",
+            args, 
+            ac);
+        XtManageChild(label_realtime_setup_icon);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(form_realtime_setup, (char *)"Browse", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNx, 10); ac++;
+        XtSetArg(args[ac], XmNy, 100); ac++;
+        XtSetArg(args[ac], XmNwidth, 92); ac++;
+        XtSetArg(args[ac], XmNheight, 52); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(form_realtime_setup, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        pushButton_realtimesetup_pathbrowse = XmCreatePushButton(form_realtime_setup,
+            (char *)"pushButton_realtimesetup_pathbrowse",
+            args, 
+            ac);
+        XtManageChild(pushButton_realtimesetup_pathbrowse);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(pushButton_realtimesetup_pathbrowse, XmNactivateCallback, do_mbgrdviz_realtimesetup_path_browse, (XtPointer)0);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(form_realtime_setup, (char *)"Test", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNx, 110); ac++;
+        XtSetArg(args[ac], XmNy, 100); ac++;
+        XtSetArg(args[ac], XmNwidth, 92); ac++;
+        XtSetArg(args[ac], XmNheight, 52); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(form_realtime_setup, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        pushButton_realtimesetup_pathtest = XmCreatePushButton(form_realtime_setup,
+            (char *)"pushButton_realtimesetup_pathtest",
+            args, 
+            ac);
+        XtManageChild(pushButton_realtimesetup_pathtest);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(pushButton_realtimesetup_pathtest, XmNactivateCallback, do_mbgrdviz_realtimesetup_path_test, (XtPointer)0);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNx, 10); ac++;
+    XtSetArg(args[ac], XmNy, 342); ac++;
+    XtSetArg(args[ac], XmNwidth, 476); ac++;
+    XtSetArg(args[ac], XmNheight, 20); ac++;
+    separator5 = XmCreateSeparator(form_realtime_setup,
+        (char *)"separator5",
+        args, 
+        ac);
+    XtManageChild(separator5);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(form_realtime_setup, (char *)"Data read before update", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNtitleString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNvalue, 1); ac++;
+        XtSetArg(args[ac], XmNmaximum, 25); ac++;
+        XtSetArg(args[ac], XmNshowArrows, TRUE); ac++;
+        XtSetArg(args[ac], XmNshowValue, TRUE); ac++;
+        XtSetArg(args[ac], XmNorientation, XmHORIZONTAL); ac++;
+        XtSetArg(args[ac], XmNx, 10); ac++;
+        XtSetArg(args[ac], XmNy, 272); ac++;
+        XtSetArg(args[ac], XmNwidth, 476); ac++;
+        XtSetArg(args[ac], XmNheight, 63); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(form_realtime_setup, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        scale_realtimesetup_update = XmCreateScale(form_realtime_setup,
+            (char *)"scale_realtimesetup_update",
+            args, 
+            ac);
+        XtManageChild(scale_realtimesetup_update);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(scale_realtimesetup_update, XmNvalueChangedCallback, do_mbgrdviz_realtimesetup_updaterate, (XtPointer)0);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(form_realtime_setup, (char *)"Display Update Rate:", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_CENTER); ac++;
+        XtSetArg(args[ac], XmNx, 10); ac++;
+        XtSetArg(args[ac], XmNy, 242); ac++;
+        XtSetArg(args[ac], XmNwidth, 476); ac++;
+        XtSetArg(args[ac], XmNheight, 30); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(form_realtime_setup, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        label_realtimesetup_update = XmCreateLabel(form_realtime_setup,
+            (char *)"label_realtimesetup_update",
+            args, 
+            ac);
+        XtManageChild(label_realtimesetup_update);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNx, 10); ac++;
+    XtSetArg(args[ac], XmNy, 222); ac++;
+    XtSetArg(args[ac], XmNwidth, 476); ac++;
+    XtSetArg(args[ac], XmNheight, 20); ac++;
+    separator4 = XmCreateSeparator(form_realtime_setup,
+        (char *)"separator4",
+        args, 
+        ac);
+    XtManageChild(separator4);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNx, 10); ac++;
+    XtSetArg(args[ac], XmNy, 50); ac++;
+    XtSetArg(args[ac], XmNwidth, 476); ac++;
+    XtSetArg(args[ac], XmNheight, 40); ac++;
+    XtSetArg(args[ac], XmNfontList, 
+        BX_CONVERT(form_realtime_setup, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+        XmRFontList, 0, &argok)); if (argok) ac++;
+    textField_realtimesetup_path = XmCreateTextField(form_realtime_setup,
+        (char *)"textField_realtimesetup_path",
+        args, 
+        ac);
+    XtManageChild(textField_realtimesetup_path);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(form_realtime_setup, (char *)"Realtime Nav Source Path:", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_CENTER); ac++;
+        XtSetArg(args[ac], XmNx, 10); ac++;
+        XtSetArg(args[ac], XmNy, 10); ac++;
+        XtSetArg(args[ac], XmNwidth, 471); ac++;
+        XtSetArg(args[ac], XmNheight, 40); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(form_realtime_setup, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        label_realtimesetup_path = XmCreateLabel(form_realtime_setup,
+            (char *)"label_realtimesetup_path",
+            args, 
+            ac);
+        XtManageChild(label_realtimesetup_path);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNtopAttachment, XmATTACH_WIDGET); ac++;
+    XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_NONE); ac++;
+    XtSetArg(args[ac], XmNbottomOffset, 0); ac++;
+    XtSetArg(args[ac], XmNleftOffset, 10); ac++;
+    XtSetArg(args[ac], XmNrightOffset, 7); ac++;
+    XtSetArg(args[ac], XmNtopOffset, 72); ac++;
+    XtSetArg(args[ac], XmNtopWidget, textField_realtimesetup_path); ac++;
+    XtSetValues(label_realtimesetup_teststatus, args, ac);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNtopAttachment, XmATTACH_WIDGET); ac++;
+    XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_WIDGET); ac++;
+    XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_NONE); ac++;
+    XtSetArg(args[ac], XmNbottomOffset, 0); ac++;
+    XtSetArg(args[ac], XmNleftOffset, 8); ac++;
+    XtSetArg(args[ac], XmNrightOffset, 50); ac++;
+    XtSetArg(args[ac], XmNtopOffset, 2); ac++;
+    XtSetArg(args[ac], XmNleftWidget, pushButton_realtimesetup_pathtest); ac++;
+    XtSetArg(args[ac], XmNtopWidget, textField_realtimesetup_path); ac++;
+    XtSetValues(radioBox_realtimesetup_pathmode, args, ac);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNtopAttachment, XmATTACH_WIDGET); ac++;
+    XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_NONE); ac++;
+    XtSetArg(args[ac], XmNbottomOffset, 0); ac++;
+    XtSetArg(args[ac], XmNleftOffset, 200); ac++;
+    XtSetArg(args[ac], XmNrightOffset, 197); ac++;
+    XtSetArg(args[ac], XmNtopOffset, 9); ac++;
+    XtSetArg(args[ac], XmNtopWidget, separator6); ac++;
+    XtSetValues(pushButton_realtimesetup_dismiss, args, ac);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNtopAttachment, XmATTACH_WIDGET); ac++;
+    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_NONE); ac++;
+    XtSetArg(args[ac], XmNbottomOffset, 0); ac++;
+    XtSetArg(args[ac], XmNleftOffset, 10); ac++;
+    XtSetArg(args[ac], XmNtopOffset, 0); ac++;
+    XtSetArg(args[ac], XmNtopWidget, spinBox_realtimesetup_icon); ac++;
+    XtSetValues(separator6, args, ac);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNtopAttachment, XmATTACH_WIDGET); ac++;
+    XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_NONE); ac++;
+    XtSetArg(args[ac], XmNbottomOffset, 0); ac++;
+    XtSetArg(args[ac], XmNleftOffset, 10); ac++;
+    XtSetArg(args[ac], XmNrightOffset, 7); ac++;
+    XtSetArg(args[ac], XmNtopOffset, 0); ac++;
+    XtSetArg(args[ac], XmNtopWidget, label_realtime_setup_icon); ac++;
+    XtSetValues(spinBox_realtimesetup_icon, args, ac);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNtopAttachment, XmATTACH_WIDGET); ac++;
+    XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_NONE); ac++;
+    XtSetArg(args[ac], XmNbottomOffset, 0); ac++;
+    XtSetArg(args[ac], XmNleftOffset, 10); ac++;
+    XtSetArg(args[ac], XmNrightOffset, 7); ac++;
+    XtSetArg(args[ac], XmNtopOffset, 0); ac++;
+    XtSetArg(args[ac], XmNtopWidget, separator5); ac++;
+    XtSetValues(label_realtime_setup_icon, args, ac);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNtopAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNrightAttachment, XmATTACH_NONE); ac++;
+    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_NONE); ac++;
+    XtSetArg(args[ac], XmNbottomOffset, 0); ac++;
+    XtSetArg(args[ac], XmNleftOffset, 10); ac++;
+    XtSetArg(args[ac], XmNrightOffset, 0); ac++;
+    XtSetArg(args[ac], XmNtopOffset, 100); ac++;
+    XtSetValues(pushButton_realtimesetup_pathbrowse, args, ac);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNtopAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNrightAttachment, XmATTACH_NONE); ac++;
+    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_WIDGET); ac++;
+    XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_NONE); ac++;
+    XtSetArg(args[ac], XmNbottomOffset, 0); ac++;
+    XtSetArg(args[ac], XmNleftOffset, 8); ac++;
+    XtSetArg(args[ac], XmNrightOffset, 0); ac++;
+    XtSetArg(args[ac], XmNtopOffset, 100); ac++;
+    XtSetArg(args[ac], XmNleftWidget, pushButton_realtimesetup_pathbrowse); ac++;
+    XtSetValues(pushButton_realtimesetup_pathtest, args, ac);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNtopAttachment, XmATTACH_WIDGET); ac++;
+    XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_NONE); ac++;
+    XtSetArg(args[ac], XmNbottomOffset, 0); ac++;
+    XtSetArg(args[ac], XmNleftOffset, 10); ac++;
+    XtSetArg(args[ac], XmNrightOffset, 11); ac++;
+    XtSetArg(args[ac], XmNtopOffset, 7); ac++;
+    XtSetArg(args[ac], XmNtopWidget, scale_realtimesetup_update); ac++;
+    XtSetValues(separator5, args, ac);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNtopAttachment, XmATTACH_WIDGET); ac++;
+    XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_NONE); ac++;
+    XtSetArg(args[ac], XmNbottomOffset, 0); ac++;
+    XtSetArg(args[ac], XmNleftOffset, 10); ac++;
+    XtSetArg(args[ac], XmNrightOffset, 11); ac++;
+    XtSetArg(args[ac], XmNtopOffset, 0); ac++;
+    XtSetArg(args[ac], XmNtopWidget, label_realtimesetup_update); ac++;
+    XtSetValues(scale_realtimesetup_update, args, ac);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNtopAttachment, XmATTACH_WIDGET); ac++;
+    XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_NONE); ac++;
+    XtSetArg(args[ac], XmNbottomOffset, 0); ac++;
+    XtSetArg(args[ac], XmNleftOffset, 10); ac++;
+    XtSetArg(args[ac], XmNrightOffset, 11); ac++;
+    XtSetArg(args[ac], XmNtopOffset, 0); ac++;
+    XtSetArg(args[ac], XmNtopWidget, separator4); ac++;
+    XtSetValues(label_realtimesetup_update, args, ac);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNtopAttachment, XmATTACH_WIDGET); ac++;
+    XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_NONE); ac++;
+    XtSetArg(args[ac], XmNbottomOffset, 0); ac++;
+    XtSetArg(args[ac], XmNleftOffset, 10); ac++;
+    XtSetArg(args[ac], XmNrightOffset, 11); ac++;
+    XtSetArg(args[ac], XmNtopOffset, 0); ac++;
+    XtSetArg(args[ac], XmNtopWidget, label_realtimesetup_teststatus); ac++;
+    XtSetValues(separator4, args, ac);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNtopAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_NONE); ac++;
+    XtSetArg(args[ac], XmNleftOffset, 10); ac++;
+    XtSetArg(args[ac], XmNrightOffset, 11); ac++;
+    XtSetArg(args[ac], XmNtopOffset, 50); ac++;
+    XtSetValues(textField_realtimesetup_path, args, ac);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNleftOffset, 10); ac++;
+    XtSetArg(args[ac], XmNrightOffset, 16); ac++;
+    XtSetArg(args[ac], XmNtopOffset, 10); ac++;
+    XtSetValues(label_realtimesetup_path, args, ac);
+    
     ac = 0;
     XtSetArg(args[ac], XmNnumValues, 0); ac++;
     XtSetArg(args[ac], XmNpositionType, XmPOSITION_VALUE); ac++;

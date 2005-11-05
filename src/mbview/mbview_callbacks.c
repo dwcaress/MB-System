@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbview_callbacks.c	10/7/2002
- *    $Id: mbview_callbacks.c,v 5.8 2005-02-18 07:32:55 caress Exp $
+ *    $Id: mbview_callbacks.c,v 5.9 2005-11-05 01:11:47 caress Exp $
  *
  *    Copyright (c) 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -18,6 +18,9 @@
  * Date:	October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2005/02/18 07:32:55  caress
+ * Fixed nav display and button sensitivity.
+ *
  * Revision 5.7  2005/02/17 07:35:08  caress
  * Moving towards 5.0.6 release.
  *
@@ -110,11 +113,11 @@
 /*------------------------------------------------------------------------------*/
 
 /* local variables */
-Cardinal 	ac;
-Arg      	args[256];
-char		value_text[MB_PATH_MAXLINE];
+static Cardinal 	ac;
+static Arg      	args[256];
+static char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_callbacks.c,v 5.8 2005-02-18 07:32:55 caress Exp $";
+static char rcs_id[]="$Id: mbview_callbacks.c,v 5.9 2005-11-05 01:11:47 caress Exp $";
 
 /* function prototypes */
 
@@ -449,6 +452,9 @@ int mbview_reset_shared(int mode)
 		shared.topLevelShell_navlist = NULL;	
 		shared.mainWindow_navlist = NULL;
 		}
+    	
+	/* global lon lat print style */
+	shared.lonlatstyle = MBV_LONLAT_MINUTES;
 
 	/* site data */
 	shared.shareddata.site_mode = MBV_SITE_OFF;
@@ -827,6 +833,7 @@ int mbview_reset(int instance)
 		view->contourhirez = MB_NO;
 		view->contourfullrez = MB_NO;
 
+		/* grid display bounds */
 		view->xmin = 0.0;
 		view->xmax = 0.0;
 		view->ymin = 0.0;
@@ -835,7 +842,7 @@ int mbview_reset(int instance)
 		view->yorigin = 0.0;
 		view->zorigin = 0.0;
 		view->scale = 0.0;
-
+ 
 		view->offset2d_x = 0.0;
 		view->offset2d_y = 0.0;
 		view->offset2d_x_save = 0.0;
@@ -1848,9 +1855,12 @@ int mbview_open(int verbose, int instance, int *error)
 		XtSetValues(view->mb3dview.mbview_pushButton_colorbounds_dismiss, args, ac);
 		XtSetValues(view->mb3dview.mbview_dialogShell_resolution, args, ac);
 		XtSetValues(view->mb3dview.mbview_bulletinBoard_resolution, args, ac);
-		XtSetValues(view->mb3dview.mbview_label_lowresolution, args, ac);
+		XtSetValues(view->mb3dview.mbview_label_gridrenderres, args, ac);
+		XtSetValues(view->mb3dview.mbview_label_navrenderdecimation, args, ac);
 		XtSetValues(view->mb3dview.mbview_scale_mediumresolution, args, ac);
 		XtSetValues(view->mb3dview.mbview_scale_lowresolution, args, ac);
+		XtSetValues(view->mb3dview.mbview_scale_navmediumresolution, args, ac);
+		XtSetValues(view->mb3dview.mbview_scale_navlowresolution, args, ac);
 		XtSetValues(view->mb3dview.mbview_pushButton_resolution_dismiss, args, ac);
 		XtSetValues(view->mb3dview.mbview_dialogShell_message, args, ac);
 		XtSetValues(view->mb3dview.mbview_bulletinBoard_message, args, ac);
@@ -2759,7 +2769,7 @@ do_mbview_set_projection_label(int instance)
 		else if (sscanf(data->primary_grid_projection_id, "epsg%d", &projectionid) == 1
 			&& projectionid >= 32700 && projectionid < 32800)
 			{
-			sprintf(tmptext,":t\"  Projected: %s\":t\"    UTM Zone %d N\"",
+			sprintf(tmptext,":t\"  Projected: %s\":t\"    UTM Zone %d S\"",
 				data->primary_grid_projection_id,
 				projectionid - 32700);
 			strcat(value_text, tmptext);
@@ -3008,6 +3018,7 @@ do_mbview_display_utm( Widget w, XtPointer client_data, XtPointer call_data)
 	struct mbview_struct *data;
 	int	projectionid, utmzone;
 	double	reference_lon;
+	double	reference_lat;
     
 	/* get instance */
 	ac = 0;
@@ -3029,12 +3040,15 @@ fprintf(stderr,"do_mbview_display_utm: instance:%d\n", instance);
 		view->globalprojected = MB_NO;
 		view->viewboundscount = MBV_BOUNDSFREQUENCY;
 
-		reference_lon = 0.5 * (data->primary_xmin + data->primary_xmax);
+		mbview_projectgrid2ll(instance,
+				0.5 * (data->primary_xmin + data->primary_xmax),
+				0.5 * (data->primary_ymin + data->primary_ymax),
+				&reference_lon, &reference_lat);
 		if (reference_lon > 180.0)
 			reference_lon -= 360.0;
 		utmzone = (int)(((reference_lon + 183.0)
 				/ 6.0) + 0.5);
-		if (0.5 * (data->primary_ymin + data->primary_ymax) >= 0.0)
+		if (reference_lat >= 0.0)
 			projectionid = 32600 + utmzone;
 		else
 			projectionid = 32700 + utmzone;
@@ -7185,12 +7199,12 @@ fprintf(stderr,"do_mbview_resolutionpopup: instance:%d\n", instance);
 	XtVaSetValues(view->mb3dview.mbview_scale_mediumresolution, 
 			XmNvalue, data->hirez_dimension, 
 			NULL);
-/*	XtVaSetValues(view->mb3dview.mbview_scale_lowresolutionnav, 
+	XtVaSetValues(view->mb3dview.mbview_scale_navlowresolution, 
 			XmNvalue, data->lorez_navdecimate, 
 			NULL);
-	XtVaSetValues(view->mb3dview.mbview_scale_mediumresolutionnav, 
+	XtVaSetValues(view->mb3dview.mbview_scale_navmediumresolution, 
 			XmNvalue, data->hirez_navdecimate, 
-			NULL);*/
+			NULL);
     
 }
 /*------------------------------------------------------------------------------*/
@@ -7249,12 +7263,12 @@ fprintf(stderr,"do_mbview_resolutionchange: instance:%d\n", instance);
 	XtVaGetValues(view->mb3dview.mbview_scale_mediumresolution,
 		XmNvalue, &hirez_dimension,
 		NULL);
-/*	XtVaGetValues(view->mb3dview.mbview_scale_lowresolutionnav,
+	XtVaGetValues(view->mb3dview.mbview_scale_navlowresolution,
 		XmNvalue, &lorez_navdecimate,
 		NULL);
-	XtVaGetValues(view->mb3dview.mbview_scale_mediumresolutionnav,
+	XtVaGetValues(view->mb3dview.mbview_scale_navmediumresolution,
 		XmNvalue, &hirez_navdecimate,
-		NULL);*/
+		NULL);
 		
 	/* make dimensions even multiples of 10 */
 	if (lorez_dimension > hirez_dimension)
@@ -7269,6 +7283,10 @@ fprintf(stderr,"do_mbview_resolutionchange: instance:%d\n", instance);
 	XtVaSetValues(view->mb3dview.mbview_scale_mediumresolution, 
 			XmNvalue, data->hirez_dimension, 
 			NULL);
+
+	/* set nav decimation */
+	data->lorez_navdecimate = lorez_navdecimate;
+	data->hirez_navdecimate = hirez_navdecimate;
    
     /* reset status flags and arrays */
     view->lastdrawrez = MBV_REZ_NONE;
@@ -7280,7 +7298,7 @@ fprintf(stderr,"do_mbview_resolutionchange: instance:%d\n", instance);
     view->contourfullrez = MB_NO;
     
 if (mbv_verbose >= 2)
-fprintf(stderr,"do_mbview_resolutionchange instance:%d resolutions: %d %d decimations: % %d\n", 
+fprintf(stderr,"do_mbview_resolutionchange instance:%d resolutions: %d %d decimations: %d %d\n", 
 instance, data->lorez_dimension, data->hirez_dimension,
 instance, data->lorez_navdecimate, data->hirez_navdecimate);
     

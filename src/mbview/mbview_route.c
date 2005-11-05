@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_route.c	9/25/2003
- *    $Id: mbview_route.c,v 5.9 2005-04-07 04:16:31 caress Exp $
+ *    $Id: mbview_route.c,v 5.10 2005-11-05 01:11:47 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  *		begun on October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.9  2005/04/07 04:16:31  caress
+ * Fixed a route handling problem.
+ *
  * Revision 5.8  2005/03/25 04:46:15  caress
  * Fixed MBgrdviz crashes related to route data by fixing problem with allocation and deallocation of route arrays in the mbview library.
  *
@@ -93,12 +96,12 @@
 /*------------------------------------------------------------------------------*/
 
 /* local variables */
-Cardinal 	ac;
-Arg      	args[256];
-char		value_text[MB_PATH_MAXLINE];
-char		value_string[MB_PATH_MAXLINE];
+static Cardinal 	ac;
+static Arg      	args[256];
+static char		value_text[MB_PATH_MAXLINE];
+static char		value_string[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_route.c,v 5.9 2005-04-07 04:16:31 caress Exp $";
+static char rcs_id[]="$Id: mbview_route.c,v 5.10 2005-11-05 01:11:47 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_getroutecount(int verbose, int instance,
@@ -2104,16 +2107,16 @@ int mbview_drawroute(int instance, int rez)
 					colortable_object_green[icolor], 
 					colortable_object_blue[icolor]);
 
-				/* draw the site as a disk or sphere using GLUT */
+				/* draw the route point as a disk or sphere using GLUT */
 
 				glTranslatef(shared.shareddata.routes[iroute].points[jpoint].xdisplay[instance],
 						shared.shareddata.routes[iroute].points[jpoint].ydisplay[instance],
 						shared.shareddata.routes[iroute].points[jpoint].zdisplay[instance]);
 				if (iroute == shared.shareddata.route_selected
 					&& jpoint == shared.shareddata.route_point_selected)
-	    				glCallList((GLuint)MBV_GLLIST_SITELARGE);
+	    				glCallList((GLuint)MBV_GLLIST_ROUTELARGE);
 				else
-	    				glCallList((GLuint)MBV_GLLIST_SITESMALL);
+	    				glCallList((GLuint)MBV_GLLIST_ROUTESMALL);
 				glTranslatef(-shared.shareddata.routes[iroute].points[jpoint].xdisplay[instance],
 						-shared.shareddata.routes[iroute].points[jpoint].ydisplay[instance],
 						-shared.shareddata.routes[iroute].points[jpoint].zdisplay[instance]);
@@ -2219,7 +2222,8 @@ int mbview_updateroutelist()
 				for (jpoint=0;jpoint<shared.shareddata.routes[iroute].npoints;jpoint++)
 					{
 					/* add list item for each route */
-					mbview_setlonlatstrings(shared.shareddata.routes[iroute].points[jpoint].xlon,
+					mbview_setlonlatstrings(shared.lonlatstyle, 
+								shared.shareddata.routes[iroute].points[jpoint].xlon,
 								shared.shareddata.routes[iroute].points[jpoint].ylat,
 								lonstr0, latstr0);
 					sprintf(value_string,"%3d | %3d | %s | %s | %.3f | %s | %d | %s", 

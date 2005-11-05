@@ -74,7 +74,7 @@ extern void BxExitCB(Widget, XtPointer, XtPointer);
 /* global mbview variables */
 Widget mainWindow;
 
-static char rcs_id[] = "$Id: mbgrdviz_main.c,v 5.4 2005-02-10 02:50:00 caress Exp $";
+static char rcs_id[] = "$Id: mbgrdviz_main.c,v 5.5 2005-11-05 01:11:47 caress Exp $";
 static char program_name[] = "MBgrdviz";
 static char help_message[] =  "MBgrdviz provides simple interactive 2D/3Dvizualization of GMT grids.";
 static char usage_message[] = "mbgrdviz [-Igrdfile -T -V -H]";
@@ -247,8 +247,8 @@ int main( int argc, char **argv)
     XtSetArg(args[ac], XmNtitle, "MBgrdviz"); ac++;
     XtSetArg(args[ac], XmNx, 108); ac++;
     XtSetArg(args[ac], XmNy, 87); ac++;
-    XtSetArg(args[ac], XmNwidth, 197); ac++;
-    XtSetArg(args[ac], XmNheight, 214); ac++;
+    XtSetArg(args[ac], XmNwidth, 260); ac++;
+    XtSetArg(args[ac], XmNheight, 215); ac++;
     topLevelShell = XtCreatePopupShell((char *)"topLevelShell",
         topLevelShellWidgetClass,
         parent,

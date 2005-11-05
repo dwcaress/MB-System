@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_primary.c	9/25/2003
- *    $Id: mbview_primary.c,v 5.3 2005-02-18 07:32:55 caress Exp $
+ *    $Id: mbview_primary.c,v 5.4 2005-11-05 01:11:47 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  *		begun on October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2005/02/18 07:32:55  caress
+ * Fixed nav display and button sensitivity.
+ *
  * Revision 5.2  2005/02/08 22:37:42  caress
  * Heading towards 5.0.6 release.
  *
@@ -75,11 +78,11 @@
 /*------------------------------------------------------------------------------*/
 
 /* local variables */
-Cardinal 	ac;
-Arg      	args[256];
-char		value_text[MB_PATH_MAXLINE];
+static Cardinal 	ac;
+static Arg      	args[256];
+static char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_primary.c,v 5.3 2005-02-18 07:32:55 caress Exp $";
+static char rcs_id[]="$Id: mbview_primary.c,v 5.4 2005-11-05 01:11:47 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_setprimarygrid(int verbose, int instance,

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbviewprivate.h	9/24/2003
- *    $Id: mbviewprivate.h,v 5.8 2005-08-09 16:33:00 caress Exp $
+ *    $Id: mbviewprivate.h,v 5.9 2005-11-05 01:11:47 caress Exp $
  *
  *    Copyright (c) 2003, 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -18,6 +18,9 @@
  * Date:	September 24,  2003
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2005/08/09 16:33:00  caress
+ * Working on portability and on survey planning.
+ *
  * Revision 5.7  2005/02/18 07:32:57  caress
  * Fixed nav display and button sensitivity.
  *
@@ -112,6 +115,9 @@ struct mbview_shared_struct
     int			init_sitelist;
     int			init_routelist;
     int			init_navlist;
+    	
+    /* global lon lat print style */
+    int	lonlatstyle;
     
     /* pointer to structure holding global data */
     struct mbview_shareddata_struct shareddata;
@@ -233,7 +239,7 @@ struct mbview_world_struct
     double yorigin;
     double zorigin;
     double scale;
-    
+
     /* relevant mbio defaults */
     double timegap;
     
@@ -494,6 +500,14 @@ int mbview_getzdata(int instance,
 			double xgrid, double ygrid,
 			int *found, double *zdata);
 int mbview_pick(int instance, int which, int xpixel, int ypixel);
+int mbview_picksize(int instance);
+int mbview_pick_text(int instance);
+int mbview_setlonlatstrings(int style, double lon, double lat, char *lonstring, char *latstring);
+int mbview_region(int instance, int which, int xpixel, int ypixel);
+int mbview_area(int instance, int which, int xpixel, int ypixel);
+int mbview_drawpick(int instance);
+int mbview_drawregion(int instance);
+int mbview_drawarea(int instance);
 int mbview_findpoint(int instance, int xpixel, int ypixel,
 			int *found, 
 			double *xgrid, double *ygrid,

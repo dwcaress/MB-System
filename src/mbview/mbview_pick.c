@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_pick.c	9/29/2003
- *    $Id: mbview_pick.c,v 5.7 2005-02-18 07:32:55 caress Exp $
+ *    $Id: mbview_pick.c,v 5.8 2005-11-05 01:11:47 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  *		begun on October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2005/02/18 07:32:55  caress
+ * Fixed nav display and button sensitivity.
+ *
  * Revision 5.6  2005/02/08 22:37:42  caress
  * Heading towards 5.0.6 release.
  *
@@ -87,12 +90,12 @@
 /*------------------------------------------------------------------------------*/
 
 /* local variables */
-Cardinal 	ac;
-Arg      	args[256];
-char		value_text[MB_PATH_MAXLINE];
-char		value_list[MB_PATH_MAXLINE];
+static Cardinal 	ac;
+static Arg      	args[256];
+static char		value_text[MB_PATH_MAXLINE];
+static char		value_list[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_pick.c,v 5.7 2005-02-18 07:32:55 caress Exp $";
+static char rcs_id[]="$Id: mbview_pick.c,v 5.8 2005-11-05 01:11:47 caress Exp $";
 	
 
 /*------------------------------------------------------------------------------*/
@@ -400,7 +403,8 @@ int mbview_pick_text(int instance)
 	/* update pick info */
 	if (data->pickinfo_mode == MBV_PICK_ONEPOINT)
 		{
-		mbview_setlonlatstrings(data->pick.endpoints[0].xlon, data->pick.endpoints[0].ylat, 
+		mbview_setlonlatstrings(shared.lonlatstyle, 
+					data->pick.endpoints[0].xlon, data->pick.endpoints[0].ylat, 
 					lonstr0, latstr0);
 		sprintf(value_text,":::t\"Pick Info:\":t\" Lon: %s\":t\" Lat: %s\":t\" Depth: %.3f m\"", 
 			lonstr0, latstr0, data->pick.endpoints[0].zdata);
@@ -409,9 +413,11 @@ int mbview_pick_text(int instance)
 		}
 	else if (data->pickinfo_mode == MBV_PICK_TWOPOINT)
 		{
-		mbview_setlonlatstrings(data->pick.endpoints[0].xlon, data->pick.endpoints[0].ylat, 
+		mbview_setlonlatstrings(shared.lonlatstyle, 
+					data->pick.endpoints[0].xlon, data->pick.endpoints[0].ylat, 
 					lonstr0, latstr0);
-		mbview_setlonlatstrings(data->pick.endpoints[1].xlon, data->pick.endpoints[1].ylat, 
+		mbview_setlonlatstrings(shared.lonlatstyle, 
+					data->pick.endpoints[1].xlon, data->pick.endpoints[1].ylat, 
 					lonstr1, latstr1);
 		if (data->display_projection_mode != MBV_PROJECTION_SPHEROID)
 			{
@@ -463,9 +469,11 @@ int mbview_pick_text(int instance)
 		}
 	else if (data->pickinfo_mode == MBV_PICK_REGION)
 		{
-		mbview_setlonlatstrings(data->region.cornerpoints[0].xlon, data->region.cornerpoints[0].ylat, 
+		mbview_setlonlatstrings(shared.lonlatstyle, 
+					data->region.cornerpoints[0].xlon, data->region.cornerpoints[0].ylat, 
 					lonstr0, latstr0);
-		mbview_setlonlatstrings(data->region.cornerpoints[3].xlon, data->region.cornerpoints[3].ylat, 
+		mbview_setlonlatstrings(shared.lonlatstyle, 
+					data->region.cornerpoints[3].xlon, data->region.cornerpoints[3].ylat, 
 					lonstr1, latstr1);
 		sprintf(value_text,
 		":::t\"Region Info:\":t\" West: %s\":t\" North: %s\":t\" East: %s\":t\" South: %s\":t\" Width: %.3f m\":t\" Height: %.3f m\"", 
@@ -481,7 +489,8 @@ int mbview_pick_text(int instance)
 	else if (data->pickinfo_mode == MBV_PICK_SITE
 		&& shared.shareddata.site_selected != MBV_SELECT_NONE)
 		{
-		mbview_setlonlatstrings(shared.shareddata.sites[shared.shareddata.site_selected].point.xlon, 
+		mbview_setlonlatstrings(shared.lonlatstyle, 
+					shared.shareddata.sites[shared.shareddata.site_selected].point.xlon, 
 					shared.shareddata.sites[shared.shareddata.site_selected].point.ylat, 
 					lonstr0, latstr0);
 		sprintf(value_text,":::t\"Site %d Pick Info:\":t\" Lon: %s\":t\" Lat: %s\":t\" Depth: %.3f m\":t\" Color: %d\":t\" Size: %d\":t\" Name: %s\"", 
@@ -501,7 +510,8 @@ int mbview_pick_text(int instance)
 		&& shared.shareddata.route_selected != MBV_SELECT_NONE
 		&& shared.shareddata.route_point_selected != MBV_SELECT_NONE)
 		{
-		mbview_setlonlatstrings(shared.shareddata.routes[shared.shareddata.route_selected].points[shared.shareddata.route_point_selected].xlon, 
+		mbview_setlonlatstrings(shared.lonlatstyle, 
+					shared.shareddata.routes[shared.shareddata.route_selected].points[shared.shareddata.route_point_selected].xlon, 
 					shared.shareddata.routes[shared.shareddata.route_selected].points[shared.shareddata.route_point_selected].ylat, 
 					lonstr0, latstr0);
 		sprintf(value_text,":::t\"Route %d Pick Info:\":t\" Point: %d\":t\" Lon: %s\":t\" Lat: %s\":t\" Depth: %.3f m\":t\" Color: %d\":t\" Size: %d\":t\" Name: %s\"", 
@@ -530,7 +540,8 @@ int mbview_pick_text(int instance)
 			time_i[0], time_i[1], time_i[2], 
 			time_i[3], time_i[4], time_i[5], 
 			(time_i[6] / 1000));
-		mbview_setlonlatstrings(shared.shareddata.navs[shared.shareddata.nav_selected[0]].navpts[shared.shareddata.nav_point_selected[0]].point.xlon, 
+		mbview_setlonlatstrings(shared.lonlatstyle, 
+					shared.shareddata.navs[shared.shareddata.nav_selected[0]].navpts[shared.shareddata.nav_point_selected[0]].point.xlon, 
 					shared.shareddata.navs[shared.shareddata.nav_selected[0]].navpts[shared.shareddata.nav_point_selected[0]].point.ylat, 
 					lonstr0, latstr0);
 		sprintf(value_text,":::t\"Navigation Pick Info:\":t\" %s\":t\" %s\":t\" Lon: %s\":t\" Lat: %s\":t\" Vehicle Depth: %.3f m\":t\" Heading: %.1f deg\":t\" Speed: %.1f km/hr\"", 
@@ -558,7 +569,8 @@ int mbview_pick_text(int instance)
 			time_i[0], time_i[1], time_i[2], 
 			time_i[3], time_i[4], time_i[5], 
 			(time_i[6] / 1000));
-		mbview_setlonlatstrings(shared.shareddata.navs[shared.shareddata.nav_selected[0]].navpts[shared.shareddata.nav_point_selected[0]].point.xlon, 
+		mbview_setlonlatstrings(shared.lonlatstyle, 
+					shared.shareddata.navs[shared.shareddata.nav_selected[0]].navpts[shared.shareddata.nav_point_selected[0]].point.xlon, 
 					shared.shareddata.navs[shared.shareddata.nav_selected[0]].navpts[shared.shareddata.nav_point_selected[0]].point.ylat, 
 					lonstr0, latstr0);
 		mb_get_date(mbv_verbose,
@@ -568,7 +580,8 @@ int mbview_pick_text(int instance)
 			time_i[0], time_i[1], time_i[2], 
 			time_i[3], time_i[4], time_i[5], 
 			(time_i[6] / 1000));
-		mbview_setlonlatstrings(shared.shareddata.navs[shared.shareddata.nav_selected[1]].navpts[shared.shareddata.nav_point_selected[1]].point.xlon, 
+		mbview_setlonlatstrings(shared.lonlatstyle, 
+					shared.shareddata.navs[shared.shareddata.nav_selected[1]].navpts[shared.shareddata.nav_point_selected[1]].point.xlon, 
 					shared.shareddata.navs[shared.shareddata.nav_selected[1]].navpts[shared.shareddata.nav_point_selected[1]].point.ylat, 
 					lonstr1, latstr1);
 		sprintf(value_text,":::t\"Navigation Picks Info:\":t\" %s\":t\" %s\":t\" Lon: %s\":t\" Lat: %s\":t\" %s\":t\" %s\":t\" Lon: %s\":t\" Lat: %s\"", 
@@ -600,11 +613,13 @@ int mbview_pick_text(int instance)
 }
 
 /*------------------------------------------------------------------------------*/
-int mbview_setlonlatstrings(double lon, double lat, char *lonstring, char *latstring)
+int mbview_setlonlatstrings(int style, double lon, double lat, char *lonstring, char *latstring)
 {
 	/* local variables */
 	char	*function_name = "mbview_setlonlatstrings";
 	int	status = MB_SUCCESS;
+	int	degree;
+	double	minute;
 
 	/* print starting debug statements */
 	if (mbv_verbose >= 2)
@@ -614,6 +629,7 @@ int mbview_setlonlatstrings(double lon, double lat, char *lonstring, char *latst
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       style:            %d\n",style);
 		fprintf(stderr,"dbg2       lon:              %f\n",lon);
 		fprintf(stderr,"dbg2       lat:              %f\n",lat);
 		}
@@ -627,14 +643,33 @@ int mbview_setlonlatstrings(double lon, double lat, char *lonstring, char *latst
 		{
 		lon += 360.0;
 		}
-	if (lon < 0.0)
-		sprintf(lonstring, "%9.5f W", fabs(lon));
+	
+	if (style == MBV_LONLAT_DECIMAL)
+		{
+		if (lon < 0.0)
+			sprintf(lonstring, "%9.5f W", fabs(lon));
+		else
+			sprintf(lonstring, "%9.5f E", fabs(lon));
+		if (lat < 0.0)
+			sprintf(latstring, "%8.5f S", fabs(lat));
+		else
+			sprintf(latstring, "%8.5f N", fabs(lat));
+		}
 	else
-		sprintf(lonstring, "%9.5f E", fabs(lon));
-	if (lat < 0.0)
-		sprintf(latstring, "%8.5f S", fabs(lat));
-	else
-		sprintf(latstring, "%8.5f N", fabs(lat));
+		{
+		degree = (int)fabs(lon);
+		minute = 60.0 * (fabs(lon) - (double)degree);
+		if (lon < 0.0)
+			sprintf(lonstring, "%3d W %6.3f", degree, minute);
+		else
+			sprintf(lonstring, "%3d E %6.3f", degree, minute);
+		degree = (int)fabs(lat);
+		minute = 60.0 * (fabs(lat) - (double)degree);
+		if (lat < 0.0)
+			sprintf(latstring, "%3d S %6.3f", degree, minute);
+		else
+			sprintf(latstring, "%3d N %6.3f", degree, minute);
+		}
 	
 	/* print output debug statements */
 	if (mbv_verbose >= 2)
