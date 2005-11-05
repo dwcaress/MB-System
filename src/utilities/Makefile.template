@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 5.17 2005-06-04 06:32:07 caress Exp $
+#	$Id: Makefile.template,v 5.18 2005-11-05 01:07:54 caress Exp $
 #
 #     Copyright (c) 1993, 1994, 2000, 2002, 2003, 2005 by
 #     David W. Caress (caress@mbari.org)
@@ -16,6 +16,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.17  2005/06/04 06:32:07  caress
+# Added program mb7k2jstar.
+#
 # Revision 5.16  2004/12/02 06:39:28  caress
 # Fixes while supporting Reson 7k data.
 #
@@ -205,8 +208,9 @@ all:	$(BINDIR)/mbformat \
 	$(BINDIR)/mbfilter \
 	$(BINDIR)/mbcut \
 	$(BINDIR)/mbtide \
-	$(BINDIR)/mbsimradmakess\
-	$(BINDIR)/mb7k2jstar
+	$(BINDIR)/mbsimradmakess \
+	$(BINDIR)/mb7k2jstar \
+	$(BINDIR)/mb7kpreprocess
 
 ### make clean removes the object files
 clean:
@@ -344,6 +348,9 @@ $(BINDIR)/mbauvnavusbl:	mbauvnavusbl.o $(LIBDIR)/libmbio.a $(LIBDIR)/libproj.a $
 $(BINDIR)/mb7k2jstar:	mb7k2jstar.o $(LIBDIR)/libmbio.a $(LIBDIR)/libproj.a $(LIBDIR)/libgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
 	$(CC) $(CFLAGS) mb7k2jstar.o $(LIBDIR)/libmbio.a $(LIBDIR)/libproj.a $(LIBDIR)/libgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a \
 		$(LFLAGS) -o $(BINDIR)/mb7k2jstar
+$(BINDIR)/mb7kpreprocess:	mb7kpreprocess.o $(LIBDIR)/libmbio.a $(LIBDIR)/libproj.a $(LIBDIR)/libmbaux.a $(LIBDIR)/libgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
+	$(CC) $(CFLAGS) mb7kpreprocess.o $(LIBDIR)/libmbio.a $(LIBDIR)/libproj.a $(LIBDIR)/libmbaux.a $(LIBDIR)/libgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a \
+		$(LFLAGS) -o $(BINDIR)/mb7kpreprocess
 
 ### compile the source files
 mbformat.o:	mbformat.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
@@ -431,3 +438,5 @@ mbauvnavusbl.o:	mbauvnavusbl.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(IN
 	$(CC) -c $(CFLAGS) mbauvnavusbl.c
 mb7k2jstar.o:	mb7k2jstar.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h $(INCDIR)/mbsys_reson7k.h $(INCDIR)/mbsys_jstar.h
 	$(CC) -c $(CFLAGS) mb7k2jstar.c
+mb7kpreprocess.o:	mb7kpreprocess.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h $(INCDIR)/mbsys_reson7k.h $(INCDIR)/mbsys_jstar.h
+	$(CC) -c $(CFLAGS) mb7kpreprocess.c

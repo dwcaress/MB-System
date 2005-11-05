@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb7k2jstar.c	5/19/2005
- *    $Id: mb7k2jstar.c,v 5.2 2005-08-17 17:27:02 caress Exp $
+ *    $Id: mb7k2jstar.c,v 5.3 2005-11-05 01:07:54 caress Exp $
  *
  *    Copyright (c) 2005 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	May 19, 2005
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2005/08/17 17:27:02  caress
+ * Fixed scaling for heading, roll, and pitch values.
+ *
  * Revision 5.1  2005/06/15 15:35:37  caress
  * Fixed issues.
  *
@@ -49,8 +52,12 @@
 #define	MB7K2JSTAR_SSHIGH	2
 #define	MB7K2JSTAR_SBP		3
 #define	MB7K2JSTAR_ALL		4
+#define	MB7K2JSTAR_BOTTOMPICK_NONE		0
+#define	MB7K2JSTAR_BOTTOMPICK_BATHYMETRY	1
+#define	MB7K2JSTAR_BOTTOMPICK_ALTITUDE		2
+#define	MB7K2JSTAR_BOTTOMPICK_ARRIVAL		3
 
-static char rcs_id[] = "$Id: mb7k2jstar.c,v 5.2 2005-08-17 17:27:02 caress Exp $";
+static char rcs_id[] = "$Id: mb7k2jstar.c,v 5.3 2005-11-05 01:07:54 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
@@ -58,7 +65,7 @@ main (int argc, char **argv)
 {
 	static char program_name[] = "mb7k2jstar";
 	static char help_message[] =  "mb7k2jstar extracts Edgetech subbottom profiler and sidescan data \nfrom Reson 7k format data and outputs in the Edgetech Jstar format.";
-	static char usage_message[] = "mb7k2jstar [-Ifile -Atype -C -Fformat -Ooutfile -H -V]";
+	static char usage_message[] = "mb7k2jstar [-Ifile -Atype -Bmode[/threshold] -C -Fformat -Ooutfile -H -V]";
 	extern char *optarg;
 	extern int optkind;
 	int	errflg = 0;
@@ -144,20 +151,17 @@ main (int argc, char **argv)
 	int	obeams_amp;
 	int	opixels_ss;
 	
+	/* extract modes */
 	int	extract_sbp = MB_NO;
 	int	extract_sslow = MB_NO;
 	int	extract_sshigh = MB_NO;
 	int	print_comments = MB_NO;
 	
-	int	mode;
-	int	format_status, format_guess, format_output;
-	int	shortspersample;
-	int	trace_size;
-	char	*data;
+	/* bottompick mode */
+	int	bottompickmode = MB7K2JSTAR_BOTTOMPICK_ALTITUDE;
+	double	bottompickthreshold = 0.4;
 	
-	int	read_data;
-	int	found;
-	
+	/* counting variables */
 	int	nreaddata = 0;
 	int	nreadheader = 0;
 	int	nreadssv = 0;
@@ -168,7 +172,6 @@ main (int argc, char **argv)
 	int	nwritesbp = 0;
 	int	nwritesslo = 0;
 	int	nwritesshi = 0;
-	
 	int	nreaddatatot = 0;
 	int	nreadheadertot = 0;
 	int	nreadssvtot = 0;
@@ -180,7 +183,19 @@ main (int argc, char **argv)
 	int	nwritesslotot = 0;
 	int	nwritesshitot = 0;
 	
-	int	i, j, k;
+	int	mode;
+	int	format_status, format_guess, format_output;
+	int	shortspersample;
+	int	trace_size;
+	char	*data;
+	double	value, threshold;
+	double	channelmax;
+	int	channelpick;
+	
+	int	read_data;
+	int	found;
+	
+	int	i, j, k, n;
 
 	/* get current default values */
 	status = mb_defaults(verbose,&format,&pings,&lonflip,bounds,
@@ -190,7 +205,7 @@ main (int argc, char **argv)
 	strcpy (read_file, "datalist.mb-1");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "A:a:CcF:f:I:i:O:o:T:t:VvHh")) != -1)
+	while ((c = getopt(argc, argv, "A:a:B:b:CcF:f:I:i:O:o:T:t:VvHh")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -241,6 +256,15 @@ main (int argc, char **argv)
 					extract_sbp = MB_YES;
 					}
 				}
+			flag++;
+			break;
+		case 'B':
+		case 'b':
+			n = sscanf (optarg,"%d/%lf", &bottompickmode, &bottompickthreshold);
+			if (n == 0)
+				bottompickmode = MB7K2JSTAR_BOTTOMPICK_ALTITUDE;
+			else if (n == 1 && bottompickmode == MB7K2JSTAR_BOTTOMPICK_ARRIVAL)
+				bottompickthreshold = 0.5;
 			flag++;
 			break;
 		case 'C':
@@ -297,39 +321,41 @@ main (int argc, char **argv)
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Control Parameters:\n");
-		fprintf(stderr,"dbg2       verbose:        %d\n",verbose);
-		fprintf(stderr,"dbg2       help:           %d\n",help);
-		fprintf(stderr,"dbg2       format:         %d\n",format);
-		fprintf(stderr,"dbg2       pings:          %d\n",pings);
-		fprintf(stderr,"dbg2       lonflip:        %d\n",lonflip);
-		fprintf(stderr,"dbg2       bounds[0]:      %f\n",bounds[0]);
-		fprintf(stderr,"dbg2       bounds[1]:      %f\n",bounds[1]);
-		fprintf(stderr,"dbg2       bounds[2]:      %f\n",bounds[2]);
-		fprintf(stderr,"dbg2       bounds[3]:      %f\n",bounds[3]);
-		fprintf(stderr,"dbg2       btime_i[0]:     %d\n",btime_i[0]);
-		fprintf(stderr,"dbg2       btime_i[1]:     %d\n",btime_i[1]);
-		fprintf(stderr,"dbg2       btime_i[2]:     %d\n",btime_i[2]);
-		fprintf(stderr,"dbg2       btime_i[3]:     %d\n",btime_i[3]);
-		fprintf(stderr,"dbg2       btime_i[4]:     %d\n",btime_i[4]);
-		fprintf(stderr,"dbg2       btime_i[5]:     %d\n",btime_i[5]);
-		fprintf(stderr,"dbg2       btime_i[6]:     %d\n",btime_i[6]);
-		fprintf(stderr,"dbg2       etime_i[0]:     %d\n",etime_i[0]);
-		fprintf(stderr,"dbg2       etime_i[1]:     %d\n",etime_i[1]);
-		fprintf(stderr,"dbg2       etime_i[2]:     %d\n",etime_i[2]);
-		fprintf(stderr,"dbg2       etime_i[3]:     %d\n",etime_i[3]);
-		fprintf(stderr,"dbg2       etime_i[4]:     %d\n",etime_i[4]);
-		fprintf(stderr,"dbg2       etime_i[5]:     %d\n",etime_i[5]);
-		fprintf(stderr,"dbg2       etime_i[6]:     %d\n",etime_i[6]);
-		fprintf(stderr,"dbg2       speedmin:       %f\n",speedmin);
-		fprintf(stderr,"dbg2       timegap:        %f\n",timegap);
-		fprintf(stderr,"dbg2       timeshift:      %f\n",timeshift);
-		fprintf(stderr,"dbg2       file:           %s\n",file);
-		fprintf(stderr,"dbg2       output_file:    %s\n",output_file);
-		fprintf(stderr,"dbg2       output_file_set:%d\n",output_file_set);
-		fprintf(stderr,"dbg2       extract_sbp:    %d\n",extract_sbp);
-		fprintf(stderr,"dbg2       extract_sslow:  %d\n",extract_sslow);
-		fprintf(stderr,"dbg2       extract_sshigh: %d\n",extract_sshigh);
-		fprintf(stderr,"dbg2       print_comments: %d\n",print_comments);
+		fprintf(stderr,"dbg2       verbose:             %d\n",verbose);
+		fprintf(stderr,"dbg2       help:                %d\n",help);
+		fprintf(stderr,"dbg2       format:              %d\n",format);
+		fprintf(stderr,"dbg2       pings:               %d\n",pings);
+		fprintf(stderr,"dbg2       lonflip:             %d\n",lonflip);
+		fprintf(stderr,"dbg2       bounds[0]:           %f\n",bounds[0]);
+		fprintf(stderr,"dbg2       bounds[1]:           %f\n",bounds[1]);
+		fprintf(stderr,"dbg2       bounds[2]:           %f\n",bounds[2]);
+		fprintf(stderr,"dbg2       bounds[3]:           %f\n",bounds[3]);
+		fprintf(stderr,"dbg2       btime_i[0]:          %d\n",btime_i[0]);
+		fprintf(stderr,"dbg2       btime_i[1]:          %d\n",btime_i[1]);
+		fprintf(stderr,"dbg2       btime_i[2]:          %d\n",btime_i[2]);
+		fprintf(stderr,"dbg2       btime_i[3]:          %d\n",btime_i[3]);
+		fprintf(stderr,"dbg2       btime_i[4]:          %d\n",btime_i[4]);
+		fprintf(stderr,"dbg2       btime_i[5]:          %d\n",btime_i[5]);
+		fprintf(stderr,"dbg2       btime_i[6]:          %d\n",btime_i[6]);
+		fprintf(stderr,"dbg2       etime_i[0]:          %d\n",etime_i[0]);
+		fprintf(stderr,"dbg2       etime_i[1]:          %d\n",etime_i[1]);
+		fprintf(stderr,"dbg2       etime_i[2]:          %d\n",etime_i[2]);
+		fprintf(stderr,"dbg2       etime_i[3]:          %d\n",etime_i[3]);
+		fprintf(stderr,"dbg2       etime_i[4]:          %d\n",etime_i[4]);
+		fprintf(stderr,"dbg2       etime_i[5]:          %d\n",etime_i[5]);
+		fprintf(stderr,"dbg2       etime_i[6]:          %d\n",etime_i[6]);
+		fprintf(stderr,"dbg2       speedmin:            %f\n",speedmin);
+		fprintf(stderr,"dbg2       timegap:             %f\n",timegap);
+		fprintf(stderr,"dbg2       timeshift:           %f\n",timeshift);
+		fprintf(stderr,"dbg2       bottompickmode:      %d\n",bottompickmode);
+		fprintf(stderr,"dbg2       bottompickthreshold: %f\n",bottompickthreshold);
+		fprintf(stderr,"dbg2       file:                %s\n",file);
+		fprintf(stderr,"dbg2       output_file:         %s\n",output_file);
+		fprintf(stderr,"dbg2       output_file_set:     %d\n",output_file_set);
+		fprintf(stderr,"dbg2       extract_sbp:         %d\n",extract_sbp);
+		fprintf(stderr,"dbg2       extract_sslow:       %d\n",extract_sslow);
+		fprintf(stderr,"dbg2       extract_sshigh:      %d\n",extract_sshigh);
+		fprintf(stderr,"dbg2       print_comments:      %d\n",print_comments);
 		}
 
 	/* if help desired then print it and exit */
@@ -413,24 +439,46 @@ main (int argc, char **argv)
 		exit(error);
 		}
 
-	/* allocate memory for data arrays */
-	status = mb_malloc(verbose,beams_bath*sizeof(char),(char **)&beamflag,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),(char **)&bath,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),
-			(char **)&bathacrosstrack,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),
-			(char **)&bathalongtrack,&error);
-	status = mb_malloc(verbose,beams_amp*sizeof(double),(char **)&amp,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(double),(char **)&ss,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(double),(char **)&ssacrosstrack,
-			&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(double),(char **)&ssalongtrack,
-			&error);
-
 	/* get pointers to data storage */
 	imb_io_ptr = (struct mb_io_struct *) imbio_ptr;
 	istore_ptr = imb_io_ptr->store_data;
 	istore = (struct mbsys_reson7k_struct *) istore_ptr;
+
+	if (error == MB_ERROR_NO_ERROR)
+		{
+		beamflag = NULL;
+		bath = NULL;
+		amp = NULL;
+		bathacrosstrack = NULL;
+		bathalongtrack = NULL;
+		ss = NULL;
+		ssacrosstrack = NULL;
+		ssalongtrack = NULL;
+		}
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(char), (void **)&beamflag, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(double), (void **)&bath, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_AMPLITUDE,
+						sizeof(double), (void **)&amp, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(double), (void **)&bathacrosstrack, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(double), (void **)&bathalongtrack, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+						sizeof(double), (void **)&ss, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+						sizeof(double), (void **)&ssacrosstrack, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+						sizeof(double), (void **)&ssalongtrack, &error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
@@ -756,24 +804,6 @@ imb_io_ptr->fix_lat[i]);*/
 				channel->sonardepth = 0;						/* 236-235 : Sonar depth in 0.001 m */
 				channel->sonaraltitude = 0;						/* 236-239 : Sonar altitude in 0.001 m */
 
-				/* reset navigation and other values */
-				if (navlon < 180.0) navlon = navlon + 360.0;
-				if (navlon > 180.0) navlon = navlon - 360.0;
-				channel->sourceCoordX = (int) (360000.0 * navlon);
-				channel->sourceCoordY = (int) (360000.0 * navlat);
-				channel->groupCoordX = (int) (360000.0 * navlon);
-				channel->groupCoordY = (int) (360000.0 * navlat);
-				channel->coordUnits = 2;
-				channel->heading = (short) (60.0 * heading);
-				channel->startDepth = sonardepth / channel->sampleInterval / 0.00000075; 
-				channel->sonardepth = 1000 * sonardepth;
-				channel->sonaraltitude = 1000 * altitude;
-				channel->depth = channel->sonardepth + channel->sonaraltitude;
-				channel->roll = (short) (60.0 * roll); 
-				channel->pitch = (short) (60.0 * pitch); 
-				channel->heaveCompensation = heave /
-						channel->sampleInterval / 0.00000075; 
-
 				/* allocate memory for the trace */
 				if (channel->dataFormat == 1)
 					shortspersample = 2;
@@ -797,6 +827,72 @@ imb_io_ptr->fix_lat[i]);*/
 					for (i=0;i<trace_size;i++)
 						data[i] = s7kchannel->data[i];
 					}
+
+				/* set the sonar altitude using the specified mode */
+				if (bottompickmode == MB7K2JSTAR_BOTTOMPICK_ARRIVAL)
+					{
+					/* get bottom arrival in trace */
+					if (channel->dataFormat == MBSYS_JSTAR_TRACEFORMAT_ANALYTIC)
+						{
+						channelmax = 0.0;
+						for (i=0;i<channel->samples;i++)
+							{
+							value = sqrt((double) (channel->trace[2*i] * channel->trace[2*i] 
+								+ channel->trace[2*i+1] * channel->trace[2*i+1]));
+							channelmax = MAX(value, channelmax);
+							}
+						channelpick = 0;
+						threshold = bottompickthreshold * channelmax;
+						for (i=0;i<channel->samples && channelpick == 0;i++)
+							{
+							value = sqrt((double) (channel->trace[2*i] * channel->trace[2*i] 
+								+ channel->trace[2*i+1] * channel->trace[2*i+1]));
+							if (value >= threshold)
+								channelpick = i;
+							}
+						}
+					else
+						{
+						channelmax = 0.0;
+						for (i=0;i<channel->samples;i++)
+							{
+							value = (double)(channel->trace[i]);
+							channelmax = MAX(value, channelmax);
+							}
+						channelpick = 0;
+						threshold = bottompickthreshold * channelmax;
+						for (i=0;i<channel->samples && channelpick == 0;i++)
+							{
+							value = (double)(channel->trace[i]);
+							if (value >= threshold)
+								channelpick = i;
+							}
+						}
+						
+					/* set sonar altitude */
+					channel->sonaraltitude = 0.00075 * channelpick * channel->sampleInterval;
+					}
+				else
+					{
+					channel->sonaraltitude = 1000 * altitude;
+					}
+
+				/* reset navigation and other values */
+				if (navlon < 180.0) navlon = navlon + 360.0;
+				if (navlon > 180.0) navlon = navlon - 360.0;
+				channel->sourceCoordX = (int) (360000.0 * navlon);
+				channel->sourceCoordY = (int) (360000.0 * navlat);
+				channel->groupCoordX = (int) (360000.0 * navlon);
+				channel->groupCoordY = (int) (360000.0 * navlat);
+				channel->coordUnits = 2;
+				channel->heading = (short) (60.0 * heading);
+				channel->startDepth = sonardepth / channel->sampleInterval / 0.00000075; 
+				channel->sonardepth = 1000 * sonardepth;
+				channel->depth = channel->sonardepth + channel->sonaraltitude;
+				channel->roll = (short) (60.0 * roll); 
+				channel->pitch = (short) (60.0 * pitch); 
+				channel->heaveCompensation = heave /
+						channel->sampleInterval / 0.00000075; 
 
 				/* write the record */
 				mb_write_ping(verbose, ombio_ptr, ostore_ptr, &error);
@@ -939,24 +1035,6 @@ imb_io_ptr->fix_lat[i]);*/
 				channel->sonardepth = 0;						/* 236-235 : Sonar depth in 0.001 m */
 				channel->sonaraltitude = 0;						/* 236-239 : Sonar altitude in 0.001 m */
 
-				/* reset navigation and other values */
-				if (navlon < 180.0) navlon = navlon + 360.0;
-				if (navlon > 180.0) navlon = navlon - 360.0;
-				channel->sourceCoordX = (int) (360000.0 * navlon);
-				channel->sourceCoordY = (int) (360000.0 * navlat);
-				channel->groupCoordX = (int) (360000.0 * navlon);
-				channel->groupCoordY = (int) (360000.0 * navlat);
-				channel->coordUnits = 2;
-				channel->heading = (short) (60.0 * heading);
-				channel->startDepth = sonardepth / channel->sampleInterval / 0.00000075; 
-				channel->depth = channel->sonardepth + channel->sonaraltitude;
-				channel->sonardepth = 1000 * sonardepth;
-				channel->sonaraltitude = 1000 * altitude;
-				channel->roll = (short) (60.0 * roll); 
-				channel->pitch = (short) (60.0 * pitch); 
-				channel->heaveCompensation = heave /
-						channel->sampleInterval / 0.00000075; 
-
 				/* allocate memory for the trace */
 				if (channel->dataFormat == 1)
 					shortspersample = 2;
@@ -980,6 +1058,72 @@ imb_io_ptr->fix_lat[i]);*/
 					for (i=0;i<trace_size;i++)
 						data[i] = s7kchannel->data[i];
 					}
+
+				/* set the sonar altitude using the specified mode */
+				if (bottompickmode == MB7K2JSTAR_BOTTOMPICK_ARRIVAL)
+					{
+					/* get bottom arrival in trace */
+					if (channel->dataFormat == MBSYS_JSTAR_TRACEFORMAT_ANALYTIC)
+						{
+						channelmax = 0.0;
+						for (i=0;i<channel->samples;i++)
+							{
+							value = sqrt((double) (channel->trace[2*i] * channel->trace[2*i] 
+								+ channel->trace[2*i+1] * channel->trace[2*i+1]));
+							channelmax = MAX(value, channelmax);
+							}
+						channelpick = 0;
+						threshold = bottompickthreshold * channelmax;
+						for (i=0;i<channel->samples && channelpick == 0;i++)
+							{
+							value = sqrt((double) (channel->trace[2*i] * channel->trace[2*i] 
+								+ channel->trace[2*i+1] * channel->trace[2*i+1]));
+							if (value >= threshold)
+								channelpick = i;
+							}
+						}
+					else
+						{
+						channelmax = 0.0;
+						for (i=0;i<channel->samples;i++)
+							{
+							value = (double)(channel->trace[i]);
+							channelmax = MAX(value, channelmax);
+							}
+						channelpick = 0;
+						threshold = bottompickthreshold * channelmax;
+						for (i=0;i<channel->samples && channelpick == 0;i++)
+							{
+							value = (double)(channel->trace[i]);
+							if (value >= threshold)
+								channelpick = i;
+							}
+						}
+						
+					/* set sonar altitude */
+					channel->sonaraltitude = 0.00075 * channelpick * channel->sampleInterval;
+					}
+				else
+					{
+					channel->sonaraltitude = 1000 * altitude;
+					}
+
+				/* reset navigation and other values */
+				if (navlon < 180.0) navlon = navlon + 360.0;
+				if (navlon > 180.0) navlon = navlon - 360.0;
+				channel->sourceCoordX = (int) (360000.0 * navlon);
+				channel->sourceCoordY = (int) (360000.0 * navlat);
+				channel->groupCoordX = (int) (360000.0 * navlon);
+				channel->groupCoordY = (int) (360000.0 * navlat);
+				channel->coordUnits = 2;
+				channel->heading = (short) (60.0 * heading);
+				channel->startDepth = sonardepth / channel->sampleInterval / 0.00000075; 
+				channel->depth = channel->sonardepth + channel->sonaraltitude;
+				channel->sonardepth = 1000 * sonardepth;
+				channel->roll = (short) (60.0 * roll); 
+				channel->pitch = (short) (60.0 * pitch); 
+				channel->heaveCompensation = heave /
+						channel->sampleInterval / 0.00000075; 
 
 				/*----------------------------------------------------------------*/
 				/* copy low frequency starboard sidescan to jstar storage */
@@ -1103,24 +1247,6 @@ imb_io_ptr->fix_lat[i]);*/
 				channel->sonardepth = 0;						/* 236-235 : Sonar depth in 0.001 m */
 				channel->sonaraltitude = 0;						/* 236-239 : Sonar altitude in 0.001 m */
 
-				/* reset navigation and other values */
-				if (navlon < 180.0) navlon = navlon + 360.0;
-				if (navlon > 180.0) navlon = navlon - 360.0;
-				channel->sourceCoordX = (int) (360000.0 * navlon);
-				channel->sourceCoordY = (int) (360000.0 * navlat);
-				channel->groupCoordX = (int) (360000.0 * navlon);
-				channel->groupCoordY = (int) (360000.0 * navlat);
-				channel->coordUnits = 2;
-				channel->heading = (short) (60.0 * heading);
-				channel->startDepth = sonardepth / channel->sampleInterval / 0.00000075; 
-				channel->sonardepth = 1000 * sonardepth;
-				channel->sonaraltitude = 1000 * altitude;
-				channel->depth = channel->sonardepth + channel->sonaraltitude;
-				channel->roll = (short) (60.0 * roll); 
-				channel->pitch = (short) (60.0 * pitch); 
-				channel->heaveCompensation = heave /
-						channel->sampleInterval / 0.00000075; 
-
 				/* allocate memory for the trace */
 				if (channel->dataFormat == 1)
 					shortspersample = 2;
@@ -1144,6 +1270,72 @@ imb_io_ptr->fix_lat[i]);*/
 					for (i=0;i<trace_size;i++)
 						data[i] = s7kchannel->data[i];
 					}
+
+				/* set the sonar altitude using the specified mode */
+				if (bottompickmode == MB7K2JSTAR_BOTTOMPICK_ARRIVAL)
+					{
+					/* get bottom arrival in trace */
+					if (channel->dataFormat == MBSYS_JSTAR_TRACEFORMAT_ANALYTIC)
+						{
+						channelmax = 0.0;
+						for (i=0;i<channel->samples;i++)
+							{
+							value = sqrt((double) (channel->trace[2*i] * channel->trace[2*i] 
+								+ channel->trace[2*i+1] * channel->trace[2*i+1]));
+							channelmax = MAX(value, channelmax);
+							}
+						channelpick = 0;
+						threshold = bottompickthreshold * channelmax;
+						for (i=0;i<channel->samples && channelpick == 0;i++)
+							{
+							value = sqrt((double) (channel->trace[2*i] * channel->trace[2*i] 
+								+ channel->trace[2*i+1] * channel->trace[2*i+1]));
+							if (value >= threshold)
+								channelpick = i;
+							}
+						}
+					else
+						{
+						channelmax = 0.0;
+						for (i=0;i<channel->samples;i++)
+							{
+							value = (double)(channel->trace[i]);
+							channelmax = MAX(value, channelmax);
+							}
+						channelpick = 0;
+						threshold = bottompickthreshold * channelmax;
+						for (i=0;i<channel->samples && channelpick == 0;i++)
+							{
+							value = (double)(channel->trace[i]);
+							if (value >= threshold)
+								channelpick = i;
+							}
+						}
+						
+					/* set sonar altitude */
+					channel->sonaraltitude = 0.00075 * channelpick * channel->sampleInterval;
+					}
+				else
+					{
+					channel->sonaraltitude = 1000 * altitude;
+					}
+
+				/* reset navigation and other values */
+				if (navlon < 180.0) navlon = navlon + 360.0;
+				if (navlon > 180.0) navlon = navlon - 360.0;
+				channel->sourceCoordX = (int) (360000.0 * navlon);
+				channel->sourceCoordY = (int) (360000.0 * navlat);
+				channel->groupCoordX = (int) (360000.0 * navlon);
+				channel->groupCoordY = (int) (360000.0 * navlat);
+				channel->coordUnits = 2;
+				channel->heading = (short) (60.0 * heading);
+				channel->startDepth = sonardepth / channel->sampleInterval / 0.00000075; 
+				channel->sonardepth = 1000 * sonardepth;
+				channel->depth = channel->sonardepth + channel->sonaraltitude;
+				channel->roll = (short) (60.0 * roll); 
+				channel->pitch = (short) (60.0 * pitch); 
+				channel->heaveCompensation = heave /
+						channel->sampleInterval / 0.00000075; 
 
 				/* write the record */
 				nwritesslo++;
@@ -1286,24 +1478,6 @@ imb_io_ptr->fix_lat[i]);*/
 				channel->sonardepth = 0;						/* 236-235 : Sonar depth in 0.001 m */
 				channel->sonaraltitude = 0;						/* 236-239 : Sonar altitude in 0.001 m */
 
-				/* reset navigation and other values */
-				if (navlon < 180.0) navlon = navlon + 360.0;
-				if (navlon > 180.0) navlon = navlon - 360.0;
-				channel->sourceCoordX = (int) (360000.0 * navlon);
-				channel->sourceCoordY = (int) (360000.0 * navlat);
-				channel->groupCoordX = (int) (360000.0 * navlon);
-				channel->groupCoordY = (int) (360000.0 * navlat);
-				channel->coordUnits = 2;
-				channel->heading = (short) (60.0 * heading);
-				channel->startDepth = sonardepth / channel->sampleInterval / 0.00000075; 
-				channel->sonardepth = 1000 * sonardepth;
-				channel->sonaraltitude = 1000 * altitude;
-				channel->depth = channel->sonardepth + channel->sonaraltitude;
-				channel->roll = (short) (60.0 * roll); 
-				channel->pitch = (short) (60.0 * pitch); 
-				channel->heaveCompensation = heave /
-						channel->sampleInterval / 0.00000075; 
-
 				/* allocate memory for the trace */
 				if (channel->dataFormat == 1)
 					shortspersample = 2;
@@ -1327,6 +1501,73 @@ imb_io_ptr->fix_lat[i]);*/
 					for (i=0;i<trace_size;i++)
 						data[i] = s7kchannel->data[i];
 					}
+
+				/* set the sonar altitude using the specified mode */
+				if (bottompickmode == MB7K2JSTAR_BOTTOMPICK_ARRIVAL)
+					{
+					/* get bottom arrival in trace */
+					if (channel->dataFormat == MBSYS_JSTAR_TRACEFORMAT_ANALYTIC)
+						{
+						channelmax = 0.0;
+						for (i=0;i<channel->samples;i++)
+							{
+							value = sqrt((double) (channel->trace[2*i] * channel->trace[2*i] 
+								+ channel->trace[2*i+1] * channel->trace[2*i+1]));
+							channelmax = MAX(value, channelmax);
+							}
+						channelpick = 0;
+						threshold = bottompickthreshold * channelmax;
+						for (i=0;i<channel->samples && channelpick == 0;i++)
+							{
+							value = sqrt((double) (channel->trace[2*i] * channel->trace[2*i] 
+								+ channel->trace[2*i+1] * channel->trace[2*i+1]));
+							if (value >= threshold)
+								channelpick = i;
+							}
+						}
+					else
+						{
+						channelmax = 0.0;
+						for (i=0;i<channel->samples;i++)
+							{
+							value = (double)(channel->trace[i]);
+							channelmax = MAX(value, channelmax);
+							}
+						channelpick = 0;
+						threshold = bottompickthreshold * channelmax;
+						for (i=0;i<channel->samples && channelpick == 0;i++)
+							{
+							value = (double)(channel->trace[i]);
+							if (value >= threshold)
+								channelpick = i;
+							}
+						}
+						
+					/* set sonar altitude */
+					channel->sonaraltitude = 0.00075 * channelpick * channel->sampleInterval;
+					}
+				else
+					{
+					channel->sonaraltitude = 1000 * altitude;
+					}
+
+				/* reset navigation and other values */
+				if (navlon < 180.0) navlon = navlon + 360.0;
+				if (navlon > 180.0) navlon = navlon - 360.0;
+				channel->sourceCoordX = (int) (360000.0 * navlon);
+				channel->sourceCoordY = (int) (360000.0 * navlat);
+				channel->groupCoordX = (int) (360000.0 * navlon);
+				channel->groupCoordY = (int) (360000.0 * navlat);
+				channel->coordUnits = 2;
+				channel->heading = (short) (60.0 * heading);
+				channel->startDepth = sonardepth / channel->sampleInterval / 0.00000075; 
+				channel->sonardepth = 1000 * sonardepth;
+				channel->sonaraltitude = 1000 * altitude;
+				channel->depth = channel->sonardepth + channel->sonaraltitude;
+				channel->roll = (short) (60.0 * roll); 
+				channel->pitch = (short) (60.0 * pitch); 
+				channel->heaveCompensation = heave /
+						channel->sampleInterval / 0.00000075; 
 
 				/*----------------------------------------------------------------*/
 				/* copy high frequency starboard sidescan to jstar storage */
@@ -1450,24 +1691,6 @@ imb_io_ptr->fix_lat[i]);*/
 				channel->sonardepth = 0;						/* 236-235 : Sonar depth in 0.001 m */
 				channel->sonaraltitude = 0;						/* 236-239 : Sonar altitude in 0.001 m */
 
-				/* reset navigation and other values */
-				if (navlon < 180.0) navlon = navlon + 360.0;
-				if (navlon > 180.0) navlon = navlon - 360.0;
-				channel->sourceCoordX = (int) (360000.0 * navlon);
-				channel->sourceCoordY = (int) (360000.0 * navlat);
-				channel->groupCoordX = (int) (360000.0 * navlon);
-				channel->groupCoordY = (int) (360000.0 * navlat);
-				channel->coordUnits = 2;
-				channel->heading = (short) (60.0 * heading);
-				channel->startDepth = sonardepth / channel->sampleInterval / 0.00000075; 
-				channel->sonardepth = 1000 * sonardepth;
-				channel->sonaraltitude = 1000 * altitude;
-				channel->depth = channel->sonardepth + channel->sonaraltitude;
-				channel->roll = (short) (60.0 * roll);
-				channel->pitch = (short) (60.0 * pitch); 
-				channel->heaveCompensation = heave /
-						channel->sampleInterval / 0.00000075; 
-
 				/* allocate memory for the trace */
 				if (channel->dataFormat == 1)
 					shortspersample = 2;
@@ -1491,6 +1714,72 @@ imb_io_ptr->fix_lat[i]);*/
 					for (i=0;i<trace_size;i++)
 						data[i] = s7kchannel->data[i];
 					}
+
+				/* set the sonar altitude using the specified mode */
+				if (bottompickmode == MB7K2JSTAR_BOTTOMPICK_ARRIVAL)
+					{
+					/* get bottom arrival in trace */
+					if (channel->dataFormat == MBSYS_JSTAR_TRACEFORMAT_ANALYTIC)
+						{
+						channelmax = 0.0;
+						for (i=0;i<channel->samples;i++)
+							{
+							value = sqrt((double) (channel->trace[2*i] * channel->trace[2*i] 
+								+ channel->trace[2*i+1] * channel->trace[2*i+1]));
+							channelmax = MAX(value, channelmax);
+							}
+						channelpick = 0;
+						threshold = bottompickthreshold * channelmax;
+						for (i=0;i<channel->samples && channelpick == 0;i++)
+							{
+							value = sqrt((double) (channel->trace[2*i] * channel->trace[2*i] 
+								+ channel->trace[2*i+1] * channel->trace[2*i+1]));
+							if (value >= threshold)
+								channelpick = i;
+							}
+						}
+					else
+						{
+						channelmax = 0.0;
+						for (i=0;i<channel->samples;i++)
+							{
+							value = (double)(channel->trace[i]);
+							channelmax = MAX(value, channelmax);
+							}
+						channelpick = 0;
+						threshold = bottompickthreshold * channelmax;
+						for (i=0;i<channel->samples && channelpick == 0;i++)
+							{
+							value = (double)(channel->trace[i]);
+							if (value >= threshold)
+								channelpick = i;
+							}
+						}
+						
+					/* set sonar altitude */
+					channel->sonaraltitude = 0.00075 * channelpick * channel->sampleInterval;
+					}
+				else
+					{
+					channel->sonaraltitude = 1000 * altitude;
+					}
+
+				/* reset navigation and other values */
+				if (navlon < 180.0) navlon = navlon + 360.0;
+				if (navlon > 180.0) navlon = navlon - 360.0;
+				channel->sourceCoordX = (int) (360000.0 * navlon);
+				channel->sourceCoordY = (int) (360000.0 * navlat);
+				channel->groupCoordX = (int) (360000.0 * navlon);
+				channel->groupCoordY = (int) (360000.0 * navlat);
+				channel->coordUnits = 2;
+				channel->heading = (short) (60.0 * heading);
+				channel->startDepth = sonardepth / channel->sampleInterval / 0.00000075; 
+				channel->sonardepth = 1000 * sonardepth;
+				channel->depth = channel->sonardepth + channel->sonaraltitude;
+				channel->roll = (short) (60.0 * roll);
+				channel->pitch = (short) (60.0 * pitch); 
+				channel->heaveCompensation = heave /
+						channel->sampleInterval / 0.00000075; 
 
 				/* write the record */
 				nwritesshi++;
@@ -1534,16 +1823,6 @@ imb_io_ptr->fix_lat[i]);*/
 
 	/* close the swath file */
 	status = mb_close(verbose,&imbio_ptr,&error);
-
-	/* deallocate memory used for data arrays */
-	mb_free(verbose,(char **)&beamflag,&error); 
-	mb_free(verbose,(char **)&bath,&error); 
-	mb_free(verbose,(char **)&bathacrosstrack,&error); 
-	mb_free(verbose,(char **)&bathalongtrack,&error); 
-	mb_free(verbose,(char **)&amp,&error); 
-	mb_free(verbose,(char **)&ss,&error); 
-	mb_free(verbose,(char **)&ssacrosstrack,&error); 
-	mb_free(verbose,(char **)&ssalongtrack,&error); 
 	
 	/* output counts */
 	fprintf(stdout, "\nData records read from: %s\n", file);

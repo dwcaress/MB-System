@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbbackangle.c	1/6/95
- *    $Id: mbbackangle.c,v 5.10 2005-08-17 17:28:54 caress Exp $
+ *    $Id: mbbackangle.c,v 5.11 2005-11-05 01:07:54 caress Exp $
  *
  *    Copyright (c) 1995, 2000, 2002, 2003, 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	January 6, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.10  2005/08/17 17:28:54  caress
+ * Improved how the best altitude value is obtained for sidescan and amplitude data correction.
+ *
  * Revision 5.9  2005/03/25 04:43:00  caress
  * Standardized the string lengths used for filenames and comment data.
  *
@@ -121,13 +124,20 @@
 #define	MBBACKANGLE_AMP	1
 #define	MBBACKANGLE_SS	2
 #define	MBBACKANGLE_INNERSWATHLIMIT 15.0
-
+#define	MBBACKANGLE_BEAMPATTERN_EMPIRICAL		0
+#define	MBBACKANGLE_BEAMPATTERN_SIDESCAN		1
 int output_table(int verbose, FILE *tfp, int ntable, int nping, double time_d,
 	int nangles, double angle_max, double dangle, int symmetry,
 	int *nmean, double *mean, double *sigma, 
 	int *error);
-
-static char rcs_id[] = "$Id: mbbackangle.c,v 5.10 2005-08-17 17:28:54 caress Exp $";
+int output_model(int verbose, FILE *tfp, 
+	double ssbeamwidth, double ssdepression, double ref_angle,
+	int ntable, int nping, double time_d, double altitude,
+	int nangles, double angle_max, double dangle, int symmetry,
+	int *nmean, double *mean, double *sigma, 
+	int *error);
+						
+static char rcs_id[] = "$Id: mbbackangle.c,v 5.11 2005-11-05 01:07:54 caress Exp $";
 static char program_name[] = "mbbackangle";
 
 /*--------------------------------------------------------------------*/
@@ -143,7 +153,7 @@ average function for a user defined number of pings. The \n\t\
 tables are output to an \".aga\" file which can be applied \n\t\
 by MBprocess.";
 	static char usage_message[] = "mbbackangle -Ifile \
-[-Akind -Fformat -Ggridmode/angle/max/nx/ny \
+[-Akind -Bmode[/beamwidth/depression] -Fformat -Ggridmode/angle/max/nx/ny \
 -Nnangles/angle_max -Ppings -Zaltitude -V -H]";
 	extern char *optarg;
 	extern int optkind;
@@ -235,6 +245,10 @@ by MBprocess.";
 	double	*sigmass = NULL;
 	double	altitude_default = 0.0;
 	double	time_d_avg;
+	double	altitude_avg;
+	int	beammode = MBBACKANGLE_BEAMPATTERN_EMPIRICAL;
+	double	ssbeamwidth = 50.0;
+	double	ssdepression = 20.0;
 	int	amp_corr_type;
 	int	amp_corr_symmetry = MBP_SSCORR_SYMMETRIC;
 	int	amp_corr_slope = MBP_AMPCORR_IGNORESLOPE;
@@ -289,6 +303,7 @@ by MBprocess.";
 	time_t	right_now;
 	char	date[25], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
 
+	double	d1, d2;
 	int	i, j;
 	int	ix, jy, k, n;
 	
@@ -307,7 +322,7 @@ by MBprocess.";
 	strcpy (read_file, "datalist.mb-1");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "A:a:CcDdF:f:G:g:HhI:i:N:n:P:p:QqR:r:VvZ:z:")) != -1)
+	while ((c = getopt(argc, argv, "A:a:B:b:CcDdF:f:G:g:HhI:i:N:n:P:p:QqR:r:VvZ:z:")) != -1)
 	  switch (c) 
 		{
 		case 'A':
@@ -317,6 +332,18 @@ by MBprocess.";
 				sidescan_on = MB_YES;
 			if (ampkind == MBBACKANGLE_AMP)
 				amplitude_on = MB_YES;
+			flag++;
+			break;
+		case 'B':
+		case 'b':
+			n = sscanf (optarg,"%d/%lf/%lf", &beammode, &d1, &d2);
+			if (beammode == MBBACKANGLE_BEAMPATTERN_SIDESCAN)
+				{
+				if (n >= 2)
+					ssbeamwidth = d1;
+				if (n >= 3)
+					ssdepression = d2;
+				}
 			flag++;
 			break;
 		case 'C':
@@ -468,6 +495,10 @@ by MBprocess.";
 		fprintf(stderr,"dbg2       nangles:      %d\n",nangles);
 		fprintf(stderr,"dbg2       angle_max:    %f\n",angle_max);
 		fprintf(stderr,"dbg2       ref_angle:    %f\n",ref_angle_default);
+		fprintf(stderr,"dbg2       beammode:     %d\n",beammode);
+		fprintf(stderr,"dbg2       ssbeamwidth:  %f\n",ssbeamwidth);
+		fprintf(stderr,"dbg2       ssdepression: %f\n",ssdepression);
+		fprintf(stderr,"dbg2       ref_angle:    %f\n",ref_angle_default);
 		fprintf(stderr,"dbg2       pings_avg:    %d\n",pings_avg);
 		fprintf(stderr,"dbg2       angle_max:    %f\n",angle_max);
 		fprintf(stderr,"dbg2       altitude:     %f\n",altitude_default);
@@ -548,6 +579,10 @@ by MBprocess.";
 			fprintf(stderr, "Working on beam amplitude data...\n");
 		if (sidescan_on == MB_YES)
 			fprintf(stderr, "Working on sidescan data...\n");
+		if (beammode == MBBACKANGLE_BEAMPATTERN_EMPIRICAL)
+			fprintf(stderr, "Generating empirical correction tables...\n");
+		else if (beammode == MBBACKANGLE_BEAMPATTERN_SIDESCAN)
+			fprintf(stderr, "Generating sidescan model correction tables...\n");
 		if (useslope == MB_YES)
 			fprintf(stderr, "Using seafloor slope in calculating correction tables...\n");
 		else
@@ -675,7 +710,9 @@ by MBprocess.";
 	/* set correction modes according to format */
 	if (format == MBF_SB2100RW
 	    || format == MBF_SB2100B1
-	    || format == MBF_SB2100B2)
+	    || format == MBF_SB2100B2
+	    || format == MBF_EDGJSTAR
+	    || format == MBF_EDGJSTR2)
 	    ss_corr_type = MBP_SSCORR_DIVISION;
 	else
 	    ss_corr_type = MBP_SSCORR_SUBTRACTION;
@@ -722,6 +759,48 @@ by MBprocess.";
 	if (error == MB_ERROR_NO_ERROR)
 		status = mb_malloc(verbose,(beams_bath+1)*sizeof(double),
 					&slopeacrosstrack,&error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(char), (void **)&beamflag, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(double), (void **)&bath, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_AMPLITUDE,
+						sizeof(double), (void **)&amp, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(double), (void **)&bathacrosstrack, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(double), (void **)&bathalongtrack, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+						sizeof(double), (void **)&ss, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+						sizeof(double), (void **)&ssacrosstrack, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+						sizeof(double), (void **)&ssalongtrack, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(double), (void **)&depths, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(double), (void **)&depthsmooth, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(double), (void **)&depthacrosstrack, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(double), (void **)&slopes, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						2 * sizeof(double), (void **)&slopeacrosstrack, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						2 * sizeof(double), (void **)&bathalongtrack, &error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
@@ -885,19 +964,37 @@ by MBprocess.";
 			{
 			/* write out tables */
 			time_d_avg /= navg;
-			if (amplitude_on == MB_YES)
-			output_table(verbose, atfp, ntable, navg, time_d_avg, 
-					nangles, angle_max, dangle, symmetry,
-					nmeanamp, meanamp, sigmaamp, &error);
-			if (sidescan_on == MB_YES)
-			output_table(verbose, stfp, ntable, navg, time_d_avg, 
-					nangles, angle_max, dangle, symmetry,
-					nmeanss, meanss, sigmass, &error);
+			altitude_avg /= navg;
+			if (beammode == MBBACKANGLE_BEAMPATTERN_EMPIRICAL)
+				{
+				if (amplitude_on == MB_YES)
+				output_table(verbose, atfp, ntable, navg, time_d_avg, 
+						nangles, angle_max, dangle, symmetry,
+						nmeanamp, meanamp, sigmaamp, &error);
+				if (sidescan_on == MB_YES)
+				output_table(verbose, stfp, ntable, navg, time_d_avg, 
+						nangles, angle_max, dangle, symmetry,
+						nmeanss, meanss, sigmass, &error);
+				}
+			else if (beammode == MBBACKANGLE_BEAMPATTERN_SIDESCAN)
+				{
+				if (amplitude_on == MB_YES)
+				output_model(verbose, atfp, ssbeamwidth, ssdepression, ref_angle,
+						ntable, navg, time_d_avg, altitude_avg,
+						nangles, angle_max, dangle, symmetry,
+						nmeanamp, meanamp, sigmaamp, &error);
+				if (sidescan_on == MB_YES)
+				output_model(verbose, stfp, ssbeamwidth, ssdepression, ref_angle,
+						ntable, navg, time_d_avg, altitude_avg,
+						nangles, angle_max, dangle, symmetry,
+						nmeanss, meanss, sigmass, &error);
+				}
 			ntable++;
 					
 			/* reinitialize arrays */
 			navg = 0;
 			time_d_avg = 0.0;
+			altitude_avg = 0.0;
 			if (amplitude_on == MB_YES)
 			for (i=0;i<nangles;i++)
 				{
@@ -925,6 +1022,7 @@ by MBprocess.";
 		    
 		    /* increment time */
 		    time_d_avg += time_d;
+		    altitude_avg += altitude;
 
 		    /* get the seafloor slopes */
 		    if (beams_bath > 0)
@@ -1062,7 +1160,7 @@ time_d, i, ssacrosstrack[i], altitude_use, angle);*/
 				    }
 					
 				/* load amplitude into grid */
-				if (gridamp == MB_YES)
+				if (gridss == MB_YES)
 				    {
 				    ix = (angle + gridssangle) / gridssdx;
 				    jy = ss[i] / gridssdy;
@@ -1077,7 +1175,7 @@ time_d, i, ssacrosstrack[i], altitude_use, angle);*/
 			    /* print debug statements */
 			    if (verbose >= 5)
 				{
-				fprintf(stderr,"dbg5       %d %d: slope:%f altitude:%f xtrack:%f ang:%f j:%d\n",
+				fprintf(stderr,"dbg5kkk       %d %d: slope:%f altitude:%f xtrack:%f ang:%f j:%d\n",
 				    nrec, i, slope, altitude_use, ssacrosstrack[i], angle, j);
 				}
 			    }
@@ -1139,7 +1237,7 @@ time_d, i, ssacrosstrack[i], altitude_use, angle);*/
 				argc, argv, &error);
 	
 		/* run mbm_grdplot */
-		sprintf(plot_cmd, "mbm_grdplot -I%s -JX9/5 -G1 -Z0/40.0 -MXM# -MXI%s -V -L\"File %s - %s:%s\"", 
+		sprintf(plot_cmd, "mbm_grdplot -I%s -JX9/5 -G1 -S -MGQ100 -MXM# -MXI%s -V -L\"File %s - %s:%s\"", 
 				gridfile, amptablefile, gridfile, title, zlabel);
 		if (verbose)
 			{
@@ -1186,14 +1284,14 @@ time_d, i, ssacrosstrack[i], altitude_use, angle);*/
 		write_cdfgrd(verbose, gridfile, gridsshist,
 				gridssnx, gridssny, 
 				(double)(-gridssangle), gridssangle, 
-				(double)0.0, gridampmax,
+				(double)0.0, gridssmax,
 				(double)0.0, ampmax,
 				gridssdx, gridssdy,
 				xlabel, ylabel, zlabel, title, projection,
 				argc, argv, &error);
 	
 		/* run mbm_grdplot */
-		sprintf(plot_cmd, "mbm_grdplot -I%s -JX9/5 -G1 -Z0/40.0 -MXM# -MXI%s -V -L\"File %s - %s:%s\"", 
+		sprintf(plot_cmd, "mbm_grdplot -I%s -JX9/5 -G1 -S -MGQ100 -MXM# -MXI%s -V -L\"File %s - %s:%s\"", 
 				gridfile, sstablefile, gridfile, title, zlabel);
 		if (verbose)
 			{
@@ -1236,21 +1334,6 @@ time_d, i, ssacrosstrack[i], altitude_use, angle);*/
 	    	fprintf(stderr, "%d tables written to %s\n", ntable, sstablefile);
 		}
 	    }
-
-	/* deallocate memory used for data arrays */
-	mb_free(verbose,&beamflag,&error);
-	mb_free(verbose,&bath,&error);
-	mb_free(verbose,&amp,&error);
-	mb_free(verbose,&bathacrosstrack,&error);
-	mb_free(verbose,&bathalongtrack,&error);
-	mb_free(verbose,&ss,&error);
-	mb_free(verbose,&ssacrosstrack,&error);
-	mb_free(verbose,&ssalongtrack,&error);
-	mb_free(verbose,&depths,&error);
-	mb_free(verbose,&depthsmooth,&error);
-	mb_free(verbose,&depthacrosstrack,&error);
-	mb_free(verbose,&slopes,&error);
-	mb_free(verbose,&slopeacrosstrack,&error);
 
 	/* figure out whether and what to read next */
         if (read_datalist == MB_YES)
@@ -1431,6 +1514,118 @@ int output_table(int verbose, FILE *tfp, int ntable, int nping, double time_d,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+int output_model(int verbose, FILE *tfp, 
+	double beamwidth, double depression, double ref_angle,
+	int ntable, int nping, double time_d, double altitude,
+	int nangles, double angle_max, double dangle, int symmetry,
+	int *nmean, double *mean, double *sigma, 
+	int *error)
+{
+	char	*function_name = "output_model";
+	int	status = MB_SUCCESS;
+	double	ref_amp, range, del, factor, aa;
+	double	angle, amean, asigma, sum, sumsq, sumn;
+	int	time_i[7];
+	int	ii, jj, i0, i1, iref;
+	int	i, j;
+	
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBBACKANGLE function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:         %d\n", verbose);
+		fprintf(stderr,"dbg2       tfp:             %d\n", tfp);
+		fprintf(stderr,"dbg2       beamwidth:       %f\n", beamwidth);
+		fprintf(stderr,"dbg2       depression:      %f\n", depression);
+		fprintf(stderr,"dbg2       ref_angle:       %f\n", ref_angle);
+		fprintf(stderr,"dbg2       ntable:          %d\n", ntable);
+		fprintf(stderr,"dbg2       nping:           %d\n", nping);
+		fprintf(stderr,"dbg2       time_d:          %f\n", time_d);
+		fprintf(stderr,"dbg2       altitude:        %f\n", altitude);
+		fprintf(stderr,"dbg2       nangles:         %d\n", nangles);
+		fprintf(stderr,"dbg2       angle_max:       %f\n", angle_max);
+		fprintf(stderr,"dbg2       dangle:          %f\n", dangle);
+		fprintf(stderr,"dbg2       symmetry:        %d\n", symmetry);
+		fprintf(stderr,"dbg2       mean and sigma:\n");
+		for (i=0;i<nangles;i++)
+			fprintf(stderr,"dbg2         %d %f %d %f %f\n", 
+				i, (i * dangle), nmean[i], mean[i], sigma[i]);
+		}
+		
+	/* get average amplitude at reference angle */
+	iref = (angle_max - ref_angle) / dangle;
+	i0 = MAX(iref - 1, 0);
+	i1 = MIN(iref + 1, nangles - 1);
+	ref_amp = 0.0;
+	sum = 0.0;
+	sumsq = 0.0;
+	sumn = 0.0;
+	for (ii=i0;ii<=i1;ii++)
+		{
+		sum += mean[ii];
+		sumsq += sigma[ii];
+		sumn += nmean[ii];
+		jj = nangles - ii - 1;
+		sum += mean[jj];
+		sumsq += sigma[jj];
+		sumn += nmean[jj];
+		}
+	if (sumn > 0.0)
+		{
+		ref_amp = sum /  sumn;
+		asigma = sqrt((sumsq / sumn) - amean * amean);
+		}
+		
+	/* get model that combines gaussian with 1/r
+		- gaussian must drop to 0.7 max at 0.5 * beamwidth
+		- model must equal ref_amp at ref_angle */
+	del = (90.0 - depression) - 0.5 * beamwidth;
+	aa = -log(0.1) / (del * del);
+	del = 90.0 - depression - ref_angle;
+	range = altitude / cos (DTR * ref_angle);
+	factor = ref_amp * range * range / exp(-aa * del * del);
+fprintf(stderr,"depression:%f beamwidth:%f aa:%f factor:%f\n",
+depression,beamwidth,aa,factor);
+
+	/* process sums and print out results */
+	mb_get_date(verbose, time_d, time_i, error);
+	fprintf(tfp,"# table: %d\n", ntable);
+	fprintf(tfp,"# nping: %d\n", nping);
+	fprintf(tfp,"# time:  %4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d    %16.6f\n",
+		time_i[0],time_i[1],time_i[2],
+		time_i[3],time_i[4],time_i[5],
+		time_i[6],time_d);
+	fprintf(tfp,"# nangles: %d\n", nangles);
+	for (i=0;i<nangles;i++)
+		{
+		angle = -angle_max + i * dangle;
+		del = fabs(angle) - (90 - depression);
+		range = altitude / cos (DTR * fabs(angle));
+		amean = factor * exp(-aa * del * del) / (range * range);
+fprintf(stderr,"angle:%f del:%f range:%f amean:%f\n",angle,del,range,amean);
+		fprintf(tfp,"%7.4f %12.4f %12.4f\n", angle, amean, asigma);
+		}
+	fprintf(tfp,"#\n");
+	fprintf(tfp,"#\n");
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBBACKANGLE function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:           %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:          %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
 /*
  * function write_cdfgrd writes output grid to a 
  * GMT version 2 netCDF grd file 
@@ -1458,7 +1653,7 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 	char	*getenv();
 
 	/* print input debug statements */
-	if (verbose >= 2)
+	if (verbose >= 0)
 		{
 		fprintf(stderr,"\ndbg2  Function <%s> called\n",
 			function_name);
@@ -1472,6 +1667,8 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 		fprintf(stderr,"dbg2       xmax:       %f\n",xmax);
 		fprintf(stderr,"dbg2       ymin:       %f\n",ymin);
 		fprintf(stderr,"dbg2       ymax:       %f\n",ymax);
+		fprintf(stderr,"dbg2       zmin:       %f\n",zmin);
+		fprintf(stderr,"dbg2       zmax:       %f\n",zmax);
 		fprintf(stderr,"dbg2       dx:         %f\n",dx);
 		fprintf(stderr,"dbg2       dy:         %f\n",dy);
 		fprintf(stderr,"dbg2       xlab:       %s\n",xlab);

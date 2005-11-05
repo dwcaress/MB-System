@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbhistogram.c	12/28/94
- *    $Id: mbhistogram.c,v 5.4 2005-03-25 04:42:59 caress Exp $
+ *    $Id: mbhistogram.c,v 5.5 2005-11-05 01:07:54 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	December 28, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2005/03/25 04:42:59  caress
+ * Standardized the string lengths used for filenames and comment data.
+ *
  * Revision 5.3  2003/04/17 21:18:57  caress
  * Release 5.0.beta30
  *
@@ -98,7 +101,7 @@
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbhistogram.c,v 5.4 2005-03-25 04:42:59 caress Exp $";
+	static char rcs_id[] = "$Id: mbhistogram.c,v 5.5 2005-11-05 01:07:54 caress Exp $";
 	static char program_name[] = "MBHISTOGRAM";
 	static char help_message[] =  "MBHISTOGRAM reads a swath sonar data file and generates a histogram\n\tof the bathymetry,  amplitude,  or sidescan values. Alternatively, \n\tmbhistogram can output a list of values which break up the\n\tdistribution into equal sized regions.\n\tThe results are dumped to stdout.";
 	static char usage_message[] = "mbhistogram [-Akind -Byr/mo/da/hr/mn/sc -Dmin/max -Eyr/mo/da/hr/mn/sc -Fformat -G -Ifile -Llonflip -Mnintervals -Nnbins -Ppings -Rw/e/s/n -Sspeed -V -H]";
@@ -474,29 +477,29 @@ main (int argc, char **argv)
 
 	/* allocate memory for data arrays */
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_malloc(verbose,beams_bath*sizeof(char),
-					&beamflag,&error);
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(char), (void **)&beamflag, &error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_malloc(verbose,beams_bath*sizeof(double),
-					&bath,&error);
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(double), (void **)&bath, &error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_malloc(verbose,beams_amp*sizeof(double),
-					&amp,&error);
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_AMPLITUDE,
+						sizeof(double), (void **)&amp, &error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_malloc(verbose,beams_bath*sizeof(double),
-					&bathacrosstrack,&error);
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(double), (void **)&bathacrosstrack, &error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_malloc(verbose,beams_bath*sizeof(double),
-					&bathalongtrack,&error);
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(double), (void **)&bathalongtrack, &error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_malloc(verbose,pixels_ss*sizeof(double),
-					&ss,&error);
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+						sizeof(double), (void **)&ss, &error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_malloc(verbose,pixels_ss*sizeof(double),
-					&ssacrosstrack,&error);
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+						sizeof(double), (void **)&ssacrosstrack, &error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_malloc(verbose,pixels_ss*sizeof(double),
-					&ssalongtrack,&error);
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+						sizeof(double), (void **)&ssalongtrack, &error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
@@ -629,16 +632,6 @@ main (int argc, char **argv)
 	    fprintf(stderr, "%d records processed\n%d data processed\n", 
 		    nrec, nvalue);
 	    }
-
-	/* deallocate memory used for data arrays */
-	mb_free(verbose,&beamflag,&error);
-	mb_free(verbose,&bath,&error);
-	mb_free(verbose,&amp,&error);
-	mb_free(verbose,&bathacrosstrack,&error);
-	mb_free(verbose,&bathalongtrack,&error);
-	mb_free(verbose,&ss,&error);
-	mb_free(verbose,&ssacrosstrack,&error);
-	mb_free(verbose,&ssalongtrack,&error);
 
 	/* figure out whether and what to read next */
         if (read_datalist == MB_YES)

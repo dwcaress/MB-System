@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbextractsegy.c	4/18/2004
- *    $Id: mbextractsegy.c,v 5.6 2005-06-04 06:07:02 caress Exp $
+ *    $Id: mbextractsegy.c,v 5.7 2005-11-05 01:07:54 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,10 @@
  * Date:	April 18, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2005/06/04 06:07:02  caress
+ * Fixed output of a single segy file deriving from a list
+ * of input swath files.
+ *
  * Revision 5.5  2004/10/06 19:10:52  caress
  * Release 5.0.5 update.
  *
@@ -54,7 +58,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mb_segy.h"
 
-static char rcs_id[] = "$Id: mbextractsegy.c,v 5.6 2005-06-04 06:07:02 caress Exp $";
+static char rcs_id[] = "$Id: mbextractsegy.c,v 5.7 2005-11-05 01:07:54 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
@@ -376,18 +380,30 @@ main (int argc, char **argv)
 		}
 
 	/* allocate memory for data arrays */
-	status = mb_malloc(verbose,beams_bath*sizeof(char),(char **)&beamflag,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),(char **)&bath,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),
-			(char **)&bathacrosstrack,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),
-			(char **)&bathalongtrack,&error);
-	status = mb_malloc(verbose,beams_amp*sizeof(double),(char **)&amp,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(double),(char **)&ss,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(double),(char **)&ssacrosstrack,
-			&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(double),(char **)&ssalongtrack,
-			&error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(char), (void **)&beamflag, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(double), (void **)&bath, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_AMPLITUDE,
+						sizeof(double), (void **)&amp, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(double), (void **)&bathacrosstrack, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(double), (void **)&bathalongtrack, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+						sizeof(double), (void **)&ss, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+						sizeof(double), (void **)&ssacrosstrack, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+						sizeof(double), (void **)&ssalongtrack, &error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
@@ -677,16 +693,6 @@ main (int argc, char **argv)
 
 	/* close the swath file */
 	status = mb_close(verbose,&mbio_ptr,&error);
-
-	/* deallocate memory used for data arrays */
-	mb_free(verbose,(char **)&beamflag,&error); 
-	mb_free(verbose,(char **)&bath,&error); 
-	mb_free(verbose,(char **)&bathacrosstrack,&error); 
-	mb_free(verbose,(char **)&bathalongtrack,&error); 
-	mb_free(verbose,(char **)&amp,&error); 
-	mb_free(verbose,(char **)&ss,&error); 
-	mb_free(verbose,(char **)&ssacrosstrack,&error); 
-	mb_free(verbose,(char **)&ssalongtrack,&error); 
 
 	/* deallocate memory used for segy data arrays */
 	mb_free(verbose,(char **)&segydata,&error); 

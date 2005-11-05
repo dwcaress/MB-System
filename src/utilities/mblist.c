@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mblist.c	2/1/93
- *    $Id: mblist.c,v 5.16 2005-06-04 06:17:38 caress Exp $
+ *    $Id: mblist.c,v 5.17 2005-11-05 01:07:54 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -28,6 +28,9 @@
  *		in 1990.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.16  2005/06/04 06:17:38  caress
+ * MBlist can now output the data in CDL and netCDF formats. This capability was contributed by Gordon Keith.
+ *
  * Revision 5.15  2004/12/02 06:38:10  caress
  * Fixes while supporting Reson 7k data.
  *
@@ -280,7 +283,7 @@ int printNaN(int verbose, FILE *output, int ascii, int *invert, int *flipsign, i
 /* NaN value */
 double	NaN;
 
-static char rcs_id[] = "$Id: mblist.c,v 5.16 2005-06-04 06:17:38 caress Exp $";
+static char rcs_id[] = "$Id: mblist.c,v 5.17 2005-11-05 01:07:54 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
@@ -1638,26 +1641,42 @@ fprintf(stderr,"DATE: %s\n",date);
 		}
 
 	/* allocate memory for data arrays */
-	status = mb_malloc(verbose,beams_bath*sizeof(char),(char **)&beamflag,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),(char **)&bath,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),
-			(char **)&bathacrosstrack,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),
-			(char **)&bathalongtrack,&error);
-	status = mb_malloc(verbose,beams_amp*sizeof(double),(char **)&amp,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(double),(char **)&ss,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(double),(char **)&ssacrosstrack,
-			&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(double),(char **)&ssalongtrack,
-			&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),
-					(char **)&depths,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),
-					(char **)&depthacrosstrack,&error);
-	status = mb_malloc(verbose,(beams_bath+1)*sizeof(double),
-					(char **)&slopes,&error);
-	status = mb_malloc(verbose,(beams_bath+1)*sizeof(double),
-					(char **)&slopeacrosstrack,&error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(char), (void **)&beamflag, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(double), (void **)&bath, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_AMPLITUDE,
+						sizeof(double), (void **)&amp, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(double), (void **)&bathacrosstrack, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(double), (void **)&bathalongtrack, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+						sizeof(double), (void **)&ss, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+						sizeof(double), (void **)&ssacrosstrack, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+						sizeof(double), (void **)&ssalongtrack, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(double), (void **)&depths, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(double), (void **)&depthacrosstrack, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						2 * sizeof(double), (void **)&slopes, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						2 * sizeof(double), (void **)&slopeacrosstrack, &error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
@@ -3081,20 +3100,6 @@ fprintf(stderr,"DATE: %s\n",date);
 
 	/* close the swath file */
 	status = mb_close(verbose,&mbio_ptr,&error);
-
-	/* deallocate memory used for data arrays */
-	mb_free(verbose,(char **)&beamflag,&error); 
-	mb_free(verbose,(char **)&bath,&error); 
-	mb_free(verbose,(char **)&bathacrosstrack,&error); 
-	mb_free(verbose,(char **)&bathalongtrack,&error); 
-	mb_free(verbose,(char **)&amp,&error); 
-	mb_free(verbose,(char **)&ss,&error); 
-	mb_free(verbose,(char **)&ssacrosstrack,&error); 
-	mb_free(verbose,(char **)&ssalongtrack,&error); 
-	mb_free(verbose,(char **)&depths,&error);
-	mb_free(verbose,(char **)&depthacrosstrack,&error);
-	mb_free(verbose,(char **)&slopes,&error);
-	mb_free(verbose,(char **)&slopeacrosstrack,&error);
 
 	/* figure out whether and what to read next */
         if (read_datalist == MB_YES)

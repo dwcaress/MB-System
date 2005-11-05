@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrid.c	5/2/94
- *    $Id: mbgrid.c,v 5.29 2005-08-17 17:25:36 caress Exp $
+ *    $Id: mbgrid.c,v 5.30 2005-11-05 01:07:54 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -38,6 +38,9 @@
  * Rererewrite:	January 2, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.29  2005/08/17 17:25:36  caress
+ * Moved back to zgrid algorithm, but left it possible to use surface through a preprocessor define statement.
+ *
  * Revision 5.28  2005/03/25 04:41:30  caress
  * Fixed a problem with the beam footprint gridding algorithm in mbgrid that caused beam footprints to be miscalculated for submerged sonars.
  *
@@ -404,7 +407,7 @@ double mbgrid_erf();
 FILE	*outfp;
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbgrid.c,v 5.29 2005-08-17 17:25:36 caress Exp $";
+static char rcs_id[] = "$Id: mbgrid.c,v 5.30 2005-11-05 01:07:54 caress Exp $";
 static char program_name[] = "mbgrid";
 static char help_message[] =  "mbgrid is an utility used to grid bathymetry, amplitude, or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbgrid -Ifilelist -Oroot \
@@ -1582,29 +1585,30 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 		    mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 		    /* allocate memory for reading data arrays */
-		    status = mb_malloc(verbose,beams_bath*sizeof(char),
-				    &beamflag,&error);
-		    if (status == MB_SUCCESS)
-		    status = mb_malloc(verbose,beams_bath*sizeof(double),
-				    &bath,&error);
-		    if (status == MB_SUCCESS)
-		    status = mb_malloc(verbose,beams_bath*sizeof(double),
-				    &bathlon,&error);
-		    if (status == MB_SUCCESS)
-		    status = mb_malloc(verbose,beams_bath*sizeof(double),
-				    &bathlat,&error);
-		    if (status == MB_SUCCESS)
-		    status = mb_malloc(verbose,beams_amp*sizeof(double),
-				    &amp,&error);
-		    if (status == MB_SUCCESS)
-		    status = mb_malloc(verbose,pixels_ss*sizeof(double),
-				    &ss,&error);
-		    if (status == MB_SUCCESS)
-		    status = mb_malloc(verbose,pixels_ss*sizeof(double),
-				    &sslon,&error);
-		    if (status == MB_SUCCESS)
-		    status = mb_malloc(verbose,pixels_ss*sizeof(double),
-				    &sslat,&error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							    sizeof(char), (void **)&beamflag, &error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							    sizeof(double), (void **)&bath, &error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_AMPLITUDE,
+							    sizeof(double), (void **)&amp, &error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							    sizeof(double), (void **)&bathlon, &error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							    sizeof(double), (void **)&bathlat, &error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+							    sizeof(double), (void **)&ss, &error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+							    sizeof(double), (void **)&sslon, &error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+							    sizeof(double), (void **)&sslat, &error);
 
 		    /* if error initializing memory then quit */
 		    if (error != MB_ERROR_NO_ERROR)
@@ -1875,14 +1879,6 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 			  }
 			}
 		    status = mb_close(verbose,&mbio_ptr,&error);
-		    mb_free(verbose,&beamflag,&error); 
-		    mb_free(verbose,&bath,&error); 
-		    mb_free(verbose,&bathlon,&error); 
-		    mb_free(verbose,&bathlat,&error); 
-		    mb_free(verbose,&amp,&error); 
-		    mb_free(verbose,&ss,&error); 
-		    mb_free(verbose,&sslon,&error); 
-		    mb_free(verbose,&sslat,&error); 
 		    status = MB_SUCCESS;
 		    error = MB_ERROR_NO_ERROR;
 		    }
@@ -2032,29 +2028,30 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 			}
 
 		    /* allocate memory for reading data arrays */
-		    status = mb_malloc(verbose,beams_bath*sizeof(char),
-				    &beamflag,&error);
-		    if (status == MB_SUCCESS)
-		    status = mb_malloc(verbose,beams_bath*sizeof(double),
-				    &bath,&error);
-		    if (status == MB_SUCCESS)
-		    status = mb_malloc(verbose,beams_bath*sizeof(double),
-				    &bathlon,&error);
-		    if (status == MB_SUCCESS)
-		    status = mb_malloc(verbose,beams_bath*sizeof(double),
-				    &bathlat,&error);
-		    if (status == MB_SUCCESS)
-		    status = mb_malloc(verbose,beams_amp*sizeof(double),
-				    &amp,&error);
-		    if (status == MB_SUCCESS)
-		    status = mb_malloc(verbose,pixels_ss*sizeof(double),
-				    &ss,&error);
-		    if (status == MB_SUCCESS)
-		    status = mb_malloc(verbose,pixels_ss*sizeof(double),
-				    &sslon,&error);
-		    if (status == MB_SUCCESS)
-		    status = mb_malloc(verbose,pixels_ss*sizeof(double),
-				    &sslat,&error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							    sizeof(char), (void **)&beamflag, &error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							    sizeof(double), (void **)&bath, &error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_AMPLITUDE,
+							    sizeof(double), (void **)&amp, &error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							    sizeof(double), (void **)&bathlon, &error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							    sizeof(double), (void **)&bathlat, &error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+							    sizeof(double), (void **)&ss, &error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+							    sizeof(double), (void **)&sslon, &error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+							    sizeof(double), (void **)&sslat, &error);
 
 		    /* if error initializing memory then quit */
 		    if (error != MB_ERROR_NO_ERROR)
@@ -2468,14 +2465,6 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 			  }
 			}
 		    status = mb_close(verbose,&mbio_ptr,&error);
-		    mb_free(verbose,&beamflag,&error); 
-		    mb_free(verbose,&bath,&error); 
-		    mb_free(verbose,&bathlon,&error); 
-		    mb_free(verbose,&bathlat,&error); 
-		    mb_free(verbose,&amp,&error); 
-		    mb_free(verbose,&ss,&error); 
-		    mb_free(verbose,&sslon,&error); 
-		    mb_free(verbose,&sslat,&error); 
 		    status = MB_SUCCESS;
 		    error = MB_ERROR_NO_ERROR;
 		    }
@@ -2742,29 +2731,30 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 			}
 
 		    /* allocate memory for reading data arrays */
-		    status = mb_malloc(verbose,beams_bath*sizeof(char),
-				    &beamflag,&error);
-		    if (status == MB_SUCCESS)
-		    status = mb_malloc(verbose,beams_bath*sizeof(double),
-				    &bath,&error);
-		    if (status == MB_SUCCESS)
-		    status = mb_malloc(verbose,beams_bath*sizeof(double),
-				    &bathlon,&error);
-		    if (status == MB_SUCCESS)
-		    status = mb_malloc(verbose,beams_bath*sizeof(double),
-				    &bathlat,&error);
-		    if (status == MB_SUCCESS)
-		    status = mb_malloc(verbose,beams_amp*sizeof(double),
-				    &amp,&error);
-		    if (status == MB_SUCCESS)
-		    status = mb_malloc(verbose,pixels_ss*sizeof(double),
-				    &ss,&error);
-		    if (status == MB_SUCCESS)
-		    status = mb_malloc(verbose,pixels_ss*sizeof(double),
-				    &sslon,&error);
-		    if (status == MB_SUCCESS)
-		    status = mb_malloc(verbose,pixels_ss*sizeof(double),
-				    &sslat,&error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							    sizeof(char), (void **)&beamflag, &error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							    sizeof(double), (void **)&bath, &error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_AMPLITUDE,
+							    sizeof(double), (void **)&amp, &error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							    sizeof(double), (void **)&bathlon, &error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							    sizeof(double), (void **)&bathlat, &error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+							    sizeof(double), (void **)&ss, &error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+							    sizeof(double), (void **)&sslon, &error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+							    sizeof(double), (void **)&sslat, &error);
 
 		    /* if error initializing memory then quit */
 		    if (error != MB_ERROR_NO_ERROR)
@@ -3080,14 +3070,6 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 			  }
 			}
 		    status = mb_close(verbose,&mbio_ptr,&error);
-		    mb_free(verbose,&beamflag,&error); 
-		    mb_free(verbose,&bath,&error); 
-		    mb_free(verbose,&bathlon,&error); 
-		    mb_free(verbose,&bathlat,&error); 
-		    mb_free(verbose,&amp,&error); 
-		    mb_free(verbose,&ss,&error); 
-		    mb_free(verbose,&sslon,&error); 
-		    mb_free(verbose,&sslat,&error); 
 		    status = MB_SUCCESS;
 		    error = MB_ERROR_NO_ERROR;
 		    }

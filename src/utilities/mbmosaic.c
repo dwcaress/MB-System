@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmosaic.c	2/10/97
- *    $Id: mbmosaic.c,v 5.17 2004-12-02 06:38:50 caress Exp $
+ *    $Id: mbmosaic.c,v 5.18 2005-11-05 01:07:54 caress Exp $
  *
  *    Copyright (c) 1997, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	February 10, 1997
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.17  2004/12/02 06:38:50  caress
+ * Fix suggested by Gordon Keith
+ *
  * Revision 5.16  2003/12/12 01:39:06  caress
  * Fixed designation of the output stream to stdout or stderr.
  *
@@ -166,7 +169,7 @@
 #define	NO_DATA_FLAG	99999
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbmosaic.c,v 5.17 2004-12-02 06:38:50 caress Exp $";
+static char rcs_id[] = "$Id: mbmosaic.c,v 5.18 2005-11-05 01:07:54 caress Exp $";
 static char program_name[] = "mbmosaic";
 static char help_message[] =  "mbmosaic is an utility used to mosaic amplitude or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered by multibeam swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbmosaic -Ifilelist -Oroot \
@@ -1159,6 +1162,8 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 			fprintf(outfp, "  Preferred look azimuth: %f\n", priority_azimuth);
 			fprintf(outfp, "  Look azimuth factor:    %f\n", priority_azimuth_factor);
 			}
+		fprintf(outfp,"  Gaussian filter 1/e length: %f grid intervals\n",
+				scale);
 		if (! clip) 
 			fprintf(outfp,"  Spline interpolation not applied\n");
 		if (clip) 
@@ -1285,40 +1290,66 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 			}
 
 		    /* allocate memory for reading data arrays */
-		    status = mb_malloc(verbose,beams_bath*sizeof(char),
-				    &beamflag,&error);
-		    status = mb_malloc(verbose,beams_bath*sizeof(double),
-				    &bath,&error);
-		    status = mb_malloc(verbose,beams_bath*sizeof(double),
-				    &bathacrosstrack,&error);
-		    status = mb_malloc(verbose,beams_bath*sizeof(double),
-				    &bathalongtrack,&error);
-		    status = mb_malloc(verbose,beams_bath*sizeof(double),
-				    &bathlon,&error);
-		    status = mb_malloc(verbose,beams_bath*sizeof(double),
-				    &bathlat,&error);
-		    status = mb_malloc(verbose,beams_amp*sizeof(double),
-				    &amp,&error);
-		    status = mb_malloc(verbose,pixels_ss*sizeof(double),
-				    &ss,&error);
-		    status = mb_malloc(verbose,pixels_ss*sizeof(double),
-				    &ssacrosstrack,&error);
-		    status = mb_malloc(verbose,pixels_ss*sizeof(double),
-				    &ssalongtrack,&error);
-		    status = mb_malloc(verbose,pixels_ss*sizeof(double),
-				    &sslon,&error);
-		    status = mb_malloc(verbose,pixels_ss*sizeof(double),
-				    &sslat,&error);
-		    status = mb_malloc(verbose, MAX(beams_amp, pixels_ss)
-				    * sizeof(double),
-				    &angles,&error);			
-		    status = mb_malloc(verbose, MAX(beams_amp, pixels_ss)
-				    * sizeof(double),
-				    &priorities,&error);			
-		    status = mb_malloc(verbose, beams_bath*sizeof(double),
-				    &work1,&error);			
-		    status = mb_malloc(verbose, beams_bath*sizeof(double),
-				    &work2,&error);			
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							    sizeof(char), (void **)&beamflag, &error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							    sizeof(double), (void **)&bath, &error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_AMPLITUDE,
+							    sizeof(double), (void **)&amp, &error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							    sizeof(double), (void **)&bathacrosstrack, &error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							    sizeof(double), (void **)&bathalongtrack, &error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							    sizeof(double), (void **)&bathlon, &error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							    sizeof(double), (void **)&bathlat, &error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+							    sizeof(double), (void **)&ss, &error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+							    sizeof(double), (void **)&ssacrosstrack, &error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+							    sizeof(double), (void **)&ssalongtrack, &error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+							    sizeof(double), (void **)&sslon, &error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+							    sizeof(double), (void **)&sslat, &error);
+		    if (beams_amp > pixels_ss)
+		    	{
+		    	if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_AMPLITUDE, 
+							    sizeof(double), (void **)&angles, &error);
+		    	if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_AMPLITUDE, 
+							    sizeof(double), (void **)&priorities, &error);
+			}
+		    else
+		    	{
+		    	if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+							    sizeof(double), (void **)&angles, &error);
+		    	if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+							    sizeof(double), (void **)&priorities, &error);
+			}
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							    sizeof(double), (void **)&work1, &error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							    sizeof(double), (void **)&work2, &error);
 
 		    /* if error initializing memory then quit */
 		    if (error != MB_ERROR_NO_ERROR)
@@ -1429,13 +1460,21 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 				&& iy >= 0 
 				&& iy < gydim)
 			        {
-				/* set grid if highest weight */
-				kgrid = ix*gydim + iy;
-				if (priorities[ib] > maxpriority[kgrid])
+			        ix1 = MAX(ix - xtradim, 0);
+			        ix2 = MIN(ix + xtradim, gxdim - 1);
+			        iy1 = MAX(iy - xtradim, 0);
+			        iy2 = MIN(iy + xtradim, gydim - 1);
+			        for (ii=ix1;ii<=ix2;ii++)
+			         for (jj=iy1;jj<=iy2;jj++)
 				    {
-				    grid[kgrid] = amp[ib];
-				    cnt[kgrid] = 1;
-				    maxpriority[kgrid] = priorities[ib];
+				    /* set grid if highest weight */
+				    kgrid = ii*gydim + jj;
+				    if (priorities[ib] > maxpriority[kgrid])
+				    	{
+				    	grid[kgrid] = amp[ib];
+				    	cnt[kgrid] = 1;
+				    	maxpriority[kgrid] = priorities[ib];
+				    	}
 				    }
 				ndata++;
 				ndatafile++;
@@ -1499,13 +1538,21 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 				&& iy >= 0 
 				&& iy < gydim )
 			        {
-				/* set grid if highest weight */
-				kgrid = ix*gydim + iy;
-				if (priorities[ib] > maxpriority[kgrid])
+			        ix1 = MAX(ix - xtradim, 0);
+			        ix2 = MIN(ix + xtradim, gxdim - 1);
+			        iy1 = MAX(iy - xtradim, 0);
+			        iy2 = MIN(iy + xtradim, gydim - 1);
+			        for (ii=ix1;ii<=ix2;ii++)
+			         for (jj=iy1;jj<=iy2;jj++)
 				    {
-				    grid[kgrid] = ss[ib];
-				    cnt[kgrid] = 1;
-				    maxpriority[kgrid] = priorities[ib];
+				    /* set grid if highest weight */
+				    kgrid = ii*gydim + jj;
+				    if (priorities[ib] > maxpriority[kgrid])
+				    	{
+				    	grid[kgrid] = ss[ib];
+				    	cnt[kgrid] = 1;
+				    	maxpriority[kgrid] = priorities[ib];
+				    	}
 				    }
 				ndata++;
 				ndatafile++;
@@ -1514,22 +1561,6 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 			  }
 			}
 		    status = mb_close(verbose,&mbio_ptr,&error);
-		    mb_free(verbose,&beamflag,&error); 
-		    mb_free(verbose,&bath,&error); 
-		    mb_free(verbose,&bathacrosstrack,&error); 
-		    mb_free(verbose,&bathalongtrack,&error); 
-		    mb_free(verbose,&bathlon,&error); 
-		    mb_free(verbose,&bathlat,&error); 
-		    mb_free(verbose,&amp,&error); 
-		    mb_free(verbose,&ss,&error); 
-		    mb_free(verbose,&ssacrosstrack,&error); 
-		    mb_free(verbose,&ssalongtrack,&error); 
-		    mb_free(verbose,&sslon,&error); 
-		    mb_free(verbose,&sslat,&error); 
-		    mb_free(verbose,&angles,&error); 
-		    mb_free(verbose,&priorities,&error); 
-		    mb_free(verbose,&work1,&error); 
-		    mb_free(verbose,&work2,&error); 
 		    status = MB_SUCCESS;
 		    error = MB_ERROR_NO_ERROR;
 		    }
@@ -1616,40 +1647,66 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 			}
 
 		    /* allocate memory for reading data arrays */
-		    status = mb_malloc(verbose,beams_bath*sizeof(char),
-				    &beamflag,&error);
-		    status = mb_malloc(verbose,beams_bath*sizeof(double),
-				    &bath,&error);
-		    status = mb_malloc(verbose,beams_bath*sizeof(double),
-				    &bathacrosstrack,&error);
-		    status = mb_malloc(verbose,beams_bath*sizeof(double),
-				    &bathalongtrack,&error);
-		    status = mb_malloc(verbose,beams_bath*sizeof(double),
-				    &bathlon,&error);
-		    status = mb_malloc(verbose,beams_bath*sizeof(double),
-				    &bathlat,&error);
-		    status = mb_malloc(verbose,beams_amp*sizeof(double),
-				    &amp,&error);
-		    status = mb_malloc(verbose,pixels_ss*sizeof(double),
-				    &ss,&error);
-		    status = mb_malloc(verbose,pixels_ss*sizeof(double),
-				    &ssacrosstrack,&error);
-		    status = mb_malloc(verbose,pixels_ss*sizeof(double),
-				    &ssalongtrack,&error);
-		    status = mb_malloc(verbose,pixels_ss*sizeof(double),
-				    &sslon,&error);
-		    status = mb_malloc(verbose,pixels_ss*sizeof(double),
-				    &sslat,&error);
-		    status = mb_malloc(verbose, MAX(beams_amp, pixels_ss)
-				    * sizeof(double),
-				    &angles,&error);			
-		    status = mb_malloc(verbose, MAX(beams_amp, pixels_ss)
-				    * sizeof(double),
-				    &priorities,&error);			
-		    status = mb_malloc(verbose, beams_bath*sizeof(double),
-				    &work1,&error);			
-		    status = mb_malloc(verbose, beams_bath*sizeof(double),
-				    &work2,&error);			
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							    sizeof(char), (void **)&beamflag, &error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							    sizeof(double), (void **)&bath, &error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_AMPLITUDE,
+							    sizeof(double), (void **)&amp, &error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							    sizeof(double), (void **)&bathacrosstrack, &error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							    sizeof(double), (void **)&bathalongtrack, &error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							    sizeof(double), (void **)&bathlon, &error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							    sizeof(double), (void **)&bathlat, &error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+							    sizeof(double), (void **)&ss, &error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+							    sizeof(double), (void **)&ssacrosstrack, &error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+							    sizeof(double), (void **)&ssalongtrack, &error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+							    sizeof(double), (void **)&sslon, &error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+							    sizeof(double), (void **)&sslat, &error);
+		    if (beams_amp > pixels_ss)
+		    	{
+		    	if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_AMPLITUDE, 
+							    sizeof(double), (void **)&angles, &error);
+		    	if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_AMPLITUDE, 
+							    sizeof(double), (void **)&priorities, &error);
+			}
+		    else
+		    	{
+		    	if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+							    sizeof(double), (void **)&angles, &error);
+		    	if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+							    sizeof(double), (void **)&priorities, &error);
+			}
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							    sizeof(double), (void **)&work1, &error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							    sizeof(double), (void **)&work2, &error);
 
 		    /* if error initializing memory then quit */
 		    if (error != MB_ERROR_NO_ERROR)
@@ -1778,8 +1835,7 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 					grid[kgrid] += norm_weight * amp[ib];
 					norm[kgrid] += norm_weight;
 					sigma[kgrid] += norm_weight * amp[ib] * amp[ib];
-					if (ii == ix && jj == iy)
-					    cnt[kgrid]++;
+					cnt[kgrid]++;
 					}
 				    }
 				ndata++;
@@ -1862,8 +1918,7 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 					grid[kgrid] += norm_weight * ss[ib];
 					norm[kgrid] += norm_weight;
 					sigma[kgrid] += norm_weight * ss[ib] * ss[ib];
-					if (ii == ix && jj == iy)
-					    cnt[kgrid]++;
+					cnt[kgrid]++;
 					}
 				    }
 				ndata++;
@@ -1873,22 +1928,6 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 			  }
 			}
 		    status = mb_close(verbose,&mbio_ptr,&error);
-		    mb_free(verbose,&beamflag,&error); 
-		    mb_free(verbose,&bath,&error); 
-		    mb_free(verbose,&bathacrosstrack,&error); 
-		    mb_free(verbose,&bathalongtrack,&error); 
-		    mb_free(verbose,&bathlon,&error); 
-		    mb_free(verbose,&bathlat,&error); 
-		    mb_free(verbose,&amp,&error); 
-		    mb_free(verbose,&ss,&error); 
-		    mb_free(verbose,&ssacrosstrack,&error); 
-		    mb_free(verbose,&ssalongtrack,&error); 
-		    mb_free(verbose,&sslon,&error); 
-		    mb_free(verbose,&sslat,&error); 
-		    mb_free(verbose,&angles,&error); 
-		    mb_free(verbose,&priorities,&error); 
-		    mb_free(verbose,&work1,&error); 
-		    mb_free(verbose,&work2,&error); 
 		    status = MB_SUCCESS;
 		    error = MB_ERROR_NO_ERROR;
 		    }
