@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em12darw.c	2/2/93
- *	$Id: mbr_em12darw.c,v 5.10 2003-12-04 23:10:22 caress Exp $
+ *	$Id: mbr_em12darw.c,v 5.11 2005-11-05 00:48:05 caress Exp $
  *
  *    Copyright (c) 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	R. B. Owens
  * Date:	January 24, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 5.10  2003/12/04 23:10:22  caress
+ * Fixed problems with format 54 EM12DARW due to old code assuming how internal structure was packed. Also changed handling of beamflags for formats that don't support beamflags. Now flagged beams will always be nulled in such cases.
+ *
  * Revision 5.9  2003/05/20 18:05:32  caress
  * Added svp_source to data source parameters.
  *
@@ -161,7 +164,7 @@ int mbr_wt_em12darw(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_em12darw(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_em12darw.c,v 5.10 2003-12-04 23:10:22 caress Exp $";
+	static char res_id[]="$Id: mbr_em12darw.c,v 5.11 2005-11-05 00:48:05 caress Exp $";
 	char	*function_name = "mbr_register_em12darw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -207,6 +210,7 @@ int mbr_register_em12darw(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr->mb_io_store_free = &mbsys_simrad_deall; 
 	mb_io_ptr->mb_io_read_ping = &mbr_rt_em12darw; 
 	mb_io_ptr->mb_io_write_ping = &mbr_wt_em12darw; 
+	mb_io_ptr->mb_io_dimensions = &mbsys_simrad_dimensions; 
 	mb_io_ptr->mb_io_extract = &mbsys_simrad_extract; 
 	mb_io_ptr->mb_io_insert = &mbsys_simrad_insert; 
 	mb_io_ptr->mb_io_extract_nav = &mbsys_simrad_extract_nav; 
@@ -294,7 +298,7 @@ int mbr_info_em12darw(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_em12darw.c,v 5.10 2003-12-04 23:10:22 caress Exp $";
+	static char res_id[]="$Id: mbr_em12darw.c,v 5.11 2005-11-05 00:48:05 caress Exp $";
 	char	*function_name = "mbr_info_em12darw";
 	int	status = MB_SUCCESS;
 
@@ -364,7 +368,7 @@ int mbr_info_em12darw(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_em12darw(int verbose, void *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_em12darw.c,v 5.10 2003-12-04 23:10:22 caress Exp $";
+ static char res_id[]="$Id: mbr_em12darw.c,v 5.11 2005-11-05 00:48:05 caress Exp $";
 	char	*function_name = "mbr_alm_em12darw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

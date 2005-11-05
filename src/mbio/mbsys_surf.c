@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_surf.c	3.00	6/25/01
- *	$Id: mbsys_surf.c,v 5.14 2003-12-04 23:10:24 caress Exp $
+ *	$Id: mbsys_surf.c,v 5.15 2005-11-05 00:48:04 caress Exp $
  *
  *    Copyright (c) 2001, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -27,6 +27,9 @@
  * Date:	June 20, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.14  2003/12/04 23:10:24  caress
+ * Fixed problems with format 54 EM12DARW due to old code assuming how internal structure was packed. Also changed handling of beamflags for formats that don't support beamflags. Now flagged beams will always be nulled in such cases.
+ *
  * Revision 5.13  2003/11/24 21:09:09  caress
  * Implement Reinhard Holtkamp's suggested mods for better SURF format support.
  *
@@ -67,7 +70,7 @@ double mbsys_get_depth(	SurfMultiBeamDepth* 			MultiBeamDepth,
 						float	heave,
 						int		n );
 
-static char res_id[]="$Id: mbsys_surf.c,v 5.14 2003-12-04 23:10:24 caress Exp $";
+static char res_id[]="$Id: mbsys_surf.c,v 5.15 2005-11-05 00:48:04 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_surf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
@@ -152,6 +155,70 @@ int mbsys_surf_deall(int verbose, void *mbio_ptr, void **store_ptr,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbsys_surf_dimensions(int verbose, void *mbio_ptr, void *store_ptr, 
+		int *kind, int *nbath, int *namp, int *nss, int *error)
+{
+	char	*function_name = "mbsys_surf_dimensions";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	struct mbsys_surf_struct *store;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mb_ptr:     %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* get data structure pointer */
+	store = (struct mbsys_surf_struct *) store_ptr;
+
+	/* get data kind */
+	*kind = store->kind;
+
+	/* extract data from structure */
+	if (*kind == MB_DATA_DATA)
+		{
+		/* get beam and pixel numbers */
+		*nbath = store->NrBeams;
+		*namp = store->NrAmplitudes;
+		*nss = store->NrSidescan;
+		}
+	else
+		{
+		/* get beam and pixel numbers */
+		*nbath = 0;
+		*namp = 0;
+		*nss = 0;
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
+		fprintf(stderr,"dbg2       nbath:         %d\n",*nbath);
+		fprintf(stderr,"dbg2       namp:          %d\n",*namp);
+		fprintf(stderr,"dbg2       nss:           %d\n",*nss);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:     %d\n",status);

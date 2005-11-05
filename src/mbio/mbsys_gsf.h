@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_gsf.h	6/10/97
- *	$Id: mbsys_gsf.h,v 5.4 2003-04-17 21:05:23 caress Exp $
+ *	$Id: mbsys_gsf.h,v 5.5 2005-11-05 00:48:05 caress Exp $
  *
  *    Copyright (c) 1998, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	March 5, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2003/04/17 21:05:23  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.3  2002/09/18 23:32:59  caress
  * Release 5.0.beta23
  *
@@ -87,6 +90,8 @@ int mbsys_gsf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error);
 int mbsys_gsf_deall(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error);
+int mbsys_gsf_dimensions(int verbose, void *mbio_ptr, void *store_ptr, 
+			int *kind, int *nbath, int *namp, int *nss, int *error);
 int mbsys_gsf_extract(int verbose, void *mbio_ptr, void *store_ptr, 
 			int *kind, int time_i[7], double *time_d,
 			double *navlon, double *navlat,

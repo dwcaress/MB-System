@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_close.c	1/25/93
- *	$Id: mb_close.c,v 5.9 2003-11-24 19:25:02 caress Exp $
+ *	$Id: mb_close.c,v 5.10 2005-11-05 00:48:04 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	January 25, 1993
  *	
  * $Log: not supported by cvs2svn $
+ * Revision 5.9  2003/11/24 19:25:02  caress
+ * Implementing changes by Reinhard Holtkamp to better support SURF data.
+ *
  * Revision 5.8  2003/04/17 21:05:23  caress
  * Release 5.0.beta30
  *
@@ -149,7 +152,7 @@
 /*--------------------------------------------------------------------*/
 int mb_close(int verbose, void **mbio_ptr, int *error)
 {
-	static	char	rcs_id[]="$Id: mb_close.c,v 5.9 2003-11-24 19:25:02 caress Exp $";
+	static	char	rcs_id[]="$Id: mb_close.c,v 5.10 2005-11-05 00:48:04 caress Exp $";
 	char	*function_name = "mb_close";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -184,25 +187,7 @@ int mb_close(int verbose, void **mbio_ptr, int *error)
 		status = mb_free(verbose,&mb_io_ptr->xdrs2,error);
 	if (mb_io_ptr->hdr_comment != NULL)
 		status = mb_free(verbose,&mb_io_ptr->hdr_comment,error);
-	status = mb_free(verbose,&mb_io_ptr->beamflag,error);
-	status = mb_free(verbose,&mb_io_ptr->bath,error);
-	status = mb_free(verbose,&mb_io_ptr->amp,error);
-	status = mb_free(verbose,&mb_io_ptr->bath_acrosstrack,error);
-	status = mb_free(verbose,&mb_io_ptr->bath_alongtrack,error);
-	status = mb_free(verbose,&mb_io_ptr->bath_num,error);
-	status = mb_free(verbose,&mb_io_ptr->amp_num,error);
-	status = mb_free(verbose,&mb_io_ptr->ss,error);
-	status = mb_free(verbose,&mb_io_ptr->ss_acrosstrack,error);
-	status = mb_free(verbose,&mb_io_ptr->ss_alongtrack,error);
-	status = mb_free(verbose,&mb_io_ptr->ss_num,error);
-	status = mb_free(verbose,&mb_io_ptr->new_beamflag,error);
-	status = mb_free(verbose,&mb_io_ptr->new_bath,error);
-	status = mb_free(verbose,&mb_io_ptr->new_amp,error);
-	status = mb_free(verbose,&mb_io_ptr->new_bath_acrosstrack,error);
-	status = mb_free(verbose,&mb_io_ptr->new_bath_alongtrack,error);
-	status = mb_free(verbose,&mb_io_ptr->new_ss,error);
-	status = mb_free(verbose,&mb_io_ptr->new_ss_acrosstrack,error);
-	status = mb_free(verbose,&mb_io_ptr->new_ss_alongtrack,error);
+	status = mb_deall_ioarrays(verbose, *mbio_ptr, error);
 
 	/* close the files if normal */
 	if (mb_io_ptr->filetype == MB_FILETYPE_NORMAL

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_gsfgenmb.c	2/27/98
- *	$Id: mbr_gsfgenmb.c,v 5.6 2003-05-20 18:05:32 caress Exp $
+ *	$Id: mbr_gsfgenmb.c,v 5.7 2005-11-05 00:48:03 caress Exp $
  *
  *    Copyright (c) 1998, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	February 27, 1998
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2003/05/20 18:05:32  caress
+ * Added svp_source to data source parameters.
+ *
  * Revision 5.5  2003/04/17 21:05:23  caress
  * Release 5.0.beta30
  *
@@ -111,7 +114,7 @@ int mbr_wt_gsfgenmb(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_gsfgenmb(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_gsfgenmb.c,v 5.6 2003-05-20 18:05:32 caress Exp $";
+	static char res_id[]="$Id: mbr_gsfgenmb.c,v 5.7 2005-11-05 00:48:03 caress Exp $";
 	char	*function_name = "mbr_register_gsfgenmb";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -157,6 +160,7 @@ int mbr_register_gsfgenmb(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr->mb_io_store_free = &mbsys_gsf_deall; 
 	mb_io_ptr->mb_io_read_ping = &mbr_rt_gsfgenmb; 
 	mb_io_ptr->mb_io_write_ping = &mbr_wt_gsfgenmb; 
+	mb_io_ptr->mb_io_dimensions = &mbsys_gsf_dimensions; 
 	mb_io_ptr->mb_io_extract = &mbsys_gsf_extract; 
 	mb_io_ptr->mb_io_insert = &mbsys_gsf_insert; 
 	mb_io_ptr->mb_io_extract_nav = &mbsys_gsf_extract_nav; 
@@ -243,7 +247,7 @@ int mbr_info_gsfgenmb(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_gsfgenmb.c,v 5.6 2003-05-20 18:05:32 caress Exp $";
+	static char res_id[]="$Id: mbr_gsfgenmb.c,v 5.7 2005-11-05 00:48:03 caress Exp $";
 	char	*function_name = "mbr_info_gsfgenmb";
 	int	status = MB_SUCCESS;
 
@@ -262,7 +266,7 @@ int mbr_info_gsfgenmb(int verbose,
 	*system = MB_SYS_GSF;
 	*beams_bath_max = 254;
 	*beams_amp_max = 254;
-	*pixels_ss_max = 0;
+	*pixels_ss_max = 8192;
 	strncpy(format_name, "GSFGENMB", MB_NAME_LENGTH);
 	strncpy(system_name, "GSF", MB_NAME_LENGTH);
 	strncpy(format_description, "Format name:          MBF_GSFGENMB\nInformal Description: SAIC Generic Sensor Format (GSF)\nAttributes:           variable beams,  bathymetry and amplitude,\n                      binary, single files, SAIC. \n", MB_DESCRIPTION_LENGTH);
@@ -313,7 +317,7 @@ int mbr_info_gsfgenmb(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_gsfgenmb(int verbose, void *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_gsfgenmb.c,v 5.6 2003-05-20 18:05:32 caress Exp $";
+ static char res_id[]="$Id: mbr_gsfgenmb.c,v 5.7 2005-11-05 00:48:03 caress Exp $";
 	char	*function_name = "mbr_alm_gsfgenmb";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -524,6 +528,15 @@ int mbr_rt_gsfgenmb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		status = MB_SUCCESS;
 		*error = MB_ERROR_NO_ERROR;
 		data->kind = MB_DATA_DATA;
+		
+		/* get beam widths */
+		ret = gsfGetSwathBathyBeamWidths(records, &(mb_io_ptr->beamwidth_ltrack), 
+							&(mb_io_ptr->beamwidth_xtrack));
+		if (ret < 0)
+		    {
+		    mb_io_ptr->beamwidth_ltrack = 0.0;
+		    mb_io_ptr->beamwidth_xtrack = 0.0;
+		    }
 		}
 		
 	    else

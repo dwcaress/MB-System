@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mbldeoih.c	2/2/93
- *	$Id: mbr_mbldeoih.c,v 5.11 2005-03-25 04:21:33 caress Exp $
+ *	$Id: mbr_mbldeoih.c,v 5.12 2005-11-05 00:48:05 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	February 2, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 5.11  2005/03/25 04:21:33  caress
+ * Corrected problem with debug output of sidescan data.
+ *
  * Revision 5.10  2004/12/02 06:33:31  caress
  * Fixes while supporting Reson 7k data.
  *
@@ -210,7 +213,7 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 #define	MBF_MBLDEOIH_OLDHEADERSIZE	38
 #define	MBF_MBLDEOIH_NEWHEADERSIZE	44
 
-static char res_id[]="$Id: mbr_mbldeoih.c,v 5.11 2005-03-25 04:21:33 caress Exp $";
+static char res_id[]="$Id: mbr_mbldeoih.c,v 5.12 2005-11-05 00:48:05 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_mbldeoih(int verbose, void *mbio_ptr, int *error)
@@ -260,6 +263,7 @@ int mbr_register_mbldeoih(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr->mb_io_store_free = &mbsys_ldeoih_deall; 
 	mb_io_ptr->mb_io_read_ping = &mbr_rt_mbldeoih; 
 	mb_io_ptr->mb_io_write_ping = &mbr_wt_mbldeoih; 
+	mb_io_ptr->mb_io_dimensions = &mbsys_ldeoih_dimensions; 
 	mb_io_ptr->mb_io_extract = &mbsys_ldeoih_extract; 
 	mb_io_ptr->mb_io_insert = &mbsys_ldeoih_insert; 
 	mb_io_ptr->mb_io_extract_nav = &mbsys_ldeoih_extract_nav; 

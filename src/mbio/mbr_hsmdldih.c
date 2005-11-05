@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsmdldih.c	9/26/95
- *	$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbr_hsmdldih.c,v 5.9 2003-05-20 18:05:32 caress Exp $
+ *	$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbr_hsmdldih.c,v 5.10 2005-11-05 00:48:04 caress Exp $
  *
  *    Copyright (c) 1995, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	September 26, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.9  2003/05/20 18:05:32  caress
+ * Added svp_source to data source parameters.
+ *
  * Revision 5.8  2003/04/17 21:05:23  caress
  * Release 5.0.beta30
  *
@@ -145,7 +148,7 @@ int mbr_wt_hsmdldih(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_hsmdldih(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_hsmdldih.c,v 5.9 2003-05-20 18:05:32 caress Exp $";
+	static char res_id[]="$Id: mbr_hsmdldih.c,v 5.10 2005-11-05 00:48:04 caress Exp $";
 	char	*function_name = "mbr_register_hsmdldih";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -191,6 +194,7 @@ int mbr_register_hsmdldih(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr->mb_io_store_free = &mbsys_hsmd_deall; 
 	mb_io_ptr->mb_io_read_ping = &mbr_rt_hsmdldih; 
 	mb_io_ptr->mb_io_write_ping = &mbr_wt_hsmdldih; 
+	mb_io_ptr->mb_io_dimensions = &mbsys_hsmd_dimensions; 
 	mb_io_ptr->mb_io_extract = &mbsys_hsmd_extract; 
 	mb_io_ptr->mb_io_insert = &mbsys_hsmd_insert; 
 	mb_io_ptr->mb_io_extract_nav = &mbsys_hsmd_extract_nav; 
@@ -277,7 +281,7 @@ int mbr_info_hsmdldih(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_hsmdldih.c,v 5.9 2003-05-20 18:05:32 caress Exp $";
+	static char res_id[]="$Id: mbr_hsmdldih.c,v 5.10 2005-11-05 00:48:04 caress Exp $";
 	char	*function_name = "mbr_info_hsmdldih";
 	int	status = MB_SUCCESS;
 
@@ -347,7 +351,7 @@ int mbr_info_hsmdldih(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_hsmdldih(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbr_hsmdldih.c,v 5.9 2003-05-20 18:05:32 caress Exp $";
+	static char res_id[]="$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbr_hsmdldih.c,v 5.10 2005-11-05 00:48:04 caress Exp $";
 	char	 *function_name = "mbr_alm_hsmdldih";
 	int	 status = MB_SUCCESS;
 	int	 i;

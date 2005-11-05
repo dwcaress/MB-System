@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_get_all.c	1/26/93
- *    $Id: mb_get_all.c,v 5.9 2004-12-02 06:33:30 caress Exp $
+ *    $Id: mb_get_all.c,v 5.10 2005-11-05 00:48:04 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	January 26, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.9  2004/12/02 06:33:30  caress
+ * Fixes while supporting Reson 7k data.
+ *
  * Revision 5.8  2004/04/27 01:46:12  caress
  * Various updates of April 26, 2004.
  *
@@ -126,7 +129,7 @@
 #include "../../include/mb_io.h"
 #include "../../include/mb_define.h"
 
-static char rcs_id[]="$Id: mb_get_all.c,v 5.9 2004-12-02 06:33:30 caress Exp $";
+static char rcs_id[]="$Id: mb_get_all.c,v 5.10 2005-11-05 00:48:04 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind,
@@ -143,6 +146,7 @@ int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind,
 	char	*function_name = "mb_get_all";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
+	int	beams_bath, beams_amp, pixels_ss;
 	int	i;
 	double	mtodeglon, mtodeglat;
 	double	dx, dy;
@@ -176,6 +180,34 @@ int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind,
 
 	/* get next ping */
 	status = mb_read_ping(verbose,mbio_ptr,*store_ptr,kind,error);
+
+	/* if io arrays have been reallocated, update the
+		pointers of arrays passed into this function,
+		as these pointers may have changed */
+	if (status == MB_SUCCESS
+		&& mb_io_ptr->new_kind == MB_DATA_DATA)
+		{
+		if (mb_io_ptr->bath_arrays_reallocated == MB_YES)
+			{
+			status = mb_update_arrayptr(verbose, mbio_ptr, (void **) &beamflag, error);
+			status = mb_update_arrayptr(verbose, mbio_ptr, (void **) &bath, error);
+			status = mb_update_arrayptr(verbose, mbio_ptr, (void **) &bathacrosstrack, error);
+			status = mb_update_arrayptr(verbose, mbio_ptr, (void **) &bathalongtrack, error);
+			mb_io_ptr->bath_arrays_reallocated = MB_NO;
+			}
+		if (mb_io_ptr->amp_arrays_reallocated == MB_YES)
+			{
+			status = mb_update_arrayptr(verbose, mbio_ptr, (void **) &amp, error);
+			mb_io_ptr->amp_arrays_reallocated = MB_NO;
+			}
+		if (mb_io_ptr->ss_arrays_reallocated == MB_YES)
+			{
+			status = mb_update_arrayptr(verbose, mbio_ptr, (void **) &ss, error);
+			status = mb_update_arrayptr(verbose, mbio_ptr, (void **) &ssacrosstrack, error);
+			status = mb_update_arrayptr(verbose, mbio_ptr, (void **) &ssalongtrack, error);
+			mb_io_ptr->ss_arrays_reallocated = MB_NO;
+			}
+		}
 	
 	/* if survey data read into storage array */
 	if (status == MB_SUCCESS

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_gsf.c	3.00	8/20/94
- *	$Id: mbsys_gsf.c,v 5.7 2003-07-26 17:59:32 caress Exp $
+ *	$Id: mbsys_gsf.c,v 5.8 2005-11-05 00:48:04 caress Exp $
  *
  *    Copyright (c) 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	March 5, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2003/07/26 17:59:32  caress
+ * Changed beamflag handling code.
+ *
  * Revision 5.6  2003/04/17 21:05:23  caress
  * Release 5.0.beta30
  *
@@ -94,7 +97,7 @@
 int mbsys_gsf_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_gsf.c,v 5.7 2003-07-26 17:59:32 caress Exp $";
+ static char res_id[]="$Id: mbsys_gsf.c,v 5.8 2005-11-05 00:48:04 caress Exp $";
 	char	*function_name = "mbsys_gsf_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -176,6 +179,93 @@ int mbsys_gsf_deall(int verbose, void *mbio_ptr, void **store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+int mbsys_gsf_dimensions(int verbose, void *mbio_ptr, void *store_ptr, 
+		int *kind, int *nbath, int *namp, int *nss, int *error)
+{
+	char	*function_name = "mbsys_gsf_dimensions";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	struct mbsys_gsf_struct *store;
+	gsfDataID	    *dataID;
+	gsfRecords	    *records;
+	gsfSwathBathyPing   *mb_ping;
+	gsfTimeSeriesIntensity	*snippet;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mb_ptr:     %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* get data structure pointer */
+	store = (struct mbsys_gsf_struct *) store_ptr;
+	dataID = &(store->dataID);
+	records = &(store->records);
+
+	/* get data kind */
+	*kind = store->kind;
+
+	/* extract data from structure */
+	if (*kind == MB_DATA_DATA)
+		{
+		/* get beam and pixel numbers */
+		mb_ping = &(records->mb_ping);
+
+		if (mb_ping->depth != NULL)
+		    *nbath = mb_ping->number_beams;
+		else
+		    *nbath = 0;
+		if (mb_ping->mc_amplitude != NULL
+		    || mb_ping->mr_amplitude != NULL)
+		    *namp = mb_ping->number_beams;
+		else
+		    *namp = 0;
+		*nss = 0;
+		if (mb_ping->brb_inten != NULL)
+			{
+			for (i=0;i<*nbath;i++)
+				{
+				snippet = &(mb_ping->brb_inten->time_series[i]);
+				(*nss) += snippet->sample_count;
+				}
+			}
+		}
+	else
+		{
+		/* get beam and pixel numbers */
+		*nbath = 0;
+		*namp = 0;
+		*nss = 0;
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
+		fprintf(stderr,"dbg2       nbath:      %d\n",*nbath);
+		fprintf(stderr,"dbg2        namp:      %d\n",*namp);
+		fprintf(stderr,"dbg2        nss:       %d\n",*nss);
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
 int mbsys_gsf_extract(int verbose, void *mbio_ptr, void *store_ptr, 
 		int *kind, int time_i[7], double *time_d,
 		double *navlon, double *navlat,
@@ -193,6 +283,11 @@ int mbsys_gsf_extract(int verbose, void *mbio_ptr, void *store_ptr,
 	gsfDataID	    *dataID;
 	gsfRecords	    *records;
 	gsfSwathBathyPing   *mb_ping;
+	gsfTimeSeriesIntensity	*snippet;
+	t_gsfReson8100Specific	*Reson8100Specific;
+	double	ss_spacing, ss_spacing_use;
+	double	vertical, range, beam_foot, sint, angle;
+	int	gsfstatus;
 	int	i, j;
 
 	/* print input debug statements */
@@ -238,95 +333,110 @@ int mbsys_gsf_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		*speed = 1.852 * mb_ping->speed;
 		
 		/* set beamwidths in mb_io structure */
-		if (mb_ping->sensor_id 
-		    == GSF_SWATH_BATHY_SUBRECORD_SEABEAM_SPECIFIC)
-		    {
-		    mb_io_ptr->beamwidth_ltrack = 2.67;
-		    mb_io_ptr->beamwidth_xtrack = 2.67;
-		    }
-		else if (mb_ping->sensor_id 
-		    == GSF_SWATH_BATHY_SUBRECORD_EM100_SPECIFIC)
-		    {
-		    mb_io_ptr->beamwidth_ltrack = 3.3;
-		    mb_io_ptr->beamwidth_xtrack = 3.3;
-		    }
-		else if (mb_ping->sensor_id 
-		    == GSF_SWATH_BATHY_SUBRECORD_EM950_SPECIFIC)
-		    {
-		    mb_io_ptr->beamwidth_ltrack = 3.3;
-		    mb_io_ptr->beamwidth_xtrack = 3.3;
-		    }
-		else if (mb_ping->sensor_id 
-		    == GSF_SWATH_BATHY_SUBRECORD_EM121A_SPECIFIC)
-		    {
-		    mb_io_ptr->beamwidth_ltrack = 1.0;
-		    mb_io_ptr->beamwidth_xtrack = 1.0;
-		    }
-		else if (mb_ping->sensor_id 
-		    == GSF_SWATH_BATHY_SUBRECORD_EM121_SPECIFIC)
-		    {
-		    mb_io_ptr->beamwidth_ltrack = 1.0;
-		    mb_io_ptr->beamwidth_xtrack = 1.0;
-		    }
-		else if (mb_ping->sensor_id 
-		    == GSF_SWATH_BATHY_SUBRECORD_SEAMAP_SPECIFIC)
-		    {
-		    mb_io_ptr->beamwidth_ltrack = 2.0;
-		    mb_io_ptr->beamwidth_xtrack = 2.0;
-		    }
-		else if (mb_ping->sensor_id 
-		    == GSF_SWATH_BATHY_SUBRECORD_SEABAT_SPECIFIC)
-		    {
-		    mb_io_ptr->beamwidth_ltrack = 1.5;
-		    mb_io_ptr->beamwidth_xtrack = 1.5;
-		    }
-		else if (mb_ping->sensor_id 
-		    == GSF_SWATH_BATHY_SUBRECORD_EM1000_SPECIFIC)
-		    {
-		    mb_io_ptr->beamwidth_ltrack = 3.3;
-		    mb_io_ptr->beamwidth_xtrack = 3.3;
-		    }
-		else if (mb_ping->sensor_id 
-		    == GSF_SWATH_BATHY_SUBRECORD_TYPEIII_SEABEAM_SPECIFIC)
-		    {
-		    mb_io_ptr->beamwidth_ltrack = 2.67;
-		    mb_io_ptr->beamwidth_xtrack = 2.67;
-		    }
-		else if (mb_ping->sensor_id 
-		    == GSF_SWATH_BATHY_SUBRECORD_SB_AMP_SPECIFIC)
-		    {
-		    mb_io_ptr->beamwidth_ltrack = 2.0;
-		    mb_io_ptr->beamwidth_xtrack = 2.0;
-		    }
-		else if (mb_ping->sensor_id 
-		    == GSF_SWATH_BATHY_SUBRECORD_SEABAT_II_SPECIFIC)
-		    {
-		    mb_io_ptr->beamwidth_ltrack = 1.5;
-		    mb_io_ptr->beamwidth_xtrack = 1.5;
-		    }
-		else if (mb_ping->sensor_id 
-		    == GSF_SWATH_BATHY_SUBRECORD_SEABAT_8101_SPECIFIC)
-		    {
-		    mb_io_ptr->beamwidth_ltrack = 1.5;
-		    mb_io_ptr->beamwidth_xtrack = 1.5;
-		    }
-		else if (mb_ping->sensor_id 
-		    == GSF_SWATH_BATHY_SUBRECORD_SEABEAM_2112_SPECIFIC)
-		    {
-		    mb_io_ptr->beamwidth_ltrack = 2.0;
-		    mb_io_ptr->beamwidth_xtrack = 2.0;
-		    }
-		else if (mb_ping->sensor_id 
-		    == GSF_SWATH_BATHY_SUBRECORD_ELAC_MKII_SPECIFIC)
-		    {
-		    mb_io_ptr->beamwidth_ltrack = 1.5;
-		    mb_io_ptr->beamwidth_xtrack = 2.8;
-		    }
-		else
-		    {
-		    mb_io_ptr->beamwidth_ltrack = 2.0;
-		    mb_io_ptr->beamwidth_xtrack = 2.0;
-		    }
+		gsfstatus = gsfGetSwathBathyBeamWidths(records, 
+			&(mb_io_ptr->beamwidth_ltrack),
+			&(mb_io_ptr->beamwidth_xtrack));
+
+		/* if not set then use hard coded values */
+		if (mb_io_ptr->beamwidth_ltrack <= 0.0 
+			|| mb_io_ptr->beamwidth_xtrack <= 0.0)
+			{
+			if (mb_ping->sensor_id 
+			    == GSF_SWATH_BATHY_SUBRECORD_SEABEAM_SPECIFIC)
+			    {
+			    mb_io_ptr->beamwidth_ltrack = 2.67;
+			    mb_io_ptr->beamwidth_xtrack = 2.67;
+			    }
+			else if (mb_ping->sensor_id 
+			    == GSF_SWATH_BATHY_SUBRECORD_EM100_SPECIFIC)
+			    {
+			    mb_io_ptr->beamwidth_ltrack = 3.3;
+			    mb_io_ptr->beamwidth_xtrack = 3.3;
+			    }
+			else if (mb_ping->sensor_id 
+			    == GSF_SWATH_BATHY_SUBRECORD_EM950_SPECIFIC)
+			    {
+			    mb_io_ptr->beamwidth_ltrack = 3.3;
+			    mb_io_ptr->beamwidth_xtrack = 3.3;
+			    }
+			else if (mb_ping->sensor_id 
+			    == GSF_SWATH_BATHY_SUBRECORD_EM121A_SPECIFIC)
+			    {
+			    mb_io_ptr->beamwidth_ltrack = 1.0;
+			    mb_io_ptr->beamwidth_xtrack = 1.0;
+			    }
+			else if (mb_ping->sensor_id 
+			    == GSF_SWATH_BATHY_SUBRECORD_EM121_SPECIFIC)
+			    {
+			    mb_io_ptr->beamwidth_ltrack = 1.0;
+			    mb_io_ptr->beamwidth_xtrack = 1.0;
+			    }
+			else if (mb_ping->sensor_id 
+			    == GSF_SWATH_BATHY_SUBRECORD_SEAMAP_SPECIFIC)
+			    {
+			    mb_io_ptr->beamwidth_ltrack = 2.0;
+			    mb_io_ptr->beamwidth_xtrack = 2.0;
+			    }
+			else if (mb_ping->sensor_id 
+			    == GSF_SWATH_BATHY_SUBRECORD_SEABAT_SPECIFIC)
+			    {
+			    mb_io_ptr->beamwidth_ltrack = 1.5;
+			    mb_io_ptr->beamwidth_xtrack = 1.5;
+			    }
+			else if (mb_ping->sensor_id 
+			    == GSF_SWATH_BATHY_SUBRECORD_EM1000_SPECIFIC)
+			    {
+			    mb_io_ptr->beamwidth_ltrack = 3.3;
+			    mb_io_ptr->beamwidth_xtrack = 3.3;
+			    }
+			else if (mb_ping->sensor_id 
+			    == GSF_SWATH_BATHY_SUBRECORD_TYPEIII_SEABEAM_SPECIFIC)
+			    {
+			    mb_io_ptr->beamwidth_ltrack = 2.67;
+			    mb_io_ptr->beamwidth_xtrack = 2.67;
+			    }
+			else if (mb_ping->sensor_id 
+			    == GSF_SWATH_BATHY_SUBRECORD_SB_AMP_SPECIFIC)
+			    {
+			    mb_io_ptr->beamwidth_ltrack = 2.0;
+			    mb_io_ptr->beamwidth_xtrack = 2.0;
+			    }
+			else if (mb_ping->sensor_id 
+			    == GSF_SWATH_BATHY_SUBRECORD_SEABAT_II_SPECIFIC)
+			    {
+			    mb_io_ptr->beamwidth_ltrack = 1.5;
+			    mb_io_ptr->beamwidth_xtrack = 1.5;
+			    }
+			else if (mb_ping->sensor_id 
+			    == GSF_SWATH_BATHY_SUBRECORD_SEABAT_8101_SPECIFIC)
+			    {
+			    mb_io_ptr->beamwidth_ltrack = 1.5;
+			    mb_io_ptr->beamwidth_xtrack = 1.5;
+			    }
+			else if (mb_ping->sensor_id 
+			    == GSF_SWATH_BATHY_SUBRECORD_SEABEAM_2112_SPECIFIC)
+			    {
+			    mb_io_ptr->beamwidth_ltrack = 2.0;
+			    mb_io_ptr->beamwidth_xtrack = 2.0;
+			    }
+			else if (mb_ping->sensor_id 
+			    == GSF_SWATH_BATHY_SUBRECORD_ELAC_MKII_SPECIFIC)
+			    {
+			    mb_io_ptr->beamwidth_ltrack = 1.5;
+			    mb_io_ptr->beamwidth_xtrack = 2.8;
+			    }
+			else if (mb_ping->sensor_id 
+			    == GSF_SWATH_BATHY_SUBRECORD_ELAC_MKII_SPECIFIC)
+			    {
+			    mb_io_ptr->beamwidth_ltrack = 1.5;
+			    mb_io_ptr->beamwidth_xtrack = 2.8;
+			    }
+			else
+			    {
+			    mb_io_ptr->beamwidth_ltrack = 2.0;
+			    mb_io_ptr->beamwidth_xtrack = 2.0;
+			    }
+			}
 
 		/* get numbers of beams and pixels */
 		if (mb_ping->depth != NULL)
@@ -374,6 +484,68 @@ int mbsys_gsf_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		for (i=0;i<*namp;i++)
 			{
 			amp[i] = mb_ping->mr_amplitude[i];
+			}
+			
+		/* read multibeam sidescan if available */
+		if (mb_ping->brb_inten != NULL)
+			{
+			/* get sample rate and raw sidescan sample size */
+			if (mb_ping->sensor_id 
+					== GSF_SWATH_BATHY_SUBRECORD_RESON_8101_SPECIFIC
+				|| mb_ping->sensor_id 
+					== GSF_SWATH_BATHY_SUBRECORD_RESON_8111_SPECIFIC
+				|| mb_ping->sensor_id 
+					== GSF_SWATH_BATHY_SUBRECORD_RESON_8124_SPECIFIC
+				|| mb_ping->sensor_id 
+					== GSF_SWATH_BATHY_SUBRECORD_RESON_8125_SPECIFIC
+				|| mb_ping->sensor_id 
+					== GSF_SWATH_BATHY_SUBRECORD_RESON_8150_SPECIFIC
+				|| mb_ping->sensor_id 
+					== GSF_SWATH_BATHY_SUBRECORD_RESON_8160_SPECIFIC)
+				{
+				ss_spacing = 750.0 / ((double)mb_ping->sensor_data.gsfReson8100Specific.sample_rate);
+				}
+			else if (mb_ping->sensor_id 
+					== GSF_SWATH_BATHY_SUBRECORD_EM3000_SPECIFIC
+				|| mb_ping->sensor_id 
+					== GSF_SWATH_BATHY_SUBRECORD_EM1002_SPECIFIC
+				|| mb_ping->sensor_id 
+					== GSF_SWATH_BATHY_SUBRECORD_EM300_SPECIFIC
+				|| mb_ping->sensor_id 
+					== GSF_SWATH_BATHY_SUBRECORD_EM120_SPECIFIC
+				|| mb_ping->sensor_id 
+					== GSF_SWATH_BATHY_SUBRECORD_EM3002_SPECIFIC
+				|| mb_ping->sensor_id 
+					== GSF_SWATH_BATHY_SUBRECORD_EM3000D_SPECIFIC
+				|| mb_ping->sensor_id 
+					== GSF_SWATH_BATHY_SUBRECORD_EM3002D_SPECIFIC)
+				{
+				ss_spacing = 750.0 / ((double)mb_ping->sensor_data.gsfEM3Specific.sample_rate);
+				}
+			*nss = 0;
+			for (i=0;i<*nbath;i++)
+				{
+				/* get pixel sample size */
+				snippet = &(mb_ping->brb_inten->time_series[i]);
+				vertical = mb_ping->depth[i] - mb_ping->depth_corrector;
+				range = sqrt(vertical * vertical + bathacrosstrack[i] * bathacrosstrack[i]);
+				angle = 90.0 - fabs(mb_ping->beam_angle[i]);
+				beam_foot = range * sin(DTR * mb_io_ptr->beamwidth_xtrack)
+							/ cos(DTR * angle);
+				sint = fabs(sin(DTR * angle));
+				if (sint < snippet->sample_count * ss_spacing / beam_foot)
+				    ss_spacing_use = beam_foot / snippet->sample_count;
+				else
+				    ss_spacing_use = ss_spacing / sint;
+				for (j=0;j<snippet->sample_count;j++)
+					{
+					ss[*nss] = snippet->samples[j];
+					ssacrosstrack[*nss] = bathacrosstrack[i]
+						+ ss_spacing_use * (j - snippet->detect_sample);
+					ssalongtrack[*nss] = bathalongtrack[snippet->detect_sample];
+					(*nss)++;
+					}
+				}
 			}
 
 		/* print debug statements */
@@ -491,6 +663,9 @@ int mbsys_gsf_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			i,amp[i],bathacrosstrack[i],bathalongtrack[i]);
 		fprintf(stderr,"dbg2        nss:      %d\n",
 			*nss);
+		for (i=0;i<*nss;i++)
+		  fprintf(stderr,"dbg2       pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n",
+			i,ss[i],ssacrosstrack[i],ssalongtrack[i]);
 		}
 	if (verbose >= 2)
 		{
@@ -523,6 +698,7 @@ int mbsys_gsf_insert(int verbose, void *mbio_ptr, void *store_ptr,
 	double	bathmax;
 	double	bathacrosstrackmax;
 	double	bathalongtrackmax;
+	int	anyunflagged;
 	int	i, j;
 
 	/* print input debug statements */
@@ -664,17 +840,19 @@ int mbsys_gsf_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		    }
 
 		/* if ping flag set check for any unset
-		    beam flags - unset ping flag if any
-		    good beams found */
-		if (mb_ping->ping_flags != 0)
-		    {
-		    for (i=0;i<nbath;i++)
+		    beam flags - set or unset ping flag based on whether any
+		    unflagged beams are found */
+		anyunflagged = MB_NO;
+		for (i=0;i<nbath;i++)
 			{
 			if (mb_beam_ok(beamflag[i]))
-			    mb_ping->ping_flags = 0;
+			    anyunflagged = MB_YES;
 			}
-		    }
-
+		if (anyunflagged == MB_NO)
+			mb_ping->ping_flags = GSF_IGNORE_PING;
+		else
+			mb_ping->ping_flags = 0;
+		
 		/* get scale factor for bathymetry */
 		bathmax = 0.0;
 		bathacrosstrackmax = 0.0;

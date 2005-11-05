@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsds2raw.c	6/20/01
- *	$Id: mbr_hsds2raw.c,v 5.10 2003-05-20 18:05:32 caress Exp $
+ *	$Id: mbr_hsds2raw.c,v 5.11 2005-11-05 00:48:05 caress Exp $
  *
  *    Copyright (c) 2001, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * 		D. N. Chayes
  * Date:	June 20, 2001
  * $Log: not supported by cvs2svn $
+ * Revision 5.10  2003/05/20 18:05:32  caress
+ * Added svp_source to data source parameters.
+ *
  * Revision 5.9  2003/04/17 21:05:23  caress
  * Release 5.0.beta30
  *
@@ -104,7 +107,7 @@ int mbr_wt_hsds2raw(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_hsds2raw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
-static char res_id[]="$Id: mbr_hsds2raw.c,v 5.10 2003-05-20 18:05:32 caress Exp $";
+static char res_id[]="$Id: mbr_hsds2raw.c,v 5.11 2005-11-05 00:48:05 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_hsds2raw(int verbose, void *mbio_ptr, int *error)
@@ -154,6 +157,7 @@ int mbr_register_hsds2raw(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr->mb_io_store_free = &mbsys_atlas_deall; 
 	mb_io_ptr->mb_io_read_ping = &mbr_rt_hsds2raw; 
 	mb_io_ptr->mb_io_write_ping = &mbr_wt_hsds2raw; 
+	mb_io_ptr->mb_io_dimensions = &mbsys_atlas_dimensions; 
 	mb_io_ptr->mb_io_extract = &mbsys_atlas_extract; 
 	mb_io_ptr->mb_io_insert = &mbsys_atlas_insert; 
 	mb_io_ptr->mb_io_extract_nav = &mbsys_atlas_extract_nav; 

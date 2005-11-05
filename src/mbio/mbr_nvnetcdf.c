@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_nvnetcdf.c	5/4/02
- *	$Id: mbr_nvnetcdf.c,v 5.3 2005-03-26 22:05:17 caress Exp $
+ *	$Id: mbr_nvnetcdf.c,v 5.4 2005-11-05 00:48:04 caress Exp $
  *
  *    Copyright (c) 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	May 4, 2002
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2005/03/26 22:05:17  caress
+ * Release 5.0.7.
+ *
  * Revision 5.2  2003/05/20 18:05:32  caress
  * Added svp_source to data source parameters.
  *
@@ -82,7 +85,7 @@ int mbr_dem_nvnetcdf(int verbose, void *mbio_ptr, int *error);
 int mbr_rt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
-static char res_id[]="$Id: mbr_nvnetcdf.c,v 5.3 2005-03-26 22:05:17 caress Exp $";
+static char res_id[]="$Id: mbr_nvnetcdf.c,v 5.4 2005-11-05 00:48:04 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_nvnetcdf(int verbose, void *mbio_ptr, int *error)
@@ -132,6 +135,7 @@ int mbr_register_nvnetcdf(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr->mb_io_store_free = &mbsys_navnetcdf_deall; 
 	mb_io_ptr->mb_io_read_ping = &mbr_rt_nvnetcdf; 
 	mb_io_ptr->mb_io_write_ping = &mbr_wt_nvnetcdf; 
+	mb_io_ptr->mb_io_dimensions = &mbsys_navnetcdf_dimensions; 
 	mb_io_ptr->mb_io_extract = &mbsys_navnetcdf_extract; 
 	mb_io_ptr->mb_io_insert = &mbsys_navnetcdf_insert; 
 	mb_io_ptr->mb_io_extract_nav = &mbsys_navnetcdf_extract_nav; 

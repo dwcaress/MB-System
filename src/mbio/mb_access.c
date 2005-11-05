@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_access.c	11/1/00
- *    $Id: mb_access.c,v 5.12 2004-12-02 06:33:32 caress Exp $
+ *    $Id: mb_access.c,v 5.13 2005-11-05 00:48:05 caress Exp $
 
  *    Copyright (c) 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	October 1, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.12  2004/12/02 06:33:32  caress
+ * Fixes while supporting Reson 7k data.
+ *
  * Revision 5.11  2004/09/16 19:02:33  caress
  * Changes to better support segy data.
  *
@@ -71,7 +74,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mb_segy.h"
 
-static char rcs_id[]="$Id: mb_access.c,v 5.12 2004-12-02 06:33:32 caress Exp $";
+static char rcs_id[]="$Id: mb_access.c,v 5.13 2005-11-05 00:48:05 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_alloc(int verbose, void *mbio_ptr,
@@ -200,6 +203,61 @@ int mb_get_store(int verbose, void *mbio_ptr,
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       store_ptr:  %d\n",*store_ptr);
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_dimensions(int verbose, void *mbio_ptr, void *store_ptr, 
+		int *kind, int *nbath, int *namp, int *nss, int *error)
+{
+	char	*function_name = "mb_dimensions";
+	int	status;
+	struct mb_io_struct *mb_io_ptr;
+	double	easting, northing;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mb_ptr:     %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* call the appropriate mbsys_ extraction routine */
+	if (mb_io_ptr->mb_io_extract != NULL)
+		{
+		status = (*mb_io_ptr->mb_io_dimensions)
+				(verbose, mbio_ptr, store_ptr, 
+				kind, nbath, namp, nss, error);
+		}
+	else
+		{
+		status = MB_FAILURE;
+		*error = MB_ERROR_BAD_SYSTEM;
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
+		fprintf(stderr,"dbg2       nbath:      %d\n",*nbath);
+		fprintf(stderr,"dbg2       namp:       %d\n",*namp);
+		fprintf(stderr,"dbg2       nss:        %d\n",*nss);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:     %d\n",status);
@@ -427,6 +485,18 @@ int mb_insert(int verbose, void *mbio_ptr, void *store_ptr,
 
 	/* get mbio descriptor */
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+	
+	/* check that io arrays are large enough, allocate larger arrays if necessary */
+	if (nbath > mb_io_ptr->beams_bath_alloc
+		|| namp > mb_io_ptr->beams_amp_alloc
+		|| nss > mb_io_ptr->pixels_ss_alloc)
+		{
+		status = mb_update_arrays(verbose, mbio_ptr,
+			nbath, namp, nss, error);
+		}
+	mb_io_ptr->beams_bath_max = MAX(mb_io_ptr->beams_bath_max, nbath);
+	mb_io_ptr->beams_amp_max = MAX(mb_io_ptr->beams_amp_max, namp);
+	mb_io_ptr->pixels_ss_max = MAX(mb_io_ptr->pixels_ss_max, nss);
 		
 	/* apply inverse projection if required */
 	if (mb_io_ptr->projection_initialized == MB_YES)

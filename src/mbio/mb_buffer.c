@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_buffer.c	2/25/93
- *    $Id: mb_buffer.c,v 5.6 2004-04-27 01:46:13 caress Exp $
+ *    $Id: mb_buffer.c,v 5.7 2005-11-05 00:48:05 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -39,6 +39,9 @@
  * Date:	February 25, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2004/04/27 01:46:13  caress
+ * Various updates of April 26, 2004.
+ *
  * Revision 5.5  2003/04/17 21:05:23  caress
  * Release 5.0.beta30
  *
@@ -179,7 +182,7 @@
 /*--------------------------------------------------------------------*/
 int mb_buffer_init(int verbose, void **buff_ptr, int *error)
 {
-  static char rcs_id[]="$Id: mb_buffer.c,v 5.6 2004-04-27 01:46:13 caress Exp $";
+  static char rcs_id[]="$Id: mb_buffer.c,v 5.7 2005-11-05 00:48:05 caress Exp $";
 	char	*function_name = "mb_buffer_init";
 	int	status = MB_SUCCESS;
 	struct mb_buffer_struct *buff;
@@ -283,6 +286,7 @@ int mb_buffer_load(int verbose, void *buff_ptr,void *mbio_ptr,
 	char	*store_ptr;
 	int	nget;
 	int	kind;
+	int	beams_bath, beams_amp, pixels_ss;
 	int	i;
 
 	/* print input debug statements */

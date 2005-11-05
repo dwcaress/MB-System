@@ -1,6 +1,6 @@
 /* --------------------------------------------------------------------
  *    The MB-system:	mbsys_hsmd.h	8/12/95
- *	$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbsys_hsmd.h,v 5.4 2003-04-17 21:05:23 caress Exp $
+ *	$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbsys_hsmd.h,v 5.5 2005-11-05 00:48:04 caress Exp $
  *
  *    Copyright (c) 1995, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -27,6 +27,9 @@
  * Date:	August 10, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2003/04/17 21:05:23  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.3  2002/09/18 23:32:59  caress
  * Release 5.0.beta23
  *
@@ -220,6 +223,8 @@ int mbsys_hsmd_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error);
 int mbsys_hsmd_deall(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error);
+int mbsys_hsmd_dimensions(int verbose, void *mbio_ptr, void *store_ptr, 
+			int *kind, int *nbath, int *namp, int *nss, int *error);
 int mbsys_hsmd_extract(int verbose, void *mbio_ptr, void *store_ptr, 
 			int *kind, int time_i[7], double *time_d,
 			double *navlon, double *navlat,

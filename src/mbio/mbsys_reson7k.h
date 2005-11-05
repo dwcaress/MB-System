@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_reson7k.h	3/3/2004
- *	$Id: mbsys_reson7k.h,v 5.7 2004-12-02 06:33:29 caress Exp $
+ *	$Id: mbsys_reson7k.h,v 5.8 2005-11-05 00:48:05 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	March 3, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2004/12/02 06:33:29  caress
+ * Fixes while supporting Reson 7k data.
+ *
  * Revision 5.6  2004/11/08 05:47:20  caress
  * Now gets sidescan from snippet data, maybe even properly...
  *
@@ -56,6 +59,37 @@
  *      a record  type header, an optional record data field and an optional 
  *	data field for extra  information. The optional data field typically 
  *	holds non-generic sensor specific data.   *
+ *   5. Navigation data may be found in three different record types.
+ *      The bathymetry records (kind = MB_DATA_DATA) hold navigation
+ *      and attitude data, but these values are not initially set by
+ *      the Reson 6046 datalogger. In MB-System these values get set
+ *      by running the program mb7kpreprocess by interpolating the
+ *      the values found in either the R7KRECID_Position records
+ *      (kind = MB_DATA_NAV1) or the R7KRECID_Bluefin records
+ *      (kind = MB_DATA_NAV2). MB-System uses the bathymetry records as
+ *      the primary navigation source, so the interpolated values are
+ *      accessed by mbnavedit and, by default, mbnavlist. The raw values 
+ *      of the ancillary navigation records (R7KRECID_Position and
+ *      R7KRECID_Bluefin) may be accessed by mbnavlist using the -N1
+ *      and -N2 options, respectably.
+ *   6. Attitude data may be found in three different record types.
+ *      The bathymetry records (kind = MB_DATA_DATA) hold navigation
+ *      and attitude data, but these values are not initially set by
+ *      the Reson 6046 datalogger. In MB-System these values get set
+ *      by running the program mb7kpreprocess by interpolating the
+ *      the values found in either the R7KRECID_RollPitchHeave records
+ *      (kind = MB_DATA_ATTITUDE) or the R7KRECID_Bluefin records
+ *      (kind = MB_DATA_NAV2). MB-System uses the bathymetry records as
+ *      the primary attitude source, so the interpolated values are
+ *      accessed by mbnavedit and, by default, mbnavlist. The raw values 
+ *      of the secondary ancillary navigation records (R7KRECID_Bluefin),
+ *      including attitude, may be accessed by mbnavlist using the -N2
+ *      option.
+ *   7. The MB-System code assumes that a Reson 7k data file will include
+ *      either R7KRECID_RollPitchHeave and R7KRECID_Position records
+ *      or R7KRECID_Bluefin records. Bad things will happen if the 
+ *      data file contains both the generic records and the bluefin
+ *      records.
  */
  
 /* include mb_define.h */
@@ -185,7 +219,8 @@
 #define R7KHDRSIZE_7kMatchFilter				24
 #define R7KHDRSIZE_7kBeamGeometry				12
 #define R7KHDRSIZE_7kCalibrationData				10
-#define R7KHDRSIZE_7kBathymetricData				18
+#define R7KHDRSIZE_7kBathymetricData_v4				18
+#define R7KHDRSIZE_7kBathymetricData				24
 #define R7KHDRSIZE_7kBackscatterImageData			64
 #define R7KHDRSIZE_7kBeamData					30
 #define R7KHDRSIZE_7kVerticalDepth				42
@@ -293,8 +328,8 @@
 #define	MBSYS_RESON7K_BUFFER_STARTSIZE	32768
 #define	MBSYS_RESON7K_MAX_DEVICE	10
 #define MBSYS_RESON7K_MAX_RECEIVERS	1024
-#define	MBSYS_RESON7K_MAX_BEAMS		240
-#define	MBSYS_RESON7K_MAX_PIXELS	1024
+#define	MBSYS_RESON7K_MAX_BEAMS		256
+#define	MBSYS_RESON7K_MAX_PIXELS	4096
 
 typedef struct s7k_time_struct
 {
@@ -903,7 +938,7 @@ typedef struct s7k_bluefin_nav_struct
     	s7k_time 	s7kTime;		/* 7KTIME               u8*10   UTC.*/
 	unsigned int	checksum;		/* Checksum for all bytes in record */
 	short		reserved;
-	unsigned int	quality;
+	unsigned int	quality;		/* Kearfott INS quality and mode info */
 	double		latitude;		/* Latitude (radians) */
 	double		longitude;		/* Longitude (radians) */
 	float		speed;			/* Speed (m/sec) */
@@ -1118,6 +1153,17 @@ typedef struct s7kr_bathymetry_struct
 								in the multi-ping
 								sequence */
 	unsigned int	number_beams;		/* Number of receiver beams */
+	mb_u_char	layer_comp_flag;	/* Flag indicating if layer compensation is on 
+							0 = off 
+							1 = on 
+							****Not present prior to Version 5!!! */
+	mb_u_char	sound_vel_flag;		/* Flag indicating if sound velocity is measured 
+							or manually entered 
+							0 = measured 
+							1 = manually entered  
+							****Not present prior to Version 5!!! */
+	float		sound_velocity;		/* Sound veocity at the sonar (m/sec)  
+							****Not present prior to Version 5!!! */
 	float		range[MBSYS_RESON7K_MAX_BEAMS];	/* Two way travel time (seconds) */
 	mb_u_char	quality[MBSYS_RESON7K_MAX_BEAMS];	/* Beam quality bitfield:
 							0-3: quality value 
@@ -1705,6 +1751,8 @@ int mbsys_reson7k_tlt_alloc(int verbose,
 int mbsys_reson7k_deall(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error);
 int mbsys_reson7k_zero_ss(int verbose, void *store_ptr, int *error);
+int mbsys_reson7k_dimensions(int verbose, void *mbio_ptr, void *store_ptr, 
+			int *kind, int *nbath, int *namp, int *nss, int *error);
 int mbsys_reson7k_extract(int verbose, void *mbio_ptr, void *store_ptr, 
 			int *kind, int time_i[7], double *time_d,
 			double *navlon, double *navlat,

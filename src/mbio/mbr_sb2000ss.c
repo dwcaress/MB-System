@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sb2000ss.c	10/14/94
- *	$Id: mbr_sb2000ss.c,v 5.12 2003-05-20 18:05:32 caress Exp $
+ *	$Id: mbr_sb2000ss.c,v 5.13 2005-11-05 00:48:05 caress Exp $
  *
  *    Copyright (c) 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	October 14, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 5.12  2003/05/20 18:05:32  caress
+ * Added svp_source to data source parameters.
+ *
  * Revision 5.11  2003/04/17 21:05:23  caress
  * Release 5.0.beta30
  *
@@ -165,7 +168,7 @@ int mbr_dem_sb2000ss(int verbose, void *mbio_ptr, int *error);
 int mbr_rt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_sb2000ss(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
-static char res_id[]="$Id: mbr_sb2000ss.c,v 5.12 2003-05-20 18:05:32 caress Exp $";
+static char res_id[]="$Id: mbr_sb2000ss.c,v 5.13 2005-11-05 00:48:05 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_sb2000ss(int verbose, void *mbio_ptr, int *error)
@@ -216,6 +219,7 @@ int mbr_register_sb2000ss(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr->mb_io_store_free = &mbsys_sb2000_deall; 
 	mb_io_ptr->mb_io_read_ping = &mbr_rt_sb2000ss; 
 	mb_io_ptr->mb_io_write_ping = &mbr_wt_sb2000ss; 
+	mb_io_ptr->mb_io_dimensions = &mbsys_sb2000_dimensions; 
 	mb_io_ptr->mb_io_extract = &mbsys_sb2000_extract; 
 	mb_io_ptr->mb_io_insert = &mbsys_sb2000_insert; 
 	mb_io_ptr->mb_io_extract_nav = &mbsys_sb2000_extract_nav; 

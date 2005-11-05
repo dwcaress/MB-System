@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_mr1v2001.h	3/6/2003
- *	$Id: mbsys_mr1v2001.h,v 5.0 2003-03-10 20:03:59 caress Exp $
+ *	$Id: mbsys_mr1v2001.h,v 5.1 2005-11-05 00:48:03 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	March 6, 2003
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2003/03/10 20:03:59  caress
+ * Initial version.
+ *
  *
  *
  */
@@ -104,6 +107,8 @@ int mbsys_mr1v2001_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error);
 int mbsys_mr1v2001_deall(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error);
+int mbsys_mr1v2001_dimensions(int verbose, void *mbio_ptr, void *store_ptr, 
+			int *kind, int *nbath, int *namp, int *nss, int *error);
 int mbsys_mr1v2001_extract(int verbose, void *mbio_ptr, void *store_ptr, 
 			int *kind, int time_i[7], double *time_d,
 			double *navlon, double *navlat,

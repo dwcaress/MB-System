@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_edgjstar.c	5/2/2005
- *	$Id: mbr_edgjstar.c,v 5.0 2005-06-04 04:11:35 caress Exp $
+ *	$Id: mbr_edgjstar.c,v 5.1 2005-11-05 00:48:04 caress Exp $
  *
  *    Copyright (c) 2005 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	May 2, 2005
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2005/06/04 04:11:35  caress
+ * Support for Edgetech Jstar format (id 132 and 133).
+ *
  *
  *
  */
@@ -94,7 +97,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_edgjstar(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_edgjstar.c,v 5.0 2005-06-04 04:11:35 caress Exp $";
+	static char res_id[]="$Id: mbr_edgjstar.c,v 5.1 2005-11-05 00:48:04 caress Exp $";
 	char	*function_name = "mbr_register_edgjstar";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -140,6 +143,7 @@ int mbr_register_edgjstar(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr->mb_io_store_free = &mbsys_jstar_deall; 
 	mb_io_ptr->mb_io_read_ping = &mbr_rt_edgjstar; 
 	mb_io_ptr->mb_io_write_ping = &mbr_wt_edgjstar; 
+	mb_io_ptr->mb_io_dimensions = &mbsys_jstar_dimensions; 
 	mb_io_ptr->mb_io_extract = &mbsys_jstar_extract; 
 	mb_io_ptr->mb_io_insert = &mbsys_jstar_insert; 
 	mb_io_ptr->mb_io_extract_nav = &mbsys_jstar_extract_nav; 
@@ -232,7 +236,7 @@ int mbr_info_edgjstar(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_edgjstar.c,v 5.0 2005-06-04 04:11:35 caress Exp $";
+	static char res_id[]="$Id: mbr_edgjstar.c,v 5.1 2005-11-05 00:48:04 caress Exp $";
 	char	*function_name = "mbr_info_edgjstar";
 	int	status = MB_SUCCESS;
 
@@ -302,7 +306,7 @@ int mbr_info_edgjstar(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_register_edgjstr2(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_edgjstar.c,v 5.0 2005-06-04 04:11:35 caress Exp $";
+	static char res_id[]="$Id: mbr_edgjstar.c,v 5.1 2005-11-05 00:48:04 caress Exp $";
 	char	*function_name = "mbr_register_edgjstr2";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -440,7 +444,7 @@ int mbr_info_edgjstr2(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_edgjstar.c,v 5.0 2005-06-04 04:11:35 caress Exp $";
+	static char res_id[]="$Id: mbr_edgjstar.c,v 5.1 2005-11-05 00:48:04 caress Exp $";
 	char	*function_name = "mbr_info_edgjstr2";
 	int	status = MB_SUCCESS;
 
@@ -510,7 +514,7 @@ int mbr_info_edgjstr2(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_edgjstar(int verbose, void *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_edgjstar.c,v 5.0 2005-06-04 04:11:35 caress Exp $";
+ static char res_id[]="$Id: mbr_edgjstar.c,v 5.1 2005-11-05 00:48:04 caress Exp $";
 	char	*function_name = "mbr_alm_edgjstar";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -991,6 +995,9 @@ status,message.type,message.subsystem,message.channel,message.size);*/
 					{
 					done = MB_YES;
 					}
+/*fprintf(stderr,"Done reading 1: %d  pingNum:%d %d   subsystem:%d %d\n",
+done,store->ssport.pingNum,store->ssstbd.pingNum,
+store->ssport.message.subsystem,store->ssstbd.message.subsystem);*/
 				}
 
 			/* else end of file */
@@ -1050,17 +1057,17 @@ status,message.type,message.subsystem,message.channel,message.size);*/
 			fprintf(stderr,"\ndbg5  Channel 0 (Port):\n");
 		comment = (struct mbsys_jstar_comment_struct *) &(store->comment);
 		fprintf(stderr,"dbg5     start_marker:                %d\n",comment->message.start_marker);
-		fprintf(stderr,"dbg5     version:                     %d\n",sbp->message.version);
-		fprintf(stderr,"dbg5     session:                     %d\n",sbp->message.session);
-		fprintf(stderr,"dbg5     type:                        %d\n",sbp->message.type);
-		fprintf(stderr,"dbg5     command:                     %d\n",sbp->message.command);
-		fprintf(stderr,"dbg5     subsystem:                   %d\n",sbp->message.subsystem);
-		fprintf(stderr,"dbg5     channel:                     %d\n",sbp->message.channel);
-		fprintf(stderr,"dbg5     sequence:                    %d\n",sbp->message.sequence);
-		fprintf(stderr,"dbg5     reserved:                    %d\n",sbp->message.reserved);
-		fprintf(stderr,"dbg5     size:                        %d\n",sbp->message.size);
+		fprintf(stderr,"dbg5     version:                     %d\n",comment->message.version);
+		fprintf(stderr,"dbg5     session:                     %d\n",comment->message.session);
+		fprintf(stderr,"dbg5     type:                        %d\n",comment->message.type);
+		fprintf(stderr,"dbg5     command:                     %d\n",comment->message.command);
+		fprintf(stderr,"dbg5     subsystem:                   %d\n",comment->message.subsystem);
+		fprintf(stderr,"dbg5     channel:                     %d\n",comment->message.channel);
+		fprintf(stderr,"dbg5     sequence:                    %d\n",comment->message.sequence);
+		fprintf(stderr,"dbg5     reserved:                    %d\n",comment->message.reserved);
+		fprintf(stderr,"dbg5     size:                        %d\n",comment->message.size);
 
-		fprintf(stderr,"dbg5     comment:                     %s\n",store->comment);
+		fprintf(stderr,"dbg5     comment:                     %s\n",store->comment.comment);
 		}
 	else if (status == MB_SUCCESS && verbose >= 5 && store->kind == MB_DATA_SUBBOTTOM_SUBBOTTOM)
 		{
