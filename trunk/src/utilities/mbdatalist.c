@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbdatalist.c	10/10/2001
- *    $Id: mbdatalist.c,v 5.8 2004-10-06 19:10:52 caress Exp $
+ *    $Id: mbdatalist.c,v 5.9 2005-11-05 01:07:54 caress Exp $
  *
  *    Copyright (c) 2001, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	October 10, 2001
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2004/10/06 19:10:52  caress
+ * Release 5.0.5 update.
+ *
  * Revision 5.7  2003/04/17 21:17:10  caress
  * Release 5.0.beta30
  *
@@ -64,7 +67,7 @@
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbdatalist.c,v 5.8 2004-10-06 19:10:52 caress Exp $";
+	static char rcs_id[] = "$Id: mbdatalist.c,v 5.9 2005-11-05 01:07:54 caress Exp $";
 	static char program_name[] = "mbdatalist";
 	static char help_message[] =  "mbdatalist parses recursive datalist files and outputs the\ncomplete list of data files and formats. \nThe results are dumped to stdout.";
 	static char usage_message[] = "mbdatalist [-Fformat -Ifile -N -O -P -Q -Rw/e/s/n -U -Z -V -H]";
@@ -95,6 +98,7 @@ main (int argc, char **argv)
 	int	etime_i[7];
 	double	speedmin;
 	double	timegap;
+	char	fileroot[MB_PATH_MAXLINE];
 	char	file[MB_PATH_MAXLINE];
 	char	pwd[MB_PATH_MAXLINE];
 	int	nfile = 0;
@@ -212,7 +216,7 @@ main (int argc, char **argv)
 		fprintf(output,"dbg2  Control Parameters:\n");
 		fprintf(output,"dbg2       verbose:        %d\n",verbose);
 		fprintf(output,"dbg2       help:           %d\n",help);
-		fprintf(output,"dbg2       file:           %d\n",read_file);
+		fprintf(output,"dbg2       file:           %s\n",read_file);
 		fprintf(output,"dbg2       format:         %d\n",format);
 		fprintf(output,"dbg2       look_processed: %d\n",look_processed);
 		fprintf(output,"dbg2       make_inf:       %d\n",make_inf);
@@ -254,17 +258,22 @@ main (int argc, char **argv)
 	/* if make_datalistp desired then make it and exit */
 	if (make_datalistp)
 		{
-	    	if ((fp = fopen("datalistp.mb-1","w")) == NULL)
+   		/* figure out data format and fileroot if possible */
+		status = mb_get_format(verbose, read_file, 
+					fileroot, &format, &error);
+		sprintf(file, "%sp.mb-1", fileroot);
+
+	    	if ((fp = fopen(file,"w")) == NULL)
 		    {
 		    error = MB_ERROR_OPEN_FAIL;
-		    fprintf(stderr, "\nUnable to open output file datalistp.mb-1\n");
+		    fprintf(stderr, "\nUnable to open output file %s\n", file);
 		    fprintf(stderr, "Program %s aborted!\n", program_name);
 		    exit(error);
 		    }
-		fprintf(fp, "$PROCESSED\ndatalist.mb-1 -1\n");
+		fprintf(fp, "$PROCESSED\n%s %d\n", read_file, format);
 		fclose(fp);
 		if (verbose > 0)
-		    fprintf(output, "Convenience datalist file datalistp.mb-1 created...\n");
+		    fprintf(output, "Convenience datalist file %s created...\n", file);
 		exit(error);
 		}
 

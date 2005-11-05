@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbclean.c	2/26/93
- *    $Id: mbclean.c,v 5.11 2005-03-25 04:43:00 caress Exp $
+ *    $Id: mbclean.c,v 5.12 2005-11-05 01:07:54 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2001, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -54,6 +54,9 @@
  * by David Caress.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.11  2005/03/25 04:43:00  caress
+ * Standardized the string lengths used for filenames and comment data.
+ *
  * Revision 5.10  2004/12/18 01:38:52  caress
  * Working towards release 5.0.6.
  *
@@ -241,7 +244,7 @@ int mbclean_save_edit(int verbose, FILE *sofp, double time_d, int beam,
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbclean.c,v 5.11 2005-03-25 04:43:00 caress Exp $";
+	static char rcs_id[] = "$Id: mbclean.c,v 5.12 2005-11-05 01:07:54 caress Exp $";
 	static char program_name[] = "MBCLEAN";
 	static char help_message[] =  "MBCLEAN identifies and flags artifacts in swath sonar bathymetry data\nBad beams  are  indentified  based  on  one simple criterion only: \nexcessive bathymetric slopes.   The default input and output streams \nare stdin and stdout.";
 	static char usage_message[] = "mbclean [-Amax -Blow/high -Cslope -Dmin/max \n\t-Fformat -Gfraction_low/fraction_high \n\t-Iinfile -Llonflip -Mmode -Nbuffersize -Ooutfile -Q -Sspike_slope/mode/format -Xzap_beams \n\t-V -H]";
@@ -725,35 +728,48 @@ main (int argc, char **argv)
 		ping[i].bathalongtrack = NULL;
 		ping[i].bathx = NULL;
 		ping[i].bathy = NULL;
-		status = mb_malloc(verbose,beams_bath*sizeof(char),
-			&ping[i].beamflag,&error);
-		status = mb_malloc(verbose,beams_bath*sizeof(char),
-			&ping[i].beamflagorg,&error);
-		status = mb_malloc(verbose,beams_bath*sizeof(double),
-			&ping[i].bath,&error);
-		status = mb_malloc(verbose,beams_bath*sizeof(double),
-			&ping[i].bathacrosstrack,&error);
-		status = mb_malloc(verbose,beams_bath*sizeof(double),
-			&ping[i].bathalongtrack,&error);
-		status = mb_malloc(verbose,beams_bath*sizeof(double),
-			&ping[i].bathx,&error);
-		status = mb_malloc(verbose,beams_bath*sizeof(double),
-			&ping[i].bathy,&error);
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							sizeof(char), (void **)&ping[i].beamflag, &error);
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							sizeof(char), (void **)&ping[i].beamflagorg, &error);
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							sizeof(double), (void **)&ping[i].bath, &error);
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							sizeof(double), (void **)&ping[i].bathacrosstrack, &error);
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							sizeof(double), (void **)&ping[i].bathalongtrack, &error);
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							sizeof(double), (void **)&ping[i].bathx, &error);
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							sizeof(double), (void **)&ping[i].bathy, &error);
 		}
 	amp = NULL;
 	ss = NULL;
 	ssacrosstrack = NULL;
 	ssalongtrack = NULL;
-	status = mb_malloc(verbose,beams_amp*sizeof(double),
-			&amp,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(double),
-			&ss,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(double),
-			&ssacrosstrack,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(double),
-			&ssalongtrack,&error);
-	status = mb_malloc(verbose,4*beams_bath*sizeof(double),
-			&list,&error);
+	list = NULL;
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_AMPLITUDE,
+						sizeof(double), (void **)&amp, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+						sizeof(double), (void **)&ss, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+						sizeof(double), (void **)&ssacrosstrack, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+						sizeof(double), (void **)&ssalongtrack, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						4 * sizeof(double), (void **)&list, &error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
@@ -1758,22 +1774,6 @@ i,esf.edit_time_d[i],esf.edit_beam[i],esf.edit_action[i],esf.edit_use[i]);
 			MBP_EDIT_ON, esffile, 
 			&error);
 	    }
-
-	/* free the memory */
-	for (j=0;j<3;j++)
-		{
-		mb_free(verbose,&ping[j].beamflag,&error); 
-		mb_free(verbose,&ping[j].bath,&error); 
-		mb_free(verbose,&ping[j].bathacrosstrack,&error); 
-		mb_free(verbose,&ping[j].bathalongtrack,&error); 
-		mb_free(verbose,&ping[j].bathx,&error); 
-		mb_free(verbose,&ping[j].bathy,&error); 
-		}
-	mb_free(verbose,&amp,&error); 
-	mb_free(verbose,&ss,&error); 
-	mb_free(verbose,&ssacrosstrack,&error); 
-	mb_free(verbose,&ssalongtrack,&error); 
-	mb_free(verbose,&list,&error); 
 
 	/* check memory */
 	if (verbose >= 4)

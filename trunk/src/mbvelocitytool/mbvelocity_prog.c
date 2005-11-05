@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:    mbvelocitytool.c        6/6/93
- *    $Id: mbvelocity_prog.c,v 5.13 2004-10-06 19:06:56 caress Exp $ 
+ *    $Id: mbvelocity_prog.c,v 5.14 2005-11-05 01:06:40 caress Exp $ 
  *
  *    Copyright (c) 1993, 1994, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:        June 6, 1993 
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.13  2004/10/06 19:06:56  caress
+ * Release 5.0.5 update.
+ *
  * Revision 5.12  2003/04/17 21:11:18  caress
  * Release 5.0.beta30
  *
@@ -222,7 +225,7 @@ struct mbvt_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbvelocity_prog.c,v 5.13 2004-10-06 19:06:56 caress Exp $";
+static char rcs_id[] = "$Id: mbvelocity_prog.c,v 5.14 2005-11-05 01:06:40 caress Exp $";
 static char program_name[] = "MBVELOCITYTOOL";
 static char help_message[] = "MBVELOCITYTOOL is an interactive water velocity profile editor  \nused to examine multiple water velocity profiles and to create  \nnew water velocity profiles which can be used for the processing  \nof multibeam sonar data.  In general, this tool is used to  \nexamine water velocity profiles obtained from XBTs, CTDs, or  \ndatabases, and to construct new profiles consistent with these  \nvarious sources of information.";
 static char usage_message[] = "mbvelocitytool [-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ssvpfile -Wsvpfile -V -H]";
@@ -311,12 +314,6 @@ double	*ss = NULL;
 double	*ssacrosstrack = NULL;
 double	*ssalongtrack = NULL;
 char	comment[MB_COMMENT_MAXLINE];
-double	*ttimes = NULL;
-double	*angles = NULL;
-double	*angles_forward = NULL;
-double	*angles_null = NULL;
-double	*heave = NULL;
-double	*alongtrack_offset = NULL;
 double	draft;
 double	*p = NULL;
 int	nraypathmax;
@@ -2473,7 +2470,7 @@ int mbvt_open_swath_file(char *file, int form, int *numload)
 	struct stat file_status;
 	int	fstat;
 	double	rr, zz;
-	int	i;
+	int	i, k;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -2554,26 +2551,30 @@ int mbvt_open_swath_file(char *file, int form, int *numload)
 	beam_last = beams_bath;
 
 	/* allocate memory for data arrays */
-	status = mb_malloc(verbose,beams_bath*sizeof(char),&beamflag,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),&bath,&error);
-	status = mb_malloc(verbose,beams_amp*sizeof(double),&amp,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),&bathacrosstrack,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),&bathalongtrack,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(double),&ss,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(double),&ssacrosstrack,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(double),&ssalongtrack,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),&ttimes,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),&angles,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),&angles_forward,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),&angles_null,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),&heave,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),&alongtrack_offset,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),&depth,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),&acrosstrack,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),&angle,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),&residual,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),&res_sd,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(int),&nresidual,&error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(char), (void **)&beamflag, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(double), (void **)&bath, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_AMPLITUDE,
+						sizeof(double), (void **)&amp, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(double), (void **)&bathacrosstrack, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(double), (void **)&bathalongtrack, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+						sizeof(double), (void **)&ss, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+						sizeof(double), (void **)&ssacrosstrack, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+						sizeof(double), (void **)&ssalongtrack, &error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
@@ -2588,8 +2589,6 @@ int mbvt_open_swath_file(char *file, int form, int *numload)
 	/* initialize the buffer */
 	nbuffer = 0;
 	ssv_start = 0.0;
-	bath_min = 10000.0;
-	bath_max = 0.0;
 	navlon_levitus = 0.0;
 	navlat_levitus = 0.0;
 		
@@ -2671,6 +2670,9 @@ int mbvt_open_swath_file(char *file, int form, int *numload)
 			ping[nbuffer].alongtrack_offset = (double *) malloc(ping[nbuffer].beams_bath*sizeof(double));
 			ping[nbuffer].allocated = ping[nbuffer].beams_bath;
 			}
+		if (status == MB_SUCCESS
+			&& beams_bath < ping[nbuffer].beams_bath)
+			beams_bath = ping[nbuffer].beams_bath;
 
 		if (status == MB_SUCCESS
 			&& ping[nbuffer].allocated > 0)
@@ -2734,20 +2736,6 @@ int mbvt_open_swath_file(char *file, int form, int *numload)
 			/* check for first nonzero ssv */
 			if (ping[nbuffer].ssv > 0.0 && ssv_start == 0.0)
 				ssv_start = ping[nbuffer].ssv;
-			    
-			/* get approximate min max depths */
-			for (i=0;i<ping[nbuffer].beams_bath;i++)
-			    if (mb_beam_ok(ping[nbuffer].beamflag[i]))
-				{
-				depth[i] = 750 * ping[nbuffer].ttimes[i] 
-					* cos(DTR * ping[nbuffer].angles[i]);
-
-				/* get min max depths */
-				if (depth[i] < bath_min)
-				    bath_min = depth[i];
-				if (depth[i] > bath_max)
-				    bath_max = depth[i];
-				}
 			}
 		if (status == MB_SUCCESS)
 			{
@@ -2773,6 +2761,17 @@ int mbvt_open_swath_file(char *file, int form, int *numload)
 		status = MB_SUCCESS;
 		error = MB_ERROR_NO_ERROR;
 		}
+
+	/* allocate resicual arrays to accomodate greatest number of beams */
+	if (status == MB_SUCCESS)
+		{
+		status = mb_malloc(verbose,beams_bath*sizeof(double),&depth,&error);
+		status = mb_malloc(verbose,beams_bath*sizeof(double),&acrosstrack,&error);
+		status = mb_malloc(verbose,beams_bath*sizeof(double),&angle,&error);
+		status = mb_malloc(verbose,beams_bath*sizeof(double),&residual,&error);
+		status = mb_malloc(verbose,beams_bath*sizeof(double),&res_sd,&error);
+		status = mb_malloc(verbose,beams_bath*sizeof(int),&nresidual,&error);
+		}
 	
 	/* set error message */
 	if (nbuffer <= 0)
@@ -2782,6 +2781,28 @@ int mbvt_open_swath_file(char *file, int form, int *numload)
 
 	if (ssv_start <= 0.0)
 		ssv_start = 1500.0;
+
+	/* get approximate min max depths */
+	bath_min = 10000.0;
+	bath_max = 0.0;
+	for (k=0;k<nbuffer;k++)
+		{
+		/* loop over the beams */
+		for (i=0;i<ping[k].beams_bath;i++)
+		    {
+		    if (mb_beam_ok(ping[k].beamflag[i]))
+			{
+			depth[i] = 750 * ping[k].ttimes[i] 
+				* cos(DTR * ping[k].angles[i]);
+
+			/* get min max depths */
+			if (depth[i] < bath_min)
+			    bath_min = depth[i];
+			if (depth[i] > bath_max)
+			    bath_max = depth[i];
+			}
+		     }
+		}
 		
 	/* set maxdepth and apply */
 	if (bath_max > 0.0 && bath_max < 13000.0)
@@ -2916,20 +2937,6 @@ int mbvt_deallocate_swath()
 	/* deallocate previously loaded data, if any */
 	if (nbuffer > 0)
 		{
-		mb_free(verbose,&beamflag,&error);
-		mb_free(verbose,&bath,&error);
-		mb_free(verbose,&amp,&error);
-		mb_free(verbose,&bathacrosstrack,&error);
-		mb_free(verbose,&bathalongtrack,&error);
-		mb_free(verbose,&ss,&error);
-		mb_free(verbose,&ssacrosstrack,&error);
-		mb_free(verbose,&ssalongtrack,&error);
-		mb_free(verbose,&ttimes,&error);
-		mb_free(verbose,&angles,&error);
-		mb_free(verbose,&angles_forward,&error);
-		mb_free(verbose,&angles_null,&error);
-		mb_free(verbose,&heave,&error);
-		mb_free(verbose,&alongtrack_offset,&error);
 		mb_free(verbose,&nraypath,&error);
 		for (i=0;i<beams_bath;i++)
 			{

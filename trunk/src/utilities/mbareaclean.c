@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbareaclean.c	2/27/2003
- *    $Id: mbareaclean.c,v 5.4 2004-12-02 06:39:28 caress Exp $
+ *    $Id: mbareaclean.c,v 5.5 2005-11-05 01:07:54 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -37,6 +37,9 @@
  *		Amsterdam Airport
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2004/12/02 06:39:28  caress
+ * Fixes while supporting Reson 7k data.
+ *
  * Revision 5.3  2004/09/16 00:57:46  caress
  * Fixed parsing of bounds argument.
  *
@@ -122,7 +125,7 @@ int getsoundingptr(int verbose, int soundingid,
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbareaclean.c,v 5.4 2004-12-02 06:39:28 caress Exp $";
+	static char rcs_id[] = "$Id: mbareaclean.c,v 5.5 2005-11-05 01:07:54 caress Exp $";
 	static char program_name[] = "MBAREACLEAN";
 	static char help_message[] =  "MBAREACLEAN identifies and flags artifacts in swath bathymetry data";
 	static char usage_message[] = "mbareaclean [-Fformat -Iinfile -Rwest/east/south/north -B -G -Mthreshold/nmin -Sbinsize]";
@@ -588,24 +591,30 @@ main (int argc, char **argv)
 		}
 
 	/* allocate memory for data arrays */
-	status = mb_malloc(verbose, beams_bath * sizeof(char),
-			&beamflag, &error);
-	status = mb_malloc(verbose, beams_bath * sizeof(char),
-			&beamflagorg, &error);
-	status = mb_malloc(verbose, beams_bath * sizeof(double),
-			&bath, &error);
-	status = mb_malloc(verbose, beams_amp * sizeof(double),
-			&amp, &error);
-	status = mb_malloc(verbose, beams_bath * sizeof(double),
-			&bathlon, &error);
-	status = mb_malloc(verbose, beams_bath * sizeof(double),
-			&bathlat, &error);
-	status = mb_malloc(verbose, pixels_ss * sizeof(double),
-			&ss, &error);
-	status = mb_malloc(verbose, pixels_ss * sizeof(double),
-			&sslon, &error);
-	status = mb_malloc(verbose, pixels_ss * sizeof(double),
-			&sslat, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(char), (void **)&beamflag, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(double), (void **)&bath, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_AMPLITUDE,
+						sizeof(double), (void **)&amp, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(double), (void **)&bathlon, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(double), (void **)&bathlat, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+						sizeof(double), (void **)&ss, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+						sizeof(double), (void **)&sslon, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+						sizeof(double), (void **)&sslat, &error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
@@ -860,18 +869,6 @@ files[sndg->sndg_file].ping_time_d[sndg->sndg_ping], sndg->sndg_depth);*/
 	/* close the files */
 	status = mb_close(verbose,&mbio_ptr,&error);
 	mb_esf_close(verbose, &esf, &error);
-		
-
-	/* free the memory */
-	mb_free(verbose,&beamflag,&error); 
-	mb_free(verbose,&beamflagorg,&error); 
-	mb_free(verbose,&bath,&error); 
-	mb_free(verbose,&amp,&error); 
-	mb_free(verbose,&bathlon,&error); 
-	mb_free(verbose,&bathlat,&error); 
-	mb_free(verbose,&ss,&error); 
-	mb_free(verbose,&sslon,&error); 
-	mb_free(verbose,&sslat,&error); 
 
 	/* check memory */
 	if (verbose >= 4)

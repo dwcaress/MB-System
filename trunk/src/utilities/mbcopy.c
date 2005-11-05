@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcopy.c	2/4/93
- *    $Id: mbcopy.c,v 5.16 2005-03-25 04:42:59 caress Exp $
+ *    $Id: mbcopy.c,v 5.17 2005-11-05 01:07:54 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003, 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	February 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.16  2005/03/25 04:42:59  caress
+ * Standardized the string lengths used for filenames and comment data.
+ *
  * Revision 5.15  2004/09/16 01:00:01  caress
  * Fixed copyright.
  *
@@ -217,7 +220,7 @@ int mbcopy_any_to_mbldeoih(int verbose,
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbcopy.c,v 5.16 2005-03-25 04:42:59 caress Exp $";
+	static char rcs_id[] = "$Id: mbcopy.c,v 5.17 2005-11-05 01:07:54 caress Exp $";
 	static char program_name[] = "MBcopy";
 	static char help_message[] =  "MBcopy copies an input swath sonar data file to an output \nswath sonar data file with the specified conversions.  Options include \nwindowing in time and space and ping averaging.  The input and \noutput data formats may differ, though not all possible combinations \nmake sense.  The default input and output streams are stdin and stdout.";
 	static char usage_message[] = "mbcopy [-Byr/mo/da/hr/mn/sc -Ccommentfile -D -Eyr/mo/da/hr/mn/sc \n\t-Fiformat/oformat -H  -Iinfile -Llonflip -N -Ooutfile \n\t-Ppings -Qsleep_factor -Rw/e/s/n -Sspeed -V]";
@@ -619,30 +622,54 @@ main (int argc, char **argv)
 		}
 
 	/* allocate memory for data arrays */
-	status = mb_malloc(verbose,ibeams_bath*sizeof(char),&ibeamflag,&error);
-	status = mb_malloc(verbose,ibeams_bath*sizeof(double),&ibath,&error);
-	status = mb_malloc(verbose,ibeams_bath*sizeof(double),&ibathacrosstrack,
-				&error);
-	status = mb_malloc(verbose,ibeams_bath*sizeof(double),&ibathalongtrack,
-				&error);
-	status = mb_malloc(verbose,ibeams_amp*sizeof(double),&iamp,&error);
-	status = mb_malloc(verbose,ipixels_ss*sizeof(double),&iss,&error);
-	status = mb_malloc(verbose,ipixels_ss*sizeof(double),&issacrosstrack,
-				&error);
-	status = mb_malloc(verbose,ipixels_ss*sizeof(double),&issalongtrack,
-				&error);
-	status = mb_malloc(verbose,obeams_bath*sizeof(char),&obeamflag,&error);
-	status = mb_malloc(verbose,obeams_bath*sizeof(double),&obath,&error);
-	status = mb_malloc(verbose,obeams_bath*sizeof(double),&obathacrosstrack,
-				&error);
-	status = mb_malloc(verbose,obeams_bath*sizeof(double),&obathalongtrack,
-				&error);
-	status = mb_malloc(verbose,obeams_amp*sizeof(double),&oamp,&error);
-	status = mb_malloc(verbose,opixels_ss*sizeof(double),&oss,&error);
-	status = mb_malloc(verbose,opixels_ss*sizeof(double),&ossacrosstrack,
-				&error);
-	status = mb_malloc(verbose,opixels_ss*sizeof(double),&ossalongtrack,
-				&error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(char), (void **)&ibeamflag, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(double), (void **)&ibath, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_AMPLITUDE,
+						sizeof(double), (void **)&iamp, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(double), (void **)&ibathacrosstrack, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(double), (void **)&ibathalongtrack, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+						sizeof(double), (void **)&iss, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+						sizeof(double), (void **)&issacrosstrack, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+						sizeof(double), (void **)&issalongtrack, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(char), (void **)&obeamflag, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(double), (void **)&obath, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_AMPLITUDE,
+						sizeof(double), (void **)&oamp, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(double), (void **)&obathacrosstrack, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(double), (void **)&obathalongtrack, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_SIDESCAN, 
+						sizeof(double), (void **)&oss, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_SIDESCAN, 
+						sizeof(double), (void **)&ossacrosstrack, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_SIDESCAN, 
+						sizeof(double), (void **)&ossalongtrack, &error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
@@ -1160,24 +1187,6 @@ main (int argc, char **argv)
 	/* close the files */
 	status = mb_close(verbose,&imbio_ptr,&error);
 	status = mb_close(verbose,&ombio_ptr,&error);
-
-	/* deallocate memory for data arrays */
-	mb_free(verbose,&ibeamflag,&error); 
-	mb_free(verbose,&ibath,&error); 
-	mb_free(verbose,&ibathacrosstrack,&error); 
-	mb_free(verbose,&ibathalongtrack,&error); 
-	mb_free(verbose,&iamp,&error); 
-	mb_free(verbose,&iss,&error); 
-	mb_free(verbose,&issacrosstrack,&error); 
-	mb_free(verbose,&issalongtrack,&error); 
-	mb_free(verbose,&obeamflag,&error); 
-	mb_free(verbose,&obath,&error); 
-	mb_free(verbose,&obathacrosstrack,&error); 
-	mb_free(verbose,&obathalongtrack,&error); 
-	mb_free(verbose,&oamp,&error); 
-	mb_free(verbose,&oss,&error); 
-	mb_free(verbose,&ossacrosstrack,&error); 
-	mb_free(verbose,&ossalongtrack,&error); 
 
 	/* check memory */
 	if (verbose >= 4)

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbps.c	11/4/93
- *    $Id: mbps.c,v 5.6 2005-03-25 04:43:01 caress Exp $
+ *    $Id: mbps.c,v 5.7 2005-11-05 01:07:54 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	August 31, 1991 (original version)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2005/03/25 04:43:01  caress
+ * Standardized the string lengths used for filenames and comment data.
+ *
  * Revision 5.5  2004/05/21 23:51:19  caress
  * Progress supporting Reson 7k data, including support for extracing subbottom profiler data.
  *
@@ -159,7 +162,7 @@ int rgb_white[] = {255, 255, 255};
 main (int argc, char **argv)
 {
 
-	static char rcs_id[] = "$Id: mbps.c,v 5.6 2005-03-25 04:43:01 caress Exp $";
+	static char rcs_id[] = "$Id: mbps.c,v 5.7 2005-11-05 01:07:54 caress Exp $";
 	static char program_name[] = "MBPS";
 	static char help_message[] =  "MBPS reads a swath bathymetry data file and creates a postscript 3-d mesh plot";
 	static char usage_message[] = "mbps [-Iinfile -Fformat -Nnpings -Ppings\n\t-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc  \n\t-Aalpha -Keta -Dviewdir -Xvertexag \n\t-T\"title\" -Wmetersperinch \n\t-Sspeedmin -Ggap -Ydisplay_stats \n\t-Zdisplay_scales -V -H]";
@@ -482,14 +485,18 @@ main (int argc, char **argv)
 	ss = NULL;
 	ssacrosstrack = NULL;
 	ssalongtrack = NULL;
-	status = mb_malloc(verbose,beams_amp*sizeof(double),
-			&amp,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(double),
-			&ss,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(double),
-			&ssacrosstrack,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(double),
-			&ssalongtrack,&error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_AMPLITUDE,
+						sizeof(double), (void **)&amp, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+						sizeof(double), (void **)&ss, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+						sizeof(double), (void **)&ssacrosstrack, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+						sizeof(double), (void **)&ssalongtrack, &error);
 	for (i=0;i<num_pings_max+3;i++) 
 		{
 		if (error == MB_ERROR_NO_ERROR) 
@@ -501,18 +508,24 @@ main (int argc, char **argv)
 			data[i].bathalongtrack = NULL;
 			data[i].xp = NULL;
 			data[i].yp = NULL;
-			status = mb_malloc(verbose,beams_bath*sizeof(char),
-					&data[i].beamflag,&error);
-			status = mb_malloc(verbose,beams_bath*sizeof(double),
-					&data[i].bath,&error);
-			status = mb_malloc(verbose,beams_bath*sizeof(double),
-					&data[i].bathacrosstrack,&error);
-			status = mb_malloc(verbose,beams_bath*sizeof(double),
-					&data[i].bathalongtrack,&error);
-			status = mb_malloc(verbose,beams_bath*sizeof(double),
-					&data[i].xp,&error);
-			status = mb_malloc(verbose,beams_bath*sizeof(double),
-					&data[i].yp,&error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+								sizeof(char), (void **)&beamflag, &error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+								sizeof(double), (void **)&bath, &error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+								sizeof(double), (void **)&bathacrosstrack, &error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+								sizeof(double), (void **)&bathalongtrack, &error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+								sizeof(double), (void **)&xp, &error);
+			if (error == MB_ERROR_NO_ERROR)
+				status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+								sizeof(double), (void **)&yp, &error);
 			for (j=0; j<beams_bath; j++)
 				data[i].beamflag[j] = MB_FLAG_NULL;
 			} /* if data[i] */
@@ -1055,18 +1068,8 @@ main (int argc, char **argv)
 	ps_plotend(1);
 
 	/* deallocate memory */
-	mb_free(verbose,&amp,&error);
-	mb_free(verbose,&ss,&error);
-	mb_free(verbose,&ssacrosstrack,&error);
-	mb_free(verbose,&ssalongtrack,&error);
 	for (i=0;i<nread;i++) 
 		{
-		mb_free(verbose,&data[i].beamflag,&error);
-		mb_free(verbose,&data[i].bath,&error);
-		mb_free(verbose,&data[i].bathacrosstrack,&error);
-		mb_free(verbose,&data[i].bathalongtrack,&error);
-		mb_free(verbose,&data[i].xp,&error);
-		mb_free(verbose,&data[i].yp,&error);
 		mb_free(verbose,&data[i],&error);
 		}
 

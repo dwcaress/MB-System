@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbprocess.c	3/31/93
- *    $Id: mbprocess.c,v 5.39 2005-08-17 17:31:56 caress Exp $
+ *    $Id: mbprocess.c,v 5.40 2005-11-05 01:07:54 caress Exp $
  *
  *    Copyright (c) 2000, 2002, 2003, 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -36,6 +36,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.39  2005/08/17 17:31:56  caress
+ * Improved how the best altitude value is obtained for sidescan and amplitude data correction.
+ *
  * Revision 5.38  2005/06/04 05:17:28  caress
  * Added KLUGE005 feature to insert navigation record timestamps into processed survey records. This allows timestamp fixes made using MBnavedit to be applied during processing.
  *
@@ -216,7 +219,7 @@ int get_anglecorr(int verbose,
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbprocess.c,v 5.39 2005-08-17 17:31:56 caress Exp $";
+	static char rcs_id[] = "$Id: mbprocess.c,v 5.40 2005-11-05 01:07:54 caress Exp $";
 	static char program_name[] = "mbprocess";
 	static char help_message[] =  "mbprocess is a tool for processing swath sonar bathymetry data.\n\
 This program performs a number of functions, including:\n\
@@ -3081,33 +3084,48 @@ and mbedit edit save files.\n";
 		}
 
 	/* allocate memory for data arrays */
-	status = mb_malloc(verbose,beams_bath*sizeof(char),&beamflag,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),&bath,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),
-				&bathacrosstrack,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),
-				&bathalongtrack,&error);
-	status = mb_malloc(verbose,beams_amp*sizeof(double),&amp,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(double),&ss,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(double),&ssacrosstrack,
-				&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(double),&ssalongtrack,
-				&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),&ttimes,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),&angles,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),&angles_forward,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),&angles_null,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),&bheave,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),&alongtrack_offset,&error);
-	if (process.mbp_sscorr_mode == MBP_SSCORR_ON
-		|| process.mbp_ampcorr_mode == MBP_AMPCORR_ON)
-		{
-		status = mb_malloc(verbose,beams_bath*sizeof(double),&(depths),&error);
-		status = mb_malloc(verbose,beams_bath*sizeof(double),&(depthsmooth),&error);
-		status = mb_malloc(verbose,beams_bath*sizeof(double),&(depthacrosstrack),&error);
-		status = mb_malloc(verbose,(beams_bath+1)*sizeof(double),&(slopes),&error);
-		status = mb_malloc(verbose,(beams_bath+1)*sizeof(double),&(slopeacrosstrack),&error);
-		}
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(char), (void **)&beamflag, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(double), (void **)&bath, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_AMPLITUDE,
+						sizeof(double), (void **)&amp, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(double), (void **)&bathacrosstrack, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(double), (void **)&bathalongtrack, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+						sizeof(double), (void **)&ss, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+						sizeof(double), (void **)&ssacrosstrack, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+						sizeof(double), (void **)&ssalongtrack, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, 
+						sizeof(double), (void **)&ttimes, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, 
+						sizeof(double), (void **)&angles, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, 
+						sizeof(double), (void **)&angles_forward, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, 
+						sizeof(double), (void **)&angles_null, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, 
+						sizeof(double), (void **)&bheave, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, 
+						sizeof(double), (void **)&alongtrack_offset, &error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
@@ -3201,6 +3219,60 @@ and mbedit edit save files.\n";
 			program_name);
 		exit(error);
 		}
+
+	    /* reallocate memory for data arrays */
+	    if (error == MB_ERROR_NO_ERROR)
+		    status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						    sizeof(char), (void **)&beamflag, &error);
+	    if (error == MB_ERROR_NO_ERROR)
+		    status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						    sizeof(double), (void **)&bath, &error);
+	    if (error == MB_ERROR_NO_ERROR)
+		    status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_AMPLITUDE,
+						    sizeof(double), (void **)&amp, &error);
+	    if (error == MB_ERROR_NO_ERROR)
+		    status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						    sizeof(double), (void **)&bathacrosstrack, &error);
+	    if (error == MB_ERROR_NO_ERROR)
+		    status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						    sizeof(double), (void **)&bathalongtrack, &error);
+	    if (error == MB_ERROR_NO_ERROR)
+		    status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+						    sizeof(double), (void **)&ss, &error);
+	    if (error == MB_ERROR_NO_ERROR)
+		    status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+						    sizeof(double), (void **)&ssacrosstrack, &error);
+	    if (error == MB_ERROR_NO_ERROR)
+		    status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+						    sizeof(double), (void **)&ssalongtrack, &error);
+	    if (error == MB_ERROR_NO_ERROR)
+		    status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, 
+						    sizeof(double), (void **)&ttimes, &error);
+	    if (error == MB_ERROR_NO_ERROR)
+		    status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, 
+						    sizeof(double), (void **)&angles, &error);
+	    if (error == MB_ERROR_NO_ERROR)
+		    status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, 
+						    sizeof(double), (void **)&angles_forward, &error);
+	    if (error == MB_ERROR_NO_ERROR)
+		    status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, 
+						    sizeof(double), (void **)&angles_null, &error);
+	    if (error == MB_ERROR_NO_ERROR)
+		    status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, 
+						    sizeof(double), (void **)&bheave, &error);
+	    if (error == MB_ERROR_NO_ERROR)
+		    status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, 
+						    sizeof(double), (void **)&alongtrack_offset, &error);
+
+	    /* if error initializing memory then quit */
+	    if (error != MB_ERROR_NO_ERROR)
+		    {
+		    mb_error(verbose,error,&message);
+		    fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
+		    fprintf(stderr,"\nProgram <%s> Terminated\n",
+			    program_name);
+		    exit(error);
+		    }
 	    }
 	if (ssv_start <= 0.0)
 		ssv_start = ssv_default;
@@ -3208,6 +3280,27 @@ and mbedit edit save files.\n";
 	/* reset error */
 	error = MB_ERROR_NO_ERROR;
 	status = MB_SUCCESS;
+
+	/* allocate memory for amplitude and sidescan correction arrays */
+	if (process.mbp_sscorr_mode == MBP_SSCORR_ON
+		|| process.mbp_ampcorr_mode == MBP_AMPCORR_ON)
+		{
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, 
+							sizeof(double), (void **)&depths, &error);
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, 
+							sizeof(double), (void **)&depthsmooth, &error);
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, 
+							sizeof(double), (void **)&depthacrosstrack, &error);
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, 
+							2 * sizeof(double), (void **)&slopes, &error);
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, 
+							2 * sizeof(double), (void **)&slopeacrosstrack, &error);
+		}
 
 	/*--------------------------------------------
 	  output comments
@@ -5135,7 +5228,6 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 						&error);
 			reference_amp = 0.5 * (reference_amp_port
 							+ reference_amp_stbd);
-			
 /*fprintf(stderr, "itable:%d time:%f nangle:%d\n",
 itable, ampcorrtableuse.time_d, 
 ampcorrtableuse.nangle);
@@ -5292,13 +5384,13 @@ time_d, i, ssacrosstrack[i], altitude, sonardepth, bathy, altitude_use, angle);*
 								sscorrtableuse.angle, 
 								sscorrtableuse.amplitude, 
 								angle, &correction, &error);
-fprintf(stderr, "ping:%d pixel:%d altitude_use:%f slope:%f angle:%f corr:%f reference:%f ss: %f", 
-idata, i, altitude_use, slope, angle, correction, reference_amp, ss[i]);
+/*fprintf(stderr, "ping:%d pixel:%d altitude_use:%f slope:%f angle:%f corr:%f reference:%f ss: %f", 
+idata, i, altitude_use, slope, angle, correction, reference_amp, ss[i]);*/
 						if (process.mbp_sscorr_type == MBP_SSCORR_SUBTRACTION)
 				    			ss[i] = ss[i] - correction + reference_amp;
 						else
 				    			ss[i] = ss[i] / correction * reference_amp;
-fprintf(stderr, " ss: %f\n", ss[i]);
+/*fprintf(stderr, " ss: %f\n", ss[i]);*/
 						if (ss[i] < 0.0)
 				    			ss[i] = 0.0;
 						}
@@ -5339,7 +5431,7 @@ fprintf(stderr, " ss: %f\n", ss[i]);
 			&& (kind == MB_DATA_DATA
 			    || kind == MB_DATA_COMMENT))
 			{
-			status = mb_insert(5,imbio_ptr,
+			status = mb_insert(verbose,imbio_ptr,
 					store_ptr,kind, 
 					time_i,time_d,
 					navlon,navlat,speed,heading,
@@ -5358,7 +5450,7 @@ fprintf(stderr, " ss: %f\n", ss[i]);
 			|| (kind == MB_DATA_COMMENT 
 				&& strip_comments == MB_NO))
 			{
-			status = mb_put_all(5,ombio_ptr,
+			status = mb_put_all(verbose,ombio_ptr,
 					store_ptr,MB_NO,kind,
 					time_i,time_d,
 					navlon,navlat,speed,heading,
@@ -5423,11 +5515,6 @@ i,esf.edit[i].time_d,esf.edit[i].beam,esf.edit[i].action,esf.edit[i].use);*/
 		mb_free(verbose,&(sscorrtableuse.angle),&error);
 		mb_free(verbose,&(sscorrtableuse.amplitude),&error);
 		mb_free(verbose,&(sscorrtableuse.sigma),&error);
-		mb_free(verbose,&(depths),&error);
-		mb_free(verbose,&(depthsmooth),&error);
-		mb_free(verbose,&(depthacrosstrack),&error);
-		mb_free(verbose,&(slopes),&error);
-		mb_free(verbose,&(slopeacrosstrack),&error);
 		for (i=0;i<nsscorrtable;i++)
 			{
 			mb_free(verbose,&(sscorrtable[i].angle),&error);
@@ -5485,24 +5572,10 @@ i,esf.edit[i].time_d,esf.edit[i].beam,esf.edit[i].action,esf.edit[i].use);*/
 		mb_esf_close(verbose,&esf,&error);
 		}
 
-	/* deallocate memory for data arrays */
+	/* deallocate memory for svp arrays */
 	mb_free(verbose,&depth,&error);
 	mb_free(verbose,&velocity,&error);
 	mb_free(verbose,&velocity_sum,&error);
-	mb_free(verbose,&ttimes,&error);
-	mb_free(verbose,&angles,&error);
-	mb_free(verbose,&angles_forward,&error);
-	mb_free(verbose,&angles_null,&error);
-	mb_free(verbose,&bheave,&error);
-	mb_free(verbose,&alongtrack_offset,&error);
-	mb_free(verbose,&beamflag,&error); 
-	mb_free(verbose,&bath,&error); 
-	mb_free(verbose,&bathacrosstrack,&error); 
-	mb_free(verbose,&bathalongtrack,&error); 
-	mb_free(verbose,&amp,&error); 
-	mb_free(verbose,&ss,&error); 
-	mb_free(verbose,&ssacrosstrack,&error); 
-	mb_free(verbose,&ssalongtrack,&error); 
 
 	/* check memory */
 	if (verbose >= 4)

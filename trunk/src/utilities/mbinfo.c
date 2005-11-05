@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbinfo.c	2/1/93
- *    $Id: mbinfo.c,v 5.19 2005-03-25 04:43:01 caress Exp $
+ *    $Id: mbinfo.c,v 5.20 2005-11-05 01:07:54 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -26,6 +26,9 @@
  * Date:	February 1, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.19  2005/03/25 04:43:01  caress
+ * Standardized the string lengths used for filenames and comment data.
+ *
  * Revision 5.18  2004/12/02 06:38:09  caress
  * Fixes while supporting Reson 7k data.
  *
@@ -212,7 +215,7 @@ struct ping
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbinfo.c,v 5.19 2005-03-25 04:43:01 caress Exp $";
+	static char rcs_id[] = "$Id: mbinfo.c,v 5.20 2005-11-05 01:07:54 caress Exp $";
 	static char program_name[] = "MBINFO";
 	static char help_message[] =  "MBINFO reads a swath sonar data file and outputs \nsome basic statistics.  If pings are averaged (pings > 2) \nMBINFO estimates the variance for each of the swath \nbeams by reading a set number of pings (>2) and then finding \nthe variance of the detrended values for each beam. \nThe results are dumped to stdout.";
 	static char usage_message[] = "mbinfo [-Byr/mo/da/hr/mn/sc -C -Eyr/mo/da/hr/mn/sc -Fformat -Ifile -Llonflip -Mnx/ny -N -Ppings -Rw/e/s/n -Sspeed -V -H]";
@@ -746,59 +749,59 @@ main (int argc, char **argv)
 			datacur->sslat = NULL;
 			}
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_malloc(verbose,beams_bath_alloc*sizeof(char),
-					&datacur->beamflag,&error);
+			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							sizeof(char), (void **)&datacur->beamflag, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_malloc(verbose,beams_bath_alloc*sizeof(double),
-					&datacur->bath,&error);
+			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							sizeof(double), (void **)&datacur->bath, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_malloc(verbose,beams_amp_alloc*sizeof(double),
-					&datacur->amp,&error);
+			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_AMPLITUDE,
+							sizeof(double), (void **)&datacur->amp, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_malloc(verbose,beams_bath_alloc*sizeof(double),
-					&datacur->bathlon,&error);
+			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							sizeof(double), (void **)&datacur->bathlon, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_malloc(verbose,beams_bath_alloc*sizeof(double),
-					&datacur->bathlat,&error);
+			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							sizeof(double), (void **)&datacur->bathlat, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_malloc(verbose,pixels_ss_alloc*sizeof(double),
-					&datacur->ss,&error);
+			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+							sizeof(double), (void **)&datacur->ss, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_malloc(verbose,pixels_ss_alloc*sizeof(double),
-					&datacur->sslon,&error);
+			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+							sizeof(double), (void **)&datacur->sslon, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_malloc(verbose,pixels_ss_alloc*sizeof(double),
-					&datacur->sslat,&error);
+			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+							sizeof(double), (void **)&datacur->sslat, &error);
 		}
 	if (pings_read > 1 && pass == 0)
 		{
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_malloc(verbose,beams_bath_alloc*sizeof(double),
-				&bathmean,&error);
+			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							sizeof(double), (void **)&bathmean, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_malloc(verbose,beams_bath_alloc*sizeof(double),
-				&bathvar,&error);
+			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							sizeof(double), (void **)&bathvar, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_malloc(verbose,beams_bath_alloc*sizeof(int),
-				&nbathvar,&error);
+			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							sizeof(int), (void **)&nbathvar, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_malloc(verbose,beams_amp_alloc*sizeof(double),
-				&ampmean,&error);
+			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_AMPLITUDE,
+							sizeof(double),(void **) &ampmean, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_malloc(verbose,beams_amp_alloc*sizeof(double),
-				&ampvar,&error);
+			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_AMPLITUDE,
+							sizeof(double), (void **)&ampvar, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_malloc(verbose,beams_amp_alloc*sizeof(int),
-				&nampvar,&error);
+			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_AMPLITUDE,
+							sizeof(int), (void **)&nampvar, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_malloc(verbose,pixels_ss_alloc*sizeof(double),
-				&ssmean,&error);
+			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+							sizeof(double), (void **)&ssmean, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_malloc(verbose,pixels_ss_alloc*sizeof(double),
-				&ssvar,&error);
+			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+							sizeof(double), (void **)&ssvar, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_malloc(verbose,pixels_ss_alloc*sizeof(int),
-				&nssvar,&error);
+			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+							sizeof(int), (void **)&nssvar, &error);
 		}
 		
 	/* if coverage mask requested get cell sizes */
@@ -916,6 +919,20 @@ main (int argc, char **argv)
 
 			/* read a ping of data */
 			datacur = data[nread];
+			status = mb_read(verbose,mbio_ptr,&kind,&pings,
+				time_i,&time_d,
+				&navlon,&navlat,
+				&speed,&heading,
+				&distance,&altitude,&sonardepth,
+				&beams_bath,&beams_amp,&pixels_ss,
+				datacur->beamflag,datacur->bath,datacur->amp,
+				datacur->bathlon,datacur->bathlat,
+				datacur->ss,datacur->sslon,datacur->sslat,
+				comment,&error);
+				
+			/* use local pointers for convenience - do not set these before the
+				mb_read call because registered arrays can be dynamically
+				reallocated during mb_read, mb_get, and mb_get_all calls */
 			beamflag = datacur->beamflag;
 			bath = datacur->bath;
 			amp = datacur->amp;
@@ -924,15 +941,6 @@ main (int argc, char **argv)
 			ss = datacur->ss;
 			sslon = datacur->sslon;
 			sslat = datacur->sslat;
-			status = mb_read(verbose,mbio_ptr,&kind,&pings,
-				time_i,&time_d,
-				&navlon,&navlat,
-				&speed,&heading,
-				&distance,&altitude,&sonardepth,
-				&beams_bath,&beams_amp,&pixels_ss,
-				beamflag,bath,amp,bathlon,bathlat,
-				ss,sslon,sslat,
-				comment,&error);
 
 			/* increment counters */
 			if (pass == 0 
