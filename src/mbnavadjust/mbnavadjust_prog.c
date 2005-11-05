@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavadjust_prog.c	3/23/00
- *    $Id: mbnavadjust_prog.c,v 5.16 2005-06-04 04:34:07 caress Exp $
+ *    $Id: mbnavadjust_prog.c,v 5.17 2005-11-05 00:57:03 caress Exp $
  *
  *    Copyright (c) 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	March 23, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.16  2005/06/04 04:34:07  caress
+ * Added notion of "truecrossings", so it's possible to process the data while only looking at crossing tracks and ignoring overlap points.
+ *
  * Revision 5.15  2004/12/18 01:35:42  caress
  * Working towards release 5.0.6.
  *
@@ -112,6 +115,7 @@ struct	pingraw
 	double	navlat;
 	double	heading;
 	double	draft;
+	double	beams_bath;
 	char	*beamflag;
 	double	*bath;
 	double	*bathacrosstrack;
@@ -128,7 +132,7 @@ struct swathraw
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbnavadjust_prog.c,v 5.16 2005-06-04 04:34:07 caress Exp $";
+static char rcs_id[] = "$Id: mbnavadjust_prog.c,v 5.17 2005-11-05 00:57:03 caress Exp $";
 static char program_name[] = "mbnavadjust";
 static char help_message[] =  "mbnavadjust is an interactive navigation adjustment package for swath sonar data.\n";
 static char usage_message[] = "mbnavadjust [-Iproject -V -H]";
@@ -154,45 +158,6 @@ double	btime_d;
 double	etime_d;
 double	speedmin;
 double	timegap;
-int	beams_bath;
-int	beams_amp;
-int	pixels_ss;
-void	*imbio_ptr = NULL;
-void	*ombio_ptr = NULL;
-
-/* mbio read and write values */
-void	*istore_ptr = NULL;
-void	*ostore_ptr = NULL;
-int	kind;
-int	time_i[7];
-double	time_d;
-double	navlon;
-double	navlat;
-double	speed;
-double	heading;
-double	distance;
-double	altitude;
-double	sonardepth;
-double	draft;
-double	roll;
-double	pitch;
-double	heave;
-int	nbath;
-int	namp;
-int	nss;
-char	*beamflag = NULL;
-double	*bath = NULL;
-double	*bathacrosstrack = NULL;
-double	*bathalongtrack = NULL;
-double	*amp = NULL;
-double	*ss = NULL;
-double	*ssacrosstrack = NULL;
-double	*ssalongtrack = NULL;
-int	idata = 0;
-int	icomment = 0;
-int	odata = 0;
-int	ocomment = 0;
-char	comment[MB_COMMENT_MAXLINE];
 
 /* color control values */
 #define	WHITE	0	
@@ -243,6 +208,9 @@ int	*gridnm = NULL;
 #define NINTERVALS_MISFIT 80
 int	nmisfit_intervals = NINTERVALS_MISFIT;
 double	misfit_intervals[NINTERVALS_MISFIT];
+
+/* minimum initial sigma_crossing */
+#define	SIGMA_MINIMUM	0.0000001;
 
 /* system function declarations */
 char	*ctime();
@@ -1649,6 +1617,39 @@ int mbnavadjust_import_file(char *path, int iformat)
 	char	npath[STRING_MAX];
 	char	opath[STRING_MAX];
 	char	*root;
+
+	/* mbio read and write values */
+	void	*imbio_ptr = NULL;
+	void	*ombio_ptr = NULL;
+	void	*istore_ptr = NULL;
+	void	*ostore_ptr = NULL;
+	int	kind;
+	int	time_i[7];
+	double	time_d;
+	double	navlon;
+	double	navlat;
+	double	speed;
+	double	heading;
+	double	distance;
+	double	altitude;
+	double	sonardepth;
+	double	draft;
+	double	roll;
+	double	pitch;
+	double	heave;
+	int	beams_bath;
+	int	beams_amp;
+	int	pixels_ss;
+	char	*beamflag = NULL;
+	double	*bath = NULL;
+	double	*bathacrosstrack = NULL;
+	double	*bathalongtrack = NULL;
+	double	*amp = NULL;
+	double	*ss = NULL;
+	double	*ssacrosstrack = NULL;
+	double	*ssalongtrack = NULL;
+	char	comment[MB_COMMENT_MAXLINE];
+
 	int	output_id, found;
 	int	obeams_bath,obeams_amp,opixels_ss;
 	int	iform;
@@ -1782,18 +1783,38 @@ int mbnavadjust_import_file(char *path, int iformat)
 	/* allocate memory for data arrays */
 	if (status == MB_SUCCESS)
 		{
-		status = mb_malloc(mbna_verbose,beams_bath*sizeof(char),&beamflag,&error);
-		status = mb_malloc(mbna_verbose,beams_bath*sizeof(double),&bath,&error);
-		status = mb_malloc(mbna_verbose,beams_bath*sizeof(double),
-			&bathacrosstrack,&error);
-		status = mb_malloc(mbna_verbose,beams_bath*sizeof(double),
-			&bathalongtrack,&error);
-		status = mb_malloc(mbna_verbose,beams_amp*sizeof(double),&amp,&error);
-		status = mb_malloc(mbna_verbose,pixels_ss*sizeof(double),&ss,&error);
-		status = mb_malloc(mbna_verbose,pixels_ss*sizeof(double),&ssacrosstrack,
-			&error);
-		status = mb_malloc(mbna_verbose,pixels_ss*sizeof(double),&ssalongtrack,
-			&error);
+		beamflag = NULL;
+		bath = NULL;
+		amp = NULL;
+		bathacrosstrack = NULL;
+		bathalongtrack = NULL;
+		ss = NULL;
+		ssacrosstrack = NULL;
+		ssalongtrack = NULL;
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_register_array(mbna_verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							sizeof(char), (void **)&beamflag, &error);
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_register_array(mbna_verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							sizeof(double), (void **)&bath, &error);
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_register_array(mbna_verbose, imbio_ptr, MB_MEM_TYPE_AMPLITUDE,
+							sizeof(double), (void **)&amp, &error);
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_register_array(mbna_verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							sizeof(double), (void **)&bathacrosstrack, &error);
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_register_array(mbna_verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							sizeof(double), (void **)&bathalongtrack, &error);
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_register_array(mbna_verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+							sizeof(double), (void **)&ss, &error);
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_register_array(mbna_verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+							sizeof(double), (void **)&ssacrosstrack, &error);
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_register_array(mbna_verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+							sizeof(double), (void **)&ssalongtrack, &error);
 
 		/* if error initializing memory then don't read the file */
 		if (error != MB_ERROR_NO_ERROR)
@@ -2286,16 +2307,6 @@ beams_bath,beams_amp,pixels_ss);*/
 			status = mb_free(mbna_verbose,&ostore->bath_alongtrack,&error);
 			status = mb_close(mbna_verbose,&ombio_ptr,&error);
 			}
-
-		/* deallocate memory used for data arrays */
-		mb_free(mbna_verbose,&beamflag,&error);
-		mb_free(mbna_verbose,&bath,&error);
-		mb_free(mbna_verbose,&bathacrosstrack,&error);
-		mb_free(mbna_verbose,&bathalongtrack,&error);
-		mb_free(mbna_verbose,&amp,&error);
-		mb_free(mbna_verbose,&ss,&error);
-		mb_free(mbna_verbose,&ssacrosstrack,&error);
-		mb_free(mbna_verbose,&ssalongtrack,&error);
 		
 		/* now search for crossings */
 		if (file != NULL && first != MB_YES)
@@ -2322,18 +2333,38 @@ beams_bath,beams_amp,pixels_ss);*/
 				/* allocate memory for data arrays */
 				if (status == MB_SUCCESS)
 				    {
-				    status = mb_malloc(mbna_verbose,beams_bath*sizeof(char),&beamflag,&error);
-				    status = mb_malloc(mbna_verbose,beams_bath*sizeof(double),&bath,&error);
-				    status = mb_malloc(mbna_verbose,beams_bath*sizeof(double),
-					    &bathacrosstrack,&error);
-				    status = mb_malloc(mbna_verbose,beams_bath*sizeof(double),
-					    &bathalongtrack,&error);
-				    status = mb_malloc(mbna_verbose,beams_amp*sizeof(double),&amp,&error);
-				    status = mb_malloc(mbna_verbose,pixels_ss*sizeof(double),&ss,&error);
-				    status = mb_malloc(mbna_verbose,pixels_ss*sizeof(double),&ssacrosstrack,
-					    &error);
-				    status = mb_malloc(mbna_verbose,pixels_ss*sizeof(double),&ssalongtrack,
-					    &error);
+				    beamflag = NULL;
+				    bath = NULL;
+				    amp = NULL;
+				    bathacrosstrack = NULL;
+				    bathalongtrack = NULL;
+				    ss = NULL;
+				    ssacrosstrack = NULL;
+				    ssalongtrack = NULL;
+				    if (error == MB_ERROR_NO_ERROR)
+					    status = mb_register_array(mbna_verbose, ombio_ptr, MB_MEM_TYPE_BATHYMETRY,
+									    sizeof(char), (void **)&beamflag, &error);
+				    if (error == MB_ERROR_NO_ERROR)
+					    status = mb_register_array(mbna_verbose, ombio_ptr, MB_MEM_TYPE_BATHYMETRY,
+									    sizeof(double), (void **)&bath, &error);
+				    if (error == MB_ERROR_NO_ERROR)
+					    status = mb_register_array(mbna_verbose, ombio_ptr, MB_MEM_TYPE_AMPLITUDE,
+									    sizeof(double), (void **)&amp, &error);
+				    if (error == MB_ERROR_NO_ERROR)
+					    status = mb_register_array(mbna_verbose, ombio_ptr, MB_MEM_TYPE_BATHYMETRY,
+									    sizeof(double), (void **)&bathacrosstrack, &error);
+				    if (error == MB_ERROR_NO_ERROR)
+					    status = mb_register_array(mbna_verbose, ombio_ptr, MB_MEM_TYPE_BATHYMETRY,
+									    sizeof(double), (void **)&bathalongtrack, &error);
+				    if (error == MB_ERROR_NO_ERROR)
+					    status = mb_register_array(mbna_verbose, ombio_ptr, MB_MEM_TYPE_SIDESCAN, 
+									    sizeof(double), (void **)&ss, &error);
+				    if (error == MB_ERROR_NO_ERROR)
+					    status = mb_register_array(mbna_verbose, ombio_ptr, MB_MEM_TYPE_SIDESCAN, 
+									    sizeof(double), (void **)&ssacrosstrack, &error);
+				    if (error == MB_ERROR_NO_ERROR)
+					    status = mb_register_array(mbna_verbose, ombio_ptr, MB_MEM_TYPE_SIDESCAN, 
+									    sizeof(double), (void **)&ssalongtrack, &error);
 		    
 				    /* if error initializing memory then don't read the file */
 				    if (error != MB_ERROR_NO_ERROR)
@@ -2415,14 +2446,6 @@ fprintf(stderr, "\n");
 
 				/* deallocate memory used for data arrays */
 				status = mb_close(mbna_verbose,&ombio_ptr,&error);
-				status = mb_free(mbna_verbose,&beamflag,&error);
-				status = mb_free(mbna_verbose,&bath,&error);
-				status = mb_free(mbna_verbose,&bathacrosstrack,&error);
-				status = mb_free(mbna_verbose,&bathalongtrack,&error);
-				status = mb_free(mbna_verbose,&amp,&error);
-				status = mb_free(mbna_verbose,&ss,&error);
-				status = mb_free(mbna_verbose,&ssacrosstrack,&error);
-				status = mb_free(mbna_verbose,&ssalongtrack,&error);
 				
 				/* now compare coverage masks */
 				for (i=0;i<project.num_files;i++)
@@ -4147,6 +4170,39 @@ int mbnavadjust_section_load(int file_id, int section_id, void **swathraw_ptr, v
 	struct swath *swath;
 	struct mbna_file *file;
 	struct mbna_section *section;
+
+	/* mbio read and write values */
+	void	*imbio_ptr = NULL;
+	void	*ombio_ptr = NULL;
+	void	*istore_ptr = NULL;
+	void	*ostore_ptr = NULL;
+	int	kind;
+	int	time_i[7];
+	double	time_d;
+	double	navlon;
+	double	navlat;
+	double	speed;
+	double	heading;
+	double	distance;
+	double	altitude;
+	double	sonardepth;
+	double	draft;
+	double	roll;
+	double	pitch;
+	double	heave;
+	int	beams_bath;
+	int	beams_amp;
+	int	pixels_ss;
+	char	*beamflag = NULL;
+	double	*bath = NULL;
+	double	*bathacrosstrack = NULL;
+	double	*bathalongtrack = NULL;
+	double	*amp = NULL;
+	double	*ss = NULL;
+	double	*ssacrosstrack = NULL;
+	double	*ssalongtrack = NULL;
+	char	comment[MB_COMMENT_MAXLINE];
+
 	char	path[STRING_MAX];
 	int	iformat;
 	double	tick_len_map, label_hgt_map;
@@ -4187,7 +4243,44 @@ int mbnavadjust_section_load(int file_id, int section_id, void **swathraw_ptr, v
 			fprintf(stderr,"\nMBIO Error returned from function <mb_read_init>:\n%s\n",error_message);
 			fprintf(stderr,"\nSwath sonar File <%s> not initialized for reading\n",path);
 			}
-	
+
+		/* allocate memory for data arrays */
+		if (status == MB_SUCCESS)
+			{
+			if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(mbna_verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							    sizeof(char), (void **)&beamflag, &error);
+			if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(mbna_verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							    sizeof(double), (void **)&bath, &error);
+			if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(mbna_verbose, imbio_ptr, MB_MEM_TYPE_AMPLITUDE,
+							    sizeof(double), (void **)&amp, &error);
+			if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(mbna_verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							    sizeof(double), (void **)&bathacrosstrack, &error);
+			if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(mbna_verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							    sizeof(double), (void **)&bathalongtrack, &error);
+			if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(mbna_verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+							    sizeof(double), (void **)&ss, &error);
+			if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(mbna_verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+							    sizeof(double), (void **)&ssacrosstrack, &error);
+			if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(mbna_verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+							    sizeof(double), (void **)&ssalongtrack, &error);
+
+			/* if error initializing memory then don't read the file */
+			if (error != MB_ERROR_NO_ERROR)
+				{
+				mb_error(mbna_verbose,error,&error_message);
+				fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",
+					error_message);
+				}
+			}
+		
 		/* allocate memory for data arrays */
 		if (status == MB_SUCCESS)
 			{
@@ -4206,18 +4299,11 @@ int mbnavadjust_section_load(int file_id, int section_id, void **swathraw_ptr, v
 			for (i=0;i<swathraw->npings_max;i++)
 				{
 				pingraw = &swathraw->pingraws[i];
+				pingraw->beams_bath = 0;
 				pingraw->beamflag = NULL;
 				pingraw->bath = NULL;
 				pingraw->bathacrosstrack = NULL;
 				pingraw->bathalongtrack = NULL;
-				status = mb_malloc(mbna_verbose, beams_bath * sizeof(char), 
-							&pingraw->beamflag, &error);
-				status = mb_malloc(mbna_verbose, beams_bath * sizeof(double), 
-							&pingraw->bath, &error);
-				status = mb_malloc(mbna_verbose, beams_bath * sizeof(double), 
-							&pingraw->bathacrosstrack, &error);
-				status = mb_malloc(mbna_verbose, beams_bath * sizeof(double), 
-							&pingraw->bathalongtrack, &error);
 				}
 
 			/* initialize contour controls */
@@ -4258,32 +4344,67 @@ int mbnavadjust_section_load(int file_id, int section_id, void **swathraw_ptr, v
 			while (done == MB_NO)
 			    {
 			    /* read the next ping */
-			    pingraw = &swathraw->pingraws[swathraw->npings];
 			    status = mb_get_all(mbna_verbose,imbio_ptr,
-				    &istore_ptr,&kind,
-				    pingraw->time_i, &pingraw->time_d,
-				    &pingraw->navlon, &pingraw->navlat, &speed,
-				    &pingraw->heading, &distance,
-				    &altitude, &sonardepth,
+				    &istore_ptr, &kind, time_i, &time_d, 
+				    &navlon, &navlat, &speed,
+				    &heading, &distance, &altitude, &sonardepth,
 				    &beams_bath, &beams_amp, &pixels_ss,
-				    pingraw->beamflag, pingraw->bath, 
-				    imb_io_ptr->amp,
-				    pingraw->bathacrosstrack, pingraw->bathalongtrack,
-				    imb_io_ptr->ss, 
-				    imb_io_ptr->ss_acrosstrack, 
-				    imb_io_ptr->ss_alongtrack,
+				    beamflag, bath, amp, bathacrosstrack, bathalongtrack,
+				    ss, ssacrosstrack, ssalongtrack,
 				    comment, &error);
 	
 			    /* handle successful read */
 			    if (status == MB_SUCCESS
 				&& kind == MB_DATA_DATA)
 			    	{
-			    	/* update bookkeeping */
+				/* allocate memory for the raw arrays */
+				pingraw = &swathraw->pingraws[swathraw->npings];
+				status = mb_malloc(mbna_verbose, beams_bath * sizeof(char), 
+							&pingraw->beamflag, &error);
+				status = mb_malloc(mbna_verbose, beams_bath * sizeof(double), 
+							&pingraw->bath, &error);
+				status = mb_malloc(mbna_verbose, beams_bath * sizeof(double), 
+							&pingraw->bathacrosstrack, &error);
+				status = mb_malloc(mbna_verbose, beams_bath * sizeof(double), 
+							&pingraw->bathalongtrack, &error);
+			
+				/* make sure enough memory is allocated for contouring arrays */
+		        	ping = &swath->pings[swathraw->npings];
+				if (ping->beams_bath_alloc < beams_bath)
+					{
+					status = mb_realloc(mbna_verbose,beams_bath*sizeof(char),
+							&(ping->beamflag),&error);
+					status = mb_realloc(mbna_verbose,beams_bath*sizeof(double),
+							&(ping->bath),&error);
+					status = mb_realloc(mbna_verbose,beams_bath*sizeof(double),
+							&(ping->bathlon),&error);
+					status = mb_realloc(mbna_verbose,beams_bath*sizeof(double),
+							&(ping->bathlat),&error);
+					ping->beams_bath_alloc = beams_bath;
+					}
+				
+			    	/* copy arrays and update bookkeeping */
 			    	if (error == MB_ERROR_NO_ERROR)
 				    {
 				    swathraw->npings++;
 				    if (swathraw->npings >= swathraw->npings_max)
 				    	done = MB_YES;
+					
+				    for (i=0;i<7;i++)
+				    	pingraw->time_i[i] = time_i[i];
+				    pingraw->time_d = time_d;
+				    pingraw->navlon = navlon;
+				    pingraw->navlat = navlat;
+				    pingraw->heading = heading;
+				    pingraw->draft = draft;
+				    pingraw->beams_bath = beams_bath;
+				    for (i=0;i<beams_bath;i++)
+				    	{
+					pingraw->beamflag[i] = beamflag[i];
+				    	pingraw->bath[i] = bath[i];
+				    	pingraw->bathacrosstrack[i] = bathacrosstrack[i];
+				    	pingraw->bathalongtrack[i] = bathalongtrack[i];
+					}
 				    }
 
 				/* extract all nav values */
@@ -4295,10 +4416,6 @@ int mbnavadjust_section_load(int file_id, int section_id, void **swathraw_ptr, v
 					&roll, &pitch, &heave, 
 					&error);
 
-			    	/* null out any unused beams for formats with
-					variable numbers of beams */
-			    	for (i=beams_bath;i<swathraw->beams_bath;i++)
-				    pingraw->beamflag[i] = MB_FLAG_NULL;
 /*fprintf(stderr, "%d  %4d/%2d/%2d %2d:%2d:%2d.%6.6d  %11.6f %11.6f %d:%d\n",
 status,
 ping->time_i[0],ping->time_i[1],ping->time_i[2],
@@ -4410,7 +4527,8 @@ int mbnavadjust_section_translate(int file_id, void *swathraw_ptr, void *swath_p
 				    &mtodeglon, &mtodeglat);
 		    headingx = sin(ping->heading * DTR);
 		    headingy = cos(ping->heading * DTR);
-		    for (i=0;i<swathraw->beams_bath;i++)
+		    ping->beams_bath = pingraw->beams_bath;
+		    for (i=0;i<ping->beams_bath;i++)
 			{
 			ping->beamflag[i] = pingraw->beamflag[i];
 			if (mb_beam_ok(pingraw->beamflag[i]))
@@ -4642,6 +4760,7 @@ int mbnavadjust_naverr_snavpoints(int ix, int iy)
 	double	x, y, dx, dy, d;
 	struct mbna_crossing *crossing;
 	struct mbna_section *section;
+	double	distance;
 	int	i;
 
  	/* print input debug statements */
@@ -4908,7 +5027,7 @@ mbna_lon_min, mbna_lon_max, mbna_lat_min, mbna_lat_max);*/
 	    	/* loop over all beams */
 	    	for (i=0;i<swath1->npings;i++)
 	    		{
-	    		for (j=0;j<swath1->beams_bath;j++)
+	    		for (j=0;j<swath1->pings[i].beams_bath;j++)
 	    			{
 	    			if (mb_beam_ok(swath1->pings[i].beamflag[j]))
 	    				{
@@ -4933,7 +5052,7 @@ i, j, swath1->pings[i].bathlon[j], swath1->pings[i].bathlat[j], x, y, igx, igy);
 	    	/* loop over all beams */
 	    	for (i=0;i<swath2->npings;i++)
 	    		{
-	    		for (j=0;j<swath2->beams_bath;j++)
+	    		for (j=0;j<swath2->pings[i].beams_bath;j++)
 	    			{
 	    			if (mb_beam_ok(swath2->pings[i].beamflag[j]))
 	    				{
@@ -5723,6 +5842,16 @@ mbnavadjust_invertnav()
 	char	buffer[BUFFER_MAX];
 	int	done, nscan;
 	double	factor;
+	int	time_i[7];
+	double	navlon;
+	double	navlat;
+	double	speed;
+	double	heading;
+	double	distance;
+	double	draft;
+	double	roll;
+	double	pitch;
+	double	heave;
 	int	mbp_heading_mode;
 	double	mbp_headingbias;
 	int	mbp_rollbias_mode;
@@ -5783,16 +5912,19 @@ do_message_on(message);
 				    nseq++;
 				else
 				    nseq = 1;
+				    
+				/* get time difference between current and previous nav point */
+				dtime_d = section->snav_time_d[isnav] - time_d_old;
 				
-				/* add first derivative constraint if nseq > 1 */
-				if (nseq > 1)
+				/* add first derivative constraint if nseq > 1 AND dtime_d > 0.0 */
+				if (nseq > 1 && dtime_d > 0.0)
 				    {
-				    avg_dtime_d += section->snav_time_d[isnav] - time_d_old;
+				    avg_dtime_d += dtime_d;
 				    ndx++;
 				    }
 				
 				/* add second derivative constraint if nseq > 2 */
-				if (nseq > 2)
+				if (nseq > 2 && dtime_d > 0.0)
 				    ndx2++;
 				
 				/* save time_d values */
@@ -5926,6 +6058,7 @@ do_message_on(message);
 				    nseq++;
 				else
 				    nseq = 1;
+				    
 			    	/* if file fixed then fix snav point */
 			    	if (file->status == MBNA_FILE_FIXED)
 				    {
@@ -6049,6 +6182,7 @@ fprintf(stderr, "BAD snav ID: %d %d %d\n", nc1, nc2, nsnav);
 			nia[nr] = 2;
 			nx[2 * nc1]++;
 			nx[2 * nc2]++;
+/*fprintf(stderr,"nr:%d k:%d a1:%g a2:%g d:%d\n", nr,k, a[k],a[k+1],d[nr]);*/
 			nr++;
 			
 			/* make latitude constraint */
@@ -6061,6 +6195,7 @@ fprintf(stderr, "BAD snav ID: %d %d %d\n", nc1, nc2, nsnav);
 			nia[nr] = 2;
 			nx[2 * nc1 + 1]++;
 			nx[2 * nc2 + 1]++;
+/*fprintf(stderr,"nr:%d k:%d a1:%g a2:%g d:%d\n", nr,k, a[k],a[k+1],d[nr]);*/
 			nr++;
 			}
 		    }
@@ -6139,8 +6274,8 @@ fprintf(stderr,"INITIAL SIGMA: sigma_total:%g sigma_crossing:%g\n", sigma_total,
 		    supt = smax + err;
 		    if (sup > supt)
 			supt = sup;
-		    if (mbna_verbose > 1)
-		    fprintf(stderr, "Initial lspeig: %g %g %g %g\n",
+		    if (mbna_verbose > 0)
+		    fprintf(stderr, "Initial lspeig: sup:%g smax:%g err:%g supt:%g\n",
 			sup, smax, err, supt);
 		    ncyc = 16;
 		    for (i=0;i<4;i++)
@@ -6150,8 +6285,8 @@ fprintf(stderr,"INITIAL SIGMA: sigma_total:%g sigma_crossing:%g\n", sigma_total,
 			supt = smax + err;
 			if (sup > supt)
 			    supt = sup;
-			if (mbna_verbose > 1)
-			fprintf(stderr, "lspeig[%d]: %g %g %g %g\n",
+			if (mbna_verbose > 0)
+			fprintf(stderr, "lspeig[%d]: sup:%g smax:%g err:%g supt:%g\n",
 			    i, sup, smax, err, supt);
 			}
 			
@@ -6159,7 +6294,7 @@ fprintf(stderr,"INITIAL SIGMA: sigma_total:%g sigma_crossing:%g\n", sigma_total,
 		    slo = supt / bandwidth;
 		    chebyu(sigma, ncycle, supt, slo, work);
 		    errlsq = errlim(sigma, ncycle, supt, slo);
-		    if (mbna_verbose > 1)
+		    if (mbna_verbose > 0)
 		    fprintf(stderr, "Theoretical error: %f\n", errlsq);
 		    if (mbna_verbose > 1)
 		    for (i=0;i<ncycle;i++)
@@ -6200,7 +6335,8 @@ fprintf(stderr,"INITIAL SIGMA: sigma_total:%g sigma_crossing:%g\n", sigma_total,
 		    if (first == MB_YES)
 			{
 			first = MB_NO;
-			sigma_crossing_first = MAX(sigma_crossing,1e-9);
+			sigma_crossing_first = SIGMA_MINIMUM;
+			sigma_crossing_first = MAX(sigma_crossing, sigma_crossing_first);
 			smoothweight_old = smoothweight;
 			smoothmin = smoothweight;
 			}
