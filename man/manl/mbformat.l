@@ -64,7 +64,7 @@ is the filename with any format specific suffix removed.
 .B \-L
 Causes the format descriptions to be omitted 
 so that only the \fBMBIO\fP format id numbers are listed.
-TP
+.TP
 .B \-V
 Normally, \fBmbformat\fP only prints out format descriptions.  If the
 \fB-V\fP flag is given, then \fBmbformat\fP works in a "verbose" mode and

@@ -1,4 +1,4 @@
-.TH mbdatalist l "1 October 2004" "MB-System 5.0" "MB-System 5.0"
+.TH mbdatalist l "16 September 2005" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbdatalist\fP - parses recursive datalist files and outputs the
 complete list of data files, formats, and file weights.
@@ -203,12 +203,33 @@ If the \fB-V\fP flag is given, then \fBmbinfo\fP works in a "verbose" mode and
 outputs the program version being used.
 .TP
 .B \-Z
-The \fB-Z\fP option causes the program to generate a datalist file
-named "datalistp.mb-1", and then exit. This datalist file has the following form:
+The \fB-Z\fP option causes the program to generate a datalist file that
+will first set a $PROCESSED flag and then reference the input
+file specified using the \fB-I\fP\fIfilename\fP option. 
+The output datalist is named 
+by adding a "p.mb-1" suffix to the root of the input file (the root is
+the portion before any \fBMB-System\fP suffix).
+.br
+By default, the input is assumed to be a datalist named datalist.mb-1, resulting
+in an output datalist named datalistp.mb-1 with the following contents:
 .br
  	$PROCESSED
  	datalist.mb-1 -1
 .br
+If the input file is specified as a datalist like 
+datalist_sslo.mb-1, then the output datalist 
+datalist_sslop.mb-1
+will have the following contents:
+.br
+ 	$PROCESSED
+ 	datalist_sslo.mb-1 -1
+.br
+If the input file is specified as a swath file like 
+20050916122920.mb57, then the output datalist 20050916122920p.mb-1
+will have the following contents:
+.br
+ 	$PROCESSED
+ 	20050916122920.mb57 57
 
 .SH EXAMPLES
 Suppose we have two swath data files from an EM3000 multibeam
