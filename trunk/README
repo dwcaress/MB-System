@@ -182,6 +182,47 @@ the start of each trace or at the seafloor arrival time. The
 user may also set the length of time the gain is applied; 
 samples after the end of the gain window are zeroed.
 
+The method for determining the best altitude value to be used
+in correcting amplitude and sidescan data has been improved
+in programs mbbackangle and mbbprocess.
+
+The program mbgrid once again uses the Zgrid algorithm for 
+thin plate spline interpolation. The code allows for the GMT
+Surface algorithm to be used instead by compiling with a 
+-DUSESURFACE compile flag.
+
+The macros mbm_grdplot and mbm_grd3dplot have been altered so
+that histogram equalization will work even if grdhisteq returns
+a smaller number of valid intervals than requested.
+
+The capability of plotting amplitude vs. grazing angle histograms
+from mbbackangle results has been fixed for sidescan data.
+
+A further significant architectural change was implemented for  release
+5.0.8  in  order  to support data formats that have no explicit maximum
+number of beams or pixels. The memory management of arrays used to hold
+bathymetry,  amplitude,  and  sidescan data has been made dynamic. Now,
+when data records are encountered that include larger numbers of  beams
+or  pixels  than  will  fit  in  the arrays previously allocated, those
+arrays are reallocated to the required size. This is handled  automati-
+cally for all of the internal arrays used by MBIO functions. Of course,
+applications using MBIO must  allocate  arrays  that  are  passed  into
+functions  like  mb_read, mb_get_all, and mb_get to be populated by the
+desired data. In order for these arrays to be managed dynamically,  the
+application  must  first register each array by passing the location of
+the array pointer to a new function called mb_register_array.
+
+The program MBgrdtiff has been altered so that the geoTiff images 
+produced are more generally portable.
+
+A macro called mbm_rolltimelag has been written to analyze attitude 
+time lag. This macro extracts raw attitude and apparent slope values
+from multibeam data, and then calculates the cross correlation between
+roll and apparent slope over a specified range of time lags. If there
+is a an attitude time lag, then the bathymetry collected over a planar
+bottom should be dominated by a jitter that is correlated, with a time
+lag, with the roll signal.
+
 
 MB-SYSTEM VERSION 5.0.7 RELEASE NOTES:
 ------------------------------------------
@@ -1067,10 +1108,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.63 2005-06-15 15:05:42 caress Exp $
+RCS ID: $Id: README,v 5.64 2005-11-05 01:43:16 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.63  2005/06/15 15:05:42  caress
+Some new fixes noted.
+
 Revision 5.62  2005/06/04 03:32:27  caress
 Updates during 5.0.8 development.
 

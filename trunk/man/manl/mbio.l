@@ -35,12 +35,12 @@ location for the amplitude.  Sidescan is generally constructed with
 a higher spatial resolution than bathymetry, and carries its
 own location parameters.  In the context of \fBMB-System\fP documentation,
 the discrete values of bathymetry and amplitude are referred 
-to as "beams", and the discrete values of
-sidescan are referred to as "pixels". An additional difference
-between "beam" and "pixel" data involves data flagging. An array
-of "beamflags" is carried by \fBMBIO\fP functions which allows
-the bathymetry (and by extension the amplitude) data to be flagged
-as bad. The details of the beamflagging scheme are presented below.
+to as "beams", and the discrete values of sidescan are referred to 
+as "pixels". An additional difference between "beam" and "pixel" 
+data involves data flagging. An array of "beamflags" is carried by 
+\fBMBIO\fP functions which allows the bathymetry (and by extension 
+the amplitude) data to be flagged as bad. The details of the 
+beamflagging scheme are presented below.
 
 .SH VERSION 5 CHANGES
 This document describes version 5 releases of \fBMBIO\fP. 
@@ -52,6 +52,22 @@ Most of the changes are internal, but two  function calls have
 disappeared (\fBmb_put()\fP and \fBmb_write()\fP), and a 
 number of new functions have been added.
 
+A further significant architectural change was implemented for
+release 5.0.8 in order to support data formats that have no
+explicit maximum number of beams or pixels. The memory management
+of arrays used to hold bathymetry, amplitude, and sidescan data
+has been made dynamic. Now, when data records are encountered that
+include larger numbers of beams or pixels than will fit in the
+arrays previously allocated, those arrays are reallocated to
+the required size. This is handled automatically for all of the
+internal arrays used by \fBMBIO\fP functions. Of course, 
+applications using \fBMBIO\fP must allocate arrays that are 
+passed into functions like \fBmb_read\fP, \fBmb_get_all\fP, and
+\fBmb_get\fP to be populated by the desired data. In order for
+these arrays to be managed dynamically, the application must 
+first register each array by passing the location of the array
+pointer to a new function called \fBmb_register_array\fP.
+
 .SH OVERVIEW
 \fBMBIO\fP opens and initializes sonar data files for reading
 and writing using the functions \fBmb_read_init\fP and \fBmb_write_init\fP,
@@ -59,11 +75,26 @@ respectively.  These functions return a pointer to a data structure
 including all relevent information about the opened file, the
 control parameters which determine how data is read or written,
 and the arrays used for processing the data as it is read or written.
-This pointer is then passed to
-the functions used for reading or writing.  There is no limit
-on the number of files which may be opened for reading or writing
-at any given time in a program.  Data files are closed using the
-function \fBmb_close\fP.
+This pointer is then passed to the functions used for reading or 
+writing.  There is no limit on the number of files which may be 
+opened for reading or writing at any given time in a program.  
+
+The \fBmb_read_init\fP and \fBmb_write_init\fP functions also return
+initial maximum numbers of bathymetry beams, amplitude beams,
+and sidescan pixels that can be used to allocate data storage
+arrays of the appropriate sizes. However, for some data formats
+there are no specified maximum numbers of beams and pixels, and
+so in general the required dimensions may increase as data are
+read. Applications must pass appropriately dimensioned arrays
+into data extraction routines such as \fBmb_read\fP, \fBmb_get\fP,
+and \fBmb_get_all\fP. In order to enable dynamic memory management
+of thse application arrays, the application must first register
+each array by passing the array pointer location to the function
+\fBmb_register_array\fP.
+
+Data files are closed using the function \fBmb_close\fP. All
+internal and registered arrays are deallocated as part of closing
+the file.
 
 When it comes to actually reading and writing swath mapping
 sonar data, \fBMBIO\fP has three levels of i/o functionality:
@@ -111,7 +142,6 @@ sonar data, \fBMBIO\fP has three levels of i/o functionality:
  			\fBmb_copyrecord()\fP
  	3:	Buffered reading and writing of data structures 
  		containing all of the available information. 
- 		This capability is useful for applications 
  		The primary functions are:
  			\fBmb_buffer_init()\fP
  			\fBmb_buffer_close()\fP
@@ -135,21 +165,19 @@ such as graphics which require only the navigation and the depth
 and/or backscatter values. 
 
 The level 2 functions (\fBmb_get_all()\fP and
-\fBmb_put_all()\fP) read and write the 
-complete data structures, translate the data to internal data structures
+\fBmb_put_all()\fP) read and write the complete data 
+structures, translate the data to internal data structures
 associated with each of the supported sonar systems, and 
 pass pointers to these internal data structures. Additional
-functions allow a variety of information to be 
-extracted from or inserted into
-the data structures (e.g. mb_extract() and mb_insert()). Additional
-information may be accessed using special include files to 
-decode the data structures. The great majority of processing
-programs use level 2 functions.
+functions allow a variety of information to be extracted 
+from or inserted into the data structures (e.g. mb_extract() 
+and mb_insert()). Additional information may be accessed 
+using special include files to  decode the data structures. 
+The great majority of processing programs use level 2 functions.
 
 The level 3 functions provide buffered reading and 
-writing which is useful for applications which generate
-output files and need access to multiple pings 
-at a time.  In addition to reading
+writing which is useful for applications that generate
+output files and need access to multiple pings at a time.  In addition to reading
 (\fBmb_buffer_load()\fP) and writing (\fBmb_buffer_dump()\fP), functions
 exist for extracting information from the buffer (\fBmb_buffer_extract()\fP)
 and inserting information into the buffer (\fBmb_buffer_insert()\fP).
@@ -423,8 +451,9 @@ The following swath mapping sonar data formats are supported in this version of
     MBIO Data Format ID:  75
     Format name:          MBF_MBNETCDF
     Informal Description: CARAIBES CDF multibeam
-    Attributes:           Data from all sonar systems, bathymetry only, 
-                          variable beams, netCDF, IFREMER.
+    Attributes:           Data from all sonar systems,  
+                          bathymetry only, variable 
+                          beams, netCDF, IFREMER.
     
     MBIO Data Format ID:  81
     Format name:          MBF_CBAT9001
@@ -449,6 +478,23 @@ The following swath mapping sonar data formats are supported in this version of
     Attributes:           101 beam bathymetry, 
                           ASCII, read-only, Coastal  
                           Oceanographics.
+
+    MBIO Data Format ID:  84
+    Format name:          MBF_XTFR8101
+    Informal Description: XTF format Reson SeaBat 81XX
+    Attributes:           240 beam bathymetry and amplitude,
+                          1024 pixel sidescan
+                          binary, read-only,
+                          Triton-Elics.
+
+    MBIO Data Format ID:  88
+    Format name:          MBF_RESON7KR
+    Informal Description: Reson 7K multibeam vendor format
+    Attributes:           Reson 7K series multibeam sonars, 
+                          bathymetry, amplitude, three 
+                          channels sidescan, and subbottom
+                          up to 254 beams, variable pixels, 
+                          binary, Reson.
     
     MBIO Data Format ID:  91
     Format name:          MBF_BCHRTUNB
@@ -529,6 +575,25 @@ The following swath mapping sonar data formats are supported in this version of
     Attributes:           variable pixels,  sidescan, 
                           binary TIFF variant,  
                           single files, Sea Scan. 
+
+    MBIO Data Format ID:  132
+    Format name:          MBF_EDGJSTAR
+    Informal Description: Edgetech Jstar format
+    Attributes:           variable pixels, dual frequency 
+                          sidescan and subbottom,
+                          binary SEGY variant, single files,
+                          low frequency sidescan returned as
+                          survey data, Edgetech. 
+
+    MBIO Data Format ID:  133
+    Format name:          MBF_EDGJSTR2
+    Informal Description: Edgetech Jstar format
+    Attributes:           variable pixels, dual frequency 
+                          sidescan and subbottom,
+                          binary SEGY variant, single files,
+                          high frequency sidescan returned as
+                          survey data, Edgetech. 
+
     
     MBIO Data Format ID:  141
     Format name:          MBF_OICGEODA
@@ -596,6 +661,18 @@ The following swath mapping sonar data formats are supported in this version of
     Format name:          MBF_MBNETCDF
     Informal Description: CARAIBES CDF navigation
     Attributes:           netCDF, IFREMER.
+
+    MBIO Data Format ID:  168
+    Format name:          MBF_ASCIIXYT
+    Informal Description: Generic XYT sounding format
+    Attributes:           XYT (lon lat topography) ASCII 
+                          soundings, generic
+
+    MBIO Data Format ID:  169
+    Format name:          MBF_ASCIIYXT
+    Informal Description: Generic YXT sounding format
+    Attributes:           YXT (lat lon topograpy) ASCII 
+                          soundings, generic
     
     MBIO Data Format ID:  171
     Format name:          MBF_HS10JAMS
@@ -617,7 +694,7 @@ The following swath mapping sonar data formats are supported in this version of
     Attributes:           STN Atlas multibeam sonars, 
     			  Hydrosweep DS2, Hydrosweep MD, 
     			  Fansweep 10, Fansweep 20, 
-			  bathymetry, amplitude, and sidescan,
+    			  bathymetry, amplitude, and sidescan,
     			  up to 1440 beams and 4096 pixels,
     			  XDR binary, STN Atlas.
     
@@ -851,17 +928,29 @@ The structure pointed to by
 which govern how the data is read; this pointer must be provided to
 the functions \fBmb_read\fP, \fBmb_get\fP, \fBmb_get_all\fP, 
 or \fBmb_buffer_load\fP to read data. The values \fIbeams_bath\fP,
-\fIbeams_amp\fP, and \fIpixels_ss\fP return the maximum number 
+\fIbeams_amp\fP, and \fIpixels_ss\fP return initial estimates of the maximum number 
 of bathymetry and amplitude beams and sidescan pixels, respectively,
-that the specified data format may contain.  In general, \fIbeams_amp\fP
-will either be zero or equal to \fIbeams_bath\fP.  In order to successfully
-read data, the calling program must
-provide pointers to arrays large enough to hold \fIbeams_bath\fP bathymetry
-values, \fIbeams_amp\fP amplitude values, and \fIpixels_ss\fP sidescan
-values. The values \fIbtime_d\fP
+that the specified data format may contain. In general, \fIbeams_amp\fP
+will either be zero or equal to \fIbeams_bath\fP. The values \fIbtime_d\fP
 and \fIetime_d\fP give the desired beginning and end times of the data
 converted to seconds since 00:00:00 on January 1, 1970;
 \fBMBIO\fP uses these units to calculate time internally.
+
+For most data formats, the initial maximum beam and pixel dimensions will not change. 
+However, a few formats support both variable and arbitrarily large numbers
+of beams and/or pixels, and so applications must be capable of handling
+dynamic changes in the numbers of beams and pixels. The arrays allocated 
+internally in the \fImbio_ptr\fP structure are automatically increased
+when necessary. However, in order to successfully extract 
+swath data using \fImb_get\fP, \fImb_get_all\fP, \fImb_read\fP, or
+\fImb_extract\fP, an application must also
+provide pointers to arrays large enough to hold the current maximum numbers
+of bathymetry beams, amplitude beams, and sidescan pixels. The function
+\fImb_register_ioarray\fP allows applications to register array pointers
+so that these arrays are also dynamically allocated by \fIMBIO\fP. Registered
+arrays will be managed as data are read and then freed when \fBmb_close\fP
+is called.
+
 A status value indicating success or failure is returned; an error value
 argument passes more detailed information about initialization failures. 
 
@@ -905,8 +994,50 @@ write data, the calling program must
 provide pointers to arrays large enough to hold \fIbeams_bath\fP bathymetry
 values, \fIbeams_amp\fP amplitude values, and \fIpixels_ss\fP sidescan
 values. 
+
+For most data formats, the initial maximum beam and pixel dimensions will not change. 
+However, a few formats support both variable and arbitrarily large numbers
+of beams and/or pixels, and so applications must be capable of handling
+dynamic changes in the numbers of beams and pixels. The arrays allocated 
+internally in the \fImbio_ptr\fP structure are automatically increased
+when necessary. However, in order to successfully insert modified 
+swath data using \fImb_put\fP, \fImb_put_all\fP, or
+\fImb_insert\fP, an application must also
+provide pointers to arrays large enough to hold the current maximum numbers
+of bathymetry beams, amplitude beams, and sidescan pixels. The function
+\fImb_register_ioarray\fP allows applications to register array pointers
+so that these arrays are also dynamically allocated by \fIMBIO\fP. Registered
+arrays will be managed as data are read and written and then freed when \fBmb_close\fP
+is called.
+
 A status value indicating success or failure is returned; an error value
 argument passes more detailed information about initialization failures. 
+
+---------------------------------------------------------
+.br
+int \fBmb_register_array\fP(
+ 		int \fIverbose\fP, 
+ 		void *\fImbio_ptr\fP, 
+ 		int \fItype\fP, 
+ 		int \fIsize\fP, 
+ 		void **\fIhandle\fP, 
+ 		int \fI*error\fP)
+
+Registers an array pointer *\fIhandle\fP so that the size of
+the allocated array can be managed dynamically by \fBMBIO\fP.
+Note that the location \fI**\fIhandle\fP of the array 
+pointer must be supplied, not the pointer value *\fIhandle\fP.
+The pointer value *\fIhandle\fP should initially be NULL.  
+The \fItype\fP value indicates whether this
+array is to be dimensioned according to the maximum number of
+bathymetry beams (\fItype\fP = 1), amplitude beams (\fItype\fP = 2), 
+or sidescan pixels (\fItype\fP = 3). The \fIsize\fP
+value indicates the size of each element array in bytes (e.g. a char
+array has \fIsize\fP = 1, a short array has \fIsize\fP = 2, an
+int array or a float array have \fIsize\fP = 4, and a double array
+has \fIsize\fP = 8). The array is associated with the \fBMBIO\fP
+descriptor \fImbio_ptr\fP, and is freed when \fImb_close\fP is
+called for this particular \fImbio_ptr\fP.
 
 ---------------------------------------------------------
 .br
@@ -916,11 +1047,12 @@ int \fBmb_close\fP(
  		int \fI*error\fP)
 
 Closes the data file listed in the \fBMBIO\fP descriptor pointed to 
-by \fImbio_ptr\fP and releases all specially allocated memory.  
-The \fIverbose\fP
-value controls the standard error output verbosity of the function.
-A status value indicating success or failure is returned; an error value
-argument passes more detailed information about failures. 
+by \fImbio_ptr\fP and releases all specially allocated memory,
+including all application arrays registered using \fBmb_register_array\fP..  
+The \fIverbose\fP value controls the standard error output verbosity 
+of the function. A status value indicating success or failure is 
+returned; an error value argument passes more detailed information 
+about failures. 
 .SH LEVEL 1 FUNCTIONS
 
 ---------------------------------------------------------
