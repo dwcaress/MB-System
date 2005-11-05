@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_site.c	9/25/2003
- *    $Id: mbview_site.c,v 5.4 2005-02-18 07:32:55 caress Exp $
+ *    $Id: mbview_site.c,v 5.5 2005-11-05 01:11:47 caress Exp $
  *
  *    Copyright (c) 2003, 2004, 2005 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  *		begun on October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2005/02/18 07:32:55  caress
+ * Fixed nav display and button sensitivity.
+ *
  * Revision 5.3  2005/02/08 22:37:43  caress
  * Heading towards 5.0.6 release.
  *
@@ -82,16 +85,16 @@ extern int	mbv_verbose;
 extern int	mbv_ninstance;
 extern Widget	parent_widget;
 extern XtAppContext	app_context;
-extern char	value_text[MB_PATH_MAXLINE];
 extern struct mbview_world_struct mbviews[MBV_MAX_WINDOWS];
 extern char	*mbsystem_library_name;
 
 /* local variables */
-Cardinal 	ac = 0;
-Arg      	args[256];
-char	value_string[MB_PATH_MAXLINE];
+static Cardinal 	ac = 0;
+static Arg      	args[256];
+static char	value_string[MB_PATH_MAXLINE];
+static char	value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_site.c,v 5.4 2005-02-18 07:32:55 caress Exp $";
+static char rcs_id[]="$Id: mbview_site.c,v 5.5 2005-11-05 01:11:47 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_getsitecount(int verbose, int instance,
@@ -1369,7 +1372,8 @@ int mbview_updatesitelist()
 			for (isite=0;isite<shared.shareddata.nsite;isite++)
 				{
 				/* add list item for each site */
-				mbview_setlonlatstrings(shared.shareddata.sites[isite].point.xlon, 
+				mbview_setlonlatstrings(shared.lonlatstyle, 
+							shared.shareddata.sites[isite].point.xlon, 
 							shared.shareddata.sites[isite].point.ylat, 
 							lonstr0, latstr0);
 				sprintf(value_string,"%3d | %s | %s | %.3f | %s | %d | %s", 

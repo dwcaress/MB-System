@@ -40,7 +40,8 @@ names = case_sensitive
 !(BX) bx_info("c_makefile", "mbgrdviz_makefile-c", true)
 !(BX) bx_info("c_imakefile", "mbgrdviz_Imakefile", true)
 !(BX) bx_info("c_dirpath", "")
-!(BX) bx_info("include_path", ".", false)
+!(BX) bx_info("include_path", "./sandbox/mbsystem/src/mbview",
+!(BX)		".", false)
 !(BX) bx_info("xrunner_command", "$(M_ROOT)/arch/X11.5/Xm1.2/mic_xm.o", false)
 !(BX) bx_info("purify_command", "purify", false)
 !(BX) bx_info("system_directory", "/opt/bx-6.1")
@@ -55,6 +56,11 @@ names = case_sensitive
 !(BX) bx_info("integrate_xrunner", "false")
 
 procedure BxGlobalWidgetId;
+identifier BXG_pushButton_realtime_resume;
+identifier BXG_pushButton_realtime_pause;
+identifier BXG_pushButton_realtime_stop;
+identifier BXG_pushButton_realtime_start;
+identifier BXG_pushButton_realtime_setup;
 identifier BXG_pushButton_saveroute;
 identifier BXG_pushButton_savesite;
 identifier BXG_pushButton_openswath;
@@ -70,6 +76,8 @@ identifier BXG_spinText_arearoute_color;
 identifier BXG_spinBox_arearoute_color;
 identifier BXG_spinText_arearoute_crosslines;
 identifier BXG_spinBox_arearoute_crosslines;
+identifier BXG_label_arearoute_depth;
+identifier BXG_label_arearoute_altitude;
 identifier BXG_spinText_arearoute_altitude;
 identifier BXG_spinBox_arearoute_altitude;
 identifier BXG_spinText_arearoute_depth;
@@ -78,6 +86,8 @@ identifier BXG_spinText_arearoute_direction;
 identifier BXG_spinBox_arearoute_direction;
 identifier BXG_spinText_arearoute_swathwidth;
 identifier BXG_spinBox_arearoute_swathwidth;
+identifier BXG_label_arearoute_swathwidth;
+identifier BXG_label_arearoute_platform;
 identifier BXG_spinText_arearoute_platform;
 identifier BXG_spinBox_arearoute_platform;
 identifier BXG_spinText_arearoute_linespacing;
@@ -87,8 +97,18 @@ identifier BXG_spinBox_arearoute_interleaving;
 identifier BXG_label_arearoute_info;
 identifier BXG_spinText_arearoute_linecontrol;
 identifier BXG_spinBox_arearoute_linecontrol;
+identifier BXG_label_arearoute_linespacing;
 identifier BXG_pushButton_arearoute_ok;
 identifier BXG_bulletinBoard_arearoute;
+identifier BXG_label_realtimesetup_teststatus;
+identifier BXG_toggleButton_realtimesetup_pointer;
+identifier BXG_toggleButton_realtimesetup_recent;
+identifier BXG_radioBox_realtimesetup_pathmode;
+identifier BXG_spinText_realtimesetup_icon;
+identifier BXG_pushButton_realtimesetup_pathbrowse;
+identifier BXG_pushButton_realtimesetup_pathtest;
+identifier BXG_scale_realtimesetup_update;
+identifier BXG_textField_realtimesetup_path;
 procedure BxExitCB(integer);
 procedure BxManageCB(string);
 procedure BxUnmanageCB(string);
@@ -107,6 +127,15 @@ procedure do_mbgrdviz_fileSelectionBox_savesite();
 procedure do_mbgrdviz_generate_survey();
 procedure do_mbgrdviz_openfile();
 procedure do_mbgrdviz_quit();
+procedure do_mbgrdviz_realtime_pause();
+procedure do_mbgrdviz_realtime_resume();
+procedure do_mbgrdviz_realtime_start();
+procedure do_mbgrdviz_realtime_stop();
+procedure do_mbgrdviz_realtimesetup_icon();
+procedure do_mbgrdviz_realtimesetup_path_browse();
+procedure do_mbgrdviz_realtimesetup_path_test();
+procedure do_mbgrdviz_realtimesetup_pathmode();
+procedure do_mbgrdviz_realtimesetup_updaterate();
 
 list BaseStyle : arguments {
 };
@@ -131,6 +160,518 @@ list Style_useReasons : callbacks {
 !(BX)    handlers BaseStyleHandlers;
 !(BX)};
 
+
+object label_realtimesetup_path : XmLabel widget {
+    arguments {
+        arguments Style_use;
+        XmNalignment = XmALIGNMENT_CENTER;
+        XmNlabelString = compound_string("Realtime Nav Source Path:");
+        XmNrightAttachment = XmATTACH_FORM;
+        XmNleftAttachment = XmATTACH_FORM;
+        XmNleftOffset = 10;
+        XmNrightOffset = 16;
+        XmNtopOffset = 10;
+        XmNx = 10;
+        XmNy = 10;
+        XmNwidth = 471;
+        XmNheight = 40;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object textField_realtimesetup_path : XmTextField widget {
+    arguments {
+        arguments Style_use;
+        XmNtopAttachment = XmATTACH_FORM;
+        XmNrightAttachment = XmATTACH_FORM;
+        XmNleftAttachment = XmATTACH_FORM;
+        XmNbottomAttachment = XmATTACH_NONE;
+        XmNleftOffset = 10;
+        XmNrightOffset = 11;
+        XmNtopOffset = 50;
+        XmNx = 10;
+        XmNy = 50;
+        XmNwidth = 476;
+        XmNheight = 40;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_textField_realtimesetup_path);
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object separator4 : XmSeparator widget {
+    arguments {
+        XmNtopAttachment = XmATTACH_WIDGET;
+        XmNrightAttachment = XmATTACH_FORM;
+        XmNleftAttachment = XmATTACH_FORM;
+        XmNbottomAttachment = XmATTACH_NONE;
+        XmNbottomOffset = 0;
+        XmNleftOffset = 10;
+        XmNrightOffset = 11;
+        XmNtopOffset = 0;
+        XmNtopWidget = XmLabel label_realtimesetup_teststatus;
+        XmNx = 10;
+        XmNy = 222;
+        XmNwidth = 476;
+        XmNheight = 20;
+    };
+    controls {
+    };
+    callbacks {
+    };
+};
+
+object label_realtimesetup_update : XmLabel widget {
+    arguments {
+        arguments Style_use;
+        XmNalignment = XmALIGNMENT_CENTER;
+        XmNlabelString = compound_string("Display Update Rate:");
+        XmNtopAttachment = XmATTACH_WIDGET;
+        XmNrightAttachment = XmATTACH_FORM;
+        XmNleftAttachment = XmATTACH_FORM;
+        XmNbottomAttachment = XmATTACH_NONE;
+        XmNbottomOffset = 0;
+        XmNleftOffset = 10;
+        XmNrightOffset = 11;
+        XmNtopOffset = 0;
+        XmNtopWidget = XmSeparator separator4;
+        XmNx = 10;
+        XmNy = 242;
+        XmNwidth = 476;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object scale_realtimesetup_update : XmScale widget {
+    arguments {
+        arguments Style_use;
+        XmNvalue = 1;
+        XmNtitleString = compound_string("Data read before update");
+        XmNmaximum = 25;
+        XmNshowArrows = TRUE;
+        XmNshowValue = TRUE;
+        XmNorientation = XmHORIZONTAL;
+        XmNtopAttachment = XmATTACH_WIDGET;
+        XmNrightAttachment = XmATTACH_FORM;
+        XmNleftAttachment = XmATTACH_FORM;
+        XmNbottomAttachment = XmATTACH_NONE;
+        XmNbottomOffset = 0;
+        XmNleftOffset = 10;
+        XmNrightOffset = 11;
+        XmNtopOffset = 0;
+        XmNtopWidget = XmLabel label_realtimesetup_update;
+        XmNx = 10;
+        XmNy = 272;
+        XmNwidth = 476;
+        XmNheight = 63;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_scale_realtimesetup_update);
+        XmNvalueChangedCallback = procedure do_mbgrdviz_realtimesetup_updaterate();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object separator5 : XmSeparator widget {
+    arguments {
+        XmNtopAttachment = XmATTACH_WIDGET;
+        XmNrightAttachment = XmATTACH_FORM;
+        XmNleftAttachment = XmATTACH_FORM;
+        XmNbottomAttachment = XmATTACH_NONE;
+        XmNbottomOffset = 0;
+        XmNleftOffset = 10;
+        XmNrightOffset = 11;
+        XmNtopOffset = 7;
+        XmNtopWidget = XmScale scale_realtimesetup_update;
+        XmNx = 10;
+        XmNy = 342;
+        XmNwidth = 476;
+        XmNheight = 20;
+    };
+    controls {
+    };
+    callbacks {
+    };
+};
+
+object pushButton_realtimesetup_pathtest : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Test");
+        XmNtopAttachment = XmATTACH_FORM;
+        XmNrightAttachment = XmATTACH_NONE;
+        XmNleftAttachment = XmATTACH_WIDGET;
+        XmNbottomAttachment = XmATTACH_NONE;
+        XmNbottomOffset = 0;
+        XmNleftOffset = 8;
+        XmNrightOffset = 0;
+        XmNtopOffset = 100;
+        XmNleftWidget = XmPushButton pushButton_realtimesetup_pathbrowse;
+        XmNx = 110;
+        XmNy = 100;
+        XmNwidth = 92;
+        XmNheight = 52;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_realtimesetup_pathtest);
+        XmNactivateCallback = procedure do_mbgrdviz_realtimesetup_path_test();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object pushButton_realtimesetup_pathbrowse : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Browse");
+        XmNtopAttachment = XmATTACH_FORM;
+        XmNrightAttachment = XmATTACH_NONE;
+        XmNleftAttachment = XmATTACH_FORM;
+        XmNbottomAttachment = XmATTACH_NONE;
+        XmNbottomOffset = 0;
+        XmNleftOffset = 10;
+        XmNrightOffset = 0;
+        XmNtopOffset = 100;
+        XmNx = 10;
+        XmNy = 100;
+        XmNwidth = 92;
+        XmNheight = 52;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_realtimesetup_pathbrowse);
+        XmNactivateCallback = procedure do_mbgrdviz_realtimesetup_path_browse();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object label_realtime_setup_icon : XmLabel widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Realtime Display Icon:");
+        XmNtopAttachment = XmATTACH_WIDGET;
+        XmNrightAttachment = XmATTACH_FORM;
+        XmNleftAttachment = XmATTACH_FORM;
+        XmNbottomAttachment = XmATTACH_NONE;
+        XmNbottomOffset = 0;
+        XmNleftOffset = 10;
+        XmNrightOffset = 7;
+        XmNtopOffset = 0;
+        XmNtopWidget = XmSeparator separator5;
+        XmNx = 10;
+        XmNy = 362;
+        XmNwidth = 480;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object spinText_realtimesetup_icon : XmTextField widget {
+    arguments {
+        arguments Style_use;
+        XmNeditable = false;
+        XmNx = 2;
+        XmNy = 5;
+        XmNwidth = 410;
+        XmNheight = 40;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_spinText_realtimesetup_icon);
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object spinBox_realtimesetup_icon : XmSpinBox widget {
+    arguments {
+        arguments Style_use;
+        XmNtopAttachment = XmATTACH_WIDGET;
+        XmNrightAttachment = XmATTACH_FORM;
+        XmNleftAttachment = XmATTACH_FORM;
+        XmNbottomAttachment = XmATTACH_NONE;
+        XmNbottomOffset = 0;
+        XmNleftOffset = 10;
+        XmNrightOffset = 7;
+        XmNtopOffset = 0;
+        XmNtopWidget = XmLabel label_realtime_setup_icon;
+        XmNx = 10;
+        XmNy = 392;
+        XmNwidth = 480;
+        XmNheight = 50;
+    };
+    controls {
+         managed XmTextField spinText_realtimesetup_icon;
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        XmNvalueChangedCallback = procedure do_mbgrdviz_realtimesetup_icon();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object separator6 : XmSeparator widget {
+    arguments {
+        XmNtopAttachment = XmATTACH_WIDGET;
+        XmNleftAttachment = XmATTACH_FORM;
+        XmNbottomAttachment = XmATTACH_NONE;
+        XmNbottomOffset = 0;
+        XmNleftOffset = 10;
+        XmNtopOffset = 0;
+        XmNtopWidget = XmSpinBox spinBox_realtimesetup_icon;
+        XmNx = 10;
+        XmNy = 442;
+        XmNwidth = 476;
+        XmNheight = 20;
+    };
+    controls {
+    };
+    callbacks {
+    };
+};
+
+object pushButton_realtimesetup_dismiss : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Dismiss");
+        XmNtopAttachment = XmATTACH_WIDGET;
+        XmNrightAttachment = XmATTACH_FORM;
+        XmNleftAttachment = XmATTACH_FORM;
+        XmNbottomAttachment = XmATTACH_NONE;
+        XmNbottomOffset = 0;
+        XmNleftOffset = 200;
+        XmNrightOffset = 197;
+        XmNtopOffset = 9;
+        XmNtopWidget = XmSeparator separator6;
+        XmNx = 200;
+        XmNy = 471;
+        XmNwidth = 100;
+        XmNheight = 52;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        XmNactivateCallback = procedure BxUnmanageCB("form_realtime_setup");
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object toggleButton : XmToggleButton widget {
+    arguments {
+        XmNx = -700;
+        XmNy = -200;
+        XmNwidth = 100;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+    };
+};
+
+object toggleButton_realtimesetup_recent : XmToggleButton widget {
+    arguments {
+        arguments Style_use;
+        XmNalignment = XmALIGNMENT_BEGINNING;
+        XmNlabelString = compound_string("Most Recent File in Directory");
+        XmNwidth = 231;
+        XmNheight = 28;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_toggleButton_realtimesetup_recent);
+        XmNvalueChangedCallback = procedure do_mbgrdviz_realtimesetup_pathmode();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object toggleButton_realtimesetup_pointer : XmToggleButton widget {
+    arguments {
+        arguments Style_use;
+        XmNalignment = XmALIGNMENT_BEGINNING;
+        XmNlabelString = compound_string("Use Pointer File");
+        XmNwidth = 231;
+        XmNheight = 28;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_toggleButton_realtimesetup_pointer);
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object radioBox_realtimesetup_pathmode : XmRadioBox widget {
+    arguments {
+        arguments Style_use;
+        XmNtopAttachment = XmATTACH_WIDGET;
+        XmNrightAttachment = XmATTACH_FORM;
+        XmNleftAttachment = XmATTACH_WIDGET;
+        XmNbottomAttachment = XmATTACH_NONE;
+        XmNbottomOffset = 0;
+        XmNleftOffset = 8;
+        XmNrightOffset = 50;
+        XmNtopOffset = 2;
+        XmNleftWidget = XmPushButton pushButton_realtimesetup_pathtest;
+        XmNtopWidget = XmTextField textField_realtimesetup_path;
+        XmNx = 210;
+        XmNy = 92;
+        XmNwidth = 237;
+        XmNheight = 65;
+    };
+    controls {
+         managed XmToggleButton toggleButton_realtimesetup_recent;
+         managed XmToggleButton toggleButton_realtimesetup_pointer;
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_radioBox_realtimesetup_pathmode);
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object label_realtimesetup_teststatus : XmLabel widget {
+    arguments {
+        arguments Style_use;
+        XmNalignment = XmALIGNMENT_BEGINNING;
+        XmNlabelString = compound_string("Test Status: No realtime data av" &
+ "ailable", separate=true) &
+ compound_string("Path: Unknown");
+        XmNtopAttachment = XmATTACH_WIDGET;
+        XmNrightAttachment = XmATTACH_FORM;
+        XmNleftAttachment = XmATTACH_FORM;
+        XmNbottomAttachment = XmATTACH_NONE;
+        XmNbottomOffset = 0;
+        XmNleftOffset = 10;
+        XmNrightOffset = 7;
+        XmNtopOffset = 72;
+        XmNtopWidget = XmTextField textField_realtimesetup_path;
+        XmNx = 10;
+        XmNy = 162;
+        XmNwidth = 480;
+        XmNheight = 60;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_label_realtimesetup_teststatus);
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object form_realtime_setup : XmFormDialog widget {
+    arguments {
+        arguments Style_use;
+        XmNautoUnmanage = false;
+        XmNresizePolicy = XmRESIZE_GROW;
+        XmNx = 307;
+        XmNy = 216;
+        XmNwidth = 497;
+        XmNheight = 540;
+    };
+    controls {
+         managed XmLabel label_realtimesetup_teststatus;
+         managed XmRadioBox radioBox_realtimesetup_pathmode;
+         managed XmToggleButton toggleButton;
+         managed XmPushButton pushButton_realtimesetup_dismiss;
+         managed XmSeparator separator6;
+         managed XmSpinBox spinBox_realtimesetup_icon;
+         managed XmLabel label_realtime_setup_icon;
+         managed XmPushButton pushButton_realtimesetup_pathbrowse;
+         managed XmPushButton pushButton_realtimesetup_pathtest;
+         managed XmSeparator separator5;
+         managed XmScale scale_realtimesetup_update;
+         managed XmLabel label_realtimesetup_update;
+         managed XmSeparator separator4;
+         managed XmTextField textField_realtimesetup_path;
+         managed XmLabel label_realtimesetup_path;
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+!(BX)object dialogShell_realtimesetup : XmDialogShell widget {
+!(BX)    arguments {
+!(BX)        arguments Style_use;
+!(BX)        XmNtitle = "Realtime Setup";
+!(BX)        XmNwidth = 497;
+!(BX)        XmNheight = 540;
+!(BX)    };
+!(BX)    controls {
+!(BX)         managed XmFormDialog form_realtime_setup;
+!(BX)    };
+!(BX)    callbacks {
+!(BX)        callbacks Style_useReasons;
+!(BX)    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+!(BX)};
 
 object pushButton_arearoute_dismiss : XmPushButton widget {
     arguments {
@@ -181,8 +722,8 @@ object label_arearoute_linespacing : XmLabel widget {
         arguments Style_use;
         XmNalignment = XmALIGNMENT_BEGINNING;
         XmNlabelString = compound_string("Line Spacing (m):");
-        XmNx = 10;
-        XmNy = 320;
+        XmNx = 240;
+        XmNy = 160;
         XmNwidth = 140;
         XmNheight = 30;
     };
@@ -190,6 +731,7 @@ object label_arearoute_linespacing : XmLabel widget {
     };
     callbacks {
         callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_label_arearoute_linespacing);
     };
 !(BX)    handlers {
 !(BX)        handlers Style_useHandlers;
@@ -219,6 +761,7 @@ object label_arearoute_linecontrol : XmLabel widget {
 object spinText_arearoute_linecontrol : XmTextField widget {
     arguments {
         arguments Style_use;
+        XmNcursorPositionVisible = false;
         XmNvalue = "";
         XmNeditable = false;
         XmNnumValues = 0;
@@ -226,8 +769,9 @@ object spinText_arearoute_linecontrol : XmTextField widget {
 	compound_string(""));
         XmNpositionType = XmPOSITION_VALUE;
         XmNx = 2;
-        XmNy = 0;
+        XmNy = 5;
         XmNwidth = 200;
+        XmNheight = 40;
     };
     controls {
     };
@@ -248,7 +792,7 @@ object spinBox_arearoute_linecontrol : XmSpinBox widget {
         XmNx = 10;
         XmNy = 190;
         XmNwidth = 230;
-        XmNheight = 36;
+        XmNheight = 50;
     };
     controls {
          managed XmTextField spinText_arearoute_linecontrol;
@@ -290,6 +834,7 @@ object label_arearoute_info : XmLabel widget {
 object spinText_arearoute_interleaving : XmTextField widget {
     arguments {
         arguments Style_use;
+        XmNcursorPositionVisible = false;
         XmNeditable = false;
         XmNposition = 1;
         XmNminimumValue = 1;
@@ -298,6 +843,9 @@ object spinText_arearoute_interleaving : XmTextField widget {
         XmNnumValues = 0;
         XmNvalues = string_table(
 	compound_string(""));
+        XmNx = 2;
+        XmNy = 0;
+        XmNheight = 40;
     };
     controls {
     };
@@ -314,7 +862,7 @@ object spinBox_arearoute_interleaving : XmSpinBox widget {
     arguments {
         arguments Style_use;
         XmNx = 10;
-        XmNy = 270;
+        XmNy = 430;
         XmNwidth = 230;
         XmNheight = 40;
     };
@@ -337,7 +885,7 @@ object label_arearoute_interleaving : XmLabel widget {
         XmNalignment = XmALIGNMENT_BEGINNING;
         XmNlabelString = compound_string("Interleaving Factor (1=none):");
         XmNx = 10;
-        XmNy = 240;
+        XmNy = 400;
         XmNwidth = 210;
         XmNheight = 30;
     };
@@ -354,11 +902,14 @@ object label_arearoute_interleaving : XmLabel widget {
 object spinText_arearoute_linespacing : XmTextField widget {
     arguments {
         arguments Style_use;
+        XmNcursorPositionVisible = false;
+        XmNeditable = false;
         XmNposition = 200;
         XmNminimumValue = 1;
         XmNmaximumValue = 10000;
         XmNspinBoxChildType = XmNUMERIC;
-        XmNy = 0;
+        XmNx = 2;
+        XmNy = 5;
         XmNwidth = 200;
         XmNheight = 40;
     };
@@ -377,10 +928,10 @@ object spinText_arearoute_linespacing : XmTextField widget {
 object spinBox_arearoute_linespacing : XmSpinBox widget {
     arguments {
         arguments Style_use;
-        XmNx = 10;
-        XmNy = 350;
+        XmNx = 240;
+        XmNy = 190;
         XmNwidth = 230;
-        XmNheight = 40;
+        XmNheight = 50;
     };
     controls {
          managed XmTextField spinText_arearoute_linespacing;
@@ -398,6 +949,7 @@ object spinBox_arearoute_linespacing : XmSpinBox widget {
 object spinText_arearoute_platform : XmTextField widget {
     arguments {
         arguments Style_use;
+        XmNcursorPositionVisible = false;
         XmNvalue = "";
         XmNeditable = false;
         XmNnumValues = 0;
@@ -405,8 +957,9 @@ object spinText_arearoute_platform : XmTextField widget {
 	compound_string(""));
         XmNpositionType = XmPOSITION_VALUE;
         XmNx = 2;
-        XmNy = 0;
+        XmNy = 5;
         XmNwidth = 200;
+        XmNheight = 40;
     };
     controls {
     };
@@ -425,9 +978,9 @@ object spinBox_arearoute_platform : XmSpinBox widget {
         XmNarrowLayout = XmARROWS_END;
         XmNlayoutDirection = XmLEFT_TO_RIGHT;
         XmNx = 240;
-        XmNy = 190;
+        XmNy = 270;
         XmNwidth = 230;
-        XmNheight = 36;
+        XmNheight = 50;
     };
     controls {
          managed XmTextField spinText_arearoute_platform;
@@ -448,7 +1001,7 @@ object label_arearoute_platform : XmLabel widget {
         XmNalignment = XmALIGNMENT_BEGINNING;
         XmNlabelString = compound_string("Platform Type:");
         XmNx = 240;
-        XmNy = 160;
+        XmNy = 240;
         XmNwidth = 180;
         XmNheight = 30;
     };
@@ -456,6 +1009,7 @@ object label_arearoute_platform : XmLabel widget {
     };
     callbacks {
         callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_label_arearoute_platform);
     };
 !(BX)    handlers {
 !(BX)        handlers Style_useHandlers;
@@ -477,6 +1031,7 @@ object label_arearoute_swathwidth : XmLabel widget {
     };
     callbacks {
         callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_label_arearoute_swathwidth);
     };
 !(BX)    handlers {
 !(BX)        handlers Style_useHandlers;
@@ -486,12 +1041,14 @@ object label_arearoute_swathwidth : XmLabel widget {
 object spinText_arearoute_swathwidth : XmTextField widget {
     arguments {
         arguments Style_use;
+        XmNcursorPositionVisible = false;
+        XmNeditable = false;
         XmNincrementValue = 5;
         XmNposition = 120;
         XmNminimumValue = 5;
         XmNmaximumValue = 175;
         XmNspinBoxChildType = XmNUMERIC;
-        XmNy = 0;
+        XmNy = 5;
         XmNwidth = 200;
         XmNheight = 40;
     };
@@ -512,7 +1069,7 @@ object spinBox_arearoute_swathwidth : XmSpinBox widget {
         XmNx = 240;
         XmNy = 350;
         XmNwidth = 230;
-        XmNheight = 40;
+        XmNheight = 50;
     };
     controls {
          managed XmTextField spinText_arearoute_swathwidth;
@@ -532,7 +1089,7 @@ object label_arearoute_direction : XmLabel widget {
         arguments Style_use;
         XmNalignment = XmALIGNMENT_BEGINNING;
         XmNlabelString = compound_string("Start Corner:");
-        XmNx = 240;
+        XmNx = 10;
         XmNy = 240;
         XmNwidth = 180;
         XmNheight = 30;
@@ -550,6 +1107,7 @@ object label_arearoute_direction : XmLabel widget {
 object spinText_arearoute_direction : XmTextField widget {
     arguments {
         arguments Style_use;
+        XmNcursorPositionVisible = false;
         XmNvalue = "";
         XmNeditable = false;
         XmNnumValues = 0;
@@ -559,6 +1117,7 @@ object spinText_arearoute_direction : XmTextField widget {
         XmNx = 2;
         XmNy = 0;
         XmNwidth = 200;
+        XmNheight = 40;
     };
     controls {
     };
@@ -576,10 +1135,10 @@ object spinBox_arearoute_direction : XmSpinBox widget {
         arguments Style_use;
         XmNarrowLayout = XmARROWS_END;
         XmNlayoutDirection = XmLEFT_TO_RIGHT;
-        XmNx = 240;
+        XmNx = 10;
         XmNy = 270;
         XmNwidth = 230;
-        XmNheight = 36;
+        XmNheight = 40;
     };
     controls {
          managed XmTextField spinText_arearoute_direction;
@@ -597,11 +1156,14 @@ object spinBox_arearoute_direction : XmSpinBox widget {
 object spinText_arearoute_depth : XmTextField widget {
     arguments {
         arguments Style_use;
+        XmNcursorPositionVisible = false;
+        XmNeditable = false;
         XmNposition = 200;
         XmNminimumValue = 1;
         XmNmaximumValue = 10000;
         XmNspinBoxChildType = XmNUMERIC;
-        XmNy = 0;
+        XmNx = 2;
+        XmNy = 5;
         XmNwidth = 200;
         XmNheight = 40;
     };
@@ -620,10 +1182,10 @@ object spinText_arearoute_depth : XmTextField widget {
 object spinBox_arearoute_depth : XmSpinBox widget {
     arguments {
         arguments Style_use;
-        XmNx = 10;
-        XmNy = 430;
+        XmNx = 240;
+        XmNy = 510;
         XmNwidth = 230;
-        XmNheight = 40;
+        XmNheight = 50;
     };
     controls {
          managed XmTextField spinText_arearoute_depth;
@@ -641,11 +1203,13 @@ object spinBox_arearoute_depth : XmSpinBox widget {
 object spinText_arearoute_altitude : XmTextField widget {
     arguments {
         arguments Style_use;
+        XmNcursorPositionVisible = false;
+        XmNeditable = false;
         XmNposition = 200;
         XmNminimumValue = 1;
         XmNmaximumValue = 10000;
         XmNspinBoxChildType = XmNUMERIC;
-        XmNy = 0;
+        XmNy = 5;
         XmNwidth = 200;
         XmNheight = 40;
     };
@@ -667,7 +1231,7 @@ object spinBox_arearoute_altitude : XmSpinBox widget {
         XmNx = 240;
         XmNy = 430;
         XmNwidth = 230;
-        XmNheight = 40;
+        XmNheight = 50;
     };
     controls {
          managed XmTextField spinText_arearoute_altitude;
@@ -696,6 +1260,7 @@ object label_arearoute_altitude : XmLabel widget {
     };
     callbacks {
         callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_label_arearoute_altitude);
     };
 !(BX)    handlers {
 !(BX)        handlers Style_useHandlers;
@@ -707,8 +1272,8 @@ object label_arearoute_depth : XmLabel widget {
         arguments Style_use;
         XmNalignment = XmALIGNMENT_BEGINNING;
         XmNlabelString = compound_string("Sonar Depth (m):");
-        XmNx = 10;
-        XmNy = 400;
+        XmNx = 240;
+        XmNy = 480;
         XmNwidth = 140;
         XmNheight = 30;
     };
@@ -716,6 +1281,7 @@ object label_arearoute_depth : XmLabel widget {
     };
     callbacks {
         callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_label_arearoute_depth);
     };
 !(BX)    handlers {
 !(BX)        handlers Style_useHandlers;
@@ -725,6 +1291,8 @@ object label_arearoute_depth : XmLabel widget {
 object spinText_arearoute_crosslines : XmTextField widget {
     arguments {
         arguments Style_use;
+        XmNcursorPositionVisible = false;
+        XmNeditable = false;
         XmNposition = 0;
         XmNminimumValue = 0;
         XmNmaximumValue = 50;
@@ -750,7 +1318,7 @@ object spinBox_arearoute_crosslines : XmSpinBox widget {
     arguments {
         arguments Style_use;
         XmNx = 10;
-        XmNy = 510;
+        XmNy = 350;
         XmNwidth = 230;
         XmNheight = 40;
     };
@@ -773,7 +1341,7 @@ object label_arearoute_depth1 : XmLabel widget {
         XmNalignment = XmALIGNMENT_BEGINNING;
         XmNlabelString = compound_string("Cross Lines:");
         XmNx = 10;
-        XmNy = 480;
+        XmNy = 320;
         XmNwidth = 140;
         XmNheight = 30;
     };
@@ -792,7 +1360,7 @@ object label_arearoute_color : XmLabel widget {
         arguments Style_use;
         XmNalignment = XmALIGNMENT_BEGINNING;
         XmNlabelString = compound_string("Route Color:");
-        XmNx = 240;
+        XmNx = 10;
         XmNy = 480;
         XmNwidth = 180;
         XmNheight = 30;
@@ -810,6 +1378,7 @@ object label_arearoute_color : XmLabel widget {
 object spinText_arearoute_color : XmTextField widget {
     arguments {
         arguments Style_use;
+        XmNcursorPositionVisible = false;
         XmNvalue = "";
         XmNeditable = false;
         XmNnumValues = 0;
@@ -819,6 +1388,7 @@ object spinText_arearoute_color : XmTextField widget {
         XmNx = 2;
         XmNy = 0;
         XmNwidth = 200;
+        XmNheight = 40;
     };
     controls {
     };
@@ -836,10 +1406,10 @@ object spinBox_arearoute_color : XmSpinBox widget {
         arguments Style_use;
         XmNarrowLayout = XmARROWS_END;
         XmNlayoutDirection = XmLEFT_TO_RIGHT;
-        XmNx = 240;
+        XmNx = 10;
         XmNy = 510;
         XmNwidth = 230;
-        XmNheight = 36;
+        XmNheight = 40;
     };
     controls {
          managed XmTextField spinText_arearoute_color;
@@ -901,10 +1471,10 @@ object bulletinBoard_arearoute : XmBulletinBoardDialog widget {
  "ed Area...");
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 398;
-        XmNy = 186;
-        XmNwidth = 486;
-        XmNheight = 654;
+        XmNx = 8;
+        XmNy = 32;
+        XmNwidth = 476;
+        XmNheight = 641;
     };
     controls {
          managed XmTextField textField_arearoute_name;
@@ -945,8 +1515,8 @@ object bulletinBoard_arearoute : XmBulletinBoardDialog widget {
 !(BX)object dialogShell_arearoute : XmDialogShell widget {
 !(BX)    arguments {
 !(BX)        arguments Style_use;
-!(BX)        XmNwidth = 486;
-!(BX)        XmNheight = 654;
+!(BX)        XmNwidth = 476;
+!(BX)        XmNheight = 641;
 !(BX)    };
 !(BX)    controls {
 !(BX)         managed XmBulletinBoardDialog bulletinBoard_arearoute;
@@ -1028,130 +1598,6 @@ object label_about_title : XmLabel widget {
 		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
 		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
 		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
 		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')));
         XmNlabelString = compound_string(#character_set("TimesBold24")"MBg" &
  "rdviz") &
@@ -1196,130 +1642,6 @@ object label_about_mbsystem : XmLabel widget {
         arguments Style_use;
         XmNfontList = font_table(
 		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
 		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
 		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
 		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
@@ -1377,254 +1699,6 @@ object label_about_LDEO : XmLabel widget {
 		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
 		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
 		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
 		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')));
         XmNlabelString = compound_string(#character_set("TimesBold12")"Lam" &
  "ont-Doherty", separate=true) &
@@ -1658,254 +1732,6 @@ object label_about_MBARI : XmLabel widget {
 		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
 		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
 		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
 		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')));
         XmNlabelString = compound_string(#character_set("TimesBold12")"Mon" &
  "terey Bay", separate=true) &
@@ -1932,254 +1758,6 @@ object label_about_authors : XmLabel widget {
         arguments Style_use;
         XmNfontList = font_table(
 		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
 		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
 		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
 		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
@@ -2223,378 +1801,6 @@ object label_about_version : XmLabel widget {
 		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
 		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
 		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
-		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
-		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
-		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
 		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')));
         XmNlabelString = compound_string(#character_set("TimesMedium14")"M" &
  "B-System Release 5.0.0", separate=true) &
@@ -2624,7 +1830,7 @@ object bulletinBoard_about : XmBulletinBoardDialog widget {
         XmNx = 8;
         XmNy = 32;
         XmNwidth = 463;
-        XmNheight = 528;
+        XmNheight = 531;
     };
     controls {
          managed XmLabel label_about_version;
@@ -2650,7 +1856,7 @@ object bulletinBoard_about : XmBulletinBoardDialog widget {
 !(BX)        arguments Style_use;
 !(BX)        XmNtitle = "About MBgrdviz...";
 !(BX)        XmNwidth = 463;
-!(BX)        XmNheight = 528;
+!(BX)        XmNheight = 531;
 !(BX)    };
 !(BX)    controls {
 !(BX)         managed XmBulletinBoardDialog bulletinBoard_about;
@@ -2667,8 +1873,8 @@ object bulletinBoard_mbgrdviz : XmBulletinBoard widget {
     arguments {
         arguments Style_use;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNwidth = 197;
-        XmNheight = 180;
+        XmNwidth = 260;
+        XmNheight = 181;
     };
     controls {
     };
@@ -2844,8 +2050,8 @@ object pushButton_quit : XmPushButton widget {
 object pulldownMenu_file : XmPulldownMenu widget {
     arguments {
         arguments Style_use;
-        XmNx = 113;
-        XmNy = 116;
+        XmNx = 0;
+        XmNy = 0;
         XmNwidth = 142;
         XmNheight = 200;
     };
@@ -2908,8 +2114,8 @@ object pushButton_help_about : XmPushButton widget {
 object pulldownMenu_help : XmPulldownMenu widget {
     arguments {
         arguments Style_use;
-        XmNx = 253;
-        XmNy = 116;
+        XmNx = 0;
+        XmNy = 0;
         XmNwidth = 54;
         XmNheight = 28;
     };
@@ -2928,7 +2134,7 @@ object cascadeButton_help : XmCascadeButton widget {
     arguments {
         arguments Style_use;
         XmNlabelString = compound_string("Help");
-        XmNx = 145;
+        XmNx = 208;
         XmNy = 5;
         XmNwidth = 47;
         XmNheight = 24;
@@ -2944,17 +2150,146 @@ object cascadeButton_help : XmCascadeButton widget {
 !(BX)    };
 };
 
+object pushButton_realtime_setup : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Setup");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_realtime_setup);
+        XmNactivateCallback = procedure BxManageCB("form_realtime_setup");
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object pushButton_realtime_start : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Start");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_realtime_start);
+        XmNactivateCallback = procedure do_mbgrdviz_realtime_start();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object pushButton_realtime_stop : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Stop");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_realtime_stop);
+        XmNactivateCallback = procedure do_mbgrdviz_realtime_stop();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object pushButton_realtime_pause : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Pause");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_realtime_pause);
+        XmNactivateCallback = procedure do_mbgrdviz_realtime_pause();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object pushButton_realtime_resume : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Resume");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_realtime_resume);
+        XmNactivateCallback = procedure do_mbgrdviz_realtime_resume();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object pulldownMenu_realtime : XmPulldownMenu widget {
+    arguments {
+        arguments Style_use;
+        XmNx = 0;
+        XmNy = 0;
+        XmNwidth = 68;
+        XmNheight = 124;
+    };
+    controls {
+         managed XmPushButton pushButton_realtime_setup;
+         managed XmPushButton pushButton_realtime_start;
+         managed XmPushButton pushButton_realtime_stop;
+         managed XmPushButton pushButton_realtime_pause;
+         managed XmPushButton pushButton_realtime_resume;
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object cascadeButton_realtime : XmCascadeButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Realtime");
+        XmNx = 46;
+        XmNy = 5;
+        XmNwidth = 76;
+        XmNheight = 24;
+    };
+    controls {
+         unmanaged XmPulldownMenu pulldownMenu_realtime;
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
 object menuBar_mbgrdviz : XmMenuBar widget {
     arguments {
         arguments Style_use;
         XmNpacking = XmPACK_TIGHT;
         XmNmenuHelpWidget = XmCascadeButton cascadeButton_help;
-        XmNwidth = 197;
+        XmNwidth = 260;
         XmNheight = 34;
     };
     controls {
          managed XmCascadeButton cascadeButton_file;
          managed XmCascadeButton cascadeButton_help;
+         managed XmCascadeButton cascadeButton_realtime;
     };
     callbacks {
         callbacks Style_useReasons;
@@ -2969,8 +2304,8 @@ object mainWindow_mbgrdviz : XmMainWindow widget {
         arguments Style_use;
         XmNx = 108;
         XmNy = 87;
-        XmNwidth = 197;
-        XmNheight = 214;
+        XmNwidth = 260;
+        XmNheight = 215;
     };
     controls {
         Xm_Separator1 {
@@ -3006,6 +2341,7 @@ object mainWindow_mbgrdviz : XmMainWindow widget {
 !(BX)                handlers Style_useHandlers;
 !(BX)            };
         };
+!(BX)         unmanaged XmDialogShell dialogShell_realtimesetup;
 !(BX)         unmanaged XmDialogShell dialogShell_arearoute;
 !(BX)         unmanaged XmDialogShell dialogShell_open;
 !(BX)         unmanaged XmDialogShell dialogShell_about;
@@ -3026,8 +2362,8 @@ object mainWindow_mbgrdviz : XmMainWindow widget {
 !(BX)        XmNtitle = "MBgrdviz";
 !(BX)        XmNx = 108;
 !(BX)        XmNy = 87;
-!(BX)        XmNwidth = 197;
-!(BX)        XmNheight = 214;
+!(BX)        XmNwidth = 260;
+!(BX)        XmNheight = 215;
 !(BX)    };
 !(BX)    controls {
 !(BX)         managed XmMainWindow mainWindow_mbgrdviz;

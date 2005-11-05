@@ -30,12 +30,23 @@
 /**
  * Start Global Widget Declarations.
  */
+EXTERNAL Widget   label_realtimesetup_teststatus;
+EXTERNAL Widget   radioBox_realtimesetup_pathmode;
+EXTERNAL Widget   toggleButton_realtimesetup_recent;
+EXTERNAL Widget   toggleButton_realtimesetup_pointer;
+EXTERNAL Widget   spinText_realtimesetup_icon;
+EXTERNAL Widget   pushButton_realtimesetup_pathbrowse;
+EXTERNAL Widget   pushButton_realtimesetup_pathtest;
+EXTERNAL Widget   scale_realtimesetup_update;
+EXTERNAL Widget   textField_realtimesetup_path;
 EXTERNAL Widget   bulletinBoard_arearoute;
 EXTERNAL Widget   textField_arearoute_name;
 EXTERNAL Widget   spinBox_arearoute_color;
 EXTERNAL Widget   spinText_arearoute_color;
 EXTERNAL Widget   spinBox_arearoute_crosslines;
 EXTERNAL Widget   spinText_arearoute_crosslines;
+EXTERNAL Widget   label_arearoute_depth;
+EXTERNAL Widget   label_arearoute_altitude;
 EXTERNAL Widget   spinBox_arearoute_altitude;
 EXTERNAL Widget   spinText_arearoute_altitude;
 EXTERNAL Widget   spinBox_arearoute_depth;
@@ -44,6 +55,8 @@ EXTERNAL Widget   spinBox_arearoute_direction;
 EXTERNAL Widget   spinText_arearoute_direction;
 EXTERNAL Widget   spinBox_arearoute_swathwidth;
 EXTERNAL Widget   spinText_arearoute_swathwidth;
+EXTERNAL Widget   label_arearoute_swathwidth;
+EXTERNAL Widget   label_arearoute_platform;
 EXTERNAL Widget   spinBox_arearoute_platform;
 EXTERNAL Widget   spinText_arearoute_platform;
 EXTERNAL Widget   spinBox_arearoute_linespacing;
@@ -53,6 +66,7 @@ EXTERNAL Widget   spinText_arearoute_interleaving;
 EXTERNAL Widget   label_arearoute_info;
 EXTERNAL Widget   spinBox_arearoute_linecontrol;
 EXTERNAL Widget   spinText_arearoute_linecontrol;
+EXTERNAL Widget   label_arearoute_linespacing;
 EXTERNAL Widget   pushButton_arearoute_ok;
 EXTERNAL Widget   dialogShell_open;
 EXTERNAL Widget   fileSelectionBox;
@@ -64,6 +78,11 @@ EXTERNAL Widget   pushButton_opennav;
 EXTERNAL Widget   pushButton_openswath;
 EXTERNAL Widget   pushButton_savesite;
 EXTERNAL Widget   pushButton_saveroute;
+EXTERNAL Widget   pushButton_realtime_setup;
+EXTERNAL Widget   pushButton_realtime_start;
+EXTERNAL Widget   pushButton_realtime_stop;
+EXTERNAL Widget   pushButton_realtime_pause;
+EXTERNAL Widget   pushButton_realtime_resume;
 /**
  * End Global Widget Declarations.
  */

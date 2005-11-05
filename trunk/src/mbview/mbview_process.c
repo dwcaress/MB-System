@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_process.c	9/25/2003
- *    $Id: mbview_process.c,v 5.8 2005-02-18 07:32:56 caress Exp $
+ *    $Id: mbview_process.c,v 5.9 2005-11-05 01:11:47 caress Exp $
  *
  *    Copyright (c) 2003, 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  *		begun on October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2005/02/18 07:32:56  caress
+ * Fixed nav display and button sensitivity.
+ *
  * Revision 5.7  2005/02/08 22:37:42  caress
  * Heading towards 5.0.6 release.
  *
@@ -93,11 +96,11 @@
 /*------------------------------------------------------------------------------*/
 
 /* local variables */
-Cardinal 	ac;
-Arg      	args[256];
-char		value_text[MB_PATH_MAXLINE];
+static Cardinal 	ac;
+static Arg      	args[256];
+static char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_process.c,v 5.8 2005-02-18 07:32:56 caress Exp $";
+static char rcs_id[]="$Id: mbview_process.c,v 5.9 2005-11-05 01:11:47 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_projectdata(int instance)
@@ -189,6 +192,12 @@ fprintf(stderr,"mbview_projectdata: %d\n", instance);
 					&error);
 		if (proj_status == MB_SUCCESS)
 			view->primary_pj_init = MB_YES;
+		proj_status = mb_proj_init(mbv_verbose, 
+					data->display_projection_id,
+					&(view->display_pjptr),
+					&error);
+		if (proj_status == MB_SUCCESS)
+			view->display_pj_init = MB_YES;
 		}
 	   
 	/* else set up projections as needed */

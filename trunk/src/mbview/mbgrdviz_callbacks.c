@@ -56,6 +56,7 @@ extern int isnanf(float x);
 #define MBGRDVIZ_OPENSWATH	5
 #define MBGRDVIZ_SAVEROUTE	6
 #define MBGRDVIZ_SAVESITE	7
+#define MBGRDVIZ_REALTIME	8
 
 /* Projection defines */
 #define ModelTypeProjected	     1
@@ -76,6 +77,12 @@ extern int isnanf(float x);
 #define MBGRDVIZ_SURVEY_DIRECTION_SE			1
 #define MBGRDVIZ_SURVEY_DIRECTION_NW			2
 #define MBGRDVIZ_SURVEY_DIRECTION_NE			3
+#define	MBGRDVIZ_REALTIME_ICON_SHIP			0
+#define	MBGRDVIZ_REALTIME_ICON_ROV			1
+#define	MBGRDVIZ_REALTIME_ICON_AUV			2
+#define	MBGRDVIZ_REALTIME_OFF				0
+#define	MBGRDVIZ_REALTIME_ON				1
+#define	MBGRDVIZ_REALTIME_PAUSE				2
 int	working_route = -1;
 int	survey_instance = 0;
 int	survey_mode = MBGRDVIZ_SURVEY_MODE_UNIFORM;
@@ -89,9 +96,13 @@ int	survey_depth = 0;
 int	survey_altitude = 150;
 int	survey_color = MBV_COLOR_BLACK;
 char	survey_name[MB_PATH_MAXLINE];
+mb_path	realtime_path;
+int	realtime_status = MBGRDVIZ_REALTIME_OFF;
+int	realtime_update = 5;
+int	realtime_icon = MBGRDVIZ_REALTIME_ICON_SHIP;
 
 /* id variables */
-static char rcs_id[] = "$Id: mbgrdviz_callbacks.c,v 5.13 2005-08-09 16:32:59 caress Exp $";
+static char rcs_id[] = "$Id: mbgrdviz_callbacks.c,v 5.14 2005-11-05 01:11:47 caress Exp $";
 static char program_name[] = "MBgrdviz";
 static char help_message[] = "MBgrdviz is an interactive 2D/3D visualization tool for GMT grid files.";
 static char usage_message[] = "mbgrdviz [-H -T -V]";
@@ -123,6 +134,10 @@ void do_mbgrdviz_open_region( Widget w, XtPointer client_data, XtPointer call_da
 void do_mbgrdviz_make_survey( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbgrdviz_arearoute_recalc(int instance);
 void do_mbgrdviz_arearoute_info(int instance);
+void do_mbgrdviz_realtimesetup_icon( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_realtimesetup_path_browse( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_realtimesetup_updaterate( Widget w, XtPointer client_data, XtPointer call_data);
+
 /*
  * Motif required Headers
  */
@@ -370,6 +385,21 @@ int do_mbgrdviz_init(int argc, char **argv, int verbosity)
 	XmStringFree(str_list[3]);
 	XmStringFree(str_list[4]);
 	XmStringFree(str_list[5]);
+	XtFree((XtPointer)str_list);
+
+	/* set up realtime control widgets */
+
+	/* set up realtime display icon */
+	str_list = (XmStringTable) XtMalloc(2 * sizeof(XmString *));
+	str_list[0] = XmStringCreateLocalized("Ship");
+	str_list[1] = XmStringCreateLocalized("ROV");
+	str_list[2] = XmStringCreateLocalized("AUV");
+	ac = 0;
+	XtSetArg(args[ac], XmNnumValues, 3); ac++;
+	XtSetArg(args[ac], XmNvalues, str_list); ac++;
+	XtSetValues(spinText_realtimesetup_icon, args, ac);
+	XmStringFree(str_list[0]);
+	XmStringFree(str_list[1]);
 	XtFree((XtPointer)str_list);
 
 	/* initialize mbview_id list */
@@ -699,6 +729,38 @@ do_mbgrdviz_fileSelectionBox_savesite( Widget w, XtPointer client_data, XtPointe
 }
 /*---------------------------------------------------------------------------------------*/
 void
+do_mbgrdviz_fileSelectionBox_realtime( Widget w, XtPointer client_data, XtPointer call_data)
+{
+        Cardinal ac = 0;
+        Arg      args[256];
+	int	instance;
+	int	actionid;
+        XmString	tmp0;
+	int	argok;
+    	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    
+    	/* get instance */
+	instance = 0;
+	
+	/* set title to open file dialog  */
+	ac = 0;
+	XtSetArg(args[ac], XmNtitle, "Set Realtime Navigation Source"); ac++;
+	XtSetValues(dialogShell_open, args, ac);
+	BxManageCB(w, (XtPointer)"fileSelectionBox", call_data);
+
+	/* set fileSelectionBox parameters */
+	ac = 0;
+	tmp0 = (XmString) BX_CONVERT(dialogShell_open, "*", 
+                				XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNpattern, tmp0); ac++;
+	actionid = MBGRDVIZ_REALTIME * MBV_MAX_WINDOWS + instance;
+	XtSetArg(args[ac], XmNuserData, actionid); ac++;
+	XtSetValues(fileSelectionBox, args, ac);
+        XmStringFree((XmString)tmp0);
+    
+}
+/*---------------------------------------------------------------------------------------*/
+void
 do_mbgrdviz_close( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
@@ -845,6 +907,14 @@ do_mbgrdviz_openfile( Widget w, XtPointer client_data, XtPointer call_data)
 		do_mbview_message_on("Saving route data...", instance);
 		status = do_mbgrdviz_saveroute(instance, file_ptr);
 		}
+	
+	/* else set realtime data source */
+	else if (mode == MBGRDVIZ_REALTIME)
+		{
+		/* Set realtime source path */
+		XmTextSetString(textField_realtimesetup_path, file_ptr);
+		
+		}
 
 	/* free the string */
 	if (file_ptr != NULL)
@@ -854,7 +924,7 @@ do_mbgrdviz_openfile( Widget w, XtPointer client_data, XtPointer call_data)
 		}
 
 	/* close the message */
-	if (mode > MBGRDVIZ_OPENGRID)
+	if (mode > MBGRDVIZ_OPENGRID && mode != MBGRDVIZ_REALTIME)
 		do_mbview_message_off(instance);
 }
 /*---------------------------------------------------------------------------------------*/
@@ -2026,6 +2096,8 @@ int do_mbgrdviz_opennav(int instance, int swathbounds, char *input_file_ptr)
 	int	format;
 	double	weight;
 	int	done;
+	mb_path	messagestr;
+	char	*lastslash;
 
 	/* read data for valid instance */
 	if (instance >= 0)
@@ -2050,14 +2122,28 @@ int do_mbgrdviz_opennav(int instance, int swathbounds, char *input_file_ptr)
 					/* check for available nav file if that is
 					   all that is needed */
 					if (swathbounds == MB_NO)
-						mb_get_fnv(5, swathfile, &format, &error);
+						mb_get_fnv(verbose, swathfile, &format, &error);
 
 					/* else check for available fbt file  */
 					else
-						mb_get_fbt(5, swathfile, &format, &error);
+						mb_get_fbt(verbose, swathfile, &format, &error);
 
 					/* read the swath or nav data using mbio calls */
-fprintf(stderr,"Reading navigation from %s\n",swathfile);
+
+					/* update message */
+					if (swathbounds == MB_NO)
+						strcpy(messagestr, "Reading navigation: ");
+					else
+						strcpy(messagestr, "Reading swath data: ");
+					lastslash = strrchr(swathfile, '/');
+					if ((lastslash = strrchr(swathfile, '/')) != NULL)
+						strcat(messagestr,&(lastslash[1]));
+					else
+						strcat(messagestr,swathfile);
+					do_mbview_message_on(messagestr, instance);
+fprintf(stderr,"%s\n",messagestr);
+
+					/* read the data */
 					do_mbgrdviz_readnav(instance, swathfile, 
 								format, weight, &error);
 					}
@@ -2509,6 +2595,7 @@ int do_mbgrdviz_readgrd(int instance, char *grdfile,
 	int	nscan;
 	int	utmzone;
         float   NaN;
+	char	NorS;
 	char	*projection = "-Jx1.0";
 	float	*rawdata;
 	float	*usedata;
@@ -2633,19 +2720,18 @@ int do_mbgrdviz_readgrd(int instance, char *grdfile,
 	/* try to get projection from the grd file remark */
 	if (strncmp(&(header.remark[2]), "Projection: ", 12) == 0)
 		{
-		if ((nscan = sscanf(&(header.remark[2]), "Projection: UTM%dN", &utmzone)) == 1)
+		if ((nscan = sscanf(&(header.remark[2]), "Projection: UTM%d%c", &utmzone, &NorS)) == 2)
 			{
-			sprintf(projectionname, "UTM%dN", utmzone);
-			modeltype = ModelTypeProjected;
-			projectionid = 32600 + utmzone;
-			*grid_projection_mode = MBV_PROJECTION_PROJECTED;
-			sprintf(grid_projection_id, "epsg%d", projectionid);
-			}
-		else if ((nscan = sscanf(&(header.remark[2]), "Projection: UTM%dS", &utmzone)) == 1)
-			{
-			sprintf(projectionname, "UTM%dS", utmzone);
-			modeltype = ModelTypeProjected;
-			projectionid = 32700 + utmzone;
+			if (NorS == 'N')
+				{
+				projectionid = 32600 + utmzone;
+				}
+			else if (NorS == 'S')
+				{
+				projectionid = 32700 + utmzone;
+				}
+				modeltype = ModelTypeProjected;
+			sprintf(projectionname, "UTM%2.2d%c", utmzone, NorS);
 			*grid_projection_mode = MBV_PROJECTION_PROJECTED;
 			sprintf(grid_projection_id, "epsg%d", projectionid);
 			}
@@ -3171,63 +3257,54 @@ fprintf(stderr,"Called do_mbgrdviz_make_survey instance:%d\n", instance);
 			doesn't seem to work, so set survey_instance as well */
 		survey_instance = instance;
 		
-		/* set parameters */
-
+		}
+	    
+    	/* set widgets */
+	if (status == MB_SUCCESS)
+		{
 		ac = 0;
 		XtSetArg(args[ac], XmNposition, survey_mode); ac++; 
-		XtSetArg(args[ac], XmNsensitive, True); ac++; 
 		XtSetValues(spinText_arearoute_linecontrol, args, ac);
 
 		ac = 0;
-		XtSetArg(args[ac], XmNposition, survey_platform); ac++;
-		XtSetArg(args[ac], XmNsensitive, True); ac++; 
-		XtSetValues(spinText_arearoute_platform, args, ac);
-
-		ac = 0;
-		XtSetArg(args[ac], XmNposition, survey_interleaving); ac++;
-		XtSetArg(args[ac], XmNsensitive, True); ac++; 
-		XtSetValues(spinText_arearoute_interleaving, args, ac);
-
-		ac = 0;
 		XtSetArg(args[ac], XmNposition, survey_direction); ac++;
-		XtSetArg(args[ac], XmNsensitive, True); ac++; 
 		XtSetValues(spinText_arearoute_direction, args, ac);
 
 		ac = 0;
 		XtSetArg(args[ac], XmNposition, survey_crosslines); ac++;
-		XtSetArg(args[ac], XmNsensitive, True); ac++; 
 		XtSetValues(spinText_arearoute_crosslines, args, ac);
 
 		ac = 0;
-		XtSetArg(args[ac], XmNposition, survey_swathwidth); ac++;
-		if (survey_mode == MBGRDVIZ_SURVEY_MODE_VARIABLE)
-			{
-			XtSetArg(args[ac], XmNsensitive, True); ac++; 
-			}
-		else
-			{
-			XtSetArg(args[ac], XmNsensitive, False); ac++; 
-			}
-		XtSetValues(spinText_arearoute_swathwidth, args, ac);
-
-		ac = 0;
-		XtSetArg(args[ac], XmNposition, survey_linespacing); ac++;
-		if (survey_mode == MBGRDVIZ_SURVEY_MODE_UNIFORM)
-			{
-			XtSetArg(args[ac], XmNsensitive, True); ac++; 
-			}
-		else
-			{
-			XtSetArg(args[ac], XmNsensitive, False); ac++; 
-			}
-		XtSetValues(spinText_arearoute_linespacing, args, ac);
+		XtSetArg(args[ac], XmNposition, survey_interleaving); ac++;
+		XtSetValues(spinText_arearoute_interleaving, args, ac);
 
 		ac = 0;
 		XtSetArg(args[ac], XmNposition, survey_color); ac++;
-		XtSetArg(args[ac], XmNsensitive, True); ac++; 
 		XtSetValues(spinText_arearoute_color, args, ac);
 
+		ac = 0;
+		XtSetArg(args[ac], XmNposition, survey_linespacing); ac++;
+		XtSetValues(spinText_arearoute_linespacing, args, ac);
+
+		ac = 0;
+		XtSetArg(args[ac], XmNposition, survey_platform); ac++;
+		XtSetValues(spinText_arearoute_platform, args, ac);
+
+		ac = 0;
+		XtSetArg(args[ac], XmNposition, survey_swathwidth); ac++;
+		XtSetValues(spinText_arearoute_swathwidth, args, ac);
+
+		ac = 0;
+		XtSetArg(args[ac], XmNposition, survey_altitude); ac++;
+		XtSetValues(spinText_arearoute_altitude, args, ac);
+
+		ac = 0;
+		XtSetArg(args[ac], XmNposition, survey_depth); ac++;
+		XtSetValues(spinText_arearoute_depth, args, ac);
+
 		XmTextSetString(textField_arearoute_name, survey_name);
+
+		do_mbgrdviz_arearoute_recalc(instance);
 
 		/* put up the dialog */
 		BxManageCB(w, (XtPointer)"bulletinBoard_arearoute", call_data);
@@ -3261,10 +3338,13 @@ void do_mbgrdviz_generate_survey( Widget w, XtPointer client_data, XtPointer cal
 	double	dsigna[4] = {1.0, -1.0, 1.0, -1.0};
 	int	jendpointa[4] = {0, 0, 1, 1};
 	
-	double	xx, dx, dy, r, dxuse, dyuse, dxd, dyd, dxextra, dyextra;
+	char	*error_message;
+	double	*xx = NULL;
+	double	dx, dy, r, dxuse, dyuse, dxd, dyd, dxextra, dyextra;
 	double	rrr[4], xxx, yyy;
 	int	iline, jendpoint, ok;
 	int	endcorner, jstart, kend;
+	int	nlines_alloc = 0;
 	int	i, j, k;
 
     	/* get source mbview instance */
@@ -3294,6 +3374,75 @@ fprintf(stderr,"Called do_mbgrdviz_generate_survey instance:%d\n", instance);
 			mbview_deleteroute(verbose, instance, working_route, &error);
 			working_route = -1;
 			}
+			
+		/* get unit vector for survey area boundaries */
+		dx = data->area.cornerpoints[1].xdisplay 
+			- data->area.cornerpoints[0].xdisplay;
+		dy = data->area.cornerpoints[1].ydisplay 
+			- data->area.cornerpoints[0].ydisplay;
+		r = sqrt(dx * dx + dy * dy);
+		dx = dx / r;
+		dy = dy / r;
+
+		/* get parameters */
+		if (data->area.bearing >= 315.0 || data->area.bearing < 45.0)
+			{
+			if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_SW)
+				k = 0;
+			else if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_SE)
+				k = 1;
+			else if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_NW)
+				k = 2;
+			else if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_NE)
+				k = 3;
+			}
+		else if (data->area.bearing >= 45.0 && data->area.bearing < 135.0)
+			{
+			if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_SW)
+				k = 1;
+			else if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_SE)
+				k = 3;
+			else if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_NW)
+				k = 0;
+			else if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_NE)
+				k = 2;
+			}
+		else if (data->area.bearing >= 135.0 && data->area.bearing < 225.0)
+			{
+			if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_SW)
+				k = 3;
+			else if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_SE)
+				k = 2;
+			else if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_NW)
+				k = 1;
+			else if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_NE)
+				k = 0;
+			}
+		else if (data->area.bearing >= 225.0 && data->area.bearing < 315.0)
+			{
+			if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_SW)
+				k = 2;
+			else if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_SE)
+				k = 0;
+			else if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_NW)
+				k = 3;
+			else if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_NE)
+				k = 1;
+			}
+		dsign = dsigna[k];
+		jendpoint = jendpointa[k];
+		if (survey_color == 0)
+			color = MBV_COLOR_BLACK;
+		else if (survey_color == 1)
+			color = MBV_COLOR_YELLOW;
+		else if (survey_color == 2)
+			color = MBV_COLOR_GREEN;
+		else if (survey_color == 3)
+			color = MBV_COLOR_BLUEGREEN;
+		else if (survey_color == 4)
+			color = MBV_COLOR_BLUE;
+		else if (survey_color == 5)
+			color = MBV_COLOR_PURPLE;
 
 		/* do uniform line spacing */
 		if (survey_mode == MBGRDVIZ_SURVEY_MODE_UNIFORM)
@@ -3301,85 +3450,109 @@ fprintf(stderr,"Called do_mbgrdviz_generate_survey instance:%d\n", instance);
 			/* get number of lines */
 			first = MB_YES;
 			line_spacing = (double) survey_linespacing;
-			nlines = (data->area.width / line_spacing) + 1;
-			nlinegroups = nlines / survey_interleaving + 1;
-
-			/* get unit vector for survey area boundaries */
-			dx = data->area.cornerpoints[1].xdisplay 
-				- data->area.cornerpoints[0].xdisplay;
-			dy = data->area.cornerpoints[1].ydisplay 
-				- data->area.cornerpoints[0].ydisplay;
-			r = sqrt(dx * dx + dy * dy);
-			dx = dx / r;
-			dy = dy / r;
 			line_spacing_use = line_spacing * r / data->area.width;
-fprintf(stderr,"width:%f spacing:%f nlines:%d r:%f dx:%f dy:%f\n",
-data->area.width,line_spacing_use,nlines,r,dx,dy);
-
-			/* get parameters */
-			if (data->area.bearing >= 315.0 || data->area.bearing < 45.0)
-				{
-				if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_SW)
-					k = 0;
-				else if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_SE)
-					k = 1;
-				else if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_NW)
-					k = 2;
-				else if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_NE)
-					k = 3;
-				}
-			else if (data->area.bearing >= 45.0 && data->area.bearing < 135.0)
-				{
-				if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_SW)
-					k = 1;
-				else if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_SE)
-					k = 3;
-				else if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_NW)
-					k = 0;
-				else if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_NE)
-					k = 2;
-				}
-			else if (data->area.bearing >= 135.0 && data->area.bearing < 225.0)
-				{
-				if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_SW)
-					k = 3;
-				else if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_SE)
-					k = 2;
-				else if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_NW)
-					k = 1;
-				else if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_NE)
-					k = 0;
-				}
-			else if (data->area.bearing >= 225.0 && data->area.bearing < 315.0)
-				{
-				if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_SW)
-					k = 2;
-				else if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_SE)
-					k = 0;
-				else if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_NW)
-					k = 3;
-				else if (survey_direction == MBGRDVIZ_SURVEY_DIRECTION_NE)
-					k = 1;
-				}
-			dsign = dsigna[k];
-			jendpoint = jendpointa[k];
-			if (survey_color == 0)
-				color = MBV_COLOR_BLACK;
-			else if (survey_color == 1)
-				color = MBV_COLOR_YELLOW;
-			else if (survey_color == 2)
-				color = MBV_COLOR_GREEN;
-			else if (survey_color == 3)
-				color = MBV_COLOR_BLUEGREEN;
-			else if (survey_color == 4)
-				color = MBV_COLOR_BLUE;
-			else if (survey_color == 5)
-				color = MBV_COLOR_PURPLE;
-
-			/* work in display coordinates */
+			nlines = (data->area.width / line_spacing) + 1;
 			
+			/* allocate space for line position array */
+			status = mb_malloc(verbose, nlines * sizeof(double), &xx, &error);
+			if (status != MB_SUCCESS)
+				{
+				nlines_alloc = 0;
+				mb_error(verbose,error,&error_message);
+				fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",
+					error_message);
+				}
+			else
+				nlines_alloc = nlines;
+			
+			/* calculate line positions */
+			if (status == MB_SUCCESS)
+			for (i=0;i<nlines;i++)
+				{
+				/* get line position in survey area */
+				xx[i] = dsign * line_spacing_use * (((double)i) 
+								- 0.5 * (nlines - 1.0));
+				}
+			}
+
+		/* do variable line spacing with constant altitude */
+		else if (survey_mode == MBGRDVIZ_SURVEY_MODE_VARIABLE
+			&& survey_platform == MBGRDVIZ_SURVEY_PLATFORM_SUBMERGED_ALTITUDE)
+			{
+			/* get number of lines */
+			first = MB_YES;
+			line_spacing = (double) survey_altitude * 2.0 * tan(0.5 * survey_swathwidth);
+			line_spacing_use = line_spacing * r / data->area.width;
+			nlines = (data->area.width / line_spacing) + 1;
+			
+			/* allocate space for line position array */
+			status = mb_malloc(verbose, nlines * sizeof(double), &xx, &error);
+			if (status != MB_SUCCESS)
+				{
+				nlines_alloc = 0;
+				mb_error(verbose,error,&error_message);
+				fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",
+					error_message);
+				}
+			else
+				nlines_alloc = nlines;
+			
+			/* calculate line positions */
+			if (status == MB_SUCCESS)
+			for (i=0;i<nlines;i++)
+				{
+				/* get line position in survey area */
+				xx[i] = dsign * line_spacing_use * (((double)i) 
+								- 0.5 * (nlines - 1.0));
+				}
+			}
+
+		/* do variable line spacing with variable altitude */
+		else if (survey_mode == MBGRDVIZ_SURVEY_MODE_VARIABLE)
+			{
+			/* find range of altitude along each line and calculate the swath width
+				from the smallest altitude */
+				
+			/* start in the center of the survey */
+				 
+			/* get number of lines */
+			first = MB_YES;
+			line_spacing = (double) survey_altitude * 2.0 * tan(0.5 * survey_swathwidth);
+			line_spacing_use = line_spacing * r / data->area.width;
+			nlines = (data->area.width / line_spacing) + 1;
+			
+			/* allocate space for line position array */
+			nlines_alloc += 100;
+			status = mb_realloc(verbose, nlines_alloc * sizeof(double), &xx, &error);
+			if (status != MB_SUCCESS)
+				{
+				nlines_alloc = 0;
+				mb_error(verbose,error,&error_message);
+				fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",
+					error_message);
+				}
+			else
+				nlines_alloc = nlines;
+			
+			/* calculate line positions */
+			if (status == MB_SUCCESS)
+				{
+				for (i=0;i<nlines;i++)
+					{
+					/* get line position in survey area */
+					xx[i] = dsign * line_spacing_use * (((double)i) 
+									- 0.5 * (nlines - 1.0));
+					}
+				}
+			}
+
+		/* generate the lines */
+		if (nlines > 0 && status == MB_SUCCESS)
+			{			
 			/* generate points */
+			/* work in display coordinates */
 			npoints = 0;
+			nlinegroups = nlines / survey_interleaving + 1;
 			for (j=0;j<survey_interleaving;j++)
 			for (i=0;i<nlinegroups;i++)
 				{
@@ -3389,10 +3562,8 @@ data->area.width,line_spacing_use,nlines,r,dx,dy);
 				if (iline < nlines)
 					{
 					/* get line position in survey area */
-					xx = dsign * line_spacing_use * (((double)iline) 
-								- 0.5 * (nlines - 1.0));
-					dxuse = dx * xx;
-					dyuse = dy * xx;
+					dxuse = dx * xx[iline];
+					dyuse = dy * xx[iline];
 					
 					/* add a bit of transit before later interleaved lines */
 					if (jendpoint == 1)
@@ -3493,10 +3664,13 @@ iline, jendpoint, xlon, ylat, zdata, xgrid, ygrid, xdisplay, ydisplay, zdisplay)
 					npoints++;
 					}
 				}
+				
+			/* deallocate line position array */
+			mb_free(verbose, &xx, &error);
 			}
 			
 		/* do crosslines if requested */
-		if (survey_crosslines > 0)
+		if (survey_crosslines > 0 && status == MB_SUCCESS)
 			{
 			/* figure out which corner the mail lines ended at */
 			for (i=0;i<4;i++)
@@ -3694,28 +3868,32 @@ fprintf(stderr,"Called do_mbgrdviz_arearoute_parameterchange instance:%d\n", ins
 		XtGetValues(spinText_arearoute_linecontrol, args, ac);
 
 		ac = 0;
-		XtSetArg(args[ac], XmNposition, (XtPointer) &survey_platform); ac++;
-		XtGetValues(spinText_arearoute_platform, args, ac);
-
-		ac = 0;
-		XtSetArg(args[ac], XmNposition, (XtPointer) &survey_interleaving); ac++;
-		XtGetValues(spinText_arearoute_interleaving, args, ac);
-
-		ac = 0;
 		XtSetArg(args[ac], XmNposition, (XtPointer) &survey_direction); ac++;
 		XtGetValues(spinText_arearoute_direction, args, ac);
-
-		ac = 0;
-		XtSetArg(args[ac], XmNposition, (XtPointer) &survey_swathwidth); ac++;
-		XtGetValues(spinText_arearoute_swathwidth, args, ac);
 
 		ac = 0;
 		XtSetArg(args[ac], XmNposition, (XtPointer) &survey_crosslines); ac++;
 		XtGetValues(spinText_arearoute_crosslines, args, ac);
 
 		ac = 0;
+		XtSetArg(args[ac], XmNposition, (XtPointer) &survey_interleaving); ac++;
+		XtGetValues(spinText_arearoute_interleaving, args, ac);
+
+		ac = 0;
+		XtSetArg(args[ac], XmNposition, (XtPointer) &survey_color); ac++;
+		XtGetValues(spinText_arearoute_color, args, ac);
+
+		ac = 0;
 		XtSetArg(args[ac], XmNposition, (XtPointer) &survey_linespacing); ac++;
 		XtGetValues(spinText_arearoute_linespacing, args, ac);
+
+		ac = 0;
+		XtSetArg(args[ac], XmNposition, (XtPointer) &survey_platform); ac++;
+		XtGetValues(spinText_arearoute_platform, args, ac);
+
+		ac = 0;
+		XtSetArg(args[ac], XmNposition, (XtPointer) &survey_swathwidth); ac++;
+		XtGetValues(spinText_arearoute_swathwidth, args, ac);
 
 		ac = 0;
 		XtSetArg(args[ac], XmNposition, (XtPointer) &survey_altitude); ac++;
@@ -3724,10 +3902,6 @@ fprintf(stderr,"Called do_mbgrdviz_arearoute_parameterchange instance:%d\n", ins
 		ac = 0;
 		XtSetArg(args[ac], XmNposition, (XtPointer) &survey_depth); ac++;
 		XtGetValues(spinText_arearoute_depth, args, ac);
-
-		ac = 0;
-		XtSetArg(args[ac], XmNposition, (XtPointer) &survey_color); ac++;
-		XtGetValues(spinText_arearoute_color, args, ac);
 
 		tmp = XmTextGetString(textField_arearoute_name);
 		if (tmp != NULL && strlen(tmp) > 0)
@@ -3789,19 +3963,26 @@ fprintf(stderr,"Called do_mbgrdviz_arearoute_recalc instance:%d\n", instance);
     	/* set widgets */
 	if (status == MB_SUCCESS)
 		{
-		/* set swathwidth */
 		ac = 0;
-		if (survey_mode == MBGRDVIZ_SURVEY_MODE_VARIABLE)
-			{
-			XtSetArg(args[ac], XmNsensitive, True); ac++; 
-			}
-		else
-			{
-			XtSetArg(args[ac], XmNsensitive, False); ac++; 
-			}
-		XtSetValues(spinText_arearoute_swathwidth, args, ac);
+		XtSetArg(args[ac], XmNsensitive, True); ac++; 
+		XtSetValues(spinText_arearoute_linecontrol, args, ac);
 
-		/* set linespacing */
+		ac = 0;
+		XtSetArg(args[ac], XmNsensitive, True); ac++; 
+		XtSetValues(spinText_arearoute_direction, args, ac);
+
+		ac = 0;
+		XtSetArg(args[ac], XmNsensitive, True); ac++; 
+		XtSetValues(spinText_arearoute_crosslines, args, ac);
+
+		ac = 0;
+		XtSetArg(args[ac], XmNsensitive, True); ac++; 
+		XtSetValues(spinText_arearoute_interleaving, args, ac);
+
+		ac = 0;
+		XtSetArg(args[ac], XmNsensitive, True); ac++; 
+		XtSetValues(spinText_arearoute_color, args, ac);
+
 		ac = 0;
 		if (survey_mode == MBGRDVIZ_SURVEY_MODE_UNIFORM)
 			{
@@ -3813,7 +3994,28 @@ fprintf(stderr,"Called do_mbgrdviz_arearoute_recalc instance:%d\n", instance);
 			}
 		XtSetValues(spinText_arearoute_linespacing, args, ac);
 
-		/* set depth */
+		ac = 0;
+		if (survey_mode == MBGRDVIZ_SURVEY_MODE_VARIABLE)
+			{
+			XtSetArg(args[ac], XmNsensitive, True); ac++; 
+			}
+		else
+			{
+			XtSetArg(args[ac], XmNsensitive, False); ac++; 
+			}
+		XtSetValues(spinText_arearoute_platform, args, ac);
+
+		ac = 0;
+		if (survey_mode == MBGRDVIZ_SURVEY_MODE_VARIABLE)
+			{
+			XtSetArg(args[ac], XmNsensitive, True); ac++; 
+			}
+		else
+			{
+			XtSetArg(args[ac], XmNsensitive, False); ac++; 
+			}
+		XtSetValues(spinText_arearoute_swathwidth, args, ac);
+
 		ac = 0;
 		if (survey_mode == MBGRDVIZ_SURVEY_MODE_VARIABLE
 			&& survey_platform == MBGRDVIZ_SURVEY_PLATFORM_SUBMERGED_DEPTH)
@@ -3824,9 +4026,8 @@ fprintf(stderr,"Called do_mbgrdviz_arearoute_recalc instance:%d\n", instance);
 			{
 			XtSetArg(args[ac], XmNsensitive, False); ac++; 
 			}
-		XtSetValues(spinText_arearoute_depth, args, ac);
+		XtSetValues(spinText_arearoute_altitude, args, ac);
 
-		/* set altitude */
 		ac = 0;
 		if (survey_mode == MBGRDVIZ_SURVEY_MODE_VARIABLE
 			&& survey_platform == MBGRDVIZ_SURVEY_PLATFORM_SUBMERGED_ALTITUDE)
@@ -3837,7 +4038,7 @@ fprintf(stderr,"Called do_mbgrdviz_arearoute_recalc instance:%d\n", instance);
 			{
 			XtSetArg(args[ac], XmNsensitive, False); ac++; 
 			}
-		XtSetValues(spinText_arearoute_altitude, args, ac);
+		XtSetValues(spinText_arearoute_depth, args, ac);
 
 		do_mbgrdviz_arearoute_info(instance);
 	
@@ -3891,7 +4092,7 @@ fprintf(stderr,"Called do_mbgrdviz_arearoute_info instance:%d\n", instance);
 					&error);
 
 			sprintf(info_text,
-			":::t\"Current Area:\":t\" Length: %.1f m  Width: %.1f m  Bearing: %.1f deg\":t\"New Route: %d  Name: %s\":t\" Waypoints: %d  Total Points:%d\":t\" Distance: %.1f m (lateral) %.1f m (over bottom)\":t\" Time: %.3f hours (%.1f seconds)\"", 
+			":::t\"Current Area:\":t\" Length: %.1f m  Width: %.1f m  Bearing: %.1f deg\":t\"New Route: %d  Name: %s\":t\" Waypoints: %d  Total Points:%d\":t\" Distance: %.1f m (lateral) %.1f m (over bottom)\"", 
 				data->area.length,
 				data->area.width,
 				data->area.bearing,
@@ -3900,9 +4101,7 @@ fprintf(stderr,"Called do_mbgrdviz_arearoute_info instance:%d\n", instance);
 				nroutewaypoint,
 				nroutpoint,
 				routedistancelateral,
-				routedistancetopo,
-				(routedistancelateral / 1.5 / 3600.0),
-				(routedistancelateral / 1.5));
+				routedistancetopo);
 			}		
 		else
 			{
@@ -4016,3 +4215,180 @@ do_mbgrdviz_arearoute_depth_increment( Widget w, XtPointer client_data, XtPointe
 	XtSetValues(spinText_arearoute_depth, args, ac);
 }
 /*---------------------------------------------------------------------------------------*/
+
+void
+do_mbgrdviz_realtime_start( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+}
+
+void
+do_mbgrdviz_realtimesetup_path_reset( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+}
+
+void
+do_mbgrdviz_realtime_pause( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+}
+
+void
+do_mbgrdviz_realtime_stop( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+}
+
+void
+do_mbgrdviz_realtime_resume( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+}
+
+void
+do_mbgrdviz_realtimesetup_path_apply( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+}
+/*      Function Name:	BxPopdownCB
+ *
+ *      Description:   	This function accepts a string of the form:
+ *			"(WL)[widgetName, widgetName, ...]"
+ *			It attempts to convert the widget names to Widget IDs
+ *			and then popdown the widgets WITHOUT any grab.
+ *
+ *      Arguments:      Widget		w:	the activating widget.
+ *			XtPointer	client:	the string of widget names to
+ *						popup.
+ *			XtPointer	call:	the call data (unused).
+ *
+ *      Notes:        * This function expects that there is an application
+ *                      shell from which all other widgets are descended.
+ *		      * BxPopdownCB can only work on Shell widgets.  It will
+ *			not work on other object types.  This is because
+ *			popping down can only be done to a shell.  A check
+ *			is made using XtIsShell() and an appropriate error
+ *			is output if the passed object is not a Shell.
+ */
+
+/* ARGSUSED */
+void
+BxPopdownCB ARGLIST((w, client, call))
+ARG( Widget, w)
+ARG( XtPointer, client)
+GRAU( XtPointer, call)
+{
+    WidgetList		widgets;
+    int			i;
+
+    /*
+     * This function returns a NULL terminated WidgetList.  The memory for
+     * the list needs to be freed when it is no longer needed.
+     */
+    widgets = BxWidgetIdsFromNames(w, "BxPopdownCB", (String)client);
+    
+    i = 0;
+    while ( widgets && widgets[i] != NULL )
+    {
+	if ( XtIsShell(widgets[i]) )
+	{
+	    XtPopdown(widgets[i]);
+	}
+	else
+	{
+	    printf("Callback Error (BxPopdownCB):\n\t\
+Object %s is not a Shell\n", XtName(widgets[i]));
+	}
+	i++;
+    }
+    XtFree((char *)widgets);
+}
+
+/*      Function Name:	BxPopupCB
+ *
+ *      Description:   	This function accepts a string of the form:
+ *			"(WL)[widgetName, widgetName, ...]"
+ *			It attempts to convert the widget names to Widget IDs
+ *			and then popup the widgets WITHOUT any grab.
+ *
+ *      Arguments:      Widget		w:	the activating widget.
+ *			XtPointer	client:	the string of widget names to
+ *						popup.
+ *			XtPointer	call:	the call data (unused).
+ *
+ *      Notes:        * This function expects that there is an application
+ *                      shell from which all other widgets are descended.
+ *		      * BxPopupCB can only work on Shell widgets.  It will not
+ *			work on other object types.  This is because popping up
+ *			can only be done to a shell.  A check is made using
+ *			XtIsShell() and an appropriate error is output if the
+ *			passed object is not a Shell.
+ */
+
+/* ARGSUSED */
+void
+BxPopupCB ARGLIST((w, client, call))
+ARG( Widget, w)
+ARG( XtPointer, client)
+GRAU( XtPointer, call)
+{
+    WidgetList		widgets;
+    int			i;
+
+    /*
+     * This function returns a NULL terminated WidgetList.  The memory for
+     * the list needs to be freed when it is no longer needed.
+     */
+    widgets = BxWidgetIdsFromNames(w, "BxPopupCB", (String)client);
+
+    i = 0;
+    while( widgets && widgets[i] != NULL )
+    {
+	if ( XtIsShell(widgets[i]) )
+	{
+	    XtPopup(widgets[i], XtGrabNone);
+	}
+	else
+	{
+	    printf("Callback Error (BxPopupCB):\n\t\
+Object %s is not a Shell\n", XtName(widgets[i]));
+	}
+	i++;
+    }
+    XtFree((char *)widgets);
+}
+
+
+void
+do_mbgrdviz_realtimesetup_icon( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+}
+
+void
+do_mbgrdviz_realtimesetup_path_browse( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+
+	do_mbgrdviz_fileSelectionBox_realtime( w, client_data, call_data);
+
+}
+
+void
+do_mbgrdviz_realtimesetup_updaterate( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+}
+
+void
+do_mbgrdviz_realtimesetup_path_test( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+}
+
+void
+do_mbgrdviz_realtimesetup_pathmode( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+}

@@ -148,7 +148,11 @@ typedef struct _MB3DViewData
     Widget mbview_pushButton_colorbounds_dismiss;
     Widget mbview_dialogShell_resolution;
     Widget mbview_bulletinBoard_resolution;
-    Widget mbview_label_lowresolution;
+    Widget mbview_scale_navmediumresolution;
+    Widget mbview_scale_navlowresolution;
+    Widget separator;
+    Widget mbview_label_navrenderdecimation;
+    Widget mbview_label_gridrenderres;
     Widget mbview_scale_mediumresolution;
     Widget mbview_scale_lowresolution;
     Widget mbview_pushButton_resolution_dismiss;

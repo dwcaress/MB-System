@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbview.h	10/9/2002
- *    $Id: mbview.h,v 5.10 2005-08-09 16:32:59 caress Exp $
+ *    $Id: mbview.h,v 5.11 2005-11-05 01:11:47 caress Exp $
  *
  *    Copyright (c) 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -18,6 +18,9 @@
  * Date:	October 10,  2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.10  2005/08/09 16:32:59  caress
+ * Working on portability and on survey planning.
+ *
  * Revision 5.9  2005/02/18 07:32:56  caress
  * Fixed nav display and button sensitivity.
  *
@@ -105,6 +108,10 @@
 /* simple view mode defines for contours, sites, routes, etc */
 #define	MBV_VIEW_OFF		0
 #define	MBV_VIEW_ON		1
+
+/* lon lat style mode */
+#define MBV_LONLAT_DECIMAL	0
+#define	MBV_LONLAT_MINUTES	1
 
 /* colortable view mode defines */
 #define	MBV_COLORTABLE_NORMAL		0
