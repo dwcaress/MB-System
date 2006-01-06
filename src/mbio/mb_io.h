@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	1/19/93
- *    $Id: mb_io.h,v 5.21 2005-11-05 00:48:04 caress Exp $
+ *    $Id: mb_io.h,v 5.22 2006-01-06 18:27:19 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.21  2005/11/05 00:48:04  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.20  2004/12/02 06:33:30  caress
  * Fixes while supporting Reson 7k data.
  *
@@ -177,6 +180,9 @@
 /* MBIO input/output control structure */
 struct mb_io_struct
 	{
+	/* system byte swapping */
+	int	byteswapped;	/* 0 = unswapped, 1 = swapped (Intel byte order) */
+
 	/* format parameters */
 	int	format;		/* data format id */
 	int	system;		/* sonar system id */

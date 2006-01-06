@@ -48,13 +48,11 @@ Programs such as \fBmbgrid\fP try to check statistics or "inf"
 files to see if the corresponding data files include data within
 the specified geographic bounds. Other programs look for
 "fast bathymetry" or "fast navigation" ("fbt" or "fnv") files
-in order to read the data more quickly. The \fB-N\fP 
-option causes \fBmbdatalist\fP to create these three types of
-ancillary files for each swath data file. 
-The \fB-O\fP option causes \fBmbdatalist\fP to
-create the "inf", "fbt", and "fnv" files 
-only when they don't already
-exist or are out of date (older than the data file).
+in order to read the data more quickly. The \fB-N\fP option causes 
+\fBmbdatalist\fP to create these three types of ancillary files 
+for each swath data file. The \fB-O\fP option causes \fBmbdatalist\fP 
+to create the "inf", "fbt", and "fnv" files only when they don't 
+already exist or are out of date (older than the data file).
 
 Datalists may also contain a third value, called the grid
 weight, which is used by \fBmbgrid\fP to priortize data.
@@ -71,18 +69,25 @@ See the \fBMB-System\fP manual page for a more complete
 description.
 
 The \fB-R\fP\fIw/e/s/n\fP option causes the program to check each
-data file with an "inf" file for overlap with 
-the desired bounds, and only report those
-files with data in the desired area (or no 
-"inf" file to check). This behavior mimics that of
-\fBmbgrid\fP, allowing users to check what data files will 
-contribute to gridding some particular area.
+data file with an "inf" file for overlap with the desired bounds, 
+and only report those files with data in the desired area (or no 
+"inf" file to check). This behavior mimics that of \fBmbgrid\fP, 
+allowing users to check what data files will contribute to gridding 
+some particular area.
 
-The \fB-Q\fP option causes the program to check each
-data file for the existence of any ancillary files (e.g. navigation
-files, edit save files, etc.)
-referenced in its mbprocess parameter file 
-(if the parameter file exists). 
+The \fB-Q\fP option causes the program to check each data file for 
+the existence of any ancillary files (e.g. navigation files, edit 
+save files, etc.) referenced in its mbprocess parameter file 
+(if the parameter file exists). The program will list any problem
+found with the processing parameters, and will also list any
+data problem noted in the "inf" files. The possible data problems
+include:
+        No survey data found
+        Zero longitude or latitude in survey data
+        Instantaneous speed exceeds 25 km/hr
+        Average speed exceeds 25 km/hr
+        Sounding depth exceeds 11000 m
+        Unsupported Simrad datagram
 
 The \fB-Z\fP option causes the program to generate a datalist file
 named "datalistp.mb-1" and then exit. This datalist has the following form:

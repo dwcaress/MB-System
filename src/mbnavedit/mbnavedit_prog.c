@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_prog.c	6/23/95
- *    $Id: mbnavedit_prog.c,v 5.16 2005-11-05 00:58:10 caress Exp $
+ *    $Id: mbnavedit_prog.c,v 5.17 2006-01-06 18:24:13 caress Exp $
  *
  *    Copyright (c) 1995, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	August 28, 2000 (New version - no buffered i/o)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.16  2005/11/05 00:58:10  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.15  2005/06/04 04:45:50  caress
  * Added feature to apply longitude and latitude offsets to the navigation.
  *
@@ -241,7 +244,7 @@ struct mbnavedit_plot_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbnavedit_prog.c,v 5.16 2005-11-05 00:58:10 caress Exp $";
+static char rcs_id[] = "$Id: mbnavedit_prog.c,v 5.17 2006-01-06 18:24:13 caress Exp $";
 static char program_name[] = "MBNAVEDIT";
 static char help_message[] =  "MBNAVEDIT is an interactive navigation editor for swath sonar data.\n\tIt can work with any data format supported by the MBIO library.\n";
 static char usage_message[] = "mbnavedit [-Byr/mo/da/hr/mn/sc -D  -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ooutfile -X -V -H]";
@@ -821,7 +824,7 @@ int mbnavedit_open_file(int useprevious)
 	    }
 
 	/* initialize reading the input multibeam file */
-	status = mb_format_source(5, &format_use, 
+	status = mb_format_source(verbose, &format_use, 
 			&nav_source, &heading_source, 
 			&vru_source, &svp_source, 
 			&error);
@@ -4846,17 +4849,17 @@ int mbnavedit_plot_all()
 		tint_min = center - 0.005;
 		tint_max = center + 0.005;
 		}
-	if ((lon_max - lon_min) < 0.01)
+	if ((lon_max - lon_min) < 0.001)
 		{
 		center = 0.5*(lon_min + lon_max);
-		lon_min = center - 0.005;
-		lon_max = center + 0.005;
+		lon_min = center - 0.0005;
+		lon_max = center + 0.0005;
 		}
-	if ((lat_max - lat_min) < 0.01)
+	if ((lat_max - lat_min) < 0.001)
 		{
 		center = 0.5*(lat_min + lat_max);
-		lat_min = center - 0.005;
-		lat_max = center + 0.005;
+		lat_min = center - 0.0005;
+		lat_max = center + 0.0005;
 		}
 	if (speed_max < 10.0)
 		speed_max = 10.0;

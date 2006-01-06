@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_swap.c	7/6/94
- *    $Id: mb_swap.c,v 5.3 2004-11-06 03:55:15 caress Exp $
+ *    $Id: mb_swap.c,v 5.4 2006-01-06 18:27:18 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -28,6 +28,9 @@
  * Date:	July 6, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2004/11/06 03:55:15  caress
+ * Working to support the Reson 7k format.
+ *
  * Revision 5.2  2003/04/17 21:05:23  caress
  * Release 5.0.beta30
  *
@@ -75,6 +78,22 @@
 #include "../../include/mb_status.h"
 #include "../../include/mb_swap.h"
 #include "../../include/mb_define.h"
+
+/*--------------------------------------------------------------------*/
+/* function mb_swap_check determines if the cpu is byteswapped */
+int mb_swap_check()
+{
+	unsigned short testshort = 255;
+	char		*testchar;
+	testchar = (char *) &testshort;
+	int	byteswapped;
+	if (testchar[0] == 0)
+		byteswapped = MB_NO;
+	else
+		byteswapped = MB_YES;
+	
+	return(byteswapped);
+}
 
 /*--------------------------------------------------------------------*/
 /* function mb_swap_float swaps the bytes of an 4 byte float value */

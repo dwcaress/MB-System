@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad2.h	10/9/98
- *	$Id: mbsys_simrad2.h,v 5.14 2005-11-05 00:48:04 caress Exp $
+ *	$Id: mbsys_simrad2.h,v 5.15 2006-01-06 18:27:18 caress Exp $
  *
  *    Copyright (c) 1998, 2001, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -32,6 +32,9 @@
  * Date:	October 9, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.14  2005/11/05 00:48:04  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.13  2005/04/07 04:24:34  caress
  * 5.0.7 Release.
  *
@@ -312,7 +315,7 @@
 #define	MBSYS_SIMRAD2_MAXBEAMS		254
 #define	MBSYS_SIMRAD2_MAXPIXELS		1024
 #define	MBSYS_SIMRAD2_MAXRAWPIXELS	32000
-#define MBSYS_SIMRAD2_MAXTX		9
+#define MBSYS_SIMRAD2_MAXTX		19
 #define	MBSYS_SIMRAD2_MAXSVP		1024
 #define	MBSYS_SIMRAD2_MAXATTITUDE	100
 #define	MBSYS_SIMRAD2_MAXHEADING	100
@@ -321,8 +324,12 @@
 #define	MBSYS_SIMRAD2_COMMENT_LENGTH	256
 #define	MBSYS_SIMRAD2_BUFFER_SIZE	2048
 
-/* datagram types */
+/* datagram start and end byte */
+#define	EM2_START_BYTE		0x02
+#define	EM2_END_BYTE		0x03
 #define	EM2_END			0x03
+
+/* datagram types including start byte */
 #define	EM2_NONE		0
 #define	EM2_STOP2		0x0230
 #define	EM2_OFF			0x0231
@@ -345,12 +352,43 @@
 #define	EM2_SVP			0x0256
 #define	EM2_SSPINPUT		0x0257
 #define	EM2_RAWBEAM2		0x0265
+#define	EM2_RAWBEAM3		0x0266
 #define	EM2_HEIGHT		0x0268
 #define	EM2_STOP		0x0269
 #define	EM2_REMOTE		0x0270
 #define	EM2_SSP			0x0273
 #define	EM2_BATH_MBA		0x02E1
 #define	EM2_SS_MBA		0x02E2
+
+/* datagram types */
+#define	EM2_ID_STOP2		0x30
+#define	EM2_ID_OFF		0x31
+#define	EM2_ID_ON		0x32
+#define	EM2_ID_ATTITUDE		0x41
+#define	EM2_ID_CLOCK		0x43
+#define	EM2_ID_BATH		0x44
+#define	EM2_ID_SBDEPTH		0x45
+#define	EM2_ID_RAWBEAM		0x46
+#define	EM2_ID_SSV		0x47
+#define	EM2_ID_HEADING		0x48
+#define	EM2_ID_START		0x49
+#define	EM2_ID_TILT		0x4A
+#define	EM2_ID_CBECHO		0x4B
+#define	EM2_ID_POS		0x50
+#define	EM2_ID_RUN_PARAMETER	0x52
+#define	EM2_ID_SS		0x53
+#define	EM2_ID_TIDE		0x54
+#define	EM2_ID_SVP2		0x55
+#define	EM2_ID_SVP		0x56
+#define	EM2_ID_SSPINPUT		0x57
+#define	EM2_ID_RAWBEAM2		0x65
+#define	EM2_ID_RAWBEAM3		0x66
+#define	EM2_ID_HEIGHT		0x68
+#define	EM2_ID_STOP		0x69
+#define	EM2_ID_REMOTE		0x70
+#define	EM2_ID_SSP		0x73
+#define	EM2_ID_BATH_MBA		0xE1
+#define	EM2_ID_SS_MBA		0xE2
 
 /* datagram sizes where constant */
 #define	EM2_RUN_PARAMETER_SIZE		52
@@ -380,6 +418,9 @@
 #define	EM2_RAWBEAM2_HEADER_SIZE	42
 #define	EM2_RAWBEAM2_BEAM_SIZE		16
 #define	EM2_RAWBEAM2_TX_SIZE		12
+#define	EM2_RAWBEAM3_HEADER_SIZE	32
+#define	EM2_RAWBEAM3_BEAM_SIZE		12
+#define	EM2_RAWBEAM3_TX_SIZE		20
 #define	EM2_SS_HEADER_SIZE		28
 #define	EM2_SS_BEAM_SIZE		6
 #define	EM2_SS_MBA_HEADER_SIZE		32
@@ -391,7 +432,7 @@
 #define	EM2_INVALID_SHORT		0xFFFF
 #define EM2_INVALID_U_INT		0xFFFFFFFF
 #define EM2_INVALID_INT			0x7FFFFFFF
-
+     
 /* internal data structure for survey data */
 struct mbsys_simrad2_ping_struct
 	{
@@ -509,7 +550,7 @@ struct mbsys_simrad2_ping_struct
 					    - nonzero only if raw beam record read */
 	int	png_raw_depth_res;	/* depth resolution (0.01 m) */
 	int	png_raw_distance_res;	/* x and y resolution (0.01 m) */
-	int	png_raw_sample_rate;	/* sampling rate (Hz) */
+	int	png_raw_sample_rate;	/* sampling rate (Hz or 0.01 Hz) */
 	int	png_raw_status;		/* status from PU/TRU */
 	int	png_raw_rangenormal;	/* normal incidence range (meters) */
 	int	png_raw_normalbackscatter; /* normal incidence backscatter (dB) (-60 to +9) */
@@ -560,6 +601,47 @@ struct mbsys_simrad2_ping_struct
 	int	png_raw_rxroll[MBSYS_SIMRAD2_MAXBEAMS];	/* roll (0.01 deg) */
 	int	png_raw_rxpitch[MBSYS_SIMRAD2_MAXBEAMS];	/* pitch angle (0.01 deg) */
 	int	png_raw_rxheave[MBSYS_SIMRAD2_MAXBEAMS];	/* heave (0.01 m) */
+				
+	/* raw travel time and angle data version 3 */
+	int	png_raw3_read;	/* flag indicating actual reading of newer rawbeam record */
+	int	png_raw3_date;	/* date = year*10000 + month*100 + day
+				    Feb 26, 1995 = 19950226 */
+	int	png_raw3_msec;	/* time since midnight in msec
+				    08:12:51.234 = 29570234 */
+	int	png_raw3_count;	/* sequential counter or input identifier */
+	int	png_raw3_serial;	/* system 1 or system 2 serial number */
+	int	png_raw3_ntx;		/* number of TX pulses (1 to 9) */
+	int	png_raw3_nbeams;		/* number of raw travel times and angles
+					    - nonzero only if raw beam record read */
+	int	png_raw3_sample_rate;	/* sampling rate (Hz or 0.01 Hz) */
+	int	png_raw3_xducer_depth;	/* transmit transducer depth (0.01 m) */
+	int	png_raw3_ssv;		/* sound speed at transducer (0.1 m/sec) */
+	int	png_raw3_nbeams_max;	/* maximum number of beams possible */
+	int	png_raw3_txtiltangle[MBSYS_SIMRAD2_MAXTX];/* tilt angle (0.01 deg) */
+	int	png_raw3_txfocus[MBSYS_SIMRAD2_MAXTX];   /* focus range (0.1 m)
+								0 = no focus */
+	int	png_raw3_txsignallength[MBSYS_SIMRAD2_MAXTX];	/* signal length (usec) */
+	int	png_raw3_txoffset[MBSYS_SIMRAD2_MAXTX];	/* transmit time offset (usec) */
+	int	png_raw3_txcenter[MBSYS_SIMRAD2_MAXTX];	/* center frequency (Hz) */
+	int	png_raw3_txbandwidth[MBSYS_SIMRAD2_MAXTX];	/* bandwidth (10 Hz) */
+	int	png_raw3_txwaveform[MBSYS_SIMRAD2_MAXTX];	/* signal waveform identifier 
+									0 = CW, 1 = FM */
+	int	png_raw3_txsector[MBSYS_SIMRAD2_MAXTX];	/* transmit sector number (0-19) */
+	int	png_raw3_rxpointangle[MBSYS_SIMRAD2_MAXBEAMS];
+				/* Raw beam pointing angles in 0.01 degree,
+					positive to port. 
+					These values are relative to the transducer 
+					array and have not been corrected
+					for vessel motion. */
+	int	png_raw3_rxrange[MBSYS_SIMRAD2_MAXBEAMS];	/* Ranges (0.25 samples) */
+	int	png_raw3_rxsector[MBSYS_SIMRAD2_MAXBEAMS];	/* transmit sector identifier */
+	int	png_raw3_rxamp[MBSYS_SIMRAD2_MAXBEAMS];		/* 0.5 dB */
+	int	png_raw3_rxquality[MBSYS_SIMRAD2_MAXBEAMS];	/* beam quality flag */
+	int	png_raw3_rxwindow[MBSYS_SIMRAD2_MAXBEAMS];	/* length of detection window */
+	int	png_raw3_rxbeam_num[MBSYS_SIMRAD2_MAXBEAMS];	
+				/* beam 128 is first beam on 
+				    second head of EM3000D */
+	int	png_raw3_rxspare[MBSYS_SIMRAD2_MAXBEAMS];	/* spare */
 
 	/* sidescan */
 	int	png_ss_read;	/* flag indicating actual reading of sidescan record */

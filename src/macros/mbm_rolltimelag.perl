@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_rollover.perl	6/18/93
-#    $Id: mbm_rolltimelag.perl,v 5.0 2005-11-05 01:35:38 caress Exp $
+#    $Id: mbm_rolltimelag.perl,v 5.1 2006-01-06 18:26:26 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 2000, 2003 by 
 #    D. W. Caress (caress@mbari.org)
@@ -35,17 +35,20 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   June 13, 1993
 #
 # Version:
-#   $Id: mbm_rolltimelag.perl,v 5.0 2005-11-05 01:35:38 caress Exp $
+#   $Id: mbm_rolltimelag.perl,v 5.1 2006-01-06 18:26:26 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.0  2005/11/05 01:35:38  caress
+#   Macro to analyze attitude time lag problem. This is mainly intended for use with Reson 7k data.
+#
 #
 #
 #
 $program_name = "mbm_rolltimelag";
 #
 # Deal with command line arguments
-&Getopts('I:i:F:f:T:t:W:w:Vv');
+&Getopts('I:i:F:f:N:n:S:s:T:t:Vv');
 $file =        ($opt_I || $opt_i);
 $format =      ($opt_F || $opt_f);
 $timelagstep = ($opt_S || $opt_s || 0.05);
@@ -126,18 +129,19 @@ if (!open(XFIL,">$xcorrfile"))
 print "\nCalculating roll/slope cross correlation for $file_mb ...\n";
 print "Running mblist...\n";
 #print "Running mblist...\nmblist -F$formats[$cnt-1] -I$file_mb -OMA\n";
-@mblist = `mblist -F$formats[$cnt-1] -I$file_mb -OMA >& 1`;
+@mblist = `mblist -F$formats[$cnt-1] -I$file_mb -OMAR >& 1`;
 $nslope = 0;
 while (@mblist)
 	{
 	$line = shift @mblist;
 	if ($line =~ /(\S+)\s+(\S+)/)
 		{
-		($time_d, $slope) = $line =~ /(\S+)\s+(\S+)/;
+		($time_d, $slope, $roll) = $line =~ /(\S+)\s+(\S+)\s+(\S+)/;
 		if ($nslope == 0 || $time_d > @slope_time_d[$nslope-1])
 			{
 			push(@slope_time_d, $time_d);
-			push(@slope, $slope);
+			push(@slope, -$slope + $roll);
+			push(@slope_roll, $roll);
 			$nslope++;
 			}
 		}
@@ -168,7 +172,7 @@ print "Read $nroll roll data...\n";
 # Print out what's been read
 # for ($i = 0; $i < $nslope; $i++)
 # 	{
-# 	print "Slope: @slope_time_d[$i] @slope[$i]\n";
+# 	print "Slope: @slope_time_d[$i] @slope[$i] @slope_roll[$i]\n";
 # 	}
 # for ($i = 0; $i < $nroll; $i++)
 # 	{
@@ -227,7 +231,7 @@ for ($i = 0; $i < $nslope / $npings; $i++)
 				{
 				# interpolate lagged roll value
 				$nr = -1;
-				$time_d = @slope_time_d[$j] - $timelag;
+				$time_d = @slope_time_d[$j] + $timelag;
 				for ($l = 0; $l < $nroll - 1 && $nr < 0; $l++)
 					{
 					if ($time_d >= @roll_time_d[$l] 
@@ -314,12 +318,13 @@ $j0, $j1, $maxtimelag, $maxr, $peaktimelag, $peakr;
 	}
 	
 # generate plot of cross correlation data
-'mbm_xyplot -I$xcorrfile -M';
+'mbm_xyplot -I$xcorrfile';
 
 # clear arrays 
 $nslope = 0;
 @slope = ();
 @slope_time_d = ();
+@slope_roll = ();
 $nroll = 0;
 @roll = ();
 @roll_time_d = ();

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_esf.c	4/10/2003
- *    $Id: mb_esf.c,v 5.8 2005-04-07 04:24:33 caress Exp $
+ *    $Id: mb_esf.c,v 5.9 2006-01-06 18:27:19 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	April 10, 2003
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2005/04/07 04:24:33  caress
+ * 5.0.7 Release.
+ *
  * Revision 5.7  2005/03/26 22:05:18  caress
  * Release 5.0.7.
  *
@@ -61,7 +64,7 @@
 #include "../../include/mb_process.h"
 #include "../../include/mb_swap.h"
 
-static char rcs_id[]="$Id: mb_esf.c,v 5.8 2005-04-07 04:24:33 caress Exp $";
+static char rcs_id[]="$Id: mb_esf.c,v 5.9 2006-01-06 18:27:19 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 /* 	function mb_esf_check checks for an existing esf file. */
@@ -233,6 +236,7 @@ int mb_esf_open(int verbose, char *esffile,
 	esf->edit = NULL;
 	esf->esffp = NULL;
 	esf->essfp = NULL;
+	esf->byteswapped = mb_swap_check();
 	
 	/* load edits from existing esf file if requested */
 	if (load == MB_YES)
@@ -297,14 +301,12 @@ int mb_esf_open(int verbose, char *esffile,
 				status = MB_FAILURE;
 				*error = MB_ERROR_EOF;
 				}
-#ifdef BYTESWAPPED
-			    else
+			    else if (esf->byteswapped == MB_YES)
 				{
 				mb_swap_double(&(esf->edit[i].time_d));
 				esf->edit[i].beam = mb_swap_int(esf->edit[i].beam);
 				esf->edit[i].action = mb_swap_int(esf->edit[i].action);
 				}
-#endif
 /*fprintf(stderr,"EDITS READ: i:%d edit: %f %d %d  use:%d\n",
 i,esf->edit[i].time_d,esf->edit[i].beam,
 esf->edit[i].action,esf->edit[i].use);*/
@@ -566,11 +568,12 @@ int mb_esf_save(int verbose, struct mb_esf_struct *esf,
 	if (esf->esffp != NULL)
 	    {		
 /*fprintf(stderr,"OUTPUT EDIT: %f %d %d\n",time_d,beam,action);*/
-#ifdef BYTESWAPPED
-	    mb_swap_double(&time_d);
-	    beam = mb_swap_int(beam);
-	    action = mb_swap_int(action);
-#endif
+	    if (esf->byteswapped == MB_YES)
+	    	{
+	   	mb_swap_double(&time_d);
+	    	beam = mb_swap_int(beam);
+	    	action = mb_swap_int(action);
+		}
 	    if (fwrite(&time_d, sizeof(double), 1, esf->esffp) != 1)
 		{
 		status = MB_FAILURE;
@@ -636,11 +639,12 @@ int mb_ess_save(int verbose, struct mb_esf_struct *esf,
 	if (esf->essfp != NULL)
 	    {		
 /*fprintf(stderr,"OUTPUT EDIT: %f %d %d\n",time_d,beam,action);*/
-#ifdef BYTESWAPPED
-	    mb_swap_double(&time_d);
-	    beam = mb_swap_int(beam);
-	    action = mb_swap_int(action);
-#endif
+	    if (esf->byteswapped == MB_YES)
+	    	{
+	        mb_swap_double(&time_d);
+	        beam = mb_swap_int(beam);
+	        action = mb_swap_int(action);
+		}
 	    if (fwrite(&time_d, sizeof(double), 1, esf->essfp) != 1)
 		{
 		status = MB_FAILURE;

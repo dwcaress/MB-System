@@ -223,6 +223,28 @@ is a an attitude time lag, then the bathymetry collected over a planar
 bottom should be dominated by a jitter that is correlated, with a time
 lag, with the roll signal.
 
+The format 56 (vendor Simrad multibeam format) i/o module has been 
+altered to support data logged on byteswapped platforms (e.g. Windows 
+Intel PC's.). The Simrad multibeam formats 56 and 57 now support a
+recently introduced raw range and beam angle datagram.
+
+The program mbdatalist has been augmented to allow users to easily identify
+some problems with swath data files and the processing parameters 
+specified in parameter files. The -n and -o options are used to generate
+ancillary files for all swath files referenced through a recursive datalist
+structure. These options now invoke mbinfo with the -n option, causing
+the "inf" files to include listings of easily identified data problems.
+The -q option of mbdatalist now extracts and lists these data problems
+as well as problems with the processing parameters.The possible data problems
+include:
+        No survey data found
+        Zero longitude or latitude in survey data
+        Instantaneous speed exceeds 25 km/hr
+        Average speed exceeds 25 km/hr
+        Sounding depth exceeds 11000 m
+        Unsupported Simrad datagram
+To populate the "inf" files of existing datalist structures with data problem 
+notices, use mbdatalist with the -n option.
 
 MB-SYSTEM VERSION 5.0.7 RELEASE NOTES:
 ------------------------------------------
@@ -1108,10 +1130,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.64 2005-11-05 01:43:16 caress Exp $
+RCS ID: $Id: README,v 5.65 2006-01-06 18:18:25 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.64  2005/11/05 01:43:16  caress
+Update.
+
 Revision 5.63  2005/06/15 15:05:42  caress
 Some new fixes noted.
 

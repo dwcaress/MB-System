@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_process.h	9/11/00
- *    $Id: mb_process.h,v 5.22 2005-03-25 04:16:41 caress Exp $
+ *    $Id: mb_process.h,v 5.23 2006-01-06 18:27:19 caress Exp $
  *
  *    Copyright (c) 2000, 2002, 2003, 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -457,6 +457,9 @@
  * Date:	September 11, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.22  2005/03/25 04:16:41  caress
+ * Added sonar depth merging to mbprocess.
+ *
  * Revision 5.21  2004/12/02 06:33:31  caress
  * Fixes while supporting Reson 7k data.
  *
@@ -789,6 +792,7 @@ struct mb_esf_struct
 	{
 	char	esffile[MB_PATH_MAXLINE];
 	char	esstream[MB_PATH_MAXLINE];
+	int	byteswapped;
 	int	nedit;
 	struct mb_edit_struct	*edit;
 	FILE	*esffp;

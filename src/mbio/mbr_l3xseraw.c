@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_l3xseraw.c	3/27/2000
- *	$Id: mbr_l3xseraw.c,v 5.14 2005-11-05 00:48:04 caress Exp $
+ *	$Id: mbr_l3xseraw.c,v 5.15 2006-01-06 18:27:19 caress Exp $
  *
  *    Copyright (c) 2000, 2001, 2002, 2003 by 
  *    D. W. Caress (caress@mbari.org)
@@ -26,6 +26,9 @@
  * Additional Authors:	P. A. Cohen and S. Dzurenko
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.14  2005/11/05 00:48:04  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.13  2003/05/20 18:05:32  caress
  * Added svp_source to data source parameters.
  *
@@ -130,7 +133,7 @@ int mbr_wt_l3xseraw(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_l3xseraw(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.14 2005-11-05 00:48:04 caress Exp $";
+	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.15 2006-01-06 18:27:19 caress Exp $";
 	char	*function_name = "mbr_register_l3xseraw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -263,7 +266,7 @@ int mbr_info_l3xseraw(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.14 2005-11-05 00:48:04 caress Exp $";
+	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.15 2006-01-06 18:27:19 caress Exp $";
 	char	*function_name = "mbr_info_l3xseraw";
 	int	status = MB_SUCCESS;
 
@@ -333,7 +336,7 @@ int mbr_info_l3xseraw(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_l3xseraw(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.14 2005-11-05 00:48:04 caress Exp $";
+	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.15 2006-01-06 18:27:19 caress Exp $";
 	char	*function_name = "mbr_alm_l3xseraw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -816,6 +819,25 @@ fprintf(stderr, "READ SIDESCAN\n");
 				    *frame_expect = MBSYS_XSE_MBM_FRAME;
 				    done = MB_NO;
 				    }
+#ifdef MB_DEBUG
+fprintf(stderr, "\tDONE:%d BEAMS:%d PIXELS:%d\n", done, store->mul_num_beams, store->sid_num_pixels);
+#endif
+			    }
+			else if (frame_id == MBSYS_XSE_MBM_FRAME
+				&& *frame_expect == MBSYS_XSE_SSN_FRAME)
+			    {
+#ifdef MB_DEBUG
+fprintf(stderr, "READ NOTHING - SAVE HEADER\n");
+#endif
+			    store->kind = MB_DATA_DATA;
+			    *frame_save = MB_YES;
+			    *frame_id_save = frame_id;
+			    *frame_source_save = frame_source;
+			    *frame_sec_save = frame_sec;
+			    *frame_usec_save = frame_usec;
+			    *buffer_size_save = buffer_size;
+			    *frame_expect = MBSYS_XSE_NONE_FRAME;
+			    done = MB_YES;
 #ifdef MB_DEBUG
 fprintf(stderr, "\tDONE:%d BEAMS:%d PIXELS:%d\n", done, store->mul_num_beams, store->sid_num_pixels);
 #endif

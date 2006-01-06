@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_process.c	9/11/00
- *    $Id: mb_process.c,v 5.33 2005-11-05 00:48:04 caress Exp $
+ *    $Id: mb_process.c,v 5.34 2006-01-06 18:27:19 caress Exp $
  *
  *    Copyright (c) 2000, 2002, 2003, 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	September 11, 2000
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.33  2005/11/05 00:48:04  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.32  2005/03/25 04:16:41  caress
  * Added sonar depth merging to mbprocess.
  *
@@ -149,7 +152,7 @@
 #include "../../include/mb_format.h"
 #include "../../include/mb_process.h"
 
-static char rcs_id[]="$Id: mb_process.c,v 5.33 2005-11-05 00:48:04 caress Exp $";
+static char rcs_id[]="$Id: mb_process.c,v 5.34 2006-01-06 18:27:19 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_pr_readpar(int verbose, char *file, int lookforfiles, 
@@ -2105,7 +2108,8 @@ int mb_pr_get_output(int verbose, int *format,
 }
 /*--------------------------------------------------------------------*/
 int mb_pr_check(int verbose, char *ifile, 
-			int *problem, 	
+			int *nparproblem, 	
+			int *ndataproblem, 	
 			int *error)
 {
 	char	*function_name = "mb_pr_check";
@@ -2113,6 +2117,9 @@ int mb_pr_check(int verbose, char *ifile,
 	struct mb_process_struct process;
 	char	ofile[MBP_FILENAMESIZE];
 	int	format;
+	char	line[MB_PATH_MAXLINE];
+	FILE	*fp;
+	int	dataproblemid;
 	int	unexpected_format = MB_NO;
 	int	unexpected_output = MB_NO;
 	int	missing_ifile = MB_NO;
@@ -2147,7 +2154,8 @@ int mb_pr_check(int verbose, char *ifile,
 		output = stderr;
 		
 	/* set no problem */
-	*problem = MB_NO;
+	*nparproblem = 0;
+	*ndataproblem = 0;
 	unexpected_format = MB_NO;
 	unexpected_output = MB_NO;
 	missing_ifile = MB_NO;
@@ -2164,10 +2172,10 @@ int mb_pr_check(int verbose, char *ifile,
 	if (stat(ifile, &statbuf) != 0)
 	    {
 	    missing_ifile = MB_YES;
-	    *problem = MB_YES;
+	    *nparproblem++;
 	    }
 	
-	/* only check rest if parameter file exists */
+	/* only check parameter file if parameter file exists */
 	sprintf(ofile, "%s.par", ifile);
 	if (stat(ofile, &statbuf) == 0)
 	    {
@@ -2187,7 +2195,7 @@ int mb_pr_check(int verbose, char *ifile,
 		&& process.mbp_format != format)
 		{
 		unexpected_format = MB_YES;
-		*problem = MB_YES;
+		*nparproblem++;
 		
 		/* get output file with specified format */
 		status = mb_pr_get_output(verbose, &process.mbp_format, process.mbp_ifile, 
@@ -2202,7 +2210,7 @@ int mb_pr_check(int verbose, char *ifile,
 		if (strcmp(process.mbp_ofile, ofile) != 0)
 		    {
 		    unexpected_output = MB_YES;
-		    *problem = MB_YES;
+		    *nparproblem++;
 		    }
 		}
     
@@ -2211,7 +2219,7 @@ int mb_pr_check(int verbose, char *ifile,
 		&& stat(process.mbp_ofile, &statbuf) != 0)
 		{
 		missing_ofile = MB_YES;
-		*problem = MB_YES;
+		*nparproblem++;
 		}
     
 	    /* check if nav file specified but does not exist */
@@ -2219,7 +2227,7 @@ int mb_pr_check(int verbose, char *ifile,
 		&& stat(process.mbp_navfile, &statbuf) != 0)
 		{
 		missing_navfile = MB_YES;
-		*problem = MB_YES;
+		*nparproblem++;
 		}
     
 	    /* check if navadj file specified but does not exist */
@@ -2227,7 +2235,7 @@ int mb_pr_check(int verbose, char *ifile,
 		&& stat(process.mbp_navadjfile, &statbuf) != 0)
 		{
 		missing_navadjfile = MB_YES;
-		*problem = MB_YES;
+		*nparproblem++;
 		}
    
 	    /* check if attitude file specified but does not exist */
@@ -2235,7 +2243,7 @@ int mb_pr_check(int verbose, char *ifile,
 		&& stat(process.mbp_attitudefile, &statbuf) != 0)
 		{
 		missing_attitudefile = MB_YES;
-		*problem = MB_YES;
+		*nparproblem++;
 		}
    
 	    /* check if sonardepth file specified but does not exist */
@@ -2243,7 +2251,7 @@ int mb_pr_check(int verbose, char *ifile,
 		&& stat(process.mbp_sonardepthfile, &statbuf) != 0)
 		{
 		missing_sonardepthfile = MB_YES;
-		*problem = MB_YES;
+		*nparproblem++;
 		}
     
 	    /* check if svp file specified but does not exist */
@@ -2251,7 +2259,7 @@ int mb_pr_check(int verbose, char *ifile,
 		&& stat(process.mbp_svpfile, &statbuf) != 0)
 		{
 		missing_svpfile = MB_YES;
-		*problem = MB_YES;
+		*nparproblem++;
 		}
     
 	    /* check if edit file specified but does not exist */
@@ -2259,7 +2267,7 @@ int mb_pr_check(int verbose, char *ifile,
 		&& stat(process.mbp_editfile, &statbuf) != 0)
 		{
 		missing_editfile = MB_YES;
-		*problem = MB_YES;
+		*nparproblem++;
 		}
     
 	    /* check if tide file specified but does not exist */
@@ -2267,14 +2275,36 @@ int mb_pr_check(int verbose, char *ifile,
 		&& stat(process.mbp_tidefile, &statbuf) != 0)
 		{
 		missing_tidefile = MB_YES;
-		*problem = MB_YES;
+		*nparproblem++;
 		}
 	    }
+	
+	/* only check inf file if inf file exists */
+	sprintf(ofile, "%s.inf", ifile);
+	if (stat(ofile, &statbuf) == 0)
+	    {
+	    /* open if possible */
+	    if ((fp = fopen(ofile,"r")) != NULL)
+		    {
+		    /* read the inf file */
+		    while (fgets(line, MB_PATH_MAXLINE, fp) != NULL)
+			{
+			if (strncmp(line, "PN: ", 4) == 0)
+			    {
+			    if (*ndataproblem == 0 && verbose > 0)
+			    	fprintf(output, "\nData File Problems: %s\n", ifile);
+			    fprintf(output, "%s: %s", ifile, &line[4]);
+			    (*ndataproblem)++;
+			    }
+			}
+		    }
+	    }
+
 	    
 	/* output results */
-	if (*problem == MB_YES && verbose > 0)
+	if (*nparproblem > 0 && verbose > 0)
 	    {
-	    fprintf(output, "\nParameter File Problem: %s\n", process.mbp_ifile);
+	    fprintf(output, "\nParameter File Problems: %s\n", ifile);
 	    if (unexpected_format == MB_YES)
 		fprintf(output, "\tUnexpected format: %d instead of %d\n", 
 			process.mbp_format, format);
@@ -2309,7 +2339,7 @@ int mb_pr_check(int verbose, char *ifile,
 		fprintf(output, "\tMissing tide file: %s does not exist\n", 
 			process.mbp_tidefile);
 	    }
-	else if (*problem == MB_YES)
+	else if (*nparproblem > 0)
 	    {
 	    if (unexpected_format == MB_YES)
 		fprintf(output, "%s : Unexpected format : %d\n", 
@@ -2352,10 +2382,11 @@ int mb_pr_check(int verbose, char *ifile,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return value:\n");
-		fprintf(stderr,"dbg2       problem:    %d\n",problem);
-		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2       nparproblem:  %d\n",*nparproblem);
+		fprintf(stderr,"dbg2       ndataproblem: %d\n",*ndataproblem);
+		fprintf(stderr,"dbg2       error:        %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:     %d\n",status);
+		fprintf(stderr,"dbg2       status:       %d\n",status);
 		}
 
 	/* return status */

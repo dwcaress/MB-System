@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	4/8/93
- *    $Id: mbedit_prog.c,v 5.26 2005-11-04 22:51:11 caress Exp $
+ *    $Id: mbedit_prog.c,v 5.27 2006-01-06 18:25:45 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -27,6 +27,9 @@
  * Date:	September 19, 2000 (New version - no buffered i/o)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.26  2005/11/04 22:51:11  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.25  2005/03/25 04:12:24  caress
  * MBedit now allows alongtrack and acrosstrack views as well as the traditional waterfall display of profiles.
  *
@@ -352,7 +355,7 @@ struct mbedit_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbedit_prog.c,v 5.26 2005-11-04 22:51:11 caress Exp $";
+static char rcs_id[] = "$Id: mbedit_prog.c,v 5.27 2006-01-06 18:25:45 caress Exp $";
 static char program_name[] = "MBedit";
 static char help_message[] =  
 "MBedit is an interactive editor used to identify and flag\n\
@@ -5049,7 +5052,7 @@ int mbedit_plot_all(
 	char	string[MB_PATH_MAXLINE];
 	char	*string_ptr;
 	int	fpx, fpdx, fpy, fpdy;
-	double	tsmin, tsmax, tsscale, tsvalue;
+	double	tsmin, tsmax, tsscale, tsvalue, tsslope;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -5427,17 +5430,38 @@ int mbedit_plot_all(
 		/* if plotting roll, also plot acrosstrack slope */
 		if (show_time == MBEDIT_PLOT_ROLL)
 			{
-			mbedit_xtrackslope(current_id, &tsvalue);
-			x0 = margin/2 + (int) ((tsvalue - tsmin) * tsscale);
+			mbedit_xtrackslope(current_id, &tsslope);
+			x0 = margin/2 + (int) ((tsslope - tsmin) * tsscale);
 			y0 = ymax - dy / 2;
 			for (i=current_id;i<current_id+nplot;i++)
 				{
 				/*x = margin/2 + ping[i].heading / 360.0 * 2 * margin;*/
-				mbedit_xtrackslope(i, &tsvalue);
-				x = margin/2 + (int) ((tsvalue - tsmin) * tsscale);
+				mbedit_xtrackslope(i, &tsslope);
+				x = margin/2 + (int) ((tsslope - tsmin) * tsscale);
 				y = ymax - dy / 2 - (i - current_id) * dy;
 				xg_drawline(mbedit_xgid,x0,y0,x,y,
 					pixel_values[RED],XG_SOLIDLINE);
+				x0 = x;
+				y0 = y;
+				}
+			}
+			
+		/* if plotting roll, also plot acrosstrack slope - roll */
+		if (show_time == MBEDIT_PLOT_ROLL)
+			{
+			mbedit_xtrackslope(current_id, &tsslope);
+			mbedit_tsvalue(i, show_time, &tsvalue);
+			x0 = margin/2 + (int) ((tsvalue - tsslope - tsmin) * tsscale);
+			y0 = ymax - dy / 2;
+			for (i=current_id;i<current_id+nplot;i++)
+				{
+				/*x = margin/2 + ping[i].heading / 360.0 * 2 * margin;*/
+				mbedit_xtrackslope(i, &tsslope);
+				mbedit_tsvalue(i, show_time, &tsvalue);
+				x = margin/2 + (int) ((tsvalue - tsslope - tsmin) * tsscale);
+				y = ymax - dy / 2 - (i - current_id) * dy;
+				xg_drawline(mbedit_xgid,x0,y0,x,y,
+					pixel_values[BLUE],XG_SOLIDLINE);
 				x0 = x;
 				y0 = y;
 				}
@@ -6481,7 +6505,7 @@ int mbedit_tsminmax(int iping, int nping, int data_id, double *tsmin, double *ts
 	/* local variables */
 	char	*function_name = "mbedit_tsminmax";
 	int	status = MB_SUCCESS;
-	double	value;
+	double	value, value2;
 	double	halfwidth;
 	double	center;
 	int	i;
@@ -6512,6 +6536,16 @@ int mbedit_tsminmax(int iping, int nping, int data_id, double *tsmin, double *ts
 			mbedit_tsvalue(i, data_id, &value);
 			*tsmin = MIN(*tsmin, value);
 			*tsmax = MAX(*tsmax, value);
+			
+			/* handle slope plotting in roll plot */
+			if (data_id == MBEDIT_PLOT_ROLL)
+				{
+				mbedit_xtrackslope(i, &value2);
+				*tsmin = MIN(*tsmin, value2);
+				*tsmax = MAX(*tsmax, value2);
+				*tsmin = MIN(*tsmin, value - value2);
+				*tsmax = MAX(*tsmax, value - value2);
+				}
 			}
 		}
 		
@@ -6605,7 +6639,7 @@ int mbedit_tsminmax(int iping, int nping, int data_id, double *tsmin, double *ts
 int mbedit_xtrackslope(int iping, double *slope)
 {
 	/* local variables */
-	char	*function_name = "mbedit_tsvalue";
+	char	*function_name = "mbedit_xtrackslope";
 	int	status = MB_SUCCESS;
 	int	jbeam;
 	int	ns;

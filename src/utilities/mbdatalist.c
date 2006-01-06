@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbdatalist.c	10/10/2001
- *    $Id: mbdatalist.c,v 5.9 2005-11-05 01:07:54 caress Exp $
+ *    $Id: mbdatalist.c,v 5.10 2006-01-06 18:19:58 caress Exp $
  *
  *    Copyright (c) 2001, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	October 10, 2001
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.9  2005/11/05 01:07:54  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.8  2004/10/06 19:10:52  caress
  * Release 5.0.5 update.
  *
@@ -67,7 +70,7 @@
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbdatalist.c,v 5.9 2005-11-05 01:07:54 caress Exp $";
+	static char rcs_id[] = "$Id: mbdatalist.c,v 5.10 2006-01-06 18:19:58 caress Exp $";
 	static char program_name[] = "mbdatalist";
 	static char help_message[] =  "mbdatalist parses recursive datalist files and outputs the\ncomplete list of data files and formats. \nThe results are dumped to stdout.";
 	static char usage_message[] = "mbdatalist [-Fformat -Ifile -N -O -P -Q -Rw/e/s/n -U -Z -V -H]";
@@ -106,7 +109,11 @@ main (int argc, char **argv)
 	int	force_update = MB_NO;
 	int	problem_report = MB_NO;
 	int	problem = MB_NO;
-	int	nproblem = 0;
+	int	nparproblem;
+	int	ndataproblem;
+	int	nparproblemtot = 0;
+	int	ndataproblemtot = 0;
+	int	nproblemfiles = 0;
 	int	make_datalistp = MB_NO;
 	
 	/* output stream for basic stuff (stdout if verbose <= 1,
@@ -293,9 +300,12 @@ main (int argc, char **argv)
 		    }
 		else if (problem_report == MB_YES)
 		    {
-		    status = mb_pr_check(verbose, read_file, &problem, &error);
-		    if (problem == MB_YES)
-			nproblem++;
+		    status = mb_pr_check(verbose, read_file, &nparproblem, &ndataproblem, &error);
+		    if (nparproblem + ndataproblem > 0)
+			nproblemfiles++;
+		    nparproblemtot += nparproblem;
+		    ndataproblemtot += ndataproblem;
+			
 		    }
 		else
 		    {
@@ -345,9 +355,11 @@ main (int argc, char **argv)
 			    }
 			else if (problem_report == MB_YES)
 			    {
-			    status = mb_pr_check(verbose, file, &problem, &error);
-			    if (problem == MB_YES)
-				nproblem++;
+			    status = mb_pr_check(verbose, file, &nparproblem, &ndataproblem, &error);
+		    	    if (nparproblem + ndataproblem > 0)
+				nproblemfiles++;
+		    	    nparproblemtot += nparproblem;
+		    	    ndataproblemtot += ndataproblem;
 			    }
 			else
 			    {
@@ -379,9 +391,13 @@ main (int argc, char **argv)
 	/* output counts */
 	if (verbose > 0)
 	    {
-	    fprintf(output, "\nTotal swath files: %d\n", nfile);
+	    fprintf(output, "\nTotal swath files:         %d\n", nfile);
 	    if (problem_report == MB_YES)
-		fprintf(output, "Total problems identified: %d\n", nproblem);
+	    	{
+		fprintf(output, "Total files with problems: %d\n", nproblemfiles);
+		fprintf(output, "Total parameter problems:  %d\n", nparproblemtot);
+		fprintf(output, "Total data problems:       %d\n", ndataproblemtot);
+		}
 	    }
 
 	/* check memory */

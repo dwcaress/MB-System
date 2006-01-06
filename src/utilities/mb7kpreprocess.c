@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb7kpreprocess.c	10/12/2005
- *    $Id: mb7kpreprocess.c,v 5.0 2005-11-05 01:09:17 caress Exp $
+ *    $Id: mb7kpreprocess.c,v 5.1 2006-01-06 18:19:58 caress Exp $
  *
  *    Copyright (c) 2005 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	October 12, 2005
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2005/11/05 01:09:17  caress
+ * Program to preprocess Reson 7k format data.
+ *
  *
  */
 
@@ -40,8 +43,10 @@
 #include "../../include/mbsys_reson7k.h"
 
 #define MB7KPREPROCESS_ALLOC_CHUNK 1000
+#define MB7KPREPROCESS_PROCESS		1
+#define MB7KPREPROCESS_TIMESTAMPLIST	2
 
-static char rcs_id[] = "$Id: mb7kpreprocess.c,v 5.0 2005-11-05 01:09:17 caress Exp $";
+static char rcs_id[] = "$Id: mb7kpreprocess.c,v 5.1 2006-01-06 18:19:58 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
@@ -124,6 +129,10 @@ main (int argc, char **argv)
 	char	comment[MB_COMMENT_MAXLINE];
 	int	icomment = 0;
 	
+	/* program mode */
+	int	mode = MB7KPREPROCESS_PROCESS;
+	int	fix_time_stamps = MB_NO;
+	
 	/* data structure pointers */
 	s7kr_fileheader		*fileheader;
 	s7kr_position 		*position;
@@ -196,6 +205,9 @@ main (int argc, char **argv)
 	double	*batht_time_d = NULL;
 	int	*batht_ping = NULL;
 	double	*batht_time_d_new = NULL;
+	double	*batht_time_offset = NULL;
+	int	*batht_ping_offset = NULL;
+	int	*batht_good_offset = NULL;
 	
 	/* edgetech timetag data */
 	int	nedget = 0;
@@ -228,7 +240,11 @@ main (int argc, char **argv)
 	int	found, jfound;
 	int	d1, d2;
 	double	v;
-	
+	int	sslo_lastread;
+	double	sslo_last_time_d;
+	int	sslo_last_ping;
+	int	foundstart, foundend;
+	int	start, end;
 	int	i, j, n;
 
 	/* get current default values */
@@ -239,7 +255,7 @@ main (int argc, char **argv)
 	strcpy (read_file, "datalist.mb-1");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "D:d:F:f:I:i:O:o:R:r:T:t:VvHh")) != -1)
+	while ((c = getopt(argc, argv, "BbD:d:F:f:I:i:LlO:o:R:r:T:t:VvHh")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -249,6 +265,10 @@ main (int argc, char **argv)
 		case 'V':
 		case 'v':
 			verbose++;
+			break;
+		case 'B':
+		case 'b':
+			fix_time_stamps = MB_YES;
 			break;
 		case 'D':
 		case 'd':
@@ -263,6 +283,11 @@ main (int argc, char **argv)
 		case 'I':
 		case 'i':
 			sscanf (optarg,"%s", read_file);
+			flag++;
+			break;
+		case 'L':
+		case 'l':
+			mode = MB7KPREPROCESS_TIMESTAMPLIST;
 			flag++;
 			break;
 		case 'O':
@@ -345,7 +370,11 @@ main (int argc, char **argv)
 		fprintf(stderr,"dbg2       read_file:           %s\n",read_file);
 		fprintf(stderr,"dbg2       ofile:               %s\n",ofile);
 		fprintf(stderr,"dbg2       ofile_set:           %d\n",ofile_set);
+		fprintf(stderr,"dbg2       mode:                %d\n",mode);
+		fprintf(stderr,"dbg2       fix_time_stamps:     %d\n",fix_time_stamps);
 		fprintf(stderr,"dbg2       timelag:             %f\n",timelag);
+		fprintf(stderr,"dbg2       depthsensoroffx:     %f\n",depthsensoroffx);
+		fprintf(stderr,"dbg2       depthsensoroffz:     %f\n",depthsensoroffz);
 		for (i=0;i<nrangeoffset;i++)
 			fprintf(stderr,"dbg2       rangeoffset[%d]:         %d %d %f\n",
 				rangeoffsetstart[i], rangeoffsetend[i], rangeoffset[i]);
@@ -481,6 +510,7 @@ main (int argc, char **argv)
 	nreadsslo = 0;
 	nreadsshi = 0;
 	nreadother = 0;
+	sslo_lastread = MB_NO;
 	while (error <= MB_ERROR_NO_ERROR)
 		{
 		/* reset error */
@@ -581,6 +611,9 @@ main (int argc, char **argv)
 					status = mb_realloc(verbose,nbatht_alloc*sizeof(double),&batht_time_d,&error);
 					status = mb_realloc(verbose,nbatht_alloc*sizeof(int),&batht_ping,&error);
 					status = mb_realloc(verbose,nbatht_alloc*sizeof(double),&batht_time_d_new,&error);
+					status = mb_realloc(verbose,nbatht_alloc*sizeof(double),&batht_time_offset,&error);
+					status = mb_realloc(verbose,nbatht_alloc*sizeof(int),&batht_ping_offset,&error);
+					status = mb_realloc(verbose,nbatht_alloc*sizeof(int),&batht_good_offset,&error);
 					if (error != MB_ERROR_NO_ERROR)
 						{
 						mb_error(verbose,error,&message);
@@ -596,6 +629,20 @@ main (int argc, char **argv)
 					{
 					batht_time_d[nbatht] = time_d;
 					batht_ping[nbatht] = bathymetry->ping_number;
+					
+					/* grab the last sslo ping if it was the last thing read */
+					if (sslo_lastread == MB_YES)
+						{
+						batht_time_offset[nbatht] = sslo_last_time_d - time_d;
+						batht_ping_offset[nbatht] = sslo_last_ping - bathymetry->ping_number;
+						batht_good_offset[nbatht] = MB_YES;
+						}
+					else
+						{
+						batht_time_offset[nbatht] = -9999.99;
+						batht_ping_offset[nbatht] = 0;
+						batht_good_offset[nbatht] = MB_NO;
+						}
 					nbatht++;
 					}
 				}
@@ -892,6 +939,8 @@ main (int argc, char **argv)
 				edget_ping[nedget] = fsdwssheader->pingNum;
 				nedget++;
 				}
+			sslo_last_time_d = time_d;
+			sslo_last_ping = fsdwssheader->pingNum;
 			}
 			
 	   	/* handle high frequency sidescan data */
@@ -945,6 +994,12 @@ main (int argc, char **argv)
 			fprintf(stderr,"dbg2       error:          %d\n",error);
 			fprintf(stderr,"dbg2       status:         %d\n",status);
 			}
+			
+		/* set sslo_lastread flag */
+		if (status == MB_SUCCESS && kind == MB_DATA_SIDESCAN2)
+			sslo_lastread = MB_YES;
+		else
+			sslo_lastread = MB_NO;
 		}
 
 	/* close the swath file */
@@ -1000,8 +1055,56 @@ main (int argc, char **argv)
 	if (read_datalist == MB_YES)
 		mb_datalist_close(verbose,&datalist,&error);
 		
+	/* fix problems with batht timestamp arrays */
+	for (i=0;i<nbatht-1;i++)
+		{
+		if (batht_good_offset[i+1] == MB_NO)
+			{
+			batht_good_offset[i] = MB_NO;
+			}
+		}
+	for (i=0;i<nbatht;i++)
+		{
+		if (batht_good_offset[i] == MB_NO)
+			{
+			foundstart = MB_NO;
+			foundend = MB_NO;
+			for (j = i - 1; j >= 0 && foundstart == MB_NO; j--)
+				{
+				if (batht_good_offset[j] == MB_YES)
+					{
+					foundstart = MB_YES;
+					start = j;
+					}
+				}
+			for (j = i + 1; j < nbatht && foundend == MB_NO; j++)
+				{
+				if (batht_good_offset[j] == MB_YES)
+					{
+					foundend = MB_YES;
+					end = j;
+					}
+				}
+			if (foundstart == MB_YES && foundend == MB_YES)
+				{
+				batht_time_offset[i] = batht_time_offset[start] 
+							+ (batht_time_offset[end] - batht_time_offset[start])
+								* ((double)(i - start)) / ((double)(end - start));
+				}
+			else if (foundstart == MB_YES)
+				{
+				batht_time_offset[i] = batht_time_offset[start];
+				}
+			else if (foundend == MB_YES)
+				{
+				batht_time_offset[i] = batht_time_offset[end];
+				}
+			}
+		batht_time_d_new[i] = batht_time_d[i] + batht_time_offset[i];
+		}	
+		
 	/* output navigation and attitude data */
-	if (verbose > 0)
+	if (verbose > 0 || mode == MB7KPREPROCESS_TIMESTAMPLIST)
 		{
 		fprintf(stdout, "\nTotal navigation/attitude data read: %d\n", nnav);
 		for (i=0;i<nnav;i++)
@@ -1016,15 +1119,15 @@ main (int argc, char **argv)
 			fprintf(stdout, "  ALT: %5d %17.6f %8.3f\n", 
 				i, alt_time_d[i], alt_altitude[i]);
 			}
-		for (i=0;i<nbatht;i++)
-			{
-			fprintf(stdout, "  BAT: %5d %17.6f %d\n", 
-				i, batht_time_d[i], batht_ping[i]);
-			}
 		for (i=0;i<nedget;i++)
 			{
 			fprintf(stdout, "  EDG: %5d %17.6f %d\n", 
 				i, edget_time_d[i], edget_ping[i]);
+			}
+		for (i=0;i<nbatht;i++)
+			{
+			fprintf(stdout, "  BAT: %5d %17.6f %17.6f %5d   offsets: %17.6f %5d  %5d\n", 
+				i, batht_time_d[i], batht_time_d_new[i], batht_ping[i], batht_time_offset[i], batht_ping_offset[i], batht_good_offset[i]);
 			}
 		}
 	
@@ -1044,37 +1147,11 @@ main (int argc, char **argv)
 	fprintf(stdout, "     Low Sidescan:      %d\n", nreadsslotot);
 	fprintf(stdout, "     High Sidescan:     %d\n", nreadsshitot);
 
-	
-	/* get bathymetry timestamp corrections */
-	jfound = 0;
-	for (i=0;i<nbatht;i++)
-		{
-		found = MB_NO;
-		for (j=jfound;j<nedget && found == MB_NO;j++)
-			{
-			if (batht_time_d[i] < edget_time_d[j])
-				{
-				found = MB_YES;
-				if (j > 0)
-					{
-					batht_time_d_new[i] = edget_time_d[j-1];
-					jfound = j-1;
-					}
-				else
-					{
-					batht_time_d_new[i] = 0.0;
-					jfound = j;
-					}
-				
-/*fprintf(stderr,"i:%d ping:%d time: %f %f   %f\n",
-i,batht_ping[i],batht_time_d[i],batht_time_d_new[i],batht_time_d_new[i]-batht_time_d[i]);*/
-				}
-			}
-		}
-	
 	/* now read the data files again, this time interpolating nav and attitude
 		into the multibeam records and fixing other problems found in the
 		data */
+	if (mode == MB7KPREPROCESS_PROCESS)
+	{
 
 	/* open file list */
 	if (read_datalist == MB_YES)
@@ -1306,20 +1383,23 @@ i,batht_ping[i],batht_time_d[i],batht_time_d_new[i],batht_time_d_new[i]-batht_ti
 					header->RecordNumber,bathymetry->ping_number,bathymetry->number_beams);
 					
 				/* fix time stamp */
-				found = MB_NO;
-				for (j=0; j < nbatht && found == MB_NO; j++)
+				if (fix_time_stamps == MB_YES)
 					{
-					if (bathymetry->ping_number == batht_ping[j])
+					found = MB_NO;
+					for (j=0; j < nbatht && found == MB_NO; j++)
 						{
-						found = MB_YES;
-						time_d = batht_time_d_new[j];
-						mb_get_date(verbose, time_d, time_i);
-						mb_get_jtime(verbose, time_i, time_j);
-						header->s7kTime.Year = time_j[0];
-						header->s7kTime.Day = time_j[1];
-						header->s7kTime.Hours = time_i[3];
-						header->s7kTime.Minutes = time_i[4];
-						header->s7kTime.Seconds = time_i[5] + 0.000001 * time_i[6];
+						if (bathymetry->ping_number == batht_ping[j])
+							{
+							found = MB_YES;
+							time_d = batht_time_d_new[j];
+							mb_get_date(verbose, time_d, time_i);
+							mb_get_jtime(verbose, time_i, time_j);
+							header->s7kTime.Year = time_j[0];
+							header->s7kTime.Day = time_j[1];
+							header->s7kTime.Hours = time_i[3];
+							header->s7kTime.Minutes = time_i[4];
+							header->s7kTime.Seconds = time_i[5] + 0.000001 * time_i[6];
+							}
 						}
 					}
 
@@ -1825,6 +1905,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]);*/
 	fprintf(stdout, "     Subbottom:         %d\n", nreadsbptot);
 	fprintf(stdout, "     Low Sidescan:      %d\n", nreadsslotot);
 	fprintf(stdout, "     High Sidescan:     %d\n", nreadsshitot);
+	}
 		
 	
 	/* deallocate navigation arrays */

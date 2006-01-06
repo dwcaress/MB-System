@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grdplot.perl	8/6/95
-#    $Id: mbm_grdplot.perl,v 5.16 2005-11-05 01:34:20 caress Exp $
+#    $Id: mbm_grdplot.perl,v 5.17 2006-01-06 18:26:26 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 2000, 2003 by 
 #    D. W. Caress (caress@mbari.org)
@@ -55,7 +55,8 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #            -MGQdpi -MGSscalefactor -MGTx/y/size/angle/font/just/text
 #            -MGU[/dx/dy/][label] -MCAanot_int/[ffont_size][aangle][/r/g/b][o]]
 #            -MCGgap/width -MCQcut -MCT[+|-][gap/length][:LH] -MCWtype[pen]
-#            -MNIdatalist
+#            -MNFformat -MNIdatalist
+#            -MNN[time_tick/time_annot/date_annot/time_tick_len[/name_hgt] | F | FP]
 #            -MTCfill -MTDresolution -MTGfill -MTIriver[/pen] 
 #            -MTNborder[/pen] -MTSfill -MTWpen
 #            -MXGfill -MXIxy_file -MXSsymbol/size -MXWpen]
@@ -67,10 +68,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   October 19, 1994
 #
 # Version:
-#   $Id: mbm_grdplot.perl,v 5.16 2005-11-05 01:34:20 caress Exp $
+#   $Id: mbm_grdplot.perl,v 5.17 2006-01-06 18:26:26 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.16  2005/11/05 01:34:20  caress
+#   Much work over the past two months.
+#
 #   Revision 5.15  2005/04/07 04:12:39  caress
 #   Implemented feature to generate contours from a separate grid file. Contributed by Gordon Keith.
 #
@@ -577,6 +581,13 @@ if ($misc)
 		# deal with swath navigation options
 		##############################
 
+		# set swath file format id
+		if ($cmd =~ /^[Nn][Ff]./)
+			{
+			($swathformat) = $cmd =~ 
+				/^[Nn][Ff](\S+)/;
+			}
+
 		# set swath file datalist of which to plot navigation
 		if ($cmd =~ /^[Nn][Ii]./)
 			{
@@ -584,6 +595,12 @@ if ($misc)
 				/^[Nn][Ii](\S+)/;
 			}
 
+		# set swath navigation parameters
+		if ($cmd =~ /^[Nn][Nn]./)
+			{
+			($navigation_control) = $cmd =~ 
+				/^[Nn][Nn](\S+)/;
+			}
 
 		# deal with pscoast options
 		##############################
@@ -2352,14 +2369,23 @@ for ($i = 0; $i < scalar(@xyfiles); $i++)
 # do swath nav plots
 if ($swathnavdatalist) 
 	{
-	$navigation_mode = 1;
-	$name_mode = 1;
-	$name_perp = 1;
-	$navigation_control = "0.25/1/4/0.15";
+	if (!$navigation_control)
+		{
+		$navigation_control = "0.25/1/4/0.15";
+		}
+	if (!$swathformat)
+		{
+		$swathformatline = `mbformat -I $swathnavdatalist -L`;
+		($swathformat) = $swathformatline =~ /(\S+)/;
+		if ($swathformat == 0)
+			{
+			$swathformat = -1;
+			}
+		}
 
 	printf FCMD "#\n# Make swath nav plot\n";
 	printf FCMD "echo Running mbcontour...\n";
-	printf FCMD "mbcontour -F-1 -I $swathnavdatalist \\\n\t";
+	printf FCMD "mbcontour -F$swathformat -I $swathnavdatalist \\\n\t";
 	printf FCMD "-J\$MAP_PROJECTION\$MAP_SCALE \\\n\t";
 	printf FCMD "-R\$MAP_REGION \\\n\t";
 	printf FCMD "-D$navigation_control \\\n\t";
@@ -2635,10 +2661,11 @@ if ($verbose)
 		foreach $file_int (@files_intensity) {
 			print "    Data GRD File:            $file_int\n";
 		}
+		}
 	if ($swathnavdatalist)
 		{
 		print "    Swath Nav Datalist:        $swathnavdatalist\n";
-		}
+		print "    Swath Nav Controls:        $navigation_control\n";
 		}
 	foreach $xyfile (@xyfiles) {
 		print "    XY Data File:             $xyfile\n";

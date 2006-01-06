@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad2.c	3.00	10/9/98
- *	$Id: mbsys_simrad2.c,v 5.19 2005-11-05 00:48:05 caress Exp $
+ *	$Id: mbsys_simrad2.c,v 5.20 2006-01-06 18:27:19 caress Exp $
  *
  *    Copyright (c) 1998, 2001, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -31,6 +31,9 @@
  * Date:	October 9, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.19  2005/11/05 00:48:05  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.18  2003/04/22 20:51:22  caress
  * Fixed bug in inserting sonar depth value.
  *
@@ -121,7 +124,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_simrad2.h"
 
-static char res_id[]="$Id: mbsys_simrad2.c,v 5.19 2005-11-05 00:48:05 caress Exp $";
+static char res_id[]="$Id: mbsys_simrad2.c,v 5.20 2006-01-06 18:27:19 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_simrad2_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
@@ -685,6 +688,53 @@ int mbsys_simrad2_survey_alloc(int verbose,
 			ping->png_raw_rxroll[i] = 0;	/* roll (0.01 deg) */
 			ping->png_raw_rxpitch[i] = 0;	/* pitch angle (0.01 deg) */
 			ping->png_raw_rxheave[i] = 0;	/* heave (0.01 m) */
+		    	}
+				
+		/* raw travel time and angle data version 3 */
+		ping->png_raw3_read;	/* flag indicating actual reading of newer rawbeam record */
+		ping->png_raw3_date;	/* date = year*10000 + month*100 + day
+				    Feb 26, 1995 = 19950226 */
+		ping->png_raw3_msec;	/* time since midnight in msec
+				    08:12:51.234 = 29570234 */
+		ping->png_raw3_count;	/* sequential counter or input identifier */
+		ping->png_raw3_serial;	/* system 1 or system 2 serial number */
+		ping->png_raw3_ntx;		/* number of TX pulses (1 to 9) */
+		ping->png_raw3_nbeams;		/* number of raw travel times and angles
+					    - nonzero only if raw beam record read */
+		ping->png_raw3_sample_rate;	/* sampling rate (Hz or 0.01 Hz) */
+		ping->png_raw3_xducer_depth;	/* transmit transducer depth (0.01 m) */
+		ping->png_raw3_ssv;		/* sound speed at transducer (0.1 m/sec) */
+		ping->png_raw3_nbeams_max;	/* maximum number of beams possible */
+		for (i=0;i<MBSYS_SIMRAD2_MAXTX;i++)
+			{
+			ping->png_raw3_txtiltangle[i] = 0;/* tilt angle (0.01 deg) */
+			ping->png_raw3_txfocus[i] = 0;   /* focus range (0.1 m)
+									0 = no focus */
+			ping->png_raw3_txsignallength[i] = 0;	/* signal length (usec) */
+			ping->png_raw3_txoffset[i] = 0;	/* transmit time offset (usec) */
+			ping->png_raw3_txcenter[i] = 0;	/* center frequency (Hz) */
+			ping->png_raw3_txbandwidth[i] = 0;	/* bandwidth (10 Hz) */
+			ping->png_raw3_txwaveform[i] = 0;	/* signal waveform identifier 
+										0 = CW, 1 = FM */
+			ping->png_raw3_txsector[i] = 0;	/* transmit sector number (0-19) */
+		    	}
+		for (i=0;i<MBSYS_SIMRAD2_MAXBEAMS;i++)
+		    	{
+			ping->png_raw3_rxpointangle[i] = 0;;
+					/* Raw beam pointing angles in 0.01 degree,
+						positive to port. 
+						These values are relative to the transducer 
+						array and have not been corrected
+						for vessel motion. */
+			ping->png_raw3_rxrange[i] = 0;;	/* Ranges (0.25 samples) */
+			ping->png_raw3_rxsector[i] = 0;;	/* transmit sector identifier */
+			ping->png_raw3_rxamp[i] = 0;;		/* 0.5 dB */
+			ping->png_raw3_rxquality[i] = 0;;	/* beam quality flag */
+			ping->png_raw3_rxwindow[i] = 0;;	/* length of detection window */
+			ping->png_raw3_rxbeam_num[i] = 0;;	
+					/* beam 128 is first beam on 
+					    second head of EM3000D */
+			ping->png_raw3_rxspare[i] = 0;;	/* spare */
 		    	}
 	
 		/* sidescan */

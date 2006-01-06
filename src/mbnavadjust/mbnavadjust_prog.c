@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavadjust_prog.c	3/23/00
- *    $Id: mbnavadjust_prog.c,v 5.17 2005-11-05 00:57:03 caress Exp $
+ *    $Id: mbnavadjust_prog.c,v 5.18 2006-01-06 18:25:21 caress Exp $
  *
  *    Copyright (c) 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	March 23, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.17  2005/11/05 00:57:03  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.16  2005/06/04 04:34:07  caress
  * Added notion of "truecrossings", so it's possible to process the data while only looking at crossing tracks and ignoring overlap points.
  *
@@ -132,7 +135,7 @@ struct swathraw
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbnavadjust_prog.c,v 5.17 2005-11-05 00:57:03 caress Exp $";
+static char rcs_id[] = "$Id: mbnavadjust_prog.c,v 5.18 2006-01-06 18:25:21 caress Exp $";
 static char program_name[] = "mbnavadjust";
 static char help_message[] =  "mbnavadjust is an interactive navigation adjustment package for swath sonar data.\n";
 static char usage_message[] = "mbnavadjust [-Iproject -V -H]";
@@ -209,8 +212,8 @@ int	*gridnm = NULL;
 int	nmisfit_intervals = NINTERVALS_MISFIT;
 double	misfit_intervals[NINTERVALS_MISFIT];
 
-/* minimum initial sigma_crossing */
-#define	SIGMA_MINIMUM	0.0000001;
+/* minimum initial sigma_crossing (meters) */
+#define	SIGMA_MINIMUM	0.1;
 
 /* system function declarations */
 char	*ctime();
@@ -6335,7 +6338,7 @@ fprintf(stderr,"INITIAL SIGMA: sigma_total:%g sigma_crossing:%g\n", sigma_total,
 		    if (first == MB_YES)
 			{
 			first = MB_NO;
-			sigma_crossing_first = SIGMA_MINIMUM;
+			sigma_crossing_first = mbna_mtodeglat * SIGMA_MINIMUM;
 			sigma_crossing_first = MAX(sigma_crossing, sigma_crossing_first);
 			smoothweight_old = smoothweight;
 			smoothmin = smoothweight;

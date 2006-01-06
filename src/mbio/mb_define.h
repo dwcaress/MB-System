@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	4/21/96
- *    $Id: mb_define.h,v 5.28 2005-11-05 00:48:04 caress Exp $
+ *    $Id: mb_define.h,v 5.29 2006-01-06 18:27:19 caress Exp $
  *
  *    Copyright (c) 1996, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	April 21, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.28  2005/11/05 00:48:04  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.27  2004/12/18 01:34:43  caress
  * Working towards release 5.0.6.
  *
@@ -533,6 +536,7 @@ int mb_hedint_add(int verbose, void *mbio_ptr,
 int mb_hedint_interp(int verbose, void *mbio_ptr, 
 		double time_d, double *heading, 
 		int *error);
+int mb_swap_check();
 int mb_get_double(double *, char *, int);
 int mb_get_int(int *, char *, int);
 int mb_get_binary_short(int, void *, short *);

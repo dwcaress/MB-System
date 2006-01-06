@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbio_status.h	2/1/93
- *    $Id: mb_status.h,v 5.58 2005-11-05 00:48:05 caress Exp $
+ *    $Id: mb_status.h,v 5.59 2006-01-06 18:27:19 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003, 2004, 2005 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.58  2005/11/05 00:48:05  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.57  2005/06/15 15:19:00  caress
  * Fixed typo.
  *
@@ -446,7 +449,7 @@ static char *unknown_error_msg[] =
 /* MBIO function notice messages */
 static char *notice_msg[] = 
 	{
-	"Unknown notice identifier", 
+	"Unknown notice identifier junk", 
 
 	/* notices for data record types */
 	"MB_DATA_DATA (ID=1): survey data", 
@@ -511,18 +514,19 @@ static char *notice_msg[] =
 	"MB_ERROR_NO_DATA_DUMPED (ID=-14): No data was dumped from the buffer",
 	"MB_ERROR_NO_MORE_DATA (ID=-15): No more survey data records in buffer", 
 	"MB_ERROR_DATA_NOT_INSERTED (ID=-16): Data inconsistencies prevented inserting data into storage structure", 
+	"MB_ERROR_BAD_PROJECTION (ID=-17): UTM projection initialization failed", 
 	
 	/* problem notices */
-	"APPARENT DATA PROBLEM (ID=1): No survey data found",
-	"APPARENT DATA PROBLEM (ID=2): Zero longitude or latitude in survey data",
-	"APPARENT DATA PROBLEM (ID=3): Instantaneous speed exceeds 25 km/hr",
-	"APPARENT DATA PROBLEM (ID=4): Average speed exceeds 25 km/hr",
-	"APPARENT DATA PROBLEM (ID=5): Sounding depth exceeds 11000 m",
-	"APPARENT DATA PROBLEM (ID=6): Unsupported Simrad datagram",
+	"DATA PROBLEM (ID=1): No survey data found",
+	"DATA PROBLEM (ID=2): Zero longitude or latitude in survey data",
+	"DATA PROBLEM (ID=3): Instantaneous speed exceeds 25 km/hr",
+	"DATA PROBLEM (ID=4): Average speed exceeds 25 km/hr",
+	"DATA PROBLEM (ID=5): Sounding depth exceeds 11000 m",
+	"DATA PROBLEM (ID=6): Unsupported Simrad datagram",
 	};
 static char *unknown_notice_msg[] =
 	{
-	"Unknown notice identifier"
+	"Unknown notice identifier detritus"
 	};
 	
 /* MBIO unknown time flag:

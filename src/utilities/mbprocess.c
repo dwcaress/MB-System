@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbprocess.c	3/31/93
- *    $Id: mbprocess.c,v 5.40 2005-11-05 01:07:54 caress Exp $
+ *    $Id: mbprocess.c,v 5.41 2006-01-06 18:19:59 caress Exp $
  *
  *    Copyright (c) 2000, 2002, 2003, 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -36,6 +36,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.40  2005/11/05 01:07:54  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.39  2005/08/17 17:31:56  caress
  * Improved how the best altitude value is obtained for sidescan and amplitude data correction.
  *
@@ -219,7 +222,7 @@ int get_anglecorr(int verbose,
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbprocess.c,v 5.40 2005-11-05 01:07:54 caress Exp $";
+	static char rcs_id[] = "$Id: mbprocess.c,v 5.41 2006-01-06 18:19:59 caress Exp $";
 	static char program_name[] = "mbprocess";
 	static char help_message[] =  "mbprocess is a tool for processing swath sonar bathymetry data.\n\
 This program performs a number of functions, including:\n\
@@ -410,6 +413,10 @@ and mbedit edit save files.\n";
 	struct mb_esf_struct esf;
 	char	esffile[MB_PATH_MAXLINE];
 	char	notice[MB_PATH_MAXLINE];
+	int	neditnull;
+	int	neditduplicate;
+	int	neditnotused;
+	int	neditused;
 	
 	double	draft_org, depth_offset_use, depth_offset_change, depth_offset_org, static_shift;
 	double	roll_org, pitch_org, heave_org;
@@ -4238,8 +4245,8 @@ and mbedit edit save files.\n";
 			&& kind == MB_DATA_DATA
 			&& nnav > 0)
 			{
-fprintf(stderr,"time_d:%f ntime[%d]:%f kluge005:%d\n",
-time_d,idata-1,ntime[idata-1],process.mbp_kluge005);
+/*fprintf(stderr,"time_d:%f ntime[%d]:%f kluge005:%d\n",
+time_d,idata-1,ntime[idata-1],process.mbp_kluge005);*/
 			time_d = ntime[idata-1];
 			mb_get_date(verbose,time_d,time_i);
 			}
@@ -4947,12 +4954,12 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 			    {
 			    fprintf(stderr,"\ndbg5  Depth values calculated in program <%s>:\n",program_name);
 			    fprintf(stderr,"dbg5       kind:  %d\n",kind);
-			    fprintf(stderr,"dbg5      beam    time      depth        dist      flag\n");	
+			    fprintf(stderr,"dbg5      beam    ttime      depth        xtrack    ltrack      flag\n");	
 			    for (i=0;i<nbath;i++)
 				fprintf(stderr,"dbg5       %2d   %f   %f   %f   %f   %d\n",
 				    i,ttimes[i],
 				    bath[i],bathacrosstrack[i],
-				    bathalongtrack[i]);
+				    bathalongtrack[i],beamflag[i]);
 			    }
 			}
 
@@ -5485,21 +5492,50 @@ idata, i, altitude_use, slope, angle, correction, reference_amp, ss[i]);*/
 				}
 			}
 		}
-for (i=0;i<esf.nedit;i++)
-{
-if (esf.edit[i].use == 1000)
-fprintf(stderr,"BEAM FLAG TIED TO NULL BEAM: i:%d edit: %f %d %d   %d\n",
-i,esf.edit[i].time_d,esf.edit[i].beam,esf.edit[i].action,esf.edit[i].use);
-else if (esf.edit[i].use == 100)
-fprintf(stderr,"DUPLICATE BEAM FLAG:         i:%d edit: %f %d %d   %d\n",
-i,esf.edit[i].time_d,esf.edit[i].beam,esf.edit[i].action,esf.edit[i].use);
-else if (esf.edit[i].use != 1)
-fprintf(stderr,"BEAM FLAG NOT USED:          i:%d edit: %f %d %d   %d\n",
-i,esf.edit[i].time_d,esf.edit[i].beam,esf.edit[i].action,esf.edit[i].use);
-/*else if (esf.edit[i].use == 1)
-fprintf(stderr,"BEAM FLAG USED:              i:%d edit: %f %d %d   %d\n",
-i,esf.edit[i].time_d,esf.edit[i].beam,esf.edit[i].action,esf.edit[i].use);*/
-}
+		
+	/* output beam flagging success info */
+	neditnull = 0;
+	neditduplicate = 0;
+	neditnotused = 0;
+	neditused = 0;
+	for (i=0;i<esf.nedit;i++)
+		{
+		if (esf.edit[i].use == 1000)
+			{
+			neditnull++;
+			if (verbose >= 2)
+			fprintf(stderr,"BEAM FLAG TIED TO NULL BEAM: i:%d edit: %f %d %d   %d\n",
+				i,esf.edit[i].time_d,esf.edit[i].beam,esf.edit[i].action,esf.edit[i].use);
+			}
+		else if (esf.edit[i].use == 100)
+			{
+			neditduplicate++;
+			if (verbose >= 2)
+			fprintf(stderr,"DUPLICATE BEAM FLAG:         i:%d edit: %f %d %d   %d\n",
+				i,esf.edit[i].time_d,esf.edit[i].beam,esf.edit[i].action,esf.edit[i].use);
+			}
+		else if (esf.edit[i].use != 1)
+			{
+			neditnotused++;
+			if (verbose >= 2)
+			fprintf(stderr,"BEAM FLAG NOT USED:          i:%d edit: %f %d %d   %d\n",
+				i,esf.edit[i].time_d,esf.edit[i].beam,esf.edit[i].action,esf.edit[i].use);
+			}
+		else if (esf.edit[i].use == 1)
+			{
+			neditused++;
+			if (verbose >= 2)
+			fprintf(stderr,"BEAM FLAG USED:              i:%d edit: %f %d %d   %d\n",
+				i,esf.edit[i].time_d,esf.edit[i].beam,esf.edit[i].action,esf.edit[i].use);
+			}
+		}
+	if (verbose >= 1)
+		{
+		fprintf(stderr, "          %d flags used\n", neditused);
+		fprintf(stderr, "          %d flags not used\n", neditnotused);
+		fprintf(stderr, "          %d flags tied to null beams\n", neditnull);
+		fprintf(stderr, "          %d duplicate flags\n", neditduplicate);
+		}
 
 	/*--------------------------------------------
 	  close files and deallocate memory
