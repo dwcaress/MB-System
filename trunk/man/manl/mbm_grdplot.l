@@ -1,4 +1,4 @@
-.TH mbm_grdplot l "13 November 2002" "MB-System 5.0" "MB-System 5.0"
+.TH mbm_grdplot l "7 November 2005" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbm_grdplot\fP - Create an executable shellscript which will generate
 a GMT map of gridded data in a GMT grd file.
@@ -37,6 +37,8 @@ Miscellaneous Options:
 \fB-MCA\fP\fIanot_int/\fP[\fIffont_size\fP][\fIaangle\fP][\fI/r/g/b\fP][\fIo\fP]]
 \fB-MCG\fP\fIgap/width\fP \fB-MCQ\fP\fIcut \fP
 \fB-MCT\fP[\fI+|-\fP][\fIgap/length\fP][\fI:LH\fP] \fB-MCW\fP\fItype\fP[\fIpen\fP]
+\fB-MNF\fP\fIformat\fP \fB-MNI\fP\fIswathdata\fP
+\fB-MNN\fP[\fItime_tick/time_annot/date_annot/time_tick_len\fP[\fI/name_hgt\fP] | \fIF\fP | \fIFP\fP]
 \fB-MTC\fP\fIfill\fP \fB-MTD\fP\fIresolution\fP 
 \fB-MTG\fP\fIfill\fP \fB-MTI\fP\fIriver[/pen]\fP 
 \fB-MTN\fP\fIborder[/pen]\fP \fB-MTS\fP\fIfill\fP 
@@ -545,7 +547,7 @@ onto the (\fIx,y\fP) point: 1 = Lower Left corner,
 needed.
 .TP
 .B \-MGU
-\fP[\fI/dx/dy/\fP][\fIlabel\fP]
+[\fI/dx/dy/\fP][\fIlabel\fP]
 .br
 Draw Unix System time stamp on plot.  User may specify where the lower left corner
 of the stamp should fall on the page relative to lower left corner of plot in inch [Default is (-0.75,-0.75)].  Optionally,
@@ -595,6 +597,70 @@ then only contours marked with upper case C or A will have tickmarks [and anotat
 \fItype\fP, if present, can be 'a' for annotated contours or 'c' for regular contours [Default].
 \fIpen\fP sets the attributes for the particular line.  Default values for annotated contours:
 width = 3, color = black, texture = solid.  Regular contours have default width = 1.
+.TP
+.B \-MNF
+\fIformat\fP 
+.br
+Sets the data format for the input swath data specified with the \fB-MNI\fP 
+option. If \fIformat\fP < 0, then the input file specified
+with the \fB-MNI\fP option will actually contain a list of input swath sonar
+data files. This program uses the \fBMBIO\fP library and will read or 
+write any swath sonar format supported by \fBMBIO\fP. A list of the 
+swath sonar data formats currently supported by \fBMBIO\fP and their 
+identifier values is given in the \fBMBIO\fP manual page. 
+Default: \fIformat\fP = -1.
+.TP
+.B \-MNI
+\fIswathdata\fP 
+.br
+This option causes the navigation track of swath data to be
+plotted. Here \fIswathdata\fP is the input file, and may be either
+a single swath file or a list of swath files. If \fIformat\fP > 0 
+(set with the \fB-MNF\fP option) then the swath sonar data 
+contained in \fIswathdata\fP is read and processed. If \fIformat\fP < 0 
+(the default),  then \fIswathdata\fP
+is assumed to be an ascii file containing a list of the input swath sonar
+data files to be processed and their formats.  The program will read 
+the data in each one of these files.
+In the \fIswathdata\fP file, each
+data file should be followed by a data format identifier, e.g.:
+ 	datafile1 11
+ 	datafile2 24
+.br
+This program uses the \fBMBIO\fP library and will read or write any swath sonar
+format supported by \fBMBIO\fP. A list of the swath sonar data formats
+currently supported by \fBMBIO\fP and their identifier values
+is given in the \fBMBIO\fP manual page.
+.TP
+.B \-MNN
+[\fItime_tick/time_annot/date_annot/time_tick_len\fP[\fI/name_hgt/name_perp\fP] | \fIF\fP | \fIFP\fP]
+.br
+This option sets the annotation of the swath file navigation
+plot specified using the .\fB-MNI\fP option.
+Time marks are made with "X" marks along the shiptrack; annotated
+time marks show the time in HH:MM format next to the time mark
+and annotated date marks show the time and julian day in
+HH:MM/DDD format.  The "X" marks are
+\fItime_tick_len\fP inches high for normal time marks and 
+1.5 times \fItime_tick_len\fP inches high for annotated time or date
+marks.  The interval of time ticks, annotated time ticks, and 
+annotated date ticks are given in hours by 
+\fItime_tick\fP, \fItime_annot\fP, and \fIdate_annot\fP, respectively.
+If the \fIname_hgt\fP parameter is not given when the other parameters
+are specified, then no filename annotation will be done. If given,
+\fIname_hgt\fP sets the height in inches of the filename annotation
+and turns that annotation on. If given as 1,
+\fIname_perp\fP causes the filename annotation to be perpendicular
+to the shiptrack rather than parallel (the default).
+If the \fB-MNN\fP\fIF\fP is given, then 
+a navigation track will be generated using the default parameters 
+and also with filename annotation along the shiptrack. If the 
+\fB-MNN\fP\fIFP\fP is given, then a navigation track will be generated 
+with the default parameters and also with filename annotation 
+perpendicular to the shiptrack.
+Defaults: \fItime_tick\fP = 0.25; \fItime_annot\fP = 1.0; \fIdate_annot\fP = 4.0; 
+\fItime_tick_len\fP = 0.1; \fIname_hgt\fP = 0.1; \fIname_perp\fP = 0.
+
 .TP
 .B \-MTC
 \fIfill\fP 

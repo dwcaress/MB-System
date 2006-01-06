@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_cbat8101.c	8/8/94
- *	$Id: mbr_cbat8101.c,v 5.8 2005-11-05 00:48:04 caress Exp $
+ *	$Id: mbr_cbat8101.c,v 5.9 2006-01-06 18:27:19 caress Exp $
  *
  *    Copyright (c) 1998, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	December 10, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2005/11/05 00:48:04  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.7  2003/05/20 18:05:32  caress
  * Added svp_source to data source parameters.
  *
@@ -111,7 +114,7 @@ int mbr_wt_cbat8101(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_cbat8101(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_cbat8101.c,v 5.8 2005-11-05 00:48:04 caress Exp $";
+	static char res_id[]="$Id: mbr_cbat8101.c,v 5.9 2006-01-06 18:27:19 caress Exp $";
 	char	*function_name = "mbr_register_cbat8101";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -244,7 +247,7 @@ int mbr_info_cbat8101(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_cbat8101.c,v 5.8 2005-11-05 00:48:04 caress Exp $";
+	static char res_id[]="$Id: mbr_cbat8101.c,v 5.9 2006-01-06 18:27:19 caress Exp $";
 	char	*function_name = "mbr_info_cbat8101";
 	int	status = MB_SUCCESS;
 
@@ -314,7 +317,7 @@ int mbr_info_cbat8101(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_cbat8101(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_cbat8101.c,v 5.8 2005-11-05 00:48:04 caress Exp $";
+	static char res_id[]="$Id: mbr_cbat8101.c,v 5.9 2006-01-06 18:27:19 caress Exp $";
 	char	*function_name = "mbr_alm_cbat8101";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -948,56 +951,58 @@ int mbr_cbat8101_rd_data(int verbose, void *mbio_ptr, int *error)
 	*error = MB_ERROR_NO_ERROR;
 	while (done == MB_NO)
 		{
-#ifndef BYTESWAPPED
-		/* get first part of next record label */
-		if ((status = fread(&label[0],1,1,mb_io_ptr->mbfp)) != 1)
+		if (mb_io_ptr->byteswapped == MB_NO)
 			{
-			status = MB_FAILURE;
-			*error = MB_ERROR_EOF;
-			}
-
-		/* if first part is good read second part */
-		if (status == MB_SUCCESS && label[0] == 0x02)
-			{
-			if ((status = fread(&label[1],1,1,mb_io_ptr->mbfp)) != 1)
-				{
-				status = MB_FAILURE;
-				*error = MB_ERROR_EOF;
-				}
-			}
-
-#else
-		/* byteswapped case */
-		/* get second part of next record label */
-		if ((status = fread(&label[1],1,1,mb_io_ptr->mbfp)) != 1)
-			{
-			status = MB_FAILURE;
-			*error = MB_ERROR_EOF;
-			}
-
-		/* if not first and second part looks like first
-			get other piece from last label */
-		if (status == MB_SUCCESS && first == MB_NO
-			&& label[1] == 0x02)
-			{
-			label[0] = label[1];
-			label[1] = label_save[0];
-			}
-
-		/* else get first part of next record label */
-		else if (status == MB_SUCCESS)
-			{
+			/* get first part of next record label */
 			if ((status = fread(&label[0],1,1,mb_io_ptr->mbfp)) != 1)
 				{
 				status = MB_FAILURE;
 				*error = MB_ERROR_EOF;
 				}
-			}
 
-		/* save label */
-		label_save[0] = label[0];
-		label_save[1] = label[1];
-#endif
+			/* if first part is good read second part */
+			if (status == MB_SUCCESS && label[0] == 0x02)
+				{
+				if ((status = fread(&label[1],1,1,mb_io_ptr->mbfp)) != 1)
+					{
+					status = MB_FAILURE;
+					*error = MB_ERROR_EOF;
+					}
+				}
+			}
+		else
+			{
+			/* byteswapped case */
+			/* get second part of next record label */
+			if ((status = fread(&label[1],1,1,mb_io_ptr->mbfp)) != 1)
+				{
+				status = MB_FAILURE;
+				*error = MB_ERROR_EOF;
+				}
+
+			/* if not first and second part looks like first
+				get other piece from last label */
+			if (status == MB_SUCCESS && first == MB_NO
+				&& label[1] == 0x02)
+				{
+				label[0] = label[1];
+				label[1] = label_save[0];
+				}
+
+			/* else get first part of next record label */
+			else if (status == MB_SUCCESS)
+				{
+				if ((status = fread(&label[0],1,1,mb_io_ptr->mbfp)) != 1)
+					{
+					status = MB_FAILURE;
+					*error = MB_ERROR_EOF;
+					}
+				}
+
+			/* save label */
+			label_save[0] = label[0];
+			label_save[1] = label[1];
+			}
 
 		/* reset first flag */
 		first = MB_NO;
@@ -1021,7 +1026,7 @@ int mbr_cbat8101_rd_data(int verbose, void *mbio_ptr, int *error)
 		else if (*type == RESON_COMMENT)
 			{
 			status = mbr_cbat8101_rd_comment(
-				verbose,mbfp,data,error);
+				verbose,mbfp,mb_io_ptr->byteswapped,data,error);
 			if (status == MB_SUCCESS)
 				{
 				done = MB_YES;
@@ -1031,7 +1036,7 @@ int mbr_cbat8101_rd_data(int verbose, void *mbio_ptr, int *error)
 		else if (*type == RESON_PARAMETER)
 			{
 			status = mbr_cbat8101_rd_parameter(
-				verbose,mbfp,data,error);
+				verbose,mbfp,mb_io_ptr->byteswapped,data,error);
 			if (status == MB_SUCCESS)
 				{
 				done = MB_YES;
@@ -1041,7 +1046,7 @@ int mbr_cbat8101_rd_data(int verbose, void *mbio_ptr, int *error)
 		else if (*type == RESON_NAV)
 			{
 			status = mbr_cbat8101_rd_nav(
-				verbose,mbfp,data,error);
+				verbose,mbfp,mb_io_ptr->byteswapped,data,error);
 			if (status == MB_SUCCESS)
 				{
 				done = MB_YES;
@@ -1051,7 +1056,7 @@ int mbr_cbat8101_rd_data(int verbose, void *mbio_ptr, int *error)
 		else if (*type == RESON_SVP)
 			{
 			status = mbr_cbat8101_rd_svp(
-				verbose,mbfp,data,error);
+				verbose,mbfp,mb_io_ptr->byteswapped,data,error);
 			if (status == MB_SUCCESS)
 				{
 				done = MB_YES;
@@ -1061,7 +1066,7 @@ int mbr_cbat8101_rd_data(int verbose, void *mbio_ptr, int *error)
 		else if (*type == RESON_BATH_8101)
 			{
 			status = mbr_cbat8101_rd_bath(
-				verbose,mbfp,data,error);
+				verbose,mbfp,mb_io_ptr->byteswapped,data,error);
 			if (status == MB_SUCCESS)
 				{
 				done = MB_YES;
@@ -1071,7 +1076,7 @@ int mbr_cbat8101_rd_data(int verbose, void *mbio_ptr, int *error)
 		else if (*type == RESON_SHORT_SVP)
 			{
 			status = mbr_cbat8101_rd_short_svp(
-				verbose,mbfp,data,error);
+				verbose,mbfp,mb_io_ptr->byteswapped,data,error);
 			if (status == MB_SUCCESS)
 				{
 				done = MB_YES;
@@ -1081,7 +1086,7 @@ int mbr_cbat8101_rd_data(int verbose, void *mbio_ptr, int *error)
 		else if (*type == RESON_HEADING)
 			{
 			status = mbr_cbat8101_rd_heading(
-				verbose,mbfp,data,error);
+				verbose,mbfp,mb_io_ptr->byteswapped,data,error);
 			if (status == MB_SUCCESS)
 				{
 				done = MB_YES;
@@ -1091,7 +1096,7 @@ int mbr_cbat8101_rd_data(int verbose, void *mbio_ptr, int *error)
 		else if (*type == RESON_ATTITUDE)
 			{
 			status = mbr_cbat8101_rd_attitude(
-				verbose,mbfp,data,error);
+				verbose,mbfp,mb_io_ptr->byteswapped,data,error);
 			if (status == MB_SUCCESS)
 				{
 				done = MB_YES;
@@ -1126,7 +1131,7 @@ int mbr_cbat8101_rd_data(int verbose, void *mbio_ptr, int *error)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_cbat8101_rd_comment(int verbose, FILE *mbfp, 
+int mbr_cbat8101_rd_comment(int verbose, FILE *mbfp, int swap,
 		struct mbf_cbat8101_struct *data, int *error)
 {
 	char	*function_name = "mbr_cbat8101_rd_comment";
@@ -1142,6 +1147,7 @@ int mbr_cbat8101_rd_comment(int verbose, FILE *mbfp,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
+		fprintf(stderr,"dbg2       swap:       %d\n",swap);
 		fprintf(stderr,"dbg2       data:       %d\n",data);
 		}
 
@@ -1185,7 +1191,7 @@ int mbr_cbat8101_rd_comment(int verbose, FILE *mbfp,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_cbat8101_rd_parameter(int verbose, FILE *mbfp, 
+int mbr_cbat8101_rd_parameter(int verbose, FILE *mbfp, int swap, 
 		struct mbf_cbat8101_struct *data, int *error)
 {
 	char	*function_name = "mbr_cbat8101_rd_parameter";
@@ -1202,6 +1208,7 @@ int mbr_cbat8101_rd_parameter(int verbose, FILE *mbfp,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
+		fprintf(stderr,"dbg2       swap:       %d\n",swap);
 		fprintf(stderr,"dbg2       data:       %d\n",data);
 		}
 
@@ -1227,81 +1234,84 @@ int mbr_cbat8101_rd_parameter(int verbose, FILE *mbfp,
 		data->par_second =         (int) line[5];
 		data->par_hundredth_sec =  (int) line[6];
 		data->par_thousandth_sec = (int) line[7];
-#ifndef BYTESWAPPED
-		short_ptr = (short *) &line[8];
-		data->roll_offset = *short_ptr;
-		short_ptr = (short *) &line[10];
-		data->pitch_offset = *short_ptr;
-		short_ptr = (short *) &line[12];
-		data->heading_offset = *short_ptr;
-		short_ptr = (short *) &line[14];
-		data->time_delay = *short_ptr;
-		short_ptr = (short *) &line[16];
-		data->transducer_depth = *short_ptr;
-		short_ptr = (short *) &line[18];
-		data->transducer_height = *short_ptr;
-		short_ptr = (short *) &line[20];
-		data->transducer_x = *short_ptr;
-		short_ptr = (short *) &line[22];
-		data->transducer_y = *short_ptr;
-		short_ptr = (short *) &line[24];
-		data->antenna_z = *short_ptr;
-		short_ptr = (short *) &line[26];
-		data->antenna_x = *short_ptr;
-		short_ptr = (short *) &line[28];
-		data->antenna_y = *short_ptr;
-		short_ptr = (short *) &line[30];
-		data->motion_sensor_x = *short_ptr;
-		short_ptr = (short *) &line[32];
-		data->motion_sensor_y = *short_ptr;
-		short_ptr = (short *) &line[34];
-		data->motion_sensor_z = *short_ptr;
-		short_ptr = (short *) &line[36];
-		data->spare = *short_ptr;
-		short_ptr = (short *) &line[38];
-		data->line_number = *short_ptr;
-		short_ptr = (short *) &line[40];
-		data->start_or_stop = *short_ptr;
-		short_ptr = (short *) &line[42];
-		data->transducer_serial_number = *short_ptr;
-#else
-		short_ptr = (short *) &line[8];
-		data->roll_offset = (short) mb_swap_short(*short_ptr);
-		short_ptr = (short *) &line[10];
-		data->pitch_offset = (short) mb_swap_short(*short_ptr);
-		short_ptr = (short *) &line[12];
-		data->heading_offset = (short) mb_swap_short(*short_ptr);
-		short_ptr = (short *) &line[14];
-		data->time_delay = (short) mb_swap_short(*short_ptr);
-		short_ptr = (short *) &line[16];
-		data->transducer_depth = (short) mb_swap_short(*short_ptr);
-		short_ptr = (short *) &line[18];
-		data->transducer_height = (short) mb_swap_short(*short_ptr);
-		short_ptr = (short *) &line[20];
-		data->transducer_x = (short) mb_swap_short(*short_ptr);
-		short_ptr = (short *) &line[22];
-		data->transducer_y = (short) mb_swap_short(*short_ptr);
-		short_ptr = (short *) &line[24];
-		data->antenna_z = (short) mb_swap_short(*short_ptr);
-		short_ptr = (short *) &line[26];
-		data->antenna_x = (short) mb_swap_short(*short_ptr);
-		short_ptr = (short *) &line[28];
-		data->antenna_y = (short) mb_swap_short(*short_ptr);
-		short_ptr = (short *) &line[30];
-		data->motion_sensor_x = (short) mb_swap_short(*short_ptr);
-		short_ptr = (short *) &line[32];
-		data->motion_sensor_y = (short) mb_swap_short(*short_ptr);
-		short_ptr = (short *) &line[34];
-		data->motion_sensor_z = (short) mb_swap_short(*short_ptr);
-		short_ptr = (short *) &line[36];
-		data->spare = (short) mb_swap_short(*short_ptr);
-		short_ptr = (short *) &line[38];
-		data->line_number = (short) mb_swap_short(*short_ptr);
-		short_ptr = (short *) &line[40];
-		data->start_or_stop = (short) mb_swap_short(*short_ptr);
-		short_ptr = (short *) &line[42];
-		data->transducer_serial_number = (short) mb_swap_short(*short_ptr);
-#endif
+		if (swap == MB_NO)
+			{
+			short_ptr = (short *) &line[8];
+			data->roll_offset = *short_ptr;
+			short_ptr = (short *) &line[10];
+			data->pitch_offset = *short_ptr;
+			short_ptr = (short *) &line[12];
+			data->heading_offset = *short_ptr;
+			short_ptr = (short *) &line[14];
+			data->time_delay = *short_ptr;
+			short_ptr = (short *) &line[16];
+			data->transducer_depth = *short_ptr;
+			short_ptr = (short *) &line[18];
+			data->transducer_height = *short_ptr;
+			short_ptr = (short *) &line[20];
+			data->transducer_x = *short_ptr;
+			short_ptr = (short *) &line[22];
+			data->transducer_y = *short_ptr;
+			short_ptr = (short *) &line[24];
+			data->antenna_z = *short_ptr;
+			short_ptr = (short *) &line[26];
+			data->antenna_x = *short_ptr;
+			short_ptr = (short *) &line[28];
+			data->antenna_y = *short_ptr;
+			short_ptr = (short *) &line[30];
+			data->motion_sensor_x = *short_ptr;
+			short_ptr = (short *) &line[32];
+			data->motion_sensor_y = *short_ptr;
+			short_ptr = (short *) &line[34];
+			data->motion_sensor_z = *short_ptr;
+			short_ptr = (short *) &line[36];
+			data->spare = *short_ptr;
+			short_ptr = (short *) &line[38];
+			data->line_number = *short_ptr;
+			short_ptr = (short *) &line[40];
+			data->start_or_stop = *short_ptr;
+			short_ptr = (short *) &line[42];
+			data->transducer_serial_number = *short_ptr;
+			}
+		else
+			{
+			short_ptr = (short *) &line[8];
+			data->roll_offset = (short) mb_swap_short(*short_ptr);
+			short_ptr = (short *) &line[10];
+			data->pitch_offset = (short) mb_swap_short(*short_ptr);
+			short_ptr = (short *) &line[12];
+			data->heading_offset = (short) mb_swap_short(*short_ptr);
+			short_ptr = (short *) &line[14];
+			data->time_delay = (short) mb_swap_short(*short_ptr);
+			short_ptr = (short *) &line[16];
+			data->transducer_depth = (short) mb_swap_short(*short_ptr);
+			short_ptr = (short *) &line[18];
+			data->transducer_height = (short) mb_swap_short(*short_ptr);
+			short_ptr = (short *) &line[20];
+			data->transducer_x = (short) mb_swap_short(*short_ptr);
+			short_ptr = (short *) &line[22];
+			data->transducer_y = (short) mb_swap_short(*short_ptr);
+			short_ptr = (short *) &line[24];
+			data->antenna_z = (short) mb_swap_short(*short_ptr);
+			short_ptr = (short *) &line[26];
+			data->antenna_x = (short) mb_swap_short(*short_ptr);
+			short_ptr = (short *) &line[28];
+			data->antenna_y = (short) mb_swap_short(*short_ptr);
+			short_ptr = (short *) &line[30];
+			data->motion_sensor_x = (short) mb_swap_short(*short_ptr);
+			short_ptr = (short *) &line[32];
+			data->motion_sensor_y = (short) mb_swap_short(*short_ptr);
+			short_ptr = (short *) &line[34];
+			data->motion_sensor_z = (short) mb_swap_short(*short_ptr);
+			short_ptr = (short *) &line[36];
+			data->spare = (short) mb_swap_short(*short_ptr);
+			short_ptr = (short *) &line[38];
+			data->line_number = (short) mb_swap_short(*short_ptr);
+			short_ptr = (short *) &line[40];
+			data->start_or_stop = (short) mb_swap_short(*short_ptr);
+			short_ptr = (short *) &line[42];
+			data->transducer_serial_number = (short) mb_swap_short(*short_ptr);
+			}
 		}
 
 	/* print debug statements */
@@ -1353,7 +1363,7 @@ int mbr_cbat8101_rd_parameter(int verbose, FILE *mbfp,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_cbat8101_rd_nav(int verbose, FILE *mbfp, 
+int mbr_cbat8101_rd_nav(int verbose, FILE *mbfp, int swap, 
 		struct mbf_cbat8101_struct *data, int *error)
 {
 	char	*function_name = "mbr_cbat8101_rd_nav";
@@ -1371,6 +1381,7 @@ int mbr_cbat8101_rd_nav(int verbose, FILE *mbfp,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
+		fprintf(stderr,"dbg2       swap:       %d\n",swap);
 		fprintf(stderr,"dbg2       data:       %d\n",data);
 		}
 
@@ -1396,45 +1407,48 @@ int mbr_cbat8101_rd_nav(int verbose, FILE *mbfp,
 		data->pos_second =         (int) line[5];
 		data->pos_hundredth_sec =  (int) line[6];
 		data->pos_thousandth_sec = (int) line[7];
-#ifndef BYTESWAPPED
-		int_ptr = (int *) &line[8];
-		data->pos_latitude = *int_ptr;
-		int_ptr = (int *) &line[12];
-		data->pos_longitude = *int_ptr;
-		int_ptr = (int *) &line[16];
-		data->utm_northing = *int_ptr;
-		int_ptr = (int *) &line[20];
-		data->utm_easting = *int_ptr;
-		int_ptr = (int *) &line[24];
-		data->utm_zone_lon = *int_ptr;
-		data->utm_zone = line[28];
-		data->hemisphere = line[29];
-		data->ellipsoid = line[30];
-		data->pos_spare = line[31];
-		short_ptr = (short *) &line[32];
-		data->semi_major_axis = (int) *short_ptr;
-		short_ptr = (short *) &line[34];
-		data->other_quality = (int) *short_ptr;
-#else
-		int_ptr = (int *) &line[8];
-		data->pos_latitude = (int) mb_swap_int(*int_ptr);
-		int_ptr = (int *) &line[12];
-		data->pos_longitude = (int) mb_swap_int(*int_ptr);
-		int_ptr = (int *) &line[16];
-		data->utm_northing = (int) mb_swap_int(*int_ptr);
-		int_ptr = (int *) &line[20];
-		data->utm_easting = (int) mb_swap_int(*int_ptr);
-		int_ptr = (int *) &line[24];
-		data->utm_zone_lon = (int) mb_swap_int(*int_ptr);
-		data->utm_zone = line[28];
-		data->hemisphere = line[29];
-		data->ellipsoid = line[30];
-		data->pos_spare = line[31];
-		short_ptr = (short *) &line[32];
-		data->semi_major_axis = (int) mb_swap_short(*short_ptr);
-		short_ptr = (short *) &line[34];
-		data->other_quality = (int) mb_swap_short(*short_ptr);
-#endif
+		if (swap == MB_NO)
+			{
+			int_ptr = (int *) &line[8];
+			data->pos_latitude = *int_ptr;
+			int_ptr = (int *) &line[12];
+			data->pos_longitude = *int_ptr;
+			int_ptr = (int *) &line[16];
+			data->utm_northing = *int_ptr;
+			int_ptr = (int *) &line[20];
+			data->utm_easting = *int_ptr;
+			int_ptr = (int *) &line[24];
+			data->utm_zone_lon = *int_ptr;
+			data->utm_zone = line[28];
+			data->hemisphere = line[29];
+			data->ellipsoid = line[30];
+			data->pos_spare = line[31];
+			short_ptr = (short *) &line[32];
+			data->semi_major_axis = (int) *short_ptr;
+			short_ptr = (short *) &line[34];
+			data->other_quality = (int) *short_ptr;
+			}
+		else
+			{
+			int_ptr = (int *) &line[8];
+			data->pos_latitude = (int) mb_swap_int(*int_ptr);
+			int_ptr = (int *) &line[12];
+			data->pos_longitude = (int) mb_swap_int(*int_ptr);
+			int_ptr = (int *) &line[16];
+			data->utm_northing = (int) mb_swap_int(*int_ptr);
+			int_ptr = (int *) &line[20];
+			data->utm_easting = (int) mb_swap_int(*int_ptr);
+			int_ptr = (int *) &line[24];
+			data->utm_zone_lon = (int) mb_swap_int(*int_ptr);
+			data->utm_zone = line[28];
+			data->hemisphere = line[29];
+			data->ellipsoid = line[30];
+			data->pos_spare = line[31];
+			short_ptr = (short *) &line[32];
+			data->semi_major_axis = (int) mb_swap_short(*short_ptr);
+			short_ptr = (short *) &line[34];
+			data->other_quality = (int) mb_swap_short(*short_ptr);
+			}
 		}
 
 	/* print debug statements */
@@ -1478,7 +1492,7 @@ int mbr_cbat8101_rd_nav(int verbose, FILE *mbfp,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_cbat8101_rd_svp(int verbose, FILE *mbfp, 
+int mbr_cbat8101_rd_svp(int verbose, FILE *mbfp, int swap, 
 		struct mbf_cbat8101_struct *data, int *error)
 {
 	char	*function_name = "mbr_cbat8101_rd_svp";
@@ -1497,6 +1511,7 @@ int mbr_cbat8101_rd_svp(int verbose, FILE *mbfp,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
+		fprintf(stderr,"dbg2       swap:       %d\n",swap);
 		fprintf(stderr,"dbg2       data:       %d\n",data);
 		}
 
@@ -1522,29 +1537,35 @@ int mbr_cbat8101_rd_svp(int verbose, FILE *mbfp,
 		data->svp_second =         (int) line[5];
 		data->svp_hundredth_sec =  (int) line[6];
 		data->svp_thousandth_sec = (int) line[7];
-#ifndef BYTESWAPPED
-		int_ptr = (int *) &line[8];
-		data->svp_latitude = *int_ptr;
-		int_ptr = (int *) &line[12];
-		data->svp_longitude = *int_ptr;
-#else
-		int_ptr = (int *) &line[8];
-		data->svp_latitude = (int) mb_swap_int(*int_ptr);
-		int_ptr = (int *) &line[12];
-		data->svp_latitude = (int) mb_swap_int(*int_ptr);
-#endif
+		if (swap == MB_NO)
+			{
+			int_ptr = (int *) &line[8];
+			data->svp_latitude = *int_ptr;
+			int_ptr = (int *) &line[12];
+			data->svp_longitude = *int_ptr;
+			}
+		else
+			{
+			int_ptr = (int *) &line[8];
+			data->svp_latitude = (int) mb_swap_int(*int_ptr);
+			int_ptr = (int *) &line[12];
+			data->svp_latitude = (int) mb_swap_int(*int_ptr);
+			}
 		data->svp_num = 0;
 		for (i=0;i<500;i++)
 			{
 			short_ptr = (short *) &line[16+4*i];
 			short_ptr2 = (short *) &line[18+4*i];
-#ifndef BYTESWAPPED
-			data->svp_depth[i] = *short_ptr;
-			data->svp_vel[i] = *short_ptr2;
-#else
-			data->svp_depth[i] = (short) mb_swap_short(*short_ptr);
-			data->svp_vel[i] = (short) mb_swap_short(*short_ptr2);
-#endif
+			if (swap == MB_NO)
+				{
+				data->svp_depth[i] = *short_ptr;
+				data->svp_vel[i] = *short_ptr2;
+				}
+			else
+				{
+				data->svp_depth[i] = (short) mb_swap_short(*short_ptr);
+				data->svp_vel[i] = (short) mb_swap_short(*short_ptr2);
+				}
 			if (data->svp_vel[i] > 0) data->svp_num = i + 1;
 			}
 		}
@@ -1585,7 +1606,7 @@ int mbr_cbat8101_rd_svp(int verbose, FILE *mbfp,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_cbat8101_rd_short_svp(int verbose, FILE *mbfp, 
+int mbr_cbat8101_rd_short_svp(int verbose, FILE *mbfp, int swap, 
 		struct mbf_cbat8101_struct *data, int *error)
 {
 	char	*function_name = "mbr_cbat8101_rd_svp";
@@ -1604,6 +1625,7 @@ int mbr_cbat8101_rd_short_svp(int verbose, FILE *mbfp,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
+		fprintf(stderr,"dbg2       swap:       %d\n",swap);
 		fprintf(stderr,"dbg2       data:       %d\n",data);
 		}
 
@@ -1629,29 +1651,35 @@ int mbr_cbat8101_rd_short_svp(int verbose, FILE *mbfp,
 		data->svp_second =         (int) line[5];
 		data->svp_hundredth_sec =  (int) line[6];
 		data->svp_thousandth_sec = (int) line[7];
-#ifndef BYTESWAPPED
-		int_ptr = (int *) &line[8];
-		data->svp_latitude = *int_ptr;
-		int_ptr = (int *) &line[12];
-		data->svp_longitude = *int_ptr;
-#else
-		int_ptr = (int *) &line[8];
-		data->svp_latitude = (int) mb_swap_int(*int_ptr);
-		int_ptr = (int *) &line[12];
-		data->svp_latitude = (int) mb_swap_int(*int_ptr);
-#endif
+		if (swap == MB_NO)
+			{
+			int_ptr = (int *) &line[8];
+			data->svp_latitude = *int_ptr;
+			int_ptr = (int *) &line[12];
+			data->svp_longitude = *int_ptr;
+			}
+		else
+			{
+			int_ptr = (int *) &line[8];
+			data->svp_latitude = (int) mb_swap_int(*int_ptr);
+			int_ptr = (int *) &line[12];
+			data->svp_latitude = (int) mb_swap_int(*int_ptr);
+			}
 		data->svp_num = 0;
 		for (i=0;i<200;i++)
 			{
 			short_ptr = (short *) &line[16+4*i];
 			short_ptr2 = (short *) &line[18+4*i];
-#ifndef BYTESWAPPED
-			data->svp_depth[i] = *short_ptr;
-			data->svp_vel[i] = *short_ptr2;
-#else
-			data->svp_depth[i] = (short) mb_swap_short(*short_ptr);
-			data->svp_vel[i] = (short) mb_swap_short(*short_ptr2);
-#endif
+			if (swap == MB_NO)
+				{
+				data->svp_depth[i] = *short_ptr;
+				data->svp_vel[i] = *short_ptr2;
+				}
+			else
+				{
+				data->svp_depth[i] = (short) mb_swap_short(*short_ptr);
+				data->svp_vel[i] = (short) mb_swap_short(*short_ptr2);
+				}
 			if (data->svp_vel[i] > 0) data->svp_num = i + 1;
 			}
 		}
@@ -1692,7 +1720,7 @@ int mbr_cbat8101_rd_short_svp(int verbose, FILE *mbfp,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_cbat8101_rd_bath(int verbose, FILE *mbfp, 
+int mbr_cbat8101_rd_bath(int verbose, FILE *mbfp, int swap, 
 		struct mbf_cbat8101_struct *data, int *error)
 {
 	char	*function_name = "mbr_cbat8101_rd_bath";
@@ -1712,6 +1740,7 @@ int mbr_cbat8101_rd_bath(int verbose, FILE *mbfp,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
+		fprintf(stderr,"dbg2       swap:       %d\n",swap);
 		fprintf(stderr,"dbg2       data:       %d\n",data);
 		}
 
@@ -1737,88 +1766,94 @@ int mbr_cbat8101_rd_bath(int verbose, FILE *mbfp,
 		data->second =         (int) line[5];
 		data->hundredth_sec =  (int) line[6];
 		data->thousandth_sec = (int) line[7];
-#ifndef BYTESWAPPED
-		int_ptr = (int *) &line[8];
-		data->latitude = *int_ptr;
-		int_ptr = (int *) &line[12];
-		data->longitude = *int_ptr;
-		short_ptr = (short *) &line[16];
-		data->roll = (int) *short_ptr;
-		short_ptr = (short *) &line[18];
-		data->pitch = (int) *short_ptr;
-		short_ptr = (short *) &line[20];
-		data->heading = (unsigned short) *short_ptr;
-		short_ptr = (short *) &line[22];
-		data->heave = (int) *short_ptr;
-		short_ptr = (short *) &line[24];
-		data->ping_number = (int) *short_ptr;
-		short_ptr = (short *) &line[26];
-		data->sound_vel = (int) *short_ptr;
-#else
-		int_ptr = (int *) &line[8];
-		data->latitude = (int) mb_swap_int(*int_ptr);
-		int_ptr = (int *) &line[12];
-		data->latitude = (int) mb_swap_int(*int_ptr);
-		short_ptr = (short *) &line[16];
-		data->roll = (int) mb_swap_short(*short_ptr);
-		short_ptr = (short *) &line[18];
-		data->pitch = (int) mb_swap_short(*short_ptr);
-		short_ptr = (short *) &line[20];
-		data->heading = (unsigned short) mb_swap_short(*short_ptr);
-		short_ptr = (short *) &line[22];
-		data->heave = (int) mb_swap_short(*short_ptr);
-		short_ptr = (short *) &line[24];
-		data->ping_number = (int) mb_swap_short(*short_ptr);
-		short_ptr = (short *) &line[26];
-		data->sound_vel = (int) mb_swap_short(*short_ptr);
-#endif
+		if (swap == MB_NO)
+			{
+			int_ptr = (int *) &line[8];
+			data->latitude = *int_ptr;
+			int_ptr = (int *) &line[12];
+			data->longitude = *int_ptr;
+			short_ptr = (short *) &line[16];
+			data->roll = (int) *short_ptr;
+			short_ptr = (short *) &line[18];
+			data->pitch = (int) *short_ptr;
+			short_ptr = (short *) &line[20];
+			data->heading = (unsigned short) *short_ptr;
+			short_ptr = (short *) &line[22];
+			data->heave = (int) *short_ptr;
+			short_ptr = (short *) &line[24];
+			data->ping_number = (int) *short_ptr;
+			short_ptr = (short *) &line[26];
+			data->sound_vel = (int) *short_ptr;
+			}
+		else
+			{
+			int_ptr = (int *) &line[8];
+			data->latitude = (int) mb_swap_int(*int_ptr);
+			int_ptr = (int *) &line[12];
+			data->latitude = (int) mb_swap_int(*int_ptr);
+			short_ptr = (short *) &line[16];
+			data->roll = (int) mb_swap_short(*short_ptr);
+			short_ptr = (short *) &line[18];
+			data->pitch = (int) mb_swap_short(*short_ptr);
+			short_ptr = (short *) &line[20];
+			data->heading = (unsigned short) mb_swap_short(*short_ptr);
+			short_ptr = (short *) &line[22];
+			data->heave = (int) mb_swap_short(*short_ptr);
+			short_ptr = (short *) &line[24];
+			data->ping_number = (int) mb_swap_short(*short_ptr);
+			short_ptr = (short *) &line[26];
+			data->sound_vel = (int) mb_swap_short(*short_ptr);
+			}
 		data->mode = (int) line[28];
 		data->gain1 = (int) line[29];
 		data->gain2 = (int) line[30];
 		data->gain3 = (int) line[31];
 		data->beams_bath = MBF_CBAT8101_MAXBEAMS;
-#ifndef BYTESWAPPED
-		for (i=0;i<data->beams_bath;i++)
+		if (swap == MB_NO)
 			{
-			beamarray = line + 32 + 12*i;
-			short_ptr = (short *) beamarray; 
-			data->bath[i] = *short_ptr;
-			short_ptr = ((short *) beamarray) + 1; 
-			data->bath_acrosstrack[i] = *short_ptr;
-			short_ptr = ((short *) beamarray) + 2; 
-			data->bath_alongtrack[i] = *short_ptr;
-			short_ptr = ((short *) beamarray) + 3; 
-			data->tt[i] = *short_ptr;
-			short_ptr = ((short *) beamarray) + 4; 
-			data->angle[i] = *short_ptr;
-			char_ptr = (unsigned char *) (beamarray + 10); 
-			data->quality[i] = (short) *char_ptr;
-			char_ptr = (unsigned char *) (beamarray + 11); 
-			data->amp[i] = (short) *char_ptr;
+			for (i=0;i<data->beams_bath;i++)
+				{
+				beamarray = line + 32 + 12*i;
+				short_ptr = (short *) beamarray; 
+				data->bath[i] = *short_ptr;
+				short_ptr = ((short *) beamarray) + 1; 
+				data->bath_acrosstrack[i] = *short_ptr;
+				short_ptr = ((short *) beamarray) + 2; 
+				data->bath_alongtrack[i] = *short_ptr;
+				short_ptr = ((short *) beamarray) + 3; 
+				data->tt[i] = *short_ptr;
+				short_ptr = ((short *) beamarray) + 4; 
+				data->angle[i] = *short_ptr;
+				char_ptr = (unsigned char *) (beamarray + 10); 
+				data->quality[i] = (short) *char_ptr;
+				char_ptr = (unsigned char *) (beamarray + 11); 
+				data->amp[i] = (short) *char_ptr;
+				}
 			}
-#else
-		for (i=0;i<data->beams_bath;i++)
+		else
 			{
-			beamarray = line + 32 + 12*i;
-			short_ptr = (short *) beamarray; 
-			data->bath[i] = 
-				(short) mb_swap_short(*short_ptr);
-			short_ptr = ((short *) beamarray) + 1; 
-			data->bath_acrosstrack[i] = 
-				(short) mb_swap_short(*short_ptr);
-			short_ptr = ((short *) beamarray) + 2; 
-			data->bath_alongtrack[i] = 
-				(short) mb_swap_short(*short_ptr);
-			short_ptr = ((short *) beamarray) + 3; 
-			data->tt[i] = (short) mb_swap_short(*short_ptr);
-			short_ptr = ((short *) beamarray) + 4; 
-			data->angle[i] = (short) mb_swap_short(*short_ptr);
-			char_ptr = beamarray + 10; 
-			data->quality[i] = (short) *char_ptr;
-			char_ptr = beamarray + 11; 
-			data->amp[i] = (short) *char_ptr;
+			for (i=0;i<data->beams_bath;i++)
+				{
+				beamarray = line + 32 + 12*i;
+				short_ptr = (short *) beamarray; 
+				data->bath[i] = 
+					(short) mb_swap_short(*short_ptr);
+				short_ptr = ((short *) beamarray) + 1; 
+				data->bath_acrosstrack[i] = 
+					(short) mb_swap_short(*short_ptr);
+				short_ptr = ((short *) beamarray) + 2; 
+				data->bath_alongtrack[i] = 
+					(short) mb_swap_short(*short_ptr);
+				short_ptr = ((short *) beamarray) + 3; 
+				data->tt[i] = (short) mb_swap_short(*short_ptr);
+				short_ptr = ((short *) beamarray) + 4; 
+				data->angle[i] = (short) mb_swap_short(*short_ptr);
+				char_ptr = beamarray + 10; 
+				data->quality[i] = (short) *char_ptr;
+				char_ptr = beamarray + 11; 
+				data->amp[i] = (short) *char_ptr;
+				}
 			}
-#endif
 		}
 
 	/* print debug statements */
@@ -1870,7 +1905,7 @@ int mbr_cbat8101_rd_bath(int verbose, FILE *mbfp,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_cbat8101_rd_heading(int verbose, FILE *mbfp, 
+int mbr_cbat8101_rd_heading(int verbose, FILE *mbfp, int swap, 
 		struct mbf_cbat8101_struct *data, int *error)
 {
 	char	*function_name = "mbr_cbat8101_rd_heading";
@@ -1888,6 +1923,7 @@ int mbr_cbat8101_rd_heading(int verbose, FILE *mbfp,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
+		fprintf(stderr,"dbg2       swap:       %d\n",swap);
 		fprintf(stderr,"dbg2       data:       %d\n",data);
 		}
 
@@ -1913,13 +1949,16 @@ int mbr_cbat8101_rd_heading(int verbose, FILE *mbfp,
 		data->second =         (int) line[5];
 		data->hundredth_sec =  (int) line[6];
 		data->thousandth_sec = (int) line[7];
-#ifndef BYTESWAPPED
-		short_ptr = (short *) &line[8];
-		data->heading = (int) *short_ptr;
-#else
-		short_ptr = (short *) &line[8];
-		data->heading = (int) mb_swap_short(*short_ptr);
-#endif
+		if (swap == MB_NO)
+			{
+			short_ptr = (short *) &line[8];
+			data->heading = (int) *short_ptr;
+			}
+		else
+			{
+			short_ptr = (short *) &line[8];
+			data->heading = (int) mb_swap_short(*short_ptr);
+			}
 		}
 
 	/* print debug statements */
@@ -1953,7 +1992,7 @@ int mbr_cbat8101_rd_heading(int verbose, FILE *mbfp,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_cbat8101_rd_attitude(int verbose, FILE *mbfp, 
+int mbr_cbat8101_rd_attitude(int verbose, FILE *mbfp, int swap, 
 		struct mbf_cbat8101_struct *data, int *error)
 {
 	char	*function_name = "mbr_cbat8101_rd_attitude";
@@ -1971,6 +2010,7 @@ int mbr_cbat8101_rd_attitude(int verbose, FILE *mbfp,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
+		fprintf(stderr,"dbg2       swap:       %d\n",swap);
 		fprintf(stderr,"dbg2       data:       %d\n",data);
 		}
 
@@ -1996,21 +2036,24 @@ int mbr_cbat8101_rd_attitude(int verbose, FILE *mbfp,
 		data->second =         (int) line[5];
 		data->hundredth_sec =  (int) line[6];
 		data->thousandth_sec = (int) line[7];
-#ifndef BYTESWAPPED
-		short_ptr = (short *) &line[8];
-		data->heave = (int) *short_ptr;
-		short_ptr = (short *) &line[10];
-		data->roll = (int) *short_ptr;
-		short_ptr = (short *) &line[12];
-		data->pitch = (int) *short_ptr;
-#else
-		short_ptr = (short *) &line[8];
-		data->heave = (int) mb_swap_short(*short_ptr);
-		short_ptr = (short *) &line[10];
-		data->roll = (int) mb_swap_short(*short_ptr);
-		short_ptr = (short *) &line[12];
-		data->pitch = (int) mb_swap_short(*short_ptr);
-#endif
+		if (swap == MB_NO)
+			{
+			short_ptr = (short *) &line[8];
+			data->heave = (int) *short_ptr;
+			short_ptr = (short *) &line[10];
+			data->roll = (int) *short_ptr;
+			short_ptr = (short *) &line[12];
+			data->pitch = (int) *short_ptr;
+			}
+		else
+			{
+			short_ptr = (short *) &line[8];
+			data->heave = (int) mb_swap_short(*short_ptr);
+			short_ptr = (short *) &line[10];
+			data->roll = (int) mb_swap_short(*short_ptr);
+			short_ptr = (short *) &line[12];
+			data->pitch = (int) mb_swap_short(*short_ptr);
+			}
 		}
 
 	/* print debug statements */
@@ -2072,31 +2115,31 @@ int mbr_cbat8101_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 
 	if (data->kind == MB_DATA_COMMENT)
 		{
-		status = mbr_cbat8101_wr_comment(verbose,mbfp,data,error);
+		status = mbr_cbat8101_wr_comment(verbose,mbfp,mb_io_ptr->byteswapped,data,error);
 		}
 	else if (data->kind == MB_DATA_PARAMETER)
 		{
-		status = mbr_cbat8101_wr_parameter(verbose,mbfp,data,error);
+		status = mbr_cbat8101_wr_parameter(verbose,mbfp,mb_io_ptr->byteswapped,data,error);
 		}
 	else if (data->kind == MB_DATA_NAV)
 		{
-		status = mbr_cbat8101_wr_nav(verbose,mbfp,data,error);
+		status = mbr_cbat8101_wr_nav(verbose,mbfp,mb_io_ptr->byteswapped,data,error);
 		}
 	else if (data->kind == MB_DATA_VELOCITY_PROFILE)
 		{
-		status = mbr_cbat8101_wr_svp(verbose,mbfp,data,error);
+		status = mbr_cbat8101_wr_svp(verbose,mbfp,mb_io_ptr->byteswapped,data,error);
 		}
 	else if (data->kind == MB_DATA_DATA)
 		{
-		status = mbr_cbat8101_wr_bath(verbose,mbfp,data,error);
+		status = mbr_cbat8101_wr_bath(verbose,mbfp,mb_io_ptr->byteswapped,data,error);
 		}
 	else if (data->kind == MB_DATA_HEADING)
 		{
-		status = mbr_cbat8101_wr_heading(verbose,mbfp,data,error);
+		status = mbr_cbat8101_wr_heading(verbose,mbfp,mb_io_ptr->byteswapped,data,error);
 		}
 	else if (data->kind == MB_DATA_ATTITUDE)
 		{
-		status = mbr_cbat8101_wr_attitude(verbose,mbfp,data,error);
+		status = mbr_cbat8101_wr_attitude(verbose,mbfp,mb_io_ptr->byteswapped,data,error);
 		}
 	else
 		{
@@ -2127,7 +2170,7 @@ int mbr_cbat8101_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_cbat8101_wr_comment(int verbose, FILE *mbfp, char *data_ptr, int *error)
+int mbr_cbat8101_wr_comment(int verbose, FILE *mbfp, int swap, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_cbat8101_wr_comment";
 	int	status = MB_SUCCESS;
@@ -2145,6 +2188,7 @@ int mbr_cbat8101_wr_comment(int verbose, FILE *mbfp, char *data_ptr, int *error)
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
+		fprintf(stderr,"dbg2       swap:       %d\n",swap);
 		fprintf(stderr,"dbg2       data_ptr:   %d\n",data_ptr);
 		}
 
@@ -2161,9 +2205,8 @@ int mbr_cbat8101_wr_comment(int verbose, FILE *mbfp, char *data_ptr, int *error)
 
 	/* write the record label */
 	label = RESON_COMMENT;
-#ifdef BYTESWAPPED
-	label = (short) mb_swap_short(label);
-#endif
+	if (swap == MB_YES)
+		label = (short) mb_swap_short(label);
 	status = fwrite(&label,1,2,mbfp);
 	if (status != 2)
 		{
@@ -2217,7 +2260,7 @@ int mbr_cbat8101_wr_comment(int verbose, FILE *mbfp, char *data_ptr, int *error)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_cbat8101_wr_parameter(int verbose, FILE *mbfp, char *data_ptr, int *error)
+int mbr_cbat8101_wr_parameter(int verbose, FILE *mbfp, int swap, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_cbat8101_wr_parameter";
 	int	status = MB_SUCCESS;
@@ -2235,6 +2278,7 @@ int mbr_cbat8101_wr_parameter(int verbose, FILE *mbfp, char *data_ptr, int *erro
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
+		fprintf(stderr,"dbg2       swap:       %d\n",swap);
 		fprintf(stderr,"dbg2       data_ptr:   %d\n",data_ptr);
 		}
 
@@ -2277,9 +2321,8 @@ int mbr_cbat8101_wr_parameter(int verbose, FILE *mbfp, char *data_ptr, int *erro
 
 	/* write the record label */
 	label = RESON_PARAMETER;
-#ifdef BYTESWAPPED
-	label = (short) mb_swap_short(label);
-#endif
+	if (swap == MB_YES)
+		label = (short) mb_swap_short(label);
 	status = fwrite(&label,1,2,mbfp);
 	if (status != 2)
 		{
@@ -2301,81 +2344,84 @@ int mbr_cbat8101_wr_parameter(int verbose, FILE *mbfp, char *data_ptr, int *erro
 		line[5] = (char) data->par_second;
 		line[6] = (char) data->par_hundredth_sec;
 		line[7] = (char) data->par_thousandth_sec;
-#ifndef BYTESWAPPED
-		short_ptr = (short *) &line[8];
-		*short_ptr = data->roll_offset;
-		short_ptr = (short *) &line[10];
-		*short_ptr = data->pitch_offset;
-		short_ptr = (short *) &line[12];
-		*short_ptr = data->heading_offset;
-		short_ptr = (short *) &line[14];
-		*short_ptr = data->time_delay;
-		short_ptr = (short *) &line[16];
-		*short_ptr = data->transducer_depth;
-		short_ptr = (short *) &line[18];
-		*short_ptr = data->transducer_height;
-		short_ptr = (short *) &line[20];
-		*short_ptr = data->transducer_x;
-		short_ptr = (short *) &line[22];
-		*short_ptr = data->transducer_y;
-		short_ptr = (short *) &line[24];
-		*short_ptr = data->antenna_z;
-		short_ptr = (short *) &line[26];
-		*short_ptr = data->antenna_x;
-		short_ptr = (short *) &line[28];
-		*short_ptr = data->antenna_y;
-		short_ptr = (short *) &line[30];
-		*short_ptr = data->motion_sensor_x;
-		short_ptr = (short *) &line[32];
-		*short_ptr = data->motion_sensor_y;
-		short_ptr = (short *) &line[34];
-		*short_ptr = data->motion_sensor_z;
-		short_ptr = (short *) &line[36];
-		*short_ptr = data->spare;
-		short_ptr = (short *) &line[38];
-		*short_ptr = data->line_number;
-		short_ptr = (short *) &line[40];
-		*short_ptr = data->start_or_stop;
-		short_ptr = (short *) &line[42];
-		*short_ptr = data->transducer_serial_number;
-#else
-		short_ptr = (short *) &line[8];
-		*short_ptr = (short) mb_swap_short(data->roll_offset);
-		short_ptr = (short *) &line[10];
-		*short_ptr = (short) mb_swap_short(data->pitch_offset);
-		short_ptr = (short *) &line[12];
-		*short_ptr = (short) mb_swap_short(data->heading_offset);
-		short_ptr = (short *) &line[14];
-		*short_ptr = (short) mb_swap_short(data->time_delay);
-		short_ptr = (short *) &line[16];
-		*short_ptr = (short) mb_swap_short(data->transducer_depth);
-		short_ptr = (short *) &line[18];
-		*short_ptr = (short) mb_swap_short(data->transducer_height);
-		short_ptr = (short *) &line[20];
-		*short_ptr = (short) mb_swap_short(data->transducer_x);
-		short_ptr = (short *) &line[22];
-		*short_ptr = (short) mb_swap_short(data->transducer_y);
-		short_ptr = (short *) &line[24];
-		*short_ptr = (short) mb_swap_short(data->antenna_z);
-		short_ptr = (short *) &line[26];
-		*short_ptr = (short) mb_swap_short(data->antenna_x);
-		short_ptr = (short *) &line[28];
-		*short_ptr = (short) mb_swap_short(data->antenna_y);
-		short_ptr = (short *) &line[30];
-		*short_ptr = (short) mb_swap_short(data->motion_sensor_x);
-		short_ptr = (short *) &line[32];
-		*short_ptr = (short) mb_swap_short(data->motion_sensor_y);
-		short_ptr = (short *) &line[34];
-		*short_ptr = (short) mb_swap_short(data->motion_sensor_z);
-		short_ptr = (short *) &line[36];
-		*short_ptr = (short) mb_swap_short(data->spare);
-		short_ptr = (short *) &line[38];
-		*short_ptr = (short) mb_swap_short(data->line_number);
-		short_ptr = (short *) &line[40];
-		*short_ptr = (short) mb_swap_short(data->start_or_stop);
-		short_ptr = (short *) &line[42];
-		*short_ptr = (short) mb_swap_short(data->transducer_serial_number);
-#endif
+		if (swap == MB_NO)
+			{
+			short_ptr = (short *) &line[8];
+			*short_ptr = data->roll_offset;
+			short_ptr = (short *) &line[10];
+			*short_ptr = data->pitch_offset;
+			short_ptr = (short *) &line[12];
+			*short_ptr = data->heading_offset;
+			short_ptr = (short *) &line[14];
+			*short_ptr = data->time_delay;
+			short_ptr = (short *) &line[16];
+			*short_ptr = data->transducer_depth;
+			short_ptr = (short *) &line[18];
+			*short_ptr = data->transducer_height;
+			short_ptr = (short *) &line[20];
+			*short_ptr = data->transducer_x;
+			short_ptr = (short *) &line[22];
+			*short_ptr = data->transducer_y;
+			short_ptr = (short *) &line[24];
+			*short_ptr = data->antenna_z;
+			short_ptr = (short *) &line[26];
+			*short_ptr = data->antenna_x;
+			short_ptr = (short *) &line[28];
+			*short_ptr = data->antenna_y;
+			short_ptr = (short *) &line[30];
+			*short_ptr = data->motion_sensor_x;
+			short_ptr = (short *) &line[32];
+			*short_ptr = data->motion_sensor_y;
+			short_ptr = (short *) &line[34];
+			*short_ptr = data->motion_sensor_z;
+			short_ptr = (short *) &line[36];
+			*short_ptr = data->spare;
+			short_ptr = (short *) &line[38];
+			*short_ptr = data->line_number;
+			short_ptr = (short *) &line[40];
+			*short_ptr = data->start_or_stop;
+			short_ptr = (short *) &line[42];
+			*short_ptr = data->transducer_serial_number;
+			}
+		else
+			{
+			short_ptr = (short *) &line[8];
+			*short_ptr = (short) mb_swap_short(data->roll_offset);
+			short_ptr = (short *) &line[10];
+			*short_ptr = (short) mb_swap_short(data->pitch_offset);
+			short_ptr = (short *) &line[12];
+			*short_ptr = (short) mb_swap_short(data->heading_offset);
+			short_ptr = (short *) &line[14];
+			*short_ptr = (short) mb_swap_short(data->time_delay);
+			short_ptr = (short *) &line[16];
+			*short_ptr = (short) mb_swap_short(data->transducer_depth);
+			short_ptr = (short *) &line[18];
+			*short_ptr = (short) mb_swap_short(data->transducer_height);
+			short_ptr = (short *) &line[20];
+			*short_ptr = (short) mb_swap_short(data->transducer_x);
+			short_ptr = (short *) &line[22];
+			*short_ptr = (short) mb_swap_short(data->transducer_y);
+			short_ptr = (short *) &line[24];
+			*short_ptr = (short) mb_swap_short(data->antenna_z);
+			short_ptr = (short *) &line[26];
+			*short_ptr = (short) mb_swap_short(data->antenna_x);
+			short_ptr = (short *) &line[28];
+			*short_ptr = (short) mb_swap_short(data->antenna_y);
+			short_ptr = (short *) &line[30];
+			*short_ptr = (short) mb_swap_short(data->motion_sensor_x);
+			short_ptr = (short *) &line[32];
+			*short_ptr = (short) mb_swap_short(data->motion_sensor_y);
+			short_ptr = (short *) &line[34];
+			*short_ptr = (short) mb_swap_short(data->motion_sensor_z);
+			short_ptr = (short *) &line[36];
+			*short_ptr = (short) mb_swap_short(data->spare);
+			short_ptr = (short *) &line[38];
+			*short_ptr = (short) mb_swap_short(data->line_number);
+			short_ptr = (short *) &line[40];
+			*short_ptr = (short) mb_swap_short(data->start_or_stop);
+			short_ptr = (short *) &line[42];
+			*short_ptr = (short) mb_swap_short(data->transducer_serial_number);
+			}
 		line[RESON_PARAMETER_SIZE] = 0x03;
 		line[RESON_PARAMETER_SIZE+1] = '\0';
 		line[RESON_PARAMETER_SIZE+2] = '\0';
@@ -2409,7 +2455,7 @@ int mbr_cbat8101_wr_parameter(int verbose, FILE *mbfp, char *data_ptr, int *erro
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_cbat8101_wr_nav(int verbose, FILE *mbfp, char *data_ptr, int *error)
+int mbr_cbat8101_wr_nav(int verbose, FILE *mbfp, int swap, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_cbat8101_wr_nav";
 	int	status = MB_SUCCESS;
@@ -2428,6 +2474,7 @@ int mbr_cbat8101_wr_nav(int verbose, FILE *mbfp, char *data_ptr, int *error)
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
+		fprintf(stderr,"dbg2       swap:       %d\n",swap);
 		fprintf(stderr,"dbg2       data_ptr:   %d\n",data_ptr);
 		}
 
@@ -2462,9 +2509,9 @@ int mbr_cbat8101_wr_nav(int verbose, FILE *mbfp, char *data_ptr, int *error)
 
 	/* write the record label */
 	label = RESON_NAV;
-#ifdef BYTESWAPPED
-	label = (short) mb_swap_short(label);
-#endif
+	if (swap == MB_YES)
+		label = (short) mb_swap_short(label);
+
 	status = fwrite(&label,1,2,mbfp);
 	if (status != 2)
 		{
@@ -2486,45 +2533,48 @@ int mbr_cbat8101_wr_nav(int verbose, FILE *mbfp, char *data_ptr, int *error)
 		line[5] = (char) data->pos_second;
 		line[6] = (char) data->pos_hundredth_sec;
 		line[7] = (char) data->pos_thousandth_sec;
-#ifndef BYTESWAPPED
-		int_ptr = (int *) &line[8];
-		*int_ptr = data->pos_latitude;
-		int_ptr = (int *) &line[12];
-		*int_ptr = data->pos_longitude;
-		int_ptr = (int *) &line[16];
-		*int_ptr = data->utm_northing;
-		int_ptr = (int *) &line[20];
-		*int_ptr = data->utm_easting;
-		int_ptr = (int *) &line[24];
-		*int_ptr = data->utm_zone_lon;
-		line[28] = data->utm_zone;
-		line[29] = data->hemisphere;
-		line[30] = data->ellipsoid;
-		line[31] = data->pos_spare;
-		short_ptr = (short *) &line[32];
-		*short_ptr = (short) data->semi_major_axis;
-		short_ptr = (short *) &line[34];
-		*short_ptr = (short) data->other_quality;
-#else
-		int_ptr = (int *) &line[8];
-		*int_ptr = (int) mb_swap_int(data->pos_latitude);
-		int_ptr = (int *) &line[12];
-		*int_ptr = (int) mb_swap_int(data->pos_longitude);
-		int_ptr = (int *) &line[16];
-		*int_ptr = (int) mb_swap_int(data->utm_northing);
-		int_ptr = (int *) &line[20];
-		*int_ptr = (int) mb_swap_int(data->utm_easting);
-		int_ptr = (int *) &line[24];
-		*int_ptr = (int) mb_swap_int(data->utm_zone_lon);
-		line[28] = data->utm_zone;
-		line[29] = data->hemisphere;
-		line[30] = data->ellipsoid;
-		line[31] = data->pos_spare;
-		short_ptr = (short *) &line[32];
-		*short_ptr = (short) mb_swap_short(data->semi_major_axis);
-		short_ptr = (short *) &line[34];
-		*short_ptr = (short) mb_swap_short(data->other_quality);
-#endif
+		if (swap == MB_NO)
+			{
+			int_ptr = (int *) &line[8];
+			*int_ptr = data->pos_latitude;
+			int_ptr = (int *) &line[12];
+			*int_ptr = data->pos_longitude;
+			int_ptr = (int *) &line[16];
+			*int_ptr = data->utm_northing;
+			int_ptr = (int *) &line[20];
+			*int_ptr = data->utm_easting;
+			int_ptr = (int *) &line[24];
+			*int_ptr = data->utm_zone_lon;
+			line[28] = data->utm_zone;
+			line[29] = data->hemisphere;
+			line[30] = data->ellipsoid;
+			line[31] = data->pos_spare;
+			short_ptr = (short *) &line[32];
+			*short_ptr = (short) data->semi_major_axis;
+			short_ptr = (short *) &line[34];
+			*short_ptr = (short) data->other_quality;
+			}
+		else
+			{
+			int_ptr = (int *) &line[8];
+			*int_ptr = (int) mb_swap_int(data->pos_latitude);
+			int_ptr = (int *) &line[12];
+			*int_ptr = (int) mb_swap_int(data->pos_longitude);
+			int_ptr = (int *) &line[16];
+			*int_ptr = (int) mb_swap_int(data->utm_northing);
+			int_ptr = (int *) &line[20];
+			*int_ptr = (int) mb_swap_int(data->utm_easting);
+			int_ptr = (int *) &line[24];
+			*int_ptr = (int) mb_swap_int(data->utm_zone_lon);
+			line[28] = data->utm_zone;
+			line[29] = data->hemisphere;
+			line[30] = data->ellipsoid;
+			line[31] = data->pos_spare;
+			short_ptr = (short *) &line[32];
+			*short_ptr = (short) mb_swap_short(data->semi_major_axis);
+			short_ptr = (short *) &line[34];
+			*short_ptr = (short) mb_swap_short(data->other_quality);
+			}
 		line[RESON_NAV_SIZE] = 0x03;
 		line[RESON_NAV_SIZE+1] = '\0';
 		line[RESON_NAV_SIZE+2] = '\0';
@@ -2558,7 +2608,7 @@ int mbr_cbat8101_wr_nav(int verbose, FILE *mbfp, char *data_ptr, int *error)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_cbat8101_wr_svp(int verbose, FILE *mbfp, char *data_ptr, int *error)
+int mbr_cbat8101_wr_svp(int verbose, FILE *mbfp, int swap, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_cbat8101_wr_svp";
 	int	status = MB_SUCCESS;
@@ -2580,6 +2630,7 @@ int mbr_cbat8101_wr_svp(int verbose, FILE *mbfp, char *data_ptr, int *error)
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
+		fprintf(stderr,"dbg2       swap:       %d\n",swap);
 		fprintf(stderr,"dbg2       data_ptr:   %d\n",data_ptr);
 		}
 
@@ -2622,9 +2673,8 @@ int mbr_cbat8101_wr_svp(int verbose, FILE *mbfp, char *data_ptr, int *error)
 		}
 
 	/* write the record label */
-#ifdef BYTESWAPPED
-	label = (short) mb_swap_short(label);
-#endif
+	if (swap == MB_YES)
+		label = (short) mb_swap_short(label);
 	status = fwrite(&label,1,2,mbfp);
 	if (status != 2)
 		{
@@ -2646,30 +2696,36 @@ int mbr_cbat8101_wr_svp(int verbose, FILE *mbfp, char *data_ptr, int *error)
 		line[5] = (char) data->svp_second;
 		line[6] = (char) data->svp_hundredth_sec;
 		line[7] = (char) data->svp_thousandth_sec;
-#ifndef BYTESWAPPED
-		int_ptr = (int *) &line[8];
-		*int_ptr = data->svp_latitude;
-		int_ptr = (int *) &line[12];
-		*int_ptr = data->svp_longitude;
-#else
-		int_ptr = (int *) &line[8];
-		*int_ptr = (int) mb_swap_int(data->svp_latitude);
-		int_ptr = (int *) &line[12];
-		*int_ptr = (int) mb_swap_int(data->svp_longitude);
-#endif
+		if (swap == MB_NO)
+			{
+			int_ptr = (int *) &line[8];
+			*int_ptr = data->svp_latitude;
+			int_ptr = (int *) &line[12];
+			*int_ptr = data->svp_longitude;
+			}
+		else
+			{
+			int_ptr = (int *) &line[8];
+			*int_ptr = (int) mb_swap_int(data->svp_latitude);
+			int_ptr = (int *) &line[12];
+			*int_ptr = (int) mb_swap_int(data->svp_longitude);
+			}
 		for (i=0;i<data->svp_num;i++)
 			{
 			short_ptr = (short *) &line[16+4*i];
 			short_ptr2 = (short *) &line[18+4*i];
-#ifndef BYTESWAPPED
-			*short_ptr = (short) data->svp_depth[i];
-			*short_ptr2 = (short) data->svp_vel[i];
-#else
-			*short_ptr = (short) 
-				mb_swap_short((short)data->svp_depth[i]);
-			*short_ptr2 = (short) 
-				mb_swap_short((short)data->svp_vel[i]);
-#endif
+			if (swap == MB_NO)
+				{
+				*short_ptr = (short) data->svp_depth[i];
+				*short_ptr2 = (short) data->svp_vel[i];
+				}
+			else
+				{
+				*short_ptr = (short) 
+					mb_swap_short((short)data->svp_depth[i]);
+				*short_ptr2 = (short) 
+					mb_swap_short((short)data->svp_vel[i]);
+				}
 			}
 		for (i=data->svp_num;i<svp_num_max;i++)
 			{
@@ -2711,7 +2767,7 @@ int mbr_cbat8101_wr_svp(int verbose, FILE *mbfp, char *data_ptr, int *error)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_cbat8101_wr_bath(int verbose, FILE *mbfp, char *data_ptr, int *error)
+int mbr_cbat8101_wr_bath(int verbose, FILE *mbfp, int swap, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_cbat8101_wr_bath";
 	int	status = MB_SUCCESS;
@@ -2732,6 +2788,7 @@ int mbr_cbat8101_wr_bath(int verbose, FILE *mbfp, char *data_ptr, int *error)
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
+		fprintf(stderr,"dbg2       swap:       %d\n",swap);
 		fprintf(stderr,"dbg2       data_ptr:   %d\n",data_ptr);
 		}
 
@@ -2774,9 +2831,8 @@ int mbr_cbat8101_wr_bath(int verbose, FILE *mbfp, char *data_ptr, int *error)
 
 	/* write the record label */
 	label = RESON_BATH_8101;
-#ifdef BYTESWAPPED
-	label = (short) mb_swap_short(label);
-#endif
+	if (swap == MB_YES)
+		label = (short) mb_swap_short(label);
 	status = fwrite(&label,1,2,mbfp);
 	if (status != 2)
 		{
@@ -2798,91 +2854,97 @@ int mbr_cbat8101_wr_bath(int verbose, FILE *mbfp, char *data_ptr, int *error)
 		line[5] = (char) data->second;
 		line[6] = (char) data->hundredth_sec;
 		line[7] = (char) data->thousandth_sec;
-#ifndef BYTESWAPPED
-		int_ptr = (int *) &line[8];
-		*int_ptr = data->latitude;
-		int_ptr = (int *) &line[12];
-		*int_ptr = data->longitude;
-		short_ptr = (short *) &line[16];
-		*short_ptr = (short) data->roll;
-		short_ptr = (short *) &line[18];
-		*short_ptr = (short) data->pitch;
-		short_ptr = (short *) &line[20];
-		*short_ptr = (unsigned short) data->heading;
-		short_ptr = (short *) &line[22];
-		*short_ptr = (short) data->heave;
-		short_ptr = (short *) &line[24];
-		*short_ptr = (short) data->ping_number;
-		short_ptr = (short *) &line[26];
-		*short_ptr = (short) data->sound_vel;
-#else
-		int_ptr = (int *) &line[8];
-		*int_ptr = (int) mb_swap_int(data->latitude);
-		int_ptr = (int *) &line[12];
-		*int_ptr = (int) mb_swap_int(data->longitude);
-		short_ptr = (short *) &line[16];
-		*short_ptr = (short) mb_swap_short(data->roll);
-		short_ptr = (short *) &line[18];
-		*short_ptr = (short) mb_swap_short(data->pitch);
-		short_ptr = (short *) &line[20];
-		*short_ptr = (unsigned short) mb_swap_short(data->heading);
-		short_ptr = (short *) &line[22];
-		*short_ptr = (short) mb_swap_short(data->heave);
-		short_ptr = (short *) &line[24];
-		*short_ptr = (short) mb_swap_short(data->ping_number);
-		short_ptr = (short *) &line[26];
-		*short_ptr = (short) mb_swap_short(data->sound_vel);
-#endif
+		if (swap == MB_NO)
+			{
+			int_ptr = (int *) &line[8];
+			*int_ptr = data->latitude;
+			int_ptr = (int *) &line[12];
+			*int_ptr = data->longitude;
+			short_ptr = (short *) &line[16];
+			*short_ptr = (short) data->roll;
+			short_ptr = (short *) &line[18];
+			*short_ptr = (short) data->pitch;
+			short_ptr = (short *) &line[20];
+			*short_ptr = (unsigned short) data->heading;
+			short_ptr = (short *) &line[22];
+			*short_ptr = (short) data->heave;
+			short_ptr = (short *) &line[24];
+			*short_ptr = (short) data->ping_number;
+			short_ptr = (short *) &line[26];
+			*short_ptr = (short) data->sound_vel;
+			}
+		else
+			{
+			int_ptr = (int *) &line[8];
+			*int_ptr = (int) mb_swap_int(data->latitude);
+			int_ptr = (int *) &line[12];
+			*int_ptr = (int) mb_swap_int(data->longitude);
+			short_ptr = (short *) &line[16];
+			*short_ptr = (short) mb_swap_short(data->roll);
+			short_ptr = (short *) &line[18];
+			*short_ptr = (short) mb_swap_short(data->pitch);
+			short_ptr = (short *) &line[20];
+			*short_ptr = (unsigned short) mb_swap_short(data->heading);
+			short_ptr = (short *) &line[22];
+			*short_ptr = (short) mb_swap_short(data->heave);
+			short_ptr = (short *) &line[24];
+			*short_ptr = (short) mb_swap_short(data->ping_number);
+			short_ptr = (short *) &line[26];
+			*short_ptr = (short) mb_swap_short(data->sound_vel);
+			}
 		line[28] = (char) data->mode;
 		line[29] = (char) data->gain1;
 		line[30] = (char) data->gain2;
 		line[31] = (char) data->gain3;
 
 
-#ifndef BYTESWAPPED
-		for (i=0;i<MBF_CBAT8101_MAXBEAMS;i++)
+		if (swap == MB_NO)
 			{
-			beamarray = line + 32 + 12*i;
-			short_ptr = (short *) beamarray; 
-			*short_ptr = (short) data->bath[i];
-			short_ptr = ((short *) beamarray) + 1; 
-			*short_ptr = (short) data->bath_acrosstrack[i];
-			short_ptr = ((short *) beamarray) + 2; 
-			*short_ptr = (short) data->bath_alongtrack[i];
-			short_ptr = ((short *) beamarray) + 3; 
-			*short_ptr = (short) data->tt[i];
-			short_ptr = ((short *) beamarray) + 4; 
-			*short_ptr = (short) data->angle[i];
-			char_ptr = (unsigned char *) (beamarray + 10); 
-			*char_ptr = (char) data->quality[i];
-			char_ptr = (unsigned char *) (beamarray + 11); 
-			*char_ptr = (char) data->amp[i];
+			for (i=0;i<MBF_CBAT8101_MAXBEAMS;i++)
+				{
+				beamarray = line + 32 + 12*i;
+				short_ptr = (short *) beamarray; 
+				*short_ptr = (short) data->bath[i];
+				short_ptr = ((short *) beamarray) + 1; 
+				*short_ptr = (short) data->bath_acrosstrack[i];
+				short_ptr = ((short *) beamarray) + 2; 
+				*short_ptr = (short) data->bath_alongtrack[i];
+				short_ptr = ((short *) beamarray) + 3; 
+				*short_ptr = (short) data->tt[i];
+				short_ptr = ((short *) beamarray) + 4; 
+				*short_ptr = (short) data->angle[i];
+				char_ptr = (unsigned char *) (beamarray + 10); 
+				*char_ptr = (char) data->quality[i];
+				char_ptr = (unsigned char *) (beamarray + 11); 
+				*char_ptr = (char) data->amp[i];
+				}
 			}
-#else
-		for (i=0;i<MBF_CBAT8101_MAXBEAMS;i++)
+		else
 			{
-			beamarray = line + 32 + 12*i;
-			short_ptr = (short *) beamarray; 
-			*short_ptr = (short) 
-				mb_swap_short((short)data->bath[i]);
-			short_ptr = ((short *) beamarray) + 1; 
-			*short_ptr = (short) 
-				mb_swap_short((short)data->bath_acrosstrack[i]);
-			short_ptr = ((short *) beamarray) + 2; 
-			*short_ptr = (short) 
-				mb_swap_short((short)data->bath_alongtrack[i]);
-			short_ptr = ((short *) beamarray) + 3; 
-			*short_ptr = (short) 
-				mb_swap_short((short)data->tt[i]);
-			short_ptr = ((short *) beamarray) + 4; 
-			*short_ptr = (short) 
-				mb_swap_short((short)data->angle[i]);
-			char_ptr = beamarray + 10; 
-			*char_ptr = (char) data->quality[i];
-			char_ptr = beamarray + 11; 
-			*char_ptr = (unsigned char) data->amp[i];
+			for (i=0;i<MBF_CBAT8101_MAXBEAMS;i++)
+				{
+				beamarray = line + 32 + 12*i;
+				short_ptr = (short *) beamarray; 
+				*short_ptr = (short) 
+					mb_swap_short((short)data->bath[i]);
+				short_ptr = ((short *) beamarray) + 1; 
+				*short_ptr = (short) 
+					mb_swap_short((short)data->bath_acrosstrack[i]);
+				short_ptr = ((short *) beamarray) + 2; 
+				*short_ptr = (short) 
+					mb_swap_short((short)data->bath_alongtrack[i]);
+				short_ptr = ((short *) beamarray) + 3; 
+				*short_ptr = (short) 
+					mb_swap_short((short)data->tt[i]);
+				short_ptr = ((short *) beamarray) + 4; 
+				*short_ptr = (short) 
+					mb_swap_short((short)data->angle[i]);
+				char_ptr = beamarray + 10; 
+				*char_ptr = (char) data->quality[i];
+				char_ptr = beamarray + 11; 
+				*char_ptr = (unsigned char) data->amp[i];
+				}
 			}
-#endif
 		line[RESON_BATH_8101_SIZE] = 0x03;
 		line[RESON_BATH_8101_SIZE+1] = '\0';
 		line[RESON_BATH_8101_SIZE+2] = '\0';
@@ -2916,7 +2978,7 @@ int mbr_cbat8101_wr_bath(int verbose, FILE *mbfp, char *data_ptr, int *error)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_cbat8101_wr_heading(int verbose, FILE *mbfp, char *data_ptr, int *error)
+int mbr_cbat8101_wr_heading(int verbose, FILE *mbfp, int swap, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_cbat8101_wr_heading";
 	int	status = MB_SUCCESS;
@@ -2935,6 +2997,7 @@ int mbr_cbat8101_wr_heading(int verbose, FILE *mbfp, char *data_ptr, int *error)
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
+		fprintf(stderr,"dbg2       swap:       %d\n",swap);
 		fprintf(stderr,"dbg2       data_ptr:   %d\n",data_ptr);
 		}
 
@@ -2959,9 +3022,8 @@ int mbr_cbat8101_wr_heading(int verbose, FILE *mbfp, char *data_ptr, int *error)
 
 	/* write the record label */
 	label = RESON_HEADING;
-#ifdef BYTESWAPPED
-	label = (short) mb_swap_short(label);
-#endif
+	if (swap == MB_YES)
+		label = (short) mb_swap_short(label);
 	status = fwrite(&label,1,2,mbfp);
 	if (status != 2)
 		{
@@ -2983,13 +3045,16 @@ int mbr_cbat8101_wr_heading(int verbose, FILE *mbfp, char *data_ptr, int *error)
 		line[5] = (char) data->second;
 		line[6] = (char) data->hundredth_sec;
 		line[7] = (char) data->thousandth_sec;
-#ifndef BYTESWAPPED
-		short_ptr = (short *) &line[8];
-		*short_ptr = (short) data->heading;
-#else
-		short_ptr = (short *) &line[8];
-		*short_ptr = (short) mb_swap_short(data->heading);
-#endif
+		if (swap == MB_NO)
+			{
+			short_ptr = (short *) &line[8];
+			*short_ptr = (short) data->heading;
+			}
+		else
+			{
+			short_ptr = (short *) &line[8];
+			*short_ptr = (short) mb_swap_short(data->heading);
+			}
 		line[RESON_HEADING_SIZE] = 0x03;
 		line[RESON_HEADING_SIZE+1] = '\0';
 		line[RESON_HEADING_SIZE+2] = '\0';
@@ -3023,7 +3088,7 @@ int mbr_cbat8101_wr_heading(int verbose, FILE *mbfp, char *data_ptr, int *error)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_cbat8101_wr_attitude(int verbose, FILE *mbfp, char *data_ptr, int *error)
+int mbr_cbat8101_wr_attitude(int verbose, FILE *mbfp, int swap, char *data_ptr, int *error)
 {
 	char	*function_name = "mbr_cbat8101_wr_attitude";
 	int	status = MB_SUCCESS;
@@ -3042,6 +3107,7 @@ int mbr_cbat8101_wr_attitude(int verbose, FILE *mbfp, char *data_ptr, int *error
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
+		fprintf(stderr,"dbg2       swap:       %d\n",swap);
 		fprintf(stderr,"dbg2       data_ptr:   %d\n",data_ptr);
 		}
 
@@ -3068,9 +3134,8 @@ int mbr_cbat8101_wr_attitude(int verbose, FILE *mbfp, char *data_ptr, int *error
 
 	/* write the record label */
 	label = RESON_ATTITUDE;
-#ifdef BYTESWAPPED
-	label = (short) mb_swap_short(label);
-#endif
+	if (swap == MB_YES)
+		label = (short) mb_swap_short(label);
 	status = fwrite(&label,1,2,mbfp);
 	if (status != 2)
 		{
@@ -3092,21 +3157,24 @@ int mbr_cbat8101_wr_attitude(int verbose, FILE *mbfp, char *data_ptr, int *error
 		line[5] = (char) data->second;
 		line[6] = (char) data->hundredth_sec;
 		line[7] = (char) data->thousandth_sec;
-#ifndef BYTESWAPPED
-		short_ptr = (short *) &line[8];
-		*short_ptr = (short) data->heave;
-		short_ptr = (short *) &line[10];
-		*short_ptr = (short) data->roll;
-		short_ptr = (short *) &line[12];
-		*short_ptr = (short) data->pitch;
-#else
-		short_ptr = (short *) &line[8];
-		*short_ptr = (short) mb_swap_short(data->heave);
-		short_ptr = (short *) &line[10];
-		*short_ptr = (short) mb_swap_short(data->roll);
-		short_ptr = (short *) &line[12];
-		*short_ptr = (short) mb_swap_short(data->pitch);
-#endif
+		if (swap == MB_NO)
+			{
+			short_ptr = (short *) &line[8];
+			*short_ptr = (short) data->heave;
+			short_ptr = (short *) &line[10];
+			*short_ptr = (short) data->roll;
+			short_ptr = (short *) &line[12];
+			*short_ptr = (short) data->pitch;
+			}
+		else
+			{
+			short_ptr = (short *) &line[8];
+			*short_ptr = (short) mb_swap_short(data->heave);
+			short_ptr = (short *) &line[10];
+			*short_ptr = (short) mb_swap_short(data->roll);
+			short_ptr = (short *) &line[12];
+			*short_ptr = (short) mb_swap_short(data->pitch);
+			}
 		line[RESON_ATTITUDE_SIZE] = 0x03;
 		line[RESON_ATTITUDE_SIZE+1] = '\0';
 		line[RESON_ATTITUDE_SIZE+2] = '\0';

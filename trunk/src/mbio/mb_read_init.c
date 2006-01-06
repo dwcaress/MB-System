@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_read_init.c	1/25/93
- *    $Id: mb_read_init.c,v 5.17 2005-11-05 00:48:05 caress Exp $
+ *    $Id: mb_read_init.c,v 5.18 2006-01-06 18:27:19 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	January 25, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.17  2005/11/05 00:48:05  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.16  2004/07/15 19:25:04  caress
  * Progress in supporting Reson 7k data.
  *
@@ -217,7 +220,7 @@ int mb_read_init(int verbose, char *file,
 		int *beams_bath, int *beams_amp, int *pixels_ss, 
 		int *error)
 {
-	static char rcs_id[]="$Id: mb_read_init.c,v 5.17 2005-11-05 00:48:05 caress Exp $";
+	static char rcs_id[]="$Id: mb_read_init.c,v 5.18 2006-01-06 18:27:19 caress Exp $";
 	char	*function_name = "mb_read_init";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
@@ -273,6 +276,12 @@ int mb_read_init(int verbose, char *file,
 		{
 		memset(*mbio_ptr, 0, sizeof(struct mb_io_struct));
 		mb_io_ptr = (struct mb_io_struct *) *mbio_ptr;
+		}
+		
+	/* set system byte order flag */
+	if (status == MB_SUCCESS)
+		{
+		mb_io_ptr->byteswapped = mb_swap_check();
 		}
 				
 	/* get format information */
@@ -682,7 +691,7 @@ int mb_read_init(int verbose, char *file,
 		status = mb_free(verbose,&mb_io_ptr->ss_acrosstrack,error);
 		status = mb_free(verbose,&mb_io_ptr->ss_alongtrack,error);
 		status = mb_free(verbose,&mb_io_ptr->ss_num,error);
-		status = mb_free(verbose,&mb_io_ptr->beamflag,error);
+		status = mb_free(verbose,&mb_io_ptr->new_beamflag,error);
 		status = mb_free(verbose,&mb_io_ptr->new_bath,error);
 		status = mb_free(verbose,&mb_io_ptr->new_amp,error);
 		status = mb_free(verbose,&mb_io_ptr->new_bath_acrosstrack,error);

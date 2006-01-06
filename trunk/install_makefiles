@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	install_makefiles	5/20/94
-#    $Id: install_makefiles,v 5.18 2005-06-04 03:32:26 caress Exp $
+#    $Id: install_makefiles,v 5.19 2006-01-06 18:19:00 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 1996, 1997, 2001, 2002, 2003, 2005 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -57,10 +57,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   May 20, 1994
 #
 # Version:
-#   $Id: install_makefiles,v 5.18 2005-06-04 03:32:26 caress Exp $
+#   $Id: install_makefiles,v 5.19 2006-01-06 18:19:00 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.18  2005/06/04 03:32:26  caress
+#   Updates during 5.0.8 development.
+#
 #   Revision 5.17  2005/03/25 04:01:02  caress
 #   Fixes to 5.0.6.
 #
@@ -466,8 +469,8 @@ else
 	$MOTIFINCDIR = "/sw/include";
 	$MOTIFLIBS = "-L/sw/lib -L/usr/X11R6/lib -lXm -lXt -lX11";
 	$OPENGLLIBS = "-lGLw -lGLU -lGL";
-	$GMTLIBDIR = "/usr/local/geoware/PROGS/GMT/GMT4.0/lib";
-	$GMTINCDIR = "/usr/local/geoware/PROGS/GMT/GMT4.0/include";
+	$GMTLIBDIR = "/sw/lib";
+	$GMTINCDIR = "/sw/include";
 	$NETCDFLIBDIR = "/sw/lib";
 	$NETCDFINCDIR = "/sw/include";
 	$LEVITUS = "$MBSYSTEM_HOME/share/LevitusAnnual82.dat";

@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 5.18 2005-11-05 01:07:54 caress Exp $
+#	$Id: Makefile.template,v 5.19 2006-01-06 18:19:58 caress Exp $
 #
 #     Copyright (c) 1993, 1994, 2000, 2002, 2003, 2005 by
 #     David W. Caress (caress@mbari.org)
@@ -16,6 +16,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.18  2005/11/05 01:07:54  caress
+# Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+#
 # Revision 5.17  2005/06/04 06:32:07  caress
 # Added program mb7k2jstar.
 #
@@ -210,7 +213,8 @@ all:	$(BINDIR)/mbformat \
 	$(BINDIR)/mbtide \
 	$(BINDIR)/mbsimradmakess \
 	$(BINDIR)/mb7k2jstar \
-	$(BINDIR)/mb7kpreprocess
+	$(BINDIR)/mb7kpreprocess \
+	$(BINDIR)/mbrolltimelag	
 
 ### make clean removes the object files
 clean:
@@ -351,6 +355,9 @@ $(BINDIR)/mb7k2jstar:	mb7k2jstar.o $(LIBDIR)/libmbio.a $(LIBDIR)/libproj.a $(LIB
 $(BINDIR)/mb7kpreprocess:	mb7kpreprocess.o $(LIBDIR)/libmbio.a $(LIBDIR)/libproj.a $(LIBDIR)/libmbaux.a $(LIBDIR)/libgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
 	$(CC) $(CFLAGS) mb7kpreprocess.o $(LIBDIR)/libmbio.a $(LIBDIR)/libproj.a $(LIBDIR)/libmbaux.a $(LIBDIR)/libgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a \
 		$(LFLAGS) -o $(BINDIR)/mb7kpreprocess
+$(BINDIR)/mbrolltimelag:	mbrolltimelag.o $(LIBDIR)/libmbio.a $(LIBDIR)/libproj.a $(LIBDIR)/libmbaux.a $(LIBDIR)/libgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
+	$(CC) $(CFLAGS) mbrolltimelag.o $(LIBDIR)/libmbio.a $(LIBDIR)/libproj.a $(LIBDIR)/libmbaux.a $(LIBDIR)/libgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a \
+		$(LFLAGS) -o $(BINDIR)/mbrolltimelag
 
 ### compile the source files
 mbformat.o:	mbformat.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
@@ -440,3 +447,5 @@ mb7k2jstar.o:	mb7k2jstar.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR
 	$(CC) -c $(CFLAGS) mb7k2jstar.c
 mb7kpreprocess.o:	mb7kpreprocess.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h $(INCDIR)/mbsys_reson7k.h $(INCDIR)/mbsys_jstar.h
 	$(CC) -c $(CFLAGS) mb7kpreprocess.c
+mbrolltimelag.o:	mbrolltimelag.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
+	$(CC) -c $(CFLAGS) mbrolltimelag.c

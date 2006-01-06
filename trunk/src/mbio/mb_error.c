@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_error.c	2/2/93
- *    $Id: mb_error.c,v 5.4 2003-04-17 21:05:23 caress Exp $
+ *    $Id: mb_error.c,v 5.5 2006-01-06 18:27:19 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	February 2, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2003/04/17 21:05:23  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.3  2002/09/18 23:32:59  caress
  * Release 5.0.beta23
  *
@@ -90,7 +93,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mb_io.h"
 
-static char rcs_id[]="$Id: mb_error.c,v 5.4 2003-04-17 21:05:23 caress Exp $";
+static char rcs_id[]="$Id: mb_error.c,v 5.5 2006-01-06 18:27:19 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_error(int verbose, int error, char **message)
@@ -255,7 +258,7 @@ int mb_notice_log_problem(int verbose, void *mbio_ptr,
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* log data record type in the notice list */
-	if (problem_id > 0 && problem_id <= MB_DATA_KINDS)
+	if (problem_id > 0 && problem_id <= MB_PROBLEM_MAX)
 		{
 		mb_io_ptr->notice_list[MB_DATA_KINDS - MB_ERROR_MIN + problem_id]++;
 		}

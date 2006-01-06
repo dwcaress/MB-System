@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_xyplot.perl	8/6/95
-#    $Id: mbm_xyplot.perl,v 5.10 2005-11-05 01:34:20 caress Exp $
+#    $Id: mbm_xyplot.perl,v 5.11 2006-01-06 18:26:26 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 2000, 2003 by 
 #    D. W. Caress (caress@mbari.org)
@@ -56,10 +56,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   August 9, 1995
 #
 # Version:
-#   $Id: mbm_xyplot.perl,v 5.10 2005-11-05 01:34:20 caress Exp $
+#   $Id: mbm_xyplot.perl,v 5.11 2006-01-06 18:26:26 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.10  2005/11/05 01:34:20  caress
+#   Much work over the past two months.
+#
 #   Revision 5.9  2005/03/25 04:05:40  caress
 #   Fixed handling of tickinfo string.
 #   For mbm_plot only, added control on filename annotation direction.
@@ -218,12 +221,13 @@ while (@grdinfo)
 		}
 	}
 
+# Get the current working directory.
+$current_working_dir = `pwd`;
+
 # Deal with command line arguments
 $command_line = "@ARGV";
-&MBGetopts('B:b:C:c:D:d::G:g:HhI+i+J:j:L:l:M+m+NnO:o:P:p:QqR:r:S:s:TtU:u:VvW:w:Xx');
+&MBGetopts('B:b:G:g:HhI+i+J:j:L:l:M+m+NnO:o:P:p:QqR:r:S:s:TtU:u:VvW:w:Xx:Zz');
 $tick_info = 		($opt_B || $opt_b);
-$columns = 		($opt_C || $opt_c);
-$delimiter = 		($opt_D || $opt_d);
 $xyfill = 		($opt_G || $opt_g);
 $help =    		($opt_H || $opt_h);
 $file_data =    	($opt_I || $opt_i);
@@ -241,6 +245,7 @@ $orientation = 		($opt_U || $opt_u);
 $verbose = 		($opt_V || $opt_v);
 $xypen = 		($opt_W || $opt_w);
 $execute = 		($opt_X || $opt_x);
+$save_temp_files = 	($opt_Z || $opt_z);
 
 # print out help message if required
 if ($help)
@@ -390,146 +395,172 @@ if ($misc)
 
 # set page size
 if (!$pagesize)
-	{
-	$pagesize = "a";
-	}
+{
+    $pagesize = "a";
+}
 else
-	{
-	$pagesize =~ tr/A-Z/a-z/;
-	if (!$page_width_in{$pagesize})
-		{
-		$pagesize = "a";
-		}
-	}
+{
+    $pagesize =~ tr/A-Z/a-z/;
+    if (!$page_width_in{$pagesize})
+    {
+	$pagesize = "a";
+    }
+}
 
 # get postscript viewer
 # check environment variable
 if ($ENV{"MB_PS_VIEWER"})
-	{
-	$ps_viewer = $ENV{"MB_PS_VIEWER"};
-	}
+{
+    $ps_viewer = $ENV{"MB_PS_VIEWER"};
+}
 # check for .mbio_defaults file
 if (!$ps_viewer)
+{
+    $home = $ENV{"HOME"};
+    $mbdef = "$home/.mbio_defaults";
+    if (open(MBDEF,"<$mbdef"))
+    {
+	while (<MBDEF>)
 	{
-	$home = $ENV{"HOME"};
-	$mbdef = "$home/.mbio_defaults";
-	if (open(MBDEF,"<$mbdef"))
-		{
-		while (<MBDEF>)
-			{
-			if (/ps viewer:\s+(\S+)/)
-				{
-				($ps_viewer) = /ps viewer:\s+(\S+)/;
-				}
-			}
-		close MBDEF;
-		}
+	    if (/ps viewer:\s+(\S+)/)
+	    {
+		($ps_viewer) = /ps viewer:\s+(\S+)/;
+	    }
 	}
+	close MBDEF;
+    }
+}
 # else just set it to ghostview
 if (!$ps_viewer)
-	{
-	$ps_viewer = "ghostview";
-	}
+{
+    $ps_viewer = "ghostview";
+}
 
 # set default xy control values
 if (!$xysymbol)
-	{
-	$xysymbol = "N";
-	}
+{
+    $xysymbol = "N";
+}
 if (!$xyfill)
-	{
-	$xyfill = "N";
-	}
+{
+    $xyfill = "N";
+}
 if (!$xypen)
-	{
-	$xypen = "N";
-	}
+{
+    $xypen = "N";
+}
 if (!$xysegment)
-	{
-	$xysegment = "N";
-	}
+{
+    $xysegment = "N";
+}
 else
-	{
-	$xysegment = "Y";
-	}
+{
+    $xysegment = "Y";
+}
 
-# parse list of data files
+# Some notes about how data files are processed:
+
+# mbm_xyplot will plot multiple data sets on a single plot using
+# either of two mechanisms. The first method is to specify multiple
+# input file flags and associated arguments ( e.g. mbm_xyplot
+# -i[fileargs]:file -i[fileargs]:file ...). The second method is to
+# use the utilize the multi-segemnt feature psxy. The -M flag allows
+# multiple "segments" of x,y pairs to be listed in a single file each
+# separated by a single line having a special character. The default
+# character is ">", and indeed that is the ONLY character supported
+# here. 
+
+# When multiple flags are specified as described above, MBGetopts will
+# return their arguments concatinated by ":::::::". The first line
+# below splits those arguments so they may be processed separately for
+# each file. 
+
+# Each file may have any of several optional arguments. Most are quite
+# straightforward, however the column flag (C) warrents some
+# explaination. The column flag allows the user to specify the columns
+# to be plotted by utilizing a simple syntax in which a column is
+# specified by c[N] where N deones the column number. The full syntax
+# is then c#[xcol]_c#[ycol] where the underbar delimits the syntax for
+# the x column and y columns respectively. 
+
 @data_file_list = split(/:::::::/, $file_data);
 foreach $xyfile_raw (@data_file_list) {
-	# set default parameters
-	$xysymbol_f = $xysymbol;
-	$xyfill_f = $xyfill;
-	$xypen_f = $xypen;
-	$xysegment_f = $xysegment;
-	$delimiter = "\s+";
-	$xmath_f='c#[0]';
-	$ymath_f='c#[1]';
-
-	# figure out how many parameters to set for each file
-	@filearg = split(/:/, $xyfile_raw);
+    # set default parameters
+    $xysymbol_f = $xysymbol;
+    $xyfill_f = $xyfill;
+    $xypen_f = $xypen;
+    $xysegment_f = $xysegment;
+    $delimiter_f = '\s+';
+    $xmath_f='$line[0]';
+    $ymath_f='$line[1]';
+    
+    # figure out how many parameters to set for each file
+    @filearg = split(/:/, $xyfile_raw);
 	for ($i = 0; $i < $#filearg; $i++) {
-		if ($filearg[$i] =~ /S(\S+)/)
-			{
-			($xysymbol_f) = $filearg[$i] =~ /S(\S+)/;
-			}
-		if ($filearg[$i] =~ /G(\S+)/)
-			{
-			($xyfill_f) = $filearg[$i] =~ /G(\S+)/;
-			}
-		if ($filearg[$i] =~ /W(\S+)/)
-			{
-			($xypen_f) = $filearg[$i] =~ /W(\S+)/;
-			}
-		if ($filearg[$i] =~ /N/)
-			{
-			$xysegment_f = "Y";
-			}
-		if ($filearg[$i] =~ /N/)
-			{
-			$xysegment_f = "Y";
-			}
-		if ($filearg[$i]=~ /D/)
-		{
-		    ($delimiter_f) = $filearg[$i] =~ /D(\S+)/;
-		}
-		if ($filearg[$i]=~ /C/)
-		{
-		    ($xmath_f,$ymath_f) = $filearg[$i] =~ /C(\S+)_(\S+)/;
-		    $xmath_f =~ s/c\#/\$line/g;
-		    $ymath_f =~ s/c\#/\$line/g;
-		    $xmath_f =~ s/\#/\$linecnt/g;
-                    $ymath_f =~ s/\#/\$linecnt/g;
-
-
-		}
-
+	    if ($filearg[$i] =~ /S(\S+)/)
+	    {
+		($xysymbol_f) = $filearg[$i] =~ /S(\S+)/;
 	    }
+	    if ($filearg[$i] =~ /G(\S+)/)
+	    {
+		($xyfill_f) = $filearg[$i] =~ /G(\S+)/;
+	    }
+	    if ($filearg[$i] =~ /W(\S+)/)
+			{
+			    ($xypen_f) = $filearg[$i] =~ /W(\S+)/;
+			}
+	    if ($filearg[$i] =~ /M/)
+	    {
+		$xysegment_f = "Y";
+			}
+	    if ($filearg[$i]=~ /D/)
+	    {
+		($delimiter_f) = $filearg[$i] =~ /D(\S+)/;
+	    }
+	    if ($filearg[$i]=~ /C/)
+	    {
+		($xmath_f,$ymath_f) = $filearg[$i] =~ /C(\S+)_(\S+)/;
 
-	# set filename
-	push(@xysymbols, $xysymbol_f);
-	push(@xyfills, $xyfill_f);
-	push(@xypens, $xypen_f);
-	push(@xysegments, $xysegment_f);
-	push(@xyfiles, $filearg[$#filearg]);
-	push(@delimiters, $delimiter_f);
-	     push(@xmath, $xmath_f);
-	     push(@ymath, $ymath_f);
+		# Turn the c[] expresssions used in the command line
+		# arguments to ones that perl can evaluate, by
+		# substituing '$line' for c and subtracting one from
+		# the column number.
+
+		$xmath_f =~ s/c\[(\d+)\]/\$line[$1-1]/g;
+		$ymath_f =~ s/c\[(\d+)\]/\$line[$1-1]/g;
+		$xmath_f =~ s/\#/\$linecnt/g;
+		$ymath_f =~ s/\#/\$linecnt/g;
+		
+		
+	    }
+	    
+	}
+    
+    # Push each argument into parallel arrays.
+    push(@xysymbols, $xysymbol_f);
+    push(@xyfills, $xyfill_f);
+    push(@xypens, $xypen_f);
+    push(@xysegments, $xysegment_f);
+    push(@xyfiles, $filearg[$#filearg]);
+    push(@delimiters, $delimiter_f);
+    push(@xmath, $xmath_f);
+    push(@ymath, $ymath_f);
 
 }
 
 # check that files are ok
 if (scalar(@xyfiles) <= 0)
 	{
-	print "\a";
-	die "\nNo input file specified!\n$program_name aborted\n";
+	    print "\a";
+	    die "\nNo input file specified!\n$program_name aborted\n";
 	}
 
 foreach $xyfile (@xyfiles) {
-	if (! -e $xyfile)
-		{
-		print "\a";
-		die "\nInput file $xyfile cannot be opened!\n$program_name aborted\n";
-		}
+    if (! -e $xyfile)
+    {
+	print "\a";
+	die "\nInput file $xyfile cannot be opened!\n$program_name aborted\n";
+    }
 }
 
 # set output root if needed
@@ -542,34 +573,71 @@ if (!$root)
 $i=0;
 foreach $xyfile(@xyfiles){
     $INFILE="<$xyfile";
-    $OUTFILE=">$xyfile$i.tmp";
+
+    $OUTFILE=">$xyfile$i.$$";
+    # Strip off the leading path and substitute the current working directory.
+    $OUTFILE =~ s/^\>\//.*\/\>$current_working_dir/g;
+
+
     open INFILE or die "Cannot open $xyfile: $'";
     open OUTFILE or die "Cannot open temporary file: $'";
     $linecnt=1;
+    
+    
     while (<INFILE>) {
 	chomp;
-($xval, $yval) = $line =~ /(\S+)\s+(\S+)/;
-#	@line=split /$delimiters[$i]/, $_;
 
-#	# Evaluate the perl/math expressions but quit if there's an error.
-#	$xval=eval $xmath[$i];
-#	if(!$xval) {
-#	    die "\nAn error occurred evaluating\n$xmath[$i].\nThis is likely a syntax error, but if this error occurred in the middle\nof processing it may be a divide by zero error. \nAborting...\n";
-#	}
-#	$yval=eval $ymath[$i];
-#	if(!$yval) {
-#	    die "\nAn error occurred evaluating:\n$ymath[$i].\nThis is likely a syntax error, but if this error occurred in the middle\nof processing it may be a divide by zero error. \nAborting...\n";
-#	}
-    
+
+	# Here we check to see if a line has the standard psxy segment
+	# separater. If it does, we print print it out directly to the
+	# output file, and continue processing lines.
+
+	if ( $_ =~ m/\>/ ) {
+	    print(OUTFILE "$_\n");
+	}else{
+
+	    # Here we check to see if the line starts with a
+	    # delimiter.  If it does, all the first column will be
+	    # empty. For files with white-space delimiters, this is
+	    # counter intuitive. So we remove the leading delimiter
+	    # when it occurs by substituting nothing for it.
+
+	    if ( $_ =~ /^$delimiters[$i]/ ) {
+		$_ =~ s/^$delimiters[$i]//;
+	    }
+	    
+	       
+	    @line = split /$delimiters[$i]/, $_;
+
+            # Evaluate the perl/math expressions. If there's an error, 
+	    # don't quite but warn to STDIO. (should probably go to 
+	    # STDERR). Divide-by-zero errors will be caught by this.
+	my $xval = eval $xmath[$i];
+	
+	print "WARNING!!! NON-NUMERIC RESULT DETECTED: $@" if $@;
+
+	my $yval = eval $ymath[$i];
+
+	print "WARNING!!! NON-NUMERIC RESULT DETECTED: $@" if $@;
+	
+	# Verify that we got numbers...
+	if (! ($xval =~ m/-?\d*\.?\d*|-?\.\d+/ && 
+	       $yval =~ m/-?\d*\.?\d*|-?\.\d+/)  ) {
+	    print "WARNING!!! NON-NUMERIC RESULT DETECTED! X: $xval Y: $yval Skipping...\n";
+	}
+	
 	push(@xvalues, $xval);
 	push(@yvalues, $yval);
-
+	
 	print(OUTFILE "$xval\t$yval\n");
+
+    }
 	$linecnt+=1;
     }
     $i+=1;
     close INFILE;
     close OUTFILE;
+
     # Reset the file names to the new temporarily files.
     $OUTFILE =~ s/^>//;
     $xyfile="$OUTFILE";
@@ -1333,6 +1401,13 @@ if ($data_scale)
 	{
 	printf FCMD "/bin/rm -f $file_use\n";
 	}
+
+if (! $save_temp_files) {
+    foreach $file (@xyfiles) {
+	printf FCMD "/bin/rm -f $file \n";
+    }
+}
+
 
 # reset GMT defaults
 print FCMD "#\n# Reset GMT default fonts\n";
