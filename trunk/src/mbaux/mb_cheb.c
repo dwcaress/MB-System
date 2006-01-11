@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_cheb.c			3/23/00
- *    $Id: mb_cheb.c,v 5.0 2000-12-01 22:53:59 caress Exp $
+ *    $Id: mb_cheb.c,v 5.1 2006-01-11 07:33:01 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -31,6 +31,9 @@
  * Date:	March 23, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01 22:53:59  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.1  2000/09/30  06:54:58  caress
  * Snapshot for Dale.
  *
@@ -44,6 +47,9 @@
 /*--------------------------------------------------------------------*/
 #include <stdio.h>
 #include <math.h>
+
+/* mbio include files */
+#include "../../include/mb_define.h"
 
 /* function defines */
 void lsqup();

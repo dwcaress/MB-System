@@ -83,6 +83,9 @@ Merge navigation with swath data file (among other tasks): <a
       <li>
 Adjust navigation to match bathymetric features in overlapping swathes:
         <a href="mbnavadjust.html">mbnavadjust</a></li>
+  <li> Merge inertial
+and surface tracking navigation for
+submerged sonar platforms (e.g. ROVs and AUVs): <a href="mbauvnavusbl.html">mbauvnavusbl</a></li>
     </ul>
   </ul>
   <ul>
@@ -127,6 +130,9 @@ Extract subarea of GMT grid file: <a href="mbm_grdcut.html">mbm_grdcut</a>*</li>
       <li>
 Perform forward and inverse UTM projections of ASCII data triples: <a
  href="mbm_utm.html">mbm_utm</a>*</li>
+      <li>
+Estimate attitude time lag by cross correlation of apparent bottom slope with the roll time series: <a
+ href="mbrolltimelag.html">mbrolltimelag</a></li>
     </ul>
     <li>
 Sidescan and Amplitude Data Processing</li>
@@ -154,7 +160,15 @@ Extract subarea of GMT grid file: <a href="mbm_grdcut.html">mbm_grdcut</a>*</li>
 Grid Vizualization</li>
     <ul>
       <li>
-GMT grid vizualization: <a href="mbgrdviz.html">mbgrdviz</a>*</li>
+GMT grid vizualization and survey planning: <a href="mbgrdviz.html">mbgrdviz</a>*</li>
+    </ul>
+    <li>
+Survey planning</li>
+    <ul>
+      <li>
+GMT grid vizualization and survey planning: <a href="mbgrdviz.html">mbgrdviz</a>*</li>
+      <li>
+Translate an mbgrdviz survey route file into an MBARI AUV mission script: <a href="mbm_route2mission.html">mbm_route2mission</a>*</li>
     </ul>
       <li>
 Postscript Graphics</li>
@@ -202,6 +216,15 @@ Convert GMT grid file to a set of tiled GeoVRML files: <a
  href="mbsegylist.html">mbsegylist</a></li>
       <li>Grid seismic data from segy data files: <a
  href="mbsegygrid.html">mbsegygrid</a><br>
+      </li>
+    </ul>
+    <li>Format-specific processing, extraction, or translation</li>
+    <ul>
+      <li>Extract Jstar format (format 132) sidescan and subbottom data from Reson 7k (format 88) data files: <a
+ href="mb7k2jstar.html">mb7k2jstar</a>
+      </li>
+      <li>Preprocess Reson 7k data (format 88), including applying time lag and biases to attitude and navigation data: <a
+ href="mb7kpreprocess.html">mb7kpreprocess</a>
       </li>
     </ul>
   </ul>
@@ -264,7 +287,7 @@ Regenerate Simrad EM300/EM3000 sidescan data: <a
   </ul>
   <center>
   <p><br>
-Last Updated: $Date: 2005-02-19 20:16:05 $ $Revision: 5.11 $</p>
+Last Updated: $Date: 2006-01-11 07:28:00 $ $Revision: 5.12 $</p>
   </center>
   <p>
   </p>

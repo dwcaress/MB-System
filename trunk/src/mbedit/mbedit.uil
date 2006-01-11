@@ -42,6 +42,7 @@ names = case_sensitive
 !(BX) bx_info("c_dirpath", "")
 !(BX) bx_info("include_path", ".", false)
 !(BX) bx_info("xrunner_command", "$(M_ROOT)/arch/X11.5/Xm1.2/mic_xm.o", false)
+!(BX) bx_info("purify_command", "purify", false)
 !(BX) bx_info("system_directory", "/opt/bx-6.1")
 !(BX) bx_info("builder_version", "BuilderXcessory Version 6.1.3")
 !(BX) bx_info("build_lang", "C")
@@ -498,8 +499,8 @@ object scale_filters_cutdistancestart : XmScale widget {
         XmNvalue = 1000;
         XmNtitleString = compound_string("Start Flagging Distance (m)");
         XmNmaximum = 10000;
-        XmNscaleMultiple = 1;
         XmNshowArrows = TRUE;
+        XmNscaleMultiple = 1;
         XmNshowValue = TRUE;
         XmNorientation = XmHORIZONTAL;
         XmNx = 100;
@@ -525,8 +526,8 @@ object scale_filters_cutdistanceend : XmScale widget {
         XmNvalue = 1000;
         XmNtitleString = compound_string("End Flagging Distance (m)");
         XmNmaximum = 10000;
-        XmNscaleMultiple = 1;
         XmNshowArrows = TRUE;
+        XmNscaleMultiple = 1;
         XmNshowValue = TRUE;
         XmNorientation = XmHORIZONTAL;
         XmNx = 100;
@@ -784,10 +785,10 @@ object bulletinBoard_filters : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 0;
-        XmNy = 451;
-        XmNwidth = 426;
-        XmNheight = 344;
+        XmNx = 570;
+        XmNy = 44;
+        XmNwidth = 430;
+        XmNheight = 311;
     };
     controls {
          managed XmScrolledWindow scrolledWindow_filters;
@@ -806,8 +807,8 @@ object bulletinBoard_filters : XmBulletinBoardDialog widget {
 !(BX)object dialogShell_filters : XmDialogShell widget {
 !(BX)    arguments {
 !(BX)        XmNtitle = "Filters";
-!(BX)        XmNwidth = 426;
-!(BX)        XmNheight = 344;
+!(BX)        XmNwidth = 430;
+!(BX)        XmNheight = 311;
 !(BX)    };
 !(BX)    controls {
 !(BX)         managed XmBulletinBoardDialog bulletinBoard_filters;
@@ -999,8 +1000,8 @@ object bulletinBoard_annotation : XmBulletinBoardDialog widget {
     arguments {
         XmNdialogTitle = compound_string("Annotation");
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 0;
-        XmNy = 533;
+        XmNx = 428;
+        XmNy = 554;
         XmNwidth = 536;
         XmNheight = 179;
     };
@@ -1213,8 +1214,8 @@ object pushButton_buffer_dismiss : XmPushButton widget {
 object bulletinBoard_buffer : XmBulletinBoardDialog widget {
     arguments {
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 0;
-        XmNy = 530;
+        XmNx = 435;
+        XmNy = 570;
         XmNwidth = 536;
         XmNheight = 186;
     };
@@ -1331,8 +1332,8 @@ object bulletinBoard_error : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNdialogStyle = XmDIALOG_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 0;
-        XmNy = 520;
+        XmNx = 439;
+        XmNy = 580;
         XmNwidth = 311;
         XmNheight = 205;
     };
@@ -1451,8 +1452,8 @@ object bulletinBoard_editsave : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNdialogStyle = XmDIALOG_FULL_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 0;
-        XmNy = 534;
+        XmNx = 385;
+        XmNy = 574;
         XmNwidth = 431;
         XmNheight = 177;
     };
@@ -1538,8 +1539,8 @@ object bulletinBoard_message : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNdialogStyle = XmDIALOG_FULL_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_NONE;
-        XmNx = 0;
-        XmNy = 567;
+        XmNx = 345;
+        XmNy = 588;
         XmNwidth = 496;
         XmNheight = 112;
     };
@@ -1808,8 +1809,8 @@ object label_about_create1 : XmLabel widget {
 object bulletinBoard_about : XmBulletinBoardDialog widget {
     arguments {
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 1204;
-        XmNy = 372;
+        XmNx = 368;
+        XmNy = 448;
         XmNwidth = 473;
         XmNheight = 501;
     };
@@ -2123,8 +2124,8 @@ object bulletinBoard_goto : XmBulletinBoardDialog widget {
     arguments {
         arguments Style_use;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 0;
-        XmNy = 450;
+        XmNx = 462;
+        XmNy = 520;
         XmNwidth = 196;
         XmNheight = 346;
     };
@@ -2444,8 +2445,8 @@ object bulletinBoard_file : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 1170;
-        XmNy = 356;
+        XmNx = 334;
+        XmNy = 451;
         XmNwidth = 541;
         XmNheight = 533;
     };
@@ -3801,8 +3802,8 @@ object mbedit_bboard : XmBulletinBoard widget {
 object window_mbedit : XmMainWindow widget {
     arguments {
         arguments Style_use;
-        XmNx = 58;
-        XmNy = 608;
+        XmNx = 52;
+        XmNy = 383;
         XmNwidth = 1014;
         XmNheight = 709;
     };
@@ -3867,8 +3868,8 @@ object window_mbedit : XmMainWindow widget {
 !(BX)        XmNiconName = "MBedit";
 !(BX)        XmNallowShellResize = false;
 !(BX)        XmNdeleteResponse = XmDESTROY;
-!(BX)        XmNx = 58;
-!(BX)        XmNy = 586;
+!(BX)        XmNx = 52;
+!(BX)        XmNy = 383;
 !(BX)        XmNwidth = 1014;
 !(BX)        XmNheight = 709;
 !(BX)    };
