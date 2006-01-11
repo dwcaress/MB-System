@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_close.c	1/25/93
- *	$Id: mb_close.c,v 5.10 2005-11-05 00:48:04 caress Exp $
+ *	$Id: mb_close.c,v 5.11 2006-01-11 07:37:29 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	January 25, 1993
  *	
  * $Log: not supported by cvs2svn $
+ * Revision 5.10  2005/11/05 00:48:04  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.9  2003/11/24 19:25:02  caress
  * Implementing changes by Reinhard Holtkamp to better support SURF data.
  *
@@ -139,6 +142,7 @@
 #include <rpc/rpc.h>
 #endif
 #ifdef OTHER
+#include <rpc/types.h>
 #include <rpc/xdr.h>
 #endif
 
@@ -152,7 +156,7 @@
 /*--------------------------------------------------------------------*/
 int mb_close(int verbose, void **mbio_ptr, int *error)
 {
-	static	char	rcs_id[]="$Id: mb_close.c,v 5.10 2005-11-05 00:48:04 caress Exp $";
+	static	char	rcs_id[]="$Id: mb_close.c,v 5.11 2006-01-11 07:37:29 caress Exp $";
 	char	*function_name = "mb_close";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

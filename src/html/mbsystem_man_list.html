@@ -37,6 +37,9 @@ correction to beam amplitude or sidescan data.</li>
 flags
 bad beams in swath
 sonar bathymetry data within a specified area.</li>
+  <li> <a href="mbauvnavusbl.html">mbauvnavusbl</a>: Merge inertial
+and surface tracking navigation for
+submerged sonar platforms (e.g. ROVs and AUVs).</li>
   <li> <a href="mbbackangle.html">mbbackangle</a>: Generates an ".ssc"
 or
 sidescan correction file by calculating average sidescan amplitudes
@@ -154,6 +157,9 @@ a swath
 sonar system using two pieces of coincident bathymetry data collected
 with
 opposing ship headings.</li>
+      <li>
+<a href="mbrolltimelag.html">mbrolltimelag</a> Estimate attitude time 
+lag by cross correlation of apparent bottom slope with the roll time series: </li>
   <li><a href="mbsegygrid.html">mbsegygrid</a>:
 Generate time vs. trace number grids of seismic data from segy files.<br>
   </li>
@@ -193,6 +199,11 @@ program for
 modeling the affect of the water velocity profile on swath sonar
 bathymetry
 calculations.</li>
+  <li> <a href="mb7k2jstar.html">mb7k2jstar</a>: Extract Jstar format 
+(format 132) sidescan and subbottom data from Reson 7k (format 88) data files.</li>
+  <li> <a href="mb7kpreprocess.html">mb7kpreprocess</a>: Preprocess 
+Reson 7k data (format 88), including applying time lag and biases to 
+attitude and navigation data.</li>
 </ul>
 Macros are programs or shellscripts which make use of programs from the
 MB-System and other software packages to accomplish common tasks
@@ -260,6 +271,8 @@ file, calculates the noise in the vertical reference used by the sonar,
 and generates a file containing roll corrections which can be applied
 to
 the data.</li>
+  <li> <a href="mbm_route2mission.html">mbm_route2mission</a>: 
+Translate an mbgrdviz survey route file into an MBARI AUV mission script.</li>
   <li> <a href="mbm_stat.html">mbm_stat</a>: Runs mbinfo on a swath
 sonar
 data
@@ -285,7 +298,7 @@ and writes a shellscript which will generate GMT plot of the data.</li>
 </ul>
 <center>
 <p><br>
-Last Updated: $Date: 2005-02-19 20:16:05 $ $Revision: 5.14 $</p>
+Last Updated: $Date: 2006-01-11 07:28:00 $ $Revision: 5.15 $</p>
 </center>
 <p>
 </p>

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrdtiff.c	5/30/93
- *    $Id: mbgrdtiff.c,v 5.10 2005-11-04 20:18:04 caress Exp $
+ *    $Id: mbgrdtiff.c,v 5.11 2006-01-11 07:25:53 caress Exp $
  *
  *    Copyright (c) 1999, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -215,6 +215,9 @@
  *
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.10  2005/11/04 20:18:04  caress
+ * Altered the GeoTiff header so that images are compatible with more GIS packages.
+ *
  * Revision 5.9  2004/05/21 23:13:35  caress
  * Changes to support GMT 4.0
  *
@@ -369,20 +372,11 @@ int              tiff_offset[] =
 			448       /* GeoAsciiParamsTag */
 		      };
 
-/* global image variables and defines */
-#ifndef YIQ
-#ifdef GMT3_0
-#define YIQ(r,g,b)	rint(0.299*(r) + 0.587*(g) + 0.114*(b))
-#else
-#define  YIQ(rgb)
-#endif
-#endif
-
 /*--------------------------------------------------------------------*/
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbgrdtiff.c,v 5.10 2005-11-04 20:18:04 caress Exp $";
+	static char rcs_id[] = "$Id: mbgrdtiff.c,v 5.11 2006-01-11 07:25:53 caress Exp $";
 	static char program_name[] = "mbgrdtiff";
 	static char help_message[] = "mbgrdtiff generates a tiff image from a GMT grid. The \nimage generation is similar to that of the GMT program \ngrdimage. In particular, the color map is applied from \na GMT CPT file, and shading overlay grids may be applied. \nThe output TIFF file contains information allowing\nthe ArcView and ArcInfo GIS packages to import the image\nas a geographically located coverage.";
 	static char usage_message[] = "mbgrdtiff -Ccptfile -Igrdfile -Otiff_file [-H -Kintensfile -V]";
@@ -449,20 +443,10 @@ main (int argc, char **argv)
 	intensity = MB_NO;
 
 	/* deal with gmt options */
-#ifdef GMT3_0
-	gmt_begin (1, argv);
-#else
 	GMT_begin (1, argv);
-#endif
-#ifdef GMT3_0
-	errflg += get_common_args (projection, 
-				&bounds[0], &bounds[1], 
-				&bounds[2], &bounds[3]);
-#else
 	errflg += GMT_get_common_args (projection, 
 				&bounds[0], &bounds[1], 
 				&bounds[2], &bounds[3]);
-#endif
 	for (i = 1; i < argc; i++) 
 		{
 		if (argv[i][0] == '-') 
@@ -474,15 +458,9 @@ main (int argc, char **argv)
 				case 'r':
 					argv[i][1] = 'R';
 				case 'R':
-#ifdef GMT3_0
-					errflg += get_common_args (argv[i], 
-						&bounds[0], &bounds[1], 
-						&bounds[2], &bounds[3]);
-#else
 					errflg += GMT_get_common_args (argv[i], 
 						&bounds[0], &bounds[1], 
 						&bounds[2], &bounds[3]);
-#endif
 					break;
 				
 				/* Supplemental parameters */
@@ -539,13 +517,8 @@ main (int argc, char **argv)
 		exit(error);
 		}
 	
-#ifdef GMT3_0
-	grd_init (&header, argc, argv, FALSE);
-	grd_init (&iheader, argc, argv, FALSE);
-#else
 	GMT_grd_init (&header, argc, argv, FALSE);
 	GMT_grd_init (&iheader, argc, argv, FALSE);
-#endif
 
 	/* print starting message */
 	if (verbose == 1 || help)
@@ -579,13 +552,8 @@ main (int argc, char **argv)
 		}
 
 	/* get color palette file */
-#ifdef GMT3_0
-	read_cpt(cptfile);
-	if (gmt_n_colors <= 0)
-#else
 	GMT_read_cpt(cptfile);
 	if (GMT_n_colors <= 0)
-#endif
 	  {
 	    fprintf(stderr,"\nColor pallette table not properly specified:\n");
 	    fprintf(stderr,"\nProgram <%s> Terminated\n",
@@ -595,11 +563,7 @@ main (int argc, char **argv)
 	  }
 	
 	/* read input grd file header */
-#ifdef GMT3_0
-	if (read_grd_info (grdfile, &header)) 
-#else
 	if (GMT_read_grd_info (grdfile, &header)) 
-#endif
 	    {
 	    error = MB_ERROR_OPEN_FAIL;
 	    fprintf(stderr,"\nUnable to open grd file: %s\n",
@@ -610,11 +574,7 @@ main (int argc, char **argv)
 	    }
 	if (intensity == MB_YES)
 	    {
-#ifdef GMT3_0
-	    if (read_grd_info (intensfile, &iheader)) 
-#else
 	    if (GMT_read_grd_info (intensfile, &iheader)) 
-#endif
 		{
 		error = MB_ERROR_OPEN_FAIL;
 		fprintf(stderr,"\nUnable to open intensity grd file: %s\n",
@@ -652,23 +612,14 @@ main (int argc, char **argv)
 
 	/* Determine the wesn to be used to read the grdfile */
 	off = (header.node_offset) ? 0 : 1;
-#ifdef GMT3_0
-	map_setup (bounds[0], bounds[1], bounds[2], bounds[3]);
-	grd_setregion (&header, &bounds[0], &bounds[1], &bounds[2], &bounds[3]);
-#else
 	GMT_map_setup (bounds[0], bounds[1], bounds[2], bounds[3]);
 	GMT_grd_setregion (&header, &bounds[0], &bounds[1], &bounds[2], &bounds[3]);
-#endif	
 
 	/* allocate memory */
 	nx = irint ( (bounds[1] - bounds[0]) / header.x_inc) + off;
 	ny = irint ( (bounds[3] - bounds[2]) / header.y_inc) + off;
 	nxy = nx * ny;
-#ifdef GMT3_0
-	if (gmt_gray)
-#else
 	if (GMT_gray)
-#endif
 	  image_size = nx * ny;
 	else
 	  image_size = 3 * nx * ny;
@@ -692,15 +643,9 @@ main (int argc, char **argv)
 	pad[1] = 0;
 	pad[2] = 0;
 	pad[3] = 0;
-#ifdef GMT3_0
-	if (read_grd (grdfile, &header, grid, 
-			    bounds[0],  bounds[1],  bounds[2],  bounds[3], 
-			    pad, FALSE))
-#else
 	if (GMT_read_grd (grdfile, &header, grid, 
 			    bounds[0],  bounds[1],  bounds[2],  bounds[3], 
 			    pad, FALSE))
-#endif
 	    {
 	    error = MB_ERROR_OPEN_FAIL;
 	    fprintf(stderr,"\nUnable to read grd file: %s\n",
@@ -711,15 +656,9 @@ main (int argc, char **argv)
 	    }
 	if (intensity == MB_YES)
 	    {
-#ifdef GMT3_0
-	    if (read_grd (intensfile, &iheader, igrid, 
-				bounds[0],  bounds[1],  bounds[2],  bounds[3], 
-				pad, FALSE))
-#else
 	    if (GMT_read_grd (intensfile, &iheader, igrid, 
 				bounds[0],  bounds[1],  bounds[2],  bounds[3], 
 				pad, FALSE))
-#endif
 		{
 		error = MB_ERROR_OPEN_FAIL;
 		fprintf(stderr,"\nUnable to read intensity grd file: %s\n",
@@ -787,11 +726,7 @@ main (int argc, char **argv)
 	    	fprintf(stderr,"  Latitude:   %f %f  %f\n",
 		  	header.y_min, header.y_max, header.y_inc);
 		}
-#ifdef GMT3_0
-	    if (gmt_gray)
-#else
 	    if (GMT_gray)
-#endif
 		fprintf(stderr,"Writing 8 bit grayscale TIFF image\n");
 	    else
 		fprintf(stderr,"Writing 24 bit color TIFF image\n");
@@ -864,11 +799,7 @@ main (int argc, char **argv)
 		index += 4;
 		break;
 	      case BitsPerSample:
-#ifdef GMT3_0
-		if (gmt_gray)
-#else
 		if (GMT_gray)
-#endif
 		  {
 		    value_int = 1;
 		    mb_put_binary_int(MB_NO, value_int, &tiff_header[index]);
@@ -903,11 +834,7 @@ main (int argc, char **argv)
 		value_int = 1;
 		mb_put_binary_int(MB_NO, value_int, &tiff_header[index]);
 		index += 4;
-#ifdef GMT3_0
-		if (gmt_gray)
-#else
 		if (GMT_gray)
-#endif
 		  {
 		  value_short = 1;
 		  }
@@ -930,11 +857,7 @@ main (int argc, char **argv)
 		value_int = 1;
 		mb_put_binary_int(MB_NO, value_int, &tiff_header[index]);
 		index += 4;
-#ifdef GMT3_0
-		if (gmt_gray)
-#else
 		if (GMT_gray)
-#endif
 		  value_short = 1;
 		else
 		  value_short = 3;
@@ -953,11 +876,7 @@ main (int argc, char **argv)
 		value_int = 1;
 		mb_put_binary_int(MB_NO, value_int, &tiff_header[index]);
 		index += 4;
-#ifdef GMT3_0
-		if (gmt_gray)
-#else
 		if (GMT_gray)
-#endif
 		  value_int = nx * ny;
 		else
 		  value_int = 3 * nx * ny;
@@ -1159,22 +1078,6 @@ main (int argc, char **argv)
 	  for (i=0;i<nx;i++)
 	    {
 	      k = j * nx + i;
-#ifdef GMT3_0
-	      get_rgb24(grid[k], &r, &g, &b);
-	      if (intensity == MB_YES)
-		illuminate(igrid[k], &r, &g, &b);
-	      if (gmt_gray)
-		{
-		  tiff_image[k] = (mb_u_char)r;
-		}
-	      else
-		{
-	          kk = 3 * k;
-		  tiff_image[kk] = (mb_u_char)r;
-		  tiff_image[kk+1] = (mb_u_char)g;
-		  tiff_image[kk+2] = (mb_u_char)b;
-		}
-#else
 	      GMT_get_rgb24(grid[k], rgb);
 	      if (intensity == MB_YES)
 		GMT_illuminate(igrid[k], rgb);
@@ -1189,7 +1092,6 @@ main (int argc, char **argv)
 		  tiff_image[kk+1] = (mb_u_char)rgb[1];
 		  tiff_image[kk+2] = (mb_u_char)rgb[2];
 		}
-#endif
 	    }
 
 	/* write the header */
