@@ -188,7 +188,7 @@ CreatemainWindow_mbgrdviz(Widget parent)
     
     ac = 0;
     XtSetArg(args[ac], XmNx, 108); ac++;
-    XtSetArg(args[ac], XmNy, 87); ac++;
+    XtSetArg(args[ac], XmNy, 109); ac++;
     XtSetArg(args[ac], XmNwidth, 260); ac++;
     XtSetArg(args[ac], XmNheight, 215); ac++;
     mainWindow_mbgrdviz = XmCreateMainWindow(parent,
@@ -536,6 +536,7 @@ CreatemainWindow_mbgrdviz(Widget parent)
         tmp0 = (XmString) BX_CONVERT(menuBar_mbgrdviz, (char *)"Realtime", 
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNsensitive, False); ac++;
         XtSetArg(args[ac], XmNx, 46); ac++;
         XtSetArg(args[ac], XmNy, 5); ac++;
         XtSetArg(args[ac], XmNwidth, 76); ac++;
@@ -557,8 +558,8 @@ CreatemainWindow_mbgrdviz(Widget parent)
     
     
     ac = 0;
-    XtSetArg(args[ac], XmNx, 0); ac++;
-    XtSetArg(args[ac], XmNy, 0); ac++;
+    XtSetArg(args[ac], XmNx, 154); ac++;
+    XtSetArg(args[ac], XmNy, 138); ac++;
     XtSetArg(args[ac], XmNwidth, 68); ac++;
     XtSetArg(args[ac], XmNheight, 124); ac++;
     pulldownMenu_realtime = XmCreatePulldownMenu(XtParent(cascadeButton_realtime),
@@ -573,6 +574,7 @@ CreatemainWindow_mbgrdviz(Widget parent)
         tmp0 = (XmString) BX_CONVERT(pulldownMenu_realtime, (char *)"Setup", 
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNsensitive, False); ac++;
         XtSetArg(args[ac], XmNfontList, 
             BX_CONVERT(pulldownMenu_realtime, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
@@ -597,6 +599,7 @@ CreatemainWindow_mbgrdviz(Widget parent)
         tmp0 = (XmString) BX_CONVERT(pulldownMenu_realtime, (char *)"Start", 
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNsensitive, False); ac++;
         XtSetArg(args[ac], XmNfontList, 
             BX_CONVERT(pulldownMenu_realtime, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
@@ -621,6 +624,7 @@ CreatemainWindow_mbgrdviz(Widget parent)
         tmp0 = (XmString) BX_CONVERT(pulldownMenu_realtime, (char *)"Stop", 
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNsensitive, False); ac++;
         XtSetArg(args[ac], XmNfontList, 
             BX_CONVERT(pulldownMenu_realtime, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
@@ -645,6 +649,7 @@ CreatemainWindow_mbgrdviz(Widget parent)
         tmp0 = (XmString) BX_CONVERT(pulldownMenu_realtime, (char *)"Pause", 
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNsensitive, False); ac++;
         XtSetArg(args[ac], XmNfontList, 
             BX_CONVERT(pulldownMenu_realtime, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
@@ -669,6 +674,7 @@ CreatemainWindow_mbgrdviz(Widget parent)
         tmp0 = (XmString) BX_CONVERT(pulldownMenu_realtime, (char *)"Resume", 
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNsensitive, False); ac++;
         XtSetArg(args[ac], XmNfontList, 
             BX_CONVERT(pulldownMenu_realtime, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
@@ -701,8 +707,8 @@ CreatemainWindow_mbgrdviz(Widget parent)
     
     ac = 0;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNx, 8); ac++;
-    XtSetArg(args[ac], XmNy, 32); ac++;
+    XtSetArg(args[ac], XmNx, 1289); ac++;
+    XtSetArg(args[ac], XmNy, 357); ac++;
     XtSetArg(args[ac], XmNwidth, 463); ac++;
     XtSetArg(args[ac], XmNheight, 531); ac++;
     bulletinBoard_about = XtCreateWidget((char *)"bulletinBoard_about",
@@ -719,7 +725,7 @@ CreatemainWindow_mbgrdviz(Widget parent)
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(bulletinBoard_about, (char *)"-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14", 
+            BX_CONVERT(bulletinBoard_about, (char *)"-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14", 
             XmRFontList, 0, &argok)); if (argok) ac++;
         XtSetArg(args[ac], XmNrecomputeSize, False); ac++;
         XtSetArg(args[ac], XmNx, 10); ac++;
@@ -747,7 +753,7 @@ CreatemainWindow_mbgrdviz(Widget parent)
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(bulletinBoard_about, (char *)"-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12", 
+            BX_CONVERT(bulletinBoard_about, (char *)"-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12", 
             XmRFontList, 0, &argok)); if (argok) ac++;
         XtSetArg(args[ac], XmNx, 10); ac++;
         XtSetArg(args[ac], XmNy, 280); ac++;
@@ -774,7 +780,7 @@ CreatemainWindow_mbgrdviz(Widget parent)
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(bulletinBoard_about, (char *)"-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12", 
+            BX_CONVERT(bulletinBoard_about, (char *)"-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12", 
             XmRFontList, 0, &argok)); if (argok) ac++;
         XtSetArg(args[ac], XmNx, 70); ac++;
         XtSetArg(args[ac], XmNy, 340); ac++;
@@ -801,7 +807,7 @@ CreatemainWindow_mbgrdviz(Widget parent)
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(bulletinBoard_about, (char *)"-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12", 
+            BX_CONVERT(bulletinBoard_about, (char *)"-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12", 
             XmRFontList, 0, &argok)); if (argok) ac++;
         XtSetArg(args[ac], XmNx, 230); ac++;
         XtSetArg(args[ac], XmNy, 340); ac++;
@@ -839,7 +845,7 @@ CreatemainWindow_mbgrdviz(Widget parent)
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(bulletinBoard_about, (char *)"-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24", 
+            BX_CONVERT(bulletinBoard_about, (char *)"-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24", 
             XmRFontList, 0, &argok)); if (argok) ac++;
         XtSetArg(args[ac], XmNx, 10); ac++;
         XtSetArg(args[ac], XmNy, 120); ac++;
@@ -877,7 +883,7 @@ CreatemainWindow_mbgrdviz(Widget parent)
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(bulletinBoard_about, (char *)"-*-times-bold-r-*-*-*-180-*-*-*-*-iso8859-1=TimesBold18,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24", 
+            BX_CONVERT(bulletinBoard_about, (char *)"-*-times-bold-r-*-*-*-180-*-*-*-*-iso8859-1=TimesBold18,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24", 
             XmRFontList, 0, &argok)); if (argok) ac++;
         XtSetArg(args[ac], XmNx, 10); ac++;
         XtSetArg(args[ac], XmNy, 10); ac++;
@@ -941,8 +947,8 @@ CreatemainWindow_mbgrdviz(Widget parent)
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNpattern, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNautoUnmanage, True); ac++;
-        XtSetArg(args[ac], XmNx, 8); ac++;
-        XtSetArg(args[ac], XmNy, 32); ac++;
+        XtSetArg(args[ac], XmNx, 1354); ac++;
+        XtSetArg(args[ac], XmNy, 370); ac++;
         XtSetArg(args[ac], XmNwidth, 334); ac++;
         XtSetArg(args[ac], XmNheight, 505); ac++;
         fileSelectionBox = XtCreateWidget((char *)"fileSelectionBox",
@@ -976,8 +982,8 @@ CreatemainWindow_mbgrdviz(Widget parent)
         XtSetArg(args[ac], XmNdialogTitle, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNautoUnmanage, False); ac++;
         XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-        XtSetArg(args[ac], XmNx, 8); ac++;
-        XtSetArg(args[ac], XmNy, 32); ac++;
+        XtSetArg(args[ac], XmNx, 1283); ac++;
+        XtSetArg(args[ac], XmNy, 302); ac++;
         XtSetArg(args[ac], XmNwidth, 476); ac++;
         XtSetArg(args[ac], XmNheight, 641); ac++;
         bulletinBoard_arearoute = XtCreateWidget((char *)"bulletinBoard_arearoute",
@@ -1712,8 +1718,8 @@ CreatemainWindow_mbgrdviz(Widget parent)
     ac = 0;
     XtSetArg(args[ac], XmNautoUnmanage, False); ac++;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNx, 307); ac++;
-    XtSetArg(args[ac], XmNy, 216); ac++;
+    XtSetArg(args[ac], XmNx, 1272); ac++;
+    XtSetArg(args[ac], XmNy, 353); ac++;
     XtSetArg(args[ac], XmNwidth, 497); ac++;
     XtSetArg(args[ac], XmNheight, 540); ac++;
     form_realtime_setup = XtCreateWidget((char *)"form_realtime_setup",

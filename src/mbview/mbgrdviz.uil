@@ -625,8 +625,8 @@ object form_realtime_setup : XmFormDialog widget {
         arguments Style_use;
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 307;
-        XmNy = 216;
+        XmNx = 1272;
+        XmNy = 353;
         XmNwidth = 497;
         XmNheight = 540;
     };
@@ -1471,8 +1471,8 @@ object bulletinBoard_arearoute : XmBulletinBoardDialog widget {
  "ed Area...");
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 8;
-        XmNy = 32;
+        XmNx = 1283;
+        XmNy = 302;
         XmNwidth = 476;
         XmNheight = 641;
     };
@@ -1534,8 +1534,8 @@ object fileSelectionBox : XmFileSelectionDialog widget {
         arguments Style_use;
         XmNautoUnmanage = true;
         XmNpattern = compound_string("*grd");
-        XmNx = 8;
-        XmNy = 32;
+        XmNx = 1354;
+        XmNy = 370;
         XmNwidth = 334;
         XmNheight = 505;
     };
@@ -1598,6 +1598,10 @@ object label_about_title : XmLabel widget {
 		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
 		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
 		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
+		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
+		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
+		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
+		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
 		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')));
         XmNlabelString = compound_string(#character_set("TimesBold24")"MBg" &
  "rdviz") &
@@ -1642,6 +1646,10 @@ object label_about_mbsystem : XmLabel widget {
         arguments Style_use;
         XmNfontList = font_table(
 		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
+		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
+		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
+		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
+		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
 		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
 		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
 		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
@@ -1699,6 +1707,14 @@ object label_about_LDEO : XmLabel widget {
 		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
 		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
 		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
+		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
+		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
+		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
+		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
+		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
+		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
+		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
+		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
 		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')));
         XmNlabelString = compound_string(#character_set("TimesBold12")"Lam" &
  "ont-Doherty", separate=true) &
@@ -1732,6 +1748,14 @@ object label_about_MBARI : XmLabel widget {
 		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
 		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
 		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
+		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
+		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
+		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
+		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
+		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
+		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
+		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
+		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
 		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')));
         XmNlabelString = compound_string(#character_set("TimesBold12")"Mon" &
  "terey Bay", separate=true) &
@@ -1758,6 +1782,14 @@ object label_about_authors : XmLabel widget {
         arguments Style_use;
         XmNfontList = font_table(
 		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
+		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
+		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
+		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
+		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
+		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
+		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
+		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
+		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
 		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
 		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
 		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
@@ -1801,6 +1833,18 @@ object label_about_version : XmLabel widget {
 		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
 		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
 		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
+		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
+		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
+		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
+		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
+		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
+		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
+		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
+		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
+		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
+		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
+		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
+		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
 		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')));
         XmNlabelString = compound_string(#character_set("TimesMedium14")"M" &
  "B-System Release 5.0.0", separate=true) &
@@ -1827,8 +1871,8 @@ object bulletinBoard_about : XmBulletinBoardDialog widget {
     arguments {
         arguments Style_use;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 8;
-        XmNy = 32;
+        XmNx = 1289;
+        XmNy = 357;
         XmNwidth = 463;
         XmNheight = 531;
     };
@@ -2153,6 +2197,7 @@ object cascadeButton_help : XmCascadeButton widget {
 object pushButton_realtime_setup : XmPushButton widget {
     arguments {
         arguments Style_use;
+        XmNsensitive = false;
         XmNlabelString = compound_string("Setup");
     };
     controls {
@@ -2170,6 +2215,7 @@ object pushButton_realtime_setup : XmPushButton widget {
 object pushButton_realtime_start : XmPushButton widget {
     arguments {
         arguments Style_use;
+        XmNsensitive = false;
         XmNlabelString = compound_string("Start");
     };
     controls {
@@ -2187,6 +2233,7 @@ object pushButton_realtime_start : XmPushButton widget {
 object pushButton_realtime_stop : XmPushButton widget {
     arguments {
         arguments Style_use;
+        XmNsensitive = false;
         XmNlabelString = compound_string("Stop");
     };
     controls {
@@ -2204,6 +2251,7 @@ object pushButton_realtime_stop : XmPushButton widget {
 object pushButton_realtime_pause : XmPushButton widget {
     arguments {
         arguments Style_use;
+        XmNsensitive = false;
         XmNlabelString = compound_string("Pause");
     };
     controls {
@@ -2221,6 +2269,7 @@ object pushButton_realtime_pause : XmPushButton widget {
 object pushButton_realtime_resume : XmPushButton widget {
     arguments {
         arguments Style_use;
+        XmNsensitive = false;
         XmNlabelString = compound_string("Resume");
     };
     controls {
@@ -2238,8 +2287,8 @@ object pushButton_realtime_resume : XmPushButton widget {
 object pulldownMenu_realtime : XmPulldownMenu widget {
     arguments {
         arguments Style_use;
-        XmNx = 0;
-        XmNy = 0;
+        XmNx = 154;
+        XmNy = 138;
         XmNwidth = 68;
         XmNheight = 124;
     };
@@ -2261,6 +2310,7 @@ object pulldownMenu_realtime : XmPulldownMenu widget {
 object cascadeButton_realtime : XmCascadeButton widget {
     arguments {
         arguments Style_use;
+        XmNsensitive = false;
         XmNlabelString = compound_string("Realtime");
         XmNx = 46;
         XmNy = 5;
@@ -2303,7 +2353,7 @@ object mainWindow_mbgrdviz : XmMainWindow widget {
     arguments {
         arguments Style_use;
         XmNx = 108;
-        XmNy = 87;
+        XmNy = 109;
         XmNwidth = 260;
         XmNheight = 215;
     };

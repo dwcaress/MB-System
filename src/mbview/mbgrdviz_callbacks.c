@@ -102,7 +102,7 @@ int	realtime_update = 5;
 int	realtime_icon = MBGRDVIZ_REALTIME_ICON_SHIP;
 
 /* id variables */
-static char rcs_id[] = "$Id: mbgrdviz_callbacks.c,v 5.14 2005-11-05 01:11:47 caress Exp $";
+static char rcs_id[] = "$Id: mbgrdviz_callbacks.c,v 5.15 2006-01-11 07:43:19 caress Exp $";
 static char program_name[] = "MBgrdviz";
 static char help_message[] = "MBgrdviz is an interactive 2D/3D visualization tool for GMT grid files.";
 static char usage_message[] = "mbgrdviz [-H -T -V]";
@@ -2601,36 +2601,15 @@ int do_mbgrdviz_readgrd(int instance, char *grdfile,
 	float	*usedata;
 	int	i,j,k,kk;
 	
-#ifdef GMT3_0
-	gmt_begin (pargc, pargv);
-#else
 	GMT_begin (pargc, pargv);
 	GMT_put_history(pargc, pargv);
-#endif
-
-#ifdef GMT3_0
-	get_common_args (projection, xmin, xmax, ymin, ymax);
-#else
 	GMT_get_common_args (projection, xmin, xmax, ymin, ymax);
-#endif
- 	
-#ifdef GMT3_0
-	grd_init (&header, pargc, pargv, FALSE);
-#else
 	GMT_grd_init (&header, pargc, pargv, FALSE);
-#endif
-#ifndef GMT3_0
 	GMT_make_fnan (GMT_f_NaN);
 	GMT_make_dnan (GMT_d_NaN);
-	GMT_grd_in_nan_value = GMT_grd_out_nan_value = GMT_d_NaN;
-#endif
 	
 	/* read input grd file header */
-#ifdef GMT3_0
-	if (read_grd_info (grdfile, &header)) 
-#else
 	if (GMT_read_grd_info (grdfile, &header)) 
-#endif
 	    {
 	    error = MB_ERROR_OPEN_FAIL;
 	    fprintf(stderr,"\nUnable to open grd file: %s\n",
@@ -2673,28 +2652,17 @@ int do_mbgrdviz_readgrd(int instance, char *grdfile,
 
 	/* Determine the wesn to be used to read the grdfile */
 	off = (header.node_offset) ? 0 : 1;
-#ifdef GMT3_0
-	map_setup (*xmin, *xmax, *ymin, *ymax);
-	grd_setregion (&header, xmin,  xmax, ymin, ymax);
-#else
 	GMT_map_setup (*xmin, *xmax, *ymin, *ymax);
 	GMT_grd_setregion (&header, xmin,  xmax, ymin, ymax);
-#endif	
 
 	/* read the grid */
 	pad[0] = 0;
 	pad[1] = 0;
 	pad[2] = 0;
 	pad[3] = 0;
-#ifdef GMT3_0
-	if (read_grd (grdfile, &header, rawdata, 
-			    *xmin, *xmax, *ymin, *ymax, 
-			    pad, FALSE))
-#else
 	if (GMT_read_grd (grdfile, &header, rawdata, 
 			    *xmin, *xmax, *ymin, *ymax, 
 			    pad, FALSE))
-#endif
 	    {
 	    error = MB_ERROR_OPEN_FAIL;
 	    fprintf(stderr,"\nUnable to read grd file: %s\n",

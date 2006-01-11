@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	memalloc.c	3/7/2003
- *	$Id: memalloc.c,v 5.0 2003-03-11 19:09:14 caress Exp $
+ *	$Id: memalloc.c,v 5.1 2006-01-11 07:46:15 caress Exp $
  *
- *    Copyright (c) 2003 by
+ *    Copyright (c) 2003, 2006 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -23,6 +23,9 @@
  * Author:	D. W. Caress (MB-System revisions)
  * Date:	March 7, 2003 (MB-System revisions)
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2003/03/11 19:09:14  caress
+ * Initial version.
+ *
  *
  *
  *--------------------------------------------------------------------*/
