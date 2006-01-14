@@ -1,4 +1,4 @@
-.TH mbinfo l "28 May 2002" "MB-System 5.0" "MB-System 5.0"
+.TH mbinfo l "13 January 2006" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbinfo\fP - Output some basic statistics of swath sonar data files.
 
@@ -175,7 +175,7 @@ then the longitude values will be in
 the range from -180 to 180 degrees. If \fIlonflip\fP=1 
 then the longitude values will be in
 the range from 0 to 360 degrees.
-Default: \fBmbinfo selects the bext longitude range based 
+Default: \fBmbinfo\fP selects the bext longitude range based 
 on the first data.
 .TP
 .B \-M
