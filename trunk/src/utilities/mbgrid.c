@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrid.c	5/2/94
- *    $Id: mbgrid.c,v 5.30 2005-11-05 01:07:54 caress Exp $
+ *    $Id: mbgrid.c,v 5.31 2006-01-18 15:17:00 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 1995, 2000, 2002, 2003 by
+ *    Copyright (c) 1993, 1994, 1995, 2000, 2002, 2003, 2006 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -38,6 +38,9 @@
  * Rererewrite:	January 2, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.30  2005/11/05 01:07:54  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.29  2005/08/17 17:25:36  caress
  * Moved back to zgrid algorithm, but left it possible to use surface through a preprocessor define statement.
  *
@@ -331,14 +334,10 @@
 
 /* standard include files */
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include <string.h>
 #include <time.h>
-
-/* Includes for System 5 type operating system */
-#if defined (IRIX) || defined (LYNX)
-#include <stdlib.h>
-#endif
 
 /* mbio include files */
 #include "../../include/mb_status.h"
@@ -407,7 +406,7 @@ double mbgrid_erf();
 FILE	*outfp;
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbgrid.c,v 5.30 2005-11-05 01:07:54 caress Exp $";
+static char rcs_id[] = "$Id: mbgrid.c,v 5.31 2006-01-18 15:17:00 caress Exp $";
 static char program_name[] = "mbgrid";
 static char help_message[] =  "mbgrid is an utility used to grid bathymetry, amplitude, or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbgrid -Ifilelist -Oroot \
@@ -634,11 +633,6 @@ main (int argc, char **argv)
 	ydim = 101;
 	gxdim = 0;
 	gydim = 0;
-#ifndef GMT3_0
-	GMT_make_fnan (GMT_f_NaN);
-	GMT_make_dnan (GMT_d_NaN);
-	GMT_grd_in_nan_value = GMT_grd_out_nan_value = GMT_d_NaN;
-#endif
 	pid = getpid();
 
 	/* process argument list */
@@ -940,11 +934,7 @@ main (int argc, char **argv)
 	/* define NaN in case it's needed */
 	if (use_NaN == MB_YES)
 		{
-#ifdef GMT3_0
-		NaN = zero/zero;
-#else
 		GMT_make_fnan(NaN);
-#endif
 		outclipvalue = NaN;
 		}
 
@@ -4686,13 +4676,8 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 		}
 
 	/* inititialize grd header */
-#ifdef GMT3_0
-	grdio_init();
-	grd_init (&grd, argc, argv, MB_NO);
-#else
 	GMT_grdio_init();
 	GMT_grd_init (&grd, argc, argv, MB_NO);
-#endif
 
 	/* copy values to grd header */
 	grd.nx = nx;
@@ -4761,11 +4746,7 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 				}
 
 		/* write the GMT netCDF grd file */
-#ifdef GMT3_0
-		write_grd(outfile, &grd, a, w, e, s, n, pad, complex);
-#else
 		GMT_write_grd(outfile, &grd, a, w, e, s, n, pad, complex);
-#endif
 
 		/* free memory for output array */
 		mb_free(verbose, &a, error);

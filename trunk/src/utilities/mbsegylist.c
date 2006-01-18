@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsegylist.c	5/29/2004
- *    $Id: mbsegylist.c,v 5.3 2005-06-04 05:19:04 caress Exp $
+ *    $Id: mbsegylist.c,v 5.4 2006-01-18 15:17:00 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	May 29, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2005/06/04 05:19:04  caress
+ * Fixed water depth calculation.
+ *
  * Revision 5.2  2004/10/06 19:10:53  caress
  * Release 5.0.5 update.
  *
@@ -38,6 +41,7 @@
 
 /* standard include files */
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include <string.h>
 #include <time.h>
@@ -65,7 +69,7 @@
 /* NaN value */
 double	NaN;
 
-static char rcs_id[] = "$Id: mbsegylist.c,v 5.3 2005-06-04 05:19:04 caress Exp $";
+static char rcs_id[] = "$Id: mbsegylist.c,v 5.4 2006-01-18 15:17:00 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
@@ -165,11 +169,7 @@ main (int argc, char **argv)
 	list[n_list]='L'; n_list++;
 
 	/* get NaN value */
-#ifdef GMT3_0
-	NaN = zero/zero;
-#else
 	GMT_make_dnan(NaN);
-#endif
 
 	/* process argument list */
 	while ((c = getopt(argc, argv, "AaI:i:L:l:O:o:VvWwHh")) != -1)

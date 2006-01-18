@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmerge.c	2/20/93
  *
- *    $Id: mbmerge.c,v 5.6 2005-03-25 04:43:02 caress Exp $
+ *    $Id: mbmerge.c,v 5.7 2006-01-18 15:17:00 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	February 20, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2005/03/25 04:43:02  caress
+ * Standardized the string lengths used for filenames and comment data.
+ *
  * Revision 5.5  2003/07/02 18:14:19  caress
  * Release 5.0.0
  *
@@ -151,6 +154,7 @@
 
 /* standard include files */
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include <string.h>
 #include <time.h>
@@ -169,7 +173,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbmerge.c,v 5.6 2005-03-25 04:43:02 caress Exp $";
+	static char rcs_id[] = "$Id: mbmerge.c,v 5.7 2006-01-18 15:17:00 caress Exp $";
 	static char program_name[] = "MBMERGE";
 	static char help_message[] =  "MBMERGE merges new navigation with swath sonar data from an \ninput file and then writes the merged data to an output \nswath sonar data file. The default input \nand output streams are stdin and stdout.";
 	static char usage_message[] = "mbmerge [-Aheading_offset -B -Fformat -Llonflip -V -H  -Iinfile -Ooutfile -Mnavformat -Nnavfile -Z]";

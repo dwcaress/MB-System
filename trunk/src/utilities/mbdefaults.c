@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbdefaults.c	1/23/93
- *	$Id: mbdefaults.c,v 5.4 2003-04-17 21:17:10 caress Exp $
+ *	$Id: mbdefaults.c,v 5.5 2006-01-18 15:17:00 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Author:	D. W. Caress
  * Date:	January 23, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2003/04/17 21:17:10  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.3  2001/11/20 21:50:38  caress
  * The .mbio_defaults file no longer controls format,
  * pings, bounds, btime_i, and etime_i.
@@ -81,6 +84,7 @@
 
 /* standard include files */
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include <string.h>
 
@@ -92,7 +96,7 @@
 
 main (int argc, char **argv)
 {
-static char rcs_id[]="$Id: mbdefaults.c,v 5.4 2003-04-17 21:17:10 caress Exp $";
+static char rcs_id[]="$Id: mbdefaults.c,v 5.5 2006-01-18 15:17:00 caress Exp $";
 	static char program_name[] = "MBDEFAULTS";
 	static char help_message[] = "MBDEFAULTS sets and retrieves the /default MBIO control \nparameters stored in the file ~/.mbio_defaults. \nOnly the parameters specified by command line \narguments will be changed; if no ~/.mbio_defaults \nfile exists one will be created.";
 	static char usage_message[] = "mbdefaults [-Dpsdisplay -Fformat -Iimagedisplay\n\t-Rw/e/s/n -Ppings -Sspeed -Llonflip\n\t-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc -Wproject -V -H]";

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:    mbstripNaN.c        8/8/02
- *    $Id: mbstripnan.c,v 5.2 2003-04-17 21:18:57 caress Exp $
+ *    $Id: mbstripnan.c,v 5.3 2006-01-18 15:17:00 caress Exp $
  *
  *    Copyright (c) 2002, 2003 by
  *    Mike McCann (mccann@mbari.org)
@@ -23,6 +23,9 @@
  * MBARI
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2003/04/17 21:18:57  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.1  2002/08/21 00:57:11  caress
  * Release 5.0.beta22
  *
@@ -32,6 +35,7 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 /*--------------------------------------------------------------------*/
 /*

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbfilter.c	1/16/95
- *    $Id: mbfilter.c,v 5.4 2005-03-25 04:43:00 caress Exp $
+ *    $Id: mbfilter.c,v 5.5 2006-01-18 15:17:00 caress Exp $
  *
  *    Copyright (c) 1995, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -32,6 +32,9 @@
  * Date:	January 16, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2005/03/25 04:43:00  caress
+ * Standardized the string lengths used for filenames and comment data.
+ *
  * Revision 5.3  2003/04/17 21:17:10  caress
  * Release 5.0.beta30
  *
@@ -112,6 +115,7 @@
 
 /* standard include files */
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include <string.h>
 #include <time.h>
@@ -175,7 +179,7 @@ struct mbfilter_ping_struct
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbfilter.c,v 5.4 2005-03-25 04:43:00 caress Exp $";
+	static char rcs_id[] = "$Id: mbfilter.c,v 5.5 2006-01-18 15:17:00 caress Exp $";
 	static char program_name[] = "MBFILTER";
 	static char help_message[] =  
 "mbfilter applies one or more simple filters to the specified\n\t\

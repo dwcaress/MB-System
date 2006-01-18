@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbprocess.c	3/31/93
- *    $Id: mbprocess.c,v 5.41 2006-01-06 18:19:59 caress Exp $
+ *    $Id: mbprocess.c,v 5.42 2006-01-18 15:17:00 caress Exp $
  *
  *    Copyright (c) 2000, 2002, 2003, 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -36,6 +36,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.41  2006/01/06 18:19:59  caress
+ * Working towards 5.0.8
+ *
  * Revision 5.40  2005/11/05 01:07:54  caress
  * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
  *
@@ -222,7 +225,7 @@ int get_anglecorr(int verbose,
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbprocess.c,v 5.41 2006-01-06 18:19:59 caress Exp $";
+	static char rcs_id[] = "$Id: mbprocess.c,v 5.42 2006-01-18 15:17:00 caress Exp $";
 	static char program_name[] = "mbprocess";
 	static char help_message[] =  "mbprocess is a tool for processing swath sonar bathymetry data.\n\
 This program performs a number of functions, including:\n\
@@ -5348,7 +5351,7 @@ i,sscorrtableuse.angle[i],sscorrtableuse.amplitude[i],sscorrtableuse.sigma[i]);*
 					bathy = 0.0;
 			    		if (ndepths > 1)
 						{
-						status = mb_pr_get_bathyslope(5,
+						status = mb_pr_get_bathyslope(verbose,
 				    				ndepths,
 				    				depths,
 				    				depthacrosstrack,

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb7kpreprocess.c	10/12/2005
- *    $Id: mb7kpreprocess.c,v 5.1 2006-01-06 18:19:58 caress Exp $
+ *    $Id: mb7kpreprocess.c,v 5.2 2006-01-18 15:17:00 caress Exp $
  *
  *    Copyright (c) 2005 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	October 12, 2005
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2006/01/06 18:19:58  caress
+ * Working towards 5.0.8
+ *
  * Revision 5.0  2005/11/05 01:09:17  caress
  * Program to preprocess Reson 7k format data.
  *
@@ -32,6 +35,7 @@
 
 /* standard include files */
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include <string.h>
 
@@ -46,7 +50,7 @@
 #define MB7KPREPROCESS_PROCESS		1
 #define MB7KPREPROCESS_TIMESTAMPLIST	2
 
-static char rcs_id[] = "$Id: mb7kpreprocess.c,v 5.1 2006-01-06 18:19:58 caress Exp $";
+static char rcs_id[] = "$Id: mb7kpreprocess.c,v 5.2 2006-01-18 15:17:00 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 

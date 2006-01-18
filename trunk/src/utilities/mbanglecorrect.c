@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbanglecorrect.c	8/13/95
- *    $Id: mbanglecorrect.c,v 5.4 2005-03-25 04:42:59 caress Exp $
+ *    $Id: mbanglecorrect.c,v 5.5 2006-01-18 15:17:00 caress Exp $
  *
  *    Copyright (c) 1995, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -47,6 +47,9 @@ The default input and output streams are stdin and stdout.\n";
  * Date:	January 12, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2005/03/25 04:42:59  caress
+ * Standardized the string lengths used for filenames and comment data.
+ *
  * Revision 5.3  2003/04/17 21:17:10  caress
  * Release 5.0.beta30
  *
@@ -125,6 +128,7 @@ The default input and output streams are stdin and stdout.\n";
 
 /* standard include files */
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include <string.h>
 #include <time.h>
@@ -178,7 +182,7 @@ struct mbanglecorrect_ping_struct
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbanglecorrect.c,v 5.4 2005-03-25 04:42:59 caress Exp $";
+	static char rcs_id[] = "$Id: mbanglecorrect.c,v 5.5 2006-01-18 15:17:00 caress Exp $";
 	static char program_name[] = "MBANGLECORRECT";
 	static char help_message[] =  
 "mbanglecorrect is a tool for processing sidescan data.  This program\n\t\

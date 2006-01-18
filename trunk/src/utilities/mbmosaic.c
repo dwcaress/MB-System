@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmosaic.c	2/10/97
- *    $Id: mbmosaic.c,v 5.18 2005-11-05 01:07:54 caress Exp $
+ *    $Id: mbmosaic.c,v 5.19 2006-01-18 15:17:00 caress Exp $
  *
- *    Copyright (c) 1997, 2000, 2002, 2003 by
+ *    Copyright (c) 1997, 2000, 2002, 2003, 2006 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -25,6 +25,9 @@
  * Date:	February 10, 1997
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.18  2005/11/05 01:07:54  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.17  2004/12/02 06:38:50  caress
  * Fix suggested by Gordon Keith
  *
@@ -127,6 +130,7 @@
 
 /* standard include files */
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include <string.h>
 #include <time.h>
@@ -169,7 +173,7 @@
 #define	NO_DATA_FLAG	99999
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbmosaic.c,v 5.18 2005-11-05 01:07:54 caress Exp $";
+static char rcs_id[] = "$Id: mbmosaic.c,v 5.19 2006-01-18 15:17:00 caress Exp $";
 static char program_name[] = "mbmosaic";
 static char help_message[] =  "mbmosaic is an utility used to mosaic amplitude or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered by multibeam swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbmosaic -Ifilelist -Oroot \
@@ -372,11 +376,6 @@ main (int argc, char **argv)
 	ydim = 101;
 	gxdim = 0;
 	gydim = 0;
-#ifndef GMT3_0
-	GMT_make_fnan (GMT_f_NaN);
-	GMT_make_dnan (GMT_d_NaN);
-	GMT_grd_in_nan_value = GMT_grd_out_nan_value = GMT_d_NaN;
-#endif
 
 	/* process argument list */
 	while ((c = getopt(argc, argv, "A:a:B:b:C:c:D:d:E:e:F:f:G:g:HhI:i:J:j:L:l:MmNnO:o:P:p:R:r:S:s:T:t:U:u:VvW:w:X:x:Y:y:Z:z:")) != -1)
@@ -659,11 +658,7 @@ main (int argc, char **argv)
 	/* define NaN in case it's needed */
 	if (use_NaN == MB_YES)
 		{
-#ifdef GMT3_0
-		NaN = zero/zero;
-#else
 		GMT_make_fnan(NaN);
-#endif
 		outclipvalue = NaN;
 		}
 
@@ -2839,13 +2834,8 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 		}
 
 	/* inititialize grd header */
-#ifdef GMT3_0
-	grdio_init();
-	grd_init (&grd, argc, argv, MB_NO);
-#else
 	GMT_grdio_init();
 	GMT_grd_init (&grd, argc, argv, MB_NO);
-#endif
 
 	/* copy values to grd header */
 	grd.nx = nx;
@@ -2904,11 +2894,7 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 				}
 
 		/* write the GMT netCDF grd file */
-#ifdef GMT3_0
-		write_grd(outfile, &grd, a, w, e, s, n, pad, complex);
-#else
 		GMT_write_grd(outfile, &grd, a, w, e, s, n, pad, complex);
-#endif
 
 		/* free memory for output array */
 		mb_free(verbose, &a, error);
