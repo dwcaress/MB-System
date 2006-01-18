@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbps.c	11/4/93
- *    $Id: mbps.c,v 5.7 2005-11-05 01:07:54 caress Exp $
+ *    $Id: mbps.c,v 5.8 2006-01-18 15:15:10 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	August 31, 1991 (original version)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2005/11/05 01:07:54  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.6  2005/03/25 04:43:01  caress
  * Standardized the string lengths used for filenames and comment data.
  *
@@ -119,6 +122,7 @@
 
 /* standard include files */
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include <string.h>
 
@@ -128,6 +132,7 @@
 
 /* GMT include files */
 #include "gmt.h"
+#include "pslib.h"
 
 /*--------------------------------------------------------------------*/
 
@@ -162,7 +167,7 @@ int rgb_white[] = {255, 255, 255};
 main (int argc, char **argv)
 {
 
-	static char rcs_id[] = "$Id: mbps.c,v 5.7 2005-11-05 01:07:54 caress Exp $";
+	static char rcs_id[] = "$Id: mbps.c,v 5.8 2006-01-18 15:15:10 caress Exp $";
 	static char program_name[] = "MBPS";
 	static char help_message[] =  "MBPS reads a swath bathymetry data file and creates a postscript 3-d mesh plot";
 	static char usage_message[] = "mbps [-Iinfile -Fformat -Nnpings -Ppings\n\t-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc  \n\t-Aalpha -Keta -Dviewdir -Xvertexag \n\t-T\"title\" -Wmetersperinch \n\t-Sspeedmin -Ggap -Ydisplay_stats \n\t-Zdisplay_scales -V -H]";
@@ -816,16 +821,9 @@ main (int argc, char **argv)
 	/* initialize the Postscript plotting */
 	ps_plotinit(NULL,0,orient,x_off,y_off,1.0,1.0,1,300,1,
 		gmtdefs.paper_width, gmtdefs.page_rgb, 
-#ifdef GMT3_0
-		gmt_epsinfo (argv[0]));
-	echo_command (argc, argv);
-#else
-#ifdef GMT4_0
 		gmtdefs.encoding.name, 
-#endif
 		GMT_epsinfo (argv[0]));
 	GMT_echo_command (argc, argv);
-#endif
 		
 	/* now loop over the data in the appropriate order
 	    laying down white filled boxes with black outlines
@@ -865,11 +863,7 @@ main (int argc, char **argv)
 				yl[2] = scaling * data[i+1].yp[jj+1];
 				xl[3] = scaling * data[i].xp[jj+1];
 				yl[3] = scaling * data[i].yp[jj+1];
-#ifdef GMT3_0
-				ps_polygon(xl,yl,4,255,255,255,1);
-#else
 				ps_polygon(xl,yl,4,rgb_white,1);
-#endif
 				}
 			}
 		}
@@ -883,7 +877,7 @@ main (int argc, char **argv)
 		xl[0]=0;
 		yl[0]=max_yp*scaling+.6;
 		sprintf(label,"%s",title);
-		ps_text(xl[0],yl[0],20,label,0.,6,0);
+		ps_text(xl[0],yl[0],20.,label,0.,6,0);
 		} 
 	else 
 		{
@@ -891,16 +885,16 @@ main (int argc, char **argv)
 		xl[0]=0;
 		yl[0]=max_yp*scaling+1.3;
 		sprintf(label,"%s",title);
-		ps_text(xl[0],yl[0],20,label,0.,6,0);
+		ps_text(xl[0],yl[0],20.,label,0.,6,0);
 
 		xl[0]-=3.25;
 		yl[0]-=0.3;
 		sprintf(label,"Mean Lat.: %3d@+o@+ %4.1f'   Mean Lon.: %4d@+o @+%4.1f'   Heading: %.1lf@+o @+",(int)mean_lat, mean_latmin, (int)mean_lon, mean_lonmin, mean_hdg);
-		ps_text(xl[0],yl[0],15,label,0.,4,0);
+		ps_text(xl[0],yl[0],15.,label,0.,4,0);
 
 		yl[0]-=0.3;
 		sprintf(label,"View Angle: %.1lf@+o @+  V.E.: %.1lfX   Scale: %.0lf m/inch   Track Length: %.1lf km",eta,ve,1.0/scaling,track_length/1000.0);
-		ps_text(xl[0],yl[0],15,label,0.,4,0);
+		ps_text(xl[0],yl[0],15.,label,0.,4,0);
 
 		yl[0]-=0.3;
 		sprintf(label,
@@ -908,7 +902,7 @@ main (int argc, char **argv)
 		timbeg_i[0],timbeg_i[1],timbeg_i[2],timbeg_i[3],
 		timbeg_i[4],timbeg_i[5],timend_i[0],timend_i[1],
 		timend_i[2],timend_i[3],timend_i[4],timend_i[5]);
-		ps_text(xl[0],yl[0],15,label,0.,4,0);
+		ps_text(xl[0],yl[0],15.,label,0.,4,0);
 		} /* else after if display_stats */
 
 
@@ -925,13 +919,9 @@ main (int argc, char **argv)
 		yl[1]=yl[2]= min_yp*scaling-1.;
 		yl[0]=yl[3]= yl[1]+0.1;
 	
-#ifdef GMT3_0
-		ps_line(xl,yl,4,3,0);
-#else
 		ps_line(xl,yl,4,3,0,0);
-#endif
 		sprintf(label,"%.0f km",xscale/1000.0);
-		ps_text(xl[0]+.5,yl[0]+.05,15,label,0.,6,0);
+		ps_text(xl[0]+.5,yl[0]+.05,15.,label,0.,6,0);
 
 	
 		/* plot the z-scale */
@@ -948,13 +938,9 @@ main (int argc, char **argv)
 		yl[0]=yl[1]= min_yp*scaling-1.;
 		yl[2]=yl[3]= yl[0]+zscale_inch;
 
-#ifdef GMT3_0
-		ps_line(xl,yl,4,3,0);
-#else
 		ps_line(xl,yl,4,3,0,0);
-#endif
 		sprintf(label,"%.0f m",zscale);
-		ps_text(xl[0]+0.3,yl[0]+zscale_inch/2.0,15,label,0.,6,0);
+		ps_text(xl[0]+0.3,yl[0]+zscale_inch/2.0,15.,label,0.,6,0);
 
 
 		/* plot an arrow in the ship's direction */
@@ -971,16 +957,10 @@ main (int argc, char **argv)
 		yl[1] = ((yl[1]-yl[0])/distot/2) + min_yp*scaling-1.;
 		xl[0] = 0.+.6; 
 		yl[0] = 0.+min_yp*scaling-0.85;
-#ifdef GMT3_0
-		ps_vector(xl[0],yl[0],xl[1],yl[1],
-		    0.01,0.25,0.1,1.0,
-		    0,0,0,0);
-#else
 		ps_vector(xl[0],yl[0],xl[1],yl[1],
 		    0.01,0.25,0.1,1.0,rgb_black,0);
-#endif
-		ps_text(xl[0]-1.7,yl[0]+.2,15,"ship heading",0.,1,0);
-		ps_text(xl[0]-1.7,yl[0],15,"direction",0.,1,0);
+		ps_text(xl[0]-1.7,yl[0]+.2,15.,"ship heading",0.,1,0);
+		ps_text(xl[0]-1.7,yl[0],15.,"direction",0.,1,0);
 
 
 		/* plot the three axes */
@@ -1040,26 +1020,21 @@ main (int argc, char **argv)
 			xl[1]=xl[0]+xl[1];
 			yl[1]=yl[0]+yl[1];
 
-#ifdef GMT3_0
-			ps_vector(xl[0],yl[0],xl[1],yl[1],
-				0.01,0.25,0.1,1.0,0,0,0,0);
-#else
 			ps_vector(xl[0],yl[0],xl[1],yl[1],
 				0.01,0.25,0.1,1.0,rgb_black,0);
-#endif
 
 			if (i==0&&rotate==0)
-				ps_text(xl[1],yl[1]+.15,15,"x",0.,6,0);
+				ps_text(xl[1],yl[1]+.15,15.,"x",0.,6,0);
 			else if (i==1&&rotate==0)
-				ps_text(xl[1],yl[1]+.15,15,"y",0.,6,0);
+				ps_text(xl[1],yl[1]+.15,15.,"y",0.,6,0);
 			else if (i==2&&rotate==0)
-				ps_text(xl[1],yl[1]+.15,15,"z",0.,6,0);
+				ps_text(xl[1],yl[1]+.15,15.,"z",0.,6,0);
 			else if (i==0&&rotate==1)
-				ps_text(xl[1],yl[1]+.15,15,"-x",0.,6,0);
+				ps_text(xl[1],yl[1]+.15,15.,"-x",0.,6,0);
 			else if (i==1&&rotate==1)
-				ps_text(xl[1],yl[1]+.15,15,"-y",0.,6,0);
+				ps_text(xl[1],yl[1]+.15,15.,"-y",0.,6,0);
 			else if (i==2&&rotate==1)
-				ps_text(xl[1],yl[1]+.15,15,"z",0.,6,0);
+				ps_text(xl[1],yl[1]+.15,15.,"z",0.,6,0);
 
 			} /* (i=0;i<3;i++) */
 		} /* if display_scales */
