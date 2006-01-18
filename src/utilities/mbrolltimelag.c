@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbrolltimelag.c	11/10/2005
  *
- *    $Id: mbrolltimelag.c,v 5.0 2006-01-06 18:20:56 caress Exp $
+ *    $Id: mbrolltimelag.c,v 5.1 2006-01-18 15:17:00 caress Exp $
  *
  *    Copyright (c) 2005 by
  *    David W. Caress (caress@mbari.org)
@@ -27,6 +27,9 @@
  * Date:	November 11, 2005
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2006/01/06 18:20:56  caress
+ * Working towards 5.0.8
+ *
  *
  *
  *
@@ -34,6 +37,7 @@
 
 /* standard include files */
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include <string.h>
 #include <time.h>
@@ -50,10 +54,10 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbrolltimelag.c,v 5.0 2006-01-06 18:20:56 caress Exp $";
+	static char rcs_id[] = "$Id: mbrolltimelag.c,v 5.1 2006-01-18 15:17:00 caress Exp $";
 	static char program_name[] = "MBrolltimelag";
 	static char help_message[] = "MBrolltimelag extracts the roll time series and the apparent \nbottom slope time series from swath data, and then calculates \nthe cross correlation between the roll and the slope minus roll \nfor a specified set of time lags.";
-	static char usage_message[] = "mbrolltimelag -Iswathdata [-Fformat -Nnping -Tnlag/lagmin/lagmax -V -H ]";
+	static char usage_message[] = "mbrolltimelag -Iswathdata [-Fformat -Nnping -Snavchannel -Tnlag/lagmin/lagmax -V -H ]";
 
 	/* parsing variables */
 	extern char *optarg;
@@ -86,7 +90,7 @@ main (int argc, char **argv)
 	double	file_weight;
 	
 	/* cross correlation parameters */
-	int	navsource = MB_DATA_DATA;
+	int	navchannel = MB_DATA_DATA;
 	int	npings = 100;
 	int	nlag = 41;
 	double	lagmin = -2.0;
@@ -168,7 +172,7 @@ main (int argc, char **argv)
 			break;
 		case 'S':
 		case 's':
-			sscanf (optarg,"%d", &navsource);
+			sscanf (optarg,"%d", &navchannel);
 			flag++;
 			break;
 		case 'T':
@@ -213,7 +217,7 @@ main (int argc, char **argv)
 		fprintf(stderr,"dbg2       nlag:            %d\n",nlag);
 		fprintf(stderr,"dbg2       lagmin:          %f\n",lagmin);
 		fprintf(stderr,"dbg2       lagmax:          %f\n",lagmax);
-		fprintf(stderr,"dbg2       navsource:       %f\n",navsource);
+		fprintf(stderr,"dbg2       navchannel:      %f\n",navchannel);
 		}
 
 	/* if help desired then print it and exit */
@@ -250,7 +254,7 @@ main (int argc, char **argv)
 		}
 		
 	/* first get roll data from the entire swathdata (which can be a datalist ) */
-	sprintf(cmdfile, "mbnavlist -I%s -F%d -N%d -OMR", swathdata, format, navsource);
+	sprintf(cmdfile, "mbnavlist -I%s -F%d -N%d -OMR", swathdata, format, navchannel);
 	fprintf(stderr,"\nRunning %s...\n",cmdfile);
 	fp = popen(cmdfile, "r");
 	while ((nscan = fscanf(fp, "%lf %lf", &time_d, &roll)) == 2)
@@ -316,7 +320,7 @@ main (int argc, char **argv)
 	/* loop over all files to be read */
 	while (read_data == MB_YES)
 		{
-		sprintf(cmdfile, "mblist -I%s -F%d -OMAR", swathfile, format, navsource);
+		sprintf(cmdfile, "mblist -I%s -F%d -OMAR", swathfile, format, navchannel);
 		fprintf(stderr,"\nRunning %s...\n",cmdfile);
 		fp = popen(cmdfile, "r");
 		while ((nscan = fscanf(fp, "%lf %lf %lf", &time_d, &slope, &roll)) == 3)

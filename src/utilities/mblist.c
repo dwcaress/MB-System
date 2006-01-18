@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mblist.c	2/1/93
- *    $Id: mblist.c,v 5.17 2005-11-05 01:07:54 caress Exp $
+ *    $Id: mblist.c,v 5.18 2006-01-18 15:17:00 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -28,6 +28,9 @@
  *		in 1990.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.17  2005/11/05 01:07:54  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.16  2005/06/04 06:17:38  caress
  * MBlist can now output the data in CDL and netCDF formats. This capability was contributed by Gordon Keith.
  *
@@ -217,6 +220,7 @@
 
 /* standard include files */
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include <string.h>
 #include <time.h>
@@ -283,7 +287,7 @@ int printNaN(int verbose, FILE *output, int ascii, int *invert, int *flipsign, i
 /* NaN value */
 double	NaN;
 
-static char rcs_id[] = "$Id: mblist.c,v 5.17 2005-11-05 01:07:54 caress Exp $";
+static char rcs_id[] = "$Id: mblist.c,v 5.18 2006-01-18 15:17:00 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
@@ -468,11 +472,7 @@ main (int argc, char **argv)
 	dump_mode = DUMP_MODE_LIST;
 
 	/* get NaN value */
-#ifdef GMT3_0
-	NaN = zero/zero;
-#else
 	GMT_make_dnan(NaN);
-#endif
 
 	strcpy(output_file, "-");
 

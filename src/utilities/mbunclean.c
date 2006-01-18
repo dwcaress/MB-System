@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbunclean.c	3/10/93
- *    $Id: mbunclean.c,v 5.4 2005-03-25 04:43:03 caress Exp $
+ *    $Id: mbunclean.c,v 5.5 2006-01-18 15:17:00 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	March 10, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2005/03/25 04:43:03  caress
+ * Standardized the string lengths used for filenames and comment data.
+ *
  * Revision 5.3  2003/04/17 21:18:57  caress
  * Release 5.0.beta30
  *
@@ -85,6 +88,9 @@
  *
  * Revision 3.1  1993/05/14  23:49:32  sohara
  * fixed $Log: not supported by cvs2svn $
+ * fixed Revision 5.4  2005/03/25 04:43:03  caress
+ * fixed Standardized the string lengths used for filenames and comment data.
+ * fixed
  * fixed Revision 5.3  2003/04/17 21:18:57  caress
  * fixed Release 5.0.beta30
  * fixed
@@ -153,6 +159,7 @@
 
 /* standard include files */
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include <string.h>
 #include <time.h>
@@ -167,7 +174,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbunclean.c,v 5.4 2005-03-25 04:43:03 caress Exp $";
+	static char rcs_id[] = "$Id: mbunclean.c,v 5.5 2006-01-18 15:17:00 caress Exp $";
 	static char program_name[] = "MBUNCLEAN";
 	static char help_message[] =  "MBUNCLEAN unflags swath bathymetry and amplitude data \nwhich has been flagged as bad by being set negative. \nThe default input and output streams are stdin and stdout.";
 	static char usage_message[] = "mbunclean [-Blow/high -Fformat -Llonflip -V -H  -Iinfile -Ooutfile]";

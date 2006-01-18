@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbbackangle.c	1/6/95
- *    $Id: mbbackangle.c,v 5.11 2005-11-05 01:07:54 caress Exp $
+ *    $Id: mbbackangle.c,v 5.12 2006-01-18 15:17:00 caress Exp $
  *
  *    Copyright (c) 1995, 2000, 2002, 2003, 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	January 6, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.11  2005/11/05 01:07:54  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.10  2005/08/17 17:28:54  caress
  * Improved how the best altitude value is obtained for sidescan and amplitude data correction.
  *
@@ -106,6 +109,7 @@
 
 /* standard include files */
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include <string.h>
 #include <sys/stat.h>
@@ -137,7 +141,7 @@ int output_model(int verbose, FILE *tfp,
 	int *nmean, double *mean, double *sigma, 
 	int *error);
 						
-static char rcs_id[] = "$Id: mbbackangle.c,v 5.11 2005-11-05 01:07:54 caress Exp $";
+static char rcs_id[] = "$Id: mbbackangle.c,v 5.12 2006-01-18 15:17:00 caress Exp $";
 static char program_name[] = "mbbackangle";
 
 /*--------------------------------------------------------------------*/
@@ -1680,13 +1684,8 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 		}
 
 	/* inititialize grd header */
-#ifdef GMT3_0
-	grdio_init();
-	grd_init (&grd, argc, argv, MB_NO);
-#else
 	GMT_grdio_init();
 	GMT_grd_init (&grd, argc, argv, MB_NO);
-#endif
 
 	/* copy values to grd header */
 	grd.nx = nx;
@@ -1755,11 +1754,7 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 				}
 
 		/* write the GMT netCDF grd file */
-#ifdef GMT3_0
-		write_grd(outfile, &grd, a, w, e, s, n, pad, complex);
-#else
 		GMT_write_grd(outfile, &grd, a, w, e, s, n, pad, complex);
-#endif
 
 		/* free memory for output array */
 		mb_free(verbose, &a, error);

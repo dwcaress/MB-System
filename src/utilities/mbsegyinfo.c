@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsegyinfo.c	6/2/2004
- *    $Id: mbsegyinfo.c,v 5.2 2004-10-06 19:10:53 caress Exp $
+ *    $Id: mbsegyinfo.c,v 5.3 2006-01-18 15:17:00 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -19,6 +19,9 @@
  * Date:	June 2, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2004/10/06 19:10:53  caress
+ * Release 5.0.5 update.
+ *
  * Revision 5.1  2004/07/27 19:48:35  caress
  * Working on handling subbottom data.
  *
@@ -32,6 +35,7 @@
 
 /* standard include files */
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include <string.h>
 #include <time.h>
@@ -59,7 +63,7 @@
 /* NaN value */
 double	NaN;
 
-static char rcs_id[] = "$Id: mbsegyinfo.c,v 5.2 2004-10-06 19:10:53 caress Exp $";
+static char rcs_id[] = "$Id: mbsegyinfo.c,v 5.3 2006-01-18 15:17:00 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 

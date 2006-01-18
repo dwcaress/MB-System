@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsegygrid.c	6/12/2004
- *    $Id: mbsegygrid.c,v 5.6 2005-06-15 15:35:01 caress Exp $
+ *    $Id: mbsegygrid.c,v 5.7 2006-01-18 15:17:00 caress Exp $
  *
- *    Copyright (c) 2004, 2005 by
+ *    Copyright (c) 2004, 2005, 2006 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -21,6 +21,9 @@
  * Date:	June 12, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2005/06/15 15:35:01  caress
+ * Added capability to scale shot to distance and time to depth. Also added -MGQ100 to the mbm_grdplot arguments so that the seismic image is more nicely displayed by grdimage.
+ *
  * Revision 5.5  2005/06/04 05:59:26  caress
  * Added a time-varying gain option.
  *
@@ -46,6 +49,7 @@
 
 /* standard include files */
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include <string.h>
 #include <time.h>
@@ -94,7 +98,7 @@ char	*getenv();
 	stderr if verbose > 1) */
 FILE	*outfp;
 
-static char rcs_id[] = "$Id: mbsegygrid.c,v 5.6 2005-06-15 15:35:01 caress Exp $";
+static char rcs_id[] = "$Id: mbsegygrid.c,v 5.7 2006-01-18 15:17:00 caress Exp $";
 static char program_name[] = "MBsegygrid";
 static char help_message[] =  "MBsegygrid grids trace data from segy data files.";
 static char usage_message[] = "MBsegygrid -Ifile -Oroot [-Ashotscale/timescale \n\
@@ -199,14 +203,7 @@ main (int argc, char **argv)
 	segyfile[0] = '\0';
 
 	/* get NaN value */
-#ifdef GMT3_0
-	NaN = zero/zero;
-#else
-	GMT_make_fnan (GMT_f_NaN);
-	GMT_make_dnan (GMT_d_NaN);
-	GMT_grd_in_nan_value = GMT_grd_out_nan_value = GMT_d_NaN;
 	GMT_make_fnan(NaN);
-#endif
 
 	/* process argument list */
 	while ((c = getopt(argc, argv, "A:a:D:d:G:g:I:i:O:o:RrS:s:T:t:VvW:w:Hh")) != -1)
@@ -998,13 +995,8 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 		}
 
 	/* inititialize grd header */
-#ifdef GMT3_0
-	grdio_init();
-	grd_init (&grd, argc, argv, MB_NO);
-#else
 	GMT_grdio_init();
 	GMT_grd_init (&grd, argc, argv, MB_NO);
-#endif
 
 	/* copy values to grd header */
 	grd.nx = nx;
@@ -1048,9 +1040,6 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 	complex = 0;
 
 	/* write grid to GMT netCDF grd file */
-#ifdef GMT3_0
-	write_grd(outfile, &grd, grid, w, e, s, n, pad, complex);
-#else
 /*for (i=0;i<nx;i++)
 for (j=0;j<ny;j++)
 {
@@ -1058,7 +1047,6 @@ k = j * nx + i;
 fprintf(outfp,"%d %d %d %f\n",i,j,k,grid[k]);
 }*/
 	GMT_write_grd(outfile, &grd, grid, w, e, s, n, pad, complex);
-#endif
 
 	/* print output debug statements */
 	if (verbose >= 2)

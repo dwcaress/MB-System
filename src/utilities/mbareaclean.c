@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbareaclean.c	2/27/2003
- *    $Id: mbareaclean.c,v 5.5 2005-11-05 01:07:54 caress Exp $
+ *    $Id: mbareaclean.c,v 5.6 2006-01-18 15:17:00 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -37,6 +37,9 @@
  *		Amsterdam Airport
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2005/11/05 01:07:54  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.4  2004/12/02 06:39:28  caress
  * Fixes while supporting Reson 7k data.
  *
@@ -57,6 +60,7 @@
 
 /* standard include files */
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include <string.h>
 #include <sys/stat.h>
@@ -125,7 +129,7 @@ int getsoundingptr(int verbose, int soundingid,
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbareaclean.c,v 5.5 2005-11-05 01:07:54 caress Exp $";
+	static char rcs_id[] = "$Id: mbareaclean.c,v 5.6 2006-01-18 15:17:00 caress Exp $";
 	static char program_name[] = "MBAREACLEAN";
 	static char help_message[] =  "MBAREACLEAN identifies and flags artifacts in swath bathymetry data";
 	static char usage_message[] = "mbareaclean [-Fformat -Iinfile -Rwest/east/south/north -B -G -Mthreshold/nmin -Sbinsize]";

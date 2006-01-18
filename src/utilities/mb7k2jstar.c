@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb7k2jstar.c	5/19/2005
- *    $Id: mb7k2jstar.c,v 5.3 2005-11-05 01:07:54 caress Exp $
+ *    $Id: mb7k2jstar.c,v 5.4 2006-01-18 15:17:00 caress Exp $
  *
  *    Copyright (c) 2005 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	May 19, 2005
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2005/11/05 01:07:54  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.2  2005/08/17 17:27:02  caress
  * Fixed scaling for heading, roll, and pitch values.
  *
@@ -36,6 +39,7 @@
 
 /* standard include files */
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include <string.h>
 
@@ -57,7 +61,7 @@
 #define	MB7K2JSTAR_BOTTOMPICK_ALTITUDE		2
 #define	MB7K2JSTAR_BOTTOMPICK_ARRIVAL		3
 
-static char rcs_id[] = "$Id: mb7k2jstar.c,v 5.3 2005-11-05 01:07:54 caress Exp $";
+static char rcs_id[] = "$Id: mb7k2jstar.c,v 5.4 2006-01-18 15:17:00 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 

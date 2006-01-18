@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbformat.c	1/22/93
- *    $Id: mbformat.c,v 5.7 2003-04-17 21:17:10 caress Exp $
+ *    $Id: mbformat.c,v 5.8 2006-01-18 15:17:00 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	January 22, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2003/04/17 21:17:10  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.6  2003/02/27 04:43:23  caress
  * Added -K option for output of fileroots.
  *
@@ -94,6 +97,7 @@
 
 /* standard include files */
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include <string.h>
 
@@ -112,7 +116,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbformat.c,v 5.7 2003-04-17 21:17:10 caress Exp $";
+	static char rcs_id[] = "$Id: mbformat.c,v 5.8 2006-01-18 15:17:00 caress Exp $";
 	static char program_name[] = "MBFORMAT";
 	static char help_message[] = "MBFORMAT is an utility which identifies the swath data formats \nassociated with MBIO format id's.  If no format id is specified, \nMBFORMAT lists all of the currently supported formats.";
 	static char usage_message[] = "mbformat [-Fformat -Ifile -L -W -V -H]";
@@ -301,10 +305,10 @@ main (int argc, char **argv)
 		printf("is associated with and uses a data structure including the complete data\n");
 		printf("stream for that sonar. At present, formats associated with the following\n");
 		printf("sonars are supported: </P>\n\n");
-		printf("<UL>\n<LI>Sea Beam &quot;classic&quot; 16 beam multibeam sonar </LI>\n\n");
-		printf("<LI>Hydrosweep DS 59 beam multibeam sonar </LI>\n\n");
-		printf("<LI>Hydrosweep DS2 140 beam multibeam sonar </LI>\n\n");
-		printf("<LI>Hydrosweep MD 40 beam mid-depth multibeam sonar </LI>\n\n");
+		printf("<UL>\n<LI>Sea Beam &quot;classic&quot; multibeam sonar </LI>\n\n");
+		printf("<LI>Hydrosweep DS multibeam sonar </LI>\n\n");
+		printf("<LI>Hydrosweep DS2 multibeam sonar </LI>\n\n");
+		printf("<LI>Hydrosweep MD multibeam sonar </LI>\n\n");
 		printf("<LI>Sea Beam 2000 multibeam sonar </LI>\n\n");
 		printf("<LI>Sea Beam 2112 and 2136 multibeam sonars </LI>\n\n");
 		printf("<LI>Sea Beam 2120 multibeam sonars </LI>\n\n");
@@ -313,10 +317,11 @@ main (int argc, char **argv)
 		printf("<LI>Simrad Mesotech SM2000 multibeam sonar</LI>\n\n");
 		printf("<LI>Hawaii MR-1 shallow tow interferometric sonar </LI>\n\n");
 		printf("<LI>ELAC Bottomchart and Bottomchart MkII shallow water multibeam sonars</LI>\n\n");
-		printf("<LI>Reson Seabat 9001/9002/8081 shallow water multibeam sonars </LI>\n\n");
+		printf("<LI>Reson Seabat multibeam sonars (e.g. 9001, 8081, 7125)</LI>\n\n");
 		printf("<LI>WHOI DSL AMS-120 deep tow interferometric sonar </LI>\n\n");
 		printf("<LI>Sea Scan sidescan sonar</LI>\n\n");
 		printf("<LI>Furuno HS-1 multibeam sonar</LI>\n\n");
+		printf("<LI>Edgetech sidescan and subbottom profiler sonars</LI>\n\n");
 		printf("</UL>\n\n");
 		printf("<P>The following swath mapping sonar data formats are currently supported by MB-System:</P>\n\n");
 

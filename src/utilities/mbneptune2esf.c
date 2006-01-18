@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbneptune2esf.c	2004/11/11
- *    $Id: mbneptune2esf.c,v 5.3 2005-11-05 01:07:54 caress Exp $
+ *    $Id: mbneptune2esf.c,v 5.4 2006-01-18 15:17:00 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    Gordon Keith
@@ -46,6 +46,9 @@
  * This program is based on a skeleton derived from mbclean.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2005/11/05 01:07:54  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.2  2005/03/25 04:43:02  caress
  * Standardized the string lengths used for filenames and comment data.
  *
@@ -60,6 +63,7 @@
 
 /* standard include files */
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include <string.h>
 #include <sys/stat.h>
@@ -143,7 +147,7 @@ int mbclean_save_edit(int verbose, FILE *sofp, double time_d, int beam,
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbneptune2esf.c,v 5.3 2005-11-05 01:07:54 caress Exp $";
+	static char rcs_id[] = "$Id: mbneptune2esf.c,v 5.4 2006-01-18 15:17:00 caress Exp $";
 	static char program_name[] = "mbneptune2esf";
 	static char help_message[] =  "mbneptune2esf reads a Simrad Neptune BinStat rules files and a list of MB-Systems data files\nand applies the flags in the rules file to the esf file of the coresponding line";
 	static char usage_message[] = "mbneptune2esf [-Rrules -Fformat -Iinfile -Ooutfile -V -H]";

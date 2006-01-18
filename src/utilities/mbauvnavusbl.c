@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbauvnavusbl.c	11/21/2004
  *
- *    $Id: mbauvnavusbl.c,v 5.1 2004-12-18 01:38:52 caress Exp $
+ *    $Id: mbauvnavusbl.c,v 5.2 2006-01-18 15:17:00 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	November 21, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2004/12/18 01:38:52  caress
+ * Working towards release 5.0.6.
+ *
  * Revision 5.0  2004/12/02 06:41:47  caress
  * New program to help process ROV/AUV navigation data.
  *
@@ -34,6 +37,7 @@
 
 /* standard include files */
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include <string.h>
 #include <time.h>
@@ -51,7 +55,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbauvnavusbl.c,v 5.1 2004-12-18 01:38:52 caress Exp $";
+	static char rcs_id[] = "$Id: mbauvnavusbl.c,v 5.2 2006-01-18 15:17:00 caress Exp $";
 	static char program_name[] = "MBauvnavusbl";
 	static char help_message[] = "MBauvnavusbl reads a primary navigation file (usually from a submerged platform\n swath survey) and also reads secondary navigation (e.g. USBL fixes).\n The program calculates position offsets between the raw survey navigation\n and the secondary navigation every 3600 seconds (10 minutes), and then\n linearly interpolates and applies this adjustment vector for each\n primary navigation position. The adjusted navigation is output.";
 	static char usage_message[] = "mbauvnavusbl -Inavfile -Ooutfile -Uusblfile [-Fnavformat -Llonflip -Musblformat -V -H ]";

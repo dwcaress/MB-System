@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbextractsegy.c	4/18/2004
- *    $Id: mbextractsegy.c,v 5.7 2005-11-05 01:07:54 caress Exp $
+ *    $Id: mbextractsegy.c,v 5.8 2006-01-18 15:17:00 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	April 18, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2005/11/05 01:07:54  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.6  2005/06/04 06:07:02  caress
  * Fixed output of a single segy file deriving from a list
  * of input swath files.
@@ -49,6 +52,7 @@
 
 /* standard include files */
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include <string.h>
 
@@ -58,7 +62,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mb_segy.h"
 
-static char rcs_id[] = "$Id: mbextractsegy.c,v 5.7 2005-11-05 01:07:54 caress Exp $";
+static char rcs_id[] = "$Id: mbextractsegy.c,v 5.8 2006-01-18 15:17:00 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 

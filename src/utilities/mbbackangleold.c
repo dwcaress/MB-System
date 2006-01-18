@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbbackangle.c	1/6/95
- *    $Id: mbbackangleold.c,v 5.4 2005-03-25 04:43:02 caress Exp $
+ *    $Id: mbbackangleold.c,v 5.5 2006-01-18 15:17:00 caress Exp $
  *
  *    Copyright (c) 1995, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	January 6, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2005/03/25 04:43:02  caress
+ * Standardized the string lengths used for filenames and comment data.
+ *
  * Revision 5.3  2003/04/17 21:17:10  caress
  * Release 5.0.beta30
  *
@@ -85,6 +88,7 @@
 
 /* standard include files */
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include <string.h>
 
@@ -100,7 +104,7 @@
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbbackangleold.c,v 5.4 2005-03-25 04:43:02 caress Exp $";
+	static char rcs_id[] = "$Id: mbbackangleold.c,v 5.5 2006-01-18 15:17:00 caress Exp $";
 	static char program_name[] = "mbbackangle";
 	static char help_message[] =  
 "mbbackangle reads a swath sonar data file and generates a table\n\t\
