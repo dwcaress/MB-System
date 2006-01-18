@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grdplot.perl	8/6/95
-#    $Id: mbm_grdplot.perl,v 5.17 2006-01-06 18:26:26 caress Exp $
+#    $Id: mbm_grdplot.perl,v 5.18 2006-01-18 15:09:27 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 2000, 2003 by 
 #    D. W. Caress (caress@mbari.org)
@@ -68,10 +68,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   October 19, 1994
 #
 # Version:
-#   $Id: mbm_grdplot.perl,v 5.17 2006-01-06 18:26:26 caress Exp $
+#   $Id: mbm_grdplot.perl,v 5.18 2006-01-18 15:09:27 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.17  2006/01/06 18:26:26  caress
+#   Working towards 5.0.8
+#
 #   Revision 5.16  2005/11/05 01:34:20  caress
 #   Much work over the past two months.
 #
@@ -1042,15 +1045,25 @@ if (!$bounds || !$zbounds || $zmode == 1)
 			($ymin_f,$ymax_f) = $line =~ 
 				/\S+\s+y_min:\s+(\S+)\s+y_max:\s+(\S+)\s+y_inc:/;
 			}
-		if ($line =~ /\S+\s+zmin:\s+(\S+)\s+zmax:\s+(\S+)\s+units:/)
+		if ($line =~ /\S+\s+zmin:\s+(\S+)\s+zmax:\s+(\S+)\s+units:\s+\S+/)
 			{
 			($zmin_f,$zmax_f) = $line =~ 
-				/\S+\s+zmin:\s+(\S+)\s+zmax:\s+(\S+)\s+units:/;
+				/\S+\s+zmin:\s+(\S+)\s+zmax:\s+(\S+)\s+units:\s+\S+/;
+			}
+		elsif ($line =~ /\S+\s+zmin:\s+(\S+)\s+zmax:\s+(\S+)\s+name:\s+\S+/)
+			{
+			($zmin_f,$zmax_f) = $line =~ 
+				/\S+\s+zmin:\s+(\S+)\s+zmax:\s+(\S+)\s+name:\s+\S+/;
 			}
 		if ($line =~ /\S+\s+z_min:\s+(\S+)\s+z_max:\s+(\S+)\s+units:/)
 			{
 			($zmin_f,$zmax_f,$zunits_s) = $line =~ 
-				/\S+\s+z_min:\s+(\S+)\s+z_max:\s+(\S+)\s+units:\s+(\S+)/;
+				/\S+\s+z_min:\s+(\S+)\s+z_max:\s+(\S+)\s+units:\s+\S+/;
+			}
+		elsif ($line =~ /\S+\s+z_min:\s+(\S+)\s+z_max:\s+(\S+)\s+name:\s+\S+/)
+			{
+			($zmin_f,$zmax_f,$zunits_s) = $line =~ 
+				/\S+\s+z_min:\s+(\S+)\s+z_max:\s+(\S+)\s+name:\s+\S+/;
 			}
 		}
 
@@ -1079,6 +1092,7 @@ if (!$bounds || !$zbounds || $zmode == 1)
 		|| ($zmin_f >= $zmax_f && !$zbounds))
 		{
 		print "\a";
+		print "$xmin_f $xmax_f $ymin_f $ymax_f $zmin_f $zmax_f\n";
 		die "The program grdinfo does not appear to have worked \nproperly with file $file_grd!\n$program_name aborted.\n"
 		}
 	}

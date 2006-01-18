@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grd3dplot.perl	8/6/95
-#    $Id: mbm_grd3dplot.perl,v 5.13 2005-11-05 01:34:20 caress Exp $
+#    $Id: mbm_grd3dplot.perl,v 5.14 2006-01-18 15:09:27 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 2000, 2003 by 
 #    D. W. Caress (caress@mbari.org)
@@ -63,10 +63,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   August 8, 1994
 #
 # Version:
-#   $Id: mbm_grd3dplot.perl,v 5.13 2005-11-05 01:34:20 caress Exp $
+#   $Id: mbm_grd3dplot.perl,v 5.14 2006-01-18 15:09:27 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.13  2005/11/05 01:34:20  caress
+#   Much work over the past two months.
+#
 #   Revision 5.12  2005/03/25 04:05:40  caress
 #   Fixed handling of tickinfo string.
 #   For mbm_plot only, added control on filename annotation direction.
@@ -826,25 +829,46 @@ if (!$bounds || !$zbounds)
 			$gridprojected = 0;
 			}
 		if ($line =~ 
+			/\S+\s+x_min:\s+(\S+)\s+x_max:\s+(\S+)\s+x_inc:\s+(\S+)\s+units:\s+(.+)\s+nx:\s+(\S+)/)
+			{
+			($xmin_f,$xmax_f,$xinc_f,$xunits,$xnx_d) = $line =~ 
+				/\S+\s+x_min:\s+(\S+)\s+x_max:\s+(\S+)\s+x_inc:\s+(\S+)\s+units:\s+(.+)\s+nx:\s+(\S+)/;
+			}
+		elsif ($line =~ 
 			/\S+\s+x_min:\s+(\S+)\s+x_max:\s+(\S+)\s+x_inc:/)
 			{
-			($xmin,$xmax) = $line =~ 
+			($xmin_f,$xmax_f) = $line =~ 
 				/\S+\s+x_min:\s+(\S+)\s+x_max:\s+(\S+)\s+x_inc:/;
 			}
-		if ($line =~ /\S+\s+y_min:\s+(\S+)\s+y_max:\s+(\S+)\s+y_inc:/)
+		if ($line =~ /\S+\s+y_min:\s+(\S+)\s+y_max:\s+(\S+)\s+y_inc:\s+(\S+)\s+units:\s+(.+)\s+ny:\s+(\S+)/)
 			{
-			($ymin,$ymax) = $line =~ 
+			($ymin_f,$ymax_f,$yinc_f,$yunits,$yny_d) = $line =~ 
+				/\S+\s+y_min:\s+(\S+)\s+y_max:\s+(\S+)\s+y_inc:\s+(\S+)\s+units:\s+(.+)\s+ny:\s+(\S+)/;
+			}
+		elsif ($line =~ /\S+\s+y_min:\s+(\S+)\s+y_max:\s+(\S+)\s+y_inc:/)
+			{
+			($ymin_f,$ymax_f) = $line =~ 
 				/\S+\s+y_min:\s+(\S+)\s+y_max:\s+(\S+)\s+y_inc:/;
 			}
-		if ($line =~ /\S+\s+zmin:\s+(\S+)\s+zmax:\s+(\S+)\s+units:/)
+		if ($line =~ /\S+\s+zmin:\s+(\S+)\s+zmax:\s+(\S+)\s+units:\s+\S+/)
 			{
-			($zmin,$zmax) = $line =~ 
-				/\S+\s+zmin:\s+(\S+)\s+zmax:\s+(\S+)\s+units:/;
+			($zmin_f,$zmax_f) = $line =~ 
+				/\S+\s+zmin:\s+(\S+)\s+zmax:\s+(\S+)\s+units:\s+\S+/;
+			}
+		elsif ($line =~ /\S+\s+zmin:\s+(\S+)\s+zmax:\s+(\S+)\s+name:\s+\S+/)
+			{
+			($zmin_f,$zmax_f) = $line =~ 
+				/\S+\s+zmin:\s+(\S+)\s+zmax:\s+(\S+)\s+name:\s+\S+/;
 			}
 		if ($line =~ /\S+\s+z_min:\s+(\S+)\s+z_max:\s+(\S+)\s+units:/)
 			{
-			($zmin,$zmax) = $line =~ 
-				/\S+\s+z_min:\s+(\S+)\s+z_max:\s+(\S+)\s+units:/;
+			($zmin_f,$zmax_f,$zunits_s) = $line =~ 
+				/\S+\s+z_min:\s+(\S+)\s+z_max:\s+(\S+)\s+units:\s+\S+/;
+			}
+		elsif ($line =~ /\S+\s+z_min:\s+(\S+)\s+z_max:\s+(\S+)\s+name:\s+\S+/)
+			{
+			($zmin_f,$zmax_f,$zunits_s) = $line =~ 
+				/\S+\s+z_min:\s+(\S+)\s+z_max:\s+(\S+)\s+name:\s+\S+/;
 			}
 		}
 
