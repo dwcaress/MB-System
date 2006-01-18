@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 5.19 2006-01-06 18:19:58 caress Exp $
+#	$Id: Makefile.template,v 5.20 2006-01-18 15:16:06 caress Exp $
 #
 #     Copyright (c) 1993, 1994, 2000, 2002, 2003, 2005 by
 #     David W. Caress (caress@mbari.org)
@@ -16,6 +16,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.19  2006/01/06 18:19:58  caress
+# Working towards 5.0.8
+#
 # Revision 5.18  2005/11/05 01:07:54  caress
 # Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
 #
@@ -292,7 +295,7 @@ $(BINDIR)/mbsmooth:	mbsmooth.o $(LIBDIR)/libmbio.a $(LIBDIR)/libproj.a $(LIBDIR)
 		-o $(BINDIR)/mbsmooth
 $(BINDIR)/mbps:	mbps.o $(LIBDIR)/libmbio.a $(LIBDIR)/libproj.a $(LIBDIR)/libgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
 	$(CC) $(CFLAGS) mbps.o $(LIBDIR)/libmbio.a $(LIBDIR)/libproj.a $(LIBDIR)/libgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a \
-		$(GMTLIBDIR)/libgmt.a $(GMTLIBDIR)/libpsl.a \
+		$(GMTLIBDIR)/libgmt.a $(GMTLIBDIR)/libpsl.a $(GMTLIBDIR)/libgmtps.a \
 		$(LFLAGS) -o $(BINDIR)/mbps
 $(BINDIR)/mbstripnan:	mbstripnan.o
 	$(CC) $(CFLAGS) mbstripnan.o $(LFLAGS) -o $(BINDIR)/mbstripnan
