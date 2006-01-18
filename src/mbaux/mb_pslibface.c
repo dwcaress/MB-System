@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_pslibface.c	5/15/94
- *    $Id: mb_pslibface.c,v 5.2 2006-01-11 07:33:01 caress Exp $
+ *    $Id: mb_pslibface.c,v 5.3 2006-01-18 15:11:05 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	May 15, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2006/01/11 07:33:01  caress
+ * Working towards 5.0.8
+ *
  * Revision 5.1  2004/05/21 23:19:26  caress
  * Changes to support GMT 4.0
  *
@@ -94,6 +97,7 @@
 
 /* GMT include files */
 #include "gmt.h"
+#include "pslib.h"
 
 /* global variables */
 int	argc_save;
@@ -115,7 +119,7 @@ int plot_init(	int	verbose,
 		double	*inch2lon, 
 		int	*error)
 {
-  	static char rcs_id[]="$Id: mb_pslibface.c,v 5.2 2006-01-11 07:33:01 caress Exp $";
+  	static char rcs_id[]="$Id: mb_pslibface.c,v 5.3 2006-01-18 15:11:05 caress Exp $";
 	char	*function_name = "plot_init";
 	int	status = MB_SUCCESS;
 	int	errflg = 0;
@@ -260,7 +264,7 @@ int plot_init(	int	verbose,
 /* 	function plot_end ends the GMT plotting. */
 int plot_end(int verbose, int *error)
 {
-  	static char rcs_id[]="$Id: mb_pslibface.c,v 5.2 2006-01-11 07:33:01 caress Exp $";
+  	static char rcs_id[]="$Id: mb_pslibface.c,v 5.3 2006-01-18 15:11:05 caress Exp $";
 	char	*function_name = "plot_end";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -371,7 +375,7 @@ void justify_string(double height, char *string, double *s)
 /*--------------------------------------------------------------------*/
 void plot_string(double x, double y, double hgt, double angle, char *label)
 {
-	int	point;
+	double	point;
 	double	height;
 	double	xx, yy;
 
