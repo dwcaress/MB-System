@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_plot.perl	6/18/93
-#    $Id: mbm_plot.perl,v 5.18 2005-11-05 01:34:20 caress Exp $
+#    $Id: mbm_plot.perl,v 5.19 2006-01-20 17:39:15 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 2000, 2003, 2005 by 
 #    D. W. Caress (caress@mbari.org)
@@ -72,10 +72,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   June 17, 1993
 #
 # Version:
-#   $Id: mbm_plot.perl,v 5.18 2005-11-05 01:34:20 caress Exp $
+#   $Id: mbm_plot.perl,v 5.19 2006-01-20 17:39:15 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.18  2005/11/05 01:34:20  caress
+#   Much work over the past two months.
+#
 #   Revision 5.17  2005/03/25 04:05:40  caress
 #   Fixed handling of tickinfo string.
 #   For mbm_plot only, added control on filename annotation direction.
@@ -1330,23 +1333,40 @@ if ($bounds)
 # or expand the data limits a bit and ensure a reasonable aspect ratio
 else
 	{
+	# get first cut bounds
 	$delx = 0.05 * ($xmax_data - $xmin_data);
 	$dely = 0.05 * ($ymax_data - $ymin_data);
 	$xmin = $xmin_data - $delx;
 	$xmax = $xmax_data + $delx;
 	$ymin = $ymin_data - $dely;
 	$ymax = $ymax_data + $dely;
-	$dx = $xmax - $xmin;
-	$dy = $ymax - $ymin;
+	
+	# get aspect ratio in approximate real distances
+	$C1 = 111412.84;
+	$C2 = -93.5;
+	$C3 = 0.118;
+	$C4 = 111132.92;
+	$C5 = -559.82;
+	$C6 = 1.175;
+	$C7 = 0.0023;
+	$DTR = 3.14159265358979323846 / 180.0;
+	$radlat = 0.5 * ($ymax + $ymin) * $DTR;
+	$mtodeglat = 1./abs($C4 + $C5*cos(2*$radlat) 
+				+ $C6*cos(4*$radlat) + $C7*cos(6*$radlat));
+	$mtodeglon = 1./abs($C1*cos($radlat) + $C2*cos(3*$radlat) 
+				+ $C3*cos(5*$radlat));
+	$dx = ($xmax - $xmin) / $mtodeglon;
+	$dy = ($ymax - $ymin) / $mtodeglat;
+	
 	if ($dy/$dx > 2.0)
 		{
-		$delx = 0.5 * (0.5 * $dy - $dx);
+		$delx = (0.5 * (0.5 * $dy - $dx)) * $mtodeglon;
 		$xmin = $xmin - $delx;
 		$xmax = $xmax + $delx;
 		}
 	elsif ($dx/$dy > 2.0)
 		{
-		$dely = 0.5 * (0.5 * $dx - $dy);
+		$dely = (0.5 * (0.5 * $dx - $dy)) * $mtodeglat;
 		$ymin = $ymin - $dely;
 		$ymax = $ymax + $dely;
 		}
