@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	4/8/93
- *    $Id: mbedit_prog.c,v 5.27 2006-01-06 18:25:45 caress Exp $
+ *    $Id: mbedit_prog.c,v 5.28 2006-01-20 19:36:19 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -27,6 +27,9 @@
  * Date:	September 19, 2000 (New version - no buffered i/o)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.27  2006/01/06 18:25:45  caress
+ * Working towards 5.0.8
+ *
  * Revision 5.26  2005/11/04 22:51:11  caress
  * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
  *
@@ -275,6 +278,7 @@
 
 /* standard include files */
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <math.h>
 #include <string.h>
@@ -355,7 +359,7 @@ struct mbedit_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbedit_prog.c,v 5.27 2006-01-06 18:25:45 caress Exp $";
+static char rcs_id[] = "$Id: mbedit_prog.c,v 5.28 2006-01-20 19:36:19 caress Exp $";
 static char program_name[] = "MBedit";
 static char help_message[] =  
 "MBedit is an interactive editor used to identify and flag\n\
@@ -1928,7 +1932,16 @@ int mbedit_action_mouse_toggle(
 		}
 
 	/* reset info */
-	info_set = MB_NO;
+	if (info_set == MB_YES)
+		{
+		status = mbedit_unplot_beam(info_ping,info_beam);
+		status = mbedit_unplot_info();
+		info_set = MB_NO;
+		status = mbedit_plot_beam(info_ping,info_beam-1);
+		status = mbedit_plot_beam(info_ping,info_beam);
+		status = mbedit_plot_beam(info_ping,info_beam+1);
+		status = mbedit_plot_ping(info_ping);
+		}
 
 	/* do nothing unless file has been opened */
 	if (file_open == MB_YES)
@@ -2129,7 +2142,16 @@ int mbedit_action_mouse_pick(
 		}
 
 	/* reset info */
-	info_set = MB_NO;
+	if (info_set == MB_YES)
+		{
+		status = mbedit_unplot_beam(info_ping,info_beam);
+		status = mbedit_unplot_info();
+		info_set = MB_NO;
+		status = mbedit_plot_beam(info_ping,info_beam-1);
+		status = mbedit_plot_beam(info_ping,info_beam);
+		status = mbedit_plot_beam(info_ping,info_beam+1);
+		status = mbedit_plot_ping(info_ping);
+		}
 
 	/* do nothing unless file has been opened */
 	if (file_open == MB_YES)
@@ -2320,7 +2342,16 @@ int mbedit_action_mouse_erase(
 		}
 
 	/* reset info */
-	info_set = MB_NO;
+	if (info_set == MB_YES)
+		{
+		status = mbedit_unplot_beam(info_ping,info_beam);
+		status = mbedit_unplot_info();
+		info_set = MB_NO;
+		status = mbedit_plot_beam(info_ping,info_beam-1);
+		status = mbedit_plot_beam(info_ping,info_beam);
+		status = mbedit_plot_beam(info_ping,info_beam+1);
+		status = mbedit_plot_ping(info_ping);
+		}
 
 	/* do nothing unless file has been opened */
 	if (file_open == MB_YES)
@@ -2497,7 +2528,16 @@ int mbedit_action_mouse_restore(
 		}
 
 	/* reset info */
-	info_set = MB_NO;
+	if (info_set == MB_YES)
+		{
+		status = mbedit_unplot_beam(info_ping,info_beam);
+		status = mbedit_unplot_info();
+		info_set = MB_NO;
+		status = mbedit_plot_beam(info_ping,info_beam-1);
+		status = mbedit_plot_beam(info_ping,info_beam);
+		status = mbedit_plot_beam(info_ping,info_beam+1);
+		status = mbedit_plot_ping(info_ping);
+		}
 
 	/* do nothing unless file has been opened */
 	if (file_open == MB_YES)
@@ -2824,7 +2864,16 @@ int mbedit_action_zap_outbounds(
 		}
 
 	/* reset info */
-	info_set = MB_NO;
+	if (info_set == MB_YES)
+		{
+		status = mbedit_unplot_beam(info_ping,info_beam);
+		status = mbedit_unplot_info();
+		info_set = MB_NO;
+		status = mbedit_plot_beam(info_ping,info_beam-1);
+		status = mbedit_plot_beam(info_ping,info_beam);
+		status = mbedit_plot_beam(info_ping,info_beam+1);
+		status = mbedit_plot_ping(info_ping);
+		}
 
 	/* do nothing unless file has been opened */
 	if (file_open == MB_YES)
@@ -2953,7 +3002,16 @@ int mbedit_action_bad_ping(
 		}
 
 	/* reset info */
-	info_set = MB_NO;
+	if (info_set == MB_YES)
+		{
+		status = mbedit_unplot_beam(info_ping,info_beam);
+		status = mbedit_unplot_info();
+		info_set = MB_NO;
+		status = mbedit_plot_beam(info_ping,info_beam-1);
+		status = mbedit_plot_beam(info_ping,info_beam);
+		status = mbedit_plot_beam(info_ping,info_beam+1);
+		status = mbedit_plot_ping(info_ping);
+		}
 
 	/* check if a file has been opened 
 		and a beam has been picked and saved */
@@ -3059,7 +3117,16 @@ int mbedit_action_good_ping(
 		}
 
 	/* reset info */
-	info_set = MB_NO;
+	if (info_set == MB_YES)
+		{
+		status = mbedit_unplot_beam(info_ping,info_beam);
+		status = mbedit_unplot_info();
+		info_set = MB_NO;
+		status = mbedit_plot_beam(info_ping,info_beam-1);
+		status = mbedit_plot_beam(info_ping,info_beam);
+		status = mbedit_plot_beam(info_ping,info_beam+1);
+		status = mbedit_plot_ping(info_ping);
+		}
 
 	/* check if a file has been opened 
 		and a beam has been picked and saved */
@@ -3167,7 +3234,16 @@ int mbedit_action_left_ping(
 		}
 
 	/* reset info */
-	info_set = MB_NO;
+	if (info_set == MB_YES)
+		{
+		status = mbedit_unplot_beam(info_ping,info_beam);
+		status = mbedit_unplot_info();
+		info_set = MB_NO;
+		status = mbedit_plot_beam(info_ping,info_beam-1);
+		status = mbedit_plot_beam(info_ping,info_beam);
+		status = mbedit_plot_beam(info_ping,info_beam+1);
+		status = mbedit_plot_ping(info_ping);
+		}
 
 	/* check if a file has been opened 
 		and a beam has been picked and saved */
@@ -3273,7 +3349,16 @@ int mbedit_action_right_ping(
 		}
 
 	/* reset info */
-	info_set = MB_NO;
+	if (info_set == MB_YES)
+		{
+		status = mbedit_unplot_beam(info_ping,info_beam);
+		status = mbedit_unplot_info();
+		info_set = MB_NO;
+		status = mbedit_plot_beam(info_ping,info_beam-1);
+		status = mbedit_plot_beam(info_ping,info_beam);
+		status = mbedit_plot_beam(info_ping,info_beam+1);
+		status = mbedit_plot_ping(info_ping);
+		}
 
 	/* check if a file has been opened 
 		and a beam has been picked and saved */
@@ -3379,7 +3464,16 @@ int mbedit_action_zero_ping(
 		}
 
 	/* reset info */
-	info_set = MB_NO;
+	if (info_set == MB_YES)
+		{
+		status = mbedit_unplot_beam(info_ping,info_beam);
+		status = mbedit_unplot_info();
+		info_set = MB_NO;
+		status = mbedit_plot_beam(info_ping,info_beam-1);
+		status = mbedit_plot_beam(info_ping,info_beam);
+		status = mbedit_plot_beam(info_ping,info_beam+1);
+		status = mbedit_plot_ping(info_ping);
+		}
 
 	/* check if a file has been opened 
 		and a beam has been picked and saved */
@@ -3487,7 +3581,16 @@ int mbedit_action_flag_view(
 		}
 
 	/* reset info */
-	info_set = MB_NO;
+	if (info_set == MB_YES)
+		{
+		status = mbedit_unplot_beam(info_ping,info_beam);
+		status = mbedit_unplot_info();
+		info_set = MB_NO;
+		status = mbedit_plot_beam(info_ping,info_beam-1);
+		status = mbedit_plot_beam(info_ping,info_beam);
+		status = mbedit_plot_beam(info_ping,info_beam+1);
+		status = mbedit_plot_ping(info_ping);
+		}
 
 	/* do nothing unless file has been opened */
 	if (file_open == MB_YES)
@@ -3603,7 +3706,16 @@ int mbedit_action_unflag_view(
 		}
 
 	/* reset info */
-	info_set = MB_NO;
+	if (info_set == MB_YES)
+		{
+		status = mbedit_unplot_beam(info_ping,info_beam);
+		status = mbedit_unplot_info();
+		info_set = MB_NO;
+		status = mbedit_plot_beam(info_ping,info_beam-1);
+		status = mbedit_plot_beam(info_ping,info_beam);
+		status = mbedit_plot_beam(info_ping,info_beam+1);
+		status = mbedit_plot_ping(info_ping);
+		}
 
 	/* do nothing unless file has been opened */
 	if (file_open == MB_YES)
@@ -3720,7 +3832,16 @@ int mbedit_action_unflag_all(
 		}
 
 	/* reset info */
-	info_set = MB_NO;
+	if (info_set == MB_YES)
+		{
+		status = mbedit_unplot_beam(info_ping,info_beam);
+		status = mbedit_unplot_info();
+		info_set = MB_NO;
+		status = mbedit_plot_beam(info_ping,info_beam-1);
+		status = mbedit_plot_beam(info_ping,info_beam);
+		status = mbedit_plot_beam(info_ping,info_beam+1);
+		status = mbedit_plot_ping(info_ping);
+		}
 
 	/* do nothing unless file has been opened */
 	if (file_open == MB_YES)
@@ -3838,7 +3959,16 @@ function_name);
 		}
 
 	/* reset info */
-	info_set = MB_NO;
+	if (info_set == MB_YES)
+		{
+		status = mbedit_unplot_beam(info_ping,info_beam);
+		status = mbedit_unplot_info();
+		info_set = MB_NO;
+		status = mbedit_plot_beam(info_ping,info_beam-1);
+		status = mbedit_plot_beam(info_ping,info_beam);
+		status = mbedit_plot_beam(info_ping,info_beam+1);
+		status = mbedit_plot_ping(info_ping);
+		}
 
 	/* do nothing unless file has been opened */
 	if (file_open == MB_YES)
@@ -3928,7 +4058,16 @@ int mbedit_filter_ping(int iping)
 		}
 
 	/* reset info */
-	info_set = MB_NO;
+	if (info_set == MB_YES)
+		{
+		status = mbedit_unplot_beam(info_ping,info_beam);
+		status = mbedit_unplot_info();
+		info_set = MB_NO;
+		status = mbedit_plot_beam(info_ping,info_beam-1);
+		status = mbedit_plot_beam(info_ping,info_beam);
+		status = mbedit_plot_beam(info_ping,info_beam+1);
+		status = mbedit_plot_ping(info_ping);
+		}
 
 	/* do nothing unless file has been opened and filters set on */
 	if (file_open == MB_YES

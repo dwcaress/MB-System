@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbinfo.c	2/1/93
- *    $Id: mbinfo.c,v 5.22 2006-01-18 15:17:00 caress Exp $
+ *    $Id: mbinfo.c,v 5.23 2006-01-20 19:34:48 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -26,6 +26,9 @@
  * Date:	February 1, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.22  2006/01/18 15:17:00  caress
+ * Added stdlib.h include.
+ *
  * Revision 5.21  2006/01/06 18:19:59  caress
  * Working towards 5.0.8
  *
@@ -222,7 +225,7 @@ struct ping
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbinfo.c,v 5.22 2006-01-18 15:17:00 caress Exp $";
+	static char rcs_id[] = "$Id: mbinfo.c,v 5.23 2006-01-20 19:34:48 caress Exp $";
 	static char program_name[] = "MBINFO";
 	static char help_message[] =  "MBINFO reads a swath sonar data file and outputs \nsome basic statistics.  If pings are averaged (pings > 2) \nMBINFO estimates the variance for each of the swath \nbeams by reading a set number of pings (>2) and then finding \nthe variance of the detrended values for each beam. \nThe results are dumped to stdout.";
 	static char usage_message[] = "mbinfo [-Byr/mo/da/hr/mn/sc -C -Eyr/mo/da/hr/mn/sc -Fformat -Ifile -Llonflip -Mnx/ny -N -Ppings -Rw/e/s/n -Sspeed -V -H]";
@@ -416,7 +419,19 @@ main (int argc, char **argv)
 	int	*nampvar = NULL;
 	double	*ssmean = NULL;
 	double	*ssvar = NULL;
-	int	*nssvar = NULL;
+	int	*nssvar = NULL;	
+	int	nbathtot_alloc = 0;
+	int	namptot_alloc = 0;
+	int	nsstot_alloc = 0;
+	double	*bathmeantot = NULL;
+	double	*bathvartot = NULL;
+	int	*nbathvartot = NULL;
+	double	*ampmeantot = NULL;
+	double	*ampvartot = NULL;
+	int	*nampvartot = NULL;
+	double	*ssmeantot = NULL;
+	double	*ssvartot = NULL;
+	int	*nssvartot = NULL;
 	
 	/* coverage mask variables */
 	int	coverage_mask = MB_NO;
@@ -1700,23 +1715,89 @@ main (int argc, char **argv)
 		for (i=0;i<MB_NOTICE_MAX;i++)
 			notice_list_tot[i] += notice_list[i];
 		}
+		
+	/* deal with statistics */
+	if (pings_read > 2)
+		{
+		/* allocate total statistics arrays if needed */
+		if (nbathtot_alloc < beams_bath_max)
+			{
+			status = mb_realloc(verbose,beams_bath_max*sizeof(double),
+						&bathmeantot,&error);
+			status = mb_realloc(verbose,beams_bath_max*sizeof(double),
+						&bathvartot,&error);
+			status = mb_realloc(verbose,beams_bath_max*sizeof(int),
+						&nbathvartot,&error);
+			nbathtot_alloc = beams_bath_max;
+			if (error != MB_ERROR_NO_ERROR)
+				{
+				mb_error(verbose,error,&message);
+				fprintf(stream,"\nMBIO Error allocating data arrays:\n%s\n",message);
+				fprintf(stream,"\nProgram <%s> Terminated\n",
+					program_name);
+				exit(error);
+				}				
+			}
+		if (namptot_alloc < beams_amp_max)
+			{
+			status = mb_realloc(verbose,beams_amp_max*sizeof(double),
+						&ampmeantot,&error);
+			status = mb_realloc(verbose,beams_amp_max*sizeof(double),
+						&ampvartot,&error);
+			status = mb_realloc(verbose,beams_amp_max*sizeof(int),
+						&nampvartot,&error);
+			namptot_alloc = beams_amp_max;
+			if (error != MB_ERROR_NO_ERROR)
+				{
+				mb_error(verbose,error,&message);
+				fprintf(stream,"\nMBIO Error allocating data arrays:\n%s\n",message);
+				fprintf(stream,"\nProgram <%s> Terminated\n",
+					program_name);
+				exit(error);
+				}				
+			}
+		if (nsstot_alloc < pixels_ss_max)
+			{
+			status = mb_realloc(verbose,pixels_ss_max*sizeof(double),
+						&ssmeantot,&error);
+			status = mb_realloc(verbose,pixels_ss_max*sizeof(double),
+						&ssvartot,&error);
+			status = mb_realloc(verbose,pixels_ss_max*sizeof(int),
+						&nssvartot,&error);
+			nsstot_alloc = pixels_ss_max;
+			if (error != MB_ERROR_NO_ERROR)
+				{
+				mb_error(verbose,error,&message);
+				fprintf(stream,"\nMBIO Error allocating data arrays:\n%s\n",message);
+				fprintf(stream,"\nProgram <%s> Terminated\n",
+					program_name);
+				exit(error);
+				}				
+			}
+
+		/* copy statistics to total statistics */
+		for (i=0;i<beams_bath;i++)
+			{
+			bathmeantot[i] += bathmean[i];
+			bathvartot[i] += bathvar[i];
+			nbathvartot[i] += nbathvar[i];
+			}
+		for (i=0;i<beams_amp;i++)
+			{
+			ampmeantot[i] += ampmean[i];
+			ampvartot[i] += ampvar[i];
+			nampvartot[i] += nampvar[i];
+			}
+		for (i=0;i<pixels_ss;i++)
+			{
+			ssmeantot[i] += ssmean[i];
+			ssvartot[i] += ssvar[i];
+			nssvartot[i] += nssvar[i];
+			}
+		}
 
 	/* close the swath file */
 	status = mb_close(verbose,&mbio_ptr,&error);
-
-	/* deallocate memory used for data arrays */
-	for (i=0;i<pings_read;i++)
-		{
-		mb_free(verbose,&data[i]->beamflag,&error);
-		mb_free(verbose,&data[i]->bath,&error);
-		mb_free(verbose,&data[i]->amp,&error);
-		mb_free(verbose,&data[i]->bathlon,&error);
-		mb_free(verbose,&data[i]->bathlat,&error);
-		mb_free(verbose,&data[i]->ss,&error);
-		mb_free(verbose,&data[i]->sslon,&error);
-		mb_free(verbose,&data[i]->sslat,&error);
-		mb_free(verbose,&data[i],&error);
-		}
 
 	/* figure out whether and what to read next */
         if (read_datalist == MB_YES)
@@ -1750,22 +1831,22 @@ main (int argc, char **argv)
 	if (pings_read > 2)
 		{
 		for (i=0;i<beams_bath_alloc;i++)
-			if (nbathvar[i] > 0)
+			if (nbathvartot[i] > 0)
 				{
-				bathmean[i] = bathmean[i]/nbathvar[i];
-				bathvar[i] = bathvar[i]/nbathvar[i];
+				bathmeantot[i] = bathmeantot[i]/nbathvartot[i];
+				bathvartot[i] = bathvartot[i]/nbathvartot[i];
 				}
 		for (i=0;i<beams_amp_alloc;i++)
-			if (nampvar[i] > 0)
+			if (nampvartot[i] > 0)
 				{
-				ampmean[i] = ampmean[i]/nampvar[i];
-				ampvar[i] = ampvar[i]/nampvar[i];
+				ampmeantot[i] = ampmeantot[i]/nampvartot[i];
+				ampvartot[i] = ampvartot[i]/nampvartot[i];
 				}
 		for (i=0;i<pixels_ss_alloc;i++)
-			if (nssvar[i] > 0)
+			if (nssvartot[i] > 0)
 				{
-				ssmean[i] = ssmean[i]/nssvar[i];
-				ssvar[i] = ssvar[i]/nssvar[i];
+				ssmeantot[i] = ssmeantot[i]/nssvartot[i];
+				ssvartot[i] = ssvartot[i]/nssvartot[i];
 				}
 		}
 
@@ -1900,9 +1981,9 @@ main (int argc, char **argv)
 		fprintf(output," ----     -      ----     --------    -----\n");
 		for (i=0;i<beams_bath_max;i++)
 			fprintf(output,"%4d  %5d   %8.2f   %8.2f  %8.2f\n",
-				i,nbathvar[i],bathy_scale*bathmean[i],
-				bathy_scale*bathy_scale*bathvar[i],
-				bathy_scale*sqrt(bathvar[i]));
+				i,nbathvartot[i],bathy_scale*bathmeantot[i],
+				bathy_scale*bathy_scale*bathvartot[i],
+				bathy_scale*sqrt(bathvartot[i]));
 		fprintf(output,"\n");
 		}
 	if (pings_read > 2 && beams_amp_max > 0 
@@ -1914,8 +1995,8 @@ main (int argc, char **argv)
 		fprintf(output," ----     -      ----     --------    -----\n");
 		for (i=0;i<beams_amp_max;i++)
 			fprintf(output,"%4d  %5d   %8.2f   %8.2f  %8.2f\n",
-				i,nampvar[i],ampmean[i],
-				ampvar[i],sqrt(ampvar[i]));
+				i,nampvartot[i],ampmeantot[i],
+				ampvartot[i],sqrt(ampvartot[i]));
 		fprintf(output,"\n");
 		}
 	if (pings_read > 2 && pixels_ss_max > 0 
@@ -1927,8 +2008,8 @@ main (int argc, char **argv)
 		fprintf(output," ----     -      ----     --------    -----\n");
 		for (i=0;i<pixels_ss_max;i++)
 			fprintf(output,"%4d  %5d   %8.2f   %8.2f  %8.2f\n",
-				i,nssvar[i],ssmean[i],
-				ssvar[i],sqrt(ssvar[i]));
+				i,nssvartot[i],ssmeantot[i],
+				ssvartot[i],sqrt(ssvartot[i]));
 		fprintf(output,"\n");
 		}
 	if (print_notices == MB_YES)
@@ -1987,15 +2068,15 @@ main (int argc, char **argv)
 	    }
 
 	/* deallocate memory used for data arrays */
-	mb_free(verbose,&bathmean,&error);
-	mb_free(verbose,&bathvar,&error);
-	mb_free(verbose,&nbathvar,&error);
-	mb_free(verbose,&ampmean,&error);
-	mb_free(verbose,&ampvar,&error);
-	mb_free(verbose,&nampvar,&error);
-	mb_free(verbose,&ssmean,&error);
-	mb_free(verbose,&ssvar,&error);
-	mb_free(verbose,&nssvar,&error);
+	mb_free(verbose,&bathmeantot,&error);
+	mb_free(verbose,&bathvartot,&error);
+	mb_free(verbose,&nbathvartot,&error);
+	mb_free(verbose,&ampmeantot,&error);
+	mb_free(verbose,&ampvartot,&error);
+	mb_free(verbose,&nampvartot,&error);
+	mb_free(verbose,&ssmeantot,&error);
+	mb_free(verbose,&ssvartot,&error);
+	mb_free(verbose,&nssvartot,&error);
 	mb_free(verbose,&mask,&error);
 
 	/* set program status */
