@@ -269,8 +269,13 @@ no vertical exageration.
 .TP
 .B Plot Scaling->Velocity Range
 This slider sets the minimum and maximum velocity values of the velocity
-profile display.  The minimum value is 1490 m/s minus the velocity range;
-the maximum value is 1490 m/s plus the velocity range.
+profile display.  The minimum value is the velocity center minus the velocity range;
+the maximum value is the velocity center plus the velocity range.
+.TP
+.B Plot Scaling->Velocity Center
+This slider sets the center velocity value of the velocity
+profile display.  The minimum value is the velocity center minus the velocity range;
+the maximum value is the velocity center plus the velocity range.
 .TP
 .B Plot Scaling->Residual Range
 This slider sets the minimum and maximum bathymetry residual values 
