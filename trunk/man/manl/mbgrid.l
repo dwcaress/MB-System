@@ -1,4 +1,4 @@
-.TH mbgrid l "28 November 2003" "MB-System 5.0" "MB-System 5.0"
+.TH mbgrid l "19 January 2006" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbgrid\fP - Grid bathymetry, amplitude, or sidescan data 
 from swath sonar data files.
@@ -9,7 +9,7 @@ Version 5.0
 .SH SYNOPSIS
 \fBmbgrid\fP \fB-I\fIfilelist\fP \fB-O\fIroot\fP 
 \fB-R\fIwest/east/south/north\fP [\fB-A\fIdatatype\fP 
-\fB-B\fIborder\fP -C\fIclip\fP \fB-D\fIxdim/ydim\fP 
+\fB-B\fIborder\fP -C\fIclip\fP[\fI/mode\fP] \fB-D\fIxdim/ydim\fP 
 \fB-E\fIdx/dy/units[!]\fP \fB-F\fImode\fP 
 \fB-G\fIgridkind\fP \fB-J\fIprojection\fP \fB-K\fIbackground\fP
 \fB-L\fIlonflip\fP \fB-M -N -P\fIpings\fP \fB-Q\fP
@@ -148,7 +148,7 @@ lag. This option works best with the median filter scheme.
 
 The gridding can be augmented by interpolation using a 2D thin plate
 spline algorithm with optional tension. The use of interpolation is
-set with the \fB-C\fP\fIclip/mode\fP option, and is only used to fill
+set with the \fB-C\fP\fIclip[/mode]\fP option, and is only used to fill
 in grid cells left undefined after all of the swath data have been
 processed. The \fIclip\fP value sets the distance from swath data to
 which the interpolation is applied (this distance is specified as
@@ -643,7 +643,7 @@ will be filled in through spine interpolation even in the areas
 not covered by data. The output looks like:
  
  Program MBGRID
- Version $Id: mbgrid.l,v 5.10 2004-05-24 22:39:17 caress Exp $
+ Version $Id: mbgrid.l,v 5.11 2006-01-20 15:55:39 caress Exp $
  MB-system Version 4.5
  
  MBGRID Parameters:
