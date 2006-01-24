@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_site.c	9/25/2003
- *    $Id: mbview_site.c,v 5.5 2005-11-05 01:11:47 caress Exp $
+ *    $Id: mbview_site.c,v 5.6 2006-01-24 19:21:32 caress Exp $
  *
  *    Copyright (c) 2003, 2004, 2005 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  *		begun on October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2005/11/05 01:11:47  caress
+ * Much work over the past two months.
+ *
  * Revision 5.4  2005/02/18 07:32:55  caress
  * Fixed nav display and button sensitivity.
  *
@@ -42,6 +45,7 @@
 
 /* Standard includes for builtins. */
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
 #include <math.h>
@@ -94,7 +98,7 @@ static Arg      	args[256];
 static char	value_string[MB_PATH_MAXLINE];
 static char	value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_site.c,v 5.5 2005-11-05 01:11:47 caress Exp $";
+static char rcs_id[]="$Id: mbview_site.c,v 5.6 2006-01-24 19:21:32 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_getsitecount(int verbose, int instance,

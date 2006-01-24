@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_callbacks.c	6/24/95
- *    $Id: mbnavedit_callbacks.c,v 5.10 2005-06-04 04:45:50 caress Exp $
+ *    $Id: mbnavedit_callbacks.c,v 5.11 2006-01-24 19:19:24 caress Exp $
  *
  *    Copyright (c) 1995, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	August 28, 2000 (New version - no buffered i/o)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.10  2005/06/04 04:45:50  caress
+ * Added feature to apply longitude and latitude offsets to the navigation.
+ *
  * Revision 5.9  2005/03/25 04:35:56  caress
  * Added capability to interpolate over repeated values.
  *
@@ -109,6 +112,7 @@
 
 /* include files */
 #include <stdio.h>
+#include <stdlib.h>
 #include <Xm/Xm.h>
 #include <X11/cursorfont.h>
 #include <sys/types.h>

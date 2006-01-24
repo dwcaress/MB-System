@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_emoldraw.c	3/4/2001
- *	$Id: mbr_emoldraw.c,v 5.9 2005-11-05 00:48:04 caress Exp $
+ *	$Id: mbr_emoldraw.c,v 5.10 2006-01-24 19:11:17 caress Exp $
  *
  *    Copyright (c) 2001, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	March 4, 2001
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.9  2005/11/05 00:48:04  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.8  2003/12/04 23:10:23  caress
  * Fixed problems with format 54 EM12DARW due to old code assuming how internal structure was packed. Also changed handling of beamflags for formats that don't support beamflags. Now flagged beams will always be nulled in such cases.
  *
@@ -106,7 +109,7 @@ int mbr_emoldraw_chk_label(int verbose, void *mbio_ptr, short type);
 /*--------------------------------------------------------------------*/
 int mbr_register_emoldraw(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_emoldraw.c,v 5.9 2005-11-05 00:48:04 caress Exp $";
+	static char res_id[]="$Id: mbr_emoldraw.c,v 5.10 2006-01-24 19:11:17 caress Exp $";
 	char	*function_name = "mbr_register_emoldraw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -240,7 +243,7 @@ int mbr_info_emoldraw(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_emoldraw.c,v 5.9 2005-11-05 00:48:04 caress Exp $";
+	static char res_id[]="$Id: mbr_emoldraw.c,v 5.10 2006-01-24 19:11:17 caress Exp $";
 	char	*function_name = "mbr_info_emoldraw";
 	int	status = MB_SUCCESS;
 
@@ -310,7 +313,7 @@ int mbr_info_emoldraw(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_emoldraw(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_emoldraw.c,v 5.9 2005-11-05 00:48:04 caress Exp $";
+	static char res_id[]="$Id: mbr_emoldraw.c,v 5.10 2006-01-24 19:11:17 caress Exp $";
 	char	*function_name = "mbr_alm_emoldraw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -2220,7 +2223,7 @@ int mbr_emoldraw_rd_em1000bath(int verbose, FILE *mbfp,
 			for (j=0;j<11;j++)
 				beamarray[j] = line[32+11*i+j];
 			short_ptr = (short int *) beamarray; 
-			mb_get_binary_short(MB_YES, &short_ptr[0], &ping->bath[i]);
+			mb_get_binary_short(MB_YES, &short_ptr[0], (short *) &ping->bath[i]);
 			mb_get_binary_short(MB_YES, &short_ptr[1], &ping->bath_acrosstrack[i]);
 			mb_get_binary_short(MB_YES, &short_ptr[2], &ping->bath_alongtrack[i]);
 			mb_get_binary_short(MB_YES, &short_ptr[3], &ping->tt[i]);
@@ -2362,7 +2365,7 @@ int mbr_emoldraw_rd_em12bath(int verbose, FILE *mbfp,
 			for (j=0;j<11;j++)
 				beamarray[j] = line[32+11*i+j];
 			short_ptr = (short int *) beamarray; 
-			mb_get_binary_short(MB_YES, &short_ptr[0], &ping->bath[i]);
+			mb_get_binary_short(MB_YES, &short_ptr[0], (short *) &ping->bath[i]);
 			mb_get_binary_short(MB_YES, &short_ptr[1], &ping->bath_acrosstrack[i]);
 			mb_get_binary_short(MB_YES, &short_ptr[2], &ping->bath_alongtrack[i]);
 			mb_get_binary_short(MB_YES, &short_ptr[3], &ping->tt[i]);
@@ -2499,7 +2502,7 @@ int mbr_emoldraw_rd_em121bath(int verbose, FILE *mbfp,
 			for (j=0;j<11;j++)
 				beamarray[j] = line[44+11*i+j];
 			short_ptr = (short int *) beamarray; 
-			mb_get_binary_short(MB_YES, &short_ptr[0], &ping->bath[i]);
+			mb_get_binary_short(MB_YES, &short_ptr[0], (short *) &ping->bath[i]);
 			mb_get_binary_short(MB_YES, &short_ptr[1], &ping->bath_acrosstrack[i]);
 			mb_get_binary_short(MB_YES, &short_ptr[2], &ping->bath_alongtrack[i]);
 			mb_get_binary_short(MB_YES, &short_ptr[3], &ping->tt[i]);

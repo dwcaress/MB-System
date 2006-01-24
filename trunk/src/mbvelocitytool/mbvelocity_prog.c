@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:    mbvelocitytool.c        6/6/93
- *    $Id: mbvelocity_prog.c,v 5.14 2005-11-05 01:06:40 caress Exp $ 
+ *    $Id: mbvelocity_prog.c,v 5.15 2006-01-24 19:20:45 caress Exp $ 
  *
  *    Copyright (c) 1993, 1994, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:        June 6, 1993 
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.14  2005/11/05 01:06:40  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.13  2004/10/06 19:06:56  caress
  * Release 5.0.5 update.
  *
@@ -177,6 +180,7 @@
 
 /* standard include files */
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include <string.h>
 #include <sys/stat.h>
@@ -225,7 +229,7 @@ struct mbvt_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbvelocity_prog.c,v 5.14 2005-11-05 01:06:40 caress Exp $";
+static char rcs_id[] = "$Id: mbvelocity_prog.c,v 5.15 2006-01-24 19:20:45 caress Exp $";
 static char program_name[] = "MBVELOCITYTOOL";
 static char help_message[] = "MBVELOCITYTOOL is an interactive water velocity profile editor  \nused to examine multiple water velocity profiles and to create  \nnew water velocity profiles which can be used for the processing  \nof multibeam sonar data.  In general, this tool is used to  \nexamine water velocity profiles obtained from XBTs, CTDs, or  \ndatabases, and to construct new profiles consistent with these  \nvarious sources of information.";
 static char usage_message[] = "mbvelocitytool [-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ssvpfile -Wsvpfile -V -H]";
@@ -249,6 +253,7 @@ int	mbvt_xgid;
 int	borders[4];
 double	maxdepth = 3000.0;
 double	velrange = 500.0;
+double	velcenter = 1490.0;
 double	resrange = 200.0;
 double	ssv_start = 0.0;
 int	anglemode = MBP_ANGLES_SNELL;
@@ -651,7 +656,7 @@ int mbvt_set_graphics(int xgid, int *brdr, int ncol, int *pixels)
 /*                  int status                                        */
 /*--------------------------------------------------------------------*/
 int mbvt_get_values(int *s_edit, int *s_ndisplay, double *s_maxdepth,
-	double *s_velrange, double *s_resrange, 
+	double *s_velrange, double *s_velcenter, double *s_resrange, 
 	int *s_anglemode, int *s_format)
 {
 	/* local variables */
@@ -670,6 +675,7 @@ int mbvt_get_values(int *s_edit, int *s_ndisplay, double *s_maxdepth,
 	*s_ndisplay = ndisplay;
 	*s_maxdepth = maxdepth;
 	*s_velrange = velrange;
+	*s_velcenter = velcenter;
 	*s_resrange = resrange;
 	*s_anglemode = anglemode;
 	*s_format = format;
@@ -684,6 +690,7 @@ int mbvt_get_values(int *s_edit, int *s_ndisplay, double *s_maxdepth,
 		fprintf(stderr,"dbg2       s_ndisplay:  %d\n",*s_ndisplay);
 		fprintf(stderr,"dbg2       s_maxdepth:  %f\n",*s_maxdepth);
 		fprintf(stderr,"dbg2       s_velrange:  %f\n",*s_velrange);
+		fprintf(stderr,"dbg2       s_velcenter: %f\n",*s_velcenter);
 		fprintf(stderr,"dbg2       s_resrange:  %f\n",*s_resrange);
 		fprintf(stderr,"dbg2       s_anglemode: %d\n",*s_anglemode);
 		fprintf(stderr,"dbg2       s_format:    %d\n",*s_format);
@@ -699,6 +706,7 @@ int mbvt_get_values(int *s_edit, int *s_ndisplay, double *s_maxdepth,
 /* Called by:                                                         */
 /*                  action_maxdepth - mbvelocity_callbacks - slider   */
 /*                  action_velrange - mbvelocity_callbacks - slider   */
+/*                  action_velcenter - mbvelocity_callbacks - slider   */
 /*                  action_residual_range - mbvelocity_callbacks      */
 /* Functions called:                                                  */
 /*                  none                                              */
@@ -706,7 +714,7 @@ int mbvt_get_values(int *s_edit, int *s_ndisplay, double *s_maxdepth,
 /*                  status                                            */
 /*--------------------------------------------------------------------*/
 int mbvt_set_values(int s_edit, int s_ndisplay, 
-		double s_maxdepth, double s_velrange, 
+		double s_maxdepth, double s_velrange, double s_velcenter, 
 		double s_resrange, int s_anglemode)
 {
 	/* local variables */
@@ -723,6 +731,7 @@ int mbvt_set_values(int s_edit, int s_ndisplay,
 		fprintf(stderr,"dbg2       s_ndisplay:  %d\n",s_ndisplay);
 		fprintf(stderr,"dbg2       s_maxdepth:  %f\n",s_maxdepth);
 		fprintf(stderr,"dbg2       s_velrange:  %f\n",s_velrange);
+		fprintf(stderr,"dbg2       s_velcenter: %f\n",s_velcenter);
 		fprintf(stderr,"dbg2       s_resrange:  %f\n",s_resrange);
 		fprintf(stderr,"dbg2       s_anglemode: %d\n",s_anglemode);
 		}
@@ -732,6 +741,7 @@ int mbvt_set_values(int s_edit, int s_ndisplay,
 	ndisplay = s_ndisplay;
 	maxdepth = s_maxdepth;
 	velrange = s_velrange;
+	velcenter = s_velcenter;
 	resrange = s_resrange;
 	anglemode = s_anglemode;
 
@@ -1603,8 +1613,8 @@ int mbvt_plot()
 	ymax = 0.5*(borders[3] - borders[2]);
 	xcen = xmin + (xmax - xmin)/2;
 	ycen = ymin + (ymax - ymin)/2;
-	xminimum = 1490.0 - velrange/2;
-	xmaximum = 1490.0 + velrange/2;
+	xminimum = velcenter - velrange/2;
+	xmaximum = velcenter + velrange/2;
 	deltax = 0.15*(xmaximum - xminimum);
 	xscale = (xmax - xmin)/(xmaximum - xminimum);
 	x_int = deltax*xscale;

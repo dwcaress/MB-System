@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbvelocity_callbacks.c	4/7/97
- *    $Id: mbvelocity_callbacks.c,v 5.6 2003-04-17 21:11:18 caress Exp $
+ *    $Id: mbvelocity_callbacks.c,v 5.7 2006-01-24 19:20:45 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -26,6 +26,9 @@
  * Date:	April 7, 1997  GUI recast
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2003/04/17 21:11:18  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.5  2002/08/21 00:51:54  caress
  * Fixed label displays for command line loading.
  *
@@ -88,6 +91,7 @@
  * Standard includes for builtins.
  */
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
 #include "mbvelocity_creation.h"
@@ -165,6 +169,7 @@ int	edit_gui;
 int	ndisplay_gui;
 double	maxdepth_gui;
 double	velrange_gui;
+double	velcenter_gui;
 double	resrange_gui;
 int	format_gui;
 int	anglemode_gui;
@@ -593,7 +598,7 @@ void do_set_controls()
 {
 	/* get some values from mbvelocitytool */
 	mbvt_get_values(&edit_gui,&ndisplay_gui,&maxdepth_gui,
-		&velrange_gui,&resrange_gui,&anglemode_gui,&format_gui);
+		&velrange_gui,&velcenter_gui,&resrange_gui,&anglemode_gui,&format_gui);
 			
 	/* set about version label */
 	sprintf(message_str, ":::t\"MB-System Release %s\":t\"%s\"", 
@@ -656,6 +661,13 @@ void do_set_controls()
 			XmNvalue, (int)velrange_gui, 
 			NULL);
 
+	/* set values of velocity center slider */
+	XtVaSetValues(slider_velcenter, 
+			XmNvalue, (int)velcenter_gui, 
+			XmNminimum, (int)1300, 
+			XmNmaximum, (int)1700, 
+			NULL);
+
 	/* set values of residual range slider */
 	XtVaSetValues(slider_residual_range, 
 			XmNvalue, ((int) (10 * resrange_gui)), 
@@ -687,7 +699,25 @@ do_velrange( Widget w, XtPointer client_data, XtPointer call_data)
     velrange_gui = (double) acs->value;
 
     mbvt_set_values(edit_gui,ndisplay_gui,maxdepth_gui,
-	    velrange_gui,resrange_gui,anglemode_gui);
+	    velrange_gui,velcenter_gui,resrange_gui,anglemode_gui);
+
+    /* replot everything */
+    do_set_controls();
+
+    mbvt_plot();
+}
+
+/*--------------------------------------------------------------------*/
+
+void
+do_velcenter( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmScaleCallbackStruct *acs=(XmScaleCallbackStruct*)call_data;
+    
+    velcenter_gui = (double) acs->value;
+
+    mbvt_set_values(edit_gui,ndisplay_gui,maxdepth_gui,
+	    velrange_gui,velcenter_gui,resrange_gui,anglemode_gui);
 
     /* replot everything */
     do_set_controls();
@@ -732,7 +762,7 @@ do_maxdepth( Widget w, XtPointer client_data, XtPointer call_data)
     maxdepth_gui = (double) acs->value;
     
     mbvt_set_values(edit_gui,ndisplay_gui,maxdepth_gui,
-	    velrange_gui,resrange_gui,anglemode_gui);
+	    velrange_gui,velcenter_gui,resrange_gui,anglemode_gui);
 
     /* replot everything */
     do_set_controls();
@@ -755,7 +785,7 @@ do_anglemode( Widget w, XtPointer client_data, XtPointer call_data)
 	anglemode_gui = 2;
 
     mbvt_set_values(edit_gui,ndisplay_gui,maxdepth_gui,
-	    velrange_gui,resrange_gui,anglemode_gui);
+	    velrange_gui,velcenter_gui,resrange_gui,anglemode_gui);
 
     /* replot everything */
     do_set_controls();
@@ -1027,7 +1057,7 @@ do_residual_range( Widget w, XtPointer client_data, XtPointer call_data)
     resrange_gui = ((double)acs->value / 10.0);
     
     mbvt_set_values(edit_gui,ndisplay_gui,maxdepth_gui,
-	    velrange_gui,resrange_gui,anglemode_gui);
+	    velrange_gui,velcenter_gui,resrange_gui,anglemode_gui);
 
     /* replot everything */
     do_set_controls();

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_prog.c	6/23/95
- *    $Id: mbnavedit_prog.c,v 5.17 2006-01-06 18:24:13 caress Exp $
+ *    $Id: mbnavedit_prog.c,v 5.18 2006-01-24 19:19:24 caress Exp $
  *
  *    Copyright (c) 1995, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	August 28, 2000 (New version - no buffered i/o)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.17  2006/01/06 18:24:13  caress
+ * Working towards 5.0.8
+ *
  * Revision 5.16  2005/11/05 00:58:10  caress
  * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
  *
@@ -157,6 +160,7 @@
 
 /* standard include files */
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include <string.h>
 #include <time.h>
@@ -244,7 +248,7 @@ struct mbnavedit_plot_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbnavedit_prog.c,v 5.17 2006-01-06 18:24:13 caress Exp $";
+static char rcs_id[] = "$Id: mbnavedit_prog.c,v 5.18 2006-01-24 19:19:24 caress Exp $";
 static char program_name[] = "MBNAVEDIT";
 static char help_message[] =  "MBNAVEDIT is an interactive navigation editor for swath sonar data.\n\tIt can work with any data format supported by the MBIO library.\n";
 static char usage_message[] = "mbnavedit [-Byr/mo/da/hr/mn/sc -D  -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ooutfile -X -V -H]";

@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	hsdump.c	6/16/93
- *    $Id: hsdump.c,v 5.5 2005-03-25 04:42:59 caress Exp $
+ *    $Id: hsdump.c,v 5.6 2006-01-24 19:12:01 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000, 2003 by
+ *    Copyright (c) 1993, 1994, 2000, 2003, 2006 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -21,6 +21,9 @@
  * Date:	June 16, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2005/03/25 04:42:59  caress
+ * Standardized the string lengths used for filenames and comment data.
+ *
  * Revision 5.4  2003/04/17 21:17:10  caress
  * Release 5.0.beta30
  *
@@ -93,6 +96,7 @@
 
 /* standard include files */
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include <string.h>
 
@@ -107,7 +111,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: hsdump.c,v 5.5 2005-03-25 04:42:59 caress Exp $";
+	static char rcs_id[] = "$Id: hsdump.c,v 5.6 2006-01-24 19:12:01 caress Exp $";
 	static char program_name[] = "HSDUMP";
 	static char help_message[] =  "HSDUMP lists the information contained in data records on\n\tHydrosweep DS data files, including survey, calibrate, water \n\tvelocity and comment records. The default input stream is stdin.";
 	static char usage_message[] = "hsdump [-Fformat -V -H -Iinfile -Okind]";

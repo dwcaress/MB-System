@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	io.c	3/7/2003
- *	$Id: io.c,v 5.0 2003-03-11 19:09:14 caress Exp $
+ *	$Id: io.c,v 5.1 2006-01-24 19:24:04 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Author:	D. W. Caress (MB-System revisions)
  * Date:	March 7, 2003 (MB-System revisions)
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2003/03/11 19:09:14  caress
+ * Initial version.
+ *
  *
  *
  *--------------------------------------------------------------------*/
@@ -36,6 +39,7 @@
 */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <math.h>
 
@@ -380,9 +384,9 @@ mr1_xdrpnghdr(Ping *png, XDR *xdrs)
 {
 	int mr1_xdrside(PingSide *, XDR *);
 
-	if (!xdr_long(xdrs, &(png->png_tm.tv_sec)))
+	if (!xdr_long(xdrs, (long *) &(png->png_tm.tv_sec)))
 		return 0;
-	if (!xdr_long(xdrs, &(png->png_tm.tv_usec)))
+	if (!xdr_long(xdrs, (long *) &(png->png_tm.tv_usec)))
 		return 0;
 	if (!xdr_float(xdrs, &(png->png_period)))
 		return 0;

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_mem.c	3/1/93
- *    $Id: mb_mem.c,v 5.8 2005-11-05 00:48:04 caress Exp $
+ *    $Id: mb_mem.c,v 5.9 2006-01-24 19:11:17 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	March 1, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2005/11/05 00:48:04  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.7  2004/12/18 01:34:43  caress
  * Working towards release 5.0.6.
  *
@@ -108,6 +111,7 @@
 
 /* standard include files */
 #include <stdio.h>
+#include <stdlib.h>
 
 /* mbio include files */
 #include "../../include/mb_status.h"
@@ -125,7 +129,7 @@ static int	mb_alloc_overflow = MB_NO;
 /* Local debug define */
 /* #define MB_MEM_DEBUG 1 */
 
-static char rcs_id[]="$Id: mb_mem.c,v 5.8 2005-11-05 00:48:04 caress Exp $";
+static char rcs_id[]="$Id: mb_mem.c,v 5.9 2006-01-24 19:11:17 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_malloc(int verbose, size_t size, void **ptr, int *error)
@@ -545,7 +549,7 @@ int mb_memory_list(int verbose, int *error)
 int mb_register_array(int verbose, void *mbio_ptr, 
 		int type, int size, void **handle, int *error)
 {
-	static char rcs_id[]="$Id: mb_mem.c,v 5.8 2005-11-05 00:48:04 caress Exp $";
+	static char rcs_id[]="$Id: mb_mem.c,v 5.9 2006-01-24 19:11:17 caress Exp $";
 	char	*function_name = "mb_update_arrays";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -648,7 +652,7 @@ mb_io_ptr->regarray_ptr[mb_io_ptr->n_regarray-1]);*/
 int mb_update_arrays(int verbose, void *mbio_ptr, 
 		int nbath, int namp, int nss, int *error)
 {
-	static char rcs_id[]="$Id: mb_mem.c,v 5.8 2005-11-05 00:48:04 caress Exp $";
+	static char rcs_id[]="$Id: mb_mem.c,v 5.9 2006-01-24 19:11:17 caress Exp $";
 	char	*function_name = "mb_update_arrays";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -939,7 +943,7 @@ nss,mb_io_ptr->pixels_ss_alloc);*/
 int mb_update_arrayptr(int verbose, void *mbio_ptr, 
 		void **handle, int *error)
 {
-	static char rcs_id[]="$Id: mb_mem.c,v 5.8 2005-11-05 00:48:04 caress Exp $";
+	static char rcs_id[]="$Id: mb_mem.c,v 5.9 2006-01-24 19:11:17 caress Exp $";
 	char	*function_name = "mb_update_arrayptr";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -992,7 +996,7 @@ fprintf(stderr,"\n");*/
 /*--------------------------------------------------------------------*/
 int mb_deall_ioarrays(int verbose, void *mbio_ptr, int *error)
 {
-	static char rcs_id[]="$Id: mb_mem.c,v 5.8 2005-11-05 00:48:04 caress Exp $";
+	static char rcs_id[]="$Id: mb_mem.c,v 5.9 2006-01-24 19:11:17 caress Exp $";
 	char	*function_name = "mb_deall_ioarrays";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
