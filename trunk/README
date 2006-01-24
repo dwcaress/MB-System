@@ -252,6 +252,10 @@ center as well as the range of the water sound speed model plot window.
 Fixed mbm_plot so that it calculates reasonable plot bounds at high
 latitudes.
 
+The program mbset now accepts '=' as well as ':' as separators between
+parameter names and values in -P option arguments (as suggested by
+Bob Covill).
+
 MB-SYSTEM VERSION 5.0.7 RELEASE NOTES:
 ------------------------------------------
 
@@ -1136,10 +1140,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.69 2006-01-24 19:04:07 caress Exp $
+RCS ID: $Id: README,v 5.70 2006-01-24 22:06:42 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.69  2006/01/24 19:04:07  caress
+Version 5.0.8 beta.
+
 Revision 5.68  2006/01/20 19:40:55  caress
 Working towards 5.0.8
 
