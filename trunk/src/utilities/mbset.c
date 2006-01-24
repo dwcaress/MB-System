@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbset.c	1/4/2000
- *    $Id: mbset.c,v 5.26 2006-01-18 15:17:00 caress Exp $
+ *    $Id: mbset.c,v 5.27 2006-01-24 22:23:15 caress Exp $
  *
  *    Copyright (c) 2000, 2002, 2003, 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -30,6 +30,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.26  2006/01/18 15:17:00  caress
+ * Added stdlib.h include.
+ *
  * Revision 5.25  2005/03/25 04:38:13  caress
  * Sonar depth merging has been added to mbprocess and mbset. This is controlled by the SONARDEPTHMODE, SONARDEPTHFILE, and SONARDEPTHFORMAT mbprocess parameters.
  *
@@ -136,7 +139,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbset.c,v 5.26 2006-01-18 15:17:00 caress Exp $";
+	static char rcs_id[] = "$Id: mbset.c,v 5.27 2006-01-24 22:23:15 caress Exp $";
 	static char program_name[] = "mbset";
 	static char help_message[] = "MBset is a tool for setting values in an mbprocess parameter file.\n\
 MBprocess is a tool for processing swath sonar bathymetry data  \n\
@@ -224,6 +227,21 @@ the manual pages for mbprocess and mbset. \n\n";
 		case 'p':
 			if (strlen(optarg) > 1)
 			    {
+			    /* Replace first '=' before ':' with ':'  */
+			    for (i = 0; i < strlen(optarg); i++)
+				{
+				if (optarg[i] == ':')
+				    {
+				    break;
+				    }
+				else if (optarg[i] == '=')
+				    {
+				    optarg[i] = ':';
+				    break;
+				    }
+				}
+				
+			    /* store the parameter argument */
 			    pargv = (char **) realloc(pargv, (pargc + 1) * sizeof(char *));
 			    pargv[pargc] = (char *) malloc(strlen(optarg)+1);
 			    strcpy(pargv[pargc], optarg);
