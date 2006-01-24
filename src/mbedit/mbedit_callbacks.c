@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit_callbacks.c	3/28/97
- *    $Id: mbedit_callbacks.c,v 5.14 2005-03-25 04:12:23 caress Exp $
+ *    $Id: mbedit_callbacks.c,v 5.15 2006-01-24 19:12:42 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	March 28, 1997  GUI recast
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.14  2005/03/25 04:12:23  caress
+ * MBedit now allows alongtrack and acrosstrack views as well as the traditional waterfall display of profiles.
+ *
  * Revision 5.13  2004/12/02 06:31:02  caress
  * First cut at adding stacked views from along and across track.
  *
@@ -126,6 +129,7 @@
  * Standard includes for builtins.
  */
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
 #include <sys/stat.h>
@@ -1516,6 +1520,7 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
     int root_x_return, root_y_return,win_x,win_y;
     unsigned int mask_return;
     int doit;
+char	eventname[64];
 
     /* check for data file loaded at startup */
     if (startup_file)
@@ -1531,6 +1536,13 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
     /* If there is input in the drawing area */
     if (acs->reason == XmCR_INPUT)
     {
+      /* deal with expose events by replotting the mbedit view */
+      if (event->xany.type == Expose || event->xany.type == GraphicsExpose)
+		status = mbedit_action_plot(mplot_width, mexager,
+				    mx_interval, my_interval, 
+				    mplot_size, mshow_detects, mshow_flagged, mshow_time, 
+				    &nbuffer, &ngood, &icurrent, &mnplot);
+    
       /* Deal with KeyPress events */
       if(event->xany.type == KeyPress)
       {

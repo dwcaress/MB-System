@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavadjust_callbacks.c	2/22/2000
- *    $Id: mbnavadjust_callbacks.c,v 5.8 2005-06-04 04:34:06 caress Exp $
+ *    $Id: mbnavadjust_callbacks.c,v 5.9 2006-01-24 19:18:42 caress Exp $
  *
  *    Copyright (c) 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	March 22, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2005/06/04 04:34:06  caress
+ * Added notion of "truecrossings", so it's possible to process the data while only looking at crossing tracks and ignoring overlap points.
+ *
  * Revision 5.7  2004/12/02 06:34:27  caress
  * Fixes while supporting Reson 7k data.
  *
@@ -55,6 +58,7 @@
 
 /* include files */
 #include <stdio.h>
+#include <stdlib.h>
 #include <Xm/Xm.h>
 #include <Xm/List.h>
 #include <X11/cursorfont.h>

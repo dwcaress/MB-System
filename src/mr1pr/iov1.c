@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	iov1.c	3/7/2003
- *	$Id: iov1.c,v 5.0 2003-03-11 19:09:14 caress Exp $
+ *	$Id: iov1.c,v 5.1 2006-01-24 19:24:04 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Author:	D. W. Caress (MB-System revisions)
  * Date:	March 7, 2003 (MB-System revisions)
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2003/03/11 19:09:14  caress
+ * Initial version.
+ *
  *
  *
  *--------------------------------------------------------------------*/
@@ -66,9 +69,9 @@ mr1_xdrpnghdrv1(Ping *png, XDR *xdrs)
 		nan_init= 1;
 	}
 
-	if (!xdr_long(xdrs, &(png->png_tm.tv_sec)))
+	if (!xdr_long(xdrs, (long *) &(png->png_tm.tv_sec)))
 		return 0;
-	if (!xdr_long(xdrs, &(png->png_tm.tv_usec)))
+	if (!xdr_long(xdrs, (long *) &(png->png_tm.tv_usec)))
 		return 0;
 	png->png_period= nan_f;
 

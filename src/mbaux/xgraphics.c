@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	xgraphics.c	8/3/94
- *    $Id: xgraphics.c,v 5.3 2006-01-11 07:33:01 caress Exp $
+ *    $Id: xgraphics.c,v 5.4 2006-01-24 19:17:13 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1999, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	August 3, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2006/01/11 07:33:01  caress
+ * Working towards 5.0.8
+ *
  * Revision 5.2  2003/04/17 20:45:10  caress
  * Release 5.0.beta30
  *
@@ -67,6 +70,7 @@
 /* standard includes */
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 
@@ -98,7 +102,7 @@ struct xg_graphic
 int xg_init(Display *display, Window can_xid, 
 		int *can_bounds, char *fontname)
 {
-static char rcs_id[]="$Id: xgraphics.c,v 5.3 2006-01-11 07:33:01 caress Exp $";
+static char rcs_id[]="$Id: xgraphics.c,v 5.4 2006-01-24 19:17:13 caress Exp $";
 	/* local variables */
 	struct xg_graphic *graphic;
 	XGCValues gc_val;

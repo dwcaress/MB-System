@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_route.c	9/25/2003
- *    $Id: mbview_route.c,v 5.10 2005-11-05 01:11:47 caress Exp $
+ *    $Id: mbview_route.c,v 5.11 2006-01-24 19:21:32 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  *		begun on October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.10  2005/11/05 01:11:47  caress
+ * Much work over the past two months.
+ *
  * Revision 5.9  2005/04/07 04:16:31  caress
  * Fixed a route handling problem.
  *
@@ -57,6 +60,7 @@
 
 /* Standard includes for builtins. */
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
 #include <math.h>
@@ -101,7 +105,7 @@ static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 static char		value_string[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_route.c,v 5.10 2005-11-05 01:11:47 caress Exp $";
+static char rcs_id[]="$Id: mbview_route.c,v 5.11 2006-01-24 19:21:32 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_getroutecount(int verbose, int instance,

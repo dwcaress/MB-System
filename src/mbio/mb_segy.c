@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_segy.c	5/25/2004
- *    $Id: mb_segy.c,v 5.3 2004-11-06 03:55:17 caress Exp $
+ *    $Id: mb_segy.c,v 5.4 2006-01-24 19:11:17 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	May 25, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2004/11/06 03:55:17  caress
+ * Working to support the Reson 7k format.
+ *
  * Revision 5.2  2004/09/16 19:02:34  caress
  * Changes to better support segy data.
  *
@@ -36,6 +39,8 @@
 
 /* standard include files */
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <math.h>
 
 /* mbio include files */
@@ -44,7 +49,7 @@
 #include "../../include/mb_segy.h"
 #include "../../include/mb_swap.h"
 
-static char rcs_id[]="$Id: mb_segy.c,v 5.3 2004-11-06 03:55:17 caress Exp $";
+static char rcs_id[]="$Id: mb_segy.c,v 5.4 2006-01-24 19:11:17 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 /* 	function mb_segy_read_init opens an existing segy file for 

@@ -27,12 +27,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-
-#ifdef _WIN32
-#include "types_win32.h"
 #include <string.h>
-#endif
-
 #include "xdr_surf.h"
 #include "mem_surf.h"
 #include "util_surf.h"

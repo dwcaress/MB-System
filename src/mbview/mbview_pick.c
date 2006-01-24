@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_pick.c	9/29/2003
- *    $Id: mbview_pick.c,v 5.8 2005-11-05 01:11:47 caress Exp $
+ *    $Id: mbview_pick.c,v 5.9 2006-01-24 19:21:32 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  *		begun on October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2005/11/05 01:11:47  caress
+ * Much work over the past two months.
+ *
  * Revision 5.7  2005/02/18 07:32:55  caress
  * Fixed nav display and button sensitivity.
  *
@@ -51,6 +54,7 @@
 
 /* Standard includes for builtins. */
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
 #include <math.h>
@@ -95,7 +99,7 @@ static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 static char		value_list[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_pick.c,v 5.8 2005-11-05 01:11:47 caress Exp $";
+static char rcs_id[]="$Id: mbview_pick.c,v 5.9 2006-01-24 19:21:32 caress Exp $";
 	
 
 /*------------------------------------------------------------------------------*/

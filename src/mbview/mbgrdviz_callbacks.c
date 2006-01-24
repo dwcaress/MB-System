@@ -16,6 +16,7 @@
  * Standard includes for builtins.
  */
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
 #include <math.h>
@@ -102,7 +103,7 @@ int	realtime_update = 5;
 int	realtime_icon = MBGRDVIZ_REALTIME_ICON_SHIP;
 
 /* id variables */
-static char rcs_id[] = "$Id: mbgrdviz_callbacks.c,v 5.15 2006-01-11 07:43:19 caress Exp $";
+static char rcs_id[] = "$Id: mbgrdviz_callbacks.c,v 5.16 2006-01-24 19:21:32 caress Exp $";
 static char program_name[] = "MBgrdviz";
 static char help_message[] = "MBgrdviz is an interactive 2D/3D visualization tool for GMT grid files.";
 static char usage_message[] = "mbgrdviz [-H -T -V]";
