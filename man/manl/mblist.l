@@ -89,7 +89,7 @@ Default: \fIyr/mo/da/hr/mn/sc\fP = 1962/2/21/10/30/0.
 .br
 Causes netCDF CDL format output to be generated (see \fBncgen\fP).
 When the \fB-A\fP (binary) option is also set \fBmblist\fP will call \fBncgen\fP to 
-convert the CDL file to a binary netCDF file (default name is \fmblist.nc\fP.
+convert the CDL file to a binary netCDF file (default name is \fBmblist.nc\fP.
 If the conversion fails for any reason the CDL file will remain.
 .TP
 .B \-D

@@ -1,4 +1,4 @@
-.TH mbm_xyplot l "13 October 2003" "MB-System 5.0" "MB-System 5.0"
+.TH mbm_xyplot l "7 November 2005" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbm_xyplot\fP - Create an executable shellscript which will generate
 a GMT plot of xy data.
@@ -8,7 +8,7 @@ Version 5.0
 
 .SH SYNOPSIS
 \fBmbm_xyplot\fP \fB-I\fP\fI[filepars:]file\fP 
-[\fB-D\fP\fIdelimiter\fP \fB-G\fP\fIfill\fP \fB-H\fP 
+[\fB-I\fP\fI[filepars:]file\fP \fB-G\fP\fIfill\fP \fB-H\fP 
 \fB-O\fP\fIroot\fP \fB-P\fP\fIpagesize\fP
 \fB-S\fP\fIsymbol/size\fP
 \fB-U\fP\fIorientation\fP \fB-V\fP 
@@ -19,7 +19,7 @@ Additional Options:
 [\fB-B\fP\fItickinfo\fP \fP
 \fB-J\fP\fIprojection\fP[\fI/scale | width\fP]
 \fB-L\fP\fItitle\fP[\fI:xlabel:ylabel\fP] \fB-M\fP\fImisc\fP 
-\fB-Q\fP \fB-R\fP\fIw/e/s/n\fP \fB-X\fP ]
+\fB-Q\fP \fB-R\fP\fIw/e/s/n\fP \fB-X\fP \fB-Z\fP]
 
 Miscellaneous Options:
 .br
@@ -41,13 +41,29 @@ production of nice looking plots with a few command line
 arguments. 
 
 By default \fBmbm_xyplot\fP expects the input data files to have
-values organized in columns separated by white space. However, users may optionally specify
-a non-white-space delimiter for each file. Input data files can have an arbitrary number of columns. When more
-than two columns exist the one can specify which two columns to plot (the first and second
-are the default). Users may also specify a single column to be plotted
-versus data-point-number.  Alternatively, users can specify a more complicated perl expression 
-for extracting the data to be plotted. The macro uses the specified rules to extract
-the x-y pairs to be plotted and leaves the extracted data in files to be read by the plotting shellscript. 
+values organized in columns separated by white space. However, users
+may optionally specify a non-white-space delimiter for each
+file. Input data files can have an arbitrary number of columns. When
+two or more columns exist the one may specify which two columns to
+plot (the first vs second is the default). In addition, users may
+optionally specify a single column to be plotted versus
+data-point-number.  
+
+The standard syntax with which one selects columns to plot may also be
+embedded into a larger Perl expression, which will be evaluated for
+each line of the data file. In this way, one may do on-the-fly
+mathimatics or substring extractions as required.  Indeed, one may
+specify most any Perl expression that when evaluated, will be a
+numeric result for plotting. For example, one can multiply the values
+in a column by a constant, add the values of two columns together or
+even extract latitude and longitude degrees and minutes in a file of
+NMEA strings and convert the results to decimal degrees for
+plotting. The macro uses the specified delimter to extract the
+values from each column, evaluate the expressions, and then leaves the
+result in temporary data in files to be read by the plotting
+shellscript. The temporary files are deleted on execution of the shell
+script by default, but can optionally be retained for debugging
+purposes.
 
 For users seeking more control over the plot
 appearance, a number of additional optional arguments are
@@ -69,27 +85,6 @@ Suzanne H. O'Hara (sohara@ldeo.columbia.edu)
   Lamont-Doherty Earth Observatory
 
 .SH SIMPLE DESCRIPTION OF BASIC OPTIONS
-.TP
-.B \-C
-\fI<xexpression>_<yexpression>\fP 
-.br
-Sets rules used by \fBmbm_xyplot\fP to extract the x and y values 
-from the input data columns. By default, \fBmbm_xyplot\fP uses the
-first column as the x value and the second column as the y value on
-the plot. Here <xexpression> refers to a perl expression that will
-extract the desired x value, and <yexpression> to the corresponding
-expression for extracting the y value. The simplest expression is just
-the character '#', which is interpreted as the line number (or data count) 
-in the file. To extract values from a particular expression, use the
-expression 'c[N]', where N is the desired column number start
-.TP
-.B \-D
-\fIdelimiter\fP 
-.br
-Sets \fBmbm_xyplot\fP to parse an input file using the
-character(s) specified as \fIdelimiter\fP to delimiter the
-data into columns. By default, \fBmbm_xyplot\fP assumes
-the columns are separated by white space.
 .TP
 .B \-G
 \fIfill\fP 
@@ -116,21 +111,22 @@ of its operation and then exit immediately.
 .B \-I
 \fI[filepars:]xy_file \fP
 .br
-Specifies a file containing (x,y) pairs to be plotted
-as lines or symbols. 
 
-The line and symbol characteristics
-are set using the last \fB-G\fP, \fB-S\fP, and \fB-W\fP
-options used. In order to plot different files
-using different line or symbol characteristics, 
-\fB-G\fP, \fB-S\fP, and \fB-W\fP commands can be
-strung together in front of \fIxy_file\fP; the "-"
-is omitted and the commands are separated by ":".
-For example, the command 
-\fB-IG\fP\fI255/0/0:\fP\fBS\fP\fIa/0.1:xy.dat\fP
-will plot the (x,y) data pairs in the file xy.dat
-as 0.1 inch diameter red stars.
-[Default is a solid black line].
+Specifies a file containing (x,y) pairs to be plotted as lines or
+symbols. Optional parameters preceed the file name and consist of a
+list of flag-argument pairs, strung together with colons. These
+arguments may include the column delimiter, which columns to plot,
+line and symbol characteristics and a flag to specify when multiple
+data segments are embedded in a single file. The looks like the
+following.:
+
+\fB -I\fP\fBD\fP\fIdelimiter\fP:\fBC\fP\fIcolumnsexpression\fP:\fBG\fP\fIcolor\fP:\fBS\fP\fIsymbol\fP:\fBW\fP\fIweight\fP:\fBM\fP:\fBxyfile\fR
+
+Default parameters are whitespace [ D(\\s+) ], column 1 vs column 2
+[ Cc[1]_c[2] ], black lines without symbols [ SN ], [ GN ], [ W1 ], and no
+multiple segments (omitted M flag).
+
+Please see the "Complete Description of Options" below for details. 
 .TP
 .B \-O
 \fIroot\fP
@@ -217,21 +213,90 @@ This "help" flag cause the program to print out a description
 of its operation and then exit immediately.
 .TP
 .B \-I
-\fI[filepars:]xy_file \fP
+\fI[filepars:]xy_file\fP
 .br
-Specifies a file containing (x,y) pairs to be plotted
-as lines or symbols. The line and symbol characteristics
-are set using the last \fB-G\fP, \fB-S\fP, and \fB-W\fP
-options used. In order to plot different files
-using different line or symbol characteristics, 
-\fB-G\fP, \fB-S\fP, and \fB-W\fP commands can be
-strung together in front of \fIxy_file\fP; the "-"
-is omitted and the commands are separated by ":".
-For example, the command 
-\fB-IG\fP\fI255/0/0:\fP\fBS\fP\fIa/0.1:xy.dat\fP
-will plot the (x,y) data pairs in the file xy.dat
-as 0.1 inch diameter red stars.
-[Default is a solid black line].
+
+Specifies the files containing the data to be plotted, and for each
+file, a list of file parameters which are comprised of the rules used
+by \fBmbm_xyplot\fP to parse and manipulate the x and y values on the
+fly, as well as the line and symbol characters used for plotting the
+results.
+
+The file parameters are an optional list of flags and their arguments
+concatinated and strung together with colons. A full specification has
+the following general syntax although individual flags and their
+arguements need not appear in any particular order as long as argument
+follows corresponding flag.:
+
+
+\fB -I\fP\fBD\fP\fIdelimiter\fP:\fBC\fP\fIcolumnsexpression\fP:\fBG\fP\fIcolor\fP:\fBS\fP\fIsymbol\fP:\fBW\fP\fIweight\fP:\fBM\fP:\fBxyfile\fR
+
+The delimiter may be any character string. The default delimiter is
+whitespace. 
+
+By default, \fBmbm_xyplot\fP uses the first column as the x value and
+the second column as the y value for the plot. However, the \fBC\fP
+flag and column expression allows the user to chose other columns to
+plot. The general syntax is
+
+\fBC\fP \fIc[xcol]_c[ycol]\fR
+
+where 'xcol' and 'ycol' designate the x and y columns
+respectively. Columns are numbered starting at '1' one the left most
+column in the file. In addition, either c[] expression may be replaced
+with a single '#' symbol to plot the other variable vs. line
+number. For example,
+
+\fBC\fP \fI#_c[ycol]\fR
+
+will plot the values in column 'ycol' vs their line number in the file.
+
+Other valid Perl expressions may be substituted for either column
+expression as well. For example, to plot in kilometers, a file whose
+columns contain x and y coordinates in meters, one would specify
+
+\fBC\fP \fIc[0]/1000_c[1]/1000\fP 
+
+The line and symbol characteristics are set using the \fBG\fP,
+\fBS\fP, and \fBW\fP options.  For example, the command
+\fB-IG\fP\fI255/0/0:\fP\fBS\fP\fIa/0.1:xy.dat\fP will plot the (x,y)
+data pairs in the file xy.dat as 0.1 inch diameter red stars.
+[Default is a solid black line]. See the psxy man page for more
+details.
+
+When multiple data files are specified (with multiple \fB-I\fP
+statements, the last \fBG\fP, \fBS\fP, and \fBW\fP options specified
+are for subsequent files. In order to plot different files using
+different line or symbol characteristics, new sets of commands can be
+specified for each file.
+
+Finally, note that there are two ways in which one may plot multiple
+data sets on the same plot. One may specify multiple sets of file arguments
+[i.e. \fB-I\fP\fI[filepars:]xy_file\fP], one for each file to be
+plotted. This allows the most flexibility, including different
+one-the-fly manipulations and colors for each xy series. 
+
+An alternative is to utilize the "multiple segments" feature of
+\fBpsxy\fP. Specify the \fBM\fP flag in the file argument list to
+invoke this feature. A single file may then contain all the data, one
+series after the next, with lines containing a single ">" and nothing
+more to delineate breaks in data segments. This is the default break
+character for psxy, and currently the only break character supported by
+mbm_xyplot. For example \fB-IM\fP:xy.dat would plot multiple data
+series in the file xy.dat whose segements were separated as in the
+following snippet:
+
+1.2   3
+.br
+1.3   5
+.br
+>
+.br
+0     .1
+.br
+0.1   .4
+.br
+
 .TP
 .B \-J
 \fIprojection\fP[\fI/scale | /width\fP]
@@ -641,6 +706,39 @@ As an example, the contents of the plotting shellscript
  #
  # All done!
  echo All done!
+
+.SH ADVANCED EXAMPLES
+
+Suppose we have a file of NMEA GGA strings logged from a GPS receiver
+whose data looks like the following:
+
+filename: gps.raw:
+
+$GPGGA,000023.00,5427.89080,N,14600.29458,W,1,10,0.9,19.01,M,6.40,M,,*70
+$GPGGA,000024.00,5427.89248,N,14600.30088,W,1,10,0.9,19.39,M,6.40,M,,*7B
+$GPGGA,000025.00,5427.89424,N,14600.30713,W,1,10,0.9,19.72,M,6.40,M,,*7C
+
+We can specify a comma delimited file and convert the latitude and
+longitude fields to decimal degrees on the fly with the following:
+
+     mbm_xyplot \-ID,:C'substr(c[5],0,3)+substr(c[5],3,length(c[5]))/60_substr(c[3],0,2)+substr(c[3],2,length(c[3]))/60':gps.raw
+
+This is about as ugly as it gets. However, it is quite
+straightforward and very handy, so let us pick this apart. The -I flag
+specifies the file to plot and its parameters. The D subfield followed
+by ',' indicates the file is comma delimited. The C subfield followed
+by the Perl expression extracts fields to plot. There are two
+expressions here, the x values, (longitude) and the x values
+(latitude) separated by an "_". In the longitude expression, the
+degree portion of the longitude, which is the 5th field (c[5]) is
+extracted and added to the minute portion of the longitude divided by
+60. The same is done with the latitude field, (c[3]).
+
+Note the single quotes surrounding the C expression. These are
+required to ensure complex expressions such as these are not
+inadvertently interpreted by the shell.
+
+
 
 .SH SEE ALSO
 \fBmbsystem\fP(l), \fBmbcontour\fP(l), 
