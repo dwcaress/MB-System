@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad2.c	3.00	10/9/98
- *	$Id: mbsys_simrad2.c,v 5.20 2006-01-06 18:27:19 caress Exp $
+ *	$Id: mbsys_simrad2.c,v 5.21 2006-01-27 20:09:47 caress Exp $
  *
  *    Copyright (c) 1998, 2001, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -31,6 +31,9 @@
  * Date:	October 9, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.20  2006/01/06 18:27:19  caress
+ * Working towards 5.0.8
+ *
  * Revision 5.19  2005/11/05 00:48:05  caress
  * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
  *
@@ -124,7 +127,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_simrad2.h"
 
-static char res_id[]="$Id: mbsys_simrad2.c,v 5.20 2006-01-06 18:27:19 caress Exp $";
+static char res_id[]="$Id: mbsys_simrad2.c,v 5.21 2006-01-27 20:09:47 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_simrad2_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
@@ -1478,7 +1481,9 @@ int mbsys_simrad2_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			|| store->sonar == MBSYS_SIMRAD2_EM3000D_4 
 			|| store->sonar == MBSYS_SIMRAD2_EM3000D_5 
 			|| store->sonar == MBSYS_SIMRAD2_EM3000D_6 
-			|| store->sonar == MBSYS_SIMRAD2_EM3000D_7)
+			|| store->sonar == MBSYS_SIMRAD2_EM3000D_7 
+			|| store->sonar == MBSYS_SIMRAD2_EM3000D_8 
+			|| store->sonar == MBSYS_SIMRAD2_EM3002)
 		    mb_io_ptr->beamwidth_ltrack = 1.5;
 		else if (store->sonar == MBSYS_SIMRAD2_EM1000)
 		    mb_io_ptr->beamwidth_ltrack = 3.3;
@@ -1509,7 +1514,9 @@ int mbsys_simrad2_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			|| store->sonar == MBSYS_SIMRAD2_EM3000D_4 
 			|| store->sonar == MBSYS_SIMRAD2_EM3000D_5 
 			|| store->sonar == MBSYS_SIMRAD2_EM3000D_6 
-			|| store->sonar == MBSYS_SIMRAD2_EM3000D_7)
+			|| store->sonar == MBSYS_SIMRAD2_EM3000D_7 
+			|| store->sonar == MBSYS_SIMRAD2_EM3000D_8 
+			|| store->sonar == MBSYS_SIMRAD2_EM3002)
 		    mb_io_ptr->beamwidth_xtrack = 1.5;
 		else if (store->sonar == MBSYS_SIMRAD2_EM1000)
 		    mb_io_ptr->beamwidth_xtrack = 3.3;
@@ -2206,7 +2213,9 @@ int mbsys_simrad2_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 		    || store->sonar == MBSYS_SIMRAD2_EM3000D_4 
 		    || store->sonar == MBSYS_SIMRAD2_EM3000D_5 
 		    || store->sonar == MBSYS_SIMRAD2_EM3000D_6 
-		    || store->sonar == MBSYS_SIMRAD2_EM3000D_7)
+		    || store->sonar == MBSYS_SIMRAD2_EM3000D_7 
+		    || store->sonar == MBSYS_SIMRAD2_EM3000D_8 
+		    || store->sonar == MBSYS_SIMRAD2_EM3002)
 		    ttscale = 0.5 / 14000;
 		else if (store->sonar == MBSYS_SIMRAD2_EM12S
 		    || store->sonar == MBSYS_SIMRAD2_EM12D
@@ -2243,7 +2252,9 @@ int mbsys_simrad2_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 				|| store->sonar == MBSYS_SIMRAD2_EM3000D_4 
 				|| store->sonar == MBSYS_SIMRAD2_EM3000D_5 
 				|| store->sonar == MBSYS_SIMRAD2_EM3000D_6 
-				|| store->sonar == MBSYS_SIMRAD2_EM3000D_7)
+				|| store->sonar == MBSYS_SIMRAD2_EM3000D_7 
+				|| store->sonar == MBSYS_SIMRAD2_EM3000D_8 
+				|| store->sonar == MBSYS_SIMRAD2_EM3002)
 			    angles_null[i] = angles[i];
 			else if (store->sonar == MBSYS_SIMRAD2_EM1000)
 			    angles_null[i] = angles[i];
@@ -3439,7 +3450,9 @@ int mbsys_simrad2_makess(int verbose, void *mbio_ptr, void *store_ptr,
 		    || store->sonar == MBSYS_SIMRAD2_EM3000D_4 
 		    || store->sonar == MBSYS_SIMRAD2_EM3000D_5 
 		    || store->sonar == MBSYS_SIMRAD2_EM3000D_6 
-		    || store->sonar == MBSYS_SIMRAD2_EM3000D_7)
+		    || store->sonar == MBSYS_SIMRAD2_EM3000D_7 
+		    || store->sonar == MBSYS_SIMRAD2_EM3000D_8 
+		    || store->sonar == MBSYS_SIMRAD2_EM3002)
 		    ss_spacing = 750.0 / 14000;
 		else if (store->sonar == MBSYS_SIMRAD2_EM12S
 		    || store->sonar == MBSYS_SIMRAD2_EM12D
