@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em300raw.c	10/16/98
- *	$Id: mbr_em300raw.c,v 5.28 2006-01-27 19:09:38 caress Exp $
+ *	$Id: mbr_em300raw.c,v 5.29 2006-01-27 20:09:47 caress Exp $
  *
  *    Copyright (c) 1998, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	October 16,  1998
  * $Log: not supported by cvs2svn $
+ * Revision 5.28  2006/01/27 19:09:38  caress
+ * Version 5.0.8beta2
+ *
  * Revision 5.27  2006/01/06 18:27:19  caress
  * Working towards 5.0.8
  *
@@ -283,7 +286,7 @@ int mbr_em300raw_wr_rawbeam2(int verbose, FILE *mbfp, int swap,
 int mbr_em300raw_wr_ss(int verbose, FILE *mbfp, int swap, 
 		struct mbsys_simrad2_struct *store, int *error);
 
-static char res_id[]="$Id: mbr_em300raw.c,v 5.28 2006-01-27 19:09:38 caress Exp $";
+static char res_id[]="$Id: mbr_em300raw.c,v 5.29 2006-01-27 20:09:47 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_em300raw(int verbose, void *mbio_ptr, int *error)
@@ -1740,7 +1743,8 @@ int mbr_em300raw_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 			|| sonarunswap == MBSYS_SIMRAD2_EM3000D_5
 			|| sonarunswap == MBSYS_SIMRAD2_EM3000D_6
 			|| sonarunswap == MBSYS_SIMRAD2_EM3000D_7
-			|| sonarunswap == MBSYS_SIMRAD2_EM3000D_8)
+			|| sonarunswap == MBSYS_SIMRAD2_EM3000D_8
+			|| sonarunswap == MBSYS_SIMRAD2_EM3002)
 			{
 			sonarunswapgood = MB_YES;
 			}
@@ -1762,7 +1766,8 @@ int mbr_em300raw_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 			|| sonarswap == MBSYS_SIMRAD2_EM3000D_5
 			|| sonarswap == MBSYS_SIMRAD2_EM3000D_6
 			|| sonarswap == MBSYS_SIMRAD2_EM3000D_7
-			|| sonarswap == MBSYS_SIMRAD2_EM3000D_8)
+			|| sonarswap == MBSYS_SIMRAD2_EM3000D_8
+			|| sonarswap == MBSYS_SIMRAD2_EM3002)
 			{
 			sonarswapgood = MB_YES;
 			}
@@ -1817,7 +1822,8 @@ fprintf(stderr,"typegood:%d mb_io_ptr->byteswapped:%d sonarswapgood:%d *databyte
 		&& *sonar != MBSYS_SIMRAD2_EM3000D_5
 		&& *sonar != MBSYS_SIMRAD2_EM3000D_6
 		&& *sonar != MBSYS_SIMRAD2_EM3000D_7
-		&& *sonar != MBSYS_SIMRAD2_EM3000D_8)
+		&& *sonar != MBSYS_SIMRAD2_EM3000D_8
+		&& *sonar != MBSYS_SIMRAD2_EM3002)
 		{
 		sonargood = MB_NO;
 		}

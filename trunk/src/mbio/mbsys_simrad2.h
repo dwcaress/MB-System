@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad2.h	10/9/98
- *	$Id: mbsys_simrad2.h,v 5.15 2006-01-06 18:27:18 caress Exp $
+ *	$Id: mbsys_simrad2.h,v 5.16 2006-01-27 20:09:47 caress Exp $
  *
  *    Copyright (c) 1998, 2001, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -32,6 +32,9 @@
  * Date:	October 9, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.15  2006/01/06 18:27:18  caress
+ * Working towards 5.0.8
+ *
  * Revision 5.14  2005/11/05 00:48:04  caress
  * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
  *
@@ -304,6 +307,7 @@
 #define	MBSYS_SIMRAD2_EM3000D_6	3006
 #define	MBSYS_SIMRAD2_EM3000D_7	3007
 #define	MBSYS_SIMRAD2_EM3000D_8	3008
+#define	MBSYS_SIMRAD2_EM3002	3020
 
 #define	MBSYS_SIMRAD2_EM12S	9901
 #define	MBSYS_SIMRAD2_EM12D	9902
