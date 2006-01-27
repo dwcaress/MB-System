@@ -3,9 +3,9 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	install_makefiles	5/20/94
-#    $Id: install_makefiles,v 5.21 2006-01-18 07:26:04 caress Exp $
+#    $Id: install_makefiles,v 5.22 2006-01-27 19:08:27 caress Exp $
 #
-#    Copyright (c) 1993, 1994, 1995, 1996, 1997, 2001, 2002, 2003, 2005 by 
+#    Copyright (c) 1993, 1994, 1995, 1996, 1997, 2001, 2002, 2003, 2005, 2006 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
 #    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
 #    Lamont-Doherty Earth Observatory
@@ -16,6 +16,12 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #
 # Command:
 #   install_makefiles [-Ppreset]
+#
+# Author:
+#   David W. Caress
+#   Lamont-Doherty Earth Observatory
+#   Palisades, NY  10964
+#   May 20, 1994
 #
 # Purpose:
 #   Perl shellscript to create makefiles appropriate to a particular
@@ -30,6 +36,40 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   installer should edit this script so that the locations of
 #   important libraries and include files are accurate and so that
 #   the compile and link flags are correct.
+#
+#   The important parameters to be set are:
+#	MBSYSTEM_HOME	Absolute path to the directory containing
+#				this file.
+#	OS		Operating system (SUN, IRIX, LINUX, LYNX, 
+#				SOLARIS, HPUX, or OTHER).
+#	BYTESWAPPED	If set to "YES" will enable byte swapping
+#				of input and output binary data.
+#				Otherwise byte swapping is disabled.
+#				Byte swapping needs to be enabled
+#				when installing on "little endian"
+#				machines such as PCs or VAXs.
+#	CC		C compiler to be used (optional).
+#	GRAPHICAL	If set to "YES" will enable the installation
+#			of the Motif based graphical utilities mbedit,
+#			mbnavedit, and mbvelocitytool. If Motif 
+#                       is not available but the nongraphical utilities 
+#                       are desired then disable with "NO". 
+#			(optional, default is "YES")
+#       MOTIFINCDIR	Location of Motif include files.
+#       MOTIFLIBS	X and Motif libraries required for graphical tools.
+#       OPENGLLIBS	OpenGL libraries required for new graphical tools,
+#.                              including MBgrdviz. If this parameter is 
+#                               not set, 
+#                            
+#	GMTLIBDIR	Location of GMT libraries libgmt.a and libpsl.a
+#	GMTINCDIR	Location of GMT include files gmt.h, grd.h,
+#				and pslib.h
+#	NETCDFLIBDIR	Location of NetCDF library libnetcdf.a
+#	NETCDFINCDIR	Location of NetCDF include file netcdf.h
+#	LEVITUS		Path for Levitus data file annual
+#                       This is usually $MBSYSTEM_HOME/share/annual.
+#	CFLAGS		Compile flags for C source files.
+#	LFLAGS		Load flags for all object files.
 #
 #   A few preset variable configurations are defined and can be
 #   specified using the -P option. These include:
@@ -46,21 +86,38 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #       irixusrlocal - install manually on SGI IRIX 
 #				- assumes installation in /usr/local/mbsystem
 #				- assumes netCDF and GMT installs in /usr/local
+#	
+#--------------------------------------------------------------------
+# EDIT THE PARAMETERS HERE IF NO APPROPRIATE PRESET CONFIGURATION IS DEFINED
+# Set the configuration parameters manually:
+#--------------------------------------------------------------------
+$MBSYSTEM_HOME = "/Users/caress/sandbox/mbsystem";
+$OS = "DARWIN";
+$CC = "cc";
+$BYTESWAPPED = "NO";
+$GRAPHICAL = "YES";
+$MOTIFINCDIR = "/sw/include";
+$MOTIFLIBS = "-L/sw/lib -L/usr/X11R6/lib -lXm -lXt -lX11";
+$OPENGLLIBS = "-lGLw -lGLU -lGL";
+$GMTLIBDIR = "/usr/local/gmt/lib";
+$GMTINCDIR = "/usr/local/gmt/include";
+$NETCDFLIBDIR = "/sw/lib";
+$NETCDFINCDIR = "/sw/include";
+$LEVITUS = "$MBSYSTEM_HOME/share/LevitusAnnual82.dat";
+$PROJECTIONS = "$MBSYSTEM_HOME/share/Projections.dat";
+$CFLAGS = "-g -I/usr/X11R6/include";
+$LFLAGS = "-Wl -lm -bind_at_load";
 #
-# Usage:
-#   install_makefiles
-#
-# Author:
-#   David W. Caress
-#   Lamont-Doherty Earth Observatory
-#   Palisades, NY  10964
-#   May 20, 1994
+#--------------------------------------------------------------------
 #
 # Version:
-#   $Id: install_makefiles,v 5.21 2006-01-18 07:26:04 caress Exp $
+#   $Id: install_makefiles,v 5.22 2006-01-27 19:08:27 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.21  2006/01/18 07:26:04  caress
+#   Removed all references to GMT versions since MB-System will now build only with GMT4.1.
+#
 #   Revision 5.20  2006/01/11 07:23:24  caress
 #   Working towards 5.0.8
 #
@@ -194,42 +251,106 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # First cut.
 #
 #
-#
-#
-# The important parameters to be set are:
-#	MBSYSTEM_HOME	Absolute path to the directory containing
-#				this file.
-#	OS		Operating system (SUN, IRIX, LINUX, LYNX, 
-#				SOLARIS, HPUX, or OTHER).
-#	BYTESWAPPED	If set to "YES" will enable byte swapping
-#				of input and output binary data.
-#				Otherwise byte swapping is disabled.
-#				Byte swapping needs to be enabled
-#				when installing on "little endian"
-#				machines such as PCs or VAXs.
-#	CC		C compiler to be used (optional).
-#	GRAPHICAL	If set to "YES" will enable the installation
-#			of the Motif based graphical utilities mbedit,
-#			mbnavedit, and mbvelocitytool. If Motif 
-#                       is not available but the nongraphical utilities 
-#                       are desired then disable with "NO". 
-#			(optional, default is "YES")
-#       MOTIFINCDIR	Location of Motif include files.
-#       MOTIFLIBS	X and Motif libraries required for graphical tools.
-#       OPENGLLIBS	OpenGL libraries required for new graphical tools,
-#.                              including MBgrdviz. If this parameter is 
-#                               not set, 
-#                            
-#	GMTLIBDIR	Location of GMT libraries libgmt.a and libpsl.a
-#	GMTINCDIR	Location of GMT include files gmt.h, grd.h,
-#				and pslib.h
-#	NETCDFLIBDIR	Location of NetCDF library libnetcdf.a
-#	NETCDFINCDIR	Location of NetCDF include file netcdf.h
-#	LEVITUS		Path for Levitus data file annual
-#                       This is usually $MBSYSTEM_HOME/share/annual.
-#	CFLAGS		Compile flags for C source files.
-#	LFLAGS		Load flags for all object files.
-#
+#--------------------------------------------------------------------
+
+# Deal with command line arguments
+$command_line = "@ARGV";
+&MBGetopts('P:p:');
+$preset = 	($opt_P || $opt_p);
+
+	
+#--------------------------------------------------------------------
+# USE PARAMETERS SET ABOVE IF NO APPROPRIATE PRESET CONFIGURATION IS DEFINED
+#--------------------------------------------------------------------
+if (!$preset)
+	{
+	print "\nUsing manually defined configuration...\n";
+	}
+#--------------------------------------------------------------------
+# ELSE RESET PARAMTERS USING SPECIFIED PRESET CONFIGURATION
+#--------------------------------------------------------------------
+# 
+# Preset configuration for MacOs X when building through fink
+elsif ($preset eq "macosxfink")
+	{
+	print "\nUsing preset configuration for MacOs X by fink in /sw...\n";
+	$FINKPREFIX = "@FINKPREFIX@";
+	$MBSYSTEM_HOME = "$FINKPREFIX";
+	$OS = "DARWIN";
+	$CC = "cc";
+	$BYTESWAPPED = "NO";
+	$GRAPHICAL = "YES";
+	$MOTIFINCDIR = "$FINKPREFIX/include";
+	$MOTIFLIBS = "-L$FINKPREFIX/lib -L/usr/X11R6/lib -lXm -lXt -lX11";
+	$OPENGLLIBS = "-lGLw -lGLU -lGL";
+	$GMTLIBDIR = "$FINKPREFIX/lib";
+	$GMTINCDIR = "$FINKPREFIX/include";
+	$NETCDFLIBDIR = "$FINKPREFIX/lib";
+	$NETCDFINCDIR = "$FINKPREFIX/include";
+	$LEVITUS = "$MBSYSTEM_HOME/share/mbsystem/LevitusAnnual82.dat";
+	$PROJECTIONS = "$MBSYSTEM_HOME/share/mbsystem/Projections.dat";
+	$CFLAGS = "-O3 -funroll-loops -fexpensive-optimizations -I/usr/X11R6/include -Wall -Wimplicit -pedantic -W -Wstrict-prototypes -Wredundant-decls  -Wimplicit-int -Wimplicit-function-declaration -Wnested-externs";
+	$LFLAGS = "-Wl -lm -bind_at_load";
+	}
+# 
+# Preset configuration for MacOs X when building in /usr/local
+#       assumes that GMT, netCDF, and OpenMotif are installed using fink
+elsif ($preset eq "macosxusrlocal")
+	{
+	print "\nUsing preset configuration for MacOs X in /usr/local/...\n";
+	$FINKPREFIX = "/sw";
+	$MBSYSTEM_HOME = "/usr/local/mbsystem";
+	$OS = "DARWIN";
+	$CC = "cc";
+	$BYTESWAPPED = "NO";
+	$GRAPHICAL = "YES";
+	$MOTIFINCDIR = "$FINKPREFIX/include";
+	$MOTIFLIBS = "-L$FINKPREFIX/lib -L/usr/X11R6/lib -lXm -lXt -lX11";
+	$OPENGLLIBS = "-lGLw -lGLU -lGL";
+	$GMTLIBDIR = "$FINKPREFIX/lib";
+	$GMTINCDIR = "$FINKPREFIX/include";
+	$NETCDFLIBDIR = "$FINKPREFIX/lib";
+	$NETCDFINCDIR = "$FINKPREFIX/include";
+	$LEVITUS = "$MBSYSTEM_HOME/share/LevitusAnnual82.dat";
+	$PROJECTIONS = "$MBSYSTEM_HOME/share/Projections.dat";
+	$CFLAGS = "-g -I/usr/X11R6/include";
+	$LFLAGS = "-Wl -lm -bind_at_load";
+	}
+# 
+# Preset configuration for SGI Irix when building in /usr/local
+#       assumes that GMT and netCDF are installed in /usr/local
+elsif ($preset eq "irixusrlocal")
+	{
+	print "\nUsing preset configuration for SGI Irix in /usr/local/...\n";
+	$MBSYSTEM_HOME = "/usr/local/mbsystem";
+	$OS = "IRIX64";
+	$CC = "cc";
+	$BYTESWAPPED = "NO";
+	$GRAPHICAL = "YES";
+	$MOTIFINCDIR = "/usr/include/Xm";
+	$MOTIFLIBS = "-lXm -lXt -lX11";
+	$OPENGLLIBS = "-lGLw -lGLU -lGL";
+	$GMTLIBDIR = "/usr/local/gmt/src";
+	$GMTINCDIR = "/usr/local/gmt/src";
+	$NETCDFLIBDIR = "/usr/local/netcdf/lib";
+	$NETCDFINCDIR = "/usr/local/netcdf/include";
+	$LEVITUS = "$MBSYSTEM_HOME/share/LevitusAnnual82.dat";
+	$PROJECTIONS = "$MBSYSTEM_HOME/share/Projections.dat";
+	$CFLAGS = "-O2";
+	$LFLAGS = "-lm -lsun";
+	}
+	
+# Quit because preset not recognized:
+else
+	{
+	print "\nUnrecognized preset $preset specified...\n";
+	print "The currently supported preset configurations include:\n\tmacosfink\n\tmacosusrlocal\n";
+	die "Exiting without creating new Makefiles...\n";
+	}
+
+#--------------------------------------------------------------------
+# HERE ARE SOME EXAMPLE CONFIGURATION SETTINGS FOR VARIOUS SYSTEMS
+#--------------------------------------------------------------------
 # Example for installing on L-DEO Sun workstations running SunOs 4.1.x:
 #	$MBSYSTEM_HOME = "/home/hs/caress/dev/mbsystem";
 #	$OS = "SUN";
@@ -379,11 +500,11 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #	$LEVITUS = "/usr/local/levitus/annual";
 #
 # Example for installing on Apple Macintosh Computers
-# running MacOS X version 10.2.6. Here I am using the 
-# Apple X11 distribution and the LessTif (www.lesstif.org)
+# running MacOS X version 10.2 or later. Here I am using the 
+# Apple X11 distribution and the OpenMotif (www.openmotif.org)
 # port provided by Fink (www.fink.org). 
-# The "-force_flat_namespace" linker flag is no longer
-# required with 10.2.6 but was needed in $LFLAGS previously.
+# The "-force_flat_namespace" linker flag was
+# required in $LFLAGS prior to 10.2.6
 #	$MBSYSTEM_HOME = "/Users/caress/dev/mbsystem";
 #	$OS = "DARWIN";
 #	$CC = "cc";
@@ -400,85 +521,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #	$CFLAGS = "-g -I/usr/X11R6/include";
 #	$LFLAGS = "-Wl -lm -bind_at_load";
 #
-# **********************************
-
-# Deal with command line arguments
-$command_line = "@ARGV";
-&MBGetopts('P:p:');
-$preset = 	($opt_P || $opt_p);
-
-# USE APPROPRIATE PRESET CONFIGURATION
-# 
-# Preset configuration for MacOs X when building through fink
-if ($preset eq "macosxfink")
-	{
-	print "\nUsing preset configuration for MacOs X by fink in /sw...\n";
-	$FINKPREFIX = "@FINKPREFIX@";
-	$MBSYSTEM_HOME = "$FINKPREFIX";
-	$OS = "DARWIN";
-	$CC = "cc";
-	$BYTESWAPPED = "NO";
-	$GRAPHICAL = "YES";
-	$MOTIFINCDIR = "$FINKPREFIX/include";
-	$MOTIFLIBS = "-L$FINKPREFIX/lib -L/usr/X11R6/lib -lXm -lXt -lX11";
-	$OPENGLLIBS = "-lGLw -lGLU -lGL";
-	$GMTLIBDIR = "$FINKPREFIX/lib";
-	$GMTINCDIR = "$FINKPREFIX/include";
-	$NETCDFLIBDIR = "$FINKPREFIX/lib";
-	$NETCDFINCDIR = "$FINKPREFIX/include";
-	$LEVITUS = "$MBSYSTEM_HOME/share/mbsystem/LevitusAnnual82.dat";
-	$PROJECTIONS = "$MBSYSTEM_HOME/share/mbsystem/Projections.dat";
-	$CFLAGS = "-O3 -funroll-loops -fexpensive-optimizations -I/usr/X11R6/include -Wall -Wimplicit -pedantic -W -Wstrict-prototypes -Wredundant-decls  -Wimplicit-int -Wimplicit-function-declaration -Wnested-externs";
-	$LFLAGS = "-Wl -lm -bind_at_load";
-	}
-# 
-# Preset configuration for MacOs X when building in /usr/local
-#       assumes that GMT, netCDF, and OpenMotif are installed using fink
-elsif ($preset eq "macosxusrlocal")
-	{
-	print "\nUsing preset configuration for MacOs X in /usr/local/...\n";
-	$FINKPREFIX = "/sw";
-	$MBSYSTEM_HOME = "/usr/local/mbsystem";
-	$OS = "DARWIN";
-	$CC = "cc";
-	$BYTESWAPPED = "NO";
-	$GRAPHICAL = "YES";
-	$MOTIFINCDIR = "$FINKPREFIX/include";
-	$MOTIFLIBS = "-L$FINKPREFIX/lib -L/usr/X11R6/lib -lXm -lXt -lX11";
-	$OPENGLLIBS = "-lGLw -lGLU -lGL";
-	$GMTLIBDIR = "$FINKPREFIX/lib";
-	$GMTINCDIR = "$FINKPREFIX/include";
-	$NETCDFLIBDIR = "$FINKPREFIX/lib";
-	$NETCDFINCDIR = "$FINKPREFIX/include";
-	$LEVITUS = "$MBSYSTEM_HOME/share/LevitusAnnual82.dat";
-	$PROJECTIONS = "$MBSYSTEM_HOME/share/Projections.dat";
-	$CFLAGS = "-g -I/usr/X11R6/include";
-	$LFLAGS = "-Wl -lm -bind_at_load";
-	}
-	
-# EDIT THE PARAMETERS HERE IF NO APPROPRIATE PRESET CONFIGURATION IS DEFINED
-# Set the configuration parameters manually:
-else
-	{
-	print "\nUsing manually defined configuration...\n";
-	$MBSYSTEM_HOME = "/Users/caress/sandbox/mbsystem";
-	$OS = "DARWIN";
-	$CC = "cc";
-	$BYTESWAPPED = "NO";
-	$GRAPHICAL = "YES";
-	$MOTIFINCDIR = "/sw/include";
-	$MOTIFLIBS = "-L/sw/lib -L/usr/X11R6/lib -lXm -lXt -lX11";
-	$OPENGLLIBS = "-lGLw -lGLU -lGL";
-	$GMTLIBDIR = "/usr/local/gmt/lib";
-	$GMTINCDIR = "/usr/local/gmt/include";
-	$NETCDFLIBDIR = "/sw/lib";
-	$NETCDFINCDIR = "/sw/include";
-	$LEVITUS = "$MBSYSTEM_HOME/share/LevitusAnnual82.dat";
-	$PROJECTIONS = "$MBSYSTEM_HOME/share/Projections.dat";
-	$CFLAGS = "-g -I/usr/X11R6/include";
-	$LFLAGS = "-Wl -lm -bind_at_load";
-	}
-
+#--------------------------------------------------------------------
 #
 # **** LEAVE EVERYTHING ELSE BELOW ALONE ****
 

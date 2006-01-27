@@ -26,6 +26,7 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
+Version 5.0.8beta2     January 27, 2006
 Version 5.0.8beta      January 24, 2006
 Version 5.0.7          April 7, 2005
 Version 5.0.6          February 19, 2005
@@ -84,7 +85,7 @@ Palisades, NY 10964
 
 MB-SYSTEM COPYRIGHT, LICENSING AND CAVEAT:
 -----------------------------------------
-MB-System Copyright (C) 1993-2005 by
+MB-System Copyright (C) 1993-2006 by
 David W. Caress (caress@mbari.org)
   Monterey Bay Aquarium Research Institute
   Moss Landing, CA 95039
@@ -255,6 +256,10 @@ latitudes.
 The program mbset now accepts '=' as well as ':' as separators between
 parameter names and values in -P option arguments (as suggested by
 Bob Covill).
+
+The install_makefiles script has been altered so that the editable 
+parameters are located towards the top of the file rather than below
+the documentation of example settings for different operating systems.
 
 MB-SYSTEM VERSION 5.0.7 RELEASE NOTES:
 ------------------------------------------
@@ -1140,10 +1145,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.70 2006-01-24 22:06:42 caress Exp $
+RCS ID: $Id: README,v 5.71 2006-01-27 19:08:27 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.70  2006/01/24 22:06:42  caress
+5.0.8beta.
+
 Revision 5.69  2006/01/24 19:04:07  caress
 Version 5.0.8 beta.
 

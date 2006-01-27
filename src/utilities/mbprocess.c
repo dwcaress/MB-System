@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbprocess.c	3/31/93
- *    $Id: mbprocess.c,v 5.43 2006-01-20 19:34:47 caress Exp $
+ *    $Id: mbprocess.c,v 5.44 2006-01-27 19:13:04 caress Exp $
  *
  *    Copyright (c) 2000, 2002, 2003, 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -36,6 +36,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.43  2006/01/20 19:34:47  caress
+ * Working towards 5.0.8
+ *
  * Revision 5.42  2006/01/18 15:17:00  caress
  * Added stdlib.h include.
  *
@@ -228,7 +231,7 @@ int get_anglecorr(int verbose,
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbprocess.c,v 5.43 2006-01-20 19:34:47 caress Exp $";
+	static char rcs_id[] = "$Id: mbprocess.c,v 5.44 2006-01-27 19:13:04 caress Exp $";
 	static char program_name[] = "mbprocess";
 	static char help_message[] =  "mbprocess is a tool for processing swath sonar bathymetry data.\n\
 This program performs a number of functions, including:\n\
@@ -2544,7 +2547,7 @@ and mbedit edit save files.\n";
 				mb_get_itime(verbose,time_j,time_i);
 				mb_get_time(verbose,time_i,&time_d);
 				tidetime[ntide] = time_d;
-				if (nget == 7)
+				if (nget == 6)
 					tide_ok = MB_YES;
 				}
 	

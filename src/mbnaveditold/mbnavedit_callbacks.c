@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_callbacks.c	6/24/95
- *    $Id: mbnavedit_callbacks.c,v 5.2 2003-04-17 21:10:27 caress Exp $
+ *    $Id: mbnavedit_callbacks.c,v 5.3 2006-01-27 19:12:12 caress Exp $
  *
  *    Copyright (c) 1995, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	June 24,  1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2003/04/17 21:10:27  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.1  2001/01/22 07:49:44  caress
  * Version 5.0.beta01
  *
@@ -87,6 +90,7 @@
 
 /* include files */
 #include <stdio.h>
+#include <stdlib.h>
 #include <Xm/Xm.h>
 #include <X11/cursorfont.h>
 
