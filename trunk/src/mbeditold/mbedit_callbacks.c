@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit_callbacks.c	3/28/97
- *    $Id: mbedit_callbacks.c,v 5.2 2003-04-17 20:50:51 caress Exp $
+ *    $Id: mbedit_callbacks.c,v 5.3 2006-01-27 19:11:29 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	March 28, 1997  GUI recast
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2003/04/17 20:50:51  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.1  2001/01/22 07:42:13  caress
  * Version 5.0.beta01
  *
@@ -89,6 +92,7 @@
  * Standard includes for builtins.
  */
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
 #include <sys/stat.h>

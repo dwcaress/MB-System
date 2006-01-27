@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em300mba.c	10/16/98
- *	$Id: mbr_em300mba.c,v 5.24 2006-01-11 07:37:29 caress Exp $
+ *	$Id: mbr_em300mba.c,v 5.25 2006-01-27 19:09:38 caress Exp $
  *
  *    Copyright (c) 1998, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	October 16,  1998
  * $Log: not supported by cvs2svn $
+ * Revision 5.24  2006/01/11 07:37:29  caress
+ * Working towards 5.0.8
+ *
  * Revision 5.23  2006/01/06 18:27:19  caress
  * Working towards 5.0.8
  *
@@ -265,7 +268,7 @@ int mbr_em300mba_wr_rawbeam3(int verbose, FILE *mbfp, int swap,
 int mbr_em300mba_wr_ss(int verbose, FILE *mbfp, int swap, 
 		struct mbsys_simrad2_struct *store, int *error);
 
-static char res_id[]="$Id: mbr_em300mba.c,v 5.24 2006-01-11 07:37:29 caress Exp $";
+static char res_id[]="$Id: mbr_em300mba.c,v 5.25 2006-01-27 19:09:38 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_em300mba(int verbose, void *mbio_ptr, int *error)
@@ -911,14 +914,7 @@ int mbr_em300mba_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 
 	/* set flag to swap bytes if necessary */
-	if (mb_io_ptr->byteswapped != *databyteswapped)
-		{
-		swap = MB_YES;
-		}
-	else
-		{
-		swap = MB_NO;
-		}
+	swap = *databyteswapped;
 
 	/* loop over reading data until a record is ready for return */
 	done = MB_NO;
@@ -987,17 +983,10 @@ Have a nice day...\n");
 			*sonarlast = sonar;
 
 			/* set flag to swap bytes if necessary */
-			if (mb_io_ptr->byteswapped != *databyteswapped)
-				{
-				swap = MB_YES;
-				}
-			else
-				{
-				swap = MB_NO;
-				}
+			swap = *databyteswapped;
 
 			/* get record_size */
-			if (swap == MB_YES)
+			if (*databyteswapped != mb_io_ptr->byteswapped)
 				record_size = mb_swap_int(record_size);
 			*record_size_save = record_size;
 			}
@@ -1710,23 +1699,20 @@ int mbr_em300mba_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 		}
 
 	/* set flag to swap bytes if necessary */
-	if (mb_io_ptr->byteswapped != *databyteswapped)
-		{
-		swap = MB_YES;
-		}
-	else
-		{
-		swap = MB_NO;
-		}
+	swap = *databyteswapped;
 		
 	*type = *((short *)&label[0]);
 	*sonar = *((short *)&label[2]);
 	if (mb_io_ptr->byteswapped == MB_YES)
 		*type = mb_swap_short(*type);
-	if (swap == MB_YES)
+	if (*databyteswapped != mb_io_ptr->byteswapped)
 		{
 		*sonar = mb_swap_short(*sonar);
 		}
+
+#ifdef MBR_EM300RAW_DEBUG
+fprintf(stderr,"typegood:%d mb_io_ptr->byteswapped:%d sonarswapgood:%d *databyteswapped:%d *type:%d *sonar:%d\n",typegood,mb_io_ptr->byteswapped,sonarswapgood,*databyteswapped,*type,*sonar);
+#endif
 		
 	/* check for valid sonar */
 	if (*sonar != MBSYS_SIMRAD2_EM120
@@ -5082,7 +5068,7 @@ int mbr_em300mba_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 #endif
 
 	/* set swap flag */
-	swap = mb_io_ptr->byteswapped;
+	swap = MB_NO;
 
 	if (store->kind == MB_DATA_COMMENT
 		|| store->kind == MB_DATA_START

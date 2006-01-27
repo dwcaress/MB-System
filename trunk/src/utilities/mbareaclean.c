@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbareaclean.c	2/27/2003
- *    $Id: mbareaclean.c,v 5.6 2006-01-18 15:17:00 caress Exp $
+ *    $Id: mbareaclean.c,v 5.7 2006-01-27 19:13:04 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -37,6 +37,9 @@
  *		Amsterdam Airport
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2006/01/18 15:17:00  caress
+ * Added stdlib.h include.
+ *
  * Revision 5.5  2005/11/05 01:07:54  caress
  * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
  *
@@ -129,7 +132,7 @@ int getsoundingptr(int verbose, int soundingid,
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbareaclean.c,v 5.6 2006-01-18 15:17:00 caress Exp $";
+	static char rcs_id[] = "$Id: mbareaclean.c,v 5.7 2006-01-27 19:13:04 caress Exp $";
 	static char program_name[] = "MBAREACLEAN";
 	static char help_message[] =  "MBAREACLEAN identifies and flags artifacts in swath bathymetry data";
 	static char usage_message[] = "mbareaclean [-Fformat -Iinfile -Rwest/east/south/north -B -G -Mthreshold/nmin -Sbinsize]";
@@ -206,8 +209,8 @@ main (int argc, char **argv)
 	int	plane_fit_nmin = 10;
 	int	output_good = MB_NO;
 	int	output_bad = MB_NO;
-	double	areabounds[4];
-	double	binsize;
+	double	areabounds[4] = {0.0, 0.0, 0.0, 0.0};;
+	double	binsize = 0.0;
 	double	dx, dy;
 	int	nx, ny;
 	double	mtodeglon;
@@ -619,6 +622,9 @@ main (int argc, char **argv)
 	if (error == MB_ERROR_NO_ERROR)
 		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
 						sizeof(double), (void **)&sslat, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(char), (void **)&beamflagorg, &error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
