@@ -178,6 +178,10 @@ Plotting shellscripts
 called "root_num.grd.cmd" and "root_sd.grd.cmd" are also output
 if the grids are in a \fBGMT\fP grid format.
 
+The \fB-J\fP option can be used to specify grids in UTM eastings
+and northings (meters) rather than in geographic coordinates
+(longitude and latitude degrees).
+
 .SH AUTHORSHIP
 David W. Caress (caress@mbari.org)
 .br
@@ -192,12 +196,13 @@ Dale N. Chayes (dale@ldeo.columbia.edu)
 .B \-A
 \fIdatatype\fP
 .br
-Sets the type of data to be read and moThe \fB-J\fP option can be used to specify grids in UTM eastings
-and northings (meters) rather than in geographic coordinates
-(longitude and latitude degrees).saiced.  
-If \fIdatatype\fP = 3,
-amplitude data will be gridded.  If \fIdatatype\fP = 4,
-sidescan data will be gridded.  
+Sets the type of data to be read and mosaiced.  
+ 	\fIdatatype\fP = 3, amplitude data will be mosaiced.  
+ 	\fIdatatype\fP = 4, sidescan data will be mosaiced.  
+ 	\fIdatatype\fP = 5, flat bottom grazing angle will be mosaiced.  
+ 	\fIdatatype\fP = 6, acrosstrack grazing angle will be mosaiced.  
+ 	\fIdatatype\fP = 7, acrosstrack slope will be mosaiced.  
+.br
 Default: \fIdatatype\fP = 4 (sidescan).
 .TP
 .B \-B
@@ -629,7 +634,7 @@ the mosaic to be filled in through spine interpolation .
 The output looks like:
  
  Program mbmosaic
- Version $Id: mbmosaic.l,v 5.6 2003-11-28 19:19:14 caress Exp $
+ Version $Id: mbmosaic.l,v 5.7 2006-02-01 07:36:08 caress Exp $
  MB-system Version 4.5
 
  MBMOSAIC Parameters:

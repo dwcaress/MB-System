@@ -1,4 +1,4 @@
-.TH mbareaclean l "28 November 2003" "MB-System 5.0" "MB-System 5.0"
+.TH mbareaclean l "31 January 2006" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbareaclean\fP - Tool to automatically flag bad beams in swath 
 sonar bathymetry data within a specified area.
@@ -7,8 +7,10 @@ sonar bathymetry data within a specified area.
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbareaclean\fP [\fB-F\fP\fIformat\fP \fB-I\fP\fIinfile\fP \fB-R\fP\fIwest/east/south/north\fP 
-\fB-B -G -H -M\fP\fIthreshold\fP[\fI/nmin\fP] \fB-S\fP\fIbinsize\fP -V\fP]
+\fBmbareaclean\fP  \fB-R\fP\fIwest/east/south/north\fP  \fB-S\fP\fIbinsize\fP 
+[\fB-D\fP\fIthreshold\fP \fB-F\fP\fIformat\fP \fB-I\fP\fIinfile\fP 
+\fB-B -G -H -M\fP\fIthreshold\fP[\fI/nmin\fP]  
+\fB-N\fP[-]\fImin_beam\fP[\fI/maxbeam\fP] \fB-T\fP\fItype\fP -V\fP]
 
 .SH DESCRIPTION
 \fBmbareaclean\fP identifies and flags artifacts in swath sonar 
@@ -35,8 +37,8 @@ to the edit save file of the swath file containing that sounding. This
 program will create edit save files if necessary, or append to those that
 already exist.
 
-At present only one algorithm for identifying good and bad beams is
-implemented. This is a simple median filter controlled by the 
+At present only two algorithms for identifying good and bad beams is
+implemented. The first is a simple median filter controlled by the 
 \fB-M\fP\fIthreshold/nmin\fP option. Soundings that differ from the
 median depth by a value greater than \fIthreshold\fP times the sonar 
 altitude will be considered "bad". So, if \fIthreshold\fP = 0.05, then
@@ -44,6 +46,30 @@ any sounding that is 5% greater or less than the median depth will be
 considered bad. The \fInmin\fP parameter sets the minimum number of 
 soundings required to use the median filter, The default values are 
 \fIthreshold\fP = 0.25 and \fInmin\fP = 10.
+
+The second algorithm is a simple standard deviation filter controlled by the
+\fB-D\fP\fIthreshold/nmin\fP option. Soundings that differ from the
+mean depth by a value greater than \fIthreshold\fP times the standard deviation 
+of the bin will be considered "bad". So, if \fIthreshold\fP = 2, then
+any sounding that is more than 2 standard deviations greater or less than the mean depth will be
+considered bad. The \fInmin\fP parameter sets the minimum number of 
+soundings required to use the filter, The default values are 
+\fIthreshold\fP = 2.0 and \fInmin\fP = 10.
+
+Two options allow limiting the soundings that may be flagged. 
+\fB-N\fP[-]\fImin_beam/maxbeam\fP limits flagging to only those beams in 
+(or out) of the given range. 
+\fB-T\fP\fItype\fP limits flagging to soundings using the specified bottom 
+detection algorithm.
+Many sounders use amplitude detection algorithms for the central beams
+and phase detection algorithms for the outer beams, falling back to 
+amplitude detection when phase detection fails. 
+Amplitude detections in the outer beams are second rate soundings and
+frequently have a higher range of errors than other soundings. 
+Using \fB-N\fP and \fB-T\fP together allows stricter cleaning algorithms
+to be applied to these lower quality data. For example to flag bad all
+amplitude detections in the outer thirty beams which are more than one standard deviation
+from the mean: \fB-N-30 -T1 -D1\fP.
 
 .SH AUTHORSHIP
 David W. Caress (caress@mbari.org)
@@ -63,6 +89,18 @@ Dale N. Chayes (dale@ldeo.columbia.edu)
 This option causes \fBmbareaclean\fP to flag as bad any previously unflagged
 soundings that fail one of the specified statistical tests. If neither \fB-B\fP
 or \fB-G\fP are specified, then the program will by default use this option.
+.TP
+.B \-D
+\fIthreshold\fP[\fI/nmin\fP]
+.br
+Turns on use of a standard deviation filter test for the soundings. 
+Soundings that differ from the
+mean depth by a value greater than \fIthreshold\fP times the standard deviation 
+will be considered "bad". So, if \fIthreshold\fP = 2.0, then
+any sounding that is twice the standard deviation from the mean depth will be
+considered bad. The \fInmin\fP parameter sets the minimum number of 
+soundings required to use the standard deviation filter. The default values are 
+\fIthreshold\fP = 2.0 and \fInmin\fP = 10.
 .TP
 .B \-F
 \fIformat\fP
@@ -94,8 +132,8 @@ Sets the input filename. If \fIformat\fP > 0 (set with the
 is read and processed. If \fIformat\fP < 0, then \fIinfile\fP
 is assumed to be an ascii file containing a list of the input swath sonar
 data files to be processed and their formats.  The program will read 
-and process the data in each one of these files. Each input file will
-have an associated output file with either the ".sga" or ".aga" suffix.
+and process the data in all of these files. Each input file will
+have an associated output file with either the ".esf" suffix.
 In the \fIinfile\fP file, each
 data file should be followed by a data format identifier, e.g.:
  	datafile1 11
@@ -118,6 +156,18 @@ considered bad. The \fInmin\fP parameter sets the minimum number of
 soundings required to use the median filter, The default values are 
 \fIthreshold\fP = 0.25 and \fInmin\fP = 10.
 .TP
+.B \-N
+[-]\fImin_beam\fP[\fI/max_beam\fP]
+.br
+Limits the beams to which flagging will be applied.
+Only soundings for beams from \fImin_beam\fP to \fImax_beam\fP, inclusive, will have flags applied.
+If \fImin_beam\fP is preceded by a \fB-\fP then only beams outside the range will be flagged.
+If \fImax_beam\fP is not given it will be set so that an equal number of beams lay above it as 
+lay below \fImin_beam\fP. So for a Simrad EM1002 sounder with 111 beams \fB-N-30\fP will only flag
+beam numbers 1 to 29 and 82 to 111. 
+All good soundings, regardless of beam, will be included in the calculations of median, mean 
+and standard deviation for the bin.
+.TP
 .B \-R
 \fIwest/east/south/north\fP
 .br
@@ -135,6 +185,16 @@ with the \fB-R\fP option will be broken into a grid with cells that
 are roughly \fIbinsize\fP meters east-west and north-south.
 .br
 Default: None. This is a mandatory argument.
+.TP
+.B \-T
+\fIdetect_type\fP
+.br
+Limits the soundings to which flagging will be applied to only those which
+use the specified bottom detection algorithm.
+\fIdetect_type\fP must be one of:
+      0 - unknown algorithm
+      1 - amplitude detection 
+      2 - phase detection
 .TP
 .B \-V
 Normally, \fBmbareaclean\fP works "silently" without outputting
@@ -160,7 +220,7 @@ of the sonar altitude, and the minimum number of sounding required for
 filtering is 10. The results look like:
 
  Program MBAREACLEAN
- Version $Id: mbareaclean.l,v 5.3 2004-05-21 23:10:32 caress Exp $
+ Version $Id: mbareaclean.l,v 5.4 2006-02-01 07:36:08 caress Exp $
  MB-system Version 5.0.beta29
  Area of interest:
       Minimum Longitude: -122.425560 Maximum Longitude: -122.419740
@@ -212,9 +272,6 @@ filtering is 10. The results look like:
 \fBmbinfo\fP(l) \fBmbprocess\fP(l),
 
 .SH BUGS
-A simple median filter is the only statistical test
-implemented at present. Any suggestions?
-
 The algorithms implemented in \fBmbareaclean\fP simply 
 don't detect all bathymetric artifacts that
 are obvious to the eye on contour charts.  Although
