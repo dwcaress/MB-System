@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmosaic.c	2/10/97
- *    $Id: mbmosaic.c,v 5.19 2006-01-18 15:17:00 caress Exp $
+ *    $Id: mbmosaic.c,v 5.20 2006-02-01 07:31:06 caress Exp $
  *
  *    Copyright (c) 1997, 2000, 2002, 2003, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	February 10, 1997
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.19  2006/01/18 15:17:00  caress
+ * Added stdlib.h include.
+ *
  * Revision 5.18  2005/11/05 01:07:54  caress
  * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
  *
@@ -162,6 +165,9 @@
 /* gridded data type */
 #define	MBMOSAIC_DATA_AMPLITUDE		3
 #define	MBMOSAIC_DATA_SIDESCAN		4
+#define MBMOSAIC_DATA_FLAT_GRAZING	5
+#define MBMOSAIC_DATA_GRAZING		6
+#define MBMOSAIC_DATA_SLOPE		7
 
 /* prioritization mode */
 #define	MBMOSAIC_PRIORITY_NONE		0
@@ -173,7 +179,7 @@
 #define	NO_DATA_FLAG	99999
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbmosaic.c,v 5.19 2006-01-18 15:17:00 caress Exp $";
+static char rcs_id[] = "$Id: mbmosaic.c,v 5.20 2006-02-01 07:31:06 caress Exp $";
 static char program_name[] = "mbmosaic";
 static char help_message[] =  "mbmosaic is an utility used to mosaic amplitude or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered by multibeam swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbmosaic -Ifilelist -Oroot \
@@ -259,6 +265,8 @@ main (int argc, char **argv)
 	char	ofile[MB_PATH_MAXLINE];
 	char	plot_cmd[MB_COMMENT_MAXLINE];
 	int	plot_status;
+	int	use_beams = MB_NO;
+	int 	use_slope = MB_NO;
 
 	/* mbio read values */
 	int	rpings;
@@ -312,6 +320,15 @@ main (int argc, char **argv)
 	int	nmax;
 	double	smin, smax;
 	int	nbinset, nbinzero, nbinspline;
+
+	/* crosstrack slope values */
+	double	angle, depth, slope;
+	int	ndepths;
+	double	*depths;
+	double	*depthacrosstrack;
+	int	nslopes;
+	double	*slopes;
+	double	*slopeacrosstrack;
 
 	/* projected grid parameters */
 	int	use_projection = MB_NO;
@@ -643,6 +660,17 @@ main (int argc, char **argv)
 		error = MB_ERROR_BAD_PARAMETER;
 		exit(error);
 		}
+
+	/* use bathymetry/amplitude beams for types other than sidescan */
+	if (datatype == MBMOSAIC_DATA_SIDESCAN)
+	  	use_beams = MB_NO;
+	else
+	  	use_beams = MB_YES;
+
+	/* use bathymetry slope for slope and slope corrected grazing angle */
+	if (datatype == MBMOSAIC_DATA_GRAZING
+		|| datatype == MBMOSAIC_DATA_SLOPE)
+		use_slope = MB_YES;
 
 	/* more option not available with single best algorithm */
 	if (more == MB_YES 
@@ -1069,6 +1097,12 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 			fprintf(outfp,"Amplitude\n");
 		else if (datatype == MBMOSAIC_DATA_SIDESCAN)
 			fprintf(outfp,"Sidescan\n");
+		else if (datatype == MBMOSAIC_DATA_FLAT_GRAZING)
+			fprintf(outfp,"Flat bottom grazing angle\n");
+		else if (datatype == MBMOSAIC_DATA_GRAZING)
+			fprintf(outfp,"Grazing angle\n");
+		else if (datatype == MBMOSAIC_DATA_SLOPE)
+			fprintf(outfp,"Bottom slope\n");
 		else
 			fprintf(outfp,"Unknown?\n");
 		fprintf(outfp,"Grid projection: %s\n", projection_id);
@@ -1398,7 +1432,7 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 				headingy = cos(DTR*heading);
 				}
 
-			if (datatype == MBMOSAIC_DATA_AMPLITUDE
+			if (use_beams == MB_YES
 				&& error == MB_ERROR_NO_ERROR)
 			  {
 				
@@ -1441,6 +1475,14 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 				beams_amp, amp, bathacrosstrack, 
 				angles, priorities, &error);
 
+			  /* get bathymetry slopes if needed */
+			  if (use_slope == MB_YES)
+			    	set_bathyslope(verbose, 
+					beams_bath,beamflag,bath,bathacrosstrack,
+					&ndepths,depths,depthacrosstrack,
+					&nslopes,slopes,slopeacrosstrack,
+					&error);
+
 			  /* deal with data */
 			  for (ib=0;ib<beams_amp;ib++) 
 			    if (mb_beam_ok(beamflag[ib]))
@@ -1465,15 +1507,44 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 				    /* set grid if highest weight */
 				    kgrid = ii*gydim + jj;
 				    if (priorities[ib] > maxpriority[kgrid])
-				    	{
-				    	grid[kgrid] = amp[ib];
-				    	cnt[kgrid] = 1;
-				    	maxpriority[kgrid] = priorities[ib];
-				    	}
+					{
+					if (use_slope)
+						status = get_bathyslope(verbose,
+						    ndepths,depths,depthacrosstrack,
+						    nslopes,slopes,slopeacrosstrack,
+						    depthacrosstrack[ib],
+						    &depth,&slope,&error);
+
+					if (datatype == MBMOSAIC_DATA_AMPLITUDE)
+					    grid[kgrid] = amp[ib];
+					else if (datatype == MBMOSAIC_DATA_FLAT_GRAZING)
+					  {
+					    if (angles[ib] > 0)
+					      grid[kgrid] = angles[ib];
+					    else
+					      grid[kgrid] = - angles[ib];
+					  }
+					else if (datatype == MBMOSAIC_DATA_GRAZING)
+					  {
+					    slope +=  angles[ib];
+					    if (slope < 0)
+					      slope = - slope;
+					    grid[kgrid] = slope;
+					  }
+					else if (datatype == MBMOSAIC_DATA_SLOPE)
+					  {
+					    if (slope < 0)
+					      slope = - slope;
+					    grid[kgrid] = slope;
+					  }
+
+					cnt[kgrid] = 1;
+					maxpriority[kgrid] = priorities[ib];
+					}
+				    ndata++;
+				    ndatafile++;
 				    }
-				ndata++;
-				ndatafile++;
-				}
+				  }
 			      }
 			  }
 			else if (datatype == MBMOSAIC_DATA_SIDESCAN
@@ -1543,14 +1614,14 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 				    /* set grid if highest weight */
 				    kgrid = ii*gydim + jj;
 				    if (priorities[ib] > maxpriority[kgrid])
-				    	{
-				    	grid[kgrid] = ss[ib];
-				    	cnt[kgrid] = 1;
-				    	maxpriority[kgrid] = priorities[ib];
-				    	}
+					{
+					grid[kgrid] = ss[ib];
+					cnt[kgrid] = 1;
+					maxpriority[kgrid] = priorities[ib];
+					}
+				    ndata++;
+				    ndatafile++;
 				    }
-				ndata++;
-				ndatafile++;
 				}
 			      }
 			  }
@@ -1755,7 +1826,7 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 				headingy = cos(DTR*heading);
 				}
 
-			if (datatype == MBMOSAIC_DATA_AMPLITUDE
+			if (use_beams == MB_YES
 				&& error == MB_ERROR_NO_ERROR)
 			  {
 				
@@ -1798,6 +1869,14 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 				beams_amp, amp, bathacrosstrack, 
 				angles, priorities, &error);
 
+			  /* get bathymetry slopes if needed */
+			  if (use_slope == MB_YES)
+			    	set_bathyslope(verbose, 
+					beams_bath,beamflag,bath,bathacrosstrack,
+					&ndepths,depths,depthacrosstrack,
+					&nslopes,slopes,slopeacrosstrack,
+					&error);
+
 			  /* deal with data */
 			  for (ib=0;ib<beams_amp;ib++) 
 			    if (mb_beam_ok(beamflag[ib]))
@@ -1824,13 +1903,47 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 				    if (priorities[ib] > 0.0 
 					&& priorities[ib] >= maxpriority[kgrid] - priority_range)
 					{
+					if (use_slope)
+					    status = get_bathyslope(verbose,
+						ndepths,depths,depthacrosstrack,
+						nslopes,slopes,slopeacrosstrack,
+						depthacrosstrack[ib],
+						&depth,&slope,&error);
+
 					xx = wbnd[0] + ii*dx - bathlon[ib];
 					yy = wbnd[2] + jj*dy - bathlat[ib];
 					norm_weight = file_weight * exp(-(xx*xx + yy*yy)*factor);
-					grid[kgrid] += norm_weight * amp[ib];
 					norm[kgrid] += norm_weight;
-					sigma[kgrid] += norm_weight * amp[ib] * amp[ib];
-					cnt[kgrid]++;
+					if (datatype == MBMOSAIC_DATA_AMPLITUDE)
+					  {
+					    grid[kgrid] += norm_weight * amp[ib];
+					    sigma[kgrid] += norm_weight * amp[ib] * amp[ib];
+					  }
+					else if (datatype == MBMOSAIC_DATA_FLAT_GRAZING)
+					  {
+					    if (angles[ib] > 0)
+					      grid[kgrid] += norm_weight * angles[ib];
+					    else
+					      grid[kgrid] -= norm_weight * angles[ib];
+					    sigma[kgrid] += norm_weight * angles[ib] * angles[ib];
+					  }
+					else if (datatype == MBMOSAIC_DATA_GRAZING)
+					  {
+					    slope += angles[ib];
+					    if (slope < 0)
+					      slope = - slope;
+					    grid[kgrid] += norm_weight * slope;
+					    sigma[kgrid] += norm_weight * slope * slope;
+					  }
+					else if (datatype == MBMOSAIC_DATA_SLOPE)
+					  {
+					    if (slope < 0)
+					      slope = - slope;
+					    grid[kgrid] += norm_weight * slope;
+					    sigma[kgrid] += norm_weight * slope * slope;
+					  }
+					if (ii == ix && jj == iy)
+					    cnt[kgrid]++;
 					}
 				    }
 				ndata++;
@@ -1913,7 +2026,8 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 					grid[kgrid] += norm_weight * ss[ib];
 					norm[kgrid] += norm_weight;
 					sigma[kgrid] += norm_weight * ss[ib] * ss[ib];
-					cnt[kgrid]++;
+					if (ii == ix && jj == iy)
+					    cnt[kgrid]++;
 					}
 				    }
 				ndata++;
@@ -2240,6 +2354,27 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 		strcpy(nlabel,"Number of Sidescan Data Points");
 		strcpy(sdlabel,"Sidescan Standard Deviation (m)");
 		strcpy(title,"Sidescan Grid");
+		}
+	else if (datatype == MBMOSAIC_DATA_FLAT_GRAZING)
+		{
+		strcpy(zlabel,"Degrees");
+		strcpy(nlabel,"Number of Bottom Data Points");
+		strcpy(sdlabel,"Grazing angle Standard Deviation (m)");
+		strcpy(title,"Flat bottom grazing angle Grid");
+		}
+	else if (datatype == MBMOSAIC_DATA_GRAZING)
+		{
+		strcpy(zlabel,"Degrees");
+		strcpy(nlabel,"Number of Bottom Data Points");
+		strcpy(sdlabel,"Grazing angle Standard Deviation (m)");
+		strcpy(title,"Grazing Angle Grid");
+		}
+	else if (datatype == MBMOSAIC_DATA_SLOPE)
+		{
+		strcpy(zlabel,"Degrees");
+		strcpy(nlabel,"Number of Slope Data Points");
+		strcpy(sdlabel,"Slope Standard Deviation (m)");
+		strcpy(title,"Slope Grid");
 		}
 
 	/* write first output file */
@@ -3187,5 +3322,203 @@ int double_compare(double *a, double *b)
 		return(1);
 	else
 		return(-1);
+}
+/*--------------------------------------------------------------------*/
+int set_bathyslope(int verbose,
+	int nbath, char *beamflag, double *bath, double *bathacrosstrack,
+	int *ndepths, double *depths, double *depthacrosstrack, 
+	int *nslopes, double *slopes, double *slopeacrosstrack, 
+	int *error)
+{
+	char	*function_name = "set_bathyslope";
+	int	status = MB_SUCCESS;
+	int	i;
+	
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBlist function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
+		fprintf(stderr,"dbg2       nbath:           %d\n",nbath);
+		fprintf(stderr,"dbg2       bath:            %d\n",bath);
+		fprintf(stderr,"dbg2       bathacrosstrack: %d\n",
+			bathacrosstrack);
+		fprintf(stderr,"dbg2       bath:\n");
+		for (i=0;i<nbath;i++)
+			fprintf(stderr,"dbg2         %d %f %f\n", 
+				i, bath[i], bathacrosstrack[i]);
+		}
+
+	/* first find all depths */
+	*ndepths = 0;
+	for (i=0;i<nbath;i++)
+		{
+		if (mb_beam_ok(beamflag[i]))
+			{
+			depths[*ndepths] = bath[i];
+			depthacrosstrack[*ndepths] = bathacrosstrack[i];
+			(*ndepths)++;
+			}
+		}
+
+	/* now calculate slopes */
+	*nslopes = *ndepths + 1;
+	for (i=0;i<*ndepths-1;i++)
+		{
+		slopes[i+1] = (depths[i+1] - depths[i])
+			/(depthacrosstrack[i+1] - depthacrosstrack[i]);
+		slopeacrosstrack[i+1] = 0.5*(depthacrosstrack[i+1] 
+			+ depthacrosstrack[i]);
+		}
+	if (*ndepths > 1)
+		{
+		slopes[0] = 0.0;
+		slopeacrosstrack[0] = depthacrosstrack[0];
+		slopes[*ndepths] = 0.0;
+		slopeacrosstrack[*ndepths] = 
+			depthacrosstrack[*ndepths-1];
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBlist function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       ndepths:         %d\n",
+			*ndepths);
+		fprintf(stderr,"dbg2       depths:\n");
+		for (i=0;i<*ndepths;i++)
+			fprintf(stderr,"dbg2         %d %f %f\n", 
+				i, depths[i], depthacrosstrack[i]);
+		fprintf(stderr,"dbg2       nslopes:         %d\n",
+			*nslopes);
+		fprintf(stderr,"dbg2       slopes:\n");
+		for (i=0;i<*nslopes;i++)
+			fprintf(stderr,"dbg2         %d %f %f\n", 
+				i, slopes[i], slopeacrosstrack[i]);
+		fprintf(stderr,"dbg2       error:           %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:          %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int get_bathyslope(int verbose,
+	int ndepths, double *depths, double *depthacrosstrack, 
+	int nslopes, double *slopes, double *slopeacrosstrack, 
+	double acrosstrack, double *depth,  double *slope, 
+	int *error)
+{
+	char	*function_name = "get_bathyslope";
+	int	status = MB_SUCCESS;
+	int	found_depth, found_slope;
+	int	idepth, islope;
+	int	i;
+	
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBlist function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
+		fprintf(stderr,"dbg2       ndepths:         %d\n",
+			ndepths);
+		fprintf(stderr,"dbg2       depths:\n");
+		for (i=0;i<ndepths;i++)
+			fprintf(stderr,"dbg2         %d %f %f\n", 
+				i, depths[i], depthacrosstrack[i]);
+		fprintf(stderr,"dbg2       nslopes:         %d\n",
+			nslopes);
+		fprintf(stderr,"dbg2       slopes:\n");
+		for (i=0;i<nslopes;i++)
+			fprintf(stderr,"dbg2         %d %f %f\n", 
+				i, slopes[i], slopeacrosstrack[i]);
+		fprintf(stderr,"dbg2       acrosstrack:     %f\n",acrosstrack);
+		}
+
+	/* check if acrosstrack is in defined interval */
+	found_depth = MB_NO;
+	found_slope = MB_NO;
+	if (ndepths > 1)
+	if (acrosstrack >= depthacrosstrack[0]
+		&& acrosstrack <= depthacrosstrack[ndepths-1])
+	    {
+
+	    /* look for depth */
+	    idepth = -1;
+	    while (found_depth == MB_NO && idepth < ndepths - 2)
+		{
+		idepth++;
+		if (acrosstrack >= depthacrosstrack[idepth]
+		    && acrosstrack <= depthacrosstrack[idepth+1])
+		    {
+		    *depth = depths[idepth] 
+			    + (acrosstrack - depthacrosstrack[idepth])
+			    /(depthacrosstrack[idepth+1] 
+			    - depthacrosstrack[idepth])
+			    *(depths[idepth+1] - depths[idepth]);
+		    found_depth = MB_YES;
+		    *error = MB_ERROR_NO_ERROR;
+		    }
+		}
+
+	    /* look for slope */
+	    islope = -1;
+	    while (found_slope == MB_NO && islope < nslopes - 2)
+		{
+		islope++;
+		if (acrosstrack >= slopeacrosstrack[islope]
+		    && acrosstrack <= slopeacrosstrack[islope+1])
+		    {
+		    *slope = slopes[islope] 
+			    + (acrosstrack - slopeacrosstrack[islope])
+			    /(slopeacrosstrack[islope+1] 
+			    - slopeacrosstrack[islope])
+			    *(slopes[islope+1] - slopes[islope]);
+		    found_slope = MB_YES;
+		    *error = MB_ERROR_NO_ERROR;
+		    }
+		}
+	    }
+
+	/* translate slope to degrees */
+	if (found_slope == MB_YES)
+	    *slope = RTD * atan(*slope);
+
+	if (isnan(*slope))
+	    *slope = 90;
+
+	/* check for failure */
+	if (found_depth != MB_YES || found_slope != MB_YES)
+		{
+		status = MB_FAILURE;
+		*error = MB_ERROR_OTHER;
+		*depth = 0.0;
+		*slope = 0.0;
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBlist function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       depth:           %f\n",*depth);
+		fprintf(stderr,"dbg2       slope:           %f\n",*slope);
+		fprintf(stderr,"dbg2       error:           %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:          %d\n",status);
+		}
+
+	/* return status */
+	return(status);
 }
 /*--------------------------------------------------------------------*/

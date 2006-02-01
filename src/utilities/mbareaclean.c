@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbareaclean.c	2/27/2003
- *    $Id: mbareaclean.c,v 5.7 2006-01-27 19:13:04 caress Exp $
+ *    $Id: mbareaclean.c,v 5.8 2006-02-01 07:31:06 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -37,6 +37,9 @@
  *		Amsterdam Airport
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2006/01/27 19:13:04  caress
+ * Version 5.0.8beta2
+ *
  * Revision 5.6  2006/01/18 15:17:00  caress
  * Added stdlib.h include.
  *
@@ -97,6 +100,7 @@ struct mbareaclean_file_struct {
 	int	nsndg;
 	int	nsndg_alloc;
 	int	sndg_countstart;
+  	int	beams_bath;
 	struct mbareaclean_sndg_struct *sndg;
 	};
 struct mbareaclean_sndg_struct {
@@ -109,6 +113,7 @@ struct mbareaclean_sndg_struct {
 	char	sndg_beamflag_org;
 	char	sndg_beamflag_esf;
 	char	sndg_beamflag;
+	char	sndg_edit;
 	};
 	
 /* sounding atorage values and arrays */
@@ -132,10 +137,10 @@ int getsoundingptr(int verbose, int soundingid,
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbareaclean.c,v 5.7 2006-01-27 19:13:04 caress Exp $";
+	static char rcs_id[] = "$Id: mbareaclean.c,v 5.8 2006-02-01 07:31:06 caress Exp $";
 	static char program_name[] = "MBAREACLEAN";
 	static char help_message[] =  "MBAREACLEAN identifies and flags artifacts in swath bathymetry data";
-	static char usage_message[] = "mbareaclean [-Fformat -Iinfile -Rwest/east/south/north -B -G -Mthreshold/nmin -Sbinsize]";
+	static char usage_message[] = "mbareaclean [-Fformat -Iinfile -Rwest/east/south/north -B -G -Sbinsize \n\t -Mthreshold/nmin -Dthreshold/nmin -Ttype -N[-]minbeam/maxbeam]";
 	extern char *optarg;
 	extern int optkind;
 	int	errflg = 0;
@@ -191,6 +196,7 @@ main (int argc, char **argv)
 	int	pixels_ss;
 	char	*beamflag;
 	char	*beamflagorg;
+	int	*detect;
 	double	*bath;
 	double	*amp;
 	double	*bathlon;
@@ -207,14 +213,28 @@ main (int argc, char **argv)
 	int	plane_fit = MB_NO;
 	double	plane_fit_threshold = 0.05;
 	int	plane_fit_nmin = 10;
+	int	std_dev_filter = MB_NO;
+	double	std_dev_threshold = 2.0;
+	int	std_dev_nmin = 10;
 	int	output_good = MB_NO;
 	int	output_bad = MB_NO;
-	double	areabounds[4] = {0.0, 0.0, 0.0, 0.0};;
+	int	flag_detect = MB_DETECT_AMPLITUDE;
+	int	use_detect = MB_NO;
+	int	limit_beams = MB_NO;
+	int	beam_in = MB_YES;
+	int	min_beam = 0;
+	int	max_beam = 0;
+	int	max_beam_no = 0;
+	double	areabounds[4];
 	double	binsize = 0.0;
 	double	dx, dy;
 	int	nx, ny;
 	double	mtodeglon;
 	double	mtodeglat;
+	double	mean;
+	double	std_dev;
+	int	detect_status;
+	int 	detect_error;
 	
 	/* median filter parameters */
 	int	binnum;
@@ -283,7 +303,7 @@ main (int argc, char **argv)
 	timegap = 1000000000.0;
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhBbGgF:f:I:i:M:m:P:p:S:s:R:r:")) != -1)
+	while ((c = getopt(argc, argv, "VvHhBbGgD:d:F:f:I:i:M:m:N:n:P:p:S:sT:t::R:r:")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -297,6 +317,13 @@ main (int argc, char **argv)
 		case 'B':
 		case 'b':
 			output_bad = MB_YES;
+			flag++;
+			break;
+		case 'D':
+		case 'd':
+		  	std_dev_filter = MB_YES;
+			sscanf (optarg,"%lf/%d", 
+				&std_dev_threshold,&std_dev_nmin);
 			flag++;
 			break;
 		case 'F':
@@ -323,6 +350,23 @@ main (int argc, char **argv)
 			if (n > 1) median_filter_nmin = i1;
 			flag++;
 			break;
+		case 'N':
+		case 'n':
+			limit_beams = MB_YES;
+			sscanf (optarg,"%d/%d", 
+					&min_beam,&max_beam_no);
+			if (optarg[0] == '-')
+			  {
+			    min_beam = -min_beam;
+			    beam_in = MB_NO;
+			  }
+			if (max_beam_no < 0)
+			  max_beam_no = -max_beam_no;
+			max_beam = max_beam_no;
+			if (max_beam < min_beam)
+			  max_beam = min_beam;
+			flag++;
+			break;
 		case 'P':
 		case 'p':
 			plane_fit = MB_YES;
@@ -343,6 +387,12 @@ main (int argc, char **argv)
 			sscanf (optarg,"%lf", &binsize);
 			flag++;
 			break;
+		case 'T':
+		case 't':
+		  	use_detect = MB_YES;
+			sscanf (optarg,"%d", &flag_detect);
+			flag++;
+			break;
 		case '?':
 			errflg++;
 		}
@@ -359,7 +409,8 @@ main (int argc, char **argv)
 
 	/* turn on median filter if nothing specified */
 	if (median_filter == MB_NO
-		&& plane_fit == MB_NO)
+		&& plane_fit == MB_NO
+	    	&& std_dev_filter == MB_NO)
 		median_filter = MB_YES;
 
 	/* turn on output bad if nothing specified */
@@ -414,6 +465,15 @@ main (int argc, char **argv)
 		fprintf(stderr,"dbg2       plane_fit:                 %d\n",plane_fit);
 		fprintf(stderr,"dbg2       plane_fit_threshold:       %f\n",plane_fit_threshold);
 		fprintf(stderr,"dbg2       plane_fit_nmin:            %d\n",plane_fit_nmin);
+		fprintf(stderr,"dbg2       std_dev_filter:            %d\n",std_dev_filter);
+		fprintf(stderr,"dbg2       std_dev_threshold:         %d\n",std_dev_threshold);
+		fprintf(stderr,"dbg2       std_dev_nmin:              %d\n",std_dev_nmin);
+		fprintf(stderr,"dbg2       use_detect:                %d\n",use_detect);
+		fprintf(stderr,"dbg2       flag_detect:               %d\n",flag_detect);
+		fprintf(stderr,"dbg2       limit_beams:               %d\n",limit_beams);
+		fprintf(stderr,"dbg2       beam_in:                   %d\n",beam_in);
+		fprintf(stderr,"dbg2       min_beam:                  %d\n",min_beam);
+		fprintf(stderr,"dbg2       max_beam_no                %d\n",max_beam_no);
 		fprintf(stderr,"dbg2       output_good:    %d\n",output_good);
 		fprintf(stderr,"dbg2       output_bad:     %d\n",output_bad);
 		fprintf(stderr,"dbg2       areabounds[0]:  %f\n",areabounds[0]);
@@ -433,6 +493,8 @@ main (int argc, char **argv)
 
 	/* calculate grid properties */
 	mb_coor_scale(verbose,0.5*(areabounds[2]+areabounds[3]),&mtodeglon,&mtodeglat);
+	if (binsize <= 0.0)
+		binsize = (areabounds[1] - areabounds[0]) / 101 / mtodeglon;
 	dx = binsize * mtodeglon;
 	dy = binsize * mtodeglat;
 	nx = 1 + (int)((areabounds[1] - areabounds[0]) / dx);
@@ -504,6 +566,40 @@ main (int argc, char **argv)
 			}
 		else
 			fprintf(stderr,"     Plane fit:     OFF\n");
+		if (std_dev_filter == MB_YES)
+			{
+			fprintf(stderr,"     Standard deviation filter: ON\n");
+			fprintf(stderr,"     Standard deviation filter threshold:    %f\n",
+					std_dev_threshold);
+			fprintf(stderr,"     Standard deviation filter minimum N:    %d\n",
+					std_dev_nmin);
+			}
+		else
+			fprintf(stderr,"     Standard deviation filter: OFF\n");
+		fprintf(stderr,"Restrictions:\n");
+		if (use_detect) 
+			{
+			fprintf(stderr,"     Only flag if bottom detection algorithn is: ");
+			if (flag_detect == MB_DETECT_UNKNOWN)
+			  	fprintf(stderr,"UNKNOWN\n");
+			else if (flag_detect == MB_DETECT_AMPLITUDE)
+			  	fprintf(stderr,"AMPLITUDE\n");
+			else if (flag_detect == MB_DETECT_PHASE)
+			  	fprintf(stderr,"PHASE\n");
+			else
+			  	fprintf(stderr,"%d\n", flag_detect);
+			}
+		if (limit_beams == MB_YES)
+			{
+			fprintf(stderr,"     Only flag if beams ");
+			if (beam_in == MB_YES)
+			  fprintf(stderr,"between");
+			else
+			  fprintf(stderr,"outside");
+			fprintf(stderr," beams %d - %d\n", min_beam, max_beam_no);
+			}
+		else
+			fprintf(stderr,"     Flag all beams\n");
 		fprintf(stderr,"Output:\n");
 		if (output_bad == MB_YES)
 			fprintf(stderr,"     Flag unflagged soundings identified as bad:  ON\n");
@@ -570,7 +666,8 @@ main (int argc, char **argv)
 	/* check for "fast bathymetry" or "fbt" file */
 	strcpy(swathfileread, swathfile);
 	formatread = format;
-	mb_get_fbt(verbose, swathfileread, &formatread, &error);
+	if (use_detect == MB_NO)
+	  	mb_get_fbt(verbose, swathfileread, &formatread, &error);
 
 	/* initialize reading the input swath sonar file */
 	if ((status = mb_read_init(
@@ -601,6 +698,9 @@ main (int argc, char **argv)
 	if (error == MB_ERROR_NO_ERROR)
 		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
 						sizeof(char), (void **)&beamflag, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(char), (void **)&detect, &error);
 	if (error == MB_ERROR_NO_ERROR)
 		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
 						sizeof(double), (void **)&bath, &error);
@@ -670,6 +770,7 @@ main (int argc, char **argv)
 	files[nfile].nsndg = 0;
 	files[nfile].nsndg_alloc = SNDGALLOCNUM;
 	files[nfile].sndg_countstart = nsndg;
+	files[nfile].beams_bath = beams_bath;
 	files[nfile].sndg = NULL;
 	status = mb_malloc(verbose,
 			files[nfile].nping_alloc * sizeof(double),
@@ -737,6 +838,23 @@ main (int argc, char **argv)
 		    		time_d, beams_bath, 
 				beamflagorg, &error);
 		
+		/* get detection */
+		if (use_detect == MB_YES) 
+		  	{
+			status = mb_get_store(verbose,mbio_ptr,&store_ptr,&error);
+			detect_status = mb_detects(verbose,mbio_ptr,store_ptr,
+						&kind,&beams_bath,detect,&detect_error);
+		    
+			if (detect_status != MB_SUCCESS)
+				{
+				status = MB_SUCCESS;
+				for (i=0;i<beams_bath;i++)
+					{
+					detect[i] = MB_DETECT_UNKNOWN;
+					}
+				}
+		    	}
+		
 		/* update counters */
 		pings_tot++;
 		pings_file++;
@@ -791,6 +909,10 @@ main (int argc, char **argv)
 		files[nfile-1].ping_time_d[files[nfile-1].nping] = time_d;
 		files[nfile-1].ping_altitude[files[nfile-1].nping] = altitude;
 		files[nfile-1].nping++;
+		
+		/* check beam range */
+		if (limit_beams == MB_YES && max_beam_no == 0)
+		  max_beam = beams_bath - min_beam;
 		
 		/* now loop over the beams and store the soundings in the grid bins */
 		for (ib=0;ib<beams_bath;ib++)
@@ -851,6 +973,23 @@ main (int argc, char **argv)
 					sndg->sndg_beamflag_org = beamflag[ib];
 					sndg->sndg_beamflag_esf = beamflagorg[ib];
 					sndg->sndg_beamflag = beamflagorg[ib];
+					sndg->sndg_edit = MB_YES;
+					if (use_detect && detect[ib] != flag_detect)
+					  	sndg->sndg_edit = MB_NO;
+					if (limit_beams == MB_YES)
+					  	{
+						if (min_beam <= ib && ib <= max_beam)
+						  	{
+							if (beam_in == MB_NO)
+							  	sndg->sndg_edit = MB_NO;
+							}
+						else
+						    	{
+							if (beam_in == MB_YES)
+							  	sndg->sndg_edit = MB_NO;
+							}
+						}
+/* fprintf(stderr,"beam: %d  edit: %d\n", ib, sndg->sndg_edit);*/
 					files[nfile-1].nsndg++;
 					nsndg++;
 					gsndg[kgrid][gsndgnum[kgrid]] 
@@ -983,30 +1122,75 @@ gsndg[kgrid][i],sndg->sndg_file,
 files[sndg->sndg_file].ping_time_d[sndg->sndg_ping], sndg->sndg_depth,median_depth,
 files[sndg->sndg_file].ping_altitude[sndg->sndg_ping],
 threshold);*/
-				if (output_bad == MB_YES
-					&& mb_beam_ok(sndg->sndg_beamflag)
-					&& fabs(sndg->sndg_depth - median_depth) 
-						> threshold)
-					{
-					sndg->sndg_beamflag = MB_FLAG_FLAG + MB_FLAG_FILTER;
-					files[sndg->sndg_file].nflagged++;
-/*fprintf(stderr," FLAGGED");*/
-					} 
-				else if (output_good == MB_YES
-					&& !mb_beam_ok(sndg->sndg_beamflag)
-					&& sndg->sndg_beamflag != MB_FLAG_NULL
-					&& fabs(sndg->sndg_depth - median_depth) 
-						<= threshold)
-					{
-					sndg->sndg_beamflag = MB_FLAG_NONE;
-					files[sndg->sndg_file].nunflagged++;
-/*fprintf(stderr," UNFLAGGED");*/
-					}
-/*fprintf(stderr,"\n");*/
+				flag_sounding(verbose, 
+					      fabs(sndg->sndg_depth - median_depth) > threshold,
+					      output_bad, output_good,
+					      sndg, &error);
 				}
 			}
 		}
 	}
+
+	/* deal with standard deviation filter */
+	if (std_dev_filter == MB_YES)
+	  {
+	  /* loop over grid cells applying std dev filter test */
+	  for (ix=0;ix<nx;ix++)
+	  for (iy=0;iy<ny;iy++)
+	    {
+		  /* get cell id */
+		  kgrid = ix*ny + iy;
+		  xx = areabounds[0] + 0.5 * dx + ix * dx;
+		  yy = areabounds[3] + 0.5 * dy + iy * dy;
+
+		  /* get mean */
+		  mean = 0.0;
+		  binnum = 0;
+		  for (i=0;i<gsndgnum[kgrid];i++)
+		    {
+			  getsoundingptr(verbose, gsndg[kgrid][i], &sndg, &error);
+			  if (mb_beam_ok(sndg->sndg_beamflag))
+			    {
+			      mean += sndg->sndg_depth;
+			      binnum++;
+			    }
+		    }
+		  mean /= binnum;
+
+		      /* get standard deviation */
+		      std_dev = 0.0;
+		      for (i=0;i<gsndgnum[kgrid];i++)
+			{
+			  getsoundingptr(verbose, gsndg[kgrid][i], &sndg, &error);
+			  if (mb_beam_ok(sndg->sndg_beamflag))
+			    std_dev += (sndg->sndg_depth - mean) * (sndg->sndg_depth - mean);
+			}
+		      std_dev = sqrt(std_dev / binnum);
+
+		      threshold = std_dev * std_dev_threshold;
+
+if (binnum>0)
+fprintf(stderr,"bin: %d %d %d  pos: %f %f  nsoundings:%d / %d mean:%f std_dev:%f\n",
+	  ix,iy,kgrid,xx,yy,binnum,gsndgnum[kgrid],mean,std_dev);
+
+
+		  /* apply standard deviation threshold only if there are enough soundings */
+		  if (binnum >= std_dev_nmin)
+		    {
+
+		      /* process the soundings */
+		      for (i=0;i<gsndgnum[kgrid];i++)
+			{
+			  getsoundingptr(verbose, gsndg[kgrid][i], &sndg, &error);
+			  flag_sounding(verbose, 
+					fabs(sndg->sndg_depth - mean) > threshold,
+					output_bad, output_good, 
+					sndg, &error);
+			}
+
+		    }
+	    }
+	  }
 
 	/* loop over files checking for changed soundings */
 	for (i=0; i < nfile; i++)
@@ -1166,6 +1350,75 @@ int getsoundingptr(int verbose, int soundingid,
 
 	/* return */
 	return(status);
+}
+/*--------------------------------------------------------------------*/
+
+int flag_sounding(int verbose, int flag, int output_bad, int output_good,
+		  struct mbareaclean_sndg_struct *sndg, int *error)
+{
+	/* local variables */
+	char	*function_name = "flag_sounding";
+	int	status = MB_SUCCESS;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:       %d\n",verbose);
+		fprintf(stderr,"dbg2       flag:          %d\n",flag);
+		fprintf(stderr,"dbg2       output_bad:    %d\n",output_bad);
+		fprintf(stderr,"dbg2       output_good:   %d\n",output_good);
+		fprintf(stderr,"dbg2       sndg->sndg_edit:     %d\n",sndg->sndg_edit);
+		fprintf(stderr,"dbg2       sndg->sndg_beam:     %d\n",sndg->sndg_beam);
+		fprintf(stderr,"dbg2       sndg->sndg_beamflag: %d\n",sndg->sndg_beamflag);
+		}
+	
+	if (sndg->sndg_edit == MB_YES) 
+	  {
+	    if (output_bad == MB_YES
+		&& mb_beam_ok(sndg->sndg_beamflag)
+		&& flag )
+	      {
+		sndg->sndg_beamflag = MB_FLAG_FLAG + MB_FLAG_FILTER;
+		files[sndg->sndg_file].nflagged++;
+	      } 
+
+	    else if (output_good == MB_YES
+		     && !mb_beam_ok(sndg->sndg_beamflag)
+		     && sndg->sndg_beamflag != MB_FLAG_NULL
+		     && !flag)
+	      {
+		sndg->sndg_beamflag = MB_FLAG_NONE;
+		files[sndg->sndg_file].nunflagged++;
+	      }
+
+	    else if (output_good == MB_YES
+		     && !mb_beam_ok(sndg->sndg_beamflag)
+		     && sndg->sndg_beamflag != MB_FLAG_NULL
+		     && flag)
+	      {
+		sndg->sndg_edit = MB_NO;
+	      }
+	  }
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       sndg->sndg_edit:     %d\n",sndg->sndg_edit);
+		fprintf(stderr,"dbg2       sndg->sndg_beamflag: %d\n",sndg->sndg_beamflag);
+		fprintf(stderr,"dbg2       error:           %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:          %d\n",status);
+		}
+
+	/* return */
+	return(status);
+
 }
 
 /*--------------------------------------------------------------------*/
