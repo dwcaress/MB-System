@@ -26,6 +26,7 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
+Version 5.0.8beta3     February 1, 2006
 Version 5.0.8beta2     January 27, 2006
 Version 5.0.8beta      January 24, 2006
 Version 5.0.7          April 7, 2005
@@ -260,6 +261,12 @@ Bob Covill).
 The install_makefiles script has been altered so that the editable 
 parameters are located towards the top of the file rather than below
 the documentation of example settings for different operating systems.
+
+The program mbareaclean now incorporates a mean filter as well as a
+median filter.
+
+The program mbmosaic will now mosaic grazing angle or acrosstrack slope as
+well as amplitude or sidescan data.
 
 MB-SYSTEM VERSION 5.0.7 RELEASE NOTES:
 ------------------------------------------
@@ -1145,10 +1152,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.71 2006-01-27 19:08:27 caress Exp $
+RCS ID: $Id: README,v 5.72 2006-02-01 07:52:09 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.71  2006/01/27 19:08:27  caress
+Version 5.0.8beta2
+
 Revision 5.70  2006/01/24 22:06:42  caress
 5.0.8beta.
 
