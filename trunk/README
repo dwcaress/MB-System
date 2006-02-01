@@ -26,6 +26,7 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
+Version 5.0.8beta4     February 1, 2006
 Version 5.0.8beta3     February 1, 2006
 Version 5.0.8beta2     January 27, 2006
 Version 5.0.8beta      January 24, 2006
@@ -263,10 +264,15 @@ parameters are located towards the top of the file rather than below
 the documentation of example settings for different operating systems.
 
 The program mbareaclean now incorporates a mean filter as well as a
-median filter.
+median filter (contributed by Gordon Keith).
 
 The program mbmosaic will now mosaic grazing angle or acrosstrack slope as
-well as amplitude or sidescan data.
+well as amplitude or sidescan data (contributed by Gordon Keith).
+
+The program mblist will now output some format specific values from
+Simrad multibeams (formats 56 and 57). In particular, some 
+system parameters, raw amplitude values, and raw sidescan samples
+may now be output (Contributed by Gordon Keith).
 
 MB-SYSTEM VERSION 5.0.7 RELEASE NOTES:
 ------------------------------------------
@@ -1152,10 +1158,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.72 2006-02-01 07:52:09 caress Exp $
+RCS ID: $Id: README,v 5.73 2006-02-01 18:32:47 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.72  2006/02/01 07:52:09  caress
+Modifications suggested by Gordon Keith
+
 Revision 5.71  2006/01/27 19:08:27  caress
 Version 5.0.8beta2
 
