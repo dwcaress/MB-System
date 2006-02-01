@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em300raw.c	10/16/98
- *	$Id: mbr_em300raw.c,v 5.29 2006-01-27 20:09:47 caress Exp $
+ *	$Id: mbr_em300raw.c,v 5.30 2006-02-01 18:32:05 caress Exp $
  *
  *    Copyright (c) 1998, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	October 16,  1998
  * $Log: not supported by cvs2svn $
+ * Revision 5.29  2006/01/27 20:09:47  caress
+ * Added support for EM3002
+ *
  * Revision 5.28  2006/01/27 19:09:38  caress
  * Version 5.0.8beta2
  *
@@ -286,7 +289,7 @@ int mbr_em300raw_wr_rawbeam2(int verbose, FILE *mbfp, int swap,
 int mbr_em300raw_wr_ss(int verbose, FILE *mbfp, int swap, 
 		struct mbsys_simrad2_struct *store, int *error);
 
-static char res_id[]="$Id: mbr_em300raw.c,v 5.29 2006-01-27 20:09:47 caress Exp $";
+static char res_id[]="$Id: mbr_em300raw.c,v 5.30 2006-02-01 18:32:05 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_em300raw(int verbose, void *mbio_ptr, int *error)
@@ -1149,6 +1152,7 @@ Have a nice day...\n");
 			(type == EM2_BATH
 			|| type == EM2_RAWBEAM
 			|| type == EM2_RAWBEAM2
+			|| type == EM2_RAWBEAM3
 			|| type == EM2_SS))
 			{
 			if (store->ping == NULL)
@@ -4472,7 +4476,7 @@ int mbr_em300raw_rd_rawbeam3(int verbose, FILE *mbfp, int swap,
 	char	*function_name = "mbr_em300raw_rd_rawbeam3";
 	int	status = MB_SUCCESS;
 	struct mbsys_simrad2_ping_struct *ping;
-	char	line[EM2_RAWBEAM2_HEADER_SIZE];
+	char	line[EM2_RAWBEAM3_HEADER_SIZE];
 	short	short_val;
 	int	int_val;
 	int	read_len;
