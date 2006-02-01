@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mblist.c	2/1/93
- *    $Id: mblist.c,v 5.18 2006-01-18 15:17:00 caress Exp $
+ *    $Id: mblist.c,v 5.19 2006-02-01 18:25:57 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
+ *    Copyright (c) 1993, 1994, 2000, 2002, 2003, 2006 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -28,6 +28,9 @@
  *		in 1990.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.18  2006/01/18 15:17:00  caress
+ * Added stdlib.h include.
+ *
  * Revision 5.17  2005/11/05 01:07:54  caress
  * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
  *
@@ -229,6 +232,8 @@
 #include "../../include/mb_status.h"
 #include "../../include/mb_format.h"
 #include "../../include/mb_define.h"
+#include "../../include/mb_io.h"
+#include "../../include/mbsys_simrad2.h"
 
 /* GMT include files */
 #include "gmt_nan.h"
@@ -270,24 +275,64 @@ int set_output(	int	verbose,
 		char	*list, 
 		int	*error);
 int set_bathyslope(int verbose,
-	int nbath, char *beamflag, double *bath, double *bathacrosstrack,
-	int *ndepths, double *depths, double *depthacrosstrack, 
-	int *nslopes, double *slopes, double *slopeacrosstrack, 
-	int *error);
+		int nbath, char *beamflag, double *bath, double *bathacrosstrack,
+		int *ndepths, double *depths, double *depthacrosstrack, 
+		int *nslopes, double *slopes, double *slopeacrosstrack, 
+		int *error);
 int get_bathyslope(int verbose,
-	int ndepths, double *depths, double *depthacrosstrack, 
-	int nslopes, double *slopes, double *slopeacrosstrack, 
-	double acrosstrack, double *depth,  double *slope, 
-	int *error);
+		int ndepths, double *depths, double *depthacrosstrack, 
+		int nslopes, double *slopes, double *slopeacrosstrack, 
+		double acrosstrack, double *depth,  double *slope, 
+		int *error);
 int printsimplevalue(int verbose, FILE *output, 
-	double value, int width, int precision, 
-	int ascii, int *invert, int *flipsign, int *error);
+		double value, int width, int precision, 
+		int ascii, int *invert, int *flipsign, int *error);
 int printNaN(int verbose, FILE *output, int ascii, int *invert, int *flipsign, int *error);
+int mb_get_raw(int verbose, void *mbio_ptr,
+		int *sample_rate,
+		double *absorption,
+		int *max_range,
+		int *r_zero,
+		int *r_zero_corr,
+		int *tvg_start,
+		int *tvg_stop,
+		double *bsn,
+		double *bso,
+		int *tx,
+		int *tvg_crossover,
+		int *nbeams_ss,
+		int *npixels,
+		int *beam_samples,
+		int *start_sample,
+		int *range,
+		double *bs,
+		double *ss_pixels,
+		int *error);
+int mb_get_raw_simrad2(int verbose, void *mbio_ptr, 
+		int *sample_rate,
+		double *absorption,
+		int *max_range,
+		int *r_zero,
+		int *r_zero_corr,
+		int *tvg_start,
+		int *tvg_stop,
+		double *bsn,
+		double *bso,
+		int *tx,
+		int *tvg_crossover,
+		int *nbeams_ss,
+		int *npixels,
+		int *beam_samples,
+		int *start_sample,
+		int *range,
+		double *bs,
+		double *ss_pixels,
+		int *error);
 
 /* NaN value */
 double	NaN;
 
-static char rcs_id[] = "$Id: mblist.c,v 5.18 2006-01-18 15:17:00 caress Exp $";
+static char rcs_id[] = "$Id: mblist.c,v 5.19 2006-02-01 18:25:57 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
@@ -359,6 +404,8 @@ main (int argc, char **argv)
 	int	check_ss = MB_NO;
 	int	invert_next_value = MB_NO;
 	int	signflip_next_value = MB_NO;
+	int	raw_next_value = MB_NO;
+	int	read_raw = MB_NO;
 	int	first = MB_YES;
 	int	ascii = MB_YES;
 	int	netcdf = MB_NO;
@@ -431,6 +478,29 @@ main (int argc, char **argv)
 	/* bathymetry feet flag */
 	int	bathy_in_feet = MB_NO;
 	double	bathy_scale;
+
+	/* raw data values */
+	int	count = 0;
+	int	invert;
+	int	flip;
+	int	sample_rate;
+	double	absorption;
+	int	max_range;
+	int 	r_zero;
+	int 	r_zero_corr;
+	int 	tvg_start;
+	int	 tvg_stop;
+	double 	bsn;
+	double 	bso;
+	int 	tx;
+	int 	tvg_crossover;
+	int 	nbeams_ss;
+	int 	npixels;
+	int 	*beam_samples = NULL;
+	int 	*range = NULL;
+	int 	*start_sample = NULL;
+	double	*bs = NULL;
+	double	*ss_pixels = NULL;
 
 	int	read_data;
 	double	distmin;
@@ -803,7 +873,27 @@ main (int argc, char **argv)
 	      fprintf(outfile, "%s ", argv[i]);
 	    fprintf(outfile, "\n\t// %s\n\n", rcs_id);
 	    fprintf(outfile, "dimensions:\n\ttimestring = 26, timestring_J = 24, timestring_j = 23, \n\t");
-	    fprintf(outfile, "timefields_J = 6,  timefields_j = 5, timefields_t = 7, latm = 13, \n\tdata = unlimited ;\n\n");
+	    fprintf(outfile, "timefields_J = 6,  timefields_j = 5, timefields_t = 7, latm = 13, \n\t");
+
+	    /* find dimensions in format list */
+	    raw_next_value == MB_NO;
+	    for (i=0; i<n_list; i++) 
+	    	if (list[i] == '/' || list[i] == '-') {
+		  // ignore
+		} else if (raw_next_value == MB_NO) {
+		    if (list[i] == '.')
+		        raw_next_value = MB_YES;
+		} else if (list[i] >= '0' && list[i] <= '9') 
+		    count = count * 10 + list[i] - '0';
+		else {
+		  raw_next_value = MB_NO;
+		  if (count > 0) {
+		    fprintf(outfile, "%c = %d,  ", list[i], count);
+		    count = 0;
+		  }
+		}
+
+	    fprintf(outfile, "\n\tdata = unlimited ;\n\n");
 	    fprintf(outfile, "variables:\n\t");
 	    fprintf(outfile, ":command_line = \"");
 	    for ( i=0; i < argc; i++)
@@ -820,8 +910,6 @@ main (int argc, char **argv)
 	    else
 	      strcpy(user, "unknown");
 	    gethostname(host,128);
-fprintf(stderr,"DATE: %s\n",ctime(&right_now));
-fprintf(stderr,"DATE: %s\n",date);
 	    
 	    fprintf(outfile, "\t:run = \"by <%s> on cpu <%s> at <%s>\";\n\n", user, host, date);
 	    
@@ -836,6 +924,8 @@ fprintf(stderr,"DATE: %s\n",date);
 		    exit(1);
 		  }
 
+		if (raw_next_value == MB_NO)
+		  {
 		switch (list[i]) 
 		  {
 		  case '/': /* Inverts next simple value */
@@ -844,6 +934,11 @@ fprintf(stderr,"DATE: %s\n",date);
 
 		  case '-': /* Flip sign on next simple value */
 		    signflip_next_value = MB_YES;
+		    break;
+
+		  case '.': /* Raw value next field */
+		    raw_next_value = MB_YES;
+		    count = 0;
 		    break;
 		    
 		  case 'A': /* Average seafloor crosstrack slope */
@@ -1579,6 +1674,301 @@ fprintf(stderr,"DATE: %s\n",date);
 		    fprintf(outfile, "number\";\n");
 		    break;
 		  }
+		  }
+		else
+		  {
+		switch (list[i]) 
+		  {
+		  case '/': /* Inverts next simple value */
+		    invert_next_value = MB_YES;
+		    break;
+
+		  case '-': /* Flip sign on next simple value */
+		    signflip_next_value = MB_YES;
+		    break;
+
+		  case '.': /* Raw value next field */
+		    raw_next_value = MB_YES;
+		    break;
+
+		  case '0':
+		  case '1':
+		  case '2':
+		  case '3':
+		  case '4':
+		  case '5':
+		  case '6':
+		  case '7':
+		  case '8':
+		  case '9':
+		    	count = count * 10 + list[i] - '0';
+			break;
+
+		  case 'A': /* backscatter */
+			strcpy(variable, "backscatter");
+			if (signflip_next_value == MB_YES)
+			  strcat(variable, "-");
+			if (invert_next_value == MB_YES)
+			  strcat(variable, "_");
+			
+			fprintf(output[i], "\t%s = ", variable);
+			
+			fprintf(outfile, "\tfloat %s(data);\n", variable);
+			fprintf(outfile, "\t\t%s:long_name = \"Backscatter\";\n", variable);
+			fprintf(outfile, "\t\t%s:units = \"", variable);
+			if (signflip_next_value == MB_YES)
+			  fprintf(outfile, "-");
+			if (invert_next_value == MB_YES)
+			  fprintf(outfile, "1/");
+			fprintf(outfile, "dB\";\n");
+			
+			signflip_next_value = MB_NO;
+			invert_next_value = MB_NO;
+			raw_next_value = MB_NO;
+			break;
+
+		  case 'a': /* absorption */
+			strcpy(variable, "absorption");
+			if (signflip_next_value == MB_YES)
+			  strcat(variable, "-");
+			if (invert_next_value == MB_YES)
+			  strcat(variable, "_");
+			
+			fprintf(output[i], "\t%s = ", variable);
+			
+			fprintf(outfile, "\tfloat %s(data);\n", variable);
+			fprintf(outfile, "\t\t%s:long_name = \"Mean absorption\";\n", variable);
+			fprintf(outfile, "\t\t%s:units = \"", variable);
+			if (signflip_next_value == MB_YES)
+			  fprintf(outfile, "-");
+			if (invert_next_value == MB_YES)
+			  fprintf(outfile, "1/");
+			fprintf(outfile, "dB/km\";\n");
+			
+			signflip_next_value = MB_NO;
+			invert_next_value = MB_NO;
+			raw_next_value = MB_NO;
+			break;
+
+		  case 'B': /* BSN - Normal incidence backscatter */
+			strcpy(variable, "bsn");
+			if (signflip_next_value == MB_YES)
+			  strcat(variable, "-");
+			if (invert_next_value == MB_YES)
+			  strcat(variable, "_");
+			
+			fprintf(output[i], "\t%s = ", variable);
+			
+			fprintf(outfile, "\tfloat %s(data);\n", variable);
+			fprintf(outfile, "\t\t%s:long_name = \"Normal incidence backscatter\";\n", variable);
+			fprintf(outfile, "\t\t%s:units = \"", variable);
+			if (signflip_next_value == MB_YES)
+			  fprintf(outfile, "-");
+			if (invert_next_value == MB_YES)
+			  fprintf(outfile, "1/");
+			fprintf(outfile, "dB\";\n");
+			
+			signflip_next_value = MB_NO;
+			invert_next_value = MB_NO;
+			raw_next_value = MB_NO;
+			break;
+
+		  case 'b': /* BSO - Oblique backscatter */
+			strcpy(variable, "bso");
+			if (signflip_next_value == MB_YES)
+			  strcat(variable, "-");
+			if (invert_next_value == MB_YES)
+			  strcat(variable, "_");
+			
+			fprintf(output[i], "\t%s = ", variable);
+			
+			fprintf(outfile, "\tfloat %s(data);\n", variable);
+			fprintf(outfile, "\t\t%s:long_name = \"Oblique backscatter\";\n", variable);
+			fprintf(outfile, "\t\t%s:units = \"", variable);
+			if (signflip_next_value == MB_YES)
+			  fprintf(outfile, "-");
+			if (invert_next_value == MB_YES)
+			  fprintf(outfile, "1/");
+			fprintf(outfile, "dB\";\n");
+			
+			signflip_next_value = MB_NO;
+			invert_next_value = MB_NO;
+			raw_next_value = MB_NO;
+			break;
+
+		  case 'G': /* TVG start */
+			strcpy(variable, "tvg_start");
+			if (signflip_next_value == MB_YES)
+			  strcat(variable, "-");
+			if (invert_next_value == MB_YES)
+			  strcat(variable, "_");
+			
+			fprintf(output[i], "\t%s = ", variable);
+			
+			fprintf(outfile, "\tfloat %s(data);\n", variable);
+			fprintf(outfile, "\t\t%s:long_name = \"Start range of TVG ramp\";\n", variable);
+			fprintf(outfile, "\t\t%s:units = \"", variable);
+			if (signflip_next_value == MB_YES)
+			  fprintf(outfile, "-");
+			if (invert_next_value == MB_YES)
+			  fprintf(outfile, "1/");
+			fprintf(outfile, "samples\";\n");
+			
+			signflip_next_value = MB_NO;
+			invert_next_value = MB_NO;
+			raw_next_value = MB_NO;
+			break;
+
+		  case 'g': /* TVG stop */
+			strcpy(variable, "tvg_stop");
+			if (signflip_next_value == MB_YES)
+			  strcat(variable, "-");
+			if (invert_next_value == MB_YES)
+			  strcat(variable, "_");
+			
+			fprintf(output[i], "\t%s = ", variable);
+			
+			fprintf(outfile, "\tfloat %s(data);\n", variable);
+			fprintf(outfile, "\t\t%s:long_name = \"Stop range of TVG ramp\";\n", variable);
+			fprintf(outfile, "\t\t%s:units = \"", variable);
+			if (signflip_next_value == MB_YES)
+			  fprintf(outfile, "-");
+			if (invert_next_value == MB_YES)
+			  fprintf(outfile, "1/");
+			fprintf(outfile, "samples\";\n");
+			
+			signflip_next_value = MB_NO;
+			invert_next_value = MB_NO;
+			raw_next_value = MB_NO;
+			break;
+
+		  case 'p': /* sidescan pixel */
+			strcpy(variable, "sidescan");
+			if (signflip_next_value == MB_YES)
+			  strcat(variable, "-");
+			if (invert_next_value == MB_YES)
+			  strcat(variable, "_");
+			
+			fprintf(output[i], "\t%s = ", variable);
+			
+			if (count == 0)
+			  fprintf(outfile, "\tfloat %s(data);\n", variable);
+			else
+			  fprintf(outfile, "\tfloat %s(data, %c);\n", variable, list[i]);
+
+			fprintf(outfile, "\t\t%s:long_name = \"Raw sidescan pixels\";\n", variable);
+			fprintf(outfile, "\t\t%s:units = \"", variable);
+			if (signflip_next_value == MB_YES)
+			  fprintf(outfile, "-");
+			if (invert_next_value == MB_YES)
+			  fprintf(outfile, "1/");
+			fprintf(outfile, "dB\";\n");
+			
+			signflip_next_value = MB_NO;
+			invert_next_value = MB_NO;
+			raw_next_value = MB_NO;
+			break;
+		    
+		  case 'R': /* range */
+			strcpy(variable, "range");
+			if (signflip_next_value == MB_YES)
+			  strcat(variable, "-");
+			if (invert_next_value == MB_YES)
+			  strcat(variable, "_");
+			
+			fprintf(output[i], "\t%s = ", variable);
+			
+			fprintf(outfile, "\tfloat %s(data);\n", variable);
+			fprintf(outfile, "\t\t%s:long_name = \"Range \";\n", variable);
+			fprintf(outfile, "\t\t%s:units = \"", variable);
+			if (signflip_next_value == MB_YES)
+			  fprintf(outfile, "-");
+			if (invert_next_value == MB_YES)
+			  fprintf(outfile, "1/");
+			fprintf(outfile, "samples\";\n");
+			
+			signflip_next_value = MB_NO;
+			invert_next_value = MB_NO;
+			raw_next_value = MB_NO;
+			break;
+
+		  case 'r': /* Sample rate */
+			strcpy(variable, "sample_rate");
+			if (signflip_next_value == MB_YES)
+			  strcat(variable, "-");
+			if (invert_next_value == MB_YES)
+			  strcat(variable, "_");
+			
+			fprintf(output[i], "\t%s = ", variable);
+			
+			fprintf(outfile, "\tfloat %s(data);\n", variable);
+			fprintf(outfile, "\t\t%s:long_name = \"Sample Rate\";\n", variable);
+			fprintf(outfile, "\t\t%s:units = \"", variable);
+			if (signflip_next_value == MB_YES)
+			  fprintf(outfile, "-");
+			if (invert_next_value == MB_YES)
+			  fprintf(outfile, "1/");
+			fprintf(outfile, "Hertz\";\n");
+			
+			signflip_next_value = MB_NO;
+			invert_next_value = MB_NO;
+			raw_next_value = MB_NO;
+			break;
+
+		  case 'S': /* Sidescan pixels */
+			strcpy(variable, "pixels");
+			if (signflip_next_value == MB_YES)
+			  strcat(variable, "-");
+			if (invert_next_value == MB_YES)
+			  strcat(variable, "_");
+			
+			fprintf(output[i], "\t%s = ", variable);
+			
+			fprintf(outfile, "\tfloat %s(data);\n", variable);
+			fprintf(outfile, "\t\t%s:long_name = \"Total sidescan pixels \";\n", variable);
+			fprintf(outfile, "\t\t%s:units = \"", variable);
+			if (signflip_next_value == MB_YES)
+			  fprintf(outfile, "-");
+			if (invert_next_value == MB_YES)
+			  fprintf(outfile, "1/");
+			fprintf(outfile, "pixels\";\n");
+			
+			signflip_next_value = MB_NO;
+			invert_next_value = MB_NO;
+			raw_next_value = MB_NO;
+			break;
+
+		  case 's': /* Sidescan pixels per beam */
+			strcpy(variable, "beam_pixels");
+			if (signflip_next_value == MB_YES)
+			  strcat(variable, "-");
+			if (invert_next_value == MB_YES)
+			  strcat(variable, "_");
+			
+			fprintf(output[i], "\t%s = ", variable);
+			
+			fprintf(outfile, "\tfloat %s(data);\n", variable);
+			fprintf(outfile, "\t\t%s:long_name = \"Sidescan pixels per beam\";\n", variable);
+			fprintf(outfile, "\t\t%s:units = \"", variable);
+			if (signflip_next_value == MB_YES)
+			  fprintf(outfile, "-");
+			if (invert_next_value == MB_YES)
+			  fprintf(outfile, "1/");
+			fprintf(outfile, "pixels\";\n");
+			
+			signflip_next_value = MB_NO;
+			invert_next_value = MB_NO;
+			raw_next_value = MB_NO;
+			break;
+
+
+
+		  default:
+			raw_next_value = MB_NO;
+			break;
+		  }
+		  }
+
 	      }
 	    fprintf(outfile, "\n\ndata:\n");
 	  }
@@ -1611,7 +2001,9 @@ fprintf(stderr,"DATE: %s\n",date);
 		use_ss = MB_YES;
 	else
 		for (i=0; i<n_list; i++) 
-			{
+		    {
+		    if (raw_next_value == MB_NO) 
+		        {
 			if (list[i] == 'Z' || list[i] == 'z'
 				|| list[i] == 'A' || list[i] == 'a')
 				use_bath = MB_YES;
@@ -1631,7 +2023,20 @@ fprintf(stderr,"DATE: %s\n",date);
 			if (list[i] == 'P' || list[i] == 'p' 
 				|| list[i] == 'R' || list[i] == 'r')
 				use_nav = MB_YES;
+			if (list[i] == '.')
+			  raw_next_value = MB_YES;
 			}
+		    else
+			{
+			read_raw = MB_YES;
+			if (list[i] == 'R')
+				use_bath = MB_YES;
+			if (list[i] == 'B' || list[i] == 'b')
+				use_amp = MB_YES;
+			if (list[i] != '/' &&  list[i] != '-' && list[i] != '.')
+				raw_next_value = MB_NO;
+			}
+		    }
 	if (check_values == MBLIST_CHECK_ON
 		|| check_values == MBLIST_CHECK_ON_NULL)
 		{
@@ -1677,6 +2082,23 @@ fprintf(stderr,"DATE: %s\n",date);
 	if (error == MB_ERROR_NO_ERROR)
 		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
 						2 * sizeof(double), (void **)&slopeacrosstrack, &error);
+	if (read_raw == MB_YES)
+		{
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							sizeof(int), (void **)&beam_samples, &error);
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							sizeof(int), (void **)&start_sample, &error);
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							sizeof(int), (void **)&range, &error);
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							sizeof(double), (void **)&bs, &error);
+		status = mb_malloc(verbose,(MBSYS_SIMRAD2_MAXRAWPIXELS)*sizeof(double),
+					(char **)&ss_pixels,&error);
+		}
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
@@ -1991,6 +2413,31 @@ fprintf(stderr,"DATE: %s\n",date);
 			time_d_old = time_d;
 			}
 
+		/* get raw values if required */
+		if (read_raw == MB_YES)
+			{
+			status = mb_get_raw(verbose, mbio_ptr,
+					&sample_rate,
+					&absorption,
+					&max_range,
+					&r_zero,
+					&r_zero_corr,
+					&tvg_start,
+					&tvg_stop,
+					&bsn,
+					&bso,
+					&tx,
+					&tvg_crossover,
+					&nbeams_ss,
+					&npixels,
+					beam_samples,
+					start_sample,
+					range,
+					bs,
+					ss_pixels,
+					&error);
+			}  
+
 		/* now loop over beams */
 		if (error == MB_ERROR_NO_ERROR)
 		for (j=beam_start;j<=beam_end;j++)
@@ -2029,7 +2476,9 @@ fprintf(stderr,"DATE: %s\n",date);
 			if (netcdf == MB_YES && lcount > 0)
 			  fprintf(output[i], ", ");
 
-			switch (list[i]) 
+			if (raw_next_value == MB_NO)
+			    {
+			    switch (list[i]) 
 				{
 				case '/': /* Inverts next simple value */
 					invert_next_value = MB_YES;
@@ -2577,6 +3026,161 @@ fprintf(stderr,"DATE: %s\n",date);
 						list[i]);
 					break;
 				}
+			    }
+			else /* raw_next_value */
+			    {
+			    switch (list[i]) 
+				{
+				case '/': /* Inverts next simple value */
+					invert_next_value = MB_YES;
+					break;
+				case '-': /* Flip sign on next simple value */
+					signflip_next_value = MB_YES;
+					break;
+				case '.': /* Raw value next field */
+					raw_next_value = MB_YES;
+					break;
+
+				
+				case '0':
+				case '1':
+				case '2':
+				case '3':
+				case '4':
+				case '5':
+				case '6':
+				case '7':
+				case '8':
+				case '9':
+					count = count * 10 + list[i] - '0';
+					break;
+
+				case 'A': /* backscatter */
+				        printsimplevalue(verbose, output[i], bs[j], 5, 1, ascii, 
+							    &invert_next_value, 
+							    &signflip_next_value, &error);
+					raw_next_value = MB_NO;
+					break;
+				case 'a': /* absorption */
+				        printsimplevalue(verbose, output[i], absorption, 5, 2, ascii, 
+							    &invert_next_value, 
+							    &signflip_next_value, &error);
+					raw_next_value = MB_NO;
+					break;
+				case 'B': /* BSN - Normal incidence backscatter */
+				        printsimplevalue(verbose, output[i], bsn, 5, 2, ascii, 
+							    &invert_next_value, 
+							    &signflip_next_value, &error);
+					raw_next_value = MB_NO;
+					break;
+				case 'b': /* BSO - Oblique backscatter */
+					printsimplevalue(verbose, output[i], bso, 5, 2, ascii, 
+							    &invert_next_value, 
+							    &signflip_next_value, &error);
+					raw_next_value = MB_NO;
+					break;
+				case 'G': /* TVG start */
+					if (ascii == MB_YES)
+					    fprintf(output[i],"%6d",tvg_start);
+					else
+					    {
+					    b = tvg_start;
+					    fwrite(&b, sizeof(double), 1, outfile);
+					    }
+					raw_next_value = MB_NO;
+					break;
+				case 'g': /* TVG stop */
+					if (ascii == MB_YES)
+					    fprintf(output[i],"%6d",tvg_stop);
+					else
+					    {
+					    b = tvg_stop;
+					    fwrite(&b, sizeof(double), 1, outfile);
+					    }
+					raw_next_value = MB_NO;
+				case 'p': /* sidescan */
+					invert = invert_next_value;
+					flip = signflip_next_value;
+				  	printsimplevalue(verbose, output[i], ss_pixels[start_sample[j]], 5, 1, ascii, 
+							 &invert_next_value, 
+							 &signflip_next_value, &error);
+					if (count > 0)
+					  {
+					    for (k = 1; k < count && k < beam_samples[j]; k++) 
+					      {
+						if (netcdf == MB_YES)
+						  fprintf(output[i], ", ");
+						if (ascii == MB_YES)
+						  fprintf(output[i], "\t");
+						invert_next_value = invert;
+						signflip_next_value = flip;
+
+						printsimplevalue(verbose, output[i], ss_pixels[start_sample[j] + k], 5, 1, ascii, 
+								 &invert_next_value, 
+								 &signflip_next_value, &error);
+					      }
+					    for (; k < count; k++)
+					      {
+						if (netcdf == MB_YES)
+						  fprintf(output[i], ", ");
+						if (ascii == MB_YES)
+						  fprintf(output[i], "\t");
+						printNaN(verbose, output[i], ascii, &invert_next_value, 
+							 &signflip_next_value, &error);
+					      }
+					  }
+
+					raw_next_value = MB_NO;
+					break;
+				case 'R': /* range */
+					if (ascii == MB_YES)
+					    fprintf(output[i],"%6d",range[j]);
+					else
+					    {
+					    b = range[j];
+					    fwrite(&b, sizeof(double), 1, outfile);
+					    }
+					raw_next_value = MB_NO;
+					break;
+				case 'r': /* Sample rate */
+					if (ascii == MB_YES)
+					    fprintf(output[i],"%6d",sample_rate);
+					else
+					    {
+					    b = sample_rate;
+					    fwrite(&b, sizeof(double), 1, outfile);
+					    }
+					raw_next_value = MB_NO;
+					break;
+				case 'S': /* Sidescan pixels */
+					if (ascii == MB_YES)
+					    fprintf(output[i],"%6d",npixels);
+					else
+					    {
+					    b = npixels;
+					    fwrite(&b, sizeof(double), 1, outfile);
+					    }
+					raw_next_value = MB_NO;
+					break;
+				case 's': /* Sidescan pixels per beam */
+					if (ascii == MB_YES)
+					    fprintf(output[i],"%6d",beam_samples[j]);
+					else
+					    {
+					    b = beam_samples[j];
+					    fwrite(&b, sizeof(double), 1, outfile);
+					    }
+					raw_next_value = MB_NO;
+					break;
+
+				default:
+					if (ascii == MB_YES)
+					    fprintf(output[i],"<Invalid Option: %c>",
+						list[i]);
+					raw_next_value = MB_NO;
+					break;
+				}
+			    }
 			if (ascii == MB_YES)
 			    {
 			    if (i<(n_list-1)) fprintf(output[i], "\t");
@@ -2627,7 +3231,9 @@ fprintf(stderr,"DATE: %s\n",date);
 			if (netcdf == MB_YES && lcount > 0)
 			  fprintf(output[i], ", ");
 
-			switch (list[i]) 
+			if (raw_next_value == MB_NO)
+			    {
+			    switch (list[i]) 
 				{
 				case '/': /* Inverts next simple value */
 					invert_next_value = MB_YES;
@@ -3081,6 +3687,164 @@ fprintf(stderr,"DATE: %s\n",date);
 						list[i]);
 					break;
 				}
+			    }
+			else /* raw_next_value */
+			    {
+			    switch (list[i]) 
+				{
+				case '/': /* Inverts next simple value */
+					invert_next_value = MB_YES;
+					break;
+				case '-': /* Flip sign on next simple value */
+					signflip_next_value = MB_YES;
+					break;
+				case '.': /* Raw value next field */
+					raw_next_value = MB_YES;
+					break;
+
+				case '0':
+				case '1':
+				case '2':
+				case '3':
+				case '4':
+				case '5':
+				case '6':
+				case '7':
+				case '8':
+				case '9':
+					count = count * 10 + list[i] - '0';
+					break;
+
+				case 'A': /* backscatter */
+				        printsimplevalue(verbose, output[i], bs[beam_vertical], 5, 1, ascii, 
+							    &invert_next_value, 
+							    &signflip_next_value, &error);
+					raw_next_value = MB_NO;
+					break;
+				case 'a': /* absorption */
+				        printsimplevalue(verbose, output[i], absorption, 5, 2, ascii, 
+							    &invert_next_value, 
+							    &signflip_next_value, &error);
+					raw_next_value = MB_NO;
+					break;
+				case 'B': /* BSN - Normal incidence backscatter */
+				        printsimplevalue(verbose, output[i], bsn, 5, 2, ascii, 
+							    &invert_next_value, 
+							    &signflip_next_value, &error);
+					raw_next_value = MB_NO;
+					break;
+				case 'b': /* BSO - Oblique backscatter */
+					printsimplevalue(verbose, output[i], bso, 5, 2, ascii, 
+							    &invert_next_value, 
+							    &signflip_next_value, &error);
+					raw_next_value = MB_NO;
+					break;
+				case 'G': /* TVG start */
+					if (ascii == MB_YES)
+					    fprintf(output[i],"%6d",tvg_start);
+					else
+					    {
+					    b = tvg_start;
+					    fwrite(&b, sizeof(double), 1, outfile);
+					    }
+					raw_next_value = MB_NO;
+					break;
+				case 'g': /* TVG stop */
+					if (ascii == MB_YES)
+					    fprintf(output[i],"%6d",tvg_stop);
+					else
+					    {
+					    b = tvg_stop;
+					    fwrite(&b, sizeof(double), 1, outfile);
+					    }
+					raw_next_value = MB_NO;
+					break;
+				case 'p': /* sidescan */
+					invert = invert_next_value;
+					flip = signflip_next_value;
+				  	printsimplevalue(verbose, output[i], ss_pixels[start_sample[beam_vertical]], 5, 1, ascii, 
+							 &invert_next_value, 
+							 &signflip_next_value, &error);
+					if (count > 0)
+					  {
+					    for (k = 1; k < count && k < beam_samples[beam_vertical]; k++) 
+					      {
+						if (netcdf == MB_YES)
+						  fprintf(output[i], ", ");
+						if (ascii == MB_YES)
+						  fprintf(output[i], "\t");
+						invert_next_value = invert;
+						signflip_next_value = flip;
+
+						printsimplevalue(verbose, output[i], ss_pixels[start_sample[beam_vertical] + k], 5, 1, ascii, 
+								 &invert_next_value, 
+								 &signflip_next_value, &error);
+					      }
+					    for (; k < count; k++)
+					      {
+						if (netcdf == MB_YES)
+						  fprintf(output[i], ", ");
+						if (ascii == MB_YES)
+						  fprintf(output[i], "\t");
+						printNaN(verbose, output[i], ascii, &invert_next_value, 
+							 &signflip_next_value, &error);
+					      }
+					  }
+
+					raw_next_value = MB_NO;
+					break;
+
+				case 'R': /* range */
+					if (ascii == MB_YES)
+					    fprintf(output[i],"%6d",range[beam_vertical]);
+					else
+					    {
+					    b = range[beam_vertical];
+					    fwrite(&b, sizeof(double), 1, outfile);
+					    }
+					raw_next_value = MB_NO;
+					break;
+
+				case 'r': /* Sample rate */
+					if (ascii == MB_YES)
+					    fprintf(output[i],"%6d",sample_rate);
+					else
+					    {
+					    b = sample_rate;
+					    fwrite(&b, sizeof(double), 1, outfile);
+					    }
+					raw_next_value = MB_NO;
+					break;
+
+				case 'S': /* Sidescan pixels */
+					if (ascii == MB_YES)
+					    fprintf(output[i],"%6d",npixels);
+					else
+					    {
+					    b = npixels;
+					    fwrite(&b, sizeof(double), 1, outfile);
+					    }
+					raw_next_value = MB_NO;
+					break;
+				case 's': /* Sidescan pixels per beam */
+					if (ascii == MB_YES)
+					    fprintf(output[i],"%6d",beam_samples[beam_vertical]);
+					else
+					    {
+					    b = beam_samples[beam_vertical];
+					    fwrite(&b, sizeof(double), 1, outfile);
+					    }
+					raw_next_value = MB_NO;
+					break;
+
+				default:
+					if (ascii == MB_YES)
+					    fprintf(output[i],"<Invalid Option: %c>",
+						list[i]);
+					raw_next_value = MB_NO;
+					break;
+				}
+			    }
 			if (ascii == MB_YES)
 			    {
 			    if (i<(n_list-1)) fprintf(output[i], "\t");
@@ -3100,6 +3864,12 @@ fprintf(stderr,"DATE: %s\n",date);
 
 	/* close the swath file */
 	status = mb_close(verbose,&mbio_ptr,&error);
+
+	/* deallocate memory used for data arrays */
+	if (read_raw == MB_YES)
+		{
+		mb_free(verbose,(char **)&ss_pixels,&error); 
+		}
 
 	/* figure out whether and what to read next */
         if (read_datalist == MB_YES)
@@ -3126,7 +3896,8 @@ fprintf(stderr,"DATE: %s\n",date);
 	    {
 	    for (i=0; i<n_list; i++) 
 	        {
-		if(list[i] != '/' && list[i] != '-')
+		if(list[i] != '/' && list[i] != '-' && list[i] != '.' &&
+		   !(list[i] >= '0' && list[i] <= '9'))
 		    {
 		    fprintf(output[i], " ;\n\n");
 		    rewind(output[i]);
@@ -3701,5 +4472,156 @@ int printNaN(int verbose, FILE *output, int ascii, int *invert, int *flipsign, i
 
 	/* return status */
 	return(status);
+}
+/*--------------------------------------------------------------------*/
+/*
+Method to get fields from raw data, similar to mb_get_all.
+*/
+int mb_get_raw(int verbose, void *mbio_ptr,
+	       int	*sample_rate,
+	       double	*absorption,
+	       int 	*max_range,
+	       int 	*r_zero,
+	       int 	*r_zero_corr,
+	       int 	*tvg_start,
+	       int 	*tvg_stop,
+	       double 	*bsn,
+	       double 	*bso,
+	       int 	*tx,
+	       int 	*tvg_crossover,
+	       int 	*nbeams_ss,
+	       int 	*npixels,
+	       int 	*beam_samples,
+	       int	*start_sample,
+	       int 	*range,
+	       double 	*bs,
+	       double	*ss_pixels,
+	       int 	*error)
+{
+	char	*function_name = "mb_get_raw";
+	int	status = MB_SUCCESS;
+	int	i;
+	
+	struct mb_io_struct     *mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+	
+	*sample_rate = 0;
+	*absorption = 0;
+	*max_range = 0;
+	*r_zero = 0;
+	*r_zero_corr = 0;
+	*tvg_start = 0;
+	*tvg_stop = 0;
+	*bsn = 0;
+	*bso = 0;
+	*tx = 0;
+	*tvg_crossover = 0;
+	*nbeams_ss = 0;
+	*npixels = 0;
+
+	for (i = 0; i < mb_io_ptr->beams_bath_max; i++)
+	  {
+	    beam_samples[i] = 0;
+	    start_sample[i] = 0;
+	    range[i] = 0;
+	    bs[i] = 0.0;
+	  }
+
+	switch (mb_io_ptr->format) 
+	  {
+	  case MBF_EM300MBA:
+	  case MBF_EM300RAW:
+	    mb_get_raw_simrad2(verbose, mbio_ptr, 
+			       sample_rate,
+			       absorption,
+			       max_range,
+			       r_zero,
+			       r_zero_corr,
+			       tvg_start,
+			       tvg_stop,
+			       bsn,
+			       bso,
+			       tx,
+			       tvg_crossover,
+			       nbeams_ss,
+			       npixels,
+			       beam_samples,
+			       start_sample,
+			       range,
+			       bs,
+			       ss_pixels,
+			       error);
+
+	    break;
+	  }
+
+	return status;
+}
+
+/*--------------------------------------------------------------------*/
+/*
+Method to get fields from simrad2 raw data.
+*/
+
+int mb_get_raw_simrad2(int verbose, void *mbio_ptr, 
+		       int	*sample_rate,
+		       double	*absorption,
+		       int 	*max_range,
+		       int 	*r_zero,
+		       int 	*r_zero_corr,
+		       int 	*tvg_start,
+		       int 	*tvg_stop,
+		       double 	*bsn,
+		       double 	*bso,
+		       int 	*tx,
+		       int 	*tvg_crossover,
+		       int 	*nbeams_ss,
+		       int 	*npixels,
+		       int 	*beam_samples,
+		       int	*start_sample,
+		       int 	*range,
+		       double 	*bs,
+		       double	*ss_pixels,
+		       int 	*error)
+{
+	char	*function_name = "mb_get_raw_simrad2";
+	int	status = MB_SUCCESS;
+  	int	i;
+
+	struct mb_io_struct     	*mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+	struct mbsys_simrad2_struct	*store_ptr = (struct mbsys_simrad2_struct *) mb_io_ptr->store_data;
+	struct mbsys_simrad2_ping_struct *ping_ptr = store_ptr->ping;
+
+	if (store_ptr->kind == MB_DATA_DATA)
+	  {
+	    *sample_rate =  ping_ptr->png_sample_rate;
+	    *absorption = ping_ptr->png_max_range * 0.01;
+	    *max_range = ping_ptr->png_max_range;
+	    *r_zero = ping_ptr->png_r_zero;
+	    *r_zero_corr = ping_ptr->png_r_zero_corr;
+	    *tvg_start = ping_ptr->png_tvg_start;
+	    *tvg_stop = ping_ptr->png_tvg_stop;
+	    *bsn = ping_ptr->png_bsn * 0.5;
+	    *bso = ping_ptr->png_bso * 0.5;
+	    *tx = ping_ptr->png_tx;
+	    *tvg_crossover = ping_ptr->png_tvg_crossover;
+	    *nbeams_ss = ping_ptr->png_nbeams_ss;
+	    *npixels = ping_ptr->png_npixels;
+	    
+	    
+	    for (i = 0; i < ping_ptr->png_nbeams; i++)
+	      {
+		range[ping_ptr->png_beam_num[i] - 1] = ping_ptr->png_range[i];
+		bs[ping_ptr->png_beam_num[i] - 1] = ping_ptr->png_amp[i] * 0.5;
+	      }
+	    for (i = 0; i < ping_ptr->png_nbeams_ss; i++) 
+	      {
+		beam_samples[ping_ptr->png_beam_index[i]] = ping_ptr->png_beam_samples[i];
+		start_sample[ping_ptr->png_beam_index[i]] = ping_ptr->png_start_sample[i];
+	      }
+	    for (i = 0; i < ping_ptr->png_npixels; i++)
+	      ss_pixels[i] = ping_ptr->png_ssraw[i] * 0.5;
+	  }
+
+	return status;
 }
 /*--------------------------------------------------------------------*/
