@@ -1,4 +1,4 @@
-.TH mblist l "3 June 2005" "MB-System 5.0" "MB-System 5.0"
+.TH mblist l "1 February 2006" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmblist\fP - List data in swath data files.
 
@@ -89,8 +89,8 @@ Default: \fIyr/mo/da/hr/mn/sc\fP = 1962/2/21/10/30/0.
 .br
 Causes netCDF CDL format output to be generated (see \fBncgen\fP).
 When the \fB-A\fP (binary) option is also set \fBmblist\fP will call \fBncgen\fP to 
-convert the CDL file to a binary netCDF file (default name is \fBmblist.nc\fP.
-If the conversion fails for any reason the CDL file will remain.
+convert the CDL file to a binary netCDF file (default name is \fImblist.nc\fP),
+if successful the CDL file will be removed.
 .TP
 .B \-D
 \fIdumpmode\fP
@@ -225,7 +225,7 @@ special character: this causes the value
 indicated by the next character to be  inverted. This applies only to simple
 numeric values such as depth and 
 heading and not to values like time  
-strings orpositions with hemisphere 
+strings or positions with hemisphere 
 characters.
 .IP
 \fB-\fP  
@@ -345,8 +345,38 @@ for ping count
 .\fBz\fP  for depth (positive downwards) (m)
 .IP
 \fB#\fP  for beam or pixel number
-.br
+.IP
+\fB .\fP 
+special character: this causes the next character to be 
+interpretted from the following list rather than the above list.
+These allow access to raw values in format specific form and may
+not be supported by all formats.
+.IP
+\fB .A\fP  Amplitude (backscatter) in dB (formats 56 & 67 - Simrad multibeam only)
+.IP
+\fB .a\fP  Mean absorption coefficient in dB/km (formats 56 & 67 - Simrad multibeam some versions only)
+.IP
+\fB .B\fP  Normal incidence backscatter in dB (formats 56 & 67 - Simrad multibeam only)
+.IP
+\fB .b\fP  Oblique backscatter in dB (formats 56 & 67 - Simrad multibeam only)
+.IP
+\fB .G\fP  Start of TVG ramp in samples (formats 56 & 67 - Simrad multibeam only)
+.IP
+\fB .g\fP  Stop of TVG ramp in samples (formats 56 & 67 - Simrad multibeam only)
+.IP
+\fB .p\fP  Raw sidescan pixels in dB (formats 56 & 67 - Simrad multibeam only).
+May be preceded by a number to give the first n pixels (NaN padded) of the beam,
+for example\fB .30p\fP will give the first 30 sidescan pixels of each beam.
+.IP
+\fB .R\fP  Range in samples (formats 56 & 67 - Simrad multibeam only)
+.IP
+\fB .r\fP  Sampling rate in Hz (formats 56 & 67 - Simrad multibeam only)
+.IP
+\fB .S\fP  Number of raw sidescan pixels per ping (formats 56 & 67 - Simrad multibeam only)
+.IP
+\fB .s\fP  Number of raw sidescan pixels per beam (formats 56 & 67 - Simrad multibeam only)
 
+.br
 Default \fIoutput_format\fP = \fBYXLZ\fP (latitude, longitude, cumulative
 along-track distance, and depth).
 .TP
@@ -612,6 +642,22 @@ Either way, the output is as follows:
  	-49.298476	  12.164803	    28
  	-49.298639	  12.163530	    14
  	.....
+
+Suppose one wishes to examine the number of raw sidescan pixels in Simrad EM1002 data file
+and the first 5 pixels of each beam:
+
+	mblist -i 0044_20000425_093808.mb57 -MA -ON#.S.s.5p
+
+The output will be as follows:
+
+     1       0           11278     286      -31.5   -32.0   -32.0   -32.5   -33.0
+     1       1           11278     133      -34.5   -34.5   -34.5   -34.5   -33.5
+     1       2           11278     142      -40.0   -40.0   -40.0   -40.0   -40.0
+     1       3           11278     139      -40.0   -40.5   -40.5   -40.5   -40.5
+     1       4           11278     159      -39.5   -38.5   -38.5   -39.0   -38.5
+     ...
+     1      54           11278     1        -27.00  NaN     NaN     NaN     NaN
+     .....
 
 .SH SEE ALSO
 \fBmbsystem\fP(l), \fBmbinfo\fP(l)
