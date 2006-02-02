@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrid.c	5/2/94
- *    $Id: mbgrid.c,v 5.31 2006-01-18 15:17:00 caress Exp $
+ *    $Id: mbgrid.c,v 5.32 2006-02-02 19:40:57 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 2000, 2002, 2003, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -38,6 +38,9 @@
  * Rererewrite:	January 2, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.31  2006/01/18 15:17:00  caress
+ * Added stdlib.h include.
+ *
  * Revision 5.30  2005/11/05 01:07:54  caress
  * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
  *
@@ -406,7 +409,7 @@ double mbgrid_erf();
 FILE	*outfp;
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbgrid.c,v 5.31 2006-01-18 15:17:00 caress Exp $";
+static char rcs_id[] = "$Id: mbgrid.c,v 5.32 2006-02-02 19:40:57 caress Exp $";
 static char program_name[] = "mbgrid";
 static char help_message[] =  "mbgrid is an utility used to grid bathymetry, amplitude, or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbgrid -Ifilelist -Oroot \
@@ -3812,14 +3815,14 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 		/* resample grid */
 		if (use_projection == MB_YES)
 			{
-			sprintf(plot_cmd, "grdsample %s -Gtmpgrdsample%d.grd -R%f/%f/%f/%f -I%f/%f",
+			sprintf(plot_cmd, "grdsample %s -Gtmpgrdsample%d.grd -R%f/%f/%f/%f -I%.12f/%.12f",
 				backgroundfileuse, pid,glonmin,glonmax,bounds[2],bounds[3], 
 				0.25 * (glonmax - glonmin) / (gxdim - 1),
 				0.25 * (bounds[3] - bounds[2]) / (gydim - 1));
 			}
 		else
 			{
-			sprintf(plot_cmd, "grdsample %s -Gtmpgrdsample%d.grd -R%f/%f/%f/%f -I%f/%f",
+			sprintf(plot_cmd, "grdsample %s -Gtmpgrdsample%d.grd -R%f/%f/%f/%f -I%.12f/%.12f",
 				backgroundfileuse, pid, gbnd[0], gbnd[1], gbnd[2], gbnd[3], 
 				dx, dy);
 			}
@@ -3830,7 +3833,7 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 		/* extract points with preprocessing if that will help */
 		if (use_projection == MB_NO)
 			{
-			sprintf(plot_cmd, "grd2xyz tmpgrdsample%d.grd -S -bo | blockmean -bi -bo -C -R%f/%f/%f/%f -I%f/%f",
+			sprintf(plot_cmd, "grd2xyz tmpgrdsample%d.grd -S -bo | blockmean -bi -bo -C -R%f/%f/%f/%f -I%.12f/%.12f",
 				pid, gbnd[0], gbnd[1], gbnd[2], gbnd[3], dx, dy);
 			}
 		else
