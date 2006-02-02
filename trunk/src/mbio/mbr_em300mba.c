@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em300mba.c	10/16/98
- *	$Id: mbr_em300mba.c,v 5.27 2006-02-01 18:32:05 caress Exp $
+ *	$Id: mbr_em300mba.c,v 5.28 2006-02-02 19:42:09 caress Exp $
  *
  *    Copyright (c) 1998, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	October 16,  1998
  * $Log: not supported by cvs2svn $
+ * Revision 5.27  2006/02/01 18:32:05  caress
+ * Fixed problem reading RAWBEAM3 records.
+ *
  * Revision 5.26  2006/01/27 20:09:47  caress
  * Added support for EM3002
  *
@@ -274,7 +277,7 @@ int mbr_em300mba_wr_rawbeam3(int verbose, FILE *mbfp, int swap,
 int mbr_em300mba_wr_ss(int verbose, FILE *mbfp, int swap, 
 		struct mbsys_simrad2_struct *store, int *error);
 
-static char res_id[]="$Id: mbr_em300mba.c,v 5.27 2006-02-01 18:32:05 caress Exp $";
+static char res_id[]="$Id: mbr_em300mba.c,v 5.28 2006-02-02 19:42:09 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_em300mba(int verbose, void *mbio_ptr, int *error)
@@ -845,6 +848,7 @@ int mbr_em300mba_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	int	*record_size_save;
 	char	*label;
 	int	*label_save_flag;
+	char	*record_size_char;
 	short	expect;
 	short	type;
 	short	sonar;
@@ -896,6 +900,7 @@ int mbr_em300mba_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	sonarlast = (short *) &mb_io_ptr->save9;
 	nbadrec = (int *) &mb_io_ptr->save7;
 	length = (int *) &mb_io_ptr->save8;
+	record_size_char = (char *) &record_size;
 	if (*expect_save_flag == MB_YES)
 		{
 		expect = *expect_save;
@@ -954,7 +959,9 @@ int mbr_em300mba_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					mbio_ptr, label, &type, &sonar) != MB_SUCCESS)
 			    {
 			    /* get next byte */
-			    record_size = ((record_size & 0x00ffffff) << 8) | (0x000000ff &label[0]);
+			    for (i=0;i<3;i++)
+				record_size_char[i] = record_size_char[i+1];
+			    record_size_char[3] = label[0];
 			    for (i=0;i<3;i++)
 				label[i] = label[i+1];
 			    if ((read_len = fread(&label[3],

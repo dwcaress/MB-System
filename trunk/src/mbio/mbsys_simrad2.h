@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad2.h	10/9/98
- *	$Id: mbsys_simrad2.h,v 5.16 2006-01-27 20:09:47 caress Exp $
+ *	$Id: mbsys_simrad2.h,v 5.17 2006-02-02 19:42:09 caress Exp $
  *
  *    Copyright (c) 1998, 2001, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -32,6 +32,9 @@
  * Date:	October 9, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.16  2006/01/27 20:09:47  caress
+ * Added support for EM3002
+ *
  * Revision 5.15  2006/01/06 18:27:18  caress
  * Working towards 5.0.8
  *
@@ -321,10 +324,10 @@
 #define	MBSYS_SIMRAD2_MAXRAWPIXELS	32000
 #define MBSYS_SIMRAD2_MAXTX		19
 #define	MBSYS_SIMRAD2_MAXSVP		1024
-#define	MBSYS_SIMRAD2_MAXATTITUDE	100
-#define	MBSYS_SIMRAD2_MAXHEADING	100
-#define	MBSYS_SIMRAD2_MAXSSV		100
-#define	MBSYS_SIMRAD2_MAXTILT		100
+#define	MBSYS_SIMRAD2_MAXATTITUDE	256
+#define	MBSYS_SIMRAD2_MAXHEADING	256
+#define	MBSYS_SIMRAD2_MAXSSV		256
+#define	MBSYS_SIMRAD2_MAXTILT		256
 #define	MBSYS_SIMRAD2_COMMENT_LENGTH	256
 #define	MBSYS_SIMRAD2_BUFFER_SIZE	2048
 
