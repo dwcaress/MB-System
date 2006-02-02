@@ -63,6 +63,7 @@ extern void BxExitCB(Widget, XtPointer, XtPointer);
 /* Begin user code block <globals> */
 
 #include <stdio.h>
+#include <stdlib.h>
 
 /* MBIO include files */
 #include "../../include/mb_status.h"
@@ -74,7 +75,7 @@ extern void BxExitCB(Widget, XtPointer, XtPointer);
 /* global mbview variables */
 Widget mainWindow;
 
-static char rcs_id[] = "$Id: mbgrdviz_main.c,v 5.5 2005-11-05 01:11:47 caress Exp $";
+static char rcs_id[] = "$Id: mbgrdviz_main.c,v 5.6 2006-02-02 19:43:11 caress Exp $";
 static char program_name[] = "MBgrdviz";
 static char help_message[] =  "MBgrdviz provides simple interactive 2D/3Dvizualization of GMT grids.";
 static char usage_message[] = "mbgrdviz [-Igrdfile -T -V -H]";
