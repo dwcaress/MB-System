@@ -1,4 +1,4 @@
-.TH mbsystem l "24 February 2004" "MB-System 5.0" "MB-System 5.0"
+.TH mbsystem l "3 February 2006" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbsystem\fP - A set of utilities for manipulating and 
 processing swath sonar bathymetry, amplitude, and sidescan data.
@@ -283,6 +283,9 @@ deep-towed inteferometric sonar. This format has been
 supported by including the code for the HMRG library libmr1pr 
 in the \fBMB-System MBIO\fP library. Thanks to Roger Davis and HMRG for 
 making the code available under the GPL.
+.IP \(bu 4
+The Edgetech Jstar format for sidescan and subbottom data is 
+now supported as formats 132 and 133.
 
 .SH THE NEW VERSION 5 DATA PROCESSING STRUCTURE
 Previous versions of \fBMB-System\fP have emphasized
@@ -619,6 +622,12 @@ These are the MB-system programs which are used in the
 version 5 parallel processing scheme. Those programs that
 are also relevant to the serial processing scheme are
 marked with an *:
+ \fBmb7k2jstar\fP: Extract Jstar format (format 132) sidescan 
+ 		and subbottom data from Reson 7k (format 88) 
+ 		data files.
+ \fBmb7kpreprocess\fP: Preprocess Reson 7k data (format 88), 
+ 		including applying time lag and biases to 
+ 		attitude and navigation data.
  \fBmbbackangle\fP:  Generates tables of the average 
  		amplitude or sidescan values as a 
  		function of the grazing angle with 
@@ -643,9 +652,11 @@ marked with an *:
  		data formats supported by the \fBMBIO\fP library. 
  \fBmbgetesf\fP*:  Extract list of flagging or unflagging 
  		beam edit events from a swath sonar data 
-		file in the edit save file (".esf") format
-		used by \fBmbedit\fP, \fBmbclean\fP, and
-		\fBmbprocess\fP.
+ 		file in the edit save file (".esf") format
+ 		used by \fBmbedit\fP, \fBmbclean\fP, and
+ 		\fBmbprocess\fP.
+ \fBmbgrdtiff\fP: Generate TIFF image from gridded data
+ \fBmbgrdviz\fP: Vizualize GMT grids.
  \fBmbgrid\fP*:  Grid bathymetry, amplitude, and sidescan 
  		data from swath sonar data files. 
  \fBmbhistogram\fP*:  Obtain histogram of bathymetry, 
@@ -668,6 +679,9 @@ marked with an *:
  		swath sonar data files. 
  \fBmbnavlist\fP*:  List navigation data in swath 
  		sonar data files. 
+ \fBmbneptune2esf\fP: Extract bathymetry edits from 
+ 		Simrad Neptune software into edit save 
+		file format.
  \fBmbprocess\fP: Performs a variety of processing
  		tasks in a single step, including
  		merging navigation, applying 
@@ -676,6 +690,9 @@ marked with an *:
  		sidescan.
  \fBmbps\fP*:    Simple perspective views of swath
  		bathymetry in Postscript. 
+ \fBmbrolltimelag\fP:  Estimate attitude time lag by cross 
+ 		correlation of apparent bottom slope with the 
+ 		roll time series: 
  \fBmbsegygrid\fP: Generate time vs. trace number 
  		grids of seismic data from segy files.
  \fBmbsegyinfo\fP: Output some basic statistics of 
@@ -742,27 +759,45 @@ with the old serial processing scheme:
 Macros are programs or shellscripts which make use of programs 
 from the MB-system and other software packages to accomplish common
 tasks easily.  These are the current MB-system macros:
- \fBmbmfmtvel\fP:  Scans a Hydrosweep DS data file 
- 		and outputs a formatted table of 
- 		the mean water velocity and surface 
- 		water velocity values used in 
- 		processing that data.
+ \fBmbm_arc2grd\fP:  Convert an ESRI ArcView ASCII grid file 
+ 		to a GMT grid file.
+ \fBmbm_copy\fP:  Translate groups of swath data files 
+ 		between formats
  \fBmbm_dslnavfix\fP:  Reads a WHOI DSL AMS-120 processed
  		navigation file containing UTM northings
  		and eastings and outputs a navigation file
  		containing longitude and latitude which is
  		suitable for use with \fBmbmerge\fP.
+ \fBmbm_fmtvel\fP:  Scans a Hydrosweep DS data file 
+ 		and outputs a formatted table of 
+ 		the mean water velocity and surface 
+ 		water velocity values used in 
+ 		processing that data.
+ \fBmbm_grd2arc\fP:  Converts a GMT grid file to an ESRI ArcView 
+ 		ASCII grid file.
  \fBmbm_grd2geovrml\fP:  Create and execute commands which 
   		generate a TerraVision tileset and GeoVRML 
  		set  of  files  that can  be combined with 
  		other data and viewed in a web browser.
- \fBmbm_grdplot\fP:  Reads a GMT GRD grid file and 
- 		writes a shellscript which will 
- 		generate a GMT map of the data.
  \fBmbm_grd3dplot\fP:  Reads a GMT GRD grid file and 
  		writes a shellscript which will 
  		generate a GMT 3D perspective view
  		of the data.
+ \fBmbm_grdcut\fP:  Extracts a subarea of a GMT grid file.
+ \fBmbm_grdplot\fP:  Reads a GMT GRD grid file and 
+ 		writes a shellscript which will 
+ 		generate a GMT map of the data.
+ \fBmbm_grdtiff\fP:  Reads a GMT GRD grid file and writes a 
+ 		shellscript which will generate a TIFF image 
+ 		of the data.
+ \fBmbm_grid\fP:  Reads a swath sonar data file and writes a 
+ 		shellscript which will grid bathymetry data or 
+ 		mosaic sidescan (or amplitude) data using 
+ 		reasonable guesses at the appropriate grid
+ 		bounds and bin size.
+ \fBmbm_makedatalist\fP: Generates an MB-System datalist 
+ 		file referencing  all identifiable swath 
+ 		files in the specified target directory.
  \fBmbm_plot\fP:  Reads a swath sonar data file and 
  		writes a shellscript which will 
  		generate a swath and/or contour 
@@ -772,10 +807,13 @@ tasks easily.  These are the current MB-system macros:
  		used by the sonar, and generates a file 
  		containing roll corrections which
  		can be applied to the data.
+ \fBmbm_route2mission\fP:  Translate an mbgrdviz survey route 
+ 		file into an MBARI AUV mission script.
  \fBmbm_stat\fP:  Runs \fBmbinfo\fP on a swath sonar data  
  		file and extracts beam statistics from 
- 		the output of mbinfo.
- \fBmbm_utm\fP: Performs forward and inverse UTM projections of ASCII data triples. 
+ 		the output of \fBmbinfo\fP.
+ \fBmbm_utm\fP: Performs forward and inverse UTM projections 
+ 		of ASCII data triples. 
  \fBmbm_vrefcheck\fP:  Generates a plot of high pass
  		filtered apparent crosstrack seafloor slope.
  \fBmbm_xbt\fP:  Processes a Sparton XBT data file 

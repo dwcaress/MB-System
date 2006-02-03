@@ -1,4 +1,4 @@
-.TH mbm_grdinfo l "3 February 2006" "MB-System 5.0" "MB-System 5.0"
+.TH mbm_makedatalist l "3 February 2006" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbm_makedatalist\fP - Macro to generate a datalist of the swath
 files in a specified directory.
@@ -77,7 +77,7 @@ this file are:
 where the file junk.txt has been ignored.
 
 .SH SEE ALSO
-\fBmbsystem\fP(l), \fBmbdatalist\fP(l), \fBmbm_grdinfo\fP(l)
+\fBmbsystem\fP(l), \fBmbdatalist\fP(l), \fBmbinfo\fP(l)
 
 .SH BUGS
 This macro doesn't yet recognize when one swath file derives from

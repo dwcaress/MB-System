@@ -26,6 +26,7 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
+Version 5.0.8beta5     February 3, 2006
 Version 5.0.8beta4     February 1, 2006
 Version 5.0.8beta3     February 1, 2006
 Version 5.0.8beta2     January 27, 2006
@@ -228,8 +229,8 @@ lag, with the roll signal.
 
 The format 56 (vendor Simrad multibeam format) i/o module has been 
 altered to support data logged on byteswapped platforms (e.g. Windows 
-Intel PC's.). The Simrad multibeam formats 56 and 57 now support a
-recently introduced raw range and beam angle datagram.
+Intel PC's.). The Simrad multibeam formats 56 and 57 now support
+recently introduced raw angle/range and water column imagery datagrams.
 
 The program mbdatalist has been augmented to allow users to easily identify
 some problems with swath data files and the processing parameters 
@@ -273,6 +274,9 @@ The program mblist will now output some format specific values from
 Simrad multibeams (formats 56 and 57). In particular, some 
 system parameters, raw amplitude values, and raw sidescan samples
 may now be output (Contributed by Gordon Keith).
+
+A new macro called mbm_makedatalist can easily generate a datalist
+referencing all identifiable swath files in a specified directory.
 
 MB-SYSTEM VERSION 5.0.7 RELEASE NOTES:
 ------------------------------------------
@@ -1158,10 +1162,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.73 2006-02-01 18:32:47 caress Exp $
+RCS ID: $Id: README,v 5.74 2006-02-03 22:45:30 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.73  2006/02/01 18:32:47  caress
+Release 5.0.8beta4.
+
 Revision 5.72  2006/02/01 07:52:09  caress
 Modifications suggested by Gordon Keith
 
