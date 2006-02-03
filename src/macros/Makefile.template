@@ -1,7 +1,7 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 5.3 2006-01-11 07:30:28 caress Exp $
+#	$Id: Makefile.template,v 5.4 2006-02-03 21:06:55 caress Exp $
 #
-#     Copyright (c) 1993, 1994, 2000, 2003 by
+#     Copyright (c) 1993, 1994, 2000, 2003, 2006 by
 #     David W. Caress (caress@mbari.org)
 #       Monterey Bay Aquarium Research Institute
 #       Moss Landing, CA 95039
@@ -16,6 +16,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.3  2006/01/11 07:30:28  caress
+# Working towards 5.0.8
+#
 # Revision 5.2  2005/11/05 01:34:20  caress
 # Much work over the past two months.
 #
@@ -101,7 +104,8 @@ all:	$(BINDIR)/mbm_xbt \
 	$(BINDIR)/mbm_utm \
 	$(BINDIR)/mbm_grd2geovrml \
 	$(BINDIR)/mbm_copy \
-	$(BINDIR)/mbm_route2mission	
+	$(BINDIR)/mbm_route2mission \
+	$(BINDIR)/mbm_makedatalist	
 
 ### make clean does nothing
 clean:
@@ -167,3 +171,6 @@ $(BINDIR)/mbm_copy:	mbm_copy.perl
 $(BINDIR)/mbm_route2mission:	mbm_route2mission.perl
 	cp mbm_route2mission.perl $(BINDIR)/mbm_route2mission
 	chmod 775 $(BINDIR)/mbm_route2mission
+$(BINDIR)/mbm_makedatalist:	mbm_makedatalist.perl
+	cp mbm_makedatalist.perl $(BINDIR)/mbm_makedatalist
+	chmod 775 $(BINDIR)/mbm_makedatalist
