@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad2.c	3.00	10/9/98
- *	$Id: mbsys_simrad2.c,v 5.21 2006-01-27 20:09:47 caress Exp $
+ *	$Id: mbsys_simrad2.c,v 5.22 2006-02-03 21:08:51 caress Exp $
  *
  *    Copyright (c) 1998, 2001, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -31,6 +31,9 @@
  * Date:	October 9, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.21  2006/01/27 20:09:47  caress
+ * Added support for EM3002
+ *
  * Revision 5.20  2006/01/06 18:27:19  caress
  * Working towards 5.0.8
  *
@@ -127,7 +130,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_simrad2.h"
 
-static char res_id[]="$Id: mbsys_simrad2.c,v 5.21 2006-01-27 20:09:47 caress Exp $";
+static char res_id[]="$Id: mbsys_simrad2.c,v 5.22 2006-02-03 21:08:51 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_simrad2_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
@@ -437,6 +440,9 @@ int mbsys_simrad2_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	/* pointer to survey data structure */
 	store->ping = NULL;
 
+	/* pointer to water column data structure */
+	store->wc = NULL;
+
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
@@ -694,20 +700,20 @@ int mbsys_simrad2_survey_alloc(int verbose,
 		    	}
 				
 		/* raw travel time and angle data version 3 */
-		ping->png_raw3_read;	/* flag indicating actual reading of newer rawbeam record */
-		ping->png_raw3_date;	/* date = year*10000 + month*100 + day
+		ping->png_raw3_read = 0;	/* flag indicating actual reading of newer rawbeam record */
+		ping->png_raw3_date = 0;	/* date = year*10000 + month*100 + day
 				    Feb 26, 1995 = 19950226 */
-		ping->png_raw3_msec;	/* time since midnight in msec
+		ping->png_raw3_msec = 0;	/* time since midnight in msec
 				    08:12:51.234 = 29570234 */
-		ping->png_raw3_count;	/* sequential counter or input identifier */
-		ping->png_raw3_serial;	/* system 1 or system 2 serial number */
-		ping->png_raw3_ntx;		/* number of TX pulses (1 to 9) */
-		ping->png_raw3_nbeams;		/* number of raw travel times and angles
+		ping->png_raw3_count = 0;	/* sequential counter or input identifier */
+		ping->png_raw3_serial = 0;	/* system 1 or system 2 serial number */
+		ping->png_raw3_ntx = 0;		/* number of TX pulses (1 to 9) */
+		ping->png_raw3_nbeams = 0;		/* number of raw travel times and angles
 					    - nonzero only if raw beam record read */
-		ping->png_raw3_sample_rate;	/* sampling rate (Hz or 0.01 Hz) */
-		ping->png_raw3_xducer_depth;	/* transmit transducer depth (0.01 m) */
-		ping->png_raw3_ssv;		/* sound speed at transducer (0.1 m/sec) */
-		ping->png_raw3_nbeams_max;	/* maximum number of beams possible */
+		ping->png_raw3_sample_rate = 0;	/* sampling rate (Hz or 0.01 Hz) */
+		ping->png_raw3_xducer_depth = 0;	/* transmit transducer depth (0.01 m) */
+		ping->png_raw3_ssv = 0;		/* sound speed at transducer (0.1 m/sec) */
+		ping->png_raw3_nbeams_max = 0;	/* maximum number of beams possible */
 		for (i=0;i<MBSYS_SIMRAD2_MAXTX;i++)
 			{
 			ping->png_raw3_txtiltangle[i] = 0;/* tilt angle (0.01 deg) */
@@ -801,6 +807,104 @@ int mbsys_simrad2_survey_alloc(int verbose,
 				/* the processed sidescan alongtrack distances 
 					in distance resolution units */
 		    }
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+
+
+/*--------------------------------------------------------------------*/
+int mbsys_simrad2_wc_alloc(int verbose, 
+			void *mbio_ptr, void *store_ptr, 
+			int *error)
+{
+	char	*function_name = "mbsys_wc_survey_alloc";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	struct mbsys_simrad2_struct *store;
+	struct mbsys_simrad2_watercolumn_struct *wc;
+	int	i, j;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* get data structure pointer */
+	store = (struct mbsys_simrad2_struct *) store_ptr;
+
+	/* allocate memory for data structure if needed */
+	if (store->wc == NULL)
+		status = mb_malloc(verbose,
+			sizeof(struct mbsys_simrad2_watercolumn_struct),
+			&(store->wc),error);
+			
+	if (status == MB_SUCCESS)
+		{
+
+		/* get data structure pointer */
+		wc = (struct mbsys_simrad2_watercolumn_struct *) store->wc;
+
+		/* initialize everything */
+		wc->wtc_date = 0;	/* date = year*10000 + month*100 + day
+				    Feb 26, 1995 = 19950226 */
+		wc->wtc_msec = 0;	/* time since midnight in msec
+				    08:12:51.234 = 29570234 */
+		wc->wtc_count = 0;	/* sequential counter or input identifier */
+		wc->wtc_serial = 0;	/* system 1 or system 2 serial number */
+		wc->wtc_ndatagrams = 0;	/* number of datagrams used to represent 
+						the water column for this ping */
+		wc->wtc_datagram = 0;	/* number this datagram */
+		wc->wtc_ntx = 0;	/* number of transmit sectors */
+		wc->wtc_nrx = 0;	/* number of receive beams */
+		wc->wtc_nbeam = 0;	/* number of beams in this datagram */
+		wc->wtc_ssv = 0;	/* sound speed at transducer (0.1 m/sec) */
+		wc->wtc_sfreq = 0;	/* sampling frequency (0.01 Hz) */
+		wc->wtc_heave = 0;	/* tx time heave at transducer (0.01 m) */
+		wc->wtc_spare1 = 0;	/* spare */
+		wc->wtc_spare2 = 0;	/* spare */
+		wc->wtc_spare3 = 0;	/* spare */
+		for (i=0;i<MBSYS_SIMRAD2_MAXTX;i++)
+			{
+			wc->wtc_txtiltangle[i] = 0;	/* tilt angle (0.01 deg) */
+			wc->wtc_txcenter[i] = 0;	/* center frequency (Hz) */
+			wc->wtc_txsector[i] = 0;	/* transmit sector number (0-19) */
+			}
+		for (i=0;i<MBSYS_SIMRAD2_MAXBEAMS;i++)
+			{
+			wc->beam[i].wtc_rxpointangle = 0;	/* Beam pointing angles in 0.01 degree,
+									positive to port. These values are roll stabilized. */
+			wc->beam[i].wtc_start_sample = 0;	/* start sample number */
+			wc->beam[i].wtc_beam_samples = 0;	/* number of water column samples derived from
+									each beam */
+			wc->beam[i].wtc_sector = 0;		/* transmit sector identifier */
+			wc->beam[i].wtc_beam = 0;  		/* beam 128 is first beam on 
+				  	  				second head of EM3000D */
+			for (j=0;j<MBSYS_SIMRAD2_MAXRAWPIXELS;j++)
+				wc->beam[i].wtc_amp[j] = 0;	/* water column amplitude (dB) */
+			}
 		}
 
 	/* print output debug statements */
@@ -1169,6 +1273,10 @@ int mbsys_simrad2_deall(int verbose, void *mbio_ptr, void **store_ptr,
 	/* deallocate memory for survey data structure */
 	if (store->ping != NULL)
 		status = mb_free(verbose,&(store->ping),error);
+
+	/* deallocate memory for water column data structure */
+	if (store->wc != NULL)
+		status = mb_free(verbose,&(store->wc),error);
 
 	/* deallocate memory for attitude data structure */
 	if (store->attitude != NULL)

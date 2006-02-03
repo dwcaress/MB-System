@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 5.20 2006-01-18 15:16:06 caress Exp $
+#	$Id: Makefile.template,v 5.21 2006-02-03 21:10:39 caress Exp $
 #
 #     Copyright (c) 1993, 1994, 2000, 2002, 2003, 2005 by
 #     David W. Caress (caress@mbari.org)
@@ -16,6 +16,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.20  2006/01/18 15:16:06  caress
+# Had to link some programs with both gmtlib and pslib to work with GMT 4.1.
+#
 # Revision 5.19  2006/01/06 18:19:58  caress
 # Working towards 5.0.8
 #
@@ -373,7 +376,7 @@ mbinfo.o:	mbinfo.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_def
 	$(CC) -c $(CFLAGS) mbinfo.c
 mbcopy.o:	mbcopy.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbcopy.c
-mblist.o:	mblist.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
+mblist.o:	mblist.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h $(INCDIR)/mbsys_simrad2.h
 	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) mblist.c
 mbmerge.o:	mbmerge.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbmerge.c

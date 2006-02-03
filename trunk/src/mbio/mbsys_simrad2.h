@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad2.h	10/9/98
- *	$Id: mbsys_simrad2.h,v 5.17 2006-02-02 19:42:09 caress Exp $
+ *	$Id: mbsys_simrad2.h,v 5.18 2006-02-03 21:08:51 caress Exp $
  *
  *    Copyright (c) 1998, 2001, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -32,6 +32,9 @@
  * Date:	October 9, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.17  2006/02/02 19:42:09  caress
+ * Fixed handling of unknown datagrams on little-endian systems.
+ *
  * Revision 5.16  2006/01/27 20:09:47  caress
  * Added support for EM3002
  *
@@ -168,6 +171,7 @@
  *        *0x0266: Raw range and beam angle               44-1658 bytes
  *        *0x0268: Height Output                          24 bytes
  *        *0x0269: Parameter - Stop                       variable size
+ *        *0x026B: Water column                           variable size
  *         0x0270: Parameter - Remote                     variable size
  *         0x0273: Surface sound speed                    variable size
  *        *0x02E1: Bathymetry (MBARI format 57)           48-4092 bytes
@@ -321,7 +325,7 @@
 /* maximum number of beams and pixels */
 #define	MBSYS_SIMRAD2_MAXBEAMS		254
 #define	MBSYS_SIMRAD2_MAXPIXELS		1024
-#define	MBSYS_SIMRAD2_MAXRAWPIXELS	32000
+#define	MBSYS_SIMRAD2_MAXRAWPIXELS	65535
 #define MBSYS_SIMRAD2_MAXTX		19
 #define	MBSYS_SIMRAD2_MAXSVP		1024
 #define	MBSYS_SIMRAD2_MAXATTITUDE	256
@@ -362,6 +366,7 @@
 #define	EM2_RAWBEAM3		0x0266
 #define	EM2_HEIGHT		0x0268
 #define	EM2_STOP		0x0269
+#define	EM2_WATERCOLUMN		0x026B
 #define	EM2_REMOTE		0x0270
 #define	EM2_SSP			0x0273
 #define	EM2_BATH_MBA		0x02E1
@@ -392,6 +397,7 @@
 #define	EM2_ID_RAWBEAM3		0x66
 #define	EM2_ID_HEIGHT		0x68
 #define	EM2_ID_STOP		0x69
+#define	EM2_ID_WATERCOLUMN	0x6B
 #define	EM2_ID_REMOTE		0x70
 #define	EM2_ID_SSP		0x73
 #define	EM2_ID_BATH_MBA		0xE1
@@ -432,6 +438,9 @@
 #define	EM2_SS_BEAM_SIZE		6
 #define	EM2_SS_MBA_HEADER_SIZE		32
 #define	EM2_SS_MBA_BEAM_SIZE		6
+#define	EM2_WC_HEADER_SIZE		36
+#define	EM2_WC_TX_SIZE			6
+#define	EM2_WC_BEAM_SIZE		10
 
 /* invalid value flags */
 #define	EM2_INVALID_AMP			0x7F
@@ -699,6 +708,48 @@ struct mbsys_simrad2_ping_struct
 	short	png_ssalongtrack[MBSYS_SIMRAD2_MAXPIXELS];
 				/* the processed sidescan alongtrack distances 
 					in distance resolution units */
+	};
+
+/* internal data structure for attitude data */
+struct mbsys_simrad2_wcbeam_struct
+	{
+	int	wtc_rxpointangle;	/* Beam pointing angles in 0.01 degree,
+						positive to port. These values are roll stabilized. */
+	int	wtc_start_sample;	/* start sample number */
+	int	wtc_beam_samples;	/* number of water column samples derived from
+						each beam */
+	int	wtc_beam_spare;		/* unknown */
+	int	wtc_sector;		/* transmit sector identifier */
+	int	wtc_beam;  		/* beam 128 is first beam on 
+				  	  	second head of EM3000D */
+	mb_s_char wtc_amp[MBSYS_SIMRAD2_MAXRAWPIXELS]; /* water column amplitude (dB) */
+	};
+	
+/* internal data structure for attitude data */
+struct mbsys_simrad2_watercolumn_struct
+	{
+	int	wtc_date;	/* date = year*10000 + month*100 + day
+				    Feb 26, 1995 = 19950226 */
+	int	wtc_msec;	/* time since midnight in msec
+				    08:12:51.234 = 29570234 */
+	int	wtc_count;	/* sequential counter or input identifier */
+	int	wtc_serial;	/* system 1 or system 2 serial number */
+	int	wtc_ndatagrams;	/* number of datagrams used to represent 
+						the water column for this ping */
+	int	wtc_datagram;	/* number this datagram */
+	int	wtc_ntx;	/* number of transmit sectors */
+	int	wtc_nrx;	/* number of receive beams */
+	int	wtc_nbeam;	/* number of beams in this datagram */
+	int	wtc_ssv;	/* sound speed at transducer (0.1 m/sec) */
+	int	wtc_sfreq;	/* sampling frequency (0.01 Hz) */
+	int	wtc_heave;	/* tx time heave at transducer (0.01 m) */
+	int	wtc_spare1;	/* spare */
+	int	wtc_spare2;	/* spare */
+	int	wtc_spare3;	/* spare */
+	int	wtc_txtiltangle[MBSYS_SIMRAD2_MAXTX];	/* tilt angle (0.01 deg) */
+	int	wtc_txcenter[MBSYS_SIMRAD2_MAXTX];	/* center frequency (Hz) */
+	int	wtc_txsector[MBSYS_SIMRAD2_MAXTX];	/* transmit sector number (0-19) */
+	struct mbsys_simrad2_wcbeam_struct beam[MBSYS_SIMRAD2_MAXBEAMS];
 	};
 
 /* internal data structure for attitude data */
@@ -1036,6 +1087,9 @@ struct mbsys_simrad2_struct
 
 	/* pointer to survey data structure */
 	struct mbsys_simrad2_ping_struct *ping;
+
+	/* pointer to water column data structure */
+	struct mbsys_simrad2_watercolumn_struct *wc;
 	};
 	
 	
