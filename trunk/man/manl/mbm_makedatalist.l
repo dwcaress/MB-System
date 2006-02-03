@@ -18,7 +18,7 @@ The output datalist will be placed in the current working
 directory. The output datalist is named datalist.mb-1 
 by default, but can be specified with the \fB-O\fP option.
 If no target directory is specified with the \fB-I\fP
-option, then the current working directory is used. In order
+option, then the current working directory is used. In order 
 for swath files to be recognized and included in the datalist,
 they must conform to the MB-System swath file naming convention
 (see the \fBmbsystem\fP manual page for details).
