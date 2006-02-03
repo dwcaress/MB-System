@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em300raw.c	10/16/98
- *	$Id: mbr_em300raw.c,v 5.31 2006-02-02 19:42:09 caress Exp $
+ *	$Id: mbr_em300raw.c,v 5.32 2006-02-03 21:08:51 caress Exp $
  *
  *    Copyright (c) 1998, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	October 16,  1998
  * $Log: not supported by cvs2svn $
+ * Revision 5.31  2006/02/02 19:42:09  caress
+ * Fixed handling of unknown datagrams on little-endian systems.
+ *
  * Revision 5.30  2006/02/01 18:32:05  caress
  * Fixed problem reading RAWBEAM3 records.
  *
@@ -258,6 +261,9 @@ int mbr_em300raw_rd_rawbeam3(int verbose, FILE *mbfp, int swap,
 int mbr_em300raw_rd_ss(int verbose, FILE *mbfp, int swap, 
 		struct mbsys_simrad2_struct *store, 
 		short sonar, int length, int *match, int *error);
+int mbr_em300raw_rd_wc(int verbose, FILE *mbfp, int swap, 
+		struct mbsys_simrad2_struct *store, 
+		short sonar, int *error);
 int mbr_em300raw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_em300raw_wr_start(int verbose, FILE *mbfp, int swap, 
 		struct mbsys_simrad2_struct *store, int *error);
@@ -291,8 +297,10 @@ int mbr_em300raw_wr_rawbeam2(int verbose, FILE *mbfp, int swap,
 		struct mbsys_simrad2_struct *store, int *error);
 int mbr_em300raw_wr_ss(int verbose, FILE *mbfp, int swap, 
 		struct mbsys_simrad2_struct *store, int *error);
+int mbr_em300raw_wr_wc(int verbose, FILE *mbfp, int swap, 
+		struct mbsys_simrad2_struct *store, int *error);
 
-static char res_id[]="$Id: mbr_em300raw.c,v 5.31 2006-02-02 19:42:09 caress Exp $";
+static char res_id[]="$Id: mbr_em300raw.c,v 5.32 2006-02-03 21:08:51 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_em300raw(int verbose, void *mbio_ptr, int *error)
@@ -605,7 +613,6 @@ int mbr_rt_em300raw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	struct mbsys_simrad2_attitude_struct *attitude;
 	struct mbsys_simrad2_heading_struct *heading;
 	struct mbsys_simrad2_ssv_struct *ssv;
-	struct mbsys_simrad2_tilt_struct *tilt;
 	struct mbsys_simrad2_ping_struct *ping;
 	int	time_i[7];
 	double	ntime_d, ptime_d, atime_d;
@@ -638,7 +645,6 @@ int mbr_rt_em300raw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	attitude = (struct mbsys_simrad2_attitude_struct *) store->attitude;
 	heading = (struct mbsys_simrad2_heading_struct *) store->heading;
 	ssv = (struct mbsys_simrad2_ssv_struct *) store->ssv;
-	tilt = (struct mbsys_simrad2_tilt_struct *) store->tilt;
 	ping = (struct mbsys_simrad2_ping_struct *) store->ping;
 	pixel_size = (double *) &mb_io_ptr->saved1;
 	swath_width = (double *) &mb_io_ptr->saved2;
@@ -1085,7 +1091,7 @@ Have a nice day...\n");
 			*typelast = type;
 			*sonarlast = sonar;
 
-			/* set flag to swap bytes if necessary */
+			/* set flag to swap MBR_EM300RAW_DEBUGbytes if necessary */
 			swap = *databyteswapped;
 
 			/* get record_size */
@@ -1168,6 +1174,17 @@ Have a nice day...\n");
 					store_ptr,error);
 			ping = (struct mbsys_simrad2_ping_struct *) store->ping;
 			}
+		
+		/* allocate secondary data structure for
+			water column data if needed */
+		if (status == MB_SUCCESS && 
+			(type == EM2_WATERCOLUMN))
+			{
+			if (store->wc == NULL)
+			    status = mbsys_simrad2_wc_alloc(
+					verbose,mbio_ptr,
+					store_ptr,error);
+			}
 
 		/* read the appropriate data records */
 		if (status == MB_FAILURE && expect == EM2_NONE)
@@ -1210,6 +1227,7 @@ Have a nice day...\n");
 			&& type != EM2_RAWBEAM3
 			&& type != EM2_HEIGHT
 			&& type != EM2_STOP
+			&& type != EM2_WATERCOLUMN
 			&& type != EM2_REMOTE
 			&& type != EM2_SSP
 			&& type != EM2_BATH_MBA
@@ -1606,6 +1624,26 @@ Have a nice day...\n");
 				}
 			    }
 			}
+		else if (type == EM2_WATERCOLUMN)
+			{
+#ifdef MBR_EM300RAW_DEBUG
+	fprintf(stderr,"call mbr_em300raw_rd_wc type %x\n",type);
+#endif
+			status = mbr_em300raw_rd_wc(
+				verbose,mbfp,swap,store,sonar,error);
+			if (status == MB_SUCCESS)
+				{
+				done = MB_YES;
+				if (expect != EM2_NONE)
+					{
+					*expect_save = expect;
+					*expect_save_flag = MB_YES;
+					*first_type_save = first_type;
+					}
+				else
+					*expect_save_flag = MB_NO;
+				}
+			}
 		else
 			{
 #ifdef MBR_EM300RAW_DEBUG
@@ -1630,17 +1668,19 @@ Have a nice day...\n");
 			done = MB_YES;
 
 #ifdef MBR_EM300RAW_DEBUG
+	fprintf(stderr,"record_size:%d bytes read:%d file_pos old:%d new:%d\n", 
+		record_size, ftell(mbfp) - mb_io_ptr->file_bytes, mb_io_ptr->file_bytes, ftell(mbfp));
 	fprintf(stderr,"done:%d expect:%x status:%d error:%d\n", 
 		done, expect, status, *error);
 	fprintf(stderr,"end of mbr_em300raw_rd_data loop:\n\n");
 #endif
-		}
 		
-	/* get file position */
-	if (*label_save_flag == MB_YES)
-		mb_io_ptr->file_bytes = ftell(mbfp) - 2;
-	else if (*expect_save_flag != MB_YES)
-		mb_io_ptr->file_bytes = ftell(mbfp);
+		/* get file position */
+		if (*label_save_flag == MB_YES)
+			mb_io_ptr->file_bytes = ftell(mbfp) - 2;
+		else
+			mb_io_ptr->file_bytes = ftell(mbfp);
+		}
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -1723,6 +1763,7 @@ int mbr_em300raw_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 		|| typebyte == EM2_ID_RAWBEAM3
 		|| typebyte == EM2_ID_HEIGHT
 		|| typebyte == EM2_ID_STOP
+		|| typebyte == EM2_ID_WATERCOLUMN
 		|| typebyte == EM2_ID_REMOTE
 		|| typebyte == EM2_ID_SSP
 		|| typebyte == EM2_ID_BATH_MBA
@@ -5038,6 +5079,250 @@ int mbr_em300raw_rd_ss(int verbose, FILE *mbfp, int swap,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+int mbr_em300raw_rd_wc(int verbose, FILE *mbfp, int swap, 
+		struct mbsys_simrad2_struct *store, 
+		short sonar, int *error)
+{
+	char	*function_name = "mbr_em300raw_rd_wc";
+	int	status = MB_SUCCESS;
+	struct mbsys_simrad2_watercolumn_struct *wc;
+	char	line[EM2_WC_HEADER_SIZE];
+	short	short_val;
+	int	read_len;
+	int	done;
+	int	file_bytes;
+	int	i, j;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
+		fprintf(stderr,"dbg2       swap:       %d\n",swap);
+		fprintf(stderr,"dbg2       store:      %d\n",store);
+		fprintf(stderr,"dbg2       sonar:      %d\n",sonar);
+		}
+		
+	/* get  storage structure */
+	wc = (struct mbsys_simrad2_watercolumn_struct *) store->wc;
+		
+	/* set kind and type values */
+	store->kind = MB_DATA_WATER_COLUMN;
+	store->type = EM2_WATERCOLUMN;
+	store->sonar = sonar;
+	file_bytes = ftell(mbfp);
+
+	/* read binary header values into char array */
+	read_len = fread(line,1,EM2_WC_HEADER_SIZE,mbfp);
+	if (read_len == EM2_WC_HEADER_SIZE)
+		status = MB_SUCCESS;
+	else
+		{
+		status = MB_FAILURE;
+		*error = MB_ERROR_EOF;
+		}
+
+	/* get binary header data */
+	if (status == MB_SUCCESS)
+		{
+		mb_get_binary_int(swap, &line[0], &wc->wtc_date); 
+		    store->date = wc->wtc_date;
+		mb_get_binary_int(swap, &line[4], & wc->wtc_msec); 
+		    store->msec = wc->wtc_msec;
+		mb_get_binary_short(swap, &line[8], &short_val); 
+		    wc->wtc_count = (int) ((unsigned short) short_val);
+		mb_get_binary_short(swap, &line[10], &short_val); 
+		    wc->wtc_serial = (int) ((unsigned short) short_val);
+		mb_get_binary_short(swap, &line[12], &short_val); 
+		    wc->wtc_ndatagrams = (int) ((unsigned short) short_val);
+		mb_get_binary_short(swap, &line[14], &short_val); 
+		    wc->wtc_datagram = (int) ((unsigned short) short_val);
+		mb_get_binary_short(swap, &line[16], &short_val); 
+		    wc->wtc_ntx = (int) ((unsigned short) short_val);
+		mb_get_binary_short(swap, &line[18], &short_val); 
+		    wc->wtc_nrx = (int) ((unsigned short) short_val);
+		mb_get_binary_short(swap, &line[20], &short_val); 
+		    wc->wtc_nbeam = (int) ((unsigned short) short_val);
+		mb_get_binary_short(swap, &line[22], &short_val); 
+		    wc->wtc_ssv = (int) ((unsigned short) short_val);
+		mb_get_binary_int(swap, &line[24], &(wc->wtc_sfreq)); 
+		mb_get_binary_short(swap, &line[28], &short_val); 
+		    wc->wtc_heave = (int) ((short) short_val);
+		mb_get_binary_short(swap, &line[30], &short_val); 
+		    wc->wtc_spare1 = (int) ((unsigned short) short_val);
+		mb_get_binary_short(swap, &line[32], &short_val); 
+		    wc->wtc_spare2 = (int) ((unsigned short) short_val);
+		mb_get_binary_short(swap, &line[34], &short_val); 
+		    wc->wtc_spare3 = (int) ((unsigned short) short_val);
+		}
+		
+	/* check for some indicators of a broken record 
+	    - these do happen!!!! */
+	if (status == MB_SUCCESS)
+		{
+		if (wc->wtc_nbeam < 0
+			|| wc->wtc_nbeam > MBSYS_SIMRAD2_MAXBEAMS
+			|| wc->wtc_ntx < 0
+			|| wc->wtc_ntx > MBSYS_SIMRAD2_MAXTX)
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_UNINTELLIGIBLE;
+			}
+		}
+
+	/* read binary beam values */
+	if (status == MB_SUCCESS)
+	    {
+	    for (i=0;i<wc->wtc_ntx && status == MB_SUCCESS;i++)
+		{
+		read_len = fread(line,1,EM2_WC_TX_SIZE,mbfp);
+		if (read_len == EM2_WC_TX_SIZE 
+			&& i < MBSYS_SIMRAD2_MAXTX)
+			{
+			mb_get_binary_short(swap, &line[0], &short_val); 
+			    wc->wtc_txtiltangle[i] = (int) (short_val);
+			mb_get_binary_short(swap, &line[2], &short_val); 
+			    wc->wtc_txcenter[i] = (int) (short_val);
+			wc->wtc_txsector[i] = (int) ((mb_u_char) line[4]);
+			}
+		else
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_EOF;
+			}
+		}
+	    for (i=0;i<wc->wtc_nbeam && status == MB_SUCCESS;i++)
+		{
+		read_len = fread(line,1,EM2_WC_BEAM_SIZE,mbfp);
+		if (read_len == EM2_WC_BEAM_SIZE 
+			&& i < MBSYS_SIMRAD2_MAXBEAMS)
+			{
+			mb_get_binary_short(swap, &line[0], &short_val); 
+			    wc->beam[i].wtc_rxpointangle = (int) (short_val);
+			mb_get_binary_short(swap, &line[2], &short_val); 
+			    wc->beam[i].wtc_start_sample = (int) (short_val);
+			mb_get_binary_short(swap, &line[4], &short_val); 
+			    wc->beam[i].wtc_beam_samples = (int) (unsigned short)(short_val);
+			mb_get_binary_short(swap, &line[6], &short_val); 
+			    wc->beam[i].wtc_beam_spare = (int) (unsigned short)(short_val);
+			wc->beam[i].wtc_sector = (int) (mb_u_char) (line[8]);
+			wc->beam[i].wtc_beam = (int) (mb_u_char) (line[9]);
+			}
+		read_len = fread(wc->beam[i].wtc_amp,1,wc->beam[i].wtc_beam_samples,mbfp);
+		}
+	    }
+		
+	/* now loop over reading individual characters to 
+	    get last bytes of record */
+	if (status == MB_SUCCESS)
+	    {
+	    done = MB_NO;
+	    while (done == MB_NO)
+		{
+		read_len = fread(&line[0],1,1,mbfp);
+		if (read_len == 1 && line[0] == EM2_END)
+			{
+			done = MB_YES;
+			status = MB_SUCCESS;
+			/* get last two check sum bytes */
+			read_len = fread(&line[1],2,1,mbfp);
+#ifdef MBR_EM300RAW_DEBUG
+	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n", 
+		line[0], line[0], 
+		line[1], line[1], 
+		line[2], line[2]);
+#endif
+			}
+		else if (read_len == 1)
+			{
+			status = MB_SUCCESS;
+			}
+		else
+			{
+			done = MB_YES;
+			/* return success here because all of the
+			    important information in this record has
+			    already been read - next attempt to read
+			    file will return error */
+			status = MB_SUCCESS;
+			}
+		}
+#ifdef MBR_EM300RAW_DEBUG
+	fprintf(stderr, "\n");
+#endif
+	    }
+
+	/* print debug statements */
+	if (verbose >= 5)
+		{
+		fprintf(stderr,"\ndbg5  Values read in MBIO function <%s>\n",
+			function_name);
+		fprintf(stderr,"dbg5       type:            %d\n",store->type);
+		fprintf(stderr,"dbg5       sonar:           %d\n",store->sonar);
+		fprintf(stderr,"dbg5       date:            %d\n",store->date);
+		fprintf(stderr,"dbg5       msec:            %d\n",store->msec);
+		fprintf(stderr,"dbg5       wtc_date:        %d\n",wc->wtc_date);
+		fprintf(stderr,"dbg5       wtc_msec:        %d\n",wc->wtc_msec);
+		fprintf(stderr,"dbg5       wtc_count:       %d\n",wc->wtc_count);
+		fprintf(stderr,"dbg5       wtc_serial:      %d\n",wc->wtc_serial);
+		fprintf(stderr,"dbg5       wtc_ndatagrams:  %d\n",wc->wtc_ndatagrams);
+		fprintf(stderr,"dbg5       wtc_datagram:    %d\n",wc->wtc_datagram);
+		fprintf(stderr,"dbg5       wtc_ntx:         %d\n",wc->wtc_ntx);
+		fprintf(stderr,"dbg5       wtc_nrx:         %d\n",wc->wtc_nrx);
+		fprintf(stderr,"dbg5       wtc_nbeam:       %d\n",wc->wtc_nbeam);
+		fprintf(stderr,"dbg5       wtc_ssv:         %d\n",wc->wtc_ssv);
+		fprintf(stderr,"dbg5       wtc_sfreq:       %d\n",wc->wtc_sfreq);
+		fprintf(stderr,"dbg5       wtc_heave:       %d\n",wc->wtc_heave);
+		fprintf(stderr,"dbg5       wtc_spare1:      %d\n",wc->wtc_spare1);
+		fprintf(stderr,"dbg5       wtc_spare2:      %d\n",wc->wtc_spare2);
+		fprintf(stderr,"dbg5       wtc_spare3:      %d\n",wc->wtc_spare3);
+		fprintf(stderr,"dbg5       ---------------------------\n");
+		fprintf(stderr,"dbg5       cnt  tilt center sector\n");
+		fprintf(stderr,"dbg5       ---------------------------\n");
+		for (i=0;i<wc->wtc_ntx;i++)
+			fprintf(stderr,"dbg5       %3d %6d %6d %6d\n",
+				i, wc->wtc_txtiltangle[i], wc->wtc_txcenter[i], 
+				wc->wtc_txsector[i]);
+		for (i=0;i<wc->wtc_nbeam;i++)
+			{
+			fprintf(stderr,"dbg5       --------------------------------------------------\n");
+			fprintf(stderr,"dbg5       cnt  angle start samples unknown sector beam\n");
+			fprintf(stderr,"dbg5       --------------------------------------------------\n");
+			fprintf(stderr,"dbg5        %4d %3d %2d %4d %4d %4d %4d\n",
+				i, wc->beam[i].wtc_rxpointangle, 
+				wc->beam[i].wtc_start_sample, 
+				wc->beam[i].wtc_beam_samples, 
+				wc->beam[i].wtc_beam_spare, 
+				wc->beam[i].wtc_sector, 
+				wc->beam[i].wtc_beam);
+/*			fprintf(stderr,"dbg5       --------------------------------------------------\n");
+			fprintf(stderr,"dbg5       beam[%d]: sample amplitude\n",i);
+			fprintf(stderr,"dbg5       --------------------------------------------------\n");
+			for (j=0;j<wc->beam[i].wtc_beam_samples;j++)
+				fprintf(stderr,"dbg5        %4d %4d\n",
+					j, wc->beam[i].wtc_amp[j]);*/
+			}
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
 int mbr_em300raw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 {
 	char	*function_name = "mbr_em300raw_wr_data";
@@ -5202,6 +5487,13 @@ int mbr_em300raw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 #ifdef MBR_EM300RAW_DEBUG
 	else fprintf(stderr,"NOT call mbr_em300raw_wr_ss kind:%d type %x\n",store->kind,store->type);
 #endif
+		}
+	else if (store->kind == MB_DATA_WATER_COLUMN)
+		{
+#ifdef MBR_EM300RAW_DEBUG
+	fprintf(stderr,"call mbr_em300raw_wr_wc kind:%d type %x\n",store->kind,store->type);
+#endif
+	        status = mbr_em300raw_wr_wc(verbose,mbfp,swap,store,error);
 		}
 	else
 		{
@@ -8824,6 +9116,304 @@ int mbr_em300raw_wr_ss(int verbose, FILE *mbfp, int swap,
 		/* write out data */
 		write_len = fwrite(&line[1],1,3,mbfp);
 		if (write_len != 3)
+			{
+			*error = MB_ERROR_WRITE_FAIL;
+			status = MB_FAILURE;
+			}
+		else
+			{
+			*error = MB_ERROR_NO_ERROR;
+			status = MB_SUCCESS;
+			}
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_em300raw_wr_wc(int verbose, FILE *mbfp, int swap, 
+		struct mbsys_simrad2_struct *store, int *error)
+{
+	char	*function_name = "mbr_em300raw_wr_wc";
+	int	status = MB_SUCCESS;
+	struct mbsys_simrad2_watercolumn_struct *wc;
+	char	line[EM2_WC_HEADER_SIZE];
+	short	label;
+	int	write_len;
+	int	write_size;
+	unsigned short checksum;
+	mb_u_char   *uchar_ptr;
+	int	record_size;
+	int	pad;
+	int	i, j;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
+		fprintf(stderr,"dbg2       swap:       %d\n",swap);
+		fprintf(stderr,"dbg2       store:      %d\n",store);
+		}
+		
+	/* get storage structure */
+	wc = (struct mbsys_simrad2_watercolumn_struct *) store->wc;
+
+	/* print debug statements */
+	if (verbose >= 5)
+		{
+		fprintf(stderr,"\ndbg5  Values to be written in MBIO function <%s>\n",
+			function_name);
+		fprintf(stderr,"dbg5       type:            %d\n",store->type);
+		fprintf(stderr,"dbg5       sonar:           %d\n",store->sonar);
+		fprintf(stderr,"dbg5       date:            %d\n",store->date);
+		fprintf(stderr,"dbg5       msec:            %d\n",store->msec);
+		fprintf(stderr,"dbg5       wtc_date:        %d\n",wc->wtc_date);
+		fprintf(stderr,"dbg5       wtc_msec:        %d\n",wc->wtc_msec);
+		fprintf(stderr,"dbg5       wtc_count:       %d\n",wc->wtc_count);
+		fprintf(stderr,"dbg5       wtc_serial:      %d\n",wc->wtc_serial);
+		fprintf(stderr,"dbg5       wtc_ndatagrams:  %d\n",wc->wtc_ndatagrams);
+		fprintf(stderr,"dbg5       wtc_datagram:    %d\n",wc->wtc_datagram);
+		fprintf(stderr,"dbg5       wtc_ntx:         %d\n",wc->wtc_ntx);
+		fprintf(stderr,"dbg5       wtc_nrx:         %d\n",wc->wtc_nrx);
+		fprintf(stderr,"dbg5       wtc_nbeam:       %d\n",wc->wtc_nbeam);
+		fprintf(stderr,"dbg5       wtc_ssv:         %d\n",wc->wtc_ssv);
+		fprintf(stderr,"dbg5       wtc_sfreq:       %d\n",wc->wtc_sfreq);
+		fprintf(stderr,"dbg5       wtc_heave:       %d\n",wc->wtc_heave);
+		fprintf(stderr,"dbg5       wtc_spare1:      %d\n",wc->wtc_spare1);
+		fprintf(stderr,"dbg5       wtc_spare2:      %d\n",wc->wtc_spare2);
+		fprintf(stderr,"dbg5       wtc_spare3:      %d\n",wc->wtc_spare3);
+		fprintf(stderr,"dbg5       ---------------------------\n");
+		fprintf(stderr,"dbg5       cnt  tilt center sector\n");
+		fprintf(stderr,"dbg5       ---------------------------\n");
+		for (i=0;i<wc->wtc_ntx;i++)
+			fprintf(stderr,"dbg5       %3d %6d %6d %6d\n",
+				i, wc->wtc_txtiltangle[i], wc->wtc_txcenter[i], 
+				wc->wtc_txsector[i]);
+		for (i=0;i<wc->wtc_nbeam;i++)
+			{
+			fprintf(stderr,"dbg5       --------------------------------------------------\n");
+			fprintf(stderr,"dbg5       cnt  angle start samples unknown sector beam\n");
+			fprintf(stderr,"dbg5       --------------------------------------------------\n");
+			fprintf(stderr,"dbg5        %4d %3d %2d %4d %4d %4d %4d\n",
+				i, wc->beam[i].wtc_rxpointangle, 
+				wc->beam[i].wtc_start_sample, 
+				wc->beam[i].wtc_beam_samples, 
+				wc->beam[i].wtc_beam_spare, 
+				wc->beam[i].wtc_sector, 
+				wc->beam[i].wtc_beam);
+/*			fprintf(stderr,"dbg5       --------------------------------------------------\n");
+			fprintf(stderr,"dbg5       beam[%d]: sample amplitude\n",i);
+			fprintf(stderr,"dbg5       --------------------------------------------------\n");
+			for (j=0;j<wc->beam[i].wtc_beam_samples;j++)
+				fprintf(stderr,"dbg5        %4d %4d\n",
+					j, wc->beam[i].wtc_amp[j]);*/
+			}
+		}
+		
+	/* zero checksum */
+	checksum = 0;
+
+	/* write the record size */
+	record_size = EM2_WC_HEADER_SIZE 
+			+ EM2_WC_BEAM_SIZE * wc->wtc_nbeam 
+			+ EM2_WC_TX_SIZE * wc->wtc_ntx + 8;
+	for (i=0;i<wc->wtc_nbeam;i++)
+		{
+		record_size += wc->beam[i].wtc_beam_samples;
+		}
+	pad = (record_size % 2);
+	record_size += pad;
+	mb_put_binary_int(swap, record_size, (void *) &write_size); 
+	write_len = fwrite(&write_size,1,4,mbfp);
+	if (write_len != 4)
+		{
+		status = MB_FAILURE;
+		*error = MB_ERROR_WRITE_FAIL;
+		}
+	else
+		status = MB_SUCCESS;
+
+	/* write the record label */
+	if (status == MB_SUCCESS)
+		{
+		mb_put_binary_short(swap, (short) (EM2_WATERCOLUMN), (void *) &label); 
+		write_len = fwrite(&label,1,2,mbfp);
+		if (write_len != 2)
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_WRITE_FAIL;
+			}
+		else
+			status = MB_SUCCESS;
+		
+		/* compute checksum */
+		uchar_ptr = (mb_u_char *) &label;
+		checksum += uchar_ptr[1];
+		}
+
+	if (status == MB_SUCCESS)
+		{
+		mb_put_binary_short(swap, (short) (store->sonar), (void *) &label); 
+		write_len = fwrite(&label,1,2,mbfp);
+		if (write_len != 2)
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_WRITE_FAIL;
+			}
+		else
+			status = MB_SUCCESS;
+			
+		/* compute checksum */
+		uchar_ptr = (mb_u_char *) &label;
+		checksum += uchar_ptr[0];
+		checksum += uchar_ptr[1];
+		}
+
+	/* output binary header data */
+	if (status == MB_SUCCESS)
+		{
+		mb_put_binary_int(swap, (int) wc->wtc_date, (void *) &line[0]); 
+		mb_put_binary_int(swap, (int) wc->wtc_msec, (void *) &line[4]); 
+		mb_put_binary_short(swap, (unsigned short) wc->wtc_count, (void *) &line[8]);
+		mb_put_binary_short(swap, (unsigned short) wc->wtc_serial, (void *) &line[10]);
+		mb_put_binary_short(swap, (unsigned short) wc->wtc_ndatagrams, (void *) &line[12]);
+		mb_put_binary_short(swap, (unsigned short) wc->wtc_datagram, (void *) &line[14]);
+		mb_put_binary_short(swap, (unsigned short) wc->wtc_ntx, (void *) &line[16]);
+		mb_put_binary_short(swap, (unsigned short) wc->wtc_nrx, (void *) &line[18]);
+		mb_put_binary_short(swap, (unsigned short) wc->wtc_nbeam, (void *) &line[20]);
+		mb_put_binary_short(swap, (unsigned short) wc->wtc_ssv, (void *) &line[22]);
+		mb_put_binary_int(swap, (int) wc->wtc_sfreq, (void *) &line[24]); 
+		mb_put_binary_short(swap, (short) wc->wtc_heave, (void *) &line[28]);
+		mb_put_binary_short(swap, (unsigned short) wc->wtc_spare1, (void *) &line[30]);
+		mb_put_binary_short(swap, (unsigned short) wc->wtc_spare2, (void *) &line[32]);
+		mb_put_binary_short(swap, (unsigned short) wc->wtc_spare3, (void *) &line[34]);
+		
+		/* compute checksum */
+		uchar_ptr = (mb_u_char *) line;
+		for (j=0;j<EM2_WC_HEADER_SIZE;j++)
+		    checksum += uchar_ptr[j];
+
+		/* write out data */
+		write_len = fwrite(line,1,EM2_WC_HEADER_SIZE,mbfp);
+		if (write_len != EM2_WC_HEADER_SIZE)
+			{
+			*error = MB_ERROR_WRITE_FAIL;
+			status = MB_FAILURE;
+			}
+		else
+			{
+			*error = MB_ERROR_NO_ERROR;
+			status = MB_SUCCESS;
+			}
+		}
+
+	/* output binary beam data */
+	if (status == MB_SUCCESS)
+	    {
+	    for (i=0;i<wc->wtc_ntx;i++)
+		{
+		mb_put_binary_short(swap, (short) wc->wtc_txtiltangle[i], (void *) &line[0]);
+		mb_put_binary_short(swap, (unsigned short) wc->wtc_txcenter[i], (void *) &line[2]);
+		line[4] = (mb_u_char) wc->wtc_txsector[i];
+		line[5] = (mb_u_char) 0;
+		
+		/* compute checksum */
+		uchar_ptr = (mb_u_char *) line;
+		for (j=0;j<EM2_WC_TX_SIZE;j++)
+		    checksum += uchar_ptr[j];
+
+		/* write out data */
+		write_len = fwrite(line,1,EM2_WC_TX_SIZE,mbfp);
+		if (write_len != EM2_WC_TX_SIZE)
+			{
+			*error = MB_ERROR_WRITE_FAIL;
+			status = MB_FAILURE;
+			}
+		else
+			{
+			*error = MB_ERROR_NO_ERROR;
+			status = MB_SUCCESS;
+			}
+		}
+	    for (i=0;i<wc->wtc_nbeam;i++)
+		{
+		mb_put_binary_short(swap, (short) wc->beam[i].wtc_rxpointangle, (void *) &line[0]);
+		mb_put_binary_short(swap, (unsigned short) wc->beam[i].wtc_start_sample, (void *) &line[2]);
+		mb_put_binary_short(swap, (unsigned short) wc->beam[i].wtc_beam_samples, (void *) &line[4]);
+		mb_put_binary_short(swap, (unsigned short) wc->beam[i].wtc_beam_spare, (void *) &line[6]);
+		line[8] = (mb_u_char) wc->beam[i].wtc_sector;
+		line[9] = (mb_u_char) wc->beam[i].wtc_beam;
+		
+		/* compute checksum */
+		uchar_ptr = (mb_u_char *) line;
+		for (j=0;j<EM2_WC_BEAM_SIZE;j++)
+		    checksum += uchar_ptr[j];
+
+		/* write out data */
+		write_len = fwrite(line,1,EM2_WC_BEAM_SIZE,mbfp);
+		if (write_len != EM2_WC_BEAM_SIZE)
+			{
+			*error = MB_ERROR_WRITE_FAIL;
+			status = MB_FAILURE;
+			}
+		else
+			{
+			*error = MB_ERROR_NO_ERROR;
+			status = MB_SUCCESS;
+			}
+		
+		/* compute checksum */
+		uchar_ptr = (mb_u_char *) wc->beam[i].wtc_amp;
+		for (j=0;j<wc->beam[i].wtc_beam_samples;j++)
+		    checksum += uchar_ptr[j];
+
+		/* write out data */
+		write_len = fwrite(wc->beam[i].wtc_amp,1,wc->beam[i].wtc_beam_samples,mbfp);
+		if (write_len != wc->beam[i].wtc_beam_samples)
+			{
+			*error = MB_ERROR_WRITE_FAIL;
+			status = MB_FAILURE;
+			}
+		else
+			{
+			*error = MB_ERROR_NO_ERROR;
+			status = MB_SUCCESS;
+			}
+		}
+	    }
+
+	/* output end of record */
+	if (status == MB_SUCCESS)
+		{
+		if (pad == 1)
+			{
+			line[0] = 0;
+			checksum += line[0];
+			}
+		line[1] = 0x03;
+	    
+		/* set checksum */
+		mb_put_binary_short(swap, (unsigned short) checksum, (void *) &line[2]);
+
+		/* write out data */
+		write_len = fwrite(&line[!pad],1,3+pad,mbfp);
+		if (write_len != 3+pad)
 			{
 			*error = MB_ERROR_WRITE_FAIL;
 			status = MB_FAILURE;

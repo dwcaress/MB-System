@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbio_status.h	2/1/93
- *    $Id: mb_status.h,v 5.63 2006-02-01 18:30:55 caress Exp $
+ *    $Id: mb_status.h,v 5.64 2006-02-03 21:08:51 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003, 2004, 2005 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.63  2006/02/01 18:30:55  caress
+ * Release 5.0.8beta4
+ *
  * Revision 5.62  2006/01/27 19:09:38  caress
  * Version 5.0.8beta2
  *
@@ -308,7 +311,7 @@
 #define	MB_NO	0
 
 /* MBIO data type ("kind") convention */
-#define	MB_DATA_KINDS			44
+#define	MB_DATA_KINDS			45
 #define	MB_DATA_NONE			0
 #define	MB_DATA_DATA			1	/* general survey data */
 #define	MB_DATA_COMMENT			2	/* general comment */
@@ -354,13 +357,14 @@
 #define	MB_DATA_ABSORPTIONLOSS		42	/* Reson 7k */
 #define	MB_DATA_SPREADINGLOSS		43	/* Reson 7k */
 #define	MB_DATA_INSTALLATION		44	/* Reson 7k */
+#define	MB_DATA_WATER_COLUMN		45	/* Simrad */
 
 /* MBIO function status convention */
 #define	MB_SUCCESS			1
 #define	MB_FAILURE			0
 
 /* MBIO minimum and maximum error values */
-#define	MB_ERROR_MIN			-17
+#define	MB_ERROR_MIN			-18
 #define	MB_ERROR_MAX			15
 
 /* MBIO function fatal error values */
@@ -388,17 +392,18 @@
 #define	MB_ERROR_SPEED_TOO_SMALL	-4
 #define	MB_ERROR_COMMENT		-5
 #define	MB_ERROR_SUBBOTTOM		-6
-#define	MB_ERROR_OTHER			-7
-#define	MB_ERROR_UNINTELLIGIBLE		-8
-#define	MB_ERROR_IGNORE			-9
-#define	MB_ERROR_NO_DATA_REQUESTED	-10
-#define	MB_ERROR_BUFFER_FULL		-11
-#define	MB_ERROR_NO_DATA_LOADED		-12
-#define	MB_ERROR_BUFFER_EMPTY		-13
-#define	MB_ERROR_NO_DATA_DUMPED		-14
-#define	MB_ERROR_NO_MORE_DATA		-15
-#define	MB_ERROR_DATA_NOT_INSERTED	-16
-#define	MB_ERROR_BAD_PROJECTION		-17
+#define	MB_ERROR_WATER_COLUMN		-7
+#define	MB_ERROR_OTHER			-8
+#define	MB_ERROR_UNINTELLIGIBLE		-9
+#define	MB_ERROR_IGNORE			-10
+#define	MB_ERROR_NO_DATA_REQUESTED	-11
+#define	MB_ERROR_BUFFER_FULL		-12
+#define	MB_ERROR_NO_DATA_LOADED		-13
+#define	MB_ERROR_BUFFER_EMPTY		-14
+#define	MB_ERROR_NO_DATA_DUMPED		-15
+#define	MB_ERROR_NO_MORE_DATA		-16
+#define	MB_ERROR_DATA_NOT_INSERTED	-17
+#define	MB_ERROR_BAD_PROJECTION		-18
 
 /* MBIO problem values */
 #define	MB_PROBLEM_MAX			6
@@ -438,6 +443,7 @@ static char *nonfatal_error_msg[] =
 	"Ship speed too small",
 	"Comment record",
 	"Subbottom record",
+	"Water column record",
 	"Neither a data record nor a comment record",
 	"Unintelligible data record",
 	"Ignore this data",
@@ -508,6 +514,7 @@ static char *notice_msg[] =
 	"MB_DATA_ABSORPTIONLOSS (ID=42): Absorption loss record", 
 	"MB_DATA_SPREADINGLOSS (ID=43): Spreading loss record", 
 	"MB_DATA_INSTALLATION (ID=44): Installation parameter record", 
+	"MB_DATA_WATER_COLUMN (ID=45): Water column record", 
 	
 	/* notices for nonfatal error messages */
 	"MB_ERROR_TIME_GAP (ID=-1): Time gap in data",
@@ -516,17 +523,18 @@ static char *notice_msg[] =
 	"MB_ERROR_SPEED_TOO_SMALL (ID=-4): Ship speed too small",
 	"MB_ERROR_COMMENT (ID=-5): Comment record",
 	"MB_ERROR_SUBBOTTOM (ID=-6): Subbottom record",
-	"MB_ERROR_OTHER (ID=-7): Neither a data record nor a comment record",
-	"MB_ERROR_UNINTELLIGIBLE (ID=-8): Unintelligible data record",
-	"MB_ERROR_IGNORE (ID=-9): Ignore this data",
-	"MB_ERROR_NO_DATA_REQUESTED (ID=-10): No data requested for buffer load",
-	"MB_ERROR_BUFFER_FULL (ID=-11): Data buffer is full",
-	"MB_ERROR_NO_DATA_LOADED (ID=-12): No data was loaded into the buffer",
-	"MB_ERROR_BUFFER_EMPTY (ID=-13): Data buffer is empty",
-	"MB_ERROR_NO_DATA_DUMPED (ID=-14): No data was dumped from the buffer",
-	"MB_ERROR_NO_MORE_DATA (ID=-15): No more survey data records in buffer", 
-	"MB_ERROR_DATA_NOT_INSERTED (ID=-16): Data inconsistencies prevented inserting data into storage structure", 
-	"MB_ERROR_BAD_PROJECTION (ID=-17): UTM projection initialization failed", 
+	"MB_ERROR_WATER_COLUMN (ID=-7): Water column record",
+	"MB_ERROR_OTHER (ID=-8): Neither a data record nor a comment record",
+	"MB_ERROR_UNINTELLIGIBLE (ID=-9): Unintelligible data record",
+	"MB_ERROR_IGNORE (ID=-10): Ignore this data",
+	"MB_ERROR_NO_DATA_REQUESTED (ID=-11): No data requested for buffer load",
+	"MB_ERROR_BUFFER_FULL (ID=-12): Data buffer is full",
+	"MB_ERROR_NO_DATA_LOADED (ID=-13): No data was loaded into the buffer",
+	"MB_ERROR_BUFFER_EMPTY (ID=-14): Data buffer is empty",
+	"MB_ERROR_NO_DATA_DUMPED (ID=-15): No data was dumped from the buffer",
+	"MB_ERROR_NO_MORE_DATA (ID=-16): No more survey data records in buffer", 
+	"MB_ERROR_DATA_NOT_INSERTED (ID=-17): Data inconsistencies prevented inserting data into storage structure", 
+	"MB_ERROR_BAD_PROJECTION (ID=-18): UTM projection initialization failed", 
 	
 	/* problem notices */
 	"DATA PROBLEM (ID=1): No survey data found",
