@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em300mba.c	10/16/98
- *	$Id: mbr_em300mba.c,v 5.30 2006-02-06 06:18:06 caress Exp $
+ *	$Id: mbr_em300mba.c,v 5.31 2006-02-06 16:54:50 caress Exp $
  *
  *    Copyright (c) 1998, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	October 16,  1998
  * $Log: not supported by cvs2svn $
+ * Revision 5.30  2006/02/06 06:18:06  caress
+ * Commented out checks for beam mismatches between bathy and sidescan records - Barry Eakins of SIO has complained of dropped pings in Revelle data.
+ *
  * Revision 5.29  2006/02/03 21:08:51  caress
  * Working on supporting water column datagrams in Simrad formats.
  *
@@ -288,7 +291,7 @@ int mbr_em300mba_wr_ss(int verbose, FILE *mbfp, int swap,
 int mbr_em300mba_wr_wc(int verbose, FILE *mbfp, int swap, 
 		struct mbsys_simrad2_struct *store, int *error);
 
-static char res_id[]="$Id: mbr_em300mba.c,v 5.30 2006-02-06 06:18:06 caress Exp $";
+static char res_id[]="$Id: mbr_em300mba.c,v 5.31 2006-02-06 16:54:50 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_em300mba(int verbose, void *mbio_ptr, int *error)
@@ -690,7 +693,7 @@ int mbr_rt_em300mba(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		time_i[5] = (ping->png_ss_msec % 60000) / 1000;
 		time_i[6] = (ping->png_ss_msec % 1000) * 1000;
 		mb_get_time(verbose, time_i, &ss_time_d);
-
+		
 		/* check for time match - if bath newer than
 		   sidescan then zero sidescan,  if sidescan
 		   newer than bath then set error,  if ok then
@@ -701,34 +704,49 @@ int mbr_rt_em300mba(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    {
 		    status = mbsys_simrad2_zero_ss(verbose,store_ptr,error);
 		    }
+		else if (bath_time_d > ss_time_d)
+		    {
+		    if (verbose > 0)
+		    	fprintf(stderr,"%s: Sidescan zeroed because bathymetry and sidescan timestamps disagree: %f %f\n",
+				function_name, bath_time_d, ss_time_d);
+		    status = mbsys_simrad2_zero_ss(verbose,store_ptr,error);
+		    }
 		else if (bath_time_d < ss_time_d)
 		    {
+		    if (verbose > 0)
+		    	fprintf(stderr,"%s: Ping unintelligible because bathymetry and sidescan timestamps disagree: %f %f\n",
+				function_name, bath_time_d, ss_time_d);
 		    *error = MB_ERROR_UNINTELLIGIBLE;
 		    status = MB_FAILURE;
 		    }
-/*		else
+		else
 		    {
 		    /* check for some indicators of broken records */
-/*		    if (ping->png_nbeams != ping->png_nbeams_ss)
+		    if (ping->png_nbeams < ping->png_nbeams_ss
+			|| ping->png_nbeams > ping->png_nbeams_ss + 1)
+			{
+		    	if (verbose > 0)
+		    		fprintf(stderr,"%s: Sidescan zeroed because number of bathymetry and sidescan beams disagree: %d %d\n",
+					function_name, ping->png_nbeams, ping->png_nbeams_ss);
+		    	status = mbsys_simrad2_zero_ss(verbose,store_ptr,error);
+			}
+		    else if (ping->png_nbeams == ping->png_nbeams_ss)
+			{
+			for (i=0;i<ping->png_nbeams;i++)
 			    {
-			    *error = MB_ERROR_UNINTELLIGIBLE;
-			    status = MB_FAILURE;
-			    }
-		    else
-			    {
-			    for (i=0;i<ping->png_nbeams;i++)
+			    if (ping->png_beam_num[i] != 
+				    ping->png_beam_index[i] + 1
+				&& ping->png_beam_num[i] != 
+				    ping->png_beam_index[i] - 1)
 				{
-				if (ping->png_beam_num[i] != 
-					ping->png_beam_index[i] + 1
-				    && ping->png_beam_num[i] != 
-					ping->png_beam_index[i] - 1)
-				    {
-				    *error = MB_ERROR_UNINTELLIGIBLE;
-				    status = MB_FAILURE;
-				    }
+		    		if (verbose > 0)
+		    			fprintf(stderr,"%s: Sidescan zeroed because bathymetry and sidescan beam ids disagree: %d %d %d\n",
+						function_name, i, ping->png_beam_num[i], ping->png_beam_index[i]);
+		    		status = mbsys_simrad2_zero_ss(verbose,store_ptr,error);
 				}
 			    }
-		    }*/
+			}
+		    }
 		}
 
 	if (status == MB_SUCCESS
