@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em300raw.c	10/16/98
- *	$Id: mbr_em300raw.c,v 5.32 2006-02-03 21:08:51 caress Exp $
+ *	$Id: mbr_em300raw.c,v 5.33 2006-02-06 06:18:07 caress Exp $
  *
  *    Copyright (c) 1998, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	October 16,  1998
  * $Log: not supported by cvs2svn $
+ * Revision 5.32  2006/02/03 21:08:51  caress
+ * Working on supporting water column datagrams in Simrad formats.
+ *
  * Revision 5.31  2006/02/02 19:42:09  caress
  * Fixed handling of unknown datagrams on little-endian systems.
  *
@@ -300,7 +303,7 @@ int mbr_em300raw_wr_ss(int verbose, FILE *mbfp, int swap,
 int mbr_em300raw_wr_wc(int verbose, FILE *mbfp, int swap, 
 		struct mbsys_simrad2_struct *store, int *error);
 
-static char res_id[]="$Id: mbr_em300raw.c,v 5.32 2006-02-03 21:08:51 caress Exp $";
+static char res_id[]="$Id: mbr_em300raw.c,v 5.33 2006-02-06 06:18:07 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_em300raw(int verbose, void *mbio_ptr, int *error)
@@ -746,10 +749,10 @@ int mbr_rt_em300raw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    *error = MB_ERROR_UNINTELLIGIBLE;
 		    status = MB_FAILURE;
 		    }
-		else
+/*		else
 		    {
 		    /* check for some indicators of broken records */
-		    if (ping->png_nbeams < ping->png_nbeams_ss
+/*		    if (ping->png_nbeams < ping->png_nbeams_ss
 			|| ping->png_nbeams > ping->png_nbeams_ss + 1)
 			{
 			*error = MB_ERROR_UNINTELLIGIBLE;
@@ -769,7 +772,7 @@ int mbr_rt_em300raw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 				}
 			    }
 			}
-		    }
+		    }*/
 		}
 
 	if (status == MB_SUCCESS
