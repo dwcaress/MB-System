@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em300mba.c	10/16/98
- *	$Id: mbr_em300mba.c,v 5.31 2006-02-06 16:54:50 caress Exp $
+ *	$Id: mbr_em300mba.c,v 5.32 2006-02-07 03:12:14 caress Exp $
  *
  *    Copyright (c) 1998, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,10 @@
  * Author:	D. W. Caress
  * Date:	October 16,  1998
  * $Log: not supported by cvs2svn $
+ * Revision 5.31  2006/02/06 16:54:50  caress
+ * Set the Simrad i/o modules to output error messages with verbose > 0 when
+ * sidescan is zeroed because of mismatch between bathymetry and sidescan records.
+ *
  * Revision 5.30  2006/02/06 06:18:06  caress
  * Commented out checks for beam mismatches between bathy and sidescan records - Barry Eakins of SIO has complained of dropped pings in Revelle data.
  *
@@ -291,7 +295,7 @@ int mbr_em300mba_wr_ss(int verbose, FILE *mbfp, int swap,
 int mbr_em300mba_wr_wc(int verbose, FILE *mbfp, int swap, 
 		struct mbsys_simrad2_struct *store, int *error);
 
-static char res_id[]="$Id: mbr_em300mba.c,v 5.31 2006-02-06 16:54:50 caress Exp $";
+static char res_id[]="$Id: mbr_em300mba.c,v 5.32 2006-02-07 03:12:14 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_em300mba(int verbose, void *mbio_ptr, int *error)
@@ -707,15 +711,19 @@ int mbr_rt_em300mba(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		else if (bath_time_d > ss_time_d)
 		    {
 		    if (verbose > 0)
-		    	fprintf(stderr,"%s: Sidescan zeroed because bathymetry and sidescan timestamps disagree: %f %f\n",
-				function_name, bath_time_d, ss_time_d);
+		    	fprintf(stderr,"%s: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d Sidescan zeroed, bathtime:%f >  sstime:%f\n",
+				function_name, time_i[0], time_i[1], time_i[2], 
+					time_i[3], time_i[4], time_i[5], time_i[6],
+					bath_time_d, ss_time_d);
 		    status = mbsys_simrad2_zero_ss(verbose,store_ptr,error);
 		    }
 		else if (bath_time_d < ss_time_d)
 		    {
 		    if (verbose > 0)
-		    	fprintf(stderr,"%s: Ping unintelligible because bathymetry and sidescan timestamps disagree: %f %f\n",
-				function_name, bath_time_d, ss_time_d);
+		    	fprintf(stderr,"%s: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d Ping unintelligible bathtime:%f < sstime%f\n",
+				function_name, time_i[0], time_i[1], time_i[2], 
+					time_i[3], time_i[4], time_i[5], time_i[6],
+					bath_time_d, ss_time_d);
 		    *error = MB_ERROR_UNINTELLIGIBLE;
 		    status = MB_FAILURE;
 		    }
@@ -725,10 +733,11 @@ int mbr_rt_em300mba(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    if (ping->png_nbeams < ping->png_nbeams_ss
 			|| ping->png_nbeams > ping->png_nbeams_ss + 1)
 			{
-		    	if (verbose > 0)
-		    		fprintf(stderr,"%s: Sidescan zeroed because number of bathymetry and sidescan beams disagree: %d %d\n",
-					function_name, ping->png_nbeams, ping->png_nbeams_ss);
-		    	status = mbsys_simrad2_zero_ss(verbose,store_ptr,error);
+		    	if (verbose > 1)
+			    	fprintf(stderr,"%s: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d Sidescan ignored: num bath beams != num ss beams: %d %d\n",
+					function_name, time_i[0], time_i[1], time_i[2], 
+					time_i[3], time_i[4], time_i[5], time_i[6],
+					ping->png_nbeams, ping->png_nbeams_ss);
 			}
 		    else if (ping->png_nbeams == ping->png_nbeams_ss)
 			{
@@ -739,10 +748,11 @@ int mbr_rt_em300mba(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 				&& ping->png_beam_num[i] != 
 				    ping->png_beam_index[i] - 1)
 				{
-		    		if (verbose > 0)
-		    			fprintf(stderr,"%s: Sidescan zeroed because bathymetry and sidescan beam ids disagree: %d %d %d\n",
-						function_name, i, ping->png_beam_num[i], ping->png_beam_index[i]);
-		    		status = mbsys_simrad2_zero_ss(verbose,store_ptr,error);
+		    		if (verbose > 1)
+				    	fprintf(stderr,"%s: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d Sidescan ignored: bath and ss beam indexes don't match: : %d %d %d\n",
+						function_name, time_i[0], time_i[1], time_i[2], 
+						time_i[3], time_i[4], time_i[5], time_i[6],
+						i, ping->png_beam_num[i], ping->png_beam_index[i]);
 				}
 			    }
 			}

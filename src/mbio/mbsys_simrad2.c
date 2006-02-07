@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad2.c	3.00	10/9/98
- *	$Id: mbsys_simrad2.c,v 5.22 2006-02-03 21:08:51 caress Exp $
+ *	$Id: mbsys_simrad2.c,v 5.23 2006-02-07 03:12:14 caress Exp $
  *
  *    Copyright (c) 1998, 2001, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -31,6 +31,9 @@
  * Date:	October 9, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.22  2006/02/03 21:08:51  caress
+ * Working on supporting water column datagrams in Simrad formats.
+ *
  * Revision 5.21  2006/01/27 20:09:47  caress
  * Added support for EM3002
  *
@@ -130,7 +133,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_simrad2.h"
 
-static char res_id[]="$Id: mbsys_simrad2.c,v 5.22 2006-02-03 21:08:51 caress Exp $";
+static char res_id[]="$Id: mbsys_simrad2.c,v 5.23 2006-02-07 03:12:14 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_simrad2_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
@@ -3483,6 +3486,9 @@ int mbsys_simrad2_makess(int verbose, void *mbio_ptr, void *store_ptr,
 	int	pixel_int_use;
 	double	angle, depth, xtrack, xtrackss;
 	double	range, beam_foot, beamwidth, sint;
+	int	time_i[7];
+	double	bath_time_d, ss_time_d;
+	int	ss_ok;
 	int	first, last, k1, k2;
 	int	i, k, kk;
 
@@ -3620,9 +3626,59 @@ int mbsys_simrad2_makess(int verbose, void *mbio_ptr, void *store_ptr,
 		    
 		/* get pixel interpolation */
 		pixel_int_use = pixel_int + 1;
+		
+		/* check that sidescan can be used */
+		/* get times of bath and sidescan records */
+		time_i[0] = ping->png_date / 10000;
+		time_i[1] = (ping->png_date % 10000) / 100;
+		time_i[2] = ping->png_date % 100;
+		time_i[3] = ping->png_msec / 3600000;
+		time_i[4] = (ping->png_msec % 3600000) / 60000;
+		time_i[5] = (ping->png_msec % 60000) / 1000;
+		time_i[6] = (ping->png_msec % 1000) * 1000;
+		mb_get_time(verbose, time_i, &bath_time_d);
+		time_i[0] = ping->png_ss_date / 10000;
+		time_i[1] = (ping->png_ss_date % 10000) / 100;
+		time_i[2] = ping->png_ss_date % 100;
+		time_i[3] = ping->png_ss_msec / 3600000;
+		time_i[4] = (ping->png_ss_msec % 3600000) / 60000;
+		time_i[5] = (ping->png_ss_msec % 60000) / 1000;
+		time_i[6] = (ping->png_ss_msec % 1000) * 1000;
+		mb_get_time(verbose, time_i, &ss_time_d);
+		ss_ok = MB_YES;
+		if (ping->png_nbeams < ping->png_nbeams_ss
+		    || ping->png_nbeams > ping->png_nbeams_ss + 1)
+		    {
+		    ss_ok = MB_NO;
+		    if (verbose > 0)
+			    fprintf(stderr,"%s: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d Sidescan ignored: num bath beams != num ss beams: %d %d\n",
+				    function_name, time_i[0], time_i[1], time_i[2], 
+				    time_i[3], time_i[4], time_i[5], time_i[6],
+				    ping->png_nbeams, ping->png_nbeams_ss);
+		    }
+		else if (ping->png_nbeams == ping->png_nbeams_ss)
+		    {
+		    for (i=0;i<ping->png_nbeams;i++)
+			{
+			if (ping->png_beam_num[i] != 
+				ping->png_beam_index[i] + 1
+			    && ping->png_beam_num[i] != 
+				ping->png_beam_index[i] - 1)
+			    {
+		    	    ss_ok = MB_NO;
+			    if (verbose > 0)
+				    fprintf(stderr,"%s: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d Sidescan ignored: bath and ss beam indexes don't match: : %d %d %d\n",
+					    function_name, time_i[0], time_i[1], time_i[2], 
+					    time_i[3], time_i[4], time_i[5], time_i[6],
+					    i, ping->png_beam_num[i], ping->png_beam_index[i]);
+			    }
+			}
+		    }
+		
 
 		/* loop over raw sidescan, putting each raw pixel into
 			the binning arrays */
+		if (ss_ok == MB_YES)
 		for (i=0;i<ping->png_nbeams_ss;i++)
 			{
 			beam_ss = &ping->png_ssraw[ping->png_start_sample[i]];
