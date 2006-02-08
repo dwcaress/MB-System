@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit_callbacks.c	3/28/97
- *    $Id: mbedit_callbacks.c,v 5.15 2006-01-24 19:12:42 caress Exp $
+ *    $Id: mbedit_callbacks.c,v 5.16 2006-02-08 16:57:36 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	March 28, 1997  GUI recast
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.15  2006/01/24 19:12:42  caress
+ * Version 5.0.8 beta.
+ *
  * Revision 5.14  2005/03/25 04:12:23  caress
  * MBedit now allows alongtrack and acrosstrack views as well as the traditional waterfall display of profiles.
  *
@@ -501,9 +504,15 @@ do_mbedit_init(int argc, char **argv)
     status = XLookupColor(display,colormap, "black",&db_color,&colors[1]);
     if ((status = XAllocColor(display,colormap,&colors[1])) == 0)
 	    fprintf(stderr,"Failure to allocate color: black\n");
+#ifdef USE_ORANGE
+    status = XLookupColor(display,colormap, "orange",&db_color,&colors[2]);
+    if ((status = XAllocColor(display,colormap,&colors[2])) == 0)
+	    fprintf(stderr,"Failure to allocate color: orange\n");
+#else
     status = XLookupColor(display,colormap, "red",&db_color,&colors[2]);
     if ((status = XAllocColor(display,colormap,&colors[2])) == 0)
 	    fprintf(stderr,"Failure to allocate color: red\n");
+#endif
     status = XLookupColor(display,colormap, "green",&db_color,&colors[3]);
     if ((status = XAllocColor(display,colormap,&colors[3])) == 0)
 	    fprintf(stderr,"Failure to allocate color: green\n");
