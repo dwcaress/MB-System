@@ -26,6 +26,7 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
+Version 5.0.8          February 8, 2006
 Version 5.0.8beta5     February 3, 2006
 Version 5.0.8beta4     February 1, 2006
 Version 5.0.8beta3     February 1, 2006
@@ -231,6 +232,11 @@ The format 56 (vendor Simrad multibeam format) i/o module has been
 altered to support data logged on byteswapped platforms (e.g. Windows 
 Intel PC's.). The Simrad multibeam formats 56 and 57 now support
 recently introduced raw angle/range and water column imagery datagrams.
+These i/o modules also now handle cases where the beams listed in a
+sidescan datagram do not exactly match the beams listed in the corresponding
+bathymetry datagram differently than before. Previously the entire
+ping would have been dropped. Now, the ping is preserved but the raw
+sidescan samples are not used to generate binned sidescan.
 
 The program mbdatalist has been augmented to allow users to easily identify
 some problems with swath data files and the processing parameters 
@@ -1142,6 +1148,8 @@ ACKNOWLEDGMENTS:
 ----------------
 A number of people have made contributions to the code
 included in MB-System.  These include:
+    Bob Covill (Tekmap Consulting)
+    Gordon Keith (CSIRO)
     Suzanne O'Hara (Lamont-Doherty Earth Observatory) 
     Daniel Scheirer (Brown University) 
     Paul Cohen (SeaBeam Instruments, now Fidelity Investments) 
@@ -1162,10 +1170,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.74 2006-02-03 22:45:30 caress Exp $
+RCS ID: $Id: README,v 5.75 2006-02-08 17:59:25 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.74  2006/02/03 22:45:30  caress
+Release 5.0.8beta5
+
 Revision 5.73  2006/02/01 18:32:47  caress
 Release 5.0.8beta4.
 
