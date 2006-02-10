@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grd2arc.perl	6/11/99
-#    $Id: mbm_grd2arc.perl,v 5.2 2003-04-17 20:42:48 caress Exp $
+#    $Id: mbm_grd2arc.perl,v 5.3 2006-02-10 01:27:40 caress Exp $
 #
 #    Copyright (c) 1999, 2000, 2003 by
 #    D. W. Caress (caress@mbari.org)
@@ -38,10 +38,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   October 5, 1999
 #
 # Version:
-#   $Id: mbm_grd2arc.perl,v 5.2 2003-04-17 20:42:48 caress Exp $
+#   $Id: mbm_grd2arc.perl,v 5.3 2006-02-10 01:27:40 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.2  2003/04/17 20:42:48  caress
+#   Release 5.0.beta30
+#
 #   Revision 5.1  2001/06/03 06:59:24  caress
 #   Release 5.0.beta01
 #
@@ -118,17 +121,59 @@ while (@grdinfo)
 	{
 	$line = shift @grdinfo;
 	if ($line =~ 
+		/\S+\s+x_min:\s+\S+\s+x_max:\s+\S+\s+x_inc:\s+\S+\s+units:\s+.+\s+nx:\s+\S+/)
+		{
+		($xmin_f,$xmax_f,$xinc_f,$xunits,$xnx_d) = $line =~ 
+			/\S+\s+x_min:\s+(\S+)\s+x_max:\s+(\S+)\s+x_inc:\s+(\S+)\s+units:\s+(.+)\s+nx:\s+(\S+)/;
+		}
+	elsif ($line =~ 
+		/\S+\s+x_min:\s+\S+\s+x_max:\s+\S+\s+x_inc:\s+\S+\s+name:\s+.+\s+nx:\s+\S+/)
+		{
+		($xmin_f,$xmax_f,$xinc_f,$xunits,$xnx_d) = $line =~ 
+			/\S+\s+x_min:\s+(\S+)\s+x_max:\s+(\S+)\s+x_inc:\s+(\S+)\s+name:\s+(.+)\s+nx:\s+(\S+)/;
+		}
+	elsif ($line =~ 
 		/\S+\s+x_min:\s+(\S+)\s+x_max:\s+(\S+)\s+x_inc:/)
 		{
-		($xmin_f,$xmax_f,$xinc_f,$ncols) = $line =~ 
-			/\S+\s+x_min:\s+(\S+)\s+x_max:\s+(\S+)\s+x_inc:\s+(\S+).+nx:\s+(\S+)/;
+		($xmin_f,$xmax_f) = $line =~ 
+			/\S+\s+x_min:\s+(\S+)\s+x_max:\s+(\S+)\s+x_inc:/;
 		}
-	if ($line =~ /\S+\s+y_min:\s+(\S+)\s+y_max:\s+(\S+)\s+y_inc:/)
+	if ($line =~ /\S+\s+y_min:\s+\S+\s+y_max:\s+\S+\s+y_inc:\s+\S+\s+units:\s+.+\s+ny:\s+\S+/)
 		{
-		($ymin_f,$ymax_f,$yinc_f,$nrows) = $line =~ 
-			/\S+\s+y_min:\s+(\S+)\s+y_max:\s+(\S+)\s+y_inc:\s+(\S+).+ny:\s+(\S+)/;
+		($ymin_f,$ymax_f,$yinc_f,$yunits,$yny_d) = $line =~ 
+			/\S+\s+y_min:\s+(\S+)\s+y_max:\s+(\S+)\s+y_inc:\s+(\S+)\s+units:\s+(.+)\s+ny:\s+(\S+)/;
 		}
-	if ($line =~ /\S+\s+Normal node registration used/)
+	elsif ($line =~ /\S+\s+y_min:\s+\S+\s+y_max:\s+\S+\s+y_inc:\s+\S+\s+name:\s+.+\s+ny:\s+\S+/)
+		{
+		($ymin_f,$ymax_f,$yinc_f,$yunits,$yny_d) = $line =~ 
+			/\S+\s+y_min:\s+(\S+)\s+y_max:\s+(\S+)\s+y_inc:\s+(\S+)\s+name:\s+(.+)\s+ny:\s+(\S+)/;
+		}
+	elsif ($line =~ /\S+\s+y_min:\s+\S+\s+y_max:\s+\S+\s+y_inc:/)
+		{
+		($ymin_f,$ymax_f) = $line =~ 
+			/\S+\s+y_min:\s+(\S+)\s+y_max:\s+(\S+)\s+y_inc:/;
+		}
+	if ($line =~ /\S+\s+zmin:\s+\S+\s+zmax:\s+\S+\s+units:\s+\S+/)
+		{
+		($zmin_f,$zmax_f) = $line =~ 
+			/\S+\s+zmin:\s+(\S+)\s+zmax:\s+(\S+)\s+units:\s+\S+/;
+		}
+	elsif ($line =~ /\S+\s+zmin:\s+\S+\s+zmax:\s+\S+\s+name:\s+\S+/)
+		{
+		($zmin_f,$zmax_f) = $line =~ 
+			/\S+\s+zmin:\s+(\S+)\s+zmax:\s+(\S+)\s+name:\s+\S+/;
+		}
+	if ($line =~ /\S+\s+z_min:\s+\S+\s+z_max:\s+\S+\s+units:/)
+		{
+		($zmin_f,$zmax_f,$zunits_s) = $line =~ 
+			/\S+\s+z_min:\s+(\S+)\s+z_max:\s+(\S+)\s+units:\s+(.+)/;
+		}
+	elsif ($line =~ /\S+\s+z_min:\s+\S+\s+z_max:\s+\S+\s+name:/)
+		{
+		($zmin_f,$zmax_f,$zunits_s) = $line =~ 
+			/\S+\s+z_min:\s+(\S+)\s+z_max:\s+(\S+)\s+name:\s+(.+)/;
+		}
+	elsif ($line =~ /\S+\s+Normal node registration used/)
 		{
 		$node_normal = 1;
 		}
@@ -159,7 +204,7 @@ if ($verbose)
 	print "\nProgram $program_name status:\n";
 	print "\tInput GRD file:            $ifile\n";
 	print "\tOutput ArcView ASCII file: $ofile\n";
-	print "\tGrid dimensions:    $ncols  $nrows\n";
+	print "\tGrid dimensions:    $xnx_d  $yny_d\n";
 	print "\tGrid cell sizes:    $xinc_f  $yinc_f\n";
 	print "\tGrid bounds (GMT):  $xmin_f  $xmax_f    $ymin_f  $ymax_f\n";
 	print "\tGrid bounds (Arc):  $xmin_a  $xmax_a    $ymin_a  $ymax_a\n";
@@ -173,8 +218,8 @@ if ($xinc_f != $yinc_f)
 	}
 
 # output header of Arcview ascii file
-printf OUT "ncols $ncols\n";
-printf OUT "nrows $nrows\n";
+printf OUT "ncols $xnx_d\n";
+printf OUT "nrows $yny_d\n";
 printf OUT "xllcorner $xmin_a\n";
 printf OUT "yllcorner $ymin_a\n";
 printf OUT "cellsize $xinc_f\n";
@@ -206,7 +251,7 @@ while (<TMP>)
 		{
 		$cnt = $cnt + 1;
 		$cnttot = $cnttot + 1;
-		if ($cnt == $ncols)
+		if ($cnt == $xnx_d)
 			{
 			print OUT "$nodata\n";
 			$cnt = 0;
@@ -221,7 +266,7 @@ while (<TMP>)
 		$cnt = $cnt + 1;
 		$cnttot = $cnttot + 1;
 		($value) = $line =~ /(\S+)/;
-		if ($cnt == $ncols)
+		if ($cnt == $xnx_d)
 			{
 			print OUT "$value\n";
 			$cnt = 0;
@@ -231,7 +276,7 @@ while (<TMP>)
 			print OUT "$value ";
 			}
 		}
-	if ($verbose > 0 && $cnttot / $ncols / $nrows > $target)
+	if ($verbose > 0 && $cnttot / $xnx_d / $yny_d > $target)
 		{
 		$value = 100.0 * $target;
 		print "$value% complete\n";
