@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_arc2grd.perl	4/23/01
-#    $Id: mbm_grdcut.perl,v 5.3 2003-07-02 18:12:33 caress Exp $
+#    $Id: mbm_grdcut.perl,v 5.4 2006-02-10 01:27:40 caress Exp $
 #
 #    Copyright (c) 2001, 2003 by
 #    D. W. Caress (caress@mbari.org)
@@ -40,10 +40,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #    10 km off the Kohala coast of Hawaii)
 #
 # Version:
-#   $Id: mbm_grdcut.perl,v 5.3 2003-07-02 18:12:33 caress Exp $
+#   $Id: mbm_grdcut.perl,v 5.4 2006-02-10 01:27:40 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.3  2003/07/02 18:12:33  caress
+#   Release 5.0.0
+#
 #   Revision 5.2  2003/04/17 20:42:48  caress
 #   Release 5.0.beta30
 #
@@ -140,28 +143,70 @@ while (@grdinfo)
 	{
 	$line = shift @grdinfo;
 	if ($line =~ 
-			/\S+\s+x_min:\s+(\S+)\s+x_max:\s+(\S+)\s+x_inc:/)
+		/\S+\s+x_min:\s+\S+\s+x_max:\s+\S+\s+x_inc:\s+\S+\s+units:\s+.+\s+nx:\s+\S+/)
 		{
-		($xmin,$xmax,$xinc,$nx) = $line =~ 
-				/\S+\s+x_min:\s+(\S+)\s+x_max:\s+(\S+)\s+x_inc:\s+(\S+)\s+units:.+nx:\s+(\S+)/;
+		($xmin_f,$xmax_f,$xinc_f,$xunits,$xnx_d) = $line =~ 
+			/\S+\s+x_min:\s+(\S+)\s+x_max:\s+(\S+)\s+x_inc:\s+(\S+)\s+units:\s+(.+)\s+nx:\s+(\S+)/;
 		}
-	if ($line =~ /\S+\s+y_min:\s+(\S+)\s+y_max:\s+(\S+)\s+y_inc:/)
+	elsif ($line =~ 
+		/\S+\s+x_min:\s+\S+\s+x_max:\s+\S+\s+x_inc:\s+\S+\s+name:\s+.+\s+nx:\s+\S+/)
 		{
-		($ymin,$ymax,$yinc,$ny) = $line =~ 
-				/\S+\s+y_min:\s+(\S+)\s+y_max:\s+(\S+)\s+y_inc:\s+(\S+)\s+units:.+ny:\s+(\S+)/;
+		($xmin_f,$xmax_f,$xinc_f,$xunits,$xnx_d) = $line =~ 
+			/\S+\s+x_min:\s+(\S+)\s+x_max:\s+(\S+)\s+x_inc:\s+(\S+)\s+name:\s+(.+)\s+nx:\s+(\S+)/;
+		}
+	elsif ($line =~ 
+		/\S+\s+x_min:\s+(\S+)\s+x_max:\s+(\S+)\s+x_inc:/)
+		{
+		($xmin_f,$xmax_f) = $line =~ 
+			/\S+\s+x_min:\s+(\S+)\s+x_max:\s+(\S+)\s+x_inc:/;
+		}
+	if ($line =~ /\S+\s+y_min:\s+\S+\s+y_max:\s+\S+\s+y_inc:\s+\S+\s+units:\s+.+\s+ny:\s+\S+/)
+		{
+		($ymin_f,$ymax_f,$yinc_f,$yunits,$yny_d) = $line =~ 
+			/\S+\s+y_min:\s+(\S+)\s+y_max:\s+(\S+)\s+y_inc:\s+(\S+)\s+units:\s+(.+)\s+ny:\s+(\S+)/;
+		}
+	elsif ($line =~ /\S+\s+y_min:\s+\S+\s+y_max:\s+\S+\s+y_inc:\s+\S+\s+name:\s+.+\s+ny:\s+\S+/)
+		{
+		($ymin_f,$ymax_f,$yinc_f,$yunits,$yny_d) = $line =~ 
+			/\S+\s+y_min:\s+(\S+)\s+y_max:\s+(\S+)\s+y_inc:\s+(\S+)\s+name:\s+(.+)\s+ny:\s+(\S+)/;
+		}
+	elsif ($line =~ /\S+\s+y_min:\s+\S+\s+y_max:\s+\S+\s+y_inc:/)
+		{
+		($ymin_f,$ymax_f) = $line =~ 
+			/\S+\s+y_min:\s+(\S+)\s+y_max:\s+(\S+)\s+y_inc:/;
+		}
+	if ($line =~ /\S+\s+zmin:\s+\S+\s+zmax:\s+\S+\s+units:\s+\S+/)
+		{
+		($zmin_f,$zmax_f) = $line =~ 
+			/\S+\s+zmin:\s+(\S+)\s+zmax:\s+(\S+)\s+units:\s+\S+/;
+		}
+	elsif ($line =~ /\S+\s+zmin:\s+\S+\s+zmax:\s+\S+\s+name:\s+\S+/)
+		{
+		($zmin_f,$zmax_f) = $line =~ 
+			/\S+\s+zmin:\s+(\S+)\s+zmax:\s+(\S+)\s+name:\s+\S+/;
+		}
+	if ($line =~ /\S+\s+z_min:\s+\S+\s+z_max:\s+\S+\s+units:/)
+		{
+		($zmin_f,$zmax_f,$zunits_s) = $line =~ 
+			/\S+\s+z_min:\s+(\S+)\s+z_max:\s+(\S+)\s+units:\s+(.+)/;
+		}
+	elsif ($line =~ /\S+\s+z_min:\s+\S+\s+z_max:\s+\S+\s+name:/)
+		{
+		($zmin_f,$zmax_f,$zunits_s) = $line =~ 
+			/\S+\s+z_min:\s+(\S+)\s+z_max:\s+(\S+)\s+name:\s+(.+)/;
 		}
 	}
 
 # calculate acceptable output bounds
-$diffx = ($xminr - $xmin) / $xinc;
-$diffxn = int(($xminr - $xmin) / $xinc);
+$diffx = ($xminr - $xmin_f) / $xinc_f;
+$diffxn = int(($xminr - $xmin_f) / $xinc_f);
 print "diffx: $diffx $diffxn\n";
-$xminout = $xmin + $xinc * int(($xminr - $xmin) / $xinc);
-$xmaxout = $xmin + $xinc * int(($xmaxr - $xmin) / $xinc + 0.5);
-$yminout = $ymin + $yinc * int(($yminr - $ymin) / $yinc);
-$ymaxout = $ymin + $yinc * int(($ymaxr - $ymin) / $yinc + 0.5);
-$nxout = int((($xmaxout - $xminout) / $xinc) + 0.5) + 1;
-$nyout = int((($ymaxout - $yminout) / $yinc) + 0.5) + 1;
+$xminout = $xmin_f + $xinc_f * int(($xminr - $xmin_f) / $xinc_f);
+$xmaxout = $xmin_f + $xinc_f * int(($xmaxr - $xmin_f) / $xinc_f + 0.5);
+$yminout = $ymin_f + $yinc_f * int(($yminr - $ymin_f) / $yinc_f);
+$ymaxout = $ymin_f + $yinc_f * int(($ymaxr - $ymin_f) / $yinc_f + 0.5);
+$nxout = int((($xmaxout - $xminout) / $xinc_f) + 0.5) + 1;
+$nyout = int((($ymaxout - $yminout) / $yinc_f) + 0.5) + 1;
 
 # tell the world we got started
 if ($verbose) 
@@ -169,9 +214,9 @@ if ($verbose)
 	print "\nProgram $program_name status:\n";
 	print "\tInput GRD file:         $ifile\n";
 	print "\tOutput GRD file:        $ofile\n";
-	print "\tInput Grid bounds:      $xmin $xmax  $ymin $ymax\n";
+	print "\tInput Grid bounds:      $xmin_f $xmax_f  $ymin_f $ymax_f\n";
 	print "\tInput grid dimensions:  $nx  $ny\n";
-	print "\tGrid cell sizes:        $xinc  $yinc\n";
+	print "\tGrid cell sizes:        $xinc_f  $yinc_f\n";
 	print "\tRequested Grid bounds:  $xminr $xmaxr  $yminr $ymaxr\n";
 	print "\tOutput Grid bounds:     $xminout $xmaxout  $yminout $ymaxout\n";
 	print "\tOutput grid dimensions: $nxout  $nyout\n";
