@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_swap.c	7/6/94
- *    $Id: mb_swap.c,v 5.4 2006-01-06 18:27:18 caress Exp $
+ *    $Id: mb_swap.c,v 5.5 2006-02-12 04:28:09 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -28,6 +28,9 @@
  * Date:	July 6, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2006/01/06 18:27:18  caress
+ * Working towards 5.0.8
+ *
  * Revision 5.3  2004/11/06 03:55:15  caress
  * Working to support the Reson 7k format.
  *
@@ -85,8 +88,8 @@ int mb_swap_check()
 {
 	unsigned short testshort = 255;
 	char		*testchar;
-	testchar = (char *) &testshort;
 	int	byteswapped;
+	testchar = (char *) &testshort;
 	if (testchar[0] == 0)
 		byteswapped = MB_NO;
 	else
