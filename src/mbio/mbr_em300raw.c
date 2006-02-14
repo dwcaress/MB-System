@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em300raw.c	10/16/98
- *	$Id: mbr_em300raw.c,v 5.35 2006-02-07 03:12:14 caress Exp $
+ *	$Id: mbr_em300raw.c,v 5.36 2006-02-14 01:57:25 caress Exp $
  *
  *    Copyright (c) 1998, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	October 16,  1998
  * $Log: not supported by cvs2svn $
+ * Revision 5.35  2006/02/07 03:12:14  caress
+ * Another shot at dealing with broken simrad sidescan records. Now we will keep the raw sidescan data but not use it to make the binned sidescan returned by the standard mbio extract functions.
+ *
  * Revision 5.34  2006/02/06 16:54:50  caress
  * Set the Simrad i/o modules to output error messages with verbose > 0 when
  * sidescan is zeroed because of mismatch between bathymetry and sidescan records.
@@ -310,7 +313,7 @@ int mbr_em300raw_wr_ss(int verbose, FILE *mbfp, int swap,
 int mbr_em300raw_wr_wc(int verbose, FILE *mbfp, int swap, 
 		struct mbsys_simrad2_struct *store, int *error);
 
-static char res_id[]="$Id: mbr_em300raw.c,v 5.35 2006-02-07 03:12:14 caress Exp $";
+static char res_id[]="$Id: mbr_em300raw.c,v 5.36 2006-02-14 01:57:25 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_em300raw(int verbose, void *mbio_ptr, int *error)
@@ -972,6 +975,7 @@ int mbr_em300raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	int	*databyteswapped;
 	int	record_size;
 	int	*record_size_save;
+	int	bytes_read;
 	char	*label;
 	int	*label_save_flag;
 	char	*record_size_char;
@@ -1696,6 +1700,26 @@ Have a nice day...\n");
 		/* bail out if there is an error */
 		if (status == MB_FAILURE)
 			done = MB_YES;
+			
+		/* if necessary read over unread but expected bytes */
+		bytes_read = ftell(mbfp) - mb_io_ptr->file_bytes - 4;
+		if (*label_save_flag == MB_NO && bytes_read < record_size)
+			{
+#ifdef MBR_EM300RAW_DEBUG
+	fprintf(stderr,"skip over %d unread bytes of supported datagram type %x\n",
+			record_size - bytes_read, type);
+#endif
+			for (i=0;i<record_size - bytes_read;i++)
+				{
+				if ((read_len = fread(&junk,
+					1,1,mb_io_ptr->mbfp)) != 1)
+					{
+					status = MB_FAILURE;
+					*error = MB_ERROR_EOF;
+					expect = EM2_NONE;
+					}
+				}
+			}
 
 #ifdef MBR_EM300RAW_DEBUG
 	fprintf(stderr,"record_size:%d bytes read:%d file_pos old:%d new:%d\n", 
@@ -4686,7 +4710,7 @@ ping->png_raw3_date,ping->png_raw3_msec,ping->png_raw3_count,ping->png_raw3_nbea
 			ping->png_raw3_rxwindow[i] = (mb_u_char) line[7];
 			mb_get_binary_short(swap, &line[8], &short_val); 
 			    ping->png_raw3_rxbeam_num[i] = (int) ((short) short_val);
-			mb_get_binary_short(swap, &line[8], &short_val); 
+			mb_get_binary_short(swap, &line[10], &short_val); 
 			    ping->png_raw3_rxspare[i] = (int) ((unsigned short) short_val);
 			}
 		else
@@ -4774,11 +4798,11 @@ ping->png_raw3_date,ping->png_raw3_msec,ping->png_raw3_count,ping->png_raw3_nbea
 		fprintf(stderr,"dbg5       angle range sector amp quality window beam\n");
 		fprintf(stderr,"dbg5       ------------------------------------------------------------\n");
 		for (i=0;i<ping->png_raw3_nbeams;i++)
-			fprintf(stderr,"dbg5       %3d %5d %3d %3d %4d %3d %5d %5d\n",
+			fprintf(stderr,"dbg5       %3d %5d %3d %3d %4d %3d %5d %5d %5d\n",
 				i, ping->png_raw3_rxpointangle[i], ping->png_raw3_rxrange[i], 
 				ping->png_raw3_rxsector[i], ping->png_raw3_rxamp[i], 
 				ping->png_raw3_rxquality[i], ping->png_raw3_rxwindow[i],  
-				ping->png_raw3_rxbeam_num[i]);
+				ping->png_raw3_rxbeam_num[i],ping->png_raw3_rxspare[i]);
 		}
 
 	/* print output debug statements */
@@ -8730,11 +8754,11 @@ int mbr_em300raw_wr_rawbeam3(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg5       angle range sector amp quality window beam\n");
 		fprintf(stderr,"dbg5       ------------------------------------------------------------\n");
 		for (i=0;i<ping->png_raw3_nbeams;i++)
-			fprintf(stderr,"dbg5       %3d %5d %3d %3d %4d %3d %5d %5d\n",
+			fprintf(stderr,"dbg5       %3d %5d %3d %3d %4d %3d %5d %5d %5d\n",
 				i, ping->png_raw3_rxpointangle[i], ping->png_raw3_rxrange[i], 
 				ping->png_raw3_rxsector[i], ping->png_raw3_rxamp[i], 
 				ping->png_raw3_rxquality[i], ping->png_raw3_rxwindow[i],  
-				ping->png_raw3_rxbeam_num[i]);
+				ping->png_raw3_rxbeam_num[i],ping->png_raw3_rxspare[i]);
 		}
 		
 	/* zero checksum */
