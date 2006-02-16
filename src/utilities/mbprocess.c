@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbprocess.c	3/31/93
- *    $Id: mbprocess.c,v 5.44 2006-01-27 19:13:04 caress Exp $
+ *    $Id: mbprocess.c,v 5.45 2006-02-16 21:11:44 caress Exp $
  *
  *    Copyright (c) 2000, 2002, 2003, 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -36,6 +36,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.44  2006/01/27 19:13:04  caress
+ * Version 5.0.8beta2
+ *
  * Revision 5.43  2006/01/20 19:34:47  caress
  * Working towards 5.0.8
  *
@@ -231,7 +234,7 @@ int get_anglecorr(int verbose,
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbprocess.c,v 5.44 2006-01-27 19:13:04 caress Exp $";
+	static char rcs_id[] = "$Id: mbprocess.c,v 5.45 2006-02-16 21:11:44 caress Exp $";
 	static char program_name[] = "mbprocess";
 	static char help_message[] =  "mbprocess is a tool for processing swath sonar bathymetry data.\n\
 This program performs a number of functions, including:\n\
@@ -1518,7 +1521,7 @@ and mbedit edit save files.\n";
 				&time_j[0],&time_j[1],&ihr,
 				&time_j[2],&sec,
 				&nlon[nnav],&nlat[nnav]);
-			time_j[2] = time_j[2] + 60*hr;
+			time_j[2] = time_j[2] + 60*ihr;
 			time_j[3] = (int) sec;
 			time_j[4] = 1000000*(sec - time_j[3]);
 			mb_get_itime(verbose,time_j,time_i);
@@ -2152,7 +2155,7 @@ and mbedit edit save files.\n";
 					&attituderoll[nattitude],
 					&attitudepitch[nattitude],
 					&attitudeheave[nattitude]);
-				time_j[2] = time_j[2] + 60*hr;
+				time_j[2] = time_j[2] + 60*ihr;
 				time_j[3] = (int) sec;
 				time_j[4] = 1000000*(sec - time_j[3]);
 				mb_get_itime(verbose,time_j,time_i);
@@ -2350,7 +2353,7 @@ and mbedit edit save files.\n";
 					&time_j[0],&time_j[1],&ihr,
 					&time_j[2],&sec,
 					&fsonardepth[nsonardepth]);
-				time_j[2] = time_j[2] + 60*hr;
+				time_j[2] = time_j[2] + 60*ihr;
 				time_j[3] = (int) sec;
 				time_j[4] = 1000000*(sec - time_j[3]);
 				mb_get_itime(verbose,time_j,time_i);
@@ -2541,7 +2544,7 @@ and mbedit edit save files.\n";
 					&time_j[0],&time_j[1],&ihr,
 					&time_j[2],&sec,
 					&tide[ntide]);
-				time_j[2] = time_j[2] + 60*hr;
+				time_j[2] = time_j[2] + 60*ihr;
 				time_j[3] = (int) sec;
 				time_j[4] = 1000000*(sec - time_j[3]);
 				mb_get_itime(verbose,time_j,time_i);
