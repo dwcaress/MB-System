@@ -1,9 +1,9 @@
-MB-SYSTEM VERSION 5.0.8 README FILE:
+MB-SYSTEM VERSION 5.0.9 README FILE:
 ----------------------------------------
 
 This file is located at the top of the MB-System directory
 structure. This directory structure contains the version 
-5.0.8 release of the MB-System software package for 
+5.0.9 release of the MB-System software package for 
 processing and display of swath sonar data.  
 
 MB-SYSTEM VERSION 5 DESCRIPTION:
@@ -26,6 +26,7 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
+Version 5.0.9          February 17, 2006
 Version 5.0.8          February 8, 2006
 Version 5.0.8beta5     February 3, 2006
 Version 5.0.8beta4     February 1, 2006
@@ -130,6 +131,27 @@ Aquarium Research Institute, or any other individuals or
 organizations involved in the design and maintenance of the 
 MB-System software package are NOT responsible for any damage 
 that may follow from correct or incorrect use of these programs.
+
+MB-SYSTEM VERSION 5.0.9 RELEASE NOTES:
+------------------------------------------
+
+The version 5.0.9 release of MB-System is purely a bug fix 
+release, and includes only a few changes relative to the 5.0.8 
+release.
+
+The macros mbm_grdtiff, mbm_grd2arc, mbm_grd3dplot, mbm_grdinfo, 
+mbm_grdtiff, mbm_grd2geovrml, and mbm_grdcut have been fixed to
+work properly with the output of the GMT 4.1 version of grdinfo.
+
+The code in src/mbio/mb_swap.c has been fixed so it will compile
+using the Solaris cc compiler.
+
+MBprocess had been fixed so that it will read navigation
+formats using julian days properly.
+
+MBnavedit has been altered so that speed and acceleration weighting
+values in the smooth inversion function can be less than 1.0.
+
 
 MB-SYSTEM VERSION 5.0.8 RELEASE NOTES:
 ------------------------------------------
@@ -1174,10 +1196,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.76 2006-02-08 19:15:27 caress Exp $
+RCS ID: $Id: README,v 5.77 2006-02-16 21:24:25 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.76  2006/02/08 19:15:27  caress
+Release 5.0.8. Really.
+
 Revision 5.75  2006/02/08 17:59:25  caress
 Release 5.0.8. Finally.
 
