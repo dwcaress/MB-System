@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_prog.c	6/23/95
- *    $Id: mbnavedit_prog.c,v 5.18 2006-01-24 19:19:24 caress Exp $
+ *    $Id: mbnavedit_prog.c,v 5.19 2006-02-16 21:15:07 caress Exp $
  *
  *    Copyright (c) 1995, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	August 28, 2000 (New version - no buffered i/o)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.18  2006/01/24 19:19:24  caress
+ * Version 5.0.8 beta.
+ *
  * Revision 5.17  2006/01/06 18:24:13  caress
  * Working towards 5.0.8
  *
@@ -248,7 +251,7 @@ struct mbnavedit_plot_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbnavedit_prog.c,v 5.18 2006-01-24 19:19:24 caress Exp $";
+static char rcs_id[] = "$Id: mbnavedit_prog.c,v 5.19 2006-02-16 21:15:07 caress Exp $";
 static char program_name[] = "MBNAVEDIT";
 static char help_message[] =  "MBNAVEDIT is an interactive navigation editor for swath sonar data.\n\tIt can work with any data format supported by the MBIO library.\n";
 static char usage_message[] = "mbnavedit [-Byr/mo/da/hr/mn/sc -D  -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ooutfile -X -V -H]";
@@ -1157,7 +1160,7 @@ int mbnavedit_load_data()
 	char	*function_name = "mbnavedit_load_data";
 	int	status = MB_SUCCESS;
 	int	i;
-	char	string[50];
+	char	string[MB_PATH_MAXLINE];
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -4220,7 +4223,7 @@ int mbnavedit_get_inversion()
 	double	lon_avg, lat_avg;
 	double	mtodeglon, mtodeglat;
 	double	dtime_d, dtime_d_sq;
-	char	string[50];
+	char	string[MB_PATH_MAXLINE];
 	int	i, ii, j, k;
 
 	/* print input debug statements */
@@ -4633,7 +4636,7 @@ int mbnavedit_plot_all()
 	int	swidth, sascent, sdescent;
 	char	yformat[10];
 	int	i, j, k, ii;
-	char	string[128];
+	char	string[MB_PATH_MAXLINE];
 	int	fpx, fpdx, fpy, fpdy;
 
 	/* print input debug statements */
