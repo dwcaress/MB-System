@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.h	1/19/93
- *    $Id: mb_format.h,v 5.18 2005-06-04 04:15:59 caress Exp $
+ *    $Id: mb_format.h,v 5.19 2006-03-06 21:47:48 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2001, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -19,6 +19,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.18  2005/06/04 04:15:59  caress
+ * Support for Edgetech Jstar format (id 132 and 133).
+ *
  * Revision 5.17  2004/11/06 03:55:15  caress
  * Working to support the Reson 7k format.
  *
@@ -217,7 +220,7 @@
 #define MB_FORMAT_DEF
 
 /* define date of last format update */
-static char mb_format_updatedate[] = "$Date: 2005-06-04 04:15:59 $ $Revision: 5.18 $";
+static char mb_format_updatedate[] = "$Date: 2006-03-06 21:47:48 $ $Revision: 5.19 $";
 
 /* Supported swath sonar systems */
 #define	MB_SYS_NONE		0
@@ -232,23 +235,24 @@ static char mb_format_updatedate[] = "$Date: 2005-06-04 04:15:59 $ $Revision: 5.
 #define	MB_SYS_MR1V2001		9
 #define	MB_SYS_LDEOIH		10
 #define	MB_SYS_RESON		11
-#define	MB_SYS_ELAC		12
-#define	MB_SYS_ELACMK2		13
-#define MB_SYS_HSMD		14
-#define MB_SYS_DSL		15
-#define MB_SYS_GSF		16
-#define MB_SYS_MSTIFF		17
-#define MB_SYS_OIC		18
-#define MB_SYS_HDCS		10
-#define MB_SYS_SINGLEBEAM	20
-#define MB_SYS_XSE		21
-#define MB_SYS_HS10		22
-#define	MB_SYS_NETCDF		23
-#define	MB_SYS_ATLAS		24
-#define	MB_SYS_NAVNETCDF	25
-#define	MB_SYS_SURF		26
-#define	MB_SYS_RESON7K		27
-#define	MB_SYS_JSTAR		28
+#define	MB_SYS_RESON8K		12
+#define	MB_SYS_ELAC		13
+#define	MB_SYS_ELACMK2		14
+#define MB_SYS_HSMD		15
+#define MB_SYS_DSL		16
+#define MB_SYS_GSF		17
+#define MB_SYS_MSTIFF		18
+#define MB_SYS_OIC		19
+#define MB_SYS_HDCS		20
+#define MB_SYS_SINGLEBEAM	21
+#define MB_SYS_XSE		22
+#define MB_SYS_HS10		23
+#define	MB_SYS_NETCDF		24
+#define	MB_SYS_ATLAS		25
+#define	MB_SYS_NAVNETCDF	26
+#define	MB_SYS_SURF		27
+#define	MB_SYS_RESON7K		28
+#define	MB_SYS_JSTAR		29
 
 /* Number of supported MBIO data formats */
 #define	MB_FORMATS	59

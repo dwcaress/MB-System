@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_gsf.c	3.00	8/20/94
- *	$Id: mbsys_gsf.c,v 5.8 2005-11-05 00:48:04 caress Exp $
+ *	$Id: mbsys_gsf.c,v 5.9 2006-03-06 21:47:48 caress Exp $
  *
  *    Copyright (c) 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	March 5, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2005/11/05 00:48:04  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.7  2003/07/26 17:59:32  caress
  * Changed beamflag handling code.
  *
@@ -97,7 +100,7 @@
 int mbsys_gsf_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_gsf.c,v 5.8 2005-11-05 00:48:04 caress Exp $";
+ static char res_id[]="$Id: mbsys_gsf.c,v 5.9 2006-03-06 21:47:48 caress Exp $";
 	char	*function_name = "mbsys_gsf_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -1205,6 +1208,14 @@ int mbsys_gsf_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 			    angles_null[i] = angles[i];
 		    }
 		else if (mb_ping->sensor_id 
+		    == GSF_SWATH_BATHY_SUBRECORD_RESON_8101_SPECIFIC)
+		    {
+		    *ssv = mb_ping->sensor_data.gsfReson8100Specific.surface_velocity;
+		    *draft = mb_ping->depth_corrector;
+		    for (i=0;i<*nbeams;i++)
+			    angles_null[i] = angles[i];
+		    }		    
+		else if (mb_ping->sensor_id 
 		    == GSF_SWATH_BATHY_SUBRECORD_SEABEAM_2112_SPECIFIC)
 		    {
 		    *ssv = mb_ping->sensor_data.gsfSeaBeam2112Specific.surface_velocity;
@@ -1335,7 +1346,7 @@ int mbsys_gsf_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA)
 	    {
-	    *transducer_depth = mb_ping->depth_corrector;
+	    *transducer_depth = mb_ping->depth_corrector + mb_ping->heave;
 
 	    /* get altitude if available */
 	    if (mb_ping->sensor_id 
@@ -1465,7 +1476,7 @@ int mbsys_gsf_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 	/* insert data into structure */
 	if (store->kind == MB_DATA_DATA)
 	    {
-	    mb_ping->depth_corrector = transducer_depth;
+	    mb_ping->depth_corrector = transducer_depth - mb_ping->heave;
 
 	    /* set altitude if possible */
 	    if (mb_ping->sensor_id 
@@ -1985,6 +1996,88 @@ int mbsys_gsf_copy(int verbose, void *mbio_ptr,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbsys_gsf_getscale(int verbose, double *data, char *flag, int ndata, 
+			int nbits, int signedvalue, 
+			double *multiplier, double *offset, int *error)
+{
+	char	*function_name = "mbsys_gsf_copy";
+	int	status = MB_SUCCESS;
+	double	datamin;
+	double	datamax;
+	int	firstfound;
+	int 	i;
+	int	j = 0;
+	
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:     %d\n",verbose);
+		fprintf(stderr,"dbg2       data:        %d\n",data);
+		fprintf(stderr,"dbg2       flag:        %d\n",flag);
+		fprintf(stderr,"dbg2       ndata:       %d\n",ndata);
+		fprintf(stderr,"dbg2       nbits:       %d\n",nbits);
+		fprintf(stderr,"dbg2       signedvalue: %d\n",signedvalue);
+		}
+
+	/* create multipliers and offset for the array */
+	*multiplier = 0.0;
+	*offset = 0.0;
+	datamax = 0.0;
+	datamin  = 0.0;
+	firstfound = MB_NO;
+	for (i=0; i < ndata; i++) 
+		{
+		if (flag == NULL || flag[i] != MB_FLAG_NULL ) 
+			{
+			if (firstfound == MB_NO)
+				{
+				datamax = data[i];
+				datamin = data[i];
+				firstfound = MB_YES;
+				}
+			else
+				{
+				datamax = MAX(datamax, data[i]);
+				datamin = MIN(datamin, data[i]);
+				}
+			}
+		}
+
+	if (datamin != datamax) 
+		{
+		/* double rounded to an integer */
+		*multiplier = (double)((int)pow(2, nbits) 
+			/ (1.05 * (datamax - datamin)));
+		if (signedvalue == MB_YES)  
+			{ 
+			*offset = -(datamax + datamin) / 2;
+			} 
+		else 
+			{
+			*offset = -datamin;
+			}
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       multiplier: %f\n",*multiplier);
+		fprintf(stderr,"dbg2       offset:     %f\n",*offset);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:     %d\n",status);

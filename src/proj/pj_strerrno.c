@@ -52,24 +52,33 @@ pj_err_list[] = {
 	"|lat_1| == |lat_2|",				/* -42 */
 	"lat_0 is pi/2 from mean lat",			/* -43 */
 	"unparseable coordinate system definition",	/* -44 */
+	"geocentric transformation missing z or ellps",	/* -45 */
+	"unknown prime meridian conversion id",		/* -46 */
 };
 	char *
-pj_strerrno(int err) {
-	if (err > 0)
+pj_strerrno(int err) 
+{
+    static char note[50];
+
+    if (err > 0)
 #ifdef HAVE_STRERROR
-		return strerror(err);
+        return strerror(err);
 #else
-		{   static char note[50];
-			sprintf(note,"no system list, errno: %d\n", err);
-			return note;
-		}
+    {   
+        sprintf(note,"no system list, errno: %d\n", err);
+        return note;
+    }
 #endif
-	else if (err < 0) {
-		err = - err - 1;
-		if (err < (sizeof(pj_err_list) / sizeof(char *)))
-			return(pj_err_list[err]);
-		else
-			return("invalid projection system error number");
-	} else
-		return 0;
+    else if (err < 0) {
+        int adjusted_err = - err - 1;
+        if (adjusted_err < (sizeof(pj_err_list) / sizeof(char *)))
+            return(pj_err_list[adjusted_err]);
+        else
+        {
+            sprintf( note, "invalid projection system error (%d)",
+                     err );
+            return note;
+        }
+    } else
+        return NULL;
 }

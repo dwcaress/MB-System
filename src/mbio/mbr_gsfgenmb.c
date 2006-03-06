@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_gsfgenmb.c	2/27/98
- *	$Id: mbr_gsfgenmb.c,v 5.7 2005-11-05 00:48:03 caress Exp $
+ *	$Id: mbr_gsfgenmb.c,v 5.8 2006-03-06 21:47:48 caress Exp $
  *
  *    Copyright (c) 1998, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	February 27, 1998
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2005/11/05 00:48:03  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.6  2003/05/20 18:05:32  caress
  * Added svp_source to data source parameters.
  *
@@ -114,7 +117,7 @@ int mbr_wt_gsfgenmb(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_gsfgenmb(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_gsfgenmb.c,v 5.7 2005-11-05 00:48:03 caress Exp $";
+	static char res_id[]="$Id: mbr_gsfgenmb.c,v 5.8 2006-03-06 21:47:48 caress Exp $";
 	char	*function_name = "mbr_register_gsfgenmb";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -247,7 +250,7 @@ int mbr_info_gsfgenmb(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_gsfgenmb.c,v 5.7 2005-11-05 00:48:03 caress Exp $";
+	static char res_id[]="$Id: mbr_gsfgenmb.c,v 5.8 2006-03-06 21:47:48 caress Exp $";
 	char	*function_name = "mbr_info_gsfgenmb";
 	int	status = MB_SUCCESS;
 
@@ -317,7 +320,7 @@ int mbr_info_gsfgenmb(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_gsfgenmb(int verbose, void *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_gsfgenmb.c,v 5.7 2005-11-05 00:48:03 caress Exp $";
+ static char res_id[]="$Id: mbr_gsfgenmb.c,v 5.8 2006-03-06 21:47:48 caress Exp $";
 	char	*function_name = "mbr_alm_gsfgenmb";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -345,6 +348,9 @@ int mbr_alm_gsfgenmb(int verbose, void *mbio_ptr, int *error)
 	memset(mb_io_ptr->raw_data, 0, mb_io_ptr->structure_size);
 	status = mbsys_gsf_alloc(verbose,mbio_ptr,
 		&mb_io_ptr->store_data,error);
+		
+	/* set processing parameter output flag */
+	mb_io_ptr->save1 = MB_NO;
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -758,6 +764,24 @@ int mbr_wt_gsfgenmb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	/* write gsf data to file */
 	if (status == MB_SUCCESS)
 	    {
+	    /* if first survey ping and no processing parameters output, 
+	    	output the processing parameters */
+	    if (data->kind == MB_DATA_DATA && mb_io_ptr->save1 == MB_NO)
+	    	{
+		/* write a processing parameter record */
+		dataID->recordID = GSF_RECORD_PROCESSING_PARAMETERS; 
+		if ((ret = gsfWrite((int)mb_io_ptr->mbfp, dataID, records)) < 0)
+		    {
+		    status = MB_FAILURE;
+		    *error = MB_ERROR_WRITE_FAIL;
+		    }
+		dataID->recordID = GSF_RECORD_SWATH_BATHYMETRY_PING;
+		mb_io_ptr->save1 = MB_YES;
+		}
+	    else if (data->kind == MB_DATA_PROCESSING_PARAMETERS)
+		mb_io_ptr->save1 = MB_YES;
+	    
+	    /* write the record */
 	    if ((ret = gsfWrite((int)mb_io_ptr->mbfp, dataID, records)) < 0)
 		{
 		status = MB_FAILURE;

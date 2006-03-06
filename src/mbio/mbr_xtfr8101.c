@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_xtfr8101.c	8/8/94
- *	$Id: mbr_xtfr8101.c,v 5.9 2005-11-05 00:48:05 caress Exp $
+ *	$Id: mbr_xtfr8101.c,v 5.10 2006-03-06 21:47:48 caress Exp $
  *
  *    Copyright (c) 2001, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	August 26, 2001
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.9  2005/11/05 00:48:05  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.8  2003/05/20 18:05:32  caress
  * Added svp_source to data source parameters.
  *
@@ -103,7 +106,7 @@ int mbr_wt_xtfr8101(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_xtfr8101(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_xtfr8101.c,v 5.9 2005-11-05 00:48:05 caress Exp $";
+	static char res_id[]="$Id: mbr_xtfr8101.c,v 5.10 2006-03-06 21:47:48 caress Exp $";
 	char	*function_name = "mbr_register_xtfr8101";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -236,7 +239,7 @@ int mbr_info_xtfr8101(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_xtfr8101.c,v 5.9 2005-11-05 00:48:05 caress Exp $";
+	static char res_id[]="$Id: mbr_xtfr8101.c,v 5.10 2006-03-06 21:47:48 caress Exp $";
 	char	*function_name = "mbr_info_xtfr8101";
 	int	status = MB_SUCCESS;
 
@@ -252,7 +255,7 @@ int mbr_info_xtfr8101(int verbose,
 	/* set format info parameters */
 	status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
-	*system = MB_SYS_RESON;
+	*system = MB_SYS_RESON8K;
 	*beams_bath_max = MBSYS_RESON8K_MAXBEAMS;
 	*beams_amp_max = MBSYS_RESON8K_MAXBEAMS;
 	*pixels_ss_max = MBSYS_RESON8K_MAXPIXELS;
@@ -306,7 +309,7 @@ int mbr_info_xtfr8101(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_xtfr8101(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_xtfr8101.c,v 5.9 2005-11-05 00:48:05 caress Exp $";
+	static char res_id[]="$Id: mbr_xtfr8101.c,v 5.10 2006-03-06 21:47:48 caress Exp $";
 	char	*function_name = "mbr_alm_xtfr8101";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -465,6 +468,7 @@ int mbr_rt_xtfr8101(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	double	rr, xx, zz, r, a, a2;
 	double	*pixel_size, *swath_width;
 	double	lever_x, lever_y, lever_z;
+	int	badtime;
 	int	i, j, k;
 
 	/* print input debug statements */
@@ -504,6 +508,20 @@ int mbr_rt_xtfr8101(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		time_i[5] = data->bathheader.Second;
 		time_i[6] = 10000 * data->bathheader.HSeconds;
 		mb_get_time(verbose, time_i, &time_d);
+
+		/* do check on time here - we sometimes get a bad fix */
+		badtime = MB_NO;
+		if (time_i[0] < 1970 && time_i[0] > 2100 ) badtime = MB_YES;
+		if (time_i[1] < 0 && time_i[1] > 12) badtime = MB_YES;
+		if (time_i[2] < 0 && time_i[2] > 31 ) badtime = MB_YES;
+		if (badtime == MB_YES) 
+			{
+			if (verbose > 0)
+				fprintf(stderr," Bad time from XTF in bathy header\n");
+			data->kind == MB_DATA_NONE;
+			status = MB_FAILURE;
+			*error = MB_ERROR_UNINTELLIGIBLE;
+			}
 		
 		/* get nav time */
 		dtime = 3600.0 * (data->bathheader.FixTimeHour - data->bathheader.Hour)
@@ -584,10 +602,21 @@ int mbr_rt_xtfr8101(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		/* interpolate attitude if possible */
 		if (mb_io_ptr->nattitude > 1)
 		    {
+                    /* time tag is on receive;  average reception is closer 
+		    	to the midpoint of the two way travel time
+		        but will vary on beam angle and water depth 
+		        set the receive time delay to the average 
+			( 0 to 60 deg)  two way travel time for a seabed 
+		        located at 80% of the maximum range 
+		        Old code:
 		    timetag = 0.001 * data->bathheader.AttitudeTimeTag 
 				    - store->png_latency 
 				    + 2.0 * ((double)data->reson8100rit.range_set) 
-					    / ((double)data->reson8100rit.velocity);
+					    / ((double)data->reson8100rit.velocity); */
+		    timetag = 0.001 * data->bathheader.AttitudeTimeTag 
+				    - store->png_latency 
+				    + 1.4*((double)data->reson8100rit.range_set) 
+					    / ((double)data->reson8100rit.velocity);		    
 		    mb_attint_interp(verbose, mbio_ptr, timetag,  
 			    &(store->png_heave), &(store->png_roll), 
 			    &(store->png_pitch), error);
@@ -634,13 +663,15 @@ timetag, store->png_roll);
 			    &lever_z,
 			    error);
 		store->png_heave += lever_z;
-/*fprintf(stderr,"offsets: %f %f %f   roll:%f pitch:%f    dz:%f\n", 
+#ifdef MBR_XTFR8101_DEBUG
+fprintf(stderr,"offsets: %f %f %f   roll:%f pitch:%f    dz:%f\n", 
 store->MBOffsetX - store->MRUOffsetX,
 store->MBOffsetY - store->MRUOffsetY,
 store->MBOffsetZ - store->MRUOffsetZ,
 (double) (store->png_roll - store->MRUOffsetRoll),
 (double) (store->MRUOffsetPitch - store->png_pitch),
-lever_z);*/
+lever_z);
+#endif
 
 		store->packet_type = data->reson8100rit.packet_type;      		/* identifier for packet type  */
 		store->packet_subtype = data->reson8100rit.packet_subtype;   		/* identifier for packet subtype */
@@ -715,7 +746,8 @@ lever_z);*/
 		else
 			store->beams_amp = 0;
 		
-		ttscale = 0.125 / store->sample_rate;
+		/* ttscale in seconds per range count ( 4 counts per time interval) */
+		ttscale = 0.25 / store->sample_rate;
 		icenter = store->beams_bath / 2;
 		angscale = ((double)store->beam_width_num) 
 			/ ((double)store->beam_width_denom);
@@ -747,7 +779,7 @@ lever_z);*/
 					store->png_pitch, angle, 
 					&theta, &phi, 
 					error);
-				rr = store->velocity * ttscale * store->range[i];
+				rr = 0.5 * store->velocity * ttscale * store->range[i];
 				xx = rr * sin(DTR * theta);
 				zz = rr * cos(DTR * theta);
 				store->bath_acrosstrack[i] 
@@ -1141,6 +1173,15 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error)
 		mb_get_binary_int(MB_YES, &line[index], (int *)&(packetheader.NumBytesThisRecord)); 
 		index += 4;
 
+		/* check packet header details */
+		if( packetheader.NumChansToFollow > 20 || packetheader.NumChansToFollow < 0) 
+			{
+			if (verbose > 0)
+				fprintf(stderr,"Bad packet header in xtf - skip this record\n");
+			packetheader.NumBytesThisRecord = 0;
+			packetheader.HeaderType = 99;
+			}
+		
 		/* print debug statements */
 		if (verbose >= 5)
 			{
@@ -1449,6 +1490,14 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error)
 			pingchanportheader->ReservedSpace[i] = (mb_u_char) line[index];
 			index++;
 			}
+		    
+		    /* fix up on time duration if needed */
+		    if ( pingchanportheader->TimeDuration == 0.0) 
+		    	{
+		    	pingchanportheader->TimeDuration 
+				= pingchanportheader->SlantRange 
+					/ sidescanheader->SoundVelocity;
+		    	}
 		    }
 		else
 		    {
@@ -1561,6 +1610,14 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error)
 			pingchanstbdheader->ReservedSpace[i] = (mb_u_char) line[index];
 			index++;
 			}
+		    
+		    /* fix up on time duration if needed */
+		    if ( pingchanstbdheader->TimeDuration == 0.0) 
+		    	{
+		    	pingchanstbdheader->TimeDuration 
+				= pingchanstbdheader->SlantRange 
+					/ sidescanheader->SoundVelocity;
+		    	}
 		    }
 		else
 		    {
@@ -1897,7 +1954,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error)
 		    read_len = fread(line,1,bathheader->packetheader.NumBytesThisRecord-242,mb_io_ptr->mbfp);
 		    if (read_len == bathheader->packetheader.NumBytesThisRecord-242)
 			{
-			/* handle RESON_PACKETID_RT_VERY_OLD */
+			/* check synch value */
 			mb_get_binary_int(MB_YES, &line[0], (int *)&(synch));
 			if (synch != 65535)
 			    {
@@ -1905,6 +1962,8 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error)
 			    *error = MB_ERROR_UNINTELLIGIBLE;
 			    done = MB_YES;			    
 			    }
+
+			/* handle RESON_PACKETID_RT_VERY_OLD */
 			else if (line[4] == 0x13)
 			    {
 			    index = 0;
@@ -1973,6 +2032,129 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error)
 				reson8100rit->quality[i] = (mb_u_char) line[index]; 
 				index++;
 				}
+			    
+			    }
+
+			/* handle RESON_PACKETID_RIT */
+			else if (line[4] == 0x18)
+			    {
+			    index = 0;
+			    for (i=0;i<4;i++)
+				{
+				reson8100rit->synch_header[i] = line[index];
+				index++;
+				}
+			    reson8100rit->packet_type = line[index];
+			    index++;
+			    reson8100rit->packet_subtype = line[index];
+			    index++;
+			    mb_get_binary_short(MB_NO, &line[index], (short int *)&(reson8100rit->latency)); 
+			    index += 2;
+			    mb_get_binary_int(MB_NO, &line[index], (int *)&(reson8100rit->Seconds)); 
+			    index += 4;
+			    mb_get_binary_int(MB_NO, &line[index], (int *)&(reson8100rit->Millisecs)); 
+			    index += 4;    
+			    
+			    mb_get_binary_int(MB_NO, &line[index], (int *)&(reson8100rit->ping_number)); 
+			    index += 4;
+
+			    mb_get_binary_int(MB_NO, &line[index], (int *)&(reson8100rit->sonar_id)); 
+			    index += 4;
+			    
+			    mb_get_binary_short(MB_NO, &line[index], (short int *)&(reson8100rit->sonar_model)); 
+			    index += 2;
+			    
+			    mb_get_binary_short(MB_NO, &line[index], (short int *)&(reson8100rit->frequency)); 
+			    index += 2;
+			    		    			   
+			    mb_get_binary_short(MB_NO, &line[index], (short int *)&(reson8100rit->velocity)); 
+			    index += 2;
+			    
+			    mb_get_binary_short(MB_NO, &line[index], (short int *)&(reson8100rit->sample_rate)); 
+			    index += 2;
+			    
+			    
+			    mb_get_binary_short(MB_NO, &line[index], (short int *)&(reson8100rit->ping_rate)); 
+			    index += 2;
+			  		    
+			    mb_get_binary_short(MB_NO, &line[index], (short int *)&(reson8100rit->range_set)); 
+			    index += 2;
+			    
+			    mb_get_binary_short(MB_NO, &line[index], (short int *)&(reson8100rit->power)); 
+			    index += 2;
+			    
+			    mb_get_binary_short(MB_NO, &line[index], (short int *)&(reson8100rit->gain)); 
+			    index += 2;			    
+			    
+			     mb_get_binary_short(MB_NO, &line[index], (short int *)&(reson8100rit->pulse_width)); 
+			    index += 2;
+			    			    
+			    reson8100rit->tvg_spread = (mb_u_char) line[index];
+			    index++;	
+			    	    
+			    reson8100rit->tvg_absorp = (mb_u_char) line[index];
+			    index++;	
+			    				
+			    reson8100rit->projector_type = (mb_u_char) line[index];
+			    index++;				    
+			        
+			    reson8100rit->projector_beam_width = (mb_u_char) line[index];
+			    index++;
+
+			     mb_get_binary_short(MB_NO, &line[index], (short int *)&(reson8100rit->beam_width_num)); 
+			    index += 2;
+
+			     mb_get_binary_short(MB_NO, &line[index], (short int *)&(reson8100rit->beam_width_denom)); 
+			    index += 2;
+			    
+			    mb_get_binary_short(MB_NO, &line[index], (short int *)&(reson8100rit->projector_angle)); 
+			    index += 2;		
+			    
+			    mb_get_binary_short(MB_NO, &line[index], (short int *)&(reson8100rit->min_range)); 
+			    index += 2;
+			    
+			    mb_get_binary_short(MB_NO, &line[index], (short int *)&(reson8100rit->max_range)); 
+			    index += 2;
+			    
+			    mb_get_binary_short(MB_NO, &line[index], (short int *)&(reson8100rit->min_depth)); 
+			    index += 2;
+			    
+			    mb_get_binary_short(MB_NO, &line[index], (short int *)&(reson8100rit->max_depth)); 
+			    index += 2;
+			    
+			    reson8100rit->filters_active = (mb_u_char) line[index];
+			    index++;
+			    
+			    reson8100rit->spare[0] = (mb_u_char) line[index];
+			    index++;
+			    
+			    reson8100rit->spare[1] = (mb_u_char) line[index];
+			    index++;
+			    
+			    reson8100rit->spare[2] = (mb_u_char) line[index];
+			    index++;
+			    
+			    mb_get_binary_short(MB_NO, &line[index], (short int *)&(reson8100rit->temperature)); 
+			    index += 2;
+			    
+			    mb_get_binary_short(MB_NO, &line[index], (short int *)&(reson8100rit->beam_count)); 
+			    index += 2;			    	    
+
+			    for (i=0;i<reson8100rit->beam_count;i++)
+				{
+				mb_get_binary_short(MB_NO, &line[index], (short int *)&(reson8100rit->range[i])); 
+				index += 2;
+				}
+			    for (i=0;i<reson8100rit->beam_count/2;i++)
+				{
+				reson8100rit->quality[i] = (mb_u_char) line[index]; 
+				index++;
+				}
+			    for (i=0;i<reson8100rit->beam_count;i++)
+				{
+				mb_get_binary_short(MB_NO, &line[index], (short int *)&(reson8100rit->intensity[i])); 
+				index += 2;
+			        }
 			    
 			    }
 			else
@@ -2134,7 +2316,9 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error)
 		for (i=0;i<((int)packetheader.NumBytesThisRecord)-14;i++)
 			{
 			read_len = fread(line,1,1,mb_io_ptr->mbfp);
-fprintf(stderr,"i:%d read_len:%d\n",i,read_len);
+#ifdef MBR_XTFR8101_DEBUG
+fprintf(stderr,"Reading unknown packet i:%d read_len:%d\n",i,read_len);
+#endif
 			}
 		if (read_len != 1)
 		    {

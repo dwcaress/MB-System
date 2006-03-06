@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: proj_api.h,v 5.2 2004-02-25 21:39:36 caress Exp $
+ * $Id: proj_api.h,v 5.3 2006-03-06 21:49:27 caress Exp $
  *
  * Project:  PROJ.4
  * Purpose:  Public (application) include file for PROJ.4 API, and constants.
@@ -28,6 +28,22 @@
  ******************************************************************************
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.13  2004/10/30 02:33:47  fwarmerdam
+ * Updated release version.
+ *
+ * Revision 1.12  2004/09/16 15:14:01  fwarmerdam
+ * * src/pj_open_lib.c: added pj_set_searchpath() provided by Eric Miller.
+ *
+ * Revision 1.11  2004/07/28 23:23:49  warmerda
+ * Changed ra to es in declarations for pj_geocentric_to_geodetic()
+ * and pj_geodetic_to_geocentric() as suggested by Britton Kerin.
+ *
+ * Revision 1.10  2004/05/04 03:28:01  warmerda
+ * Updated version.
+ *
+ * Revision 1.9  2004/04/15 13:56:24  warmerda
+ * added pj_get_release
+ *
  * Revision 1.8  2003/03/31 14:52:38  warmerda
  * updated to 4.4.7
  *
@@ -67,7 +83,7 @@ extern "C" {
 #endif
 
 /* Try to update this every version! */
-#define PJ_VERSION 447
+#define PJ_VERSION 449
 
 extern char const pj_release[]; /* global release id string */
 
@@ -97,10 +113,10 @@ int pj_transform( projPJ src, projPJ dst, long point_count, int point_offset,
                   double *x, double *y, double *z );
 int pj_datum_transform( projPJ src, projPJ dst, long point_count, int point_offset,
                         double *x, double *y, double *z );
-int pj_geocentric_to_geodetic( double a, double ra,
+int pj_geocentric_to_geodetic( double a, double es,
                                long point_count, int point_offset,
                                double *x, double *y, double *z );
-int pj_geodetic_to_geocentric( double a, double ra,
+int pj_geodetic_to_geocentric( double a, double es,
                                long point_count, int point_offset,
                                double *x, double *y, double *z );
 int pj_compare_datums( projPJ srcdefn, projPJ dstdefn );
@@ -113,6 +129,7 @@ int pj_is_geocent(projPJ);
 void pj_pr_list(projPJ);
 void pj_free(projPJ);
 void pj_set_finder( const char *(*)(const char *) );
+void pj_set_searchpath ( int count, const char **path );
 projPJ pj_init(int, char **);
 projPJ pj_init_plus(const char *);
 char *pj_get_def(projPJ, int);
@@ -121,6 +138,7 @@ void *pj_malloc(size_t);
 void pj_dalloc(void *);
 char *pj_strerrno(int);
 int *pj_get_errno_ref();
+const char *pj_get_release();
 
 #ifdef __cplusplus
 }

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_gsf.h	6/10/97
- *	$Id: mbsys_gsf.h,v 5.5 2005-11-05 00:48:05 caress Exp $
+ *	$Id: mbsys_gsf.h,v 5.6 2006-03-06 21:47:48 caress Exp $
  *
  *    Copyright (c) 1998, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	March 5, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2005/11/05 00:48:05  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.4  2003/04/17 21:05:23  caress
  * Release 5.0.beta30
  *
@@ -146,4 +149,7 @@ int mbsys_gsf_insert_svp(int verbose, void *mbio_ptr, void *store_ptr,
 int mbsys_gsf_copy(int verbose, void *mbio_ptr, 
 			void *store_ptr, void *copy_ptr,
 			int *error);
+int mbsys_gsf_getscale(int verbose, double *data, char *flag, int ndata, 
+			int nbits, int signedvalue, 
+			double *multiplier, double *offset, int *error);
 

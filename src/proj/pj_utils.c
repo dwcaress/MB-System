@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: pj_utils.c,v 5.2 2004-02-25 21:39:38 caress Exp $
+ * $Id: pj_utils.c,v 5.3 2006-03-06 21:49:27 caress Exp $
  *
  * Project:  PROJ.4
  * Purpose:  Some utility functions we don't want to bother putting in

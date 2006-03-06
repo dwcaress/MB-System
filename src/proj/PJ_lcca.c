@@ -1,4 +1,4 @@
-static const char RCS_ID[] = "$Id: PJ_lcca.c,v 5.0 2004-02-24 23:14:16 caress Exp $";
+static const char RCS_ID[] = "$Id: PJ_lcca.c,v 5.1 2006-03-06 21:49:27 caress Exp $";
 /* PROJ.4 Cartographic Projection System -- Revision Log:
 **$Log: not supported by cvs2svn $
 **Revision 1.1  2003/03/04 02:59:41  warmerda

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: pj_gridinfo.c,v 5.0 2004-02-24 23:14:16 caress Exp $
+ * $Id: pj_gridinfo.c,v 5.1 2006-03-06 21:49:27 caress Exp $
  *
  * Project:  PROJ.4
  * Purpose:  Functions for handling individual PJ_GRIDINFO's.  Includes
@@ -29,6 +29,12 @@
  ******************************************************************************
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2004/10/30 04:03:03  fwarmerdam
+ * fixed reported information in ctable debug message
+ *
+ * Revision 1.5  2003/08/20 13:23:58  warmerda
+ * Avoid unsigned char / char casting issues for VC++.
+ *
  * Revision 1.4  2003/03/19 03:36:41  warmerda
  * Fixed so swap_words() works when it should.
  *
@@ -372,7 +378,7 @@ static int pj_gridinfo_init_ntv2( FILE *fid, PJ_GRIDINFO *gilist )
             return 0;
         }
 
-        if( strncmp(header,"SUB_NAME",8) != 0 )
+        if( strncmp((const char *) header,"SUB_NAME",8) != 0 )
         {
             pj_errno = -38;
             return 0;
@@ -396,7 +402,7 @@ static int pj_gridinfo_init_ntv2( FILE *fid, PJ_GRIDINFO *gilist )
 /*      Initialize a corresponding "ct" structure.                      */
 /* -------------------------------------------------------------------- */
         ct = (struct CTABLE *) pj_malloc(sizeof(struct CTABLE));
-        strncpy( ct->id, header + 8, 8 );
+        strncpy( ct->id, (const char *) header + 8, 8 );
         ct->id[8] = '\0';
 
         ct->ll.lam = - *((double *) (header+7*16+8)); /* W_LONG */
@@ -460,7 +466,7 @@ static int pj_gridinfo_init_ntv2( FILE *fid, PJ_GRIDINFO *gilist )
 /* -------------------------------------------------------------------- */
 /*      Attach to the correct list or sublist.                          */
 /* -------------------------------------------------------------------- */
-        if( strncmp(header+24,"NONE",4) == 0 )
+        if( strncmp((const char *)header+24,"NONE",4) == 0 )
         {
             if( gi != gilist )
             {
@@ -476,7 +482,8 @@ static int pj_gridinfo_init_ntv2( FILE *fid, PJ_GRIDINFO *gilist )
             PJ_GRIDINFO *lnk;
             PJ_GRIDINFO *gp = gilist;
             
-            while( gp != NULL && strncmp(gp->ct->id,header+24,8) != 0 )
+            while( gp != NULL 
+                   && strncmp(gp->ct->id,(const char*)header+24,8) != 0 )
                 gp = gp->next;
 
             if( gp == NULL )
@@ -484,7 +491,7 @@ static int pj_gridinfo_init_ntv2( FILE *fid, PJ_GRIDINFO *gilist )
                 if( getenv("PROJ_DEBUG") != NULL )
                     fprintf( stderr, "pj_gridinfo_init_ntv2(): "
                              "failed to find parent %8.8s for %.\n", 
-                             header+24, gi->ct->id );
+                             (const char *) header+24, gi->ct->id );
 
                 for( lnk = gp; lnk->next != NULL; lnk = lnk->next ) {}
                 lnk->next = gi;
@@ -681,8 +688,8 @@ PJ_GRIDINFO *pj_gridinfo_init( const char *gridname )
                      ct->id, 
                      ct->lim.lam, ct->lim.phi,
                      ct->ll.lam * RAD_TO_DEG, ct->ll.phi * RAD_TO_DEG,
-                     (ct->ll.lam + ct->lim.lam*ct->del.lam) * RAD_TO_DEG, 
-                     (ct->ll.phi + ct->lim.phi*ct->del.lam) * RAD_TO_DEG );
+                     (ct->ll.lam + (ct->lim.lam-1)*ct->del.lam) * RAD_TO_DEG, 
+                     (ct->ll.phi + (ct->lim.phi-1)*ct->del.phi) * RAD_TO_DEG );
     }
 
     fclose(fp);
