@@ -85,7 +85,7 @@ each data point's contribution to a Gaussian weighted
 average for each nearby grid cell is calculated as the point is read
 and added to
 the grid cell sums.  The weighting function is given by:
- 	W(r) = Aexp(r**2/a**2)
+ 	W(r) = Aexp(-r**2/a**2)
 .br
 where r is the distance from the center of the grid point to the data point,
 a is the distance at which the weighting function falls to 1/e of its
@@ -643,7 +643,7 @@ will be filled in through spine interpolation even in the areas
 not covered by data. The output looks like:
  
  Program MBGRID
- Version $Id: mbgrid.l,v 5.11 2006-01-20 15:55:39 caress Exp $
+ Version $Id: mbgrid.l,v 5.12 2006-03-06 21:57:21 caress Exp $
  MB-system Version 4.5
  
  MBGRID Parameters:
