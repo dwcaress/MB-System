@@ -132,6 +132,24 @@ organizations involved in the design and maintenance of the
 MB-System software package are NOT responsible for any damage 
 that may follow from correct or incorrect use of these programs.
 
+MB-SYSTEM VERSION 5.0.10 RELEASE NOTES:
+------------------------------------------
+
+The version 5.0.10 release of MB-System is purely a bug fix 
+release, and includes only a few changes relative to the 5.0.9 
+release.
+
+A typo in the mbgrid man page was fixed.
+
+A catastrophic error in the i/o module for the MBF_ASCIIYXZ
+format was fixed.
+
+The proj library was updated to use code from the Proj 4.4.9 release.
+
+The proj and GSF libraries internal to MB-System have been
+renamed libmbproj and libmbgsf to avoid name conflicts with
+proj and gsf in package managers like fink for MacOsX.
+
 MB-SYSTEM VERSION 5.0.9 RELEASE NOTES:
 ------------------------------------------
 
@@ -1196,10 +1214,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.78 2006-02-20 05:25:09 caress Exp $
+RCS ID: $Id: README,v 5.79 2006-03-06 21:33:42 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.78  2006/02/20 05:25:09  caress
+Release 5.0.9
+
 Revision 5.77  2006/02/16 21:24:25  caress
 Release 5.0.9
 
