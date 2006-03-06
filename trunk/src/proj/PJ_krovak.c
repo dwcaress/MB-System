@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: PJ_krovak.c,v 5.0 2004-02-24 23:14:16 caress Exp $
+ * $Id: PJ_krovak.c,v 5.1 2006-03-06 21:49:27 caress Exp $
  *
  * Project:  PROJ.4
  * Purpose:  Implementation of the krovak (Krovak) projection.
@@ -49,7 +49,7 @@
 #include <string.h>
 #include <stdio.h>
 
-PJ_CVSID("$Id: PJ_krovak.c,v 5.0 2004-02-24 23:14:16 caress Exp $");	
+PJ_CVSID("$Id: PJ_krovak.c,v 5.1 2006-03-06 21:49:27 caress Exp $");	
 
 PROJ_HEAD(krovak, "Krovak") "\n\tPCyl., Sph.";
 

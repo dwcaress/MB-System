@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_put_all.c	2/4/93
- *    $Id: mb_put_all.c,v 5.3 2003-04-17 21:05:23 caress Exp $
+ *    $Id: mb_put_all.c,v 5.4 2006-03-06 21:47:48 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	February 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2003/04/17 21:05:23  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.2  2002/09/18 23:32:59  caress
  * Release 5.0.beta23
  *
@@ -122,7 +125,7 @@ int mb_put_all(int verbose, void *mbio_ptr, void *store_ptr,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
 		char *comment, int *error)
 {
-  static char rcs_id[]="$Id: mb_put_all.c,v 5.3 2003-04-17 21:05:23 caress Exp $";
+  static char rcs_id[]="$Id: mb_put_all.c,v 5.4 2006-03-06 21:47:48 caress Exp $";
 	char	*function_name = "mb_put_all";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -211,6 +214,17 @@ int mb_put_all(int verbose, void *mbio_ptr, void *store_ptr,
 
 	/* write the data */
 	status = mb_write_ping(verbose,mbio_ptr,store_ptr,error);
+
+	/* increment counters */
+	if (status == MB_SUCCESS)
+		{
+		if (kind == MB_DATA_DATA)
+			mb_io_ptr->ping_count++;
+		else if (kind == MB_DATA_NAV)
+			mb_io_ptr->nav_count++;
+		else if (kind == MB_DATA_COMMENT)
+			mb_io_ptr->comment_count++;
+		}
 
 	/* print output debug statements */
 	if (verbose >= 2)

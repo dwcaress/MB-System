@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: projects.h,v 5.2 2004-02-25 21:39:40 caress Exp $
+ * $Id: projects.h,v 5.3 2006-03-06 21:49:27 caress Exp $
  *
  * Project:  PROJ.4
  * Purpose:  Primary (private) include file for PROJ.4 library.
@@ -28,6 +28,19 @@
  ******************************************************************************
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.21  2004/10/28 16:08:13  fwarmerdam
+ * added pj_get_*_ref() accessors
+ *
+ * Revision 1.20  2004/10/20 17:04:29  fwarmerdam
+ * added geos, sterea and supporting gauss code from libproj4
+ *
+ * Revision 1.19  2004/08/31 22:57:11  warmerda
+ * Don't re-declare hypot() on win32 as it will conflict with math.h as per
+ * http://bugzilla.remotesensing.org/show_bug.cgi?id=495
+ *
+ * Revision 1.18  2004/04/15 13:56:45  warmerda
+ * changed PJD_ERR_GEOCENTRIC to -45
+ *
  * Revision 1.17  2003/03/17 18:56:34  warmerda
  * implement heirarchical NTv2 gridinfos
  *
@@ -113,7 +126,10 @@ extern "C" {
 #define MAX_PATH_FILENAME 1024
 #endif
 	/* prototype hypot for systems where absent */
+#ifndef _WIN32
 extern double hypot(double, double);
+#endif
+
 	/* some useful constants */
 #define HALFPI		1.5707963267948966
 #define FORTPI		0.78539816339744833
@@ -144,7 +160,7 @@ extern double hypot(double, double);
 #define PJD_WGS84     4   /* WGS84 (or anything considered equivelent) */
 
 /* datum system errors */
-#define PJD_ERR_GEOCENTRIC 100
+#define PJD_ERR_GEOCENTRIC -45
 
 #define USE_PROJUV 
 
@@ -407,8 +423,18 @@ PJ_GRIDINFO *pj_gridinfo_init( const char * );
 int pj_gridinfo_load( PJ_GRIDINFO * );
 void pj_gridinfo_free( PJ_GRIDINFO * );
 
+void *pj_gauss_ini(double, double, double *,double *);
+LP pj_gauss(LP, const void *);
+LP pj_inv_gauss(LP, const void *);
+
 extern char const pj_release[];
 
+struct PJ_ELLPS *pj_get_ellps_ref( void );
+struct PJ_DATUMS *pj_get_datums_ref( void );
+struct PJ_UNITS *pj_get_units_ref( void );
+struct PJ_LIST  *pj_get_list_ref( void );
+struct PJ_PRIME_MERIDIANS  *pj_get_prime_meridians_ref( void );
+ 
 #ifndef DISABLE_CVSID
 #  define PJ_CVSID(string)     static char pj_cvsid[] = string; \
 static char *cvsid_aw() { return( cvsid_aw() ? ((char *) NULL) : pj_cvsid ); }

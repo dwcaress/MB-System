@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcopy.c	2/4/93
- *    $Id: mbcopy.c,v 5.18 2006-01-18 15:17:00 caress Exp $
+ *    $Id: mbcopy.c,v 5.19 2006-03-06 21:47:02 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003, 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	February 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.18  2006/01/18 15:17:00  caress
+ * Added stdlib.h include.
+ *
  * Revision 5.17  2005/11/05 01:07:54  caress
  * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
  *
@@ -174,6 +177,7 @@
 #include "../../include/mbsys_ldeoih.h"
 #include "../../include/mbsys_gsf.h"
 #include "../../include/mbsys_hsds.h"
+#include "../../include/mbsys_reson8k.h"
 
 /* defines for special copying routines */
 #define	MBCOPY_PARTIAL			0
@@ -183,6 +187,7 @@
 #define	MBCOPY_SIMRAD_TO_SIMRAD2	4
 #define	MBCOPY_ANY_TO_MBLDEOIH		5
 #define	MBCOPY_HDSD_TO_GSF		6
+#define	MBCOPY_RESON8K_TO_GSF		7
 
 /* function prototypes */
 int setup_transfer_rules(int verbose, int ibeams, int obeams,
@@ -224,7 +229,7 @@ int mbcopy_any_to_mbldeoih(int verbose,
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbcopy.c,v 5.18 2006-01-18 15:17:00 caress Exp $";
+	static char rcs_id[] = "$Id: mbcopy.c,v 5.19 2006-03-06 21:47:02 caress Exp $";
 	static char program_name[] = "MBcopy";
 	static char help_message[] =  "MBcopy copies an input swath sonar data file to an output \nswath sonar data file with the specified conversions.  Options include \nwindowing in time and space and ping averaging.  The input and \noutput data formats may differ, though not all possible combinations \nmake sense.  The default input and output streams are stdin and stdout.";
 	static char usage_message[] = "mbcopy [-Byr/mo/da/hr/mn/sc -Ccommentfile -D -Eyr/mo/da/hr/mn/sc \n\t-Fiformat/oformat -H  -Iinfile -Llonflip -N -Ooutfile \n\t-Ppings -Qsleep_factor -Rw/e/s/n -Sspeed -V]";
@@ -607,6 +612,10 @@ main (int argc, char **argv)
 	else if (pings == 1 
 		&& omb_io_ptr->format == MBF_MBLDEOIH)
 		copymode = MBCOPY_ANY_TO_MBLDEOIH;
+	else if (pings == 1 
+		&& imb_io_ptr->format == MBF_XTFR8101 
+		&& omb_io_ptr->format ==  MBF_GSFGENMB )
+		copymode = MBCOPY_RESON8K_TO_GSF;		
 	else
 		copymode = MBCOPY_PARTIAL;
 
@@ -1080,6 +1089,14 @@ main (int argc, char **argv)
 			ostore_ptr = omb_io_ptr->store_data;
 			status = mbcopy_simrad_to_simrad2(verbose, 
 				    istore_ptr, ostore_ptr, &error);
+			}
+		else if (copymode == MBCOPY_RESON8K_TO_GSF
+			&& error == MB_ERROR_NO_ERROR)
+			{
+
+			ostore_ptr = omb_io_ptr->store_data;
+			status = mbcopy_reson8k_to_gsf(verbose, 
+				    imbio_ptr, omb_io_ptr, &error);
 			}
 		else if (copymode == MBCOPY_ANY_TO_MBLDEOIH
 			&& error == MB_ERROR_NO_ERROR)
@@ -2699,6 +2716,425 @@ int mbcopy_any_to_mbldeoih(int verbose,
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbcopy_reson8k_to_gsf(int verbose, 
+		void *imbio_ptr, 
+		void *ombio_ptr,
+		int *error)
+{
+	char	*function_name = "mbcopy_reson8k_to_gsf";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	struct mb_io_struct *omb_io_ptr;
+	struct mbsys_reson8k_struct *istore_ptr;
+	struct mbsys_gsf_struct *ostore_ptr;			
+	struct mbsys_reson8k_struct *store; 	/* reson data */
+	struct mbsys_gsf_struct *ostore; 	/* gsf data */
+	gsfDataID	    *dataID; 		/* pointers withinin gsf data */
+	gsfRecords	    *records;
+	gsfSwathBathyPing   *mb_ping;
+	gsfMBParams params;
+	double	bathmax;
+	double	bathacrosstrackmax;
+	double	bathalongtrackmax;
+	double  multiplier, offset, lxy;
+	double	time_d;
+	int	time_i[7];
+	double gain_correction;
+	double	angscale;
+	double	alpha;
+	double	beta;
+	double	theta;
+	double	phi;
+	int	icenter;
+	int	i, j, ret;
+		
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBcopy function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       istore:     %d\n",istore_ptr);
+		fprintf(stderr,"dbg2       ostore:     %d\n",ostore_ptr);
+		fprintf(stderr,"dbg2       kind:       %d\n",istore_ptr->kind);
+		}
+
+	mb_io_ptr  = (struct mb_io_struct *) imbio_ptr;
+	omb_io_ptr = (struct mb_io_struct *) ombio_ptr;
+	
+	istore_ptr = mb_io_ptr->store_data;
+	ostore_ptr = omb_io_ptr->store_data;
+	
+	/* copy the data  */
+	if (istore_ptr != NULL && ostore_ptr != NULL 
+		&& (char *) istore_ptr != (char *) ostore)
+		{
+		
+		/* get reson data structure pointer */
+		store = (struct mbsys_reson8k_struct *) istore_ptr;
+
+		/* get data structure pointer */
+		ostore = (struct mbsys_gsf_struct *) ostore_ptr;
+
+		/* output gsf data structure  */
+		records = &(ostore->records);
+		dataID  = &(ostore->dataID);
+		mb_ping = &(records->mb_ping);
+
+		/* set data kind */
+		ostore->kind = store->kind;
+
+		/* insert data in structure */
+		if (store->kind == MB_DATA_DATA)
+			{		
+			/* on the first ping set the processing parameters up  */
+			if ( mb_io_ptr->ping_count == 1 ) 
+				{
+				/* ostore->kind = MB_DATA_PROCESSING_PARAMETERS;
+				dataID->recordID = GSF_RECORD_PROCESSING_PARAMETERS; */
+
+				params.roll_compensated = GSF_COMPENSATED; 
+				params.pitch_compensated = GSF_COMPENSATED;
+				params.heave_compensated = GSF_COMPENSATED;
+				params.tide_compensated = 0; 
+				params.ray_tracing = 0      ;
+				params.depth_calculation =GSF_DEPTHS_RE_1500_MS; 
+				params.to_apply.draft[0] = 0;	    
+				params.to_apply.roll_bias[0] = 0;;	    
+				params.to_apply.pitch_bias[0] = 0;;	    
+				params.to_apply.gyro_bias[0] = 0;;
+				/* note it appears the x and y axis are switched between 
+					reson and gsf reference systems	*/
+				params.to_apply.position_x_offset = store->NavOffsetY;  	    
+				params.to_apply.position_y_offset = store->NavOffsetX;  	    
+				params.to_apply.position_z_offset = store->NavOffsetZ;  	    
+				params.to_apply.transducer_x_offset[0] = store->MBOffsetY;
+				params.to_apply.transducer_y_offset[0] = store->MBOffsetX;
+				params.to_apply.transducer_z_offset[0] = store->MBOffsetZ;
+				params.to_apply.mru_roll_bias = store->MRUOffsetRoll;			    
+				params.to_apply.mru_pitch_bias = store->MRUOffsetPitch; 		    
+				params.to_apply.mru_heading_bias = 0;		    
+				params.to_apply.mru_x_offset = store->MRUOffsetY;			    
+				params.to_apply.mru_y_offset = store->MRUOffsetX;			    
+				params.to_apply.mru_z_offset = store->MRUOffsetZ;			    
+				params.to_apply.center_of_rotation_x_offset = 0;	    
+				params.to_apply.center_of_rotation_y_offset = 0;	    
+				params.to_apply.center_of_rotation_z_offset = 0;	   
+				ret = gsfPutMBParams(&params, records,(int) omb_io_ptr->mbfp, 1); 
+				}
+
+			/* set data id */
+			dataID->recordID = GSF_RECORD_SWATH_BATHYMETRY_PING;
+			mb_ping = &(records->mb_ping);
+
+			/* get time */
+			mb_ping->ping_time.tv_sec = (int) store->png_time_d;
+			mb_ping->ping_time.tv_nsec 
+				= (int) (1000000000 
+				    * (store->png_time_d 
+					    - mb_ping->ping_time.tv_sec));
+
+			/* get navigation */
+			mb_ping->longitude = store->png_longitude;
+			mb_ping->latitude = store->png_latitude;
+
+			/* get heading */
+			mb_ping->heading = store->png_heading;
+
+			/* get speed */
+			mb_ping->speed = store->png_speed/ 1.852;
+			
+			/* set sonar depth */
+			mb_ping->depth_corrector = store->MBOffsetZ;
+
+                	/* do roll pitch heave */
+			mb_ping->roll =  store->png_roll;
+			mb_ping->pitch = store->png_pitch;
+			mb_ping->heave = store->png_heave;		
+
+			/* get numbers of beams */
+			mb_ping->number_beams = store->beams_bath;
+
+			/* allocate memory in arrays if required */
+			if (store->beams_bath > 0)
+			      {
+			      mb_ping->beam_flags 
+				  = (unsigned char *) 
+				      realloc(mb_ping->beam_flags,
+						  store->beams_bath * sizeof(char));
+			      mb_ping->depth 
+				  = (double *) 
+				      realloc(mb_ping->depth,
+						  store->beams_bath * sizeof(double));
+			      mb_ping->across_track 
+				  = (double *) 
+				      realloc(mb_ping->across_track,
+						  store->beams_bath * sizeof(double));
+			      mb_ping->along_track 
+				  = (double *) 
+				      realloc(mb_ping->along_track,
+						  store->beams_bath * sizeof(double));
+			      mb_ping->travel_time 
+				  = (double *) 
+				      realloc(mb_ping->travel_time,
+						  store->beams_bath * sizeof(double));
+			      mb_ping->beam_angle 
+				  = (double *) 
+				      realloc(mb_ping->beam_angle,
+						  store->beams_bath * sizeof(double));
+			      mb_ping->beam_angle_forward
+				  = (double *) 
+				      realloc(mb_ping->beam_angle_forward,
+						  store->beams_bath * sizeof(double));
+
+			      if (mb_ping->beam_flags == NULL
+				  || mb_ping->depth == NULL
+				  || mb_ping->across_track == NULL
+				  || mb_ping->along_track == NULL
+				  || mb_ping->travel_time == NULL
+				  || mb_ping->beam_angle_forward == NULL 
+				  || mb_ping->beam_angle == NULL )
+				  {
+				  status = MB_FAILURE;
+				  *error = MB_ERROR_MEMORY_FAIL;
+				  }
+			      }
+			  if (store->beams_amp > 0
+			      && mb_ping->mc_amplitude != NULL)
+			      {
+			      mb_ping->mc_amplitude 
+				  = (double *) 
+				      realloc(mb_ping->mc_amplitude,
+						  store->beams_amp * sizeof(double));
+			      if (mb_ping->mc_amplitude == NULL)
+				  {
+				  status = MB_FAILURE;
+				  *error = MB_ERROR_MEMORY_FAIL;
+				  }
+			      }
+			  else if (store->beams_amp > 0)
+			      {
+			      mb_ping->mr_amplitude 
+				  = (double *) 
+				      realloc(mb_ping->mr_amplitude,
+						  store->beams_amp * sizeof(double));
+			      if (mb_ping->mr_amplitude == NULL)
+				  {
+				  status = MB_FAILURE;
+				  *error = MB_ERROR_MEMORY_FAIL;
+				  }
+			      }
+
+			  /* if ping flag set check for any unset
+			      beam flags - unset ping flag if any
+			      good beams found */
+			  if (mb_ping->ping_flags != 0)
+			      {
+			      for (i=0;i<store->beams_bath;i++)
+				  {
+				  if (mb_beam_ok(store->beamflag[i]))
+				      mb_ping->ping_flags = 0;
+				  }
+			      }
+
+			  /* read depth and beam location values into storage arrays */
+			  icenter = store->beams_bath / 2;
+			  angscale = ((double)store->beam_width_num) 
+					/ ((double)store->beam_width_denom);
+			  for (i=0;i<store->beams_bath;i++)
+				  {
+				  mb_ping->beam_flags[i] = store->beamflag[i];
+				  if (store->beamflag[i] != MB_FLAG_NULL)
+				      {
+				      mb_ping->depth[i] = store->bath[i];
+				      mb_ping->across_track[i] = store->bath_acrosstrack[i];
+				      mb_ping->along_track[i] = store->bath_alongtrack[i];
+				      mb_ping->travel_time[i] = 0.25 * (double)store->range[i]/(double)store->sample_rate;
+				      alpha = store->png_pitch;
+				      beta = 90.0 + (icenter - i) * angscale + store->png_roll; 
+				      mb_rollpitch_to_takeoff(
+					      verbose, 
+					      alpha, beta, 
+					      &theta, &phi, 
+					      error);
+				      mb_ping->beam_angle[i] = theta;
+				      if (phi < 0.0)
+				      	phi += 360.0;
+				      if (phi > 360.0)
+				      	phi -= 360.0;
+				      mb_ping->beam_angle_forward[i] = phi;
+/*fprintf(stderr,"MBCOPY: i:%d angles: %f %f\n",i,mb_ping->beam_angle[i],mb_ping->beam_angle_forward[i]);*/
+				      }
+				  else
+				      {
+				      mb_ping->depth[i] = 0.0;
+				      mb_ping->across_track[i] = 0.0;
+				      mb_ping->along_track[i] = 0.0;
+				      mb_ping->travel_time[i] = 0.0;
+				      mb_ping->beam_angle[i] = 0.0;
+				      mb_ping->beam_angle_forward[i] = 0;
+				      }
+				  }
+
+			  /* set scale factor for bathymetry */
+			  mbsys_gsf_getscale(verbose, store->bath, store->beamflag, store->beams_amp, 
+					16, MB_NO, 
+					&mb_ping->scaleFactors.scaleTable[0].multiplier, 
+					&mb_ping->scaleFactors.scaleTable[0].offset,
+					error);
+			  mbsys_gsf_getscale(verbose, store->bath_acrosstrack, store->beamflag, store->beams_amp, 
+					16, MB_YES, 
+					&mb_ping->scaleFactors.scaleTable[1].multiplier, 
+					&mb_ping->scaleFactors.scaleTable[1].offset,
+					error);
+			  mbsys_gsf_getscale(verbose, store->bath_alongtrack, store->beamflag, store->beams_amp, 
+					16, MB_YES, 
+					&mb_ping->scaleFactors.scaleTable[2].multiplier, 
+					&mb_ping->scaleFactors.scaleTable[2].offset,
+					error);
+
+			  /* set travel time scale assume two full byte for a 
+			  	two way 120 m travel path */
+			  mb_ping->scaleFactors.scaleTable[3].multiplier = 65535/0.160, mb_ping->scaleFactors.scaleTable[3].offset = 0;
+
+			  /* assume angle degrees are stored in hundreds of a degree */
+			  mb_ping->scaleFactors.scaleTable[4].multiplier  = 100.; 
+			  mb_ping->scaleFactors.scaleTable[4].offset = 0;
+			  mb_ping->scaleFactors.scaleTable[17].multiplier = 50.; 
+			  mb_ping->scaleFactors.scaleTable[17].offset = 0;
+
+			  mb_ping->scaleFactors.numArraySubrecords = 6;	
+
+			  /* choose gain factor -it's a guess based on dataset 
+			  	regression analysis!! rcc */
+			  gain_correction = 2.2*(store->gain & 63) + 6*store->power;
+
+			  /* read amplitude values into storage arrays */
+			  if (mb_ping->mc_amplitude != NULL)
+			  	{
+				for (i=0;i<store->beams_amp;i++)
+				  	{
+				 	/* note - we are storing 1/2 db increments */
+					mb_ping->mc_amplitude[i] = 40*log10(store->intensity[i]);
+				  	}
+
+				/* set scale factor for mc_amplitude */
+				mbsys_gsf_getscale(verbose, mb_ping->mc_amplitude, store->beamflag, store->beams_amp, 
+						8, MB_YES, &multiplier, &offset, error);
+		    		mb_ping->scaleFactors.scaleTable[GSF_SWATH_BATHY_SUBRECORD_MEAN_CAL_AMPLITUDE_ARRAY-1].multiplier
+						= multiplier;
+				mb_ping->scaleFactors.scaleTable[GSF_SWATH_BATHY_SUBRECORD_MEAN_CAL_AMPLITUDE_ARRAY-1].offset
+						= offset;
+				mb_ping->scaleFactors.numArraySubrecords ++ ;			
+			  	}
+			  else if (mb_ping->mr_amplitude != NULL)
+			  	{
+				for (i=0;i<store->beams_amp;i++)
+					{
+					mb_ping->mr_amplitude[i] = 40*log10(store->intensity[i])- gain_correction;
+					}
+
+			       /* Set scale factor for mr _amplitude */
+				mbsys_gsf_getscale(verbose, mb_ping->mr_amplitude, store->beamflag, store->beams_amp, 
+						8, MB_NO, &multiplier, &offset, error);
+		    		mb_ping->scaleFactors.scaleTable[GSF_SWATH_BATHY_SUBRECORD_MEAN_REL_AMPLITUDE_ARRAY-1].multiplier
+						= multiplier;
+				mb_ping->scaleFactors.scaleTable[GSF_SWATH_BATHY_SUBRECORD_MEAN_REL_AMPLITUDE_ARRAY-1].offset
+						= offset;	
+				mb_ping->scaleFactors.numArraySubrecords  ++ ;		
+			  	}
+
+			/* generate imagery from sidescan trace 
+				code here would have to be modified for snippets
+
+	        		mb_ping->brb_inten = (gsfBRBIntensity *) realloc(mb_ping->brb_inten,sizeof(gsfBRBIntensity));
+
+				gsfBRBIntensity *brb;
+				brb = mb_ping->brb_inten;					  
+				brb->bits_per_sample = (unsigned char) 16;
+				brb->applied_corrections = 0;
+				gsfTimeSeriesIntensity *brb_ts;
+				*brb_ts = brb->time_series;
+				*brb_ts = (gsfTimeSeriesIntensity*)realloc(*brb_ts,store->beams_bath*sizeof(gsfTimeSeriesIntensity));	
+				*/	 
+
+			/* now fill in the reson 8100 specific fields */
+			mb_ping->sensor_id = GSF_SWATH_BATHY_SUBRECORD_RESON_8101_SPECIFIC;
+			mb_ping->sensor_data.gsfReson8100Specific.latency = store->latency ;
+			mb_ping->sensor_data.gsfReson8100Specific.ping_number = store->ping_number ; 
+			mb_ping->sensor_data.gsfReson8100Specific.sonar_id = store->sonar_id ;   
+			mb_ping->sensor_data.gsfReson8100Specific.sonar_model = store->sonar_model ; 
+			mb_ping->sensor_data.gsfReson8100Specific.frequency = store->frequency ;   
+			mb_ping->sensor_data.gsfReson8100Specific.surface_velocity = store->velocity ;
+			mb_ping->sensor_data.gsfReson8100Specific.sample_rate = store->sample_rate ; 
+			mb_ping->sensor_data.gsfReson8100Specific.ping_rate = store->ping_rate ;   
+			mb_ping->sensor_data.gsfReson8100Specific.mode = GSF_8100_AMPLITUDE ;
+			mb_ping->sensor_data.gsfReson8100Specific.range = store->range_set ;         
+			mb_ping->sensor_data.gsfReson8100Specific.power = store->power ;         
+			mb_ping->sensor_data.gsfReson8100Specific.gain = store->gain ;	       
+			mb_ping->sensor_data.gsfReson8100Specific.pulse_width = store->pulse_width ;   
+			mb_ping->sensor_data.gsfReson8100Specific.tvg_spreading = store->tvg_spread ; 
+			mb_ping->sensor_data.gsfReson8100Specific.tvg_absorption = store->tvg_absorp ;
+			mb_ping->sensor_data.gsfReson8100Specific.fore_aft_bw = store->projector_beam_width/10.;   
+			mb_ping->sensor_data.gsfReson8100Specific.athwart_bw = (double)store->beam_width_num/(double)store->beam_width_denom;    
+			mb_ping->sensor_data.gsfReson8100Specific.projector_type = store->projector_type ;
+			mb_ping->sensor_data.gsfReson8100Specific.projector_angle = store->projector_angle ;
+			mb_ping->sensor_data.gsfReson8100Specific.range_filt_min = store->min_range ;
+			mb_ping->sensor_data.gsfReson8100Specific.range_filt_max = store->max_range ;
+			mb_ping->sensor_data.gsfReson8100Specific.depth_filt_min = store->min_depth ;
+			mb_ping->sensor_data.gsfReson8100Specific.depth_filt_max = store-> max_depth;
+			mb_ping->sensor_data.gsfReson8100Specific.filters_active = store->filters_active ;
+			mb_ping->sensor_data.gsfReson8100Specific.temperature = store->temperature ;   
+			mb_ping->sensor_data.gsfReson8100Specific.beam_spacing = (double)store->beam_width_num/(double)store->beam_width_denom;  
+			}
+
+		/* insert comment in structure */
+		else if (store->kind == MB_DATA_COMMENT)
+			{
+			dataID->recordID = GSF_RECORD_COMMENT;
+			if (records->comment.comment_length < strlen(store->comment) + 1)
+			    {
+			    if ((records->comment.comment 
+					= (char *) 
+					    realloc(records->comment.comment,
+						strlen(store->comment)+1))
+						    == NULL) 
+				{
+				status = MB_FAILURE;
+				*error = MB_ERROR_MEMORY_FAIL;
+				records->comment.comment_length = 0;
+				}
+			    }
+			if (status = MB_SUCCESS && records->comment.comment != NULL)
+			    {
+			    strcpy(records->comment.comment, store->comment);
+			    records->comment.comment_length = strlen(store->comment)+1;
+			    records->comment.comment_time.tv_sec = (int) store->png_time_d;
+			    records->comment.comment_time.tv_nsec 
+				    = (int) (1000000000 
+					* (store->png_time_d 
+						- records->comment.comment_time.tv_sec));
+			    }
+			}
+
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
 		}
 
 	/* return status */

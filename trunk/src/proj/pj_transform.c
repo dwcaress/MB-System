@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: pj_transform.c,v 5.2 2004-02-25 21:39:36 caress Exp $
+ * $Id: pj_transform.c,v 5.3 2006-03-06 21:49:27 caress Exp $
  *
  * Project:  PROJ.4
  * Purpose:  Perform overall coordinate system to coordinate system 
@@ -30,6 +30,28 @@
  ******************************************************************************
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.13  2004/10/25 15:34:36  fwarmerdam
+ * make names of geodetic funcs from geotrans unique
+ *
+ * Revision 1.12  2004/05/03 19:45:23  warmerda
+ * Altered so that raw ellpses are treated as a essentially having a
+ * +towgs84=0,0,0 specification so ellpisoid shifts are applied.
+ * Fixed so that prime meridian shifts are applied if the coordinate system is
+ * not lat/long (ie. if it is projected).  This fixes:
+ * http://bugzilla.remotesensing.org/show_bug.cgi?id=510
+ *
+ * Revision 1.11  2004/01/24 09:37:19  warmerda
+ * pj_transform() will no longer return an error code if any of the points are
+ * transformable.  In this case the application is expected to check for
+ * HUGE_VAL to identify failed points.
+ * As part of the implementation, I added a list of pj_errno values that
+ * are transient (ie per-point) rather than indicating global failure for the
+ * coordinate system definition.  We use this in deciding which pj_fwd and
+ * pj_inv error codes are really fatal and should be reported.
+ *
+ * Revision 1.10  2003/08/21 02:09:06  warmerda
+ * added a bunch of HUGE_VAL checking
+ *
  * Revision 1.9  2003/03/26 16:52:30  warmerda
  * added check that an inverse transformation func exists
  *
@@ -64,7 +86,7 @@
 #include <math.h>
 #include "geocent.h"
 
-PJ_CVSID("$Id: pj_transform.c,v 5.2 2004-02-25 21:39:36 caress Exp $");
+PJ_CVSID("$Id: pj_transform.c,v 5.3 2006-03-06 21:49:27 caress Exp $");
 
 #ifndef SRS_WGS84_SEMIMAJOR
 #define SRS_WGS84_SEMIMAJOR 6378137.0
@@ -81,6 +103,25 @@ PJ_CVSID("$Id: pj_transform.c,v 5.2 2004-02-25 21:39:36 caress Exp $");
 #define Ry_BF (defn->datum_params[4])
 #define Rz_BF (defn->datum_params[5])
 #define M_BF  (defn->datum_params[6])
+
+/* 
+** This table is intended to indicate for any given error code in 
+** the range 0 to -44, whether that error will occur for all locations (ie.
+** it is a problem with the coordinate system as a whole) in which case the
+** value would be 0, or if the problem is with the point being transformed
+** in which case the value is 1. 
+**
+** At some point we might want to move this array in with the error message
+** list or something, but while experimenting with it this should be fine. 
+*/
+
+static int transient_error[45] = {
+    /*             0  1  2  3  4  5  6  7  8  9   */
+    /* 0 to 9 */   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    /* 10 to 19 */ 0, 0, 0, 0, 1, 1, 0, 1, 1, 1,  
+    /* 20 to 29 */ 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 
+    /* 30 to 39 */ 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 
+    /* 40 to 44 */ 0, 0, 0, 0, 0 };
 
 /************************************************************************/
 /*                            pj_transform()                            */
@@ -123,9 +164,12 @@ int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
             }
         }
 
-        pj_geocentric_to_geodetic( srcdefn->a, srcdefn->es,
-                                   point_count, point_offset, x, y, z );
+        if( pj_geocentric_to_geodetic( srcdefn->a, srcdefn->es,
+                                       point_count, point_offset, 
+                                       x, y, z ) != 0) 
+            return pj_errno;
     }
+
 /* -------------------------------------------------------------------- */
 /*      Transform source points to lat/long, if they aren't             */
 /*      already.                                                        */
@@ -151,9 +195,21 @@ int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
             projected_loc.u = x[point_offset*i];
             projected_loc.v = y[point_offset*i];
 
+            if( projected_loc.u == HUGE_VAL )
+                continue;
+
             geodetic_loc = pj_inv( projected_loc, srcdefn );
             if( pj_errno != 0 )
-                return pj_errno;
+            {
+                if( pj_errno > 0 || pj_errno < -44 || point_count == 1
+                    || transient_error[-pj_errno] == 0 )
+                    return pj_errno;
+                else
+                {
+                    geodetic_loc.u = HUGE_VAL;
+                    geodetic_loc.v = HUGE_VAL;
+                }
+            }
 
             x[point_offset*i] = geodetic_loc.u;
             y[point_offset*i] = geodetic_loc.v;
@@ -163,10 +219,13 @@ int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
 /*      But if they are already lat long, adjust for the prime          */
 /*      meridian if there is one in effect.                             */
 /* -------------------------------------------------------------------- */
-    else if( srcdefn->from_greenwich != 0.0 )
+    if( srcdefn->from_greenwich != 0.0 )
     {
         for( i = 0; i < point_count; i++ )
-            x[point_offset*i] += srcdefn->from_greenwich;
+        {
+            if( x[point_offset*i] != HUGE_VAL )
+                x[point_offset*i] += srcdefn->from_greenwich;
+        }
     }
 
 /* -------------------------------------------------------------------- */
@@ -175,6 +234,20 @@ int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
     if( pj_datum_transform( srcdefn, dstdefn, point_count, point_offset, 
                             x, y, z ) != 0 )
         return pj_errno;
+
+/* -------------------------------------------------------------------- */
+/*      But if they are staying lat long, adjust for the prime          */
+/*      meridian if there is one in effect.                             */
+/* -------------------------------------------------------------------- */
+    if( dstdefn->from_greenwich != 0.0 )
+    {
+        for( i = 0; i < point_count; i++ )
+        {
+            if( x[point_offset*i] != HUGE_VAL )
+                x[point_offset*i] -= dstdefn->from_greenwich;
+        }
+    }
+
 
 /* -------------------------------------------------------------------- */
 /*      Transform destination latlong to geocentric if required.        */
@@ -194,8 +267,11 @@ int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
         {
             for( i = 0; i < point_count; i++ )
             {
-                x[point_offset*i] *= dstdefn->fr_meter;
-                y[point_offset*i] *= dstdefn->fr_meter;
+                if( x[point_offset*i] != HUGE_VAL )
+                {
+                    x[point_offset*i] *= dstdefn->fr_meter;
+                    y[point_offset*i] *= dstdefn->fr_meter;
+                }
             }
         }
     }
@@ -214,24 +290,26 @@ int pj_transform( PJ *srcdefn, PJ *dstdefn, long point_count, int point_offset,
             geodetic_loc.u = x[point_offset*i];
             geodetic_loc.v = y[point_offset*i];
 
+            if( geodetic_loc.u == HUGE_VAL )
+                continue;
+
             projected_loc = pj_fwd( geodetic_loc, dstdefn );
             if( pj_errno != 0 )
-                return pj_errno;
+            {
+                if( pj_errno > 0 || pj_errno < -44 || point_count == 1
+                    || transient_error[-pj_errno] == 0 )
+                    return pj_errno;
+                else
+                {
+                    projected_loc.u = HUGE_VAL;
+                    projected_loc.v = HUGE_VAL;
+                }
+            }
 
             x[point_offset*i] = projected_loc.u;
             y[point_offset*i] = projected_loc.v;
         }
     }
-/* -------------------------------------------------------------------- */
-/*      But if they are staying lat long, adjust for the prime          */
-/*      meridian if there is one in effect.                             */
-/* -------------------------------------------------------------------- */
-    else if( dstdefn->from_greenwich != 0.0 )
-    {
-        for( i = 0; i < point_count; i++ )
-            x[point_offset*i] -= dstdefn->from_greenwich;
-    }
-
 
     return 0;
 }
@@ -253,7 +331,7 @@ int pj_geodetic_to_geocentric( double a, double es,
     else
         b = a * sqrt(1-es);
 
-    if( Set_Geocentric_Parameters( a, b ) != 0 )
+    if( pj_Set_Geocentric_Parameters( a, b ) != 0 )
     {
         pj_errno = PJD_ERR_GEOCENTRIC;
         return pj_errno;
@@ -263,7 +341,7 @@ int pj_geodetic_to_geocentric( double a, double es,
     {
         long io = i * point_offset;
 
-        if( Convert_Geodetic_To_Geocentric( y[io], x[io], z[io], 
+        if( pj_Convert_Geodetic_To_Geocentric( y[io], x[io], z[io], 
                                             x+io, y+io, z+io ) != 0 )
         {
             pj_errno = PJD_ERR_GEOCENTRIC;
@@ -291,7 +369,7 @@ int pj_geocentric_to_geodetic( double a, double es,
     else
         b = a * sqrt(1-es);
 
-    if( Set_Geocentric_Parameters( a, b ) != 0 )
+    if( pj_Set_Geocentric_Parameters( a, b ) != 0 )
     {
         pj_errno = PJD_ERR_GEOCENTRIC;
         return pj_errno;
@@ -301,7 +379,10 @@ int pj_geocentric_to_geodetic( double a, double es,
     {
         long io = i * point_offset;
 
-        Convert_Geocentric_To_Geodetic( x[io], y[io], z[io], 
+        if( x[io] == HUGE_VAL )
+            continue;
+
+        pj_Convert_Geocentric_To_Geodetic( x[io], y[io], z[io], 
                                         y+io, x+io, z+io );
     }
 
@@ -373,6 +454,9 @@ int pj_geocentric_to_wgs84( PJ *defn,
         {
             long io = i * point_offset;
             
+            if( x[io] == HUGE_VAL )
+                continue;
+
             x[io] = x[io] + defn->datum_params[0];
             y[io] = y[io] + defn->datum_params[1];
             z[io] = z[io] + defn->datum_params[2];
@@ -384,6 +468,9 @@ int pj_geocentric_to_wgs84( PJ *defn,
         {
             long io = i * point_offset;
             double x_out, y_out, z_out;
+
+            if( x[io] == HUGE_VAL )
+                continue;
 
             x_out = M_BF*(       x[io] - Rz_BF*y[io] + Ry_BF*z[io]) + Dx_BF;
             y_out = M_BF*( Rz_BF*x[io] +       y[io] - Rx_BF*z[io]) + Dy_BF;
@@ -416,6 +503,9 @@ int pj_geocentric_from_wgs84( PJ *defn,
         for( i = 0; i < point_count; i++ )
         {
             long io = i * point_offset;
+
+            if( x[io] == HUGE_VAL )
+                continue;
             
             x[io] = x[io] - defn->datum_params[0];
             y[io] = y[io] - defn->datum_params[1];
@@ -428,6 +518,9 @@ int pj_geocentric_from_wgs84( PJ *defn,
         {
             long io = i * point_offset;
             double x_tmp, y_tmp, z_tmp;
+
+            if( x[io] == HUGE_VAL )
+                continue;
 
             x_tmp = (x[io] - Dx_BF) / M_BF;
             y_tmp = (y[io] - Dy_BF) / M_BF;
@@ -504,7 +597,8 @@ int pj_datum_transform( PJ *srcdefn, PJ *dstdefn,
 /* ==================================================================== */
 /*      Do we need to go through geocentric coordinates?                */
 /* ==================================================================== */
-    if( srcdefn->datum_type == PJD_3PARAM 
+    if( src_es != dst_es || src_a != dst_a
+        || srcdefn->datum_type == PJD_3PARAM 
         || srcdefn->datum_type == PJD_7PARAM
         || dstdefn->datum_type == PJD_3PARAM 
         || dstdefn->datum_type == PJD_7PARAM)
@@ -519,12 +613,16 @@ int pj_datum_transform( PJ *srcdefn, PJ *dstdefn,
 /* -------------------------------------------------------------------- */
 /*      Convert between datums.                                         */
 /* -------------------------------------------------------------------- */
-        if( srcdefn->datum_type != PJD_UNKNOWN
-            && dstdefn->datum_type != PJD_UNKNOWN )
+        if( srcdefn->datum_type == PJD_3PARAM 
+            || srcdefn->datum_type == PJD_7PARAM )
         {
             pj_geocentric_to_wgs84( srcdefn, point_count, point_offset,x,y,z);
             CHECK_RETURN;
+        }
 
+        if( dstdefn->datum_type == PJD_3PARAM 
+            || dstdefn->datum_type == PJD_7PARAM )
+        {
             pj_geocentric_from_wgs84( dstdefn, point_count,point_offset,x,y,z);
             CHECK_RETURN;
         }

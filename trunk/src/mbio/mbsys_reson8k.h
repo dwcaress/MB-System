@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_reson.h	8/20/94
- *	$Id: mbsys_reson8k.h,v 5.4 2005-11-05 00:48:05 caress Exp $
+ *	$Id: mbsys_reson8k.h,v 5.5 2006-03-06 21:47:48 caress Exp $
  *
  *    Copyright (c) 2001, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -18,14 +18,16 @@
  * multibeam sonar systems.
  * The data formats which are commonly used to store Reson 8K
  * data in files include
- *      MBF_xtfr8101 : MBIO ID 84
- *      MBF_resn8101 : MBIO ID 85
+ *       MBF_XTFR8101 : MBIO ID 84
  *
  *
  * Author:	D. W. Caress
  * Date:	September 2, 2001
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2005/11/05 00:48:05  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.3  2003/04/17 21:05:23  caress
  * Release 5.0.beta30
  *

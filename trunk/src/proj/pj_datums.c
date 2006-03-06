@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: pj_datums.c,v 5.2 2004-02-25 21:39:38 caress Exp $
+ * $Id: pj_datums.c,v 5.3 2006-03-06 21:49:27 caress Exp $
  *
  * Project:  PROJ.4
  * Purpose:  Built in datum list.
@@ -28,6 +28,12 @@
  ******************************************************************************
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.10  2004/10/28 16:07:55  fwarmerdam
+ * added pj_get_*_ref() accessors
+ *
+ * Revision 1.9  2004/05/04 01:15:21  warmerda
+ * Added NZGD49 datum - see bug 339
+ *
  * Revision 1.8  2003/03/28 14:29:28  warmerda
  * Fixed ire65 definition ... use mod_airy, not modif_airy.
  *
@@ -79,8 +85,15 @@ C_NAMESPACE struct PJ_DATUMS pj_datums[] = {
 "carthage",  "towgs84=-263.0,6.0,431.0",  "clark80",  "Carthage 1934 Tunisia",
 "hermannskogel", "towgs84=653.0,-212.0,449.0",  "bessel",  "Hermannskogel",
 "ire65",  "towgs84=482.530,-130.596,564.557,-1.042,-0.214,-0.631,8.15",  "mod_airy",  "Ireland 1965",
+"nzgd49",    "towgs84=59.47,-5.04,187.44,0.47,-0.1,1.024,-4.5993", "intl", "New Zealand Geodetic Datum 1949",
 NULL,       NULL,                                    NULL,    NULL 
 };
+
+struct PJ_DATUMS *pj_get_datums_ref()
+
+{
+    return pj_datums;
+}
 
 C_NAMESPACE struct PJ_PRIME_MERIDIANS pj_prime_meridians[] = {
     /* id        definition                         */
@@ -100,6 +113,10 @@ C_NAMESPACE struct PJ_PRIME_MERIDIANS pj_prime_meridians[] = {
     "oslo",      "10d43'22.5\"E",
     NULL,        NULL 
 };
-    
 
+struct PJ_PRIME_MERIDIANS *pj_get_prime_meridians_ref()
+
+{
+    return pj_prime_meridians;
+}
 

@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  7/16/2002
-#	$Id: Makefile.template,v 5.4 2004-02-25 21:39:36 caress Exp $
+#	$Id: Makefile.template,v 5.5 2006-03-06 21:49:27 caress Exp $
 #
 #     Copyright (c) 2002, 2003 by
 #     David W. Caress (caress@mbari.org)
@@ -16,6 +16,9 @@
 # Date:		July 16, 2002
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.4  2004/02/25 21:39:36  caress
+# Release 5.0.3
+#
 # Revision 5.3  2003/07/27 20:50:22  caress
 # Release 5.0.0
 #
@@ -48,7 +51,7 @@ INCDIR = ../../include
 
 ### make all makes the proj library, executables, man pages, 
 ### and associated include files
-all:	$(LIBDIR)/libproj.a \
+all:	$(LIBDIR)/libmbproj.a \
 	$(INCDIR)/proj_api.h
 	
 ### make clean removes the object files
@@ -57,13 +60,13 @@ clean:
 
 ### link or copy the executables
 #$(BINDIR)/proj: proj.o \
-#		$(LIBDIR)/libproj.a
+#		$(LIBDIR)/libmbproj.a
 #	$(CC) $(CFLAGS) proj.o \
-#		$(LIBDIR)/libproj.a \
+#		$(LIBDIR)/libmbproj.a \
 #		$(LFLAGS) -o $(BINDIR)/proj
 
 ### put together the library
-$(LIBDIR)/libproj.a: \
+$(LIBDIR)/libmbproj.a: \
 		PJ_aea.o \
 		PJ_aeqd.o \
 		PJ_airy.o \
@@ -90,6 +93,7 @@ $(LIBDIR)/libproj.a: \
 		PJ_fahey.o \
 		PJ_fouc_s.o \
 		PJ_gall.o \
+		PJ_geos.o \
 		PJ_gins8.o \
 		PJ_gn_sinu.o \
 		PJ_gnom.o \
@@ -136,6 +140,7 @@ $(LIBDIR)/libproj.a: \
 		PJ_sconics.o \
 		PJ_somerc.o \
 		PJ_stere.o \
+		PJ_sterea.o \
 		PJ_sts.o \
 		PJ_tcc.o \
 		PJ_tcea.o \
@@ -178,6 +183,7 @@ $(LIBDIR)/libproj.a: \
 		pj_errno.o \
 		pj_factors.o \
 		pj_fwd.o \
+		pj_gauss.o \
 		pj_geocent.o \
 		pj_gridinfo.o \
 		pj_gridlist.o \
@@ -203,7 +209,7 @@ $(LIBDIR)/libproj.a: \
 		rtodms.o \
 		strtod.o \
 		vector1.o
-	$(ARCHIVE) $(LIBDIR)/libproj.a \
+	$(ARCHIVE) $(LIBDIR)/libmbproj.a \
 		PJ_aea.o \
 		PJ_aeqd.o \
 		PJ_airy.o \
@@ -230,6 +236,7 @@ $(LIBDIR)/libproj.a: \
 		PJ_fahey.o \
 		PJ_fouc_s.o \
 		PJ_gall.o \
+		PJ_geos.o \
 		PJ_gins8.o \
 		PJ_gn_sinu.o \
 		PJ_gnom.o \
@@ -276,6 +283,7 @@ $(LIBDIR)/libproj.a: \
 		PJ_sconics.o \
 		PJ_somerc.o \
 		PJ_stere.o \
+		PJ_sterea.o \
 		PJ_sts.o \
 		PJ_tcc.o \
 		PJ_tcea.o \
@@ -318,6 +326,7 @@ $(LIBDIR)/libproj.a: \
 		pj_errno.o \
 		pj_factors.o \
 		pj_fwd.o \
+		pj_gauss.o \
 		pj_geocent.o \
 		pj_gridinfo.o \
 		pj_gridlist.o \
@@ -343,7 +352,7 @@ $(LIBDIR)/libproj.a: \
 		rtodms.o \
 		strtod.o \
 		vector1.o
-	ranlib $(LIBDIR)/libproj.a
+	ranlib $(LIBDIR)/libmbproj.a
 
 ### compile the source files
 PJ_aea.o:	PJ_aea.c \
@@ -450,6 +459,10 @@ PJ_gall.o:	PJ_gall.c \
 		emess.h  geocent.h  geodesic.h \
 		nad_list.h  pj_list.h  proj_api.h  projects.h
 	$(CC) -c $(CFLAGS) -I. PJ_gall.c
+PJ_geos.o:	PJ_geos.c \
+		emess.h  geocent.h  geodesic.h \
+		nad_list.h  pj_list.h  proj_api.h  projects.h
+	$(CC) -c $(CFLAGS) -I. PJ_geos.c
 PJ_gins8.o:	PJ_gins8.c \
 		emess.h  geocent.h  geodesic.h \
 		nad_list.h  pj_list.h  proj_api.h  projects.h
@@ -634,6 +647,10 @@ PJ_stere.o:	PJ_stere.c \
 		emess.h  geocent.h  geodesic.h \
 		nad_list.h  pj_list.h  proj_api.h  projects.h
 	$(CC) -c $(CFLAGS) -I. PJ_stere.c
+PJ_sterea.o:	PJ_sterea.c \
+		emess.h  geocent.h  geodesic.h \
+		nad_list.h  pj_list.h  proj_api.h  projects.h
+	$(CC) -c $(CFLAGS) -I. PJ_sterea.c
 PJ_sts.o:	PJ_sts.c \
 		emess.h  geocent.h  geodesic.h \
 		nad_list.h  pj_list.h  proj_api.h  projects.h
@@ -818,6 +835,10 @@ pj_fwd.o:	pj_fwd.c \
 		emess.h  geocent.h  geodesic.h \
 		nad_list.h  pj_list.h  proj_api.h  projects.h
 	$(CC) -c $(CFLAGS) -I. pj_fwd.c
+pj_gauss.o:	pj_gauss.c \
+		emess.h  geocent.h  geodesic.h \
+		nad_list.h  pj_list.h  proj_api.h  projects.h
+	$(CC) -c $(CFLAGS) -I. pj_gauss.c
 pj_geocent.o:	pj_geocent.c \
 		emess.h  geocent.h  geodesic.h \
 		nad_list.h  pj_list.h  proj_api.h  projects.h

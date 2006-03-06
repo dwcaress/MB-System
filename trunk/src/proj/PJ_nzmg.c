@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: PJ_nzmg.c,v 5.1 2004-02-25 21:39:39 caress Exp $
+ * $Id: PJ_nzmg.c,v 5.2 2006-03-06 21:49:27 caress Exp $
  *
  * Project:  PROJ.4
  * Purpose:  Implementation of the nzmg (New Zealand Map Grid) projection.
@@ -38,7 +38,7 @@
 #define PJ_LIB__
 #include	<projects.h>
 
-PJ_CVSID("$Id: PJ_nzmg.c,v 5.1 2004-02-25 21:39:39 caress Exp $");
+PJ_CVSID("$Id: PJ_nzmg.c,v 5.2 2006-03-06 21:49:27 caress Exp $");
 
 PROJ_HEAD(nzmg, "New Zealand Map Grid") "\n\tfixed Earth";
 

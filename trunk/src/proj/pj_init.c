@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: pj_init.c,v 5.1 2004-02-25 21:39:39 caress Exp $
+ * $Id: pj_init.c,v 5.2 2006-03-06 21:49:27 caress Exp $
  *
  * Project:  PROJ.4
  * Purpose:  Initialize projection object from string definition.  Includes
@@ -30,6 +30,24 @@
  ******************************************************************************
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.16  2004/09/08 15:23:37  warmerda
+ * added new error for unknown prime meridians
+ *
+ * Revision 1.15  2004/05/05 01:45:41  warmerda
+ * Made sword even longer.
+ *
+ * Revision 1.14  2004/05/05 01:45:00  warmerda
+ * Make sword buffer larger so long +towgs84 parameters don't get split.
+ *
+ * Revision 1.13  2003/09/16 03:46:21  warmerda
+ * dont use default ellps if any earth model info is set: bug 386
+ *
+ * Revision 1.12  2003/08/21 02:15:59  warmerda
+ * improve MAX_ARG checking
+ *
+ * Revision 1.11  2003/06/09 21:23:16  warmerda
+ * ensure start is initialized at very beginning of pj_init()
+ *
  * Revision 1.10  2003/03/16 16:38:24  warmerda
  * Modified get_opt() to terminate reading the definition when a new
  * definition (a word starting with '<') is encountered, in addition to when
@@ -48,7 +66,7 @@
 #include <string.h>
 #include <errno.h>
 
-PJ_CVSID("$Id: pj_init.c,v 5.1 2004-02-25 21:39:39 caress Exp $");
+PJ_CVSID("$Id: pj_init.c,v 5.2 2006-03-06 21:49:27 caress Exp $");
 
 static paralist *start;
 extern FILE *pj_open_lib(char *, char *);
@@ -58,12 +76,12 @@ extern FILE *pj_open_lib(char *, char *);
 /************************************************************************/
 static paralist *
 get_opt(FILE *fid, char *name, paralist *next) {
-    char sword[52], *word = sword+1;
+    char sword[302], *word = sword+1;
     int first = 1, len, c;
 
     len = strlen(name);
     *sword = 't';
-    while (fscanf(fid, "%50s", word) == 1) {
+    while (fscanf(fid, "%300s", word) == 1) {
         if (*word == '#') /* skip comments */
             while((c = fgetc(fid)) != EOF && c != '\n') ;
         else if (*word == '<') { /* control name */
@@ -75,9 +93,15 @@ get_opt(FILE *fid, char *name, paralist *next) {
                 break;
             }
         } else if (!first && !pj_param(start, sword).i) {
-            /* don't default ellipse if datum is set */
+            /* don't default ellipse if datum, ellps or any earth model
+               information is set. */
             if( strncmp(word,"ellps=",6) != 0 
-                || !pj_param(start, "tdatum").i )
+                || (!pj_param(start, "tdatum").i 
+                    && !pj_param(start, "tellps").i 
+                    && !pj_param(start, "ta").i 
+                    && !pj_param(start, "tb").i 
+                    && !pj_param(start, "trf").i 
+                    && !pj_param(start, "tf").i) )
             {
                 next = next->next = pj_mkparam(word);
             }
@@ -158,13 +182,16 @@ pj_init_plus( const char *definition )
         switch( defn_copy[i] )
         {
           case '+':
-            if( argc+1 == MAX_ARG )
+            if( i == 0 || defn_copy[i-1] == '\0' )
             {
-                pj_errno = -44;
-                return NULL;
+                if( argc+1 == MAX_ARG )
+                {
+                    pj_errno = -44;
+                    return NULL;
+                }
+                
+                argv[argc++] = defn_copy + i + 1;
             }
-
-            argv[argc++] = defn_copy + i + 1;
             break;
 
           case ' ':
@@ -204,6 +231,7 @@ pj_init(int argc, char **argv) {
 	PJ *PIN = 0;
 
 	errno = pj_errno = 0;
+        start = NULL;
 
 	/* put arguments into internal linked list */
 	if (argc <= 0) { pj_errno = -1; goto bum_call; }
@@ -322,11 +350,11 @@ pj_init(int argc, char **argv) {
             }
             
             if( value == NULL 
-                && dmstor(name,&next_str) != 0.0 
+                && (dmstor(name,&next_str) != 0.0  || *name == '0')
                 && *next_str == '\0' )
                 value = name;
 
-            if (!value) { pj_errno = -7; goto bum_call; }
+            if (!value) { pj_errno = -46; goto bum_call; }
             PIN->from_greenwich = dmstor(value,NULL);
 	}
         else

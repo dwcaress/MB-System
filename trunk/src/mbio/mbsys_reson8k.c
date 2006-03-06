@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_reson8k.c	3.00	8/20/94
- *	$Id: mbsys_reson8k.c,v 5.4 2005-11-05 00:48:04 caress Exp $
+ *	$Id: mbsys_reson8k.c,v 5.5 2006-03-06 21:47:48 caress Exp $
  *
  *    Copyright (c) 2001, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -19,12 +19,14 @@
  * The data formats which are commonly used to store Reson 8K
  * data in files include
  *      MBF_xtfr8101 : MBIO ID 84
- *      MBF_resn8101 : MBIO ID 85
  *
  * Author:	D. W. Caress
  * Date:	September 3, 2001
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2005/11/05 00:48:04  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.3  2003/04/17 21:05:23  caress
  * Release 5.0.beta30
  *
@@ -56,7 +58,7 @@
 int mbsys_reson8k_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_reson8k.c,v 5.4 2005-11-05 00:48:04 caress Exp $";
+ static char res_id[]="$Id: mbsys_reson8k.c,v 5.5 2006-03-06 21:47:48 caress Exp $";
 	char	*function_name = "mbsys_reson8k_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -826,14 +828,14 @@ int mbsys_reson8k_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 		*ssv = (double) store->velocity;
 
 		/* get travel times, angles */
-		ttscale = 4.0 / store->sample_rate;
+		ttscale = 0.25 / store->sample_rate;
 		icenter = store->beams_bath / 2;
 		angscale = ((double)store->beam_width_num) 
 			/ ((double)store->beam_width_denom);
 		for (i=0;i<*nbeams;i++)
 			{
 			ttimes[i] = ttscale * store->range[i];
-			angle = 90.0 + (icenter - i) * angscale; 
+			angle = 90.0 + (icenter - i) * angscale + store->png_roll; 
 			pitch = store->png_pitch;
 			mb_rollpitch_to_takeoff(
 				verbose, pitch, angle, 
