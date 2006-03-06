@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb7kpreprocess.c	10/12/2005
- *    $Id: mb7kpreprocess.c,v 5.2 2006-01-18 15:17:00 caress Exp $
+ *    $Id: mb7kpreprocess.c,v 5.3 2006-03-06 21:44:27 caress Exp $
  *
  *    Copyright (c) 2005 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	October 12, 2005
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2006/01/18 15:17:00  caress
+ * Added stdlib.h include.
+ *
  * Revision 5.1  2006/01/06 18:19:58  caress
  * Working towards 5.0.8
  *
@@ -50,7 +53,7 @@
 #define MB7KPREPROCESS_PROCESS		1
 #define MB7KPREPROCESS_TIMESTAMPLIST	2
 
-static char rcs_id[] = "$Id: mb7kpreprocess.c,v 5.2 2006-01-18 15:17:00 caress Exp $";
+static char rcs_id[] = "$Id: mb7kpreprocess.c,v 5.3 2006-03-06 21:44:27 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
@@ -1427,7 +1430,8 @@ main (int argc, char **argv)
 					}
 					
 				/* fix early version 5 quality flags */
-				else if (bathymetry->header.Version == 5)
+				else if (bathymetry->header.Version == 5
+						&& header->s7kTime.Year < 2006)
 					{
 					for (i=0;i<bathymetry->number_beams;i++)
 						{
@@ -1439,6 +1443,27 @@ main (int argc, char **argv)
 /*fprintf(stderr," %d\n",bathymetry->quality[i]);*/
 							}
 						else if ((bathymetry->quality[i]) == 4)
+							{
+/*fprintf(stderr,"beam %d: AMPLI quality: %d",i,bathymetry->quality[i]);*/
+							bathymetry->quality[i] = 16 + 15;
+/*fprintf(stderr," %d\n",bathymetry->quality[i]);*/
+							}
+						}
+					}
+					
+				/* fix early version 5 quality flags */
+				else if (bathymetry->header.Version == 5)
+					{
+					for (i=0;i<bathymetry->number_beams;i++)
+						{
+						/* phase picks */
+						if ((bathymetry->quality[i]) == 4)
+							{
+/*fprintf(stderr,"beam %d: PHASE quality: %d",i,bathymetry->quality[i]);*/
+							bathymetry->quality[i] = 32 + 15;
+/*fprintf(stderr," %d\n",bathymetry->quality[i]);*/
+							}
+						else if ((bathymetry->quality[i]) == 2)
 							{
 /*fprintf(stderr,"beam %d: AMPLI quality: %d",i,bathymetry->quality[i]);*/
 							bathymetry->quality[i] = 16 + 15;
