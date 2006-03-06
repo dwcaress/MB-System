@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrid.c	5/2/94
- *    $Id: mbgrid.c,v 5.33 2006-02-06 06:33:40 caress Exp $
+ *    $Id: mbgrid.c,v 5.34 2006-03-06 21:44:56 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 2000, 2002, 2003, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -38,6 +38,9 @@
  * Rererewrite:	January 2, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.33  2006/02/06 06:33:40  caress
+ * Fixed interpolation of background grid data.
+ *
  * Revision 5.32  2006/02/02 19:40:57  caress
  * Increased resolution of grid bin size passed to grdsample and grd2xyz.
  *
@@ -412,7 +415,7 @@ double mbgrid_erf();
 FILE	*outfp;
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbgrid.c,v 5.33 2006-02-06 06:33:40 caress Exp $";
+static char rcs_id[] = "$Id: mbgrid.c,v 5.34 2006-03-06 21:44:56 caress Exp $";
 static char program_name[] = "mbgrid";
 static char help_message[] =  "mbgrid is an utility used to grid bathymetry, amplitude, or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbgrid -Ifilelist -Oroot \
@@ -1481,7 +1484,7 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 		{
 		error = MB_ERROR_OPEN_FAIL;
 		fprintf(outfp,"\nUnable to open datalist file: %s\n",
-			file);
+			dfile);
 		}
 
 	/***** do footprint gridding *****/
