@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_jstar.c	10/4/94
- *	$Id: mbsys_jstar.c,v 5.2 2005-11-05 00:48:05 caress Exp $
+ *	$Id: mbsys_jstar.c,v 5.3 2006-03-12 19:23:19 caress Exp $
  *
  *    Copyright (c) 2005 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Author:	D. W. Caress
  * Date:	May 4, 2005
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2005/11/05 00:48:05  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.1  2005/06/15 15:20:17  caress
  * Fixed problems with writing Bluefin records in 7k data and improved support for Edgetech Jstar data.
  *
@@ -46,11 +49,14 @@
 #include "../../include/mb_segy.h"
 #include "../../include/mbsys_jstar.h"
 
+/* define ln(2) for local usage */
+#define MB_LN_2	0.69314718056
+
 /*--------------------------------------------------------------------*/
 int mbsys_jstar_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_jstar.c,v 5.2 2005-11-05 00:48:05 caress Exp $";
+ static char res_id[]="$Id: mbsys_jstar.c,v 5.3 2006-03-12 19:23:19 caress Exp $";
 	char	*function_name = "mbsys_jstar_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -476,7 +482,7 @@ int mbsys_jstar_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		istart = (int)(altitude / rawpixelsize);
 /*fprintf(stderr,"istart:%d altitude:%f rawpixelsize:%f startDepth:%d\n",
 istart,altitude,rawpixelsize,ssport->startDepth);*/
-		weight = exp2((double)ssport->weightingFactor);
+		weight = exp(MB_LN_2 * ((double)ssport->weightingFactor));
 /*fprintf(stderr, "Subsystem: %d Weights: %d %f ",ssport->message.subsystem,ssport->weightingFactor,weight);*/
 		jstart = *nss / 2;
 /*fprintf(stderr,"Port istart:%d of %d    jstart:%d of %d\n",istart,ssport->samples,jstart,*nss);*/
@@ -489,7 +495,7 @@ istart,altitude,rawpixelsize,ssport->startDepth);*/
 /*fprintf(stderr,"Binning Port: i:%d j:%d ss:%f\n",i,j,ss[j]/ssalongtrack[j]);*/
 			}
 		istart = MAX(0, ((int)(altitude / rawpixelsize)));
-		weight = exp2((double)ssstbd->weightingFactor);
+		weight = exp(MB_LN_2 * ((double)ssstbd->weightingFactor));
 /*fprintf(stderr, "   %d %f\n",ssstbd->weightingFactor,weight);*/
 /*fprintf(stderr,"Stbd istart:%d of %d    jstart:%d of %d\n",istart,ssstbd->samples,jstart,*nss);*/
 		for (i=istart;i<ssstbd->samples;i++)
@@ -929,20 +935,20 @@ int mbsys_jstar_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			if (ssmax > 0.0)
 				{
 				weight = 65535.0 / ssmax;
-				ssport->weightingFactor = log2(weight);
+				ssport->weightingFactor = log(weight) / MB_LN_2;
 				ssstbd->weightingFactor = ssport->weightingFactor;
 				}
 				
 			/* insert port and starboard traces from sidescan swath */
 			jstart = nss / 2 - 1;
-			weight = exp2((double)ssport->weightingFactor);
+			weight = exp(MB_LN_2 * ((double)ssport->weightingFactor));
 			for (j=jstart;j>=0;j--)
 				{
 				i = istart + (jstart - j);
 				ssport->trace[i] = (short) (ss[j] * weight);
 				}
 			jstart = nss / 2;
-			weight = exp2((double)ssstbd->weightingFactor);
+			weight = exp(MB_LN_2 * ((double)ssstbd->weightingFactor));
 			for (j=jstart;j<nss;j++)
 				{
 				i = istart + (j - jstart);
@@ -1936,7 +1942,7 @@ int mbsys_jstar_extract_segy(int verbose, void *mbio_ptr, void *store_ptr,
 								kind, segyheader_ptr, error);
 								
 		/* get the trace weight */
-		weight = exp2((double)sbp->weightingFactor);
+		weight = exp(MB_LN_2 * ((double)sbp->weightingFactor));
 /*fprintf(stderr, "Subsystem: %d Weight: %d %f\n",sbp->message.subsystem,sbp->weightingFactor,weight);*/
 
 		/* extract the data */
@@ -2231,7 +2237,7 @@ int mbsys_jstar_insert_segy(int verbose, void *mbio_ptr, void *store_ptr,
 			}
 		if (datamax > 0.0)
 			{
-			sbp->weightingFactor = (short) log2(datamax) - 15;
+			sbp->weightingFactor = (short) (log(datamax) / MB_LN_2) - 15;
 			}
 		else
 			sbp->weightingFactor = 0;
