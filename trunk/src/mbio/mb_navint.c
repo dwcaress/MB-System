@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_time.c	10/30/2000
- *    $Id: mb_navint.c,v 5.12 2005-06-15 15:17:51 caress Exp $
+ *    $Id: mb_navint.c,v 5.13 2006-03-14 01:41:52 caress Exp $
  *
  *    Copyright (c) 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	October 30, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.12  2005/06/15 15:17:51  caress
+ * Added some useful debug statements.
+ *
  * Revision 5.11  2005/03/25 04:31:23  caress
  * Minor changes to code comments.
  *
@@ -74,11 +77,11 @@
     #define MB_NAVINT_DEBUG 1
     #define MB_ATTINT_DEBUG 1
     #define MB_HEDINT_DEBUG 1
-    #define MB_DEPINT_DEBUG 1
-    #define MB_ALTINT_DEBUG 1*/
+    #define MB_DEPINT_DEBUG 1 
+    #define MB_ALTINT_DEBUG 1 */
 
 
-static char rcs_id[]="$Id: mb_navint.c,v 5.12 2005-06-15 15:17:51 caress Exp $";
+static char rcs_id[]="$Id: mb_navint.c,v 5.13 2006-03-14 01:41:52 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 /* 	function mb_navint_add adds a nav fix to the internal
@@ -141,7 +144,7 @@ int mb_navint_add(int verbose, void *mbio_ptr, double time_d, double lon, double
 		mb_io_ptr->fix_lat[mb_io_ptr->nfix] = lat;
 		mb_io_ptr->nfix++;
 #ifdef MB_NAVINT_DEBUG
-	fprintf(stderr, "mb_navint_add:    Nav fix %d added\n", mb_io_ptr->nfix);
+	fprintf(stderr, "mb_navint_add:    Nav fix %d %f %f added\n", mb_io_ptr->nfix, lon, lat);
 #endif
 
 		/* print debug statements */
@@ -284,8 +287,8 @@ int mb_navint_interp(int verbose, void *mbio_ptr,
 			+ factor*(mb_io_ptr->fix_lat[ifix] - mb_io_ptr->fix_lat[ifix-1]);
 		status = MB_SUCCESS;
 #ifdef MB_NAVINT_DEBUG
-	fprintf(stderr, "mb_navint_interp: Nav interpolated at fix %d of %d with factor:%f\n", 
-		ifix, mb_io_ptr->nfix, factor);
+	fprintf(stderr, "mb_navint_interp: Nav  %f %f interpolated at fix %d of %d with factor:%f\n", 
+		*lon, *lat, ifix, mb_io_ptr->nfix, factor);
 #endif
 		}
 		
@@ -306,8 +309,8 @@ int mb_navint_interp(int verbose, void *mbio_ptr,
 			+ headingy * mtodeglat * dd;
 		status = MB_SUCCESS;
 #ifdef MB_NAVINT_DEBUG
-	fprintf(stderr, "mb_navint_interp: Nav extrapolated from last fix of %d with distance:%f and speed:%f\n", 
-		mb_io_ptr->nfix, dd, speed_mps);
+	fprintf(stderr, "mb_navint_interp: Nav %f %f extrapolated from last fix of %d with distance:%f and speed:%f\n", 
+		*lon, *lat, mb_io_ptr->nfix, dd, speed_mps);
 #endif
 		}
 		
@@ -326,8 +329,8 @@ int mb_navint_interp(int verbose, void *mbio_ptr,
 			+ headingy * mtodeglat * dd;
 		status = MB_SUCCESS;
 #ifdef MB_NAVINT_DEBUG
-	fprintf(stderr, "mb_navint_interp: Nav extrapolated from first fix of %d with distance %f and speed:%f\n", 
-		mb_io_ptr->nfix, dd, speed_mps);
+	fprintf(stderr, "mb_navint_interp: Nav %f %f extrapolated from first fix of %d with distance %f and speed:%f\n", 
+		*lon, *lat, mb_io_ptr->nfix, dd, speed_mps);
 #endif
 		}
 
@@ -415,7 +418,8 @@ int mb_attint_add(int verbose, void *mbio_ptr,
 		mb_io_ptr->attitude_pitch[mb_io_ptr->nattitude] = pitch;
 		mb_io_ptr->nattitude++;
 #ifdef MB_ATTINT_DEBUG
-	fprintf(stderr, "mb_attint_add:    Attitude fix %d added\n", mb_io_ptr->nattitude);
+	fprintf(stderr, "mb_attint_add:    Attitude fix %d %f %f %f added\n", 
+				mb_io_ptr->nattitude, roll, pitch, heave);
 #endif
 
 		/* print debug statements */
@@ -509,8 +513,8 @@ int mb_attint_interp(int verbose, void *mbio_ptr,
 			+ factor*(mb_io_ptr->attitude_pitch[ifix] - mb_io_ptr->attitude_pitch[ifix-1]);
 		status = MB_SUCCESS;
 #ifdef MB_ATTINT_DEBUG
-	fprintf(stderr, "mb_attint_interp: Attitude interpolated at fix %d of %d with factor:%f\n", 
-		ifix, mb_io_ptr->nattitude, factor);
+	fprintf(stderr, "mb_attint_interp: Attitude %f %f %f interpolated at fix %d of %d with factor:%f\n", 
+		*roll, *pitch, *heave, ifix, mb_io_ptr->nattitude, factor);
 #endif
 		}
 		
@@ -525,8 +529,8 @@ int mb_attint_interp(int verbose, void *mbio_ptr,
 		*pitch = mb_io_ptr->attitude_pitch[mb_io_ptr->nattitude-1];
 		status = MB_SUCCESS;
 #ifdef MB_ATTINT_DEBUG
-	fprintf(stderr, "mb_attint_interp: Attitude extrapolated from last fix of %d\n", 
-		mb_io_ptr->nattitude);
+	fprintf(stderr, "mb_attint_interp: Attitude %f %f %f extrapolated from last fix of %d\n", 
+		*roll, *pitch, *heave, mb_io_ptr->nattitude);
 #endif
 		}
 		
@@ -538,8 +542,8 @@ int mb_attint_interp(int verbose, void *mbio_ptr,
 		*pitch = mb_io_ptr->attitude_pitch[0];
 		status = MB_SUCCESS;
 #ifdef MB_ATTINT_DEBUG
-	fprintf(stderr, "mb_attint_interp: Attitude extrapolated from first fix of %d\n", 
-		mb_io_ptr->nattitude);
+	fprintf(stderr, "mb_attint_interp: Attitude %f %f %f extrapolated from first fix of %d\n", 
+		*roll, *pitch, *heave, mb_io_ptr->nattitude);
 #endif
 		}
 
@@ -619,7 +623,7 @@ int mb_hedint_add(int verbose, void *mbio_ptr, double time_d, double heading, in
 		mb_io_ptr->heading_heading[mb_io_ptr->nheading] = heading;
 		mb_io_ptr->nheading++;
 #ifdef MB_HEDINT_DEBUG
-	fprintf(stderr, "mb_hedint_add:    Heading fix %d added\n", mb_io_ptr->nheading);
+	fprintf(stderr, "mb_hedint_add:    Heading fix %d %f added\n", mb_io_ptr->nheading, heading);
 #endif
 
 		/* print debug statements */
@@ -714,8 +718,8 @@ int mb_hedint_interp(int verbose, void *mbio_ptr,
 			*heading -= 360.0;
 		status = MB_SUCCESS;
 #ifdef MB_HEDINT_DEBUG
-	fprintf(stderr, "mb_hedint_interp: Heading interpolated at value %d of %d with factor:%f\n", 
-		ifix, mb_io_ptr->nheading, factor);
+	fprintf(stderr, "mb_hedint_interp: Heading %f interpolated at value %d of %d with factor:%f\n", 
+		*heading, ifix, mb_io_ptr->nheading, factor);
 #endif
 		}
 		
@@ -728,8 +732,8 @@ int mb_hedint_interp(int verbose, void *mbio_ptr,
 		*heading = mb_io_ptr->heading_heading[mb_io_ptr->nheading-1];
 		status = MB_SUCCESS;
 #ifdef MB_HEDINT_DEBUG
-	fprintf(stderr, "mb_hedint_interp: Heading taken from last value of %d\n", 
-		mb_io_ptr->nheading);
+	fprintf(stderr, "mb_hedint_interp: Heading %f taken from last value of %d\n", 
+		*heading, mb_io_ptr->nheading);
 #endif
 		}
 		
@@ -739,8 +743,8 @@ int mb_hedint_interp(int verbose, void *mbio_ptr,
 		*heading = mb_io_ptr->heading_heading[0];
 		status = MB_SUCCESS;
 #ifdef MB_HEDINT_DEBUG
-	fprintf(stderr, "mb_hedint_interp: Heading taken from first value of %d\n", 
-		mb_io_ptr->nheading);
+	fprintf(stderr, "mb_hedint_interp: Heading %f taken from first value of %d\n", 
+		*heading, mb_io_ptr->nheading);
 #endif
 		}
 
@@ -816,7 +820,7 @@ int mb_depint_add(int verbose, void *mbio_ptr, double time_d, double sonardepth,
 		mb_io_ptr->sonardepth_sonardepth[mb_io_ptr->nsonardepth] = sonardepth;
 		mb_io_ptr->nsonardepth++;
 #ifdef MB_DEPINT_DEBUG
-	fprintf(stderr, "mb_depint_add:    sonardepth fix %d added\n", mb_io_ptr->nsonardepth);
+	fprintf(stderr, "mb_depint_add:    sonardepth fix %d %f added\n", mb_io_ptr->nsonardepth, sonardepth);
 #endif
 
 		/* print debug statements */
@@ -901,8 +905,8 @@ int mb_depint_interp(int verbose, void *mbio_ptr,
 			+ factor*(mb_io_ptr->sonardepth_sonardepth[ifix] - mb_io_ptr->sonardepth_sonardepth[ifix-1]);
 		status = MB_SUCCESS;
 #ifdef MB_DEPINT_DEBUG
-	fprintf(stderr, "mb_depint_interp: sonardepth interpolated at fix %d of %d with factor:%f\n", 
-		ifix, mb_io_ptr->nsonardepth, factor);
+	fprintf(stderr, "mb_depint_interp: sonardepth %f interpolated at fix %d of %d with factor:%f\n", 
+		*sonardepth, ifix, mb_io_ptr->nsonardepth, factor);
 #endif
 		}
 		
@@ -915,8 +919,8 @@ int mb_depint_interp(int verbose, void *mbio_ptr,
 		*sonardepth = mb_io_ptr->sonardepth_sonardepth[mb_io_ptr->nsonardepth-1];
 		status = MB_SUCCESS;
 #ifdef MB_DEPINT_DEBUG
-	fprintf(stderr, "mb_depint_interp: sonardepth extrapolated from last fix of %d\n", 
-		mb_io_ptr->nsonardepth);
+	fprintf(stderr, "mb_depint_interp: sonardepth %f extrapolated from last fix of %d\n", 
+		*sonardepth, mb_io_ptr->nsonardepth);
 #endif
 		}
 		
@@ -926,8 +930,8 @@ int mb_depint_interp(int verbose, void *mbio_ptr,
 		*sonardepth = mb_io_ptr->sonardepth_sonardepth[0];
 		status = MB_SUCCESS;
 #ifdef MB_DEPINT_DEBUG
-	fprintf(stderr, "mb_depint_interp: sonardepth extrapolated from first fix of %d\n", 
-		mb_io_ptr->nsonardepth);
+	fprintf(stderr, "mb_depint_interp: sonardepth %f extrapolated from first fix of %d\n", 
+		*sonardepth, mb_io_ptr->nsonardepth);
 #endif
 		}
 
@@ -1003,7 +1007,7 @@ int mb_altint_add(int verbose, void *mbio_ptr, double time_d, double altitude, i
 		mb_io_ptr->altitude_altitude[mb_io_ptr->naltitude] = altitude;
 		mb_io_ptr->naltitude++;
 #ifdef MB_ALTINT_DEBUG
-	fprintf(stderr, "mb_altint_add:    altitude fix %d added\n", mb_io_ptr->naltitude);
+	fprintf(stderr, "mb_altint_add:    altitude fix %d %f added\n", mb_io_ptr->naltitude, altitude);
 #endif
 
 		/* print debug statements */
@@ -1088,8 +1092,8 @@ int mb_altint_interp(int verbose, void *mbio_ptr,
 			+ factor*(mb_io_ptr->altitude_altitude[ifix] - mb_io_ptr->altitude_altitude[ifix-1]);
 		status = MB_SUCCESS;
 #ifdef MB_ALTINT_DEBUG
-	fprintf(stderr, "mb_altint_interp: altitude interpolated at fix %d of %d with factor:%f\n", 
-		ifix, mb_io_ptr->naltitude, factor);
+	fprintf(stderr, "mb_altint_interp: altitude %f interpolated at fix %d of %d with factor:%f\n", 
+		*altitude, ifix, mb_io_ptr->naltitude, factor);
 #endif
 		}
 		
@@ -1102,8 +1106,8 @@ int mb_altint_interp(int verbose, void *mbio_ptr,
 		*altitude = mb_io_ptr->altitude_altitude[mb_io_ptr->naltitude-1];
 		status = MB_SUCCESS;
 #ifdef MB_ALTINT_DEBUG
-	fprintf(stderr, "mb_altint_interp: altitude extrapolated from last fix of %d\n", 
-		mb_io_ptr->naltitude);
+	fprintf(stderr, "mb_altint_interp: altitude %f extrapolated from last fix of %d\n", 
+		*altitude, mb_io_ptr->naltitude);
 #endif
 		}
 		
@@ -1113,8 +1117,8 @@ int mb_altint_interp(int verbose, void *mbio_ptr,
 		*altitude = mb_io_ptr->altitude_altitude[0];
 		status = MB_SUCCESS;
 #ifdef MB_ALTINT_DEBUG
-	fprintf(stderr, "mb_altint_interp: altitude extrapolated from first fix of %d\n", 
-		mb_io_ptr->naltitude);
+	fprintf(stderr, "mb_altint_interp: altitude %f extrapolated from first fix of %d\n", 
+		*altitude, mb_io_ptr->naltitude);
 #endif
 		}
 
