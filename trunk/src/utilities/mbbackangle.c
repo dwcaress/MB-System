@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbbackangle.c	1/6/95
- *    $Id: mbbackangle.c,v 5.13 2006-02-01 07:31:06 caress Exp $
+ *    $Id: mbbackangle.c,v 5.14 2006-03-14 01:59:24 caress Exp $
  *
  *    Copyright (c) 1995, 2000, 2002, 2003, 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	January 6, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.13  2006/02/01 07:31:06  caress
+ * Modifications suggested by Gordon Keith
+ *
  * Revision 5.12  2006/01/18 15:17:00  caress
  * Added stdlib.h include.
  *
@@ -144,7 +147,7 @@ int output_model(int verbose, FILE *tfp,
 	int *nmean, double *mean, double *sigma, 
 	int *error);
 						
-static char rcs_id[] = "$Id: mbbackangle.c,v 5.13 2006-02-01 07:31:06 caress Exp $";
+static char rcs_id[] = "$Id: mbbackangle.c,v 5.14 2006-03-14 01:59:24 caress Exp $";
 static char program_name[] = "mbbackangle";
 
 /*--------------------------------------------------------------------*/
@@ -913,6 +916,7 @@ by MBprocess.";
 	    	fprintf(atfp, "## Number of angle bins:  %d\n", nangles);
 	    	fprintf(atfp, "## Maximum angle:         %f\n", angle_max);
 	   	fprintf(atfp, "## Default altitude:      %f\n", altitude_default);
+		fprintf(atfp, "## Slope correction:      %d\n", amp_corr_slope);
 	   	fprintf(atfp, "## Data type:             beam amplitude\n");
 		}
 
@@ -940,6 +944,7 @@ by MBprocess.";
 	    	fprintf(stfp, "## Number of angle bins:  %d\n", nangles);
 	    	fprintf(stfp, "## Maximum angle:         %f\n", angle_max);
 	   	fprintf(stfp, "## Default altitude:      %f\n", altitude_default);
+		fprintf(stfp, "## Slope Correction:      %d\n", ss_corr_slope);
 	   	fprintf(stfp, "## Data type:             sidescan\n");
 		}
 	    }
