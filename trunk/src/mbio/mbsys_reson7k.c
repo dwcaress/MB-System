@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_reson7k.c	3.00	3/23/2004
- *	$Id: mbsys_reson7k.c,v 5.10 2005-11-05 00:48:04 caress Exp $
+ *	$Id: mbsys_reson7k.c,v 5.11 2006-03-14 01:48:08 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -26,6 +26,9 @@
  * Date:	March 23, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.10  2005/11/05 00:48:04  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.9  2005/06/15 15:20:17  caress
  * Fixed problems with writing Bluefin records in 7k data and improved support for Edgetech Jstar data.
  *
@@ -72,11 +75,14 @@
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_reson7k.h"
 #include "../../include/mb_segy.h"
+
+/* define ln(2) for local usage */
+#define MB_LN_2	0.69314718056
 	
 /* turn on debug statements here */
 /* #define MSYS_RESON7KR_DEBUG 1 */
 
-static char res_id[]="$Id: mbsys_reson7k.c,v 5.10 2005-11-05 00:48:04 caress Exp $";
+static char res_id[]="$Id: mbsys_reson7k.c,v 5.11 2006-03-14 01:48:08 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_zero7kheader(int verbose, s7k_header	*header, 
@@ -5189,6 +5195,7 @@ int mbsys_reson7k_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 					{
 					*altitudev = bathymetry->depth[i] - *transducer_depth;
 					altitude_found = MB_YES;
+					xtrackmin = fabs((double)bathymetry->acrosstrack[i]);
 					}
 				}
 			}
@@ -6341,7 +6348,7 @@ int mbsys_reson7k_extract_segy(int verbose, void *mbio_ptr, void *store_ptr,
 		ushortptr = (unsigned short *) fsdwchannel->data;
 								
 		/* get the trace weight */
-		weight = exp2((double)fsdwsegyheader->weightingFactor);
+		weight = exp(MB_LN_2 * ((double)fsdwsegyheader->weightingFactor));
 /*fprintf(stderr, "Subbottom: Weight: %d %f\n",fsdwsegyheader->weightingFactor,weight);*/
 			
 		/* extract the data */
@@ -6652,7 +6659,7 @@ int mbsys_reson7k_insert_segy(int verbose, void *mbio_ptr, void *store_ptr,
 			}
 		if (datamax > 0.0)
 			{
-			fsdwsegyheader->weightingFactor = (short) log2(datamax) - 15;
+			fsdwsegyheader->weightingFactor = (short) (log(datamax) / MB_LN_2) - 15;
 			}
 		else
 			fsdwsegyheader->weightingFactor = 0;
