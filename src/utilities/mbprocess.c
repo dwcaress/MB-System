@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbprocess.c	3/31/93
- *    $Id: mbprocess.c,v 5.45 2006-02-16 21:11:44 caress Exp $
+ *    $Id: mbprocess.c,v 5.46 2006-03-14 01:51:53 caress Exp $
  *
  *    Copyright (c) 2000, 2002, 2003, 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -36,6 +36,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.45  2006/02/16 21:11:44  caress
+ * Fixed problems with reading time from some navigation formats.
+ *
  * Revision 5.44  2006/01/27 19:13:04  caress
  * Version 5.0.8beta2
  *
@@ -234,7 +237,7 @@ int get_anglecorr(int verbose,
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbprocess.c,v 5.45 2006-02-16 21:11:44 caress Exp $";
+	static char rcs_id[] = "$Id: mbprocess.c,v 5.46 2006-03-14 01:51:53 caress Exp $";
 	static char program_name[] = "mbprocess";
 	static char help_message[] =  "mbprocess is a tool for processing swath sonar bathymetry data.\n\
 This program performs a number of functions, including:\n\
@@ -4734,7 +4737,7 @@ alpha, beta, lever_heave);*/
 			    nbeams = nbath;
 			    for (i=0;i<nbath;i++)
 				{
-				if (mb_beam_ok(beamflag[i]))
+				if (beamflag[i] != MB_FLAG_NULL)
 				    {
 				    zz = bath[i] - sonardepth;
 				    rr = sqrt(zz * zz 
@@ -4748,10 +4751,15 @@ alpha, beta, lever_heave);*/
 						&angles[i],
 						&angles_forward[i],
 						&error);
-				    angles_null[i] = 0.0;
-				    bheave[i] = 0.0;
-				    alongtrack_offset[i] = 0.0;
 				    }
+				else
+				    {
+				    angles[i] = 0.0;
+				    angles_forward[i] = 0.0;
+				    }
+				angles_null[i] = 0.0;
+				bheave[i] = 0.0;
+				alongtrack_offset[i] = 0.0;
 				}
 			    }
 
