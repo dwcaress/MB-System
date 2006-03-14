@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_reson7kr.c	4/4/2004
- *	$Id: mbr_reson7kr.c,v 5.11 2005-11-05 00:48:05 caress Exp $
+ *	$Id: mbr_reson7kr.c,v 5.12 2006-03-14 01:44:02 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	April 4,2004
  * $Log: not supported by cvs2svn $
+ * Revision 5.11  2005/11/05 00:48:05  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.10  2005/06/15 15:20:16  caress
  * Fixed problems with writing Bluefin records in 7k data and improved support for Edgetech Jstar data.
  *
@@ -195,7 +198,7 @@ int mbr_reson7kr_wr_soundvelocity(int verbose, int *bufferalloc, char **bufferpt
 int mbr_reson7kr_wr_absorptionloss(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 int mbr_reson7kr_wr_spreadingloss(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 
-static char res_id[]="$Id: mbr_reson7kr.c,v 5.11 2005-11-05 00:48:05 caress Exp $";
+static char res_id[]="$Id: mbr_reson7kr.c,v 5.12 2006-03-14 01:44:02 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_reson7kr(int verbose, void *mbio_ptr, int *error)
@@ -679,6 +682,7 @@ int mbr_rt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 					(double)(bluefin->nav[i].position_time), 
 					(double)(bluefin->nav[i].depth), 
 					error);
+			if  (bluefin->nav[i].altitude > 0.0 && bluefin->nav[i].altitude < 250.0)
 			mb_altint_add(verbose, mbio_ptr,
 					(double)(bluefin->nav[i].altitude_time), 
 					(double)(bluefin->nav[i].altitude), 
@@ -821,6 +825,9 @@ fprintf(stderr,"Record returned: type:%d status:%d error:%d\n\n",store->kind, st
 					= MBSYS_RESON7K_RECORDHEADER_SIZE 
 						+ R7KHDRSIZE_7kBathymetricData
 						+ bathymetry->number_beams * 9;
+
+/*mbsys_reson7k_print_bathymetry(verbose, bathymetry, error);*/
+
 			}
 		}
 
@@ -1537,6 +1544,9 @@ store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
 header->RecordNumber,bathymetry->ping_number);
 #endif
 					}
+
+/*mbsys_reson7k_print_bathymetry(verbose, &(store->bathymetry), error);*/
+
 				}
 			else if (*recordid == R7KRECID_7kBackscatterImageData)
 				{
@@ -7474,6 +7484,9 @@ fprintf(stderr," R7KRECID_7kBeamGeometry\n");
 fprintf(stderr, "Writing record id: %4.4hX | %d", R7KRECID_7kBathymetricData, R7KRECID_7kBathymetricData);
 fprintf(stderr," R7KRECID_7kBathymetricData\n");
 #endif
+
+/*mbsys_reson7k_print_bathymetry(verbose, &(store->bathymetry), error);*/
+
 				status = mbr_reson7kr_wr_bathymetry(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
 				buffer = (char *) *bufferptr;
 			write_len = fwrite(buffer,1,size,mb_io_ptr->mbfp);
