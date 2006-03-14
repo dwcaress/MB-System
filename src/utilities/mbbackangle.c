@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbbackangle.c	1/6/95
- *    $Id: mbbackangle.c,v 5.14 2006-03-14 01:59:24 caress Exp $
+ *    $Id: mbbackangle.c,v 5.15 2006-03-14 02:35:45 caress Exp $
  *
  *    Copyright (c) 1995, 2000, 2002, 2003, 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,10 @@
  * Date:	January 6, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.14  2006/03/14 01:59:24  caress
+ * A minor change to mbbackangle to output the status of slope correction (-Q)
+ * in the coments in the output file.
+ *
  * Revision 5.13  2006/02/01 07:31:06  caress
  * Modifications suggested by Gordon Keith
  *
@@ -147,7 +151,7 @@ int output_model(int verbose, FILE *tfp,
 	int *nmean, double *mean, double *sigma, 
 	int *error);
 						
-static char rcs_id[] = "$Id: mbbackangle.c,v 5.14 2006-03-14 01:59:24 caress Exp $";
+static char rcs_id[] = "$Id: mbbackangle.c,v 5.15 2006-03-14 02:35:45 caress Exp $";
 static char program_name[] = "mbbackangle";
 
 /*--------------------------------------------------------------------*/
@@ -974,7 +978,8 @@ by MBprocess.";
 		if ((navg > 0
 			&& (error == MB_ERROR_TIME_GAP
 				|| error == MB_ERROR_EOF))
-			|| (navg >= pings_avg))
+			|| (navg >= pings_avg)
+			|| (navg == 0 && error == MB_ERROR_EOF))
 			{
 			/* write out tables */
 			time_d_avg /= navg;
