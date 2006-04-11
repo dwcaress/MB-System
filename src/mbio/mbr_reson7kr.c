@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_reson7kr.c	4/4/2004
- *	$Id: mbr_reson7kr.c,v 5.12 2006-03-14 01:44:02 caress Exp $
+ *	$Id: mbr_reson7kr.c,v 5.13 2006-04-11 19:14:46 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	April 4,2004
  * $Log: not supported by cvs2svn $
+ * Revision 5.12  2006/03/14 01:44:02  caress
+ * Added test for reasonable altitude value derived from Bluefin records.
+ *
  * Revision 5.11  2005/11/05 00:48:05  caress
  * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
  *
@@ -80,7 +83,7 @@
 #include "../../include/mb_swap.h"
 	
 /* turn on debug statements here */
-/*#define MBR_RESON7KR_DEBUG 1*/
+/* #define MBR_RESON7KR_DEBUG 1 */
 	
 /* essential function prototypes */
 int mbr_register_reson7kr(int verbose, void *mbio_ptr, 
@@ -198,7 +201,7 @@ int mbr_reson7kr_wr_soundvelocity(int verbose, int *bufferalloc, char **bufferpt
 int mbr_reson7kr_wr_absorptionloss(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 int mbr_reson7kr_wr_spreadingloss(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 
-static char res_id[]="$Id: mbr_reson7kr.c,v 5.12 2006-03-14 01:44:02 caress Exp $";
+static char res_id[]="$Id: mbr_reson7kr.c,v 5.13 2006-04-11 19:14:46 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_reson7kr(int verbose, void *mbio_ptr, int *error)
@@ -1021,7 +1024,7 @@ double klugelon, klugelat;
 			    }
 			    
 			/* report problem */
-			if (skip > 0 && verbose > 0)
+			if (skip > 0 && verbose >= 0)
 			    {
 			    if (*nbadrec == 0)
 			    	fprintf(stderr, 
@@ -1102,6 +1105,7 @@ skip, *recordid, *recordid,
 			if (*recordid == R7KRECID_7kVolatileSonarSettings 
 				|| *recordid == R7KRECID_7kMatchFilter 
 				|| *recordid == R7KRECID_7kBeamGeometry 
+				|| *recordid == R7KRECID_7kRemoteControlSonarSettings 
 				|| *recordid == R7KRECID_7kBathymetricData 
 				|| *recordid == R7KRECID_7kBackscatterImageData 
 				|| *recordid == R7KRECID_7kBeamData 
@@ -1172,6 +1176,7 @@ skip, *recordid, *recordid,
 					store->read_matchfilter = MB_NO;
 					store->read_beamgeometry = MB_NO;
 					store->read_bathymetry = MB_NO;
+					store->read_remotecontrolsettings = MB_NO;
 					store->read_backscatter = MB_NO;
 					store->read_beam = MB_NO;
 					store->read_verticaldepth = MB_NO;
@@ -1677,7 +1682,8 @@ header->RecordNumber,image->ping_number);
 			else if (*recordid == R7KRECID_7kRemoteControlSonarSettings)
 				{
 				status = mbr_reson7kr_rd_remotecontrolsettings(verbose, buffer, store_ptr, error);
-				done = MB_YES;
+				store->read_remotecontrolsettings = MB_YES;
+				done = MB_NO;
 				}
 			else if (*recordid == R7KRECID_7kRoll)
 				{
@@ -1720,6 +1726,7 @@ header->RecordNumber,image->ping_number);
 				&& store->read_matchfilter == MB_YES
 				&& store->read_beamgeometry == MB_YES
 				&& store->read_bathymetry == MB_YES
+				&& store->read_remotecontrolsettings == MB_YES
 				&& store->read_backscatter == MB_YES
 				&& store->read_beam == MB_YES
 				&& store->read_verticaldepth == MB_YES
@@ -2032,6 +2039,12 @@ int mbr_reson7kr_chk_pingnumber(int verbose, int recordid, char *buffer,
 	else if (recordid == R7KRECID_7kImageData)
 		{
 		index = offset + 4;
+		mb_get_binary_int(MB_YES, &buffer[index], ping_number);
+		status = MB_SUCCESS;
+		}
+	else if (recordid == R7KRECID_7kRemoteControlSonarSettings)
+		{
+		index = offset + 12;
 		mb_get_binary_int(MB_YES, &buffer[index], ping_number);
 		status = MB_SUCCESS;
 		}
@@ -6916,7 +6929,7 @@ int mbr_reson7kr_rd_remotecontrolsettings(int verbose, char *buffer, void *store
 	if (status == MB_SUCCESS)
 		{
 		/* set kind */
-		store->kind = MB_DATA_PARAMETER;
+		store->kind = MB_DATA_DATA;
 		store->type = R7KRECID_7kRemoteControlSonarSettings;
 		
 		/* get the time */
@@ -7467,6 +7480,24 @@ fprintf(stderr, "Writing record id: %4.4hX | %d", R7KRECID_7kBeamGeometry, R7KRE
 fprintf(stderr," R7KRECID_7kBeamGeometry\n");
 #endif
 			status = mbr_reson7kr_wr_beamgeometry(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+			buffer = (char *) *bufferptr;
+			write_len = fwrite(buffer,1,size,mb_io_ptr->mbfp);
+			if (write_len != size)
+				{
+				status = MB_FAILURE;
+				*error = MB_ERROR_WRITE_FAIL;
+				}
+			}
+			
+		/* Reson 7k remote control settings (record 7004) */
+		if (status == MB_SUCCESS && store->read_remotecontrolsettings == MB_YES)
+			{
+			store->type = R7KRECID_7kBeamGeometry;
+#ifdef MBR_RESON7KR_DEBUG
+fprintf(stderr, "Writing record id: %4.4hX | %d", R7KRECID_7kBeamGeometry, R7KRECID_7kBeamGeometry);
+fprintf(stderr," R7KRECID_7kBeamGeometry\n");
+#endif
+			status = mbr_reson7kr_wr_remotecontrolsettings(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
 			buffer = (char *) *bufferptr;
 			write_len = fwrite(buffer,1,size,mb_io_ptr->mbfp);
 			if (write_len != size)
@@ -11338,14 +11369,6 @@ int mbr_reson7kr_wr_bathymetry(int verbose, int *bufferalloc, char **bufferptr, 
 	store = (struct mbsys_reson7k_struct *) store_ptr;
 	bathymetry = &(store->bathymetry);
 	header = &(bathymetry->header);
-
-	/* print out the data to be output */
-#ifdef MBR_RESON7KR_DEBUG
-	if (verbose > 0)
-#else
-	if (verbose >= 2)
-#endif
-	mbsys_reson7k_print_bathymetry(verbose, bathymetry, error);
 	
 	/* figure out size of output record */
 	*size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
@@ -11358,6 +11381,17 @@ int mbr_reson7kr_wr_bathymetry(int verbose, int *bufferalloc, char **bufferptr, 
 								+ R7KHDRSIZE_7kBathymetricData
 								+ bathymetry->number_beams * 9;
 		}
+	else
+		header->OffsetToOptionalData = 0;
+	header->Size = *size;
+
+	/* print out the data to be output */
+#ifdef MBR_RESON7KR_DEBUG
+	if (verbose > 0)
+#else
+	if (verbose >= 2)
+#endif
+	mbsys_reson7k_print_bathymetry(verbose, bathymetry, error);
 	
 	/* allocate memory to read rest of record if necessary */
 	if (*bufferalloc < *size)

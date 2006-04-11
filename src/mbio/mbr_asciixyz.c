@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_asciixyz.c	5/8/2002
- *	$Id: mbr_asciixyz.c,v 5.5 2006-03-06 21:47:48 caress Exp $
+ *	$Id: mbr_asciixyz.c,v 5.6 2006-04-11 19:14:46 caress Exp $
  *
  *    Copyright (c) 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -29,6 +29,9 @@
  * Date:	May 8, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2006/03/06 21:47:48  caress
+ * Implemented changes suggested by Bob Courtney of the Geological Survey of Canada to support translating Reson data to GSF.
+ *
  * Revision 5.4  2005/11/05 00:48:03  caress
  * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
  *
@@ -88,7 +91,7 @@ int mbr_dem_asciixyz(int verbose, void *mbio_ptr, int *error);
 int mbr_rt_asciixyz(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_asciixyz(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
-static char res_id[]="$Id: mbr_asciixyz.c,v 5.5 2006-03-06 21:47:48 caress Exp $";
+static char res_id[]="$Id: mbr_asciixyz.c,v 5.6 2006-04-11 19:14:46 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_asciixyz(int verbose, void *mbio_ptr, int *error)
@@ -540,6 +543,7 @@ int mbr_register_asciixyt(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr->mb_io_store_free = &mbsys_singlebeam_deall; 
 	mb_io_ptr->mb_io_read_ping = &mbr_rt_asciixyz; 
 	mb_io_ptr->mb_io_write_ping = &mbr_wt_asciixyz; 
+	mb_io_ptr->mb_io_dimensions = &mbsys_singlebeam_dimensions; 
 	mb_io_ptr->mb_io_extract = &mbsys_singlebeam_extract; 
 	mb_io_ptr->mb_io_insert = &mbsys_singlebeam_insert; 
 	mb_io_ptr->mb_io_extract_nav = &mbsys_singlebeam_extract_nav; 
@@ -740,6 +744,7 @@ int mbr_register_asciiyxt(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr->mb_io_store_free = &mbsys_singlebeam_deall; 
 	mb_io_ptr->mb_io_read_ping = &mbr_rt_asciixyz; 
 	mb_io_ptr->mb_io_write_ping = &mbr_wt_asciixyz; 
+	mb_io_ptr->mb_io_dimensions = &mbsys_singlebeam_dimensions; 
 	mb_io_ptr->mb_io_extract = &mbsys_singlebeam_extract; 
 	mb_io_ptr->mb_io_insert = &mbsys_singlebeam_insert; 
 	mb_io_ptr->mb_io_extract_nav = &mbsys_singlebeam_extract_nav; 
@@ -1041,19 +1046,37 @@ int mbr_rt_asciixyz(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    /* read data */
 	    if (mb_io_ptr->format == MBF_ASCIIXYZ
 	    	|| mb_io_ptr->format == MBF_ASCIIXYT)
+		{
 		nread = sscanf(line,
 			"%lf %lf %lf %c",
 			&store->longitude,
 			&store->latitude,
 			&store->bath,
 			&flag);
+		if (nread < 3)
+		nread = sscanf(line,
+			"%lf,%lf,%lf",
+			&store->longitude,
+			&store->latitude,
+			&store->bath);
+		store->flag = MB_FLAG_NONE;
+		}
 	    else
+		{
 		nread = sscanf(line,
 			"%lf %lf %lf %c",
 			&store->latitude,
 			&store->longitude,
 			&store->bath,
 			&flag);
+		if (nread < 3)
+		nread = sscanf(line,
+			"%lf,%lf,%lf",
+			&store->latitude,
+			&store->longitude,
+			&store->bath);
+		store->flag = MB_FLAG_NONE;
+		}
 	    if (mb_io_ptr->format == MBF_ASCIIXYT
 	    	|| mb_io_ptr->format == MBF_ASCIIYXT)
 		store->bath = -store->bath;

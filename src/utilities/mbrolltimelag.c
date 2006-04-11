@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbrolltimelag.c	11/10/2005
  *
- *    $Id: mbrolltimelag.c,v 5.1 2006-01-18 15:17:00 caress Exp $
+ *    $Id: mbrolltimelag.c,v 5.2 2006-04-11 19:19:30 caress Exp $
  *
  *    Copyright (c) 2005 by
  *    David W. Caress (caress@mbari.org)
@@ -27,6 +27,9 @@
  * Date:	November 11, 2005
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2006/01/18 15:17:00  caress
+ * Added stdlib.h include.
+ *
  * Revision 5.0  2006/01/06 18:20:56  caress
  * Working towards 5.0.8
  *
@@ -54,7 +57,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbrolltimelag.c,v 5.1 2006-01-18 15:17:00 caress Exp $";
+	static char rcs_id[] = "$Id: mbrolltimelag.c,v 5.2 2006-04-11 19:19:30 caress Exp $";
 	static char program_name[] = "MBrolltimelag";
 	static char help_message[] = "MBrolltimelag extracts the roll time series and the apparent \nbottom slope time series from swath data, and then calculates \nthe cross correlation between the roll and the slope minus roll \nfor a specified set of time lags.";
 	static char usage_message[] = "mbrolltimelag -Iswathdata [-Fformat -Nnping -Snavchannel -Tnlag/lagmin/lagmax -V -H ]";
@@ -76,13 +79,17 @@ main (int argc, char **argv)
 	/* Files and formats */
 	char	swathdata[MB_PATH_MAXLINE];
 	char	swathfile[MB_PATH_MAXLINE];
+	char	swathroot[MB_PATH_MAXLINE];
 	char	xcorfile[MB_PATH_MAXLINE];
 	char	xcorfiletot[MB_PATH_MAXLINE];
 	char	cmdfile[MB_PATH_MAXLINE];
+	char	histfile[MB_PATH_MAXLINE];
 	int	format = 0;
-	FILE	*fp;
-	FILE	*fpx;
-	FILE	*fpt;
+	int	formatguess = 0;
+	FILE	*fp = NULL;
+	FILE	*fpx = NULL;
+	FILE	*fpt = NULL;
+	FILE	*fph = NULL;
 	int	read_datalist = MB_NO;
 	int	read_data = MB_NO;
 	void	*datalist;
@@ -135,6 +142,7 @@ main (int argc, char **argv)
 	double	rollint;
 	
 	char	buffer[MB_PATH_MAXLINE], *result;
+	int	found;
 	int	nscan;
 	double	value;
 	int	j0, j1;
@@ -229,8 +237,9 @@ main (int argc, char **argv)
 		}
 
 	/* get format if required */
+	mb_get_format(verbose,swathdata,swathroot,&formatguess,&error);
 	if (format == 0)
-		mb_get_format(verbose,swathdata,NULL,&format,&error);
+		format = formatguess;
 
 	/* determine whether to read one file or a list of files */
 	if (format < 0)
@@ -278,7 +287,7 @@ main (int argc, char **argv)
 	/* open total cross correlation file */
 	if (read_datalist == MB_YES)
 		{
-		sprintf(xcorfiletot, "%s_xcorr.txt", swathdata);
+		sprintf(xcorfiletot, "%s_xcorr.txt", swathroot);
 		if ((fpt = fopen(xcorfiletot, "w")) == NULL)
 			{
 			error = MB_ERROR_OPEN_FAIL;
@@ -288,6 +297,18 @@ main (int argc, char **argv)
 				program_name);
 			exit(error);
 			}
+		}
+	
+	/* open time lag histogram file */
+	sprintf(histfile, "%s_timelaghist.txt", swathroot);
+	if ((fph = fopen(histfile, "w")) == NULL)
+		{
+		error = MB_ERROR_OPEN_FAIL;
+		fprintf(stderr,"\nUnable to open histogram output: %s\n",
+			histfile);
+		fprintf(stderr,"\nProgram <%s> Terminated\n",
+			program_name);
+		exit(error);
 		}
 
 	/* open file list */
@@ -320,7 +341,8 @@ main (int argc, char **argv)
 	/* loop over all files to be read */
 	while (read_data == MB_YES)
 		{
-		sprintf(cmdfile, "mblist -I%s -F%d -OMAR", swathfile, format, navchannel);
+		nslope = 0;
+		sprintf(cmdfile, "mblist -I%s -F%d -OMAR", swathfile, format);
 		fprintf(stderr,"\nRunning %s...\n",cmdfile);
 		fp = popen(cmdfile, "r");
 		while ((nscan = fscanf(fp, "%lf %lf %lf", &time_d, &slope, &roll)) == 3)
@@ -400,25 +422,27 @@ main (int argc, char **argv)
 					sumsloperoll = 0.0;
 					sumslopesq = 0.0;
 					sumrollsq = 0.0;
+					nr = 0;
 
 					for (j = j0; j <= j1; j++)
 						{
 						/* interpolate lagged roll value */
-						nr = -1;
+						found = MB_NO;
 						time_d = slope_time_d[j] + timelag;
-						for (l = 0; l < nroll - 1 && nr < 0; l++)
+						for (l = nr; l < nroll - 1 && found == MB_NO; l++)
 							{
 							if (time_d >= roll_time_d[l] 
 								&& time_d <= roll_time_d[l+1])
 								{
 								nr = l;
+								found = MB_YES;
 								}
 							}
-						if (nr == -1 && time_d < roll_time_d[0])
+						if (found == MB_NO && time_d < roll_time_d[0])
 							{
 							rollint = roll_roll[0];
 							}
-						else if (nr == -1 && time_d > roll_time_d[nroll - 1])
+						else if (found == MB_NO && time_d > roll_time_d[nroll - 1])
 							{
 							rollint = roll_roll[nroll - 1];
 							}
@@ -482,6 +506,12 @@ main (int argc, char **argv)
 					}
 				}
 
+			/* print out best correlated time lag estimates */
+			if (peakr > 0.90)
+				{
+				fprintf(fph, "%6.3f\n", peaktimelag);
+				}
+
 			/* print out max and closest peak cross correlations */
 			if (verbose > 0)
 				{
@@ -519,10 +549,23 @@ main (int argc, char **argv)
 		mb_datalist_close(verbose,&datalist,&error);
 			
 	/* close cross correlation file */
-	fclose(fpt);
+	if (read_datalist == MB_YES)
+		fclose(fpt);
+			
+	/* close histogram file */
+	fclose(fph);
 		
 	/* generate plot shellscript for cross correlation file */
-	sprintf(cmdfile, "mbm_xyplot -I%s -N", xcorfiletot);
+	if (read_datalist == MB_YES)
+		{
+		sprintf(cmdfile, "mbm_xyplot -I%s -N", xcorfiletot);
+		fprintf(stderr, "Running: %s...\n", cmdfile);
+		system(cmdfile);
+		}
+		
+	/* generate plot shellscript for time lag histogram */
+	sprintf(cmdfile, "mbm_histplot -I%s -R%f/%f/0/50 -C%g -L\"Frequency Histogram of %s:Time Lag (sec):Frequency%\"", 
+			histfile, lagmin, lagmax, lagstep, swathdata);
 	fprintf(stderr, "Running: %s...\n", cmdfile);
 	system(cmdfile);
 

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_reson7k.h	3/3/2004
- *	$Id: mbsys_reson7k.h,v 5.8 2005-11-05 00:48:05 caress Exp $
+ *	$Id: mbsys_reson7k.h,v 5.9 2006-04-11 19:14:46 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	March 3, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2005/11/05 00:48:05  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.7  2004/12/02 06:33:29  caress
  * Fixes while supporting Reson 7k data.
  *
@@ -1598,6 +1601,7 @@ struct mbsys_reson7k_struct
 	int		read_volatilesettings;
 	int		read_matchfilter;
 	int		read_beamgeometry;
+	int		read_remotecontrolsettings;
 	int		read_bathymetry;
 	int		read_backscatter;
 	int		read_beam;

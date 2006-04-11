@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb7kpreprocess.c	10/12/2005
- *    $Id: mb7kpreprocess.c,v 5.3 2006-03-06 21:44:27 caress Exp $
+ *    $Id: mb7kpreprocess.c,v 5.4 2006-04-11 19:19:29 caress Exp $
  *
  *    Copyright (c) 2005 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	October 12, 2005
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2006/03/06 21:44:27  caress
+ * Changed to handle old style Reson beam quality flags.
+ *
  * Revision 5.2  2006/01/18 15:17:00  caress
  * Added stdlib.h include.
  *
@@ -53,7 +56,7 @@
 #define MB7KPREPROCESS_PROCESS		1
 #define MB7KPREPROCESS_TIMESTAMPLIST	2
 
-static char rcs_id[] = "$Id: mb7kpreprocess.c,v 5.3 2006-03-06 21:44:27 caress Exp $";
+static char rcs_id[] = "$Id: mb7kpreprocess.c,v 5.4 2006-04-11 19:19:29 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
@@ -533,8 +536,8 @@ main (int argc, char **argv)
 				    ss,ssacrosstrack,ssalongtrack,
 				    comment,&error);
 		    
-		/* nonfatal errors do not matter */
-		if (error < MB_ERROR_NO_ERROR)
+		/* some nonfatal errors do not matter */
+		if (error < MB_ERROR_NO_ERROR && error > MB_ERROR_UNINTELLIGIBLE)
 			{
 			error = MB_ERROR_NO_ERROR;
 			status = MB_SUCCESS;
@@ -612,7 +615,7 @@ main (int argc, char **argv)
 					header->RecordNumber,bathymetry->ping_number,bathymetry->number_beams);
 				
 				/* allocate memory for bathymetry timetag arrays if needed */
-				if (nbatht == 0 || nbatht > nbatht_alloc)
+				if (nbatht == 0 || nbatht >= nbatht_alloc)
 					{
 					nbatht_alloc +=  MB7KPREPROCESS_ALLOC_CHUNK;
 					status = mb_realloc(verbose,nbatht_alloc*sizeof(double),&batht_time_d,&error);
@@ -1038,6 +1041,7 @@ main (int argc, char **argv)
 	nreadssvtot += nreadssv;
 	nreadnav1tot += nreadnav1;
 	nreadsbptot += nreadsbp;
+fprintf(stderr,"Set nreadsbptot:%d\n",nreadsbptot);
 	nreadsslotot += nreadsslo;
 	nreadsshitot += nreadsshi;
 	nreadothertot += nreadother;
@@ -1153,6 +1157,21 @@ main (int argc, char **argv)
 	fprintf(stdout, "     Subbottom:         %d\n", nreadsbptot);
 	fprintf(stdout, "     Low Sidescan:      %d\n", nreadsslotot);
 	fprintf(stdout, "     High Sidescan:     %d\n", nreadsshitot);
+
+	nreadfileheadertot = 0;
+	nreadmultibeamtot = 0;
+	nreadmbvolatilesettingstot = 0;
+	nreadmbbeamgeometrytot = 0;
+	nreadmbbathymetrytot = 0;
+	nreadmbbackscattertot = 0;
+	nreadmbbeamtot = 0;
+	nreadmbimagetot = 0;
+	nreadssvtot = 0;
+	nreadnav1tot = 0;
+	nreadsbptot = 0;
+	nreadsslotot = 0;
+	nreadsshitot = 0;
+	nreadothertot = 0;
 
 	/* now read the data files again, this time interpolating nav and attitude
 		into the multibeam records and fixing other problems found in the
@@ -1280,7 +1299,6 @@ main (int argc, char **argv)
 		exit(error);
 		}
 		
-
 	/* read and print data */
 	nreadfileheader = 0;
 	nreadmultibeam = 0;
@@ -1311,8 +1329,8 @@ main (int argc, char **argv)
 				    ss,ssacrosstrack,ssalongtrack,
 				    comment,&error);
 		    
-		/* nonfatal errors do not matter */
-		if (error < MB_ERROR_NO_ERROR)
+		/* some nonfatal errors do not matter */
+		if (error < MB_ERROR_NO_ERROR && error > MB_ERROR_UNINTELLIGIBLE)
 			{
 			error = MB_ERROR_NO_ERROR;
 			status = MB_SUCCESS;
@@ -1485,7 +1503,7 @@ main (int argc, char **argv)
 				
 				/* get navigation, etc */
 				speed = 0.0;
-				interp_status = mb_linear_interp(verbose, 
+				interp_status = mb_linear_interp_degrees(verbose, 
 							nav_time_d-1, nav_heading-1,
 							nnav, (time_d + timelag), &heading, &j, 
 							&error);
