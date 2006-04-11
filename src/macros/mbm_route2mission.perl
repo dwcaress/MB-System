@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system: mbm_route2mission.perl   7/18/2004
-#    $Id: mbm_route2mission.perl,v 5.5 2005-11-05 01:34:20 caress Exp $
+#    $Id: mbm_route2mission.perl,v 5.6 2006-04-11 19:12:53 caress Exp $
 #
 #    Copyright (c) 2004 by 
 #    D. W. Caress (caress@mbari.org)
@@ -34,10 +34,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #      Moss Landing, CA
 #
 # Version:
-# $Id: mbm_route2mission.perl,v 5.5 2005-11-05 01:34:20 caress Exp $
+# $Id: mbm_route2mission.perl,v 5.6 2006-04-11 19:12:53 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.5  2005/11/05 01:34:20  caress
+#   Much work over the past two months.
+#
 #   Revision 5.4  2005/06/04 04:28:43  caress
 #   Added support for new waypoint_depth AUV behavior.
 #
@@ -69,6 +72,12 @@ $program_name = "mbm_route2mission";
 #     2 = Also do GPS fix at surface at each line end (waypoint = 4)
 #     3 = Also do GPS fix at surface at each line start and end (waypoint = 3 || 4)
 
+# Derivation of timeout duration values
+#     Use 1.5 * expected duration for waypoint behaviors
+#     Use 1.3 * expected duration the mission as a whole
+$durationfactorwaypoint = 1.5;
+$durationfactormission = 1.3;
+
 # set defaults
 
 # mission
@@ -78,7 +87,7 @@ $altitudedesired = $altitudemin;
 $mission_speed = 1.5;
 
 # behavior gps
-$gpsminhits = 60;
+$gpsminhits = 30;
 $gpsduration = 600;
 
 # behavior setpoint
@@ -90,13 +99,17 @@ $descentdepth = 3.0;
 $descendtime = 300;
 
 # behavior ascend
-$ascendrudder = 10;
+$ascendrudder = 5;
 $ascendpitch = 20;
 $ascendenddepth = 2;
 
 # behavior reson
 $resonduration = 6;
-$sonaraltitudemax = 60.0;
+$sonaraltitudemax =100.0;
+$mb_pingrate = 2.0;
+$mb_transmitgain = 220.0;
+$mb_receivegain = 67.0;
+$mb_pulsewidth = 0.000030;
 
 
 # behavior waypoint and waypoint_depth
@@ -413,8 +426,8 @@ for ($i = 1; $i < $nmissionpoints - 1; $i++)
 $missiontime += (-$mmissiondepths[$nmissionpoints - 1] / $ascendrate) 
 		+ $gpsduration;
 		
-# calculate abort time using safety factor of 2.0
-$aborttime = 2.0 * $missiontime;
+# calculate abort time using safety factor of $durationfactormission
+$aborttime = $durationfactormission * $missiontime;
 	
 # Print out program info
 if ($outputoff)
@@ -638,6 +651,7 @@ print "Output Behavior: ascend\n";
 		print MFILE "behavior reson \r\n";
 		print MFILE "{ \r\n";
 		print MFILE "duration  = RESON_DURATION; \r\n";
+		print MFILE "MB_Power = 0; \r\n";
 		print MFILE "SBP_Mode  = 0; \r\n";
 		print MFILE "LoSS_Mode = 0; \r\n";
 		print MFILE "HiSS_Mode = 0; \r\n";
@@ -702,14 +716,10 @@ print "Output Behavior: reson (stop, Log_Mode = 0)\n";
 		
 		# sonar range allows for 1.2 * 120 degree swath
 		$mb_range = 1.2 * 2.0 * $sonaraltitudeuse;
-		$mb_pingrate = 2.0;
-		$mb_transmitgain = 220.0;
-		$mb_receivegain = 80.0;
-		$mb_pulsewidth = 0.000030;
-		$mb_minrange = 0.75 * $sonaraltitudeuse;
+		$mb_minrange = 0.5 * $sonaraltitudeuse;
 		$mb_maxrange = $mb_range;
-		$mb_mindepth = 0.75 * $sonaraltitudeuse;
-		$mb_maxdepth = 1.3 * $sonaraltitudeuse;
+		$mb_mindepth = 0.5 * $sonaraltitudeuse;
+		$mb_maxdepth = $mb_range;
 		$sslo_range = 0.9 * 750.0 / $mb_pingrate;
 		if ($sslo_range > 200.0)
 			{
@@ -798,7 +808,7 @@ print "Output Behavior: reson (stop, Log_Mode = 0)\n";
 		if ($mappingsonar && $mwaypoints[$i] != 0 && $iwaypoint == 0)
 			{
 			print MFILE "#######################################################\r\n";
-			print MFILE "# Turn Edgetech sonars on and start logging.\r\n";
+			print MFILE "# Turn Mapping sonars on and start logging.\r\n";
 			print MFILE "# \r\n";
 			print MFILE "behavior reson \r\n";
 			print MFILE "{ \r\n";
@@ -817,13 +827,13 @@ print "Output Behavior: reson (startup, Log_Mode = 1)\n";
 			print MFILE "duration  = RESON_DURATION; \r\n";	
 			print MFILE "SBP_Mode = 1; \r\n";
 			print MFILE "SBP_Power = 100.0; \r\n";
-			print MFILE "SBP_Gain = 64.0; \r\n";
+			#print MFILE "SBP_Gain = 64.0; \r\n";
 			printf MFILE "SBP_Duration = %.3f; \r\n", $sbp_duration;
 			print MFILE "LoSS_Mode = 1; \r\n";
 			print MFILE "LoSS_Power = 100.0; \r\n";
 			printf MFILE "LoSS_Range = %.2f; \r\n", $sslo_range;
-			print MFILE "HiSS_Mode = 0; \r\n";
-			print MFILE "HiSS_Power = 0.0; \r\n";
+			print MFILE "HiSS_Mode = 1; \r\n";
+			print MFILE "HiSS_Power = 100.0; \r\n";
 			print MFILE "HiSS_Range = $sslo_range; \r\n";
 			print MFILE "MB_Power = $mb_transmitgain; \r\n";
 			printf MFILE "MB_Range = %.2f; \r\n", $mb_range;
@@ -879,7 +889,7 @@ print "Output Behavior: reson (setup, Log_Mode = 0)\n";
 			printf MFILE "latitude     = %f; \r\n", $mlats[$i];
 			printf MFILE "longitude    = %f; \r\n", $mlons[$i];
 			print MFILE "captureRadius = 10; \r\n";
-			printf MFILE "duration     = %d; \r\n", (2.0 * $distance / $mission_speed);
+			printf MFILE "duration     = %d; \r\n", ($durationfactorwaypoint * $distance / $mission_speed);
 			printf MFILE "depth        = %f; \r\n", $mmissiondepths[$i];
 			print MFILE "speed        = MISSION_SPEED; \r\n";
 			print MFILE "} \r\n";
@@ -922,7 +932,7 @@ print "Output Behavior: waypoint_depth (during line) ";
 			printf MFILE "latitude          = %f; \r\n", $mlats[$i];
 			printf MFILE "longitude         = %f; \r\n", $mlons[$i];
 			print MFILE "captureRadius      = 10; \r\n";
-			printf MFILE "duration          = %d; \r\n", (2.0 * $distance / $mission_speed);
+			printf MFILE "duration          = %d; \r\n", ($durationfactorwaypoint * $distance / $mission_speed);
 			printf MFILE "initialDepth      = %f; \r\n", $mmissiondepths[$i];
 print " Depths: $mmissiondepths[$i]";
 			if ($i == $nmissionpoints - 1)
@@ -1013,6 +1023,56 @@ print "Output Behavior: setpoint\n";
 	print MFILE "abortOnTimeout = True; \r\n";
 	print MFILE "} \r\n";
 print "Output Behavior: gps\n";
+
+	# get starting sonar parameters assuming 25 m altitude
+	$sonaraltitudeuse = 25.0;
+	$mb_range = 1.2 * 2.0 * $sonaraltitudeuse;
+	$mb_minrange = 0.5 * $sonaraltitudeuse;
+	$mb_maxrange = $mb_range;
+	$mb_mindepth = 0.5 * $sonaraltitudeuse;
+	$mb_maxdepth = $mb_range;
+	$sslo_range = 0.9 * 750.0 / $mb_pingrate;
+	if ($sslo_range > 200.0)
+		{
+		$sslo_range = 200.0;
+		}
+	$sbp_duration = 1000.0 * 0.9 / $mb_pingrate;
+
+	print MFILE "#######################################################\r\n";
+	print MFILE "# Set sonar parameters, turn pinging on but logging off \r\n";
+	print MFILE "# \r\n";
+	print MFILE "behavior reson \r\n";
+	print MFILE "{ \r\n";
+	print MFILE "duration  = RESON_DURATION; \r\n";	
+	print MFILE "MB_Mode  = 1; \r\n";	
+	print MFILE "Log_Mode  = 0; \r\n";	
+	print MFILE "SBP_Mode = 1; \r\n";
+	print MFILE "SBP_Power = 100.0; \r\n";
+	#print MFILE "SBP_Gain = 64.0; \r\n";
+	printf MFILE "SBP_Duration = %.3f; \r\n", $sbp_duration;
+	print MFILE "LoSS_Mode = 1; \r\n";
+	print MFILE "LoSS_Power = 100.0; \r\n";
+	printf MFILE "LoSS_Range = %.2f; \r\n", $sslo_range;
+	print MFILE "HiSS_Mode = 1; \r\n";
+	print MFILE "HiSS_Power = 100.0; \r\n";
+	print MFILE "HiSS_Range = $sslo_range; \r\n";
+	print MFILE "MB_Power = $mb_transmitgain; \r\n";
+	printf MFILE "MB_Range = %.2f; \r\n", $mb_range;
+	print MFILE "MB_Rate = $mb_pingrate; \r\n";
+	print MFILE "MB_Gain = $mb_receivegain; \r\n";
+	printf MFILE "MB_Pulse_Width = %f; \r\n", $mb_pulsewidth;
+	printf MFILE "MB_Bottom_Detect_Filter_Min_Range = %.2f; \r\n", $mb_minrange;
+	printf MFILE "MB_Bottom_Detect_Filter_Max_Range = %.2f; \r\n", $mb_maxrange;
+	printf MFILE "MB_Bottom_Detect_Filter_Min_Depth = %.2f; \r\n", $mb_mindepth;
+	printf MFILE "MB_Bottom_Detect_Filter_Max_Depth = %.2f; \r\n", $mb_maxdepth;
+	print MFILE "MB_Bottom_Detect_Range_Mode = 1; \r\n";
+	print MFILE "MB_Bottom_Detect_Depth_Mode = 1; \r\n";
+	print MFILE "Snippet_Mode = 0; \r\n";
+	print MFILE "Window_Size = 0; \r\n";
+	print MFILE "} \r\n";
+	print MFILE "# \r\n";
+	print MFILE "#######################################################\r\n";
+print "Output Behavior: reson (start, reset, Log_Mode = 0)\n";
 	print MFILE "#######################################################\r\n";
 
 	# Close the output file
