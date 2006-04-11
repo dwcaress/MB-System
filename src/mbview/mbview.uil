@@ -42,7 +42,6 @@ names = case_sensitive
 !(BX) bx_info("c_dirpath", "")
 !(BX) bx_info("include_path", ".", false)
 !(BX) bx_info("xrunner_command", "$(M_ROOT)/arch/X11.5/Xm1.2/mic_xm.o", false)
-!(BX) bx_info("purify_command", "purify", false)
 !(BX) bx_info("system_directory", "/opt/bx-6.1")
 !(BX) bx_info("builder_version", "BuilderXcessory Version 6.1.3")
 !(BX) bx_info("build_lang", "C")
@@ -99,6 +98,10 @@ procedure do_mbview_overlay_illumination();
 procedure do_mbview_overlay_none();
 procedure do_mbview_overlay_secondary();
 procedure do_mbview_overlay_slope();
+procedure do_mbview_profile_dismiss();
+procedure do_mbview_profile_exager();
+procedure do_mbview_profile_slope();
+procedure do_mbview_profile_width();
 procedure do_mbview_projection_popdown();
 procedure do_mbview_projection_popup();
 procedure do_mbview_reset_view();
@@ -118,6 +121,7 @@ procedure do_mbview_sitelist_delete();
 procedure do_mbview_sitelist_popdown();
 procedure do_mbview_sitelistpopup();
 procedure do_mbview_sitelistselect();
+procedure do_mbview_view_profile();
 
 list BaseStyle : arguments {
 };
@@ -148,10 +152,9 @@ object mB3DNavList : XmFormDialog widget {
 !(BX) BxNclass = "MB3DNavList";
 !(BX) BxNsubclassDerived = "False";
         arguments Style_use;
-        XmNborderWidth = 0;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 541;
-        XmNy = 413;
+        XmNx = 1421;
+        XmNy = 501;
         XmNwidth = 200;
         XmNheight = 200;
     };
@@ -193,8 +196,8 @@ object mB3DRouteList : XmFormDialog widget {
 !(BX) BxNsubclassDerived = "False";
         arguments Style_use;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 541;
-        XmNy = 413;
+        XmNx = 1421;
+        XmNy = 501;
         XmNwidth = 200;
         XmNheight = 200;
     };
@@ -236,8 +239,8 @@ object mB3DSiteList : XmFormDialog widget {
 !(BX) BxNsubclassDerived = "False";
         arguments Style_use;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 541;
-        XmNy = 413;
+        XmNx = 1421;
+        XmNy = 501;
         XmNwidth = 200;
         XmNheight = 200;
     };
@@ -279,8 +282,8 @@ object mbview_mbgrdviz : XmBulletinBoardDialog widget {
 !(BX) BxNsubclassDerived = "False";
         arguments Style_use;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 8;
-        XmNy = 32;
+        XmNx = 1129;
+        XmNy = 143;
         XmNwidth = 783;
         XmNheight = 915;
     };
@@ -302,6 +305,7 @@ object mbview_mbgrdviz : XmBulletinBoardDialog widget {
 !(BX)         unmanaged XmDialogShell mB3DView_mbview_dialogShell_3dparms;
 !(BX)         unmanaged XmDialogShell mB3DView_mbview_dialogShell_2dparms;
 !(BX)         unmanaged XmDialogShell mB3DView_mbview_dialogShell_projection;
+!(BX)         unmanaged XmDialogShell mB3DView_mbview_dialogShell_profile;
     };
     callbacks {
         callbacks Style_useReasons;
@@ -542,7 +546,7 @@ object mB3DSiteList_mbview_form_sitelist : XmForm widget {
 !(BX) BxNderived = "MB3DSiteListDerived";
 !(BX) BxNfilebase = "MB3DSiteListDerived";
 !(BX) BxNclassFilebase = "MB3DSiteList";
-!(BX) BxNclassGeometry = "411x286+87+298";
+!(BX) BxNclassGeometry = "411x286+87+474";
 !(BX) BxNgenerate = "True";
 !(BX) BxNreference = "True";
 !(BX) BxNpaletteGroup = "Project Classes";
@@ -551,7 +555,7 @@ object mB3DSiteList_mbview_form_sitelist : XmForm widget {
         arguments Style_use;
         XmNresizePolicy = XmRESIZE_GROW;
         XmNx = 87;
-        XmNy = 298;
+        XmNy = 474;
         XmNwidth = 411;
         XmNheight = 286;
     };
@@ -704,7 +708,7 @@ object mB3DRouteList_mbview_form_routelist : XmForm widget {
 !(BX) BxNderived = "MB3DRouteListDerived";
 !(BX) BxNfilebase = "MB3DRouteListDerived";
 !(BX) BxNclassFilebase = "MB3DRouteList";
-!(BX) BxNclassGeometry = "415x239+72+326";
+!(BX) BxNclassGeometry = "415x239+72+502";
 !(BX) BxNgenerate = "True";
 !(BX) BxNreference = "True";
 !(BX) BxNpaletteGroup = "Project Classes";
@@ -713,7 +717,7 @@ object mB3DRouteList_mbview_form_routelist : XmForm widget {
         arguments Style_use;
         XmNresizePolicy = XmRESIZE_GROW;
         XmNx = 72;
-        XmNy = 326;
+        XmNy = 502;
         XmNwidth = 415;
         XmNheight = 239;
     };
@@ -866,7 +870,7 @@ object mB3DNavList_mbview_form_navlist : XmForm widget {
 !(BX) BxNderived = "MB3DNavListDerived";
 !(BX) BxNfilebase = "MB3DNavListDerived";
 !(BX) BxNclassFilebase = "MB3DNavList";
-!(BX) BxNclassGeometry = "415x243+76+350";
+!(BX) BxNclassGeometry = "415x243+76+526";
 !(BX) BxNgenerate = "True";
 !(BX) BxNreference = "True";
 !(BX) BxNpaletteGroup = "Project Classes";
@@ -875,7 +879,7 @@ object mB3DNavList_mbview_form_navlist : XmForm widget {
         arguments Style_use;
         XmNresizePolicy = XmRESIZE_GROW;
         XmNx = 76;
-        XmNy = 350;
+        XmNy = 526;
         XmNwidth = 415;
         XmNheight = 243;
     };
@@ -892,6 +896,248 @@ object mB3DNavList_mbview_form_navlist : XmForm widget {
 !(BX)        handlers Style_useHandlers;
 !(BX)    };
 };
+
+object mB3DView_mbview_profile_pushButton_dismiss : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Dismiss");
+        XmNtopAttachment = XmATTACH_FORM;
+        XmNleftAttachment = XmATTACH_FORM;
+        XmNbottomAttachment = XmATTACH_NONE;
+        XmNleftOffset = 90;
+        XmNtopOffset = 330;
+        XmNx = 90;
+        XmNy = 330;
+        XmNwidth = 110;
+        XmNheight = 32;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        XmNactivateCallback = procedure do_mbview_profile_dismiss();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DView_mbview_scale_profile_exager : XmScale widget {
+    arguments {
+        arguments Style_use;
+        XmNdecimalPoints = 1;
+        XmNvalue = 10;
+        XmNtitleString = compound_string("Vertical Exageration");
+        XmNshowArrows = TRUE;
+        XmNshowValue = TRUE;
+        XmNorientation = XmHORIZONTAL;
+        XmNleftAttachment = XmATTACH_FORM;
+        XmNleftOffset = 10;
+        XmNtopOffset = 140;
+        XmNx = 10;
+        XmNy = 140;
+        XmNwidth = 270;
+        XmNheight = 60;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        XmNvalueChangedCallback = procedure do_mbview_profile_exager();
+        XmNdragCallback = procedure do_mbview_profile_exager();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DView_mbview_profile_label_info : XmLabel widget {
+    arguments {
+        arguments Style_use;
+        XmNborderWidth = 1;
+        XmNbackground = color('white');
+        XmNlabelString = compound_string("Profile Source: Route ", separate=true) &
+ compound_string("Length: 1.0 km", separate=true) &
+ compound_string("Vertical Range: -100.5 to 512.0 m", separate=true);
+        XmNrecomputeSize = false;
+        XmNleftAttachment = XmATTACH_FORM;
+        XmNleftOffset = 10;
+        XmNtopOffset = 0;
+        XmNx = 10;
+        XmNy = 0;
+        XmNwidth = 270;
+        XmNheight = 130;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DView_mbview_drawingArea_profile : XmDrawingArea widget {
+    arguments {
+        arguments Style_use;
+        XmNborderWidth = 1;
+        XmNbackground = color('White');
+        XmNwidth = 500;
+        XmNheight = 240;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DView_mbview_scrolledWindow_profile : XmScrolledWindow widget {
+    arguments {
+        arguments Style_use;
+        XmNscrollingPolicy = XmAUTOMATIC;
+        XmNtopAttachment = XmATTACH_FORM;
+        XmNrightAttachment = XmATTACH_FORM;
+        XmNleftAttachment = XmATTACH_FORM;
+        XmNbottomAttachment = XmATTACH_FORM;
+        XmNbottomOffset = 10;
+        XmNleftOffset = 290;
+        XmNrightOffset = 6;
+        XmNtopOffset = 0;
+        XmNx = 290;
+        XmNy = 0;
+        XmNwidth = 638;
+        XmNheight = 365;
+    };
+    controls {
+         managed XmDrawingArea mB3DView_mbview_drawingArea_profile;
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DView_mbview_scale_profile_slope : XmScale widget {
+    arguments {
+        arguments Style_use;
+        XmNminimum = 1;
+        XmNdecimalPoints = 2;
+        XmNvalue = 200;
+        XmNtitleString = compound_string("Slope Threshold");
+        XmNmaximum = 200;
+        XmNshowArrows = TRUE;
+        XmNscaleMultiple = 1;
+        XmNshowValue = TRUE;
+        XmNorientation = XmHORIZONTAL;
+        XmNtopAttachment = XmATTACH_FORM;
+        XmNleftAttachment = XmATTACH_FORM;
+        XmNbottomAttachment = XmATTACH_NONE;
+        XmNbottomOffset = 0;
+        XmNleftOffset = 10;
+        XmNtopOffset = 200;
+        XmNx = 10;
+        XmNy = 200;
+        XmNwidth = 270;
+        XmNheight = 63;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        XmNvalueChangedCallback = procedure do_mbview_profile_slope();
+        XmNdragCallback = procedure do_mbview_profile_slope();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DView_mbview_scale_profile_width : XmScale widget {
+    arguments {
+        arguments Style_use;
+        XmNminimum = 1;
+        XmNdecimalPoints = 0;
+        XmNvalue = 1;
+        XmNtitleString = compound_string("Display Width Multiple");
+        XmNmaximum = 5;
+        XmNshowArrows = TRUE;
+        XmNscaleMultiple = 1;
+        XmNshowValue = TRUE;
+        XmNorientation = XmHORIZONTAL;
+        XmNtopAttachment = XmATTACH_FORM;
+        XmNleftAttachment = XmATTACH_FORM;
+        XmNbottomAttachment = XmATTACH_NONE;
+        XmNbottomOffset = 0;
+        XmNleftOffset = 10;
+        XmNtopOffset = 263;
+        XmNx = 10;
+        XmNy = 263;
+        XmNwidth = 270;
+        XmNheight = 62;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        XmNvalueChangedCallback = procedure do_mbview_profile_width();
+        XmNdragCallback = procedure do_mbview_profile_width();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mB3DView_mbview_form_profile : XmFormDialog widget {
+    arguments {
+        arguments Style_use;
+        XmNdialogTitle = compound_string("MBview Profile Display");
+        XmNresizePolicy = XmRESIZE_GROW;
+        XmNx = 476;
+        XmNy = 549;
+        XmNwidth = 934;
+        XmNheight = 375;
+    };
+    controls {
+         managed XmScale mB3DView_mbview_scale_profile_width;
+         managed XmScale mB3DView_mbview_scale_profile_slope;
+         managed XmScrolledWindow mB3DView_mbview_scrolledWindow_profile;
+         managed XmLabel mB3DView_mbview_profile_label_info;
+         managed XmScale mB3DView_mbview_scale_profile_exager;
+         managed XmPushButton mB3DView_mbview_profile_pushButton_dismiss;
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+!(BX)object mB3DView_mbview_dialogShell_profile : XmDialogShell widget {
+!(BX)    arguments {
+!(BX)        arguments Style_use;
+!(BX)        XmNx = 476;
+!(BX)        XmNy = 549;
+!(BX)        XmNwidth = 934;
+!(BX)        XmNheight = 375;
+!(BX)    };
+!(BX)    controls {
+!(BX)         managed XmFormDialog mB3DView_mbview_form_profile;
+!(BX)    };
+!(BX)    callbacks {
+!(BX)        callbacks Style_useReasons;
+!(BX)    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+!(BX)};
 
 object mB3DView_mbview_pushButton_projection_dismiss : XmPushButton widget {
     arguments {
@@ -1033,8 +1279,8 @@ object mB3DView_mbview_bulletinBoard_projection : XmBulletinBoardDialog widget {
     arguments {
         arguments Style_use;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 458;
-        XmNy = 369;
+        XmNx = 1338;
+        XmNy = 479;
         XmNwidth = 365;
         XmNheight = 288;
     };
@@ -1056,8 +1302,8 @@ object mB3DView_mbview_bulletinBoard_projection : XmBulletinBoardDialog widget {
 !(BX)    arguments {
 !(BX)        arguments Style_use;
 !(BX)        XmNtitle = "Projections";
-!(BX)        XmNx = 458;
-!(BX)        XmNy = 369;
+!(BX)        XmNx = 1338;
+!(BX)        XmNy = 479;
 !(BX)        XmNwidth = 365;
 !(BX)        XmNheight = 288;
 !(BX)    };
@@ -1265,8 +1511,8 @@ object mB3DView_mbview_bulletinBoard_2dparms : XmBulletinBoardDialog widget {
         XmNdialogTitle = compound_string("MBview 2D Parameters");
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 547;
-        XmNy = 405;
+        XmNx = 1427;
+        XmNy = 515;
         XmNwidth = 187;
         XmNheight = 215;
     };
@@ -1293,8 +1539,8 @@ object mB3DView_mbview_bulletinBoard_2dparms : XmBulletinBoardDialog widget {
 !(BX)object mB3DView_mbview_dialogShell_2dparms : XmDialogShell widget {
 !(BX)    arguments {
 !(BX)        arguments Style_use;
-!(BX)        XmNx = 547;
-!(BX)        XmNy = 405;
+!(BX)        XmNx = 1427;
+!(BX)        XmNy = 515;
 !(BX)        XmNwidth = 187;
 !(BX)        XmNheight = 215;
 !(BX)    };
@@ -1809,8 +2055,8 @@ object mB3DView_mbview_bulletinBoard_3dparms : XmBulletinBoardDialog widget {
         XmNdialogTitle = compound_string("MBview 3D Parameters");
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 500;
-        XmNy = 274;
+        XmNx = 1380;
+        XmNy = 384;
         XmNwidth = 281;
         XmNheight = 478;
     };
@@ -1854,8 +2100,8 @@ object mB3DView_mbview_bulletinBoard_3dparms : XmBulletinBoardDialog widget {
 !(BX)object mB3DView_mbview_dialogShell_3dparms : XmDialogShell widget {
 !(BX)    arguments {
 !(BX)        arguments Style_use;
-!(BX)        XmNx = 500;
-!(BX)        XmNy = 274;
+!(BX)        XmNx = 1380;
+!(BX)        XmNy = 384;
 !(BX)        XmNwidth = 281;
 !(BX)        XmNheight = 478;
 !(BX)    };
@@ -2170,7 +2416,7 @@ object mB3DView_mbview_toggleButton_overlay_shade_ctoh : XmToggleButton widget {
     arguments {
         arguments Style_use;
         XmNlabelString = compound_string("Cold-to-Hot");
-        XmNwidth = 117;
+        XmNwidth = 109;
         XmNheight = 28;
     };
     controls {
@@ -2187,7 +2433,7 @@ object mB3DView_mbview_toggleButton_overlay_shade_htoc : XmToggleButton widget {
     arguments {
         arguments Style_use;
         XmNlabelString = compound_string("Hot-to-Cold");
-        XmNwidth = 117;
+        XmNwidth = 109;
         XmNheight = 28;
     };
     controls {
@@ -2206,7 +2452,7 @@ object mB3DView_mbview_radioBox_overlay_shade : XmRadioBox widget {
         XmNorientation = XmHORIZONTAL;
         XmNx = 30;
         XmNy = 330;
-        XmNwidth = 243;
+        XmNwidth = 227;
         XmNheight = 34;
     };
     controls {
@@ -2298,8 +2544,8 @@ object mB3DView_mbview_bulletinBoard_shadeparms : XmBulletinBoardDialog widget {
         XmNdialogTitle = compound_string("MBview Shading Parameters");
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 501;
-        XmNy = 293;
+        XmNx = 1381;
+        XmNy = 403;
         XmNwidth = 280;
         XmNheight = 440;
     };
@@ -2337,8 +2583,8 @@ object mB3DView_mbview_bulletinBoard_shadeparms : XmBulletinBoardDialog widget {
 !(BX)object mB3DView_mbview_dialogShell_shadeparms : XmDialogShell widget {
 !(BX)    arguments {
 !(BX)        arguments Style_use;
-!(BX)        XmNx = 501;
-!(BX)        XmNy = 293;
+!(BX)        XmNx = 1381;
+!(BX)        XmNy = 403;
 !(BX)        XmNwidth = 280;
 !(BX)        XmNheight = 440;
 !(BX)    };
@@ -2575,8 +2821,8 @@ object mB3DView_mbview_bulletinBoard_about : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNdialogTitle = compound_string("About MBview...");
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 409;
-        XmNy = 247;
+        XmNx = 1289;
+        XmNy = 357;
         XmNwidth = 463;
         XmNheight = 531;
     };
@@ -2602,8 +2848,8 @@ object mB3DView_mbview_bulletinBoard_about : XmBulletinBoardDialog widget {
 !(BX)object mB3DView_mbview_dialogShell_about : XmDialogShell widget {
 !(BX)    arguments {
 !(BX)        arguments Style_use;
-!(BX)        XmNx = 409;
-!(BX)        XmNy = 247;
+!(BX)        XmNx = 1289;
+!(BX)        XmNy = 357;
 !(BX)        XmNwidth = 463;
 !(BX)        XmNheight = 531;
 !(BX)    };
@@ -2664,8 +2910,8 @@ object mB3DView_mbview_bulletinBoard_message : XmBulletinBoardDialog widget {
         XmNdialogStyle = XmDIALOG_FULL_APPLICATION_MODAL;
         XmNdialogTitle = compound_string("MBview: Please wait...");
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 430;
-        XmNy = 465;
+        XmNx = 1310;
+        XmNy = 575;
         XmNwidth = 421;
         XmNheight = 95;
     };
@@ -2684,8 +2930,8 @@ object mB3DView_mbview_bulletinBoard_message : XmBulletinBoardDialog widget {
 !(BX)object mB3DView_mbview_dialogShell_message : XmDialogShell widget {
 !(BX)    arguments {
 !(BX)        arguments Style_use;
-!(BX)        XmNx = 430;
-!(BX)        XmNy = 465;
+!(BX)        XmNx = 1310;
+!(BX)        XmNy = 575;
 !(BX)        XmNwidth = 421;
 !(BX)        XmNheight = 95;
 !(BX)    };
@@ -2833,7 +3079,7 @@ object mB3DView_mbview_scale_navlowresolution : XmScale widget {
         XmNtitleString = compound_string("Low Resolution Decimation");
         XmNmaximum = 25;
         XmNshowArrows = TRUE;
-        XmNscaleMultiple = 50;
+        XmNscaleMultiple = 2;
         XmNshowValue = TRUE;
         XmNorientation = XmHORIZONTAL;
         XmNx = 10;
@@ -2860,7 +3106,7 @@ object mB3DView_mbview_scale_navmediumresolution : XmScale widget {
         XmNtitleString = compound_string("Medium Resolution Decimation");
         XmNmaximum = 10;
         XmNshowArrows = TRUE;
-        XmNscaleMultiple = 100;
+        XmNscaleMultiple = 1;
         XmNshowValue = TRUE;
         XmNorientation = XmHORIZONTAL;
         XmNx = 10;
@@ -2885,8 +3131,8 @@ object mB3DView_mbview_bulletinBoard_resolution : XmBulletinBoardDialog widget {
         XmNdialogTitle = compound_string("MBview Rendering Resolution");
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 179;
-        XmNy = 304;
+        XmNx = 1375;
+        XmNy = 397;
         XmNwidth = 291;
         XmNheight = 451;
     };
@@ -2912,8 +3158,8 @@ object mB3DView_mbview_bulletinBoard_resolution : XmBulletinBoardDialog widget {
 !(BX)    arguments {
 !(BX)        arguments Style_use;
 !(BX)        XmNtitle = "MB3DView Rendering Resolution";
-!(BX)        XmNx = 179;
-!(BX)        XmNy = 304;
+!(BX)        XmNx = 1375;
+!(BX)        XmNy = 397;
 !(BX)        XmNwidth = 291;
 !(BX)        XmNheight = 451;
 !(BX)    };
@@ -3119,7 +3365,7 @@ object mB3DView_mbview_toggleButton_data_ctoh : XmToggleButton widget {
     arguments {
         arguments Style_use;
         XmNlabelString = compound_string("Cold-to-Hot");
-        XmNwidth = 117;
+        XmNwidth = 109;
         XmNheight = 28;
     };
     controls {
@@ -3136,7 +3382,7 @@ object mB3DView_mbview_toggleButton_data_htoc : XmToggleButton widget {
     arguments {
         arguments Style_use;
         XmNlabelString = compound_string("Hot-to-Cold");
-        XmNwidth = 117;
+        XmNwidth = 109;
         XmNheight = 28;
     };
     controls {
@@ -3155,7 +3401,7 @@ object mB3DView_mbview_radioBox_colormode : XmRadioBox widget {
         XmNorientation = XmHORIZONTAL;
         XmNx = 30;
         XmNy = 70;
-        XmNwidth = 243;
+        XmNwidth = 227;
         XmNheight = 34;
     };
     controls {
@@ -3270,7 +3516,7 @@ object mB3DView_mbview_toggleButton_slope_ctoh : XmToggleButton widget {
     arguments {
         arguments Style_use;
         XmNlabelString = compound_string("Cold-to-Hot");
-        XmNwidth = 117;
+        XmNwidth = 109;
         XmNheight = 28;
     };
     controls {
@@ -3287,7 +3533,7 @@ object mB3DView_mbview_toggleButton_slope_htoc : XmToggleButton widget {
     arguments {
         arguments Style_use;
         XmNlabelString = compound_string("Hot-to-Cold");
-        XmNwidth = 117;
+        XmNwidth = 109;
         XmNheight = 28;
     };
     controls {
@@ -3306,7 +3552,7 @@ object mB3DView_mbview_radioBox_slopemode : XmRadioBox widget {
         XmNorientation = XmHORIZONTAL;
         XmNx = 30;
         XmNy = 220;
-        XmNwidth = 243;
+        XmNwidth = 227;
         XmNheight = 34;
     };
     controls {
@@ -3434,7 +3680,7 @@ object mB3DView_mbview_toggleButton_overlay_ctoh : XmToggleButton widget {
     arguments {
         arguments Style_use;
         XmNlabelString = compound_string("Cold-to-Hot");
-        XmNwidth = 117;
+        XmNwidth = 109;
         XmNheight = 28;
     };
     controls {
@@ -3451,7 +3697,7 @@ object mB3DView_mbview_toggleButton_overlay_htoc : XmToggleButton widget {
     arguments {
         arguments Style_use;
         XmNlabelString = compound_string("Hot-to-Cold");
-        XmNwidth = 117;
+        XmNwidth = 109;
         XmNheight = 28;
     };
     controls {
@@ -3470,7 +3716,7 @@ object mB3DView_mbview_radioBox_overlaymode : XmRadioBox widget {
         XmNorientation = XmHORIZONTAL;
         XmNx = 30;
         XmNy = 330;
-        XmNwidth = 243;
+        XmNwidth = 227;
         XmNheight = 34;
     };
     controls {
@@ -3504,8 +3750,8 @@ object mB3DView_mbview_bulletinBoard_colorbounds : XmBulletinBoardDialog widget 
         XmNdialogTitle = compound_string("MBview Colors and Contours");
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 52;
-        XmNy = 412;
+        XmNx = 1301;
+        XmNy = 400;
         XmNwidth = 440;
         XmNheight = 445;
     };
@@ -3548,8 +3794,8 @@ object mB3DView_mbview_bulletinBoard_colorbounds : XmBulletinBoardDialog widget 
 !(BX)    arguments {
 !(BX)        arguments Style_use;
 !(BX)        XmNtitle = "MB3DView Colors & Contours";
-!(BX)        XmNx = 52;
-!(BX)        XmNy = 412;
+!(BX)        XmNx = 1301;
+!(BX)        XmNy = 400;
 !(BX)        XmNwidth = 440;
 !(BX)        XmNheight = 445;
 !(BX)    };
@@ -3988,13 +4234,38 @@ object mB3DView_mbview_toggleButton_colortable_sealevel : XmToggleButton widget 
 !(BX)    };
 };
 
+object mB3DView_separator1 : XmSeparator widget {
+    arguments {
+    };
+    controls {
+    };
+    callbacks {
+    };
+};
+
+object mB3DView_mbview_toggleButton_profile : XmToggleButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Profile");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        XmNvalueChangedCallback = procedure do_mbview_view_profile();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
 object mbview_pulldownMenu_view : XmPulldownMenu widget {
     arguments {
         arguments Style_use;
         XmNx = 0;
         XmNy = 0;
         XmNwidth = 211;
-        XmNheight = 492;
+        XmNheight = 518;
     };
     controls {
          managed XmToggleButton mB3DView_mbview_toggleButton_display_2D;
@@ -4021,6 +4292,8 @@ object mbview_pulldownMenu_view : XmPulldownMenu widget {
          managed XmToggleButton mB3DView_mbview_toggleButton_colortable_gray;
          managed XmToggleButton mB3DView_mbview_toggleButton_colortable_flat;
          managed XmToggleButton mB3DView_mbview_toggleButton_colortable_sealevel;
+         managed XmSeparator mB3DView_separator1;
+         managed XmToggleButton mB3DView_mbview_toggleButton_profile;
     };
     callbacks {
         callbacks Style_useReasons;
@@ -4857,7 +5130,7 @@ object mbview_bulletinBoard_mbview : XmBulletinBoard widget {
 !(BX) BxNderived = "MB3DViewDerived";
 !(BX) BxNfilebase = "MB3DViewDerived";
 !(BX) BxNclassFilebase = "MB3DView";
-!(BX) BxNclassGeometry = "801x814+12+202";
+!(BX) BxNclassGeometry = "801x814+76+425";
 !(BX) BxNgenerate = "True";
 !(BX) BxNreference = "True";
 !(BX) BxNpaletteGroup = "Project Classes";
@@ -4865,8 +5138,8 @@ object mbview_bulletinBoard_mbview : XmBulletinBoard widget {
 !(BX) BxNpaletteGeom = "+0+0";
         arguments Style_use;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 12;
-        XmNy = 202;
+        XmNx = 76;
+        XmNy = 425;
         XmNwidth = 801;
         XmNheight = 814;
     };
@@ -4888,6 +5161,7 @@ object mbview_bulletinBoard_mbview : XmBulletinBoard widget {
 !(BX)         unmanaged XmDialogShell mB3DView_mbview_dialogShell_3dparms;
 !(BX)         unmanaged XmDialogShell mB3DView_mbview_dialogShell_2dparms;
 !(BX)         unmanaged XmDialogShell mB3DView_mbview_dialogShell_projection;
+!(BX)         unmanaged XmDialogShell mB3DView_mbview_dialogShell_profile;
     };
     callbacks {
         callbacks Style_useReasons;

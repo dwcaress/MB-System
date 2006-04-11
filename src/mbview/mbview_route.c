@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_route.c	9/25/2003
- *    $Id: mbview_route.c,v 5.11 2006-01-24 19:21:32 caress Exp $
+ *    $Id: mbview_route.c,v 5.12 2006-04-11 19:17:04 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  *		begun on October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.11  2006/01/24 19:21:32  caress
+ * Version 5.0.8 beta.
+ *
  * Revision 5.10  2005/11/05 01:11:47  caress
  * Much work over the past two months.
  *
@@ -105,7 +108,7 @@ static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 static char		value_string[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_route.c,v 5.11 2006-01-24 19:21:32 caress Exp $";
+static char rcs_id[]="$Id: mbview_route.c,v 5.12 2006-04-11 19:17:04 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_getroutecount(int verbose, int instance,
@@ -1078,6 +1081,7 @@ int mbview_pick_route_select(int instance, int which, int xpixel, int ypixel)
 	/* local variables */
 	char	*function_name = "mbview_pick_route_select";
 	int	status = MB_SUCCESS;
+	int	error = MB_ERROR_NO_ERROR;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 	int	found;
@@ -1085,6 +1089,9 @@ int mbview_pick_route_select(int instance, int which, int xpixel, int ypixel)
 	double	xlon, ylat, zdata;
 	double	xdisplay, ydisplay, zdisplay;
 	double	xx, yy, rr, rrmin;
+	double	dx, dy;
+	int	iroute;
+	int	jpoint;
 	int	i, j;
 
 	/* print starting debug statements */
@@ -1161,32 +1168,34 @@ int mbview_pick_route_select(int instance, int which, int xpixel, int ypixel)
 		/* reset selected route position */
 		if (found)
 			{
-			shared.shareddata.routes[shared.shareddata.route_selected].points[shared.shareddata.route_point_selected].xgrid[instance] = xgrid;
-			shared.shareddata.routes[shared.shareddata.route_selected].points[shared.shareddata.route_point_selected].ygrid[instance] = ygrid;
-			shared.shareddata.routes[shared.shareddata.route_selected].points[shared.shareddata.route_point_selected].xlon = xlon;
-			shared.shareddata.routes[shared.shareddata.route_selected].points[shared.shareddata.route_point_selected].ylat = ylat;
-			shared.shareddata.routes[shared.shareddata.route_selected].points[shared.shareddata.route_point_selected].zdata = zdata;
-			shared.shareddata.routes[shared.shareddata.route_selected].points[shared.shareddata.route_point_selected].xdisplay[instance] = xdisplay;
-			shared.shareddata.routes[shared.shareddata.route_selected].points[shared.shareddata.route_point_selected].ydisplay[instance] = ydisplay;
-			shared.shareddata.routes[shared.shareddata.route_selected].points[shared.shareddata.route_point_selected].zdisplay[instance] = zdisplay;
-			mbview_updatepointw(instance, &(shared.shareddata.routes[shared.shareddata.route_selected].points[shared.shareddata.route_point_selected]));
+			iroute = shared.shareddata.route_selected;
+			jpoint = shared.shareddata.route_point_selected;
+			shared.shareddata.routes[iroute].points[jpoint].xgrid[instance] = xgrid;
+			shared.shareddata.routes[iroute].points[jpoint].ygrid[instance] = ygrid;
+			shared.shareddata.routes[iroute].points[jpoint].xlon = xlon;
+			shared.shareddata.routes[iroute].points[jpoint].ylat = ylat;
+			shared.shareddata.routes[iroute].points[jpoint].zdata = zdata;
+			shared.shareddata.routes[iroute].points[jpoint].xdisplay[instance] = xdisplay;
+			shared.shareddata.routes[iroute].points[jpoint].ydisplay[instance] = ydisplay;
+			shared.shareddata.routes[iroute].points[jpoint].zdisplay[instance] = zdisplay;
+			mbview_updatepointw(instance, &(shared.shareddata.routes[iroute].points[jpoint]));
 			
 			/* drape the affected segments */
-			if (shared.shareddata.route_point_selected > 0)
+			if (jpoint > 0)
 				{
 				/* drape the segment */
-				mbview_drapesegmentw(instance, &(shared.shareddata.routes[shared.shareddata.route_selected].segments[shared.shareddata.route_point_selected-1]));
+				mbview_drapesegmentw(instance, &(shared.shareddata.routes[iroute].segments[jpoint-1]));
 			
 				/* update the segment for all active instances */
-				mbview_updatesegmentw(instance, &(shared.shareddata.routes[shared.shareddata.route_selected].segments[shared.shareddata.route_point_selected-1]));
+				mbview_updatesegmentw(instance, &(shared.shareddata.routes[iroute].segments[jpoint-1]));
 				}
-			if (shared.shareddata.route_point_selected < shared.shareddata.routes[shared.shareddata.route_selected].npoints - 1)
+			if (jpoint < shared.shareddata.routes[iroute].npoints - 1)
 				{
 				/* drape the segment */
-				mbview_drapesegmentw(instance, &(shared.shareddata.routes[shared.shareddata.route_selected].segments[shared.shareddata.route_point_selected]));
+				mbview_drapesegmentw(instance, &(shared.shareddata.routes[iroute].segments[jpoint]));
 			
 				/* update the segment for all active instances */
-				mbview_updatesegmentw(instance, &(shared.shareddata.routes[shared.shareddata.route_selected].segments[shared.shareddata.route_point_selected]));
+				mbview_updatesegmentw(instance, &(shared.shareddata.routes[iroute].segments[jpoint]));
 				}
 			}
 		}
@@ -1251,6 +1260,169 @@ int mbview_pick_route_select(int instance, int which, int xpixel, int ypixel)
 				fprintf(stderr,"dbg2       route %d %d nls_alloc:    %d\n",i,j,shared.shareddata.routes[i].segments[j].nls_alloc);
 				fprintf(stderr,"dbg2       route %d %d endpoints[0]: %d\n",i,j,shared.shareddata.routes[i].segments[j].endpoints[0]);
 				fprintf(stderr,"dbg2       route %d %d endpoints[1]: %d\n",i,j,shared.shareddata.routes[i].segments[j].endpoints[1]);
+				}
+			}
+		}
+	
+	/* print output debug statements */
+	if (mbv_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:          %d\n",status);
+		}
+
+	/* return */
+	return(status);
+}
+
+/*------------------------------------------------------------------------------*/
+int mbview_extract_route_profile(int instance)
+{
+
+	/* local variables */
+	char	*function_name = "mbview_extract_route_profile";
+	int	status = MB_SUCCESS;
+	int	error = MB_ERROR_NO_ERROR;
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
+	int	iroute, jpoint, jstart;
+	int	nprpoints;
+	double	dx, dy;
+	int	i, j;
+
+	/* print starting debug statements */
+	if (mbv_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
+		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       instance:         %d\n",instance);
+		}
+		
+	/* get view */
+	view = &(mbviews[instance]);
+	data = &(view->data);
+		
+	/* if a route is selected, extract the profile */
+	if (shared.shareddata.route_selected != MBV_SELECT_NONE
+		&& shared.shareddata.routes[shared.shareddata.route_selected].npoints > 1)
+		{
+		data->profile.source = MBV_PROFILE_ROUTE;
+		strcpy(data->profile.source_name, "Route");
+		data->profile.length = 0.0;
+		iroute = shared.shareddata.route_selected;
+		
+		/* make sure enough memory is allocated for the profile */
+		nprpoints = 0;
+		for (i=0;i<shared.shareddata.routes[iroute].npoints-1;i++)
+			{
+			nprpoints += shared.shareddata.routes[iroute].segments[i].nls;
+			}
+		if (data->profile.npoints_alloc < nprpoints)
+			{
+			status = mbview_allocprofilearrays(mbv_verbose, 
+					nprpoints, &(data->profile.points), &error);
+			if (status == MB_SUCCESS)
+				{
+				data->profile.npoints_alloc = nprpoints;
+				}
+			else
+				{
+				data->profile.npoints_alloc = 0;
+				}
+			}
+			
+		/* extract the profile */
+		if (nprpoints > 2 && data->profile.npoints_alloc >= nprpoints)
+			{
+			data->profile.npoints = 0;
+			for (i=0;i<shared.shareddata.routes[iroute].npoints-1;i++)
+				{
+				if (i == 0)
+					jstart = 0;
+				else
+					jstart = 1;
+				for (j=jstart;j<shared.shareddata.routes[iroute].segments[i].nls;j++)
+					{
+					if (j == 0 || j == shared.shareddata.routes[iroute].segments[i].nls - 1)
+						data->profile.points[data->profile.npoints].boundary = MB_YES;
+					else
+						data->profile.points[data->profile.npoints].boundary = MB_NO;
+					data->profile.points[data->profile.npoints].xgrid = shared.shareddata.routes[iroute].segments[i].lspoints[j].xgrid[instance];
+					data->profile.points[data->profile.npoints].ygrid = shared.shareddata.routes[iroute].segments[i].lspoints[j].ygrid[instance];
+					data->profile.points[data->profile.npoints].xlon = shared.shareddata.routes[iroute].segments[i].lspoints[j].xlon;
+					data->profile.points[data->profile.npoints].ylat = shared.shareddata.routes[iroute].segments[i].lspoints[j].ylat;
+					data->profile.points[data->profile.npoints].zdata = shared.shareddata.routes[iroute].segments[i].lspoints[j].zdata;
+					data->profile.points[data->profile.npoints].xdisplay = shared.shareddata.routes[iroute].segments[i].lspoints[j].xdisplay[instance];
+					data->profile.points[data->profile.npoints].ydisplay = shared.shareddata.routes[iroute].segments[i].lspoints[j].ydisplay[instance];
+					if (data->profile.npoints == 0)
+						{
+						data->profile.zmin = data->profile.points[data->profile.npoints].zdata;
+						data->profile.zmax = data->profile.points[data->profile.npoints].zdata;
+						data->profile.points[data->profile.npoints].distance = 0.0;
+						}
+					else
+						{
+						data->profile.zmin = MIN(data->profile.zmin, data->profile.points[data->profile.npoints].zdata);
+						data->profile.zmax = MAX(data->profile.zmax, data->profile.points[data->profile.npoints].zdata);
+						if (data->display_projection_mode != MBV_PROJECTION_SPHEROID)
+							{
+							dx = data->profile.points[data->profile.npoints].xdisplay
+									- data->profile.points[data->profile.npoints-1].xdisplay;
+							dy = data->profile.points[data->profile.npoints].ydisplay
+									- data->profile.points[data->profile.npoints-1].ydisplay;
+							data->profile.points[data->profile.npoints].distance = sqrt(dx * dx + dy * dy) / view->scale 
+								+ data->profile.points[data->profile.npoints-1].distance;
+							}
+						else
+							{
+							mbview_greatcircle_dist(instance, 
+								data->profile.points[0].xlon, 
+								data->profile.points[0].ylat, 
+								data->profile.points[data->profile.npoints].xlon, 
+								data->profile.points[data->profile.npoints].ylat, 
+								&(data->profile.points[data->profile.npoints].distance));
+							}
+						}
+					data->profile.points[data->profile.npoints].navzdata = 0.0;
+					data->profile.points[data->profile.npoints].navtime_d = 0.0;
+					data->profile.npoints++;
+					}
+				}
+			data->profile.length = data->profile.points[data->profile.npoints-1].distance;
+			
+			/* calculate slope */
+			for (i=0;i<data->profile.npoints;i++)
+				{
+				if (i == 0)
+					{
+					dy = (data->profile.points[i+1].zdata
+						- data->profile.points[i].zdata);
+					dx = (data->profile.points[i+1].distance
+						- data->profile.points[i].distance);
+					}
+				else if (i == data->profile.npoints - 1)
+					{
+					dy = (data->profile.points[i].zdata
+						- data->profile.points[i-1].zdata);
+					dx = (data->profile.points[i].distance
+						- data->profile.points[i-1].distance);
+					}
+				else
+					{
+					dy = (data->profile.points[i+1].zdata
+						- data->profile.points[i-1].zdata);
+					dx = (data->profile.points[i+1].distance
+						- data->profile.points[i-1].distance);
+					}
+				if (dx > 0.0)
+					data->profile.points[i].slope = fabs(dy / dx);
+				else
+					data->profile.points[i].slope = 0.0;
 				}
 			}
 		}

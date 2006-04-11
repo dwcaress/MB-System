@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_process.c	9/25/2003
- *    $Id: mbview_process.c,v 5.10 2006-01-24 19:21:32 caress Exp $
+ *    $Id: mbview_process.c,v 5.11 2006-04-11 19:17:04 caress Exp $
  *
  *    Copyright (c) 2003, 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  *		begun on October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.10  2006/01/24 19:21:32  caress
+ * Version 5.0.8 beta.
+ *
  * Revision 5.9  2005/11/05 01:11:47  caress
  * Much work over the past two months.
  *
@@ -104,7 +107,7 @@ static Cardinal 	ac;
 static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_process.c,v 5.10 2006-01-24 19:21:32 caress Exp $";
+static char rcs_id[]="$Id: mbview_process.c,v 5.11 2006-04-11 19:17:04 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_projectdata(int instance)
@@ -2638,6 +2641,68 @@ int mbview_greatcircle_distbearing(int instance,
 		fprintf(stderr,"dbg2  Return value:\n");
 		fprintf(stderr,"dbg2       t3:          %f\n",t3);
 		fprintf(stderr,"dbg2       bearing:     %f\n",*bearing);
+		fprintf(stderr,"dbg2       distance:    %f\n",*distance);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:      %d\n",status);
+		}
+
+	/* return */
+	return(status);
+}
+/*------------------------------------------------------------------------------*/
+int mbview_greatcircle_dist(int instance, 
+			double lon1, double lat1, double lon2,  double lat2,
+			double *distance)
+{
+	/* local variables */
+	char	*function_name = "mbview_greatcircle_dist";
+	int	status = MB_SUCCESS;
+	int	error = MB_ERROR_NO_ERROR;
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
+	double	rlon1, rlat1, rlon2, rlat2;
+	double	t1, t2, dd;
+
+	/* print starting debug statements */
+	if (mbv_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
+		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       instance:         %d\n",instance);
+		fprintf(stderr,"dbg2       lon1:             %f\n",lon1);
+		fprintf(stderr,"dbg2       lat1:             %f\n",lat1);
+		fprintf(stderr,"dbg2       lon2:             %f\n",lon2);
+		fprintf(stderr,"dbg2       lat2:             %f\n",lat2);
+		}
+		
+	/* get view */
+	view = &(mbviews[instance]);
+	data = &(view->data);
+	
+	/* note: these equations derive in part from source code read at:
+		http://simgear.org/doxygen/polar3d_8hxx-source.html
+		on 17 February 2004 by D.W. Caress
+		The source code found at this location is licensed under the LGPL */
+
+	/* get great circle distance */
+	rlon1 = DTR * lon1;
+	rlat1 = DTR * lat1;
+	rlon2 = DTR * lon2;
+	rlat2 = DTR * lat2;
+	t1 = sin(0.5 * (rlon1 - rlon2));
+	t2 = sin(0.5 * (rlat1 - rlat2));
+	dd = 2.0 * asin(sqrt(t2 * t2 + cos(rlat1) * cos(rlat2) * t1 * t1));
+	*distance = MBV_SPHEROID_RADIUS * dd;
+
+	/* print output debug statements */
+	if (mbv_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return value:\n");
 		fprintf(stderr,"dbg2       distance:    %f\n",*distance);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:      %d\n",status);

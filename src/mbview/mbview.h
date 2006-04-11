@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbview.h	10/9/2002
- *    $Id: mbview.h,v 5.11 2005-11-05 01:11:47 caress Exp $
+ *    $Id: mbview.h,v 5.12 2006-04-11 19:17:04 caress Exp $
  *
  *    Copyright (c) 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -18,6 +18,9 @@
  * Date:	October 10,  2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.11  2005/11/05 01:11:47  caress
+ * Much work over the past two months.
+ *
  * Revision 5.10  2005/08/09 16:32:59  caress
  * Working on portability and on survey planning.
  *
@@ -211,6 +214,13 @@
 #define MBV_PICKMASK_NAVANY			256
 #define MBV_PICKMASK_NEWINSTANCE		512
 
+/* profile defines */
+#define MBV_PROFILE_NONE			0
+#define MBV_PROFILE_TWOPOINT			1
+#define MBV_PROFILE_ROUTE			2
+#define MBV_PROFILE_NAV				3
+#define	MBV_PROFILE_FACTOR_MAX 			4.0
+
 /* structure declarations */
 struct mbview_contoursegment_struct {
 	float	x[2];
@@ -269,6 +279,21 @@ struct mbview_navpointw_struct {
 	int	cdp;
 	};
 
+struct mbview_profilepoint_struct {
+	int	boundary;
+	double	xgrid;
+	double	ygrid;
+	double	xlon;
+	double	ylat;
+	double	zdata;
+	double	distance;
+	double	xdisplay;
+	double	ydisplay;
+	double	navzdata;
+	double	navtime_d;
+	double	slope;
+	};
+
 struct mbview_linesegment_struct {
 	struct mbview_point_struct *endpoints[2];
 	int	nls;
@@ -284,6 +309,8 @@ struct mbview_linesegmentw_struct {
 	};
 
 struct mbview_pick_struct {
+	double	range;
+	double	bearing;
 	struct mbview_point_struct endpoints[2];
 	struct mbview_point_struct xpoints[8];
 	struct mbview_linesegment_struct segment;
@@ -346,6 +373,17 @@ struct mbview_nav_struct {
 	struct mbview_linesegmentw_struct *segments;
 	};
 
+struct mbview_profile_struct {
+	int	source;
+	mb_path	source_name;
+	double	length;
+	double	zmin;
+	double	zmax;
+	int	npoints;
+	int	npoints_alloc;
+	struct mbview_profilepoint_struct *points;
+	};
+
 struct mbview_shareddata_struct {
 	/* nav pick */
 	int	navpick_type;
@@ -383,7 +421,7 @@ struct mbview_struct {
 	/* active flag */
 	int	active;
 
-	/* widget controls */
+	/* main plot widget controls */
 	mb_path	title;
 	int	xo;
 	int	yo;
@@ -393,6 +431,11 @@ struct mbview_struct {
 	int	hirez_dimension;
 	int	lorez_navdecimate;
 	int	hirez_navdecimate;
+
+	/* profile plot widget controls */
+	mb_path	prtitle;
+	int	prwidth;
+	int	prheight;
 
 	/* mode controls */
 	int	display_mode;
@@ -437,6 +480,11 @@ struct mbview_struct {
 	
 	/* contour controls */
 	double	contour_interval;
+	
+	/* profile controls */
+	double	profile_exageration;
+	int	profile_widthfactor;
+	double	profile_slopethreshold;
 	
 	/* projection controls */
 	int	primary_grid_projection_mode;
@@ -502,11 +550,15 @@ struct mbview_struct {
 	int	region_pickcorner;
 	struct mbview_region_struct region;
 	
+	/* profile data */
+	struct mbview_profile_struct profile;
+	
 	/* global data view modes */
 	int	site_view_mode;
 	int	route_view_mode;
 	int	nav_view_mode;
 	int	navdrape_view_mode;
+	int	profile_view_mode;
 	
 	};
 

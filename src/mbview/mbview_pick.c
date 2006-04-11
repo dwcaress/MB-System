@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_pick.c	9/29/2003
- *    $Id: mbview_pick.c,v 5.9 2006-01-24 19:21:32 caress Exp $
+ *    $Id: mbview_pick.c,v 5.10 2006-04-11 19:17:04 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  *		begun on October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.9  2006/01/24 19:21:32  caress
+ * Version 5.0.8 beta.
+ *
  * Revision 5.8  2005/11/05 01:11:47  caress
  * Much work over the past two months.
  *
@@ -99,7 +102,7 @@ static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 static char		value_list[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_pick.c,v 5.9 2006-01-24 19:21:32 caress Exp $";
+static char rcs_id[]="$Id: mbview_pick.c,v 5.10 2006-04-11 19:17:04 caress Exp $";
 	
 
 /*------------------------------------------------------------------------------*/
@@ -109,12 +112,15 @@ int mbview_pick(int instance, int which, int xpixel, int ypixel)
 	/* local variables */
 	char	*function_name = "mbview_pick";
 	int	status = MB_SUCCESS;
+	int	error = MB_ERROR_NO_ERROR;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 	int	found;
 	double	xgrid, ygrid;
 	double	xlon, ylat, zdata;
 	double	xdisplay, ydisplay, zdisplay;
+	double	dx, dy;
+	int	npoints;
 	int	i;
 
 	/* print starting debug statements */
@@ -176,6 +182,28 @@ int mbview_pick(int instance, int which, int xpixel, int ypixel)
 			data->pick.endpoints[1].zdisplay = zdisplay;
 			}
 			
+		/* calculate range and bearing */
+		if (data->display_projection_mode != MBV_PROJECTION_SPHEROID)
+			{
+			dx = data->pick.endpoints[1].xdisplay
+					- data->pick.endpoints[0].xdisplay;
+			dy = data->pick.endpoints[1].ydisplay
+					- data->pick.endpoints[0].ydisplay;
+			data->pick.range = sqrt(dx * dx + dy * dy) / view->scale ;
+			data->pick.bearing = RTD * atan2(dx, dy);
+			}
+		else
+			{
+			mbview_greatcircle_distbearing(instance, 
+				data->pick.endpoints[0].xlon, 
+				data->pick.endpoints[0].ylat, 
+				data->pick.endpoints[1].xlon, 
+				data->pick.endpoints[1].ylat, 
+				&(data->pick.bearing), &(data->pick.range));
+			}
+		if (data->pick.bearing < 0.0)
+			data->pick.bearing += 360.0;
+			
 		/* generate 3D drape of pick marks if either 3D display 
 			or the pick move is final */
 		if (data->pick_type != MBV_PICK_NONE
@@ -186,10 +214,11 @@ int mbview_pick(int instance, int which, int xpixel, int ypixel)
 			}
 			
 		/* if a two point pick has been made generate 3D drape 
-			if either 3D display 
-			or the pick move is final */
+			if either 3D display, the pick move is final 
+			or the profile display is on */
 		if (data->pick_type == MBV_PICK_TWOPOINT
 			&& (data->display_mode == MBV_DISPLAY_3D 
+				|| data->profile_view_mode == MBV_VIEW_ON
 				|| which == MBV_PICK_UP))
 			{
 			mbview_drapesegment(instance, &(data->pick.segment));
@@ -211,6 +240,151 @@ int mbview_pick(int instance, int which, int xpixel, int ypixel)
 		
 	/* set pick annotation */
 	mbview_pick_text(instance);
+	
+	/* print output debug statements */
+	if (mbv_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:          %d\n",status);
+		}
+
+	/* return */
+	return(status);
+}
+
+/*------------------------------------------------------------------------------*/
+int mbview_extract_pick_profile(int instance)
+{
+
+	/* local variables */
+	char	*function_name = "mbview_extract_pick_profile";
+	int	status = MB_SUCCESS;
+	int	error = MB_ERROR_NO_ERROR;
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
+	double	dx, dy;
+	int	npoints;
+	int	i;
+
+	/* print starting debug statements */
+	if (mbv_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
+		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       instance:         %d\n",instance);
+		}
+		
+	/* get view */
+	view = &(mbviews[instance]);
+	data = &(view->data);	
+			
+	/* if a two point pick has been made and the profile display
+		is on or the pick is final, insert the draped
+		segment into the profile data */
+	if (data->pick_type == MBV_PICK_TWOPOINT)
+		{
+		data->profile.source = MBV_PROFILE_TWOPOINT;
+		strcpy(data->profile.source_name, "Two point pick");
+		data->profile.length = data->pick.range;
+		npoints = MAX(2, data->pick.segment.nls);
+		if (data->profile.npoints_alloc < npoints)
+			{
+			status = mbview_allocprofilearrays(mbv_verbose, 
+					npoints, &(data->profile.points), &error);
+			if (status == MB_SUCCESS)
+				{
+				data->profile.npoints_alloc = npoints;
+				}
+			else
+				{
+				data->profile.npoints_alloc = 0;
+				}
+			}
+		if (npoints > 2 && data->profile.npoints_alloc >= npoints)
+			{
+			/* get the profile data */
+			for (i=0;i<npoints;i++)
+				{
+				data->profile.points[i].boundary = MB_NO;
+				data->profile.points[i].xgrid = data->pick.segment.lspoints[i].xgrid;
+				data->profile.points[i].ygrid = data->pick.segment.lspoints[i].ygrid;
+				data->profile.points[i].xlon = data->pick.segment.lspoints[i].xlon;
+				data->profile.points[i].ylat = data->pick.segment.lspoints[i].ylat;
+				data->profile.points[i].zdata = data->pick.segment.lspoints[i].zdata;
+				data->profile.points[i].xdisplay = data->pick.segment.lspoints[i].xdisplay;
+				data->profile.points[i].ydisplay = data->pick.segment.lspoints[i].ydisplay;
+				if (i == 0)
+					{
+					data->profile.zmin = data->profile.points[i].zdata;
+					data->profile.zmax = data->profile.points[i].zdata;
+					data->profile.points[i].distance = 0.0;
+					}
+				else
+					{
+					data->profile.zmin = MIN(data->profile.zmin, data->profile.points[i].zdata);
+					data->profile.zmax = MAX(data->profile.zmax, data->profile.points[i].zdata);
+					if (data->display_projection_mode != MBV_PROJECTION_SPHEROID)
+						{
+						dx = data->profile.points[i].xdisplay
+								- data->profile.points[i-1].xdisplay;
+						dy = data->profile.points[i].ydisplay
+								- data->profile.points[i-1].ydisplay;
+						data->profile.points[i].distance = sqrt(dx * dx + dy * dy) / view->scale 
+							+ data->profile.points[i-1].distance;
+						}
+					else
+						{
+						mbview_greatcircle_dist(instance, 
+							data->profile.points[0].xlon, 
+							data->profile.points[0].ylat, 
+							data->profile.points[i].xlon, 
+							data->profile.points[i].ylat, 
+							&(data->profile.points[i].distance));
+						}
+					}
+				data->profile.points[i].navzdata = 0.0;
+				data->profile.points[i].navtime_d = 0.0;
+				}
+			data->profile.points[0].boundary = MB_YES;
+			data->profile.points[npoints-1].boundary = MB_YES;
+			data->profile.npoints = npoints;
+			
+			/* calculate slope */
+			for (i=0;i<data->profile.npoints;i++)
+				{
+				if (i == 0)
+					{
+					dy = (data->profile.points[i+1].zdata
+						- data->profile.points[i].zdata);
+					dx = (data->profile.points[i+1].distance
+						- data->profile.points[i].distance);
+					}
+				else if (i == npoints - 1)
+					{
+					dy = (data->profile.points[i].zdata
+						- data->profile.points[i-1].zdata);
+					dx = (data->profile.points[i].distance
+						- data->profile.points[i-1].distance);
+					}
+				else
+					{
+					dy = (data->profile.points[i+1].zdata
+						- data->profile.points[i-1].zdata);
+					dx = (data->profile.points[i+1].distance
+						- data->profile.points[i-1].distance);
+					}
+				if (dx > 0.0)
+					data->profile.points[i].slope = fabs(dy / dx);
+				else
+					data->profile.points[i].slope = 0.0;
+				}
+			}
+		}
 	
 	/* print output debug statements */
 	if (mbv_verbose >= 2)
@@ -383,7 +557,6 @@ int mbview_pick_text(int instance)
 	int	status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
-	double	dx, dy, range, bearing;
 	int	time_i[7];
 	char	lonstr0[24], lonstr1[24];
 	char	latstr0[24], latstr1[24];
@@ -423,40 +596,20 @@ int mbview_pick_text(int instance)
 		mbview_setlonlatstrings(shared.lonlatstyle, 
 					data->pick.endpoints[1].xlon, data->pick.endpoints[1].ylat, 
 					lonstr1, latstr1);
-		if (data->display_projection_mode != MBV_PROJECTION_SPHEROID)
-			{
-			dx = data->pick.endpoints[1].xdisplay
-					- data->pick.endpoints[0].xdisplay;
-			dy = data->pick.endpoints[1].ydisplay
-					- data->pick.endpoints[0].ydisplay;
-			range = sqrt(dx * dx + dy * dy) / view->scale ;
-			bearing = RTD * atan2(dx, dy);
-			}
-		else
-			{
-			mbview_greatcircle_distbearing(instance, 
-				data->pick.endpoints[0].xlon, 
-				data->pick.endpoints[0].ylat, 
-				data->pick.endpoints[1].xlon, 
-				data->pick.endpoints[1].ylat, 
-				&bearing, &range);
-			}
-		if (bearing < 0.0)
-			bearing += 360.0;
 		sprintf(value_text,
 		":::t\"Pick Info:\":t\" Lon 1: %s\":t\" Lat 1: %s\":t\" Depth 1: %.3f m\":t\" Lon 2: %s\":t\" Lat 2: %s\":t\" Depth 2: %.3f m\":t\" Bearing: %.1f deg\":t\" Distance: %.3f m\"", 
 			lonstr0, latstr0,
 			data->pick.endpoints[0].zdata,
 			lonstr1, latstr1,
 			data->pick.endpoints[1].zdata,
-			bearing, range);
+			data->pick.bearing, data->pick.range);
 		sprintf(value_list,
 		"Pick Info: Lon 1: %s Lat 1: %s Depth 1: %.3f m Lon 2: %s Lat 2: %s Depth 2: %.3f m Bearing: %.1f deg Distance: %.3f m", 
 			lonstr0, latstr0,
 			data->pick.endpoints[0].zdata,
 			lonstr1, latstr1,
 			data->pick.endpoints[1].zdata,
-			bearing, range);
+			data->pick.bearing, data->pick.range);
 		}
 	else if (data->pickinfo_mode == MBV_PICK_AREA)
 		{
