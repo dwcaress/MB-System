@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsegygrid.c	6/12/2004
- *    $Id: mbsegygrid.c,v 5.7 2006-01-18 15:17:00 caress Exp $
+ *    $Id: mbsegygrid.c,v 5.8 2006-04-11 19:19:30 caress Exp $
  *
  *    Copyright (c) 2004, 2005, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	June 12, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2006/01/18 15:17:00  caress
+ * Added stdlib.h include.
+ *
  * Revision 5.6  2005/06/15 15:35:01  caress
  * Added capability to scale shot to distance and time to depth. Also added -MGQ100 to the mbm_grdplot arguments so that the seismic image is more nicely displayed by grdimage.
  *
@@ -55,11 +58,6 @@
 #include <time.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-
-/* Includes for System 5 type operating system */
-#if defined (IRIX) || defined (LYNX)
-#include <stdlib.h>
-#endif
 
 /* MBIO include files */
 #include "../../include/mb_status.h"
@@ -98,7 +96,7 @@ char	*getenv();
 	stderr if verbose > 1) */
 FILE	*outfp;
 
-static char rcs_id[] = "$Id: mbsegygrid.c,v 5.7 2006-01-18 15:17:00 caress Exp $";
+static char rcs_id[] = "$Id: mbsegygrid.c,v 5.8 2006-04-11 19:19:30 caress Exp $";
 static char program_name[] = "MBsegygrid";
 static char help_message[] =  "MBsegygrid grids trace data from segy data files.";
 static char usage_message[] = "MBsegygrid -Ifile -Oroot [-Ashotscale/timescale \n\
@@ -761,7 +759,7 @@ i,iy,factor,i,trace[i]);*/
 	/* run mbm_grdplot */
 	xwidth = 0.01 * (double) ngridx;
 	ywidth = 6.0;
-	sprintf(plot_cmd, "mbm_grdplot -I%s -JX%f/%f -G1 -MGQ100 -V -L\"File %s - %s:%s\"", 
+	sprintf(plot_cmd, "mbm_grdplot -I%s -JX%f/%f -G1 -V -L\"File %s - %s:%s\"", 
 			gridfile, xwidth, ywidth, gridfile, title, zlabel);
 	if (verbose)
 		{
