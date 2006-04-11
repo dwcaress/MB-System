@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbviewprivate.h	9/24/2003
- *    $Id: mbviewprivate.h,v 5.9 2005-11-05 01:11:47 caress Exp $
+ *    $Id: mbviewprivate.h,v 5.10 2006-04-11 19:17:04 caress Exp $
  *
  *    Copyright (c) 2003, 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -18,6 +18,9 @@
  * Date:	September 24,  2003
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.9  2005/11/05 01:11:47  caress
+ * Much work over the past two months.
+ *
  * Revision 5.8  2005/08/09 16:33:00  caress
  * Working on portability and on survey planning.
  *
@@ -63,6 +66,8 @@
 #define MBV_OPENGL_ZMAX3D 100000000.0
 #define MBV_OPENGL_3D_CONTOUR_OFFSET 0.001
 #define MBV_OPENGL_3D_LINE_OFFSET 0.005
+#define MBV_OPENGL_ZPROFILE1 -100.0
+#define MBV_OPENGL_ZPROFILE2 -200.0
 
 /* OpenGL list IDs */
 #define MBV_GLLIST_SITESMALL  (3 * MBV_MAX_WINDOWS + 0)
@@ -162,7 +167,12 @@ struct mbview_world_struct
     int			naction;
     int			actionsensitive[MBV_NUM_ACTIONS];
     Widget		pushButton_action[MBV_NUM_ACTIONS];
-       
+    Widget		prglwmda;
+    XVisualInfo 	*prvi;
+    int			prglx_init;
+    GLXContext		prglx_context;
+    float 		praspect_ratio;
+        
     /* cursors */
     Cursor TargetBlackCursor;
     Cursor TargetGreenCursor;
@@ -432,6 +442,7 @@ void do_mbview_glwda_expose( Widget w, XtPointer client_data, XtPointer call_dat
 void do_mbview_glwda_resize( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbview_glwda_input( Widget w, XtPointer client_data, XtPointer call_data);
 void mbview_resize( Widget w, XtPointer client_data, XEvent *event, Boolean *unused);
+void do_mbview_profile_resize( Widget w, XtPointer client_data, XEvent *event, Boolean *unused);
 void do_mbview_dismiss( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbview_data_primary( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbview_data_primaryslope( Widget w, XtPointer client_data, XtPointer call_data);
@@ -461,6 +472,8 @@ void set_mbview_label_string(Widget w, String str);
 void set_mbview_label_multiline_string(Widget w, String str);
 void get_mbview_text_string(Widget w, String str);
 void do_mbview_xevents();
+
+
 int mbview_zscalegridpoint(int instance, int k);
 int mbview_zscalepoint(int instance, 
 				int global, double offset_factor, 
@@ -508,6 +521,11 @@ int mbview_area(int instance, int which, int xpixel, int ypixel);
 int mbview_drawpick(int instance);
 int mbview_drawregion(int instance);
 int mbview_drawarea(int instance);
+
+int mbview_extract_pick_profile(int instance);
+int mbview_extract_route_profile(int instance);
+int mbview_extract_nav_profile(int instance);
+
 int mbview_findpoint(int instance, int xpixel, int ypixel,
 			int *found, 
 			double *xgrid, double *ygrid,
@@ -579,6 +597,9 @@ int mbview_sphere_rotate(double *eulermatrix,
 int mbview_greatcircle_distbearing(int instance, 
 			double lon1, double lat1, double lon2,  double lat2,
 			double *bearing, double *distance);
+int mbview_greatcircle_dist(int instance, 
+			double lon1, double lat1, double lon2,  double lat2,
+			double *distance);
 int mbview_greatcircle_endposition(int instance, 
 			double lon1, double lat1, double bearing, double distance,
 			double *lon2, double *lat2);

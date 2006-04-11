@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_nav.c	10/28/2003
- *    $Id: mbview_nav.c,v 5.9 2006-01-24 19:21:32 caress Exp $
+ *    $Id: mbview_nav.c,v 5.10 2006-04-11 19:17:04 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -18,6 +18,9 @@
  * Date:	October 28, 2003
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.9  2006/01/24 19:21:32  caress
+ * Version 5.0.8 beta.
+ *
  * Revision 5.8  2005/11/05 01:11:47  caress
  * Much work over the past two months.
  *
@@ -96,7 +99,7 @@ static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 static char		value_string[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_nav.c,v 5.9 2006-01-24 19:21:32 caress Exp $";
+static char rcs_id[]="$Id: mbview_nav.c,v 5.10 2006-04-11 19:17:04 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_getnavcount(int verbose, int instance,
@@ -1210,6 +1213,187 @@ int mbview_pick_nav_select(int instance, int select, int which, int xpixel, int 
 	/* return */
 	return(status);
 }
+/*------------------------------------------------------------------------------*/
+int mbview_extract_nav_profile(int instance)
+{
+
+	/* local variables */
+	char	*function_name = "mbview_extract_nav_profile";
+	int	status = MB_SUCCESS;
+	int	error = MB_ERROR_NO_ERROR;
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
+	int	inav, jpoint, jstart;
+	int	nprpoints;
+	double	dx, dy;
+	int	lasti, lastj, firstj;
+	int	i, j;
+
+	/* print starting debug statements */
+	if (mbv_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
+		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       instance:         %d\n",instance);
+		}
+		
+	/* get view */
+	view = &(mbviews[instance]);
+	data = &(view->data);
+		
+	/* if any nav exists, check if any are selected then extract the profile */
+	if (shared.shareddata.nnav > 0)
+		{
+		data->profile.source = MBV_PROFILE_NAV;
+		strcpy(data->profile.source_name, "Navigation");
+		data->profile.length = 0.0;
+		
+		/* make sure enough memory is allocated for the profile */
+		nprpoints = 0;
+		for (i=0;i<shared.shareddata.nnav;i++)
+			{
+			for (j=0;j<shared.shareddata.navs[i].npoints;j++)
+				{
+				if (shared.shareddata.navs[i].navpts[j].selected == MB_YES)
+					{
+					nprpoints ++;
+					}
+				}
+			}
+		if (data->profile.npoints_alloc < nprpoints)
+			{
+			status = mbview_allocprofilearrays(mbv_verbose, 
+					nprpoints, &(data->profile.points), &error);
+			if (status == MB_SUCCESS)
+				{
+				data->profile.npoints_alloc = nprpoints;
+				}
+			else
+				{
+				data->profile.npoints_alloc = 0;
+				}
+			}
+			
+		/* extract the profile */
+		if (nprpoints > 2 && data->profile.npoints_alloc >= nprpoints)
+			{
+			data->profile.npoints = 0;
+			lasti = 0;
+			lastj = 0;
+			for (i=0;i<shared.shareddata.nnav;i++)
+				{
+				firstj = -1;
+				for (j=0;j<shared.shareddata.navs[i].npoints;j++)
+					{
+					if (shared.shareddata.navs[i].navpts[j].selected == MB_YES)
+						{
+						data->profile.points[data->profile.npoints].boundary = MB_YES;
+						if (data->profile.npoints > 0 
+							&& i == lasti && j > 1 && lastj == j-1 
+							&& j > 0 && firstj != j-1)
+							data->profile.points[data->profile.npoints-1].boundary = MB_NO;
+						lasti = i;
+						lastj = j;
+						if (firstj == -1)
+							firstj = j;
+						
+						data->profile.points[data->profile.npoints].xgrid = shared.shareddata.navs[i].navpts[j].pointcntr.xgrid[instance];
+						data->profile.points[data->profile.npoints].ygrid = shared.shareddata.navs[i].navpts[j].pointcntr.ygrid[instance];
+						data->profile.points[data->profile.npoints].xlon = shared.shareddata.navs[i].navpts[j].pointcntr.xlon;
+						data->profile.points[data->profile.npoints].ylat = shared.shareddata.navs[i].navpts[j].pointcntr.ylat;
+						data->profile.points[data->profile.npoints].zdata = shared.shareddata.navs[i].navpts[j].pointcntr.zdata;
+						data->profile.points[data->profile.npoints].xdisplay = shared.shareddata.navs[i].navpts[j].pointcntr.xdisplay[instance];
+						data->profile.points[data->profile.npoints].ydisplay = shared.shareddata.navs[i].navpts[j].pointcntr.ydisplay[instance];
+						if (data->profile.npoints == 0)
+							{
+							data->profile.zmin = data->profile.points[data->profile.npoints].zdata;
+							data->profile.zmax = data->profile.points[data->profile.npoints].zdata;
+							data->profile.points[data->profile.npoints].distance = 0.0;
+							}
+						else
+							{
+							data->profile.zmin = MIN(data->profile.zmin, data->profile.points[data->profile.npoints].zdata);
+							data->profile.zmax = MAX(data->profile.zmax, data->profile.points[data->profile.npoints].zdata);
+							if (data->display_projection_mode != MBV_PROJECTION_SPHEROID)
+								{
+								dx = data->profile.points[data->profile.npoints].xdisplay
+										- data->profile.points[data->profile.npoints-1].xdisplay;
+								dy = data->profile.points[data->profile.npoints].ydisplay
+										- data->profile.points[data->profile.npoints-1].ydisplay;
+								data->profile.points[data->profile.npoints].distance = sqrt(dx * dx + dy * dy) / view->scale 
+									+ data->profile.points[data->profile.npoints-1].distance;
+								}
+							else
+								{
+								mbview_greatcircle_dist(instance, 
+									data->profile.points[0].xlon, 
+									data->profile.points[0].ylat, 
+									data->profile.points[data->profile.npoints].xlon, 
+									data->profile.points[data->profile.npoints].ylat, 
+									&(data->profile.points[data->profile.npoints].distance));
+								}
+							}
+						data->profile.points[data->profile.npoints].navzdata = shared.shareddata.navs[i].navpts[j].point.zdata;;
+						data->profile.points[data->profile.npoints].navtime_d = shared.shareddata.navs[i].navpts[j].time_d;
+						data->profile.npoints++;
+						}
+					else
+						{
+						firstj = -1;
+						}
+					}
+				}
+			data->profile.length = data->profile.points[data->profile.npoints-1].distance;
+			
+			/* calculate slope */
+			for (i=0;i<data->profile.npoints;i++)
+				{
+				if (i == 0)
+					{
+					dy = (data->profile.points[i+1].zdata
+						- data->profile.points[i].zdata);
+					dx = (data->profile.points[i+1].distance
+						- data->profile.points[i].distance);
+					}
+				else if (i == data->profile.npoints - 1)
+					{
+					dy = (data->profile.points[i].zdata
+						- data->profile.points[i-1].zdata);
+					dx = (data->profile.points[i].distance
+						- data->profile.points[i-1].distance);
+					}
+				else
+					{
+					dy = (data->profile.points[i+1].zdata
+						- data->profile.points[i-1].zdata);
+					dx = (data->profile.points[i+1].distance
+						- data->profile.points[i-1].distance);
+					}
+				if (dx > 0.0)
+					data->profile.points[i].slope = fabs(dy / dx);
+				else
+					data->profile.points[i].slope = 0.0;
+				}
+			}
+		}
+	
+	/* print output debug statements */
+	if (mbv_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:          %d\n",status);
+		}
+
+	/* return */
+	return(status);
+}
+
+
 /*------------------------------------------------------------------------------*/
 int mbview_nav_delete(int instance, int inav)
 {

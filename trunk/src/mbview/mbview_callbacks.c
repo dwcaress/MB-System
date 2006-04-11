@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbview_callbacks.c	10/7/2002
- *    $Id: mbview_callbacks.c,v 5.10 2006-01-24 19:21:32 caress Exp $
+ *    $Id: mbview_callbacks.c,v 5.11 2006-04-11 19:17:04 caress Exp $
  *
  *    Copyright (c) 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -18,6 +18,9 @@
  * Date:	October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.10  2006/01/24 19:21:32  caress
+ * Version 5.0.8 beta.
+ *
  * Revision 5.9  2005/11/05 01:11:47  caress
  * Much work over the past two months.
  *
@@ -121,10 +124,9 @@ static Cardinal 	ac;
 static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_callbacks.c,v 5.10 2006-01-24 19:21:32 caress Exp $";
+static char rcs_id[]="$Id: mbview_callbacks.c,v 5.11 2006-04-11 19:17:04 caress Exp $";
 
 /* function prototypes */
-
 /*------------------------------------------------------------------------------*/
 
 /*------------------------------------------------------------------------------*/
@@ -633,6 +635,14 @@ int mbview_reset(int instance)
 		data->overlay_shade_magnitude = 1.0;
 		data->overlay_shade_center = 0.0;
 		data->overlay_shade_mode = MBV_COLORTABLE_NORMAL;
+	
+		/* contour controls */
+		data->contour_interval = 100.0;
+		
+		/* profile controls */
+		data->profile_exageration = 1.0;
+		data->profile_widthfactor = 1;
+		data->profile_slopethreshold = 2.00;
 
 		/* projection controls */
 		data->primary_grid_projection_mode = MBV_PROJECTION_GEOGRAPHIC;
@@ -804,13 +814,18 @@ int mbview_reset(int instance)
 		/* nav data */
 		data->nav_view_mode = MBV_VIEW_OFF;
 		data->navdrape_view_mode = MBV_VIEW_OFF;
+
+		/* profile data */
+		data->profile_view_mode = MBV_VIEW_OFF;
 		
 		/* windows */
 		view->topLevelShell = NULL;
 		view->mainWindow = NULL;
 		view->glwmda = NULL;
+		view->prglwmda = NULL;
 		view->dpy = NULL;
 		view->glx_init = MB_NO;
+		view->prglx_init = MB_NO;
 		view->message_on = MB_NO;
 		view->plot_recursion = 0;
 		view->plot_done = MB_NO;
@@ -1037,6 +1052,11 @@ int mbview_getdataptr(int verbose, int instance, struct mbview_struct **datahand
 		/* contour controls */
 		fprintf(stderr,"dbg2       contour_interval:           %f\n", data->slope_magnitude);
 
+		/* profile controls */
+		fprintf(stderr,"dbg2       profile_exageration:        %f\n", data->profile_exageration);
+		fprintf(stderr,"dbg2       profile_widthfactor:        %d\n", data->profile_widthfactor);
+		fprintf(stderr,"dbg2       profile_slopethreshold:     %f\n", data->profile_slopethreshold);
+
 		/* projection controls */
 		fprintf(stderr,"dbg2       primary_grid_projection_mode:   %d\n", data->primary_grid_projection_mode);
 		fprintf(stderr,"dbg2       primary_grid_projection_id:     %s\n", data->primary_grid_projection_id);
@@ -1184,6 +1204,28 @@ int mbview_getdataptr(int verbose, int instance, struct mbview_struct **datahand
 				fprintf(stderr,"dbg2       nav %d %d stbd ydisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointstbd.ydisplay[0]);
 				fprintf(stderr,"dbg2       nav %d %d stbd zdisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointstbd.zdisplay[0]);
 				}
+			}
+		
+		/* profile data */
+		fprintf(stderr,"dbg2       profile_view_mode:         %d\n",data->profile_view_mode);
+		fprintf(stderr,"dbg2       source:                    %d\n",data->profile.source);
+		fprintf(stderr,"dbg2       source_name:               %s\n",data->profile.source_name);
+		fprintf(stderr,"dbg2       length:                    %f\n",data->profile.length);
+		fprintf(stderr,"dbg2       zmin:                      %f\n",data->profile.zmin);
+		fprintf(stderr,"dbg2       zmax:                      %f\n",data->profile.zmax);
+		fprintf(stderr,"dbg2       npoints:                   %d\n",data->profile.npoints);
+		fprintf(stderr,"dbg2       npoints_alloc:             %d\n",data->profile.npoints_alloc);
+		for (i=0;i<data->profile.npoints;i++)
+			{
+			fprintf(stderr,"dbg2       profile %d boundary: %d\n",i,j,data->profile.points[i].boundary);
+			fprintf(stderr,"dbg2       profile %d xgrid:    %f\n",i,j,data->profile.points[i].xgrid);
+			fprintf(stderr,"dbg2       profile %d ygrid:    %f\n",i,j,data->profile.points[i].ygrid);
+			fprintf(stderr,"dbg2       profile %d xlon:     %f\n",i,j,data->profile.points[i].xlon);
+			fprintf(stderr,"dbg2       profile %d ylat:     %f\n",i,j,data->profile.points[i].ylat);
+			fprintf(stderr,"dbg2       profile %d zdata:    %f\n",i,j,data->profile.points[i].zdata);
+			fprintf(stderr,"dbg2       profile %d distance: %f\n",i,j,data->profile.points[i].distance);
+			fprintf(stderr,"dbg2       profile %d xdisplay: %f\n",i,j,data->profile.points[i].xdisplay);
+			fprintf(stderr,"dbg2       profile %d ydisplay: %f\n",i,j,data->profile.points[i].ydisplay);
 			}
 
 		fprintf(stderr,"dbg2       error:                     %d\n",*error);
@@ -1484,6 +1526,11 @@ int mbview_open(int verbose, int instance, int *error)
 		/* contour controls */
 		fprintf(stderr,"dbg2       contour_interval:           %f\n", data->slope_magnitude);
 
+		/* profile controls */
+		fprintf(stderr,"dbg2       profile_exageration:        %f\n", data->profile_exageration);
+		fprintf(stderr,"dbg2       profile_widthfactor:        %d\n", data->profile_widthfactor);
+		fprintf(stderr,"dbg2       profile_slopethreshold:     %f\n", data->profile_slopethreshold);
+
 		/* projection controls */
 		fprintf(stderr,"dbg2       primary_grid_projection_mode:   %d\n", data->primary_grid_projection_mode);
 		fprintf(stderr,"dbg2       primary_grid_projection_id:     %s\n", data->primary_grid_projection_id);
@@ -1642,6 +1689,27 @@ int mbview_open(int verbose, int instance, int *error)
 				}
 			}
 
+		/* profile data */
+		fprintf(stderr,"dbg2       profile_view_mode:         %d\n",data->profile_view_mode);
+		fprintf(stderr,"dbg2       source:                    %d\n",data->profile.source);
+		fprintf(stderr,"dbg2       source_name:               %s\n",data->profile.source_name);
+		fprintf(stderr,"dbg2       length:                    %f\n",data->profile.length);
+		fprintf(stderr,"dbg2       zmin:                      %f\n",data->profile.zmin);
+		fprintf(stderr,"dbg2       zmax:                      %f\n",data->profile.zmax);
+		fprintf(stderr,"dbg2       npoints:                   %d\n",data->profile.npoints);
+		fprintf(stderr,"dbg2       npoints_alloc:             %d\n",data->profile.npoints_alloc);
+		for (i=0;i<data->profile.npoints;i++)
+			{
+			fprintf(stderr,"dbg2       profile %d boundary: %d\n",i,j,data->profile.points[i].boundary);
+			fprintf(stderr,"dbg2       profile %d xgrid:    %f\n",i,j,data->profile.points[i].xgrid);
+			fprintf(stderr,"dbg2       profile %d ygrid:    %f\n",i,j,data->profile.points[i].ygrid);
+			fprintf(stderr,"dbg2       profile %d xlon:     %f\n",i,j,data->profile.points[i].xlon);
+			fprintf(stderr,"dbg2       profile %d ylat:     %f\n",i,j,data->profile.points[i].ylat);
+			fprintf(stderr,"dbg2       profile %d zdata:    %f\n",i,j,data->profile.points[i].zdata);
+			fprintf(stderr,"dbg2       profile %d distance: %f\n",i,j,data->profile.points[i].distance);
+			fprintf(stderr,"dbg2       profile %d xdisplay: %f\n",i,j,data->profile.points[i].xdisplay);
+			fprintf(stderr,"dbg2       profile %d ydisplay: %f\n",i,j,data->profile.points[i].ydisplay);
+			}
 		}
 		
 	/* set active */
@@ -1681,11 +1749,16 @@ int mbview_open(int verbose, int instance, int *error)
     		XtManageChild(view->mb3dview.MB3DView);
     		XtPopup(XtParent(view->mainWindow), XtGrabNone);
 
-		/* get resize events - add an event handler */
+		/* get resize events - add event handlers */
 		XtAddEventHandler(view->topLevelShell, 
 					StructureNotifyMask, 
 					False, 
 					mbview_resize, 
+					(XtPointer)instance);
+		XtAddEventHandler(view->mb3dview.mbview_form_profile, 
+					StructureNotifyMask, 
+					False, 
+					do_mbview_profile_resize, 
 					(XtPointer)instance);
 
 		/* intitialize OpenGL graphics */
@@ -1801,6 +1874,7 @@ int mbview_open(int verbose, int instance, int *error)
 		XtSetValues(view->mb3dview.mbview_toggleButton_colortable_gray, args, ac);
 		XtSetValues(view->mb3dview.mbview_toggleButton_colortable_flat, args, ac);
 		XtSetValues(view->mb3dview.mbview_toggleButton_colortable_sealevel, args, ac);
+		XtSetValues(view->mb3dview.mbview_toggleButton_profile, args, ac);
 		XtSetValues(view->mb3dview.mbview_cascadeButton_controls, args, ac);
 		XtSetValues(view->mb3dview.mbview_pulldownMenu_controls, args, ac);
 		XtSetValues(view->mb3dview.mbview_pushButton_colorbounds, args, ac);
@@ -1957,6 +2031,15 @@ int mbview_open(int verbose, int instance, int *error)
 		XtSetValues(view->mb3dview.mbview_label_projection, args, ac);
 		XtSetValues(view->mb3dview.mbview_pushButton_projection_dismiss, args, ac);
 		XtSetValues(view->glwmda, args, ac);
+		XtSetValues(view->mb3dview.mbview_dialogShell_profile, args, ac);
+		XtSetValues(view->mb3dview.mbview_form_profile, args, ac);
+		XtSetValues(view->mb3dview.mbview_scrolledWindow_profile, args, ac);
+		XtSetValues(view->mb3dview.mbview_profile_label_info, args, ac);
+		XtSetValues(view->mb3dview.mbview_scale_profile_exager, args, ac);
+		XtSetValues(view->mb3dview.mbview_scale_profile_width, args, ac);
+		XtSetValues(view->mb3dview.mbview_scale_profile_slope, args, ac);
+		XtSetValues(view->mb3dview.mbview_profile_pushButton_dismiss, args, ac);
+		XtSetValues(view->mb3dview.mbview_drawingArea_profile, args, ac);
 
 		/* set the initialization flag */
 		view->init = MBV_WINDOW_VISIBLE;
@@ -2174,6 +2257,7 @@ int mbview_update_sensitivity(int verbose, int instance, int *error)
 	XtSetValues(view->mb3dview.mbview_toggleButton_overlay_illumination, args, ac);
 	XtSetValues(view->mb3dview.mbview_toggleButton_overlay_slope, args, ac);
 	XtSetValues(view->mb3dview.mbview_toggleButton_overlay_contour, args, ac);
+	XtSetValues(view->mb3dview.mbview_toggleButton_profile, args, ac);
 	XtSetValues(view->mb3dview.mbview_radioBox_slopemode, args, ac);
 	XtSetValues(view->mb3dview.mbview_toggleButton_slope_ctoh, args, ac);
 	XtSetValues(view->mb3dview.mbview_toggleButton_slope_htoc, args, ac);
@@ -2616,9 +2700,9 @@ mbview_resize( Widget w, XtPointer client_data, XEvent *event, Boolean *unused)
 		    
 	    /* get new shell size */
 	    XtVaGetValues(view->topLevelShell, 
-	    XmNwidth, &width, 
-	    XmNheight, &height, 
-	    NULL);
+	    	XmNwidth, &width, 
+	    	XmNheight, &height, 
+	   	NULL);
 
 	    /* do this only if the shell was REALLY resized and not just moved */
 	    if (data->width != width - LEFT_WIDTH
@@ -3122,6 +3206,7 @@ do_mbview_glwda_input( Widget w, XtPointer client_data, XtPointer call_data)
 	int actual;
 	int shade_mode;
 	int replotall;
+	int replotprofile;
 	int i;
 
     /* get instance */
@@ -3138,6 +3223,9 @@ acs->width, acs->height, instance);
     
     /* set replotall to MB_NO */
     replotall = MB_NO;
+    
+    /* set replotprofile to MB_NO */
+    replotprofile = MB_NO;
 	
     /* get event */
     event = acs->event;
@@ -3175,6 +3263,9 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 		    mbview_pick(instance, MBV_PICK_DOWN,
 				    view->button_down_x, 
 				    data->height - view->button_down_y);
+
+		    /* set replotprofile */
+		    replotprofile = MB_YES;
 			    
 		    /* replot */
 		    mbview_plotlow(instance);
@@ -3226,6 +3317,9 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 
 		    /* set replotall */
 		    replotall = MB_YES;
+
+		    /* set replotprofile */
+		    replotprofile = MB_YES;
 
 		    /* replot */
 		    mbview_plotlow(instance);
@@ -3360,6 +3454,9 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 
 		    /* set replotall */
 		    replotall = MB_YES;
+
+		    /* set replotprofile */
+		    replotprofile = MB_YES;
 
 		    /* replot */
 		    mbview_plotlow(instance);
@@ -3515,6 +3612,9 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 		    /* set replotall */
 		    replotall = MB_YES;
 
+		    /* set replotprofile */
+		    replotprofile = MB_YES;
+
 		    /* replot */
 		    mbview_plotlow(instance);
 		    }			    
@@ -3578,6 +3678,9 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 		    mbview_pick(instance, MBV_PICK_MOVE,
 				view->button_move_x, 
 				data->height - view->button_move_y);
+
+		    /* set replotprofile */
+		    replotprofile = MB_YES;
 			
 		    /* replot */
 		    mbview_plotlow(instance);
@@ -3629,6 +3732,9 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 
 		    /* set replotall */
 		    replotall = MB_YES;
+
+		    /* set replotprofile */
+		    replotprofile = MB_YES;
 
 		    /* replot */
 		    mbview_plotlow(instance);
@@ -3848,6 +3954,9 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 
 		    /* set replotall */
 		    replotall = MB_YES;
+
+		    /* set replotprofile */
+		    replotprofile = MB_YES;
 
 		    /* replot */
 		    mbview_plotlow(instance);
@@ -4127,6 +4236,9 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 		    /* set replotall */
 		    replotall = MB_YES;
 
+		    /* set replotprofile */
+		    replotprofile = MB_YES;
+
 		    /* replot */
 		    mbview_plotlow(instance);
 		    }
@@ -4150,7 +4262,7 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 		    }
 
 		} /* end of right button events */
-
+	  
 	  /* if needed replot all active instances */
 	  if (replotall == MB_YES)
 		{
@@ -4189,6 +4301,9 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 		    mbview_pick(instance, MBV_PICK_UP,
 				    view->button_up_x, 
 				    data->height - view->button_up_y);
+
+		    /* set replotprofile */
+		    replotprofile = MB_YES;
 			    
 		    /* replot */
 		    mbview_plotlow(instance);
@@ -4223,6 +4338,9 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 		    {				    		
 		    /* set replotall */
 		    replotall = MB_YES;
+
+		    /* set replotprofile */
+		    replotprofile = MB_YES;
 		    }
 		}
 
@@ -4279,6 +4397,9 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 		    {				    		
 		    /* set replotall */
 		    replotall = MB_YES;
+
+		    /* set replotprofile */
+		    replotprofile = MB_YES;
 		    }
 					    
 		/* handle selecting navigation */
@@ -4291,6 +4412,9 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 
 		    /* set replotall */
 		    replotall = MB_YES;
+
+		    /* set replotprofile */
+		    replotprofile = MB_YES;
 
 		    /* replot */
 		    mbview_plotlow(instance);
@@ -4333,6 +4457,9 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 		    {				    		
 		    /* set replotall */
 		    replotall = MB_YES;
+
+		    /* set replotprofile */
+		    replotprofile = MB_YES;
 		    }
 					    
 		/* handle deselecting navigation */
@@ -4345,6 +4472,9 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 
 		    /* set replotall */
 		    replotall = MB_YES;
+
+		    /* set replotprofile */
+		    replotprofile = MB_YES;
 
 		    /* replot */
 		    mbview_plotlow(instance);
@@ -4400,6 +4530,21 @@ fprintf(stderr,"KeyPress event\n");
 	  } /* end of key switch */
 
        } /* end of key press events */
+       
+       /* if needed replot profile */
+       if (replotprofile == MB_YES)
+	  {
+	  /* extract profile if pick is right type */
+	  if (data->pickinfo_mode == MBV_PICK_TWOPOINT)
+	     mbview_extract_pick_profile(instance);
+	  else if (data->pickinfo_mode == MBV_PICK_ROUTE)
+	     mbview_extract_route_profile(instance);
+	  else if (data->pickinfo_mode == MBV_PICK_NAV)
+	     mbview_extract_nav_profile(instance);
+
+	  /* now replot profile */
+	  mbview_plotprofile(instance);
+	  }
  
      } /* end of inputs from window */
 
@@ -4490,6 +4635,16 @@ int mbview_destroy(int verbose, int instance, int destroywidgets, int *error)
 	    /* destroy the widgets */
 	    if (destroywidgets == MB_YES)
 		{
+		/* delete old glx_context if it exists */
+		if (view->prglx_init == MB_YES)
+		    {
+		    /* make correct window current for OpenGL */
+		    GLwDrawingAreaMakeCurrent(view->prglwmda, view->prglx_context);
+
+		    glXDestroyContext(view->dpy, view->prglx_context);
+		    view->prglx_init = MB_NO;
+		    }
+
 		/* delete old glx_context if it exists */
 		if (view->glx_init == MB_YES)
 		    {
@@ -7381,7 +7536,7 @@ fprintf(stderr,"do_mbview_sitelistselect:\n");
 		shared.shareddata.site_selected = position_list[0] - 1;
 		}
 		
-	/* get first valid instance */
+	/* redraw valid instances */
 	instance = -1;
 	for (i=0;i<MBV_MAX_WINDOWS;i++)
 		{
@@ -7396,17 +7551,14 @@ fprintf(stderr,"do_mbview_sitelistselect:\n");
 			/* set pick annotation */
 			mbviews[i].data.pickinfo_mode = MBV_PICK_SITE;
 			mbview_pick_text(i);
+			/* draw */
+if (mbv_verbose >= 2)
+fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_sitelistselect instance:%d\n",instance);
+			mbview_plotlowhigh(i);
+			mbview_plotlowhighall(i);
 			}
 		}
 		
-	if (instance >= 0)
-		{
-		/* draw */
-if (mbv_verbose >= 2)
-fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_sitelistselect\n");
-		mbview_plotlowhigh(instance);
-		mbview_plotlowhighall(instance);
-		}
 }
 /*------------------------------------------------------------------------------*/
 
@@ -7449,7 +7601,7 @@ fprintf(stderr,"do_mbview_routelistselect:\n");
 			}
 		}
 		
-	/* get first valid instance */
+	/* redraw valid instances */
 	instance = -1;
 	for (i=0;i<MBV_MAX_WINDOWS;i++)
 		{
@@ -7464,16 +7616,13 @@ fprintf(stderr,"do_mbview_routelistselect:\n");
 			/* set pick annotation */
 			mbviews[i].data.pickinfo_mode = MBV_PICK_ROUTE;
 			mbview_pick_text(i);
-			}
-		}
-		
-	if (instance >= 0)
-		{
-		/* draw */
+
+			/* draw */
 if (mbv_verbose >= 2)
 fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_routelistselect\n");
-		mbview_plotlowhigh(instance);
-		mbview_plotlowhighall(instance);
+			mbview_plotlowhigh(i);
+			mbview_plotlowhighall(i);
+			}
 		}
 }
 /*------------------------------------------------------------------------------*/
@@ -7552,7 +7701,7 @@ fprintf(stderr,"do_mbview_navlistselect:\n");
 			&& shared.shareddata.nav_point_selected[0] == shared.shareddata.nav_point_selected[1])
 		shared.shareddata.navpick_type = MBV_PICK_ONEPOINT;
 		
-	/* get first valid instance */
+	/* redraw valid instances */
 	instance = -1;
 	for (i=0;i<MBV_MAX_WINDOWS;i++)
 		{
@@ -7570,16 +7719,20 @@ fprintf(stderr,"do_mbview_navlistselect:\n");
 			/* set pick annotation */
 			mbviews[i].data.pickinfo_mode = MBV_PICK_NAV;
 			mbview_pick_text(i);
-			}
-		}
-		
-	if (instance >= 0)
-		{
-		/* draw */
+			
+			/* draw */
 if (mbv_verbose >= 2)
-fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_sitelistselect\n");
-		mbview_plotlowhigh(instance);
-		mbview_plotlowhighall(instance);
+fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_sitelistselect: instance:%d\n", i);
+			mbview_plotlowhigh(i);
+			mbview_plotlowhighall(i);
+	  
+			/* extract profile if pick is right type */
+			if (mbviews[i].data.pickinfo_mode == MBV_PICK_NAV)
+			   mbview_extract_nav_profile(i);
+
+			/* now replot profile */
+			mbview_plotprofile(i);
+			}
 		}
 }
 
@@ -7632,20 +7785,17 @@ fprintf(stderr,"do_mbview_sitelist_delete:\n");
 				if (mbviews[i].data.pickinfo_mode == MBV_PICK_SITE)
 					mbviews[i].data.pickinfo_mode == MBV_PICK_NONE;
 				mbview_pick_text(i);
+
+				/* draw */
+if (mbv_verbose >= 2)
+fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_sitelist_delete\n");
+				mbview_plotlowhigh(i);
+				mbview_plotlowhighall(i);
 				}
 			}
 
 		/* update site list */
 		mbview_updatesitelist();
-		}
-
-	if (instance >= 0)
-		{
-		/* draw */
-if (mbv_verbose >= 2)
-fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_sitelist_delete\n");
-		mbview_plotlowhigh(instance);
-		mbview_plotlowhighall(instance);
 		}
 }
 
@@ -7709,20 +7859,17 @@ fprintf(stderr,"do_mbview_routelist_delete:\n");
 				if (mbviews[i].data.pickinfo_mode == MBV_PICK_ROUTE)
 					mbviews[i].data.pickinfo_mode == MBV_PICK_NONE;
 				mbview_pick_text(i);
+
+				/* draw */
+if (mbv_verbose >= 2)
+fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_routelist_delete\n");
+				mbview_plotlowhigh(i);
+				mbview_plotlowhighall(i);
 				}
 			}
 
 		/* update route list */
 		mbview_updateroutelist();
-		}
-
-	if (instance >= 0)
-		{
-		/* draw */
-if (mbv_verbose >= 2)
-fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_routelist_delete\n");
-		mbview_plotlowhigh(instance);
-		mbview_plotlowhighall(instance);
 		}
 }
 /*------------------------------------------------------------------------------*/
@@ -7776,20 +7923,24 @@ fprintf(stderr,"do_mbview_navlist_delete:\n");
 				if (mbviews[i].data.pickinfo_mode == MBV_PICK_NAV)
 					mbviews[i].data.pickinfo_mode == MBV_PICK_NONE;
 				mbview_pick_text(i);
+
+				/* draw */
+if (mbv_verbose >= 2)
+fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_navlist_delete\n");
+				mbview_plotlowhigh(instance);
+				mbview_plotlowhighall(instance);
+	  
+				/* extract profile if pick is right type */
+				if (mbviews[i].data.pickinfo_mode == MBV_PICK_NAV)
+			 	  mbview_extract_nav_profile(i);
+
+				/* now replot profile */
+				mbview_plotprofile(i);
 				}
 			}
 
 		/* update nav list */
 		mbview_updatenavlist();
-		}
-
-	if (instance >= 0)
-		{
-		/* draw */
-if (mbv_verbose >= 2)
-fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_navlist_delete\n");
-		mbview_plotlowhigh(instance);
-		mbview_plotlowhighall(instance);
 		}
 }
 
@@ -7971,6 +8122,15 @@ fprintf(stderr,"do_mbview_clearpicks\n");
 		{
 		data->area_type = MBV_AREA_NONE;
 		replotinstance = MB_YES;
+		}
+		
+	/* clear local profile */
+	if (data->profile.npoints > 0)
+		{
+		data->profile.npoints = 0;
+		data->profile.source = MBV_PROFILE_NONE;
+		if (data->profile_view_mode == MBV_VIEW_ON)
+			mbview_plotprofile(instance);
 		}
 
 	/* clear shared picks */		
@@ -8438,3 +8598,254 @@ int do_mbview_workfunction(XtPointer client_data)
 
 /*------------------------------------------------------------------------------*/
 
+
+void
+do_mbview_profile_dismiss( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    	int	error;
+	int	instance;
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
+
+	/* get instance */
+	ac = 0;
+	XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
+	XtGetValues(w, args, ac);
+
+if (mbv_verbose >= 2)
+fprintf(stderr,"do_mbview_profile_dismiss: instance:%d\n", instance);
+	    
+	/* get view */
+	view = &(mbviews[instance]);
+	data = &(view->data);
+
+	if (data->profile_view_mode == MBV_VIEW_ON)
+		{
+		/* destroy opengl context */
+		mbview_destroy_prglx(instance);
+
+		/* turn off profile viewing */
+    		XtUnmanageChild(view->mb3dview.mbview_form_profile);
+		data->profile_view_mode = MBV_VIEW_OFF;
+		}
+		
+	/* reset the togglebutton */
+	ac = 0;
+	if (data->profile_view_mode == MBV_VIEW_ON)
+		{
+		XtSetArg(args[ac], XmNset, XmSET); ac++;
+		}
+	else
+		{
+		XtSetArg(args[ac], XmNset, XmUNSET); ac++;
+		}
+	XtSetValues(view->mb3dview.mbview_toggleButton_profile, args, ac);
+	
+}
+/*------------------------------------------------------------------------------*/
+
+void
+do_mbview_view_profile( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    	int	error;
+	int	instance;
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
+
+	/* get instance */
+	ac = 0;
+	XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
+	XtGetValues(w, args, ac);
+
+if (mbv_verbose >= 2)
+fprintf(stderr,"do_mbview_view_profile: instance:%d\n", instance);
+	    
+	/* get view */
+	view = &(mbviews[instance]);
+	data = &(view->data);
+	
+	if (data->profile_view_mode == MBV_VIEW_OFF)
+		{
+
+    		XtManageChild(view->mb3dview.mbview_form_profile);
+		data->profile_view_mode = MBV_VIEW_ON;
+
+		/* intitialize OpenGL graphics */
+		ac = 0;
+		XtSetArg(args[ac], GLwNrgba, TRUE);
+		ac++;
+		XtSetArg(args[ac], GLwNdepthSize, 1);
+		ac++;
+		XtSetArg(args[ac], GLwNdoublebuffer, True);
+		ac++;
+		XtSetArg(args[ac], GLwNallocateBackground, TRUE);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, data->prwidth);
+		ac++;
+		XtSetArg(args[ac], XmNheight, data->prheight);
+		ac++;
+		view->dpy = (Display *) XtDisplay(view->mb3dview.MB3DView);
+		view->prglwmda = GLwCreateMDrawingArea(view->mb3dview.mbview_drawingArea_profile, 
+			"glwidget", args, ac);
+		XtManageChild (view->prglwmda);
+		XSelectInput(view->dpy, XtWindow(view->prglwmda), 
+			(ButtonPressMask | ButtonReleaseMask | ButtonMotionMask 
+				| KeyPressMask | KeyReleaseMask | ExposureMask ) );
+
+		/* initialize the opengl widget */
+		mbview_reset_prglx(instance);
+
+		/* draw the profile */
+		mbview_plotprofile(instance);
+		}
+		
+	/* reset the togglebutton */
+	ac = 0;
+	if (data->profile_view_mode == MBV_VIEW_ON)
+		{
+		XtSetArg(args[ac], XmNset, XmSET); ac++;
+		}
+	else
+		{
+		XtSetArg(args[ac], XmNset, XmUNSET); ac++;
+		}
+	XtSetValues(view->mb3dview.mbview_toggleButton_profile, args, ac);
+	
+}
+/*------------------------------------------------------------------------------*/
+
+void
+do_mbview_profile_resize( Widget w, XtPointer client_data, XEvent *event, Boolean *unused)
+{
+	int	instance;
+	Dimension	width;
+	Dimension	height;
+	XConfigureEvent *cevent = (XConfigureEvent *) event;
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
+	
+if (mbv_verbose >= 0)
+fprintf(stderr,"do_mbview_profile_resize: instance:%d\n", instance);
+
+	/* do this only if a resize event happens */
+	if (cevent->type == ConfigureNotify)
+		{
+		/* get view */
+		instance = (int)client_data;
+		view = &(mbviews[instance]);
+		data = &(view->data);
+
+		/* get new shell size */
+		XtVaGetValues(view->mb3dview.mbview_scrolledWindow_profile, 
+			XmNwidth, &width, 
+			XmNheight, &height, 
+			NULL);
+fprintf(stderr,"view->mbview_scrolledWindow_profile: width:%d height:%d\n",width,height);
+				
+		/* reinitialize the opengl widget */
+		mbview_reset_prglx(instance);
+
+		/* draw the profile */
+		mbview_plotprofile(instance);
+
+		}	
+}
+/*------------------------------------------------------------------------------*/
+
+void
+do_mbview_profile_exager( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmScaleCallbackStruct *acs = (XmScaleCallbackStruct*)call_data;
+	int	instance;
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
+	int	profile_exager;
+
+	/* get instance */
+	ac = 0;
+	XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
+	XtGetValues(w, args, ac);
+
+if (mbv_verbose >= 2)
+fprintf(stderr,"do_mbview_profile_exager: instance:%d\n", instance);
+	    
+	/* get view */
+	view = &(mbviews[instance]);
+	data = &(view->data);
+
+	profile_exager = acs->value;
+	data->profile_exageration = 0.1 * ((double)profile_exager);
+				
+	/* reinitialize the opengl widget */
+	mbview_reset_prglx(instance);
+
+	/* draw the profile */
+	mbview_plotprofile(instance);
+}
+/*------------------------------------------------------------------------------*/
+
+void
+do_mbview_profile_width( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmScaleCallbackStruct *acs = (XmScaleCallbackStruct*)call_data;
+	int	instance;
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
+	int	profile_widthfactor;
+
+	/* get instance */
+	ac = 0;
+	XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
+	XtGetValues(w, args, ac);
+
+if (mbv_verbose >= 2)
+fprintf(stderr,"do_mbview_profile_width: instance:%d\n", instance);
+	    
+	/* get view */
+	view = &(mbviews[instance]);
+	data = &(view->data);
+
+	profile_widthfactor = acs->value;
+	data->profile_widthfactor = profile_widthfactor;
+				
+	/* reinitialize the opengl widget */
+	mbview_reset_prglx(instance);
+
+	/* draw the profile */
+	mbview_plotprofile(instance);
+}
+/*------------------------------------------------------------------------------*/
+
+void
+do_mbview_profile_slope( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmScaleCallbackStruct *acs = (XmScaleCallbackStruct*)call_data;
+	int	instance;
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
+	int	profile_slopethreshold;
+
+	/* get instance */
+	ac = 0;
+	XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
+	XtGetValues(w, args, ac);
+
+if (mbv_verbose >= 2)
+fprintf(stderr,"do_mbview_profile_slope: instance:%d\n", instance);
+	    
+	/* get view */
+	view = &(mbviews[instance]);
+	data = &(view->data);
+
+	profile_slopethreshold = acs->value;
+	data->profile_slopethreshold = 0.01 * ((double)profile_slopethreshold);
+				
+	/* reinitialize the opengl widget */
+	mbview_reset_prglx(instance);
+
+	/* draw the profile */
+	mbview_plotprofile(instance);
+}
+/*------------------------------------------------------------------------------*/

@@ -84,6 +84,8 @@ typedef struct _MB3DViewData
     Widget mbview_toggleButton_colortable_gray;
     Widget mbview_toggleButton_colortable_flat;
     Widget mbview_toggleButton_colortable_sealevel;
+    Widget separator1;
+    Widget mbview_toggleButton_profile;
     Widget mbview_cascadeButton_controls;
     Widget mbview_pulldownMenu_controls;
     Widget mbview_pushButton_colorbounds;
@@ -246,6 +248,15 @@ typedef struct _MB3DViewData
     Widget mbview_toggleButton_spheroid;
     Widget mbview_label_projection;
     Widget mbview_pushButton_projection_dismiss;
+    Widget mbview_dialogShell_profile;
+    Widget mbview_form_profile;
+    Widget mbview_scale_profile_width;
+    Widget mbview_scale_profile_slope;
+    Widget mbview_scrolledWindow_profile;
+    Widget mbview_drawingArea_profile;
+    Widget mbview_profile_label_info;
+    Widget mbview_scale_profile_exager;
+    Widget mbview_profile_pushButton_dismiss;
     
     /**
      * All methods and data..

@@ -27,6 +27,8 @@
 #include <Xm/MwmUtil.h>
 #include <Xm/TextF.h>
 #include <Xm/Scale.h>
+#include <Xm/Form.h>
+#include <Xm/ScrolledW.h>
 #include <Xm/BulletinB.h>
 #include <Xm/PushB.h>
 #include <Xm/RowColumn.h>
@@ -39,6 +41,8 @@
 #include <Xm/MwmUtil.h>
 #include <Xm/TextF.h>
 #include <Xm/Scale.h>
+#include <Xm/Form.h>
+#include <Xm/ScrolledW.h>
 #include "MB3DView.h"
 
 /**
@@ -85,6 +89,7 @@ extern void do_mbview_colortable_muted(Widget, XtPointer, XtPointer);
 extern void do_mbview_colortable_gray(Widget, XtPointer, XtPointer);
 extern void do_mbview_colortable_flat(Widget, XtPointer, XtPointer);
 extern void do_mbview_colortable_sealevel(Widget, XtPointer, XtPointer);
+extern void do_mbview_view_profile(Widget, XtPointer, XtPointer);
 extern void do_mbview_colorboundspopup(Widget, XtPointer, XtPointer);
 extern void do_mbview_2dparmspopup(Widget, XtPointer, XtPointer);
 extern void do_mbview_3dparmspopup(Widget, XtPointer, XtPointer);
@@ -112,6 +117,10 @@ extern void do_mbview_projection_popdown(Widget, XtPointer, XtPointer);
 extern void do_mbview_display_geographic(Widget, XtPointer, XtPointer);
 extern void do_mbview_display_utm(Widget, XtPointer, XtPointer);
 extern void do_mbview_display_spheroid(Widget, XtPointer, XtPointer);
+extern void do_mbview_profile_width(Widget, XtPointer, XtPointer);
+extern void do_mbview_profile_slope(Widget, XtPointer, XtPointer);
+extern void do_mbview_profile_exager(Widget, XtPointer, XtPointer);
+extern void do_mbview_profile_dismiss(Widget, XtPointer, XtPointer);
 
 /*
  * This table is used to define class resources that are placed
@@ -164,6 +173,8 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
     XtInitializeWidgetClass((WidgetClass)xmBulletinBoardWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmTextFieldWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmScaleWidgetClass);
+    XtInitializeWidgetClass((WidgetClass)xmFormWidgetClass);
+    XtInitializeWidgetClass((WidgetClass)xmScrolledWindowWidgetClass);
     /**
      * Setup app-defaults fallback table if not already done.
      */
@@ -179,8 +190,8 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
     
     ac = 0;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNx, 12); ac++;
-    XtSetArg(args[ac], XmNy, 202); ac++;
+    XtSetArg(args[ac], XmNx, 76); ac++;
+    XtSetArg(args[ac], XmNy, 425); ac++;
     XtSetArg(args[ac], XmNwidth, 801); ac++;
     XtSetArg(args[ac], XmNheight, 814); ac++;
     class_in->MB3DView = XmCreateBulletinBoard(parent,
@@ -611,7 +622,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
     XtSetArg(args[ac], XmNx, 0); ac++;
     XtSetArg(args[ac], XmNy, 0); ac++;
     XtSetArg(args[ac], XmNwidth, 211); ac++;
-    XtSetArg(args[ac], XmNheight, 492); ac++;
+    XtSetArg(args[ac], XmNheight, 518); ac++;
     class_in->mbview_pulldownMenu_view = XmCreatePulldownMenu(XtParent(class_in->mbview_cascadeButton_view),
         (char *)"mbview_pulldownMenu_view",
         args, 
@@ -1124,6 +1135,37 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
     }
     
     XtAddCallback(class_in->mbview_toggleButton_colortable_sealevel, XmNvalueChangedCallback, do_mbview_colortable_sealevel, (XtPointer)0);
+    
+    ac = 0;
+    class_in->separator1 = XmCreateSeparator(class_in->mbview_pulldownMenu_view,
+        (char *)"separator1",
+        args, 
+        ac);
+    XtManageChild(class_in->separator1);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"Profile", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->mbview_toggleButton_profile = XmCreateToggleButton(class_in->mbview_pulldownMenu_view,
+            (char *)"mbview_toggleButton_profile",
+            args, 
+            ac);
+        XtManageChild(class_in->mbview_toggleButton_profile);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(class_in->mbview_toggleButton_profile, XmNvalueChangedCallback, do_mbview_view_profile, (XtPointer)0);
     
     ac = 0;
     XtSetArg(args[ac], XmNsubMenuId, class_in->mbview_pulldownMenu_view); ac++;
@@ -1805,9 +1847,237 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
     XtManageChild(class_in->mbview_drawingArea_mbview);
     
     ac = 0;
+    XtSetArg(args[ac], XmNx, 476); ac++;
+    XtSetArg(args[ac], XmNy, 549); ac++;
+    XtSetArg(args[ac], XmNwidth, 934); ac++;
+    XtSetArg(args[ac], XmNheight, 375); ac++;
+    class_in->mbview_dialogShell_profile = XmCreateDialogShell(class_in->MB3DView,
+        (char *)"mbview_dialogShell_profile",
+        args, 
+        ac);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->mbview_dialogShell_profile, (char *)"MBview Profile Display", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNdialogTitle, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
+        XtSetArg(args[ac], XmNx, 476); ac++;
+        XtSetArg(args[ac], XmNy, 549); ac++;
+        XtSetArg(args[ac], XmNwidth, 934); ac++;
+        XtSetArg(args[ac], XmNheight, 375); ac++;
+        class_in->mbview_form_profile = XtCreateWidget((char *)"mbview_form_profile",
+            xmFormWidgetClass,
+            class_in->mbview_dialogShell_profile,
+            args, 
+            ac);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->mbview_form_profile, (char *)"Display Width Multiple", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNtitleString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNminimum, 1); ac++;
+        XtSetArg(args[ac], XmNdecimalPoints, 0); ac++;
+        XtSetArg(args[ac], XmNvalue, 1); ac++;
+        XtSetArg(args[ac], XmNmaximum, 5); ac++;
+        XtSetArg(args[ac], XmNshowArrows, TRUE); ac++;
+        XtSetArg(args[ac], XmNscaleMultiple, 1); ac++;
+        XtSetArg(args[ac], XmNshowValue, TRUE); ac++;
+        XtSetArg(args[ac], XmNorientation, XmHORIZONTAL); ac++;
+        XtSetArg(args[ac], XmNx, 10); ac++;
+        XtSetArg(args[ac], XmNy, 263); ac++;
+        XtSetArg(args[ac], XmNwidth, 270); ac++;
+        XtSetArg(args[ac], XmNheight, 62); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(class_in->mbview_form_profile, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->mbview_scale_profile_width = XmCreateScale(class_in->mbview_form_profile,
+            (char *)"mbview_scale_profile_width",
+            args, 
+            ac);
+        XtManageChild(class_in->mbview_scale_profile_width);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(class_in->mbview_scale_profile_width, XmNvalueChangedCallback, do_mbview_profile_width, (XtPointer)0);
+    XtAddCallback(class_in->mbview_scale_profile_width, XmNdragCallback, do_mbview_profile_width, (XtPointer)0);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->mbview_form_profile, (char *)"Slope Threshold", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNtitleString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNminimum, 1); ac++;
+        XtSetArg(args[ac], XmNdecimalPoints, 2); ac++;
+        XtSetArg(args[ac], XmNvalue, 200); ac++;
+        XtSetArg(args[ac], XmNmaximum, 200); ac++;
+        XtSetArg(args[ac], XmNshowArrows, TRUE); ac++;
+        XtSetArg(args[ac], XmNscaleMultiple, 1); ac++;
+        XtSetArg(args[ac], XmNshowValue, TRUE); ac++;
+        XtSetArg(args[ac], XmNorientation, XmHORIZONTAL); ac++;
+        XtSetArg(args[ac], XmNx, 10); ac++;
+        XtSetArg(args[ac], XmNy, 200); ac++;
+        XtSetArg(args[ac], XmNwidth, 270); ac++;
+        XtSetArg(args[ac], XmNheight, 63); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(class_in->mbview_form_profile, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->mbview_scale_profile_slope = XmCreateScale(class_in->mbview_form_profile,
+            (char *)"mbview_scale_profile_slope",
+            args, 
+            ac);
+        XtManageChild(class_in->mbview_scale_profile_slope);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(class_in->mbview_scale_profile_slope, XmNvalueChangedCallback, do_mbview_profile_slope, (XtPointer)0);
+    XtAddCallback(class_in->mbview_scale_profile_slope, XmNdragCallback, do_mbview_profile_slope, (XtPointer)0);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNscrollingPolicy, XmAUTOMATIC); ac++;
+    XtSetArg(args[ac], XmNx, 290); ac++;
+    XtSetArg(args[ac], XmNy, 0); ac++;
+    XtSetArg(args[ac], XmNwidth, 638); ac++;
+    XtSetArg(args[ac], XmNheight, 365); ac++;
+    class_in->mbview_scrolledWindow_profile = XmCreateScrolledWindow(class_in->mbview_form_profile,
+        (char *)"mbview_scrolledWindow_profile",
+        args, 
+        ac);
+    XtManageChild(class_in->mbview_scrolledWindow_profile);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNborderWidth, 1); ac++;
+    XtSetArg(args[ac], XmNbackground, 
+        BX_CONVERT(class_in->mbview_scrolledWindow_profile, (char *)"White", 
+        XmRPixel, 0, &argok)); if (argok) ac++;
+    XtSetArg(args[ac], XmNwidth, 500); ac++;
+    XtSetArg(args[ac], XmNheight, 240); ac++;
+    class_in->mbview_drawingArea_profile = XmCreateDrawingArea(class_in->mbview_scrolledWindow_profile,
+        (char *)"mbview_drawingArea_profile",
+        args, 
+        ac);
+    XtManageChild(class_in->mbview_drawingArea_profile);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->mbview_form_profile, (char *)":::t\"Profile Source: Route \":t\"Length: 1.0 km\":t\"Vertical Range: -100.5 to 512.0 m\"", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNborderWidth, 1); ac++;
+        XtSetArg(args[ac], XmNbackground, 
+            BX_CONVERT(class_in->mbview_form_profile, (char *)"white", 
+            XmRPixel, 0, &argok)); if (argok) ac++;
+        XtSetArg(args[ac], XmNrecomputeSize, False); ac++;
+        XtSetArg(args[ac], XmNx, 10); ac++;
+        XtSetArg(args[ac], XmNy, 0); ac++;
+        XtSetArg(args[ac], XmNwidth, 270); ac++;
+        XtSetArg(args[ac], XmNheight, 130); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(class_in->mbview_form_profile, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->mbview_profile_label_info = XmCreateLabel(class_in->mbview_form_profile,
+            (char *)"mbview_profile_label_info",
+            args, 
+            ac);
+        XtManageChild(class_in->mbview_profile_label_info);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->mbview_form_profile, (char *)"Vertical Exageration", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNtitleString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNdecimalPoints, 1); ac++;
+        XtSetArg(args[ac], XmNvalue, 10); ac++;
+        XtSetArg(args[ac], XmNshowArrows, TRUE); ac++;
+        XtSetArg(args[ac], XmNshowValue, TRUE); ac++;
+        XtSetArg(args[ac], XmNorientation, XmHORIZONTAL); ac++;
+        XtSetArg(args[ac], XmNx, 10); ac++;
+        XtSetArg(args[ac], XmNy, 140); ac++;
+        XtSetArg(args[ac], XmNwidth, 270); ac++;
+        XtSetArg(args[ac], XmNheight, 60); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(class_in->mbview_form_profile, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->mbview_scale_profile_exager = XmCreateScale(class_in->mbview_form_profile,
+            (char *)"mbview_scale_profile_exager",
+            args, 
+            ac);
+        XtManageChild(class_in->mbview_scale_profile_exager);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(class_in->mbview_scale_profile_exager, XmNvalueChangedCallback, do_mbview_profile_exager, (XtPointer)0);
+    XtAddCallback(class_in->mbview_scale_profile_exager, XmNdragCallback, do_mbview_profile_exager, (XtPointer)0);
+     
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->mbview_form_profile, (char *)"Dismiss", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNx, 90); ac++;
+        XtSetArg(args[ac], XmNy, 330); ac++;
+        XtSetArg(args[ac], XmNwidth, 110); ac++;
+        XtSetArg(args[ac], XmNheight, 32); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(class_in->mbview_form_profile, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->mbview_profile_pushButton_dismiss = XmCreatePushButton(class_in->mbview_form_profile,
+            (char *)"mbview_profile_pushButton_dismiss",
+            args, 
+            ac);
+        XtManageChild(class_in->mbview_profile_pushButton_dismiss);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(class_in->mbview_profile_pushButton_dismiss, XmNactivateCallback, do_mbview_profile_dismiss, (XtPointer)0);
+    
+    ac = 0;
     XtSetArg(args[ac], XmNtitle, "Projections"); ac++;
-    XtSetArg(args[ac], XmNx, 458); ac++;
-    XtSetArg(args[ac], XmNy, 369); ac++;
+    XtSetArg(args[ac], XmNx, 1338); ac++;
+    XtSetArg(args[ac], XmNy, 479); ac++;
     XtSetArg(args[ac], XmNwidth, 365); ac++;
     XtSetArg(args[ac], XmNheight, 288); ac++;
     class_in->mbview_dialogShell_projection = XmCreateDialogShell(class_in->MB3DView,
@@ -1817,8 +2087,8 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
     
     ac = 0;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNx, 458); ac++;
-    XtSetArg(args[ac], XmNy, 369); ac++;
+    XtSetArg(args[ac], XmNx, 1338); ac++;
+    XtSetArg(args[ac], XmNy, 479); ac++;
     XtSetArg(args[ac], XmNwidth, 365); ac++;
     XtSetArg(args[ac], XmNheight, 288); ac++;
     class_in->mbview_bulletinBoard_projection = XtCreateWidget((char *)"mbview_bulletinBoard_projection",
@@ -2005,8 +2275,8 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
     XtAddCallback(class_in->mbview_pushButton_projection_dismiss, XmNactivateCallback, do_mbview_projection_popdown, (XtPointer)0);
     
     ac = 0;
-    XtSetArg(args[ac], XmNx, 547); ac++;
-    XtSetArg(args[ac], XmNy, 405); ac++;
+    XtSetArg(args[ac], XmNx, 1427); ac++;
+    XtSetArg(args[ac], XmNy, 515); ac++;
     XtSetArg(args[ac], XmNwidth, 187); ac++;
     XtSetArg(args[ac], XmNheight, 215); ac++;
     class_in->mbview_dialogShell_2dparms = XmCreateDialogShell(class_in->MB3DView,
@@ -2023,8 +2293,8 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNdialogTitle, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNautoUnmanage, False); ac++;
         XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-        XtSetArg(args[ac], XmNx, 547); ac++;
-        XtSetArg(args[ac], XmNy, 405); ac++;
+        XtSetArg(args[ac], XmNx, 1427); ac++;
+        XtSetArg(args[ac], XmNy, 515); ac++;
         XtSetArg(args[ac], XmNwidth, 187); ac++;
         XtSetArg(args[ac], XmNheight, 215); ac++;
         class_in->mbview_bulletinBoard_2dparms = XtCreateWidget((char *)"mbview_bulletinBoard_2dparms",
@@ -2262,8 +2532,8 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
     XtAddCallback(class_in->mbview_pushButton_view_2d_dismiss, XmNactivateCallback, do_mbview_2dparmspopdown, (XtPointer)0);
     
     ac = 0;
-    XtSetArg(args[ac], XmNx, 500); ac++;
-    XtSetArg(args[ac], XmNy, 274); ac++;
+    XtSetArg(args[ac], XmNx, 1380); ac++;
+    XtSetArg(args[ac], XmNy, 384); ac++;
     XtSetArg(args[ac], XmNwidth, 281); ac++;
     XtSetArg(args[ac], XmNheight, 478); ac++;
     class_in->mbview_dialogShell_3dparms = XmCreateDialogShell(class_in->MB3DView,
@@ -2280,8 +2550,8 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNdialogTitle, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNautoUnmanage, False); ac++;
         XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-        XtSetArg(args[ac], XmNx, 500); ac++;
-        XtSetArg(args[ac], XmNy, 274); ac++;
+        XtSetArg(args[ac], XmNx, 1380); ac++;
+        XtSetArg(args[ac], XmNy, 384); ac++;
         XtSetArg(args[ac], XmNwidth, 281); ac++;
         XtSetArg(args[ac], XmNheight, 478); ac++;
         class_in->mbview_bulletinBoard_3dparms = XtCreateWidget((char *)"mbview_bulletinBoard_3dparms",
@@ -2860,8 +3130,8 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
     XtAddCallback(class_in->mbview_pushButton_view_3d_dismiss, XmNactivateCallback, do_mbview_3dparmspopdown, (XtPointer)0);
     
     ac = 0;
-    XtSetArg(args[ac], XmNx, 501); ac++;
-    XtSetArg(args[ac], XmNy, 293); ac++;
+    XtSetArg(args[ac], XmNx, 1381); ac++;
+    XtSetArg(args[ac], XmNy, 403); ac++;
     XtSetArg(args[ac], XmNwidth, 280); ac++;
     XtSetArg(args[ac], XmNheight, 440); ac++;
     class_in->mbview_dialogShell_shadeparms = XmCreateDialogShell(class_in->MB3DView,
@@ -2878,8 +3148,8 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNdialogTitle, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNautoUnmanage, False); ac++;
         XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-        XtSetArg(args[ac], XmNx, 501); ac++;
-        XtSetArg(args[ac], XmNy, 293); ac++;
+        XtSetArg(args[ac], XmNx, 1381); ac++;
+        XtSetArg(args[ac], XmNy, 403); ac++;
         XtSetArg(args[ac], XmNwidth, 280); ac++;
         XtSetArg(args[ac], XmNheight, 440); ac++;
         class_in->mbview_bulletinBoard_shadeparms = XtCreateWidget((char *)"mbview_bulletinBoard_shadeparms",
@@ -3384,8 +3654,8 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
     XtAddCallback(class_in->mbview_pushButton_shadeparms_dismiss2, XmNactivateCallback, do_mbview_shadeparmspopdown, (XtPointer)0);
     
     ac = 0;
-    XtSetArg(args[ac], XmNx, 409); ac++;
-    XtSetArg(args[ac], XmNy, 247); ac++;
+    XtSetArg(args[ac], XmNx, 1289); ac++;
+    XtSetArg(args[ac], XmNy, 357); ac++;
     XtSetArg(args[ac], XmNwidth, 463); ac++;
     XtSetArg(args[ac], XmNheight, 531); ac++;
     class_in->mbview_dialogShell_about = XmCreateDialogShell(class_in->MB3DView,
@@ -3401,8 +3671,8 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNdialogTitle, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-        XtSetArg(args[ac], XmNx, 409); ac++;
-        XtSetArg(args[ac], XmNy, 247); ac++;
+        XtSetArg(args[ac], XmNx, 1289); ac++;
+        XtSetArg(args[ac], XmNy, 357); ac++;
         XtSetArg(args[ac], XmNwidth, 463); ac++;
         XtSetArg(args[ac], XmNheight, 531); ac++;
         class_in->mbview_bulletinBoard_about = XtCreateWidget((char *)"mbview_bulletinBoard_about",
@@ -3632,8 +3902,8 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
     XtAddCallback(class_in->mbview_pushButton_about_dismiss, XmNactivateCallback, do_mbview_aboutpopdown, (XtPointer)0);
     
     ac = 0;
-    XtSetArg(args[ac], XmNx, 430); ac++;
-    XtSetArg(args[ac], XmNy, 465); ac++;
+    XtSetArg(args[ac], XmNx, 1310); ac++;
+    XtSetArg(args[ac], XmNy, 575); ac++;
     XtSetArg(args[ac], XmNwidth, 421); ac++;
     XtSetArg(args[ac], XmNheight, 95); ac++;
     class_in->mbview_dialogShell_message = XmCreateDialogShell(class_in->MB3DView,
@@ -3650,8 +3920,8 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNdialogTitle, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNdialogStyle, XmDIALOG_FULL_APPLICATION_MODAL); ac++;
         XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-        XtSetArg(args[ac], XmNx, 430); ac++;
-        XtSetArg(args[ac], XmNy, 465); ac++;
+        XtSetArg(args[ac], XmNx, 1310); ac++;
+        XtSetArg(args[ac], XmNy, 575); ac++;
         XtSetArg(args[ac], XmNwidth, 421); ac++;
         XtSetArg(args[ac], XmNheight, 95); ac++;
         class_in->mbview_bulletinBoard_message = XtCreateWidget((char *)"mbview_bulletinBoard_message",
@@ -3725,8 +3995,8 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
     
     ac = 0;
     XtSetArg(args[ac], XmNtitle, "MB3DView Rendering Resolution"); ac++;
-    XtSetArg(args[ac], XmNx, 179); ac++;
-    XtSetArg(args[ac], XmNy, 304); ac++;
+    XtSetArg(args[ac], XmNx, 1375); ac++;
+    XtSetArg(args[ac], XmNy, 397); ac++;
     XtSetArg(args[ac], XmNwidth, 291); ac++;
     XtSetArg(args[ac], XmNheight, 451); ac++;
     class_in->mbview_dialogShell_resolution = XmCreateDialogShell(class_in->MB3DView,
@@ -3743,8 +4013,8 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNdialogTitle, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNautoUnmanage, False); ac++;
         XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-        XtSetArg(args[ac], XmNx, 179); ac++;
-        XtSetArg(args[ac], XmNy, 304); ac++;
+        XtSetArg(args[ac], XmNx, 1375); ac++;
+        XtSetArg(args[ac], XmNy, 397); ac++;
         XtSetArg(args[ac], XmNwidth, 291); ac++;
         XtSetArg(args[ac], XmNheight, 451); ac++;
         class_in->mbview_bulletinBoard_resolution = XtCreateWidget((char *)"mbview_bulletinBoard_resolution",
@@ -3995,8 +4265,8 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
     
     ac = 0;
     XtSetArg(args[ac], XmNtitle, "MB3DView Colors & Contours"); ac++;
-    XtSetArg(args[ac], XmNx, 52); ac++;
-    XtSetArg(args[ac], XmNy, 412); ac++;
+    XtSetArg(args[ac], XmNx, 1301); ac++;
+    XtSetArg(args[ac], XmNy, 400); ac++;
     XtSetArg(args[ac], XmNwidth, 440); ac++;
     XtSetArg(args[ac], XmNheight, 445); ac++;
     class_in->mbview_dialogShell_colorbounds = XmCreateDialogShell(class_in->MB3DView,
@@ -4013,8 +4283,8 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         XtSetArg(args[ac], XmNdialogTitle, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNautoUnmanage, False); ac++;
         XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-        XtSetArg(args[ac], XmNx, 52); ac++;
-        XtSetArg(args[ac], XmNy, 412); ac++;
+        XtSetArg(args[ac], XmNx, 1301); ac++;
+        XtSetArg(args[ac], XmNy, 400); ac++;
         XtSetArg(args[ac], XmNwidth, 440); ac++;
         XtSetArg(args[ac], XmNheight, 445); ac++;
         class_in->mbview_bulletinBoard_colorbounds = XtCreateWidget((char *)"mbview_bulletinBoard_colorbounds",
@@ -4685,6 +4955,55 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
     }
     
     XtAddCallback(class_in->mbview_pushButton_colorbounds_dismiss, XmNactivateCallback, do_mbview_colorboundspopdown, (XtPointer)0);
+    ac = 0;
+    XtSetArg(args[ac], XmNtopAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_NONE); ac++;
+    XtSetArg(args[ac], XmNbottomOffset, 0); ac++;
+    XtSetArg(args[ac], XmNleftOffset, 10); ac++;
+    XtSetArg(args[ac], XmNtopOffset, 263); ac++;
+    XtSetValues(class_in->mbview_scale_profile_width, args, ac);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNtopAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_NONE); ac++;
+    XtSetArg(args[ac], XmNbottomOffset, 0); ac++;
+    XtSetArg(args[ac], XmNleftOffset, 10); ac++;
+    XtSetArg(args[ac], XmNtopOffset, 200); ac++;
+    XtSetValues(class_in->mbview_scale_profile_slope, args, ac);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNtopAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNbottomOffset, 10); ac++;
+    XtSetArg(args[ac], XmNleftOffset, 290); ac++;
+    XtSetArg(args[ac], XmNrightOffset, 6); ac++;
+    XtSetArg(args[ac], XmNtopOffset, 0); ac++;
+    XtSetValues(class_in->mbview_scrolledWindow_profile, args, ac);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNleftOffset, 10); ac++;
+    XtSetArg(args[ac], XmNtopOffset, 0); ac++;
+    XtSetValues(class_in->mbview_profile_label_info, args, ac);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNleftOffset, 10); ac++;
+    XtSetArg(args[ac], XmNtopOffset, 140); ac++;
+    XtSetValues(class_in->mbview_scale_profile_exager, args, ac);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNtopAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_NONE); ac++;
+    XtSetArg(args[ac], XmNleftOffset, 90); ac++;
+    XtSetArg(args[ac], XmNtopOffset, 330); ac++;
+    XtSetValues(class_in->mbview_profile_pushButton_dismiss, args, ac);
+    
     
     /*
      * Assign functions to class record
