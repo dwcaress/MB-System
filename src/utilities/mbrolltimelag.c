@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbrolltimelag.c	11/10/2005
  *
- *    $Id: mbrolltimelag.c,v 5.2 2006-04-11 19:19:30 caress Exp $
+ *    $Id: mbrolltimelag.c,v 5.3 2006-04-19 18:31:23 caress Exp $
  *
  *    Copyright (c) 2005 by
  *    David W. Caress (caress@mbari.org)
@@ -27,6 +27,9 @@
  * Date:	November 11, 2005
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2006/04/11 19:19:30  caress
+ * Various fixes.
+ *
  * Revision 5.1  2006/01/18 15:17:00  caress
  * Added stdlib.h include.
  *
@@ -57,7 +60,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbrolltimelag.c,v 5.2 2006-04-11 19:19:30 caress Exp $";
+	static char rcs_id[] = "$Id: mbrolltimelag.c,v 5.3 2006-04-19 18:31:23 caress Exp $";
 	static char program_name[] = "MBrolltimelag";
 	static char help_message[] = "MBrolltimelag extracts the roll time series and the apparent \nbottom slope time series from swath data, and then calculates \nthe cross correlation between the roll and the slope minus roll \nfor a specified set of time lags.";
 	static char usage_message[] = "mbrolltimelag -Iswathdata [-Fformat -Nnping -Snavchannel -Tnlag/lagmin/lagmax -V -H ]";
@@ -564,8 +567,8 @@ main (int argc, char **argv)
 		}
 		
 	/* generate plot shellscript for time lag histogram */
-	sprintf(cmdfile, "mbm_histplot -I%s -R%f/%f/0/50 -C%g -L\"Frequency Histogram of %s:Time Lag (sec):Frequency%\"", 
-			histfile, lagmin, lagmax, lagstep, swathdata);
+	sprintf(cmdfile, "mbm_histplot -I%s -C%g -L\"Frequency Histogram of %s:Time Lag (sec):Frequency%\"", 
+			histfile, lagstep, swathdata);
 	fprintf(stderr, "Running: %s...\n", cmdfile);
 	system(cmdfile);
 
