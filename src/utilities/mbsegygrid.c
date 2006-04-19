@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsegygrid.c	6/12/2004
- *    $Id: mbsegygrid.c,v 5.8 2006-04-11 19:19:30 caress Exp $
+ *    $Id: mbsegygrid.c,v 5.9 2006-04-19 18:30:34 caress Exp $
  *
  *    Copyright (c) 2004, 2005, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	June 12, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2006/04/11 19:19:30  caress
+ * Various fixes.
+ *
  * Revision 5.7  2006/01/18 15:17:00  caress
  * Added stdlib.h include.
  *
@@ -78,6 +81,7 @@
 #define MBSEGYGRID_GAIN_OFF		0
 #define MBSEGYGRID_GAIN_TZERO		1
 #define MBSEGYGRID_GAIN_SEAFLOOR	2
+#define MBSEGYGRID_GAIN_AGCSEAFLOOR	3
 
 /* NaN value */
 float	NaN;
@@ -96,7 +100,7 @@ char	*getenv();
 	stderr if verbose > 1) */
 FILE	*outfp;
 
-static char rcs_id[] = "$Id: mbsegygrid.c,v 5.8 2006-04-11 19:19:30 caress Exp $";
+static char rcs_id[] = "$Id: mbsegygrid.c,v 5.9 2006-04-19 18:30:34 caress Exp $";
 static char program_name[] = "MBsegygrid";
 static char help_message[] =  "MBsegygrid grids trace data from segy data files.";
 static char usage_message[] = "MBsegygrid -Ifile -Oroot [-Ashotscale/timescale \n\
@@ -187,13 +191,10 @@ main (int argc, char **argv)
 	double	xwidth, ywidth;
 	int	ix, iy, iys, igainstart, igainend;
 	int	iystart, iyend;
-	double	factor, gtime, btime, stime, dtime;
+	double	factor, gtime, btime, stime, dtime, tmax;
 	double	btimesave = 0.0;
 	double	stimesave = 0.0;
 	double	dtimesave = 0.0;
-	int	rmsmode = MB_NO;
-	double	rms;
-	int	nrms;
 	int	plot_status;
 	int	i, j, k, n;
 
@@ -204,7 +205,7 @@ main (int argc, char **argv)
 	GMT_make_fnan(NaN);
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "A:a:D:d:G:g:I:i:O:o:RrS:s:T:t:VvW:w:Hh")) != -1)
+	while ((c = getopt(argc, argv, "A:a:D:d:G:g:I:i:O:o:S:s:T:t:VvW:w:Hh")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -242,11 +243,6 @@ main (int argc, char **argv)
 		case 'O':
 		case 'o':
 			sscanf (optarg,"%s", fileroot);
-			flag++;
-			break;
-		case 'R':
-		case 'r':
-			rmsmode = MB_YES;
 			flag++;
 			break;
 		case 'S':
@@ -337,7 +333,6 @@ main (int argc, char **argv)
 		fprintf(outfp,"dbg2       gainmode:       %d\n",gainmode);
 		fprintf(outfp,"dbg2       gain:           %f\n",gain);
 		fprintf(outfp,"dbg2       gainwindow:     %f\n",gainwindow);
-		fprintf(outfp,"dbg2       rmsmode:        %d\n",rmsmode);
 		fprintf(outfp,"dbg2       scale2distance: %d\n",scale2distance);
 		fprintf(outfp,"dbg2       shotscale:      %f\n",shotscale);
 		fprintf(outfp,"dbg2       timescale:      %f\n",timescale);
@@ -462,7 +457,6 @@ main (int argc, char **argv)
 		fprintf(outfp,"     gain mode:          %d\n",gainmode);
 		fprintf(outfp,"     gain:               %f\n",gain);
 		fprintf(outfp,"     gainwindow:         %f\n",gainwindow);
-		fprintf(outfp,"     rmsmode:            %d\n",rmsmode);		
 		fprintf(outfp,"Output Parameters:\n");
 		fprintf(outfp,"     grid filename:      %s\n",gridfile);
 		fprintf(outfp,"     x grid dimension:   %d\n",ngridx);
@@ -621,7 +615,8 @@ main (int argc, char **argv)
 						}
 
 					/* apply gain if desired */
-					if (gainmode != MBSEGYGRID_GAIN_OFF)
+					if (gainmode == MBSEGYGRID_GAIN_TZERO
+						|| gainmode == MBSEGYGRID_GAIN_SEAFLOOR)
 						{
 						if (gainmode == MBSEGYGRID_GAIN_TZERO)
 							igainstart = (dtime - btime) / sampleinterval;
@@ -637,33 +632,59 @@ main (int argc, char **argv)
 							igainend = igainstart + gainwindow / sampleinterval;
 							igainend = MIN(traceheader.nsamps - 1, igainend);
 							}
-/*fprintf(stderr,"gainmode:%d btime:%f stime:%f igainstart:%d igainend:%d\n",gainmode,btime,stime,igainstart,igainend);*/
+/*fprintf(stderr,"gainmode:%d btime:%f stime:%f igainstart:%d igainend:%d\n",
+gainmode,btime,stime,igainstart,igainend);*/
+						for (i=0;i<=igainstart;i++)
+							{
+							trace[i] = 0.0;
+							}
 						for (i=igainstart;i<=igainend;i++)
 							{
-							iy = iys + i / decimatey;
-/*fprintf(stderr,"i:%d iy:%d iystart:%d iyend:%d\n",i,iy,iystart,iyend);*/
-							if (iy >= iystart && iy <= iyend)
-								{
-								gtime = (i - igainstart) * sampleinterval;
-								factor = 1.0 + gain * gtime;
+							gtime = (i - igainstart) * sampleinterval;
+							factor = 1.0 + gain * gtime;
 /*fprintf(stderr,"i:%d iy:%d factor:%f trace[%d]: %f",
 i,iy,factor,i,trace[i]);*/
-								trace[i] = trace[i] * factor;
+							trace[i] = trace[i] * factor;
 /*fprintf(stderr," %f\n",trace[i]);*/
-								}
 							}
 						for (i=igainend+1;i<=traceheader.nsamps;i++)
 							{
-							iy = iys + i / decimatey;
-							if (iy >= iystart && iy <= iyend)
-								{
-								trace[i] = 0.0;
-								}
+							trace[i] = 0.0;
 							}
 						}
+					else if (gainmode == MBSEGYGRID_GAIN_AGCSEAFLOOR)
+						{
+						igainstart = (stime - btime - 0.5 * gainwindow) / sampleinterval;
+						igainstart = MAX(0, igainstart);
+						igainend = (stime - btime + 0.5 * gainwindow) / sampleinterval;
+						igainend = MIN(traceheader.nsamps - 1, igainend);
+						tmax = fabs(trace[igainstart]);
+						for (i=igainstart;i<=igainend;i++)
+							{
+							tmax = MAX(tmax, fabs(trace[i]));
+							}
+						if (tmax > 0.0)
+							factor = gain / tmax;
+						else
+							factor = 1.0;
+						for (i=0;i<=traceheader.nsamps;i++)
+							{
+							trace[i] *= factor;
+							}
+/*fprintf(stderr,"igainstart:%d igainend:%d tmax:%f factor:%f\n",
+igainstart,igainend,tmax,factor);*/
+						}
 						
+
+					/* insert data into the grid */
+					for (iy=0;iy<ngridy;iy++)
+						{
+						ptrace[iy] = 0.0;
+						wtrace[iy] = 0.0;
+						}
+
 					/* process trace */
-					for (i=0;i<traceheader.nsamps;i+=decimatey)
+					for (i=0;i<traceheader.nsamps;i++)
 						{
 						iy = iys + i / decimatey;
 						k = iy * ngridx + ix;
@@ -677,34 +698,18 @@ i,iy,factor,i,trace[i]);*/
 					/* if this is the last trace to go in this column, add it to the grid */
 					if ((tracecount + 1) % decimatex == 0)
 						{
-						/* first get rms */
-						rms = 0.0;
-						nrms = 0;
-						for (iy=0;iy<ngridy;iy++)
-							{
-							if (wtrace[iy] > 0.0)
-								{
-								rms += ptrace[iy] * ptrace[iy] 
-									/ wtrace[iy] / wtrace[iy];
-								nrms++;
-								}
-							}
-						if (nrms > 0)
-							rms = sqrt(rms) / nrms;
-/*fprintf(outfp,"grid ix:%d nrms:%d rms:%f\n",ix,nrms,rms);*/
-
 						/* insert data into the grid */
 						for (iy=0;iy<ngridy;iy++)
 							{
 							k = iy * ngridx + ix;
 							if (wtrace[iy] > 0.0)
 								{
-								grid[k] = ptrace[iy] / wtrace[iy] / rms;
+								grid[k] = ptrace[iy] / wtrace[iy];
+/*fprintf(stderr,"ix:%d iy:%d k:%d ptrace:%f wtrace:%f grid:%f\n",
+ix,iy,k,ptrace[iy],wtrace[iy],grid[k]);*/
 								gridmintot = MIN(grid[k], gridmintot);
 								gridmaxtot = MAX(grid[k], gridmaxtot);
 								}
-							ptrace[iy] = 0.0;
-							wtrace[iy] = 0.0;
 							}
 						}
 					}
@@ -746,7 +751,6 @@ i,iy,factor,i,trace[i]);*/
 		gridmintot, gridmaxtot, dx, dy, 
 		xlabel, ylabel, zlabel, title, 
 		projection, argc, argv, &error);
-	
 
 	/* close the swath file */
 	status = mb_segy_close(verbose,&mbsegyioptr,&error);
@@ -757,8 +761,8 @@ i,iy,factor,i,trace[i]);*/
 	status = mb_free(verbose, &wtrace, &error);
 	
 	/* run mbm_grdplot */
-	xwidth = 0.01 * (double) ngridx;
-	ywidth = 6.0;
+	xwidth = MIN(0.01 * (double) ngridx, 55.0);
+	ywidth = MIN(0.01 * (double) ngridy, 28.0);
 	sprintf(plot_cmd, "mbm_grdplot -I%s -JX%f/%f -G1 -V -L\"File %s - %s:%s\"", 
 			gridfile, xwidth, ywidth, gridfile, title, zlabel);
 	if (verbose)
