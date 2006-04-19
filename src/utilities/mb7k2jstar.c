@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb7k2jstar.c	5/19/2005
- *    $Id: mb7k2jstar.c,v 5.4 2006-01-18 15:17:00 caress Exp $
+ *    $Id: mb7k2jstar.c,v 5.5 2006-04-19 18:32:07 caress Exp $
  *
  *    Copyright (c) 2005 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	May 19, 2005
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2006/01/18 15:17:00  caress
+ * Added stdlib.h include.
+ *
  * Revision 5.3  2005/11/05 01:07:54  caress
  * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
  *
@@ -61,7 +64,7 @@
 #define	MB7K2JSTAR_BOTTOMPICK_ALTITUDE		2
 #define	MB7K2JSTAR_BOTTOMPICK_ARRIVAL		3
 
-static char rcs_id[] = "$Id: mb7k2jstar.c,v 5.4 2006-01-18 15:17:00 caress Exp $";
+static char rcs_id[] = "$Id: mb7k2jstar.c,v 5.5 2006-04-19 18:32:07 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
@@ -89,7 +92,7 @@ main (int argc, char **argv)
 	char	output_file[MB_PATH_MAXLINE];
 	int	output_file_set = MB_NO;
 	void	*datalist;
-	int	look_processed = MB_DATALIST_LOOK_UNSET;
+	int	look_processed = MB_DATALIST_LOOK_YES;
 	double	file_weight;
 	int	format = 0;
 	int	iformat = MBF_RESON7KR;
@@ -141,6 +144,16 @@ main (int argc, char **argv)
 	double	*ss = NULL;
 	double	*ssacrosstrack = NULL;
 	double	*ssalongtrack = NULL;
+	double	*ttimes = NULL;
+	double	*angles = NULL;
+	double	*angles_forward = NULL;
+	double	*angles_null = NULL;
+	double	*bheave = NULL;
+	double	*alongtrack_offset = NULL;
+	double	draft;
+	double	ssv;
+	double	ssv_use = 1500.0;
+	
 	char	comment[MB_COMMENT_MAXLINE];
 	int	icomment = 0;
 	
@@ -192,9 +205,15 @@ main (int argc, char **argv)
 	int	shortspersample;
 	int	trace_size;
 	char	*data;
+	unsigned short	*datashort;
 	double	value, threshold;
 	double	channelmax;
 	int	channelpick;
+	double	ttime_min;
+	double	ttime_min_use;
+	int	ttime_min_ok = MB_NO;
+	int	beam_min;
+	int	smooth = 0;
 	
 	int	read_data;
 	int	found;
@@ -209,7 +228,7 @@ main (int argc, char **argv)
 	strcpy (read_file, "datalist.mb-1");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "A:a:B:b:CcF:f:I:i:O:o:T:t:VvHh")) != -1)
+	while ((c = getopt(argc, argv, "A:a:B:b:CcF:f:I:i:O:o:S:s:T:t:VvHh")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -291,6 +310,11 @@ main (int argc, char **argv)
 			output_file_set  = MB_YES;
 			flag++;
 			break;
+		case 'S':
+		case 's':
+			sscanf (optarg,"%d", &smooth);
+			flag++;
+			break;
 		case 'T':
 		case 't':
 			sscanf (optarg,"%lf", &timeshift);
@@ -353,6 +377,7 @@ main (int argc, char **argv)
 		fprintf(stderr,"dbg2       timeshift:           %f\n",timeshift);
 		fprintf(stderr,"dbg2       bottompickmode:      %d\n",bottompickmode);
 		fprintf(stderr,"dbg2       bottompickthreshold: %f\n",bottompickthreshold);
+		fprintf(stderr,"dbg2       smooth:              %d\n",smooth);
 		fprintf(stderr,"dbg2       file:                %s\n",file);
 		fprintf(stderr,"dbg2       output_file:         %s\n",output_file);
 		fprintf(stderr,"dbg2       output_file_set:     %d\n",output_file_set);
@@ -483,6 +508,24 @@ main (int argc, char **argv)
 	if (error == MB_ERROR_NO_ERROR)
 		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, 
 						sizeof(double), (void **)&ssalongtrack, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(double), (void **)&ttimes, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(double), (void **)&angles, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(double), (void **)&angles_forward, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(double), (void **)&angles_null, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(double), (void **)&bheave, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(double), (void **)&alongtrack_offset, &error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
@@ -526,6 +569,10 @@ main (int argc, char **argv)
 				if (format_status != MB_SUCCESS || format_guess != format)
 					{
 					strcpy(output_file, file);
+					}
+				if (output_file[strlen(output_file)-1] == 'p')
+					{
+					output_file[strlen(output_file)-1] = '\0';
 					}
 				if (extract_sbp == MB_YES && extract_sslow == MB_YES && extract_sshigh == MB_YES)
 					{
@@ -583,6 +630,7 @@ main (int argc, char **argv)
 	nwritesbp = 0;
 	nwritesslo = 0;
 	nwritesshi = 0;
+	ttime_min_ok = MB_NO;
 	while (error <= MB_ERROR_NO_ERROR)
 		{
 		/* reset error */
@@ -600,6 +648,44 @@ main (int argc, char **argv)
 /*fprintf(stderr,"kind:%d %s \n\ttime_i:%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d  %f    time_i:%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d  %f\n",
 kind,notice_msg[kind],time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],time_d,
 istore->time_i[0],istore->time_i[1],istore->time_i[2],istore->time_i[3],istore->time_i[4],istore->time_i[5],istore->time_i[6],istore->time_d);*/
+				
+		if (kind == MB_DATA_DATA 
+			&& error <= MB_ERROR_NO_ERROR)
+			{
+			/* extract travel times */
+			status = mb_ttimes(verbose,imbio_ptr,
+				istore_ptr,&kind,&beams_bath,
+				ttimes,angles,
+				angles_forward,angles_null,
+				bheave,alongtrack_offset,
+				&draft,&ssv,&error);
+				
+			/* check surface sound velocity */
+			if (ssv > 0.0)
+				ssv_use = ssv;
+				
+			/* get bottom arrival time, if possible */
+			ttime_min = 0.0;
+			found = MB_NO;
+			for (i=0;i<beams_bath;i++)
+				{
+				if (mb_beam_ok(beamflag[i]))
+					{
+					if (found == MB_NO || ttimes[i] < ttime_min)
+						{
+						ttime_min = ttimes[i];
+						beam_min = i;
+						found = MB_YES;
+						}
+					}
+				}
+			if (found == MB_YES)
+				{
+				ttime_min_use = ttime_min;
+				ttime_min_ok = MB_YES;
+				}
+/*fprintf(stderr,"found:%d beam_min:%d ttime_min_use:%f\n", found, beam_min, ttime_min_use);*/
+			}
 		    
 		/* nonfatal errors do not matter */
 		if (error < MB_ERROR_NO_ERROR)
@@ -668,7 +754,7 @@ imb_io_ptr->fix_lat[i]);*/
 			}
 			
 	   	/* handle bluefin nav data */
-		else if (status == MB_SUCCESS && kind == MB_DATA_NAV1) 
+		else if (status == MB_SUCCESS && kind == MB_DATA_NAV2) 
 			{
 /*fprintf(stderr,"MB_DATA_NAV1: status:%d error:%d kind:%d\n",status,error,kind);*/
 			nreadnav1++;
@@ -876,6 +962,10 @@ imb_io_ptr->fix_lat[i]);*/
 					/* set sonar altitude */
 					channel->sonaraltitude = 0.00075 * channelpick * channel->sampleInterval;
 					}
+				else if (bottompickmode == MB7K2JSTAR_BOTTOMPICK_BATHYMETRY)
+					{
+					channel->sonaraltitude = (int) (750000.0 * ttime_min_use);
+					}
 				else
 					{
 					channel->sonaraltitude = 1000 * altitude;
@@ -1058,9 +1148,31 @@ imb_io_ptr->fix_lat[i]);*/
 				/* copy the trace */
 				if (status == MB_SUCCESS)
 					{
-					data = (char *) channel->trace;
-					for (i=0;i<trace_size;i++)
-						data[i] = s7kchannel->data[i];
+					if (smooth > 0 && channel->dataFormat == 0)
+						{
+						datashort = (unsigned short *) s7kchannel->data;
+						for (i=0;i<channel->samples;i++)
+							{
+							n = 0;
+							channel->trace[i] = 0.0;
+							for (j=MAX(i-smooth,0);j<MIN(i+smooth,channel->samples-1);j++)
+								{
+								channel->trace[i] += datashort[j];
+								n++;
+/*fprintf(stderr,"i:%d j:%d raw:%d tot:%d\n",i,j,datashort[j],channel->trace[i]);*/
+								}
+							channel->trace[i] /= n;
+/*fprintf(stderr,"Final data[%d] n:%d : %d\n", i, n, channel->trace[i]);*/
+							}
+						}
+					else
+						{
+						data = (char *) channel->trace;
+						for (i=0;i<trace_size;i++)
+							{
+							data[i] = s7kchannel->data[i];
+							}
+						}
 					}
 
 				/* set the sonar altitude using the specified mode */
@@ -1106,6 +1218,10 @@ imb_io_ptr->fix_lat[i]);*/
 						
 					/* set sonar altitude */
 					channel->sonaraltitude = 0.00075 * channelpick * channel->sampleInterval;
+					}
+				else if (bottompickmode == MB7K2JSTAR_BOTTOMPICK_BATHYMETRY)
+					{
+					channel->sonaraltitude = (int) (750000.0 * ttime_min_use);
 					}
 				else
 					{
@@ -1270,9 +1386,31 @@ imb_io_ptr->fix_lat[i]);*/
 				/* copy the trace */
 				if (status == MB_SUCCESS)
 					{
-					data = (char *) channel->trace;
-					for (i=0;i<trace_size;i++)
-						data[i] = s7kchannel->data[i];
+					if (smooth > 0 && channel->dataFormat == 0)
+						{
+						datashort = (unsigned short *) s7kchannel->data;
+						for (i=0;i<channel->samples;i++)
+							{
+							n = 0;
+							channel->trace[i] = 0.0;
+							for (j=MAX(i-smooth,0);j<MIN(i+smooth,channel->samples-1);j++)
+								{
+								channel->trace[i] += datashort[j];
+								n++;
+/*fprintf(stderr,"i:%d j:%d raw:%d tot:%d\n",i,j,datashort[j],channel->trace[i]);*/
+								}
+							channel->trace[i] /= n;
+/*fprintf(stderr,"Final data[%d] n:%d : %d\n", i, n, channel->trace[i]);*/
+							}
+						}
+					else
+						{
+						data = (char *) channel->trace;
+						for (i=0;i<trace_size;i++)
+							{
+							data[i] = s7kchannel->data[i];
+							}
+						}
 					}
 
 				/* set the sonar altitude using the specified mode */
@@ -1318,6 +1456,10 @@ imb_io_ptr->fix_lat[i]);*/
 						
 					/* set sonar altitude */
 					channel->sonaraltitude = 0.00075 * channelpick * channel->sampleInterval;
+					}
+				else if (bottompickmode == MB7K2JSTAR_BOTTOMPICK_BATHYMETRY)
+					{
+					channel->sonaraltitude = (int) (750000.0 * ttime_min_use);
 					}
 				else
 					{
@@ -1501,9 +1643,31 @@ imb_io_ptr->fix_lat[i]);*/
 				/* copy the trace */
 				if (status == MB_SUCCESS)
 					{
-					data = (char *) channel->trace;
-					for (i=0;i<trace_size;i++)
-						data[i] = s7kchannel->data[i];
+					if (smooth > 0 && channel->dataFormat == 0)
+						{
+						datashort = (unsigned short *) s7kchannel->data;
+						for (i=0;i<channel->samples;i++)
+							{
+							n = 0;
+							channel->trace[i] = 0.0;
+							for (j=MAX(i-smooth,0);j<MIN(i+smooth,channel->samples-1);j++)
+								{
+								channel->trace[i] += datashort[j];
+								n++;
+/*fprintf(stderr,"i:%d j:%d raw:%d tot:%d\n",i,j,datashort[j],channel->trace[i]);*/
+								}
+							channel->trace[i] /= n;
+/*fprintf(stderr,"Final data[%d] n:%d : %d\n", i, n, channel->trace[i]);*/
+							}
+						}
+					else
+						{
+						data = (char *) channel->trace;
+						for (i=0;i<trace_size;i++)
+							{
+							data[i] = s7kchannel->data[i];
+							}
+						}
 					}
 
 				/* set the sonar altitude using the specified mode */
@@ -1550,6 +1714,10 @@ imb_io_ptr->fix_lat[i]);*/
 					/* set sonar altitude */
 					channel->sonaraltitude = 0.00075 * channelpick * channel->sampleInterval;
 					}
+				else if (bottompickmode == MB7K2JSTAR_BOTTOMPICK_BATHYMETRY)
+					{
+					channel->sonaraltitude = (int) (750000.0 * ttime_min_use);
+					}
 				else
 					{
 					channel->sonaraltitude = 1000 * altitude;
@@ -1566,7 +1734,6 @@ imb_io_ptr->fix_lat[i]);*/
 				channel->heading = (short) (60.0 * heading);
 				channel->startDepth = sonardepth / channel->sampleInterval / 0.00000075; 
 				channel->sonardepth = 1000 * sonardepth;
-				channel->sonaraltitude = 1000 * altitude;
 				channel->depth = channel->sonardepth + channel->sonaraltitude;
 				channel->roll = (short) (60.0 * roll); 
 				channel->pitch = (short) (60.0 * pitch); 
@@ -1714,9 +1881,31 @@ imb_io_ptr->fix_lat[i]);*/
 				/* copy the trace */
 				if (status == MB_SUCCESS)
 					{
-					data = (char *) channel->trace;
-					for (i=0;i<trace_size;i++)
-						data[i] = s7kchannel->data[i];
+					if (smooth > 0 && channel->dataFormat == 0)
+						{
+						datashort = (unsigned short *) s7kchannel->data;
+						for (i=0;i<channel->samples;i++)
+							{
+							n = 0;
+							channel->trace[i] = 0.0;
+							for (j=MAX(i-smooth,0);j<MIN(i+smooth,channel->samples-1);j++)
+								{
+								channel->trace[i] += datashort[j];
+								n++;
+/*fprintf(stderr,"i:%d j:%d raw:%d tot:%d\n",i,j,datashort[j],channel->trace[i]);*/
+								}
+							channel->trace[i] /= n;
+/*fprintf(stderr,"Final data[%d] n:%d : %d\n", i, n, channel->trace[i]);*/
+							}
+						}
+					else
+						{
+						data = (char *) channel->trace;
+						for (i=0;i<trace_size;i++)
+							{
+							data[i] = s7kchannel->data[i];
+							}
+						}
 					}
 
 				/* set the sonar altitude using the specified mode */
@@ -1762,6 +1951,10 @@ imb_io_ptr->fix_lat[i]);*/
 						
 					/* set sonar altitude */
 					channel->sonaraltitude = 0.00075 * channelpick * channel->sampleInterval;
+					}
+				else if (bottompickmode == MB7K2JSTAR_BOTTOMPICK_BATHYMETRY)
+					{
+					channel->sonaraltitude = (int) (750000.0 * ttime_min_use);
 					}
 				else
 					{
