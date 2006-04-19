@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbbackangle.c	1/6/95
- *    $Id: mbbackangle.c,v 5.15 2006-03-14 02:35:45 caress Exp $
+ *    $Id: mbbackangle.c,v 5.16 2006-04-19 18:29:04 caress Exp $
  *
  *    Copyright (c) 1995, 2000, 2002, 2003, 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	January 6, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.15  2006/03/14 02:35:45  caress
+ * Altered mbbackangle so that it outputs at least one table, even if there are no survey pings in a file.
+ *
  * Revision 5.14  2006/03/14 01:59:24  caress
  * A minor change to mbbackangle to output the status of slope correction (-Q)
  * in the coments in the output file.
@@ -151,7 +154,7 @@ int output_model(int verbose, FILE *tfp,
 	int *nmean, double *mean, double *sigma, 
 	int *error);
 						
-static char rcs_id[] = "$Id: mbbackangle.c,v 5.15 2006-03-14 02:35:45 caress Exp $";
+static char rcs_id[] = "$Id: mbbackangle.c,v 5.16 2006-04-19 18:29:04 caress Exp $";
 static char program_name[] = "mbbackangle";
 
 /*--------------------------------------------------------------------*/
@@ -201,6 +204,8 @@ by MBprocess.";
 	char	swathfile[MB_PATH_MAXLINE];
 	char	amptablefile[MB_PATH_MAXLINE];
 	char	sstablefile[MB_PATH_MAXLINE];
+	char	ampalltablefile[MB_PATH_MAXLINE];
+	char	ssalltablefile[MB_PATH_MAXLINE];
 	FILE	*atfp;
 	FILE	*stfp;
 	int	beams_bath;
@@ -251,15 +256,24 @@ by MBprocess.";
 	double	angle_start;
 	int	pings_avg = 50;
 	int	navg = 0;
+	int	ntotavg = 0;
 	int	*nmeanamp = NULL;
 	double	*meanamp = NULL;
 	double	*sigmaamp = NULL;
 	int	*nmeanss = NULL;
 	double	*meanss = NULL;
 	double	*sigmass = NULL;
+	int	*nmeantotamp = NULL;
+	double	*meantotamp = NULL;
+	double	*sigmatotamp = NULL;
+	int	*nmeantotss = NULL;
+	double	*meantotss = NULL;
+	double	*sigmatotss = NULL;
 	double	altitude_default = 0.0;
 	double	time_d_avg;
 	double	altitude_avg;
+	double	time_d_totavg;
+	double	altitude_totavg;
 	int	beammode = MBBACKANGLE_BEAMPATTERN_EMPIRICAL;
 	double	ssbeamwidth = 50.0;
 	double	ssdepression = 20.0;
@@ -554,6 +568,15 @@ by MBprocess.";
 		if (error == MB_ERROR_NO_ERROR)
 			status = mb_malloc(verbose,nangles*sizeof(double),
 				&sigmaamp,&error);
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_malloc(verbose,nangles*sizeof(int),
+				&nmeantotamp,&error);
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_malloc(verbose,nangles*sizeof(double),
+				&meantotamp,&error);
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_malloc(verbose,nangles*sizeof(double),
+				&sigmatotamp,&error);
 		}
 	if (sidescan_on == MB_YES)
 		{
@@ -566,6 +589,15 @@ by MBprocess.";
 		if (error == MB_ERROR_NO_ERROR)
 			status = mb_malloc(verbose,nangles*sizeof(double),
 				&sigmass,&error);
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_malloc(verbose,nangles*sizeof(int),
+				&nmeantotss,&error);
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_malloc(verbose,nangles*sizeof(double),
+				&meantotss,&error);
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_malloc(verbose,nangles*sizeof(double),
+				&sigmatotss,&error);
 		}
 
 	/* if error initializing memory then quit */
@@ -620,6 +652,9 @@ by MBprocess.";
 		nmeanamp[i] = 0;
 		meanamp[i] = 0.0;
 		sigmaamp[i] = 0.0;
+		nmeantotamp[i] = 0;
+		meantotamp[i] = 0.0;
+		sigmatotamp[i] = 0.0;
 		}
 	if (sidescan_on == MB_YES)
 	for (i=0;i<nangles;i++)
@@ -627,7 +662,15 @@ by MBprocess.";
 		nmeanss[i] = 0;
 		meanss[i] = 0.0;
 		sigmass[i] = 0.0;
+		nmeantotss[i] = 0;
+		meantotss[i] = 0.0;
+		sigmatotss[i] = 0.0;
 		}
+
+	/* initialize counting variables */
+	ntotavg = 0;
+	time_d_totavg = 0.0;
+	altitude_totavg = 0.0;
 
 	/* initialize grids */
 	if (gridamp == MB_YES)
@@ -1038,10 +1081,13 @@ by MBprocess.";
 		    /* increment record counter */
 		    nrec++;
 		    navg++;
+		    ntotavg++;
 		    
 		    /* increment time */
 		    time_d_avg += time_d;
 		    altitude_avg += altitude;
+		    time_d_totavg += time_d;
+		    altitude_totavg += altitude;
 
 		    /* get the seafloor slopes */
 		    if (beams_bath > 0)
@@ -1098,6 +1144,9 @@ by MBprocess.";
 				    meanamp[j] += amp[i];
 				    sigmaamp[j] += amp[i]*amp[i];
 				    nmeanamp[j]++;
+				    meantotamp[j] += amp[i];
+				    sigmatotamp[j] += amp[i]*amp[i];
+				    nmeantotamp[j]++;
 				    }
 					
 				/* load amplitude into grid */
@@ -1176,6 +1225,9 @@ time_d, i, ssacrosstrack[i], altitude_use, angle);*/
 				    meanss[j] += ss[i];
 				    sigmass[j] += ss[i]*ss[i];
 				    nmeanss[j]++;
+				    meantotss[j] += ss[i];
+				    sigmatotss[j] += ss[i]*ss[i];
+				    nmeantotss[j]++;
 				    }
 					
 				/* load amplitude into grid */
@@ -1374,6 +1426,56 @@ time_d, i, ssacrosstrack[i], altitude_use, angle);*/
         if (read_datalist == MB_YES)
 		mb_datalist_close(verbose,&datalist,&error);
 
+	/* write out total tables */
+	time_d_totavg /= ntotavg;
+	altitude_totavg /= ntotavg;
+	if (dump == MB_NO && amplitude_on == MB_YES)
+	    {
+	    strcpy(amptablefile,read_file);
+ 	    strcat(amptablefile,"_tot.aga");
+	    if ((atfp = fopen(amptablefile,"w")) == NULL)
+		{
+		error = MB_ERROR_OPEN_FAIL;
+		mb_error(verbose,error,&message);
+		fprintf(stderr, "\nUnable to open output table file %s\n", amptablefile);
+		fprintf(stderr, "Program %s aborted!\n", program_name);
+		exit(error);
+		}
+	    if (beammode == MBBACKANGLE_BEAMPATTERN_EMPIRICAL)
+		    output_table(verbose, atfp, 1, ntotavg, time_d_totavg, 
+				    nangles, angle_max, dangle, symmetry,
+				    nmeanamp, meanamp, sigmaamp, &error);
+	    else if (beammode == MBBACKANGLE_BEAMPATTERN_SIDESCAN)
+		    output_model(verbose, atfp, ssbeamwidth, ssdepression, ref_angle,
+				    1, ntotavg, time_d_totavg, altitude_totavg,
+				    nangles, angle_max, dangle, symmetry,
+				    nmeantotamp, meantotamp, sigmatotamp, &error);
+	    fclose(atfp);
+	    }
+	if (dump == MB_NO && sidescan_on == MB_YES)
+	    {
+	    strcpy(sstablefile,read_file);
+ 	    strcat(sstablefile,"_tot.sga");
+	    if ((stfp = fopen(sstablefile,"w")) == NULL)
+		{
+		error = MB_ERROR_OPEN_FAIL;
+		mb_error(verbose,error,&message);
+		fprintf(stderr, "\nUnable to open output table file %s\n", sstablefile);
+		fprintf(stderr, "Program %s aborted!\n", program_name);
+		exit(error);
+		}
+	    if (beammode == MBBACKANGLE_BEAMPATTERN_EMPIRICAL)
+		    output_table(verbose, stfp, 1, ntotavg, time_d_totavg, 
+				    nangles, angle_max, dangle, symmetry,
+				    nmeantotss, meantotss, sigmatotss, &error);
+	    else if (beammode == MBBACKANGLE_BEAMPATTERN_SIDESCAN)
+		    output_model(verbose, stfp, ssbeamwidth, ssdepression, ref_angle,
+				    1, ntotavg, time_d_totavg, altitude_totavg,
+				    nangles, angle_max, dangle, symmetry,
+				    nmeantotss, meantotss, sigmatotss, &error);
+	    fclose(stfp);
+	    }
+
 	/* output information */
 	if (error == MB_ERROR_NO_ERROR && verbose > 0)
 	    {
@@ -1396,6 +1498,9 @@ time_d, i, ssacrosstrack[i], altitude_use, angle);*/
 		mb_free(verbose,&nmeanamp,&error);
 		mb_free(verbose,&meanamp,&error);
 		mb_free(verbose,&sigmaamp,&error);
+		mb_free(verbose,&nmeantotamp,&error);
+		mb_free(verbose,&meantotamp,&error);
+		mb_free(verbose,&sigmatotamp,&error);
 		if (gridamp == MB_YES)
 			{
 			mb_free(verbose,&gridamphist,&error);
@@ -1406,6 +1511,9 @@ time_d, i, ssacrosstrack[i], altitude_use, angle);*/
 		mb_free(verbose,&nmeanss,&error);
 		mb_free(verbose,&meanss,&error);
 		mb_free(verbose,&sigmass,&error);
+		mb_free(verbose,&nmeantotss,&error);
+		mb_free(verbose,&meantotss,&error);
+		mb_free(verbose,&sigmatotss,&error);
 		if (gridss == MB_YES)
 			{
 			mb_free(verbose,&gridsshist,&error);
@@ -1672,7 +1780,7 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 	char	*getenv();
 
 	/* print input debug statements */
-	if (verbose >= 0)
+	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  Function <%s> called\n",
 			function_name);
