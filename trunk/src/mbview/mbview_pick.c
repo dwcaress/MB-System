@@ -1,8 +1,8 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_pick.c	9/29/2003
- *    $Id: mbview_pick.c,v 5.10 2006-04-11 19:17:04 caress Exp $
+ *    $Id: mbview_pick.c,v 5.11 2006-04-26 22:06:39 caress Exp $
  *
- *    Copyright (c) 2003 by
+ *    Copyright (c) 2003, 2006 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -21,6 +21,9 @@
  *		begun on October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.10  2006/04/11 19:17:04  caress
+ * Added a profile capability.
+ *
  * Revision 5.9  2006/01/24 19:21:32  caress
  * Version 5.0.8 beta.
  *
@@ -102,7 +105,7 @@ static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 static char		value_list[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_pick.c,v 5.10 2006-04-11 19:17:04 caress Exp $";
+static char rcs_id[]="$Id: mbview_pick.c,v 5.11 2006-04-26 22:06:39 caress Exp $";
 	
 
 /*------------------------------------------------------------------------------*/
@@ -294,7 +297,7 @@ int mbview_extract_pick_profile(int instance)
 		npoints = MAX(2, data->pick.segment.nls);
 		if (data->profile.npoints_alloc < npoints)
 			{
-			status = mbview_allocprofilearrays(mbv_verbose, 
+			status = mbview_allocprofilepoints(mbv_verbose, 
 					npoints, &(data->profile.points), &error);
 			if (status == MB_SUCCESS)
 				{
@@ -323,6 +326,7 @@ int mbview_extract_pick_profile(int instance)
 					data->profile.zmin = data->profile.points[i].zdata;
 					data->profile.zmax = data->profile.points[i].zdata;
 					data->profile.points[i].distance = 0.0;
+					data->profile.points[i].distovertopo = 0.0;
 					}
 				else
 					{
@@ -346,6 +350,28 @@ int mbview_extract_pick_profile(int instance)
 							data->profile.points[i].ylat, 
 							&(data->profile.points[i].distance));
 						}
+					dy = (data->profile.points[i].zdata
+						- data->profile.points[i-1].zdata);
+					dx = (data->profile.points[i].distance
+						- data->profile.points[i-1].distance);
+					data->profile.points[i].distovertopo = data->profile.points[i-1].distovertopo
+										+ sqrt(dy * dy + dx * dx);
+					if (dx > 0.0)
+						data->profile.points[i].slope = fabs(dy / dx);
+					else
+						data->profile.points[i].slope = 0.0;
+					}
+				data->profile.points[i].bearing = data->pick.bearing;
+				if (i > 1)
+					{
+					dy = (data->profile.points[i].zdata
+						- data->profile.points[i-2].zdata);
+					dx = (data->profile.points[i].distance
+						- data->profile.points[i-2].distance);
+					if (dx > 0.0)
+						data->profile.points[i-1].slope = fabs(dy / dx);
+					else
+						data->profile.points[i-1].slope = 0.0;
 					}
 				data->profile.points[i].navzdata = 0.0;
 				data->profile.points[i].navtime_d = 0.0;
@@ -353,36 +379,6 @@ int mbview_extract_pick_profile(int instance)
 			data->profile.points[0].boundary = MB_YES;
 			data->profile.points[npoints-1].boundary = MB_YES;
 			data->profile.npoints = npoints;
-			
-			/* calculate slope */
-			for (i=0;i<data->profile.npoints;i++)
-				{
-				if (i == 0)
-					{
-					dy = (data->profile.points[i+1].zdata
-						- data->profile.points[i].zdata);
-					dx = (data->profile.points[i+1].distance
-						- data->profile.points[i].distance);
-					}
-				else if (i == npoints - 1)
-					{
-					dy = (data->profile.points[i].zdata
-						- data->profile.points[i-1].zdata);
-					dx = (data->profile.points[i].distance
-						- data->profile.points[i-1].distance);
-					}
-				else
-					{
-					dy = (data->profile.points[i+1].zdata
-						- data->profile.points[i-1].zdata);
-					dx = (data->profile.points[i+1].distance
-						- data->profile.points[i-1].distance);
-					}
-				if (dx > 0.0)
-					data->profile.points[i].slope = fabs(dy / dx);
-				else
-					data->profile.points[i].slope = 0.0;
-				}
 			}
 		}
 	

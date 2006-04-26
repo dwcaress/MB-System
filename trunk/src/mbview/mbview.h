@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbview.h	10/9/2002
- *    $Id: mbview.h,v 5.12 2006-04-11 19:17:04 caress Exp $
+ *    $Id: mbview.h,v 5.13 2006-04-26 22:06:39 caress Exp $
  *
  *    Copyright (c) 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -18,6 +18,9 @@
  * Date:	October 10,  2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.12  2006/04/11 19:17:04  caress
+ * Added a profile capability.
+ *
  * Revision 5.11  2005/11/05 01:11:47  caress
  * Much work over the past two months.
  *
@@ -287,11 +290,13 @@ struct mbview_profilepoint_struct {
 	double	ylat;
 	double	zdata;
 	double	distance;
+	double	distovertopo;
 	double	xdisplay;
 	double	ydisplay;
 	double	navzdata;
 	double	navtime_d;
 	double	slope;
+	double	bearing;
 	};
 
 struct mbview_linesegment_struct {
@@ -829,6 +834,53 @@ int mbview_addnav(int verbose, int instance,
 			int	navshot,
 			int	navcdp,
 			int *error);
+int mbview_getprofilecount(int verbose, int instance,
+			int *npoints,
+			int *error);
+int mbview_allocprofilepoints(int verbose, 
+			int	npoints,
+			struct mbview_profilepoint_struct **points,
+			int 	*error);
+int mbview_freeprofilepoints(int verbose, 
+			double	**points,
+			int *error);
+int mbview_allocprofilearrays(int verbose, 
+			int	npoints,
+			double	**distance,
+			double	**zdata,
+			int	**boundary,
+			double	**xlon,
+			double	**ylat,
+			double	**distovertopo,
+			double	**bearing,
+			double	**slope,
+			int 	*error);
+int mbview_freeprofilearrays(int verbose, 
+			double	**distance,
+			double	**zdata,
+			int	**boundary,
+			double	**xlon,
+			double	**ylat,
+			double	**distovertopo,
+			double	**bearing,
+			double	**slope,
+			int *error);
+int mbview_getprofile(int verbose, int instance,
+			mb_path	source_name,
+			double	*length,
+			double	*zmin,
+			double	*zmax,
+			int	*npoints,
+			double	*distance,
+			double	*zdata,
+			int	*boundary,
+			double	*xlon,
+			double	*ylat,
+			double	*distovertopo,
+			double	*bearing,
+			double	*slope,
+			int *error);
+
 int mbview_enableviewsites(int verbose, int instance,
 			int *error);
 int mbview_enableeditsites(int verbose, int instance,

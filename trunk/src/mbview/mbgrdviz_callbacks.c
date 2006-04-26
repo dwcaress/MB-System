@@ -57,7 +57,8 @@ extern int isnanf(float x);
 #define MBGRDVIZ_OPENSWATH	5
 #define MBGRDVIZ_SAVEROUTE	6
 #define MBGRDVIZ_SAVESITE	7
-#define MBGRDVIZ_REALTIME	8
+#define MBGRDVIZ_SAVEPROFILE	8
+#define MBGRDVIZ_REALTIME	9
 
 /* Projection defines */
 #define ModelTypeProjected	     1
@@ -67,6 +68,7 @@ extern int isnanf(float x);
 /* Site and route file versions */
 #define MBGRDVIZ_SITE_VERSION "1.00"
 #define MBGRDVIZ_ROUTE_VERSION "1.00"
+#define MBGRDVIZ_PROFILE_VERSION "1.00"
 
 /* Survey planning parameters */
 #define MBGRDVIZ_SURVEY_MODE_UNIFORM			0
@@ -103,7 +105,7 @@ int	realtime_update = 5;
 int	realtime_icon = MBGRDVIZ_REALTIME_ICON_SHIP;
 
 /* id variables */
-static char rcs_id[] = "$Id: mbgrdviz_callbacks.c,v 5.16 2006-01-24 19:21:32 caress Exp $";
+static char rcs_id[] = "$Id: mbgrdviz_callbacks.c,v 5.17 2006-04-26 22:06:39 caress Exp $";
 static char program_name[] = "MBgrdviz";
 static char help_message[] = "MBgrdviz is an interactive 2D/3D visualization tool for GMT grid files.";
 static char usage_message[] = "mbgrdviz [-H -T -V]";
@@ -730,6 +732,38 @@ do_mbgrdviz_fileSelectionBox_savesite( Widget w, XtPointer client_data, XtPointe
 }
 /*---------------------------------------------------------------------------------------*/
 void
+do_mbgrdviz_fileSelectionBox_saveprofile( Widget w, XtPointer client_data, XtPointer call_data)
+{
+        Cardinal ac = 0;
+        Arg      args[256];
+	int	instance;
+	int	actionid;
+        XmString	tmp0;
+	int	argok;
+    	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    
+    	/* get instance */
+	instance = (int) client_data;
+	
+	/* set title to open file dialog  */
+	ac = 0;
+	XtSetArg(args[ac], XmNtitle, "Save Profile File"); ac++;
+	XtSetValues(dialogShell_open, args, ac);
+	BxManageCB(w, (XtPointer)"fileSelectionBox", call_data);
+
+	/* set fileSelectionBox parameters */
+	ac = 0;
+	tmp0 = (XmString) BX_CONVERT(dialogShell_open, "*", 
+                				XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNpattern, tmp0); ac++;
+	actionid = MBGRDVIZ_SAVEPROFILE * MBV_MAX_WINDOWS + instance;
+	XtSetArg(args[ac], XmNuserData, actionid); ac++;
+	XtSetValues(fileSelectionBox, args, ac);
+        XmStringFree((XmString)tmp0);
+    
+}
+/*---------------------------------------------------------------------------------------*/
+void
 do_mbgrdviz_fileSelectionBox_realtime( Widget w, XtPointer client_data, XtPointer call_data)
 {
         Cardinal ac = 0;
@@ -907,6 +941,14 @@ do_mbgrdviz_openfile( Widget w, XtPointer client_data, XtPointer call_data)
 		/* write route file */
 		do_mbview_message_on("Saving route data...", instance);
 		status = do_mbgrdviz_saveroute(instance, file_ptr);
+		}
+	
+	/* else write route data */
+	else if (mode == MBGRDVIZ_SAVEPROFILE)
+		{
+		/* write route file */
+		do_mbview_message_on("Saving profile data...", instance);
+		status = do_mbgrdviz_saveprofile(instance, file_ptr);
 		}
 	
 	/* else set realtime data source */
@@ -1313,6 +1355,10 @@ int do_mbgrdviz_openprimary(char *input_file_ptr)
 				mbview_addaction(verbose, instance,
 					do_mbgrdviz_fileSelectionBox_saveroute,
 					"Save Route File", 
+					MBV_PICKMASK_NONE, &error);
+				mbview_addaction(verbose, instance,
+					do_mbgrdviz_fileSelectionBox_saveprofile,
+					"Save Profile File", 
 					MBV_PICKMASK_NONE, &error);
 
 				mbview_addaction(verbose, instance,
@@ -2085,6 +2131,170 @@ int do_mbgrdviz_saveroute(int instance, char *output_file_ptr)
 		    }
 		}
 	    }
+}
+/*---------------------------------------------------------------------------------------*/
+
+int do_mbgrdviz_saveprofile(int instance, char *output_file_ptr)
+{
+	char function_name[] = "do_mbgrdviz_saveprofile";
+	int	status = MB_SUCCESS;
+	FILE	*sfp;
+	char	buffer[MB_PATH_MAXLINE];
+	int	npoints = 0;
+	int	npointalloc = 0;
+	double	*prdistance = NULL;
+	double	*prtopo = NULL;
+	int	*prboundary = NULL;
+	double	*prlon = NULL;
+	double	*prlat = NULL;
+	double	*prdistovertopo = NULL;
+	double	*prbearing = NULL;
+	double	*prslope = NULL;
+	mb_path	prsourcename;
+	double	prlength;
+	double	przmin;
+	double	przmax;
+	int	i, j;
+
+	/* time, user, host variables */
+	time_t	right_now;
+	char	date[25], *user_ptr, host[MB_PATH_MAXLINE];
+	char	*unknown = "Unknown";
+
+	/* read data for valid instance */
+	if (instance >= 0)
+	    {
+
+	    /* get the number of profiles to be written to the outpuf file */
+	    status = mbview_getprofilecount(verbose, instance, &npoints, &error);
+	    if (npoints <= 0)
+	    	{
+		fprintf(stderr,"Unable to write profile file...\nCurrently %d profile points defined for instance %d!\n",
+			npoints, instance);
+		XBell((Display *) XtDisplay(mainWindow),100);
+		status = MB_FAILURE;
+		}
+		
+	    /* initialize the output file */
+	    if (status == MB_SUCCESS && npoints > 0)
+	    	{
+		/* open the output file */
+		if ((sfp = fopen(output_file_ptr, "w")) != NULL) 
+			{
+			/* write the profile file header */
+			fprintf(sfp, "## Profile File Version %s\n", MBGRDVIZ_PROFILE_VERSION);
+			fprintf(sfp, "## Output by Program %s\n",program_name); 
+			fprintf(sfp, "## Program Version %s\n",rcs_id);
+			fprintf(sfp, "## MB-System Version %s\n",MB_VERSION);
+			strncpy(date,"\0",25);
+			right_now = time((time_t *)0);
+			strncpy(date,ctime(&right_now),24);
+			if ((user_ptr = getenv("USER")) == NULL)
+				if ((user_ptr = getenv("LOGNAME")) == NULL)
+					user_ptr = unknown;
+			gethostname(host,MB_PATH_MAXLINE);
+			fprintf(sfp, "## Run by user <%s> on cpu <%s> at <%s>\n",
+				user_ptr,host,date);
+			fprintf(sfp, "## Number of profile points: %d\n",npoints); 
+			fprintf(sfp, "## Profile point format:\n"); 
+			fprintf(sfp, "##   <lateral distance (m)> <topography (m)> <boundary (boolean)> <longitude (deg)> <latitude (deg)> <distance over topo (m)> <bearing (deg)> <slope (m/m)>\n"); 
+			}
+			
+		/* output error message */
+		else
+			{
+			error = MB_ERROR_OPEN_FAIL;
+			status = MB_FAILURE;
+			fprintf(stderr,"\nUnable to Open profile file <%s> for writing\n",output_file_ptr);
+			XBell((Display *) XtDisplay(mainWindow),100);
+			}
+		}
+	    
+	    /* if all ok proceed to extract and output profiles */
+	    if (status == MB_SUCCESS)
+		{
+		/* allocate profile arrays */
+		if (status == MB_SUCCESS
+			&& npointalloc < npoints)
+			{
+			status = mbview_allocprofilearrays(verbose, 
+						npoints,
+						&prdistance,
+						&prtopo,
+						&prboundary,
+						&prlon,
+						&prlat,
+						&prdistovertopo,
+						&prbearing,
+						&prslope,
+						&error);
+			if (status == MB_SUCCESS)
+				{
+				npointalloc = npoints;
+				}
+
+			/* if error initializing memory then cancel dealing with this profile */
+			else
+	    			{
+				fprintf(stderr,"Unable to write profile...\nArray allocation for %d points failed for instance %d!\n",
+					npoints, instance);
+				XBell((Display *) XtDisplay(mainWindow),100);
+				npoints = 0;		    
+				}
+			}
+
+		/* extract data for profile */
+		status = mbview_getprofile(verbose, instance,
+					prsourcename,
+					&prlength,
+					&przmin,
+					&przmax,
+					&npoints,
+					prdistance,
+					prtopo,
+					prboundary,
+					prlon,
+					prlat,
+					prdistovertopo,
+					prbearing,
+					prslope,
+					&error);
+
+		/* write the profile header */
+		fprintf(sfp,"## PROFILESOURCE %s\n", prsourcename);
+		fprintf(sfp,"## PROFILELENGTH %f\n", prlength);
+		fprintf(sfp,"## PROFILEZMIN %f\n", przmin);
+		fprintf(sfp,"## PROFILEZMAX %f\n", przmax);
+		fprintf(sfp,"## PROFILEPOINTS %d\n", npoints);
+
+		/* write the profile points */
+		for (j=0;j<npoints;j++)
+			{
+			fprintf(sfp,"%f %f %d %f %f %f %f %f\n",
+				prdistance[j], prtopo[j], prboundary[j], 
+				prlon[j], prlat[j], prdistovertopo[j], 
+				prbearing[j], prslope[j]);
+			}
+
+	    /* close the output file */
+	    fclose(sfp);
+
+	    /* deallocate arrays */
+	    if (npointalloc > 0)
+	    	{
+		status = mbview_freeroutearrays(verbose, 
+					&prdistance,
+					&prtopo,
+					&prboundary,
+					&prlon,
+					&prlat,
+					&prdistovertopo,
+					&prbearing,
+					&prslope,
+					&error);
+		}
+	    }
+	}
 }
 /*---------------------------------------------------------------------------------------*/
 
@@ -3139,7 +3349,8 @@ fprintf(stderr,"done opening mbview instance:%d\n",instance);
 				mbview_addaction(verbose, instance,
 					do_mbgrdviz_fileSelectionBox_saveroute,
 					"Save Route File", 
-					MBV_PICKMASK_NONE, &error);
+					MBV_PICKMASK_TWOPOINT + MBV_PICKMASK_ROUTE + MBV_PICKMASK_NAVTWOPOINT, 
+					&error);
 
 				mbview_addaction(verbose, instance,
 					do_mbgrdviz_open_region,
