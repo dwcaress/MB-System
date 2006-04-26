@@ -10,8 +10,8 @@
   <meta name="Keywords"
  content="seafloor,mapping,multibeam,sonar,bathymetry,sidescan,swath processing,open,source,software">
 </head>
-<body text="#000000" bgcolor="#ffffff" link="#336699" vlink="#997040"
- alink="#cc9900">
+<body alink="#cc9900" bgcolor="#ffffff" link="#336699" text="#000000"
+ vlink="#997040">
 <center>
 <h4><u>List of MB-System Programs:</u></h4>
 </center>
@@ -79,8 +79,7 @@ for reading and writing swath sonar data</li>
 flag
 bad beams
 in swath sonar bathymetry data.</li>
-  <li><a
- href="mbeditold.html">mbeditold</a>:
+  <li><a href="mbeditold.html">mbeditold</a>:
 Old interactive editor used to
 flag bad beams in swath sonar bathymetry data.</li>
   <li><a href="mbextractsegy.html">mbextractsegy</a>:
@@ -141,8 +140,9 @@ to fix problems with navigation in swath sonar data files.</li>
   <li> <a href="mbnavlist.html">mbnavlist</a>: List navigation data in
 swath sonar
 data files.</li>
-  <li> <a href="mbneptune2esf.html">mbneptune2esf</a>: Extract bathymetry 
-edits from Simrad Neptune software into edit save file format.</li>
+  <li> <a href="mbneptune2esf.html">mbneptune2esf</a>: Extract
+bathymetry edits from Simrad Neptune software into edit save file
+format.</li>
   <li> <a href="mbprocess.html">mbprocess</a>: Process swath sonar
 data
 files, including
@@ -157,9 +157,9 @@ a swath
 sonar system using two pieces of coincident bathymetry data collected
 with
 opposing ship headings.</li>
-      <li>
-<a href="mbrolltimelag.html">mbrolltimelag</a> Estimate attitude time 
-lag by cross correlation of apparent bottom slope with the roll time series: </li>
+  <li><a href="mbrolltimelag.html">mbrolltimelag</a> Estimate attitude
+time lag by cross correlation of apparent bottom slope with the roll
+time series: </li>
   <li><a href="mbsegygrid.html">mbsegygrid</a>:
 Generate time vs. trace number grids of seismic data from segy files.<br>
   </li>
@@ -167,8 +167,7 @@ Generate time vs. trace number grids of seismic data from segy files.<br>
 Output some basic statistics of segy seismic data files.</li>
   <li><a href="mbsegylist.html">mbsegylist</a>:
 List selected header values in segy seismic data files.</li>
-  <li><a
- href="mbset.html">mbset</a>:
+  <li><a href="mbset.html">mbset</a>:
 Create and modify parameter files used
 to control mbprocess.</li>
   <li><a href="mbsimradmakess.html">mbsimradmakess</a>: Regenerate
@@ -199,10 +198,11 @@ program for
 modeling the affect of the water velocity profile on swath sonar
 bathymetry
 calculations.</li>
-  <li> <a href="mb7k2jstar.html">mb7k2jstar</a>: Extract Jstar format 
-(format 132) sidescan and subbottom data from Reson 7k (format 88) data files.</li>
-  <li> <a href="mb7kpreprocess.html">mb7kpreprocess</a>: Preprocess 
-Reson 7k data (format 88), including applying time lag and biases to 
+  <li> <a href="mb7k2jstar.html">mb7k2jstar</a>: Extract Jstar format
+(format 132) sidescan and subbottom data from Reson 7k (format 88) data
+files.</li>
+  <li> <a href="mb7kpreprocess.html">mb7kpreprocess</a>: Preprocess
+Reson 7k data (format 88), including applying time lag and biases to
 attitude and navigation data.</li>
 </ul>
 Macros are programs or shellscripts which make use of programs from the
@@ -252,13 +252,16 @@ of the data.</li>
 file
 to
 an ArcView ASCII grid file.</li>
+  <li> <a href="mbm_grid.html">mbm_histplot</a>: Create an executable
+shellscript which will generate a GMT histogram plot of a dataset.</li>
   <li> <a href="mbm_grid.html">mbm_grid</a>: Reads a swath sonar data
-file and writes a shellscript which will grid bathymetry data or mosaic sidescan
+file and writes a shellscript which will grid bathymetry data or mosaic
+sidescan
 (or amplitude) data using reasonable guesses at the appropriate grid
 bounds
 and bin size.</li>
-  <li> <a href="mbm_makedatalist.html">mbm_makedatalist</a>: Generates an 
-MB-System datalist file referencing  all  identifiable  swath files in 
+  <li><a href="mbm_makedatalist.html">mbm_makedatalist</a>: Generates
+an MB-System datalist file referencing all identifiable swath files in
 the specified target directory.</li>
   <li> <a href="mbm_plot.html">mbm_plot</a>: Reads a swath sonar data
 file
@@ -272,8 +275,9 @@ file, calculates the noise in the vertical reference used by the sonar,
 and generates a file containing roll corrections which can be applied
 to
 the data.</li>
-  <li> <a href="mbm_route2mission.html">mbm_route2mission</a>: 
-Translate an mbgrdviz survey route file into an MBARI AUV mission script.</li>
+  <li> <a href="mbm_route2mission.html">mbm_route2mission</a>:
+Translate an mbgrdviz survey route file into an MBARI AUV mission
+script.</li>
   <li> <a href="mbm_stat.html">mbm_stat</a>: Runs mbinfo on a swath
 sonar
 data
@@ -299,13 +303,13 @@ and writes a shellscript which will generate GMT plot of the data.</li>
 </ul>
 <center>
 <p><br>
-Last Updated: $Date: 2006-02-03 22:46:26 $ $Revision: 5.16 $</p>
+Last Updated: $Date: 2006-04-26 22:07:42 $ $Revision: 5.17 $</p>
 </center>
 <p>
 </p>
 <hr width="67%">
 <p><a href="mbsystem_home.html"><img src="mbsystem_logo_small.gif"
- border="0" height="51" width="154" align="bottom"></a><a
+ align="bottom" border="0" height="51" width="154"></a><a
  href="mbsystem_home.html">Back
 to MB-System Home Page...</a>
 </p>
