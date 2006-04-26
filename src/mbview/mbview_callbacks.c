@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbview_callbacks.c	10/7/2002
- *    $Id: mbview_callbacks.c,v 5.11 2006-04-11 19:17:04 caress Exp $
+ *    $Id: mbview_callbacks.c,v 5.12 2006-04-26 22:06:39 caress Exp $
  *
  *    Copyright (c) 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -18,6 +18,9 @@
  * Date:	October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.11  2006/04/11 19:17:04  caress
+ * Added a profile capability.
+ *
  * Revision 5.10  2006/01/24 19:21:32  caress
  * Version 5.0.8 beta.
  *
@@ -124,7 +127,7 @@ static Cardinal 	ac;
 static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_callbacks.c,v 5.11 2006-04-11 19:17:04 caress Exp $";
+static char rcs_id[]="$Id: mbview_callbacks.c,v 5.12 2006-04-26 22:06:39 caress Exp $";
 
 /* function prototypes */
 /*------------------------------------------------------------------------------*/
@@ -4703,31 +4706,51 @@ int mbview_destroy(int verbose, int instance, int destroywidgets, int *error)
 	    if (status == MB_SUCCESS
 		    && data->pick.segment.nls_alloc != 0
 		    && data->pick.segment.lspoints != NULL)
+		    {
 		    status = mb_free(mbv_verbose, &data->pick.segment.lspoints, error);
+		    data->pick.segment.nls_alloc = 0;
+		    }
 	    for (i=0;i<4;i++)
 		    {
      		    if (status == MB_SUCCESS
-		    && data->pick.xsegments[i].lspoints != 0
+		    && data->pick.xsegments[i].nls_alloc != 0
 		    && data->pick.xsegments[i].lspoints != NULL)
-   		    status = mb_free(mbv_verbose, &data->pick.xsegments[i].lspoints, error);
+			    {
+   			    status = mb_free(mbv_verbose, &data->pick.xsegments[i].lspoints, error);
+			    data->pick.xsegments[i].nls_alloc = 0;
+			    }
 		    }
      	    if (status == MB_SUCCESS
-		    && data->area.segment.lspoints != 0
+		    && data->area.segment.nls_alloc != 0
 		    && data->area.segment.lspoints != NULL)
-   		    status = mb_free(mbv_verbose, &data->area.segment.lspoints, error);
-	    for (i=0;i<4;i++)
 		    {
-     		    if (status == MB_SUCCESS
-		    && data->area.segments[i].lspoints != 0
-		    && data->area.segments[i].lspoints != NULL)
-   		    status = mb_free(mbv_verbose, &data->area.segments[i].lspoints, error);
+   		    status = mb_free(mbv_verbose, &data->area.segment.lspoints, error);
+		    data->area.segment.nls_alloc = 0;
 		    }
 	    for (i=0;i<4;i++)
 		    {
      		    if (status == MB_SUCCESS
-		    && data->region.segments[i].lspoints != 0
+		    && data->area.segments[i].nls_alloc != 0
+		    && data->area.segments[i].lspoints != NULL)
+			    {
+   			    status = mb_free(mbv_verbose, &data->area.segments[i].lspoints, error);
+			    data->area.segments[i].nls_alloc = 0;
+			    }
+		    }
+	    for (i=0;i<4;i++)
+		    {
+     		    if (status == MB_SUCCESS
+		    && data->region.segments[i].nls_alloc != 0
 		    && data->region.segments[i].lspoints != NULL)
-   		    status = mb_free(mbv_verbose, &data->region.segments[i].lspoints, error);
+			    {
+   			    status = mb_free(mbv_verbose, &data->region.segments[i].lspoints, error);
+			    data->region.segments[i].nls_alloc = 0;
+			    }
+		    }
+	    if (data->profile.npoints_alloc > 0)
+	    	    {
+   		    status = mb_free(mbv_verbose, &data->profile.points, error);
+		    data->profile.npoints_alloc = 0;
 		    }
 		    
 	    /* deallocate shared data if no more active instances */
@@ -4748,7 +4771,10 @@ int mbview_destroy(int verbose, int instance, int destroywidgets, int *error)
 		if (status == MB_SUCCESS
 		    && shared.shareddata.navpick.segment.nls_alloc != 0
 		    && shared.shareddata.navpick.segment.lspoints != NULL)
+		    {
 		    status = mb_free(mbv_verbose, &shared.shareddata.navpick.segment.lspoints, error);
+		    shared.shareddata.navpick.segment.nls_alloc = 0;
+		    }
 		for (i=0;i<4;i++)
 		    {
 		    if (status == MB_SUCCESS

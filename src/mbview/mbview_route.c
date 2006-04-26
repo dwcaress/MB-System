@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_route.c	9/25/2003
- *    $Id: mbview_route.c,v 5.12 2006-04-11 19:17:04 caress Exp $
+ *    $Id: mbview_route.c,v 5.13 2006-04-26 22:06:40 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  *		begun on October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.12  2006/04/11 19:17:04  caress
+ * Added a profile capability.
+ *
  * Revision 5.11  2006/01/24 19:21:32  caress
  * Version 5.0.8 beta.
  *
@@ -108,7 +111,7 @@ static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 static char		value_string[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_route.c,v 5.12 2006-04-11 19:17:04 caress Exp $";
+static char rcs_id[]="$Id: mbview_route.c,v 5.13 2006-04-26 22:06:40 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_getroutecount(int verbose, int instance,
@@ -1324,7 +1327,7 @@ int mbview_extract_route_profile(int instance)
 			}
 		if (data->profile.npoints_alloc < nprpoints)
 			{
-			status = mbview_allocprofilearrays(mbv_verbose, 
+			status = mbview_allocprofilepoints(mbv_verbose, 
 					nprpoints, &(data->profile.points), &error);
 			if (status == MB_SUCCESS)
 				{
@@ -1364,6 +1367,8 @@ int mbview_extract_route_profile(int instance)
 						data->profile.zmin = data->profile.points[data->profile.npoints].zdata;
 						data->profile.zmax = data->profile.points[data->profile.npoints].zdata;
 						data->profile.points[data->profile.npoints].distance = 0.0;
+						data->profile.points[data->profile.npoints].distovertopo = 0.0;
+						data->profile.points[data->profile.npoints].bearing = 0.0;
 						}
 					else
 						{
@@ -1377,9 +1382,17 @@ int mbview_extract_route_profile(int instance)
 									- data->profile.points[data->profile.npoints-1].ydisplay;
 							data->profile.points[data->profile.npoints].distance = sqrt(dx * dx + dy * dy) / view->scale 
 								+ data->profile.points[data->profile.npoints-1].distance;
+							data->profile.points[data->profile.npoints].bearing = RTD * atan2(dx, dy);
 							}
 						else
 							{
+							mbview_greatcircle_distbearing(instance, 
+								data->profile.points[data->profile.npoints-1].xlon, 
+								data->profile.points[data->profile.npoints-1].ylat, 
+								data->profile.points[data->profile.npoints].xlon, 
+								data->profile.points[data->profile.npoints].ylat, 
+								&(data->profile.points[data->profile.npoints].bearing), 
+								&(data->profile.points[data->profile.npoints].distance));
 							mbview_greatcircle_dist(instance, 
 								data->profile.points[0].xlon, 
 								data->profile.points[0].ylat, 
@@ -1387,6 +1400,31 @@ int mbview_extract_route_profile(int instance)
 								data->profile.points[data->profile.npoints].ylat, 
 								&(data->profile.points[data->profile.npoints].distance));
 							}
+						dy = (data->profile.points[data->profile.npoints].zdata
+							- data->profile.points[data->profile.npoints-1].zdata);
+						dx = (data->profile.points[data->profile.npoints].distance
+							- data->profile.points[data->profile.npoints-1].distance);
+						data->profile.points[i].distovertopo = data->profile.points[data->profile.npoints-1].distovertopo
+											+ sqrt(dy * dy + dx * dx);
+						if (dx > 0.0)
+							data->profile.points[data->profile.npoints].slope = fabs(dy / dx);
+						else
+							data->profile.points[data->profile.npoints].slope = 0.0;
+						}
+					if (data->profile.points[data->profile.npoints].bearing < 0.0)
+						data->profile.points[data->profile.npoints].bearing += 360.0;
+					if (data->profile.npoints == 1)
+						data->profile.points[0].bearing = data->profile.points[data->profile.npoints].bearing;
+					if (data->profile.npoints > 1)
+						{
+						dy = (data->profile.points[data->profile.npoints].zdata
+							- data->profile.points[data->profile.npoints-2].zdata);
+						dx = (data->profile.points[data->profile.npoints].distance
+							- data->profile.points[data->profile.npoints-2].distance);
+						if (dx > 0.0)
+							data->profile.points[data->profile.npoints-1].slope = fabs(dy / dx);
+						else
+							data->profile.points[data->profile.npoints-1].slope = 0.0;
 						}
 					data->profile.points[data->profile.npoints].navzdata = 0.0;
 					data->profile.points[data->profile.npoints].navtime_d = 0.0;
@@ -1394,36 +1432,6 @@ int mbview_extract_route_profile(int instance)
 					}
 				}
 			data->profile.length = data->profile.points[data->profile.npoints-1].distance;
-			
-			/* calculate slope */
-			for (i=0;i<data->profile.npoints;i++)
-				{
-				if (i == 0)
-					{
-					dy = (data->profile.points[i+1].zdata
-						- data->profile.points[i].zdata);
-					dx = (data->profile.points[i+1].distance
-						- data->profile.points[i].distance);
-					}
-				else if (i == data->profile.npoints - 1)
-					{
-					dy = (data->profile.points[i].zdata
-						- data->profile.points[i-1].zdata);
-					dx = (data->profile.points[i].distance
-						- data->profile.points[i-1].distance);
-					}
-				else
-					{
-					dy = (data->profile.points[i+1].zdata
-						- data->profile.points[i-1].zdata);
-					dx = (data->profile.points[i+1].distance
-						- data->profile.points[i-1].distance);
-					}
-				if (dx > 0.0)
-					data->profile.points[i].slope = fabs(dy / dx);
-				else
-					data->profile.points[i].slope = 0.0;
-				}
 			}
 		}
 	
