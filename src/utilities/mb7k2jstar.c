@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb7k2jstar.c	5/19/2005
- *    $Id: mb7k2jstar.c,v 5.5 2006-04-19 18:32:07 caress Exp $
+ *    $Id: mb7k2jstar.c,v 5.6 2006-04-26 22:05:25 caress Exp $
  *
  *    Copyright (c) 2005 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	May 19, 2005
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2006/04/19 18:32:07  caress
+ * Allowed smoothing of extracted sidescan.
+ *
  * Revision 5.4  2006/01/18 15:17:00  caress
  * Added stdlib.h include.
  *
@@ -63,8 +66,10 @@
 #define	MB7K2JSTAR_BOTTOMPICK_BATHYMETRY	1
 #define	MB7K2JSTAR_BOTTOMPICK_ALTITUDE		2
 #define	MB7K2JSTAR_BOTTOMPICK_ARRIVAL		3
+#define	MB7K2JSTAR_SSGAIN_OFF			0
+#define	MB7K2JSTAR_SSGAIN_TVG_1OVERR		1
 
-static char rcs_id[] = "$Id: mb7k2jstar.c,v 5.5 2006-04-19 18:32:07 caress Exp $";
+static char rcs_id[] = "$Id: mb7k2jstar.c,v 5.6 2006-04-26 22:05:25 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
@@ -178,6 +183,10 @@ main (int argc, char **argv)
 	int	bottompickmode = MB7K2JSTAR_BOTTOMPICK_ALTITUDE;
 	double	bottompickthreshold = 0.4;
 	
+	/* sidescan gain mode */
+	int	gainmode = MB7K2JSTAR_SSGAIN_OFF;
+	double	gainfactor = 1.0;
+	
 	/* counting variables */
 	int	nreaddata = 0;
 	int	nreadheader = 0;
@@ -214,6 +223,7 @@ main (int argc, char **argv)
 	int	ttime_min_ok = MB_NO;
 	int	beam_min;
 	int	smooth = 0;
+	double	factor;
 	
 	int	read_data;
 	int	found;
@@ -228,7 +238,7 @@ main (int argc, char **argv)
 	strcpy (read_file, "datalist.mb-1");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "A:a:B:b:CcF:f:I:i:O:o:S:s:T:t:VvHh")) != -1)
+	while ((c = getopt(argc, argv, "A:a:B:b:CcF:f:G:g:I:i:O:o:S:s:T:t:VvHh")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -297,6 +307,11 @@ main (int argc, char **argv)
 		case 'F':
 		case 'f':
 			sscanf (optarg,"%d", &format);
+			flag++;
+			break;
+		case 'G':
+		case 'g':
+			sscanf (optarg,"%d/%lf", &gainmode, &gainfactor);
 			flag++;
 			break;
 		case 'I':
@@ -378,6 +393,8 @@ main (int argc, char **argv)
 		fprintf(stderr,"dbg2       bottompickmode:      %d\n",bottompickmode);
 		fprintf(stderr,"dbg2       bottompickthreshold: %f\n",bottompickthreshold);
 		fprintf(stderr,"dbg2       smooth:              %d\n",smooth);
+		fprintf(stderr,"dbg2       gainmode:            %d\n",gainmode);
+		fprintf(stderr,"dbg2       gainfactor:          %f\n",gainfactor);
 		fprintf(stderr,"dbg2       file:                %s\n",file);
 		fprintf(stderr,"dbg2       output_file:         %s\n",output_file);
 		fprintf(stderr,"dbg2       output_file_set:     %d\n",output_file_set);
@@ -965,6 +982,8 @@ imb_io_ptr->fix_lat[i]);*/
 				else if (bottompickmode == MB7K2JSTAR_BOTTOMPICK_BATHYMETRY)
 					{
 					channel->sonaraltitude = (int) (750000.0 * ttime_min_use);
+					if (channel->sonaraltitude == 0)
+						channel->sonaraltitude = 1000 * altitude;
 					}
 				else
 					{
@@ -1165,6 +1184,23 @@ imb_io_ptr->fix_lat[i]);*/
 /*fprintf(stderr,"Final data[%d] n:%d : %d\n", i, n, channel->trace[i]);*/
 							}
 						}
+					else if (smooth < 0 && channel->dataFormat == 0)
+						{
+						datashort = (unsigned short *) s7kchannel->data;
+						for (i=0;i<channel->samples;i++)
+							{
+							n = 0;
+							value = 0.0;
+							for (j=MAX(i+smooth,0);j<MIN(i-smooth,channel->samples-1);j++)
+								{
+								value += datashort[j] * datashort[j];
+								n++;
+/*fprintf(stderr,"i:%d j:%d raw:%d tot:%d\n",i,j,datashort[j],channel->trace[i]);*/
+								}
+							channel->trace[i] = (unsigned int) (sqrt(value) / n);
+/*fprintf(stderr,"Final data[%d] n:%d : %d\n", i, n, channel->trace[i]);*/
+							}
+						}
 					else
 						{
 						data = (char *) channel->trace;
@@ -1222,10 +1258,31 @@ imb_io_ptr->fix_lat[i]);*/
 				else if (bottompickmode == MB7K2JSTAR_BOTTOMPICK_BATHYMETRY)
 					{
 					channel->sonaraltitude = (int) (750000.0 * ttime_min_use);
+					if (channel->sonaraltitude == 0)
+						channel->sonaraltitude = 1000 * altitude;
 					}
 				else
 					{
 					channel->sonaraltitude = 1000 * altitude;
+					}
+					
+				/* apply gain if specified */
+				if (gainmode == MB7K2JSTAR_SSGAIN_TVG_1OVERR)
+					{
+					channelpick = (int) (((double)channel->sonaraltitude) / 0.00075 / ((double)channel->sampleInterval));
+					channelpick = MAX(channelpick, 1);
+/*fprintf(stderr,"altitude:%d sampleInterval:%d channelpick:%d\n",channel->sonaraltitude,channel->sampleInterval,channelpick);*/
+					for (i=0;i<channelpick;i++)
+						{
+						channel->trace[i] = (unsigned short) (gainfactor * channel->trace[i]);
+						}
+					for (i=channelpick;i<channel->samples;i++)
+						{
+						factor = gainfactor * (((double)( i * i)) / ((double) (channelpick * channelpick)));
+/*fprintf(stderr,"sample %d: factor:%f value: %d",i,factor,channel->trace[i]);*/
+						channel->trace[i] = (unsigned short) (factor * channel->trace[i]);
+/*fprintf(stderr," %d\n",channel->trace[i]);*/
+						}
 					}
 
 				/* reset navigation and other values */
@@ -1403,6 +1460,23 @@ imb_io_ptr->fix_lat[i]);*/
 /*fprintf(stderr,"Final data[%d] n:%d : %d\n", i, n, channel->trace[i]);*/
 							}
 						}
+					else if (smooth < 0 && channel->dataFormat == 0)
+						{
+						datashort = (unsigned short *) s7kchannel->data;
+						for (i=0;i<channel->samples;i++)
+							{
+							n = 0;
+							value = 0.0;
+							for (j=MAX(i+smooth,0);j<MIN(i-smooth,channel->samples-1);j++)
+								{
+								value += datashort[j] * datashort[j];
+								n++;
+/*fprintf(stderr,"i:%d j:%d raw:%d tot:%d\n",i,j,datashort[j],channel->trace[i]);*/
+								}
+							channel->trace[i] = (unsigned int) (sqrt(value) / n);
+/*fprintf(stderr,"Final data[%d] n:%d : %d\n", i, n, channel->trace[i]);*/
+							}
+						}
 					else
 						{
 						data = (char *) channel->trace;
@@ -1460,10 +1534,27 @@ imb_io_ptr->fix_lat[i]);*/
 				else if (bottompickmode == MB7K2JSTAR_BOTTOMPICK_BATHYMETRY)
 					{
 					channel->sonaraltitude = (int) (750000.0 * ttime_min_use);
+					if (channel->sonaraltitude == 0)
+						channel->sonaraltitude = 1000 * altitude;
 					}
 				else
 					{
 					channel->sonaraltitude = 1000 * altitude;
+					}
+					
+				/* apply gain if specified */
+				if (gainmode == MB7K2JSTAR_SSGAIN_TVG_1OVERR)
+					{
+					channelpick = (int) (((double)channel->sonaraltitude) / 0.00075 / ((double)channel->sampleInterval));
+/*fprintf(stderr,"altitude:%d sampleInterval:%d channelpick:%d\n",channel->sonaraltitude,channel->sampleInterval,channelpick);*/
+					channelpick = MAX(channelpick, 1);
+					for (i=channelpick;i<channel->samples;i++)
+						{
+						factor = gainfactor * (((double)( i * i)) / ((double) (channelpick * channelpick)));
+/*fprintf(stderr,"sample %d: factor:%f value: %d",i,factor,channel->trace[i]);*/
+						channel->trace[i] = (unsigned short) (factor * channel->trace[i]);
+/*fprintf(stderr," %d\n",channel->trace[i]);*/
+						}
 					}
 
 				/* reset navigation and other values */
@@ -1660,6 +1751,23 @@ imb_io_ptr->fix_lat[i]);*/
 /*fprintf(stderr,"Final data[%d] n:%d : %d\n", i, n, channel->trace[i]);*/
 							}
 						}
+					else if (smooth < 0 && channel->dataFormat == 0)
+						{
+						datashort = (unsigned short *) s7kchannel->data;
+						for (i=0;i<channel->samples;i++)
+							{
+							n = 0;
+							value = 0.0;
+							for (j=MAX(i+smooth,0);j<MIN(i-smooth,channel->samples-1);j++)
+								{
+								value += datashort[j] * datashort[j];
+								n++;
+/*fprintf(stderr,"i:%d j:%d raw:%d tot:%d\n",i,j,datashort[j],channel->trace[i]);*/
+								}
+							channel->trace[i] = (unsigned int) (sqrt(value) / n);
+/*fprintf(stderr,"Final data[%d] n:%d : %d\n", i, n, channel->trace[i]);*/
+							}
+						}
 					else
 						{
 						data = (char *) channel->trace;
@@ -1717,6 +1825,8 @@ imb_io_ptr->fix_lat[i]);*/
 				else if (bottompickmode == MB7K2JSTAR_BOTTOMPICK_BATHYMETRY)
 					{
 					channel->sonaraltitude = (int) (750000.0 * ttime_min_use);
+					if (channel->sonaraltitude == 0)
+						channel->sonaraltitude = 1000 * altitude;
 					}
 				else
 					{
@@ -1898,6 +2008,23 @@ imb_io_ptr->fix_lat[i]);*/
 /*fprintf(stderr,"Final data[%d] n:%d : %d\n", i, n, channel->trace[i]);*/
 							}
 						}
+					else if (smooth < 0 && channel->dataFormat == 0)
+						{
+						datashort = (unsigned short *) s7kchannel->data;
+						for (i=0;i<channel->samples;i++)
+							{
+							n = 0;
+							value = 0.0;
+							for (j=MAX(i+smooth,0);j<MIN(i-smooth,channel->samples-1);j++)
+								{
+								value += datashort[j] * datashort[j];
+								n++;
+/*fprintf(stderr,"i:%d j:%d raw:%d tot:%d\n",i,j,datashort[j],channel->trace[i]);*/
+								}
+							channel->trace[i] = (unsigned int) (sqrt(value) / n);
+/*fprintf(stderr,"Final data[%d] n:%d : %d\n", i, n, channel->trace[i]);*/
+							}
+						}
 					else
 						{
 						data = (char *) channel->trace;
@@ -1955,6 +2082,8 @@ imb_io_ptr->fix_lat[i]);*/
 				else if (bottompickmode == MB7K2JSTAR_BOTTOMPICK_BATHYMETRY)
 					{
 					channel->sonaraltitude = (int) (750000.0 * ttime_min_use);
+					if (channel->sonaraltitude == 0)
+						channel->sonaraltitude = 1000 * altitude;
 					}
 				else
 					{

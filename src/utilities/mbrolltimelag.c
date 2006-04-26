@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbrolltimelag.c	11/10/2005
  *
- *    $Id: mbrolltimelag.c,v 5.3 2006-04-19 18:31:23 caress Exp $
+ *    $Id: mbrolltimelag.c,v 5.4 2006-04-26 22:05:26 caress Exp $
  *
  *    Copyright (c) 2005 by
  *    David W. Caress (caress@mbari.org)
@@ -27,6 +27,9 @@
  * Date:	November 11, 2005
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2006/04/19 18:31:23  caress
+ * Fixed use of mbm_histplot.
+ *
  * Revision 5.2  2006/04/11 19:19:30  caress
  * Various fixes.
  *
@@ -60,7 +63,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbrolltimelag.c,v 5.3 2006-04-19 18:31:23 caress Exp $";
+	static char rcs_id[] = "$Id: mbrolltimelag.c,v 5.4 2006-04-26 22:05:26 caress Exp $";
 	static char program_name[] = "MBrolltimelag";
 	static char help_message[] = "MBrolltimelag extracts the roll time series and the apparent \nbottom slope time series from swath data, and then calculates \nthe cross correlation between the roll and the slope minus roll \nfor a specified set of time lags.";
 	static char usage_message[] = "mbrolltimelag -Iswathdata [-Fformat -Nnping -Snavchannel -Tnlag/lagmin/lagmax -V -H ]";
@@ -87,12 +90,16 @@ main (int argc, char **argv)
 	char	xcorfiletot[MB_PATH_MAXLINE];
 	char	cmdfile[MB_PATH_MAXLINE];
 	char	histfile[MB_PATH_MAXLINE];
+	char	fhistfile[MB_PATH_MAXLINE];
+	char	modelfile[MB_PATH_MAXLINE];
 	int	format = 0;
 	int	formatguess = 0;
 	FILE	*fp = NULL;
 	FILE	*fpx = NULL;
+	FILE	*fpf = NULL;
 	FILE	*fpt = NULL;
 	FILE	*fph = NULL;
+	FILE	*fpm = NULL;
 	int	read_datalist = MB_NO;
 	int	read_data = MB_NO;
 	void	*datalist;
@@ -120,6 +127,9 @@ main (int argc, char **argv)
 	double	*roll_time_d = NULL;
 	double	*roll_roll = NULL;
 	
+	/* timelag histogram array */
+	int	*timelaghistogram = NULL;
+	
 	double	time_d;
 	double	roll;
 	double	slope;
@@ -140,6 +150,10 @@ main (int argc, char **argv)
 	double	maxr;
 	double	peaktimelag;
 	double	peakr;
+	int	peakk;
+	int	peakkmax;
+	int	peakksum;
+	double	time_d_avg;
 	
 	int	nr;
 	double	rollint;
@@ -251,6 +265,7 @@ main (int argc, char **argv)
 	/* get time lag step */
 	lagstep = (lagmax - lagmin) / (nlag - 1);
 	status = mb_realloc(verbose, nlag * sizeof(double), &rr, &error);
+	status = mb_realloc(verbose, nlag * sizeof(int), &timelaghistogram, &error);
 		
 	/* print out some helpful information */
 	if (verbose > 0)
@@ -313,6 +328,18 @@ main (int argc, char **argv)
 			program_name);
 		exit(error);
 		}
+	
+	/* open time lag model file */
+	sprintf(modelfile, "%s_timelagmodel.txt", swathroot);
+	if ((fpm = fopen(modelfile, "w")) == NULL)
+		{
+		error = MB_ERROR_OPEN_FAIL;
+		fprintf(stderr,"\nUnable to open time lag model output: %s\n",
+			modelfile);
+		fprintf(stderr,"\nProgram <%s> Terminated\n",
+			program_name);
+		exit(error);
+		}
 
 	/* open file list */
 	if (read_datalist == MB_YES)
@@ -345,6 +372,7 @@ main (int argc, char **argv)
 	while (read_data == MB_YES)
 		{
 		nslope = 0;
+		time_d_avg = 0.0;
 		sprintf(cmdfile, "mblist -I%s -F%d -OMAR", swathfile, format);
 		fprintf(stderr,"\nRunning %s...\n",cmdfile);
 		fp = popen(cmdfile, "r");
@@ -360,6 +388,7 @@ main (int argc, char **argv)
 			if (nslope == 0 || time_d > slope_time_d[nslope-1])
 				{
 				slope_time_d[nslope] = time_d;
+				time_d_avg += time_d;
 				slope_slope[nslope] = roll - slope;
 				slope_roll[nslope] = roll;
 				nslope++;
@@ -367,7 +396,21 @@ main (int argc, char **argv)
 			}
 		fclose(fp);
 		nslopetot += nslope;
+		if (nslope > 0)
+			time_d_avg /= nslope;
 		fprintf(stderr,"%d slope data read from %s\n", nslope, swathfile);
+	
+		/* open time lag histogram file */
+		sprintf(fhistfile, "%s_timelaghist.txt", swathfile);
+		if ((fpf = fopen(fhistfile, "w")) == NULL)
+			{
+			error = MB_ERROR_OPEN_FAIL;
+			fprintf(stderr,"\nUnable to open histogram output: %s\n",
+				fhistfile);
+			fprintf(stderr,"\nProgram <%s> Terminated\n",
+				program_name);
+			exit(error);
+			}
 	
 		/* open cross correlation file */
 		sprintf(xcorfile, "%s_xcorr.txt", swathfile);
@@ -379,6 +422,12 @@ main (int argc, char **argv)
 			fprintf(stderr,"\nProgram <%s> Terminated\n",
 				program_name);
 			exit(error);
+			}
+			
+		/* initialize time lag histogram */
+		for (k=0;k<nlag;k++)
+			{
+			timelaghistogram[k] = 0;
 			}
 		
 		/* now do cross correlation calculations */
@@ -487,6 +536,7 @@ main (int argc, char **argv)
 						}
 					if (k == 0)
 						{
+						peakk = k;
 						peakr = rr[k];
 						peaktimelag = timelag;
 						}
@@ -496,6 +546,7 @@ main (int argc, char **argv)
 						&& rr[k] > rr[k+1]
 						&& abs(timelag) < abs(peaktimelag))
 						{
+						peakk = k;
 						peakr = rr[k];
 						peaktimelag = timelag;
 						}
@@ -503,6 +554,7 @@ main (int argc, char **argv)
 						&& peaktimelag == -lagmax
 						&& rr[k] > peakr)
 						{
+						peakk = k;
 						peakr = rr[k];
 						peaktimelag = timelag;
 						}
@@ -512,6 +564,13 @@ main (int argc, char **argv)
 			/* print out best correlated time lag estimates */
 			if (peakr > 0.90)
 				{
+				timelaghistogram[peakk]++;
+				}
+
+			/* augment histogram */
+			if (peakr > 0.90)
+				{
+				fprintf(fpf, "%6.3f\n", peaktimelag);
 				fprintf(fph, "%6.3f\n", peaktimelag);
 				}
 
@@ -523,13 +582,40 @@ main (int argc, char **argv)
 				}
 			}
 			
-		/* close cross correlation file */
+		/* close cross correlation and histogram files */
 		fclose(fpx);
+		fclose(fpf);
 		
 		/* generate plot shellscript for cross correlation file */
 		sprintf(cmdfile, "mbm_xyplot -I%s -N", xcorfile);
 		fprintf(stderr, "Running: %s...\n", cmdfile);
 		system(cmdfile);
+
+		/* generate plot shellscript for time lag histogram */
+		sprintf(cmdfile, "mbm_histplot -I%s -C%g -L\"Frequency Histogram of %s:Time Lag (sec):Frequency \%\"", 
+				fhistfile, lagstep, swathfile);
+		fprintf(stderr, "Running: %s...\n", cmdfile);
+		system(cmdfile);
+		
+		/* output peak time lag */
+		peakk = 0;
+		peakkmax = 0;
+		peakksum = 0;
+		for (k=0;k<nlag;k++)
+			{
+			if (timelaghistogram[k] > peakkmax)
+				{
+				peakkmax = timelaghistogram[k];
+				peakk = k;
+				}
+			peakksum += timelaghistogram[k];
+			}
+		if (nslope > 0 && peakksum > 0 && peakkmax > 0
+			&& peakkmax > peakksum / 5)
+			{
+			timelag = -lagmax + peakk * lagstep;
+			fprintf(fpm, "%f %f\n", time_d_avg, timelag);
+			}
 
 		/* figure out whether and what to read next */
         	if (read_datalist == MB_YES)
@@ -557,6 +643,9 @@ main (int argc, char **argv)
 			
 	/* close histogram file */
 	fclose(fph);
+			
+	/* close time lag model file */
+	fclose(fpm);
 		
 	/* generate plot shellscript for cross correlation file */
 	if (read_datalist == MB_YES)
@@ -567,8 +656,14 @@ main (int argc, char **argv)
 		}
 		
 	/* generate plot shellscript for time lag histogram */
-	sprintf(cmdfile, "mbm_histplot -I%s -C%g -L\"Frequency Histogram of %s:Time Lag (sec):Frequency%\"", 
+	sprintf(cmdfile, "mbm_histplot -I%s -C%g -L\"Frequency Histogram of %s:Time Lag (sec):Frequency: \%\"", 
 			histfile, lagstep, swathdata);
+	fprintf(stderr, "Running: %s...\n", cmdfile);
+	system(cmdfile);
+		
+	/* generate plot shellscript for time lag model */
+	sprintf(cmdfile, "mbm_xyplot -I%s -ISc0.1:%s -L\"Time lag model of %s:Time (sec):Time Lag (sec):\"", 
+			modelfile, modelfile, swathdata);
 	fprintf(stderr, "Running: %s...\n", cmdfile);
 	system(cmdfile);
 
@@ -579,6 +674,7 @@ main (int argc, char **argv)
 	mb_free(verbose,&roll_time_d,&error);
 	mb_free(verbose,&roll_roll,&error);
 	mb_free(verbose,&rr,&error);
+	mb_free(verbose,&timelaghistogram,&error);
 
 	/* check memory */
 	if (verbose >= 4)
