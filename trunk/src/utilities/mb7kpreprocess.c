@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb7kpreprocess.c	10/12/2005
- *    $Id: mb7kpreprocess.c,v 5.4 2006-04-11 19:19:29 caress Exp $
+ *    $Id: mb7kpreprocess.c,v 5.5 2006-04-26 22:05:26 caress Exp $
  *
  *    Copyright (c) 2005 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	October 12, 2005
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2006/04/11 19:19:29  caress
+ * Various fixes.
+ *
  * Revision 5.3  2006/03/06 21:44:27  caress
  * Changed to handle old style Reson beam quality flags.
  *
@@ -44,6 +47,8 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 /* MBIO include files */
 #include "../../include/mb_status.h"
@@ -55,8 +60,11 @@
 #define MB7KPREPROCESS_ALLOC_CHUNK 1000
 #define MB7KPREPROCESS_PROCESS		1
 #define MB7KPREPROCESS_TIMESTAMPLIST	2
+#define	MB7KPREPROCESS_TIMELAG_OFF	0
+#define	MB7KPREPROCESS_TIMELAG_CONSTANT	1
+#define	MB7KPREPROCESS_TIMELAG_MODEL	2
 
-static char rcs_id[] = "$Id: mb7kpreprocess.c,v 5.4 2006-04-11 19:19:29 caress Exp $";
+static char rcs_id[] = "$Id: mb7kpreprocess.c,v 5.5 2006-04-26 22:05:26 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
@@ -226,7 +234,14 @@ main (int argc, char **argv)
 	int	*edget_ping = NULL;
 	
 	/* timelag parameters */
+	int	timelagmode = MB7KPREPROCESS_TIMELAG_OFF;
 	double	timelag = 0.0;
+	double	timelagconstant = 0.0;
+	char	timelagfile[MB_PATH_MAXLINE];
+	FILE	*tfp;
+	int	ntimelag = 0;
+	double	*timelag_time_d = NULL;
+	double	*timelag_model = NULL;
 	
 	/* range offset parameters */
 	int	nrangeoffset = 0;
@@ -244,6 +259,10 @@ main (int argc, char **argv)
 	double	alpha, beta, theta, phi;
 	double	rr, xx, zz;
 	
+	struct stat file_status;
+	int	fstat;
+	char	buffer[MB_PATH_MAXLINE];
+	char	*result;
 	int	read_data;
 	int	testformat;
 	char	fileroot[MB_PATH_MAXLINE];
@@ -320,7 +339,17 @@ main (int argc, char **argv)
 			break;
 		case 'T':
 		case 't':
-			sscanf (optarg,"%lf", &timelag);
+			sscanf (optarg,"%s", timelagfile);
+			if ((fstat = stat(timelagfile, &file_status)) == 0
+				&& (file_status.st_mode & S_IFMT) != S_IFDIR)
+					{
+					timelagmode = MB7KPREPROCESS_TIMELAG_MODEL;
+					}
+			else
+				{
+				sscanf (optarg,"%lf", &timelagconstant);
+				timelagmode = MB7KPREPROCESS_TIMELAG_CONSTANT;
+				}
 			flag++;
 			break;
 		case '?':
@@ -382,6 +411,18 @@ main (int argc, char **argv)
 		fprintf(stderr,"dbg2       ofile_set:           %d\n",ofile_set);
 		fprintf(stderr,"dbg2       mode:                %d\n",mode);
 		fprintf(stderr,"dbg2       fix_time_stamps:     %d\n",fix_time_stamps);
+		fprintf(stderr,"dbg2       timelagmode:         %d\n",timelagmode);
+		if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
+			{
+			fprintf(stderr,"dbg2       timelagfile:         %s\n",timelagfile);
+			fprintf(stderr,"dbg2       ntimelag:            %d\n",ntimelag);
+			for (i=0;i<nrangeoffset;i++)
+				fprintf(stderr,"dbg2       timelag[%d]:         %f %f\n",
+					i, timelag_time_d[i], timelag_model[i]);
+			}
+		else
+			fprintf(stderr,"dbg2       timelag:             %f\n",timelag);
+		fprintf(stderr,"dbg2       timelag:             %f\n",timelag);
 		fprintf(stderr,"dbg2       timelag:             %f\n",timelag);
 		fprintf(stderr,"dbg2       depthsensoroffx:     %f\n",depthsensoroffx);
 		fprintf(stderr,"dbg2       depthsensoroffz:     %f\n",depthsensoroffz);
@@ -396,6 +437,72 @@ main (int argc, char **argv)
 		fprintf(stderr,"\n%s\n",help_message);
 		fprintf(stderr,"\nusage: %s\n", usage_message);
 		exit(error);
+		}
+		
+	/* get time lag model if specified */
+	if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
+		{
+		/* count the data points in the timelag file */
+		ntimelag = 0;
+		if ((tfp = fopen(timelagfile, "r")) == NULL) 
+			{
+			error = MB_ERROR_OPEN_FAIL;
+			fprintf(stderr,"\nUnable to open time lag model File <%s> for reading\n",timelagfile);
+			fprintf(stderr,"\nProgram <%s> Terminated\n",
+				program_name);
+			exit(error);
+			}
+		while ((result = fgets(buffer,MB_PATH_MAXLINE,tfp)) == buffer)
+			if (buffer[0] != '#')
+			    ntimelag++;
+		fclose(tfp);
+
+		/* allocate arrays for time lag */
+		if (ntimelag > 0)
+		    {
+		    status = mb_malloc(verbose,ntimelag * sizeof(double), &timelag_time_d,&error);
+		    if (error == MB_ERROR_NO_ERROR)
+		    	status = mb_malloc(verbose,ntimelag * sizeof(double), &timelag_model,&error);
+		    if (error != MB_ERROR_NO_ERROR)
+			{
+			mb_error(verbose,error,&message);
+			fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
+			fprintf(stderr,"\nProgram <%s> Terminated\n",
+				program_name);
+			exit(error);
+			}		    
+		    }
+
+		/* if no time lag data then quit */
+		else
+		    {
+		    error = MB_ERROR_BAD_DATA;
+		    fprintf(stderr,"\nUnable to read data from time lag model file <%s>\n",timelagfile);
+		    fprintf(stderr,"\nProgram <%s> Terminated\n",
+			    program_name);
+		    exit(error);
+		    }		    
+
+		/* read the data points in the timelag file */
+		ntimelag = 0;
+		if ((tfp = fopen(timelagfile, "r")) == NULL) 
+		    {
+		    error = MB_ERROR_OPEN_FAIL;
+		    fprintf(stderr,"\nUnable to open time lag model File <%s> for reading\n",timelagfile);
+		    fprintf(stderr,"\nProgram <%s> Terminated\n",
+			    program_name);
+		    exit(error);
+		    }
+		while ((result = fgets(buffer,MB_PATH_MAXLINE,tfp)) == buffer)
+		    {
+		    if (buffer[0] != '#')
+			{
+			/* read the time and time lag pair */
+			if (sscanf(buffer,"%lf %lf",&timelag_time_d[ntimelag],&timelag_model[ntimelag]) == 2)
+			    ntimelag++;
+			}
+		    }
+		fclose(tfp);
 		}
 
 	/* get format if required */
@@ -1339,8 +1446,8 @@ fprintf(stderr,"Set nreadsbptot:%d\n",nreadsbptot);
 	   	/* handle multibeam data */
 		if (status == MB_SUCCESS && kind == MB_DATA_DATA) 
 			{
+			/* update counters */
 			nreadmultibeam++;
-			
 			bathymetry = &(istore->bathymetry);
 			if (istore->read_volatilesettings == MB_YES)
 				nreadmbvolatilesettings++;
@@ -1500,6 +1607,23 @@ fprintf(stderr,"Set nreadsbptot:%d\n",nreadsbptot);
 					}
 
 				/* recalculate optional values in bathymetry record */
+				
+				/* get timelag value */
+				if (timelagmode == MB7KPREPROCESS_TIMELAG_OFF)
+					{
+					timelag = 0.0;
+					}
+				else if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
+					{
+					timelag = timelagconstant;
+					}
+				else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
+					{
+					interp_status = mb_linear_interp_degrees(verbose, 
+								timelag_time_d-1, timelag_model-1,
+								ntimelag, time_d, &timelag, &j, 
+								&error);
+					}
 				
 				/* get navigation, etc */
 				speed = 0.0;
