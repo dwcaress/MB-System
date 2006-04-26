@@ -8,7 +8,7 @@ Version 5.0
 .SH SYNOPSIS
 \fBmbsegygrid\fP \fB-I\fIsegyfile\fP \fB-O\fIgridfile\fP 
 [\fB-A\fIshotscale/timescale\fP \fB-D\fIdecimatex/decimatey\fP
-\fB-G\fImode/gain[/window]\fP \fB-R\fP
+\fB-G\fImode/gain[/window]\fP 
 \fB-S\fImode[/start/end[/schan/echan]]\fP \fB-T\fIsweep[/delay]\fP 
 \fB-W\fImode/start/end\fP \fB-H \fB-V\fP]";
 
@@ -90,9 +90,6 @@ Sets the filename of the input segy seismic data file to be gridded.
 \fIgridfile\fP
 .br
 Sets the filename for the output GMT netCDF format grid.
-.TP
-.B \-R
-Enables trace normalization using the trace's rms value.
 .TP
 .B \-S
 \fImode[/start/end[/schan/echan]]\fP
@@ -219,7 +216,6 @@ and the output to the terminal looks like:
  	     window end:         0.000000 seconds
  	     gain mode:          0
  	     gain:               0.000000
- 	     rmsmode:            0
  	Output Parameters:
  	     grid filename:      SubbottomGrid.grd
  	     x grid dimension:   2527
