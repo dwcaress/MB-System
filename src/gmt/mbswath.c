@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbswath.c	5/30/93
- *    $Id: mbswath.c,v 5.11 2006-01-11 07:25:53 caress Exp $
+ *    $Id: mbswath.c,v 5.12 2006-06-02 03:00:31 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -29,6 +29,9 @@
  * Date:	May 30, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.11  2006/01/11 07:25:53  caress
+ * Working towards 5.0.8
+ *
  * Revision 5.10  2005/11/04 20:50:19  caress
  * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
  *
@@ -307,7 +310,7 @@ unsigned char r, g, b, gray;
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbswath.c,v 5.11 2006-01-11 07:25:53 caress Exp $";
+	static char rcs_id[] = "$Id: mbswath.c,v 5.12 2006-06-02 03:00:31 caress Exp $";
 	static char program_name[] = "MBSWATH";
 	static char help_message[] =  "MBSWATH is a GMT compatible utility which creates a color postscript \nimage of swath bathymetry or backscatter data.  The image \nmay be shaded relief as well.  Complete maps are made by using \nMBSWATH in conjunction with the usual GMT programs.";
 	static char usage_message[] = "mbswath -Ccptfile -Jparameters -Rwest/east/south/north \n\t[-Afactor -Btickinfo -byr/mon/day/hour/min/sec \n\t-ccopies -Dmode/ampscale/ampmin/ampmax \n\t-Eyr/mon/day/hour/min/sec -fformat \n\t-Fred/green/blue -Gmagnitude/azimuth -Idatalist \n\t-K -Ncptfile -O -P -ppings -Qdpi -Ttimegap -U -W -Xx-shift -Yy-shift \n\t-Zmode -V -H]";
@@ -881,6 +884,9 @@ main (int argc, char **argv)
 		}
 
 	/* initialize plotting */
+#ifdef GMT4_1_2
+	GMT_plotinit (argc, argv);
+#else
 	ps_plotinit (NULL, gmtdefs.overlay, gmtdefs.page_orientation, 
 		gmtdefs.x_origin, gmtdefs.y_origin,
 		gmtdefs.global_x_scale, gmtdefs.global_y_scale, 
@@ -891,6 +897,7 @@ main (int argc, char **argv)
 	GMT_echo_command (argc, argv);
 	if (gmtdefs.unix_time) 
 		GMT_timestamp (argc, argv);
+#endif
 
 	/* set clip path */
 	GMT_geo_to_xy(borders_use[0],borders_use[2],&clipx[0],&clipy[0]);
@@ -1404,7 +1411,11 @@ main (int argc, char **argv)
 		}
 
 	/* end the plot */
+#ifdef GMT4_1_2
+	GMT_plotend ();
+#else
 	ps_plotend (gmtdefs.last_page);
+#endif
 
 	/* deallocate image */
 	if (image == MBSWATH_IMAGE_8 || image == MBSWATH_IMAGE_24)
