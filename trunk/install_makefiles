@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	install_makefiles	5/20/94
-#    $Id: install_makefiles,v 5.22 2006-01-27 19:08:27 caress Exp $
+#    $Id: install_makefiles,v 5.23 2006-06-16 19:24:47 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 1996, 1997, 2001, 2002, 2003, 2005, 2006 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -105,16 +105,19 @@ $NETCDFLIBDIR = "/sw/lib";
 $NETCDFINCDIR = "/sw/include";
 $LEVITUS = "$MBSYSTEM_HOME/share/LevitusAnnual82.dat";
 $PROJECTIONS = "$MBSYSTEM_HOME/share/Projections.dat";
-$CFLAGS = "-g -I/usr/X11R6/include";
+$CFLAGS = "-g -DGMT4_1_2 -I/usr/X11R6/include";
 $LFLAGS = "-Wl -lm -bind_at_load";
 #
 #--------------------------------------------------------------------
 #
 # Version:
-#   $Id: install_makefiles,v 5.22 2006-01-27 19:08:27 caress Exp $
+#   $Id: install_makefiles,v 5.23 2006-06-16 19:24:47 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.22  2006/01/27 19:08:27  caress
+#   Version 5.0.8beta2
+#
 #   Revision 5.21  2006/01/18 07:26:04  caress
 #   Removed all references to GMT versions since MB-System will now build only with GMT4.1.
 #
