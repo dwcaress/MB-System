@@ -135,9 +135,8 @@ that may follow from correct or incorrect use of these programs.
 MB-SYSTEM VERSION 5.0.10 RELEASE NOTES:
 ------------------------------------------
 
-The version 5.0.10 release of MB-System is purely a bug fix 
-release, and includes only a few changes relative to the 5.0.9 
-release.
+The version 5.0.10 release of MB-System contains both bug fixes
+and new capabilities relative to the 5.0.9 release.
 
 A typo in the mbgrid man page was fixed.
 
@@ -149,6 +148,53 @@ The proj library was updated to use code from the Proj 4.4.9 release.
 The proj and GSF libraries internal to MB-System have been
 renamed libmbproj and libmbgsf to avoid name conflicts with
 proj and gsf in package managers like fink for MacOsX.
+
+Fixed mbprocess problem with per-beam heave values when applying 
+rotational bathymetry correction - previously did not initialize 
+heave values for non-null but flagged beams.
+
+A minor change to mbbackangle to output the slope correction 
+status (-Q) in the coments in the output file.
+
+Altered mbbackangle so that it outputs at least one table, 
+even if there are no survey pings in a file. This prevents 
+mbprocess from failing on data files with no survey pings.
+
+Also altered mbbackangle so that it outputs a single global
+correction table based on all of the input data. This can
+be used for uniform correction of sidescan and amplitude
+data.s
+
+A new program mbrolltimelag calculates the cross-correlation
+between roll data and the difference between the seafloor
+slope and the roll. If there is a time lag in the roll data,
+then the two series should have a cross correlation maximum
+at a nonzero time lag.
+
+New macro mbm_histplot for simple histogram plots.
+
+MBgrdviz now has a profile display capability. Profiles can
+be displayed and exported from two point picks, selected routes,
+and selected navigation. The profile view is enabled from the
+view menu.
+
+Fixed output of ESRI ARC ascii grids from mbgrid and mbmosiac.
+
+Added interactive control over the target of precision of the
+navigation inversion in MBnavadjust. 
+
+Added output of Winfrog pts file to mbm_route2mission.
+
+Added output of Winfrog pts file to mbgrdviz.
+
+MBedit now automatically chooses appropriate acrosstrack and
+vertical annotation intervals when files are opened.
+
+MBextractsegy now will extract subbottom data to segy files
+in sequential line files based on waypoints in a route file.
+
+Updated manual page for mbm_route2mission.
+
 
 MB-SYSTEM VERSION 5.0.9 RELEASE NOTES:
 ------------------------------------------
@@ -1214,10 +1260,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.79 2006-03-06 21:33:42 caress Exp $
+RCS ID: $Id: README,v 5.80 2006-06-16 19:24:47 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.79  2006/03/06 21:33:42  caress
+Working towards 5.0.10
+
 Revision 5.78  2006/02/20 05:25:09  caress
 Release 5.0.9
 
