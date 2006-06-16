@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  6/23/95
-#	$Id: Makefile.template,v 5.5 2006-03-06 21:38:15 caress Exp $
+#	$Id: Makefile.template,v 5.6 2006-06-16 19:30:58 caress Exp $
 #
 #     Copyright (c) 2000, 2003 by 
 #     David W. Caress (caress@mbari.org)
@@ -16,6 +16,9 @@
 # Date:		September 7, 2000
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.5  2006/03/06 21:38:15  caress
+# Changed libproj and libgsf to libmbproj and libmbgsf.
+#
 # Revision 5.4  2003/07/27 20:49:38  caress
 # Release 5.0.0
 #
@@ -104,8 +107,6 @@ mbnavadjust_util.o: mbnavadjust_util.c mbnavadjust_creation.h
 mbnavadjust_prog.o: mbnavadjust_prog.c mbnavadjust.h  $(INCDIR)/mb_format.h \
 		$(INCDIR)/mb_io.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) $(CFLAGS) -I$(INCDIR) -c mbnavadjust_prog.c
-cheb.o: cheb.c  
-	$(CC) $(CFLAGS) -I$(INCDIR) -c cheb.c
 
 clean: 
 	rm -f core *.o

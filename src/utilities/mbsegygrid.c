@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsegygrid.c	6/12/2004
- *    $Id: mbsegygrid.c,v 5.9 2006-04-19 18:30:34 caress Exp $
+ *    $Id: mbsegygrid.c,v 5.10 2006-06-16 19:30:58 caress Exp $
  *
  *    Copyright (c) 2004, 2005, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	June 12, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.9  2006/04/19 18:30:34  caress
+ * Fixed application of gain below seafloor.
+ *
  * Revision 5.8  2006/04/11 19:19:30  caress
  * Various fixes.
  *
@@ -100,7 +103,7 @@ char	*getenv();
 	stderr if verbose > 1) */
 FILE	*outfp;
 
-static char rcs_id[] = "$Id: mbsegygrid.c,v 5.9 2006-04-19 18:30:34 caress Exp $";
+static char rcs_id[] = "$Id: mbsegygrid.c,v 5.10 2006-06-16 19:30:58 caress Exp $";
 static char program_name[] = "MBsegygrid";
 static char help_message[] =  "MBsegygrid grids trace data from segy data files.";
 static char usage_message[] = "MBsegygrid -Ifile -Oroot [-Ashotscale/timescale \n\
@@ -578,7 +581,7 @@ main (int argc, char **argv)
 					tracemax = MAX(tracemin, trace[i]);
 					}	
 
-				if (verbose > 0 || nread % 25 == 0)
+				if ((verbose == 0 && nread % 250 == 0) || (nread % 25 == 0))
 					{
 					if (traceok == MB_YES) 
 						fprintf(outfp,"PROCESS ");

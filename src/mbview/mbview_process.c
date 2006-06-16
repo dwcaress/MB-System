@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_process.c	9/25/2003
- *    $Id: mbview_process.c,v 5.11 2006-04-11 19:17:04 caress Exp $
+ *    $Id: mbview_process.c,v 5.12 2006-06-16 19:30:58 caress Exp $
  *
  *    Copyright (c) 2003, 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  *		begun on October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.11  2006/04/11 19:17:04  caress
+ * Added a profile capability.
+ *
  * Revision 5.10  2006/01/24 19:21:32  caress
  * Version 5.0.8 beta.
  *
@@ -107,7 +110,7 @@ static Cardinal 	ac;
 static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_process.c,v 5.11 2006-04-11 19:17:04 caress Exp $";
+static char rcs_id[]="$Id: mbview_process.c,v 5.12 2006-06-16 19:30:58 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_projectdata(int instance)
@@ -125,6 +128,7 @@ int mbview_projectdata(int instance)
 	int	i, j, k, k1, k2;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
+	char	*message;
 
 	/* print starting debug statements */
 	if (mbv_verbose >= 2)
@@ -198,13 +202,27 @@ fprintf(stderr,"mbview_projectdata: %d\n", instance);
 					&(view->primary_pjptr),
 					&error);
 		if (proj_status == MB_SUCCESS)
+			{
 			view->primary_pj_init = MB_YES;
-		proj_status = mb_proj_init(mbv_verbose, 
-					data->display_projection_id,
-					&(view->display_pjptr),
-					&error);
-		if (proj_status == MB_SUCCESS)
-			view->display_pj_init = MB_YES;
+			proj_status = mb_proj_init(mbv_verbose, 
+						data->display_projection_id,
+						&(view->display_pjptr),
+						&error);
+			if (proj_status == MB_SUCCESS)
+				view->display_pj_init = MB_YES;
+			}
+			
+		/* quit if projection fails */
+		if (proj_status != MB_SUCCESS)
+			{
+			mb_error(mbv_verbose,error,&message);
+			fprintf(stderr,"\nMBIO Error initializing projection:\n%s\n",
+				message);
+			fprintf(stderr,"\nProgram terminated in <%s>\n",
+					function_name);
+			mb_memory_clear(mbv_verbose, &error);
+			exit(error);
+			}
 		}
 	   
 	/* else set up projections as needed */
@@ -220,6 +238,18 @@ fprintf(stderr,"mbview_projectdata: %d\n", instance);
 						&error);
 			if (proj_status == MB_SUCCESS)
 				view->primary_pj_init = MB_YES;
+			
+			/* quit if projection fails */
+			if (proj_status != MB_SUCCESS)
+				{
+				mb_error(mbv_verbose,error,&message);
+				fprintf(stderr,"\nMBIO Error initializing projection:\n%s\n",
+					message);
+				fprintf(stderr,"\nProgram terminated in <%s>\n",
+					function_name);
+				mb_memory_clear(mbv_verbose, &error);
+				exit(error);
+				}
 				
 			/* get initial bounds */
 			proj_status = mb_proj_inverse(mbv_verbose,
@@ -254,6 +284,18 @@ fprintf(stderr,"mbview_projectdata: %d\n", instance);
 						&error);
 			if (proj_status == MB_SUCCESS)
 				view->display_pj_init = MB_YES;
+			
+			/* quit if projection fails */
+			if (proj_status != MB_SUCCESS)
+				{
+				mb_error(mbv_verbose,error,&message);
+				fprintf(stderr,"\nMBIO Error initializing projection:\n%s\n",
+					message);
+				fprintf(stderr,"\nProgram terminated in <%s>\n",
+					function_name);
+				mb_memory_clear(mbv_verbose, &error);
+				exit(error);
+				}
 				
 			/* get bounds */
 			proj_status = mb_proj_forward(mbv_verbose,
@@ -417,6 +459,18 @@ fprintf(stderr,"  Display scale: %f\n", view->scale);*/
 					&error);
 		if (proj_status == MB_SUCCESS)
 			view->secondary_pj_init = MB_YES;
+			
+		/* quit if projection fails */
+		if (proj_status != MB_SUCCESS)
+			{
+			mb_error(mbv_verbose,error,&message);
+			fprintf(stderr,"\nMBIO Error initializing projection:\n%s\n",
+				message);
+			fprintf(stderr,"\nProgram terminated in <%s>\n",
+					function_name);
+			mb_memory_clear(mbv_verbose, &error);
+			exit(error);
+			}
 		}
 		
 	/* check for pending event */

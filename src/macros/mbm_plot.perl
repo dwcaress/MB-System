@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_plot.perl	6/18/93
-#    $Id: mbm_plot.perl,v 5.19 2006-01-20 17:39:15 caress Exp $
+#    $Id: mbm_plot.perl,v 5.20 2006-06-16 19:30:58 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 2000, 2003, 2005 by 
 #    D. W. Caress (caress@mbari.org)
@@ -72,10 +72,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   June 17, 1993
 #
 # Version:
-#   $Id: mbm_plot.perl,v 5.19 2006-01-20 17:39:15 caress Exp $
+#   $Id: mbm_plot.perl,v 5.20 2006-06-16 19:30:58 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.19  2006/01/20 17:39:15  caress
+#   Working towards 5.0.8
+#
 #   Revision 5.18  2005/11/05 01:34:20  caress
 #   Much work over the past two months.
 #
@@ -1272,7 +1275,18 @@ foreach $file_mb (@files_data)
 # use user defined data limits for bathymetry if supplied
 if ($zbounds)
 	{
-	($zmin,$zmax) = $zbounds =~ /(\S+)\/(\S+)/;
+	if ($color_mode == 4)
+		{
+		($amin_data,$amax_data) = $zbounds =~ /(\S+)\/(\S+)/;
+		}
+	elsif ($color_mode == 5)
+		{
+		($smin_data,$smax_data) = $zbounds =~ /(\S+)\/(\S+)/;
+		}
+	else
+		{
+		($zmin,$zmax) = $zbounds =~ /(\S+)\/(\S+)/;
+		}
 	}
 else
 	{

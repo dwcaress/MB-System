@@ -616,6 +616,13 @@ texture = solid].
 Normally, \fBmbm_xyplot\fP creates an executable shellscript and
 then exits.  This option will cause the shellscript to be executed
 in the background before \fBmbm_xyplot\fP exits.
+.TP
+.B \-Z
+\fBmbm_xyplot\fP extracts the desired columns of the input data
+and creates secondary files with the xy values to be plotted.
+Normally these files are left in place by the plot shellscript
+to be used multiple times. The \fB-Z\fP option causes the
+shellscript to delete those secondary files.
 
 .SH EXAMPLES
 Suppose we have obtained a swath sonar data file called

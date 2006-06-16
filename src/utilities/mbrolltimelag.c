@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbrolltimelag.c	11/10/2005
  *
- *    $Id: mbrolltimelag.c,v 5.4 2006-04-26 22:05:26 caress Exp $
+ *    $Id: mbrolltimelag.c,v 5.5 2006-06-16 19:30:58 caress Exp $
  *
  *    Copyright (c) 2005 by
  *    David W. Caress (caress@mbari.org)
@@ -27,6 +27,9 @@
  * Date:	November 11, 2005
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2006/04/26 22:05:26  caress
+ * Changes to handle MBARI Mapping AUV data better.
+ *
  * Revision 5.3  2006/04/19 18:31:23  caress
  * Fixed use of mbm_histplot.
  *
@@ -63,7 +66,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbrolltimelag.c,v 5.4 2006-04-26 22:05:26 caress Exp $";
+	static char rcs_id[] = "$Id: mbrolltimelag.c,v 5.5 2006-06-16 19:30:58 caress Exp $";
 	static char program_name[] = "MBrolltimelag";
 	static char help_message[] = "MBrolltimelag extracts the roll time series and the apparent \nbottom slope time series from swath data, and then calculates \nthe cross correlation between the roll and the slope minus roll \nfor a specified set of time lags.";
 	static char usage_message[] = "mbrolltimelag -Iswathdata [-Fformat -Nnping -Snavchannel -Tnlag/lagmin/lagmax -V -H ]";
@@ -610,7 +613,7 @@ main (int argc, char **argv)
 				}
 			peakksum += timelaghistogram[k];
 			}
-		if (nslope > 0 && peakksum > 0 && peakkmax > 0
+		if (nslope > 0 && peakksum > 0 && peakkmax > 1
 			&& peakkmax > peakksum / 5)
 			{
 			timelag = -lagmax + peakk * lagstep;

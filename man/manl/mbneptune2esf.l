@@ -84,10 +84,6 @@ David W. Caress (caress@mbari.org)
 Dale N. Chayes (dale@ldeo.columbia.edu)
 .br
   Lamont-Doherty Earth Observatory
-.br
-Alberto Malinverno
-.br
-  Schlumberger-Doll
 
 .SH OPTIONS
 .TP

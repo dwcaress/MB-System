@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_route.c	9/25/2003
- *    $Id: mbview_route.c,v 5.13 2006-04-26 22:06:40 caress Exp $
+ *    $Id: mbview_route.c,v 5.14 2006-06-16 19:30:58 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  *		begun on October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.13  2006/04/26 22:06:40  caress
+ * Improved profile view feature and enabled export of profile data.
+ *
  * Revision 5.12  2006/04/11 19:17:04  caress
  * Added a profile capability.
  *
@@ -111,7 +114,7 @@ static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 static char		value_string[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_route.c,v 5.13 2006-04-26 22:06:40 caress Exp $";
+static char rcs_id[]="$Id: mbview_route.c,v 5.14 2006-06-16 19:30:58 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_getroutecount(int verbose, int instance,
@@ -963,6 +966,9 @@ int mbview_getroute(int verbose, int instance,
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       npointtotal:               %d\n", *npointtotal);
+		fprintf(stderr,"dbg2       routecolor:                %d\n", *routecolor);
+		fprintf(stderr,"dbg2       routesize:                 %d\n", *routesize);
+		fprintf(stderr,"dbg2       routename:                 %s\n", routename);
 		for (i=0;i<*npointtotal;i++)
 			{
 			fprintf(stderr,"dbg2       route:%d lon:%f lat:%f waypoint:%d topo:%f bearing:%f dist:%f distbot:%f color:%d size:%d name:%s\n", 
@@ -1908,6 +1914,8 @@ int mbview_route_add(int instance, int inew, int jnew, int waypoint,
 		for (j=shared.shareddata.routes[inew].npoints-1;j>jnew;j--)
 			{
 			shared.shareddata.routes[inew].segments[j] = shared.shareddata.routes[inew].segments[j-1];
+			shared.shareddata.routes[inew].segments[j].endpoints[0] = &(shared.shareddata.routes[inew].points[j]);
+			shared.shareddata.routes[inew].segments[j].endpoints[1] = &(shared.shareddata.routes[inew].points[j+1]);
 			}
 		
 		/* add the new point */
@@ -2341,6 +2349,9 @@ int mbview_drawroute(int instance, int rez)
 			glEnd();
 			}
 		}
+#ifdef MBV_GETERRORS
+mbview_glerrorcheck(instance, 1, function_name);
+#endif
 
 	/* print output debug statements */
 	if (mbv_verbose >= 2)

@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system: mbm_route2mission.perl   7/18/2004
-#    $Id: mbm_route2mission.perl,v 5.6 2006-04-11 19:12:53 caress Exp $
+#    $Id: mbm_route2mission.perl,v 5.7 2006-06-16 19:30:58 caress Exp $
 #
 #    Copyright (c) 2004 by 
 #    D. W. Caress (caress@mbari.org)
@@ -25,7 +25,10 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   in survey planning for the MBARI Mapping AUV.
 #
 # Usage:
-#   mbm_route2mission -Iroutefile [-Aaltitudemin -Ddepthmax -Fforwarddistance -Omissionfile -Wwaypointspacing -V -H]
+#   mbm_route2mission -Iroutefile [-Aaltitudemin/altitudeabort[/altitudedesired] 
+#                     -Bbehavior -Ddepthmax/depthabort[/depthdescent]
+#                     -Fforwarddistance -Ggpsmode -M -Omissionfile 
+#                     -P[startdistance | startlon/startlat] -Sspeed -Tstarttime -Wwaypointspacing -V -H]
 #
 # 
 # Author:
@@ -34,10 +37,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #      Moss Landing, CA
 #
 # Version:
-# $Id: mbm_route2mission.perl,v 5.6 2006-04-11 19:12:53 caress Exp $
+# $Id: mbm_route2mission.perl,v 5.7 2006-06-16 19:30:58 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.6  2006/04/11 19:12:53  caress
+#   Updates during Mapping AUV test operations.
+#
 #   Revision 5.5  2005/11/05 01:34:20  caress
 #   Much work over the past two months.
 #
@@ -80,6 +86,9 @@ $durationfactormission = 1.3;
 
 # set defaults
 
+# route name
+$routename = "Survey";
+
 # mission
 $altitudemin = 18.0;
 $altitudeabort = 10.0;
@@ -105,10 +114,10 @@ $ascendenddepth = 2;
 
 # behavior reson
 $resonduration = 6;
-$sonaraltitudemax =100.0;
+$sonaraltitudemax = 100.0;
 $mb_pingrate = 2.0;
 $mb_transmitgain = 220.0;
-$mb_receivegain = 67.0;
+$mb_receivegain = 70.0;
 $mb_pulsewidth = 0.000030;
 
 
@@ -120,7 +129,7 @@ $depthabort = 150.0;
 $maxcrosstrackerror = 30.0;
 
 # default waypoint behavior to use
-$behavior = $behaviorWaypointID;
+$behavior = $behaviorWaypointDepthID;
 
 # assumed ascent and descent rate
 $ascendrate = 0.5; # m/s
@@ -199,10 +208,14 @@ elsif ($deptharg
 	($depthmax, $depthabort) 
 		= $deptharg =~ /^(\S+)\/(\S+)/;
 	}
-if ($startposition)
+if ($startposition && $startposition =~ /^(\S+)\/(\S+)/)
 	{
 	($startlon, $startlat) 
 		= $startposition =~ /^(\S+)\/(\S+)/;
+	}
+elsif ($startposition)
+	{
+	($startdistance) = $startposition;
 	}
 
 # Open the input file
@@ -220,7 +233,12 @@ else
 $cnt = 0;
 while ($line = <RFILE>) 
 	{
-	if ($line =~ /^## /)
+	if ($line =~ /^## ROUTENAME/)
+		{
+		($routename) = $line 
+			=~ /^## ROUTENAME\s+(\S+)/;
+		}
+	elsif ($line =~ /^## /)
 		{
 #		printf "Comment: $line";
 		}
@@ -342,6 +360,7 @@ for ($i = 0; $i < $npoints; $i++)
 for ($i = 0; $i < $nmissionpoints; $i++)
 	{
 	$topomax = $mtopos[$i];
+	$topomin = $mtopos[$i];
 	for ($j = 0; $j < $npoints; $j++)
 		{
 		$ii = $i - 1;
@@ -351,15 +370,22 @@ for ($i = 0; $i < $nmissionpoints; $i++)
 			}
 		$ddist = $distances[$j] - $mdistances[$ii];
 		if ($ddist > 0.0 
-			&& $ddist <= $forwarddist
-			&& $topos[$j] > $topomax)
+			&& $ddist <= $forwarddist)
 			{
-			$topomax = $topos[$j];
+			if ($topos[$j] > $topomax)
+				{
+				$topomax = $topos[$j];
+				}
+			if ($topos[$j] < $topomin)
+				{
+				$topomin = $topos[$j];
+				}
 			}
 		}
 	push(@mtopomaxs, $topomax);
+	push(@mtopomins, $topomin);
 	push(@mmissiondepths, $topomax);
-	$ascendtime = 1.2 * $topomax / $ascendrate;
+	$ascendtime = -1.2 * $topomax / $ascendrate;
 	if ($ascendtime < 300)
 		{
 		$ascendtime = 300;
@@ -368,7 +394,7 @@ for ($i = 0; $i < $nmissionpoints; $i++)
 	}
 
 # Calculate time to first waypoint
-if ($startposition)
+if ($startlon && $startlat)
 	{
 	# get local scaling of lon lat to distance
 	$C1 = 111412.84;
@@ -635,7 +661,7 @@ print "Output Behavior: gps\n";
 	print MFILE "behavior ascend  \r\n";
 	print MFILE "{ \r\n";
 	$i = $nmissionpoints - 1;
-	print MFILE "duration  = $ascendtimes[$i]; \r\n";
+	printf MFILE "duration  = %d; \r\n", $ascendtimes[$i];
 	print MFILE "horizontalMode   = rudder; \r\n";
 	print MFILE "horizontal       = ASCENDRUDDER; \r\n";
 	print MFILE "pitch            = ASCENDPITCH; \r\n";
@@ -721,10 +747,10 @@ print "Output Behavior: reson (stop, Log_Mode = 0)\n";
 		$mb_mindepth = 0.5 * $sonaraltitudeuse;
 		$mb_maxdepth = $mb_range;
 		$sslo_range = 0.9 * 750.0 / $mb_pingrate;
-		if ($sslo_range > 200.0)
-			{
-			$sslo_range = 200.0;
-			}
+		#if ($sslo_range > 200.0)
+		#	{
+		#	$sslo_range = 200.0;
+		#	}
 		$sbp_duration = 1000.0 * 0.9 / $mb_pingrate;
 
 		# do ascend, gps, descend at line starts and ends if specified
@@ -832,8 +858,8 @@ print "Output Behavior: reson (startup, Log_Mode = 1)\n";
 			print MFILE "LoSS_Mode = 1; \r\n";
 			print MFILE "LoSS_Power = 100.0; \r\n";
 			printf MFILE "LoSS_Range = %.2f; \r\n", $sslo_range;
-			print MFILE "HiSS_Mode = 1; \r\n";
-			print MFILE "HiSS_Power = 100.0; \r\n";
+			print MFILE "HiSS_Mode = 0; \r\n";
+			print MFILE "HiSS_Power = 0.0; \r\n";
 			print MFILE "HiSS_Range = $sslo_range; \r\n";
 			print MFILE "MB_Power = $mb_transmitgain; \r\n";
 			printf MFILE "MB_Range = %.2f; \r\n", $mb_range;
@@ -873,6 +899,7 @@ print "Output Behavior: reson (setup, Log_Mode = 0)\n";
 				}
 			printf MFILE "#   Segment length %f meters\r\n", $distance;
 			printf MFILE "#   Minimum depth: %f meters looking forward %f meters along route\r\n", -$mtopomaxs[$i], $forwarddist;
+			printf MFILE "#   Maximum depth: %f meters looking forward %f meters along route\r\n", -$mtopomins[$i], $forwarddist;
 			printf MFILE "#   Maximum vehicle depth: %f meters\r\n", $depthmax;
 			printf MFILE "#   Desired vehicle altitude: %f meters\r\n", $altitudedesired;
 			printf MFILE "#   Minimum vehicle altitude: %f meters\r\n", $altitudemin;
@@ -916,6 +943,7 @@ print "Output Behavior: waypoint_depth (during line) ";
 				}
 			printf MFILE "#   Segment length %f meters\r\n", $distance;
 			printf MFILE "#   Minimum depth: %f meters looking forward %f meters along route\r\n", -$mtopomaxs[$i], $forwarddist;
+			printf MFILE "#   Maximum depth: %f meters looking forward %f meters along route\r\n", -$mtopomins[$i], $forwarddist;
 			printf MFILE "#   Maximum vehicle depth: %f meters\r\n", $depthmax;
 			printf MFILE "#   Desired vehicle altitude: %f meters\r\n", $altitudedesired;
 			printf MFILE "#   Minimum vehicle altitude: %f meters\r\n", $altitudemin;
@@ -1053,8 +1081,8 @@ print "Output Behavior: gps\n";
 	print MFILE "LoSS_Mode = 1; \r\n";
 	print MFILE "LoSS_Power = 100.0; \r\n";
 	printf MFILE "LoSS_Range = %.2f; \r\n", $sslo_range;
-	print MFILE "HiSS_Mode = 1; \r\n";
-	print MFILE "HiSS_Power = 100.0; \r\n";
+	print MFILE "HiSS_Mode = 0; \r\n";
+	print MFILE "HiSS_Power = 0.0; \r\n";
 	print MFILE "HiSS_Range = $sslo_range; \r\n";
 	print MFILE "MB_Power = $mb_transmitgain; \r\n";
 	printf MFILE "MB_Range = %.2f; \r\n", $mb_range;
@@ -1077,6 +1105,19 @@ print "Output Behavior: reson (start, reset, Log_Mode = 0)\n";
 
 	# Close the output file
 	close(MFILE);
+
+	# output winfrog waypoint file unless outputoff option selected
+	$winfrogfile = "$root.pts";
+	open(WFILE,">$winfrogfile") || die "Cannot open output winfrog file: $winfrogfile\r\n$program_name aborted.\r\n";
+	printf WFILE "0,$routename,0,0.000,0.000,1,2,65280,0,0.200,0,0,1.000\r\n";
+	for ($i = 0; $i < $npoints; $i++)
+ 		{
+		if ($waypoints[$i] != 0)
+			{
+ 			printf WFILE "1,%.10f,%.10f,0.00m,0.00m,0.00,0.00,%.3f\r\n", $lats[$i], $lons[$i], $distances[$i];
+			}
+ 		}
+	close(WFILE);
 
 	# generate data for plots
 	$topodatafile = "$root" . "_topo.xy";

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbio_status.h	2/1/93
- *    $Id: mb_status.h,v 5.69 2006-02-20 05:29:08 caress Exp $
+ *    $Id: mb_status.h,v 5.70 2006-06-16 19:30:58 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003, 2004, 2005 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.69  2006/02/20 05:29:08  caress
+ * Release 5.0.9
+ *
  * Revision 5.68  2006/02/16 21:25:45  caress
  * Release 5.0.9
  *
@@ -379,7 +382,7 @@
 #define	MB_FAILURE			0
 
 /* MBIO minimum and maximum error values */
-#define	MB_ERROR_MIN			-18
+#define	MB_ERROR_MIN			-19
 #define	MB_ERROR_MAX			15
 
 /* MBIO function fatal error values */
@@ -419,6 +422,7 @@
 #define	MB_ERROR_NO_MORE_DATA		-16
 #define	MB_ERROR_DATA_NOT_INSERTED	-17
 #define	MB_ERROR_BAD_PROJECTION		-18
+#define	MB_ERROR_MISSING_PROJECTIONS	-19
 
 /* MBIO problem values */
 #define	MB_PROBLEM_MAX			6
@@ -469,7 +473,8 @@ static char *nonfatal_error_msg[] =
 	"No data was dumped from the buffer",
 	"No more survey data records in buffer", 
 	"Data inconsistencies prevented inserting data into storage structure",
-	"UTM projection initialization failed"
+	"UTM projection initialization failed",
+	"Projection database cannot be read", 
 	};
 static char *unknown_error_msg[] =
 	{
@@ -550,6 +555,7 @@ static char *notice_msg[] =
 	"MB_ERROR_NO_MORE_DATA (ID=-16): No more survey data records in buffer", 
 	"MB_ERROR_DATA_NOT_INSERTED (ID=-17): Data inconsistencies prevented inserting data into storage structure", 
 	"MB_ERROR_BAD_PROJECTION (ID=-18): UTM projection initialization failed", 
+	"MB_ERROR_MISSING_PROJECTIONS (ID=-19): Projection database cannot be read", 
 	
 	/* problem notices */
 	"DATA PROBLEM (ID=1): No survey data found",

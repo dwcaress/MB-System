@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavadjust_prog.c	3/23/00
- *    $Id: mbnavadjust_prog.c,v 5.19 2006-01-24 19:18:42 caress Exp $
+ *    $Id: mbnavadjust_prog.c,v 5.20 2006-06-16 19:30:58 caress Exp $
  *
  *    Copyright (c) 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	March 23, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.19  2006/01/24 19:18:42  caress
+ * Version 5.0.8 beta.
+ *
  * Revision 5.18  2006/01/06 18:25:21  caress
  * Working towards 5.0.8
  *
@@ -139,7 +142,7 @@ struct swathraw
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbnavadjust_prog.c,v 5.19 2006-01-24 19:18:42 caress Exp $";
+static char rcs_id[] = "$Id: mbnavadjust_prog.c,v 5.20 2006-06-16 19:30:58 caress Exp $";
 static char program_name[] = "mbnavadjust";
 static char help_message[] =  "mbnavadjust is an interactive navigation adjustment package for swath sonar data.\n";
 static char usage_message[] = "mbnavadjust [-Iproject -V -H]";
@@ -249,12 +252,14 @@ int mbnavadjust_init_globals()
  	project.num_truecrossings_analyzed = 0;
  	project.crossings = NULL;
 	project.num_ties = 0;
+	project.inversion = MBNA_INVERSION_NONE;
 	project.logfp = NULL;
  	mbna_status = MBNA_STATUS_GUI;
  	mbna_view_list = MBNA_VIEW_LIST_FILES;
  	project.section_length = 10.0;
  	project.section_soundings = 20000;
  	project.decimation = 1;
+	project.precision = SIGMA_MINIMUM;
 	mbna_file_id_1 = -1;
 	mbna_section_1 = -1;
 	mbna_file_id_2 = -1;
@@ -616,6 +621,7 @@ int mbnavadjust_file_new(char *projectname)
 				project.crossings = NULL;
 				project.num_ties = 0;
 				project.inversion = MBNA_INVERSION_NONE;
+				project.precision = SIGMA_MINIMUM;
 				
 				/* create data directory */
 				if (mkdir(project.datadir,00775) != 0)
@@ -942,7 +948,7 @@ int mbnavadjust_write_project()
 		fprintf(hfp,"##MBNAVADJUST PROJECT\n");
 		fprintf(hfp,"MB-SYSTEM_VERSION\t%s\n",MB_VERSION);
 		fprintf(hfp,"PROGRAM_VERSION\t%s\n",rcs_id);
-		fprintf(hfp,"FILE_VERSION\t1.02\n");
+		fprintf(hfp,"FILE_VERSION\t1.03\n");
 		fprintf(hfp,"NAME\t%s\n",project.name);
 		fprintf(hfp,"PATH\t%s\n",project.path);
 		fprintf(hfp,"HOME\t%s\n",project.home);
@@ -956,6 +962,7 @@ int mbnavadjust_write_project()
 		fprintf(hfp,"COLORINTERVAL\t%f\n",project.col_int);
 		fprintf(hfp,"TICKINTERVAL\t%f\n",project.tick_int);
 		fprintf(hfp,"INVERSION\t%d\n",project.inversion);
+		fprintf(hfp,"PRECISION\t%f\n",project.precision);
 		for (i=0;i<project.num_files;i++)
 			{
 			/* write out basic file info */
@@ -1194,6 +1201,17 @@ int mbnavadjust_read_project()
 				|| (nscan = sscanf(buffer,"%s %d",label,&project.inversion)) != 2
 				|| strcmp(label,"INVERSION") != 0))
 			status = MB_FAILURE;
+		if (status == MB_SUCCESS)
+			{
+			if ((versionmajor > 1 || versionminor > 2)
+				&& ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
+					|| (nscan = sscanf(buffer,"%s %lf",label,&project.precision)) != 2
+					|| strcmp(label,"PRECISION") != 0))
+				status = MB_FAILURE;
+			else
+				project.precision = SIGMA_MINIMUM;
+			}
+
 		/* allocate memory for files array */
 		if (project.num_files > 0)
 			{
@@ -6342,7 +6360,7 @@ fprintf(stderr,"INITIAL SIGMA: sigma_total:%g sigma_crossing:%g\n", sigma_total,
 		    if (first == MB_YES)
 			{
 			first = MB_NO;
-			sigma_crossing_first = mbna_mtodeglat * SIGMA_MINIMUM;
+			sigma_crossing_first = mbna_mtodeglat * project.precision;
 			sigma_crossing_first = MAX(sigma_crossing, sigma_crossing_first);
 			smoothweight_old = smoothweight;
 			smoothmin = smoothweight;

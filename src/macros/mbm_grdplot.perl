@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grdplot.perl	8/6/95
-#    $Id: mbm_grdplot.perl,v 5.19 2006-01-20 17:39:15 caress Exp $
+#    $Id: mbm_grdplot.perl,v 5.20 2006-06-16 19:30:58 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 2000, 2003 by 
 #    D. W. Caress (caress@mbari.org)
@@ -68,10 +68,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   October 19, 1994
 #
 # Version:
-#   $Id: mbm_grdplot.perl,v 5.19 2006-01-20 17:39:15 caress Exp $
+#   $Id: mbm_grdplot.perl,v 5.20 2006-06-16 19:30:58 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.19  2006/01/20 17:39:15  caress
+#   Working towards 5.0.8
+#
 #   Revision 5.18  2006/01/18 15:09:27  caress
 #   Now parses grdinfo output from GMT 4.1.
 #
@@ -192,6 +195,9 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #
 $program_name = "mbm_grdplot";
 
+# use the Posix module
+use POSIX;
+
 # set degree to radians conversion
 $DTR = 3.1415926 / 180.0;
 
@@ -225,29 +231,29 @@ $DTR = 3.1415926 / 180.0;
 	"c7",    4.50);
 %page_anot_font = ( 
 	"a",     8,   "b",    12,   "c",    16,   "d",    24,
-	"e",    32,   "f",    32,   "e1",   32,   "a0",   32,
+	"e",    24,   "f",    24,   "e1",   24,   "a0",   24,
 	"a1",   24,   "a2",   16,   "a3",   12,   "a4",    8,
 	"a5",    6,   "a6",    6,   "a7",    6,   "a8",    4,
-	"a9",    4,   "a10",   4,   "b0",   32,   "b1",   24,
+	"a9",    4,   "a10",   4,   "b0",   24,   "b1",   24,
 	"b2",   16,   "b3",   16,   "b4",   12,   "b5",    8,
 	"b6",    6,   "b7",    4,   "b8",    4,   "b9",    4,
-	"b10",   4,   "c0",   32,   "c1",   24,   "c2",   16,
+	"b10",   4,   "c0",   24,   "c1",   24,   "c2",   16,
 	"c3",   12,   "c4",    8,   "c5",    6,   "c6",    6,
 	"c7",    6);
 %page_header_font =(
 	"a",    10,   "b",    15,   "c",    20,   "d",    30,
-	"e",    40,   "f",    40,   "e1",   40,   "a0",   40,
+	"e",    30,   "f",    30,   "e1",   30,   "a0",   30,
 	"a1",   30,   "a2",   20,   "a3",   15,   "a4",   10,
 	"a5",    8,   "a6",    8,   "a7",    8,   "a8",    5,
-	"a9",    5,   "a10",   5,   "b0",   40,   "b1",   30,
+	"a9",    5,   "a10",   5,   "b0",   30,   "b1",   30,
 	"b2",   20,   "b3",   20,   "b4",   15,   "b5",   10,
 	"b6",    8,   "b7",    5,   "b8",    5,   "b9",    5,
-	"b10",   5,   "c0",   40,   "c1",   30,   "c2",   20,
+	"b10",   5,   "c0",   30,   "c1",   30,   "c2",   20,
 	"c3",   15,   "c4",   10,   "c5",    8,   "c6",    8,
 	"c7",    8);
 %page_gmt_name =     (
 	"a",     "archA",   "b",     "archB",   "c",     "archC",   "d",     "archD", 
-	"e",     "archE",   "f",     "archE",   "e1",    "archE",   "a0",    "A0",
+	"e",     "archE",   "f",     "B0",      "e1",    "B0",      "a0",    "A0",
 	"a1",    "A1",      "a2",    "A2",      "a3",    "A3",      "a4",    "A4",
 	"a5",    "A5",      "a6",    "A6",      "a7",    "A7",      "a8",    "A8",
 	"a9",    "A9",      "a10",   "A10",     "b0",    "B0",      "b1",    "B1",
@@ -1316,30 +1322,33 @@ if (($use_scale && $plot_scale) || ($use_width && $plot_width))
 		{
 		# try to find a sufficiently large pagesize
 		$pagesize_save = $pagesize;
+		$good_page = 0;
 		foreach $elem (@page_size_names) {
-			$pagesize = "$elem";
-			&GetPageSize;
-			if ($portrait)
+			if (!$good_page)
 				{
-				$width_max = $width_max_portrait;
-				$height_max = $height_max_portrait;
-				}
-			else
-				{
-				$width_max = $width_max_landscape;
-				$height_max = $height_max_landscape;
-				}
-			if (!$good_page && 
-				$plot_width <= $width_max 
-				&& $plot_height <= $height_max)
-				{
-				$good_page = 1;
-				$pagesize_save = $pagesize;
+				$pagesize = "$elem";
+				&GetPageSize;
+				if ($portrait)
+					{
+					$width_max = $width_max_portrait;
+					$height_max = $height_max_portrait;
+					}
+				else
+					{
+					$width_max = $width_max_landscape;
+					$height_max = $height_max_landscape;
+					}
+				if ($plot_width <= $width_max 
+					&& $plot_height <= $height_max)
+					{
+					$good_page = 1;
+					$pagesize_save = $pagesize;
+					}
 				}
 			}
 
 		# print out warning
-		if ($pagesize eq $pagesize_save)
+		if (!$good_page)
 			{
 			print "\nWarning: Unable to fit plot on any available page size!\n";
 			print "\tThis plot will not be particularly useful!\n";
@@ -3005,6 +3014,22 @@ if ($scale_loc eq "l")
 			    / $page_height_in{"a"};
 	$space_right =  1.00 * $page_height_in{$pagesize} 
 			    / $page_height_in{"a"};
+	if ($space_top > 4.50)
+		{
+		$space_top = 4.50;
+		}
+	if ($space_bottom > 2.25)
+		{
+		$space_bottom = 2.25;
+		}
+	if ($space_left > 7.50)
+		{
+		$space_left = 7.50;
+		}
+	if ($space_right > 3.00)
+		{
+		$space_right = 3.00;
+		}
 	}
 elsif ($scale_loc eq "r")
 	{
@@ -3016,6 +3041,22 @@ elsif ($scale_loc eq "r")
 			    / $page_height_in{"a"};
 	$space_right =  2.50 * $page_height_in{$pagesize} 
 			    / $page_height_in{"a"};
+	if ($space_top > 4.50)
+		{
+		$space_top = 4.50;
+		}
+	if ($space_bottom > 2.25)
+		{
+		$space_bottom = 2.25;
+		}
+	if ($space_left > 3.00)
+		{
+		$space_left = 3.00;
+		}
+	if ($space_right > 7.50)
+		{
+		$space_right = 7.50;
+		}
 	}
 elsif ($scale_loc eq "t")
 	{
@@ -3027,6 +3068,22 @@ elsif ($scale_loc eq "t")
 			    / $page_height_in{"a"};
 	$space_right =  1.00 * $page_height_in{$pagesize} 
 			    / $page_height_in{"a"};
+	if ($space_top > 8.25)
+		{
+		$space_top = 8.25;
+		}
+	if ($space_bottom > 2.25)
+		{
+		$space_bottom = 2.25;
+		}
+	if ($space_left > 3.00)
+		{
+		$space_left = 3.00;
+		}
+	if ($space_right > 3.00)
+		{
+		$space_right = 3.00;
+		}
 	}
 else
 	{
@@ -3038,6 +3095,22 @@ else
 			    / $page_height_in{"a"};
 	$space_right =  1.00 * $page_height_in{$pagesize} 
 			    / $page_height_in{"a"};
+	if ($space_top > 4.50)
+		{
+		$space_top = 4.50;
+		}
+	if ($space_bottom > 6.00)
+		{
+		$space_bottom = 6.00;
+		}
+	if ($space_left > 3.00)
+		{
+		$space_left = 3.00;
+		}
+	if ($space_right > 3.00)
+		{
+		$space_right = 3.00;
+		}
 	}
 
 # set the relevent page width and height
@@ -3398,13 +3471,15 @@ sub GetBaseTick {
 		{
 		$base_tick_x = ($xmax - $xmin) / 5;
 		}
-	$base_tick_y = ($ymax - $ymin) / 5;
+	$base_tick_y = 10.0**(floor(log(($ymax - $ymin) / 5) / log (10)));
+	#$base_tick_y = ($ymax - $ymin) / 5;
 	
 	# deal with seismic grids (time vs trace number)
 	if ($gridprojected == 2)
 		{
+		$base_gridline_y = $base_tick_y / 2;
 		$base_tick_x = "$base_tick_x" . "\":Trace Number:\"";
-		$base_tick_y = "$base_tick_y" . "\":Time (sec):\"";
+		$base_tick_y = "a$base_tick_y" . "g$base_gridline_y" . "\":Time (sec):\"";
 		}
 	
 	# deal with generic linear grids 

@@ -1,4 +1,4 @@
-.TH mbnavadjust l "16 March 2004" "MB-System 5.0" "MB-System 5.0"
+.TH mbnavadjust l "16 May 2006" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbnavadjust\fP - Package that solves for optimal navigation by
 matching bathymetry of overlapping swathes.
@@ -373,6 +373,11 @@ of the contour interval.
 This slider widget sets the depth interval in meters at which contours have
 downhill facing tickmarks. The tick interval should be a multiple of the contour
 interval.
+.TP
+.B Precision (m)
+This slider widget sets the target inversion precision in meters as measured
+by the standard deviation misfit of the tie point offsets. See the Details of 
+the Inversion section below to learn how this value affects the inversion.
 .TP
 .B Apply
 This button applies any changed values in the slider widgets of the \fBControls Window\fP.
@@ -1151,16 +1156,19 @@ insure that the smoothing is negligible and that the tie point offsets are fit
 to the maximum degree possible. This first inversion is used to set a "reference"
 value of Chi. In some cases, the tie points offsets do not substantially conflict
 and it is possible for the inversion to fit the offsets nearly exactly so that
-Chi is quite small. If the initial Chi is greater than 1.0 meters, \fBmbnavadjust\fP
-sets the reference fit to this value. Otherwise, the reference fit is set to
-1.0 meters (a reasonable minimum for navigational uncertainty). 
-The program then recalculates solutions with different
-penalty weights until the resulting Chi is between 1.05 and 1.1 times the reference fit.
-This last solution is chosen as the best solution, reported as the navigation
-adjustment inversion solution, and applied to that swath data navigation. 
-The justification for choosing the optimal solution in this fashion is that
-this approach insures that the smoothness constraint is sufficient large to
-be impacting the fit, but not so large that the fit has been substantially degraded.
+Chi is quite small. If the initial Chi is greater than the target precision for
+the inversion (set from the Controls panel), \fBmbnavadjust\fP sets the
+reference fit to this initial value. Otherwise, the reference fit is set to
+the target precision. The default value is 0.1 meters, which is appropriate for
+high resolution, low-altitude surveys. Larger values will be more appropriate 
+for large altitude (e.g. deep water hull-mounted) surveys. The program then 
+recalculates solutions with different penalty weights until the resulting Chi 
+is between 1.05 and 1.1 times the reference fit. This last solution is chosen 
+as the best solution, reported as the navigation adjustment inversion solution, 
+and applied to that swath data navigation.  The justification for choosing the 
+optimal solution in this fashion is that this approach insures that the smoothness 
+constraint is sufficient large to be impacting the fit, but not so large that 
+the fit has been substantially degraded.
 
 .SH REFERENCES
 

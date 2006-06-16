@@ -34,6 +34,7 @@
 /**
  * Start Global Widget Declarations.
  */
+EXTERNAL Widget   scale_controls_precision;
 EXTERNAL Widget   scale_controls_sectionlength;
 EXTERNAL Widget   scale_controls_tickinterval;
 EXTERNAL Widget   scale_controls_colorinterval;
