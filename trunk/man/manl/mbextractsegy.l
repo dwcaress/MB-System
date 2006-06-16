@@ -8,15 +8,11 @@ rewrites it as a SEGY file.
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbextractsegy\fP [\fB-B\fIyr/mo/da/hr/mn/sc\fP \fB-C -E\fIyr/mo/da/hr/mn/sc\fP 
-\fB-F\fIformat\fP \fB-G\fP \fB-I\fIfilename\fP 
-\fB-L\fIlonflip\fP \fB-M\fIlondim/latdim\fP 
-\fB-N\fP \fB-O\fP \fB-P\fIping\fP 
-\fB-R\fIwest/east/south/norths\fP \fB-S\fIspeed\fP \fB-W -V -H\fP]
- 
-\fBmbextractsegy\fP [\fB-B\fIyr/mo/da/hr/mn/sc\fP -E\fIyr/mo/da/hr/mn/sc\fP 
-\fB-F\fIformat\fP \fB-I\fIfile\fP \fB-O\fIsegyfile\fP 
-\fB-S\fIsampleformat\fP \fB-V -H\fP]
+\fBmbextractsegy\fP [\fB-B\fP\fIyr/mo/da/hr/mn/sc\fP \fB-E\fP\fIyr/mo/da/hr/mn/sc\fP 
+\fB-F\fP\fIformat\fP \fB-I\fP\fIfile\fP 
+\fB-L\fP\fIstartline/lineroot\fP \fB-O\fP\fIsegyfile\fP 
+\fB-R\fP\fIroutefile\fP \fB-S\fP\fIsampleformat\fP 
+\fB-T\fP\fItimeshift\fP \fB-V -H\fP]
 
 .SH DESCRIPTION
 \fBMBextractsegy\fP is a utility for reading a swath sonar data file 
@@ -32,6 +28,18 @@ file is named by adding a ".sinf" suffix to the SEGY filename.
 At present, the only swath data formats from which subbottom data
 can be extracted are format 88 (Reson 7k format), format 132 
 (Edgetech Jstar format), and format 133 (Edgetech Jstar format).
+
+The extracted segy data file(s) can be organized three ways. If the \fB-O\fP
+option is used to specify a single segy output file, then all of the 
+segy data will be output to that single file. If the \fB-R\fP option is
+used to specify a survey route file that includes the waypoints covered
+while collecting the data file(s) referenced by \fB-I\fP\fIfile\fP, then
+the output segy data will be broken up by the sequential lines defined by
+the waypoints. In this case each output segy file will be named using the 
+line root name specified by \fB-L\fP\fIstartline/lineroot\fP with a sequential line
+number starting from \fIstartline\fP. If neither the \fB-O\fP or \fB-L\fP 
+options are used, each input swath file will have a corresponding segy output
+file with the ".segy" suffix added to the original filename.
 
 .SH AUTHORSHIP
 David W. Caress (caress@mbari.org)

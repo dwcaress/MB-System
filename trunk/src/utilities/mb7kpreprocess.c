@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb7kpreprocess.c	10/12/2005
- *    $Id: mb7kpreprocess.c,v 5.5 2006-04-26 22:05:26 caress Exp $
+ *    $Id: mb7kpreprocess.c,v 5.6 2006-06-16 19:30:58 caress Exp $
  *
  *    Copyright (c) 2005 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	October 12, 2005
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2006/04/26 22:05:26  caress
+ * Changes to handle MBARI Mapping AUV data better.
+ *
  * Revision 5.4  2006/04/11 19:19:29  caress
  * Various fixes.
  *
@@ -64,7 +67,7 @@
 #define	MB7KPREPROCESS_TIMELAG_CONSTANT	1
 #define	MB7KPREPROCESS_TIMELAG_MODEL	2
 
-static char rcs_id[] = "$Id: mb7kpreprocess.c,v 5.5 2006-04-26 22:05:26 caress Exp $";
+static char rcs_id[] = "$Id: mb7kpreprocess.c,v 5.6 2006-06-16 19:30:58 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
@@ -1148,7 +1151,6 @@ main (int argc, char **argv)
 	nreadssvtot += nreadssv;
 	nreadnav1tot += nreadnav1;
 	nreadsbptot += nreadsbp;
-fprintf(stderr,"Set nreadsbptot:%d\n",nreadsbptot);
 	nreadsslotot += nreadsslo;
 	nreadsshitot += nreadsshi;
 	nreadothertot += nreadother;

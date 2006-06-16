@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrid.c	5/2/94
- *    $Id: mbgrid.c,v 5.34 2006-03-06 21:44:56 caress Exp $
+ *    $Id: mbgrid.c,v 5.35 2006-06-16 19:30:58 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 2000, 2002, 2003, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -38,6 +38,9 @@
  * Rererewrite:	January 2, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.34  2006/03/06 21:44:56  caress
+ * Fixed bug.
+ *
  * Revision 5.33  2006/02/06 06:33:40  caress
  * Fixed interpolation of background grid data.
  *
@@ -415,7 +418,7 @@ double mbgrid_erf();
 FILE	*outfp;
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbgrid.c,v 5.34 2006-03-06 21:44:56 caress Exp $";
+static char rcs_id[] = "$Id: mbgrid.c,v 5.35 2006-06-16 19:30:58 caress Exp $";
 static char program_name[] = "mbgrid";
 static char help_message[] =  "mbgrid is an utility used to grid bathymetry, amplitude, or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbgrid -Ifilelist -Oroot \
@@ -566,7 +569,7 @@ main (int argc, char **argv)
 	float	xmin, ymin, ddx, ddy, zflag, cay;
 	double	**data;
 	double	*value = NULL;
-	int	ndata, ndatafile, nbackground;
+	int	ndata, ndatafile, nbackground, nbackground_alloc;
 	int	time_ok;
 	double	zmin, zmax, zclip;
 	int	nmax;
@@ -1207,6 +1210,16 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 		&& (datatype == MBGRID_DATA_TOPOGRAPHY
 		|| datatype == MBGRID_DATA_BATHYMETRY))
 		topofactor = topofactor / 0.3048;
+		
+	/* check that dx == dy for Arc ascii grid output */
+	if (gridkind == MBGRID_ARCASCII && dx != dy)
+		{
+		fprintf(outfp,"\nArc Ascii grid output (-G4) requires square cells, but grid intervals dx:%f dy:%f differ...\n", dx, dy);
+		fprintf(outfp,"\nProgram <%s> Terminated\n",
+			program_name);
+		error = MB_ERROR_BAD_PARAMETER;
+		exit(error);
+		}
 
 	/* get data input bounds in lon lat */
 	if (use_projection == MB_NO)
@@ -3702,17 +3715,17 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 			
 		/* guess about twice the data actually expected */
 		if (use_projection == MB_YES)
-			nbackground = 32 * gxdim * gydim;
+			nbackground_alloc = 2 * gxdim * gydim;
 		else
-			nbackground = 2 * gxdim * gydim;
+			nbackground_alloc = 2 * gxdim * gydim;
 
 		/* allocate and initialize background data arrays */
 #ifdef USESURFACE
-		status = mb_malloc(verbose,nbackground*sizeof(float),&bxdata,&error);
+		status = mb_malloc(verbose,nbackground_alloc*sizeof(float),&bxdata,&error);
 		if (status == MB_SUCCESS) 
-			status = mb_malloc(verbose,nbackground*sizeof(float),&bydata,&error);
+			status = mb_malloc(verbose,nbackground_alloc*sizeof(float),&bydata,&error);
 		if (status == MB_SUCCESS) 
-			status = mb_malloc(verbose,nbackground*sizeof(float),&bzdata,&error);
+			status = mb_malloc(verbose,nbackground_alloc*sizeof(float),&bzdata,&error);
 		if (error != MB_ERROR_NO_ERROR)
 			{
 			mb_error(verbose,MB_ERROR_MEMORY_FAIL,&message);
@@ -3723,11 +3736,11 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 			mb_memory_clear(verbose, &error);
 			exit(error);
 			}
-		memset((char *)bxdata,0,nbackground*sizeof(float));
-		memset((char *)bydata,0,nbackground*sizeof(float));
-		memset((char *)bzdata,0,nbackground*sizeof(float));
+		memset((char *)bxdata,0,nbackground_alloc*sizeof(float));
+		memset((char *)bydata,0,nbackground_alloc*sizeof(float));
+		memset((char *)bzdata,0,nbackground_alloc*sizeof(float));
 #else
-		status = mb_malloc(verbose,3*nbackground*sizeof(float),&bdata,&error);
+		status = mb_malloc(verbose,3*nbackground_alloc*sizeof(float),&bdata,&error);
 		if (error != MB_ERROR_NO_ERROR)
 			{
 			mb_error(verbose,MB_ERROR_MEMORY_FAIL,&message);
@@ -3738,7 +3751,7 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 			mb_memory_clear(verbose, &error);
 			exit(error);
 			}
-		memset((char *)bdata,0,3*nbackground*sizeof(float));
+		memset((char *)bdata,0,3*nbackground_alloc*sizeof(float));
 #endif
 
 		/* get initial grid using grdraster */
@@ -3806,8 +3819,8 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 			{
 			sprintf(plot_cmd, "grdsample %s -Gtmpgrdsample%d.grd -R%.12f/%.12f/%.12f/%.12f -I%.12f/%.12f",
 				backgroundfileuse, pid,glonmin,glonmax,bounds[2],bounds[3], 
-				0.25 * (glonmax - glonmin) / (gxdim - 1),
-				0.25 * (bounds[3] - bounds[2]) / (gydim - 1));
+				1.0 * (glonmax - glonmin) / (gxdim - 1),
+				1.0 * (bounds[3] - bounds[2]) / (gydim - 1));
 			}
 		else
 			{
@@ -3850,10 +3863,44 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 					mb_proj_forward(verbose, pjptr, tlon, tlat,
 					&tlon, &tlat, &error);
 #ifdef USESURFACE
+				if (nbackground >= nbackground_alloc)
+					{
+					nbackground_alloc += 10000;
+					status = mb_realloc(verbose,nbackground_alloc*sizeof(float),&bxdata,&error);
+					if (status == MB_SUCCESS) 
+						status = mb_realloc(verbose,nbackground_alloc*sizeof(float),&bydata,&error);
+					if (status == MB_SUCCESS) 
+						status = mb_realloc(verbose,nbackground_alloc*sizeof(float),&bzdata,&error);
+					if (error != MB_ERROR_NO_ERROR)
+						{
+						mb_error(verbose,MB_ERROR_MEMORY_FAIL,&message);
+						fprintf(outfp,"\nMBIO Error reallocating background data array:\n%s\n",
+							message);
+						fprintf(outfp,"\nProgram <%s> Terminated\n",
+							program_name);
+						mb_memory_clear(verbose, &error);
+						exit(error);
+						}
+					}
 				bxdata[nbackground] = (float) tlon;
 				bydata[nbackground] = (float) tlat;
 				bzdata[nbackground] = (float) tvalue;
 #else
+				if (nbackground >= nbackground_alloc)
+					{
+					nbackground_alloc += 10000;
+					status = mb_realloc(verbose,3*nbackground_alloc*sizeof(float),&bdata,&error);
+					if (error != MB_ERROR_NO_ERROR)
+						{
+						mb_error(verbose,MB_ERROR_MEMORY_FAIL,&message);
+						fprintf(outfp,"\nMBIO Error allocating background interpolation work arrays:\n%s\n",
+							message);
+						fprintf(outfp,"\nProgram <%s> Terminated\n",
+							program_name);
+						mb_memory_clear(verbose, &error);
+						exit(error);
+						}
+					}
 				bdata[nbackground*3] = (float) tlon;
 				bdata[nbackground*3+1] = (float) tlat;
 				bdata[nbackground*3+2] = (float) tvalue;
@@ -4533,8 +4580,8 @@ int write_arcascii(int verbose, char *outfile, float *grid,
 		{
 		fprintf(fp, "ncols %d\n", nx);
 		fprintf(fp, "nrows %d\n", ny);
-		fprintf(fp, "xllcorner %.10g\n", xmin);
-		fprintf(fp, "yllcorner %.10g\n", ymin);
+		fprintf(fp, "xllcorner %.10g\n", xmin - 0.5 * dx);
+		fprintf(fp, "yllcorner %.10g\n", ymin - 0.5 * dy);
 		fprintf(fp, "cellsize %.10g\n", dx);
 		fprintf(fp, "nodata_value -99999\n");
 		for (j=0;j<ny;j++)

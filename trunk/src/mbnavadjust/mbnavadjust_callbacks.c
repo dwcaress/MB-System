@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavadjust_callbacks.c	2/22/2000
- *    $Id: mbnavadjust_callbacks.c,v 5.9 2006-01-24 19:18:42 caress Exp $
+ *    $Id: mbnavadjust_callbacks.c,v 5.10 2006-06-16 19:30:58 caress Exp $
  *
  *    Copyright (c) 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	March 22, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.9  2006/01/24 19:18:42  caress
+ * Version 5.0.8 beta.
+ *
  * Revision 5.8  2005/06/04 04:34:06  caress
  * Added notion of "truecrossings", so it's possible to process the data while only looking at crossing tracks and ignoring overlap points.
  *
@@ -1248,6 +1251,13 @@ void do_update_status()
 			XmNvalue, ivalue, 
 			NULL);
 
+	/* set values of inversion precsion slider */
+	ivalue = (int) (100 * project.precision);
+	XtVaSetValues(scale_controls_precision, 
+			XmNdecimalPoints, 2, 
+			XmNvalue, ivalue, 
+			NULL);
+
 	/* set misfit offset center toggles */
 	if (mbna_misfit_center == MBNA_MISFIT_ZEROCENTER)
 	    {
@@ -2336,7 +2346,13 @@ do_controls_apply( Widget w, XtPointer client_data, XtPointer call_data)
 		XmNvalue, &ivalue, 
 		NULL);
     project.tick_int = ((double) ivalue) / 100.0;
-    
+ 
+    /* get values of inversion precision slider */
+    XtVaGetValues(scale_controls_precision, 
+		XmNvalue, &ivalue, 
+		NULL);
+    project.precision = ((double) ivalue) / 100.0;
+   
     if (mbna_file_id_1 >= 0 && mbna_section_1 >= 0)
    	 project.files[mbna_file_id_1].sections[mbna_section_1].contoursuptodate = MB_NO;
     if (mbna_file_id_2 >= 0 && mbna_section_2 >= 0)
@@ -2513,6 +2529,13 @@ do_controls_scale_colorinterval( Widget w, XtPointer client_data, XtPointer call
 			XmNdecimalPoints, 2, 
 			XmNvalue, ivalue, 
 			NULL);
+}
+/*--------------------------------------------------------------------*/
+
+void
+do_scale_controls_precision( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
 }
 
 /*--------------------------------------------------------------------*/

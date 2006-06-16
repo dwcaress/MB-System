@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbview.h	10/9/2002
- *    $Id: mbview.h,v 5.13 2006-04-26 22:06:39 caress Exp $
+ *    $Id: mbview.h,v 5.14 2006-06-16 19:30:58 caress Exp $
  *
  *    Copyright (c) 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -18,6 +18,9 @@
  * Date:	October 10,  2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.13  2006/04/26 22:06:39  caress
+ * Improved profile view feature and enabled export of profile data.
+ *
  * Revision 5.12  2006/04/11 19:17:04  caress
  * Added a profile capability.
  *
@@ -216,6 +219,9 @@
 #define MBV_PICKMASK_NAVTWOPOINT		128
 #define MBV_PICKMASK_NAVANY			256
 #define MBV_PICKMASK_NEWINSTANCE		512
+#define MBV_EXISTMASK_SITE			1024
+#define MBV_EXISTMASK_ROUTE			2048
+#define MBV_EXISTMASK_NAV			4096
 
 /* profile defines */
 #define MBV_PROFILE_NONE			0

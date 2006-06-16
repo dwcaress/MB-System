@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_proj.c	7/16/2002
- *    $Id: mb_proj.c,v 5.4 2004-02-24 22:17:05 caress Exp $
+ *    $Id: mb_proj.c,v 5.5 2006-06-16 19:30:58 caress Exp $
  *
  *    Copyright (c) 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -33,6 +33,9 @@
  * Date:	July 16, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2004/02/24 22:17:05  caress
+ * Added mb_proj_transform() function.
+ *
  * Revision 5.3  2003/04/17 21:05:23  caress
  * Release 5.0.beta30
  *
@@ -53,6 +56,7 @@
 /* standard include files */
 #include <stdio.h>
 #include <math.h>
+#include <sys/stat.h>
 
 /* mbio include files */
 #include "../../include/mb_status.h"
@@ -70,7 +74,8 @@ int mb_proj_init(int verbose,
 	int	status = MB_SUCCESS;
 	char 	pj_init_args[MB_PATH_MAXLINE];
 	projPJ 	pj;
-	
+	struct stat file_status;
+	int	fstat;	
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -82,21 +87,32 @@ int mb_proj_init(int verbose,
 		fprintf(stderr,"dbg2       projection: %s\n",projection);
 		}
 		
-	/* initialize the projection */
-	sprintf(pj_init_args, "+init=%s:%s",
-			projectionfile,projection);
-	pj = pj_init_plus(pj_init_args);
-	*pjptr = (void *) pj;
-
-	/* check success */
-	if (*pjptr != NULL)
+	/* check the existence of the projection database */
+	if ((fstat = stat(projectionfile, &file_status)) == 0
+		&& (file_status.st_mode & S_IFMT) != S_IFDIR)
 		{
-		*error = MB_ERROR_NO_ERROR;
-		status = MB_SUCCESS;
+		/* initialize the projection */
+		sprintf(pj_init_args, "+init=%s:%s",
+				projectionfile,projection);
+		pj = pj_init_plus(pj_init_args);
+		*pjptr = (void *) pj;
+
+		/* check success */
+		if (*pjptr != NULL)
+			{
+			*error = MB_ERROR_NO_ERROR;
+			status = MB_SUCCESS;
+			}
+		else
+			{
+			*error = MB_ERROR_BAD_PROJECTION;
+			status = MB_FAILURE;
+			}
 		}
 	else
 		{
-		*error = MB_ERROR_BAD_PROJECTION;
+		/* cannot initialize the projection */
+		*error = MB_ERROR_MISSING_PROJECTIONS;
 		status = MB_FAILURE;
 		}
 

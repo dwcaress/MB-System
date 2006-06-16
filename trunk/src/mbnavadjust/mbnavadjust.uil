@@ -123,6 +123,7 @@ identifier BXG_label_biases_files;
 identifier BXG_toggleButton_biases_separate;
 identifier BXG_toggleButton_biases_together;
 identifier BXG_label_about_version;
+identifier BXG_scale_controls_precision;
 identifier BXG_scale_controls_sectionlength;
 identifier BXG_scale_controls_tickinterval;
 identifier BXG_scale_controls_colorinterval;
@@ -173,6 +174,7 @@ procedure do_naverr_zerooffset();
 procedure do_quit();
 procedure do_scale_contourinterval();
 procedure do_scale_controls_decimation();
+procedure do_scale_controls_precision();
 procedure do_scale_controls_sectionlength();
 procedure do_scale_controls_sectionsoundings();
 procedure do_scale_controls_tickinterval();
@@ -214,19 +216,17 @@ object pushButton_controls_dismiss : XmPushButton widget {
     arguments {
         arguments Style_use;
         XmNlabelString = compound_string("Dismiss");
-        XmNtopAttachment = XmATTACH_OPPOSITE_WIDGET;
+        XmNtopAttachment = XmATTACH_NONE;
         XmNrightAttachment = XmATTACH_FORM;
         XmNleftAttachment = XmATTACH_WIDGET;
         XmNbottomAttachment = XmATTACH_FORM;
-        XmNbottomOffset = 18;
-        XmNleftOffset = 40;
-        XmNrightOffset = 226;
-        XmNtopOffset = 20;
+        XmNbottomOffset = 19;
+        XmNleftOffset = 30;
+        XmNrightOffset = 227;
         XmNleftWidget = XmPushButton pushButton_controls_apply;
-        XmNtopWidget = XmSeparator separator5;
-        XmNx = 360;
-        XmNy = 280;
-        XmNwidth = 70;
+        XmNx = 300;
+        XmNy = 340;
+        XmNwidth = 80;
         XmNheight = 30;
     };
     controls {
@@ -255,7 +255,7 @@ object scale_controls_sectionsoundings : XmScale widget {
         XmNrightAttachment = XmATTACH_FORM;
         XmNleftAttachment = XmATTACH_WIDGET;
         XmNbottomAttachment = XmATTACH_POSITION;
-        XmNbottomPosition = 23;
+        XmNbottomPosition = 16;
         XmNleftOffset = 0;
         XmNrightOffset = 6;
         XmNtopOffset = 4;
@@ -263,8 +263,8 @@ object scale_controls_sectionsoundings : XmScale widget {
         XmNtopWidget = XmScale scale_controls_sectionlength;
         XmNx = 190;
         XmNy = 40;
-        XmNwidth = 460;
-        XmNheight = 35;
+        XmNwidth = 411;
+        XmNheight = 22;
     };
     controls {
     };
@@ -285,9 +285,9 @@ object label_controls_sectionsoundings : XmLabel widget {
         XmNlabelString = compound_string("Max # Soundings in Section:");
         XmNleftAttachment = XmATTACH_FORM;
         XmNleftOffset = 10;
-        XmNtopOffset = 60;
+        XmNtopOffset = 50;
         XmNx = 10;
-        XmNy = 60;
+        XmNy = 50;
         XmNwidth = 180;
         XmNheight = 20;
     };
@@ -308,9 +308,9 @@ object label_controls_decimation : XmLabel widget {
         XmNlabelString = compound_string("Decimation:");
         XmNleftAttachment = XmATTACH_FORM;
         XmNleftOffset = 10;
-        XmNtopOffset = 120;
+        XmNtopOffset = 110;
         XmNx = 10;
-        XmNy = 120;
+        XmNy = 110;
         XmNwidth = 130;
         XmNheight = 20;
     };
@@ -343,8 +343,8 @@ object scale_controls_decimation : XmScale widget {
         XmNtopOffset = 0;
         XmNtopWidget = XmSeparator separator4;
         XmNx = 140;
-        XmNy = 100;
-        XmNwidth = 510;
+        XmNy = 87;
+        XmNwidth = 461;
         XmNheight = 36;
     };
     controls {
@@ -367,12 +367,12 @@ object separator5 : XmSeparator widget {
         XmNbottomAttachment = XmATTACH_NONE;
         XmNbottomOffset = 0;
         XmNleftOffset = 10;
-        XmNrightOffset = 6;
+        XmNrightOffset = 7;
         XmNtopOffset = 4;
         XmNtopWidget = XmScale scale_controls_tickinterval;
         XmNx = 10;
-        XmNy = 260;
-        XmNwidth = 640;
+        XmNy = 247;
+        XmNwidth = 590;
         XmNheight = 20;
     };
     controls {
@@ -391,9 +391,9 @@ object separator4 : XmSeparator widget {
         XmNrightOffset = 6;
         XmNtopOffset = 5;
         XmNtopWidget = XmScale scale_controls_sectionsoundings;
-        XmNx = 13;
-        XmNy = 80;
-        XmNwidth = 637;
+        XmNx = 12;
+        XmNy = 67;
+        XmNwidth = 589;
         XmNheight = 20;
     };
     controls {
@@ -406,15 +406,13 @@ object pushButton_controls_apply : XmPushButton widget {
     arguments {
         arguments Style_use;
         XmNlabelString = compound_string("Apply");
-        XmNtopAttachment = XmATTACH_OPPOSITE_WIDGET;
+        XmNtopAttachment = XmATTACH_NONE;
         XmNleftAttachment = XmATTACH_FORM;
         XmNbottomAttachment = XmATTACH_FORM;
-        XmNbottomOffset = 18;
-        XmNleftOffset = 250;
-        XmNtopOffset = 20;
-        XmNtopWidget = XmSeparator separator5;
-        XmNx = 250;
-        XmNy = 280;
+        XmNbottomOffset = 19;
+        XmNleftOffset = 200;
+        XmNx = 200;
+        XmNy = 340;
         XmNwidth = 70;
         XmNheight = 30;
     };
@@ -436,9 +434,9 @@ object label_controls_tickinterval : XmLabel widget {
         XmNlabelString = compound_string("Tick Interval (m):");
         XmNleftAttachment = XmATTACH_FORM;
         XmNleftOffset = 10;
-        XmNtopOffset = 240;
+        XmNtopOffset = 230;
         XmNx = 10;
-        XmNy = 240;
+        XmNy = 230;
         XmNwidth = 120;
         XmNheight = 20;
     };
@@ -459,9 +457,9 @@ object label_controls_colorinterval : XmLabel widget {
         XmNlabelString = compound_string("Color Interval (m):");
         XmNleftAttachment = XmATTACH_FORM;
         XmNleftOffset = 10;
-        XmNtopOffset = 200;
+        XmNtopOffset = 190;
         XmNx = 10;
-        XmNy = 200;
+        XmNy = 190;
         XmNwidth = 130;
         XmNheight = 20;
     };
@@ -482,9 +480,9 @@ object label_controls_contourinterval : XmLabel widget {
         XmNlabelString = compound_string("Contour Interval (m):");
         XmNleftAttachment = XmATTACH_FORM;
         XmNleftOffset = 10;
-        XmNtopOffset = 160;
+        XmNtopOffset = 150;
         XmNx = 10;
-        XmNy = 160;
+        XmNy = 150;
         XmNwidth = 140;
         XmNheight = 20;
     };
@@ -518,8 +516,8 @@ object scale_controls_contourinterval : XmScale widget {
         XmNtopOffset = 4;
         XmNtopWidget = XmScale scale_controls_decimation;
         XmNx = 140;
-        XmNy = 140;
-        XmNwidth = 510;
+        XmNy = 127;
+        XmNwidth = 461;
         XmNheight = 36;
     };
     controls {
@@ -554,8 +552,8 @@ object scale_controls_colorinterval : XmScale widget {
         XmNtopOffset = 4;
         XmNtopWidget = XmScale scale_controls_contourinterval;
         XmNx = 140;
-        XmNy = 180;
-        XmNwidth = 510;
+        XmNy = 167;
+        XmNwidth = 461;
         XmNheight = 36;
     };
     controls {
@@ -590,8 +588,8 @@ object scale_controls_tickinterval : XmScale widget {
         XmNtopOffset = 4;
         XmNtopWidget = XmScale scale_controls_colorinterval;
         XmNx = 140;
-        XmNy = 220;
-        XmNwidth = 510;
+        XmNy = 207;
+        XmNwidth = 461;
         XmNheight = 36;
     };
     controls {
@@ -624,7 +622,7 @@ object scale_controls_sectionlength : XmScale widget {
         XmNleftWidget = XmLabel label_controls_sectionlength;
         XmNx = 180;
         XmNy = 0;
-        XmNwidth = 470;
+        XmNwidth = 421;
         XmNheight = 36;
     };
     controls {
@@ -664,16 +662,93 @@ object label_controls_sectionlength : XmLabel widget {
 !(BX)    };
 };
 
+object separator12 : XmSeparator widget {
+    arguments {
+        XmNrightAttachment = XmATTACH_FORM;
+        XmNleftAttachment = XmATTACH_FORM;
+        XmNleftOffset = 10;
+        XmNrightOffset = 12;
+        XmNtopOffset = 310;
+        XmNx = 10;
+        XmNy = 310;
+        XmNwidth = 585;
+        XmNheight = 20;
+    };
+    controls {
+    };
+    callbacks {
+    };
+};
+
+object scale_controls_precision : XmScale widget {
+    arguments {
+        arguments Style_use;
+        XmNminimum = 1;
+        XmNdecimalPoints = 2;
+        XmNvalue = 10;
+        XmNmaximum = 5000;
+        XmNshowArrows = TRUE;
+        XmNshowValue = TRUE;
+        XmNorientation = XmHORIZONTAL;
+        XmNrightAttachment = XmATTACH_FORM;
+        XmNleftAttachment = XmATTACH_FORM;
+        XmNleftOffset = 140;
+        XmNrightOffset = 7;
+        XmNtopOffset = 270;
+        XmNx = 140;
+        XmNy = 270;
+        XmNwidth = 460;
+        XmNheight = 36;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_scale_controls_precision);
+        XmNvalueChangedCallback = procedure do_scale_controls_precision();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object label_controls_precision : XmLabel widget {
+    arguments {
+        arguments Style_use;
+        XmNalignment = XmALIGNMENT_BEGINNING;
+        XmNlabelString = compound_string("Inversion", separate=true) &
+ compound_string("Precision (m):");
+        XmNleftAttachment = XmATTACH_FORM;
+        XmNleftOffset = 10;
+        XmNtopOffset = 270;
+        XmNx = 10;
+        XmNy = 270;
+        XmNwidth = 120;
+        XmNheight = 40;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
 object form_controls : XmFormDialog widget {
     arguments {
         arguments Style_use;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 226;
-        XmNy = 482;
-        XmNwidth = 656;
-        XmNheight = 328;
+        XmNx = 543;
+        XmNy = 432;
+        XmNwidth = 607;
+        XmNheight = 389;
     };
     controls {
+         managed XmLabel label_controls_precision;
+         managed XmScale scale_controls_precision;
+         managed XmSeparator separator12;
          managed XmLabel label_controls_sectionlength;
          managed XmScale scale_controls_sectionlength;
          managed XmScale scale_controls_tickinterval;
@@ -703,8 +778,8 @@ object form_controls : XmFormDialog widget {
 !(BX)    arguments {
 !(BX)        arguments Style_use;
 !(BX)        XmNtitle = "Controls";
-!(BX)        XmNwidth = 656;
-!(BX)        XmNheight = 328;
+!(BX)        XmNwidth = 607;
+!(BX)        XmNheight = 389;
 !(BX)    };
 !(BX)    controls {
 !(BX)         managed XmFormDialog form_controls;
@@ -1015,8 +1090,8 @@ object form_about : XmFormDialog widget {
     arguments {
         arguments Style_use;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 118;
-        XmNy = 202;
+        XmNx = 520;
+        XmNy = 456;
         XmNwidth = 488;
         XmNheight = 484;
     };
@@ -1360,8 +1435,8 @@ object bulletinBoard_biases : XmBulletinBoardDialog widget {
         XmNdialogTitle = compound_string("Heading & Roll Bias");
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 241;
-        XmNy = 185;
+        XmNx = 1379;
+        XmNy = 400;
         XmNwidth = 284;
         XmNheight = 446;
     };
@@ -1947,8 +2022,8 @@ object bulletinBoard_naverr : XmBulletinBoardDialog widget {
         XmNautoUnmanage = false;
         XmNnoResize = true;
         XmNresizePolicy = XmRESIZE_NONE;
-        XmNx = 169;
-        XmNy = 92;
+        XmNx = 407;
+        XmNy = 381;
         XmNwidth = 845;
         XmNheight = 595;
     };
@@ -2075,8 +2150,8 @@ object bulletinBoard_fileselection : XmBulletinBoardDialog widget {
     arguments {
         XmNdialogStyle = XmDIALOG_FULL_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_NONE;
-        XmNx = 90;
-        XmNy = 581;
+        XmNx = 559;
+        XmNy = 605;
         XmNwidth = 611;
         XmNheight = 530;
     };
@@ -2192,8 +2267,8 @@ object bulletinBoard_error : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNdialogStyle = XmDIALOG_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 218;
-        XmNy = 779;
+        XmNx = 1365;
+        XmNy = 543;
         XmNwidth = 311;
         XmNheight = 160;
     };
@@ -2272,8 +2347,8 @@ object bulletinBoard_message : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNdialogStyle = XmDIALOG_FULL_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_ANY;
-        XmNx = 245;
-        XmNy = 469;
+        XmNx = 1250;
+        XmNy = 580;
         XmNwidth = 542;
         XmNheight = 86;
     };
@@ -2812,8 +2887,8 @@ object pushButton_updateproject : XmPushButton widget {
 object pulldownMenu_action : XmPulldownMenu widget {
     arguments {
         arguments Style_use;
-        XmNx = 207;
-        XmNy = 246;
+        XmNx = 0;
+        XmNy = 0;
         XmNwidth = 141;
         XmNheight = 164;
     };

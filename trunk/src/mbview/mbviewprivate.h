@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbviewprivate.h	9/24/2003
- *    $Id: mbviewprivate.h,v 5.10 2006-04-11 19:17:04 caress Exp $
+ *    $Id: mbviewprivate.h,v 5.11 2006-06-16 19:30:58 caress Exp $
  *
  *    Copyright (c) 2003, 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -18,6 +18,9 @@
  * Date:	September 24,  2003
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.10  2006/04/11 19:17:04  caress
+ * Added a profile capability.
+ *
  * Revision 5.9  2005/11/05 01:11:47  caress
  * Much work over the past two months.
  *
@@ -57,6 +60,10 @@
 
 /*--------------------------------------------------------------------*/
 
+/* OpenGL Error checking */
+/* #define MBV_GETERRORS 1 */
+
+/* OpenGL plotting parameters */
 #define LEFT_WIDTH 200
 #define LEFT_HEIGHT 30
 #define MBV_OPENGL_WIDTH 3.0

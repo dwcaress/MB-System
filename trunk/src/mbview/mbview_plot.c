@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_plot.c	9/26/2003
- *    $Id: mbview_plot.c,v 5.7 2006-01-24 19:21:32 caress Exp $
+ *    $Id: mbview_plot.c,v 5.8 2006-06-16 19:30:58 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  *		begun on October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2006/01/24 19:21:32  caress
+ * Version 5.0.8 beta.
+ *
  * Revision 5.6  2005/11/05 01:11:47  caress
  * Much work over the past two months.
  *
@@ -92,7 +95,7 @@ static Cardinal 	ac;
 static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_plot.c,v 5.7 2006-01-24 19:21:32 caress Exp $";
+static char rcs_id[]="$Id: mbview_plot.c,v 5.8 2006-06-16 19:30:58 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_reset_glx(int instance)
@@ -140,6 +143,10 @@ int mbview_reset_glx(int instance)
 	view->contourlorez = MB_NO;
 	view->contourhirez = MB_NO;
 	view->contourfullrez = MB_NO;
+	
+#ifdef MBV_GETERRORS
+mbview_glerrorcheck(instance, 1, function_name);
+#endif
 
 	/* print output debug statements */
 	if (mbv_verbose >= 2)
@@ -221,6 +228,9 @@ int mbview_drawdata(int instance, int rez)
 	if (data->display_mode == MBV_DISPLAY_3D
 		|| data->display_projection_mode == MBV_PROJECTION_SPHEROID)
 		glEnable(GL_DEPTH_TEST);
+#ifdef MBV_GETERRORS
+mbview_glerrorcheck(instance, 1, function_name);
+#endif
 		
 	/* set color parameters */
 	mbview_setcolorparms(instance);
@@ -397,8 +407,15 @@ data->primary_x[kk],data->primary_y[kk],data->primary_z[kk]);*/
 			}
 		else
 			{
-			glEnd();
-			on = MB_NO;
+			 if (on == MB_YES)
+			 	{
+			 	glEnd();
+#ifdef MBV_GETERRORS
+fprintf(stderr,"glEnd called ");
+mbview_glerrorcheck(instance, 24, function_name);
+#endif
+				on = MB_NO;
+				}
 			flip = MB_NO;
 			}
 		if (data->primary_data[ll] != data->primary_nodatavalue)
@@ -428,14 +445,25 @@ data->primary_x[kk],data->primary_y[kk],data->primary_z[kk]);*/
 			}
 		else
 			{
-			glEnd();
-			on = MB_NO;
+			if (on == MB_YES)
+				{
+				glEnd();
+#ifdef MBV_GETERRORS
+fprintf(stderr,"glEnd called ");
+mbview_glerrorcheck(instance, 28, function_name);
+#endif
+				on = MB_NO;
+				}
 			flip = MB_NO;
 			}
 		}
 	if (on == MB_YES)
 		{
 		glEnd();
+#ifdef MBV_GETERRORS
+fprintf(stderr,"glEnd called ");
+mbview_glerrorcheck(instance, 29, function_name);
+#endif
 		on = MB_NO;
 		flip = MB_NO;
 		}
@@ -452,6 +480,9 @@ data->primary_x[kk],data->primary_y[kk],data->primary_z[kk]);*/
 	if (view->plot_done == MB_YES)
 		i = data->primary_nx;
 	}
+#ifdef MBV_GETERRORS
+mbview_glerrorcheck(instance, 2, function_name);
+#endif
 
 	/* draw contours */
 	if (data->grid_contour_mode == MBV_VIEW_ON)
@@ -463,6 +494,10 @@ data->primary_x[kk],data->primary_y[kk],data->primary_z[kk]);*/
 		else if (rez == MBV_REZ_LOW && view->contourlorez == MB_YES)
 	    		glCallList((GLuint)(3*instance+1));
 		}
+	
+#ifdef MBV_GETERRORS
+mbview_glerrorcheck(instance, 3, function_name);
+#endif
 		
 	/* draw current pick */
 	mbview_drawpick(instance);
@@ -1046,6 +1081,9 @@ fprintf(stderr,"     data->pick_type:  %d\n",data->pick_type);*/
 		glXSwapBuffers (XtDisplay(view->glwmda), 
 				XtWindow(view->glwmda));
 		}
+#ifdef MBV_GETERRORS
+mbview_glerrorcheck(instance, 1, function_name);
+#endif
 
 	/* print output debug statements */
 	if (mbv_verbose >= 2)
@@ -3234,4 +3272,49 @@ int mbview_drapesegmentw_grid(int instance, struct mbview_linesegmentw_struct *s
 	return(status);
 }
 
+/*------------------------------------------------------------------------------*/
+int mbview_glerrorcheck(int instance, int id, char *sourcefunction)
+{
+
+	/* local variables */
+	char	*function_name = "mbview_glerrorcheck";
+	int	status = MB_SUCCESS;
+	int	error = MB_ERROR_NO_ERROR;
+	GLenum	gl_error;
+	GLubyte *gl_error_msg;
+
+	/* print starting debug statements */
+	if (mbv_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
+		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       instance:         %d\n",instance);
+		fprintf(stderr,"dbg2       id:               %d\n",id);
+		fprintf(stderr,"dbg2       sourcefunction:   %s\n",sourcefunction);
+		}
+	
+	/* check for OpenGL error if MBV_GETERRORS set */
+	gl_error = glGetError();
+	gl_error_msg = gluErrorString(gl_error);
+	if (gl_error != GL_NO_ERROR)
+		fprintf(stderr,"Function %s: Instance:%d id:%d OpenGL error: %s\n", 
+			sourcefunction, instance, id, gl_error_msg);
+	
+	/* print output debug statements */
+	if (mbv_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:          %d\n",status);
+		fprintf(stderr,"dbg2       gl_error:        %d\n",gl_error);
+		fprintf(stderr,"dbg2       gl_error_msg:    %s\n",gl_error_msg);
+		}
+
+	/* return */
+	return(status);
+}
 /*------------------------------------------------------------------------------*/

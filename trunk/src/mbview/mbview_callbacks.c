@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbview_callbacks.c	10/7/2002
- *    $Id: mbview_callbacks.c,v 5.12 2006-04-26 22:06:39 caress Exp $
+ *    $Id: mbview_callbacks.c,v 5.13 2006-06-16 19:30:58 caress Exp $
  *
  *    Copyright (c) 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -18,6 +18,9 @@
  * Date:	October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.12  2006/04/26 22:06:39  caress
+ * Improved profile view feature and enabled export of profile data.
+ *
  * Revision 5.11  2006/04/11 19:17:04  caress
  * Added a profile capability.
  *
@@ -127,7 +130,7 @@ static Cardinal 	ac;
 static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_callbacks.c,v 5.12 2006-04-26 22:06:39 caress Exp $";
+static char rcs_id[]="$Id: mbview_callbacks.c,v 5.13 2006-06-16 19:30:58 caress Exp $";
 
 /* function prototypes */
 /*------------------------------------------------------------------------------*/
@@ -2502,6 +2505,16 @@ int mbview_action_sensitivity(int instance)
 					if (shared.shareddata.navs[j].nselected > 0)
 						XtSetArg(args[ac], XmNsensitive, True);
 					}
+				}
+			else if (view->actionsensitive[i] & MBV_EXISTMASK_SITE
+				&& shared.shareddata.nsite > 0)
+				{
+				XtSetArg(args[ac], XmNsensitive, True);
+				}
+			else if (view->actionsensitive[i] & MBV_EXISTMASK_ROUTE
+				&& shared.shareddata.nroute > 0)
+				{
+				XtSetArg(args[ac], XmNsensitive, True);
 				}
 			if (view->actionsensitive[i] & MBV_PICKMASK_NEWINSTANCE
 				&& mbview_allactive == MB_YES)
@@ -8706,7 +8719,7 @@ fprintf(stderr,"do_mbview_view_profile: instance:%d\n", instance);
 		ac++;
 		XtSetArg(args[ac], GLwNdoublebuffer, True);
 		ac++;
-		XtSetArg(args[ac], GLwNallocateBackground, TRUE);
+		XtSetArg(args[ac], GLwNallocateBackground, FALSE);
 		ac++;
 		XtSetArg(args[ac], XmNwidth, data->prwidth);
 		ac++;

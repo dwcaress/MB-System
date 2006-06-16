@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	4/8/93
- *    $Id: mbedit_prog.c,v 5.29 2006-01-24 19:12:42 caress Exp $
+ *    $Id: mbedit_prog.c,v 5.30 2006-06-16 19:30:58 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997, 2000, 2003, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -27,6 +27,9 @@
  * Date:	September 19, 2000 (New version - no buffered i/o)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.29  2006/01/24 19:12:42  caress
+ * Version 5.0.8 beta.
+ *
  * Revision 5.28  2006/01/20 19:36:19  caress
  * Working towards 5.0.8
  *
@@ -362,7 +365,7 @@ struct mbedit_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbedit_prog.c,v 5.29 2006-01-24 19:12:42 caress Exp $";
+static char rcs_id[] = "$Id: mbedit_prog.c,v 5.30 2006-06-16 19:30:58 caress Exp $";
 static char program_name[] = "MBedit";
 static char help_message[] =  
 "MBedit is an interactive editor used to identify and flag\n\
@@ -5217,8 +5220,6 @@ int mbedit_plot_all(
 	/* set scales and tick intervals */
 	plot_width = plwd;
 	exager = exgr;
-	x_interval = xntrvl;
-	y_interval = yntrvl;
 	show_detects = sh_dtcts;
 	show_flagged = sh_flggd;
 	show_time = sh_time,
@@ -5296,7 +5297,26 @@ int mbedit_plot_all(
 		for (i=0;i<ndec;i++)
 			maxx = maxx * 10;
 		maxx = (plot_width / maxx + 1) * maxx;
-		do_reset_scale_x(plot_width, maxx);
+
+		xntrvl = plot_width / 10;
+		if (xntrvl > 1000)
+			xntrvl = 1000 * (xntrvl % 1000);
+		else if (xntrvl > 500)
+			xntrvl = 500 * (xntrvl % 500);
+		else if (xntrvl > 250)
+			xntrvl = 250 * (xntrvl % 250);
+		else if (xntrvl > 100)
+			xntrvl = 100 * (xntrvl % 100);
+		else if (xntrvl > 50)
+			xntrvl = 50 * (xntrvl % 50);
+		else if (xntrvl > 25)
+			xntrvl = 25 * (xntrvl % 25);
+		else if (xntrvl > 10)
+			xntrvl = 10 * (xntrvl % 10);
+		else if (xntrvl > 5)
+			xntrvl = 5 * (xntrvl % 5);
+		yntrvl = xntrvl;
+		do_reset_scale_x(plot_width, maxx, xntrvl, yntrvl);
 		}
 
 	/* print out information */
@@ -5326,6 +5346,8 @@ int mbedit_plot_all(
 		pixel_values[WHITE],XG_SOLIDLINE);
 
 	/* set scaling */
+	x_interval = xntrvl;
+	y_interval = yntrvl;
 	xcen = xmin + (xmax - xmin)/2;
 	ycen = ymin + (ymax - ymin)/2;
 	dx = (xmax - xmin)/plot_size;

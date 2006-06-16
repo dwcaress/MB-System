@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_error.c	2/2/93
- *    $Id: mb_error.c,v 5.5 2006-01-06 18:27:19 caress Exp $
+ *    $Id: mb_error.c,v 5.6 2006-06-16 19:30:58 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	February 2, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2006/01/06 18:27:19  caress
+ * Working towards 5.0.8
+ *
  * Revision 5.4  2003/04/17 21:05:23  caress
  * Release 5.0.beta30
  *
@@ -93,7 +96,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mb_io.h"
 
-static char rcs_id[]="$Id: mb_error.c,v 5.5 2006-01-06 18:27:19 caress Exp $";
+static char rcs_id[]="$Id: mb_error.c,v 5.6 2006-06-16 19:30:58 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_error(int verbose, int error, char **message)
@@ -111,6 +114,8 @@ int mb_error(int verbose, int error, char **message)
 		fprintf(stderr,"dbg2       verbose: %d\n",verbose);
 		fprintf(stderr,"dbg2       error:   %d\n",error);
 		fprintf(stderr,"dbg2       message: %d\n",message);
+		fprintf(stderr,"dbg2       MB_ERROR_MIN: %d\n",MB_ERROR_MIN);
+		fprintf(stderr,"dbg2       MB_ERROR_MAX: %d\n",MB_ERROR_MAX);
 		}
 
 	/* set the message and status */

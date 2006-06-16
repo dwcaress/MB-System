@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit_callbacks.c	3/28/97
- *    $Id: mbedit_callbacks.c,v 5.16 2006-02-08 16:57:36 caress Exp $
+ *    $Id: mbedit_callbacks.c,v 5.17 2006-06-16 19:30:58 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	March 28, 1997  GUI recast
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.16  2006/02/08 16:57:36  caress
+ * Added #ifdef to let user build mbedit to use orange instead of red.
+ *
  * Revision 5.15  2006/01/24 19:12:42  caress
  * Version 5.0.8 beta.
  *
@@ -1110,7 +1113,7 @@ do_scale_x( Widget w, XtPointer client_data, XtPointer call_data)
 
 /*--------------------------------------------------------------------*/
 
-int do_reset_scale_x(int pwidth, int maxx)
+int do_reset_scale_x(int pwidth, int maxx, int xntrvl, int yntrvl)
 {
 	char	label[10];
 
@@ -1123,8 +1126,12 @@ int do_reset_scale_x(int pwidth, int maxx)
 		if (maxx < 2)
 			maxx = 2;
 		}
+	mx_interval = xntrvl;
+	my_interval = yntrvl;
+fprintf(stderr,"Called: do_reset_scale_x: %d %d %d %d\n", 
+	pwidth, maxx, xntrvl, yntrvl);
 	
-	/* reset the widget */
+	/* set values of plot width slider */
 	XtVaSetValues(slider_scale_x, 
 			XmNvalue, mplot_width, 
 			XmNmaximum, maxx, 
@@ -1132,6 +1139,16 @@ int do_reset_scale_x(int pwidth, int maxx)
 	sprintf(label, "%d", maxx);
 	set_label_string(slider_scale_x_max_label, 
 			label);	
+
+	/* set values of x interval slider */
+	XtVaSetValues(slider_x_interval, 
+			XmNvalue, mx_interval, 
+			NULL);
+
+	/* set values of y interval slider */
+	XtVaSetValues(slider_y_interval, 
+			XmNvalue, my_interval, 
+			NULL);
 
 	return(1);
 	

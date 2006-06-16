@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavadjust.h	6/24/95
- *    $Id: mbnavadjust.h,v 5.6 2005-06-04 04:34:07 caress Exp $
+ *    $Id: mbnavadjust.h,v 5.7 2006-06-16 19:30:58 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	March 22, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2005/06/04 04:34:07  caress
+ * Added notion of "truecrossings", so it's possible to process the data while only looking at crossing tracks and ignoring overlap points.
+ *
  * Revision 5.5  2004/12/02 06:34:27  caress
  * Fixes while supporting Reson 7k data.
  *
@@ -195,6 +198,7 @@ struct mbna_project {
 	double	tick_int;
 	double	label_int;
 	int	decimation;
+	double	precision;
 	int	inversion;
 	FILE	*logfp;
 };

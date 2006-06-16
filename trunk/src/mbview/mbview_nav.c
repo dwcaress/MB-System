@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_nav.c	10/28/2003
- *    $Id: mbview_nav.c,v 5.11 2006-04-26 22:06:39 caress Exp $
+ *    $Id: mbview_nav.c,v 5.12 2006-06-16 19:30:58 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -18,6 +18,9 @@
  * Date:	October 28, 2003
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.11  2006/04/26 22:06:39  caress
+ * Improved profile view feature and enabled export of profile data.
+ *
  * Revision 5.10  2006/04/11 19:17:04  caress
  * Added a profile capability.
  *
@@ -102,7 +105,7 @@ static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 static char		value_string[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_nav.c,v 5.11 2006-04-26 22:06:39 caress Exp $";
+static char rcs_id[]="$Id: mbview_nav.c,v 5.12 2006-06-16 19:30:58 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_getnavcount(int verbose, int instance,
@@ -1706,7 +1709,6 @@ int mbview_drawnavpick(int instance)
 		/* set color and linewidth */
 		glColor3f(1.0, 0.0, 0.0);
 		glLineWidth(3.0);
-		glBegin(GL_LINE);
 		
 		/* plot first navpick point draped */
 		if (data->display_mode == MBV_DISPLAY_3D 
@@ -1847,8 +1849,10 @@ int mbview_drawnavpick(int instance)
 				glEnd();
 				}
 			}
-		glEnd();
 		}
+#ifdef MBV_GETERRORS
+mbview_glerrorcheck(instance, 1, function_name);
+#endif
 
 	/* print output debug statements */
 	if (mbv_verbose >= 2)
@@ -2195,6 +2199,9 @@ shared.shareddata.navs[inav].segments[jpoint].lspoints[k].zdisplay[instance]);*/
 			}
 		
 		}
+#ifdef MBV_GETERRORS
+mbview_glerrorcheck(instance, 1, function_name);
+#endif
 
 	/* print output debug statements */
 	if (mbv_verbose >= 2)

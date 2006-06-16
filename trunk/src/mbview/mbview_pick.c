@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_pick.c	9/29/2003
- *    $Id: mbview_pick.c,v 5.11 2006-04-26 22:06:39 caress Exp $
+ *    $Id: mbview_pick.c,v 5.12 2006-06-16 19:30:58 caress Exp $
  *
  *    Copyright (c) 2003, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  *		begun on October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.11  2006/04/26 22:06:39  caress
+ * Improved profile view feature and enabled export of profile data.
+ *
  * Revision 5.10  2006/04/11 19:17:04  caress
  * Added a profile capability.
  *
@@ -105,7 +108,7 @@ static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 static char		value_list[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_pick.c,v 5.11 2006-04-26 22:06:39 caress Exp $";
+static char rcs_id[]="$Id: mbview_pick.c,v 5.12 2006-06-16 19:30:58 caress Exp $";
 	
 
 /*------------------------------------------------------------------------------*/
@@ -2009,7 +2012,6 @@ int mbview_drawpick(int instance)
 		/* set color and linewidth */
 		glColor3f(1.0, 0.0, 0.0);
 		glLineWidth(3.0);
-		glBegin(GL_LINE);
 		
 		/* plot first pick point */
 		if (data->display_mode == MBV_DISPLAY_3D 
@@ -2140,8 +2142,10 @@ int mbview_drawpick(int instance)
 				glEnd();
 				}
 			}
-		glEnd();
 		}
+#ifdef MBV_GETERRORS
+mbview_glerrorcheck(instance, 1, function_name);
+#endif
 
 	/* print output debug statements */
 	if (mbv_verbose >= 2)
@@ -2215,6 +2219,9 @@ int mbview_drawregion(int instance)
 						(float)(data->region.segments[i].endpoints[1]->ydisplay), 
 						(float)(data->region.segments[i].endpoints[1]->zdisplay));
 				glEnd();
+#ifdef MBV_GETERRORS
+mbview_glerrorcheck(instance, 1, function_name);
+#endif
 				}
 			}
 		}
@@ -2279,6 +2286,9 @@ int mbview_drawarea(int instance)
 						(float)(data->area.segment.lspoints[j].zdisplay));
 				}
 			glEnd();
+#ifdef MBV_GETERRORS
+mbview_glerrorcheck(instance, 1, function_name);
+#endif
 			}
 		else
 			{
@@ -2290,6 +2300,9 @@ int mbview_drawarea(int instance)
 					(float)(data->area.segment.endpoints[1]->ydisplay), 
 					(float)(data->area.segment.endpoints[1]->zdisplay));
 			glEnd();
+#ifdef MBV_GETERRORS
+mbview_glerrorcheck(instance, 1, function_name);
+#endif
 			}
 				
 		/* plot quad segments */
@@ -2306,6 +2319,9 @@ int mbview_drawarea(int instance)
 							(float)(data->area.segments[i].lspoints[j].zdisplay));
 					}
 				glEnd();
+#ifdef MBV_GETERRORS
+mbview_glerrorcheck(instance, 1, function_name);
+#endif
 				}
 			else
 				{
@@ -2317,9 +2333,15 @@ int mbview_drawarea(int instance)
 						(float)(data->area.segments[i].endpoints[1]->ydisplay), 
 						(float)(data->area.segments[i].endpoints[1]->zdisplay));
 				glEnd();
+#ifdef MBV_GETERRORS
+mbview_glerrorcheck(instance, 1, function_name);
+#endif
 				}
 			}
 		}
+#ifdef MBV_GETERRORS
+mbview_glerrorcheck(instance, 1, function_name);
+#endif
 
 	/* print output debug statements */
 	if (mbv_verbose >= 2)

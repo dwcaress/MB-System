@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_xyplot.perl	8/6/95
-#    $Id: mbm_xyplot.perl,v 5.11 2006-01-06 18:26:26 caress Exp $
+#    $Id: mbm_xyplot.perl,v 5.12 2006-06-16 19:30:58 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 2000, 2003 by 
 #    D. W. Caress (caress@mbari.org)
@@ -56,10 +56,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   August 9, 1995
 #
 # Version:
-#   $Id: mbm_xyplot.perl,v 5.11 2006-01-06 18:26:26 caress Exp $
+#   $Id: mbm_xyplot.perl,v 5.12 2006-06-16 19:30:58 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.11  2006/01/06 18:26:26  caress
+#   Working towards 5.0.8
+#
 #   Revision 5.10  2005/11/05 01:34:20  caress
 #   Much work over the past two months.
 #
@@ -245,7 +248,7 @@ $orientation = 		($opt_U || $opt_u);
 $verbose = 		($opt_V || $opt_v);
 $xypen = 		($opt_W || $opt_w);
 $execute = 		($opt_X || $opt_x);
-$save_temp_files = 	($opt_Z || $opt_z);
+$delete_temp_files = 	($opt_Z || $opt_z);
 
 # print out help message if required
 if ($help)
@@ -1402,7 +1405,7 @@ if ($data_scale)
 	printf FCMD "/bin/rm -f $file_use\n";
 	}
 
-if (! $save_temp_files) {
+if ($delete_temp_files) {
     foreach $file (@xyfiles) {
 	printf FCMD "/bin/rm -f $file \n";
     }

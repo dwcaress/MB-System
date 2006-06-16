@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_process.h	9/11/00
- *    $Id: mb_process.h,v 5.23 2006-01-06 18:27:19 caress Exp $
+ *    $Id: mb_process.h,v 5.24 2006-06-16 19:30:58 caress Exp $
  *
  *    Copyright (c) 2000, 2002, 2003, 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -457,6 +457,9 @@
  * Date:	September 11, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.23  2006/01/06 18:27:19  caress
+ * Working towards 5.0.8
+ *
  * Revision 5.22  2005/03/25 04:16:41  caress
  * Added sonar depth merging to mbprocess.
  *
@@ -531,6 +534,12 @@
  *
  *
  */
+
+/* start this include */
+#ifndef MB_PROCESS_DEF
+
+/* header file flag */
+#define	MB_PROCESS_DEF		1
 
 /* include mb_io.h if needed */
 #ifndef MB_IO_DEF
@@ -1151,5 +1160,8 @@ int mb_esf_save(int verbose, struct mb_esf_struct *esf,
 			double time_d, int beam, int action, int *error);
 int mb_esf_close(int verbose, struct mb_esf_struct *esf, int *error);
 
+
+/* end this include */
+#endif
 
 
