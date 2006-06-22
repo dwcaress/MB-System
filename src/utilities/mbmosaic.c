@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmosaic.c	2/10/97
- *    $Id: mbmosaic.c,v 5.21 2006-04-11 19:19:29 caress Exp $
+ *    $Id: mbmosaic.c,v 5.22 2006-06-22 04:45:43 caress Exp $
  *
  *    Copyright (c) 1997, 2000, 2002, 2003, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	February 10, 1997
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.21  2006/04/11 19:19:29  caress
+ * Various fixes.
+ *
  * Revision 5.20  2006/02/01 07:31:06  caress
  * Modifications suggested by Gordon Keith
  *
@@ -177,7 +180,7 @@
 #define	NO_DATA_FLAG	99999
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbmosaic.c,v 5.21 2006-04-11 19:19:29 caress Exp $";
+static char rcs_id[] = "$Id: mbmosaic.c,v 5.22 2006-06-22 04:45:43 caress Exp $";
 static char program_name[] = "mbmosaic";
 static char help_message[] =  "mbmosaic is an utility used to mosaic amplitude or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered by multibeam swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbmosaic -Ifilelist -Oroot \
@@ -2967,6 +2970,7 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 		}
 
 	/* inititialize grd header */
+	GMT_begin(argc, argv);
 	GMT_grdio_init();
 	GMT_grd_init (&grd, argc, argv, MB_NO);
 

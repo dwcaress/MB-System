@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsegygrid.c	6/12/2004
- *    $Id: mbsegygrid.c,v 5.10 2006-06-16 19:30:58 caress Exp $
+ *    $Id: mbsegygrid.c,v 5.11 2006-06-22 04:45:43 caress Exp $
  *
  *    Copyright (c) 2004, 2005, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	June 12, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.10  2006/06/16 19:30:58  caress
+ * Check in after the Santa Monica Basin Mapping AUV Expedition.
+ *
  * Revision 5.9  2006/04/19 18:30:34  caress
  * Fixed application of gain below seafloor.
  *
@@ -103,7 +106,7 @@ char	*getenv();
 	stderr if verbose > 1) */
 FILE	*outfp;
 
-static char rcs_id[] = "$Id: mbsegygrid.c,v 5.10 2006-06-16 19:30:58 caress Exp $";
+static char rcs_id[] = "$Id: mbsegygrid.c,v 5.11 2006-06-22 04:45:43 caress Exp $";
 static char program_name[] = "MBsegygrid";
 static char help_message[] =  "MBsegygrid grids trace data from segy data files.";
 static char usage_message[] = "MBsegygrid -Ifile -Oroot [-Ashotscale/timescale \n\
@@ -1000,6 +1003,7 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 		}
 
 	/* inititialize grd header */
+	GMT_begin(argc, argv);
 	GMT_grdio_init();
 	GMT_grd_init (&grd, argc, argv, MB_NO);
 

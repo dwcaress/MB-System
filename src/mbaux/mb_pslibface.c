@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_pslibface.c	5/15/94
- *    $Id: mb_pslibface.c,v 5.4 2006-06-02 03:01:30 caress Exp $
+ *    $Id: mb_pslibface.c,v 5.5 2006-06-22 04:45:42 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	May 15, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2006/06/02 03:01:30  caress
+ * Put in ifdefs to handle new GMT version.
+ *
  * Revision 5.3  2006/01/18 15:11:05  caress
  * Had to change ps_text calls to work with pslib from GMT 4.1.
  *
@@ -122,7 +125,7 @@ int plot_init(	int	verbose,
 		double	*inch2lon, 
 		int	*error)
 {
-  	static char rcs_id[]="$Id: mb_pslibface.c,v 5.4 2006-06-02 03:01:30 caress Exp $";
+  	static char rcs_id[]="$Id: mb_pslibface.c,v 5.5 2006-06-22 04:45:42 caress Exp $";
 	char	*function_name = "plot_init";
 	int	status = MB_SUCCESS;
 	int	errflg = 0;
@@ -203,9 +206,7 @@ int plot_init(	int	verbose,
 	GMT_map_setup(bounds[0],bounds[1],bounds[2],bounds[3]);
 
 	/* initialize plotting */
-#ifdef GMT4_1_2
-	GMT_plotinit (argc, argv);
-#else
+#ifdef GMT4_1_0
 	ps_plotinit (NULL, gmtdefs.overlay, gmtdefs.page_orientation, 
 		gmtdefs.x_origin, gmtdefs.y_origin,
 		gmtdefs.global_x_scale, gmtdefs.global_y_scale, 
@@ -214,6 +215,8 @@ int plot_init(	int	verbose,
 		gmtdefs.encoding.name, 
 		GMT_epsinfo (argv[0]));
 	GMT_echo_command (argc, argv);
+#else
+	GMT_plotinit (argc, argv);
 #endif
 
 	/* copy bounds in correct order for use by this program */
@@ -271,7 +274,7 @@ int plot_init(	int	verbose,
 /* 	function plot_end ends the GMT plotting. */
 int plot_end(int verbose, int *error)
 {
-  	static char rcs_id[]="$Id: mb_pslibface.c,v 5.4 2006-06-02 03:01:30 caress Exp $";
+  	static char rcs_id[]="$Id: mb_pslibface.c,v 5.5 2006-06-22 04:45:42 caress Exp $";
 	char	*function_name = "plot_end";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -300,16 +303,16 @@ int plot_end(int verbose, int *error)
 		}
 
 	/* plot the unix timestamp if required */
-#ifndef GMT4_1_2
+#ifdef GMT4_1_0
 	if (gmtdefs.unix_time) 
 		GMT_timestamp (argc_save, argv_save);
 #endif
 
 	/* end the plot */
-#ifdef GMT4_1_2
-	GMT_plotend ();
-#else
+#ifdef GMT4_1_0
 	ps_plotend (gmtdefs.last_page);
+#else
+	GMT_plotend ();
 #endif
 
 	/* print output debug statements */

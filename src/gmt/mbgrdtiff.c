@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrdtiff.c	5/30/93
- *    $Id: mbgrdtiff.c,v 5.11 2006-01-11 07:25:53 caress Exp $
+ *    $Id: mbgrdtiff.c,v 5.12 2006-06-22 04:45:42 caress Exp $
  *
  *    Copyright (c) 1999, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -215,6 +215,9 @@
  *
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.11  2006/01/11 07:25:53  caress
+ * Working towards 5.0.8
+ *
  * Revision 5.10  2005/11/04 20:18:04  caress
  * Altered the GeoTiff header so that images are compatible with more GIS packages.
  *
@@ -376,7 +379,7 @@ int              tiff_offset[] =
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbgrdtiff.c,v 5.11 2006-01-11 07:25:53 caress Exp $";
+	static char rcs_id[] = "$Id: mbgrdtiff.c,v 5.12 2006-06-22 04:45:42 caress Exp $";
 	static char program_name[] = "mbgrdtiff";
 	static char help_message[] = "mbgrdtiff generates a tiff image from a GMT grid. The \nimage generation is similar to that of the GMT program \ngrdimage. In particular, the color map is applied from \na GMT CPT file, and shading overlay grids may be applied. \nThe output TIFF file contains information allowing\nthe ArcView and ArcInfo GIS packages to import the image\nas a geographically located coverage.";
 	static char usage_message[] = "mbgrdtiff -Ccptfile -Igrdfile -Otiff_file [-H -Kintensfile -V]";
@@ -415,6 +418,7 @@ main (int argc, char **argv)
 	char    tiff_header[TIFF_HEADER_SIZE];
 	char    *tiff_image = NULL;
 	char	tiff_comment[TIFF_COMMENT_MAXLINE];
+	char	NorS;
 	
 	/* other variables */
 	FILE    *tfp;
@@ -601,6 +605,49 @@ main (int argc, char **argv)
 		}
 	    }
 	    
+	/* try to get projection from the grd file remark */
+	if (strncmp(&(header.remark[2]), "Projection: ", 12) == 0)
+		{
+		if ((nscan = sscanf(&(header.remark[2]), "Projection: UTM%d%c", &utmzone, &NorS)) == 2)
+			{
+			if (NorS == 'N')
+				{
+				projectionid = 32600 + utmzone;
+				}
+			else if (NorS == 'S')
+				{
+				projectionid = 32700 + utmzone;
+				}
+				modeltype = ModelTypeProjected;
+			sprintf(projectionname, "UTM%2.2d%c", utmzone, NorS);
+			
+			project_info.degree[0] = FALSE;
+			}
+		else if ((nscan = sscanf(&(header.remark[2]), "Projection: epsg%d", &projectionid)) == 1)
+			{
+			sprintf(projectionname, "epsg%d", projectionid);
+			modeltype = ModelTypeProjected;
+			
+			project_info.degree[0] = FALSE;
+			}
+		else
+			{
+			strcpy(projectionname, "Geographic WGS84");
+			modeltype = ModelTypeGeographic;
+			projectionid = GCS_WGS_84;
+			
+			project_info.degree[0] = TRUE;
+			}
+		}
+	else
+		{
+		strcpy(projectionname, "Geographic WGS84");
+		modeltype = ModelTypeGeographic;
+		projectionid = GCS_WGS_84;
+			
+		project_info.degree[0] = TRUE;
+		}	
+	    
 	/* set bounds from grd file if not set on command line */
 	if (bounds[1] <= bounds[0] || bounds[3] <= bounds[2])
 	    {
@@ -668,40 +715,6 @@ main (int argc, char **argv)
 		exit(error);
 		}
 	    }
-	    
-	/* try to get projection from the grd file remark */
-	if (strncmp(&(header.remark[2]), "Projection: ", 12) == 0)
-		{
-		if ((nscan = sscanf(&(header.remark[2]), "Projection: UTM%dN", &utmzone)) == 1)
-			{
-			sprintf(projectionname, "UTM%dN", utmzone);
-			modeltype = ModelTypeProjected;
-			projectionid = 32600 + utmzone;
-			}
-		else if ((nscan = sscanf(&(header.remark[2]), "Projection: UTM%dS", &utmzone)) == 1)
-			{
-			sprintf(projectionname, "UTM%dS", utmzone);
-			modeltype = ModelTypeProjected;
-			projectionid = 32700 + utmzone;
-			}
-		else if ((nscan = sscanf(&(header.remark[2]), "Projection: epsg%d", &projectionid)) == 1)
-			{
-			sprintf(projectionname, "epsg%d", projectionid);
-			modeltype = ModelTypeProjected;
-			}
-		else
-			{
-			strcpy(projectionname, "Geographic WGS84");
-			modeltype = ModelTypeGeographic;
-			projectionid = GCS_WGS_84;
-			}
-		}
-	else
-		{
-		strcpy(projectionname, "Geographic WGS84");
-		modeltype = ModelTypeGeographic;
-		projectionid = GCS_WGS_84;
-		}
 
 	/* print debug info */
 	if (verbose >= 0)

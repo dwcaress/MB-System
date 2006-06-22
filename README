@@ -1,9 +1,9 @@
-MB-SYSTEM VERSION 5.0.9 README FILE:
+MB-SYSTEM VERSION 5.1.0beta README FILE:
 ----------------------------------------
 
 This file is located at the top of the MB-System directory
 structure. This directory structure contains the version 
-5.0.9 release of the MB-System software package for 
+5.1.0beta release of the MB-System software package for 
 processing and display of swath sonar data.  
 
 MB-SYSTEM VERSION 5 DESCRIPTION:
@@ -26,6 +26,7 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
+Version 5.1.0beta      June 21, 2006
 Version 5.0.9          February 20, 2006
 Version 5.0.8          February 8, 2006
 Version 5.0.8beta5     February 3, 2006
@@ -132,10 +133,10 @@ organizations involved in the design and maintenance of the
 MB-System software package are NOT responsible for any damage 
 that may follow from correct or incorrect use of these programs.
 
-MB-SYSTEM VERSION 5.0.10 RELEASE NOTES:
+MB-SYSTEM VERSION 5.1.0 RELEASE NOTES:
 ------------------------------------------
 
-The version 5.0.10 release of MB-System contains both bug fixes
+The version 5.1.0 release of MB-System contains both bug fixes
 and new capabilities relative to the 5.0.9 release.
 
 A typo in the mbgrid man page was fixed.
@@ -178,7 +179,8 @@ be displayed and exported from two point picks, selected routes,
 and selected navigation. The profile view is enabled from the
 view menu.
 
-Fixed output of ESRI ARC ascii grids from mbgrid and mbmosiac.
+Fixed problems with output of ESRI ARC ascii grids from 
+mbgrid and mbmosiac.
 
 Added interactive control over the target of precision of the
 navigation inversion in MBnavadjust. 
@@ -194,6 +196,9 @@ MBextractsegy now will extract subbottom data to segy files
 in sequential line files based on waypoints in a route file.
 
 Updated manual page for mbm_route2mission.
+
+A bug in mbgrdtiff has been fixed that mislocated the geoTIFF
+images by 1/2 pixel, thanks to Gordon Keith.
 
 
 MB-SYSTEM VERSION 5.0.9 RELEASE NOTES:
@@ -1236,11 +1241,17 @@ future.
 
 ACKNOWLEDGMENTS:
 ----------------
+The MB-System Cookbook was written by Val Schmidt, formerly
+of L-DEO and now with CCOM/JHC at the University of New
+Hampshire.
+
 A number of people have made contributions to the code
 included in MB-System.  These include:
     Bob Covill (Tekmap Consulting)
     Gordon Keith (CSIRO)
+    Val Schmidt (CCOM/JHC, University of New Hampshire)
     Suzanne O'Hara (Lamont-Doherty Earth Observatory) 
+    Mike McCann (MBARI) 
     Daniel Scheirer (Brown University) 
     Paul Cohen (SeaBeam Instruments, now Fidelity Investments) 
     Steve Dzurenko (SeaBeam Instruments, now University of Texas) 
@@ -1260,10 +1271,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.80 2006-06-16 19:24:47 caress Exp $
+RCS ID: $Id: README,v 5.81 2006-06-22 04:45:42 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.80  2006/06/16 19:24:47  caress
+Check in after the Santa Monica Basin Mapping AUV Expedition.
+
 Revision 5.79  2006/03/06 21:33:42  caress
 Working towards 5.0.10
 

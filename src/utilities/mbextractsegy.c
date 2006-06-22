@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbextractsegy.c	4/18/2004
- *    $Id: mbextractsegy.c,v 5.9 2006-06-16 19:30:58 caress Exp $
+ *    $Id: mbextractsegy.c,v 5.10 2006-06-22 04:45:43 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	April 18, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.9  2006/06/16 19:30:58  caress
+ * Check in after the Santa Monica Basin Mapping AUV Expedition.
+ *
  * Revision 5.8  2006/01/18 15:17:00  caress
  * Added stdlib.h include.
  *
@@ -73,7 +76,7 @@
 #define MBES_ROUTE_WAYPOINT_STARTLINE	3
 #define MBES_ROUTE_WAYPOINT_ENDLINE	4
 
-static char rcs_id[] = "$Id: mbextractsegy.c,v 5.9 2006-06-16 19:30:58 caress Exp $";
+static char rcs_id[] = "$Id: mbextractsegy.c,v 5.10 2006-06-22 04:45:43 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
@@ -188,8 +191,15 @@ main (int argc, char **argv)
 	double	seafloordepthmax;
 	double	sweep;
 	double	delay;
+	double	startlon;
+	double	startlat;
+	double	endlon;
+	double	endlat;
+	double	linedistance;
+	double	linebearing;
 
 	char	command[MB_PATH_MAXLINE];
+	char	scale[MB_PATH_MAXLINE];
 	double	mtodeglon, mtodeglat;
 	double	dx, dy;
 	FILE	*fp = NULL;
@@ -470,6 +480,7 @@ main (int argc, char **argv)
 		rangelast = 1000 * rangethreshold;
 		seafloordepthmin = -1.0;
 		seafloordepthmax = -1.0;
+		linenumber = startline;
 
 		/* output status */
 		if (verbose > 0)
@@ -640,29 +651,52 @@ main (int argc, char **argv)
 
 				    /* use mbsegyinfo to generate a sinf file */
 				    sprintf(command, "mbsegyinfo -I %s -O", output_file);
-		   		    fprintf(stdout, "Executing: %s\n", command);
+		   		    fprintf(stderr, "Executing: %s\n", command);
 				    system(command);
+		    
+				    /* get bearing and plot scale */
+				    dx = (endlon - startlon) / mtodeglon;
+				    dy = (endlat - startlat) / mtodeglat;
+				    linedistance = sqrt(dx * dx + dy * dy);
+				    linebearing = RTD * atan2(dx, dy);
+				    if (linebearing < 0.0)
+		    			linebearing += 360.0;
+				    if (linebearing >= 45.0 && linebearing <= 225.0)
+		   			strcpy(scale, "-Jx0.01/75");
+				    else
+		   			strcpy(scale, "-Jx-0.01/75");
 				    
 				    /* output commands to first cut plotting script file */
 				    sweep = (seafloordepthmax - seafloordepthmin) / 750.0 + 0.1;
 				    sweep = (1 + (int)(sweep / 0.05)) * 0.05; 
 				    delay = seafloordepthmin / 750.0;
 				    delay = ((int)(delay / 0.05)) * 0.05; 
-				    linenumber = startline + activewaypoint;
 				    fprintf(sfp, "# Generate section plot of segy file: %s\n", output_file);
+				    fprintf(sfp, "#   Section Start Position: %.6f %.6f\n", startlon, startlat);
+				    fprintf(sfp, "#   Section End Position:   %.6f %.6f\n", endlon, endlat);
+				    fprintf(sfp, "#   Section length: %f km\n", linedistance);
+				    fprintf(sfp, "#   Section bearing: %f degrees\n", linebearing);
 				    fprintf(sfp, "mbsegygrid -I %s \\\n\t-S0 -T%.2f/%.2f -W3/-0.01/%.2f \\\n\t-G2/50.0/0.1 \\\n\t-O %s_%4.4d_section\n", 
 						    output_file, sweep, delay, sweep, lineroot, linenumber);
-				    fprintf(sfp, "mbm_grdplot -I %s_%4.4d_section.grd \\\n\t-Jx0.01/75 -Z0/400/1 \\\n\t-Ba250/a0.05g0.05 -G1 -W1/4 -D -V \\\n\t-O %s_%4.4d_sectionplot \\\n\t-L\"%s Line %d\"\n",
-						    lineroot, linenumber, lineroot, linenumber, lineroot, linenumber);
+				    fprintf(sfp, "mbm_grdplot -I %s_%4.4d_section.grd \\\n\t%s -Z0/400/1 \\\n\t-Ba250/a0.05g0.05 -G1 -W1/4 -D -V \\\n\t-O %s_%4.4d_sectionplot \\\n\t-L\"%s Line %d\"\n",
+						    lineroot, linenumber, scale, lineroot, linenumber, lineroot, linenumber);
 				    fprintf(sfp, "%s_%4.4d_sectionplot.cmd\n\n",
 						    lineroot, linenumber);
+				    fflush(sfp);
 				    fprintf(stderr, "# Generate section plot of segy file: %s\n", output_file);
+				    fprintf(stderr, "#   Section Start Position: %.6f %.6f\n", startlon, startlat);
+				    fprintf(stderr, "#   Section End Position:   %.6f %.6f\n", endlon, endlat);
+				    fprintf(stderr, "#   Section length: %f km\n", linedistance);
+				    fprintf(stderr, "#   Section bearing: %f degrees\n", linebearing);
 				    fprintf(stderr, "mbsegygrid -I %s \\\n\t-S0 -T%.2f/%.2f -W3/-0.01/%.2f \\\n\t-G2/50.0/0.1 \\\n\t-O %s_%4.4d_section\n", 
 						    output_file, sweep, delay, sweep, lineroot, linenumber);
-				    fprintf(stderr, "mbm_grdplot -I %s_%4.4d_section.grd \\\n\t-Jx0.01/75 -Z0/400/1 \\\n\t-Ba250/a0.05g0.05 -G1 -W1/4 -D -V \\\n\t-O %s_%4.4d_sectionplot \\\n\t-L\"%s Line %d\"\n",
-						    lineroot, linenumber, lineroot, linenumber, lineroot, linenumber);
+				    fprintf(stderr, "mbm_grdplot -I %s_%4.4d_section.grd \\\n\t%s -Z0/400/1 \\\n\t-Ba250/a0.05g0.05 -G1 -W1/4 -D -V \\\n\t-O %s_%4.4d_sectionplot \\\n\t-L\"%s Line %d\"\n",
+						    lineroot, linenumber, scale, lineroot, linenumber, lineroot, linenumber);
 				    fprintf(stderr, "%s_%4.4d_sectionplot.cmd\n\n",
 						    lineroot, linenumber);
+				
+				    /* increment line number */
+				    linenumber++;
 				    }
 
 				/* increment active waypoint */
@@ -690,7 +724,6 @@ main (int argc, char **argv)
 			    {
 			    if (route_file_set == MB_YES && nroutepoint > 1)
 				    {
-				    linenumber = startline + activewaypoint;
 				    sprintf(output_file, "%s_%4.4d.segy", lineroot, linenumber);
 				    }
 			    else
@@ -804,6 +837,18 @@ main (int argc, char **argv)
 				{
 				tracemin = MIN(tracemin, segydata[i]);
 				tracemax = MAX(tracemax, segydata[i]);
+				}
+				
+			/* get starting and ending positions */
+			if (nwrite == 0)
+				{
+				startlon = ((double)segytraceheader.src_long) / 360000.0;
+				startlat = ((double)segytraceheader.src_lat) / 360000.0;
+				}
+			else
+				{
+				endlon = ((double)segytraceheader.src_long) / 360000.0;
+				endlat = ((double)segytraceheader.src_lat) / 360000.0;
 				}
 				
 			/* get seafloor depth min and max */
@@ -994,27 +1039,46 @@ main (int argc, char **argv)
 				    
 		    /* use mbsegyinfo to generate a sinf file */
 		    sprintf(command, "mbsegyinfo -I %s -O", output_file);
-		    fprintf(stdout, "Executing: %s\n", command);
+		    fprintf(stderr, "Executing: %s\n", command);
 		    system(command);
+		    
+		    /* get bearing and plot scale */
+		    dx = (endlon - startlon) / mtodeglon;
+		    dy = (endlat - startlat) / mtodeglat;
+		    linedistance = sqrt(dx * dx + dy * dy);
+		    if (linebearing < 0.0)
+		    	linebearing += 360.0;
+		    if (linebearing >= 45.0 && linebearing <= 225.0)
+		   	strcpy(scale, "-Jx0.01/75");
+		    else
+		   	strcpy(scale, "-Jx-0.01/75");
 				    
 		    /* output commands to first cut plotting script file */
 		    sweep = (seafloordepthmax - seafloordepthmin) / 750.0 + 0.1;
 		    sweep = (1 + (int)(sweep / 0.05)) * 0.05; 
 		    delay = seafloordepthmin / 750.0;
 		    delay = ((int)(delay / 0.05)) * 0.05; 
-		    linenumber = startline + activewaypoint;
 		    fprintf(sfp, "# Generate section plot of segy file: %s\n", output_file);
+		    fprintf(sfp, "#   Section Start Position: %.6f %.6f\n", startlon, startlat);
+		    fprintf(sfp, "#   Section End Position:   %.6f %.6f\n", endlon, endlat);
+		    fprintf(sfp, "#   Section length: %f km\n", linedistance);
+		    fprintf(sfp, "#   Section bearing: %f degrees\n", linebearing);
 		    fprintf(sfp, "mbsegygrid -I %s \\\n\t-S0 -T%.2f/%.2f -W3/-0.01/%.2f \\\n\t-G2/50.0/0.1 \\\n\t-O %s_%4.4d_section\n", 
 				    output_file, sweep, delay, sweep, lineroot, linenumber);
-		    fprintf(sfp, "mbm_grdplot -I %s_%4.4d_section.grd \\\n\t-Jx0.01/75 -Z0/400/1 \\\n\t-Ba250/a0.05g0.05 -G1 -W1/4 -D -V \\\n\t-O %s_%4.4d_sectionplot \\\n\t-L\"%s Line %d\"\n",
-				    lineroot, linenumber, lineroot, linenumber, lineroot, linenumber);
+		    fprintf(sfp, "mbm_grdplot -I %s_%4.4d_section.grd \\\n\t%s -Z0/400/1 \\\n\t-Ba250/a0.05g0.05 -G1 -W1/4 -D -V \\\n\t-O %s_%4.4d_sectionplot \\\n\t-L\"%s Line %d\"\n",
+				    lineroot, linenumber, scale, lineroot, linenumber, lineroot, linenumber);
 		    fprintf(sfp, "%s_%4.4d_sectionplot.cmd\n\n",
 				    lineroot, linenumber);
+		    fflush(sfp);
 		    fprintf(stderr, "# Generate section plot of segy file: %s\n", output_file);
+		    fprintf(stderr, "#   Section Start Position: %.6f %.6f\n", startlon, startlat);
+		    fprintf(stderr, "#   Section End Position:   %.6f %.6f\n", endlon, endlat);
+		    fprintf(stderr, "#   Section length: %f km\n", linedistance);
+		    fprintf(stderr, "#   Section bearing: %f degrees\n", linebearing);
 		    fprintf(stderr, "mbsegygrid -I %s \\\n\t-S0 -T%.2f/%.2f -W3/-0.01/%.2f \\\n\t-G2/50.0/0.1 \\\n\t-O %s_%4.4d_section\n", 
 				    output_file, sweep, delay, sweep, lineroot, linenumber);
-		    fprintf(stderr, "mbm_grdplot -I %s_%4.4d_section.grd \\\n\t-Jx0.01/75 -Z0/400/1 \\\n\t-Ba250/a0.05g0.05 -G1 -W1/4 -D -V \\\n\t-O %s_%4.4d_sectionplot \\\n\t-L\"%s Line %d\"\n",
-				    lineroot, linenumber, lineroot, linenumber, lineroot, linenumber);
+		    fprintf(stderr, "mbm_grdplot -I %s_%4.4d_section.grd \\\n\t%s -Z0/400/1 \\\n\t-Ba250/a0.05g0.05 -G1 -W1/4 -D -V \\\n\t-O %s_%4.4d_sectionplot \\\n\t-L\"%s Line %d\"\n",
+				    lineroot, linenumber, scale, lineroot, linenumber, lineroot, linenumber);
 		    fprintf(stderr, "%s_%4.4d_sectionplot.cmd\n\n",
 				    lineroot, linenumber);
 		    }

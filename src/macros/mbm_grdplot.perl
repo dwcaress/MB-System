@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grdplot.perl	8/6/95
-#    $Id: mbm_grdplot.perl,v 5.20 2006-06-16 19:30:58 caress Exp $
+#    $Id: mbm_grdplot.perl,v 5.21 2006-06-22 04:45:42 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 2000, 2003 by 
 #    D. W. Caress (caress@mbari.org)
@@ -68,10 +68,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   October 19, 1994
 #
 # Version:
-#   $Id: mbm_grdplot.perl,v 5.20 2006-06-16 19:30:58 caress Exp $
+#   $Id: mbm_grdplot.perl,v 5.21 2006-06-22 04:45:42 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.20  2006/06/16 19:30:58  caress
+#   Check in after the Santa Monica Basin Mapping AUV Expedition.
+#
 #   Revision 5.19  2006/01/20 17:39:15  caress
 #   Working towards 5.0.8
 #
@@ -1730,7 +1733,9 @@ if ($gmt_version eq "3.0"
 	}
 else
 	{
-	$gmt_def = "PAPER_MEDIA/$page_gmt_name{$pagesize}+";
+	# If + is added then the media is EPS
+	# $gmt_def = "PAPER_MEDIA/$page_gmt_name{$pagesize}+";
+	$gmt_def = "PAPER_MEDIA/$page_gmt_name{$pagesize}";
 	push(@gmt_macro_defs, $gmt_def);
 	}
 $gmt_def = "ANOT_FONT/Helvetica";
@@ -2295,7 +2300,14 @@ elsif ($nlabels < 2)
 	}
 
 # set basemap axes annotation
-if ($tick_info)
+if ($gridprojected == 2 && $tick_info && $tick_info =~ /\S+\/\S+/)
+	{
+	($base_tick_x, $base_tick_y) = $tick_info =~ /(\S+)\/(\S+)/;
+	$base_tick_x = "$base_tick_x" . "\":Trace Number:\"";
+	$base_tick_y = "$base_tick_y" . "\":Time (sec):\"";
+	$axes = "$base_tick_x/$base_tick_y:.\"$tlabel\":WESn";
+	}
+elsif ($tick_info)
 	{
 	$axes = $tick_info;
 	if (!($tick_info =~ /.*:\..*/))
@@ -2307,7 +2319,7 @@ else
 	{
 	# figure out some reasonable tick intervals for the basemap
 	&GetBaseTick;
-	$axes = "$base_tick_x/$base_tick_y:.\"$tlabel\":";
+	$axes = "$base_tick_x/$base_tick_y:.\"$tlabel\":WESn";
 	}
 
 # do coastline plots
@@ -2446,7 +2458,7 @@ if ($swathnavdatalist)
 	}
 
 # do psscale plot
-if ($color_mode && $color_pallette < 5)
+if ($color_mode && $color_pallette < 5 && $gridprojected != 2)
 	{
 	printf FCMD "#\n# Make color scale\n";
 	printf FCMD "echo Running psscale...\n";
