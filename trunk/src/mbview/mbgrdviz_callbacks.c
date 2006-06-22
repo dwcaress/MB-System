@@ -106,7 +106,7 @@ int	realtime_update = 5;
 int	realtime_icon = MBGRDVIZ_REALTIME_ICON_SHIP;
 
 /* id variables */
-static char rcs_id[] = "$Id: mbgrdviz_callbacks.c,v 5.18 2006-06-16 19:30:58 caress Exp $";
+static char rcs_id[] = "$Id: mbgrdviz_callbacks.c,v 5.19 2006-06-22 04:45:43 caress Exp $";
 static char program_name[] = "MBgrdviz";
 static char help_message[] = "MBgrdviz is an interactive 2D/3D visualization tool for GMT grid files.";
 static char usage_message[] = "mbgrdviz [-H -T -V]";
@@ -3035,6 +3035,57 @@ int do_mbgrdviz_readgrd(int instance, char *grdfile,
 	    		program_name);
 	    exit(error);
 	    }
+	    
+	/* try to get projection from the grd file remark */
+	if (strncmp(&(header.remark[2]), "Projection: ", 12) == 0)
+		{
+		if ((nscan = sscanf(&(header.remark[2]), "Projection: UTM%d%c", &utmzone, &NorS)) == 2)
+			{
+			if (NorS == 'N')
+				{
+				projectionid = 32600 + utmzone;
+				}
+			else if (NorS == 'S')
+				{
+				projectionid = 32700 + utmzone;
+				}
+				modeltype = ModelTypeProjected;
+			sprintf(projectionname, "UTM%2.2d%c", utmzone, NorS);
+			*grid_projection_mode = MBV_PROJECTION_PROJECTED;
+			sprintf(grid_projection_id, "epsg%d", projectionid);
+			
+			project_info.degree[0] = FALSE;
+			}
+		else if ((nscan = sscanf(&(header.remark[2]), "Projection: epsg%d", &projectionid)) == 1)
+			{
+			sprintf(projectionname, "epsg%d", projectionid);
+			modeltype = ModelTypeProjected;
+			*grid_projection_mode = MBV_PROJECTION_PROJECTED;
+			sprintf(grid_projection_id, "epsg%d", projectionid);
+			
+			project_info.degree[0] = FALSE;
+			}
+		else
+			{
+			strcpy(projectionname, "Geographic WGS84");
+			modeltype = ModelTypeGeographic;
+			projectionid = GCS_WGS_84;
+			*grid_projection_mode = MBV_PROJECTION_GEOGRAPHIC;
+			sprintf(grid_projection_id, "epsg%d", projectionid);
+			
+			project_info.degree[0] = TRUE;
+			}
+		}
+	else
+		{
+		strcpy(projectionname, "Geographic WGS84");
+		modeltype = ModelTypeGeographic;
+		projectionid = GCS_WGS_84;
+		*grid_projection_mode = MBV_PROJECTION_GEOGRAPHIC;
+		sprintf(grid_projection_id, "epsg%d", projectionid);
+			
+		project_info.degree[0] = TRUE;
+		}	
 
 	/* set up internal arrays */
     	*nodatavalue = MIN(MBV_DEFAULT_NODATA, header.z_min - 10 * (header.z_max - header.z_min));
@@ -3101,49 +3152,6 @@ int do_mbgrdviz_readgrd(int instance, char *grdfile,
 			usedata[k] = rawdata[kk];
 		}
 	mb_free(verbose, &rawdata, &error);
-	    
-	/* try to get projection from the grd file remark */
-	if (strncmp(&(header.remark[2]), "Projection: ", 12) == 0)
-		{
-		if ((nscan = sscanf(&(header.remark[2]), "Projection: UTM%d%c", &utmzone, &NorS)) == 2)
-			{
-			if (NorS == 'N')
-				{
-				projectionid = 32600 + utmzone;
-				}
-			else if (NorS == 'S')
-				{
-				projectionid = 32700 + utmzone;
-				}
-				modeltype = ModelTypeProjected;
-			sprintf(projectionname, "UTM%2.2d%c", utmzone, NorS);
-			*grid_projection_mode = MBV_PROJECTION_PROJECTED;
-			sprintf(grid_projection_id, "epsg%d", projectionid);
-			}
-		else if ((nscan = sscanf(&(header.remark[2]), "Projection: epsg%d", &projectionid)) == 1)
-			{
-			sprintf(projectionname, "epsg%d", projectionid);
-			modeltype = ModelTypeProjected;
-			*grid_projection_mode = MBV_PROJECTION_PROJECTED;
-			sprintf(grid_projection_id, "epsg%d", projectionid);
-			}
-		else
-			{
-			strcpy(projectionname, "Geographic WGS84");
-			modeltype = ModelTypeGeographic;
-			projectionid = GCS_WGS_84;
-			*grid_projection_mode = MBV_PROJECTION_GEOGRAPHIC;
-			sprintf(grid_projection_id, "epsg%d", projectionid);
-			}
-		}
-	else
-		{
-		strcpy(projectionname, "Geographic WGS84");
-		modeltype = ModelTypeGeographic;
-		projectionid = GCS_WGS_84;
-		*grid_projection_mode = MBV_PROJECTION_GEOGRAPHIC;
-		sprintf(grid_projection_id, "epsg%d", projectionid);
-		}	
 
 	/* print debug info */
 	if (verbose > 0)

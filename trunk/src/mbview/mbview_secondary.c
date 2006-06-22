@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_secondary.c	9/25/2003
- *    $Id: mbview_secondary.c,v 5.6 2006-06-16 19:30:58 caress Exp $
+ *    $Id: mbview_secondary.c,v 5.7 2006-06-22 04:45:43 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  *		begun on October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2006/06/16 19:30:58  caress
+ * Check in after the Santa Monica Basin Mapping AUV Expedition.
+ *
  * Revision 5.5  2006/01/24 19:21:32  caress
  * Version 5.0.8 beta.
  *
@@ -89,7 +92,7 @@ static Cardinal 	ac;
 static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_secondary.c,v 5.6 2006-06-16 19:30:58 caress Exp $";
+static char rcs_id[]="$Id: mbview_secondary.c,v 5.7 2006-06-22 04:45:43 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_setsecondarygrid(int verbose, int instance,
@@ -198,7 +201,7 @@ int mbview_setsecondarygrid(int verbose, int instance,
 		proj_status = mb_proj_init(mbv_verbose, 
 					data->secondary_grid_projection_id,
 					&(view->secondary_pjptr),
-					&error);
+					error);
 		if (proj_status == MB_SUCCESS)
 			view->secondary_pj_init = MB_YES;
 fprintf(stderr,"SECONDARY GRID PROJECTION:%d %d %s\n",
@@ -207,13 +210,13 @@ view->secondary_pj_init,view->secondary_pjptr,data->secondary_grid_projection_id
 		/* quit if projection fails */
 		if (proj_status != MB_SUCCESS)
 			{
-			mb_error(verbose,error,&message);
+			mb_error(verbose,*error,&message);
 			fprintf(stderr,"\nMBIO Error initializing projection:\n%s\n",
 				message);
 			fprintf(stderr,"\nProgram terminated in <%s>\n",
 				function_name);
 			mb_memory_clear(mbv_verbose, &error);
-			exit(error);
+			exit(*error);
 			}
 		}
 		
