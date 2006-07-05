@@ -26,7 +26,7 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
-Version 5.1.0beta      June 21, 2006
+Version 5.1.0beta      July 5, 2006
 Version 5.0.9          February 20, 2006
 Version 5.0.8          February 8, 2006
 Version 5.0.8beta5     February 3, 2006
@@ -199,6 +199,11 @@ Updated manual page for mbm_route2mission.
 
 A bug in mbgrdtiff has been fixed that mislocated the geoTIFF
 images by 1/2 pixel, thanks to Gordon Keith.
+
+The plotting macros mbm_plot, mbm_grdplot, mbm_xyplot, 
+mbm_3dgrdplot, and mbm_histplot all now use the current
+GMT default parameter PLOT_DEGREE_FORMAT rather than
+the old DEGREE_FORMAT.
 
 
 MB-SYSTEM VERSION 5.0.9 RELEASE NOTES:
@@ -1271,10 +1276,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.81 2006-06-22 04:45:42 caress Exp $
+RCS ID: $Id: README,v 5.82 2006-07-05 19:50:21 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.81  2006/06/22 04:45:42  caress
+Working towards 5.1.0
+
 Revision 5.80  2006/06/16 19:24:47  caress
 Check in after the Santa Monica Basin Mapping AUV Expedition.
 

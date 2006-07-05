@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_plot.c	9/26/2003
- *    $Id: mbview_plot.c,v 5.8 2006-06-16 19:30:58 caress Exp $
+ *    $Id: mbview_plot.c,v 5.9 2006-07-05 19:50:21 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  *		begun on October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2006/06/16 19:30:58  caress
+ * Check in after the Santa Monica Basin Mapping AUV Expedition.
+ *
  * Revision 5.7  2006/01/24 19:21:32  caress
  * Version 5.0.8 beta.
  *
@@ -95,7 +98,7 @@ static Cardinal 	ac;
 static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_plot.c,v 5.8 2006-06-16 19:30:58 caress Exp $";
+static char rcs_id[]="$Id: mbview_plot.c,v 5.9 2006-07-05 19:50:21 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_reset_glx(int instance)
@@ -988,7 +991,15 @@ fprintf(stderr,"     data->pick_type:  %d\n",data->pick_type);*/
 	
 
 	/* get bounds of grid seen in current view */
-	if (view->viewboundscount >= MBV_BOUNDSFREQUENCY)
+	if (rez == MBV_REZ_FULL
+		&& data->display_mode == MBV_DISPLAY_3D)
+		{
+		data->viewbounds[0] = 0;
+		data->viewbounds[1] = data->primary_nx - 1;
+		data->viewbounds[2] = 0;
+		data->viewbounds[3] = data->primary_ny - 1;
+		}
+	else if (view->viewboundscount >= MBV_BOUNDSFREQUENCY)
 		{
 		mbview_viewbounds(instance);
 		view->viewboundscount = 0;

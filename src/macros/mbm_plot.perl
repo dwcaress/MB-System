@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_plot.perl	6/18/93
-#    $Id: mbm_plot.perl,v 5.20 2006-06-16 19:30:58 caress Exp $
+#    $Id: mbm_plot.perl,v 5.21 2006-07-05 19:50:21 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 2000, 2003, 2005 by 
 #    D. W. Caress (caress@mbari.org)
@@ -72,10 +72,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   June 17, 1993
 #
 # Version:
-#   $Id: mbm_plot.perl,v 5.20 2006-06-16 19:30:58 caress Exp $
+#   $Id: mbm_plot.perl,v 5.21 2006-07-05 19:50:21 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.20  2006/06/16 19:30:58  caress
+#   Check in after the Santa Monica Basin Mapping AUV Expedition.
+#
 #   Revision 5.19  2006/01/20 17:39:15  caress
 #   Working towards 5.0.8
 #
@@ -1981,8 +1984,17 @@ $gmt_def = "COLOR_FOREGROUND/255/255/255";
 push(@gmt_macro_defs, $gmt_def);
 $gmt_def = "COLOR_NAN/255/255/255";
 push(@gmt_macro_defs, $gmt_def);
-$gmt_def = "DEGREE_FORMAT/3";
-push(@gmt_macro_defs, $gmt_def);
+if ($gmt_version eq "3.0"
+	|| $gmt_version eq "3.1")
+	{
+	$gmt_def = "DEGREE_FORMAT/3";
+	push(@gmt_macro_defs, $gmt_def);
+	}
+else
+	{
+	$gmt_def = "PLOT_DEGREE_FORMAT/ddd:mm";
+	push(@gmt_macro_defs, $gmt_def);
+	}
 
 # set shade control if not set by user
 if (!$shade_control && $color_mode == 3 && !stretch_shade)
