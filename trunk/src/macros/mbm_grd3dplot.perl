@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grd3dplot.perl	8/6/95
-#    $Id: mbm_grd3dplot.perl,v 5.15 2006-01-20 17:39:15 caress Exp $
+#    $Id: mbm_grd3dplot.perl,v 5.16 2006-07-05 19:50:21 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 2000, 2003 by 
 #    D. W. Caress (caress@mbari.org)
@@ -63,10 +63,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   August 8, 1994
 #
 # Version:
-#   $Id: mbm_grd3dplot.perl,v 5.15 2006-01-20 17:39:15 caress Exp $
+#   $Id: mbm_grd3dplot.perl,v 5.16 2006-07-05 19:50:21 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.15  2006/01/20 17:39:15  caress
+#   Working towards 5.0.8
+#
 #   Revision 5.14  2006/01/18 15:09:27  caress
 #   Now parses grdinfo output from GMT 4.1.
 #
@@ -1593,8 +1596,17 @@ $gmt_def = "COLOR_FOREGROUND/255/255/255";
 push(@gmt_macro_defs, $gmt_def);
 $gmt_def = "COLOR_NAN/255/255/255";
 push(@gmt_macro_defs, $gmt_def);
-$gmt_def = "DEGREE_FORMAT/3";
-push(@gmt_macro_defs, $gmt_def);
+if ($gmt_version eq "3.0"
+	|| $gmt_version eq "3.1")
+	{
+	$gmt_def = "DEGREE_FORMAT/3";
+	push(@gmt_macro_defs, $gmt_def);
+	}
+else
+	{
+	$gmt_def = "PLOT_DEGREE_FORMAT/ddd:mm";
+	push(@gmt_macro_defs, $gmt_def);
+	}
 
 # open the shellscript file
 if (!open(FCMD,">$cmdfile"))

@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grdplot.perl	8/6/95
-#    $Id: mbm_grdplot.perl,v 5.21 2006-06-22 04:45:42 caress Exp $
+#    $Id: mbm_grdplot.perl,v 5.22 2006-07-05 19:50:21 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 2000, 2003 by 
 #    D. W. Caress (caress@mbari.org)
@@ -68,10 +68,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   October 19, 1994
 #
 # Version:
-#   $Id: mbm_grdplot.perl,v 5.21 2006-06-22 04:45:42 caress Exp $
+#   $Id: mbm_grdplot.perl,v 5.22 2006-07-05 19:50:21 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.21  2006/06/22 04:45:42  caress
+#   Working towards 5.1.0
+#
 #   Revision 5.20  2006/06/16 19:30:58  caress
 #   Check in after the Santa Monica Basin Mapping AUV Expedition.
 #
@@ -1734,8 +1737,7 @@ if ($gmt_version eq "3.0"
 else
 	{
 	# If + is added then the media is EPS
-	# $gmt_def = "PAPER_MEDIA/$page_gmt_name{$pagesize}+";
-	$gmt_def = "PAPER_MEDIA/$page_gmt_name{$pagesize}";
+	$gmt_def = "PAPER_MEDIA/$page_gmt_name{$pagesize}+";
 	push(@gmt_macro_defs, $gmt_def);
 	}
 $gmt_def = "ANOT_FONT/Helvetica";
@@ -1762,8 +1764,17 @@ $gmt_def = "COLOR_FOREGROUND/255/255/255";
 push(@gmt_macro_defs, $gmt_def);
 $gmt_def = "COLOR_NAN/255/255/255";
 push(@gmt_macro_defs, $gmt_def);
-$gmt_def = "DEGREE_FORMAT/3";
-push(@gmt_macro_defs, $gmt_def);
+if ($gmt_version eq "3.0"
+	|| $gmt_version eq "3.1")
+	{
+	$gmt_def = "DEGREE_FORMAT/3";
+	push(@gmt_macro_defs, $gmt_def);
+	}
+else
+	{
+	$gmt_def = "PLOT_DEGREE_FORMAT/ddd:mm";
+	push(@gmt_macro_defs, $gmt_def);
+	}
 
 # open the shellscript file
 if (!open(FCMD,">$cmdfile"))
@@ -2319,7 +2330,7 @@ else
 	{
 	# figure out some reasonable tick intervals for the basemap
 	&GetBaseTick;
-	$axes = "$base_tick_x/$base_tick_y:.\"$tlabel\":WESn";
+	$axes = "$base_tick_x/$base_tick_y:.\"$tlabel\":";
 	}
 
 # do coastline plots

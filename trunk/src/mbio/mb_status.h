@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbio_status.h	2/1/93
- *    $Id: mb_status.h,v 5.71 2006-06-22 04:45:42 caress Exp $
+ *    $Id: mb_status.h,v 5.72 2006-07-05 19:50:21 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003, 2004, 2005 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.71  2006/06/22 04:45:42  caress
+ * Working towards 5.1.0
+ *
  * Revision 5.70  2006/06/16 19:30:58  caress
  * Check in after the Santa Monica Basin Mapping AUV Expedition.
  *
@@ -325,7 +328,7 @@
 
 /* MB-system version id */
 #define	MB_VERSION	"5.1.0beta"
-#define	MB_BUILD_DATE	"June 21, 2006"
+#define	MB_BUILD_DATE	"July 5, 2006"
 
 /* MBIO function boolean convention */
 #define	MB_YES	1

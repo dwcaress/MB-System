@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_xyplot.perl	8/6/95
-#    $Id: mbm_xyplot.perl,v 5.12 2006-06-16 19:30:58 caress Exp $
+#    $Id: mbm_xyplot.perl,v 5.13 2006-07-05 19:50:21 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 2000, 2003 by 
 #    D. W. Caress (caress@mbari.org)
@@ -56,10 +56,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   August 9, 1995
 #
 # Version:
-#   $Id: mbm_xyplot.perl,v 5.12 2006-06-16 19:30:58 caress Exp $
+#   $Id: mbm_xyplot.perl,v 5.13 2006-07-05 19:50:21 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.12  2006/06/16 19:30:58  caress
+#   Check in after the Santa Monica Basin Mapping AUV Expedition.
+#
 #   Revision 5.11  2006/01/06 18:26:26  caress
 #   Working towards 5.0.8
 #
@@ -1145,8 +1148,17 @@ $gmt_def = "COLOR_FOREGROUND/255/255/255";
 push(@gmt_macro_defs, $gmt_def);
 $gmt_def = "COLOR_NAN/255/255/255";
 push(@gmt_macro_defs, $gmt_def);
-$gmt_def = "DEGREE_FORMAT/3";
-push(@gmt_macro_defs, $gmt_def);
+if ($gmt_version eq "3.0"
+	|| $gmt_version eq "3.1")
+	{
+	$gmt_def = "DEGREE_FORMAT/3";
+	push(@gmt_macro_defs, $gmt_def);
+	}
+else
+	{
+	$gmt_def = "PLOT_DEGREE_FORMAT/ddd:mm";
+	push(@gmt_macro_defs, $gmt_def);
+	}
 
 # open the shellscript file
 if (!open(FCMD,">$cmdfile"))
