@@ -9,9 +9,9 @@
  *
  * Restrictions/Limitations :
  * 1) This library assumes the host computer uses the ASCII character set.
- * 2) This library assumes that the data types u_short and u_long are defined
+ * 2) This library assumes that the data types u_short and u_int are defined
  *    on the host machine, where a u_short is a 16 bit unsigned integer, and
- *    a u_long is a 32 bit unsigned integer.
+ *    a u_int is a 32 bit unsigned integer.
  * 3) This library assumes that the type short is at least 16 bits, and that
  *    the type int is at least 32 bits.
  * 4) This library assumes that the Posix compliant functions getpid() and
@@ -58,6 +58,10 @@
  *                 record should never contain more than sixty seconds worth of
  *                 data.
  * jsb  01/15/02  Update for Windows.
+ * bac  06/28/06  Added J.Depner updates to support a progress callback when
+ *                 writing to the index file, as an alternative to the
+ *                 DISPLAY_SPINNER printouts.  Replaced references to long types
+ *                 with int types, for compilation on 64-bit architectures.
  *
  *
  * Classification : Unclassified
@@ -97,6 +101,49 @@ static void close_temp_file(int, FILE *);
 static int gsfCreateIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft);
 static int gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft);
 
+
+
+
+/* JCD: Variables and functions for the index progress callback */
+
+static  GSF_PROGRESS_CALLBACK  gsf_progress_callback = NULL;
+/********************************************************************
+ *
+ * Function Name : gsf_register_progress_callback
+ *
+ * Description : This function registers a callback function, defined
+ *                by the user, to be called to report the progress
+ *                of the index file creation.  If no progress
+ *                callback is registered, status is printed to stdout
+ *                if the DISPLAY_SPINNER macro is defined.
+ *
+ * Inputs :
+ *  progressCB = Name of progress callback function to call when
+ *               creating the GSF index file.  The progress callback
+ *               will accept two integer arguments, and this function
+ *               will be called whenever the percent complete changes.
+ *               The first argument will be one of the following three
+ *               values, to represent the state of the progress:
+ *                  1 = Reading GSF file
+ *                  2 = Creating new index file
+ *                  3 = Appending to existing index file
+ *               The second argument contains the percent complete
+ *               of the current state.
+ *
+ * Returns :
+ *  None
+ *
+ * Error Conditions :
+ *  None
+ *
+ ********************************************************************/
+void gsf_register_progress_callback (GSF_PROGRESS_CALLBACK progressCB)
+{
+    gsf_progress_callback = progressCB;
+}
+
+
+
 /********************************************************************
  *
  * Function Name : gsfOpenIndex
@@ -112,7 +159,7 @@ static int gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *
  *      Type      Description
  *      ----      -----------
  *      char[16]  Text header containing "INDEX-GSF-"<"version">
- *      long      The size of the gsf file when the index file was created.
+ *      int       The size of the gsf file when the index file was created.
  *      int       Endian indicator (0x00010203 or 0x03020100 depending
  *                upon sex of machine, if 0x03020100 then the index
  *                data must be byte swapped).
@@ -121,7 +168,7 @@ static int gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *
  *
  *
  *      int       Record ID of first record type.
- *      long      Address within the index file of the beginning of
+ *      int       Address within the index file of the beginning of
  *                the index for the first record type.
  *      int       Number of index records for the first record type.
  *      .
@@ -129,7 +176,7 @@ static int gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *
  *      .
  *      .
  *      int       Record ID of last record type.
- *      long      Address within the index file of the beginning of
+ *      int       Address within the index file of the beginning of
  *                the index for the last record type.
  *      int       Number of index records for the last record type.
  *
@@ -138,8 +185,8 @@ static int gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *
  *  is :
  *
  *      time_t    Posix.4 proposed time seconds.
- *      long      Posix.4 proposed time nanoseconds.
- *      long      Address of the associated record within the gsf file for the
+ *      int       Posix.4 proposed time nanoseconds.
+ *      int       Address of the associated record within the gsf file for the
  *                specified record type.
  *      .
  *      .
@@ -251,7 +298,7 @@ gsfOpenIndex(const char *filename, int handle, GSF_FILE_TABLE *ft)
      */
     if (ft->index_data.swap)
     {
-        SwapLong((unsigned long *) &index_header.gsfFileSize, 1);
+        SwapLong((unsigned int *) &index_header.gsfFileSize, 1);
     }
 
 
@@ -287,7 +334,7 @@ gsfOpenIndex(const char *filename, int handle, GSF_FILE_TABLE *ft)
     fread(&index_header.number_record_types, 4, 1, ft->index_data.fp);
     if (ft->index_data.swap)
     {
-        SwapLong((unsigned long *) &index_header.number_record_types, 1);
+        SwapLong((unsigned int *) &index_header.number_record_types, 1);
     }
     ft->index_data.number_of_types = index_header.number_record_types;
 
@@ -313,7 +360,7 @@ gsfOpenIndex(const char *filename, int handle, GSF_FILE_TABLE *ft)
         fread(&j, 4, 1, ft->index_data.fp);
         if (ft->index_data.swap)
         {
-            SwapLong((unsigned long *) &j, 1);
+            SwapLong((unsigned int *) &j, 1);
         }
 
         /*  This is not really necessary but it makes things easier to code.
@@ -329,8 +376,8 @@ gsfOpenIndex(const char *filename, int handle, GSF_FILE_TABLE *ft)
 
         if (ft->index_data.swap)
         {
-            SwapLong((unsigned long *) &ft->index_data.start_addr[j], 1);
-            SwapLong((unsigned long *) &ft->index_data.number_of_records[j], 1);
+            SwapLong((unsigned int *) &ft->index_data.start_addr[j], 1);
+            SwapLong((unsigned int *) &ft->index_data.number_of_records[j], 1);
         }
     }
 
@@ -356,9 +403,9 @@ gsfOpenIndex(const char *filename, int handle, GSF_FILE_TABLE *ft)
                 ft->index_data.fp);
             if (ft->index_data.swap)
             {
-                SwapLong((unsigned long *) &ft->index_data.scale_factor_addr[i].sec, 1);
-                SwapLong((unsigned long *) &ft->index_data.scale_factor_addr[i].nsec, 1);
-                SwapLong((unsigned long *) &ft->index_data.scale_factor_addr[i].addr, 1);
+                SwapLong((unsigned int *) &ft->index_data.scale_factor_addr[i].sec, 1);
+                SwapLong((unsigned int *) &ft->index_data.scale_factor_addr[i].nsec, 1);
+                SwapLong((unsigned int *) &ft->index_data.scale_factor_addr[i].addr, 1);
             }
         }
     }
@@ -396,9 +443,9 @@ gsfCreateIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
     int              old_percent;
     int              total_recs;
     int              count;
-    long             endian = 0x00010203;
-    long             eof;
-    long             current;
+    int              endian = 0x00010203;
+    int              eof;
+    int              current;
     FILE            *temp[NUM_REC_TYPES];
     gsfDataID        data_id;
     gsfRecords       records;
@@ -736,7 +783,6 @@ gsfCreateIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
                     break;
             }
 
-#ifdef DISPLAY_SPINNER
             /*  Print the percent spinner to stdout.    */
             if ((current = ftell(ft->fp)) == -1 )
             {
@@ -744,13 +790,24 @@ gsfCreateIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
                 return (-1);
             }
             percent = ((double) current  / (double) eof) * 100.0;
+
             if (old_percent != percent)
             {
-                printf("Reading GSF file - %03d%% complete\r", percent);
-                fflush(stdout);
+                /*  JCD: now calls a callback if it is registered.  */
+
+                if (gsf_progress_callback)
+                  {
+                    (*gsf_progress_callback) (1, percent);
+                  }
+#ifdef DISPLAY_SPINNER
+                else
+                  {
+                    printf("Reading GSF file - %03d%% complete\r", percent);
+                    fflush(stdout);
+                  }
+#endif
                 old_percent = percent;
             }
-#endif
         }
         else
         {
@@ -830,16 +887,25 @@ gsfCreateIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
 
                 count++;
 
-#ifdef DISPLAY_SPINNER
                 /*  Print the percent spinner to stdout.  */
                 percent = ((float) (count) / (float) total_recs) * 100.0;
                 if (old_percent != percent)
                 {
-                    printf("Writing index file - %03d%% complete\r", percent);
-                    fflush(stdout);
+                    /*  JCD: now calls a callback if it is registered.  */
+
+                    if (gsf_progress_callback)
+                      {
+                        (*gsf_progress_callback) (2, percent);
+                      }
+#ifdef DISPLAY_SPINNER
+                    else
+                      {
+                        printf("Writing index file - %03d%% complete\r", percent);
+                        fflush(stdout);
+                      }
+#endif
                     old_percent = percent;
                 }
-#endif
             }
 
             /*  Move to the beginning of the final file and write the
@@ -899,7 +965,7 @@ gsfCreateIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
     ft->index_data.swap = 0;
 
 #ifdef DISPLAY_SPINNER
-    printf("                                            \r");
+    if (!gsf_progress_callback) printf("                                            \r");
 #endif
     return (0);
 }
@@ -935,11 +1001,11 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
     int              last_record_number;
     int              percent;
     int              old_percent;
-    long             last_index=0;
-    long             eof;
-    long             current;
-    long             endian = 0x00010203;
-    long             l_temp;
+    int              last_index=0;
+    int              eof;
+    int              current;
+    int              endian = 0x00010203;
+    int              l_temp;
     FILE            *temp[NUM_REC_TYPES];
     gsfDataID        data_id;
     gsfRecords       records;
@@ -960,7 +1026,7 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
     fread(&index_header.number_record_types, 4, 1, ft->index_data.fp);
     if (ft->index_data.swap)
     {
-        SwapLong((unsigned long *) &index_header.number_record_types, 1);
+        SwapLong((unsigned int *) &index_header.number_record_types, 1);
     }
     ft->index_data.number_of_types = index_header.number_record_types;
 
@@ -986,7 +1052,7 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
         fread(&j, 4, 1, ft->index_data.fp);
         if (ft->index_data.swap)
         {
-            SwapLong((unsigned long *) &j, 1);
+            SwapLong((unsigned int *) &j, 1);
         }
 
         /*  This is not really necessary but it makes things easier to code.
@@ -1002,8 +1068,8 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
 
         if (ft->index_data.swap)
         {
-            SwapLong((unsigned long *) &ft->index_data.start_addr[j], 1);
-            SwapLong((unsigned long *) &ft->index_data.number_of_records[j], 1);
+            SwapLong((unsigned int *) &ft->index_data.start_addr[j], 1);
+            SwapLong((unsigned int *) &ft->index_data.number_of_records[j], 1);
         }
     }
 
@@ -1022,9 +1088,9 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
                 fread(&index_rec, sizeof(INDEX_REC), 1, ft->index_data.fp);
                 if (ft->index_data.swap)
                 {
-                    SwapLong((unsigned long *) &index_rec.sec,  1);
-                    SwapLong((unsigned long *) &index_rec.nsec, 1);
-                    SwapLong((unsigned long *) &index_rec.addr, 1);
+                    SwapLong((unsigned int *) &index_rec.sec,  1);
+                    SwapLong((unsigned int *) &index_rec.nsec, 1);
+                    SwapLong((unsigned int *) &index_rec.addr, 1);
                 }
                 if (temp[i] == NULL)
                 {
@@ -1070,9 +1136,9 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
                 ft->index_data.fp);
             if (ft->index_data.swap)
             {
-                SwapLong((unsigned long *) &ft->index_data.scale_factor_addr[i].sec, 1);
-                SwapLong((unsigned long *) &ft->index_data.scale_factor_addr[i].nsec, 1);
-                SwapLong((unsigned long *) &ft->index_data.scale_factor_addr[i].addr, 1);
+                SwapLong((unsigned int *) &ft->index_data.scale_factor_addr[i].sec, 1);
+                SwapLong((unsigned int *) &ft->index_data.scale_factor_addr[i].nsec, 1);
+                SwapLong((unsigned int *) &ft->index_data.scale_factor_addr[i].addr, 1);
             }
         }
     }
@@ -1394,8 +1460,7 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
                     break;
             }
 
-#ifdef DISPLAY_SPINNER
-            /*  Print the percent spinner to stdout.    */
+            /*  Print the percent spinner to stdout.  */
             if ((current = ftell(ft->fp)) == -1 )
             {
                 gsfError = GSF_FILE_TELL_ERROR;
@@ -1403,12 +1468,22 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
             }
             percent = ((double) current  / (double) eof) * 100.0;
             if (old_percent != percent)
-            {
-                printf("Reading GSF file - %03d%% complete\r", percent);
-                fflush(stdout);
-                old_percent = percent;
-            }
+              {
+                /*  JCD: now calls a callback if it is registered.  */
+
+                if (gsf_progress_callback)
+                  {
+                    (*gsf_progress_callback) (3, percent);
+                  }
+#ifdef DISPLAY_SPINNER
+                else
+                  {
+                    printf("Writing index file - %03d%% complete\r", percent);
+                    fflush(stdout);
+                  }
 #endif
+                old_percent = percent;
+              }
         }
         else
         {
@@ -1441,7 +1516,7 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
     l_temp = ft->file_size;
     if (ft->index_data.swap)
     {
-        SwapLong((unsigned long *) &l_temp, 1);
+        SwapLong((unsigned int *) &l_temp, 1);
     }
     fwrite(&l_temp, 4, 1, ft->index_data.fp);
 
@@ -1449,14 +1524,14 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
     l_temp = endian;
     if (ft->index_data.swap)
     {
-        SwapLong((unsigned long *) &l_temp, 1);
+        SwapLong((unsigned int *) &l_temp, 1);
     }
     fwrite(&l_temp, 4, 1, ft->index_data.fp);
 
     l_temp = index_header.number_record_types;
     if (ft->index_data.swap)
     {
-        SwapLong((unsigned long *) &l_temp, 1);
+        SwapLong((unsigned int *) &l_temp, 1);
     }
     fwrite(&l_temp, 4, 1, ft->index_data.fp);
 
@@ -1500,7 +1575,7 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
             {
                 if (ft->index_data.swap)
                 {
-                    SwapLong((unsigned long *) &index_rec, 3);
+                    SwapLong((unsigned int *) &index_rec, 3);
                 }
                 fwrite(&index_rec, sizeof(INDEX_REC), 1, ft->index_data.fp);
             }
@@ -1519,21 +1594,21 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
             l_temp = ft->index_data.record_type[i];
             if (ft->index_data.swap)
             {
-                SwapLong((unsigned long *) &l_temp, 1);
+                SwapLong((unsigned int *) &l_temp, 1);
             }
             fwrite(&l_temp, 4, 1, ft->index_data.fp);
 
             l_temp = ft->index_data.start_addr[i];
             if (ft->index_data.swap)
             {
-                SwapLong((unsigned long *) &l_temp, 1);
+                SwapLong((unsigned int *) &l_temp, 1);
             }
             fwrite(&l_temp, 4, 1, ft->index_data.fp);
 
             l_temp = ft->index_data.number_of_records[i];
             if (ft->index_data.swap)
             {
-                SwapLong((unsigned long *) &l_temp, 1);
+                SwapLong((unsigned int *) &l_temp, 1);
             }
             fwrite(&l_temp, 4, 1, ft->index_data.fp);
 
@@ -1580,9 +1655,9 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
                 ft->index_data.fp);
             if (ft->index_data.swap)
             {
-                SwapLong((unsigned long *) &ft->index_data.scale_factor_addr[i].sec, 1);
-                SwapLong((unsigned long *) &ft->index_data.scale_factor_addr[i].nsec, 1);
-                SwapLong((unsigned long *) &ft->index_data.scale_factor_addr[i].addr, 1);
+                SwapLong((unsigned int *) &ft->index_data.scale_factor_addr[i].sec, 1);
+                SwapLong((unsigned int *) &ft->index_data.scale_factor_addr[i].nsec, 1);
+                SwapLong((unsigned int *) &ft->index_data.scale_factor_addr[i].addr, 1);
             }
 
         }
@@ -1597,7 +1672,9 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
      *  ft->index_data.swap = 0;
      */
 
-    printf("                                            \r");
+#ifdef DISPLAY_SPINNER
+    if (!gsf_progress_callback) printf("                                            \r");
+#endif
 
     return(0);
 }
@@ -1756,9 +1833,9 @@ gsfCloseIndex(GSF_FILE_TABLE *ft)
 *                                                                              *
 *   Routines Called:    None                                                   *
 *                                                                              *
-*   Glossary:           longvalue       - the word to be byte-swapped          *
-*                       bytevalue       - bytes within the longword            *
-*                       data            - union of longvalue, bytevalue        *
+*   Glossary:           intvalue        - the word to be byte-swapped          *
+*                       bytevalue       - bytes within the word                *
+*                       data            - union of intvalue, bytevalue         *
 *                       swap_address    - address of word to be swapped        *
 *                       byte0           - temporary storage                    *
 *                       byte1           - temporary storage                    *
@@ -1774,31 +1851,31 @@ gsfCloseIndex(GSF_FILE_TABLE *ft)
 \******************************************************************************/
 
 void
-SwapLong(unsigned long *base_address, long count)
+SwapLong(unsigned int *base_address, int count)
 {
     union
     {
-        unsigned long   longvalue;      /* the longword to swap                */
-        unsigned char   bytevalue[4];   /* bytes within the longword           */
+        unsigned int    intvalue;       /* the word to swap                    */
+        unsigned char   bytevalue[4];   /* bytes within the word               */
     }
     data;
 
     unsigned char   byte0,      /* temporary storage                   */
                     byte1;      /* temporary storage                   */
-    long            i;          /* counter for number of words swapped */
+    int             i;          /* counter for number of words swapped */
 
     for (i = 0; i < count; i++)
     {
         /* Swap the bytes.                                                      */
 
-        data.longvalue = *(base_address + i);
+        data.intvalue = *(base_address + i);
         byte0 = data.bytevalue[0];
         byte1 = data.bytevalue[1];
         data.bytevalue[0] = data.bytevalue[3];
         data.bytevalue[1] = data.bytevalue[2];
         data.bytevalue[2] = byte1;
         data.bytevalue[3] = byte0;
-        *(base_address + i) = data.longvalue;
+        *(base_address + i) = data.intvalue;
     }
     return;
 }

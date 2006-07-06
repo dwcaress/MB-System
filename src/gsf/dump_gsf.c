@@ -39,6 +39,7 @@ extern int gsfError;
 static gsfRecords gsfRec;
 static gsfDataID id;
 static int shortOutput;
+static int pingTimeOutput;
 
 /* function prototypes for this module */
 static void     printMBPing(int rec_number);
@@ -91,13 +92,17 @@ main(int argc, char *argv[])
     /* check the command line arguments */
     if (argc < 3)
     {
-        fprintf(stderr, "Useage: %s [-s] -f <gsf filename> [-s mm/dd/yy hh:mm:ss]\n", argv[0]);
+        fprintf(stderr, "Useage: %s [-s] -f <gsf filename> [-pt] [-t mm/dd/yy hh:mm:ss]\n", argv[0]);
+        fprintf(stderr, "-s: short output a page at a time\n");
+        fprintf(stderr, "-f: for specifying the input file\n");
+        fprintf(stderr, "-pt: short output showing only ping times, all pings printed to stdout\n");
+        fprintf(stderr, "-t: for specifying start time\n");
         exit(0);
     }
 
     for (i=1; i<argc; i++)
     {
-        if ((strcmp(argv[i], "-f") == 0) && (i+1 <= argc))
+        if ((strcmp(argv[i], "-f") == 0) && (i+1 <=argc))
         {
             sscanf(argv[i+1], "%s", gsfFileName);
             break;
@@ -111,9 +116,14 @@ main(int argc, char *argv[])
             shortOutput = 1;
             break;
         }
-        else
+    }
+
+    for (i=1; i<argc; i++)
+    {
+        if ((strcmp(argv[i], "-pt") == 0) && (i+1 <= argc))
         {
-            shortOutput = 0;
+            pingTimeOutput = 1;
+            shortOutput = 1;
             break;
         }
     }
@@ -181,7 +191,7 @@ main(int argc, char *argv[])
         }
 
         record_number++;
-        if ((record_number % 20) == 0)
+        if (((record_number % 20) == 0) && (!pingTimeOutput))
         {
             fprintf(stdout, "Press return to continue, q to quit\n");
             val = fgetc (stdin);
@@ -203,13 +213,17 @@ main(int argc, char *argv[])
                 {
                     t = gmtime(&gsfRec.mb_ping.ping_time.tv_sec);
                     ptr = str + strftime(str, sizeof(str), " %Y/%j %H:%M:%S", t);
-                    ptr += sprintf(ptr,".%02d", (int)(gsfRec.mb_ping.ping_time.tv_nsec/1e7));
+                    ptr += sprintf(ptr,".%03d", (int)(gsfRec.mb_ping.ping_time.tv_nsec/1e6));
                     ptr += sprintf(ptr,"%+11.6f %+11.6f", gsfRec.mb_ping.latitude, gsfRec.mb_ping.longitude);
                     fprintf(stdout, "%05d - Ping at: %s\n", record_number, str);
                 }
                 else
                 {
                     printMBPing(record_number);
+                }
+                if (pingTimeOutput) 
+                {
+                    continue;
                 }
                 break;
 
@@ -291,8 +305,7 @@ static void
 printMBPing(int rec_number)
 {
 
-    char            str[132];
-    char            tstr[80];
+    char            str[512];
     char           *ptr;
     int             i, j;
     int             ret;
@@ -359,6 +372,7 @@ printMBPing(int rec_number)
     if (gsfRec.mb_ping.quality_factor != NULL)
     {
         sprintf(str, "%s  Qualit", str);
+    
     }
     if (gsfRec.mb_ping.receive_heave != NULL)
     {
@@ -370,7 +384,16 @@ printMBPing(int rec_number)
         sprintf(str, "%s BotSmpl", str);  /* index to the bottom detect sample */
         sprintf(str, "%s MaxInt.", str);  /* max intensity value for the beam */
     }
-
+    if (gsfRec.mb_ping.quality_flags != NULL)
+    {
+        sprintf(str, "%s Q Flags", str);
+    
+    }
+    if (gsfRec.mb_ping.beam_flags != NULL)
+    {
+        sprintf(str, "%s B Flags", str);
+    
+    }
     fprintf(stdout, "%s\n", str);
 
     for (i = 0, line = 0; i < gsfRec.mb_ping.number_beams; i++, line++)
@@ -439,7 +462,15 @@ printMBPing(int rec_number)
                     max_intensity_sample = gsfRec.mb_ping.brb_inten->time_series[i].samples[j];
                 }
             }
-            sprintf(str, "%s %07X", str, max_intensity_sample);
+            sprintf(str, "%s %07lX", str, max_intensity_sample);
+        }
+        if (gsfRec.mb_ping.quality_flags != NULL)
+        {
+            sprintf(str, "%s %0.7d", str, gsfRec.mb_ping.quality_flags[i]);
+        }
+        if (gsfRec.mb_ping.beam_flags != NULL)
+        {
+            sprintf(str, "%s %0.7d", str, gsfRec.mb_ping.beam_flags[i]);
         }
         fprintf(stdout, "%s\n", str);
         if (line > 20)
