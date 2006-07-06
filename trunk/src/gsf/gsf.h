@@ -15,17 +15,6 @@
  * Not (yet!) supported on a machine with 64 bit architecture.
  ******
  *
- ********************************************************************
- * NONSTANDARD CHANGE FOR MB-SYSTEM!!!!
- * MB-System Modification
- *  Changed declaration of struct timespec to struct gsfTimespec to 
- *  avoid checking for timespec declaration.
- * This is a change from the standard GSF distribution!!!
- *  David W. Caress
- *  April 8, 2002 *
- ********************************************************************
- *
- *
  * Change Descriptions :
  * who when      what
  * --- ----      ----
@@ -112,6 +101,10 @@
  *               singlebeam subrecord IDs to be less than 256, as previous version did not save
  *               these sensors IDs correctly.  Added beam spacing to Reson 8100 sensor-specific
  *               subrecord.  Added definitions for RTG position types in gsfHVNavigationError record.
+ * bac 06-28-06  Added sensor ID for EM121A data received via Kongsberg SIS, mapped to existing
+ *               EM3 series sensor specific data structure.  Added __APPLE__ macro definition to
+ *               support compile switch steering around definition of struct timespec on MAC OSX.
+ *               Changed structure elements of type long to int, for compilation on 64-bit architectures.
  *
  *
  * Classification : Unclassified
@@ -148,7 +141,7 @@ extern          "C"
 #endif
 
 /* Define this version of the GSF library */
-#define GSF_VERSION       "GSF-v02.03"
+#define GSF_VERSION       "GSF-v02.04"
 
 /* Define largest ever expected record size */
 #define GSF_MAX_RECORD_SIZE    262144
@@ -290,6 +283,7 @@ gsfDataID;
 #define GSF_SWATH_BATHY_SUBRECORD_EM3002_SPECIFIC           (unsigned)129
 #define GSF_SWATH_BATHY_SUBRECORD_EM3000D_SPECIFIC          (unsigned)130
 #define GSF_SWATH_BATHY_SUBRECORD_EM3002D_SPECIFIC          (unsigned)131
+#define GSF_SWATH_BATHY_SUBRECORD_EM121A_SIS_SPECIFIC       (unsigned)132
 
 #define GSF_SINGLE_BEAM_SUBRECORD_UNKNOWN                   (unsigned)  0
 #define GSF_SINGLE_BEAM_SUBRECORD_ECHOTRAC_SPECIFIC         (unsigned)201
@@ -340,32 +334,26 @@ gsfDataID;
 #define GSF_NULL_ALONG_TRACK_ERROR     0.0
 #define GSF_NULL_NAV_POS_ERROR         0.0
 
-/* MB-System Modification
-    Changed declaration of struct timespec to struct gsfTimespec to 
-    avoid checking for timespec declaration.
-    David W. Caress
-    April 8, 2002 */
-    struct gsfTimespec
-    {
-        time_t          tv_sec;
-        long            tv_nsec;
-    };
-
 /* define Posix.4 proposed structure for internal storage of time */
-/*
 #if (!defined (_STRUCT_TIMESPEC_) && !defined (_TIMESPEC_T) && !defined (_STRUCT_TIMESPEC) && !defined (_SYS_TIMESPEC_H) && !defined (__timespec_defined))
 #define _STRUCT_TIMESPEC_
 #define _TIMESPEC_T
 #define _STRUCT_TIMESPEC
 #define _SYS_TIMESPEC_H
 #define __timespec_defined
+/* MAC OSX is a different bird, and while doesn't have the structures defined */
+/* above, does have the timespec structure defined. __APPLE__ will be set when  */
+/* compiled with Apple's gcc on OSX and other third party compilers, so we use it to */
+/* insure the definition below does not conflict. */
+ #ifndef __APPLE__
+
     struct timespec
     {
         time_t          tv_sec;
         long            tv_nsec;
     };
+ #endif
 #endif
-*/
 
 /* Define a structure for the gsf header record */
 #define GSF_VERSION_SIZE 12
@@ -378,8 +366,8 @@ gsfHeader;
 /* Define the data structure for the swath bathymety summary record */
 typedef struct t_gsfSwathBathySummary
 {
-    struct gsfTimespec start_time;
-    struct gsfTimespec end_time;
+    struct timespec start_time;
+    struct timespec end_time;
     double          min_latitude;
     double          min_longitude;
     double          max_latitude;
@@ -629,7 +617,7 @@ t_gsfElacMkIISpecific;
 typedef struct t_gsfEM3RunTime
 {
     int             model_number;               /* from the run-time parameter datagram */
-    struct gsfTimespec dg_time;                    /* from the run-time parameter datagram */
+    struct timespec dg_time;                    /* from the run-time parameter datagram */
     int             ping_number;                /* sequential counter 0 - 65535 */
     int             serial_number;              /* The sonar head serial number */
     int             system_status;              /* normally = 0 */
@@ -812,7 +800,7 @@ typedef union t_gsfSensorSpecific
     t_gsfSeaBat8101Specific   gsfSeaBat8101Specific;
     t_gsfSeaBeam2112Specific  gsfSeaBeam2112Specific;
     t_gsfElacMkIISpecific     gsfElacMkIISpecific;
-    t_gsfEM3Specific          gsfEM3Specific;          /* used for EM120, EM300, EM1002, EM3000 */
+    t_gsfEM3Specific          gsfEM3Specific;          /* used for EM120, EM300, EM1002, EM3000, EM3002, and EM121A_SIS */
     t_gsfReson8100Specific    gsfReson8100Specific;
 
         /* Single beam sensors added */
@@ -971,7 +959,7 @@ typedef struct gsfTimeSeriesIntensity
     unsigned short sample_count;       /* number of amplitude samples ber beam */
     unsigned short detect_sample;      /* index of bottom detection sample for the beam */
     unsigned char  spare[8];           /* for future use */
-    unsigned long *samples;            /* Array of per-beam time series intensity samples  */
+    unsigned int  *samples;            /* Array of per-beam time series intensity samples  */
 } gsfTimeSeriesIntensity;
 
 #define GSF_INTENSITY_LINEAR     (unsigned)0x01
@@ -982,7 +970,7 @@ typedef struct gsfTimeSeriesIntensity
 typedef struct t_gsfBRBIntensity
 {
     unsigned char           bits_per_sample;       /* bits per intensity sample */
-    unsigned long           applied_corrections;   /* flags to describe corrections applied to intensity values */
+    unsigned int            applied_corrections;   /* flags to describe corrections applied to intensity values */
     unsigned char           spare[16];             /* spare header space */
     gsfSensorImagery        sensor_imagery;        /* sensor specific per-ping imagery information */
     gsfTimeSeriesIntensity *time_series;           /* array of per-beam time series intenstites records */
@@ -991,7 +979,7 @@ typedef struct t_gsfBRBIntensity
 /* Define the data structure for a ping from a swath bathymetric system */
 typedef struct t_gsfSwathBathyPing
 {
-    struct gsfTimespec    ping_time;          /* seconds and nanoseconds */
+    struct timespec    ping_time;          /* seconds and nanoseconds */
     double             latitude;           /* in degrees */
     double             longitude;          /* in degrees */
     short              number_beams;       /* in this ping */
@@ -1036,7 +1024,7 @@ gsfSwathBathyPing;
 /* Define a single beam record structure. */
 typedef struct t_gsfSingleBeamPing
 {
-    struct gsfTimespec ping_time;          /* Time the sounding was made */
+    struct timespec ping_time;          /* Time the sounding was made */
     double          latitude;           /* latitude (degrees) of sounding */
     double          longitude;          /* longitude (degrees) of sounding */
     double          tide_corrector;     /* in meters */
@@ -1056,8 +1044,8 @@ gsfSingleBeamPing;
 /* Define the sound velocity profile structure */
 typedef struct t_gsfSVP
 {
-    struct gsfTimespec observation_time;   /* time the SVP measurement was made            */
-    struct gsfTimespec application_time;   /* time the SVP was used by the sonar           */
+    struct timespec observation_time;   /* time the SVP measurement was made            */
+    struct timespec application_time;   /* time the SVP was used by the sonar           */
     double          latitude;           /* latitude (degrees) of SVP measurement        */
     double          longitude;          /* longitude (degrees) of SVP measurement       */
     int             number_points;      /* number of data points in the profile         */
@@ -1070,7 +1058,7 @@ gsfSVP;
 #define GSF_MAX_PROCESSING_PARAMETERS 128
 typedef struct t_gsfProcessingParameters
 {
-    struct gsfTimespec param_time;
+    struct timespec param_time;
     int             number_parameters;
     short           param_size[GSF_MAX_PROCESSING_PARAMETERS];  /* array of sizes of param text */
     char           *param[GSF_MAX_PROCESSING_PARAMETERS];       /* array of parameters: "param_name=param_value" */
@@ -1081,7 +1069,7 @@ gsfProcessingParameters;
 #define GSF_MAX_SENSOR_PARAMETERS 128
 typedef struct t_gsfSensorParameters
 {
-    struct gsfTimespec param_time;
+    struct timespec param_time;
     int             number_parameters;
     short           param_size[GSF_MAX_SENSOR_PARAMETERS];      /* array of sizes of param text */
     char           *param[GSF_MAX_SENSOR_PARAMETERS];   /* array of parameters: "param_name=param_value" */
@@ -1091,7 +1079,7 @@ gsfSensorParameters;
 /* Define the comment record structure */
 typedef struct t_gsfComment
 {
-    struct gsfTimespec comment_time;
+    struct timespec comment_time;
     int             comment_length;
     char           *comment;
 }
@@ -1102,7 +1090,7 @@ gsfComment;
 #define GSF_HOST_NAME_LENGTH 64
 typedef struct t_gsfHistory
 {
-    struct gsfTimespec history_time;
+    struct timespec history_time;
     char            host_name[GSF_HOST_NAME_LENGTH + 1];
     char            operator_name[GSF_OPERATOR_LENGTH + 1];
     char           *command_line;
@@ -1117,7 +1105,7 @@ gsfHistory;
  */
 typedef struct t_gsfNavigationError
 {
-    struct gsfTimespec nav_error_time;
+    struct timespec nav_error_time;
     int             record_id;          /* Containing nav with these errors */
     double          latitude_error;     /* 90% CE in meters */
     double          longitude_error;    /* 90% CE in meters */
@@ -1130,7 +1118,7 @@ gsfNavigationError;
  */
 typedef struct t_gsfHVNavigationError
 {
-    struct gsfTimespec nav_error_time;
+    struct timespec nav_error_time;
     int             record_id;                 /* Containing nav with these errors */
     double          horizontal_error;          /* RMS error in meters */
     double          vertical_error;            /* RMS error in meters */
@@ -1155,7 +1143,7 @@ gsfHVNavigationError;
 typedef struct t_gsfAttitude
 {
     short            num_measurements;      /* number of attitude measurements in this record */
-    struct gsfTimespec *attitude_time;         /* seconds and nanoseconds */
+    struct timespec *attitude_time;         /* seconds and nanoseconds */
     double          *pitch;                 /* in degrees */
     double          *roll;                  /* in degrees */
     double          *heave;                 /* in meters */

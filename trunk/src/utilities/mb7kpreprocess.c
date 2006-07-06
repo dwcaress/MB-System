@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb7kpreprocess.c	10/12/2005
- *    $Id: mb7kpreprocess.c,v 5.6 2006-06-16 19:30:58 caress Exp $
+ *    $Id: mb7kpreprocess.c,v 5.7 2006-07-06 05:30:57 caress Exp $
  *
  *    Copyright (c) 2005 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	October 12, 2005
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2006/06/16 19:30:58  caress
+ * Check in after the Santa Monica Basin Mapping AUV Expedition.
+ *
  * Revision 5.5  2006/04/26 22:05:26  caress
  * Changes to handle MBARI Mapping AUV data better.
  *
@@ -67,7 +70,7 @@
 #define	MB7KPREPROCESS_TIMELAG_CONSTANT	1
 #define	MB7KPREPROCESS_TIMELAG_MODEL	2
 
-static char rcs_id[] = "$Id: mb7kpreprocess.c,v 5.6 2006-06-16 19:30:58 caress Exp $";
+static char rcs_id[] = "$Id: mb7kpreprocess.c,v 5.7 2006-07-06 05:30:57 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
@@ -915,7 +918,7 @@ main (int argc, char **argv)
 				
 			/* allocate memory for navigation/attitude arrays if needed */
 			if (bluefin->number_frames > 0 
-				&& nnav + bluefin->number_frames > nnav_alloc)
+				&& nnav + bluefin->number_frames >= nnav_alloc)
 				{
 				nnav_alloc +=  MB7KPREPROCESS_ALLOC_CHUNK;
 				status = mb_realloc(verbose,nnav_alloc*sizeof(double),&nav_time_d,&error);
@@ -937,7 +940,7 @@ main (int argc, char **argv)
 					}		    
 				}
 			if (bluefin->number_frames > 0 
-				&& nalt + bluefin->number_frames > nalt_alloc)
+				&& nalt + bluefin->number_frames >= nalt_alloc)
 				{
 				nalt_alloc +=  MB7KPREPROCESS_ALLOC_CHUNK;
 				status = mb_realloc(verbose,nalt_alloc*sizeof(double),&alt_time_d,&error);
@@ -1027,7 +1030,7 @@ main (int argc, char **argv)
 				}
 				
 			/* allocate memory for edgetech timetag arrays if needed */
-			if (nedget == 0 || nedget > nedget_alloc)
+			if (nedget == 0 || nedget >= nedget_alloc)
 				{
 				nedget_alloc +=  MB7KPREPROCESS_ALLOC_CHUNK;
 				status = mb_realloc(verbose,nedget_alloc*sizeof(double),&edget_time_d,&error);

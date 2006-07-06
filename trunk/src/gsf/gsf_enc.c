@@ -10,9 +10,9 @@
  *
  * Restrictions/Limitations :
  * 1) This library assumes the host computer uses the ASCII character set.
- * 2) This library assumes that the data types u_short and u_long are defined
+ * 2) This library assumes that the data types u_short and u_int are defined
  *    on the host machine, where a u_short is a 16 bit unsigned integer, and
- *    a u_long is a 32 bit unsigned integer.
+ *    a u_int is a 32 bit unsigned integer.
  * 3) This library assumes that the type short is at least 16 bits, and that
  *    the type int is at least 32 bits.
  *
@@ -77,6 +77,9 @@
  * bac          12-28-04  Added support for Navisound singlebeam, EM3000D, EM3002, and EM3002D.  Fixed
  *                        encoding of 1-byte BRB intensity values.  Corrected the encode/decode of Reson
  *                        projector angle.  Added beam_spacing to the gsfReson8100Specific subrecord.
+ * bac          06-28-06  Added support for EM121A data received via Kongsberg SIS, mapped to existing
+ *                        EM3 series sensor specific data structure. Replaced references to long types
+ *                        with int types, for compilation on 64-bit architectures.
  *
  * Classification : Unclassified
  *
@@ -91,7 +94,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-/* rely on the network type definitions of (u_short, and u_long) */
+/* rely on the network type definitions of (u_short, and u_int) */
 #include <sys/types.h>
 #ifndef WIN32
 #include <netinet/in.h>
@@ -1355,6 +1358,7 @@ gsfEncodeSwathBathymetryPing(unsigned char *sptr, gsfSwathBathyPing * ping, GSF_
         case (GSF_SWATH_BATHY_SUBRECORD_EM3002_SPECIFIC):
         case (GSF_SWATH_BATHY_SUBRECORD_EM3000D_SPECIFIC):
         case (GSF_SWATH_BATHY_SUBRECORD_EM3002D_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_EM121A_SIS_SPECIFIC):
             sensor_size = EncodeEM3Specific(p, &ping->sensor_data, ft);
             break;
 
@@ -4226,6 +4230,7 @@ EncodeBRBIntensity(unsigned char *sptr, gsfBRBIntensity *idata, int num_beams, i
         case (GSF_SWATH_BATHY_SUBRECORD_EM3002_SPECIFIC):
         case (GSF_SWATH_BATHY_SUBRECORD_EM3000D_SPECIFIC):
         case (GSF_SWATH_BATHY_SUBRECORD_EM3002D_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_EM121A_SIS_SPECIFIC):
             sensor_size = EncodeEM3ImagerySpecific(ptr, &idata->sensor_imagery);
             break;
 
@@ -4894,7 +4899,7 @@ gsfEncodeHVNavigationError(unsigned char *sptr, gsfHVNavigationError *hv_nav_err
     return (p - sptr);
 }
 
-static void LocalSubtractTimes (struct gsfTimespec *base_time, struct gsfTimespec *subtrahend, double *difference)
+static void LocalSubtractTimes (struct timespec *base_time, struct timespec *subtrahend, double *difference)
 {
     double fraction = 0.0;
     double seconds  = 0.0;
@@ -4930,7 +4935,7 @@ gsfEncodeAttitude(unsigned char *sptr, gsfAttitude * attitude)
     gsfuShort       stemp;
     double          dtemp;
     int             i;
-    struct gsfTimespec basetime;
+    struct timespec basetime;
     double          time_offset;
 
     /* write the full time for the first time in the record, and save subsequent times

@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	install_makefiles	5/20/94
-#    $Id: install_makefiles,v 5.24 2006-07-05 19:50:21 caress Exp $
+#    $Id: install_makefiles,v 5.25 2006-07-06 05:30:57 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 1996, 1997, 2001, 2002, 2003, 2005, 2006 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -115,10 +115,13 @@ $LFLAGS = "-Wl -lm -bind_at_load";
 #--------------------------------------------------------------------
 #
 # Version:
-#   $Id: install_makefiles,v 5.24 2006-07-05 19:50:21 caress Exp $
+#   $Id: install_makefiles,v 5.25 2006-07-06 05:30:57 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.24  2006/07/05 19:50:21  caress
+#   Working towards 5.1.0beta
+#
 #   Revision 5.23  2006/06/16 19:24:47  caress
 #   Check in after the Santa Monica Basin Mapping AUV Expedition.
 #
@@ -548,6 +551,12 @@ $LFLAGS = "$LFLAGS -L$NETCDFLIBDIR -lnetcdf";
 if ($BYTESWAPPED eq "YES")
 	{
 	$CFLAGS = "$CFLAGS -DBYTESWAPPED";
+	}
+	
+# add __APPLE__ flag to CFLAGS to allow GSF code to build under OSX
+if ($OS eq "DARWIN")
+	{
+	$CFLAGS = "$CFLAGS -D__APPLE__";
 	}
 
 # set archiver 

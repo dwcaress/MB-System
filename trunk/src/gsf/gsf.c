@@ -103,6 +103,9 @@
  *                gsfLoadDepthScaleFactorAutoOffset to vary the offset interval based on precision.
  *                Updated gsfFree to free and set to NULL the quality_flags, vertical_error, horizontal_error,
  *                and brb_inten arrays.  Added vertical_error and horizontal_error processing to gsfCopyRecords.
+ * bac 06-28-06   Updated gsfIsStarboardPing to work with EM3000D and EM3002D.  Updated gsfCopyRecords
+ *                to copy the hv_nav_error record.  Added  for EM121A data received via Kongsberg SIS.
+ *                Replaced references to long types with int types, for compilation on 64-bit architectures.
  *
  * Classification : Unclassified
  *
@@ -121,7 +124,7 @@
 #include <math.h>
 #include <sys/stat.h>
 
-/* rely on the network type definitions of (u_short, and u_long) */
+/* rely on the network type definitions of (u_short, and u_int) */
 #include <sys/types.h>
 #ifndef WIN32
 #include <netinet/in.h>
@@ -328,7 +331,7 @@ gsfOpen(const char *filename, const int mode, int *handle)
         gsfError = GSF_READ_ERROR;
         return(-1);
     }
-    gsfFileTable[fileTableIndex].file_size = (long) stat_buf.st_size;
+    gsfFileTable[fileTableIndex].file_size = (int) stat_buf.st_size;
 
     /* If this file was just created, (ie it has a size of 0 bytes) then
      * write the gsf file header record. Also, set a flag to indicate
@@ -648,7 +651,7 @@ gsfOpenBuffered(const char *filename, const int mode, int *handle, int buf_size)
         gsfError = GSF_READ_ERROR;
         return(-1);
     }
-    gsfFileTable[fileTableIndex].file_size = (long) stat_buf.st_size;
+    gsfFileTable[fileTableIndex].file_size = (int) stat_buf.st_size;
 
     /* If this file was just created, (ie it has a size of 0 bytes) then
      * write the gsf file header record. Also, set a flag to indicate
@@ -1527,7 +1530,7 @@ gsfSeekRecord(int handle, gsfDataID *id)
     }
     if (gsfFileTable[handle - 1].index_data.swap)
     {
-        SwapLong((unsigned long *) &index_rec.addr, 1);
+        SwapLong((unsigned int *) &index_rec.addr, 1);
     }
 
     /* If the record type is GSF_RECORD_SWATH_BATHYMETRY_PING then we
@@ -1964,7 +1967,7 @@ gsfWrite(int handle, gsfDataID *id, gsfRecords *rptr)
 int
 gsfLoadScaleFactor(gsfScaleFactors *sf, int subrecordID, char c_flag, double precision, int offset)
 {
-    unsigned long   itemp;
+    unsigned int    itemp;
     double          mult;
 
     /* If we're adding a new subrecord, bump counter and check bounds */
@@ -2216,7 +2219,7 @@ gsfFree (gsfRecords *rec)
         {
             for (i = 0; i < rec->mb_ping.number_beams; i++)
             {
-                if (rec->mb_ping.brb_inten->time_series[i].samples != (unsigned long *) NULL)
+                if (rec->mb_ping.brb_inten->time_series[i].samples != (unsigned int *) NULL)
                 {
                     free (rec->mb_ping.brb_inten->time_series[i].samples);
                     rec->mb_ping.brb_inten->time_series[i].samples = NULL;
@@ -2285,10 +2288,10 @@ gsfFree (gsfRecords *rec)
     }
 
     /* Free the dynamically allocated memory from the attitude record */
-    if (rec->attitude.attitude_time != (struct gsfTimespec *) NULL)
+    if (rec->attitude.attitude_time != (struct timespec *) NULL)
     {
         free (rec->attitude.attitude_time);
-        rec->attitude.attitude_time = (struct gsfTimespec *) NULL;
+        rec->attitude.attitude_time = (struct timespec *) NULL;
     }
 
     if (rec->attitude.pitch != (double *) NULL)
@@ -2678,7 +2681,7 @@ gsfIndexTime(int handle, int record_type, int record_number, time_t * sec, long 
     }
     if (gsfFileTable[handle - 1].index_data.swap)
     {
-        SwapLong((unsigned long *) &index_rec, 3);
+        SwapLong((unsigned int *) &index_rec, 3);
     }
 
     /*  Store the time and return the record number.    */
@@ -2699,7 +2702,7 @@ gsfIndexTime(int handle, int record_type, int record_number, time_t * sec, long 
  *  buff = a pointer to an unsigned char buffer containing the data
  *  num_bytes = a integer containing the number of bytes of data
  *
- * Returns : a gsfuLong (u_long) data type containing the computed checksum.
+ * Returns : a gsfuLong (u_int) data type containing the computed checksum.
  *
  * Error Conditions :
  *
@@ -3372,12 +3375,12 @@ gsfCopyRecords (gsfRecords *target, gsfRecords *source)
 
             for (i = 0; i < source->mb_ping.number_beams; i++)
             {
-                if (source->mb_ping.brb_inten->time_series[i].samples != (unsigned long *) NULL)
+                if (source->mb_ping.brb_inten->time_series[i].samples != (unsigned int *) NULL)
                 {
-                    if (target->mb_ping.brb_inten->time_series[i].samples == (unsigned long *) NULL)
+                    if (target->mb_ping.brb_inten->time_series[i].samples == (unsigned int *) NULL)
                     {
-                        target->mb_ping.brb_inten->time_series[i].samples = (unsigned long *) calloc (sizeof(unsigned long), source->mb_ping.brb_inten->time_series[i].sample_count);
-                        if (target->mb_ping.brb_inten->time_series[i].samples == (unsigned long *) NULL)
+                        target->mb_ping.brb_inten->time_series[i].samples = (unsigned int *) calloc (sizeof(unsigned int), source->mb_ping.brb_inten->time_series[i].sample_count);
+                        if (target->mb_ping.brb_inten->time_series[i].samples == (unsigned int *) NULL)
                         {
                             gsfError = GSF_MEMORY_ALLOCATION_FAILED;
                             return(-1);
@@ -3385,14 +3388,14 @@ gsfCopyRecords (gsfRecords *target, gsfRecords *source)
                     }
                     else if (target->mb_ping.brb_inten->time_series[i].sample_count < source->mb_ping.brb_inten->time_series[i].sample_count)
                     {
-                        target->mb_ping.brb_inten->time_series[i].samples = (unsigned long *) realloc (target->mb_ping.brb_inten->time_series[i].samples, sizeof(unsigned long) * source->mb_ping.brb_inten->time_series[i].sample_count);
-                        if (target->mb_ping.brb_inten->time_series[i].samples == (unsigned long *) NULL)
+                        target->mb_ping.brb_inten->time_series[i].samples = (unsigned int *) realloc (target->mb_ping.brb_inten->time_series[i].samples, sizeof(unsigned int) * source->mb_ping.brb_inten->time_series[i].sample_count);
+                        if (target->mb_ping.brb_inten->time_series[i].samples == (unsigned int *) NULL)
                         {
                             gsfError = GSF_MEMORY_ALLOCATION_FAILED;
                             return(-1);
                         }
                     }
-                    memcpy (target->mb_ping.brb_inten->time_series[i].samples, source->mb_ping.brb_inten->time_series[i].samples, sizeof(unsigned long) * source->mb_ping.brb_inten->time_series[i].sample_count);
+                    memcpy (target->mb_ping.brb_inten->time_series[i].samples, source->mb_ping.brb_inten->time_series[i].samples, sizeof(unsigned int) * source->mb_ping.brb_inten->time_series[i].sample_count);
                     target->mb_ping.brb_inten->time_series[i].sample_count = source->mb_ping.brb_inten->time_series[i].sample_count;
                     target->mb_ping.brb_inten->time_series[i].detect_sample = source->mb_ping.brb_inten->time_series[i].detect_sample;
                 }
@@ -3597,26 +3600,29 @@ gsfCopyRecords (gsfRecords *target, gsfRecords *source)
     /* Copy the navigation error record from the source to the target */
     target->nav_error = source->nav_error;
 
+    /* Copy the HV navigation error record from the source to the target */
+    target->hv_nav_error = source->hv_nav_error;
+
     /* Now hande the attitude record dynamic memory */
-    if (target->attitude.attitude_time == (struct gsfTimespec *) NULL)
+    if (target->attitude.attitude_time == (struct timespec *) NULL)
     {
-        target->attitude.attitude_time = (struct gsfTimespec *) calloc (sizeof(struct gsfTimespec), source->attitude.num_measurements);
-        if (target->attitude.attitude_time == (struct gsfTimespec *) NULL)
+        target->attitude.attitude_time = (struct timespec *) calloc (sizeof(struct timespec), source->attitude.num_measurements);
+        if (target->attitude.attitude_time == (struct timespec *) NULL)
         {
             gsfError = GSF_MEMORY_ALLOCATION_FAILED;
             return(-1);
         }
-        memcpy (target->attitude.attitude_time, source->attitude.attitude_time, sizeof(struct gsfTimespec) * source->attitude.num_measurements);
+        memcpy (target->attitude.attitude_time, source->attitude.attitude_time, sizeof(struct timespec) * source->attitude.num_measurements);
     }
     else if (target->attitude.num_measurements < source->attitude.num_measurements)
     {
-        target->attitude.attitude_time = (struct gsfTimespec *) realloc (target->attitude.attitude_time, sizeof(struct gsfTimespec) * source->attitude.num_measurements);
-        if (target->attitude.attitude_time == (struct gsfTimespec *) NULL)
+        target->attitude.attitude_time = (struct timespec *) realloc (target->attitude.attitude_time, sizeof(struct timespec) * source->attitude.num_measurements);
+        if (target->attitude.attitude_time == (struct timespec *) NULL)
         {
             gsfError = GSF_MEMORY_ALLOCATION_FAILED;
             return(-1);
         }
-        memcpy (target->attitude.attitude_time, source->attitude.attitude_time, sizeof(struct gsfTimespec) * source->attitude.num_measurements);
+        memcpy (target->attitude.attitude_time, source->attitude.attitude_time, sizeof(struct timespec) * source->attitude.num_measurements);
     }
 
     if (target->attitude.roll == (double *) NULL)
@@ -5604,6 +5610,7 @@ gsfGetSwathBathyBeamWidths(gsfRecords *data, double *fore_aft, double *athwartsh
         case (GSF_SWATH_BATHY_SUBRECORD_EM3002_SPECIFIC):
         case (GSF_SWATH_BATHY_SUBRECORD_EM3000D_SPECIFIC):
         case (GSF_SWATH_BATHY_SUBRECORD_EM3002D_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_EM121A_SIS_SPECIFIC):
             *fore_aft = 1.5;
             *athwartship = 1.5;
             if (data->mb_ping.sensor_data.gsfEM3Specific.run_time[0].transmit_beam_width != 0.0)
@@ -5679,6 +5686,21 @@ gsfIsStarboardPing(gsfRecords *data)
         {
            ret = 1;
         }
+        break;
+
+        case GSF_SWATH_BATHY_SUBRECORD_EM3000D_SPECIFIC:
+        case GSF_SWATH_BATHY_SUBRECORD_EM3002D_SPECIFIC:
+            /* it is assumed that the center_beam is set to the vertical beam. */
+            if (data->mb_ping.center_beam < data->mb_ping.number_beams / 2)
+            {
+                /* most of the beams are to starboard of vertical */
+                ret = 1;
+            }
+            else
+            {
+                /* most of the beams are to port of vertical */
+                ret = 0;
+            }
         break;
 
         default:

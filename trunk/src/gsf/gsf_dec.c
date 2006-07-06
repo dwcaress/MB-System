@@ -12,9 +12,9 @@
  *
  * Restrictions/Limitations :
  * 1) This library assumes the host computer uses the ASCII character set.
- * 2) This library assumes that the data types u_short and u_long are defined
+ * 2) This library assumes that the data types u_short and u_int are defined
  *    on the host machine, where a u_short is a 16 bit unsigned integer, and
- *    a u_long is a 32 bit unsigned integer.
+ *    a u_int is a 32 bit unsigned integer.
  * 3) This library assumes that the type short is at least 16 bits, and that
  *    the type int is at least 32 bits.
  *
@@ -72,6 +72,9 @@
  *                        projector angle.  Added beam_spacing to the gsfReson8100Specific subrecord.
  *                        Updated gsfDecodeSensorParameters and gsfDecodeProcessingParameters to save
  *                        number_parameters correctly in the GSF_FILE_TABLE structure.
+ * bac          06-28-06  Added support for EM121A data received via Kongsberg SIS, mapped to existing
+ *                        EM3 series sensor specific data structure. Changed all casts to type long to
+ *                        casts to type int, for compilation on 64-bit architectures.
  *
  * Classification : Unclassified
  *
@@ -86,7 +89,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-/* rely on the network type definitions of (u_short, and u_long) */
+/* rely on the network type definitions of (u_short, and u_int) */
 #include <sys/types.h>
 #ifndef WIN32
 #include <netinet/in.h>
@@ -259,7 +262,7 @@ gsfDecodeSwathBathySummary(gsfSwathBathySummary *sum, unsigned char *sptr)
 
     /* Next four bytes contains the minimum depth */
     memcpy(&signed_int, p, 4);
-    sum->min_depth = (signed long)ntohl(signed_int) / 100.0;
+    sum->min_depth = (signed int)ntohl(signed_int) / 100.0;
     p += 4;
 
     /* Next four bytes contains the maximum depth */
@@ -1209,6 +1212,11 @@ gsfDecodeSwathBathymetryPing(gsfSwathBathyPing *ping, unsigned char *sptr, GSF_F
             case (GSF_SWATH_BATHY_SUBRECORD_EM3002D_SPECIFIC):
                 p += DecodeEM3Specific(&ping->sensor_data, p, ft);
                 ping->sensor_id = GSF_SWATH_BATHY_SUBRECORD_EM3002D_SPECIFIC;
+                break;
+
+            case (GSF_SWATH_BATHY_SUBRECORD_EM121A_SIS_SPECIFIC):
+                p += DecodeEM3Specific(&ping->sensor_data, p, ft);
+                ping->sensor_id = GSF_SWATH_BATHY_SUBRECORD_EM121A_SIS_SPECIFIC;
                 break;
 
             case (GSF_SWATH_BATHY_SUBRECORD_RESON_8101_SPECIFIC):
@@ -4013,7 +4021,7 @@ DecodeBRBIntensity(gsfBRBIntensity ** idata, unsigned char *sptr, int num_beams,
 
     /* decode the sample applied corrections description */
     memcpy(&ltemp, ptr, 4);
-    (*idata)->applied_corrections = (unsigned long) ntohl(ltemp);
+    (*idata)->applied_corrections = (unsigned int) ntohl(ltemp);
     ptr += 4;
 
     /* decode the spare header bytes */
@@ -4030,6 +4038,7 @@ DecodeBRBIntensity(gsfBRBIntensity ** idata, unsigned char *sptr, int num_beams,
         case (GSF_SWATH_BATHY_SUBRECORD_EM3002_SPECIFIC):
         case (GSF_SWATH_BATHY_SUBRECORD_EM3000D_SPECIFIC):
         case (GSF_SWATH_BATHY_SUBRECORD_EM3002D_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_EM121A_SIS_SPECIFIC):
             sensor_size = DecodeEM3ImagerySpecific(&(*idata)->sensor_imagery, ptr);
             break;
 
@@ -4069,11 +4078,11 @@ DecodeBRBIntensity(gsfBRBIntensity ** idata, unsigned char *sptr, int num_beams,
         ptr += 8;
 
         /* Allocate memory for the array of samples if none has been allocated yet. */
-        if ((*idata)->time_series[i].samples == (unsigned long *) NULL)
+        if ((*idata)->time_series[i].samples == (unsigned int *) NULL)
         {
-            (*idata)->time_series[i].samples = (unsigned long *) calloc((*idata)->time_series[i].sample_count, sizeof(unsigned long));
+            (*idata)->time_series[i].samples = (unsigned int *) calloc((*idata)->time_series[i].sample_count, sizeof(unsigned int));
 
-            if ((*idata)->time_series[i].samples == (unsigned long *) NULL)
+            if ((*idata)->time_series[i].samples == (unsigned int *) NULL)
             {
                 gsfError = GSF_MEMORY_ALLOCATION_FAILED;
                 return (-1);
@@ -4084,15 +4093,15 @@ DecodeBRBIntensity(gsfBRBIntensity ** idata, unsigned char *sptr, int num_beams,
 
         if ((*idata)->time_series[i].sample_count > samplesArraySize[handle - 1][i])
         {
-            (*idata)->time_series[i].samples = (unsigned long *) realloc((void *) (*idata)->time_series[i].samples, (*idata)->time_series[i].sample_count * sizeof(unsigned long));
+            (*idata)->time_series[i].samples = (unsigned int *) realloc((void *) (*idata)->time_series[i].samples, (*idata)->time_series[i].sample_count * sizeof(unsigned int));
 
-            if ((*idata)->time_series[i].samples == (unsigned long *) NULL)
+            if ((*idata)->time_series[i].samples == (unsigned int *) NULL)
             {
                 gsfError = GSF_MEMORY_ALLOCATION_FAILED;
                 return (-1);
             }
 
-            memset ((*idata)->time_series[i].samples, 0, (*idata)->time_series[i].sample_count * sizeof(unsigned long));
+            memset ((*idata)->time_series[i].samples, 0, (*idata)->time_series[i].sample_count * sizeof(unsigned int));
 
             samplesArraySize[handle - 1][i] = (*idata)->time_series[i].sample_count;
         }
@@ -4108,7 +4117,7 @@ DecodeBRBIntensity(gsfBRBIntensity ** idata, unsigned char *sptr, int num_beams,
                 bytes_to_unpack[2] = ptr[0];
                 bytes_to_unpack[3] = ptr[1] & 0xF0;
                 memcpy (&ltemp, bytes_to_unpack, 4);
-                (*idata)->time_series[i].samples[j] = (unsigned long) ntohl(ltemp);
+                (*idata)->time_series[i].samples[j] = (unsigned int) ntohl(ltemp);
 
                 if (j+1 < (*idata)->time_series[i].sample_count)
                 {
@@ -4118,7 +4127,7 @@ DecodeBRBIntensity(gsfBRBIntensity ** idata, unsigned char *sptr, int num_beams,
                     bytes_to_unpack[2] |= ptr[2] >> 4;
                     bytes_to_unpack[3] = ptr[2] << 4;
                     memcpy (&ltemp, bytes_to_unpack, 4);
-                    (*idata)->time_series[i].samples[j+1] = (unsigned long) ntohl(ltemp);
+                    (*idata)->time_series[i].samples[j+1] = (unsigned int) ntohl(ltemp);
                 }
                 ptr += 3;
             }
@@ -4129,19 +4138,19 @@ DecodeBRBIntensity(gsfBRBIntensity ** idata, unsigned char *sptr, int num_beams,
             {
                 if (bytes_per_sample == 1)
                 {
-                    (*idata)->time_series[i].samples[j] = (unsigned long) *ptr;
+                    (*idata)->time_series[i].samples[j] = (unsigned int) *ptr;
                     ptr++;
                 }
                 else if (bytes_per_sample == 2)
                 {
                     memcpy(&stemp, ptr, 2);
-                    (*idata)->time_series[i].samples[j] = (unsigned long) ntohs(stemp);
+                    (*idata)->time_series[i].samples[j] = (unsigned int) ntohs(stemp);
                     ptr += 2;
                 }
                 else if (bytes_per_sample == 4)
                 {
                     memcpy(&ltemp, ptr, 4);
-                    (*idata)->time_series[i].samples[j] = (unsigned long) ntohl(ltemp);
+                    (*idata)->time_series[i].samples[j] = (unsigned int) ntohl(ltemp);
                     ptr += 4;
                 }
                 else
@@ -4862,7 +4871,7 @@ gsfDecodeHVNavigationError(gsfHVNavigationError *hv_nav_error, GSF_FILE_TABLE *f
     return (p - sptr);
 }
 
-static void LocalAddTimes (struct gsfTimespec *base_time, double delta_time, struct gsfTimespec *sum_time)
+static void LocalAddTimes (struct timespec *base_time, double delta_time, struct timespec *sum_time)
 {
     double fraction = 0.0;
     double tmp      = 0.0;
@@ -4916,7 +4925,7 @@ gsfDecodeAttitude(gsfAttitude *attitude, GSF_FILE_TABLE *ft, unsigned char *sptr
     gsfuShort       stemp;
     gsfsShort       signed_short;
     int             i;
-    struct gsfTimespec basetime;
+    struct timespec basetime;
     double          time_offset;
 
     /* First four byte integer contains the observation time seconds */
@@ -4935,18 +4944,18 @@ gsfDecodeAttitude(gsfAttitude *attitude, GSF_FILE_TABLE *ft, unsigned char *sptr
     attitude->num_measurements = ntohs(stemp);
 
     /* NULL out caller's memory pointers in case memory allocation fails */
-    attitude->attitude_time = (struct gsfTimespec *) NULL;
+    attitude->attitude_time = (struct timespec *) NULL;
     attitude->pitch = (double *) NULL;
     attitude->roll = (double *) NULL;
     attitude->heave = (double *) NULL;
     attitude->heading = (double *) NULL;
 
     /* make sure we have memory for the attitude measurements */
-    if (ft->rec.attitude.attitude_time == (struct gsfTimespec *) NULL)
+    if (ft->rec.attitude.attitude_time == (struct timespec *) NULL)
     {
-        ft->rec.attitude.attitude_time = (struct gsfTimespec *) calloc(attitude->num_measurements, sizeof(struct gsfTimespec));
+        ft->rec.attitude.attitude_time = (struct timespec *) calloc(attitude->num_measurements, sizeof(struct timespec));
 
-        if (ft->rec.attitude.attitude_time == (struct gsfTimespec *) NULL)
+        if (ft->rec.attitude.attitude_time == (struct timespec *) NULL)
         {
             gsfError = GSF_MEMORY_ALLOCATION_FAILED;
             return (-1);
@@ -4957,14 +4966,14 @@ gsfDecodeAttitude(gsfAttitude *attitude, GSF_FILE_TABLE *ft, unsigned char *sptr
      */
     else if (ft->rec.attitude.num_measurements < attitude->num_measurements)
     {
-        ft->rec.attitude.attitude_time = (struct gsfTimespec *) realloc(ft->rec.attitude.attitude_time, attitude->num_measurements * sizeof(struct gsfTimespec));
+        ft->rec.attitude.attitude_time = (struct timespec *) realloc(ft->rec.attitude.attitude_time, attitude->num_measurements * sizeof(struct timespec));
 
-        if (ft->rec.attitude.attitude_time == (struct gsfTimespec *) NULL)
+        if (ft->rec.attitude.attitude_time == (struct timespec *) NULL)
         {
             gsfError = GSF_MEMORY_ALLOCATION_FAILED;
             return (-1);
         }
-        memset(ft->rec.attitude.attitude_time, 0, attitude->num_measurements * sizeof(struct gsfTimespec));
+        memset(ft->rec.attitude.attitude_time, 0, attitude->num_measurements * sizeof(struct timespec));
     }
     /* Set the caller's pointer to this dynamic memory */
     attitude->attitude_time = ft->rec.attitude.attitude_time;

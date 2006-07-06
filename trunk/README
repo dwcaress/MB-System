@@ -205,6 +205,11 @@ mbm_3dgrdplot, and mbm_histplot all now use the current
 GMT default parameter PLOT_DEGREE_FORMAT rather than
 the old DEGREE_FORMAT.
 
+Upgraded the mbsystem/gsf code to GSF version 2.0.4. Since the
+libgsf code now has #ifdef statements allowing compilation
+under MacOSX, the code contained in MB-System no longer has
+modifications relative to the generic GSF releases.
+
 
 MB-SYSTEM VERSION 5.0.9 RELEASE NOTES:
 ------------------------------------------
@@ -1276,10 +1281,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.82 2006-07-05 19:50:21 caress Exp $
+RCS ID: $Id: README,v 5.83 2006-07-06 05:30:57 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.82  2006/07/05 19:50:21  caress
+Working towards 5.1.0beta
+
 Revision 5.81  2006/06/22 04:45:42  caress
 Working towards 5.1.0
 
