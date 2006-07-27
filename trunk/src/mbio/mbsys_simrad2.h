@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad2.h	10/9/98
- *	$Id: mbsys_simrad2.h,v 5.18 2006-02-03 21:08:51 caress Exp $
+ *	$Id: mbsys_simrad2.h,v 5.19 2006-07-27 18:42:52 caress Exp $
  *
  *    Copyright (c) 1998, 2001, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -32,6 +32,9 @@
  * Date:	October 9, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.18  2006/02/03 21:08:51  caress
+ * Working on supporting water column datagrams in Simrad formats.
+ *
  * Revision 5.17  2006/02/02 19:42:09  caress
  * Fixed handling of unknown datagrams on little-endian systems.
  *
@@ -315,6 +318,7 @@
 #define	MBSYS_SIMRAD2_EM3000D_7	3007
 #define	MBSYS_SIMRAD2_EM3000D_8	3008
 #define	MBSYS_SIMRAD2_EM3002	3020
+#define	MBSYS_SIMRAD2_EM710	 710
 
 #define	MBSYS_SIMRAD2_EM12S	9901
 #define	MBSYS_SIMRAD2_EM12D	9902

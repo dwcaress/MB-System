@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrdtiff.c	5/30/93
- *    $Id: mbgrdtiff.c,v 5.12 2006-06-22 04:45:42 caress Exp $
+ *    $Id: mbgrdtiff.c,v 5.13 2006-07-27 18:42:51 caress Exp $
  *
  *    Copyright (c) 1999, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -215,6 +215,9 @@
  *
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.12  2006/06/22 04:45:42  caress
+ * Working towards 5.1.0
+ *
  * Revision 5.11  2006/01/11 07:25:53  caress
  * Working towards 5.0.8
  *
@@ -379,7 +382,7 @@ int              tiff_offset[] =
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbgrdtiff.c,v 5.12 2006-06-22 04:45:42 caress Exp $";
+	static char rcs_id[] = "$Id: mbgrdtiff.c,v 5.13 2006-07-27 18:42:51 caress Exp $";
 	static char program_name[] = "mbgrdtiff";
 	static char help_message[] = "mbgrdtiff generates a tiff image from a GMT grid. The \nimage generation is similar to that of the GMT program \ngrdimage. In particular, the color map is applied from \na GMT CPT file, and shading overlay grids may be applied. \nThe output TIFF file contains information allowing\nthe ArcView and ArcInfo GIS packages to import the image\nas a geographically located coverage.";
 	static char usage_message[] = "mbgrdtiff -Ccptfile -Igrdfile -Otiff_file [-H -Kintensfile -V]";
@@ -955,9 +958,9 @@ main (int argc, char **argv)
 		mb_put_binary_double(MB_NO, value_double, &tiff_header[tiff_offset[i] + 1 * 8]);
 		value_double = 0;
 		mb_put_binary_double(MB_NO, value_double, &tiff_header[tiff_offset[i] + 2 * 8]);
-		value_double = header.x_min + 0.5 * header.x_inc;
+		value_double = header.x_min - 0.5 * header.x_inc;
 		mb_put_binary_double(MB_NO, value_double, &tiff_header[tiff_offset[i] + 3 * 8]);
-		value_double = header.y_max - 0.5 * header.y_inc;
+		value_double = header.y_max + 0.5 * header.y_inc;
 		mb_put_binary_double(MB_NO, value_double, &tiff_header[tiff_offset[i] + 4 * 8]);
 		value_double = 0.0;
 		mb_put_binary_double(MB_NO, value_double, &tiff_header[tiff_offset[i] + 5 * 8]);
