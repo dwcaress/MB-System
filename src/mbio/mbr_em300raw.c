@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em300raw.c	10/16/98
- *	$Id: mbr_em300raw.c,v 5.36 2006-02-14 01:57:25 caress Exp $
+ *	$Id: mbr_em300raw.c,v 5.37 2006-07-27 18:42:51 caress Exp $
  *
  *    Copyright (c) 1998, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	October 16,  1998
  * $Log: not supported by cvs2svn $
+ * Revision 5.36  2006/02/14 01:57:25  caress
+ * Added checks to handle case where Simrad multibeam constructs rawbeam3 datagram with an incorrect size. This happens when the number of transmit sectors is 3 rather than 9 in R/V Revelle data following a January 2006 firmware upgrade.
+ *
  * Revision 5.35  2006/02/07 03:12:14  caress
  * Another shot at dealing with broken simrad sidescan records. Now we will keep the raw sidescan data but not use it to make the binned sidescan returned by the standard mbio extract functions.
  *
@@ -313,7 +316,7 @@ int mbr_em300raw_wr_ss(int verbose, FILE *mbfp, int swap,
 int mbr_em300raw_wr_wc(int verbose, FILE *mbfp, int swap, 
 		struct mbsys_simrad2_struct *store, int *error);
 
-static char res_id[]="$Id: mbr_em300raw.c,v 5.36 2006-02-14 01:57:25 caress Exp $";
+static char res_id[]="$Id: mbr_em300raw.c,v 5.37 2006-07-27 18:42:51 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_em300raw(int verbose, void *mbio_ptr, int *error)
@@ -1227,6 +1230,8 @@ Have a nice day...\n");
 	fprintf(stderr,"call nothing, read failure, no expect\n");
 #endif
 			done = MB_YES;
+			record_size = 0;
+			*record_size_save = record_size;
 			}
 		else if (status == MB_FAILURE && expect != EM2_NONE)
 			{
@@ -1850,7 +1855,8 @@ int mbr_em300raw_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 			|| sonarunswap == MBSYS_SIMRAD2_EM3000D_6
 			|| sonarunswap == MBSYS_SIMRAD2_EM3000D_7
 			|| sonarunswap == MBSYS_SIMRAD2_EM3000D_8
-			|| sonarunswap == MBSYS_SIMRAD2_EM3002)
+			|| sonarunswap == MBSYS_SIMRAD2_EM3002
+			|| sonarunswap == MBSYS_SIMRAD2_EM710)
 			{
 			sonarunswapgood = MB_YES;
 			}
@@ -1873,7 +1879,8 @@ int mbr_em300raw_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 			|| sonarswap == MBSYS_SIMRAD2_EM3000D_6
 			|| sonarswap == MBSYS_SIMRAD2_EM3000D_7
 			|| sonarswap == MBSYS_SIMRAD2_EM3000D_8
-			|| sonarswap == MBSYS_SIMRAD2_EM3002)
+			|| sonarswap == MBSYS_SIMRAD2_EM3002
+			|| sonarswap == MBSYS_SIMRAD2_EM710)
 			{
 			sonarswapgood = MB_YES;
 			}
@@ -1929,7 +1936,8 @@ fprintf(stderr,"typegood:%d mb_io_ptr->byteswapped:%d sonarswapgood:%d *databyte
 		&& *sonar != MBSYS_SIMRAD2_EM3000D_6
 		&& *sonar != MBSYS_SIMRAD2_EM3000D_7
 		&& *sonar != MBSYS_SIMRAD2_EM3000D_8
-		&& *sonar != MBSYS_SIMRAD2_EM3002)
+		&& *sonar != MBSYS_SIMRAD2_EM3002
+		&& *sonar != MBSYS_SIMRAD2_EM710)
 		{
 		sonargood = MB_NO;
 		}

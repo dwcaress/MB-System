@@ -210,6 +210,7 @@ libgsf code now has #ifdef statements allowing compilation
 under MacOSX, the code contained in MB-System no longer has
 modifications relative to the generic GSF releases.
 
+Added support for Simrad EM710 data in formats 56 and 57.
 
 MB-SYSTEM VERSION 5.0.9 RELEASE NOTES:
 ------------------------------------------
@@ -1281,10 +1282,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.83 2006-07-06 05:30:57 caress Exp $
+RCS ID: $Id: README,v 5.84 2006-07-27 18:42:24 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.83  2006/07/06 05:30:57  caress
+Working more towards 5.1.0beta
+
 Revision 5.82  2006/07/05 19:50:21  caress
 Working towards 5.1.0beta
 

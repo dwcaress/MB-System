@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em300mba.c	10/16/98
- *	$Id: mbr_em300mba.c,v 5.32 2006-02-07 03:12:14 caress Exp $
+ *	$Id: mbr_em300mba.c,v 5.33 2006-07-27 18:42:51 caress Exp $
  *
  *    Copyright (c) 1998, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	October 16,  1998
  * $Log: not supported by cvs2svn $
+ * Revision 5.32  2006/02/07 03:12:14  caress
+ * Another shot at dealing with broken simrad sidescan records. Now we will keep the raw sidescan data but not use it to make the binned sidescan returned by the standard mbio extract functions.
+ *
  * Revision 5.31  2006/02/06 16:54:50  caress
  * Set the Simrad i/o modules to output error messages with verbose > 0 when
  * sidescan is zeroed because of mismatch between bathymetry and sidescan records.
@@ -295,7 +298,7 @@ int mbr_em300mba_wr_ss(int verbose, FILE *mbfp, int swap,
 int mbr_em300mba_wr_wc(int verbose, FILE *mbfp, int swap, 
 		struct mbsys_simrad2_struct *store, int *error);
 
-static char res_id[]="$Id: mbr_em300mba.c,v 5.32 2006-02-07 03:12:14 caress Exp $";
+static char res_id[]="$Id: mbr_em300mba.c,v 5.33 2006-07-27 18:42:51 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_em300mba(int verbose, void *mbio_ptr, int *error)
@@ -1133,6 +1136,8 @@ Have a nice day...\n");
 	fprintf(stderr,"call nothing, read failure, no expect\n");
 #endif
 			done = MB_YES;
+			record_size = 0;
+			*record_size_save = record_size;
 			}
 		else if (status == MB_FAILURE && expect != EM2_NONE)
 			{
@@ -1815,7 +1820,8 @@ fprintf(stderr,"typegood:%d mb_io_ptr->byteswapped:%d sonarswapgood:%d *databyte
 		&& *sonar != MBSYS_SIMRAD2_EM3000D_6
 		&& *sonar != MBSYS_SIMRAD2_EM3000D_7
 		&& *sonar != MBSYS_SIMRAD2_EM3000D_8
-		&& *sonar != MBSYS_SIMRAD2_EM3002)
+		&& *sonar != MBSYS_SIMRAD2_EM3002
+		&& *sonar != MBSYS_SIMRAD2_EM710)
 		{
 		sonargood = MB_NO;
 		}

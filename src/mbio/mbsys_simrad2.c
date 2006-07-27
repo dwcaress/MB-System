@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad2.c	3.00	10/9/98
- *	$Id: mbsys_simrad2.c,v 5.23 2006-02-07 03:12:14 caress Exp $
+ *	$Id: mbsys_simrad2.c,v 5.24 2006-07-27 18:42:52 caress Exp $
  *
  *    Copyright (c) 1998, 2001, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -31,6 +31,9 @@
  * Date:	October 9, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.23  2006/02/07 03:12:14  caress
+ * Another shot at dealing with broken simrad sidescan records. Now we will keep the raw sidescan data but not use it to make the binned sidescan returned by the standard mbio extract functions.
+ *
  * Revision 5.22  2006/02/03 21:08:51  caress
  * Working on supporting water column datagrams in Simrad formats.
  *
@@ -133,7 +136,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_simrad2.h"
 
-static char res_id[]="$Id: mbsys_simrad2.c,v 5.23 2006-02-07 03:12:14 caress Exp $";
+static char res_id[]="$Id: mbsys_simrad2.c,v 5.24 2006-07-27 18:42:52 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_simrad2_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
@@ -2316,7 +2319,8 @@ int mbsys_simrad2_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 		    || store->sonar == MBSYS_SIMRAD2_EM300 
 		    || store->sonar == MBSYS_SIMRAD2_EM1002 
 		    || store->sonar == MBSYS_SIMRAD2_EM2000 
-		    || store->sonar == MBSYS_SIMRAD2_EM3000)
+		    || store->sonar == MBSYS_SIMRAD2_EM3000 
+		    || store->sonar == MBSYS_SIMRAD2_EM710)
 		    ttscale = 0.5 / ping->png_sample_rate;
 		else if (store->sonar == MBSYS_SIMRAD2_EM3000D_1 
 		    || store->sonar == MBSYS_SIMRAD2_EM3000D_2 
@@ -2354,7 +2358,6 @@ int mbsys_simrad2_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 			if (angles_forward[j] < 0.0) angles_forward[j] += 360.0;
 			if (store->sonar == MBSYS_SIMRAD2_EM120 
 				|| store->sonar == MBSYS_SIMRAD2_EM300 
-				|| store->sonar == MBSYS_SIMRAD2_EM1002 
 				|| store->sonar == MBSYS_SIMRAD2_EM2000 
 				|| store->sonar == MBSYS_SIMRAD2_EM3000
 				|| store->sonar == MBSYS_SIMRAD2_EM3000D_1 
@@ -2365,9 +2368,11 @@ int mbsys_simrad2_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 				|| store->sonar == MBSYS_SIMRAD2_EM3000D_6 
 				|| store->sonar == MBSYS_SIMRAD2_EM3000D_7 
 				|| store->sonar == MBSYS_SIMRAD2_EM3000D_8 
-				|| store->sonar == MBSYS_SIMRAD2_EM3002)
-			    angles_null[i] = angles[i];
-			else if (store->sonar == MBSYS_SIMRAD2_EM1000)
+				|| store->sonar == MBSYS_SIMRAD2_EM3002 
+				|| store->sonar == MBSYS_SIMRAD2_EM710)
+			    angles_null[i] = 0.0;
+			else if (store->sonar == MBSYS_SIMRAD2_EM1000 
+				|| store->sonar == MBSYS_SIMRAD2_EM1002)
 			    angles_null[i] = angles[i];
 			else if (store->sonar == MBSYS_SIMRAD2_EM12S
 				|| store->sonar == MBSYS_SIMRAD2_EM12D
@@ -3556,7 +3561,8 @@ int mbsys_simrad2_makess(int verbose, void *mbio_ptr, void *store_ptr,
 		    || store->sonar == MBSYS_SIMRAD2_EM300 
 		    || store->sonar == MBSYS_SIMRAD2_EM1002 
 		    || store->sonar == MBSYS_SIMRAD2_EM2000 
-		    || store->sonar == MBSYS_SIMRAD2_EM3000)
+		    || store->sonar == MBSYS_SIMRAD2_EM3000 
+		    || store->sonar == MBSYS_SIMRAD2_EM710)
 		    ss_spacing = 750.0 / ping->png_sample_rate;
 		else if (store->sonar == MBSYS_SIMRAD2_EM3000D_1 
 		    || store->sonar == MBSYS_SIMRAD2_EM3000D_2 
