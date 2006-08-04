@@ -212,6 +212,8 @@ modifications relative to the generic GSF releases.
 
 Added support for Simrad EM710 data in formats 56 and 57.
 
+Fixed byte count problem with comment records in format 94 (XSE data).
+
 MB-SYSTEM VERSION 5.0.9 RELEASE NOTES:
 ------------------------------------------
 
@@ -1282,10 +1284,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.84 2006-07-27 18:42:24 caress Exp $
+RCS ID: $Id: README,v 5.85 2006-08-04 03:56:41 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.84  2006/07/27 18:42:24  caress
+Working towards 5.1.0
+
 Revision 5.83  2006/07/06 05:30:57  caress
 Working more towards 5.1.0beta
 

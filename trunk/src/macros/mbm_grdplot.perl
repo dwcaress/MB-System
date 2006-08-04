@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grdplot.perl	8/6/95
-#    $Id: mbm_grdplot.perl,v 5.22 2006-07-05 19:50:21 caress Exp $
+#    $Id: mbm_grdplot.perl,v 5.23 2006-08-04 03:56:41 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 2000, 2003 by 
 #    D. W. Caress (caress@mbari.org)
@@ -68,10 +68,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   October 19, 1994
 #
 # Version:
-#   $Id: mbm_grdplot.perl,v 5.22 2006-07-05 19:50:21 caress Exp $
+#   $Id: mbm_grdplot.perl,v 5.23 2006-08-04 03:56:41 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.22  2006/07/05 19:50:21  caress
+#   Working towards 5.1.0beta
+#
 #   Revision 5.21  2006/06/22 04:45:42  caress
 #   Working towards 5.1.0
 #
@@ -3494,7 +3497,7 @@ sub GetBaseTick {
 		{
 		$base_tick_x = ($xmax - $xmin) / 5;
 		}
-	$base_tick_y = 10.0**(floor(log(($ymax - $ymin) / 5) / log (10)));
+	$base_tick_y = 10.0**(floor(log(abs($ymax - $ymin) / 5) / log (10)));
 	#$base_tick_y = ($ymax - $ymin) / 5;
 	
 	# deal with seismic grids (time vs trace number)

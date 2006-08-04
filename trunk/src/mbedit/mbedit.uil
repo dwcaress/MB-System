@@ -93,6 +93,7 @@ identifier BXG_slider_number_step_label;
 identifier BXG_slider_number_step;
 identifier BXG_slider_number_max_step_label;
 identifier BXG_setting_mode_toggle_info;
+identifier BXG_setting_mode_toggle_grab;
 identifier BXG_setting_mode_toggle_restore;
 identifier BXG_setting_mode_toggle_erase;
 identifier BXG_setting_mode_toggle_pick;
@@ -165,6 +166,7 @@ procedure do_load_ok();
 procedure do_load_ok_with_save();
 procedure do_mode_erase();
 procedure do_mode_info();
+procedure do_mode_grab();
 procedure do_mode_pick();
 procedure do_mode_restore();
 procedure do_mode_toggle();
@@ -2578,6 +2580,25 @@ object setting_mode_toggle_restore : XmToggleButton widget {
 !(BX)    };
 };
 
+object setting_mode_toggle_grab : XmToggleButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Grab");
+        XmNwidth = 54;
+        XmNheight = 28;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_setting_mode_toggle_grab);
+        XmNvalueChangedCallback = procedure do_mode_grab();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
 object setting_mode_toggle_info : XmToggleButton widget {
     arguments {
         arguments Style_use;
@@ -2615,6 +2636,7 @@ object setting_mode : XmRowColumn widget {
          managed XmToggleButton setting_mode_toggle_pick;
          managed XmToggleButton setting_mode_toggle_erase;
          managed XmToggleButton setting_mode_toggle_restore;
+         managed XmToggleButton setting_mode_toggle_grab;
          managed XmToggleButton setting_mode_toggle_info;
     };
     callbacks {
