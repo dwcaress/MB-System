@@ -1,4 +1,4 @@
-.TH mbm_arc2grd l "15 June 2006" "MB-System 5.0" "MB-System 5.0"
+.TH mbm_route2mission l "12 July 2006" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbm_route2mission\fP - Macro to convert an \fBmbgrdviz\fP route file into an
 MBARI AUV mission script. 
@@ -10,8 +10,10 @@ Version 5.0\fP
 \fBmbm_route2mission\fP \fB-I\fP\fIroutefile\fP 
 [\fB-A\fP\fIaltitudemin/altitudeabort[/altitudedepthcom]\fP 
 \fB-B\fP\fIbehavior\fP \fB-D\fP\fIdepthmax/depthabort/depthdescent\fP 
-\fB-F\fP\fIforwarddistance\fP \fB-G\fP\fIgpsmode\fP \fB-M\fP \fB-O\fP\fImissionfile\fP 
-\fB-P\fP\fI[startlon/startlat | startdistance]\fP \fB-T\fP\fIspeed\fP \fB-T\fP\fIstarttime\fP
+\fB-F\fP\fIforwarddistance\fP \fB-G\fP\fIgpsmode\fP \fB-G\fP\fIapproachdepth\fP 
+\fB-M -N\fP \fB-O\fP\fImissionfile\fP 
+\fB-P\fP\fI[startlon/startlat | startdistance]\fP 
+\fB-T\fP\fIspeed\fP \fB-T\fP\fIstarttime\fP
 \fB-W\fP\fIwaypointspacing\fP \fB-V\fP \fB-H\fP]
 
 .SH DESCRIPTION
@@ -70,6 +72,13 @@ while otherwise maintaining a constant altitude.
 
 The \fB-G\fP option allows the user to specify that the vehicle ascend to the surface
 and reset positioning  with GPS at the beginning and/or end of survey lines.
+
+The \fB-N\fP option allows the user to specify that the vehicle first move to the
+initial survey waypoint, and then follow a spiral descent to the desired survey depth. 
+The \fB-L\fP\fIapproachdepth\fP option sets the vehicle depth as it approaches the
+first waypoint before the spiral descent. These options are used for deepwater missions
+in which the vehicle navigation is updated by acoustic modem during the free
+inertial descents.
 
 The mission script must also allow sufficient time for the vehicle to transit from its
 starting point to the first waypoint in the survey mission. The \fB-T\fP and \fB-P\fP
@@ -148,9 +157,21 @@ A route file specifies a desired survey route as a set of
 lines between waypoints. In addition to the waypoints, the file
 also includes the depth profiles along those lines.
 .TP
+.B \-L
+\fIapproachdepth\fP
+.br
+Sets the vehicle depth during the approach to the first waypoint when a
+spiral descent to depth at the first waypoint is specified  using the \fB-N\fP option.
+.TP
 .B \-M
 This option enables control of the Mapping AUV's mapping sonars. By default,
 the AUV mission is generated without turning on the mapping sonars.
+.TP
+.B \-N
+\fIapproachdepth\fP
+.br
+Sets the mission to include a shallow transit to the first waypoint followed by a
+spiral descent to depth to start the survey.
 .TP
 .B \-O
 \fImissionfile\fP

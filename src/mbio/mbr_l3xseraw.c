@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_l3xseraw.c	3/27/2000
- *	$Id: mbr_l3xseraw.c,v 5.15 2006-01-06 18:27:19 caress Exp $
+ *	$Id: mbr_l3xseraw.c,v 5.16 2006-08-04 03:56:41 caress Exp $
  *
  *    Copyright (c) 2000, 2001, 2002, 2003 by 
  *    D. W. Caress (caress@mbari.org)
@@ -26,6 +26,9 @@
  * Additional Authors:	P. A. Cohen and S. Dzurenko
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.15  2006/01/06 18:27:19  caress
+ * Working towards 5.0.8
+ *
  * Revision 5.14  2005/11/05 00:48:04  caress
  * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
  *
@@ -90,6 +93,7 @@
 /* include for byte swapping */
 #include "../../include/mb_swap.h"
 
+
 /*
 #define MB_DEBUG 1
 #define MB_DEBUG2 1
@@ -133,7 +137,7 @@ int mbr_wt_l3xseraw(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_l3xseraw(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.15 2006-01-06 18:27:19 caress Exp $";
+	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.16 2006-08-04 03:56:41 caress Exp $";
 	char	*function_name = "mbr_register_l3xseraw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -266,7 +270,7 @@ int mbr_info_l3xseraw(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.15 2006-01-06 18:27:19 caress Exp $";
+	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.16 2006-08-04 03:56:41 caress Exp $";
 	char	*function_name = "mbr_info_l3xseraw";
 	int	status = MB_SUCCESS;
 
@@ -336,7 +340,7 @@ int mbr_info_l3xseraw(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_l3xseraw(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.15 2006-01-06 18:27:19 caress Exp $";
+	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.16 2006-08-04 03:56:41 caress Exp $";
 	char	*function_name = "mbr_alm_l3xseraw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -5694,7 +5698,7 @@ int mbr_l3xseraw_wr_comment(int verbose,int *buffer_size,char *buffer,void *stor
 	index += 4;
 
 	/* get group size and id */
-	mb_put_binary_int(SWAPFLAG, len, &buffer[index]); index += 4;
+	mb_put_binary_int(SWAPFLAG, (len + 4), &buffer[index]); index += 4;
 	group_id = MBSYS_XSE_COM_GROUP_GEN;
 	mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
 	strncpy(&buffer[index], store->comment, len); index += len;

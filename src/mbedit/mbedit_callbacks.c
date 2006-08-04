@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit_callbacks.c	3/28/97
- *    $Id: mbedit_callbacks.c,v 5.17 2006-06-16 19:30:58 caress Exp $
+ *    $Id: mbedit_callbacks.c,v 5.18 2006-08-04 03:56:41 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	March 28, 1997  GUI recast
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.17  2006/06/16 19:30:58  caress
+ * Check in after the Santa Monica Basin Mapping AUV Expedition.
+ *
  * Revision 5.16  2006/02/08 16:57:36  caress
  * Added #ifdef to let user build mbedit to use orange instead of red.
  *
@@ -198,7 +201,8 @@ Widget	fileSelectionText;
 #define	MODE_PICK	1
 #define	MODE_ERASE	2
 #define	MODE_RESTORE	3
-#define	MODE_INFO	4
+#define	MODE_GRAB	4
+#define	MODE_INFO	5
 #define	VIEW_WATERFALL		0
 #define	VIEW_ALONGTRACK		1
 #define	VIEW_ACROSSTRACK	2
@@ -715,6 +719,7 @@ int do_setup_data()
 	XmToggleButtonSetState(setting_mode_toggle_pick, 0, FALSE);
 	XmToggleButtonSetState(setting_mode_toggle_erase, 0, FALSE);
 	XmToggleButtonSetState(setting_mode_toggle_restore, 0, FALSE);
+	XmToggleButtonSetState(setting_mode_toggle_grab, 0, FALSE);
 	XmToggleButtonSetState(setting_mode_toggle_info, 0, FALSE);
 	if (mode_pick == MODE_TOGGLE)
 	    XmToggleButtonSetState(setting_mode_toggle_toggle, 1, FALSE);
@@ -724,6 +729,8 @@ int do_setup_data()
 	    XmToggleButtonSetState(setting_mode_toggle_erase, 1, FALSE);
 	else if (mode_pick == MODE_RESTORE)
 	    XmToggleButtonSetState(setting_mode_toggle_restore, 1, FALSE);
+	else if (mode_pick == MODE_GRAB)
+	    XmToggleButtonSetState(setting_mode_toggle_grab, 1, FALSE);
 	else if (mode_pick == MODE_INFO)
 	    XmToggleButtonSetState(setting_mode_toggle_info, 1, FALSE);
 	    
@@ -983,6 +990,22 @@ do_mode_restore( Widget w, XtPointer client_data, XtPointer call_data)
 /*--------------------------------------------------------------------*/
 
 void
+do_mode_grab( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+
+    mode_pick = MODE_GRAB;
+
+    myCursor = XCreateFontCursor(theDisplay, XC_target);
+    XAllocNamedColor(theDisplay,colormap,"blue",&closest[0],&exact[0]);
+    XAllocNamedColor(theDisplay,colormap,"coral",&closest[1],&exact[1]);
+    XRecolorCursor(theDisplay,myCursor,&closest[0],&closest[1]);
+    XDefineCursor(theDisplay,can_xid,myCursor);
+}
+
+/*--------------------------------------------------------------------*/
+
+void
 do_mode_info( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
@@ -995,7 +1018,6 @@ do_mode_info( Widget w, XtPointer client_data, XtPointer call_data)
     XRecolorCursor(theDisplay,myCursor,&closest[0],&closest[1]);
     XDefineCursor(theDisplay,can_xid,myCursor);
 }
-
 /*--------------------------------------------------------------------*/
 
 void
@@ -1546,7 +1568,7 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
     int root_x_return, root_y_return,win_x,win_y;
     unsigned int mask_return;
     int doit;
-char	eventname[64];
+    char	eventname[64];
 
     /* check for data file loaded at startup */
     if (startup_file)
@@ -1686,6 +1708,7 @@ char	eventname[64];
 			    XmToggleButtonSetState(setting_mode_toggle_pick, 0, FALSE);
 			    XmToggleButtonSetState(setting_mode_toggle_erase, 0, FALSE);
 			    XmToggleButtonSetState(setting_mode_toggle_restore, 0, FALSE);
+			    XmToggleButtonSetState(setting_mode_toggle_grab, 0, FALSE);
 			    XmToggleButtonSetState(setting_mode_toggle_info, 0, FALSE);
 
 			    myCursor = XCreateFontCursor(theDisplay, XC_target);
@@ -1705,6 +1728,7 @@ char	eventname[64];
 			    XmToggleButtonSetState(setting_mode_toggle_pick, 1, FALSE);
 			    XmToggleButtonSetState(setting_mode_toggle_erase, 0, FALSE);
 			    XmToggleButtonSetState(setting_mode_toggle_restore, 0, FALSE);
+			    XmToggleButtonSetState(setting_mode_toggle_grab, 0, FALSE);
 			    XmToggleButtonSetState(setting_mode_toggle_info, 0, FALSE);
 
 			    myCursor = XCreateFontCursor(theDisplay, XC_target);
@@ -1724,6 +1748,7 @@ char	eventname[64];
 			    XmToggleButtonSetState(setting_mode_toggle_pick, 0, FALSE);
 			    XmToggleButtonSetState(setting_mode_toggle_erase, 1, FALSE);
 			    XmToggleButtonSetState(setting_mode_toggle_restore, 0, FALSE);
+			    XmToggleButtonSetState(setting_mode_toggle_grab, 0, FALSE);
 			    XmToggleButtonSetState(setting_mode_toggle_info, 0, FALSE);
 
 			    myCursor = XCreateFontCursor(theDisplay, XC_exchange);
@@ -1743,6 +1768,7 @@ char	eventname[64];
 			    XmToggleButtonSetState(setting_mode_toggle_pick, 0, FALSE);
 			    XmToggleButtonSetState(setting_mode_toggle_erase, 0, FALSE);
 			    XmToggleButtonSetState(setting_mode_toggle_restore, 1, FALSE);
+			    XmToggleButtonSetState(setting_mode_toggle_grab, 0, FALSE);
 			    XmToggleButtonSetState(setting_mode_toggle_info, 0, FALSE);
 
 			    myCursor = XCreateFontCursor(theDisplay, XC_exchange);
@@ -1757,11 +1783,32 @@ char	eventname[64];
 	    case 'T':
 	    case 't':
 			    {
+			    mode_pick = MODE_GRAB;
+			    XmToggleButtonSetState(setting_mode_toggle_toggle, 0, FALSE);
+			    XmToggleButtonSetState(setting_mode_toggle_pick, 0, FALSE);
+			    XmToggleButtonSetState(setting_mode_toggle_erase, 0, FALSE);
+			    XmToggleButtonSetState(setting_mode_toggle_restore, 0, FALSE);
+			    XmToggleButtonSetState(setting_mode_toggle_grab, 1, FALSE);
+			    XmToggleButtonSetState(setting_mode_toggle_info, 0, FALSE);
+
+			    myCursor = XCreateFontCursor(theDisplay, XC_target);
+			    XAllocNamedColor(theDisplay,colormap,"blue",&closest[0],&exact[0]);
+			    XAllocNamedColor(theDisplay,colormap,"coral",&closest[1],&exact[1]);
+			    XRecolorCursor(theDisplay,myCursor,&closest[0],&closest[1]);
+			    XDefineCursor(theDisplay,can_xid,myCursor);
+			    }
+		    break;
+	    case '}':
+	    case ']':
+	    case 'Y':
+	    case 'y':
+			    {
 			    mode_pick = MODE_INFO;
 			    XmToggleButtonSetState(setting_mode_toggle_toggle, 0, FALSE);
 			    XmToggleButtonSetState(setting_mode_toggle_pick, 0, FALSE);
 			    XmToggleButtonSetState(setting_mode_toggle_erase, 0, FALSE);
 			    XmToggleButtonSetState(setting_mode_toggle_restore, 0, FALSE);
+			    XmToggleButtonSetState(setting_mode_toggle_grab, 0, FALSE);
 			    XmToggleButtonSetState(setting_mode_toggle_info, 1, FALSE);
 
 			    myCursor = XCreateFontCursor(theDisplay, XC_target);
@@ -1862,7 +1909,7 @@ char	eventname[64];
       /* Check for mouse pressed and not pressed and released. */
       if(event->xany.type == ButtonPress)
       {
-	  /* If left mouse button is pushed then toggle, pick, erase, restore, or info. */
+	  /* If left mouse button is pushed then toggle, pick, erase, restore, grab, or info. */
 	  if ((event->xbutton.button == 1 && mode_reverse_mouse == MB_NO)
 		|| (event->xbutton.button == 3 && mode_reverse_mouse == MB_YES))
 	    {
@@ -1873,14 +1920,14 @@ char	eventname[64];
 	    while (doit)
 		{
 
-		if(mode_pick == MODE_TOGGLE)
+		if (mode_pick == MODE_TOGGLE)
 		    status = mbedit_action_mouse_toggle(
 			    x_loc, y_loc,
 			    mplot_width,mexager,
 			    mx_interval,my_interval,
 			    mplot_size,mshow_detects, mshow_flagged,mshow_time,
 			    &nbuffer,&ngood,&icurrent,&mnplot);
-		else if(mode_pick == MODE_PICK)
+		else if (mode_pick == MODE_PICK)
 		    status = mbedit_action_mouse_pick(
 			    x_loc, y_loc,
 			    mplot_width,mexager,
@@ -1896,6 +1943,13 @@ char	eventname[64];
 			    &nbuffer,&ngood,&icurrent,&mnplot);
 		else if (mode_pick == MODE_RESTORE) 
 		    status = mbedit_action_mouse_restore(
+			    x_loc, y_loc,
+			    mplot_width,mexager,
+			    mx_interval,my_interval,
+			    mplot_size,mshow_detects, mshow_flagged,mshow_time,
+			    &nbuffer,&ngood,&icurrent,&mnplot);
+		else if (mode_pick == MODE_GRAB) 
+		    status = mbedit_action_mouse_grab(
 			    x_loc, y_loc,
 			    mplot_width,mexager,
 			    mx_interval,my_interval,
