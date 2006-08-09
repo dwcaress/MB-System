@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbfilter.c	1/16/95
- *    $Id: mbfilter.c,v 5.5 2006-01-18 15:17:00 caress Exp $
+ *    $Id: mbfilter.c,v 5.6 2006-08-09 22:41:27 caress Exp $
  *
  *    Copyright (c) 1995, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -32,6 +32,9 @@
  * Date:	January 16, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2006/01/18 15:17:00  caress
+ * Added stdlib.h include.
+ *
  * Revision 5.4  2005/03/25 04:43:00  caress
  * Standardized the string lengths used for filenames and comment data.
  *
@@ -179,7 +182,7 @@ struct mbfilter_ping_struct
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbfilter.c,v 5.5 2006-01-18 15:17:00 caress Exp $";
+	static char rcs_id[] = "$Id: mbfilter.c,v 5.6 2006-08-09 22:41:27 caress Exp $";
 	static char program_name[] = "MBFILTER";
 	static char help_message[] =  
 "mbfilter applies one or more simple filters to the specified\n\t\
@@ -1649,7 +1652,7 @@ int hipass_median(int verbose, int n, double *val, double *wgt,
 	/* sort values and get median value */
 	if (n > 0)
 		{
-		qsort((char *)val,n,sizeof(double),mb_double_compare);
+		qsort((char *)val,n,sizeof(double),(void *)mb_double_compare);
 		*hipass = val[0] - val[n/2];
 		}
 
@@ -1816,7 +1819,7 @@ int smooth_median(int verbose, double original,
 	/* sort values and get median value */
 	if (n > 0)
 		{
-		qsort((char *)val,n,sizeof(double),mb_double_compare);
+		qsort((char *)val,n,sizeof(double),(void *)mb_double_compare);
 		*smooth = val[n/2];
 		}
 

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_reson8k.c	3.00	8/20/94
- *	$Id: mbsys_reson8k.c,v 5.5 2006-03-06 21:47:48 caress Exp $
+ *	$Id: mbsys_reson8k.c,v 5.6 2006-08-09 22:41:27 caress Exp $
  *
  *    Copyright (c) 2001, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	September 3, 2001
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2006/03/06 21:47:48  caress
+ * Implemented changes suggested by Bob Courtney of the Geological Survey of Canada to support translating Reson data to GSF.
+ *
  * Revision 5.4  2005/11/05 00:48:04  caress
  * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
  *
@@ -58,7 +61,7 @@
 int mbsys_reson8k_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_reson8k.c,v 5.5 2006-03-06 21:47:48 caress Exp $";
+ static char res_id[]="$Id: mbsys_reson8k.c,v 5.6 2006-08-09 22:41:27 caress Exp $";
 	char	*function_name = "mbsys_reson8k_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -1563,9 +1566,6 @@ int mbsys_reson8k_makess(int verbose, void *mbio_ptr, void *store_ptr,
 	int	goodbeam1, goodbeam2, pixel1, pixel2, ipixel;
 	int	i, j, k, jj, kk, l, m;
 
-	/* compare function for qsort */
-	int mb_double_compare();
-
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
@@ -1637,7 +1637,7 @@ int mbsys_reson8k_makess(int verbose, void *mbio_ptr, void *store_ptr,
 		if (pixel_size_set == MB_NO
 		    && nbathsort > 0)
 		    {
-		    qsort((char *)bathsort, nbathsort, sizeof(double),mb_double_compare);
+		    qsort((char *)bathsort, nbathsort, sizeof(double),(void *)mb_double_compare);
 		    pixel_size_calc = 2 * tan(DTR * (*swath_width)) * bathsort[nbathsort/2] 
 					/ MBSYS_RESON8K_MAXPIXELS;
 		    pixel_size_calc = MAX(pixel_size_calc, bathsort[nbathsort/2] * sin(DTR * 0.1));

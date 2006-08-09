@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_reson7k.c	3.00	3/23/2004
- *	$Id: mbsys_reson7k.c,v 5.11 2006-03-14 01:48:08 caress Exp $
+ *	$Id: mbsys_reson7k.c,v 5.12 2006-08-09 22:41:27 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -26,6 +26,9 @@
  * Date:	March 23, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.11  2006/03/14 01:48:08  caress
+ * Changed log2() and exp2() calls to log() and exp() for compatitibility with non-POSIX compliant operating systems.
+ *
  * Revision 5.10  2005/11/05 00:48:04  caress
  * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
  *
@@ -82,7 +85,7 @@
 /* turn on debug statements here */
 /* #define MSYS_RESON7KR_DEBUG 1 */
 
-static char res_id[]="$Id: mbsys_reson7k.c,v 5.11 2006-03-14 01:48:08 caress Exp $";
+static char res_id[]="$Id: mbsys_reson7k.c,v 5.12 2006-08-09 22:41:27 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_zero7kheader(int verbose, s7k_header	*header, 
@@ -7397,9 +7400,6 @@ int mbsys_reson7k_makess(int verbose, void *mbio_ptr, void *store_ptr,
 	unsigned int	*uintptr;
 	int	i, k, kk;
 
-	/* compare function for qsort */
-	int mb_double_compare();
-
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
@@ -7474,7 +7474,7 @@ int mbsys_reson7k_makess(int verbose, void *mbio_ptr, void *store_ptr,
 		if (pixel_size_set == MB_NO
 		    && nbathsort > 0)
 		    {
-		    qsort((char *)bathsort, nbathsort, sizeof(double),mb_double_compare);
+		    qsort((char *)bathsort, nbathsort, sizeof(double),(void *)mb_double_compare);
 		    pixel_size_calc = 2 * tan(DTR * (*swath_width)) * bathsort[nbathsort/2] 
 					/ MBSYS_RESON7K_MAX_PIXELS;
 /* fprintf(stderr,"swath_width:%f altitude:%f pixel_size_calc:%f\n",

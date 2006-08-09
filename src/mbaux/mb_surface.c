@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_surface.c	5/2/94
- *    $Id: mb_surface.c,v 5.2 2005-03-25 04:09:53 caress Exp $
+ *    $Id: mb_surface.c,v 5.3 2006-08-09 22:41:27 caress Exp $
  *
  *    Inclusion in MB-System:
  *    Copyright (c) 1994, 2003 by
@@ -57,6 +57,9 @@
  * Date:	May 2, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2005/03/25 04:09:53  caress
+ * Problems with global variables in mb_surface.c stomping on similarly named global variables in some programs has been fixed.
+ *
  * Revision 5.1  2003/04/29 20:27:48  caress
  * Fixed multiple definitions of "error".
  *
@@ -536,7 +539,7 @@ int set_index () {
 			data[k].index = i * block_ny + j;
 	}
 	
-	qsort ((char *)data, npoints, sizeof (struct MB_SURFACE_DATA), compare_points);
+	qsort ((char *)data, npoints, sizeof (struct MB_SURFACE_DATA), (void *)compare_points);
 	
 	npoints -= k_skipped;
 	
@@ -1275,7 +1278,7 @@ int	throw_away_unusables()
 	
 	/* Sort the data  */
 	
-	qsort ((char *)data, npoints, sizeof (struct MB_SURFACE_DATA), compare_points);
+	qsort ((char *)data, npoints, sizeof (struct MB_SURFACE_DATA), (void *)compare_points);
 	
 	/* If more than one datum is indexed to same node, only the first should be kept.
 		Mark the additional ones as OUTSIDE
@@ -1293,7 +1296,7 @@ int	throw_away_unusables()
 	}
 	/* Sort again; this time the OUTSIDE points will be thrown away  */
 	
-	qsort ((char *)data, npoints, sizeof (struct MB_SURFACE_DATA), compare_points);
+	qsort ((char *)data, npoints, sizeof (struct MB_SURFACE_DATA), (void *)compare_points);
 	npoints -= n_outside;
 	status = mb_realloc(local_verbose, npoints * sizeof(struct MB_SURFACE_DATA), &data, &local_error);
 	if (local_verbose && (n_outside)) {

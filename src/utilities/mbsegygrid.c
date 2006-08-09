@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsegygrid.c	6/12/2004
- *    $Id: mbsegygrid.c,v 5.11 2006-06-22 04:45:43 caress Exp $
+ *    $Id: mbsegygrid.c,v 5.12 2006-08-09 22:41:27 caress Exp $
  *
  *    Copyright (c) 2004, 2005, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	June 12, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.11  2006/06/22 04:45:43  caress
+ * Working towards 5.1.0
+ *
  * Revision 5.10  2006/06/16 19:30:58  caress
  * Check in after the Santa Monica Basin Mapping AUV Expedition.
  *
@@ -106,7 +109,7 @@ char	*getenv();
 	stderr if verbose > 1) */
 FILE	*outfp;
 
-static char rcs_id[] = "$Id: mbsegygrid.c,v 5.11 2006-06-22 04:45:43 caress Exp $";
+static char rcs_id[] = "$Id: mbsegygrid.c,v 5.12 2006-08-09 22:41:27 caress Exp $";
 static char program_name[] = "MBsegygrid";
 static char help_message[] =  "MBsegygrid grids trace data from segy data files.";
 static char usage_message[] = "MBsegygrid -Ifile -Oroot [-Ashotscale/timescale \n\
@@ -1003,9 +1006,12 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 		}
 
 	/* inititialize grd header */
-	GMT_begin(argc, argv);
-	GMT_grdio_init();
-	GMT_grd_init (&grd, argc, argv, MB_NO);
+	GMT_program = program_name;
+	GMT_grd_init (&grd, 1, argv, FALSE);
+	GMT_io_init ();
+	GMT_grdio_init ();
+	GMT_make_fnan (GMT_f_NaN);
+	GMT_make_dnan (GMT_d_NaN);
 
 	/* copy values to grd header */
 	grd.nx = nx;
@@ -1056,6 +1062,11 @@ k = j * nx + i;
 fprintf(outfp,"%d %d %d %f\n",i,j,k,grid[k]);
 }*/
 	GMT_write_grd(outfile, &grd, grid, w, e, s, n, pad, complex);
+	    
+	/* free GMT memory */
+	GMT_free ((void *)GMT_io.skip_if_NaN);
+	GMT_free ((void *)GMT_io.in_col_type);
+	GMT_free ((void *)GMT_io.out_col_type);
 
 	/* print output debug statements */
 	if (verbose >= 2)

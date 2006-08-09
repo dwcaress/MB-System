@@ -1,4 +1,4 @@
-.TH mbedit l "23 March 2005" "MB-System 5.0" "MB-System 5.0"
+.TH mbedit l "7 August 2006" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbedit\fP - Interactive editor used to flag bad bathymetry values in swath sonar bathymetry data.
 
@@ -81,7 +81,10 @@ the nearest bathymetry point. In erase mode the left mouse button
 is held down as the cursor is dragged over the data; all bathymetry
 points touched by the mouse are flagged. Restore mode is just like
 erase mode, except that the affected bathymetry values are unflagged.
-Finally, info mode acts like pick mode, except that instead of flagging
+In grab mode, a red rectangle is drawn as the mouse is dragged 
+with the left button down. When the button is released, all 
+unflagged soundings within the rectangle are flagged. Finally, 
+info mode acts like pick mode, except that instead of flagging
 the nearest sounding, the program displays information about the
 selected ping and sounding above the bathymetry profile box.
 A few keyboard macros described below add additional flexibility
@@ -96,14 +99,12 @@ includes a \fBFilters...\fP button that brings up a dialog
 which sets the automatic flagging functions. At present, these
 include a median filter algorithm, a "wrong side filter", "data 
 cutting" by beam number, and "data cutting" by acrosstrack
-distance. The "wrong side" filter
-flags soundings positioned on the "wrong" side of the
-swath (port soundings incorrectly located on the starboard side,
-or vice versa). The two "data cutting" algorithms flag
-beams inside or outside of specified beam number ranges
-or acrosstrack distance ranges, respectively. 
-Additional automatic filters will be added
-in later versions.
+distance. The "wrong side" filter flags soundings positioned on 
+the "wrong" side of the swath (port soundings incorrectly located 
+on the starboard side, or vice versa). The two "data cutting" 
+algorithms flag beams inside or outside of specified beam number 
+ranges or acrosstrack distance ranges, respectively.  Additional 
+automatic filters will be added in later versions.
 
 If the ping includes flagged depths outside the plotting box, the ping label
 is underlain by a green box. If
@@ -656,16 +657,20 @@ is set to \fIErase\fP, then the cursor will change to an erasor and
 any beam with the cursor while the left mouse button is held down
 will be flagged.  If mode is set to \fIRestore\fP, the behavior will
 be the same as for \fIErase\fP except that the affected beams will be
-unflagged instead of flagged. Info mode acts like pick mode, 
-except that instead of flagging
+unflagged instead of flagged. In \fIGrab\fP mode, a red rectangle is drawn 
+as the mouse is dragged with the left button down. When the button is 
+released, all unflagged soundings within the rectangle are flagged.  
+\fBInfo\fP mode acts like pick mode, except that instead of flagging
 the nearest sounding, the program displays information about the
 selected ping and sounding above the bathymetry profile box. 
-The edit mode can also be set using
-key macros (see the keyboard action section):  
+The edit mode can also be set using key macros (see the keyboard 
+action section):  
+.br
  	Toggle:		'Q', 'q', 'U', 'u' 
  	Pick:		'W', 'w', 'I', 'i' 
  	Erase:		'E', 'e', 'O', 'o' 
  	Restore:	'R', 'r', 'P', 'p' 
+ 	Grab:		'Y', 'y', '}, ']' 
  	Info:		'T', 't', '{', '[' 
 .TP
 .B Unflag View
@@ -783,6 +788,14 @@ while the left mouse button is held down to be unflagged.
 The edit mode can also be set using the \fBMode\fP toggle buttons.
 .TP
 .B 'T', 't', '{', or '['
+.B Grab Mode:
+Pressing one of these keys sets the edit mode to "grab" so that
+dragging the left mouse button will draw a red rectangle. Any beams 
+inside the rectangle when the left mouse button is released will 
+be flagged. The edit mode can also be set using the \fBMode\fP 
+toggle buttons.
+.TP
+.B 'Y', 'y', '}', or ']'
 .B Info Mode:
 Pressing one of these keys sets the edit mode to "info" so that
 clicking the left mouse button will cause information about the

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrid.c	5/2/94
- *    $Id: mbgrid.c,v 5.36 2006-06-22 04:45:43 caress Exp $
+ *    $Id: mbgrid.c,v 5.37 2006-08-09 22:41:27 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 2000, 2002, 2003, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -38,6 +38,9 @@
  * Rererewrite:	January 2, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.36  2006/06/22 04:45:43  caress
+ * Working towards 5.1.0
+ *
  * Revision 5.35  2006/06/16 19:30:58  caress
  * Check in after the Santa Monica Basin Mapping AUV Expedition.
  *
@@ -421,7 +424,7 @@ double mbgrid_erf();
 FILE	*outfp;
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbgrid.c,v 5.36 2006-06-22 04:45:43 caress Exp $";
+static char rcs_id[] = "$Id: mbgrid.c,v 5.37 2006-08-09 22:41:27 caress Exp $";
 static char program_name[] = "mbgrid";
 static char help_message[] =  "mbgrid is an utility used to grid bathymetry, amplitude, or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbgrid -Ifilelist -Oroot \
@@ -3210,7 +3213,7 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 				{
 				value = data[kgrid];
 				qsort((char *)value,cnt[kgrid],sizeof(double),
-					mb_double_compare);
+					(void *)mb_double_compare);
 				if (grid_mode == MBGRID_MEDIAN_FILTER)
 					{
 					grid[kgrid] = value[cnt[kgrid]/2];
@@ -4363,6 +4366,7 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 		proj_status = mb_proj_free(verbose, &(pjptr), &error);
 
 	/* run mbm_grdplot */
+fprintf(stderr,"should run mbm_grdplot gridkind:%d\n",gridkind);
 	if (gridkind == MBGRID_GMTGRD)
 		{
 		/* execute mbm_grdplot */
@@ -4738,9 +4742,12 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 		}
 
 	/* inititialize grd header */
-	GMT_begin(argc, argv);
-	GMT_grdio_init();
-	GMT_grd_init (&grd, argc, argv, MB_NO);
+	GMT_program = program_name;
+	GMT_grd_init (&grd, 1, argv, FALSE);
+	GMT_io_init ();
+	GMT_grdio_init ();
+	GMT_make_fnan (GMT_f_NaN);
+	GMT_make_dnan (GMT_d_NaN);
 
 	/* copy values to grd header */
 	grd.nx = nx;
@@ -4814,6 +4821,11 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 		/* free memory for output array */
 		mb_free(verbose, &a, error);
 		}
+	    
+	/* free GMT memory */
+	GMT_free ((void *)GMT_io.skip_if_NaN);
+	GMT_free ((void *)GMT_io.in_col_type);
+	GMT_free ((void *)GMT_io.out_col_type);
 
 	/* print output debug statements */
 	if (verbose >= 2)

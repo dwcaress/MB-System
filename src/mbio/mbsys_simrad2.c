@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad2.c	3.00	10/9/98
- *	$Id: mbsys_simrad2.c,v 5.24 2006-07-27 18:42:52 caress Exp $
+ *	$Id: mbsys_simrad2.c,v 5.25 2006-08-09 22:41:27 caress Exp $
  *
  *    Copyright (c) 1998, 2001, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -31,6 +31,9 @@
  * Date:	October 9, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.24  2006/07/27 18:42:52  caress
+ * Working towards 5.1.0
+ *
  * Revision 5.23  2006/02/07 03:12:14  caress
  * Another shot at dealing with broken simrad sidescan records. Now we will keep the raw sidescan data but not use it to make the binned sidescan returned by the standard mbio extract functions.
  *
@@ -136,7 +139,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_simrad2.h"
 
-static char res_id[]="$Id: mbsys_simrad2.c,v 5.24 2006-07-27 18:42:52 caress Exp $";
+static char res_id[]="$Id: mbsys_simrad2.c,v 5.25 2006-08-09 22:41:27 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_simrad2_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
@@ -3497,9 +3500,6 @@ int mbsys_simrad2_makess(int verbose, void *mbio_ptr, void *store_ptr,
 	int	first, last, k1, k2;
 	int	i, k, kk;
 
-	/* compare function for qsort */
-	int mb_double_compare();
-
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
@@ -3616,7 +3616,7 @@ int mbsys_simrad2_makess(int verbose, void *mbio_ptr, void *store_ptr,
 		if (pixel_size_set == MB_NO
 		    && nbathsort > 0)
 		    {
-		    qsort((char *)bathsort, nbathsort, sizeof(double),mb_double_compare);
+		    qsort((char *)bathsort, nbathsort, sizeof(double),(void *)mb_double_compare);
 		    pixel_size_calc = 2 * tan(DTR * (*swath_width)) * bathsort[nbathsort/2] 
 					/ MBSYS_SIMRAD2_MAXPIXELS;
 		    pixel_size_calc = MAX(pixel_size_calc, bathsort[nbathsort/2] * sin(DTR * 0.1));

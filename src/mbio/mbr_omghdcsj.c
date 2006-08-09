@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_omghdcsj.c	3/10/99
- *	$Id: mbr_omghdcsj.c,v 5.7 2005-11-05 00:48:04 caress Exp $
+ *	$Id: mbr_omghdcsj.c,v 5.8 2006-08-09 22:41:27 caress Exp $
  *
  *    Copyright (c) 1999, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	March 10, 1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2005/11/05 00:48:04  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.6  2003/05/20 18:05:32  caress
  * Added svp_source to data source parameters.
  *
@@ -120,7 +123,7 @@ int mbr_wt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_omghdcsj(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_omghdcsj.c,v 5.7 2005-11-05 00:48:04 caress Exp $";
+	static char res_id[]="$Id: mbr_omghdcsj.c,v 5.8 2006-08-09 22:41:27 caress Exp $";
 	char	*function_name = "mbr_register_omghdcsj";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -253,7 +256,7 @@ int mbr_info_omghdcsj(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_omghdcsj.c,v 5.7 2005-11-05 00:48:04 caress Exp $";
+	static char res_id[]="$Id: mbr_omghdcsj.c,v 5.8 2006-08-09 22:41:27 caress Exp $";
 	char	*function_name = "mbr_info_omghdcsj";
 	int	status = MB_SUCCESS;
 
@@ -323,7 +326,7 @@ int mbr_info_omghdcsj(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_omghdcsj(int verbose, void *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_omghdcsj.c,v 5.7 2005-11-05 00:48:04 caress Exp $";
+ static char res_id[]="$Id: mbr_omghdcsj.c,v 5.8 2006-08-09 22:41:27 caress Exp $";
 	char	*function_name = "mbr_alm_omghdcsj";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -599,9 +602,6 @@ int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	int	ifix;
 	int	first, last, k1, k2;
 	int	i, j, k, jj, kk;
-
-	/* compare function for qsort */
-	int mb_double_compare();
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -1831,7 +1831,7 @@ int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    }
 
 		/* get median depth and sidescan pixel size */
-		qsort((char *)bathsort, nbathsort, sizeof(double),mb_double_compare);
+		qsort((char *)bathsort, nbathsort, sizeof(double),(void *)mb_double_compare);
 		pixel_size_calc = 2 * tan(DTR * swathwidth) * bathsort[nbathsort/2] 
 				    / MBF_OMGHDCSJ_MAX_PIXELS;
 		pixel_size_calc = MAX(pixel_size_calc, bathsort[nbathsort/2] * sin(DTR * 0.1));

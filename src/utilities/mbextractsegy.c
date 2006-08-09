@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbextractsegy.c	4/18/2004
- *    $Id: mbextractsegy.c,v 5.10 2006-06-22 04:45:43 caress Exp $
+ *    $Id: mbextractsegy.c,v 5.11 2006-08-09 22:41:27 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	April 18, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.10  2006/06/22 04:45:43  caress
+ * Working towards 5.1.0
+ *
  * Revision 5.9  2006/06/16 19:30:58  caress
  * Check in after the Santa Monica Basin Mapping AUV Expedition.
  *
@@ -76,7 +79,7 @@
 #define MBES_ROUTE_WAYPOINT_STARTLINE	3
 #define MBES_ROUTE_WAYPOINT_ENDLINE	4
 
-static char rcs_id[] = "$Id: mbextractsegy.c,v 5.10 2006-06-22 04:45:43 caress Exp $";
+static char rcs_id[] = "$Id: mbextractsegy.c,v 5.11 2006-08-09 22:41:27 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
@@ -397,6 +400,9 @@ main (int argc, char **argv)
 		fprintf(stderr,"\nusage: %s\n", usage_message);
 		exit(error);
 		}
+		
+	/* set starting line number */
+	linenumber = startline;
 
 	/* if specified read route file */
 	if (route_file_set == MB_YES)
@@ -480,7 +486,6 @@ main (int argc, char **argv)
 		rangelast = 1000 * rangethreshold;
 		seafloordepthmin = -1.0;
 		seafloordepthmax = -1.0;
-		linenumber = startline;
 
 		/* output status */
 		if (verbose > 0)
@@ -1081,6 +1086,9 @@ main (int argc, char **argv)
 				    lineroot, linenumber, scale, lineroot, linenumber, lineroot, linenumber);
 		    fprintf(stderr, "%s_%4.4d_sectionplot.cmd\n\n",
 				    lineroot, linenumber);
+				    
+		    /* increment line number */
+		    linenumber++;
 		    }
 		}
 

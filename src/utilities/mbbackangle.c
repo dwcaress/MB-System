@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbbackangle.c	1/6/95
- *    $Id: mbbackangle.c,v 5.17 2006-04-26 22:05:26 caress Exp $
+ *    $Id: mbbackangle.c,v 5.18 2006-08-09 22:41:27 caress Exp $
  *
  *    Copyright (c) 1995, 2000, 2002, 2003, 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	January 6, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.17  2006/04/26 22:05:26  caress
+ * Changes to handle MBARI Mapping AUV data better.
+ *
  * Revision 5.16  2006/04/19 18:29:04  caress
  * Added output of global correction table.
  *
@@ -157,7 +160,7 @@ int output_model(int verbose, FILE *tfp,
 	int *nmean, double *mean, double *sigma, 
 	int *error);
 						
-static char rcs_id[] = "$Id: mbbackangle.c,v 5.17 2006-04-26 22:05:26 caress Exp $";
+static char rcs_id[] = "$Id: mbbackangle.c,v 5.18 2006-08-09 22:41:27 caress Exp $";
 static char program_name[] = "mbbackangle";
 
 /*--------------------------------------------------------------------*/
@@ -1853,8 +1856,12 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 		}
 
 	/* inititialize grd header */
-	GMT_grdio_init();
-	GMT_grd_init (&grd, argc, argv, MB_NO);
+	GMT_program = program_name;
+	GMT_grd_init (&grd, 1, argv, FALSE);
+	GMT_io_init ();
+	GMT_grdio_init ();
+	GMT_make_fnan (GMT_f_NaN);
+	GMT_make_dnan (GMT_d_NaN);
 
 	/* copy values to grd header */
 	grd.nx = nx;
@@ -1928,6 +1935,11 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 		/* free memory for output array */
 		mb_free(verbose, &a, error);
 		}
+	    
+	/* free GMT memory */
+	GMT_free ((void *)GMT_io.skip_if_NaN);
+	GMT_free ((void *)GMT_io.in_col_type);
+	GMT_free ((void *)GMT_io.out_col_type);
 
 	/* print output debug statements */
 	if (verbose >= 2)
