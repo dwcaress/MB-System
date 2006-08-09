@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grdplot.perl	8/6/95
-#    $Id: mbm_grdplot.perl,v 5.23 2006-08-04 03:56:41 caress Exp $
+#    $Id: mbm_grdplot.perl,v 5.24 2006-08-09 22:36:23 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 2000, 2003 by 
 #    D. W. Caress (caress@mbari.org)
@@ -68,10 +68,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   October 19, 1994
 #
 # Version:
-#   $Id: mbm_grdplot.perl,v 5.23 2006-08-04 03:56:41 caress Exp $
+#   $Id: mbm_grdplot.perl,v 5.24 2006-08-09 22:36:23 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.23  2006/08/04 03:56:41  caress
+#   Working towards 5.1.0 release.
+#
 #   Revision 5.22  2006/07/05 19:50:21  caress
 #   Working towards 5.1.0beta
 #
@@ -1257,23 +1260,31 @@ else
 `echo $xmax $ymax >> tmp$$.dat`;
 `echo $xmin $ymax >> tmp$$.dat`;
 @projected = `mapproject tmp$$.dat -J$projection$projection_pars -R$bounds_plot 2>&1 `;
+print "mapproject tmp$$.dat -J$projection$projection_pars -R$bounds_plot \n";
 `/bin/rm -f tmp$$.dat`;
+$cnt = 0;
 while (@projected)
 	{
 	$line = shift @projected;
-	if (!$xxmin)
+	$cnt++;
+	
+print $line;
+	if ($cnt == 1)
 		{
 		($xxmin,$yymin) = $line =~ /(\S+)\s+(\S+)/;
 		$xxmax = $xxmin;
 		$yymax = $yymin;
+print "set: xx: $xx : $xxmin $xxmax | yy: $yy : $yymin $yymax\n";
 		}
 	else
 		{
 		($xx,$yy) = $line =~ /(\S+)\s+(\S+)/;
+print "before: xx: $xx : $xxmin $xxmax | yy: $yy : $yymin $yymax\n";
 		$xxmin = ($xx < $xxmin ? $xx : $xxmin);
 		$xxmax = ($xx > $xxmax ? $xx : $xxmax);
 		$yymin = ($yy < $yymin ? $yy : $yymin);
 		$yymax = ($yy > $yymax ? $yy : $yymax);
+print "after: xx: $xx : $xxmin $xxmax | yy: $yy : $yymin $yymax\n\n";
 		}
 	}
 $dxx = $xxmax - $xxmin;
