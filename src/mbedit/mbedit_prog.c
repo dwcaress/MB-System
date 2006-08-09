@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	4/8/93
- *    $Id: mbedit_prog.c,v 5.32 2006-08-04 03:56:41 caress Exp $
+ *    $Id: mbedit_prog.c,v 5.33 2006-08-09 22:35:33 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997, 2000, 2003, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -27,6 +27,9 @@
  * Date:	September 19, 2000 (New version - no buffered i/o)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.32  2006/08/04 03:56:41  caress
+ * Working towards 5.1.0 release.
+ *
  * Revision 5.31  2006/07/06 05:30:57  caress
  * Working more towards 5.1.0beta
  *
@@ -334,6 +337,11 @@
 #define MBEDIT_VIEW_ALONGTRACK		1
 #define MBEDIT_VIEW_ACROSSTRACK		2
 
+/* grab modes */
+#define MBEDIT_GRAB_START		0
+#define MBEDIT_GRAB_MOVE		1
+#define MBEDIT_GRAB_END			2
+
 /* ping structure definition */
 struct mbedit_ping_struct 
 	{
@@ -371,7 +379,7 @@ struct mbedit_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbedit_prog.c,v 5.32 2006-08-04 03:56:41 caress Exp $";
+static char rcs_id[] = "$Id: mbedit_prog.c,v 5.33 2006-08-09 22:35:33 caress Exp $";
 static char program_name[] = "MBedit";
 static char help_message[] =  
 "MBedit is an interactive editor used to identify and flag\n\
@@ -478,6 +486,13 @@ double	info_bathacrosstrack;
 double	info_bathalongtrack;
 int	info_detect;
 
+/* grab parameters */
+int	grab_set = MB_NO;
+int	grab_start_x;
+int	grab_start_y;
+int	grab_end_x;
+int	grab_end_y;
+
 /* save file control variables */
 int	esffile_open = MB_NO;
 struct mb_esf_struct esf;
@@ -543,9 +558,6 @@ double	*bathlist;
 #define	XG_DASHLINE	1
 int	ncolors;
 int	pixel_values[256];
-
-/* compare function for qsort */
-int mb_double_compare();
 
 /*--------------------------------------------------------------------*/
 int mbedit_init(int argc, char ** argv, int *startup_file)
@@ -2685,6 +2697,7 @@ int mbedit_action_mouse_restore(
 }
 /*--------------------------------------------------------------------*/
 int mbedit_action_mouse_grab(
+		int	grabmode,
 		int	x_loc, 
 		int	y_loc, 
 		int	plwd, 
@@ -2705,6 +2718,9 @@ int mbedit_action_mouse_grab(
 	int	status = MB_SUCCESS;
 	int	ix, iy, range, range_min;
 	int	iping, jbeam;
+	int	xgmin, xgmax, ygmin, ygmax;
+	int	found;
+	int	replot_label;
 	int	i, j;
 
 	/* print input debug statements */
@@ -2713,6 +2729,7 @@ int mbedit_action_mouse_grab(
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       grabmode:    %d\n",grabmode);
 		fprintf(stderr,"dbg2       x_loc:       %d\n",x_loc);
 		fprintf(stderr,"dbg2       y_loc:       %d\n",y_loc);
 		fprintf(stderr,"dbg2       plot_width:  %d\n",plwd);
@@ -2740,66 +2757,235 @@ int mbedit_action_mouse_grab(
 			status = mbedit_plot_ping(info_ping);
 			}
 
-		/* check if a beam has been picked */
-		iping = 0;
-		jbeam = 0;
-		range_min = 100000;
-		for (i=current_id;i<current_id+nplot;i++)
+		/* get start of grab rectangle */
+		if (grabmode == MBEDIT_GRAB_START)
 			{
-			for (j=0;j<ping[i].beams_bath;j++)
+			grab_set = MB_YES;
+			grab_start_x = x_loc;
+			grab_start_y = y_loc;
+			grab_end_x = x_loc;
+			grab_end_y = y_loc;
+
+			/* get grab rectangle to use */
+			if (grab_start_x <= grab_end_x)
 				{
-				if (ping[i].beamflag[j] != MB_FLAG_NULL)
+				xgmin = grab_start_x;
+				xgmax = grab_end_x;
+				}
+			else
+				{
+				xgmin = grab_end_x;
+				xgmax = grab_start_x;
+				}
+			if (grab_start_y <= grab_end_y)
+				{
+				ygmin = grab_start_y;
+				ygmax = grab_end_y;
+				}
+			else
+				{
+				ygmin = grab_end_y;
+				ygmax = grab_start_y;
+				}
+
+			/* draw grab ractangle */
+			xg_drawrectangle(mbedit_xgid,
+				xgmin,
+				ygmin, 
+				xgmax - xgmin, 
+				ygmax - ygmin,
+				pixel_values[RED],XG_SOLIDLINE);
+			}
+
+		/* change grab rectangle */
+		else if (grabmode == MBEDIT_GRAB_MOVE)
+			{
+			/* get grab rectangle to use */
+			if (grab_start_x <= grab_end_x)
+				{
+				xgmin = grab_start_x;
+				xgmax = grab_end_x;
+				}
+			else
+				{
+				xgmin = grab_end_x;
+				xgmax = grab_start_x;
+				}
+			if (grab_start_y <= grab_end_y)
+				{
+				ygmin = grab_start_y;
+				ygmax = grab_end_y;
+				}
+			else
+				{
+				ygmin = grab_end_y;
+				ygmax = grab_start_y;
+				}
+
+			/* undraw old grab rectangle */
+			xg_drawrectangle(mbedit_xgid,
+				xgmin,
+				ygmin, 
+				xgmax - xgmin, 
+				ygmax - ygmin,
+				pixel_values[WHITE],XG_SOLIDLINE);
+
+			/* update grab rectangle */
+			grab_set = MB_YES;
+			grab_end_x = x_loc;
+			grab_end_y = y_loc;
+
+			/* get grab rectangle to use */
+			if (grab_start_x <= grab_end_x)
+				{
+				xgmin = grab_start_x;
+				xgmax = grab_end_x;
+				}
+			else
+				{
+				xgmin = grab_end_x;
+				xgmax = grab_start_x;
+				}
+			if (grab_start_y <= grab_end_y)
+				{
+				ygmin = grab_start_y;
+				ygmax = grab_end_y;
+				}
+			else
+				{
+				ygmin = grab_end_y;
+				ygmax = grab_start_y;
+				}
+
+			/* draw grab rectangle */
+			xg_drawrectangle(mbedit_xgid,
+				xgmin,
+				ygmin, 
+				xgmax - xgmin, 
+				ygmax - ygmin,
+				pixel_values[RED],XG_SOLIDLINE);
+
+			/* replot beams on bounds of the grab box */
+			for (i=current_id;i<current_id+nplot;i++)
+			    {
+			    found = MB_NO;
+			    replot_label = MB_NO;
+			    for (j=0;j<ping[i].beams_bath;j++)
+			      {
+			      if (ping[i].beamflag[j] != MB_FLAG_NULL)
+				{
+				if (abs(ping[i].bath_x[j] - xgmin) <= 10
+					|| abs(ping[i].bath_x[j] - xgmax) <= 10
+					|| abs(ping[i].bath_y[j] - ygmin) <= 10
+					|| abs(ping[i].bath_y[j] - ygmax) <= 10)
 					{
-					ix = x_loc - ping[i].bath_x[j];
-					iy = y_loc - ping[i].bath_y[j];
-					range = (int) 
-						sqrt((double) (ix*ix + iy*iy));
-					if (range < range_min)
-						{
-						range_min = range;
-						iping = i;
-						jbeam = j;
-						}
+					/* replot the affected beams */
+		 			found = MB_YES;
+					status = mbedit_plot_beam(i,j);
+
+					/* if beam out of bounds replot label */
+					if (ping[i].bath_x[j] < xmin
+					    || ping[i].bath_x[j] > xmax
+					    || ping[i].bath_y[j] < ymin
+					    || ping[i].bath_y[j] > ymax)
+					    replot_label = MB_YES;
 					}
 				}
+			      }
+
+			    /* replot affected ping */
+			    if (found == MB_YES && *ngood > 0)
+					status = mbedit_plot_ping(i);
+			    if (replot_label == MB_YES)
+				    status = mbedit_plot_ping_label(i, MB_NO);
+			    }
 			}
 
-		/* check to see if closest beam is 
-			close enough to be id'd */
-		if (range_min <= MBEDIT_PICK_DISTANCE)
+		/* apply grab rectangle */
+		else if (grabmode == MBEDIT_GRAB_END)
 			{
-			info_set = MB_YES;
-			info_ping = iping;
-			info_beam = jbeam;
-			info_time_i[0] = ping[iping].time_i[0];
-			info_time_i[1] = ping[iping].time_i[1];
-			info_time_i[2] = ping[iping].time_i[2];
-			info_time_i[3] = ping[iping].time_i[3];
-			info_time_i[4] = ping[iping].time_i[4];
-			info_time_i[5] = ping[iping].time_i[5];
-			info_time_i[6] = ping[iping].time_i[6];
-			info_time_d = ping[iping].time_d;
-			info_navlon = ping[iping].navlon;
-			info_navlat = ping[iping].navlat;
-			info_speed = ping[iping].speed;
-			info_heading = ping[iping].heading;
-			info_altitude = ping[iping].altitude;
-			info_beams_bath = ping[iping].beams_bath;
-			info_beamflag = ping[iping].beamflag[jbeam];
-			info_bath = ping[iping].bath[jbeam];
-			info_bathacrosstrack = ping[iping].bathacrosstrack[jbeam];
-			info_bathalongtrack = ping[iping].bathalongtrack[jbeam];
-			info_detect = ping[iping].detect[jbeam];
-/*			fprintf(stderr,"\nping: %d beam:%d depth:%10.3f \n",
-				iping,jbeam,ping[iping].bath[jbeam]);*/
+			/* get final grab rectangle */
+			grab_set = MB_NO;
+			grab_end_x = x_loc;
+			grab_end_y = y_loc;
 
-			/* replot old info beam if needed */
-			status = mbedit_plot_beam(info_ping,info_beam);
-			status = mbedit_plot_info();
+			/* get grab rectangle to use */
+			if (grab_start_x <= grab_end_x)
+				{
+				xgmin = grab_start_x;
+				xgmax = grab_end_x;
+				}
+			else
+				{
+				xgmin = grab_end_x;
+				xgmax = grab_start_x;
+				}
+			if (grab_start_y <= grab_end_y)
+				{
+				ygmin = grab_start_y;
+				ygmax = grab_end_y;
+				}
+			else
+				{
+				ygmin = grab_end_y;
+				ygmax = grab_start_y;
+				}
 
+			/* look for beams to be erased */
+			for (i=current_id;i<current_id+nplot;i++)
+			    {
+			    found = MB_NO;
+			    replot_label = MB_NO;
+			    for (j=0;j<ping[i].beams_bath;j++)
+			      {
+			      if (mb_beam_ok(ping[i].beamflag[j]))
+				{
+				if (ping[i].bath_x[j] >= xgmin
+					&& ping[i].bath_x[j] <= xgmax
+					&& ping[i].bath_y[j] >= ygmin
+					&& ping[i].bath_y[j] <= ygmax
+					&& *ngood > 0)
+					{
+					/* write edit to save file */
+					if (esffile_open == MB_YES)
+					    {
+					    mb_ess_save(verbose, &esf,
+			    			    ping[i].time_d, 
+						    j, MBP_EDIT_FLAG, &error);
+					    }
+
+					/* reset the beam value */
+					if (mb_beam_ok(ping[i].beamflag[j]))
+					ping[i].beamflag[j] = 
+						MB_FLAG_FLAG + MB_FLAG_MANUAL;
+					if (verbose >= 1)
+						{
+						fprintf(stderr,"\nping: %d beam:%d depth:%10.3f ",
+							i,j,ping[i].bath[j]);
+						fprintf(stderr," flagged\n");
+						}
+
+					/* replot the affected beams */
+		 			found = MB_YES;
+					beam_save = MB_YES;
+					iping_save = i;
+					jbeam_save = j;
+
+					/* if beam out of bounds replot label */
+					if (ping[i].bath_x[j] < xmin
+					    || ping[i].bath_x[j] > xmax
+					    || ping[i].bath_y[j] < ymin
+					    || ping[i].bath_y[j] > ymax)
+					    replot_label = MB_YES;
+					}
+				}
+			      }
+			    }
+
+			/* replot everything */
+			status = mbedit_plot_all(plwd,exgr,xntrvl,yntrvl,
+				    plt_size,sh_dtcts,sh_flggd,sh_time,nplt,MB_NO);
 			}
-		else
-			info_set = MB_NO;
 
 		/* set some return values */
 		*nbuffer = nbuff;
@@ -4295,7 +4481,7 @@ int mbedit_filter_ping(int iping)
 				    }
 				if (nbathlist > 0)
 				    {
-				    qsort((char *)bathlist,nbathlist,sizeof(double),mb_double_compare);
+				    qsort((char *)bathlist,nbathlist,sizeof(double),(void *)mb_double_compare);
 				    bathmedian = bathlist[nbathlist/2];
 		 		    }
 			    	if (100 * fabs(ping[iping].bath[jbeam] - bathmedian) / ping[iping].altitude
@@ -5437,7 +5623,7 @@ int mbedit_plot_all(
 		}
 	if (nbathlist > 0)
 		{
-		qsort((char *)bathlist,nbathlist,sizeof(double),mb_double_compare);
+		qsort((char *)bathlist,nbathlist,sizeof(double),(void *)mb_double_compare);
 		bathmedian = bathlist[nbathlist/2];
 		}
 		
