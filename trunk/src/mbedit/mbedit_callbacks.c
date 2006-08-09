@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit_callbacks.c	3/28/97
- *    $Id: mbedit_callbacks.c,v 5.18 2006-08-04 03:56:41 caress Exp $
+ *    $Id: mbedit_callbacks.c,v 5.19 2006-08-09 22:35:32 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	March 28, 1997  GUI recast
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.18  2006/08/04 03:56:41  caress
+ * Working towards 5.1.0 release.
+ *
  * Revision 5.17  2006/06/16 19:30:58  caress
  * Check in after the Santa Monica Basin Mapping AUV Expedition.
  *
@@ -209,6 +212,9 @@ Widget	fileSelectionText;
 #define	OUTPUT_MODE_OUTPUT	0
 #define	OUTPUT_MODE_EDIT	1
 #define	OUTPUT_MODE_BROWSE	2
+#define GRAB_START		0
+#define GRAB_MOVE		1
+#define GRAB_END		2
 
 /* global variables */
 XtAppContext app_context;
@@ -997,7 +1003,7 @@ do_mode_grab( Widget w, XtPointer client_data, XtPointer call_data)
     mode_pick = MODE_GRAB;
 
     myCursor = XCreateFontCursor(theDisplay, XC_target);
-    XAllocNamedColor(theDisplay,colormap,"blue",&closest[0],&exact[0]);
+    XAllocNamedColor(theDisplay,colormap,"red",&closest[0],&exact[0]);
     XAllocNamedColor(theDisplay,colormap,"coral",&closest[1],&exact[1]);
     XRecolorCursor(theDisplay,myCursor,&closest[0],&closest[1]);
     XDefineCursor(theDisplay,can_xid,myCursor);
@@ -1568,6 +1574,7 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
     int root_x_return, root_y_return,win_x,win_y;
     unsigned int mask_return;
     int doit;
+    int	grab_mode;
     char	eventname[64];
 
     /* check for data file loaded at startup */
@@ -1915,6 +1922,7 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
 	    {
 	    x_loc = event->xbutton.x;
 	    y_loc = event->xbutton.y;
+	    grab_mode = GRAB_START;
 
 	    doit = 1;
 	    while (doit)
@@ -1949,12 +1957,19 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
 			    mplot_size,mshow_detects, mshow_flagged,mshow_time,
 			    &nbuffer,&ngood,&icurrent,&mnplot);
 		else if (mode_pick == MODE_GRAB) 
+		    {
 		    status = mbedit_action_mouse_grab(
+		    	    grab_mode,
 			    x_loc, y_loc,
 			    mplot_width,mexager,
 			    mx_interval,my_interval,
 			    mplot_size,mshow_detects, mshow_flagged,mshow_time,
 			    &nbuffer,&ngood,&icurrent,&mnplot);
+		    if (status == MB_SUCCESS)
+		    	grab_mode = GRAB_MOVE;
+		    else
+		    	grab_mode = GRAB_START;
+		    }
 		else if (mode_pick == MODE_INFO) 
 		    status = mbedit_action_mouse_info(
 			    x_loc, y_loc,
@@ -2040,6 +2055,19 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
 			}
 		    else
 		       doit = 0;
+		       
+		    /* if grab on but mouse released, end grab */
+		    if (grab_mode == GRAB_MOVE && doit == 0)
+			{
+			status = mbedit_action_mouse_grab(
+		    		GRAB_END, 
+				x_loc, y_loc,
+				mplot_width,mexager,
+				mx_interval,my_interval,
+				mplot_size,mshow_detects, mshow_flagged,mshow_time,
+				&nbuffer,&ngood,&icurrent,&mnplot);
+			grab_mode = GRAB_START;
+			}
 		}
 
 	    } /* end of left button events */
