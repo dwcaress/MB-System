@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbclean.c	2/26/93
- *    $Id: mbcleanold.c,v 5.5 2006-01-18 15:17:00 caress Exp $
+ *    $Id: mbcleanold.c,v 5.6 2006-08-09 22:41:27 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -28,6 +28,9 @@
  * by David Caress.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2006/01/18 15:17:00  caress
+ * Added stdlib.h include.
+ *
  * Revision 5.4  2005/03/25 04:43:02  caress
  * Standardized the string lengths used for filenames and comment data.
  *
@@ -198,7 +201,7 @@ struct bad_struct
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbcleanold.c,v 5.5 2006-01-18 15:17:00 caress Exp $";
+	static char rcs_id[] = "$Id: mbcleanold.c,v 5.6 2006-08-09 22:41:27 caress Exp $";
 	static char program_name[] = "MBCLEAN";
 	static char help_message[] =  "MBCLEAN identifies and flags artifacts in swath sonar bathymetry data\nBad beams  are  indentified  based  on  one simple criterion only: \nexcessive bathymetric slopes.   The default input and output streams \nare stdin and stdout.";
 	static char usage_message[] = "mbclean [-Amax -Blow/high -Cslope -Dmin/max \n\t-Fformat -Gfraction_low/fraction_high \n\t-Iinfile -Llonflip -Mmode -Nbuffersize -Ooutfile -Q -Xzap_beams \n\t-V -H]";
@@ -963,7 +966,7 @@ main (int argc, char **argv)
 				    }
 				}
 			}
-			qsort((char *)list,nlist,sizeof(double),mb_double_compare);
+			qsort((char *)list,nlist,sizeof(double),(void *)mb_double_compare);
 			median = list[nlist/2];
 			if (verbose >= 2)
 				{

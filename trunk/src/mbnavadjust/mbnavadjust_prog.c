@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavadjust_prog.c	3/23/00
- *    $Id: mbnavadjust_prog.c,v 5.21 2006-07-27 18:42:52 caress Exp $
+ *    $Id: mbnavadjust_prog.c,v 5.22 2006-08-09 22:41:27 caress Exp $
  *
  *    Copyright (c) 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	March 23, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.21  2006/07/27 18:42:52  caress
+ * Working towards 5.1.0
+ *
  * Revision 5.20  2006/06/16 19:30:58  caress
  * Check in after the Santa Monica Basin Mapping AUV Expedition.
  *
@@ -145,7 +148,7 @@ struct swathraw
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbnavadjust_prog.c,v 5.21 2006-07-27 18:42:52 caress Exp $";
+static char rcs_id[] = "$Id: mbnavadjust_prog.c,v 5.22 2006-08-09 22:41:27 caress Exp $";
 static char program_name[] = "mbnavadjust";
 static char help_message[] =  "mbnavadjust is an interactive navigation adjustment package for swath sonar data.\n";
 static char usage_message[] = "mbnavadjust [-Iproject -V -H]";
@@ -5192,7 +5195,7 @@ ic, jc, gridnm[kc], grid1[kc], grid2[kc], gridm[kc]);*/
 			}
 		    }
 		qsort((char *)gridmeq,grid_nxyeq,sizeof(double),
-				mb_double_compare);
+				(void *)mb_double_compare);
 		dinterval = ((double) grid_nxyeq) / ((double)(nmisfit_intervals-1));
 		if (dinterval < 1.0)
 			{

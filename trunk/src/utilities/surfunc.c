@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrid.c	5/2/94
- *    $Id: surfunc.c,v 4.2 1994-10-21 13:02:31 caress Exp $
+ *    $Id: surfunc.c,v 4.3 2006-08-09 22:41:27 caress Exp $
  *
  *    Inclusion in MB-System:
  *    Copyright (c) 1994 by 
@@ -55,6 +55,9 @@
  * Date:	May 2, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.2  1994/10/21 13:02:31  caress
+ * Release V4.0
+ *
  * Revision 4.1  1994/06/04  02:02:01  caress
  * Fixed several bugs and made some stylistic changes to
  * the output.  Changed the data input bounds to be much
@@ -499,7 +502,7 @@ int set_index () {
 			data[k].index = i * block_ny + j;
 	}
 	
-	qsort ((char *)data, npoints, sizeof (struct DATA), compare_points);
+	qsort ((char *)data, npoints, sizeof (struct DATA), (void *)compare_points);
 	
 	npoints -= k_skipped;
 	
@@ -1247,7 +1250,7 @@ int	throw_away_unusables()
 	
 	/* Sort the data  */
 	
-	qsort ((char *)data, npoints, sizeof (struct DATA), compare_points);
+	qsort ((char *)data, npoints, sizeof (struct DATA), (void *)compare_points);
 	
 	/* If more than one datum is indexed to same node, only the first should be kept.
 		Mark the additional ones as OUTSIDE
@@ -1265,7 +1268,7 @@ int	throw_away_unusables()
 	}
 	/* Sort again; this time the OUTSIDE points will be thrown away  */
 	
-	qsort ((char *)data, npoints, sizeof (struct DATA), compare_points);
+	qsort ((char *)data, npoints, sizeof (struct DATA), (void *)compare_points);
 	npoints -= n_outside;
 	data = (struct DATA *) memory ((char *)data, npoints, sizeof(struct DATA), "surface");
 	/*
@@ -1513,7 +1516,7 @@ int	nx, ny;
 	}
 
 	if (n_sug) {
-		qsort((char *)sug, n_sug, sizeof(struct SUGGESTION), compare_sugs);
+		qsort((char *)sug, n_sug, sizeof(struct SUGGESTION), (void *)compare_sugs);
 		for (i = 0; i < n_sug && i < 10; i++) {
 			fprintf(stderr,"surface:  HINT:  Choosing nx = %ld, ny = %ld might cut run time by a factor of %.8lg\n",
 				sug[i].nx, sug[i].ny, sug[i].factor);

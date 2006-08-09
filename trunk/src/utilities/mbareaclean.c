@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbareaclean.c	2/27/2003
- *    $Id: mbareaclean.c,v 5.8 2006-02-01 07:31:06 caress Exp $
+ *    $Id: mbareaclean.c,v 5.9 2006-08-09 22:41:27 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -37,6 +37,9 @@
  *		Amsterdam Airport
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2006/02/01 07:31:06  caress
+ * Modifications suggested by Gordon Keith
+ *
  * Revision 5.7  2006/01/27 19:13:04  caress
  * Version 5.0.8beta2
  *
@@ -137,7 +140,7 @@ int getsoundingptr(int verbose, int soundingid,
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbareaclean.c,v 5.8 2006-02-01 07:31:06 caress Exp $";
+	static char rcs_id[] = "$Id: mbareaclean.c,v 5.9 2006-08-09 22:41:27 caress Exp $";
 	static char program_name[] = "MBAREACLEAN";
 	static char help_message[] =  "MBAREACLEAN identifies and flags artifacts in swath bathymetry data";
 	static char usage_message[] = "mbareaclean [-Fformat -Iinfile -Rwest/east/south/north -B -G -Sbinsize \n\t -Mthreshold/nmin -Dthreshold/nmin -Ttype -N[-]minbeam/maxbeam]";
@@ -1105,7 +1108,7 @@ ix,iy,kgrid,gsndg[kgrid][i],sndg->sndg_beamflag,binnum);*/
 			{
 			/* run qsort */
 			qsort((char *)bindepths,binnum,sizeof(double),
-				mb_double_compare);
+				(void *)mb_double_compare);
 			median_depth = bindepths[binnum / 2];
 if (binnum>0)
 fprintf(stderr,"bin: %d %d %d  pos: %f %f  nsoundings:%d median:%f\n",

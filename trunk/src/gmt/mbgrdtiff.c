@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrdtiff.c	5/30/93
- *    $Id: mbgrdtiff.c,v 5.13 2006-07-27 18:42:51 caress Exp $
+ *    $Id: mbgrdtiff.c,v 5.14 2006-08-09 22:41:27 caress Exp $
  *
  *    Copyright (c) 1999, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -215,6 +215,9 @@
  *
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.13  2006/07/27 18:42:51  caress
+ * Working towards 5.1.0
+ *
  * Revision 5.12  2006/06/22 04:45:42  caress
  * Working towards 5.1.0
  *
@@ -382,7 +385,7 @@ int              tiff_offset[] =
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbgrdtiff.c,v 5.13 2006-07-27 18:42:51 caress Exp $";
+	static char rcs_id[] = "$Id: mbgrdtiff.c,v 5.14 2006-08-09 22:41:27 caress Exp $";
 	static char program_name[] = "mbgrdtiff";
 	static char help_message[] = "mbgrdtiff generates a tiff image from a GMT grid. The \nimage generation is similar to that of the GMT program \ngrdimage. In particular, the color map is applied from \na GMT CPT file, and shading overlay grids may be applied. \nThe output TIFF file contains information allowing\nthe ArcView and ArcInfo GIS packages to import the image\nas a geographically located coverage.";
 	static char usage_message[] = "mbgrdtiff -Ccptfile -Igrdfile -Otiff_file [-H -Kintensfile -V]";
@@ -1150,9 +1153,12 @@ main (int argc, char **argv)
 		fprintf(stderr,"dbg2  Ending status:\n");
 		fprintf(stderr,"dbg2       status:  %d\n",status);
 		}
+		
+	/* clean up GMT memory usage and file locking */
+	fprintf(stderr,"\n");
+	GMT_end(1, argv);
 
 	/* end it all */
-	fprintf(stderr,"\n");
 	exit(status);
 }
 

@@ -106,7 +106,7 @@ int	realtime_update = 5;
 int	realtime_icon = MBGRDVIZ_REALTIME_ICON_SHIP;
 
 /* id variables */
-static char rcs_id[] = "$Id: mbgrdviz_callbacks.c,v 5.19 2006-06-22 04:45:43 caress Exp $";
+static char rcs_id[] = "$Id: mbgrdviz_callbacks.c,v 5.20 2006-08-09 22:41:27 caress Exp $";
 static char program_name[] = "MBgrdviz";
 static char help_message[] = "MBgrdviz is an interactive 2D/3D visualization tool for GMT grid files.";
 static char usage_message[] = "mbgrdviz [-H -T -V]";
@@ -306,7 +306,7 @@ int do_mbgrdviz_init(int argc, char **argv, int verbosity)
 	XmStringTable	str_list;
 	int	i, j;
 
-	pargc = argc;
+	pargc = 1;
 	pargv = argv;
 	verbose = verbosity;
 	error = MB_ERROR_NO_ERROR;
@@ -3018,10 +3018,14 @@ int do_mbgrdviz_readgrd(int instance, char *grdfile,
 	float	*usedata;
 	int	i,j,k,kk;
 	
-	GMT_begin (pargc, pargv);
+	/* do required initialization */
+/*	GMT_begin (pargc, pargv);
 	GMT_put_history(pargc, pargv);
-	GMT_get_common_args (projection, xmin, xmax, ymin, ymax);
-	GMT_grd_init (&header, pargc, pargv, FALSE);
+	GMT_get_common_args (projection, xmin, xmax, ymin, ymax);*/
+	GMT_program = program_name;
+	GMT_grd_init (&header, 1, pargv, FALSE);
+	GMT_io_init ();
+	GMT_grdio_init ();
 	GMT_make_fnan (GMT_f_NaN);
 	GMT_make_dnan (GMT_d_NaN);
 	
@@ -3139,6 +3143,11 @@ int do_mbgrdviz_readgrd(int instance, char *grdfile,
 		    program_name);
 	    exit(error);
 	    }
+	    
+	/* free GMT memory */
+	GMT_free ((void *)GMT_io.skip_if_NaN);
+	GMT_free ((void *)GMT_io.in_col_type);
+	GMT_free ((void *)GMT_io.out_col_type);
 	    
 	/* reorder grid to internal convention */
 	for (i=0;i<*nx;i++)
