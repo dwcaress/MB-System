@@ -648,9 +648,9 @@ can be changed by increments of 0.01 by clicking with the left button
 inside the slider area, but not on the slider itself.
 .TP
 .B Mode
-This toggle allows the user to specify the edit mode.  If mode
-is set to \fIToggle\fP, then clicking the left mouse button will cause
-the nearest beam to toggle between flagged and unflagged.  If mode
+This set of radio buttons allows the user to specify the edit mode. If
+mode is set to \fIToggle\fP, then clicking the left mouse button will 
+cause the nearest beam to toggle between flagged and unflagged.  If mode
 is set to \fIPick\fP, then clicking the left mouse button will cause
 the nearest unflagged beam to be flagged.  If mode
 is set to \fIErase\fP, then the cursor will change to an erasor and
@@ -660,7 +660,7 @@ be the same as for \fIErase\fP except that the affected beams will be
 unflagged instead of flagged. In \fIGrab\fP mode, a red rectangle is drawn 
 as the mouse is dragged with the left button down. When the button is 
 released, all unflagged soundings within the rectangle are flagged.  
-\fBInfo\fP mode acts like pick mode, except that instead of flagging
+\fIInfo\fP mode acts like pick mode, except that instead of flagging
 the nearest sounding, the program displays information about the
 selected ping and sounding above the bathymetry profile box. 
 The edit mode can also be set using key macros (see the keyboard 
