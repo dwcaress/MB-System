@@ -1,9 +1,9 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmerge.c	2/20/93
  *
- *    $Id: mbmerge.c,v 5.7 2006-01-18 15:17:00 caress Exp $
+ *    $Id: mbmerge.c,v 5.8 2006-09-11 18:55:54 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000, 2003 by
+ *    Copyright (c) 1993, 1994, 2000, 2003, 2006 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -23,6 +23,9 @@
  * Date:	February 20, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2006/01/18 15:17:00  caress
+ * Added stdlib.h include.
+ *
  * Revision 5.6  2005/03/25 04:43:02  caress
  * Standardized the string lengths used for filenames and comment data.
  *
@@ -173,7 +176,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbmerge.c,v 5.7 2006-01-18 15:17:00 caress Exp $";
+	static char rcs_id[] = "$Id: mbmerge.c,v 5.8 2006-09-11 18:55:54 caress Exp $";
 	static char program_name[] = "MBMERGE";
 	static char help_message[] =  "MBMERGE merges new navigation with swath sonar data from an \ninput file and then writes the merged data to an output \nswath sonar data file. The default input \nand output streams are stdin and stdout.";
 	static char usage_message[] = "mbmerge [-Aheading_offset -B -Fformat -Llonflip -V -H  -Iinfile -Ooutfile -Mnavformat -Nnavfile -Z]";
@@ -880,7 +883,7 @@ main (int argc, char **argv)
 
 	/* write comments to beginning of output file */
 	kind = MB_DATA_COMMENT;
-	sprintf(comment,"This data merged with navigation by program %s version %s",
+	sprintf(comment,"These data merged with navigation by program %s version %s",
 		program_name,rcs_id);
 	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;

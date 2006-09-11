@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	4/8/93
- *    $Id: mbedit_prog.c,v 5.33 2006-08-09 22:35:33 caress Exp $
+ *    $Id: mbedit_prog.c,v 5.34 2006-09-11 18:55:52 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997, 2000, 2003, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -27,6 +27,11 @@
  * Date:	September 19, 2000 (New version - no buffered i/o)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.33  2006/08/09 22:35:33  caress
+ * A new edit mode called "grab" has been added to MBedit. In this
+ * mode, the user drags a rectangle on the ping display. When the mouse
+ * is released, all unflagged beams within that rectangle are flagged.
+ *
  * Revision 5.32  2006/08/04 03:56:41  caress
  * Working towards 5.1.0 release.
  *
@@ -379,7 +384,7 @@ struct mbedit_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbedit_prog.c,v 5.33 2006-08-09 22:35:33 caress Exp $";
+static char rcs_id[] = "$Id: mbedit_prog.c,v 5.34 2006-09-11 18:55:52 caress Exp $";
 static char program_name[] = "MBedit";
 static char help_message[] =  
 "MBedit is an interactive editor used to identify and flag\n\
@@ -1766,7 +1771,7 @@ int mbedit_action_step(
 	/* reset info */
 	info_set = MB_NO;
 
-	/* check if a file has been opened and there is data */
+	/* check if a file has been opened and there are data */
 	if (file_open == MB_YES && nbuff > 0)
 		{
 

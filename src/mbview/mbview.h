@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbview.h	10/9/2002
- *    $Id: mbview.h,v 5.14 2006-06-16 19:30:58 caress Exp $
+ *    $Id: mbview.h,v 5.15 2006-09-11 18:55:53 caress Exp $
  *
- *    Copyright (c) 2002, 2003 by
+ *    Copyright (c) 2002, 2003, 2006 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -18,6 +18,9 @@
  * Date:	October 10,  2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.14  2006/06/16 19:30:58  caress
+ * Check in after the Santa Monica Basin Mapping AUV Expedition.
+ *
  * Revision 5.13  2006/04/26 22:06:39  caress
  * Improved profile view feature and enabled export of profile data.
  *
@@ -363,8 +366,11 @@ struct mbview_route_struct {
 	int	color;
 	int	size;
 	mb_path	name;
+	double	distancelateral;
+	double	distancetopo;
 	int	npoints;
 	int	npoints_alloc;
+	int	nroutepoint;
 	int	*waypoint;
 	struct mbview_pointw_struct *points;
 	struct mbview_linesegmentw_struct *segments;
@@ -915,6 +921,7 @@ int mbview_pick_route_select(int instance, int which, int xpixel, int ypixel);
 int mbview_pick_route_add(int instance, int which, int xpixel, int ypixel);
 int mbview_pick_route_delete(int instance, int xpixel, int ypixel);
 int mbview_route_delete(int instance, int iroute, int ipoint);
+int mbview_route_setdistance(int instance, int working_route);
 	
 int mbview_projectforward(int instance, int needlonlat,
 				double xgrid, double ygrid, double zgrid,

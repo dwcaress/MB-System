@@ -1,9 +1,9 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcut.c	1/26/95
  *
- *    $Id: mbcut.c,v 5.5 2006-01-18 15:17:00 caress Exp $
+ *    $Id: mbcut.c,v 5.6 2006-09-11 18:55:54 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 1995, 2000, 2003 by
+ *    Copyright (c) 1993, 1994, 1995, 2000, 2003, 2006 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -23,6 +23,9 @@
  * Date:	January 26, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2006/01/18 15:17:00  caress
+ * Added stdlib.h include.
+ *
  * Revision 5.4  2005/03/25 04:43:00  caress
  * Standardized the string lengths used for filenames and comment data.
  *
@@ -107,7 +110,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbcut.c,v 5.5 2006-01-18 15:17:00 caress Exp $";
+	static char rcs_id[] = "$Id: mbcut.c,v 5.6 2006-09-11 18:55:54 caress Exp $";
 	static char program_name[] = "mbcut";
 	static char help_message[] = 
 "MBCUT removes swath data values that lie outside ranges\n\t\
@@ -440,7 +443,7 @@ The default input and output streams are stdin and stdout.";
 
 	/* write comments to beginning of output file */
 	kind = MB_DATA_COMMENT;
-	sprintf(comment,"This data altered by program %s version %s",
+	sprintf(comment,"These data altered by program %s version %s",
 		program_name,rcs_id);
 	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;

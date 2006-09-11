@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmask.c	6/15/93
- *    $Id: mbmask.c,v 5.5 2006-01-18 15:17:00 caress Exp $
+ *    $Id: mbmask.c,v 5.6 2006-09-11 18:55:54 caress Exp $
  *
- *    Copyright (c) 1993,1994, 2000, 2003 by
+ *    Copyright (c) 1993,1994, 2000, 2003, 2006 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -27,6 +27,9 @@
  * Date:	June 15, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2006/01/18 15:17:00  caress
+ * Added stdlib.h include.
+ *
  * Revision 5.4  2005/03/25 04:43:03  caress
  * Standardized the string lengths used for filenames and comment data.
  *
@@ -128,7 +131,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbmask.c,v 5.5 2006-01-18 15:17:00 caress Exp $";
+	static char rcs_id[] = "$Id: mbmask.c,v 5.6 2006-09-11 18:55:54 caress Exp $";
 	static char program_name[] = "MBMASK";
 	static char help_message[] = "MBMASK reads a flagging mask file and applies it to the input \nmultibeam data file.  Flagging mask files are created from  \nmultibeam data files using the program MBGETMASK.  If the time \ntag of a mask record matches that of a data ping, then any \nbeams marked as flagged in the mask are flagged in the data. \nThe utilities MBGETMASK and MBMASK provide a means for transferring \nediting information from one file to another, provided the files \ncontain versions of the same data. \nThe default input and output multibeam streams are stdin and stdout.";
 	static char usage_message[] = "mbmask [-Fformat -Mmaskfile -Iinfile -Ooutfile -V -H]";
@@ -495,7 +498,7 @@ main (int argc, char **argv)
 
 	/* write comments to beginning of output file */
 	kind = MB_DATA_COMMENT;
-	sprintf(comment,"Data flagging mask applied to this data by program %s",
+	sprintf(comment,"Data flagging mask applied to these data by program %s",
 		program_name);
 	status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	if (error == MB_ERROR_NO_ERROR) ocomment++;

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrdtiff.c	5/30/93
- *    $Id: mbgrdtiff.c,v 5.14 2006-08-09 22:41:27 caress Exp $
+ *    $Id: mbgrdtiff.c,v 5.15 2006-09-11 18:55:52 caress Exp $
  *
  *    Copyright (c) 1999, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -215,6 +215,9 @@
  *
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.14  2006/08/09 22:41:27  caress
+ * Fixed programs that read or write grids so that they do not use the GMT_begin() function; these programs will now work when GMT is built in the default fashion, when GMT is built in the default fashion, with "advisory file locking" enabled.
+ *
  * Revision 5.13  2006/07/27 18:42:51  caress
  * Working towards 5.1.0
  *
@@ -385,7 +388,7 @@ int              tiff_offset[] =
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbgrdtiff.c,v 5.14 2006-08-09 22:41:27 caress Exp $";
+	static char rcs_id[] = "$Id: mbgrdtiff.c,v 5.15 2006-09-11 18:55:52 caress Exp $";
 	static char program_name[] = "mbgrdtiff";
 	static char help_message[] = "mbgrdtiff generates a tiff image from a GMT grid. The \nimage generation is similar to that of the GMT program \ngrdimage. In particular, the color map is applied from \na GMT CPT file, and shading overlay grids may be applied. \nThe output TIFF file contains information allowing\nthe ArcView and ArcInfo GIS packages to import the image\nas a geographically located coverage.";
 	static char usage_message[] = "mbgrdtiff -Ccptfile -Igrdfile -Otiff_file [-H -Kintensfile -V]";
@@ -399,6 +402,7 @@ main (int argc, char **argv)
 	/* MBIO status variables */
 	int	status = MB_SUCCESS;
 	int	verbose = 0;
+	int	lonflip = 0;
 	int	error = MB_ERROR_NO_ERROR;
 	char	*message = NULL;
 
@@ -441,6 +445,9 @@ main (int argc, char **argv)
 	double  value_double;
 	char	*projection = "-Jx1.0";
 
+	/* get current mb default values */
+	status = mb_lonflip(verbose,&lonflip);
+
 	/* initialize some values */
 	strcpy (grdfile,"\0");
 	strcpy (intensfile,"\0");
@@ -480,7 +487,7 @@ main (int argc, char **argv)
 		}
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhC:c:I:i:K:k:O:o:R:r:")) != -1)
+	while ((c = getopt(argc, argv, "VvHhC:c:I:i:K:k:L:l:O:o:R:r:")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -501,6 +508,11 @@ main (int argc, char **argv)
 		case 'k':
 			intensity = MB_YES;
 			sscanf (optarg,"%s", intensfile);
+			flag++;
+			break;
+		case 'L':
+		case 'l':
+			sscanf (optarg,"%d", &lonflip);
 			flag++;
 			break;
 		case 'O':
@@ -721,6 +733,18 @@ main (int argc, char **argv)
 		exit(error);
 		}
 	    }
+	    
+	/* apply lonflip */
+	if (modeltype != ModelTypeProjected)
+		{
+		mb_apply_lonflip(verbose, lonflip, &header.x_min);
+		mb_apply_lonflip(verbose, lonflip, &header.x_max);
+		if (intensity == MB_YES)
+	    		{
+			mb_apply_lonflip(verbose, lonflip, &iheader.x_min);
+			mb_apply_lonflip(verbose, lonflip, &iheader.x_max);
+			}
+		}
 
 	/* print debug info */
 	if (verbose >= 0)

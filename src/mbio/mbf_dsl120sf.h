@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_dsl120sf.h	8/9/96
- *	$Id: mbf_dsl120sf.h,v 5.2 2003-04-17 21:05:23 caress Exp $
+ *	$Id: mbf_dsl120sf.h,v 5.3 2006-09-11 18:55:52 caress Exp $
  *
- *    Copyright (c) 1994, 2000, 2002, 2003 by
+ *    Copyright (c) 1994, 2000, 2002, 2003, 2006 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -15,7 +15,7 @@
 /*
  * mbf_dsl120sf.h defines the data structures used by MBIO functions
  * to store data in the MBF_DSL120SF format (MBIO id 111).
- * This data is collected using the WHOI DSL AMS-120, a 120 khz 
+ * These data are collected using the WHOI DSL AMS-120, a 120 khz 
  * deep-towed sonar which produces both sidescan and bathymetry.
  * The data formats used to store the DSL AMS-120 data are: 
  *      MBF_DSL120SF : MBIO ID 111
@@ -25,6 +25,9 @@
  * Author:	D. W. Caress
  * Date:	August 9, 1996
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2003/04/17 21:05:23  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.1  2002/09/18 23:32:59  caress
  * Release 5.0.beta23
  *

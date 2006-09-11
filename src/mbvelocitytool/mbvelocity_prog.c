@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:    mbvelocitytool.c        6/6/93
- *    $Id: mbvelocity_prog.c,v 5.15 2006-01-24 19:20:45 caress Exp $ 
+ *    $Id: mbvelocity_prog.c,v 5.16 2006-09-11 18:55:53 caress Exp $ 
  *
  *    Copyright (c) 1993, 1994, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:        June 6, 1993 
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.15  2006/01/24 19:20:45  caress
+ * Version 5.0.8 beta.
+ *
  * Revision 5.14  2005/11/05 01:06:40  caress
  * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
  *
@@ -213,7 +216,7 @@ struct mbvt_ping_struct
 	double	navlat;
 	double	speed;
 	double	heading;
-	double	draft;
+	double	sonardepth;
 	double	ssv;
 	int	beams_bath;
 	char	*beamflag;
@@ -229,7 +232,7 @@ struct mbvt_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbvelocity_prog.c,v 5.15 2006-01-24 19:20:45 caress Exp $";
+static char rcs_id[] = "$Id: mbvelocity_prog.c,v 5.16 2006-09-11 18:55:53 caress Exp $";
 static char program_name[] = "MBVELOCITYTOOL";
 static char help_message[] = "MBVELOCITYTOOL is an interactive water velocity profile editor  \nused to examine multiple water velocity profiles and to create  \nnew water velocity profiles which can be used for the processing  \nof multibeam sonar data.  In general, this tool is used to  \nexamine water velocity profiles obtained from XBTs, CTDs, or  \ndatabases, and to construct new profiles consistent with these  \nvarious sources of information.";
 static char usage_message[] = "mbvelocitytool [-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ssvpfile -Wsvpfile -V -H]";
@@ -319,7 +322,6 @@ double	*ss = NULL;
 double	*ssacrosstrack = NULL;
 double	*ssalongtrack = NULL;
 char	comment[MB_COMMENT_MAXLINE];
-double	draft;
 double	*p = NULL;
 int	nraypathmax;
 int	*nraypath;
@@ -327,6 +329,9 @@ double	**raypathx;
 double	**raypathy;
 double	*depth = NULL;
 double	*acrosstrack = NULL;
+double	rayxmax;
+double	raydepthmin;
+double	raydepthmax;
 struct mbvt_ping_struct	ping[MBVT_BUFFER_SIZE];
 
 /* depth range variables */
@@ -1312,7 +1317,7 @@ int mbvt_open_display_profile(char *file)
 		fprintf(stderr,"dbg2       file:        %s\n",file);
 		}
 
-	/* check that there is room for this data */
+	/* check that there is room for these data */
 	if (ndisplay >= MAX_PROFILES)
 		{
 		status = MB_FAILURE;
@@ -1884,16 +1889,32 @@ int mbvt_plot()
 	ypmax = ypmin + (xpmax - xpmin)/5.0;
 	xpcen = xpmin + (xpmax - xpmin)/2;
 	ypcen = ypmin + (ypmax - ypmin)/2;
-	xpminimum = -2.25*maxdepth;
-	xpmaximum = 2.25*maxdepth;
-	deltaxp = 0.4*maxdepth;
-	xpscale = (xpmax - xpmin)/(xpmaximum - xpminimum);
+	
+	if (nbuffer == 0 || nraypath == NULL)
+		{
+		raydepthmin = 0.0;
+		raydepthmax = maxdepth;
+		}
+	
+	ypminimum = raydepthmin - 0.02 * (raydepthmax - raydepthmin);
+	ypmaximum = raydepthmax + 0.02 * (raydepthmax - raydepthmin);
+	ypscale = (ypmax - ypmin)/(ypmaximum - ypminimum);	
+	xpscale = ypscale;
+	xpmaximum = (xpmax - xpmin)/(2*xpscale);
+	xpminimum = -xpmaximum;
+	if (xpmaximum < rayxmax)
+		{
+		xpmaximum = 1.02 * rayxmax;
+		xpminimum = -xpmaximum;
+		xpscale = (xpmax - xpmin)/(xpmaximum - xpminimum);
+		ypscale = xpscale;
+		ypmaximum = ypminimum + (ypmax - ypmin) / ypscale;
+		}
+	
+	deltaxp = 0.4 * (raydepthmax - raydepthmin);	
 	xp_int = deltaxp*xpscale;
 	nxp_int = (xpmaximum - xpminimum)/deltaxp/2 + 1;
-	ypminimum = 0.0;
-	ypmaximum = maxdepth;
 	deltayp = 0.2*(ypmaximum - ypminimum);
-	ypscale = (ypmax - ypmin)/(ypmaximum - ypminimum);	
 	yp_int = deltayp*ypscale;
 	nyp_int = (ypmaximum - ypminimum)/deltayp + 1;
 
@@ -2704,13 +2725,13 @@ int mbvt_open_swath_file(char *file, int form, int *numload)
 					    ping[nbuffer].angles_null,
 					    ping[nbuffer].heave,
 					    ping[nbuffer].alongtrack_offset,
-					    &ping[nbuffer].draft,
+					    &ping[nbuffer].sonardepth,
 					    &ping[nbuffer].ssv,&error);
 			    }
 			else
 			    {
 			    nbeams = ping[nbuffer].beams_bath;
-			    ping[nbuffer].draft = sonardepth;
+			    ping[nbuffer].sonardepth = sonardepth;
 			    ping[nbuffer].ssv = 1500.0;
 			    for (i=0;i<ping[nbuffer].beams_bath;i++)
 				{
@@ -2803,7 +2824,8 @@ int mbvt_open_swath_file(char *file, int form, int *numload)
 		    if (mb_beam_ok(ping[k].beamflag[i]))
 			{
 			depth[i] = 750 * ping[k].ttimes[i] 
-				* cos(DTR * ping[k].angles[i]);
+				* cos(DTR * ping[k].angles[i]) 
+				+ ping[k].sonardepth + ping[k].heave[i];
 
 			/* get min max depths */
 			if (depth[i] < bath_min)
@@ -3022,6 +3044,7 @@ int mbvt_process_multibeam()
 	double	delta, a, b;
 	int	ns;
 	double	depth_predict, res;
+	double	sonardepth, sonardepthshift;
 	int	i, j, k;
 	
 	/* print input debug statements */
@@ -3069,6 +3092,9 @@ int mbvt_process_multibeam()
 	status = mb_rt_init(verbose, nvel, dep, vel, &rt_svp, &error);
 	first = MB_YES;
 	nbeams = 0;
+	rayxmax = 0.0;
+	raydepthmin = 10000;
+	raydepthmax = 0.0;
 
 	/* loop over the data records */
 	for (k=0;k<nbuffer;k++)
@@ -3087,6 +3113,17 @@ int mbvt_process_multibeam()
 			ping[k].ssv = ssv_start;
 		else
 			ssv_start = ping[k].ssv;
+
+		/* get depth of sonar - apply shift is sonar is above water */
+		sonardepth = ping[k].heave[i] + ping[k].sonardepth;
+		sonardepthshift = 0.0;
+		if (first == MB_YES)
+			raydepthmin = MIN(raydepthmin, sonardepth);
+		if (sonardepth < 0.0)
+			{
+			sonardepthshift = sonardepth;
+			sonardepth = 0.0;
+			}
 
 		/* loop over the beams */
 		for (i=0;i<ping[k].beams_bath;i++)
@@ -3107,7 +3144,7 @@ int mbvt_process_multibeam()
 			    /* call raytracing without keeping
 				plotting list */
 			    status = mb_rt(verbose, 
-				    rt_svp, 0.0, 
+				    rt_svp, sonardepth, 
 				    ping[k].angles[i], 0.5*ping[k].ttimes[i],
 				    anglemode, ping[k].ssv, ping[k].angles_null[i], 
 				    0, NULL, NULL, NULL, 
@@ -3119,7 +3156,7 @@ int mbvt_process_multibeam()
 			    /* call raytracing keeping
 				plotting list */
 			    status = mb_rt(verbose, 
-				    rt_svp, 0.0, 
+				    rt_svp, sonardepth, 
 				    ping[k].angles[i], 0.5*ping[k].ttimes[i],
 				    anglemode, ping[k].ssv, ping[k].angles_null[i], 
 				    nraypathmax, &nraypath[i], 
@@ -3136,18 +3173,24 @@ int mbvt_process_multibeam()
 			acrosstrack[i] = factor * acrosstrack[i];
 
 			/* add to depth if needed */
-			depth[i] = depth[i] + ping[k].heave[i] + draft;
+			depth[i] += sonardepthshift;
 
 			/* get min max depths */
 			if (depth[i] < bath_min)
 			    bath_min = depth[i];
 			if (depth[i] > bath_max)
 			    bath_max = depth[i];
+			if (first == MB_YES)
+				{
+				rayxmax = MAX(rayxmax, fabs(acrosstrack[i]));
+				raydepthmax = MAX(raydepthmax, depth[i]);
+				}
 
 			/* output some debug values */
 			if (verbose >= 5)
 			    fprintf(stderr,"dbg5       %3d %3d %6.3f %6.3f %8.2f %8.2f %8.2f %8.2f\n",
-				k, i, 0.5*ping[k].ttimes[i], ping[k].angles[i], acrosstrack[i], ping[k].heave[i],draft,depth[i]);
+				k, i, 0.5*ping[k].ttimes[i], ping[k].angles[i], acrosstrack[i], 
+				ping[k].heave[i],ping[k].sonardepth,depth[i]);
 
 			/* get sums for linear fit */
 			sx += acrosstrack[i];

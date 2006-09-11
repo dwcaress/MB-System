@@ -1,4 +1,4 @@
-.TH mbm_copy l "10 March 2003" "MB-System 5.0" "MB-System 5.0"
+.TH mbm_copy l "27 August 2006" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbm_copy\fP - Apply mbcopy to all files referenced through
 a datalist, using the MB-System file suffix convention
@@ -9,7 +9,7 @@ Version 5.0
 
 .SH SYNOPSIS
 \fBmbm_copy\fP \fB-F\fP\fIoutputformat\fP \fB-I\fP\fIdatalist\fP 
-[\fB-H\fP \fB-T\fP \fB-V\fP]
+[\fB-H\fP \fB-C -T\fP \fB-V\fP]
 
 .SH DESCRIPTION
 
@@ -53,6 +53,11 @@ Dale N. Chayes (dale@ldeo.columbia.edu)
 .B \-H
 This "help" flag cause the program to print out a description
 of its operation and then exit immediately.
+.TP
+.B \-C
+.br
+This option causes the program to check if each output file
+already exists, and to forgo copying those that do exist.
 .TP
 .B \-F
 \fIoutputformat\fP

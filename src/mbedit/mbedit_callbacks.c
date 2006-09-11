@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit_callbacks.c	3/28/97
- *    $Id: mbedit_callbacks.c,v 5.19 2006-08-09 22:35:32 caress Exp $
+ *    $Id: mbedit_callbacks.c,v 5.20 2006-09-11 18:55:52 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,11 @@
  * Date:	March 28, 1997  GUI recast
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.19  2006/08/09 22:35:32  caress
+ * A new edit mode called "grab" has been added to MBedit. In this
+ * mode, the user drags a rectangle on the ping display. When the mouse
+ * is released, all unflagged beams within that rectangle are flagged.
+ *
  * Revision 5.18  2006/08/04 03:56:41  caress
  * Working towards 5.1.0 release.
  *
@@ -2194,6 +2199,8 @@ do_number_step( Widget w, XtPointer client_data, XtPointer call_data)
 		    maxx = maxx/2;
 	    else
 		    maxx = 2*maxx;
+	    if (maxx > plot_size_max)
+		    maxx = plot_size_max;
 	    if (maxx < 2)
 		    maxx = 2;
 	    XtVaSetValues(slider_number_step, 

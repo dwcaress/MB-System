@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grdinfo.perl	4/26/01
-#    $Id: mbm_grdinfo.perl,v 1.4 2006-02-10 01:27:40 caress Exp $
+#    $Id: mbm_grdinfo.perl,v 1.5 2006-09-11 18:55:52 caress Exp $
 #
 #    Copyright (c) 2001, 2003 by 
 #    D. W. Caress (caress@mbari.org)
@@ -40,10 +40,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #    10 km off the windward coast of Oahu)
 ##
 # Version:
-#   $Id: mbm_grdinfo.perl,v 1.4 2006-02-10 01:27:40 caress Exp $
+#   $Id: mbm_grdinfo.perl,v 1.5 2006-09-11 18:55:52 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 1.4  2006/02/10 01:27:40  caress
+#   Fixed parsing of grdinfo output to handle changes to GMT4.1.
+#
 #   Revision 1.3  2003/07/02 18:12:33  caress
 #   Release 5.0.0
 #
@@ -210,25 +213,37 @@ if ($bounds)
 		# cut out desired file
 		$pid = getppid();
 		$file_grd = "$file_input" ."_grdcut_$pid";
-		@grdcut = `mbm_grdcut -I$file_input -O$file_grd -R$xmin/$xmax/$ymin/$ymax -V`;
-		@grdinfo = `grdinfo $file_grd`;
+		@grdcut = `mbm_grdcut -I$file_input -O$file_grd -R$xmin/$xmax/$ymin/$ymax -V 2>&1`;
+		
+		if ($verbose > 0)
+			{
+			print "\nRunning mbm_grdcut...\n";
+			print "\tmbm_grdcut -I$file_input -O$file_grd -R$xmin/$xmax/$ymin/$ymax -V\n";
+			while (@grdcut)
+				{
+				$line = shift @grdcut;
+				print "mbm_grdcut output: $line";
+				}
+			}
+			
+		@grdinfo = `grdinfo $file_grd 2>&1`;
 		@rminfo = `rm -f $file_grd`;
 		
 		# if it doesn't work just grdinfo the whole file
 		if (!@grdinfo)
 			{
-			@grdinfo = `grdinfo $file_input`;
+			@grdinfo = `grdinfo $file_input 2>&1`;
 			}
 		}
 	else
 		{
-		@grdinfo = `grdinfo $file_input`;
+		@grdinfo = `grdinfo $file_input 2>&1`;
  		}
 
  	}
 else
 	{
-	@grdinfo = `grdinfo $file_input`;
+	@grdinfo = `grdinfo $file_input 2>&1`;
  	}
 
 # now spit out grdinfo results 

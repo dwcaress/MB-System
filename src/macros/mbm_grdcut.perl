@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_arc2grd.perl	4/23/01
-#    $Id: mbm_grdcut.perl,v 5.4 2006-02-10 01:27:40 caress Exp $
+#    $Id: mbm_grdcut.perl,v 5.5 2006-09-11 18:55:52 caress Exp $
 #
 #    Copyright (c) 2001, 2003 by
 #    D. W. Caress (caress@mbari.org)
@@ -40,10 +40,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #    10 km off the Kohala coast of Hawaii)
 #
 # Version:
-#   $Id: mbm_grdcut.perl,v 5.4 2006-02-10 01:27:40 caress Exp $
+#   $Id: mbm_grdcut.perl,v 5.5 2006-09-11 18:55:52 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.4  2006/02/10 01:27:40  caress
+#   Fixed parsing of grdinfo output to handle changes to GMT4.1.
+#
 #   Revision 5.3  2003/07/02 18:12:33  caress
 #   Release 5.0.0
 #
@@ -138,7 +141,7 @@ $line = `gmtdefaults -L | grep D_FORMAT`;
 `gmtset D_FORMAT %.15lg`;
 
 # get limits of files using grdinfo
-@grdinfo = `grdinfo $ifile`;
+@grdinfo = `grdinfo $ifile 2>&1`;
 while (@grdinfo)
 	{
 	$line = shift @grdinfo;
@@ -224,11 +227,15 @@ if ($verbose)
 
 # run grdcut
 $cmd = "grdcut $ifile -G$ofile -R$xminout/$xmaxout/$yminout/$ymaxout -V";
-if ($verbose)
+@grdcut = `$cmd 2>&1`;
+if ($verbose) 
 	{
-	print "\nRunning grdcut...\n$cmd\n";
+	while (@grdcut)
+		{
+		$line = shift @grdinfo;
+		print "\tgrdcut output: $line";
+		}
 	}
-`$cmd`;
 
 # reset the GMT default double format
 `gmtset D_FORMAT $dformatsave`;

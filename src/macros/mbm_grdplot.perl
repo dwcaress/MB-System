@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grdplot.perl	8/6/95
-#    $Id: mbm_grdplot.perl,v 5.24 2006-08-09 22:36:23 caress Exp $
+#    $Id: mbm_grdplot.perl,v 5.25 2006-09-11 18:55:52 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 2000, 2003 by 
 #    D. W. Caress (caress@mbari.org)
@@ -68,10 +68,14 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   October 19, 1994
 #
 # Version:
-#   $Id: mbm_grdplot.perl,v 5.24 2006-08-09 22:36:23 caress Exp $
+#   $Id: mbm_grdplot.perl,v 5.25 2006-09-11 18:55:52 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.24  2006/08/09 22:36:23  caress
+#   The macro mbm_grdplot now handles calls for a linear plot with
+#   decreasing x values (e.g. using -Jx-0.01/20 to specify the projection).
+#
 #   Revision 5.23  2006/08/04 03:56:41  caress
 #   Working towards 5.1.0 release.
 #
@@ -1009,19 +1013,45 @@ if ($file_intensity)
 # get limits of files using grdinfo
 if (!$bounds || !$zbounds || $zmode == 1)
 	{
+	if ($verbose > 0)
+		{
+		print "\nRunning grdinfo to get file bounds and min max...\n";
+		}
+		
 	foreach $file_grd (@files_data) {
 
 	if ($bounds)
 		{
-		@grdinfo = `mbm_grdinfo -I$file_grd -R$bounds`;
+		if ($verbose > 0)
+			{
+			print "\tmbm_grdinfo -I$file_grd -R$bounds -V\n";
+			}
+		if ($verbose > 0)
+			{
+			@grdinfo = `mbm_grdinfo -I$file_grd -R$bounds -V`;
+			}
+		else
+			{
+			@grdinfo = `mbm_grdinfo -I$file_grd -R$bounds`;
+			}
 		}
 	else
 		{
-		@grdinfo = `grdinfo $file_grd`;
+		@grdinfo = `grdinfo $file_grd 2>&1`;
+		if ($verbose > 0)
+			{
+			print "\tgrdinfo -I$file_grd\n";
+			}
 		}
 	while (@grdinfo)
 		{
 		$line = shift @grdinfo;
+		
+		if ($verbose > 0)
+			{
+			print "\tgrdinfo output: $line";
+			}
+			
 		if ($line =~ 
 			/\s+Projection: UTM Zone \S+/)
 			{
@@ -1119,7 +1149,7 @@ if (!$bounds || !$zbounds || $zmode == 1)
 		$zmax_t = &max($zmax, $zmax_f);
 		}
 
-	# check that there is data
+	# check that there are data
 	if ($xmin_f >= $xmax_f || $ymin_f >= $ymax_f 
 		|| ($zmin_f >= $zmax_f && !$zbounds))
 		{
@@ -1197,7 +1227,7 @@ else
 	$zmax = $zmax_t;
 	}
 
-# check that there is data
+# check that there are data
 if ((!$use_corner_points && ($xmin >= $xmax || $ymin >= $ymax)) 
 	|| $zmin >= $zmax)
 	{
@@ -1259,8 +1289,12 @@ else
 `echo $xmax $ymin >> tmp$$.dat`;
 `echo $xmax $ymax >> tmp$$.dat`;
 `echo $xmin $ymax >> tmp$$.dat`;
-@projected = `mapproject tmp$$.dat -J$projection$projection_pars -R$bounds_plot 2>&1 `;
-print "mapproject tmp$$.dat -J$projection$projection_pars -R$bounds_plot \n";
+@projected = `mapproject tmp$$.dat -J$projection$projection_pars -R$bounds_plot 2>&1`;
+#
+if ($verbose > 0)
+	{
+	print "\nCalling GMT program mapproject...\n\tmapproject tmp$$.dat -J$projection$projection_pars -R$bounds_plot \n";
+	}
 `/bin/rm -f tmp$$.dat`;
 $cnt = 0;
 while (@projected)
@@ -1268,23 +1302,24 @@ while (@projected)
 	$line = shift @projected;
 	$cnt++;
 	
-print $line;
+	if ($verbose > 0)
+		{
+		print "mapproject output: $line";
+		}
+
 	if ($cnt == 1)
 		{
 		($xxmin,$yymin) = $line =~ /(\S+)\s+(\S+)/;
 		$xxmax = $xxmin;
 		$yymax = $yymin;
-print "set: xx: $xx : $xxmin $xxmax | yy: $yy : $yymin $yymax\n";
 		}
 	else
 		{
 		($xx,$yy) = $line =~ /(\S+)\s+(\S+)/;
-print "before: xx: $xx : $xxmin $xxmax | yy: $yy : $yymin $yymax\n";
 		$xxmin = ($xx < $xxmin ? $xx : $xxmin);
 		$xxmax = ($xx > $xxmax ? $xx : $xxmax);
 		$yymin = ($yy < $yymin ? $yy : $yymin);
 		$yymax = ($yy > $yymax ? $yy : $yymax);
-print "after: xx: $xx : $xxmin $xxmax | yy: $yy : $yymin $yymax\n\n";
 		}
 	}
 $dxx = $xxmax - $xxmin;
@@ -1294,7 +1329,21 @@ $dyy = $yymax - $yymin;
 if ($dxx == 0.0 && $dyy == 0.0)
 	{
 	print "\a";
-	die "Invalid projection specified - $program_name aborted\n";
+	print "GMT program mapproject failed...\n";
+	print "\tMapproject invocation:\n";
+	print "\t\tmapproject tmp$$.dat -J$projection$projection_pars -R$bounds_plot\n";
+	print "\tInput bounds:\n";
+	print "\t\txmin:$xmin xmax:$xmax ymax:$ymin ymax:$ymax\n";
+	if ($cnt < 4)
+		{
+		print "\tmapproject seems to have failed to generate output\n";
+		}
+	else
+		{
+		print "\tOutput bounds:\n";
+		print "\t\txmin:$xxmin xmax:$xxmax ymax:$yymin ymax:$yymax\n";
+		}
+	die "Program $program_name aborted\n";
 	}
 
 # figure out scaling issues
@@ -1655,11 +1704,11 @@ if ($contour_file)
 	{
 	if ($bounds)
 		{
-		@grdinfo = `mbm_grdinfo -I$contour_file -R$bounds`;
+		@grdinfo = `mbm_grdinfo -I$contour_file -R$bounds 2>&1`;
 		}
 	else
 		{
-		@grdinfo = `grdinfo $contour_file`;
+		@grdinfo = `grdinfo $contour_file 2>&1`;
 		}
 	while (@grdinfo)
 		{
@@ -3503,13 +3552,13 @@ sub GetBaseTick {
 			{
 			$base_tick_x = $xmax - $xmin;
 			}
+		$base_tick_y = 10.0**(floor(log(abs($ymax - $ymin) / 5) / log (10)));
 		}
 	else
 		{
 		$base_tick_x = ($xmax - $xmin) / 5;
+		$base_tick_y = ($ymax - $ymin) / 5;
 		}
-	$base_tick_y = 10.0**(floor(log(abs($ymax - $ymin) / 5) / log (10)));
-	#$base_tick_y = ($ymax - $ymin) / 5;
 	
 	# deal with seismic grids (time vs trace number)
 	if ($gridprojected == 2)

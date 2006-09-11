@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 5.22 2006-03-06 21:42:34 caress Exp $
+#	$Id: Makefile.template,v 5.23 2006-09-11 18:55:53 caress Exp $
 #
 #     Copyright (c) 1993, 1994, 2000, 2002, 2003, 2005 by
 #     David W. Caress (caress@mbari.org)
@@ -16,6 +16,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.22  2006/03/06 21:42:34  caress
+# Changed libproj and libgsf to libmbproj and libmbgsf.
+#
 # Revision 5.21  2006/02/03 21:10:39  caress
 # Working on supporting water column datagrams in Simrad formats.
 #
@@ -223,7 +226,8 @@ all:	$(BINDIR)/mbformat \
 	$(BINDIR)/mbsimradmakess \
 	$(BINDIR)/mb7k2jstar \
 	$(BINDIR)/mb7kpreprocess \
-	$(BINDIR)/mbrolltimelag	
+	$(BINDIR)/mbrolltimelag	\
+	$(BINDIR)/mbauvloglist	
 
 ### make clean removes the object files
 clean:
@@ -367,6 +371,9 @@ $(BINDIR)/mb7kpreprocess:	mb7kpreprocess.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbpr
 $(BINDIR)/mbrolltimelag:	mbrolltimelag.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbaux.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
 	$(CC) $(CFLAGS) mbrolltimelag.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbaux.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a \
 		$(LFLAGS) -o $(BINDIR)/mbrolltimelag
+$(BINDIR)/mbauvloglist:	mbauvloglist.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbaux.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
+	$(CC) $(CFLAGS) mbauvloglist.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbaux.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a \
+		$(LFLAGS) -o $(BINDIR)/mbauvloglist
 
 ### compile the source files
 mbformat.o:	mbformat.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
@@ -458,3 +465,5 @@ mb7kpreprocess.o:	mb7kpreprocess.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h 
 	$(CC) -c $(CFLAGS) mb7kpreprocess.c
 mbrolltimelag.o:	mbrolltimelag.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbrolltimelag.c
+mbauvloglist.o:	mbauvloglist.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
+	$(CC) -c $(CFLAGS) mbauvloglist.c

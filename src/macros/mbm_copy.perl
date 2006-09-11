@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_plot.perl	1/17/2003
-#    $Id: mbm_copy.perl,v 5.1 2005-11-05 01:34:20 caress Exp $
+#    $Id: mbm_copy.perl,v 5.2 2006-09-11 18:55:52 caress Exp $
 #
 #    Copyright (c) 2003 by 
 #    D. W. Caress (caress@mbari.org)
@@ -25,7 +25,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   to name the output files. 
 #
 # Basic Usage: 
-#   mbm_copy -Foutputformat -Idatalist [-H -V -T]
+#   mbm_copy -Foutputformat -Idatalist [-H -V -C -T]
 #
 # Author:
 #   David W. Caress
@@ -34,10 +34,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   January 17, 2003
 #
 # Version:
-#   $Id: mbm_copy.perl,v 5.1 2005-11-05 01:34:20 caress Exp $
+#   $Id: mbm_copy.perl,v 5.2 2006-09-11 18:55:52 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.1  2005/11/05 01:34:20  caress
+#   Much work over the past two months.
+#
 #   Revision 5.0  2003/03/10 19:54:43  caress
 #   Initial version.
 #
@@ -51,6 +54,7 @@ $command_line = "@ARGV";
 $oformat = 		($opt_F || $opt_f);
 $help =    		($opt_H || $opt_h);
 $datalist =    		($opt_I || $opt_i);
+$check =    		($opt_C || $opt_c);
 $test =    		($opt_T || $opt_t);
 $verbose = 		($opt_V || $opt_v);
 
@@ -126,15 +130,18 @@ foreach $file_mb (@files_data)
 		}
 	
 	# copy to output format using mbcopy
-	$mbcopy = "mbcopy -F$iformat/$outformat -I$file_mb -O$root.mb$outformat";
-	if (!$test)
+	if (!$check || !(-e $ofile_mb))
 		{
-		print "Running: $mbcopy\n";
-		`$mbcopy`;
-		}
-	else
-		{
-		print "Testing: $mbcopy\n";
+		$mbcopy = "mbcopy -F$iformat/$outformat -I$file_mb -O$root.mb$outformat";
+		if (!$test)
+			{
+			print "Running: $mbcopy\n";
+			`$mbcopy`;
+			}
+		else
+			{
+			print "Testing: $mbcopy\n";
+			}
 		}
 		
 	# increment counter

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbio_status.h	2/1/93
- *    $Id: mb_status.h,v 5.73 2006-08-10 00:12:42 caress Exp $
+ *    $Id: mb_status.h,v 5.74 2006-09-11 18:55:52 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003, 2004, 2005, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.73  2006/08/10 00:12:42  caress
+ * Working towards 5.1.0beta2
+ *
  * Revision 5.72  2006/07/05 19:50:21  caress
  * Working towards 5.1.0beta
  *
@@ -391,7 +394,7 @@
 #define	MB_FAILURE			0
 
 /* MBIO minimum and maximum error values */
-#define	MB_ERROR_MIN			-19
+#define	MB_ERROR_MIN			-22
 #define	MB_ERROR_MAX			15
 
 /* MBIO function fatal error values */
@@ -432,6 +435,9 @@
 #define	MB_ERROR_DATA_NOT_INSERTED	-17
 #define	MB_ERROR_BAD_PROJECTION		-18
 #define	MB_ERROR_MISSING_PROJECTIONS	-19
+#define	MB_ERROR_MISSING_NAVATTITUDE	-20
+#define	MB_ERROR_NOT_ENOUGH_DATA	-21
+#define	MB_ERROR_FILE_NOT_FOUND		-22
 
 /* MBIO problem values */
 #define	MB_PROBLEM_MAX			6
@@ -460,7 +466,7 @@ static char *fatal_error_msg[] =
 	"Invalid control parameter specified by user",
 	"Invalid buffer id",
 	"Invalid system id - this should not happen!", 
-	"This data file is not in the specified format!"
+	"These data file is not in the specified format!"
 	};
 static char *nonfatal_error_msg[] =
 	{
@@ -474,7 +480,7 @@ static char *nonfatal_error_msg[] =
 	"Water column record",
 	"Neither a data record nor a comment record",
 	"Unintelligible data record",
-	"Ignore this data",
+	"Ignore these data",
 	"No data requested for buffer load",
 	"Data buffer is full",
 	"No data was loaded into the buffer",
@@ -484,6 +490,9 @@ static char *nonfatal_error_msg[] =
 	"Data inconsistencies prevented inserting data into storage structure",
 	"UTM projection initialization failed",
 	"Projection database cannot be read", 
+	"Missing navigation and/or attitude data", 
+	"Not enough data available to perform operation", 
+	"Requested file not found", 
 	};
 static char *unknown_error_msg[] =
 	{
@@ -555,7 +564,7 @@ static char *notice_msg[] =
 	"MB_ERROR_WATER_COLUMN (ID=-7): Water column record",
 	"MB_ERROR_OTHER (ID=-8): Neither a data record nor a comment record",
 	"MB_ERROR_UNINTELLIGIBLE (ID=-9): Unintelligible data record",
-	"MB_ERROR_IGNORE (ID=-10): Ignore this data",
+	"MB_ERROR_IGNORE (ID=-10): Ignore these data",
 	"MB_ERROR_NO_DATA_REQUESTED (ID=-11): No data requested for buffer load",
 	"MB_ERROR_BUFFER_FULL (ID=-12): Data buffer is full",
 	"MB_ERROR_NO_DATA_LOADED (ID=-13): No data was loaded into the buffer",

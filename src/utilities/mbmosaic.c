@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmosaic.c	2/10/97
- *    $Id: mbmosaic.c,v 5.23 2006-08-09 22:41:27 caress Exp $
+ *    $Id: mbmosaic.c,v 5.24 2006-09-11 18:55:54 caress Exp $
  *
  *    Copyright (c) 1997, 2000, 2002, 2003, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	February 10, 1997
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.23  2006/08/09 22:41:27  caress
+ * Fixed programs that read or write grids so that they do not use the GMT_begin() function; these programs will now work when GMT is built in the default fashion, when GMT is built in the default fashion, with "advisory file locking" enabled.
+ *
  * Revision 5.22  2006/06/22 04:45:43  caress
  * Working towards 5.1.0
  *
@@ -183,7 +186,7 @@
 #define	NO_DATA_FLAG	99999
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbmosaic.c,v 5.23 2006-08-09 22:41:27 caress Exp $";
+static char rcs_id[] = "$Id: mbmosaic.c,v 5.24 2006-09-11 18:55:54 caress Exp $";
 static char program_name[] = "mbmosaic";
 static char help_message[] =  "mbmosaic is an utility used to mosaic amplitude or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered by multibeam swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbmosaic -Ifilelist -Oroot \
@@ -319,7 +322,7 @@ main (int argc, char **argv)
 	float	*work1 = NULL;
 	float	*work2 = NULL;
 	float	*work3 = NULL;
-	int	ndata, ndatafile;
+	unsigned int	ndata, ndatafile;
 	double	zmin, zmax, zclip;
 	int	nmax;
 	double	smin, smax;
@@ -1637,7 +1640,7 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 		if (verbose >= 2) 
 			fprintf(outfp,"\n");
 		if (verbose > 0 || file_in_bounds == MB_YES)
-			fprintf(outfp,"%d data points processed in %s\n",
+			fprintf(outfp,"%u data points processed in %s\n",
 				ndatafile,file);
 		} /* end if (format > 0) */
 
@@ -1645,7 +1648,7 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 	if (datalist != NULL)
 		mb_datalist_close(verbose,&datalist,&error);
 	if (verbose > 0)
-		fprintf(outfp,"\n%d total data points processed in highest weight pass\n",ndata);
+		fprintf(outfp,"\n%u total data points processed in highest weight pass\n",ndata);
 	if (verbose > 0 && grid_mode == MBMOSAIC_AVERAGE)
 		fprintf(outfp, "\n");
 		
@@ -2016,6 +2019,8 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 			        ix2 = MIN(ix + xtradim, gxdim - 1);
 			        iy1 = MAX(iy - xtradim, 0);
 			        iy2 = MIN(iy + xtradim, gydim - 1);
+/*fprintf(stderr," ib:%d ss:%f ix:%d iy:%d priority:%f max:%f range:%f", 
+ib,ss[ib],ix,iy,priorities[ib],maxpriority[kgrid],priority_range);*/
 			        for (ii=ix1;ii<=ix2;ii++)
 			         for (jj=iy1;jj<=iy2;jj++)
 				    {
@@ -2032,8 +2037,11 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 					sigma[kgrid] += norm_weight * ss[ib] * ss[ib];
 					if (ii == ix && jj == iy)
 					    cnt[kgrid]++;
+/*fprintf(stderr," kgrid:%d norm_weight:%g grid:%g norm:%g cnt:%d",
+kgrid,norm_weight,grid[kgrid],norm[kgrid],cnt[kgrid]);*/
 					}
 				    }
+/*fprintf(stderr,"\n");*/
 				ndata++;
 				ndatafile++;
 				}
@@ -2047,7 +2055,7 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 		if (verbose >= 2) 
 			fprintf(outfp,"\n");
 		if (verbose > 0 || file_in_bounds == MB_YES)
-			fprintf(outfp,"%d data points processed in %s\n",
+			fprintf(outfp,"%u data points processed in %s\n",
 				ndatafile,file);
 		} /* end if (format > 0) */
 
@@ -2055,7 +2063,7 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 	if (datalist != NULL)
 		mb_datalist_close(verbose,&datalist,&error);
 	if (verbose > 0)
-		fprintf(outfp,"\n%d total data points processed in averaging pass\n",ndata);
+		fprintf(outfp,"\n%u total data points processed in averaging pass\n",ndata);
 
 	}
 	/***** end of second pass gridding *****/
@@ -2202,7 +2210,7 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 
 		/* do the interpolation */
 		if (verbose > 0)
-			fprintf(outfp,"\nDoing spline interpolation with %d data points...\n",ndata);
+			fprintf(outfp,"\nDoing spline interpolation with %u data points...\n",ndata);
 		cay = tension;
 		xmin = sxmin;
 		ymin = symin;
@@ -3084,7 +3092,7 @@ int mbmosaic_get_priorities(
 		double	*depthacrosstrack, 
 		double	bath_default, 
 		double	heading, 
-		int	ndata, 
+		unsigned int	ndata, 
 		double	*data, 
 		double	*acrosstrack, 
 		double	*angles, 
@@ -3305,10 +3313,12 @@ int mbmosaic_get_priorities(
 		}
 		
 	/* apply file weighting */
-	for (i=0;i<ndata;i++)
+	/* removed 3 Sep 2006 DWC */
+/*	for (i=0;i<ndata;i++)
 		{
 		priorities[i] = file_weight * priorities[i];
 		}
+*/
 
 	/* print output debug statements */
 	if (verbose >= 2)
