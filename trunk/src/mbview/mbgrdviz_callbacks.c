@@ -56,10 +56,11 @@ extern int isnanf(float x);
 #define MBGRDVIZ_OPENNAV		4
 #define MBGRDVIZ_OPENSWATH		5
 #define MBGRDVIZ_SAVEROUTE		6
-#define MBGRDVIZ_SAVEWINFROG		7
-#define MBGRDVIZ_SAVESITE		8
-#define MBGRDVIZ_SAVEPROFILE		9
-#define MBGRDVIZ_REALTIME		10
+#define MBGRDVIZ_SAVEWINFROGPTS		7
+#define MBGRDVIZ_SAVEWINFROGWPT		8
+#define MBGRDVIZ_SAVESITE		9
+#define MBGRDVIZ_SAVEPROFILE		10
+#define MBGRDVIZ_REALTIME		11
 
 /* Projection defines */
 #define ModelTypeProjected	     1
@@ -106,7 +107,7 @@ int	realtime_update = 5;
 int	realtime_icon = MBGRDVIZ_REALTIME_ICON_SHIP;
 
 /* id variables */
-static char rcs_id[] = "$Id: mbgrdviz_callbacks.c,v 5.20 2006-08-09 22:41:27 caress Exp $";
+static char rcs_id[] = "$Id: mbgrdviz_callbacks.c,v 5.21 2006-09-11 18:55:53 caress Exp $";
 static char program_name[] = "MBgrdviz";
 static char help_message[] = "MBgrdviz is an interactive 2D/3D visualization tool for GMT grid files.";
 static char usage_message[] = "mbgrdviz [-H -T -V]";
@@ -133,7 +134,8 @@ void do_mbgrdviz_fileSelectionBox_opensite( Widget w, XtPointer client_data, XtP
 void do_mbgrdviz_fileSelectionBox_opennav( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbgrdviz_fileSelectionBox_openswath( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbgrdviz_fileSelectionBox_saveroute( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbgrdviz_fileSelectionBox_savewinfrog( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_fileSelectionBox_savewinfrogpts( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_fileSelectionBox_savewinfrogwpt( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbgrdviz_fileSelectionBox_savesite( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbgrdviz_open_region( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbgrdviz_make_survey( Widget w, XtPointer client_data, XtPointer call_data);
@@ -702,7 +704,7 @@ do_mbgrdviz_fileSelectionBox_saveroute( Widget w, XtPointer client_data, XtPoint
 }
 /*---------------------------------------------------------------------------------------*/
 void
-do_mbgrdviz_fileSelectionBox_savewinfrog( Widget w, XtPointer client_data, XtPointer call_data)
+do_mbgrdviz_fileSelectionBox_savewinfrogpts( Widget w, XtPointer client_data, XtPointer call_data)
 {
         Cardinal ac = 0;
         Arg      args[256];
@@ -717,7 +719,7 @@ do_mbgrdviz_fileSelectionBox_savewinfrog( Widget w, XtPointer client_data, XtPoi
 	
 	/* set title to open file dialog  */
 	ac = 0;
-	XtSetArg(args[ac], XmNtitle, "Save Route as Winfrog File"); ac++;
+	XtSetArg(args[ac], XmNtitle, "Save Route as Winfrog PTS File"); ac++;
 	XtSetValues(dialogShell_open, args, ac);
 	BxManageCB(w, (XtPointer)"fileSelectionBox", call_data);
 
@@ -726,7 +728,39 @@ do_mbgrdviz_fileSelectionBox_savewinfrog( Widget w, XtPointer client_data, XtPoi
 	tmp0 = (XmString) BX_CONVERT(dialogShell_open, "*", 
                 				XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNpattern, tmp0); ac++;
-	actionid = MBGRDVIZ_SAVEWINFROG * MBV_MAX_WINDOWS + instance;
+	actionid = MBGRDVIZ_SAVEWINFROGPTS * MBV_MAX_WINDOWS + instance;
+	XtSetArg(args[ac], XmNuserData, actionid); ac++;
+	XtSetValues(fileSelectionBox, args, ac);
+        XmStringFree((XmString)tmp0);
+    
+}
+/*---------------------------------------------------------------------------------------*/
+void
+do_mbgrdviz_fileSelectionBox_savewinfrogwpt( Widget w, XtPointer client_data, XtPointer call_data)
+{
+        Cardinal ac = 0;
+        Arg      args[256];
+	int	instance;
+	int	actionid;
+        XmString	tmp0;
+	int	argok;
+    	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    
+    	/* get instance */
+	instance = (int) client_data;
+	
+	/* set title to open file dialog  */
+	ac = 0;
+	XtSetArg(args[ac], XmNtitle, "Save Route as Winfrog WPT File"); ac++;
+	XtSetValues(dialogShell_open, args, ac);
+	BxManageCB(w, (XtPointer)"fileSelectionBox", call_data);
+
+	/* set fileSelectionBox parameters */
+	ac = 0;
+	tmp0 = (XmString) BX_CONVERT(dialogShell_open, "*", 
+                				XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNpattern, tmp0); ac++;
+	actionid = MBGRDVIZ_SAVEWINFROGWPT * MBV_MAX_WINDOWS + instance;
 	XtSetArg(args[ac], XmNuserData, actionid); ac++;
 	XtSetValues(fileSelectionBox, args, ac);
         XmStringFree((XmString)tmp0);
@@ -978,11 +1012,19 @@ do_mbgrdviz_openfile( Widget w, XtPointer client_data, XtPointer call_data)
 		}
 	
 	/* else write route data as Winfrog pts file */
-	else if (mode == MBGRDVIZ_SAVEWINFROG)
+	else if (mode == MBGRDVIZ_SAVEWINFROGPTS)
 		{
 		/* write route file */
-		do_mbview_message_on("Saving Winfrog format route data...", instance);
-		status = do_mbgrdviz_savewinfrog(instance, file_ptr);
+		do_mbview_message_on("Saving route as Winfrog PTS file...", instance);
+		status = do_mbgrdviz_savewinfrogpts(instance, file_ptr);
+		}
+	
+	/* else write route data as Winfrog wpt file */
+	else if (mode == MBGRDVIZ_SAVEWINFROGWPT)
+		{
+		/* write route file */
+		do_mbview_message_on("Saving route as Winfrog WPT file...", instance);
+		status = do_mbgrdviz_savewinfrogwpt(instance, file_ptr);
 		}
 	
 	/* else write route data */
@@ -1399,8 +1441,12 @@ int do_mbgrdviz_openprimary(char *input_file_ptr)
 					"Save Route File", 
 					MBV_EXISTMASK_ROUTE, &error);
 				mbview_addaction(verbose, instance,
-					do_mbgrdviz_fileSelectionBox_savewinfrog,
-					"Save Route as Winfrog File", 
+					do_mbgrdviz_fileSelectionBox_savewinfrogpts,
+					"Save Route as Winfrog PTS File", 
+					MBV_EXISTMASK_ROUTE, &error);
+				mbview_addaction(verbose, instance,
+					do_mbgrdviz_fileSelectionBox_savewinfrogwpt,
+					"Save Route as Winfrog WPT File", 
 					MBV_EXISTMASK_ROUTE, &error);
 				mbview_addaction(verbose, instance,
 					do_mbgrdviz_fileSelectionBox_saveprofile,
@@ -2191,9 +2237,9 @@ int do_mbgrdviz_saveroute(int instance, char *output_file_ptr)
 }
 /*---------------------------------------------------------------------------------------*/
 
-int do_mbgrdviz_savewinfrog(int instance, char *output_file_ptr)
+int do_mbgrdviz_savewinfrogpts(int instance, char *output_file_ptr)
 {
-	char function_name[] = "do_mbgrdviz_saveroute";
+	char function_name[] = "do_mbgrdviz_savewinfrogpts";
 	int	status = MB_SUCCESS;
 	FILE	*sfp;
 	char	buffer[MB_PATH_MAXLINE];
@@ -2315,6 +2361,157 @@ int do_mbgrdviz_savewinfrog(int instance, char *output_file_ptr)
 			    {
 			    if (routewaypoint[j] != MBV_ROUTE_WAYPOINT_NONE)
  			        fprintf(sfp,"1,%.10f,%.10f,0.00m,0.00m,0.00,0.00,%.3f\r\n", routelat[j], routelon[j], distlateral[j]);
+			    }
+		    }
+
+		/* close the output file */
+		fclose(sfp);
+
+		/* deallocate arrays */
+		if (npointalloc > 0)
+	    	    {
+		    status = mbview_freeroutearrays(verbose, 
+					    &routelon,
+					    &routelat,
+					    &routewaypoint,
+					    &routetopo,
+					    &routebearing,
+					    &distlateral,
+					    &distovertopo,
+					    &slope,
+					    &error);
+		    }
+		}
+	    }
+}
+/*---------------------------------------------------------------------------------------*/
+
+int do_mbgrdviz_savewinfrogwpt(int instance, char *output_file_ptr)
+{
+	char function_name[] = "do_mbgrdviz_savewinfrogwpt";
+	int	status = MB_SUCCESS;
+	FILE	*sfp;
+	char	buffer[MB_PATH_MAXLINE];
+	int	nroute = 0;
+	int	npoint = 0;
+	int	nintpoint = 0;
+	int	npointtotal = 0;
+	int	npointalloc = 0;
+	double	*routelon = NULL;
+	double	*routelat = NULL;
+	int	*routewaypoint = NULL;
+	double	*routetopo = NULL;
+	double	*routebearing = NULL;
+	double	*distlateral = NULL;
+	double	*distovertopo = NULL;
+	double	*slope = NULL;
+	int	routecolor;
+	int	routesize;
+	mb_path	routename;
+	int	iroute, j, n;
+
+	/* time, user, host variables */
+	time_t	right_now;
+	char	date[25], *user_ptr, host[MB_PATH_MAXLINE];
+	char	*unknown = "Unknown";
+
+	/* read data for valid instance */
+	if (instance >= 0)
+	    {
+
+	    /* get the number of routes to be written to the outpuf file */
+	    status = mbview_getroutecount(verbose, instance, &nroute, &error);
+	    if (nroute <= 0)
+	    	{
+		fprintf(stderr,"Unable to write route file...\nCurrently %d routes defined for instance %d!\n",
+			nroute, instance);
+		XBell((Display *) XtDisplay(mainWindow),100);
+		status = MB_FAILURE;
+		}
+		
+	    /* initialize the output file */
+	    if (status == MB_SUCCESS && nroute > 0)
+	    	{
+		/* open the output file */
+		if ((sfp = fopen(output_file_ptr, "w")) == NULL) 
+			{
+			error = MB_ERROR_OPEN_FAIL;
+			status = MB_FAILURE;
+			fprintf(stderr,"\nUnable to Open route file <%s> for writing\n",output_file_ptr);
+			XBell((Display *) XtDisplay(mainWindow),100);
+			}
+		}
+	    
+	    /* if all ok proceed to extract and output routes */
+	    if (status == MB_SUCCESS)
+	    	{
+	        /* loop over routes */
+		for (iroute=0;iroute<nroute;iroute++)
+	    	    {
+		    /* get point count for current route */
+		    status = mbview_getroutepointcount(verbose, instance,
+			    iroute, &npoint, &nintpoint, &error);
+
+		    /* allocate route arrays */
+		    npointtotal = npoint + nintpoint;
+		    if (status == MB_SUCCESS
+			    && npointalloc < npointtotal)
+			    {
+			    status = mbview_allocroutearrays(verbose, 
+						    npointtotal,
+						    &routelon,
+						    &routelat,
+						    &routewaypoint,
+						    &routetopo,
+						    &routebearing,
+						    &distlateral,
+						    &distovertopo,
+						    &slope,
+						    &error);
+			    if (status == MB_SUCCESS)
+				    {
+				    npointalloc = npointtotal;
+				    }
+
+			    /* if error initializing memory then cancel dealing with this route */
+			    else
+	    			    {
+				    fprintf(stderr,"Unable to write route...\nArray allocation for %d points failed for instance %d!\n",
+					    npointtotal, instance);
+				    XBell((Display *) XtDisplay(mainWindow),100);
+				    npoint = 0;		    
+				    nintpoint = 0;		    
+				    npointtotal = 0;		    
+				    }
+			    }
+
+		    /* extract data for route */
+		    status = mbview_getroute(verbose, instance,
+					    iroute,
+					    &npointtotal,
+					    routelon,
+					    routelat,
+					    routewaypoint,
+					    routetopo,
+					    routebearing,
+					    distlateral,
+					    distovertopo,
+					    slope,
+					    &routecolor,
+					    &routesize,
+					    routename,
+					    &error);
+
+		    /* write the route points */
+		    n = 0;
+		    for (j=0;j<npointtotal;j++)
+			    {
+			    if (routewaypoint[j] != MBV_ROUTE_WAYPOINT_NONE)
+			    	{
+				n++;
+ 			        fprintf(sfp,"%s %d,%.10f,%.10f,17,100.0,0.00,0.00,255,0.00\r\n", 
+						routename, n, routelat[j], routelon[j]);
+				}
 			    }
 		    }
 
@@ -3574,8 +3771,12 @@ fprintf(stderr,"done opening mbview instance:%d\n",instance);
 					"Save Route File", 
 					MBV_EXISTMASK_ROUTE, &error);
 				mbview_addaction(verbose, instance,
-					do_mbgrdviz_fileSelectionBox_savewinfrog,
-					"Save Route File", 
+					do_mbgrdviz_fileSelectionBox_savewinfrogpts,
+					"Save Route as Winfrog PTS File", 
+					MBV_EXISTMASK_ROUTE, &error);
+				mbview_addaction(verbose, instance,
+					do_mbgrdviz_fileSelectionBox_savewinfrogwpt,
+					"Save Route as Winfrog WPT File", 
 					MBV_EXISTMASK_ROUTE, &error);
 				mbview_addaction(verbose, instance,
 					do_mbgrdviz_fileSelectionBox_saveprofile,

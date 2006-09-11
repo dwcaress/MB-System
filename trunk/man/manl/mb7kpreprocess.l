@@ -1,4 +1,4 @@
-.TH mb7kpreprocess l "12 January 2006" "MB-System 5.0" "MB-System 5.0"
+.TH mb7kpreprocess l "13 August 2006" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmb7kpreprocess\fP - performs preprocessing of Reson 7k multibeam data 
 in the 7k format (\fBMBIO\fP format 88).
@@ -7,8 +7,8 @@ in the 7k format (\fBMBIO\fP format 88).
 Version 5.0
 
 .SH SYNOPSIS
-\fBmb7kpreprocess\fP [\fB-B\fP \fB-D\fP\fIoffx/offy\fP \fB-F\fP\fIformat\fP 
-\fB-I\fIfile \fB-A\fItype\fP \fB-L\fP \fB-O\fP\fIoutfile\fP 
+\fBmb7kpreprocess\fP [\fB-A\fP \fB-B\fP \fB-D\fP\fIoffx/offy\fP \fB-F\fP\fIformat\fP 
+\fB-I\fIfile \fB-L\fP \fB-N\fP\fIinsfile\fP \fB-O\fP\fIoutfile\fP 
 \fB-T\fP\fItimelag\fP \fB-H -V\fP]
 
 .SH DESCRIPTION
@@ -30,9 +30,15 @@ Dale N. Chayes (dale@ldeo.columbia.edu)
 
 .SH OPTIONS
 .TP
+.B \-A
+.br
+This option causes the program to output multibeam records occuring before the first
+available navigation and attitude data. Normally, these records are ignored.
+.TP
 .B \-B
 .br
 This option corrects the bathymetry timetags so they agree with the subbottom profiler timetags. 
+.TP
 .B \-D
 \fIoffx/offz\fP
 .br
@@ -76,11 +82,26 @@ format 88).
 This option causes the program to list the timetags of bathymetry,
 sidescan, subbottom, navigation, and attitude data records.
 .TP
+.B \-N
+\fIinsfile\fP
+.br
+The program will read navigation and attitude from the MBARI AUV navigation
+log file \fIinsfile\fP and merge those data with the multibeam, sidescan,
+and subbtottom data in the 7k file.If a timelag model is specified using
+\fB-T\fP\fItimelag\fP, the time lag will be applied to the navigation and
+attitude data before merging with the sonar data. The navigation and attitude
+data from \fIinsfile\fP will also be embedded in asynchronous data records
+in the output 7k format data. Any pre-existing navigation data records will
+be replaced.
+.TP
 .B \-T
 \fItimelag\fP
 .br
-This option specifies a timelag to be applied to the navigation and
-attitude data prior to it being merged with the bathymetry.
+This option specifies a \fItimelag\fP value in seconds to be applied 
+to the navigation and attitude data prior to it being merged with the 
+bathymetry. If \fItimelag\fP is a valid path to a file containing time
+stamp and time lag pairs, then these data will be read and the time lag
+applied to particular records will be interpolated by time.
 
 .SH EXAMPLES
 Suppose that one has collected a Reson 7k datafile incorporating 

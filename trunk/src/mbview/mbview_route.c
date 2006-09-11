@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_route.c	9/25/2003
- *    $Id: mbview_route.c,v 5.14 2006-06-16 19:30:58 caress Exp $
+ *    $Id: mbview_route.c,v 5.15 2006-09-11 18:55:53 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  *		begun on October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.14  2006/06/16 19:30:58  caress
+ * Check in after the Santa Monica Basin Mapping AUV Expedition.
+ *
  * Revision 5.13  2006/04/26 22:06:40  caress
  * Improved profile view feature and enabled export of profile data.
  *
@@ -114,7 +117,7 @@ static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 static char		value_string[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_route.c,v 5.14 2006-06-16 19:30:58 caress Exp $";
+static char rcs_id[]="$Id: mbview_route.c,v 5.15 2006-09-11 18:55:53 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_getroutecount(int verbose, int instance,
@@ -285,91 +288,12 @@ int mbview_getrouteinfo(int verbose, int instance,
 		/* get basic info */
 		route = &(shared.shareddata.routes[working_route]);
 		*nroutewaypoint = route->npoints;
-		*nroutpoint = 0;
+		*nroutpoint = route->nroutepoint;
 		strcpy(routename, route->name);
 		*routecolor = route->color;
 		*routesize = route->size;
-		*routedistancelateral = 0.0;
-		*routedistancetopo = 0.0;
-
-		/* loop over the route segments */
-		for (i=0;i<route->npoints-1;i++)
-			{
-			/* do first point */
-			routelon1 = route->points[i].xlon;
-			if (routelon1 < -180.0)
-				routelon1 += 360.0;
-			else if (routelon1 > 180.0)
-				routelon1 -= 360.0;
-			routelat1 = route->points[i].ylat ;
-			routetopo1 = route->points[i].zdata;
-			if (*nroutpoint == 0)
-				{
-				distlateral = 0.0;
-				distovertopo = 0.0;
-				}
-			else
-				{
-				mbview_projectdistance(instance,
-					routelon0, routelat0, routetopo0,
-					routelon1, routelat1, routetopo1,
-					&distlateral,
-					&distovertopo,
-					&routeslope);
-				}
-			(*routedistancelateral) += distlateral;
-			(*routedistancetopo) += distovertopo;
-			routelon0 = routelon1;
-			routelat0 = routelat1;
-			routetopo0 = routetopo1;
-			(*nroutpoint)++;
-			
-			/* loop over interior of segment */
-			for (j=1;j<route->segments[i].nls-1;j++)
-				{
-				routelon1 = route->segments[i].lspoints[j].xlon;
-				if (routelon1 < -180.0)
-					routelon1 += 360.0;
-				else if (routelon1 > 180.0)
-					routelon1 -= 360.0;
-				routelat1 = route->segments[i].lspoints[j].ylat;
-				routetopo1 = route->segments[i].lspoints[j].zdata;
-				mbview_projectdistance(instance,
-					routelon0, routelat0, routetopo0,
-					routelon1, routelat1, routetopo1,
-					&distlateral,
-					&distovertopo,
-					&routeslope);
-				(*routedistancelateral) += distlateral;
-				(*routedistancetopo) += distovertopo;
-				routelon0 = routelon1;
-				routelat0 = routelat1;
-				routetopo0 = routetopo1;
-				(*nroutpoint)++;
-				}
-			}
-			
-		/* do last point */
-		j = route->npoints - 1;
-		routelon1 = route->points[j].xlon;
-		if (routelon1 < -180.0)
-			routelon1 += 360.0;
-		else if (routelon1 > 180.0)
-			routelon1 -= 360.0;
-		routelat1 = route->points[j].ylat ;
-		routetopo1 = route->points[j].zdata;
-		mbview_projectdistance(instance,
-			routelon0, routelat0, routetopo0,
-			routelon1, routelat1, routetopo1,
-			&distlateral,
-			&distovertopo,
-			&routeslope);
-		(*routedistancelateral) += distlateral;
-		(*routedistancetopo) += distovertopo;
-		routelon0 = routelon1;
-		routelat0 = routelat1;
-		routetopo0 = routetopo1;
-		(*nroutpoint)++;
+		*routedistancelateral = route->distancelateral;
+		*routedistancetopo = route->distancetopo;
 		}
 		
 	/* print output debug statements */
@@ -659,6 +583,9 @@ int mbview_addroute(int verbose, int instance,
 	shared.shareddata.routes[*iroute].color = routecolor;
 	shared.shareddata.routes[*iroute].size = routesize;
 	strcpy(shared.shareddata.routes[*iroute].name,routename);
+
+	/* set distance values */
+	mbview_route_setdistance(instance, *iroute);
 	
 	/* make routes viewable */
 	if (data->route_view_mode != MBV_VIEW_ON)
@@ -1206,6 +1133,9 @@ int mbview_pick_route_select(int instance, int which, int xpixel, int ypixel)
 				/* update the segment for all active instances */
 				mbview_updatesegmentw(instance, &(shared.shareddata.routes[iroute].segments[jpoint]));
 				}
+
+			/* set distance values */
+			mbview_route_setdistance(instance, iroute);
 			}
 		}
 
@@ -1595,6 +1525,9 @@ int mbview_pick_route_add(int instance, int which, int xpixel, int ypixel)
 				/* update the segment for all active instances */
 				mbview_updatesegmentw(instance, &(shared.shareddata.routes[shared.shareddata.route_selected].segments[shared.shareddata.route_point_selected]));
 				}
+
+			/* set distance values */
+			mbview_route_setdistance(instance, shared.shareddata.route_selected);
 			}
 		}
 
@@ -1962,6 +1895,9 @@ int mbview_route_add(int instance, int inew, int jnew, int waypoint,
 			/* update the segment for all active instances */
 			mbview_updatesegmentw(instance, &(shared.shareddata.routes[inew].segments[jnew]));
 			}
+			
+		/* set distance values */
+		mbview_route_setdistance(instance, inew);
 	
 		/* make routes viewable */
 		if (data->route_view_mode != MBV_VIEW_ON)
@@ -2106,6 +2042,12 @@ int mbview_route_delete(int instance, int iroute, int ipoint)
 				mbview_updatesegmentw(instance, &(shared.shareddata.routes[iroute].segments[j]));
 				}
 			}
+			
+		/* if route still has points then reset distance values */
+		if (shared.shareddata.routes[iroute].npoints > 0)
+			{
+			mbview_route_setdistance(instance, iroute);
+			}
 
 		/* if last point deleted then move remaining routes if necessary */
 		if (shared.shareddata.routes[iroute].npoints <= 0)
@@ -2188,7 +2130,146 @@ int mbview_route_delete(int instance, int iroute, int ipoint)
 	return(status);
 }
 
+
+/*------------------------------------------------------------------------------*/
+int mbview_route_setdistance(int instance, int working_route)
+{
+	/* local variables */
+	char	*function_name = "mbview_route_setdistance";
+	int	status = MB_SUCCESS;
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
+	struct mbview_route_struct *route;
+	double	distlateral, distovertopo;
+	double	routelon0, routelon1;
+	double	routelat0, routelat1;
+	double	routetopo0, routetopo1;
+	double	routeslope;
+	int	i, j;
+
+	/* print starting debug statements */
+	if (mbv_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
+		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:                   %d\n", mbv_verbose);
+		fprintf(stderr,"dbg2       instance:                  %d\n", instance);
+		fprintf(stderr,"dbg2       working_route:             %d\n", working_route);
+		}
+
+	/* get view */
+	view = &(mbviews[instance]);
+	data = &(view->data);
+
+	/* check that the route is valid */
+	if (working_route >= 0 && working_route < shared.shareddata.nroute && shared.shareddata.routes[working_route].npoints > 0)
+		{
+		/* get route pointer */
+		route = &(shared.shareddata.routes[working_route]);
 		
+		/* loop over the route segments */
+		route->distancelateral = 0.0;
+		route->distancetopo = 0.0;
+		route->nroutepoint = 0;
+		for (i=0;i<route->npoints-1;i++)
+			{
+			/* do first point */
+			routelon1 = route->points[i].xlon;
+			if (routelon1 < -180.0)
+				routelon1 += 360.0;
+			else if (routelon1 > 180.0)
+				routelon1 -= 360.0;
+			routelat1 = route->points[i].ylat ;
+			routetopo1 = route->points[i].zdata;
+			if (route->nroutepoint == 0)
+				{
+				distlateral = 0.0;
+				distovertopo = 0.0;
+				}
+			else
+				{
+				mbview_projectdistance(instance,
+					routelon0, routelat0, routetopo0,
+					routelon1, routelat1, routetopo1,
+					&distlateral,
+					&distovertopo,
+					&routeslope);
+				}
+			route->distancelateral += distlateral;
+			route->distancetopo += distovertopo;
+			routelon0 = routelon1;
+			routelat0 = routelat1;
+			routetopo0 = routetopo1;
+			route->nroutepoint++;
+			
+			/* loop over interior of segment */
+			for (j=1;j<route->segments[i].nls-1;j++)
+				{
+				routelon1 = route->segments[i].lspoints[j].xlon;
+				if (routelon1 < -180.0)
+					routelon1 += 360.0;
+				else if (routelon1 > 180.0)
+					routelon1 -= 360.0;
+				routelat1 = route->segments[i].lspoints[j].ylat;
+				routetopo1 = route->segments[i].lspoints[j].zdata;
+				mbview_projectdistance(instance,
+					routelon0, routelat0, routetopo0,
+					routelon1, routelat1, routetopo1,
+					&distlateral,
+					&distovertopo,
+					&routeslope);
+				route->distancelateral += distlateral;
+				route->distancetopo += distovertopo;
+				routelon0 = routelon1;
+				routelat0 = routelat1;
+				routetopo0 = routetopo1;
+				route->nroutepoint++;
+				}
+			}
+			
+		/* do last point */
+		j = route->npoints - 1;
+		routelon1 = route->points[j].xlon;
+		if (routelon1 < -180.0)
+			routelon1 += 360.0;
+		else if (routelon1 > 180.0)
+			routelon1 -= 360.0;
+		routelat1 = route->points[j].ylat ;
+		routetopo1 = route->points[j].zdata;
+		mbview_projectdistance(instance,
+			routelon0, routelat0, routetopo0,
+			routelon1, routelat1, routetopo1,
+			&distlateral,
+			&distovertopo,
+			&routeslope);
+		route->distancelateral += distlateral;
+		route->distancetopo += distovertopo;
+		routelon0 = routelon1;
+		routelat0 = routelat1;
+		routetopo0 = routetopo1;
+		route->nroutepoint++;
+		}
+		
+	/* print output debug statements */
+	if (mbv_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       routedistancelateral:      %f\n", route->distancelateral);
+		fprintf(stderr,"dbg2       routedistancetopo:         %f\n", route->distancetopo);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:                    %d\n", status);
+		}
+
+	/* return */
+	return(status);
+
+}
+
 /*------------------------------------------------------------------------------*/
 int mbview_drawroute(int instance, int rez)
 {

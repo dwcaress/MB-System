@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_reson7k.c	3.00	3/23/2004
- *	$Id: mbsys_reson7k.c,v 5.12 2006-08-09 22:41:27 caress Exp $
+ *	$Id: mbsys_reson7k.c,v 5.13 2006-09-11 18:55:53 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -26,6 +26,9 @@
  * Date:	March 23, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.12  2006/08/09 22:41:27  caress
+ * Fixed programs that read or write grids so that they do not use the GMT_begin() function; these programs will now work when GMT is built in the default fashion, when GMT is built in the default fashion, with "advisory file locking" enabled.
+ *
  * Revision 5.11  2006/03/14 01:48:08  caress
  * Changed log2() and exp2() calls to log() and exp() for compatitibility with non-POSIX compliant operating systems.
  *
@@ -85,7 +88,7 @@
 /* turn on debug statements here */
 /* #define MSYS_RESON7KR_DEBUG 1 */
 
-static char res_id[]="$Id: mbsys_reson7k.c,v 5.12 2006-08-09 22:41:27 caress Exp $";
+static char res_id[]="$Id: mbsys_reson7k.c,v 5.13 2006-09-11 18:55:53 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_zero7kheader(int verbose, s7k_header	*header, 
@@ -2600,7 +2603,7 @@ int mbsys_reson7k_print_bluefin(int verbose,
 			fprintf(stderr,"%s     nav[%d].7kTime->Minutes:    %d\n",first,i,bluefin->nav[i].s7kTime.Minutes);
 			fprintf(stderr,"%s     nav[%d].checksum:           %d\n",first,i,bluefin->nav[i].checksum);
 			fprintf(stderr,"%s     nav[%d].reserved:           %d\n",first,i,bluefin->nav[i].reserved);
-			fprintf(stderr,"%s     nav[%d].quality:            %d\n",first,i,bluefin->nav[i].quality);
+			fprintf(stderr,"%s     nav[%d].quality:            %x\n",first,i,bluefin->nav[i].quality);
 			fprintf(stderr,"%s     nav[%d].latitude:           %f\n",first,i,bluefin->nav[i].latitude);
 			fprintf(stderr,"%s     nav[%d].longitude:          %f\n",first,i,bluefin->nav[i].longitude);
 			fprintf(stderr,"%s     nav[%d].speed:              %f\n",first,i,bluefin->nav[i].speed);

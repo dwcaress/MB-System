@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_l3xseraw.c	3/27/2000
- *	$Id: mbr_l3xseraw.c,v 5.16 2006-08-04 03:56:41 caress Exp $
+ *	$Id: mbr_l3xseraw.c,v 5.17 2006-09-11 18:55:52 caress Exp $
  *
  *    Copyright (c) 2000, 2001, 2002, 2003 by 
  *    D. W. Caress (caress@mbari.org)
@@ -26,6 +26,9 @@
  * Additional Authors:	P. A. Cohen and S. Dzurenko
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.16  2006/08/04 03:56:41  caress
+ * Working towards 5.1.0 release.
+ *
  * Revision 5.15  2006/01/06 18:27:19  caress
  * Working towards 5.0.8
  *
@@ -94,8 +97,8 @@
 #include "../../include/mb_swap.h"
 
 
-/*
 #define MB_DEBUG 1
+/*
 #define MB_DEBUG2 1
 */
 
@@ -137,7 +140,7 @@ int mbr_wt_l3xseraw(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_l3xseraw(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.16 2006-08-04 03:56:41 caress Exp $";
+	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.17 2006-09-11 18:55:52 caress Exp $";
 	char	*function_name = "mbr_register_l3xseraw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -270,7 +273,7 @@ int mbr_info_l3xseraw(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.16 2006-08-04 03:56:41 caress Exp $";
+	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.17 2006-09-11 18:55:52 caress Exp $";
 	char	*function_name = "mbr_info_l3xseraw";
 	int	status = MB_SUCCESS;
 
@@ -340,7 +343,7 @@ int mbr_info_l3xseraw(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_l3xseraw(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.16 2006-08-04 03:56:41 caress Exp $";
+	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.17 2006-09-11 18:55:52 caress Exp $";
 	char	*function_name = "mbr_alm_l3xseraw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -1586,6 +1589,7 @@ int mbr_l3xseraw_rd_ship(int verbose,int buffer_size,char *buffer,void *store_pt
 	int	done;
 	int	index;
 	int	skip;
+	int	nchar;
 	int	i;
 
 	/* print input debug statements */
@@ -1670,7 +1674,18 @@ fprintf(stderr, "Group %d of %d bytes to be parsed in MBIO function <%s>\n",
 			/* handle general group */
 			if (group_id == MBSYS_XSE_SHP_GROUP_GEN)
 				{
-				/* currently unused by MB-System */
+				mb_get_binary_int(SWAPFLAG, &buffer[index], &nchar); index += 4;
+				for (i=0;i<nchar;i++)
+					{
+					store->par_ship_name[i] = buffer[index]; index++;
+					}
+				store->par_ship_name[nchar] = 0;
+				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->par_ship_length); index += 8;
+				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->par_ship_beam); index += 8;
+				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->par_ship_draft); index += 8;
+				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->par_ship_height); index += 8;
+				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->par_ship_displacement); index += 8;
+				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->par_ship_weight); index += 8;
 				}
 		
 			/* handle time group */
@@ -1688,7 +1703,19 @@ fprintf(stderr, "Group %d of %d bytes to be parsed in MBIO function <%s>\n",
 			/* handle sensors group */
 			else if (group_id == MBSYS_XSE_SHP_GROUP_SENSORS)
 				{
-				/* currently unused by MB-System */
+				mb_get_binary_int(SWAPFLAG, &buffer[index], &store->par_ship_nsensor); index += 4;
+				for (i=0;i<store->par_ship_nsensor;i++)
+					{
+					mb_get_binary_int(SWAPFLAG, &buffer[index], &store->par_ship_sensor_id[i]); index += 4;
+					}
+				for (i=0;i<store->par_ship_nsensor;i++)
+					{
+					mb_get_binary_int(SWAPFLAG, &buffer[index], &store->par_ship_sensor_type[i]); index += 4;
+					}
+				for (i=0;i<store->par_ship_nsensor;i++)
+					{
+					mb_get_binary_int(SWAPFLAG, &buffer[index], &store->par_ship_sensor_frequency[i]); index += 4;
+					}
 				}
 
 			/* handle motion group */
@@ -1742,6 +1769,19 @@ fprintf(stderr, "Group %d of %d bytes to be parsed in MBIO function <%s>\n",
 	    fprintf(stderr,"dbg5       par_source:          %d\n",store->par_source);
 	    fprintf(stderr,"dbg5       par_sec:             %u\n",store->par_sec);
 	    fprintf(stderr,"dbg5       par_usec:            %u\n",store->par_usec);
+	    fprintf(stderr,"dbg5       par_ship_name:       %s\n",store->par_ship_name);
+	    fprintf(stderr,"dbg5       par_ship_length:     %f\n",store->par_ship_length);
+	    fprintf(stderr,"dbg5       par_ship_beam:       %f\n",store->par_ship_beam);
+	    fprintf(stderr,"dbg5       par_ship_draft:      %f\n",store->par_ship_draft);
+	    fprintf(stderr,"dbg5       par_ship_height:     %f\n",store->par_ship_height);
+	    fprintf(stderr,"dbg5       par_ship_displacement: %f\n",store->par_ship_displacement);
+	    fprintf(stderr,"dbg5       par_ship_weight:     %f\n",store->par_ship_weight);
+	    for (i=0;i<store->par_ship_nsensor;i++)
+		{
+		fprintf(stderr,"dbg5       par_ship_sensor_id[%d]:        %d\n",i,store->par_ship_sensor_id[i]);
+		fprintf(stderr,"dbg5       par_ship_sensor_type[%d]:      %d\n",i,store->par_ship_sensor_type[i]);
+		fprintf(stderr,"dbg5       par_ship_sensor_frequency[%d]: %d\n",i,store->par_ship_sensor_frequency[i]);
+		}
 	    fprintf(stderr,"dbg5       par_roll_bias:       %f\n",store->par_roll_bias);
 	    fprintf(stderr,"dbg5       par_pitch_bias:      %f\n",store->par_pitch_bias);
 	    fprintf(stderr,"dbg5       par_heading_bias:    %f\n",store->par_heading_bias);
@@ -4152,6 +4192,7 @@ int mbr_l3xseraw_wr_ship(int verbose,int *buffer_size,char *buffer,void *store_p
 	int group_cnt_index;
 	int frame_id;
 	int group_id;
+	int	nchar;
 	int	i;
 
 	/* print input debug statements */
@@ -4176,6 +4217,22 @@ int mbr_l3xseraw_wr_ship(int verbose,int *buffer_size,char *buffer,void *store_p
 	    fprintf(stderr,"dbg5       par_source:          %d\n",store->par_source);
 	    fprintf(stderr,"dbg5       par_sec:             %u\n",store->par_sec);
 	    fprintf(stderr,"dbg5       par_usec:            %u\n",store->par_usec);
+	    fprintf(stderr,"dbg5       par_ship_name:       %s\n",store->par_ship_name);
+	    fprintf(stderr,"dbg5       par_ship_length:     %f\n",store->par_ship_length);
+	    fprintf(stderr,"dbg5       par_ship_beam:       %f\n",store->par_ship_beam);
+	    fprintf(stderr,"dbg5       par_ship_draft:      %f\n",store->par_ship_draft);
+	    fprintf(stderr,"dbg5       par_ship_height:     %f\n",store->par_ship_height);
+	    fprintf(stderr,"dbg5       par_ship_displacement: %f\n",store->par_ship_displacement);
+	    fprintf(stderr,"dbg5       par_ship_weight:     %f\n",store->par_ship_weight);
+	    fprintf(stderr,"dbg5       par_ship_nsensor:    %d\n",store->par_ship_nsensor);
+	    for (i=0;i<store->par_ship_nsensor;i++)
+		{
+		fprintf(stderr,"dbg5       par_ship_sensor_id[%d]:        %d\n",i,store->par_ship_sensor_id[i]);
+		fprintf(stderr,"dbg5       par_ship_sensor_type[%d]:      %d\n",i,store->par_ship_sensor_type[i]);
+		fprintf(stderr,"dbg5       par_ship_sensor_frequency[%d]: %d\n",i,store->par_ship_sensor_frequency[i]);
+		}
+	    
+	    
 	    fprintf(stderr,"dbg5       par_roll_bias:       %f\n",store->par_roll_bias);
 	    fprintf(stderr,"dbg5       par_pitch_bias:      %f\n",store->par_pitch_bias);
 	    fprintf(stderr,"dbg5       par_heading_bias:    %f\n",store->par_heading_bias);
@@ -4218,6 +4275,102 @@ int mbr_l3xseraw_wr_ship(int verbose,int *buffer_size,char *buffer,void *store_p
 	mb_put_binary_int(SWAPFLAG, store->par_sec, &buffer[index]); index += 4;
 	mb_put_binary_int(SWAPFLAG, store->par_usec, &buffer[index]); index += 4;
 	frame_count += 16;
+
+	/* get group label */
+#ifdef DATAINPCBYTEORDER
+	strncpy(&buffer[index], "GSH$", 4);
+#else
+	strncpy(&buffer[index], "$HSG", 4);
+#endif
+	index += 4;
+
+	/* start the group byte count, but don't write it to buffer yet */
+	/* mark the byte count spot in the buffer and increment index so we skip it */
+	group_count = 0;
+	group_cnt_index = index;
+	index += 4;
+	
+	/* get parameter group */
+	group_id = MBSYS_XSE_SHP_GROUP_GEN;
+	mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
+	nchar = strlen(store->par_ship_name);
+	mb_put_binary_int(SWAPFLAG, nchar, &buffer[index]); index += 4;
+	for (i=0;i<nchar;i++)
+		{
+		buffer[index] = store->par_ship_name[i]; index++;
+		}
+	mb_put_binary_double(SWAPFLAG, store->par_ship_length, &buffer[index]); index += 8;
+	mb_put_binary_double(SWAPFLAG, store->par_ship_beam, &buffer[index]); index += 8;
+	mb_put_binary_double(SWAPFLAG, store->par_ship_draft, &buffer[index]); index += 8;
+	mb_put_binary_double(SWAPFLAG, store->par_ship_height, &buffer[index]); index += 8;
+	mb_put_binary_double(SWAPFLAG, store->par_ship_displacement, &buffer[index]); index += 8;
+	mb_put_binary_double(SWAPFLAG, store->par_ship_weight, &buffer[index]); index += 8;
+
+	/* get end of group label */
+#ifdef DATAINPCBYTEORDER
+	strncpy(&buffer[index], "GSH#", 4);
+#else
+	strncpy(&buffer[index], "#HSG", 4);
+#endif
+	index += 4;
+	group_count += nchar + 56;
+
+	/* go back and fill in group byte count */
+	mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
+
+	/* add group count to the frame count */
+	frame_count += group_count + 12;
+
+	/* get group label */
+#ifdef DATAINPCBYTEORDER
+	strncpy(&buffer[index], "GSH$", 4);
+#else
+	strncpy(&buffer[index], "$HSG", 4);
+#endif
+	index += 4;
+
+	/* start the group byte count, but don't write it to buffer yet */
+	/* mark the byte count spot in the buffer and increment index so we skip it */
+	group_count = 0;
+	group_cnt_index = index;
+	index += 4;
+	
+	/* get parameter group */
+	group_id = MBSYS_XSE_SHP_GROUP_SENSORS;
+	mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
+	mb_put_binary_int(SWAPFLAG, store->par_ship_nsensor, &buffer[index]); index += 4;
+	for (i=0;i<store->par_ship_nsensor;i++)
+		{
+		mb_put_binary_int(SWAPFLAG, store->par_ship_sensor_id[i], &buffer[index]); index += 4;
+		}
+	for (i=0;i<store->par_ship_nsensor;i++)
+		{
+		mb_put_binary_int(SWAPFLAG, store->par_ship_sensor_type[i], &buffer[index]); index += 4;
+		}
+	for (i=0;i<store->par_ship_nsensor;i++)
+		{
+		mb_put_binary_int(SWAPFLAG, store->par_ship_sensor_frequency[i], &buffer[index]); index += 4;
+		}
+
+	/* get end of group label */
+#ifdef DATAINPCBYTEORDER
+	strncpy(&buffer[index], "GSH#", 4);
+#else
+	strncpy(&buffer[index], "#HSG", 4);
+#endif
+	index += 4;
+	group_count += 3 * store->par_ship_nsensor + 4;
+
+	/* go back and fill in group byte count */
+	mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
+
+	/* add group count to the frame count */
+	frame_count += group_count + 12;
+
+
+
+
+
 
 	/* get group label */
 #ifdef DATAINPCBYTEORDER

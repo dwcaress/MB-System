@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_reson7k.h	3/3/2004
- *	$Id: mbsys_reson7k.h,v 5.9 2006-04-11 19:14:46 caress Exp $
+ *	$Id: mbsys_reson7k.h,v 5.10 2006-09-11 18:55:53 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	March 3, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.9  2006/04/11 19:14:46  caress
+ * Various fixes.
+ *
  * Revision 5.8  2005/11/05 00:48:05  caress
  * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
  *
@@ -367,7 +370,7 @@ typedef struct s7k_header_struct
     unsigned short Reserved;			/* Reserved  */
     unsigned int   RecordType;			/* Record type          u32 Unique identifier of indicating the type of 
     												data embedded in this record. */
-    unsigned int   DeviceId;			/* Device identifier    u32 Identifier of the device that this data pertains. */
+    unsigned int   DeviceId;			/* Device identifier    u32 Identifier of the device to which this datum pertains. */
     unsigned short Reserved2;			/* Reserved  */
     unsigned short SystemEnumerator;		/* System enumerator	The enumerator is used to differentiate between devices with the 
     									same device identifiers in one installation/system. It is up to 

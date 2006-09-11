@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_reson7kr.c	4/4/2004
- *	$Id: mbr_reson7kr.c,v 5.13 2006-04-11 19:14:46 caress Exp $
+ *	$Id: mbr_reson7kr.c,v 5.14 2006-09-11 18:55:53 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	April 4,2004
  * $Log: not supported by cvs2svn $
+ * Revision 5.13  2006/04/11 19:14:46  caress
+ * Various fixes.
+ *
  * Revision 5.12  2006/03/14 01:44:02  caress
  * Added test for reasonable altitude value derived from Bluefin records.
  *
@@ -201,7 +204,7 @@ int mbr_reson7kr_wr_soundvelocity(int verbose, int *bufferalloc, char **bufferpt
 int mbr_reson7kr_wr_absorptionloss(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 int mbr_reson7kr_wr_spreadingloss(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 
-static char res_id[]="$Id: mbr_reson7kr.c,v 5.13 2006-04-11 19:14:46 caress Exp $";
+static char res_id[]="$Id: mbr_reson7kr.c,v 5.14 2006-09-11 18:55:53 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_reson7kr(int verbose, void *mbio_ptr, int *error)
@@ -764,74 +767,76 @@ fprintf(stderr,"Record returned: type:%d status:%d error:%d\n\n",store->kind, st
 				    &heave, &roll, &pitch, error);
 				    
 		/* if the optional data are not all available, this ping
-			is not useful, and is discarded by setting
-			*error to MB_ERROR_UNINTELLIGIBLE */
+			is not useful. Just use null values here and catch
+			this condition with mb7kpreprocess */
 		if (interp_status == MB_FAILURE)
 			{
-			status = MB_FAILURE;
-			*error = MB_ERROR_UNINTELLIGIBLE;
+			/* set nav & attitude data to zero */
+			longitude = 0.0;
+			latitude = 0.0;
+			heading = 0.0;
+			roll = 0.0;
+			pitch = 0.0;
+			heave = 0.0;
+			sonar_depth = 0.0;
 			}
 			
-		/* if the optional data are available, then proceed */
+		/* calculate the optional values in the bathymetry record */
+		bathymetry->longitude = DTR * longitude;
+		bathymetry->latitude = DTR * latitude;
+		bathymetry->heading = DTR * heading;
+		bathymetry->height_source = 1;
+		bathymetry->tide = 0.0;
+		bathymetry->roll = DTR * roll;
+		bathymetry->pitch = DTR * pitch;
+		bathymetry->heave = heave;
+		bathymetry->vehicle_height = -sonar_depth;
+
+		/* get bathymetry */
+		if (volatilesettings->sound_velocity > 0.0)
+			soundspeed = volatilesettings->sound_velocity;
+		else if (bluefin->environmental[0].sound_speed > 0.0)
+			soundspeed = bluefin->environmental[0].sound_speed;
 		else
+			soundspeed = 1500.0;
+		for (i=0;i<bathymetry->number_beams;i++)
 			{
-			bathymetry->longitude = DTR * longitude;
-			bathymetry->latitude = DTR * latitude;
-			bathymetry->heading = DTR * heading;
-			bathymetry->height_source = 1;
-			bathymetry->tide = 0.0;
-			bathymetry->roll = DTR * roll;
-			bathymetry->pitch = DTR * pitch;
-			bathymetry->heave = heave;
-			bathymetry->vehicle_height = -sonar_depth;
-
-			/* get bathymetry */
-			if (volatilesettings->sound_velocity > 0.0)
-				soundspeed = volatilesettings->sound_velocity;
-			else if (bluefin->environmental[0].sound_speed > 0.0)
-				soundspeed = bluefin->environmental[0].sound_speed;
-			else
-				soundspeed = 1500.0;
-			for (i=0;i<bathymetry->number_beams;i++)
+			if ((bathymetry->quality[i] & 15) > 0)
 				{
-				if ((bathymetry->quality[i] & 15) > 0)
-					{
-					alpha = RTD * beamgeometry->angle_alongtrack[i] + bathymetry->pitch;
-					beta = 90.0 - RTD * beamgeometry->angle_acrosstrack[i] + bathymetry->roll;
-					mb_rollpitch_to_takeoff(
-						verbose, 
-						alpha, beta, 
-						&theta, &phi, 
-						error);
-					rr = 0.5 * soundspeed * bathymetry->range[i];
-					xx = rr * sin(DTR * theta);
-					zz = rr * cos(DTR * theta);
-					bathymetry->acrosstrack[i] = xx * cos(DTR * phi);
-					bathymetry->alongtrack[i] = xx * sin(DTR * phi);
-					bathymetry->depth[i] = zz + sonar_depth;
-					bathymetry->pointing_angle[i] = DTR * theta;
-					bathymetry->azimuth_angle[i] = DTR * phi;
-					}
-				else
-					{
-					bathymetry->depth[i] = 0.0;
-					bathymetry->acrosstrack[i] = 0.0;
-					bathymetry->alongtrack[i] = 0.0;
-					bathymetry->pointing_angle[i] = 0.0;
-					bathymetry->azimuth_angle[i] = 0.0;
-					}
+				alpha = RTD * beamgeometry->angle_alongtrack[i] + bathymetry->pitch;
+				beta = 90.0 - RTD * beamgeometry->angle_acrosstrack[i] - bathymetry->roll;
+				mb_rollpitch_to_takeoff(
+					verbose, 
+					alpha, beta, 
+					&theta, &phi, 
+					error);
+				rr = 0.5 * soundspeed * bathymetry->range[i];
+				xx = rr * sin(DTR * theta);
+				zz = rr * cos(DTR * theta);
+				bathymetry->acrosstrack[i] = xx * cos(DTR * phi);
+				bathymetry->alongtrack[i] = xx * sin(DTR * phi);
+				bathymetry->depth[i] = zz + sonar_depth;
+				bathymetry->pointing_angle[i] = DTR * theta;
+				bathymetry->azimuth_angle[i] = DTR * phi;
 				}
+			else
+				{
+				bathymetry->depth[i] = 0.0;
+				bathymetry->acrosstrack[i] = 0.0;
+				bathymetry->alongtrack[i] = 0.0;
+				bathymetry->pointing_angle[i] = 0.0;
+				bathymetry->azimuth_angle[i] = 0.0;
+				}
+			}
 
-			/* set flag */
-			bathymetry->optionaldata = MB_YES;
-			bathymetry->header.OffsetToOptionalData 
-					= MBSYS_RESON7K_RECORDHEADER_SIZE 
-						+ R7KHDRSIZE_7kBathymetricData
-						+ bathymetry->number_beams * 9;
+		/* set flag */
+		bathymetry->optionaldata = MB_YES;
+		bathymetry->header.OffsetToOptionalData 
+				= MBSYS_RESON7K_RECORDHEADER_SIZE 
+					+ R7KHDRSIZE_7kBathymetricData
+					+ bathymetry->number_beams * 9;
 
 /*mbsys_reson7k_print_bathymetry(verbose, bathymetry, error);*/
-
-			}
 		}
 
 	/* set error and kind in mb_io_ptr */
@@ -1477,7 +1482,7 @@ fprintf(stderr,"mbr_reson7kr_rd_fsdwsshi: EDGETECH TIME: %f %f\n", *edgetech_tim
 				mb_get_time(verbose, time_i, &time_d);
 				if (*edgetech_time_d > 0.0 && time_d - *edgetech_time_d > 0.002)
 					*edgetech_dt = time_d - *edgetech_time_d;
-				*edgetech_time_d = time_d;
+				*edgetech_time_d = time_d;*/
 #ifdef MBR_RESON7KR_DEBUG
 fprintf(stderr,"mbr_reson7kr_rd_fsdwsb:    EDGETECH TIME: %f %f\n", *edgetech_time_d, *edgetech_dt);
 #endif*/
@@ -4874,6 +4879,38 @@ header->RecordNumber);
 			mb_get_binary_float(MB_YES, &buffer[index], &(bluefin->nav[i].yaw_rate)); index += 4;
 			mb_get_binary_double(MB_YES, &buffer[index], &(bluefin->nav[i].position_time)); index += 8;
 			mb_get_binary_double(MB_YES, &buffer[index], &(bluefin->nav[i].altitude_time)); index += 8;
+/*
+fprintf(stderr,"Bluefin nav[%d].packet_size:        %d\n",i,bluefin->nav[i].packet_size);
+fprintf(stderr,"Bluefin nav[%d].version:            %d\n",i,bluefin->nav[i].version);
+fprintf(stderr,"Bluefin nav[%d].offset:             %d\n",i,bluefin->nav[i].offset);
+fprintf(stderr,"Bluefin nav[%d].data_type:          %d\n",i,bluefin->nav[i].data_type);
+fprintf(stderr,"Bluefin nav[%d].data_size:          %d\n",i,bluefin->nav[i].data_size);
+fprintf(stderr,"Bluefin nav[%d].s7kTime.Year:       %d\n",i,bluefin->nav[i].s7kTime.Year);
+fprintf(stderr,"Bluefin nav[%d].s7kTime.Day:        %d\n",i,bluefin->nav[i].s7kTime.Day);
+fprintf(stderr,"Bluefin nav[%d].s7kTime.Seconds:    %f\n",i,bluefin->nav[i].s7kTime.Seconds);
+fprintf(stderr,"Bluefin nav[%d].s7kTime.Hours:      %d\n",i,bluefin->nav[i].s7kTime.Hours);
+fprintf(stderr,"Bluefin nav[%d].7kTime->Minutes:    %d\n",i,bluefin->nav[i].s7kTime.Minutes);
+fprintf(stderr,"Bluefin nav[%d].checksum:           %d\n",i,bluefin->nav[i].checksum);
+fprintf(stderr,"Bluefin nav[%d].reserved:           %d\n",i,bluefin->nav[i].reserved);
+fprintf(stderr,"Bluefin nav[%d].quality:            %x\n",i,bluefin->nav[i].quality);
+fprintf(stderr,"Bluefin nav[%d].latitude:           %f\n",i,bluefin->nav[i].latitude);
+fprintf(stderr,"Bluefin nav[%d].longitude:          %f\n",i,bluefin->nav[i].longitude);
+fprintf(stderr,"Bluefin nav[%d].speed:              %f\n",i,bluefin->nav[i].speed);
+fprintf(stderr,"Bluefin nav[%d].depth:              %f\n",i,bluefin->nav[i].depth);
+fprintf(stderr,"Bluefin nav[%d].altitude:           %f\n",i,bluefin->nav[i].altitude);
+fprintf(stderr,"Bluefin nav[%d].roll:               %f\n",i,bluefin->nav[i].roll);
+fprintf(stderr,"Bluefin nav[%d].pitch:              %f\n",i,bluefin->nav[i].pitch);
+fprintf(stderr,"Bluefin nav[%d].yaw:                %f\n",i,bluefin->nav[i].yaw);
+fprintf(stderr,"Bluefin nav[%d].northing_rate:      %f\n",i,bluefin->nav[i].northing_rate);
+fprintf(stderr,"Bluefin nav[%d].easting_rate:       %f\n",i,bluefin->nav[i].easting_rate);
+fprintf(stderr,"Bluefin nav[%d].depth_rate:         %f\n",i,bluefin->nav[i].depth_rate);
+fprintf(stderr,"Bluefin nav[%d].altitude_rate:      %f\n",i,bluefin->nav[i].altitude_rate);
+fprintf(stderr,"Bluefin nav[%d].roll_rate:          %f\n",i,bluefin->nav[i].roll_rate);
+fprintf(stderr,"Bluefin nav[%d].pitch_rate:         %f\n",i,bluefin->nav[i].pitch_rate);
+fprintf(stderr,"Bluefin nav[%d].yaw_rate:           %f\n",i,bluefin->nav[i].yaw_rate);
+fprintf(stderr,"Bluefin nav[%d].position_time:      %f\n",i,bluefin->nav[i].position_time);
+fprintf(stderr,"Bluefin nav[%d].altitude_time:      %f\n",i,bluefin->nav[i].altitude_time);
+*/
 
 /* print out the nav point time stamp */
 #ifdef MBR_RESON7KR_DEBUG

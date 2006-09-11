@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_defaults.c	10/7/94
- *    $Id: mb_defaults.c,v 5.6 2003-04-17 21:05:23 caress Exp $
+ *    $Id: mb_defaults.c,v 5.7 2006-09-11 18:55:52 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	January 23, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2003/04/17 21:05:23  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.5  2002/10/02 23:55:42  caress
  * Release 5.0.beta24
  *
@@ -110,7 +113,7 @@ int mb_defaults(int verbose, int *format, int *pings,
 		int *btime_i, int *etime_i,
 		double *speedmin, double *timegap)
 {
-  static char rcs_id[]="$Id: mb_defaults.c,v 5.6 2003-04-17 21:05:23 caress Exp $";
+  static char rcs_id[]="$Id: mb_defaults.c,v 5.7 2006-09-11 18:55:52 caress Exp $";
 	char	*function_name = "mb_defaults";
 	int	status;
 	FILE	*fp;
@@ -219,7 +222,7 @@ int mb_defaults(int verbose, int *format, int *pings,
 /*--------------------------------------------------------------------*/
 int mb_env(int verbose, char *psdisplay, char *imgdisplay, char *mbproject)
 {
-  static char rcs_id[]="$Id: mb_defaults.c,v 5.6 2003-04-17 21:05:23 caress Exp $";
+  static char rcs_id[]="$Id: mb_defaults.c,v 5.7 2006-09-11 18:55:52 caress Exp $";
 	char	*function_name = "mbenv";
 	int	status;
 	FILE	*fp;
@@ -311,6 +314,69 @@ int mb_env(int verbose, char *psdisplay, char *imgdisplay, char *mbproject)
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       psdisplay:  %s\n",psdisplay);
 		fprintf(stderr,"dbg2       mbproject:  %s\n",mbproject);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_lonflip(int verbose, int *lonflip)
+{
+  static char rcs_id[]="$Id: mb_defaults.c,v 5.7 2006-09-11 18:55:52 caress Exp $";
+	char	*function_name = "mb_lonflip";
+	int	status;
+	FILE	*fp;
+	char	file[MB_PATH_MAXLINE];
+	char	home[MB_PATH_MAXLINE];
+	char	string[MB_PATH_MAXLINE];
+	char	*HOME = "HOME";
+	char	*home_ptr;
+	char	*getenv();
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose: %d\n",verbose);
+		}
+
+	/* set system default values */
+	*lonflip = 0;
+
+	/* set the filename */
+	if ((home_ptr = getenv(HOME)) != NULL)
+		{
+		strcpy(file,home_ptr);
+		strcat(file,"/.mbio_defaults");
+
+		/* open and read values from file if possible */
+		if ((fp = fopen(file, "r")) != NULL)
+			{
+			status = MB_SUCCESS;
+			while (fgets(string,sizeof(string),fp) != NULL)
+				{
+				if (strncmp(string,"lonflip:",8) == 0)
+					sscanf(string,"lonflip: %d",lonflip);
+				}
+ 			fclose(fp);
+			}
+		else
+			status = MB_FAILURE;
+		}
+	else
+		status = MB_FAILURE;
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       lonflip:    %d\n",*lonflip);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:  %d\n",status);
 		}

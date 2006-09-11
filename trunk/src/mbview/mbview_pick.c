@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_pick.c	9/29/2003
- *    $Id: mbview_pick.c,v 5.12 2006-06-16 19:30:58 caress Exp $
+ *    $Id: mbview_pick.c,v 5.13 2006-09-11 18:55:53 caress Exp $
  *
  *    Copyright (c) 2003, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  *		begun on October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.12  2006/06/16 19:30:58  caress
+ * Check in after the Santa Monica Basin Mapping AUV Expedition.
+ *
  * Revision 5.11  2006/04/26 22:06:39  caress
  * Improved profile view feature and enabled export of profile data.
  *
@@ -108,7 +111,7 @@ static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 static char		value_list[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_pick.c,v 5.12 2006-06-16 19:30:58 caress Exp $";
+static char rcs_id[]="$Id: mbview_pick.c,v 5.13 2006-09-11 18:55:53 caress Exp $";
 	
 
 /*------------------------------------------------------------------------------*/
@@ -670,19 +673,19 @@ int mbview_pick_text(int instance)
 					shared.shareddata.routes[shared.shareddata.route_selected].points[shared.shareddata.route_point_selected].xlon, 
 					shared.shareddata.routes[shared.shareddata.route_selected].points[shared.shareddata.route_point_selected].ylat, 
 					lonstr0, latstr0);
-		sprintf(value_text,":::t\"Route %d Pick Info:\":t\" Point: %d\":t\" Lon: %s\":t\" Lat: %s\":t\" Depth: %.3f m\":t\" Color: %d\":t\" Size: %d\":t\" Name: %s\"", 
+		sprintf(value_text,":::t\"Route %d Pick Info:\":t\" Point: %d\":t\" Lon: %s\":t\" Lat: %s\":t\" Depth: %.3f m\":t\" Length: %.3f m\":t\" LOB: %.3f m\":t\" Name: %s\"", 
 			shared.shareddata.route_selected,shared.shareddata.route_point_selected, 
 			lonstr0, latstr0,
 			shared.shareddata.routes[shared.shareddata.route_selected].points[shared.shareddata.route_point_selected].zdata,
-			shared.shareddata.routes[shared.shareddata.route_selected].color,
-			shared.shareddata.routes[shared.shareddata.route_selected].size,
+			shared.shareddata.routes[shared.shareddata.route_selected].distancelateral,
+			shared.shareddata.routes[shared.shareddata.route_selected].distancetopo,
 			shared.shareddata.routes[shared.shareddata.route_selected].name);
-		sprintf(value_list,"Route %d Pick Info: Point: %d Lon: %s Lat: %s Depth: %.3f m Color: %d Size: %d Name: %s", 
+		sprintf(value_list,"Route %d Pick Info: Point: %d Lon: %s Lat: %s Depth: %.3f m Length: %.3f m LOB: %.3f m Name: %s", 
 			shared.shareddata.route_selected,shared.shareddata.route_point_selected, 
 			lonstr0, latstr0,
 			shared.shareddata.routes[shared.shareddata.route_selected].points[shared.shareddata.route_point_selected].zdata,
-			shared.shareddata.routes[shared.shareddata.route_selected].color,
-			shared.shareddata.routes[shared.shareddata.route_selected].size,
+			shared.shareddata.routes[shared.shareddata.route_selected].distancelateral,
+			shared.shareddata.routes[shared.shareddata.route_selected].distancetopo,
 			shared.shareddata.routes[shared.shareddata.route_selected].name);
 		}
 	else if (data->pickinfo_mode == MBV_PICK_NAV

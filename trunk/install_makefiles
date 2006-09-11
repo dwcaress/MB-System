@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	install_makefiles	5/20/94
-#    $Id: install_makefiles,v 5.25 2006-07-06 05:30:57 caress Exp $
+#    $Id: install_makefiles,v 5.26 2006-09-11 18:55:51 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 1996, 1997, 2001, 2002, 2003, 2005, 2006 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -40,8 +40,9 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   The important parameters to be set are:
 #	MBSYSTEM_HOME	Absolute path to the directory containing
 #				this file.
-#	OS		Operating system (SUN, IRIX, LINUX, LYNX, 
-#				SOLARIS, HPUX, or OTHER).
+#	OS		Operating system (Recognized options are:
+#				DARWIN, LINUX, CYGWIN, SUN, IRIX, 
+#				SOLARIS, HPUX, LYNX, or OTHER).
 #	BYTESWAPPED	If set to "YES" will enable byte swapping
 #				of input and output binary data.
 #				Otherwise byte swapping is disabled.
@@ -115,10 +116,13 @@ $LFLAGS = "-Wl -lm -bind_at_load";
 #--------------------------------------------------------------------
 #
 # Version:
-#   $Id: install_makefiles,v 5.25 2006-07-06 05:30:57 caress Exp $
+#   $Id: install_makefiles,v 5.26 2006-09-11 18:55:51 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.25  2006/07/06 05:30:57  caress
+#   Working more towards 5.1.0beta
+#
 #   Revision 5.24  2006/07/05 19:50:21  caress
 #   Working towards 5.1.0beta
 #
@@ -328,6 +332,29 @@ elsif ($preset eq "macosxusrlocal")
 	$PROJECTIONS = "$MBSYSTEM_HOME/share/Projections.dat";
 	$CFLAGS = "-g -I/usr/X11R6/include";
 	$LFLAGS = "-Wl -lm -bind_at_load";
+	}
+# 
+# Preset configuration for Cygwin on Windows when building in /usr/local
+#       assumes that GMT and netCDF are also installed in /usr/local
+elsif ($preset eq "CYGWIN")
+	{
+	print "\nUsing preset configuration for Cygwin on Windows in /usr/local...\n";
+	$MBSYSTEM_HOME = "/usr/local/mbsystem";
+	$OS = "CYGWIN";
+	$CC = "gcc";
+	$BYTESWAPPED = "YES";
+	$GRAPHICAL = "YES";
+	$MOTIFINCDIR = "/usr/X11R6/include/Xm";
+	$MOTIFLIBS = "-L/usr/X11R6/lib -lXm -lXt -lX11";
+	$OPENGLLIBS = "-lGLw -lGLU -lGL";
+	$GMTLIBDIR = "/usr/local/gmt/lib";
+	$GMTINCDIR = "/usr/local/gmt/include";
+	$NETCDFLIBDIR = "/usr/local/netcdf/lib";
+	$NETCDFINCDIR = "/usr/local/netcdf/include";
+	$LEVITUS = "$MBSYSTEM_HOME/share/LevitusAnnual82.dat";
+	$PROJECTIONS = "$MBSYSTEM_HOME/share/Projections.dat";
+	$CFLAGS = "-g -fdata-sections -I/usr/X11R6/include";
+	$LFLAGS = "-lrpc -lrpclib -lm -Wl,--enable-runtime-pseudo-reloc";
 	}
 # 
 # Preset configuration for SGI Irix when building in /usr/local
@@ -554,7 +581,7 @@ if ($BYTESWAPPED eq "YES")
 	}
 	
 # add __APPLE__ flag to CFLAGS to allow GSF code to build under OSX
-if ($OS eq "DARWIN")
+if ($OS eq "DARWIN" || $OS eq "CYGWIN")
 	{
 	$CFLAGS = "$CFLAGS -D__APPLE__";
 	}

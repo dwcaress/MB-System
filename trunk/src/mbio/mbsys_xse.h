@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_xse.h	3/27/2000
- *	$Id: mbsys_xse.h,v 5.9 2005-11-05 00:48:03 caress Exp $
+ *	$Id: mbsys_xse.h,v 5.10 2006-09-11 18:55:53 caress Exp $
  *
  *    Copyright (c) 2000, 2001, 2002, 2003 by 
  *    D. W. Caress (caress@mbari.org)
@@ -28,6 +28,9 @@
  * Additional Authors:	P. A. Cohen and S. Dzurenko
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.9  2005/11/05 00:48:03  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.8  2003/04/17 21:05:23  caress
  * Release 5.0.beta30
  *
@@ -180,6 +183,7 @@
 #define	MBSYS_XSE_TIME_OFFSET		2177452800.0
 #define	MBSYS_XSE_BUFFER_SIZE		32000
 #define	MBSYS_XSE_MAX_SIZE		200
+#define	MBSYS_XSE_MAX_SENSORS		16
 
 /* frame and group id's */
 #define MBSYS_XSE_NONE_FRAME		0
@@ -308,6 +312,28 @@ struct mbsys_xse_struct
 	int	par_source;		/* sensor id */
 	unsigned int	par_sec;	/* sec since 1/1/1901 00:00 */
 	unsigned int	par_usec;	/* microseconds */
+	unsigned int    par_ship_name_length;	/* length of ship name, chars */
+	char    par_ship_name[MBSYS_XSE_DESCRIPTION_LENGTH]; /* Name of Vessel */
+	double  par_ship_length;	/* vessel total length, meters */
+	double  par_ship_beam;		/* vessel total width, meters */
+	double  par_ship_draft;		/* vessel maximum draft, meters */
+	double  par_ship_height;	/* vessel maximum height, meters */
+	double  par_ship_displacement;	/* vessel maximum displacement, cubic meters */
+	double  par_ship_weight;	/* vessel maximum weight, kg */
+	
+	int	par_ship_nsensor;					/* number of sensors */
+	int	par_ship_sensor_id[MBSYS_XSE_MAX_SENSORS];		/* sensor id array */
+	int	par_ship_sensor_type[MBSYS_XSE_MAX_SENSORS];		/* sensor type array 
+										1000 : SeaBeam 1000
+										2000 : SeaBeam 2100
+										2001 : SeaBeam 2100 V-shaped
+										3000 : SeaBeam 3000 
+										4000 : single beam
+										8000 : Edgetech sidescan
+										9000 : 
+										9001 : SSV */
+	int	par_ship_sensor_frequency[MBSYS_XSE_MAX_SENSORS];	/* sensor frequency array (kHz) */
+	
 	float	par_roll_bias;		/* radians */
 	float	par_pitch_bias;		/* radians */
 	float	par_heading_bias;	/* radians */
@@ -327,13 +353,6 @@ struct mbsys_xse_struct
 	float	par_hrp_y;		/* motion sensor y position, meters */
 	float	par_hrp_z;		/* motion sensor z position, meters */
 	unsigned int    par_length;	/* length of ship name, chars */
-	char    par_ship_name[MBSYS_XSE_DESCRIPTION_LENGTH]; /* Name of Vessel */
-	double  par_ship_length;	/* vessel total length, meters */
-	double  par_ship_width;		/* vessel total width, meters */
-	double  par_ship_draft;		/* vessel maximum draft, meters */
-	double  par_ship_height;	/* vessel maximum height, meters */
-	double  par_ship_displacement;	/* vessel maximum displacement, cubic meters */
-	double  par_ship_weight;	/* vessel maximum weight, kg */
 	unsigned int	par_ndraft_time;	/* number of times for each draft  */
 	unsigned int	par_draft_time[MBSYS_XSE_MAX_SIZE]; /* UTC time for each draft value, seconds */
 	unsigned int	par_num_drafts;		/* number of draft values */

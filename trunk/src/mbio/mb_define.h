@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	4/21/96
- *    $Id: mb_define.h,v 5.29 2006-01-06 18:27:19 caress Exp $
+ *    $Id: mb_define.h,v 5.30 2006-09-11 18:55:52 caress Exp $
  *
  *    Copyright (c) 1996, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	April 21, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.29  2006/01/06 18:27:19  caress
+ * Working towards 5.0.8
+ *
  * Revision 5.28  2005/11/05 00:48:04  caress
  * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
  *
@@ -232,6 +235,7 @@ int mb_defaults(int verbose, int *format, int *pings,
 		int *btime_i, int *etime_i,
 		double *speedmin, double *timegap);
 int mb_env(int verbose, char *psdisplay, char *imgdisplay, char *mbproject);
+int mb_lonflip(int verbose, int *lonflip);
 int mb_format_register(int verbose, int *format, void *mbio_ptr, 
 		int *error);
 int mb_format_info(int verbose, int *format, int *system, 
@@ -511,6 +515,10 @@ int mb_buffer_insert_nav(int verbose, void *buff_ptr, void *mbio_ptr,
 int mb_buffer_get_ptr(int verbose, void *buff_ptr, void *mbio_ptr,
 		int id, void **store_ptr, 
 		int *error);
+
+int mb_coor_scale(int verbose, double latitude, 
+		double *mtodeglon, double *mtodeglat);
+int mb_apply_lonflip(int verbose, int lonflip, double *longitude);
 
 int mb_error(int, int, char **);
 int mb_notice_log_datatype(int verbose, void *mbio_ptr, int data_id);

@@ -3,9 +3,9 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system: mbm_route2mission.perl   7/18/2004
-#    $Id: mbm_route2mission.perl,v 5.8 2006-07-27 18:42:51 caress Exp $
+#    $Id: mbm_route2mission.perl,v 5.9 2006-09-11 18:55:52 caress Exp $
 #
-#    Copyright (c) 2004 by 
+#    Copyright (c) 2004, 2006 by 
 #    D. W. Caress (caress@mbari.org)
 #      Monterey Bay Aquarium Research Institute
 #      Moss Landing, CA
@@ -37,10 +37,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #      Moss Landing, CA
 #
 # Version:
-# $Id: mbm_route2mission.perl,v 5.8 2006-07-27 18:42:51 caress Exp $
+# $Id: mbm_route2mission.perl,v 5.9 2006-09-11 18:55:52 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.8  2006/07/27 18:42:51  caress
+#   Working towards 5.1.0
+#
 #   Revision 5.7  2006/06/16 19:30:58  caress
 #   Check in after the Santa Monica Basin Mapping AUV Expedition.
 #
@@ -84,8 +87,12 @@ $program_name = "mbm_route2mission";
 # Derivation of timeout duration values
 #     Use 1.5 * expected duration for waypoint behaviors
 #     Use 1.3 * expected duration the mission as a whole
+#     Abort time must not be greater than battery life of 8 hours = 28800 seconds
 $durationfactorwaypoint = 1.5;
 $durationfactormission = 1.3;
+$durationmax = 28800;
+$batterylife = 30600;
+$safetymargin = 3600;
 
 # set defaults
 
@@ -107,14 +114,14 @@ $gpsmode = 0;
 $setpointtime = 30;
 
 # behavior descend
-$descendpitch = -15;
-$descendrudder = 4;
+$descendpitch = -30;
+$descendrudder = 3;
 $descentdepth = 3.0;
 $initialdescendtime = 300;
 
 # behavior ascend
-$ascendrudder = 5;
-$ascendpitch = 20;
+$ascendrudder = 3;
+$ascendpitch = 30;
 $ascendenddepth = 2;
 
 # behavior reson
@@ -122,7 +129,7 @@ $resonduration = 6;
 $sonaraltitudemax = 100.0;
 $mb_pingrate = 2.0;
 $mb_transmitgain = 220.0;
-$mb_receivegain = 70.0;
+$mb_receivegain = 75.0;
 $mb_pulsewidth = 0.000030;
 
 
@@ -140,7 +147,7 @@ $behavior = $behaviorWaypointDepthID;
 $approachdepth = 50.0;
 
 # assumed ascent and descent rate
-$ascendrate = 0.31; # m/s
+$ascendrate = 0.36; # m/s
 $descendrate = 0.23; # m/s
 
 $forwarddist = 400.0;
@@ -473,7 +480,12 @@ $missiontime += (-$mmissiondepths[$nmissionpoints - 1] / $ascendrate)
 		
 # calculate abort time using safety factor of $durationfactormission
 $aborttime = $durationfactormission * $missiontime;
-	
+$ascendtime = $ascendtimes[$nmissionpoints - 1];
+if ($aborttime > $batterylife - $safetymargin - $ascendtime)
+	{
+	$aborttime = $batterylife - $safetymargin - $ascendtime;
+	}
+
 # Print out program info
 if ($outputoff)
 	{
@@ -492,6 +504,9 @@ elsif ($verbose)
 	printf "    Distance:                 %.0f (m)  %.3f (km)\r\n", $distancelastmpoint, 0.001 * $distancelastmpoint;
 	printf "    Estimated Time:           %d (s)  %.3f (hr)\r\n", $missiontime, $missiontime / 3600.0;
 	printf "    Abort Time:               %d (s)\r\n", $aborttime;
+	printf "    Max battery life:         %d (s)\r\n", $batterylife;
+	printf "    Safety margin:            %d (s)\r\n", $safetymargin;
+	printf "    Ascend time:              %d (s)\r\n", $ascendtime;
 	printf "    Way Points:               $nwaypoints\r\n";
 	printf "    Route Points:             $nmissionpoints\r\n";
 	if ($behavior == $behaviorWaypointDepthID)
@@ -567,6 +582,9 @@ else
 	printf "    Distance:                 %.0f (m)  %.3f (km) \r\n", $distancelastmpoint, 0.001 * $distancelastmpoint;
 	printf "    Estimated Time:           %d (s)  %.3f (hr) \r\n", $missiontime, $missiontime / 3600.0;
 	printf "    Abort Time:               %d (s)\r\n", $aborttime;
+	printf "    Max battery life:         %d (s)\r\n", $batterylife;
+	printf "    Safety margin:            %d (s)\r\n", $safetymargin;
+	printf "    Ascend time:              %d (s)\r\n", $ascendtime;
 	printf "    Way Points:               $nwaypoints\r\n";
 	printf "    Route Points:             $nmissionpoints\r\n";
 	}
@@ -592,6 +610,9 @@ if (!$outputoff)
 	printf MFILE "#     Distance:                 $distancelastmpoint (m)\r\n";
 	printf MFILE "#     Estimated Time:           %d (s)  %.3f (hr)\r\n", $missiontime, $missiontime / 3600.0;
 	printf MFILE "#     Abort Time:               %d (s)\r\n", $aborttime;
+	printf MFILE "#     Max battery life:         %d (s)\r\n", $batterylife;
+	printf MFILE "#     Safety margin:            %d (s)\r\n", $safetymargin;
+	printf MFILE "#     Ascend time:              %d (s)\r\n", $ascendtime;
 	printf MFILE "#     Way Points:               $nwaypoints\r\n";
 	printf MFILE "#     Route Points:             $nmissionpoints\r\n";
 	if ($mappingsonar)
@@ -773,6 +794,10 @@ print "Output Behavior: reson (stop, Log_Mode = 0)\n";
 			{
 			$sonaraltitudeuse = $sonaraltitudemax;
 			}
+		elsif ($sonaraltitude < $altitudemin)
+			{
+			$sonaraltitudeuse = $altitudemin;
+			}
 		else
 			{
 			$sonaraltitudeuse = $sonaraltitude;
@@ -894,10 +919,10 @@ print "Output Behavior: reson (stop, Log_Mode = 0)\n";
 			print MFILE "} \r\n";
 print "Output Behavior: reson (startup, Log_Mode = 1)\n";
 			print MFILE "# Set sonar parameters \r\n";
-			print MFILE "#   Actual Altitude: $sonaraltitude\n";
-			print MFILE "#   Altitude Set: $sonaraltitudeuse\n";
-			print MFILE "#   Vehicle Depth:$mmissiondepths[$i] \n";
-			print MFILE "#   Seafloor Depth:$mtopos[$i]\n";
+			print MFILE "#   Commanded altitude: $sonaraltitude\n";
+			print MFILE "#   Actual altitude: $sonaraltitudeuse\n";
+			print MFILE "#   Commanded vehicle depth:$mmissiondepths[$i] \n";
+			print MFILE "#   Seafloor depth:$mtopos[$i]\n";
 			print MFILE "# \r\n";
 			print MFILE "behavior reson \r\n";
 			print MFILE "{ \r\n";
@@ -925,6 +950,7 @@ print "Output Behavior: reson (setup, Log_Mode = 0, waypoint($i) type = $mwaypoi
 			printf MFILE "MB_Range = %.2f; \r\n", $mb_range;
 			print MFILE "MB_Rate = $mb_pingrate; \r\n";
 			print MFILE "MB_Gain = $mb_receivegain; \r\n";
+			print MFILE "MB_Sound_Velocity = 0.0; \r\n";
 			printf MFILE "MB_Pulse_Width = %f; \r\n", $mb_pulsewidth;
 			printf MFILE "MB_Bottom_Detect_Filter_Min_Range = %.2f; \r\n", $mb_minrange;
 			printf MFILE "MB_Bottom_Detect_Filter_Max_Range = %.2f; \r\n", $mb_maxrange;
@@ -1106,10 +1132,10 @@ print " $mmissiondepths[$i+1]\n";
 			{
 			print MFILE "#######################################################\r\n";
 			print MFILE "# Reset sonar parameters \r\n";
-			print MFILE "#   Actual Altitude: $sonaraltitude\n";
-			print MFILE "#   Altitude Set: $sonaraltitudeuse\n";
-			print MFILE "#   Vehicle Depth:$mmissiondepths[$i] \n";
-			print MFILE "#   Seafloor Depth:$mtopos[$i]\n";
+			print MFILE "#   Commanded altitude: $sonaraltitude\n";
+			print MFILE "#   Actual altitude: $sonaraltitudeuse\n";
+			print MFILE "#   Commanded vehicle depth:$mmissiondepths[$i] \n";
+			print MFILE "#   Seafloor depth:$mtopos[$i]\n";
 			print MFILE "# \r\n";
 			print MFILE "behavior reson \r\n";
 			print MFILE "{ \r\n";
@@ -1133,6 +1159,7 @@ print "Output Behavior: reson (reset, Log_Mode = 1, line  = $iwaypoint, waypoint
 			printf MFILE "MB_Range = %.2f; \r\n", $mb_range;
 			print MFILE "MB_Rate = $mb_pingrate; \r\n";
 			print MFILE "MB_Gain = $mb_receivegain; \r\n";
+			print MFILE "MB_Sound_Velocity = 0.0; \r\n";
 			printf MFILE "MB_Pulse_Width = %f; \r\n", $mb_pulsewidth;
 			printf MFILE "MB_Bottom_Detect_Filter_Min_Range = %.2f; \r\n", $mb_minrange;
 			printf MFILE "MB_Bottom_Detect_Filter_Max_Range = %.2f; \r\n", $mb_maxrange;
@@ -1189,8 +1216,8 @@ print "Output Behavior: setpoint\n";
 	print MFILE "} \r\n";
 print "Output Behavior: gps\n";
 
-	# get starting sonar parameters assuming 25 m altitude
-	$sonaraltitudeuse = 25.0;
+	# get starting sonar parameters assuming $altitudedesired altitude
+	$sonaraltitudeuse = $altitudedesired;
 	$mb_range = 1.2 * 2.0 * $sonaraltitudeuse;
 	$mb_minrange = 0.5 * $sonaraltitudeuse;
 	$mb_maxrange = $mb_range;
@@ -1225,6 +1252,7 @@ print "Output Behavior: gps\n";
 	printf MFILE "MB_Range = %.2f; \r\n", $mb_range;
 	print MFILE "MB_Rate = $mb_pingrate; \r\n";
 	print MFILE "MB_Gain = $mb_receivegain; \r\n";
+	print MFILE "MB_Sound_Velocity = 0.0; \r\n";
 	printf MFILE "MB_Pulse_Width = %f; \r\n", $mb_pulsewidth;
 	printf MFILE "MB_Bottom_Detect_Filter_Min_Range = %.2f; \r\n", $mb_minrange;
 	printf MFILE "MB_Bottom_Detect_Filter_Max_Range = %.2f; \r\n", $mb_maxrange;

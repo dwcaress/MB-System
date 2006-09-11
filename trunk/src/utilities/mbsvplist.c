@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsvplist.c	1/3/2001
- *    $Id: mbsvplist.c,v 5.8 2006-01-18 15:17:00 caress Exp $
+ *    $Id: mbsvplist.c,v 5.9 2006-09-11 18:55:54 caress Exp $
  *
  *    Copyright (c) 2001, 2003, 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -32,6 +32,9 @@
  * Date:	January 3,  2001
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2006/01/18 15:17:00  caress
+ * Added stdlib.h include.
+ *
  * Revision 5.7  2005/11/05 01:07:54  caress
  * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
  *
@@ -80,7 +83,7 @@ char	*getenv();
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbsvplist.c,v 5.8 2006-01-18 15:17:00 caress Exp $";
+	static char rcs_id[] = "$Id: mbsvplist.c,v 5.9 2006-09-11 18:55:54 caress Exp $";
 	static char program_name[] = "mbsvplist";
 	static char help_message[] =  "mbsvplist lists all water sound velocity\nprofiles (SVPs) within swath data files. Swath bathymetry is\ncalculated from raw angles and travel times by raytracing\nthrough a model of the speed of sound in water. Many swath\ndata formats allow SVPs to be embedded in the data, and\noften the SVPs used to calculate the data will be included.\nBy default, all unique SVPs encountered are listed to\nstdout. The SVPs may instead be written to individual files\nwith names FILE_XXX.svp, where FILE is the swath data\nfilename and XXX is the SVP count within the file.  The -D\noption causes duplicate SVPs to be output.";
 	static char usage_message[] = "mbsvplist [-D -Fformat -H -Ifile -O -P -V -Z]";
@@ -171,6 +174,17 @@ main (int argc, char **argv)
 	int	svp_depthzero_reset;
 	double	svp_depthzero;
 
+	/* ttimes values */
+	int	ssv_output;
+	int	nbeams;
+	double	*ttimes = NULL;
+	double	*angles = NULL;
+	double	*angles_forward = NULL;
+	double	*angles_null = NULL;
+	double	*heave = NULL;
+	double	*alongtrack_offset = NULL;
+	double	ssv;
+
 	time_t	right_now;
 	char	date[25], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
 	int	read_data;
@@ -227,11 +241,19 @@ main (int argc, char **argv)
 		case 'O':
 		case 'o':
 			svp_file_output = MB_YES;
+			ssv_output = MB_NO;
 			break;
 		case 'P':
 		case 'p':
 			svp_file_output = MB_YES;
 			svp_file_use = MB_YES;
+			ssv_output = MB_NO;
+			break;
+		case 'S':
+		case 's':
+			ssv_output = MB_YES;
+			svp_file_output = MB_NO;
+			svp_file_use = MB_NO;
 			break;
 		case 'Z':
 		case 'z':
@@ -393,6 +415,24 @@ main (int argc, char **argv)
 	if (error == MB_ERROR_NO_ERROR)
 		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
 						sizeof(double), (void **)&ssalongtrack, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(double), (void **)&ttimes, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(double), (void **)&angles, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(double), (void **)&angles_forward, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(double), (void **)&angles_null, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(double), (void **)&heave, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(double), (void **)&alongtrack_offset, &error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
@@ -408,7 +448,10 @@ main (int argc, char **argv)
 	/* output info */
 	if (verbose >= 1)
 		{
-		fprintf(stderr, "\nSearching %s for SVP records\n", file);
+		if (ssv_output == MB_YES)
+			fprintf(stderr, "\nSearching %s for SSV records\n", file);
+		else
+			fprintf(stderr, "\nSearching %s for SVP records\n", file);
 		}
 
 	/* read and print data */
@@ -503,7 +546,7 @@ main (int argc, char **argv)
 				}
 			}
 			
-		/* else if survey data save time */
+		/* else if survey data save time and get ttimes */
 		else if (error <= MB_ERROR_NO_ERROR
 			&& kind == MB_DATA_DATA)
 			{
@@ -511,10 +554,24 @@ main (int argc, char **argv)
 			svp_time_d = time_d;
 			for (i=0;i<7;i++)
 			    svp_time_i[i] = time_i[i];
+			    
+			/* extract ttimes */
+			status = mb_ttimes(verbose, mbio_ptr, store_ptr,
+						&kind, &nbeams, 
+						ttimes, angles, 
+						angles_forward, angles_null,
+						heave, alongtrack_offset, 
+						&sonardepth, &ssv, &error);
+			
+			/* output ssv */
+			if (ssv_output == MB_YES)
+				{
+				fprintf(stdout, "%f %f\n", sonardepth, ssv);
+				}
 			}
 			
 		/* if svp loaded print it out */
-		if (svp_loaded == MB_YES
+		if (svp_loaded == MB_YES && ssv_output == MB_NO
 			&& ((error <= MB_ERROR_NO_ERROR
 			    && kind == MB_DATA_DATA)
 				|| error > MB_ERROR_NO_ERROR))
