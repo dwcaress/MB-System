@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbio_status.h	2/1/93
- *    $Id: mb_status.h,v 5.74 2006-09-11 18:55:52 caress Exp $
+ *    $Id: mb_status.h,v 5.75 2006-09-11 19:04:41 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003, 2004, 2005, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,10 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.74  2006/09/11 18:55:52  caress
+ * Changes during Western Flyer and Thomas Thompson cruises, August-September
+ * 2006.
+ *
  * Revision 5.73  2006/08/10 00:12:42  caress
  * Working towards 5.1.0beta2
  *
@@ -333,8 +337,8 @@
 #define MB_STATUS_DEF
 
 /* MB-system version id */
-#define	MB_VERSION	"5.1.0beta2"
-#define	MB_BUILD_DATE	"August 9, 2006"
+#define	MB_VERSION	"5.1.0beta3"
+#define	MB_BUILD_DATE	"September 11, 2006"
 
 /* MBIO function boolean convention */
 #define	MB_YES	1
