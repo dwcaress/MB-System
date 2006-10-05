@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_singlebeam.c	4/13/99
- *	$Id: mbsys_singlebeam.c,v 5.9 2005-11-05 00:48:04 caress Exp $
+ *	$Id: mbsys_singlebeam.c,v 5.10 2006-10-05 18:58:29 caress Exp $
  *
- *    Copyright (c) 1999, 2000, 2002, 2003 by
+ *    Copyright (c) 1999, 2000, 2002, 2003, 2006 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -23,11 +23,15 @@
  *      MBF_MBARINAV : MBIO ID 164
  *      MBF_MBARIROV : MBIO ID 165
  *      MBF_MBPRONAV : MBIO ID 166
+ *      MBF_MBARROV2 : MBIO ID 170
  *
  * Author:	D. W. Caress
  * Date:	April 13,  1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.9  2005/11/05 00:48:04  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.8  2005/03/25 04:29:56  caress
  * Fixed problem in which sonar depth could be calculated from implausible pressure values in some single beam or navigation formats.
  *
@@ -83,7 +87,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_singlebeam.h"
 
-static char res_id[]="$Id: mbsys_singlebeam.c,v 5.9 2005-11-05 00:48:04 caress Exp $";
+static char res_id[]="$Id: mbsys_singlebeam.c,v 5.10 2006-10-05 18:58:29 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_singlebeam_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
@@ -155,6 +159,10 @@ int mbsys_singlebeam_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	store->heading_flag = 0;
 	store->altitude_flag = 0;
 	store->attitude_flag = 0;
+	store->portlon = 0.0;
+	store->portlat = 0.0;
+	store->stbdlon = 0.0;
+	store->stbdlat = 0.0;
 	for (i=0;i<MBSYS_SINGLEBEAM_MAXLINE;i++)
 	    store->comment[i] = 0;
 
@@ -1049,6 +1057,93 @@ int mbsys_singlebeam_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbsys_singlebeam_swathbounds(int verbose, void *mbio_ptr, void *store_ptr,
+			int *kind, double *portlon, double *portlat,
+			double *stbdlon, double *stbdlat,
+			int *error)
+{
+	char	*function_name = "mbsys_singlebeam_swathbounds";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	struct mbsys_singlebeam_struct *store;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mb_ptr:     %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* get data structure pointer */
+	store = (struct mbsys_singlebeam_struct *) store_ptr;
+
+	/* get data kind */
+	*kind = store->kind;
+
+	/* extract data from structure */
+	if (*kind == MB_DATA_DATA)
+		{   
+		/* get swathbounds */
+		*portlon = store->portlon;
+		*portlat = store->portlat;
+		*stbdlon = store->stbdlon;
+		*stbdlat = store->stbdlat;
+		mb_apply_lonflip(verbose, mb_io_ptr->lonflip, portlon);
+		mb_apply_lonflip(verbose, mb_io_ptr->lonflip, stbdlon);
+		}
+
+	/* deal with comment */
+	else if (*kind == MB_DATA_COMMENT)
+		{
+		/* set status */
+		*error = MB_ERROR_COMMENT;
+		status = MB_FAILURE;
+		}
+
+	/* deal with other record type */
+	else
+		{
+		/* set status */
+		*error = MB_ERROR_OTHER;
+		status = MB_FAILURE;
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
+		}
+	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+		&& *kind == MB_DATA_DATA)
+		{
+		fprintf(stderr,"dbg2       portlon:  %f\n",*portlon);
+		fprintf(stderr,"dbg2       portlat:  %f\n",*portlat);
+		fprintf(stderr,"dbg2       stbdlon:  %f\n",*stbdlon);
+		fprintf(stderr,"dbg2       stbdlat:  %f\n",*stbdlat);
+		}
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"dbg2       error:          %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:         %d\n",status);
 		}
 
 	/* return status */

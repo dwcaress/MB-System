@@ -88,41 +88,41 @@ extern int isnanf(float x);
 #define	MBGRDVIZ_REALTIME_OFF				0
 #define	MBGRDVIZ_REALTIME_ON				1
 #define	MBGRDVIZ_REALTIME_PAUSE				2
-int	working_route = -1;
-int	survey_instance = 0;
-int	survey_mode = MBGRDVIZ_SURVEY_MODE_UNIFORM;
-int	survey_platform = MBGRDVIZ_SURVEY_PLATFORM_SUBMERGED_ALTITUDE;
-int	survey_interleaving = 1;
-int	survey_direction = MBGRDVIZ_SURVEY_DIRECTION_SW;
-int	survey_crosslines = 0;
-int	survey_linespacing = 200;
-int	survey_swathwidth = 120;
-int	survey_depth = 0;
-int	survey_altitude = 150;
-int	survey_color = MBV_COLOR_BLACK;
-char	survey_name[MB_PATH_MAXLINE];
-mb_path	realtime_path;
-int	realtime_status = MBGRDVIZ_REALTIME_OFF;
-int	realtime_update = 5;
-int	realtime_icon = MBGRDVIZ_REALTIME_ICON_SHIP;
+static int	working_route = -1;
+static int	survey_instance = 0;
+static int	survey_mode = MBGRDVIZ_SURVEY_MODE_UNIFORM;
+static int	survey_platform = MBGRDVIZ_SURVEY_PLATFORM_SUBMERGED_ALTITUDE;
+static int	survey_interleaving = 1;
+static int	survey_direction = MBGRDVIZ_SURVEY_DIRECTION_SW;
+static int	survey_crosslines = 0;
+static int	survey_linespacing = 200;
+static int	survey_swathwidth = 120;
+static int	survey_depth = 0;
+static int	survey_altitude = 150;
+static int	survey_color = MBV_COLOR_BLACK;
+static char	survey_name[MB_PATH_MAXLINE];
+static mb_path	realtime_path;
+static int	realtime_status = MBGRDVIZ_REALTIME_OFF;
+static int	realtime_update = 5;
+static int	realtime_icon = MBGRDVIZ_REALTIME_ICON_SHIP;
 
 /* id variables */
-static char rcs_id[] = "$Id: mbgrdviz_callbacks.c,v 5.21 2006-09-11 18:55:53 caress Exp $";
+static char rcs_id[] = "$Id: mbgrdviz_callbacks.c,v 5.22 2006-10-05 18:58:29 caress Exp $";
 static char program_name[] = "MBgrdviz";
 static char help_message[] = "MBgrdviz is an interactive 2D/3D visualization tool for GMT grid files.";
 static char usage_message[] = "mbgrdviz [-H -T -V]";
 
 /* status variables */
-int	verbose;
-int	error;
-int	pargc;
-char	**pargv;
+static int	verbose;
+static int	error;
+static int	pargc;
+static char	**pargv;
 
 /* widgets */
-int	mbview_id[MBV_MAX_WINDOWS];
+static int	mbview_id[MBV_MAX_WINDOWS];
 extern 	Widget mainWindow;
-Widget	fileSelectionList;
-Widget	fileSelectionText;
+static Widget	fileSelectionList;
+static Widget	fileSelectionText;
 
 /* function prototypes */
 void do_mbgrdviz_sensitivity();
@@ -3052,35 +3052,76 @@ npoint,time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],lon
 						}
 					}
 					
-				/* find centermost beam */
-				icenter = -1;
-				iport = -1;
-				istbd = -1;
-				centerdistance = 0.0;
-				portdistance = 0.0;
-				stbddistance = 0.0;
-				for (i=0;i<beams_bath;i++)
+				/* get swathbounds */
+				if (format == MBF_MBPRONAV)
 					{
-					if (mb_beam_ok(beamflag[i]))
+					status = mbsys_singlebeam_swathbounds(verbose, mbio_ptr, store_ptr, &kind, 
+										&navportlon[npoint], &navportlat[npoint],
+										&navstbdlon[npoint], &navstbdlat[npoint],
+										error);
+					if (navportlon[npoint] != navstbdlon[npoint]
+						|| navportlat[npoint] != navstbdlat[npoint])
+						swathbounds = MB_YES;
+					}
+					
+				else
+					{
+					/* find centermost beam */
+					icenter = -1;
+					iport = -1;
+					istbd = -1;
+					centerdistance = 0.0;
+					portdistance = 0.0;
+					stbddistance = 0.0;
+					for (i=0;i<beams_bath;i++)
 						{
-						if (icenter == -1
-							|| fabs(bathacrosstrack[i]) < centerdistance)
+						if (mb_beam_ok(beamflag[i]))
 							{
-							icenter = i;
-							centerdistance = bathacrosstrack[i];
+							if (icenter == -1
+								|| fabs(bathacrosstrack[i]) < centerdistance)
+								{
+								icenter = i;
+								centerdistance = bathacrosstrack[i];
+								}
+							if (iport == -1
+								|| bathacrosstrack[i] < portdistance)
+								{
+								iport = i;
+								portdistance = bathacrosstrack[i];
+								}
+							if (istbd == -1
+								|| bathacrosstrack[i] > stbddistance)
+								{
+								istbd = i;
+								stbddistance = bathacrosstrack[i];
+								}
 							}
-						if (iport == -1
-							|| bathacrosstrack[i] < portdistance)
-							{
-							iport = i;
-							portdistance = bathacrosstrack[i];
-							}
-						if (istbd == -1
-							|| bathacrosstrack[i] > stbddistance)
-							{
-							istbd = i;
-							stbddistance = bathacrosstrack[i];
-							}
+						}
+
+					mb_coor_scale(verbose,lat,&mtodeglon,&mtodeglat);
+					headingx = sin(heading * DTR);
+					headingy = cos(heading * DTR);
+					if (icenter >= 0)
+						{
+						navportlon[npoint] = lon 
+							+ headingy * mtodeglon * bathacrosstrack[iport]
+							+ headingx * mtodeglon * bathalongtrack[iport];
+						navportlat[npoint] = lat 
+							- headingx * mtodeglat * bathacrosstrack[iport]
+							+ headingy * mtodeglat * bathalongtrack[iport];
+						navstbdlon[npoint] = lon 
+							+ headingy * mtodeglon * bathacrosstrack[istbd]
+							+ headingx * mtodeglon * bathalongtrack[istbd];
+						navstbdlat[npoint] = lat 
+							- headingx * mtodeglat * bathacrosstrack[istbd]
+							+ headingy * mtodeglat * bathalongtrack[istbd];
+						}
+					else
+						{
+						navportlon[npoint] = lon;
+						navportlat[npoint] = lat;
+						navstbdlon[npoint] = lon;
+						navstbdlat[npoint] = lat;
 						}
 					}
 					
@@ -3090,34 +3131,7 @@ npoint,time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],lon
 				navlat[npoint] = lat;
 				navz[npoint] = -sonardepth;
 				navheading[npoint] = heading;
-				navspeed[npoint] = speed;
-
-				mb_coor_scale(verbose,lat,&mtodeglon,&mtodeglat);
-				headingx = sin(heading * DTR);
-				headingy = cos(heading * DTR);
-				if (icenter >= 0)
-					{
-					navportlon[npoint] = lon 
-						+ headingy * mtodeglon * bathacrosstrack[iport]
-						+ headingx * mtodeglon * bathalongtrack[iport];
-					navportlat[npoint] = lat 
-						- headingx * mtodeglat * bathacrosstrack[iport]
-						+ headingy * mtodeglat * bathalongtrack[iport];
-					navstbdlon[npoint] = lon 
-						+ headingy * mtodeglon * bathacrosstrack[istbd]
-						+ headingx * mtodeglon * bathalongtrack[istbd];
-					navstbdlat[npoint] = lat 
-						- headingx * mtodeglat * bathacrosstrack[istbd]
-						+ headingy * mtodeglat * bathalongtrack[istbd];
-					}
-				else
-					{
-					navportlon[npoint] = lon;
-					navportlat[npoint] = lat;
-					navstbdlon[npoint] = lon;
-					navstbdlat[npoint] = lat;
-					}
-				
+				navspeed[npoint] = speed;				
 				
 				navcdp[npoint] = 0;
 				navshot[npoint] = 0;
@@ -3219,6 +3233,8 @@ int do_mbgrdviz_readgrd(int instance, char *grdfile,
 /*	GMT_begin (pargc, pargv);
 	GMT_put_history(pargc, pargv);
 	GMT_get_common_args (projection, xmin, xmax, ymin, ymax);*/
+	project_info.degree[0] = 0;
+	project_info.degree[1] = 0;
 	GMT_program = program_name;
 	GMT_grd_init (&header, 1, pargv, FALSE);
 	GMT_io_init ();
@@ -3275,6 +3291,8 @@ int do_mbgrdviz_readgrd(int instance, char *grdfile,
 			sprintf(grid_projection_id, "epsg%d", projectionid);
 			
 			project_info.degree[0] = TRUE;
+			GMT_io.in_col_type[0] = GMT_IS_LON;
+			GMT_io.in_col_type[1] = GMT_IS_LAT;
 			}
 		}
 	else
@@ -3286,6 +3304,8 @@ int do_mbgrdviz_readgrd(int instance, char *grdfile,
 		sprintf(grid_projection_id, "epsg%d", projectionid);
 			
 		project_info.degree[0] = TRUE;
+		GMT_io.in_col_type[0] = GMT_IS_LON;
+		GMT_io.in_col_type[1] = GMT_IS_LAT;
 		}	
 
 	/* set up internal arrays */
@@ -4425,6 +4445,13 @@ iline, jendpoint, xlon, ylat, zdata, xgrid, ygrid, xdisplay, ydisplay, zdisplay)
 		do_mbgrdviz_arearoute_info(instance);
 		mbview_enableviewnavs(verbose, instance, &error);
 		status = mbview_update(verbose, instance, &error);
+		}
+
+	/* update widgets of remaining mbview windows */
+	for (i=0;i<MBV_MAX_WINDOWS;i++)
+		{
+		if (i != instance && mbview_id[i] == MB_YES)
+			status = mbview_update(verbose, i, &error);
 		}
 }
 /*---------------------------------------------------------------------------------------*/

@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 5.21 2006-09-11 18:55:52 caress Exp $
+#	$Id: Makefile.template,v 5.22 2006-10-05 18:58:28 caress Exp $
 #
 #     Copyright (c) 1993, 1994, 2000, 2002, 2003, 2006 by
 #     David W. Caress (caress@mbari.org)
@@ -16,6 +16,10 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.21  2006/09/11 18:55:52  caress
+# Changes during Western Flyer and Thomas Thompson cruises, August-September
+# 2006.
+#
 # Revision 5.20  2005/06/04 04:15:59  caress
 # Support for Edgetech Jstar format (id 132 and 133).
 #
@@ -209,8 +213,8 @@ all:	$(INCDIR)/mb_format.h $(INCDIR)/mb_status.h \
 	$(INCDIR)/mbf_dsl120pf.h $(INCDIR)/mbf_dsl120sf.h \
 	$(INCDIR)/mbf_gsfgenmb.h $(INCDIR)/mbf_mstiffss.h \
 	$(INCDIR)/mbf_oicgeoda.h $(INCDIR)/mbf_oicmbari.h \
-	$(INCDIR)/mbf_omghdcsj.h \
-	$(INCDIR)/mbf_mgd77dat.h $(INCDIR)/mbf_mbarirov.h \
+	$(INCDIR)/mbf_omghdcsj.h $(INCDIR)/mbf_mgd77dat.h \
+	$(INCDIR)/mbf_mbarirov.h $(INCDIR)/mbf_mbarrov2.h \
 	$(INCDIR)/mbf_mbpronav.h $(INCDIR)/mbf_xtfr8101.h \
 	$(LIBDIR)/libmbio.a
 
@@ -271,7 +275,7 @@ $(LIBDIR)/libmbio.a:	mb_format.o mb_error.o \
 		mbr_oicgeoda.o mbr_oicmbari.o \
 		mbr_omghdcsj.o mbr_mgd77dat.o \
 		mbr_asciixyz.o mbr_hydrob93.o \
-		mbr_mbarirov.o \
+		mbr_mbarirov.o mbr_mbarrov2.o \
 		mbr_mbpronav.o mbr_hs10jams.o \
 		mbr_hsds2raw.o mbr_hsds2lam.o \
  		mbr_xtfr8101.o \
@@ -331,7 +335,7 @@ $(LIBDIR)/libmbio.a:	mb_format.o mb_error.o \
 		mbr_oicgeoda.o mbr_oicmbari.o \
 		mbr_omghdcsj.o mbr_mgd77dat.o \
 		mbr_asciixyz.o mbr_hydrob93.o \
-		mbr_mbarirov.o \
+		mbr_mbarirov.o mbr_mbarrov2.o \
 		mbr_mbpronav.o mbr_hs10jams.o \
 		mbr_hsds2raw.o mbr_hsds2lam.o \
  		mbr_xtfr8101.o \
@@ -548,6 +552,8 @@ mbr_hydrob93.o: mbr_hydrob93.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INC
 	$(CC) -c $(CFLAGS) mbr_hydrob93.c
 mbr_mbarirov.o: mbr_mbarirov.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbf_mbarirov.h $(INCDIR)/mbsys_singlebeam.h
 	$(CC) -c $(CFLAGS) mbr_mbarirov.c
+mbr_mbarrov2.o: mbr_mbarrov2.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbf_mbarrov2.h $(INCDIR)/mbsys_singlebeam.h
+	$(CC) -c $(CFLAGS) mbr_mbarrov2.c
 mbr_mbpronav.o: mbr_mbpronav.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbf_mbpronav.h $(INCDIR)/mbsys_singlebeam.h
 	$(CC) -c $(CFLAGS) mbr_mbpronav.c
 mbr_hs10jams.o: mbr_hs10jams.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbsys_hs10.h
@@ -783,6 +789,9 @@ $(INCDIR)/mbf_mgd77dat.h:	mbf_mgd77dat.h
 $(INCDIR)/mbf_mbarirov.h:	mbf_mbarirov.h
 	cp mbf_mbarirov.h $(INCDIR)/mbf_mbarirov.h
 	chmod 664 $(INCDIR)/mbf_mbarirov.h
+$(INCDIR)/mbf_mbarrov2.h:	mbf_mbarrov2.h
+	cp mbf_mbarrov2.h $(INCDIR)/mbf_mbarrov2.h
+	chmod 664 $(INCDIR)/mbf_mbarrov2.h
 $(INCDIR)/mbf_mbpronav.h:	mbf_mbpronav.h
 	cp mbf_mbpronav.h $(INCDIR)/mbf_mbpronav.h
 	chmod 664 $(INCDIR)/mbf_mbpronav.h
