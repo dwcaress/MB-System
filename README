@@ -1,9 +1,9 @@
-MB-SYSTEM VERSION 5.1.0beta2 README FILE:
+MB-SYSTEM VERSION 5.1.0beta4 README FILE:
 ----------------------------------------
 
 This file is located at the top of the MB-System directory
 structure. This directory structure contains the version 
-5.1.0beta2 release of the MB-System software package for 
+5.1.0beta4 release of the MB-System software package for 
 processing and display of swath sonar data.  
 
 MB-SYSTEM VERSION 5 DESCRIPTION:
@@ -26,6 +26,8 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
+Version 5.1.0beta4     October 5, 2006
+Version 5.1.0beta3     September 11, 2006
 Version 5.1.0beta2     August 9, 2006
 Version 5.1.0beta      July 5, 2006
 Version 5.0.9          February 20, 2006
@@ -234,6 +236,12 @@ so that they will work with GMT 4.1.3 built in the default fashion
 Fixed mbgrdtiff so that it creates geographic GeoTIFF images with
 the longitude bounds consistent with the user's default or 
 specified lonflip value.
+
+MBlist can now print out values associated with the port-most and
+starboard-most non-null beams and pixels. Use the special '=' or '+'
+characters in the -O option.
+
+Support was added for a new MBARI ROV navigation format (format id 170)
 
 MB-SYSTEM VERSION 5.0.9 RELEASE NOTES:
 ------------------------------------------
@@ -1305,10 +1313,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.88 2006-09-11 19:04:41 caress Exp $
+RCS ID: $Id: README,v 5.89 2006-10-05 18:58:28 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.88  2006/09/11 19:04:41  caress
+Setting up release 5.1.0beta3.
+
 Revision 5.87  2006/08/10 00:08:10  caress
 Working towards 5.0.0beta2
 

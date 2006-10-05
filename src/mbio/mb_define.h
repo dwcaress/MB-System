@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	4/21/96
- *    $Id: mb_define.h,v 5.30 2006-09-11 18:55:52 caress Exp $
+ *    $Id: mb_define.h,v 5.31 2006-10-05 18:58:28 caress Exp $
  *
  *    Copyright (c) 1996, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,10 @@
  * Date:	April 21, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.30  2006/09/11 18:55:52  caress
+ * Changes during Western Flyer and Thomas Thompson cruises, August-September
+ * 2006.
+ *
  * Revision 5.29  2006/01/06 18:27:19  caress
  * Working towards 5.0.8
  *
@@ -289,6 +293,19 @@ int mb_check_info(int verbose, char *file, int lonflip,
 		    int *error);
 int mb_make_info(int verbose, int force,
 		    char *file, int format, int *error);
+int mb_swathbounds(int verbose, int checkgood,
+		double navlon, double navlat, double heading, 
+		int nbath, int nss,
+		char *beamflag, double *bath, 
+		double *bathacrosstrack, double *bathalongtrack,
+		double *ss, double *ssacrosstrack, double *ssalongtrack,
+		int *ibeamport,
+		int *ibeamcntr,
+		int *ibeamstbd,
+		int *ipixelport,
+		int *ipixelcntr,
+		int *ipixelstbd,
+		int *error);
 int mb_read_init(int verbose, char *file, 
 		int format, int pings, int lonflip, double bounds[4],
 		int btime_i[7], int etime_i[7], 

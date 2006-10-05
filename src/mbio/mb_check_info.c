@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_check_info.c	1/25/93
- *    $Id: mb_check_info.c,v 5.15 2006-09-11 18:55:52 caress Exp $
+ *    $Id: mb_check_info.c,v 5.16 2006-10-05 18:58:28 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,10 @@
  * Date:	September 3, 1996
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.15  2006/09/11 18:55:52  caress
+ * Changes during Western Flyer and Thomas Thompson cruises, August-September
+ * 2006.
+ *
  * Revision 5.14  2006/01/06 18:27:19  caress
  * Working towards 5.0.8
  *
@@ -109,7 +113,7 @@ int mb_check_info(int verbose, char *file, int lonflip,
 		    double bounds[4], int *file_in_bounds,
 		    int *error)
 {
-	static char rcs_id[]="$Id: mb_check_info.c,v 5.15 2006-09-11 18:55:52 caress Exp $";
+	static char rcs_id[]="$Id: mb_check_info.c,v 5.16 2006-10-05 18:58:28 caress Exp $";
 	char	*function_name = "mb_check_info";
 	int	status;
 	char	file_inf[MB_PATH_MAXLINE];
@@ -346,7 +350,7 @@ int mb_check_info(int verbose, char *file, int lonflip,
 int mb_get_info(int verbose, char *file, struct mb_info_struct *mb_info, int lonflip,
 		    int *error)
 {
-	static char rcs_id[]="$Id: mb_check_info.c,v 5.15 2006-09-11 18:55:52 caress Exp $";
+	static char rcs_id[]="$Id: mb_check_info.c,v 5.16 2006-10-05 18:58:28 caress Exp $";
 	char	*function_name = "mb_get_info";
 	int	status;
 	char	file_inf[MB_PATH_MAXLINE];
@@ -792,7 +796,7 @@ int mb_make_info(int verbose, int force,
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBcopy function <%s> called\n",
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
@@ -862,6 +866,7 @@ int mb_make_info(int verbose, int force,
 	    && format != MBF_HYDROB93
 	    && format != MBF_MGD77DAT
 	    && format != MBF_MBARIROV
+	    && format != MBF_MBARROV2
 	    && format != MBF_MBPRONAV)
 		{
 		if (verbose >= 1)
@@ -882,12 +887,13 @@ int mb_make_info(int verbose, int force,
 	    && format != MBF_HYDROB93
 	    && format != MBF_MGD77DAT
 	    && format != MBF_MBARIROV
+	    && format != MBF_MBARROV2
 	    && format != MBF_NVNETCDF
 	    && format != MBF_MBPRONAV)
 		{
 		if (verbose >= 1)
 			fprintf(stderr,"Generating fnv file for %s\n",file);
-		sprintf(command, "mblist -F %d -I %s -O tMXYHSc > %s.fnv", 
+		sprintf(command, "mblist -F %d -I %s -O tMXYHScRPr=X=Y+X+Y > %s.fnv", 
 			format, file, file);
 		system(command);
 		}
@@ -895,7 +901,7 @@ int mb_make_info(int verbose, int force,
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBcopy function <%s> completed\n",
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
@@ -921,7 +927,7 @@ int mb_get_fbt(int verbose,
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBcopy function <%s> called\n",
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
@@ -952,7 +958,7 @@ int mb_get_fbt(int verbose,
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBcopy function <%s> completed\n",
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       file:       %s\n",file);
@@ -980,7 +986,7 @@ int mb_get_fnv(int verbose,
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBcopy function <%s> called\n",
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
@@ -1011,11 +1017,178 @@ int mb_get_fnv(int verbose,
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBcopy function <%s> completed\n",
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       file:       %s\n",file);
 		fprintf(stderr,"dbg2       format:     %d\n",*format);
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_swathbounds(int verbose, int checkgood,
+			double navlon, double navlat, double heading, 
+			int nbath, int nss,
+			char *beamflag, double *bath, 
+			double *bathacrosstrack, double *bathalongtrack,
+			double *ss, double *ssacrosstrack, double *ssalongtrack,
+			int *ibeamport,
+			int *ibeamcntr,
+			int *ibeamstbd,
+			int *ipixelport,
+			int *ipixelcntr,
+			int *ipixelstbd,
+			int *error)
+{
+	char	*function_name = "mb_swathbounds";
+	int	status = MB_SUCCESS;
+	double	mtodeglon, mtodeglat;
+	double	headingx, headingy;
+	double	xtrackmin, xtrackmax, distmin;
+	int	found;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:       %d\n",verbose);
+		fprintf(stderr,"dbg2       checkgood:     %d\n",checkgood);
+		fprintf(stderr,"dbg2       longitude:     %f\n",navlon);
+		fprintf(stderr,"dbg2       latitude:      %f\n",navlat);
+		fprintf(stderr,"dbg2       heading:       %f\n",heading);
+		fprintf(stderr,"dbg2       nbath:         %d\n",nbath);
+		if (verbose >= 3 && nbath > 0)
+		  {
+		  fprintf(stderr,"dbg3       beam   flag  bath  crosstrack alongtrack\n");
+		  for (i=0;i<nbath;i++)
+		    fprintf(stderr,"dbg3       %4d   %3d   %f    %f     %f\n",
+			i,beamflag[i],bath[i],
+			bathacrosstrack[i],bathalongtrack[i]);
+		  }
+		fprintf(stderr,"dbg2       nss:      %d\n",nss);
+		if (verbose >= 3 && nss > 0)
+		  {
+		  fprintf(stderr,"dbg3       pixel sidescan crosstrack alongtrack\n");
+		  for (i=0;i<nss;i++)
+		    fprintf(stderr,"dbg3       %4d   %f    %f     %f\n",
+			i,ss[i],
+			ssacrosstrack[i],ssalongtrack[i]);
+		  }
+		}
+		
+	/* get coordinate scaling */
+	mb_coor_scale(verbose,navlat,&mtodeglon,&mtodeglat);
+	headingx = sin(heading * DTR);
+	headingy = cos(heading * DTR);
+	
+	/* set starting values */
+	*ibeamport = 0;
+	*ibeamcntr = 0;
+	*ibeamstbd = 0;
+	*ipixelport = 0;
+	*ipixelcntr = 0;
+	*ipixelstbd = 0;
+	
+	/* get min max of non-null beams */
+	xtrackmin = 0.0;
+	xtrackmax = 0.0;
+	distmin = 0.0;
+	found = MB_NO;
+	for (i=0;i<nbath;i++)
+		{
+		if ((checkgood && mb_beam_ok(beamflag[i])) || beamflag[i] != MB_FLAG_NULL)
+			{
+			if (found == MB_NO)
+				{
+				*ibeamport = i;
+				*ibeamcntr = i;
+				*ibeamstbd = i;
+				xtrackmin = bathacrosstrack[i];
+				distmin = fabs(bathacrosstrack[i]);
+				xtrackmax = bathacrosstrack[i];
+				found = MB_YES;
+				}
+			else 
+				{
+				if (fabs(bathacrosstrack[i]) < distmin)
+					{
+					*ibeamcntr = i;
+					distmin = fabs(bathacrosstrack[i]);
+					}
+				if (bathacrosstrack[i] < xtrackmin)
+					{
+					*ibeamport = i;
+					xtrackmin = bathacrosstrack[i];
+					}
+				else if (bathacrosstrack[i] > xtrackmax)
+					{
+					*ibeamstbd = i;
+					xtrackmax = bathacrosstrack[i];
+					}
+				}
+			}
+		}
+	
+	/* get min max of non-null pixels */
+	xtrackmin = 0.0;
+	xtrackmax = 0.0;
+	distmin = 0.0;
+	found = MB_NO;
+	for (i=0;i<nss;i++)
+		{
+		if (ss[i] > 0.0)
+			{
+			if (found == MB_NO)
+				{
+				*ipixelport = i;
+				*ipixelcntr = i;
+				*ipixelstbd = i;
+				xtrackmin = ssacrosstrack[i];
+				distmin = fabs(ssacrosstrack[i]);
+				xtrackmax = ssacrosstrack[i];
+				found = MB_YES;
+				}
+			else 
+				{
+				if (fabs(ssacrosstrack[i]) < distmin)
+					{
+					*ipixelcntr = i;
+					distmin = fabs(ssacrosstrack[i]);
+					}
+				if (ssacrosstrack[i] < xtrackmin)
+					{
+					*ipixelport = i;
+					xtrackmin = ssacrosstrack[i];
+					}
+				else if (ssacrosstrack[i] > xtrackmax)
+					{
+					*ipixelstbd = i;
+					xtrackmax = ssacrosstrack[i];
+					}
+				}
+			}
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       ibeamport:     %d\n",*ibeamport);
+		fprintf(stderr,"dbg2       ibeamport:     %d\n",*ibeamcntr);
+		fprintf(stderr,"dbg2       ibeamstbd:     %d\n",*ibeamstbd);
+		fprintf(stderr,"dbg2       ipixelport:    %d\n",*ipixelport);
+		fprintf(stderr,"dbg2       ipixelport:    %d\n",*ipixelcntr);
+		fprintf(stderr,"dbg2       ipixelstbd:    %d\n",*ipixelstbd);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:     %d\n",status);

@@ -1,4 +1,4 @@
-.TH mblist l "1 February 2006" "MB-System 5.0" "MB-System 5.0"
+.TH mblist l9 "1 September 2006" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmblist\fP - List data in swath data files.
 
@@ -236,6 +236,24 @@ to simple numeric values such as
 depth and heading and not to values   
 like time strings or positions with 
 hemisphere characters.
+.IP
+\fB=\fP  
+special character: this causes the value 
+indicated by the next character to 
+derive from the port-most non-null
+beam or pixel. This applies only 
+to numeric values associated with
+beams or pixels such as depth, longitude,
+or latitude.
+.IP
+\fB+\fP  
+special character: this causes the value 
+indicated by the next character to 
+derive from the starboard-most non-null
+beam or pixel. This applies only 
+to numeric values associated with
+beams or pixels such as depth, longitude,
+or latitude.
 .IP
 \fBA\fP 
 for apparent seafloor crosstrack slope 

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.h	1/19/93
- *    $Id: mb_format.h,v 5.19 2006-03-06 21:47:48 caress Exp $
+ *    $Id: mb_format.h,v 5.20 2006-10-05 18:58:28 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2001, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -19,6 +19,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.19  2006/03/06 21:47:48  caress
+ * Implemented changes suggested by Bob Courtney of the Geological Survey of Canada to support translating Reson data to GSF.
+ *
  * Revision 5.18  2005/06/04 04:15:59  caress
  * Support for Edgetech Jstar format (id 132 and 133).
  *
@@ -220,7 +223,7 @@
 #define MB_FORMAT_DEF
 
 /* define date of last format update */
-static char mb_format_updatedate[] = "$Date: 2006-03-06 21:47:48 $ $Revision: 5.19 $";
+static char mb_format_updatedate[] = "$Date: 2006-10-05 18:58:28 $ $Revision: 5.20 $";
 
 /* Supported swath sonar systems */
 #define	MB_SYS_NONE		0
@@ -255,7 +258,7 @@ static char mb_format_updatedate[] = "$Date: 2006-03-06 21:47:48 $ $Revision: 5.
 #define	MB_SYS_JSTAR		29
 
 /* Number of supported MBIO data formats */
-#define	MB_FORMATS	59
+#define	MB_FORMATS	60
 
 /* Data formats supported by MBIO */
 #define MBF_DATALIST	-1
@@ -436,6 +439,7 @@ static char mb_format_updatedate[] = "$Date: 2006-03-06 21:47:48 $ $Revision: 5.
 #define MBF_NVNETCDF    167     /* CARAIBES CDF navigation, netCDF, IFREMER */ 
 #define MBF_ASCIIXYT    168     /* XYT (lon lat topography) soundings, ascii, generic */ 
 #define MBF_ASCIIYXT    169     /* YXT (lat lon topography) soundings, ascii, generic */ 
+#define MBF_MBARROV2    170     /* MBARI ROV navigation format, ascii, MBARI */ 
 #define MBF_HS10JAMS    171     /* Furuno HS10 multibeam format, 45 beams, 
 					bathymetry and amplitude, ascii, JAMSTEC */ 
 #define MBF_SAMESURF    181     /* STN Atlas processing multibeam format, 

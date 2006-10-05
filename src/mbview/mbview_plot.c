@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_plot.c	9/26/2003
- *    $Id: mbview_plot.c,v 5.9 2006-07-05 19:50:21 caress Exp $
+ *    $Id: mbview_plot.c,v 5.10 2006-10-05 18:58:29 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  *		begun on October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.9  2006/07/05 19:50:21  caress
+ * Working towards 5.1.0beta
+ *
  * Revision 5.8  2006/06/16 19:30:58  caress
  * Check in after the Santa Monica Basin Mapping AUV Expedition.
  *
@@ -98,7 +101,7 @@ static Cardinal 	ac;
 static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_plot.c,v 5.9 2006-07-05 19:50:21 caress Exp $";
+static char rcs_id[]="$Id: mbview_plot.c,v 5.10 2006-10-05 18:58:29 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_reset_glx(int instance)
@@ -1239,6 +1242,25 @@ int mbview_findpoint(int instance, int xpixel, int ypixel,
 		*xdisplay = xdisplaysave;
 		*ydisplay = ydisplaysave;
 		*zdisplay = zdisplaysave;
+		}
+				
+	/* if not found and 2D get position directly from pixels */
+	if (*found == MB_NO && data->display_mode == MBV_DISPLAY_2D)
+		{
+		*xdisplay = view->left - view->offset2d_x
+			+ 2.0 * MBV_OPENGL_WIDTH / view->size2d 
+			* ((double)xpixel) / ((double)data->width);
+		*ydisplay = view->bottom - view->offset2d_y
+			+ 2.0 * MBV_OPENGL_WIDTH / view->aspect_ratio / view->size2d 
+			* ((double)ypixel) / ((double)data->height);
+		*zdisplay = 0.0;
+		mbview_projectdisplay2ll(instance,
+			*xdisplay, *ydisplay, *zdisplay,
+			xlon, ylat);
+		mbview_projectll2xyzgrid(instance,
+			*xlon, *ylat,
+			xgrid, ygrid, zdata);
+		*found = MB_YES;
 		}
 	
 	/* print output debug statements */

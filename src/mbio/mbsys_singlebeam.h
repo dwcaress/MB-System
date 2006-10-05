@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_singlebeam.h	4/13/93
- *	$Id: mbsys_singlebeam.h,v 5.6 2005-11-05 00:48:05 caress Exp $
+ *	$Id: mbsys_singlebeam.h,v 5.7 2006-10-05 18:58:29 caress Exp $
  *
- *    Copyright (c) 1999, 2000, 2002, 2003 by
+ *    Copyright (c) 1999, 2000, 2002, 2003, 2006 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -23,11 +23,15 @@
  *      MBF_MBARINAV : MBIO ID 164
  *      MBF_MBARIROV : MBIO ID 165
  *      MBF_MBPRONAV : MBIO ID 166
+ *      MBF_MBARROV2 : MBIO ID 170
  *
  * Author:	D. W. Caress
  * Date:	April 13,  1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2005/11/05 00:48:05  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.5  2003/04/17 21:05:23  caress
  * Release 5.0.beta30
  *
@@ -64,6 +68,13 @@
  *      true single beam formats, marine geophysical underway
  *      data formats, and navigation formats. These formats
  *      in some cases support magnetics and gravity data.
+ *   2. With MB-System 5.1, the mbf_mbpronav format has been
+ *      extended to include min and max acrosstrack distances
+ *      of non-null data for both bathymetry beams and 
+ *      sidescan pixels. This allows these values to be included
+ *      in the *.fnv files and supports mbgrdviz and mbproject.
+ *      These values are accessed by a special function
+ *      mbsys_singlebeam_swathbounds().
  */
 
 /* maximum line length in characters */
@@ -192,6 +203,11 @@ struct mbsys_singlebeam_struct
                              seismic data. */
 	int	seismic_shot;
 			    /* SEISMIC SHOT-POINT NUMBER */
+
+	/* ship navigation */
+	double	ship_longitude;	/* degrees */
+	double	ship_latitude;	/* degrees */
+	double	ship_heading;	/* degrees */
 	
 	/* flags */
 	int	position_flag;
@@ -199,6 +215,13 @@ struct mbsys_singlebeam_struct
 	int	heading_flag;
 	int	altitude_flag;
 	int	attitude_flag;
+	int	qc_flag;
+	
+	/* swathbounds */
+	double	portlon;
+	double	portlat;
+	double	stbdlon;
+	double	stbdlat;
  
 	/* comment */
 	char	comment[MBSYS_SINGLEBEAM_MAXLINE];

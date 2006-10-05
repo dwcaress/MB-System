@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mbpronav.c	5/20/99
- *	$Id: mbr_mbpronav.c,v 5.10 2005-11-05 00:48:03 caress Exp $
+ *	$Id: mbr_mbpronav.c,v 5.11 2006-10-05 18:58:29 caress Exp $
  *
  *    Copyright (c) 1999, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	October 18, 1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.10  2005/11/05 00:48:03  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.9  2005/03/25 04:23:10  caress
  * Now zeros unused parts of mbsys_singlebeam data.
  *
@@ -114,7 +117,7 @@ int mbr_wt_mbpronav(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_mbpronav(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_mbpronav.c,v 5.10 2005-11-05 00:48:03 caress Exp $";
+	static char res_id[]="$Id: mbr_mbpronav.c,v 5.11 2006-10-05 18:58:29 caress Exp $";
 	char	*function_name = "mbr_register_mbpronav";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -247,7 +250,7 @@ int mbr_info_mbpronav(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_mbpronav.c,v 5.10 2005-11-05 00:48:03 caress Exp $";
+	static char res_id[]="$Id: mbr_mbpronav.c,v 5.11 2006-10-05 18:58:29 caress Exp $";
 	char	*function_name = "mbr_info_mbpronav";
 	int	status = MB_SUCCESS;
 
@@ -317,7 +320,7 @@ int mbr_info_mbpronav(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_mbpronav(int verbose, void *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_mbpronav.c,v 5.10 2005-11-05 00:48:03 caress Exp $";
+ static char res_id[]="$Id: mbr_mbpronav.c,v 5.11 2006-10-05 18:58:29 caress Exp $";
 	char	*function_name = "mbr_alm_mbpronav";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -554,7 +557,11 @@ int mbr_rt_mbpronav(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		store->heading_flag = 0;
 		store->altitude_flag = 0;
 		store->attitude_flag = 0;
-		}
+		store->portlon = data->portlon;
+		store->portlat = data->portlat;
+		store->stbdlon = data->stbdlon;
+		store->stbdlat = data->stbdlat;
+ 		}
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -615,6 +622,10 @@ int mbr_wt_mbpronav(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		data->heave = store->heave;
 		for (i=0;i<MBSYS_SINGLEBEAM_MAXLINE;i++)
 		    data->comment[i] = store->comment[i];
+		data->portlon = store->portlon;
+		data->portlat = store->portlat;
+		data->stbdlon = store->stbdlon;
+		data->stbdlat = store->stbdlat;
 		}
 
 	/* write next data to file */
@@ -649,7 +660,8 @@ int mbr_mbpronav_rd_data(int verbose, void *mbio_ptr, int *error)
 	double  sec;
 	double  d1, d2, d3, d4, d5;
 	double  d6, d7, d8, d9;
-	int	i, i1, i2, i3, i4, i5;
+	double  d10, d11, d12, d13;
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -702,7 +714,7 @@ int mbr_mbpronav_rd_data(int verbose, void *mbio_ptr, int *error)
 
 	    /* read data */
 	    nread = sscanf(line,
-			"%d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %d %d %d %d %d",
+			"%d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf",
 			&data->time_i[0],
 			&data->time_i[1],
 			&data->time_i[2],
@@ -718,30 +730,15 @@ int mbr_mbpronav_rd_data(int verbose, void *mbio_ptr, int *error)
 			&d7,
 			&d8,
 			&d9, 
-			&i1, 
-			&i2, 
-			&i3, 
-			&i4, 
-			&i5);
+			&d10, 
+			&d11, 
+			&d12, 
+			&d13);
 	    data->time_i[5] = (int) sec;
 	    data->time_i[6] = 1000000.0 * (sec - data->time_i[5]);
-	    if (nread == 8)
+	    if (nread >= 8)
 	        {
 	        mb_get_time(verbose,data->time_i,&data->time_d);
-		data->longitude = d1;
-		data->latitude = d2;
-		data->heading = 0.0;
-		data->speed = 0.0;
-		data->sonardepth = 0.0;
-		data->roll = 0.0;
-		data->pitch = 0.0;
-		data->heave = 0.0;
-	    	status = MB_SUCCESS;
-	   	*error = MB_ERROR_NO_ERROR;
-		}
-	    else if (nread == 9)
-	        {
-	        data->time_d = d1;
 		data->longitude = d2;
 		data->latitude = d3;
 		data->heading = 0.0;
@@ -750,64 +747,34 @@ int mbr_mbpronav_rd_data(int verbose, void *mbio_ptr, int *error)
 		data->roll = 0.0;
 		data->pitch = 0.0;
 		data->heave = 0.0;
+		data->portlon = 0.0;
+		data->portlat = 0.0;
+		data->stbdlon = 0.0;
+		data->stbdlat = 0.0;
 	    	status = MB_SUCCESS;
 	   	*error = MB_ERROR_NO_ERROR;
 		}
-	    else if (nread == 10)
-	        {
-	        data->time_d = d1;
-		data->longitude = d2;
-		data->latitude = d3;
+	    if (nread >= 10)
 		data->heading = d4;
-		data->speed = 0.0;
-		data->sonardepth = 0.0;
-		data->roll = 0.0;
-		data->pitch = 0.0;
-		data->heave = 0.0;
-	    	status = MB_SUCCESS;
-	   	*error = MB_ERROR_NO_ERROR;
-		}
-	    else if (nread == 11)
-	        {
-	        data->time_d = d1;
-		data->longitude = d2;
-		data->latitude = d3;
-		data->heading = d4;
+	    if (nread >= 11)
 		data->speed = d5;
-		data->sonardepth = 0.0;
-		data->roll = 0.0;
-		data->pitch = 0.0;
-		data->heave = 0.0;
-	    	status = MB_SUCCESS;
-	   	*error = MB_ERROR_NO_ERROR;
-		}
-	    else if (nread == 12)
-	        {
-	        data->time_d = d1;
-		data->longitude = d2;
-		data->latitude = d3;
-		data->heading = d4;
-		data->speed = d5;
+	    if (nread >= 12)
 		data->sonardepth = d6;
-		data->roll = 0.0;
-		data->pitch = 0.0;
-		data->heave = 0.0;
-	    	status = MB_SUCCESS;
-	   	*error = MB_ERROR_NO_ERROR;
-		}
-	    else if (nread >= 15)
-	        {
-	        data->time_d = d1;
-		data->longitude = d2;
-		data->latitude = d3;
-		data->heading = d4;
-		data->speed = d5;
-		data->sonardepth = d6;
+	    if (nread >= 15)
+	    	{
 		data->roll = d7;
 		data->pitch = d8;
 		data->heave = d9;
-	    	status = MB_SUCCESS;
-	   	*error = MB_ERROR_NO_ERROR;
+		}
+	    if (nread >= 17)
+	    	{
+		data->portlon = d10;
+		data->portlat = d11;
+		}
+	    if (nread >= 19)
+	    	{
+		data->stbdlon = d12;
+		data->stbdlat = d13;
 		}
 		
 	    /* get time set if only one of two variables is defined */
@@ -824,24 +791,28 @@ int mbr_mbpronav_rd_data(int verbose, void *mbio_ptr, int *error)
 			fprintf(stderr,"\ndbg4  Data read in MBIO function <%s>\n",
 				function_name);
 			fprintf(stderr,"dbg4  Values,read:\n");
-			fprintf(stderr,"dbg4       time_i[0]:    %d\n",data->time_i[0]);
-			fprintf(stderr,"dbg4       time_i[1]:    %d\n",data->time_i[1]);
-			fprintf(stderr,"dbg4       time_i[2]:    %d\n",data->time_i[2]);
-			fprintf(stderr,"dbg4       time_i[3]:    %d\n",data->time_i[3]);
-			fprintf(stderr,"dbg4       time_i[4]:    %d\n",data->time_i[4]);
-			fprintf(stderr,"dbg4       time_i[5]:    %d\n",data->time_i[5]);
-			fprintf(stderr,"dbg4       time_i[6]:    %d\n",data->time_i[6]);
-			fprintf(stderr,"dbg4       time_d:       %f\n",data->time_d);
-			fprintf(stderr,"dbg4       latitude:     %f\n",data->latitude);
-			fprintf(stderr,"dbg4       longitude:    %f\n",data->longitude);
-			fprintf(stderr,"dbg4       heading:      %f\n",data->heading);
-			fprintf(stderr,"dbg4       speed:        %f\n",data->speed);
-			fprintf(stderr,"dbg4       sonardepth:   %f\n",data->sonardepth);
-			fprintf(stderr,"dbg4       roll:         %f\n",data->roll);
-			fprintf(stderr,"dbg4       pitch:        %f\n",data->pitch);
-			fprintf(stderr,"dbg4       heave:        %f\n",data->heave);
-			fprintf(stderr,"dbg4       error:        %d\n",*error);
-			fprintf(stderr,"dbg4       status:       %d\n",status);
+			fprintf(stderr,"dbg4       time_i[0]:      %d\n",data->time_i[0]);
+			fprintf(stderr,"dbg4       time_i[1]:      %d\n",data->time_i[1]);
+			fprintf(stderr,"dbg4       time_i[2]:      %d\n",data->time_i[2]);
+			fprintf(stderr,"dbg4       time_i[3]:      %d\n",data->time_i[3]);
+			fprintf(stderr,"dbg4       time_i[4]:      %d\n",data->time_i[4]);
+			fprintf(stderr,"dbg4       time_i[5]:      %d\n",data->time_i[5]);
+			fprintf(stderr,"dbg4       time_i[6]:      %d\n",data->time_i[6]);
+			fprintf(stderr,"dbg4       time_d:         %f\n",data->time_d);
+			fprintf(stderr,"dbg4       latitude:       %f\n",data->latitude);
+			fprintf(stderr,"dbg4       longitude:      %f\n",data->longitude);
+			fprintf(stderr,"dbg4       heading:        %f\n",data->heading);
+			fprintf(stderr,"dbg4       speed:          %f\n",data->speed);
+			fprintf(stderr,"dbg4       sonardepth:     %f\n",data->sonardepth);
+			fprintf(stderr,"dbg4       roll:           %f\n",data->roll);
+			fprintf(stderr,"dbg4       pitch:          %f\n",data->pitch);
+			fprintf(stderr,"dbg4       heave:          %f\n",data->heave);
+			fprintf(stderr,"dbg4       portlon:        %f\n",data->portlon);
+			fprintf(stderr,"dbg4       portlat:        %f\n",data->portlat);
+			fprintf(stderr,"dbg4       stbdlon:        %f\n",data->stbdlon);
+			fprintf(stderr,"dbg4       stbdlat:        %f\n",data->stbdlat);
+			fprintf(stderr,"dbg4       error:          %d\n",*error);
+			fprintf(stderr,"dbg4       status:         %d\n",status);
 			}
 	    	}
 	    	
@@ -929,12 +900,16 @@ int mbr_mbpronav_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 		    fprintf(stderr,"dbg4       roll:         %f\n",data->roll);
 		    fprintf(stderr,"dbg4       pitch:        %f\n",data->pitch);
 		    fprintf(stderr,"dbg4       heave:        %f\n",data->heave);
+		    fprintf(stderr,"dbg4       portlon:      %f\n",data->portlon);
+		    fprintf(stderr,"dbg4       portlat:      %f\n",data->portlat);
+		    fprintf(stderr,"dbg4       stbdlon:      %f\n",data->stbdlon);
+		    fprintf(stderr,"dbg4       stbdlat:      %f\n",data->stbdlat);
 		    fprintf(stderr,"dbg4       error:        %d\n",*error);
 		    fprintf(stderr,"dbg4       status:       %d\n",status);
 		    }
 
             sprintf(line,
-			"%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d %16.6f %.6f %.6f %.2f %.2f %.2f %.2f %.2f %.2f\n",
+			"%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d %16.6f %.6f %.6f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f\n",
 			data->time_i[0],
 			data->time_i[1],
 			data->time_i[2],
@@ -950,7 +925,11 @@ int mbr_mbpronav_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 			data->sonardepth,
 			data->roll,
 			data->pitch,
-			data->heave);
+			data->heave,
+			data->portlon,
+			data->portlat,
+			data->stbdlon,
+			data->stbdlat);
 	    }
 
 	if (fputs(line,mb_io_ptr->mbfp) == EOF)

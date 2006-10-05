@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_route.c	9/25/2003
- *    $Id: mbview_route.c,v 5.15 2006-09-11 18:55:53 caress Exp $
+ *    $Id: mbview_route.c,v 5.16 2006-10-05 18:58:29 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,10 @@
  *		begun on October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.15  2006/09/11 18:55:53  caress
+ * Changes during Western Flyer and Thomas Thompson cruises, August-September
+ * 2006.
+ *
  * Revision 5.14  2006/06/16 19:30:58  caress
  * Check in after the Santa Monica Basin Mapping AUV Expedition.
  *
@@ -117,7 +121,7 @@ static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 static char		value_string[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_route.c,v 5.15 2006-09-11 18:55:53 caress Exp $";
+static char rcs_id[]="$Id: mbview_route.c,v 5.16 2006-10-05 18:58:29 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_getroutecount(int verbose, int instance,
@@ -1340,7 +1344,8 @@ int mbview_extract_route_profile(int instance)
 							- data->profile.points[data->profile.npoints-1].zdata);
 						dx = (data->profile.points[data->profile.npoints].distance
 							- data->profile.points[data->profile.npoints-1].distance);
-						data->profile.points[i].distovertopo = data->profile.points[data->profile.npoints-1].distovertopo
+						data->profile.points[data->profile.npoints].distovertopo 
+							= data->profile.points[data->profile.npoints-1].distovertopo
 											+ sqrt(dy * dy + dx * dx);
 						if (dx > 0.0)
 							data->profile.points[data->profile.npoints].slope = fabs(dy / dx);
@@ -1878,22 +1883,20 @@ int mbview_route_add(int instance, int inew, int jnew, int waypoint,
 		/* set npoints */
 		shared.shareddata.routes[inew].npoints++;
 
-		/* drape the affected segments */
-		if (jnew > 0)
+		/* reset affected segment endpoints */
+		if (shared.shareddata.routes[inew].npoints > 0)
 			{
-			/* drape the segment */
-			mbview_drapesegmentw(instance, &(shared.shareddata.routes[inew].segments[jnew-1]));
+			for (j=MAX(0,jnew-1);j<MIN(shared.shareddata.routes[inew].npoints-1,jnew+1);j++)
+				{
+				shared.shareddata.routes[inew].segments[j].endpoints[0] = &(shared.shareddata.routes[inew].points[j]);
+				shared.shareddata.routes[inew].segments[j].endpoints[1] = &(shared.shareddata.routes[inew].points[j+1]);
+
+				/* drape the segment */
+				mbview_drapesegmentw(instance, &(shared.shareddata.routes[inew].segments[j]));
 			
-			/* update the segment for all active instances */
-			mbview_updatesegmentw(instance, &(shared.shareddata.routes[inew].segments[jnew-1]));
-			}
-		if (jnew < shared.shareddata.routes[inew].npoints - 1)
-			{
-			/* drape the segment */
-			mbview_drapesegmentw(instance, &(shared.shareddata.routes[inew].segments[jnew]));
-			
-			/* update the segment for all active instances */
-			mbview_updatesegmentw(instance, &(shared.shareddata.routes[inew].segments[jnew]));
+				/* update the segment for all active instances */
+				mbview_updatesegmentw(instance, &(shared.shareddata.routes[inew].segments[j]));
+				}
 			}
 			
 		/* set distance values */
@@ -1994,16 +1997,10 @@ int mbview_route_delete(int instance, int iroute, int ipoint)
 	if (iroute >= 0 && iroute < shared.shareddata.nroute
 		&& ipoint >= 0 && ipoint < shared.shareddata.routes[iroute].npoints)
 		{
-		/* free segment */
+		/* free segment immediately after deleted point */
 		if (shared.shareddata.routes[iroute].npoints > 1)
 			{
-			if (ipoint == 0)
-				{
-				mb_free(mbv_verbose,&(shared.shareddata.routes[iroute].segments[ipoint].lspoints),&error);
-				shared.shareddata.routes[iroute].segments[ipoint].nls = 0;
-				shared.shareddata.routes[iroute].segments[ipoint].nls_alloc = 0;
-				}
-			else
+			if (ipoint < shared.shareddata.routes[iroute].npoints - 1)
 				{
 				mb_free(mbv_verbose,&(shared.shareddata.routes[iroute].segments[ipoint].lspoints),&error);
 				shared.shareddata.routes[iroute].segments[ipoint].nls = 0;
@@ -2030,7 +2027,7 @@ int mbview_route_delete(int instance, int iroute, int ipoint)
 		/* if route still has points then reset affected segment endpoints */
 		if (shared.shareddata.routes[iroute].npoints > 0)
 			{
-			for (j=MAX(0,ipoint-1);j<MIN(shared.shareddata.routes[iroute].npoints-1,ipoint+1);j++)
+			for (j=MAX(0,ipoint-1);j<shared.shareddata.routes[iroute].npoints-1;j++)
 				{
 				shared.shareddata.routes[iroute].segments[j].endpoints[0] = &(shared.shareddata.routes[iroute].points[j]);
 				shared.shareddata.routes[iroute].segments[j].endpoints[1] = &(shared.shareddata.routes[iroute].points[j+1]);
