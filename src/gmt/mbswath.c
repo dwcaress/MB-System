@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbswath.c	5/30/93
- *    $Id: mbswath.c,v 5.13 2006-06-22 04:45:42 caress Exp $
+ *    $Id: mbswath.c,v 5.14 2006-11-07 20:19:29 dale Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -29,6 +29,9 @@
  * Date:	May 30, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.13  2006/06/22 04:45:42  caress
+ * Working towards 5.1.0
+ *
  * Revision 5.12  2006/06/02 03:00:31  caress
  * Put in ifdefs to handle new GMT version.
  *
@@ -313,7 +316,7 @@ unsigned char r, g, b, gray;
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbswath.c,v 5.13 2006-06-22 04:45:42 caress Exp $";
+	static char rcs_id[] = "$Id: mbswath.c,v 5.14 2006-11-07 20:19:29 dale Exp $";
 	static char program_name[] = "MBSWATH";
 	static char help_message[] =  "MBSWATH is a GMT compatible utility which creates a color postscript \nimage of swath bathymetry or backscatter data.  The image \nmay be shaded relief as well.  Complete maps are made by using \nMBSWATH in conjunction with the usual GMT programs.";
 	static char usage_message[] = "mbswath -Ccptfile -Jparameters -Rwest/east/south/north \n\t[-Afactor -Btickinfo -byr/mon/day/hour/min/sec \n\t-ccopies -Dmode/ampscale/ampmin/ampmax \n\t-Eyr/mon/day/hour/min/sec -fformat \n\t-Fred/green/blue -Gmagnitude/azimuth -Idatalist \n\t-K -Ncptfile -O -P -ppings -Qdpi -Ttimegap -U -W -Xx-shift -Yy-shift \n\t-Zmode -V -H]";
@@ -640,7 +643,7 @@ main (int argc, char **argv)
 					if (GMT_getrgb (&argv_gmt[i][2], 
 						gmtdefs.basemap_frame_rgb)) 
 						{
-						GMT_pen_syntax ('F');
+						GMT_pen_syntax ('F'," ");
 						errflg++;
 						}
 				case '0':
