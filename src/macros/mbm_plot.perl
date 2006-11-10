@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_plot.perl	6/18/93
-#    $Id: mbm_plot.perl,v 5.21 2006-07-05 19:50:21 caress Exp $
+#    $Id: mbm_plot.perl,v 5.22 2006-11-10 22:02:59 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 2000, 2003, 2005 by 
 #    D. W. Caress (caress@mbari.org)
@@ -43,7 +43,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   mbm_plot -Fformat -Ifile [-Amagnitude[/azimuth | zero_level] 
 #            -C[cont_int/col_int/tic_int/lab_int/tic_len/lab_hgt] 
 #            -Gcolor_mode -H 
-#            -N[time_tick/time_annot/date_annot/time_tick_len]
+#            -N[time_tick/time_annot/date_annot/time_tick_len[/name_hgt]  |  F | FP]
 #            -Oroot -Ppagesize -S[color/shade] -T -Uorientation -V 
 #            -Wcolor_style[/pallette] ]
 #
@@ -59,6 +59,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #            -MGQdpi -MGU[/dx/dy/][label]
 #            -MMAfactor/mode/depth -MMByr/mo/da/hr/mn/sc 
 #            -MMDmode/scale[/min/max] -MMEyr/mo/da/hr/mn/sc 
+#            -MMMpingnumber_tick/pingnumber_annot/pingnumber_tick_len
 #            -MMNnplot -MMPpings -MMSspeedmin 
 #            -MMTtimegap -MMZalgorithm 
 #            -MTCfill -MTDresolution -MTGfill -MTIriver[/pen] 
@@ -72,10 +73,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   June 17, 1993
 #
 # Version:
-#   $Id: mbm_plot.perl,v 5.21 2006-07-05 19:50:21 caress Exp $
+#   $Id: mbm_plot.perl,v 5.22 2006-11-10 22:02:59 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.21  2006/07/05 19:50:21  caress
+#   Working towards 5.1.0beta
+#
 #   Revision 5.20  2006/06/16 19:30:58  caress
 #   Check in after the Santa Monica Basin Mapping AUV Expedition.
 #
@@ -482,7 +486,7 @@ if ($help)
 	print "\t$program_name -Fformat -Ifile [-Amagnitude[/azimuth | zero_level]\n";
 	print "\t\t-C[cont_int/col_int/tic_int/lab_int/tic_len/lab_hgt]\n";
 	print "\t\t-Gcolor_mode -H\n";
-	print "\t\t-N[time_tick/time_annot/date_annot/time_tick_len[/name_hgt[/name_perp]] | F[P]]\n";
+	print "\t\t-N[time_tick/time_annot/date_annot/time_tick_len[/name_hgt[/name_perp]] | F | FP]\n";
 	print "\t\t-Oroot -Ppagesize -S[color/shade] -T -Uorientation -V \n";
 	print "\t\t-Wcolor_style[/pallette] ]\n";
 	print "Additional Options:\n";
@@ -496,6 +500,7 @@ if ($help)
 	print "\t\t-MGQdpi -MGU[/dx/dy/][label]\n";
 	print "\t\t-MMAfactor/mode/depth -MMByr/mo/da/hr/mn/sc\n";
 	print "\t\t-MMDmode/scale[/min/max] -MMEyr/mo/da/hr/mn/sc\n";
+	print "\t\t-MMMpingnumber_tick/pingnumber_annot/pingnumber_tick_len\n";
 	print "\t\t-MMNnplot -MMPpings -MMSspeedmin\n";
 	print "\t\t-MMTtimegap -MMZalgorithm\n";
 	print "\t\t-MTCfill -MTDresolution -MTGfill -MTIriver[/pen]\n";
@@ -631,6 +636,17 @@ if ($misc)
 		if ($cmd =~ /^[Mm][Ee]./)
 			{
 			($mb_etime) = $cmd =~ /^[Mm][Ee](.+)/;
+			}
+
+		# set pingnumber annotation
+		if ($cmd =~ /^[Mm][Mm]./)
+			{
+			($pingnumber_control) = $cmd =~ /^[Mm][Mm](.+)/;
+			$pingnumber_mode = 1;
+			}
+		elsif ($cmd =~ /^[Mm][Mm]/)
+			{
+			$pingnumber_mode = 1;
 			}
 
 		# set number of pings to be contoured at a time
@@ -864,7 +880,6 @@ else
 		$color_pallette = 1;
 		}
 	}
-printf "navigation_control:$navigation_control\n";
 if ($navigation_control && $navigation_control =~ /\S+\/\S+\/\S+\/\S+/)
 	{
 	$navigation_mode = 1;
@@ -872,7 +887,6 @@ if ($navigation_control && $navigation_control =~ /\S+\/\S+\/\S+\/\S+/)
 elsif ($navigation_control && ($navigation_control =~ /FP/ 
 				|| $navigation_control =~ /fp/))
 	{
-printf "navigation_control:PERP\n";
 	$navigation_mode = 1;
 	$name_mode = 1;
 	$name_perp = 1;
@@ -882,7 +896,6 @@ printf "navigation_control:PERP\n";
 elsif ($navigation_control && ($navigation_control =~ /F/ 
 				|| $navigation_control =~ /f/))
 	{
-printf "navigation_control:NOT PERP\n";
 	$navigation_mode = 1;
 	$name_mode = 1;
 	$name_perp = 0;
@@ -938,6 +951,35 @@ elsif ($navigation_control)
 elsif ($navigation_mode)
 	{
 	$navigation_control = "0.25/1/4/0.15";
+	}
+if ($pingnumber_mode)
+	{
+	if ($pingnumber_control && $pingnumber_control =~ /\S+\/\S+\/\S+/)
+		{
+		($pingnumber_tick, $pingnumber_annot, $pingnumber_tick_len) 
+				= $pingnumber_control =~  /(\S+)\/(\S+)\/(\S+)/;
+		}
+	elsif ($pingnumber_control && $pingnumber_control =~ /\S+\/\S+/)
+		{
+		($pingnumber_tick, $pingnumber_annot) 
+				= $pingnumber_control =~  /(\S+)\/(\S+)/;
+		$pingnumber_tick_len = 0.10;
+		}
+	elsif ($pingnumber_control && $pingnumber_control =~ /\S+/)
+		{
+		($pingnumber_tick) = $pingnumber_control =~  /(\S+)/;
+		$pingnumber_tick_len = 0.10;
+		$pingnumber_annot = 100;
+		}
+	else
+		{
+		$pingnumber_tick_len = 0.10;
+		$pingnumber_annot = 100;
+		$pingnumber_tick = 50;
+		}
+	$pingnumber_control = "$pingnumber_tick" 
+			. "/" . "$pingnumber_annot"
+			. "/" . "$pingnumber_tick_len";
 	}
 if ($color_flip_control)
 	{
@@ -2445,6 +2487,10 @@ if ($contour_mode || $navigation_mode)
 		{
 		printf FCMD "-G$nav_name_hgt \\\n\t";
 		}
+	if ($pingnumber_mode)
+		{
+		printf FCMD "-M$pingnumber_control \\\n\t";
+		}
 	if ($mb_btime)
 		{
 		printf FCMD "-b$mb_btime \\\n\t";
@@ -2894,6 +2940,10 @@ if ($verbose)
 	if ($navigation_mode)
 		{
 		print "    Navigation control:       $navigation_control\n";
+		}
+	if ($pingnumber_mode)
+		{
+		print "    Ping annotation control:  $pingnumber_control\n";
 		}
 	if ($name_mode)
 		{
