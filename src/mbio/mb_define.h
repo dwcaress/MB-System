@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	4/21/96
- *    $Id: mb_define.h,v 5.31 2006-10-05 18:58:28 caress Exp $
+ *    $Id: mb_define.h,v 5.32 2006-11-10 22:36:04 caress Exp $
  *
  *    Copyright (c) 1996, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	April 21, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.31  2006/10/05 18:58:28  caress
+ * Changes for 5.1.0beta4
+ *
  * Revision 5.30  2006/09/11 18:55:52  caress
  * Changes during Western Flyer and Thomas Thompson cruises, August-September
  * 2006.
@@ -165,6 +168,7 @@
 #define	MB_FILETYPE_GSF		3
 #define	MB_FILETYPE_NETCDF	4
 #define MB_FILETYPE_SURF	5
+#define MB_FILETYPE_SEGY	6
 
 /* settings for recursive datalist reading functions */
 #define MB_DATALIST_LOOK_UNSET		0

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbextractsegy.c	4/18/2004
- *    $Id: mbextractsegy.c,v 5.11 2006-08-09 22:41:27 caress Exp $
+ *    $Id: mbextractsegy.c,v 5.12 2006-11-10 22:36:05 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	April 18, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.11  2006/08/09 22:41:27  caress
+ * Fixed programs that read or write grids so that they do not use the GMT_begin() function; these programs will now work when GMT is built in the default fashion, when GMT is built in the default fashion, with "advisory file locking" enabled.
+ *
  * Revision 5.10  2006/06/22 04:45:43  caress
  * Working towards 5.1.0
  *
@@ -79,7 +82,7 @@
 #define MBES_ROUTE_WAYPOINT_STARTLINE	3
 #define MBES_ROUTE_WAYPOINT_ENDLINE	4
 
-static char rcs_id[] = "$Id: mbextractsegy.c,v 5.11 2006-08-09 22:41:27 caress Exp $";
+static char rcs_id[] = "$Id: mbextractsegy.c,v 5.12 2006-11-10 22:36:05 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
@@ -181,7 +184,7 @@ main (int argc, char **argv)
 	double	*routelat = NULL;
 	int	*routewaypoint = NULL;
 	double	range;
-	double	rangethreshold = 10.0;
+	double	rangethreshold = 25.0;
 	double	rangelast;
 	int	activewaypoint = 0;
 	int	startline = 1;
@@ -204,6 +207,9 @@ main (int argc, char **argv)
 	char	command[MB_PATH_MAXLINE];
 	char	scale[MB_PATH_MAXLINE];
 	double	mtodeglon, mtodeglat;
+	double	lastlon;
+	double	lastlat;
+	double	lastheading;
 	double	dx, dy;
 	FILE	*fp = NULL;
 	char	*result;
@@ -481,7 +487,7 @@ main (int argc, char **argv)
 		fp = NULL;
 		
 		/* set starting values */
-		activewaypoint = 0;
+		activewaypoint = 1;
 		mb_coor_scale(verbose,routelat[activewaypoint], &mtodeglon, &mtodeglat);
 		rangelast = 1000 * rangethreshold;
 		seafloordepthmin = -1.0;
@@ -632,6 +638,14 @@ main (int argc, char **argv)
 		    ss,ssacrosstrack,ssalongtrack,
 		    comment,&error);
 		    
+		/* save last nav and heading */
+		if (navlon != 0.0)
+			lastlon = navlon;
+		if (navlat != 0.0)
+			lastlat = navlat;
+		if (heading != 0.0)
+			lastheading = heading;
+		    
 		/* check survey data position against waypoints */
 		if (nroutepoint > 1 && navlon != 0.0 && navlat != 0.0)
 			{
@@ -667,9 +681,9 @@ main (int argc, char **argv)
 				    if (linebearing < 0.0)
 		    			linebearing += 360.0;
 				    if (linebearing >= 45.0 && linebearing <= 225.0)
-		   			strcpy(scale, "-Jx0.01/75");
+		   			strcpy(scale, "-Jx0.005/25");
 				    else
-		   			strcpy(scale, "-Jx-0.01/75");
+		   			strcpy(scale, "-Jx-0.005/25");
 				    
 				    /* output commands to first cut plotting script file */
 				    sweep = (seafloordepthmax - seafloordepthmin) / 750.0 + 0.1;
@@ -807,6 +821,14 @@ main (int argc, char **argv)
 			segytraceheader.min = time_i[4];
 			segytraceheader.sec = time_i[5];
 			}
+		    
+		    /* set nav and heading if needed */
+		    if (segytraceheader.src_long == 0)
+			    segytraceheader.src_long = (int)(lastlon * 360000.0);
+		    if (segytraceheader.src_lat == 0)
+			    segytraceheader.src_lat = (int)(lastlat * 360000.0);
+		    if (segytraceheader.heading == 0.0)
+			    segytraceheader.heading = lastheading;
 				    
 		    /* write fileheader if needed */
 		    if (status == MB_SUCCESS && nwrite == 0)
@@ -950,7 +972,7 @@ main (int argc, char **argv)
         		mb_put_binary_float(MB_NO, segytraceheader.dummy6, (void *) &buffer[index]); index += 4;
         		mb_put_binary_float(MB_NO, segytraceheader.dummy7, (void *) &buffer[index]); index += 4;
         		mb_put_binary_float(MB_NO, segytraceheader.dummy8, (void *) &buffer[index]); index += 4;
-        		mb_put_binary_float(MB_NO, segytraceheader.dummy9, (void *) &buffer[index]); index += 4;
+        		mb_put_binary_float(MB_NO, segytraceheader.heading, (void *) &buffer[index]); index += 4;
 
 			/* write out segy header */
 			if (fwrite(buffer,1,MB_SEGY_TRACEHEADER_LENGTH,fp) 
@@ -1054,9 +1076,9 @@ main (int argc, char **argv)
 		    if (linebearing < 0.0)
 		    	linebearing += 360.0;
 		    if (linebearing >= 45.0 && linebearing <= 225.0)
-		   	strcpy(scale, "-Jx0.01/75");
+		   	strcpy(scale, "-Jx0.005/10");
 		    else
-		   	strcpy(scale, "-Jx-0.01/75");
+		   	strcpy(scale, "-Jx-0.005/10");
 				    
 		    /* output commands to first cut plotting script file */
 		    sweep = (seafloordepthmax - seafloordepthmin) / 750.0 + 0.1;

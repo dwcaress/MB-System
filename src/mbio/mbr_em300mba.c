@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em300mba.c	10/16/98
- *	$Id: mbr_em300mba.c,v 5.33 2006-07-27 18:42:51 caress Exp $
+ *	$Id: mbr_em300mba.c,v 5.34 2006-11-10 22:36:04 caress Exp $
  *
  *    Copyright (c) 1998, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	October 16,  1998
  * $Log: not supported by cvs2svn $
+ * Revision 5.33  2006/07/27 18:42:51  caress
+ * Working towards 5.1.0
+ *
  * Revision 5.32  2006/02/07 03:12:14  caress
  * Another shot at dealing with broken simrad sidescan records. Now we will keep the raw sidescan data but not use it to make the binned sidescan returned by the standard mbio extract functions.
  *
@@ -298,7 +301,7 @@ int mbr_em300mba_wr_ss(int verbose, FILE *mbfp, int swap,
 int mbr_em300mba_wr_wc(int verbose, FILE *mbfp, int swap, 
 		struct mbsys_simrad2_struct *store, int *error);
 
-static char res_id[]="$Id: mbr_em300mba.c,v 5.33 2006-07-27 18:42:51 caress Exp $";
+static char res_id[]="$Id: mbr_em300mba.c,v 5.34 2006-11-10 22:36:04 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_em300mba(int verbose, void *mbio_ptr, int *error)
@@ -350,6 +353,7 @@ int mbr_register_em300mba(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr->mb_io_read_ping = &mbr_rt_em300mba; 
 	mb_io_ptr->mb_io_write_ping = &mbr_wt_em300mba; 
 	mb_io_ptr->mb_io_dimensions = &mbsys_simrad2_dimensions; 
+	mb_io_ptr->mb_io_pingnumber = &mbsys_simrad2_pingnumber; 
 	mb_io_ptr->mb_io_extract = &mbsys_simrad2_extract; 
 	mb_io_ptr->mb_io_insert = &mbsys_simrad2_insert; 
 	mb_io_ptr->mb_io_extract_nav = &mbsys_simrad2_extract_nav; 

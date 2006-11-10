@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.h	1/19/93
- *    $Id: mb_format.h,v 5.20 2006-10-05 18:58:28 caress Exp $
+ *    $Id: mb_format.h,v 5.21 2006-11-10 22:36:04 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2001, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -19,6 +19,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.20  2006/10/05 18:58:28  caress
+ * Changes for 5.1.0beta4
+ *
  * Revision 5.19  2006/03/06 21:47:48  caress
  * Implemented changes suggested by Bob Courtney of the Geological Survey of Canada to support translating Reson data to GSF.
  *
@@ -223,7 +226,7 @@
 #define MB_FORMAT_DEF
 
 /* define date of last format update */
-static char mb_format_updatedate[] = "$Date: 2006-10-05 18:58:28 $ $Revision: 5.20 $";
+static char mb_format_updatedate[] = "$Date: 2006-11-10 22:36:04 $ $Revision: 5.21 $";
 
 /* Supported swath sonar systems */
 #define	MB_SYS_NONE		0
@@ -258,7 +261,7 @@ static char mb_format_updatedate[] = "$Date: 2006-10-05 18:58:28 $ $Revision: 5.
 #define	MB_SYS_JSTAR		29
 
 /* Number of supported MBIO data formats */
-#define	MB_FORMATS	60
+#define	MB_FORMATS	61
 
 /* Data formats supported by MBIO */
 #define MBF_DATALIST	-1
@@ -428,6 +431,9 @@ static char mb_format_updatedate[] = "$Date: 2006-10-05 18:58:28 $ $Revision: 5.
 #define MBF_OMGHDCSJ    151     /* UNB OMG HDCS format, variable  
 					beam bathymetry and amplitude, variable
 					pixel sidescan, binary, UNB */ 
+#define MBF_SEGYSEGY    160     /* SEGY seismic or subbottom trace data, 
+					single beam bathymetry, nav, 
+					binary, SEG (SIOSEIS variant) */ 
 #define MBF_MGD77DAT    161     /* NGDC MGD77 underway geophysics format, 
 					single beam bathymetry, nav, magnetics, gravity, 
 					ascii, NOAA NGDC */ 

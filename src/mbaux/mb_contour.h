@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_contour.h	5/16/94
- *    $Id: mb_contour.h,v 5.5 2005-11-04 22:49:51 caress Exp $
+ *    $Id: mb_contour.h,v 5.6 2006-11-10 22:36:04 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2003, 2005 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	May 15, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2005/11/04 22:49:51  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.4  2005/03/25 04:10:51  caress
  * Control over the filename annotation orientation has been added and the orientation itself has been fixed.
  *
@@ -63,6 +66,7 @@ struct	ping
 	double	navlon;
 	double	navlat;
 	double	heading;
+	int	pingnumber;
 	int	beams_bath;
 	int	beams_bath_alloc;
 	char	*beamflag;
@@ -88,6 +92,7 @@ struct swath
 	int	plot_triangles;
 	int	plot_track;
 	int	plot_name;
+	int	plot_pingnumber;
 
 	/* contour control parameters */
 	double	contour_int;
@@ -111,6 +116,11 @@ struct swath
 	double	date_annot_int;
 	double	time_tick_len;
 	double	name_hgt;
+
+	/* pingnumber control parameters */
+	int	pingnumber_tick_int;
+	int	pingnumber_annot_int;
+	double	pingnumber_tick_len;
 
 	/* triangle network */
 	int	npts;
@@ -165,6 +175,7 @@ int mb_contour_init(
 		int	plot_triangles,
 		int	plot_track,
 		int	plot_name,
+		int	plot_pingnumber,
 		double	contour_int,
 		double	color_int,
 		double	tick_int,
@@ -182,6 +193,9 @@ int mb_contour_init(
 		double	date_annot_int,
 		double	time_tick_len,
 		double	name_hgt,
+		int	pingnumber_tick_int,
+		int	pingnumber_annot_int,
+		double	pingnumber_tick_len,
 		int	*error);
 int mb_contour_deall(
 		int	verbose, 

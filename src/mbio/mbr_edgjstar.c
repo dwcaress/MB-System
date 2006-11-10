@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_edgjstar.c	5/2/2005
- *	$Id: mbr_edgjstar.c,v 5.2 2006-04-11 19:14:46 caress Exp $
+ *	$Id: mbr_edgjstar.c,v 5.3 2006-11-10 22:36:04 caress Exp $
  *
  *    Copyright (c) 2005 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	May 2, 2005
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2006/04/11 19:14:46  caress
+ * Various fixes.
+ *
  * Revision 5.1  2005/11/05 00:48:04  caress
  * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
  *
@@ -100,7 +103,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_edgjstar(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_edgjstar.c,v 5.2 2006-04-11 19:14:46 caress Exp $";
+	static char res_id[]="$Id: mbr_edgjstar.c,v 5.3 2006-11-10 22:36:04 caress Exp $";
 	char	*function_name = "mbr_register_edgjstar";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -147,6 +150,7 @@ int mbr_register_edgjstar(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr->mb_io_read_ping = &mbr_rt_edgjstar; 
 	mb_io_ptr->mb_io_write_ping = &mbr_wt_edgjstar; 
 	mb_io_ptr->mb_io_dimensions = &mbsys_jstar_dimensions; 
+	mb_io_ptr->mb_io_pingnumber = &mbsys_jstar_pingnumber; 
 	mb_io_ptr->mb_io_extract = &mbsys_jstar_extract; 
 	mb_io_ptr->mb_io_insert = &mbsys_jstar_insert; 
 	mb_io_ptr->mb_io_extract_nav = &mbsys_jstar_extract_nav; 
@@ -239,7 +243,7 @@ int mbr_info_edgjstar(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_edgjstar.c,v 5.2 2006-04-11 19:14:46 caress Exp $";
+	static char res_id[]="$Id: mbr_edgjstar.c,v 5.3 2006-11-10 22:36:04 caress Exp $";
 	char	*function_name = "mbr_info_edgjstar";
 	int	status = MB_SUCCESS;
 
@@ -309,7 +313,7 @@ int mbr_info_edgjstar(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_register_edgjstr2(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_edgjstar.c,v 5.2 2006-04-11 19:14:46 caress Exp $";
+	static char res_id[]="$Id: mbr_edgjstar.c,v 5.3 2006-11-10 22:36:04 caress Exp $";
 	char	*function_name = "mbr_register_edgjstr2";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -448,7 +452,7 @@ int mbr_info_edgjstr2(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_edgjstar.c,v 5.2 2006-04-11 19:14:46 caress Exp $";
+	static char res_id[]="$Id: mbr_edgjstar.c,v 5.3 2006-11-10 22:36:04 caress Exp $";
 	char	*function_name = "mbr_info_edgjstr2";
 	int	status = MB_SUCCESS;
 
@@ -518,7 +522,7 @@ int mbr_info_edgjstr2(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_edgjstar(int verbose, void *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_edgjstar.c,v 5.2 2006-04-11 19:14:46 caress Exp $";
+ static char res_id[]="$Id: mbr_edgjstar.c,v 5.3 2006-11-10 22:36:04 caress Exp $";
 	char	*function_name = "mbr_alm_edgjstar";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

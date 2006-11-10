@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbprocess.c	3/31/93
- *    $Id: mbprocess.c,v 5.46 2006-03-14 01:51:53 caress Exp $
+ *    $Id: mbprocess.c,v 5.47 2006-11-10 22:36:05 caress Exp $
  *
  *    Copyright (c) 2000, 2002, 2003, 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -36,6 +36,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.46  2006/03/14 01:51:53  caress
+ * Fixed problem with per-beam heave values when applying rotational bathymetry correction - previously did not initialize heave values for non-null but flagged beams.
+ *
  * Revision 5.45  2006/02/16 21:11:44  caress
  * Fixed problems with reading time from some navigation formats.
  *
@@ -237,7 +240,7 @@ int get_anglecorr(int verbose,
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbprocess.c,v 5.46 2006-03-14 01:51:53 caress Exp $";
+	static char rcs_id[] = "$Id: mbprocess.c,v 5.47 2006-11-10 22:36:05 caress Exp $";
 	static char program_name[] = "mbprocess";
 	static char help_message[] =  "mbprocess is a tool for processing swath sonar bathymetry data.\n\
 This program performs a number of functions, including:\n\
@@ -724,7 +727,7 @@ and mbedit edit save files.\n";
 	{
 
 	/* load parameters */
-	status = mb_pr_readpar(verbose, mbp_ifile, MB_YES, 
+	status = mb_pr_readpar(verbose, mbp_ifile, MB_NO, 
 			&process, &error);
 			
 	/* reset output file and format if not reading from datalist */

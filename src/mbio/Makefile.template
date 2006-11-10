@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 5.22 2006-10-05 18:58:28 caress Exp $
+#	$Id: Makefile.template,v 5.23 2006-11-10 22:36:04 caress Exp $
 #
 #     Copyright (c) 1993, 1994, 2000, 2002, 2003, 2006 by
 #     David W. Caress (caress@mbari.org)
@@ -16,6 +16,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.22  2006/10/05 18:58:28  caress
+# Changes for 5.1.0beta4
+#
 # Revision 5.21  2006/09/11 18:55:52  caress
 # Changes during Western Flyer and Thomas Thompson cruises, August-September
 # 2006.
@@ -281,7 +284,7 @@ $(LIBDIR)/libmbio.a:	mb_format.o mb_error.o \
  		mbr_xtfr8101.o \
 		mbr_mbnetcdf.o mbr_nvnetcdf.o \
 		mbr_samesurf.o mbr_reson7kr.o \
-		mbr_edgjstar.o
+		mbr_edgjstar.o mbr_segysegy.o
 	$(ARCHIVE) $(LIBDIR)/libmbio.a \
 		mb_format.o mb_error.o \
 		mb_swap.o mb_compare.o mb_navint.o \
@@ -341,7 +344,7 @@ $(LIBDIR)/libmbio.a:	mb_format.o mb_error.o \
  		mbr_xtfr8101.o \
 		mbr_mbnetcdf.o mbr_nvnetcdf.o \
 		mbr_samesurf.o mbr_reson7kr.o \
-		mbr_edgjstar.o
+		mbr_edgjstar.o mbr_segysegy.o
 	ranlib $(LIBDIR)/libmbio.a
 
 ### compile the source files
@@ -574,6 +577,8 @@ mbr_reson7kr.o: mbr_reson7kr.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INC
 	$(CC) -c $(CFLAGS) -I$(NETCDFINCDIR) mbr_reson7kr.c
 mbr_edgjstar.o: mbr_edgjstar.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbsys_jstar.h $(INCDIR)/mb_segy.h
 	$(CC) -c $(CFLAGS) -I$(NETCDFINCDIR) mbr_edgjstar.c
+mbr_segysegy.o: mbr_segysegy.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbsys_singlebeam.h $(INCDIR)/mb_segy.h
+	$(CC) -c $(CFLAGS) -I$(NETCDFINCDIR) mbr_segysegy.c
 
 ### copy the include files to the include file directory
 $(INCDIR)/mb_format.h:	mb_format.h

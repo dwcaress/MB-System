@@ -1,4 +1,4 @@
-.TH mbcontour l "23 March 2005" "MB-System 5.0" "MB-System 5.0"
+.TH mbcontour l "8 November 2006" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbcontour\fP - GMT compatible utility for color fill or color shaded relief
 swath plots of swath sonar data using Postscript.
@@ -14,7 +14,8 @@ Version 5.0
 \fB-D\fItime_tick/time_annot/date_annot/time_tick_len\fP 
 \fB-E\fIyr/mo/da/hr/mn/sc\fP 
 \fB-f\fIformat\fP \fB-F\fIred/green/blue\fP \fB-G\fIname_hgt[/name_perp]\fP  
-\fB-I\fIinfile\fP \fB-K\fP \fB-L\fIlonflip\fP \fB-M\fP 
+\fB-I\fIinfile\fP \fB-K\fP \fB-L\fIlonflip\fP 
+\fB-M\fIpingnumber_tick/pingnumber_annot/pingnumber_tick_len\fP
 \fB-N\fInplot\fP \fB-O\fP \fB-P\fP \fB-p\fIpings\fP 
 \fB-Q\fP \fB-S\fIspeed \fB-T\fItimegap\fP \fB-U\fP \fB-W\fP \fB-X\fIx-shift\fP 
 \fB-Y\fIy-shift\fP \fB-Z\fIalgorithm\fP 
@@ -37,9 +38,12 @@ conditions. The contour levels  and colors can be controlled
 directly or set implicitly using contour and color change intervals. 
 Contours can also be set to have ticks pointing downhill.
 
-Shiptracks can also be plotted using the \fB-D\fP option. The \fB-G\fP 
+Shiptracks can also be plotted using the \fB-D\fP, \fB-G\fP, and 
+\fB-M\fP options. The \fB-D\fP option controls the basic track
+plotting, including time annotation. The \fB-G\fP 
 option causes the start of each swath data file to be annotated with
-the filename.
+the filename. The \fB-M\fP option controls ping number annotation,
+or shot number annotation in the case of segy format seismic data.
 
 Before opening an input swath data file, \fBmbcontour\fP checks for
 an ascii file in the same directory having the same name except
@@ -304,7 +308,15 @@ the range from 0 to 360 degrees.
 Default: \fIlonflip\fP = 0.
 .TP
 .B \-M
-Force conversion to monochrome image using the [television] YIQ transformation.
+\fIpingnumber_tick/pingnumber_annot/pingnumber_tick_len\fP
+.br
+Sets the parameters governing the pingnumber annotation of the shiptrack.  
+Tick marks are made along the shiptrack at \fIpingnumber_tick\fP intervals; these
+are \fItime_tick_len\fP inches long. Longer tick marks are made along the 
+shiptrack at \fIpingnumber_annot\fP intervals; these are 1.5 times \fItime_tick_len\fP 
+inches long.
+Defaults: \fIpingnumber_tick\fP = 50; \fIpingnumber_annot\fP = 100; 
+\fIpingnumber_tick_len\fP = 0.1.
 .TP
 .B \-N
 \fInplot\fP

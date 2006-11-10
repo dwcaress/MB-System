@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_jstar.h	2/21/2005
- *	$Id: mbsys_jstar.h,v 5.1 2005-11-05 00:48:03 caress Exp $
+ *	$Id: mbsys_jstar.h,v 5.2 2006-11-10 22:36:05 caress Exp $
  *
  *    Copyright (c) 2005 by
  *    David W. Caress (caress@mbari.org)
@@ -19,6 +19,9 @@
  * Author:	D. W. Caress
  * Date:	February 21, 2005
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2005/11/05 00:48:03  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.0  2005/06/04 04:11:35  caress
  * Support for Edgetech Jstar format (id 132 and 133).
  *
@@ -273,6 +276,8 @@ int mbsys_jstar_deall(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error);
 int mbsys_jstar_dimensions(int verbose, void *mbio_ptr, void *store_ptr, 
 			int *kind, int *nbath, int *namp, int *nss, int *error);
+int mbsys_jstar_pingnumber(int verbose, void *mbio_ptr, 
+			int *pingnumber, int *error);
 int mbsys_jstar_extract(int verbose, void *mbio_ptr, void *store_ptr, 
 			int *kind, int time_i[7], double *time_d,
 			double *navlon, double *navlat,

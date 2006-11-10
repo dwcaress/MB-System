@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	1/19/93
- *    $Id: mb_segy.h,v 5.5 2005-05-05 23:53:01 caress Exp $
+ *    $Id: mb_segy.h,v 5.6 2006-11-10 22:36:04 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -26,6 +26,9 @@
  * Date:	April 13, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2005/05/05 23:53:01  caress
+ * Just added a space in a line of code...
+ *
  * Revision 5.4  2004/09/16 19:02:33  caress
  * Changes to better support segy data.
  *
@@ -180,7 +183,7 @@ struct mb_segytraceheader_struct
         float   	dummy6; 	/* bytes 224-227 */
         float   	dummy7; 	/* bytes 228-231 */
         float   	dummy8; 	/* bytes 232-235 */
-        float   	dummy9; 	/* bytes 236-239 */
+        float   	heading; 	/* bytes 236-239, heading in degrees (MB-System only) */
 };
 struct mb_segyio_struct
 	{
@@ -188,6 +191,8 @@ struct mb_segyio_struct
 	char 	segyfile[MB_PATH_MAXLINE];
 	int	bufferalloc;
 	char	*buffer;
+	int	asciiheader_set;
+	int	fileheader_set;
 	struct mb_segyasciiheader_struct asciiheader;
 	struct mb_segyfileheader_struct fileheader;
 	struct mb_segytraceheader_struct traceheader;

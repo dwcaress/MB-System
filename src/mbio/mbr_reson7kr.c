@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_reson7kr.c	4/4/2004
- *	$Id: mbr_reson7kr.c,v 5.14 2006-09-11 18:55:53 caress Exp $
+ *	$Id: mbr_reson7kr.c,v 5.15 2006-11-10 22:36:05 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,10 @@
  * Author:	D. W. Caress
  * Date:	April 4,2004
  * $Log: not supported by cvs2svn $
+ * Revision 5.14  2006/09/11 18:55:53  caress
+ * Changes during Western Flyer and Thomas Thompson cruises, August-September
+ * 2006.
+ *
  * Revision 5.13  2006/04/11 19:14:46  caress
  * Various fixes.
  *
@@ -204,7 +208,7 @@ int mbr_reson7kr_wr_soundvelocity(int verbose, int *bufferalloc, char **bufferpt
 int mbr_reson7kr_wr_absorptionloss(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 int mbr_reson7kr_wr_spreadingloss(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 
-static char res_id[]="$Id: mbr_reson7kr.c,v 5.14 2006-09-11 18:55:53 caress Exp $";
+static char res_id[]="$Id: mbr_reson7kr.c,v 5.15 2006-11-10 22:36:05 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_reson7kr(int verbose, void *mbio_ptr, int *error)
@@ -256,7 +260,7 @@ int mbr_register_reson7kr(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr->mb_io_read_ping = &mbr_rt_reson7kr; 
 	mb_io_ptr->mb_io_write_ping = &mbr_wt_reson7kr; 
 	mb_io_ptr->mb_io_dimensions = &mbsys_reson7k_dimensions; 
-	mb_io_ptr->mb_io_dimensions = &mbsys_reson7k_dimensions; 
+	mb_io_ptr->mb_io_pingnumber = &mbsys_reson7k_pingnumber; 
 	mb_io_ptr->mb_io_extract = &mbsys_reson7k_extract; 
 	mb_io_ptr->mb_io_insert = &mbsys_reson7k_insert; 
 	mb_io_ptr->mb_io_extract_nav = &mbsys_reson7k_extract_nav; 

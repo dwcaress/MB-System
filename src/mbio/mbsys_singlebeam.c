@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_singlebeam.c	4/13/99
- *	$Id: mbsys_singlebeam.c,v 5.10 2006-10-05 18:58:29 caress Exp $
+ *	$Id: mbsys_singlebeam.c,v 5.11 2006-11-10 22:36:05 caress Exp $
  *
  *    Copyright (c) 1999, 2000, 2002, 2003, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -29,6 +29,9 @@
  * Date:	April 13,  1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.10  2006/10/05 18:58:29  caress
+ * Changes for 5.1.0beta4
+ *
  * Revision 5.9  2005/11/05 00:48:04  caress
  * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
  *
@@ -87,7 +90,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_singlebeam.h"
 
-static char res_id[]="$Id: mbsys_singlebeam.c,v 5.10 2006-10-05 18:58:29 caress Exp $";
+static char res_id[]="$Id: mbsys_singlebeam.c,v 5.11 2006-11-10 22:36:05 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_singlebeam_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
@@ -273,6 +276,50 @@ int mbsys_singlebeam_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2       nbath:         %d\n",*nbath);
 		fprintf(stderr,"dbg2       namp:          %d\n",*namp);
 		fprintf(stderr,"dbg2       nss:           %d\n",*nss);
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbsys_singlebeam_pingnumber(int verbose, void *mbio_ptr, 
+		int *pingnumber, int *error)
+{
+	char	*function_name = "mbsys_singlebeam_dimensions";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	struct mbsys_singlebeam_struct *store;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mb_ptr:     %d\n",mbio_ptr);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* get data structure pointer */
+	store = (struct mbsys_singlebeam_struct *) mb_io_ptr->store_data;
+
+	/* extract data from structure */
+	*pingnumber = store->seismic_shot;
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       pingnumber: %d\n",*pingnumber);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:     %d\n",status);

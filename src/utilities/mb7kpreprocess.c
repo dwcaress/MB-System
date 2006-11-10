@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb7kpreprocess.c	10/12/2005
- *    $Id: mb7kpreprocess.c,v 5.8 2006-09-11 18:55:53 caress Exp $
+ *    $Id: mb7kpreprocess.c,v 5.9 2006-11-10 22:36:05 caress Exp $
  *
  *    Copyright (c) 2005 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,10 @@
  * Date:	October 12, 2005
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2006/09/11 18:55:53  caress
+ * Changes during Western Flyer and Thomas Thompson cruises, August-September
+ * 2006.
+ *
  * Revision 5.7  2006/07/06 05:30:57  caress
  * Working more towards 5.1.0beta
  *
@@ -73,7 +77,7 @@
 #define	MB7KPREPROCESS_TIMELAG_CONSTANT	1
 #define	MB7KPREPROCESS_TIMELAG_MODEL	2
 
-static char rcs_id[] = "$Id: mb7kpreprocess.c,v 5.8 2006-09-11 18:55:53 caress Exp $";
+static char rcs_id[] = "$Id: mb7kpreprocess.c,v 5.9 2006-11-10 22:36:05 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
@@ -2043,8 +2047,9 @@ time_d,navlon,navlat,heading,sonardepth,altitude,roll,pitch,speed);*/
 							bathymetry->depth[i] = zz + sonardepth;
 							bathymetry->pointing_angle[i] = DTR * theta;
 							bathymetry->azimuth_angle[i] = DTR * phi;
-/*fprintf(stderr,"i:%d roll:%f %f pitch:%f %f   depth:%f %f %f\n",
-i,roll,pitch, bathymetry->roll, bathymetry->pitch,
+/*fprintf(stderr,"i:%d roll:%f %f pitch:%f %f alpha:%f beta:%f theta:%f phi:%f  depth:%f %f %f\n",
+i,roll, bathymetry->roll,pitch, bathymetry->pitch,
+alpha,beta,theta,phi,
 bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]);*/
 							}
 						else

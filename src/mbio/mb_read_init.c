@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_read_init.c	1/25/93
- *    $Id: mb_read_init.c,v 5.19 2006-01-11 07:37:29 caress Exp $
+ *    $Id: mb_read_init.c,v 5.20 2006-11-10 22:36:04 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	January 25, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.19  2006/01/11 07:37:29  caress
+ * Working towards 5.0.8
+ *
  * Revision 5.18  2006/01/06 18:27:19  caress
  * Working towards 5.0.8
  *
@@ -224,7 +227,7 @@ int mb_read_init(int verbose, char *file,
 		int *beams_bath, int *beams_amp, int *pixels_ss, 
 		int *error)
 {
-	static char rcs_id[]="$Id: mb_read_init.c,v 5.19 2006-01-11 07:37:29 caress Exp $";
+	static char rcs_id[]="$Id: mb_read_init.c,v 5.20 2006-11-10 22:36:04 caress Exp $";
 	char	*function_name = "mb_read_init";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
@@ -664,6 +667,18 @@ int mb_read_init(int verbose, char *file,
 			}
 		}
 	    else
+		{
+		status = MB_FAILURE;
+		*error = MB_ERROR_OPEN_FAIL;
+		}
+	    }
+	    
+	/* else handle segy files to be opened with mb_segy */
+	else if (mb_io_ptr->filetype == MB_FILETYPE_SEGY)
+	    {
+	    status = mb_segy_read_init(verbose, mb_io_ptr->file, 
+		&(mb_io_ptr->mbfp), NULL, NULL, error);
+	    if (status != MB_SUCCESS)
 		{
 		status = MB_FAILURE;
 		*error = MB_ERROR_OPEN_FAIL;

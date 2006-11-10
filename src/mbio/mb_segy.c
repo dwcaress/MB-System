@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_segy.c	5/25/2004
- *    $Id: mb_segy.c,v 5.4 2006-01-24 19:11:17 caress Exp $
+ *    $Id: mb_segy.c,v 5.5 2006-11-10 22:36:04 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	May 25, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2006/01/24 19:11:17  caress
+ * Version 5.0.8 beta.
+ *
  * Revision 5.3  2004/11/06 03:55:17  caress
  * Working to support the Reson 7k format.
  *
@@ -49,20 +52,22 @@
 #include "../../include/mb_segy.h"
 #include "../../include/mb_swap.h"
 
-static char rcs_id[]="$Id: mb_segy.c,v 5.4 2006-01-24 19:11:17 caress Exp $";
+static char rcs_id[]="$Id: mb_segy.c,v 5.5 2006-11-10 22:36:04 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 /* 	function mb_segy_read_init opens an existing segy file for 
 	reading. The file headers are returned */
 int mb_segy_read_init(int verbose, char *segyfile, 
 		void **mbsegyio_ptr,
-		struct mb_segyasciiheader_struct *asciiheader,
-		struct mb_segyfileheader_struct *fileheader,
+		struct mb_segyasciiheader_struct *segyasciiheader,
+		struct mb_segyfileheader_struct *segyfileheader,
 		int *error)
 {
   	char	*function_name = "mb_segy_read_init";
 	int	status = MB_SUCCESS;
 	struct mb_segyio_struct *mb_segyio_ptr;
+	struct mb_segyasciiheader_struct *asciiheader;
+	struct mb_segyfileheader_struct *fileheader;
 	char	*buffer;
 	int	index;
 	int	i, j;
@@ -76,8 +81,8 @@ int mb_segy_read_init(int verbose, char *segyfile,
 		fprintf(stderr,"dbg2       verbose:             %d\n",verbose);
 		fprintf(stderr,"dbg2       segyfile:            %s\n",segyfile);
 		fprintf(stderr,"dbg2       mbsegyio_ptr:        %d\n",mbsegyio_ptr);
-		fprintf(stderr,"dbg2       asciiheader:         %d\n",asciiheader);
-		fprintf(stderr,"dbg2       fileheader:          %d\n",fileheader);
+		fprintf(stderr,"dbg2       asciiheader:         %d\n",segyasciiheader);
+		fprintf(stderr,"dbg2       fileheader:          %d\n",segyfileheader);
 		}
 
 	/* allocate memory for mbsegyio descriptor */
@@ -97,6 +102,10 @@ int mb_segy_read_init(int verbose, char *segyfile,
 			mb_segyio_ptr->bufferalloc = MB_SEGY_FILEHEADER_LENGTH;
 		else
 			mb_segyio_ptr->bufferalloc = 0;
+			
+		/* set local pointers */
+		asciiheader = &(mb_segyio_ptr->asciiheader);
+		fileheader = &(mb_segyio_ptr->fileheader);
 		}
 
 	/* if ok then open the segy file */
@@ -110,18 +119,24 @@ int mb_segy_read_init(int verbose, char *segyfile,
 			status = MB_FAILURE;
 			fprintf(stderr, "\nUnable to open segy file %s\n", mb_segyio_ptr->segyfile);
 			}
+			
+		/* set asciiheader and fileheader flags */
+		mb_segyio_ptr->asciiheader_set = MB_NO;
+		mb_segyio_ptr->fileheader_set = MB_NO;
 		}
 
 	/* if ok then read file headers */
 	if (status == MB_SUCCESS)
 		{
 		/* read ascii header */
-		if (fread(asciiheader,1,MB_SEGY_ASCIIHEADER_LENGTH,mb_segyio_ptr->fp) 
+		if (fread((char *) asciiheader,1,MB_SEGY_ASCIIHEADER_LENGTH,mb_segyio_ptr->fp) 
 					!= MB_SEGY_ASCIIHEADER_LENGTH)
 			{
 			status = MB_FAILURE;
 			*error = MB_ERROR_EOF;
 			}
+		else
+			mb_segyio_ptr->asciiheader_set = MB_YES;
 
 		/* read file header */
 		if (fread(mb_segyio_ptr->buffer,1,MB_SEGY_FILEHEADER_LENGTH,mb_segyio_ptr->fp) 
@@ -130,6 +145,8 @@ int mb_segy_read_init(int verbose, char *segyfile,
 			status = MB_FAILURE;
 			*error = MB_ERROR_EOF;
 			}
+		else
+			mb_segyio_ptr->fileheader_set = MB_YES;
 
 		/* extract file header data */
 		if (status == MB_SUCCESS)
@@ -170,9 +187,11 @@ int mb_segy_read_init(int verbose, char *segyfile,
 				}
 			}
 
-		/* copy the output structures */
-		mb_segyio_ptr->asciiheader = *asciiheader;
-		mb_segyio_ptr->fileheader = *fileheader;
+		/* copy the output structures if pointers provided */
+		if (segyasciiheader != NULL)
+			*segyasciiheader = *asciiheader;
+		if (segyfileheader != NULL)
+			*segyfileheader = *fileheader;
 		}
 
 	/* print output debug statements */
@@ -251,38 +270,42 @@ int mb_segy_write_init(int verbose, char *segyfile,
 		fprintf(stderr,"dbg2       segyfile:            %s\n",segyfile);
 		fprintf(stderr,"dbg2       asciiheader:         %d\n",asciiheader);
 		fprintf(stderr,"dbg2       fileheader:          %d\n",fileheader);
-		for (j=0;j<40;j++)
-			fprintf(stderr,"dbg2       asciiheader[%2.2d]:     %s",j,asciiheader[j]);
-		fprintf(stderr,"dbg2       jobid:               %d\n",fileheader->jobid);
-		fprintf(stderr,"dbg2       line:                %d\n",fileheader->line);
-		fprintf(stderr,"dbg2       reel:                %d\n",fileheader->reel);
-		fprintf(stderr,"dbg2       channels:            %d\n",fileheader->channels);
-		fprintf(stderr,"dbg2       aux_channels:        %d\n",fileheader->aux_channels);
-		fprintf(stderr,"dbg2       sample_interval:     %d\n",fileheader->sample_interval);
-		fprintf(stderr,"dbg2       sample_interval_org: %d\n",fileheader->sample_interval_org);
-		fprintf(stderr,"dbg2       number_samples:      %d\n",fileheader->number_samples);
-		fprintf(stderr,"dbg2       number_samples_org:  %d\n",fileheader->number_samples_org);
-		fprintf(stderr,"dbg2       format:              %d\n",fileheader->format);
-		fprintf(stderr,"dbg2       cdp_fold:            %d\n",fileheader->cdp_fold);
-		fprintf(stderr,"dbg2       trace_sort:          %d\n",fileheader->trace_sort);
-		fprintf(stderr,"dbg2       vertical_sum:        %d\n",fileheader->vertical_sum);
-		fprintf(stderr,"dbg2       sweep_start:         %d\n",fileheader->sweep_start);
-		fprintf(stderr,"dbg2       sweep_end:           %d\n",fileheader->sweep_end);
-		fprintf(stderr,"dbg2       sweep_length:        %d\n",fileheader->sweep_length);
-		fprintf(stderr,"dbg2       sweep_type:          %d\n",fileheader->sweep_type);
-		fprintf(stderr,"dbg2       sweep_trace:         %d\n",fileheader->sweep_trace);
-		fprintf(stderr,"dbg2       sweep_taper_start:   %d\n",fileheader->sweep_taper_start);
-		fprintf(stderr,"dbg2       sweep_taper_end:     %d\n",fileheader->sweep_taper_end);
-		fprintf(stderr,"dbg2       sweep_taper:         %d\n",fileheader->sweep_taper);
-		fprintf(stderr,"dbg2       correlated:          %d\n",fileheader->correlated);
-		fprintf(stderr,"dbg2       binary_gain:         %d\n",fileheader->binary_gain);
-		fprintf(stderr,"dbg2       amplitude:           %d\n",fileheader->amplitude);
-		fprintf(stderr,"dbg2       units:               %d\n",fileheader->units);
-		fprintf(stderr,"dbg2       impulse_polarity:    %d\n",fileheader->impulse_polarity);
-		fprintf(stderr,"dbg2       vibrate_polarity:    %d\n",fileheader->vibrate_polarity);
-		fprintf(stderr,"dbg2       domain:              %d\n",fileheader->domain);
-		for (i=0;i<338;i++)
-			fprintf(stderr,"dbg2       extra[%d]::          %d",i,fileheader->extra[i]);
+		if (asciiheader != NULL)
+			for (j=0;j<40;j++)
+				fprintf(stderr,"dbg2       asciiheader[%2.2d]:     %s",j,asciiheader[j]);
+		if (fileheader != NULL)
+			{
+			fprintf(stderr,"dbg2       jobid:               %d\n",fileheader->jobid);
+			fprintf(stderr,"dbg2       line:                %d\n",fileheader->line);
+			fprintf(stderr,"dbg2       reel:                %d\n",fileheader->reel);
+			fprintf(stderr,"dbg2       channels:            %d\n",fileheader->channels);
+			fprintf(stderr,"dbg2       aux_channels:        %d\n",fileheader->aux_channels);
+			fprintf(stderr,"dbg2       sample_interval:     %d\n",fileheader->sample_interval);
+			fprintf(stderr,"dbg2       sample_interval_org: %d\n",fileheader->sample_interval_org);
+			fprintf(stderr,"dbg2       number_samples:      %d\n",fileheader->number_samples);
+			fprintf(stderr,"dbg2       number_samples_org:  %d\n",fileheader->number_samples_org);
+			fprintf(stderr,"dbg2       format:              %d\n",fileheader->format);
+			fprintf(stderr,"dbg2       cdp_fold:            %d\n",fileheader->cdp_fold);
+			fprintf(stderr,"dbg2       trace_sort:          %d\n",fileheader->trace_sort);
+			fprintf(stderr,"dbg2       vertical_sum:        %d\n",fileheader->vertical_sum);
+			fprintf(stderr,"dbg2       sweep_start:         %d\n",fileheader->sweep_start);
+			fprintf(stderr,"dbg2       sweep_end:           %d\n",fileheader->sweep_end);
+			fprintf(stderr,"dbg2       sweep_length:        %d\n",fileheader->sweep_length);
+			fprintf(stderr,"dbg2       sweep_type:          %d\n",fileheader->sweep_type);
+			fprintf(stderr,"dbg2       sweep_trace:         %d\n",fileheader->sweep_trace);
+			fprintf(stderr,"dbg2       sweep_taper_start:   %d\n",fileheader->sweep_taper_start);
+			fprintf(stderr,"dbg2       sweep_taper_end:     %d\n",fileheader->sweep_taper_end);
+			fprintf(stderr,"dbg2       sweep_taper:         %d\n",fileheader->sweep_taper);
+			fprintf(stderr,"dbg2       correlated:          %d\n",fileheader->correlated);
+			fprintf(stderr,"dbg2       binary_gain:         %d\n",fileheader->binary_gain);
+			fprintf(stderr,"dbg2       amplitude:           %d\n",fileheader->amplitude);
+			fprintf(stderr,"dbg2       units:               %d\n",fileheader->units);
+			fprintf(stderr,"dbg2       impulse_polarity:    %d\n",fileheader->impulse_polarity);
+			fprintf(stderr,"dbg2       vibrate_polarity:    %d\n",fileheader->vibrate_polarity);
+			fprintf(stderr,"dbg2       domain:              %d\n",fileheader->domain);
+			for (i=0;i<338;i++)
+				fprintf(stderr,"dbg2       extra[%d]::          %d",i,fileheader->extra[i]);
+			}
 		fprintf(stderr,"dbg2       mbsegyio_ptr:        %d\n",mbsegyio_ptr);
 		}
 
@@ -316,29 +339,35 @@ int mb_segy_write_init(int verbose, char *segyfile,
 			status = MB_FAILURE;
 			fprintf(stderr, "\nUnable to open segy file %s\n", mb_segyio_ptr->segyfile);
 			}
+			
+		/* set asciiheader and fileheader flags */
+		mb_segyio_ptr->asciiheader_set = MB_NO;
+		mb_segyio_ptr->fileheader_set = MB_NO;
 		}
 
-	/* copy the output structures */
-	if (status == MB_SUCCESS)
+	/* handle the asciiheader structure */
+	if (status == MB_SUCCESS && asciiheader != NULL)
 		{
+		/* copy the asciiheader structure */
 		mb_segyio_ptr->asciiheader = *asciiheader;
-		mb_segyio_ptr->fileheader = *fileheader;
-		}
 
-	/* if ok then write ascii header */
-	if (status == MB_SUCCESS)
-		{
+		/* if ok then write ascii header */
 		if (fwrite(asciiheader,1,MB_SEGY_ASCIIHEADER_LENGTH,mb_segyio_ptr->fp) 
 					!= MB_SEGY_ASCIIHEADER_LENGTH)
 			{
 			status = MB_FAILURE;
 			*error = MB_ERROR_WRITE_FAIL;
 			}
+		else
+			mb_segyio_ptr->asciiheader_set = MB_YES;
 		}
 
-	/* if ok then write file header */
-	if (status == MB_SUCCESS)
+	/* handle the fileheader structure */
+	if (status == MB_SUCCESS && fileheader != NULL)
 		{
+		/* copy the fileheader structure */
+		mb_segyio_ptr->fileheader = *fileheader;
+
 		/* insert file header */
 		index = 0;
 		buffer = mb_segyio_ptr->buffer;
@@ -382,6 +411,8 @@ int mb_segy_write_init(int verbose, char *segyfile,
 			status = MB_FAILURE;
 			*error = MB_ERROR_WRITE_FAIL;
 			}
+		else
+			mb_segyio_ptr->fileheader_set = MB_YES;
 		}
 
 	/* print output debug statements */
@@ -584,7 +615,7 @@ int mb_segy_read_trace(int verbose, void *mbsegyio_ptr,
         	mb_get_binary_float(MB_NO, (void *) &(buffer[index]), &(traceheader->dummy6)); index += 4;
         	mb_get_binary_float(MB_NO, (void *) &(buffer[index]), &(traceheader->dummy7)); index += 4;
         	mb_get_binary_float(MB_NO, (void *) &(buffer[index]), &(traceheader->dummy8)); index += 4;
-        	mb_get_binary_float(MB_NO, (void *) &(buffer[index]), &(traceheader->dummy9)); index += 4;
+        	mb_get_binary_float(MB_NO, (void *) &(buffer[index]), &(traceheader->heading)); index += 4;
 		}
 	
 	/* make sure there is adequate memory */
@@ -761,7 +792,7 @@ int mb_segy_read_trace(int verbose, void *mbsegyio_ptr,
 		fprintf(stderr,"dbg2       dummy6:        %d\n",traceheader->dummy6);
 		fprintf(stderr,"dbg2       dummy7:        %d\n",traceheader->dummy7);
 		fprintf(stderr,"dbg2       dummy8:        %d\n",traceheader->dummy8);
-		fprintf(stderr,"dbg2       dummy9:        %d\n",traceheader->dummy9);
+		fprintf(stderr,"dbg2       heading:       %d\n",traceheader->heading);
 		for (i=0;i<traceheader->nsamps;i++)
 			fprintf(stderr,"dbg2       trace[%d]:%f\n",i,trace[i]);
 		fprintf(stderr,"dbg2       error:         %d\n",*error);
@@ -784,6 +815,7 @@ int mb_segy_write_trace(int verbose, void *mbsegyio_ptr,
   	char	*function_name = "mb_segy_write_trace";
 	int	status = MB_SUCCESS;
 	struct mb_segyio_struct *mb_segyio_ptr;
+	struct mb_segyasciiheader_struct *asciiheader;
 	struct mb_segyfileheader_struct *fileheader;
 	char	*buffer;
 	int	index;
@@ -794,6 +826,8 @@ int mb_segy_write_trace(int verbose, void *mbsegyio_ptr,
 
 	/* get segyio pointer */
 	mb_segyio_ptr = (struct mb_segyio_struct *) mbsegyio_ptr;
+	asciiheader = &(mb_segyio_ptr->asciiheader);
+	fileheader = &(mb_segyio_ptr->fileheader);
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -866,9 +900,81 @@ int mb_segy_write_trace(int verbose, void *mbsegyio_ptr,
 		fprintf(stderr,"dbg2       dummy6:        %d\n",traceheader->dummy6);
 		fprintf(stderr,"dbg2       dummy7:        %d\n",traceheader->dummy7);
 		fprintf(stderr,"dbg2       dummy8:        %d\n",traceheader->dummy8);
-		fprintf(stderr,"dbg2       dummy9:        %d\n",traceheader->dummy9);
+		fprintf(stderr,"dbg2       heading:       %d\n",traceheader->heading);
 		for (i=0;i<traceheader->nsamps;i++)
 			fprintf(stderr,"dbg2       trace[%d]:%f\n",i,trace[i]);
+		}
+		
+	/* if asciiheader has not yet been written, write it */
+	if (mb_segyio_ptr->asciiheader_set == MB_NO)
+		{
+		if (fwrite(asciiheader,1,MB_SEGY_ASCIIHEADER_LENGTH,mb_segyio_ptr->fp) 
+					!= MB_SEGY_ASCIIHEADER_LENGTH)
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_WRITE_FAIL;
+			}
+		else
+			mb_segyio_ptr->asciiheader_set = MB_YES;
+		}
+		
+	/* if fileheader has not yet been written, write it */
+	if (mb_segyio_ptr->fileheader_set == MB_NO)
+		{
+		/* make sure there is adequate memory in the buffer */
+		if (mb_segyio_ptr->bufferalloc < MB_SEGY_FILEHEADER_LENGTH)
+			{
+			/* allocate buffer memory */
+			status = mb_realloc(verbose, MB_SEGY_FILEHEADER_LENGTH,
+					&(mb_segyio_ptr->buffer),error);
+			if (status == MB_SUCCESS)
+				mb_segyio_ptr->bufferalloc = MB_SEGY_FILEHEADER_LENGTH;
+			else
+				mb_segyio_ptr->bufferalloc = 0;
+			}
+
+		index = 0;
+		buffer = mb_segyio_ptr->buffer;
+		mb_put_binary_int(MB_NO, fileheader->jobid, (void *) &(buffer[index])); index += 4;
+		mb_put_binary_int(MB_NO, fileheader->line, (void *) &(buffer[index])); index += 4;
+		mb_put_binary_int(MB_NO, fileheader->reel, (void *) &(buffer[index])); index += 4;
+		mb_put_binary_short(MB_NO, fileheader->channels, (void *) &(buffer[index])); index += 2;
+		mb_put_binary_short(MB_NO, fileheader->aux_channels, (void *) &(buffer[index])); index += 2;
+		mb_put_binary_short(MB_NO, fileheader->sample_interval, (void *) &(buffer[index])); index += 2;
+		mb_put_binary_short(MB_NO, fileheader->sample_interval_org, (void *) &(buffer[index])); index += 2;
+		mb_put_binary_short(MB_NO, fileheader->number_samples, (void *) &(buffer[index])); index += 2;
+		mb_put_binary_short(MB_NO, fileheader->number_samples_org, (void *) &(buffer[index])); index += 2;
+		mb_put_binary_short(MB_NO, fileheader->format, (void *) &(buffer[index])); index += 2;
+		mb_put_binary_short(MB_NO, fileheader->cdp_fold, (void *) &(buffer[index])); index += 2;
+		mb_put_binary_short(MB_NO, fileheader->trace_sort, (void *) &(buffer[index])); index += 2;
+		mb_put_binary_short(MB_NO, fileheader->vertical_sum, (void *) &(buffer[index])); index += 2;
+		mb_put_binary_short(MB_NO, fileheader->sweep_start, (void *) &(buffer[index])); index += 2;
+		mb_put_binary_short(MB_NO, fileheader->sweep_end, (void *) &(buffer[index])); index += 2;
+		mb_put_binary_short(MB_NO, fileheader->sweep_length, (void *) &(buffer[index])); index += 2;
+		mb_put_binary_short(MB_NO, fileheader->sweep_type, (void *) &(buffer[index])); index += 2;
+		mb_put_binary_short(MB_NO, fileheader->sweep_trace, (void *) &(buffer[index])); index += 2;
+		mb_put_binary_short(MB_NO, fileheader->sweep_taper_start, (void *) &(buffer[index])); index += 2;
+		mb_put_binary_short(MB_NO, fileheader->sweep_taper_end, (void *) &(buffer[index])); index += 2;
+		mb_put_binary_short(MB_NO, fileheader->sweep_taper, (void *) &(buffer[index])); index += 2;
+		mb_put_binary_short(MB_NO, fileheader->correlated, (void *) &(buffer[index])); index += 2;
+		mb_put_binary_short(MB_NO, fileheader->binary_gain, (void *) &(buffer[index])); index += 2;
+		mb_put_binary_short(MB_NO, fileheader->amplitude, (void *) &(buffer[index])); index += 2;
+		mb_put_binary_short(MB_NO, fileheader->units, (void *) &(buffer[index])); index += 2;
+		mb_put_binary_short(MB_NO, fileheader->impulse_polarity, (void *) &(buffer[index])); index += 2;
+		mb_put_binary_short(MB_NO, fileheader->vibrate_polarity, (void *) &(buffer[index])); index += 2;
+		mb_put_binary_short(MB_NO, fileheader->domain, (void *) &(buffer[index])); index += 2;
+		for (i=0;i<338;i++)
+			{
+			buffer[index] = fileheader->extra[i]; index++;
+			}
+		if (fwrite(buffer,1,MB_SEGY_FILEHEADER_LENGTH,mb_segyio_ptr->fp) 
+					!= MB_SEGY_FILEHEADER_LENGTH)
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_WRITE_FAIL;
+			}
+		else
+			mb_segyio_ptr->fileheader_set = MB_YES;
 		}
 	
 	/* make sure there is adequate memory in the buffer */
@@ -990,7 +1096,7 @@ int mb_segy_write_trace(int verbose, void *mbsegyio_ptr,
         	mb_put_binary_float(MB_NO, traceheader->dummy6, (void *) &buffer[index]); index += 4;
         	mb_put_binary_float(MB_NO, traceheader->dummy7, (void *) &buffer[index]); index += 4;
         	mb_put_binary_float(MB_NO, traceheader->dummy8, (void *) &buffer[index]); index += 4;
-        	mb_put_binary_float(MB_NO, traceheader->dummy9, (void *) &buffer[index]); index += 4;
+        	mb_put_binary_float(MB_NO, traceheader->heading, (void *) &buffer[index]); index += 4;
 	
 		/* write trace header */
 		if (fwrite(buffer,1,MB_SEGY_TRACEHEADER_LENGTH,mb_segyio_ptr->fp) 

@@ -1,4 +1,4 @@
-.TH mbm_plot l "7 November 2005" "MB-System 5.0" "MB-System 5.0"
+.TH mbm_plot l "9 November 2006" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbm_plot\fP - Create an executable shellscript which will generate
 a GMT plot of swath sonar swath data.
@@ -12,7 +12,7 @@ Version 5.0
 \fB-C\fP\fI[cont_int/col_int/tic_int/lab_int/tic_len/lab_hgt]\fP
 \fB-D\fP[\fIflipcolor/flipshade\fP]
 \fB-G\fP\fIcolor_mode\fP \fB-H\fP
-\fB-N\fP\fI[time_tick/time_annot/date_annot/time_tick_len[/name_hgt] | F]\fP
+\fB-N\fP\fI[time_tick/time_annot/date_annot/time_tick_len[/name_hgt] | F | FP]\fP
 \fB-O\fP\fIroot\fP \fB-P\fP\fIpagesize \fP
 \fB-S\fP\fI[color/shade]\fP \fB-T\fP
 \fB-U\fP\fIorientation\fP \fB-V\fP 
@@ -606,6 +606,16 @@ multiplication by \fIscale\fP. Default: \fImode\fP = 1, \fIscale\fP = 1.0,
 Sets the ending time for data allowed in the input data; pings
 with times after the ending time will be ignored. 
 Default: \fIyr/mo/da/hr/mn/sc\fP = 2062/2/21/10/30/0.
+.TP
+\fB-MMM\fP\fI[pingnumber_tick/pingnumber_annot/pingnumber_tick_len]\fP
+Turns on ping number (or shot number) annotation of navigation tracks.
+Tick marks are made along the shiptrack at \fIpingnumber_tick\fP intervals; these
+are \fItime_tick_len\fP inches long. Longer tick marks are made along the 
+shiptrack at \fIpingnumber_annot\fP intervals; these are 1.5 times \fItime_tick_len\fP 
+inches long.
+Defaults: Pingnumber annotation off. If the \fB-MMM\fP option is given without
+specifying the controlling parameters, then \fIpingnumber_tick\fP = 50, 
+\fIpingnumber_annot\fP = 100, and \fIpingnumber_tick_len\fP = 0.1.
 .TP
 \fB-MMN\fP\fInplot\fP
 Sets the number of pings to be read in before each contouring

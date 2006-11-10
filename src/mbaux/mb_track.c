@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_track.c	8/15/93
- *    $Id: mb_track.c,v 5.2 2005-03-25 04:10:52 caress Exp $
+ *    $Id: mb_track.c,v 5.3 2006-11-10 22:36:04 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000, 2004, 2005 by
+ *    Copyright (c) 1993, 1994, 2000, 2004, 2005, 2006 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -19,6 +19,9 @@
  * Date:	August, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2005/03/25 04:10:52  caress
+ * Control over the filename annotation orientation has been added and the orientation itself has been fixed.
+ *
  * Revision 5.1  2004/12/18 01:32:50  caress
  * Added filename annotation.
  *
@@ -83,11 +86,12 @@
 #define IDN 2
 #define IOR -3
 
+static char rcs_id[]="$Id: mb_track.c,v 5.3 2006-11-10 22:36:04 caress Exp $";
+
 /*--------------------------------------------------------------------------*/
 /* 	function mb_track plots the shiptrack of multibeam data. */
 void mb_track(int verbose, struct swath *data, int *error)
 {
-  	static char rcs_id[]="$Id: mb_track.c,v 5.2 2005-03-25 04:10:52 caress Exp $";
 	char	*function_name = "mb_track";
 	int	status = MB_SUCCESS;
 	int	time_tick, time_annot, date_annot;
@@ -105,21 +109,19 @@ void mb_track(int verbose, struct swath *data, int *error)
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:            %d\n",verbose);
-		fprintf(stderr,"dbg2       swath:              %d\n",data);
-		fprintf(stderr,"dbg2       time tick interval: %f\n",
-			data->time_tick_int);
-		fprintf(stderr,"dbg2       time interval:      %f\n",
-			data->time_annot_int);
-		fprintf(stderr,"dbg2       date interval:      %f\n",
-			data->date_annot_int);
-		fprintf(stderr,"dbg2       time tick length:   %f\n",
-			data->time_tick_len);
+		fprintf(stderr,"dbg2       verbose:              %d\n",verbose);
+		fprintf(stderr,"dbg2       swath:                %d\n",data);
+		fprintf(stderr,"dbg2       time tick interval:   %f\n",data->time_tick_int);
+		fprintf(stderr,"dbg2       time interval:        %f\n",data->time_annot_int);
+		fprintf(stderr,"dbg2       date interval:        %f\n",data->date_annot_int);
+		fprintf(stderr,"dbg2       time tick length:     %f\n",data->time_tick_len);
 		}
 
-	/* draw the shiptrack */
+	/* set line width */
 	setline(3);
 	newpen(0);
+
+	/* draw the shiptrack */
 	for (i=1;i<data->npings;i++)
 		{
 /*		boldline(data->pings[i-1].navlon,data->pings[i-1].navlat,
@@ -197,7 +199,7 @@ void mb_track(int verbose, struct swath *data, int *error)
 				data->pings[i].time_i[3],
 				data->pings[i].time_i[4],							time_j[1]);
 			plot_string(x,y,data->time_tick_len,90.0-angle,label);
-		}
+			}
 
 		/* do time annotation if needed */
 		else if (time_annot == MB_YES)
@@ -259,12 +261,116 @@ void mb_track(int verbose, struct swath *data, int *error)
 	return;
 }
 
+
+/*--------------------------------------------------------------------------*/
+/* 	function mb_trackpingnumber annotates pingnumbers */
+void mb_trackpingnumber(int verbose, struct swath *data, int *error)
+{
+	char	*function_name = "mb_trackpingnumber";
+	int	status = MB_SUCCESS;
+	int	pingnumber_tick, pingnumber_annot;
+	double	hour0, hour1;
+	int	time_j[5];
+	double	x, y, x1, y1, x2, y2, x3, y3, x4, y4;
+	double	dx, dy;
+	double	angle;
+	char	label[25];
+	double	justify[4];
+	int	i, j, k;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:              %d\n",verbose);
+		fprintf(stderr,"dbg2       swath:                %d\n",data);
+		fprintf(stderr,"dbg2       pingnumber tick int:  %d\n",data->pingnumber_tick_int);
+		fprintf(stderr,"dbg2       pingnumber annot int: %d\n",data->pingnumber_annot_int);
+		fprintf(stderr,"dbg2       pingnumber tick len:  %f\n",data->pingnumber_tick_len);
+		}
+
+	/* set line width */
+	setline(3);
+	newpen(0);
+
+	/* draw the pingnumber ticks and annotations */
+	for (i=0;i<data->npings;i++)
+		{
+		/* check for pingnumber tick */
+		pingnumber_tick = MB_NO;
+		if (data->pings[i].pingnumber % data->pingnumber_tick_int == 0)
+			pingnumber_tick = MB_YES;
+
+		/* check for pingnumber annotation */
+		pingnumber_annot = MB_NO;
+		if (data->pings[i].pingnumber % data->pingnumber_annot_int == 0 )
+			pingnumber_annot = MB_YES;
+
+		/* now get azimuth and location if needed */
+		if (pingnumber_tick == MB_YES || pingnumber_annot == MB_YES)
+			{
+			/* get azimuth from heading */
+			angle = data->pings[i].heading + 90.0;
+			if (angle > 360.0)
+				angle = angle - 360.0;
+			dx = sin(DTR*angle);
+			dy = cos(DTR*angle);
+
+			/* get location */
+			x = data->pings[i].navlon;
+			y = data->pings[i].navlat;
+			}
+
+		/* do pingnumber annotation if needed */
+		if (pingnumber_annot == MB_YES)
+			{
+			sprintf(label,"%d ", data->pings[i].pingnumber, data->pings[i].pingnumber);
+			justify_string(data->pingnumber_tick_len, label, justify);
+			x1 = x - 0.375*data->pingnumber_tick_len*dx;
+			y1 = y - 0.375*data->pingnumber_tick_len*dy;
+			x2 = x - 1.5*justify[2]*dx;
+			y2 = y - 1.5*justify[2]*dy;
+			plot(x1,y1,IUP);
+			plot(x,y,IDN);
+			plot_string(x2,y2,data->pingnumber_tick_len,90.0-angle,label);
+			}
+
+		/* do time tick if needed */
+		else if (pingnumber_tick == MB_YES)
+			{
+			x1 = x - 0.25*data->pingnumber_tick_len*dx;
+			y1 = y - 0.25*data->pingnumber_tick_len*dy;
+			x2 = x + 0.25*data->pingnumber_tick_len*dx;
+			y2 = y + 0.25*data->pingnumber_tick_len*dy;
+			plot(x1,y1,IUP);
+			plot(x,y,IDN);
+			}
+		}
+
+	/* reset line width */
+	setline(0);
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	return;
+}
+
 /*--------------------------------------------------------------------------*/
 /* 	function mb_trackname plots the filename on the shiptrack. 
 	 - contributed by Gordon Keith, CSIRO, December 2004 */
 void mb_trackname(int verbose, int perpendicular, struct swath *data, char *file, int *error)
 {
-  	static char rcs_id[]="$Id: mb_track.c,v 5.2 2005-03-25 04:10:52 caress Exp $";
 	char	*function_name = "mb_trackname";
 	int	status = MB_SUCCESS;
 	double	x, y, x1, y1, x2, y2, x3, y3, x4, y4;
