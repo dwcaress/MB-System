@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcontour.c	6/4/93
- *    $Id: mbcontour.c,v 5.11 2006-01-18 07:27:01 caress Exp $
+ *    $Id: mbcontour.c,v 5.12 2006-11-10 22:05:37 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000, 2003, 2004, 2005 by
+ *    Copyright (c) 1993, 1994, 2000, 2003, 2004, 2005, 2006 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -24,6 +24,9 @@
  * Date:	June 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.11  2006/01/18 07:27:01  caress
+ * Fixed to work with GMT4.1
+ *
  * Revision 5.10  2005/11/04 20:50:19  caress
  * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
  *
@@ -202,7 +205,7 @@
 
 main (int argc, char **argv) 
 {
-	static char rcs_id[] = "$Id: mbcontour.c,v 5.11 2006-01-18 07:27:01 caress Exp $";
+	static char rcs_id[] = "$Id: mbcontour.c,v 5.12 2006-11-10 22:05:37 caress Exp $";
 #ifdef MBCONTOURFILTER
 	static char program_name[] = "MBCONTOURFILTER";
 	static char help_message[] =  "MBCONTOURFILTER is a utility which creates a pen plot \ncontour map of multibeam swath bathymetry.  \nThe primary purpose of this program is to serve as \npart of a real-time plotting system.  The contour \nlevels and colors can be controlled \ndirectly or set implicitly using contour and color change intervals. \nContours can also be set to have ticks pointing downhill.";
@@ -278,6 +281,7 @@ main (int argc, char **argv)
 	double	*sslon = NULL;
 	double	*sslat = NULL;
 	char	comment[256];
+	int	pingnumber;
 
 	/* plot control variables */
 	int	contour_algorithm;
@@ -315,6 +319,11 @@ main (int argc, char **argv)
 	int	name_perp;
 	double	scale;
 	int	bathy_in_feet;
+	int	plot_pingnumber;
+	int	pingnumber_tick_int;
+	int	pingnumber_annot_int;
+	double	pingnumber_tick_len;
+	double	pingnumber_tick_len_map;
 
 	/* pen variables */
 	int	ncolor;
@@ -336,6 +345,7 @@ main (int argc, char **argv)
 	int	setcolors;
 	double	navlon_old;
 	double	navlat_old;
+	int	i1, i2;
 	double	d1, d2, d3, d4, d5, d6, d7;
 	int	nscan;
 	int	i;
@@ -379,6 +389,10 @@ main (int argc, char **argv)
 	plot_contours = MB_NO;
 	plot_triangles = MB_NO;
 	bathy_in_feet = MB_NO;
+	plot_pingnumber = MB_NO;
+	pingnumber_tick_int = 50;
+	pingnumber_annot_int = 100;
+	pingnumber_tick_len = 0.1;
 
 	/* get GMT options into separate argv */
 	argv_gmt[0] = argv[0];
@@ -420,7 +434,7 @@ main (int argc, char **argv)
 	  }
 
 	/* deal with mb options */
-	while ((c = getopt(argc, argv, "VvHhA:a:B:b:C:c:D:d:E:e:F:f:G:g:I:i:J:j:KkL:l:N:n:OoPp:QqR:r:S:s:T:t:UuWwX:x:Y:y:Z:z:")) != -1)
+	while ((c = getopt(argc, argv, "VvHhA:a:B:b:C:c:D:d:E:e:F:f:G:g:I:i:J:j:KkL:l:M:m:N:n:OoPp:QqR:r:S:s:T:t:UuWwX:x:Y:y:Z:z:")) != -1)
 	  switch (c) 
 		{
 		case 'A':
@@ -502,6 +516,19 @@ main (int argc, char **argv)
 			sscanf (optarg,"%d", &lonflip);
 			lonflip_set = MB_YES;
 			flag++;
+			break;
+		case 'M':
+		case 'm':
+			nscan = sscanf (optarg, "%d/%d/%lf",
+					&i1,&i2,&d3,&d4);
+			if (nscan >= 1)
+			    pingnumber_tick_int = i1;
+			if (nscan >= 2)
+			    pingnumber_annot_int = i2;
+			if (nscan >= 3)
+			    pingnumber_tick_len = d3;
+			if (nscan >= 1)
+			    plot_pingnumber = MB_YES;
 			break;
 		case 'N':
 		case 'n':
@@ -621,51 +648,54 @@ main (int argc, char **argv)
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Control Parameters:\n");
-		fprintf(stderr,"dbg2       verbose:          %d\n",verbose);
-		fprintf(stderr,"dbg2       help:             %d\n",help);
-		fprintf(stderr,"dbg2       format:           %d\n",format);
-		fprintf(stderr,"dbg2       pings:            %d\n",pings);
-		fprintf(stderr,"dbg2       lonflip:          %d\n",lonflip);
-		fprintf(stderr,"dbg2       btime_i[0]:       %d\n",btime_i[0]);
-		fprintf(stderr,"dbg2       btime_i[1]:       %d\n",btime_i[1]);
-		fprintf(stderr,"dbg2       btime_i[2]:       %d\n",btime_i[2]);
-		fprintf(stderr,"dbg2       btime_i[3]:       %d\n",btime_i[3]);
-		fprintf(stderr,"dbg2       btime_i[4]:       %d\n",btime_i[4]);
-		fprintf(stderr,"dbg2       btime_i[5]:       %d\n",btime_i[5]);
-		fprintf(stderr,"dbg2       btime_i[6]:       %d\n",btime_i[6]);
-		fprintf(stderr,"dbg2       etime_i[0]:       %d\n",etime_i[0]);
-		fprintf(stderr,"dbg2       etime_i[1]:       %d\n",etime_i[1]);
-		fprintf(stderr,"dbg2       etime_i[2]:       %d\n",etime_i[2]);
-		fprintf(stderr,"dbg2       etime_i[3]:       %d\n",etime_i[3]);
-		fprintf(stderr,"dbg2       etime_i[4]:       %d\n",etime_i[4]);
-		fprintf(stderr,"dbg2       etime_i[5]:       %d\n",etime_i[5]);
-		fprintf(stderr,"dbg2       etime_i[6]:       %d\n",etime_i[6]);
-		fprintf(stderr,"dbg2       speedmin:         %f\n",speedmin);
-		fprintf(stderr,"dbg2       timegap:          %f\n",timegap);
-		fprintf(stderr,"dbg2       read file:        %s\n",read_file);
-		fprintf(stderr,"dbg2       bounds[0]:        %f\n",bounds[0]);
-		fprintf(stderr,"dbg2       bounds[1]:        %f\n",bounds[1]);
-		fprintf(stderr,"dbg2       bounds[2]:        %f\n",bounds[2]);
-		fprintf(stderr,"dbg2       bounds[3]:        %f\n",bounds[3]);
-		fprintf(stderr,"dbg2       contour algorithm:%d\n",contour_algorithm);
-		fprintf(stderr,"dbg2       plot contours:    %d\n",plot_contours);
-		fprintf(stderr,"dbg2       plot triangles:   %d\n",plot_triangles);
-		fprintf(stderr,"dbg2       plot track:       %d\n",plot_track);
-		fprintf(stderr,"dbg2       plot name:        %d\n",plot_name);
-		fprintf(stderr,"dbg2       contour interval: %f\n",cont_int);
-		fprintf(stderr,"dbg2       color interval:   %f\n",col_int);
-		fprintf(stderr,"dbg2       tick interval:    %f\n",tick_int);
-		fprintf(stderr,"dbg2       label interval:   %f\n",label_int);
-		fprintf(stderr,"dbg2       tick length:      %f\n",tick_len);
-		fprintf(stderr,"dbg2       label height:     %f\n",label_hgt);
-		fprintf(stderr,"dbg2       label spacing:    %f\n",label_spacing);
-		fprintf(stderr,"dbg2       number contoured: %d\n",nplot);
-		fprintf(stderr,"dbg2       time tick int:    %f\n",time_tick_int);
-		fprintf(stderr,"dbg2       time interval:    %f\n",time_annot_int);
-		fprintf(stderr,"dbg2       date interval:    %f\n",date_annot_int);
-		fprintf(stderr,"dbg2       time tick length: %f\n\n",time_tick_len);
-		fprintf(stderr,"dbg2       name height:      %f\n\n",name_hgt);
-		fprintf(stderr,"dbg2       bathy_in_feet:    %d\n",bathy_in_feet);
+		fprintf(stderr,"dbg2       verbose:              %d\n",verbose);
+		fprintf(stderr,"dbg2       help:                 %d\n",help);
+		fprintf(stderr,"dbg2       format:               %d\n",format);
+		fprintf(stderr,"dbg2       pings:                %d\n",pings);
+		fprintf(stderr,"dbg2       lonflip:              %d\n",lonflip);
+		fprintf(stderr,"dbg2       btime_i[0]:           %d\n",btime_i[0]);
+		fprintf(stderr,"dbg2       btime_i[1]:           %d\n",btime_i[1]);
+		fprintf(stderr,"dbg2       btime_i[2]:           %d\n",btime_i[2]);
+		fprintf(stderr,"dbg2       btime_i[3]:           %d\n",btime_i[3]);
+		fprintf(stderr,"dbg2       btime_i[4]:           %d\n",btime_i[4]);
+		fprintf(stderr,"dbg2       btime_i[5]:           %d\n",btime_i[5]);
+		fprintf(stderr,"dbg2       btime_i[6]:           %d\n",btime_i[6]);
+		fprintf(stderr,"dbg2       etime_i[0]:           %d\n",etime_i[0]);
+		fprintf(stderr,"dbg2       etime_i[1]:           %d\n",etime_i[1]);
+		fprintf(stderr,"dbg2       etime_i[2]:           %d\n",etime_i[2]);
+		fprintf(stderr,"dbg2       etime_i[3]:           %d\n",etime_i[3]);
+		fprintf(stderr,"dbg2       etime_i[4]:           %d\n",etime_i[4]);
+		fprintf(stderr,"dbg2       etime_i[5]:           %d\n",etime_i[5]);
+		fprintf(stderr,"dbg2       etime_i[6]:           %d\n",etime_i[6]);
+		fprintf(stderr,"dbg2       speedmin:             %f\n",speedmin);
+		fprintf(stderr,"dbg2       timegap:              %f\n",timegap);
+		fprintf(stderr,"dbg2       read file:            %s\n",read_file);
+		fprintf(stderr,"dbg2       bounds[0]:            %f\n",bounds[0]);
+		fprintf(stderr,"dbg2       bounds[1]:            %f\n",bounds[1]);
+		fprintf(stderr,"dbg2       bounds[2]:            %f\n",bounds[2]);
+		fprintf(stderr,"dbg2       bounds[3]:            %f\n",bounds[3]);
+		fprintf(stderr,"dbg2       contour algorithm:    %d\n",contour_algorithm);
+		fprintf(stderr,"dbg2       plot contours:        %d\n",plot_contours);
+		fprintf(stderr,"dbg2       plot triangles:       %d\n",plot_triangles);
+		fprintf(stderr,"dbg2       plot track:           %d\n",plot_track);
+		fprintf(stderr,"dbg2       plot name:            %d\n",plot_name);
+		fprintf(stderr,"dbg2       contour interval:     %f\n",cont_int);
+		fprintf(stderr,"dbg2       color interval:       %f\n",col_int);
+		fprintf(stderr,"dbg2       tick interval:        %f\n",tick_int);
+		fprintf(stderr,"dbg2       label interval:       %f\n",label_int);
+		fprintf(stderr,"dbg2       tick length:          %f\n",tick_len);
+		fprintf(stderr,"dbg2       label height:         %f\n",label_hgt);
+		fprintf(stderr,"dbg2       label spacing:        %f\n",label_spacing);
+		fprintf(stderr,"dbg2       number contoured:     %d\n",nplot);
+		fprintf(stderr,"dbg2       time tick int:        %f\n",time_tick_int);
+		fprintf(stderr,"dbg2       time interval:        %f\n",time_annot_int);
+		fprintf(stderr,"dbg2       date interval:        %f\n",date_annot_int);
+		fprintf(stderr,"dbg2       time tick length:     %f\n",time_tick_len);
+		fprintf(stderr,"dbg2       name height:          %f\n",name_hgt);
+		fprintf(stderr,"dbg2       pingnumber tick int:  %d\n",pingnumber_tick_int);
+		fprintf(stderr,"dbg2       pingnumber annot int: %d\n",pingnumber_annot_int);
+		fprintf(stderr,"dbg2       pingnumber tick len:  %f\n",pingnumber_tick_len);
+		fprintf(stderr,"dbg2       bathy_in_feet:        %d\n\n",bathy_in_feet);
 		}
 
 	/* if bounds not specified then quit */
@@ -685,6 +715,7 @@ main (int argc, char **argv)
 	tick_len_map = inchtolon * tick_len;
 	time_tick_len_map = inchtolon * time_tick_len;
 	name_hgt_map = inchtolon * name_hgt;
+	pingnumber_tick_len_map = inchtolon * pingnumber_tick_len;
 
 	/* read contours from file */
 	if (set_contours == MB_YES)
@@ -923,13 +954,14 @@ main (int argc, char **argv)
 		status = mb_contour_init(verbose,&swath_plot,nplot,beams_bath,
 				    contour_algorithm,
 				    plot_contours,plot_triangles,
-				    plot_track,plot_name,
+				    plot_track,plot_name,plot_pingnumber,
 				    cont_int,col_int,tick_int,label_int,
 				    tick_len_map,label_hgt_map,label_spacing_map,
 				    ncolor,nlevel,level,label,tick,
 				    time_tick_int,time_annot_int,
-				    date_annot_int,time_tick_len_map,
-				    name_hgt_map,
+				    date_annot_int,time_tick_len_map,name_hgt_map,
+				    pingnumber_tick_int,pingnumber_annot_int,
+				    pingnumber_tick_len_map,
 				    &error);
 		swath_plot->beams_bath = beams_bath;
 
@@ -967,6 +999,12 @@ main (int argc, char **argv)
 			    ss,sslon,sslat,
 			    comment,&error);
 			    
+		    /* get pingnumber */
+		    if (status == MB_SUCCESS)
+		    	{
+		    	status = mb_pingnumber(verbose,mbio_ptr,&pingnumber,&error);
+			}
+			    
 		    /* copy data to swath_plot */
 		    if (status == MB_SUCCESS)
 		    	{
@@ -994,6 +1032,7 @@ main (int argc, char **argv)
 			pingcur->navlat = navlat;
 			pingcur->heading = heading;
 			pingcur->beams_bath = beams_bath;
+			pingcur->pingnumber = pingnumber;
 			for (i=0;i<beams_bath;i++)
 				{
 				pingcur->beamflag[i] = beamflag[i];
@@ -1047,12 +1086,12 @@ main (int argc, char **argv)
 		    /* update bookkeeping */
 		    if (error == MB_ERROR_NO_ERROR)
 			    {
-			    if (*npings == 0 || 
+			    /*if (*npings == 0 || 
 				    (*npings > 0 
 				    && contour_algorithm == MB_CONTOUR_TRIANGLES)
 				    || (*npings > 0 
 				    && (navlon != navlon_old 
-				    || navlat != navlat_old)))
+				    || navlat != navlat_old)))*/
 				    {
 				    nping_read += pings_read;
 				    (*npings)++;
@@ -1111,10 +1150,16 @@ main (int argc, char **argv)
 				    || plot_triangles == MB_YES)
 				    mb_contour(verbose,swath_plot,&error);
     
-			    /* plot shiptrack */
+			    /* plot nav track */
 			    if (plot_track == MB_YES)
 				    mb_track(verbose,swath_plot,&error);
     
+			    /* annotate pingnumber */
+			    if (plot_pingnumber == MB_YES)
+			    	    {
+				    mb_trackpingnumber(verbose,swath_plot,&error);
+				    }
+   
 			    if (plot_name == MB_YES && plotted_name == MB_NO) 
 			    	    {
 				    mb_trackname(verbose,name_perp,swath_plot,file,&error);
