@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_jstar.c	10/4/94
- *	$Id: mbsys_jstar.c,v 5.3 2006-03-12 19:23:19 caress Exp $
+ *	$Id: mbsys_jstar.c,v 5.4 2006-11-10 22:36:05 caress Exp $
  *
  *    Copyright (c) 2005 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Author:	D. W. Caress
  * Date:	May 4, 2005
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2006/03/12 19:23:19  caress
+ * Changed log2() and exp2() calls to log() and exp() for compatitibility with non-POSIX compliant operating systems.
+ *
  * Revision 5.2  2005/11/05 00:48:05  caress
  * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
  *
@@ -56,7 +59,7 @@
 int mbsys_jstar_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_jstar.c,v 5.3 2006-03-12 19:23:19 caress Exp $";
+ static char res_id[]="$Id: mbsys_jstar.c,v 5.4 2006-11-10 22:36:05 caress Exp $";
 	char	*function_name = "mbsys_jstar_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -198,29 +201,25 @@ int mbsys_jstar_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 	/* get data kind */
 	*kind = store->kind;
 
-	/* extract data from structure */
-	if (*kind == MB_DATA_DATA)
+	/* get beam and pixel numbers */
+	if (*kind == MB_DATA_SUBBOTTOM_SUBBOTTOM)
 		{
-		/* get beam and pixel numbers */
-		if (*kind == MB_DATA_SUBBOTTOM_SUBBOTTOM)
-			{
-			sbp = (struct mbsys_jstar_channel_struct *) &(store->sbp);
-			*nbath = 1;
-			*namp = 0;
-			*nss = 0;
-			}
-		else if (*kind == MB_DATA_DATA
-			|| *kind == MB_DATA_SIDESCAN2)
-			{
-			ssport = (struct mbsys_jstar_channel_struct *) &(store->ssport);
-			ssstbd = (struct mbsys_jstar_channel_struct *) &(store->ssstbd);
-			*nbath = 1;
-			*namp = 0;
-			if ((ssport->samples + ssstbd->samples) > MBSYS_JSTAR_PIXELS_MAX)
-				*nss = MBSYS_JSTAR_PIXELS_MAX;
-			else
-				*nss = ssport->samples + ssstbd->samples;
-			}
+		sbp = (struct mbsys_jstar_channel_struct *) &(store->sbp);
+		*nbath = 1;
+		*namp = 0;
+		*nss = 0;
+		}
+	else if (*kind == MB_DATA_DATA
+		|| *kind == MB_DATA_SIDESCAN2)
+		{
+		ssport = (struct mbsys_jstar_channel_struct *) &(store->ssport);
+		ssstbd = (struct mbsys_jstar_channel_struct *) &(store->ssstbd);
+		*nbath = 1;
+		*namp = 0;
+		if ((ssport->samples + ssstbd->samples) > MBSYS_JSTAR_PIXELS_MAX)
+			*nss = MBSYS_JSTAR_PIXELS_MAX;
+		else
+			*nss = ssport->samples + ssstbd->samples;
 		}
 	else
 		{
@@ -240,6 +239,71 @@ int mbsys_jstar_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2       nbath:      %d\n",*nbath);
 		fprintf(stderr,"dbg2        namp:      %d\n",*namp);
 		fprintf(stderr,"dbg2        nss:       %d\n",*nss);
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbsys_jstar_pingnumber(int verbose, void *mbio_ptr, 
+		int *pingnumber, int *error)
+{
+	char	*function_name = "mbsys_jstar_pingnumber";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	struct mbsys_jstar_struct *store;
+	struct mbsys_jstar_channel_struct *sbp;
+	struct mbsys_jstar_channel_struct *ssport;
+	struct mbsys_jstar_channel_struct *ssstbd;
+	int	kind;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mb_ptr:     %d\n",mbio_ptr);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* get data structure pointer */
+	store = (struct mbsys_jstar_struct *) mb_io_ptr->store_data;
+
+	/* get data kind */
+	kind = store->kind;
+
+	/* extract data from structure */
+	if (kind == MB_DATA_SUBBOTTOM_SUBBOTTOM)
+		{
+		sbp = (struct mbsys_jstar_channel_struct *) &(store->sbp);
+		*pingnumber = sbp->pingNum;
+		}
+	else if (kind == MB_DATA_DATA
+		|| kind == MB_DATA_SIDESCAN2)
+		{
+		ssport = (struct mbsys_jstar_channel_struct *) &(store->ssport);
+		ssstbd = (struct mbsys_jstar_channel_struct *) &(store->ssstbd);
+		*pingnumber = ssport->pingNum;
+		}
+	else
+		{
+		*pingnumber = mb_io_ptr->ping_count;
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       pingnumber: %d\n",*pingnumber);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:     %d\n",status);
@@ -1787,7 +1851,7 @@ int mbsys_jstar_extract_segytraceheader(int verbose, void *mbio_ptr, void *store
 		mb_segytraceheader_ptr->dummy6		= 0.0;
 		mb_segytraceheader_ptr->dummy7		= 0.0;
 		mb_segytraceheader_ptr->dummy8		= 0.0;
-		mb_segytraceheader_ptr->dummy9		= 0.0;
+		mb_segytraceheader_ptr->heading		= sbp->heading / 60.0;
 		
 		/* done translating values */
 
@@ -1880,7 +1944,7 @@ int mbsys_jstar_extract_segytraceheader(int verbose, void *mbio_ptr, void *store
 		fprintf(stderr,"dbg2       dummy6:            %d\n",mb_segytraceheader_ptr->dummy6);
 		fprintf(stderr,"dbg2       dummy7:            %d\n",mb_segytraceheader_ptr->dummy7);
 		fprintf(stderr,"dbg2       dummy8:            %d\n",mb_segytraceheader_ptr->dummy8);
-		fprintf(stderr,"dbg2       dummy9:            %d\n",mb_segytraceheader_ptr->dummy9);
+		fprintf(stderr,"dbg2       heading:           %d\n",mb_segytraceheader_ptr->heading);
 		fprintf(stderr,"dbg2       error:             %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:            %d\n",status);
@@ -2107,7 +2171,7 @@ int mbsys_jstar_extract_segy(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2       dummy6:            %d\n",mb_segytraceheader_ptr->dummy6);
 		fprintf(stderr,"dbg2       dummy7:            %d\n",mb_segytraceheader_ptr->dummy7);
 		fprintf(stderr,"dbg2       dummy8:            %d\n",mb_segytraceheader_ptr->dummy8);
-		fprintf(stderr,"dbg2       dummy9:            %d\n",mb_segytraceheader_ptr->dummy9);
+		fprintf(stderr,"dbg2       heading:           %d\n",mb_segytraceheader_ptr->heading);
 		for (i=0;i<mb_segytraceheader_ptr->nsamps;i++)
 			fprintf(stderr,"dbg2       segydata[%d]:      %f\n",i,segydata[i]);
 		fprintf(stderr,"dbg2       error:             %d\n",*error);
@@ -2359,7 +2423,7 @@ int mbsys_jstar_insert_segy(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2       dummy6:            %d\n",mb_segytraceheader_ptr->dummy6);
 		fprintf(stderr,"dbg2       dummy7:            %d\n",mb_segytraceheader_ptr->dummy7);
 		fprintf(stderr,"dbg2       dummy8:            %d\n",mb_segytraceheader_ptr->dummy8);
-		fprintf(stderr,"dbg2       dummy9:            %d\n",mb_segytraceheader_ptr->dummy9);
+		fprintf(stderr,"dbg2       heading:           %d\n",mb_segytraceheader_ptr->heading);
 		fprintf(stderr,"dbg2       error:             %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:            %d\n",status);

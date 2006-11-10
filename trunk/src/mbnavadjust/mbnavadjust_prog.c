@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavadjust_prog.c	3/23/00
- *    $Id: mbnavadjust_prog.c,v 5.22 2006-08-09 22:41:27 caress Exp $
+ *    $Id: mbnavadjust_prog.c,v 5.23 2006-11-10 22:36:05 caress Exp $
  *
  *    Copyright (c) 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	March 23, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.22  2006/08/09 22:41:27  caress
+ * Fixed programs that read or write grids so that they do not use the GMT_begin() function; these programs will now work when GMT is built in the default fashion, when GMT is built in the default fashion, with "advisory file locking" enabled.
+ *
  * Revision 5.21  2006/07/27 18:42:52  caress
  * Working towards 5.1.0
  *
@@ -148,7 +151,7 @@ struct swathraw
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbnavadjust_prog.c,v 5.22 2006-08-09 22:41:27 caress Exp $";
+static char rcs_id[] = "$Id: mbnavadjust_prog.c,v 5.23 2006-11-10 22:36:05 caress Exp $";
 static char program_name[] = "mbnavadjust";
 static char help_message[] =  "mbnavadjust is an interactive navigation adjustment package for swath sonar data.\n";
 static char usage_message[] = "mbnavadjust [-Iproject -V -H]";
@@ -4346,12 +4349,13 @@ int mbnavadjust_section_load(int file_id, int section_id, void **swathraw_ptr, v
 					    num_pings,
 					    beams_bath,
 					    mbna_contour_algorithm,
-					    MB_YES,MB_NO,MB_NO,MB_NO,
+					    MB_YES,MB_NO,MB_NO,MB_NO,MB_NO,
 					    project.cont_int, project.col_int,
 					    project.tick_int, project.label_int,
 					    tick_len_map, label_hgt_map, 0.0, 
 					    mbna_ncolor, 0, NULL, NULL, NULL,
-					    0.0, 0.0, 0.0, 0.0, 0.0,
+					    0.0, 0.0, 0.0, 0.0,
+					    0, 0, 0.0, 0.0,
 					    &error);
 			swath = (struct swath *) *swath_ptr;
 			swath->beams_bath = beams_bath;

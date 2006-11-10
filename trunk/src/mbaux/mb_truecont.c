@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_truecont.c	4/21/94
- *    $Id: mb_truecont.c,v 5.4 2005-11-04 22:49:51 caress Exp $
+ *    $Id: mb_truecont.c,v 5.5 2006-11-10 22:36:04 caress Exp $
  *
  *    Copyright (c) 1994, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -54,6 +54,7 @@ int mb_contour_init(
 		int	plot_triangles,
 		int	plot_track,
 		int	plot_name,
+		int	plot_pingnumber,
 		double	contour_int,
 		double	color_int,
 		double	tick_int,
@@ -71,9 +72,12 @@ int mb_contour_init(
 		double	date_annot_int,
 		double	time_tick_len,
 		double	name_hgt,
+		int	pingnumber_tick_int,
+		int	pingnumber_annot_int,
+		double	pingnumber_tick_len,
 		int	*error)
 {
-  	static char rcs_id[]="$Id: mb_truecont.c,v 5.4 2005-11-04 22:49:51 caress Exp $";
+  	static char rcs_id[]="$Id: mb_truecont.c,v 5.5 2006-11-10 22:36:04 caress Exp $";
 	char	*function_name = "mb_contour_init";
 	int	status = MB_SUCCESS;
 	struct swath *dataptr;
@@ -87,32 +91,36 @@ int mb_contour_init(
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:          %d\n",verbose);
-		fprintf(stderr,"dbg2       data:             %d\n",data);
-		fprintf(stderr,"dbg2       npings_max:       %d\n",npings_max);
-		fprintf(stderr,"dbg2       beams_bath:       %d\n",beams_bath);
-		fprintf(stderr,"dbg2       contour algorithm:%d\n",contour_algorithm);
-		fprintf(stderr,"dbg2       plot contours:    %d\n",plot_contours);
-		fprintf(stderr,"dbg2       plot triangles:   %d\n",plot_triangles);
-		fprintf(stderr,"dbg2       plot track:       %d\n",plot_track);
-		fprintf(stderr,"dbg2       plot name:        %d\n",plot_name);
-		fprintf(stderr,"dbg2       contour interval: %f\n",contour_int);
-		fprintf(stderr,"dbg2       color interval:   %f\n",color_int);
-		fprintf(stderr,"dbg2       tick interval:    %f\n",tick_int);
-		fprintf(stderr,"dbg2       label interval:   %f\n",label_int);
-		fprintf(stderr,"dbg2       tick length:      %f\n",tick_len);
-		fprintf(stderr,"dbg2       label height:     %f\n",label_hgt);
-		fprintf(stderr,"dbg2       label spacing:    %f\n",label_spacing);
-		fprintf(stderr,"dbg2       number of colors: %d\n",ncolor);
-		fprintf(stderr,"dbg2       number of levels: %d\n",nlevel);
+		fprintf(stderr,"dbg2       verbose:              %d\n",verbose);
+		fprintf(stderr,"dbg2       data:                 %d\n",data);
+		fprintf(stderr,"dbg2       npings_max:           %d\n",npings_max);
+		fprintf(stderr,"dbg2       beams_bath:           %d\n",beams_bath);
+		fprintf(stderr,"dbg2       contour algorithm:    %d\n",contour_algorithm);
+		fprintf(stderr,"dbg2       plot contours:        %d\n",plot_contours);
+		fprintf(stderr,"dbg2       plot triangles:       %d\n",plot_triangles);
+		fprintf(stderr,"dbg2       plot track:           %d\n",plot_track);
+		fprintf(stderr,"dbg2       plot name:            %d\n",plot_name);
+		fprintf(stderr,"dbg2       plot pingnumber:      %d\n",plot_pingnumber);
+		fprintf(stderr,"dbg2       contour interval:     %f\n",contour_int);
+		fprintf(stderr,"dbg2       color interval:       %f\n",color_int);
+		fprintf(stderr,"dbg2       tick interval:        %f\n",tick_int);
+		fprintf(stderr,"dbg2       label interval:       %f\n",label_int);
+		fprintf(stderr,"dbg2       tick length:          %f\n",tick_len);
+		fprintf(stderr,"dbg2       label height:         %f\n",label_hgt);
+		fprintf(stderr,"dbg2       label spacing:        %f\n",label_spacing);
+		fprintf(stderr,"dbg2       number of colors:     %d\n",ncolor);
+		fprintf(stderr,"dbg2       number of levels:     %d\n",nlevel);
 		for (i=0;i<nlevel;i++)
 			fprintf(stderr,"dbg2       level %d: %f %d %d\n",
 				i,level_list[i],label_list[i],tick_list[i]);
-		fprintf(stderr,"dbg2       time tick int:    %f\n",time_tick_int);
-		fprintf(stderr,"dbg2       time interval:    %f\n",time_annot_int);
-		fprintf(stderr,"dbg2       date interval:    %f\n",date_annot_int);
-		fprintf(stderr,"dbg2       time tick length: %f\n",time_tick_len);
-		fprintf(stderr,"dbg2       name height:      %f\n\n",name_hgt);
+		fprintf(stderr,"dbg2       time tick int:        %f\n",time_tick_int);
+		fprintf(stderr,"dbg2       time interval:        %f\n",time_annot_int);
+		fprintf(stderr,"dbg2       date interval:        %f\n",date_annot_int);
+		fprintf(stderr,"dbg2       time tick length:     %f\n",time_tick_len);
+		fprintf(stderr,"dbg2       name height:          %f\n",name_hgt);
+		fprintf(stderr,"dbg2       pingnumber tick int:  %d\n",pingnumber_tick_int);
+		fprintf(stderr,"dbg2       pingnumber annot int: %d\n",pingnumber_annot_int);
+		fprintf(stderr,"dbg2       pingnumber tick len:  %f\n",pingnumber_tick_len);
 		}
 
 	/* allocate memory for swath structure */
@@ -164,6 +172,7 @@ int mb_contour_init(
 	dataptr->plot_triangles = plot_triangles;
 	dataptr->plot_track = plot_track;
 	dataptr->plot_name = plot_name;
+	dataptr->plot_pingnumber = plot_pingnumber;
 
 	/* set variables and allocate memory for contour controls */
 	dataptr->contour_int = contour_int;
@@ -209,6 +218,11 @@ int mb_contour_init(
 	dataptr->date_annot_int = date_annot_int;
 	dataptr->time_tick_len = time_tick_len;
 	dataptr->name_hgt = name_hgt;
+
+	/* set variables and allocate memory for pingnumber control parameters */
+	dataptr->pingnumber_tick_int = pingnumber_tick_int;
+	dataptr->pingnumber_annot_int = pingnumber_annot_int;
+	dataptr->pingnumber_tick_len = pingnumber_tick_len;
 
 	/* set variables and allocate memory for triangle network */
 	dataptr->npts = 0;
@@ -340,7 +354,7 @@ int mb_contour_deall(
 		struct swath *data, 
 		int	*error)
 {
-  	static char rcs_id[]="$Id: mb_truecont.c,v 5.4 2005-11-04 22:49:51 caress Exp $";
+  	static char rcs_id[]="$Id: mb_truecont.c,v 5.5 2006-11-10 22:36:04 caress Exp $";
 	char	*function_name = "mb_contour_deall";
 	int	status = MB_SUCCESS;
 	struct ping *ping;
@@ -476,7 +490,7 @@ int mb_tcontour(
 		struct swath *data, 
 		int	*error)
 {
-  	static char rcs_id[]="$Id: mb_truecont.c,v 5.4 2005-11-04 22:49:51 caress Exp $";
+  	static char rcs_id[]="$Id: mb_truecont.c,v 5.5 2006-11-10 22:36:04 caress Exp $";
 	char	*function_name = "mb_tcontour";
 	int	status = MB_SUCCESS;
 	struct ping *ping;
@@ -1258,7 +1272,7 @@ int dump_contour(struct swath *data, double value)
 /* 	function mb_ocontour contours multibeam data. */
 int mb_ocontour(int verbose, struct swath *data, int *error)
 {
-  	static char rcs_id[]="$Id: mb_truecont.c,v 5.4 2005-11-04 22:49:51 caress Exp $";
+  	static char rcs_id[]="$Id: mb_truecont.c,v 5.5 2006-11-10 22:36:04 caress Exp $";
 	char	*function_name = "mb_ocontour";
 	int	status = MB_SUCCESS;
 	struct ping *ping;
@@ -1825,7 +1839,7 @@ int get_next_old(struct swath *data, int *nk, int *ni, int *nj, int *nd,
 		};
 	int	ii, edge;
 	int	kt[3], it[3], jt[3], dt[3], ifedge[3];
-	double	xs, ys, x0, y0, x2, y2, dist0, dist2;
+	double	xs, ys;
 
 	/* there are three possible edges for the contour to go to */
 	/* (left = 0, across = 1, right = 2) */
@@ -1912,7 +1926,6 @@ int get_next_old(struct swath *data, int *nk, int *ni, int *nj, int *nd,
 int get_pos_old(struct swath *data, double eps, double *x, double *y,
 		int k, int i, int j, double value)
 {
-	int	i2, j2;
 	double	x1, y1, x2, y2, v1, v2, factor;
 
 	/* get grid positions and values */

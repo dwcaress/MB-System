@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	1/19/93
- *    $Id: mb_io.h,v 5.22 2006-01-06 18:27:19 caress Exp $
+ *    $Id: mb_io.h,v 5.23 2006-11-10 22:36:04 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.22  2006/01/06 18:27:19  caress
+ * Working towards 5.0.8
+ *
  * Revision 5.21  2005/11/05 00:48:04  caress
  * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
  *
@@ -426,6 +429,8 @@ struct mb_io_struct
 	/* function pointers for extracting and inserting data */
 	int (*mb_io_dimensions)(int verbose, void *mbio_ptr, void *store_ptr, 
 		int *kind, int *nbath, int *namp, int *nss, int *error);
+	int (*mb_io_pingnumber)(int verbose, void *mbio_ptr, 
+		int *pingnumber, int *error);
 	int (*mb_io_extract)(int verbose, void *mbio_ptr, void *store_ptr, 
 		int *kind, int time_i[7], double *time_d,
 		double *navlon, double *navlat,

@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system: mbm_route2mission.perl   7/18/2004
-#    $Id: mbm_route2mission.perl,v 5.9 2006-09-11 18:55:52 caress Exp $
+#    $Id: mbm_route2mission.perl,v 5.10 2006-11-10 22:36:04 caress Exp $
 #
 #    Copyright (c) 2004, 2006 by 
 #    D. W. Caress (caress@mbari.org)
@@ -37,10 +37,14 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #      Moss Landing, CA
 #
 # Version:
-# $Id: mbm_route2mission.perl,v 5.9 2006-09-11 18:55:52 caress Exp $
+# $Id: mbm_route2mission.perl,v 5.10 2006-11-10 22:36:04 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.9  2006/09/11 18:55:52  caress
+#   Changes during Western Flyer and Thomas Thompson cruises, August-September
+#   2006.
+#
 #   Revision 5.8  2006/07/27 18:42:51  caress
 #   Working towards 5.1.0
 #
@@ -804,11 +808,16 @@ print "Output Behavior: reson (stop, Log_Mode = 0)\n";
 			}
 		
 		# sonar range allows for 1.2 * 120 degree swath
-		$mb_range = 1.2 * 2.0 * $sonaraltitudeuse;
-		$mb_minrange = 0.5 * $sonaraltitudeuse;
+#		$mb_range = 1.2 * 2.0 * $sonaraltitudeuse;
+#		$mb_minrange = 0.5 * $sonaraltitudeuse;
+#		$mb_maxrange = $mb_range;
+#		$mb_mindepth = 0.5 * $sonaraltitudeuse;
+#		$mb_maxdepth = $mb_range;
+		$mb_range = 4.0 * $sonaraltitudeuse;
+		$mb_minrange = 0.4 * $sonaraltitudeuse;
 		$mb_maxrange = $mb_range;
-		$mb_mindepth = 0.5 * $sonaraltitudeuse;
-		$mb_maxdepth = $mb_range;
+		$mb_mindepth = 0.0;
+		$mb_maxdepth = 0.75 * $mb_range;
 		$sslo_range = 0.9 * 750.0 / $mb_pingrate;
 		#if ($sslo_range > 200.0)
 		#	{
@@ -1218,11 +1227,16 @@ print "Output Behavior: gps\n";
 
 	# get starting sonar parameters assuming $altitudedesired altitude
 	$sonaraltitudeuse = $altitudedesired;
-	$mb_range = 1.2 * 2.0 * $sonaraltitudeuse;
-	$mb_minrange = 0.5 * $sonaraltitudeuse;
+#	$mb_range = 1.2 * 2.0 * $sonaraltitudeuse;
+#	$mb_minrange = 0.5 * $sonaraltitudeuse;
+#	$mb_maxrange = $mb_range;
+#	$mb_mindepth = 0.5 * $sonaraltitudeuse;
+#	$mb_maxdepth = $mb_range;
+	$mb_range = 4.0 * $sonaraltitudeuse;
+	$mb_minrange = 0.4 * $sonaraltitudeuse;
 	$mb_maxrange = $mb_range;
-	$mb_mindepth = 0.5 * $sonaraltitudeuse;
-	$mb_maxdepth = $mb_range;
+	$mb_mindepth = 0.0;
+	$mb_maxdepth = 0.75 * $mb_range;
 	$sslo_range = 0.9 * 750.0 / $mb_pingrate;
 	if ($sslo_range > 200.0)
 		{

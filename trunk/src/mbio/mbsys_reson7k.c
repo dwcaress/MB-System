@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_reson7k.c	3.00	3/23/2004
- *	$Id: mbsys_reson7k.c,v 5.13 2006-09-11 18:55:53 caress Exp $
+ *	$Id: mbsys_reson7k.c,v 5.14 2006-11-10 22:36:05 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -26,6 +26,10 @@
  * Date:	March 23, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.13  2006/09/11 18:55:53  caress
+ * Changes during Western Flyer and Thomas Thompson cruises, August-September
+ * 2006.
+ *
  * Revision 5.12  2006/08/09 22:41:27  caress
  * Fixed programs that read or write grids so that they do not use the GMT_begin() function; these programs will now work when GMT is built in the default fashion, when GMT is built in the default fashion, with "advisory file locking" enabled.
  *
@@ -88,7 +92,7 @@
 /* turn on debug statements here */
 /* #define MSYS_RESON7KR_DEBUG 1 */
 
-static char res_id[]="$Id: mbsys_reson7k.c,v 5.13 2006-09-11 18:55:53 caress Exp $";
+static char res_id[]="$Id: mbsys_reson7k.c,v 5.14 2006-11-10 22:36:05 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_zero7kheader(int verbose, s7k_header	*header, 
@@ -4165,6 +4169,51 @@ int mbsys_reson7k_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+int mbsys_reson7k_pingnumber(int verbose, void *mbio_ptr, 
+		int *pingnumber, int *error)
+{
+	char	*function_name = "mbsys_reson7k_pingnumber";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	struct mbsys_reson7k_struct *store;
+	s7kr_bathymetry *bathymetry;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mb_ptr:     %d\n",mbio_ptr);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* get data structure pointer */
+	store = (struct mbsys_reson7k_struct *) mb_io_ptr->store_data;
+
+	/* extract data from structure */
+	bathymetry = (s7kr_bathymetry *) &store->bathymetry;
+	*pingnumber = bathymetry->ping_number;
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       pingnumber: %d\n",*pingnumber);
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
 int mbsys_reson7k_extract(int verbose, void *mbio_ptr, void *store_ptr, 
 		int *kind, int time_i[7], double *time_d,
 		double *navlon, double *navlat,
@@ -6059,7 +6108,7 @@ int mbsys_reson7k_extract_segytraceheader(int verbose, void *mbio_ptr, void *sto
 	int	watersoundspeed;
 	float	fwatertime;
 	double	longitude, latitude;
-	double	speed;
+	double	speed, heading;
 	int	time_j[5];
 	int	i;
 
@@ -6115,7 +6164,9 @@ int mbsys_reson7k_extract_segytraceheader(int verbose, void *mbio_ptr, void *sto
 			watersoundspeed = 1500;
 		fwatertime = 2.0 * dwaterdepth / ((double) watersoundspeed);
 		
-		mb_navint_interp(verbose, mbio_ptr, store->time_d, RTD * bathymetry->heading, speed, 
+		mb_hedint_interp(verbose, mbio_ptr, store->time_d,  
+				    &heading, error);
+		mb_navint_interp(verbose, mbio_ptr, store->time_d, heading, speed, 
 				    &longitude, &latitude, &speed, error);
 		if (longitude == 0.0 && latitude == 0.0
 			&& bathymetry->longitude != 0.0 && bathymetry->latitude != 0.0)
@@ -6191,7 +6242,7 @@ int mbsys_reson7k_extract_segytraceheader(int verbose, void *mbio_ptr, void *sto
 		mb_segytraceheader_ptr->dummy6	= 0.0;
 		mb_segytraceheader_ptr->dummy7	= 0.0;
 		mb_segytraceheader_ptr->dummy8	= 0.0;
-		mb_segytraceheader_ptr->dummy9	= 0.0;
+		mb_segytraceheader_ptr->heading	= heading;
 		
 		/* done translating values */
 
@@ -6284,7 +6335,7 @@ int mbsys_reson7k_extract_segytraceheader(int verbose, void *mbio_ptr, void *sto
 		fprintf(stderr,"dbg2       dummy6:            %d\n",mb_segytraceheader_ptr->dummy6);
 		fprintf(stderr,"dbg2       dummy7:            %d\n",mb_segytraceheader_ptr->dummy7);
 		fprintf(stderr,"dbg2       dummy8:            %d\n",mb_segytraceheader_ptr->dummy8);
-		fprintf(stderr,"dbg2       dummy9:            %d\n",mb_segytraceheader_ptr->dummy9);
+		fprintf(stderr,"dbg2       heading:           %d\n",mb_segytraceheader_ptr->heading);
 		fprintf(stderr,"dbg2       error:             %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:            %d\n",status);
@@ -6519,7 +6570,7 @@ int mbsys_reson7k_extract_segy(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2       dummy6:            %d\n",mb_segytraceheader_ptr->dummy6);
 		fprintf(stderr,"dbg2       dummy7:            %d\n",mb_segytraceheader_ptr->dummy7);
 		fprintf(stderr,"dbg2       dummy8:            %d\n",mb_segytraceheader_ptr->dummy8);
-		fprintf(stderr,"dbg2       dummy9:            %d\n",mb_segytraceheader_ptr->dummy9);
+		fprintf(stderr,"dbg2       heading:           %d\n",mb_segytraceheader_ptr->heading);
 		for (i=0;i<mb_segytraceheader_ptr->nsamps;i++)
 			fprintf(stderr,"dbg2       segydata[%d]:      %f\n",i,segydata[i]);
 		fprintf(stderr,"dbg2       error:             %d\n",*error);
@@ -6788,7 +6839,7 @@ int mbsys_reson7k_insert_segy(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2       dummy6:            %d\n",mb_segytraceheader_ptr->dummy6);
 		fprintf(stderr,"dbg2       dummy7:            %d\n",mb_segytraceheader_ptr->dummy7);
 		fprintf(stderr,"dbg2       dummy8:            %d\n",mb_segytraceheader_ptr->dummy8);
-		fprintf(stderr,"dbg2       dummy9:            %d\n",mb_segytraceheader_ptr->dummy9);
+		fprintf(stderr,"dbg2       heading:           %d\n",mb_segytraceheader_ptr->heading);
 		fprintf(stderr,"dbg2       error:             %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:            %d\n",status);

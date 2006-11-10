@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsegylist.c	5/29/2004
- *    $Id: mbsegylist.c,v 5.4 2006-01-18 15:17:00 caress Exp $
+ *    $Id: mbsegylist.c,v 5.5 2006-11-10 22:36:05 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	May 29, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2006/01/18 15:17:00  caress
+ * Added stdlib.h include.
+ *
  * Revision 5.3  2005/06/04 05:19:04  caress
  * Fixed water depth calculation.
  *
@@ -69,7 +72,7 @@
 /* NaN value */
 double	NaN;
 
-static char rcs_id[] = "$Id: mbsegylist.c,v 5.4 2006-01-18 15:17:00 caress Exp $";
+static char rcs_id[] = "$Id: mbsegylist.c,v 5.5 2006-11-10 22:36:05 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
@@ -305,10 +308,6 @@ main (int argc, char **argv)
 		/* get needed values */
 		if (status == MB_SUCCESS)
 			{
-			if (first == MB_YES)
-				{
-				time_d_old = time_d;
-				}
 			time_j[0] = traceheader.year;
 			time_j[1] = traceheader.day_of_yr;
 			time_j[2] = traceheader.min + 60 * traceheader.hour;
@@ -316,6 +315,10 @@ main (int argc, char **argv)
 			time_j[4] = 1000 * traceheader.mils;
 			mb_get_itime(verbose, time_j, time_i);
 			mb_get_time(verbose, time_i, &time_d);
+			if (first == MB_YES)
+				{
+				time_d_old = time_d;
+				}
 			if (traceheader.elev_scalar < 0)
 				factor = 1.0 / ((float) (-traceheader.elev_scalar));
 			else

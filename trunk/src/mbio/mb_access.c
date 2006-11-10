@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_access.c	11/1/00
- *    $Id: mb_access.c,v 5.13 2005-11-05 00:48:05 caress Exp $
+ *    $Id: mb_access.c,v 5.14 2006-11-10 22:36:04 caress Exp $
 
  *    Copyright (c) 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	October 1, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.13  2005/11/05 00:48:05  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.12  2004/12/02 06:33:32  caress
  * Fixes while supporting Reson 7k data.
  *
@@ -74,7 +77,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mb_segy.h"
 
-static char rcs_id[]="$Id: mb_access.c,v 5.13 2005-11-05 00:48:05 caress Exp $";
+static char rcs_id[]="$Id: mb_access.c,v 5.14 2006-11-10 22:36:04 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_alloc(int verbose, void *mbio_ptr,
@@ -258,6 +261,57 @@ int mb_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2       nbath:      %d\n",*nbath);
 		fprintf(stderr,"dbg2       namp:       %d\n",*namp);
 		fprintf(stderr,"dbg2       nss:        %d\n",*nss);
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_pingnumber(int verbose, void *mbio_ptr, 
+		int *pingnumber, int *error)
+{
+	char	*function_name = "mb_pingnumber";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mb_ptr:     %d\n",mbio_ptr);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* call the appropriate mbsys_ extraction routine */
+	if (mb_io_ptr->mb_io_pingnumber != NULL)
+		{
+		status = (*mb_io_ptr->mb_io_pingnumber)
+				(verbose, mbio_ptr, 
+				pingnumber, error);
+		}
+	else
+		{
+		*pingnumber = mb_io_ptr->ping_count;
+		status = MB_SUCCESS;
+		*error = MB_ERROR_NO_ERROR;
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       pingnumber: %d\n",*pingnumber);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:     %d\n",status);
@@ -1630,7 +1684,7 @@ int mb_extract_segytraceheader(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2       dummy6:            %d\n",mb_segytraceheader_ptr->dummy6);
 		fprintf(stderr,"dbg2       dummy7:            %d\n",mb_segytraceheader_ptr->dummy7);
 		fprintf(stderr,"dbg2       dummy8:            %d\n",mb_segytraceheader_ptr->dummy8);
-		fprintf(stderr,"dbg2       dummy9:            %d\n",mb_segytraceheader_ptr->dummy9);
+		fprintf(stderr,"dbg2       heading:           %d\n",mb_segytraceheader_ptr->heading);
 		fprintf(stderr,"dbg2       error:             %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:            %d\n",status);
@@ -1757,7 +1811,7 @@ int mb_extract_segy(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2       dummy6:         %d\n",mb_segytraceheader_ptr->dummy6);
 		fprintf(stderr,"dbg2       dummy7:         %d\n",mb_segytraceheader_ptr->dummy7);
 		fprintf(stderr,"dbg2       dummy8:         %d\n",mb_segytraceheader_ptr->dummy8);
-		fprintf(stderr,"dbg2       dummy9:         %d\n",mb_segytraceheader_ptr->dummy9);
+		fprintf(stderr,"dbg2       heading:        %d\n",mb_segytraceheader_ptr->heading);
 		for (i=0;i<mb_segytraceheader_ptr->nsamps;i++)
 		    fprintf(stderr,"dbg2       sample:%d  data:%f\n", i, segydata[i]);
 		fprintf(stderr,"dbg2       error:          %d\n",*error);
@@ -1857,7 +1911,7 @@ int mb_insert_segy(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2       dummy6:         %d\n",mb_segytraceheader_ptr->dummy6);
 		fprintf(stderr,"dbg2       dummy7:         %d\n",mb_segytraceheader_ptr->dummy7);
 		fprintf(stderr,"dbg2       dummy8:         %d\n",mb_segytraceheader_ptr->dummy8);
-		fprintf(stderr,"dbg2       dummy9:         %d\n",mb_segytraceheader_ptr->dummy9);
+		fprintf(stderr,"dbg2       heading:        %d\n",mb_segytraceheader_ptr->heading);
 		for (i=0;i<mb_segytraceheader_ptr->nsamps;i++)
 		    fprintf(stderr,"dbg2       sample:%d  data:%f\n", i, segydata[i]);
 		}

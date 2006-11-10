@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_reson7k.h	3/3/2004
- *	$Id: mbsys_reson7k.h,v 5.10 2006-09-11 18:55:53 caress Exp $
+ *	$Id: mbsys_reson7k.h,v 5.11 2006-11-10 22:36:05 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,10 @@
  * Date:	March 3, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.10  2006/09/11 18:55:53  caress
+ * Changes during Western Flyer and Thomas Thompson cruises, August-September
+ * 2006.
+ *
  * Revision 5.9  2006/04/11 19:14:46  caress
  * Various fixes.
  *
@@ -1760,6 +1764,8 @@ int mbsys_reson7k_deall(int verbose, void *mbio_ptr, void **store_ptr,
 int mbsys_reson7k_zero_ss(int verbose, void *store_ptr, int *error);
 int mbsys_reson7k_dimensions(int verbose, void *mbio_ptr, void *store_ptr, 
 			int *kind, int *nbath, int *namp, int *nss, int *error);
+int mbsys_reson7k_pingnumber(int verbose, void *mbio_ptr, 
+			int *pingnumber, int *error);
 int mbsys_reson7k_extract(int verbose, void *mbio_ptr, void *store_ptr, 
 			int *kind, int time_i[7], double *time_d,
 			double *navlon, double *navlat,
