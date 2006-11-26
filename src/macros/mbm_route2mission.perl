@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system: mbm_route2mission.perl   7/18/2004
-#    $Id: mbm_route2mission.perl,v 5.10 2006-11-10 22:36:04 caress Exp $
+#    $Id: mbm_route2mission.perl,v 5.11 2006-11-26 09:42:01 caress Exp $
 #
 #    Copyright (c) 2004, 2006 by 
 #    D. W. Caress (caress@mbari.org)
@@ -37,10 +37,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #      Moss Landing, CA
 #
 # Version:
-# $Id: mbm_route2mission.perl,v 5.10 2006-11-10 22:36:04 caress Exp $
+# $Id: mbm_route2mission.perl,v 5.11 2006-11-26 09:42:01 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.10  2006/11/10 22:36:04  caress
+#   Working towards release 5.1.0
+#
 #   Revision 5.9  2006/09/11 18:55:52  caress
 #   Changes during Western Flyer and Thomas Thompson cruises, August-September
 #   2006.
@@ -151,8 +154,8 @@ $behavior = $behaviorWaypointDepthID;
 $approachdepth = 50.0;
 
 # assumed ascent and descent rate
-$ascendrate = 0.36; # m/s
-$descendrate = 0.23; # m/s
+$ascendrate = 0.583; # m/s
+$descendrate = 0.417; # m/s
 
 $forwarddist = 400.0;
 $waypointdist = 200.0;
