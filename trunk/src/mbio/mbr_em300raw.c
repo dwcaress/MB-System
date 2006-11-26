@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em300raw.c	10/16/98
- *	$Id: mbr_em300raw.c,v 5.38 2006-11-10 22:36:05 caress Exp $
+ *	$Id: mbr_em300raw.c,v 5.39 2006-11-26 09:37:09 caress Exp $
  *
  *    Copyright (c) 1998, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	October 16,  1998
  * $Log: not supported by cvs2svn $
+ * Revision 5.38  2006/11/10 22:36:05  caress
+ * Working towards release 5.1.0
+ *
  * Revision 5.37  2006/07/27 18:42:51  caress
  * Working towards 5.1.0
  *
@@ -231,58 +234,58 @@ int mbr_em300raw_chk_label(int verbose, void *mbio_ptr, char *label,
 		short *type, short *sonar);
 int mbr_em300raw_rd_start(int verbose, FILE *mbfp, int swap, 
 		struct mbsys_simrad2_struct *store, 
-		short type, short sonar, int *version, int *error);
+		short type, short sonar, int *version, int *goodend, int *error);
 int mbr_em300raw_rd_run_parameter(int verbose, FILE *mbfp, int swap, 
 		struct mbsys_simrad2_struct *store, 
-		short sonar, int *error);
+		short sonar, int *goodend, int *error);
 int mbr_em300raw_rd_clock(int verbose, FILE *mbfp, int swap, 
 		struct mbsys_simrad2_struct *store, 
-		short sonar, int *error);
+		short sonar, int *goodend, int *error);
 int mbr_em300raw_rd_tide(int verbose, FILE *mbfp, int swap, 
 		struct mbsys_simrad2_struct *store, 
-		short sonar, int *error);
+		short sonar, int *goodend, int *error);
 int mbr_em300raw_rd_height(int verbose, FILE *mbfp, int swap, 
 		struct mbsys_simrad2_struct *store, 
-		short sonar, int *error);
+		short sonar, int *goodend, int *error);
 int mbr_em300raw_rd_heading(int verbose, FILE *mbfp, int swap, 
 		struct mbsys_simrad2_struct *store, 
-		short sonar, int *error);
+		short sonar, int *goodend, int *error);
 int mbr_em300raw_rd_ssv(int verbose, FILE *mbfp, int swap, 
 		struct mbsys_simrad2_struct *store, 
-		short sonar, int *error);
+		short sonar, int *goodend, int *error);
 int mbr_em300raw_rd_tilt(int verbose, FILE *mbfp, int swap, 
 		struct mbsys_simrad2_struct *store, 
-		short sonar, int *error);
+		short sonar, int *goodend, int *error);
 int mbr_em300raw_rd_attitude(int verbose, FILE *mbfp, int swap, 
 		struct mbsys_simrad2_struct *store, 
-		short sonar, int *error);
+		short sonar, int *goodend, int *error);
 int mbr_em300raw_rd_pos(int verbose, FILE *mbfp, int swap, 
 		struct mbsys_simrad2_struct *store, 
-		short sonar, int *error);
+		short sonar, int *goodend, int *error);
 int mbr_em300raw_rd_svp(int verbose, FILE *mbfp, int swap, 
 		struct mbsys_simrad2_struct *store, 
-		short sonar, int *error);
+		short sonar, int *goodend, int *error);
 int mbr_em300raw_rd_svp2(int verbose, FILE *mbfp, int swap, 
 		struct mbsys_simrad2_struct *store, 
-		short sonar, int *error);
+		short sonar, int *goodend, int *error);
 int mbr_em300raw_rd_bath(int verbose, FILE *mbfp, int swap, 
 		struct mbsys_simrad2_struct *store, 
-		int *match, short sonar, int version, int *error);
+		int *match, short sonar, int version, int *goodend, int *error);
 int mbr_em300raw_rd_rawbeam(int verbose, FILE *mbfp, int swap, 
 		struct mbsys_simrad2_struct *store, 
-		short sonar, int *error);
+		short sonar, int *goodend, int *error);
 int mbr_em300raw_rd_rawbeam2(int verbose, FILE *mbfp, int swap, 
 		struct mbsys_simrad2_struct *store, 
-		short sonar, int *error);
+		short sonar, int *goodend, int *error);
 int mbr_em300raw_rd_rawbeam3(int verbose, FILE *mbfp, int swap, 
 		struct mbsys_simrad2_struct *store, 
-		short sonar, int *error);
+		short sonar, int *goodend, int *error);
 int mbr_em300raw_rd_ss(int verbose, FILE *mbfp, int swap, 
 		struct mbsys_simrad2_struct *store, 
-		short sonar, int length, int *match, int *error);
+		short sonar, int length, int *match, int *goodend, int *error);
 int mbr_em300raw_rd_wc(int verbose, FILE *mbfp, int swap, 
 		struct mbsys_simrad2_struct *store, 
-		short sonar, int *error);
+		short sonar, int *goodend, int *error);
 int mbr_em300raw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_em300raw_wr_start(int verbose, FILE *mbfp, int swap, 
 		struct mbsys_simrad2_struct *store, int *error);
@@ -319,7 +322,7 @@ int mbr_em300raw_wr_ss(int verbose, FILE *mbfp, int swap,
 int mbr_em300raw_wr_wc(int verbose, FILE *mbfp, int swap, 
 		struct mbsys_simrad2_struct *store, int *error);
 
-static char res_id[]="$Id: mbr_em300raw.c,v 5.38 2006-11-10 22:36:05 caress Exp $";
+static char res_id[]="$Id: mbr_em300raw.c,v 5.39 2006-11-26 09:37:09 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_em300raw(int verbose, void *mbio_ptr, int *error)
@@ -998,6 +1001,7 @@ int mbr_em300raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	short	*sonarlast;
 	int	*nbadrec;
 	int     *length;
+	int	good_end_bytes;
 	int	match;
 	int	read_len;
 	int	skip = 0;
@@ -1301,7 +1305,7 @@ Have a nice day...\n");
 	fprintf(stderr,"call mbr_em300raw_rd_start type %x\n",type);
 #endif
 			status = mbr_em300raw_rd_start(
-				verbose,mbfp,swap,store,type,sonar,version,error);
+				verbose,mbfp,swap,store,type,sonar,version,&good_end_bytes,error);
 			if (status == MB_SUCCESS)
 			    {
 			    done = MB_YES;
@@ -1321,7 +1325,7 @@ Have a nice day...\n");
 	fprintf(stderr,"call mbr_em300raw_rd_run_parameter type %x\n",type);
 #endif
 			status = mbr_em300raw_rd_run_parameter(
-				verbose,mbfp,swap,store,sonar,error);
+				verbose,mbfp,swap,store,sonar,&good_end_bytes,error);
 			if (status == MB_SUCCESS)
 				{
 				done = MB_YES;
@@ -1341,7 +1345,7 @@ Have a nice day...\n");
 	fprintf(stderr,"call mbr_em300raw_rd_clock type %x\n",type);
 #endif
 			status = mbr_em300raw_rd_clock(
-				verbose,mbfp,swap,store,sonar,error);
+				verbose,mbfp,swap,store,sonar,&good_end_bytes,error);
 			if (status == MB_SUCCESS)
 				{
 				done = MB_YES;
@@ -1361,7 +1365,7 @@ Have a nice day...\n");
 	fprintf(stderr,"call mbr_em300raw_rd_tide type %x\n",type);
 #endif
 			status = mbr_em300raw_rd_tide(
-				verbose,mbfp,swap,store,sonar,error);
+				verbose,mbfp,swap,store,sonar,&good_end_bytes,error);
 			if (status == MB_SUCCESS)
 				{
 				done = MB_YES;
@@ -1381,7 +1385,7 @@ Have a nice day...\n");
 	fprintf(stderr,"call mbr_em300raw_rd_height type %x\n",type);
 #endif
 			status = mbr_em300raw_rd_height(
-				verbose,mbfp,swap,store,sonar,error);
+				verbose,mbfp,swap,store,sonar,&good_end_bytes,error);
 			if (status == MB_SUCCESS)
 				{
 				done = MB_YES;
@@ -1401,7 +1405,7 @@ Have a nice day...\n");
 	fprintf(stderr,"call mbr_em300raw_rd_heading type %x\n",type);
 #endif
 			status = mbr_em300raw_rd_heading(
-				verbose,mbfp,swap,store,sonar,error);
+				verbose,mbfp,swap,store,sonar,&good_end_bytes,error);
 			if (status == MB_SUCCESS)
 				{
 				done = MB_YES;
@@ -1421,7 +1425,7 @@ Have a nice day...\n");
 	fprintf(stderr,"call mbr_em300raw_rd_ssv type %x\n",type);
 #endif
 			status = mbr_em300raw_rd_ssv(
-				verbose,mbfp,swap,store,sonar,error);
+				verbose,mbfp,swap,store,sonar,&good_end_bytes,error);
 			if (status == MB_SUCCESS)
 				{
 				done = MB_YES;
@@ -1441,7 +1445,7 @@ Have a nice day...\n");
 	fprintf(stderr,"call mbr_em300raw_rd_tilt type %x\n",type);
 #endif
 			status = mbr_em300raw_rd_tilt(
-				verbose,mbfp,swap,store,sonar,error);
+				verbose,mbfp,swap,store,sonar,&good_end_bytes,error);
 			if (status == MB_SUCCESS)
 				{
 				done = MB_YES;
@@ -1461,7 +1465,7 @@ Have a nice day...\n");
 	fprintf(stderr,"call mbr_em300raw_rd_attitude type %x\n",type);
 #endif
 			status = mbr_em300raw_rd_attitude(
-				verbose,mbfp,swap,store,sonar,error);
+				verbose,mbfp,swap,store,sonar,&good_end_bytes,error);
 			if (status == MB_SUCCESS)
 				{
 				done = MB_YES;
@@ -1481,7 +1485,7 @@ Have a nice day...\n");
 	fprintf(stderr,"call mbr_em300raw_rd_pos type %x\n",type);
 #endif
 			status = mbr_em300raw_rd_pos(
-				verbose,mbfp,swap,store,sonar,error);
+				verbose,mbfp,swap,store,sonar,&good_end_bytes,error);
 			if (status == MB_SUCCESS)
 				{
 				done = MB_YES;
@@ -1501,7 +1505,7 @@ Have a nice day...\n");
 	fprintf(stderr,"call mbr_em300raw_rd_svp type %x\n",type);
 #endif
 			status = mbr_em300raw_rd_svp(
-				verbose,mbfp,swap,store,sonar,error);
+				verbose,mbfp,swap,store,sonar,&good_end_bytes,error);
 			if (status == MB_SUCCESS)
 				{
 				done = MB_YES;
@@ -1521,7 +1525,7 @@ Have a nice day...\n");
 	fprintf(stderr,"call mbr_em300raw_rd_svp2 type %x\n",type);
 #endif
 			status = mbr_em300raw_rd_svp2(
-				verbose,mbfp,swap,store,sonar,error);
+				verbose,mbfp,swap,store,sonar,&good_end_bytes,error);
 			if (status == MB_SUCCESS)
 				{
 				done = MB_YES;
@@ -1553,7 +1557,7 @@ Have a nice day...\n");
 	fprintf(stderr,"call mbr_em300raw_rd_bath type %x\n",type);
 #endif
 			status = mbr_em300raw_rd_bath(
-				verbose,mbfp,swap,store,&match,sonar,*version,error);
+				verbose,mbfp,swap,store,&match,sonar,*version,&good_end_bytes,error);
 			if (status == MB_SUCCESS)
 				{
 				if (first_type == EM2_NONE
@@ -1576,7 +1580,7 @@ Have a nice day...\n");
 	fprintf(stderr,"call mbr_em300raw_rd_rawbeam type %x\n",type);
 #endif
 			status = mbr_em300raw_rd_rawbeam(
-				verbose,mbfp,swap,store,sonar,error);
+				verbose,mbfp,swap,store,sonar,&good_end_bytes,error);
 			if (status == MB_SUCCESS)
 				ping->png_raw1_read = MB_YES;
 			if (expect == EM2_SS
@@ -1592,7 +1596,7 @@ Have a nice day...\n");
 	fprintf(stderr,"call mbr_em300raw_rd_rawbeam2 type %x\n",type);
 #endif
 			status = mbr_em300raw_rd_rawbeam2(
-				verbose,mbfp,swap,store,sonar,error);
+				verbose,mbfp,swap,store,sonar,&good_end_bytes,error);
 			if (status == MB_SUCCESS)
 				ping->png_raw2_read = MB_YES;
 			if (expect == EM2_SS
@@ -1608,7 +1612,7 @@ Have a nice day...\n");
 	fprintf(stderr,"call mbr_em300raw_rd_rawbeam3 type %x\n",type);
 #endif
 			status = mbr_em300raw_rd_rawbeam3(
-				verbose,mbfp,swap,store,sonar,error);
+				verbose,mbfp,swap,store,sonar,&good_end_bytes,error);
 			if (status == MB_SUCCESS)
 				ping->png_raw3_read = MB_YES;
 			if (expect == EM2_SS
@@ -1637,7 +1641,7 @@ Have a nice day...\n");
 	fprintf(stderr,"call mbr_em300raw_rd_ss type %x\n",type);
 #endif
 			status = mbr_em300raw_rd_ss(
-				verbose,mbfp,swap,store,sonar,*length,&match,error);
+				verbose,mbfp,swap,store,sonar,*length,&match,&good_end_bytes,error);
 			if (status == MB_SUCCESS)
 			    {
 			    ping->png_ss_read = MB_YES;
@@ -1673,7 +1677,7 @@ Have a nice day...\n");
 	fprintf(stderr,"call mbr_em300raw_rd_wc type %x\n",type);
 #endif
 			status = mbr_em300raw_rd_wc(
-				verbose,mbfp,swap,store,sonar,error);
+				verbose,mbfp,swap,store,sonar,&good_end_bytes,error);
 			if (status == MB_SUCCESS)
 				{
 				done = MB_YES;
@@ -1712,7 +1716,8 @@ Have a nice day...\n");
 			
 		/* if necessary read over unread but expected bytes */
 		bytes_read = ftell(mbfp) - mb_io_ptr->file_bytes - 4;
-		if (*label_save_flag == MB_NO && bytes_read < record_size)
+		if (*label_save_flag == MB_NO && good_end_bytes == MB_NO 
+			&& bytes_read < record_size)
 			{
 #ifdef MBR_EM300RAW_DEBUG
 	fprintf(stderr,"skip over %d unread bytes of supported datagram type %x\n",
@@ -1998,7 +2003,7 @@ fprintf(stderr,"typegood:%d mb_io_ptr->byteswapped:%d sonarswapgood:%d *databyte
 /*--------------------------------------------------------------------*/
 int mbr_em300raw_rd_start(int verbose, FILE *mbfp, int swap, 
 		struct mbsys_simrad2_struct *store, 
-		short type, short sonar, int *version, int *error)
+		short type, short sonar, int *version, int *goodend, int *error)
 {
 	char	*function_name = "mbr_em300raw_rd_start";
 	int	status = MB_SUCCESS;
@@ -2023,6 +2028,9 @@ int mbr_em300raw_rd_start(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2       type:       %d\n",type);
 		fprintf(stderr,"dbg2       sonar:      %d\n",sonar);
 		}
+		
+	/* set goodend false until a good end is found */
+	*goodend = MB_NO;
 		
 	/* make sure comment is initialized */
 	store->par_com[0] = '\0';
@@ -2285,6 +2293,8 @@ int mbr_em300raw_rd_start(int verbose, FILE *mbfp, int swap,
 	    /* if we got the end byte then get check sum bytes */
 	    if (line[0] == EM2_END)
 		{
+		if (line[0] == EM2_END)
+			*goodend = MB_YES;
 		read_len = fread(&line[1],2,1,mbfp);
 	    /* don't check success of read
 	        - return success here even if read fails
@@ -2392,6 +2402,7 @@ int mbr_em300raw_rd_start(int verbose, FILE *mbfp, int swap,
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       version:    %d\n",*version);
+		fprintf(stderr,"dbg2       goodend:    %d\n",*goodend);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:  %d\n",status);
@@ -2403,7 +2414,7 @@ int mbr_em300raw_rd_start(int verbose, FILE *mbfp, int swap,
 /*--------------------------------------------------------------------*/
 int mbr_em300raw_rd_run_parameter(int verbose, FILE *mbfp, int swap, 
 		struct mbsys_simrad2_struct *store, 
-		short sonar, int *error)
+		short sonar, int *goodend, int *error)
 {
 	char	*function_name = "mbr_em300raw_rd_run_parameter";
 	int	status = MB_SUCCESS;
@@ -2425,6 +2436,9 @@ int mbr_em300raw_rd_run_parameter(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2       store:      %d\n",store);
 		fprintf(stderr,"dbg2       sonar:      %d\n",sonar);
 		}
+		
+	/* set goodend false until a good end is found */
+	*goodend = MB_NO;
 		
 	/* set kind and type values */
 	store->kind = MB_DATA_RUN_PARAMETER;
@@ -2478,6 +2492,8 @@ int mbr_em300raw_rd_run_parameter(int verbose, FILE *mbfp, int swap,
 		store->run_stab_mode = (mb_u_char) line[38];
 		for (i=0;i<6;i++)
 		    store->run_spare[i] = line[39+i];
+		if (line[EM2_RUN_PARAMETER_SIZE-7] == EM2_END)
+			*goodend = MB_YES;
 #ifdef MBR_EM300RAW_DEBUG
 	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n", 
 		line[EM2_RUN_PARAMETER_SIZE-7], line[EM2_RUN_PARAMETER_SIZE-7], 
@@ -2527,6 +2543,7 @@ int mbr_em300raw_rd_run_parameter(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       goodend:    %d\n",*goodend);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:  %d\n",status);
@@ -2538,7 +2555,7 @@ int mbr_em300raw_rd_run_parameter(int verbose, FILE *mbfp, int swap,
 /*--------------------------------------------------------------------*/
 int mbr_em300raw_rd_clock(int verbose, FILE *mbfp, int swap, 
 		struct mbsys_simrad2_struct *store, 
-		short sonar, int *error)
+		short sonar, int *goodend, int *error)
 {
 	char	*function_name = "mbr_em300raw_rd_clock";
 	int	status = MB_SUCCESS;
@@ -2559,6 +2576,9 @@ int mbr_em300raw_rd_clock(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2       store:      %d\n",store);
 		fprintf(stderr,"dbg2       sonar:      %d\n",sonar);
 		}
+		
+	/* set goodend false until a good end is found */
+	*goodend = MB_NO;
 		
 	/* set kind and type values */
 	store->kind = MB_DATA_CLOCK;
@@ -2589,6 +2609,8 @@ int mbr_em300raw_rd_clock(int verbose, FILE *mbfp, int swap,
 		mb_get_binary_int(swap, &line[12], &store->clk_origin_date); 
 		mb_get_binary_int(swap, &line[16], &store->clk_origin_msec); 
 		store->clk_1_pps_use = (mb_u_char) line[20];
+		if (line[EM2_CLOCK_SIZE-7] == EM2_END)
+			*goodend = MB_YES;
 #ifdef MBR_EM300RAW_DEBUG
 	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n", 
 		line[EM2_CLOCK_SIZE-7], line[EM2_CLOCK_SIZE-7], 
@@ -2621,6 +2643,7 @@ int mbr_em300raw_rd_clock(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       goodend:    %d\n",*goodend);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:  %d\n",status);
@@ -2632,7 +2655,7 @@ int mbr_em300raw_rd_clock(int verbose, FILE *mbfp, int swap,
 /*--------------------------------------------------------------------*/
 int mbr_em300raw_rd_tide(int verbose, FILE *mbfp, int swap, 
 		struct mbsys_simrad2_struct *store, 
-		short sonar, int *error)
+		short sonar, int *goodend, int *error)
 {
 	char	*function_name = "mbr_em300raw_rd_tide";
 	int	status = MB_SUCCESS;
@@ -2653,6 +2676,9 @@ int mbr_em300raw_rd_tide(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2       store:      %d\n",store);
 		fprintf(stderr,"dbg2       sonar:      %d\n",sonar);
 		}
+		
+	/* set goodend false until a good end is found */
+	*goodend = MB_NO;
 		
 	/* set kind and type values */
 	store->kind = MB_DATA_TIDE;
@@ -2684,6 +2710,8 @@ int mbr_em300raw_rd_tide(int verbose, FILE *mbfp, int swap,
 		mb_get_binary_int(swap, &line[16], &store->tid_origin_msec); 
 		mb_get_binary_short(swap, &line[20], &short_val); 
 		    store->tid_tide = (int) short_val;
+		if (line[EM2_TIDE_SIZE-7] == 0x03)
+			*goodend = MB_YES;
 #ifdef MBR_EM300RAW_DEBUG
 	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n", 
 		line[EM2_TIDE_SIZE-7], line[EM2_TIDE_SIZE-7], 
@@ -2716,6 +2744,7 @@ int mbr_em300raw_rd_tide(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       goodend:    %d\n",*goodend);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:  %d\n",status);
@@ -2727,7 +2756,7 @@ int mbr_em300raw_rd_tide(int verbose, FILE *mbfp, int swap,
 /*--------------------------------------------------------------------*/
 int mbr_em300raw_rd_height(int verbose, FILE *mbfp, int swap, 
 		struct mbsys_simrad2_struct *store, 
-		short sonar, int *error)
+		short sonar, int *goodend, int *error)
 {
 	char	*function_name = "mbr_em300raw_rd_height";
 	int	status = MB_SUCCESS;
@@ -2748,6 +2777,9 @@ int mbr_em300raw_rd_height(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2       store:      %d\n",store);
 		fprintf(stderr,"dbg2       sonar:      %d\n",sonar);
 		}
+		
+	/* set goodend false until a good end is found */
+	*goodend = MB_NO;
 		
 	/* set kind and type values */
 	store->kind = MB_DATA_HEIGHT;
@@ -2777,6 +2809,8 @@ int mbr_em300raw_rd_height(int verbose, FILE *mbfp, int swap,
 		    store->hgt_serial = (int) ((unsigned short) short_val);
 		mb_get_binary_int(swap, &line[12], &store->hgt_height); 
 		store->hgt_type = (mb_u_char) line[16];
+		if (line[EM2_HEIGHT_SIZE-7] == EM2_END)
+			*goodend = MB_YES;
 #ifdef MBR_EM300RAW_DEBUG
 	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n", 
 		line[EM2_HEIGHT_SIZE-7], line[EM2_HEIGHT_SIZE-7], 
@@ -2808,6 +2842,7 @@ int mbr_em300raw_rd_height(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       goodend:    %d\n",*goodend);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:  %d\n",status);
@@ -2819,7 +2854,7 @@ int mbr_em300raw_rd_height(int verbose, FILE *mbfp, int swap,
 /*--------------------------------------------------------------------*/
 int mbr_em300raw_rd_heading(int verbose, FILE *mbfp, int swap, 
 		struct mbsys_simrad2_struct *store, 
-		short sonar, int *error)
+		short sonar, int *goodend, int *error)
 {
 	char	*function_name = "mbr_em300raw_rd_heading";
 	int	status = MB_SUCCESS;
@@ -2842,6 +2877,9 @@ int mbr_em300raw_rd_heading(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2       store:      %d\n",store);
 		fprintf(stderr,"dbg2       sonar:      %d\n",sonar);
 		}
+		
+	/* set goodend false until a good end is found */
+	*goodend = MB_NO;
 		
 	/* get  storage structure */
 	heading = (struct mbsys_simrad2_heading_struct *) store->heading;
@@ -2917,6 +2955,8 @@ int mbr_em300raw_rd_heading(int verbose, FILE *mbfp, int swap,
 			    file will return error */
 			status = MB_SUCCESS;
 			}
+		if (line[1] == EM2_END)
+			*goodend = MB_YES;
 #ifdef MBR_EM300RAW_DEBUG
 	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n", 
 		line[1], line[1], 
@@ -2953,6 +2993,7 @@ int mbr_em300raw_rd_heading(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       goodend:    %d\n",*goodend);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:  %d\n",status);
@@ -2964,7 +3005,7 @@ int mbr_em300raw_rd_heading(int verbose, FILE *mbfp, int swap,
 /*--------------------------------------------------------------------*/
 int mbr_em300raw_rd_ssv(int verbose, FILE *mbfp, int swap, 
 		struct mbsys_simrad2_struct *store, 
-		short sonar, int *error)
+		short sonar, int *goodend, int *error)
 {
 	char	*function_name = "mbr_em300raw_rd_ssv";
 	int	status = MB_SUCCESS;
@@ -2987,6 +3028,9 @@ int mbr_em300raw_rd_ssv(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2       store:      %d\n",store);
 		fprintf(stderr,"dbg2       sonar:      %d\n",sonar);
 		}
+		
+	/* set goodend false until a good end is found */
+	*goodend = MB_NO;
 		
 	/* get  storage structure */
 	ssv = (struct mbsys_simrad2_ssv_struct *) store->ssv;
@@ -3061,6 +3105,8 @@ int mbr_em300raw_rd_ssv(int verbose, FILE *mbfp, int swap,
 			    file will return error */
 			status = MB_SUCCESS;
 			}
+		if (line[1] == EM2_END)
+			*goodend = MB_YES;
 #ifdef MBR_EM300RAW_DEBUG
 	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n", 
 		line[1], line[1], 
@@ -3096,6 +3142,7 @@ int mbr_em300raw_rd_ssv(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       goodend:    %d\n",*goodend);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:  %d\n",status);
@@ -3107,7 +3154,7 @@ int mbr_em300raw_rd_ssv(int verbose, FILE *mbfp, int swap,
 /*--------------------------------------------------------------------*/
 int mbr_em300raw_rd_tilt(int verbose, FILE *mbfp, int swap, 
 		struct mbsys_simrad2_struct *store, 
-		short sonar, int *error)
+		short sonar, int *goodend, int *error)
 {
 	char	*function_name = "mbr_em300raw_rd_tilt";
 	int	status = MB_SUCCESS;
@@ -3130,6 +3177,9 @@ int mbr_em300raw_rd_tilt(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2       store:      %d\n",store);
 		fprintf(stderr,"dbg2       sonar:      %d\n",sonar);
 		}
+		
+	/* set goodend false until a good end is found */
+	*goodend = MB_NO;
 		
 	/* get  storage structure */
 	tilt = (struct mbsys_simrad2_tilt_struct *) store->tilt;
@@ -3204,6 +3254,8 @@ int mbr_em300raw_rd_tilt(int verbose, FILE *mbfp, int swap,
 			    file will return error */
 			status = MB_SUCCESS;
 			}
+		if (line[1] == EM2_END)
+			*goodend = MB_YES;
 #ifdef MBR_EM300RAW_DEBUG
 	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n", 
 		line[1], line[1], 
@@ -3239,6 +3291,7 @@ int mbr_em300raw_rd_tilt(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       goodend:    %d\n",*goodend);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:  %d\n",status);
@@ -3250,7 +3303,7 @@ int mbr_em300raw_rd_tilt(int verbose, FILE *mbfp, int swap,
 /*--------------------------------------------------------------------*/
 int mbr_em300raw_rd_attitude(int verbose, FILE *mbfp, int swap, 
 		struct mbsys_simrad2_struct *store, 
-		short sonar, int *error)
+		short sonar, int *goodend, int *error)
 {
 	char	*function_name = "mbr_em300raw_rd_attitude";
 	int	status = MB_SUCCESS;
@@ -3273,6 +3326,9 @@ int mbr_em300raw_rd_attitude(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2       store:      %d\n",store);
 		fprintf(stderr,"dbg2       sonar:      %d\n",sonar);
 		}
+		
+	/* set goodend false until a good end is found */
+	*goodend = MB_NO;
 		
 	/* get  storage structure */
 	attitude = (struct mbsys_simrad2_attitude_struct *) store->attitude;
@@ -3356,6 +3412,8 @@ int mbr_em300raw_rd_attitude(int verbose, FILE *mbfp, int swap,
 			    file will return error */
 			status = MB_SUCCESS;
 			}
+		if (line[1] == EM2_END)
+			*goodend = MB_YES;
 #ifdef MBR_EM300RAW_DEBUG
 	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n", 
 		line[1], line[1], 
@@ -3394,6 +3452,7 @@ int mbr_em300raw_rd_attitude(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       goodend:    %d\n",*goodend);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:  %d\n",status);
@@ -3405,7 +3464,7 @@ int mbr_em300raw_rd_attitude(int verbose, FILE *mbfp, int swap,
 /*--------------------------------------------------------------------*/
 int mbr_em300raw_rd_pos(int verbose, FILE *mbfp, int swap, 
 		struct mbsys_simrad2_struct *store, 
-		short sonar, int *error)
+		short sonar, int *goodend, int *error)
 {
 	char	*function_name = "mbr_em300raw_rd_pos";
 	int	status = MB_SUCCESS;
@@ -3428,6 +3487,9 @@ int mbr_em300raw_rd_pos(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2       store:      %d\n",store);
 		fprintf(stderr,"dbg2       sonar:      %d\n",sonar);
 		}
+		
+	/* set goodend false until a good end is found */
+	*goodend = MB_NO;
 		
 	/* set kind and type values */
 	store->kind = MB_DATA_NAV;
@@ -3500,6 +3562,8 @@ int mbr_em300raw_rd_pos(int verbose, FILE *mbfp, int swap,
 			/* get last two check sum bytes */
 			if (sonar != MBSYS_SIMRAD2_EM3000)
 				read_len = fread(&line[1],2,1,mbfp);
+		if (line[0] == EM2_END)
+			*goodend = MB_YES;
 #ifdef MBR_EM300RAW_DEBUG
 	if (sonar != MBSYS_SIMRAD2_EM3000)
 	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n", 
@@ -3592,6 +3656,7 @@ int mbr_em300raw_rd_pos(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       goodend:    %d\n",*goodend);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:  %d\n",status);
@@ -3603,7 +3668,7 @@ int mbr_em300raw_rd_pos(int verbose, FILE *mbfp, int swap,
 /*--------------------------------------------------------------------*/
 int mbr_em300raw_rd_svp(int verbose, FILE *mbfp, int swap, 
 		struct mbsys_simrad2_struct *store, 
-		short sonar, int *error)
+		short sonar, int *goodend, int *error)
 {
 	char	*function_name = "mbr_em300raw_rd_svp";
 	int	status = MB_SUCCESS;
@@ -3625,6 +3690,9 @@ int mbr_em300raw_rd_svp(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2       store:      %d\n",store);
 		fprintf(stderr,"dbg2       sonar:      %d\n",sonar);
 		}
+		
+	/* set goodend false until a good end is found */
+	*goodend = MB_NO;
 		
 	/* set kind and type values */
 	store->kind = MB_DATA_VELOCITY_PROFILE;
@@ -3699,6 +3767,8 @@ int mbr_em300raw_rd_svp(int verbose, FILE *mbfp, int swap,
 			    file will return error */
 			status = MB_SUCCESS;
 			}
+		if (line[1] == EM2_END)
+			*goodend = MB_YES;
 #ifdef MBR_EM300RAW_DEBUG
 	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n", 
 		line[1], line[1], 
@@ -3737,6 +3807,7 @@ int mbr_em300raw_rd_svp(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       goodend:    %d\n",*goodend);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:  %d\n",status);
@@ -3748,7 +3819,7 @@ int mbr_em300raw_rd_svp(int verbose, FILE *mbfp, int swap,
 /*--------------------------------------------------------------------*/
 int mbr_em300raw_rd_svp2(int verbose, FILE *mbfp, int swap, 
 		struct mbsys_simrad2_struct *store, 
-		short sonar, int *error)
+		short sonar, int *goodend, int *error)
 {
 	char	*function_name = "mbr_em300raw_rd_svp2";
 	int	status = MB_SUCCESS;
@@ -3770,6 +3841,9 @@ int mbr_em300raw_rd_svp2(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2       store:      %d\n",store);
 		fprintf(stderr,"dbg2       sonar:      %d\n",sonar);
 		}
+		
+	/* set goodend false until a good end is found */
+	*goodend = MB_NO;
 		
 	/* set kind and type values */
 	store->kind = MB_DATA_VELOCITY_PROFILE;
@@ -3842,6 +3916,8 @@ int mbr_em300raw_rd_svp2(int verbose, FILE *mbfp, int swap,
 			    file will return error */
 			status = MB_SUCCESS;
 			}
+		if (line[1] == EM2_END)
+			*goodend = MB_YES;
 #ifdef MBR_EM300RAW_DEBUG
 	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n", 
 		line[1], line[1], 
@@ -3880,6 +3956,7 @@ int mbr_em300raw_rd_svp2(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       goodend:    %d\n",*goodend);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:  %d\n",status);
@@ -3891,7 +3968,7 @@ int mbr_em300raw_rd_svp2(int verbose, FILE *mbfp, int swap,
 /*--------------------------------------------------------------------*/
 int mbr_em300raw_rd_bath(int verbose, FILE *mbfp, int swap, 
 		struct mbsys_simrad2_struct *store, 
-		int *match, short sonar, int version, int *error)
+		int *match, short sonar, int version, int *goodend, int *error)
 {
 	char	*function_name = "mbr_em300raw_rd_bath";
 	int	status = MB_SUCCESS;
@@ -3915,6 +3992,9 @@ int mbr_em300raw_rd_bath(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2       sonar:      %d\n",sonar);
 		fprintf(stderr,"dbg2       version:    %d\n",version);
 		}
+		
+	/* set goodend false until a good end is found */
+	*goodend = MB_NO;
 		
 	/* get  storage structure */
 	ping = (struct mbsys_simrad2_ping_struct *) store->ping;
@@ -4034,6 +4114,8 @@ ping->png_date,ping->png_msec,ping->png_count,ping->png_nbeams);*/
 			status = MB_FAILURE;
 			*error = MB_ERROR_EOF;
 			}
+		if (line[1] == EM2_END)
+			*goodend = MB_YES;
 #ifdef MBR_EM300RAW_DEBUG
 	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n", 
 		line[1], line[1], 
@@ -4124,6 +4206,7 @@ ping->png_date,ping->png_msec,ping->png_count,ping->png_nbeams);*/
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       match:      %d\n",*match);
+		fprintf(stderr,"dbg2       goodend:    %d\n",*goodend);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:  %d\n",status);
@@ -4135,7 +4218,7 @@ ping->png_date,ping->png_msec,ping->png_count,ping->png_nbeams);*/
 /*--------------------------------------------------------------------*/
 int mbr_em300raw_rd_rawbeam(int verbose, FILE *mbfp, int swap, 
 		struct mbsys_simrad2_struct *store, 
-		short sonar, int *error)
+		short sonar, int *goodend, int *error)
 {
 	char	*function_name = "mbr_em300raw_rd_rawbeam";
 	int	status = MB_SUCCESS;
@@ -4158,6 +4241,9 @@ int mbr_em300raw_rd_rawbeam(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2       store:      %d\n",store);
 		fprintf(stderr,"dbg2       sonar:      %d\n",sonar);
 		}
+		
+	/* set goodend false until a good end is found */
+	*goodend = MB_NO;
 		
 	/* get  storage structure */
 	ping = (struct mbsys_simrad2_ping_struct *) store->ping;
@@ -4244,6 +4330,8 @@ int mbr_em300raw_rd_rawbeam(int verbose, FILE *mbfp, int swap,
 			status = MB_FAILURE;
 			*error = MB_ERROR_EOF;
 			}
+		if (line[1] == EM2_END)
+			*goodend = MB_YES;
 #ifdef MBR_EM300RAW_DEBUG
 	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n", 
 		line[1], line[1], 
@@ -4304,6 +4392,7 @@ int mbr_em300raw_rd_rawbeam(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       goodend:    %d\n",*goodend);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:  %d\n",status);
@@ -4315,7 +4404,7 @@ int mbr_em300raw_rd_rawbeam(int verbose, FILE *mbfp, int swap,
 /*--------------------------------------------------------------------*/
 int mbr_em300raw_rd_rawbeam2(int verbose, FILE *mbfp, int swap, 
 		struct mbsys_simrad2_struct *store, 
-		short sonar, int *error)
+		short sonar, int *goodend, int *error)
 {
 	char	*function_name = "mbr_em300raw_rd_rawbeam2";
 	int	status = MB_SUCCESS;
@@ -4339,6 +4428,9 @@ int mbr_em300raw_rd_rawbeam2(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2       store:      %d\n",store);
 		fprintf(stderr,"dbg2       sonar:      %d\n",sonar);
 		}
+		
+	/* set goodend false until a good end is found */
+	*goodend = MB_NO;
 		
 	/* get  storage structure */
 	ping = (struct mbsys_simrad2_ping_struct *) store->ping;
@@ -4488,6 +4580,8 @@ int mbr_em300raw_rd_rawbeam2(int verbose, FILE *mbfp, int swap,
 			status = MB_FAILURE;
 			*error = MB_ERROR_EOF;
 			}
+		if (line[1] == EM2_END)
+			*goodend = MB_YES;
 #ifdef MBR_EM300RAW_DEBUG
 	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n", 
 		line[1], line[1], 
@@ -4576,6 +4670,7 @@ int mbr_em300raw_rd_rawbeam2(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       goodend:    %d\n",*goodend);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:  %d\n",status);
@@ -4587,7 +4682,7 @@ int mbr_em300raw_rd_rawbeam2(int verbose, FILE *mbfp, int swap,
 /*--------------------------------------------------------------------*/
 int mbr_em300raw_rd_rawbeam3(int verbose, FILE *mbfp, int swap, 
 		struct mbsys_simrad2_struct *store, 
-		short sonar, int *error)
+		short sonar, int *goodend, int *error)
 {
 	char	*function_name = "mbr_em300raw_rd_rawbeam3";
 	int	status = MB_SUCCESS;
@@ -4612,6 +4707,9 @@ int mbr_em300raw_rd_rawbeam3(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2       store:      %d\n",store);
 		fprintf(stderr,"dbg2       sonar:      %d\n",sonar);
 		}
+		
+	/* set goodend false until a good end is found */
+	*goodend = MB_NO;
 		
 	/* get  storage structure */
 	ping = (struct mbsys_simrad2_ping_struct *) store->ping;
@@ -4746,6 +4844,8 @@ ping->png_raw3_date,ping->png_raw3_msec,ping->png_raw3_count,ping->png_raw3_nbea
 			status = MB_FAILURE;
 			*error = MB_ERROR_EOF;
 			}
+		if (line[1] == EM2_END)
+			*goodend = MB_YES;
 #ifdef MBR_EM300RAW_DEBUG
 	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n", 
 		line[1], line[1], 
@@ -4823,6 +4923,7 @@ ping->png_raw3_date,ping->png_raw3_msec,ping->png_raw3_count,ping->png_raw3_nbea
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       goodend:    %d\n",*goodend);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:  %d\n",status);
@@ -4834,7 +4935,7 @@ ping->png_raw3_date,ping->png_raw3_msec,ping->png_raw3_count,ping->png_raw3_nbea
 /*--------------------------------------------------------------------*/
 int mbr_em300raw_rd_ss(int verbose, FILE *mbfp, int swap, 
 		struct mbsys_simrad2_struct *store, 
-		short sonar, int length, int *match, int *error)
+		short sonar, int length, int *match, int *goodend, int *error)
 {
 	char	*function_name = "mbr_em300raw_rd_ss";
 	int	status = MB_SUCCESS;
@@ -4860,6 +4961,9 @@ int mbr_em300raw_rd_ss(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2       sonar:      %d\n",sonar);
 		fprintf(stderr,"dbg2       length:     %d\n",length);
 		}
+		
+	/* set goodend false until a good end is found */
+	*goodend = MB_NO;
 		
 	/* get  storage structure */
 	ping = (struct mbsys_simrad2_ping_struct *) store->ping;
@@ -5038,6 +5142,7 @@ ping->png_ss_date,ping->png_ss_msec,ping->png_ss_count,ping->png_nbeams_ss);*/
 			status = MB_SUCCESS;
 			/* get last two check sum bytes */
 			read_len = fread(&line[1],2,1,mbfp);
+			*goodend = MB_YES;
 #ifdef MBR_EM300RAW_DEBUG
 	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n", 
 		line[0], line[0], 
@@ -5142,6 +5247,7 @@ ping->png_ss_date,ping->png_ss_msec,ping->png_ss_count,ping->png_nbeams_ss);*/
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       match:      %d\n",*match);
+		fprintf(stderr,"dbg2       goodend:    %d\n",*goodend);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:  %d\n",status);
@@ -5153,7 +5259,7 @@ ping->png_ss_date,ping->png_ss_msec,ping->png_ss_count,ping->png_nbeams_ss);*/
 /*--------------------------------------------------------------------*/
 int mbr_em300raw_rd_wc(int verbose, FILE *mbfp, int swap, 
 		struct mbsys_simrad2_struct *store, 
-		short sonar, int *error)
+		short sonar, int *goodend, int *error)
 {
 	char	*function_name = "mbr_em300raw_rd_wc";
 	int	status = MB_SUCCESS;
@@ -5178,6 +5284,9 @@ int mbr_em300raw_rd_wc(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2       store:      %d\n",store);
 		fprintf(stderr,"dbg2       sonar:      %d\n",sonar);
 		}
+		
+	/* set goodend false until a good end is found */
+	*goodend = MB_NO;
 		
 	/* get  storage structure */
 	wc = (struct mbsys_simrad2_watercolumn_struct *) store->wc;
@@ -5302,6 +5411,7 @@ int mbr_em300raw_rd_wc(int verbose, FILE *mbfp, int swap,
 			status = MB_SUCCESS;
 			/* get last two check sum bytes */
 			read_len = fread(&line[1],2,1,mbfp);
+			*goodend = MB_YES;
 #ifdef MBR_EM300RAW_DEBUG
 	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n", 
 		line[0], line[0], 
@@ -5386,6 +5496,7 @@ int mbr_em300raw_rd_wc(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       goodend:    %d\n",*goodend);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:  %d\n",status);

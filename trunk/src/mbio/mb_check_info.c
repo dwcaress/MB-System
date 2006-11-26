@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_check_info.c	1/25/93
- *    $Id: mb_check_info.c,v 5.16 2006-10-05 18:58:28 caress Exp $
+ *    $Id: mb_check_info.c,v 5.17 2006-11-26 09:37:09 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	September 3, 1996
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.16  2006/10/05 18:58:28  caress
+ * Changes for 5.1.0beta4
+ *
  * Revision 5.15  2006/09/11 18:55:52  caress
  * Changes during Western Flyer and Thomas Thompson cruises, August-September
  * 2006.
@@ -113,7 +116,7 @@ int mb_check_info(int verbose, char *file, int lonflip,
 		    double bounds[4], int *file_in_bounds,
 		    int *error)
 {
-	static char rcs_id[]="$Id: mb_check_info.c,v 5.16 2006-10-05 18:58:28 caress Exp $";
+	static char rcs_id[]="$Id: mb_check_info.c,v 5.17 2006-11-26 09:37:09 caress Exp $";
 	char	*function_name = "mb_check_info";
 	int	status;
 	char	file_inf[MB_PATH_MAXLINE];
@@ -350,7 +353,7 @@ int mb_check_info(int verbose, char *file, int lonflip,
 int mb_get_info(int verbose, char *file, struct mb_info_struct *mb_info, int lonflip,
 		    int *error)
 {
-	static char rcs_id[]="$Id: mb_check_info.c,v 5.16 2006-10-05 18:58:28 caress Exp $";
+	static char rcs_id[]="$Id: mb_check_info.c,v 5.17 2006-11-26 09:37:09 caress Exp $";
 	char	*function_name = "mb_get_info";
 	int	status;
 	char	file_inf[MB_PATH_MAXLINE];
@@ -864,6 +867,7 @@ int mb_make_info(int verbose, int force,
 	    && format != MBF_ASCIIXYT
 	    && format != MBF_ASCIIYXT
 	    && format != MBF_HYDROB93
+	    && format != MBF_SEGYSEGY
 	    && format != MBF_MGD77DAT
 	    && format != MBF_MBARIROV
 	    && format != MBF_MBARROV2
@@ -885,6 +889,7 @@ int mb_make_info(int verbose, int force,
 	    && format != MBF_ASCIIXYT
 	    && format != MBF_ASCIIYXT
 	    && format != MBF_HYDROB93
+	    && format != MBF_SEGYSEGY
 	    && format != MBF_MGD77DAT
 	    && format != MBF_MBARIROV
 	    && format != MBF_MBARROV2
