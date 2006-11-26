@@ -1,9 +1,9 @@
-MB-SYSTEM VERSION 5.1.0beta4 README FILE:
+MB-SYSTEM VERSION 5.1.0 README FILE:
 ----------------------------------------
 
 This file is located at the top of the MB-System directory
 structure. This directory structure contains the version 
-5.1.0beta4 release of the MB-System software package for 
+5.1.0 release of the MB-System software package for 
 processing and display of swath sonar data.  
 
 MB-SYSTEM VERSION 5 DESCRIPTION:
@@ -1330,10 +1330,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.91 2006-11-26 09:35:55 caress Exp $
+RCS ID: $Id: README,v 5.92 2006-11-26 16:15:16 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.91  2006/11/26 09:35:55  caress
+Making distribution 5.1.0.
+
 Revision 5.90  2006/11/10 22:36:04  caress
 Working towards release 5.1.0
 
