@@ -9,7 +9,7 @@ Version 5.0
 
 .SH SYNOPSIS
 \fBmbextractsegy\fP [\fB-B\fP\fIyr/mo/da/hr/mn/sc\fP \fB-E\fP\fIyr/mo/da/hr/mn/sc\fP 
-\fB-F\fP\fIformat\fP \fB-I\fP\fIfile\fP 
+\fB-F\fP\fIformat\fP \fB-I\fP\fIfile\fP \fB-J\fP\fIxscale/yscale/maxwidth\fP 
 \fB-L\fP\fIstartline/lineroot\fP \fB-O\fP\fIsegyfile\fP 
 \fB-R\fP\fIroutefile\fP \fB-S\fP\fIsampleformat\fP 
 \fB-T\fP\fItimeshift\fP \fB-V -H\fP]
@@ -112,6 +112,16 @@ This program uses the \fBMBIO\fP library and will read or write any swath sonar
 format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page. Default: \fIinfile\fP = "stdin".
+.TP
+.B \-J
+\fIxscale/yscale/maxwidth\fP
+.br
+Sets the scale of the default section plots. The \fIxscale\fP value is
+in inches per shot, and the \fIyscale\fP value is in inches per second. 
+The \fImaxwidth\fP value sets the maximum plot width in inches. If 
+\fIxscale\fP and the shot range imply a width greater than \fmaxwidth\fP,
+then the section will be broken up into multiple plots.
+Default: \fIxscale\fP = 0.01; \fIyscale\fP = 75; \fImaxwidth\fP = 45.0
 .TP
 .B \-O
 .br

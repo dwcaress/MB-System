@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbauvloglist.c	8/14/2006
- *    $Id: mbauvloglist.c,v 5.0 2006-11-20 19:59:21 caress Exp $
+ *    $Id: mbauvloglist.c,v 5.1 2006-11-26 09:42:01 caress Exp $
  *
  *    Copyright (c) 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Location:	R/V Western Flyer hove to in a gale offshore British Columbia
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2006/11/20 19:59:21  caress
+ * Added program to CVS.
+ *
  *
  */
 
@@ -45,15 +48,15 @@
 #define	TYPE_INTEGER	2
 #define	TYPE_DOUBLE	3
 
-static char rcs_id[] = "$Id: mbauvloglist.c,v 5.0 2006-11-20 19:59:21 caress Exp $";
+static char rcs_id[] = "$Id: mbauvloglist.c,v 5.1 2006-11-26 09:42:01 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
 main (int argc, char **argv)
 {
 	static char program_name[] = "MBauvloglist";
-	static char help_message[] =  "MBsegylist lists table data from an MBARI AUV mission log file.";
-	static char usage_message[] = "MBauvloglist -Ifile [-A -Llonflip -Olist -H -V]";
+	static char help_message[] =  "MBauvloglist lists table data from an MBARI AUV mission log file.";
+	static char usage_message[] = "MBauvloglist -Ifile [-Fprintformat -Llonflip -Olist -H -V]";
 	extern char *optarg;
 	extern int optkind;
 	int	errflg = 0;

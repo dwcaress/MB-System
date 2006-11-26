@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbextractsegy.c	4/18/2004
- *    $Id: mbextractsegy.c,v 5.12 2006-11-10 22:36:05 caress Exp $
+ *    $Id: mbextractsegy.c,v 5.13 2006-11-26 09:42:01 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	April 18, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.12  2006/11/10 22:36:05  caress
+ * Working towards release 5.1.0
+ *
  * Revision 5.11  2006/08/09 22:41:27  caress
  * Fixed programs that read or write grids so that they do not use the GMT_begin() function; these programs will now work when GMT is built in the default fashion, when GMT is built in the default fashion, with "advisory file locking" enabled.
  *
@@ -82,7 +85,7 @@
 #define MBES_ROUTE_WAYPOINT_STARTLINE	3
 #define MBES_ROUTE_WAYPOINT_ENDLINE	4
 
-static char rcs_id[] = "$Id: mbextractsegy.c,v 5.12 2006-11-10 22:36:05 caress Exp $";
+static char rcs_id[] = "$Id: mbextractsegy.c,v 5.13 2006-11-26 09:42:01 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
@@ -90,7 +93,7 @@ main (int argc, char **argv)
 {
 	static char program_name[] = "MBextractsegy";
 	static char help_message[] =  "MBextractsegy extracts subbottom profiler, center beam reflection,\nor seismic reflection data from data supported by MB-System and\nrewrites it as a SEGY file in the form used by SIOSEIS.";
-	static char usage_message[] = "mbextractsegy [-Byr/mo/dy/hr/mn/sc/us -Eyr/mo/dy/hr/mn/sc/us -Fformat -Ifile -H -Osegyfile -Ssampleformat -V]";
+	static char usage_message[] = "mbextractsegy [-Byr/mo/dy/hr/mn/sc/us -Eyr/mo/dy/hr/mn/sc/us -Fformat -Ifile -H -Jxscale/yscale -Osegyfile -Ssampleformat -V]";
 	extern char *optarg;
 	extern int optkind;
 	int	errflg = 0;
@@ -193,16 +196,24 @@ main (int argc, char **argv)
 	/* auto plotting */
 	FILE	*sfp = NULL;
 	char	scriptfile[MB_PATH_MAXLINE];
-	double	seafloordepthmin;
-	double	seafloordepthmax;
+	double	seafloordepthmin = -1.0;
+	double	seafloordepthmax = -1.0;
 	double	sweep;
 	double	delay;
 	double	startlon;
 	double	startlat;
+	int	startshot;
 	double	endlon;
 	double	endlat;
+	int	endshot;
 	double	linedistance;
 	double	linebearing;
+	int	nshot;
+	int	nshotmax;
+	int	nplot;
+	double	xscale = 0.01;
+	double	yscale = 75.0;
+	double	maxwidth = 45.0;
 
 	char	command[MB_PATH_MAXLINE];
 	char	scale[MB_PATH_MAXLINE];
@@ -271,7 +282,7 @@ main (int argc, char **argv)
 		segyfileheader.extra[i] = 0;
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "B:b:D:d:E:e:F:f:I:i:L:l:O:o:R:r:S:s:T:t:VvHh")) != -1)
+	while ((c = getopt(argc, argv, "B:b:D:d:E:e:F:f:I:i:J:j:L:l:O:o:R:r:S:s:T:t:VvHh")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -306,6 +317,11 @@ main (int argc, char **argv)
 		case 'I':
 		case 'i':
 			sscanf (optarg,"%s", read_file);
+			flag++;
+			break;
+		case 'J':
+		case 'j':
+			sscanf (optarg,"%lf/%lf/%lf", &xscale, &yscale, &maxwidth);
 			flag++;
 			break;
 		case 'L':
@@ -397,6 +413,9 @@ main (int argc, char **argv)
 		fprintf(stderr,"dbg2       output_file_set:%d\n",output_file_set);
 		fprintf(stderr,"dbg2       output_file:    %s\n",output_file);
 		fprintf(stderr,"dbg2       lineroot:       %s\n",lineroot);
+		fprintf(stderr,"dbg2       xscale:         %f\n",xscale);
+		fprintf(stderr,"dbg2       yscale:         %f\n",yscale);
+		fprintf(stderr,"dbg2       maxwidth:       %f\n",maxwidth);
 		}
 
 	/* if help desired then print it and exit */
@@ -409,6 +428,9 @@ main (int argc, char **argv)
 		
 	/* set starting line number */
 	linenumber = startline;
+	
+	/* set maximum number of shots per plot */
+	nshotmax = (int)(maxwidth / xscale);
 
 	/* if specified read route file */
 	if (route_file_set == MB_YES)
@@ -681,38 +703,57 @@ main (int argc, char **argv)
 				    if (linebearing < 0.0)
 		    			linebearing += 360.0;
 				    if (linebearing >= 45.0 && linebearing <= 225.0)
-		   			strcpy(scale, "-Jx0.005/25");
+				        sprintf(scale, "-Jx%f/%f", xscale, yscale);
 				    else
-		   			strcpy(scale, "-Jx-0.005/25");
+				        sprintf(scale, "-Jx%f/%f", xscale, yscale);
 				    
 				    /* output commands to first cut plotting script file */
+				    /* The maximum useful plot length is about 4500 shots, so
+		    			we break longer files up into multiple plots */
+				    nshot = endshot - startshot + 1;
+				    nplot = nshot / nshotmax;
+				    if (nwrite % nshotmax > 0)
+		    			nplot++;
 				    sweep = (seafloordepthmax - seafloordepthmin) / 750.0 + 0.1;
 				    sweep = (1 + (int)(sweep / 0.05)) * 0.05; 
 				    delay = seafloordepthmin / 750.0;
 				    delay = ((int)(delay / 0.05)) * 0.05; 
-				    fprintf(sfp, "# Generate section plot of segy file: %s\n", output_file);
+				    fprintf(sfp, "# Generate %d section plot(s) of segy file: %s\n", nplot, output_file);
 				    fprintf(sfp, "#   Section Start Position: %.6f %.6f\n", startlon, startlat);
 				    fprintf(sfp, "#   Section End Position:   %.6f %.6f\n", endlon, endlat);
 				    fprintf(sfp, "#   Section length: %f km\n", linedistance);
 				    fprintf(sfp, "#   Section bearing: %f degrees\n", linebearing);
-				    fprintf(sfp, "mbsegygrid -I %s \\\n\t-S0 -T%.2f/%.2f -W3/-0.01/%.2f \\\n\t-G2/50.0/0.1 \\\n\t-O %s_%4.4d_section\n", 
-						    output_file, sweep, delay, sweep, lineroot, linenumber);
-				    fprintf(sfp, "mbm_grdplot -I %s_%4.4d_section.grd \\\n\t%s -Z0/400/1 \\\n\t-Ba250/a0.05g0.05 -G1 -W1/4 -D -V \\\n\t-O %s_%4.4d_sectionplot \\\n\t-L\"%s Line %d\"\n",
-						    lineroot, linenumber, scale, lineroot, linenumber, lineroot, linenumber);
-				    fprintf(sfp, "%s_%4.4d_sectionplot.cmd\n\n",
-						    lineroot, linenumber);
-				    fflush(sfp);
-				    fprintf(stderr, "# Generate section plot of segy file: %s\n", output_file);
+				    fprintf(stderr, "# Generate %d section plot(s) of segy file: %s\n", nplot, output_file);
 				    fprintf(stderr, "#   Section Start Position: %.6f %.6f\n", startlon, startlat);
 				    fprintf(stderr, "#   Section End Position:   %.6f %.6f\n", endlon, endlat);
 				    fprintf(stderr, "#   Section length: %f km\n", linedistance);
 				    fprintf(stderr, "#   Section bearing: %f degrees\n", linebearing);
-				    fprintf(stderr, "mbsegygrid -I %s \\\n\t-S0 -T%.2f/%.2f -W3/-0.01/%.2f \\\n\t-G2/50.0/0.1 \\\n\t-O %s_%4.4d_section\n", 
-						    output_file, sweep, delay, sweep, lineroot, linenumber);
-				    fprintf(stderr, "mbm_grdplot -I %s_%4.4d_section.grd \\\n\t%s -Z0/400/1 \\\n\t-Ba250/a0.05g0.05 -G1 -W1/4 -D -V \\\n\t-O %s_%4.4d_sectionplot \\\n\t-L\"%s Line %d\"\n",
-						    lineroot, linenumber, scale, lineroot, linenumber, lineroot, linenumber);
-				    fprintf(stderr, "%s_%4.4d_sectionplot.cmd\n\n",
-						    lineroot, linenumber);
+				    for (i=0;i<nplot;i++)
+		    			{
+		        		fprintf(stderr, "# Section plot %d of %d\n", i + 1, nplot);
+					fprintf(stderr, "mbsegygrid -I %s \\\n\t-S0/%d/%d -T%.2f/%.2f -W3/-0.01/%.2f \\\n\t-G2/50.0/0.1 \\\n\t-O %s_%4.4d_%2.2d_section\n", 
+							output_file, (startshot + i * nshotmax),
+							MIN((startshot  + (i + 1) * nshotmax - 1), endshot),
+							sweep, delay, sweep, lineroot, linenumber, i + 1);
+					fprintf(stderr, "mbm_grdplot -I %s_%4.4d_%2.2d_section.grd \\\n\t%s -Z0/400/1 \\\n\t-Ba250/a0.05g0.05 -G1 -W1/4 -D -V \\\n\t-O %s_%4.4d_%2.2d_sectionplot \\\n\t-L\"%s Line %d Plot %d of %d\"\n",
+							lineroot, linenumber, i + 1, scale, 
+							lineroot, linenumber, i + 1, lineroot, linenumber,
+							i + 1, nplot);
+					fprintf(stderr, "%s_%4.4d_%2.2d_sectionplot.cmd\n\n",
+							lineroot, linenumber, i + 1);
+		        		fprintf(sfp, "#   Section plot %d of %d\n", i + 1, nplot);
+					fprintf(sfp, "mbsegygrid -I %s \\\n\t-S0/%d/%d -T%.2f/%.2f -W3/-0.01/%.2f \\\n\t-G2/50.0/0.1 \\\n\t-O %s_%4.4d_%2.2d_section\n", 
+							output_file, (startshot + i * nshotmax),
+							MIN((startshot  + (i + 1) * nshotmax - 1), endshot),
+							sweep, delay, sweep, lineroot, linenumber, i + 1);
+					fprintf(sfp, "mbm_grdplot -I %s_%4.4d_%2.2d_section.grd \\\n\t%s -Z0/400/1 \\\n\t-Ba250/a0.05g0.05 -G1 -W1/4 -D -V \\\n\t-O %s_%4.4d_%2.2d_sectionplot \\\n\t-L\"%s Line %d Plot %d of %d\"\n",
+							lineroot, linenumber, i + 1, scale, 
+							lineroot, linenumber, i + 1, lineroot, linenumber,
+							i + 1, nplot);
+					fprintf(sfp, "%s_%4.4d_%2.2d_sectionplot.cmd\n\n",
+							lineroot, linenumber, i + 1);
+					fflush(sfp);
+					}
 				
 				    /* increment line number */
 				    linenumber++;
@@ -871,11 +912,13 @@ main (int argc, char **argv)
 				{
 				startlon = ((double)segytraceheader.src_long) / 360000.0;
 				startlat = ((double)segytraceheader.src_lat) / 360000.0;
+				startshot = segytraceheader.shot_num;
 				}
 			else
 				{
 				endlon = ((double)segytraceheader.src_long) / 360000.0;
 				endlat = ((double)segytraceheader.src_lat) / 360000.0;
+				endshot = segytraceheader.shot_num;
 				}
 				
 			/* get seafloor depth min and max */
@@ -883,13 +926,13 @@ main (int argc, char **argv)
 				{
 				if (seafloordepthmin < 0.0)
 					{
-					seafloordepthmin = 0.01 * segytraceheader.src_wbd;
-					seafloordepthmax = 0.01 * segytraceheader.src_wbd;
+					seafloordepthmin = 0.01 * ((double) segytraceheader.src_wbd);
+					seafloordepthmax = 0.01 * ((double) segytraceheader.src_wbd);
 					}
 				else
 					{
-					seafloordepthmin = MIN(seafloordepthmin, 0.01 * segytraceheader.src_wbd);
-					seafloordepthmax = MAX(seafloordepthmax, 0.01 * segytraceheader.src_wbd);
+					seafloordepthmin = MIN(seafloordepthmin, 0.01 * ((double) segytraceheader.src_wbd));
+					seafloordepthmax = MAX(seafloordepthmax, 0.01 * ((double) segytraceheader.src_wbd));
 					}
 				}
 			
@@ -1076,38 +1119,58 @@ main (int argc, char **argv)
 		    if (linebearing < 0.0)
 		    	linebearing += 360.0;
 		    if (linebearing >= 45.0 && linebearing <= 225.0)
-		   	strcpy(scale, "-Jx0.005/10");
-		    else
-		   	strcpy(scale, "-Jx-0.005/10");
+			sprintf(scale, "-Jx%f/%f", xscale, yscale);
+				    else
+			sprintf(scale, "-Jx%f/%f", xscale, yscale);
 				    
 		    /* output commands to first cut plotting script file */
+		    /* The maximum useful plot length is about 4500 shots, so
+		    	we break longer files up into multiple plots */
+		    nshot = endshot - startshot + 1;
+		    nplot = nshot / nshotmax;
+		    if (nwrite % nshotmax > 0)
+		    	nplot++;
+fprintf(stderr,"seafloordepthmin:%f seafloordepthmax:%f\n", seafloordepthmin, seafloordepthmax);
 		    sweep = (seafloordepthmax - seafloordepthmin) / 750.0 + 0.1;
 		    sweep = (1 + (int)(sweep / 0.05)) * 0.05; 
 		    delay = seafloordepthmin / 750.0;
 		    delay = ((int)(delay / 0.05)) * 0.05; 
-		    fprintf(sfp, "# Generate section plot of segy file: %s\n", output_file);
+		    fprintf(sfp, "# Generate %d section plot(s) of segy file: %s\n", nplot, output_file);
 		    fprintf(sfp, "#   Section Start Position: %.6f %.6f\n", startlon, startlat);
 		    fprintf(sfp, "#   Section End Position:   %.6f %.6f\n", endlon, endlat);
 		    fprintf(sfp, "#   Section length: %f km\n", linedistance);
 		    fprintf(sfp, "#   Section bearing: %f degrees\n", linebearing);
-		    fprintf(sfp, "mbsegygrid -I %s \\\n\t-S0 -T%.2f/%.2f -W3/-0.01/%.2f \\\n\t-G2/50.0/0.1 \\\n\t-O %s_%4.4d_section\n", 
-				    output_file, sweep, delay, sweep, lineroot, linenumber);
-		    fprintf(sfp, "mbm_grdplot -I %s_%4.4d_section.grd \\\n\t%s -Z0/400/1 \\\n\t-Ba250/a0.05g0.05 -G1 -W1/4 -D -V \\\n\t-O %s_%4.4d_sectionplot \\\n\t-L\"%s Line %d\"\n",
-				    lineroot, linenumber, scale, lineroot, linenumber, lineroot, linenumber);
-		    fprintf(sfp, "%s_%4.4d_sectionplot.cmd\n\n",
-				    lineroot, linenumber);
-		    fflush(sfp);
-		    fprintf(stderr, "# Generate section plot of segy file: %s\n", output_file);
+		    fprintf(stderr, "# Generate %d section plot(s) of segy file: %s\n", nplot, output_file);
 		    fprintf(stderr, "#   Section Start Position: %.6f %.6f\n", startlon, startlat);
 		    fprintf(stderr, "#   Section End Position:   %.6f %.6f\n", endlon, endlat);
 		    fprintf(stderr, "#   Section length: %f km\n", linedistance);
 		    fprintf(stderr, "#   Section bearing: %f degrees\n", linebearing);
-		    fprintf(stderr, "mbsegygrid -I %s \\\n\t-S0 -T%.2f/%.2f -W3/-0.01/%.2f \\\n\t-G2/50.0/0.1 \\\n\t-O %s_%4.4d_section\n", 
-				    output_file, sweep, delay, sweep, lineroot, linenumber);
-		    fprintf(stderr, "mbm_grdplot -I %s_%4.4d_section.grd \\\n\t%s -Z0/400/1 \\\n\t-Ba250/a0.05g0.05 -G1 -W1/4 -D -V \\\n\t-O %s_%4.4d_sectionplot \\\n\t-L\"%s Line %d\"\n",
-				    lineroot, linenumber, scale, lineroot, linenumber, lineroot, linenumber);
-		    fprintf(stderr, "%s_%4.4d_sectionplot.cmd\n\n",
-				    lineroot, linenumber);
+		    for (i=0;i<nplot;i++)
+		    	{
+		        fprintf(stderr, "# Section plot %d of %d\n", i + 1, nplot);
+			fprintf(stderr, "mbsegygrid -I %s \\\n\t-S0/%d/%d -T%.2f/%.2f -W3/-0.01/%.2f \\\n\t-G2/50.0/0.1 \\\n\t-O %s_%4.4d_%2.2d_section\n", 
+					output_file, (startshot + i * nshotmax),
+					MIN((startshot  + (i + 1) * nshotmax - 1), endshot),
+					sweep, delay, sweep, lineroot, linenumber, i + 1);
+			fprintf(stderr, "mbm_grdplot -I %s_%4.4d_%2.2d_section.grd \\\n\t%s -Z0/400/1 \\\n\t-Ba250/a0.05g0.05 -G1 -W1/4 -D -V \\\n\t-O %s_%4.4d_%2.2d_sectionplot \\\n\t-L\"%s Line %d Plot %d of %d\"\n",
+					lineroot, linenumber, i + 1, scale, 
+					lineroot, linenumber, i + 1, lineroot, linenumber,
+					i + 1, nplot);
+			fprintf(stderr, "%s_%4.4d_%2.2d_sectionplot.cmd\n\n",
+					lineroot, linenumber, i + 1);
+		        fprintf(sfp, "#   Section plot %d of %d\n", i + 1, nplot);
+			fprintf(sfp, "mbsegygrid -I %s \\\n\t-S0/%d/%d -T%.2f/%.2f -W3/-0.01/%.2f \\\n\t-G2/50.0/0.1 \\\n\t-O %s_%4.4d_%2.2d_section\n", 
+					output_file, (startshot + i * nshotmax),
+					MIN((startshot  + (i + 1) * nshotmax - 1), endshot),
+					sweep, delay, sweep, lineroot, linenumber, i + 1);
+			fprintf(sfp, "mbm_grdplot -I %s_%4.4d_%2.2d_section.grd \\\n\t%s -Z0/400/1 \\\n\t-Ba250/a0.05g0.05 -G1 -W1/4 -D -V \\\n\t-O %s_%4.4d_%2.2d_sectionplot \\\n\t-L\"%s Line %d Plot %d of %d\"\n",
+					lineroot, linenumber, i + 1, scale, 
+					lineroot, linenumber, i + 1, lineroot, linenumber,
+					i + 1, nplot);
+			fprintf(sfp, "%s_%4.4d_%2.2d_sectionplot.cmd\n\n",
+					lineroot, linenumber, i + 1);
+			fflush(sfp);
+			}
 				    
 		    /* increment line number */
 		    linenumber++;
