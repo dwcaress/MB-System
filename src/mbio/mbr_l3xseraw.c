@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_l3xseraw.c	3/27/2000
- *	$Id: mbr_l3xseraw.c,v 5.17 2006-09-11 18:55:52 caress Exp $
+ *	$Id: mbr_l3xseraw.c,v 5.18 2006-12-15 21:36:16 caress Exp $
  *
  *    Copyright (c) 2000, 2001, 2002, 2003 by 
  *    D. W. Caress (caress@mbari.org)
@@ -26,6 +26,10 @@
  * Additional Authors:	P. A. Cohen and S. Dzurenko
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.17  2006/09/11 18:55:52  caress
+ * Changes during Western Flyer and Thomas Thompson cruises, August-September
+ * 2006.
+ *
  * Revision 5.16  2006/08/04 03:56:41  caress
  * Working towards 5.1.0 release.
  *
@@ -97,7 +101,7 @@
 #include "../../include/mb_swap.h"
 
 
-#define MB_DEBUG 1
+/* #define MB_DEBUG 1 */
 /*
 #define MB_DEBUG2 1
 */
@@ -140,7 +144,7 @@ int mbr_wt_l3xseraw(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_l3xseraw(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.17 2006-09-11 18:55:52 caress Exp $";
+	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.18 2006-12-15 21:36:16 caress Exp $";
 	char	*function_name = "mbr_register_l3xseraw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -273,7 +277,7 @@ int mbr_info_l3xseraw(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.17 2006-09-11 18:55:52 caress Exp $";
+	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.18 2006-12-15 21:36:16 caress Exp $";
 	char	*function_name = "mbr_info_l3xseraw";
 	int	status = MB_SUCCESS;
 
@@ -343,7 +347,7 @@ int mbr_info_l3xseraw(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_l3xseraw(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.17 2006-09-11 18:55:52 caress Exp $";
+	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.18 2006-12-15 21:36:16 caress Exp $";
 	char	*function_name = "mbr_alm_l3xseraw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
