@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_angle.c	1/21/93
- *    $Id: mb_angle.c,v 5.6 2006-09-11 18:55:52 caress Exp $
+ *    $Id: mb_angle.c,v 5.7 2006-12-15 21:35:31 caress Exp $
  *
  *    Copyright (c) 1998, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -85,29 +85,29 @@
  * 
  * 2. Roll-Pitch Coordinates
  * -------------------------
- * The three parameters are r, alpha, and beta, where
- * r is the distance from the origin, alpha is the angle 
- * forward (effectively pitch angle), and beta is the
+ * The three parameters are r, pitch, and roll, where
+ * r is the distance from the origin, pitch is the angle 
+ * forward (effectively pitch angle), and roll is the
  * angle from horizontal in the x-z plane (effectively
  * roll angle). Applying a roll or pitch correction is 
- * simple in these coordinates because pitch is just alpha 
- * and roll is just beta. However, raytracing is complicated 
+ * simple in these coordinates because pitch is just pitch 
+ * and roll is just roll. However, raytracing is complicated 
  * because deflection from vertical has components in both 
- * alpha and beta.
+ * pitch and roll.
  * 
- * 	-PI/2 <= alpha <= PI/2
- * 	0 <= beta <= PI
+ * 	-PI/2 <= pitch <= PI/2
+ * 	0 <= roll <= PI
  * 	
- * 	x = r * COS(alpha) * COS(beta) 
- * 	y = r * SIN(alpha)
- * 	z = r * COS(alpha) * SIN(beta) 
+ * 	x = r * COS(pitch) * COS(roll) 
+ * 	y = r * SIN(pitch)
+ * 	z = r * COS(pitch) * SIN(roll) 
  * 	
- * 	alpha = -PI/2 ---> horizontal, in x-y plane with y negative
- * 	alpha = 0     ---> ship level, zero pitch, in x-z plane
- * 	alpha = PI/2  ---> horizontal, in x-y plane with y positive
- * 	beta = 0      ---> starboard, along positive x-axis
- * 	beta = PI/2   ---> in y-z plane rotated by alpha
- * 	beta = PI     ---> port, along negative x-axis
+ * 	pitch = -PI/2 ---> horizontal, in x-y plane with y negative
+ * 	pitch = 0     ---> ship level, zero pitch, in x-z plane
+ * 	pitch = PI/2  ---> horizontal, in x-y plane with y positive
+ * 	roll = 0      ---> starboard, along positive x-axis
+ * 	roll = PI/2   ---> in y-z plane rotated by pitch
+ * 	roll = PI     ---> port, along negative x-axis
  * 
  * IV. SeaBeam Coordinates
  * ----------------------
@@ -154,7 +154,7 @@
  * particular data format. Currently, most data formats
  * do not contain an alongtrack component to the position
  * values; in these cases the conversion is trivial since
- * phi = beta = 0 and theta = alpha. The angle and travel time 
+ * phi = roll = 0 and theta = pitch. The angle and travel time 
  * values can be accessed using the MBIO function mb_ttimes.
  * All angle values passed by MB-System functions are in
  * degrees rather than radians.
@@ -175,6 +175,10 @@
  * Date:	December 30, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2006/09/11 18:55:52  caress
+ * Changes during Western Flyer and Thomas Thompson cruises, August-September
+ * 2006.
+ *
  * Revision 5.5  2003/04/17 21:05:23  caress
  * Release 5.0.beta30
  *
@@ -216,12 +220,13 @@
 /*--------------------------------------------------------------------*/
 int mb_takeoff_to_rollpitch(int verbose,
 		double theta, double phi,
-		double *alpha, double *beta,
+		double *pitch, double *roll,
 		int *error)
 {
 	char	*function_name = "mb_takeoff_to_rollpitch";
 	int	status = MB_SUCCESS;
 	double	x, y, z;
+	double	asinroll;
 	
 
 	/* print input debug statements */
@@ -241,10 +246,10 @@ int mb_takeoff_to_rollpitch(int verbose,
 	z = cos(DTR * theta);
 
 	/* convert to roll-pitch coordinates */
-	*alpha = asin(y);
-	*beta = acos(x / cos(*alpha));
-	*alpha *= RTD;
-	*beta *= RTD;
+	*roll = acos(x);
+	*pitch = asin(y / sin(*roll));
+	*pitch *= RTD;
+	*roll *= RTD;
 
 	/* assume success */
 	*error = MB_ERROR_NO_ERROR;
@@ -256,8 +261,8 @@ int mb_takeoff_to_rollpitch(int verbose,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       alpha:           %f\n",*alpha);
-		fprintf(stderr,"dbg2       beta:            %f\n",*beta);
+		fprintf(stderr,"dbg2       pitch:           %f\n",*pitch);
+		fprintf(stderr,"dbg2       roll:            %f\n",*roll);
 		fprintf(stderr,"dbg2       error:           %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:          %d\n",status);
@@ -268,14 +273,14 @@ int mb_takeoff_to_rollpitch(int verbose,
 }
 /*--------------------------------------------------------------------*/
 int mb_rollpitch_to_takeoff(int verbose,
-		double alpha, double beta,
+		double pitch, double roll,
 		double *theta, double *phi,
 		int *error)
 {
 	char	*function_name = "mb_rollpitch_to_takeoff";
 	int	status = MB_SUCCESS;
 	double	x, y, z;
-	double	sintheta;	
+	double	sintheta;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -284,14 +289,14 @@ int mb_rollpitch_to_takeoff(int verbose,
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       alpha:      %f\n",alpha);
-		fprintf(stderr,"dbg2       beta:       %f\n",beta);
+		fprintf(stderr,"dbg2       pitch:      %f\n",pitch);
+		fprintf(stderr,"dbg2       roll:       %f\n",roll);
 		}
 		
 	/* convert to cartesian coordinates */
-	x = cos(DTR * alpha) * cos(DTR * beta);
-	y = sin(DTR * alpha);
-	z = cos(DTR * alpha) * sin(DTR * beta);
+	x = cos(DTR * roll);
+	y = sin(DTR * pitch) * sin(DTR * roll);
+	z = cos(DTR * pitch) * sin(DTR * roll);
 
 	/* convert to takeoff angle coordinates */
 	*theta = acos(z);
@@ -404,8 +409,8 @@ int mb_lever(int verbose,
 		double vru_offset_x,
 		double vru_offset_y,
 		double vru_offset_z,
-		double vru_alpha,
-		double vru_beta,
+		double vru_pitch,
+		double vru_roll,
 		double *lever_x,
 		double *lever_y,
 		double *lever_z,
@@ -415,10 +420,10 @@ int mb_lever(int verbose,
 	int	status = MB_SUCCESS;
 	double	x, y, z;
 	double	xx, yy, zz, r;
-	double	alpha, beta;
+	double	pitch, roll;
 
 	/* print input debug statements */
-	if (verbose >= 5)
+	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
@@ -433,15 +438,15 @@ int mb_lever(int verbose,
 		fprintf(stderr,"dbg2       vru_offset_x:   %f\n",vru_offset_x);
 		fprintf(stderr,"dbg2       vru_offset_y:   %f\n",vru_offset_y);
 		fprintf(stderr,"dbg2       vru_offset_z:   %f\n",vru_offset_z);
-		fprintf(stderr,"dbg2       vru_alpha:      %f\n",vru_alpha);
-		fprintf(stderr,"dbg2       vru_beta:       %f\n",vru_beta);
+		fprintf(stderr,"dbg2       vru_pitch:      %f\n",vru_pitch);
+		fprintf(stderr,"dbg2       vru_roll:       %f\n",vru_roll);
 		}
 
 	/* do lever calculation to find heave implied by roll and pitch
 	   for a sonar displaced from the vru:
-		x = r * COS(alpha) * COS(beta) 
-		y = r * SIN(alpha)
-		z = r * COS(alpha) * SIN(beta) */
+		x = r * COS(pitch) * COS(roll) 
+		y = r * SIN(pitch)
+		z = r * COS(pitch) * SIN(roll) */
 	/* get net offset between sonar and vru */
 	xx = sonar_offset_x - vru_offset_x;
 	yy = sonar_offset_y - vru_offset_y;
@@ -452,20 +457,20 @@ int mb_lever(int verbose,
 	if (r > 0.0)
 	    {
 	    /* get initial angles */
-	    alpha = RTD * asin(yy / r);
-	    if (cos(DTR * alpha) != 0.0)
-		beta = RTD * acos(xx / (r * cos(DTR * alpha)));
+	    pitch = RTD * asin(yy / r);
+	    if (cos(DTR * pitch) != 0.0)
+		roll = RTD * acos(xx / (r * cos(DTR * pitch)));
 	    else
-		beta = 0.0;
+		roll = 0.0;
 		
   	    /* apply angle change */
-	    alpha += vru_alpha;
-	    beta += vru_beta;
+	    pitch += vru_pitch;
+	    roll += vru_roll;
 	    
 	    /* calculate new offsets */
-	    x =  r * cos(DTR * alpha) * cos(DTR * beta);
-	    y =  r * sin(DTR * alpha);
-	    z =  r * cos(DTR * alpha) * sin(DTR * beta);
+	    x = r * cos(DTR * roll);
+	    y = r * sin(DTR * pitch) * sin(DTR * roll);
+	    z = r * cos(DTR * pitch) * sin(DTR * roll);
 	    
 	    /* get heave change due to lever arm */
 	    *lever_z =  z - zz;
@@ -477,9 +482,9 @@ int mb_lever(int verbose,
 
 	/* do lever calculation to find position shift implied by roll and pitch
 	   for a sonar displaced from the nav sensor:
-		x = r * COS(alpha) * COS(beta) 
-		y = r * SIN(alpha)
-		z = r * COS(alpha) * SIN(beta) */
+		x = r * COS(pitch) * COS(roll) 
+		y = r * SIN(pitch)
+		z = r * COS(pitch) * SIN(roll) */
 	/* get net offset between sonar and nav sensor */
 	xx = sonar_offset_x - nav_offset_x;
 	yy = sonar_offset_y - nav_offset_y;
@@ -490,20 +495,20 @@ int mb_lever(int verbose,
 	if (r > 0.0)
 	    {
 	    /* get initial angles */
-	    alpha = RTD * asin(yy / r);
-	    if (cos(DTR * alpha) != 0.0)
-		beta = RTD * acos(xx / (r * cos(DTR * alpha)));
+	    pitch = RTD * asin(yy / r);
+	    if (cos(DTR * pitch) != 0.0)
+		roll = RTD * acos(xx / (r * cos(DTR * pitch)));
 	    else
-		beta = 0.0;
+		roll = 0.0;
 		
   	    /* apply angle change */
-	    alpha += vru_alpha;
-	    beta += vru_beta;
+	    pitch += vru_pitch;
+	    roll += vru_roll;
 	    
 	    /* calculate new offsets */
-	    x =  r * cos(DTR * alpha) * cos(DTR * beta);
-	    y =  r * sin(DTR * alpha);
-	    z =  r * cos(DTR * alpha) * sin(DTR * beta);
+	    x = r * cos(DTR * roll);
+	    y = r * sin(DTR * pitch) * sin(DTR * roll);
+	    z = r * cos(DTR * pitch) * sin(DTR * roll);
 	    
 	    /* get position change due to lever arm */
 	    *lever_x =  x - xx;
@@ -520,7 +525,7 @@ int mb_lever(int verbose,
 	status = MB_SUCCESS;
 
 	/* print output debug statements */
-	if (verbose >= 5)
+	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
@@ -537,3 +542,4 @@ int mb_lever(int verbose,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+
