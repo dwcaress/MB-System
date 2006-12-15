@@ -111,7 +111,6 @@ of its operation and then exit immediately.
 .B \-I
 \fI[filepars:]xy_file \fP
 .br
-
 Specifies a file containing (x,y) pairs to be plotted as lines or
 symbols. Optional parameters preceed the file name and consist of a
 list of flag-argument pairs, strung together with colons. These
@@ -430,7 +429,7 @@ onto the (\fIx,y\fP) point: 1 = Lower Left corner,
 needed.
 .TP
 .B \-MGU
-\fP[\fI/dx/dy/\fP][\fIlabel\fP]
+[\fI/dx/dy/\fP][\fIlabel\fP]
 .br
 Draw Unix System time stamp on plot.  User may specify where the lower left corner
 of the stamp should fall on the page relative to lower left corner of plot in inch [Default is (-0.75,-0.75)].  Optionally,

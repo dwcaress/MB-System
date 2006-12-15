@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grdplot.perl	8/6/95
-#    $Id: mbm_grdplot.perl,v 5.25 2006-09-11 18:55:52 caress Exp $
+#    $Id: mbm_grdplot.perl,v 5.26 2006-12-15 21:42:49 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 2000, 2003 by 
 #    D. W. Caress (caress@mbari.org)
@@ -68,10 +68,14 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   October 19, 1994
 #
 # Version:
-#   $Id: mbm_grdplot.perl,v 5.25 2006-09-11 18:55:52 caress Exp $
+#   $Id: mbm_grdplot.perl,v 5.26 2006-12-15 21:42:49 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.25  2006/09/11 18:55:52  caress
+#   Changes during Western Flyer and Thomas Thompson cruises, August-September
+#   2006.
+#
 #   Revision 5.24  2006/08/09 22:36:23  caress
 #   The macro mbm_grdplot now handles calls for a linear plot with
 #   decreasing x values (e.g. using -Jx-0.01/20 to specify the projection).
@@ -344,6 +348,11 @@ $ncpt = 11;
 	@cptbr7 = (255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255);
 	@cptbg7 = (255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255);
 	@cptbb7 = (255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255);
+
+# color pallette 8 - Sealevel (above sealevel - Haxby colors used below sealevel
+	@cptbr8 = (250, 245, 240, 235, 230, 221, 212, 211, 210, 205, 200);
+	@cptbg8 = (250, 240, 230, 221, 212, 201, 190, 180, 170, 160, 150);
+	@cptbb8 = (120, 112, 104,  96,  88,  80,  72,  64,  56,  48,  40);
 
 # Determine the GMT version
 @grdinfo = `grdinfo 2>&1`;
@@ -1673,29 +1682,81 @@ elsif ($color_mode)
 # get colors to use by interpolating defined color pallette
 if ($color_mode)
 	{
-	# set selected color pallette
-	eval "\@cptbr = \@cptbr$color_pallette;";
-	eval "\@cptbg = \@cptbg$color_pallette;";
-	eval "\@cptbb = \@cptbb$color_pallette;";
-
-	# interpolate colors
-	for ($i = 0; $i < $ncolors; $i++)
+	# if doing sealevel colors (different colormaps above and below sealevel 
+	# then generate first Haxby colormap below sealevel and second brown
+	# colormap above sealevel
+	if ($color_pallette != 8)
 		{
-		$xx = ($ncpt - 1) * $i / ($ncolors - 1);
-		$i1 = int($xx);
-		$i2 = $i1 + 1;
-		$red = $cptbr[$i1] 
-			+ ($cptbr[$i2] - $cptbr[$i1])
-			* ($xx - $i1) / ($i2 - $i1);
-		$green = $cptbg[$i1] 
-			+ ($cptbg[$i2] - $cptbg[$i1])
-			* ($xx - $i1) / ($i2 - $i1);
-		$blue = $cptbb[$i1] 
-			+ ($cptbb[$i2] - $cptbb[$i1])
-			* ($xx - $i1) / ($i2 - $i1);
-		push (@cptr, $red);
-		push (@cptg, $green);
-		push (@cptb, $blue);
+		# set selected color pallette
+		eval "\@cptbr = \@cptbr$color_pallette;";
+		eval "\@cptbg = \@cptbg$color_pallette;";
+		eval "\@cptbb = \@cptbb$color_pallette;";
+
+		# interpolate colors
+		for ($i = 0; $i < $ncolors; $i++)
+			{
+			$xx = ($ncpt - 1) * $i / ($ncolors - 1);
+			$i1 = int($xx);
+			$i2 = $i1 + 1;
+			$red = $cptbr[$i1] 
+				+ ($cptbr[$i2] - $cptbr[$i1])
+				* ($xx - $i1) / ($i2 - $i1);
+			$green = $cptbg[$i1] 
+				+ ($cptbg[$i2] - $cptbg[$i1])
+				* ($xx - $i1) / ($i2 - $i1);
+			$blue = $cptbb[$i1] 
+				+ ($cptbb[$i2] - $cptbb[$i1])
+				* ($xx - $i1) / ($i2 - $i1);
+			push (@cptr, $red);
+			push (@cptg, $green);
+			push (@cptb, $blue);
+			}
+		}
+		
+	# if doing sealevel colors (different colormaps above and below sealevel 
+	# then generate first Haxby colormap below sealevel and second brown
+	# colormap above sealevel
+	else
+		{
+		# interpolate colors
+		for ($i = 0; $i < $ncolors; $i++)
+			{
+			$xx = ($ncpt - 1) * $i / ($ncolors - 1);
+			$i1 = int($xx);
+			$i2 = $i1 + 1;
+			$red = $cptbr[$i1] 
+				+ ($cptbr[$i2] - $cptbr1[$i1])
+				* ($xx - $i1) / ($i2 - $i1);
+			$green = $cptbg[$i1] 
+				+ ($cptbg[$i2] - $cptbg1[$i1])
+				* ($xx - $i1) / ($i2 - $i1);
+			$blue = $cptbb[$i1] 
+				+ ($cptbb[$i2] - $cptbb1[$i1])
+				* ($xx - $i1) / ($i2 - $i1);
+			push (@cptr, $red);
+			push (@cptg, $green);
+			push (@cptb, $blue);
+			}
+
+		# interpolate colors
+		for ($i = 0; $i < $ncolors; $i++)
+			{
+			$xx = ($ncpt - 1) * $i / ($ncolors - 1);
+			$i1 = int($xx);
+			$i2 = $i1 + 1;
+			$red = $cptbr[$i1] 
+				+ ($cptbr[$i2] - $cptbr8[$i1])
+				* ($xx - $i1) / ($i2 - $i1);
+			$green = $cptbg[$i1] 
+				+ ($cptbg[$i2] - $cptbg8[$i1])
+				* ($xx - $i1) / ($i2 - $i1);
+			$blue = $cptbb[$i1] 
+				+ ($cptbb[$i2] - $cptbb8[$i1])
+				* ($xx - $i1) / ($i2 - $i1);
+			push (@cptrr, $red);
+			push (@cptgg, $green);
+			push (@cptbb, $blue);
+			}
 		}
 	}
 
