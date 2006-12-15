@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbextractsegy.c	4/18/2004
- *    $Id: mbextractsegy.c,v 5.13 2006-11-26 09:42:01 caress Exp $
+ *    $Id: mbextractsegy.c,v 5.14 2006-12-15 21:42:49 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	April 18, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.13  2006/11/26 09:42:01  caress
+ * Making distribution 5.1.0.
+ *
  * Revision 5.12  2006/11/10 22:36:05  caress
  * Working towards release 5.1.0
  *
@@ -84,8 +87,10 @@
 #define MBES_ROUTE_WAYPOINT_TRANSIT	2
 #define MBES_ROUTE_WAYPOINT_STARTLINE	3
 #define MBES_ROUTE_WAYPOINT_ENDLINE	4
+#define MBES_ONLINE_THRESHOLD		15.0
+#define MBES_ONLINE_COUNT		30
 
-static char rcs_id[] = "$Id: mbextractsegy.c,v 5.13 2006-11-26 09:42:01 caress Exp $";
+static char rcs_id[] = "$Id: mbextractsegy.c,v 5.14 2006-12-15 21:42:49 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
@@ -93,7 +98,7 @@ main (int argc, char **argv)
 {
 	static char program_name[] = "MBextractsegy";
 	static char help_message[] =  "MBextractsegy extracts subbottom profiler, center beam reflection,\nor seismic reflection data from data supported by MB-System and\nrewrites it as a SEGY file in the form used by SIOSEIS.";
-	static char usage_message[] = "mbextractsegy [-Byr/mo/dy/hr/mn/sc/us -Eyr/mo/dy/hr/mn/sc/us -Fformat -Ifile -H -Jxscale/yscale -Osegyfile -Ssampleformat -V]";
+	static char usage_message[] = "mbextractsegy [-Byr/mo/dy/hr/mn/sc/us -Eyr/mo/dy/hr/mn/sc/us -Fformat -Ifile -Jxscale/yscale -Lstartline/lineroot -Osegyfile -Rroutefile -Ssampleformat -H -V]";
 	extern char *optarg;
 	extern int optkind;
 	int	errflg = 0;
@@ -185,6 +190,7 @@ main (int argc, char **argv)
 	int	waypoint;
 	double	*routelon = NULL;
 	double	*routelat = NULL;
+	double	*routeheading = NULL;
 	int	*routewaypoint = NULL;
 	double	range;
 	double	rangethreshold = 25.0;
@@ -221,6 +227,8 @@ main (int argc, char **argv)
 	double	lastlon;
 	double	lastlat;
 	double	lastheading;
+	double	headingdiff;
+	int	oktowrite;
 	double	dx, dy;
 	FILE	*fp = NULL;
 	char	*result;
@@ -455,8 +463,8 @@ main (int argc, char **argv)
 				}
 			else
 				{
-				nget = sscanf(comment,"%lf %lf %lf %d",
-				    &lon, &lat, &topo, &waypoint);
+				nget = sscanf(comment,"%lf %lf %lf %d %lf",
+				    &lon, &lat, &topo, &waypoint, &heading);
 				if (comment[0] == '#')
 					{
 					fprintf(stderr,"buffer:%s",comment);
@@ -480,6 +488,8 @@ main (int argc, char **argv)
 								(char **)&routelon, &error);
 					status = mb_realloc(verbose, nroutepointalloc * sizeof(double),
 								(char **)&routelat, &error);
+					status = mb_realloc(verbose, nroutepointalloc * sizeof(double),
+								(char **)&routeheading, &error);
 					status = mb_realloc(verbose, nroutepointalloc * sizeof(int),
 								(char **)&routewaypoint, &error);
 				    	if (status != MB_SUCCESS)
@@ -498,6 +508,7 @@ main (int argc, char **argv)
 					{
 					routelon[nroutepoint] = lon;
 					routelat[nroutepoint] = lat;
+					routeheading[nroutepoint] = heading;
 					routewaypoint[nroutepoint] = waypoint;
 					nroutepoint++;
 					}
@@ -514,13 +525,14 @@ main (int argc, char **argv)
 		rangelast = 1000 * rangethreshold;
 		seafloordepthmin = -1.0;
 		seafloordepthmax = -1.0;
+		oktowrite = 0;
 
 		/* output status */
 		if (verbose > 0)
 			{
 			/* output info on file output */
 			fprintf(stderr,"Read %d waypoints from route file: %s\n",
-				nroutepoint, output_file);
+				nroutepoint, route_file);
 			}
 		}
 
@@ -765,6 +777,7 @@ main (int argc, char **argv)
 				rangelast = 1000 * rangethreshold;
 				seafloordepthmin = -1.0;
 				seafloordepthmax = -1.0;
+				oktowrite = 0;
 				}
 			else
 				rangelast = range;
@@ -870,30 +883,25 @@ main (int argc, char **argv)
 			    segytraceheader.src_lat = (int)(lastlat * 360000.0);
 		    if (segytraceheader.heading == 0.0)
 			    segytraceheader.heading = lastheading;
-				    
-		    /* write fileheader if needed */
-		    if (status == MB_SUCCESS && nwrite == 0)
+			
+		    /* if following a route check that the vehicle has come on line 
+		    	(within MBES_ONLINE_THRESHOLD degrees)
+		    	before writing any data */
+		    if (nroutepoint > 1 && activewaypoint > 0)
 		    	{
-			segyfileheader.format = 5;
-			segyfileheader.channels = 1;
-			segyfileheader.aux_channels = 0;
-			segyfileheader.sample_interval = segytraceheader.si_micros;
-			segyfileheader.sample_interval_org = segytraceheader.si_micros;
-			segyfileheader.number_samples = segytraceheader.nsamps;
-			segyfileheader.number_samples_org = segytraceheader.nsamps;
-			if (fwrite(&segyasciiheader, 1, MB_SEGY_ASCIIHEADER_LENGTH, fp) 
-						!= MB_SEGY_ASCIIHEADER_LENGTH)
-				{
-				status = MB_FAILURE;
-				error = MB_ERROR_WRITE_FAIL;
-				}
-			else if (fwrite(&segyfileheader, 1, MB_SEGY_FILEHEADER_LENGTH, fp) 
-						!= MB_SEGY_FILEHEADER_LENGTH)
-				{
-				status = MB_FAILURE;
-				error = MB_ERROR_WRITE_FAIL;
-				}
+			headingdiff = fabs(routeheading[activewaypoint-1] - segytraceheader.heading);
+			if (headingdiff > 180.0)
+				headingdiff = 360.0 - headingdiff;
+			if (headingdiff < MBES_ONLINE_THRESHOLD)
+				oktowrite++;
+			else
+				oktowrite = 0;
+/*fprintf(stderr,"heading: %f %f %f oktowrite:%d\n", 
+routeheading[activewaypoint-1],segytraceheader.heading,headingdiff,oktowrite);*/
 			}
+		    else
+		    	oktowrite = MBES_ONLINE_COUNT;
+		    
 				    
 		    /* note good status */
 		    if (status == MB_SUCCESS)
@@ -944,102 +952,131 @@ main (int argc, char **argv)
 				segytraceheader.year,segytraceheader.day_of_yr,
 				segytraceheader.hour,segytraceheader.min,segytraceheader.sec,segytraceheader.mils,
 				segytraceheader.nsamps,segytraceheader.si_micros,tracemin,tracemax);
-			
-			/* insert segy header data into output buffer */
-			index = 0;
-			mb_put_binary_int(MB_NO, segytraceheader.seq_num, (void *) &buffer[index]); index += 4;
-			mb_put_binary_int(MB_NO, segytraceheader.seq_reel, (void *) &buffer[index]); index += 4;
-			mb_put_binary_int(MB_NO, segytraceheader.shot_num, (void *) &buffer[index]); index += 4;
-			mb_put_binary_int(MB_NO, segytraceheader.shot_tr, (void *) &buffer[index]); index += 4;
-			mb_put_binary_int(MB_NO, segytraceheader.espn, (void *) &buffer[index]); index += 4;
-			mb_put_binary_int(MB_NO, segytraceheader.rp_num, (void *) &buffer[index]); index += 4;
-			mb_put_binary_int(MB_NO, segytraceheader.rp_tr, (void *) &buffer[index]); index += 4;
-			mb_put_binary_short(MB_NO, segytraceheader.trc_id, (void *) &buffer[index]); index += 2;
-			mb_put_binary_short(MB_NO, segytraceheader.num_vstk, (void *) &buffer[index]); index += 2;
-			mb_put_binary_short(MB_NO, segytraceheader.cdp_fold, (void *) &buffer[index]); index += 2;
-			mb_put_binary_short(MB_NO, segytraceheader.use, (void *) &buffer[index]); index += 2;
-			mb_put_binary_int(MB_NO, segytraceheader.range, (void *) &buffer[index]); index += 4;
-			mb_put_binary_int(MB_NO, segytraceheader.grp_elev, (void *) &buffer[index]); index += 4;
-			mb_put_binary_int(MB_NO, segytraceheader.src_elev, (void *) &buffer[index]); index += 4;
-			mb_put_binary_int(MB_NO, segytraceheader.src_depth, (void *) &buffer[index]); index += 4;
-			mb_put_binary_int(MB_NO, segytraceheader.grp_datum, (void *) &buffer[index]); index += 4;
-			mb_put_binary_int(MB_NO, segytraceheader.src_datum, (void *) &buffer[index]); index += 4;
-			mb_put_binary_int(MB_NO, segytraceheader.src_wbd, (void *) &buffer[index]); index += 4;
-			mb_put_binary_int(MB_NO, segytraceheader.grp_wbd, (void *) &buffer[index]); index += 4;
-        		mb_put_binary_short(MB_NO, segytraceheader.elev_scalar, (void *) &buffer[index]); index += 2;
-        		mb_put_binary_short(MB_NO, segytraceheader.coord_scalar, (void *) &buffer[index]); index += 2;
-			mb_put_binary_int(MB_NO, segytraceheader.src_long, (void *) &buffer[index]); index += 4;
-			mb_put_binary_int(MB_NO, segytraceheader.src_lat, (void *) &buffer[index]); index += 4;
-			mb_put_binary_int(MB_NO, segytraceheader.grp_long, (void *) &buffer[index]); index += 4;
-			mb_put_binary_int(MB_NO, segytraceheader.grp_lat, (void *) &buffer[index]); index += 4;
-        		mb_put_binary_short(MB_NO, segytraceheader.coord_units, (void *) &buffer[index]); index += 2;
-        		mb_put_binary_short(MB_NO, segytraceheader.wvel, (void *) &buffer[index]); index += 2;
-        		mb_put_binary_short(MB_NO, segytraceheader.sbvel, (void *) &buffer[index]); index += 2;
-        		mb_put_binary_short(MB_NO, segytraceheader.src_up_vel, (void *) &buffer[index]); index += 2;
-        		mb_put_binary_short(MB_NO, segytraceheader.grp_up_vel, (void *) &buffer[index]); index += 2;
-        		mb_put_binary_short(MB_NO, segytraceheader.src_static, (void *) &buffer[index]); index += 2;
-        		mb_put_binary_short(MB_NO, segytraceheader.grp_static, (void *) &buffer[index]); index += 2;
-        		mb_put_binary_short(MB_NO, segytraceheader.tot_static, (void *) &buffer[index]); index += 2;
-        		mb_put_binary_short(MB_NO, segytraceheader.laga, (void *) &buffer[index]); index += 2;
-			mb_put_binary_int(MB_NO, segytraceheader.delay_mils, (void *) &buffer[index]); index += 4;
-        		mb_put_binary_short(MB_NO, segytraceheader.smute_mils, (void *) &buffer[index]); index += 2;
-        		mb_put_binary_short(MB_NO, segytraceheader.emute_mils, (void *) &buffer[index]); index += 2;
-        		mb_put_binary_short(MB_NO, segytraceheader.nsamps, (void *) &buffer[index]); index += 2;
-        		mb_put_binary_short(MB_NO, segytraceheader.si_micros, (void *) &buffer[index]); index += 2;
-			for (i=0;i<19;i++)
-				{
-        			mb_put_binary_short(MB_NO, segytraceheader.other_1[i], (void *) &buffer[index]); index += 2;
-				}
-        		mb_put_binary_short(MB_NO, segytraceheader.year, (void *) &buffer[index]); index += 2;
-        		mb_put_binary_short(MB_NO, segytraceheader.day_of_yr, (void *) &buffer[index]); index += 2;
-        		mb_put_binary_short(MB_NO, segytraceheader.hour, (void *) &buffer[index]); index += 2;
-        		mb_put_binary_short(MB_NO, segytraceheader.min, (void *) &buffer[index]); index += 2;
-        		mb_put_binary_short(MB_NO, segytraceheader.sec, (void *) &buffer[index]); index += 2;
-        		mb_put_binary_short(MB_NO, segytraceheader.mils, (void *) &buffer[index]); index += 2;
-        		mb_put_binary_short(MB_NO, segytraceheader.tr_weight, (void *) &buffer[index]); index += 2;
-			for (i=0;i<5;i++)
-				{
-        			mb_put_binary_short(MB_NO, segytraceheader.other_2[i], (void *) &buffer[index]); index += 2;
-				}
-			mb_put_binary_float(MB_NO, segytraceheader.delay, (void *) &buffer[index]); index += 4;
-        		mb_put_binary_float(MB_NO, segytraceheader.smute_sec, (void *) &buffer[index]); index += 4;
-        		mb_put_binary_float(MB_NO, segytraceheader.emute_sec, (void *) &buffer[index]); index += 4;
-        		mb_put_binary_float(MB_NO, segytraceheader.si_secs, (void *) &buffer[index]); index += 4;
-        		mb_put_binary_float(MB_NO, segytraceheader.wbt_secs, (void *) &buffer[index]); index += 4;
-			mb_put_binary_int(MB_NO, segytraceheader.end_of_rp, (void *) &buffer[index]); index += 4;
-        		mb_put_binary_float(MB_NO, segytraceheader.dummy1, (void *) &buffer[index]); index += 4;
-        		mb_put_binary_float(MB_NO, segytraceheader.dummy2, (void *) &buffer[index]); index += 4;
-        		mb_put_binary_float(MB_NO, segytraceheader.dummy3, (void *) &buffer[index]); index += 4;
-        		mb_put_binary_float(MB_NO, segytraceheader.dummy4, (void *) &buffer[index]); index += 4;
-        		mb_put_binary_float(MB_NO, segytraceheader.dummy5, (void *) &buffer[index]); index += 4;
-        		mb_put_binary_float(MB_NO, segytraceheader.dummy6, (void *) &buffer[index]); index += 4;
-        		mb_put_binary_float(MB_NO, segytraceheader.dummy7, (void *) &buffer[index]); index += 4;
-        		mb_put_binary_float(MB_NO, segytraceheader.dummy8, (void *) &buffer[index]); index += 4;
-        		mb_put_binary_float(MB_NO, segytraceheader.heading, (void *) &buffer[index]); index += 4;
 
-			/* write out segy header */
-			if (fwrite(buffer,1,MB_SEGY_TRACEHEADER_LENGTH,fp) 
-						!= MB_SEGY_TRACEHEADER_LENGTH)
-				{
-				status = MB_FAILURE;
-				error = MB_ERROR_WRITE_FAIL;
-				}
-			
-			/* insert segy data into output buffer */
-			index = 0;
-			for (i=0;i<segytraceheader.nsamps;i++)
-				{
-        			mb_put_binary_float(MB_NO, segydata[i], (void *) &buffer[index]); index += 4;
-				}
+			/* only write data if ok */
+			if (oktowrite >= MBES_ONLINE_COUNT)
+				{	
+				    
+				/* write fileheader if needed */
+				if (status == MB_SUCCESS && nwrite == 0)
+		    		    {
+				    segyfileheader.format = 5;
+				    segyfileheader.channels = 1;
+				    segyfileheader.aux_channels = 0;
+				    segyfileheader.sample_interval = segytraceheader.si_micros;
+				    segyfileheader.sample_interval_org = segytraceheader.si_micros;
+				    segyfileheader.number_samples = segytraceheader.nsamps;
+				    segyfileheader.number_samples_org = segytraceheader.nsamps;
+				    if (fwrite(&segyasciiheader, 1, MB_SEGY_ASCIIHEADER_LENGTH, fp) 
+							    != MB_SEGY_ASCIIHEADER_LENGTH)
+					    {
+					    status = MB_FAILURE;
+					    error = MB_ERROR_WRITE_FAIL;
+					    }
+				    else if (fwrite(&segyfileheader, 1, MB_SEGY_FILEHEADER_LENGTH, fp) 
+							    != MB_SEGY_FILEHEADER_LENGTH)
+					    {
+					    status = MB_FAILURE;
+					    error = MB_ERROR_WRITE_FAIL;
+					    }
+				    }
 
-			/* write out data */
-			nwrite++;
-			if (status == MB_SUCCESS
-				&& fwrite(buffer, 1, segytraceheader.nsamps * samplesize, fp) 
-						!= segytraceheader.nsamps * samplesize)
-				{
-				status = MB_FAILURE;
-				error = MB_ERROR_WRITE_FAIL;
+				/* insert segy header data into output buffer */
+				index = 0;
+				mb_put_binary_int(MB_NO, segytraceheader.seq_num, (void *) &buffer[index]); index += 4;
+				mb_put_binary_int(MB_NO, segytraceheader.seq_reel, (void *) &buffer[index]); index += 4;
+				mb_put_binary_int(MB_NO, segytraceheader.shot_num, (void *) &buffer[index]); index += 4;
+				mb_put_binary_int(MB_NO, segytraceheader.shot_tr, (void *) &buffer[index]); index += 4;
+				mb_put_binary_int(MB_NO, segytraceheader.espn, (void *) &buffer[index]); index += 4;
+				mb_put_binary_int(MB_NO, segytraceheader.rp_num, (void *) &buffer[index]); index += 4;
+				mb_put_binary_int(MB_NO, segytraceheader.rp_tr, (void *) &buffer[index]); index += 4;
+				mb_put_binary_short(MB_NO, segytraceheader.trc_id, (void *) &buffer[index]); index += 2;
+				mb_put_binary_short(MB_NO, segytraceheader.num_vstk, (void *) &buffer[index]); index += 2;
+				mb_put_binary_short(MB_NO, segytraceheader.cdp_fold, (void *) &buffer[index]); index += 2;
+				mb_put_binary_short(MB_NO, segytraceheader.use, (void *) &buffer[index]); index += 2;
+				mb_put_binary_int(MB_NO, segytraceheader.range, (void *) &buffer[index]); index += 4;
+				mb_put_binary_int(MB_NO, segytraceheader.grp_elev, (void *) &buffer[index]); index += 4;
+				mb_put_binary_int(MB_NO, segytraceheader.src_elev, (void *) &buffer[index]); index += 4;
+				mb_put_binary_int(MB_NO, segytraceheader.src_depth, (void *) &buffer[index]); index += 4;
+				mb_put_binary_int(MB_NO, segytraceheader.grp_datum, (void *) &buffer[index]); index += 4;
+				mb_put_binary_int(MB_NO, segytraceheader.src_datum, (void *) &buffer[index]); index += 4;
+				mb_put_binary_int(MB_NO, segytraceheader.src_wbd, (void *) &buffer[index]); index += 4;
+				mb_put_binary_int(MB_NO, segytraceheader.grp_wbd, (void *) &buffer[index]); index += 4;
+        			mb_put_binary_short(MB_NO, segytraceheader.elev_scalar, (void *) &buffer[index]); index += 2;
+        			mb_put_binary_short(MB_NO, segytraceheader.coord_scalar, (void *) &buffer[index]); index += 2;
+				mb_put_binary_int(MB_NO, segytraceheader.src_long, (void *) &buffer[index]); index += 4;
+				mb_put_binary_int(MB_NO, segytraceheader.src_lat, (void *) &buffer[index]); index += 4;
+				mb_put_binary_int(MB_NO, segytraceheader.grp_long, (void *) &buffer[index]); index += 4;
+				mb_put_binary_int(MB_NO, segytraceheader.grp_lat, (void *) &buffer[index]); index += 4;
+        			mb_put_binary_short(MB_NO, segytraceheader.coord_units, (void *) &buffer[index]); index += 2;
+        			mb_put_binary_short(MB_NO, segytraceheader.wvel, (void *) &buffer[index]); index += 2;
+        			mb_put_binary_short(MB_NO, segytraceheader.sbvel, (void *) &buffer[index]); index += 2;
+        			mb_put_binary_short(MB_NO, segytraceheader.src_up_vel, (void *) &buffer[index]); index += 2;
+        			mb_put_binary_short(MB_NO, segytraceheader.grp_up_vel, (void *) &buffer[index]); index += 2;
+        			mb_put_binary_short(MB_NO, segytraceheader.src_static, (void *) &buffer[index]); index += 2;
+        			mb_put_binary_short(MB_NO, segytraceheader.grp_static, (void *) &buffer[index]); index += 2;
+        			mb_put_binary_short(MB_NO, segytraceheader.tot_static, (void *) &buffer[index]); index += 2;
+        			mb_put_binary_short(MB_NO, segytraceheader.laga, (void *) &buffer[index]); index += 2;
+				mb_put_binary_int(MB_NO, segytraceheader.delay_mils, (void *) &buffer[index]); index += 4;
+        			mb_put_binary_short(MB_NO, segytraceheader.smute_mils, (void *) &buffer[index]); index += 2;
+        			mb_put_binary_short(MB_NO, segytraceheader.emute_mils, (void *) &buffer[index]); index += 2;
+        			mb_put_binary_short(MB_NO, segytraceheader.nsamps, (void *) &buffer[index]); index += 2;
+        			mb_put_binary_short(MB_NO, segytraceheader.si_micros, (void *) &buffer[index]); index += 2;
+				for (i=0;i<19;i++)
+					{
+        				mb_put_binary_short(MB_NO, segytraceheader.other_1[i], (void *) &buffer[index]); index += 2;
+					}
+        			mb_put_binary_short(MB_NO, segytraceheader.year, (void *) &buffer[index]); index += 2;
+        			mb_put_binary_short(MB_NO, segytraceheader.day_of_yr, (void *) &buffer[index]); index += 2;
+        			mb_put_binary_short(MB_NO, segytraceheader.hour, (void *) &buffer[index]); index += 2;
+        			mb_put_binary_short(MB_NO, segytraceheader.min, (void *) &buffer[index]); index += 2;
+        			mb_put_binary_short(MB_NO, segytraceheader.sec, (void *) &buffer[index]); index += 2;
+        			mb_put_binary_short(MB_NO, segytraceheader.mils, (void *) &buffer[index]); index += 2;
+        			mb_put_binary_short(MB_NO, segytraceheader.tr_weight, (void *) &buffer[index]); index += 2;
+				for (i=0;i<5;i++)
+					{
+        				mb_put_binary_short(MB_NO, segytraceheader.other_2[i], (void *) &buffer[index]); index += 2;
+					}
+				mb_put_binary_float(MB_NO, segytraceheader.delay, (void *) &buffer[index]); index += 4;
+        			mb_put_binary_float(MB_NO, segytraceheader.smute_sec, (void *) &buffer[index]); index += 4;
+        			mb_put_binary_float(MB_NO, segytraceheader.emute_sec, (void *) &buffer[index]); index += 4;
+        			mb_put_binary_float(MB_NO, segytraceheader.si_secs, (void *) &buffer[index]); index += 4;
+        			mb_put_binary_float(MB_NO, segytraceheader.wbt_secs, (void *) &buffer[index]); index += 4;
+				mb_put_binary_int(MB_NO, segytraceheader.end_of_rp, (void *) &buffer[index]); index += 4;
+        			mb_put_binary_float(MB_NO, segytraceheader.dummy1, (void *) &buffer[index]); index += 4;
+        			mb_put_binary_float(MB_NO, segytraceheader.dummy2, (void *) &buffer[index]); index += 4;
+        			mb_put_binary_float(MB_NO, segytraceheader.dummy3, (void *) &buffer[index]); index += 4;
+        			mb_put_binary_float(MB_NO, segytraceheader.dummy4, (void *) &buffer[index]); index += 4;
+        			mb_put_binary_float(MB_NO, segytraceheader.dummy5, (void *) &buffer[index]); index += 4;
+        			mb_put_binary_float(MB_NO, segytraceheader.dummy6, (void *) &buffer[index]); index += 4;
+        			mb_put_binary_float(MB_NO, segytraceheader.dummy7, (void *) &buffer[index]); index += 4;
+        			mb_put_binary_float(MB_NO, segytraceheader.dummy8, (void *) &buffer[index]); index += 4;
+        			mb_put_binary_float(MB_NO, segytraceheader.heading, (void *) &buffer[index]); index += 4;
+
+				/* write out segy header */
+				if (fwrite(buffer,1,MB_SEGY_TRACEHEADER_LENGTH,fp) 
+							!= MB_SEGY_TRACEHEADER_LENGTH)
+					{
+					status = MB_FAILURE;
+					error = MB_ERROR_WRITE_FAIL;
+					}
+
+				/* insert segy data into output buffer */
+				index = 0;
+				for (i=0;i<segytraceheader.nsamps;i++)
+					{
+        				mb_put_binary_float(MB_NO, segydata[i], (void *) &buffer[index]); index += 4;
+					}
+
+				/* write out data */
+				nwrite++;
+				if (status == MB_SUCCESS
+					&& fwrite(buffer, 1, segytraceheader.nsamps * samplesize, fp) 
+							!= segytraceheader.nsamps * samplesize)
+					{
+					status = MB_FAILURE;
+					error = MB_ERROR_WRITE_FAIL;
+					}
 				}
 			
 			}
@@ -1192,6 +1229,7 @@ fprintf(stderr,"seafloordepthmin:%f seafloordepthmax:%f\n", seafloordepthmin, se
 		{	    
 		status = mb_free(verbose, (char **)&routelon, &error);
 		status = mb_free(verbose, (char **)&routelat, &error);
+		status = mb_free(verbose, (char **)&routeheading, &error);
 		status = mb_free(verbose, (char **)&routewaypoint, &error);
 		}
 

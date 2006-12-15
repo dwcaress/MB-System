@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_nav.c	10/28/2003
- *    $Id: mbview_nav.c,v 5.12 2006-06-16 19:30:58 caress Exp $
+ *    $Id: mbview_nav.c,v 5.13 2006-12-15 21:42:49 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -18,6 +18,9 @@
  * Date:	October 28, 2003
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.12  2006/06/16 19:30:58  caress
+ * Check in after the Santa Monica Basin Mapping AUV Expedition.
+ *
  * Revision 5.11  2006/04/26 22:06:39  caress
  * Improved profile view feature and enabled export of profile data.
  *
@@ -105,7 +108,7 @@ static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 static char		value_string[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_nav.c,v 5.12 2006-06-16 19:30:58 caress Exp $";
+static char rcs_id[]="$Id: mbview_nav.c,v 5.13 2006-12-15 21:42:49 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_getnavcount(int verbose, int instance,
@@ -1929,7 +1932,8 @@ int mbview_drawnav(int instance, int rez)
 				{
 				/* set size and color */
 				if (shared.shareddata.navs[inav].navpts[jpoint].selected == MB_YES
-					|| shared.shareddata.navs[inav].navpts[jpoint+1].selected == MB_YES)
+					|| (jpoint < shared.shareddata.navs[inav].npoints - 1
+						&& shared.shareddata.navs[inav].navpts[jpoint+1].selected == MB_YES))
 					{
 					glColor3f(colortable_object_red[MBV_COLOR_RED], 
 						colortable_object_green[MBV_COLOR_RED], 

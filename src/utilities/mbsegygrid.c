@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsegygrid.c	6/12/2004
- *    $Id: mbsegygrid.c,v 5.12 2006-08-09 22:41:27 caress Exp $
+ *    $Id: mbsegygrid.c,v 5.13 2006-12-15 21:42:49 caress Exp $
  *
  *    Copyright (c) 2004, 2005, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	June 12, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.12  2006/08/09 22:41:27  caress
+ * Fixed programs that read or write grids so that they do not use the GMT_begin() function; these programs will now work when GMT is built in the default fashion, when GMT is built in the default fashion, with "advisory file locking" enabled.
+ *
  * Revision 5.11  2006/06/22 04:45:43  caress
  * Working towards 5.1.0
  *
@@ -109,7 +112,7 @@ char	*getenv();
 	stderr if verbose > 1) */
 FILE	*outfp;
 
-static char rcs_id[] = "$Id: mbsegygrid.c,v 5.12 2006-08-09 22:41:27 caress Exp $";
+static char rcs_id[] = "$Id: mbsegygrid.c,v 5.13 2006-12-15 21:42:49 caress Exp $";
 static char program_name[] = "MBsegygrid";
 static char help_message[] =  "MBsegygrid grids trace data from segy data files.";
 static char usage_message[] = "MBsegygrid -Ifile -Oroot [-Ashotscale/timescale \n\
@@ -748,7 +751,7 @@ ix,iy,k,ptrace[iy],wtrace[iy],grid[k]);*/
 	else
 		{
 		strcpy(xlabel, "Trace Number");
-		strcpy(ylabel, "Time (seconds)");
+		strcpy(ylabel, "Travel Time (seconds)");
 		dx = (double) decimatex;
 		dy = sampleinterval / decimatey;
 		}

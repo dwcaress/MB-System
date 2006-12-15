@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb7k2jstar.c	5/19/2005
- *    $Id: mb7k2jstar.c,v 5.6 2006-04-26 22:05:25 caress Exp $
+ *    $Id: mb7k2jstar.c,v 5.7 2006-12-15 21:42:49 caress Exp $
  *
  *    Copyright (c) 2005 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	May 19, 2005
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2006/04/26 22:05:25  caress
+ * Changes to handle MBARI Mapping AUV data better.
+ *
  * Revision 5.5  2006/04/19 18:32:07  caress
  * Allowed smoothing of extracted sidescan.
  *
@@ -68,8 +71,14 @@
 #define	MB7K2JSTAR_BOTTOMPICK_ARRIVAL		3
 #define	MB7K2JSTAR_SSGAIN_OFF			0
 #define	MB7K2JSTAR_SSGAIN_TVG_1OVERR		1
+#define MBES_ALLOC_NUM			128
+#define MBES_ROUTE_WAYPOINT_NONE		0
+#define MBES_ROUTE_WAYPOINT_SIMPLE	1
+#define MBES_ROUTE_WAYPOINT_TRANSIT	2
+#define MBES_ROUTE_WAYPOINT_STARTLINE	3
+#define MBES_ROUTE_WAYPOINT_ENDLINE	4
 
-static char rcs_id[] = "$Id: mb7k2jstar.c,v 5.6 2006-04-26 22:05:25 caress Exp $";
+static char rcs_id[] = "$Id: mb7k2jstar.c,v 5.7 2006-12-15 21:42:49 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
@@ -77,7 +86,7 @@ main (int argc, char **argv)
 {
 	static char program_name[] = "mb7k2jstar";
 	static char help_message[] =  "mb7k2jstar extracts Edgetech subbottom profiler and sidescan data \nfrom Reson 7k format data and outputs in the Edgetech Jstar format.";
-	static char usage_message[] = "mb7k2jstar [-Ifile -Atype -Bmode[/threshold] -C -Fformat -Ooutfile -H -V]";
+	static char usage_message[] = "mb7k2jstar [-Ifile -Atype -Bmode[/threshold] -C -Fformat -Lstartline/lineroot -Ooutfile -Rroutefile -X -H -V]";
 	extern char *optarg;
 	extern int optkind;
 	int	errflg = 0;
@@ -95,6 +104,8 @@ main (int argc, char **argv)
 	int	read_datalist = MB_NO;
 	char	read_file[MB_PATH_MAXLINE];
 	char	output_file[MB_PATH_MAXLINE];
+	char	current_output_file[MB_PATH_MAXLINE];
+	int	new_output_file = MB_YES;
 	int	output_file_set = MB_NO;
 	void	*datalist;
 	int	look_processed = MB_DATALIST_LOOK_YES;
@@ -186,6 +197,28 @@ main (int argc, char **argv)
 	/* sidescan gain mode */
 	int	gainmode = MB7K2JSTAR_SSGAIN_OFF;
 	double	gainfactor = 1.0;
+	int	ssflip = MB_NO;
+	
+	/* route and auto-line data */
+	char	route_file[MB_PATH_MAXLINE];
+	int	route_file_set = MB_NO;
+	int	rawroutefile = MB_NO;
+	char	lineroot[MB_PATH_MAXLINE];
+	int	nroutepoint = 0;
+	int	nroutepointalloc = 0;
+	double	lon;
+	double	lat;
+	double	topo;
+	int	waypoint;
+	double	*routelon = NULL;
+	double	*routelat = NULL;
+	int	*routewaypoint = NULL;
+	double	range;
+	double	rangethreshold = 25.0;
+	double	rangelast;
+	int	activewaypoint = 0;
+	int	startline = 1;
+	int	linenumber;
 	
 	/* counting variables */
 	int	nreaddata = 0;
@@ -210,7 +243,8 @@ main (int argc, char **argv)
 	int	nwritesshitot = 0;
 	
 	int	mode;
-	int	format_status, format_guess, format_output;
+	int	format_status, format_guess;
+	int	format_output = MBF_EDGJSTAR;
 	int	shortspersample;
 	int	trace_size;
 	char	*data;
@@ -224,6 +258,15 @@ main (int argc, char **argv)
 	int	beam_min;
 	int	smooth = 0;
 	double	factor;
+	double	mtodeglon, mtodeglat;
+	double	lastlon;
+	double	lastlat;
+	double	lastheading;
+	double	dx, dy;
+	FILE	*fp = NULL;
+	char	*result;
+	int	nget;
+	int	point_ok;
 	
 	int	read_data;
 	int	found;
@@ -238,7 +281,7 @@ main (int argc, char **argv)
 	strcpy (read_file, "datalist.mb-1");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "A:a:B:b:CcF:f:G:g:I:i:O:o:S:s:T:t:VvHh")) != -1)
+	while ((c = getopt(argc, argv, "A:a:B:b:CcF:f:G:g:I:i:L:l:O:o:R:r:S:s:T:t:XxVvHh")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -319,10 +362,21 @@ main (int argc, char **argv)
 			sscanf (optarg,"%s", read_file);
 			flag++;
 			break;
+		case 'L':
+		case 'l':
+			sscanf (optarg,"%d/%s", &startline, lineroot);
+			flag++;
+			break;
 		case 'O':
 		case 'o':
 			sscanf (optarg,"%s", output_file);
 			output_file_set  = MB_YES;
+			flag++;
+			break;
+		case 'R':
+		case 'r':
+			sscanf (optarg,"%s", route_file);
+			route_file_set = MB_YES;
 			flag++;
 			break;
 		case 'S':
@@ -333,6 +387,11 @@ main (int argc, char **argv)
 		case 'T':
 		case 't':
 			sscanf (optarg,"%lf", &timeshift);
+			flag++;
+			break;
+		case 'X':
+		case 'x':
+			ssflip = MB_YES;
 			flag++;
 			break;
 		case '?':
@@ -396,8 +455,11 @@ main (int argc, char **argv)
 		fprintf(stderr,"dbg2       gainmode:            %d\n",gainmode);
 		fprintf(stderr,"dbg2       gainfactor:          %f\n",gainfactor);
 		fprintf(stderr,"dbg2       file:                %s\n",file);
+		fprintf(stderr,"dbg2       route_file_set:      %d\n",route_file_set);
+		fprintf(stderr,"dbg2       route_file:          %s\n",route_file);
 		fprintf(stderr,"dbg2       output_file:         %s\n",output_file);
 		fprintf(stderr,"dbg2       output_file_set:     %d\n",output_file_set);
+		fprintf(stderr,"dbg2       lineroot:            %s\n",lineroot);
 		fprintf(stderr,"dbg2       extract_sbp:         %d\n",extract_sbp);
 		fprintf(stderr,"dbg2       extract_sslow:       %d\n",extract_sslow);
 		fprintf(stderr,"dbg2       extract_sshigh:      %d\n",extract_sshigh);
@@ -430,6 +492,109 @@ main (int argc, char **argv)
 		fprintf(stdout, "     Low Sidescan\n");
 	if (extract_sshigh == MB_YES)
 		fprintf(stdout, "     High Sidescan\n");
+	if (ssflip == MB_YES)
+		fprintf(stdout, "     Sidescan port and starboard exchanged\n");
+		
+	/* set starting line number and output file if route read */
+	if (route_file_set == MB_YES)
+		{
+		linenumber = startline;
+		sprintf(output_file, "%s_%4.4d.mb132", lineroot, linenumber);
+		}
+	
+	/* new output file obviously needed */
+	new_output_file = MB_YES;
+
+	/* if specified read route file */
+	if (route_file_set == MB_YES)
+		{	    
+		/* open the input file */
+		if ((fp = fopen(route_file, "r")) == NULL) 
+			{
+			error = MB_ERROR_OPEN_FAIL;
+			status == MB_FAILURE;
+			fprintf(stderr,"\nUnable to open route file <%s> for reading\n",route_file);
+			exit(status);
+			}
+		rawroutefile = MB_NO;
+		while ((result = fgets(comment,MB_PATH_MAXLINE,fp)) == comment)
+		    	{
+			if (comment[0] == '#')
+				{
+				if (strncmp(comment,"## Route File Version", 21) == 0)
+					{
+					rawroutefile = MB_NO;
+					}
+				}
+			else
+				{
+				nget = sscanf(comment,"%lf %lf %lf %d",
+				    &lon, &lat, &topo, &waypoint);
+				if (comment[0] == '#')
+					{
+					fprintf(stderr,"buffer:%s",comment);
+					if (strncmp(comment,"## Route File Version", 21) == 0)
+						{
+						rawroutefile = MB_NO;
+						}
+					}
+		    		if ((rawroutefile == MB_YES && nget >= 2)
+					|| (rawroutefile == MB_NO && nget >= 3 && waypoint > MBES_ROUTE_WAYPOINT_NONE))
+					point_ok = MB_YES;
+				else
+					point_ok = MB_NO;
+			    
+				/* if good data check for need to allocate more space */
+				if (point_ok == MB_YES
+					&& nroutepoint + 1 > nroutepointalloc)
+				    	{
+				    	nroutepointalloc += MBES_ALLOC_NUM;
+					status = mb_realloc(verbose, nroutepointalloc * sizeof(double),
+								(char **)&routelon, &error);
+					status = mb_realloc(verbose, nroutepointalloc * sizeof(double),
+								(char **)&routelat, &error);
+					status = mb_realloc(verbose, nroutepointalloc * sizeof(int),
+								(char **)&routewaypoint, &error);
+				    	if (status != MB_SUCCESS)
+					    	{
+						mb_error(verbose,error,&message);
+						fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",
+							message);
+						fprintf(stderr,"\nProgram <%s> Terminated\n",
+							program_name);
+						exit(error);
+					    	}
+				    	}
+
+				/* add good point to route */
+				if (point_ok == MB_YES && nroutepointalloc > nroutepoint + 1)
+					{
+					routelon[nroutepoint] = lon;
+					routelat[nroutepoint] = lat;
+					routewaypoint[nroutepoint] = waypoint;
+					nroutepoint++;
+					}
+				}
+			}
+
+		/* close the file */
+		fclose(fp);
+		fp = NULL;
+		
+		/* set starting values */
+		activewaypoint = 1;
+		mb_coor_scale(verbose,routelat[activewaypoint], &mtodeglon, &mtodeglat);
+		rangelast = 1000 * rangethreshold;
+
+		/* output status */
+		if (verbose > 0)
+			{
+			/* output info on file output */
+			fprintf(stderr,"\nImported %d waypoints from route file: %s\n",
+				nroutepoint, route_file);
+			}
+		}
+
 
 	/* get format if required */
 	if (format == 0)
@@ -555,84 +720,48 @@ main (int argc, char **argv)
 		exit(error);
 		}
 		
-	/* set up output file */
+	/* set up output file name if needed */
 	if (error == MB_ERROR_NO_ERROR)
-		{			
-		if ((output_file_set == MB_YES
-			&& ombio_ptr == NULL)
-			|| output_file_set == MB_NO)
+		{
+		if (output_file_set == MB_YES && ombio_ptr == NULL)
 			{
-			/* close any old output file unless a single file has been specified */
-			if (ombio_ptr != NULL)
+			/* set flag to open new output file */
+			new_output_file = MB_YES;
+			}
+			
+		else if (output_file_set == MB_NO && route_file_set == MB_NO)
+			{
+			new_output_file = MB_YES;
+			format_status = mb_get_format(verbose, file, output_file, 
+		    				&format_guess, &error);
+			if (format_status != MB_SUCCESS || format_guess != format)
 				{
-				/* close the swath file */
-				status = mb_close(verbose,&ombio_ptr,&error);
-
-				/* generate inf file */
-				if (status == MB_SUCCESS)
-					{
-					status = mb_make_info(verbose, MB_YES, 
-								output_file, 
-								format_output, 
-								&error);
-					}
+				strcpy(output_file, file);
 				}
-				
-			/* get new output file name */
-			if (output_file_set == MB_NO)
+			if (output_file[strlen(output_file)-1] == 'p')
 				{
-				format_status = mb_get_format(verbose, file, output_file, 
-		    					&format_guess, &error);
-				if (format_status != MB_SUCCESS || format_guess != format)
-					{
-					strcpy(output_file, file);
-					}
-				if (output_file[strlen(output_file)-1] == 'p')
-					{
-					output_file[strlen(output_file)-1] = '\0';
-					}
-				if (extract_sbp == MB_YES && extract_sslow == MB_YES && extract_sshigh == MB_YES)
-					{
-					strcat(output_file,".jsf");
-					format_output = MBF_EDGJSTAR;
-					}
-				else if (extract_sslow == MB_YES)
-					{
-					strcat(output_file,".mb132");
-					format_output = MBF_EDGJSTAR;
-					}
-				else if (extract_sshigh == MB_YES)
-					{
-					strcat(output_file,".mb133");
-					format_output = MBF_EDGJSTR2;
-					}
-				else if (extract_sbp == MB_YES)
-					{
-					strcat(output_file,".jsf");
-					format_output = MBF_EDGJSTAR;
-					}
+				output_file[strlen(output_file)-1] = '\0';
 				}
-				
-			/* open the new file */
-			nwritesbp = 0;
-			nwritesslo = 0;
-			nwritesshi = 0;
-			if ((status = mb_write_init(
-				verbose,output_file,MBF_EDGJSTAR,
-				&ombio_ptr,&obeams_bath,&obeams_amp,&opixels_ss,&error)) != MB_SUCCESS)
+			if (extract_sbp == MB_YES && extract_sslow == MB_YES && extract_sshigh == MB_YES)
 				{
-				mb_error(verbose,error,&message);
-				fprintf(stderr,"\nMBIO Error returned from function <mb_write_init>:\n%s\n",message);
-				fprintf(stderr,"\nMultibeam File <%s> not initialized for reading\n",file);
-				fprintf(stderr,"\nProgram <%s> Terminated\n",
-					program_name);
-				exit(error);
+				strcat(output_file,".jsf");
+				format_output = MBF_EDGJSTAR;
 				}
-
-			/* get pointers to data storage */
-			omb_io_ptr = (struct mb_io_struct *) ombio_ptr;
-			ostore_ptr = omb_io_ptr->store_data;
-			ostore = (struct mbsys_jstar_struct *) ostore_ptr;
+			else if (extract_sslow == MB_YES)
+				{
+				strcat(output_file,".mb132");
+				format_output = MBF_EDGJSTAR;
+				}
+			else if (extract_sshigh == MB_YES)
+				{
+				strcat(output_file,".mb133");
+				format_output = MBF_EDGJSTR2;
+				}
+			else if (extract_sbp == MB_YES)
+				{
+				strcat(output_file,".jsf");
+				format_output = MBF_EDGJSTAR;
+				}
 			}
 		}
 
@@ -644,10 +773,8 @@ main (int argc, char **argv)
 	nreadsbp = 0;
 	nreadsslo = 0;
 	nreadsshi = 0;
-	nwritesbp = 0;
-	nwritesslo = 0;
-	nwritesshi = 0;
 	ttime_min_ok = MB_NO;
+
 	while (error <= MB_ERROR_NO_ERROR)
 		{
 		/* reset error */
@@ -665,6 +792,82 @@ main (int argc, char **argv)
 /*fprintf(stderr,"kind:%d %s \n\ttime_i:%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d  %f    time_i:%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d  %f\n",
 kind,notice_msg[kind],time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],time_d,
 istore->time_i[0],istore->time_i[1],istore->time_i[2],istore->time_i[3],istore->time_i[4],istore->time_i[5],istore->time_i[6],istore->time_d);*/
+
+		/* reset nonfatal errors */
+		if (kind == MB_DATA_DATA && error < 0)
+			{
+			status = MB_SUCCESS;
+			error = MB_ERROR_NO_ERROR;
+			}
+
+		/* save last nav and heading */
+		if (status == MB_SUCCESS && kind == MB_DATA_DATA)
+			{
+			if (navlon != 0.0)
+				lastlon = navlon;
+			if (navlat != 0.0)
+				lastlat = navlat;
+			if (heading != 0.0)
+				lastheading = heading;
+			}
+		    
+		/* check survey data position against waypoints */
+/* fprintf(stderr,"status:%d error:%d kind:%d route_file_set:%d nroutepoint:%d navlon:%f navlat:%f\n",
+status,error,kind,route_file_set,nroutepoint,navlon,navlat); */
+		if (status == MB_SUCCESS && kind == MB_DATA_DATA
+			&& route_file_set == MB_YES && nroutepoint > 1 
+			&& navlon != 0.0 && navlat != 0.0)
+			{
+			dx = (navlon - routelon[activewaypoint]) / mtodeglon;
+			dy = (navlat - routelat[activewaypoint]) / mtodeglat;
+			range = sqrt(dx * dx + dy * dy);
+/* fprintf(stderr,"activewaypoint:%d range:%f\n",activewaypoint, range); */
+			if (range < rangethreshold 
+				&& (activewaypoint == 0 || range > rangelast) 
+				&& activewaypoint < nroutepoint - 1)
+				{
+/* fprintf(stderr,"New output by range to routepoint: %f\n",range); &/
+				/* if needed set flag to open new output file */
+				if (new_output_file == MB_NO)
+				    {
+				    /* increment line number */
+				    linenumber++;
+				    
+				    /* set output file name */
+				    sprintf(output_file, "%s_%4.4d", lineroot, linenumber);
+				    if (extract_sbp == MB_YES && extract_sslow == MB_YES && extract_sshigh == MB_YES)
+					    {
+					    strcat(output_file,".jsf");
+					    format_output = MBF_EDGJSTAR;
+					    }
+				    else if (extract_sslow == MB_YES)
+					    {
+					    strcat(output_file,".mb132");
+					    format_output = MBF_EDGJSTAR;
+					    }
+				    else if (extract_sshigh == MB_YES)
+					    {
+					    strcat(output_file,".mb133");
+					    format_output = MBF_EDGJSTR2;
+					    }
+				    else if (extract_sbp == MB_YES)
+					    {
+					    strcat(output_file,".jsf");
+					    format_output = MBF_EDGJSTAR;
+					    }
+				    
+				    /* set to open new output file */
+				    new_output_file = MB_YES;
+				    }
+
+				/* increment active waypoint */
+				activewaypoint++;
+				mb_coor_scale(verbose,routelat[activewaypoint], &mtodeglon, &mtodeglat);
+				rangelast = 1000 * rangethreshold;
+				}
+			else
+				rangelast = range;
+			}
 				
 		if (kind == MB_DATA_DATA 
 			&& error <= MB_ERROR_NO_ERROR)
@@ -710,7 +913,68 @@ istore->time_i[0],istore->time_i[1],istore->time_i[2],istore->time_i[3],istore->
 			error = MB_ERROR_NO_ERROR;
 			status = MB_SUCCESS;
 			}
-				    
+			
+		/* if needed open new output file */
+		if (status == MB_SUCCESS
+			&& new_output_file == MB_YES
+			&& ((extract_sbp == MB_YES && kind == MB_DATA_SUBBOTTOM_SUBBOTTOM)
+				|| (extract_sslow == MB_YES && kind == MB_DATA_SIDESCAN2)
+				|| (extract_sshigh == MB_YES && kind == MB_DATA_SIDESCAN3)))
+			{
+				
+			/* close any old output file unless a single file has been specified */
+			if (ombio_ptr != NULL)
+				{
+				/* close the swath file */
+				status = mb_close(verbose,&ombio_ptr,&error);
+
+				/* generate inf file */
+				if (status == MB_SUCCESS)
+					{
+					status = mb_make_info(verbose, MB_YES, 
+								current_output_file, 
+								format_output, 
+								&error);
+					}
+					
+				/* output counts */
+				fprintf(stdout, "\nData records written to: %s\n", current_output_file);
+				fprintf(stdout, "     Subbottom:     %d\n", nwritesbp);
+				fprintf(stdout, "     Low Sidescan:  %d\n", nwritesslo);
+				fprintf(stdout, "     High Sidescan: %d\n", nwritesshi);
+				nwritesbptot += nwritesbp;
+				nwritesslotot += nwritesslo;
+				nwritesshitot += nwritesshi;
+				}
+				
+			/* open the new file */
+			nwritesbp = 0;
+			nwritesslo = 0;
+			nwritesshi = 0;
+			if ((status = mb_write_init(
+				verbose,output_file,MBF_EDGJSTAR,
+				&ombio_ptr,&obeams_bath,&obeams_amp,&opixels_ss,&error)) != MB_SUCCESS)
+				{
+				mb_error(verbose,error,&message);
+				fprintf(stderr,"\nMBIO Error returned from function <mb_write_init>:\n%s\n",message);
+				fprintf(stderr,"\nMultibeam File <%s> not initialized for writing\n",file);
+				fprintf(stderr,"\nProgram <%s> Terminated\n",
+					program_name);
+				exit(error);
+				}
+				
+			/* save current_output_file */
+			strcpy(current_output_file, output_file);
+
+			/* get pointers to data storage */
+			omb_io_ptr = (struct mb_io_struct *) ombio_ptr;
+			ostore_ptr = omb_io_ptr->store_data;
+			ostore = (struct mbsys_jstar_struct *) ostore_ptr;
+			
+			/* reset new_output_file */
+			new_output_file = MB_NO;
+			}
+
 		/* apply time shift if needed */
 		if (status == MB_SUCCESS && timeshift != 0.0
 			&& (kind == MB_DATA_SUBBOTTOM_SUBBOTTOM
@@ -784,7 +1048,7 @@ imb_io_ptr->fix_lat[i]);*/
 			nreadsbp++;
 			
 			/* output data if desired */
-			if (extract_sbp == MB_YES)
+			if (extract_sbp == MB_YES && nreadnav1 > 0)
 				{		
 				/* set overall parameters */
 				ostore->kind = kind;
@@ -1020,7 +1284,7 @@ imb_io_ptr->fix_lat[i]);*/
 			nreadsslo++;
 			
 			/* output data if desired */
-			if (extract_sslow == MB_YES)
+			if (extract_sslow == MB_YES && nreadnav1 > 0)
 				{
 				/* set overall parameters */
 				ostore->kind = MB_DATA_DATA;
@@ -1028,7 +1292,10 @@ imb_io_ptr->fix_lat[i]);*/
 
 				/*----------------------------------------------------------------*/
 				/* copy low frequency port sidescan to jstar storage */
-				channel = (struct mbsys_jstar_channel_struct *) &(ostore->ssport);
+				if (ssflip == MB_YES)
+					channel = (struct mbsys_jstar_channel_struct *) &(ostore->ssstbd);
+				else
+					channel = (struct mbsys_jstar_channel_struct *) &(ostore->ssport);
 				s7kchannel = (s7k_fsdwchannel *) &(istore->fsdwsslo.channel[0]);
 				s7kssheader = (s7k_fsdwssheader *) &(istore->fsdwsslo.ssheader[0]);
 
@@ -1039,7 +1306,10 @@ imb_io_ptr->fix_lat[i]);*/
 				channel->message.type = 80;
 				channel->message.command = 0;
 				channel->message.subsystem = 20;
-				channel->message.channel = 0;
+				if (ssflip == MB_YES)
+					channel->message.channel = 1;
+				else
+					channel->message.channel = 0;
 				channel->message.sequence = 0;
 				channel->message.reserved = 0;
 				channel->message.size = 0;
@@ -1304,7 +1574,10 @@ imb_io_ptr->fix_lat[i]);*/
 
 				/*----------------------------------------------------------------*/
 				/* copy low frequency starboard sidescan to jstar storage */
-				channel = (struct mbsys_jstar_channel_struct *) &(ostore->ssstbd);
+				if (ssflip == MB_YES)
+					channel = (struct mbsys_jstar_channel_struct *) &(ostore->ssport);
+				else
+					channel = (struct mbsys_jstar_channel_struct *) &(ostore->ssstbd);
 				s7kchannel = (s7k_fsdwchannel *) &(istore->fsdwsslo.channel[1]);
 				s7kssheader = (s7k_fsdwssheader *) &(istore->fsdwsslo.ssheader[1]);
 
@@ -1315,7 +1588,10 @@ imb_io_ptr->fix_lat[i]);*/
 				channel->message.type = 80;
 				channel->message.command = 0;
 				channel->message.subsystem = 20;
-				channel->message.channel = 1;
+				if (ssflip == MB_YES)
+					channel->message.channel = 0;
+				else
+					channel->message.channel = 1;
 				channel->message.sequence = 0;
 				channel->message.reserved = 0;
 				channel->message.size = 0;
@@ -1587,7 +1863,7 @@ imb_io_ptr->fix_lat[i]);*/
 			nreadsshi++;
 			
 			/* output data if desired */
-			if (extract_sshigh == MB_YES)
+			if (extract_sshigh == MB_YES && nreadnav1 > 0)
 				{
 				/* set overall parameters */
 				ostore->kind = MB_DATA_SIDESCAN2;
@@ -1595,7 +1871,10 @@ imb_io_ptr->fix_lat[i]);*/
 
 				/*----------------------------------------------------------------*/
 				/* copy high frequency port sidescan to jstar storage */
-				channel = (struct mbsys_jstar_channel_struct *) &(ostore->ssport);
+				if (ssflip == MB_YES)
+					channel = (struct mbsys_jstar_channel_struct *) &(ostore->ssstbd);
+				else
+					channel = (struct mbsys_jstar_channel_struct *) &(ostore->ssport);
 				s7kchannel = (s7k_fsdwchannel *) &(istore->fsdwsshi.channel[0]);
 				s7kssheader = (s7k_fsdwssheader *) &(istore->fsdwsshi.ssheader[0]);
 
@@ -1852,7 +2131,10 @@ imb_io_ptr->fix_lat[i]);*/
 
 				/*----------------------------------------------------------------*/
 				/* copy high frequency starboard sidescan to jstar storage */
-				channel = (struct mbsys_jstar_channel_struct *) &(ostore->ssstbd);
+				if (ssflip == MB_YES)
+					channel = (struct mbsys_jstar_channel_struct *) &(ostore->ssport);
+				else
+					channel = (struct mbsys_jstar_channel_struct *) &(ostore->ssstbd);
 				s7kchannel = (s7k_fsdwchannel *) &(istore->fsdwsshi.channel[1]);
 				s7kssheader = (s7k_fsdwssheader *) &(istore->fsdwsshi.ssheader[1]);
 
@@ -2159,10 +2441,6 @@ imb_io_ptr->fix_lat[i]);*/
 	fprintf(stdout, "     Subbottom:     %d\n", nreadsbp);
 	fprintf(stdout, "     Low Sidescan:  %d\n", nreadsslo);
 	fprintf(stdout, "     High Sidescan: %d\n", nreadsshi);
-	fprintf(stdout, "Data records written to: %s\n", output_file);
-	fprintf(stdout, "     Subbottom:     %d\n", nwritesbp);
-	fprintf(stdout, "     Low Sidescan:  %d\n", nwritesslo);
-	fprintf(stdout, "     High Sidescan: %d\n", nwritesshi);
 	nreaddatatot += nreaddata;
 	nreadheadertot += nreadheader;
 	nreadssvtot += nreadssv;
@@ -2170,9 +2448,6 @@ imb_io_ptr->fix_lat[i]);*/
 	nreadsbptot += nreadsbp;
 	nreadsslotot += nreadsslo;
 	nreadsshitot += nreadsshi;
-	nwritesbptot += nwritesbp;
-	nwritesslotot += nwritesslo;
-	nwritesshitot += nwritesshi;
 
 	/* figure out whether and what to read next */
         if (read_datalist == MB_YES)
@@ -2194,7 +2469,7 @@ imb_io_ptr->fix_lat[i]);*/
 	if (read_datalist == MB_YES)
 		mb_datalist_close(verbose,&datalist,&error);
 
-	/* close any old output file unless a single file has been specified */
+	/* close output file if still open */
 	if (ombio_ptr != NULL)
 		{
 		/* close the swath file */

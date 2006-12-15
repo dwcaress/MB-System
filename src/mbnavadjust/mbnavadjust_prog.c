@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavadjust_prog.c	3/23/00
- *    $Id: mbnavadjust_prog.c,v 5.23 2006-11-10 22:36:05 caress Exp $
+ *    $Id: mbnavadjust_prog.c,v 5.24 2006-12-15 21:42:49 caress Exp $
  *
  *    Copyright (c) 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	March 23, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.23  2006/11/10 22:36:05  caress
+ * Working towards release 5.1.0
+ *
  * Revision 5.22  2006/08/09 22:41:27  caress
  * Fixed programs that read or write grids so that they do not use the GMT_begin() function; these programs will now work when GMT is built in the default fashion, when GMT is built in the default fashion, with "advisory file locking" enabled.
  *
@@ -151,7 +154,7 @@ struct swathraw
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbnavadjust_prog.c,v 5.23 2006-11-10 22:36:05 caress Exp $";
+static char rcs_id[] = "$Id: mbnavadjust_prog.c,v 5.24 2006-12-15 21:42:49 caress Exp $";
 static char program_name[] = "mbnavadjust";
 static char help_message[] =  "mbnavadjust is an interactive navigation adjustment package for swath sonar data.\n";
 static char usage_message[] = "mbnavadjust [-Iproject -V -H]";
@@ -4983,6 +4986,17 @@ int mbnavadjust_get_misfit()
 	int	ioff, joff, istart, iend, jstart, jend;
 	int	i1, i2, j1, j2, k1, k2;
 	int	i, j, k, kk;
+	
+	/* vertical misfit parameters */
+	int	nzmisfitcalc;
+	double	zmisfit;
+	double	zmisfitmin, zoffmin;
+	int	nzmisfit;
+	double	zmax = 5.0;
+	double	zmin;
+	double	dz = 0.01;
+	double	zoff;
+	int	iz;
 
  	/* print input debug statements */
 	if (mbna_verbose >= 2)
@@ -5218,6 +5232,55 @@ ic, jc, gridnm[kc], grid1[kc], grid2[kc], gridm[kc]);*/
 				misfit_intervals[k] = gridmeq[kk];
 				}
 			}
+			
+		/* calculate misfit as a function of z offset at current x,y offset */
+		zmin = -zmax;
+		nzmisfitcalc = 2 * zmax / dz + 1;
+		zmisfitmin = 10000000.0;
+		for (iz=0;iz<nzmisfitcalc;iz++)
+			{
+			nzmisfit = 0;
+			zmisfit = 0.0;
+			zoff = zmin + dz * iz;
+			for (i=0;i<grid_nx;i++)
+			    for (j=0;j<grid_ny;j++)
+				{
+				k = i + j * grid_nx;
+				if (gridn1[k] > 0 && gridn2[k] > 0)
+				    {
+				    zmisfit += (grid1[k] - grid2[k] - zoff)
+						    * (grid1[k] - grid2[k] - zoff);
+				    nzmisfit++;
+				    }
+				}
+			if (nzmisfit > 0)
+				{
+				zmisfit /= nzmisfit;
+				if (zmisfit < zmisfitmin)
+					{
+					zmisfitmin = zmisfit;
+					zoffmin = zoff;
+					}
+				}
+			}
+		fprintf(stderr, "Crossing %d Z offset: %f  %f  %f sec   %f m   %f m/hr\n", 
+			mbna_current_crossing,
+			swath1->pings[swath1->npings/2].time_d,
+			swath2->pings[swath2->npings/2].time_d,
+			swath1->pings[swath1->npings/2].time_d
+				- swath2->pings[swath2->npings/2].time_d,
+			zoffmin,
+			3600.0 * zoffmin / (swath1->pings[swath1->npings/2].time_d
+				- swath2->pings[swath2->npings/2].time_d));
+		fprintf(stdout, "Crossing %d Z offset: %f  %f  %f sec   %f m   %f m/hr\n", 
+			mbna_current_crossing,
+			swath1->pings[swath1->npings/2].time_d,
+			swath2->pings[swath2->npings/2].time_d,
+			swath1->pings[swath1->npings/2].time_d
+				- swath2->pings[swath2->npings/2].time_d,
+			zoffmin,
+			3600.0 * zoffmin / (swath1->pings[swath1->npings/2].time_d
+				- swath2->pings[swath2->npings/2].time_d));
 		
 		do_message_off();
  		}

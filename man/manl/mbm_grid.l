@@ -10,19 +10,6 @@ Version 5.0
 .SH SYNOPSIS
 mbm_grid \fB-I\fP\fIfile\fP
 \fB-F\fP\fIformat\fP \fB-O\fP\fIroot\fP
-The \fB-K\fP\fIbackground\fP option is used to underlay a bathymetry or topography
-grid with a global or regional topography model. The background data
-model is accessed from a database using the \fBGMT\fP program grdraster.
-The \fIbackground\fP value is an identifier number used to specify which
-dataset to extract using \fBgrdraster\fP. These identifiers are user
-defined and vary with installations. When the \fB-K\fP\fIbackground\fP
-option is invoked, \fBgrdraster\fP is used to extract all of the longitude,
-latitude, and topography values within the specified database that lie
-within the desired grid. These values are interpolated onto the desired
-grid locations using the thin plate spline algorithm, and then mapped onto
-the grid wherever the values are undefined by either swath data or the
-spline interpolation invoked with the \fB-C\fP option.
-
 \fB-R\fP\fIwest/east/south/north\fP
 [\fB-A\fP\fIdatatype\fP \fB-B\fP\fIborder\fP \fB-C\fP\fIclip\fP
 \fB-D\fP\fIxdim/ydim\fP \fB-E\fP\fIdx/dy/units\fP
@@ -267,10 +254,19 @@ into GIS software.
 .B \-K
 \fIbackground\fP
 .br
-Enables filling in all undefined grid cells with bathymetry or topography
-from a global or regional database accessed with the \fBGMT\fP program
-\fBgrdraster\fP. The \fIbackground\fP specifies which locally defined
-database is accessed with \fBgrdraster\fP.
+The \fB-K\fP\fIbackground\fP option is used to underlay a bathymetry or topography
+grid with a global or regional topography model. The background data
+model is accessed from a database using the \fBGMT\fP program grdraster.
+The \fIbackground\fP value is an identifier number used to specify which
+dataset to extract using \fBgrdraster\fP. These identifiers are user
+defined and vary with installations. When the \fB-K\fP\fIbackground\fP
+option is invoked, \fBgrdraster\fP is used to extract all of the longitude,
+latitude, and topography values within the specified database that lie
+within the desired grid. These values are interpolated onto the desired
+grid locations using the thin plate spline algorithm, and then mapped onto
+the grid wherever the values are undefined by either swath data or the
+spline interpolation invoked with the \fB-C\fP option.
+
 .TP
 .B \-L
 \fIlonflip\fP
