@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbextractsegy.c	4/18/2004
- *    $Id: mbextractsegy.c,v 5.14 2006-12-15 21:42:49 caress Exp $
+ *    $Id: mbextractsegy.c,v 5.15 2007-03-02 18:22:54 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	April 18, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.14  2006/12/15 21:42:49  caress
+ * Incremental CVS update.
+ *
  * Revision 5.13  2006/11/26 09:42:01  caress
  * Making distribution 5.1.0.
  *
@@ -90,7 +93,7 @@
 #define MBES_ONLINE_THRESHOLD		15.0
 #define MBES_ONLINE_COUNT		30
 
-static char rcs_id[] = "$Id: mbextractsegy.c,v 5.14 2006-12-15 21:42:49 caress Exp $";
+static char rcs_id[] = "$Id: mbextractsegy.c,v 5.15 2007-03-02 18:22:54 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
@@ -180,6 +183,7 @@ main (int argc, char **argv)
 	/* route and auto-line data */
 	char	route_file[MB_PATH_MAXLINE];
 	int	route_file_set = MB_NO;
+	int	checkroutebearing = MB_NO;
 	int	rawroutefile = MB_NO;
 	char	lineroot[MB_PATH_MAXLINE];
 	int	nroutepoint = 0;
@@ -218,8 +222,8 @@ main (int argc, char **argv)
 	int	nshotmax;
 	int	nplot;
 	double	xscale = 0.01;
-	double	yscale = 75.0;
-	double	maxwidth = 45.0;
+	double	yscale = 50.0;
+	double	maxwidth = 30.0;
 
 	char	command[MB_PATH_MAXLINE];
 	char	scale[MB_PATH_MAXLINE];
@@ -290,7 +294,7 @@ main (int argc, char **argv)
 		segyfileheader.extra[i] = 0;
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "B:b:D:d:E:e:F:f:I:i:J:j:L:l:O:o:R:r:S:s:T:t:VvHh")) != -1)
+	while ((c = getopt(argc, argv, "B:b:D:d:E:e:F:f:I:i:J:j:L:l:MmO:o:R:r:S:s:T:t:VvHh")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -335,6 +339,11 @@ main (int argc, char **argv)
 		case 'L':
 		case 'l':
 			sscanf (optarg,"%d/%s", &startline, lineroot);
+			flag++;
+			break;
+		case 'M':
+		case 'm':
+			checkroutebearing = MB_YES;
 			flag++;
 			break;
 		case 'O':
@@ -535,7 +544,7 @@ main (int argc, char **argv)
 				nroutepoint, route_file);
 			}
 		}
-
+		
 	/* get format if required */
 	if (format == 0)
 		mb_get_format(verbose,read_file,NULL,&format,&error);
@@ -717,10 +726,10 @@ main (int argc, char **argv)
 				    if (linebearing >= 45.0 && linebearing <= 225.0)
 				        sprintf(scale, "-Jx%f/%f", xscale, yscale);
 				    else
-				        sprintf(scale, "-Jx%f/%f", xscale, yscale);
+				        sprintf(scale, "-Jx-%f/%f", xscale, yscale);
 				    
 				    /* output commands to first cut plotting script file */
-				    /* The maximum useful plot length is about 4500 shots, so
+				    /* The maximum useful plot length is about nshotmax shots, so
 		    			we break longer files up into multiple plots */
 				    nshot = endshot - startshot + 1;
 				    nplot = nshot / nshotmax;
@@ -781,6 +790,9 @@ main (int argc, char **argv)
 				}
 			else
 				rangelast = range;
+/* fprintf(stderr,"> activewaypoint:%d linenumber:%d range:%f   lon: %f %f   lat: %f %f oktowrite:%d\n", 
+activewaypoint,linenumber,range, navlon, 
+routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 			}
 
 		/* if desired extract subbottom data */
@@ -887,7 +899,8 @@ main (int argc, char **argv)
 		    /* if following a route check that the vehicle has come on line 
 		    	(within MBES_ONLINE_THRESHOLD degrees)
 		    	before writing any data */
-		    if (nroutepoint > 1 && activewaypoint > 0)
+		    if (checkroutebearing == MB_YES 
+		    	&& nroutepoint > 1 && activewaypoint > 0)
 		    	{
 			headingdiff = fabs(routeheading[activewaypoint-1] - segytraceheader.heading);
 			if (headingdiff > 180.0)
@@ -896,12 +909,15 @@ main (int argc, char **argv)
 				oktowrite++;
 			else
 				oktowrite = 0;
-/*fprintf(stderr,"heading: %f %f %f oktowrite:%d\n", 
+/* fprintf(stderr,"heading: %f %f %f oktowrite:%d\n", 
 routeheading[activewaypoint-1],segytraceheader.heading,headingdiff,oktowrite);*/
 			}
 		    else
 		    	oktowrite = MBES_ONLINE_COUNT;
-		    
+/*if (status == MB_SUCCESS)
+fprintf(stderr,"activewaypoint:%d linenumber:%d range:%f   lon: %f %f   lat: %f %f oktowrite:%d\n", 
+activewaypoint,linenumber,range, navlon, 
+routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 				    
 		    /* note good status */
 		    if (status == MB_SUCCESS)
@@ -1106,6 +1122,9 @@ routeheading[activewaypoint-1],segytraceheader.heading,headingdiff,oktowrite);*/
 
 	/* close the swath file */
 	status = mb_close(verbose,&mbio_ptr,&error);
+	
+	/* output read statistics */
+	fprintf(stderr,"%d records read from %s\n", nread, file);
 
 	/* deallocate memory used for segy data arrays */
 	mb_free(verbose,(char **)&segydata,&error); 
@@ -1139,7 +1158,7 @@ routeheading[activewaypoint-1],segytraceheader.heading,headingdiff,oktowrite);*/
 		    fp = NULL;
 
 		    /* output count of segy records */
-		    fprintf(stderr,"%d records output to segy file %s\n",
+		    fprintf(stderr,"\n%d records output to segy file %s\n",
 					nwrite, output_file);
 		    if (verbose > 0)
 			fprintf(stderr,"\n");
@@ -1157,11 +1176,11 @@ routeheading[activewaypoint-1],segytraceheader.heading,headingdiff,oktowrite);*/
 		    	linebearing += 360.0;
 		    if (linebearing >= 45.0 && linebearing <= 225.0)
 			sprintf(scale, "-Jx%f/%f", xscale, yscale);
-				    else
-			sprintf(scale, "-Jx%f/%f", xscale, yscale);
+		    else
+			sprintf(scale, "-Jx-%f/%f", xscale, yscale);
 				    
 		    /* output commands to first cut plotting script file */
-		    /* The maximum useful plot length is about 4500 shots, so
+		    /* The maximum useful plot length is about nshotmax shots, so
 		    	we break longer files up into multiple plots */
 		    nshot = endshot - startshot + 1;
 		    nplot = nshot / nshotmax;
