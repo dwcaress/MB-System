@@ -107,7 +107,7 @@ static int	realtime_update = 5;
 static int	realtime_icon = MBGRDVIZ_REALTIME_ICON_SHIP;
 
 /* id variables */
-static char rcs_id[] = "$Id: mbgrdviz_callbacks.c,v 5.22 2006-10-05 18:58:29 caress Exp $";
+static char rcs_id[] = "$Id: mbgrdviz_callbacks.c,v 5.23 2007-03-02 20:39:07 caress Exp $";
 static char program_name[] = "MBgrdviz";
 static char help_message[] = "MBgrdviz is an interactive 2D/3D visualization tool for GMT grid files.";
 static char usage_message[] = "mbgrdviz [-H -T -V]";
@@ -1958,6 +1958,7 @@ fprintf(stderr,"routename:%s routecolor:%d routesize:%d\n\n",routename,routecolo
 			/* if data accumulated call mbview_addroute() */
 			if (npoint > 0)
 			    {
+fprintf(stderr,"Calling mbview_addroute npoint:%d\n", npoint);
 			    status = mbview_addroute(verbose, instance,
 			    				npoint, routelon, routelat, routewaypoint,
 							routecolor, routesize, routename,
@@ -2001,7 +2002,7 @@ fprintf(stderr,"routename:%s routecolor:%d routesize:%d\n\n",routename,routecolo
 			    }
 			    
 			/* add good point to route */
-			if (point_ok == MB_YES && npointalloc > npoint + 1)
+			if (point_ok == MB_YES && npointalloc > npoint)
 			    {
 			    routelon[npoint] = lon;
 			    routelat[npoint] = lat;
@@ -2014,6 +2015,7 @@ fprintf(stderr,"routename:%s routecolor:%d routesize:%d\n\n",routename,routecolo
 		/* add last route if not already handled */
 		if (npoint > 0)
 		    {
+fprintf(stderr,"Calling mbview_addroute npoint:%d\n", npoint);
 		    status = mbview_addroute(verbose, instance,
 			    			npoint, routelon, routelat, routewaypoint,
 						routecolor, routesize, routename,
