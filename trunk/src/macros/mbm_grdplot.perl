@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grdplot.perl	8/6/95
-#    $Id: mbm_grdplot.perl,v 5.26 2006-12-15 21:42:49 caress Exp $
+#    $Id: mbm_grdplot.perl,v 5.27 2007-03-02 20:34:26 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 2000, 2003 by 
 #    D. W. Caress (caress@mbari.org)
@@ -56,6 +56,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #            -MGU[/dx/dy/][label] -MCAanot_int/[ffont_size][aangle][/r/g/b][o]]
 #            -MCGgap/width -MCQcut -MCT[+|-][gap/length][:LH] -MCWtype[pen]
 #            -MNFformat -MNIdatalist
+#            -MMM[pingnumber_tick/pingnumber_annot/pingnumber_tick_len]
 #            -MNN[time_tick/time_annot/date_annot/time_tick_len[/name_hgt] | F | FP]
 #            -MTCfill -MTDresolution -MTGfill -MTIriver[/pen] 
 #            -MTNborder[/pen] -MTSfill -MTWpen
@@ -68,10 +69,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   October 19, 1994
 #
 # Version:
-#   $Id: mbm_grdplot.perl,v 5.26 2006-12-15 21:42:49 caress Exp $
+#   $Id: mbm_grdplot.perl,v 5.27 2007-03-02 20:34:26 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.26  2006/12/15 21:42:49  caress
+#   Incremental CVS update.
+#
 #   Revision 5.25  2006/09/11 18:55:52  caress
 #   Changes during Western Flyer and Thomas Thompson cruises, August-September
 #   2006.
@@ -432,7 +436,9 @@ if ($help)
 	print "\t\t-MGQdpi -MGSscalefactor -MGTx/y/size/angle/font/just/text\n";
 	print "\t\t-MGU[/dx/dy/][label] -MCAanot_int/[ffont_size][aangle][/r/g/b][o]]\n";
 	print "\t\t-MCGgap/width -MCQcut -MCT[+|-][gap/length][:LH] -MCWtype[pen]\n";
-	print "\t\t-MNIdatalist\n";
+	print "\t\t-MNA[name_hgt[/P] | P] -MNFformat -MNIdatalist\n";
+	print "\t\t-MNN[time_tick/time_annot/date_annot/time_tick_len[/name_hgt] | F | FP]\n";
+	print "\t\t-MNP[pingnumber_tick/pingnumber_annot/pingnumber_tick_len]\n";
 	print "\t\t-MTCfill -MTDresolution -MTGfill -MTIriver[/pen]\n";
 	print "\t\t-MTNborder[/pen] -MTSfill -MTWpen\n";
 	print "\t\t-MXGfill -MXIxy_file -MXM -MXSsymbol/size -MXWpen]\n";
@@ -618,6 +624,32 @@ if ($misc)
 		# deal with swath navigation options
 		##############################
 
+		# set filename annotation
+		if ($cmd =~ /^[Nn][Aa]\S+\/P/)
+			{
+			($nav_name_hgt) = $cmd =~ /^[Nn][Aa](\S+)\/P/;
+			$name_mode = 1;
+			$name_perp = 1;
+			}
+		elsif ($cmd =~ /^[Nn][Aa]P/)
+			{
+			$name_mode = 1;
+			$name_perp = 1;
+			$nav_name_hgt = 0.15;
+			}
+		elsif ($cmd =~ /^[Nn][Aa]\S+/)
+			{
+			($nav_name_hgt) = $cmd =~ /^[Nn][Aa](\S+)/;
+			$name_mode = 1;
+			$name_perp = 0;
+			}
+		elsif ($cmd =~ /^[Nn][Aa]/)
+			{
+			$name_mode = 1;
+			$name_perp = 0;
+			$nav_name_hgt = 0.15;
+			}
+
 		# set swath file format id
 		if ($cmd =~ /^[Nn][Ff]./)
 			{
@@ -637,6 +669,42 @@ if ($misc)
 			{
 			($navigation_control) = $cmd =~ 
 				/^[Nn][Nn](\S+)/;
+			$navigation_mode = 1;
+			}
+		elsif ($cmd =~ /^[Nn][Nn]/)
+			{
+			$navigation_mode = 1;
+			}
+
+		# set pingnumber annotation
+		if ($cmd =~ /^[Nn][Pp]./)
+			{
+			($pingnumber_control) = $cmd =~ /^[Nn][Pp](.+)/;
+			$pingnumber_mode = 1;
+			if ($pingnumber_control =~ /\S+\/\S+\/\S+/)
+				{
+				($pingnumber_tick, $pingnumber_annot, $pingnumber_tick_len) 
+						= $pingnumber_control =~  /(\S+)\/(\S+)\/(\S+)/;
+				}
+			elsif ($pingnumber_control =~ /\S+\/\S+/)
+				{
+				($pingnumber_tick, $pingnumber_annot) 
+						= $pingnumber_control =~  /(\S+)\/(\S+)/;
+				$pingnumber_tick_len = 0.10;
+				}
+			elsif ($pingnumber_control =~ /\S+/)
+				{
+				($pingnumber_tick) = $pingnumber_control =~  /(\S+)/;
+				$pingnumber_tick_len = 0.10;
+				$pingnumber_annot = 100;
+				}
+			}
+		elsif ($cmd =~ /^[Nn][Pp]/)
+			{
+			$pingnumber_mode = 1;
+			$pingnumber_tick_len = 0.10;
+			$pingnumber_annot = 100;
+			$pingnumber_tick = 50;
 			}
 
 		# deal with pscoast options
@@ -1829,6 +1897,86 @@ if ($coast_control
 	{
 	$coast_resolution = "f";
 	}
+	
+# set swath navigation controls
+if ($navigation_control && $navigation_control =~ /\S+\/\S+\/\S+\/\S+/)
+	{
+	$navigation_mode = 1;
+	}
+elsif ($navigation_control && ($navigation_control =~ /FP/ 
+				|| $navigation_control =~ /fp/))
+	{
+	$navigation_mode = 1;
+	$name_mode = 1;
+	$name_perp = 1;
+	$navigation_control = "0.25/1/4/0.15";
+	$nav_name_hgt = "0.15";
+	}
+elsif ($navigation_control && ($navigation_control =~ /F/ 
+				|| $navigation_control =~ /f/))
+	{
+	$navigation_mode = 1;
+	$name_mode = 1;
+	$name_perp = 0;
+	$navigation_control = "0.25/1/4/0.15";
+	$nav_name_hgt = "0.15";
+	}
+elsif ($navigation_control)
+	{
+	if ($navigation_control =~ /\S+\/\S+\/\S+\/\S+\/\S+\/\S+/)
+		{
+		$navigation_mode = 1;
+		$name_mode = 1;
+		($nav_time_tick, $nav_time_annot, 
+				$nav_date_annot, $nav_tick_size, $nav_name_hgt, $name_perp) 
+				= $navigation_control =~  /(\S+)\/(\S+)\/(\S+)\/(\S+)\/(\S+)/;
+		}
+	elsif ($navigation_control =~ /\S+\/\S+\/\S+\/\S+\/\S+/)
+		{
+		$navigation_mode = 1;
+		$name_mode = 1;
+		$name_perp = 0;
+		($nav_time_tick, $nav_time_annot, 
+				$nav_date_annot, $nav_tick_size, $nav_name_hgt) 
+				= $navigation_control =~  /(\S+)\/(\S+)\/(\S+)\/(\S+)\/(\S+)/;
+		}
+	elsif ($navigation_control =~ /\S+\/\S+\/\S+/)
+		{
+		($nav_time_tick, $nav_time_annot, 
+			$nav_date_annot) 
+			= $navigation_control =~  /(\S+)\/(\S+)\/(\S+)/;
+		$nav_tick_size = 0.15;
+		}
+	elsif ($navigation_control =~ /\S+\/\S+/)
+		{
+		($nav_time_tick, $nav_time_annot) 
+			= $navigation_control =~  /(\S+)\/(\S+)/;
+		$nav_date_annot = 100000;
+		$nav_tick_size = 0.15;
+		}
+	else
+		{
+		$nav_time_tick = $navigation_control;
+		$nav_time_annot = 100000;
+		$nav_date_annot = 100000;
+		$nav_tick_size = 0.15;
+		}
+	$navigation_mode = 1;
+	$navigation_control = "$nav_time_tick" 
+			. "/" . "$nav_time_annot"
+			. "/" . "$nav_date_annot"
+			. "/" . "$nav_tick_size";
+	}
+elsif ($navigation_mode)
+	{
+	$navigation_control = "0.25/1/4/0.15";
+	}
+if ($pingnumber_mode)
+	{
+	$pingnumber_control = "$pingnumber_tick" 
+			. "/" . "$pingnumber_annot"
+			. "/" . "$pingnumber_tick_len";
+	}
 
 # come up with the filenames
 $cmdfile = "$root.cmd";
@@ -2557,10 +2705,6 @@ for ($i = 0; $i < scalar(@xyfiles); $i++)
 # do swath nav plots
 if ($swathnavdatalist) 
 	{
-	if (!$navigation_control)
-		{
-		$navigation_control = "0.25/1/4/0.15";
-		}
 	if (!$swathformat)
 		{
 		$swathformatline = `mbformat -I $swathnavdatalist -L`;
@@ -2576,7 +2720,22 @@ if ($swathnavdatalist)
 	printf FCMD "mbcontour -F$swathformat -I $swathnavdatalist \\\n\t";
 	printf FCMD "-J\$MAP_PROJECTION\$MAP_SCALE \\\n\t";
 	printf FCMD "-R\$MAP_REGION \\\n\t";
-	printf FCMD "-D$navigation_control \\\n\t";
+	if ($navigation_mode)
+		{
+		printf FCMD "-D$navigation_control \\\n\t";
+		}
+	if ($name_mode && $name_perp != 0)
+		{
+		printf FCMD "-G$nav_name_hgt/1 \\\n\t";
+		}
+	elsif ($name_mode)
+		{
+		printf FCMD "-G$nav_name_hgt \\\n\t";
+		}
+	if ($pingnumber_mode)
+		{
+		printf FCMD "-M$pingnumber_control \\\n\t";
+		}
 	if ($portrait)
 		{
 		printf FCMD "-P ";
@@ -2853,7 +3012,6 @@ if ($verbose)
 	if ($swathnavdatalist)
 		{
 		print "    Swath Nav Datalist:        $swathnavdatalist\n";
-		print "    Swath Nav Controls:        $navigation_control\n";
 		}
 	foreach $xyfile (@xyfiles) {
 		print "    XY Data File:             $xyfile\n";
@@ -2977,6 +3135,30 @@ if ($verbose)
 		for ($i = 0; $i < scalar(@coast_boundaries); $i++) 
 			{
 			printf "    National Boundaries:      $coast_boundaries[$i]\n";
+			}
+		}
+	if ($swathnavdatalist)
+		{
+		print "\n  Swath Navigation Plotting Controls:\n";
+		if ($navigation_mode)
+			{
+			print "    Navigation control:       $navigation_control\n";
+			}
+		if ($pingnumber_mode)
+			{
+			print "    Ping annotation control:  $pingnumber_control\n";
+			}
+		if ($name_mode)
+			{
+			print "    Name annotation height:   $nav_name_hgt\n";
+			if ($name_perp)
+				{
+				print "    Name annotation style:    Perpendicular\n";
+				}
+			else
+				{
+				print "    Name annotation style:    Parallel\n";
+				}
 			}
 		}
 	if (@xyfiles)

@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_plot.perl	6/18/93
-#    $Id: mbm_plot.perl,v 5.22 2006-11-10 22:02:59 caress Exp $
+#    $Id: mbm_plot.perl,v 5.23 2007-03-02 20:34:26 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 2000, 2003, 2005 by 
 #    D. W. Caress (caress@mbari.org)
@@ -59,9 +59,10 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #            -MGQdpi -MGU[/dx/dy/][label]
 #            -MMAfactor/mode/depth -MMByr/mo/da/hr/mn/sc 
 #            -MMDmode/scale[/min/max] -MMEyr/mo/da/hr/mn/sc 
-#            -MMMpingnumber_tick/pingnumber_annot/pingnumber_tick_len
 #            -MMNnplot -MMPpings -MMSspeedmin 
 #            -MMTtimegap -MMZalgorithm 
+#            -MNA[name_hgt[/P] | P]
+#            -MNP[pingnumber_tick/pingnumber_annot/pingnumber_tick_len]
 #            -MTCfill -MTDresolution -MTGfill -MTIriver[/pen] 
 #            -MTNborder[/pen] -MTSfill -MTWpen
 #            -MXGfill -MXIxy_file -MXSsymbol/size -MXWpen]
@@ -73,10 +74,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   June 17, 1993
 #
 # Version:
-#   $Id: mbm_plot.perl,v 5.22 2006-11-10 22:02:59 caress Exp $
+#   $Id: mbm_plot.perl,v 5.23 2007-03-02 20:34:26 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.22  2006/11/10 22:02:59  caress
+#   Added ping number/shot number navigation track annotation.
+#
 #   Revision 5.21  2006/07/05 19:50:21  caress
 #   Working towards 5.1.0beta
 #
@@ -500,9 +504,10 @@ if ($help)
 	print "\t\t-MGQdpi -MGU[/dx/dy/][label]\n";
 	print "\t\t-MMAfactor/mode/depth -MMByr/mo/da/hr/mn/sc\n";
 	print "\t\t-MMDmode/scale[/min/max] -MMEyr/mo/da/hr/mn/sc\n";
-	print "\t\t-MMMpingnumber_tick/pingnumber_annot/pingnumber_tick_len\n";
 	print "\t\t-MMNnplot -MMPpings -MMSspeedmin\n";
 	print "\t\t-MMTtimegap -MMZalgorithm\n";
+	print "\t\t-MNA[name_hgt[/P] | P]\n";
+	print "\t\t-MNP[pingnumber_tick/pingnumber_annot/pingnumber_tick_len]\n";
 	print "\t\t-MTCfill -MTDresolution -MTGfill -MTIriver[/pen]\n";
 	print "\t\t-MTNborder[/pen] -MTSfill -MTWpen\n";
 	print "\t\t-MXGfill -MXIxy_file -MXM -MXSsymbol/size -MXWpen]\n";
@@ -638,17 +643,6 @@ if ($misc)
 			($mb_etime) = $cmd =~ /^[Mm][Ee](.+)/;
 			}
 
-		# set pingnumber annotation
-		if ($cmd =~ /^[Mm][Mm]./)
-			{
-			($pingnumber_control) = $cmd =~ /^[Mm][Mm](.+)/;
-			$pingnumber_mode = 1;
-			}
-		elsif ($cmd =~ /^[Mm][Mm]/)
-			{
-			$pingnumber_mode = 1;
-			}
-
 		# set number of pings to be contoured at a time
 		if ($cmd =~ /^[Mm][Nn]./)
 			{
@@ -677,6 +671,66 @@ if ($misc)
 		if ($cmd =~ /^[Mm][Zz]./)
 			{
 			($contour_algorithm) = $cmd =~ /^[Mm][Zz](.+)/;
+			}
+
+		# deal with MB-System navigation annotation options
+		##############################
+
+		# set filename annotation
+		if ($cmd =~ /^[Nn][Aa]\S+\/P/)
+			{
+			($nav_name_hgt) = $cmd =~ /^[Nn][Aa](\S+)\/P/;
+			$name_mode = 1;
+			$name_perp = 1;
+			}
+		elsif ($cmd =~ /^[Nn][Aa]P/)
+			{
+			$name_mode = 1;
+			$name_perp = 1;
+			$nav_name_hgt = 0.15;
+			}
+		elsif ($cmd =~ /^[Nn][Aa]\S+/)
+			{
+			($nav_name_hgt) = $cmd =~ /^[Nn][Aa](\S+)/;
+			$name_mode = 1;
+			$name_perp = 0;
+			}
+		elsif ($cmd =~ /^[Nn][Aa]/)
+			{
+			$name_mode = 1;
+			$name_perp = 0;
+			$nav_name_hgt = 0.15;
+			}
+
+		# set pingnumber annotation
+		if ($cmd =~ /^[Nn][Pp]./)
+			{
+			($pingnumber_control) = $cmd =~ /^[Nn][Pp](.+)/;
+			$pingnumber_mode = 1;
+			if ($pingnumber_control =~ /\S+\/\S+\/\S+/)
+				{
+				($pingnumber_tick, $pingnumber_annot, $pingnumber_tick_len) 
+						= $pingnumber_control =~  /(\S+)\/(\S+)\/(\S+)/;
+				}
+			elsif ($pingnumber_control =~ /\S+\/\S+/)
+				{
+				($pingnumber_tick, $pingnumber_annot) 
+						= $pingnumber_control =~  /(\S+)\/(\S+)/;
+				$pingnumber_tick_len = 0.10;
+				}
+			elsif ($pingnumber_control =~ /\S+/)
+				{
+				($pingnumber_tick) = $pingnumber_control =~  /(\S+)/;
+				$pingnumber_tick_len = 0.10;
+				$pingnumber_annot = 100;
+				}
+			}
+		elsif ($cmd =~ /^[Nn][Pp]/)
+			{
+			$pingnumber_mode = 1;
+			$pingnumber_tick_len = 0.10;
+			$pingnumber_annot = 100;
+			$pingnumber_tick = 50;
 			}
 
 		# deal with pscoast options
@@ -954,29 +1008,6 @@ elsif ($navigation_mode)
 	}
 if ($pingnumber_mode)
 	{
-	if ($pingnumber_control && $pingnumber_control =~ /\S+\/\S+\/\S+/)
-		{
-		($pingnumber_tick, $pingnumber_annot, $pingnumber_tick_len) 
-				= $pingnumber_control =~  /(\S+)\/(\S+)\/(\S+)/;
-		}
-	elsif ($pingnumber_control && $pingnumber_control =~ /\S+\/\S+/)
-		{
-		($pingnumber_tick, $pingnumber_annot) 
-				= $pingnumber_control =~  /(\S+)\/(\S+)/;
-		$pingnumber_tick_len = 0.10;
-		}
-	elsif ($pingnumber_control && $pingnumber_control =~ /\S+/)
-		{
-		($pingnumber_tick) = $pingnumber_control =~  /(\S+)/;
-		$pingnumber_tick_len = 0.10;
-		$pingnumber_annot = 100;
-		}
-	else
-		{
-		$pingnumber_tick_len = 0.10;
-		$pingnumber_annot = 100;
-		$pingnumber_tick = 50;
-		}
 	$pingnumber_control = "$pingnumber_tick" 
 			. "/" . "$pingnumber_annot"
 			. "/" . "$pingnumber_tick_len";
@@ -2948,6 +2979,14 @@ if ($verbose)
 	if ($name_mode)
 		{
 		print "    Name annotation height:   $nav_name_hgt\n";
+		if ($name_perp)
+			{
+			print "    Name annotation style:    Perpendicular\n";
+			}
+		else
+			{
+			print "    Name annotation style:    Parallel\n";
+			}
 		}
 	if ($color_mode)
 		{
