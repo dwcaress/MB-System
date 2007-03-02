@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system: mbm_route2mission.perl   7/18/2004
-#    $Id: mbm_route2mission.perl,v 5.11 2006-11-26 09:42:01 caress Exp $
+#    $Id: mbm_route2mission.perl,v 5.12 2007-03-02 20:33:37 caress Exp $
 #
 #    Copyright (c) 2004, 2006 by 
 #    D. W. Caress (caress@mbari.org)
@@ -37,10 +37,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #      Moss Landing, CA
 #
 # Version:
-# $Id: mbm_route2mission.perl,v 5.11 2006-11-26 09:42:01 caress Exp $
+# $Id: mbm_route2mission.perl,v 5.12 2007-03-02 20:33:37 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.11  2006/11/26 09:42:01  caress
+#   Making distribution 5.1.0.
+#
 #   Revision 5.10  2006/11/10 22:36:04  caress
 #   Working towards release 5.1.0
 #
@@ -622,6 +625,22 @@ if (!$outputoff)
 	printf MFILE "#     Ascend time:              %d (s)\r\n", $ascendtime;
 	printf MFILE "#     Way Points:               $nwaypoints\r\n";
 	printf MFILE "#     Route Points:             $nmissionpoints\r\n";
+	if ($behavior == $behaviorWaypointDepthID)
+		{
+		printf MFILE "#     Survey behavior:          WaypointDepth\r\n";
+		}
+	else
+		{
+		printf MFILE "#     Survey behavior:          Waypoint\r\n";
+		}
+	if ($spiraldescent)
+		{
+		printf MFILE "#     Descent style:            Spiral descent\r\n";
+		}
+	else
+		{
+		printf MFILE "#     Descent style:            Waypoint descent\r\n";
+		}
 	if ($mappingsonar)
 		{
 		printf MFILE "#     Mapping sonar control enabled:          \r\n";
@@ -632,6 +651,7 @@ if (!$outputoff)
 		}
 	printf MFILE "# \r\n";
 	printf MFILE "# Mission Parameters:\r\n";
+	printf MFILE "#     Vehicle Speed:            %f (m/s) %f (knots)\r\n", $mission_speed, 1.943846 * $mission_speed;
 	printf MFILE "#     Desired Vehicle Altitude: $altitudedesired (m)\r\n";
 	printf MFILE "#     Minimum Vehicle Altitude: $altitudemin (m)\r\n";
 	printf MFILE "#     Abort Vehicle Altitude:   $altitudeabort (m)\r\n";
