@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcontour.c	6/4/93
- *    $Id: mbcontour.c,v 5.12 2006-11-10 22:05:37 caress Exp $
+ *    $Id: mbcontour.c,v 5.13 2007-03-02 18:17:38 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2003, 2004, 2005, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	June 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.12  2006/11/10 22:05:37  caress
+ * Added ping number/shot number navigation track annotation.
+ *
  * Revision 5.11  2006/01/18 07:27:01  caress
  * Fixed to work with GMT4.1
  *
@@ -205,7 +208,7 @@
 
 main (int argc, char **argv) 
 {
-	static char rcs_id[] = "$Id: mbcontour.c,v 5.12 2006-11-10 22:05:37 caress Exp $";
+	static char rcs_id[] = "$Id: mbcontour.c,v 5.13 2007-03-02 18:17:38 caress Exp $";
 #ifdef MBCONTOURFILTER
 	static char program_name[] = "MBCONTOURFILTER";
 	static char help_message[] =  "MBCONTOURFILTER is a utility which creates a pen plot \ncontour map of multibeam swath bathymetry.  \nThe primary purpose of this program is to serve as \npart of a real-time plotting system.  The contour \nlevels and colors can be controlled \ndirectly or set implicitly using contour and color change intervals. \nContours can also be set to have ticks pointing downhill.";
@@ -494,8 +497,6 @@ main (int argc, char **argv)
 			    name_hgt = 0.1;
 			if (nscan < 2)
 			    name_perp = MB_NO;
-			if (plot_track == MB_NO)
-			    plot_track = MB_YES;
 			break;
 		case 'H':
 		case 'h':
@@ -520,7 +521,7 @@ main (int argc, char **argv)
 		case 'M':
 		case 'm':
 			nscan = sscanf (optarg, "%d/%d/%lf",
-					&i1,&i2,&d3,&d4);
+					&i1,&i2,&d3);
 			if (nscan >= 1)
 			    pingnumber_tick_int = i1;
 			if (nscan >= 2)
@@ -605,10 +606,23 @@ main (int argc, char **argv)
 
 	/* if nothing set to be plotted, plot contours and track */
 	if (plot_contours == MB_NO && plot_triangles == MB_NO 
-		&& plot_track == MB_NO)
+		&& plot_track == MB_NO && plot_pingnumber == MB_NO)
 		{
 		plot_contours = MB_YES;
 		plot_track = MB_YES;
+		}
+	if (plot_name == MB_YES && plot_track == MB_NO 
+		&& plot_pingnumber == MB_NO)
+		{
+		plot_track = MB_YES;
+		}
+	if (plot_track == MB_NO 
+		&& plot_pingnumber == MB_YES)
+		{
+		plot_track = MB_YES;
+		time_tick_int = 10000000.0;
+		time_annot_int = 10000000.0;
+		date_annot_int = 10000000.0;
 		}
 
 	/* print starting message */
@@ -678,6 +692,7 @@ main (int argc, char **argv)
 		fprintf(stderr,"dbg2       plot contours:        %d\n",plot_contours);
 		fprintf(stderr,"dbg2       plot triangles:       %d\n",plot_triangles);
 		fprintf(stderr,"dbg2       plot track:           %d\n",plot_track);
+		fprintf(stderr,"dbg2       plot_pingnumber:      %d\n",plot_pingnumber);
 		fprintf(stderr,"dbg2       plot name:            %d\n",plot_name);
 		fprintf(stderr,"dbg2       contour interval:     %f\n",cont_int);
 		fprintf(stderr,"dbg2       color interval:       %f\n",col_int);
@@ -894,7 +909,7 @@ main (int argc, char **argv)
 		    }
 
 		/* else check for "fast nav" or "fnv" file */
-		else if (plot_track == MB_YES)
+		else if (plot_track == MB_YES || plot_pingnumber == MB_YES)
 		    {
 		    mb_get_fnv(verbose, file, &format, &error);
 		    }
