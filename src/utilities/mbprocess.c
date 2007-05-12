@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbprocess.c	3/31/93
- *    $Id: mbprocess.c,v 5.47 2006-11-10 22:36:05 caress Exp $
+ *    $Id: mbprocess.c,v 5.48 2007-05-12 19:44:26 caress Exp $
  *
  *    Copyright (c) 2000, 2002, 2003, 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -36,6 +36,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.47  2006/11/10 22:36:05  caress
+ * Working towards release 5.1.0
+ *
  * Revision 5.46  2006/03/14 01:51:53  caress
  * Fixed problem with per-beam heave values when applying rotational bathymetry correction - previously did not initialize heave values for non-null but flagged beams.
  *
@@ -240,7 +243,7 @@ int get_anglecorr(int verbose,
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbprocess.c,v 5.47 2006-11-10 22:36:05 caress Exp $";
+	static char rcs_id[] = "$Id: mbprocess.c,v 5.48 2007-05-12 19:44:26 caress Exp $";
 	static char program_name[] = "mbprocess";
 	static char help_message[] =  "mbprocess is a tool for processing swath sonar bathymetry data.\n\
 This program performs a number of functions, including:\n\
@@ -398,9 +401,10 @@ and mbedit edit save files.\n";
 	double	splineflag;
 	double	*ntime, *nlon, *nlat, *nheading, *nspeed;
 	double	*ndraft, *nroll, *npitch, *nheave;
-	double	*natime, *nalon, *nalat;
+	double	*natime, *nalon, *nalat, *naz;
+	double	zoffset;
 	double	*nlonspl, *nlatspl;
-	double	*nalonspl, *nalatspl;
+	double	*nalonspl, *nalatspl, *nazspl;
 	double	*attitudetime, *attituderoll, *attitudepitch, *attitudeheave;
 	double	rollval, pitchval, heaveval;
 	double	*fsonardepthtime, *fsonardepth, fsonardepthval;
@@ -815,7 +819,7 @@ and mbedit edit save files.\n";
 			    navfilemodtime = 0;
     
 		    /* get mod time for the navigation adjustment file if needed */
-		    if (process.mbp_navadj_mode != MBP_NAV_OFF
+		    if (process.mbp_navadj_mode != MBP_NAVADJ_OFF
 			    && (fstat = stat(process.mbp_navadjfile, &file_status)) == 0
 			    && (file_status.st_mode & S_IFMT) != S_IFDIR)
 			    navadjfilemodtime = file_status.st_mtime;
@@ -1013,15 +1017,21 @@ and mbedit edit save files.\n";
 		fprintf(stderr,"  Navigation not merged from navigation file.\n");
 
 	    fprintf(stderr,"\nAdjusted Navigation Merging:\n");
-	    if (process.mbp_navadj_mode == MBP_NAV_ON)
+	    if (process.mbp_navadj_mode >= MBP_NAVADJ_LL)
+	    	{
 		fprintf(stderr,"  Navigation merged from adjusted navigation file.\n");
+		fprintf(stderr,"  Adjusted navigation file:      %s\n", process.mbp_navadjfile);
+		if (process.mbp_navadj_mode == MBP_NAVADJ_LL)
+		    fprintf(stderr,"  Adjusted navigation applied to: lon lat only\n");
+		else if (process.mbp_navadj_mode == MBP_NAVADJ_LLZ)
+		    fprintf(stderr,"  Adjusted navigation applied to: lon lat depth_offset\n");
+		if (process.mbp_navadj_algorithm == MBP_NAV_LINEAR)
+		    fprintf(stderr,"  Adjusted navigation algorithm: linear interpolation\n");
+		else if (process.mbp_navadj_algorithm == MBP_NAV_SPLINE)
+		    fprintf(stderr,"  Adjusted navigation algorithm: spline interpolation\n");
+		}
 	    else
 		fprintf(stderr,"  Navigation not merged from adjusted navigation file.\n");
-	    fprintf(stderr,"  Adjusted navigation file:      %s\n", process.mbp_navadjfile);
-	    if (process.mbp_navadj_algorithm == MBP_NAV_LINEAR)
-		fprintf(stderr,"  Adjusted navigation algorithm: linear interpolation\n");
-	    else if (process.mbp_navadj_algorithm == MBP_NAV_SPLINE)
-		fprintf(stderr,"  Adjusted navigation algorithm: spline interpolation\n");
 
 	    fprintf(stderr,"\nAttitude Merging:\n");
 	    if (process.mbp_attitude_mode == MBP_ATTITUDE_ON)
@@ -1897,7 +1907,7 @@ and mbedit edit save files.\n";
 	  --------------------------------------------*/
 
 	/* if adjusted nav merging to be done get adjusted nav */
-	if (process.mbp_navadj_mode == MBP_NAV_ON)
+	if (process.mbp_navadj_mode >= MBP_NAVADJ_LL)
 	    {
 	    /* set max number of characters to be read at a time */
 	    nchar = 128;
@@ -1923,8 +1933,10 @@ and mbedit edit save files.\n";
 		status = mb_malloc(verbose,nanav*sizeof(double),&natime,&error);
 		status = mb_malloc(verbose,nanav*sizeof(double),&nalon,&error);
 		status = mb_malloc(verbose,nanav*sizeof(double),&nalat,&error);
+		status = mb_malloc(verbose,nanav*sizeof(double),&naz,&error);
 		status = mb_malloc(verbose,nanav*sizeof(double),&nalonspl,&error);
 		status = mb_malloc(verbose,nanav*sizeof(double),&nalatspl,&error);
+		status = mb_malloc(verbose,nanav*sizeof(double),&nazspl,&error);
 	
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR)
@@ -1962,12 +1974,17 @@ and mbedit edit save files.\n";
 		nav_ok = MB_NO;
 
 		/* deal with nav in form: yr mon day hour min sec time_d lon lat */
-		nget = sscanf(buffer,"%d %d %d %d %d %lf %lf %lf %lf",
+		nget = sscanf(buffer,"%d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf",
 			&time_i[0],&time_i[1],&time_i[2],
 			&time_i[3],&time_i[4],&sec,
 			&natime[nanav],
-			&nalon[nanav],&nalat[nanav]);
-		if (nget >= 9)
+			&nalon[nanav],&nalat[nanav],
+			&heading, &speed, &draft, 
+			&roll, &pitch, &heave, 
+			&naz[nanav]);
+		if (process.mbp_navadj_mode == MBP_NAVADJ_LL && nget >= 9)
+			nav_ok = MB_YES;
+		else if (process.mbp_navadj_mode == MBP_NAVADJ_LLZ && nget >= 16)
 			nav_ok = MB_YES;
 
 		/* make sure longitude is defined according to lonflip */
@@ -2035,6 +2052,8 @@ and mbedit edit save files.\n";
 			splineflag, splineflag, nalonspl-1, &error);
 	    mb_spline_init(verbose, natime-1, nalat-1, nanav,
 			splineflag, splineflag, nalatspl-1, &error);
+	    mb_spline_init(verbose, natime-1, naz-1, nanav,
+			splineflag, splineflag, nazspl-1, &error);
     
 	    /* get start and finish times of nav */
 	    mb_get_date(verbose,natime[0],stime_i);
@@ -3936,20 +3955,36 @@ and mbedit edit save files.\n";
 			    if (error == MB_ERROR_NO_ERROR) ocomment++;
 				}
 			}
-		if (process.mbp_navadj_mode == MBP_NAV_OFF)
+		if (process.mbp_navadj_mode == MBP_NAVADJ_OFF)
 			{
 			strncpy(comment,"\0",MBP_FILENAMESIZE);
 			sprintf(comment,"  Merge adjusted navigation: OFF");
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			if (error == MB_ERROR_NO_ERROR) ocomment++;
 			}
-		else if (process.mbp_navadj_mode == MBP_NAV_ON)
+		else if (process.mbp_navadj_mode >= MBP_NAVADJ_LL)
 			{
 			strncpy(comment,"\0",MBP_FILENAMESIZE);
 			sprintf(comment,"  Adjusted navigation file: %s", process.mbp_navadjfile);
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			if (error == MB_ERROR_NO_ERROR) ocomment++;
 			strncpy(comment,"\0",MBP_FILENAMESIZE);
+			if (process.mbp_navadj_mode == MBP_NAVADJ_LL)
+				{
+				strncpy(comment,"\0",MBP_FILENAMESIZE);
+				sprintf(comment,"  Adjusted navigation applied to lon lat only");
+				status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+				if (error == MB_ERROR_NO_ERROR) ocomment++;
+				strncpy(comment,"\0",MBP_FILENAMESIZE);
+				}
+			else if (process.mbp_navadj_mode == MBP_NAVADJ_LLZ)
+				{
+				strncpy(comment,"\0",MBP_FILENAMESIZE);
+				sprintf(comment,"  Adjusted navigation applied to lon lat depth");
+				status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+				if (error == MB_ERROR_NO_ERROR) ocomment++;
+				strncpy(comment,"\0",MBP_FILENAMESIZE);
+				}
 			if (process.mbp_navadj_algorithm == MBP_NAV_LINEAR)
 			    sprintf(comment,"  Adjusted navigation algorithm: linear interpolation");
 			else if (process.mbp_navadj_algorithm == MBP_NAV_SPLINE)
@@ -4494,7 +4529,7 @@ time_d,idata-1,ntime[idata-1],process.mbp_kluge005);*/
 
 		/* interpolate the adjusted navigation if desired */
 		if (error == MB_ERROR_NO_ERROR
-			&& process.mbp_navadj_mode == MBP_NAV_ON
+			&& process.mbp_navadj_mode >= MBP_NAVADJ_LL
 			&& (kind == MB_DATA_DATA
 			    || kind == MB_DATA_NAV))
 			{			
@@ -4652,7 +4687,7 @@ alpha, beta, lever_heave);*/
 			    dx = (nlon[itime] - nlon[itime-1])/mtodeglon;
 			    dy = (nlat[itime] - nlat[itime-1])/mtodeglat;
 			    }
-			else if (process.mbp_navadj_mode == MBP_NAV_ON)
+			else if (process.mbp_navadj_mode >= MBP_NAVADJ_LL)
 			    {
 			    mb_coor_scale(verbose,nalat[iatime-1],&mtodeglon,&mtodeglat);
 			    del_time = natime[iatime] - natime[iatime-1];
@@ -4668,7 +4703,7 @@ alpha, beta, lever_heave);*/
 			    dy = (navlat - navlat_old)/mtodeglat;
 			    }
 			if (process.mbp_nav_mode == MBP_NAV_ON
-				|| process.mbp_navadj_mode == MBP_NAV_ON
+				|| process.mbp_navadj_mode >= MBP_NAVADJ_LL
 				|| (kind == MB_DATA_DATA && idata > 1
 					|| kind == MB_DATA_NAV && inav > 1))
 			    {
@@ -5591,6 +5626,42 @@ idata, i, altitude_use, slope, angle, correction, reference_amp, ss[i]);*/
 			{
 			if (beamflag[i] != MB_FLAG_NULL)
 				bath[i] -= tideval;
+			}
+		    }
+
+	/*--------------------------------------------
+	  apply z offset from navigation adjustment correction
+	  --------------------------------------------*/
+			    
+		/* apply z offset from navigation adjustment correction */
+		if (error == MB_ERROR_NO_ERROR
+			&& kind == MB_DATA_DATA
+			&& process.mbp_navadj_mode == MBP_NAVADJ_LLZ
+			&& nanav > 1)
+		    {
+		    /* interpolate z offset */
+		    if (process.mbp_navadj_algorithm == MBP_NAV_SPLINE
+			&& time_d >= natime[0] 
+			&& time_d <= natime[nanav-1])
+			{
+			intstat = mb_spline_interp(verbose, 
+				    natime-1, naz-1, nazspl-1,
+				    nanav, time_d, &zoffset, &iatime, 
+				    &error);
+			}
+		    else
+			{
+			intstat = mb_linear_interp(verbose, 
+				    natime-1, naz-1,
+				    nanav, time_d, &zoffset, &iatime, 
+				    &error);
+			}
+
+		    /* apply tide to all valid beams */
+		    for (i=0;i<nbath;i++)
+			{
+			if (beamflag[i] != MB_FLAG_NULL)
+				bath[i] += zoffset;
 			}
 		    }
 
