@@ -147,6 +147,30 @@ first, which is incorrect, but only produced obvious errors with
 large pitch values. Now roll is applied first, and the translation
 between sonar coordinates and raytracing coordinates is correct.
 
+Ping number, and more importantly for seismic data, shot number
+annotation of navigation tracks is now supported by mbm_grdplot.
+
+Improved handling of navigation plotting and annotation by 
+mbcontour, mbm_plot, and mbm_grdplot. It is now easier to specify
+time, ping number, and filename annotation of navigation tracks.
+
+Major modifications have been made to MBnavadjust. MBnavadjust
+now picks offsets in z (depth) as well as x (longitude) and 
+y (latitude). An autopicking algorithm has been implemented, 
+and a display of the optimal navigation adjustment model added
+as well.
+
+The acrosstrack view of MBedit now shows the real alongtrack
+positions of the soundings.
+
+Fixed bug in mbsys_gsf.c that incorrectly calculated the alongtrack
+distance of sidescan samples in "snippet" sidescan data contained in
+GSF format (121) multibeam data. On occasion this bug produced 
+egregiously wrong alongtrack values.
+
+Fixed bug in mbgrid that caused failure to write Arc Ascii grids
+with option -G4.
+
 MB-SYSTEM VERSION 5.1.0 RELEASE NOTES:
 ------------------------------------------
 
@@ -1340,10 +1364,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.93 2006-12-15 21:42:49 caress Exp $
+RCS ID: $Id: README,v 5.94 2007-05-12 19:28:23 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.93  2006/12/15 21:42:49  caress
+Incremental CVS update.
+
 Revision 5.92  2006/11/26 16:15:16  caress
 Release 5.1.0
 
