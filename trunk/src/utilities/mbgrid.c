@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrid.c	5/2/94
- *    $Id: mbgrid.c,v 5.37 2006-08-09 22:41:27 caress Exp $
+ *    $Id: mbgrid.c,v 5.38 2007-05-12 19:34:37 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 1995, 2000, 2002, 2003, 2006 by
+ *    Copyright (c) 1993, 1994, 1995, 2000, 2002, 2003, 2006, 2007 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -38,6 +38,9 @@
  * Rererewrite:	January 2, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.37  2006/08/09 22:41:27  caress
+ * Fixed programs that read or write grids so that they do not use the GMT_begin() function; these programs will now work when GMT is built in the default fashion, when GMT is built in the default fashion, with "advisory file locking" enabled.
+ *
  * Revision 5.36  2006/06/22 04:45:43  caress
  * Working towards 5.1.0
  *
@@ -403,6 +406,9 @@
 #define MBGRID_INTERP_NEAR	2
 #define MBGRID_INTERP_ALL	3
 
+/* comparison threshold */
+#define MBGRID_TINY		0.00000001
+
 /* interpolation algorithm 
 	The code is set to use either of two
 	algorithms for 2D thin plate spline
@@ -424,7 +430,7 @@ double mbgrid_erf();
 FILE	*outfp;
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbgrid.c,v 5.37 2006-08-09 22:41:27 caress Exp $";
+static char rcs_id[] = "$Id: mbgrid.c,v 5.38 2007-05-12 19:34:37 caress Exp $";
 static char program_name[] = "mbgrid";
 static char help_message[] =  "mbgrid is an utility used to grid bathymetry, amplitude, or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbgrid -Ifilelist -Oroot \
@@ -1218,8 +1224,9 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 		topofactor = topofactor / 0.3048;
 		
 	/* check that dx == dy for Arc ascii grid output */
-	if (gridkind == MBGRID_ARCASCII && dx != dy)
+	if (gridkind == MBGRID_ARCASCII && fabs(dx - dy) > MBGRID_TINY)
 		{
+fprintf(outfp,"dx:%f dy:%f dy-dx:%g\n",dx,dy,dy-dx);
 		fprintf(outfp,"\nArc Ascii grid output (-G4) requires square cells, but grid intervals dx:%f dy:%f differ...\n", dx, dy);
 		fprintf(outfp,"\nProgram <%s> Terminated\n",
 			program_name);
