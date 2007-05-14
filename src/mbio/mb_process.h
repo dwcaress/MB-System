@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_process.h	9/11/00
- *    $Id: mb_process.h,v 5.24 2006-06-16 19:30:58 caress Exp $
+ *    $Id: mb_process.h,v 5.25 2007-05-14 06:25:47 caress Exp $
  *
  *    Copyright (c) 2000, 2002, 2003, 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -457,6 +457,9 @@
  * Date:	September 11, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.24  2006/06/16 19:30:58  caress
+ * Check in after the Santa Monica Basin Mapping AUV Expedition.
+ *
  * Revision 5.23  2006/01/06 18:27:19  caress
  * Working towards 5.0.8
  *
@@ -551,6 +554,9 @@
 #define MBP_METANOVALUE		9999999.
 #define MBP_NAV_OFF		0
 #define MBP_NAV_ON		1
+#define MBP_NAVADJ_OFF		0
+#define MBP_NAVADJ_LL		1
+#define MBP_NAVADJ_LLZ		2
 #define MBP_NAV_LINEAR		0
 #define MBP_NAV_SPLINE		1
 #define MBP_ATTITUDE_OFF	0
