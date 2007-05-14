@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	4/8/93
- *    $Id: mbedit_prog.c,v 5.34 2006-09-11 18:55:52 caress Exp $
+ *    $Id: mbedit_prog.c,v 5.35 2007-05-14 06:30:29 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997, 2000, 2003, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -27,6 +27,10 @@
  * Date:	September 19, 2000 (New version - no buffered i/o)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.34  2006/09/11 18:55:52  caress
+ * Changes during Western Flyer and Thomas Thompson cruises, August-September
+ * 2006.
+ *
  * Revision 5.33  2006/08/09 22:35:33  caress
  * A new edit mode called "grab" has been added to MBedit. In this
  * mode, the user drags a rectangle on the ping display. When the mouse
@@ -366,6 +370,7 @@ struct mbedit_ping_struct
 	double	roll;
 	double	pitch;
 	double	heave;
+	double	distance;
 	int	beams_bath;
 	char	*beamflag;
 	char	*beamflagorg;
@@ -384,7 +389,7 @@ struct mbedit_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbedit_prog.c,v 5.34 2006-09-11 18:55:52 caress Exp $";
+static char rcs_id[] = "$Id: mbedit_prog.c,v 5.35 2007-05-14 06:30:29 caress Exp $";
 static char program_name[] = "MBedit";
 static char help_message[] =  
 "MBedit is an interactive editor used to identify and flag\n\
@@ -5271,6 +5276,11 @@ int mbedit_load_data(int buffer_size,
 						&ping[nbuff].pitch,
 						&ping[nbuff].heave, 
 						&error);
+			if (nbuff == 0)
+				ping[nbuff].distance = 0.0;
+			else
+				ping[nbuff].distance = ping[nbuff-1].distance 
+							+ ping[nbuff].speed * ping[nbuff].time_interval / 3.6;
 			detect_status = mb_detects(verbose,imbio_ptr,store_ptr,
 						&kind,&nbeams,detect,&detect_error);
 			if (detect_status != MB_SUCCESS)
@@ -6036,7 +6046,9 @@ int mbedit_plot_all(
 					}
 				else
 					{
-					ping[i].bath_x[j] = x;
+					/* ping[i].bath_x[j] = x;*/
+					ping[i].bath_x[j] = xcen
+						+ dxscale*(ping[i].bathalongtrack[j] + ping[i].distance - ping[current_id+nplot/2].distance);
 					ping[i].bath_y[j] = ycen + dyscale*
 						(fabs((double)ping[i].bath[j]) 
 						- bathmedian);
