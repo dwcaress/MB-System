@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system: mbm_route2mission.perl   7/18/2004
-#    $Id: mbm_route2mission.perl,v 5.12 2007-03-02 20:33:37 caress Exp $
+#    $Id: mbm_route2mission.perl,v 5.13 2007-05-14 17:10:12 caress Exp $
 #
 #    Copyright (c) 2004, 2006 by 
 #    D. W. Caress (caress@mbari.org)
@@ -37,10 +37,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #      Moss Landing, CA
 #
 # Version:
-# $Id: mbm_route2mission.perl,v 5.12 2007-03-02 20:33:37 caress Exp $
+# $Id: mbm_route2mission.perl,v 5.13 2007-05-14 17:10:12 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.12  2007/03/02 20:33:37  caress
+#   Fixed informational output.
+#
 #   Revision 5.11  2006/11/26 09:42:01  caress
 #   Making distribution 5.1.0.
 #
@@ -101,8 +104,8 @@ $program_name = "mbm_route2mission";
 $durationfactorwaypoint = 1.5;
 $durationfactormission = 1.3;
 $durationmax = 28800;
-$batterylife = 30600;
-$safetymargin = 3600;
+$batterylife = 36000;
+$safetymargin = 1800;
 
 # set defaults
 
@@ -131,7 +134,7 @@ $initialdescendtime = 300;
 
 # behavior ascend
 $ascendrudder = 3;
-$ascendpitch = 30;
+$ascendpitch = 45;
 $ascendenddepth = 2;
 
 # behavior reson
@@ -1142,6 +1145,10 @@ print "Output Behavior: waypoint_depth (during line $iwaypoint) ";
 			printf MFILE "longitude         = %f; \r\n", $mlons[$i];
 			print MFILE "captureRadius      = 10; \r\n";
 			printf MFILE "duration          = %d; \r\n", ($durationfactorwaypoint * $distance / $mission_speed);
+			if ($mwaypoints[$i] != 0 && $iwaypoint != 0)
+				{
+				printf MFILE "# abortOnTimeout    = True; \r\n";
+				}
 			printf MFILE "initialDepth      = %f; \r\n", $mmissiondepths[$i];
 print " Depths: $mmissiondepths[$i]";
 			if ($i == $nmissionpoints - 1)
@@ -1275,11 +1282,11 @@ print "Output Behavior: gps\n";
 	print MFILE "duration  = RESON_DURATION; \r\n";	
 	print MFILE "MB_Mode  = 1; \r\n";	
 	print MFILE "Log_Mode  = 0; \r\n";	
-	print MFILE "SBP_Mode = 1; \r\n";
+	print MFILE "SBP_Mode = 0; \r\n";
 	print MFILE "SBP_Power = 0.0; \r\n";
 	#print MFILE "SBP_Gain = 128.0; \r\n";
 	printf MFILE "SBP_Duration = %.3f; \r\n", $sbp_duration;
-	print MFILE "LoSS_Mode = 1; \r\n";
+	print MFILE "LoSS_Mode = 0; \r\n";
 	print MFILE "LoSS_Power = 0.0; \r\n";
 	printf MFILE "LoSS_Range = %.2f; \r\n", $sslo_range;
 	print MFILE "HiSS_Mode = 0; \r\n";
