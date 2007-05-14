@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_proj.c	7/16/2002
- *    $Id: mb_proj.c,v 5.5 2006-06-16 19:30:58 caress Exp $
+ *    $Id: mb_proj.c,v 5.6 2007-05-14 06:20:09 caress Exp $
  *
  *    Copyright (c) 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -33,6 +33,9 @@
  * Date:	July 16, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2006/06/16 19:30:58  caress
+ * Check in after the Santa Monica Basin Mapping AUV Expedition.
+ *
  * Revision 5.4  2004/02/24 22:17:05  caress
  * Added mb_proj_transform() function.
  *
@@ -112,6 +115,9 @@ int mb_proj_init(int verbose,
 	else
 		{
 		/* cannot initialize the projection */
+		fprintf(stderr,"\nUnable to open projection database at expected location:\n\t%s\n",
+			projectionfile);
+		fprintf(stderr,"Set projection database location using the $MBSYSTEM_HOME and $PROJECTIONS \ntags in the install_makefiles script.\n\n");
 		*error = MB_ERROR_MISSING_PROJECTIONS;
 		status = MB_FAILURE;
 		}
