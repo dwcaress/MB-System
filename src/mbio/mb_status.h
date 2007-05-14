@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbio_status.h	2/1/93
- *    $Id: mb_status.h,v 5.77 2006-11-26 09:37:09 caress Exp $
+ *    $Id: mb_status.h,v 5.78 2007-05-14 06:23:44 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003, 2004, 2005, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.77  2006/11/26 09:37:09  caress
+ * Making distribution 5.1.0.
+ *
  * Revision 5.76  2006/10/05 18:58:28  caress
  * Changes for 5.1.0beta4
  *
@@ -343,8 +346,8 @@
 #define MB_STATUS_DEF
 
 /* MB-system version id */
-#define	MB_VERSION	"5.1.0"
-#define	MB_BUILD_DATE	"November 26, 2006"
+#define	MB_VERSION	"5.1.1beta2"
+#define	MB_BUILD_DATE	"March 23, 2007"
 
 /* MBIO function boolean convention */
 #define	MB_YES	1
@@ -584,6 +587,9 @@ static char *notice_msg[] =
 	"MB_ERROR_DATA_NOT_INSERTED (ID=-17): Data inconsistencies prevented inserting data into storage structure", 
 	"MB_ERROR_BAD_PROJECTION (ID=-18): UTM projection initialization failed", 
 	"MB_ERROR_MISSING_PROJECTIONS (ID=-19): Projection database cannot be read", 
+	"MB_ERROR_MISSING_NAVATTITUDE (ID=-20): Attitude data are missing for this ping",
+	"MB_ERROR_NOT_ENOUGH_DATA (ID=-21): Not enough data to perform spline interpolation",
+	"MB_ERROR_FILE_NOT_FOUND (ID=-22): Required file cannot be found",
 	
 	/* problem notices */
 	"DATA PROBLEM (ID=1): No survey data found",
@@ -591,7 +597,7 @@ static char *notice_msg[] =
 	"DATA PROBLEM (ID=3): Instantaneous speed exceeds 25 km/hr",
 	"DATA PROBLEM (ID=4): Average speed exceeds 25 km/hr",
 	"DATA PROBLEM (ID=5): Sounding depth exceeds 11000 m",
-	"DATA PROBLEM (ID=6): Unsupported Simrad datagram",
+	"DATA PROBLEM (ID=6): Unsupported datagram or record",
 	};
 static char *unknown_notice_msg[] =
 	{
