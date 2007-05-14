@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavadjust_callbacks.c	2/22/2000
- *    $Id: mbnavadjust_callbacks.c,v 5.10 2006-06-16 19:30:58 caress Exp $
+ *    $Id: mbnavadjust_callbacks.c,v 5.11 2007-05-14 06:34:11 caress Exp $
  *
  *    Copyright (c) 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	March 22, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.10  2006/06/16 19:30:58  caress
+ * Check in after the Santa Monica Basin Mapping AUV Expedition.
+ *
  * Revision 5.9  2006/01/24 19:18:42  caress
  * Version 5.0.8 beta.
  *
@@ -120,15 +123,17 @@ WidgetList	BxWidgetIdsFromNames PROTOTYPE((Widget, char*, char*));
 #define EV_MASK (ButtonPressMask | ButtonReleaseMask | ButtonMotionMask | KeyPressMask | KeyReleaseMask | ExposureMask)
 XtAppContext	app_context;
 Display		*display;
-Window		cont_xid, corr_xid;
+Window		cont_xid, corr_xid, zoff_xid;
 Colormap	colormap;
-GC		cont_gc, corr_gc;
+GC		cont_gc, corr_gc, modp_gc;
 XGCValues	xgcv;
 XFontStruct	*fontStruct;
 #define	XG_SOLIDLINE	0
 #define	XG_DASHLINE	1
-int	cont_xgid;		/* XG graphics id */
-int	corr_xgid;		/* XG graphics id */
+int	cont_xgid = 0;		/* XG graphics id */
+int	corr_xgid = 0;		/* XG graphics id */
+int	zoff_xgid = 0;		/* XG graphics id */
+int	modp_xgid = 0;		/* XG graphics id */
 Cursor myCursor;
 
 /* Set the colors used for this program here. */
@@ -139,8 +144,10 @@ XColor db_color;
 
 /* Set these to the dimensions of your canvas drawing */
 /* areas, minus 1, located in the uil file             */
-static int cont_borders[4] = { 0, 500, 0, 500 };
-static int corr_borders[4] = { 0, 300, 0, 300 };
+static int cont_borders[4] = { 0, 600, 0, 600 };
+static int corr_borders[4] = { 0, 301, 0, 301 };
+static int zoff_borders[4] = { 0, 300, 0, 60 };
+static int modp_borders[4];
 
 /* file opening parameters */
 #define FILE_MODE_NONE 		0
@@ -149,7 +156,6 @@ static int corr_borders[4] = { 0, 300, 0, 300 };
 #define FILE_MODE_IMPORT 	3
 int	file_mode = FILE_MODE_NONE;
 int	format = 0;
-int	startup_file = 0;
 int	expose_plot_ok = True;
 int selected = 0; /* indicates an input file is selected */
 
@@ -158,6 +164,7 @@ static int button1down = MB_NO;
 static int button2down = MB_NO;
 static int button3down = MB_NO;
 static int loc_x, loc_y;
+static int mod_loc_x, mod_loc_y;
 
 int	status;
 char	string[STRING_MAX];
@@ -170,6 +177,7 @@ void	do_naverr_cont_expose( Widget w, XtPointer client_data, XtPointer call_data
 void	do_naverr_corr_expose( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_naverr_cont_input( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_naverr_corr_input( Widget w, XtPointer client_data, XtPointer call_data);
+void	do_naverr_zcorr_input( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_naverr_previous( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_naverr_next( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_naverr_nextunset( Widget w, XtPointer client_data, XtPointer call_data);
@@ -179,6 +187,8 @@ void	do_naverr_selecttie( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_naverr_settie( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_naverr_resettie( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_naverr_setnone( Widget w, XtPointer client_data, XtPointer call_data);
+void	do_naverr_zerooffset( Widget w, XtPointer client_data, XtPointer call_data);
+void	do_naverr_zerozoffset( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_dismiss_naverr( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_naverr_minmisfit( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_naverr_misfitcenter( Widget w, XtPointer client_data, XtPointer call_data);
@@ -190,10 +200,12 @@ void	do_quit( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_fileselection_mode( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_fileselection_ok( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_fileselection_cancel( Widget w, XtPointer client_data, XtPointer call_data);
-void	do_view_showcrossings( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_view_showdata( Widget w, XtPointer client_data, XtPointer call_data);
+void	do_view_showcrossings( Widget w, XtPointer client_data, XtPointer call_data);
+void	do_view_showgoodcrossings( Widget w, XtPointer client_data, XtPointer call_data);
+void	do_view_showtruecrossings( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_view_showties( Widget w, XtPointer client_data, XtPointer call_data);
-void	do_action_makecontours( Widget w, XtPointer client_data, XtPointer call_data);
+void	do_action_autopick( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_action_analyzecrossings( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_action_invertnav( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_fileselection_list(Widget w, XtPointer client, XtPointer call);
@@ -202,6 +214,7 @@ void	set_label_string(Widget w, String str);
 void	set_label_multiline_string(Widget w, String str);
 void	get_text_string(Widget w, String str);
 int	do_info_add(char *info, int timetag);
+void	do_modelplot_resize( Widget w, XtPointer client_data, XEvent *event, Boolean *unused);
 
 /*--------------------------------------------------------------------*/
 /*      Function Name: 	BxManageCB
@@ -524,6 +537,10 @@ GRAU( XtPointer, call)
 void
 do_mbnavadjust_init(int argc, char **argv)
 {
+    Cardinal  ac = 0;
+    Arg       args[256];
+    int               argok;
+    XmString  tmp0;
     int	    i,j;
     String translations = 
 	    "<Btn1Down>:	DrawingAreaInput() ManagerGadgetArm() \n\
@@ -553,6 +570,12 @@ do_mbnavadjust_init(int argc, char **argv)
 	    (Widget) XmFileSelectionBoxGetChild(
 				    fileSelectionBox,
 				    XmDIALOG_HELP_BUTTON));
+    ac = 0;
+    tmp0 = (XmString) BX_CONVERT(fileSelectionBox, "*.nvh", 
+                                          XmRXmString, 0, &argok);
+    XtSetArg(args[ac], XmNpattern, tmp0); ac++;
+    XtSetValues(fileSelectionBox, args, ac);
+    XmStringFree((XmString)tmp0);
 				    
     /* reset translation table for drawingArea widgets */
     XtVaSetValues(drawingArea_naverr_cont,
@@ -561,6 +584,19 @@ do_mbnavadjust_init(int argc, char **argv)
     XtVaSetValues(drawingArea_naverr_corr,
 			XmNtranslations, XtParseTranslationTable(translations),
 			NULL);
+    XtVaSetValues(drawingArea_naverr_zcorr,
+			XmNtranslations, XtParseTranslationTable(translations),
+			NULL);
+    XtVaSetValues(drawingArea_modelplot,
+			XmNtranslations, XtParseTranslationTable(translations),
+			NULL);
+
+    /* add resize event handler to modelplot */
+    XtAddEventHandler(bulletinBoard_modelplot, 
+			StructureNotifyMask, 
+			False, 
+			do_modelplot_resize, 
+			(XtPointer)0);
 				
     /* Setup the entire screen. */
     display = XtDisplay(form_mbnavadjust);
@@ -680,6 +716,7 @@ do_mbnavadjust_init(int argc, char **argv)
 	    mpixel_values[i] = colors[i].pixel;
 	    }
     status = mbnavadjust_set_colors(NCOLORS, (int *) mpixel_values);
+    status = mbnavadjust_set_borders(cont_borders, corr_borders, zoff_borders);
 
     /* set verbose */
     mbna_verbose = 0;
@@ -690,8 +727,8 @@ do_mbnavadjust_init(int argc, char **argv)
     do_info_add(string, MB_YES);
 
     /* initialize mbnavadjust proper */
-    status = mbnavadjust_init(argc,argv,&startup_file);
     status = mbnavadjust_init_globals();
+    status = mbnavadjust_init(argc,argv);
     do_set_controls();
     do_update_status();
 }
@@ -817,12 +854,13 @@ void do_update_status()
 					truecrossing = ' ';
 				else
 					truecrossing = 'X';
-				sprintf(string,"%c%c %4d %3.3d:%3.3d %3.3d:%3.3d %2d",
+				sprintf(string,"%c%c %4d %3.3d:%3.3d %3.3d:%3.3d %3d %2d",
 					status_char, truecrossing, i,
 					crossing->file_id_1,
 					crossing->section_1,
 					crossing->file_id_2,
 					crossing->section_2,
+					crossing->overlap,
 					crossing->num_ties);
     				xstr[i] = XmStringCreateLocalized(string);
 				if (mbna_verbose > 0)
@@ -840,6 +878,71 @@ void do_update_status()
 			XmListSelectPos(list_data,mbna_crossing_select+1,0);
 			XmListSetPos(list_data,
 				MAX(mbna_crossing_select+1-5, 1));
+			}
+		}
+ 	else if (mbna_view_list == MBNA_VIEW_LIST_GOODCROSSINGS)
+		{
+		set_label_string(label_listdata,">25% Overlap Crossings:");
+		if (mbna_verbose > 0)
+			fprintf(stderr,">25% Overlap Crossings:\n");
+		if (project.num_files > 0)
+			{
+			xstr = (XmString *) malloc(project.num_crossings * sizeof(XmString));
+			j = 0;
+			for (i=0;i<project.num_crossings;i++)
+				{
+				crossing = &(project.crossings[i]);
+				if (crossing->overlap >= MBNA_OVERLAP_THRESHOLD)
+					{
+					if (crossing->status == MBNA_CROSSING_STATUS_NONE)
+						status_char = 'U';
+					else if (crossing->status == MBNA_CROSSING_STATUS_SET)
+						status_char = '*';
+					else
+						status_char = '-';
+					if (crossing->truecrossing == MB_NO)
+						truecrossing = ' ';
+					else
+						truecrossing = 'X';
+					sprintf(string,"%c%c %4d %3.3d:%3.3d %3.3d:%3.3d %3d %2d",
+						status_char, truecrossing, i,
+						crossing->file_id_1,
+						crossing->section_1,
+						crossing->file_id_2,
+						crossing->section_2,
+						crossing->overlap,
+						crossing->num_ties);
+    					xstr[j] = XmStringCreateLocalized(string);
+					if (mbna_verbose > 0)
+						fprintf(stderr,"%s\n",string);
+					j++;
+					}
+				}
+    			XmListAddItems(list_data,xstr,project.num_goodcrossings,0);
+			for (i=0;i<j;i++)
+				{
+    				XmStringFree(xstr[i]);
+    				}
+    			free(xstr);
+			}
+		if (mbna_crossing_select != MBNA_SELECT_NONE
+			&& project.crossings[mbna_crossing_select].overlap >= MBNA_OVERLAP_THRESHOLD)
+			{
+			j = 0;
+			for (i=0;i<=mbna_crossing_select;i++)
+				{
+				crossing = &(project.crossings[i]);
+				if (crossing->overlap >= MBNA_OVERLAP_THRESHOLD)
+					{
+					j++;
+					}
+				}
+			if (j > 0)
+				{
+				XmListSelectPos(list_data,j,0);
+				XmListSetPos(list_data,
+					MAX(j-5, 1));
+				}
 			}
 		}
  	else if (mbna_view_list == MBNA_VIEW_LIST_TRUECROSSINGS)
@@ -863,12 +966,13 @@ void do_update_status()
 					else
 						status_char = '-';
 					truecrossing = 'X';
-					sprintf(string,"%c%c %4d %3.3d:%3.3d %3.3d:%3.3d %2d",
+					sprintf(string,"%c%c %4d %3.3d:%3.3d %3.3d:%3.3d %3d %2d",
 						status_char, truecrossing, i,
 						crossing->file_id_1,
 						crossing->section_1,
 						crossing->file_id_2,
 						crossing->section_2,
+						crossing->overlap,
 						crossing->num_ties);
     					xstr[j] = XmStringCreateLocalized(string);
 					if (mbna_verbose > 0)
@@ -922,7 +1026,7 @@ void do_update_status()
 				{
 				tie = (struct mbna_tie *) &crossing->ties[j];
 				if (tie->inversion_status == MBNA_INVERSION_CURRENT)
-				    sprintf(string,"%4d %2d %3.3d:%3.3d:%2.2d %3.3d:%3.3d:%2.2d %8.2f %8.2f %8.2f %8.2f",
+				    sprintf(string,"%4d %2d %3.3d:%3.3d:%2.2d %3.3d:%3.3d:%2.2d %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f",
 					i, j,
 					crossing->file_id_1,
 					crossing->section_1,
@@ -932,10 +1036,12 @@ void do_update_status()
 					tie->snav_2,
 					tie->offset_x_m,
 					tie->offset_y_m,
+					tie->offset_z_m,
 					tie->inversion_offset_x_m - tie->offset_x_m,
-					tie->inversion_offset_y_m - tie->offset_y_m);
+					tie->inversion_offset_y_m - tie->offset_y_m,
+					tie->inversion_offset_z_m - tie->offset_z_m);
 				else if (tie->inversion_status == MBNA_INVERSION_OLD)
-				    sprintf(string,"%4d %2d %3.3d:%3.3d:%2.2d %3.3d:%3.3d:%2.2d %8.2f %8.2f %8.2f %8.2f ***",
+				    sprintf(string,"%4d %2d %3.3d:%3.3d:%2.2d %3.3d:%3.3d:%2.2d %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f ***",
 					i, j,
 					crossing->file_id_1,
 					crossing->section_1,
@@ -945,10 +1051,12 @@ void do_update_status()
 					tie->snav_2,
 					tie->offset_x_m,
 					tie->offset_y_m,
+					tie->offset_z_m,
 					tie->inversion_offset_x_m - tie->offset_x_m,
-					tie->inversion_offset_y_m - tie->offset_y_m);
+					tie->inversion_offset_y_m - tie->offset_y_m,
+					tie->inversion_offset_z_m - tie->offset_z_m);
 				else
-				    sprintf(string,"%4d %2d %3.3d:%3.3d:%2.2d %3.3d:%3.3d:%2.2d %8.2f %8.2f",
+				    sprintf(string,"%4d %2d %3.3d:%3.3d:%2.2d %3.3d:%3.3d:%2.2d %8.2f %8.2f %8.2f",
 					i, j,
 					crossing->file_id_1,
 					crossing->section_1,
@@ -957,7 +1065,8 @@ void do_update_status()
 					crossing->section_2,
 					tie->snav_2,
 					tie->offset_x_m,
-					tie->offset_y_m);
+					tie->offset_y_m,
+					tie->offset_z_m);
     				xstr[k] = XmStringCreateLocalized(string);
 				if (mbna_verbose > 0)
 					fprintf(stderr,"%s\n",string);
@@ -1077,6 +1186,9 @@ void do_update_status()
 			XtVaSetValues(pushButton_showcrossings,
 				XmNsensitive, True,
 				NULL);
+			XtVaSetValues(pushButton_showgoodcrossings,
+				XmNsensitive, True,
+				NULL);
 			XtVaSetValues(pushButton_showtruecrossings,
 				XmNsensitive, True,
 				NULL);
@@ -1090,6 +1202,27 @@ void do_update_status()
 				XmNsensitive, True,
 				NULL);
 			XtVaSetValues(pushButton_showcrossings,
+				XmNsensitive, False,
+				NULL);
+			XtVaSetValues(pushButton_showgoodcrossings,
+				XmNsensitive, True,
+				NULL);
+			XtVaSetValues(pushButton_showtruecrossings,
+				XmNsensitive, True,
+				NULL);
+			XtVaSetValues(pushButton_showties,
+				XmNsensitive, True,
+				NULL);
+			}
+		else if (mbna_view_list == MBNA_VIEW_LIST_GOODCROSSINGS)
+			{
+			XtVaSetValues(pushButton_showdata,
+				XmNsensitive, True,
+				NULL);
+			XtVaSetValues(pushButton_showcrossings,
+				XmNsensitive, True,
+				NULL);
+			XtVaSetValues(pushButton_showgoodcrossings,
 				XmNsensitive, False,
 				NULL);
 			XtVaSetValues(pushButton_showtruecrossings,
@@ -1107,6 +1240,9 @@ void do_update_status()
 			XtVaSetValues(pushButton_showcrossings,
 				XmNsensitive, True,
 				NULL);
+			XtVaSetValues(pushButton_showgoodcrossings,
+				XmNsensitive, True,
+				NULL);
 			XtVaSetValues(pushButton_showtruecrossings,
 				XmNsensitive, False,
 				NULL);
@@ -1120,6 +1256,9 @@ void do_update_status()
 				XmNsensitive, True,
 				NULL);
 			XtVaSetValues(pushButton_showcrossings,
+				XmNsensitive, True,
+				NULL);
+			XtVaSetValues(pushButton_showgoodcrossings,
 				XmNsensitive, True,
 				NULL);
 			XtVaSetValues(pushButton_showtruecrossings,
@@ -1138,6 +1277,9 @@ void do_update_status()
 		XtVaSetValues(pushButton_showcrossings,
 			XmNsensitive, False,
 			NULL);
+		XtVaSetValues(pushButton_showgoodcrossings,
+			XmNsensitive, False,
+			NULL);
 		XtVaSetValues(pushButton_showtruecrossings,
 			XmNsensitive, False,
 			NULL);
@@ -1150,7 +1292,7 @@ void do_update_status()
 		&& project.open == MB_YES
 		&& project.num_files > 0)
 		{
-		XtVaSetValues(pushButton_makecontours,
+		XtVaSetValues(pushButton_autopick,
 			XmNsensitive, True,
 			NULL);
 		XtVaSetValues(pushButton_makegrid,
@@ -1168,13 +1310,21 @@ void do_update_status()
 			XtVaSetValues(pushButton_invertnav,
 				XmNsensitive, False,
 				NULL);
+		if (project.inversion != MBNA_INVERSION_NONE)
+			XtVaSetValues(pushButton_showmodelplot,
+				XmNsensitive, True,
+				NULL);
+		else
+			XtVaSetValues(pushButton_showmodelplot,
+				XmNsensitive, False,
+				NULL);
 		XtVaSetValues(pushButton_updateproject,
 			XmNsensitive, False,
 			NULL);
 		}
 	else
 		{
-		XtVaSetValues(pushButton_makecontours,
+		XtVaSetValues(pushButton_autopick,
 			XmNsensitive, False,
 			NULL);
 		XtVaSetValues(pushButton_makegrid,
@@ -1187,6 +1337,9 @@ void do_update_status()
 			XmNsensitive, False,
 			NULL);
 		XtVaSetValues(pushButton_updateproject,
+			XmNsensitive, False,
+			NULL);
+		XtVaSetValues(pushButton_showmodelplot,
 			XmNsensitive, False,
 			NULL);
 		}
@@ -1258,6 +1411,12 @@ void do_update_status()
 			XmNvalue, ivalue, 
 			NULL);
 
+	/* set values of z offset width slider */
+	ivalue = (int) (project.zoffsetwidth);
+	XtVaSetValues(scale_controls_zoffset, 
+			XmNvalue, ivalue, 
+			NULL);
+
 	/* set misfit offset center toggles */
 	if (mbna_misfit_center == MBNA_MISFIT_ZEROCENTER)
 	    {
@@ -1274,10 +1433,14 @@ void do_update_status()
 
 void
 do_naverr_init()
-{
+{    
+    /* manage naverr */
+    XtManageChild(bulletinBoard_naverr);
+    
     /* Setup just the "canvas" part of the screen. */
     cont_xid = XtWindow(drawingArea_naverr_cont);
     corr_xid = XtWindow(drawingArea_naverr_corr);
+    zoff_xid = XtWindow(drawingArea_naverr_zcorr);
 
     /* Setup the "graphics Context" for just the "canvas" */
     xgcv.background = WhitePixelOfScreen(DefaultScreenOfDisplay(display));
@@ -1305,8 +1468,8 @@ do_naverr_init()
     /* initialize graphics */
     cont_xgid = xg_init(display, cont_xid, cont_borders, xgfont);
     corr_xgid = xg_init(display, corr_xid, corr_borders, xgfont);
-    status = mbnavadjust_set_graphics(cont_xgid,corr_xgid,
-		    cont_borders, corr_borders);
+    zoff_xgid = xg_init(display, zoff_xid, zoff_borders, xgfont);
+    status = mbnavadjust_set_graphics(cont_xgid, corr_xgid, zoff_xgid);
 		
     /* set status flag */
     mbna_status = MBNA_STATUS_NAVERR;
@@ -1322,6 +1485,8 @@ do_naverr_init()
     /* update naverr labels */
     mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
     do_update_naverr();
+    if (project.modelplot == MB_YES)
+	mbnavadjust_modelplot_plot();
     do_update_status();
 }
 
@@ -1359,15 +1524,16 @@ do_update_naverr()
         	sprintf(string,":::t\"Crossing: %d of %d\"\
 :t\"Sections: %4.4d:%4.4d and %4.4d:%4.4d\"\
 :t\"Status: Unset \"\
-:t\"Contour Plot Width: %.2f m\"\
-:t\"Misfit Plot Width:  %.2f m\"\
+:t\"Contour Plot Width:   %.2f m\"\
+:t\"Misfit Plot Width:    %.2f m\"\
+:t\"Z Offset Plot Width:  %.2f m\"\
 :t\"Zoom Factor: %.2f \"\
 :t\"Tie Points: None\"\
-:t\"Relative Offsets:   None   None\"",
+:t\"Relative Offsets:   None None None\"",
                	 	mbna_current_crossing, project.num_crossings,
                 	crossing->file_id_1,crossing->section_1,
                 	crossing->file_id_2,crossing->section_2,
-               	 	plot_width, misfit_width, zoom_factor);
+               	 	plot_width, misfit_width, project.zoffsetwidth, zoom_factor);
                 }
 	else if (crossing->status == MBNA_CROSSING_STATUS_SET)
 		{
@@ -1376,18 +1542,20 @@ do_update_naverr()
 :t\"Current Tie Point: %2d of %2d\"\
 :t\"Contour Plot Width: %.2f m\"\
 :t\"Misfit Plot Width:  %.2f m\"\
+:t\"Z Offset Plot Width:  %.2f m\"\
 :t\"Zoom Factor: %.2f \"\
 :t\"Nav Points: %4d %4d\"\
-:t\"Relative Offsets:   %9.3f m   %9.3f m\"",
+:t\"Relative Offsets (m):   %.3f %.3f %.3f\"",
                	 	mbna_current_crossing, project.num_crossings,
                 	crossing->file_id_1,crossing->section_1,
                 	crossing->file_id_2,crossing->section_2,
                 	mbna_current_tie, crossing->num_ties,
-               	 	plot_width, misfit_width, zoom_factor,
+               	 	plot_width, misfit_width, project.zoffsetwidth, zoom_factor,
                 	tie->snav_1,
 			tie->snav_2,
                 	tie->offset_x_m,
-			tie->offset_y_m);
+			tie->offset_y_m,
+			tie->offset_z_m);
                 }
 	else
 		{
@@ -1398,11 +1566,11 @@ do_update_naverr()
 :t\"Misfit Plot Width:  %.2f m\"\
 :t\"Zoom Factor: %.2f \"\
 :t\"Tie Points: Skipped\"\
-:t\"Relative Offsets:   Skipped   Skipped\"",
+:t\"Relative Offsets:   Skipped Skipped Skipped\"",
                	 	mbna_current_crossing, project.num_crossings,
                  	crossing->file_id_1,crossing->section_1,
                 	crossing->file_id_2,crossing->section_2,
-              	 	plot_width, misfit_width, zoom_factor);
+              	 	plot_width, misfit_width, project.zoffsetwidth, zoom_factor);
                 }
 	set_label_multiline_string(label_naverr_status, string);
 
@@ -1433,17 +1601,18 @@ do_naverr_offsetlabel()
     if (mbna_current_crossing >= 0)
     	{
     	/* set main naverr status label */
-        sprintf(string,":::t\"Working Offsets: %10.3f m  %10.3f m\":t\"Working Tie Points: %d:%d\"",
+        sprintf(string,":::t\"Working Offsets (m): %.3f %.3f %.3f\":t\"Working Tie Points: %d:%d\"",
         		mbna_offset_x / mbna_mtodeglon,
 			mbna_offset_y / mbna_mtodeglat,
+			mbna_offset_z,
 			mbna_snav_1, mbna_snav_2);
     	}
 
     else
     	{
     	/* set main naverr status label */
-        sprintf(string,":::t\"Working Offsets: %10.3f m  %10.3f m\":t\"Working Tie Points: %d:%d\"",
-        		0.0, 0.0, 0, 0);
+        sprintf(string,":::t\"Working Offsets (m): %.3f %.3f %.3f\":t\"Working Tie Points: %d:%d\"",
+        		0.0, 0.0, 0.0, 0, 0);
     	}
     set_label_multiline_string(label_naverr_offsets, string);
 
@@ -1526,7 +1695,6 @@ do_list_data_select( Widget w, XtPointer client_data, XtPointer call_data)
 		/* bring up naverr window if required */
 		if (mbna_naverr_load == MB_NO)
 		    {
-		    XtManageChild(bulletinBoard_naverr);
 		    do_naverr_init();
 		    }
 		    
@@ -1536,6 +1704,46 @@ do_list_data_select( Widget w, XtPointer client_data, XtPointer call_data)
 		    mbnavadjust_naverr_specific(mbna_crossing_select, mbna_tie_select);
 		    mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
 		    do_update_naverr();
+		    if (project.modelplot == MB_YES)
+			    mbnavadjust_modelplot_plot();
+		    do_update_status();
+		    }
+		}
+	else if (mbna_view_list == MBNA_VIEW_LIST_GOODCROSSINGS)
+		{
+		mbna_file_select = MBNA_SELECT_NONE;
+		mbna_crossing_select = MBNA_SELECT_NONE;
+		mbna_tie_select = MBNA_SELECT_NONE;
+		
+		/* get crossing and tie from list */
+		k = 0;
+		for (i=0;i<project.num_crossings && mbna_crossing_select == MBNA_SELECT_NONE;i++)
+			{
+			crossing = &(project.crossings[i]);
+			if (crossing->overlap >= MBNA_OVERLAP_THRESHOLD)
+			    {
+			    if (k == position_list[0] - 1)
+				{
+				mbna_crossing_select = i;
+				}
+			    k++;
+			    }
+			}
+		
+		/* bring up naverr window if required */
+		if (mbna_naverr_load == MB_NO)
+		    {
+		    do_naverr_init();
+		    }
+		    
+		/* else if naverr window is up, load selected crossing */
+		else
+		    {
+		    mbnavadjust_naverr_specific(mbna_crossing_select, mbna_tie_select);
+		    mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
+		    do_update_naverr();
+		    if (project.modelplot == MB_YES)
+			    mbnavadjust_modelplot_plot();
 		    do_update_status();
 		    }
 		}
@@ -1563,7 +1771,6 @@ do_list_data_select( Widget w, XtPointer client_data, XtPointer call_data)
 		/* bring up naverr window if required */
 		if (mbna_naverr_load == MB_NO)
 		    {
-		    XtManageChild(bulletinBoard_naverr);
 		    do_naverr_init();
 		    }
 		    
@@ -1573,6 +1780,8 @@ do_list_data_select( Widget w, XtPointer client_data, XtPointer call_data)
 		    mbnavadjust_naverr_specific(mbna_crossing_select, mbna_tie_select);
 		    mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
 		    do_update_naverr();
+		    if (project.modelplot == MB_YES)
+			    mbnavadjust_modelplot_plot();
 		    do_update_status();
 		    }
 		}
@@ -1596,7 +1805,6 @@ do_list_data_select( Widget w, XtPointer client_data, XtPointer call_data)
 		/* bring up naverr window if required */
 		if (mbna_naverr_load == MB_NO)
 		    {
-		    XtManageChild(bulletinBoard_naverr);
 		    do_naverr_init();
 		    }
 		    
@@ -1606,6 +1814,8 @@ do_list_data_select( Widget w, XtPointer client_data, XtPointer call_data)
 		    mbnavadjust_naverr_specific(mbna_crossing_select, mbna_tie_select);
 		    mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
 		    do_update_naverr();
+		    if (project.modelplot == MB_YES)
+			    mbnavadjust_modelplot_plot();
 		    do_update_status();
 		    }
 		}
@@ -1663,6 +1873,7 @@ do_naverr_cont_input( Widget w, XtPointer client_data, XtPointer call_data)
 		    loc_y = event->xbutton.y;
 		    mbna_offset_x_old = mbna_offset_x;
 		    mbna_offset_y_old = mbna_offset_y;
+		    mbna_offset_z_old = mbna_offset_z;
 		
 		    /* reset offset label */
 		    mbnavadjust_naverr_checkoksettie();
@@ -1788,6 +1999,7 @@ do_naverr_corr_input( Widget w, XtPointer client_data, XtPointer call_data)
 		    button1down = MB_YES;
 		    mbna_offset_x_old = mbna_offset_x;
 		    mbna_offset_y_old = mbna_offset_y;
+		    mbna_offset_z_old = mbna_offset_z;
 		    mbna_offset_x = mbna_misfit_offset_x 
 				    + (event->xbutton.x
 		    			- (corr_borders[0] + corr_borders[1]) / 2)
@@ -1837,6 +2049,79 @@ do_naverr_corr_input( Widget w, XtPointer client_data, XtPointer call_data)
 		/* reset old position */
 		mbna_offset_x_old = mbna_offset_x;
 		mbna_offset_y_old = mbna_offset_y;
+		mbna_offset_z_old = mbna_offset_z;
+		}
+      }
+    } /* end of inputs from window */
+}
+/*--------------------------------------------------------------------*/
+
+void
+do_naverr_zcorr_input( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XEvent *event;
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    event = acs->event;
+
+    /* If there is input in the drawing area */
+    if (acs->reason == XmCR_INPUT)
+    {
+      /* Check for mouse pressed. */
+      if (event->xany.type == ButtonPress)
+      {
+	  /* If left mouse button is pushed then save position. */
+	  if (event->xbutton.button == 1)
+		{
+		button1down = MB_YES;
+		mbna_offset_x_old = mbna_offset_x;
+		mbna_offset_y_old = mbna_offset_y;
+		mbna_offset_z_old = mbna_offset_z;
+		mbna_offset_z = ((event->xbutton.x - zoff_borders[0]) 
+		    			/ mbna_zoff_scale_x) 
+					+ mbna_misfit_offset_z - 0.5 * project.zoffsetwidth;
+
+		/* replot contours */
+		mbnavadjust_naverr_plot(MBNA_PLOT_MODE_MOVE);
+   		do_update_naverr();
+		do_naverr_offsetlabel();
+		} /* end of left button events */
+      } /* end of button press events */
+
+      /* Check for mouse released. */
+      if (event->xany.type == ButtonRelease)
+      {
+	  if (event->xbutton.button == 1)
+	    	{
+		button1down = MB_NO;
+		mbnavadjust_crossing_replot();
+		mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
+   		do_update_naverr();
+		do_naverr_offsetlabel();
+	    	}
+      } /* end of button release events */
+
+      /* Check for mouse motion while pressed. */
+      if (event->xany.type == MotionNotify)
+      {
+	  if (button1down == MB_YES)
+		{
+		/* move offset */
+		mbna_offset_z = ((event->xbutton.x - zoff_borders[0]) 
+		    			/ mbna_zoff_scale_x) 
+					+ mbna_misfit_offset_z - 0.5 * project.zoffsetwidth;
+fprintf(stderr,"buttonx:%d %f  mbna_misfit_offset_z:%f project.zoffsetwidth:%f  mbna_offset_z:%f\n",
+event->xbutton.x,((event->xbutton.x - zoff_borders[0])/mbna_zoff_scale_x), mbna_misfit_offset_z,
+project.zoffsetwidth, mbna_offset_z);
+		
+		/* replot contours */
+		mbnavadjust_naverr_plot(MBNA_PLOT_MODE_MOVE);
+   		do_update_naverr();
+		do_naverr_offsetlabel();
+		
+		/* reset old position */
+		mbna_offset_x_old = mbna_offset_x;
+		mbna_offset_y_old = mbna_offset_y;
+		mbna_offset_z_old = mbna_offset_z;
 		}
       }
     } /* end of inputs from window */
@@ -1852,6 +2137,8 @@ do_naverr_previous( Widget w, XtPointer client_data, XtPointer call_data)
     mbnavadjust_naverr_previous();
     mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
     do_update_naverr();
+    if (project.modelplot == MB_YES)
+	mbnavadjust_modelplot_plot();
     do_update_status();
 }
 
@@ -1865,6 +2152,8 @@ do_naverr_next( Widget w, XtPointer client_data, XtPointer call_data)
     mbnavadjust_naverr_next();
     mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
     do_update_naverr();
+    if (project.modelplot == MB_YES)
+	mbnavadjust_modelplot_plot();
     do_update_status();
 }
 
@@ -1878,6 +2167,8 @@ do_naverr_nextunset( Widget w, XtPointer client_data, XtPointer call_data)
     mbnavadjust_naverr_nextunset();
     mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
     do_update_naverr();
+    if (project.modelplot == MB_YES)
+	mbnavadjust_modelplot_plot();
     do_update_status();
 }
 
@@ -1891,6 +2182,8 @@ do_naverr_addtie( Widget w, XtPointer client_data, XtPointer call_data)
     mbnavadjust_naverr_addtie();
     mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
     do_update_naverr();
+    if (project.modelplot == MB_YES)
+	mbnavadjust_modelplot_plot();
     do_update_status();
 }
 
@@ -1904,6 +2197,8 @@ do_naverr_deletetie( Widget w, XtPointer client_data, XtPointer call_data)
     mbnavadjust_naverr_deletetie();
     mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
     do_update_naverr();
+    if (project.modelplot == MB_YES)
+	mbnavadjust_modelplot_plot();
     do_update_status();
 }
 
@@ -1917,6 +2212,8 @@ do_naverr_selecttie( Widget w, XtPointer client_data, XtPointer call_data)
     mbnavadjust_naverr_selecttie();
     mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
     do_update_naverr();
+    if (project.modelplot == MB_YES)
+	mbnavadjust_modelplot_plot();
     do_update_status();
 }
 
@@ -1931,6 +2228,8 @@ do_naverr_setnone( Widget w, XtPointer client_data, XtPointer call_data)
     mbnavadjust_naverr_nextunset();
     mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
     do_update_naverr();
+    if (project.modelplot == MB_YES)
+	mbnavadjust_modelplot_plot();
     do_update_status();
 }
 
@@ -1944,6 +2243,8 @@ do_naverr_setoffset( Widget w, XtPointer client_data, XtPointer call_data)
     mbnavadjust_naverr_save();
     mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
     do_update_naverr();
+    if (project.modelplot == MB_YES)
+	mbnavadjust_modelplot_plot();
     do_update_status();
 }
 
@@ -1957,6 +2258,8 @@ do_naverr_resettie( Widget w, XtPointer client_data, XtPointer call_data)
     mbnavadjust_naverr_resettie();
     mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
     do_update_naverr();
+    if (project.modelplot == MB_YES)
+	mbnavadjust_modelplot_plot();
     do_update_status();
 }
 
@@ -1981,6 +2284,8 @@ do_dismiss_naverr( Widget w, XtPointer client_data, XtPointer call_data)
     xg_free(corr_xgid);
     mbnavadjust_naverr_checkoksettie();
     do_update_naverr();
+    if (project.modelplot == MB_YES)
+	mbnavadjust_modelplot_plot();
     do_update_status();
 }
 
@@ -2010,10 +2315,40 @@ do_naverr_zerooffset( Widget w, XtPointer client_data, XtPointer call_data)
 	/* move offset */
 	mbna_offset_x = 0.0;
 	mbna_offset_y = 0.0;
+	mbna_offset_z = 0.0;
+		
+	/* replot contours */
+	mbnavadjust_crossing_replot();
+	mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
+	do_naverr_offsetlabel();
+}
+/*--------------------------------------------------------------------*/
+
+void
+do_naverr_zerozoffset( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+		
+	/* move offset */
+	mbna_offset_z = 0.0;
+		
+	/* replot contours */
+	mbnavadjust_crossing_replot();
+	mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
+	do_naverr_offsetlabel();
+}
+/*--------------------------------------------------------------------*/
+
+void
+do_naverr_applyzoffset( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
 		
 	/* replot contours */
 	mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
 	do_naverr_offsetlabel();
+	if (project.modelplot == MB_YES)
+		mbnavadjust_modelplot_plot();
 }
 
 /*--------------------------------------------------------------------*/
@@ -2024,12 +2359,16 @@ do_naverr_minmisfit( Widget w, XtPointer client_data, XtPointer call_data)
     XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
 
 	/* move offset */
-	mbna_offset_x = mbna_minmisfit_offset_x + mbna_misfit_offset_x;
-	mbna_offset_y = mbna_minmisfit_offset_y + mbna_misfit_offset_y;
+	mbna_offset_x = mbna_minmisfit_x;
+	mbna_offset_y = mbna_minmisfit_y;
+	mbna_offset_z = mbna_minmisfit_z;
 		
 	/* replot contours */
-    	mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
+	mbnavadjust_crossing_replot();
+   	mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
     	do_update_naverr();
+	if (project.modelplot == MB_YES)
+		mbnavadjust_modelplot_plot();
 
 }
 /*--------------------------------------------------------------------*/
@@ -2352,6 +2691,12 @@ do_controls_apply( Widget w, XtPointer client_data, XtPointer call_data)
 		XmNvalue, &ivalue, 
 		NULL);
     project.precision = ((double) ivalue) / 100.0;
+ 
+    /* get values of z offset width slider */
+    XtVaGetValues(scale_controls_zoffset, 
+		XmNvalue, &ivalue, 
+		NULL);
+    project.zoffsetwidth = ((double) ivalue);
    
     if (mbna_file_id_1 >= 0 && mbna_section_1 >= 0)
    	 project.files[mbna_file_id_1].sections[mbna_section_1].contoursuptodate = MB_NO;
@@ -2537,6 +2882,13 @@ do_scale_controls_precision( Widget w, XtPointer client_data, XtPointer call_dat
 {
     XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
 }
+/*--------------------------------------------------------------------*/
+
+void
+do_scale_controls_zoffset( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+}
 
 /*--------------------------------------------------------------------*/
 void
@@ -2662,6 +3014,16 @@ do_view_showcrossings( Widget w, XtPointer client_data, XtPointer call_data)
     mbna_view_list = MBNA_VIEW_LIST_CROSSINGS;
     do_update_status();
 }
+/*--------------------------------------------------------------------*/
+
+void
+do_view_showgoodcrossings( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+
+    mbna_view_list = MBNA_VIEW_LIST_GOODCROSSINGS;
+    do_update_status();
+}
 
 /*--------------------------------------------------------------------*/
 void
@@ -2725,14 +3087,14 @@ do_action_unfix( Widget w, XtPointer client_data, XtPointer call_data)
 /*--------------------------------------------------------------------*/
 
 void
-do_action_makecontours( Widget w, XtPointer client_data, XtPointer call_data)
+do_action_autopick( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
     
     /* make sure that contours are generated for all of the existing crossings */
 		
     mbna_status = MBNA_STATUS_MAKECONTOUR;
-    mbnavadjust_makecontours();
+    mbnavadjust_autopick();
     mbna_status = MBNA_STATUS_GUI;
     
 }
@@ -2752,8 +3114,279 @@ do_action_invertnav( Widget w, XtPointer client_data, XtPointer call_data)
     mbna_status = MBNA_STATUS_NAVSOLVE;
     mbnavadjust_invertnav();
     mbna_status = MBNA_STATUS_GUI;
+    if (project.modelplot == MB_YES)
+	mbnavadjust_modelplot_plot();
     do_update_status();
 }
+
+
+/*--------------------------------------------------------------------*/
+
+void
+do_modelplot_show( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    Window	modp_xid;
+    Dimension	width, height;
+    
+    /* get drawingArea size */
+    XtVaGetValues(drawingArea_modelplot, 
+	XmNwidth, &width, 
+	XmNheight, &height, 
+	NULL);
+    mbna_modelplot_width = width;
+    mbna_modelplot_height = height;
+    modp_borders[0] = 0;
+    modp_borders[1] = mbna_modelplot_width - 1;
+    modp_borders[2] = 0;
+    modp_borders[3] = mbna_modelplot_height - 1;
+    
+    /* Setup just the "canvas" part of the screen. */
+    modp_xid = XtWindow(drawingArea_modelplot);
+
+    /* Setup the "graphics Context" for just the "canvas" */
+    xgcv.background = WhitePixelOfScreen(DefaultScreenOfDisplay(display));
+    xgcv.foreground = BlackPixelOfScreen(DefaultScreenOfDisplay(display));
+    xgcv.line_width = 2;
+    modp_gc = XCreateGC(display, modp_xid, GCBackground | GCForeground
+	     | GCLineWidth, &xgcv);
+
+    /* Setup the font for just the "canvas" screen. */
+    fontStruct = XLoadQueryFont(display, xgfont);
+    XSetFont(display,modp_gc,fontStruct->fid);
+    XSelectInput(display, modp_xid, EV_MASK );
+
+    /* Setup cursors. */
+    myCursor = XCreateFontCursor(display, XC_target);
+    XRecolorCursor(display,myCursor,&colors[2],&colors[5]);
+    XDefineCursor(display,modp_xid,myCursor);
+
+    /* initialize graphics */
+    modp_xgid = xg_init(display, modp_xid, modp_borders, xgfont);
+    status = mbnavadjust_set_modelplot_graphics(modp_xgid, modp_borders);
+
+    /* set status flag */
+    project.modelplot = MB_YES;
+    mbna_modelplot_zoom_x1 = 0;
+    mbna_modelplot_zoom_x2 = 0;
+    mbna_modelplot_pingstart = 0;
+    mbna_modelplot_pingend = project.num_pings - 1;
+    mbna_modelplot_pickfile = MBNA_SELECT_NONE;
+    mbna_modelplot_picksection = MBNA_SELECT_NONE;
+    mbna_modelplot_picksnav = MBNA_SELECT_NONE;
+    
+    /* plot the model */
+    mbnavadjust_modelplot_plot();
+}
+/*--------------------------------------------------------------------*/
+
+void
+do_modelplot_dismiss( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+
+    /* deallocate graphics */
+    project.modelplot = MB_NO;
+    XFreeGC(display,modp_gc);
+    xg_free(modp_xgid);
+}
+
+/*------------------------------------------------------------------------------*/
+void 
+do_modelplot_resize( Widget w, XtPointer client_data, XEvent *event, Boolean *unused)
+{
+    Window	modp_xid;
+	XConfigureEvent *cevent = (XConfigureEvent *) event;
+	Cardinal	ac;
+	Arg		args[256];
+	Dimension	width, height;
+	
+	/* do this only if a resize event happens */
+	if (cevent->type == ConfigureNotify)
+	    {
+	    /* get new shell size */
+	    XtVaGetValues(bulletinBoard_modelplot, 
+	    	XmNwidth, &width, 
+	    	XmNheight, &height, 
+	   	NULL);
+
+	    /* do this only if the shell was REALLY resized and not just moved */
+	    if (mbna_modelplot_width != width - MBNA_MODELPLOT_LEFT_WIDTH
+	    	|| mbna_modelplot_height != height - MBNA_MODELPLOT_LEFT_HEIGHT)
+	    	{
+		/* set drawing area size */
+		mbna_modelplot_width = width - MBNA_MODELPLOT_LEFT_WIDTH;
+		mbna_modelplot_height = height - MBNA_MODELPLOT_LEFT_HEIGHT;
+		ac = 0;
+		XtSetArg(args[ac], XmNwidth, (Dimension) mbna_modelplot_width); ac++;
+		XtSetArg(args[ac], XmNheight,(Dimension) mbna_modelplot_height); ac++;
+		XtSetValues(drawingArea_modelplot, args, ac);
+
+		/* deallocate graphics */
+		XFreeGC(display,modp_gc);
+		xg_free(modp_xgid);
+
+		/* get drawingArea size */
+		modp_borders[0] = 0;
+		modp_borders[1] = mbna_modelplot_width - 1;
+		modp_borders[2] = 0;
+		modp_borders[3] = mbna_modelplot_height - 1;
+
+		/* Setup just the "canvas" part of the screen. */
+		modp_xid = XtWindow(drawingArea_modelplot);
+
+		/* Setup the "graphics Context" for just the "canvas" */
+		xgcv.background = WhitePixelOfScreen(DefaultScreenOfDisplay(display));
+		xgcv.foreground = BlackPixelOfScreen(DefaultScreenOfDisplay(display));
+		xgcv.line_width = 2;
+		modp_gc = XCreateGC(display,modp_xid,GCBackground | GCForeground
+			 | GCLineWidth, &xgcv);
+
+		/* Setup the font for just the "canvas" screen. */
+		fontStruct = XLoadQueryFont(display, xgfont);
+		XSetFont(display,modp_gc,fontStruct->fid);
+		XSelectInput(display, modp_xid, EV_MASK );
+
+		/* Setup cursors. */
+		myCursor = XCreateFontCursor(display, XC_target);
+		XRecolorCursor(display,myCursor,&colors[2],&colors[5]);
+		XDefineCursor(display,modp_xid,myCursor);
+
+		/* initialize graphics */
+		modp_xgid = xg_init(display, modp_xid, modp_borders, xgfont);
+		status = mbnavadjust_set_modelplot_graphics(modp_xgid, modp_borders);
+
+		/* plot the model */
+		mbnavadjust_modelplot_plot();
+
+	    	}
+	    }
+}
+
+/*--------------------------------------------------------------------*/
+
+void
+do_modelplot_fullsize( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+
+	/* replot model */
+	mbna_modelplot_zoom_x1 = 0;
+	mbna_modelplot_zoom_x2 = 0;
+	mbna_modelplot_pingstart = 0;
+	mbna_modelplot_pingend = project.num_pings - 1;
+	mbnavadjust_modelplot_setzoom();
+	mbnavadjust_modelplot_plot();
+}
+
+/*--------------------------------------------------------------------*/
+
+void
+do_modelplot_input( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XEvent  *event = acs->event;
+    
+    /* If there is input in the drawing area */
+    if (acs->reason == XmCR_INPUT)
+    {
+      /* Check for mouse pressed. */
+      if (event->xany.type == ButtonPress)
+      {
+	  /* If left mouse button is pushed */
+	  if (event->xbutton.button == 1)
+		    {
+		    button1down = MB_YES;
+
+		    } /* end of left button events */
+
+	    /* If middle mouse button is pushed */
+	    if (event->xbutton.button == 2)
+		    {
+		    button2down = MB_YES;
+		    mbna_modelplot_zoom_x1 = event->xbutton.x;
+		    mbna_modelplot_zoom_x2 = event->xbutton.x;
+	    	
+		    /* replot model */
+		    mbnavadjust_modelplot_plot();
+		    } /* end of middle button events */
+
+	    /* If right mouse button is pushed */
+	    if (event->xbutton.button == 3)
+		    {
+		    button3down = MB_YES;
+		    } /* end of right button events */	
+      } /* end of button press events */
+
+      /* Check for mouse released. */
+      if (event->xany.type == ButtonRelease)
+      {
+	  /* If left mouse button is released */
+	    if (event->xbutton.button == 1)
+	    	  {
+	    	  button1down = MB_NO;
+		  
+		  /* pick nearest tie point */
+		  mbnavadjust_modelpot_pick(event->xbutton.x, event->xbutton.y);
+
+		  /* replot model */
+		  mbnavadjust_modelplot_plot();
+	    	  }
+
+	    /* If middle mouse button is released */
+	    if (event->xbutton.button == 2)
+	    	  {
+	    	  button2down = MB_NO;
+	    	  mbna_modelplot_zoom_x2 = event->xbutton.x;
+
+		  /* replot model */
+		  mbnavadjust_modelplot_setzoom();
+		  mbnavadjust_modelplot_plot();
+		  mbna_modelplot_zoom_x1 = 0;
+		  mbna_modelplot_zoom_x2 = 0;
+		  }
+
+	    /* If right mouse button is released */
+	    if (event->xbutton.button == 3)
+	    	  {
+	    	  button3down = MB_NO;
+		  
+		  /* pick nearest tie point */
+		  mbnavadjust_modelpot_repick(event->xbutton.x, event->xbutton.y);
+
+		  /* replot model */
+		  mbnavadjust_modelplot_plot();
+	    	  }
+
+      } /* end of button release events */
+
+      /* Check for mouse motion while pressed. */
+      if (event->xany.type == MotionNotify)
+      {
+	    /* If middle mouse button is held during motion */
+	    if (button2down == MB_YES)
+		{
+	    	 mbna_modelplot_zoom_x2 = event->xbutton.x;
+	    	
+		 /* replot model */
+		 mbnavadjust_modelplot_plot();
+	    	}
+      }
+    } /* end of inputs from window */
+
+}
+
+/*--------------------------------------------------------------------*/
+
+void
+do_modelplot_expose( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+
+    /* replot the model */
+    mbnavadjust_modelplot_plot();
+}
+
 /*--------------------------------------------------------------------*/
 /* ARGSUSED */
 void
@@ -3019,6 +3652,7 @@ do_update_project( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
 }
+/*--------------------------------------------------------------------*/
 
 void
 do_make_grid( Widget w, XtPointer client_data, XtPointer call_data)

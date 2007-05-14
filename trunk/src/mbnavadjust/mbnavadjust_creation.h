@@ -34,6 +34,9 @@
 /**
  * Start Global Widget Declarations.
  */
+EXTERNAL Widget   bulletinBoard_modelplot;
+EXTERNAL Widget   drawingArea_modelplot;
+EXTERNAL Widget   scale_controls_zoffset;
 EXTERNAL Widget   scale_controls_precision;
 EXTERNAL Widget   scale_controls_sectionlength;
 EXTERNAL Widget   scale_controls_tickinterval;
@@ -51,6 +54,8 @@ EXTERNAL Widget   label_biases_files;
 EXTERNAL Widget   toggleButton_biases_together;
 EXTERNAL Widget   toggleButton_biases_separate;
 EXTERNAL Widget   bulletinBoard_naverr;
+EXTERNAL Widget   drawingArea_naverr_zcorr;
+EXTERNAL Widget   pushButton_naverr_zerozoffset;
 EXTERNAL Widget   pushButton_naverr_settie;
 EXTERNAL Widget   toggleButton_misfitcenter_zero;
 EXTERNAL Widget   toggleButton_misfitcenter_auto;
@@ -88,12 +93,14 @@ EXTERNAL Widget   pushButton_importdata;
 EXTERNAL Widget   pushButton_quit;
 EXTERNAL Widget   pushButton_showdata;
 EXTERNAL Widget   pushButton_showcrossings;
+EXTERNAL Widget   pushButton_showgoodcrossings;
 EXTERNAL Widget   pushButton_showtruecrossings;
 EXTERNAL Widget   pushButton_showties;
+EXTERNAL Widget   pushButton_makegrid;
+EXTERNAL Widget   pushButton_showmodelplot;
 EXTERNAL Widget   pushButton_fix;
 EXTERNAL Widget   pushButton_unfix;
-EXTERNAL Widget   pushButton_makecontours;
-EXTERNAL Widget   pushButton_makegrid;
+EXTERNAL Widget   pushButton_autopick;
 EXTERNAL Widget   pushButton_analyzecrossings;
 EXTERNAL Widget   pushButton_invertnav;
 EXTERNAL Widget   pushButton_updateproject;
