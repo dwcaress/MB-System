@@ -70,12 +70,14 @@ identifier BXG_form_mbnavadjust;
 identifier BXG_pushButton_updateproject;
 identifier BXG_pushButton_invertnav;
 identifier BXG_pushButton_analyzecrossings;
-identifier BXG_pushButton_makegrid;
-identifier BXG_pushButton_makecontours;
+identifier BXG_pushButton_autopick;
 identifier BXG_pushButton_unfix;
 identifier BXG_pushButton_fix;
+identifier BXG_pushButton_showmodelplot;
+identifier BXG_pushButton_makegrid;
 identifier BXG_pushButton_showties;
 identifier BXG_pushButton_showtruecrossings;
+identifier BXG_pushButton_showgoodcrossings;
 identifier BXG_pushButton_showcrossings;
 identifier BXG_pushButton_showdata;
 identifier BXG_pushButton_quit;
@@ -94,6 +96,8 @@ identifier BXG_label_format;
 identifier BXG_fileSelectionBox;
 identifier BXG_bulletinBoard_fileselection;
 identifier BXG_xmDialogShell_fileselection;
+identifier BXG_drawingArea_naverr_zcorr;
+identifier BXG_pushButton_naverr_zerozoffset;
 identifier BXG_pushButton_naverr_settie;
 identifier BXG_toggleButton_misfitcenter_auto;
 identifier BXG_toggleButton_misfitcenter_zero;
@@ -123,6 +127,7 @@ identifier BXG_label_biases_files;
 identifier BXG_toggleButton_biases_separate;
 identifier BXG_toggleButton_biases_together;
 identifier BXG_label_about_version;
+identifier BXG_scale_controls_zoffset;
 identifier BXG_scale_controls_precision;
 identifier BXG_scale_controls_sectionlength;
 identifier BXG_scale_controls_tickinterval;
@@ -130,14 +135,16 @@ identifier BXG_scale_controls_colorinterval;
 identifier BXG_scale_controls_contourinterval;
 identifier BXG_scale_controls_decimation;
 identifier BXG_scale_controls_sectionsoundings;
+identifier BXG_drawingArea_modelplot;
+identifier BXG_bulletinBoard_modelplot;
 procedure BxExitCB(integer);
 procedure BxManageCB(string);
 procedure BxSetValuesCB(string);
 procedure BxUnmanageCB(string);
 procedure do_action_analyzecrossings();
+procedure do_action_autopick();
 procedure do_action_fix();
 procedure do_action_invertnav();
-procedure do_action_makecontours();
 procedure do_action_unfix();
 procedure do_biases_apply();
 procedure do_biases_applyall();
@@ -153,6 +160,11 @@ procedure do_fileselection_mode(integer);
 procedure do_fileselection_ok();
 procedure do_list_data_select();
 procedure do_make_grid();
+procedure do_modelplot_dismiss();
+procedure do_modelplot_expose();
+procedure do_modelplot_fullsize();
+procedure do_modelplot_input();
+procedure do_modelplot_show();
 procedure do_naverr_addtie();
 procedure do_naverr_cont_expose();
 procedure do_naverr_cont_input();
@@ -170,7 +182,9 @@ procedure do_naverr_resettie();
 procedure do_naverr_selecttie();
 procedure do_naverr_setnone();
 procedure do_naverr_setoffset();
+procedure do_naverr_zcorr_input();
 procedure do_naverr_zerooffset();
+procedure do_naverr_zerozoffset();
 procedure do_quit();
 procedure do_scale_contourinterval();
 procedure do_scale_controls_decimation();
@@ -178,9 +192,11 @@ procedure do_scale_controls_precision();
 procedure do_scale_controls_sectionlength();
 procedure do_scale_controls_sectionsoundings();
 procedure do_scale_controls_tickinterval();
+procedure do_scale_controls_zoffset();
 procedure do_update_project();
 procedure do_view_showcrossings();
 procedure do_view_showdata();
+procedure do_view_showgoodcrossings();
 procedure do_view_showties();
 procedure do_view_showtruecrossings();
 !(BX) "Widget" "bulletinBoard_biases"
@@ -212,6 +228,138 @@ list Style_useReasons : callbacks {
 !(BX)};
 
 
+object pushButton_modelplot_dismiss : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Dismiss");
+        XmNx = 10;
+        XmNy = 10;
+        XmNwidth = 70;
+        XmNheight = 32;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+       XmNactivateCallback = procedures {
+                 BxUnmanageCB("bulletinBoard_modelplot");
+                 do_modelplot_dismiss();
+        };
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object drawingArea_modelplot : XmDrawingArea widget {
+    arguments {
+        arguments Style_use;
+        XmNborderWidth = 1;
+        XmNbackground = color('white');
+        XmNx = 10;
+        XmNy = 50;
+        XmNwidth = 820;
+        XmNheight = 330;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_drawingArea_modelplot);
+        XmNinputCallback = procedure do_modelplot_input();
+        XmNexposeCallback = procedure do_modelplot_expose();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object label_modelplot_status : XmLabel widget {
+    arguments {
+        arguments Style_use;
+        XmNalignment = XmALIGNMENT_BEGINNING;
+        XmNlabelString = compound_string("0 pings 0 nav pts 0 ties Inversi" &
+ "on: out of date");
+        XmNx = 230;
+        XmNy = 10;
+        XmNwidth = 490;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object pushButton_modelplot_fullsize : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Full Size");
+        XmNx = 150;
+        XmNy = 10;
+        XmNwidth = 80;
+        XmNheight = 32;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        XmNactivateCallback = procedure do_modelplot_fullsize();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object bulletinBoard_modelplot : XmBulletinBoardDialog widget {
+    arguments {
+        arguments Style_use;
+        XmNautoUnmanage = false;
+        XmNresizePolicy = XmRESIZE_GROW;
+        XmNx = 115;
+        XmNy = 362;
+        XmNwidth = 843;
+        XmNheight = 393;
+    };
+    controls {
+         managed XmPushButton pushButton_modelplot_fullsize;
+         managed XmLabel label_modelplot_status;
+         managed XmDrawingArea drawingArea_modelplot;
+         managed XmPushButton pushButton_modelplot_dismiss;
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_bulletinBoard_modelplot);
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+!(BX)object dialogShell_modelplot : XmDialogShell widget {
+!(BX)    arguments {
+!(BX)        arguments Style_use;
+!(BX)        XmNtitle = "Navigation Adjustment Model Plot" &
+!(BX) "";
+!(BX)        XmNallowShellResize = true;
+!(BX)        XmNwidth = 843;
+!(BX)        XmNheight = 393;
+!(BX)    };
+!(BX)    controls {
+!(BX)         managed XmBulletinBoardDialog bulletinBoard_modelplot;
+!(BX)    };
+!(BX)    callbacks {
+!(BX)        callbacks Style_useReasons;
+!(BX)    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+!(BX)};
+
 object pushButton_controls_dismiss : XmPushButton widget {
     arguments {
         arguments Style_use;
@@ -225,8 +373,8 @@ object pushButton_controls_dismiss : XmPushButton widget {
         XmNrightOffset = 227;
         XmNleftWidget = XmPushButton pushButton_controls_apply;
         XmNx = 300;
-        XmNy = 340;
-        XmNwidth = 80;
+        XmNy = 389;
+        XmNwidth = 108;
         XmNheight = 30;
     };
     controls {
@@ -255,7 +403,7 @@ object scale_controls_sectionsoundings : XmScale widget {
         XmNrightAttachment = XmATTACH_FORM;
         XmNleftAttachment = XmATTACH_WIDGET;
         XmNbottomAttachment = XmATTACH_POSITION;
-        XmNbottomPosition = 16;
+        XmNbottomPosition = 19;
         XmNleftOffset = 0;
         XmNrightOffset = 6;
         XmNtopOffset = 4;
@@ -263,8 +411,8 @@ object scale_controls_sectionsoundings : XmScale widget {
         XmNtopWidget = XmScale scale_controls_sectionlength;
         XmNx = 190;
         XmNy = 40;
-        XmNwidth = 411;
-        XmNheight = 22;
+        XmNwidth = 439;
+        XmNheight = 43;
     };
     controls {
     };
@@ -285,9 +433,9 @@ object label_controls_sectionsoundings : XmLabel widget {
         XmNlabelString = compound_string("Max # Soundings in Section:");
         XmNleftAttachment = XmATTACH_FORM;
         XmNleftOffset = 10;
-        XmNtopOffset = 50;
+        XmNtopOffset = 60;
         XmNx = 10;
-        XmNy = 50;
+        XmNy = 60;
         XmNwidth = 180;
         XmNheight = 20;
     };
@@ -308,10 +456,10 @@ object label_controls_decimation : XmLabel widget {
         XmNlabelString = compound_string("Decimation:");
         XmNleftAttachment = XmATTACH_FORM;
         XmNleftOffset = 10;
-        XmNtopOffset = 110;
+        XmNtopOffset = 120;
         XmNx = 10;
-        XmNy = 110;
-        XmNwidth = 130;
+        XmNy = 120;
+        XmNwidth = 120;
         XmNheight = 20;
     };
     controls {
@@ -340,11 +488,11 @@ object scale_controls_decimation : XmScale widget {
         XmNbottomOffset = 0;
         XmNleftOffset = 140;
         XmNrightOffset = 6;
-        XmNtopOffset = 0;
+        XmNtopOffset = -4;
         XmNtopWidget = XmSeparator separator4;
         XmNx = 140;
-        XmNy = 87;
-        XmNwidth = 461;
+        XmNy = 104;
+        XmNwidth = 489;
         XmNheight = 36;
     };
     controls {
@@ -371,8 +519,8 @@ object separator5 : XmSeparator widget {
         XmNtopOffset = 4;
         XmNtopWidget = XmScale scale_controls_tickinterval;
         XmNx = 10;
-        XmNy = 247;
-        XmNwidth = 590;
+        XmNy = 264;
+        XmNwidth = 618;
         XmNheight = 20;
     };
     controls {
@@ -391,9 +539,9 @@ object separator4 : XmSeparator widget {
         XmNrightOffset = 6;
         XmNtopOffset = 5;
         XmNtopWidget = XmScale scale_controls_sectionsoundings;
-        XmNx = 12;
-        XmNy = 67;
-        XmNwidth = 589;
+        XmNx = 13;
+        XmNy = 88;
+        XmNwidth = 616;
         XmNheight = 20;
     };
     controls {
@@ -412,7 +560,7 @@ object pushButton_controls_apply : XmPushButton widget {
         XmNbottomOffset = 19;
         XmNleftOffset = 200;
         XmNx = 200;
-        XmNy = 340;
+        XmNy = 389;
         XmNwidth = 70;
         XmNheight = 30;
     };
@@ -434,9 +582,9 @@ object label_controls_tickinterval : XmLabel widget {
         XmNlabelString = compound_string("Tick Interval (m):");
         XmNleftAttachment = XmATTACH_FORM;
         XmNleftOffset = 10;
-        XmNtopOffset = 230;
+        XmNtopOffset = 240;
         XmNx = 10;
-        XmNy = 230;
+        XmNy = 240;
         XmNwidth = 120;
         XmNheight = 20;
     };
@@ -457,9 +605,9 @@ object label_controls_colorinterval : XmLabel widget {
         XmNlabelString = compound_string("Color Interval (m):");
         XmNleftAttachment = XmATTACH_FORM;
         XmNleftOffset = 10;
-        XmNtopOffset = 190;
+        XmNtopOffset = 200;
         XmNx = 10;
-        XmNy = 190;
+        XmNy = 200;
         XmNwidth = 130;
         XmNheight = 20;
     };
@@ -480,9 +628,9 @@ object label_controls_contourinterval : XmLabel widget {
         XmNlabelString = compound_string("Contour Interval (m):");
         XmNleftAttachment = XmATTACH_FORM;
         XmNleftOffset = 10;
-        XmNtopOffset = 150;
+        XmNtopOffset = 160;
         XmNx = 10;
-        XmNy = 150;
+        XmNy = 160;
         XmNwidth = 140;
         XmNheight = 20;
     };
@@ -516,8 +664,8 @@ object scale_controls_contourinterval : XmScale widget {
         XmNtopOffset = 4;
         XmNtopWidget = XmScale scale_controls_decimation;
         XmNx = 140;
-        XmNy = 127;
-        XmNwidth = 461;
+        XmNy = 144;
+        XmNwidth = 489;
         XmNheight = 36;
     };
     controls {
@@ -552,8 +700,8 @@ object scale_controls_colorinterval : XmScale widget {
         XmNtopOffset = 4;
         XmNtopWidget = XmScale scale_controls_contourinterval;
         XmNx = 140;
-        XmNy = 167;
-        XmNwidth = 461;
+        XmNy = 184;
+        XmNwidth = 489;
         XmNheight = 36;
     };
     controls {
@@ -588,8 +736,8 @@ object scale_controls_tickinterval : XmScale widget {
         XmNtopOffset = 4;
         XmNtopWidget = XmScale scale_controls_colorinterval;
         XmNx = 140;
-        XmNy = 207;
-        XmNwidth = 461;
+        XmNy = 224;
+        XmNwidth = 489;
         XmNheight = 36;
     };
     controls {
@@ -616,13 +764,13 @@ object scale_controls_sectionlength : XmScale widget {
         XmNorientation = XmHORIZONTAL;
         XmNrightAttachment = XmATTACH_FORM;
         XmNleftAttachment = XmATTACH_WIDGET;
-        XmNleftOffset = 10;
-        XmNrightOffset = 6;
+        XmNleftOffset = 20;
+        XmNrightOffset = 7;
         XmNtopOffset = 0;
         XmNleftWidget = XmLabel label_controls_sectionlength;
-        XmNx = 180;
+        XmNx = 190;
         XmNy = 0;
-        XmNwidth = 421;
+        XmNwidth = 438;
         XmNheight = 36;
     };
     controls {
@@ -671,7 +819,7 @@ object separator12 : XmSeparator widget {
         XmNtopOffset = 310;
         XmNx = 10;
         XmNy = 310;
-        XmNwidth = 585;
+        XmNwidth = 613;
         XmNheight = 20;
     };
     controls {
@@ -697,7 +845,7 @@ object scale_controls_precision : XmScale widget {
         XmNtopOffset = 270;
         XmNx = 140;
         XmNy = 270;
-        XmNwidth = 460;
+        XmNwidth = 488;
         XmNheight = 36;
     };
     controls {
@@ -736,16 +884,88 @@ object label_controls_precision : XmLabel widget {
 !(BX)    };
 };
 
+object label_controls_zoffset : XmLabel widget {
+    arguments {
+        arguments Style_use;
+        XmNalignment = XmALIGNMENT_BEGINNING;
+        XmNlabelString = compound_string("Z Offset Width (m):");
+        XmNleftAttachment = XmATTACH_FORM;
+        XmNleftOffset = 10;
+        XmNtopOffset = 340;
+        XmNx = 10;
+        XmNy = 340;
+        XmNwidth = 120;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object scale_controls_zoffset : XmScale widget {
+    arguments {
+        arguments Style_use;
+        XmNminimum = 1;
+        XmNdecimalPoints = 0;
+        XmNvalue = 10;
+        XmNmaximum = 20;
+        XmNshowArrows = TRUE;
+        XmNshowValue = TRUE;
+        XmNorientation = XmHORIZONTAL;
+        XmNleftAttachment = XmATTACH_FORM;
+        XmNleftOffset = 140;
+        XmNtopOffset = 330;
+        XmNx = 140;
+        XmNy = 330;
+        XmNwidth = 480;
+        XmNheight = 36;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_scale_controls_zoffset);
+        XmNvalueChangedCallback = procedure do_scale_controls_zoffset();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object separator14 : XmSeparator widget {
+    arguments {
+        XmNleftAttachment = XmATTACH_FORM;
+        XmNleftOffset = 10;
+        XmNtopOffset = 370;
+        XmNx = 10;
+        XmNy = 370;
+        XmNwidth = 613;
+        XmNheight = 20;
+    };
+    controls {
+    };
+    callbacks {
+    };
+};
+
 object form_controls : XmFormDialog widget {
     arguments {
         arguments Style_use;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 543;
-        XmNy = 432;
-        XmNwidth = 607;
-        XmNheight = 389;
+        XmNx = 1203;
+        XmNy = 404;
+        XmNwidth = 635;
+        XmNheight = 438;
     };
     controls {
+         managed XmSeparator separator14;
+         managed XmScale scale_controls_zoffset;
+         managed XmLabel label_controls_zoffset;
          managed XmLabel label_controls_precision;
          managed XmScale scale_controls_precision;
          managed XmSeparator separator12;
@@ -778,8 +998,8 @@ object form_controls : XmFormDialog widget {
 !(BX)    arguments {
 !(BX)        arguments Style_use;
 !(BX)        XmNtitle = "Controls";
-!(BX)        XmNwidth = 607;
-!(BX)        XmNheight = 389;
+!(BX)        XmNwidth = 635;
+!(BX)        XmNheight = 438;
 !(BX)    };
 !(BX)    controls {
 !(BX)         managed XmFormDialog form_controls;
@@ -1090,8 +1310,8 @@ object form_about : XmFormDialog widget {
     arguments {
         arguments Style_use;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 520;
-        XmNy = 456;
+        XmNx = 1277;
+        XmNy = 381;
         XmNwidth = 488;
         XmNheight = 484;
     };
@@ -1485,9 +1705,9 @@ object pushButton_naverr_setnone : XmPushButton widget {
         arguments Style_use;
         XmNlabelString = compound_string("Skip Crossing");
         XmNrecomputeSize = false;
-        XmNx = 560;
-        XmNy = 40;
-        XmNwidth = 90;
+        XmNx = 350;
+        XmNy = 10;
+        XmNwidth = 100;
         XmNheight = 30;
     };
     controls {
@@ -1529,7 +1749,7 @@ object pushButton_naverr_next : XmPushButton widget {
         arguments Style_use;
         XmNlabelString = compound_string("Next");
         XmNrecomputeSize = false;
-        XmNx = 180;
+        XmNx = 170;
         XmNy = 10;
         XmNwidth = 80;
         XmNheight = 30;
@@ -1552,7 +1772,7 @@ object pushButton_naverr_minmisfit : XmPushButton widget {
         XmNlabelString = compound_string("Minimum Misfit");
         XmNrecomputeSize = false;
         XmNx = 10;
-        XmNy = 530;
+        XmNy = 620;
         XmNwidth = 110;
         XmNheight = 60;
     };
@@ -1573,9 +1793,9 @@ object pushButton_naverr_selecttie : XmPushButton widget {
         arguments Style_use;
         XmNlabelString = compound_string("Select Tie");
         XmNrecomputeSize = false;
-        XmNx = 460;
+        XmNx = 750;
         XmNy = 10;
-        XmNwidth = 90;
+        XmNwidth = 100;
         XmNheight = 30;
     };
     controls {
@@ -1595,9 +1815,9 @@ object pushButton_naverr_dismiss : XmPushButton widget {
         arguments Style_use;
         XmNlabelString = compound_string("Dismiss");
         XmNrecomputeSize = false;
-        XmNx = 760;
+        XmNx = 850;
         XmNy = 10;
-        XmNwidth = 80;
+        XmNwidth = 70;
         XmNheight = 60;
     };
     controls {
@@ -1623,7 +1843,7 @@ object drawingArea_naverr_corr : XmDrawingArea widget {
         XmNbackground = color('white');
         XmNresizePolicy = XmRESIZE_NONE;
         XmNx = 10;
-        XmNy = 220;
+        XmNy = 240;
         XmNwidth = 301;
         XmNheight = 301;
     };
@@ -1646,10 +1866,10 @@ object drawingArea_naverr_cont : XmDrawingArea widget {
         XmNborderWidth = 1;
         XmNbackground = color('white');
         XmNresizePolicy = XmRESIZE_NONE;
-        XmNx = 330;
-        XmNy = 80;
-        XmNwidth = 501;
-        XmNheight = 501;
+        XmNx = 320;
+        XmNy = 70;
+        XmNwidth = 600;
+        XmNheight = 600;
     };
     controls {
     };
@@ -1673,7 +1893,7 @@ object label_naverr_status : XmLabel widget {
         XmNx = 10;
         XmNy = 50;
         XmNwidth = 300;
-        XmNheight = 130;
+        XmNheight = 150;
     };
     controls {
     };
@@ -1691,9 +1911,9 @@ object pushButton_naverr_nextunset : XmPushButton widget {
         arguments Style_use;
         XmNlabelString = compound_string("Next Unset");
         XmNrecomputeSize = false;
-        XmNx = 270;
+        XmNx = 250;
         XmNy = 10;
-        XmNwidth = 80;
+        XmNwidth = 90;
         XmNheight = 30;
     };
     controls {
@@ -1715,7 +1935,7 @@ object label_naverr_offsets : XmLabel widget {
         XmNlabelString = compound_string("No Data Imported");
         XmNrecomputeSize = false;
         XmNx = 10;
-        XmNy = 180;
+        XmNy = 200;
         XmNwidth = 300;
         XmNheight = 40;
     };
@@ -1734,9 +1954,9 @@ object pushButton_naverr_zerooffset : XmPushButton widget {
     arguments {
         arguments Style_use;
         XmNlabelString = compound_string("Zero Offset");
-        XmNx = 660;
+        XmNx = 550;
         XmNy = 10;
-        XmNwidth = 90;
+        XmNwidth = 100;
         XmNheight = 30;
     };
     controls {
@@ -1755,9 +1975,9 @@ object pushButton_naverr_fullsize : XmPushButton widget {
     arguments {
         arguments Style_use;
         XmNlabelString = compound_string("Full Size");
-        XmNx = 360;
-        XmNy = 10;
-        XmNwidth = 90;
+        XmNx = 350;
+        XmNy = 40;
+        XmNwidth = 100;
         XmNheight = 30;
     };
     controls {
@@ -1777,9 +1997,9 @@ object pushButton_naverr_deletetie : XmPushButton widget {
         arguments Style_use;
         XmNlabelString = compound_string("Delete Tie");
         XmNrecomputeSize = false;
-        XmNx = 460;
+        XmNx = 750;
         XmNy = 40;
-        XmNwidth = 90;
+        XmNwidth = 100;
         XmNheight = 30;
     };
     controls {
@@ -1799,9 +2019,9 @@ object pushButton_naverr_addtie : XmPushButton widget {
         arguments Style_use;
         XmNlabelString = compound_string("Add Tie");
         XmNrecomputeSize = false;
-        XmNx = 360;
-        XmNy = 40;
-        XmNwidth = 90;
+        XmNx = 650;
+        XmNy = 10;
+        XmNwidth = 100;
         XmNheight = 30;
     };
     controls {
@@ -1821,9 +2041,9 @@ object pushButton_naverr_resettie : XmPushButton widget {
         arguments Style_use;
         XmNlabelString = compound_string("Reset Offset");
         XmNrecomputeSize = false;
-        XmNx = 660;
+        XmNx = 450;
         XmNy = 40;
-        XmNwidth = 90;
+        XmNwidth = 100;
         XmNheight = 30;
     };
     controls {
@@ -1882,7 +2102,7 @@ object radioBox_misfitcenter : XmRadioBox widget {
     arguments {
         arguments Style_use;
         XmNx = 130;
-        XmNy = 530;
+        XmNy = 620;
         XmNwidth = 180;
         XmNheight = 61;
     };
@@ -1902,9 +2122,9 @@ object pushButton_naverr_settie : XmPushButton widget {
     arguments {
         arguments Style_use;
         XmNlabelString = compound_string("Set Offset");
-        XmNx = 560;
+        XmNx = 450;
         XmNy = 10;
-        XmNwidth = 90;
+        XmNwidth = 100;
         XmNheight = 30;
     };
     controls {
@@ -1947,7 +2167,7 @@ object pushButton_naverr_controls : XmPushButton widget {
     };
     callbacks {
         callbacks Style_useReasons;
-        XmNactivateCallback = procedure BxManageCB("bulletinBoard_controls");
+        XmNactivateCallback = procedure BxManageCB("form_controls");
     };
 !(BX)    handlers {
 !(BX)        handlers Style_useHandlers;
@@ -2013,6 +2233,51 @@ object menuBar_settings : XmMenuBar widget {
 !(BX)    };
 };
 
+object pushButton_naverr_zerozoffset : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Zero Z Offset");
+        XmNx = 550;
+        XmNy = 40;
+        XmNwidth = 100;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_naverr_zerozoffset);
+        XmNactivateCallback = procedure do_naverr_zerozoffset();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object drawingArea_naverr_zcorr : XmDrawingArea widget {
+    arguments {
+        arguments Style_use;
+        XmNborderWidth = 1;
+        XmNbackground = color('white');
+        XmNresizePolicy = XmRESIZE_NONE;
+        XmNx = 10;
+        XmNy = 550;
+        XmNwidth = 300;
+        XmNheight = 60;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_drawingArea_naverr_zcorr);
+        XmNinputCallback = procedure do_naverr_zcorr_input();
+        XmNexposeCallback = procedure do_naverr_corr_expose();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
 object bulletinBoard_naverr : XmBulletinBoardDialog widget {
     arguments {
         arguments Style_use;
@@ -2022,12 +2287,14 @@ object bulletinBoard_naverr : XmBulletinBoardDialog widget {
         XmNautoUnmanage = false;
         XmNnoResize = true;
         XmNresizePolicy = XmRESIZE_NONE;
-        XmNx = 407;
-        XmNy = 381;
-        XmNwidth = 845;
-        XmNheight = 595;
+        XmNx = 68;
+        XmNy = 121;
+        XmNwidth = 935;
+        XmNheight = 685;
     };
     controls {
+         managed XmDrawingArea drawingArea_naverr_zcorr;
+         managed XmPushButton pushButton_naverr_zerozoffset;
          managed XmMenuBar menuBar_settings;
          managed XmPushButton pushButton_naverr_settie;
          managed XmRadioBox radioBox_misfitcenter;
@@ -2060,8 +2327,8 @@ object bulletinBoard_naverr : XmBulletinBoardDialog widget {
 !(BX)object dialogShell_naverr : XmDialogShell widget {
 !(BX)    arguments {
 !(BX)        arguments Style_use;
-!(BX)        XmNwidth = 845;
-!(BX)        XmNheight = 595;
+!(BX)        XmNwidth = 935;
+!(BX)        XmNheight = 685;
 !(BX)    };
 !(BX)    controls {
 !(BX)         managed XmBulletinBoardDialog bulletinBoard_naverr;
@@ -2150,8 +2417,8 @@ object bulletinBoard_fileselection : XmBulletinBoardDialog widget {
     arguments {
         XmNdialogStyle = XmDIALOG_FULL_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_NONE;
-        XmNx = 559;
-        XmNy = 605;
+        XmNx = 1215;
+        XmNy = 358;
         XmNwidth = 611;
         XmNheight = 530;
     };
@@ -2645,7 +2912,7 @@ object pushButton_showdata : XmPushButton widget {
 object pushButton_showcrossings : XmPushButton widget {
     arguments {
         arguments Style_use;
-        XmNlabelString = compound_string("Show Crossings");
+        XmNlabelString = compound_string("Show All Crossings");
     };
     controls {
     };
@@ -2653,6 +2920,23 @@ object pushButton_showcrossings : XmPushButton widget {
         callbacks Style_useReasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_showcrossings);
         XmNactivateCallback = procedure do_view_showcrossings();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object pushButton_showgoodcrossings : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Show >25% Overlap Crossings");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_showgoodcrossings);
+        XmNactivateCallback = procedure do_view_showgoodcrossings();
     };
 !(BX)    handlers {
 !(BX)        handlers Style_useHandlers;
@@ -2693,19 +2977,69 @@ object pushButton_showties : XmPushButton widget {
 !(BX)    };
 };
 
+object separator13 : XmSeparator widget {
+    arguments {
+    };
+    controls {
+    };
+    callbacks {
+    };
+};
+
+object pushButton_makegrid : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Visualize Survey");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_makegrid);
+        XmNactivateCallback = procedure do_make_grid();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object pushButton_showmodelplot : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Show Modelplot");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_showmodelplot);
+       XmNactivateCallback = procedures {
+                 BxManageCB("bulletinBoard_modelplot");
+                 do_modelplot_show();
+        };
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
 object pulldownMenu_view : XmPulldownMenu widget {
     arguments {
         arguments Style_use;
-        XmNx = 0;
-        XmNy = 0;
-        XmNwidth = 139;
-        XmNheight = 92;
+        XmNx = 143;
+        XmNy = 80;
+        XmNwidth = 196;
+        XmNheight = 160;
     };
     controls {
          managed XmPushButton pushButton_showdata;
          managed XmPushButton pushButton_showcrossings;
+         managed XmPushButton pushButton_showgoodcrossings;
          managed XmPushButton pushButton_showtruecrossings;
          managed XmPushButton pushButton_showties;
+         managed XmSeparator separator13;
+         managed XmPushButton pushButton_makegrid;
+         managed XmPushButton pushButton_showmodelplot;
     };
     callbacks {
         callbacks Style_useReasons;
@@ -2778,33 +3112,17 @@ object separator7 : XmSeparator widget {
     };
 };
 
-object pushButton_makecontours : XmPushButton widget {
+object pushButton_autopick : XmPushButton widget {
     arguments {
         arguments Style_use;
-        XmNlabelString = compound_string("Generate Contours");
+        XmNlabelString = compound_string("Auto-Pick Offsets");
     };
     controls {
     };
     callbacks {
         callbacks Style_useReasons;
-        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_makecontours);
-        XmNactivateCallback = procedure do_action_makecontours();
-    };
-!(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
-!(BX)    };
-};
-
-object pushButton_makegrid : XmPushButton widget {
-    arguments {
-        arguments Style_use;
-    };
-    controls {
-    };
-    callbacks {
-        callbacks Style_useReasons;
-        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_makegrid);
-        XmNactivateCallback = procedure do_make_grid();
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_autopick);
+        XmNactivateCallback = procedure do_action_autopick();
     };
 !(BX)    handlers {
 !(BX)        handlers Style_useHandlers;
@@ -2887,17 +3205,16 @@ object pushButton_updateproject : XmPushButton widget {
 object pulldownMenu_action : XmPulldownMenu widget {
     arguments {
         arguments Style_use;
-        XmNx = 0;
-        XmNy = 0;
-        XmNwidth = 141;
-        XmNheight = 164;
+        XmNx = 188;
+        XmNy = 80;
+        XmNwidth = 120;
+        XmNheight = 142;
     };
     controls {
          managed XmPushButton pushButton_fix;
          managed XmPushButton pushButton_unfix;
          managed XmSeparator separator7;
-         managed XmPushButton pushButton_makecontours;
-         managed XmPushButton pushButton_makegrid;
+         managed XmPushButton pushButton_autopick;
          managed XmSeparator separator10;
          managed XmPushButton pushButton_analyzecrossings;
          managed XmSeparator separator11;
@@ -3192,12 +3509,14 @@ object form_mbnavadjust : XmForm widget {
 
 object mainWindow : XmMainWindow widget {
     arguments {
-        XmNx = 66;
-        XmNy = 219;
+        arguments Style_use;
+        XmNx = 47;
+        XmNy = 53;
         XmNwidth = 962;
         XmNheight = 400;
     };
     controls {
+!(BX)         unmanaged XmDialogShell dialogShell_modelplot;
 !(BX)         unmanaged XmDialogShell dialogShell_controls;
 !(BX)         unmanaged XmDialogShell dialogShell_about;
 !(BX)         unmanaged XmDialogShell dialogShell_biases;
@@ -3209,15 +3528,19 @@ object mainWindow : XmMainWindow widget {
          managed XmForm form_mbnavadjust;
     };
     callbacks {
+        callbacks Style_useReasons;
     };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
 };
 
 !(BX)object topLevelShell : TopLevelShell widget {
 !(BX)    arguments {
 !(BX)        XmNtitle = "MBnavadjust";
 !(BX)        XmNiconName = "MBnavadjust";
-!(BX)        XmNx = 66;
-!(BX)        XmNy = 197;
+!(BX)        XmNx = 47;
+!(BX)        XmNy = 53;
 !(BX)        XmNwidth = 962;
 !(BX)        XmNheight = 400;
 !(BX)    };
