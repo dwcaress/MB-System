@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_plot.perl	6/18/93
-#    $Id: mbm_plot.perl,v 5.23 2007-03-02 20:34:26 caress Exp $
+#    $Id: mbm_plot.perl,v 5.24 2007-05-14 17:09:45 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 2000, 2003, 2005 by 
 #    D. W. Caress (caress@mbari.org)
@@ -74,10 +74,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   June 17, 1993
 #
 # Version:
-#   $Id: mbm_plot.perl,v 5.23 2007-03-02 20:34:26 caress Exp $
+#   $Id: mbm_plot.perl,v 5.24 2007-05-14 17:09:45 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.23  2007/03/02 20:34:26  caress
+#   Fixed plotting of ping/shot number annotation along navigation tracks.
+#
 #   Revision 5.22  2006/11/10 22:02:59  caress
 #   Added ping number/shot number navigation track annotation.
 #
@@ -1109,6 +1112,17 @@ if (!$lonflip)
 	$lonflip = 0;
 	}
 
+# Look for mapproject
+$mapproject = `which mapproject`;
+if (! $mapproject) {
+    print "\n*** ERRORR ***\n";
+    print "The GMT command 'mapproject' is not in your path.\n";
+    print "Check your settings for the PATH environment variable.\n";
+    print "in your .bash_profile, .cshrc, or other appropriate file for your shell.\n";
+    print "\n";
+    exit 0;
+}
+
 # get limits of file using mbinfo
 if ($bounds)
 	{
@@ -1525,7 +1539,21 @@ $dyy = $yymax - $yymin;
 if ($dxx == 0.0 && $dyy == 0.0)
 	{
 	print "\a";
-	die "Invalid projection specified - $program_name aborted\n";
+	print "ERROR!\n";
+	print "  The projection and bounds specified (or automatically determined bounds\n";
+	print "  if none were specified) have resulted in a plot with either.\n";
+	print "  zero height, zero width or both. This can happen for several reasons:\n";
+	print "  mbinfo may have failed to read and interpret the file, the PLOT_DEGREE_FORMAT\n";
+	print "  GMT variable may have too few significant digits for the size of the\n";
+	print "  plot, the GMT command mapproject may have failed for some reason or you may have\n";
+	print "  specified improper bounds. Each of these things should be checked.\n";
+	print "  The file containing the bounds in Latitude and Longitude that was passed\n";
+	print "  to mapproject held these values:\n";
+	print "\t$xmin $ymin\n";
+	print "\t$xmax $ymin\n";
+	print "\t$xmax $ymax\n";
+	print "\t$xmin $ymax\n";
+	die "$program_name aborted\n";
 	}
 
 # figure out scaling issues
