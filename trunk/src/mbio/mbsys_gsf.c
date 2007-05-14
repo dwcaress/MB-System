@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_gsf.c	3.00	8/20/94
- *	$Id: mbsys_gsf.c,v 5.9 2006-03-06 21:47:48 caress Exp $
+ *	$Id: mbsys_gsf.c,v 5.10 2007-05-14 06:17:29 caress Exp $
  *
  *    Copyright (c) 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	March 5, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.9  2006/03/06 21:47:48  caress
+ * Implemented changes suggested by Bob Courtney of the Geological Survey of Canada to support translating Reson data to GSF.
+ *
  * Revision 5.8  2005/11/05 00:48:04  caress
  * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
  *
@@ -100,7 +103,7 @@
 int mbsys_gsf_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_gsf.c,v 5.9 2006-03-06 21:47:48 caress Exp $";
+ static char res_id[]="$Id: mbsys_gsf.c,v 5.10 2007-05-14 06:17:29 caress Exp $";
 	char	*function_name = "mbsys_gsf_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -545,7 +548,7 @@ int mbsys_gsf_extract(int verbose, void *mbio_ptr, void *store_ptr,
 					ss[*nss] = snippet->samples[j];
 					ssacrosstrack[*nss] = bathacrosstrack[i]
 						+ ss_spacing_use * (j - snippet->detect_sample);
-					ssalongtrack[*nss] = bathalongtrack[snippet->detect_sample];
+					ssalongtrack[*nss] = bathalongtrack[i];
 					(*nss)++;
 					}
 				}
