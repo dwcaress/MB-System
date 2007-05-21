@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcopy.c	2/4/93
- *    $Id: mbcopy.c,v 5.20 2006-09-11 18:55:53 caress Exp $
+ *    $Id: mbcopy.c,v 5.21 2007-05-21 16:15:11 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003, 2004, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,10 @@
  * Date:	February 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.20  2006/09/11 18:55:53  caress
+ * Changes during Western Flyer and Thomas Thompson cruises, August-September
+ * 2006.
+ *
  * Revision 5.19  2006/03/06 21:47:02  caress
  * Implemented changes suggested by Bob Courtney of the Geological Survey of Canada to support translating Reson data to GSF.
  *
@@ -232,7 +236,7 @@ int mbcopy_any_to_mbldeoih(int verbose,
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbcopy.c,v 5.20 2006-09-11 18:55:53 caress Exp $";
+	static char rcs_id[] = "$Id: mbcopy.c,v 5.21 2007-05-21 16:15:11 caress Exp $";
 	static char program_name[] = "MBcopy";
 	static char help_message[] =  "MBcopy copies an input swath sonar data file to an output \nswath sonar data file with the specified conversions.  Options include \nwindowing in time and space and ping averaging.  The input and \noutput data formats may differ, though not all possible combinations \nmake sense.  The default input and output streams are stdin and stdout.";
 	static char usage_message[] = "mbcopy [-Byr/mo/da/hr/mn/sc -Ccommentfile -D -Eyr/mo/da/hr/mn/sc \n\t-Fiformat/oformat -H  -Iinfile -Llonflip -N -Ooutfile \n\t-Ppings -Qsleep_factor -Rw/e/s/n -Sspeed -V]";
@@ -1420,6 +1424,13 @@ int mbcopy_elacmk2_to_xse(int verbose,
 		    ostore->mul_group_heave = MB_YES;	/* boolean flag - heave group read */
 		    ostore->mul_group_roll = MB_YES;	/* boolean flag - roll group read */
 		    ostore->mul_group_pitch = MB_YES;	/* boolean flag - pitch group read */
+		    ostore->mul_group_gates = MB_NO;	/* boolean flag - gates group read */
+		    ostore->mul_group_noise = MB_NO;	/* boolean flag - noise group read */
+		    ostore->mul_group_length = MB_NO;	/* boolean flag - length group read */
+		    ostore->mul_group_hits = MB_NO;		/* boolean flag - hits group read */
+		    ostore->mul_group_heavereceive = MB_NO;	/* boolean flag - heavereceive group read */
+		    ostore->mul_group_azimuth = MB_NO;	/* boolean flag - azimuth group read */
+		    ostore->mul_group_mbsystemnav = MB_YES;	/* boolean flag - mbsystemnav group read */
 		    }
 		else
 		    {
@@ -1436,6 +1447,13 @@ int mbcopy_elacmk2_to_xse(int verbose,
 		    ostore->mul_group_heave = MB_NO;	/* boolean flag - heave group read */
 		    ostore->mul_group_roll = MB_NO;	/* boolean flag - roll group read */
 		    ostore->mul_group_pitch = MB_NO;	/* boolean flag - pitch group read */
+		    ostore->mul_group_gates = MB_NO;	/* boolean flag - gates group read */
+		    ostore->mul_group_noise = MB_NO;	/* boolean flag - noise group read */
+		    ostore->mul_group_length = MB_NO;	/* boolean flag - length group read */
+		    ostore->mul_group_hits = MB_NO;		/* boolean flag - hits group read */
+		    ostore->mul_group_heavereceive = MB_NO;	/* boolean flag - heavereceive group read */
+		    ostore->mul_group_azimuth = MB_NO;	/* boolean flag - azimuth group read */
+		    ostore->mul_group_mbsystemnav = MB_NO;	/* boolean flag - mbsystemnav group read */
 		    }
 		ostore->mul_source = 0;		/* sensor id */
 		mb_fix_y2k(verbose, istore->pos_year, &time_i[0]);
@@ -1449,8 +1467,10 @@ int mbcopy_elacmk2_to_xse(int verbose,
 		mb_get_time(verbose,time_i,&time_d);
 		ostore->mul_sec = ((unsigned int) time_d) + MBSYS_XSE_TIME_OFFSET;		/* sec since 1/1/1901 00:00 */
 		ostore->mul_usec = (time_d - ((int) time_d)) * 1000000;		/* microseconds */
-		ostore->mul_x = istore->longitude;		/* interpolated longitude in degrees */
-		ostore->mul_y = istore->latitude;		/* interpolated latitude in degrees */
+		ostore->mul_lon = DTR * istore->longitude;		/* longitude (radians) */
+		ostore->mul_lat = DTR * istore->latitude;		/* latitude (radians) */
+		ostore->mul_heading = DTR * 0.01 * istore->heading;		/* heading (radians) */
+		ostore->mul_speed = 0.0;		/* speed (m/s) */
 		ostore->mul_ping = istore->ping_num;		/* ping number */
 		ostore->mul_frequency = 0.0;	/* transducer frequency (Hz) */
 		ostore->mul_pulse = istore->pulse_length;		/* transmit pulse length (sec) */
@@ -1477,21 +1497,76 @@ int mbcopy_elacmk2_to_xse(int verbose,
 		    }
 		
 		/* survey sidescan (sidescan frames) */
-		ostore->sid_frame = MB_NO;	/* boolean flag - sidescan frame read */
+		ostore->sid_frame = MB_NO;		/* boolean flag - sidescan frame read */
+		ostore->sid_group_avt = MB_NO;		/* boolean flag - amp vs time group read */
+		ostore->sid_group_pvt = MB_NO;		/* boolean flag - phase vs time group read */
+		ostore->sid_group_avl = MB_NO;		/* boolean flag - amp vs lateral group read */
+		ostore->sid_group_pvl = MB_NO;		/* boolean flag - phase vs lateral group read */
+		ostore->sid_group_signal = MB_NO;	/* boolean flag - phase vs lateral group read */
+		ostore->sid_group_ping = MB_NO;		/* boolean flag - phase vs lateral group read */
+		ostore->sid_group_complex = MB_NO;	/* boolean flag - phase vs lateral group read */
+		ostore->sid_group_weighting = MB_NO;	/* boolean flag - phase vs lateral group read */
 		ostore->sid_source = 0;		/* sensor id */
-		ostore->sid_sec = 0;		/* sec since 1/1/1901 00:00 */
-		ostore->sid_usec = 0;		/* microseconds */
+		ostore->sid_sec = 0;	/* sec since 1/1/1901 00:00 */
+		ostore->sid_usec = 0;	/* microseconds */
 		ostore->sid_ping = 0;		/* ping number */
 		ostore->sid_frequency = 0.0;		/* transducer frequency (Hz) */
 		ostore->sid_pulse = 0.0;		/* transmit pulse length (sec) */
 		ostore->sid_power = 0.0;		/* transmit power (dB) */
 		ostore->sid_bandwidth = 0.0;		/* receive bandwidth (Hz) */
 		ostore->sid_sample = 0.0;		/* receive sample interval (sec) */
-		ostore->sid_bin_size = 0;		/* bin size in mm */
-		ostore->sid_offset = 0;		/* lateral offset in mm */
-		ostore->sid_num_pixels = 0;		/* number of pixels */
+		ostore->sid_avt_sampleus = 0;	/* sample interval (usec) */
+		ostore->sid_avt_offset = 0;		/* time offset (usec) */
+		ostore->sid_avt_num_samples = 0;	/* number of samples */
 		for (i=0;i<MBSYS_XSE_MAXPIXELS;i++)
-		    ostore->ss[i] = 0; /* sidescan amplitude in dB */
+			ostore->sid_avt_amp[i] = 0; /* sidescan amplitude (dB) */
+		ostore->sid_pvt_sampleus = 0;	/* sample interval (usec) */
+		ostore->sid_pvt_offset = 0;		/* time offset (usec) */
+		ostore->sid_pvt_num_samples = 0;	/* number of samples */
+		for (i=0;i<MBSYS_XSE_MAXPIXELS;i++)
+			ostore->sid_pvt_phase[i] = 0; /* sidescan phase (radians) */
+		ostore->sid_avl_binsize = 0;	/* bin size (mm) */
+		ostore->sid_avl_offset = 0;		/* lateral offset (mm) */
+		ostore->sid_avl_num_samples = 0;	/* number of samples */
+		for (i=0;i<MBSYS_XSE_MAXPIXELS;i++)
+			ostore->sid_avl_amp[i] = 0; /* sidescan amplitude (dB) */
+		ostore->sid_pvl_binsize = 0;	/* bin size (mm) */
+		ostore->sid_pvl_offset = 0;		/* lateral offset (mm) */
+		ostore->sid_pvl_num_samples = 0;	/* number of samples */
+		for (i=0;i<MBSYS_XSE_MAXPIXELS;i++)
+			ostore->sid_pvl_phase[i] = 0; /* sidescan phase (radians) */
+		ostore->sid_sig_ping = 0;		/* ping number */
+		ostore->sid_sig_channel = 0;	/* channel number */
+		ostore->sid_sig_offset = 0.0;		/* start offset */
+		ostore->sid_sig_sample = 0.0;		/* bin size / sample interval */
+		ostore->sid_sig_num_samples = 0;	/* number of samples */
+		for (i=0;i<MBSYS_XSE_MAXPIXELS;i++)
+			ostore->sid_sig_phase[i] = 0; /* sidescan phase in radians */
+		ostore->sid_png_pulse = 0;	/* pulse type (0=constant, 1=linear sweep) */
+		ostore->sid_png_startfrequency = 0.0;	/* start frequency (Hz) */
+		ostore->sid_png_endfrequency = 0.0;	/* end frequency (Hz) */
+		ostore->sid_png_duration = 0.0;	/* pulse duration (msec) */
+		ostore->sid_png_mancode = 0;	/* manufacturer code (1=Edgetech, 2=Elac) */
+		ostore->sid_png_pulseid = 0;/* pulse identifier */
+		for (i=0;i<MBSYS_XSE_DESCRIPTION_LENGTH;i++)
+			ostore->sid_png_pulsename[i] = 0;	/* pulse name */
+		ostore->sid_cmp_ping = 0;		/* ping number */
+		ostore->sid_cmp_channel = 0;	/* channel number */
+		ostore->sid_cmp_offset = 0.0;		/* start offset (usec) */
+		ostore->sid_cmp_sample = 0.0;		/* bin size / sample interval (usec) */
+		ostore->sid_cmp_num_samples = 0;	/* number of samples */
+		for (i=0;i<MBSYS_XSE_MAXPIXELS;i++)
+			ostore->sid_cmp_real[i] = 0; /* real sidescan signal */
+		for (i=0;i<MBSYS_XSE_MAXPIXELS;i++)
+			ostore->sid_cmp_imaginary[i] = 0; /* imaginary sidescan signal */
+		ostore->sid_wgt_factorleft = 0;		/* weighting factor for block floating 
+						point expansion  -- 
+						defined as 2^(-N) volts for lsb */
+		ostore->sid_wgt_samplesleft = 0;	/* number of left samples */
+		ostore->sid_wgt_factorright = 0;		/* weighting factor for block floating 
+						point expansion  -- 
+						defined as 2^(-N) volts for lsb */
+		ostore->sid_wgt_samplesright = 0;	/* number of right samples */
 	
 		/* comment */
 		for (i=0;i<MIN(MBSYS_ELACMK2_COMMENT_LENGTH, MBSYS_XSE_COMMENT_LENGTH);i++)
@@ -1654,8 +1729,8 @@ int mbcopy_xse_to_elacmk2(int verbose,
 		ostore->thousandth_sec 
 			= (time_i[6] 
 			- 10000 * ostore->hundredth_sec)/100;
-		ostore->longitude = istore->mul_x;
-		ostore->latitude = istore->mul_y;
+		ostore->longitude = RTD * istore->mul_lon;
+		ostore->latitude = RTD * istore->mul_lat;
 		ostore->ping_num = istore->mul_ping;
 		ostore->sound_vel = 10 * istore->svp_ssv;
 		ostore->heading = 100 * RTD * istore->nav_course_ground;
