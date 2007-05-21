@@ -171,6 +171,12 @@ egregiously wrong alongtrack values.
 Fixed bug in mbgrid that caused failure to write Arc Ascii grids
 with option -G4.
 
+Augmented i/o module for XSE format (94) to support current version
+of SeaBeam 2112 sonars on WHOI ships. This data format now has
+an MB-System extension to its multibeam records that includes 
+interpolated navigation values. Previously only asynchronous
+navigation was handled.
+
 MB-SYSTEM VERSION 5.1.0 RELEASE NOTES:
 ------------------------------------------
 
@@ -1364,10 +1370,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.94 2007-05-12 19:28:23 caress Exp $
+RCS ID: $Id: README,v 5.95 2007-05-21 16:16:33 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.94  2007/05/12 19:28:23  caress
+Working towards next version.
+
 Revision 5.93  2006/12/15 21:42:49  caress
 Incremental CVS update.
 
