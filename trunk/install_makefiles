@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	install_makefiles	5/20/94
-#    $Id: install_makefiles,v 5.27 2006-12-15 21:42:49 caress Exp $
+#    $Id: install_makefiles,v 5.28 2007-05-25 19:32:04 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 1996, 1997, 2001, 2002, 2003, 2005, 2006 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -103,7 +103,7 @@ $BYTESWAPPED = "NO";
 $GRAPHICAL = "YES";
 $MOTIFINCDIR = "/sw/include";
 $MOTIFLIBS = "-L/sw/lib -L/usr/X11R6/lib -lXm -lXt -lX11";
-$OPENGLLIBS = "-lGLw -lGLU -lGL";
+$OPENGLLIBS = "-lGLU -lGL";
 $GMTLIBDIR = "/usr/local/gmt/lib";
 $GMTINCDIR = "/usr/local/gmt/include";
 $NETCDFLIBDIR = "/sw/lib";
@@ -116,10 +116,13 @@ $LFLAGS = "-Wl -lm -bind_at_load";
 #--------------------------------------------------------------------
 #
 # Version:
-#   $Id: install_makefiles,v 5.27 2006-12-15 21:42:49 caress Exp $
+#   $Id: install_makefiles,v 5.28 2007-05-25 19:32:04 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.27  2006/12/15 21:42:49  caress
+#   Incremental CVS update.
+#
 #   Revision 5.26  2006/09/11 18:55:51  caress
 #   Changes during Western Flyer and Thomas Thompson cruises, August-September
 #   2006.
