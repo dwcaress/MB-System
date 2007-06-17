@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_pick.c	9/29/2003
- *    $Id: mbview_pick.c,v 5.13 2006-09-11 18:55:53 caress Exp $
+ *    $Id: mbview_pick.c,v 5.14 2007-06-17 23:27:30 caress Exp $
  *
  *    Copyright (c) 2003, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,10 @@
  *		begun on October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.13  2006/09/11 18:55:53  caress
+ * Changes during Western Flyer and Thomas Thompson cruises, August-September
+ * 2006.
+ *
  * Revision 5.12  2006/06/16 19:30:58  caress
  * Check in after the Santa Monica Basin Mapping AUV Expedition.
  *
@@ -92,8 +96,8 @@
 /* OpenGL include files */
 #include <GL/gl.h>
 #include <GL/glu.h>
-#include "GL/GLwMDrawA.h" 
 #include <GL/glx.h>
+#include "mb_glwdrawa.h"
 
 /* MBIO include files */
 #include "../../include/mb_status.h"
@@ -111,7 +115,7 @@ static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 static char		value_list[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_pick.c,v 5.13 2006-09-11 18:55:53 caress Exp $";
+static char rcs_id[]="$Id: mbview_pick.c,v 5.14 2007-06-17 23:27:30 caress Exp $";
 	
 
 /*------------------------------------------------------------------------------*/
@@ -249,6 +253,18 @@ int mbview_pick(int instance, int which, int xpixel, int ypixel)
 		
 	/* set pick annotation */
 	mbview_pick_text(instance);
+	
+	/* call pick notify if defined */
+	if (which == MBV_PICK_UP && data->pick_type == MBV_PICK_ONEPOINT
+		&& data->mbview_pickonepoint_notify != NULL)
+		{
+		(data->mbview_pickonepoint_notify)(instance);
+		}
+	else if (which == MBV_PICK_UP && data->pick_type == MBV_PICK_TWOPOINT
+		&& data->mbview_picktwopoint_notify != NULL)
+		{
+		(data->mbview_picktwopoint_notify)(instance);
+		}
 	
 	/* print output debug statements */
 	if (mbv_verbose >= 2)
@@ -1448,6 +1464,13 @@ xgrid,ygrid,xlon,ylat,zdata,xdisplay,ydisplay,zdisplay);*/
 			}
 		}
 	
+	/* call pick notify if defined */
+	if (which == MBV_REGION_UP && data->region_type == MBV_REGION_QUAD
+		&& data->mbview_pickregion_notify != NULL)
+		{
+		(data->mbview_pickregion_notify)(instance);
+		}
+	
 	/* print output debug statements */
 	if (mbv_verbose >= 2)
 		{
@@ -1736,7 +1759,8 @@ int mbview_area(int instance, int which, int xpixel, int ypixel)
 	/* recalculate any good quad area whether defined this time or previously
 		this catches which == MBV_AREAASPECT_CHANGE calls */
 	if (data->area_type == MBV_AREA_QUAD
-		&& which != MBV_AREALENGTH_UP)
+		&& which != MBV_AREALENGTH_UP
+		&& which != MBV_AREAASPECT_UP)
 		{
 		/* deal with non-spheroid case */
 		if (data->display_projection_mode != MBV_PROJECTION_SPHEROID)
@@ -1957,7 +1981,8 @@ int mbview_area(int instance, int which, int xpixel, int ypixel)
 		or the pick move is final  */
 	if (data->area_type == MBV_AREA_QUAD
 		&& (data->display_mode == MBV_DISPLAY_3D 
-			|| which == MBV_AREALENGTH_UP))
+			|| which == MBV_AREALENGTH_UP 
+			|| which == MBV_AREAASPECT_UP))
 		{
 		mbview_drapesegment(instance, &(data->area.segment));
 		for (i=0;i<4;i++)
@@ -1965,6 +1990,14 @@ int mbview_area(int instance, int which, int xpixel, int ypixel)
 			/* drape the segment */
 			mbview_drapesegment(instance, &(data->area.segments[i]));
 			}
+		}
+	
+	/* call pick notify if defined */
+	if ((which == MBV_AREALENGTH_UP || which == MBV_AREAASPECT_UP) 
+		&& data->area_type == MBV_AREA_QUAD
+		&& data->mbview_pickarea_notify != NULL)
+		{
+		(data->mbview_pickarea_notify)(instance);
 		}
 	
 	/* print output debug statements */

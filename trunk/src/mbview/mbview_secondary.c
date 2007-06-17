@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_secondary.c	9/25/2003
- *    $Id: mbview_secondary.c,v 5.7 2006-06-22 04:45:43 caress Exp $
+ *    $Id: mbview_secondary.c,v 5.8 2007-06-17 23:27:30 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  *		begun on October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2006/06/22 04:45:43  caress
+ * Working towards 5.1.0
+ *
  * Revision 5.6  2006/06/16 19:30:58  caress
  * Check in after the Santa Monica Basin Mapping AUV Expedition.
  *
@@ -74,8 +77,8 @@
 /* OpenGL include files */
 #include <GL/gl.h>
 #include <GL/glu.h>
-#include "GL/GLwMDrawA.h" 
 #include <GL/glx.h>
+#include "mb_glwdrawa.h"
 
 /* MBIO include files */
 #include "../../include/mb_status.h"
@@ -92,7 +95,7 @@ static Cardinal 	ac;
 static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_secondary.c,v 5.7 2006-06-22 04:45:43 caress Exp $";
+static char rcs_id[]="$Id: mbview_secondary.c,v 5.8 2007-06-17 23:27:30 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_setsecondarygrid(int verbose, int instance,
@@ -153,7 +156,7 @@ int mbview_setsecondarygrid(int verbose, int instance,
 	
 	/* set values */
         data->secondary_grid_projection_mode = secondary_grid_projection_mode;
-        strcpy(secondary_grid_projection_id, secondary_grid_projection_id);
+        strcpy(data->secondary_grid_projection_id, secondary_grid_projection_id);
         data->secondary_nodatavalue = secondary_nodatavalue;
         data->secondary_nxy = secondary_nx * secondary_ny;
         data->secondary_nx = secondary_nx;
@@ -234,6 +237,141 @@ view->secondary_pj_init,view->secondary_pjptr,data->secondary_grid_projection_id
 	/* return */
 	return(status);
 }
+/*------------------------------------------------------------------------------*/
+int mbview_updatesecondarygrid(int verbose, int instance,
+			int	secondary_nx,
+			int	secondary_ny,
+			float	*secondary_data,
+			int *error)
+
+{
+	/* local variables */
+	char	*function_name = "mbview_updatesecondarygrid";
+	int	status = MB_SUCCESS;
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
+	int	first;
+	int	i, j, k;
+
+	/* print starting debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
+		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:                      %d\n", verbose);
+		fprintf(stderr,"dbg2       instance:                     %d\n", instance);
+		fprintf(stderr,"dbg2       secondary_nx:                 %d\n", secondary_nx);
+		fprintf(stderr,"dbg2       secondary_ny:                 %d\n", secondary_ny);
+		fprintf(stderr,"dbg2       secondary_data:               %f\n", secondary_data);
+		}
+
+	/* get view */
+	view = &(mbviews[instance]);
+	data = &(view->data);
+	
+	/* set value */
+	if (secondary_nx == data->secondary_nx
+		&& secondary_ny == data->secondary_ny)
+		{
+		first = MB_YES;
+		for (k=0;k<data->secondary_nx*data->secondary_ny;k++)
+			{
+			data->secondary_data[k] = secondary_data[k];
+			if (first == MB_YES && secondary_data[k] != data->secondary_nodatavalue)
+				{
+				data->secondary_min = data->secondary_data[k];
+				data->secondary_max = data->secondary_data[k];
+				first = MB_NO;	
+				}
+			else if (secondary_data[k] != data->secondary_nodatavalue)
+				{
+				data->secondary_min = MIN(data->secondary_min, data->secondary_data[k]);
+				data->secondary_max = MAX(data->secondary_max, data->secondary_data[k]);
+				}
+			}
+		}
+		
+	/* reset plotting and colors */
+	view->lastdrawrez = MBV_REZ_NONE;
+	mbview_setcolorparms(instance);
+	mbview_colorclear(instance);
+		
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:                     %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:                    %d\n",status);
+		}
+
+	/* return */
+	return(status);
+}
+
+/*------------------------------------------------------------------------------*/
+int mbview_updatesecondarygridcell(int verbose, int instance,
+			int	secondary_ix,
+			int	secondary_jy,
+			float	value,
+			int *error)
+
+{
+	/* local variables */
+	char	*function_name = "mbview_setsecondarygrid";
+	int	status = MB_SUCCESS;
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
+	int	k;
+
+	/* print starting debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
+		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:                      %d\n", verbose);
+		fprintf(stderr,"dbg2       instance:                     %d\n", instance);
+		fprintf(stderr,"dbg2       secondary_ix:                 %d\n", secondary_ix);
+		fprintf(stderr,"dbg2       secondary_jy:                 %d\n", secondary_jy);
+		fprintf(stderr,"dbg2       value:                        %f\n", value);
+		}
+
+	/* get view */
+	view = &(mbviews[instance]);
+	data = &(view->data);
+	
+	/* set value */
+	if (secondary_ix >= 0 && secondary_ix < data->secondary_nx
+		&& secondary_jy >= 0 && secondary_jy < data->secondary_ny)
+		{
+		/* update the cell value */
+		k = secondary_ix * data->secondary_ny + secondary_jy;
+		data->secondary_data[k] = value;
+		}
+		
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:                     %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:                    %d\n",status);
+		}
+
+	/* return */
+	return(status);
+}
+
 /*------------------------------------------------------------------------------*/
 int mbview_setsecondarycolortable(int verbose, int instance,
 			int	secondary_colortable,
@@ -322,6 +460,74 @@ int mbview_setsecondarycolortable(int verbose, int instance,
 	    		XmToggleButtonSetState(view->mb3dview.mbview_toggleButton_overlay_shade_htoc, 
 				TRUE, TRUE);
 			}
+		}
+		
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:                     %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:                    %d\n",status);
+		}
+
+	/* return */
+	return(status);
+}
+
+/*------------------------------------------------------------------------------*/
+
+int mbview_setsecondaryname(int verbose, int instance,
+				char *name, int *error)
+
+{
+	/* local variables */
+	char	*function_name = "mbview_setsecondaryname";
+	int	status = MB_SUCCESS;
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
+        XmString    tmp0;
+	Cardinal ac = 0;
+	Arg      args[256];
+	Cardinal cdc = 0;
+	Boolean  argok = False;
+
+	/* print starting debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
+		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
+		fprintf(stderr,"dbg2       instance:                  %d\n", instance);
+		fprintf(stderr,"dbg2       name:                      %s\n", name);
+		}
+
+	/* get view */
+	view = &(mbviews[instance]);
+	data = &(view->data);
+	
+	/* set secondary grid labels */
+ 	if (XtIsManaged(view->mb3dview.mbview_toggleButton_data_secondary))
+		{
+		ac = 0;
+        	tmp0 = (XmString) BX_CONVERT(view->mb3dview.mbview_toggleButton_data_secondary, (char *)name, 
+                	XmRXmString, 0, &argok);
+        	XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+		XtSetValues(view->mb3dview.mbview_toggleButton_data_secondary, args, ac);
+        	XmStringFree((XmString)tmp0);
+
+		ac = 0;
+		sprintf(value_text, "Shading by %s", name);
+        	tmp0 = (XmString) BX_CONVERT(view->mb3dview.mbview_toggleButton_overlay_secondary, (char *)value_text, 
+                	XmRXmString, 0, &argok);
+        	XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+		XtSetValues(view->mb3dview.mbview_toggleButton_overlay_secondary, args, ac);
+        	XmStringFree((XmString)tmp0);
 		}
 		
 	/* print output debug statements */

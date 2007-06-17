@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbview.h	10/9/2002
- *    $Id: mbview.h,v 5.15 2006-09-11 18:55:53 caress Exp $
+ *    $Id: mbview.h,v 5.16 2007-06-17 23:27:31 caress Exp $
  *
  *    Copyright (c) 2002, 2003, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -18,6 +18,10 @@
  * Date:	October 10,  2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.15  2006/09/11 18:55:53  caress
+ * Changes during Western Flyer and Thomas Thompson cruises, August-September
+ * 2006.
+ *
  * Revision 5.14  2006/06/16 19:30:58  caress
  * Check in after the Santa Monica Basin Mapping AUV Expedition.
  *
@@ -233,6 +237,19 @@
 #define MBV_PROFILE_NAV				3
 #define	MBV_PROFILE_FACTOR_MAX 			4.0
 
+/* mb3dsounding mouse mode value defines */
+#define	MB3DSDG_MOUSE_TOGGLE	0
+#define	MB3DSDG_MOUSE_PICK	1
+#define	MB3DSDG_MOUSE_ERASE	2
+#define	MB3DSDG_MOUSE_RESTORE	3
+#define	MB3DSDG_MOUSE_GRAB	4
+#define	MB3DSDG_MOUSE_INFO	5
+#define	MB3DSDG_EDIT_NOFLUSH		0
+#define	MB3DSDG_EDIT_FLUSH		1
+#define	MB3DSDG_EDIT_FLUSHPREVIOUS	2
+
+/*--------------------------------------------------------------------*/
+
 /* structure declarations */
 struct mbview_contoursegment_struct {
 	float	x[2];
@@ -434,6 +451,13 @@ struct mbview_struct {
 	
 	/* function pointers */
 	int (*mbview_dismiss_notify)(int id);
+	void (*mbview_pickonepoint_notify)(int id);
+	void (*mbview_picktwopoint_notify)(int id);
+	void (*mbview_pickarea_notify)(int id);
+	void (*mbview_pickregion_notify)(int id);
+	void (*mbview_picksite_notify)(int id);
+	void (*mbview_pickroute_notify)(int id);
+	void (*mbview_picknav_notify)(int id);
 	
 	/* active flag */
 	int	active;
@@ -579,6 +603,52 @@ struct mbview_struct {
 	
 	};
 
+/*--------------------------------------------------------------------*/
+
+/* mb3dsounding data structures */
+struct mb3dsoundings_sounding_struct {
+	int	ifile;
+	int	iping;
+	int	ibeam;
+	char	beamflag;
+	double	x;
+	double	y;
+	double	z;
+	float	glx;
+	float	gly;
+	float	glz;
+	int	winx;
+	int	winy;
+};
+
+struct mb3dsoundings_struct {	
+	/* location and scale parameters */
+	double	xorigin;
+	double	yorigin;
+	double	zorigin;
+	double	xmin;
+	double	ymin;
+	double	zmin;
+	double	xmax;
+	double	ymax;
+	double	zmax;
+	double	bearing;
+	double	sinbearing;
+	double	cosbearing;
+	double	scale;
+	double	zscale;
+	
+	/* sounding data */
+	int	num_soundings;
+	int	num_soundings_unflagged;
+	int	num_soundings_flagged;
+	int	num_soundings_alloc;
+	struct mb3dsoundings_sounding_struct *soundings;
+
+};
+
+
+/*--------------------------------------------------------------------*/
 /* mbview API function prototypes */
 int mbview_startup(int verbose, Widget parent, XtAppContext app, int *error);
 int mbview_quit(int verbose, int *error);
@@ -641,6 +711,16 @@ int mbview_setprimarygrid(int verbose, int instance,
 			double	primary_dy,
 			float	*primary_data,
 			int *error);
+int mbview_updateprimarygrid(int verbose, int instance,
+			int	primary_nx,
+			int	primary_ny,
+			float	*primary_data,
+			int *error);
+int mbview_updateprimarygridcell(int verbose, int instance,
+			int	primary_ix,
+			int	primary_jy,
+			float	value,
+			int *error);
 int mbview_setsecondarygrid(int verbose, int instance,
 			int	secondary_grid_projection_mode,
 			char	*secondary_grid_projection_id,
@@ -656,6 +736,16 @@ int mbview_setsecondarygrid(int verbose, int instance,
 			double	secondary_dx,
 			double	secondary_dy,
 			float	*secondary_data,
+			int *error);
+int mbview_updatesecondarygrid(int verbose, int instance,
+			int	secondary_nx,
+			int	secondary_ny,
+			float	*secondary_data,
+			int *error);
+int mbview_updatesecondarygridcell(int verbose, int instance,
+			int	primary_ix,
+			int	primary_jy,
+			float	value,
 			int *error);
 int mbview_setprimarycolortable(int verbose, int instance,
 			int	primary_colortable,
@@ -678,6 +768,8 @@ int mbview_setsecondarycolortable(int verbose, int instance,
 			double	overlay_shade_center,
 			int	overlay_shade_mode,
 			int *error);
+int mbview_setsecondaryname(int verbose, int instance,
+			char *name, int *error);
 int mbview_getsitecount(int verbose, int instance,
 			int	*nsite,
 			int *error);
@@ -908,6 +1000,10 @@ int mbview_addaction(int verbose, int instance,
 			char	*label,
 			int	sensitive,
 			int *error);
+int mbview_addpicknotify(int verbose, int instance,
+			int	picktype,
+			void	(mbview_pick_notify)(int),
+			int *error);
 
 int mbview_open(int verbose, int instance, int *error);
 int mbview_update(int verbose, int instance, int *error);
@@ -936,4 +1032,15 @@ int mbview_projectfromlonlat(int instance,
 				double *xgrid, double *ygrid,
 				double *xdisplay, double *ydisplay, double *zdisplay);
 
+/*--------------------------------------------------------------------*/
+
+/* mb3dsounding API functions */
+int mb3dsoundings_startup(int verbose, Widget parent, XtAppContext app, int *error);
+int mb3dsoundings_open(int verbose, struct mb3dsoundings_struct *soundingdata, int *error);
+int mb3dsoundings_end(int verbose, int *error);
+int mb3dsoundings_set_dismiss_notify(int verbose, void (dismiss_notify)(), int *error);
+int mb3dsoundings_set_edit_notify(int verbose, void (edit_notify)(int, int, int, char, int), int *error);
+int mb3dsoundings_set_info_notify(int verbose, void (edit_notify)(int, int, int, char *), int *error);
+int mb3dsoundings_set_bias_notify(int verbose, void (bias_notify)(double, double, double), int *error);
+int mb3dsoundings_plot(int verbose, int *error);
 /*--------------------------------------------------------------------*/

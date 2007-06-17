@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_plot.c	9/26/2003
- *    $Id: mbview_plot.c,v 5.10 2006-10-05 18:58:29 caress Exp $
+ *    $Id: mbview_plot.c,v 5.11 2007-06-17 23:27:30 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  *		begun on October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.10  2006/10/05 18:58:29  caress
+ * Changes for 5.1.0beta4
+ *
  * Revision 5.9  2006/07/05 19:50:21  caress
  * Working towards 5.1.0beta
  *
@@ -83,8 +86,8 @@
 /* OpenGL include files */
 #include <GL/gl.h>
 #include <GL/glu.h>
-#include "GL/GLwMDrawA.h" 
 #include <GL/glx.h>
+#include "mb_glwdrawa.h"
 
 /* MBIO include files */
 #include "../../include/mb_status.h"
@@ -101,7 +104,7 @@ static Cardinal 	ac;
 static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_plot.c,v 5.10 2006-10-05 18:58:29 caress Exp $";
+static char rcs_id[]="$Id: mbview_plot.c,v 5.11 2007-06-17 23:27:30 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_reset_glx(int instance)
@@ -136,12 +139,12 @@ int mbview_reset_glx(int instance)
 	
 	/* set up a new opengl context */
 	ac = 0;
-	XtSetArg(args[ac], GLwNvisualInfo, &(view->vi));
+	XtSetArg(args[ac], mbGLwNvisualInfo, &(view->vi));
 	ac++;
 	XtGetValues(view->glwmda, args, ac);
 	view->glx_context = glXCreateContext(view->dpy, view->vi,
                 	     NULL, GL_FALSE);
-	GLwDrawingAreaMakeCurrent(view->glwmda, view->glx_context);
+	glXMakeCurrent(XtDisplay(view->glwmda),XtWindow(view->glwmda),view->glx_context);
 	view->glx_init = MB_YES;
         glViewport(0, 0, data->width, data->height);
 	view->aspect_ratio = ((float)data->width) / ((float)data->height);
@@ -954,7 +957,7 @@ int mbview_plot(int instance, int rez)
 	data = &(view->data);
 	
 	/* make correct window current for OpenGL */
-	GLwDrawingAreaMakeCurrent(view->glwmda, view->glx_context);
+	glXMakeCurrent(XtDisplay(view->glwmda),XtWindow(view->glwmda),view->glx_context);
 /*fprintf(stderr,"\nmbview_plot: instance:%d rez:%d recursion:%d\n",instance,rez,view->plot_recursion);
 fprintf(stderr,"     view->plot_done:        %d\n",view->plot_done);
 fprintf(stderr,"     view->plot_recursion:   %d\n",view->plot_recursion);
@@ -1327,7 +1330,7 @@ int mbview_findpointrez(int instance, int rez, int xpixel, int ypixel,
 	data = &(view->data);
 	
 	/* make correct window current for OpenGL */
-	GLwDrawingAreaMakeCurrent(view->glwmda, view->glx_context);
+	glXMakeCurrent(XtDisplay(view->glwmda),XtWindow(view->glwmda),view->glx_context);
 /*fprintf(stderr,"\nmbview_findpointrez: instance:%d point:%d %d  bounds:%d %d %d %d\n", 
 instance,xpixel,ypixel,ijbounds[0],ijbounds[1],ijbounds[2],ijbounds[3]);*/
 	
@@ -1639,7 +1642,7 @@ int mbview_viewbounds(int instance)
 	data = &(view->data);
 	
 	/* make correct window current for OpenGL */
-	GLwDrawingAreaMakeCurrent(view->glwmda, view->glx_context);
+	glXMakeCurrent(XtDisplay(view->glwmda),XtWindow(view->glwmda),view->glx_context);
 	
 	/* apply projection if needed */
 	if (view->projected == MB_NO)
@@ -3330,8 +3333,8 @@ int mbview_glerrorcheck(int instance, int id, char *sourcefunction)
 		}
 	
 	/* check for OpenGL error if MBV_GETERRORS set */
-	gl_error = glGetError();
-	gl_error_msg = gluErrorString(gl_error);
+	gl_error = (GLenum)glGetError();
+	gl_error_msg = (GLubyte *)gluErrorString(gl_error);
 	if (gl_error != GL_NO_ERROR)
 		fprintf(stderr,"Function %s: Instance:%d id:%d OpenGL error: %s\n", 
 			sourcefunction, instance, id, gl_error_msg);

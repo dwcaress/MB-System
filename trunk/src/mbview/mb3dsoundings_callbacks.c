@@ -1,3 +1,17 @@
+/*--------------------------------------------------------------------
+ *    The MB-system:	mb3dsoundings_callbacks.c		5/25/2007
+ *    $Id: mb3dsoundings_callbacks.c,v 5.1 2007-06-17 23:27:31 caress Exp $
+ *
+ *    Copyright (c) 2007 by
+ *    David W. Caress (caress@mbari.org)
+ *      Monterey Bay Aquarium Research Institute
+ *      Moss Landing, CA 95039
+ *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Lamont-Doherty Earth Observatory
+ *      Palisades, NY 10964
+ *
+ *    See README file for copying and redistribution conditions.
+ *--------------------------------------------------------------------*/
 
 /* Begin user code block <abstract> */
 /* End user code block <abstract> */
@@ -13,15 +27,64 @@
  * Code Generator Xcessory 6.1.3 (08/19/04) CGX Scripts 6.1 Motif 2.1 
  *
  */
-#include <Xm/Xm.h>
-
-
 /*
  * Standard includes for builtins.
  */
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
+#include <math.h>
+
+/* Motif required Headers */
+#include <X11/StringDefs.h>
+#include <X11/cursorfont.h>
+#include <Xm/Xm.h>
+#include <Xm/MainW.h>
+#include <Xm/DialogS.h>
+#include <Xm/RepType.h>
+#include <Xm/MwmUtil.h>
+#include <Xm/BulletinB.h>
+#include <Xm/RowColumn.h>
+#include <Xm/CascadeB.h>
+#include <Xm/PushB.h>
+#include <Xm/Separator.h>
+#include "Mb3dsdg.h"
+
+/* OpenGL include files */
+#include <GL/gl.h>
+#include <GL/glu.h>
+#include <GL/glx.h>
+#include "mb_glwdrawa.h"
+
+/* MBIO include files */
+#include "../../include/mb_status.h"
+#include "../../include/mb_define.h"
+
+/* Set flag to define mb3dsoundings global variables in this code block */
+#define MB3DSOUNDINGSGLOBAL 
+
+/* mb3dsoundings include */
+#include "mbview.h"
+#include "mb3dsoundingsprivate.h"
+
+/*------------------------------------------------------------------------------*/
+
+/* local variables */
+static Cardinal 	ac;
+static Arg      	args[256];
+static char		value_text[MB_PATH_MAXLINE];
+
+static char rcs_id[]="$Id: mb3dsoundings_callbacks.c,v 5.1 2007-06-17 23:27:31 caress Exp $";
+
+/* function prototypes */
+/*------------------------------------------------------------------------------*/
+
+/*------------------------------------------------------------------------------*/
+/* code used in original BX application, not used for library */
+
+#ifndef MBVIEW_LIBRARY
+
+#include "creation-c.h"
 
 /*
  * Macros to make code look nicer between ANSI and K&R.
@@ -52,13 +115,6 @@
 Widget		BxFindTopShell PROTOTYPE((Widget));
 WidgetList	BxWidgetIdsFromNames PROTOTYPE((Widget, char*, char*));
 
-
-
-void
-do_mb3dsdg_mouse_pick( Widget w, XtPointer client_data, XtPointer call_data)
-{
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
-}
 /*      Function Name:	BxExitCB
  *
  *      Description:   	This functions expects an integer to be passed in
@@ -73,6 +129,8 @@ do_mb3dsdg_mouse_pick( Widget w, XtPointer client_data, XtPointer call_data)
 #ifdef VMS
 #include <stdlib.h>
 #endif
+/*---------------------------------------------------------------------------------------*/
+
 
 /* ARGSUSED */
 void
@@ -84,46 +142,2165 @@ GRAU( XtPointer, call)
     long	exitValue = (long)client;
     exit(exitValue);
 }
-
-
-void
-do_mb3dsdg_mouse_grab( Widget w, XtPointer client_data, XtPointer call_data)
+#endif
+/*------------------------------------------------------------------------------*/
+/* code below used for mb3dsoundings library                                           */
+/*------------------------------------------------------------------------------*/
+int mb3dsoundings_startup(int verbose, Widget parent, XtAppContext app, int *error)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+	/* local variables */
+	char	*function_name = "mb3dsoundings_startup";
+		
+	/* set local verbosity */
+	mbs_verbose = verbose;
+
+	/* print starting debug statements */
+	if (mbs_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
+		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:                 %d\n", verbose);
+		fprintf(stderr,"dbg2       parent:                  %d\n", parent);
+		fprintf(stderr,"dbg2       app:                     %d\n", app);
+		}
+		
+	/* set parent widget and app context */
+	parent_widget = parent;
+	app_context = app;
+	work_function_set = MB_NO;
+	timer_count = 0;
+	
+	/* initialize window */
+	mb3dsoundings_reset();
+	
+	/* set error */
+	*error = mbs_error;
+		
+	/* print output debug statements */
+	if (mbs_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:        %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:       %d\n",mbs_status);
+		}
+
+	/* return */
+	return(mbs_status);
+}
+/*------------------------------------------------------------------------------*/
+int mb3dsoundings_updategui()
+{
+	/* local variables */
+	char	*function_name = "mb3dsoundings_updategui";
+	struct mb3dsoundings_struct *soundingdata;
+	struct mb3dsoundings_sounding_struct *sounding;
+    	int	ibiasmin, ibiasmax;
+
+	soundingdata = (struct mb3dsoundings_struct *) mb3dsoundings.soundingdata;
+	
+	ibiasmin = 100 *(mb3dsoundings.irollbias / 100) - 100;
+	ibiasmax = 100 *(mb3dsoundings.irollbias / 100) + 100;
+	ac = 0;
+        XtSetArg(args[ac], XmNminimum, ibiasmin); ac++;
+        XtSetArg(args[ac], XmNmaximum, ibiasmax); ac++;
+        XtSetArg(args[ac], XmNvalue, mb3dsoundings.irollbias); ac++;
+	XtSetValues(mb3dsoundings.mb3dsdg.scale_rollbias, args, ac);
+	
+	ibiasmin = 100 *(mb3dsoundings.ipitchbias / 100) - 100;
+	ibiasmax = 100 *(mb3dsoundings.ipitchbias / 100) + 100;
+	ac = 0;
+        XtSetArg(args[ac], XmNminimum, ibiasmin); ac++;
+        XtSetArg(args[ac], XmNmaximum, ibiasmax); ac++;
+        XtSetArg(args[ac], XmNvalue, mb3dsoundings.ipitchbias); ac++;
+	XtSetValues(mb3dsoundings.mb3dsdg.scale_pitchbias, args, ac);
+	
+	ibiasmin = 100 *(mb3dsoundings.iheadingbias / 100) - 100;
+	ibiasmax = 100 *(mb3dsoundings.iheadingbias / 100) + 100;
+	ac = 0;
+        XtSetArg(args[ac], XmNminimum, ibiasmin); ac++;
+        XtSetArg(args[ac], XmNmaximum, ibiasmax); ac++;
+        XtSetArg(args[ac], XmNvalue, mb3dsoundings.iheadingbias); ac++;
+	XtSetValues(mb3dsoundings.mb3dsdg.scale_headingbias, args, ac);
+	
+	if (mb3dsoundings.view_boundingbox == MB_YES)
+		{
+    		XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_view_boundingbox, 
+				True, False);
+		}
+	else
+		{
+    		XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_view_boundingbox, 
+				False, False);
+		}
+	
+	if (mb3dsoundings.view_flagged == MB_YES)
+		{
+    		XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_view_flagged, 
+				True, False);
+		}
+	else
+		{
+    		XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_view_flagged, 
+				False, False);
+		}
+	
+	if (mb3dsoundings.view_profiles == MBS_VIEW_PROFILES_NONE)
+		{
+    		XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_view_noconnect, 
+				True, False);
+    		XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_view_connectgood, 
+				False, False);
+    		XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_view_connectall, 
+				False, False);
+		}
+	else if (mb3dsoundings.view_profiles == MBS_VIEW_PROFILES_UNFLAGGED)
+		{
+    		XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_view_noconnect, 
+				False, False);
+    		XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_view_connectgood, 
+				True, False);
+    		XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_view_connectall, 
+				False, False);
+		}
+	else
+		{
+    		XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_view_noconnect, 
+				False, False);
+    		XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_view_connectgood, 
+				False, False);
+    		XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_view_connectall, 
+				True, False);
+		}
+	
+	if (mb3dsoundings.mouse_mode == MBS_MOUSE_ROTATE)
+		{
+    		XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_mouse_rotate, 
+				True, False);
+    		XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_mouse_panzoom, 
+				False, False);
+    		XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_mouse_rotate1, 
+				True, False);
+    		XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_mouse_panzoom1, 
+				False, False);
+		}
+	else
+		{
+    		XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_mouse_rotate, 
+				False, False);
+    		XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_mouse_panzoom, 
+				True, False);
+    		XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_mouse_rotate1, 
+				False, False);
+    		XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_mouse_panzoom1, 
+				True, False);
+		}
+		
+	/* set status label */
+	mb3dsoundings_updatestatus();
+
+	/* return */
+	return(mbs_status);
+}
+/*------------------------------------------------------------------------------*/
+int mb3dsoundings_updatestatus()
+{
+	/* local variables */
+	char	*function_name = "mb3dsoundings_updatestatus";
+	struct mb3dsoundings_struct *soundingdata;
+
+	soundingdata = (struct mb3dsoundings_struct *) mb3dsoundings.soundingdata;
+	
+		
+	/* set status label */
+	sprintf(value_text, "Azi:%.2f | Elev: %.2f | Exager:%.2f | Tot:%d Good:%d Flagged:%d",
+		mb3dsoundings.azimuth, mb3dsoundings.elevation, mb3dsoundings.exageration, 
+		soundingdata->num_soundings, soundingdata->num_soundings_unflagged, 
+		soundingdata->num_soundings_flagged);
+	set_mbview_label_string(mb3dsoundings.mb3dsdg.label_status, value_text);
+
+	/* return */
+	return(mbs_status);
+}
+/*------------------------------------------------------------------------------*/
+int mb3dsoundings_end(int verbose, int *error)
+{
+	/* local variables */
+	char	*function_name = "mb3dsoundings_end()";
+		
+	/* set local verbosity */
+	mbs_verbose = verbose;
+
+	/* print starting debug statements */
+	if (mbs_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
+		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:                 %d\n", verbose);
+		}
+		
+	/* handle destruction if not already handled */
+	if (mb3dsoundings.init != MBS_WINDOW_NULL)
+	    {
+	    /* delete old glx_context if it exists */
+	    if (mb3dsoundings.glx_init == MB_YES)
+		{
+		glXDestroyContext(mb3dsoundings.dpy, mb3dsoundings.glx_context);
+		XtDestroyWidget(mb3dsoundings.glwmda);
+		mb3dsoundings.glx_init = MB_NO;
+		}
+
+	    /* destroy the topLevelShell and all its children */
+	    XtDestroyWidget(mb3dsoundings.topLevelShell);
+	    
+	    /* reset init flag */
+	    mb3dsoundings.init = MBS_WINDOW_NULL;
+	    }
+	
+	/* reinitialize parameters */
+	mb3dsoundings_reset();
+	
+	/* set flags */
+	mbs_status = MB_SUCCESS;
+	mbs_error = MB_ERROR_NO_ERROR;
+	
+	/* set error */
+	*error = mbs_error;
+		
+	/* print output debug statements */
+	if (mbs_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:        %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:       %d\n",mbs_status);
+		}
+
+	/* return */
+	return(mbs_status);
+}
+/*------------------------------------------------------------------------------*/
+
+int mb3dsoundings_set_dismiss_notify(int verbose, void (dismiss_notify)(), int *error)
+{
+	/* local variables */
+	char	*function_name = "mb3dsoundings_set_dismiss_notify";
+
+	/* print starting debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
+		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:                 %d\n", verbose);
+		}
+		
+	/* set the function pointer */
+	mb3dsoundings.mb3dsoundings_dismiss_notify = dismiss_notify;
+	
+	/* set error */
+	*error = mbs_error;
+		
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:        %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:       %d\n",mbs_status);
+		}
+
+	/* return */
+	return(mbs_status);
 }
 
-void
-do_mb3dsdg_mouse_erase( Widget w, XtPointer client_data, XtPointer call_data)
+/*------------------------------------------------------------------------------*/
+int mb3dsoundings_set_edit_notify(int verbose, void (edit_notify)(int, int, int, char, int), int *error)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+	/* local variables */
+	char	*function_name = "mb3dsoundings_set_edit_notify";
+
+	/* print starting debug statements */
+	if (mbs_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
+		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:                 %d\n", verbose);
+		}
+		
+	/* set the function pointer */
+	mb3dsoundings.mb3dsoundings_edit_notify = edit_notify;
+	
+	/* set error */
+	*error = mbs_error;
+	
+	/* set error */
+	*error = mbs_error;
+		
+	/* print output debug statements */
+	if (mbs_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:        %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:       %d\n",mbs_status);
+		}
+
+	/* return */
+	return(mbs_status);
 }
 
-void
-do_mb3dsdg_mouse_toggle( Widget w, XtPointer client_data, XtPointer call_data)
+/*------------------------------------------------------------------------------*/
+int mb3dsoundings_set_info_notify(int verbose, void (info_notify)(int, int, int, char *), int *error)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+	/* local variables */
+	char	*function_name = "mb3dsoundings_set_info_notify";
+
+	/* print starting debug statements */
+	if (mbs_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
+		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:                 %d\n", verbose);
+		}
+		
+	/* set the function pointer */
+	mb3dsoundings.mb3dsoundings_info_notify = info_notify;
+	
+	/* set error */
+	*error = mbs_error;
+	
+	/* set error */
+	*error = mbs_error;
+		
+	/* print output debug statements */
+	if (mbs_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:        %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:       %d\n",mbs_status);
+		}
+
+	/* return */
+	return(mbs_status);
 }
 
+/*------------------------------------------------------------------------------*/
+int mb3dsoundings_set_bias_notify(int verbose, void (bias_notify)(double, double, double), int *error)
+{
+	/* local variables */
+	char	*function_name = "mb3dsoundings_set_info_notify";
+
+	/* print starting debug statements */
+	if (mbs_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
+		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:                 %d\n", verbose);
+		}
+		
+	/* set the function pointer */
+	mb3dsoundings.mb3dsoundings_bias_notify = bias_notify;
+	
+	/* set error */
+	*error = mbs_error;
+	
+	/* set error */
+	*error = mbs_error;
+		
+	/* print output debug statements */
+	if (mbs_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:        %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:       %d\n",mbs_status);
+		}
+
+	/* return */
+	return(mbs_status);
+}
+
+/*------------------------------------------------------------------------------*/
+int mb3dsoundings_set_biasapply_notify(int verbose, void (biasapply_notify)(double, double, double), int *error)
+{
+	/* local variables */
+	char	*function_name = "mb3dsoundings_set_info_notify";
+
+	/* print starting debug statements */
+	if (mbs_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
+		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:                 %d\n", verbose);
+		}
+		
+	/* set the function pointer */
+	mb3dsoundings.mb3dsoundings_biasapply_notify = biasapply_notify;
+	
+	/* set error */
+	*error = mbs_error;
+	
+	/* set error */
+	*error = mbs_error;
+		
+	/* print output debug statements */
+	if (mbs_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:        %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:       %d\n",mbs_status);
+		}
+
+	/* return */
+	return(mbs_status);
+}
+
+/*------------------------------------------------------------------------------*/
+int mb3dsoundings_reset()
+{
+	/* local variables */
+	char	*function_name = "mb3dsoundings_reset";
+	int	i;
+
+	/* print starting debug statements */
+	if (mbs_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
+		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		}	
+	
+	/* initialize mb3dsoungings data and parameters */
+	mb3dsoundings.init = MBS_WINDOW_NULL;
+	
+	mb3dsoundings.mb3dsoundings_dismiss_notify = NULL;
+	mb3dsoundings.mb3dsoundings_edit_notify = NULL;	
+	mb3dsoundings.mb3dsoundings_info_notify = NULL;	
+	mb3dsoundings.mb3dsoundings_bias_notify = NULL;	
+	mb3dsoundings.mb3dsoundings_biasapply_notify = NULL;	
+	
+	mb3dsoundings.topLevelShell = NULL;
+	mb3dsoundings.mainWindow = NULL;
+	mb3dsoundings.glwmda = NULL;
+	mb3dsoundings.dpy = NULL;
+	mb3dsoundings.vi = NULL;
+	mb3dsoundings.glx_init = MB_NO;
+	mb3dsoundings.glx_context = NULL;
+	mb3dsoundings.message_on = MB_NO;
+	mb3dsoundings.edit_mode = MBS_EDIT_TOGGLE;
+	mb3dsoundings.mouse_mode = MBS_MOUSE_ROTATE;
+    
+	/* drawing variables */
+	mb3dsoundings.elevation = 0.0;
+	mb3dsoundings.azimuth = 0.0;
+	mb3dsoundings.exageration = 1.0;
+	mb3dsoundings.gl_width = 0;
+	mb3dsoundings.gl_height = 0;;
+	mb3dsoundings.right = -1.0;
+	mb3dsoundings.left = 1.0;
+	mb3dsoundings.top = 1.0;
+	mb3dsoundings.bottom = -1.0;
+	mb3dsoundings.aspect_ratio = 1.0;
+	mb3dsoundings.gl_offset_x = 0.0;
+	mb3dsoundings.gl_offset_y = 0.0;
+	mb3dsoundings.gl_offset_x_save = 0.0;
+	mb3dsoundings.gl_offset_y_save = 0.0;
+	mb3dsoundings.gl_size = 1.0;
+	mb3dsoundings.gl_size_save = 1.0;
+
+	/* button parameters */
+	mb3dsoundings.button1down = MB_NO;
+	mb3dsoundings.button2down = MB_NO;
+	mb3dsoundings.button3down = MB_NO;
+	mb3dsoundings.button_down_x = 0;
+	mb3dsoundings.button_down_y = 0;
+	mb3dsoundings.button_move_x = 0;
+	mb3dsoundings.button_move_y = 0;
+	mb3dsoundings.button_up_x = 0;
+	mb3dsoundings.button_up_y = 0;
+    
+    	/* edit grab parameters */
+	mb3dsoundings.grab_start_defined = MB_NO;
+	mb3dsoundings.grab_end_defined = MB_NO;
+	mb3dsoundings.grab_start_x = 0;
+	mb3dsoundings.grab_start_y = 0;
+	mb3dsoundings.grab_end_x = 0;
+	mb3dsoundings.grab_end_y = 0;
+	
+	/* patch test parameters */
+	mb3dsoundings.irollbias = 0;
+	mb3dsoundings.ipitchbias = 0;
+	mb3dsoundings.iheadingbias = 0;
+    
+	/* view parameters */
+	mb3dsoundings.view_boundingbox = MB_YES;
+	mb3dsoundings.view_flagged = MB_YES;
+	mb3dsoundings.view_profiles = MBS_VIEW_PROFILES_NONE;
+	
+	/* print output debug statements */
+	if (mbs_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:       %d\n",mbs_status);
+		}
+
+	/* return */
+	return(mbs_status);
+}
+
+/*---------------------------------------------------------------------------------------*/
+int mb3dsoundings_open(int verbose, struct mb3dsoundings_struct *soundingdata, int *error)
+{
+	/* local variables */
+	char	*function_name = "mb3dsoundings_open";
+	XColor	XColorBlack;
+	XColor	XColorWhite;
+	XColor	XColorRed;
+	XColor	XColorGreen;
+	XColor	XColorBlue;
+	XColor	XColorCoral;
+	XColor	exact;
+
+fprintf(stderr,"Called mb3dsoundings_open\n");
+
+	/* print starting debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
+		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:       %d\n",verbose);
+		fprintf(stderr,"dbg2       soundingdata:  %d\n",soundingdata);
+		}
+		
+	/* set the data pointer */
+	mb3dsoundings.soundingdata = (struct mb3dsoundings_struct *)soundingdata;
+	mb3dsoundings_scale(verbose, error);
+	
+	/* if not yet created then create the MB3DView class in 
+		a topLevelShell as a child of Widget parent */
+	if (mb3dsoundings.init == MBS_WINDOW_NULL)
+		{
+		ac = 0;
+		XtSetArg(args[ac], XmNtitle, "3D Soundings"); ac++;
+		XtSetArg(args[ac], XmNwidth, 800); ac++;
+		XtSetArg(args[ac], XmNheight, 600); ac++;
+		mb3dsoundings.topLevelShell = XtCreatePopupShell("topLevelShell",
+		    topLevelShellWidgetClass,
+		    parent_widget,
+		    args, 
+		    ac);
+		mb3dsoundings.mainWindow = XmCreateMainWindow(
+		    mb3dsoundings.topLevelShell, 
+		    "mainWindow_mb3dsoundings",
+        	    args, 
+        	    ac);
+    		XtManageChild(mb3dsoundings.mainWindow);
+		Mb3dsdgCreate(&(mb3dsoundings.mb3dsdg), 
+        	    mb3dsoundings.mainWindow,
+        	    "mb3dsdg",
+        	    args,
+        	    ac);
+				
+		ac = 0;
+		XtSetArg(args[ac], XmNx, mb3dsoundings.gl_xo); ac++;
+		XtSetArg(args[ac], XmNy, mb3dsoundings.gl_yo); ac++;
+		XtSetArg(args[ac], XmNwidth, mb3dsoundings.gl_width + MBS_LEFT_WIDTH); ac++;
+		XtSetArg(args[ac], XmNheight, mb3dsoundings.gl_height + MBS_LEFT_HEIGHT); ac++;
+		XtSetValues(mb3dsoundings.mb3dsdg.Mb3dsdg, args, ac);
+
+    		XtManageChild(mb3dsoundings.mb3dsdg.Mb3dsdg);
+
+		/* get resize events - add event handlers */
+		XtAddEventHandler(mb3dsoundings.mb3dsdg.drawingArea, 
+					StructureNotifyMask, 
+					False, 
+					(XtEventHandler)do_mb3dsdg_resize, 
+					(XtPointer)0);
+	    
+		/* set the mode toggles */
+		XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_mouse_toggle, 0, FALSE);
+		XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_mouse_pick, 0, FALSE);
+		XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_mouse_erase, 0, FALSE);
+		XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_mouse_restore, 0, FALSE);
+		XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_mouse_grab, 0, FALSE);
+		XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_mouse_info, 0, FALSE);
+		if (mb3dsoundings.edit_mode == MBS_EDIT_TOGGLE)
+		    XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_mouse_toggle, 1, FALSE);
+		else if (mb3dsoundings.edit_mode == MBS_EDIT_PICK)
+		    XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_mouse_pick, 1, FALSE);
+		else if (mb3dsoundings.edit_mode == MBS_EDIT_ERASE)
+		    XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_mouse_erase, 1, FALSE);
+		else if (mb3dsoundings.edit_mode == MBS_EDIT_RESTORE)
+		    XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_mouse_restore, 1, FALSE);
+		else if (mb3dsoundings.edit_mode == MBS_EDIT_GRAB)
+		    XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_mouse_grab, 1, FALSE);
+		else if (mb3dsoundings.edit_mode == MBS_EDIT_INFO)
+		    XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_mouse_info, 1, FALSE);
+
+		/* get display and xid */
+		mb3dsoundings.dpy = (Display *) XtDisplay(mb3dsoundings.mb3dsdg.Mb3dsdg);
+		mb3dsoundings.xid = XtWindow(mb3dsoundings.mb3dsdg.drawingArea);
+
+		/* generate cursors for later use */
+		XAllocNamedColor(mb3dsoundings.dpy, 
+    				    DefaultColormap(mb3dsoundings.dpy, XDefaultScreen(mb3dsoundings.dpy)),
+				    "red", &XColorRed, &exact);
+		XAllocNamedColor(mb3dsoundings.dpy, 
+    				    DefaultColormap(mb3dsoundings.dpy, XDefaultScreen(mb3dsoundings.dpy)),
+				    "green", &XColorGreen, &exact);
+		XAllocNamedColor(mb3dsoundings.dpy, 
+    				    DefaultColormap(mb3dsoundings.dpy, XDefaultScreen(mb3dsoundings.dpy)),
+				    "blue", &XColorBlue, &exact);
+		XAllocNamedColor(mb3dsoundings.dpy, 
+    				    DefaultColormap(mb3dsoundings.dpy, XDefaultScreen(mb3dsoundings.dpy)),
+				    "black", &XColorBlack, &exact);
+		XAllocNamedColor(mb3dsoundings.dpy, 
+    				    DefaultColormap(mb3dsoundings.dpy, XDefaultScreen(mb3dsoundings.dpy)),
+				    "white", &XColorWhite, &exact);
+		XAllocNamedColor(mb3dsoundings.dpy, 
+    				    DefaultColormap(mb3dsoundings.dpy, XDefaultScreen(mb3dsoundings.dpy)),
+				    "coral", &XColorCoral, &exact);
+		mb3dsoundings.TargetBlackCursor = XCreateFontCursor(mb3dsoundings.dpy, XC_target);
+		mb3dsoundings.TargetGreenCursor = XCreateFontCursor(mb3dsoundings.dpy, XC_target);
+		mb3dsoundings.TargetRedCursor = XCreateFontCursor(mb3dsoundings.dpy, XC_target);
+		mb3dsoundings.FleurBlackCursor = XCreateFontCursor(mb3dsoundings.dpy, XC_fleur);
+		mb3dsoundings.FleurRedCursor = XCreateFontCursor(mb3dsoundings.dpy, XC_fleur);
+		mb3dsoundings.SizingBlackCursor = XCreateFontCursor(mb3dsoundings.dpy, XC_sizing);
+		mb3dsoundings.SizingRedCursor = XCreateFontCursor(mb3dsoundings.dpy, XC_sizing);
+		mb3dsoundings.BoatBlackCursor = XCreateFontCursor(mb3dsoundings.dpy, XC_boat);
+		mb3dsoundings.BoatRedCursor = XCreateFontCursor(mb3dsoundings.dpy, XC_boat);
+		mb3dsoundings.WatchBlackCursor = XCreateFontCursor(mb3dsoundings.dpy, XC_watch);
+		mb3dsoundings.WatchRedCursor = XCreateFontCursor(mb3dsoundings.dpy, XC_watch);
+		XRecolorCursor(mb3dsoundings.dpy,mb3dsoundings.TargetRedCursor,&XColorRed,&XColorCoral);
+		XRecolorCursor(mb3dsoundings.dpy,mb3dsoundings.TargetGreenCursor,&XColorGreen,&XColorCoral);
+		XRecolorCursor(mb3dsoundings.dpy,mb3dsoundings.FleurRedCursor,&XColorRed,&XColorCoral);
+		XRecolorCursor(mb3dsoundings.dpy,mb3dsoundings.SizingRedCursor,&XColorRed,&XColorCoral);
+		XRecolorCursor(mb3dsoundings.dpy,mb3dsoundings.BoatRedCursor,&XColorRed,&XColorCoral);
+		XRecolorCursor(mb3dsoundings.dpy,mb3dsoundings.WatchRedCursor,&XColorRed,&XColorCoral);
+					
+		mb3dsoundings.init = MBS_WINDOW_HIDDEN;
+		}
+	
+    	if (mb3dsoundings.init == MBS_WINDOW_HIDDEN)
+		{
+		XtPopup(XtParent(mb3dsoundings.mainWindow), XtGrabNone);
+		mb3dsoundings.init = MBS_WINDOW_VISIBLE;
+		}
+
+	/* update gui widgets */
+	mb3dsoundings_updategui();
+	
+	/* reset OpenGL */
+	mb3dsoundings_reset_glx();
+		
+	/* replot the data */
+	mb3dsoundings_plot(verbose, error);
+	
+	/* set error */
+	*error = mbs_error;
+		
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:        %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:       %d\n",mbs_status);
+		}
+
+	/* return */
+	return(mbs_status);
+}
+/*------------------------------------------------------------------------------*/
+int mb3dsoundings_reset_glx()
+{
+	/* local variables */
+	char	*function_name = "mb3dsoundings_reset_glx";
+
+	/* print starting debug statements */
+	if (mbs_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
+		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		}
+		
+	/* delete old glx_context if it exists */
+	if (mb3dsoundings.glx_init == MB_YES)
+		{
+		glXDestroyContext(mb3dsoundings.dpy, mb3dsoundings.glx_context);
+		XtDestroyWidget(mb3dsoundings.glwmda);
+		mb3dsoundings.glx_init = MB_NO;
+		}
+
+	/* get dimensions of the drawingArea */
+	XtVaGetValues(mb3dsoundings.mb3dsdg.drawingArea, 
+		XmNwidth, &mb3dsoundings.gl_width, 
+		XmNheight, &mb3dsoundings.gl_height, 
+		NULL);
+	mb3dsoundings.gl_width -= 20;
+	mb3dsoundings.gl_height -= 20;
+
+	/* intitialize OpenGL graphics */
+	ac = 0;
+	XtSetArg(args[ac], mbGLwNrgba, TRUE); ac++;
+	XtSetArg(args[ac], mbGLwNdepthSize, 1); ac++;
+	XtSetArg(args[ac], mbGLwNdoublebuffer, True); ac++;
+	XtSetArg(args[ac], mbGLwNallocateBackground, TRUE); ac++;
+	XtSetArg(args[ac], XmNwidth, mb3dsoundings.gl_width); ac++;
+	XtSetArg(args[ac], XmNheight, mb3dsoundings.gl_height); ac++;
+	mb3dsoundings.glwmda = mbGLwCreateMDrawingArea(mb3dsoundings.mb3dsdg.drawingArea, 
+		"glwidget", args, ac);
+
+	XtManageChild (mb3dsoundings.glwmda);
+	XtAddCallback(mb3dsoundings.glwmda, "exposeCallback",
+		    &(do_mb3dsdg_glwda_expose), (XtPointer) NULL);
+	XtAddCallback(mb3dsoundings.glwmda, "resizeCallback", 
+		    &(do_mb3dsdg_glwda_resize), (XtPointer) NULL);
+	XtAddCallback(mb3dsoundings.glwmda, "inputCallback", 
+		    &(do_mb3dsdg_glwda_input), (XtPointer) NULL);
+	
+	/* set up a new opengl context */
+	ac = 0;
+	XtSetArg(args[ac], mbGLwNvisualInfo, &(mb3dsoundings.vi)); ac++;
+	XtGetValues(mb3dsoundings.glwmda, args, ac);
+	mb3dsoundings.glx_context = glXCreateContext(mb3dsoundings.dpy, mb3dsoundings.vi,
+                	     NULL, GL_FALSE);
+	glXMakeCurrent(XtDisplay(mb3dsoundings.glwmda),
+			XtWindow(mb3dsoundings.glwmda),
+			mb3dsoundings.glx_context);
+        glViewport(0, 0, mb3dsoundings.gl_width, mb3dsoundings.gl_height);
+	mb3dsoundings.aspect_ratio = ((float)mb3dsoundings.gl_width) / ((float)mb3dsoundings.gl_height);
+	mb3dsoundings.glx_init = MB_YES;
+
+	mb3dsoundings.dpy = (Display *) XtDisplay(mb3dsoundings.mb3dsdg.Mb3dsdg);
+	mb3dsoundings.xid = XtWindow(mb3dsoundings.mb3dsdg.drawingArea);
+	XDefineCursor(XtDisplay(mb3dsoundings.mb3dsdg.Mb3dsdg), 
+			XtWindow(mb3dsoundings.mb3dsdg.drawingArea), 
+			mb3dsoundings.TargetBlackCursor);
+
+	/* print output debug statements */
+	if (mbs_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",mbs_status);
+		}
+
+	/* return */
+	return(mbs_status);
+}
+
+		
+
+/*------------------------------------------------------------------------------*/
+
 void
-do_mb3dsdg_mouse_restore( Widget w, XtPointer client_data, XtPointer call_data)
+do_mb3dsdg_resize( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+fprintf(stderr,"Called do_mb3dsdg_resize\n");
+	
+	/* reset OpenGL */
+	mb3dsoundings_reset_glx();
+		
+	/* replot the data */
+	mb3dsoundings_plot(mbs_verbose, &mbs_error);
 }
+
+/*---------------------------------------------------------------------------------------*/
 
 void
 do_mb3dsdg_dismiss( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+fprintf(stderr,"Called do_mb3dsdg_dismiss\n");
+	
+    	XtPopdown(XtParent(mb3dsoundings.mainWindow));
+	mb3dsoundings.init = MBS_WINDOW_HIDDEN;
+	(mb3dsoundings.mb3dsoundings_dismiss_notify)();
 }
 
+/*---------------------------------------------------------------------------------------*/
+
 void
-do_mb3dsdg_input( Widget w, XtPointer client_data, XtPointer call_data)
+do_mb3dsdg_mouse_toggle( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+fprintf(stderr,"Called do_mb3dsdg_mouse_toggle\n");
+
+	mb3dsoundings.edit_mode = MBS_EDIT_TOGGLE;
 }
+
+/*------------------------------------------------------------------------------*/
+
+void
+do_mb3dsdg_mouse_pick( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+fprintf(stderr,"Called do_mb3dsdg_mouse_pick\n");
+
+	mb3dsoundings.edit_mode = MBS_EDIT_PICK;
+}
+
+/*---------------------------------------------------------------------------------------*/
+
+void
+do_mb3dsdg_mouse_erase( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+fprintf(stderr,"Called do_mb3dsdg_mouse_erase\n");
+
+	mb3dsoundings.edit_mode = MBS_EDIT_ERASE;
+}
+
+/*---------------------------------------------------------------------------------------*/
+
+void
+do_mb3dsdg_mouse_restore( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+fprintf(stderr,"Called do_mb3dsdg_mouse_restore\n");
+
+	mb3dsoundings.edit_mode = MBS_EDIT_RESTORE;
+}
+
+/*---------------------------------------------------------------------------------------*/
+
+void
+do_mb3dsdg_mouse_grab( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+fprintf(stderr,"Called do_mb3dsdg_mouse_grab\n");
+
+	mb3dsoundings.edit_mode = MBS_EDIT_GRAB;
+}
+
+/*---------------------------------------------------------------------------------------*/
 
 void
 do_mb3dsdg_mouse_info( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+fprintf(stderr,"Called do_mb3dsdg_mouse_info\n");
+
+	mb3dsoundings.edit_mode = MBS_EDIT_INFO;
 }
+
+/*---------------------------------------------------------------------------------------*/
+
+void
+do_mb3dsdg_input( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+fprintf(stderr,"Called do_mb3dsdg_input\n");
+}
+
+/*---------------------------------------------------------------------------------------*/
+
+void
+do_mb3dsdg_glwda_expose( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+fprintf(stderr,"Called do_mb3dsdg_glwda_expose\n");
+}
+
+/*---------------------------------------------------------------------------------------*/
+
+void
+do_mb3dsdg_glwda_input( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    mbGLwDrawingAreaCallbackStruct *acs = (mbGLwDrawingAreaCallbackStruct*)call_data;
+    struct mb3dsoundings_struct *soundingdata;
+	XEvent  *event;
+	KeySym keysym;
+	char buffer[1];
+	int actual;
+fprintf(stderr,"Called do_mb3dsdg_glwda_input\n");
+	
+    /* get event */
+    event = acs->event;
+    
+    /* If there is input in the drawing area */
+    if (acs->reason == XmCR_INPUT)
+    {
+      
+      /* Check for mouse pressed. */
+      if (event->xany.type == ButtonPress)
+      {
+fprintf(stderr, "event->xany.type == ButtonPress  button:%d position: %d %d  mouse mode:%d\n",
+event->xbutton.button,event->xbutton.x,event->xbutton.y, mb3dsoundings.mouse_mode);
+	  /* save location */
+	  mb3dsoundings.button_down_x = event->xbutton.x;
+	  mb3dsoundings.button_down_y = mb3dsoundings.gl_height - 1 - event->xbutton.y;
+
+	  /* If left mouse button is pushed */
+	  if (event->xbutton.button == 1)
+		{		
+		/* set button1down flag */
+		mb3dsoundings.button1down = MB_YES;
+		
+		/* deal with pick according to edit_mode */
+		if (mb3dsoundings.edit_mode == MBS_EDIT_TOGGLE)
+			{
+			mb3dsoundings_pick(mb3dsoundings.button_down_x, 
+						mb3dsoundings.button_down_y);
+			}
+		else if (mb3dsoundings.edit_mode == MBS_EDIT_PICK)
+			{
+			mb3dsoundings_pick(mb3dsoundings.button_down_x, 
+						mb3dsoundings.button_down_y);
+			}
+		else if (mb3dsoundings.edit_mode == MBS_EDIT_ERASE)
+			{
+			mb3dsoundings_eraserestore(mb3dsoundings.button_down_x, 
+						mb3dsoundings.button_down_y);
+			}
+		else if (mb3dsoundings.edit_mode == MBS_EDIT_RESTORE)
+			{
+			mb3dsoundings_eraserestore(mb3dsoundings.button_down_x, 
+						mb3dsoundings.button_down_y);
+			}
+		else if (mb3dsoundings.edit_mode == MBS_EDIT_GRAB)
+			{
+			mb3dsoundings_grab(mb3dsoundings.button_down_x, 
+						mb3dsoundings.button_down_y, MBS_EDIT_GRAB_START);
+			}
+		else if (mb3dsoundings.edit_mode == MBS_EDIT_INFO)
+			{
+			mb3dsoundings_info(mb3dsoundings.button_down_x, 
+						mb3dsoundings.button_down_y);
+			}
+		    					    		
+		} /* end of left button events */
+
+	   /* If middle mouse button is pushed */
+	   else if (event->xbutton.button == 2)
+		{
+		/* rotate mode */
+		if (mb3dsoundings.mouse_mode == MBS_MOUSE_ROTATE)
+			{
+			/* set button2down flag */
+			mb3dsoundings.button2down = MB_YES;
+
+			/* set cursor for rotate */
+	  		XDefineCursor(mb3dsoundings.dpy,mb3dsoundings.xid,mb3dsoundings.FleurBlackCursor);
+
+			mb3dsoundings.azimuth_save = mb3dsoundings.azimuth;
+			mb3dsoundings.elevation_save = mb3dsoundings.elevation;
+			}
+
+		/* pan zoom mode */
+		else if (mb3dsoundings.mouse_mode == MBS_MOUSE_PANZOOM)
+			{
+			/* set button2down flag */
+			mb3dsoundings.button2down = MB_YES;
+
+			/* set cursor for rotate */
+	  		XDefineCursor(mb3dsoundings.dpy,mb3dsoundings.xid,mb3dsoundings.FleurBlackCursor);
+
+			mb3dsoundings.gl_offset_x_save = mb3dsoundings.gl_offset_x;
+			mb3dsoundings.gl_offset_y_save = mb3dsoundings.gl_offset_y;
+			}
+		} /* end of middle button events */
+
+	   /* If right mouse button is pushed */
+	   else if (event->xbutton.button == 3)
+		{
+		/* rotate mode */
+		if (mb3dsoundings.mouse_mode == MBS_MOUSE_ROTATE)
+			{
+			/* set button3down flag */
+			mb3dsoundings.button3down = MB_YES;
+
+			/* set cursor for exagerate */
+	  		XDefineCursor(mb3dsoundings.dpy,mb3dsoundings.xid,mb3dsoundings.FleurBlackCursor);
+
+			mb3dsoundings.exageration_save = mb3dsoundings.exageration;
+			}
+
+		/* pan zoom mode */
+		else if (mb3dsoundings.mouse_mode == MBS_MOUSE_PANZOOM)
+			{
+			/* set button3down flag */
+			mb3dsoundings.button3down = MB_YES;
+
+			/* set cursor for exagerate */
+	  		XDefineCursor(mb3dsoundings.dpy,mb3dsoundings.xid,mb3dsoundings.FleurBlackCursor);
+
+			mb3dsoundings.gl_size_save = mb3dsoundings.gl_size;
+			}
+		    
+		} /* end of right button events */
+			
+      } /* end of button press events */		    		    		
+
+      /* Check for mouse motion while pressed. */
+      if (event->xany.type == MotionNotify)
+      {
+fprintf(stderr, "event->xany.type == MotionNotify  %d %d  mouse mode:%d\n",
+event->xbutton.x,event->xmotion.y, mb3dsoundings.mouse_mode);
+	  
+	  /* save location */
+	  mb3dsoundings.button_move_x = event->xmotion.x;
+	  mb3dsoundings.button_move_y = mb3dsoundings.gl_height - 1 - event->xmotion.y;
+
+	   /* If left mouse button is dragged */
+	  if (mb3dsoundings.button1down == MB_YES)
+		{
+		
+		/* deal with pick according to edit_mode */
+		if (mb3dsoundings.edit_mode == MBS_EDIT_TOGGLE)
+			{
+			}
+		else if (mb3dsoundings.edit_mode == MBS_EDIT_PICK)
+			{
+			}
+		else if (mb3dsoundings.edit_mode == MBS_EDIT_TOGGLE)
+			{
+			}
+		else if (mb3dsoundings.edit_mode == MBS_EDIT_ERASE)
+			{
+			mb3dsoundings_eraserestore(mb3dsoundings.button_move_x, 
+						mb3dsoundings.button_move_y);
+			}
+		else if (mb3dsoundings.edit_mode == MBS_EDIT_RESTORE)
+			{
+			mb3dsoundings_eraserestore(mb3dsoundings.button_move_x, 
+						mb3dsoundings.button_move_y);
+			}
+		else if (mb3dsoundings.edit_mode == MBS_EDIT_GRAB)
+			{
+			mb3dsoundings_grab(mb3dsoundings.button_move_x, 
+						mb3dsoundings.button_move_y, MBS_EDIT_GRAB_MOVE);
+			}
+		else if (mb3dsoundings.edit_mode == MBS_EDIT_INFO)
+			{
+			}
+	    
+		
+		} /* end of left button events */
+
+	   /* If middle mouse button is dragged */
+	  else if (mb3dsoundings.button2down == MB_YES)
+		{		    		    		
+		/* rotate mode */
+		if (mb3dsoundings.mouse_mode == MBS_MOUSE_ROTATE)
+			{
+			/* set cursor for rotate */
+	  		XDefineCursor(mb3dsoundings.dpy,mb3dsoundings.xid,mb3dsoundings.FleurRedCursor);
+
+			/* rotate viewpoint of 3D map */
+			mb3dsoundings.azimuth = mb3dsoundings.azimuth_save 
+				+ 180.0 * ((double)(mb3dsoundings.button_move_x 
+						- mb3dsoundings.button_down_x)) 
+					/ ((double)mb3dsoundings.gl_width);
+			mb3dsoundings.elevation = mb3dsoundings.elevation_save 
+				+ 180.0 * ((double)(mb3dsoundings.button_down_y 
+						- mb3dsoundings.button_move_y)) 
+					/ ((double)mb3dsoundings.gl_height);
+
+			mb3dsoundings_updatestatus();
+			mb3dsoundings_plot(mbs_verbose, &mbs_error);
+			}
+
+		/* pan zoom mode */
+		else if (mb3dsoundings.mouse_mode == MBS_MOUSE_PANZOOM)
+			{
+			/* set cursor for pan zoom */
+	  		XDefineCursor(mb3dsoundings.dpy,mb3dsoundings.xid,mb3dsoundings.FleurRedCursor);
+
+			/* pan */
+			mb3dsoundings.gl_offset_x = mb3dsoundings.gl_offset_x_save 
+				+ ((double)(mb3dsoundings.button_move_x 
+						- mb3dsoundings.button_down_x)) 
+			    		* (mb3dsoundings.right - mb3dsoundings.left) 
+					/ ((double)mb3dsoundings.gl_width);
+			mb3dsoundings.gl_offset_y = mb3dsoundings.gl_offset_y_save 
+				+ ((double)(mb3dsoundings.button_move_y 
+						- mb3dsoundings.button_down_y)) 
+			    		* (mb3dsoundings.top - mb3dsoundings.bottom) 
+					/ ((double)mb3dsoundings.gl_width);
+
+			mb3dsoundings_updatestatus();
+			mb3dsoundings_plot(mbs_verbose, &mbs_error);
+			}
+		} /* end of middle button events */
+
+	   /* If right mouse button is dragged */
+	  else if (mb3dsoundings.button3down == MB_YES)
+		{
+		/* rotate mode */
+		if (mb3dsoundings.mouse_mode == MBS_MOUSE_ROTATE)
+			{
+			/* set cursor for exagerate */
+	  		XDefineCursor(mb3dsoundings.dpy,mb3dsoundings.xid,mb3dsoundings.FleurRedCursor);
+
+			/* change vertical exageration of 3D map */
+			mb3dsoundings.exageration = mb3dsoundings.exageration_save 
+				* exp(((double)(mb3dsoundings.button_move_y - mb3dsoundings.button_down_y)) 
+					/ ((double)mb3dsoundings.gl_height));
+
+			mb3dsoundings_scalez(mbs_verbose, &mbs_error);
+			mb3dsoundings_updatestatus();
+			mb3dsoundings_plot(mbs_verbose, &mbs_error);
+			}
+
+		/* pan zoom mode */
+		else if (mb3dsoundings.mouse_mode == MBS_MOUSE_PANZOOM)
+			{
+			/* set cursor for zoom */
+	  		XDefineCursor(mb3dsoundings.dpy,mb3dsoundings.xid,mb3dsoundings.FleurRedCursor);
+
+			/* change zoom */
+			mb3dsoundings.gl_size = mb3dsoundings.gl_size_save 
+			    * exp(((double)(mb3dsoundings.button_move_y - mb3dsoundings.button_down_y)) 
+				    / ((double)mb3dsoundings.gl_height));
+
+			mb3dsoundings_updatestatus();
+			mb3dsoundings_plot(mbs_verbose, &mbs_error);
+			}
+		} /* end of right button events */
+			
+      } /* end of motion notify events */		    		    		
+
+
+      /* Check for mouse released. */
+      if (event->xany.type == ButtonRelease)
+      {
+fprintf(stderr, "event->xany.type == ButtonRelease  %d %d  mouse mode:%d\n",
+event->xbutton.x,event->xbutton.y, mb3dsoundings.mouse_mode);
+
+	  /* save location */
+	  mb3dsoundings.button_up_x = event->xbutton.x;
+	  mb3dsoundings.button_up_y = mb3dsoundings.gl_height - 1 - event->xbutton.y;
+ 
+	   /* If left mouse button is released */
+	  if (mb3dsoundings.button1down == MB_YES)
+		{
+		
+		/* deal with pick according to edit_mode */
+		if (mb3dsoundings.edit_mode == MBS_EDIT_TOGGLE)
+			{
+			}
+		else if (mb3dsoundings.edit_mode == MBS_EDIT_PICK)
+			{
+			}
+		else if (mb3dsoundings.edit_mode == MBS_EDIT_TOGGLE)
+			{
+			}
+		else if (mb3dsoundings.edit_mode == MBS_EDIT_ERASE)
+			{
+			}
+		else if (mb3dsoundings.edit_mode == MBS_EDIT_RESTORE)
+			{
+			}
+		else if (mb3dsoundings.edit_mode == MBS_EDIT_GRAB)
+			{
+			mb3dsoundings_grab(mb3dsoundings.button_down_x, 
+						mb3dsoundings.button_down_y, MBS_EDIT_GRAB_END);
+			}
+		else if (mb3dsoundings.edit_mode == MBS_EDIT_INFO)
+			{
+			}
+		    
+		}
+
+	   /* If middle mouse button is released */
+	  else if (mb3dsoundings.button2down == MB_YES)
+		{		    		    		
+		} /* end of middle button events */
+
+	   /* If right mouse button is released */
+	  else if (mb3dsoundings.button3down == MB_YES)
+		{
+		} /* end of right button events */
+			
+   
+	  /* unset all buttondown flags */
+	  mb3dsoundings.button1down = MB_NO;
+	  mb3dsoundings.button2down = MB_NO;
+	  mb3dsoundings.button3down = MB_NO;
+
+	  /* reset cursor */
+	  XDefineCursor(mb3dsoundings.dpy,mb3dsoundings.xid,mb3dsoundings.TargetBlackCursor);
+     } /* end of button release events */
+      
+      /* Deal with KeyPress events */
+      if(event->xany.type == KeyPress)
+      {
+fprintf(stderr,"KeyPress event\n");
+      /* Get key pressed - buffer[0] */
+      actual = XLookupString((XKeyEvent *)event, 
+		    buffer, 1, &keysym, NULL);
+
+      /* process events */
+      switch (buffer[0])
+	    {
+	    case 'R':
+	    case 'r':
+		    break;
+	    default:
+		    break;
+	  } /* end of key switch */
+
+       } /* end of key press events */
+ 
+     } /* end of inputs from window */
+
+
+}
+
+/*---------------------------------------------------------------------------------------*/
+
+void
+do_mb3dsdg_glwda_resize( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+fprintf(stderr,"Called do_mb3dsdg_glwda_resize\n");
+}
+
+/*---------------------------------------------------------------------------------------*/
+
+int
+mb3dsoundings_scale(int verbose, int *error)
+{
+    struct mb3dsoundings_struct *soundingdata;
+    struct mb3dsoundings_sounding_struct *sounding;
+    int	ifile, iping, ibeam;
+    int	i;
+    
+fprintf(stderr,"Called mb3dsoundings_scale\n");
+
+	/* loop over all soundings */
+	soundingdata = (struct mb3dsoundings_struct *) mb3dsoundings.soundingdata;
+	for (i=0;i<soundingdata->num_soundings;i++)
+		{
+		sounding = (struct mb3dsoundings_sounding_struct *) &(soundingdata->soundings[i]);
+		sounding->glx = soundingdata->scale * sounding->x;
+		sounding->gly = soundingdata->scale * sounding->y;
+		sounding->glz = mb3dsoundings.exageration * soundingdata->zscale * sounding->z;
+		}
+	
+	/* return status */
+	return(MB_SUCCESS);
+
+}
+
+/*---------------------------------------------------------------------------------------*/
+
+int
+mb3dsoundings_scalez(int verbose, int *error)
+{
+    struct mb3dsoundings_struct *soundingdata;
+    struct mb3dsoundings_sounding_struct *sounding;
+    int	ifile, iping, ibeam;
+    int	i;
+    
+fprintf(stderr,"Called mb3dsoundings_scalez\n");
+
+	/* loop over all soundings */
+	soundingdata = (struct mb3dsoundings_struct *) mb3dsoundings.soundingdata;
+	for (i=0;i<soundingdata->num_soundings;i++)
+		{
+		sounding = (struct mb3dsoundings_sounding_struct *) &(soundingdata->soundings[i]);
+		sounding->glz = mb3dsoundings.exageration * soundingdata->zscale * sounding->z;
+		}
+	
+	/* return status */
+	return(MB_SUCCESS);
+}
+/*---------------------------------------------------------------------------------------*/
+
+int
+mb3dsoundings_pick(int x, int y)
+{
+    struct mb3dsoundings_struct *soundingdata;
+    struct mb3dsoundings_sounding_struct *sounding;
+    int		ifile, iping, ibeam;
+    int		irmin;
+    double	dx, dy, r, rmin;
+    int		editevent;
+    int		i;
+    
+fprintf(stderr,"Called mb3dsoundings_pick\n");
+
+	/* loop over all soundings */
+	soundingdata = (struct mb3dsoundings_struct *) mb3dsoundings.soundingdata;
+	rmin = 10000.0;
+	irmin = 0;
+	editevent = MB_NO;
+	for (i=0;i<soundingdata->num_soundings;i++)
+		{
+		sounding = (struct mb3dsoundings_sounding_struct *) &(soundingdata->soundings[i]);
+		dx = (double)(x - sounding->winx);
+		dy = (double)(y - sounding->winy);
+		r = sqrt(dx * dx + dy * dy);
+		if (r < rmin 
+			&& (mb3dsoundings.edit_mode == MBS_EDIT_TOGGLE 
+				|| mb_beam_ok(sounding->beamflag)))
+			{
+			irmin = i;
+			rmin = r;
+			}
+		}
+	if (rmin < MBS_PICK_THRESHOLD)
+		{
+		sounding = (struct mb3dsoundings_sounding_struct *) &(soundingdata->soundings[irmin]);
+		if (mb3dsoundings.edit_mode == MBS_EDIT_TOGGLE)
+			{
+			if (mb_beam_ok(sounding->beamflag))
+				{
+				sounding->beamflag = MB_FLAG_FLAG + MB_FLAG_MANUAL;
+				soundingdata->num_soundings_unflagged--;
+				soundingdata->num_soundings_flagged++;
+				editevent = MB_YES;
+				}
+			else
+				{
+				sounding->beamflag = MB_FLAG_NONE;
+				soundingdata->num_soundings_unflagged++;
+				soundingdata->num_soundings_flagged--;
+				editevent = MB_YES;
+				}
+			}
+		else if (mb3dsoundings.edit_mode == MBS_EDIT_PICK)
+			{
+			if (mb_beam_ok(sounding->beamflag))
+				{
+				sounding->beamflag = MB_FLAG_FLAG + MB_FLAG_MANUAL;
+				soundingdata->num_soundings_unflagged--;
+				soundingdata->num_soundings_flagged++;
+				editevent = MB_YES;
+				}
+			}
+		}
+	else
+		{
+		XBell(mb3dsoundings.dpy,100);
+		}
+		
+	/* replot the data */
+	if (editevent == MB_YES)
+		{
+		mb3dsoundings_plot(mbs_verbose, &mbs_error);
+		mb3dsoundings_updatestatus();
+		}
+		
+	/* communicate edit event back to calling application */
+	if (editevent == MB_YES && mb3dsoundings.mb3dsoundings_edit_notify != NULL)
+		{
+		(mb3dsoundings.mb3dsoundings_edit_notify)(sounding->ifile, sounding->iping, 
+							sounding->ibeam, sounding->beamflag, MB3DSDG_EDIT_FLUSH);
+		}
+	
+	/* return status */
+	return(MB_SUCCESS);
+
+}
+/*---------------------------------------------------------------------------------------*/
+
+int
+mb3dsoundings_eraserestore(int x, int y)
+{
+    struct mb3dsoundings_struct *soundingdata;
+    struct mb3dsoundings_sounding_struct *sounding;
+    double	dx, dy, r;
+    int		editevent, neditevent;
+    int		i;
+    
+fprintf(stderr,"Called mb3dsoundings_eraserestore\n");
+
+	/* loop over all soundings */
+	neditevent = 0;
+	soundingdata = (struct mb3dsoundings_struct *) mb3dsoundings.soundingdata;
+	for (i=0;i<soundingdata->num_soundings;i++)
+		{
+		sounding = (struct mb3dsoundings_sounding_struct *) &(soundingdata->soundings[i]);
+		editevent = MB_NO;
+		dx = (double)(x - sounding->winx);
+		dy = (double)(y - sounding->winy);
+		r = sqrt(dx * dx + dy * dy);
+		if (r < MBS_ERASE_THRESHOLD)
+			{
+			if (mb3dsoundings.edit_mode == MBS_EDIT_ERASE 
+				&& mb_beam_ok(sounding->beamflag))
+				{
+				sounding->beamflag = MB_FLAG_FLAG + MB_FLAG_MANUAL;
+				soundingdata->num_soundings_unflagged--;
+				soundingdata->num_soundings_flagged++;
+				editevent = MB_YES;
+				}
+			else if (mb3dsoundings.edit_mode == MBS_EDIT_RESTORE 
+				&& !mb_beam_ok(sounding->beamflag))
+				{
+				sounding->beamflag = MB_FLAG_NONE;
+				soundingdata->num_soundings_unflagged++;
+				soundingdata->num_soundings_flagged--;
+				editevent = MB_YES;
+				}
+
+			/* handle valid edit event */
+			if (editevent == MB_YES)
+				{
+				neditevent++;
+				
+				/* communicate edit event back to calling application */
+				if  (mb3dsoundings.mb3dsoundings_edit_notify != NULL)
+					(mb3dsoundings.mb3dsoundings_edit_notify)(sounding->ifile, sounding->iping, 
+									sounding->ibeam, sounding->beamflag, 
+									MB3DSDG_EDIT_NOFLUSH);
+				}
+			}
+		}
+	
+	/* replot and flush the edit events in the calling application */
+	if (neditevent > 0)
+		{
+		/* replot the data */
+		mb3dsoundings_plot(mbs_verbose, &mbs_error);
+		mb3dsoundings_updatestatus();
+				
+		/* flush the edit events in the calling application */
+		(mb3dsoundings.mb3dsoundings_edit_notify)(0, 0, 0, 
+						MB_FLAG_NULL,MB3DSDG_EDIT_FLUSHPREVIOUS);
+		}
+	
+	/* return status */
+	return(MB_SUCCESS);
+
+}
+/*---------------------------------------------------------------------------------------*/
+
+int
+mb3dsoundings_grab(int x, int y, int grabmode)
+{
+    struct mb3dsoundings_struct *soundingdata;
+    struct mb3dsoundings_sounding_struct *sounding;
+    int		xmin, xmax, ymin, ymax;
+    int		editevent, neditevent;
+    int		i;
+    
+fprintf(stderr,"Called mb3dsoundings_grab mode:%d x:%d y:%d\n", grabmode, x, y);
+
+	/* save grab start point */
+	if (grabmode == MBS_EDIT_GRAB_START)
+		{
+		/* set grab parameters */
+		mb3dsoundings.grab_start_defined = MB_YES;
+		mb3dsoundings.grab_end_defined = MB_NO;
+		mb3dsoundings.grab_start_x = x;
+		mb3dsoundings.grab_start_y = y;
+		mb3dsoundings.grab_end_x = x;
+		mb3dsoundings.grab_end_y = y;
+
+		/* replot the data */
+		mb3dsoundings_plot(mbs_verbose, &mbs_error);
+		}
+
+	/* save grab end point */
+	else if (grabmode == MBS_EDIT_GRAB_MOVE)
+		{
+		/* set grab parameters */
+		mb3dsoundings.grab_end_defined = MB_YES;
+		mb3dsoundings.grab_end_x = x;
+		mb3dsoundings.grab_end_y = y;
+
+		/* replot the data */
+		mb3dsoundings_plot(mbs_verbose, &mbs_error);
+		}
+
+	/* apply grab */
+	else if (grabmode == MBS_EDIT_GRAB_END)
+		{
+		/* loop over all soundings */
+		neditevent = 0;
+		xmin = MIN(mb3dsoundings.grab_start_x, mb3dsoundings.grab_end_x);
+		xmax = MAX(mb3dsoundings.grab_start_x, mb3dsoundings.grab_end_x);
+		ymin = MIN(mb3dsoundings.grab_start_y, mb3dsoundings.grab_end_y);
+		ymax = MAX(mb3dsoundings.grab_start_y, mb3dsoundings.grab_end_y);
+fprintf(stderr, "Grab bounds: %d %d %d %d\n", xmin, xmax, ymin, ymax);
+		soundingdata = (struct mb3dsoundings_struct *) mb3dsoundings.soundingdata;
+		for (i=0;i<soundingdata->num_soundings;i++)
+			{
+			sounding = (struct mb3dsoundings_sounding_struct *) &(soundingdata->soundings[i]);
+			editevent = MB_NO;
+			if (sounding->winx >= xmin && sounding->winx <= xmax
+				&& sounding->winy >= ymin && sounding->winy <= ymax)
+				{
+				if (mb_beam_ok(sounding->beamflag))
+					{
+					sounding->beamflag = MB_FLAG_FLAG + MB_FLAG_MANUAL;
+					soundingdata->num_soundings_unflagged--;
+					soundingdata->num_soundings_flagged++;
+					editevent = MB_YES;
+					}
+
+				/* handle valid edit event */
+				if (editevent == MB_YES)
+					{
+					neditevent++;
+
+					/* communicate edit event back to calling application */
+					if  (mb3dsoundings.mb3dsoundings_edit_notify != NULL)
+						(mb3dsoundings.mb3dsoundings_edit_notify)(sounding->ifile, sounding->iping, 
+										sounding->ibeam, sounding->beamflag, 
+										MB3DSDG_EDIT_NOFLUSH);
+					}
+				}
+			}
+			
+		/* grab done so unset grab flags */
+		mb3dsoundings.grab_start_defined = MB_NO;
+		mb3dsoundings.grab_end_defined = MB_NO;
+
+		/* replot and flush the edit events in the calling application */
+		if (neditevent > 0)
+			{
+			/* replot the data */
+			mb3dsoundings_plot(mbs_verbose, &mbs_error);
+			mb3dsoundings_updatestatus();
+
+			/* flush the edit events in the calling application */
+			(mb3dsoundings.mb3dsoundings_edit_notify)(0, 0, 0, 
+							MB_FLAG_NULL,MB3DSDG_EDIT_FLUSHPREVIOUS);
+			}
+		}
+	
+	/* return status */
+	return(MB_SUCCESS);
+
+}
+/*---------------------------------------------------------------------------------------*/
+
+int
+mb3dsoundings_info(int x, int y)
+{
+    struct mb3dsoundings_struct *soundingdata;
+    struct mb3dsoundings_sounding_struct *sounding;
+    int		ifile, iping, ibeam;
+    int		irmin;
+    double	dx, dy, r, rmin;
+    mb_path	infostring;
+    int		i;
+    
+fprintf(stderr,"Called mb3dsoundings_info\n");
+
+	/* loop over all soundings */
+	soundingdata = (struct mb3dsoundings_struct *) mb3dsoundings.soundingdata;
+	rmin = 10000.0;
+	irmin = 0;
+	for (i=0;i<soundingdata->num_soundings;i++)
+		{
+		sounding = (struct mb3dsoundings_sounding_struct *) &(soundingdata->soundings[i]);
+		dx = (double)(x - sounding->winx);
+		dy = (double)(y - sounding->winy);
+		r = sqrt(dx * dx + dy * dy);
+		if (r < rmin 
+			&& (mb3dsoundings.edit_mode == MBS_EDIT_TOGGLE 
+				|| mb_beam_ok(sounding->beamflag)))
+			{
+			irmin = i;
+			rmin = r;
+			}
+		}
+	if (rmin < MBS_PICK_THRESHOLD)
+		{
+		sounding = (struct mb3dsoundings_sounding_struct *) &(soundingdata->soundings[irmin]);
+		(mb3dsoundings.mb3dsoundings_info_notify)(sounding->ifile, sounding->iping, 
+							sounding->ibeam, infostring);
+fprintf(stderr,"Infostring:\n%s", infostring);
+		}
+	else
+		{
+		XBell(mb3dsoundings.dpy,100);
+		}
+	
+	/* return status */
+	return(MB_SUCCESS);
+
+}
+/*---------------------------------------------------------------------------------------*/
+
+int
+mb3dsoundings_plot(int verbose, int *error)
+{
+    struct mb3dsoundings_struct *soundingdata;
+    struct mb3dsoundings_sounding_struct *sounding;
+    struct mb3dsoundings_sounding_struct *sounding2;
+    GLdouble 	model_matrix[16];
+    GLdouble 	projection_matrix[16];
+    GLint	viewport[4];
+    int		grabxmin, grabxmax, grabymin, grabymax;
+    float	glxmin, glymin, glzmin, glxmax, glymax, glzmax;
+    double	xx, yy, zz;
+    int	i;
+
+	/* get sounding data structure */
+	soundingdata = (struct mb3dsoundings_struct *) mb3dsoundings.soundingdata;
+fprintf(stderr,"Called mb3dsoundings_plot: %d soundings\n",
+soundingdata->num_soundings);
+	
+	/* make correct window current for OpenGL */
+	glXMakeCurrent(XtDisplay(mb3dsoundings.glwmda),
+			XtWindow(mb3dsoundings.glwmda),
+			mb3dsoundings.glx_context);
+
+	/* set background color */
+	glClearColor(1.0, 1.0, 1.0, 0.0);
+	glClearDepth((GLclampd)(2000 * MBS_OPENGL_WIDTH));
+	glDepthFunc(GL_LESS);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	/* set projection */
+	mb3dsoundings.left = -1.0 / mb3dsoundings.gl_size;
+	mb3dsoundings.right = 1.0 / mb3dsoundings.gl_size;
+	mb3dsoundings.bottom = -1.0 / mb3dsoundings.gl_size;
+	mb3dsoundings.top = 1.0 / mb3dsoundings.gl_size;
+	mb3dsoundings.aspect_ratio = 1.0 / mb3dsoundings.gl_size;
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glOrtho(mb3dsoundings.left, mb3dsoundings.right, 
+			mb3dsoundings.bottom, mb3dsoundings.top, 
+			MBS_OPENGL_ZMIN2D, MBS_OPENGL_ZMAX2D);
+
+	/* set up translations */
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	glTranslated (mb3dsoundings.gl_offset_x, 
+			mb3dsoundings.gl_offset_y, 
+			MBS_OPENGL_ZMIN2D);
+	glRotated ((float)(mb3dsoundings.elevation - 90.0), 1.0, 0.0, 0.0); 
+	glRotated ((float)(mb3dsoundings.azimuth), 0.0, 0.0, 1.0); 
+
+	/* get modelview and projection matrices and viewport */
+	glGetDoublev(GL_MODELVIEW_MATRIX, model_matrix);
+	glGetDoublev(GL_PROJECTION_MATRIX, projection_matrix);
+	glGetIntegerv(GL_VIEWPORT, viewport);
+	
+	/* Plot the bounding box if desired */
+	if (mb3dsoundings.view_boundingbox == MB_YES)
+		{
+		glxmin = soundingdata->scale * soundingdata->xmin;
+		glxmax = soundingdata->scale * soundingdata->xmax;
+		glymin = soundingdata->scale * soundingdata->ymin;
+		glymax = soundingdata->scale * soundingdata->ymax;
+		glzmin = mb3dsoundings.exageration * soundingdata->zscale * soundingdata->zmin;
+		glzmax = mb3dsoundings.exageration * soundingdata->zscale * soundingdata->zmax;	
+		glColor3f(0.0, 0.0, 0.0);
+		glBegin(GL_LINE_LOOP);
+		glVertex3f(glxmin, glymin, glzmin);
+		glVertex3f(glxmax, glymin, glzmin);
+		glVertex3f(glxmax, glymax, glzmin);
+		glVertex3f(glxmin, glymax, glzmin);
+		glEnd();
+		glBegin(GL_LINE_LOOP);
+		glVertex3f(glxmin, glymin, glzmax);
+		glVertex3f(glxmax, glymin, glzmax);
+		glVertex3f(glxmax, glymax, glzmax);
+		glVertex3f(glxmin, glymax, glzmax);
+		glEnd();
+		glBegin(GL_LINE_LOOP);
+		glVertex3f(glxmin, glymin, glzmin);
+		glVertex3f(glxmin, glymin, glzmax);
+		glVertex3f(glxmin, glymax, glzmax);
+		glVertex3f(glxmin, glymax, glzmin);
+		glEnd();
+		glBegin(GL_LINE_LOOP);
+		glVertex3f(glxmax, glymin, glzmin);
+		glVertex3f(glxmax, glymin, glzmax);
+		glVertex3f(glxmax, glymax, glzmax);
+		glVertex3f(glxmax, glymax, glzmin);
+		glEnd();
+		}
+	
+	/* Plot the profiles if desired */
+	if (mb3dsoundings.view_profiles != MBS_VIEW_PROFILES_NONE)
+		{
+		glBegin(GL_LINES);
+		for (i=0;i<soundingdata->num_soundings-1;i++)
+			{
+			sounding = (struct mb3dsoundings_sounding_struct *) &(soundingdata->soundings[i]);
+			sounding2 = (struct mb3dsoundings_sounding_struct *) &(soundingdata->soundings[i+1]);
+
+			/* plot segment only if soundings are from the same ping */
+			if (sounding2->ifile == sounding->ifile && sounding->iping == sounding2->iping)
+				{
+				/* plot in black if both soundings are good */
+				if (mb_beam_ok(sounding->beamflag) && mb_beam_ok(sounding2->beamflag))
+					{
+					glColor3f(0.0, 0.0, 0.0);
+					glVertex3f(sounding->glx, sounding->gly, sounding->glz);
+					glVertex3f(sounding2->glx, sounding2->gly, sounding2->glz);
+					}
+					
+				/* else plot in red if flagged profiles are desired */
+				else if (mb3dsoundings.view_profiles == MBS_VIEW_PROFILES_ALL)
+					{
+					glColor3f(1.0, 0.0, 0.0);
+					glVertex3f(sounding->glx, sounding->gly, sounding->glz);
+					glVertex3f(sounding2->glx, sounding2->gly, sounding2->glz);
+					}
+				}
+			}
+		glEnd();
+		}
+	
+	/* Plot the unflagged soundings */
+	glPointSize(3.0);
+	glColor3f(0.0, 0.0, 0.0);
+	glBegin(GL_POINTS);
+	for (i=0;i<soundingdata->num_soundings;i++)
+		{
+		sounding = (struct mb3dsoundings_sounding_struct *) &(soundingdata->soundings[i]);
+/*fprintf(stderr,"%d %f %f %f  %f %f %f %d", i, 
+sounding->x, sounding->y, sounding->z, 
+sounding->glx, sounding->gly, sounding->glz, sounding->beamflag);*/
+		if (mb_beam_ok(sounding->beamflag))
+			{
+			glVertex3f(sounding->glx, sounding->gly, sounding->glz);
+			/* fprintf(stderr," PLOTTED");*/
+			}
+/*fprintf(stderr,"\n");*/
+		}
+	glEnd();
+	
+	/* Plot the flagged soundings if desired */
+	if (mb3dsoundings.view_flagged == MB_YES)
+		{
+		glColor3f(1.0, 0.0, 0.0);
+		glBegin(GL_POINTS);
+		for (i=0;i<soundingdata->num_soundings;i++)
+			{
+			sounding = (struct mb3dsoundings_sounding_struct *) &(soundingdata->soundings[i]);
+			if (!mb_beam_ok(sounding->beamflag))
+				glVertex3f(sounding->glx, sounding->gly, sounding->glz);
+/*fprintf(stderr,"%f %f %f\n", sounding->glx, sounding->gly, sounding->glz);*/
+			}
+		glEnd();
+		}
+	
+	/* save the screen positions of the soundings to facillitate picking */
+	for (i=0;i<soundingdata->num_soundings;i++)
+		{
+		sounding = (struct mb3dsoundings_sounding_struct *) &(soundingdata->soundings[i]);
+		if (mb_beam_ok(sounding->beamflag))
+			{
+			glVertex3f(sounding->glx, sounding->gly, sounding->glz);
+			/* fprintf(stderr," PLOTTED");*/
+			}
+		gluProject((double)(sounding->glx), 
+			(double)(sounding->gly), 
+			(double)(sounding->glz),
+			model_matrix,
+			projection_matrix,
+			viewport,
+			&xx, &yy, &zz);
+		sounding->winx = (int)xx;
+		sounding->winy = (int)yy;
+		}
+			
+	/* plot grab rectangle before rotations */
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	if  (mb3dsoundings.button1down == MB_YES 
+		&& mb3dsoundings.grab_start_defined == MB_YES
+		&& mb3dsoundings.grab_end_defined == MB_YES)
+		{
+		grabxmin = MIN(mb3dsoundings.grab_start_x, mb3dsoundings.grab_end_x);
+		grabxmax = MAX(mb3dsoundings.grab_start_x, mb3dsoundings.grab_end_x);
+		grabymin = MIN(mb3dsoundings.grab_start_y, mb3dsoundings.grab_end_y);
+		grabymax = MAX(mb3dsoundings.grab_start_y, mb3dsoundings.grab_end_y);
+		glxmin = (mb3dsoundings.right - mb3dsoundings.left) 
+			* ((float)grabxmin) / ((float)mb3dsoundings.gl_width) 
+				- 0.5 * (mb3dsoundings.right - mb3dsoundings.left);
+		glxmax = (mb3dsoundings.right - mb3dsoundings.left) 
+			* ((float)grabxmax) / ((float)mb3dsoundings.gl_width) 
+				- 0.5 * (mb3dsoundings.right - mb3dsoundings.left);
+		glymin = (mb3dsoundings.top - mb3dsoundings.bottom) 
+			* ((float)grabymin) / ((float)mb3dsoundings.gl_height) 
+				- 0.5 * (mb3dsoundings.top - mb3dsoundings.bottom);
+		glymax = (mb3dsoundings.top - mb3dsoundings.bottom) 
+			* ((float)grabymax) / ((float)mb3dsoundings.gl_height) 
+				- 0.5 * (mb3dsoundings.top - mb3dsoundings.bottom);
+fprintf(stderr,"glxmin:%f glxmax:%f glymin:%f glymax:%f\n", glxmin, glxmax, glymin, glymax);
+		glColor3f(1.0, 1.0, 0.0);
+		glLineWidth(3.0);
+		glBegin(GL_LINE_LOOP);
+		glVertex3f(glxmin, glymin, -MBS_OPENGL_ZMIN2D - 0.5 * (MBS_OPENGL_ZMAX2D - MBS_OPENGL_ZMIN2D));
+		glVertex3f(glxmax, glymin, -MBS_OPENGL_ZMIN2D - 0.5 * (MBS_OPENGL_ZMAX2D - MBS_OPENGL_ZMIN2D));
+		glVertex3f(glxmax, glymax, -MBS_OPENGL_ZMIN2D - 0.5 * (MBS_OPENGL_ZMAX2D - MBS_OPENGL_ZMIN2D));
+		glVertex3f(glxmin, glymax, -MBS_OPENGL_ZMIN2D - 0.5 * (MBS_OPENGL_ZMAX2D - MBS_OPENGL_ZMIN2D));
+		glEnd();
+		glLineWidth(1.0);
+		}
+
+	/* flush opengl buffers */
+	glFlush();
+
+	/* swap opengl buffers */
+	glXSwapBuffers (XtDisplay(mb3dsoundings.glwmda), 
+			XtWindow(mb3dsoundings.glwmda));
+
+}
+
+/*---------------------------------------------------------------------------------------*/
+
+void
+do_mb3dsdg_rollbias( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmScaleCallbackStruct *acs = (XmScaleCallbackStruct*)call_data;
+    	int	irollbiasmin, irollbiasmax;
+    
+fprintf(stderr,"Called do_mb3dsdg_rollbias: %d\n", acs->value);
+
+	mb3dsoundings.irollbias = acs->value;
+
+	ac = 0;
+        XtSetArg(args[ac], XmNminimum, &irollbiasmin); ac++;
+        XtSetArg(args[ac], XmNmaximum, &irollbiasmax); ac++;
+        XtSetArg(args[ac], XmNvalue, &(mb3dsoundings.irollbias)); ac++;
+	XtGetValues(mb3dsoundings.mb3dsdg.scale_rollbias, args, ac);
+			
+	/* send bias parameters to calling program */
+	if (mb3dsoundings.mb3dsoundings_bias_notify != NULL)
+	(mb3dsoundings.mb3dsoundings_bias_notify)(0.01 *((double)mb3dsoundings.irollbias), 
+						0.01 *((double)mb3dsoundings.ipitchbias),
+						0.01 *((double)mb3dsoundings.iheadingbias));
+
+	/* rescale data to the gl coordinates */
+	mb3dsoundings_scale(mbs_verbose, &mbs_error);
+		
+	/* replot the data */
+	mb3dsoundings_plot(mbs_verbose, &mbs_error);
+
+	/* reset scale min max */
+	if (mb3dsoundings.irollbias == irollbiasmin || mb3dsoundings.irollbias == irollbiasmax)
+		{
+		irollbiasmin = mb3dsoundings.irollbias - 100;
+		irollbiasmax = mb3dsoundings.irollbias + 100;
+		ac = 0;
+        	XtSetArg(args[ac], XmNminimum, irollbiasmin); ac++;
+        	XtSetArg(args[ac], XmNmaximum, irollbiasmax); ac++;
+ 		XtSetValues(mb3dsoundings.mb3dsdg.scale_rollbias, args, ac);
+		}
+}
+	
+/*---------------------------------------------------------------------------------------*/
+
+void
+do_mb3dsdg_pitchbias( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmScaleCallbackStruct *acs = (XmScaleCallbackStruct*)call_data;
+    	int	ipitchbiasmin, ipitchbiasmax;
+    
+fprintf(stderr,"Called do_mb3dsdg_pitchbias: %d\n", acs->value);
+
+	mb3dsoundings.ipitchbias = acs->value;
+
+	ac = 0;
+        XtSetArg(args[ac], XmNminimum, &ipitchbiasmin); ac++;
+        XtSetArg(args[ac], XmNmaximum, &ipitchbiasmax); ac++;
+        XtSetArg(args[ac], XmNvalue, &(mb3dsoundings.ipitchbias)); ac++;
+	XtGetValues(mb3dsoundings.mb3dsdg.scale_pitchbias, args, ac);
+			
+	/* send bias parameters to calling program */
+	if (mb3dsoundings.mb3dsoundings_bias_notify != NULL)
+	(mb3dsoundings.mb3dsoundings_bias_notify)(0.01 *((double)mb3dsoundings.irollbias), 
+						0.01 *((double)mb3dsoundings.ipitchbias),
+						0.01 *((double)mb3dsoundings.iheadingbias));
+
+	/* rescale data to the gl coordinates */
+	mb3dsoundings_scale(mbs_verbose, &mbs_error);
+		
+	/* replot the data */
+	mb3dsoundings_plot(mbs_verbose, &mbs_error);
+
+	/* reset scale min max */
+	if (mb3dsoundings.ipitchbias == ipitchbiasmin || mb3dsoundings.ipitchbias == ipitchbiasmax)
+		{
+		ipitchbiasmin = mb3dsoundings.ipitchbias - 100;
+		ipitchbiasmax = mb3dsoundings.ipitchbias + 100;
+		ac = 0;
+        	XtSetArg(args[ac], XmNminimum, ipitchbiasmin); ac++;
+        	XtSetArg(args[ac], XmNmaximum, ipitchbiasmax); ac++;
+		XtSetValues(mb3dsoundings.mb3dsdg.scale_pitchbias, args, ac);
+		}
+}
+
+/*---------------------------------------------------------------------------------------*/
+
+void
+do_mb3dsdg_headingbias( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmScaleCallbackStruct *acs = (XmScaleCallbackStruct*)call_data;
+    	int	iheadingbiasmin, iheadingbiasmax;
+    
+fprintf(stderr,"Called do_mb3dsdg_headingbias: %d\n", acs->value);
+
+	mb3dsoundings.iheadingbias = acs->value;
+
+	ac = 0;
+        XtSetArg(args[ac], XmNminimum, &iheadingbiasmin); ac++;
+        XtSetArg(args[ac], XmNmaximum, &iheadingbiasmax); ac++;
+        XtSetArg(args[ac], XmNvalue, &(mb3dsoundings.iheadingbias)); ac++;
+	XtGetValues(mb3dsoundings.mb3dsdg.scale_headingbias, args, ac);
+			
+	/* send bias parameters to calling program */
+	if (mb3dsoundings.mb3dsoundings_bias_notify != NULL)
+	(mb3dsoundings.mb3dsoundings_bias_notify)(0.01 *((double)mb3dsoundings.irollbias), 
+						0.01 *((double)mb3dsoundings.ipitchbias),
+						0.01 *((double)mb3dsoundings.iheadingbias));
+
+	/* rescale data to the gl coordinates */
+	mb3dsoundings_scale(mbs_verbose, &mbs_error);
+
+	/* replot the data */
+	mb3dsoundings_plot(mbs_verbose, &mbs_error);
+
+	/* reset scale min max */
+	if (mb3dsoundings.iheadingbias == iheadingbiasmin 
+		|| mb3dsoundings.iheadingbias == iheadingbiasmax)
+		{
+		iheadingbiasmin = mb3dsoundings.iheadingbias - 100;
+		iheadingbiasmax = mb3dsoundings.iheadingbias + 100;
+		ac = 0;
+        	XtSetArg(args[ac], XmNminimum, iheadingbiasmin); ac++;
+        	XtSetArg(args[ac], XmNmaximum, iheadingbiasmax); ac++;
+		XtSetValues(mb3dsoundings.mb3dsdg.scale_headingbias, args, ac);
+		}
+}
+
+/*---------------------------------------------------------------------------------------*/
+
+void
+do_mb3dsdg_view_flagged( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    
+fprintf(stderr,"Called do_mb3dsdg_view_flagged\n");
+
+	mb3dsoundings.view_flagged = XmToggleButtonGetState(mb3dsoundings.mb3dsdg.toggleButton_view_flagged);
+		
+	/* replot the data */
+	mb3dsoundings_plot(mbs_verbose, &mbs_error);
+}
+
+/*---------------------------------------------------------------------------------------*/
+
+void
+do_mb3dsdg_view_noprofile( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    
+fprintf(stderr,"Called do_mb3dsdg_view_noprofile\n");
+
+	mb3dsoundings.view_profiles = MBS_VIEW_PROFILES_NONE;
+
+   	XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_view_noconnect, 
+			True, False);
+    	XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_view_connectgood, 
+			False, False);
+    	XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_view_connectall, 
+			False, False);
+		
+	/* replot the data */
+	mb3dsoundings_plot(mbs_verbose, &mbs_error);
+}
+
+/*---------------------------------------------------------------------------------------*/
+
+void
+do_mb3dsdg_view_goodprofile( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    
+fprintf(stderr,"Called do_mb3dsdg_view_goodprofile\n");
+
+	mb3dsoundings.view_profiles = MBS_VIEW_PROFILES_UNFLAGGED;
+
+    	XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_view_noconnect, 
+			False, False);
+    	XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_view_connectgood, 
+			True, False);
+    	XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_view_connectall, 
+			False, False);
+		
+	/* replot the data */
+	mb3dsoundings_plot(mbs_verbose, &mbs_error);
+}
+
+/*---------------------------------------------------------------------------------------*/
+
+void
+do_mb3dsdg_view_allprofile( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    
+fprintf(stderr,"Called do_mb3dsdg_view_allprofile\n");
+
+	mb3dsoundings.view_profiles = MBS_VIEW_PROFILES_ALL;
+
+    	XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_view_noconnect, 
+			False, False);
+    	XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_view_connectgood, 
+			False, False);
+    	XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_view_connectall, 
+			True, False);
+		
+	/* replot the data */
+	mb3dsoundings_plot(mbs_verbose, &mbs_error);
+}
+
+/*---------------------------------------------------------------------------------------*/
+
+void
+do_mb3dsdg_action_applybias( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    
+fprintf(stderr,"Called do_mb3dsdg_action_applybias\n");
+			
+	/* send bias parameters to calling program to be applied */
+	if (mb3dsoundings.mb3dsoundings_biasapply_notify != NULL)
+	(mb3dsoundings.mb3dsoundings_biasapply_notify)(0.01 *((double)mb3dsoundings.irollbias), 
+						0.01 *((double)mb3dsoundings.ipitchbias),
+						0.01 *((double)mb3dsoundings.iheadingbias));
+}
+
+/*---------------------------------------------------------------------------------------*/
+
+void
+do_mb3dsdg_view_boundingbox( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    
+fprintf(stderr,"Called do_mb3dsdg_view_boundingbox\n");
+
+	mb3dsoundings.view_boundingbox = XmToggleButtonGetState(mb3dsoundings.mb3dsdg.toggleButton_view_boundingbox);
+		
+	/* replot the data */
+	mb3dsoundings_plot(mbs_verbose, &mbs_error);
+}
+
+/*---------------------------------------------------------------------------------------*/
+
+void
+do_mb3dsdg_view_reset( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    
+fprintf(stderr,"Called do_mb3dsdg_view_reset\n");
+
+	/* reset view orientation */
+	mb3dsoundings.elevation = 0.0;
+	mb3dsoundings.azimuth = 0.0;
+	mb3dsoundings.exageration = 1.0;
+	
+	/* rescale */
+	mb3dsoundings_scalez(mbs_verbose, &mbs_error);
+	mb3dsoundings_updatestatus();
+		
+	/* replot the data */
+	mb3dsoundings_plot(mbs_verbose, &mbs_error);
+}
+
+/*---------------------------------------------------------------------------------------*/
+
+void
+do_mb3dsdg_mouse_panzoom( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    
+fprintf(stderr,"Called do_mb3dsdg_mouse_panzoom\n");
+
+	mb3dsoundings.mouse_mode = MBS_MOUSE_PANZOOM;
+   	XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_mouse_rotate, 
+			False, False);
+    	XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_mouse_panzoom, 
+			True, False);
+   	XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_mouse_rotate1, 
+			False, False);
+    	XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_mouse_panzoom1, 
+			True, False);
+		
+	/* set mouse mode label */
+        sprintf(value_text, ":::t\"Mouse Mode:\":t\"L: Edit (Toggle)\":t\"M: Pan\"\"R: Zoom\"");
+	set_mbview_label_multiline_string(mb3dsoundings.mb3dsdg.label_mousemode, value_text);
+}
+
+/*---------------------------------------------------------------------------------------*/
+
+void
+do_mb3dsdg_mouse_rotate( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    
+fprintf(stderr,"Called do_mb3dsdg_mouse_rotate\n");
+
+	mb3dsoundings.mouse_mode = MBS_MOUSE_ROTATE;
+	
+    	XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_mouse_rotate, 
+			True, False);
+    	XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_mouse_panzoom, 
+			False, False);
+    	XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_mouse_rotate1, 
+			True, False);
+    	XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_mouse_panzoom1, 
+			False, False);
+		
+	/* set mouse mode label */
+        sprintf(value_text, ":::t\"Mouse Mode:\":t\"L: Edit (Toggle)\":t\"M: Rotate Soundings\"\"R: Exageration\"");
+	set_mbview_label_multiline_string(mb3dsoundings.mb3dsdg.label_mousemode, value_text);
+}
+
+/*---------------------------------------------------------------------------------------*/

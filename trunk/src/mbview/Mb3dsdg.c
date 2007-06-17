@@ -16,17 +16,23 @@
  */
 #include <Xm/Xm.h>
 #include <Xm/Form.h>
-#include <Xm/Text.h>
+#include <Xm/ToggleB.h>
+#include <Xm/Separator.h>
+#include <Xm/Label.h>
+#include <Xm/Scale.h>
+#include <Xm/RowColumn.h>
+#include <Xm/CascadeB.h>
 #include <Xm/PushB.h>
 #include <Xm/DrawingA.h>
-#include <Xm/RowColumn.h>
-#include <Xm/ToggleB.h>
 #include <Xm/Form.h>
-#include <Xm/Text.h>
+#include <Xm/ToggleB.h>
+#include <Xm/Separator.h>
+#include <Xm/Label.h>
+#include <Xm/Scale.h>
+#include <Xm/RowColumn.h>
+#include <Xm/CascadeB.h>
 #include <Xm/PushB.h>
 #include <Xm/DrawingA.h>
-#include <Xm/RowColumn.h>
-#include <Xm/ToggleB.h>
 #include "Mb3dsdg.h"
 
 /**
@@ -48,8 +54,19 @@ extern void BX_SET_BACKGROUND_COLOR(Widget, ArgList, Cardinal *, Pixel);
 /**
  * Declarations for callbacks and handlers.
  */
-extern void do_mb3dsdg_dismiss(Widget, XtPointer, XtPointer);
+extern void do_mb3dsdg_mouse_panzoom(Widget, XtPointer, XtPointer);
+extern void do_mb3dsdg_mouse_rotate(Widget, XtPointer, XtPointer);
+extern void do_mb3dsdg_headingbias(Widget, XtPointer, XtPointer);
+extern void do_mb3dsdg_pitchbias(Widget, XtPointer, XtPointer);
+extern void do_mb3dsdg_rollbias(Widget, XtPointer, XtPointer);
 extern void do_mb3dsdg_input(Widget, XtPointer, XtPointer);
+extern void do_mb3dsdg_view_boundingbox(Widget, XtPointer, XtPointer);
+extern void do_mb3dsdg_view_flagged(Widget, XtPointer, XtPointer);
+extern void do_mb3dsdg_view_noprofile(Widget, XtPointer, XtPointer);
+extern void do_mb3dsdg_view_goodprofile(Widget, XtPointer, XtPointer);
+extern void do_mb3dsdg_view_allprofile(Widget, XtPointer, XtPointer);
+extern void do_mb3dsdg_action_applybias(Widget, XtPointer, XtPointer);
+extern void do_mb3dsdg_dismiss(Widget, XtPointer, XtPointer);
 extern void do_mb3dsdg_mouse_toggle(Widget, XtPointer, XtPointer);
 extern void do_mb3dsdg_mouse_pick(Widget, XtPointer, XtPointer);
 extern void do_mb3dsdg_mouse_erase(Widget, XtPointer, XtPointer);
@@ -95,11 +112,16 @@ Mb3dsdgCreate ( Mb3dsdgDataPtr class_in, Widget parent, String name, ArgList arg
      */
     RegisterBxConverters(XtWidgetToApplicationContext(parent));
     XtInitializeWidgetClass((WidgetClass)xmFormWidgetClass);
-    XtInitializeWidgetClass((WidgetClass)xmTextWidgetClass);
+    XtInitializeWidgetClass((WidgetClass)xmToggleButtonWidgetClass);
+    XtInitializeWidgetClass((WidgetClass)xmSeparatorWidgetClass);
+    XtInitializeWidgetClass((WidgetClass)xmLabelWidgetClass);
+    XtInitializeWidgetClass((WidgetClass)xmScaleWidgetClass);
+    XtInitializeWidgetClass((WidgetClass)xmRowColumnWidgetClass);
+    XtInitializeWidgetClass((WidgetClass)xmCascadeButtonWidgetClass);
+    XtInitializeWidgetClass((WidgetClass)xmRowColumnWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmPushButtonWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmDrawingAreaWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmRowColumnWidgetClass);
-    XtInitializeWidgetClass((WidgetClass)xmToggleButtonWidgetClass);
     /**
      * Setup app-defaults fallback table if not already done.
      */
@@ -121,10 +143,10 @@ Mb3dsdgCreate ( Mb3dsdgDataPtr class_in, Widget parent, String name, ArgList arg
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNdialogTitle, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-        XtSetArg(args[ac], XmNx, 102); ac++;
-        XtSetArg(args[ac], XmNy, 50); ac++;
-        XtSetArg(args[ac], XmNwidth, 528); ac++;
-        XtSetArg(args[ac], XmNheight, 533); ac++;
+        XtSetArg(args[ac], XmNx, 106); ac++;
+        XtSetArg(args[ac], XmNy, 180); ac++;
+        XtSetArg(args[ac], XmNwidth, 987); ac++;
+        XtSetArg(args[ac], XmNheight, 584); ac++;
         class_in->Mb3dsdg = XmCreateForm(parent,
             (char *)name,
             args, 
@@ -138,37 +160,625 @@ Mb3dsdgCreate ( Mb3dsdgDataPtr class_in, Widget parent, String name, ArgList arg
     
     
     ac = 0;
-    XtSetArg(args[ac], XmNbackground, 
-        BX_CONVERT(class_in->Mb3dsdg, (char *)"white", 
-        XmRPixel, 0, &argok)); if (argok) ac++;
-    XtSetArg(args[ac], XmNx, 120); ac++;
-    XtSetArg(args[ac], XmNy, 40); ac++;
-    XtSetArg(args[ac], XmNwidth, 400); ac++;
-    XtSetArg(args[ac], XmNheight, 50); ac++;
-    XtSetArg(args[ac], XmNfontList, 
-        BX_CONVERT(class_in->Mb3dsdg, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
-        XmRFontList, 0, &argok)); if (argok) ac++;
-    class_in->text_status = XmCreateText(class_in->Mb3dsdg,
-        (char *)"text_status",
-        args, 
-        ac);
-    XtManageChild(class_in->text_status);
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->Mb3dsdg, (char *)"Pan and Zoom", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNx, 650); ac++;
+        XtSetArg(args[ac], XmNy, 90); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(class_in->Mb3dsdg, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->toggleButton_mouse_panzoom1 = XmCreateToggleButton(class_in->Mb3dsdg,
+            (char *)"toggleButton_mouse_panzoom1",
+            args, 
+            ac);
+        XtManageChild(class_in->toggleButton_mouse_panzoom1);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(class_in->toggleButton_mouse_panzoom1, XmNvalueChangedCallback, do_mb3dsdg_mouse_panzoom, (XtPointer)0);
     
     ac = 0;
     {
         XmString    tmp0;
         
-        tmp0 = (XmString) BX_CONVERT(class_in->Mb3dsdg, (char *)"Dismiss", 
+        tmp0 = (XmString) BX_CONVERT(class_in->Mb3dsdg, (char *)"Rotate Soundings", 
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 50); ac++;
-        XtSetArg(args[ac], XmNwidth, 100); ac++;
-        XtSetArg(args[ac], XmNheight, 32); ac++;
+        XtSetArg(args[ac], XmNx, 650); ac++;
+        XtSetArg(args[ac], XmNy, 60); ac++;
         XtSetArg(args[ac], XmNfontList, 
             BX_CONVERT(class_in->Mb3dsdg, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
-        class_in->pushButton_dismiss = XmCreatePushButton(class_in->Mb3dsdg,
+        class_in->toggleButton_mouse_rotate1 = XmCreateToggleButton(class_in->Mb3dsdg,
+            (char *)"toggleButton_mouse_rotate1",
+            args, 
+            ac);
+        XtManageChild(class_in->toggleButton_mouse_rotate1);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(class_in->toggleButton_mouse_rotate1, XmNvalueChangedCallback, do_mb3dsdg_mouse_rotate, (XtPointer)0);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNorientation, XmVERTICAL); ac++;
+    XtSetArg(args[ac], XmNx, 630); ac++;
+    XtSetArg(args[ac], XmNy, 50); ac++;
+    XtSetArg(args[ac], XmNwidth, 20); ac++;
+    XtSetArg(args[ac], XmNheight, 80); ac++;
+    class_in->separator3 = XmCreateSeparator(class_in->Mb3dsdg,
+        (char *)"separator3",
+        args, 
+        ac);
+    XtManageChild(class_in->separator3);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->Mb3dsdg, (char *)":::t\"Mouse Mode:\":t\"L: Edit (Toggle)\":t\"M: Rotate Soundings\"\"R: Exageration\"", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNborderWidth, 1); ac++;
+        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
+        XtSetArg(args[ac], XmNbackground, 
+            BX_CONVERT(class_in->Mb3dsdg, (char *)"white", 
+            XmRPixel, 0, &argok)); if (argok) ac++;
+        XtSetArg(args[ac], XmNrecomputeSize, False); ac++;
+        XtSetArg(args[ac], XmNx, 820); ac++;
+        XtSetArg(args[ac], XmNy, 50); ac++;
+        XtSetArg(args[ac], XmNwidth, 160); ac++;
+        XtSetArg(args[ac], XmNheight, 80); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(class_in->Mb3dsdg, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->label_mousemode = XmCreateLabel(class_in->Mb3dsdg,
+            (char *)"label_mousemode",
+            args, 
+            ac);
+        XtManageChild(class_in->label_mousemode);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->Mb3dsdg, (char *)"Heading Bias (degrees)", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNtitleString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNminimum, -100); ac++;
+        XtSetArg(args[ac], XmNdecimalPoints, 2); ac++;
+        XtSetArg(args[ac], XmNshowArrows, TRUE); ac++;
+        XtSetArg(args[ac], XmNscaleMultiple, 1); ac++;
+        XtSetArg(args[ac], XmNshowValue, TRUE); ac++;
+        XtSetArg(args[ac], XmNorientation, XmHORIZONTAL); ac++;
+        XtSetArg(args[ac], XmNx, 460); ac++;
+        XtSetArg(args[ac], XmNy, 70); ac++;
+        XtSetArg(args[ac], XmNwidth, 165); ac++;
+        XtSetArg(args[ac], XmNheight, 63); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(class_in->Mb3dsdg, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->scale_headingbias = XmCreateScale(class_in->Mb3dsdg,
+            (char *)"scale_headingbias",
+            args, 
+            ac);
+        XtManageChild(class_in->scale_headingbias);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(class_in->scale_headingbias, XmNvalueChangedCallback, do_mb3dsdg_headingbias, (XtPointer)0);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->Mb3dsdg, (char *)"Pitch Bias (degrees)", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNtitleString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNminimum, -100); ac++;
+        XtSetArg(args[ac], XmNdecimalPoints, 2); ac++;
+        XtSetArg(args[ac], XmNshowArrows, TRUE); ac++;
+        XtSetArg(args[ac], XmNscaleMultiple, 1); ac++;
+        XtSetArg(args[ac], XmNshowValue, TRUE); ac++;
+        XtSetArg(args[ac], XmNorientation, XmHORIZONTAL); ac++;
+        XtSetArg(args[ac], XmNx, 270); ac++;
+        XtSetArg(args[ac], XmNy, 70); ac++;
+        XtSetArg(args[ac], XmNwidth, 190); ac++;
+        XtSetArg(args[ac], XmNheight, 63); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(class_in->Mb3dsdg, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->scale_pitchbias = XmCreateScale(class_in->Mb3dsdg,
+            (char *)"scale_pitchbias",
+            args, 
+            ac);
+        XtManageChild(class_in->scale_pitchbias);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(class_in->scale_pitchbias, XmNvalueChangedCallback, do_mb3dsdg_pitchbias, (XtPointer)0);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->Mb3dsdg, (char *)"Roll Bias (degrees)", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNtitleString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNminimum, -100); ac++;
+        XtSetArg(args[ac], XmNdecimalPoints, 2); ac++;
+        XtSetArg(args[ac], XmNshowArrows, TRUE); ac++;
+        XtSetArg(args[ac], XmNscaleMultiple, 1); ac++;
+        XtSetArg(args[ac], XmNshowValue, TRUE); ac++;
+        XtSetArg(args[ac], XmNorientation, XmHORIZONTAL); ac++;
+        XtSetArg(args[ac], XmNx, 100); ac++;
+        XtSetArg(args[ac], XmNy, 70); ac++;
+        XtSetArg(args[ac], XmNwidth, 170); ac++;
+        XtSetArg(args[ac], XmNheight, 63); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(class_in->Mb3dsdg, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->scale_rollbias = XmCreateScale(class_in->Mb3dsdg,
+            (char *)"scale_rollbias",
+            args, 
+            ac);
+        XtManageChild(class_in->scale_rollbias);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(class_in->scale_rollbias, XmNvalueChangedCallback, do_mb3dsdg_rollbias, (XtPointer)0);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->Mb3dsdg, (char *)"Azimuth: 0.00 | Elevation: 0.00 | Vert. Exager.: 1.00", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNborderWidth, 1); ac++;
+        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
+        XtSetArg(args[ac], XmNbackground, 
+            BX_CONVERT(class_in->Mb3dsdg, (char *)"white", 
+            XmRPixel, 0, &argok)); if (argok) ac++;
+        XtSetArg(args[ac], XmNx, 100); ac++;
+        XtSetArg(args[ac], XmNy, 10); ac++;
+        XtSetArg(args[ac], XmNwidth, 881); ac++;
+        XtSetArg(args[ac], XmNheight, 30); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(class_in->Mb3dsdg, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->label_status = XmCreateLabel(class_in->Mb3dsdg,
+            (char *)"label_status",
+            args, 
+            ac);
+        XtManageChild(class_in->label_status);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNorientation, XmVERTICAL); ac++;
+    XtSetArg(args[ac], XmNx, 10); ac++;
+    XtSetArg(args[ac], XmNy, 10); ac++;
+    XtSetArg(args[ac], XmNwidth, 81); ac++;
+    XtSetArg(args[ac], XmNheight, 106); ac++;
+    class_in->menuBar = XmCreateMenuBar(class_in->Mb3dsdg,
+        (char *)"menuBar",
+        args, 
+        ac);
+    XtManageChild(class_in->menuBar);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->menuBar, (char *)"View", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNx, 5); ac++;
+        XtSetArg(args[ac], XmNy, 5); ac++;
+        XtSetArg(args[ac], XmNwidth, 71); ac++;
+        XtSetArg(args[ac], XmNheight, 24); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(class_in->menuBar, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->cascadeButton_view = XmCreateCascadeButton(class_in->menuBar,
+            (char *)"cascadeButton_view",
+            args, 
+            ac);
+        XtManageChild(class_in->cascadeButton_view);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNx, 0); ac++;
+    XtSetArg(args[ac], XmNy, 0); ac++;
+    XtSetArg(args[ac], XmNwidth, 204); ac++;
+    XtSetArg(args[ac], XmNheight, 128); ac++;
+    class_in->pulldownMenu_view = XmCreatePulldownMenu(XtParent(class_in->cascadeButton_view),
+        (char *)"pulldownMenu_view",
+        args, 
+        ac);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->pulldownMenu_view, (char *)"Show Bounding Box", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(class_in->pulldownMenu_view, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->toggleButton_view_boundingbox = XmCreateToggleButton(class_in->pulldownMenu_view,
+            (char *)"toggleButton_view_boundingbox",
+            args, 
+            ac);
+        XtManageChild(class_in->toggleButton_view_boundingbox);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(class_in->toggleButton_view_boundingbox, XmNvalueChangedCallback, do_mb3dsdg_view_boundingbox, (XtPointer)0);
+    
+    ac = 0;
+    class_in->separator1 = XmCreateSeparator(class_in->pulldownMenu_view,
+        (char *)"separator1",
+        args, 
+        ac);
+    XtManageChild(class_in->separator1);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->pulldownMenu_view, (char *)"Show Flagged Soundings", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(class_in->pulldownMenu_view, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->toggleButton_view_flagged = XmCreateToggleButton(class_in->pulldownMenu_view,
+            (char *)"toggleButton_view_flagged",
+            args, 
+            ac);
+        XtManageChild(class_in->toggleButton_view_flagged);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(class_in->toggleButton_view_flagged, XmNvalueChangedCallback, do_mb3dsdg_view_flagged, (XtPointer)0);
+    
+    ac = 0;
+    class_in->separator = XmCreateSeparator(class_in->pulldownMenu_view,
+        (char *)"separator",
+        args, 
+        ac);
+    XtManageChild(class_in->separator);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->pulldownMenu_view, (char *)"Show No Profiles", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(class_in->pulldownMenu_view, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->toggleButton_view_noconnect = XmCreateToggleButton(class_in->pulldownMenu_view,
+            (char *)"toggleButton_view_noconnect",
+            args, 
+            ac);
+        XtManageChild(class_in->toggleButton_view_noconnect);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(class_in->toggleButton_view_noconnect, XmNvalueChangedCallback, do_mb3dsdg_view_noprofile, (XtPointer)0);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->pulldownMenu_view, (char *)"Show Good Profiles", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(class_in->pulldownMenu_view, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->toggleButton_view_connectgood = XmCreateToggleButton(class_in->pulldownMenu_view,
+            (char *)"toggleButton_view_connectgood",
+            args, 
+            ac);
+        XtManageChild(class_in->toggleButton_view_connectgood);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(class_in->toggleButton_view_connectgood, XmNvalueChangedCallback, do_mb3dsdg_view_goodprofile, (XtPointer)0);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->pulldownMenu_view, (char *)"Show All Profiles", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(class_in->pulldownMenu_view, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->toggleButton_view_connectall = XmCreateToggleButton(class_in->pulldownMenu_view,
+            (char *)"toggleButton_view_connectall",
+            args, 
+            ac);
+        XtManageChild(class_in->toggleButton_view_connectall);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(class_in->toggleButton_view_connectall, XmNvalueChangedCallback, do_mb3dsdg_view_allprofile, (XtPointer)0);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNsubMenuId, class_in->pulldownMenu_view); ac++;
+    XtSetValues(class_in->cascadeButton_view, args, ac);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->menuBar, (char *)"Mouse", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNx, 5); ac++;
+        XtSetArg(args[ac], XmNy, 29); ac++;
+        XtSetArg(args[ac], XmNwidth, 71); ac++;
+        XtSetArg(args[ac], XmNheight, 24); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(class_in->menuBar, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->cascadeButton_mouse = XmCreateCascadeButton(class_in->menuBar,
+            (char *)"cascadeButton_mouse",
+            args, 
+            ac);
+        XtManageChild(class_in->cascadeButton_mouse);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNx, 0); ac++;
+    XtSetArg(args[ac], XmNy, 0); ac++;
+    XtSetArg(args[ac], XmNwidth, 152); ac++;
+    XtSetArg(args[ac], XmNheight, 52); ac++;
+    class_in->pulldownMenu_mouse = XmCreatePulldownMenu(XtParent(class_in->cascadeButton_mouse),
+        (char *)"pulldownMenu_mouse",
+        args, 
+        ac);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->pulldownMenu_mouse, (char *)"Rotate Soundings", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(class_in->pulldownMenu_mouse, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->toggleButton_mouse_rotate = XmCreateToggleButton(class_in->pulldownMenu_mouse,
+            (char *)"toggleButton_mouse_rotate",
+            args, 
+            ac);
+        XtManageChild(class_in->toggleButton_mouse_rotate);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(class_in->toggleButton_mouse_rotate, XmNvalueChangedCallback, do_mb3dsdg_mouse_rotate, (XtPointer)0);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->pulldownMenu_mouse, (char *)"Pan and Zoom", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(class_in->pulldownMenu_mouse, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->toggleButton_mouse_panzoom = XmCreateToggleButton(class_in->pulldownMenu_mouse,
+            (char *)"toggleButton_mouse_panzoom",
+            args, 
+            ac);
+        XtManageChild(class_in->toggleButton_mouse_panzoom);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(class_in->toggleButton_mouse_panzoom, XmNvalueChangedCallback, do_mb3dsdg_mouse_panzoom, (XtPointer)0);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNsubMenuId, class_in->pulldownMenu_mouse); ac++;
+    XtSetValues(class_in->cascadeButton_mouse, args, ac);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->menuBar, (char *)"Action", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNx, 5); ac++;
+        XtSetArg(args[ac], XmNy, 53); ac++;
+        XtSetArg(args[ac], XmNwidth, 71); ac++;
+        XtSetArg(args[ac], XmNheight, 24); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(class_in->menuBar, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->cascadeButton_action = XmCreateCascadeButton(class_in->menuBar,
+            (char *)"cascadeButton_action",
+            args, 
+            ac);
+        XtManageChild(class_in->cascadeButton_action);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNx, 0); ac++;
+    XtSetArg(args[ac], XmNy, 0); ac++;
+    XtSetArg(args[ac], XmNwidth, 189); ac++;
+    XtSetArg(args[ac], XmNheight, 28); ac++;
+    class_in->pulldownMenu_action = XmCreatePulldownMenu(XtParent(class_in->cascadeButton_action),
+        (char *)"pulldownMenu_action",
+        args, 
+        ac);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->pulldownMenu_action, (char *)"Apply Bias Values to Grid", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(class_in->pulldownMenu_action, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->pushButton_action_applybias = XmCreatePushButton(class_in->pulldownMenu_action,
+            (char *)"pushButton_action_applybias",
+            args, 
+            ac);
+        XtManageChild(class_in->pushButton_action_applybias);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(class_in->pushButton_action_applybias, XmNactivateCallback, do_mb3dsdg_action_applybias, (XtPointer)0);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNsubMenuId, class_in->pulldownMenu_action); ac++;
+    XtSetValues(class_in->cascadeButton_action, args, ac);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->menuBar, (char *)"Dismiss", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNx, 5); ac++;
+        XtSetArg(args[ac], XmNy, 77); ac++;
+        XtSetArg(args[ac], XmNwidth, 71); ac++;
+        XtSetArg(args[ac], XmNheight, 24); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(class_in->menuBar, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->cascadeButton_dismiss = XmCreateCascadeButton(class_in->menuBar,
+            (char *)"cascadeButton_dismiss",
+            args, 
+            ac);
+        XtManageChild(class_in->cascadeButton_dismiss);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNx, 0); ac++;
+    XtSetArg(args[ac], XmNy, 0); ac++;
+    XtSetArg(args[ac], XmNwidth, 67); ac++;
+    XtSetArg(args[ac], XmNheight, 28); ac++;
+    class_in->pulldownMenu_dismiss = XmCreatePulldownMenu(XtParent(class_in->cascadeButton_dismiss),
+        (char *)"pulldownMenu_dismiss",
+        args, 
+        ac);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->pulldownMenu_dismiss, (char *)"Dismiss", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(class_in->pulldownMenu_dismiss, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->pushButton_dismiss = XmCreatePushButton(class_in->pulldownMenu_dismiss,
             (char *)"pushButton_dismiss",
             args, 
             ac);
@@ -183,6 +793,10 @@ Mb3dsdgCreate ( Mb3dsdgDataPtr class_in, Widget parent, String name, ArgList arg
     XtAddCallback(class_in->pushButton_dismiss, XmNactivateCallback, do_mb3dsdg_dismiss, (XtPointer)0);
     
     ac = 0;
+    XtSetArg(args[ac], XmNsubMenuId, class_in->pulldownMenu_dismiss); ac++;
+    XtSetValues(class_in->cascadeButton_dismiss, args, ac);
+    
+    ac = 0;
     XtSetArg(args[ac], XmNborderWidth, 1); ac++;
     XtSetArg(args[ac], XmNbackground, 
         BX_CONVERT(class_in->Mb3dsdg, (char *)"white", 
@@ -191,9 +805,9 @@ Mb3dsdgCreate ( Mb3dsdgDataPtr class_in, Widget parent, String name, ArgList arg
         BX_CONVERT(class_in->Mb3dsdg, (char *)"black", 
         XmRPixel, 0, &argok)); if (argok) ac++;
     XtSetArg(args[ac], XmNx, 10); ac++;
-    XtSetArg(args[ac], XmNy, 100); ac++;
-    XtSetArg(args[ac], XmNwidth, 510); ac++;
-    XtSetArg(args[ac], XmNheight, 420); ac++;
+    XtSetArg(args[ac], XmNy, 140); ac++;
+    XtSetArg(args[ac], XmNwidth, 970); ac++;
+    XtSetArg(args[ac], XmNheight, 435); ac++;
     class_in->drawingArea = XmCreateDrawingArea(class_in->Mb3dsdg,
         (char *)"drawingArea",
         args, 
@@ -203,8 +817,8 @@ Mb3dsdgCreate ( Mb3dsdgDataPtr class_in, Widget parent, String name, ArgList arg
     
     ac = 0;
     XtSetArg(args[ac], XmNorientation, XmHORIZONTAL); ac++;
-    XtSetArg(args[ac], XmNx, 10); ac++;
-    XtSetArg(args[ac], XmNy, 10); ac++;
+    XtSetArg(args[ac], XmNx, 100); ac++;
+    XtSetArg(args[ac], XmNy, 40); ac++;
     XtSetArg(args[ac], XmNwidth, 519); ac++;
     XtSetArg(args[ac], XmNheight, 34); ac++;
     XtSetArg(args[ac], XmNisHomogeneous, False); ac++;
@@ -370,34 +984,82 @@ Mb3dsdgCreate ( Mb3dsdgDataPtr class_in, Widget parent, String name, ArgList arg
     
     XtAddCallback(class_in->toggleButton_mouse_info, XmNvalueChangedCallback, do_mb3dsdg_mouse_info, (XtPointer)0);
     ac = 0;
+    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNleftOffset, 650); ac++;
+    XtSetArg(args[ac], XmNtopOffset, 90); ac++;
+    XtSetValues(class_in->toggleButton_mouse_panzoom1, args, ac);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNleftOffset, 650); ac++;
+    XtSetArg(args[ac], XmNtopOffset, 60); ac++;
+    XtSetValues(class_in->toggleButton_mouse_rotate1, args, ac);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNleftOffset, 630); ac++;
+    XtSetArg(args[ac], XmNtopOffset, 50); ac++;
+    XtSetValues(class_in->separator3, args, ac);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNrightAttachment, XmATTACH_NONE); ac++;
+    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNleftOffset, 820); ac++;
+    XtSetArg(args[ac], XmNrightOffset, 0); ac++;
+    XtSetArg(args[ac], XmNtopOffset, 50); ac++;
+    XtSetValues(class_in->label_mousemode, args, ac);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNrightAttachment, XmATTACH_NONE); ac++;
+    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNleftOffset, 460); ac++;
+    XtSetArg(args[ac], XmNtopOffset, 70); ac++;
+    XtSetValues(class_in->scale_headingbias, args, ac);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNrightAttachment, XmATTACH_NONE); ac++;
+    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNleftOffset, 270); ac++;
+    XtSetArg(args[ac], XmNtopOffset, 70); ac++;
+    XtSetValues(class_in->scale_pitchbias, args, ac);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNrightAttachment, XmATTACH_NONE); ac++;
+    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNleftOffset, 100); ac++;
+    XtSetArg(args[ac], XmNtopOffset, 70); ac++;
+    XtSetValues(class_in->scale_rollbias, args, ac);
+    
+    ac = 0;
     XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
     XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNleftOffset, 120); ac++;
-    XtSetArg(args[ac], XmNrightOffset, 8); ac++;
-    XtSetArg(args[ac], XmNtopOffset, 40); ac++;
-    XtSetValues(class_in->text_status, args, ac);
+    XtSetArg(args[ac], XmNleftOffset, 100); ac++;
+    XtSetArg(args[ac], XmNrightOffset, 4); ac++;
+    XtSetArg(args[ac], XmNtopOffset, 10); ac++;
+    XtSetValues(class_in->label_status, args, ac);
     
     ac = 0;
     XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
     XtSetArg(args[ac], XmNleftOffset, 10); ac++;
-    XtSetArg(args[ac], XmNtopOffset, 50); ac++;
-    XtSetValues(class_in->pushButton_dismiss, args, ac);
+    XtSetArg(args[ac], XmNtopOffset, 10); ac++;
+    XtSetValues(class_in->menuBar, args, ac);
     
     ac = 0;
     XtSetArg(args[ac], XmNtopAttachment, XmATTACH_FORM); ac++;
     XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
     XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
     XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNbottomOffset, 11); ac++;
+    XtSetArg(args[ac], XmNbottomOffset, 7); ac++;
     XtSetArg(args[ac], XmNleftOffset, 10); ac++;
-    XtSetArg(args[ac], XmNrightOffset, 6); ac++;
-    XtSetArg(args[ac], XmNtopOffset, 100); ac++;
+    XtSetArg(args[ac], XmNrightOffset, 5); ac++;
+    XtSetArg(args[ac], XmNtopOffset, 140); ac++;
     XtSetValues(class_in->drawingArea, args, ac);
     
     ac = 0;
+    XtSetArg(args[ac], XmNrightAttachment, XmATTACH_NONE); ac++;
     XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
-    XtSetArg(args[ac], XmNleftOffset, 10); ac++;
-    XtSetArg(args[ac], XmNtopOffset, 10); ac++;
+    XtSetArg(args[ac], XmNleftOffset, 100); ac++;
+    XtSetArg(args[ac], XmNtopOffset, 40); ac++;
     XtSetValues(class_in->radioBox_soundingsmode, args, ac);
     
     

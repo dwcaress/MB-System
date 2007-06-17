@@ -1,3 +1,17 @@
+/*--------------------------------------------------------------------
+ *    The MB-system:	mbgrdviz_callbacks.c		10/9/2002
+ *    $Id: mbgrdviz_callbacks.c,v 5.24 2007-06-17 23:27:30 caress Exp $
+ *
+ *    Copyright (c) 2002, 2003, 2006, 2007 by
+ *    David W. Caress (caress@mbari.org)
+ *      Monterey Bay Aquarium Research Institute
+ *      Moss Landing, CA 95039
+ *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *      Lamont-Doherty Earth Observatory
+ *      Palisades, NY 10964
+ *
+ *    See README file for copying and redistribution conditions.
+ *--------------------------------------------------------------------*/
 /*
  * README: This file is appended to at file generation time.
  * Edits can be made throughout the file
@@ -107,7 +121,7 @@ static int	realtime_update = 5;
 static int	realtime_icon = MBGRDVIZ_REALTIME_ICON_SHIP;
 
 /* id variables */
-static char rcs_id[] = "$Id: mbgrdviz_callbacks.c,v 5.23 2007-03-02 20:39:07 caress Exp $";
+static char rcs_id[] = "$Id: mbgrdviz_callbacks.c,v 5.24 2007-06-17 23:27:30 caress Exp $";
 static char program_name[] = "MBgrdviz";
 static char help_message[] = "MBgrdviz is an interactive 2D/3D visualization tool for GMT grid files.";
 static char usage_message[] = "mbgrdviz [-H -T -V]";
