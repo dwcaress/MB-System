@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbview_callbacks.c	10/7/2002
- *    $Id: mbview_callbacks.c,v 5.13 2006-06-16 19:30:58 caress Exp $
+ *    $Id: mbview_callbacks.c,v 5.14 2007-06-17 23:27:30 caress Exp $
  *
  *    Copyright (c) 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -18,6 +18,9 @@
  * Date:	October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.13  2006/06/16 19:30:58  caress
+ * Check in after the Santa Monica Basin Mapping AUV Expedition.
+ *
  * Revision 5.12  2006/04/26 22:06:39  caress
  * Improved profile view feature and enabled export of profile data.
  *
@@ -109,8 +112,8 @@
 /* OpenGL include files */
 #include <GL/gl.h>
 #include <GL/glu.h>
-#include "GL/GLwMDrawA.h" 
 #include <GL/glx.h>
+#include "mb_glwdrawa.h"
 
 /* MBIO include files */
 #include "../../include/mb_status.h"
@@ -130,7 +133,7 @@ static Cardinal 	ac;
 static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_callbacks.c,v 5.13 2006-06-16 19:30:58 caress Exp $";
+static char rcs_id[]="$Id: mbview_callbacks.c,v 5.14 2007-06-17 23:27:30 caress Exp $";
 
 /* function prototypes */
 /*------------------------------------------------------------------------------*/
@@ -586,6 +589,15 @@ int mbview_reset(int instance)
 	if (instance >= 0 && instance < MBV_MAX_WINDOWS)
 		{
 		view->init = MBV_WINDOW_NULL;
+
+		/* initialize function pointers */
+		data->mbview_pickonepoint_notify = NULL;
+		data->mbview_picktwopoint_notify = NULL;
+		data->mbview_pickarea_notify = NULL;
+		data->mbview_pickregion_notify = NULL;
+		data->mbview_picksite_notify = NULL;
+		data->mbview_pickroute_notify = NULL;
+		data->mbview_picknav_notify = NULL;
 
 		/* initialize data structure */
 		data->active = MB_NO;
@@ -1769,27 +1781,28 @@ int mbview_open(int verbose, int instance, int *error)
 
 		/* intitialize OpenGL graphics */
 		ac = 0;
-		XtSetArg(args[ac], GLwNrgba, TRUE);
+		XtSetArg(args[ac], mbGLwNrgba, TRUE);
 		ac++;
-		XtSetArg(args[ac], GLwNdepthSize, 1);
+		XtSetArg(args[ac], mbGLwNdepthSize, 1);
 		ac++;
-		XtSetArg(args[ac], GLwNdoublebuffer, True);
+		XtSetArg(args[ac], mbGLwNdoublebuffer, True);
 		ac++;
-		XtSetArg(args[ac], GLwNallocateBackground, TRUE);
+		XtSetArg(args[ac], mbGLwNallocateBackground, TRUE);
 		ac++;
 		XtSetArg(args[ac], XmNwidth, data->width);
 		ac++;
 		XtSetArg(args[ac], XmNheight, data->height);
 		ac++;
 		view->dpy = (Display *) XtDisplay(view->mb3dview.MB3DView);
-		view->glwmda = GLwCreateMDrawingArea(view->mb3dview.mbview_drawingArea_mbview, 
+		view->glwmda = mbGLwCreateMDrawingArea(view->mb3dview.mbview_drawingArea_mbview, 
 			"glwidget", args, ac);
+		/* view->glwmda = XtCreateWidget("glwidget", mbGLwDrawingAreaWidgetClass, view->mb3dview.mbview_drawingArea_mbview, args, ac);*/
 		XtManageChild (view->glwmda);
-		XtAddCallback(view->glwmda, GLwNexposeCallback,
+		XtAddCallback(view->glwmda, "exposeCallback",
 			    &(do_mbview_glwda_expose), (XtPointer) NULL);
-		XtAddCallback(view->glwmda, GLwNresizeCallback, 
+		XtAddCallback(view->glwmda, "resizeCallback", 
 			    &(do_mbview_glwda_resize), (XtPointer) NULL);
-		XtAddCallback(view->glwmda, GLwNinputCallback, 
+		XtAddCallback(view->glwmda, "inputCallback", 
 			    &(do_mbview_glwda_input), (XtPointer) NULL);
 		XSelectInput(view->dpy, XtWindow(view->glwmda), 
 			(ButtonPressMask | ButtonReleaseMask | ButtonMotionMask 
@@ -2696,6 +2709,81 @@ int mbview_addaction(int verbose, int instance,
 }
 
 /*------------------------------------------------------------------------------*/
+int mbview_addpicknotify(int verbose, int instance,
+			int	picktype,
+			void	(mbview_pick_notify)(int),
+			int *error)
+{
+	/* local variables */
+	char	*function_name = "mbview_addpicknotify";
+	int	status = MB_SUCCESS;
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
+
+	/* print starting debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
+		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:              %d\n",verbose);
+		fprintf(stderr,"dbg2       instance:             %d\n",instance);
+		fprintf(stderr,"dbg2       picktype:             %d\n",picktype);
+		fprintf(stderr,"dbg2       mbview_pick_notify:   %d\n",mbview_pick_notify);
+		}
+
+	/* get view */
+	view = &(mbviews[instance]);
+	data = &(view->data);
+	
+	/* set the pick notify function */
+	if (picktype == MBV_PICK_ONEPOINT)
+		{
+		data->mbview_pickonepoint_notify = mbview_pick_notify;
+		}
+	else if (picktype == MBV_PICK_TWOPOINT)
+		{
+		data->mbview_picktwopoint_notify = mbview_pick_notify;
+		}
+	else if (picktype == MBV_PICK_AREA)
+		{
+		data->mbview_pickarea_notify = mbview_pick_notify;
+		}
+	else if (picktype == MBV_PICK_REGION)
+		{
+		data->mbview_pickregion_notify = mbview_pick_notify;
+		}
+	else if (picktype == MBV_PICK_SITE)
+		{
+		data->mbview_picksite_notify = mbview_pick_notify;
+		}
+	else if (picktype == MBV_PICK_ROUTE)
+		{
+		data->mbview_pickroute_notify = mbview_pick_notify;
+		}
+	else if (picktype == MBV_PICK_NAV)
+		{
+		data->mbview_picknav_notify = mbview_pick_notify;
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:        %d\n",error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return */
+	return(status);
+}
+
+/*------------------------------------------------------------------------------*/
 void 
 mbview_resize( Widget w, XtPointer client_data, XEvent *event, Boolean *unused)
 {
@@ -3178,7 +3266,7 @@ fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_display_utm\n");
 void
 do_mbview_glwda_expose( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    GLwDrawingAreaCallbackStruct *acs = (GLwDrawingAreaCallbackStruct*)call_data;
+    mbGLwDrawingAreaCallbackStruct *acs = (mbGLwDrawingAreaCallbackStruct*)call_data;
 	int	instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -3197,7 +3285,7 @@ fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_glwda_expose\n");
 void
 do_mbview_glwda_resize( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    GLwDrawingAreaCallbackStruct *acs = (GLwDrawingAreaCallbackStruct*)call_data;
+    mbGLwDrawingAreaCallbackStruct *acs = (mbGLwDrawingAreaCallbackStruct*)call_data;
 	int	instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -3211,7 +3299,7 @@ do_mbview_glwda_resize( Widget w, XtPointer client_data, XtPointer call_data)
 void
 do_mbview_glwda_input( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    GLwDrawingAreaCallbackStruct *acs = (GLwDrawingAreaCallbackStruct*)call_data;
+    mbGLwDrawingAreaCallbackStruct *acs = (mbGLwDrawingAreaCallbackStruct*)call_data;
 	int	instance;
 	XEvent  *event;
 	struct mbview_world_struct *view;
@@ -4330,16 +4418,13 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 		    && (view->button_down_x != view->button_up_x
 		    	|| view->button_down_y != view->button_up_y))
 		    {				    
-		    /* set cursor for area */
-		    XDefineCursor(view->dpy,view->xid,view->TargetRedCursor);
-
 		    /* process area */
 		    mbview_region(instance, MBV_REGION_UP,
 				    view->button_up_x, 
 				    data->height - view->button_up_y);
 
-		    /* replot */
-		    mbview_plotlow(instance);
+		    /* set replotall */
+		    replotall = MB_YES;
 		    }
 					    
 		/* handle editing sites */
@@ -4389,16 +4474,13 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 		    && (view->button_down_x != view->button_up_x
 		    	|| view->button_down_y != view->button_up_y))
 		    {				    
-		    /* set cursor for area */
-		    XDefineCursor(view->dpy,view->xid,view->TargetRedCursor);
-
 		    /* process area */
 		    mbview_area(instance, MBV_AREALENGTH_UP,
 				    view->button_up_x, 
 				    data->height - view->button_up_y);
 
-		    /* replot */
-		    mbview_plotlow(instance);
+		    /* set replotall */
+		    replotall = MB_YES;
 		    }
 					    
 		/* handle editing sites */
@@ -4459,6 +4541,20 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 		    {				    
 		    /* set flag to reset view bounds */
 		    view->viewboundscount = MBV_BOUNDSFREQUENCY;
+		    }
+		    
+		/* handle area picking */
+		else if (data->mouse_mode == MBV_MOUSE_AREA
+		    && (view->button_down_x != view->button_up_x
+		    	|| view->button_down_y != view->button_up_y))
+		    {				    
+		    /* process area */
+		    mbview_area(instance, MBV_AREAASPECT_UP,
+				    view->button_up_x, 
+				    data->height - view->button_up_y);
+
+		    /* set replotall */
+		    replotall = MB_YES;
 		    }
 					    
 		/* handle editing sites */
@@ -4655,7 +4751,7 @@ int mbview_destroy(int verbose, int instance, int destroywidgets, int *error)
 		if (view->prglx_init == MB_YES)
 		    {
 		    /* make correct window current for OpenGL */
-		    GLwDrawingAreaMakeCurrent(view->prglwmda, view->prglx_context);
+		    glXMakeCurrent(XtDisplay(view->prglwmda),XtWindow(view->prglwmda),view->prglx_context);
 
 		    glXDestroyContext(view->dpy, view->prglx_context);
 		    view->prglx_init = MB_NO;
@@ -4665,7 +4761,7 @@ int mbview_destroy(int verbose, int instance, int destroywidgets, int *error)
 		if (view->glx_init == MB_YES)
 		    {
 		    /* make correct window current for OpenGL */
-		    GLwDrawingAreaMakeCurrent(view->glwmda, view->glx_context);
+		    glXMakeCurrent(XtDisplay(view->glwmda),XtWindow(view->glwmda),view->glx_context);
 
 		    glXDestroyContext(view->dpy, view->glx_context);
 		    view->glx_init = MB_NO;
@@ -8713,21 +8809,22 @@ fprintf(stderr,"do_mbview_view_profile: instance:%d\n", instance);
 
 		/* intitialize OpenGL graphics */
 		ac = 0;
-		XtSetArg(args[ac], GLwNrgba, TRUE);
+		XtSetArg(args[ac], mbGLwNrgba, TRUE);
 		ac++;
-		XtSetArg(args[ac], GLwNdepthSize, 1);
+		XtSetArg(args[ac], mbGLwNdepthSize, 1);
 		ac++;
-		XtSetArg(args[ac], GLwNdoublebuffer, True);
+		XtSetArg(args[ac], mbGLwNdoublebuffer, True);
 		ac++;
-		XtSetArg(args[ac], GLwNallocateBackground, FALSE);
+		XtSetArg(args[ac], mbGLwNallocateBackground, FALSE);
 		ac++;
 		XtSetArg(args[ac], XmNwidth, data->prwidth);
 		ac++;
 		XtSetArg(args[ac], XmNheight, data->prheight);
 		ac++;
 		view->dpy = (Display *) XtDisplay(view->mb3dview.MB3DView);
-		view->prglwmda = GLwCreateMDrawingArea(view->mb3dview.mbview_drawingArea_profile, 
+		view->prglwmda = mbGLwCreateMDrawingArea(view->mb3dview.mbview_drawingArea_profile, 
 			"glwidget", args, ac);
+		/* view->prglwmda = XtCreateWidget("glwidget", mbGLwDrawingAreaWidgetClass, view->mb3dview.mbview_drawingArea_profile, args, ac);*/
 		XtManageChild (view->prglwmda);
 		XSelectInput(view->dpy, XtWindow(view->prglwmda), 
 			(ButtonPressMask | ButtonReleaseMask | ButtonMotionMask 

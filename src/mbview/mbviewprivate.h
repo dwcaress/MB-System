@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbviewprivate.h	9/24/2003
- *    $Id: mbviewprivate.h,v 5.11 2006-06-16 19:30:58 caress Exp $
+ *    $Id: mbviewprivate.h,v 5.12 2007-06-17 23:27:31 caress Exp $
  *
  *    Copyright (c) 2003, 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -18,6 +18,9 @@
  * Date:	September 24,  2003
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.11  2006/06/16 19:30:58  caress
+ * Check in after the Santa Monica Basin Mapping AUV Expedition.
+ *
  * Revision 5.10  2006/04/11 19:17:04  caress
  * Added a profile capability.
  *
@@ -103,6 +106,7 @@
 #define MBV_AREALENGTH_MOVE	2
 #define MBV_AREALENGTH_UP	3
 #define MBV_AREAASPECT_CHANGE	4
+#define MBV_AREAASPECT_UP	5
 #define MBV_REGION_DOWN	1
 #define MBV_REGION_MOVE	2
 #define MBV_REGION_UP	3

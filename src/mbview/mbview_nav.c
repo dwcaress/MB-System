@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_nav.c	10/28/2003
- *    $Id: mbview_nav.c,v 5.13 2006-12-15 21:42:49 caress Exp $
+ *    $Id: mbview_nav.c,v 5.14 2007-06-17 23:27:30 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -18,6 +18,9 @@
  * Date:	October 28, 2003
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.13  2006/12/15 21:42:49  caress
+ * Incremental CVS update.
+ *
  * Revision 5.12  2006/06/16 19:30:58  caress
  * Check in after the Santa Monica Basin Mapping AUV Expedition.
  *
@@ -89,8 +92,8 @@
 /* OpenGL include files */
 #include <GL/gl.h>
 #include <GL/glu.h>
-#include "GL/GLwMDrawA.h" 
 #include <GL/glx.h>
+#include "mb_glwdrawa.h"
 
 /* MBIO include files */
 #include "../../include/mb_status.h"
@@ -108,7 +111,7 @@ static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 static char		value_string[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_nav.c,v 5.13 2006-12-15 21:42:49 caress Exp $";
+static char rcs_id[]="$Id: mbview_nav.c,v 5.14 2007-06-17 23:27:30 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_getnavcount(int verbose, int instance,
@@ -1127,6 +1130,13 @@ int mbview_pick_nav_select(int instance, int select, int which, int xpixel, int 
 	
 	/* set pick annotation */
 	mbview_pick_text(instance);
+	
+	/* call pick notify if defined */
+	if (which == MBV_PICK_UP && shared.shareddata.nav_selected[0] != MBV_SELECT_NONE
+		&& data->mbview_picknav_notify != NULL)
+		{
+		(data->mbview_picknav_notify)(instance);
+		}
 	
 	/* print nav debug statements */
 	if (mbv_verbose >= 2)

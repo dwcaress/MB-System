@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_route.c	9/25/2003
- *    $Id: mbview_route.c,v 5.16 2006-10-05 18:58:29 caress Exp $
+ *    $Id: mbview_route.c,v 5.17 2007-06-17 23:27:30 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  *		begun on October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.16  2006/10/05 18:58:29  caress
+ * Changes for 5.1.0beta4
+ *
  * Revision 5.15  2006/09/11 18:55:53  caress
  * Changes during Western Flyer and Thomas Thompson cruises, August-September
  * 2006.
@@ -102,8 +105,8 @@
 /* OpenGL include files */
 #include <GL/gl.h>
 #include <GL/glu.h>
-#include "GL/GLwMDrawA.h" 
 #include <GL/glx.h>
+#include "mb_glwdrawa.h"
 
 /* MBIO include files */
 #include "../../include/mb_status.h"
@@ -121,7 +124,7 @@ static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 static char		value_string[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_route.c,v 5.16 2006-10-05 18:58:29 caress Exp $";
+static char rcs_id[]="$Id: mbview_route.c,v 5.17 2007-06-17 23:27:30 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_getroutecount(int verbose, int instance,
@@ -1165,6 +1168,13 @@ int mbview_pick_route_select(int instance, int which, int xpixel, int ypixel)
 	
 	/* update route list */
 	mbview_updateroutelist();
+	
+	/* call pick notify if defined */
+	if (which == MBV_PICK_UP && shared.shareddata.route_selected != MBV_SELECT_NONE
+		&& data->mbview_pickroute_notify != NULL)
+		{
+		(data->mbview_pickroute_notify)(instance);
+		}
 	
 	/* print route debug statements */
 	if (mbv_verbose >= 2)

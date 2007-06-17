@@ -43,7 +43,33 @@ typedef struct _Mb3dsdgData
      * Widgets created by this class.
      */
     Widget Mb3dsdg;
-    Widget text_status;
+    Widget toggleButton_mouse_panzoom1;
+    Widget toggleButton_mouse_rotate1;
+    Widget separator3;
+    Widget label_mousemode;
+    Widget scale_headingbias;
+    Widget scale_pitchbias;
+    Widget scale_rollbias;
+    Widget label_status;
+    Widget menuBar;
+    Widget cascadeButton_view;
+    Widget pulldownMenu_view;
+    Widget toggleButton_view_boundingbox;
+    Widget separator1;
+    Widget toggleButton_view_flagged;
+    Widget separator;
+    Widget toggleButton_view_noconnect;
+    Widget toggleButton_view_connectgood;
+    Widget toggleButton_view_connectall;
+    Widget cascadeButton_mouse;
+    Widget pulldownMenu_mouse;
+    Widget toggleButton_mouse_rotate;
+    Widget toggleButton_mouse_panzoom;
+    Widget cascadeButton_action;
+    Widget pulldownMenu_action;
+    Widget pushButton_action_applybias;
+    Widget cascadeButton_dismiss;
+    Widget pulldownMenu_dismiss;
     Widget pushButton_dismiss;
     Widget drawingArea;
     Widget radioBox_soundingsmode;

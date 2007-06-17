@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_site.c	9/25/2003
- *    $Id: mbview_site.c,v 5.7 2006-06-16 19:30:58 caress Exp $
+ *    $Id: mbview_site.c,v 5.8 2007-06-17 23:27:30 caress Exp $
  *
  *    Copyright (c) 2003, 2004, 2005 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  *		begun on October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2006/06/16 19:30:58  caress
+ * Check in after the Santa Monica Basin Mapping AUV Expedition.
+ *
  * Revision 5.6  2006/01/24 19:21:32  caress
  * Version 5.0.8 beta.
  *
@@ -74,8 +77,8 @@
 /* OpenGL include files */
 #include <GL/gl.h>
 #include <GL/glu.h>
-#include "GL/GLwMDrawA.h" 
 #include <GL/glx.h>
+#include "mb_glwdrawa.h"
 
 /* MBIO include files */
 #include "../../include/mb_status.h"
@@ -101,7 +104,7 @@ static Arg      	args[256];
 static char	value_string[MB_PATH_MAXLINE];
 static char	value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_site.c,v 5.7 2006-06-16 19:30:58 caress Exp $";
+static char rcs_id[]="$Id: mbview_site.c,v 5.8 2007-06-17 23:27:30 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_getsitecount(int verbose, int instance,
@@ -747,6 +750,13 @@ int mbview_pick_site_select(int instance, int which, int xpixel, int ypixel)
 	
 	/* update site list */
 	mbview_updatesitelist();
+	
+	/* call pick notify if defined */
+	if (which == MBV_PICK_UP && shared.shareddata.site_selected != MBV_SELECT_NONE
+		&& data->mbview_picksite_notify != NULL)
+		{
+		(data->mbview_picksite_notify)(instance);
+		}
 	
 	/* print site debug statements */
 	if (mbv_verbose >= 2)

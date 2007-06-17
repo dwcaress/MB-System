@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_process.c	9/25/2003
- *    $Id: mbview_process.c,v 5.12 2006-06-16 19:30:58 caress Exp $
+ *    $Id: mbview_process.c,v 5.13 2007-06-17 23:27:31 caress Exp $
  *
  *    Copyright (c) 2003, 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  *		begun on October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.12  2006/06/16 19:30:58  caress
+ * Check in after the Santa Monica Basin Mapping AUV Expedition.
+ *
  * Revision 5.11  2006/04/11 19:17:04  caress
  * Added a profile capability.
  *
@@ -92,8 +95,8 @@
 /* OpenGL include files */
 #include <GL/gl.h>
 #include <GL/glu.h>
-#include "GL/GLwMDrawA.h" 
 #include <GL/glx.h>
+#include "mb_glwdrawa.h"
 
 /* MBIO include files */
 #include "../../include/mb_status.h"
@@ -110,7 +113,7 @@ static Cardinal 	ac;
 static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_process.c,v 5.12 2006-06-16 19:30:58 caress Exp $";
+static char rcs_id[]="$Id: mbview_process.c,v 5.13 2007-06-17 23:27:31 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_projectdata(int instance)
@@ -486,135 +489,22 @@ fprintf(stderr,"  Display scale: %f\n", view->scale);*/
 
 	/* calculate derivatives of primary data */
 	for (i=0;i<data->primary_nx;i++)
-	{
-	for (j=0;j<data->primary_ny;j++)
 		{
-		/* figure if x derivative can be calculated */
-		derivative_ok = MB_NO;
-		if (i == 0)
-		    {
-		    k1 = i * data->primary_ny + j;
-		    k2 = (i + 1) * data->primary_ny + j;
-		    if (data->primary_data[k1] != data->primary_nodatavalue
-		    	&& data->primary_data[k2] != data->primary_nodatavalue)
-			derivative_ok = MB_YES;
-		    }
-		else if (i == data->primary_nx - 1)
-		    {
-		    k1 = (i - 1) * data->primary_ny + j;
-		    k2 = i * data->primary_ny + j;
-		    if (data->primary_data[k1] != data->primary_nodatavalue
-		    	&& data->primary_data[k2] != data->primary_nodatavalue)
-			derivative_ok = MB_YES;
-		    }
-		else
-		    {
-		    k1 = (i - 1) * data->primary_ny + j;
-		    k = i * data->primary_ny + j;
-		    k2 = (i + 1) * data->primary_ny + j;
-		    if (data->primary_data[k1] != data->primary_nodatavalue
-		    	&& data->primary_data[k2] != data->primary_nodatavalue)
-			derivative_ok = MB_YES;
-		    else if (data->primary_data[k1] != data->primary_nodatavalue
-		    	&& data->primary_data[k] != data->primary_nodatavalue)
+		for (j=0;j<data->primary_ny;j++)
 			{
-			derivative_ok = MB_YES;
-			k2 = k;
+			mbview_derivative(instance, i, j);
 			}
-		    else if (data->primary_data[k] != data->primary_nodatavalue
-		    	&& data->primary_data[k2] != data->primary_nodatavalue)
-			{
-			derivative_ok = MB_YES;
-			k1 = k;
-			}
-		    }
-		
-		/* calculate x derivative */
-		if (derivative_ok == MB_YES)
-			{
-			dx = (data->primary_x[k2] 
-				- data->primary_x[k1]);
-			if (dx != 0.0)
-			data->primary_dzdx[k] 
-				= view->scale * 
-					(data->primary_data[k2] 
-						- data->primary_data[k1])
-					/ dx;
-			else
-			data->primary_dzdx[k] = 0.0;
-			}
-		else
-			data->primary_dzdx[k] = 0.0;
-		
-		/* figure if y derivative can be calculated */
-		derivative_ok = MB_NO;
-		if (j == 0)
-		    {
-		    k1 = i * data->primary_ny + j;
-		    k2 = i * data->primary_ny + (j + 1);
-		    if (data->primary_data[k1] != data->primary_nodatavalue
-		    	&& data->primary_data[k2] != data->primary_nodatavalue)
-			derivative_ok = MB_YES;
-		    }
-		else if (i == data->primary_ny - 1)
-		    {
-		    k1 = i * data->primary_ny + (j - 1);
-		    k2 = i * data->primary_ny + j;
-		    if (data->primary_data[k1] != data->primary_nodatavalue
-		    	&& data->primary_data[k2] != data->primary_nodatavalue)
-			derivative_ok = MB_YES;
-		    }
-		else
-		    {
-		    k1 = i * data->primary_ny + (j - 1);
-		    k = i * data->primary_ny + j;
-		    k2 = i * data->primary_ny + (j + 1);
-		    if (data->primary_data[k1] != data->primary_nodatavalue
-		    	&& data->primary_data[k2] != data->primary_nodatavalue)
-			derivative_ok = MB_YES;
-		    else if (data->primary_data[k1] != data->primary_nodatavalue
-		    	&& data->primary_data[k] != data->primary_nodatavalue)
-			{
-			derivative_ok = MB_YES;
-			k2 = k;
-			}
-		    else if (data->primary_data[k] != data->primary_nodatavalue
-		    	&& data->primary_data[k2] != data->primary_nodatavalue)
-			{
-			derivative_ok = MB_YES;
-			k1 = k;
-			}
-		    }
-		
-		/* calculate y derivative */
-		if (derivative_ok == MB_YES)
-			{
-			dy = (data->primary_y[k2] 
-				- data->primary_y[k1]);
-			if (dy != 0.0)
-			data->primary_dzdy[k] 
-				= view->scale * 
-					(data->primary_data[k2] 
-						- data->primary_data[k1])
-					/ (data->primary_y[k2] 
-						- data->primary_y[k1]);
-			else
-			data->primary_dzdy[k] = 0.0;
-			}
-		else
-			data->primary_dzdy[k] = 0.0;
+
+		/* check for pending event */
+		if (view->plot_done == MB_NO 
+			&& view->plot_interrupt_allowed == MB_YES 
+			&& i % MBV_EVENTCHECKCOARSENESS == 0)
+			do_mbview_xevents();
+
+		/* dump out of loop if plotting already done at a higher recursion */
+		if (view->plot_done == MB_YES)
+			i = data->primary_nx;
 		}
-		
-	/* check for pending event */
-	if (view->plot_done == MB_NO 
-		&& view->plot_interrupt_allowed == MB_YES 
-		&& i % MBV_EVENTCHECKCOARSENESS == 0)
-		do_mbview_xevents();
-		
-	/* dump out of loop if plotting already done at a higher recursion */
-	if (view->plot_done == MB_YES)
-		i = data->primary_nx;
-	}
 		
 	/* clear zscale for grid */
 	mbview_zscaleclear(instance);
@@ -627,6 +517,170 @@ fprintf(stderr,"  Display scale: %f\n", view->scale);*/
 		{
 		view->projected = MB_YES;
 		}
+
+	/* print output debug statements */
+	if (mbv_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return */
+	return(status);
+}
+/*------------------------------------------------------------------------------*/
+int mbview_derivative(int instance, int i, int j)
+{
+	/* local variables */
+	char	*function_name = "mbview_derivative";
+	int	status = MB_SUCCESS;
+	int	error = MB_ERROR_NO_ERROR;
+	int	derivative_ok;
+	double	dx, dy;
+	int	k, k1, k2;
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
+
+	/* print starting debug statements */
+	if (mbv_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
+		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       instance:         %d\n",instance);
+		fprintf(stderr,"dbg2       i:                %d\n",i);
+		fprintf(stderr,"dbg2       j:                %d\n",j);
+		}
+if (mbv_verbose >= 2)
+fprintf(stderr,"mbview_derivative: %d\n", instance);
+		
+	/* get view */
+	view = &(mbviews[instance]);
+	data = &(view->data);
+
+	/* figure if x derivative can be calculated */
+	derivative_ok = MB_NO;
+	k = i * data->primary_ny + j;
+	if (i == 0)
+	    {
+	    k1 = i * data->primary_ny + j;
+	    k2 = (i + 1) * data->primary_ny + j;
+	    if (data->primary_data[k1] != data->primary_nodatavalue
+		&& data->primary_data[k2] != data->primary_nodatavalue)
+		derivative_ok = MB_YES;
+	    }
+	else if (i == data->primary_nx - 1)
+	    {
+	    k1 = (i - 1) * data->primary_ny + j;
+	    k2 = i * data->primary_ny + j;
+	    if (data->primary_data[k1] != data->primary_nodatavalue
+		&& data->primary_data[k2] != data->primary_nodatavalue)
+		derivative_ok = MB_YES;
+	    }
+	else
+	    {
+	    k1 = (i - 1) * data->primary_ny + j;
+	    k2 = (i + 1) * data->primary_ny + j;
+	    if (data->primary_data[k1] != data->primary_nodatavalue
+		&& data->primary_data[k2] != data->primary_nodatavalue)
+		derivative_ok = MB_YES;
+	    else if (data->primary_data[k1] != data->primary_nodatavalue
+		&& data->primary_data[k] != data->primary_nodatavalue)
+		{
+		derivative_ok = MB_YES;
+		k2 = k;
+		}
+	    else if (data->primary_data[k] != data->primary_nodatavalue
+		&& data->primary_data[k2] != data->primary_nodatavalue)
+		{
+		derivative_ok = MB_YES;
+		k1 = k;
+		}
+	    }
+
+	/* calculate x derivative */
+	if (derivative_ok == MB_YES)
+		{
+		dx = (data->primary_x[k2] 
+			- data->primary_x[k1]);
+		if (dx != 0.0)
+		data->primary_dzdx[k] 
+			= view->scale * 
+				(data->primary_data[k2] 
+					- data->primary_data[k1])
+				/ dx;
+		else
+		data->primary_dzdx[k] = 0.0;
+		}
+	else
+		data->primary_dzdx[k] = 0.0;
+
+	/* figure if y derivative can be calculated */
+	derivative_ok = MB_NO;
+	if (j == 0)
+	    {
+	    k1 = i * data->primary_ny + j;
+	    k2 = i * data->primary_ny + (j + 1);
+	    if (data->primary_data[k1] != data->primary_nodatavalue
+		&& data->primary_data[k2] != data->primary_nodatavalue)
+		derivative_ok = MB_YES;
+	    }
+	else if (i == data->primary_ny - 1)
+	    {
+	    k1 = i * data->primary_ny + (j - 1);
+	    k2 = i * data->primary_ny + j;
+	    if (data->primary_data[k1] != data->primary_nodatavalue
+		&& data->primary_data[k2] != data->primary_nodatavalue)
+		derivative_ok = MB_YES;
+	    }
+	else
+	    {
+	    k1 = i * data->primary_ny + (j - 1);
+	    k = i * data->primary_ny + j;
+	    k2 = i * data->primary_ny + (j + 1);
+	    if (data->primary_data[k1] != data->primary_nodatavalue
+		&& data->primary_data[k2] != data->primary_nodatavalue)
+		derivative_ok = MB_YES;
+	    else if (data->primary_data[k1] != data->primary_nodatavalue
+		&& data->primary_data[k] != data->primary_nodatavalue)
+		{
+		derivative_ok = MB_YES;
+		k2 = k;
+		}
+	    else if (data->primary_data[k] != data->primary_nodatavalue
+		&& data->primary_data[k2] != data->primary_nodatavalue)
+		{
+		derivative_ok = MB_YES;
+		k1 = k;
+		}
+	    }
+
+	/* calculate y derivative */
+	if (derivative_ok == MB_YES)
+		{
+		dy = (data->primary_y[k2] 
+			- data->primary_y[k1]);
+		if (dy != 0.0)
+		data->primary_dzdy[k] 
+			= view->scale * 
+				(data->primary_data[k2] 
+					- data->primary_data[k1])
+				/ (data->primary_y[k2] 
+					- data->primary_y[k1]);
+		else
+		data->primary_dzdy[k] = 0.0;
+		}
+	else
+		data->primary_dzdy[k] = 0.0;
+		
+	/* get view */
+	view = &(mbviews[instance]);
+	data = &(view->data);
+	
 
 	/* print output debug statements */
 	if (mbv_verbose >= 2)

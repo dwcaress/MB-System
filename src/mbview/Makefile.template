@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  7/27/2003
-#	$Id: Makefile.template,v 5.8 2006-12-15 21:42:49 caress Exp $
+#	$Id: Makefile.template,v 5.9 2007-06-17 23:27:30 caress Exp $
 #
 #     Copyright (c) 2003 by
 #     David W. Caress (caress@mbari.org)
@@ -16,6 +16,9 @@
 # Date:		August 31, 2002
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.8  2006/12/15 21:42:49  caress
+# Incremental CVS update.
+#
 # Revision 5.7  2006/04/11 19:17:04  caress
 # Added a profile capability.
 #
@@ -56,7 +59,7 @@ MOTIFINCDIR = /sw/include
 MOTIFLIBS = -L/sw/lib -L/usr/X11R6/lib -lXm -lXt -lX11
 #
 # Locations of OpenGL libraries:
-OPENGLLIBS = -lGLw -lGLU -lGL
+OPENGLLIBS = -lGLU -lGL
 #
 # Compilers 
 CC = cc 
@@ -74,7 +77,7 @@ LIBDIR = ../../lib
 INCDIR = ../../include
 
 ### make all makes the executable and man page
-all: $(LIBDIR)/libmbview.a $(BINDIR)/mbgrdviz
+all: $(INCDIR)/mbview.h $(LIBDIR)/libmbview.a $(BINDIR)/mbgrdviz $(BINDIR)/mbeditviz
 
 ### make the library
 $(LIBDIR)/libmbview.a:	MB3DView.o \
@@ -90,7 +93,10 @@ $(LIBDIR)/libmbview.a:	MB3DView.o \
 		mbview_profile.o \
 		mbview_site.o \
 		mbview_route.o\
-		mbview_nav.o
+		mbview_nav.o \
+		mb_glwdrawa.o \
+		Mb3dsdg.o \
+		mb3dsoundings_callbacks.o
 	$(ARCHIVE) $(LIBDIR)/libmbview.a \
 		MB3DView.o \
 		MB3DSiteList.o\
@@ -105,7 +111,10 @@ $(LIBDIR)/libmbview.a:	MB3DView.o \
 		mbview_profile.o \
 		mbview_site.o \
 		mbview_route.o\
-		mbview_nav.o
+		mbview_nav.o \
+		mb_glwdrawa.o \
+		Mb3dsdg.o \
+		mb3dsoundings_callbacks.o
 	ranlib $(LIBDIR)/libmbview.a
 
 ### link the executables
@@ -137,6 +146,36 @@ $(BINDIR)/mbgrdviz: mbgrdviz_main.o \
 		$(GMTLIBDIR)/libgmt.a \
 		$(GMTLIBDIR)/libpsl.a \
 		$(OPENGLLIBS) $(MOTIFLIBS) $(LFLAGS) -o $(BINDIR)/mbgrdviz
+$(BINDIR)/mbeditviz: mbeditviz_main.o \
+		mbeditviz_bxutils.o \
+		mbeditviz_callbacks.o \
+		mbeditviz_prog.o \
+		mbeditviz_creation.o \
+		$(LIBDIR)/libmbview.a \
+		$(LIBDIR)/libmbio.a \
+		$(LIBDIR)/libmbproj.a \
+		$(LIBDIR)/libmbgsf.a \
+		$(LIBDIR)/libsapi.a \
+		$(LIBDIR)/libmr1pr.a  \
+		$(LIBDIR)/libmbps.a \
+		$(LIBDIR)/libmbxgr.a \
+		$(GMTLIBDIR)/libgmt.a\
+		$(GMTLIBDIR)/libpsl.a
+	$(CC) $(CFLAGS) mbeditviz_main.o \
+		mbeditviz_bxutils.o \
+		mbeditviz_callbacks.o \
+		mbeditviz_prog.o \
+		mbeditviz_creation.o \
+		$(LIBDIR)/libmbview.a \
+		$(LIBDIR)/libmbio.a \
+		$(LIBDIR)/libmbproj.a \
+		$(LIBDIR)/libmbgsf.a \
+		$(LIBDIR)/libsapi.a \
+		$(LIBDIR)/libmr1pr.a  \
+		$(LIBDIR)/libmbxgr.a \
+		$(GMTLIBDIR)/libgmt.a \
+		$(GMTLIBDIR)/libpsl.a \
+		$(OPENGLLIBS) $(MOTIFLIBS) $(LFLAGS) -o $(BINDIR)/mbeditviz
 
 ### compile the source files
 MB3DView.o: MB3DView.c MB3DView.h mbview.h mbviewprivate.h
@@ -167,6 +206,8 @@ mbview_route.o: mbview_route.c mbview.h mbviewprivate.h
 	$(CC) $(CFLAGS) -DMBVIEW_LIBRARY -I$(INCDIR) -I$(MOTIFINCDIR) -c mbview_route.c
 mbview_nav.o: mbview_nav.c mbview.h mbviewprivate.h
 	$(CC) $(CFLAGS) -DMBVIEW_LIBRARY -I$(INCDIR) -I$(MOTIFINCDIR) -c mbview_nav.c
+mb_glwdrawa.o: mb_glwdrawa.c mb_glwdrawa.h mb_glwdrawap.h
+	$(CC) $(CFLAGS) -I$(INCDIR) -I$(MOTIFINCDIR) -c mb_glwdrawa.c
 mbgrdviz_bxutils.o: mbgrdviz_bxutils.c
 	$(CC) $(CFLAGS) -I$(INCDIR) -I$(MOTIFINCDIR) -c mbgrdviz_bxutils.c
 mbgrdviz_creation.o: mbgrdviz_creation.c mbgrdviz_creation.h 
@@ -175,6 +216,25 @@ mbgrdviz_main.o: mbgrdviz_main.c mbview.h
 	$(CC) $(CFLAGS) -I$(INCDIR) -I$(MOTIFINCDIR) -c mbgrdviz_main.c
 mbgrdviz_callbacks.o: mbgrdviz_callbacks.c mbview.h
 	$(CC) $(CFLAGS) -I$(INCDIR) -I$(MOTIFINCDIR) -I$(NETCDFINCDIR) -I$(GMTINCDIR) -c mbgrdviz_callbacks.c
+Mb3dsdg.o: Mb3dsdg.c Mb3dsdg.h
+	$(CC) $(CFLAGS) -I$(INCDIR) -I$(MOTIFINCDIR) -I$(NETCDFINCDIR) -I$(GMTINCDIR) -c Mb3dsdg.c
+mb3dsoundings_callbacks.o: mb3dsoundings_callbacks.c Mb3dsdg.h mb3dsoundingsprivate.h 
+	$(CC) $(CFLAGS) -DMBVIEW_LIBRARY -I$(INCDIR) -I$(MOTIFINCDIR) -I$(NETCDFINCDIR) -I$(GMTINCDIR) -c mb3dsoundings_callbacks.c
+mbeditviz_bxutils.o: mbeditviz_bxutils.c
+	$(CC) $(CFLAGS) -I$(INCDIR) -I$(MOTIFINCDIR) -c mbeditviz_bxutils.c
+mbeditviz_creation.o: mbeditviz_creation.c mbeditviz_creation.h 
+	$(CC) $(CFLAGS) -I$(INCDIR) -I$(MOTIFINCDIR) -c mbeditviz_creation.c
+mbeditviz_main.o: mbeditviz_main.c $(INCDIR)/mbview.h
+	$(CC) $(CFLAGS) -I$(INCDIR) -I$(MOTIFINCDIR) -c mbeditviz_main.c
+mbeditviz_callbacks.o: mbeditviz_callbacks.c $(INCDIR)/mbview.h
+	$(CC) $(CFLAGS)  -DMBEDITVIZ_DECLARE_GLOBALS -I$(INCDIR) -I$(MOTIFINCDIR) -I$(NETCDFINCDIR) -I$(GMTINCDIR) -c mbeditviz_callbacks.c
+mbeditviz_prog.o: mbeditviz_prog.c $(INCDIR)/mbview.h
+	$(CC) $(CFLAGS)  -DMBEDITVIZ_DECLARE_GLOBALS -I$(INCDIR) -I$(MOTIFINCDIR) -I$(NETCDFINCDIR) -I$(GMTINCDIR) -c mbeditviz_prog.c
+
+## copy the include files to the include file directory
+$(INCDIR)/mbview.h:	mbview.h
+	cp mbview.h $(INCDIR)/mbview.h
+	chmod 664 $(INCDIR)/mbview.h
 
 ### copy the man page to the man page directory
 
