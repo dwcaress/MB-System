@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad.c	3.00	8/5/94
- *	$Id: mbsys_simrad.c,v 5.13 2006-08-09 22:41:27 caress Exp $
+ *	$Id: mbsys_simrad.c,v 5.14 2007-06-18 01:19:48 caress Exp $
  *
  *    Copyright (c) 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -31,6 +31,9 @@
  * Date:	August 5, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.13  2006/08/09 22:41:27  caress
+ * Fixed programs that read or write grids so that they do not use the GMT_begin() function; these programs will now work when GMT is built in the default fashion, when GMT is built in the default fashion, with "advisory file locking" enabled.
+ *
  * Revision 5.12  2005/11/05 00:48:04  caress
  * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
  *
@@ -161,7 +164,7 @@
 #define MBSYS_SIMRAD_C
 #include "../../include/mbsys_simrad.h"
 
-static char res_id[]="$Id: mbsys_simrad.c,v 5.13 2006-08-09 22:41:27 caress Exp $";
+static char res_id[]="$Id: mbsys_simrad.c,v 5.14 2007-06-18 01:19:48 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_simrad_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
@@ -1387,6 +1390,10 @@ int mbsys_simrad_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 			    angles_simrad = angles_EM12DS_114;			
 			else if (ping->bath_mode == 8)
 			    angles_simrad = angles_EM12DS_98;			
+			}
+		else if (store->sonar == MBSYS_SIMRAD_EM121)
+			{
+			angles_simrad = angles_EM121_GUESS;
 			}
 		if (store->sonar == MBSYS_SIMRAD_EM1000)
 			{
@@ -2673,6 +2680,10 @@ int mbsys_simrad_makess(int verbose, void *mbio_ptr, void *store_ptr,
 			    angles_simrad = angles_EM12DS_114;			
 			else if (ping->bath_mode == 8)
 			    angles_simrad = angles_EM12DS_98;			
+			}
+		else if (store->sonar == MBSYS_SIMRAD_EM121)
+			{
+			angles_simrad = angles_EM121_GUESS;
 			}
 			
 		/* if interleaved get center beam */

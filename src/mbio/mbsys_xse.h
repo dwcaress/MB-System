@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_xse.h	3/27/2000
- *	$Id: mbsys_xse.h,v 5.10 2006-09-11 18:55:53 caress Exp $
+ *	$Id: mbsys_xse.h,v 5.11 2007-06-18 01:19:48 caress Exp $
  *
  *    Copyright (c) 2000, 2001, 2002, 2003 by 
  *    D. W. Caress (caress@mbari.org)
@@ -28,6 +28,10 @@
  * Additional Authors:	P. A. Cohen and S. Dzurenko
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.10  2006/09/11 18:55:53  caress
+ * Changes during Western Flyer and Thomas Thompson cruises, August-September
+ * 2006.
+ *
  * Revision 5.9  2005/11/05 00:48:03  caress
  * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
  *
@@ -124,17 +128,20 @@
  *        Ship            4  General(1), Attitude(2), 
  *                           Position(3), Dynamics(4), Motion(5), 
  *                           Geometry(6), Description(7), 
- *                           Parameter(8)
+ *                           Parameter(8), NavigationAndMotion(9),
+ *                           Transducer(10), TransducerExtended(11)
  *        Sidescan        5  General(1), AmplitudeVsTravelTime(2), 
  *                           PhaseVsTravelTime(3), 
- *                           Amplitude(4), Phase(5)
+ *                           Amplitude(4), Phase(5), Signal(6), PingType(7)
+ *                           ComplexSignal(8), Weighting(9)
  *        Multibeam       6  General(1), Beam(2), 
  *                           Traveltime(3), Quality(4), 
  *                           Amplitude(5), Delay(6), Lateral(7), 
  *                           Along(8), Depth(9), Angle(10),  
  *                           Heave(11), Roll(12), Pitch(13),
  *                           Gates(14), Noise(15), EchoLength(16), 
- *                           Hits(17)
+ *                           Hits(17), HeaveReceive(18), Azimuth(19),
+ *                           MBsystemNavigation(99)
  *        Single Beam     7  General(1)
  *        Control         8  Request(1), Insert(2), Change(3),  
  *                           Add(4), Delete(5), Action(6), Reply(7)
@@ -163,10 +170,11 @@
  *      output both bathymetry and amplitude information 
  *      for up to 126 beams per multibeam frame.
  *      Each ping produces a variable number of beams.
- *   6. The XSE format uses asynchronous navigation only; navigation 
+ *   6. The raw XSE format provides asynchronous navigation only; navigation 
  *      is not included in the multibeam or sidescan pings.
- *      MB-System interpolates or extrapolates the available 
- *      navigation as necessary.
+ *      MB-System adds MBsystemNavigation(99) groups to the multibeam
+ *      frames so that processed navigation can be directly associated
+ *      with each survey ping..
  *   7. The comment records are supported by MB-System only and are
  *      not part of the L3 Communications XSE format specification.
  *
@@ -174,7 +182,7 @@
 
 /* maximum number of beams and pixels */
 #define	MBSYS_XSE_MAXBEAMS		151
-#define	MBSYS_XSE_MAXPIXELS		2000
+#define	MBSYS_XSE_MAXPIXELS		4096
 #define	MBSYS_XSE_MAXSAMPLES		8192
 #define	MBSYS_XSE_MAXSVP		200
 #define MBSYS_XSE_MAXDRAFT		200
@@ -184,65 +192,73 @@
 #define	MBSYS_XSE_BUFFER_SIZE		32000
 #define	MBSYS_XSE_MAX_SIZE		200
 #define	MBSYS_XSE_MAX_SENSORS		16
+#define	MBSYS_XSE_MAX_TRANSDUCERS	512
 
 /* frame and group id's */
 #define MBSYS_XSE_NONE_FRAME		0
 
 #define MBSYS_XSE_NAV_FRAME			1
-#define MBSYS_XSE_NAV_GROUP_GEN		1
-#define MBSYS_XSE_NAV_GROUP_POS		2
+#define MBSYS_XSE_NAV_GROUP_GEN			1
+#define MBSYS_XSE_NAV_GROUP_POS			2
 #define MBSYS_XSE_NAV_GROUP_ACCURACY		3
 #define MBSYS_XSE_NAV_GROUP_MOTIONGT		4
 #define MBSYS_XSE_NAV_GROUP_MOTIONTW		5
 #define MBSYS_XSE_NAV_GROUP_TRACK		6
-#define MBSYS_XSE_NAV_GROUP_HRP		7
+#define MBSYS_XSE_NAV_GROUP_HRP			7
 #define MBSYS_XSE_NAV_GROUP_HEAVE		8
 #define MBSYS_XSE_NAV_GROUP_ROLL		9
 #define MBSYS_XSE_NAV_GROUP_PITCH		10
 #define MBSYS_XSE_NAV_GROUP_HEADING		11
-#define MBSYS_XSE_NAV_GROUP_LOG		12
-#define MBSYS_XSE_NAV_GROUP_GPS		13
+#define MBSYS_XSE_NAV_GROUP_LOG			12
+#define MBSYS_XSE_NAV_GROUP_GPS			13
 
 #define MBSYS_XSE_SVP_FRAME			2
-#define MBSYS_XSE_SVP_GROUP_GEN		1
+#define MBSYS_XSE_SVP_GROUP_GEN			1
 #define MBSYS_XSE_SVP_GROUP_DEPTH		2
 #define MBSYS_XSE_SVP_GROUP_VELOCITY		3
 #define MBSYS_XSE_SVP_GROUP_CONDUCTIVITY	4
 #define MBSYS_XSE_SVP_GROUP_SALINITY		5
 #define MBSYS_XSE_SVP_GROUP_TEMP		6
 #define MBSYS_XSE_SVP_GROUP_PRESSURE		7
-#define MBSYS_XSE_SVP_GROUP_SSV		8
-#define MBSYS_XSE_SVP_GROUP_POS		9
+#define MBSYS_XSE_SVP_GROUP_SSV			8
+#define MBSYS_XSE_SVP_GROUP_POS			9
 
 #define MBSYS_XSE_TID_FRAME			3
-#define MBSYS_XSE_TID_GROUP_GEN		1
-#define MBSYS_XSE_TID_GROUP_POS		2
+#define MBSYS_XSE_TID_GROUP_GEN			1
+#define MBSYS_XSE_TID_GROUP_POS			2
 #define MBSYS_XSE_TID_GROUP_TIME		3
 #define MBSYS_XSE_TID_GROUP_TIDE		4
 
 #define MBSYS_XSE_SHP_FRAME			4
-#define MBSYS_XSE_SHP_GROUP_GEN		1
+#define MBSYS_XSE_SHP_GROUP_GEN			1
 #define MBSYS_XSE_SHP_GROUP_TIME		2
 #define MBSYS_XSE_SHP_GROUP_DRAFT		3
 #define MBSYS_XSE_SHP_GROUP_SENSORS		4
 #define MBSYS_XSE_SHP_GROUP_MOTION		5
 #define MBSYS_XSE_SHP_GROUP_GEOMETRY		6
-#define MBSYS_XSE_SHP_GROUP_DESCRIPTION	7
-#define MBSYS_XSE_SHP_GROUP_PARAMETER	8
+#define MBSYS_XSE_SHP_GROUP_DESCRIPTION		7
+#define MBSYS_XSE_SHP_GROUP_PARAMETER		8
+#define MBSYS_XSE_SHP_GROUP_NAVIGATIONANDMOTION	9
+#define MBSYS_XSE_SHP_GROUP_TRANSDUCER		10
+#define MBSYS_XSE_SHP_GROUP_TRANSDUCEREXTENDED	11
 
 #define MBSYS_XSE_SSN_FRAME			5
-#define MBSYS_XSE_SSN_GROUP_GEN		1
+#define MBSYS_XSE_SSN_GROUP_GEN			1
 #define MBSYS_XSE_SSN_GROUP_AMPVSTT		2
-#define MBSYS_XSE_SSN_GROUP_PHASEVSTT	3
+#define MBSYS_XSE_SSN_GROUP_PHASEVSTT		3
 #define MBSYS_XSE_SSN_GROUP_AMPVSLAT		4
-#define MBSYS_XSE_SSN_GROUP_PHASEVSLAT	5
+#define MBSYS_XSE_SSN_GROUP_PHASEVSLAT		5
+#define MBSYS_XSE_SSN_GROUP_SIGNAL		6
+#define MBSYS_XSE_SSN_GROUP_PINGTYPE		7
+#define MBSYS_XSE_SSN_GROUP_COMPLEXSIGNAL	8
+#define MBSYS_XSE_SSN_GROUP_WEIGHTING		9
 
 #define MBSYS_XSE_MBM_FRAME			6
-#define MBSYS_XSE_MBM_GROUP_GEN		1
+#define MBSYS_XSE_MBM_GROUP_GEN			1
 #define MBSYS_XSE_MBM_GROUP_BEAM		2
-#define MBSYS_XSE_MBM_GROUP_TT		3
+#define MBSYS_XSE_MBM_GROUP_TT			3
 #define MBSYS_XSE_MBM_GROUP_QUALITY		4
-#define MBSYS_XSE_MBM_GROUP_AMP		5
+#define MBSYS_XSE_MBM_GROUP_AMP			5
 #define MBSYS_XSE_MBM_GROUP_DELAY		6
 #define MBSYS_XSE_MBM_GROUP_LATERAL		7
 #define MBSYS_XSE_MBM_GROUP_ALONG		8
@@ -255,6 +271,9 @@
 #define MBSYS_XSE_MBM_GROUP_NOISE		15
 #define MBSYS_XSE_MBM_GROUP_LENGTH		16
 #define MBSYS_XSE_MBM_GROUP_HITS		17
+#define MBSYS_XSE_MBM_GROUP_HEAVERECEIVE	18
+#define MBSYS_XSE_MBM_GROUP_AZIMUTH		19
+#define MBSYS_XSE_MBM_GROUP_MBSYSTEMNAV		99
 
 #define MBSYS_XSE_SNG_FRAME			7
 #define MBSYS_XSE_CNT_FRAME			8
@@ -264,14 +283,14 @@
 #define MBSYS_XSE_GEO_FRAME			12
 
 #define MBSYS_XSE_SBM_FRAME			13
-#define MBSYS_XSE_SBM_GROUP_PROPERTIES	1
-#define MBSYS_XSE_SBM_GROUP_HRP		2
+#define MBSYS_XSE_SBM_GROUP_PROPERTIES		1
+#define MBSYS_XSE_SBM_GROUP_HRP			2
 #define MBSYS_XSE_SBM_GROUP_SETUP		3
-#define MBSYS_XSE_SBM_GROUP_MRU		4
+#define MBSYS_XSE_SBM_GROUP_MRU			4
 #define MBSYS_XSE_SBM_GROUP_SETTINGS		5
 #define MBSYS_XSE_SBM_GROUP_BEAMS		6
 #define MBSYS_XSE_SBM_GROUP_GATES		7
-#define MBSYS_XSE_SBM_GROUP_RAW		8
+#define MBSYS_XSE_SBM_GROUP_RAW			8
 #define MBSYS_XSE_SBM_GROUP_CENTER		9
 #define MBSYS_XSE_SBM_GROUP_MESSAGE		21
 
@@ -301,6 +320,8 @@ struct mbsys_xse_beam_struct
 	float	    noise;
 	float	    length;
 	unsigned int hits;
+	double      heavereceive;
+	double      azimuth;
 	};
 
 struct mbsys_xse_struct
@@ -334,6 +355,7 @@ struct mbsys_xse_struct
 										9001 : SSV */
 	int	par_ship_sensor_frequency[MBSYS_XSE_MAX_SENSORS];	/* sensor frequency array (kHz) */
 	
+	int	par_parameter;		/* boolean flag for parameter group */
 	float	par_roll_bias;		/* radians */
 	float	par_pitch_bias;		/* radians */
 	float	par_heading_bias;	/* radians */
@@ -352,20 +374,54 @@ struct mbsys_xse_struct
 	float	par_hrp_x;		/* motion sensor x position, meters */
 	float	par_hrp_y;		/* motion sensor y position, meters */
 	float	par_hrp_z;		/* motion sensor z position, meters */
-	unsigned int    par_length;	/* length of ship name, chars */
-	unsigned int	par_ndraft_time;	/* number of times for each draft  */
-	unsigned int	par_draft_time[MBSYS_XSE_MAX_SIZE]; /* UTC time for each draft value, seconds */
-	unsigned int	par_num_drafts;		/* number of draft values */
-	double	par_draft_value[MBSYS_XSE_MAX_SIZE]; /* Array of draft values, meters */
-	unsigned int	par_num_sensors;	/* number of external sensors */
-	unsigned int	par_sensors_id[MBSYS_XSE_MAX_SIZE]; /* Array of sensor id's */
-	unsigned int	par_num_motion;		/* number of motion sensors */
-	unsigned int	par_motion[MBSYS_XSE_MAX_SIZE]; /* Array of motion values */
-	unsigned int    par_num_geometry;	/* number of geometry values */
-	unsigned int    par_geometry[MBSYS_XSE_MAX_SIZE]; /* Array of geometry values */
-	unsigned int   par_num_description;	/* length of description string */
-	char    par_description[MBSYS_XSE_MAX_SIZE]; /* Sensor Description string */
 	
+	int	par_navigationandmotion;/* boolean flag for navigationandmotion group */
+	double	par_nam_roll_bias;	/* roll bias, radians */
+	double	par_nam_pitch_bias;	/* pitch bias, radians */
+	double	par_nam_heave_bias;	/* heave bias, meters */
+	double	par_nam_heading_bias;	/* heading/gyro bias, radians */
+	double	par_nam_time_delay;	/* nav time lag, seconds */
+	double	par_nam_nav_x;		/* navigation antenna x position, meters */
+	double	par_nam_nav_y;		/* navigation antenna y position, meters */
+	double	par_nam_nav_z;		/* navigation antenna z position, meters */
+	double	par_nam_hrp_x;		/* motion sensor x position, meters */
+	double	par_nam_hrp_y;		/* motion sensor y position, meters */
+	double	par_nam_hrp_z;		/* motion sensor z position, meters */
+
+	int	par_xdr_num_transducer; /* number of transducers */
+	int	par_xdr_sensorid[MBSYS_XSE_MAX_TRANSDUCERS]; 		/* sensor ids */
+	char 	par_xdr_transducer[MBSYS_XSE_MAX_TRANSDUCERS]; 		/* transducer type:
+										0: hydrophone
+										1: projector
+										2: transducer */
+	unsigned int par_xdr_frequency[MBSYS_XSE_MAX_TRANSDUCERS]; 	/* frequency (Hz) */
+	char 	par_xdr_side[MBSYS_XSE_MAX_TRANSDUCERS]; 		/* transducer side:
+										0: undefined
+										1: port
+										2: starboard
+										3: midship
+										4: system defined */
+	double	par_xdr_mountingroll[MBSYS_XSE_MAX_TRANSDUCERS];	/* array mounting angle roll (radians) */
+	double	par_xdr_mountingpitch[MBSYS_XSE_MAX_TRANSDUCERS];	/* array mounting angle roll (radians) */
+	double	par_xdr_mountingazimuth[MBSYS_XSE_MAX_TRANSDUCERS];	/* array mounting angle roll (radians) */
+	double	par_xdr_mountingdistance[MBSYS_XSE_MAX_TRANSDUCERS];	/* horizontal distance between
+										innermost elements of the
+										transducer arrays to the
+										ship center line in a
+										V-shaped configuration (m) */
+	double	par_xdr_x[MBSYS_XSE_MAX_TRANSDUCERS];	/* transducer center across track offset (m) */
+	double	par_xdr_y[MBSYS_XSE_MAX_TRANSDUCERS];	/* transducer center along track offset (m) */
+	double	par_xdr_z[MBSYS_XSE_MAX_TRANSDUCERS];	/* transducer center vertical offset (m) */
+	double	par_xdr_roll[MBSYS_XSE_MAX_TRANSDUCERS];	/* beamforming roll bias (radians - port up positive) */
+	double	par_xdr_pitch[MBSYS_XSE_MAX_TRANSDUCERS];	/* beamforming pitch bias (radians - bow up positive) */
+	double	par_xdr_azimuth[MBSYS_XSE_MAX_TRANSDUCERS];	/* beamforming azimuth bias (radians 
+									- projector axis clockwise with
+									respect to compass positive) */
+	int	par_xdx_num_transducer; 			/* number of transducers */
+	char 	par_xdx_roll[MBSYS_XSE_MAX_TRANSDUCERS]; 	/* mounting mode roll (0: auto, 1: manual) */
+	char	par_xdx_pitch[MBSYS_XSE_MAX_TRANSDUCERS]; 	/* mounting mode pitch (0: auto, 1: manual) */
+	char	par_xdx_azimuth[MBSYS_XSE_MAX_TRANSDUCERS]; 	/* mounting mode azimuth (0: auto, 1: manual) */
+
 	/* svp (sound velocity frames) */
 	int	svp_source;		/* sensor id */
 	unsigned int	svp_sec;	/* sec since 1/1/1901 00:00 */
@@ -381,6 +437,19 @@ struct mbsys_xse_struct
 	double	svp_ssv;		/* m/s */
 
 	/* position (navigation frames) */
+	int	nav_group_general;	/* boolean flag */
+	int	nav_group_position;	/* boolean flag */
+	int	nav_group_accuracy;	/* boolean flag */
+	int	nav_group_motiongt;	/* boolean flag */
+	int	nav_group_motiontw;	/* boolean flag */
+	int	nav_group_track;	/* boolean flag */
+	int	nav_group_hrp;		/* boolean flag */
+	int	nav_group_heave;	/* boolean flag */
+	int	nav_group_roll;		/* boolean flag */
+	int	nav_group_pitch;	/* boolean flag */
+	int	nav_group_heading;	/* boolean flag */
+	int	nav_group_log;		/* boolean flag */
+	int	nav_group_gps;		/* boolean flag */	
 	int	nav_source;		/* sensor id */
 	unsigned int	nav_sec;	/* sec since 1/1/1901 00:00 */
 	unsigned int	nav_usec;	/* microseconds */
@@ -394,10 +463,43 @@ struct mbsys_xse_struct
 					    latitude (radians) */
 	double	nav_z;			/* height (m) or 
 					    ellipsoidal height (m) */
+	short	nav_acc_quality;	/* GPS quality:
+						0: invalid
+						1: SPS
+						2: SPS differential
+						3: PPS
+						4. RTK
+						5: Float RTK
+						6: Estimated
+						7: Manual
+						8: Simulator */
+	char	nav_acc_numsatellites;	/* number of satellites */
+	float	nav_acc_horizdilution;	/* horizontal dilution of precision */
+	float	nav_acc_diffage;	/* age of differential data (sec since last update) */
+	unsigned int nav_acc_diffref;	/* differential reference station */
 	double	nav_speed_ground;	/* m/s */
 	double	nav_course_ground;	/* radians */
 	double	nav_speed_water;	/* m/s */
 	double	nav_course_water;	/* radians */
+	double	nav_trk_offset_track;	/* offset track (m) */
+	double	nav_trk_offset_sol;	/* offset SOL (m) */
+	double	nav_trk_offset_eol;	/* offset EOL (m) */
+	double	nav_trk_distance_sol;	/* distance SOL (m) */
+	double	nav_trk_azimuth_sol;	/* azimuth SOL (radians) */
+	double	nav_trk_distance_eol;	/* distance EOL (m) */
+	double	nav_trk_azimuth_eol;	/* azimuth EOL (radians) */
+	double	nav_hrp_heave;		/* heave (m) */
+	double	nav_hrp_roll;		/* roll (radians) */
+	double	nav_hrp_pitch;		/* pitch (radians) */
+	double	nav_hea_heave;		/* heave (m) */
+	double	nav_rol_roll;		/* roll (radians) */
+	double	nav_pit_pitch;		/* pitch (radians) */
+	double	nav_hdg_heading;	/* heading (radians) */
+	double	nav_log_speed;		/* speed (m/s) */
+	float	nav_gps_altitude;	/* altitude with respect to geoid */
+	float	nav_gps_geoidalseparation;	/* difference between WGS84 ellipsoid and geoid (m)
+							(positive means sea level geoid is above
+							ellipsoid) */
 	
 	/* survey depth (multibeam frames) */
 	int	mul_frame;		/* boolean flag - multibeam frame read */
@@ -417,6 +519,9 @@ struct mbsys_xse_struct
 	int	mul_group_noise;	/* boolean flag - noise group read */
 	int	mul_group_length;	/* boolean flag - length group read */
 	int	mul_group_hits;		/* boolean flag - hits group read */
+	int	mul_group_heavereceive;	/* boolean flag - heavereceive group read */
+	int	mul_group_azimuth;	/* boolean flag - azimuth group read */
+	int	mul_group_mbsystemnav;	/* boolean flag - mbsystemnav group read */
 	int	mul_source;		/* sensor id */
 	unsigned int	mul_sec;	/* sec since 1/1/1901 00:00 */
 	unsigned int	mul_usec;	/* microseconds */
@@ -428,12 +533,22 @@ struct mbsys_xse_struct
 	float	mul_sample;		/* receive sample interval (sec) */
 	float	mul_swath;		/* swath width (radians) */
 	int	mul_num_beams;		/* number of beams */
-	double	mul_x;			/* longitude in degrees */
-	double	mul_y;			/* latitude in degrees */
+	double	mul_lon;		/* longitude (radians) */
+	double	mul_lat;		/* latitude (radians) */
+	double	mul_heading;		/* heading (radians) */
+	double	mul_speed;		/* speed (m/s) */
 	struct mbsys_xse_beam_struct beams[MBSYS_XSE_MAXBEAMS];
 	
 	/* survey sidescan (sidescan frames) */
 	int	sid_frame;		/* boolean flag - sidescan frame read */
+	int	sid_group_avt;		/* boolean flag - amp vs time group read */
+	int	sid_group_pvt;		/* boolean flag - phase vs time group read */
+	int	sid_group_avl;		/* boolean flag - amp vs lateral group read */
+	int	sid_group_pvl;		/* boolean flag - phase vs lateral group read */
+	int	sid_group_signal;	/* boolean flag - signal group read */
+	int	sid_group_ping;		/* boolean flag - ping group read */
+	int	sid_group_complex;	/* boolean flag - complex group read */
+	int	sid_group_weighting;	/* boolean flag - weighting group read */
 	int	sid_source;		/* sensor id */
 	unsigned int	sid_sec;	/* sec since 1/1/1901 00:00 */
 	unsigned int	sid_usec;	/* microseconds */
@@ -443,10 +558,51 @@ struct mbsys_xse_struct
 	float	sid_power;		/* transmit power (dB) */
 	float	sid_bandwidth;		/* receive bandwidth (Hz) */
 	float	sid_sample;		/* receive sample interval (sec) */
-	int	sid_bin_size;		/* bin size in mm */
-	int	sid_offset;		/* lateral offset in mm */
-	int	sid_num_pixels;		/* number of pixels */
-	short	ss[MBSYS_XSE_MAXPIXELS]; /* sidescan amplitude in dB */
+	int	sid_avt_sampleus;	/* sample interval (usec) */
+	int	sid_avt_offset;		/* time offset (usec) */
+	int	sid_avt_num_samples;	/* number of samples */
+	short	sid_avt_amp[MBSYS_XSE_MAXPIXELS]; /* sidescan amplitude (dB) */
+	int	sid_pvt_sampleus;	/* sample interval (usec) */
+	int	sid_pvt_offset;		/* time offset (usec) */
+	int	sid_pvt_num_samples;	/* number of samples */
+	short	sid_pvt_phase[MBSYS_XSE_MAXPIXELS]; /* sidescan phase (radians) */
+	int	sid_avl_binsize;	/* bin size (mm) */
+	int	sid_avl_offset;		/* lateral offset (mm) */
+	int	sid_avl_num_samples;	/* number of samples */
+	short	sid_avl_amp[MBSYS_XSE_MAXPIXELS]; /* sidescan amplitude (dB) */
+	int	sid_pvl_binsize;	/* bin size (mm) */
+	int	sid_pvl_offset;		/* lateral offset (mm) */
+	int	sid_pvl_num_samples;	/* number of samples */
+	short	sid_pvl_phase[MBSYS_XSE_MAXPIXELS]; /* sidescan phase (radians) */
+	int	sid_sig_ping;		/* ping number */
+	int	sid_sig_channel;	/* channel number */
+	double	sid_sig_offset;		/* start offset */
+	double	sid_sig_sample;		/* bin size / sample interval */
+	int	sid_sig_num_samples;	/* number of samples */
+	short	sid_sig_phase[MBSYS_XSE_MAXPIXELS]; /* sidescan phase in radians */
+	unsigned int	sid_png_pulse;	/* pulse type (0=constant, 1=linear sweep) */
+	double	sid_png_startfrequency;	/* start frequency (Hz) */
+	double	sid_png_endfrequency;	/* end frequency (Hz) */
+	double	sid_png_duration;	/* pulse duration (msec) */
+	int	sid_png_mancode;	/* manufacturer code (1=Edgetech, 2=Elac) */
+	unsigned int	sid_png_pulseid;/* pulse identifier */
+	char	sid_png_pulsename[MBSYS_XSE_DESCRIPTION_LENGTH];	/* pulse name */
+	int	sid_cmp_ping;		/* ping number */
+	int	sid_cmp_channel;	/* channel number */
+	double	sid_cmp_offset;		/* start offset (usec) */
+	double	sid_cmp_sample;		/* bin size / sample interval (usec) */
+	int	sid_cmp_num_samples;	/* number of samples */
+	short	sid_cmp_real[MBSYS_XSE_MAXPIXELS]; /* real sidescan signal */
+	short	sid_cmp_imaginary[MBSYS_XSE_MAXPIXELS]; /* imaginary sidescan signal */
+	short	sid_wgt_factorleft;		/* weighting factor for block floating 
+						point expansion  -- 
+						defined as 2^(-N) volts for lsb */
+	unsigned int sid_wgt_samplesleft;	/* number of left samples */
+	short	sid_wgt_factorright;		/* weighting factor for block floating 
+						point expansion  -- 
+						defined as 2^(-N) volts for lsb */
+	unsigned int sid_wgt_samplesright;	/* number of right samples */
+	
 	
 	/* seabeam (seabeam frames) */
 	int	sbm_properties;		/* boolean flag - sbm properties group read */
