@@ -177,6 +177,11 @@ an MB-System extension to its multibeam records that includes
 interpolated navigation values. Previously only asynchronous
 navigation was handled.
 
+Fixed bug in old Simrad i/o module regarding EM121A data.
+
+Added prototype of MBeditviz, a tool that combines 3D bathymetry
+editing and patch test capability.
+
 MB-SYSTEM VERSION 5.1.0 RELEASE NOTES:
 ------------------------------------------
 
@@ -1370,10 +1375,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.95 2007-05-21 16:16:33 caress Exp $
+RCS ID: $Id: README,v 5.96 2007-06-18 01:23:03 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.95  2007/05/21 16:16:33  caress
+Working towards next release.
+
 Revision 5.94  2007/05/12 19:28:23  caress
 Working towards next version.
 
