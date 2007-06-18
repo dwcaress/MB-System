@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad.h	8/5/94
- *	$Id: mbsys_simrad.h,v 5.9 2005-11-05 00:48:03 caress Exp $
+ *	$Id: mbsys_simrad.h,v 5.10 2007-06-18 01:19:48 caress Exp $
  *
  *    Copyright (c) 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -32,6 +32,9 @@
  * Date:	August 5, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.9  2005/11/05 00:48:03  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.8  2003/12/04 23:10:24  caress
  * Fixed problems with format 54 EM12DARW due to old code assuming how internal structure was packed. Also changed handling of beamflags for formats that don't support beamflags. Now flagged beams will always be nulled in such cases.
  *
@@ -1169,6 +1172,21 @@ double angles_EM12S_SHALLOW[81] = {
      		-51.4375,-52.4375,-53.3125,-54.1875,
      		-55.0000,-55.8125,-56.5625,-57.3125,
      		-58.0000,-58.6875,-59.3750,-60.0000
+};
+double angles_EM121_GUESS[121] = {
+		 60.0, 59.0, 58.0, 57.0, 56.0, 55.0, 54.0, 53.0, 52.0, 51.0,
+		 50.0, 49.0, 48.0, 47.0, 46.0, 45.0, 44.0, 43.0, 42.0, 41.0, 
+		 40.0, 39.0, 38.0, 37.0, 36.0, 35.0, 34.0, 33.0, 32.0, 31.0, 
+		 30.0, 29.0, 28.0, 27.0, 26.0, 25.0, 24.0, 23.0, 22.0, 21.0, 
+		 20.0, 19.0, 18.0, 17.0, 16.0, 15.0, 14.0, 13.0, 12.0, 11.0, 
+		 10.0,  9.0,  8.0,  7.0,  6.0,  5.0,  4.0,  3.0,  2.0,  1.0,
+		  0.0,
+     		 -1.0, -2.0, -3.0, -4.0, -5.0, -6.0, -7.0, -8.0, -9.0,-10.0, 
+		-11.0,-12.0,-13.0,-14.0,-15.0,-16.0,-17.0,-18.0,-19.0,-20.0,
+		-21.0,-22.0,-23.0,-24.0,-25.0,-26.0,-27.0,-28.0,-29.0,-30.0, 
+		-31.0,-32.0,-33.0,-34.0,-35.0,-36.0,-37.0,-38.0,-39.0,-40.0,
+		-41.0,-42.0,-43.0,-44.0,-45.0,-46.0,-47.0,-48.0,-49.0,-50.0,
+     		-51.0,-52.0,-53.0,-54.0,-55.0,-56.0,-57.0,-58.0,-59.0,-60.0
 };
 #endif
 

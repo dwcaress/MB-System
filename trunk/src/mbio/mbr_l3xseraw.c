@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_l3xseraw.c	3/27/2000
- *	$Id: mbr_l3xseraw.c,v 5.18 2006-12-15 21:36:16 caress Exp $
+ *	$Id: mbr_l3xseraw.c,v 5.19 2007-06-18 01:19:48 caress Exp $
  *
  *    Copyright (c) 2000, 2001, 2002, 2003 by 
  *    D. W. Caress (caress@mbari.org)
@@ -26,6 +26,9 @@
  * Additional Authors:	P. A. Cohen and S. Dzurenko
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.18  2006/12/15 21:36:16  caress
+ * Turned off debug mode.
+ *
  * Revision 5.17  2006/09/11 18:55:52  caress
  * Changes during Western Flyer and Thomas Thompson cruises, August-September
  * 2006.
@@ -102,9 +105,8 @@
 
 
 /* #define MB_DEBUG 1 */
-/*
-#define MB_DEBUG2 1
-*/
+/* #define MB_DEBUG 1 */
+/* #define MB_DEBUG2 1 */
 
 /* set up byte swapping scenario */
 #ifdef DATAINPCBYTEORDER
@@ -144,7 +146,7 @@ int mbr_wt_l3xseraw(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_l3xseraw(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.18 2006-12-15 21:36:16 caress Exp $";
+	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.19 2007-06-18 01:19:48 caress Exp $";
 	char	*function_name = "mbr_register_l3xseraw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -277,7 +279,7 @@ int mbr_info_l3xseraw(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.18 2006-12-15 21:36:16 caress Exp $";
+	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.19 2007-06-18 01:19:48 caress Exp $";
 	char	*function_name = "mbr_info_l3xseraw";
 	int	status = MB_SUCCESS;
 
@@ -305,7 +307,7 @@ int mbr_info_l3xseraw(int verbose,
 	*variable_beams = MB_YES;
 	*traveltime = MB_YES;
 	*beam_flagging = MB_YES;
-	*nav_source = MB_DATA_NAV;
+	*nav_source = MB_DATA_DATA;
 	*heading_source = MB_DATA_DATA;
 	*vru_source = MB_DATA_DATA;
 	*svp_source = MB_DATA_VELOCITY_PROFILE;
@@ -347,7 +349,7 @@ int mbr_info_l3xseraw(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_l3xseraw(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.18 2006-12-15 21:36:16 caress Exp $";
+	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.19 2007-06-18 01:19:48 caress Exp $";
 	char	*function_name = "mbr_alm_l3xseraw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -474,26 +476,58 @@ store->mul_frame, store->sid_frame);*/
 			    - MBSYS_XSE_TIME_OFFSET
 			    + 0.000001 * store->nav_usec;
 			    
-		/* add to navlist */
-		mb_navint_add(verbose, mbio_ptr, time_d, 
+		/* add nav to navlist */
+		if (store->nav_group_position == MB_YES)
+			mb_navint_add(verbose, mbio_ptr, time_d, 
 				RTD * store->nav_x, 
 				RTD * store->nav_y, error);	    
+			    
+		/* add heading to navlist */
+		if (store->nav_group_heading == MB_YES)
+			mb_hedint_add(verbose, mbio_ptr, time_d, 
+				RTD * store->nav_hdg_heading, error);	    
+		else if (store->nav_group_motiongt == MB_YES)
+			mb_hedint_add(verbose, mbio_ptr, time_d, 
+				RTD * store->nav_course_ground, error);	    
+		else if (store->nav_group_motiontw == MB_YES)
+			mb_hedint_add(verbose, mbio_ptr, time_d, 
+				RTD * store->nav_course_water, error);	    
 		}
 
 	/* interpolate navigation for survey pings if needed */
 	if (status == MB_SUCCESS 
 		&& store->kind == MB_DATA_DATA
-		&& mb_io_ptr->nfix >= 1)
+		&& store->mul_group_mbsystemnav == MB_NO)
 		{
+		/* get timestamp */
 		time_d = store->mul_sec 
 			    - MBSYS_XSE_TIME_OFFSET
 			    + 0.000001 * store->mul_usec;
-		heading = RTD * store->nav_course_ground;
-		mb_navint_interp(verbose, mbio_ptr, time_d, heading, 
-				 ((double) 3.6 * store->nav_speed_ground), 
+			    
+		/* interpolate heading */
+		mb_hedint_interp(verbose, mbio_ptr, time_d, 
+				 &heading, error);
+
+		/* get speed if possible */
+		if (store->nav_group_log == MB_YES)
+			speed = 3.6 * store->nav_log_speed;	    
+		else if (store->nav_group_motiongt == MB_YES)
+			speed = 3.6 * store->nav_speed_ground;	    
+		else if (store->nav_group_motiontw == MB_YES)
+			speed = 3.6 * store->nav_speed_water;
+		else
+			speed = 0.0;
+
+		/* interpolate position */
+		mb_navint_interp(verbose, mbio_ptr, time_d, heading, speed, 
 				    &lon, &lat, &speed, error);
-		store->mul_x = lon;
-		store->mul_y = lat;
+				    
+		/* set values */
+		store->mul_lon = DTR * lon;
+		store->mul_lat = DTR * lat;
+		store->mul_heading = DTR * heading;
+		store->mul_speed = speed / 3.6;
+		store->mul_group_mbsystemnav = MB_YES;
 		}
 
 	/* print output debug statements */
@@ -815,14 +849,16 @@ fprintf(stderr, "READ SIDESCAN\n");
 			    status = mbr_l3xseraw_rd_sidescan(verbose,buffer_size,buffer,store_ptr,error);
 			    store->sid_frame = MB_YES;
 			    if (frame_id == *frame_expect
-				    && store->sid_ping == store->mul_ping)
+				    && store->sid_ping == store->mul_ping
+				    && store->sid_group_avl == MB_YES)
 				    {
 				    *frame_expect = MBSYS_XSE_NONE_FRAME;
 				    done = MB_YES;
 				    }
-			    else if (frame_id == *frame_expect)
+			    else if (frame_id == *frame_expect
+				    && store->sid_ping == store->mul_ping
+				    && store->sid_group_avl == MB_NO)
 				    {
-				    *frame_expect = MBSYS_XSE_MBM_FRAME;
 				    done = MB_NO;
 				    }
 			    else if (*frame_expect == MBSYS_XSE_NONE_FRAME)
@@ -831,7 +867,9 @@ fprintf(stderr, "READ SIDESCAN\n");
 				    done = MB_NO;
 				    }
 #ifdef MB_DEBUG
-fprintf(stderr, "\tDONE:%d BEAMS:%d PIXELS:%d\n", done, store->mul_num_beams, store->sid_num_pixels);
+fprintf(stderr, "\tframe_id:%d frame_expect:%d ping:%d %d sid_group_avl:%d\n",
+frame_id,*frame_expect,store->sid_ping,store->mul_ping,store->sid_group_avl);
+fprintf(stderr, "\tDONE:%d BEAMS:%d PIXELS:%d\n", done, store->mul_num_beams, store->sid_avl_num_samples);
 #endif
 			    }
 			else if (frame_id == MBSYS_XSE_MBM_FRAME
@@ -850,7 +888,7 @@ fprintf(stderr, "READ NOTHING - SAVE HEADER\n");
 			    *frame_expect = MBSYS_XSE_NONE_FRAME;
 			    done = MB_YES;
 #ifdef MB_DEBUG
-fprintf(stderr, "\tDONE:%d BEAMS:%d PIXELS:%d\n", done, store->mul_num_beams, store->sid_num_pixels);
+fprintf(stderr, "\tDONE:%d BEAMS:%d PIXELS:%d\n", done, store->mul_num_beams, store->sid_avl_num_samples);
 #endif
 			    }
 			else if (frame_id == MBSYS_XSE_MBM_FRAME)
@@ -878,7 +916,7 @@ fprintf(stderr, "READ MULTIBEAM\n");
 				    done = MB_NO;
 				    }
 #ifdef MB_DEBUG
-fprintf(stderr, "\tDONE:%d BEAMS:%d PIXELS:%d\n", done, store->mul_num_beams, store->sid_num_pixels);
+fprintf(stderr, "\tDONE:%d BEAMS:%d PIXELS:%d\n", done, store->mul_num_beams, store->sid_avl_num_samples);
 #endif
 			    }
 			else if (frame_id == MBSYS_XSE_SNG_FRAME)
@@ -1057,6 +1095,21 @@ int mbr_l3xseraw_rd_nav(int verbose,int buffer_size,char *buffer,void *store_ptr
 	mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->nav_source); index += 4;
 	mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->nav_sec); index += 4;
 	mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->nav_usec); index += 4;
+	
+	/* reset group read flags */
+	store->nav_group_general = MB_NO;	/* boolean flag */
+	store->nav_group_position = MB_NO;	/* boolean flag */
+	store->nav_group_accuracy = MB_NO;	/* boolean flag */
+	store->nav_group_motiongt = MB_NO;	/* boolean flag */
+	store->nav_group_motiontw = MB_NO;	/* boolean flag */
+	store->nav_group_track = MB_NO;		/* boolean flag */
+	store->nav_group_hrp = MB_NO;		/* boolean flag */
+	store->nav_group_heave = MB_NO;		/* boolean flag */
+	store->nav_group_roll = MB_NO;		/* boolean flag */
+	store->nav_group_pitch = MB_NO;		/* boolean flag */
+	store->nav_group_heading = MB_NO;	/* boolean flag */
+	store->nav_group_log = MB_NO;		/* boolean flag */
+	store->nav_group_gps = MB_NO;		/* boolean flag */	
 		
 	/* loop over groups */
 	done = MB_NO;
@@ -1124,6 +1177,7 @@ fprintf(stderr, "READ NAV_GROUP_GEN\n");
 #endif
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->nav_quality); index += 4;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->nav_status); index += 4;
+				store->nav_group_general = MB_YES;
 				}
 	    
 		    /* handle point group */
@@ -1142,6 +1196,21 @@ fprintf(stderr, "READ NAV_GROUP_POS\n");
 				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_x); index += 8;
 				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_y); index += 8;
 				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_z); index += 8;
+				store->nav_group_position = MB_YES;
+				}
+	    
+		    /* handle accuracy group */
+		    else if (group_id == MBSYS_XSE_NAV_GROUP_ACCURACY)
+				{
+#ifdef MB_DEBUG
+fprintf(stderr, "READ NAV_GROUP_ACCURACY\n");
+#endif
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->nav_acc_quality); index += 4;
+				store->nav_acc_numsatellites = buffer[index]; index++;
+				mb_get_binary_float(SWAPFLAG, &buffer[index], (float *) &store->nav_acc_horizdilution); index += 4;
+				mb_get_binary_float(SWAPFLAG, &buffer[index], (float *) &store->nav_acc_diffage); index += 4;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->nav_acc_diffref); index += 4;
+				store->nav_group_accuracy = MB_YES;
 				}
 	    
 		    /* handle motion ground truth group */
@@ -1152,6 +1221,7 @@ fprintf(stderr, "READ NAV_GROUP_MOTIONGT\n");
 #endif
 				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_speed_ground); index += 8;
 				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_course_ground); index += 8;
+				store->nav_group_motiongt = MB_YES;
 				}
 	    
 		    /* handle motion through water group */
@@ -1162,7 +1232,7 @@ fprintf(stderr, "READ NAV_GROUP_MOTIONTW\n");
 #endif
 				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_speed_water); index += 8;
 				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_course_water); index += 8;
-/* fprintf(stderr, "MTW Group Heading: %lf\n", store->nav_course_water); */
+				store->nav_group_motiontw = MB_YES;
 				}
 
 			/* handle current track steering properties group */
@@ -1171,7 +1241,14 @@ fprintf(stderr, "READ NAV_GROUP_MOTIONTW\n");
 #ifdef MB_DEBUG
 fprintf(stderr, "READ NAV_GROUP_TRACK\n");
 #endif
-				/* currently unused by MB-System */
+				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_trk_offset_track); index += 8;
+				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_trk_offset_sol); index += 8;
+				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_trk_offset_eol); index += 8;
+				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_trk_distance_sol); index += 8;
+				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_trk_azimuth_sol); index += 8;
+				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_trk_distance_eol); index += 8;
+				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_trk_azimuth_eol); index += 8;
+				store->nav_group_track = MB_YES;
 				}
 
 			/* handle the heaverollpitch group */
@@ -1180,7 +1257,10 @@ fprintf(stderr, "READ NAV_GROUP_TRACK\n");
 #ifdef MB_DEBUG
 fprintf(stderr, "READ NAV_GROUP_HRP\n");
 #endif
-				/* currently unused by MB-System */
+				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_hrp_heave); index += 8;
+				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_hrp_roll); index += 8;
+				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_hrp_pitch); index += 8;
+				store->nav_group_hrp = MB_YES;
 				/* heave, roll, and pitch are best obtained from the multibeam frame */
 				}
 		    
@@ -1190,7 +1270,8 @@ fprintf(stderr, "READ NAV_GROUP_HRP\n");
 #ifdef MB_DEBUG
 fprintf(stderr, "READ NAV_GROUP_HEAVE\n");
 #endif
-				/* currently unused by MB-System */
+				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_hea_heave); index += 8;
+				store->nav_group_heave = MB_YES;
 				/* heave is obtained from the multibeam frame */
 				}
 		    
@@ -1200,7 +1281,8 @@ fprintf(stderr, "READ NAV_GROUP_HEAVE\n");
 #ifdef MB_DEBUG
 fprintf(stderr, "READ NAV_GROUP_ROLL\n");
 #endif
-				/* currently unused by MB-System */
+				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_rol_roll); index += 8;
+				store->nav_group_roll = MB_YES;
 				/* roll is obtained from the multibeam frame */
 				}
 		    
@@ -1210,7 +1292,8 @@ fprintf(stderr, "READ NAV_GROUP_ROLL\n");
 #ifdef MB_DEBUG
 fprintf(stderr, "READ NAV_GROUP_PITCH\n");
 #endif
-				/* currently unused by MB-System */
+				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_pit_pitch); index += 8;
+				store->nav_group_pitch = MB_YES;
 				/* pitch is obtained from the multibeam frame */
 				}
 		    
@@ -1220,9 +1303,9 @@ fprintf(stderr, "READ NAV_GROUP_PITCH\n");
 #ifdef MB_DEBUG
 fprintf(stderr, "READ NAV_GROUP_HEADING\n");
 #endif
-				/* Let the Heading Group course value override the MTW Group course value */
-				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_course_water); index += 8;
-				/* fprintf(stderr, "Heading Group Heading: %lf\n", store->nav_course_water*RTD); */
+				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_hdg_heading); index += 8;
+				store->nav_group_heading = MB_YES;
+				/* Heading Group value overrides the MTW Group course value */
 				}
 		    
 			/* handle the log group */
@@ -1231,9 +1314,21 @@ fprintf(stderr, "READ NAV_GROUP_HEADING\n");
 #ifdef MB_DEBUG
 fprintf(stderr, "READ NAV_GROUP_LOG\n");
 #endif
-				/* currently unused by MB-System */
+				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_log_speed); index += 8;
+				store->nav_group_log = MB_YES;
 				/* speed is obtained from the motion ground truth */
 				/* and motion through water groups */
+				}
+		    
+			/* handle the gps group */
+			else if (group_id == MBSYS_XSE_NAV_GROUP_GPS)
+				{
+#ifdef MB_DEBUG
+fprintf(stderr, "READ NAV_GROUP_LOG\n");
+#endif
+				mb_get_binary_float(SWAPFLAG, &buffer[index], &store->nav_gps_altitude); index += 4;
+				mb_get_binary_float(SWAPFLAG, &buffer[index], &store->nav_gps_geoidalseparation); index += 4;
+				store->nav_group_gps = MB_YES;
 				}
 
 			else
@@ -1743,6 +1838,7 @@ fprintf(stderr, "Group %d of %d bytes to be parsed in MBIO function <%s>\n",
 		    /* handle parameter group */
 		    else if (group_id == MBSYS_XSE_SHP_GROUP_PARAMETER)
 				{
+				store->par_parameter = MB_YES;
 				mb_get_binary_float(SWAPFLAG, &buffer[index], &store->par_roll_bias); index += 4;
 				mb_get_binary_float(SWAPFLAG, &buffer[index], &store->par_pitch_bias); index += 4;
 				mb_get_binary_float(SWAPFLAG, &buffer[index], &store->par_heading_bias); index += 4;
@@ -1761,6 +1857,59 @@ fprintf(stderr, "Group %d of %d bytes to be parsed in MBIO function <%s>\n",
 				mb_get_binary_float(SWAPFLAG, &buffer[index], &store->par_hrp_x); index += 4;
 				mb_get_binary_float(SWAPFLAG, &buffer[index], &store->par_hrp_y); index += 4;
 				mb_get_binary_float(SWAPFLAG, &buffer[index], &store->par_hrp_z); index += 4;
+				}
+	    
+		    /* handle navigation and motion group */
+		    else if (group_id == MBSYS_XSE_SHP_GROUP_NAVIGATIONANDMOTION)
+				{
+				store->par_navigationandmotion = MB_YES;
+				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->par_nam_roll_bias); index += 8;
+				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->par_nam_pitch_bias); index += 8;
+				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->par_nam_heave_bias); index += 8;
+				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->par_nam_heading_bias); index += 8;
+				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->par_nam_time_delay); index += 8;
+				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->par_nam_nav_x); index += 8;
+				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->par_nam_nav_y); index += 8;
+				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->par_nam_nav_z); index += 8;
+				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->par_nam_hrp_x); index += 8;
+				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->par_nam_hrp_y); index += 8;
+				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->par_nam_hrp_z); index += 8;
+				}
+	    
+		    /* handle transducer group */
+		    else if (group_id == MBSYS_XSE_SHP_GROUP_TRANSDUCER)
+				{
+				mb_get_binary_int(SWAPFLAG, &buffer[index], &store->par_xdr_num_transducer); index += 4;
+				for (i=0;i<store->par_xdr_num_transducer;i++)
+					{
+					mb_get_binary_int(SWAPFLAG, &buffer[index], &store->par_xdr_sensorid[i]); index += 4;
+					mb_get_binary_int(SWAPFLAG, &buffer[index], &store->par_xdr_frequency[i]); index += 4;
+					store->par_xdr_transducer[i] = buffer[index]; index++;
+					store->par_xdr_side[i] = buffer[index]; index++;
+					mb_get_binary_double(SWAPFLAG, &buffer[index], &store->par_xdr_mountingroll[i]); index += 8;
+					mb_get_binary_double(SWAPFLAG, &buffer[index], &store->par_xdr_mountingpitch[i]); index += 8;
+					mb_get_binary_double(SWAPFLAG, &buffer[index], &store->par_xdr_mountingazimuth[i]); index += 8;
+					mb_get_binary_double(SWAPFLAG, &buffer[index], &store->par_xdr_mountingdistance[i]); index += 8;
+					mb_get_binary_double(SWAPFLAG, &buffer[index], &store->par_xdr_x[i]); index += 8;
+					mb_get_binary_double(SWAPFLAG, &buffer[index], &store->par_xdr_y[i]); index += 8;
+					mb_get_binary_double(SWAPFLAG, &buffer[index], &store->par_xdr_z[i]); index += 8;
+					mb_get_binary_double(SWAPFLAG, &buffer[index], &store->par_xdr_roll[i]); index += 8;
+					mb_get_binary_double(SWAPFLAG, &buffer[index], &store->par_xdr_pitch[i]); index += 8;
+					mb_get_binary_double(SWAPFLAG, &buffer[index], &store->par_xdr_azimuth[i]); index += 8;
+					}
+				}
+	    
+		    /* handle tranducer extended group */
+		    else if (group_id == MBSYS_XSE_SHP_GROUP_TRANSDUCEREXTENDED)
+				{
+				mb_get_binary_int(SWAPFLAG, &buffer[index], &store->par_xdx_num_transducer); index += 4;
+				for (i=0;i<store->par_xdx_num_transducer;i++)
+					{
+					store->par_xdx_roll[i] = buffer[index]; index++;
+					store->par_xdx_pitch[i] = buffer[index]; index++;
+					store->par_xdx_azimuth[i] = buffer[index]; index++;
+					index += 48;
+					}
 				}
 			}
 	    }
@@ -1786,6 +1935,7 @@ fprintf(stderr, "Group %d of %d bytes to be parsed in MBIO function <%s>\n",
 		fprintf(stderr,"dbg5       par_ship_sensor_type[%d]:      %d\n",i,store->par_ship_sensor_type[i]);
 		fprintf(stderr,"dbg5       par_ship_sensor_frequency[%d]: %d\n",i,store->par_ship_sensor_frequency[i]);
 		}
+	    fprintf(stderr,"dbg5       par_parameter:       %d\n",store->par_parameter);
 	    fprintf(stderr,"dbg5       par_roll_bias:       %f\n",store->par_roll_bias);
 	    fprintf(stderr,"dbg5       par_pitch_bias:      %f\n",store->par_pitch_bias);
 	    fprintf(stderr,"dbg5       par_heading_bias:    %f\n",store->par_heading_bias);
@@ -1804,6 +1954,34 @@ fprintf(stderr, "Group %d of %d bytes to be parsed in MBIO function <%s>\n",
 	    fprintf(stderr,"dbg5       par_hrp_x:           %f\n",store->par_hrp_x);
 	    fprintf(stderr,"dbg5       par_hrp_y:           %f\n",store->par_hrp_y);
 	    fprintf(stderr,"dbg5       par_hrp_z:           %f\n",store->par_hrp_z);
+	    fprintf(stderr,"dbg5       par_navigationandmotion: %d\n",store->par_navigationandmotion);
+	    fprintf(stderr,"dbg5       par_nam_roll_bias:       %f\n",store->par_nam_roll_bias);
+	    fprintf(stderr,"dbg5       par_nam_pitch_bias:      %f\n",store->par_nam_pitch_bias);
+	    fprintf(stderr,"dbg5       par_nam_heave_bias:      %f\n",store->par_nam_heave_bias);
+	    fprintf(stderr,"dbg5       par_nam_heading_bias:    %f\n",store->par_nam_heading_bias);
+	    fprintf(stderr,"dbg5       par_nam_time_delay:      %f\n",store->par_nam_time_delay);
+	    fprintf(stderr,"dbg5       par_nam_nav_x:           %f\n",store->par_nam_nav_x);
+	    fprintf(stderr,"dbg5       par_nam_nav_y:           %f\n",store->par_nam_nav_y);
+	    fprintf(stderr,"dbg5       par_nam_nav_z:           %f\n",store->par_nam_nav_z);
+	    fprintf(stderr,"dbg5       par_nam_hrp_x:           %f\n",store->par_nam_hrp_x);
+	    fprintf(stderr,"dbg5       par_nam_hrp_y:           %f\n",store->par_nam_hrp_y);
+	    fprintf(stderr,"dbg5       par_nam_hrp_z:           %f\n",store->par_nam_hrp_z);
+	    fprintf(stderr,"dbg5       par_xdr_num_transducer:  %d\n",store->par_xdr_num_transducer);
+	    fprintf(stderr,"dbg5       # sensor xducer freq side roll pitch azi dist\n");
+	    for (i=0;i<store->par_xdr_num_transducer;i++)
+	    	fprintf(stderr,"dbg5       %d %d %d %d %d %f %f %f %f\n", i, store->par_xdr_sensorid[i], store->par_xdr_transducer[i], 
+	    							store->par_xdr_frequency[i], store->par_xdr_side[i], 
+								store->par_xdr_mountingroll[i], store->par_xdr_mountingpitch[i], 
+								store->par_xdr_mountingazimuth[i], store->par_xdr_mountingdistance[i]);
+	    fprintf(stderr,"dbg5       # x y z roll pitch azimuth\n");
+	    for (i=0;i<store->par_xdr_num_transducer;i++)
+	    	fprintf(stderr,"dbg5       %d %f %f %f %f %f %f\n", i, store->par_xdr_x[i], store->par_xdr_y[i], 
+	    							store->par_xdr_z[i], store->par_xdr_roll[i], 
+								store->par_xdr_pitch[i], store->par_xdr_azimuth[i]);
+	    fprintf(stderr,"dbg5       par_xdx_num_transducer:  %d\n",store->par_xdx_num_transducer);
+	    fprintf(stderr,"dbg5       # roll pitch azimuth\n");
+	    for (i=0;i<store->par_xdx_num_transducer;i++)
+	    	fprintf(stderr,"dbg5       %d %d %d %d\n", i, store->par_xdx_roll[i], store->par_xdx_pitch[i], store->par_xdx_azimuth[i]);
 	    }
 
 	/* print output debug statements */
@@ -1926,13 +2104,13 @@ fprintf(stderr, "READ SSN_GROUP_GEN\n");
 				mb_get_binary_float(SWAPFLAG, &buffer[index], &store->sid_power); index += 4;
 				mb_get_binary_float(SWAPFLAG, &buffer[index], &store->sid_bandwidth); index += 4;
 				mb_get_binary_float(SWAPFLAG, &buffer[index], &store->sid_sample); index += 4;
-#ifdef MB_DEBUG
+#ifdef MB_DEBUG2
 fprintf(stderr, "ping=%u\n", store->sid_ping);
-fprintf(stderr, "frequency=%f\n", store->sid_frequency);
-fprintf(stderr, "pulse=%f\n", store->sid_pulse);
-fprintf(stderr, "power=%f\n", store->sid_power);
-fprintf(stderr, "bandwidth=%f\n", store->sid_bandwidth);
-fprintf(stderr, "sample=%f\n", store->sid_sample);
+fprintf(stderr, "frequency=%g\n", store->sid_frequency);
+fprintf(stderr, "pulse=%g\n", store->sid_pulse);
+fprintf(stderr, "power=%g\n", store->sid_power);
+fprintf(stderr, "bandwidth=%g\n", store->sid_bandwidth);
+fprintf(stderr, "sample=%g\n", store->sid_sample);
 #endif
 				}
 	
@@ -1942,7 +2120,22 @@ fprintf(stderr, "sample=%f\n", store->sid_sample);
 #ifdef MB_DEBUG
 fprintf(stderr, "READ SSN_GROUP_AMPVSTT\n");
 #endif
-				/* currently unused by MB-System */
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sid_avt_sampleus); index += 4;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], &store->sid_avt_offset); index += 4;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], &store->sid_avt_num_samples); index += 4;
+				for (i=0;i<store->sid_avt_num_samples;i++)
+				    if (i < MBSYS_XSE_MAXPIXELS)
+						{
+						mb_get_binary_short(SWAPFLAG, &buffer[index], &store->sid_avt_amp[i]); index += 2;
+						}
+				store->sid_group_avt = MB_YES;
+#ifdef MB_DEBUG2
+fprintf(stderr, "sid_avt_sampleus=%d\n", store->sid_avt_sampleus);
+fprintf(stderr, "sid_avt_offset=%d\n", store->sid_avt_offset);
+fprintf(stderr, "sid_avt_num_samples=%d\n", store->sid_avt_num_samples);
+for (i=0;i<store->sid_avt_num_samples;i++)
+	fprintf(stderr, "sid_avt_amp[%d]:%d\n", i, store->sid_avt_amp[i]);
+#endif
 				}
 
 			/* handle phase vs traveltime group */  
@@ -1951,7 +2144,22 @@ fprintf(stderr, "READ SSN_GROUP_AMPVSTT\n");
 #ifdef MB_DEBUG
 fprintf(stderr, "READ SSN_GROUP_PHASEVSTT\n");
 #endif
-				/* currently unused by MB-System */
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sid_pvt_sampleus); index += 4;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], &store->sid_pvt_offset); index += 4;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], &store->sid_pvt_num_samples); index += 4;
+				for (i=0;i<store->sid_pvt_num_samples;i++)
+				    if (i < MBSYS_XSE_MAXPIXELS)
+						{
+						mb_get_binary_short(SWAPFLAG, &buffer[index], &store->sid_pvt_phase[i]); index += 2;
+						}
+				store->sid_group_pvt = MB_YES;
+#ifdef MB_DEBUG2
+fprintf(stderr, "sid_pvt_sampleus=%d\n", store->sid_pvt_sampleus);
+fprintf(stderr, "sid_pvt_offset=%d\n", store->sid_pvt_offset);
+fprintf(stderr, "sid_pvt_num_samples=%d\n", store->sid_pvt_num_samples);
+for (i=0;i<store->sid_pvt_num_samples;i++)
+	fprintf(stderr, "sid_pvt_phase[%d]:%d\n", i, store->sid_pvt_phase[i]);
+#endif
 				}
 	    
 		    /* handle amplitude vs lateral group */
@@ -1960,14 +2168,22 @@ fprintf(stderr, "READ SSN_GROUP_PHASEVSTT\n");
 #ifdef MB_DEBUG
 fprintf(stderr, "READ SSN_GROUP_AMPVSLAT\n");
 #endif
-				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sid_bin_size); index += 4;
-				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sid_offset); index += 4;
-				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sid_num_pixels); index += 4;
-				for (i=0;i<store->sid_num_pixels;i++)
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sid_avl_binsize); index += 4;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sid_avl_offset); index += 4;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sid_avl_num_samples); index += 4;
+				for (i=0;i<store->sid_avl_num_samples;i++)
 				    if (i < MBSYS_XSE_MAXPIXELS)
 						{
-						mb_get_binary_short(SWAPFLAG, &buffer[index], &store->ss[i]); index += 2;
+						mb_get_binary_short(SWAPFLAG, &buffer[index], &store->sid_avl_amp[i]); index += 2;
 						}
+				store->sid_group_avl = MB_YES;
+#ifdef MB_DEBUG2
+fprintf(stderr, "sid_avl_binsize=%d\n", store->sid_avl_binsize);
+fprintf(stderr, "sid_avl_offset=%d\n", store->sid_avl_offset);
+fprintf(stderr, "sid_avl_num_samples=%d\n", store->sid_avl_num_samples);
+for (i=0;i<store->sid_avl_num_samples;i++)
+	fprintf(stderr, "sid_avl_amp[%d]:%d\n", i, store->sid_avl_amp[i]);
+#endif
 				}
 
 			else if (group_id == MBSYS_XSE_SSN_GROUP_PHASEVSLAT)
@@ -1975,7 +2191,122 @@ fprintf(stderr, "READ SSN_GROUP_AMPVSLAT\n");
 #ifdef MB_DEBUG
 fprintf(stderr, "READ SSN_GROUP_PHASEVSLAT\n");
 #endif
-				/* currently unused by MB-System */
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sid_pvl_binsize); index += 4;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sid_pvl_offset); index += 4;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sid_pvl_num_samples); index += 4;
+				for (i=0;i<store->sid_pvl_num_samples;i++)
+				    if (i < MBSYS_XSE_MAXPIXELS)
+						{
+						mb_get_binary_short(SWAPFLAG, &buffer[index], &store->sid_pvl_phase[i]); index += 2;
+						}
+				store->sid_group_pvl = MB_YES;
+#ifdef MB_DEBUG2
+fprintf(stderr, "sid_pvl_binsize=%d\n", store->sid_pvl_binsize);
+fprintf(stderr, "sid_pvl_offset=%d\n", store->sid_pvl_offset);
+fprintf(stderr, "sid_pvl_num_samples=%d\n", store->sid_pvl_num_samples);
+for (i=0;i<store->sid_pvl_num_samples;i++)
+	fprintf(stderr, "sid_pvl_phase[%d]:%d\n", i, store->sid_pvl_phase[i]);
+#endif
+				}
+
+			else if (group_id == MBSYS_XSE_SSN_GROUP_SIGNAL)
+				{
+#ifdef MB_DEBUG
+fprintf(stderr, "READ MBSYS_XSE_SSN_GROUP_SIGNAL\n");
+#endif
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sid_sig_ping); index += 4;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sid_sig_channel); index += 4;
+				mb_get_binary_double(SWAPFLAG, &buffer[index], (double *) &store->sid_sig_offset); index += 8;
+				mb_get_binary_double(SWAPFLAG, &buffer[index], (double *) &store->sid_sig_sample); index += 8;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sid_sig_num_samples); index += 4;
+				for (i=0;i<store->sid_sig_num_samples;i++)
+				    if (i < MBSYS_XSE_MAXPIXELS)
+						{
+						mb_get_binary_short(SWAPFLAG, &buffer[index], &store->sid_sig_phase[i]); index += 2;
+						}
+				store->sid_group_signal = MB_YES;
+#ifdef MB_DEBUG2
+fprintf(stderr, "sid_sig_ping=%d\n", store->sid_sig_ping);
+fprintf(stderr, "sid_sig_channel=%d\n", store->sid_sig_channel);
+fprintf(stderr, "sid_sig_offset=%g\n", store->sid_sig_offset);
+fprintf(stderr, "sid_sig_sample=%g\n", store->sid_sig_sample);
+fprintf(stderr, "sid_sig_num_samples=%d\n", store->sid_sig_num_samples);
+for (i=0;i<store->sid_sig_num_samples;i++)
+	fprintf(stderr, "sid_sig_phase[%d]:%d\n", i, store->sid_sig_phase[i]);
+#endif
+				}
+
+			else if (group_id == MBSYS_XSE_SSN_GROUP_PINGTYPE)
+				{
+#ifdef MB_DEBUG
+fprintf(stderr, "READ MBSYS_XSE_SSN_GROUP_PINGTYPE\n");
+#endif
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sid_png_pulse); index += 4;
+				mb_get_binary_double(SWAPFLAG, &buffer[index], (double *) &store->sid_png_startfrequency); index += 8;
+				mb_get_binary_double(SWAPFLAG, &buffer[index], (double *) &store->sid_png_endfrequency); index += 8;
+				mb_get_binary_double(SWAPFLAG, &buffer[index], (double *) &store->sid_png_duration); index += 8;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sid_png_mancode); index += 4;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sid_png_pulseid); index += 4;
+				for (i=0;i<byte_count-40;i++)
+					{
+					store->sid_png_pulsename[i] = buffer[index]; index++;
+					}
+				store->sid_group_ping = MB_YES;
+#ifdef MB_DEBUG2
+fprintf(stderr, "sid_png_pulse=%d\n", store->sid_png_pulse);
+fprintf(stderr, "sid_png_startfrequency=%f\n", store->sid_png_startfrequency);
+fprintf(stderr, "sid_png_endfrequency=%f\n", store->sid_png_endfrequency);
+fprintf(stderr, "sid_png_duration=%f\n", store->sid_png_duration);
+fprintf(stderr, "sid_png_mancode=%d\n", store->sid_png_mancode);
+fprintf(stderr, "sid_png_pulseid=%d\n", store->sid_png_pulseid);
+fprintf(stderr, "sid_png_pulsename=%s\n", store->sid_png_pulsename);
+#endif
+				}
+
+			else if (group_id == MBSYS_XSE_SSN_GROUP_COMPLEXSIGNAL)
+				{
+#ifdef MB_DEBUG
+fprintf(stderr, "READ MBSYS_XSE_SSN_GROUP_COMPLEXSIGNAL\n");
+#endif
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sid_cmp_ping); index += 4;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sid_cmp_channel); index += 4;
+				mb_get_binary_double(SWAPFLAG, &buffer[index], (double *) &store->sid_cmp_offset); index += 8;
+				mb_get_binary_double(SWAPFLAG, &buffer[index], (double *) &store->sid_cmp_sample); index += 8;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sid_cmp_num_samples); index += 4;
+				for (i=0;i<store->sid_cmp_num_samples;i++)
+				    if (i < MBSYS_XSE_MAXPIXELS)
+						{
+						mb_get_binary_short(SWAPFLAG, &buffer[index], &store->sid_cmp_real[i]); index += 2;
+						mb_get_binary_short(SWAPFLAG, &buffer[index], &store->sid_cmp_imaginary[i]); index += 2;
+						}
+				store->sid_group_complex = MB_YES;
+#ifdef MB_DEBUG2
+fprintf(stderr, "sid_cmp_ping=%d\n", store->sid_cmp_ping);
+fprintf(stderr, "sid_cmp_channel=%d\n", store->sid_cmp_channel);
+fprintf(stderr, "sid_cmp_offset=%f\n", store->sid_cmp_offset);
+fprintf(stderr, "sid_cmp_sample=%f\n", store->sid_cmp_sample);
+fprintf(stderr, "sid_cmp_num_samples=%d\n", store->sid_cmp_num_samples);
+for (i=0;i<store->sid_cmp_num_samples;i++)
+	fprintf(stderr, "sid_cmp_real[%d]:%d sid_cmp_imaginary[%d]:%d\n", i, store->sid_cmp_real[i], i, store->sid_cmp_imaginary[i]);
+#endif
+				}
+
+			else if (group_id == MBSYS_XSE_SSN_GROUP_WEIGHTING)
+				{
+#ifdef MB_DEBUG
+fprintf(stderr, "READ MBSYS_XSE_SSN_GROUP_WEIGHTING\n");
+#endif
+				mb_get_binary_short(SWAPFLAG, &buffer[index], (short *) &store->sid_wgt_factorleft); index += 2;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sid_wgt_samplesleft); index += 4;
+				mb_get_binary_short(SWAPFLAG, &buffer[index], (short *) &store->sid_wgt_factorright); index += 2;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sid_wgt_samplesright); index += 4;
+				store->sid_group_weighting = MB_YES;
+#ifdef MB_DEBUG2
+fprintf(stderr, "sid_wgt_factorleft=%d\n", store->sid_wgt_factorleft);
+fprintf(stderr, "sid_wgt_samplesleft=%d\n", store->sid_wgt_samplesleft);
+fprintf(stderr, "sid_wgt_factorright=%d\n", store->sid_wgt_factorright);
+fprintf(stderr, "sid_wgt_samplesright=%d\n", store->sid_wgt_samplesright);
+#endif
 				}
 
 			else
@@ -1991,8 +2322,8 @@ fprintf(stderr, "READ SSN_GROUP_OTHER\n");
 	   calculate bin size from bathymetry */
 	if (store->mul_frame == MB_YES
 	    && store->mul_num_beams > 1
-	    && store->sid_num_pixels > 1
-	    && store->sid_bin_size <= 0)
+	    && store->sid_avl_num_samples > 1
+	    && store->sid_avl_binsize <= 0)
 	    {
 	    /* get width of bathymetry swath size */
 	    xmin = 9999999.9;
@@ -2005,14 +2336,14 @@ fprintf(stderr, "READ SSN_GROUP_OTHER\n");
 	    
 	    /* get number of nonzero pixels */
 	    ngoodss = 0;
-	    for (i=0;i<store->sid_num_pixels;i++)
-			if (store->ss[i] != 0) ngoodss++;
+	    for (i=0;i<store->sid_avl_num_samples;i++)
+			if (store->sid_avl_amp[i] != 0) ngoodss++;
 		
 	    /* get bin size */
 	    if (xmax > xmin && ngoodss > 1)
 			{
 			binsize = (xmax - xmin) / (ngoodss - 1);
-			store->sid_bin_size = 1000 * binsize;
+			store->sid_avl_binsize = 1000 * binsize;
 			}
 	    }
 
@@ -2021,21 +2352,70 @@ fprintf(stderr, "READ SSN_GROUP_OTHER\n");
 	    {
 	    fprintf(stderr,"\ndbg5  Values read in MBIO function <%s>\n",
 		    function_name);
-	    fprintf(stderr,"dbg5       sid_source:          %d\n",store->sid_source);
-	    fprintf(stderr,"dbg5       sid_sec:             %u\n",store->sid_sec);
-	    fprintf(stderr,"dbg5       sid_usec:            %u\n",store->sid_usec);
-	    fprintf(stderr,"dbg5       sid_ping:            %d\n",store->sid_ping);
-	    fprintf(stderr,"dbg5       sid_frequency:       %f\n",store->sid_frequency);
-	    fprintf(stderr,"dbg5       sid_pulse:           %f\n",store->sid_pulse);
-	    fprintf(stderr,"dbg5       sid_power:           %f\n",store->sid_power);
-	    fprintf(stderr,"dbg5       sid_bandwidth:       %f\n",store->sid_bandwidth);
-	    fprintf(stderr,"dbg5       sid_sample:          %f\n",store->sid_sample);
-	    fprintf(stderr,"dbg5       sid_bin_size:        %d\n",store->sid_bin_size);
-	    fprintf(stderr,"dbg5       sid_offset:          %d\n",store->sid_offset);
-	    fprintf(stderr,"dbg5       sid_num_pixels:      %d\n",store->sid_num_pixels);
-	    for (i=0;i<store->sid_num_pixels;i++)
-		fprintf(stderr,"dbg5       pixel[%d]: %5d\n",
-		    i, store->ss[i]);
+	    fprintf(stderr,"dbg5       sid_frame:            %d\n",store->sid_frame);
+	    fprintf(stderr,"dbg5       sid_group_avt:        %d\n",store->sid_group_avt);
+	    fprintf(stderr,"dbg5       sid_group_pvt:        %d\n",store->sid_group_pvt);
+	    fprintf(stderr,"dbg5       sid_group_avl:        %d\n",store->sid_group_avl);
+	    fprintf(stderr,"dbg5       sid_group_pvl:        %d\n",store->sid_group_pvl);
+	    fprintf(stderr,"dbg5       sid_group_signal:     %d\n",store->sid_group_signal);
+	    fprintf(stderr,"dbg5       sid_group_ping:       %d\n",store->sid_group_ping);
+	    fprintf(stderr,"dbg5       sid_group_complex:    %d\n",store->sid_group_complex);
+	    fprintf(stderr,"dbg5       sid_group_weighting:  %d\n",store->sid_group_weighting);
+	    fprintf(stderr,"dbg5       sid_source:           %d\n",store->sid_source);
+	    fprintf(stderr,"dbg5       sid_sec:              %d\n",store->sid_sec);
+	    fprintf(stderr,"dbg5       sid_usec:             %u\n",store->sid_usec);
+	    fprintf(stderr,"dbg5       sid_ping:             %u\n",store->sid_ping);
+	    fprintf(stderr,"dbg5       sid_frequency:        %f\n",store->sid_frequency);
+	    fprintf(stderr,"dbg5       sid_pulse:            %f\n",store->sid_pulse);
+	    fprintf(stderr,"dbg5       sid_power:            %f\n",store->sid_power);
+	    fprintf(stderr,"dbg5       sid_bandwidth:        %f\n",store->sid_bandwidth);
+	    fprintf(stderr,"dbg5       sid_sample:           %f\n",store->sid_sample);
+	    fprintf(stderr,"dbg5       sid_avt_sampleus:     %d\n",store->sid_avt_sampleus);
+	    fprintf(stderr,"dbg5       sid_avt_offset:       %d\n",store->sid_avt_offset);
+	    fprintf(stderr,"dbg5       sid_avt_num_samples:  %d\n",store->sid_avt_num_samples);
+	    for (i=0;i<store->sid_avt_num_samples;i++)
+	    	fprintf(stderr,"dbg5       sid_avt_amp[%d]:%d\n",i,store->sid_avt_amp[i]);
+	    fprintf(stderr,"dbg5       sid_pvt_sampleus:  %d\n",store->sid_pvt_sampleus);
+	    fprintf(stderr,"dbg5       sid_pvt_offset:  %d\n",store->sid_pvt_offset);
+	    fprintf(stderr,"dbg5       sid_pvt_num_samples:  %d\n",store->sid_pvt_num_samples);
+	    for (i=0;i<store->sid_pvt_num_samples;i++)
+	    	fprintf(stderr,"dbg5       sid_pvt_phase[%d]:%d\n",i,store->sid_pvt_phase[i]);
+	    fprintf(stderr,"dbg5       sid_avl_binsize:  %d\n",store->sid_avl_binsize);
+	    fprintf(stderr,"dbg5       sid_avl_offset:  %d\n",store->sid_avl_offset);
+	    fprintf(stderr,"dbg5       sid_avl_num_samples:  %d\n",store->sid_avl_num_samples);
+	    for (i=0;i<store->sid_avl_num_samples;i++)
+	    	fprintf(stderr,"dbg5       sid_avl_amp[%d]:%d\n",i,store->sid_avl_amp[i]);
+	    fprintf(stderr,"dbg5       sid_pvl_binsize:  %d\n",store->sid_pvl_binsize);
+	    fprintf(stderr,"dbg5       sid_pvl_offset:  %d\n",store->sid_pvl_offset);
+	    fprintf(stderr,"dbg5       sid_pvl_num_samples:  %d\n",store->sid_pvl_num_samples);
+	    for (i=0;i<store->sid_pvl_num_samples;i++)
+	    	fprintf(stderr,"dbg5       sid_pvl_phase[%d]:%d\n",i,store->sid_pvl_phase[i]);
+	    fprintf(stderr,"dbg5       sid_sig_ping:  %d\n",store->sid_sig_ping);
+	    fprintf(stderr,"dbg5       sid_sig_channel:  %d\n",store->sid_sig_channel);
+	    fprintf(stderr,"dbg5       sid_sig_offset:  %f\n",store->sid_sig_offset);
+	    fprintf(stderr,"dbg5       sid_sig_sample:  %f\n",store->sid_sig_sample);
+	    fprintf(stderr,"dbg5       sid_sig_num_samples:  %d\n",store->sid_sig_num_samples);
+	    for (i=0;i<store->sid_sig_num_samples;i++)
+	    	fprintf(stderr,"dbg5       sid_sig_phase[%d]:%d\n",i,store->sid_sig_phase[i]);
+	    fprintf(stderr,"dbg5       sid_png_pulse:  %u\n",store->sid_png_pulse);
+	    fprintf(stderr,"dbg5       sid_png_startfrequency:  %f\n",store->sid_png_startfrequency);
+	    fprintf(stderr,"dbg5       sid_png_endfrequency:  %f\n",store->sid_png_endfrequency);
+	    fprintf(stderr,"dbg5       sid_png_duration:  %f\n",store->sid_png_duration);
+	    fprintf(stderr,"dbg5       sid_png_mancode:  %d\n",store->sid_png_mancode);
+	    fprintf(stderr,"dbg5       sid_png_pulseid:  %d\n",store->sid_png_pulseid);
+	    fprintf(stderr,"dbg5       sid_png_pulsename:  %s\n",store->sid_png_pulsename);
+	    fprintf(stderr,"dbg5       sid_cmp_ping:  %d\n",store->sid_cmp_ping);
+	    fprintf(stderr,"dbg5       sid_cmp_channel:  %d\n",store->sid_cmp_channel);
+	    fprintf(stderr,"dbg5       sid_cmp_offset:  %f\n",store->sid_cmp_offset);
+	    fprintf(stderr,"dbg5       sid_cmp_sample:  %f\n",store->sid_cmp_sample);
+	    fprintf(stderr,"dbg5       sid_cmp_num_samples:  %d\n",store->sid_cmp_num_samples);
+	    for (i=0;i<store->sid_sig_num_samples;i++)
+	    	fprintf(stderr,"dbg5       sid_cmp_real[%d]:%d sid_cmp_imaginary[%d]:%d\n",
+				i,store->sid_cmp_real[i],i,store->sid_cmp_imaginary[i]);
+	    fprintf(stderr,"dbg5       sid_wgt_factorleft:  %d\n",store->sid_wgt_factorleft);
+	    fprintf(stderr,"dbg5       sid_wgt_samplesleft:  %d\n",store->sid_wgt_samplesleft);
+	    fprintf(stderr,"dbg5       sid_wgt_factorright:  %d\n",store->sid_wgt_factorright);
+	    fprintf(stderr,"dbg5       sid_wgt_samplesright:  %d\n",store->sid_wgt_samplesright);
 	    }
 
 	/* print output debug statements */
@@ -2097,6 +2477,13 @@ int mbr_l3xseraw_rd_multibeam(int verbose,int buffer_size,char *buffer,void *sto
 	store->mul_group_heave = MB_NO;	/* boolean flag - heave group read */
 	store->mul_group_roll = MB_NO;	/* boolean flag - roll group read */
 	store->mul_group_pitch = MB_NO;	/* boolean flag - pitch group read */
+	store->mul_group_gates = MB_NO;	/* boolean flag - gates group read */
+	store->mul_group_noise = MB_NO;	/* boolean flag - noise group read */
+	store->mul_group_length = MB_NO;	/* boolean flag - length group read */
+	store->mul_group_hits = MB_NO;		/* boolean flag - hits group read */
+	store->mul_group_heavereceive = MB_NO;	/* boolean flag - heavereceive group read */
+	store->mul_group_azimuth = MB_NO;	/* boolean flag - azimuth group read */
+	store->mul_group_mbsystemnav = MB_NO;	/* boolean flag - mbsystemnav group read */
 		
 	/* get source and time */
 	index = 12;
@@ -2175,7 +2562,7 @@ fprintf(stderr, "READ MBM_GROUP_GEN\n");
 				mb_get_binary_float(SWAPFLAG, &buffer[index], &store->mul_bandwidth); index += 4;
 				mb_get_binary_float(SWAPFLAG, &buffer[index], &store->mul_sample); index += 4;
 				mb_get_binary_float(SWAPFLAG, &buffer[index], &store->mul_swath); index += 4;
-#ifdef MB_DEBUG
+#ifdef MB_DEBUG2
 fprintf(stderr, "ping=%u\n", store->mul_ping);
 fprintf(stderr, "frequency=%f\n", store->mul_frequency);
 fprintf(stderr, "pulse=%f\n", store->mul_pulse);
@@ -2464,7 +2851,7 @@ fprintf(stderr, "READ MBM_GROUP_GATES\n");
 fprintf(stderr, "N=%u\n", store->mul_num_beams);
 for(i=0;i<store->mul_num_beams;i++)
 	fprintf(stderr, "gate_angle[%d]=%lf gate_start[%d]=%lf gate_stop[%d]=%lf\n", 
-	    i, store->beams[i].gate_angle, store->beams[i].gate_start, store->beams[i].gate_stop);
+	    i, store->beams[i].gate_angle, i,store->beams[i].gate_start, i,store->beams[i].gate_stop);
 #endif
 				}
 
@@ -2534,10 +2921,73 @@ for(i=0;i<store->mul_num_beams;i++)
 #endif
 				}
 
+			/* handle heavereceive group */
+			else if (group_id == MBSYS_XSE_MBM_GROUP_HEAVERECEIVE)
+				{
+#ifdef MB_DEBUG
+fprintf(stderr, "READ MBM_GROUP_HEAVERECEIVE\n");
+#endif
+				store->mul_group_heavereceive = MB_YES;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->mul_num_beams); index += 4;
+				for (i=0;i<store->mul_num_beams;i++)
+				    {
+				    if (i < MBSYS_XSE_MAXBEAMS)
+						{
+						mb_get_binary_double(SWAPFLAG, &buffer[index], (double *) &store->beams[i].heavereceive); index += 8;
+						}
+				    }
+#ifdef MB_DEBUG2
+fprintf(stderr, "N=%u\n", store->mul_num_beams);
+for(i=0;i<store->mul_num_beams;i++)
+	fprintf(stderr, "heavereceive[%d]=%f\n", i, store->beams[i].heavereceive);
+#endif
+				}
+
+			/* handle azimuth group */
+			else if (group_id == MBSYS_XSE_MBM_GROUP_AZIMUTH)
+				{
+#ifdef MB_DEBUG
+fprintf(stderr, "READ MBM_GROUP_AZIMUTH\n");
+#endif
+				store->mul_group_azimuth = MB_YES;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->mul_num_beams); index += 4;
+				for (i=0;i<store->mul_num_beams;i++)
+				    {
+				    if (i < MBSYS_XSE_MAXBEAMS)
+						{
+						mb_get_binary_double(SWAPFLAG, &buffer[index], (double *) &store->beams[i].azimuth); index += 4;
+						}
+				    }
+#ifdef MB_DEBUG2
+fprintf(stderr, "N=%u\n", store->mul_num_beams);
+for(i=0;i<store->mul_num_beams;i++)
+	fprintf(stderr, "azimuth[%d]=%df\n", i, store->beams[i].azimuth);
+#endif
+				}
+
+			/* handle mbsystemnav group */
+			else if (group_id == MBSYS_XSE_MBM_GROUP_MBSYSTEMNAV)
+				{
+#ifdef MB_DEBUG
+fprintf(stderr, "READ MBSYS_XSE_MBM_GROUP_MBSYSTEMNAV\n");
+#endif
+				store->mul_group_mbsystemnav = MB_YES;
+				mb_get_binary_double(SWAPFLAG, &buffer[index], (double *) &store->mul_lon); index += 8;
+				mb_get_binary_double(SWAPFLAG, &buffer[index], (double *) &store->mul_lat); index += 8;
+				mb_get_binary_double(SWAPFLAG, &buffer[index], (double *) &store->mul_heading); index += 8;
+				mb_get_binary_double(SWAPFLAG, &buffer[index], (double *) &store->mul_speed); index += 8;
+#ifdef MB_DEBUG2
+fprintf(stderr, "lon=%f\n", store->mul_lon);
+fprintf(stderr, "lon=%f\n", store->mul_lat);
+fprintf(stderr, "lon=%f\n", store->mul_heading);
+fprintf(stderr, "lon=%f\n", store->mul_speed);
+#endif
+				}
+
 			else
 				{
 #ifdef MB_DEBUG
-fprintf(stderr, "READ MBM_GROUP_OTHER\n");
+fprintf(stderr, "READ MBM_GROUP_OTHER  group_id:%d\n", group_id);
 #endif
 				}
 		    }
@@ -2598,8 +3048,8 @@ fprintf(stderr, "READ MBM_GROUP_OTHER\n");
 	   calculate bin size from bathymetry */
 	if (store->mul_num_beams > 1
 	    && store->sid_frame == MB_YES
-	    && store->sid_num_pixels > 1
-	    && store->sid_bin_size <= 0)
+	    && store->sid_avl_num_samples > 1
+	    && store->sid_avl_binsize <= 0)
 	    {
 	    /* get width of bathymetry swath size */
 	    xmin = 9999999.9;
@@ -2612,14 +3062,14 @@ fprintf(stderr, "READ MBM_GROUP_OTHER\n");
 	    
 	    /* get number of nonzero pixels */
 	    ngoodss = 0;
-	    for (i=0;i<store->sid_num_pixels;i++)
-			if (store->ss[i] != 0) ngoodss++;
+	    for (i=0;i<store->sid_avl_num_samples;i++)
+			if (store->sid_avl_amp[i] != 0) ngoodss++;
 		
 	    /* get bin size */
 	    if (xmax > xmin && ngoodss > 1)
 			{
 			binsize = (xmax - xmin) / (ngoodss - 1);
-			store->sid_bin_size = 1000 * binsize;
+			store->sid_avl_binsize = 1000 * binsize;
 			}
 	    }
 
@@ -3580,85 +4030,184 @@ int mbr_l3xseraw_wr_nav(int verbose,int *buffer_size,char *buffer,void *store_pt
 	mb_put_binary_int(SWAPFLAG, store->nav_sec, &buffer[index]); index += 4;
 	mb_put_binary_int(SWAPFLAG, store->nav_usec, &buffer[index]); index += 4;
 	frame_count += 16;
-
-	/* get group label */
-#ifdef DATAINPCBYTEORDER
-	strncpy(&buffer[index], "GSH$", 4);
-#else
-	strncpy(&buffer[index], "$HSG", 4);
-#endif
-	index += 4;
-
-	/* start the group byte count, but don't write it to buffer yet */
-	/* mark the byte count spot in the buffer and increment index so we skip it */
-	group_count = 0;
-	group_cnt_index = index;
-	index += 4;
 	
-	/* get pos group */
-	group_id = MBSYS_XSE_NAV_GROUP_POS;
-	mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
-	mb_put_binary_int(SWAPFLAG, store->nav_description_len, &buffer[index]); index += 4;
-	for (i=0;i<store->nav_description_len;i++)
-	    {
-	    buffer[index] = store->nav_description[i]; index++;
-	    }
-	mb_put_binary_double(SWAPFLAG, store->nav_x, &buffer[index]); index += 8;
-	mb_put_binary_double(SWAPFLAG, store->nav_y, &buffer[index]); index += 8;
-	mb_put_binary_double(SWAPFLAG, store->nav_z, &buffer[index]); index += 8;
-
-	/* get end of group label */
-#ifdef DATAINPCBYTEORDER
-	strncpy(&buffer[index], "GSH#", 4);
-#else
-	strncpy(&buffer[index], "#HSG", 4);
-#endif
-	index += 4;
-	group_count += store->nav_description_len + 32;
-
-	/* go back and fill in group byte count */
-	mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
-
-	/* add group count to the frame count */
-	frame_count += group_count + 12;
-
-	/* get group label */
-#ifdef DATAINPCBYTEORDER
-	strncpy(&buffer[index], "GSH$", 4);
-#else
-	strncpy(&buffer[index], "$HSG", 4);
-#endif
-	index += 4;
-
-	/* start the group byte count, but don't write it to buffer yet */
-	/* mark the byte count spot in the buffer and increment index so we skip it */
-	group_count = 0;
-	group_cnt_index = index;
-	index += 4;
+	/*****************************************/
 	
-	/* get motion ground truth group */
-	group_id = MBSYS_XSE_NAV_GROUP_MOTIONGT;
-	mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
-	mb_put_binary_double(SWAPFLAG, store->nav_speed_ground, &buffer[index]); index += 8;
-	mb_put_binary_double(SWAPFLAG, store->nav_course_ground, &buffer[index]); index += 8;
-
-	/* get end of group label */
+	/* write general group */
+	if (store->nav_group_general == MB_YES)
+		{
+		/* get group label */
 #ifdef DATAINPCBYTEORDER
-	strncpy(&buffer[index], "GSH#", 4);
+		strncpy(&buffer[index], "GSH$", 4);
 #else
-	strncpy(&buffer[index], "#HSG", 4);
+		strncpy(&buffer[index], "$HSG", 4);
 #endif
-	index += 4;
-	group_count += 20;
+		index += 4;
 
-	/* go back and fill in group byte count */
-	mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
+		/* start the group byte count, but don't write it to buffer yet */
+		/* mark the byte count spot in the buffer and increment index so we skip it */
+		group_count = 0;
+		group_cnt_index = index;
+		index += 4;
 
-	/* add group count to the frame count */
-	frame_count += group_count + 12;
+		/* get pos group */
+		group_id = MBSYS_XSE_NAV_GROUP_GEN;
+		mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
+		mb_put_binary_int(SWAPFLAG, store->nav_quality, &buffer[index]); index += 4;
+		mb_put_binary_int(SWAPFLAG, store->nav_status, &buffer[index]); index += 4;
 
-	/* write MBSYS_XSE_NAV_GROUP_MOTIONTW group if data available */
-	if (store->nav_speed_water != 0.0 && store->nav_course_water != 0.0)
+		/* get end of group label */
+#ifdef DATAINPCBYTEORDER
+		strncpy(&buffer[index], "GSH#", 4);
+#else
+		strncpy(&buffer[index], "#HSG", 4);
+#endif
+		index += 4;
+		group_count += store->nav_description_len + 32;
+
+		/* go back and fill in group byte count */
+		mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
+
+		/* add group count to the frame count */
+		frame_count += group_count + 12;
+		}
+	
+	/*****************************************/
+	
+	/* write position group */
+	if (store->nav_group_position == MB_YES)
+		{
+		/* get group label */
+#ifdef DATAINPCBYTEORDER
+		strncpy(&buffer[index], "GSH$", 4);
+#else
+		strncpy(&buffer[index], "$HSG", 4);
+#endif
+		index += 4;
+
+		/* start the group byte count, but don't write it to buffer yet */
+		/* mark the byte count spot in the buffer and increment index so we skip it */
+		group_count = 0;
+		group_cnt_index = index;
+		index += 4;
+
+		/* get pos group */
+		group_id = MBSYS_XSE_NAV_GROUP_POS;
+		mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
+		mb_put_binary_int(SWAPFLAG, store->nav_description_len, &buffer[index]); index += 4;
+		for (i=0;i<store->nav_description_len;i++)
+		    {
+		    buffer[index] = store->nav_description[i]; index++;
+		    }
+		mb_put_binary_double(SWAPFLAG, store->nav_x, &buffer[index]); index += 8;
+		mb_put_binary_double(SWAPFLAG, store->nav_y, &buffer[index]); index += 8;
+		mb_put_binary_double(SWAPFLAG, store->nav_z, &buffer[index]); index += 8;
+
+		/* get end of group label */
+#ifdef DATAINPCBYTEORDER
+		strncpy(&buffer[index], "GSH#", 4);
+#else
+		strncpy(&buffer[index], "#HSG", 4);
+#endif
+		index += 4;
+		group_count += store->nav_description_len + 32;
+
+		/* go back and fill in group byte count */
+		mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
+
+		/* add group count to the frame count */
+		frame_count += group_count + 12;
+		}
+	
+	/*****************************************/
+	
+	/* write accuracy group */
+	if (store->nav_group_accuracy == MB_YES)
+		{
+		/* get group label */
+#ifdef DATAINPCBYTEORDER
+		strncpy(&buffer[index], "GSH$", 4);
+#else
+		strncpy(&buffer[index], "$HSG", 4);
+#endif
+		index += 4;
+
+		/* start the group byte count, but don't write it to buffer yet */
+		/* mark the byte count spot in the buffer and increment index so we skip it */
+		group_count = 0;
+		group_cnt_index = index;
+		index += 4;
+
+		/* get pos group */
+		group_id = MBSYS_XSE_NAV_GROUP_ACCURACY;
+		mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
+		mb_put_binary_short(SWAPFLAG, store->nav_acc_quality, &buffer[index]); index += 2;
+		buffer[index] = store->nav_acc_numsatellites; index++;
+		mb_put_binary_float(SWAPFLAG, store->nav_acc_horizdilution, &buffer[index]); index += 4;
+		mb_put_binary_float(SWAPFLAG, store->nav_acc_diffage, &buffer[index]); index += 4;
+		mb_put_binary_int(SWAPFLAG, store->nav_acc_diffref, &buffer[index]); index += 4;
+
+		/* get end of group label */
+#ifdef DATAINPCBYTEORDER
+		strncpy(&buffer[index], "GSH#", 4);
+#else
+		strncpy(&buffer[index], "#HSG", 4);
+#endif
+		index += 4;
+		group_count += store->nav_description_len + 32;
+
+		/* go back and fill in group byte count */
+		mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
+
+		/* add group count to the frame count */
+		frame_count += group_count + 12;
+		}
+	
+	/*****************************************/
+
+	/* write motion ground truth group */
+	if (store->nav_group_motiongt == MB_YES)
+		{
+		/* get group label */
+#ifdef DATAINPCBYTEORDER
+		strncpy(&buffer[index], "GSH$", 4);
+#else
+		strncpy(&buffer[index], "$HSG", 4);
+#endif
+		index += 4;
+
+		/* start the group byte count, but don't write it to buffer yet */
+		/* mark the byte count spot in the buffer and increment index so we skip it */
+		group_count = 0;
+		group_cnt_index = index;
+		index += 4;
+
+		/* get motion ground truth group */
+		group_id = MBSYS_XSE_NAV_GROUP_MOTIONGT;
+		mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
+		mb_put_binary_double(SWAPFLAG, store->nav_speed_ground, &buffer[index]); index += 8;
+		mb_put_binary_double(SWAPFLAG, store->nav_course_ground, &buffer[index]); index += 8;
+
+		/* get end of group label */
+#ifdef DATAINPCBYTEORDER
+		strncpy(&buffer[index], "GSH#", 4);
+#else
+		strncpy(&buffer[index], "#HSG", 4);
+#endif
+		index += 4;
+		group_count += 20;
+
+		/* go back and fill in group byte count */
+		mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
+
+		/* add group count to the frame count */
+		frame_count += group_count + 12;
+		}
+	
+	/*****************************************/
+
+	/* write motion through water group */
+	if (store->nav_group_motiontw == MB_YES)
 		{
 		/* get group label */
 #ifdef DATAINPCBYTEORDER
@@ -3694,18 +4243,220 @@ int mbr_l3xseraw_wr_nav(int verbose,int *buffer_size,char *buffer,void *store_pt
 	
 		/* add group count to the frame count */
 		frame_count += group_count + 12;
-	
-		/* get end of frame label */
-#ifdef DATAINPCBYTEORDER
-		strncpy(&buffer[index], "FSH#", 4);
-#else
-		strncpy(&buffer[index], "#HSF", 4);
-#endif
-		index += 4;	
 		}
+	
+	/*****************************************/
 
-	/* else write MBSYS_XSE_NAV_GROUP_HEADING group */
-	else
+	/* write track steering group */
+	if (store->nav_group_track == MB_YES)
+		{
+		/* get group label */
+#ifdef DATAINPCBYTEORDER
+		strncpy(&buffer[index], "GSH$", 4);
+#else
+		strncpy(&buffer[index], "$HSG", 4);
+#endif
+		index += 4;
+	
+		/* start the group byte count, but don't write it to buffer yet */
+		/* mark the byte count spot in the buffer and increment index so we skip it */
+		group_count = 0;
+		group_cnt_index = index;
+		index += 4;
+		
+		/* get motion through water group */
+		group_id = MBSYS_XSE_NAV_GROUP_TRACK;
+		mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
+		mb_put_binary_double(SWAPFLAG, store->nav_trk_offset_track, &buffer[index]); index += 8;
+		mb_put_binary_double(SWAPFLAG, store->nav_trk_offset_sol, &buffer[index]); index += 8;
+		mb_put_binary_double(SWAPFLAG, store->nav_trk_offset_eol, &buffer[index]); index += 8;
+		mb_put_binary_double(SWAPFLAG, store->nav_trk_distance_sol, &buffer[index]); index += 8;
+		mb_put_binary_double(SWAPFLAG, store->nav_trk_azimuth_sol, &buffer[index]); index += 8;
+		mb_put_binary_double(SWAPFLAG, store->nav_trk_distance_eol, &buffer[index]); index += 8;
+		mb_put_binary_double(SWAPFLAG, store->nav_trk_azimuth_eol, &buffer[index]); index += 8;
+	
+		/* get end of group label */
+#ifdef DATAINPCBYTEORDER
+		strncpy(&buffer[index], "GSH#", 4);
+#else
+		strncpy(&buffer[index], "#HSG", 4);
+#endif
+		index += 4;
+		group_count += 20;
+	
+		/* go back and fill in group byte count */
+		mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
+	
+		/* add group count to the frame count */
+		frame_count += group_count + 12;
+		}
+	
+	/*****************************************/
+
+	/* write heave roll pitch group */
+	if (store->nav_group_hrp == MB_YES)
+		{
+		/* get group label */
+#ifdef DATAINPCBYTEORDER
+		strncpy(&buffer[index], "GSH$", 4);
+#else
+		strncpy(&buffer[index], "$HSG", 4);
+#endif
+		index += 4;
+	
+		/* start the group byte count, but don't write it to buffer yet */
+		/* mark the byte count spot in the buffer and increment index so we skip it */
+		group_count = 0;
+		group_cnt_index = index;
+		index += 4;
+		
+		/* get motion through water group */
+		group_id = MBSYS_XSE_NAV_GROUP_HRP;
+		mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
+		mb_put_binary_double(SWAPFLAG, store->nav_hrp_heave, &buffer[index]); index += 8;
+		mb_put_binary_double(SWAPFLAG, store->nav_hrp_roll, &buffer[index]); index += 8;
+		mb_put_binary_double(SWAPFLAG, store->nav_hrp_pitch, &buffer[index]); index += 8;
+	
+		/* get end of group label */
+#ifdef DATAINPCBYTEORDER
+		strncpy(&buffer[index], "GSH#", 4);
+#else
+		strncpy(&buffer[index], "#HSG", 4);
+#endif
+		index += 4;
+		group_count += 20;
+	
+		/* go back and fill in group byte count */
+		mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
+	
+		/* add group count to the frame count */
+		frame_count += group_count + 12;
+		}
+	
+	/*****************************************/
+
+	/* write heave group */
+	if (store->nav_group_hrp == MB_YES)
+		{
+		/* get group label */
+#ifdef DATAINPCBYTEORDER
+		strncpy(&buffer[index], "GSH$", 4);
+#else
+		strncpy(&buffer[index], "$HSG", 4);
+#endif
+		index += 4;
+	
+		/* start the group byte count, but don't write it to buffer yet */
+		/* mark the byte count spot in the buffer and increment index so we skip it */
+		group_count = 0;
+		group_cnt_index = index;
+		index += 4;
+		
+		/* get motion through water group */
+		group_id = MBSYS_XSE_NAV_GROUP_HEAVE;
+		mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
+		mb_put_binary_double(SWAPFLAG, store->nav_hea_heave, &buffer[index]); index += 8;
+	
+		/* get end of group label */
+#ifdef DATAINPCBYTEORDER
+		strncpy(&buffer[index], "GSH#", 4);
+#else
+		strncpy(&buffer[index], "#HSG", 4);
+#endif
+		index += 4;
+		group_count += 20;
+	
+		/* go back and fill in group byte count */
+		mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
+	
+		/* add group count to the frame count */
+		frame_count += group_count + 12;
+		}
+	
+	/*****************************************/
+
+	/* write roll group */
+	if (store->nav_group_roll == MB_YES)
+		{
+		/* get group label */
+#ifdef DATAINPCBYTEORDER
+		strncpy(&buffer[index], "GSH$", 4);
+#else
+		strncpy(&buffer[index], "$HSG", 4);
+#endif
+		index += 4;
+	
+		/* start the group byte count, but don't write it to buffer yet */
+		/* mark the byte count spot in the buffer and increment index so we skip it */
+		group_count = 0;
+		group_cnt_index = index;
+		index += 4;
+		
+		/* get motion through water group */
+		group_id = MBSYS_XSE_NAV_GROUP_ROLL;
+		mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
+		mb_put_binary_double(SWAPFLAG, store->nav_rol_roll, &buffer[index]); index += 8;
+	
+		/* get end of group label */
+#ifdef DATAINPCBYTEORDER
+		strncpy(&buffer[index], "GSH#", 4);
+#else
+		strncpy(&buffer[index], "#HSG", 4);
+#endif
+		index += 4;
+		group_count += 20;
+	
+		/* go back and fill in group byte count */
+		mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
+	
+		/* add group count to the frame count */
+		frame_count += group_count + 12;
+		}
+	
+	/*****************************************/
+
+	/* write pitch group */
+	if (store->nav_group_pitch == MB_YES)
+		{
+		/* get group label */
+#ifdef DATAINPCBYTEORDER
+		strncpy(&buffer[index], "GSH$", 4);
+#else
+		strncpy(&buffer[index], "$HSG", 4);
+#endif
+		index += 4;
+	
+		/* start the group byte count, but don't write it to buffer yet */
+		/* mark the byte count spot in the buffer and increment index so we skip it */
+		group_count = 0;
+		group_cnt_index = index;
+		index += 4;
+		
+		/* get motion through water group */
+		group_id = MBSYS_XSE_NAV_GROUP_PITCH;
+		mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
+		mb_put_binary_double(SWAPFLAG, store->nav_pit_pitch, &buffer[index]); index += 8;
+	
+		/* get end of group label */
+#ifdef DATAINPCBYTEORDER
+		strncpy(&buffer[index], "GSH#", 4);
+#else
+		strncpy(&buffer[index], "#HSG", 4);
+#endif
+		index += 4;
+		group_count += 20;
+	
+		/* go back and fill in group byte count */
+		mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
+	
+		/* add group count to the frame count */
+		frame_count += group_count + 12;
+		}
+	
+	/*****************************************/
+
+	/* write heading group */
+	if (store->nav_group_heading == MB_YES)
 		{
 		/* get group label */
 #ifdef DATAINPCBYTEORDER
@@ -3724,7 +4475,7 @@ int mbr_l3xseraw_wr_nav(int verbose,int *buffer_size,char *buffer,void *store_pt
 		/* get motion through water group */
 		group_id = MBSYS_XSE_NAV_GROUP_HEADING;
 		mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
-		mb_put_binary_double(SWAPFLAG, store->nav_course_water, &buffer[index]); index += 8;
+		mb_put_binary_double(SWAPFLAG, store->nav_hdg_heading, &buffer[index]); index += 8;
 	
 		/* get end of group label */
 #ifdef DATAINPCBYTEORDER
@@ -3740,15 +4491,98 @@ int mbr_l3xseraw_wr_nav(int verbose,int *buffer_size,char *buffer,void *store_pt
 	
 		/* add group count to the frame count */
 		frame_count += group_count + 12;
-	
-		/* get end of frame label */
-#ifdef DATAINPCBYTEORDER
-		strncpy(&buffer[index], "FSH#", 4);
-#else
-		strncpy(&buffer[index], "#HSF", 4);
-#endif
-		index += 4;	
 		}
+	
+	/*****************************************/
+
+	/* write speed log group */
+	if (store->nav_group_log == MB_YES)
+		{
+		/* get group label */
+#ifdef DATAINPCBYTEORDER
+		strncpy(&buffer[index], "GSH$", 4);
+#else
+		strncpy(&buffer[index], "$HSG", 4);
+#endif
+		index += 4;
+	
+		/* start the group byte count, but don't write it to buffer yet */
+		/* mark the byte count spot in the buffer and increment index so we skip it */
+		group_count = 0;
+		group_cnt_index = index;
+		index += 4;
+		
+		/* get motion through water group */
+		group_id = MBSYS_XSE_NAV_GROUP_LOG;
+		mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
+		mb_put_binary_double(SWAPFLAG, store->nav_log_speed, &buffer[index]); index += 8;
+	
+		/* get end of group label */
+#ifdef DATAINPCBYTEORDER
+		strncpy(&buffer[index], "GSH#", 4);
+#else
+		strncpy(&buffer[index], "#HSG", 4);
+#endif
+		index += 4;
+		group_count += 12;
+	
+		/* go back and fill in group byte count */
+		mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
+	
+		/* add group count to the frame count */
+		frame_count += group_count + 12;
+		}
+	
+	/*****************************************/
+
+	/* write gps altitude group */
+	if (store->nav_group_gps == MB_YES)
+		{
+		/* get group label */
+#ifdef DATAINPCBYTEORDER
+		strncpy(&buffer[index], "GSH$", 4);
+#else
+		strncpy(&buffer[index], "$HSG", 4);
+#endif
+		index += 4;
+	
+		/* start the group byte count, but don't write it to buffer yet */
+		/* mark the byte count spot in the buffer and increment index so we skip it */
+		group_count = 0;
+		group_cnt_index = index;
+		index += 4;
+		
+		/* get motion through water group */
+		group_id = MBSYS_XSE_NAV_GROUP_GPS;
+		mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
+		mb_put_binary_float(SWAPFLAG, store->nav_gps_altitude, &buffer[index]); index += 4;
+		mb_put_binary_float(SWAPFLAG, store->nav_gps_geoidalseparation, &buffer[index]); index += 4;
+	
+		/* get end of group label */
+#ifdef DATAINPCBYTEORDER
+		strncpy(&buffer[index], "GSH#", 4);
+#else
+		strncpy(&buffer[index], "#HSG", 4);
+#endif
+		index += 4;
+		group_count += 12;
+	
+		/* go back and fill in group byte count */
+		mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
+	
+		/* add group count to the frame count */
+		frame_count += group_count + 12;
+		}
+	
+	/*****************************************/
+	
+	/* get end of frame label */
+#ifdef DATAINPCBYTEORDER
+	strncpy(&buffer[index], "FSH#", 4);
+#else
+	strncpy(&buffer[index], "#HSF", 4);
+#endif
+	index += 4;	
 
 	/* go back and fill in frame byte count */
 	mb_put_binary_int(SWAPFLAG, frame_count, &buffer[frame_cnt_index]);
@@ -4228,15 +5062,13 @@ int mbr_l3xseraw_wr_ship(int verbose,int *buffer_size,char *buffer,void *store_p
 	    fprintf(stderr,"dbg5       par_ship_height:     %f\n",store->par_ship_height);
 	    fprintf(stderr,"dbg5       par_ship_displacement: %f\n",store->par_ship_displacement);
 	    fprintf(stderr,"dbg5       par_ship_weight:     %f\n",store->par_ship_weight);
-	    fprintf(stderr,"dbg5       par_ship_nsensor:    %d\n",store->par_ship_nsensor);
 	    for (i=0;i<store->par_ship_nsensor;i++)
 		{
 		fprintf(stderr,"dbg5       par_ship_sensor_id[%d]:        %d\n",i,store->par_ship_sensor_id[i]);
 		fprintf(stderr,"dbg5       par_ship_sensor_type[%d]:      %d\n",i,store->par_ship_sensor_type[i]);
 		fprintf(stderr,"dbg5       par_ship_sensor_frequency[%d]: %d\n",i,store->par_ship_sensor_frequency[i]);
 		}
-	    
-	    
+	    fprintf(stderr,"dbg5       par_parameter:       %d\n",store->par_parameter);
 	    fprintf(stderr,"dbg5       par_roll_bias:       %f\n",store->par_roll_bias);
 	    fprintf(stderr,"dbg5       par_pitch_bias:      %f\n",store->par_pitch_bias);
 	    fprintf(stderr,"dbg5       par_heading_bias:    %f\n",store->par_heading_bias);
@@ -4255,6 +5087,34 @@ int mbr_l3xseraw_wr_ship(int verbose,int *buffer_size,char *buffer,void *store_p
 	    fprintf(stderr,"dbg5       par_hrp_x:           %f\n",store->par_hrp_x);
 	    fprintf(stderr,"dbg5       par_hrp_y:           %f\n",store->par_hrp_y);
 	    fprintf(stderr,"dbg5       par_hrp_z:           %f\n",store->par_hrp_z);
+	    fprintf(stderr,"dbg5       par_navigationandmotion: %d\n",store->par_navigationandmotion);
+	    fprintf(stderr,"dbg5       par_nam_roll_bias:       %f\n",store->par_nam_roll_bias);
+	    fprintf(stderr,"dbg5       par_nam_pitch_bias:      %f\n",store->par_nam_pitch_bias);
+	    fprintf(stderr,"dbg5       par_nam_heave_bias:      %f\n",store->par_nam_heave_bias);
+	    fprintf(stderr,"dbg5       par_nam_heading_bias:    %f\n",store->par_nam_heading_bias);
+	    fprintf(stderr,"dbg5       par_nam_time_delay:      %f\n",store->par_nam_time_delay);
+	    fprintf(stderr,"dbg5       par_nam_nav_x:           %f\n",store->par_nam_nav_x);
+	    fprintf(stderr,"dbg5       par_nam_nav_y:           %f\n",store->par_nam_nav_y);
+	    fprintf(stderr,"dbg5       par_nam_nav_z:           %f\n",store->par_nam_nav_z);
+	    fprintf(stderr,"dbg5       par_nam_hrp_x:           %f\n",store->par_nam_hrp_x);
+	    fprintf(stderr,"dbg5       par_nam_hrp_y:           %f\n",store->par_nam_hrp_y);
+	    fprintf(stderr,"dbg5       par_nam_hrp_z:           %f\n",store->par_nam_hrp_z);
+	    fprintf(stderr,"dbg5       par_xdr_num_transducer:  %d\n",store->par_xdr_num_transducer);
+	    fprintf(stderr,"dbg5       # sensor xducer freq side roll pitch azi dist\n");
+	    for (i=0;i<store->par_xdr_num_transducer;i++)
+	    	fprintf(stderr,"dbg5       %d %d %d %d %d %f %f %f %f\n", i, store->par_xdr_sensorid[i], store->par_xdr_transducer[i], 
+	    							store->par_xdr_frequency[i], store->par_xdr_side[i], 
+								store->par_xdr_mountingroll[i], store->par_xdr_mountingpitch[i], 
+								store->par_xdr_mountingazimuth[i], store->par_xdr_mountingdistance[i]);
+	    fprintf(stderr,"dbg5       # x y z roll pitch azimuth\n");
+	    for (i=0;i<store->par_xdr_num_transducer;i++)
+	    	fprintf(stderr,"dbg5       %d %f %f %f %f %f %f\n", i, store->par_xdr_x[i], store->par_xdr_y[i], 
+	    							store->par_xdr_z[i], store->par_xdr_roll[i], 
+								store->par_xdr_pitch[i], store->par_xdr_azimuth[i]);
+	    fprintf(stderr,"dbg5       par_xdx_num_transducer:  %d\n",store->par_xdx_num_transducer);
+	    fprintf(stderr,"dbg5       # roll pitch azimuth\n");
+	    for (i=0;i<store->par_xdx_num_transducer;i++)
+	    	fprintf(stderr,"dbg5       %d %d %d %d\n", i, store->par_xdx_roll[i], store->par_xdx_pitch[i], store->par_xdx_azimuth[i]);
 	    }
 
 	/* get the frame label */
@@ -4279,6 +5139,8 @@ int mbr_l3xseraw_wr_ship(int verbose,int *buffer_size,char *buffer,void *store_p
 	mb_put_binary_int(SWAPFLAG, store->par_sec, &buffer[index]); index += 4;
 	mb_put_binary_int(SWAPFLAG, store->par_usec, &buffer[index]); index += 4;
 	frame_count += 16;
+	
+	/*****************************************/
 
 	/* get group label */
 #ifdef DATAINPCBYTEORDER
@@ -4294,7 +5156,7 @@ int mbr_l3xseraw_wr_ship(int verbose,int *buffer_size,char *buffer,void *store_p
 	group_cnt_index = index;
 	index += 4;
 	
-	/* get parameter group */
+	/* get general group */
 	group_id = MBSYS_XSE_SHP_GROUP_GEN;
 	mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
 	nchar = strlen(store->par_ship_name);
@@ -4324,108 +5186,269 @@ int mbr_l3xseraw_wr_ship(int verbose,int *buffer_size,char *buffer,void *store_p
 
 	/* add group count to the frame count */
 	frame_count += group_count + 12;
-
-	/* get group label */
-#ifdef DATAINPCBYTEORDER
-	strncpy(&buffer[index], "GSH$", 4);
-#else
-	strncpy(&buffer[index], "$HSG", 4);
-#endif
-	index += 4;
-
-	/* start the group byte count, but don't write it to buffer yet */
-	/* mark the byte count spot in the buffer and increment index so we skip it */
-	group_count = 0;
-	group_cnt_index = index;
-	index += 4;
 	
-	/* get parameter group */
-	group_id = MBSYS_XSE_SHP_GROUP_SENSORS;
-	mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
-	mb_put_binary_int(SWAPFLAG, store->par_ship_nsensor, &buffer[index]); index += 4;
-	for (i=0;i<store->par_ship_nsensor;i++)
-		{
-		mb_put_binary_int(SWAPFLAG, store->par_ship_sensor_id[i], &buffer[index]); index += 4;
-		}
-	for (i=0;i<store->par_ship_nsensor;i++)
-		{
-		mb_put_binary_int(SWAPFLAG, store->par_ship_sensor_type[i], &buffer[index]); index += 4;
-		}
-	for (i=0;i<store->par_ship_nsensor;i++)
-		{
-		mb_put_binary_int(SWAPFLAG, store->par_ship_sensor_frequency[i], &buffer[index]); index += 4;
-		}
+	/*****************************************/
 
-	/* get end of group label */
+	if (store->par_ship_nsensor > 0)
+		{
+		/* get group label */
 #ifdef DATAINPCBYTEORDER
-	strncpy(&buffer[index], "GSH#", 4);
+		strncpy(&buffer[index], "GSH$", 4);
 #else
-	strncpy(&buffer[index], "#HSG", 4);
+		strncpy(&buffer[index], "$HSG", 4);
 #endif
-	index += 4;
-	group_count += 3 * store->par_ship_nsensor + 4;
+		index += 4;
 
-	/* go back and fill in group byte count */
-	mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
+		/* start the group byte count, but don't write it to buffer yet */
+		/* mark the byte count spot in the buffer and increment index so we skip it */
+		group_count = 0;
+		group_cnt_index = index;
+		index += 4;
 
-	/* add group count to the frame count */
-	frame_count += group_count + 12;
+		/* get sensors group */
+		group_id = MBSYS_XSE_SHP_GROUP_SENSORS;
+		mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
+		mb_put_binary_int(SWAPFLAG, store->par_ship_nsensor, &buffer[index]); index += 4;
+		for (i=0;i<store->par_ship_nsensor;i++)
+			{
+			mb_put_binary_int(SWAPFLAG, store->par_ship_sensor_id[i], &buffer[index]); index += 4;
+			}
+		for (i=0;i<store->par_ship_nsensor;i++)
+			{
+			mb_put_binary_int(SWAPFLAG, store->par_ship_sensor_type[i], &buffer[index]); index += 4;
+			}
+		for (i=0;i<store->par_ship_nsensor;i++)
+			{
+			mb_put_binary_int(SWAPFLAG, store->par_ship_sensor_frequency[i], &buffer[index]); index += 4;
+			}
 
-
-
-
-
-
-	/* get group label */
+		/* get end of group label */
 #ifdef DATAINPCBYTEORDER
-	strncpy(&buffer[index], "GSH$", 4);
+		strncpy(&buffer[index], "GSH#", 4);
 #else
-	strncpy(&buffer[index], "$HSG", 4);
+		strncpy(&buffer[index], "#HSG", 4);
 #endif
-	index += 4;
+		index += 4;
+		group_count += 12 * store->par_ship_nsensor + 8;
 
-	/* start the group byte count, but don't write it to buffer yet */
-	/* mark the byte count spot in the buffer and increment index so we skip it */
-	group_count = 0;
-	group_cnt_index = index;
-	index += 4;
+		/* go back and fill in group byte count */
+		mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
+
+		/* add group count to the frame count */
+		frame_count += group_count + 12;
+		}
 	
-	/* get parameter group */
-	group_id = MBSYS_XSE_SHP_GROUP_PARAMETER;
-	mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
-	mb_put_binary_float(SWAPFLAG, store->par_roll_bias, &buffer[index]); index += 4;
-	mb_put_binary_float(SWAPFLAG, store->par_pitch_bias, &buffer[index]); index += 4;
-	mb_put_binary_float(SWAPFLAG, store->par_heading_bias, &buffer[index]); index += 4;
-	mb_put_binary_float(SWAPFLAG, store->par_time_delay, &buffer[index]); index += 4;
-	mb_put_binary_float(SWAPFLAG, store->par_trans_x_port, &buffer[index]); index += 4;
-	mb_put_binary_float(SWAPFLAG, store->par_trans_y_port, &buffer[index]); index += 4;
-	mb_put_binary_float(SWAPFLAG, store->par_trans_z_port, &buffer[index]); index += 4;
-	mb_put_binary_float(SWAPFLAG, store->par_trans_x_stbd, &buffer[index]); index += 4;
-	mb_put_binary_float(SWAPFLAG, store->par_trans_y_stbd, &buffer[index]); index += 4;
-	mb_put_binary_float(SWAPFLAG, store->par_trans_z_stbd, &buffer[index]); index += 4;
-	mb_put_binary_float(SWAPFLAG, store->par_trans_err_port, &buffer[index]); index += 4;
-	mb_put_binary_float(SWAPFLAG, store->par_trans_err_stbd, &buffer[index]); index += 4;
-	mb_put_binary_float(SWAPFLAG, store->par_nav_x, &buffer[index]); index += 4;
-	mb_put_binary_float(SWAPFLAG, store->par_nav_y, &buffer[index]); index += 4;
-	mb_put_binary_float(SWAPFLAG, store->par_nav_z, &buffer[index]); index += 4;
-	mb_put_binary_float(SWAPFLAG, store->par_hrp_x, &buffer[index]); index += 4;
-	mb_put_binary_float(SWAPFLAG, store->par_hrp_y, &buffer[index]); index += 4;
-	mb_put_binary_float(SWAPFLAG, store->par_hrp_z, &buffer[index]); index += 4;
+	/*****************************************/
 
-	/* get end of group label */
+	if (store->par_parameter == MB_YES)
+		{
+		/* get group label */
 #ifdef DATAINPCBYTEORDER
-	strncpy(&buffer[index], "GSH#", 4);
+		strncpy(&buffer[index], "GSH$", 4);
 #else
-	strncpy(&buffer[index], "#HSG", 4);
+		strncpy(&buffer[index], "$HSG", 4);
 #endif
-	index += 4;
-	group_count += 76;
+		index += 4;
 
-	/* go back and fill in group byte count */
-	mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
+		/* start the group byte count, but don't write it to buffer yet */
+		/* mark the byte count spot in the buffer and increment index so we skip it */
+		group_count = 0;
+		group_cnt_index = index;
+		index += 4;
 
-	/* add group count to the frame count */
-	frame_count += group_count + 12;
+		/* get parameter group */
+		group_id = MBSYS_XSE_SHP_GROUP_PARAMETER;
+		mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
+		mb_put_binary_float(SWAPFLAG, store->par_roll_bias, &buffer[index]); index += 4;
+		mb_put_binary_float(SWAPFLAG, store->par_pitch_bias, &buffer[index]); index += 4;
+		mb_put_binary_float(SWAPFLAG, store->par_heading_bias, &buffer[index]); index += 4;
+		mb_put_binary_float(SWAPFLAG, store->par_time_delay, &buffer[index]); index += 4;
+		mb_put_binary_float(SWAPFLAG, store->par_trans_x_port, &buffer[index]); index += 4;
+		mb_put_binary_float(SWAPFLAG, store->par_trans_y_port, &buffer[index]); index += 4;
+		mb_put_binary_float(SWAPFLAG, store->par_trans_z_port, &buffer[index]); index += 4;
+		mb_put_binary_float(SWAPFLAG, store->par_trans_x_stbd, &buffer[index]); index += 4;
+		mb_put_binary_float(SWAPFLAG, store->par_trans_y_stbd, &buffer[index]); index += 4;
+		mb_put_binary_float(SWAPFLAG, store->par_trans_z_stbd, &buffer[index]); index += 4;
+		mb_put_binary_float(SWAPFLAG, store->par_trans_err_port, &buffer[index]); index += 4;
+		mb_put_binary_float(SWAPFLAG, store->par_trans_err_stbd, &buffer[index]); index += 4;
+		mb_put_binary_float(SWAPFLAG, store->par_nav_x, &buffer[index]); index += 4;
+		mb_put_binary_float(SWAPFLAG, store->par_nav_y, &buffer[index]); index += 4;
+		mb_put_binary_float(SWAPFLAG, store->par_nav_z, &buffer[index]); index += 4;
+		mb_put_binary_float(SWAPFLAG, store->par_hrp_x, &buffer[index]); index += 4;
+		mb_put_binary_float(SWAPFLAG, store->par_hrp_y, &buffer[index]); index += 4;
+		mb_put_binary_float(SWAPFLAG, store->par_hrp_z, &buffer[index]); index += 4;
+
+		/* get end of group label */
+#ifdef DATAINPCBYTEORDER
+		strncpy(&buffer[index], "GSH#", 4);
+#else
+		strncpy(&buffer[index], "#HSG", 4);
+#endif
+		index += 4;
+		group_count += 76;
+
+		/* go back and fill in group byte count */
+		mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
+
+		/* add group count to the frame count */
+		frame_count += group_count + 12;
+		}
+	
+	/*****************************************/
+
+	if (store->par_navigationandmotion == MB_YES)
+		{
+		/* get group label */
+#ifdef DATAINPCBYTEORDER
+		strncpy(&buffer[index], "GSH$", 4);
+#else
+		strncpy(&buffer[index], "$HSG", 4);
+#endif
+		index += 4;
+
+		/* start the group byte count, but don't write it to buffer yet */
+		/* mark the byte count spot in the buffer and increment index so we skip it */
+		group_count = 0;
+		group_cnt_index = index;
+		index += 4;
+
+		/* get parameter group */
+		group_id = MBSYS_XSE_SHP_GROUP_NAVIGATIONANDMOTION;
+		mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
+		mb_put_binary_double(SWAPFLAG, store->par_nam_roll_bias, &buffer[index]); index += 8;
+		mb_put_binary_double(SWAPFLAG, store->par_nam_pitch_bias, &buffer[index]); index += 8;
+		mb_put_binary_double(SWAPFLAG, store->par_nam_heave_bias, &buffer[index]); index += 8;
+		mb_put_binary_double(SWAPFLAG, store->par_nam_heading_bias, &buffer[index]); index += 8;
+		mb_put_binary_double(SWAPFLAG, store->par_nam_time_delay, &buffer[index]); index += 8;
+		mb_put_binary_double(SWAPFLAG, store->par_nam_nav_x, &buffer[index]); index += 8;
+		mb_put_binary_double(SWAPFLAG, store->par_nam_nav_y, &buffer[index]); index += 8;
+		mb_put_binary_double(SWAPFLAG, store->par_nam_nav_z, &buffer[index]); index += 8;
+		mb_put_binary_double(SWAPFLAG, store->par_nam_hrp_x, &buffer[index]); index += 8;
+		mb_put_binary_double(SWAPFLAG, store->par_nam_hrp_y, &buffer[index]); index += 8;
+		mb_put_binary_double(SWAPFLAG, store->par_nam_hrp_z, &buffer[index]); index += 8;
+
+		/* get end of group label */
+#ifdef DATAINPCBYTEORDER
+		strncpy(&buffer[index], "GSH#", 4);
+#else
+		strncpy(&buffer[index], "#HSG", 4);
+#endif
+		index += 4;
+		group_count += 92;
+
+		/* go back and fill in group byte count */
+		mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
+
+		/* add group count to the frame count */
+		frame_count += group_count + 12;
+		}
+	
+	/*****************************************/
+
+	if (store->par_xdr_num_transducer >0)
+		{
+		/* get group label */
+#ifdef DATAINPCBYTEORDER
+		strncpy(&buffer[index], "GSH$", 4);
+#else
+		strncpy(&buffer[index], "$HSG", 4);
+#endif
+		index += 4;
+
+		/* start the group byte count, but don't write it to buffer yet */
+		/* mark the byte count spot in the buffer and increment index so we skip it */
+		group_count = 0;
+		group_cnt_index = index;
+		index += 4;
+
+		/* get parameter group */
+		group_id = MBSYS_XSE_SHP_GROUP_TRANSDUCER;
+		mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
+		mb_put_binary_int(SWAPFLAG, store->par_xdr_num_transducer, &buffer[index]); index += 4;
+		for (i=0;i<store->par_xdr_num_transducer;i++)
+			{
+			mb_put_binary_int(SWAPFLAG, store->par_xdr_sensorid[i], &buffer[index]); index += 4;
+			mb_put_binary_int(SWAPFLAG, store->par_xdr_frequency[i], &buffer[index]); index += 4;
+			buffer[index] =  store->par_xdr_transducer[i]; index++;
+			buffer[index] =  store->par_xdr_side[i]; index++;
+			mb_put_binary_double(SWAPFLAG, store->par_xdr_mountingroll[i], &buffer[index]); index += 8;
+			mb_put_binary_double(SWAPFLAG, store->par_xdr_mountingpitch[i], &buffer[index]); index += 8;
+			mb_put_binary_double(SWAPFLAG, store->par_xdr_mountingazimuth[i], &buffer[index]); index += 8;
+			mb_put_binary_double(SWAPFLAG, store->par_xdr_mountingdistance[i], &buffer[index]); index += 8;
+			mb_put_binary_double(SWAPFLAG, store->par_xdr_x[i], &buffer[index]); index += 8;
+			mb_put_binary_double(SWAPFLAG, store->par_xdr_y[i], &buffer[index]); index += 8;
+			mb_put_binary_double(SWAPFLAG, store->par_xdr_z[i], &buffer[index]); index += 8;
+			mb_put_binary_double(SWAPFLAG, store->par_xdr_roll[i], &buffer[index]); index += 8;
+			mb_put_binary_double(SWAPFLAG, store->par_xdr_pitch[i], &buffer[index]); index += 8;
+			mb_put_binary_double(SWAPFLAG, store->par_xdr_azimuth[i], &buffer[index]); index += 8;
+			}
+
+		/* get end of group label */
+#ifdef DATAINPCBYTEORDER
+		strncpy(&buffer[index], "GSH#", 4);
+#else
+		strncpy(&buffer[index], "#HSG", 4);
+#endif
+		index += 4;
+		group_count += 8 + store->par_xdr_num_transducer * 90;
+
+		/* go back and fill in group byte count */
+		mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
+
+		/* add group count to the frame count */
+		frame_count += group_count + 12;
+		}
+	
+	/*****************************************/
+
+	if (store->par_xdx_num_transducer >0)
+		{
+		/* get group label */
+#ifdef DATAINPCBYTEORDER
+		strncpy(&buffer[index], "GSH$", 4);
+#else
+		strncpy(&buffer[index], "$HSG", 4);
+#endif
+		index += 4;
+
+		/* start the group byte count, but don't write it to buffer yet */
+		/* mark the byte count spot in the buffer and increment index so we skip it */
+		group_count = 0;
+		group_cnt_index = index;
+		index += 4;
+
+		/* get parameter group */
+		group_id = MBSYS_XSE_SHP_GROUP_TRANSDUCEREXTENDED;
+		mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
+		mb_put_binary_int(SWAPFLAG, store->par_xdx_num_transducer, &buffer[index]); index += 4;
+		for (i=0;i<store->par_xdx_num_transducer;i++)
+			{
+			mb_put_binary_double(SWAPFLAG, store->par_xdx_roll[i], &buffer[index]); index += 8;
+			mb_put_binary_double(SWAPFLAG, store->par_xdx_pitch[i], &buffer[index]); index += 8;
+			mb_put_binary_double(SWAPFLAG, store->par_xdx_azimuth[i], &buffer[index]); index += 8;
+			}
+		for (i=0;i<48;i++)
+			{
+			buffer[index] = 0; index++;
+			}
+
+		/* get end of group label */
+#ifdef DATAINPCBYTEORDER
+		strncpy(&buffer[index], "GSH#", 4);
+#else
+		strncpy(&buffer[index], "#HSG", 4);
+#endif
+		index += 4;
+		group_count += 4 + store->par_xdx_num_transducer * 24 + 48;
+
+		/* go back and fill in group byte count */
+		mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
+
+		/* add group count to the frame count */
+		frame_count += group_count + 12;
+		}
+	
+	/*****************************************/
 
 	/* get end of frame label */
 #ifdef DATAINPCBYTEORDER
@@ -5267,6 +6290,131 @@ int mbr_l3xseraw_wr_multibeam(int verbose,int *buffer_size,char *buffer,void *st
 	    frame_count += group_count + 12;
 	    }
 
+	/* get heavereceive groups */
+	if (store->mul_group_heavereceive == MB_YES)
+	    {
+	    /* get group label */
+#ifdef DATAINPCBYTEORDER
+	    strncpy(&buffer[index], "GSH$", 4);
+#else
+	    strncpy(&buffer[index], "$HSG", 4);
+#endif
+	    index += 4;
+    
+	    /* start the group byte count, but don't write it to buffer yet */
+	    /* mark the byte count spot in the buffer and increment index so we skip it */
+	    group_count = 0;
+	    group_cnt_index = index;
+	    index += 4;
+	    
+	    /* get heavereceive array */
+	    group_id = MBSYS_XSE_MBM_GROUP_HEAVERECEIVE;
+	    mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
+	    mb_put_binary_int(SWAPFLAG, store->mul_num_beams, &buffer[index]); index += 4;
+	    for (i=0;i<store->mul_num_beams;i++)
+			{
+			mb_put_binary_double(SWAPFLAG, store->beams[i].heavereceive, &buffer[index]); index += 8;
+			}
+
+	    /* get end of group label */
+#ifdef DATAINPCBYTEORDER
+	    strncpy(&buffer[index], "GSH#", 4);
+#else
+	    strncpy(&buffer[index], "#HSG", 4);
+#endif
+	    index += 4;
+	    group_count += 8 + store->mul_num_beams*8;
+
+	    /* go back and fill in group byte count */
+	    mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
+
+	    /* add group count to the frame count */
+	    frame_count += group_count + 12;
+	    }
+
+	/* get azimuth groups */
+	if (store->mul_group_azimuth == MB_YES)
+	    {
+	    /* get group label */
+#ifdef DATAINPCBYTEORDER
+	    strncpy(&buffer[index], "GSH$", 4);
+#else
+	    strncpy(&buffer[index], "$HSG", 4);
+#endif
+	    index += 4;
+    
+	    /* start the group byte count, but don't write it to buffer yet */
+	    /* mark the byte count spot in the buffer and increment index so we skip it */
+	    group_count = 0;
+	    group_cnt_index = index;
+	    index += 4;
+	    
+	    /* get azimuth array */
+	    group_id = MBSYS_XSE_MBM_GROUP_AZIMUTH;
+	    mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
+	    mb_put_binary_int(SWAPFLAG, store->mul_num_beams, &buffer[index]); index += 4;
+	    for (i=0;i<store->mul_num_beams;i++)
+			{
+			mb_put_binary_double(SWAPFLAG, store->beams[i].azimuth, &buffer[index]); index += 8;
+			}
+
+	    /* get end of group label */
+#ifdef DATAINPCBYTEORDER
+	    strncpy(&buffer[index], "GSH#", 4);
+#else
+	    strncpy(&buffer[index], "#HSG", 4);
+#endif
+	    index += 4;
+	    group_count += 8 + store->mul_num_beams*8;
+
+	    /* go back and fill in group byte count */
+	    mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
+
+	    /* add group count to the frame count */
+	    frame_count += group_count + 12;
+	    }
+
+	/* get azimuth groups */
+	if (store->mul_group_mbsystemnav == MB_YES)
+	    {
+	    /* get group label */
+#ifdef DATAINPCBYTEORDER
+	    strncpy(&buffer[index], "GSH$", 4);
+#else
+	    strncpy(&buffer[index], "$HSG", 4);
+#endif
+	    index += 4;
+    
+	    /* start the group byte count, but don't write it to buffer yet */
+	    /* mark the byte count spot in the buffer and increment index so we skip it */
+	    group_count = 0;
+	    group_cnt_index = index;
+	    index += 4;
+	    
+	    /* get azimuth array */
+	    group_id = MBSYS_XSE_MBM_GROUP_MBSYSTEMNAV;
+	    mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
+	    mb_put_binary_double(SWAPFLAG, store->mul_lon, &buffer[index]); index += 8;
+	    mb_put_binary_double(SWAPFLAG, store->mul_lat, &buffer[index]); index += 8;
+	    mb_put_binary_double(SWAPFLAG, store->mul_heading, &buffer[index]); index += 8;
+	    mb_put_binary_double(SWAPFLAG, store->mul_speed, &buffer[index]); index += 8;
+
+	    /* get end of group label */
+#ifdef DATAINPCBYTEORDER
+	    strncpy(&buffer[index], "GSH#", 4);
+#else
+	    strncpy(&buffer[index], "#HSG", 4);
+#endif
+	    index += 4;
+	    group_count += 36;
+
+	    /* go back and fill in group byte count */
+	    mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
+
+	    /* add group count to the frame count */
+	    frame_count += group_count + 12;
+	    }
+
 	/* get end of frame label */
 #ifdef DATAINPCBYTEORDER
 	strncpy(&buffer[index], "FSH#", 4);
@@ -5329,23 +6477,72 @@ int mbr_l3xseraw_wr_sidescan(int verbose,int *buffer_size,char *buffer,void *sto
 	/* print debug statements */
 	if (verbose >= 5)
 	    {
-	    fprintf(stderr,"\ndbg5  Values to be written in MBIO function <%s>\n",
+	    fprintf(stderr,"\ndbg5  Values read in MBIO function <%s>\n",
 		    function_name);
-	    fprintf(stderr,"dbg5       sid_source:          %d\n",store->sid_source);
-	    fprintf(stderr,"dbg5       sid_sec:             %u\n",store->sid_sec);
-	    fprintf(stderr,"dbg5       sid_usec:            %u\n",store->sid_usec);
-	    fprintf(stderr,"dbg5       sid_ping:            %d\n",store->sid_ping);
-	    fprintf(stderr,"dbg5       sid_frequency:       %f\n",store->sid_frequency);
-	    fprintf(stderr,"dbg5       sid_pulse:           %f\n",store->sid_pulse);
-	    fprintf(stderr,"dbg5       sid_power:           %f\n",store->sid_power);
-	    fprintf(stderr,"dbg5       sid_bandwidth:       %f\n",store->sid_bandwidth);
-	    fprintf(stderr,"dbg5       sid_sample:          %f\n",store->sid_sample);
-	    fprintf(stderr,"dbg5       sid_bin_size:        %d\n",store->sid_bin_size);
-	    fprintf(stderr,"dbg5       sid_offset:          %d\n",store->sid_offset);
-	    fprintf(stderr,"dbg5       sid_num_pixels:      %d\n",store->sid_num_pixels);
-	    for (i=0;i<store->sid_num_pixels;i++)
-		fprintf(stderr,"dbg5       pixel[%d]: %5d\n",
-		    i, store->ss[i]);
+	    fprintf(stderr,"dbg5       sid_frame:            %d\n",store->sid_frame);
+	    fprintf(stderr,"dbg5       sid_group_avt:        %d\n",store->sid_group_avt);
+	    fprintf(stderr,"dbg5       sid_group_pvt:        %d\n",store->sid_group_pvt);
+	    fprintf(stderr,"dbg5       sid_group_avl:        %d\n",store->sid_group_avl);
+	    fprintf(stderr,"dbg5       sid_group_pvl:        %d\n",store->sid_group_pvl);
+	    fprintf(stderr,"dbg5       sid_group_signal:     %d\n",store->sid_group_signal);
+	    fprintf(stderr,"dbg5       sid_group_ping:       %d\n",store->sid_group_ping);
+	    fprintf(stderr,"dbg5       sid_group_complex:    %d\n",store->sid_group_complex);
+	    fprintf(stderr,"dbg5       sid_group_weighting:  %d\n",store->sid_group_weighting);
+	    fprintf(stderr,"dbg5       sid_source:           %d\n",store->sid_source);
+	    fprintf(stderr,"dbg5       sid_sec:              %d\n",store->sid_sec);
+	    fprintf(stderr,"dbg5       sid_usec:             %u\n",store->sid_usec);
+	    fprintf(stderr,"dbg5       sid_ping:             %u\n",store->sid_ping);
+	    fprintf(stderr,"dbg5       sid_frequency:        %f\n",store->sid_frequency);
+	    fprintf(stderr,"dbg5       sid_pulse:            %f\n",store->sid_pulse);
+	    fprintf(stderr,"dbg5       sid_power:            %f\n",store->sid_power);
+	    fprintf(stderr,"dbg5       sid_bandwidth:        %f\n",store->sid_bandwidth);
+	    fprintf(stderr,"dbg5       sid_sample:           %f\n",store->sid_sample);
+	    fprintf(stderr,"dbg5       sid_avt_sampleus:     %d\n",store->sid_avt_sampleus);
+	    fprintf(stderr,"dbg5       sid_avt_offset:       %d\n",store->sid_avt_offset);
+	    fprintf(stderr,"dbg5       sid_avt_num_samples:  %d\n",store->sid_avt_num_samples);
+	    for (i=0;i<store->sid_avt_num_samples;i++)
+	    	fprintf(stderr,"dbg5       sid_avt_amp[%d]:%d\n",i,store->sid_avt_amp[i]);
+	    fprintf(stderr,"dbg5       sid_pvt_sampleus:  %d\n",store->sid_pvt_sampleus);
+	    fprintf(stderr,"dbg5       sid_pvt_offset:  %d\n",store->sid_pvt_offset);
+	    fprintf(stderr,"dbg5       sid_pvt_num_samples:  %d\n",store->sid_pvt_num_samples);
+	    for (i=0;i<store->sid_pvt_num_samples;i++)
+	    	fprintf(stderr,"dbg5       sid_pvt_phase[%d]:%d\n",i,store->sid_pvt_phase[i]);
+	    fprintf(stderr,"dbg5       sid_avl_binsize:  %d\n",store->sid_avl_binsize);
+	    fprintf(stderr,"dbg5       sid_avl_offset:  %d\n",store->sid_avl_offset);
+	    fprintf(stderr,"dbg5       sid_avl_num_samples:  %d\n",store->sid_avl_num_samples);
+	    for (i=0;i<store->sid_avl_num_samples;i++)
+	    	fprintf(stderr,"dbg5       sid_avl_amp[%d]:%d\n",i,store->sid_avl_amp[i]);
+	    fprintf(stderr,"dbg5       sid_pvl_binsize:  %d\n",store->sid_pvl_binsize);
+	    fprintf(stderr,"dbg5       sid_pvl_offset:  %d\n",store->sid_pvl_offset);
+	    fprintf(stderr,"dbg5       sid_pvl_num_samples:  %d\n",store->sid_pvl_num_samples);
+	    for (i=0;i<store->sid_pvl_num_samples;i++)
+	    	fprintf(stderr,"dbg5       sid_pvl_phase[%d]:%d\n",i,store->sid_pvl_phase[i]);
+	    fprintf(stderr,"dbg5       sid_sig_ping:  %d\n",store->sid_sig_ping);
+	    fprintf(stderr,"dbg5       sid_sig_channel:  %d\n",store->sid_sig_channel);
+	    fprintf(stderr,"dbg5       sid_sig_offset:  %f\n",store->sid_sig_offset);
+	    fprintf(stderr,"dbg5       sid_sig_sample:  %f\n",store->sid_sig_sample);
+	    fprintf(stderr,"dbg5       sid_sig_num_samples:  %d\n",store->sid_sig_num_samples);
+	    for (i=0;i<store->sid_sig_num_samples;i++)
+	    	fprintf(stderr,"dbg5       sid_sig_phase[%d]:%d\n",i,store->sid_sig_phase[i]);
+	    fprintf(stderr,"dbg5       sid_png_pulse:  %u\n",store->sid_png_pulse);
+	    fprintf(stderr,"dbg5       sid_png_startfrequency:  %f\n",store->sid_png_startfrequency);
+	    fprintf(stderr,"dbg5       sid_png_endfrequency:  %f\n",store->sid_png_endfrequency);
+	    fprintf(stderr,"dbg5       sid_png_duration:  %f\n",store->sid_png_duration);
+	    fprintf(stderr,"dbg5       sid_png_mancode:  %d\n",store->sid_png_mancode);
+	    fprintf(stderr,"dbg5       sid_png_pulseid:  %d\n",store->sid_png_pulseid);
+	    fprintf(stderr,"dbg5       sid_png_pulsename:  %s\n",store->sid_png_pulsename);
+	    fprintf(stderr,"dbg5       sid_cmp_ping:  %d\n",store->sid_cmp_ping);
+	    fprintf(stderr,"dbg5       sid_cmp_channel:  %d\n",store->sid_cmp_channel);
+	    fprintf(stderr,"dbg5       sid_cmp_offset:  %f\n",store->sid_cmp_offset);
+	    fprintf(stderr,"dbg5       sid_cmp_sample:  %f\n",store->sid_cmp_sample);
+	    fprintf(stderr,"dbg5       sid_cmp_num_samples:  %d\n",store->sid_cmp_num_samples);
+	    for (i=0;i<store->sid_sig_num_samples;i++)
+	    	fprintf(stderr,"dbg5       sid_cmp_real[%d]:%d sid_cmp_imaginary[%d]:%d\n",
+				i,store->sid_cmp_real[i],i,store->sid_cmp_imaginary[i]);
+	    fprintf(stderr,"dbg5       sid_wgt_factorleft:  %d\n",store->sid_wgt_factorleft);
+	    fprintf(stderr,"dbg5       sid_wgt_samplesleft:  %d\n",store->sid_wgt_samplesleft);
+	    fprintf(stderr,"dbg5       sid_wgt_factorright:  %d\n",store->sid_wgt_factorright);
+	    fprintf(stderr,"dbg5       sid_wgt_samplesright:  %d\n",store->sid_wgt_samplesright);
 	    }
 
 	/* get the frame label */
@@ -5370,7 +6567,10 @@ int mbr_l3xseraw_wr_sidescan(int verbose,int *buffer_size,char *buffer,void *sto
 	mb_put_binary_int(SWAPFLAG, store->sid_sec, &buffer[index]); index += 4;
 	mb_put_binary_int(SWAPFLAG, store->sid_usec, &buffer[index]); index += 4;
 	frame_count += 16;
+	
+	/*****************************************/
 
+	/* get general group */
 	/* get group label */
 #ifdef DATAINPCBYTEORDER
 	strncpy(&buffer[index], "GSH$", 4);
@@ -5410,46 +6610,381 @@ int mbr_l3xseraw_wr_sidescan(int verbose,int *buffer_size,char *buffer,void *sto
 	/* add group count to the frame count */
 	    frame_count += group_count + 12;
 
-	/* get amplitude vs lateral groups */
-	/* get group label */
+	/*****************************************/
+
+	/* get amplitude vs traveltime group */
+	if (store->sid_group_avt == MB_YES)
+		{
+		/* get group label */
 #ifdef DATAINPCBYTEORDER
-	strncpy(&buffer[index], "GSH$", 4);
+		strncpy(&buffer[index], "GSH$", 4);
 #else
-	strncpy(&buffer[index], "$HSG", 4);
+		strncpy(&buffer[index], "$HSG", 4);
 #endif
-	index += 4;
+		index += 4;
 
-	/* start the group byte count, but don't write it to buffer yet */
-	/* mark the byte count spot in the buffer and increment index so we skip it */
-	group_count = 0;
-	group_cnt_index = index;
-	index += 4;
-	
-	/* get amplitude array */
-	group_id = MBSYS_XSE_SSN_GROUP_AMPVSLAT;
-	mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
-	mb_put_binary_int(SWAPFLAG, store->sid_bin_size, &buffer[index]); index += 4;
-	mb_put_binary_int(SWAPFLAG, store->sid_offset, &buffer[index]); index += 4;
-	mb_put_binary_int(SWAPFLAG, store->sid_num_pixels, &buffer[index]); index += 4;
-	for (i=0;i<store->sid_num_pixels;i++)
-	    {
-	    mb_put_binary_short(SWAPFLAG, store->ss[i], &buffer[index]); index += 2;
-	    }
+		/* start the group byte count, but don't write it to buffer yet */
+		/* mark the byte count spot in the buffer and increment index so we skip it */
+		group_count = 0;
+		group_cnt_index = index;
+		index += 4;
 
-	/* get end of group label */
+		/* get amplitude array */
+		group_id = MBSYS_XSE_SSN_GROUP_AMPVSTT;
+		mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
+		mb_put_binary_int(SWAPFLAG, store->sid_avt_sampleus, &buffer[index]); index += 4;
+		mb_put_binary_int(SWAPFLAG, store->sid_avt_offset, &buffer[index]); index += 4;
+		mb_put_binary_int(SWAPFLAG, store->sid_avt_num_samples, &buffer[index]); index += 4;
+		for (i=0;i<store->sid_avt_num_samples;i++)
+		    {
+		    mb_put_binary_short(SWAPFLAG, store->sid_avt_amp[i], &buffer[index]); index += 2;
+		    }
+
+		/* get end of group label */
 #ifdef DATAINPCBYTEORDER
-	strncpy(&buffer[index], "GSH#", 4);
+		strncpy(&buffer[index], "GSH#", 4);
 #else
-	strncpy(&buffer[index], "#HSG", 4);
+		strncpy(&buffer[index], "#HSG", 4);
 #endif
-	index += 4;
-	group_count += 16 + store->sid_num_pixels*2;
+		index += 4;
+		group_count += 16 + 2 * store->sid_avt_num_samples;
 
-	/* go back and fill in group byte count */
-	mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
+		/* go back and fill in group byte count */
+		mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
 
-	/* add group count to the frame count */
-	frame_count += group_count + 12;
+		/* add group count to the frame count */
+		frame_count += group_count + 12;
+		}
+
+	/*****************************************/
+
+	/* get phase vs traveltime group */
+	if (store->sid_group_avt == MB_YES)
+		{
+		/* get group label */
+#ifdef DATAINPCBYTEORDER
+		strncpy(&buffer[index], "GSH$", 4);
+#else
+		strncpy(&buffer[index], "$HSG", 4);
+#endif
+		index += 4;
+
+		/* start the group byte count, but don't write it to buffer yet */
+		/* mark the byte count spot in the buffer and increment index so we skip it */
+		group_count = 0;
+		group_cnt_index = index;
+		index += 4;
+
+		/* get amplitude array */
+		group_id = MBSYS_XSE_SSN_GROUP_PHASEVSTT;
+		mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
+		mb_put_binary_int(SWAPFLAG, store->sid_pvt_sampleus, &buffer[index]); index += 4;
+		mb_put_binary_int(SWAPFLAG, store->sid_pvt_offset, &buffer[index]); index += 4;
+		mb_put_binary_int(SWAPFLAG, store->sid_pvt_num_samples, &buffer[index]); index += 4;
+		for (i=0;i<store->sid_pvt_num_samples;i++)
+		    {
+		    mb_put_binary_short(SWAPFLAG, store->sid_pvt_phase[i], &buffer[index]); index += 2;
+		    }
+
+		/* get end of group label */
+#ifdef DATAINPCBYTEORDER
+		strncpy(&buffer[index], "GSH#", 4);
+#else
+		strncpy(&buffer[index], "#HSG", 4);
+#endif
+		index += 4;
+		group_count += 16 + 2 * store->sid_pvt_num_samples;
+
+		/* go back and fill in group byte count */
+		mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
+
+		/* add group count to the frame count */
+		frame_count += group_count + 12;
+		}
+
+	/*****************************************/
+
+	/* get amplitude vs lateral group */
+	if (store->sid_group_avl == MB_YES)
+		{
+		/* get group label */
+#ifdef DATAINPCBYTEORDER
+		strncpy(&buffer[index], "GSH$", 4);
+#else
+		strncpy(&buffer[index], "$HSG", 4);
+#endif
+		index += 4;
+
+		/* start the group byte count, but don't write it to buffer yet */
+		/* mark the byte count spot in the buffer and increment index so we skip it */
+		group_count = 0;
+		group_cnt_index = index;
+		index += 4;
+
+		/* get amplitude array */
+		group_id = MBSYS_XSE_SSN_GROUP_AMPVSLAT;
+		mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
+		mb_put_binary_int(SWAPFLAG, store->sid_avl_binsize, &buffer[index]); index += 4;
+		mb_put_binary_int(SWAPFLAG, store->sid_avl_offset, &buffer[index]); index += 4;
+		mb_put_binary_int(SWAPFLAG, store->sid_avl_num_samples, &buffer[index]); index += 4;
+		for (i=0;i<store->sid_avl_num_samples;i++)
+		    {
+		    mb_put_binary_short(SWAPFLAG, store->sid_avl_amp[i], &buffer[index]); index += 2;
+		    }
+
+		/* get end of group label */
+#ifdef DATAINPCBYTEORDER
+		strncpy(&buffer[index], "GSH#", 4);
+#else
+		strncpy(&buffer[index], "#HSG", 4);
+#endif
+		index += 4;
+		group_count += 16 + 2 * store->sid_avl_num_samples;
+
+		/* go back and fill in group byte count */
+		mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
+
+		/* add group count to the frame count */
+		frame_count += group_count + 12;
+		}
+
+	/*****************************************/
+
+	/* get phase vs lateral group */
+	if (store->sid_group_pvl == MB_YES)
+		{
+		/* get group label */
+#ifdef DATAINPCBYTEORDER
+		strncpy(&buffer[index], "GSH$", 4);
+#else
+		strncpy(&buffer[index], "$HSG", 4);
+#endif
+		index += 4;
+
+		/* start the group byte count, but don't write it to buffer yet */
+		/* mark the byte count spot in the buffer and increment index so we skip it */
+		group_count = 0;
+		group_cnt_index = index;
+		index += 4;
+
+		/* get amplitude array */
+		group_id = MBSYS_XSE_SSN_GROUP_PHASEVSLAT;
+		mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
+		mb_put_binary_int(SWAPFLAG, store->sid_pvl_binsize, &buffer[index]); index += 4;
+		mb_put_binary_int(SWAPFLAG, store->sid_pvl_offset, &buffer[index]); index += 4;
+		mb_put_binary_int(SWAPFLAG, store->sid_pvl_num_samples, &buffer[index]); index += 4;
+		for (i=0;i<store->sid_pvl_num_samples;i++)
+		    {
+		    mb_put_binary_short(SWAPFLAG, store->sid_pvl_phase[i], &buffer[index]); index += 2;
+		    }
+
+		/* get end of group label */
+#ifdef DATAINPCBYTEORDER
+		strncpy(&buffer[index], "GSH#", 4);
+#else
+		strncpy(&buffer[index], "#HSG", 4);
+#endif
+		index += 4;
+		group_count += 16 + 2 * store->sid_pvl_num_samples;
+
+		/* go back and fill in group byte count */
+		mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
+
+		/* add group count to the frame count */
+		frame_count += group_count + 12;
+		}
+
+	/*****************************************/
+
+	/* get signal group */
+	if (store->sid_group_signal == MB_YES)
+		{
+		/* get group label */
+#ifdef DATAINPCBYTEORDER
+		strncpy(&buffer[index], "GSH$", 4);
+#else
+		strncpy(&buffer[index], "$HSG", 4);
+#endif
+		index += 4;
+
+		/* start the group byte count, but don't write it to buffer yet */
+		/* mark the byte count spot in the buffer and increment index so we skip it */
+		group_count = 0;
+		group_cnt_index = index;
+		index += 4;
+
+		/* get amplitude array */
+		group_id = MBSYS_XSE_SSN_GROUP_SIGNAL;
+		mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
+		mb_put_binary_int(SWAPFLAG, store->sid_sig_ping, &buffer[index]); index += 4;
+		mb_put_binary_int(SWAPFLAG, store->sid_sig_channel, &buffer[index]); index += 4;
+		mb_put_binary_double(SWAPFLAG, store->sid_sig_offset, &buffer[index]); index += 8;
+		mb_put_binary_double(SWAPFLAG, store->sid_sig_sample, &buffer[index]); index += 8;
+		mb_put_binary_int(SWAPFLAG, store->sid_sig_num_samples, &buffer[index]); index += 4;
+		for (i=0;i<store->sid_sig_num_samples;i++)
+		    {
+		    mb_put_binary_short(SWAPFLAG, store->sid_sig_phase[i], &buffer[index]); index += 2;
+		    }
+
+		/* get end of group label */
+#ifdef DATAINPCBYTEORDER
+		strncpy(&buffer[index], "GSH#", 4);
+#else
+		strncpy(&buffer[index], "#HSG", 4);
+#endif
+		index += 4;
+		group_count += 32 + 2 * store->sid_sig_num_samples;
+
+		/* go back and fill in group byte count */
+		mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
+
+		/* add group count to the frame count */
+		frame_count += group_count + 12;
+		}
+
+	/*****************************************/
+
+	/* get ping group */
+	if (store->sid_group_ping == MB_YES)
+		{
+		/* get group label */
+#ifdef DATAINPCBYTEORDER
+		strncpy(&buffer[index], "GSH$", 4);
+#else
+		strncpy(&buffer[index], "$HSG", 4);
+#endif
+		index += 4;
+
+		/* start the group byte count, but don't write it to buffer yet */
+		/* mark the byte count spot in the buffer and increment index so we skip it */
+		group_count = 0;
+		group_cnt_index = index;
+		index += 4;
+
+		/* get amplitude array */
+		group_id = MBSYS_XSE_SSN_GROUP_PINGTYPE;
+		mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
+		mb_put_binary_double(SWAPFLAG, store->sid_png_startfrequency, &buffer[index]); index += 8;
+		mb_put_binary_double(SWAPFLAG, store->sid_png_endfrequency, &buffer[index]); index += 8;
+		mb_put_binary_double(SWAPFLAG, store->sid_png_duration, &buffer[index]); index += 8;
+		mb_put_binary_int(SWAPFLAG, store->sid_png_mancode, &buffer[index]); index += 4;
+		mb_put_binary_int(SWAPFLAG, store->sid_png_pulseid, &buffer[index]); index += 4;
+		strcpy(&buffer[index], store->sid_png_pulsename); index += strlen(store->sid_png_pulsename);
+		buffer[index] = 0; index++;
+		if (strlen(store->sid_png_pulsename) % 2 > 0)
+			{
+			buffer[index] = 0; index++;
+			}
+
+		/* get end of group label */
+#ifdef DATAINPCBYTEORDER
+		strncpy(&buffer[index], "GSH#", 4);
+#else
+		strncpy(&buffer[index], "#HSG", 4);
+#endif
+		index += 4;
+		group_count += 36 + strlen(store->sid_png_pulsename) + 1 + (strlen(store->sid_png_pulsename) % 2);
+
+		/* go back and fill in group byte count */
+		mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
+
+		/* add group count to the frame count */
+		frame_count += group_count + 12;
+		}
+
+	/*****************************************/
+
+	/* get complex signal group */
+	if (store->sid_group_ping == MB_YES)
+		{
+		/* get group label */
+#ifdef DATAINPCBYTEORDER
+		strncpy(&buffer[index], "GSH$", 4);
+#else
+		strncpy(&buffer[index], "$HSG", 4);
+#endif
+		index += 4;
+
+		/* start the group byte count, but don't write it to buffer yet */
+		/* mark the byte count spot in the buffer and increment index so we skip it */
+		group_count = 0;
+		group_cnt_index = index;
+		index += 4;
+
+		/* get amplitude array */
+		group_id = MBSYS_XSE_SSN_GROUP_COMPLEXSIGNAL;
+		mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
+		mb_put_binary_int(SWAPFLAG, store->sid_cmp_ping, &buffer[index]); index += 4;
+		mb_put_binary_int(SWAPFLAG, store->sid_cmp_channel, &buffer[index]); index += 4;
+		mb_put_binary_double(SWAPFLAG, store->sid_cmp_offset, &buffer[index]); index += 8;
+		mb_put_binary_double(SWAPFLAG, store->sid_cmp_sample, &buffer[index]); index += 8;
+		mb_put_binary_int(SWAPFLAG, store->sid_cmp_num_samples, &buffer[index]); index += 4;
+		for (i=0;i<store->sid_cmp_num_samples;i++)
+		    {
+		    mb_put_binary_short(SWAPFLAG, store->sid_cmp_real[i], &buffer[index]); index += 2;
+		    mb_put_binary_short(SWAPFLAG, store->sid_cmp_imaginary[i], &buffer[index]); index += 2;
+		    }
+
+		/* get end of group label */
+#ifdef DATAINPCBYTEORDER
+		strncpy(&buffer[index], "GSH#", 4);
+#else
+		strncpy(&buffer[index], "#HSG", 4);
+#endif
+		index += 4;
+		group_count += 32 + 4 * store->sid_cmp_num_samples;
+
+		/* go back and fill in group byte count */
+		mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
+
+		/* add group count to the frame count */
+		frame_count += group_count + 12;
+		}
+
+	/*****************************************/
+
+	/* get weighting group */
+	if (store->sid_group_weighting == MB_YES)
+		{
+		/* get group label */
+#ifdef DATAINPCBYTEORDER
+		strncpy(&buffer[index], "GSH$", 4);
+#else
+		strncpy(&buffer[index], "$HSG", 4);
+#endif
+		index += 4;
+
+		/* start the group byte count, but don't write it to buffer yet */
+		/* mark the byte count spot in the buffer and increment index so we skip it */
+		group_count = 0;
+		group_cnt_index = index;
+		index += 4;
+
+		/* get amplitude array */
+		group_id = MBSYS_XSE_SSN_GROUP_WEIGHTING;
+		mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
+		mb_put_binary_short(SWAPFLAG, store->sid_wgt_factorleft, &buffer[index]); index += 2;
+		mb_put_binary_int(SWAPFLAG, store->sid_wgt_samplesleft, &buffer[index]); index += 4;
+		mb_put_binary_short(SWAPFLAG, store->sid_wgt_factorright, &buffer[index]); index += 2;
+		mb_put_binary_int(SWAPFLAG, store->sid_wgt_samplesright, &buffer[index]); index += 4;
+
+		/* get end of group label */
+#ifdef DATAINPCBYTEORDER
+		strncpy(&buffer[index], "GSH#", 4);
+#else
+		strncpy(&buffer[index], "#HSG", 4);
+#endif
+		index += 4;
+		group_count += 16;
+
+		/* go back and fill in group byte count */
+		mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
+
+		/* add group count to the frame count */
+		frame_count += group_count + 12;
+		}
+
+	/*****************************************/
 
 	/* get end of frame label */
 #ifdef DATAINPCBYTEORDER

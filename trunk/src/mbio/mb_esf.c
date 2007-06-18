@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_esf.c	4/10/2003
- *    $Id: mb_esf.c,v 5.10 2006-01-24 19:11:17 caress Exp $
+ *    $Id: mb_esf.c,v 5.11 2007-06-18 01:19:48 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	April 10, 2003
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.10  2006/01/24 19:11:17  caress
+ * Version 5.0.8 beta.
+ *
  * Revision 5.9  2006/01/06 18:27:19  caress
  * Working towards 5.0.8
  *
@@ -68,7 +71,7 @@
 #include "../../include/mb_process.h"
 #include "../../include/mb_swap.h"
 
-static char rcs_id[]="$Id: mb_esf.c,v 5.10 2006-01-24 19:11:17 caress Exp $";
+static char rcs_id[]="$Id: mb_esf.c,v 5.11 2007-06-18 01:19:48 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 /* 	function mb_esf_check checks for an existing esf file. */
@@ -159,11 +162,20 @@ int mb_esf_load(int verbose, char *swathfile,
 		fprintf(stderr,"dbg2       load:        %d\n",load);
 		fprintf(stderr,"dbg2       output:      %d\n",output);
 		}
+		
+	/* initialize the esf structure */
+	esf->nedit = 0;
+	esf->esffile[0] = '\0';
+	esf->esstream[0] = '\0';
+	esf->edit = NULL;
+	esf->esffp = NULL;
+	esf->essfp = NULL;
+	esf->byteswapped = mb_swap_check();
 
 	/* get name of existing or new esffile, then load old edits
 		and/or open new esf file */
 	status = mb_esf_check(verbose, swathfile, esffile, &found, error);
-	if (load == MB_YES || output == MB_YES)
+	if ((load == MB_YES && found == MB_YES) || output != MBP_ESF_NOWRITE)
 		{
 		status = mb_esf_open(verbose, esffile, 
 				load, output, esf, error);
@@ -706,12 +718,12 @@ int mb_esf_close(int verbose, struct mb_esf_struct *esf, int *error)
 		}
 
 	/* deallocate the arrays */
-	esf->nedit = 0;
 	if (esf->nedit != 0)
 		{
 		if (esf->edit != NULL)
 			status = mb_free(verbose, &(esf->edit), error);
 		}
+	esf->nedit = 0;
 
 	/* close the esf file */
 	if (esf->esffp != NULL)

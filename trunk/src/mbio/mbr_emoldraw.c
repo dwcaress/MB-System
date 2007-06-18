@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_emoldraw.c	3/4/2001
- *	$Id: mbr_emoldraw.c,v 5.10 2006-01-24 19:11:17 caress Exp $
+ *	$Id: mbr_emoldraw.c,v 5.11 2007-06-18 01:19:48 caress Exp $
  *
  *    Copyright (c) 2001, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	March 4, 2001
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.10  2006/01/24 19:11:17  caress
+ * Version 5.0.8 beta.
+ *
  * Revision 5.9  2005/11/05 00:48:04  caress
  * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
  *
@@ -109,7 +112,7 @@ int mbr_emoldraw_chk_label(int verbose, void *mbio_ptr, short type);
 /*--------------------------------------------------------------------*/
 int mbr_register_emoldraw(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_emoldraw.c,v 5.10 2006-01-24 19:11:17 caress Exp $";
+	static char res_id[]="$Id: mbr_emoldraw.c,v 5.11 2007-06-18 01:19:48 caress Exp $";
 	char	*function_name = "mbr_register_emoldraw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -243,7 +246,7 @@ int mbr_info_emoldraw(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_emoldraw.c,v 5.10 2006-01-24 19:11:17 caress Exp $";
+	static char res_id[]="$Id: mbr_emoldraw.c,v 5.11 2007-06-18 01:19:48 caress Exp $";
 	char	*function_name = "mbr_info_emoldraw";
 	int	status = MB_SUCCESS;
 
@@ -313,7 +316,7 @@ int mbr_info_emoldraw(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_emoldraw(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_emoldraw.c,v 5.10 2006-01-24 19:11:17 caress Exp $";
+	static char res_id[]="$Id: mbr_emoldraw.c,v 5.11 2007-06-18 01:19:48 caress Exp $";
 	char	*function_name = "mbr_alm_emoldraw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -953,6 +956,7 @@ int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 #ifdef MBR_EMOLDRAW_DEBUG
 	fprintf(stderr,"call mbr_emoldraw_rd_em12bath type %x\n",*type);
 #endif
+			store->sonar = MBSYS_SIMRAD_EM12S;
 			status = mbr_emoldraw_rd_em12bath(
 				verbose,mbfp,store,
 				EM_SWATH_CENTER,error);
@@ -994,6 +998,7 @@ int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 #ifdef MBR_EMOLDRAW_DEBUG
 	fprintf(stderr,"call mbr_emoldraw_rd_em12bath type %x\n",*type);
 #endif
+			store->sonar = MBSYS_SIMRAD_EM12D;
 			status = mbr_emoldraw_rd_em12bath(
 				verbose,mbfp,store,
 				EM_SWATH_PORT,error);
@@ -1035,6 +1040,7 @@ int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 #ifdef MBR_EMOLDRAW_DEBUG
 	fprintf(stderr,"call mbr_emoldraw_rd_em12bath type %x\n",*type);
 #endif
+			store->sonar = MBSYS_SIMRAD_EM12D;
 			status = mbr_emoldraw_rd_em12bath(
 				verbose,mbfp,store,
 				EM_SWATH_STARBOARD,error);
@@ -1076,6 +1082,7 @@ int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 #ifdef MBR_EMOLDRAW_DEBUG
 	fprintf(stderr,"call mbr_emoldraw_rd_em121bath type %x\n",*type);
 #endif
+			store->sonar = MBSYS_SIMRAD_EM121;
 			status = mbr_emoldraw_rd_em121bath(
 				verbose,mbfp,store,error);
 			if (status == MB_SUCCESS)
@@ -1124,6 +1131,7 @@ int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 #ifdef MBR_EMOLDRAW_DEBUG
 	fprintf(stderr,"num_bathrec:%d\n",*num_bathrec);
 #endif
+				store->sonar = MBSYS_SIMRAD_EM1000;
 				store->kind = MB_DATA_DATA;
 				if (first_type == EM_NONE
 					&& *file_has_ss == MB_YES)
