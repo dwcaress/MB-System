@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbview.h	10/9/2002
- *    $Id: mbview.h,v 5.16 2007-06-17 23:27:31 caress Exp $
+ *    $Id: mbview.h,v 5.17 2007-07-03 17:35:54 caress Exp $
  *
  *    Copyright (c) 2002, 2003, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -18,6 +18,9 @@
  * Date:	October 10,  2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.16  2007/06/17 23:27:31  caress
+ * Added NBeditviz.
+ *
  * Revision 5.15  2006/09/11 18:55:53  caress
  * Changes during Western Flyer and Thomas Thompson cruises, August-September
  * 2006.
@@ -654,6 +657,7 @@ int mbview_startup(int verbose, Widget parent, XtAppContext app, int *error);
 int mbview_quit(int verbose, int *error);
 int mbview_init(int verbose, int *instance, int *error);
 int mbview_getdataptr(int verbose, int instance, struct mbview_struct **datahandle, int *error);
+int mbview_getsharedptr(int verbose, struct mbview_shareddata_struct **sharedhandle, int *error);
 
 int mbview_setwindowparms(int verbose, int instance,
 			int	(*mbview_dismiss_notify)(int),

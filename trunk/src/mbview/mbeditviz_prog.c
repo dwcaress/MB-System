@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbeditviz_prog.c		5/1/2007
- *    $Id: mbeditviz_prog.c,v 5.0 2007-06-17 23:25:57 caress Exp $
+ *    $Id: mbeditviz_prog.c,v 5.1 2007-07-03 17:35:54 caress Exp $
  *
  *    Copyright (c) 2007 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	May 1, 2007
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2007/06/17 23:25:57  caress
+ * Added NBeditviz.
+ *
  *
  */
 
@@ -49,7 +52,7 @@
 #include "mbview.h"
 
 /* id variables */
-static char rcs_id[] = "$Id: mbeditviz_prog.c,v 5.0 2007-06-17 23:25:57 caress Exp $";
+static char rcs_id[] = "$Id: mbeditviz_prog.c,v 5.1 2007-07-03 17:35:54 caress Exp $";
 static char program_name[] = "MBeditviz";
 static char help_message[] = "MBeditviz is a bathymetry editor and patch test tool.";
 static char usage_message[] = "mbeditviz [-H -T -V]";
@@ -527,6 +530,10 @@ int mbeditviz_load_file(int ifile)
 	double	*ssalongtrack = NULL;
 	char	comment[MB_COMMENT_MAXLINE];
 
+	int	esfmodtime = 0;
+	int	ofilemodtime = 0;
+	int	load_esf;
+
 	int	swathbounds;
 	double	mtodeglon, mtodeglat;
 	double	headingx, headingy;
@@ -549,7 +556,7 @@ int mbeditviz_load_file(int ifile)
 		&& mbev_files[ifile].load_status == MB_NO)
 		{
 		file = &(mbev_files[ifile]);
-
+fprintf(stderr,"mbeditviz_load_file:%d\n",ifile);
 		/* allocate memory for pings */
 		if (file->raw_info.nrecords > 0)
 			{
@@ -959,8 +966,42 @@ fprintf(stderr,"MEMORY FAILURE in mbeditviz_load_file\n");
 			/* close the file */
 			mbev_status = mb_close(mbev_verbose,&imbio_ptr,&mbev_error);
 			
-			/* if raw file loaded (not processed), load bathymetry edits if they exist */
+			/* load bathymetry edits if needed - if raw file loaded or 
+				processed file is out of date */
+			load_esf = MB_NO;
+
+		    	/* load esf if no processed file exists */
 			if (file->processed_info_loaded == MB_NO)
+				{
+				load_esf = MB_YES;
+				}
+				
+			/* load esf if processed file exists but is out of date */
+			else if (file->process.mbp_edit_mode != MBP_EDIT_OFF)
+				{
+		    		/* get mod time for the edit save file if needed */
+				if ((fstatus = stat(file->process.mbp_editfile, &file_status)) == 0
+					&& (file_status.st_mode & S_IFMT) != S_IFDIR)
+					esfmodtime = file_status.st_mtime;
+				else
+					esfmodtime = 0;
+					
+				/* get mod time for the output file */
+				if ((fstatus = stat(file->process.mbp_ofile, &file_status)) == 0
+					&& (file_status.st_mode & S_IFMT) != S_IFDIR)
+					ofilemodtime = file_status.st_mtime;
+				else
+					ofilemodtime = 0;
+
+				if (esfmodtime > ofilemodtime)
+					{
+					load_esf = MB_YES;
+					}
+				}
+			
+			
+			/* load bathymetry edits if needed */
+			if (load_esf == MB_YES)
 				{
 				/* load the esf */
 				mbev_status = mb_esf_load(mbev_verbose, file->path, MB_YES, MBP_ESF_NOWRITE,
@@ -2286,6 +2327,8 @@ ifile,file->load_status,file->esf_open);
 							action = MBP_EDIT_FLAG;
 						else
 							action = MBP_EDIT_ZERO;
+fprintf(stderr,"mb_esf_save: ifile:%d iping:%d ibeam:%d action:%d\n",
+ifile,iping,ibeam,action);
 						mb_esf_save(mbev_verbose, &(file->esf),
 								ping->time_d, ibeam,
 								action, &mbev_error);
@@ -2711,6 +2754,178 @@ mbev_selected.num_soundings);
 	return(mbev_status);
 }				   
 /*--------------------------------------------------------------------*/
+int mbeditviz_selectnav(int instance)
+{
+	char	*function_name = "mbeditviz_selectnav";
+	struct mbev_file_struct *file;
+	struct mbev_ping_struct *ping;
+	struct mb_info_struct *info;
+	struct mbview_shareddata_struct *mbviewshared;
+	struct mbview_navpointw_struct *navpts;
+
+	int	inavcount;
+	int	ifile, iping, ibeam, isounding;
+	double	dx, dy, dz;
+	double	xmin, xmax, ymin, ymax, zmin, zmax;
+	double	headingx, headingy;
+	double	mtodeglon, mtodeglat;
+	int	i;
+
+	/* print input debug statements */
+	if (mbev_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  Function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       instance:     %d\n",instance);
+		}
+fprintf(stderr,"mbeditviz_selectnav: \n");
+		
+    	/* check shared data source for selected nav */
+	mbev_status = mbview_getsharedptr(mbev_verbose, &mbviewshared, &mbev_error);
+			
+	/* check if any nav is currently selected */
+	if (mbev_status == MB_SUCCESS)
+		{
+		/* reset sounding count */
+		mbev_selected.num_soundings = 0;
+		mbev_selected.num_soundings_unflagged = 0;
+		mbev_selected.num_soundings_flagged = 0;
+
+		/* get sounding bearing */
+		mbev_selected.bearing = 90.0;
+		mbev_selected.sinbearing = sin(DTR * mbev_selected.bearing);
+		mbev_selected.cosbearing = cos(DTR * mbev_selected.bearing);
+
+		/* loop over all files to get bounds */
+		inavcount = 0;
+		for (ifile=0;ifile<mbev_num_files;ifile++)
+			{
+			file = &mbev_files[ifile];
+			if (file->load_status == MB_YES)
+				{
+				navpts = (struct mbview_navpointw_struct *) mbviewshared->navs[inavcount].navpts;
+				for (iping=0;iping<file->num_pings;iping++)
+					{
+					if (navpts[iping].selected == MB_YES)
+						{
+						ping = &(file->pings[iping]);
+						mb_coor_scale(mbev_verbose,ping->navlat,&mtodeglon,&mtodeglat);
+						headingx = sin(ping->heading * DTR);
+						headingy = cos(ping->heading * DTR);
+						for (ibeam=0;ibeam<ping->beams_bath;ibeam++)
+							{
+							if (ping->beamflag[ibeam] != MB_FLAG_NULL)
+								{
+								/* allocate memory if needed */
+								if (mbev_selected.num_soundings 
+									>= mbev_selected.num_soundings_alloc)
+									{
+									mbev_selected.num_soundings_alloc += MBEV_ALLOCK_NUM;
+									mbev_selected.soundings = realloc(mbev_selected.soundings, mbev_selected.num_soundings_alloc 
+													* sizeof(struct mb3dsoundings_sounding_struct));
+									}
+									
+								/* same beam ids */
+								mbev_selected.soundings[mbev_selected.num_soundings].ifile = ifile;
+								mbev_selected.soundings[mbev_selected.num_soundings].iping = iping;
+								mbev_selected.soundings[mbev_selected.num_soundings].ibeam = ibeam;
+								mbev_selected.soundings[mbev_selected.num_soundings].beamflag = ping->beamflag[ibeam];
+			
+								/* apply rotations and recalculate position */
+								mbeditviz_beam_position(ping->navlon, ping->navlat, headingx, headingy,
+										mtodeglon, mtodeglat,
+										ping->bath[ibeam], ping->bathacrosstrack[ibeam], ping->bathalongtrack[ibeam], 
+										ping->sonardepth, 
+										mbev_rollbias_3dsdg, mbev_pitchbias_3dsdg, mbev_headingbias_3dsdg, 
+										&(ping->bathcorr[ibeam]), &(ping->bathlon[ibeam]), &(ping->bathlat[ibeam]));
+								mb_proj_forward(mbev_verbose, mbev_grid.pjptr, 
+									ping->bathlon[ibeam], ping->bathlat[ibeam],
+									&ping->bathx[ibeam], &ping->bathy[ibeam], 
+									&mbev_error);
+								
+								/* get local position in selected region */
+								mbev_selected.soundings[mbev_selected.num_soundings].x = ping->bathx[ibeam];
+								mbev_selected.soundings[mbev_selected.num_soundings].y = ping->bathy[ibeam];
+								mbev_selected.soundings[mbev_selected.num_soundings].z = -ping->bathcorr[ibeam];
+								if (mbev_selected.num_soundings == 0)
+									{
+									xmin = ping->bathx[ibeam];
+									xmax = ping->bathx[ibeam];
+									ymin = ping->bathy[ibeam];
+									ymax = ping->bathy[ibeam];
+									zmin = -ping->bathcorr[ibeam];
+									zmax = -ping->bathcorr[ibeam];
+									}
+								else
+									{
+									xmin = MIN(xmin, ping->bathx[ibeam]);
+									xmax = MAX(xmax, ping->bathx[ibeam]);
+									ymin = MIN(ymin, ping->bathy[ibeam]);
+									ymax = MAX(ymax, ping->bathy[ibeam]);
+									zmin = MIN(zmin, -ping->bathcorr[ibeam]);
+									zmax = MAX(zmax, -ping->bathcorr[ibeam]);
+									}
+/*fprintf(stderr,"SELECTED SOUNDING: %d %d %d  %f %f  |  %d %f %f %f\n",
+ifile,iping,ibeam,ping->bathx[ibeam],ping->bathy[ibeam],
+mbev_selected.num_soundings,
+mbev_selected.soundings[mbev_selected.num_soundings].x,
+mbev_selected.soundings[mbev_selected.num_soundings].y,
+mbev_selected.soundings[mbev_selected.num_soundings].z);*/
+								mbev_selected.num_soundings++;
+								if (mb_beam_ok(ping->beamflag[ibeam]))
+									mbev_selected.num_soundings_unflagged++;
+								else
+									mbev_selected.num_soundings_flagged++;
+								}
+							}
+						}
+					}
+				
+				inavcount++;
+				}
+			}
+
+		/* get origin and scaling */
+		dz = zmax - zmin; 
+		dx = xmax - xmin;
+		dy = ymax - ymin;
+		mbev_selected.xorigin = 0.5 * (xmin + xmax);
+		mbev_selected.yorigin = 0.5 * (ymin + ymax);;
+		mbev_selected.zorigin = 0.5 * (zmin + zmax);;
+		mbev_selected.scale = 2.0 / sqrt(dy * dy + dx * dx);
+		mbev_selected.zscale = mbev_selected.scale;
+		mbev_selected.xmin = -0.5 * dx;
+		mbev_selected.xmax = 0.5 * dx;
+		mbev_selected.ymin = -0.5 * dy;
+		mbev_selected.ymax = 0.5 * dy;
+		mbev_selected.zmin = -0.5 * dz;
+		mbev_selected.zmax = 0.5 * dz;
+		for (i=0;i<mbev_selected.num_soundings;i++)
+			{
+			mbev_selected.soundings[i].x = mbev_selected.soundings[i].x - mbev_selected.xorigin;
+			mbev_selected.soundings[i].y = mbev_selected.soundings[i].y - mbev_selected.yorigin;
+			mbev_selected.soundings[i].z = mbev_selected.soundings[i].z - mbev_selected.zorigin;
+			}
+fprintf(stderr,"mbeditviz_selectarea: num_soundings:%d\n",
+mbev_selected.num_soundings);
+		}
+
+	/* print output debug statements */
+	if (mbev_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",mbev_error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       mbev_status:%d\n",mbev_status);
+		}
+
+	/* return status */
+	return(mbev_status);
+}				   
+/*--------------------------------------------------------------------*/
 void mbeditviz_mb3dsoundings_dismiss()
 {
 	char	*function_name = "mbeditviz_mb3dsoundings_dismiss";
@@ -2770,9 +2985,9 @@ void mbeditviz_mb3dsoundings_edit(int ifile, int iping, int ibeam, char beamflag
 	struct mbev_file_struct *file;
 	struct mbev_ping_struct *ping;
 	int	action;
-if (flush !=  MB3DSDG_EDIT_NOFLUSH)
+/*if (flush !=  MB3DSDG_EDIT_NOFLUSH)
 fprintf(stderr,"mbeditviz_mb3dsoundings_edit:%d %d %d beamflag:%d flush:%d\n", 
-ifile, iping, ibeam, beamflag, flush);
+ifile, iping, ibeam, beamflag, flush);*/
 
 	/* print input debug statements */
 	if (mbev_verbose >= 2)
@@ -2806,7 +3021,7 @@ ifile, iping, ibeam, beamflag, flush);
 			/* open esf and ess files if not already open */
 			if (file->esf_open == MB_NO)
 				{
-				mbev_status = mb_esf_load(5, file->path, MB_NO, MBP_ESF_APPEND,
+				mbev_status = mb_esf_load(mbev_verbose, file->path, MB_NO, MBP_ESF_APPEND,
 								file->esffile, &(file->esf), &mbev_error);
 				if (mbev_status == MB_SUCCESS)
 					{
@@ -2821,7 +3036,7 @@ ifile, iping, ibeam, beamflag, flush);
 				}
 				
 			/* save the edits to the esf stream */
-			if (file->esf_open == MB_NO)
+			if (file->esf_open == MB_YES)
 				{
 				if (mb_beam_ok(beamflag))
 					action = MBP_EDIT_UNFLAG;

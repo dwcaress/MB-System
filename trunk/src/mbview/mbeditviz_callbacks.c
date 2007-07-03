@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbeditviz_callbacks.c		4/27/2007
- *    $Id: mbeditviz_callbacks.c,v 5.2 2007-06-18 01:16:51 caress Exp $
+ *    $Id: mbeditviz_callbacks.c,v 5.3 2007-07-03 17:35:54 caress Exp $
  *
  *    Copyright (c) 2007 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	April 27, 2007
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2007/06/18 01:16:51  caress
+ * Added MBeditviz.
+ *
  *
  */
 
@@ -1035,6 +1038,7 @@ fprintf(stderr,"do_mbeditviz_mbview_dismiss_notify status:%d\n", mbev_status);
 fprintf(stderr,"1 do_mbeditviz_mbview_dismiss_notify status:%d\n", mbev_status);
 	
 	/* destroy the grid */
+fprintf(stderr,"mbev_grid.status:%d\n",mbev_grid.status);
 	if (mbev_grid.status != MBEV_GRID_NONE)
 		mbeditviz_destroy_grid();
 fprintf(stderr,"2 do_mbeditviz_mbview_dismiss_notify status:%d\n", mbev_status);
@@ -1345,7 +1349,15 @@ void do_mbeditviz_picknav_notify(int instance)
 fprintf(stderr,"do_mbeditviz_picknav_notify:%d\n", instance);
 	
 
-fprintf(stderr,"return do_mbeditviz_pickroute_notify status:%d\n", mbev_status);
+	mbeditviz_selectnav(instance);
+	mbev_status = mb3dsoundings_open(mbev_verbose, &mbev_selected, &mbev_error);
+	mbev_status = mb3dsoundings_set_dismiss_notify(mbev_verbose, &mbeditviz_mb3dsoundings_dismiss, &mbev_error);
+	mbev_status = mb3dsoundings_set_edit_notify(mbev_verbose, &mbeditviz_mb3dsoundings_edit, &mbev_error);
+	mbev_status = mb3dsoundings_set_info_notify(mbev_verbose, &mbeditviz_mb3dsoundings_info, &mbev_error);	
+	mbev_status = mb3dsoundings_set_bias_notify(mbev_verbose, &mbeditviz_mb3dsoundings_bias, &mbev_error);
+	mbev_status = mb3dsoundings_set_biasapply_notify(mbev_verbose, &mbeditviz_mb3dsoundings_biasapply, &mbev_error);
+
+fprintf(stderr,"return do_mbeditviz_picknav_notify status:%d\n", mbev_status);
 }	
 /*------------------------------------------------------------------------------*/
 

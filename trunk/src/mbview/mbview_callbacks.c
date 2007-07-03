@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbview_callbacks.c	10/7/2002
- *    $Id: mbview_callbacks.c,v 5.14 2007-06-17 23:27:30 caress Exp $
+ *    $Id: mbview_callbacks.c,v 5.15 2007-07-03 17:35:54 caress Exp $
  *
  *    Copyright (c) 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -18,6 +18,9 @@
  * Date:	October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.14  2007/06/17 23:27:30  caress
+ * Added NBeditviz.
+ *
  * Revision 5.13  2006/06/16 19:30:58  caress
  * Check in after the Santa Monica Basin Mapping AUV Expedition.
  *
@@ -133,7 +136,7 @@ static Cardinal 	ac;
 static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_callbacks.c,v 5.14 2007-06-17 23:27:30 caress Exp $";
+static char rcs_id[]="$Id: mbview_callbacks.c,v 5.15 2007-07-03 17:35:54 caress Exp $";
 
 /* function prototypes */
 /*------------------------------------------------------------------------------*/
@@ -1244,6 +1247,148 @@ int mbview_getdataptr(int verbose, int instance, struct mbview_struct **datahand
 			fprintf(stderr,"dbg2       profile %d distance: %f\n",i,j,data->profile.points[i].distance);
 			fprintf(stderr,"dbg2       profile %d xdisplay: %f\n",i,j,data->profile.points[i].xdisplay);
 			fprintf(stderr,"dbg2       profile %d ydisplay: %f\n",i,j,data->profile.points[i].ydisplay);
+			}
+
+		fprintf(stderr,"dbg2       error:                     %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:                    %d\n",status);
+		}
+
+	/* return */
+	return(status);
+}
+
+/*------------------------------------------------------------------------------*/
+int mbview_getsharedptr(int verbose, struct mbview_shareddata_struct **sharedhandle, int *error)
+{
+	/* local variables */
+	char	*function_name = "mbview_getsharedptr";
+	int	status = MB_SUCCESS;
+	int	i,  j;
+
+	/* print starting debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
+		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
+		}
+
+	/* get shared ptr */
+	*sharedhandle = &(shared.shareddata);
+		
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       sharedhandle:              %d\n", *sharedhandle);
+				
+		/* site data */
+		fprintf(stderr,"dbg2       site_mode:            %d\n",shared.shareddata.site_mode);
+		fprintf(stderr,"dbg2       nsite:                %d\n",shared.shareddata.nsite);
+		fprintf(stderr,"dbg2       nsite_alloc:          %d\n",shared.shareddata.nsite_alloc);
+		fprintf(stderr,"dbg2       site_selected:        %d\n",shared.shareddata.site_selected);
+		for (i=0;i<shared.shareddata.nsite;i++)
+			{
+			fprintf(stderr,"dbg2       site %d xgrid:       %f\n",i,shared.shareddata.sites[i].point.xgrid[0]);
+			fprintf(stderr,"dbg2       site %d ygrid:       %f\n",i,shared.shareddata.sites[i].point.ygrid[0]);
+			fprintf(stderr,"dbg2       site %d xlon:        %f\n",i,shared.shareddata.sites[i].point.xlon);
+			fprintf(stderr,"dbg2       site %d ylat:        %f\n",i,shared.shareddata.sites[i].point.ylat);
+			fprintf(stderr,"dbg2       site %d zdata:       %f\n",i,shared.shareddata.sites[i].point.zdata);
+			fprintf(stderr,"dbg2       site %d xdisplay:    %f\n",i,shared.shareddata.sites[i].point.xdisplay[0]);
+			fprintf(stderr,"dbg2       site %d ydisplay:    %f\n",i,shared.shareddata.sites[i].point.ydisplay[0]);
+			fprintf(stderr,"dbg2       site %d zdisplay:    %f\n",i,shared.shareddata.sites[i].point.zdisplay[0]);
+			fprintf(stderr,"dbg2       site %d color:       %d\n",i,shared.shareddata.sites[i].color);
+			fprintf(stderr,"dbg2       site %d size:        %d\n",i,shared.shareddata.sites[i].size);
+			fprintf(stderr,"dbg2       site %d name:        %s\n",i,shared.shareddata.sites[i].name);
+			}
+		
+		/* route data */
+		fprintf(stderr,"dbg2       route_mode:           %d\n",shared.shareddata.route_mode);
+		fprintf(stderr,"dbg2       nroute:               %d\n",shared.shareddata.nroute);
+		fprintf(stderr,"dbg2       nroute_alloc:         %d\n",shared.shareddata.nroute_alloc);
+		fprintf(stderr,"dbg2       route_selected:       %d\n",shared.shareddata.route_selected);
+		fprintf(stderr,"dbg2       route_point_selected: %d\n",shared.shareddata.route_point_selected);
+		for (i=0;i<shared.shareddata.nroute;i++)
+			{
+			fprintf(stderr,"dbg2       route %d color:       %d\n",i,shared.shareddata.routes[i].color);
+			fprintf(stderr,"dbg2       route %d size:        %d\n",i,shared.shareddata.routes[i].size);
+			fprintf(stderr,"dbg2       route %d name:        %s\n",i,shared.shareddata.routes[i].name);
+			for (j=0;j<shared.shareddata.routes[i].npoints;j++)
+				{
+				fprintf(stderr,"dbg2       route %d %d xgrid:    %f\n",i,j,shared.shareddata.routes[i].points[j].xgrid[0]);
+				fprintf(stderr,"dbg2       route %d %d ygrid:    %f\n",i,j,shared.shareddata.routes[i].points[j].ygrid[0]);
+				fprintf(stderr,"dbg2       route %d %d xlon:     %f\n",i,j,shared.shareddata.routes[i].points[j].xlon);
+				fprintf(stderr,"dbg2       route %d %d ylat:     %f\n",i,j,shared.shareddata.routes[i].points[j].ylat);
+				fprintf(stderr,"dbg2       route %d %d zdata:    %f\n",i,j,shared.shareddata.routes[i].points[j].zdata);
+				fprintf(stderr,"dbg2       route %d %d xdisplay: %f\n",i,j,shared.shareddata.routes[i].points[j].xdisplay[0]);
+				fprintf(stderr,"dbg2       route %d %d ydisplay: %f\n",i,j,shared.shareddata.routes[i].points[j].ydisplay[0]);
+				fprintf(stderr,"dbg2       route %d %d zdisplay: %f\n",i,j,shared.shareddata.routes[i].points[j].zdisplay[0]);
+				}
+			}
+		
+		/* nav data */
+		fprintf(stderr,"dbg2       nav_mode:                  %d\n",shared.shareddata.nav_mode);
+		fprintf(stderr,"dbg2       nnav:                      %d\n",shared.shareddata.nnav);
+		fprintf(stderr,"dbg2       nnav_alloc:                %d\n",shared.shareddata.nnav_alloc);
+		fprintf(stderr,"dbg2       nav_selected:              %d\n",shared.shareddata.nav_selected);
+		fprintf(stderr,"dbg2       nav_point_selected:        %d\n",shared.shareddata.nav_point_selected);
+		for (i=0;i<shared.shareddata.nnav;i++)
+			{
+			fprintf(stderr,"dbg2       nav %d color:         %d\n",i,shared.shareddata.navs[i].color);
+			fprintf(stderr,"dbg2       nav %d size:          %d\n",i,shared.shareddata.navs[i].size);
+			fprintf(stderr,"dbg2       nav %d name:          %s\n",i,shared.shareddata.navs[i].name);
+			fprintf(stderr,"dbg2       nav %d swathbounds:   %d\n",i,shared.shareddata.navs[i].swathbounds);
+			fprintf(stderr,"dbg2       nav %d shot:          %d\n",i,shared.shareddata.navs[i].shot);
+			fprintf(stderr,"dbg2       nav %d cdp:           %d\n",i,shared.shareddata.navs[i].cdp);
+			fprintf(stderr,"dbg2       nav %d npoints:       %d\n",i,shared.shareddata.navs[i].npoints);
+			fprintf(stderr,"dbg2       nav %d npoints_alloc: %d\n",i,shared.shareddata.navs[i].npoints_alloc);
+			fprintf(stderr,"dbg2       nav %d nselected:     %d\n",i,shared.shareddata.navs[i].nselected);
+			for (j=0;j<shared.shareddata.navs[i].npoints;j++)
+				{
+				fprintf(stderr,"dbg2       nav %d %d draped:        %d\n",i,j,shared.shareddata.navs[i].navpts[j].draped);
+				fprintf(stderr,"dbg2       nav %d %d selected:      %d\n",i,j,shared.shareddata.navs[i].navpts[j].selected);
+				fprintf(stderr,"dbg2       nav %d %d time_d:        %f\n",i,j,shared.shareddata.navs[i].navpts[j].time_d);
+				fprintf(stderr,"dbg2       nav %d %d heading:       %f\n",i,j,shared.shareddata.navs[i].navpts[j].heading);
+				fprintf(stderr,"dbg2       nav %d %d speed:         %f\n",i,j,shared.shareddata.navs[i].navpts[j].speed);
+				fprintf(stderr,"dbg2       nav %d %d xgrid:         %f\n",i,j,shared.shareddata.navs[i].navpts[j].point.xgrid[0]);
+				fprintf(stderr,"dbg2       nav %d %d ygrid:         %f\n",i,j,shared.shareddata.navs[i].navpts[j].point.ygrid[0]);
+				fprintf(stderr,"dbg2       nav %d %d xlon:          %f\n",i,j,shared.shareddata.navs[i].navpts[j].point.xlon);
+				fprintf(stderr,"dbg2       nav %d %d ylat:          %f\n",i,j,shared.shareddata.navs[i].navpts[j].point.ylat);
+				fprintf(stderr,"dbg2       nav %d %d zdata:         %f\n",i,j,shared.shareddata.navs[i].navpts[j].point.zdata);
+				fprintf(stderr,"dbg2       nav %d %d xdisplay:      %f\n",i,j,shared.shareddata.navs[i].navpts[j].point.xdisplay[0]);
+				fprintf(stderr,"dbg2       nav %d %d ydisplay:      %f\n",i,j,shared.shareddata.navs[i].navpts[j].point.ydisplay[0]);
+				fprintf(stderr,"dbg2       nav %d %d zdisplay:      %f\n",i,j,shared.shareddata.navs[i].navpts[j].point.zdisplay[0]);
+				fprintf(stderr,"dbg2       nav %d %d port xgrid:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointport.xgrid[0]);
+				fprintf(stderr,"dbg2       nav %d %d port ygrid:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointport.ygrid[0]);
+				fprintf(stderr,"dbg2       nav %d %d port xlon:     %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointport.xlon);
+				fprintf(stderr,"dbg2       nav %d %d port ylat:     %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointport.ylat);
+				fprintf(stderr,"dbg2       nav %d %d port zdata:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointport.zdata);
+				fprintf(stderr,"dbg2       nav %d %d port xdisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointport.xdisplay[0]);
+				fprintf(stderr,"dbg2       nav %d %d port ydisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointport.ydisplay[0]);
+				fprintf(stderr,"dbg2       nav %d %d port zdisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointport.zdisplay[0]);
+				fprintf(stderr,"dbg2       nav %d %d cntr xgrid:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointcntr.xgrid[0]);
+				fprintf(stderr,"dbg2       nav %d %d cntr ygrid:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointcntr.ygrid[0]);
+				fprintf(stderr,"dbg2       nav %d %d cntr xlon:     %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointcntr.xlon);
+				fprintf(stderr,"dbg2       nav %d %d cntr ylat:     %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointcntr.ylat);
+				fprintf(stderr,"dbg2       nav %d %d cntr zdata:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointcntr.zdata);
+				fprintf(stderr,"dbg2       nav %d %d cntr xdisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointcntr.xdisplay[0]);
+				fprintf(stderr,"dbg2       nav %d %d cntr ydisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointcntr.ydisplay[0]);
+				fprintf(stderr,"dbg2       nav %d %d cntr zdisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointcntr.zdisplay[0]);
+				fprintf(stderr,"dbg2       nav %d %d stbd xgrid:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointstbd.xgrid[0]);
+				fprintf(stderr,"dbg2       nav %d %d stbd ygrid:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointstbd.ygrid[0]);
+				fprintf(stderr,"dbg2       nav %d %d stbd xlon:     %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointstbd.xlon);
+				fprintf(stderr,"dbg2       nav %d %d stbd ylat:     %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointstbd.ylat);
+				fprintf(stderr,"dbg2       nav %d %d stbd zdata:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointstbd.zdata);
+				fprintf(stderr,"dbg2       nav %d %d stbd xdisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointstbd.xdisplay[0]);
+				fprintf(stderr,"dbg2       nav %d %d stbd ydisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointstbd.ydisplay[0]);
+				fprintf(stderr,"dbg2       nav %d %d stbd zdisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointstbd.zdisplay[0]);
+				}
 			}
 
 		fprintf(stderr,"dbg2       error:                     %d\n",*error);
