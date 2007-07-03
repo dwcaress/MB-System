@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_reson7k.h	3/3/2004
- *	$Id: mbsys_reson7k.h,v 5.11 2006-11-10 22:36:05 caress Exp $
+ *	$Id: mbsys_reson7k.h,v 5.12 2007-07-03 17:25:50 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	March 3, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.11  2006/11/10 22:36:05  caress
+ * Working towards release 5.1.0
+ *
  * Revision 5.10  2006/09/11 18:55:53  caress
  * Changes during Western Flyer and Thomas Thompson cruises, August-September
  * 2006.
@@ -947,7 +950,11 @@ typedef struct s7k_bluefin_nav_struct
 	int		data_size;		/* Size of data in bytes */
     	s7k_time 	s7kTime;		/* 7KTIME               u8*10   UTC.*/
 	unsigned int	checksum;		/* Checksum for all bytes in record */
-	short		reserved;
+	short		timedelay;		/* Delay of position and altitude time values
+							compared to Reson 7k time values (msec)
+							- add this value to the position and
+							altitude time values to get the 
+							times synced to the 7k multibeam data */
 	unsigned int	quality;		/* Kearfott INS quality and mode info */
 	double		latitude;		/* Latitude (radians) */
 	double		longitude;		/* Longitude (radians) */
