@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb7kpreprocess.c	10/12/2005
- *    $Id: mb7kpreprocess.c,v 5.10 2006-12-15 21:42:49 caress Exp $
+ *    $Id: mb7kpreprocess.c,v 5.11 2007-07-03 17:34:37 caress Exp $
  *
  *    Copyright (c) 2005 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	October 12, 2005
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.10  2006/12/15 21:42:49  caress
+ * Incremental CVS update.
+ *
  * Revision 5.9  2006/11/10 22:36:05  caress
  * Working towards release 5.1.0
  *
@@ -80,7 +83,7 @@
 #define	MB7KPREPROCESS_TIMELAG_CONSTANT	1
 #define	MB7KPREPROCESS_TIMELAG_MODEL	2
 
-static char rcs_id[] = "$Id: mb7kpreprocess.c,v 5.10 2006-12-15 21:42:49 caress Exp $";
+static char rcs_id[] = "$Id: mb7kpreprocess.c,v 5.11 2007-07-03 17:34:37 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
@@ -2637,7 +2640,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]);*/
 						time_i[3],time_i[4],time_i[5],time_i[6],
 						bluefin->nav[i].position_time);
 					bluefin->nav[i].checksum = 0;
-					bluefin->nav[i].reserved = 0;
+					bluefin->nav[i].timedelay = 0;
 					bluefin->nav[i].quality = 0;
 					bluefin->nav[i].latitude = DTR * ins_lat[ins_output_index];
 					bluefin->nav[i].longitude = DTR * ins_lon[ins_output_index];
