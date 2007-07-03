@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_xse.c	3/27/2000
- *	$Id: mbsys_xse.c,v 5.18 2007-06-18 01:19:48 caress Exp $
+ *	$Id: mbsys_xse.c,v 5.19 2007-07-03 17:28:08 caress Exp $
  *
  *    Copyright (c) 2000, 2001, 2002, 2003 by 
  *    D. W. Caress (caress@mbari.org)
@@ -28,6 +28,9 @@
  * Additional Authors:	P. A. Cohen and S. Dzurenko
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.18  2007/06/18 01:19:48  caress
+ * Changes as of 17 June 2007.
+ *
  * Revision 5.17  2005/11/05 00:48:03  caress
  * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
  *
@@ -111,7 +114,7 @@
 int mbsys_xse_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_xse.c,v 5.18 2007-06-18 01:19:48 caress Exp $";
+ static char res_id[]="$Id: mbsys_xse.c,v 5.19 2007-07-03 17:28:08 caress Exp $";
 	char	*function_name = "mbsys_xse_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -736,12 +739,21 @@ ixtrackmin, ixtrackmax, store->mul_frequency);
 			    beamflag[j] = MB_FLAG_FILTER + MB_FLAG_FLAG;
 			else
 			    beamflag[j] = MB_FLAG_NULL;
-			bath[j] = store->beams[i].depth
-				    + store->beams[i].heave;
-			if (store->beams[i].lateral < 0.0)
-			    bath[j] += store->par_trans_z_port;
-			else
-			    bath[j] += store->par_trans_z_stbd;
+			    
+			/* bathymetry from SeaBeam 2100 multibeams is already heave and draft compensated
+				- bathymetry from Bottomchart multibeams need to have
+				heave and draft applied */
+			bath[j] = store->beams[i].depth;
+			if (store->par_ship_nsensor > 0
+				&& (store->par_ship_sensor_type[0] < 2000 
+					|| store->par_ship_sensor_type[0] > 3000))
+				{
+				bath[j] += store->beams[i].heave;
+				if (store->beams[i].lateral < 0.0)
+				    bath[j] += store->par_trans_z_port;
+				else
+				    bath[j] += store->par_trans_z_stbd;
+				}
 			bathacrosstrack[j] 
 				= dsign * store->beams[i].lateral;
 			bathalongtrack[j] 
@@ -1044,14 +1056,24 @@ int mbsys_xse_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			    store->beams[i].lateral = dsign * bathacrosstrack[j];
 			    store->beams[i].along = bathalongtrack[j];
 			    store->beams[i].amplitude = (int) (amp[j]);
-			    if (store->beams[i].lateral < 0.0)
-				store->beams[i].depth 
-				    = bath[j] - store->beams[i].heave
-				    	- store->par_trans_z_port;
-			    else
-				store->beams[i].depth 
-				    = bath[j] - store->beams[i].heave
-				    	- store->par_trans_z_stbd;
+
+			    /* bathymetry from SeaBeam 2100 multibeams stored heave and draft compensated
+				    - bathymetry from Bottomchart multibeams need to have
+				    heave and draft removed before storage */
+			    store->beams[i].depth = bath[j];
+			    if (store->par_ship_nsensor > 0
+				    && (store->par_ship_sensor_type[0] < 2000 
+					    || store->par_ship_sensor_type[0] > 3000))
+				    {
+				    if (store->beams[i].lateral < 0.0)
+					store->beams[i].depth 
+					    -= (store->beams[i].heave
+				    		+ store->par_trans_z_port);
+				    else
+					store->beams[i].depth 
+					    -= (store->beams[i].heave
+				    		+ store->par_trans_z_stbd);
+				    }
 			    }
 			}
 		    }

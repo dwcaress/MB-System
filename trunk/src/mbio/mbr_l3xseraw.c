@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_l3xseraw.c	3/27/2000
- *	$Id: mbr_l3xseraw.c,v 5.19 2007-06-18 01:19:48 caress Exp $
+ *	$Id: mbr_l3xseraw.c,v 5.20 2007-07-03 17:28:08 caress Exp $
  *
  *    Copyright (c) 2000, 2001, 2002, 2003 by 
  *    D. W. Caress (caress@mbari.org)
@@ -26,6 +26,9 @@
  * Additional Authors:	P. A. Cohen and S. Dzurenko
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.19  2007/06/18 01:19:48  caress
+ * Changes as of 17 June 2007.
+ *
  * Revision 5.18  2006/12/15 21:36:16  caress
  * Turned off debug mode.
  *
@@ -104,9 +107,8 @@
 #include "../../include/mb_swap.h"
 
 
-/* #define MB_DEBUG 1 */
-/* #define MB_DEBUG 1 */
-/* #define MB_DEBUG2 1 */
+/* #define MB_DEBUG 1
+#define MB_DEBUG2 1 */
 
 /* set up byte swapping scenario */
 #ifdef DATAINPCBYTEORDER
@@ -146,7 +148,7 @@ int mbr_wt_l3xseraw(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_l3xseraw(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.19 2007-06-18 01:19:48 caress Exp $";
+	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.20 2007-07-03 17:28:08 caress Exp $";
 	char	*function_name = "mbr_register_l3xseraw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -279,7 +281,7 @@ int mbr_info_l3xseraw(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.19 2007-06-18 01:19:48 caress Exp $";
+	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.20 2007-07-03 17:28:08 caress Exp $";
 	char	*function_name = "mbr_info_l3xseraw";
 	int	status = MB_SUCCESS;
 
@@ -349,7 +351,7 @@ int mbr_info_l3xseraw(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_l3xseraw(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.19 2007-06-18 01:19:48 caress Exp $";
+	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.20 2007-07-03 17:28:08 caress Exp $";
 	char	*function_name = "mbr_alm_l3xseraw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -606,6 +608,7 @@ int mbr_l3xseraw_rd_data(int verbose,void *mbio_ptr,void *store_ptr,int *error)
 	unsigned long	frame_transaction;
 	unsigned long	frame_address;
 	unsigned long	buffer_size;
+	unsigned long	frame_size;
 	unsigned long	*buffer_size_max;
 	unsigned long	*frame_save;
 	unsigned long	*frame_expect;
@@ -721,14 +724,18 @@ int mbr_l3xseraw_rd_data(int verbose,void *mbio_ptr,void *store_ptr,int *error)
 
 		/* Read next four bytes from the file into buffer to get us started. */
 		if (status == MB_SUCCESS)
-		    {
+		    	{
 			if ((read_len = fread(&buffer[index],1,4,mb_io_ptr->mbfp)) != 4)
 				{
 				status = MB_FAILURE;
 				*error = MB_ERROR_EOF;
+				frame_size = 0;
 				}
 			else
+				{
 				buffer_size += 4;
+		    		mb_get_binary_int(SWAPFLAG, &buffer[4], (int *) &frame_size);
+				}
 			}
 		
 		/* now read a byte at a time, continuing until we find the end mark */
@@ -794,7 +801,7 @@ buffer_size,*buffer_size_max,MBSYS_XSE_BUFFER_SIZE);
 	    if (status == MB_SUCCESS)
 			{
 #ifdef MB_DEBUG
-fprintf(stderr, "FRAME ID: %u\n",frame_id);
+fprintf(stderr, "FRAME ID: %u  BUFFER SIZE:%d  FRAME SIZE:%d\n",frame_id,buffer_size,frame_size);
 #endif
 			if (frame_id == MBSYS_XSE_NAV_FRAME)
 			    {
@@ -1883,7 +1890,7 @@ fprintf(stderr, "Group %d of %d bytes to be parsed in MBIO function <%s>\n",
 				for (i=0;i<store->par_xdr_num_transducer;i++)
 					{
 					mb_get_binary_int(SWAPFLAG, &buffer[index], &store->par_xdr_sensorid[i]); index += 4;
-					mb_get_binary_int(SWAPFLAG, &buffer[index], &store->par_xdr_frequency[i]); index += 4;
+					mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->par_xdr_frequency[i]); index += 4;
 					store->par_xdr_transducer[i] = buffer[index]; index++;
 					store->par_xdr_side[i] = buffer[index]; index++;
 					mb_get_binary_double(SWAPFLAG, &buffer[index], &store->par_xdr_mountingroll[i]); index += 8;
@@ -4154,7 +4161,7 @@ int mbr_l3xseraw_wr_nav(int verbose,int *buffer_size,char *buffer,void *store_pt
 		strncpy(&buffer[index], "#HSG", 4);
 #endif
 		index += 4;
-		group_count += store->nav_description_len + 32;
+		group_count += 19;
 
 		/* go back and fill in group byte count */
 		mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
@@ -5031,7 +5038,7 @@ int mbr_l3xseraw_wr_ship(int verbose,int *buffer_size,char *buffer,void *store_p
 	int frame_id;
 	int group_id;
 	int	nchar;
-	int	i;
+	int	i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -5423,13 +5430,13 @@ int mbr_l3xseraw_wr_ship(int verbose,int *buffer_size,char *buffer,void *store_p
 		mb_put_binary_int(SWAPFLAG, store->par_xdx_num_transducer, &buffer[index]); index += 4;
 		for (i=0;i<store->par_xdx_num_transducer;i++)
 			{
-			mb_put_binary_double(SWAPFLAG, store->par_xdx_roll[i], &buffer[index]); index += 8;
-			mb_put_binary_double(SWAPFLAG, store->par_xdx_pitch[i], &buffer[index]); index += 8;
-			mb_put_binary_double(SWAPFLAG, store->par_xdx_azimuth[i], &buffer[index]); index += 8;
-			}
-		for (i=0;i<48;i++)
-			{
-			buffer[index] = 0; index++;
+			buffer[index] = store->par_xdx_roll[i]; index++;
+			buffer[index] = store->par_xdx_pitch[i]; index++;
+			buffer[index] = store->par_xdx_azimuth[i]; index++;
+			for (j=0;j<48;j++)
+				{
+				buffer[index] = 0; index++;
+				}
 			}
 
 		/* get end of group label */
@@ -5439,7 +5446,7 @@ int mbr_l3xseraw_wr_ship(int verbose,int *buffer_size,char *buffer,void *store_p
 		strncpy(&buffer[index], "#HSG", 4);
 #endif
 		index += 4;
-		group_count += 4 + store->par_xdx_num_transducer * 24 + 48;
+		group_count += 8 + store->par_xdx_num_transducer * 51;
 
 		/* go back and fill in group byte count */
 		mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
