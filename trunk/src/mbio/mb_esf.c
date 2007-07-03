@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_esf.c	4/10/2003
- *    $Id: mb_esf.c,v 5.11 2007-06-18 01:19:48 caress Exp $
+ *    $Id: mb_esf.c,v 5.12 2007-07-03 17:33:07 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	April 10, 2003
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.11  2007/06/18 01:19:48  caress
+ * Changes as of 17 June 2007.
+ *
  * Revision 5.10  2006/01/24 19:11:17  caress
  * Version 5.0.8 beta.
  *
@@ -71,7 +74,7 @@
 #include "../../include/mb_process.h"
 #include "../../include/mb_swap.h"
 
-static char rcs_id[]="$Id: mb_esf.c,v 5.11 2007-06-18 01:19:48 caress Exp $";
+static char rcs_id[]="$Id: mb_esf.c,v 5.12 2007-07-03 17:33:07 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 /* 	function mb_esf_check checks for an existing esf file. */
@@ -373,6 +376,8 @@ esf->edit[i].action,esf->edit[i].use);*/
 		    status = MB_FAILURE;
 		    *error = MB_ERROR_OPEN_FAIL;
 		    }
+/*else
+fprintf(stderr,"esffile %s opened with mode %s\n",esf->esffile,fmode);*/
 		
 		/* open the edit save stream file */
 		if ((esf->essfp = fopen(esf->esstream,fmode)) == NULL)
@@ -380,6 +385,8 @@ esf->edit[i].action,esf->edit[i].use);*/
 		    status = MB_FAILURE;
 		    *error = MB_ERROR_OPEN_FAIL;
 		    }
+/*else
+fprintf(stderr,"esstream %s opened with mode %s\n",esf->esstream,fmode);*/
 		}
 
 	/* print output debug statements */
