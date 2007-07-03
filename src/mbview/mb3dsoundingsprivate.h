@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb3dsoundingsprivate.h	9/24/2003
- *    $Id: mb3dsoundingsprivate.h,v 5.0 2007-06-17 23:16:14 caress Exp $
+ *    $Id: mb3dsoundingsprivate.h,v 5.1 2007-07-03 17:35:54 caress Exp $
  *
  *    Copyright (c) 2007 by
  *    David W. Caress (caress@mbari.org)
@@ -18,6 +18,9 @@
  * Date:	May 25,  2007
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2007/06/17 23:16:14  caress
+ * Added MBeditviz.
+ *
  *
  */
 
@@ -116,6 +119,10 @@ struct mb3dsoundings_world_struct
     Cursor TargetBlackCursor;
     Cursor TargetGreenCursor;
     Cursor TargetRedCursor;
+    Cursor TargetBlueCursor;
+    Cursor ExchangeBlackCursor;
+    Cursor ExchangeGreenCursor;
+    Cursor ExchangeRedCursor;
     Cursor FleurBlackCursor;
     Cursor FleurRedCursor;
     Cursor SizingBlackCursor;

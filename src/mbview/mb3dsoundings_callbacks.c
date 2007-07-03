@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb3dsoundings_callbacks.c		5/25/2007
- *    $Id: mb3dsoundings_callbacks.c,v 5.1 2007-06-17 23:27:31 caress Exp $
+ *    $Id: mb3dsoundings_callbacks.c,v 5.2 2007-07-03 17:35:54 caress Exp $
  *
  *    Copyright (c) 2007 by
  *    David W. Caress (caress@mbari.org)
@@ -74,7 +74,7 @@ static Cardinal 	ac;
 static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mb3dsoundings_callbacks.c,v 5.1 2007-06-17 23:27:31 caress Exp $";
+static char rcs_id[]="$Id: mb3dsoundings_callbacks.c,v 5.2 2007-07-03 17:35:54 caress Exp $";
 
 /* function prototypes */
 /*------------------------------------------------------------------------------*/
@@ -194,6 +194,53 @@ int mb3dsoundings_startup(int verbose, Widget parent, XtAppContext app, int *err
 	return(mbs_status);
 }
 /*------------------------------------------------------------------------------*/
+int mb3dsoundings_updatecursor()
+{
+	/* local variables */
+	char	*function_name = "mb3dsoundings_updatecursor";
+		
+	/* deal with pick according to edit_mode */
+	if (mb3dsoundings.edit_mode == MBS_EDIT_TOGGLE)
+		{
+	  	XDefineCursor(XtDisplay(mb3dsoundings.mb3dsdg.Mb3dsdg), 
+					XtWindow(mb3dsoundings.mb3dsdg.drawingArea), 
+					mb3dsoundings.TargetRedCursor);
+		}
+	else if (mb3dsoundings.edit_mode == MBS_EDIT_PICK)
+		{
+	  	XDefineCursor(XtDisplay(mb3dsoundings.mb3dsdg.Mb3dsdg), 
+					XtWindow(mb3dsoundings.mb3dsdg.drawingArea), 
+					mb3dsoundings.TargetRedCursor);
+		}
+	else if (mb3dsoundings.edit_mode == MBS_EDIT_ERASE)
+		{
+	  	XDefineCursor(XtDisplay(mb3dsoundings.mb3dsdg.Mb3dsdg), 
+					XtWindow(mb3dsoundings.mb3dsdg.drawingArea), 
+					mb3dsoundings.ExchangeRedCursor);
+		}
+	else if (mb3dsoundings.edit_mode == MBS_EDIT_RESTORE)
+		{
+	  	XDefineCursor(XtDisplay(mb3dsoundings.mb3dsdg.Mb3dsdg), 
+					XtWindow(mb3dsoundings.mb3dsdg.drawingArea), 
+					mb3dsoundings.ExchangeGreenCursor);
+		}
+	else if (mb3dsoundings.edit_mode == MBS_EDIT_GRAB)
+		{
+	  	XDefineCursor(XtDisplay(mb3dsoundings.mb3dsdg.Mb3dsdg), 
+					XtWindow(mb3dsoundings.mb3dsdg.drawingArea), 
+					mb3dsoundings.TargetRedCursor);
+		}
+	else if (mb3dsoundings.edit_mode == MBS_EDIT_INFO)
+		{
+	  	XDefineCursor(XtDisplay(mb3dsoundings.mb3dsdg.Mb3dsdg), 
+					XtWindow(mb3dsoundings.mb3dsdg.drawingArea), 
+					mb3dsoundings.TargetBlueCursor);
+		}
+
+	/* return */
+	return(mbs_status);
+}
+/*------------------------------------------------------------------------------*/
 int mb3dsoundings_updategui()
 {
 	/* local variables */
@@ -303,6 +350,9 @@ int mb3dsoundings_updategui()
 		
 	/* set status label */
 	mb3dsoundings_updatestatus();
+		
+	/* set edit cursor */
+	mb3dsoundings_updatecursor();
 
 	/* return */
 	return(mbs_status);
@@ -807,6 +857,10 @@ fprintf(stderr,"Called mb3dsoundings_open\n");
 		mb3dsoundings.TargetBlackCursor = XCreateFontCursor(mb3dsoundings.dpy, XC_target);
 		mb3dsoundings.TargetGreenCursor = XCreateFontCursor(mb3dsoundings.dpy, XC_target);
 		mb3dsoundings.TargetRedCursor = XCreateFontCursor(mb3dsoundings.dpy, XC_target);
+		mb3dsoundings.TargetBlueCursor = XCreateFontCursor(mb3dsoundings.dpy, XC_target);
+		mb3dsoundings.ExchangeBlackCursor = XCreateFontCursor(mb3dsoundings.dpy, XC_exchange);
+		mb3dsoundings.ExchangeGreenCursor = XCreateFontCursor(mb3dsoundings.dpy, XC_exchange);
+		mb3dsoundings.ExchangeRedCursor = XCreateFontCursor(mb3dsoundings.dpy, XC_exchange);
 		mb3dsoundings.FleurBlackCursor = XCreateFontCursor(mb3dsoundings.dpy, XC_fleur);
 		mb3dsoundings.FleurRedCursor = XCreateFontCursor(mb3dsoundings.dpy, XC_fleur);
 		mb3dsoundings.SizingBlackCursor = XCreateFontCursor(mb3dsoundings.dpy, XC_sizing);
@@ -817,6 +871,9 @@ fprintf(stderr,"Called mb3dsoundings_open\n");
 		mb3dsoundings.WatchRedCursor = XCreateFontCursor(mb3dsoundings.dpy, XC_watch);
 		XRecolorCursor(mb3dsoundings.dpy,mb3dsoundings.TargetRedCursor,&XColorRed,&XColorCoral);
 		XRecolorCursor(mb3dsoundings.dpy,mb3dsoundings.TargetGreenCursor,&XColorGreen,&XColorCoral);
+		XRecolorCursor(mb3dsoundings.dpy,mb3dsoundings.TargetBlueCursor,&XColorBlue,&XColorCoral);
+		XRecolorCursor(mb3dsoundings.dpy,mb3dsoundings.ExchangeRedCursor,&XColorRed,&XColorCoral);
+		XRecolorCursor(mb3dsoundings.dpy,mb3dsoundings.ExchangeGreenCursor,&XColorGreen,&XColorCoral);
 		XRecolorCursor(mb3dsoundings.dpy,mb3dsoundings.FleurRedCursor,&XColorRed,&XColorCoral);
 		XRecolorCursor(mb3dsoundings.dpy,mb3dsoundings.SizingRedCursor,&XColorRed,&XColorCoral);
 		XRecolorCursor(mb3dsoundings.dpy,mb3dsoundings.BoatRedCursor,&XColorRed,&XColorCoral);
@@ -872,6 +929,7 @@ int mb3dsoundings_reset_glx()
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		}
+fprintf(stderr,"mb3dsoundings_reset_glx 1\n");
 		
 	/* delete old glx_context if it exists */
 	if (mb3dsoundings.glx_init == MB_YES)
@@ -979,6 +1037,9 @@ do_mb3dsdg_mouse_toggle( Widget w, XtPointer client_data, XtPointer call_data)
 fprintf(stderr,"Called do_mb3dsdg_mouse_toggle\n");
 
 	mb3dsoundings.edit_mode = MBS_EDIT_TOGGLE;
+		
+	/* set edit cursor */
+	mb3dsoundings_updatecursor();
 }
 
 /*------------------------------------------------------------------------------*/
@@ -990,6 +1051,9 @@ do_mb3dsdg_mouse_pick( Widget w, XtPointer client_data, XtPointer call_data)
 fprintf(stderr,"Called do_mb3dsdg_mouse_pick\n");
 
 	mb3dsoundings.edit_mode = MBS_EDIT_PICK;
+		
+	/* set edit cursor */
+	mb3dsoundings_updatecursor();
 }
 
 /*---------------------------------------------------------------------------------------*/
@@ -1001,6 +1065,9 @@ do_mb3dsdg_mouse_erase( Widget w, XtPointer client_data, XtPointer call_data)
 fprintf(stderr,"Called do_mb3dsdg_mouse_erase\n");
 
 	mb3dsoundings.edit_mode = MBS_EDIT_ERASE;
+		
+	/* set edit cursor */
+	mb3dsoundings_updatecursor();
 }
 
 /*---------------------------------------------------------------------------------------*/
@@ -1012,6 +1079,9 @@ do_mb3dsdg_mouse_restore( Widget w, XtPointer client_data, XtPointer call_data)
 fprintf(stderr,"Called do_mb3dsdg_mouse_restore\n");
 
 	mb3dsoundings.edit_mode = MBS_EDIT_RESTORE;
+		
+	/* set edit cursor */
+	mb3dsoundings_updatecursor();
 }
 
 /*---------------------------------------------------------------------------------------*/
@@ -1023,6 +1093,9 @@ do_mb3dsdg_mouse_grab( Widget w, XtPointer client_data, XtPointer call_data)
 fprintf(stderr,"Called do_mb3dsdg_mouse_grab\n");
 
 	mb3dsoundings.edit_mode = MBS_EDIT_GRAB;
+		
+	/* set edit cursor */
+	mb3dsoundings_updatecursor();
 }
 
 /*---------------------------------------------------------------------------------------*/
@@ -1034,6 +1107,9 @@ do_mb3dsdg_mouse_info( Widget w, XtPointer client_data, XtPointer call_data)
 fprintf(stderr,"Called do_mb3dsdg_mouse_info\n");
 
 	mb3dsoundings.edit_mode = MBS_EDIT_INFO;
+		
+	/* set edit cursor */
+	mb3dsoundings_updatecursor();
 }
 
 /*---------------------------------------------------------------------------------------*/
@@ -1133,7 +1209,9 @@ event->xbutton.button,event->xbutton.x,event->xbutton.y, mb3dsoundings.mouse_mod
 			mb3dsoundings.button2down = MB_YES;
 
 			/* set cursor for rotate */
-	  		XDefineCursor(mb3dsoundings.dpy,mb3dsoundings.xid,mb3dsoundings.FleurBlackCursor);
+	  		XDefineCursor(XtDisplay(mb3dsoundings.mb3dsdg.Mb3dsdg), 
+					XtWindow(mb3dsoundings.mb3dsdg.drawingArea), 
+					mb3dsoundings.FleurBlackCursor);
 
 			mb3dsoundings.azimuth_save = mb3dsoundings.azimuth;
 			mb3dsoundings.elevation_save = mb3dsoundings.elevation;
@@ -1146,7 +1224,9 @@ event->xbutton.button,event->xbutton.x,event->xbutton.y, mb3dsoundings.mouse_mod
 			mb3dsoundings.button2down = MB_YES;
 
 			/* set cursor for rotate */
-	  		XDefineCursor(mb3dsoundings.dpy,mb3dsoundings.xid,mb3dsoundings.FleurBlackCursor);
+	  		XDefineCursor(XtDisplay(mb3dsoundings.mb3dsdg.Mb3dsdg), 
+					XtWindow(mb3dsoundings.mb3dsdg.drawingArea), 
+					mb3dsoundings.FleurBlackCursor);
 
 			mb3dsoundings.gl_offset_x_save = mb3dsoundings.gl_offset_x;
 			mb3dsoundings.gl_offset_y_save = mb3dsoundings.gl_offset_y;
@@ -1163,7 +1243,9 @@ event->xbutton.button,event->xbutton.x,event->xbutton.y, mb3dsoundings.mouse_mod
 			mb3dsoundings.button3down = MB_YES;
 
 			/* set cursor for exagerate */
-	  		XDefineCursor(mb3dsoundings.dpy,mb3dsoundings.xid,mb3dsoundings.FleurBlackCursor);
+	  		XDefineCursor(XtDisplay(mb3dsoundings.mb3dsdg.Mb3dsdg), 
+					XtWindow(mb3dsoundings.mb3dsdg.drawingArea), 
+					mb3dsoundings.FleurBlackCursor);
 
 			mb3dsoundings.exageration_save = mb3dsoundings.exageration;
 			}
@@ -1175,7 +1257,9 @@ event->xbutton.button,event->xbutton.x,event->xbutton.y, mb3dsoundings.mouse_mod
 			mb3dsoundings.button3down = MB_YES;
 
 			/* set cursor for exagerate */
-	  		XDefineCursor(mb3dsoundings.dpy,mb3dsoundings.xid,mb3dsoundings.FleurBlackCursor);
+	  		XDefineCursor(XtDisplay(mb3dsoundings.mb3dsdg.Mb3dsdg), 
+					XtWindow(mb3dsoundings.mb3dsdg.drawingArea), 
+					mb3dsoundings.FleurBlackCursor);
 
 			mb3dsoundings.gl_size_save = mb3dsoundings.gl_size;
 			}
@@ -1237,7 +1321,9 @@ event->xbutton.x,event->xmotion.y, mb3dsoundings.mouse_mode);
 		if (mb3dsoundings.mouse_mode == MBS_MOUSE_ROTATE)
 			{
 			/* set cursor for rotate */
-	  		XDefineCursor(mb3dsoundings.dpy,mb3dsoundings.xid,mb3dsoundings.FleurRedCursor);
+	  		XDefineCursor(XtDisplay(mb3dsoundings.mb3dsdg.Mb3dsdg), 
+					XtWindow(mb3dsoundings.mb3dsdg.drawingArea), 
+					mb3dsoundings.FleurRedCursor);
 
 			/* rotate viewpoint of 3D map */
 			mb3dsoundings.azimuth = mb3dsoundings.azimuth_save 
@@ -1257,7 +1343,9 @@ event->xbutton.x,event->xmotion.y, mb3dsoundings.mouse_mode);
 		else if (mb3dsoundings.mouse_mode == MBS_MOUSE_PANZOOM)
 			{
 			/* set cursor for pan zoom */
-	  		XDefineCursor(mb3dsoundings.dpy,mb3dsoundings.xid,mb3dsoundings.FleurRedCursor);
+	  		XDefineCursor(XtDisplay(mb3dsoundings.mb3dsdg.Mb3dsdg), 
+					XtWindow(mb3dsoundings.mb3dsdg.drawingArea), 
+					mb3dsoundings.FleurRedCursor);
 
 			/* pan */
 			mb3dsoundings.gl_offset_x = mb3dsoundings.gl_offset_x_save 
@@ -1283,7 +1371,9 @@ event->xbutton.x,event->xmotion.y, mb3dsoundings.mouse_mode);
 		if (mb3dsoundings.mouse_mode == MBS_MOUSE_ROTATE)
 			{
 			/* set cursor for exagerate */
-	  		XDefineCursor(mb3dsoundings.dpy,mb3dsoundings.xid,mb3dsoundings.FleurRedCursor);
+	  		XDefineCursor(XtDisplay(mb3dsoundings.mb3dsdg.Mb3dsdg), 
+					XtWindow(mb3dsoundings.mb3dsdg.drawingArea), 
+					mb3dsoundings.FleurRedCursor);
 
 			/* change vertical exageration of 3D map */
 			mb3dsoundings.exageration = mb3dsoundings.exageration_save 
@@ -1299,7 +1389,9 @@ event->xbutton.x,event->xmotion.y, mb3dsoundings.mouse_mode);
 		else if (mb3dsoundings.mouse_mode == MBS_MOUSE_PANZOOM)
 			{
 			/* set cursor for zoom */
-	  		XDefineCursor(mb3dsoundings.dpy,mb3dsoundings.xid,mb3dsoundings.FleurRedCursor);
+	  		XDefineCursor(XtDisplay(mb3dsoundings.mb3dsdg.Mb3dsdg), 
+					XtWindow(mb3dsoundings.mb3dsdg.drawingArea), 
+					mb3dsoundings.FleurRedCursor);
 
 			/* change zoom */
 			mb3dsoundings.gl_size = mb3dsoundings.gl_size_save 
@@ -1370,9 +1462,10 @@ event->xbutton.x,event->xbutton.y, mb3dsoundings.mouse_mode);
 	  mb3dsoundings.button1down = MB_NO;
 	  mb3dsoundings.button2down = MB_NO;
 	  mb3dsoundings.button3down = MB_NO;
+		
+	  /* set edit cursor */
+	  mb3dsoundings_updatecursor();
 
-	  /* reset cursor */
-	  XDefineCursor(mb3dsoundings.dpy,mb3dsoundings.xid,mb3dsoundings.TargetBlackCursor);
      } /* end of button release events */
       
       /* Deal with KeyPress events */
