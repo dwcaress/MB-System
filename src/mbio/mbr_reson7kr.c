@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_reson7kr.c	4/4/2004
- *	$Id: mbr_reson7kr.c,v 5.15 2006-11-10 22:36:05 caress Exp $
+ *	$Id: mbr_reson7kr.c,v 5.16 2007-07-03 17:25:51 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	April 4,2004
  * $Log: not supported by cvs2svn $
+ * Revision 5.15  2006/11/10 22:36:05  caress
+ * Working towards release 5.1.0
+ *
  * Revision 5.14  2006/09/11 18:55:53  caress
  * Changes during Western Flyer and Thomas Thompson cruises, August-September
  * 2006.
@@ -208,7 +211,7 @@ int mbr_reson7kr_wr_soundvelocity(int verbose, int *bufferalloc, char **bufferpt
 int mbr_reson7kr_wr_absorptionloss(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 int mbr_reson7kr_wr_spreadingloss(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 
-static char res_id[]="$Id: mbr_reson7kr.c,v 5.15 2006-11-10 22:36:05 caress Exp $";
+static char res_id[]="$Id: mbr_reson7kr.c,v 5.16 2007-07-03 17:25:51 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_reson7kr(int verbose, void *mbio_ptr, int *error)
@@ -670,6 +673,8 @@ int mbr_rt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		bluefin = &(store->bluefin);
 		for (i=0;i<bluefin->number_frames;i++)
 			{
+/* if (bluefin->nav[i].timedelay != 0)
+fprintf(stderr,"NAV TIME DIFF: %f %d\n", bluefin->nav[i].position_time,bluefin->nav[i].timedelay);*/
 			mb_navint_add(verbose, mbio_ptr, 
 					(double)(bluefin->nav[i].position_time), 
 					(double)(RTD * bluefin->nav[i].longitude), 
@@ -688,15 +693,19 @@ int mbr_rt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			if (mb_io_ptr->nsonardepth == 0
 				|| (bluefin->nav[i].depth 
 					!= mb_io_ptr->sonardepth_sonardepth[mb_io_ptr->nsonardepth-1]))
-			mb_depint_add(verbose, mbio_ptr,
-					(double)(bluefin->nav[i].position_time), 
-					(double)(bluefin->nav[i].depth), 
-					error);
-			if  (bluefin->nav[i].altitude > 0.0 && bluefin->nav[i].altitude < 250.0)
-			mb_altint_add(verbose, mbio_ptr,
-					(double)(bluefin->nav[i].altitude_time), 
-					(double)(bluefin->nav[i].altitude), 
-					error);
+				mb_depint_add(verbose, mbio_ptr,
+						(double)(bluefin->nav[i].position_time), 
+						(double)(bluefin->nav[i].depth), 
+						error);
+			if (bluefin->nav[i].altitude > 0.0 && bluefin->nav[i].altitude < 250.0)
+				{
+				if (bluefin->nav[i].altitude_time <= 0.0)
+					bluefin->nav[i].altitude_time = bluefin->nav[i].position_time;
+				mb_altint_add(verbose, mbio_ptr,
+						(double)(bluefin->nav[i].altitude_time), 
+						(double)(bluefin->nav[i].altitude), 
+						error);
+				}
 			}
 		}
 
@@ -4864,7 +4873,7 @@ header->RecordNumber);
 			bluefin->nav[i].s7kTime.Hours = (mb_u_char) buffer[index]; (index)++;
 			bluefin->nav[i].s7kTime.Minutes = (mb_u_char) buffer[index]; (index)++;
 			mb_get_binary_int(MB_YES, &buffer[index], &(bluefin->nav[i].checksum)); index += 4;
-			mb_get_binary_short(MB_YES, &buffer[index], &(bluefin->nav[i].reserved)); index += 2;
+			mb_get_binary_short(MB_YES, &buffer[index], &(bluefin->nav[i].timedelay)); index += 2;
 			mb_get_binary_int(MB_YES, &buffer[index], &(bluefin->nav[i].quality)); index += 4;
 			mb_get_binary_double(MB_YES, &buffer[index], &(bluefin->nav[i].latitude)); index += 8;
 			mb_get_binary_double(MB_YES, &buffer[index], &(bluefin->nav[i].longitude)); index += 8;
@@ -4895,7 +4904,7 @@ fprintf(stderr,"Bluefin nav[%d].s7kTime.Seconds:    %f\n",i,bluefin->nav[i].s7kT
 fprintf(stderr,"Bluefin nav[%d].s7kTime.Hours:      %d\n",i,bluefin->nav[i].s7kTime.Hours);
 fprintf(stderr,"Bluefin nav[%d].7kTime->Minutes:    %d\n",i,bluefin->nav[i].s7kTime.Minutes);
 fprintf(stderr,"Bluefin nav[%d].checksum:           %d\n",i,bluefin->nav[i].checksum);
-fprintf(stderr,"Bluefin nav[%d].reserved:           %d\n",i,bluefin->nav[i].reserved);
+fprintf(stderr,"Bluefin nav[%d].timedelay:          %d\n",i,bluefin->nav[i].timedelay);
 fprintf(stderr,"Bluefin nav[%d].quality:            %x\n",i,bluefin->nav[i].quality);
 fprintf(stderr,"Bluefin nav[%d].latitude:           %f\n",i,bluefin->nav[i].latitude);
 fprintf(stderr,"Bluefin nav[%d].longitude:          %f\n",i,bluefin->nav[i].longitude);
@@ -10646,7 +10655,7 @@ int mbr_reson7kr_wr_bluefin(int verbose, int *bufferalloc, char **bufferptr, voi
 				buffer[index] = bluefin->nav[i].s7kTime.Hours; (index)++;
 				buffer[index] = bluefin->nav[i].s7kTime.Minutes; (index)++;
 				mb_put_binary_int(MB_YES, bluefin->nav[i].checksum, &buffer[index]); index += 4;
-				mb_put_binary_short(MB_YES, bluefin->nav[i].reserved, &buffer[index]); index += 2;
+				mb_put_binary_short(MB_YES, bluefin->nav[i].timedelay, &buffer[index]); index += 2;
 				mb_put_binary_int(MB_YES, bluefin->nav[i].quality, &buffer[index]); index += 4;
 				mb_put_binary_double(MB_YES, bluefin->nav[i].latitude, &buffer[index]); index += 8;
 				mb_put_binary_double(MB_YES, bluefin->nav[i].longitude, &buffer[index]); index += 8;

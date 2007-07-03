@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_reson7k.c	3.00	3/23/2004
- *	$Id: mbsys_reson7k.c,v 5.14 2006-11-10 22:36:05 caress Exp $
+ *	$Id: mbsys_reson7k.c,v 5.15 2007-07-03 17:25:51 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -26,6 +26,9 @@
  * Date:	March 23, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.14  2006/11/10 22:36:05  caress
+ * Working towards release 5.1.0
+ *
  * Revision 5.13  2006/09/11 18:55:53  caress
  * Changes during Western Flyer and Thomas Thompson cruises, August-September
  * 2006.
@@ -92,7 +95,7 @@
 /* turn on debug statements here */
 /* #define MSYS_RESON7KR_DEBUG 1 */
 
-static char res_id[]="$Id: mbsys_reson7k.c,v 5.14 2006-11-10 22:36:05 caress Exp $";
+static char res_id[]="$Id: mbsys_reson7k.c,v 5.15 2007-07-03 17:25:51 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_zero7kheader(int verbose, s7k_header	*header, 
@@ -549,7 +552,7 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 		bluefin->nav[i].s7kTime.Hours = 0;
 		bluefin->nav[i].s7kTime.Minutes = 0;
 		bluefin->nav[i].checksum = 0;
-		bluefin->nav[i].reserved = 0;
+		bluefin->nav[i].timedelay = 0;
 		bluefin->nav[i].quality = 0;
 		bluefin->nav[i].latitude = 0.0;
 		bluefin->nav[i].longitude = 0.0;
@@ -2606,7 +2609,7 @@ int mbsys_reson7k_print_bluefin(int verbose,
 			fprintf(stderr,"%s     nav[%d].s7kTime.Hours:      %d\n",first,i,bluefin->nav[i].s7kTime.Hours);
 			fprintf(stderr,"%s     nav[%d].7kTime->Minutes:    %d\n",first,i,bluefin->nav[i].s7kTime.Minutes);
 			fprintf(stderr,"%s     nav[%d].checksum:           %d\n",first,i,bluefin->nav[i].checksum);
-			fprintf(stderr,"%s     nav[%d].reserved:           %d\n",first,i,bluefin->nav[i].reserved);
+			fprintf(stderr,"%s     nav[%d].timedelay:          %d\n",first,i,bluefin->nav[i].timedelay);
 			fprintf(stderr,"%s     nav[%d].quality:            %x\n",first,i,bluefin->nav[i].quality);
 			fprintf(stderr,"%s     nav[%d].latitude:           %f\n",first,i,bluefin->nav[i].latitude);
 			fprintf(stderr,"%s     nav[%d].longitude:          %f\n",first,i,bluefin->nav[i].longitude);
