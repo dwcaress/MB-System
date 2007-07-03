@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_xse.h	3/27/2000
- *	$Id: mbsys_xse.h,v 5.11 2007-06-18 01:19:48 caress Exp $
+ *	$Id: mbsys_xse.h,v 5.12 2007-07-03 17:28:08 caress Exp $
  *
  *    Copyright (c) 2000, 2001, 2002, 2003 by 
  *    D. W. Caress (caress@mbari.org)
@@ -28,6 +28,9 @@
  * Additional Authors:	P. A. Cohen and S. Dzurenko
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.11  2007/06/18 01:19:48  caress
+ * Changes as of 17 June 2007.
+ *
  * Revision 5.10  2006/09/11 18:55:53  caress
  * Changes during Western Flyer and Thomas Thompson cruises, August-September
  * 2006.
@@ -177,6 +180,35 @@
  *      with each survey ping..
  *   7. The comment records are supported by MB-System only and are
  *      not part of the L3 Communications XSE format specification.
+ *      The comment frame encloses a single general comment group (id=1).
+ *          -------------------------------------------------------
+ *          Item     Bytes   Format   Value   Units   Description
+ *          -------------------------------------------------------
+ *          Start      4     ulong    $HSF            Frame start
+ *          Byte Count 4     ulong            bytes   Between byte count
+ *                                                      and frame end
+ *          Id         4     ulong    99              Frame id - see below
+ *          Source     4     ulong    0               Sensor id
+ *          Seconds    4     ulong            seconds Seconds since
+ *                                                      1/1/1901 00:00:00
+ *          Microsec   4     ulong            usec    Microseconds
+ *          ...        ...   ...      ...     ...     Frame specific groups
+ *          End        4     ulong    #HSF            Frame end
+ *          -------------------------------------------------------
+ *      The only comment group is 1:
+ *          -------------------------------------------------------
+ *          Item     Bytes   Format   Value   Units   Description
+ *          -------------------------------------------------------
+ *          Start      4     ulong    $HSG            Group start
+ *          Byte Count 4     ulong            bytes   Between byte count
+ *                                                      and group end
+ *          Id         4     ulong    1               Group id - see below
+ *          N          4     long             bytes   Length of null terminated
+ *                                                      comment string, padded 
+ *                                                      to a multiple of 4
+ *          Comment    N     char             chars   Comment string
+ *          End        4     ulong    #HSG            Group end
+ *          -------------------------------------------------------
  *
  */
 
@@ -195,7 +227,7 @@
 #define	MBSYS_XSE_MAX_TRANSDUCERS	512
 
 /* frame and group id's */
-#define MBSYS_XSE_NONE_FRAME		0
+#define MBSYS_XSE_NONE_FRAME			0
 
 #define MBSYS_XSE_NAV_FRAME			1
 #define MBSYS_XSE_NAV_GROUP_GEN			1
@@ -298,7 +330,7 @@
 #define MBSYS_XSE_ATT_FRAME			15
 
 #define MBSYS_XSE_COM_FRAME			99
-#define MBSYS_XSE_COM_GROUP_GEN		1
+#define MBSYS_XSE_COM_GROUP_GEN			1
 
 struct mbsys_xse_beam_struct
 	{
