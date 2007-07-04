@@ -10,10 +10,6 @@
  * 1) This library assumes the host computer uses the ASCII character set.
  * 2) This library assumes that the type short is 16 bits, and that the type
  *    int is 32 bits.
- ******
- * NOTE
- * Not (yet!) supported on a machine with 64 bit architecture.
- ******
  *
  * Change Descriptions :
  * who when      what
@@ -105,6 +101,9 @@
  *               EM3 series sensor specific data structure.  Added __APPLE__ macro definition to
  *               support compile switch steering around definition of struct timespec on MAC OSX.
  *               Changed structure elements of type long to int, for compilation on 64-bit architectures.
+ * dhg 09-27-06  Added sensor ID for gsfGeoSwathPlusSpecific data received via GeoSwath interferometric
+ *               250 Khz sonar.
+ * dhg 10-04-06  Added more sensor specific fields for the GeoSwathPlus interferometric sonar.
  *
  *
  * Classification : Unclassified
@@ -141,7 +140,7 @@ extern          "C"
 #endif
 
 /* Define this version of the GSF library */
-#define GSF_VERSION       "GSF-v02.04"
+#define GSF_VERSION       "GSF-v02.05"
 
 /* Define largest ever expected record size */
 #define GSF_MAX_RECORD_SIZE    262144
@@ -284,6 +283,10 @@ gsfDataID;
 #define GSF_SWATH_BATHY_SUBRECORD_EM3000D_SPECIFIC          (unsigned)130
 #define GSF_SWATH_BATHY_SUBRECORD_EM3002D_SPECIFIC          (unsigned)131
 #define GSF_SWATH_BATHY_SUBRECORD_EM121A_SIS_SPECIFIC       (unsigned)132
+#define GSF_SWATH_BATHY_SUBRECORD_EM710_SPECIFIC            (unsigned)133
+#define GSF_SWATH_BATHY_SUBRECORD_EM302_SPECIFIC            (unsigned)134
+#define GSF_SWATH_BATHY_SUBRECORD_EM122_SPECIFIC            (unsigned)135
+#define GSF_SWATH_BATHY_SUBRECORD_GEOSWATH_PLUS_SPECIFIC    (unsigned)136 /* 2006-09-27: dhg: GeoAcoustics GeoSwath+ */
 
 #define GSF_SINGLE_BEAM_SUBRECORD_UNKNOWN                   (unsigned)  0
 #define GSF_SINGLE_BEAM_SUBRECORD_ECHOTRAC_SPECIFIC         (unsigned)201
@@ -333,6 +336,9 @@ gsfDataID;
 #define GSF_NULL_ACROSS_TRACK_ERROR    0.0
 #define GSF_NULL_ALONG_TRACK_ERROR     0.0
 #define GSF_NULL_NAV_POS_ERROR         0.0
+
+/* Define macros used to indicate that a certain parameter is not known */
+#define GSF_BEAM_WIDTH_UNKNOWN        -1.0
 
 /* define Posix.4 proposed structure for internal storage of time */
 #if (!defined (_STRUCT_TIMESPEC_) && !defined (_TIMESPEC_T) && !defined (_STRUCT_TIMESPEC) && !defined (_SYS_TIMESPEC_H) && !defined (__timespec_defined))
@@ -775,6 +781,41 @@ typedef struct t_gsfSBNavisoundSpecific
 }
 t_gsfSBNavisoundSpecific;
 
+/*DHG 2006/09/27 Added support for GeoSwath interferometric 250 Khz sonar */
+/* Define the GeoSwath sensor specific data structure */
+typedef struct t_gsfGeoSwathPlusSpecific
+{
+    int             data_source;             /* 0 = CBF, 1 = RDF */
+    int             side;                    /* 0 = port, 1 = stbd */
+    int             model_number;            /* ie: 100, 250, 500, ... */
+    double          frequency;               /* Hz */
+    int             echosounder_type;        /* ? */
+    long            ping_number;             /* 0 - 4,294,967,295 */
+    int             num_nav_samples;         /* number of navigation samples in this ping */
+    int             num_attitude_samples;    /* number of attitude samples in this ping */
+    int             num_heading_samples;     /* number of heading samples in this ping */
+    int             num_miniSVS_samples;     /* number of miniSVS samples in this ping */
+    int             num_echosounder_samples; /* number of echosounder samples in ping */
+    int             num_raa_samples;         /* number of RAA (Range/Angle/Amplitude) samples in ping */
+    double          mean_sv;                 /* meters per second */
+    double          surface_velocity;        /* in m/s */
+    int             valid_beams;             /* number of valid beams for this ping */
+    double          sample_rate;             /* Hz */
+    double          pulse_length;            /* micro seconds */
+    int             ping_length;             /* meters */
+    int             transmit_power;          /* ? */
+    int             sidescan_gain_channel;   /* RDF documentation = 0 - 3  */
+    int             stabilization;           /* 0 or 1 */
+    int             gps_quality;             /* ? */
+    double          range_uncertainty;       /* meters */
+    double          angle_uncertainty;       /* degrees */
+    char            spare[32];               /* 32 bytes of reserved space */
+}
+t_gsfGeoSwathPlusSpecific;
+
+#define GSF_GEOSWATH_PLUS_PORT_PING 0
+#define GSF_GEOSWATH_PLUS_STBD_PING 1
+
 /* Define a union of the known sensor specific ping subrecords */
 typedef union t_gsfSensorSpecific
 {
@@ -802,8 +843,9 @@ typedef union t_gsfSensorSpecific
     t_gsfElacMkIISpecific     gsfElacMkIISpecific;
     t_gsfEM3Specific          gsfEM3Specific;          /* used for EM120, EM300, EM1002, EM3000, EM3002, and EM121A_SIS */
     t_gsfReson8100Specific    gsfReson8100Specific;
+    t_gsfGeoSwathPlusSpecific gsfGeoSwathPlusSpecific; /* DHG 2006/09/27 Use for GeoSwath+ interferometer */
 
-        /* Single beam sensors added */
+    /* Single beam sensors added */
     t_gsfSBEchotracSpecific   gsfSBEchotracSpecific;
     t_gsfSBEchotracSpecific   gsfSBBathy2000Specific;
     t_gsfSBMGD77Specific      gsfSBMGD77Specific;
@@ -1830,9 +1872,11 @@ int OPTLK       gsfGetSwathBathyBeamWidths(gsfRecords *data, double *fore_aft, d
  *     data = The address of a gsfRecords data structure maintained by the
  *         caller which contains a populated gsfSwathBathyPing substructure.
  *     fore_aft = The address of a double allocated by the caller which will
- *         be loaded with the sonar's fore/aft beam width in degrees.
+ *         be loaded with the sonar's fore/aft beam width in degrees. A value of
+ *         GSF_BEAM_WIDTH_UNKNOWN is used when the beam width is not known.
  *     athwartship = The address of a double allocated by the caller which will
- *         be loaded with the sonar's athwartship beam width in degrees.
+ *         be loaded with the sonar's athwartship beam width in degrees.  A
+ *         value of GSF_BEAM_WIDTH_UNKNOWN is used when the beam width is not known.
  *
  * Returns : This function returns zero if successful, or -1 if an error
  *     occured.

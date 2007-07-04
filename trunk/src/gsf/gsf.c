@@ -1995,7 +1995,7 @@ gsfLoadScaleFactor(gsfScaleFactors *sf, int subrecordID, char c_flag, double pre
     /* In order to assure the same multiplier is used throughout, truncate
     *  to an integer.  This is the value which is stored with the data.
     */
-    itemp = (int) mult;
+    itemp = (int) (mult + 0.501);
 
     /* The multiplier to be applied to the data is converted back to a
     *  double here, for floating point performance.
@@ -5633,7 +5633,34 @@ gsfGetSwathBathyBeamWidths(gsfRecords *data, double *fore_aft, double *athwartsh
             *athwartship = data->mb_ping.sensor_data.gsfReson8100Specific.athwart_bw;
             break;
 
-         default:
+        case GSF_SWATH_BATHY_SUBRECORD_GEOSWATH_PLUS_SPECIFIC:
+            switch (data->mb_ping.sensor_data.gsfGeoSwathPlusSpecific.model_number)
+            {
+                case 100:
+                    *fore_aft = 0.9;
+                    *athwartship = GSF_BEAM_WIDTH_UNKNOWN;
+                    break;
+
+                case 250:
+                    *fore_aft = 0.5;
+                    *athwartship = GSF_BEAM_WIDTH_UNKNOWN;
+                    break;
+
+                case 500:
+                    *fore_aft = 0.5;
+                    *athwartship = GSF_BEAM_WIDTH_UNKNOWN;
+                    break;
+
+                default:
+                    *fore_aft = GSF_BEAM_WIDTH_UNKNOWN;
+                    *athwartship = GSF_BEAM_WIDTH_UNKNOWN;
+                    break;
+            }
+            break;
+
+        default:
+            *fore_aft = GSF_BEAM_WIDTH_UNKNOWN;
+            *athwartship = GSF_BEAM_WIDTH_UNKNOWN;
             gsfError = GSF_UNRECOGNIZED_SENSOR_ID;
             ret = -1;
             break;
@@ -5670,7 +5697,10 @@ gsfIsStarboardPing(gsfRecords *data)
     /* Switch on the type of sonar this data came from */
     switch (data->mb_ping.sensor_id)
     {
-        case GSF_SWATH_BATHY_SUBRECORD_SEABAT_SPECIFIC:
+    case GSF_SWATH_BATHY_SUBRECORD_GEOSWATH_PLUS_SPECIFIC:
+        return data->mb_ping.sensor_data.gsfGeoSwathPlusSpecific.side;
+        break;
+    case GSF_SWATH_BATHY_SUBRECORD_SEABAT_SPECIFIC:
 /* zzz_ */
 /*          if (data->mb_ping.sensor_data.gsfSeaBatSpecific.mode &   */
 /*               (GSF_SEABAT_9002 | GSF_SEABAT_STBD_HEAD))           */
