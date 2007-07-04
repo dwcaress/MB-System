@@ -378,9 +378,23 @@ not be supported by all formats.
 .IP
 \fB .b\fP  Oblique backscatter in dB (formats 56 & 67 - Simrad multibeam only)
 .IP
+\fB .c\fP  Mean backscatter, one value per ping (formats 56 & 67 - Simrad multibeam only)
+.IP
+\fB .d\fP  Beam depression angle (formats 56 & 67 - Simrad multibeam only)
+.IP
+\fB .F\fP  Filename
+.IP
+\fB .f\fP  File format
+.IP
 \fB .G\fP  Start of TVG ramp in samples (formats 56 & 67 - Simrad multibeam only)
 .IP
 \fB .g\fP  Stop of TVG ramp in samples (formats 56 & 67 - Simrad multibeam only)
+.IP
+\fB .L\fP  Pulse length (formats 56 & 67 - Simrad multibeam only)
+.IP
+\fB .M\fP  Sounder mode (formats 56 & 67 - Simrad multibeam only)
+.IP
+\fB .N\fP  Ping number according to sounder (formats 56 & 67 - Simrad multibeam only)
 .IP
 \fB .p\fP  Raw sidescan pixels in dB (formats 56 & 67 - Simrad multibeam only).
 May be preceded by a number to give the first n pixels (NaN padded) of the beam,
