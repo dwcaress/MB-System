@@ -75,6 +75,8 @@
  * bac          06-28-06  Added support for EM121A data received via Kongsberg SIS, mapped to existing
  *                        EM3 series sensor specific data structure. Changed all casts to type long to
  *                        casts to type int, for compilation on 64-bit architectures.
+ * dhg          10-24-06  Added support for GeoSwathPlus interferometric sonar
+ * dhg          11-01-06  Corrected "model_number" and "frequency" for "GeoSwathPlusSpecific" record
  *
  * Classification : Unclassified
  *
@@ -161,6 +163,7 @@ static int      DecodeSBMGD77Specific(t_gsfSBMGD77Specific * sdata, unsigned cha
 static int      DecodeSBBDBSpecific(t_gsfSBBDBSpecific * sdata, unsigned char *sptr);
 static int      DecodeSBNOSHDBSpecific(t_gsfSBNOSHDBSpecific * sdata, unsigned char *sptr);
 static int      DecodeSBNavisoundSpecific(t_gsfSBNavisoundSpecific * sdata, unsigned char *sptr);
+static int      DecodeGeoSwathPlusSpecific(gsfSensorSpecific *sdata, unsigned char *sptr);
 
 /********************************************************************
  *
@@ -1227,6 +1230,11 @@ gsfDecodeSwathBathymetryPing(gsfSwathBathyPing *ping, unsigned char *sptr, GSF_F
             case (GSF_SWATH_BATHY_SUBRECORD_RESON_8160_SPECIFIC):
                 p += DecodeReson8100Specific(&ping->sensor_data, p);
                 ping->sensor_id = subrecord_id;
+                break;
+
+            case (GSF_SWATH_BATHY_SUBRECORD_GEOSWATH_PLUS_SPECIFIC):
+                p += DecodeGeoSwathPlusSpecific(&ping->sensor_data, p);
+                ping->sensor_id = GSF_SWATH_BATHY_SUBRECORD_GEOSWATH_PLUS_SPECIFIC;
                 break;
 
             /* 12/20/2002 RWL added SB types, made Echotrac version dependent */
@@ -3410,6 +3418,165 @@ DecodeEM3Specific(gsfSensorSpecific *sdata, unsigned char *sptr, GSF_FILE_TABLE 
      * }
      */
     return (p - sptr);
+}
+
+/********************************************************************
+ *
+ * Function Name : DecodeGeoSwathPlusSpecific
+ *
+ * Description : This function decodes the GeoSwath GS+ series sonar system
+ *    sensor specific information from the GSF byte stream.
+ *
+ * Inputs :
+ *    sdata = a pointer to the union of sensor specific data to be loaded
+ *    sptr = a pointer to an unsigned char buffer containing the byte stream
+ *           to read.
+ *
+ * Returns : This function returns the number of bytes enocoded.
+ *
+ * Error Conditions : none
+ *
+ ********************************************************************/
+
+static int
+DecodeGeoSwathPlusSpecific(gsfSensorSpecific *sdata, unsigned char *sptr)
+{
+    unsigned char  *p = sptr;
+    gsfuShort       stemp;
+    gsfuLong        ltemp;
+    double          dtemp;
+
+    /* First 2 bytes contain the data source (0 = CBF, 1 = RDF) */
+    memcpy(&stemp, p, 2);
+    sdata->gsfGeoSwathPlusSpecific.data_source = (int) ntohs(stemp);
+    p += 2;
+
+    /* Next 2 bytes contain the ping side (0 port, 1 = stbd)  */
+    memcpy(&stemp, p, 2);
+    sdata->gsfGeoSwathPlusSpecific.side = (int) ntohs(stemp);
+    p += 2;
+
+    /* Next 2 bytes is the sonar model number */
+    memcpy(&stemp, p, 2);
+    sdata->gsfGeoSwathPlusSpecific.model_number = (int) ntohs(stemp);
+    p += 2;
+
+    /* Next 2 bytes is the frequency, in units of Hertz */
+    memcpy(&stemp, p, 2);
+    dtemp = (double) ntohs(stemp);
+    sdata->gsfGeoSwathPlusSpecific.frequency = dtemp * 10.0;
+    p += 2;
+
+    /* Next 2 bytes is the echosounder_type */
+    memcpy(&stemp, p, 2);
+    sdata->gsfGeoSwathPlusSpecific.echosounder_type = (int) ntohs(stemp);
+    p += 2;
+
+    /* Next four byte integer contains the ping number */
+    memcpy(&ltemp, p, 4);
+    sdata->gsfGeoSwathPlusSpecific.ping_number = (long) ntohl(ltemp);
+    p += 4;
+
+    /* Next 2 bytes is the num_nav_samples */
+    memcpy(&stemp, p, 2);
+    sdata->gsfGeoSwathPlusSpecific.num_nav_samples  = (int) ntohs(stemp);
+    p += 2;
+
+    /* Next 2 bytes is the num_attitude_samples */
+    memcpy(&stemp, p, 2);
+    sdata->gsfGeoSwathPlusSpecific.num_attitude_samples  = (int) ntohs(stemp);
+    p += 2;
+
+    /* Next 2 bytes is the num_heading_samples */
+    memcpy(&stemp, p, 2);
+    sdata->gsfGeoSwathPlusSpecific.num_heading_samples  = (int) ntohs(stemp);
+    p += 2;
+
+    /* Next 2 bytes is the side indicator num_miniSVS_samples */
+    memcpy(&stemp, p, 2);
+    sdata->gsfGeoSwathPlusSpecific.num_miniSVS_samples  = (int) ntohs(stemp);
+    p += 2;
+
+    /* Next 2 bytes is the num_echosunder_samples */
+    memcpy(&stemp, p, 2);
+    sdata->gsfGeoSwathPlusSpecific.num_echosounder_samples  = (int) ntohs(stemp);
+    p += 2;
+
+    /* Next 2 bytes is the num_raa_samples */
+    memcpy(&stemp, p, 2);
+    sdata->gsfGeoSwathPlusSpecific.num_raa_samples  = (int) ntohs(stemp);
+    p += 2;
+
+    /* Next 2 bytes is the mean_sv */
+    memcpy(&stemp, p, 2);
+    dtemp = (double) ntohs(stemp);
+    sdata->gsfGeoSwathPlusSpecific.mean_sv = dtemp / 20.0;
+    p += 2;
+
+    /* Next 2 bytes is the surface_velocity */
+    memcpy(&stemp, p, 2);
+    dtemp = (double) ntohs(stemp);
+    sdata->gsfGeoSwathPlusSpecific.surface_velocity = dtemp / 20.0;
+    p += 2;
+
+    /* Next 2 bytes is the  valid_beams */
+    memcpy(&stemp, p, 2);
+    sdata->gsfGeoSwathPlusSpecific.valid_beams  = (int) ntohs(stemp);
+    p += 2;
+
+    /* Next 2 bytes is the sample_rate */
+    memcpy(&stemp, p, 2);
+    dtemp = (double) ntohs(stemp);
+    sdata->gsfGeoSwathPlusSpecific.sample_rate = dtemp * 10.0;
+    p += 2;
+
+    /* Next 2 bytes is the pulse_length */
+    memcpy(&stemp, p, 2);
+    sdata->gsfGeoSwathPlusSpecific.pulse_length = (double) ntohs(stemp);
+    p += 2;
+
+    /* Next 2 bytes is the ping_length */
+    memcpy(&stemp, p, 2);
+    sdata->gsfGeoSwathPlusSpecific.ping_length = (int) ntohs(stemp);
+    p += 2;
+
+    /* Next 2 bytes is the transmit_power */
+    memcpy(&stemp, p, 2);
+    sdata->gsfGeoSwathPlusSpecific.transmit_power = (int) ntohs(stemp);
+    p += 2;
+
+    /* Next 2 bytes is the sidescan_gain_channel */
+    memcpy(&stemp, p, 2);
+    sdata->gsfGeoSwathPlusSpecific.sidescan_gain_channel = (int) ntohs(stemp);
+    p += 2;
+
+    /* Next 2 bytes is the stabilization */
+    memcpy(&stemp, p, 2);
+    sdata->gsfGeoSwathPlusSpecific.stabilization = (int) ntohs(stemp);
+    p += 2;
+
+    /* Next 2 bytes is the gps_quality */
+    memcpy(&stemp, p, 2);
+    sdata->gsfGeoSwathPlusSpecific.gps_quality = (int) ntohs(stemp);
+    p += 2;
+
+    /* Next 2 bytes is the range uncertainty scaled to millimetres */
+    memcpy(&stemp, p, 2);
+    dtemp = (double) ntohs(stemp);
+    sdata->gsfGeoSwathPlusSpecific.range_uncertainty = dtemp / 1000.0;
+    p += 2;
+
+    /* Next 2 bytes is the angle uncertainty */
+    memcpy(&stemp, p, 2);
+    dtemp = (double) ntohs(stemp);
+    sdata->gsfGeoSwathPlusSpecific.angle_uncertainty = dtemp / 100.0;
+    p += 2;
+
+    /* Next 32 bytes are spare, but preserved for now */
+    memcpy (sdata->gsfGeoSwathPlusSpecific.spare, p, sizeof (char) * 32);
+    p += 32;
+
+    return(p - sptr);
 }
 
 /********************************************************************
