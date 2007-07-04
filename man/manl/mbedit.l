@@ -415,7 +415,15 @@ sonar altitude associated with each ping.
 .B View->Plot Roll
 This toggle, when set, causes \fBmbedit\fP to display an
 automatically scaled vertical time series plot of the 
-roll associated with each ping.
+roll associated with each ping. In addition to the roll
+time series shown in black, an estimate of the acrosstrack
+seafloor slope is shown in red (calculated by linear
+regression of the unflagged soundings for each ping), and 
+the difference between the roll and apparent slope is shown 
+in blue. If the sonar roll has been correctly applied, the
+roll and seafloor slope should be uncorrelated. If there is
+a timing error in the roll correction, then the apparent
+seafloor slope may correlate strongly with the roll.
  This plot appears to the left of the bathymetry profiles.
 .TP
 .B View->Plot Pitch

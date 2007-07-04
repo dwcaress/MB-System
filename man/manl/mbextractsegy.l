@@ -10,7 +10,7 @@ Version 5.0
 .SH SYNOPSIS
 \fBmbextractsegy\fP [\fB-B\fP\fIyr/mo/da/hr/mn/sc\fP \fB-E\fP\fIyr/mo/da/hr/mn/sc\fP 
 \fB-F\fP\fIformat\fP \fB-I\fP\fIfile\fP \fB-J\fP\fIxscale/yscale/maxwidth\fP 
-\fB-L\fP\fIstartline/lineroot\fP \fB-O\fP\fIsegyfile\fP 
+\fB-L\fP\fIstartline/lineroot\fP \fB-M -O\fP\fIsegyfile\fP 
 \fB-R\fP\fIroutefile\fP \fB-S\fP\fIsampleformat\fP 
 \fB-T\fP\fItimeshift\fP \fB-V -H\fP]
 
@@ -123,9 +123,35 @@ The \fImaxwidth\fP value sets the maximum plot width in inches. If
 then the section will be broken up into multiple plots.
 Default: \fIxscale\fP = 0.01; \fIyscale\fP = 75; \fImaxwidth\fP = 45.0
 .TP
+.B \-L
+\fIstartline/lineroot\fP
+.br
+This option sets the starting line number and the output filename root
+used when \fB-R\fP is specified so that data are output according
+to planned survey lines. Default: \fIstartline\fP = 1; \fIlineroot\fP = "sbp".
+.TP
+.B \-M
+.br
+This option causes \fBmbextractsegy\fP to omit data during turns when
+extracting into line files according to a specified set of waypoints
+(\fB-R\fP option). The traces will not be output until the heading is
+within 15 degrees of the next survey line's bearing.
+.TP
 .B \-O
 .br
-This option sets the output SEGY file path. If \fB-O\fP is not invoked,
+This option sets the output SEGY file path. If neither \fB-O\fP nore \fB-R\fP are invoked,
+the output SEGY filename (or files if a datalist is being processed) will
+be the input swath filename with ".segy" appended. 
+.TP
+.B \-R
+\fIroutefile\fP
+.br
+This option specifies an \fBmbgrdviz\fP route file containing the intended
+waypoints of the survey. If \fIroutefile\fP is specified, \fBmbextractsegy\fP
+will output SEGY data in files corresponding to the planned survey lines. 
+The output SEGY file names will be based on \fIlineroot\fP and will include 
+the line number starting with \fIstarline\fP, both of which are specified
+using the \fB-L\fP options.  If neither \fB-O\fP nore \fB-R\fP are invoked,
 the output SEGY filename (or files if a datalist is being processed) will
 be the input swath filename with ".segy" appended.
 .TP
