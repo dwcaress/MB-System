@@ -41,6 +41,8 @@ Miscellaneous Options:
 \fB-MMN\fP\fInplot\fP \fB-MMP\fP\fIpings \fP
 \fB-MMS\fP\fIspeedmin\fP 
 \fB-MMT\fP\fItimegap\fP \fB-MMZ\fP\fIalgorithm\fP
+\fB-MNA\fP\fI[name_hgt[/P] | P]\fP
+\fB-MNP\fP\fI[pingnumber_tick/pingnumber_annot/pingnumber_tick_len]\fP
 \fB-MTC\fP\fIfill\fP \fB-MTD\fP\fIresolution\fP 
 \fB-MTG\fP\fIfill\fP \fB-MTI\fP\fIriver[/pen]\fP 
 \fB-MTN\fP\fIborder[/pen]\fP \fB-MTS\fP\fIfill\fP 
@@ -607,16 +609,6 @@ Sets the ending time for data allowed in the input data; pings
 with times after the ending time will be ignored. 
 Default: \fIyr/mo/da/hr/mn/sc\fP = 2062/2/21/10/30/0.
 .TP
-\fB-MMM\fP\fI[pingnumber_tick/pingnumber_annot/pingnumber_tick_len]\fP
-Turns on ping number (or shot number) annotation of navigation tracks.
-Tick marks are made along the shiptrack at \fIpingnumber_tick\fP intervals; these
-are \fItime_tick_len\fP inches long. Longer tick marks are made along the 
-shiptrack at \fIpingnumber_annot\fP intervals; these are 1.5 times \fItime_tick_len\fP 
-inches long.
-Defaults: Pingnumber annotation off. If the \fB-MMM\fP option is given without
-specifying the controlling parameters, then \fIpingnumber_tick\fP = 50, 
-\fIpingnumber_annot\fP = 100, and \fIpingnumber_tick_len\fP = 0.1.
-.TP
 \fB-MMN\fP\fInplot\fP
 Sets the number of pings to be read in before each contouring
 episode. See the description of the \fB-MMZ\fP\fIalgorithm\fP option
@@ -666,6 +658,31 @@ The time required for the "ping to ping" algorithm varies linearly
 with the number of pings contoured; thus larger numbers of pings
 may be reasonably contoured at a time (e.g. use \fB-N\fP\fI50\fP). 
 Default: \fIalgorithm\fP = 0 unless \fIformat\fP = 41.
+.TP
+.B \-MNA
+\fI[name_hgt[/P] | P]\fP
+.br
+Turns on filename annotation of navigation tracks. If \fB-MNA\fP is given
+without specifying any controlling parameters, then the lettering height 
+\fIname_hgt\fP is 0.15 and the filenames are plotted parallel to the 
+navigation track from the start of the track. The lettering height can be
+specified using either \fB-MNA\fP\fIname_hgt\fP or \fB-MNA\fP\fIname_hgt/P\fP.
+If \fB-MNA\fP\fIP\fP or \fB-MNA\fP\fIname_hgt/P\fP is specified, 
+the filename will be plotted perpendicular to the navigation track.
+Filename annotation can also be specified using the \fB-N\fP option.
+Defaults: Filename annotation off. 
+.TP
+.B \-MNP
+\fI[pingnumber_tick/pingnumber_annot/pingnumber_tick_len]\fP
+.br
+Turns on ping number (or shot number) annotation of navigation tracks.
+Tick marks are made along the shiptrack at \fIpingnumber_tick\fP intervals; these
+are \fItime_tick_len\fP inches long. Longer tick marks are made along the 
+shiptrack at \fIpingnumber_annot\fP intervals; these are 1.5 times \fItime_tick_len\fP 
+inches long.
+Defaults: Pingnumber annotation off. If the \fB-MNP\fP option is given without
+specifying the controlling parameters, then \fIpingnumber_tick\fP = 50, 
+\fIpingnumber_annot\fP = 100, and \fIpingnumber_tick_len\fP = 0.1.
 .TP
 .B \-MTC
 \fIfill\fP 

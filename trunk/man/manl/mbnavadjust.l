@@ -22,12 +22,11 @@ swath bathymetry obtained with high frequency sonars operated
 close to the seafloor. This is  particularly true for systems
 that depend on ultra-short baseline navigation (USBL) or on
 inertial navigation (as opposed to long baseline (LBL) navigation
-obtained using transponder networks). Many old, 
-pre-GPS surveys with hull mounted
-sonars also suffer from poor navigation relative to the resolution
-of the swath bathymetry, and can thus be improved with application
-of this tool. \fBMBnavadjust\fP also works
-well to co-register surveys at different scales. For instance, our
+obtained using transponder networks). Many old, pre-GPS surveys with 
+hull mounted sonars also suffer from poor navigation relative to the 
+resolution of the swath bathymetry, and can thus be improved with 
+application of this tool. \fBMBnavadjust\fP also works well to 
+co-register surveys at different scales. For instance, our
 initial use of this tool involved co-registering a deep-towed Reson
 8101 multibeam survey of the Loihi Seamount summit (offshore Hawaii)
 with a hull mounted Simrad EM300 multibeam survey. 
