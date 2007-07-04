@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mblist.c	2/1/93
- *    $Id: mblist.c,v 5.21 2007-05-12 19:57:21 caress Exp $
+ *    $Id: mblist.c,v 5.22 2007-07-04 04:05:29 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -28,6 +28,9 @@
  *		in 1990.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.21  2007/05/12 19:57:21  caress
+ * Fixed array pointer initialization.
+ *
  * Revision 5.20  2006/10/05 18:58:29  caress
  * Changes for 5.1.0beta4
  *
@@ -295,6 +298,9 @@ int printsimplevalue(int verbose, FILE *output,
 		int ascii, int *invert, int *flipsign, int *error);
 int printNaN(int verbose, FILE *output, int ascii, int *invert, int *flipsign, int *error);
 int mb_get_raw(int verbose, void *mbio_ptr,
+		int *mode,
+		int *pulse_length,
+		int *png_count,
 		int *sample_rate,
 		double *absorption,
 		int *max_range,
@@ -311,10 +317,14 @@ int mb_get_raw(int verbose, void *mbio_ptr,
 		int *beam_samples,
 		int *start_sample,
 		int *range,
+	        double *depression,
 		double *bs,
 		double *ss_pixels,
 		int *error);
 int mb_get_raw_simrad2(int verbose, void *mbio_ptr, 
+		int *mode,
+		int *pulse_length,
+		int *png_count,
 		int *sample_rate,
 		double *absorption,
 		int *max_range,
@@ -331,6 +341,7 @@ int mb_get_raw_simrad2(int verbose, void *mbio_ptr,
 		int *beam_samples,
 		int *start_sample,
 		int *range,
+		double *depression,
 		double *bs,
 		double *ss_pixels,
 		int *error);
@@ -338,7 +349,7 @@ int mb_get_raw_simrad2(int verbose, void *mbio_ptr,
 /* NaN value */
 double	NaN;
 
-static char rcs_id[] = "$Id: mblist.c,v 5.21 2007-05-12 19:57:21 caress Exp $";
+static char rcs_id[] = "$Id: mblist.c,v 5.22 2007-07-04 04:05:29 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
@@ -462,11 +473,11 @@ main (int argc, char **argv)
 	int	ns;
 	double	angle, depth, slope;
 	int	ndepths;
-	double	*depths = NULL;
-	double	*depthacrosstrack = NULL;
+	double	*depths;
+	double	*depthacrosstrack;
 	int	nslopes;
-	double	*slopes = NULL;
-	double	*slopeacrosstrack = NULL;
+	double	*slopes;
+	double	*slopeacrosstrack;
 
 	/* course calculation variables */
 	int	use_course = MB_NO;
@@ -496,6 +507,9 @@ main (int argc, char **argv)
 	int	count = 0;
 	int	invert;
 	int	flip;
+	int	mode;
+	int	pulse_length;
+	int	png_count;
 	int	sample_rate;
 	double	absorption;
 	int	max_range;
@@ -505,6 +519,8 @@ main (int argc, char **argv)
 	int	 tvg_stop;
 	double 	bsn;
 	double 	bso;
+	double	mback;
+	int	nback;
 	int 	tx;
 	int 	tvg_crossover;
 	int 	nbeams_ss;
@@ -512,13 +528,14 @@ main (int argc, char **argv)
 	int 	*beam_samples = NULL;
 	int 	*range = NULL;
 	int 	*start_sample = NULL;
+	double	*depression = NULL;
 	double	*bs = NULL;
 	double	*ss_pixels = NULL;
 
 	int	read_data;
 	double	distmin;
 	int	found;
-	int	i, j, k;
+	int	i, j, k, m;
 
 	/* output files */
 	FILE	**output;
@@ -1809,7 +1826,7 @@ main (int argc, char **argv)
 			fprintf(output[i], "\t%s = ", variable);
 			
 			fprintf(outfile, "\tfloat %s(data);\n", variable);
-			fprintf(outfile, "\t\t%s:long_name = \"Oblique backscatter\";\n", variable);
+			fprintf(outfile, "\t\t%s:long_name = \"mean backscatter\";\n", variable);
 			fprintf(outfile, "\t\t%s:units = \"", variable);
 			if (signflip_next_value == MB_YES)
 			  fprintf(outfile, "-");
@@ -1820,6 +1837,79 @@ main (int argc, char **argv)
 			signflip_next_value = MB_NO;
 			invert_next_value = MB_NO;
 			raw_next_value = MB_NO;
+			break;
+
+		  case 'c': /* mean backscatter */
+			strcpy(variable, "mback");
+			if (signflip_next_value == MB_YES)
+			  strcat(variable, "-");
+			if (invert_next_value == MB_YES)
+			  strcat(variable, "_");
+			
+			fprintf(output[i], "\t%s = ", variable);
+			
+			fprintf(outfile, "\tfloat %s(data);\n", variable);
+			fprintf(outfile, "\t\t%s:long_name = \"Oblique backscatter\";\n", variable);
+			fprintf(outfile, "\t\t%s:units = \"", variable);
+			if (signflip_next_value == MB_YES)
+			  fprintf(outfile, "-");
+			if (invert_next_value == MB_YES)
+			  fprintf(outfile, "1/");
+			if (format == MBF_EM300RAW || format == MBF_EM300MBA)
+			  fprintf(outfile, "dB + 64\";\n");
+			else
+			  fprintf(outfile, "backscatter\";\n");
+			
+			signflip_next_value = MB_NO;
+			invert_next_value = MB_NO;
+			raw_next_value = MB_NO;
+			break;
+
+		  case 'd': /* beam depression angle */
+			strcpy(variable, "depression");
+			if (signflip_next_value == MB_YES)
+			  strcat(variable, "-");
+			if (invert_next_value == MB_YES)
+			  strcat(variable, "_");
+			
+			fprintf(output[i], "\t%s = ", variable);
+			
+			fprintf(outfile, "\tfloat %s(data);\n", variable);
+			fprintf(outfile, "\t\t%s:long_name = \"Beam depression angle\";\n", variable);
+			fprintf(outfile, "\t\t%s:units = \"", variable);
+			if (signflip_next_value == MB_YES)
+			  fprintf(outfile, "-");
+			if (invert_next_value == MB_YES)
+			  fprintf(outfile, "1/");
+			fprintf(outfile, "degrees\";\n");
+			
+			signflip_next_value = MB_NO;
+			invert_next_value = MB_NO;
+			raw_next_value = MB_NO;
+			break;
+
+		  case 'F': /* filename */
+		    	strcpy(variable, "filename");
+
+			fprintf(output[i], "\t%s = ", variable);
+
+			fprintf(outfile, "\tchar %s(data,pathsize);\n", variable);
+			fprintf(outfile, "\t\t%s:long_name = \"Name of swath data file\";\n", variable);
+			fprintf(outfile, "\t\t%s:units = \"", variable);
+
+			fprintf(outfile, "file name\";\n");
+			break;
+
+		  case 'f': /* format */
+		    	strcpy(variable, "format");
+			
+			fprintf(output[i], "\t%s = ", variable);
+
+			fprintf(outfile, "\tshort %s(data);\n", variable);
+			fprintf(outfile, "\t\t%s:long_name = \"MBsystem file format number\";\n", variable);
+			fprintf(outfile, "\t\t%s:units = \"", variable);
+			
+			fprintf(outfile, "see mbformat\";\n");
 			break;
 
 		  case 'G': /* TVG start */
@@ -1866,6 +1956,39 @@ main (int argc, char **argv)
 			signflip_next_value = MB_NO;
 			invert_next_value = MB_NO;
 			raw_next_value = MB_NO;
+			break;
+
+		  case 'L' : /* Pulse length */
+		    	strcpy(variable, "pulse_length");
+
+			fprintf(output[i], "\t%s = ", variable);
+			
+			fprintf(outfile, "\tlong %s(data);\n", variable);
+			fprintf(outfile, "\t\t%s:long_name = \"Pulse Length\";\n", variable);
+			fprintf(outfile, "\t\t%s:units = \"", variable);
+			fprintf(outfile, "us");
+			break;
+
+		  case 'M' : /* Mode */
+		    	strcpy(variable, "mode");
+
+			fprintf(output[i], "\t%s = ", variable);
+			
+			fprintf(outfile, "\tlong %s(data);\n", variable);
+			fprintf(outfile, "\t\t%s:long_name = \"Sounder mode\";\n", variable);
+			fprintf(outfile, "\t\t%s:units = \"", variable);
+			fprintf(outfile, "0=very shallow,1=shallow,2=medium,3=deep,4=very deep,5=extra deep\";\n");
+			break;
+
+		  case 'N' : /* Ping number */
+		    	strcpy(variable, "ping_no");
+
+			fprintf(output[i], "\t%s = ", variable);
+			
+			fprintf(outfile, "\tlong %s(data);\n", variable);
+			fprintf(outfile, "\t\t%s:long_name = \"Sounder ping counter\";\n", variable);
+			fprintf(outfile, "\t\t%s:units = \"", variable);
+			fprintf(outfile, "pings\";\n");
 			break;
 
 		  case 'p': /* sidescan pixel */
@@ -2059,9 +2182,9 @@ main (int argc, char **argv)
 		    else
 			{
 			read_raw = MB_YES;
-			if (list[i] == 'R')
+			if (list[i] == 'R'|| list[i] == 'd')
 				use_bath = MB_YES;
-			if (list[i] == 'B' || list[i] == 'b')
+			if (list[i] == 'B' || list[i] == 'b' || list[i] == 'c')
 				use_amp = MB_YES;
 			if (list[i] != '/' &&  list[i] != '-' && list[i] != '.')
 				raw_next_value = MB_NO;
@@ -2123,6 +2246,9 @@ main (int argc, char **argv)
 		if (error == MB_ERROR_NO_ERROR)
 			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
 							sizeof(int), (void **)&range, &error);
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							sizeof(double), (void **)&depression, &error);
 		if (error == MB_ERROR_NO_ERROR)
 			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
 							sizeof(double), (void **)&bs, &error);
@@ -2410,6 +2536,9 @@ main (int argc, char **argv)
 		if (read_raw == MB_YES)
 			{
 			status = mb_get_raw(verbose, mbio_ptr,
+					&mode,
+					&pulse_length,
+					&png_count,
 					&sample_rate,
 					&absorption,
 					&max_range,
@@ -2426,6 +2555,7 @@ main (int argc, char **argv)
 					beam_samples,
 					start_sample,
 					range,
+					depression,
 					bs,
 					ss_pixels,
 					&error);
@@ -2490,6 +2620,9 @@ main (int argc, char **argv)
 					break;
 				case '-': /* Flip sign on next simple value */
 					signflip_next_value = MB_YES;
+					break;
+				case '.': /* Raw value next field */
+					raw_next_value = MB_YES;
 					break;
 				case '=': /* Port-most value next field -ignored here */
 				  	port_next_value = MB_YES;
@@ -3073,9 +3206,25 @@ main (int argc, char **argv)
 					break;
 
 				case 'A': /* backscatter */
-				        printsimplevalue(verbose, output[i], bs[k], 5, 1, ascii, 
+					if (beamflag[k] == MB_FLAG_NULL
+					    && (check_values == MBLIST_CHECK_OFF_NAN
+						|| check_values == MBLIST_CHECK_OFF_FLAGNAN))
+					    {
+					    printNaN(verbose, output[i], ascii, &invert_next_value, 
+							    &signflip_next_value, &error);
+					    }
+					else if (!mb_beam_ok(beamflag[k])
+					    && check_values == MBLIST_CHECK_OFF_FLAGNAN)
+					    {
+					    printNaN(verbose, output[i], ascii, &invert_next_value, 
+							    &signflip_next_value, &error);
+					    }
+					else
+					    {
+					    printsimplevalue(verbose, output[i], bs[k], 5, 1, ascii, 
 							    &invert_next_value, 
 							    &signflip_next_value, &error);
+					    }
 					raw_next_value = MB_NO;
 					break;
 				case 'a': /* absorption */
@@ -3096,6 +3245,68 @@ main (int argc, char **argv)
 							    &signflip_next_value, &error);
 					raw_next_value = MB_NO;
 					break;
+				case 'c': /* Mean backscatter */
+				  	mback = 0;
+					nback = 0;
+				  	for (m = 0; m < beams_amp ; m++) {
+					  if (mb_beam_ok(beamflag[m])) {
+					    mback += amp[m];
+					    nback++;
+					  }
+					}
+					printsimplevalue(verbose, output[i], mback / nback, 5, 2, ascii, 
+							    &invert_next_value, 
+							    &signflip_next_value, &error);
+					raw_next_value = MB_NO;
+					break;
+				case 'd': /* beam depression angle */
+					if (beamflag[k] == MB_FLAG_NULL
+					    && (check_values == MBLIST_CHECK_OFF_NAN
+						|| check_values == MBLIST_CHECK_OFF_FLAGNAN))
+					    {
+					    printNaN(verbose, output[i], ascii, &invert_next_value, 
+							    &signflip_next_value, &error);
+					    }
+					else if (!mb_beam_ok(beamflag[k])
+					    && check_values == MBLIST_CHECK_OFF_FLAGNAN)
+					    {
+					    printNaN(verbose, output[i], ascii, &invert_next_value, 
+							    &signflip_next_value, &error);
+					    }
+					else
+					    {
+				            printsimplevalue(verbose, output[i], depression[k], 5, 2, ascii, 
+							    &invert_next_value, 
+							    &signflip_next_value, &error);
+					    }
+					raw_next_value = MB_NO;
+					break;
+
+				case 'F': /* filename */
+				  	if (netcdf == MB_YES) fprintf(output[i], "\"");
+					fprintf(output[i], "%s", file);
+
+					if (netcdf == MB_YES) fprintf(output[i], "\"");
+					
+					if (ascii == MB_NO)
+					  for (k = strlen(file); k < MB_PATH_MAXLINE; k++)
+					    fwrite(&file[strlen(file)], sizeof(char), 1, outfile);
+					
+					raw_next_value = MB_NO;
+					break;
+
+				case 'f': /* format */
+					if (ascii == MB_YES)
+					    fprintf(output[i],"%6d",format);
+					else
+					    {
+					    b = format;
+					    fwrite(&b, sizeof(double), 1, outfile);
+					    }
+					raw_next_value = MB_NO;
+					break;
+
+					break;
 				case 'G': /* TVG start */
 					if (ascii == MB_YES)
 					    fprintf(output[i],"%6d",tvg_start);
@@ -3115,6 +3326,37 @@ main (int argc, char **argv)
 					    fwrite(&b, sizeof(double), 1, outfile);
 					    }
 					raw_next_value = MB_NO;
+					break;
+				case 'L': /* Pulse length */
+					if (ascii == MB_YES)
+					    fprintf(output[i],"%6d",pulse_length);
+					else
+					    {
+					    b = pulse_length;
+					    fwrite(&b, sizeof(double), 1, outfile);
+					    }
+					raw_next_value = MB_NO;
+					break;
+				case 'M': /* mode */
+					if (ascii == MB_YES)
+					    fprintf(output[i],"%4d",mode);
+					else
+					    {
+					    b = mode;
+					    fwrite(&b, sizeof(double), 1, outfile);
+					    }
+					raw_next_value = MB_NO;
+					break;
+				case 'N': /* ping counter */
+					if (ascii == MB_YES)
+					    fprintf(output[i],"%6d",png_count);
+					else
+					    {
+					    b = png_count;
+					    fwrite(&b, sizeof(double), 1, outfile);
+					    }
+					raw_next_value = MB_NO;
+					break;
 				case 'p': /* sidescan */
 					invert = invert_next_value;
 					flip = signflip_next_value;
@@ -3784,6 +4026,49 @@ main (int argc, char **argv)
 							    &signflip_next_value, &error);
 					raw_next_value = MB_NO;
 					break;
+				case 'c': /* Mean backscatter */
+				  	mback = 0;
+					nback = 0;
+				  	for (m = 0; m < beams_amp ; m++) {
+					  if (mb_beam_ok(beamflag[m])) {
+					    mback += amp[m];
+					    nback++;
+					  }
+					}
+					printsimplevalue(verbose, output[i], mback / nback, 5, 2, ascii, 
+							    &invert_next_value, 
+							    &signflip_next_value, &error);
+					raw_next_value = MB_NO;
+					break;
+				case 'd': /* beam depression angle */
+				        printsimplevalue(verbose, output[i], depression[beam_vertical], 5, 2, ascii, 
+							    &invert_next_value, 
+							    &signflip_next_value, &error);
+					raw_next_value = MB_NO;
+					break;
+				case 'F': /* filename */
+				  	if (netcdf == MB_YES) fprintf(output[i], "\"");
+					fprintf(output[i], "%s", file);
+					if (netcdf == MB_YES) fprintf(output[i], "\"");
+					
+					if (ascii == MB_NO)
+					  for (k = strlen(file); k < MB_PATH_MAXLINE; k++)
+					    fwrite(&file[strlen(file)], sizeof(char), 1, outfile);
+					
+					raw_next_value = MB_NO;
+					break;
+
+				case 'f': /* format */
+					if (ascii == MB_YES)
+					    fprintf(output[i],"%6d",format);
+					else
+					    {
+					    b = format;
+					    fwrite(&b, sizeof(double), 1, outfile);
+					    }
+					raw_next_value = MB_NO;
+					break;
+
 				case 'G': /* TVG start */
 					if (ascii == MB_YES)
 					    fprintf(output[i],"%6d",tvg_start);
@@ -3800,6 +4085,36 @@ main (int argc, char **argv)
 					else
 					    {
 					    b = tvg_stop;
+					    fwrite(&b, sizeof(double), 1, outfile);
+					    }
+					raw_next_value = MB_NO;
+					break;
+				case 'L': /* Pulse length */
+					if (ascii == MB_YES)
+					    fprintf(output[i],"%6d",pulse_length);
+					else
+					    {
+					    b = pulse_length;
+					    fwrite(&b, sizeof(double), 1, outfile);
+					    }
+					raw_next_value = MB_NO;
+					break;
+				case 'M': /* mode */
+					if (ascii == MB_YES)
+					    fprintf(output[i],"%4d",mode);
+					else
+					    {
+					    b = mode;
+					    fwrite(&b, sizeof(double), 1, outfile);
+					    }
+					raw_next_value = MB_NO;
+					break;
+				case 'N': /* ping counter */
+					if (ascii == MB_YES)
+					    fprintf(output[i],"%6d",png_count);
+					else
+					    {
+					    b = png_count;
 					    fwrite(&b, sizeof(double), 1, outfile);
 					    }
 					raw_next_value = MB_NO;
@@ -4523,6 +4838,9 @@ int printNaN(int verbose, FILE *output, int ascii, int *invert, int *flipsign, i
 Method to get fields from raw data, similar to mb_get_all.
 */
 int mb_get_raw(int verbose, void *mbio_ptr,
+		   int	*mode,
+		   int	*pulse_length,
+	       int	*png_count,
 	       int	*sample_rate,
 	       double	*absorption,
 	       int 	*max_range,
@@ -4539,6 +4857,7 @@ int mb_get_raw(int verbose, void *mbio_ptr,
 	       int 	*beam_samples,
 	       int	*start_sample,
 	       int 	*range,
+	       double	*depression,
 	       double 	*bs,
 	       double	*ss_pixels,
 	       int 	*error)
@@ -4549,6 +4868,9 @@ int mb_get_raw(int verbose, void *mbio_ptr,
 	
 	struct mb_io_struct     *mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 	
+	*mode = -1;
+	*pulse_length = 0;
+	*png_count = 0;
 	*sample_rate = 0;
 	*absorption = 0;
 	*max_range = 0;
@@ -4568,6 +4890,7 @@ int mb_get_raw(int verbose, void *mbio_ptr,
 	    beam_samples[i] = 0;
 	    start_sample[i] = 0;
 	    range[i] = 0;
+	    depression[i] = 0.0;
 	    bs[i] = 0.0;
 	  }
 
@@ -4576,6 +4899,9 @@ int mb_get_raw(int verbose, void *mbio_ptr,
 	  case MBF_EM300MBA:
 	  case MBF_EM300RAW:
 	    mb_get_raw_simrad2(verbose, mbio_ptr, 
+			   	   mode,
+			   	   pulse_length,
+			       png_count,
 			       sample_rate,
 			       absorption,
 			       max_range,
@@ -4592,6 +4918,7 @@ int mb_get_raw(int verbose, void *mbio_ptr,
 			       beam_samples,
 			       start_sample,
 			       range,
+			       depression,
 			       bs,
 			       ss_pixels,
 			       error);
@@ -4608,6 +4935,9 @@ Method to get fields from simrad2 raw data.
 */
 
 int mb_get_raw_simrad2(int verbose, void *mbio_ptr, 
+			   int	*mode,
+			   int	*pulse_length,
+		       int	*png_count,
 		       int	*sample_rate,
 		       double	*absorption,
 		       int 	*max_range,
@@ -4624,6 +4954,7 @@ int mb_get_raw_simrad2(int verbose, void *mbio_ptr,
 		       int 	*beam_samples,
 		       int	*start_sample,
 		       int 	*range,
+		       double	*depression,
 		       double 	*bs,
 		       double	*ss_pixels,
 		       int 	*error)
@@ -4638,6 +4969,9 @@ int mb_get_raw_simrad2(int verbose, void *mbio_ptr,
 
 	if (store_ptr->kind == MB_DATA_DATA)
 	  {
+	    *mode = store_ptr->run_mode;
+	    *pulse_length = store_ptr->run_tran_pulse;
+	    *png_count = ping_ptr->png_count;
 	    *sample_rate =  ping_ptr->png_sample_rate;
 	    *absorption = ping_ptr->png_max_range * 0.01;
 	    *max_range = ping_ptr->png_max_range;
@@ -4656,6 +4990,7 @@ int mb_get_raw_simrad2(int verbose, void *mbio_ptr,
 	    for (i = 0; i < ping_ptr->png_nbeams; i++)
 	      {
 		range[ping_ptr->png_beam_num[i] - 1] = ping_ptr->png_range[i];
+		depression[ping_ptr->png_beam_num[i] - 1] = ping_ptr->png_depression[i] * .01;
 		bs[ping_ptr->png_beam_num[i] - 1] = ping_ptr->png_amp[i] * 0.5;
 	      }
 	    for (i = 0; i < ping_ptr->png_nbeams_ss; i++) 
