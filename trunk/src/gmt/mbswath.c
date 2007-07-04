@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbswath.c	5/30/93
- *    $Id: mbswath.c,v 5.17 2006-12-15 21:42:49 caress Exp $
+ *    $Id: mbswath.c,v 5.18 2007-07-04 03:00:19 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2003, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -29,6 +29,9 @@
  * Date:	May 30, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.17  2006/12/15 21:42:49  caress
+ * Incremental CVS update.
+ *
  * Revision 5.16  2006/11/26 09:42:01  caress
  * Making distribution 5.1.0.
  *
@@ -330,7 +333,7 @@ unsigned char r, g, b, gray;
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbswath.c,v 5.17 2006-12-15 21:42:49 caress Exp $";
+	static char rcs_id[] = "$Id: mbswath.c,v 5.18 2007-07-04 03:00:19 caress Exp $";
 	static char program_name[] = "MBSWATH";
 	static char help_message[] =  "MBSWATH is a GMT compatible utility which creates a color postscript \nimage of swath bathymetry or backscatter data.  The image \nmay be shaded relief as well.  Complete maps are made by using \nMBSWATH in conjunction with the usual GMT programs.";
 	static char usage_message[] = "mbswath -Ccptfile -Jparameters -Rwest/east/south/north \n\t[-Afactor -Btickinfo -byr/mon/day/hour/min/sec \n\t-ccopies -Dmode/ampscale/ampmin/ampmax \n\t-Eyr/mon/day/hour/min/sec -fformat \n\t-Fred/green/blue -Gmagnitude/azimuth -Idatalist \n\t-K -Ncptfile -O -P -ppings -Qdpi -Ttimegap -U -W -Xx-shift -Yy-shift \n\t-Zmode -V -H]";
@@ -1785,7 +1788,7 @@ int get_footprints(int verbose, int mode, int fp_mode,
 			headingy = cos(pingcur->heading*DTR);
 			}
 
-		/* do bathymetry */
+		/* do bathymetry with more than 2 soundings */
 		if (dobath == MB_YES && pingcur->beams_bath > 2)
 		  {
 		  j = 0;
@@ -1834,7 +1837,6 @@ int get_footprints(int verbose, int mode, int fp_mode,
 			print->x[3] = x + dlon1 + pingcur->lonfor;
 			print->y[3] = y + dlat1 + pingcur->latfor;
 			}
-
 		  j = pingcur->beams_bath-1;
 		  if (mb_beam_ok(pingcur->beamflag[j]) 
 			&& mb_beam_ok(pingcur->beamflag[j-1]))
@@ -1880,6 +1882,46 @@ int get_footprints(int verbose, int mode, int fp_mode,
 			print->y[2] = y + dlat2 + pingcur->latfor;
 			print->x[3] = x + dlon1 + pingcur->lonfor;
 			print->y[3] = y + dlat1 + pingcur->latfor;
+			}
+		  }
+
+		/* do bathymetry with 1 sounding */
+		if (dobath == MB_YES && fp_mode == MBSWATH_FOOTPRINT_REAL && pingcur->beams_bath == 1)
+		  {
+		  if (mb_beam_ok(pingcur->beamflag[0]))
+			{
+			print = &pingcur->bathfoot[0];
+			pingcur->bathflag[0] = MB_YES;
+			ddlonx = (pingcur->bathlon[0] 
+				- pingcur->navlon)/mtodeglon;
+			ddlaty = (pingcur->bathlat[0] 
+				- pingcur->navlat)/mtodeglat;
+			if (depth_def > 0.0)
+				dddepth = depth_def;
+			else if (pingcur->altitude > 0.0)
+				dddepth = pingcur->altitude;
+			else
+				dddepth = pingcur->bath[0];
+			r = rfactor*sqrt(ddlonx*ddlonx 
+				+ ddlaty*ddlaty 
+				+ dddepth*dddepth);
+
+			dlon2 = -r*headingy*mtodeglon;
+			dlat2 = -r*headingx*mtodeglat;
+			dlon1 = r*headingy*mtodeglon;
+			dlat1 = r*headingx*mtodeglat;
+			pingcur->lonaft = -r*headingx*mtodeglon;
+			pingcur->lataft = -r*headingy*mtodeglat;
+			pingcur->lonfor = r*headingx*mtodeglon;
+			pingcur->latfor = r*headingy*mtodeglat;
+			print->x[0] = pingcur->bathlon[0] + dlon1 + pingcur->lonaft;
+			print->y[0] = pingcur->bathlat[0] + dlat1 + pingcur->lataft;
+			print->x[1] = pingcur->bathlon[0] + dlon2 + pingcur->lonaft;
+			print->y[1] = pingcur->bathlat[0] + dlat2 + pingcur->lataft;
+			print->x[2] = pingcur->bathlon[0] + dlon2 + pingcur->lonfor;
+			print->y[2] = pingcur->bathlat[0] + dlat2 + pingcur->latfor;
+			print->x[3] = pingcur->bathlon[0] + dlon1 + pingcur->lonfor;
+			print->y[3] = pingcur->bathlat[0] + dlat1 + pingcur->latfor;
 			}
 		  }
 
