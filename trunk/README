@@ -185,6 +185,11 @@ editing and patch test capability.
 
 Fixed further issues with the XSE format i/o module.
 
+Added swath file copy function to mbdatalist.
+
+Fixed calculation of grazing angles in mblist by adding sonar
+depth to the calculation.
+
 MB-SYSTEM VERSION 5.1.0 RELEASE NOTES:
 ------------------------------------------
 
@@ -1378,10 +1383,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.98 2007-07-05 16:43:17 caress Exp $
+RCS ID: $Id: README,v 5.99 2007-07-05 19:18:34 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.98  2007/07/05 16:43:17  caress
+Release 5.1.1beta5
+
 Revision 5.97  2007/07/03 17:23:46  caress
 Working on things...
 
