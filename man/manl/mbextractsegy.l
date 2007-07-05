@@ -119,7 +119,7 @@ is given in the \fBMBIO\fP manual page. Default: \fIinfile\fP = "stdin".
 Sets the scale of the default section plots. The \fIxscale\fP value is
 in inches per shot, and the \fIyscale\fP value is in inches per second. 
 The \fImaxwidth\fP value sets the maximum plot width in inches. If 
-\fIxscale\fP and the shot range imply a width greater than \fmaxwidth\fP,
+\fIxscale\fP and the shot range imply a width greater than \fImaxwidth\fP,
 then the section will be broken up into multiple plots.
 Default: \fIxscale\fP = 0.01; \fIyscale\fP = 75; \fImaxwidth\fP = 45.0
 .TP

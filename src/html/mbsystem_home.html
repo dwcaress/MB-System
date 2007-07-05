@@ -6,330 +6,318 @@
   <meta name="Title" content="MB-System: Mapping the Seafloor">
   <meta name="Author" content="David Caress, Dale Chayes">
   <meta name="Description"
-  content="open source software for processing bathymetry and backscatter data from multibeam and sidescan sonar">
+ content="open source software for processing bathymetry and backscatter data from multibeam and sidescan sonar">
   <meta name="Keywords"
-  content="seafloor,mapping,multibeam,sonar,bathymetry,sidescan,swath processing,open,source,software">
+ content="seafloor,mapping,multibeam,sonar,bathymetry,sidescan,swath processing,open,source,software">
 </head>
-
-<body text="#000000" bgcolor="#ffffff" link="#336699" vlink="#997040"
-alink="#cc9900">
+<body alink="#cc9900" bgcolor="#ffffff" link="#336699" text="#000000"
+ vlink="#997040">
 <h2 align="center"><img src="mbsystem_logo.gif" height="207" width="616"></h2>
-
 <center>
 <dl>
   <dt><b><font size="+2">Mapping the Seafloor:</font></b></dt>
 </dl>
 </center>
-
 <center>
 <dl>
-  <dt><b><font size="+2">Software for the Processing and
-  Display</font></b></dt>
+  <dt><b><font size="+2">Software for the Processing and Display</font></b></dt>
 </dl>
 </center>
-
 <center>
 <dl>
   <dt><b><font size="+2">of Swath Sonar Data</font></b></dt>
 </dl>
 </center>
-
 <center>
 <dl>
-  <dt><b> </b></dt>
+  <dt><b>&nbsp;</b></dt>
 </dl>
 </center>
-
 <center>
 <dl>
-  <dt><b><font size="+1"><a href="http://www.mbari.org/staff/caress">David W.
-  Caress</a> (1,2) and <a href="http://www.ldeo.columbia.edu/%7Edale">Dale N.
-  Chayes</a> (2)</font></b></dt>
+  <dt><b><font size="+1"><a href="http://www.mbari.org/staff/caress">David
+W. Caress</a> (1,2) and <a href="http://www.ldeo.columbia.edu/%7Edale">Dale
+N. Chayes</a> (2)</font></b></dt>
 </dl>
 </center>
-
 <center>
 <dl>
-  <dt><b>1. <a href="http://www.mbari.org/">Monterey Bay Aquarium Research
-  Institute</a></b></dt>
+  <dt><b>1. <a href="http://www.mbari.org/">Monterey Bay Aquarium
+Research Institute</a></b></dt>
 </dl>
 </center>
-
 <center>
 <dl>
-  <dt><b>2. <a href="http://www.ldeo.columbia.edu/">Lamont-Doherty Earth
-  Observatory</a></b></dt>
+  <dt><b>2. <a href="http://www.ldeo.columbia.edu/">Lamont-Doherty
+Earth Observatory</a></b></dt>
 </dl>
 </center>
-
 <center>
 <dl>
-  <dt><b>of <a href="http://www.columbia.edu/">Columbia
-  University</a></b></dt>
+  <dt><b>of <a href="http://www.columbia.edu/">Columbia University</a></b></dt>
 </dl>
 </center>
-
 <center>
 <p></p>
 <hr width="67%">
-
 <p></p>
 </center>
-
 <center>
 <dl>
   <dt><b><font size="+1">Introduction</font></b></dt>
 </dl>
 </center>
-
 <p>MB-System is an open source software package for the processing and
-display of bathymetry and backscatter imagery data derived from multibeam,
-interferometry, and sidescan sonars. This software is distributed freely (and
-for free) in the form of source code for Unix platforms. The heart of the
-system is an input/output library called MBIO which allows programs to work
-transparently with any of a number of supported swath sonar data formats.
-This approach has allowed the creation of "generic" utilities which can be
-applied in a uniform manner to sonar data from a variety of sources. Most of
-the programs are command-line tools, but the package does include graphical
-tools for editing swath bathymetry, editing navigation, modeling bathymetry
+display of bathymetry and backscatter imagery data derived from
+multibeam,
+interferometry, and sidescan sonars. This software is distributed
+freely (and
+for free) in the form of source code for Unix platforms. The heart of
+the
+system is an input/output library called MBIO which allows programs to
+work
+transparently with any of a number of supported swath sonar data
+formats.
+This approach has allowed the creation of "generic" utilities which can
+be
+applied in a uniform manner to sonar data from a variety of sources.
+Most of
+the programs are command-line tools, but the package does include
+graphical
+tools for editing swath bathymetry, editing navigation, modeling
+bathymetry
 calculation, and adjusting survey navigation.</p>
-
-<p>The acronym MB stands for MultiBeam; this reflects the fact that the early
-development of MB-System focused on processing deep sea data from multibeam
-sonars. However, MB-System now supports several data formats from sidescan
+<p>The acronym MB stands for MultiBeam; this reflects the fact that the
+early
+development of MB-System focused on processing deep sea data from
+multibeam
+sonars. However, MB-System now supports several data formats from
+sidescan
 and interferometric sonars and works with data from all depth ranges.</p>
-
-<p>The <a href="http://www.nsf.gov">National Science Foundation</a> (NSF) has
-been the primary supporter of MB-System development. NSF initially provided
+<p>The <a href="http://www.nsf.gov">National Science Foundation</a>
+(NSF) has
+been the primary supporter of MB-System development. NSF initially
+provided
 grants to the authors at the <a href="http://www.ldeo.columbia.edu">
-Lamont-Doherty Earth Observatory</a> in 1993 (two years), and 1995 (five
-years). <a href="http://www.seabeam.com/"> SeaBeam Instruments</a> also
-contributed significant effort from 1994 to 1999. This support was renewed
+Lamont-Doherty Earth Observatory</a> in 1993 (two years), and 1995
+(five
+years). <a href="http://www.seabeam.com/"> SeaBeam Instruments</a>
+also
+contributed significant effort from 1994 to 1999. This support was
+renewed
 through a new five year grant (2001-2006) to Caress at the <a
-href="http://www.mbari.org"> Monterey Bay Aquarium Research Institute</a>
+ href="http://www.mbari.org"> Monterey Bay Aquarium Research Institute</a>
 (MBARI) and to Chayes at Lamont. MBARI, with support from the <a
-href="http://www.packardfoundation.org/">Packard Foundation</a>, has matched
+ href="http://www.packardfoundation.org/">Packard Foundation</a>, has
+matched
 the NSF support as part of its seafloor mapping program. </p>
-
-<p>The original NSF mandate was to create a set of generic tools which would
+<p>The original NSF mandate was to create a set of generic tools which
+would
 work with all of the sonar data used in NSF-supported projects. Not
 surprisingly, the core of the MB-System user community consists of
-NSF-supported researchers at U.S. institutions such as the Lamont-Doherty
-Earth Observatory, the Scripps Institution of Oceanography, and the Woods
-Hole Oceanographic Institution. However, MB-System has also come to be used
+NSF-supported researchers at U.S. institutions such as the
+Lamont-Doherty
+Earth Observatory, the Scripps Institution of Oceanography, and the
+Woods
+Hole Oceanographic Institution. However, MB-System has also come to be
+used
 widely in the international marine geological community.</p>
-
-<p>The MB-System source code is distributed under the <a href="gpl.html"> GNU
+<p>The MB-System source code is distributed under the <a
+ href="gpl.html"> GNU
 General Public License</a> as formulated by the <a
-href="http://www.gnu.org/">GNU Project.</a> MB-System installation depends on
+ href="http://www.gnu.org/">GNU&nbsp;Project.</a> MB-System
+installation depends on
 some other software packages (e.g. <a
-href="http://imina.soest.hawaii.edu/gmt/"> GMT</a> and <a
-href="http://unidata.ucar.edu/packages/netcdf/">netCDF</a> ), all of which
+ href="http://imina.soest.hawaii.edu/gmt/"> GMT</a> and <a
+ href="http://unidata.ucar.edu/packages/netcdf/">netCDF</a> ), all of
+which
 are freely available as source code.</p>
-
 <p>This documention is distributed with and refers to MB-System release
 5.1.0.</p>
-
 <center>
 <p></p>
 <hr width="67%">
-
 <p></p>
 </center>
-
 <center>
 <dl>
   <dt><b><font size="+1">Information About MB-System:</font></b></dt>
 </dl>
 </center>
 <ul>
-  <li><a href="mbsystem_whatsnew.html">What's new in MB-System version
-  5</a></li>
+  <li><a href="mbsystem_whatsnew.html">What's new in MB-System version 5</a></li>
   <li><a href="mbsystem_capabilities.html">Short list of capabilities</a></li>
-  <li><a href="mbsystem_man_list.html">List of MB-System programs and links
-    to manual pages</a></li>
+  <li><a href="mbsystem_man_list.html">List of MB-System programs and
+links to manual pages</a></li>
   <li><a href="mbsystem_formats.html">List of supported swath data
-  formats</a></li>
+formats</a></li>
   <li><a href="mbsystem_how_to_get.html">How to get and install
-  MB-System</a></li>
+MB-System</a></li>
   <li><a href="mbsystem_faq.html">Frequently Asked Questions (and
-  answers)</a></li>
-  <li><a href="mbsystem_future.html">Future MB-System development
-  plans</a></li>
+answers)</a></li>
+  <li><a href="mbsystem_future.html">Future MB-System development plans</a></li>
   <li><a href="mbsystem_copyright.html">Copyright and Caveat</a></li>
 </ul>
-
 <center>
 <p></p>
 <hr width="67%">
-
 <p></p>
 </center>
-
 <center>
-
 <center>
 <dl>
   <dt><b><font size="+1">Contacting the MB-System Team:</font></b></dt>
 </dl>
 </center>
-
 <div style="text-align: justify;">
-Although the MB-System authors' personal email addresses are listed below, we
-greatly prefer that all inquiries, requests, and problem reports regarding
+Although the MB-System authors' personal email addresses are listed
+below, we
+greatly prefer that all inquiries, requests, and problem reports
+regarding
 MB-System be directed to the <a
-href="http://listserver.shore.mbari.org/read/?forum=mbsystem">MB-System
+ href="http://listserver.shore.mbari.org/read/?forum=mbsystem">MB-System
 Discussion list</a>.<br>
 <br>
 <span style="text-decoration: underline;"></span></div>
-
 <center>
-<hr width="67%">
-</center>
+<hr width="67%"></center>
 <dl>
   <dt><a name="MB-authors"></a> <b><font size="+1">Authors:<br>
-  </font></b></dt>
+    </font></b></dt>
 </dl>
 </center>
-
 <center>
 <dl>
   <dt><br>
   </dt>
 </dl>
-
-<table cellspacing="0" cellpadding="0" width="100%">
+<table cellpadding="0" cellspacing="0" width="100%">
   <tbody>
     <tr>
-      <td valign="top" align="center">
-        <div align="center">
-        <p><img src="caress2001.gif" height="146" width="108"
-        align="middle"></p>
-
-        <p></p>
-        </div>
-        <dl>
-            <dd><b><a href="http://www.mbari.org/staff/caress">David W.
-              Caress</a></b></dd>
-        </dl>
-          <dd><a href="mailto:caress@mbari.org">caress@mbari.org</a></dd>
-
-        <table cellspacing="0" cellpadding="0">
-          <tbody>
-            <tr>
-              <td><dl>
-                    <dd>Senior Research Specialist</dd>
-                </dl>
-              </td>
-              <td><dd>Adjunct Associate Research Scientist</dd>
-              </td>
-            </tr>
-            <tr>
-              <td><dd><a href="http://www.mbari.org">Monterey Bay
-                    Aquarium </a></dd>
-                  <dd><a href="http://www.mbari.org">Research
-                  Institute</a></dd>
-              </td>
-              <td><dd><a href="http://www.ldeo.columbia.edu">Lamont-Doherty
-                    Earth Observatory</a>  </dd>
-                  <dd>of <a href="http://www.columbia.edu"> Columbia
-                    University</a></dd>
-              </td>
-            </tr>
-            <tr>
-              <td><dd>7700 Sandholdt Road</dd>
-              </td>
-              <td><dd>Palisades, NY 19064</dd>
-              </td>
-            </tr>
-            <tr>
-              <td><dd>Moss Landing, CA 95039</dd>
-              </td>
-              <td><br>
-              </td>
-            </tr>
-            <tr>
-              <td><dd>Voice: (831) 775-1775</dd>
-              </td>
-              <td><br>
-              </td>
-            </tr>
-            <tr>
-              <td><dd>Fax: (831) 775-1620</dd>
-              </td>
-              <td><br>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+      <td align="center" valign="top">
+      <div align="center">
+      <p><img src="caress2001.gif" align="middle" height="146"
+ width="108"></p>
+      <p></p>
+      </div>
+      <dl>
+        <dd><b><a href="http://www.mbari.org/staff/caress">David W.
+Caress</a></b></dd>
+      </dl>
+      <dd><a href="mailto:caress@mbari.org">caress@mbari.org</a></dd>
+      <table
+ style="text-align: left; margin-left: auto; margin-right: auto;"
+ cellpadding="0" cellspacing="0">
+        <tbody>
+          <tr>
+            <td> <dd>Senior Research Specialist</dd>
+            </td>
+            <td style="vertical-align: top;">&nbsp; <br>
+            </td>
+            <td><dd>Adjunct Associate Research Scientist</dd>
+            </td>
+          </tr>
+          <tr>
+            <td><dd><a href="http://www.mbari.org">Monterey Bay
+Aquarium&nbsp;</a></dd>
+            <dd><a href="http://www.mbari.org">Research Institute</a></dd>
+            </td>
+            <td style="vertical-align: top;"><br>
+            </td>
+            <td><dd><a href="http://www.ldeo.columbia.edu">Lamont-Doherty
+Earth Observatory</a> &nbsp;</dd>
+            <dd>of <a href="http://www.columbia.edu"> Columbia
+University</a></dd>
+            </td>
+          </tr>
+          <tr>
+            <td><dd>7700 Sandholdt Road</dd>
+            </td>
+            <td style="vertical-align: top;"><br>
+            </td>
+            <td><dd>Palisades, NY 19064</dd>
+            </td>
+          </tr>
+          <tr>
+            <td><dd>Moss Landing, CA 95039</dd>
+            </td>
+            <td style="vertical-align: top;"><br>
+            </td>
+            <td><br>
+            </td>
+          </tr>
+          <tr>
+            <td><dd>Voice: (831) 775-1775</dd>
+            </td>
+            <td style="vertical-align: top;"><br>
+            </td>
+            <td><br>
+            </td>
+          </tr>
+          <tr>
+            <td><dd>Fax: (831) 775-1620</dd>
+            </td>
+            <td style="vertical-align: top;"><br>
+            </td>
+            <td><br>
+            </td>
+          </tr>
+        </tbody>
+      </table>
       </td>
     </tr>
     <tr>
       <td valign="top">
-        <div align="center">
-        <p><img alt="Dale Chayes at LDEO July 2003"
-        src="ChayesJul2003.gif"></p>
-        </div>
-          <dd>
-            <div align="center">
-            <b><a href="http://www.ldeo.columbia.edu/%7Edale">Dale N.
-            Chayes</a></b></div>
-          </dd>
-          <dd>
-            <div align="center">
-            <a
-            href="mailto:dale@ldeo.columbia.edu">dale@ldeo.columbia.edu</a></div>
-          </dd>
-          <dd>
-            <div align="center">
-            Research Engineer</div>
-          </dd>
-          <dd>
-            <div align="center">
-            <a href="http://www.ldeo.columbia.edu">Lamont-Doherty Earth
-            Observatory</a> of <a href="http://www.columbia.edu">Columbia
-            University</a></div>
-          </dd>
-          <dd>
-            <div align="center">
-            Palisades, NY 10964</div>
-          </dd>
-          <dd>
-            <div align="center">
-            Voice: (845) 365-8434</div>
-          </dd>
-          <dd>
-            <div align="center">
-            Fax: (845) 359-6940</div>
-          </dd>
+      <div align="center">
+      <p><img alt="Dale Chayes at LDEO July 2003"
+ src="ChayesJul2003.gif"></p>
+      </div>
+      <dd>
+        <div align="center"> <b><a
+ href="http://www.ldeo.columbia.edu/%7Edale">Dale N. Chayes</a></b></div>
+      </dd>
+      <dd>
+        <div align="center"> <a href="mailto:dale@ldeo.columbia.edu">dale@ldeo.columbia.edu</a></div>
+      </dd>
+      <dd>
+        <div align="center"> Research Engineer</div>
+      </dd>
+      <dd>
+        <div align="center"> <a href="http://www.ldeo.columbia.edu">Lamont-Doherty
+Earth Observatory</a> of <a href="http://www.columbia.edu">Columbia
+University</a></div>
+      </dd>
+      <dd>
+        <div align="center"> Palisades, NY 10964</div>
+      </dd>
+      <dd>
+        <div align="center"> Voice: (845) 365-8434</div>
+      </dd>
+      <dd>
+        <div align="center"> Fax: (845) 359-6940</div>
+      </dd>
       </td>
     </tr>
   </tbody>
 </table>
 </center>
-  <dd><br>
-  </dd>
-
+<dd><br>
+</dd>
 <center>
 <p></p>
 <hr width="67%">
-
 <p></p>
 </center>
-
 <center>
 <dl>
-  <dt><a name="MB-documentors"></a> <b><font size="+1">
-  Documentation:</font></b></dt>
+  <dt><a name="MB-documentors"></a> <b><font size="+1"> Documentation:</font></b></dt>
 </dl>
 </center>
-
 <center>
 <dl>
-  <dt><b><font size="+1"> </font></b></dt>
+  <dt><b><font size="+1">&nbsp;</font></b></dt>
 </dl>
 </center>
-
 <center>
 <dl>
   <dt><img alt="Val Schmidt at LDEO in July 2003" src="ValJul2003.gif">
@@ -337,82 +325,83 @@ Discussion list</a>.<br>
   <dt><br>
   </dt>
 </dl>
-
-<table cellspacing="0" cellpadding="0" width="100%">
+<table cellpadding="0" cellspacing="0" width="100%">
   <tbody>
     <tr>
       <td valign="top"><dd>
-            <div align="center">
-            <b><a href="http://www.ldeo.columbia.edu/%7Evschmidt">Val
-            Schmidt</a></b></div>
-          </dd>
-          <dd>
-            <div align="center">
-            <a
-            href="mailto:vschmidt@ldeo.columbia.edu">vschmidt@ldeo.columbia.edu</a></div>
-          </dd>
-          <dd>
-            <div align="center">
-            Research Engineer</div>
-          </dd>
-          <dd>
-            <div align="center">
-            <a href="http://www.ldeo.columbia.edu">Lamont-Doherty Earth
-            Observatory</a> of <a href="http://www.columbia.edu">Columbia
-            University</a></div>
-          </dd>
-          <dd>
-            <div align="center">
-            Palisades, NY 10964</div>
-          </dd>
+        <div align="center"> <b><a
+ href="http://www.ldeo.columbia.edu/%7Evschmidt">Val Schmidt</a></b></div>
+      </dd>
+      <dd>
+        <div align="center"> <a
+ href="mailto:vschmidt@ldeo.columbia.edu">vschmidt@ldeo.columbia.edu</a></div>
+      </dd>
+      <table
+ style="text-align: left; margin-left: auto; margin-right: auto;"
+ cellpadding="0" cellspacing="0">
+        <tbody>
+          <tr>
+            <td> <dd>Research Engineer</dd>
+            </td>
+            <td><dd style="text-align: left;">Graduate Student</dd>
+            </td>
+          </tr>
+          <tr>
+            <td><dd><a href="http://www.ldeo.columbia.edu">Lamont-Doherty
+Earth Observatory</a> &nbsp;</dd>
+            <dd>of <a href="http://www.columbia.edu"> Columbia
+University</a></dd>
+            </td>
+            <td><dd><a href="http://www.ccom.unh.edu">Center of Coastal
+and Ocean Mapping </a></dd>
+            <dd><a href="http://www.ccom.unh.edu">Joint Hydrographic
+Center</a> of </dd>
+            <dd><a href="http://www.unh.edu">University of New Hampshire</a></dd>
+            </td>
+          </tr>
+          <tr>
+            <td><dd>Palisades, NY 19064</dd>
+            </td>
+            <td><dd>Durham, NH 03824</dd>
+            </td>
+          </tr>
+        </tbody>
+      </table>
       </td>
     </tr>
   </tbody>
 </table>
 </center>
-
 <center>
-
-<center>
-</center>
-
+<center></center>
 <center>
 <hr width="67%">
-
 <p></p>
 </center>
-
 <center>
 <dl>
-  <dt><a name="MB-team"></a> <b><font size="+1"> Rare Non-Virtual Meeting of
-  the MB-System Team:</font></b></dt>
+  <dt><a name="MB-team"></a> <b><font size="+1"> Rare Non-Virtual
+Meeting of the MB-System Team:</font></b></dt>
 </dl>
 </center>
-
 <center>
 <dl>
-  <dt><b><font size="+1"> <img alt="July 2003 at IRI Building, LDEO"
-  src="MBTeamJul2003.gif">
-  </font></b></dt>
+  <dt><b><font size="+1">&nbsp;<img
+ alt="July 2003 at IRI Building, LDEO" src="MBTeamJul2003.gif"> </font></b></dt>
 </dl>
 </center>
 <dl>
   <dt><br>
   </dt>
 </dl>
-
-<p>Last Updated: $Date: 2006-11-26 17:35:21 $ $Revision: 5.37
+<p>Last Updated: $Date: 2007-07-05 16:45:24 $ $Revision: 5.37
 $</p>
 </center>
-
 <p></p>
-
 <div align="center">
-<hr width="67%">
-</div>
+<hr width="67%"></div>
 <br>
-  
-
+&nbsp;
 <p></p>
 </body>
 </html>

@@ -27,6 +27,7 @@ adjusting survey navigation.
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
 Version 5.1.1          To be determined
+Version 5.1.1beta5     July 5, 2007
 Version 5.1.0          November 26, 2006
 Version 5.1.0beta4     October 5, 2006
 Version 5.1.0beta3     September 11, 2006
@@ -96,7 +97,7 @@ Palisades, NY 10964
 
 MB-SYSTEM COPYRIGHT, LICENSING AND CAVEAT:
 -----------------------------------------
-MB-System Copyright (C) 1993-2006 by
+MB-System Copyright (C) 1993-2007 by
 David W. Caress (caress@mbari.org)
   Monterey Bay Aquarium Research Institute
   Moss Landing, CA 95039
@@ -1377,10 +1378,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.97 2007-07-03 17:23:46 caress Exp $
+RCS ID: $Id: README,v 5.98 2007-07-05 16:43:17 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.97  2007/07/03 17:23:46  caress
+Working on things...
+
 Revision 5.96  2007/06/18 01:23:03  caress
 Added MBeditviz.
 
