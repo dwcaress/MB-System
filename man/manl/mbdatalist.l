@@ -1,4 +1,4 @@
-.TH mbdatalist l "16 September 2005" "MB-System 5.0" "MB-System 5.0"
+.TH mbdatalist l "5 July 2007" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbdatalist\fP - parses recursive datalist files and outputs the
 complete list of data files, formats, and file weights.
@@ -7,7 +7,7 @@ complete list of data files, formats, and file weights.
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbdatalist\fP [\fB-F\fP\fIformat\fP \fB-I\fP\fIfilename\fP \fB-N -O -P -Q -R -U -Z -V -H\fP]
+\fBmbdatalist\fP [\fB-C\fP \fB-F\fP\fIformat\fP \fB-I\fP\fIfilename\fP \fB-N -O -P -Q -R -U -Z -V -H\fP]
 
 .SH DESCRIPTION
 \fBMBdatalist\fP is a utility for parsing datalist files. 
@@ -101,6 +101,13 @@ the datalist "datalist.mb-1" with the $PROCESSED flag on. So, in order to
 grid the processed bathymetry rather than the raw bathymetry, run \fBmbgrid\fP
 with "datalistp.mb-1" as the input rather than "datalist.mb-1".
 
+Finally, this program can be used to copy the swath files referenced in a
+datalist structure to a single directory and to create a datalist there
+(names "datalist.mb-1") that references those swath files. This is 
+accomplished using the \fI-C\fP option. The \fI-C\fP copy function will
+not be done if the \fI-N\fP, \fI-O\fP, or \fI-Q\fP options are specified,
+but is compatible with the \fI-P\fP, \fI-R\fP, and \fI-U\fP options.
+
 .SH AUTHORSHIP
 David W. Caress (caress@mbari.org)
 .br
@@ -111,6 +118,17 @@ Dale N. Chayes (dale@ldeo.columbia.edu)
   Lamont-Doherty Earth Observatory
 
 .SH OPTIONS
+.TP
+.B \-C
+.br
+Causes the swath files referenced in the input datalist structure to be 
+copied to the current directory and creates a datalist
+(names "datalist.mb-1") that references the copied swath files. 
+The copy function will not be done if the \fI-N\fP, \fI-O\fP, or \fI-Q\fP options are specified.
+If the \fI-P\fP, \fI-R\fP, and \fI-U\fP options are specified these
+functions will modify which swath files are copied. Any ancilliary files
+(e.g. *inf metadata files) will also be copied, but processed data
+files derived from the target copied files will not be copied.
 .TP
 .B \-F
 \fIformat\fP
@@ -321,3 +339,6 @@ yields:
 
 .SH BUGS
 No true bugs here, only distantly related arthropods... Yum.
+Seriously, it would be better if the copy function preserved
+the modification times of the copied swath files and ancilliary
+files. Copying of processed files should also be an option.
