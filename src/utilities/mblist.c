@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mblist.c	2/1/93
- *    $Id: mblist.c,v 5.22 2007-07-04 04:05:29 caress Exp $
+ *    $Id: mblist.c,v 5.23 2007-07-05 19:17:05 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -28,6 +28,9 @@
  *		in 1990.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.22  2007/07/04 04:05:29  caress
+ * Gordon Keith's mods.
+ *
  * Revision 5.21  2007/05/12 19:57:21  caress
  * Fixed array pointer initialization.
  *
@@ -349,7 +352,7 @@ int mb_get_raw_simrad2(int verbose, void *mbio_ptr,
 /* NaN value */
 double	NaN;
 
-static char rcs_id[] = "$Id: mblist.c,v 5.22 2007-07-04 04:05:29 caress Exp $";
+static char rcs_id[] = "$Id: mblist.c,v 5.23 2007-07-05 19:17:05 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
@@ -473,11 +476,11 @@ main (int argc, char **argv)
 	int	ns;
 	double	angle, depth, slope;
 	int	ndepths;
-	double	*depths;
-	double	*depthacrosstrack;
+	double	*depths = NULL;
+	double	*depthacrosstrack = NULL;
 	int	nslopes;
-	double	*slopes;
-	double	*slopeacrosstrack;
+	double	*slopes = NULL;
+	double	*slopeacrosstrack = NULL;
 
 	/* course calculation variables */
 	int	use_course = MB_NO;
@@ -2759,8 +2762,8 @@ main (int argc, char **argv)
 					    }
 					else
 					    {
-					    angle = RTD*(atan(bathacrosstrack[k] / bath[k]));
-					    printsimplevalue(verbose, output[i], angle, 0, 2, ascii, 
+					    angle = RTD*(atan(bathacrosstrack[k] / (bath[k] - sonardepth)));
+					    printsimplevalue(verbose, output[i], angle, 0, 3, ascii, 
 							    &invert_next_value, 
 							    &signflip_next_value, &error);
 					    }
@@ -2786,9 +2789,9 @@ main (int argc, char **argv)
 						nslopes,slopes,slopeacrosstrack,
 						bathacrosstrack[k],
 						&depth,&slope,&error);
-					    angle = RTD * (atan(bathacrosstrack[k] / bath[k]))
+					    angle = RTD * (atan(bathacrosstrack[k] / (bath[k] - sonardepth)))
 						+ slope;
-					    printsimplevalue(verbose, output[i], angle, 0, 2, ascii, 
+					    printsimplevalue(verbose, output[i], angle, 0, 3, ascii, 
 							    &invert_next_value, 
 							    &signflip_next_value, &error);
 					    }
@@ -2910,7 +2913,7 @@ main (int argc, char **argv)
 							    &signflip_next_value, &error);
 					break;
 				case 'R': /* roll */
-					printsimplevalue(verbose, output[i], roll, 5, 2, ascii, 
+					printsimplevalue(verbose, output[i], roll, 6, 3, ascii, 
 							    &invert_next_value, 
 							    &signflip_next_value, &error);
 					break;
@@ -3577,8 +3580,8 @@ main (int argc, char **argv)
 					    nslopes,slopes,slopeacrosstrack,
 					    ssacrosstrack[k],
 					    &depth,&slope,&error);
-					angle = RTD*(atan(ssacrosstrack[k] / depth));
-					printsimplevalue(verbose, output[i], angle, 0, 2, ascii, 
+					angle = RTD*(atan(ssacrosstrack[k] / (depth - sonardepth)));
+					printsimplevalue(verbose, output[i], angle, 0, 3, ascii, 
 							    &invert_next_value, 
 							    &signflip_next_value, &error);
 					break;
@@ -3588,9 +3591,9 @@ main (int argc, char **argv)
 					    nslopes,slopes,slopeacrosstrack,
 					    ssacrosstrack[k],
 					    &depth,&slope,&error);
-					angle = RTD * (atan(bathacrosstrack[k] / depth))
+					angle = RTD * (atan(bathacrosstrack[k] / (depth - sonardepth)))
 					    + slope;
-					printsimplevalue(verbose, output[i], angle, 0, 2, ascii, 
+					printsimplevalue(verbose, output[i], angle, 0, 3, ascii, 
 							    &invert_next_value, 
 							    &signflip_next_value, &error);
 					break;
@@ -3710,7 +3713,7 @@ main (int argc, char **argv)
 							    &signflip_next_value, &error);
 					break;
 				case 'R': /* roll */
-					printsimplevalue(verbose, output[i], roll, 5, 2, ascii, 
+					printsimplevalue(verbose, output[i], roll, 6, 3, ascii, 
 							    &invert_next_value, 
 							    &signflip_next_value, &error);
 					break;
