@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbeditviz_prog.c		5/1/2007
- *    $Id: mbeditviz_prog.c,v 5.1 2007-07-03 17:35:54 caress Exp $
+ *    $Id: mbeditviz_prog.c,v 5.2 2007-07-05 19:53:37 caress Exp $
  *
  *    Copyright (c) 2007 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	May 1, 2007
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2007/07/03 17:35:54  caress
+ * Working on MBeditviz.
+ *
  * Revision 5.0  2007/06/17 23:25:57  caress
  * Added NBeditviz.
  *
@@ -36,6 +39,8 @@
 #include <string.h>
 #include <ctype.h>
 #include <math.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 /* MBIO include files */
 #include "../../include/mb_status.h"
@@ -52,7 +57,7 @@
 #include "mbview.h"
 
 /* id variables */
-static char rcs_id[] = "$Id: mbeditviz_prog.c,v 5.1 2007-07-03 17:35:54 caress Exp $";
+static char rcs_id[] = "$Id: mbeditviz_prog.c,v 5.2 2007-07-05 19:53:37 caress Exp $";
 static char program_name[] = "MBeditviz";
 static char help_message[] = "MBeditviz is a bathymetry editor and patch test tool.";
 static char usage_message[] = "mbeditviz [-H -T -V]";
