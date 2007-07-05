@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbdatalist.c	10/10/2001
- *    $Id: mbdatalist.c,v 5.10 2006-01-06 18:19:58 caress Exp $
+ *    $Id: mbdatalist.c,v 5.11 2007-07-05 19:16:19 caress Exp $
  *
- *    Copyright (c) 2001, 2002, 2003 by
+ *    Copyright (c) 2001, 2002, 2003, 2007 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -21,6 +21,9 @@
  * Date:	October 10, 2001
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.10  2006/01/06 18:19:58  caress
+ * Working towards 5.0.8
+ *
  * Revision 5.9  2005/11/05 01:07:54  caress
  * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
  *
@@ -70,7 +73,7 @@
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbdatalist.c,v 5.10 2006-01-06 18:19:58 caress Exp $";
+	static char rcs_id[] = "$Id: mbdatalist.c,v 5.11 2007-07-05 19:16:19 caress Exp $";
 	static char program_name[] = "mbdatalist";
 	static char help_message[] =  "mbdatalist parses recursive datalist files and outputs the\ncomplete list of data files and formats. \nThe results are dumped to stdout.";
 	static char usage_message[] = "mbdatalist [-Fformat -Ifile -N -O -P -Q -Rw/e/s/n -U -Z -V -H]";
@@ -91,6 +94,7 @@ main (int argc, char **argv)
 	void	*datalist;
 	int	look_processed = MB_DATALIST_LOOK_UNSET;
 	int	look_bounds = MB_NO;
+	int	copyfiles = MB_NO;
 	int	file_in_bounds = MB_NO;
 	double	file_weight = 1.0;
 	int	format;
@@ -104,6 +108,8 @@ main (int argc, char **argv)
 	char	fileroot[MB_PATH_MAXLINE];
 	char	file[MB_PATH_MAXLINE];
 	char	pwd[MB_PATH_MAXLINE];
+	char	command[MB_PATH_MAXLINE];
+	char	*filename;
 	int	nfile = 0;
 	int	make_inf = MB_NO;
 	int	force_update = MB_NO;
@@ -129,9 +135,14 @@ main (int argc, char **argv)
 	strcpy (read_file, "datalist.mb-1");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhF:f:I:i:NnOoPpQqR:r:UuZz")) != -1)
+	while ((c = getopt(argc, argv, "VvHhCcF:f:I:i:NnOoPpQqR:r:UuZz")) != -1)
 	  switch (c) 
 		{
+		case 'C':
+		case 'c':
+			copyfiles = MB_YES;
+			flag++;
+			break;
 		case 'F':
 		case 'f':
 			sscanf (optarg,"%d", &format);
@@ -226,6 +237,7 @@ main (int argc, char **argv)
 		fprintf(output,"dbg2       file:           %s\n",read_file);
 		fprintf(output,"dbg2       format:         %d\n",format);
 		fprintf(output,"dbg2       look_processed: %d\n",look_processed);
+		fprintf(output,"dbg2       copyfiles:      %d\n",copyfiles);
 		fprintf(output,"dbg2       make_inf:       %d\n",make_inf);
 		fprintf(output,"dbg2       force_update:   %d\n",force_update);
 		fprintf(output,"dbg2       problem_report: %d\n",problem_report);
@@ -360,6 +372,38 @@ main (int argc, char **argv)
 				nproblemfiles++;
 		    	    nparproblemtot += nparproblem;
 		    	    ndataproblemtot += ndataproblem;
+			    }
+			else if (copyfiles == MB_YES)
+			    {
+			    /* check for mbinfo file if bounds checking enabled */
+			    if (look_bounds == MB_YES)
+				{
+				status = mb_check_info(verbose, file, lonflip, bounds, 
+					    &file_in_bounds, &error);
+				if (status == MB_FAILURE)
+				    {
+				    file_in_bounds = MB_YES;
+				    status = MB_SUCCESS;
+				    error = MB_ERROR_NO_ERROR;
+				    }
+				}
+				
+			    /* copy file if no bounds checking or in bounds */
+			    if (look_bounds == MB_NO || file_in_bounds == MB_YES)
+				{
+				fprintf(output, "Copying %s %d %f\n", file, format, file_weight);
+				sprintf(command, "cp %s* .", file);
+				system(command);
+				if ((filename = strrchr(file, '/')) != NULL)
+					filename++;
+				else
+					filename = file;
+				if (nfile == 1)
+					system("rm datalist.mb-1");
+			    	sprintf(command, "echo %s %d %f >> datalist.mb-1", 
+					filename, format, file_weight);
+				system(command);
+			    	}
 			    }
 			else
 			    {
