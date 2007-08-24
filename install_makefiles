@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	install_makefiles	5/20/94
-#    $Id: install_makefiles,v 5.28 2007-05-25 19:32:04 caress Exp $
+#    $Id: install_makefiles,v 5.29 2007-08-24 23:37:05 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 1996, 1997, 2001, 2002, 2003, 2005, 2006 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -41,8 +41,8 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #	MBSYSTEM_HOME	Absolute path to the directory containing
 #				this file.
 #	OS		Operating system (Recognized options are:
-#				DARWIN, LINUX, CYGWIN, SUN, IRIX, 
-#				SOLARIS, HPUX, LYNX, or OTHER).
+#				DARWIN, LINUX, CYGWIN, SUN, IRIX, IRIX64,
+#				SOLARIS, HPUX, LYNX, CYGWIN or OTHER).
 #	BYTESWAPPED	If set to "YES" will enable byte swapping
 #				of input and output binary data.
 #				Otherwise byte swapping is disabled.
@@ -99,7 +99,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 $MBSYSTEM_HOME = "/Users/caress/sandbox/mbsystem";
 $OS = "DARWIN";
 $CC = "cc";
-$BYTESWAPPED = "NO";
+$BYTESWAPPED = "YES";
 $GRAPHICAL = "YES";
 $MOTIFINCDIR = "/sw/include";
 $MOTIFLIBS = "-L/sw/lib -L/usr/X11R6/lib -lXm -lXt -lX11";
@@ -116,10 +116,13 @@ $LFLAGS = "-Wl -lm -bind_at_load";
 #--------------------------------------------------------------------
 #
 # Version:
-#   $Id: install_makefiles,v 5.28 2007-05-25 19:32:04 caress Exp $
+#   $Id: install_makefiles,v 5.29 2007-08-24 23:37:05 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.28  2007/05/25 19:32:04  caress
+#   Removed reference to libGLw
+#
 #   Revision 5.27  2006/12/15 21:42:49  caress
 #   Incremental CVS update.
 #
@@ -306,7 +309,7 @@ elsif ($preset eq "macosxfink")
 	$GRAPHICAL = "YES";
 	$MOTIFINCDIR = "$FINKPREFIX/include";
 	$MOTIFLIBS = "-L$FINKPREFIX/lib -L/usr/X11R6/lib -lXm -lXt -lX11";
-	$OPENGLLIBS = "-lGLw -lGLU -lGL";
+	$OPENGLLIBS = "-lGLU -lGL";
 	$GMTLIBDIR = "$FINKPREFIX/lib";
 	$GMTINCDIR = "$FINKPREFIX/include";
 	$NETCDFLIBDIR = "$FINKPREFIX/lib";
@@ -330,7 +333,7 @@ elsif ($preset eq "macosxusrlocal")
 	$GRAPHICAL = "YES";
 	$MOTIFINCDIR = "$FINKPREFIX/include";
 	$MOTIFLIBS = "-L$FINKPREFIX/lib -L/usr/X11R6/lib -lXm -lXt -lX11";
-	$OPENGLLIBS = "-lGLw -lGLU -lGL";
+	$OPENGLLIBS = "-lGLU -lGL";
 	$GMTLIBDIR = "$FINKPREFIX/lib";
 	$GMTINCDIR = "$FINKPREFIX/include";
 	$NETCDFLIBDIR = "$FINKPREFIX/lib";
@@ -353,7 +356,7 @@ elsif ($preset eq "CYGWIN")
 	$GRAPHICAL = "YES";
 	$MOTIFINCDIR = "/usr/X11R6/include/Xm";
 	$MOTIFLIBS = "-L/usr/X11R6/lib -lXm -lXt -lX11";
-	$OPENGLLIBS = "-lGLw -lGLU -lGL";
+	$OPENGLLIBS = "-lGLU -lGL";
 	$GMTLIBDIR = "/usr/local/gmt/lib";
 	$GMTINCDIR = "/usr/local/gmt/include";
 	$NETCDFLIBDIR = "/usr/local/netcdf/lib";
@@ -376,7 +379,7 @@ elsif ($preset eq "irixusrlocal")
 	$GRAPHICAL = "YES";
 	$MOTIFINCDIR = "/usr/include/Xm";
 	$MOTIFLIBS = "-lXm -lXt -lX11";
-	$OPENGLLIBS = "-lGLw -lGLU -lGL";
+	$OPENGLLIBS = "-lGLU -lGL";
 	$GMTLIBDIR = "/usr/local/gmt/src";
 	$GMTINCDIR = "/usr/local/gmt/src";
 	$NETCDFLIBDIR = "/usr/local/netcdf/lib";
@@ -474,7 +477,7 @@ else
 #	$GRAPHICAL = "YES";
 #	$MOTIFINCDIR = "/usr/dt/include/Xm";
 #	$MOTIFLIBS = "-L/usr/dt/lib -lXm -lXt -lX11";
-#	$OPENGLLIBS = "-lGLw -lGLU -lGL";
+#	$OPENGLLIBS = "-lGLU -lGL";
 #	$GMTLIBDIR = "/usr/local/GMT4.1/lib";
 #	$GMTINCDIR = "/usr/local/GMT4.1/include";
 #	$NETCDFLIBDIR = "/usr/local/netcdf-3.4/lib";
@@ -574,6 +577,25 @@ else
 
 # Program Name:
 $program_name = "install_makefiles";
+
+# check for recognized operating system
+if (!$OS)
+	{
+	$OS = "OTHER";
+	}
+elsif ($OS ne "IRIX"
+	&& $OS ne "IRIX64"
+	&& $OS ne "SOLARIS"
+	&& $OS ne "LINUX"
+	&& $OS ne "LYNX"
+	&& $OS ne "SUN"
+	&& $OS ne "HPUX"
+	&& $OS ne "DARWIN"
+	&& $OS ne "CYGWIN"
+	&& $OS ne "OTHER")
+	{
+	$OS = "OTHER";
+	}
 
 # add operating system to CFLAGS
 $CFLAGS = "$CFLAGS -D$OS";
