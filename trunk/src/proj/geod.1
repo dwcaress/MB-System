@@ -9,6 +9,7 @@ geod \- direct geodesic computations
 invgeod \- inverse geodesic computations
 .SH SYNOPSIS
 .B geod
+.B +ellps=<ellipse>
 [
 .B \-afFIlptwW
 [
@@ -19,6 +20,7 @@ invgeod \- inverse geodesic computations
 file[s]
 .br
 .B invgeod
+.B +ellps=<ellipse>
 [
 .B \-afFIlptwW
 [
@@ -87,7 +89,7 @@ is employed the fields will be constant width with leading zeroes.
 .TP
 .B \-p
 This option causes the azimuthal values to be output as unsigned
-numbers between 0 and 360\(de.
+DMS numbers between 0 and 360 degrees.  Also note -f.
 .PP
 The
 .B +args

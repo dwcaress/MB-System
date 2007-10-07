@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: pj_open_lib.c,v 5.4 2006-03-06 21:49:27 caress Exp $
+ * $Id: pj_open_lib.c,v 5.5 2007-10-07 20:05:48 caress Exp $
  *
  * Project:  PROJ.4
  * Purpose:  Implementation of pj_open_lib(), and pj_set_finder().  These
@@ -45,7 +45,7 @@
 #include <string.h>
 #include <errno.h>
 
-PJ_CVSID("$Id: pj_open_lib.c,v 5.4 2006-03-06 21:49:27 caress Exp $");
+PJ_CVSID("$Id: pj_open_lib.c,v 5.5 2007-10-07 20:05:48 caress Exp $");
 
 static const char *(*pj_finder)(const char *) = NULL;
 static int path_count = 0;

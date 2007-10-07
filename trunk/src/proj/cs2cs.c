@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: cs2cs.c,v 5.3 2006-03-06 21:49:27 caress Exp $
+ * $Id: cs2cs.c,v 5.4 2007-10-07 20:05:48 caress Exp $
  *
  * Project:  PROJ.4
  * Purpose:  Mainline program sort of like ``proj'' for converting between
@@ -29,6 +29,12 @@
  ******************************************************************************
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.10  2006/10/10 15:24:05  fwarmerdam
+ *  Increase MAX_LINE to 1000 per request from Dan Scheirer.
+ *
+ * Revision 1.9  2006/03/30 14:35:09  fwarmerdam
+ * bug 1145: avoid warnings on VC8.
+ *
  * Revision 1.8  2004/10/28 16:05:37  fwarmerdam
  * avoid using global variables from DLL
  *
@@ -54,16 +60,15 @@
  * New
  *
  */
-
+#include "projects.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
 #include <math.h>
-#include "projects.h"
 #include "emess.h"
 
-#define MAX_LINE 200
+#define MAX_LINE 1000
 #define MAX_PARGS 100
 
 static projPJ   fromProj, toProj;
