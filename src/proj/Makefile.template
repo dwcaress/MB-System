@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  7/16/2002
-#	$Id: Makefile.template,v 5.5 2006-03-06 21:49:27 caress Exp $
+#	$Id: Makefile.template,v 5.6 2007-10-07 20:05:48 caress Exp $
 #
 #     Copyright (c) 2002, 2003 by
 #     David W. Caress (caress@mbari.org)
@@ -16,6 +16,9 @@
 # Date:		July 16, 2002
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.5  2006/03/06 21:49:27  caress
+# Implemented changes suggested by Bob Courtney of the Geological Survey of Canada to support translating Reson data to GSF.
+#
 # Revision 5.4  2004/02/25 21:39:36  caress
 # Release 5.0.3
 #
@@ -206,8 +209,9 @@ $(LIBDIR)/libmbproj.a: \
 		pj_units.o \
 		pj_utils.o \
 		pj_zpoly1.o \
+		proj_mdist.o \
+		proj_rouss.o \
 		rtodms.o \
-		strtod.o \
 		vector1.o
 	$(ARCHIVE) $(LIBDIR)/libmbproj.a \
 		PJ_aea.o \
@@ -349,8 +353,9 @@ $(LIBDIR)/libmbproj.a: \
 		pj_units.o \
 		pj_utils.o \
 		pj_zpoly1.o \
+		proj_mdist.o \
+		proj_rouss.o \
 		rtodms.o \
-		strtod.o \
 		vector1.o
 	ranlib $(LIBDIR)/libmbproj.a
 
@@ -931,14 +936,18 @@ proj.o:	proj.c \
 		emess.h  geocent.h  geodesic.h \
 		nad_list.h  pj_list.h  proj_api.h  projects.h
 	$(CC) -c $(CFLAGS) -I. proj.c
+proj_mdist.o:	proj_mdist.c \
+		emess.h  geocent.h  geodesic.h \
+		nad_list.h  pj_list.h  proj_api.h  projects.h
+	$(CC) -c $(CFLAGS) -I. proj_mdist.c
+proj_rouss.o:	proj_rouss.c \
+		emess.h  geocent.h  geodesic.h \
+		nad_list.h  pj_list.h  proj_api.h  projects.h
+	$(CC) -c $(CFLAGS) -I. proj_rouss.c
 rtodms.o:	rtodms.c \
 		emess.h  geocent.h  geodesic.h \
 		nad_list.h  pj_list.h  proj_api.h  projects.h
 	$(CC) -c $(CFLAGS) -I. rtodms.c
-strtod.o:	strtod.c \
-		emess.h  geocent.h  geodesic.h \
-		nad_list.h  pj_list.h  proj_api.h  projects.h
-	$(CC) -c $(CFLAGS) -I. strtod.c
 vector1.o:	vector1.c \
 		emess.h  geocent.h  geodesic.h \
 		nad_list.h  pj_list.h  proj_api.h  projects.h

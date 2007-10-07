@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: PJ_krovak.c,v 5.1 2006-03-06 21:49:27 caress Exp $
+ * $Id: PJ_krovak.c,v 5.2 2007-10-07 20:05:48 caress Exp $
  *
  * Project:  PROJ.4
  * Purpose:  Implementation of the krovak (Krovak) projection.
@@ -30,6 +30,12 @@
  ******************************************************************************
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.6  2006/09/14 13:10:50  fwarmerdam
+ * Add +czech flag to control reversal of signs (bug 1133,147)
+ *
+ * Revision 1.5  2006/03/30 01:22:48  fwarmerdam
+ * Removed win32 only debug hack.
+ *
  * Revision 1.4  2002/12/15 22:31:04  warmerda
  * handle lon_0, k, and prime meridian properly
  *
@@ -49,7 +55,7 @@
 #include <string.h>
 #include <stdio.h>
 
-PJ_CVSID("$Id: PJ_krovak.c,v 5.1 2006-03-06 21:49:27 caress Exp $");	
+PJ_CVSID("$Id: PJ_krovak.c,v 5.2 2007-10-07 20:05:48 caress Exp $");	
 
 PROJ_HEAD(krovak, "Krovak") "\n\tPCyl., Sph.";
 
@@ -136,19 +142,11 @@ FORWARD(s_forward); /* spheroid */
 	xy.y = ro * cos(eps) / a;
 	xy.x = ro * sin(eps) / a;
 
-#ifdef DEBUG
-	strcpy(errmess,"a: ");
-	strcpy(tmp,"        ");
-	ltoa((long)(a*1000000000),tmp,10);
-	strcat(errmess,tmp);
-	strcat(errmess,"e2: ");
-	strcpy(tmp,"        ");
-	ltoa((long)(e2*1000000000),tmp,10);
-	strcat(errmess,tmp);
-
-	MessageBox(NULL, errmess, NULL, 0);
-#endif
-
+        if( !pj_param(P -> params, "tczech").i )
+	  {
+	    xy.y *= -1.0;
+	    xy.x *= -1.0;
+	  }
 
 	return (xy);
 }
@@ -198,6 +196,12 @@ INVERSE(s_inverse); /* spheroid */
 	xy0=xy.x;
 	xy.x=xy.y;
 	xy.y=xy0;
+
+        if( !pj_param(P -> params, "tczech").i )
+	  {
+	    xy.x *= -1.0;
+	    xy.y *= -1.0;
+	  }
 
 	ro = sqrt(xy.x * xy.x + xy.y * xy.y);
 	eps = atan2(xy.y, xy.x);

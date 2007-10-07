@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: proj_api.h,v 5.3 2006-03-06 21:49:27 caress Exp $
+ * $Id: proj_api.h,v 5.4 2007-10-07 20:05:48 caress Exp $
  *
  * Project:  PROJ.4
  * Purpose:  Public (application) include file for PROJ.4 API, and constants.
@@ -28,6 +28,9 @@
  ******************************************************************************
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.14  2006/04/20 04:19:59  fwarmerdam
+ * updated version
+ *
  * Revision 1.13  2004/10/30 02:33:47  fwarmerdam
  * Updated release version.
  *
@@ -83,7 +86,7 @@ extern "C" {
 #endif
 
 /* Try to update this every version! */
-#define PJ_VERSION 449
+#define PJ_VERSION 450
 
 extern char const pj_release[]; /* global release id string */
 

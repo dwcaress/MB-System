@@ -86,22 +86,6 @@ expected input from longitude-latitude or x-y to latitude-longitude or y-x.
 This options reverses the order of the
 output from x-y or longitude-latitude to y-x or latitude-longitude.
 .TP
-.BI \-m " mult"
-The cartesian data may be scaled by the
-.I mult
-parameter.
-When processing data in a forward projection mode the
-cartesian output values are multiplied by
-.I mult
-otherwise the input cartesian values are divided by
-.I mult
-before inverse projection.
-If the first two characters of
-.I mult
-are 1/ or 1: then the reciprocal value of
-.I mult
-is employed.
-.TP
 .BI \-f " format"
 .I Format
 is a
@@ -127,9 +111,6 @@ is employed the fields will be constant width and with leading zeroes.
 .B \-v
 causes a listing of cartographic control parameters tested for and
 used by the program to be printed prior to input data.
-Should not be used with the
-.B \-T
-option.
 .PP
 The
 .B +args
