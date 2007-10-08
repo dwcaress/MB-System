@@ -9,7 +9,7 @@ Version 5.0\fP
 .SH SYNOPSIS
 \fBmbm_route2mission\fP \fB-I\fP\fIroutefile\fP 
 [\fB-A\fP\fIaltitudemin/altitudeabort[/altitudedepthcom]\fP 
-\fB-B\fP\fIbehavior\fP \fB-D\fP\fIdepthmax/depthabort/depthdescent\fP 
+\fB-B\fP\fIbehavior\fP \fB-C\fP\fImissiontime\fP \fB-D\fP\fIdepthmax/depthabort/depthdescent\fP 
 \fB-F\fP\fIforwarddistance\fP \fB-G\fP\fIgpsmode\fP \fB-G\fP\fIapproachdepth\fP 
 \fB-M -N\fP \fB-O\fP\fImissionfile\fP 
 \fB-P\fP\fI[startlon/startlat | startdistance]\fP 
@@ -118,6 +118,13 @@ for the approach to each waypoint. If \fIbehavior\fP = 1, then the AUV uses
 the WayPointDepth behavior in which each mission segment has both a starting
 and an ending depth specified, and the vehicle is commanded to fly a depth
 profile that is a linear ramp between the two depths. Default: \fIbehavior\fP = 1;
+.TP
+.B \-C
+\fImissiontime\fP
+.br
+Sets the maximum time allowed for the AUV mission. If the \fImissiontime\fP is
+exceeded, the AUV will transition to it's internal abort plan. 
+Default: mission abort time calculated from mission parameters.
 .TP
 .B \-D
 \fIdepthmax/depthabort/depthdescent\fP

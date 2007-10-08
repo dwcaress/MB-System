@@ -1,4 +1,4 @@
-.TH mbareaclean l "31 January 2006" "MB-System 5.0" "MB-System 5.0"
+.TH mbareaclean l "15 August 2007" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbareaclean\fP - Tool to automatically flag bad beams in swath 
 sonar bathymetry data within a specified area.
@@ -16,8 +16,9 @@ Version 5.0
 \fBmbareaclean\fP identifies and flags artifacts in swath sonar 
 bathymetry data within a specified area of interest. 
 The input data are one swath file or a datalist referencing multiple
-swath files. An area is specified in longitude and latitude bounds,
-along with a bin size in meters. The area is divided into a grid with
+swath files. The user may specify the work area in longitude and latitude 
+bounds, along with a bin size in meters. If these are not specified, the
+program will attempt to set useful values. The area is divided into a grid with
 square cells of the specified bin size. As the data are read, each of
 the soundings that fall within one of the bins is stored. Once all of
 data are read, one or more statistical tests are performed on the soundings
@@ -175,7 +176,8 @@ Sets the longitude and latitude bounds within which swath sonar
 data will be read, binned, and tested. Soundings lying outside these
 bounds will be ignored. 
 .br
-Default: None. This is a mandatory argument.
+Default: The program will determine and use a square area encompassing
+all of the data contained in the input files.
 .TP
 .B \-S
 \fIbinsize\fP
@@ -184,7 +186,8 @@ Sets the size of the bins to be used in meters. The area specified
 with the \fB-R\fP option will be broken into a grid with cells that
 are roughly \fIbinsize\fP meters east-west and north-south.
 .br
-Default: None. This is a mandatory argument.
+Default: A binsize equal to 0.2 times the maximum sonar altitude
+will be used.
 .TP
 .B \-T
 \fIdetect_type\fP
@@ -220,7 +223,7 @@ of the sonar altitude, and the minimum number of sounding required for
 filtering is 10. The results look like:
 
  Program MBAREACLEAN
- Version $Id: mbareaclean.l,v 5.4 2006-02-01 07:36:08 caress Exp $
+ Version $Id: mbareaclean.l,v 5.5 2007-10-08 16:55:56 caress Exp $
  MB-system Version 5.0.beta29
  Area of interest:
       Minimum Longitude: -122.425560 Maximum Longitude: -122.419740

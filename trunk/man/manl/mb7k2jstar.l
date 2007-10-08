@@ -1,4 +1,4 @@
-.TH mb7k2jstar l "7 June 2005" "MB-System 5.0" "MB-System 5.0"
+.TH mb7k2jstar l "15 August 2007" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmb7k2jstar\fP - extracts subbottom profiler and/or sidescan sonar
 data from Reson 7k format data files into Edgetech Jstar format data files.
@@ -7,8 +7,10 @@ data from Reson 7k format data files into Edgetech Jstar format data files.
 Version 5.0
 
 .SH SYNOPSIS
-\fBmb7k2jstar\fP [\fB-I\fIfile \fB-A\fItype\fP \fB-C\fP 
-\fB-F\fIformat\fP \fB-O\fIoutfile\fP \fB-H -V\fP]
+\fBmb7k2jstar\fP [\fB-I\fIfile \fB-A\fItype\fP 
+\fB-B\fIbottompickmode/bottompickthreshold\fP \fB-C\fP 
+\fB-F\fIformat\fP \fB-L\fP\fIstartline/lineroot\fP 
+\fB-M -O\fIoutfile\fP \fB-R\fIroutefile\fP \fB-X -H -V\fP]
 
 .SH DESCRIPTION
 \fBMB7k2jstar\fP is a utility that extracts Edgetech subbottom 
@@ -23,6 +25,18 @@ input files or on datalists. By default there will be a separate
 output file for every input file, but if the \fB-O\fP option
 is used to specify an output file, data from all input files will
 be directed to that single output file.
+
+The extracted Jstar data file(s) can be organized three ways. If the \fB-O\fP
+option is used to specify a single Jstar output file, then all of the 
+Jstar data will be output to that single file. If the \fB-R\fP option is
+used to specify a survey route file that includes the waypoints covered
+while collecting the data file(s) referenced by \fB-I\fP\fIfile\fP, then
+the output Jstar data will be broken up by the sequential lines defined by
+the waypoints. In this case each output Jstar file will be named using the 
+line root name specified by \fB-L\fP\fIstartline/lineroot\fP with a sequential line
+number starting from \fIstartline\fP. If neither the \fB-O\fP or \fB-L\fP 
+options are used, each input swath file will have a corresponding Jstar output
+file.
 
 When the user specifies that all Edgetech sidescan and subbottom
 data be extracted but does not specify the output file name, the
@@ -54,6 +68,21 @@ is given, then any high frequency sidescan records are extracted.
 The \fB-A\fP\fI3\fP option causes subbottom profiler records to
 be extracted. Default: All Edgetech sidescan and subbottom
 profiler records are extracted.
+.TP
+.B \-B
+\fIbottompickmode/bottompickthreshold\fP
+.br
+This option sets the source of the sonar first arrival time used for
+laying out sidescan on the seafloor. If \fIbottompickmode\fP = 1,
+then \fBmb7k2jstar\fP will use the altitude value associated with
+platform navigation. If \fIbottompickmode\fP = 2, then \fBmb7k2jstar\fP 
+will extract the first arrival time from multibeam bathymetry in the
+7k data stream. If \fIbottompickmode\fP = 3, then \fBmb7k2jstar\fP 
+will pick the first arrival time in the sidescan sonar data by looking
+for the first sample with an amplitude > \fIbottompickthreshold\fP times the
+maximum amplitude in the trace. 
+Default: fIbottompickmode\fP = 1.
+.TP
 .B \-C
 .br
 This option causes  \fBmb7k2jstar\fP to print out any comment records
@@ -89,6 +118,20 @@ data file should be followed by a data format identifier, e.g.:
 This program only reads Reson 7k format data files (\fBMBIO\fP
 format 88).
 .TP
+.B \-L
+\fIstartline/lineroot\fP
+.br
+This option sets the starting line number and the output filename root
+used when \fB-R\fP is specified so that data are output according
+to planned survey lines. Default: \fIstartline\fP = 1; \fIlineroot\fP = "jstar".
+.TP
+.B \-M
+.br
+This option causes \fBmb7k2jstar\fP to omit data during turns when
+extracting into line files according to a specified set of waypoints
+(\fB-R\fP option). The traces will not be output until the heading is
+within 15 degrees of the next survey line's bearing.
+.TP
 .B \-O
 .br
 This option sets the output Edgetech Jstar (\fBMBIO\fP format 132/133) format file path. 
@@ -100,9 +143,26 @@ to the output, ".mb132" is used when the low frequency sidescan records are extr
 and ".mb133" is used when the high frequency sidescan records are extracted. The record
 types to be extracted are set using the \fB-A\fP option.
 .TP
+.B \-R
+\fIroutefile\fP
+.br
+This option specifies an \fBmbgrdviz\fP route file containing the intended
+waypoints of the survey. If \fIroutefile\fP is specified, \fBmb7k2jstar\fP
+will output Jstar data in files corresponding to the planned survey lines. 
+The output Jstar file names will be based on \fIlineroot\fP and will include 
+the line number starting with \fIstarline\fP, both of which are specified
+using the \fB-L\fP options.  If neither \fB-O\fP nore \fB-R\fP are invoked,
+the output Jstar filename (or files if a datalist is being processed) will
+be the input swath filename with an appropriate suffix appended (".jsf" for 
+mixed Jstar files, ".mb132" for low frequency sidescan only files, and ".mb133" 
+for high frequency sidescan only files).
+.TP
 .B \-V
 This option increases the verbosity of \fBmb7k2jstar\fP, causing it
 to print out messages regarding its progress to stdout.
+.TP
+.B \-X
+This option switches port and starboard sidescan channels.
 
 .SH EXAMPLES
 Suppose that one has collected a Reson 7k datafile incorporating 
