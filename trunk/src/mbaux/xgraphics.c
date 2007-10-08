@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	xgraphics.c	8/3/94
- *    $Id: xgraphics.c,v 5.4 2006-01-24 19:17:13 caress Exp $
+ *    $Id: xgraphics.c,v 5.5 2007-10-08 05:48:26 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1999, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	August 3, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2006/01/24 19:17:13  caress
+ * Version 5.0.8 beta.
+ *
  * Revision 5.3  2006/01/11 07:33:01  caress
  * Working towards 5.0.8
  *
@@ -95,6 +98,28 @@ struct xg_graphic
 	XFontStruct	*font_info;	/* XFontStruct pointer */
 	};
 
+int xg_init(Display *display, Window can_xid, 
+		int *can_bounds, char *fontname);
+void xg_free(int xgid);
+void xg_drawpoint(int xgid, int x, int y, unsigned int pixel, int style);
+void xg_drawline(int xgid, int x1, int y1, int x2, int y2, 
+		unsigned int pixel, int style);
+void xg_drawrectangle(int xgid, int x, int y, int width, int height, 
+		unsigned int pixel, int style);
+void xg_drawtriangle(int xgid, 
+		int x1, int y1, int x2, int y2, int x3, int y3, 
+		unsigned int pixel, int style);
+void xg_fillrectangle(int xgid, int x, int y, int width, int height, 
+		unsigned int pixel, int style);
+void xg_filltriangle(int xgid, 
+		int x1, int y1, int x2, int y2, int x3, int y3, 
+		unsigned int pixel, int style);
+void xg_drawstring(int xgid, int x, int y, char *string, 
+		unsigned int pixel, int style);
+void xg_justify(int xgid, char *string, 
+		int *width, int *ascent, int *descent);
+void xg_setclip(int xgid, int x, int y, int width, int height);
+
 /**********************************************************************
  *	XG_INIT
  *	- initializes plotting variables, the colortable, and the GC
@@ -102,7 +127,7 @@ struct xg_graphic
 int xg_init(Display *display, Window can_xid, 
 		int *can_bounds, char *fontname)
 {
-static char rcs_id[]="$Id: xgraphics.c,v 5.4 2006-01-24 19:17:13 caress Exp $";
+static char rcs_id[]="$Id: xgraphics.c,v 5.5 2007-10-08 05:48:26 caress Exp $";
 	/* local variables */
 	struct xg_graphic *graphic;
 	XGCValues gc_val;
