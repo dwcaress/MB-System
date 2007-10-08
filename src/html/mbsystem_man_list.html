@@ -42,10 +42,9 @@ arbitrary text lists of values from MBARI AUV mission log files.</li>
   <li> <a href="mbauvnavusbl.html">mbauvnavusbl</a>: Merge inertial
 and surface tracking navigation for
 submerged sonar platforms (e.g. ROVs and AUVs).</li>
-  <li> <a href="mbbackangle.html">mbbackangle</a>: Generates an ".ssc"
-or
-sidescan correction file by calculating average sidescan amplitudes
-versus the seafloor
+  <li> <a href="mbbackangle.html">mbbackangle</a>: Generates corrections
+for sidescan and/or amplitude data by calculating average amplitudes
+as a function of the seafloor
 grazing angle.</li>
   <li> <a href="mbbackangleold.html">mbbackangleold</a>: Old tool that
 generates a table of the average
@@ -203,6 +202,10 @@ calculations.</li>
   <li> <a href="mb7k2jstar.html">mb7k2jstar</a>: Extract Jstar format
 (format 132) sidescan and subbottom data from Reson 7k (format 88) data
 files.</li>
+  <li> <a href="mb7k2ss.html">mb7k2ss</a>: mb7k2ss extracts Edgetech 
+sidescan sonar data from Reson 7k format data, bins and lays the sidescan 
+onto the seafloor, and outputs files in the MBF_MBLDEOIH formst (MBIO 
+format id 71).</li>
   <li> <a href="mb7kpreprocess.html">mb7kpreprocess</a>: Preprocess
 Reson 7k data (format 88), including applying time lag and biases to
 attitude and navigation data.</li>
@@ -303,7 +306,7 @@ and writes a shellscript which will generate GMT plot of the data.</li>
 </ul>
 <center>
 <p><br>
-Last Updated: $Date: 2006-11-26 09:38:13 $ $Revision: 5.18 $</p>
+Last Updated: $Date: 2007-10-08 16:52:33 $ $Revision: 5.19 $</p>
 </center>
 <p>
 </p>

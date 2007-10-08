@@ -1,4 +1,4 @@
-.TH mbmosaic l "13 November 2002" "MB-System 5.0" "MB-System 5.0"
+.TH mbmosaic l "15 August 2007" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbmosaic\fP - Mosaic amplitude or sidescan data 
 from swath mapping sonar data files.
@@ -33,18 +33,19 @@ or which are dominantly from a particular look azimuth
 (e.g. construct an east-looking mosaic by specifying a 
 preferred look azimuth of 90 degrees).
 
-The user must specify the bounds of the region to be 
-mosaiced (\fB-R\fP), the dimensions (\fB-D\fP) or node 
-spacing \fB-E\fP of the mosaic, a file containing a list of 
-the data files to be used and their data formats (\fB-I\fP), 
-and a character string to be used as the root of the
-output filenames (\fB-O\fP).  The user can also specify the 
-type of the input data (\fB-A\fP), the range of allowable 
-sample priorities used in the mosaicing (\fB-F\fP), the 
-preferred look azimuth (\fB-U\fP), the 
-maximum distance from data points that the spline 
-interpolation is used (\fB-C\fP), the format of the output 
-files, and other parameters.
+The user must specify a file containing a list of the data files to 
+be used and their data formats (\fB-I\fP), and a character string 
+to be used as the root of the output filenames (\fB-O\fP). The user 
+may specify the bounds of the region to be gridded (\fB-R\fP), and 
+either the dimensions (\fB-D\fP) or node spacing \fB-E\fP of the grid, 
+If the bounds and grid dimensions (or spacing) are not specified, the
+program will select the region encompassing all of the data in the
+input files and a grid spacing equivalent to 0.02 times the maximum
+sonar altitude. The user can also specify the  type of the input 
+data (\fB-A\fP), the range of allowable sample priorities used in 
+the mosaicing (\fB-F\fP), the preferred look azimuth (\fB-U\fP), the 
+maximum distance from data points that the spline interpolation is 
+used (\fB-C\fP), the format of the output files, and other parameters.
 
 By default, \fBmbmosaic\fP generates mosiacs in Geographic coordinates,
 meaning that position is defined in longitude and latitude using
@@ -250,6 +251,9 @@ the grid bounds as specified. Appending an ! to the end of
 the \fB-E\fP arguments forces \fBmbmosaic\fP to use the
 exact grid cell spacing values specified by adjusting the 
 grid bounds.
+Default: If neither the \fB-E\fP or \fB-D\P options are specified,
+the program sets the grid cell spacing to be 0.02 times the maximum 
+sonar altitude in the input files.
 .TP
 .B \-F
 \fIpriority_range\fP
@@ -476,6 +480,9 @@ will be calculated from the grid bounds and spacing. In these
 circumstances rounding errors will usually require that the eastern
 and northern bounds be adjusted to fit exactly with the 
 grid dimensions and spacing.
+Default: If the \fB-R\fP option is not specified, the program will set
+the grid bounds to be the area encompassing all of the data in the
+input files.
 .TP
 .B \-S
 \fIspeed\fP
@@ -634,7 +641,7 @@ the mosaic to be filled in through spine interpolation .
 The output looks like:
  
  Program mbmosaic
- Version $Id: mbmosaic.l,v 5.7 2006-02-01 07:36:08 caress Exp $
+ Version $Id: mbmosaic.l,v 5.8 2007-10-08 16:55:56 caress Exp $
  MB-system Version 4.5
 
  MBMOSAIC Parameters:

@@ -1,4 +1,4 @@
-.TH mblist l9 "1 September 2006" "MB-System 5.0" "MB-System 5.0"
+.TH mblist l9 "19 September 2007" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmblist\fP - List data in swath data files.
 
@@ -9,7 +9,7 @@ Version 5.0
 \fBmblist\fP [\fB-A\fP \fB-B\fP\fIyr/mo/da/hr/mn/sc\fP 
 \fB-C\fP 
 \fB-D\fP\fIdumpmode\fP 
-\fB-E\fP\fIyr/mo/da/hr/mn/sc\fP \fB-F\fP\fIformat\fP 
+\fB-E\fP\fIyr/mo/da/hr/mn/sc\fP \fB-F\fP\fIformat\fP \fB-G\fP\fIdelimiter\fP
 \fB-H\fP \fB-I\fP\fIinfilename\fP 
 \fB-L\fP\fIlonflip\fP \fB-M\fP\fIstart_beam/end_beam\fP 
 \fB-N\fP\fIstart_pixel/end_pixel\fP 
@@ -25,6 +25,7 @@ Version 5.0
 data file or files to stdout. By default, \fBmblist\fP 
 produces ASCII files in
 spreadsheet style, with data columns separated by tabs. Alternatively,
+other column delimiters can be used (\fB-G\fP option), or
 the output can be binary, with each field represented 
 as a double precision float (\fB-A\fP option). 
 Output can also be in netCDF CDL (\fB-C\fP option) format,
@@ -70,7 +71,8 @@ output options cannot be represented as single binary floats (e.g.
 time strings and longitude or latitude broken into degrees
 and minutes. These values are output as multiple fields as
 appropriate.
-Default: ASCII output with fields separated by tabs.
+Default: ASCII output with fields separated by tabs, or by another
+delimiter specified with the \fB-G\fP option.
 .TP
 .B \-B
 \fIyr/mo/da/hr/mn/sc\fP
@@ -143,6 +145,12 @@ This program uses the \fBMBIO\fP library and will read any swath
 format supported by \fBMBIO\fP. A list of the swath data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page. Default: \fIformat\fP = 11.
+.TP
+.B \-G
+\fIdelimiter\fP
+.br
+Sets the character(s) used to separate output fields when ascii
+columns are output. Default: tabs are used as delimiters.
 .TP
 .B \-H
 This "help" flag cause the program to print out a description

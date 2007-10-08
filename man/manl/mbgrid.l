@@ -1,4 +1,4 @@
-.TH mbgrid l "19 January 2006" "MB-System 5.0" "MB-System 5.0"
+.TH mbgrid l "15 August 2007" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbgrid\fP - Grid bathymetry, amplitude, or sidescan data 
 from swath sonar data files.
@@ -26,17 +26,19 @@ The gridding algorithms include gaussian weighted average,
 median filter, minimum filter (use minimum value in grid bin), and
 maximum filter (use maximum value in grid bin).
 
-The user must specify the bounds of the region to be gridded (\fB-R\fP), 
-the dimensions (\fB-D\fP) or node spacing \fB-E\fP of the grid, 
-a file containing a 
-list of the data files to be used and their data formats (\fB-I\fP), 
-and a character string to be used as the root of the
-output filenames (\fB-O\fP).  The user can also specify the type of the
+The user must specify a file containing a list of the data files to 
+be used and their data formats (\fB-I\fP), and a character string 
+to be used as the root of the output filenames (\fB-O\fP). The user 
+may specify the bounds of the region to be gridded (\fB-R\fP), and 
+either the dimensions (\fB-D\fP) or node spacing \fB-E\fP of the grid, 
+If the bounds and grid dimensions (or spacing) are not specified, the
+program will select the region encompassing all of the data in the
+input files and a grid spacing equivalent to 0.02 times the maximum
+sonar altitude. The user can also specify the type of the
 input data (\fB-A\fP), the width of the gaussian filter used for 
 weighted average gridding (\fB-W\fP), the maximum distance from 
-data points that the spline 
-interpolation is used (\fB-C\fP), the format of the output files, and
-other parameters.
+data points that the spline interpolation is used (\fB-C\fP), the 
+format of the output files, and other parameters.
 
 By default, \fBmbgrid\fP generates grids in Geographic coordinates,
 meaning that position is defined in longitude and latitude using
@@ -307,6 +309,9 @@ the grid bounds as specified. Appending an ! to the end of
 the \fB-E\fP arguments forces \fBmbgrid\fP to use the
 exact grid cell spacing values specified by adjusting the 
 grid bounds.
+Default: If neither the \fB-E\fP or \fB-D\P options are specified,
+the program sets the grid cell spacing to be 0.02 times the maximum 
+sonar altitude in the input files.
 .TP
 .B \-F
 \fImode\fP
@@ -560,6 +565,9 @@ will be calculated from the grid bounds and spacing. In these
 circumstances rounding errors will usually require that the eastern
 and northern bounds be adjusted to fit exactly with the 
 grid dimensions and spacing.
+Default: If the \fB-R\fP option is not specified, the program will set
+the grid bounds to be the area encompassing all of the data in the
+input files.
 .TP
 .B \-S
 \fIspeed\fP
@@ -643,7 +651,7 @@ will be filled in through spine interpolation even in the areas
 not covered by data. The output looks like:
  
  Program MBGRID
- Version $Id: mbgrid.l,v 5.12 2006-03-06 21:57:21 caress Exp $
+ Version $Id: mbgrid.l,v 5.13 2007-10-08 16:55:56 caress Exp $
  MB-system Version 4.5
  
  MBGRID Parameters:

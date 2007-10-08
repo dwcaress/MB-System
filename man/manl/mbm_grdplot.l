@@ -1,4 +1,4 @@
-.TH mbm_grdplot l "7 November 2005" "MB-System 5.0" "MB-System 5.0"
+.TH mbm_grdplot l "14 September 2007" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbm_grdplot\fP - Create an executable shellscript which will generate
 a GMT map of gridded data in a GMT grd file.
@@ -947,6 +947,14 @@ The supported page sizes are:
           C5   162.6 x  228.6 mm  ( 6.40 x  9.00 in.)
           C6   114.3 x  162.6 mm  ( 4.50 x  6.40 in.)
           C7    81.3 x  114.3 mm  ( 3.20 x  4.50 in.)
+
+	  MB-System large format sizes:
+          m1  1371.6 x 1828.8 mm  (54.00 x 72.00 in.)
+          m2  1371.6 x 2133.6 mm  (54.00 x 84.00 in.)
+          m3  1371.6 x 2438.4 mm  (54.00 x 96.00 in.)
+          m4  1524.0 x 1828.8 mm  (54.00 x 72.00 in.)
+          m5  1524.0 x 2133.6 mm  (54.00 x 84.00 in.)
+          m6  1524.0 x 2438.4 mm  (54.00 x 96.00 in.)
 
 The default page size is A.
 .TP
