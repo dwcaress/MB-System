@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrid.c	5/2/94
- *    $Id: surfunc.c,v 4.3 2006-08-09 22:41:27 caress Exp $
+ *    $Id: surfunc.c,v 5.0 2007-10-08 17:04:13 caress Exp $
  *
  *    Inclusion in MB-System:
  *    Copyright (c) 1994 by 
@@ -55,6 +55,9 @@
  * Date:	May 2, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 4.3  2006/08/09 22:41:27  caress
+ * Fixed programs that read or write grids so that they do not use the GMT_begin() function; these programs will now work when GMT is built in the default fashion, when GMT is built in the default fashion, with "advisory file locking" enabled.
+ *
  * Revision 4.2  1994/10/21 13:02:31  caress
  * Release V4.0
  *

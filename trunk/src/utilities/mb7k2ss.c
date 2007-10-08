@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb7k2ss.c		8/15/2007
- *    $Id: mb7k2ss.c,v 1.1 2007-10-08 16:51:01 caress Exp $
+ *    $Id: mb7k2ss.c,v 5.0 2007-10-08 17:04:13 caress Exp $
  *
  *    Copyright (c) 2007 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  *              R/V Atlantis, Axial Seamount
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.1  2007/10/08 16:51:01  caress
+ * Initial version of a program to extract Edgetech sidescan from MBARI Mapping AUV data into format 71.
+ *
  *
  *
  */
@@ -127,7 +130,7 @@ int mb7k2ss_intersect_grid(int verbose, double navlon, double navlat, double alt
 					struct mb7k2ss_grid_struct *grid,
 					double	 *range, int *error);
 
-static char rcs_id[] = "$Id: mb7k2ss.c,v 1.1 2007-10-08 16:51:01 caress Exp $";
+static char rcs_id[] = "$Id: mb7k2ss.c,v 5.0 2007-10-08 17:04:13 caress Exp $";
 static char program_name[] = "mb7k2ss";
 static int	pargc;
 static char	**pargv;
