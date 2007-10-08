@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcut.c	1/26/95
  *
- *    $Id: mbcut.c,v 5.6 2006-09-11 18:55:54 caress Exp $
+ *    $Id: mbcut.c,v 5.7 2007-10-08 16:48:07 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 2000, 2003, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,10 @@
  * Date:	January 26, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2006/09/11 18:55:54  caress
+ * Changes during Western Flyer and Thomas Thompson cruises, August-September
+ * 2006.
+ *
  * Revision 5.5  2006/01/18 15:17:00  caress
  * Added stdlib.h include.
  *
@@ -110,7 +114,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbcut.c,v 5.6 2006-09-11 18:55:54 caress Exp $";
+	static char rcs_id[] = "$Id: mbcut.c,v 5.7 2007-10-08 16:48:07 caress Exp $";
 	static char program_name[] = "mbcut";
 	static char help_message[] = 
 "MBCUT removes swath data values that lie outside ranges\n\t\
@@ -718,8 +722,8 @@ The default input and output streams are stdin and stdout.";
 		    /* now apply flags */
 		    for (i=0;i<pixels_ss;i++)
 			{
-			if (ssflag[i] == MB_NO && ss[i] > 0.0)
-			    ss[i] = 0.0;
+			if (ssflag[i] == MB_NO && ss[i] > MB_SIDESCAN_NULL)
+			    ss[i] = MB_SIDESCAN_NULL;
 			}		    
 		    }
 

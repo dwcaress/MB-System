@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsegygrid.c	6/12/2004
- *    $Id: mbsegygrid.c,v 5.13 2006-12-15 21:42:49 caress Exp $
+ *    $Id: mbsegygrid.c,v 5.14 2007-10-08 16:48:07 caress Exp $
  *
  *    Copyright (c) 2004, 2005, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	June 12, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.13  2006/12/15 21:42:49  caress
+ * Incremental CVS update.
+ *
  * Revision 5.12  2006/08/09 22:41:27  caress
  * Fixed programs that read or write grids so that they do not use the GMT_begin() function; these programs will now work when GMT is built in the default fashion, when GMT is built in the default fashion, with "advisory file locking" enabled.
  *
@@ -112,7 +115,7 @@ char	*getenv();
 	stderr if verbose > 1) */
 FILE	*outfp;
 
-static char rcs_id[] = "$Id: mbsegygrid.c,v 5.13 2006-12-15 21:42:49 caress Exp $";
+static char rcs_id[] = "$Id: mbsegygrid.c,v 5.14 2007-10-08 16:48:07 caress Exp $";
 static char program_name[] = "MBsegygrid";
 static char help_message[] =  "MBsegygrid grids trace data from segy data files.";
 static char usage_message[] = "MBsegygrid -Ifile -Oroot [-Ashotscale/timescale \n\
@@ -376,6 +379,9 @@ main (int argc, char **argv)
 			tracemode = sinftracemode;
 			tracestart = sinftracestart;
 			traceend = sinftraceend;
+			}
+		if (chanend < 1 || chanend < chanstart)
+			{
 			chanstart = sinfchanstart;
 			chanend = sinfchanend;
 			}
@@ -415,7 +421,7 @@ main (int argc, char **argv)
 	/* calculate implied grid parameters */
 	strcpy(gridfile,fileroot);
 	strcat(gridfile,".grd");
-	if (chanend > chanstart)
+	if (chanend >= chanstart)
 		ntraces = (traceend - tracestart + 1) * (chanend - chanstart + 1);
 	else
 		ntraces = traceend - tracestart + 1;
@@ -532,7 +538,7 @@ main (int argc, char **argv)
 					tracenum = traceheader.rp_num;
 					channum = traceheader.rp_tr;
 					}
-				if (chanend > chanstart)
+				if (chanend >= chanstart)
 					{
 					tracecount = (tracenum - tracestart) * (chanend - chanstart + 1)
 							+ (channum - chanstart);
@@ -574,7 +580,7 @@ main (int argc, char **argv)
 				if (tracenum < tracestart 
 					|| tracenum > traceend)
 					traceok = MB_NO;
-				else if (chanend > chanstart
+				else if (chanend >= chanstart
 						&& (channum < chanstart
 							|| channum > chanend))
 					traceok = MB_NO;

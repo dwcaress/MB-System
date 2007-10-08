@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbinfo.c	2/1/93
- *    $Id: mbinfo.c,v 5.24 2006-02-03 21:10:39 caress Exp $
+ *    $Id: mbinfo.c,v 5.25 2007-10-08 16:48:07 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -26,6 +26,9 @@
  * Date:	February 1, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.24  2006/02/03 21:10:39  caress
+ * Working on supporting water column datagrams in Simrad formats.
+ *
  * Revision 5.23  2006/01/20 19:34:48  caress
  * Working towards 5.0.8
  *
@@ -228,7 +231,7 @@ struct ping
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbinfo.c,v 5.24 2006-02-03 21:10:39 caress Exp $";
+	static char rcs_id[] = "$Id: mbinfo.c,v 5.25 2007-10-08 16:48:07 caress Exp $";
 	static char program_name[] = "MBINFO";
 	static char help_message[] =  "MBINFO reads a swath sonar data file and outputs \nsome basic statistics.  If pings are averaged (pings > 2) \nMBINFO estimates the variance for each of the swath \nbeams by reading a set number of pings (>2) and then finding \nthe variance of the detrended values for each beam. \nThe results are dumped to stdout.";
 	static char usage_message[] = "mbinfo [-Byr/mo/da/hr/mn/sc -C -Eyr/mo/da/hr/mn/sc -Fformat -Ifile -Llonflip -Mnx/ny -N -Ppings -Rw/e/s/n -Sspeed -V -H]";
@@ -704,7 +707,6 @@ main (int argc, char **argv)
 	done = MB_NO;
 	while (done == MB_NO)
 	{
-
 	/* open file list */
 	if (read_datalist == MB_YES)
 	    {
@@ -952,7 +954,7 @@ main (int argc, char **argv)
 				datacur->bathlon,datacur->bathlat,
 				datacur->ss,datacur->sslon,datacur->sslat,
 				comment,&error);
-				
+
 			/* use local pointers for convenience - do not set these before the
 				mb_read call because registered arrays can be dynamically
 				reallocated during mb_read, mb_get, and mb_get_all calls */
@@ -1393,7 +1395,7 @@ main (int argc, char **argv)
 							}
 				if (beginss == MB_NO && pixels_ss > 0)
 					for (i=0;i<pixels_ss;i++)
-						if (ss[i] > 0.0)
+						if (ss[i] > MB_SIDESCAN_NULL)
 							{
 							ssmin = ss[i];
 							ssmax = ss[i];
@@ -1453,7 +1455,7 @@ main (int argc, char **argv)
 					}
 				for (i=0;i<pixels_ss;i++)
 					{
-					if (ss[i] > 0.0)
+					if (ss[i] > MB_SIDESCAN_NULL)
 						{
 						if (good_nav == MB_YES && beginnav == MB_YES)
 							{
@@ -1477,7 +1479,9 @@ main (int argc, char **argv)
 				}
 				
 			/* update coverage mask */
-			if (pass == 1 && coverage_mask == MB_YES)
+			if (pass == 1 && coverage_mask == MB_YES
+				&& (error == MB_ERROR_NO_ERROR 
+				    || error == MB_ERROR_TIME_GAP))
 			    {
 			    ix = (int)((navlon - lonmin) / mask_dx);
 			    iy = (int)((navlat - latmin) / mask_dy);
@@ -1501,7 +1505,7 @@ main (int argc, char **argv)
 				}
 			    for (i=0;i<pixels_ss;i++)
 				{
-				if (ss[i] > 0.0)
+				if (ss[i] > MB_SIDESCAN_NULL)
 				    {
 				    ix = (int)((sslon[i] - lonmin) / mask_dx);
 				    iy = (int)((sslat[i] - latmin) / mask_dy);
@@ -1652,7 +1656,7 @@ main (int argc, char **argv)
 					{
 					datacur = data[j];
 					ss = datacur->ss;
-					if (ss[i] > 0.0)
+					if (ss[i] > MB_SIDESCAN_NULL)
 					  {
 					  nss++;
 					  mean  = mean + ss[i];
@@ -1665,7 +1669,7 @@ main (int argc, char **argv)
 					  {
 					  datacur = data[j];
 					  ss = datacur->ss;
-					  if (ss[i] > 0.0)
+					  if (ss[i] > MB_SIDESCAN_NULL)
 					    {
 					    dev = ss[i] - mean;
 					    variance = variance + dev*dev;

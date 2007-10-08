@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmosaic.c	2/10/97
- *    $Id: mbmosaic.c,v 5.24 2006-09-11 18:55:54 caress Exp $
+ *    $Id: mbmosaic.c,v 5.25 2007-10-08 16:48:07 caress Exp $
  *
  *    Copyright (c) 1997, 2000, 2002, 2003, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,10 @@
  * Date:	February 10, 1997
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.24  2006/09/11 18:55:54  caress
+ * Changes during Western Flyer and Thomas Thompson cruises, August-September
+ * 2006.
+ *
  * Revision 5.23  2006/08/09 22:41:27  caress
  * Fixed programs that read or write grids so that they do not use the GMT_begin() function; these programs will now work when GMT is built in the default fashion, when GMT is built in the default fashion, with "advisory file locking" enabled.
  *
@@ -154,6 +158,7 @@
 #include "../../include/mb_status.h"
 #include "../../include/mb_format.h"
 #include "../../include/mb_define.h"
+#include "../../include/mb_info.h"
 
 /* GMT include files */
 #include "gmt.h"
@@ -185,8 +190,53 @@
 /* flag for no data in grid */
 #define	NO_DATA_FLAG	99999
 
+#define MBMOSAIC_FOOTPRINT_REAL		0
+#define MBMOSAIC_FOOTPRINT_SPACING	1
+struct	footprint
+	{
+	double	x[4];
+	double	y[4];
+	};
+
+int mbmosaic_get_footprint(
+		int	verbose, 
+		int	mode,
+		double	beamwidth_xtrack,
+		double	beamwidth_ltrack,
+		double	altitude,
+		double	acrosstrack,
+		double	alongtrack,
+		double	acrosstrack_spacing,
+		struct footprint *footprint,
+		int	*error);
+
+int mbmosaic_get_priorities(
+		int	verbose, 
+		int	mode, 
+		double	file_weight, 
+		int	nangle, 
+		double	*aangles, 
+		double	*apriorities, 
+		double	azimuth, 
+		double	factor, 
+		int	nbath, 
+		char	*beamflag, 
+		double	*bath, 
+		double	*bathacrosstrack, 
+		double	*depth, 
+		double	*depthacrosstrack, 
+		double	sonardepth, 
+		double	altitude_default, 
+		double	heading, 
+		unsigned int	ndata, 
+		double	*data, 
+		double	*acrosstrack, 
+		double	*angles, 
+		double	*priorities, 
+		int	*error);
+
 /* program identifiers */
-static char rcs_id[] = "$Id: mbmosaic.c,v 5.24 2006-09-11 18:55:54 caress Exp $";
+static char rcs_id[] = "$Id: mbmosaic.c,v 5.25 2007-10-08 16:48:07 caress Exp $";
 static char program_name[] = "mbmosaic";
 static char help_message[] =  "mbmosaic is an utility used to mosaic amplitude or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered by multibeam swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbmosaic -Ifilelist -Oroot \
@@ -240,6 +290,7 @@ main (int argc, char **argv)
 	int	xdim = 0;
 	int	ydim = 0;
 	int	spacing_priority = MB_NO;
+	int	set_dimensions = MB_NO;
 	int	set_spacing = MB_NO;
 	double	dx_set = 0.0;
 	double	dy_set = 0.0;
@@ -267,7 +318,7 @@ main (int argc, char **argv)
 	int	n_priority_angle = 0;
 	double	*priority_angle_angle = NULL;
 	double	*priority_angle_priority = NULL;
-	double	bath_default = 1000.0;
+	double	altitude_default = 1000.0;
 	char	ifile[MB_PATH_MAXLINE];
 	char	ofile[MB_PATH_MAXLINE];
 	char	plot_cmd[MB_COMMENT_MAXLINE];
@@ -302,12 +353,18 @@ main (int argc, char **argv)
 	char	comment[MB_COMMENT_MAXLINE];
 	double	*angles = NULL;
 	double	*priorities = NULL;
+	struct	footprint *footprints = NULL;
+	struct mb_info_struct mb_info;
+	int	formatread;
+	double	beamwidth_xtrack;
+	double	beamwidth_ltrack;
 
 	/* grid variables */
 	double	gbnd[4], wbnd[4], obnd[4];
+	int	gbndset = MB_NO;
 	double	xlon, ylat, xx, yy;
-	double	factor;
-	int	gxdim, gydim, offx, offy, xtradim;
+	double	gaussian_factor;
+	int	gxdim, gydim, offx, offy;
 	double	*grid = NULL;
 	double	*norm = NULL;
 	double	*maxpriority = NULL;
@@ -319,10 +376,10 @@ main (int argc, char **argv)
 	float	*sgrid = NULL;
 	double	sxmin, symin;
 	float	xmin, ymin, ddx, ddy, zflag, cay;
-	float	*work1 = NULL;
-	float	*work2 = NULL;
-	float	*work3 = NULL;
-	unsigned int	ndata, ndatafile;
+	void	*work1 = NULL;
+	void	*work2 = NULL;
+	void	*work3 = NULL;
+	int	ndata, ndatafile;
 	double	zmin, zmax, zclip;
 	int	nmax;
 	double	smin, smax;
@@ -372,14 +429,20 @@ main (int argc, char **argv)
 	/* other variables */
 	FILE	*fp;
 	char	buffer[MB_PATH_MAXLINE], *result;
+	int	nscan;
+	double	norm_weight;
+	double	xsmin, xsmax;
+	int	ismin, ismax;
+	int	footprint_mode;
+	double	acrosstrackspacing;
 	int	i, j, ii, jj, iii, jjj, kkk, n;
 	int	i1, i2, j1, j2;
 	double	r;
 	int	dmask[9];
-	int	kgrid, kout, kint, ib, ix, iy;
-	int	ix1, ix2, iy1, iy2;
-	int	nscan;
-	double	norm_weight;
+	int	kgrid, kout, kint, ib;
+	int	ix, iy;
+	int	ixx[4], iyy[4];
+	int	ix1, ix2, iy1, iy2, dix, diy;
 
 	/* get current default values */
 	status = mb_defaults(verbose,&format,&pings,&lonflip,bounds,
@@ -422,7 +485,9 @@ main (int argc, char **argv)
 			break;
 		case 'D':
 		case 'd':
-			sscanf (optarg,"%d/%d", &xdim, &ydim);
+			n = sscanf (optarg,"%d/%d", &xdim, &ydim);
+			if (n == 2)
+				set_dimensions = MB_YES;
 			flag++;
 			break;
 		case 'E':
@@ -512,6 +577,7 @@ main (int argc, char **argv)
 		case 'R':
 		case 'r':
 			mb_get_bounds(optarg, gbnd);
+			gbndset = MB_YES;
 			flag++;
 			break;
 		case 'S':
@@ -558,7 +624,7 @@ main (int argc, char **argv)
 			break;
 		case 'Z':
 		case 'z':
-			sscanf (optarg,"%lf", &bath_default);
+			sscanf (optarg,"%lf", &altitude_default);
 			flag++;
 			break;
 		case '?':
@@ -643,7 +709,7 @@ main (int argc, char **argv)
 		fprintf(outfp,"dbg2       pfile:                %s\n",pfile);
 		fprintf(outfp,"dbg2       priority_azimuth:     %f\n",priority_azimuth);
 		fprintf(outfp,"dbg2       priority_azimuth_fac: %f\n",priority_azimuth_factor);
-		fprintf(outfp,"dbg2       bath_default:         %f\n",bath_default);
+		fprintf(outfp,"dbg2       altitude_default:     %f\n",altitude_default);
 		fprintf(outfp,"dbg2       projection_pars:      %s\n",projection_pars);
 		fprintf(outfp,"dbg2       proj flag 1:          %d\n",projection_pars_f);
 		fprintf(outfp,"dbg2       projection_id:        %s\n",projection_id);
@@ -656,6 +722,28 @@ main (int argc, char **argv)
 		fprintf(outfp,"\n%s\n",help_message);
 		fprintf(outfp,"\nusage: %s\n", usage_message);
 		exit(error);
+		}
+		
+	/* if bounds not set get bounds of input data */
+	if (gbndset == MB_NO)
+		{
+		formatread = -1;
+		status = mb_get_info_datalist(verbose, filelist, &formatread, 
+				&mb_info, lonflip, &error);
+				
+		gbnd[0] = mb_info.lon_min;
+		gbnd[1] = mb_info.lon_max;
+		gbnd[2] = mb_info.lat_min;
+		gbnd[3] = mb_info.lat_max;
+		gbndset = MB_YES;
+		
+		if (set_spacing == MB_NO && set_dimensions == MB_NO)
+			{
+			dx_set = 0.02 * mb_info.altitude_max;
+			dy_set = 0.02 * mb_info.altitude_max;
+			set_spacing = MB_YES;
+			strcpy(units, "meters");			
+			}
 		}
 
 	/* if bounds not specified then quit */
@@ -934,7 +1022,7 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 	/* calculate other grid properties */
 	dx = (gbnd[1] - gbnd[0])/(xdim-1);
 	dy = (gbnd[3] - gbnd[2])/(ydim-1);
-	factor = 4.0/(scale*scale*dx*dy);
+	gaussian_factor = 4.0/(scale*scale*dx*dy);
 	offx = 0;
 	offy = 0;
 	if (extend > 0.0)
@@ -942,7 +1030,6 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 		offx = (int) (extend*xdim);
 		offy = (int) (extend*ydim);
 		}
-	xtradim = scale + 2;
 	gxdim = xdim + 2*offx;
 	gydim = ydim + 2*offy;
 	wbnd[0] = gbnd[0] - offx*dx;
@@ -1370,6 +1457,9 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 		    	if (error == MB_ERROR_NO_ERROR)
 			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_AMPLITUDE, 
 							    sizeof(double), (void **)&priorities, &error);
+		    	if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_AMPLITUDE, 
+							    sizeof(struct footprint), (void **)&footprints, &error);
 			}
 		    else
 		    	{
@@ -1379,6 +1469,9 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 		    	if (error == MB_ERROR_NO_ERROR)
 			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
 							    sizeof(double), (void **)&priorities, &error);
+		    	if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+							    sizeof(struct footprint), (void **)&footprints, &error);
 			}
 		    if (error == MB_ERROR_NO_ERROR)
 			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
@@ -1438,16 +1531,22 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 				headingx = sin(DTR*heading);
 				headingy = cos(DTR*heading);
 				}
+				
+			/* get beam widths */
+			if (error == MB_ERROR_NO_ERROR)
+				{
+				status = mb_beamwidths(verbose, mbio_ptr, &beamwidth_xtrack, &beamwidth_ltrack, &error);
+				}
 
 			if (use_beams == MB_YES
 				&& error == MB_ERROR_NO_ERROR)
-			  {
-				
+			  {				
 			  /* translate beam locations to lon/lat */
 			  for (ib=0;ib<beams_amp;ib++)
 			    {
 			    if (mb_beam_ok(beamflag[ib]))
 				{
+				/* handle regular beams */
 				bathlon[ib] = navlon 
 				    + headingy * mtodeglon
 					* bathacrosstrack[ib]
@@ -1458,6 +1557,28 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 					* bathacrosstrack[ib]
 				    + headingy * mtodeglat
 					* bathalongtrack[ib];
+			        
+				/* get footprints */
+				mbmosaic_get_footprint(verbose, MBMOSAIC_FOOTPRINT_REAL, 
+							beamwidth_xtrack, beamwidth_ltrack,
+							(bath[ib] - sonardepth), 
+							bathacrosstrack[ib], bathalongtrack[ib],
+							0.0, &footprints[ib], &error);
+				for (j=0;j<4;j++)
+					{
+					xx = navlon 
+					    + headingy * mtodeglon
+						* footprints[ib].x[j]
+					    + headingx * mtodeglon
+						* footprints[ib].y[j];
+					yy = navlat 
+					    - headingx * mtodeglat
+						* footprints[ib].x[j]
+					    + headingy * mtodeglat
+						* footprints[ib].y[j];
+					footprints[ib].x[j] = xx;
+					footprints[ib].y[j] = yy;
+					}
 				}
 			    }
 
@@ -1466,10 +1587,19 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 			    {
 			    for (ib=0;ib<beams_amp;ib++)
 			      if (mb_beam_ok(beamflag[ib]))
+				{
 				mb_proj_forward(verbose, pjptr, 
 						bathlon[ib], bathlat[ib],
 						&bathlon[ib], &bathlat[ib],
 						&error);
+				for (j=0;j<4;j++)
+					{
+					mb_proj_forward(verbose, pjptr, 
+						footprints[ib].x[j], footprints[ib].y[j],
+						&footprints[ib].x[j], &footprints[ib].y[j],
+						&error);
+					}
+				}
 			    }
 			    
 			  /* get angles and priorities */
@@ -1478,7 +1608,7 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 				priority_azimuth, priority_azimuth_factor, 
 				beams_bath, beamflag, bath, bathacrosstrack,
 				work1, work2,  
-				bath_default, heading, 
+				sonardepth, altitude, heading, 
 				beams_amp, amp, bathacrosstrack, 
 				angles, priorities, &error);
 
@@ -1495,19 +1625,30 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 			    if (mb_beam_ok(beamflag[ib]))
 			      {
 			      /* get position in grid */
-			      ix = (bathlon[ib] - wbnd[0] + 0.5*dx)/dx;
-			      iy = (bathlat[ib] - wbnd[2] + 0.5*dy)/dy;
+			      for (j=0;j<4;j++)
+			      	 {
+			      	 ixx[j] = (footprints[ib].x[j] - wbnd[0] + 0.5*dx)/dx;
+			      	 iyy[j] = (footprints[ib].y[j] - wbnd[2] + 0.5*dy)/dy;
+				 }
+			      ix1 = ixx[0];
+			      iy1 = iyy[0];
+			      ix2 = ixx[0];
+			      iy2 = iyy[0];
+			      for (j=1;j<4;j++)
+			      	 {
+			      	 ix1 = MIN(ix1, ixx[j]);
+			      	 iy1 = MIN(iy1, iyy[j]);
+			      	 ix2 = MAX(ix2, ixx[j]);
+			      	 iy2 = MAX(iy2, iyy[j]);
+				 }
+		              dix = (int)(scale * (ix2 - ix1));
+		              diy = (int)(scale * (iy2 - iy1));
+			      ix1 = MAX(ix1 - dix, 0);
+			      ix2 = MIN(ix2 + dix, gxdim - 1);
+			      iy1 = MAX(iy1 - diy, 0);
+			      iy2 = MIN(iy2 + diy, gydim - 1);
 
 			      /* process if in region of interest */
-			      if (ix >= 0 
-				&& ix < gxdim 
-				&& iy >= 0 
-				&& iy < gydim)
-			        {
-			        ix1 = MAX(ix - xtradim, 0);
-			        ix2 = MIN(ix + xtradim, gxdim - 1);
-			        iy1 = MAX(iy - xtradim, 0);
-			        iy2 = MIN(iy + xtradim, gydim - 1);
 			        for (ii=ix1;ii<=ix2;ii++)
 			         for (jj=iy1;jj<=iy2;jj++)
 				    {
@@ -1548,20 +1689,50 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 					cnt[kgrid] = 1;
 					maxpriority[kgrid] = priorities[ib];
 					}
-				    ndata++;
-				    ndatafile++;
 				    }
-				  }
+			      ndata++;
+			      ndatafile++;
 			      }
 			  }
 			else if (datatype == MBMOSAIC_DATA_SIDESCAN
 				&& error == MB_ERROR_NO_ERROR)
 			  {
+			  /* get spacing */
+			  xsmin = 0.0;
+			  xsmax = 0.0;
+			  ismin = pixels_ss / 2;
+			  ismax = pixels_ss / 2;
+			  for (ib=0;ib<pixels_ss;ib++)
+			    {
+			    if (ss[ib] > MB_SIDESCAN_NULL)
+				{
+				if (ssacrosstrack[ib] < xsmin)
+					{
+					xsmin = ssacrosstrack[ib];
+					ismin = ib;
+					}
+				if (ssacrosstrack[ib] > xsmax)
+					{
+					xsmax = ssacrosstrack[ib];
+					ismax = ib;
+					}
+				}
+			    }
+			  if (ismax > ismin)
+			  	{
+				footprint_mode = MBMOSAIC_FOOTPRINT_SPACING;
+			  	acrosstrackspacing = (xsmax - xsmin) / (ismax - ismin);
+				}
+			  else
+			  	{
+				footprint_mode = MBMOSAIC_FOOTPRINT_REAL;
+			  	acrosstrackspacing = 0.0;
+				}
 				
 			  /* translate pixel locations to lon/lat */
 			  for (ib=0;ib<pixels_ss;ib++)
 			    {
-			    if (ss[ib] > 0.0)
+			    if (ss[ib] > MB_SIDESCAN_NULL)
 				{
 				sslon[ib] = navlon 
 				    + headingy * mtodeglon
@@ -1573,6 +1744,28 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 					* ssacrosstrack[ib]
 				    + headingy * mtodeglat
 					* ssalongtrack[ib];
+			        
+				/* get footprints */
+				mbmosaic_get_footprint(verbose, footprint_mode, 
+							beamwidth_xtrack, beamwidth_ltrack,
+							altitude, 
+							ssacrosstrack[ib], ssalongtrack[ib],
+							acrosstrackspacing, &footprints[ib], &error);
+				for (j=0;j<4;j++)
+					{
+					xx = navlon 
+					    + headingy * mtodeglon
+						* footprints[ib].x[j]
+					    + headingx * mtodeglon
+						* footprints[ib].y[j];
+					yy = navlat 
+					    - headingx * mtodeglat
+						* footprints[ib].x[j]
+					    + headingy * mtodeglat
+						* footprints[ib].y[j];
+					footprints[ib].x[j] = xx;
+					footprints[ib].y[j] = yy;
+					}
 				}
 			    }
 
@@ -1580,11 +1773,20 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 			  if (use_projection == MB_YES)
 			    {
 			    for (ib=0;ib<pixels_ss;ib++)
-			      if (ss[ib] > 0.0)
+			      if (ss[ib] > MB_SIDESCAN_NULL)
+				{
 				mb_proj_forward(verbose, pjptr, 
 						sslon[ib], sslat[ib],
 						&sslon[ib], &sslat[ib],
 						&error);
+				for (j=0;j<4;j++)
+					{
+					mb_proj_forward(verbose, pjptr, 
+						footprints[ib].x[j], footprints[ib].y[j],
+						&footprints[ib].x[j], &footprints[ib].y[j],
+						&error);
+					}
+				}
 			    }
 			    
 			  /* get angles and priorities */
@@ -1593,28 +1795,39 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 				priority_azimuth, priority_azimuth_factor, 
 				beams_bath, beamflag, bath, bathacrosstrack,
 				work1, work2,  
-				bath_default, heading, 
+				sonardepth, altitude, heading, 
 				pixels_ss, ss, ssacrosstrack, 
 				angles, priorities, &error);
 
 			  /* deal with data */
 			  for (ib=0;ib<pixels_ss;ib++) 
-			    if (ss[ib] > 0.0)
+			    if (ss[ib] > MB_SIDESCAN_NULL)
 			      {
 			      /* get position in grid */
-			      ix = (sslon[ib] - wbnd[0] + 0.5*dx)/dx;
-			      iy = (sslat[ib] - wbnd[2] + 0.5*dy)/dy;
+			      for (j=0;j<4;j++)
+			      	 {
+			      	 ixx[j] = (footprints[ib].x[j] - wbnd[0] + 0.5*dx)/dx;
+			      	 iyy[j] = (footprints[ib].y[j] - wbnd[2] + 0.5*dy)/dy;
+				 }
+			      ix1 = ixx[0];
+			      iy1 = iyy[0];
+			      ix2 = ixx[0];
+			      iy2 = iyy[0];
+			      for (j=1;j<4;j++)
+			      	 {
+			      	 ix1 = MIN(ix1, ixx[j]);
+			      	 iy1 = MIN(iy1, iyy[j]);
+			      	 ix2 = MAX(ix2, ixx[j]);
+			      	 iy2 = MAX(iy2, iyy[j]);
+				 }
+		              dix = (int)(scale * (ix2 - ix1));
+		              diy = (int)(scale * (iy2 - iy1));
+			      ix1 = MAX(ix1 - dix, 0);
+			      ix2 = MIN(ix2 + dix, gxdim - 1);
+			      iy1 = MAX(iy1 - diy, 0);
+			      iy2 = MIN(iy2 + diy, gydim - 1);
 			      
 			      /* process if in region of interest */
-			      if (ix >= 0 
-				&& ix < gxdim 
-				&& iy >= 0 
-				&& iy < gydim )
-			        {
-			        ix1 = MAX(ix - xtradim, 0);
-			        ix2 = MIN(ix + xtradim, gxdim - 1);
-			        iy1 = MAX(iy - xtradim, 0);
-			        iy2 = MIN(iy + xtradim, gydim - 1);
 			        for (ii=ix1;ii<=ix2;ii++)
 			         for (jj=iy1;jj<=iy2;jj++)
 				    {
@@ -1626,10 +1839,9 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 					cnt[kgrid] = 1;
 					maxpriority[kgrid] = priorities[ib];
 					}
-				    ndata++;
-				    ndatafile++;
 				    }
-				}
+			      ndata++;
+			      ndatafile++;
 			      }
 			  }
 			}
@@ -1764,6 +1976,9 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 		    	if (error == MB_ERROR_NO_ERROR)
 			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_AMPLITUDE, 
 							    sizeof(double), (void **)&priorities, &error);
+		    	if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_AMPLITUDE, 
+							    sizeof(struct footprint), (void **)&footprints, &error);
 			}
 		    else
 		    	{
@@ -1773,6 +1988,9 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 		    	if (error == MB_ERROR_NO_ERROR)
 			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
 							    sizeof(double), (void **)&priorities, &error);
+		    	if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+							    sizeof(struct footprint), (void **)&footprints, &error);
 			}
 		    if (error == MB_ERROR_NO_ERROR)
 			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
@@ -1832,6 +2050,12 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 				headingx = sin(DTR*heading);
 				headingy = cos(DTR*heading);
 				}
+				
+			/* get beam widths */
+			if (error == MB_ERROR_NO_ERROR)
+				{
+				status = mb_beamwidths(verbose, mbio_ptr, &beamwidth_xtrack, &beamwidth_ltrack, &error);
+				}
 
 			if (use_beams == MB_YES
 				&& error == MB_ERROR_NO_ERROR)
@@ -1852,6 +2076,28 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 					* bathacrosstrack[ib]
 				    + headingy * mtodeglat
 					* bathalongtrack[ib];
+			        
+				/* get footprints */
+				mbmosaic_get_footprint(verbose, MBMOSAIC_FOOTPRINT_REAL, 
+							beamwidth_xtrack, beamwidth_ltrack,
+							(bath[ib] - sonardepth), 
+							bathacrosstrack[ib], bathalongtrack[ib],
+							0.0, &footprints[ib], &error);
+				for (j=0;j<4;j++)
+					{
+					xx = navlon 
+					    + headingy * mtodeglon
+						* footprints[ib].x[j]
+					    + headingx * mtodeglon
+						* footprints[ib].y[j];
+					yy = navlat 
+					    - headingx * mtodeglat
+						* footprints[ib].x[j]
+					    + headingy * mtodeglat
+						* footprints[ib].y[j];
+					footprints[ib].x[j] = xx;
+					footprints[ib].y[j] = yy;
+					}
 				}
 			    }
 
@@ -1860,10 +2106,19 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 			    {
 			    for (ib=0;ib<beams_amp;ib++)
 			      if (mb_beam_ok(beamflag[ib]))
+				{
 				mb_proj_forward(verbose, pjptr, 
 						bathlon[ib], bathlat[ib],
 						&bathlon[ib], &bathlat[ib],
 						&error);
+				for (j=0;j<4;j++)
+					{
+					mb_proj_forward(verbose, pjptr, 
+						footprints[ib].x[j], footprints[ib].y[j],
+						&footprints[ib].x[j], &footprints[ib].y[j],
+						&error);
+					}
+				}
 			    }
 			    
 			  /* get angles and priorities */
@@ -1872,7 +2127,7 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 				priority_azimuth, priority_azimuth_factor, 
 				beams_bath, beamflag, bath, bathacrosstrack,
 				work1, work2,  
-				bath_default, heading, 
+				sonardepth, altitude, heading, 
 				beams_amp, amp, bathacrosstrack, 
 				angles, priorities, &error);
 
@@ -1889,19 +2144,30 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 			    if (mb_beam_ok(beamflag[ib]))
 			      {
 			      /* get position in grid */
-			      ix = (bathlon[ib] - wbnd[0] + 0.5*dx)/dx;
-			      iy = (bathlat[ib] - wbnd[2] + 0.5*dy)/dy;
+			      for (j=0;j<4;j++)
+			      	 {
+			      	 ixx[j] = (footprints[ib].x[j] - wbnd[0] + 0.5*dx)/dx;
+			      	 iyy[j] = (footprints[ib].y[j] - wbnd[2] + 0.5*dy)/dy;
+				 }
+			      ix1 = ixx[0];
+			      iy1 = iyy[0];
+			      ix2 = ixx[0];
+			      iy2 = iyy[0];
+			      for (j=1;j<4;j++)
+			      	 {
+			      	 ix1 = MIN(ix1, ixx[j]);
+			      	 iy1 = MIN(iy1, iyy[j]);
+			      	 ix2 = MAX(ix2, ixx[j]);
+			      	 iy2 = MAX(iy2, iyy[j]);
+				 }
+		              dix = (int)(scale * (ix2 - ix1));
+		              diy = (int)(scale * (iy2 - iy1));
+			      ix1 = MAX(ix1 - dix, 0);
+			      ix2 = MIN(ix2 + dix, gxdim - 1);
+			      iy1 = MAX(iy1 - diy, 0);
+			      iy2 = MIN(iy2 + diy, gydim - 1);
 
 			      /* process if in region of interest */
-			      if (ix >= 0 
-				&& ix < gxdim 
-				&& iy >= 0 
-				&& iy < gydim)
-			        {
-			        ix1 = MAX(ix - xtradim, 0);
-			        ix2 = MIN(ix + xtradim, gxdim - 1);
-			        iy1 = MAX(iy - xtradim, 0);
-			        iy2 = MIN(iy + xtradim, gydim - 1);
 			        for (ii=ix1;ii<=ix2;ii++)
 			         for (jj=iy1;jj<=iy2;jj++)
 				    {
@@ -1919,7 +2185,7 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 
 					xx = wbnd[0] + ii*dx - bathlon[ib];
 					yy = wbnd[2] + jj*dy - bathlat[ib];
-					norm_weight = file_weight * exp(-(xx*xx + yy*yy)*factor);
+					norm_weight = file_weight * exp(-(xx*xx + yy*yy)*gaussian_factor);
 					norm[kgrid] += norm_weight;
 					if (datatype == MBMOSAIC_DATA_AMPLITUDE)
 					  {
@@ -1955,17 +2221,47 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 				    }
 				ndata++;
 				ndatafile++;
-				}
 			      }
 			  }
 			else if (datatype == MBMOSAIC_DATA_SIDESCAN
 				&& error == MB_ERROR_NO_ERROR)
 			  {
+			  /* get spacing */
+			  xsmin = 0.0;
+			  xsmax = 0.0;
+			  ismin = pixels_ss / 2;
+			  ismax = pixels_ss / 2;
+			  for (ib=0;ib<pixels_ss;ib++)
+			    {
+			    if (ss[ib] > MB_SIDESCAN_NULL)
+				{
+				if (ssacrosstrack[ib] < xsmin)
+					{
+					xsmin = ssacrosstrack[ib];
+					ismin = ib;
+					}
+				if (ssacrosstrack[ib] > xsmax)
+					{
+					xsmax = ssacrosstrack[ib];
+					ismax = ib;
+					}
+				}
+			    }
+			  if (ismax > ismin)
+			  	{
+				footprint_mode = MBMOSAIC_FOOTPRINT_SPACING;
+			  	acrosstrackspacing = (xsmax - xsmin) / (ismax - ismin);
+				}
+			  else
+			  	{
+				footprint_mode = MBMOSAIC_FOOTPRINT_REAL;
+			  	acrosstrackspacing = 0.0;
+				}		
 				
 			  /* translate pixel locations to lon/lat */
 			  for (ib=0;ib<pixels_ss;ib++)
 			    {
-			    if (ss[ib] > 0.0)
+			    if (ss[ib] > MB_SIDESCAN_NULL)
 				{
 				sslon[ib] = navlon 
 				    + headingy * mtodeglon
@@ -1977,6 +2273,28 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 					* ssacrosstrack[ib]
 				    + headingy * mtodeglat
 					* ssalongtrack[ib];
+			        
+				/* get footprints */
+				mbmosaic_get_footprint(verbose, footprint_mode, 
+							beamwidth_xtrack, beamwidth_ltrack,
+							altitude, 
+							ssacrosstrack[ib], ssalongtrack[ib],
+							acrosstrackspacing, &footprints[ib], &error);
+				for (j=0;j<4;j++)
+					{
+					xx = navlon 
+					    + headingy * mtodeglon
+						* footprints[ib].x[j]
+					    + headingx * mtodeglon
+						* footprints[ib].y[j];
+					yy = navlat 
+					    - headingx * mtodeglat
+						* footprints[ib].x[j]
+					    + headingy * mtodeglat
+						* footprints[ib].y[j];
+					footprints[ib].x[j] = xx;
+					footprints[ib].y[j] = yy;
+					}
 				}
 			    }
 
@@ -1984,11 +2302,20 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 			  if (use_projection == MB_YES)
 			    {
 			    for (ib=0;ib<pixels_ss;ib++)
-			      if (ss[ib] > 0.0)
+			      if (ss[ib] > MB_SIDESCAN_NULL)
+				{
 				mb_proj_forward(verbose, pjptr, 
 						sslon[ib], sslat[ib],
 						&sslon[ib], &sslat[ib],
 						&error);
+				for (j=0;j<4;j++)
+					{
+					mb_proj_forward(verbose, pjptr, 
+						footprints[ib].x[j], footprints[ib].y[j],
+						&footprints[ib].x[j], &footprints[ib].y[j],
+						&error);
+					}
+				}
 			    }
 			    
 			  /* get angles and priorities */
@@ -1997,54 +2324,64 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 				priority_azimuth, priority_azimuth_factor, 
 				beams_bath, beamflag, bath, bathacrosstrack,
 				work1, work2,  
-				bath_default, heading, 
+				sonardepth, altitude, heading, 
 				pixels_ss, ss, ssacrosstrack, 
 				angles, priorities, &error);
 
 			  /* deal with data */
 			  for (ib=0;ib<pixels_ss;ib++) 
-			    if (ss[ib] > 0.0)
+			    if (ss[ib] > MB_SIDESCAN_NULL)
 			      {
 			      /* get position in grid */
-			      ix = (sslon[ib] - wbnd[0] + 0.5*dx)/dx;
-			      iy = (sslat[ib] - wbnd[2] + 0.5*dy)/dy;
+			      for (j=0;j<4;j++)
+			      	 {
+			      	 ixx[j] = (footprints[ib].x[j] - wbnd[0] + 0.5*dx)/dx;
+			      	 iyy[j] = (footprints[ib].y[j] - wbnd[2] + 0.5*dy)/dy;
+				 }
+			      ix1 = ixx[0];
+			      iy1 = iyy[0];
+			      ix2 = ixx[0];
+			      iy2 = iyy[0];
+			      for (j=1;j<4;j++)
+			      	 {
+			      	 ix1 = MIN(ix1, ixx[j]);
+			      	 iy1 = MIN(iy1, iyy[j]);
+			      	 ix2 = MAX(ix2, ixx[j]);
+			      	 iy2 = MAX(iy2, iyy[j]);
+				 }
+		              dix = (int)(scale * (ix2 - ix1));
+		              diy = (int)(scale * (iy2 - iy1));
+			      ix1 = MAX(ix1 - dix, 0);
+			      ix2 = MIN(ix2 + dix, gxdim - 1);
+			      iy1 = MAX(iy1 - diy, 0);
+			      iy2 = MIN(iy2 + diy, gydim - 1);
 			      
 			      /* process if in region of interest */
-			      if (ix >= 0 
-				&& ix < gxdim 
-				&& iy >= 0 
-				&& iy < gydim )
-			        {
-			        ix1 = MAX(ix - xtradim, 0);
-			        ix2 = MIN(ix + xtradim, gxdim - 1);
-			        iy1 = MAX(iy - xtradim, 0);
-			        iy2 = MIN(iy + xtradim, gydim - 1);
-/*fprintf(stderr," ib:%d ss:%f ix:%d iy:%d priority:%f max:%f range:%f", 
-ib,ss[ib],ix,iy,priorities[ib],maxpriority[kgrid],priority_range);*/
 			        for (ii=ix1;ii<=ix2;ii++)
 			         for (jj=iy1;jj<=iy2;jj++)
 				    {
-				    /* add to cell if weight high enough */
+				    /* set grid if highest weight */
 				    kgrid = ii*gydim + jj;
+/* fprintf(stderr,"priorities[%d]:%f maxpriority[%d]:%f range:%f",
+ib,priorities[ib],kgrid,maxpriority[kgrid],priority_range); */
 				    if (priorities[ib] > 0.0 
 					&& priorities[ib] >= maxpriority[kgrid] - priority_range)
 					{
+/*fprintf(stderr," - USE DATA!"); */
 					xx = wbnd[0] + ii*dx - sslon[ib];
 					yy = wbnd[2] + jj*dy - sslat[ib];
-					norm_weight = file_weight * exp(-(xx*xx + yy*yy)*factor);
+					norm_weight = file_weight * exp(-(xx*xx + yy*yy)*gaussian_factor);
 					grid[kgrid] += norm_weight * ss[ib];
 					norm[kgrid] += norm_weight;
 					sigma[kgrid] += norm_weight * ss[ib] * ss[ib];
-					if (ii == ix && jj == iy)
-					    cnt[kgrid]++;
+					cnt[kgrid]++;
 /*fprintf(stderr," kgrid:%d norm_weight:%g grid:%g norm:%g cnt:%d",
 kgrid,norm_weight,grid[kgrid],norm[kgrid],cnt[kgrid]);*/
 					}
+/* fprintf(stderr,"\n"); */
 				    }
-/*fprintf(stderr,"\n");*/
 				ndata++;
 				ndatafile++;
-				}
 			      }
 			  }
 			}
@@ -2212,8 +2549,8 @@ kgrid,norm_weight,grid[kgrid],norm[kgrid],cnt[kgrid]);*/
 		if (verbose > 0)
 			fprintf(outfp,"\nDoing spline interpolation with %u data points...\n",ndata);
 		cay = tension;
-		xmin = sxmin;
-		ymin = symin;
+		xmin = sxmin - 0.5 * dx;
+		ymin = symin - 0.5 * dy;
 		ddx = dx;
 		ddy = dy;
 		mb_zgrid(sgrid,&gxdim,&gydim,&xmin,&ymin,
@@ -3090,7 +3427,8 @@ int mbmosaic_get_priorities(
 		double	*bathacrosstrack, 
 		double	*depth, 
 		double	*depthacrosstrack, 
-		double	bath_default, 
+		double	sonardepth, 
+		double	altitude_default, 
 		double	heading, 
 		unsigned int	ndata, 
 		double	*data, 
@@ -3102,7 +3440,7 @@ int mbmosaic_get_priorities(
 	char	*function_name = "mbmosaic_get_priorities";
 	int	status = MB_SUCCESS;
 	int	ndepthgood;
-	double	depth_use;
+	double	altitude_use;
 	double	azi_starboard, azi_port;
 	double	weight_starboard, weight_port;
 	int	i, j;
@@ -3128,7 +3466,7 @@ int mbmosaic_get_priorities(
 		for (i=0;i<nbath;i++)
 			fprintf(stderr,"dbg2       i:%d flag:%3d bath:%f xtrack:%f\n",
 				i, beamflag[i], bath[i], bathacrosstrack[i]);
-		fprintf(stderr,"dbg2       bath_default:  %f\n", bath_default);
+		fprintf(stderr,"dbg2       altitude_default:  %f\n", altitude_default);
 		fprintf(stderr,"dbg2       heading:       %f\n", heading);
 		fprintf(stderr,"dbg2       amplitude/sidescan data:\n");
 		for (i=0;i<ndata;i++)
@@ -3184,70 +3522,60 @@ int mbmosaic_get_priorities(
 		/* now loop over data getting angles */
 		for (i=0;i<ndata;i++)
 		    {
-		    if (data[i] > 0.0)
+		    if (ndepthgood > 0 
+			&& acrosstrack[i] <= depthacrosstrack[0])
 			{
-			if (ndepthgood > 0 
-			    && acrosstrack[i] <= depthacrosstrack[0])
+			altitude_use = depth[0] - sonardepth;
+			}
+		    else if (ndepthgood > 0 
+			&& acrosstrack[i] >= depthacrosstrack[ndepthgood-1])
+			{
+			altitude_use = depth[ndepthgood-1] - sonardepth;
+			}
+		    else if (ndepthgood > 1)
+			{
+			for (j=0;j<ndepthgood-1;j++)
 			    {
-			    angles[i] = RTD *
-				    atan(acrosstrack[i] / depth[0]);
-
-			    }
-			else if (ndepthgood > 0 
-			    && acrosstrack[i] >= depthacrosstrack[ndepthgood-1])
-			    {
-			    angles[i] = RTD *
-				    atan(acrosstrack[i] / depth[ndepthgood-1]);
-
-			    }
-			else if (ndepthgood > 1)
-			    {
-			    for (j=0;j<ndepthgood-1;j++)
+			    if (acrosstrack[i] >= depthacrosstrack[j]
+				&& acrosstrack[i] < depthacrosstrack[j+1])
 				{
-				if (acrosstrack[i] >= depthacrosstrack[j]
-				    && acrosstrack[i] < depthacrosstrack[j+1])
-				    {
-				    depth_use = depth[j] 
-					+ (depth[j+1] - depth[j])
-					* (acrosstrack[i] - depthacrosstrack[j])
-					/ (depthacrosstrack[j+1] - depthacrosstrack[j]);
-				    angles[i] = RTD *
-					    atan(acrosstrack[i] / depth_use);
-				    }
+				altitude_use = depth[j] 
+				    + (depth[j+1] - depth[j])
+				    * (acrosstrack[i] - depthacrosstrack[j])
+				    / (depthacrosstrack[j+1] - depthacrosstrack[j]) - sonardepth;
+				angles[i] = RTD * atan(acrosstrack[i] / altitude_use);
 				}
 			    }
-			else if (ndepthgood <= 0)
-			    {
-			    angles[i] = RTD *
-				    atan(acrosstrack[i] / bath_default);
-
-			    }
-			
 			}
+		    else if (ndepthgood <= 0)
+			{
+			altitude_use = altitude_default;
+			}
+		    angles[i] = RTD * atan(acrosstrack[i] / altitude_use);
+/*fprintf(stderr,"ndepthgood:%d depth[0]:%f altitude_default:%f altitude_use:%f data[%d]:%f angles:%f\n",
+ndepthgood, depth[0], altitude_default, altitude_use, i, data[i], angles[i]);*/
 		    }
-
 
 		/* now loop over data getting angle based priorities */
 		for (i=0;i<ndata;i++)
 		    {
-		    if (data[i] > 0.0)
+		    if (angles[i] < aangles[0]
+			|| angles[i] > aangles[nangle-1])
+			priorities[i] = 0.0;
+		    else
 			{
-			if (angles[i] < aangles[0]
-			    || angles[i] > aangles[nangle-1])
-			    priorities[i] = 0.0;
-			else
-			    for (j=0;j<nangle-1;j++)
+			for (j=0;j<nangle-1;j++)
+			    {
+			    if (angles[i] >= aangles[j]
+				&& angles[i] < aangles[j+1])
 				{
-				if (angles[i] >= aangles[j]
-				    && angles[i] < aangles[j+1])
-				    {
-				    priorities[i] = apriorities[j]
-					+ (apriorities[j+1] - apriorities[j])
-					* (angles[i] - aangles[j])
-					/ (aangles[j+1] - aangles[j]);
-				    }
+				priorities[i] = apriorities[j]
+				    + (apriorities[j+1] - apriorities[j])
+				    * (angles[i] - aangles[j])
+				    / (aangles[j+1] - aangles[j]);
 				}
-			}		    
+			    }
+			}
 		    }
 		}
 
@@ -3290,9 +3618,9 @@ int mbmosaic_get_priorities(
 		    {
 		    for (i=0;i<ndata;i++)
 			{
-			if (data[i] > 0.0 && acrosstrack[i] < 0.0)
+			if (acrosstrack[i] < 0.0)
 			    priorities[i] = weight_starboard;
-			else if (data[i] > 0.0)
+			else
 			    priorities[i] = weight_port;
 			}
 		    }
@@ -3303,9 +3631,9 @@ int mbmosaic_get_priorities(
 		    {
 		    for (i=0;i<ndata;i++)
 			{
-			if (data[i] > 0.0 && acrosstrack[i] < 0.0)
+			if (acrosstrack[i] < 0.0)
 			    priorities[i] = weight_starboard * priorities[i];
-			else if (data[i] > 0.0)
+			else
 			    priorities[i] = weight_port * priorities[i];
 			}
 		    }
@@ -3536,6 +3864,102 @@ int get_bathyslope(int verbose,
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       depth:           %f\n",*depth);
 		fprintf(stderr,"dbg2       slope:           %f\n",*slope);
+		fprintf(stderr,"dbg2       error:           %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:          %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbmosaic_get_footprint(
+		int	verbose, 
+		int	mode,
+		double	beamwidth_xtrack,
+		double	beamwidth_ltrack,
+		double	altitude,
+		double	acrosstrack,
+		double	alongtrack,
+		double	acrosstrack_spacing,
+		struct footprint *footprint,
+		int	*error)
+{
+	char	*function_name = "mbmosaic_get_footprint";
+	int	status = MB_SUCCESS;
+	double	r, x, y;
+	double	theta, phi, thetap, phip;
+	double	pitch, roll, pitchp, rollp;
+	double	xsonar[4], ysonar[4];
+	
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBlist function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:             %d\n",verbose);
+		fprintf(stderr,"dbg2       mode:                %d\n",mode);
+		fprintf(stderr,"dbg2       beamwidth_xtrack:    %f\n",beamwidth_xtrack);
+		fprintf(stderr,"dbg2       beamwidth_ltrack:    %f\n",beamwidth_ltrack);
+		fprintf(stderr,"dbg2       altitude:            %f\n",altitude);
+		fprintf(stderr,"dbg2       acrosstrack:         %f\n",acrosstrack);
+		fprintf(stderr,"dbg2       alongtrack:          %f\n",alongtrack);
+		fprintf(stderr,"dbg2       acrosstrack_spacing: %f\n",acrosstrack_spacing);
+		}
+		
+	/* calculate footprint location in sonar coordinates */
+	r = sqrt(altitude * altitude + acrosstrack * acrosstrack + alongtrack * alongtrack);
+	mb_xyz_to_takeoff(verbose, acrosstrack, alongtrack, altitude, &theta, &phi, error);
+	mb_takeoff_to_rollpitch(verbose, theta, phi, &pitch, &roll, error);
+	/* z = r * cos(DTR * thetap); */
+	
+	pitchp = pitch - 0.5 * beamwidth_ltrack;
+	rollp = roll - 0.5 * beamwidth_xtrack;
+	mb_rollpitch_to_takeoff(verbose, pitchp, rollp, &thetap, &phip, error);
+	if (mode == MBMOSAIC_FOOTPRINT_REAL)
+		footprint->x[0] = r * sin(DTR * thetap) * cos(DTR * phip);
+	else
+		footprint->x[0] = acrosstrack - 0.5 * acrosstrack_spacing;
+	footprint->y[0] = r * sin(DTR * thetap) * sin(DTR * phip);
+	
+	pitchp = pitch - 0.5 * beamwidth_ltrack;
+	rollp = roll + 0.5 * beamwidth_xtrack;
+	mb_rollpitch_to_takeoff(verbose, pitchp, rollp, &thetap, &phip, error);
+	if (mode == MBMOSAIC_FOOTPRINT_REAL)
+		footprint->x[1] = r * sin(DTR * thetap) * cos(DTR * phip);
+	else
+		footprint->x[1] = acrosstrack + 0.5 * acrosstrack_spacing;
+	footprint->y[1] = r * sin(DTR * thetap) * sin(DTR * phip);
+	
+	pitchp = pitch + 0.5 * beamwidth_ltrack;
+	rollp = roll + 0.5 * beamwidth_xtrack;
+	mb_rollpitch_to_takeoff(verbose, pitchp, rollp, &thetap, &phip, error);
+	if (mode == MBMOSAIC_FOOTPRINT_REAL)
+		footprint->x[2] = r * sin(DTR * thetap) * cos(DTR * phip);
+	else
+		footprint->x[2] = acrosstrack + 0.5 * acrosstrack_spacing;
+	footprint->y[2] = r * sin(DTR * thetap) * sin(DTR * phip);
+	
+	pitchp = pitch + 0.5 * beamwidth_ltrack;
+	rollp = roll - 0.5 * beamwidth_xtrack;
+	mb_rollpitch_to_takeoff(verbose, pitchp, rollp, &thetap, &phip, error);
+	if (mode == MBMOSAIC_FOOTPRINT_REAL)
+		footprint->x[3] = r * sin(DTR * thetap) * cos(DTR * phip);
+	else
+		footprint->x[3] = acrosstrack - 0.5 * acrosstrack_spacing;
+	footprint->y[3] = r * sin(DTR * thetap) * sin(DTR * phip);
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBlist function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		for (i=0;i<4;i++)
+			fprintf(stderr,"dbg2       footprint: x[%d]:%f y[%d]:%f\n",i,footprint->x[i],i,footprint->y[i]);
 		fprintf(stderr,"dbg2       error:           %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:          %d\n",status);

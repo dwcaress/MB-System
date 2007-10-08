@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrid.c	5/2/94
- *    $Id: mbgrid.c,v 5.38 2007-05-12 19:34:37 caress Exp $
+ *    $Id: mbgrid.c,v 5.39 2007-10-08 16:48:07 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 2000, 2002, 2003, 2006, 2007 by
  *    David W. Caress (caress@mbari.org)
@@ -38,6 +38,9 @@
  * Rererewrite:	January 2, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.38  2007/05/12 19:34:37  caress
+ * Fixed -G4 option.
+ *
  * Revision 5.37  2006/08/09 22:41:27  caress
  * Fixed programs that read or write grids so that they do not use the GMT_begin() function; these programs will now work when GMT is built in the default fashion, when GMT is built in the default fashion, with "advisory file locking" enabled.
  *
@@ -365,6 +368,7 @@
 #include "../../include/mb_format.h"
 #include "../../include/mb_define.h"
 #include "../../include/mb_io.h"
+#include "../../include/mb_info.h"
 
 /* GMT include files */
 #include "gmt.h"
@@ -430,7 +434,7 @@ double mbgrid_erf();
 FILE	*outfp;
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbgrid.c,v 5.38 2007-05-12 19:34:37 caress Exp $";
+static char rcs_id[] = "$Id: mbgrid.c,v 5.39 2007-10-08 16:48:07 caress Exp $";
 static char program_name[] = "mbgrid";
 static char help_message[] =  "mbgrid is an utility used to grid bathymetry, amplitude, or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbgrid -Ifilelist -Oroot \
@@ -483,6 +487,7 @@ main (int argc, char **argv)
 	int	xdim = 0;
 	int	ydim = 0;
 	int	spacing_priority = MB_NO;
+	int	set_dimensions = MB_NO;
 	int	set_spacing = MB_NO;
 	double	dx_set = 0.0;
 	double	dy_set = 0.0;
@@ -545,6 +550,8 @@ main (int argc, char **argv)
 	double	*sslon = NULL;
 	double	*sslat = NULL;
 	char	comment[MB_COMMENT_MAXLINE];
+	struct mb_info_struct mb_info;
+	int	formatread;
 
 	/* lon,lat,value triples variables */
 	double	tlon;
@@ -553,6 +560,7 @@ main (int argc, char **argv)
 
 	/* grid variables */
 	double	gbnd[4], wbnd[4], obnd[4];
+	int	gbndset = MB_NO;
 	double	xlon, ylat, xx, yy;
 	double	factor, weight, topofactor;
 	int	gxdim, gydim, offx, offy, xtradim;
@@ -689,7 +697,9 @@ main (int argc, char **argv)
 			break;
 		case 'D':
 		case 'd':
-			sscanf (optarg,"%d/%d", &xdim, &ydim);
+			n = sscanf (optarg,"%d/%d", &xdim, &ydim);
+			if (n == 2)
+				set_dimensions = MB_YES;
 			flag++;
 			break;
 		case 'E':
@@ -789,6 +799,7 @@ main (int argc, char **argv)
 		case 'R':
 		case 'r':
 			mb_get_bounds(optarg, gbnd);
+			gbndset = MB_YES;
 			flag++;
 			break;
 		case 'S':
@@ -921,6 +932,28 @@ main (int argc, char **argv)
 		fprintf(outfp,"\n%s\n",help_message);
 		fprintf(outfp,"\nusage: %s\n", usage_message);
 		exit(error);
+		}
+		
+	/* if bounds not set get bounds of input data */
+	if (gbndset == MB_NO)
+		{
+		formatread = -1;
+		status = mb_get_info_datalist(verbose, filelist, &formatread, 
+				&mb_info, lonflip, &error);
+				
+		gbnd[0] = mb_info.lon_min;
+		gbnd[1] = mb_info.lon_max;
+		gbnd[2] = mb_info.lat_min;
+		gbnd[3] = mb_info.lat_max;
+		gbndset = MB_YES;
+		
+		if (set_spacing == MB_NO && set_dimensions == MB_NO)
+			{
+			dx_set = 0.02 * mb_info.altitude_max;
+			dy_set = 0.02 * mb_info.altitude_max;
+			set_spacing = MB_YES;
+			strcpy(units, "meters");			
+			}
 		}
 
 	/* if bounds not specified then quit */
@@ -1788,116 +1821,134 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], navlon, navlat);*/
 				    foot_dyn = 0.0;
 				    }
 				foot_range = sqrt(foot_lateral * foot_lateral + altitude * altitude);
-				foot_theta = RTD * atan2(foot_lateral, (bath[ib] - sonardepth));
-				foot_dtheta = 0.5 * mb_io_ptr->beamwidth_xtrack;
-				foot_dphi = 0.5 * mb_io_ptr->beamwidth_ltrack;
-				if (foot_dtheta <= 0.0)
-				    foot_dtheta = 1.0;
-				if (foot_dphi <= 0.0)
-				    foot_dphi = 1.0;
-/*fprintf(outfp, "dx:%f dy:%f lateral:%f range:%f theta:%f\n", 
-foot_dx, foot_dy, foot_lateral, foot_range, foot_theta);*/
-				foot_hwidth =(bath[ib] - sonardepth) * tan(DTR * (foot_theta + foot_dtheta)) 
-						    - foot_lateral;
-				foot_hlength = foot_range * tan(DTR * foot_dphi);
-/*fprintf(outfp, "dx:%f dy:%f mtodeglon:%f mtodeglat:%f\n", 
-dx, dy, mtodeglon, mtodeglat);*/
+				if (foot_range > 0.0)
+				    {
+				    foot_theta = RTD * atan2(foot_lateral, (bath[ib] - sonardepth));
+				    foot_dtheta = 0.5 * mb_io_ptr->beamwidth_xtrack;
+				    foot_dphi = 0.5 * mb_io_ptr->beamwidth_ltrack;
+				    if (foot_dtheta <= 0.0)
+					foot_dtheta = 1.0;
+				    if (foot_dphi <= 0.0)
+					foot_dphi = 1.0;
+				    foot_hwidth =(bath[ib] - sonardepth) * tan(DTR * (foot_theta + foot_dtheta)) 
+							- foot_lateral;
+				    foot_hlength = foot_range * tan(DTR * foot_dphi);
+/* fprintf(outfp, "dx:%f dy:%f lateral:%f range:%f theta:%f dtheta:%f dphi:%f fhwidth:%f fhlength:%f\n", 
+foot_dx, foot_dy, foot_lateral, foot_range, foot_theta,foot_dtheta,foot_dphi,foot_hwidth,foot_hlength);*/
 
-				/* get range of bins around footprint to examine */
-			  	if (use_projection == MB_YES)
-			  	  {
-				  foot_wix = fabs(foot_hwidth * cos(DTR * foot_theta) / dx);
-				  foot_wiy = fabs(foot_hwidth * sin(DTR * foot_theta) / dx);
-				  foot_lix = fabs(foot_hlength * sin(DTR * foot_theta) / dy);
-				  foot_liy = fabs(foot_hlength * cos(DTR * foot_theta) / dy);
-				  }
-			  	else
-			  	  {
-				  foot_wix = fabs(foot_hwidth * cos(DTR * foot_theta) * mtodeglon / dx);
-				  foot_wiy = fabs(foot_hwidth * sin(DTR * foot_theta) * mtodeglon / dx);
-				  foot_lix = fabs(foot_hlength * sin(DTR * foot_theta) * mtodeglat / dy);
-				  foot_liy = fabs(foot_hlength * cos(DTR * foot_theta) * mtodeglat / dy);
-				  }
-				foot_dix = 2 * MAX(foot_wix, foot_lix);
-				foot_diy = 2 * MAX(foot_wiy, foot_liy);
+				    /* get range of bins around footprint to examine */
+			  	    if (use_projection == MB_YES)
+			  	      {
+				      foot_wix = fabs(foot_hwidth * cos(DTR * foot_theta) / dx);
+				      foot_wiy = fabs(foot_hwidth * sin(DTR * foot_theta) / dx);
+				      foot_lix = fabs(foot_hlength * sin(DTR * foot_theta) / dy);
+				      foot_liy = fabs(foot_hlength * cos(DTR * foot_theta) / dy);
+				      }
+			  	    else
+			  	      {
+				      foot_wix = fabs(foot_hwidth * cos(DTR * foot_theta) * mtodeglon / dx);
+				      foot_wiy = fabs(foot_hwidth * sin(DTR * foot_theta) * mtodeglon / dx);
+				      foot_lix = fabs(foot_hlength * sin(DTR * foot_theta) * mtodeglat / dy);
+				      foot_liy = fabs(foot_hlength * cos(DTR * foot_theta) * mtodeglat / dy);
+				      }
+				    foot_dix = 2 * MAX(foot_wix, foot_lix);
+				    foot_diy = 2 * MAX(foot_wiy, foot_liy);
 /*fprintf(outfp, "foot_hwidth:%f foot_hlength:%f\n", foot_hwidth, foot_hlength);
 fprintf(outfp, "foot_wix:%d foot_wiy:%d  foot_lix:%d foot_liy:%d    foot_dix:%d foot_diy:%d\n", 
 foot_wix, foot_wiy, foot_lix, foot_liy, foot_dix, foot_diy);*/
-			        ix1 = MAX(ix - foot_dix, 0);
-			        ix2 = MIN(ix + foot_dix, gxdim - 1);
-			        iy1 = MAX(iy - foot_diy, 0);
-			        iy2 = MIN(iy + foot_diy, gydim - 1);
+			            ix1 = MAX(ix - foot_dix, 0);
+			            ix2 = MIN(ix + foot_dix, gxdim - 1);
+			            iy1 = MAX(iy - foot_diy, 0);
+			            iy2 = MIN(iy + foot_diy, gydim - 1);
 /*fprintf(outfp, "ix1:%d ix2:%d iy1:%d iy2:%d\n", ix1, ix2, iy1, iy2);*/
-				
-				/* loop over neighborhood of bins */
-			        for (ii=ix1;ii<=ix2;ii++)
-			         for (jj=iy1;jj<=iy2;jj++)
-				   {
-				   /* find center of bin in lon lat degrees from sounding center */
-				   kgrid = ii * gydim + jj;				   
-				   xx = (wbnd[0] + ii*dx + 0.5*dx - bathlon[ib]);
-				   yy = (wbnd[2] + jj*dy + 0.5*dy - bathlat[ib]);
-				   
-				   /* get center and corners of bin in meters from sounding center */
-			  	  if (use_projection == MB_YES)
-			  	    {
-				     xx0 = xx;
-				     yy0 = yy;
-				     bdx = 0.5 * dx;
-				     bdy = 0.5 * dy;
-				     }
-			  	  else
-			  	    {
-				     xx0 = xx / mtodeglon;
-				     yy0 = yy / mtodeglat;
-				     bdx = 0.5 * dx/ mtodeglon;
-				     bdy = 0.5 * dy/ mtodeglat;
-				     }
-				   xx1 = xx0 - bdx;
-				   xx2 = xx0 + bdx;
-				   yy1 = yy0 - bdy;
-				   yy2 = yy0 + bdy;
+
+				    /* loop over neighborhood of bins */
+			            for (ii=ix1;ii<=ix2;ii++)
+			             for (jj=iy1;jj<=iy2;jj++)
+				       {
+				       /* find center of bin in lon lat degrees from sounding center */
+				       kgrid = ii * gydim + jj;				   
+				       xx = (wbnd[0] + ii*dx + 0.5*dx - bathlon[ib]);
+				       yy = (wbnd[2] + jj*dy + 0.5*dy - bathlat[ib]);
+
+				       /* get center and corners of bin in meters from sounding center */
+			  	      if (use_projection == MB_YES)
+			  		{
+					 xx0 = xx;
+					 yy0 = yy;
+					 bdx = 0.5 * dx;
+					 bdy = 0.5 * dy;
+					 }
+			  	      else
+			  		{
+					 xx0 = xx / mtodeglon;
+					 yy0 = yy / mtodeglat;
+					 bdx = 0.5 * dx/ mtodeglon;
+					 bdy = 0.5 * dy/ mtodeglat;
+					 }
+				       xx1 = xx0 - bdx;
+				       xx2 = xx0 + bdx;
+				       yy1 = yy0 - bdy;
+				       yy2 = yy0 + bdy;
 /*fprintf(outfp, "ii:%d jj:%d ix:%d iy:%d xx:%f yy:%f\n", ii, jj, ix, iy, xx, yy);
 fprintf(outfp, "p0: %f %f   p1: %f %f   p2: %f %f\n", 
 xx0, yy0, xx1, yy1, xx2, yy2);*/
-				   
-				   /* rotate center and corners of bin to footprint coordinates */
-				   prx[0] = xx0 * foot_dxn + yy0 * foot_dyn;
-				   pry[0] = -xx0 * foot_dyn + yy0 * foot_dxn;
-				   prx[1] = xx1 * foot_dxn + yy1 * foot_dyn;
-				   pry[1] = -xx1 * foot_dyn + yy1 * foot_dxn;
-				   prx[2] = xx2 * foot_dxn + yy1 * foot_dyn;
-				   pry[2] = -xx2 * foot_dyn + yy1 * foot_dxn;
-				   prx[3] = xx1 * foot_dxn + yy2 * foot_dyn;
-				   pry[3] = -xx1 * foot_dyn + yy2 * foot_dxn;
-				   prx[4] = xx2 * foot_dxn + yy2 * foot_dyn;
-				   pry[4] = -xx2 * foot_dyn + yy2 * foot_dxn;
-				   
-				   /* get weight integrated over bin */
-				   mbgrid_weight(verbose, foot_hwidth, foot_hlength, scale, 
-						prx[0], pry[0], bdx, bdy, 
-						&prx[1], &pry[1], 
-						&weight, &use_weight, &error);
 
-				   if (use_weight != MBGRID_USE_NO)
-					{
-					weight *= file_weight;
-					norm[kgrid] = norm[kgrid] + weight;
-					grid[kgrid] = grid[kgrid] 
-						+ weight*topofactor*bath[ib];
-					sigma[kgrid] = sigma[kgrid] 
-						+ weight*topofactor*topofactor
-						*bath[ib]*bath[ib];
-					if (use_weight == MBGRID_USE_YES)
+				       /* rotate center and corners of bin to footprint coordinates */
+				       prx[0] = xx0 * foot_dxn + yy0 * foot_dyn;
+				       pry[0] = -xx0 * foot_dyn + yy0 * foot_dxn;
+				       prx[1] = xx1 * foot_dxn + yy1 * foot_dyn;
+				       pry[1] = -xx1 * foot_dyn + yy1 * foot_dxn;
+				       prx[2] = xx2 * foot_dxn + yy1 * foot_dyn;
+				       pry[2] = -xx2 * foot_dyn + yy1 * foot_dxn;
+				       prx[3] = xx1 * foot_dxn + yy2 * foot_dyn;
+				       pry[3] = -xx1 * foot_dyn + yy2 * foot_dxn;
+				       prx[4] = xx2 * foot_dxn + yy2 * foot_dyn;
+				       pry[4] = -xx2 * foot_dyn + yy2 * foot_dxn;
+
+				       /* get weight integrated over bin */
+				       mbgrid_weight(verbose, foot_hwidth, foot_hlength, scale, 
+						    prx[0], pry[0], bdx, bdy, 
+						    &prx[1], &pry[1], 
+						    &weight, &use_weight, &error);
+
+				       if (use_weight != MBGRID_USE_NO)
 					    {
-					    num[kgrid]++;
-					    if (ii == ix && jj == iy)
-						    cnt[kgrid]++;
+					    weight *= file_weight;
+					    norm[kgrid] = norm[kgrid] + weight;
+					    grid[kgrid] = grid[kgrid] 
+						    + weight*topofactor*bath[ib];
+					    sigma[kgrid] = sigma[kgrid] 
+						    + weight*topofactor*topofactor
+						    *bath[ib]*bath[ib];
+					    if (use_weight == MBGRID_USE_YES)
+						{
+						num[kgrid]++;
+						if (ii == ix && jj == iy)
+							cnt[kgrid]++;
+						}
 					    }
-					}
-				   }
-				ndata++;
-				ndatafile++;
+				       }
+				    ndata++;
+				    ndatafile++;
+				    }
+				    
+				/* else for xyz data without footprint */
+				else if (ix >= 0 && ix < gxdim 
+					  && iy >= 0 && iy < gydim)
+				    {
+			            kgrid = ix*gydim + iy;
+				    norm[kgrid] = norm[kgrid] + file_weight;
+				    grid[kgrid] = grid[kgrid] 
+					    + file_weight*topofactor*bath[ib];
+				    sigma[kgrid] = sigma[kgrid] 
+					    + file_weight*topofactor*topofactor
+					    *bath[ib]*bath[ib];
+				    num[kgrid]++;
+				    cnt[kgrid]++;
+				    ndata++;
+				    ndatafile++;
+				    }
 				}
 			      }
 			  }
@@ -1932,6 +1983,7 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 	nbinset = 0;
 	nbinzero = 0;
 	nbinspline = 0;
+	nbinbackground = 0;
 	for (i=0;i<gxdim;i++)
 		for (j=0;j<gydim;j++)
 			{
@@ -1949,10 +2001,10 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 				grid[kgrid] = clipvalue;
 				sigma[kgrid] = 0.0;
 				}
-			/*fprintf(outfp,"%d %d %d  %f %f %f   %d %d %f %f\n",
-				i,j,kgrid,
-				grid[kgrid], wbnd[0] + i*dx, wbnd[2] + j*dy,
-				num[kgrid],cnt[kgrid],norm[kgrid],sigma[kgrid]);*/
+/* fprintf(outfp,"%d %d %d  %f %f %f   %d %d %f %f\n",
+i,j,kgrid,
+grid[kgrid], wbnd[0] + i*dx, wbnd[2] + j*dy,
+num[kgrid],cnt[kgrid],norm[kgrid],sigma[kgrid]);*/
 			}
 
 	/***** end of footprint gridding *****/
@@ -2375,7 +2427,7 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 			  if (use_projection == MB_YES)
 			    {
 			    for (ib=0;ib<pixels_ss;ib++)
-			      if (ss[ib] > 0.0)
+			      if (ss[ib] > MB_SIDESCAN_NULL)
 				mb_proj_forward(verbose, pjptr, 
 						sslon[ib], sslat[ib],
 						&sslon[ib], &sslat[ib],
@@ -2384,7 +2436,7 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 
 			  /* deal with data */
 			  for (ib=0;ib<pixels_ss;ib++) 
-			    if (ss[ib] > 0.0)
+			    if (ss[ib] > MB_SIDESCAN_NULL)
 			      {
 			      /* get position in grid */
 			      ix = (sslon[ib] - wbnd[0] + 0.5*dx)/dx;
@@ -3011,7 +3063,7 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 			  if (use_projection == MB_YES)
 			    {
 			    for (ib=0;ib<pixels_ss;ib++)
-			      if (ss[ib] > 0.0)
+			      if (ss[ib] > MB_SIDESCAN_NULL)
 				mb_proj_forward(verbose, pjptr, 
 						sslon[ib], sslat[ib],
 						&sslon[ib], &sslat[ib],
@@ -3020,7 +3072,7 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 
 			  /* deal with data */
 			  for (ib=0;ib<pixels_ss;ib++) 
-			    if (ss[ib] > 0.0)
+			    if (ss[ib] > MB_SIDESCAN_NULL)
 			      {
 			      ix = (sslon[ib] - wbnd[0] + 0.5*dx)/dx;
 			      iy = (sslat[ib] - wbnd[2] + 0.5*dy)/dy;
@@ -3459,11 +3511,16 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 
 		/* do the interpolation */
 		cay = tension;
-		xmin = gbnd[0];
-		ymin = gbnd[2];
+		xmin = gbnd[0] - 0.5 * dx;
+		ymin = gbnd[2] - 0.5 * dy;
 		ddx = dx;
 		ddy = dy;
 		fprintf(outfp,"\nDoing Zgrid spline interpolation with %d data points...\n",ndata);
+for (i=0;i<ndata/3;i++)
+{
+if (sdata[3*i+2]>2000.0)
+fprintf(stderr,"%d %f\n",i,sdata[3*i+2]);
+}
 		mb_zgrid(sgrid,&gxdim,&gydim,&xmin,&ymin,
 			&ddx,&ddy,sdata,&ndata,
 			work1,work2,work3,&cay,&clip);
@@ -3478,9 +3535,9 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 
 		/* translate the interpolation into the grid array 
 		    filling only data gaps */
+		zflag = 5.0e34;
 		if (clipmode == MBGRID_INTERP_GAP)
 			{
-			zflag = 5.0e34;
 			for (i=0;i<gxdim;i++)
 			    for (j=0;j<gydim;j++)
 				{
@@ -3602,7 +3659,6 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 		    filling by proximity */
 		else if (clipmode == MBGRID_INTERP_NEAR)
 			{
-			zflag = 5.0e34;
 			for (i=0;i<gxdim;i++)
 			    for (j=0;j<gydim;j++)
 				{
@@ -3993,11 +4049,12 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 			tension,sgrid);
 #else
 		cay = tension;
-		xmin = gbnd[0];
-		ymin = gbnd[2];
+		xmin = gbnd[0] - 0.5 * dx;
+		ymin = gbnd[2] - 0.5 * dy;
 		ddx = dx;
 		ddy = dy;
 		clip = MAX(gxdim,gydim);
+		fprintf(outfp,"\nDoing Zgrid spline interpolation with %d background points...\n",nbackground);
 		mb_zgrid(sgrid,&gxdim,&gydim,&xmin,&ymin,
 			&ddx,&ddy,bdata,&nbackground,
 			work1,work2,work3,&cay,&clip);
@@ -4162,7 +4219,7 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 			output[kout] = (float) grid[kgrid];
 			if (gridkind != MBGRID_ASCII
 				&& gridkind != MBGRID_ARCASCII
-				&& grid[kgrid] == clipvalue)
+				&& grid[kgrid] >= clipvalue)
 				output[kout] = outclipvalue;
 			}
 	if (gridkind == MBGRID_ASCII)

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbanglecorrect.c	8/13/95
- *    $Id: mbanglecorrect.c,v 5.5 2006-01-18 15:17:00 caress Exp $
+ *    $Id: mbanglecorrect.c,v 5.6 2007-10-08 16:48:07 caress Exp $
  *
  *    Copyright (c) 1995, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -47,6 +47,9 @@ The default input and output streams are stdin and stdout.\n";
  * Date:	January 12, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2006/01/18 15:17:00  caress
+ * Added stdlib.h include.
+ *
  * Revision 5.4  2005/03/25 04:42:59  caress
  * Standardized the string lengths used for filenames and comment data.
  *
@@ -182,7 +185,7 @@ struct mbanglecorrect_ping_struct
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbanglecorrect.c,v 5.5 2006-01-18 15:17:00 caress Exp $";
+	static char rcs_id[] = "$Id: mbanglecorrect.c,v 5.6 2007-10-08 16:48:07 caress Exp $";
 	static char program_name[] = "MBANGLECORRECT";
 	static char help_message[] =  
 "mbanglecorrect is a tool for processing sidescan data.  This program\n\t\
@@ -1161,7 +1164,7 @@ The default input and output streams are stdin and stdout.\n";
 		      if (ampkind == MBANGLECORRECT_SS)
 		      for (i=0;i<ping[jj].pixels_ss;i++)
 			{
-			if (ping[jj].ss[i] > 0.0)
+			if (ping[jj].ss[i] > MB_SIDESCAN_NULL)
 			    {
 			    if (ping[jj].ndepths > 1)
 				{
@@ -1331,7 +1334,7 @@ The default input and output streams are stdin and stdout.\n";
 		    for (i=0;i<ping[j].pixels_ss;i++)
 			{
 			ping[j].dataprocess[i] = 0.0;
-			if (ping[j].ss[i] > 0.0)
+			if (ping[j].ss[i] > MB_SIDESCAN_NULL)
 			    {
 			    if (ping[j].ndepths > 1)
 				{
@@ -1623,11 +1626,11 @@ ss[iss],ssacrosstrack[iss]);*/
 		
 		/* now zero sidescan if not surrounded by good bathy */
 		if (!mb_beam_ok(beamflag[ibath]) || !mb_beam_ok(beamflag[ibath+1]))
-		    ss[iss] = 0.0;
+		    ss[iss] = MB_SIDESCAN_NULL;
 		else if (ssacrosstrack[iss] < bathacrosstrack[ibath])
-		    ss[iss] = 0.0;
+		    ss[iss] = MB_SIDESCAN_NULL;
 		else if (ssacrosstrack[iss] > bathacrosstrack[ibath+1])
-		    ss[iss] = 0.0;
+		    ss[iss] = MB_SIDESCAN_NULL;
 		}
 	    }
 	
@@ -1636,7 +1639,7 @@ ss[iss],ssacrosstrack[iss]);*/
 	    {
 	    for (iss=0;iss<nss;iss++)
 		{
-		ss[iss] = 0.0;
+		ss[iss] = MB_SIDESCAN_NULL;
 		}		
 	    }
 

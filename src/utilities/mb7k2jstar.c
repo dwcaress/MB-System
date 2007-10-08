@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb7k2jstar.c	5/19/2005
- *    $Id: mb7k2jstar.c,v 5.7 2006-12-15 21:42:49 caress Exp $
+ *    $Id: mb7k2jstar.c,v 5.8 2007-10-08 16:48:07 caress Exp $
  *
- *    Copyright (c) 2005 by
+ *    Copyright (c) 2005, 2007 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -20,6 +20,9 @@
  * Date:	May 19, 2005
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2006/12/15 21:42:49  caress
+ * Incremental CVS update.
+ *
  * Revision 5.6  2006/04/26 22:05:25  caress
  * Changes to handle MBARI Mapping AUV data better.
  *
@@ -77,8 +80,10 @@
 #define MBES_ROUTE_WAYPOINT_TRANSIT	2
 #define MBES_ROUTE_WAYPOINT_STARTLINE	3
 #define MBES_ROUTE_WAYPOINT_ENDLINE	4
+#define MBES_ONLINE_THRESHOLD		15.0
+#define MBES_ONLINE_COUNT		30
 
-static char rcs_id[] = "$Id: mb7k2jstar.c,v 5.7 2006-12-15 21:42:49 caress Exp $";
+static char rcs_id[] = "$Id: mb7k2jstar.c,v 5.8 2007-10-08 16:48:07 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
@@ -202,6 +207,7 @@ main (int argc, char **argv)
 	/* route and auto-line data */
 	char	route_file[MB_PATH_MAXLINE];
 	int	route_file_set = MB_NO;
+	int	checkroutebearing = MB_NO;
 	int	rawroutefile = MB_NO;
 	char	lineroot[MB_PATH_MAXLINE];
 	int	nroutepoint = 0;
@@ -212,9 +218,10 @@ main (int argc, char **argv)
 	int	waypoint;
 	double	*routelon = NULL;
 	double	*routelat = NULL;
+	double	*routeheading = NULL;
 	int	*routewaypoint = NULL;
 	double	range;
-	double	rangethreshold = 25.0;
+	double	rangethreshold = 50.0;
 	double	rangelast;
 	int	activewaypoint = 0;
 	int	startline = 1;
@@ -262,6 +269,8 @@ main (int argc, char **argv)
 	double	lastlon;
 	double	lastlat;
 	double	lastheading;
+	double	headingdiff;
+	int	oktowrite;
 	double	dx, dy;
 	FILE	*fp = NULL;
 	char	*result;
@@ -272,6 +281,9 @@ main (int argc, char **argv)
 	int	found;
 	
 	int	i, j, k, n;
+	
+	startline = 1;
+	strcpy(lineroot, "jstar");
 
 	/* get current default values */
 	status = mb_defaults(verbose,&format,&pings,&lonflip,bounds,
@@ -281,7 +293,7 @@ main (int argc, char **argv)
 	strcpy (read_file, "datalist.mb-1");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "A:a:B:b:CcF:f:G:g:I:i:L:l:O:o:R:r:S:s:T:t:XxVvHh")) != -1)
+	while ((c = getopt(argc, argv, "A:a:B:b:CcF:f:G:g:I:i:L:l:MmO:o:R:r:S:s:T:t:XxVvHh")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -365,6 +377,11 @@ main (int argc, char **argv)
 		case 'L':
 		case 'l':
 			sscanf (optarg,"%d/%s", &startline, lineroot);
+			flag++;
+			break;
+		case 'M':
+		case 'm':
+			checkroutebearing = MB_YES;
 			flag++;
 			break;
 		case 'O':
@@ -457,6 +474,7 @@ main (int argc, char **argv)
 		fprintf(stderr,"dbg2       file:                %s\n",file);
 		fprintf(stderr,"dbg2       route_file_set:      %d\n",route_file_set);
 		fprintf(stderr,"dbg2       route_file:          %s\n",route_file);
+		fprintf(stderr,"dbg2       checkroutebearing:   %d\n",checkroutebearing);
 		fprintf(stderr,"dbg2       output_file:         %s\n",output_file);
 		fprintf(stderr,"dbg2       output_file_set:     %d\n",output_file_set);
 		fprintf(stderr,"dbg2       lineroot:            %s\n",lineroot);
@@ -528,8 +546,8 @@ main (int argc, char **argv)
 				}
 			else
 				{
-				nget = sscanf(comment,"%lf %lf %lf %d",
-				    &lon, &lat, &topo, &waypoint);
+				nget = sscanf(comment,"%lf %lf %lf %d %lf",
+				    &lon, &lat, &topo, &waypoint, &heading);
 				if (comment[0] == '#')
 					{
 					fprintf(stderr,"buffer:%s",comment);
@@ -553,6 +571,8 @@ main (int argc, char **argv)
 								(char **)&routelon, &error);
 					status = mb_realloc(verbose, nroutepointalloc * sizeof(double),
 								(char **)&routelat, &error);
+					status = mb_realloc(verbose, nroutepointalloc * sizeof(double),
+								(char **)&routeheading, &error);
 					status = mb_realloc(verbose, nroutepointalloc * sizeof(int),
 								(char **)&routewaypoint, &error);
 				    	if (status != MB_SUCCESS)
@@ -571,6 +591,7 @@ main (int argc, char **argv)
 					{
 					routelon[nroutepoint] = lon;
 					routelat[nroutepoint] = lat;
+					routeheading[nroutepoint] = heading;
 					routewaypoint[nroutepoint] = waypoint;
 					nroutepoint++;
 					}
@@ -585,6 +606,7 @@ main (int argc, char **argv)
 		activewaypoint = 1;
 		mb_coor_scale(verbose,routelat[activewaypoint], &mtodeglon, &mtodeglat);
 		rangelast = 1000 * rangethreshold;
+		oktowrite = 0;
 
 		/* output status */
 		if (verbose > 0)
@@ -821,12 +843,13 @@ status,error,kind,route_file_set,nroutepoint,navlon,navlat); */
 			dx = (navlon - routelon[activewaypoint]) / mtodeglon;
 			dy = (navlat - routelat[activewaypoint]) / mtodeglat;
 			range = sqrt(dx * dx + dy * dy);
-/* fprintf(stderr,"activewaypoint:%d range:%f\n",activewaypoint, range); */
+/* fprintf(stderr,"activewaypoint:%d range:%f lon:%f %f lat:%f %f dx:%f dy:%f\n",
+activewaypoint, range, navlon, routelon[activewaypoint], navlat, routelat[activewaypoint], dx, dy);*/
 			if (range < rangethreshold 
 				&& (activewaypoint == 0 || range > rangelast) 
 				&& activewaypoint < nroutepoint - 1)
 				{
-/* fprintf(stderr,"New output by range to routepoint: %f\n",range); &/
+/* fprintf(stderr,"New output by range to routepoint: %f\n",range); */
 				/* if needed set flag to open new output file */
 				if (new_output_file == MB_NO)
 				    {
@@ -864,6 +887,7 @@ status,error,kind,route_file_set,nroutepoint,navlon,navlat); */
 				activewaypoint++;
 				mb_coor_scale(verbose,routelat[activewaypoint], &mtodeglon, &mtodeglat);
 				rangelast = 1000 * rangethreshold;
+				oktowrite = 0;
 				}
 			else
 				rangelast = range;
@@ -1013,6 +1037,29 @@ imb_io_ptr->fix_lat[i]);*/
 					&heave, &roll, &pitch, &error);
 			}
 			
+		/* if following a route check that the vehicle has come on line 
+		    	(within MBES_ONLINE_THRESHOLD degrees)
+		    	before writing any data */
+		if (checkroutebearing == MB_YES 
+		    	&& nroutepoint > 1 && activewaypoint > 0)
+		    	{
+			headingdiff = fabs(routeheading[activewaypoint-1] - heading);
+			if (headingdiff > 180.0)
+				headingdiff = 360.0 - headingdiff;
+			if (headingdiff < MBES_ONLINE_THRESHOLD)
+				oktowrite++;
+			else
+				oktowrite = 0;
+/* fprintf(stderr,"heading: %f %f %f oktowrite:%d\n", 
+routeheading[activewaypoint-1],heading,headingdiff,oktowrite);*/
+			}
+		else
+		    	oktowrite = MBES_ONLINE_COUNT;
+/* if (status == MB_SUCCESS)
+fprintf(stderr,"activewaypoint:%d linenumber:%d range:%f   lon: %f %f   lat: %f %f oktowrite:%d\n", 
+activewaypoint,linenumber,range, navlon, 
+routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
+			
 	   	/* handle multibeam data */
 		if (status == MB_SUCCESS && kind == MB_DATA_DATA) 
 			{
@@ -1048,7 +1095,7 @@ imb_io_ptr->fix_lat[i]);*/
 			nreadsbp++;
 			
 			/* output data if desired */
-			if (extract_sbp == MB_YES && nreadnav1 > 0)
+			if (extract_sbp == MB_YES && nreadnav1 > 0 && oktowrite >= MBES_ONLINE_COUNT)
 				{		
 				/* set overall parameters */
 				ostore->kind = kind;
@@ -1284,7 +1331,7 @@ imb_io_ptr->fix_lat[i]);*/
 			nreadsslo++;
 			
 			/* output data if desired */
-			if (extract_sslow == MB_YES && nreadnav1 > 0)
+			if (extract_sslow == MB_YES && nreadnav1 > 0 && oktowrite >= MBES_ONLINE_COUNT)
 				{
 				/* set overall parameters */
 				ostore->kind = MB_DATA_DATA;
@@ -1863,7 +1910,7 @@ imb_io_ptr->fix_lat[i]);*/
 			nreadsshi++;
 			
 			/* output data if desired */
-			if (extract_sshigh == MB_YES && nreadnav1 > 0)
+			if (extract_sshigh == MB_YES && nreadnav1 > 0 && oktowrite >= MBES_ONLINE_COUNT)
 				{
 				/* set overall parameters */
 				ostore->kind = MB_DATA_SIDESCAN2;
@@ -2498,6 +2545,15 @@ imb_io_ptr->fix_lat[i]);*/
 	fprintf(stdout, "     Subbottom:     %d\n", nwritesbptot);
 	fprintf(stdout, "     Low Sidescan:  %d\n", nwritesslotot);
 	fprintf(stdout, "     High Sidescan: %d\n", nwritesshitot);
+		
+	/* deallocate route arrays */
+	if (route_file_set == MB_YES)
+		{	    
+		status = mb_free(verbose, (char **)&routelon, &error);
+		status = mb_free(verbose, (char **)&routelat, &error);
+		status = mb_free(verbose, (char **)&routeheading, &error);
+		status = mb_free(verbose, (char **)&routewaypoint, &error);
+		}
 
 	/* check memory */
 	if (verbose >= 4)
