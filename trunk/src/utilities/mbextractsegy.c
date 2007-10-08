@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbextractsegy.c	4/18/2004
- *    $Id: mbextractsegy.c,v 5.15 2007-03-02 18:22:54 caress Exp $
+ *    $Id: mbextractsegy.c,v 5.16 2007-10-08 16:48:07 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	April 18, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.15  2007/03/02 18:22:54  caress
+ * When extracting lines using a route file, now omits data between where a waypoint is crossed and the sonar comes onto the next line, thus eliminating data during turns.
+ *
  * Revision 5.14  2006/12/15 21:42:49  caress
  * Incremental CVS update.
  *
@@ -93,7 +96,7 @@
 #define MBES_ONLINE_THRESHOLD		15.0
 #define MBES_ONLINE_COUNT		30
 
-static char rcs_id[] = "$Id: mbextractsegy.c,v 5.15 2007-03-02 18:22:54 caress Exp $";
+static char rcs_id[] = "$Id: mbextractsegy.c,v 5.16 2007-10-08 16:48:07 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
@@ -397,42 +400,43 @@ main (int argc, char **argv)
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Control Parameters:\n");
-		fprintf(stderr,"dbg2       verbose:        %d\n",verbose);
-		fprintf(stderr,"dbg2       help:           %d\n",help);
-		fprintf(stderr,"dbg2       format:         %d\n",format);
-		fprintf(stderr,"dbg2       pings:          %d\n",pings);
-		fprintf(stderr,"dbg2       lonflip:        %d\n",lonflip);
-		fprintf(stderr,"dbg2       bounds[0]:      %f\n",bounds[0]);
-		fprintf(stderr,"dbg2       bounds[1]:      %f\n",bounds[1]);
-		fprintf(stderr,"dbg2       bounds[2]:      %f\n",bounds[2]);
-		fprintf(stderr,"dbg2       bounds[3]:      %f\n",bounds[3]);
-		fprintf(stderr,"dbg2       btime_i[0]:     %d\n",btime_i[0]);
-		fprintf(stderr,"dbg2       btime_i[1]:     %d\n",btime_i[1]);
-		fprintf(stderr,"dbg2       btime_i[2]:     %d\n",btime_i[2]);
-		fprintf(stderr,"dbg2       btime_i[3]:     %d\n",btime_i[3]);
-		fprintf(stderr,"dbg2       btime_i[4]:     %d\n",btime_i[4]);
-		fprintf(stderr,"dbg2       btime_i[5]:     %d\n",btime_i[5]);
-		fprintf(stderr,"dbg2       btime_i[6]:     %d\n",btime_i[6]);
-		fprintf(stderr,"dbg2       etime_i[0]:     %d\n",etime_i[0]);
-		fprintf(stderr,"dbg2       etime_i[1]:     %d\n",etime_i[1]);
-		fprintf(stderr,"dbg2       etime_i[2]:     %d\n",etime_i[2]);
-		fprintf(stderr,"dbg2       etime_i[3]:     %d\n",etime_i[3]);
-		fprintf(stderr,"dbg2       etime_i[4]:     %d\n",etime_i[4]);
-		fprintf(stderr,"dbg2       etime_i[5]:     %d\n",etime_i[5]);
-		fprintf(stderr,"dbg2       etime_i[6]:     %d\n",etime_i[6]);
-		fprintf(stderr,"dbg2       speedmin:       %f\n",speedmin);
-		fprintf(stderr,"dbg2       timegap:        %f\n",timegap);
-		fprintf(stderr,"dbg2       sampleformat:   %d\n",sampleformat);
-		fprintf(stderr,"dbg2       timeshift:      %f\n",timeshift);
-		fprintf(stderr,"dbg2       file:           %s\n",file);
-		fprintf(stderr,"dbg2       route_file_set: %d\n",route_file_set);
-		fprintf(stderr,"dbg2       route_file:     %s\n",route_file);
-		fprintf(stderr,"dbg2       output_file_set:%d\n",output_file_set);
-		fprintf(stderr,"dbg2       output_file:    %s\n",output_file);
-		fprintf(stderr,"dbg2       lineroot:       %s\n",lineroot);
-		fprintf(stderr,"dbg2       xscale:         %f\n",xscale);
-		fprintf(stderr,"dbg2       yscale:         %f\n",yscale);
-		fprintf(stderr,"dbg2       maxwidth:       %f\n",maxwidth);
+		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
+		fprintf(stderr,"dbg2       help:              %d\n",help);
+		fprintf(stderr,"dbg2       format:            %d\n",format);
+		fprintf(stderr,"dbg2       pings:             %d\n",pings);
+		fprintf(stderr,"dbg2       lonflip:           %d\n",lonflip);
+		fprintf(stderr,"dbg2       bounds[0]:         %f\n",bounds[0]);
+		fprintf(stderr,"dbg2       bounds[1]:         %f\n",bounds[1]);
+		fprintf(stderr,"dbg2       bounds[2]:         %f\n",bounds[2]);
+		fprintf(stderr,"dbg2       bounds[3]:         %f\n",bounds[3]);
+		fprintf(stderr,"dbg2       btime_i[0]:        %d\n",btime_i[0]);
+		fprintf(stderr,"dbg2       btime_i[1]:        %d\n",btime_i[1]);
+		fprintf(stderr,"dbg2       btime_i[2]:        %d\n",btime_i[2]);
+		fprintf(stderr,"dbg2       btime_i[3]:        %d\n",btime_i[3]);
+		fprintf(stderr,"dbg2       btime_i[4]:        %d\n",btime_i[4]);
+		fprintf(stderr,"dbg2       btime_i[5]:        %d\n",btime_i[5]);
+		fprintf(stderr,"dbg2       btime_i[6]:        %d\n",btime_i[6]);
+		fprintf(stderr,"dbg2       etime_i[0]:        %d\n",etime_i[0]);
+		fprintf(stderr,"dbg2       etime_i[1]:        %d\n",etime_i[1]);
+		fprintf(stderr,"dbg2       etime_i[2]:        %d\n",etime_i[2]);
+		fprintf(stderr,"dbg2       etime_i[3]:        %d\n",etime_i[3]);
+		fprintf(stderr,"dbg2       etime_i[4]:        %d\n",etime_i[4]);
+		fprintf(stderr,"dbg2       etime_i[5]:        %d\n",etime_i[5]);
+		fprintf(stderr,"dbg2       etime_i[6]:        %d\n",etime_i[6]);
+		fprintf(stderr,"dbg2       speedmin:          %f\n",speedmin);
+		fprintf(stderr,"dbg2       timegap:           %f\n",timegap);
+		fprintf(stderr,"dbg2       sampleformat:      %d\n",sampleformat);
+		fprintf(stderr,"dbg2       timeshift:         %f\n",timeshift);
+		fprintf(stderr,"dbg2       file:              %s\n",file);
+		fprintf(stderr,"dbg2       route_file_set:    %d\n",route_file_set);
+		fprintf(stderr,"dbg2       route_file:        %s\n",route_file);
+		fprintf(stderr,"dbg2       checkroutebearing: %d\n",checkroutebearing);
+		fprintf(stderr,"dbg2       output_file_set:   %d\n",output_file_set);
+		fprintf(stderr,"dbg2       output_file:       %s\n",output_file);
+		fprintf(stderr,"dbg2       lineroot:          %s\n",lineroot);
+		fprintf(stderr,"dbg2       xscale:            %f\n",xscale);
+		fprintf(stderr,"dbg2       yscale:            %f\n",yscale);
+		fprintf(stderr,"dbg2       maxwidth:          %f\n",maxwidth);
 		}
 
 	/* if help desired then print it and exit */

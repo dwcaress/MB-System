@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbset.c	1/4/2000
- *    $Id: mbset.c,v 5.27 2006-01-24 22:23:15 caress Exp $
+ *    $Id: mbset.c,v 5.28 2007-10-08 16:48:06 caress Exp $
  *
- *    Copyright (c) 2000, 2002, 2003, 2004 by
+ *    Copyright (c) 2000, 2002, 2003, 2004, 2007 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -30,6 +30,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.27  2006/01/24 22:23:15  caress
+ * 5.0.8beta.
+ *
  * Revision 5.26  2006/01/18 15:17:00  caress
  * Added stdlib.h include.
  *
@@ -139,7 +142,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbset.c,v 5.27 2006-01-24 22:23:15 caress Exp $";
+	static char rcs_id[] = "$Id: mbset.c,v 5.28 2007-10-08 16:48:06 caress Exp $";
 	static char program_name[] = "mbset";
 	static char help_message[] = "MBset is a tool for setting values in an mbprocess parameter file.\n\
 MBprocess is a tool for processing swath sonar bathymetry data  \n\
@@ -900,6 +903,10 @@ the manual pages for mbprocess and mbset. \n\n";
 		    {
 		    sscanf(pargv[i], "AMPCORRSLOPE:%d", &process.mbp_ampcorr_slope);
 		    }
+		else if (strncmp(pargv[i], "AMPSSCORRTOPOFILE", 17) == 0)
+		    {
+		    sscanf(pargv[i], "AMPSSCORRTOPOFILE:%s", process.mbp_ampsscorr_topofile);
+		    }
 	
 		/* sidescan correction */
 		else if (strncmp(pargv[i], "SSCORRMODE", 10) == 0)
@@ -929,6 +936,10 @@ the manual pages for mbprocess and mbset. \n\n";
 		else if (strncmp(pargv[i], "SSCORRSLOPE", 11) == 0)
 		    {
 		    sscanf(pargv[i], "SSCORRSLOPE:%d", &process.mbp_sscorr_slope);
+		    }
+		else if (strncmp(pargv[i], "AMPSSCORRTOPOFILE", 17) == 0)
+		    {
+		    sscanf(pargv[i], "AMPSSCORRTOPOFILE:%s", process.mbp_ampsscorr_topofile);
 		    }
 
 		/* sidescan recalculation */
@@ -1322,8 +1333,13 @@ the manual pages for mbprocess and mbset. \n\n";
 	    	fprintf(stderr,"  Reference grazing angle:       %f deg\n", process.mbp_ampcorr_angle);
 		if (process.mbp_ampcorr_slope == MBP_AMPCORR_IGNORESLOPE)
 	    		fprintf(stderr,"  Amplitude correction ignores seafloor slope\n");
-		else
+		else if (process.mbp_ampcorr_slope == MBP_AMPCORR_USESLOPE)
 	    		fprintf(stderr,"  Amplitude correction uses seafloor slope\n");
+		else
+	    		{
+			fprintf(stderr,"  Amplitude correction uses topography grid for slope\n");
+	    		fprintf(stderr,"  Topography grid file:      %s m\n", process.mbp_ampsscorr_topofile);
+			}
  		}
 	    else
 		fprintf(stderr,"  Amplitude correction off.\n");
@@ -1344,8 +1360,13 @@ the manual pages for mbprocess and mbset. \n\n";
 	    	fprintf(stderr,"  Reference grazing angle:       %f deg\n", process.mbp_sscorr_angle);
 		if (process.mbp_sscorr_slope == MBP_SSCORR_IGNORESLOPE)
 	    		fprintf(stderr,"  Sidescan correction ignores seafloor slope\n");
-		else
+		else if (process.mbp_ampcorr_slope == MBP_SSCORR_USESLOPE)
 	    		fprintf(stderr,"  Sidescan correction uses seafloor slope\n");
+		else
+	    		{
+			fprintf(stderr,"  Sidescan correction uses topography grid for slope\n");
+	    		fprintf(stderr,"  Topography grid file:      %s m\n", process.mbp_ampsscorr_topofile);
+			}
  		}
 	    else
 		fprintf(stderr,"  Sidescan correction off.\n");

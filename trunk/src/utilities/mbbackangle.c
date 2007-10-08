@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbbackangle.c	1/6/95
- *    $Id: mbbackangle.c,v 5.18 2006-08-09 22:41:27 caress Exp $
+ *    $Id: mbbackangle.c,v 5.19 2007-10-08 16:48:07 caress Exp $
  *
- *    Copyright (c) 1995, 2000, 2002, 2003, 2004 by
+ *    Copyright (c) 1995, 2000, 2002, 2003, 2004m 2007 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -25,6 +25,9 @@
  * Date:	January 6, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.18  2006/08/09 22:41:27  caress
+ * Fixed programs that read or write grids so that they do not use the GMT_begin() function; these programs will now work when GMT is built in the default fashion, when GMT is built in the default fashion, with "advisory file locking" enabled.
+ *
  * Revision 5.17  2006/04/26 22:05:26  caress
  * Changes to handle MBARI Mapping AUV data better.
  *
@@ -143,12 +146,52 @@
 /* GMT include files */
 #include "gmt.h"
 
+/* get NaN detector */
+#if defined(isnanf)
+#define check_fnan(x) isnanf((x))
+#elif defined(isnan)
+#define check_fnan(x) isnan((double)(x))
+#elif HAVE_ISNANF == 1
+#define check_fnan(x) isnanf(x)
+extern int isnanf(float x);
+#elif HAVE_ISNAN == 1
+#define check_fnan(x) isnan((double)(x))
+#elif HAVE_ISNAND == 1
+#define check_fnan(x) isnand((double)(x))
+#else
+#define check_fnan(x) ((x) != (x))
+#endif
+
 /* mode defines */
 #define	MBBACKANGLE_AMP	1
 #define	MBBACKANGLE_SS	2
 #define	MBBACKANGLE_INNERSWATHLIMIT 15.0
 #define	MBBACKANGLE_BEAMPATTERN_EMPIRICAL		0
 #define	MBBACKANGLE_BEAMPATTERN_SIDESCAN		1
+
+/* define grid structure */
+struct mbba_grid_struct 
+	{
+	mb_path	file;
+        mb_path projectionname;
+	int	projection_mode;
+	mb_path	projection_id;
+	float	nodatavalue;
+	int	nxy;
+	int	nx;
+	int	ny;
+	double	min;
+	double	max;
+	double	xmin;
+	double	xmax;
+	double	ymin;
+	double	ymax;
+	double	dx;
+	double	dy;
+	float	*data;
+	};
+
+/* function prototypes */
 int output_table(int verbose, FILE *tfp, int ntable, int nping, double time_d,
 	int nangles, double angle_max, double dangle, int symmetry,
 	int *nmean, double *mean, double *sigma, 
@@ -160,24 +203,26 @@ int output_model(int verbose, FILE *tfp,
 	int *nmean, double *mean, double *sigma, 
 	int *error);
 						
-static char rcs_id[] = "$Id: mbbackangle.c,v 5.18 2006-08-09 22:41:27 caress Exp $";
+static char rcs_id[] = "$Id: mbbackangle.c,v 5.19 2007-10-08 16:48:07 caress Exp $";
 static char program_name[] = "mbbackangle";
+static int	pargc;
+static char	**pargv;
 
 /*--------------------------------------------------------------------*/
 
 main (int argc, char **argv)
 {
 	static char help_message[] =  
-"MBbackangle reads a swath sonar data file and generates \n\t\
-a set of tables containing the average sidescan values\n\t\
+"MBbackangle reads a swath sonar data file and generates a set \n\t\
+of tables containing the average amplitude an/or sidescan values\n\t\
 as a function of the angle of interaction (grazing angle) \n\t\
 with the seafloor. Each table represents the symmetrical \n\t\
-average function for a user defined number of pings. The \n\t\
-tables are output to an \".aga\" file which can be applied \n\t\
+average function for a user defined number of pings. The tables \n\t\
+are output to a \".aga\" and \".sga\" files that can be applied \n\t\
 by MBprocess.";
 	static char usage_message[] = "mbbackangle -Ifile \
 [-Akind -Bmode[/beamwidth/depression] -Fformat -Ggridmode/angle/max/nx/ny \
--Nnangles/angle_max -Ppings -Q -Rrefangle -Zaltitude -V -H]";
+-Nnangles/angle_max -Ppings -Q -Rrefangle -Ttopogridfile -Zaltitude -V -H]";
 	extern char *optarg;
 	extern int optkind;
 	int	errflg = 0;
@@ -250,12 +295,14 @@ by MBprocess.";
 	double	*slopes;
 	double	*slopeacrosstrack;
 
+	/* topography parameters */
+	struct mbba_grid_struct grid;
+
 	/* angle function variables */
 	int	amplitude_on = MB_NO;
 	int	sidescan_on = MB_NO;
 	int	dump = MB_NO;
 	int	symmetry = MB_NO;
-	int	useslope = MB_NO;
 	int	nangles = 81;
 	double	angle_max = 80.0;
 	double	dangle;
@@ -283,12 +330,14 @@ by MBprocess.";
 	int	beammode = MBBACKANGLE_BEAMPATTERN_EMPIRICAL;
 	double	ssbeamwidth = 50.0;
 	double	ssdepression = 20.0;
+	int	corr_slope = MB_NO;
+	int	corr_topogrid = MB_NO;
+	int	corr_symmetry = MBP_SSCORR_SYMMETRIC;
 	int	amp_corr_type;
-	int	amp_corr_symmetry = MBP_SSCORR_SYMMETRIC;
 	int	amp_corr_slope = MBP_AMPCORR_IGNORESLOPE;
-	int	ss_corr_type;
-	int	ss_corr_symmetry = MBP_AMPCORR_SYMMETRIC;
 	int	ss_corr_slope = MBP_SSCORR_IGNORESLOPE;
+	int	ss_type;
+	int	ss_corr_type;
 	double	ref_angle;
 	double	ref_angle_default = 30.0;
 	
@@ -319,9 +368,13 @@ by MBprocess.";
 
 	int	ampkind;
 	int	read_data;
+	double	mtodeglon, mtodeglat;
+	double	headingx, headingy;
+	double	r[3], rr;
+	double	v1[3], v2[3], v[3], vv;
+	double	slopefraction, slope;
 	double	bathy;
 	double	altitude_use;
-	double	slope;
 	double	angle;
 	double	ampmax;
 	double	norm;
@@ -339,7 +392,8 @@ by MBprocess.";
 
 	double	d1, d2;
 	int	i, j;
-	int	ix, jy, k, n;
+	int	ix, jy, kgrid, k, n;
+	int	kgrid00, kgrid10,kgrid01,kgrid11;
 	
 	char	*ctime();
 	char	*getenv();
@@ -354,9 +408,14 @@ by MBprocess.";
 
 	/* set default input to stdin */
 	strcpy (read_file, "datalist.mb-1");
+	
+	/* initialize grid */
+	memset(&grid, 0, sizeof (struct mbba_grid_struct));
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "A:a:B:b:CcDdF:f:G:g:HhI:i:N:n:P:p:QqR:r:VvZ:z:")) != -1)
+	pargc = 1;
+	pargv = argv;
+	while ((c = getopt(argc, argv, "A:a:B:b:CcDdF:f:G:g:HhI:i:N:n:P:p:QqR:r:T:t:VvZ:z:")) != -1)
 	  switch (c) 
 		{
 		case 'A':
@@ -441,14 +500,18 @@ by MBprocess.";
 			break;
 		case 'Q':
 		case 'q':
-			useslope = MB_YES;
-			amp_corr_slope = MBP_AMPCORR_USESLOPE;
-			ss_corr_slope = MBP_SSCORR_USESLOPE;
+			corr_slope = MB_YES;
 			flag++;
 			break;
 		case 'R':
 		case 'r':
 			sscanf (optarg,"%lf", &ref_angle_default);
+			flag++;
+			break;
+		case 'T':
+		case 't':
+			sscanf (optarg,"%s", &grid.file);
+			corr_topogrid = MB_YES;
 			flag++;
 			break;
 		case 'V':
@@ -489,6 +552,26 @@ by MBprocess.";
 		amplitude_on = MB_YES;
 		sidescan_on = MB_YES;
 		}
+	if (corr_slope == MB_NO && corr_topogrid == MB_NO)
+		{
+		amp_corr_slope = MBP_AMPCORR_IGNORESLOPE;
+		ss_corr_slope = MBP_SSCORR_IGNORESLOPE;
+		}
+	else if (corr_slope == MB_YES && corr_topogrid == MB_NO)
+		{
+		amp_corr_slope = MBP_AMPCORR_USESLOPE;
+		ss_corr_slope = MBP_SSCORR_USESLOPE;
+		}
+	else if (corr_slope == MB_NO && corr_topogrid == MB_YES)
+		{
+		amp_corr_slope = MBP_AMPCORR_USETOPO;
+		ss_corr_slope = MBP_SSCORR_USETOPO;
+		}
+	else if (corr_slope == MB_YES && corr_topogrid == MB_YES)
+		{
+		amp_corr_slope = MBP_AMPCORR_USETOPOSLOPE;
+		ss_corr_slope = MBP_SSCORR_USETOPOSLOPE;
+		}
 
 	/* print starting debug statements */
 	if (verbose >= 2)
@@ -527,7 +610,9 @@ by MBprocess.";
 		fprintf(stderr,"dbg2       symmetry:     %d\n",symmetry);
 		fprintf(stderr,"dbg2       amplitude_on: %d\n",amplitude_on);
 		fprintf(stderr,"dbg2       sidescan_on:  %d\n",sidescan_on);
-		fprintf(stderr,"dbg2       useslope:     %d\n",useslope);
+		fprintf(stderr,"dbg2       corr_slope:   %d\n",corr_slope);
+		fprintf(stderr,"dbg2       corr_topogrid:%d\n",corr_topogrid);
+		fprintf(stderr,"dbg2       grid.file:    %s\n",grid.file);
 		fprintf(stderr,"dbg2       nangles:      %d\n",nangles);
 		fprintf(stderr,"dbg2       angle_max:    %f\n",angle_max);
 		fprintf(stderr,"dbg2       ref_angle:    %f\n",ref_angle_default);
@@ -637,7 +722,7 @@ by MBprocess.";
 			fprintf(stderr, "Generating empirical correction tables...\n");
 		else if (beammode == MBBACKANGLE_BEAMPATTERN_SIDESCAN)
 			fprintf(stderr, "Generating sidescan model correction tables...\n");
-		if (useslope == MB_YES)
+		if (corr_slope == MB_YES)
 			fprintf(stderr, "Using seafloor slope in calculating correction tables...\n");
 		else
 			fprintf(stderr, "Using flat bottom assumption in calculating correction tables...\n");
@@ -671,6 +756,68 @@ by MBprocess.";
 		nmeantotss[i] = 0;
 		meantotss[i] = 0.0;
 		sigmatotss[i] = 0.0;
+		}
+		
+	/* get topography grid if specified */
+	if (corr_topogrid == MB_YES)
+		{
+		grid.data = NULL;
+		status = mb_readgrd(verbose, grid.file, &grid.projection_mode, grid.projection_id, &grid.nodatavalue,
+					&grid.nxy, &grid.nx, &grid.ny, &grid.min, &grid.max,
+					&grid.xmin, &grid.xmax, &grid.ymin, &grid.ymax,
+					&grid.dx, &grid.dy, &grid.data, NULL, NULL, &error);
+		if (status == MB_FAILURE) 
+			{
+			error = MB_ERROR_OPEN_FAIL;
+			fprintf(stderr,"\nUnable to read grd file: %s\n",
+			    grid.file);
+			fprintf(stderr,"\nProgram <%s> Terminated\n",
+			    program_name);
+			exit(error);
+			}
+
+		/* rationalize grid bounds and lonflip */
+		if (lonflip == -1)
+			{
+			if (grid.xmax > 180.0)
+				{
+				grid.xmin -= 360.0;
+				grid.xmax -= 360.0;
+				}
+			}
+		else if (lonflip == 0)
+			{
+			if (grid.xmin > 180.0)
+				{
+				grid.xmin -= 360.0;
+				grid.xmax -= 360.0;
+				}
+			else if (grid.xmax < -180.0)
+				{
+				grid.xmin += 360.0;
+				grid.xmax += 360.0;
+				}
+			}
+		else if (lonflip == 1)
+			{
+			if (grid.xmin < -180.0)
+				{
+				grid.xmin += 360.0;
+				grid.xmax += 360.0;
+				}
+			}
+		if (grid.xmax > 180.0)
+			{
+			lonflip = 1;
+			}
+		else if (grid.xmin < -180.0)
+			{
+			lonflip = -1;
+			}
+		else
+			{
+			lonflip = 0;
+			}
 		}
 
 	/* initialize counting variables */
@@ -779,6 +926,8 @@ by MBprocess.";
 	    || format == MBF_EDGJSTAR
 	    || format == MBF_EDGJSTR2)
 	    ss_corr_type = MBP_SSCORR_DIVISION;
+	else if (format == MBF_MBLDEOIH)
+	    ss_corr_type = MBP_SSCORR_UNKNOWN;
 	else
 	    ss_corr_type = MBP_SSCORR_SUBTRACTION;
 	amp_corr_type = MBP_AMPCORR_SUBTRACTION;
@@ -1084,6 +1233,25 @@ by MBprocess.";
 		if (error == MB_ERROR_NO_ERROR 
 		    || error == MB_ERROR_TIME_GAP)
 		    {
+		    /* if needed, attempt to get sidescan correction type */
+		    if (ss_corr_type == MBP_SSCORR_UNKNOWN)
+		    	{
+			status = mb_sidescantype(verbose, mbio_ptr, NULL, &ss_type, &error);
+			if (status == MB_SUCCESS)
+				{
+				if (ss_type == MB_SIDESCAN_LINEAR)
+					ss_corr_type = MBP_SSCORR_DIVISION;
+				else
+					ss_corr_type = MBP_SSCORR_SUBTRACTION;
+				}
+			else
+				{
+				status = MB_SUCCESS;
+				error = MB_ERROR_NO_ERROR;
+				ss_corr_type = MBP_SSCORR_SUBTRACTION;
+				}
+			}
+		    
 		    /* increment record counter */
 		    nrec++;
 		    navg++;
@@ -1103,6 +1271,12 @@ by MBprocess.";
 				&nslopes,slopes,slopeacrosstrack,
 				depthsmooth,
 				&error);
+				
+		    /* get distance scaling and heading vector */
+		    mb_coor_scale(verbose,navlat,&mtodeglon,&mtodeglat);
+		    headingx = sin(heading * DTR);
+		    headingy = cos(heading * DTR);
+				
 		    /* do the amplitude */
 		    if (amplitude_on == MB_YES)
 		    for (i=0;i<beams_amp;i++)
@@ -1110,15 +1284,86 @@ by MBprocess.";
 			if (mb_beam_ok(beamflag[i]))
 			    {
 			    namp++;
-			    if (beams_bath != beams_amp)
+			    if (corr_topogrid == MB_YES)
 				{
-				if (altitude > 0.0)
-				    bathy = altitude + sonardepth;
+				/* get position in grid */
+				r[0] =  headingy * bathacrosstrack[i]
+					+ headingx * bathalongtrack[i];
+				r[1] =  -headingx * bathacrosstrack[i]
+					+ headingy * bathalongtrack[i];
+			        ix = (navlon + r[0] * mtodeglon - grid.xmin + 0.5 * grid.dx) / grid.dx;
+			        jy = (navlat + r[1] * mtodeglat - grid.ymin + 0.5 * grid.dy) / grid.dy;
+			        kgrid = ix * grid.ny + jy;
+			        kgrid00 = (ix - 1) * grid.ny + jy - 1;
+			        kgrid01 = (ix - 1) * grid.ny + jy + 1;
+			        kgrid10 = (ix + 1) * grid.ny + jy - 1;
+			        kgrid11 = (ix + 1) * grid.ny + jy + 1;
+				if (ix > 0 && ix < grid.nx - 1 && jy > 0 && jy < grid.ny - 1
+					&& grid.data[kgrid] > grid.nodatavalue
+					&& grid.data[kgrid00] > grid.nodatavalue
+					&& grid.data[kgrid01] > grid.nodatavalue
+					&& grid.data[kgrid10] > grid.nodatavalue
+					&& grid.data[kgrid11] > grid.nodatavalue)
+					{
+					/* get look vector for data */
+					bathy = -grid.data[kgrid];
+					r[2] = grid.data[kgrid] + sonardepth;
+					rr = -sqrt(r[0] * r[0] + r[1] * r[1] + r[2] * r[2]);
+					r[0] /= rr;
+					r[1] /= rr;
+					r[2] /= rr;
+					
+					/* get normal vector to grid surface */
+					if (corr_slope == MB_YES)
+						{
+						v1[0] = 2.0 * grid.dx / mtodeglon;
+						v1[1] = 2.0 * grid.dy / mtodeglat;
+						v1[2] = grid.data[kgrid11] - grid.data[kgrid00];
+						v2[0] = -2.0 * grid.dx / mtodeglon;
+						v2[1] = 2.0 * grid.dy / mtodeglat;
+						v2[2] = grid.data[kgrid01] - grid.data[kgrid10];
+						v[0] = v1[1] * v2[2] - v2[1] * v1[2];
+						v[1] = v2[0] * v1[2] - v1[0] * v2[2];
+						v[2] = v1[0] * v2[1] - v2[0] * v1[1];
+						vv = sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+						v[0] /= vv;
+						v[1] /= vv;
+						v[2] /= vv;
+						}
+					else
+						{
+						v[0] = 0.0;
+						v[1] = 0.0;
+						v[2] = 1.0;
+						}
+					
+					/* angle between look vector and surface normal
+						is the acos(r dot v) */
+					angle = RTD * acos(r[0] * v[0] + r[1] * v[1] + r[2] *v[2]);
+					if (bathacrosstrack[i] < 0.0)
+						angle = -angle;
+					
+/* fprintf(stderr,"i:%d xtrack:%f ltrack:%f depth:%f sonardepth:%f rawangle:%f\n",
+i,bathacrosstrack[i],bathalongtrack[i],bath[i],sonardepth,RTD * atan(bathacrosstrack[i] / (sonardepth + grid.data[kgrid])));
+fprintf(stderr,"ix:%d of %d jy:%d of %d  topo:%f\n",
+ix,grid.nx,jy,grid.ny,grid.data[kgrid]);
+fprintf(stderr,"R:%f %f %f  V1:%f %f %f  V2:%f %f %f  V:%f %f %f  angle:%f\n\n",
+r[0],r[1],r[2],v1[0],v1[1],v1[2],v2[0],v2[1],v2[2],v[0],v[1],v[2],angle);*/
+					}
 				else
-				    bathy = altitude_default + sonardepth;
-				slope = 0.0;
+					{
+					if (ix >= 0 && ix < grid.nx && jy >= 0 && jy < grid.ny
+						&& grid.data[kgrid] > grid.nodatavalue)
+					    bathy = -grid.data[kgrid];
+					else if (altitude > 0.0)
+					    bathy = altitude + sonardepth;
+					else
+					    bathy = altitude_default + sonardepth;
+					angle = RTD * atan(bathacrosstrack[i] / (bathy - sonardepth));
+					slope = 0.0;
+					}
 				}
-			    else
+			    else if (beams_bath == beams_amp)
 				{
 				status = mb_pr_get_bathyslope(verbose,
 				    ndepths,depths,depthacrosstrack,
@@ -1135,14 +1380,23 @@ by MBprocess.";
 				    status = MB_SUCCESS;
 				    error = MB_ERROR_NO_ERROR;
 				    }
+				altitude_use = bathy - sonardepth;
+				angle = RTD * atan(bathacrosstrack[i] / altitude_use);
+				if (corr_slope == MB_YES)
+					angle += RTD * atan(slope);
+				}
+			    else
+				{
+				if (altitude > 0.0)
+				    bathy = altitude + sonardepth;
+				else
+				    bathy = altitude_default + sonardepth;
+				slope = 0.0;
+				altitude_use = bathy - sonardepth;
+				angle = RTD * atan(bathacrosstrack[i] / altitude_use);
 				}
 			    if (bathy > 0.0)
 				{
-				altitude_use = bathy - sonardepth;
-				angle = RTD * atan(bathacrosstrack[i] / altitude_use);
-				if (useslope == MB_YES)
-					angle += RTD * atan(slope);
-					
 				/* load amplitude into table */
 				j = (angle - angle_start)/dangle;
 				if (j >= 0 && j < nangles)
@@ -1181,10 +1435,89 @@ by MBprocess.";
 		    if (sidescan_on == MB_YES)
 		    for (i=0;i<pixels_ss;i++)
 			{
-			if (ss[i] > 0.0)
+			if (ss[i] > MB_SIDESCAN_NULL)
 			    {
 			    nss++;
-			    if (beams_bath > 0)
+			    if (corr_topogrid == MB_YES)
+				{
+				/* get position in grid */
+				r[0] =  headingy * ssacrosstrack[i]
+					+ headingx * ssalongtrack[i];
+				r[1] =  -headingx * ssacrosstrack[i]
+					+ headingy * ssalongtrack[i];
+			        ix = (navlon + r[0] * mtodeglon - grid.xmin + 0.5 * grid.dx) / grid.dx;
+			        jy = (navlat + r[1] * mtodeglat - grid.ymin + 0.5 * grid.dy) / grid.dy;
+			        kgrid = ix * grid.ny + jy;
+			        kgrid00 = (ix - 1) * grid.ny + jy - 1;
+			        kgrid01 = (ix - 1) * grid.ny + jy + 1;
+			        kgrid10 = (ix + 1) * grid.ny + jy - 1;
+			        kgrid11 = (ix + 1) * grid.ny + jy + 1;
+				if (ix > 0 && ix < grid.nx - 1 && jy > 0 && jy < grid.ny - 1
+					&& grid.data[kgrid] > grid.nodatavalue
+					&& grid.data[kgrid00] > grid.nodatavalue
+					&& grid.data[kgrid01] > grid.nodatavalue
+					&& grid.data[kgrid10] > grid.nodatavalue
+					&& grid.data[kgrid11] > grid.nodatavalue)
+					{
+					/* get look vector for data */
+					bathy = -grid.data[kgrid];
+					r[2] = grid.data[kgrid] + sonardepth;
+					rr = -sqrt(r[0] * r[0] + r[1] * r[1] + r[2] * r[2]);
+					r[0] /= rr;
+					r[1] /= rr;
+					r[2] /= rr;
+					
+					/* get normal vector to grid surface */
+					if (corr_slope == MB_YES)
+						{
+						v1[0] = 2.0 * grid.dx / mtodeglon;
+						v1[1] = 2.0 * grid.dy / mtodeglat;
+						v1[2] = grid.data[kgrid11] - grid.data[kgrid00];
+						v2[0] = -2.0 * grid.dx / mtodeglon;
+						v2[1] = 2.0 * grid.dy / mtodeglat;
+						v2[2] = grid.data[kgrid01] - grid.data[kgrid10];
+						v[0] = v1[1] * v2[2] - v2[1] * v1[2];
+						v[1] = v2[0] * v1[2] - v1[0] * v2[2];
+						v[2] = v1[0] * v2[1] - v2[0] * v1[1];
+						vv = sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+						v[0] /= vv;
+						v[1] /= vv;
+						v[2] /= vv;
+						}
+					else
+						{
+						v[0] = 0.0;
+						v[1] = 0.0;
+						v[2] = 1.0;
+						}
+					
+					/* angle between look vector and surface normal
+						is the acos(r dot v) */
+					angle = RTD * acos(r[0] * v[0] + r[1] * v[1] + r[2] *v[2]);
+					if (ssacrosstrack[i] < 0.0)
+						angle = -angle;
+					
+/* fprintf(stderr,"i:%d xtrack:%f ltrack:%f depth:%f sonardepth:%f rawangle:%f\n",
+i,ssacrosstrack[i],ssalongtrack[i],ss[i],sonardepth,RTD * atan(ssacrosstrack[i] / (sonardepth + grid.data[kgrid])));
+fprintf(stderr,"ix:%d of %d jy:%d of %d  topo:%f\n",
+ix,grid.nx,jy,grid.ny,grid.data[kgrid]);
+fprintf(stderr,"R:%f %f %f  V1:%f %f %f  V2:%f %f %f  V:%f %f %f  angle:%f\n\n",
+r[0],r[1],r[2],v1[0],v1[1],v1[2],v2[0],v2[1],v2[2],v[0],v[1],v[2],angle);*/
+					}
+				else
+					{
+					if (ix >= 0 && ix < grid.nx && jy >= 0 && jy < grid.ny
+						&& grid.data[kgrid] > grid.nodatavalue)
+					    bathy = -grid.data[kgrid];
+					else if (altitude > 0.0)
+					    bathy = altitude + sonardepth;
+					else
+					    bathy = altitude_default + sonardepth;
+					angle = RTD * atan(bathacrosstrack[i] / (bathy - sonardepth));
+					slope = 0.0;
+					}
+				}
+			    else if (beams_bath > 0)
 				{
 				status = mb_pr_get_bathyslope(verbose,
 				    ndepths,depths,depthacrosstrack,
@@ -1202,6 +1535,10 @@ by MBprocess.";
 				    status = MB_SUCCESS;
 				    error = MB_ERROR_NO_ERROR;
 				    }
+				altitude_use = bathy - sonardepth;
+				angle = RTD * atan(ssacrosstrack[i] / altitude_use);
+				if (corr_slope == MB_YES)
+					angle += RTD * atan(slope);
 				}
 			    else
 				{
@@ -1210,20 +1547,11 @@ by MBprocess.";
 				else
 				    	bathy = altitude_default;
 				slope = 0.0;
+				altitude_use = bathy - sonardepth;
+				angle = RTD * atan(ssacrosstrack[i] / altitude_use);
 				}
 			    if (bathy > 0.0)
 				{
-				altitude_use = bathy - sonardepth;
-				angle = RTD * atan(ssacrosstrack[i] / altitude_use);
-/*if (altitude > 0.0) fprintf(stderr,"time_d:%f i:%d xtrack:%f altitude:%f angle:%f\n",
-time_d, i, ssacrosstrack[i], altitude_use, angle);*/
-				if (useslope == MB_YES)
-					{
-/*fprintf(stderr,"SLOPECALC: time_d:%f i:%d angle:%f ",time_d,i,angle);*/
-					angle += RTD * atan(slope);
-/*fprintf(stderr,"slope:%f slopeangle:%f angle:%f\n",slope,RTD * atan(slope),angle);*/
-					}
-					
 				/* load amplitude into table */
 				j = (angle - angle_start)/dangle;
 				if (j >= 0 && j < nangles)
@@ -1386,15 +1714,15 @@ time_d, i, ssacrosstrack[i], altitude_use, angle);*/
 	if (amplitude_on == MB_YES)
 		status = mb_pr_update_ampcorr(verbose, swathfile, 
 			MB_YES, amptablefile, 
-			amp_corr_type, amp_corr_symmetry, ref_angle, amp_corr_slope, 
-			&error);
+			amp_corr_type, corr_symmetry, ref_angle, amp_corr_slope, 
+			grid.file, &error);
 
 	/* set sidescan correction in parameter file */
 	if (sidescan_on == MB_YES)
 		status = mb_pr_update_sscorr(verbose, swathfile, 
 			MB_YES, sstablefile, 
-			ss_corr_type, ss_corr_symmetry, ref_angle, ss_corr_slope, 
-			&error);
+			ss_corr_type, corr_symmetry, ref_angle, ss_corr_slope, 
+			grid.file, &error);
 
 	/* output information */
 	if (error == MB_ERROR_NO_ERROR && verbose > 0)
@@ -1570,6 +1898,10 @@ time_d, i, ssacrosstrack[i], altitude_use, angle);*/
 			{
 			mb_free(verbose,&gridsshist,&error);
 			}
+		}
+	if (grid.data != NULL)
+		{
+		mb_free(verbose,&grid.data,&error);
 		}
 
 	/* set program status */
@@ -1956,4 +2288,3 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-

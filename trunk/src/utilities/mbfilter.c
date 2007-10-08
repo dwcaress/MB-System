@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbfilter.c	1/16/95
- *    $Id: mbfilter.c,v 5.6 2006-08-09 22:41:27 caress Exp $
+ *    $Id: mbfilter.c,v 5.7 2007-10-08 16:48:07 caress Exp $
  *
  *    Copyright (c) 1995, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -32,6 +32,9 @@
  * Date:	January 16, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2006/08/09 22:41:27  caress
+ * Fixed programs that read or write grids so that they do not use the GMT_begin() function; these programs will now work when GMT is built in the default fashion, when GMT is built in the default fashion, with "advisory file locking" enabled.
+ *
  * Revision 5.5  2006/01/18 15:17:00  caress
  * Added stdlib.h include.
  *
@@ -182,7 +185,7 @@ struct mbfilter_ping_struct
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbfilter.c,v 5.6 2006-08-09 22:41:27 caress Exp $";
+	static char rcs_id[] = "$Id: mbfilter.c,v 5.7 2007-10-08 16:48:07 caress Exp $";
 	static char program_name[] = "MBFILTER";
 	static char help_message[] =  
 "mbfilter applies one or more simple filters to the specified\n\t\
@@ -966,7 +969,7 @@ The default input and output streams are stdin and stdout.\n";
 			    {
 			    for(i=0;i<ping[ndata].pixels_ss;i++)
 				{
-				if (ping[ndata].ss[i] > 0.0)
+				if (ping[ndata].ss[i] > MB_SIDESCAN_NULL)
 				    ping[ndata].pixelflag[i] 
 					    = MB_FLAG_NONE;
 				else

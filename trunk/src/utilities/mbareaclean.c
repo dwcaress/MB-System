@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbareaclean.c	2/27/2003
- *    $Id: mbareaclean.c,v 5.9 2006-08-09 22:41:27 caress Exp $
+ *    $Id: mbareaclean.c,v 5.10 2007-10-08 16:48:07 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -37,6 +37,9 @@
  *		Amsterdam Airport
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.9  2006/08/09 22:41:27  caress
+ * Fixed programs that read or write grids so that they do not use the GMT_begin() function; these programs will now work when GMT is built in the default fashion, when GMT is built in the default fashion, with "advisory file locking" enabled.
+ *
  * Revision 5.8  2006/02/01 07:31:06  caress
  * Modifications suggested by Gordon Keith
  *
@@ -82,6 +85,7 @@
 #include "../../include/mb_io.h"
 #include "../../include/mb_swap.h"
 #include "../../include/mb_process.h"
+#include "../../include/mb_info.h"
 
 /* allocation */
 #define FILEALLOCNUM	16
@@ -140,7 +144,7 @@ int getsoundingptr(int verbose, int soundingid,
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbareaclean.c,v 5.9 2006-08-09 22:41:27 caress Exp $";
+	static char rcs_id[] = "$Id: mbareaclean.c,v 5.10 2007-10-08 16:48:07 caress Exp $";
 	static char program_name[] = "MBAREACLEAN";
 	static char help_message[] =  "MBAREACLEAN identifies and flags artifacts in swath bathymetry data";
 	static char usage_message[] = "mbareaclean [-Fformat -Iinfile -Rwest/east/south/north -B -G -Sbinsize \n\t -Mthreshold/nmin -Dthreshold/nmin -Ttype -N[-]minbeam/maxbeam]";
@@ -183,6 +187,7 @@ main (int argc, char **argv)
 	double	etime_d;
 	double	speedmin;
 	double	timegap;
+	struct mb_info_struct mb_info;
 	
 	int	time_i[7];
 	double	time_d;
@@ -229,7 +234,9 @@ main (int argc, char **argv)
 	int	max_beam = 0;
 	int	max_beam_no = 0;
 	double	areabounds[4];
+	int	areaboundsset = MB_NO;
 	double	binsize = 0.0;
+	int	binsizeset = MB_NO;
 	double	dx, dy;
 	int	nx, ny;
 	double	mtodeglon;
@@ -383,11 +390,13 @@ main (int argc, char **argv)
 		case 'R':
 		case 'r':
 				mb_get_bounds(optarg, areabounds);
+				areaboundsset = MB_YES;
 			flag++;
 			break;
 		case 'S':
 		case 's':
 			sscanf (optarg,"%lf", &binsize);
+			binsizeset = MB_YES;
 			flag++;
 			break;
 		case 'T':
@@ -479,10 +488,12 @@ main (int argc, char **argv)
 		fprintf(stderr,"dbg2       max_beam_no                %d\n",max_beam_no);
 		fprintf(stderr,"dbg2       output_good:    %d\n",output_good);
 		fprintf(stderr,"dbg2       output_bad:     %d\n",output_bad);
+		fprintf(stderr,"dbg2       areaboundsset:  %d\n",areaboundsset);
 		fprintf(stderr,"dbg2       areabounds[0]:  %f\n",areabounds[0]);
 		fprintf(stderr,"dbg2       areabounds[1]:  %f\n",areabounds[1]);
 		fprintf(stderr,"dbg2       areabounds[2]:  %f\n",areabounds[2]);
 		fprintf(stderr,"dbg2       areabounds[3]:  %f\n",areabounds[3]);
+		fprintf(stderr,"dbg2       binsizeset:     %d\n",binsizeset);
 		fprintf(stderr,"dbg2       binsize:        %f\n",binsize);
 		}
 
@@ -492,6 +503,22 @@ main (int argc, char **argv)
 		fprintf(stderr,"\n%s\n",help_message);
 		fprintf(stderr,"\nusage: %s\n", usage_message);
 		exit(error);
+		}
+		
+	/* if bounds not set get bounds of input data */
+	if (areaboundsset == MB_NO)
+		{
+		formatread = format;
+		status = mb_get_info_datalist(verbose, read_file, &formatread, 
+				&mb_info, lonflip, &error);
+				
+		areabounds[0] = mb_info.lon_min;
+		areabounds[1] = mb_info.lon_max;
+		areabounds[2] = mb_info.lat_min;
+		areabounds[3] = mb_info.lat_max;
+		
+		if (binsizeset == MB_NO)
+			binsize = 0.2 * mb_info.altitude_max;
 		}
 
 	/* calculate grid properties */
@@ -1110,9 +1137,9 @@ ix,iy,kgrid,gsndg[kgrid][i],sndg->sndg_beamflag,binnum);*/
 			qsort((char *)bindepths,binnum,sizeof(double),
 				(void *)mb_double_compare);
 			median_depth = bindepths[binnum / 2];
-if (binnum>0)
+/* if (binnum>0)
 fprintf(stderr,"bin: %d %d %d  pos: %f %f  nsoundings:%d median:%f\n",
-ix,iy,kgrid,xx,yy,binnum,median_depth);
+ix,iy,kgrid,xx,yy,binnum,median_depth);*/
 
 			/* process the soundings */
 			for (i=0;i<gsndgnum[kgrid];i++)

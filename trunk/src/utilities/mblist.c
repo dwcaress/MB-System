@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mblist.c	2/1/93
- *    $Id: mblist.c,v 5.23 2007-07-05 19:17:05 caress Exp $
+ *    $Id: mblist.c,v 5.24 2007-10-08 16:48:07 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -28,6 +28,9 @@
  *		in 1990.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.23  2007/07/05 19:17:05  caress
+ * Fixed calculation of grazing angles by adding sonar depth to calculation.
+ *
  * Revision 5.22  2007/07/04 04:05:29  caress
  * Gordon Keith's mods.
  *
@@ -352,7 +355,7 @@ int mb_get_raw_simrad2(int verbose, void *mbio_ptr,
 /* NaN value */
 double	NaN;
 
-static char rcs_id[] = "$Id: mblist.c,v 5.23 2007-07-05 19:17:05 caress Exp $";
+static char rcs_id[] = "$Id: mblist.c,v 5.24 2007-10-08 16:48:07 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
@@ -360,7 +363,7 @@ main (int argc, char **argv)
 {
 	static char program_name[] = "MBLIST";
 	static char help_message[] =  "MBLIST prints the specified contents of a swath data \nfile to stdout. The form of the output is quite flexible; \nMBLIST is tailored to produce ascii files in spreadsheet \nstyle with data columns separated by tabs.";
-	static char usage_message[] = "mblist [-Byr/mo/da/hr/mn/sc -C -Ddump_mode -Eyr/mo/da/hr/mn/sc \n-Fformat -H -Ifile -Llonflip -Mbeam_start/beam_end -Npixel_start/pixel_end \n-Ooptions -Ppings -Rw/e/s/n -Sspeed -Ttimegap -Ucheck -Xoutfile -V -W -Zsegment]";
+	static char usage_message[] = "mblist [-Byr/mo/da/hr/mn/sc -C -Ddump_mode -Eyr/mo/da/hr/mn/sc \n-Fformat -Gdelimiter -H -Ifile -Llonflip -Mbeam_start/beam_end -Npixel_start/pixel_end \n-Ooptions -Ppings -Rw/e/s/n -Sspeed -Ttimegap -Ucheck -Xoutfile -V -W -Zsegment]";
 	extern char *optarg;
 	extern int optkind;
 	int	errflg = 0;
@@ -433,6 +436,7 @@ main (int argc, char **argv)
 	int	netcdf = MB_NO;
 	int	netcdf_cdl = MB_YES;
 	int	segment = MB_NO;
+	char	delimiter[MB_PATH_MAXLINE];
 	char	segment_tag[MB_PATH_MAXLINE];
 
 	/* MBIO read values */
@@ -570,6 +574,7 @@ main (int argc, char **argv)
 	list[5]='L';
 	list[6]='Z';
 	n_list = 7;
+	sprintf(delimiter, "\t");
 
 	/* set dump mode flag to DUMP_MODE_LIST */
 	dump_mode = DUMP_MODE_LIST;
@@ -580,7 +585,7 @@ main (int argc, char **argv)
 	strcpy(output_file, "-");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "AaB:b:CcD:d:E:e:F:f:I:i:L:l:M:m:N:n:O:o:P:p:QqR:r:S:s:T:t:U:u:X:x:Z:z:VvWwHh")) != -1)
+	while ((c = getopt(argc, argv, "AaB:b:CcD:d:E:e:F:f:G:g:I:i:L:l:M:m:N:n:O:o:P:p:QqR:r:S:s:T:t:U:u:X:x:Z:z:VvWwHh")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -629,6 +634,11 @@ main (int argc, char **argv)
 				&etime_i[0],&etime_i[1],&etime_i[2],
 				&etime_i[3],&etime_i[4],&etime_i[5]);
 			etime_i[6] = 0;
+			flag++;
+			break;
+		case 'G':
+		case 'g':
+			sscanf (optarg,"%s", delimiter);
 			flag++;
 			break;
 		case 'F':
@@ -3373,7 +3383,7 @@ main (int argc, char **argv)
 						if (netcdf == MB_YES)
 						  fprintf(output[i], ", ");
 						if (ascii == MB_YES)
-						  fprintf(output[i], "\t");
+						  fprintf(output[i], "%s", delimiter);
 						invert_next_value = invert;
 						signflip_next_value = flip;
 
@@ -3386,7 +3396,7 @@ main (int argc, char **argv)
 						if (netcdf == MB_YES)
 						  fprintf(output[i], ", ");
 						if (ascii == MB_YES)
-						  fprintf(output[i], "\t");
+						  fprintf(output[i], "%s", delimiter);
 						printNaN(verbose, output[i], ascii, &invert_next_value, 
 							 &signflip_next_value, &error);
 					      }
@@ -3445,7 +3455,7 @@ main (int argc, char **argv)
 			    }
 			if (ascii == MB_YES)
 			    {
-			    if (i<(n_list-1)) fprintf(output[i], "\t");
+			    if (i<(n_list-1)) fprintf(output[i], "%s", delimiter);
 			    else fprintf (output[lcount++ % n_list], "\n");
 			    }
 			}
@@ -4135,7 +4145,7 @@ main (int argc, char **argv)
 						if (netcdf == MB_YES)
 						  fprintf(output[i], ", ");
 						if (ascii == MB_YES)
-						  fprintf(output[i], "\t");
+						  fprintf(output[i], "%s", delimiter);
 						invert_next_value = invert;
 						signflip_next_value = flip;
 
@@ -4148,7 +4158,7 @@ main (int argc, char **argv)
 						if (netcdf == MB_YES)
 						  fprintf(output[i], ", ");
 						if (ascii == MB_YES)
-						  fprintf(output[i], "\t");
+						  fprintf(output[i], "%s", delimiter);
 						printNaN(verbose, output[i], ascii, &invert_next_value, 
 							 &signflip_next_value, &error);
 					      }
@@ -4210,7 +4220,7 @@ main (int argc, char **argv)
 			    }
 			if (ascii == MB_YES)
 			    {
-			    if (i<(n_list-1)) fprintf(output[i], "\t");
+			    if (i<(n_list-1)) fprintf(output[i], "%s", delimiter);
 			    else fprintf (output[lcount++ % n_list], "\n");
 			    }
 			}

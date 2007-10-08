@@ -1,7 +1,7 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 5.23 2006-09-11 18:55:53 caress Exp $
+#	$Id: Makefile.template,v 5.24 2007-10-08 16:48:07 caress Exp $
 #
-#     Copyright (c) 1993, 1994, 2000, 2002, 2003, 2005 by
+#     Copyright (c) 1993, 1994, 2000, 2002, 2003, 2005, 2007 by
 #     David W. Caress (caress@mbari.org)
 #       Monterey Bay Aquarium Research Institute
 #       Moss Landing, CA 95039
@@ -16,6 +16,10 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.23  2006/09/11 18:55:53  caress
+# Changes during Western Flyer and Thomas Thompson cruises, August-September
+# 2006.
+#
 # Revision 5.22  2006/03/06 21:42:34  caress
 # Changed libproj and libgsf to libmbproj and libmbgsf.
 #
@@ -227,7 +231,8 @@ all:	$(BINDIR)/mbformat \
 	$(BINDIR)/mb7k2jstar \
 	$(BINDIR)/mb7kpreprocess \
 	$(BINDIR)/mbrolltimelag	\
-	$(BINDIR)/mbauvloglist	
+	$(BINDIR)/mbauvloglist\
+	$(BINDIR)/mb7k2ss
 
 ### make clean removes the object files
 clean:
@@ -312,8 +317,8 @@ $(BINDIR)/mbstripnan:	mbstripnan.o
 $(BINDIR)/mbhistogram:	mbhistogram.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
 	$(CC) $(CFLAGS) mbhistogram.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a \
 		$(LFLAGS) -o $(BINDIR)/mbhistogram
-$(BINDIR)/mbbackangle:	mbbackangle.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
-	$(CC) $(CFLAGS) mbbackangle.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a \
+$(BINDIR)/mbbackangle:	mbbackangle.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbaux.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
+	$(CC) $(CFLAGS) mbbackangle.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbaux.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a \
 		$(GMTLIBDIR)/libgmt.a $(GMTLIBDIR)/libpsl.a \
 		$(LFLAGS) -o $(BINDIR)/mbbackangle
 $(BINDIR)/mbbackangleold:	mbbackangleold.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
@@ -345,6 +350,7 @@ $(BINDIR)/mbset:	mbset.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/lib
 		$(LFLAGS) -o $(BINDIR)/mbset
 $(BINDIR)/mbprocess:	mbprocess.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LIBDIR)/libmbaux.a
 	$(CC) $(CFLAGS) mbprocess.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LIBDIR)/libmbaux.a \
+		$(GMTLIBDIR)/libgmt.a $(GMTLIBDIR)/libpsl.a \
 		$(LFLAGS) -o $(BINDIR)/mbprocess
 $(BINDIR)/mbextractsegy:	mbextractsegy.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LIBDIR)/libmbaux.a
 	$(CC) $(CFLAGS) mbextractsegy.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LIBDIR)/libmbaux.a \
@@ -374,6 +380,10 @@ $(BINDIR)/mbrolltimelag:	mbrolltimelag.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj
 $(BINDIR)/mbauvloglist:	mbauvloglist.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbaux.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
 	$(CC) $(CFLAGS) mbauvloglist.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbaux.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a \
 		$(LFLAGS) -o $(BINDIR)/mbauvloglist
+$(BINDIR)/mb7k2ss:	mb7k2ss.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbaux.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbaux.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
+	$(CC) $(CFLAGS) mb7k2ss.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbaux.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbaux.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a \
+		$(GMTLIBDIR)/libgmt.a \
+		$(LFLAGS) -o $(BINDIR)/mb7k2ss
 
 ### compile the source files
 mbformat.o:	mbformat.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
@@ -448,7 +458,7 @@ mbsvplist.o:	mbsvplist.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/
 mbset.o:	mbset.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbset.c
 mbprocess.o:	mbprocess.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
-	$(CC) -c $(CFLAGS) mbprocess.c
+	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) -I$(NETCDFINCDIR) mbprocess.c
 mbextractsegy.o:	mbextractsegy.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h $(INCDIR)/mb_segy.h
 	$(CC) -c $(CFLAGS) mbextractsegy.c
 mbsegylist.o:	mbsegylist.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h $(INCDIR)/mb_segy.h
@@ -467,3 +477,5 @@ mbrolltimelag.o:	mbrolltimelag.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(
 	$(CC) -c $(CFLAGS) mbrolltimelag.c
 mbauvloglist.o:	mbauvloglist.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbauvloglist.c
+mb7k2ss.o:	mb7k2ss.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h $(INCDIR)/mbsys_reson7k.h $(INCDIR)/mbsys_ldeoih.h
+	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) -I$(NETCDFINCDIR) mb7k2ss.c
