@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavadjust.h	6/24/95
- *    $Id: mbnavadjust.h,v 5.8 2007-05-14 06:34:11 caress Exp $
+ *    $Id: mbnavadjust.h,v 5.9 2007-10-08 16:02:46 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	March 22, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2007/05/14 06:34:11  caress
+ * Many changes to mbnavadjust, including adding z offsets and 3D search grids.
+ *
  * Revision 5.7  2006/06/16 19:30:58  caress
  * Check in after the Santa Monica Basin Mapping AUV Expedition.
  *
@@ -167,6 +170,10 @@ struct mbna_file {
 	double	roll_bias_import;
 	double	heading_bias;
 	double	roll_bias;
+	int	block;
+	double	block_offset_x;
+	double	block_offset_y;
+	double	block_offset_z;
 	int	num_snavs;
 	int	num_pings;
 	int	num_beams;
