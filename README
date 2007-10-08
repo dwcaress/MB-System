@@ -184,6 +184,9 @@ Fixed bug in old Simrad i/o module regarding EM121A data.
 Added prototype of MBeditviz, a tool that combines 3D bathymetry
 editing and patch test capability.
 
+MBeditviz can be started from MBgrdviz. Any selected files (using
+navigation selection) will be loaded.
+
 Fixed further issues with the XSE format i/o module.
 
 Added swath file copy function to mbdatalist.
@@ -1414,10 +1417,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.101 2007-10-08 17:22:22 caress Exp $
+RCS ID: $Id: README,v 5.102 2007-10-08 17:50:47 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.101  2007/10/08 17:22:22  caress
+New MB-System version number.
+
 Revision 5.100  2007/10/08 17:16:49  caress
 State of 8 October 2007.
 
