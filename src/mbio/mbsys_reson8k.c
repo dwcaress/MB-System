@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_reson8k.c	3.00	8/20/94
- *	$Id: mbsys_reson8k.c,v 5.6 2006-08-09 22:41:27 caress Exp $
+ *	$Id: mbsys_reson8k.c,v 5.7 2007-10-08 15:59:34 caress Exp $
  *
  *    Copyright (c) 2001, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	September 3, 2001
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2006/08/09 22:41:27  caress
+ * Fixed programs that read or write grids so that they do not use the GMT_begin() function; these programs will now work when GMT is built in the default fashion, when GMT is built in the default fashion, with "advisory file locking" enabled.
+ *
  * Revision 5.5  2006/03/06 21:47:48  caress
  * Implemented changes suggested by Bob Courtney of the Geological Survey of Canada to support translating Reson data to GSF.
  *
@@ -61,7 +64,7 @@
 int mbsys_reson8k_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_reson8k.c,v 5.6 2006-08-09 22:41:27 caress Exp $";
+ static char res_id[]="$Id: mbsys_reson8k.c,v 5.7 2007-10-08 15:59:34 caress Exp $";
 	char	*function_name = "mbsys_reson8k_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -1747,6 +1750,8 @@ int mbsys_reson8k_makess(int verbose, void *mbio_ptr, void *store_ptr,
 			    first = MIN(first, k);
 			    last = k;
 			    }
+			else
+				ss[k] = MB_SIDESCAN_NULL;	
 		    }
 			
 		/* interpolate the sidescan */

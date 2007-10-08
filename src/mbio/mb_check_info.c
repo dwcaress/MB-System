@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_check_info.c	1/25/93
- *    $Id: mb_check_info.c,v 5.18 2007-06-18 01:19:48 caress Exp $
+ *    $Id: mb_check_info.c,v 5.19 2007-10-08 15:59:34 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	September 3, 1996
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.18  2007/06/18 01:19:48  caress
+ * Changes as of 17 June 2007.
+ *
  * Revision 5.17  2006/11/26 09:37:09  caress
  * Making distribution 5.1.0.
  *
@@ -102,6 +105,7 @@
 
 /* standard include files */
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include <string.h>
 #include <time.h>
@@ -115,11 +119,9 @@
 #include "../../include/mb_info.h"
 
 /*--------------------------------------------------------------------*/
-int mb_check_info(int verbose, char *file, int lonflip, 
-		    double bounds[4], int *file_in_bounds,
-		    int *error)
+int mb_check_info(int verbose, char *file, int lonflip, double bounds[4], int *file_in_bounds, int *error)
 {
-	static char rcs_id[]="$Id: mb_check_info.c,v 5.18 2007-06-18 01:19:48 caress Exp $";
+	static char rcs_id[]="$Id: mb_check_info.c,v 5.19 2007-10-08 15:59:34 caress Exp $";
 	char	*function_name = "mb_check_info";
 	int	status;
 	char	file_inf[MB_PATH_MAXLINE];
@@ -356,7 +358,7 @@ int mb_check_info(int verbose, char *file, int lonflip,
 int mb_get_info(int verbose, char *file, struct mb_info_struct *mb_info, int lonflip,
 		    int *error)
 {
-	static char rcs_id[]="$Id: mb_check_info.c,v 5.18 2007-06-18 01:19:48 caress Exp $";
+	static char rcs_id[]="$Id: mb_check_info.c,v 5.19 2007-10-08 15:59:34 caress Exp $";
 	char	*function_name = "mb_get_info";
 	int	status;
 	char	file_inf[MB_PATH_MAXLINE];
@@ -382,70 +384,7 @@ int mb_get_info(int verbose, char *file, struct mb_info_struct *mb_info, int lon
 		}
 
 	/* initialize the parameters */
-	mb_info->loaded = MB_NO;
-	strcpy(mb_info->file, file);
-	mb_info->nrecords = 0;
-	mb_info->nrecords_ss1 = 0;
-	mb_info->nrecords_ss2 = 0;
-	mb_info->nrecords_sbp = 0;
-	mb_info->nbeams_bath = 0;
-	mb_info->nbeams_bath_total = 0;
-	mb_info->nbeams_bath_good = 0;
-	mb_info->nbeams_bath_zero = 0;
-	mb_info->nbeams_bath_flagged = 0;
-	mb_info->nbeams_amp = 0;
-	mb_info->nbeams_amp_total = 0;
-	mb_info->nbeams_amp_good = 0;
-	mb_info->nbeams_amp_zero = 0;
-	mb_info->nbeams_amp_flagged = 0;
-	mb_info->npixels_ss = 0;
-	mb_info->npixels_ss_total = 0;
-	mb_info->npixels_ss_good = 0;
-	mb_info->npixels_ss_zero = 0;
-	mb_info->npixels_ss_flagged = 0;
-	mb_info->time_total = 0.0;
-	mb_info->dist_total = 0.0;
-	mb_info->speed_avg = 0.0;
-	mb_info->time_start = 0.0;
-	mb_info->lon_start = 0.0;
-	mb_info->lat_start = 0.0;
-	mb_info->depth_start = 0.0;
-	mb_info->heading_start = 0.0;
-	mb_info->speed_start = 0.0;
-	mb_info->sonardepth_start = 0.0;
-	mb_info->sonaraltitude_start = 0.0;
-	mb_info->time_end = 0.0;
-	mb_info->lon_end = 0.0;
-	mb_info->lat_end = 0.0;
-	mb_info->depth_end = 0.0;
-	mb_info->heading_end = 0.0;
-	mb_info->speed_end = 0.0;
-	mb_info->sonardepth_end = 0.0;
-	mb_info->sonaraltitude_end = 0.0;
-	mb_info->lon_min = 0.0;
-	mb_info->lon_max = 0.0;
-	mb_info->lat_min = 0.0;
-	mb_info->lat_max = 0.0;
-	mb_info->sonardepth_min = 0.0;
-	mb_info->sonardepth_max = 0.0;
-	mb_info->altitude_min = 0.0;
-	mb_info->altitude_max = 0.0;
-	mb_info->depth_min = 0.0;
-	mb_info->depth_max = 0.0;
-	mb_info->amp_min = 0.0;
-	mb_info->amp_max = 0.0;
-	mb_info->ss_min = 0.0;
-	mb_info->ss_max = 0.0;
-	mb_info->problem_nodata = 0;
-	mb_info->problem_zeronav = 0;
-	mb_info->problem_toofast = 0;
-	mb_info->problem_avgtoofast = 0;
-	mb_info->problem_toodeep = 0;
-	mb_info->problem_baddatagram = 0;
-	mb_info->mask_nx = 0;
-	mb_info->mask_ny = 0;
-	mb_info->mask_dx = 0.0;
-	mb_info->mask_dy = 0.0;
+	mb_info_init(verbose, mb_info, error);
 
 	/* get info file path */
 	strcpy(file_inf, file);
@@ -699,8 +638,8 @@ int mb_get_info(int verbose, char *file, struct mb_info_struct *mb_info, int lon
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       loaded:                 %d\n",mb_info->loaded);
-		fprintf(stderr,"dbg2       file:                   %s\n",mb_info->file);
+		fprintf(stderr,"dbg2       loaded:                   %d\n",mb_info->loaded);
+		fprintf(stderr,"dbg2       file:                     %s\n",mb_info->file);
 		fprintf(stderr,"dbg2       nrecords:                 %d\n",mb_info->nrecords);
 		fprintf(stderr,"dbg2       nrecords_sbp:             %d\n",mb_info->nrecords_sbp);
 		fprintf(stderr,"dbg2       nrecords_ss1:             %d\n",mb_info->nrecords_ss1);
@@ -844,6 +783,8 @@ int mb_make_info(int verbose, int force,
 			fprintf(stderr,"\nGenerating inf file for %s\n",file);
 		sprintf(command, "mbinfo -F %d -I %s -G -N -O -M10/10", 
 			format, file);
+		if (verbose >= 2)
+			fprintf(stderr,"\t%s\n",command);
 		system(command);
 		}
 		
@@ -1200,6 +1141,402 @@ int mb_swathbounds(int verbose, int checkgood,
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+
+/*--------------------------------------------------------------------*/
+int mb_info_init(int verbose, struct mb_info_struct *mb_info, int *error)
+{
+	static char rcs_id[]="$Id: mb_check_info.c,v 5.19 2007-10-08 15:59:34 caress Exp $";
+	char	*function_name = "mb_info_init";
+	int	status = MB_SUCCESS;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mb_info:    %d\n",mb_info);
+		}
+		
+	/* initialize mb_info_struct */
+	mb_info->loaded = MB_NO;
+	mb_info->file[0] = '\0';;
+	mb_info->nrecords = 0;
+	mb_info->nrecords_ss1 = 0;
+	mb_info->nrecords_ss2 = 0;
+	mb_info->nrecords_sbp = 0;
+	mb_info->nbeams_bath = 0;
+	mb_info->nbeams_bath_total = 0;
+	mb_info->nbeams_bath_good = 0;
+	mb_info->nbeams_bath_zero = 0;
+	mb_info->nbeams_bath_flagged = 0;
+	mb_info->nbeams_amp = 0;
+	mb_info->nbeams_amp_total = 0;
+	mb_info->nbeams_amp_good = 0;
+	mb_info->nbeams_amp_zero = 0;
+	mb_info->nbeams_amp_flagged = 0;
+	mb_info->npixels_ss = 0;
+	mb_info->npixels_ss_total = 0;
+	mb_info->npixels_ss_good = 0;
+	mb_info->npixels_ss_zero = 0;
+	mb_info->npixels_ss_flagged = 0;
+	
+	mb_info->time_total = 0.0;
+	mb_info->dist_total = 0.0;
+	mb_info->speed_avg = 0.0;
+	
+	mb_info->time_start = 0.0;
+	mb_info->lon_start = 0.0;
+	mb_info->lat_start = 0.0;
+	mb_info->depth_start = 0.0;
+	mb_info->heading_start = 0.0;
+	mb_info->speed_start = 0.0;
+	mb_info->sonardepth_start = 0.0;
+	mb_info->sonaraltitude_start = 0.0;
+	
+	mb_info->time_end = 0.0;
+	mb_info->lon_end = 0.0;
+	mb_info->lat_end = 0.0;
+	mb_info->depth_end = 0.0;
+	mb_info->heading_end = 0.0;
+	mb_info->speed_end = 0.0;
+	mb_info->sonardepth_end = 0.0;
+	mb_info->sonaraltitude_end = 0.0;
+	
+	mb_info->lon_min = 0.0;
+	mb_info->lon_max = 0.0;
+	mb_info->lat_min = 0.0;
+	mb_info->lat_max = 0.0;
+	mb_info->sonardepth_min = 0.0;
+	mb_info->sonardepth_max = 0.0;
+	mb_info->altitude_min = 0.0;
+	mb_info->altitude_max = 0.0;
+	mb_info->depth_min = 0.0;
+	mb_info->depth_max = 0.0;
+	mb_info->amp_min = 0.0;
+	mb_info->amp_max = 0.0;
+	mb_info->ss_min = 0.0;
+	mb_info->ss_max = 0.0;
+	
+	mb_info->problem_nodata = 0;
+	mb_info->problem_zeronav = 0;
+	mb_info->problem_toofast = 0;
+	mb_info->problem_avgtoofast = 0;
+	mb_info->problem_toodeep = 0;
+	mb_info->problem_baddatagram = 0;
+	
+	mb_info->mask_nx = 0;
+	mb_info->mask_ny = 0;
+	mb_info->mask_dx = 0;
+	mb_info->mask_dy = 0;
+	mb_info->mask_alloc = 0;
+	mb_info->mask = NULL;
+
+	*error = MB_ERROR_NO_ERROR;
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:          %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_get_info_datalist(int verbose, char *read_file, int *format, 
+			struct mb_info_struct *mb_info, int lonflip, int *error)
+{
+	static char rcs_id[]="$Id: mb_check_info.c,v 5.19 2007-10-08 15:59:34 caress Exp $";
+	char	*function_name = "mb_get_info_datalist";
+	int	status = MB_SUCCESS;
+	char	file_inf[MB_PATH_MAXLINE];
+	char	line[MB_PATH_MAXLINE];
+	char	swathfile[MB_PATH_MAXLINE];
+	struct mb_info_struct mb_info_file;
+	int	read_datalist = MB_NO;
+	void	*datalist;
+	int	look_processed = MB_DATALIST_LOOK_UNSET;
+	int	read_data;
+	double	file_weight;
+	int	nfile = 0;
+	int	i, j, k;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       read_file:  %s\n",read_file);
+		fprintf(stderr,"dbg2       format:     %d\n",*format);
+		fprintf(stderr,"dbg2       lonflip:    %d\n",lonflip);
+		}
+		
+	/* initialize mb_info_struct */
+	mb_info_init(verbose, mb_info, error);
+	strcpy(mb_info->file, read_file);
+
+	/* get format if required */
+	if (*format == 0)
+		mb_get_format(verbose,read_file,NULL,format,error);
+
+	/* determine whether to read one file or a list of files */
+	if (*format < 0)
+		read_datalist = MB_YES;
+
+	/* open file list */
+	if (read_datalist == MB_YES)
+	    {
+	    if ((status = mb_datalist_open(verbose, &datalist,
+					    read_file, look_processed, error)) != MB_SUCCESS)
+		{
+		*error = MB_ERROR_OPEN_FAIL;
+		status = MB_FAILURE;
+		fprintf(stderr,"\nUnable to open data list file: %s\n",
+			read_file);
+		fprintf(stderr,"\nProgram terminated in function <%s>\n",
+			function_name);
+		exit(status);
+		}
+	    if (status = mb_datalist_read(verbose,datalist,
+			    swathfile,format,&file_weight,error)
+			    == MB_SUCCESS)
+		read_data = MB_YES;
+	    else
+		read_data = MB_NO;
+	    }
+	/* else copy single filename to be read */
+	else
+	    {
+	    strcpy(swathfile, read_file);
+	    read_data = MB_YES;
+	    }
+
+	/* loop over all files to be read */
+	while (read_data == MB_YES)
+		{
+		/* read inf file */
+		status = mb_get_info(verbose, swathfile, &mb_info_file, lonflip, error);
+		
+		/* add in the results */
+                mb_info->nrecords += mb_info_file.nrecords;
+                mb_info->nrecords_ss1 += mb_info_file.nrecords_ss1;
+                mb_info->nrecords_ss2 += mb_info_file.nrecords_ss2;
+                mb_info->nrecords_sbp += mb_info_file.nrecords_sbp;
+                mb_info->nbeams_bath += mb_info_file.nbeams_bath;
+                mb_info->nbeams_bath_total += mb_info_file.nbeams_bath_total;
+                mb_info->nbeams_bath_good += mb_info_file.nbeams_bath_good;
+                mb_info->nbeams_bath_zero += mb_info_file.nbeams_bath_zero;
+                mb_info->nbeams_bath_flagged += mb_info_file.nbeams_bath_flagged;
+                mb_info->nbeams_amp += mb_info_file.nbeams_amp;
+                mb_info->nbeams_amp_total += mb_info_file.nbeams_amp_total;
+                mb_info->nbeams_amp_good += mb_info_file.nbeams_amp_good;
+                mb_info->nbeams_amp_zero += mb_info_file.nbeams_amp_zero;
+                mb_info->nbeams_amp_flagged += mb_info_file.nbeams_amp_flagged;
+                mb_info->npixels_ss += mb_info_file.npixels_ss;
+                mb_info->npixels_ss_total += mb_info_file.npixels_ss_total;
+                mb_info->npixels_ss_good += mb_info_file.npixels_ss_good;
+                mb_info->npixels_ss_zero += mb_info_file.npixels_ss_zero;
+                mb_info->npixels_ss_flagged += mb_info_file.npixels_ss_flagged;
+
+                mb_info->time_total += mb_info_file.time_total;
+                mb_info->dist_total += mb_info_file.dist_total;
+                /* mb_info.speed_avg += mb_info_file.speed_avg;*/
+
+		if (nfile == 0)
+			{
+                	mb_info->time_start += mb_info_file.time_start;
+                	mb_info->lon_start += mb_info_file.lon_start;
+                	mb_info->lat_start += mb_info_file.lat_start;
+                	mb_info->depth_start += mb_info_file.depth_start;
+                	mb_info->heading_start += mb_info_file.heading_start;
+                	mb_info->speed_start += mb_info_file.speed_start;
+                	mb_info->sonardepth_start += mb_info_file.sonardepth_start;
+                	mb_info->sonaraltitude_start += mb_info_file.sonaraltitude_start;
+			}
+
+                mb_info->time_end += mb_info_file.time_end;
+                mb_info->lon_end += mb_info_file.lon_end;
+                mb_info->lat_end += mb_info_file.lat_end;
+                mb_info->depth_end += mb_info_file.depth_end;
+                mb_info->heading_end += mb_info_file.heading_end;
+                mb_info->speed_end += mb_info_file.speed_end;
+                mb_info->sonardepth_end += mb_info_file.sonardepth_end;
+                mb_info->sonaraltitude_end += mb_info_file.sonaraltitude_end;
+
+		if (nfile == 0)
+			{
+                	mb_info->lon_min = mb_info_file.lon_min;
+                	mb_info->lon_max = mb_info_file.lon_max;
+                	mb_info->lat_min = mb_info_file.lat_min;
+                	mb_info->lat_max = mb_info_file.lat_max;
+                	mb_info->sonardepth_min = mb_info_file.sonardepth_min;
+                	mb_info->sonardepth_max = mb_info_file.sonardepth_max;
+                	mb_info->altitude_min = mb_info_file.altitude_min;
+                	mb_info->altitude_max = mb_info_file.altitude_max;
+                	mb_info->depth_min = mb_info_file.depth_min;
+                	mb_info->depth_max = mb_info_file.depth_max;
+                	mb_info->amp_min = mb_info_file.amp_min;
+                	mb_info->amp_max = mb_info_file.amp_max;
+                	mb_info->ss_min = mb_info_file.ss_min;
+                	mb_info->ss_max = mb_info_file.ss_max;
+			}
+		else
+			{
+                	mb_info->lon_min = MIN(mb_info_file.lon_min, mb_info->lon_min);
+                	mb_info->lon_max = MAX(mb_info_file.lon_max, mb_info->lon_max);
+                	mb_info->lat_min = MIN(mb_info_file.lat_min, mb_info->lat_min);
+                	mb_info->lat_max = MAX(mb_info_file.lat_max, mb_info->lat_max);
+                	mb_info->sonardepth_min = MIN(mb_info_file.sonardepth_min, mb_info->sonardepth_min);
+                	mb_info->sonardepth_max = MAX(mb_info_file.sonardepth_max, mb_info->sonardepth_max);
+                	mb_info->altitude_min = MIN(mb_info_file.altitude_min, mb_info->altitude_min);
+                	mb_info->altitude_max = MAX(mb_info_file.altitude_max, mb_info->altitude_max);
+                	mb_info->depth_min = MIN(mb_info_file.depth_min, mb_info->depth_min);
+                	mb_info->depth_max = MAX(mb_info_file.depth_max, mb_info->depth_max);
+                	mb_info->amp_min = MIN(mb_info_file.amp_min, mb_info->amp_min);
+                	mb_info->amp_max = MAX(mb_info_file.amp_max, mb_info->amp_max);
+                	mb_info->ss_min = MIN(mb_info_file.ss_min, mb_info->ss_min);
+                	mb_info->ss_max = MAX(mb_info_file.ss_max, mb_info->ss_max);
+			}
+
+                mb_info->problem_nodata += mb_info_file.problem_nodata;
+                mb_info->problem_zeronav += mb_info_file.problem_zeronav;
+                mb_info->problem_toofast += mb_info_file.problem_toofast;
+                mb_info->problem_avgtoofast += mb_info_file.problem_avgtoofast;
+                mb_info->problem_toodeep += mb_info_file.problem_toodeep;
+                mb_info->problem_baddatagram += mb_info_file.problem_baddatagram;
+
+		nfile++;
+
+		/* check memory */
+		if (verbose >= 4)
+			status = mb_memory_list(verbose,&error);
+
+		/* figure out whether and what to read next */
+        	if (read_datalist == MB_YES)
+                	{
+			if (status = mb_datalist_read(verbose,datalist,
+				    swathfile,format,&file_weight,error)
+				    == MB_SUCCESS)
+                        	read_data = MB_YES;
+                	else
+                        	read_data = MB_NO;
+                	}
+        	else
+                	{
+                	read_data = MB_NO;
+                	}
+
+		/* end loop over files in list */
+		}
+        if (read_datalist == MB_YES)
+		mb_datalist_close(verbose,&datalist,error);
+
+	/* check memory */
+	if (verbose >= 4)
+		status = mb_memory_list(verbose,&error);
+
+	/* set error and status (if you got here you succeeded */
+	*error = MB_ERROR_NO_ERROR;
+	status = MB_SUCCESS;
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       loaded:                   %d\n",mb_info->loaded);
+		fprintf(stderr,"dbg2       file:                     %s\n",mb_info->file);
+		fprintf(stderr,"dbg2       nrecords:                 %d\n",mb_info->nrecords);
+		fprintf(stderr,"dbg2       nrecords_sbp:             %d\n",mb_info->nrecords_sbp);
+		fprintf(stderr,"dbg2       nrecords_ss1:             %d\n",mb_info->nrecords_ss1);
+		fprintf(stderr,"dbg2       nrecords_ss2:             %d\n",mb_info->nrecords_ss2);
+		fprintf(stderr,"dbg2       nbeams_bath:              %d\n",mb_info->nbeams_bath);
+		fprintf(stderr,"dbg2       nbeams_bath_total:        %d\n",mb_info->nbeams_bath_total);
+		fprintf(stderr,"dbg2       nbeams_bath_good:         %d\n",mb_info->nbeams_bath_good);
+		fprintf(stderr,"dbg2       nbeams_bath_zero:         %d\n",mb_info->nbeams_bath_zero);
+		fprintf(stderr,"dbg2       nbeams_bath_flagged:      %d\n",mb_info->nbeams_bath_flagged);
+		fprintf(stderr,"dbg2       nbeams_amp:               %d\n",mb_info->nbeams_amp);
+		fprintf(stderr,"dbg2       nbeams_amp_total:         %d\n",mb_info->nbeams_amp_total);
+		fprintf(stderr,"dbg2       nbeams_amp_good:          %d\n",mb_info->nbeams_amp_good);
+		fprintf(stderr,"dbg2       nbeams_amp_zero:          %d\n",mb_info->nbeams_amp_zero);
+		fprintf(stderr,"dbg2       nbeams_amp_flagged:       %d\n",mb_info->nbeams_amp_flagged);
+		fprintf(stderr,"dbg2       npixels_ss:               %d\n",mb_info->npixels_ss);
+		fprintf(stderr,"dbg2       npixels_ss_total:         %d\n",mb_info->npixels_ss_total);
+		fprintf(stderr,"dbg2       npixels_ss_good:          %d\n",mb_info->npixels_ss_good);
+		fprintf(stderr,"dbg2       npixels_ss_zero:          %d\n",mb_info->npixels_ss_zero);
+		fprintf(stderr,"dbg2       npixels_ss_flagged:       %d\n",mb_info->npixels_ss_flagged);
+		fprintf(stderr,"dbg2       time_total:               %f\n",mb_info->time_total);
+		fprintf(stderr,"dbg2       dist_total:               %f\n",mb_info->dist_total);
+		fprintf(stderr,"dbg2       speed_avg:                %f\n",mb_info->speed_avg);
+		fprintf(stderr,"dbg2       time_start:               %f\n",mb_info->time_start);
+		fprintf(stderr,"dbg2       lon_start:                %f\n",mb_info->lon_start);
+		fprintf(stderr,"dbg2       lat_start:                %f\n",mb_info->lat_start);
+		fprintf(stderr,"dbg2       depth_start:              %f\n",mb_info->depth_start);
+		fprintf(stderr,"dbg2       heading_start:            %f\n",mb_info->heading_start);
+		fprintf(stderr,"dbg2       speed_start:              %f\n",mb_info->speed_start);
+		fprintf(stderr,"dbg2       sonardepth_start:         %f\n",mb_info->sonardepth_start);
+		fprintf(stderr,"dbg2       sonaraltitude_start:      %f\n",mb_info->sonaraltitude_start);
+		fprintf(stderr,"dbg2       time_end:                 %f\n",mb_info->time_end);
+		fprintf(stderr,"dbg2       lon_end:                  %f\n",mb_info->lon_end);
+		fprintf(stderr,"dbg2       lat_end:                  %f\n",mb_info->lat_end);
+		fprintf(stderr,"dbg2       depth_end:                %f\n",mb_info->depth_end);
+		fprintf(stderr,"dbg2       heading_end:              %f\n",mb_info->heading_end);
+		fprintf(stderr,"dbg2       speed_end:                %f\n",mb_info->speed_end);
+		fprintf(stderr,"dbg2       sonardepth_end:           %f\n",mb_info->sonardepth_end);
+		fprintf(stderr,"dbg2       sonaraltitude_end:        %f\n",mb_info->sonaraltitude_end);
+		fprintf(stderr,"dbg2       lon_min:                  %f\n",mb_info->lon_min);
+		fprintf(stderr,"dbg2       lon_max:                  %f\n",mb_info->lon_max);
+		fprintf(stderr,"dbg2       lat_min:                  %f\n",mb_info->lat_min);
+		fprintf(stderr,"dbg2       lat_max:                  %f\n",mb_info->lat_max);
+		fprintf(stderr,"dbg2       sonardepth_min:           %f\n",mb_info->sonardepth_min);
+		fprintf(stderr,"dbg2       sonardepth_max:           %f\n",mb_info->sonardepth_max);
+		fprintf(stderr,"dbg2       altitude_min:             %f\n",mb_info->altitude_min);
+		fprintf(stderr,"dbg2       altitude_max:             %f\n",mb_info->altitude_max);
+		fprintf(stderr,"dbg2       depth_min:                %f\n",mb_info->depth_min);
+		fprintf(stderr,"dbg2       depth_max:                %f\n",mb_info->depth_max);
+		fprintf(stderr,"dbg2       amp_min:                  %f\n",mb_info->amp_min);
+		fprintf(stderr,"dbg2       amp_max:                  %f\n",mb_info->amp_max);
+		fprintf(stderr,"dbg2       ss_min:                   %f\n",mb_info->ss_min);
+		fprintf(stderr,"dbg2       ss_max:                   %f\n",mb_info->ss_max);
+		fprintf(stderr,"dbg2       problem_nodata:           %d\n",mb_info->problem_nodata);
+		fprintf(stderr,"dbg2       problem_zeronav:          %d\n",mb_info->problem_zeronav);
+		fprintf(stderr,"dbg2       problem_toofast:          %d\n",mb_info->problem_toofast);
+		fprintf(stderr,"dbg2       problem_avgtoofast:       %d\n",mb_info->problem_avgtoofast);
+		fprintf(stderr,"dbg2       problem_toodeep:          %d\n",mb_info->problem_toodeep);
+		fprintf(stderr,"dbg2       problem_baddatagram:      %d\n",mb_info->problem_baddatagram);
+		fprintf(stderr,"dbg2       mask_nx:                  %d\n",mb_info->mask_nx);
+		fprintf(stderr,"dbg2       mask_ny:                  %d\n",mb_info->mask_ny);
+		fprintf(stderr,"dbg2       mask_dx:                  %f\n",mb_info->mask_dx);
+		fprintf(stderr,"dbg2       mask_dy:                  %f\n",mb_info->mask_dy);
+		fprintf(stderr,"dbg2       mask:\n");
+		for (j=mb_info->mask_ny-1;j>=0;j--)
+			{
+			fprintf(stderr, "dbg2       ");
+			for (i=0;i<mb_info->mask_nx;i++)
+				{
+				k = i + j * mb_info->mask_nx;
+				fprintf(stderr, " %1d", mb_info->mask[k]);
+				}
+			fprintf(stderr, "\n");
+			}
+		fprintf(stderr,"dbg2       error:          %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
 		}
 
 	/* return status */

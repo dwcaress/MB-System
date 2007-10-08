@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_process.h	9/11/00
- *    $Id: mb_process.h,v 5.25 2007-05-14 06:25:47 caress Exp $
+ *    $Id: mb_process.h,v 5.26 2007-10-08 15:59:34 caress Exp $
  *
- *    Copyright (c) 2000, 2002, 2003, 2004 by
+ *    Copyright (c) 2000, 2002, 2003, 2004, 2007 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -373,6 +373,10 @@
  *   AMPCORRSLOPE boolean           # sets amplitude correction slope mode [0]
  *                                  #   0: local slope ignored in calculating correction
  *                                  #   1: local slope used in calculating correction
+ *                                  #   2: topography grid used in calculating correction
+ *                                  #      but slope ignored
+ *                                  #   3: local slope from topography grid used in 
+ *                                  #      calculating correction
  *
  * SIDESCAN CORRECTION:
  *   SSCORRMODE  boolean            # sets correction of sidescan by amplitude vs grazing 
@@ -390,6 +394,13 @@
  *   SSCORRSLOPE boolean            # sets sidescan correction slope mode [0]
  *                                  #   0: local slope ignored in calculating correction
  *                                  #   1: local slope used in calculating correction
+ *                                  #   2: topography grid used in calculating correction
+ *                                  #      but slope ignored
+ *                                  #   3: local slope from topography grid used in 
+ *                                  #      calculating correction
+ *
+ * AMPLITUDE/SIDESCAN TOPOGRAPHY CORRECTION:
+ *    AMPSSCORRTOPOFILE filename    # sets amplitude/sidescan correction topography grid file path
  *
  * SIDESCAN RECALCULATION:
  *   SSRECALCMODE  boolean          # sets recalculation of sidescan for Simrad multibeam data
@@ -457,6 +468,9 @@
  * Date:	September 11, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.25  2007/05/14 06:25:47  caress
+ * Added support for vertical as well as lateral adjustments from mbnavadjust.
+ *
  * Revision 5.24  2006/06/16 19:30:58  caress
  * Check in after the Santa Monica Basin Mapping AUV Expedition.
  *
@@ -621,20 +635,26 @@
 #define MBP_TIDE_ON		1
 #define MBP_AMPCORR_OFF		0
 #define MBP_AMPCORR_ON		1
+#define MBP_AMPCORR_UNKNOWN	-1
 #define MBP_AMPCORR_SUBTRACTION	0
 #define MBP_AMPCORR_DIVISION	1
 #define MBP_AMPCORR_ASYMMETRIC	0
 #define MBP_AMPCORR_SYMMETRIC	1
 #define MBP_AMPCORR_IGNORESLOPE	0
 #define MBP_AMPCORR_USESLOPE	1
+#define MBP_AMPCORR_USETOPO	2
+#define MBP_AMPCORR_USETOPOSLOPE	3
 #define MBP_SSCORR_OFF		0
 #define MBP_SSCORR_ON		1
+#define MBP_SSCORR_UNKNOWN	-1
 #define MBP_SSCORR_SUBTRACTION	0
 #define MBP_SSCORR_DIVISION	1
 #define MBP_SSCORR_ASYMMETRIC	0
 #define MBP_SSCORR_SYMMETRIC	1
 #define MBP_SSCORR_IGNORESLOPE	0
 #define MBP_SSCORR_USESLOPE	1
+#define MBP_SSCORR_USETOPO	2
+#define MBP_SSCORR_USETOPOSLOPE	3
 #define MBP_SSRECALC_OFF	0
 #define MBP_SSRECALC_ON		1
 #define MBP_CORRECTION_UNKNOWN	-1
@@ -759,6 +779,9 @@ struct mb_process_struct
 	int	mbp_sscorr_symmetry;
 	double	mbp_sscorr_angle;
 	int	mbp_sscorr_slope;
+	
+	/* amplitude and sidescan correction */
+	char	mbp_ampsscorr_topofile[MBP_FILENAMESIZE];
 	
 	/* sidescan recalculation */
 	int	mbp_ssrecalc_mode;
@@ -937,6 +960,7 @@ int mb_pr_update_ampcorr(int verbose, char *file,
 			int	mbp_ampcorr_symmetry,
 			double	mbp_ampcorr_angle,
 			int	mbp_ampcorr_slope,
+			char	*mbp_ampcorr_topofile,
 			int *error);
 int mb_pr_update_sscorr(int verbose, char *file, 
 			int	mbp_sscorr_mode,
@@ -945,6 +969,7 @@ int mb_pr_update_sscorr(int verbose, char *file,
 			int	mbp_sscorr_symmetry,
 			double	mbp_sscorr_angle,
 			int	mbp_sscorr_slope,
+			char	*mbp_sscorr_topofile,
 			int *error);
 int mb_pr_update_ssrecalc(int verbose, char *file, 
 			int	mbp_ssrecalc_mode,
@@ -1094,6 +1119,7 @@ int mb_pr_get_ampcorr(int verbose, char *file,
 			int	*mbp_ampcorr_symmetry,
 			double	*mbp_ampcorr_angle,
 			int	*mbp_ampcorr_slope,
+			char	*mbp_ampcorr_topofile,
 			int *error);
 int mb_pr_get_sscorr(int verbose, char *file, 
 			int	*mbp_sscorr_mode,
@@ -1102,6 +1128,7 @@ int mb_pr_get_sscorr(int verbose, char *file,
 			int	*mbp_sscorr_symmetry,
 			double	*mbp_sscorr_angle,
 			int	*mbp_sscorr_slope,
+			char	*mbp_sscorr_topofile,
 			int *error);
 int mb_pr_get_ssrecalc(int verbose, char *file, 
 			int	*mbp_ssrecalc_mode,

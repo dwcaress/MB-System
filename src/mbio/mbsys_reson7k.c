@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_reson7k.c	3.00	3/23/2004
- *	$Id: mbsys_reson7k.c,v 5.15 2007-07-03 17:25:51 caress Exp $
+ *	$Id: mbsys_reson7k.c,v 5.16 2007-10-08 15:59:34 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -26,6 +26,9 @@
  * Date:	March 23, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.15  2007/07/03 17:25:51  caress
+ * Changes to handle new time lag value in bluefin nav records.
+ *
  * Revision 5.14  2006/11/10 22:36:05  caress
  * Working towards release 5.1.0
  *
@@ -88,14 +91,11 @@
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_reson7k.h"
 #include "../../include/mb_segy.h"
-
-/* define ln(2) for local usage */
-#define MB_LN_2	0.69314718056
 	
 /* turn on debug statements here */
 /* #define MSYS_RESON7KR_DEBUG 1 */
 
-static char res_id[]="$Id: mbsys_reson7k.c,v 5.15 2007-07-03 17:25:51 caress Exp $";
+static char res_id[]="$Id: mbsys_reson7k.c,v 5.16 2007-10-08 15:59:34 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_zero7kheader(int verbose, s7k_header	*header, 
@@ -7623,6 +7623,8 @@ k,kk,ss[kk],ss_cnt[kk]);*/
 				first = MIN(first, k);
 				last = k;
 				}
+			else
+				ss[k] = MB_SIDESCAN_NULL;	
 			}
 		if (last > first)
 			*nss = MBSYS_RESON7K_MAX_PIXELS;

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	4/21/96
- *    $Id: mb_define.h,v 5.32 2006-11-10 22:36:04 caress Exp $
+ *    $Id: mb_define.h,v 5.33 2007-10-08 15:59:34 caress Exp $
  *
  *    Copyright (c) 1996, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	April 21, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.32  2006/11/10 22:36:04  caress
+ * Working towards release 5.1.0
+ *
  * Revision 5.31  2006/10/05 18:58:28  caress
  * Changes for 5.1.0beta4
  *
@@ -207,6 +210,9 @@ typedef signed char	mb_s_char;
 #ifdef DARWIN
 typedef char	mb_s_char;
 #endif
+#ifdef CYGWIN
+typedef char	mb_s_char;
+#endif
 #ifdef OTHER
 typedef signed char	mb_s_char;
 #endif
@@ -223,6 +229,9 @@ typedef char mb_path[MB_PATH_MAXLINE];
 #define	M_PI	3.14159265358979323846
 #endif
 
+/* the natural log of 2 is always useful */
+#define MB_LN_2        0.69314718056
+
 /* multiply this by degrees to get radians */
 #define DTR	0.01745329251994329500
 
@@ -236,6 +245,10 @@ typedef char mb_path[MB_PATH_MAXLINE];
 #ifndef MAX
 #define	MAX(A, B)	((A) > (B) ? (A) : (B))
 #endif
+
+/* position projection flag (0 = longitude latitude, 1 = projected eastings northings) */
+#define	MB_PROJECTION_GEOGRAPHIC	0
+#define	MB_PROJECTION_PROJECTED		1
 	
 /* MBIO core function prototypes */
 int mb_defaults(int verbose, int *format, int *pings,
@@ -381,6 +394,12 @@ int mb_deall(int verbose, void *mbio_ptr,
 		void **store_ptr, int *error);
 int mb_dimensions(int verbose, void *mbio_ptr, void *store_ptr, 
 		int *kind, int *nbath, int *namp, int *nss, int *error);
+int mb_pingnumber(int verbose, void *mbio_ptr, 
+		int *pingnumber, int *error);
+int mb_beamwidths(int verbose, void *mbio_ptr, 
+		double *beamwidth_xtrack, double *beamwidth_ltrack, int *error);
+int mb_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, 
+		int *ss_type, int *error);
 int mb_extract(int verbose, void *mbio_ptr, void *store_ptr, 
 		int *kind, int time_i[7], double *time_d,
 		double *navlon, double *navlat,
@@ -597,6 +616,134 @@ int mb_int_compare(void *a, void *b);
 int mb_edit_compare(void *a, void *b);
 void hilbert(int n, double delta[], double kappa[]);
 void hilbert2(int n, double data[]);
+
+int mb_readgrd(int verbose, char *grdfile,
+			int	*grid_projection_mode,
+			char	*grid_projection_id,
+			float	*nodatavalue,
+			int	*nxy,
+			int	*nx,
+			int	*ny,
+			double	*min,
+			double	*max,
+			double	*xmin,
+			double	*xmax,
+			double	*ymin,
+			double	*ymax,
+			double	*dx,
+			double	*dy,
+			float	**data,
+			float	**data_dzdx,
+			float	**data_dzdy,
+			int	*error);
+int mb_rt_init(int verbose, int number_node, 
+		double *depth, double *velocity, 
+		char **modelptr, int *error);
+int mb_rt_deall(int verbose, char **modelptr, int *error);
+int mb_rt(int verbose, char *modelptr, 
+	double source_depth, double source_angle, double end_time, 
+	int ssv_mode, double surface_vel, double null_angle, 
+	int nplot_max, int *nplot, double *xplot, double *zplot, 
+	double *x, double *z, double *travel_time, int *ray_stat, int *error);
+int mb_spline_init(int verbose, double *x, double *y, 
+	int n, double yp1, double ypn, double *y2, int *error);
+int mb_spline_interp(int verbose, double *xa, double *ya, double *y2a,
+	int n, double x, double *y, int *i, int *error);
+int mb_linear_interp(int verbose, double *xa, double *ya,
+		int n, double x, double *y, int *i, int *error);
+void lsqup(
+    double  *a,
+    int	    *ia,
+    int	    *nia,
+    int	    nnz,
+    int	    nc,
+    int	    nr,
+    double  *x,
+    double  *dx,
+    double  *d,
+    int	    nfix,
+    int	    *ifix,
+    double  *fix,
+    int	    ncycle,
+    double  *sigma);
+void chebyu(
+    double  *sigma,
+    int	    ncycle,
+    double  shi,
+    double  slo,
+    double  *work);
+void splits(
+    double  *x,
+    double  *t,
+    int	    n);
+double errlim(
+	double	*sigma,
+	int	ncycle,
+	double	shi,
+	double	slo);
+double errrat(
+	double	x1,
+	double	x2,
+	double	*sigma,
+	int	ncycle);
+void lspeig(
+	double	*a,
+	int	*ia,
+	int	*nia,
+	int	nnz,
+	int	nc,
+	int	nr,
+	int	ncyc,
+	int	*nsig,
+	double	*x,
+	double	*dx,
+	double	*sigma,
+	double	*w,
+	double	*smax,
+	double	*err,
+	double	*sup);
+int mb_delaun(
+	int	verbose, 
+	int	npts, 
+	double	*p1, 
+	double	*p2, 
+	int	*ed, 
+	int	*ntri, 
+	int	*iv1, 
+	int	*iv2, 
+	int	*iv3, 
+	int	*ct1, 
+	int	*ct2, 
+	int	*ct3, 
+	int	*cs1, 
+	int	*cs2, 
+	int	*cs3, 
+	double	*v1, 
+	double	*v2, 
+	double	*v3, 
+	int	*istack, 
+	int	*kv1, 
+	int	*kv2, 
+	int	*error);
+int plot_init(	int	verbose, 
+		int	argc, 
+		char	**argv, 
+		double	*bounds_use, 
+		double	*scale, 
+		double	*inch2lon, 
+		int	*error);
+int plot_end(int verbose, int *error);
+int plot_exit(int argc, char **argv);
+void set_colors(int ncol, int *rd, int *gn, int *bl);
+void plot(double x, double y, int ipen);
+void setline(int linewidth);
+void newpen(int ipen);
+void justify_string(double height, char *string, double *s);
+void plot_string(double x, double y, double hgt, double angle, char *label);
+int mb_zgrid(float *z, int *nx, int *ny, 
+		float *x1, float *y1, float *dx, float *dy, float *xyz, 
+		int *n, float *zpij, int *knxt, int *imnew, 
+		float *cay, int *nrng);
 
 /* end conditional include */
 #endif
