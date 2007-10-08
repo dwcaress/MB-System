@@ -190,6 +190,36 @@ Added swath file copy function to mbdatalist.
 Fixed calculation of grazing angles in mblist by adding sonar
 depth to the calculation.
 
+Added some additional large format page sizes to the plot macros 
+mbm_plot, mbm_grdplot, mbm_grd3dplot, mbm_xyplot, and mbm_histplot.
+
+Added mblist capability to output tables using column delimiters
+other than tabs (e.g. commas to make csv files).
+
+Modified mbnavedit so that any nav points that repeat previous lon
+and lat values will be automatically flagged as bad.
+
+Fixed footprint calculation in mbmosaic, correcting problems in 
+sidescan mosaic creation.
+
+Altered mbm_utm to work with comma delimited input data as well as
+white space delimited data.
+
+Updated proj library to current version 4.5.0.
+
+Updated gsf to the current version 2.07.
+
+Sidescan extracted from MBARI Mapping AUV data can now be laid out
+on a topography grid rather than laid out with a flat bottom 
+assumption (mb7k2ss).
+
+The sidescan and amplitude correction scheme (mbbackangle & mbprocess) 
+can now use a topography grid to calculate grazing angles.
+
+Altered several programs so that sidescan data can have valid zero or
+negative values. Stopped applying a shift to Simrad sidescan and amplitude
+values to force them to be positive.
+
 MB-SYSTEM VERSION 5.1.0 RELEASE NOTES:
 ------------------------------------------
 
@@ -1383,10 +1413,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.99 2007-07-05 19:18:34 caress Exp $
+RCS ID: $Id: README,v 5.100 2007-10-08 17:16:49 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.99  2007/07/05 19:18:34  caress
+Release 5.1.1beta5
+
 Revision 5.98  2007/07/05 16:43:17  caress
 Release 5.1.1beta5
 
