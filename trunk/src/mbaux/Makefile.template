@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  9/8/00
-#	$Id: Makefile.template,v 5.5 2003-07-27 20:49:13 caress Exp $
+#	$Id: Makefile.template,v 5.6 2007-10-08 06:09:51 caress Exp $
 #
 #     Copyright (c) 2000, 2003 by
 #     David W. Caress (caress@mbari.org)
@@ -16,6 +16,9 @@
 # Date:		September 8, 2000
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.5  2003/07/27 20:49:13  caress
+# Release 5.0.0
+#
 # Revision 5.4  2003/03/22 03:09:45  caress
 # Added mb_surface.c
 #
@@ -78,7 +81,8 @@ $(LIBDIR)/libmbaux.a:	\
 		mb_delaun.o \
 		mb_rt.o \
 		mb_track.o \
-		mb_truecont.o
+		mb_truecont.o \
+		mb_readgrd.o
 	$(ARCHIVE) $(LIBDIR)/libmbaux.a \
 		mb_spline.o \
 		mb_zgrid.o \
@@ -87,7 +91,8 @@ $(LIBDIR)/libmbaux.a:	\
 		mb_delaun.o \
 		mb_rt.o \
 		mb_track.o \
-		mb_truecont.o
+		mb_truecont.o \
+		mb_readgrd.o
 	ranlib $(LIBDIR)/libmbaux.a
 $(LIBDIR)/libmbps.a:	\
 		mb_pslibface.o
@@ -119,6 +124,8 @@ mb_track.o:	mb_track.c $(INCDIR)/mb_status.h $(INCDIR)/mb_contour.h
 	$(CC) -c $(CFLAGS) mb_track.c
 mb_truecont.o:	mb_truecont.c $(INCDIR)/mb_status.h
 	$(CC) -c $(CFLAGS) mb_truecont.c
+mb_readgrd.o:	mb_readgrd.c $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
+	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) -I$(NETCDFINCDIR) mb_readgrd.c
 xgraphics.o:	xgraphics.c $(INCDIR)/mb_status.h
 	$(CC) -c $(CFLAGS) xgraphics.c
 
