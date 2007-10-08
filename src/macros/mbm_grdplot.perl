@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grdplot.perl	8/6/95
-#    $Id: mbm_grdplot.perl,v 5.27 2007-03-02 20:34:26 caress Exp $
+#    $Id: mbm_grdplot.perl,v 5.28 2007-10-08 04:30:55 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 2000, 2003 by 
 #    D. W. Caress (caress@mbari.org)
@@ -69,10 +69,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   October 19, 1994
 #
 # Version:
-#   $Id: mbm_grdplot.perl,v 5.27 2007-03-02 20:34:26 caress Exp $
+#   $Id: mbm_grdplot.perl,v 5.28 2007-10-08 04:30:55 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.27  2007/03/02 20:34:26  caress
+#   Fixed plotting of ping/shot number annotation along navigation tracks.
+#
 #   Revision 5.26  2006/12/15 21:42:49  caress
 #   Incremental CVS update.
 #
@@ -230,7 +233,8 @@ $DTR = 3.1415926 / 180.0;
 	"a", "b", "c", "d", "e", "f", "e1",
 	"a0", "a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", 
 	"b0", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", 
-	"c0", "c1", "c2", "c3", "c4", "c5", "c6", "c7");
+	"c0", "c1", "c2", "c3", "c4", "c5", "c6", "c7",
+	"m1", "m2", "m3", "m4", "m5", "m6");
 %page_width_in = (  
 	"a",     8.50,   "b",    11.00,   "c",    17.00,   "d",    22.00, 
 	"e",    34.00,   "f",    28.00,   "e1",   44.00,   "a0",   33.11,
@@ -241,7 +245,8 @@ $DTR = 3.1415926 / 180.0;
 	"b6",    4.92,   "b7",    3.46,   "b8",    2.44,   "b9",    1.73,
 	"b10",   1.22,   "c0",   36.00,   "c1",   25.60,   "c2",   18.00,
 	"c3",   12.80,   "c4",    9.00,   "c5",    6.40,   "c6",    4.50,
-	"c7",    3.20);
+	"c7",    3.20,   "m1",   54.00,   "m2",   54.00,   "m3",   54.00,
+	"m4",   60.00,   "m5",   60.00,   "m6",   60.00);
 %page_height_in = ( 
 	"a",    11.00,   "b",    17.00,   "c",    22.00,   "d",    34.00, 
 	"e",    44.00,   "f",    40.00,   "e1",   68.00,   "a0",   46.81,
@@ -252,7 +257,8 @@ $DTR = 3.1415926 / 180.0;
 	"b6",    6.93,   "b7",    4.92,   "b8",    3.46,   "b9",    2.44,
 	"b10",   1.73,   "c0",   51.20,   "c1",   36.00,   "c2",   25.60,
 	"c3",   18.00,   "c4",   12.80,   "c5",    9.00,   "c6",    6.40,
-	"c7",    4.50);
+	"c7",    4.50,   "m1",   72.00,   "m2",   84.00,   "m3",   96.00,
+	"m4",   72.00,   "m5",   84.00,   "m6",   96.00);
 %page_anot_font = ( 
 	"a",     8,   "b",    12,   "c",    16,   "d",    24,
 	"e",    24,   "f",    24,   "e1",   24,   "a0",   24,
@@ -263,7 +269,8 @@ $DTR = 3.1415926 / 180.0;
 	"b6",    6,   "b7",    4,   "b8",    4,   "b9",    4,
 	"b10",   4,   "c0",   24,   "c1",   24,   "c2",   16,
 	"c3",   12,   "c4",    8,   "c5",    6,   "c6",    6,
-	"c7",    6);
+	"c7",    6,   "m1",   24,   "m2",   24,   "m3",   24,
+	"m4",   24,   "m5",   24,   "m6",   24);
 %page_header_font =(
 	"a",    10,   "b",    15,   "c",    20,   "d",    30,
 	"e",    30,   "f",    30,   "e1",   30,   "a0",   30,
@@ -274,7 +281,8 @@ $DTR = 3.1415926 / 180.0;
 	"b6",    8,   "b7",    5,   "b8",    5,   "b9",    5,
 	"b10",   5,   "c0",   30,   "c1",   30,   "c2",   20,
 	"c3",   15,   "c4",   10,   "c5",    8,   "c6",    8,
-	"c7",    8);
+	"c7",    8,   "m1",   30,   "m2",   30,   "m3",   30,
+	"m4",   30,   "m5",   30,   "m6",   30);
 %page_gmt_name =     (
 	"a",     "archA",   "b",     "archB",   "c",     "archC",   "d",     "archD", 
 	"e",     "archE",   "f",     "B0",      "e1",    "B0",      "a0",    "A0",
@@ -285,7 +293,9 @@ $DTR = 3.1415926 / 180.0;
 	"b6",    "A6",      "b7",    "A7",      "b8",    "A8",      "b9",    "A9",
 	"b10",   "A10",     "c0",    "B0",      "c1",    "B1",      "c2",    "B2",
 	"c3",    "B3",      "c4",    "B4",      "c5",    "B5",      "c6",    "B6",
-	"c7",    "B7");
+	"c7",    "B7",      "m1", "Custom_4241x5655",    "m2",   "Custom_4241x6578",   
+	"m3",   "Custom_4241x7540",  "m4",   "Custom_4712x5655",   
+	"m5",   "Custom_4712x6578",  "m6",   "Custom_4712x7540");
 %xpsview_mem =     (
 	"a",     "4m",   "b",     "6m",   "c",     "8m",   "d",    "12m", 
 	"e",    "16m",   "f",    "16m",   "e1",   "16m",   "a0",   "16m",
@@ -296,7 +306,8 @@ $DTR = 3.1415926 / 180.0;
 	"b6",    "4m",   "b7",    "4m",   "b8",    "4m",   "b9",    "4m",
 	"b10",   "4m",   "c0",   "16m",   "c1",   "12m",   "c2",    "8m",
 	"c3",    "6m",   "c4",    "4m",   "c5",    "4m",   "c6",    "4m",
-	"c7",    "4m");
+	"c7",    "4m",   "m1",   "16m",   "m2",   "16m",   "m3",   "16m",
+	"m4",   "16m",   "m5",   "16m",   "m6",   "16m");
 
 # set default number of colors
 $ncpt = 11;
@@ -1222,8 +1233,8 @@ if (!$bounds || !$zbounds || $zmode == 1)
 		$xmax = &max($xmax, $xmax_f);
 		$ymin = &min($ymin, $ymin_f);
 		$ymax = &max($ymax, $ymax_f);
-		$zmin_t = &min($zmin, $zmin_f);
-		$zmax_t = &max($zmax, $zmax_f);
+		$zmin_t = &min($zmin_t, $zmin_f);
+		$zmax_t = &max($zmax_t, $zmax_f);
 		}
 
 	# check that there are data
@@ -1989,7 +2000,7 @@ else
 	{
 	$cptfile = "$root.cpt";
 	}
-$gmtfile = "gmtdefaults\$\$";
+$gmtfile = "gmtdefaults4\$\$";
 
 # set some gmtisms
 $first_gmt = 1;
@@ -2000,18 +2011,9 @@ $end = "-O -V >> \$PS_FILE";
 # set macro gmt default settings
 $gmt_def = "MEASURE_UNIT/inch";
 push(@gmt_macro_defs, $gmt_def);
-if ($gmt_version eq "3.0"
-	|| $gmt_version eq "3.1")
-	{
-	$gmt_def = "PAPER_WIDTH/$page_width_in{$pagesize}";
-	push(@gmt_macro_defs, $gmt_def);
-	}
-else
-	{
-	# If + is added then the media is EPS
-	$gmt_def = "PAPER_MEDIA/$page_gmt_name{$pagesize}+";
-	push(@gmt_macro_defs, $gmt_def);
-	}
+# If + is added then the media is EPS
+$gmt_def = "PAPER_MEDIA/$page_gmt_name{$pagesize}+";
+push(@gmt_macro_defs, $gmt_def);
 $gmt_def = "ANOT_FONT/Helvetica";
 push(@gmt_macro_defs, $gmt_def);
 $gmt_def = "LABEL_FONT/Helvetica";
@@ -2036,17 +2038,8 @@ $gmt_def = "COLOR_FOREGROUND/255/255/255";
 push(@gmt_macro_defs, $gmt_def);
 $gmt_def = "COLOR_NAN/255/255/255";
 push(@gmt_macro_defs, $gmt_def);
-if ($gmt_version eq "3.0"
-	|| $gmt_version eq "3.1")
-	{
-	$gmt_def = "DEGREE_FORMAT/3";
-	push(@gmt_macro_defs, $gmt_def);
-	}
-else
-	{
-	$gmt_def = "PLOT_DEGREE_FORMAT/ddd:mm";
-	push(@gmt_macro_defs, $gmt_def);
-	}
+$gmt_def = "PLOT_DEGREE_FORMAT/ddd:mm";
+push(@gmt_macro_defs, $gmt_def);
 
 # open the shellscript file
 if (!open(FCMD,">$cmdfile"))
@@ -2761,14 +2754,7 @@ if ($color_mode && $color_pallette < 5 && $gridprojected != 2)
 		$colorscale_offx,$colorscale_offy,
 		$colorscale_length,$colorscale_thick, 
 		$colorscale_vh;
-	if ($gmt_version eq "3.0")
-		{
-		print FCMD "-B\":.$slabel:\" \\\n\t";
-		}
-	else
-		{
-		print FCMD "-B\":$slabel:\" \\\n\t";
-		}
+	print FCMD "-B\":$slabel:\" \\\n\t";
 	if ($stretch_color)
 		{
 		print FCMD "-L \\\n\t";
@@ -2837,7 +2823,7 @@ if ($data_scale)
 # reset GMT defaults
 print FCMD "#\n# Reset GMT default fonts\n";
 print FCMD "echo Resetting GMT fonts...\n";
-print FCMD "/bin/mv $gmtfile .gmtdefaults\n";
+print FCMD "/bin/mv $gmtfile .gmtdefaults4\n";
 
 # display image on screen if desired
 print FCMD "#\n# Run $ps_viewer\n";
