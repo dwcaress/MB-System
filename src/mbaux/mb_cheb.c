@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_cheb.c			3/23/00
- *    $Id: mb_cheb.c,v 5.1 2006-01-11 07:33:01 caress Exp $
+ *    $Id: mb_cheb.c,v 5.2 2007-10-08 05:56:18 caress Exp $
  *
  *    Copyright (c) 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -31,6 +31,9 @@
  * Date:	March 23, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2006/01/11 07:33:01  caress
+ * Working towards 5.0.8
+ *
  * Revision 5.0  2000/12/01 22:53:59  caress
  * First cut at Version 5.0.
  *
@@ -50,14 +53,6 @@
 
 /* mbio include files */
 #include "../../include/mb_define.h"
-
-/* function defines */
-void lsqup();
-void chebyu();
-void splits();
-double errlim();
-double errrat();
-void lspeig();
 
 
 /*----------------------------------------------------------------------
