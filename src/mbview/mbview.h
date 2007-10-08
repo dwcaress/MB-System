@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbview.h	10/9/2002
- *    $Id: mbview.h,v 5.17 2007-07-03 17:35:54 caress Exp $
+ *    $Id: mbview.h,v 5.18 2007-10-08 16:32:08 caress Exp $
  *
  *    Copyright (c) 2002, 2003, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -18,6 +18,9 @@
  * Date:	October 10,  2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.17  2007/07/03 17:35:54  caress
+ * Working on MBeditviz.
+ *
  * Revision 5.16  2007/06/17 23:27:31  caress
  * Added NBeditviz.
  *
@@ -101,6 +104,7 @@
 #define MBV_MOUSE_SITE		5
 #define MBV_MOUSE_ROUTE		6
 #define MBV_MOUSE_NAV		7
+#define MBV_MOUSE_NAVFILE	8
 
 /* projection mode */
 #define	MBV_PROJECTION_GEOGRAPHIC	0
@@ -112,6 +116,11 @@
 /* display mode defines */
 #define	MBV_DISPLAY_2D		0
 #define	MBV_DISPLAY_3D		1
+
+/* data type defines */
+#define	MBV_DATA_PRIMARY		0
+#define	MBV_DATA_PRIMARYSLOPE		1
+#define	MBV_DATA_SECONDARY		2
 
 /* grid view mode defines */
 #define	MBV_GRID_VIEW_PRIMARY		0
@@ -400,9 +409,12 @@ struct mbview_nav_struct {
 	int	color;
 	int	size;
 	mb_path	name;
+	mb_path	path;
+	int	format;
 	int	swathbounds;
 	int	shot;
 	int	cdp;
+	int	decimation;
 	int	npoints;
 	int	npoints_alloc;
 	int	nselected;
@@ -487,6 +499,11 @@ struct mbview_struct {
 	int	grid_mode;
 	int	grid_shade_mode;
 	int	grid_contour_mode;
+	
+	/* histogram equalization controls */
+	int	primary_histogram;
+	int	primaryslope_histogram;
+	int	secondary_histogram;
 	
 	/* colortable controls */
 	int	primary_colortable;
@@ -675,6 +692,9 @@ int mbview_setviewcontrols(int verbose, int instance,
 			int	display_mode,
 			int	mouse_mode,
 			int	grid_mode,
+			int	primary_histogram,
+			int	primaryslope_histogram,
+			int	secondary_histogram,
 			int	primary_shade_mode,
 			int	slope_shade_mode,
 			int	secondary_shade_mode,
@@ -938,9 +958,12 @@ int mbview_addnav(int verbose, int instance,
 			int	navcolor,
 			int	navsize,
 			mb_path	navname,
+			mb_path	navpath,
+			int	navformat,
 			int	navswathbounds,
 			int	navshot,
 			int	navcdp,
+			int	decimation,
 			int *error);
 int mbview_getprofilecount(int verbose, int instance,
 			int *npoints,

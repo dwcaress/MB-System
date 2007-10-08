@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbviewprivate.h	9/24/2003
- *    $Id: mbviewprivate.h,v 5.12 2007-06-17 23:27:31 caress Exp $
+ *    $Id: mbviewprivate.h,v 5.13 2007-10-08 16:32:08 caress Exp $
  *
  *    Copyright (c) 2003, 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -18,6 +18,9 @@
  * Date:	September 24,  2003
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.12  2007/06/17 23:27:31  caress
+ * Added NBeditviz.
+ *
  * Revision 5.11  2006/06/16 19:30:58  caress
  * Check in after the Santa Monica Basin Mapping AUV Expedition.
  *
@@ -114,6 +117,8 @@
 #define MBV_WINDOW_NULL 	0
 #define MBV_WINDOW_HIDDEN 	1
 #define MBV_WINDOW_VISIBLE 	2
+
+#define MBV_RAW_HISTOGRAM_DIM 	1000
 
 #define MBV_WINDOW_HEIGHT_THRESHOLD 	700
 
@@ -250,6 +255,12 @@ struct mbview_world_struct
     float *colortable_green;
     int	shade_mode;
     double sign;
+    int	primary_histogram_set;
+    int	primaryslope_histogram_set;
+    int	secondary_histogram_set;
+    float primary_histogram[3*MBV_NUM_COLORS];
+    float primaryslope_histogram[3*MBV_NUM_COLORS];
+    float secondary_histogram[3*MBV_NUM_COLORS];
 
     /* grid display bounds */
     double xmin;
@@ -469,6 +480,7 @@ void do_mbview_mouse_mode( Widget w, XtPointer client_data, XtPointer call_data)
 void do_mbview_reset_view( Widget w, XtPointer client_data, XtPointer call_data);
 void set_mbview_mouse_mode(int instance, int mode);
 void set_mbview_grid_mode(int instance, int mode);
+void set_mbview_histogram_mode(int instance, int mode);
 void set_mbview_shade_mode(int instance, int mode);
 void set_mbview_contour_mode(int instance, int mode);
 void set_mbview_site_view_mode(int instance, int mode);
@@ -557,6 +569,40 @@ int mbview_setcolorparms(int instance);
 int mbview_update_sensitivity(int verbose, int instance, int *error);
 int mbview_action_sensitivity(int instance);
 int mbview_action_sensitivityall();
+int mbview_colorpoint(
+	struct mbview_world_struct *view,
+	struct mbview_struct *data,
+	int i, int j, int k);
+int mbview_colorpoint_histogram(
+	struct mbview_world_struct *view,
+	struct mbview_struct *data,
+	float *histogram,
+	int i, int j, int k);
+int mbview_getcolor(double value, double min, double max,
+			int colortablemode, 
+			float below_red,
+			float below_green,
+			float below_blue,
+			float above_red,
+			float above_green,
+			float above_blue,
+			float *colortable_red,
+			float *colortable_green,
+			float *colortable_blue,
+			float *red, float *green, float *blue);
+int mbview_getcolor_histogram(double value, double min, double max,
+			int colortablemode, 
+			float below_red,
+			float below_green,
+			float below_blue,
+			float above_red,
+			float above_green,
+			float above_blue,
+			float *colortable_red,
+			float *colortable_green,
+			float *colortable_blue,
+			float *histogram,
+			float *red, float *green, float *blue);
 /*--------------------------------------------------------------------*/
 int mbview_projectdata(int instance);
 int mbview_projectglobaldata(int instance);

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbview_callbacks.c	10/7/2002
- *    $Id: mbview_callbacks.c,v 5.15 2007-07-03 17:35:54 caress Exp $
+ *    $Id: mbview_callbacks.c,v 5.16 2007-10-08 16:32:08 caress Exp $
  *
  *    Copyright (c) 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -18,6 +18,9 @@
  * Date:	October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.15  2007/07/03 17:35:54  caress
+ * Working on MBeditviz.
+ *
  * Revision 5.14  2007/06/17 23:27:30  caress
  * Added NBeditviz.
  *
@@ -136,7 +139,7 @@ static Cardinal 	ac;
 static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_callbacks.c,v 5.15 2007-07-03 17:35:54 caress Exp $";
+static char rcs_id[]="$Id: mbview_callbacks.c,v 5.16 2007-10-08 16:32:08 caress Exp $";
 
 /* function prototypes */
 /*------------------------------------------------------------------------------*/
@@ -622,6 +625,10 @@ int mbview_reset(int instance)
 		data->grid_mode = MBV_GRID_VIEW_PRIMARY;
 		data->grid_contour_mode = MBV_VIEW_OFF;
 
+		data->primary_histogram = MB_NO;
+		data->primaryslope_histogram = MB_NO;
+		data->secondary_histogram = MB_NO;
+
 		data->primary_colortable = MBV_COLORTABLE_HAXBY;
 		data->primary_colortable_mode = MBV_COLORTABLE_NORMAL;
 		data->primary_colortable_min = 0.0;
@@ -872,6 +879,9 @@ int mbview_reset(int instance)
 		view->contourlorez = MB_NO;
 		view->contourhirez = MB_NO;
 		view->contourfullrez = MB_NO;
+		view->primary_histogram_set = MB_NO;
+		view->primaryslope_histogram_set = MB_NO;
+		view->secondary_histogram_set = MB_NO;
 
 		/* grid display bounds */
 		view->xmin = 0.0;
@@ -1479,6 +1489,9 @@ int mbview_setviewcontrols(int verbose, int instance,
 			int	display_mode,
 			int	mouse_mode,
 			int	grid_mode,
+			int	primary_histogram,
+			int	primaryslope_histogram,
+			int	secondary_histogram,
 			int	primary_shade_mode,
 			int	slope_shade_mode,
 			int	secondary_shade_mode,
@@ -1524,6 +1537,9 @@ int mbview_setviewcontrols(int verbose, int instance,
 		fprintf(stderr,"dbg2       display_mode:              %d\n", display_mode);
 		fprintf(stderr,"dbg2       mouse_mode:                %d\n", mouse_mode);
 		fprintf(stderr,"dbg2       grid_mode:                 %d\n", grid_mode);
+		fprintf(stderr,"dbg2       primary_histogram:         %d\n", primary_histogram);
+		fprintf(stderr,"dbg2       primaryslope_histogram:    %d\n", primaryslope_histogram);
+		fprintf(stderr,"dbg2       secondary_histogram:       %d\n", secondary_histogram);
 		fprintf(stderr,"dbg2       primary_shade_mode:        %d\n", primary_shade_mode);
 		fprintf(stderr,"dbg2       slope_shade_mode:          %d\n", slope_shade_mode);
 		fprintf(stderr,"dbg2       secondary_shade_mode:      %d\n", secondary_shade_mode);
@@ -1557,6 +1573,9 @@ int mbview_setviewcontrols(int verbose, int instance,
         data->display_mode = display_mode;
         data->mouse_mode = mouse_mode;
         data->grid_mode = grid_mode;
+        data->primary_histogram = primary_histogram;
+        data->primaryslope_histogram = primaryslope_histogram;
+        data->secondary_histogram = secondary_histogram;
         data->primary_shade_mode = primary_shade_mode;
         data->slope_shade_mode = slope_shade_mode;
         data->secondary_shade_mode = secondary_shade_mode;
@@ -1998,8 +2017,8 @@ int mbview_open(int verbose, int instance, int *error)
 		XtSetValues(view->topLevelShell, args, ac);
 		XtSetValues(view->mainWindow, args, ac);
 		XtSetValues(view->mb3dview.MB3DView, args, ac);
-		XtSetValues(view->mb3dview.mbview_pushButton_reset, args, ac);
 		XtSetValues(view->mb3dview.mbview_pushButton_clearpicks, args, ac);
+		XtSetValues(view->mb3dview.mbview_pushButton_reset, args, ac);
 		XtSetValues(view->mb3dview.mbview_radioBox_mouse, args, ac);
 		XtSetValues(view->mb3dview.mbview_toggleButton_mode_rmove, args, ac);
 		XtSetValues(view->mb3dview.mbview_toggleButton_mode_rrotate, args, ac);
@@ -2009,6 +2028,7 @@ int mbview_open(int verbose, int instance, int *error)
 		XtSetValues(view->mb3dview.mbview_toggleButton_mode_rsite, args, ac);
 		XtSetValues(view->mb3dview.mbview_toggleButton_mode_rroute, args, ac);
 		XtSetValues(view->mb3dview.mbview_toggleButton_mode_rnav, args, ac);
+		XtSetValues(view->mb3dview.mbview_toggleButton_mode_rnavfile, args, ac);
 		XtSetValues(view->mb3dview.mbview_label_status, args, ac);
 		XtSetValues(view->mb3dview.mbview_pushButton_fullrez, args, ac);
 		XtSetValues(view->mb3dview.mbview_label_pickinfo, args, ac);
@@ -2022,10 +2042,13 @@ int mbview_open(int verbose, int instance, int *error)
 		XtSetValues(view->mb3dview.mbview_toggleButton_data_primaryslope, args, ac);
 		XtSetValues(view->mb3dview.mbview_toggleButton_data_secondary, args, ac);
 		XtSetValues(view->mb3dview.mbview_separator, args, ac);
+		XtSetValues(view->mb3dview.mbview_toggleButton_histogram, args, ac);
+		XtSetValues(view->mb3dview.mbview_separator21, args, ac);
 		XtSetValues(view->mb3dview.mbview_toggleButton_overlay_none, args, ac);
 		XtSetValues(view->mb3dview.mbview_toggleButton_overlay_illumination, args, ac);
 		XtSetValues(view->mb3dview.mbview_toggleButton_overlay_slope, args, ac);
 		XtSetValues(view->mb3dview.mbview_toggleButton_overlay_secondary, args, ac);
+		XtSetValues(view->mb3dview.mbview_separator1, args, ac);
 		XtSetValues(view->mb3dview.mbview_toggleButton_overlay_contour, args, ac);
 		XtSetValues(view->mb3dview.mbview_toggleButton_site, args, ac);
 		XtSetValues(view->mb3dview.mbview_toggleButton_route, args, ac);
@@ -2038,12 +2061,19 @@ int mbview_open(int verbose, int instance, int *error)
 		XtSetValues(view->mb3dview.mbview_toggleButton_colortable_gray, args, ac);
 		XtSetValues(view->mb3dview.mbview_toggleButton_colortable_flat, args, ac);
 		XtSetValues(view->mb3dview.mbview_toggleButton_colortable_sealevel, args, ac);
+		XtSetValues(view->mb3dview.separator1, args, ac);
 		XtSetValues(view->mb3dview.mbview_toggleButton_profile, args, ac);
 		XtSetValues(view->mb3dview.mbview_cascadeButton_controls, args, ac);
 		XtSetValues(view->mb3dview.mbview_pulldownMenu_controls, args, ac);
 		XtSetValues(view->mb3dview.mbview_pushButton_colorbounds, args, ac);
+		XtSetValues(view->mb3dview.mbview_pushButton_2dview, args, ac);
+		XtSetValues(view->mb3dview.mbview_pushButton_3dview, args, ac);
+		XtSetValues(view->mb3dview.mbview_pushButton_shadeparms, args, ac);
 		XtSetValues(view->mb3dview.mbview_pushButton_resolution, args, ac);
 		XtSetValues(view->mb3dview.mbview_pushButton_projections, args, ac);
+		XtSetValues(view->mb3dview.mbview_pushButton_sitelist, args, ac);
+		XtSetValues(view->mb3dview.mbview_pushButton_routelist, args, ac);
+		XtSetValues(view->mb3dview.mbview_pushButton_navlist, args, ac);
 		XtSetValues(view->mb3dview.mbview_cascadeButton_mouse, args, ac);
 		XtSetValues(view->mb3dview.mbview_pulldownMenu_mouse, args, ac);
 		XtSetValues(view->mb3dview.mbview_toggleButton_mode_move, args, ac);
@@ -2054,6 +2084,7 @@ int mbview_open(int verbose, int instance, int *error)
 		XtSetValues(view->mb3dview.mbview_toggleButton_mode_site, args, ac);
 		XtSetValues(view->mb3dview.mbview_toggleButton_mode_route, args, ac);
 		XtSetValues(view->mb3dview.mbview_toggleButton_mode_nav, args, ac);
+		XtSetValues(view->mb3dview.mbview_toggleButton_mode_navfile, args, ac);
 		XtSetValues(view->mb3dview.mbview_cascadeButton_action, args, ac);
 		XtSetValues(view->mb3dview.mbview_pulldownMenu_action, args, ac);
 		XtSetValues(view->mb3dview.mbview_pushButton_help_about, args, ac);
@@ -2097,12 +2128,13 @@ int mbview_open(int verbose, int instance, int *error)
 		XtSetValues(view->mb3dview.mbview_pushButton_colorbounds_dismiss, args, ac);
 		XtSetValues(view->mb3dview.mbview_dialogShell_resolution, args, ac);
 		XtSetValues(view->mb3dview.mbview_bulletinBoard_resolution, args, ac);
-		XtSetValues(view->mb3dview.mbview_label_gridrenderres, args, ac);
-		XtSetValues(view->mb3dview.mbview_label_navrenderdecimation, args, ac);
-		XtSetValues(view->mb3dview.mbview_scale_mediumresolution, args, ac);
-		XtSetValues(view->mb3dview.mbview_scale_lowresolution, args, ac);
 		XtSetValues(view->mb3dview.mbview_scale_navmediumresolution, args, ac);
 		XtSetValues(view->mb3dview.mbview_scale_navlowresolution, args, ac);
+		XtSetValues(view->mb3dview.separator, args, ac);
+		XtSetValues(view->mb3dview.mbview_label_navrenderdecimation, args, ac);
+		XtSetValues(view->mb3dview.mbview_label_gridrenderres, args, ac);
+		XtSetValues(view->mb3dview.mbview_scale_mediumresolution, args, ac);
+		XtSetValues(view->mb3dview.mbview_scale_lowresolution, args, ac);
 		XtSetValues(view->mb3dview.mbview_pushButton_resolution_dismiss, args, ac);
 		XtSetValues(view->mb3dview.mbview_dialogShell_message, args, ac);
 		XtSetValues(view->mb3dview.mbview_bulletinBoard_message, args, ac);
@@ -2142,7 +2174,7 @@ int mbview_open(int verbose, int instance, int *error)
 		XtSetValues(view->mb3dview.mbview_separator16, args, ac);
 		XtSetValues(view->mb3dview.mbview_pushButton_shadeparms_apply, args, ac);
 		XtSetValues(view->mb3dview.mbview_label_illum_elev, args, ac);
-		XtSetValues(view->mb3dview.mbview_textField_illum_azi, args, ac);
+		XtSetValues(view->mb3dview.mbview_textField_illum_elev, args, ac);
 		XtSetValues(view->mb3dview.mbview_pushButton_shadeparms_dismiss2, args, ac);
 		XtSetValues(view->mb3dview.mbview_dialogShell_3dparms, args, ac);
 		XtSetValues(view->mb3dview.mbview_bulletinBoard_3dparms, args, ac);
@@ -2153,7 +2185,7 @@ int mbview_open(int verbose, int instance, int *error)
 		XtSetValues(view->mb3dview.mbview_label_view_3dzoom, args, ac);
 		XtSetValues(view->mb3dview.mbview_textField_view_3doffsety, args, ac);
 		XtSetValues(view->mb3dview.mbview_label_view_3doffsety, args, ac);
-		XtSetValues(view->mb3dview.mbview_separator1, args, ac);
+		XtSetValues(view->mb3dview.mbview_separator20, args, ac);
 		XtSetValues(view->mb3dview.mbview_textField_view_3doffsetx, args, ac);
 		XtSetValues(view->mb3dview.mbview_label_view_3doffsetx, args, ac);
 		XtSetValues(view->mb3dview.mbview_label_view_offset, args, ac);
@@ -2194,17 +2226,16 @@ int mbview_open(int verbose, int instance, int *error)
 		XtSetValues(view->mb3dview.mbview_toggleButton_spheroid, args, ac);
 		XtSetValues(view->mb3dview.mbview_label_projection, args, ac);
 		XtSetValues(view->mb3dview.mbview_pushButton_projection_dismiss, args, ac);
-		XtSetValues(view->glwmda, args, ac);
 		XtSetValues(view->mb3dview.mbview_dialogShell_profile, args, ac);
 		XtSetValues(view->mb3dview.mbview_form_profile, args, ac);
-		XtSetValues(view->mb3dview.mbview_scrolledWindow_profile, args, ac);
-		XtSetValues(view->mb3dview.mbview_profile_label_info, args, ac);
-		XtSetValues(view->mb3dview.mbview_scale_profile_exager, args, ac);
 		XtSetValues(view->mb3dview.mbview_scale_profile_width, args, ac);
 		XtSetValues(view->mb3dview.mbview_scale_profile_slope, args, ac);
-		XtSetValues(view->mb3dview.mbview_profile_pushButton_dismiss, args, ac);
+		XtSetValues(view->mb3dview.mbview_scrolledWindow_profile, args, ac);
 		XtSetValues(view->mb3dview.mbview_drawingArea_profile, args, ac);
-
+		XtSetValues(view->mb3dview.mbview_profile_label_info, args, ac);
+		XtSetValues(view->mb3dview.mbview_scale_profile_exager, args, ac);
+		XtSetValues(view->mb3dview.mbview_profile_pushButton_dismiss, args, ac);
+		XtSetValues(view->glwmda, args, ac);
 		/* set the initialization flag */
 		view->init = MBV_WINDOW_VISIBLE;
 		}
@@ -2220,6 +2251,9 @@ int mbview_open(int verbose, int instance, int *error)
 	view->contourlorez = MB_NO;
 	view->contourhirez = MB_NO;
 	view->contourfullrez = MB_NO;
+	view->primary_histogram_set = MB_NO;
+	view->primaryslope_histogram_set = MB_NO;
+	view->secondary_histogram_set = MB_NO;
 	if (data->primary_colortable_max
 		<= data->primary_colortable_min)
 		{
@@ -2304,6 +2338,9 @@ int mbview_update(int verbose, int instance, int *error)
 	view->contourlorez = MB_NO;
 	view->contourhirez = MB_NO;
 	view->contourfullrez = MB_NO;
+	view->primary_histogram_set = MB_NO;
+	view->primaryslope_histogram_set = MB_NO;
+	view->secondary_histogram_set = MB_NO;
 	if (data->primary_nxy > 0
 		&& data->primary_colortable_max
 			<= data->primary_colortable_min)
@@ -2417,6 +2454,7 @@ int mbview_update_sensitivity(int verbose, int instance, int *error)
 		}
 	XtSetValues(view->mb3dview.mbview_toggleButton_data_primary, args, ac);
 	XtSetValues(view->mb3dview.mbview_toggleButton_data_primaryslope, args, ac);
+	XtSetValues(view->mb3dview.mbview_toggleButton_histogram, args, ac);
 	XtSetValues(view->mb3dview.mbview_toggleButton_overlay_none, args, ac);
 	XtSetValues(view->mb3dview.mbview_toggleButton_overlay_illumination, args, ac);
 	XtSetValues(view->mb3dview.mbview_toggleButton_overlay_slope, args, ac);
@@ -2535,8 +2573,12 @@ int mbview_update_sensitivity(int verbose, int instance, int *error)
 	XtSetValues(view->mb3dview.mbview_toggleButton_navdrape, args, ac);
 	XtSetValues(view->mb3dview.mbview_toggleButton_mode_nav, args, ac);
 	XtSetValues(view->mb3dview.mbview_toggleButton_mode_rnav, args, ac);
+	XtSetValues(view->mb3dview.mbview_toggleButton_mode_navfile, args, ac);
+	XtSetValues(view->mb3dview.mbview_toggleButton_mode_rnavfile, args, ac);
 	set_mbview_label_string(view->mb3dview.mbview_toggleButton_mode_nav, "Pick Nav");
 	set_mbview_label_string(view->mb3dview.mbview_toggleButton_mode_rnav, "Pick Nav");
+	set_mbview_label_string(view->mb3dview.mbview_toggleButton_mode_navfile, "Pick Nav File");
+	set_mbview_label_string(view->mb3dview.mbview_toggleButton_mode_rnavfile, "Pick Nav File");
 	
 	/* now set action buttons according to current pick states */
 	mbview_action_sensitivity(instance);
@@ -2724,6 +2766,18 @@ int mbview_set_widgets(int verbose, int instance, int *error)
 	set_mbview_display_mode(instance, data->display_mode);
 	set_mbview_mouse_mode(instance, data->mouse_mode);
 	set_mbview_grid_mode(instance, data->grid_mode);
+	if (data->grid_mode == MBV_GRID_VIEW_PRIMARY)
+		{
+		set_mbview_histogram_mode(instance, data->primary_histogram);
+		}
+	else if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE)
+		{
+		set_mbview_histogram_mode(instance, data->primaryslope_histogram);
+		}
+	else if (data->grid_mode == MBV_GRID_VIEW_SECONDARY)
+		{
+		set_mbview_histogram_mode(instance, data->secondary_histogram);
+		}
 	set_mbview_contour_mode(instance, data->grid_contour_mode);
 	set_mbview_site_view_mode(instance, data->site_view_mode);
 	set_mbview_route_view_mode(instance, data->route_view_mode);
@@ -3463,8 +3517,8 @@ do_mbview_glwda_input( Widget w, XtPointer client_data, XtPointer call_data)
     XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
     XtGetValues(w, args, ac);
 if (mbv_verbose >= 2)
-fprintf(stderr,"do_mbview_glwda_input: %d %d  instance:%d\n",
-acs->width, acs->height, instance);
+fprintf(stderr,"do_mbview_glwda_input: %d %d  instance:%d type:%d\n",
+acs->width, acs->height, instance, event->xany.type);
 
     /* get view */
     view = &(mbviews[instance]);
@@ -3503,7 +3557,8 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 		    || data->mouse_mode == MBV_MOUSE_ROTATE
 		    || data->mouse_mode == MBV_MOUSE_SHADE
 		    || data->mouse_mode == MBV_MOUSE_VIEWPOINT
-		    || data->mouse_mode == MBV_MOUSE_NAV)
+		    || data->mouse_mode == MBV_MOUSE_NAV
+		    || data->mouse_mode == MBV_MOUSE_NAVFILE)
 		    {		
 		    /* set cursor for pick */
 		    XDefineCursor(view->dpy,view->xid,view->TargetRedCursor);
@@ -3712,7 +3767,7 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 		    }
 
 		/* handle selecting navigation */
-		else if (data->mouse_mode == MBV_MOUSE_NAV)
+		else if (data->mouse_mode == MBV_MOUSE_NAV || data->mouse_mode == MBV_MOUSE_NAVFILE)
 		    {				    		
 		    /* set cursor for nav */
 		    XDefineCursor(view->dpy,view->xid,view->TargetRedCursor);
@@ -3869,7 +3924,7 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 		    }			    
 			    
 		/* handle deselecting navigation */
-		else if (data->mouse_mode == MBV_MOUSE_NAV)
+		else if (data->mouse_mode == MBV_MOUSE_NAV || data->mouse_mode == MBV_MOUSE_NAVFILE)
 		    {				    		
 		    /* set cursor for area */
 		    XDefineCursor(view->dpy,view->xid,view->TargetRedCursor);
@@ -3921,7 +3976,8 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 		    || data->mouse_mode == MBV_MOUSE_ROTATE
 		    || data->mouse_mode == MBV_MOUSE_SHADE
 		    || data->mouse_mode == MBV_MOUSE_VIEWPOINT
-		    || data->mouse_mode == MBV_MOUSE_NAV)
+		    || data->mouse_mode == MBV_MOUSE_NAV
+		    || data->mouse_mode == MBV_MOUSE_NAVFILE)
 		    {		
 		    /* process pick */
 		    mbview_pick(instance, MBV_PICK_MOVE,
@@ -4212,7 +4268,7 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 		    }
 					    
 		/* handle selecting navigation */
-		else if (data->mouse_mode == MBV_MOUSE_NAV)
+		else if (data->mouse_mode == MBV_MOUSE_NAV || data->mouse_mode == MBV_MOUSE_NAVFILE)
 		    {				    		
 		    /* set cursor for nav */
 		    XDefineCursor(view->dpy,view->xid,view->TargetRedCursor);
@@ -4493,7 +4549,7 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 		    }
 					    
 		/* handle deselecting navigation */
-		else if (data->mouse_mode == MBV_MOUSE_NAV)
+		else if (data->mouse_mode == MBV_MOUSE_NAV || data->mouse_mode == MBV_MOUSE_NAVFILE)
 		    {				    		
 		    /* set cursor for nav */
 		    XDefineCursor(view->dpy,view->xid,view->TargetRedCursor);
@@ -4646,7 +4702,7 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 		    }
 					    
 		/* handle selecting navigation */
-		else if (data->mouse_mode == MBV_MOUSE_NAV)
+		else if (data->mouse_mode == MBV_MOUSE_NAV || data->mouse_mode == MBV_MOUSE_NAVFILE)
 		    {				    		
 		    /* process nav select */
 		    mbview_pick_nav_select(instance, MB_YES, MBV_PICK_UP,
@@ -4720,7 +4776,7 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 		    }
 					    
 		/* handle deselecting navigation */
-		if (data->mouse_mode == MBV_MOUSE_NAV)
+		if (data->mouse_mode == MBV_MOUSE_NAV || data->mouse_mode == MBV_MOUSE_NAVFILE)
 		    {				    		
 		    /* process nav deselect */
 		    mbview_pick_nav_select(instance, MB_NO, MBV_PICK_UP,
@@ -5262,6 +5318,7 @@ instance, data->grid_mode);
 
     /* set togglebuttons */
     set_mbview_grid_mode(instance, data->grid_mode);
+    set_mbview_histogram_mode(instance, data->primary_histogram);
     set_mbview_colortable(instance, data->primary_colortable);
     set_mbview_colortable_mode(instance, data->primary_colortable_mode);
     set_mbview_shade_mode(instance, data->primary_shade_mode);
@@ -5304,6 +5361,7 @@ instance, data->grid_mode);
 
     /* set togglebuttons */
     set_mbview_grid_mode(instance, data->grid_mode);
+    set_mbview_histogram_mode(instance, data->primaryslope_histogram);
     set_mbview_colortable(instance, data->slope_colortable);
     set_mbview_colortable_mode(instance, data->slope_colortable_mode);
     set_mbview_shade_mode(instance, data->slope_shade_mode);
@@ -5346,9 +5404,62 @@ instance, data->grid_mode);
 
     /* set togglebuttons */
     set_mbview_grid_mode(instance, data->grid_mode);
+    set_mbview_histogram_mode(instance, data->secondary_histogram);
     set_mbview_colortable(instance, data->secondary_colortable);
     set_mbview_colortable_mode(instance, data->secondary_colortable_mode);
     set_mbview_shade_mode(instance, data->secondary_shade_mode);
+   
+    /* clear color status array */
+    mbview_setcolorparms(instance);
+    mbview_colorclear(instance);
+    
+    /* draw */
+if (mbv_verbose >= 2)
+fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_data_secondary\n");
+    mbview_plotlowhigh(instance);
+}
+
+/*------------------------------------------------------------------------------*/
+void
+do_mbview_histogram( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    int	instance;
+    Boolean	value;
+    struct mbview_world_struct *view;
+    struct mbview_struct *data;
+
+    /* get instance */
+    ac = 0;
+    XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
+    XtGetValues(w, args, ac);
+fprintf(stderr,"do_mbview_histogram instance:%d\n", instance);
+	    
+    /* get view */
+    view = &(mbviews[instance]);
+    data = &(view->data);
+
+    /* get histogram value */
+    if (XmToggleButtonGetState(w))
+    	value = MB_YES;
+    else
+        value = MB_NO;
+    if (data->grid_mode == MBV_GRID_VIEW_PRIMARY)
+	    {
+	    data->primary_histogram = value;
+	    }
+    else if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE)
+	    {
+	    data->primaryslope_histogram = value;
+	    }
+    else if (data->grid_mode == MBV_GRID_VIEW_SECONDARY)
+	    {
+	    data->secondary_histogram = value;
+	    }
+
+if (mbv_verbose >= 2)
+fprintf(stderr,"do_mbview_histogram instance:%d mode:%d\n", 
+instance, data->grid_mode);
    
     /* clear color status array */
     mbview_setcolorparms(instance);
@@ -5725,7 +5836,8 @@ do_mbview_nav( Widget w, XtPointer client_data, XtPointer call_data)
     	{
 	data->nav_view_mode = MBV_VIEW_OFF;
 	if (data->navdrape_view_mode == MBV_VIEW_OFF
-		&& data->mouse_mode == MBV_MOUSE_NAV)
+		&& (data->mouse_mode == MBV_MOUSE_NAV 
+			|| data->mouse_mode == MBV_MOUSE_NAVFILE))
 		{
 		data->mouse_mode = MBV_MOUSE_MOVE;
 		set_mbview_mouse_mode(instance, data->mouse_mode);
@@ -5770,7 +5882,8 @@ do_mbview_navdrape( Widget w, XtPointer client_data, XtPointer call_data)
    	{
 	data->navdrape_view_mode = MBV_VIEW_OFF;
  	if (data->nav_view_mode == MBV_VIEW_OFF
-		&& data->mouse_mode == MBV_MOUSE_NAV)
+		&& (data->mouse_mode == MBV_MOUSE_NAV 
+			|| data->mouse_mode == MBV_MOUSE_NAVFILE))
 		{
 		data->mouse_mode = MBV_MOUSE_MOVE;
 		set_mbview_mouse_mode(instance, data->mouse_mode);
@@ -5809,15 +5922,23 @@ do_mbview_colortable_haxby( Widget w, XtPointer client_data, XtPointer call_data
 
     /* get mode value */
     if (data->grid_mode == MBV_GRID_VIEW_PRIMARY)
+    	{
 	data->primary_colortable = MBV_COLORTABLE_HAXBY;
+        set_mbview_colortable(instance, data->primary_colortable);
+        set_mbview_colortable_mode(instance, data->primary_colortable_mode);
+	}
     else if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE)
+    	{
 	data->slope_colortable = MBV_COLORTABLE_HAXBY;
+        set_mbview_colortable(instance, data->slope_colortable);
+        set_mbview_colortable_mode(instance, data->slope_colortable_mode);
+	}
     else if (data->grid_mode == MBV_GRID_VIEW_SECONDARY)
+    	{
 	data->secondary_colortable = MBV_COLORTABLE_HAXBY;
-
-    /* set togglebuttons */
-    set_mbview_colortable(instance, data->primary_colortable);
-    set_mbview_colortable_mode(instance, data->primary_colortable_mode);
+        set_mbview_colortable(instance, data->secondary_colortable);
+        set_mbview_colortable_mode(instance, data->secondary_colortable_mode);
+	}
     
 if (mbv_verbose >= 2)
 fprintf(stderr,"do_mbview_colortable_haxby instance:%d\n", instance);
@@ -5853,15 +5974,23 @@ do_mbview_colortable_bright( Widget w, XtPointer client_data, XtPointer call_dat
 
     /* get mode value */
     if (data->grid_mode == MBV_GRID_VIEW_PRIMARY)
+    	{
 	data->primary_colortable = MBV_COLORTABLE_BRIGHT;
+        set_mbview_colortable(instance, data->primary_colortable);
+        set_mbview_colortable_mode(instance, data->primary_colortable_mode);
+	}
     else if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE)
+    	{
 	data->slope_colortable = MBV_COLORTABLE_BRIGHT;
+        set_mbview_colortable(instance, data->slope_colortable);
+        set_mbview_colortable_mode(instance, data->slope_colortable_mode);
+	}
     else if (data->grid_mode == MBV_GRID_VIEW_SECONDARY)
+    	{
 	data->secondary_colortable = MBV_COLORTABLE_BRIGHT;
-
-    /* set togglebuttons */
-    set_mbview_colortable(instance, data->primary_colortable);
-    set_mbview_colortable_mode(instance, data->primary_colortable_mode);
+        set_mbview_colortable(instance, data->secondary_colortable);
+        set_mbview_colortable_mode(instance, data->secondary_colortable_mode);
+	}
     
 if (mbv_verbose >= 2)
 fprintf(stderr,"do_mbview_colortable_bright instance:%d\n", instance);
@@ -5897,16 +6026,24 @@ do_mbview_colortable_muted( Widget w, XtPointer client_data, XtPointer call_data
 
     /* get mode value */
     if (data->grid_mode == MBV_GRID_VIEW_PRIMARY)
+    	{
 	data->primary_colortable = MBV_COLORTABLE_MUTED;
+        set_mbview_colortable(instance, data->primary_colortable);
+        set_mbview_colortable_mode(instance, data->primary_colortable_mode);
+	}
     else if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE)
+    	{
 	data->slope_colortable = MBV_COLORTABLE_MUTED;
+        set_mbview_colortable(instance, data->slope_colortable);
+        set_mbview_colortable_mode(instance, data->slope_colortable_mode);
+	}
     else if (data->grid_mode == MBV_GRID_VIEW_SECONDARY)
+    	{
 	data->secondary_colortable = MBV_COLORTABLE_MUTED;
-
-    /* set togglebuttons */
-    set_mbview_colortable(instance, data->primary_colortable);
-    set_mbview_colortable_mode(instance, data->primary_colortable_mode);
-    
+        set_mbview_colortable(instance, data->secondary_colortable);
+        set_mbview_colortable_mode(instance, data->secondary_colortable_mode);
+	}
+     
 if (mbv_verbose >= 2)
 fprintf(stderr,"do_mbview_colortable_muted instance:%d\n", instance);
    
@@ -5941,15 +6078,23 @@ do_mbview_colortable_gray( Widget w, XtPointer client_data, XtPointer call_data)
 
     /* get mode value */
     if (data->grid_mode == MBV_GRID_VIEW_PRIMARY)
+    	{
 	data->primary_colortable = MBV_COLORTABLE_GRAY;
+        set_mbview_colortable(instance, data->primary_colortable);
+        set_mbview_colortable_mode(instance, data->primary_colortable_mode);
+	}
     else if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE)
+    	{
 	data->slope_colortable = MBV_COLORTABLE_GRAY;
+        set_mbview_colortable(instance, data->slope_colortable);
+        set_mbview_colortable_mode(instance, data->slope_colortable_mode);
+	}
     else if (data->grid_mode == MBV_GRID_VIEW_SECONDARY)
+    	{
 	data->secondary_colortable = MBV_COLORTABLE_GRAY;
-
-    /* set togglebuttons */
-    set_mbview_colortable(instance, data->primary_colortable);
-    set_mbview_colortable_mode(instance, data->primary_colortable_mode);
+        set_mbview_colortable(instance, data->secondary_colortable);
+        set_mbview_colortable_mode(instance, data->secondary_colortable_mode);
+	}
     
 if (mbv_verbose >= 2)
 fprintf(stderr,"do_mbview_colortable_gray instance:%d\n", instance);
@@ -5985,15 +6130,23 @@ do_mbview_colortable_flat( Widget w, XtPointer client_data, XtPointer call_data)
 
     /* get mode value */
     if (data->grid_mode == MBV_GRID_VIEW_PRIMARY)
+    	{
 	data->primary_colortable = MBV_COLORTABLE_FLAT;
+        set_mbview_colortable(instance, data->primary_colortable);
+        set_mbview_colortable_mode(instance, data->primary_colortable_mode);
+	}
     else if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE)
+    	{
 	data->slope_colortable = MBV_COLORTABLE_FLAT;
+        set_mbview_colortable(instance, data->slope_colortable);
+        set_mbview_colortable_mode(instance, data->slope_colortable_mode);
+	}
     else if (data->grid_mode == MBV_GRID_VIEW_SECONDARY)
+    	{
 	data->secondary_colortable = MBV_COLORTABLE_FLAT;
-
-    /* set togglebuttons */
-    set_mbview_colortable(instance, data->primary_colortable);
-    set_mbview_colortable_mode(instance, data->primary_colortable_mode);
+        set_mbview_colortable(instance, data->secondary_colortable);
+        set_mbview_colortable_mode(instance, data->secondary_colortable_mode);
+	}
     
 if (mbv_verbose >= 2)
 fprintf(stderr,"do_mbview_colortable_flat instance:%d\n", instance);
@@ -6030,15 +6183,23 @@ do_mbview_colortable_sealevel( Widget w, XtPointer client_data, XtPointer call_d
 
     /* get mode value */
     if (data->grid_mode == MBV_GRID_VIEW_PRIMARY)
+    	{
 	data->primary_colortable = MBV_COLORTABLE_SEALEVEL;
+        set_mbview_colortable(instance, data->primary_colortable);
+        set_mbview_colortable_mode(instance, data->primary_colortable_mode);
+	}
     else if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE)
+    	{
 	data->slope_colortable = MBV_COLORTABLE_SEALEVEL;
+        set_mbview_colortable(instance, data->slope_colortable);
+        set_mbview_colortable_mode(instance, data->slope_colortable_mode);
+	}
     else if (data->grid_mode == MBV_GRID_VIEW_SECONDARY)
+    	{
 	data->secondary_colortable = MBV_COLORTABLE_SEALEVEL;
-
-    /* set togglebuttons */
-    set_mbview_colortable(instance, data->primary_colortable);
-    set_mbview_colortable_mode(instance, data->primary_colortable_mode);
+        set_mbview_colortable(instance, data->secondary_colortable);
+        set_mbview_colortable_mode(instance, data->secondary_colortable_mode);
+	}
     
 if (mbv_verbose >= 2)
 fprintf(stderr,"do_mbview_colortable_sealevel instance:%d\n", instance);
@@ -6110,6 +6271,22 @@ fprintf(stderr,"do_mbview_mouse_rmode: \n");
 	else if (w == (mb3dviewptr->mbview_toggleButton_mode_rnav))
 	    {
 	    data->mouse_mode = MBV_MOUSE_NAV;
+	    if (data->display_mode == MBV_DISPLAY_3D)
+	    	{
+	    	data->navdrape_view_mode = MBV_VIEW_ON;
+	    	set_mbview_navdrape_view_mode(instance, data->navdrape_view_mode);
+	    	replot = MB_YES;
+		}
+	    else
+	    	{
+	    	data->nav_view_mode = MBV_VIEW_ON;
+	    	set_mbview_nav_view_mode(instance, data->nav_view_mode);
+	    	replot = MB_YES;
+		}
+	    }
+	else if (w == (mb3dviewptr->mbview_toggleButton_mode_rnavfile))
+	    {
+	    data->mouse_mode = MBV_MOUSE_NAVFILE;
 	    if (data->display_mode == MBV_DISPLAY_3D)
 	    	{
 	    	data->navdrape_view_mode = MBV_VIEW_ON;
@@ -6225,6 +6402,20 @@ fprintf(stderr,"do_mbview_mouse_mode: \n");
 	    	set_mbview_nav_view_mode(instance, data->nav_view_mode);
 		}
 	    }
+	else if (w == (mb3dviewptr->mbview_toggleButton_mode_navfile))
+	    {
+	    data->mouse_mode = MBV_MOUSE_NAVFILE;
+	    if (data->display_mode == MBV_DISPLAY_3D)
+	    	{
+	    	data->navdrape_view_mode = MBV_VIEW_ON;
+	    	set_mbview_navdrape_view_mode(instance, data->nav_view_mode);
+		}
+	    else
+	    	{
+	    	data->nav_view_mode = MBV_VIEW_ON;
+	    	set_mbview_nav_view_mode(instance, data->nav_view_mode);
+		}
+	    }
 	    
 	/* make sure sites or routes aren't selected if edit modes off */
 	if (data->mouse_mode != MBV_MOUSE_SITE
@@ -6302,6 +6493,8 @@ fprintf(stderr,"do_mbview_mouse_mode: instance:%d mode:%d\n", instance, mode);
 				False, False);
     XmToggleButtonSetState(mb3dviewptr->mbview_toggleButton_mode_nav, 
 				False, False);
+    XmToggleButtonSetState(mb3dviewptr->mbview_toggleButton_mode_navfile, 
+				False, False);
 
     XmToggleButtonSetState(mb3dviewptr->mbview_toggleButton_mode_rmove, 
 				False, False);
@@ -6318,6 +6511,8 @@ fprintf(stderr,"do_mbview_mouse_mode: instance:%d mode:%d\n", instance, mode);
     XmToggleButtonSetState(mb3dviewptr->mbview_toggleButton_mode_rroute, 
 				False, False);
     XmToggleButtonSetState(mb3dviewptr->mbview_toggleButton_mode_rnav, 
+				False, False);
+    XmToggleButtonSetState(mb3dviewptr->mbview_toggleButton_mode_rnavfile, 
 				False, False);
 
     if (data->mouse_mode == MBV_MOUSE_MOVE)
@@ -6376,6 +6571,13 @@ fprintf(stderr,"do_mbview_mouse_mode: instance:%d mode:%d\n", instance, mode);
 	XmToggleButtonSetState(mb3dviewptr->mbview_toggleButton_mode_rnav, 
 				    True, False);
 	}
+    else if (data->mouse_mode == MBV_MOUSE_NAVFILE)
+	{
+	XmToggleButtonSetState(mb3dviewptr->mbview_toggleButton_mode_navfile, 
+				    True, False);
+	XmToggleButtonSetState(mb3dviewptr->mbview_toggleButton_mode_rnavfile, 
+				    True, False);
+	}
     
     /* set widget sensitivity and visability */   
     if (data->display_mode == MBV_DISPLAY_2D)
@@ -6426,6 +6628,8 @@ fprintf(stderr,"do_mbview_mouse_mode: instance:%d mode:%d\n", instance, mode);
 	sprintf(value_text,":::t\"Mouse Mode:\":t\"L: Select Route\":t\"M: Add Route\":t\"R: Delete Route\"");
     else if (data->mouse_mode == MBV_MOUSE_NAV)
 	sprintf(value_text,":::t\"Mouse Mode:\":t\"L: Pick\":t\"M: Select Nav\":t\"R: Deselect Nav\"");
+    else if (data->mouse_mode == MBV_MOUSE_NAVFILE)
+	sprintf(value_text,":::t\"Mouse Mode:\":t\"L: Pick\":t\"M: Select Nav File\":t\"R: Deselect Nav File\"");
     set_mbview_label_multiline_string(view->mb3dview.mbview_label_mouse, value_text);
 
 
@@ -6469,6 +6673,32 @@ fprintf(stderr,"set_mbview_grid_mode: instance:%d mode:%d\n", instance, mode);
 		value = False;
 	XmToggleButtonSetState(mb3dviewptr->mbview_toggleButton_data_secondary, 
 				    value, False);
+}
+
+/*------------------------------------------------------------------------------*/
+void
+set_mbview_histogram_mode(int instance, int mode)
+{
+    Boolean	value;
+    struct mbview_world_struct *view;
+    struct mbview_struct *data;
+    MB3DViewData	*mb3dviewptr;
+
+if (mbv_verbose >= 2)
+fprintf(stderr,"set_mbview_histogram_mode: instance:%d mode:%d\n", instance, mode);
+	    
+    /* get view */
+    view = &(mbviews[instance]);
+    data = &(view->data);
+
+    mb3dviewptr = &(view->mb3dview);
+	if (mode == MB_YES)
+		value = True;
+	else
+		value = False;
+	XmToggleButtonSetState(mb3dviewptr->mbview_toggleButton_histogram, 
+				    value, False);
+
 }
 
 /*------------------------------------------------------------------------------*/
@@ -6967,6 +7197,9 @@ fprintf(stderr,"do_mbview_colorboundsapply: instance:%d\n", instance);
     		view->contourlorez = MB_NO;
     		view->contourhirez = MB_NO;
     		view->contourfullrez = MB_NO;
+		view->primary_histogram_set = MB_NO;
+		view->primaryslope_histogram_set = MB_NO;
+		view->secondary_histogram_set = MB_NO;
  		if (data->grid_contour_mode == MBV_VIEW_ON)
 			change = MB_YES;
 		}
@@ -7408,6 +7641,17 @@ fprintf(stderr,"do_mbview_3dparmsapply: instance:%d\n", instance);
 							+ data->primary_max);
 			}
 		change = MB_YES;
+
+		mbview_zscaleclear(instance);
+    		view->contourlorez = MB_NO;
+		view->contourhirez = MB_NO;
+		view->contourfullrez = MB_NO;
+
+		/* rescale data other than the grid */
+		mbview_zscale(instance);
+
+		/* set flag to reset view bounds */
+		view->viewboundscount++;
 		}
 
 	get_mbview_text_string(view->mb3dview.mbview_textField_view_3doffsetx, value_text);
@@ -8424,6 +8668,7 @@ fprintf(stderr,"do_mbview_clearpicks\n");
 		/* loop over the navs resetting selected points */
 		for (inav=0;inav<shared.shareddata.nnav;inav++)
 			{
+			shared.shareddata.navs[inav].nselected = 0;
 			for (jpoint=0;jpoint<shared.shareddata.navs[inav].npoints;jpoint++)
 				{
 				/* set size and color */

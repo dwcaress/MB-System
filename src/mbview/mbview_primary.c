@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_primary.c	9/25/2003
- *    $Id: mbview_primary.c,v 5.6 2007-06-17 23:27:30 caress Exp $
+ *    $Id: mbview_primary.c,v 5.7 2007-10-08 16:32:08 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  *		begun on October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2007/06/17 23:27:30  caress
+ * Added NBeditviz.
+ *
  * Revision 5.5  2006/01/24 19:21:32  caress
  * Version 5.0.8 beta.
  *
@@ -89,7 +92,7 @@ static Cardinal 	ac;
 static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_primary.c,v 5.6 2007-06-17 23:27:30 caress Exp $";
+static char rcs_id[]="$Id: mbview_primary.c,v 5.7 2007-10-08 16:32:08 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_setprimarygrid(int verbose, int instance,
@@ -209,6 +212,13 @@ int mbview_setprimarygrid(int verbose, int instance,
 	
 	/* copy grid */
 	memcpy(data->primary_data, primary_data, data->primary_nxy * sizeof(float));
+
+	/* reset contours and histograms */
+	view->contourlorez = MB_NO;
+	view->contourhirez = MB_NO;
+	view->contourfullrez = MB_NO;
+	view->primary_histogram_set = MB_NO;
+	view->primaryslope_histogram_set = MB_NO;
 	
 	/* set status bit arrays */
 	mbview_setcolorparms(instance);
@@ -299,10 +309,12 @@ int mbview_updateprimarygrid(int verbose, int instance,
 	mbview_setcolorparms(instance);
 	mbview_colorclear(instance);
 
-	/* reset contour flags */
+	/* reset contour and histogram flags */
 	view->contourlorez = MB_NO;
 	view->contourhirez = MB_NO;
 	view->contourfullrez = MB_NO;
+	view->primary_histogram_set = MB_NO;
+	view->primaryslope_histogram_set = MB_NO;
 		
 	/* print output debug statements */
 	if (verbose >= 2)
