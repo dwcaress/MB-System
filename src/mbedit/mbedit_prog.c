@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	4/8/93
- *    $Id: mbedit_prog.c,v 5.35 2007-05-14 06:30:29 caress Exp $
+ *    $Id: mbedit_prog.c,v 5.36 2007-10-08 07:20:21 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997, 2000, 2003, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -27,6 +27,10 @@
  * Date:	September 19, 2000 (New version - no buffered i/o)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.35  2007/05/14 06:30:29  caress
+ * The acrosstrack view of MBedit now shows the real alongtrack
+ * positions of the soundings.
+ *
  * Revision 5.34  2006/09/11 18:55:52  caress
  * Changes during Western Flyer and Thomas Thompson cruises, August-September
  * 2006.
@@ -389,7 +393,7 @@ struct mbedit_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbedit_prog.c,v 5.35 2007-05-14 06:30:29 caress Exp $";
+static char rcs_id[] = "$Id: mbedit_prog.c,v 5.36 2007-10-08 07:20:21 caress Exp $";
 static char program_name[] = "MBedit";
 static char help_message[] =  
 "MBedit is an interactive editor used to identify and flag\n\
@@ -2403,15 +2407,14 @@ int mbedit_action_mouse_erase(
 			{
 			zap_box = MB_YES;
 			zap_ping = i;
+		    
+			/* if a zap box has been picked call zap routine */
+			status = mbedit_action_zap_outbounds(zap_ping,
+				plwd,exgr,xntrvl,yntrvl,plt_size,sh_dtcts,sh_flggd,sh_time,
+				nbuffer,ngood,icurrent,nplt);
 			}
 		    }
 		}
-		    
-	    /* if a zap box has been picked call zap routine */
-	    if (zap_box == MB_YES)
-		status = mbedit_action_zap_outbounds(zap_ping,
-			plwd,exgr,xntrvl,yntrvl,plt_size,sh_dtcts,sh_flggd,sh_time,
-			nbuffer,ngood,icurrent,nplt);
 	    }
 
 	/* do not look for beam erase unless file has been opened 
@@ -2589,15 +2592,14 @@ int mbedit_action_mouse_restore(
 			{
 			zap_box = MB_YES;
 			zap_ping = i;
+
+			/* if a zap box has been picked call zap routine */
+			status = mbedit_action_zap_outbounds(zap_ping,
+				plwd,exgr,xntrvl,yntrvl,plt_size,sh_dtcts,sh_flggd,sh_time,
+				nbuffer,ngood,icurrent,nplt);
 			}
 		    }
 		}
-		    
-	    /* if a zap box has been picked call zap routine */
-	    if (zap_box == MB_YES)
-		status = mbedit_action_zap_outbounds(zap_ping,
-			plwd,exgr,xntrvl,yntrvl,plt_size,sh_dtcts,sh_flggd,sh_time,
-			nbuffer,ngood,icurrent,nplt);
 	    }
 
 	/* do not look for beam restore unless file has been opened 
@@ -2726,6 +2728,7 @@ int mbedit_action_mouse_grab(
 	/* local variables */
 	char	*function_name = "mbedit_action_mouse_grab";
 	int	status = MB_SUCCESS;
+	int	zap_box, zap_ping;
 	int	ix, iy, range, range_min;
 	int	iping, jbeam;
 	int	xgmin, xgmax, ygmin, ygmax;
@@ -2940,6 +2943,28 @@ int mbedit_action_mouse_grab(
 				ygmin = grab_end_y;
 				ygmax = grab_start_y;
 				}
+
+			/* check if any zap boxes has been picked */
+			zap_box = MB_NO;
+			for (i=current_id;i<current_id+nplot;i++)
+			    {
+			    if (ping[i].outbounds == MBEDIT_OUTBOUNDS_UNFLAGGED)
+				{
+				if (xgmin <= ping[i].zap_x1
+				    && xgmax >= ping[i].zap_x2
+				    && ygmin <= ping[i].zap_y1
+				    && ygmax >= ping[i].zap_y2)
+				    {
+				    zap_box = MB_YES;
+				    zap_ping = i;
+
+				    /* if a zap box has been picked call zap routine */
+				    status = mbedit_action_zap_outbounds(zap_ping,
+					    plwd,exgr,xntrvl,yntrvl,plt_size,sh_dtcts,sh_flggd,sh_time,
+					    nbuffer,ngood,icurrent,nplt);
+				    }
+				}
+			    }
 
 			/* look for beams to be erased */
 			for (i=current_id;i<current_id+nplot;i++)
@@ -5553,7 +5578,8 @@ int mbedit_plot_all(
 	int	swidth, sascent, sdescent;
 	int	sxstart;
 	int	xcen, ycen;
-	int	x0, y0, x, y, dx, dy;
+	int	x0, y0, x, y;
+	double	dx, dy;
 	char	string[MB_PATH_MAXLINE];
 	char	*string_ptr;
 	int	fpx, fpdx, fpy, fpdy;
@@ -5734,8 +5760,8 @@ int mbedit_plot_all(
 	y_interval = yntrvl;
 	xcen = xmin + (xmax - xmin)/2;
 	ycen = ymin + (ymax - ymin)/2;
-	dx = (xmax - xmin)/plot_size;
-	dy = (ymax - ymin)/plot_size;
+	dx = ((double)(xmax - xmin))/plot_size;
+	dy = ((double)(ymax - ymin))/plot_size;
 	xscale = 100*plot_width/(xmax - xmin);
 	yscale = (xscale*100)/exager;
 	dxscale = 100.0/xscale;
@@ -5959,13 +5985,13 @@ int mbedit_plot_all(
 		/*x0 = margin/2 + ping[current_id].heading / 360.0 * 2 * margin;*/
 		mbedit_tsvalue(current_id, show_time, &tsvalue);
 		x0 = margin/2 + (int) ((tsvalue - tsmin) * tsscale);
-		y0 = ymax - dy / 2;
+		y0 = ymax - (int)(dy / 2);
 		for (i=current_id;i<current_id+nplot;i++)
 			{
 			/*x = margin/2 + ping[i].heading / 360.0 * 2 * margin;*/
 			mbedit_tsvalue(i, show_time, &tsvalue);
 			x = margin/2 + (int) ((tsvalue - tsmin) * tsscale);
-			y = ymax - dy / 2 - (i - current_id) * dy;
+			y = ymax - (int)(dy / 2) - (int)((i - current_id) * dy);
 			xg_drawline(mbedit_xgid,x0,y0,x,y,
 				pixel_values[BLACK],XG_SOLIDLINE);
 			xg_fillrectangle(mbedit_xgid, 
@@ -5980,13 +6006,13 @@ int mbedit_plot_all(
 			{
 			mbedit_xtrackslope(current_id, &tsslope);
 			x0 = margin/2 + (int) ((tsslope - tsmin) * tsscale);
-			y0 = ymax - dy / 2;
+			y0 = ymax - (int)(dy / 2);
 			for (i=current_id;i<current_id+nplot;i++)
 				{
 				/*x = margin/2 + ping[i].heading / 360.0 * 2 * margin;*/
 				mbedit_xtrackslope(i, &tsslope);
 				x = margin/2 + (int) ((tsslope - tsmin) * tsscale);
-				y = ymax - dy / 2 - (i - current_id) * dy;
+				y = ymax - (int)(dy / 2) - (int)((i - current_id) * dy);
 				xg_drawline(mbedit_xgid,x0,y0,x,y,
 					pixel_values[RED],XG_SOLIDLINE);
 				x0 = x;
@@ -6000,14 +6026,14 @@ int mbedit_plot_all(
 			mbedit_xtrackslope(current_id, &tsslope);
 			mbedit_tsvalue(i, show_time, &tsvalue);
 			x0 = margin/2 + (int) ((tsvalue - tsslope - tsmin) * tsscale);
-			y0 = ymax - dy / 2;
+			y0 = ymax - (int)(dy / 2);
 			for (i=current_id;i<current_id+nplot;i++)
 				{
 				/*x = margin/2 + ping[i].heading / 360.0 * 2 * margin;*/
 				mbedit_xtrackslope(i, &tsslope);
 				mbedit_tsvalue(i, show_time, &tsvalue);
 				x = margin/2 + (int) ((tsvalue - tsslope - tsmin) * tsscale);
-				y = ymax - dy / 2 - (i - current_id) * dy;
+				y = ymax - (int)(dy / 2) - (int)((i - current_id) * dy);
 				xg_drawline(mbedit_xgid,x0,y0,x,y,
 					pixel_values[BLUE],XG_SOLIDLINE);
 				x0 = x;
@@ -6020,8 +6046,8 @@ int mbedit_plot_all(
 	for (i=current_id;i<current_id+nplot;i++)
 		{
 		/* set beam plotting locations */
-		x = xmax - dx / 2 - (i - current_id) * dx;
-		y = ymax - dy / 2 - (i - current_id) * dy;
+		x = xmax - (int)(dx / 2) - (int)((i - current_id) * dx);
+		y = ymax - (int)(dy / 2) - (int)((i - current_id) * dy);
 		ping[i].label_x = xmin - 5;
 		ping[i].label_y = y;
 		for (j=0;j<ping[i].beams_bath;j++)
