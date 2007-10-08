@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_utm.perl	5/13/2002
-#    $Id: mbm_utm.perl,v 5.3 2003-04-17 20:42:48 caress Exp $
+#    $Id: mbm_utm.perl,v 5.4 2007-10-08 04:27:20 caress Exp $
 #
 #    Copyright (c) 2002, 2003 by
 #    D. W. Caress (caress@mbari.org)
@@ -36,10 +36,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   May 13, 2002
 #
 # Version:
-#   $Id: mbm_utm.perl,v 5.3 2003-04-17 20:42:48 caress Exp $
+#   $Id: mbm_utm.perl,v 5.4 2007-10-08 04:27:20 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.3  2003/04/17 20:42:48  caress
+#   Release 5.0.beta30
+#
 #   Revision 5.2  2003/03/27 07:58:11  caress
 #   This macro now sets MEASURE_UNIT to inches and then resets it to the original value.
 #
@@ -55,13 +58,14 @@ $program_name = "mbm_utm";
 
 # Deal with command line arguments
 $command_line = "@ARGV";
-&MBGetopts('HHE:e:FfI:i:O:o:QqZ:z:Vv');
+&MBGetopts('HHE:e:FfI:i:L:l:O:o:QqZ:z:Vv');
 $help =    		($opt_H || $opt_h);
 $file_data =    	($opt_I || $opt_i);
 $file_out =    		($opt_O || $opt_o);
 $zone =    		($opt_Z || $opt_z || 10);
 $ellipsoid =    	($opt_E || $opt_e || "WGS-84");
 $usefeet = 		($opt_F || $opt_f);
+$lonflip = 		($opt_L || $opt_l || 0);
 $inverse = 		($opt_Q || $opt_q);
 $verbose = 		($opt_V || $opt_v);
 
@@ -75,7 +79,7 @@ if ($help)
 	print "(lon, lat, value) to UTM eastings and northings (x, y, value). ";
 	print "Inverse projections translate from (x, y, z) to (lon, lat, z).";
 	print "\nUsage: \n";
-	print "\t$program_name -Eellipsoid -Ifile -Ooutput -Zzone [-F -Q -H -V]\n";
+	print "\t$program_name -Eellipsoid -Ifile -Llonflip -Ooutput -Zzone [-F -Q -H -V]\n";
 	exit 0;
 	}
 
@@ -129,26 +133,83 @@ else
 	}
 
 # set temporary file name
-$file_tmp = "$file_data" . "$PID" . ".tmp";
+$filetmpa = "$file_data" . "$$" . "a.tmp";
+$filetmpb = "$file_data" . "$$" . "b.tmp";
 
 # Do forward projection from lon lat to UTM easting northing
 if (!$inverse)
 	{
+	# open input file
+	if (!open(INP1,"<$file_data"))
+		{
+		die "\nInput file $file_data cannot be opened!\n$program_name aborted\n";
+		}
+
+	# open temporary file
+	if (!open(OUT1,">$filetmpa"))
+		{
+		die "\nTemporary file $filetmpa cannot be opened!\n$program_name aborted\n";
+		}
+
+	# read temporary file, looping over input lines
+	if ($verbose)
+		{
+		print "Preprocessing input...\n";
+		}
+	$ndata = 0;
+	while ($line = <INP1>)
+		{
+		$ok = 0;
+
+		# replace any commas with tabs
+		$line =~ s/,/\t/g;
+		
+		if ($line =~ /[^\s\d\-\.]/)
+			{
+			}
+		elsif ($line =~ /(\S+)\s+(\S+)\s+(.*)/)
+			{
+			($xx,$yy,$val) = $line =~ /(\S+)\s+(\S+)\s+(.*)/;
+			$ok = 1;
+			}
+		elsif ($line =~ /(\S+)\s+(\S+)/)
+			{
+			($xx,$yy) = $line =~ /(\S+)\s+(\S+)/;
+			$val = "";
+			$ok = 1;
+			}
+
+		# only use good lines
+		if ($ok == 1)
+			{
+			# print out result 
+			print OUT1 "$xx\t$yy\t$val\n";
+
+			$ndata = $ndata + 1;
+			}
+		}
+
+	# close input file
+	close INP1;
+
+	# close temporary file
+	close OUT1;
+
 	# run mapproject
 	if ($verbose)
 		{
 		print "Doing forward projection using mapproject...\n";
 		}
-	`mapproject $file_data -J$projection -R$bounds > $file_tmp`;
+	`mapproject $filetmpa -J$projection -R$bounds > $filetmpb`;
 
 	# open temporary file
-	if (!open(INP,"<$file_tmp"))
+	if (!open(INP2,"<$filetmpb"))
 		{
-		die "\nTemporary file $file_tmp cannot be opened!\n$program_name aborted\n";
+		die "\nTemporary file $filetmpb cannot be opened!\n$program_name aborted\n";
 		}
 
 	# open output file
-	if (!open(OUT,">$file_out"))
+	if (!open(OUT2,">$file_out"))
 		{
 		die "\nOutput file $file_out cannot be opened!\n$program_name aborted\n";
 		}
@@ -159,7 +220,7 @@ if (!$inverse)
 		print "Processing output from mapproject...\n";
 		}
 	$ndata = 0;
-	while ($line = <INP>)
+	while ($line = <INP2>)
 		{
 		if ($line =~ /(\S+)\s+(\S+)\s+(.*)/)
 			{
@@ -184,7 +245,7 @@ if (!$inverse)
 			}
 
 		# print out result 
-		print OUT "$xx\t$yy\t$val\n";
+		print OUT2 "$xx\t$yy\t$val\n";
 
 		$ndata = $ndata + 1;
 		}
@@ -194,28 +255,25 @@ if (!$inverse)
 		}
 
 	# close temporary file
-	close INP;
+	close INP2;
 	
 	# close output file
-	close OUT;
-	
-	#remove temporary file
-	`rm $file_tmp`;
+	close OUT2;
 	}
 
 # Do inverse projection from UTM easting northing to lon lat
 else
 	{
 	# open input file
-	if (!open(INP,"<$file_data"))
+	if (!open(INP1,"<$file_data"))
 		{
 		die "\nInput file $file_data cannot be opened!\n$program_name aborted\n";
 		}
 
 	# open temporary file
-	if (!open(OUT,">$file_tmp"))
+	if (!open(OUT1,">$filetmpa"))
 		{
-		die "\nTemporary file $file_tmp cannot be opened!\n$program_name aborted\n";
+		die "\nTemporary file $filetmpa cannot be opened!\n$program_name aborted\n";
 		}
 
 	# read temporary file, looping over input lines
@@ -224,7 +282,82 @@ else
 		print "Preprocessing input...\n";
 		}
 	$ndata = 0;
-	while ($line = <INP>)
+	while ($line = <INP1>)
+		{
+		$ok = 0;
+
+		# replace any commas with tabs
+		$line =~ s/,/\t/g;
+		
+		if ($line =~ /[^\s\d\-\.]/)
+			{
+			}
+		elsif ($line =~ /(\S+)\s+(\S+)\s+(.*)/)
+			{
+			($xx,$yy,$val) = $line =~ /(\S+)\s+(\S+)\s+(.*)/;
+			$ok = 1;
+			}
+		elsif ($line =~ /(\S+)\s+(\S+)/)
+			{
+			($xx,$yy) = $line =~ /(\S+)\s+(\S+)/;
+			$val = "";
+			$ok = 1;
+			}
+
+		# only use good lines
+		if ($ok == 1)
+			{
+			# get projected values in desired units 
+			if ($usefeet)
+				{
+				$xx = 12.0 / 1000000 *($xx - $org_x_ft);
+				$yy = 12.0 / 1000000 *($yy - $org_y_ft);
+				}
+			else
+				{
+				$xx = ($xx - $org_x_m) / (0.0254 * 1000000);
+				$yy = ($yy - $org_y_m) / (0.0254 * 1000000);
+				}
+
+			# print out result 
+			print OUT1 "$xx\t$yy\t$val\n";
+
+			$ndata = $ndata + 1;
+			}
+		}
+
+	# close input file
+	close INP1;
+
+	# close temporary file
+	close OUT1;
+
+	# run mapproject
+	if ($verbose)
+		{
+		print "Doing inverse projection using mapproject...\n";
+		}
+	`mapproject $filetmpa -J$projection -I -R$bounds > $filetmpb`;
+	
+	# open temporary file
+	if (!open(INP2,"<$filetmpb"))
+		{
+		die "\nTemporary file $filetmpb cannot be opened!\n$program_name aborted\n";
+		}
+
+	# open output file
+	if (!open(OUT2,">$file_out"))
+		{
+		die "\nOutput file $file_out cannot be opened!\n$program_name aborted\n";
+		}
+
+	# read temporary file, looping over input lines
+	if ($verbose)
+		{
+		print "Processing output from mapproject...\n";
+		}
+	$ndata = 0;
+	while ($line = <INP2>)
 		{
 		if ($line =~ /(\S+)\s+(\S+)\s+(.*)/)
 			{
@@ -236,44 +369,61 @@ else
 			$val = "";
 			}
 
-		# get projected values in desired units 
-		if ($usefeet)
+		# apply lonflip
+		if ($lonflip == -1)
 			{
-			$xx = 12.0 / 1000000 *($xx - $org_x_ft);
-			$yy = 12.0 / 1000000 *($yy - $org_y_ft);
+			if ($xx < -360.0)
+				{
+				$xx += 360.0;
+				}
+			elsif ($xx > 0.0)
+				{
+				$xx -= 360.0;
+				}
 			}
-		else
+		elsif ($lonflip == 0)
 			{
-			$xx = ($xx - $org_x_m) / (0.0254 * 1000000);
-			$yy = ($yy - $org_y_m) / (0.0254 * 1000000);
+			if ($xx < -180.0)
+				{
+				$xx += 360.0;
+				}
+			elsif ($xx > 180.0)
+				{
+				$xx -= 360.0;
+				}
+			}
+		elsif ($lonflip == 1)
+			{
+			if ($xx < 0.0)
+				{
+				$xx += 360.0;
+				}
+			elsif ($xx > 360.0)
+				{
+				$xx -= 360.0;
+				}
 			}
 
 		# print out result 
-		print OUT "$xx\t$yy\t$val\n";
+		print OUT2 "$xx\t$yy\t$val\n";
 
 		$ndata = $ndata + 1;
 		}
-
-	# close input file
-	close INP;
-
-	# close temporary file
-	close OUT;
-
-	# run mapproject
-	if ($verbose)
-		{
-		print "Doing inverse projection using mapproject...\n";
-		}
-	`mapproject $file_tmp -J$projection -I -R$bounds  > $file_out`;
 	if ($verbose)
 		{
 		print "Processed $ndata data points...\n";
 		}
+
+	# close temporary file
+	close INP2;
 	
-	#remove temporary file
-	`rm $file_tmp`;
+	# close output file
+	close OUT2;
 	}
+
+# remove temporary files
+unlink($filetmpa);
+unlink($filetmpb);
 
 # reset the gmt defaults
 `gmtset D_FORMAT $d_format ELLIPSOID $ellipsoid MEASURE_UNIT $measure_unit`;
