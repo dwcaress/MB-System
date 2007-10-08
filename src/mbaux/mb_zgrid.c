@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_zgrid.c	    4/25/95
- *    $Id: mb_zgrid.c,v 5.0 2000-12-01 22:53:59 caress Exp $
+ *    $Id: mb_zgrid.c,v 5.1 2007-10-08 05:50:55 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -53,6 +53,9 @@
  * Date:	April 25, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01 22:53:59  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.5  2000/10/11  21:48:43  caress
  * Moved file to mbaux directory and renamed to mb_zgrid.c
  *
@@ -146,7 +149,7 @@ int mb_zgrid(float *z, int *nx, int *ny,
     int itmax, jmnew;
     float dzmax, dzrms;
     int kk, im, jm;
-    float dzrms8, z00, dz, ze, hrange, zn, zs, zw, zrange, dzmaxf, 
+    float dzrms8, z00, dz, ze, hrange, zn, zs, zw, zrange, dzmaxf, convtest, 
 	    relaxn, rootgs, dzrmsp, big, abz;
     int npg;
     float eps, zim, zjm;
@@ -161,7 +164,7 @@ int mb_zgrid(float *z, int *nx, int *ny,
     
 
     /* Function Body */
-    itmax = 100;
+    itmax = 1000;
     eps = (float).002;
     big = (float)9e29;
 
@@ -264,7 +267,9 @@ L70:
 	zsum += xyz[kk * 3 + 3];
 	knxt[kk - 1] = -knxt[kk - 1];
 	kk = -knxt[kk - 1];
-	if (kk - *n <= 0) {
+	if (kk <= 0) {
+	    goto L75;
+	} else if (kk - *n <= 0) {
 	    goto L70;
 	} else {
 	    goto L75;
@@ -414,7 +419,7 @@ L202:
 /*     using the laplace-spline equation  (carres method is used) */
 /* ********************************************************************** 
 */
-
+fprintf(stderr,"Zgrid starting iterations\n");
     dzrmsp = zrange;
     relax = (float)1.;
     i__3 = itmax;
@@ -769,7 +774,9 @@ L3420:
 	    zsum += zpij[kk - 1];
 	    knxt[kk - 1] = -knxt[kk - 1];
 	    kk = -knxt[kk - 1];
-	    if (kk - *n <= 0) {
+	    if (kk <= 0) {
+	        goto L3430;
+	    } else if (kk - *n <= 0) {
 		goto L3420;
 	    } else {
 		goto L3430;
@@ -790,8 +797,8 @@ L3600:
 	}
 	dzrms = sqrt(dzrms / npg);
 	root = dzrms / dzrmsp;
-	dzrmsp = dzrms;
 	dzmaxf = dzmax / zrange;
+	dzrmsp = dzrms;
 	if (iter - iter / 10 * 10 - 2 != 0) {
 	    goto L3715;
 	} else {
@@ -813,7 +820,9 @@ L3720:
 	    goto L3730;
 	}
 L3730:
-	if (dzmaxf / ((float)1. - root) - eps <= (float)0.) {
+	convtest = dzmaxf / ((float)1. - root) - eps;
+	fprintf(stderr,"Zgrid iteration %d convergence test: %f\n",iter,convtest);
+	if (convtest <= (float)0.) {
 	    goto L4010;
 	} else {
 	    goto L3740;
