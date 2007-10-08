@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_jstar.c	10/4/94
- *	$Id: mbsys_jstar.c,v 5.4 2006-11-10 22:36:05 caress Exp $
+ *	$Id: mbsys_jstar.c,v 5.5 2007-10-08 15:59:34 caress Exp $
  *
  *    Copyright (c) 2005 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Author:	D. W. Caress
  * Date:	May 4, 2005
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2006/11/10 22:36:05  caress
+ * Working towards release 5.1.0
+ *
  * Revision 5.3  2006/03/12 19:23:19  caress
  * Changed log2() and exp2() calls to log() and exp() for compatitibility with non-POSIX compliant operating systems.
  *
@@ -52,14 +55,11 @@
 #include "../../include/mb_segy.h"
 #include "../../include/mbsys_jstar.h"
 
-/* define ln(2) for local usage */
-#define MB_LN_2	0.69314718056
-
 /*--------------------------------------------------------------------*/
 int mbsys_jstar_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_jstar.c,v 5.4 2006-11-10 22:36:05 caress Exp $";
+ static char res_id[]="$Id: mbsys_jstar.c,v 5.5 2007-10-08 15:59:34 caress Exp $";
 	char	*function_name = "mbsys_jstar_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

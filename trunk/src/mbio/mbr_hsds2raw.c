@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsds2raw.c	6/20/01
- *	$Id: mbr_hsds2raw.c,v 5.11 2005-11-05 00:48:05 caress Exp $
+ *	$Id: mbr_hsds2raw.c,v 5.12 2007-10-08 15:59:34 caress Exp $
  *
  *    Copyright (c) 2001, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * 		D. N. Chayes
  * Date:	June 20, 2001
  * $Log: not supported by cvs2svn $
+ * Revision 5.11  2005/11/05 00:48:05  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.10  2003/05/20 18:05:32  caress
  * Added svp_source to data source parameters.
  *
@@ -107,7 +110,7 @@ int mbr_wt_hsds2raw(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_hsds2raw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
-static char res_id[]="$Id: mbr_hsds2raw.c,v 5.11 2005-11-05 00:48:05 caress Exp $";
+static char res_id[]="$Id: mbr_hsds2raw.c,v 5.12 2007-10-08 15:59:34 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_hsds2raw(int verbose, void *mbio_ptr, int *error)
@@ -266,7 +269,7 @@ int mbr_info_hsds2raw(int verbose,
 	strncpy(format_name, "HSDS2RAW", MB_NAME_LENGTH);
 	strncpy(system_name, "ATLAS", MB_NAME_LENGTH);
 	strncpy(format_description, "Format name:          MBF_HSDS2RAW\nInformal Description: STN Atlas raw multibeam format\nAttributes:           STN Atlas multibeam sonars, \n                      Hydrosweep DS2, Hydrosweep MD, \n                      Fansweep 10, Fansweep 20, \n                      bathymetry, amplitude, and sidescan,\n                      up to 1440 beams and 4096 pixels,\n                      XDR binary, STN Atlas.\n", MB_DESCRIPTION_LENGTH);
-	*numfile = 2;
+	*numfile = 3;
 	*filetype = MB_FILETYPE_XDR;
 	*variable_beams = MB_YES;
 	*traveltime = MB_YES;
@@ -340,7 +343,7 @@ int mbr_alm_hsds2raw(int verbose, void *mbio_ptr, int *error)
 			verbose,mbio_ptr,
 			&mb_io_ptr->store_data,error);
 			
-	/* set name for navigation file */
+	/* set name for navigation and angle files */
 	if (status == MB_SUCCESS)
 		{
 		if (strlen(mb_io_ptr->file) >= 5
@@ -350,6 +353,14 @@ int mbr_alm_hsds2raw(int verbose, void *mbio_ptr, int *error)
 			strcpy(mb_io_ptr->file2,mb_io_ptr->file);
 			strcpy(&(mb_io_ptr->file2[strlen(mb_io_ptr->file)-4]), 
 				".nav");
+			}
+		if (strlen(mb_io_ptr->file) >= 5
+		    && strncmp(&(mb_io_ptr->file[strlen(mb_io_ptr->file)-4]), 
+				".fsw", 4) == 0)
+			{
+			strcpy(mb_io_ptr->file3,mb_io_ptr->file);
+			strcpy(&(mb_io_ptr->file3[strlen(mb_io_ptr->file)-4]), 
+				".ang");
 			}
 		}
 

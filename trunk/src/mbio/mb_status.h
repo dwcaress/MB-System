@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbio_status.h	2/1/93
- *    $Id: mb_status.h,v 5.80 2007-07-05 16:42:40 caress Exp $
+ *    $Id: mb_status.h,v 5.81 2007-10-08 15:59:34 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003, 2004, 2005, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.80  2007/07/05 16:42:40  caress
+ * Release 5.1.1beta5
+ *
  * Revision 5.79  2007/06/18 01:19:48  caress
  * Changes as of 17 June 2007.
  *
@@ -352,8 +355,8 @@
 #define MB_STATUS_DEF
 
 /* MB-system version id */
-#define	MB_VERSION	"5.1.1beta5"
-#define	MB_BUILD_DATE	"July 5, 2007"
+#define	MB_VERSION	"5.1.1beta8"
+#define	MB_BUILD_DATE	"August 29, 2007"
 
 /* MBIO function boolean convention */
 #define	MB_YES	1
@@ -609,6 +612,15 @@ static char *unknown_notice_msg[] =
 	{
 	"Unknown notice identifier detritus"
 	};
+	
+/* MBIO sidescan types 
+	- sidescan values can be logarithmic (dB) or linear (usually voltage) */
+#define MB_SIDESCAN_LOGARITHMIC 0
+#define MB_SIDESCAN_LINEAR	1
+
+/* MBIO null sidescan:
+	- value used to flag sidescan values as undefined */
+#define MB_SIDESCAN_NULL -1000000000.0
 	
 /* MBIO unknown time flag:
 	- time_d value used to flag unknown time tag

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad2.c	3.00	10/9/98
- *	$Id: mbsys_simrad2.c,v 5.26 2006-11-10 22:36:05 caress Exp $
+ *	$Id: mbsys_simrad2.c,v 5.27 2007-10-08 15:59:34 caress Exp $
  *
  *    Copyright (c) 1998, 2001, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -31,6 +31,9 @@
  * Date:	October 9, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.26  2006/11/10 22:36:05  caress
+ * Working towards release 5.1.0
+ *
  * Revision 5.25  2006/08/09 22:41:27  caress
  * Fixed programs that read or write grids so that they do not use the GMT_begin() function; these programs will now work when GMT is built in the default fashion, when GMT is built in the default fashion, with "advisory file locking" enabled.
  *
@@ -142,7 +145,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_simrad2.h"
 
-static char res_id[]="$Id: mbsys_simrad2.c,v 5.26 2006-11-10 22:36:05 caress Exp $";
+static char res_id[]="$Id: mbsys_simrad2.c,v 5.27 2007-10-08 15:59:34 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_simrad2_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
@@ -1718,10 +1721,7 @@ int mbsys_simrad2_extract(int verbose, void *mbio_ptr, void *store_ptr,
 				= dacrscale * ping->png_acrosstrack[i];
 			bathalongtrack[j] 
 				= daloscale * ping->png_alongtrack[i];
-			if (ping->png_quality[i] != 0)
-				amp[j] = reflscale * ping->png_amp[i] + 64;
-			else
-				amp[j] = 0;
+			amp[j] = reflscale * ping->png_amp[i];
 			}
 		*nbath = ping->png_nbeams_max;
 		*namp = *nbath;
@@ -2195,11 +2195,7 @@ int mbsys_simrad2_insert(int verbose, void *mbio_ptr, void *store_ptr,
 				        = (int) rint(bathacrosstrack[i] / dacrscale);
 				ping->png_alongtrack[j] 
 					= (int) rint(bathalongtrack[i] / daloscale);
-				if (amp[i] != 0.0)
-					ping->png_amp[j] = (int) rint((amp[i] - 64) 
-						/ reflscale);
-				else
-					ping->png_amp[j] = 0;
+				ping->png_amp[j] = (int) rint(amp[i] / reflscale);
 				ping->png_nbeams++;
 				}
 			ping->png_nbeams_max = nbath;
@@ -2216,11 +2212,7 @@ int mbsys_simrad2_insert(int verbose, void *mbio_ptr, void *store_ptr,
 					= (int) rint(bathacrosstrack[i] / dacrscale);
 				ping->png_alongtrack[j] 
 					= (int) rint(bathalongtrack[i] / daloscale);
-				if (amp[i] != 0.0)
-					ping->png_amp[j] = (int) rint((amp[i] - 64) 
-						/ reflscale);
-				else
-					ping->png_amp[j] = 0;
+				ping->png_amp[j] = (int) rint(amp[i] / reflscale);
 				}
 			}
 		if (status == MB_SUCCESS)
@@ -3805,7 +3797,7 @@ ping->png_beam_samples[i] * ss_spacing / beam_foot);*/
 					    + (int)(xtrackss / (*pixel_size));
 					if (kk > 0 && kk < MBSYS_SIMRAD2_MAXPIXELS)
 					    {
-					    ss[kk]  += reflscale*((double)beam_ss[k]) + ssoffset;
+					    ss[kk]  += reflscale*((double)beam_ss[k]);
 					    ssalongtrack[kk] 
 						    += daloscale * ping->png_alongtrack[i];
 					    ss_cnt[kk]++;
@@ -3830,6 +3822,8 @@ ping->png_beam_samples[i] * ss_spacing / beam_foot);*/
 				first = MIN(first, k);
 				last = k;
 				}
+			else
+				ss[k] = MB_SIDESCAN_NULL;	
 			}
 			
 		/* interpolate the sidescan */
@@ -3872,9 +3866,17 @@ ping->png_beam_samples[i] * ss_spacing / beam_foot);*/
 		    ping->png_pixels_ss = 0;
 		for (i=0;i<MBSYS_SIMRAD2_MAXPIXELS;i++)
 		    {
-		    ping->png_ss[i] = (short) rint(100 * ss[i]);
-		    ping->png_ssalongtrack[i] 
-			    = (short) rint(ssalongtrack[i] / daloscale);
+		    if (ss[i] > MB_SIDESCAN_NULL)
+		    	{
+		    	ping->png_ss[i] = (short)(100 * ss[i]);
+		    	ping->png_ssalongtrack[i] 
+			    	= (short)(ssalongtrack[i] / daloscale);
+			}
+		    else
+		    	{
+		    	ping->png_ss[i] = 0;
+		    	ping->png_ssalongtrack[i] = 0;
+			}
 		    }
 
 		/* print debug statements */

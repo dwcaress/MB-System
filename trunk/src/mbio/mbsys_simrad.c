@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad.c	3.00	8/5/94
- *	$Id: mbsys_simrad.c,v 5.14 2007-06-18 01:19:48 caress Exp $
+ *	$Id: mbsys_simrad.c,v 5.15 2007-10-08 15:59:34 caress Exp $
  *
  *    Copyright (c) 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -31,6 +31,9 @@
  * Date:	August 5, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.14  2007/06/18 01:19:48  caress
+ * Changes as of 17 June 2007.
+ *
  * Revision 5.13  2006/08/09 22:41:27  caress
  * Fixed programs that read or write grids so that they do not use the GMT_begin() function; these programs will now work when GMT is built in the default fashion, when GMT is built in the default fashion, with "advisory file locking" enabled.
  *
@@ -164,7 +167,7 @@
 #define MBSYS_SIMRAD_C
 #include "../../include/mbsys_simrad.h"
 
-static char res_id[]="$Id: mbsys_simrad.c,v 5.14 2007-06-18 01:19:48 caress Exp $";
+static char res_id[]="$Id: mbsys_simrad.c,v 5.15 2007-10-08 15:59:34 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_simrad_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
@@ -699,10 +702,7 @@ int mbsys_simrad_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			}
 		for (i=0;i<*namp;i++)
 			{
-			if (ping->bath[i] != 0 && ping->amp[i] != 0)
-				amp[i] = reflscale*ping->amp[i] + 64;
-			else
-				amp[i] = 0;
+			amp[i] = reflscale*ping->amp[i];
 			}
 		if (ss != NULL)
 			{
@@ -1137,12 +1137,7 @@ int mbsys_simrad_insert(int verbose, void *mbio_ptr, void *store_ptr,
 				}
 			for (i=0;i<namp;i++)
 				{
-				if (ping->bath[i] != 0
-				    && amp[i] != 0.0)
-					ping->amp[i] = (amp[i] - 64) 
-						/ reflscale;
-				else
-					ping->amp[i] = 0;
+				ping->amp[i] = amp[i] / reflscale;
 				}
 			}
 		if (status == MB_SUCCESS)
@@ -2450,7 +2445,6 @@ int mbsys_simrad_makess(int verbose, void *mbio_ptr, void *store_ptr,
 	double	depthscale, depthoffset;
 	double	dacrscale, daloscale;
 	double	reflscale;
-	double	ssoffset;
 	double  pixel_size_calc;
 	double	ss_spacing, ss_spacing_use;
 	double	*angles_simrad;
@@ -2554,7 +2548,6 @@ int mbsys_simrad_makess(int verbose, void *mbio_ptr, void *store_ptr,
 			reflscale  = 0.5;
 			}
 		depthoffset = 0.0;
-		ssoffset = 64.0;
 
 		/* get angles */
 		interleave = MB_NO;
@@ -2796,7 +2789,6 @@ int mbsys_simrad_makess(int verbose, void *mbio_ptr, void *store_ptr,
 			fprintf(stderr,"dbg2       reflscale:     %f\n",reflscale);
 			fprintf(stderr,"dbg2       depthscale:    %f\n",depthscale);
 			fprintf(stderr,"dbg2       depthoffset:   %f\n",depthoffset);
-			fprintf(stderr,"dbg2       ssoffset:      %f\n",ssoffset);
 			fprintf(stderr,"dbg2       depthscale:    %f\n",depthscale);
 			fprintf(stderr,"dbg2       ss_spacing:    %f\n",ss_spacing);
 			fprintf(stderr,"dbg2       pixel_size:    %f\n",*pixel_size);
@@ -2860,7 +2852,7 @@ ping->beam_samples[i] * ss_spacing / beam_foot);*/
 				    + (int)(xtrackss / (*pixel_size));
 				if (kk > 0 && kk < MBSYS_SIMRAD_MAXPIXELS)
 				    {
-				    ss[kk]  += reflscale*((double)beam_ss[k]) + ssoffset;
+				    ss[kk]  += reflscale*((double)beam_ss[k]);
 				    ssalongtrack[kk] 
 					    += ltrack;
 				    ss_cnt[kk]++;
@@ -2884,6 +2876,8 @@ ping->beam_samples[i] * ss_spacing / beam_foot);*/
 				first = MIN(first, k);
 				last = k;
 				}
+			else
+				ss[k] = MB_SIDESCAN_NULL;	
 			}
 			
 		/* interpolate the sidescan */
@@ -2926,9 +2920,17 @@ ping->beam_samples[i] * ss_spacing / beam_foot);*/
 		    ping->pixels_ss = 0;
 		for (i=0;i<MBSYS_SIMRAD_MAXPIXELS;i++)
 		    {
-		    ping->ss[i] = (short)(100 * ss[i]);
-		    ping->ssalongtrack[i] 
-			    = (short)(ssalongtrack[i] / daloscale);
+		    if (ss[i] > MB_SIDESCAN_NULL)
+		    	{
+		    	ping->ss[i] = (short)(100 * ss[i]);
+		    	ping->ssalongtrack[i] 
+			    	= (short)(ssalongtrack[i] / daloscale);
+			}
+		    else
+		    	{
+		    	ping->ss[i] = 0;
+		    	ping->ssalongtrack[i] = 0;
+			}
 		    }
 
 		/* print debug statements */

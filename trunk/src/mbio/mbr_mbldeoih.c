@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mbldeoih.c	2/2/93
- *	$Id: mbr_mbldeoih.c,v 5.12 2005-11-05 00:48:05 caress Exp $
+ *	$Id: mbr_mbldeoih.c,v 5.13 2007-10-08 15:59:34 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	February 2, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 5.12  2005/11/05 00:48:05  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.11  2005/03/25 04:21:33  caress
  * Corrected problem with debug output of sidescan data.
  *
@@ -213,7 +216,7 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 #define	MBF_MBLDEOIH_OLDHEADERSIZE	38
 #define	MBF_MBLDEOIH_NEWHEADERSIZE	44
 
-static char res_id[]="$Id: mbr_mbldeoih.c,v 5.12 2005-11-05 00:48:05 caress Exp $";
+static char res_id[]="$Id: mbr_mbldeoih.c,v 5.13 2007-10-08 15:59:34 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_mbldeoih(int verbose, void *mbio_ptr, int *error)
@@ -264,6 +267,7 @@ int mbr_register_mbldeoih(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr->mb_io_read_ping = &mbr_rt_mbldeoih; 
 	mb_io_ptr->mb_io_write_ping = &mbr_wt_mbldeoih; 
 	mb_io_ptr->mb_io_dimensions = &mbsys_ldeoih_dimensions; 
+	mb_io_ptr->mb_io_sidescantype = &mbsys_ldeoih_sidescantype; 
 	mb_io_ptr->mb_io_extract = &mbsys_ldeoih_extract; 
 	mb_io_ptr->mb_io_insert = &mbsys_ldeoih_insert; 
 	mb_io_ptr->mb_io_extract_nav = &mbsys_ldeoih_extract_nav; 
@@ -307,6 +311,8 @@ int mbr_register_mbldeoih(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2       store_free:         %d\n",mb_io_ptr->mb_io_store_free);
 		fprintf(stderr,"dbg2       read_ping:          %d\n",mb_io_ptr->mb_io_read_ping);
 		fprintf(stderr,"dbg2       write_ping:         %d\n",mb_io_ptr->mb_io_write_ping);
+		fprintf(stderr,"dbg2       dimensions:         %d\n",mb_io_ptr->mb_io_dimensions);
+		fprintf(stderr,"dbg2       sidescantype:       %d\n",mb_io_ptr->mb_io_sidescantype);
 		fprintf(stderr,"dbg2       extract:            %d\n",mb_io_ptr->mb_io_extract);
 		fprintf(stderr,"dbg2       insert:             %d\n",mb_io_ptr->mb_io_insert);
 		fprintf(stderr,"dbg2       extract_nav:        %d\n",mb_io_ptr->mb_io_extract_nav);
@@ -620,7 +626,7 @@ int mbr_rt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			{
 			mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->beam_xwidth); index +=2;
 			mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->beam_lwidth); index +=2;
-			mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->spare); index +=2;
+			mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->ss_type); index +=2;
 			}
 		}
 
@@ -637,32 +643,32 @@ int mbr_rt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		}
 	if (verbose >= 5 && store->kind == MB_DATA_DATA)
 		{
-		fprintf(stderr,"dbg5       year:       %d\n",store->year);
-		fprintf(stderr,"dbg5       day:        %d\n",store->day);
-		fprintf(stderr,"dbg5       minute:     %d\n",store->min);
-		fprintf(stderr,"dbg5       second:     %d\n",store->sec);
-		fprintf(stderr,"dbg5       msec:       %d\n",store->msec);
-		fprintf(stderr,"dbg5       lonu:       %d\n",store->lon2u);
-		fprintf(stderr,"dbg5       lonb:       %d\n",store->lon2b);
-		fprintf(stderr,"dbg5       latu:       %d\n",store->lat2u);
-		fprintf(stderr,"dbg5       latb:       %d\n",store->lat2b);
-		fprintf(stderr,"dbg5       heading:    %d\n",store->heading);
-		fprintf(stderr,"dbg5       speed:      %d\n",store->speed);
-		fprintf(stderr,"dbg5       beams bath: %d\n",
+		fprintf(stderr,"dbg5       year:             %d\n",store->year);
+		fprintf(stderr,"dbg5       day:              %d\n",store->day);
+		fprintf(stderr,"dbg5       minute:           %d\n",store->min);
+		fprintf(stderr,"dbg5       second:           %d\n",store->sec);
+		fprintf(stderr,"dbg5       msec:             %d\n",store->msec);
+		fprintf(stderr,"dbg5       lonu:             %d\n",store->lon2u);
+		fprintf(stderr,"dbg5       lonb:             %d\n",store->lon2b);
+		fprintf(stderr,"dbg5       latu:             %d\n",store->lat2u);
+		fprintf(stderr,"dbg5       latb:             %d\n",store->lat2b);
+		fprintf(stderr,"dbg5       heading:          %d\n",store->heading);
+		fprintf(stderr,"dbg5       speed:            %d\n",store->speed);
+		fprintf(stderr,"dbg5       beams bath:       %d\n",
 			store->beams_bath);
-		fprintf(stderr,"dbg5       beams amp:  %d\n",
+		fprintf(stderr,"dbg5       beams amp:        %d\n",
 			store->beams_amp);
-		fprintf(stderr,"dbg5       pixels ss:  %d\n",
+		fprintf(stderr,"dbg5       pixels ss:        %d\n",
 			store->pixels_ss);
-		fprintf(stderr,"dbg5       depth scale:%d\n",store->depth_scale);
-		fprintf(stderr,"dbg5       dist scale: %d\n",store->distance_scale);
+		fprintf(stderr,"dbg5       depth scale:      %d\n",store->depth_scale);
+		fprintf(stderr,"dbg5       dist scale:       %d\n",store->distance_scale);
 		fprintf(stderr,"dbg5       transducer_depth: %d\n",store->transducer_depth);
 		fprintf(stderr,"dbg5       altitude:         %d\n",store->altitude);
 		fprintf(stderr,"dbg5       beam_xwidth:      %d\n",store->beam_xwidth);
 		fprintf(stderr,"dbg5       beam_lwidth:      %d\n",store->beam_lwidth);
-		fprintf(stderr,"dbg5       spare:            %d\n",store->spare);
-		fprintf(stderr,"dbg5       status:     %d\n",status);
-		fprintf(stderr,"dbg5       error:      %d\n",*error);
+		fprintf(stderr,"dbg5       ss_type:          %d\n",store->ss_type);
+		fprintf(stderr,"dbg5       status:           %d\n",status);
+		fprintf(stderr,"dbg5       error:            %d\n",*error);
 		}
 
 	/* read next chunk of the data */
@@ -962,32 +968,29 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		}
 	if (verbose >= 5 && store->kind == MB_DATA_DATA)
 		{
-		fprintf(stderr,"dbg5       year:       %d\n",store->year);
-		fprintf(stderr,"dbg5       day:        %d\n",store->day);
-		fprintf(stderr,"dbg5       minute:     %d\n",store->min);
-		fprintf(stderr,"dbg5       second:     %d\n",store->sec);
-		fprintf(stderr,"dbg5       msec:       %d\n",store->msec);
-		fprintf(stderr,"dbg5       lonu:       %d\n",store->lon2u);
-		fprintf(stderr,"dbg5       lonb:       %d\n",store->lon2b);
-		fprintf(stderr,"dbg5       latu:       %d\n",store->lat2u);
-		fprintf(stderr,"dbg5       latb:       %d\n",store->lat2b);
-		fprintf(stderr,"dbg5       heading:    %d\n",store->heading);
-		fprintf(stderr,"dbg5       speed:      %d\n",store->speed);
-		fprintf(stderr,"dbg5       beams bath: %d\n",
-			store->beams_bath);
-		fprintf(stderr,"dbg5       beams amp:  %d\n",
-			store->beams_amp);
-		fprintf(stderr,"dbg5       pixels ss:  %d\n",
-			store->pixels_ss);
-		fprintf(stderr,"dbg5       depth scale: %d\n",store->depth_scale);
-		fprintf(stderr,"dbg5       dist scale:  %d\n",store->distance_scale);
+		fprintf(stderr,"dbg5       year:             %d\n",store->year);
+		fprintf(stderr,"dbg5       day:              %d\n",store->day);
+		fprintf(stderr,"dbg5       minute:           %d\n",store->min);
+		fprintf(stderr,"dbg5       second:           %d\n",store->sec);
+		fprintf(stderr,"dbg5       msec:             %d\n",store->msec);
+		fprintf(stderr,"dbg5       lonu:             %d\n",store->lon2u);
+		fprintf(stderr,"dbg5       lonb:             %d\n",store->lon2b);
+		fprintf(stderr,"dbg5       latu:             %d\n",store->lat2u);
+		fprintf(stderr,"dbg5       latb:             %d\n",store->lat2b);
+		fprintf(stderr,"dbg5       heading:          %d\n",store->heading);
+		fprintf(stderr,"dbg5       speed:            %d\n",store->speed);
+		fprintf(stderr,"dbg5       beams bath:       %d\n",store->beams_bath);
+		fprintf(stderr,"dbg5       beams amp:        %d\n",store->beams_amp);
+		fprintf(stderr,"dbg5       pixels ss:        %d\n",store->pixels_ss);
+		fprintf(stderr,"dbg5       depth scale:      %d\n",store->depth_scale);
+		fprintf(stderr,"dbg5       dist scale:       %d\n",store->distance_scale);
 		fprintf(stderr,"dbg5       transducer_depth: %d\n",store->transducer_depth);
 		fprintf(stderr,"dbg5       altitude:         %d\n",store->altitude);
 		fprintf(stderr,"dbg5       beam_xwidth:      %d\n",store->beam_xwidth);
 		fprintf(stderr,"dbg5       beam_lwidth:      %d\n",store->beam_lwidth);
-		fprintf(stderr,"dbg5       spare:            %d\n",store->spare);
-		fprintf(stderr,"dbg5       status:     %d\n",status);
-		fprintf(stderr,"dbg5       error:      %d\n",*error);
+		fprintf(stderr,"dbg5       ss_type:          %d\n",store->ss_type);
+		fprintf(stderr,"dbg5       status:           %d\n",status);
+		fprintf(stderr,"dbg5       error:            %d\n",*error);
 		}
 
 	if (status == MB_SUCCESS && store->kind == MB_DATA_DATA)
@@ -1013,7 +1016,7 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		mb_put_binary_short(MB_NO, store->altitude, (void *)  &buffer[index]); index +=2;
 		mb_put_binary_short(MB_NO, store->beam_xwidth, (void *)  &buffer[index]); index +=2;
 		mb_put_binary_short(MB_NO, store->beam_lwidth, (void *)  &buffer[index]); index +=2;
-		mb_put_binary_short(MB_NO, store->spare, (void *)  &buffer[index]); index +=2;
+		mb_put_binary_short(MB_NO, store->ss_type, (void *)  &buffer[index]); index +=2;
 		}
 
 	/* write next header to file */
@@ -1038,11 +1041,11 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"dbg5       status:     %d\n",status);
 		fprintf(stderr,"dbg5       error:      %d\n",*error);
 		}
-	if (verbose >=5 && store->kind == MB_DATA_COMMENT)
+	if (verbose >= 5 && store->kind == MB_DATA_COMMENT)
 		{
 		fprintf(stderr,"dbg5       comment:    %s\n",store->comment);
 		}
-	if (verbose >=5 && store->kind == MB_DATA_DATA)
+	if (verbose >= 5 && store->kind == MB_DATA_DATA)
 		{
 			fprintf(stderr,"dbg5       beams_bath: %d\n",
 				store->beams_bath);

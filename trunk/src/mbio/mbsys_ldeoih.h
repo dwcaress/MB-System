@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_ldeoih.h	3/2/93
- *	$Id: mbsys_ldeoih.h,v 5.5 2005-11-05 00:48:04 caress Exp $
+ *	$Id: mbsys_ldeoih.h,v 5.6 2007-10-08 15:59:34 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	March 2, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2005/11/05 00:48:04  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.4  2003/04/17 21:05:23  caress
  * Release 5.0.beta30
  *
@@ -128,7 +131,9 @@ struct mbsys_ldeoih_struct
 	short	altitude;	/* scaled by depth_scale */
 	short	beam_xwidth;	/* 0.01 degrees */
 	short	beam_lwidth;	/* 0.01 degrees */
-	short	spare;		/* spare */
+	short	ss_type;	/* indicates if sidescan values are logarithmic or linear
+					ss_type = 0: logarithmic (dB)
+					ss_type = 1: linear (voltage) */
 
 	/* pointers to arrays */
 	unsigned char *beamflag;
@@ -151,6 +156,8 @@ int mbsys_ldeoih_deall(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error);
 int mbsys_ldeoih_dimensions(int verbose, void *mbio_ptr, void *store_ptr, 
 			int *kind, int *nbath, int *namp, int *nss, int *error);
+int mbsys_ldeoih_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, 
+		int *ss_type, int *error);
 int mbsys_ldeoih_extract(int verbose, void *mbio_ptr, void *store_ptr, 
 			int *kind, int time_i[7], double *time_d,
 			double *navlon, double *navlat,
