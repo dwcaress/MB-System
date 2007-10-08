@@ -34,13 +34,19 @@
 #ifndef __GSF_FT_H__
 #define __GSF_FT_H__
 
+#include <limits.h>
+
 /* Define the size of buffer of ping addresses kept for direct access */
 #define PING_ADDR_BUF_SIZE 1024
 
 /* Macro definitions for the state of the read_write_flag */
-#define LAST_OP_FLUSH         0
-#define LAST_OP_READ          1
-#define LAST_OP_WRITE         2
+#define LAST_OP_FLUSH          0
+#define LAST_OP_READ           1
+#define LAST_OP_WRITE          2
+
+/* Macro definitions for the limits of the scale factor multipler */
+#define MIN_GSF_SF_MULT_VALUE  1
+#define MAX_GSF_SF_MULT_VALUE  ULONG_MAX
 
 /* Typedef structure to hold the record index information */
 typedef struct

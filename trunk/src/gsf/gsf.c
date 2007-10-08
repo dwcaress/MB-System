@@ -148,14 +148,18 @@
 #define GSF_UNKNOWN_PARAM_TEXT "UNKNWN"   /* Flag value for unknown parameter value */
 
 /* JSB 07/15/99 Added these macros to support new gsfGetSwathBathyArrayMinMax function */
-#define GSF_U_SHORT_MIN      (0)
-#define GSF_U_SHORT_MAX  (65535)
-#define GSF_S_SHORT_MIN (-32768)
-#define GSF_S_SHORT_MAX  (32767)
-#define GSF_U_CHAR_MIN       (0)
-#define GSF_U_CHAR_MAX     (255)
-#define GSF_S_CHAR_MIN    (-128)
-#define GSF_S_CHAR_MAX    (+127)
+#define GSF_U_CHAR_MIN            (0.0)
+#define GSF_U_CHAR_MAX          (255.0)
+#define GSF_S_CHAR_MIN         (-128.0)
+#define GSF_S_CHAR_MAX         (+127.0)
+#define GSF_U_SHORT_MIN           (0.0)
+#define GSF_U_SHORT_MAX       (65535.0)
+#define GSF_S_SHORT_MIN      (-32768.0)
+#define GSF_S_SHORT_MAX       (32767.0)
+#define GSF_U_INT_MIN             (0.0)
+#define GSF_U_INT_MAX    (4294967295.0)
+#define GSF_S_INT_MIN   (-2147483648.0)
+#define GSF_S_INT_MAX    (2147483647.0)
 
 /* Static Global data for this module */
 static unsigned char streamBuff[GSF_MAX_RECORD_SIZE];
@@ -1228,11 +1232,34 @@ gsfUnpackStream (int handle, int desiredRecord, gsfDataID *dataID, gsfRecords *r
         /* Make sure that we have a big enough buffer to fit this record,
          *  then read it out.
          */
-        if (readSize > GSF_MAX_RECORD_SIZE)
+        if ((readSize <= 8) || (readSize > GSF_MAX_RECORD_SIZE))
         {
             /* wkm, may have an incomplete record here */
             gsfError = GSF_RECORD_SIZE_ERROR;
             return (-1);
+        }
+
+
+        /* No point in reading the "size" bytes for data if the ID is not recognized */
+        switch (thisID.recordID)
+        {
+            case (GSF_RECORD_HEADER):
+            case (GSF_RECORD_SWATH_BATHY_SUMMARY):
+            case (GSF_RECORD_SWATH_BATHYMETRY_PING):
+            case (GSF_RECORD_SOUND_VELOCITY_PROFILE):
+            case (GSF_RECORD_PROCESSING_PARAMETERS):
+            case (GSF_RECORD_SENSOR_PARAMETERS):
+            case (GSF_RECORD_COMMENT):
+            case (GSF_RECORD_HISTORY):
+            case (GSF_RECORD_NAVIGATION_ERROR):
+            case (GSF_RECORD_SINGLE_BEAM_PING):
+            case (GSF_RECORD_HV_NAVIGATION_ERROR):
+            case (GSF_RECORD_ATTITUDE):
+                break;
+
+            default:
+                gsfError = GSF_UNRECOGNIZED_RECORD_ID;
+                return (-1);
         }
 
         /* If the caller passed GSF_NEXT_RECORD, as the desiredRecord, they
@@ -1973,33 +2000,56 @@ gsfLoadScaleFactor(gsfScaleFactors *sf, int subrecordID, char c_flag, double pre
     /* If we're adding a new subrecord, bump counter and check bounds */
     if (sf->scaleTable[subrecordID - 1].multiplier == 0.0)
     {
-        sf->numArraySubrecords++;
-        if (sf->numArraySubrecords > GSF_MAX_PING_ARRAY_SUBRECORDS)
+        if ((sf->numArraySubrecords + 1) > GSF_MAX_PING_ARRAY_SUBRECORDS)
         {
             sf->numArraySubrecords--;
             gsfError = GSF_TOO_MANY_ARRAY_SUBRECORDS;
             return (-1);
         }
+
+        /* Compute the multiplier as one over the requested precision */
+        mult = 1.0 / precision;
+
+        /* In order to assure the same multiplier is used throughout, truncate
+         *  to an integer.  This is the value which is stored with the data.
+         *  The multiplier value is encoded on the byte stream as an integer value
+         *  (i.e. it is not scaled) so the smallest supportable precision is 1.
+         */
+        itemp = (int) (mult + 0.001);
+
+        /* QC test on the integer value as this is the number that will get encoded on the GSF byte stream */
+        if ((itemp < MIN_GSF_SF_MULT_VALUE) || (itemp > MAX_GSF_SF_MULT_VALUE))
+        {
+            gsfError = GSF_CANNOT_REPRESENT_PRECISION;
+            return (-1);
+        }
+ 
+        /* New scale factor has passed QC tests, it is now safe to bump the counter */
+        sf->numArraySubrecords++;
     }
-
-    /* Compute the multiplier as one over the requested precision */
-    mult = 1.0 / precision;
-
-    /* Test to see if integer truncation will cause an error */
-    if (mult > ULONG_MAX)
+    else
     {
-        gsfError = GSF_CANNOT_REPRESENT_PRECISION;
-        return (-1);
-    }
+        /* Compute the multiplier as one over the requested precision */
+        mult = 1.0 / precision;
 
-    /* In order to assure the same multiplier is used throughout, truncate
-    *  to an integer.  This is the value which is stored with the data.
-    */
-    itemp = (int) (mult + 0.501);
+        /* In order to assure the same multiplier is used throughout, truncate
+         *  to an integer.  This is the value which is stored with the data.
+         *  The multiplier value is encoded on the byte stream as an integer value
+         *  (i.e. it is not scaled) so the smallest supportable precision is 1.
+         */
+        itemp = (int) (mult + 0.001);
+
+        /* QC test on the integer value as this is the number that will get encoded on the GSF byte stream */  
+        if ((itemp < MIN_GSF_SF_MULT_VALUE) || (itemp > MAX_GSF_SF_MULT_VALUE))
+        {
+            gsfError = GSF_CANNOT_REPRESENT_PRECISION;
+            return (-1);
+        }
+    }
 
     /* The multiplier to be applied to the data is converted back to a
-    *  double here, for floating point performance.
-    */
+     *  double here, for floating point performance.
+     */
     sf->scaleTable[subrecordID - 1].compressionFlag = c_flag;
     sf->scaleTable[subrecordID - 1].multiplier = ((double) itemp);
     sf->scaleTable[subrecordID - 1].offset = (double) offset;
@@ -2025,7 +2075,7 @@ gsfLoadScaleFactor(gsfScaleFactors *sf, int subrecordID, char c_flag, double pre
  *  offset = the address of a double to contain the scaling DC offset.
  *
  * Returns :
- *  This function returns zero if successful, or -1 if an error occured.
+ *  This function returns zero if successful, or -1 if an error occurred.
  *
  * Error Conditions :
  *    GSF_TOO_MANY_ARRAY_SUBRECORDS
@@ -2096,6 +2146,12 @@ gsfFree (gsfRecords *rec)
     {
         free (rec->mb_ping.depth);
         rec->mb_ping.depth = (double *) NULL;
+    }
+
+    if (rec->mb_ping.nominal_depth != (double *) NULL)
+    {
+        free (rec->mb_ping.nominal_depth);
+        rec->mb_ping.nominal_depth = (double *) NULL;
     }
 
     if (rec->mb_ping.across_track != (double *) NULL)
@@ -2176,12 +2232,6 @@ gsfFree (gsfRecords *rec)
         rec->mb_ping.quality_flags = (unsigned char *) NULL;
     }
 
-    if (rec->mb_ping.nominal_depth != (double *) NULL)
-    {
-        free (rec->mb_ping.nominal_depth);
-        rec->mb_ping.nominal_depth = (double *) NULL;
-    }
-
     if (rec->mb_ping.beam_flags != (unsigned char *) NULL)
     {
         free (rec->mb_ping.beam_flags);
@@ -2210,6 +2260,36 @@ gsfFree (gsfRecords *rec)
     {
         free (rec->mb_ping.horizontal_error);
         rec->mb_ping.horizontal_error = (double *) NULL;
+    }
+
+    if (rec->mb_ping.sector_number != (unsigned short *) NULL)
+    {
+        free (rec->mb_ping.sector_number);
+        rec->mb_ping.sector_number = (unsigned short *) NULL;
+    }
+
+    if (rec->mb_ping.detection_info != (unsigned short *) NULL)
+    {
+        free (rec->mb_ping.detection_info);
+        rec->mb_ping.detection_info = (unsigned short *) NULL;
+    }
+
+    if (rec->mb_ping.incident_beam_adj != (double *) NULL)
+    {
+        free (rec->mb_ping.incident_beam_adj);
+        rec->mb_ping.incident_beam_adj = (double *) NULL;
+    }
+
+    if (rec->mb_ping.system_cleaning != (unsigned short *) NULL)
+    {
+        free (rec->mb_ping.system_cleaning);
+        rec->mb_ping.system_cleaning = (unsigned short *) NULL;
+    }
+
+    if (rec->mb_ping.doppler_corr != (double *) NULL)
+    {
+        free (rec->mb_ping.doppler_corr);
+        rec->mb_ping.doppler_corr = (double *) NULL;
     }
 
     /* we have an array of number_beams gsfIntensitySeries structures */
@@ -3333,6 +3413,121 @@ gsfCopyRecords (gsfRecords *target, gsfRecords *source)
             }
         }
         memcpy (target->mb_ping.horizontal_error, source->mb_ping.horizontal_error, sizeof(double) * source->mb_ping.number_beams);
+    }
+
+    if (source->mb_ping.sector_number != (unsigned short *) NULL)
+    {
+        if (target->mb_ping.sector_number == (unsigned short *) NULL)
+        {
+            target->mb_ping.sector_number = (unsigned short *) calloc (sizeof(unsigned short), source->mb_ping.number_beams);
+            if (target->mb_ping.sector_number == (unsigned short *) NULL)
+            {
+                gsfError = GSF_MEMORY_ALLOCATION_FAILED;
+                return(-1);
+            }
+        }
+        else if (target->mb_ping.number_beams < source->mb_ping.number_beams)
+        {
+            target->mb_ping.sector_number = (unsigned short *) realloc (target->mb_ping.sector_number, sizeof(unsigned short) * source->mb_ping.number_beams);
+            if (target->mb_ping.sector_number == (unsigned short *) NULL)
+            {
+                gsfError = GSF_MEMORY_ALLOCATION_FAILED;
+                return(-1);
+            }
+        }
+        memcpy (target->mb_ping.sector_number, source->mb_ping.sector_number, sizeof(unsigned short) * source->mb_ping.number_beams);
+    }
+
+    if (source->mb_ping.detection_info != (unsigned short *) NULL)
+    {
+        if (target->mb_ping.detection_info == (unsigned short *) NULL)
+        {
+            target->mb_ping.detection_info = (unsigned short *) calloc (sizeof(unsigned short), source->mb_ping.number_beams);
+            if (target->mb_ping.detection_info == (unsigned short *) NULL)
+            {
+                gsfError = GSF_MEMORY_ALLOCATION_FAILED;
+                return(-1);
+            }
+        }
+        else if (target->mb_ping.number_beams < source->mb_ping.number_beams)
+        {
+            target->mb_ping.detection_info = (unsigned short *) realloc (target->mb_ping.detection_info, sizeof(unsigned short) * source->mb_ping.number_beams);
+            if (target->mb_ping.detection_info == (unsigned short *) NULL)
+            {
+                gsfError = GSF_MEMORY_ALLOCATION_FAILED;
+                return(-1);
+            }
+        }
+        memcpy (target->mb_ping.detection_info, source->mb_ping.detection_info, sizeof(unsigned short) * source->mb_ping.number_beams);
+    }
+
+    if (source->mb_ping.incident_beam_adj != (double *) NULL)
+    {
+        if (target->mb_ping.incident_beam_adj == (double *) NULL)
+        {
+            target->mb_ping.incident_beam_adj = (double *) calloc (sizeof(double), source->mb_ping.number_beams);
+            if (target->mb_ping.incident_beam_adj == (double *) NULL)
+            {
+                gsfError = GSF_MEMORY_ALLOCATION_FAILED;
+                return(-1);
+            }
+        }
+        else if (target->mb_ping.number_beams < source->mb_ping.number_beams)
+        {
+            target->mb_ping.incident_beam_adj = (double *) realloc (target->mb_ping.incident_beam_adj, sizeof(double) * source->mb_ping.number_beams);
+            if (target->mb_ping.incident_beam_adj == (double *) NULL)
+            {
+                gsfError = GSF_MEMORY_ALLOCATION_FAILED;
+                return(-1);
+            }
+        }
+        memcpy (target->mb_ping.incident_beam_adj, source->mb_ping.incident_beam_adj, sizeof(double) * source->mb_ping.number_beams);
+    }
+
+    if (source->mb_ping.system_cleaning != (unsigned short *) NULL)
+    {
+        if (target->mb_ping.system_cleaning == (unsigned short *) NULL)
+        {
+            target->mb_ping.system_cleaning = (unsigned short *) calloc (sizeof(unsigned short), source->mb_ping.number_beams);
+            if (target->mb_ping.system_cleaning == (unsigned short *) NULL)
+            {
+                gsfError = GSF_MEMORY_ALLOCATION_FAILED;
+                return(-1);
+            }
+        }
+        else if (target->mb_ping.number_beams < source->mb_ping.number_beams)
+        {
+            target->mb_ping.system_cleaning = (unsigned short *) realloc (target->mb_ping.system_cleaning, sizeof(unsigned short) * source->mb_ping.number_beams);
+            if (target->mb_ping.system_cleaning == (unsigned short *) NULL)
+            {
+                gsfError = GSF_MEMORY_ALLOCATION_FAILED;
+                return(-1);
+            }
+        }
+        memcpy (target->mb_ping.system_cleaning, source->mb_ping.system_cleaning, sizeof(unsigned short) * source->mb_ping.number_beams);
+    }
+
+    if (source->mb_ping.doppler_corr != (double *) NULL)
+    {
+        if (target->mb_ping.doppler_corr == (double *) NULL)
+        {
+            target->mb_ping.doppler_corr = (double *) calloc (sizeof(double), source->mb_ping.number_beams);
+            if (target->mb_ping.doppler_corr == (double *) NULL)
+            {
+                gsfError = GSF_MEMORY_ALLOCATION_FAILED;
+                return(-1);
+            }
+        }
+        else if (target->mb_ping.number_beams < source->mb_ping.number_beams)
+        {
+            target->mb_ping.doppler_corr = (double *) realloc (target->mb_ping.doppler_corr, sizeof(double) * source->mb_ping.number_beams);
+            if (target->mb_ping.doppler_corr == (double *) NULL)
+            {
+                gsfError = GSF_MEMORY_ALLOCATION_FAILED;
+                return(-1);
+            }
+        }
+        memcpy (target->mb_ping.doppler_corr, source->mb_ping.doppler_corr, sizeof(double) * source->mb_ping.number_beams);
     }
 
     if (source->mb_ping.brb_inten != (gsfBRBIntensity *) NULL)
@@ -5623,6 +5818,21 @@ gsfGetSwathBathyBeamWidths(gsfRecords *data, double *fore_aft, double *athwartsh
             }
             break;
 
+        case (GSF_SWATH_BATHY_SUBRECORD_EM122_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_EM302_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_EM710_SPECIFIC):
+            *fore_aft = 1.0;
+            *athwartship = 1.0;
+            if (data->mb_ping.sensor_data.gsfEM4Specific.run_time.tx_beam_width != 0.0)
+            {
+                *fore_aft = data->mb_ping.sensor_data.gsfEM4Specific.run_time.tx_beam_width;
+            }
+            if (data->mb_ping.sensor_data.gsfEM4Specific.run_time.rx_beam_width != 0.0)
+            {
+                *athwartship = data->mb_ping.sensor_data.gsfEM4Specific.run_time.rx_beam_width;
+            }
+            break;
+
         case (GSF_SWATH_BATHY_SUBRECORD_RESON_8101_SPECIFIC):
         case (GSF_SWATH_BATHY_SUBRECORD_RESON_8111_SPECIFIC):
         case (GSF_SWATH_BATHY_SUBRECORD_RESON_8124_SPECIFIC):
@@ -5697,10 +5907,11 @@ gsfIsStarboardPing(gsfRecords *data)
     /* Switch on the type of sonar this data came from */
     switch (data->mb_ping.sensor_id)
     {
-    case GSF_SWATH_BATHY_SUBRECORD_GEOSWATH_PLUS_SPECIFIC:
-        return data->mb_ping.sensor_data.gsfGeoSwathPlusSpecific.side;
-        break;
-    case GSF_SWATH_BATHY_SUBRECORD_SEABAT_SPECIFIC:
+
+        case GSF_SWATH_BATHY_SUBRECORD_GEOSWATH_PLUS_SPECIFIC:
+            return data->mb_ping.sensor_data.gsfGeoSwathPlusSpecific.side;
+            break;
+        case GSF_SWATH_BATHY_SUBRECORD_SEABAT_SPECIFIC:
 /* zzz_ */
 /*          if (data->mb_ping.sensor_data.gsfSeaBatSpecific.mode &   */
 /*               (GSF_SEABAT_9002 | GSF_SEABAT_STBD_HEAD))           */
@@ -6001,37 +6212,138 @@ gsfGetSwathBathyArrayMinMax(gsfSwathBathyPing *ping, int subrecordID, double *mi
     switch (subrecordID)
     {
         case (GSF_SWATH_BATHY_SUBRECORD_DEPTH_ARRAY):
-            minimum = GSF_U_SHORT_MIN;
-            maximum = GSF_U_SHORT_MAX;
-            break;
+            switch (ping->scaleFactors.scaleTable[subrecordID - 1].compressionFlag & 0xf0)
+            {
+                case GSF_FIELD_SIZE_ONE:
+                    minimum = GSF_U_CHAR_MIN;
+                    maximum = GSF_U_CHAR_MAX;
+                    break;
+                default:
+                case GSF_FIELD_SIZE_DEFAULT:
+                case GSF_FIELD_SIZE_TWO:
+                    minimum = GSF_U_SHORT_MIN;
+                    maximum = GSF_U_SHORT_MAX;
+                    break;
+                case GSF_FIELD_SIZE_FOUR:
+                    minimum = GSF_U_INT_MIN;
+                    maximum = GSF_U_INT_MAX;
+                    break;
+            }
+        case (GSF_SWATH_BATHY_SUBRECORD_NOMINAL_DEPTH_ARRAY):
+            switch (ping->scaleFactors.scaleTable[subrecordID - 1].compressionFlag & 0xf0)
+            {
+                case GSF_FIELD_SIZE_ONE:
+                    minimum = GSF_U_CHAR_MIN;
+                    maximum = GSF_U_CHAR_MAX;
+                    break;
+                default:
+                case GSF_FIELD_SIZE_DEFAULT:
+                case GSF_FIELD_SIZE_TWO:
+                    minimum = GSF_U_SHORT_MIN;
+                    maximum = GSF_U_SHORT_MAX;
+                    break;
+                case GSF_FIELD_SIZE_FOUR:
+                    minimum = GSF_U_INT_MIN;
+                    maximum = GSF_U_INT_MAX;
+                    break;
+            }
         case (GSF_SWATH_BATHY_SUBRECORD_ACROSS_TRACK_ARRAY):
-            minimum = GSF_S_SHORT_MIN;
-            maximum = GSF_S_SHORT_MAX;
-            break;
+            switch (ping->scaleFactors.scaleTable[subrecordID - 1].compressionFlag & 0xf0)
+            {
+                case GSF_FIELD_SIZE_ONE:
+                    minimum = GSF_S_CHAR_MIN;
+                    maximum = GSF_S_CHAR_MAX;
+                    break;
+                default:
+                case GSF_FIELD_SIZE_DEFAULT:
+                case GSF_FIELD_SIZE_TWO:
+                    minimum = GSF_S_SHORT_MIN;
+                    maximum = GSF_S_SHORT_MAX;
+                    break;
+                case GSF_FIELD_SIZE_FOUR:
+                    minimum = GSF_S_INT_MIN;
+                    maximum = GSF_S_INT_MAX;
+                    break;
+            }
         case (GSF_SWATH_BATHY_SUBRECORD_ALONG_TRACK_ARRAY):
-            minimum = GSF_S_SHORT_MIN;
-            maximum = GSF_S_SHORT_MAX;
-            break;
+            switch (ping->scaleFactors.scaleTable[subrecordID - 1].compressionFlag & 0xf0)
+            {
+                case GSF_FIELD_SIZE_ONE:
+                    minimum = GSF_S_CHAR_MIN;
+                    maximum = GSF_S_CHAR_MAX;
+                    break;
+                default:
+                case GSF_FIELD_SIZE_DEFAULT:
+                case GSF_FIELD_SIZE_TWO:
+                    minimum = GSF_S_SHORT_MIN;
+                    maximum = GSF_S_SHORT_MAX;
+                    break;
+                case GSF_FIELD_SIZE_FOUR:
+                    minimum = GSF_S_INT_MIN;
+                    maximum = GSF_S_INT_MAX;
+                    break;
+            }
         case (GSF_SWATH_BATHY_SUBRECORD_TRAVEL_TIME_ARRAY):
-            minimum = GSF_U_SHORT_MIN;
-            maximum = GSF_U_SHORT_MAX;
-            break;
+            switch (ping->scaleFactors.scaleTable[subrecordID - 1].compressionFlag & 0xf0)
+            {
+                case GSF_FIELD_SIZE_ONE:
+                    minimum = GSF_U_CHAR_MIN;
+                    maximum = GSF_U_CHAR_MAX;
+                    break;
+                default:
+                case GSF_FIELD_SIZE_DEFAULT:
+                case GSF_FIELD_SIZE_TWO:
+                    minimum = GSF_U_SHORT_MIN;
+                    maximum = GSF_U_SHORT_MAX;
+                    break;
+                case GSF_FIELD_SIZE_FOUR:
+                    minimum = GSF_U_INT_MIN;
+                    maximum = GSF_U_INT_MAX;
+                    break;
+            }
         case (GSF_SWATH_BATHY_SUBRECORD_BEAM_ANGLE_ARRAY):
             minimum = GSF_S_SHORT_MIN;
             maximum = GSF_S_SHORT_MAX;
             break;
         case (GSF_SWATH_BATHY_SUBRECORD_MEAN_CAL_AMPLITUDE_ARRAY):
-            minimum = GSF_S_CHAR_MIN;
-            maximum = GSF_S_CHAR_MAX;
-            break;
+            switch (ping->scaleFactors.scaleTable[subrecordID - 1].compressionFlag & 0xf0)
+            {
+                case GSF_FIELD_SIZE_DEFAULT:
+                case GSF_FIELD_SIZE_ONE:
+                    minimum = GSF_S_CHAR_MIN;
+                    maximum = GSF_S_CHAR_MAX;
+                    break;
+                case GSF_FIELD_SIZE_TWO:
+                    minimum = GSF_S_SHORT_MIN;
+                    maximum = GSF_S_SHORT_MAX;
+                    break;
+            }
         case (GSF_SWATH_BATHY_SUBRECORD_MEAN_REL_AMPLITUDE_ARRAY):
-            minimum = GSF_U_CHAR_MIN;
-            maximum = GSF_U_CHAR_MAX;
-            break;
+            switch (ping->scaleFactors.scaleTable[subrecordID - 1].compressionFlag & 0xf0)
+            {
+                case GSF_FIELD_SIZE_DEFAULT:
+                case GSF_FIELD_SIZE_ONE:
+                    minimum = GSF_U_CHAR_MIN;
+                    maximum = GSF_U_CHAR_MAX;
+                    break;
+                case GSF_FIELD_SIZE_TWO:
+                    minimum = GSF_U_SHORT_MIN;
+                    maximum = GSF_U_SHORT_MAX;
+                    break;
+            }
         case (GSF_SWATH_BATHY_SUBRECORD_ECHO_WIDTH_ARRAY):
-            minimum = GSF_U_CHAR_MIN;
-            maximum = GSF_U_CHAR_MAX;
-            break;
+            switch (ping->scaleFactors.scaleTable[subrecordID - 1].compressionFlag & 0xf0)
+            {
+                case GSF_FIELD_SIZE_DEFAULT:
+                case GSF_FIELD_SIZE_ONE:
+                    minimum = GSF_U_CHAR_MIN;
+                    maximum = GSF_U_CHAR_MAX;
+                    break;
+                case GSF_FIELD_SIZE_TWO:
+                    minimum = GSF_U_SHORT_MIN;
+                    maximum = GSF_U_SHORT_MAX;
+                    break;
+            }
         case (GSF_SWATH_BATHY_SUBRECORD_QUALITY_FACTOR_ARRAY):
             minimum = GSF_U_CHAR_MIN;
             maximum = GSF_U_CHAR_MAX;
@@ -6049,10 +6361,6 @@ gsfGetSwathBathyArrayMinMax(gsfSwathBathyPing *ping, int subrecordID, double *mi
             maximum = GSF_U_SHORT_MAX;
             break;
         case (GSF_SWATH_BATHY_SUBRECORD_ALONG_TRACK_ERROR_ARRAY):
-            minimum = GSF_U_SHORT_MIN;
-            maximum = GSF_U_SHORT_MAX;
-            break;
-        case (GSF_SWATH_BATHY_SUBRECORD_NOMINAL_DEPTH_ARRAY):
             minimum = GSF_U_SHORT_MIN;
             maximum = GSF_U_SHORT_MAX;
             break;
@@ -6080,6 +6388,26 @@ gsfGetSwathBathyArrayMinMax(gsfSwathBathyPing *ping, int subrecordID, double *mi
             minimum = GSF_U_SHORT_MIN;
             maximum = GSF_U_SHORT_MAX;
             break;
+        case (GSF_SWATH_BATHY_SUBRECORD_SECTOR_NUMBER_ARRAY):
+            minimum = GSF_U_CHAR_MIN;
+            maximum = GSF_U_CHAR_MAX;
+            break;
+        case (GSF_SWATH_BATHY_SUBRECORD_DETECTION_INFO_ARRAY):
+            minimum = GSF_U_CHAR_MIN;
+            maximum = GSF_U_CHAR_MAX;
+            break;
+        case (GSF_SWATH_BATHY_SUBRECORD_INCIDENT_BEAM_ADJ_ARRAY):
+            minimum = GSF_S_CHAR_MIN;
+            maximum = GSF_S_CHAR_MAX;
+            break;
+        case (GSF_SWATH_BATHY_SUBRECORD_SYSTEM_CLEANING_ARRAY):
+            minimum = GSF_U_CHAR_MIN;
+            maximum = GSF_U_CHAR_MAX;
+            break;
+        case (GSF_SWATH_BATHY_SUBRECORD_DOPPLER_CORRECTION_ARRAY):
+            minimum = GSF_S_CHAR_MIN;
+            maximum = GSF_S_CHAR_MAX;
+            break;
         default:
             gsfError = GSF_UNRECOGNIZED_ARRAY_SUBRECORD_ID;
             ret_code = -1;
@@ -6094,3 +6422,4 @@ gsfGetSwathBathyArrayMinMax(gsfSwathBathyPing *ping, int subrecordID, double *mi
 
     return (ret_code);
 }
+
