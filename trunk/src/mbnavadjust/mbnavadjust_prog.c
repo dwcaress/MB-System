@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavadjust_prog.c	3/23/00
- *    $Id: mbnavadjust_prog.c,v 5.25 2007-05-14 06:34:11 caress Exp $
+ *    $Id: mbnavadjust_prog.c,v 5.26 2007-10-08 16:02:46 caress Exp $
  *
  *    Copyright (c) 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	March 23, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.25  2007/05/14 06:34:11  caress
+ * Many changes to mbnavadjust, including adding z offsets and 3D search grids.
+ *
  * Revision 5.24  2006/12/15 21:42:49  caress
  * Incremental CVS update.
  *
@@ -157,7 +160,7 @@ struct swathraw
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbnavadjust_prog.c,v 5.25 2007-05-14 06:34:11 caress Exp $";
+static char rcs_id[] = "$Id: mbnavadjust_prog.c,v 5.26 2007-10-08 16:02:46 caress Exp $";
 static char program_name[] = "mbnavadjust";
 static char help_message[] =  "mbnavadjust is an interactive navigation adjustment package for swath sonar data.\n";
 static char usage_message[] = "mbnavadjust [-Iproject -V -H]";
@@ -6564,10 +6567,13 @@ mbnavadjust_invertnav()
 	char	*function_name = "mbnavadjust_invertnav";
 	int	status = MB_SUCCESS;
 	struct mbna_file *file;
+	struct mbna_file *file1;
+	struct mbna_file *file2;
 	struct mbna_section *section;
 	struct mbna_crossing *crossing;
 	struct mbna_tie *tie;
 	int	nnav, nsnav, nfix, ndx, ndx2, ntie, nconstraint;
+	int	nblock;
 	int	nseq;
 	int	nnz = 3;
 	int	ndf = 3;
@@ -6600,6 +6606,7 @@ mbnavadjust_invertnav()
 	char	npath[STRING_MAX];
 	char	apath[STRING_MAX];
 	char	opath[STRING_MAX];
+	char	ostring[STRING_MAX];
 	FILE	*nfp, *afp, *ofp;
 	char	*result;
 	char	buffer[BUFFER_MAX];
@@ -6638,15 +6645,241 @@ mbnavadjust_invertnav()
 			|| project.num_truecrossings_analyzed == project.num_truecrossings))
 			
     		{
+		/* set message dialog on */
+		sprintf(message,"Setting up navigation inversion...");
+		do_message_on(message);
+		
+		/*----------------------------------------------------------------*/
+		
+		/* figure out the average offsets between connected sets of files 
+			- invert for x y z offsets for the blocks */
+			
+		/* count the number of blocks */
+		nblock = 0;
+		for (i=0;i<project.num_files;i++)
+		    {
+		    file = &project.files[i];
+		    if (i==0 || file->sections[0].continuity == MB_NO)
+		    	{
+			nblock++;
+			}
+		    file->block = nblock - 1;
+		    file->block_offset_x = 0.0;
+		    file->block_offset_y = 0.0;
+		    file->block_offset_z = 0.0;
+		    }
+		ntie = 0;
+		for (icrossing=0;icrossing<project.num_crossings;icrossing++)
+		    {
+		    crossing = &project.crossings[icrossing];
+		    if (crossing->status == MBNA_CROSSING_STATUS_SET)
+		    ntie++;
+		    }
+		
+		/* invert for block offsets only if there is more than one block */
+		if (nblock > 1)
+		    {
+		    /* allocate space for the inverse problem */
+		    nconstraint = ndf * ntie;
+		    nrows = nconstraint;
+		    ncols = ndf * nblock;
+		    status = mb_malloc(mbna_verbose, nnz * nrows * sizeof(double), &a,&error);
+		    status = mb_malloc(mbna_verbose, nnz * nrows * sizeof(int), &ia,&error);
+		    status = mb_malloc(mbna_verbose, nrows * sizeof(int), &nia,&error);
+		    status = mb_malloc(mbna_verbose, nrows * sizeof(double), &d,&error);
+		    status = mb_malloc(mbna_verbose, ncols * sizeof(double), &x,&error);
+		    status = mb_malloc(mbna_verbose, ncols * sizeof(int), &nx,&error);
+		    status = mb_malloc(mbna_verbose, ncols * sizeof(double), &dx,&error);
+		    status = mb_malloc(mbna_verbose, ncycle * sizeof(double), &sigma,&error);
+		    status = mb_malloc(mbna_verbose, ncycle * sizeof(double), &work,&error);
+
+		    /* initialize arrays */
+		    for (i=0;i<nrows;i++)
+			{
+			nia[i] = 0;
+			d[i] = 0.0;
+			for (j=0;j<nnz;j++)
+			    {
+			    k = nnz * i + j;
+			    ia[k] = 0;
+			    a[k] = 0.0;
+			    }
+			}
+		    for (i=0;i<ndf*nblock;i++)
+			{
+			nx[i] = 0;
+			x[i] = 0;
+			dx[i] = 0.0;
+			}
+		    for (i=0;i<ncycle;i++)
+			{
+			sigma[i] = 0;
+			work[i] = 0.0;
+			}
+
+		    /* construct the inverse problem */
+		    sprintf(message,"Solving for block offsets...");
+		    do_message_on(message);
+		    nr = 0;
+		    nc = ndf * nblock;
+		    for (icrossing=0;icrossing<project.num_crossings;icrossing++)
+			{
+			crossing = &project.crossings[icrossing];
+
+			/* use only set crossings */
+			if (crossing->status == MBNA_CROSSING_STATUS_SET)
+			for (j=0;j<crossing->num_ties;j++)
+			    {
+			    /* get tie */
+			    tie = (struct mbna_tie *) &crossing->ties[j];
+			    ntie++;
+
+			    /* get block id for first snav point */
+			    file = &project.files[crossing->file_id_1];
+			    nc1 = file->block;
+
+			    /* get block id for second snav point */
+			    file = &project.files[crossing->file_id_2];
+			    nc2 = file->block;
+
+			    /* make longitude constraint */
+			    k = nnz * nr;
+			    a[k] = -1.0;
+			    a[k+1] = 1.0;
+			    d[nr] = tie->offset_x_m;
+			    ia[k] = 3 * nc1;
+			    ia[k+1] = 3 * nc2;
+			    nia[nr] = 2;
+			    nx[3 * nc1]++;
+			    nx[3 * nc2]++;
+/* fprintf(stderr,"nr:%d k:%d a1:%g a2:%g d:%g\n", nr,k, a[k],a[k+1],d[nr]); */
+			    nr++;
+
+			    /* make latitude constraint */
+			    k = nnz * nr;
+			    a[k] = -1.0;
+			    a[k+1] = 1.0;
+			    d[nr] = tie->offset_y_m;
+			    ia[k] = 3 * nc1 + 1;
+			    ia[k+1] = 3 * nc2 + 1;
+			    nia[nr] = 2;
+			    nx[3 * nc1 + 1]++;
+			    nx[3 * nc2 + 1]++;
+/* fprintf(stderr,"nr:%d k:%d a1:%g a2:%g d:%g\n", nr,k, a[k],a[k+1],d[nr]); */
+			    nr++;
+
+			    /* make latitude constraint */
+			    k = nnz * nr;
+			    a[k] = -1.0;
+			    a[k+1] = 1.0;
+			    d[nr] = tie->offset_z_m;
+			    ia[k] = 3 * nc1 + 2;
+			    ia[k+1] = 3 * nc2 + 2;
+			    nia[nr] = 2;
+			    nx[3 * nc1 + 2]++;
+			    nx[3 * nc2 + 2]++;
+/* fprintf(stderr,"nr:%d k:%d a1:%g a2:%g d:%g\n", nr,k, a[k],a[k+1],d[nr]); */
+			    nr++;
+			    }
+			}
+
+		    /* solve the inverse problem */
+
+		    /* compute upper bound on maximum eigenvalue */
+		    ncyc = 0;
+		    nsig = 0;
+		    lspeig(a, ia, nia, nnz, nc, nr, ncyc,
+			    &nsig, x, dx, sigma, work, &smax, &err, &sup);
+		    supt = smax + err;
+		    if (sup > supt)
+			supt = sup;
+		    if (mbna_verbose > 0)
+		    fprintf(stderr, "Initial lspeig: sup:%g smax:%g err:%g supt:%g\n",
+			sup, smax, err, supt);
+		    ncyc = 16;
+		    for (i=0;i<4;i++)
+			{
+			lspeig(a, ia, nia, nnz, nc, nr, ncyc,
+				&nsig, x, dx, sigma, work, &smax, &err, &sup);
+			supt = smax + err;
+			if (sup > supt)
+			    supt = sup;
+			if (mbna_verbose > 0)
+			fprintf(stderr, "lspeig[%d]: sup:%g smax:%g err:%g supt:%g\n",
+			    i, sup, smax, err, supt);
+			}
+
+		    /* calculate chebyshev factors (errlsq is the theoretical error) */
+		    slo = supt / bandwidth;
+		    chebyu(sigma, ncycle, supt, slo, work);
+		    errlsq = errlim(sigma, ncycle, supt, slo);
+		    if (mbna_verbose > 0)
+		    fprintf(stderr, "Theoretical error: %f\n", errlsq);
+		    if (mbna_verbose > 1)
+		    for (i=0;i<ncycle;i++)
+			fprintf(stderr, "sigma[%d]: %f\n", i, sigma[i]);
+
+		    /* solve the problem */
+		    for (i=0;i<nc;i++)
+			x[i] = 0.0;
+		    lsqup(a, ia, nia, nnz, nc, nr, x, dx, d, 0, NULL, NULL, ncycle, sigma);
+
+		    /* output solution */
+		    if (mbna_verbose > 1)
+		    for (i=0;i<nc/3;i++)
+			{
+			fprintf(stderr, "block:%d  offsets: %f %f %f  nties: %d %d %d\n",
+				i, x[3*i], x[3*i+1], x[3*i+2], nx[3*i], nx[3*i+1], nx[3*i+2]);
+			}
+
+		    /* calculate error */
+		    sigma_total = 0.0;
+		    sigma_crossing = 0.0;
+		    for (i=0;i<nr;i++)
+			{
+			s = 0.0;
+			for (j=0;j<nia[i];j++)
+			    {
+			    k = nnz * i + j;
+			    s += x[ia[k]] * a[k];
+			    }
+			sigma_total += (d[i] - s) * (d[i] - s);
+			if (i >= (nr - 3 * ntie))
+			    sigma_crossing += (d[i] - s) * (d[i] - s);
+			}
+		    sigma_total = sqrt(sigma_total) / nr;
+		    sigma_crossing = sqrt(sigma_crossing) / ntie;
+
+		    /* extract results */
+		    for (i=0;i<project.num_files;i++)
+			{
+			file = &project.files[i];
+			file->block_offset_x = x[3 * file->block];
+			file->block_offset_y = x[3 * file->block + 1];
+			file->block_offset_z = x[3 * file->block + 2];
+fprintf(stderr,"file:%d block: %d block offsets: %f %f %f\n",
+i,file->block,file->block_offset_x,file->block_offset_y,file->block_offset_z);
+			}
+
+		    /* deallocate arrays */
+		    status = mb_free(mbna_verbose, &a,&error);
+		    status = mb_free(mbna_verbose, &ia,&error);
+		    status = mb_free(mbna_verbose, &nia,&error);
+		    status = mb_free(mbna_verbose, &d,&error);
+		    status = mb_free(mbna_verbose, &x,&error);
+		    status = mb_free(mbna_verbose, &nx,&error);
+		    status = mb_free(mbna_verbose, &dx,&error);
+		    status = mb_free(mbna_verbose, &sigma,&error);
+		    status = mb_free(mbna_verbose, &work,&error);
+		    }
+		
+		/*----------------------------------------------------------------*/		
+
      		/* retrieve crossing parameters */
 		/* count up the unknowns and constraints to get size of
 		 * inverse problem:
 		 *	    nconstraint = 2 * nsnav + ntie
 		 */
-		/* set message dialog on */
-		sprintf(message,"Setting up navigation inversion...");
-		do_message_on(message);
-
 		nnav = 0;
 		nsnav = 0;
 		nfix = 0;
@@ -6844,7 +7077,7 @@ do_message_on(message);
 				
 				    /* depth component */
 				    k = nnz * nr;
-				    a[k] = 1.0;
+				    a[k] = 100.0;
 				    d[nr] = 0.0;
 				    ia[k] = nc + 2;
 				    nia[nr] = 1;
@@ -6954,13 +7187,13 @@ do_message_on(message);
 			tie = (struct mbna_tie *) &crossing->ties[j];
 			
 			/* get absolute id for first snav point */
-			file = &project.files[crossing->file_id_1];
-			section = &file->sections[crossing->section_1];
+			file1 = &project.files[crossing->file_id_1];
+			section = &file1->sections[crossing->section_1];
 			nc1 = section->global_start_snav + tie->snav_1;
 
 			/* get absolute id for second snav point */
-			file = &project.files[crossing->file_id_2];
-			section = &file->sections[crossing->section_2];
+			file2 = &project.files[crossing->file_id_2];
+			section = &file2->sections[crossing->section_2];
 			nc2 = section->global_start_snav + tie->snav_2;
 if (nc1 > nsnav - 1 || nc2 > nsnav -1
 || nc1 < 0 || nc2 < 0)
@@ -6970,7 +7203,7 @@ fprintf(stderr, "BAD snav ID: %d %d %d\n", nc1, nc2, nsnav);
 			k = nnz * nr;
 			a[k] = -mbna_offsetweight;
 			a[k+1] = mbna_offsetweight;
-			d[nr] = mbna_offsetweight * tie->offset_x_m;
+			d[nr] = mbna_offsetweight * (tie->offset_x_m - file2->block_offset_x + file1->block_offset_x);
 			ia[k] = 3 * nc1;
 			ia[k+1] = 3 * nc2;
 			nia[nr] = 2;
@@ -6983,7 +7216,7 @@ fprintf(stderr, "BAD snav ID: %d %d %d\n", nc1, nc2, nsnav);
 			k = nnz * nr;
 			a[k] = -mbna_offsetweight;
 			a[k+1] = mbna_offsetweight;
-			d[nr] = mbna_offsetweight * tie->offset_y_m;
+			d[nr] = mbna_offsetweight * (tie->offset_y_m  - file2->block_offset_y + file1->block_offset_y);
 			ia[k] = 3 * nc1 + 1;
 			ia[k+1] = 3 * nc2 + 1;
 			nia[nr] = 2;
@@ -6992,11 +7225,11 @@ fprintf(stderr, "BAD snav ID: %d %d %d\n", nc1, nc2, nsnav);
 /*fprintf(stderr,"nr:%d k:%d a1:%g a2:%g d:%d\n", nr,k, a[k],a[k+1],d[nr]);*/
 			nr++;
 			
-			/* make latitude constraint */
+			/* make depth constraint */
 			k = nnz * nr;
 			a[k] = -mbna_offsetweight;
 			a[k+1] = mbna_offsetweight;
-			d[nr] = mbna_offsetweight * tie->offset_z_m;
+			d[nr] = mbna_offsetweight * (tie->offset_z_m - file2->block_offset_z + file1->block_offset_z);
 			ia[k] = 3 * nc1 + 2;
 			ia[k+1] = 3 * nc2 + 2;
 			nia[nr] = 2;
@@ -7207,9 +7440,9 @@ sigma_crossing,
 			    {
 			    if (isnav == 0 && section->continuity == MB_YES)
 				k -= 3;
-			    section->snav_lon_offset[isnav] = x[k] * mbna_mtodeglon;
-			    section->snav_lat_offset[isnav] = x[k+1] * mbna_mtodeglat;
-			    section->snav_z_offset[isnav] = x[k+2];
+			    section->snav_lon_offset[isnav] = (x[k] + file->block_offset_x) * mbna_mtodeglon;
+			    section->snav_lat_offset[isnav] = (x[k+1] + file->block_offset_y) * mbna_mtodeglat;
+			    section->snav_z_offset[isnav] = (x[k+2] + file->block_offset_z);
 			    k += 3;
 			    }
 			}
@@ -7397,11 +7630,18 @@ sigma_crossing,
 				    else
 				    	{
 				    	if (section->snav_time_d[isnav+1] > section->snav_time_d[isnav])
+					    {
 					    factor = (time_d - section->snav_time_d[isnav])
 							/ (section->snav_time_d[isnav+1] - section->snav_time_d[isnav]);
+/*if (fabs(time_d - section->snav_time_d[isnav]) < 1.0)
+fprintf(stderr,"%f %f\n",pitch,section->snav_z_offset[isnav]);
+else if (fabs(time_d - section->snav_time_d[isnav+1]) < 1.0)
+fprintf(stderr,"%f %f\n",pitch,section->snav_z_offset[isnav+1]);*/
+					    }
 				    	else
 					    factor = 0.0;
 				    	}
+					
 				    /* update and output only nonzero navigation */
 				    if (fabs(navlon) > 0.0000001 && fabs(navlat) > 0.0000001)
 				    	{
@@ -7416,17 +7656,23 @@ sigma_crossing,
 								- section->snav_z_offset[isnav]);
 
 					/* write the updated nav out */
-					fprintf(ofp, "%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d %16.6f %.6f %.6f %.2f %.2f %.2f %.2f %.2f %.2f %.2f\r\n",
+					/* printing this string twice because in some situations the first
+						print has the time_d value come out as "nan" - this is the worst sort
+						of kluge for a real but mysterious bug - apologies to all who find this
+						- DWC 18 Aug 2007 R/V Atlantis Cobb Segment JDF Ridge */
+					sprintf(ostring, "%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d %16.6f %.6f %.6f %.2f %.2f %.2f %.2f %.2f %.2f %.2f\r\n",
 						    time_i[0], time_i[1], time_i[2], time_i[3],
 						    time_i[4], time_i[5], time_i[6], time_d,
 						    navlon, navlat, heading, speed, 
 						    draft, roll, pitch, heave, zoffset);
-					fprintf(afp, "%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d %16.6f %.6f %.6f %.2f %.2f %.2f %.2f %.2f %.2f %.2f\r\n",
+					sprintf(ostring, "%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d %16.6f %.6f %.6f %.2f %.2f %.2f %.2f %.2f %.2f %.2f\r\n",
 						    time_i[0], time_i[1], time_i[2], time_i[3],
 						    time_i[4], time_i[5], time_i[6], time_d,
 						    navlon, navlat, heading, speed, 
 						    draft, roll, pitch, heave, zoffset);
-/*fprintf(stderr, "%2.2d:%2.2d:%2.2d:%5.3f %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %16.6f %.6f %.6f %.2f %.2f %.2f\n",
+					fprintf(ofp, "%s", ostring);
+					fprintf(afp, "%s", ostring);
+/*fprintf(stderr, "%2.2d:%2.2d:%2.2d:%5.3f %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %16.6f %.6f %.6f %.2f %.2f %.2f\n\n",
 i, isection, isnav, factor, 
 time_i[0], time_i[1], time_i[2], time_i[3],
 time_i[4], time_i[5], time_i[6], time_d,
