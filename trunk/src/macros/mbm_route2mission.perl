@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system: mbm_route2mission.perl   7/18/2004
-#    $Id: mbm_route2mission.perl,v 5.13 2007-05-14 17:10:12 caress Exp $
+#    $Id: mbm_route2mission.perl,v 5.14 2007-10-08 05:45:46 caress Exp $
 #
 #    Copyright (c) 2004, 2006 by 
 #    D. W. Caress (caress@mbari.org)
@@ -37,10 +37,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #      Moss Landing, CA
 #
 # Version:
-# $Id: mbm_route2mission.perl,v 5.13 2007-05-14 17:10:12 caress Exp $
+# $Id: mbm_route2mission.perl,v 5.14 2007-10-08 05:45:46 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.13  2007/05/14 17:10:12  caress
+#   Mods during May 2007 Lucia Canyon cruise.
+#
 #   Revision 5.12  2007/03/02 20:33:37  caress
 #   Fixed informational output.
 #
@@ -142,9 +145,8 @@ $resonduration = 6;
 $sonaraltitudemax = 100.0;
 $mb_pingrate = 2.0;
 $mb_transmitgain = 220.0;
-$mb_receivegain = 75.0;
+$mb_receivegain = 70.0;
 $mb_pulsewidth = 0.000030;
-
 
 # behavior waypoint and waypoint_depth
 $behaviorWaypointID = 0;
@@ -160,23 +162,25 @@ $behavior = $behaviorWaypointDepthID;
 $approachdepth = 50.0;
 
 # assumed ascent and descent rate
-$ascendrate = 0.583; # m/s
+$ascendrate = 1.0; # m/s
 $descendrate = 0.417; # m/s
 
 $forwarddist = 400.0;
 $waypointdist = 200.0;
 
 # Deal with command line arguments
-&Getopts('A:a:B:b:D:d:F:f:G:g:HhI:i:L:l:MmNnO:o:P:p:S:s:T:t:W:w:V*v*Zz');
+&MBGetopts('A:a:B:b:C:c:D:d:F:f:G:g:HhI:i:L%l%MmNnO:o:P:p:S:s:T:t:W:w:V*v*Zz');
 $altitudearg =		($opt_A || $opt_a);
 $behavior =		($opt_B || $opt_b | $behavior);
+$aborttime = 		($opt_C || $opt_c);
 $deptharg =		($opt_D || $opt_d);
 $forwarddist =		($opt_F || $opt_f || $forwarddist);
 $gpsmode =		($opt_G || $opt_g || $gpsmode);
 $help =			($opt_H || $opt_h);
 $routefile =		($opt_I || $opt_i);
 $approachdepth =	($opt_L || $opt_l || $approachdepth);
-$mappingsonar =		($opt_M || $opt_m);
+$mappingsonar =		($flg_M || $flg_m);
+$mappingsonararg =	($opt_M || $opt_m);
 $spiraldescent =	($opt_N || $opt_n);
 $missionfile =		($opt_O || $opt_o);
 $startposition =	($opt_P || $opt_p);
@@ -343,6 +347,12 @@ if ($debug)
 		}
 	}
 	
+# calculate the spiral descent depth from first waypoint and desired altitude if needed
+if ($spiraldescent)
+	{
+	$spiraldescentdepth = -$topos[0] - $altitudedesired - 10.0;
+	}
+	
 # Process the route data to generate AUV waypoints that keep the 
 # vehicle a safe distance above the bottom.
 $distancelastmpoint = 0.0;
@@ -491,8 +501,13 @@ for ($i = 1; $i < $nmissionpoints - 1; $i++)
 $missiontime += (-$mmissiondepths[$nmissionpoints - 1] / $ascendrate) 
 		+ $gpsduration;
 		
-# calculate abort time using safety factor of $durationfactormission
-$aborttime = $durationfactormission * $missiontime;
+# if not specified calculate abort time using safety factor of $durationfactormission
+if (!$aborttime)
+	{
+	$aborttime = $durationfactormission * $missiontime;
+	}
+	
+# shorten abort time if unsafe
 $ascendtime = $ascendtimes[$nmissionpoints - 1];
 if ($aborttime > $batterylife - $safetymargin - $ascendtime)
 	{
@@ -533,6 +548,7 @@ elsif ($verbose)
 	if ($spiraldescent)
 		{
 		printf "    Descent style:            Spiral descent\r\n";
+		printf "    Spiral descent depth:     $spiraldescentdepth m\r\n";
 		}
 	else
 		{
@@ -555,6 +571,10 @@ elsif ($verbose)
 	printf "    Maximum Vehicle Depth:    $depthmax (m)\r\n";
 	printf "    Abort Vehicle Depth:      $depthabort (m)\r\n";
 	printf "    Descent Vehicle Depth:    $descentdepth (m)\r\n";
+	if ($spiraldescent)
+		{
+		printf "    Spiral descent depth:     $spiraldescentdepth m\r\n";
+		}
 	printf "    Forward Looking Distance: $forwarddist (m)\r\n";
 	printf "    Waypoint Spacing:         $waypointdist (m)\r\n";
 	if ($starttime)
@@ -704,6 +724,7 @@ if (!$outputoff)
 	printf MFILE "#define ALTITUDE_ABORT     %f\r\n", $altitudeabort;
 	printf MFILE "#define GPS_DURATION       %d\r\n", $gpsduration;
 	printf MFILE "#define DESCENT_DEPTH      %f\r\n", $descentdepth;
+	printf MFILE "#define SPIRAL_DESCENT_DEPTH      %f\r\n", $spiraldescentdepth;
 	printf MFILE "#define DESCEND_DURATION   %d\r\n", $initialdescendtime;
 	printf MFILE "#define SETPOINT_DURATION  %d\r\n", $setpointtime;
 	printf MFILE "#define GPSMINHITS         %d\r\n", $gpsminhits;
@@ -962,19 +983,19 @@ print "Output Behavior: reson (startup, Log_Mode = 1)\n";
 			print MFILE "behavior reson \r\n";
 			print MFILE "{ \r\n";
 			print MFILE "duration  = RESON_DURATION; \r\n";	
-			print MFILE "SBP_Mode = 1; \r\n";
-			if ($mwaypoints[$i] == 4)
-				{
-				print MFILE "SBP_Power = 0.0; \r\n";
-print "Output Behavior: reson (setup, Log_Mode = 0, waypoint($i) type = $mwaypoints[$i], SBP off)\n";
-				}
-			elsif ($mwaypoints[$i] != 0)
-				{
-				print MFILE "SBP_Power = 100.0; \r\n";
-print "Output Behavior: reson (setup, Log_Mode = 0, waypoint($i) type = $mwaypoints[$i], SBP on)\n";
-				}
-			#print MFILE "SBP_Gain = 128.0; \r\n";
-			printf MFILE "SBP_Duration = %.3f; \r\n", $sbp_duration;
+#			print MFILE "SBP_Mode = 1; \r\n";
+#			if ($mwaypoints[$i] == 4)
+#				{
+#				print MFILE "SBP_Power = 0.0; \r\n";
+print "Output Behavior: reson (reset, Log_Mode = 0, line  = $iwaypoint, waypoint($i) type = $mwaypoints[$i], SBP off, MBrange:$mb_range MBaltitude:$sonaraltitudeuse)\n";
+#				}
+#			elsif ($mwaypoints[$i] != 0)
+#				{
+#				print MFILE "SBP_Power = 100.0; \r\n";
+#print "Output Behavior: reson (reset, Log_Mode = 0, line  = $iwaypoint, waypoint($i) type = $mwaypoints[$i], SBP on, MBrange:$mb_range MBaltitude:$sonaraltitudeuse)\n";
+#				}
+#			#print MFILE "SBP_Gain = 128.0; \r\n";
+#			printf MFILE "SBP_Duration = %.3f; \r\n", $sbp_duration;
 			print MFILE "LoSS_Mode = 1; \r\n";
 			print MFILE "LoSS_Power = 100.0; \r\n";
 			printf MFILE "LoSS_Range = %.2f; \r\n", $sslo_range;
@@ -1021,6 +1042,16 @@ print "Output Behavior: reson (setup, Log_Mode = 0, waypoint($i) type = $mwaypoi
 			printf MFILE "depth        = %f; \r\n", $mmissiondepths[$i];
 			print MFILE "speed        = MISSION_SPEED; \r\n";
 			print MFILE "} \r\n";
+			print MFILE "# \r\n";
+			print MFILE "# Zero speed setpoint to allow final nav updates over acoustic modem\r\n";
+			print MFILE "behavior setpoint  \r\n";
+			print MFILE "{ \r\n";
+			print MFILE "duration     = 180; \r\n";
+			print MFILE "heading      = 270.0; \r\n";
+			print MFILE "speed        = 0.0; \r\n";
+			print MFILE "verticalMode = pitch; \r\n";
+			print MFILE "pitch = 0; \r\n";
+			print MFILE "} \r\n";
 print "Output Behavior: waypoint\n";
 			print MFILE "# \r\n";
 			print MFILE "# Spiral descend behavior to get to proper depth at start of line 1 \r\n";
@@ -1039,6 +1070,7 @@ print "Output Behavior: waypoint\n";
 			print MFILE "horizontal       = DESCENDRUDDER; \r\n";
 			print MFILE "pitch            = DESCENDPITCH; \r\n";
 			print MFILE "speed            = MISSION_SPEED; \r\n";
+			print MFILE "maxDepth         = SPIRAL_DESCENT_DEPTH; \r\n";
 			print MFILE "minAltitude      = ALTITUDE_MIN; \r\n";
 			print MFILE "} \r\n";
 print "Output Behavior: spiral descend\n";
@@ -1179,21 +1211,21 @@ print " $mmissiondepths[$i+1]\n";
 			print MFILE "behavior reson \r\n";
 			print MFILE "{ \r\n";
 			print MFILE "duration  = RESON_DURATION; \r\n";	
-			if ($mwaypoints[$i-1] == 4)
-				{
-				print MFILE "SBP_Power = 0.0; \r\n";
-print "Output Behavior: reson (reset, Log_Mode = 1, line  = $iwaypoint, waypoint($i) type = $mwaypoints[$i], SBP off)\n";
-				}
-			elsif ($mwaypoints[$i-1] != 0)
-				{
-				print MFILE "SBP_Power = 100.0; \r\n";
-print "Output Behavior: reson (reset, Log_Mode = 1, line  = $iwaypoint, waypoint($i) type = $mwaypoints[$i], SBP on)\n";
-				}
-			else
-				{
-print "Output Behavior: reson (reset, Log_Mode = 1, line  = $iwaypoint, waypoint($i) type = $mwaypoints[$i], SBP no change)\n";
-				}
-			printf MFILE "SBP_Duration = %.3f; \r\n", $sbp_duration;
+#			if ($mwaypoints[$i-1] == 4)
+#				{
+#				print MFILE "SBP_Power = 0.0; \r\n";
+print "Output Behavior: reson (reset, Log_Mode = 1, line  = $iwaypoint, waypoint($i) type = $mwaypoints[$i], SBP off, MBrange:$mb_range MBaltitude:$sonaraltitudeuse)\n";
+#				}
+#			elsif ($mwaypoints[$i-1] != 0)
+#				{
+#				print MFILE "SBP_Power = 100.0; \r\n";
+#print "Output Behavior: reson (reset, Log_Mode = 1, line  = $iwaypoint, waypoint($i) type = $mwaypoints[$i], SBP on, MBrange:$mb_range MBaltitude:$sonaraltitudeuse)\n";
+#				}
+#			else
+#				{
+#print "Output Behavior: reson (reset, Log_Mode = 1, line  = $iwaypoint, waypoint($i) type = $mwaypoints[$i], SBP no change, MBrange:$mb_range MBaltitude:$sonaraltitudeuse)\n";
+#				}
+#			printf MFILE "SBP_Duration = %.3f; \r\n", $sbp_duration;
 			printf MFILE "LoSS_Range = %.2f; \r\n", $sslo_range;
 			printf MFILE "MB_Range = %.2f; \r\n", $mb_range;
 			print MFILE "MB_Rate = $mb_pingrate; \r\n";
@@ -1328,6 +1360,54 @@ print "Output Behavior: reson (start, reset, Log_Mode = 0)\n";
  		}
 	close(WFILE);
 
+	# output Capn Voyager WPL waypoint file unless outputoff option selected
+	$winfrogfile = "$root" . "_capnwpt.rut";
+print "Open Capn Voyager file: $winfrogfile\n";
+	open(WFILE,">$winfrogfile") || die "Cannot open output Capn Voyager file: $winfrogfile\r\n$program_name aborted.\r\n";
+	$cnt = 0;
+	for ($i = 0; $i < $npoints; $i++)
+ 		{
+		if ($waypoints[$i] != 0)
+			{
+			$cnt++;
+			if ($lats[$i] > 0.0)
+				{
+				$NorS = "N";
+				$latdeg = int($lats[$i]);
+				$latmin = ($lats[$i] - $latdeg) * 60.0;
+				$latminb = int($latmin);
+				$latmins = int(($latmin - $latminb) * 1000 + 0.5);
+				}
+			else
+				{
+				$NorS = 'S';
+				$latdeg = int(-$lats[$i]);
+				$latmin = (-$lats[$i] - $latdeg) * 60.0;
+				$latminb = int($latmin);
+				$latmins = int(($latmin - $latminb) * 1000 + 0.5);
+				}
+			if ($lons[$i] > 0.0)
+				{
+				$EorW = "E";
+				$londeg = int($lons[$i]);
+				$lonmin = ($lons[$i] - $londeg) * 60.0;
+				$lonminb = int($lonmin);
+				$lonmins = int(($lonmin - $lonminb) * 1000 + 0.5);
+				}
+			else
+				{
+				$EorW = 'W';
+				$londeg = int(-$lons[$i]);
+				$lonmin = (-$lons[$i] - $londeg) * 60.0;
+				$lonminb = int($lonmin);
+				$lonmins = int(($lonmin - $lonminb) * 1000 + 0.5);
+				}
+ 			printf "%f %f \$IIWPL,%2.2d%2.2d.%3.3d,%s,%3.3d%2.2d.%3.3d,%s,AUV %d\n", $lats[$i], $lons[$i], $latdeg, $latminb, $latmins, $NorS,, $londeg, $lonminb, $lonmins, $EorW, $cnt;
+ 			printf WFILE "\$IIWPL,%2.2d%2.2d.%3.3d,%s,%3.3d%2.2d.%3.3d,%s,AUV %d\r\n", $latdeg, $latminb, $latmins, $NorS,, $londeg, $lonminb, $lonmins, $EorW, $cnt;
+			}
+ 		}
+	close(WFILE);
+
 	# generate data for plots
 	$topodatafile = "$root" . "_topo.xy";
 	open(TFILE,">$topodatafile") || die "Cannot open output distance vs topo file: $topodatafile\r\n$program_name aborted.\r\n";
@@ -1415,4 +1495,92 @@ sub Getopts {
 }
 
 
+#-----------------------------------------------------------------------
+#-----------------------------------------------------------------------
+# This version of Getopts has been augmented to support multiple
+# calls to the same option. If an arg in argumentative is followed
+# by "+" rather than ":",  then the corresponding scalar will
+# be concatenated rather than overwritten by multiple calls to
+# the same arg.
+#
+# Usage:
+#      do Getopts('a:b+c'); # -a takes arg, -b concatenates args,  
+#			    # -c does not take arg. Sets opt_* as a
+#                           # side effect.
+
+sub MBGetopts {
+    local($argumentative) = @_;
+    local(@args,$_,$first,$rest);
+    local($errs) = 0;
+    local($[) = 0;
+
+    @args = split( / */, $argumentative );
+    while(@ARGV && ($_ = $ARGV[0]) =~ /^-(.)(.*)/) {
+	($first,$rest) = ($1,$2);
+	$pos = index($argumentative,$first);
+	if($pos >= $[) {
+	    if($args[$pos+1] eq ':') {
+		shift(@ARGV);
+		if($rest eq '') {
+		    ++$errs unless @ARGV;
+		    $rest = shift(@ARGV);
+		}
+		eval "\$opt_$first = \$rest;";
+		eval "\$flg_$first = 1;";
+	    }
+	    elsif($args[$pos+1] eq '+') {
+		shift(@ARGV);
+		if($rest eq '') {
+		    ++$errs unless @ARGV;
+		    $rest = shift(@ARGV);
+		}
+		if (eval "\$opt_$first") {
+		    eval "\$opt_$first = \$opt_$first 
+				. \":\" . \$rest;";
+		}
+		else {
+		    eval "\$opt_$first = \$rest;";
+		}
+		eval "\$flg_$first = 1;";
+	    }
+	    elsif($args[$pos+1] eq '%') {
+		shift(@ARGV);
+		if($rest ne '') {
+		    eval "\$opt_$first = \$rest;";
+		}
+		else {
+		    $rest = $ARGV[0];
+		    ($one) = $rest =~ /^-(.).*/;
+		    $pos = index($argumentative,$one);
+		    if(!$one || $pos < $[) {
+			eval "\$opt_$first = \$rest;";
+			shift(@ARGV);
+		    }
+		}
+		eval "\$flg_$first = 1;";
+	    }
+	    else {
+		eval "\$opt_$first = 1";
+		eval "\$flg_$first = 1;";
+		if($rest eq '') {
+		    shift(@ARGV);
+		}
+		else {
+		    $ARGV[0] = "-$rest";
+		}
+	    }
+	}
+	else {
+	    print STDERR "Unknown option: $first\n";
+	    ++$errs;
+	    if($rest ne '') {
+		$ARGV[0] = "-$rest";
+	    }
+	    else {
+		shift(@ARGV);
+	    }
+	}
+    }
+    $errs == 0;
+}
 #-----------------------------------------------------------------------
