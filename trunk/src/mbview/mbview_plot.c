@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_plot.c	9/26/2003
- *    $Id: mbview_plot.c,v 5.11 2007-06-17 23:27:30 caress Exp $
+ *    $Id: mbview_plot.c,v 5.12 2007-10-08 16:32:08 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  *		begun on October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.11  2007/06/17 23:27:30  caress
+ * Added NBeditviz.
+ *
  * Revision 5.10  2006/10/05 18:58:29  caress
  * Changes for 5.1.0beta4
  *
@@ -104,7 +107,7 @@ static Cardinal 	ac;
 static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_plot.c,v 5.11 2007-06-17 23:27:30 caress Exp $";
+static char rcs_id[]="$Id: mbview_plot.c,v 5.12 2007-10-08 16:32:08 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_reset_glx(int instance)
@@ -186,13 +189,17 @@ int mbview_drawdata(int instance, int rez)
 	/* local variables */
 	char	*function_name = "mbview_drawdata";
 	int	status = MB_SUCCESS;
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
 	int	on, flip;
 	int	nxrange, nyrange;
 	int	stride;
-	int	i, j, k, l, m, n, ikk, ill, kk, ll;
 	float	xlength, xxlength;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
+	int	use_histogram;
+	int	make_histogram;
+	float	*histogram;
+	int	which_data;
+	int	i, j, k, l, m, n, ikk, ill, kk, ll;
 
 	/* print starting debug statements */
 	if (mbv_verbose >= 2)
@@ -243,6 +250,45 @@ mbview_glerrorcheck(instance, 1, function_name);
 		
 	/* set color parameters */
 	mbview_setcolorparms(instance);
+	
+	/* calculate histogram equalization if needed */
+	make_histogram = MB_NO;
+	use_histogram = MB_NO;
+	if (data->grid_mode == MBV_GRID_VIEW_PRIMARY
+		&& data->primary_histogram == MB_YES)
+		{
+		use_histogram = MB_YES;
+		if (view->primary_histogram_set == MB_NO)
+			{
+			make_histogram = MB_YES;
+			which_data = MBV_DATA_PRIMARY;
+			}
+		histogram = view->primary_histogram;
+		}
+	else if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE
+		&& data->primaryslope_histogram == MB_YES)
+		{
+		use_histogram = MB_YES;
+		if (view->primaryslope_histogram_set == MB_NO)
+			{
+			make_histogram = MB_YES;
+			which_data = MBV_DATA_PRIMARYSLOPE;
+			}
+		histogram = view->primaryslope_histogram;
+		}
+	else if (data->grid_mode == MBV_GRID_VIEW_SECONDARY
+		&& data->secondary_histogram == MB_YES)
+		{
+		use_histogram = MB_YES;
+		if (view->secondary_histogram_set == MB_NO)
+			{
+			make_histogram = MB_YES;
+			which_data = MBV_DATA_SECONDARY;
+			}
+		histogram = view->secondary_histogram;
+		}
+	if (make_histogram == MB_YES)
+		mbview_make_histogram(view, data, which_data);
 	
 /*fprintf(stderr,"mbview_drawdata: %d %d stride:%d\n", instance,rez,stride);*/
 
@@ -401,8 +447,10 @@ mbview_glerrorcheck(instance, 1, function_name);
 				mbview_zscalegridpoint(instance,kk);
 			if (!(data->primary_stat_color[kk/8] & statmask[kk%8]))
 				{
-				mbview_colorpoint(
-					view, data, ikk, j, kk);
+				if (use_histogram == MB_NO)
+					mbview_colorpoint(view, data, ikk, j, kk);
+				else
+					mbview_colorpoint_histogram(view, data, histogram, ikk, j, kk);
 				}
 			glColor3f(data->primary_r[kk],
 				data->primary_g[kk],
@@ -442,8 +490,10 @@ mbview_glerrorcheck(instance, 24, function_name);
 				mbview_zscalegridpoint(instance,ll);
 			if (!(data->primary_stat_color[ll/8] & statmask[ll%8]))
 				{
-				mbview_colorpoint(
-					view, data, ill, j, ll);
+				if (use_histogram == MB_NO)
+					mbview_colorpoint(view, data, ill, j, ll);
+				else
+					mbview_colorpoint_histogram(view, data, histogram, ill, j, ll);
 				}
 			glColor3f(data->primary_r[ll],
 				data->primary_g[ll],

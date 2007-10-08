@@ -74,6 +74,7 @@ extern void do_mbview_display_3D(Widget, XtPointer, XtPointer);
 extern void do_mbview_data_primary(Widget, XtPointer, XtPointer);
 extern void do_mbview_data_primaryslope(Widget, XtPointer, XtPointer);
 extern void do_mbview_data_secondary(Widget, XtPointer, XtPointer);
+extern void do_mbview_histogram(Widget, XtPointer, XtPointer);
 extern void do_mbview_overlay_none(Widget, XtPointer, XtPointer);
 extern void do_mbview_overlay_illumination(Widget, XtPointer, XtPointer);
 extern void do_mbview_overlay_slope(Widget, XtPointer, XtPointer);
@@ -489,6 +490,34 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
     {
         XmString    tmp0;
         
+        tmp0 = (XmString) BX_CONVERT(class_in->mbview_radioBox_mouse, (char *)"Pick Nav File", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNshadowThickness, 2); ac++;
+        XtSetArg(args[ac], XmNvisibleWhenOff, False); ac++;
+        XtSetArg(args[ac], XmNwidth, 125); ac++;
+        XtSetArg(args[ac], XmNheight, 32); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(class_in->mbview_radioBox_mouse, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->mbview_toggleButton_mode_rnavfile = XmCreateToggleButton(class_in->mbview_radioBox_mouse,
+            (char *)"mbview_toggleButton_mode_rnavfile",
+            args, 
+            ac);
+        XtManageChild(class_in->mbview_toggleButton_mode_rnavfile);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(class_in->mbview_toggleButton_mode_rnavfile, XmNvalueChangedCallback, do_mbview_mouse_rmode, (XtPointer)0);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
         tmp0 = (XmString) BX_CONVERT(class_in->MB3DView, (char *)"Done.", 
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
@@ -761,6 +790,37 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
         args, 
         ac);
     XtManageChild(class_in->mbview_separator);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"Histogram Equalization", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(class_in->mbview_pulldownMenu_view, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->mbview_toggleButton_histogram = XmCreateToggleButton(class_in->mbview_pulldownMenu_view,
+            (char *)"mbview_toggleButton_histogram",
+            args, 
+            ac);
+        XtManageChild(class_in->mbview_toggleButton_histogram);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(class_in->mbview_toggleButton_histogram, XmNvalueChangedCallback, do_mbview_histogram, (XtPointer)0);
+    
+    ac = 0;
+    class_in->mbview_separator21 = XmCreateSeparator(class_in->mbview_pulldownMenu_view,
+        (char *)"mbview_separator21",
+        args, 
+        ac);
+    XtManageChild(class_in->mbview_separator21);
     
     ac = 0;
     {
@@ -1661,6 +1721,30 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
     }
     
     XtAddCallback(class_in->mbview_toggleButton_mode_nav, XmNvalueChangedCallback, do_mbview_mouse_mode, (XtPointer)0);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->mbview_pulldownMenu_mouse, (char *)"Select Nav File", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(class_in->mbview_pulldownMenu_mouse, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->mbview_toggleButton_mode_navfile = XmCreateToggleButton(class_in->mbview_pulldownMenu_mouse,
+            (char *)"mbview_toggleButton_mode_navfile",
+            args, 
+            ac);
+        XtManageChild(class_in->mbview_toggleButton_mode_navfile);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(class_in->mbview_toggleButton_mode_navfile, XmNvalueChangedCallback, do_mbview_mouse_mode, (XtPointer)0);
     
     ac = 0;
     XtSetArg(args[ac], XmNsubMenuId, class_in->mbview_pulldownMenu_mouse); ac++;

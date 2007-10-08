@@ -54,6 +54,7 @@ typedef struct _MB3DViewData
     Widget mbview_toggleButton_mode_rsite;
     Widget mbview_toggleButton_mode_rroute;
     Widget mbview_toggleButton_mode_rnav;
+    Widget mbview_toggleButton_mode_rnavfile;
     Widget mbview_label_status;
     Widget mbview_pushButton_fullrez;
     Widget mbview_label_pickinfo;
@@ -67,6 +68,8 @@ typedef struct _MB3DViewData
     Widget mbview_toggleButton_data_primaryslope;
     Widget mbview_toggleButton_data_secondary;
     Widget mbview_separator;
+    Widget mbview_toggleButton_histogram;
+    Widget mbview_separator21;
     Widget mbview_toggleButton_overlay_none;
     Widget mbview_toggleButton_overlay_illumination;
     Widget mbview_toggleButton_overlay_slope;
@@ -107,6 +110,7 @@ typedef struct _MB3DViewData
     Widget mbview_toggleButton_mode_site;
     Widget mbview_toggleButton_mode_route;
     Widget mbview_toggleButton_mode_nav;
+    Widget mbview_toggleButton_mode_navfile;
     Widget mbview_cascadeButton_action;
     Widget mbview_pulldownMenu_action;
     Widget mbview_pushButton_help_about;

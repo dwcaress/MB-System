@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_nav.c	10/28/2003
- *    $Id: mbview_nav.c,v 5.14 2007-06-17 23:27:30 caress Exp $
+ *    $Id: mbview_nav.c,v 5.15 2007-10-08 16:32:08 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -18,6 +18,9 @@
  * Date:	October 28, 2003
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.14  2007/06/17 23:27:30  caress
+ * Added NBeditviz.
+ *
  * Revision 5.13  2006/12/15 21:42:49  caress
  * Incremental CVS update.
  *
@@ -111,7 +114,7 @@ static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 static char		value_string[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_nav.c,v 5.14 2007-06-17 23:27:30 caress Exp $";
+static char rcs_id[]="$Id: mbview_nav.c,v 5.15 2007-10-08 16:32:08 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_getnavcount(int verbose, int instance,
@@ -451,9 +454,12 @@ int mbview_addnav(int verbose, int instance,
 			int	navcolor,
 			int	navsize,
 			mb_path	navname,
+			mb_path	navpath,
+			int	navformat,
 			int	navswathbounds,
 			int	navshot,
 			int	navcdp,
+			int	decimation,
 			int *error)
 {
 	/* local variables */
@@ -505,9 +511,12 @@ int mbview_addnav(int verbose, int instance,
 		fprintf(stderr,"dbg2       navcolor:                  %d\n", navcolor);
 		fprintf(stderr,"dbg2       navsize:                   %d\n", navsize);
 		fprintf(stderr,"dbg2       navname:                   %s\n", navname);
+		fprintf(stderr,"dbg2       navpath:                   %s\n", navpath);
+		fprintf(stderr,"dbg2       navformat:                 %d\n", navformat);
 		fprintf(stderr,"dbg2       navswathbounds:            %d\n", navswathbounds);
 		fprintf(stderr,"dbg2       navshot:                   %d\n", navshot);
 		fprintf(stderr,"dbg2       navcdp:                    %d\n", navcdp);
+		fprintf(stderr,"dbg2       decimation:                %d\n", decimation);
 		}
 
 	/* get view */
@@ -539,11 +548,15 @@ int mbview_addnav(int verbose, int instance,
 				shared.shareddata.navs[i].color = MBV_COLOR_RED;
 				shared.shareddata.navs[i].size = 4;
 				shared.shareddata.navs[i].name[0] = '\0';
+				shared.shareddata.navs[i].path[0] = '\0';
+				shared.shareddata.navs[i].format = 0;
 				shared.shareddata.navs[i].swathbounds = MB_NO;
 				shared.shareddata.navs[i].shot = MB_NO;
 				shared.shareddata.navs[i].cdp = MB_NO;
+				shared.shareddata.navs[i].decimation = MB_NO;
 				shared.shareddata.navs[i].npoints = 0;
 				shared.shareddata.navs[i].npoints_alloc = 0;
+				shared.shareddata.navs[i].nselected = 0;
 				shared.shareddata.navs[i].navpts = NULL;
 				shared.shareddata.navs[i].segments = NULL;
 				}
@@ -580,9 +593,12 @@ int mbview_addnav(int verbose, int instance,
 		shared.shareddata.navs[inav].color = navcolor;
 		shared.shareddata.navs[inav].size = navsize;
 		strcpy(shared.shareddata.navs[inav].name,navname);
+		strcpy(shared.shareddata.navs[inav].path,navpath);
+		shared.shareddata.navs[inav].format = navformat;
 		shared.shareddata.navs[inav].swathbounds = navswathbounds;
 		shared.shareddata.navs[inav].shot = navshot;
 		shared.shareddata.navs[inav].cdp = navcdp;
+		shared.shareddata.navs[inav].decimation = decimation;
 
 		/* loop over the points in the new nav */
 		shared.shareddata.navs[inav].npoints = npoint;
@@ -740,6 +756,7 @@ shared.shareddata.navs[inav].navpts[i].point.zdisplay[instance]);*/
 			fprintf(stderr,"dbg2       nav %d swathbounds:   %d\n",i,shared.shareddata.navs[i].swathbounds);
 			fprintf(stderr,"dbg2       nav %d shot:          %d\n",i,shared.shareddata.navs[i].shot);
 			fprintf(stderr,"dbg2       nav %d cdp:           %d\n",i,shared.shareddata.navs[i].cdp);
+			fprintf(stderr,"dbg2       nav %d decimation:    %d\n",i,shared.shareddata.navs[i].decimation);
 			fprintf(stderr,"dbg2       nav %d npoints:       %d\n",i,shared.shareddata.navs[i].npoints);
 			fprintf(stderr,"dbg2       nav %d npoints_alloc: %d\n",i,shared.shareddata.navs[i].npoints_alloc);
 			fprintf(stderr,"dbg2       nav %d nselected:     %d\n",i,shared.shareddata.navs[i].nselected);
@@ -886,7 +903,7 @@ int mbview_pick_nav_select(int instance, int select, int which, int xpixel, int 
 	int	ii,jj;
 
 	/* print starting debug statements */
-	if (mbv_verbose >= 2)
+	if (mbv_verbose >= 0)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
@@ -1043,10 +1060,11 @@ int mbview_pick_nav_select(int instance, int select, int which, int xpixel, int 
 			}
 		}
 	
-	/* only select or deselect range of nav points if enabled and two different points selected */
+	/* if data->mouse_mode == MBV_MOUSE_NAV only select or deselect range of nav points if enabled and two different points selected */
 	else if (shared.shareddata.nav_mode != MBV_NAV_OFF
 		&& shared.shareddata.nnav > 0
-		&& which == MBV_PICK_UP)
+		&& which == MBV_PICK_UP
+		&& data->mouse_mode == MBV_MOUSE_NAV)
 		{
 		/* only actually select range of nav if two different points have been selected */
 		if (shared.shareddata.nav_selected[0] != MBV_SELECT_NONE
@@ -1096,6 +1114,46 @@ int mbview_pick_nav_select(int instance, int select, int which, int xpixel, int 
 					}
 				}
 			}
+		}
+	
+	/* if data->mouse_mode == MBV_MOUSE_NAVFILE select or deselect all affected files */
+	else if (shared.shareddata.nav_mode != MBV_NAV_OFF
+		&& shared.shareddata.nnav > 0
+		&& which == MBV_PICK_UP
+		&& data->mouse_mode == MBV_MOUSE_NAVFILE)
+		{
+fprintf(stderr,"nav selected: %d %d select:%d\n",
+shared.shareddata.nav_selected[0],shared.shareddata.nav_selected[1],select);
+		/* select range of nav files if one or two different points have been selected */
+		if (shared.shareddata.nav_selected[0] != MBV_SELECT_NONE)
+			{
+			/* get order of selected nav points */
+			if (shared.shareddata.nav_selected[1] != MBV_SELECT_NONE)
+				{
+				inav0 = MIN(shared.shareddata.nav_selected[0], shared.shareddata.nav_selected[1]);
+				inav1 = MAX(shared.shareddata.nav_selected[0], shared.shareddata.nav_selected[1]);
+				}
+			else
+				{
+				inav0 = shared.shareddata.nav_selected[0];
+				inav1 = shared.shareddata.nav_selected[0];
+				}
+
+			/* loop over the affected nav */
+			for (inav=inav0;inav<=inav1;inav++)
+				{
+				for (jpt=0;jpt<shared.shareddata.navs[inav].npoints;jpt++)
+					{
+					shared.shareddata.navs[inav].navpts[jpt].selected = select;
+					}
+				shared.shareddata.navs[inav].nselected = 0;
+				for (jpt=0;jpt<shared.shareddata.navs[inav].npoints;jpt++)
+					{
+					if (shared.shareddata.navs[inav].navpts[jpt].selected == MB_YES)
+						shared.shareddata.navs[inav].nselected++;
+					}
+				}
+			}			
 		}
 
 	/* else beep */
@@ -1161,6 +1219,7 @@ int mbview_pick_nav_select(int instance, int select, int which, int xpixel, int 
 			fprintf(stderr,"dbg2       nav %d swathbounds:   %d\n",i,shared.shareddata.navs[i].swathbounds);
 			fprintf(stderr,"dbg2       nav %d shot:          %d\n",i,shared.shareddata.navs[i].shot);
 			fprintf(stderr,"dbg2       nav %d cdp:           %d\n",i,shared.shareddata.navs[i].cdp);
+			fprintf(stderr,"dbg2       nav %d decimation:    %d\n",i,shared.shareddata.navs[i].decimation);
 			fprintf(stderr,"dbg2       nav %d npoints:       %d\n",i,shared.shareddata.navs[i].npoints);
 			fprintf(stderr,"dbg2       nav %d npoints_alloc: %d\n",i,shared.shareddata.navs[i].npoints_alloc);
 			fprintf(stderr,"dbg2       nav %d nselected:     %d\n",i,shared.shareddata.navs[i].nselected);
@@ -1495,9 +1554,12 @@ int mbview_nav_delete(int instance, int inav)
 		shared.shareddata.navs[shared.shareddata.nnav-1].color = MBV_COLOR_RED;
 		shared.shareddata.navs[shared.shareddata.nnav-1].size = 4;
 		shared.shareddata.navs[shared.shareddata.nnav-1].name[0] = '\0';
+		shared.shareddata.navs[shared.shareddata.nnav-1].path[0] = '\0';
+		shared.shareddata.navs[shared.shareddata.nnav-1].format = 0;
 		shared.shareddata.navs[shared.shareddata.nnav-1].swathbounds = MB_NO;
 		shared.shareddata.navs[shared.shareddata.nnav-1].shot = MB_NO;
 		shared.shareddata.navs[shared.shareddata.nnav-1].cdp = MB_NO;
+		shared.shareddata.navs[shared.shareddata.nnav-1].decimation = 1;
 		shared.shareddata.navs[shared.shareddata.nnav-1].npoints = 0;
 		shared.shareddata.navs[shared.shareddata.nnav-1].npoints_alloc = 0;
 		shared.shareddata.navs[shared.shareddata.nnav-1].navpts = NULL;
@@ -2035,9 +2097,9 @@ shared.shareddata.navs[inav].segments[jpoint].lspoints[k].zdisplay[instance]);*/
 		segment.lspoints = NULL;
 		
 		/* loop over the navs plotting swathbounds */
-		timegapuse = 60.0 * view->timegap;
 		for (inav=0;inav<shared.shareddata.nnav;inav++)
 			{
+			timegapuse = 60.0 * shared.shareddata.navs[inav].decimation * view->timegap;
 			if (shared.shareddata.navs[inav].swathbounds == MB_YES
 				&& shared.shareddata.navs[inav].nselected > 0)
 				{

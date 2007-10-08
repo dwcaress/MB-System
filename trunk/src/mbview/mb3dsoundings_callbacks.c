@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb3dsoundings_callbacks.c		5/25/2007
- *    $Id: mb3dsoundings_callbacks.c,v 5.2 2007-07-03 17:35:54 caress Exp $
+ *    $Id: mb3dsoundings_callbacks.c,v 5.3 2007-10-08 16:32:08 caress Exp $
  *
  *    Copyright (c) 2007 by
  *    David W. Caress (caress@mbari.org)
@@ -74,7 +74,7 @@ static Cardinal 	ac;
 static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mb3dsoundings_callbacks.c,v 5.2 2007-07-03 17:35:54 caress Exp $";
+static char rcs_id[]="$Id: mb3dsoundings_callbacks.c,v 5.3 2007-10-08 16:32:08 caress Exp $";
 
 /* function prototypes */
 /*------------------------------------------------------------------------------*/
@@ -168,10 +168,10 @@ int mb3dsoundings_startup(int verbose, Widget parent, XtAppContext app, int *err
 		}
 		
 	/* set parent widget and app context */
-	parent_widget = parent;
-	app_context = app;
-	work_function_set = MB_NO;
-	timer_count = 0;
+	mbs_parent_widget = parent;
+	mbs_app_context = app;
+	mbs_work_function_set = MB_NO;
+	mbs_timer_count = 0;
 	
 	/* initialize window */
 	mb3dsoundings_reset();
@@ -780,7 +780,7 @@ fprintf(stderr,"Called mb3dsoundings_open\n");
 		XtSetArg(args[ac], XmNheight, 600); ac++;
 		mb3dsoundings.topLevelShell = XtCreatePopupShell("topLevelShell",
 		    topLevelShellWidgetClass,
-		    parent_widget,
+		    mbs_parent_widget,
 		    args, 
 		    ac);
 		mb3dsoundings.mainWindow = XmCreateMainWindow(

@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_process.c	9/25/2003
- *    $Id: mbview_process.c,v 5.13 2007-06-17 23:27:31 caress Exp $
+ *    $Id: mbview_process.c,v 5.14 2007-10-08 16:32:08 caress Exp $
  *
  *    Copyright (c) 2003, 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  *		begun on October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.13  2007/06/17 23:27:31  caress
+ * Added NBeditviz.
+ *
  * Revision 5.12  2006/06/16 19:30:58  caress
  * Check in after the Santa Monica Basin Mapping AUV Expedition.
  *
@@ -113,7 +116,7 @@ static Cardinal 	ac;
 static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_process.c,v 5.13 2007-06-17 23:27:31 caress Exp $";
+static char rcs_id[]="$Id: mbview_process.c,v 5.14 2007-10-08 16:32:08 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_projectdata(int instance)
@@ -3114,6 +3117,373 @@ fprintf(stderr,"ILLUMLGT: %f %f %f %f\n",view->illum_x, view->illum_y, view->ill
 	/* return */
 	return(status);
 }
+/*------------------------------------------------------------------------------*/
+int mbview_colordata(int instance, int rez)
+{
+	/* local variables */
+	char	*function_name = "mbview_colordata";
+	int	status = MB_SUCCESS;
+	int	stride;
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
+	double	value, svalue, factor, dd;
+	double	xlon, ylat;
+	int	use_histogram;
+	int	make_histogram;
+	float	*histogram;
+	int	which_data;
+	int	i, j, k, ii;
+
+	/* print starting debug statements */
+	if (mbv_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
+		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       instance:         %d\n",instance);
+		fprintf(stderr,"dbg2       rez:              %d\n",rez);
+		}
+		
+if (mbv_verbose >= 0)
+fprintf(stderr,"mbview_colordata: %d %d\n", instance, rez);
+		
+	/* get view */
+	view = &(mbviews[instance]);
+	data = &(view->data);
+	
+	/* calculate histogram equalization if needed */
+	make_histogram = MB_NO;
+	use_histogram = MB_NO;
+	if (data->grid_mode == MBV_GRID_VIEW_PRIMARY
+		&& data->primary_histogram == MB_YES)
+		{
+		use_histogram = MB_YES;
+		if (view->primary_histogram_set == MB_NO)
+			{
+			make_histogram = MB_YES;
+			which_data = MBV_DATA_PRIMARY;
+			}
+		histogram = view->primary_histogram;
+		}
+	else if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE
+		&& data->primaryslope_histogram == MB_YES)
+		{
+		use_histogram = MB_YES;
+		if (view->primaryslope_histogram_set == MB_NO)
+			{
+			make_histogram = MB_YES;
+			which_data = MBV_DATA_PRIMARYSLOPE;
+			}
+		histogram = view->primaryslope_histogram;
+		}
+	else if (data->grid_mode == MBV_GRID_VIEW_SECONDARY
+		&& data->secondary_histogram == MB_YES)
+		{
+		use_histogram = MB_YES;
+		if (view->secondary_histogram_set == MB_NO)
+			{
+			make_histogram = MB_YES;
+			which_data = MBV_DATA_SECONDARY;
+			}
+		histogram = view->secondary_histogram;
+		}
+	if (make_histogram == MB_YES)
+		mbview_make_histogram(view, data, which_data);
+	if (view->shade_mode == MBV_SHADE_VIEW_OVERLAY
+		&& data->secondary_histogram == MB_YES
+		&& view->secondary_histogram_set == MB_NO)
+		mbview_make_histogram(view, data, MBV_DATA_SECONDARY);
+	
+	/* set stride for looping over data */
+	if (rez == MBV_REZ_FULL)
+	    stride = 1;
+	else if (rez == MBV_REZ_HIGH)
+	    stride = MAX((int)ceil(((double)data->primary_nx) 
+				/ ((double)data->hirez_dimension)), 
+			(int)ceil(((double)data->primary_ny) 
+				/ ((double)data->hirez_dimension)));
+	else
+	    stride = MAX((int)ceil(((double)data->primary_nx) 
+				/ ((double)data->lorez_dimension)), 
+			(int)ceil(((double)data->primary_ny) 
+				/ ((double)data->lorez_dimension)));
+		
+	/* color the data using simple stretch */
+	if (use_histogram == MB_NO)
+		{
+		for (i=0;i<data->primary_nx;i+=stride)
+			{
+			for (j=0;j<data->primary_ny;j+=stride)
+				{
+				k = i * data->primary_ny + j;
+
+				if (data->primary_data[k] != data->primary_nodatavalue
+					&& !(data->primary_stat_color[k/8] & statmask[k%8]))
+					{
+					mbview_colorpoint(view, data, i, j, k);
+					}
+				}
+
+			/* check for pending event */
+			if (view->plot_done == MB_NO 
+				&& view->plot_interrupt_allowed == MB_YES 
+				&& i % MBV_EVENTCHECKCOARSENESS == 0)
+				do_mbview_xevents();
+
+			/* dump out of loop if plotting already done at a higher recursion */
+			if (view->plot_done == MB_YES)
+				i = data->primary_nx;
+			}
+		}
+		
+	/* else color the data using histogram equalization */
+	else
+		{
+		for (i=0;i<data->primary_nx;i+=stride)
+			{
+			for (j=0;j<data->primary_ny;j+=stride)
+				{
+				k = i * data->primary_ny + j;
+
+				if (data->primary_data[k] != data->primary_nodatavalue
+					&& !(data->primary_stat_color[k/8] & statmask[k%8]))
+					{
+					mbview_colorpoint_histogram(view, data, histogram, i, j, k);
+					}
+				}
+
+			/* check for pending event */
+			if (view->plot_done == MB_NO 
+				&& view->plot_interrupt_allowed == MB_YES 
+				&& i % MBV_EVENTCHECKCOARSENESS == 0)
+				do_mbview_xevents();
+
+			/* dump out of loop if plotting already done at a higher recursion */
+			if (view->plot_done == MB_YES)
+				i = data->primary_nx;
+			}
+		}
+
+	/* print output debug statements */
+	if (mbv_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return */
+	return(status);
+}
+		
+/*------------------------------------------------------------------------------*/
+int mbview_make_histogram(
+	struct mbview_world_struct *view,
+	struct mbview_struct *data,
+	int	which_data)
+{
+	/* local variables */
+	char	*function_name = "mbview_make_histogram";
+	int	status = MB_SUCCESS;
+	int	binned_counts[MBV_RAW_HISTOGRAM_DIM];
+	int	nbinned, nbinnedneg, nbinnedpos;
+	int	bindimminusone;
+	float	min, max, dhist;
+	float	slope;
+	float	*histogram;
+	int	binnedsum, target, jbinzero;
+	int	i, jbin, khist;
+
+	/* print starting debug statements */
+	if (mbv_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
+		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       view:             %d\n",view);
+		fprintf(stderr,"dbg2       data:             %d\n",data);
+		fprintf(stderr,"dbg2       which_data:       %d\n",which_data);
+		}
+
+	/* get ranges for histogram */
+	if (which_data == MBV_DATA_PRIMARY)
+		{
+		histogram = view->primary_histogram;
+		min = data->primary_colortable_min;
+		max = data->primary_colortable_max;
+		view->primary_histogram_set = MB_YES;
+		}
+	else if (which_data == MBV_DATA_PRIMARYSLOPE)
+		{
+		histogram = view->primaryslope_histogram;
+		min = data->slope_colortable_min;
+		max = data->slope_colortable_max;
+		view->primaryslope_histogram_set = MB_YES;
+		}
+	else if (which_data == MBV_DATA_SECONDARY)
+		{
+		histogram = view->secondary_histogram;
+		min = data->secondary_colortable_min;
+		max = data->secondary_colortable_max;
+		view->secondary_histogram_set = MB_YES;
+		}
+	dhist = (max - min) / (MBV_RAW_HISTOGRAM_DIM - 1);
+	
+	/* initialize histograms */
+	for (i=0;i<3*MBV_NUM_COLORS;i++)
+		histogram[i] = 0.0;
+	
+	/* initialize bins */
+	for (i=0;i<MBV_RAW_HISTOGRAM_DIM;i++)
+		binned_counts[i] = 0;
+	
+	/* loop over all values binning quantities */
+	bindimminusone = MBV_RAW_HISTOGRAM_DIM - 1;
+	nbinned = 0;
+	nbinnedneg = 0;
+	nbinnedpos = 0;
+	if (which_data == MBV_DATA_PRIMARY)
+		{
+		for (i=0;i<data->primary_nxy;i++)
+			{
+			if (data->primary_data[i] != data->primary_nodatavalue)
+				{
+				jbin = (data->primary_data[i] - min) / dhist;
+				if (jbin >= 0 && jbin <= bindimminusone)
+					{
+					binned_counts[jbin]++;
+					nbinned++;
+					if (data->primary_data[i] < 0.0)
+						nbinnedneg++;
+					else
+						nbinnedpos++;
+					}
+				}
+			}
+		}
+	else if (which_data == MBV_DATA_PRIMARYSLOPE)
+		{
+		for (i=0;i<data->primary_nxy;i++)
+			{
+			if (data->primary_data[i] != data->primary_nodatavalue)
+				{
+				slope = sqrt(data->primary_dzdx[i] 
+							* data->primary_dzdx[i]
+						+ data->primary_dzdy[i] 
+							* data->primary_dzdy[i]);
+				jbin = (slope - min) / dhist;
+				if (jbin >= 0 && jbin <= bindimminusone)
+					{
+					binned_counts[jbin]++;
+					nbinned++;
+					nbinnedpos++;
+					}
+				}
+			}
+		}
+	else if (which_data == MBV_DATA_SECONDARY)
+		{
+		for (i=0;i<data->secondary_nxy;i++)
+			{
+			if (data->secondary_data[i] != data->secondary_nodatavalue)
+				{
+				jbin = (data->secondary_data[i] - min) / dhist;
+				if (jbin >= 0 && jbin <= bindimminusone)
+					{
+					binned_counts[jbin]++;
+					nbinned++;
+					if (data->secondary_data[i] < 0.0)
+						nbinnedneg++;
+					else
+						nbinnedpos++;
+					}
+				}
+			}
+		}
+		
+	/* construct histogram equalization for full data range */
+	histogram[0] = min;
+	histogram[MBV_NUM_COLORS-1] = max;
+	binnedsum = 0;
+	khist = 1;
+	for (jbin=0;jbin<MBV_RAW_HISTOGRAM_DIM;jbin++)
+		{
+		target = (khist * nbinned) / (MBV_NUM_COLORS-1);
+		binnedsum += binned_counts[jbin];
+		if (binnedsum >= target && khist < MBV_NUM_COLORS - 1)
+			{
+			histogram[khist] = min + jbin * dhist;
+			khist++;
+			}
+		}
+		
+	/* construct histogram equalization for data < 0.0 */
+	if (nbinnedneg > MBV_NUM_COLORS)
+		{
+		jbinzero = MIN(-min / dhist, MBV_RAW_HISTOGRAM_DIM - 1);
+		histogram[MBV_NUM_COLORS] = MIN(0.0, min);
+		histogram[2*MBV_NUM_COLORS-1] = MIN(0.0, max);
+		binnedsum = 0;
+		khist = 1;
+		for (jbin=0;jbin<jbinzero;jbin++)
+			{
+			target = (khist * nbinnedneg) / (MBV_NUM_COLORS-1);
+			binnedsum += binned_counts[jbin];
+			if (binnedsum >= target && khist < MBV_NUM_COLORS - 1)
+				{
+				histogram[MBV_NUM_COLORS+khist] = min + jbin * dhist;
+				khist++;
+				}
+			}
+		}
+		
+	/* construct histogram equalization for data >= 0.0 */
+	if (nbinnedpos > MBV_NUM_COLORS)
+		{
+		jbinzero = -min / dhist;
+		histogram[2*MBV_NUM_COLORS] = MAX(0.0, min);
+		histogram[3*MBV_NUM_COLORS-1] = MAX(0.0, max);
+		binnedsum = 0;
+		khist = 1;
+		for (jbin=jbinzero;jbin<MBV_RAW_HISTOGRAM_DIM;jbin++)
+			{
+			target = (khist * nbinnedpos) / (MBV_NUM_COLORS-1);
+			binnedsum += binned_counts[jbin];
+			if (binnedsum >= target && khist < MBV_NUM_COLORS - 1)
+				{
+				histogram[2*MBV_NUM_COLORS+khist] = min + jbin * dhist;
+				khist++;
+				}
+			}
+		}
+
+	/* print output debug statements */
+	if (mbv_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       Primary histogram:\n");
+		for (i=0;i<MBV_NUM_COLORS;i++)
+			fprintf(stderr,"dbg2       value[%d]:   %f\n", i, histogram[i]);
+		fprintf(stderr,"dbg2       Negative histogram for sea level colortable:\n");
+		for (i=0;i<MBV_NUM_COLORS;i++)
+			fprintf(stderr,"dbg2       value[%d]:   %f\n", i, histogram[MBV_NUM_COLORS+i]);
+		fprintf(stderr,"dbg2       Postive histogram for sea level colortable:\n");
+		for (i=0;i<MBV_NUM_COLORS;i++)
+			fprintf(stderr,"dbg2       value[%d]:   %f\n", i, histogram[2*MBV_NUM_COLORS+i]);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return */
+	return(status);
+}
 		
 /*------------------------------------------------------------------------------*/
 int mbview_colorpoint(
@@ -3142,9 +3512,6 @@ int mbview_colorpoint(
 		fprintf(stderr,"dbg2       j:                %d\n",j);
 		fprintf(stderr,"dbg2       k:                %d\n",k);
 		}
-		
-if (mbv_verbose >= 2)
-fprintf(stderr,"mbview_colorpoint: %d %d %d\n", i, j, k);
 		
 	/* get values for coloring */
 	if (data->grid_mode == MBV_GRID_VIEW_PRIMARY)
@@ -3345,103 +3712,18 @@ intensity,data->primary_dzdx[k], data->primary_dzdy[k]);
 	return(status);
 }
 /*------------------------------------------------------------------------------*/
-int mbview_colordata(int instance, int rez)
+int mbview_colorpoint_histogram(
+	struct mbview_world_struct *view,
+	struct mbview_struct *data,
+	float *histogram,
+	int i, int j, int k)
 {
 	/* local variables */
-	char	*function_name = "mbview_colordata";
+	char	*function_name = "mbview_colorpoint_histogram";
 	int	status = MB_SUCCESS;
-	int	stride;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-	int	i, j, k, ii;
 	double	value, svalue, factor, dd;
 	double	xlon, ylat;
-
-	/* print starting debug statements */
-	if (mbv_verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
-		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %d\n",instance);
-		fprintf(stderr,"dbg2       rez:              %d\n",rez);
-		}
-		
-if (mbv_verbose >= 2)
-fprintf(stderr,"mbview_colordata: %d %d\n", instance, rez);
-		
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
-	
-	/* set stride for looping over data */
-	if (rez == MBV_REZ_FULL)
-	    stride = 1;
-	else if (rez == MBV_REZ_HIGH)
-	    stride = MAX((int)ceil(((double)data->primary_nx) 
-				/ ((double)data->hirez_dimension)), 
-			(int)ceil(((double)data->primary_ny) 
-				/ ((double)data->hirez_dimension)));
-	else
-	    stride = MAX((int)ceil(((double)data->primary_nx) 
-				/ ((double)data->lorez_dimension)), 
-			(int)ceil(((double)data->primary_ny) 
-				/ ((double)data->lorez_dimension)));
-		
-	/* color the data */
-	for (i=0;i<data->primary_nx;i+=stride)
-		{
-		for (j=0;j<data->primary_ny;j+=stride)
-			{
-			k = i * data->primary_ny + j;
-
-			if (data->primary_data[k] != data->primary_nodatavalue
-				&& !(data->primary_stat_color[k/8] & statmask[k%8]))
-				{
-				mbview_colorpoint(view, data, i, j, k);
-				}
-			}
-
-		/* check for pending event */
-		if (view->plot_done == MB_NO 
-			&& view->plot_interrupt_allowed == MB_YES 
-			&& i % MBV_EVENTCHECKCOARSENESS == 0)
-			do_mbview_xevents();
-
-		/* dump out of loop if plotting already done at a higher recursion */
-		if (view->plot_done == MB_YES)
-			i = data->primary_nx;
-		}
-
-	/* print output debug statements */
-	if (mbv_verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:  %d\n",status);
-		}
-
-	/* return */
-	return(status);
-}
-
-/*------------------------------------------------------------------------------*/
-int mbview_getsecondaryvalue(struct mbview_world_struct *view,
-				struct mbview_struct *data,
-				int i, int j, 
-				double *secondary_value)
-{
-	/* local variables */
-	char	*function_name = "mbview_getsecondaryvalue";
-	int	status = MB_SUCCESS;
-	int	error = MB_ERROR_NO_ERROR;
-	double	xlon, ylat;
-	double	xgrid, ygrid;
-	double	xsgrid, ysgrid;
-	int	ii, jj, kk;
+	double	intensity;
 
 	/* print starting debug statements */
 	if (mbv_verbose >= 2)
@@ -3453,63 +3735,209 @@ int mbview_getsecondaryvalue(struct mbview_world_struct *view,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       view:             %d\n",view);
 		fprintf(stderr,"dbg2       data:             %d\n",data);
+		fprintf(stderr,"dbg2       histogram:        %d\n",histogram);
 		fprintf(stderr,"dbg2       i:                %d\n",i);
 		fprintf(stderr,"dbg2       j:                %d\n",j);
+		fprintf(stderr,"dbg2       k:                %d\n",k);
 		}
-	
-	/* get position in primary grid */
-	xgrid = data->primary_xmin + i * data->primary_dx;
-	ygrid = data->primary_ymin + j * data->primary_dy;
 		
-	/* get lon and lat of desired position */
-	if (data->primary_grid_projection_mode == MBV_PROJECTION_PROJECTED
-		|| data->primary_grid_projection_mode == MBV_PROJECTION_ALREADYPROJECTED)
+	/* get values for coloring */
+	if (data->grid_mode == MBV_GRID_VIEW_PRIMARY)
 		{
-		mb_proj_inverse(mbv_verbose, view->primary_pjptr,
-				xgrid, ygrid, &xlon, &ylat, &error);
+		value = data->primary_data[k];
 		}
-	else
+	else if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE)
 		{
-		xlon = xgrid;
-		ylat = ygrid;
+		value = sqrt(data->primary_dzdx[k] 
+					* data->primary_dzdx[k]
+				+ data->primary_dzdy[k] 
+					* data->primary_dzdy[k]);
 		}
-
-	/* get position in secondary grid coordinates */
-	if (data->secondary_grid_projection_mode == MBV_PROJECTION_PROJECTED
-		|| data->secondary_grid_projection_mode == MBV_PROJECTION_ALREADYPROJECTED)
+	else if (data->grid_mode == MBV_GRID_VIEW_SECONDARY)
 		{
-		mb_proj_forward(mbv_verbose, view->secondary_pjptr,
-				xlon, ylat, &xsgrid, &ysgrid, &error);
-		}
-	else
-		{
-		xsgrid = xlon;
-		ysgrid = ylat;
+		if (data->secondary_sameas_primary == MB_YES)
+			value = data->secondary_data[k];
+		else
+			mbview_getsecondaryvalue(view, data, i, j, &value);
 		}
 
-	/* get rounded location in secondary grid */
-	ii = (xsgrid - data->secondary_xmin) / data->secondary_dx;
-	jj = (ysgrid - data->secondary_ymin) / data->secondary_dy;
-	
-	/* answer only defined within grid bounds */
-	if (ii < 0 || ii >= data->secondary_nx
-		|| jj < 0 || jj > data->secondary_ny)
-		{
-		*secondary_value = data->secondary_nodatavalue;
-		}
+	/* get color */
+	if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE 
+		&& view->colortable != MBV_COLORTABLE_SEALEVEL)
+	    {
+	    mbview_getcolor_histogram(value, view->min, view->max, view->colortable_mode, 
+	    		(float) 0.0, (float) 0.0, (float) 1.0, 
+	    		(float) 1.0, (float) 0.0, (float) 0.0, 
+			view->colortable_red,
+			view->colortable_green,
+			view->colortable_blue,
+			histogram,
+			&data->primary_r[k],
+			&data->primary_g[k],
+			&data->primary_b[k]);
+	    }
+	else if (view->colortable != MBV_COLORTABLE_SEALEVEL)
+	    {
+	    mbview_getcolor_histogram(value, view->min, view->max, view->colortable_mode, 
+			view->colortable_red[0],
+			view->colortable_green[0],
+			view->colortable_blue[0],
+			view->colortable_red[MBV_NUM_COLORS-1],
+			view->colortable_green[MBV_NUM_COLORS-1],
+			view->colortable_blue[MBV_NUM_COLORS-1],
+			view->colortable_red,
+			view->colortable_green,
+			view->colortable_blue,
+			histogram,
+			&data->primary_r[k],
+			&data->primary_g[k],
+			&data->primary_b[k]);
+	    }
 	else
+	    {
+	    if (value > 0.0)
 		{
-		kk = ii * data->secondary_ny + jj;
-		*secondary_value = data->secondary_data[kk];
+		if (view->colortable_mode == MBV_COLORTABLE_NORMAL)
+		    {
+		    mbview_getcolor_histogram(value, 0.0, view->max, view->colortable_mode, 
+			colortable_abovesealevel_red[0],
+			colortable_abovesealevel_green[0],
+			colortable_abovesealevel_blue[0],
+			colortable_abovesealevel_red[MBV_NUM_COLORS-1],
+			colortable_abovesealevel_green[MBV_NUM_COLORS-1],
+			colortable_abovesealevel_blue[MBV_NUM_COLORS-1],
+			colortable_abovesealevel_red,
+			colortable_abovesealevel_green,
+			colortable_abovesealevel_blue,
+			&(histogram[2*MBV_NUM_COLORS]),
+			&data->primary_r[k],
+			&data->primary_g[k],
+			&data->primary_b[k]);
+		    }
+		else
+		    {
+		    mbview_getcolor_histogram(value, -view->max / 11.0, view->max, view->colortable_mode, 
+			colortable_haxby_red[0],
+			colortable_haxby_green[0],
+			colortable_haxby_blue[0],
+			colortable_haxby_red[MBV_NUM_COLORS-1],
+			colortable_haxby_green[MBV_NUM_COLORS-1],
+			colortable_haxby_blue[MBV_NUM_COLORS-1],
+			colortable_haxby_red,
+			colortable_haxby_green,
+			colortable_haxby_blue,
+			&(histogram[2*MBV_NUM_COLORS]),
+			&data->primary_r[k],
+			&data->primary_g[k],
+			&data->primary_b[k]);
+		    }
 		}
+	    else
+		{
+		if (view->colortable_mode == MBV_COLORTABLE_REVERSED)
+		    {
+		    mbview_getcolor_histogram(value, view->min, 0.0, view->colortable_mode, 
+			colortable_abovesealevel_red[0],
+			colortable_abovesealevel_green[0],
+			colortable_abovesealevel_blue[0],
+			colortable_abovesealevel_red[MBV_NUM_COLORS-1],
+			colortable_abovesealevel_green[MBV_NUM_COLORS-1],
+			colortable_abovesealevel_blue[MBV_NUM_COLORS-1],
+			colortable_abovesealevel_red,
+			colortable_abovesealevel_green,
+			colortable_abovesealevel_blue,
+			&(histogram[MBV_NUM_COLORS]),
+			&data->primary_r[k],
+			&data->primary_g[k],
+			&data->primary_b[k]);
+		    }
+		else
+		    {
+		    mbview_getcolor_histogram(value, view->min, -view->min / 11.0, view->colortable_mode, 
+			colortable_haxby_red[0],
+			colortable_haxby_green[0],
+			colortable_haxby_blue[0],
+			colortable_haxby_red[MBV_NUM_COLORS-1],
+			colortable_haxby_green[MBV_NUM_COLORS-1],
+			colortable_haxby_blue[MBV_NUM_COLORS-1],
+			colortable_haxby_red,
+			colortable_haxby_green,
+			colortable_haxby_blue,
+			&(histogram[MBV_NUM_COLORS]),
+			&data->primary_r[k],
+			&data->primary_g[k],
+			&data->primary_b[k]);
+		    }
+		}
+	    }
+
+	/* get values for shading */
+	if (view->shade_mode != MBV_SHADE_VIEW_NONE)
+	    {
+	    if (view->shade_mode == MBV_SHADE_VIEW_ILLUMINATION)
+		{
+		dd = sqrt(view->mag2 * data->primary_dzdx[k] 
+				* data->primary_dzdx[k]
+			+ view->mag2 * data->primary_dzdy[k] 
+				* data->primary_dzdy[k]
+				+ 1.0);
+		intensity = data->illuminate_magnitude 
+			    * view->illum_x * data->primary_dzdx[k] / dd
+			+ data->illuminate_magnitude 
+			    * view->illum_y * data->primary_dzdy[k] / dd
+			+ view->illum_z / dd
+			- 0.5;
+/*if (j==25)
+fprintf(stderr,"intensity:%f  dzdx:%f  dzdy:%f\n",
+intensity,data->primary_dzdx[k], data->primary_dzdy[k]);
+*/
+
+		mbview_applyshade(intensity,
+			&data->primary_r[k],
+			&data->primary_g[k],
+			&data->primary_b[k]);
+		}
+	    else if (view->shade_mode == MBV_SHADE_VIEW_SLOPE)
+		{
+		intensity = -data->slope_magnitude
+			* sqrt(data->primary_dzdx[k] 
+					* data->primary_dzdx[k]
+				+ data->primary_dzdy[k] 
+					* data->primary_dzdy[k]);
+		intensity = MAX(intensity, -1.0);
+		mbview_applyshade(intensity,
+			&data->primary_r[k],
+			&data->primary_g[k],
+			&data->primary_b[k]);
+		}
+	    else if (view->shade_mode == MBV_SHADE_VIEW_OVERLAY)
+		{
+		if (data->secondary_sameas_primary == MB_YES)
+			svalue = data->secondary_data[k];
+		else
+			mbview_getsecondaryvalue(view, data, i, j, &svalue);
+		if (svalue != data->secondary_nodatavalue)
+			{
+			intensity = view->sign * data->overlay_shade_magnitude 
+				* (svalue - data->overlay_shade_center)
+				/ (data->secondary_max - data->secondary_min);
+			mbview_applyshade(intensity,
+				&data->primary_r[k],
+				&data->primary_g[k],
+				&data->primary_b[k]);
+			}
+		}
+	    }
+
+	/* set color status bit */
+	data->primary_stat_color[k/8] 
+		= data->primary_stat_color[k/8] | statmask[k%8];
 
 	/* print output debug statements */
 	if (mbv_verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       secondary_value:  %f\n",*secondary_value);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:  %d\n",status);
 		}
@@ -3584,6 +4012,120 @@ int mbview_getcolor(double value, double min, double max,
 		{
 		ii = (int) (factor * (MBV_NUM_COLORS - 1));
 		ff = factor * (MBV_NUM_COLORS - 1) - ii;
+		*red = colortable_red[ii]
+			+ ff * (colortable_red[ii+1] - colortable_red[ii]);
+		*green = colortable_green[ii]
+			+ ff * (colortable_green[ii+1] - colortable_green[ii]);
+		*blue = colortable_blue[ii]
+			+ ff * (colortable_blue[ii+1] - colortable_blue[ii]);
+		}
+
+	/* print output debug statements */
+	if (mbv_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       red:     %f\n",*red);
+		fprintf(stderr,"dbg2       green:   %f\n",*green);
+		fprintf(stderr,"dbg2       blue:    %f\n",*blue);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return */
+	return(status);
+}
+
+/*------------------------------------------------------------------------------*/
+int mbview_getcolor_histogram(double value, double min, double max,
+			int colortablemode, 
+			float below_red,
+			float below_green,
+			float below_blue,
+			float above_red,
+			float above_green,
+			float above_blue,
+			float *colortable_red,
+			float *colortable_green,
+			float *colortable_blue,
+			float *histogram,
+			float *red, float *green, float *blue)
+{
+	/* local variables */
+	char	*function_name = "mbview_getcolor_histogram";
+	int	status = MB_SUCCESS;
+	double	ff, factor;
+	int	found;
+	int	i, ii;
+
+	/* print starting debug statements */
+	if (mbv_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
+		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       value:            %f\n",value);
+		fprintf(stderr,"dbg2       min:              %f\n",min);
+		fprintf(stderr,"dbg2       max:              %f\n",max);
+		fprintf(stderr,"dbg2       colortablemode:   %d\n",colortablemode);
+		fprintf(stderr,"dbg2       below_red:        %f\n",below_red);
+		fprintf(stderr,"dbg2       below_green:      %f\n",below_green);
+		fprintf(stderr,"dbg2       below_blue:       %f\n",below_blue);
+		fprintf(stderr,"dbg2       above_red:        %f\n",above_red);
+		fprintf(stderr,"dbg2       above_green:      %f\n",above_green);
+		fprintf(stderr,"dbg2       above_blue:       %f\n",above_blue);
+		for (i=0;i<MBV_NUM_COLORS;i++)
+			{
+			fprintf(stderr,"dbg2       colortable:       r:%d g:%d b:%d histogram: %f\n",
+				colortable_red[i], colortable_green[i], colortable_blue[i], histogram[i]);
+			}
+		}
+		
+	/* get color */
+	if (colortablemode == MBV_COLORTABLE_NORMAL)
+		factor = (max - value) / (max - min);
+	else
+		factor = (value -  min) / (max - min);
+	/* factor = MAX(factor, 0.000001);
+	factor = MIN(factor, 0.999999);*/
+	if (factor <= 0.0)
+		{
+		*red = below_red;
+		*green = below_green;
+		*blue = below_blue;
+		}
+	else if (factor >= 1.0)
+		{
+		*red = above_red;
+		*green = above_green;
+		*blue = above_blue;
+		}
+	else
+		{
+		/* find place in histogram */
+		found = MB_NO;
+		for (i=0;i<MBV_NUM_COLORS-1 && found == MB_NO;i++)
+			{
+			if (value >= histogram[i] && value <= histogram[i+1])
+				{
+				ii = i;
+				found = MB_YES;
+				}
+			}
+			
+		/* get color */
+		if (colortablemode == MBV_COLORTABLE_NORMAL)
+			{
+			ff = (histogram[ii+1] - value) / (histogram[ii+1] - histogram[ii]);
+			ii = MBV_NUM_COLORS - 2 - ii;
+			}
+		else
+			{
+			ff = (value - histogram[ii]) / (histogram[ii+1] - histogram[ii]);
+			}
 		*red = colortable_red[ii]
 			+ ff * (colortable_red[ii+1] - colortable_red[ii]);
 		*green = colortable_green[ii]
@@ -3748,6 +4290,96 @@ int mbview_applyshade(double intensity, float *r, float *g, float *b)
 		fprintf(stderr,"dbg2       red:     %d\n",*r);
 		fprintf(stderr,"dbg2       green:   %d\n",*g);
 		fprintf(stderr,"dbg2       blue:    %d\n",*b);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return */
+	return(status);
+}
+
+/*------------------------------------------------------------------------------*/
+int mbview_getsecondaryvalue(struct mbview_world_struct *view,
+				struct mbview_struct *data,
+				int i, int j, 
+				double *secondary_value)
+{
+	/* local variables */
+	char	*function_name = "mbview_getsecondaryvalue";
+	int	status = MB_SUCCESS;
+	int	error = MB_ERROR_NO_ERROR;
+	double	xlon, ylat;
+	double	xgrid, ygrid;
+	double	xsgrid, ysgrid;
+	int	ii, jj, kk;
+
+	/* print starting debug statements */
+	if (mbv_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
+		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       view:             %d\n",view);
+		fprintf(stderr,"dbg2       data:             %d\n",data);
+		fprintf(stderr,"dbg2       i:                %d\n",i);
+		fprintf(stderr,"dbg2       j:                %d\n",j);
+		}
+	
+	/* get position in primary grid */
+	xgrid = data->primary_xmin + i * data->primary_dx;
+	ygrid = data->primary_ymin + j * data->primary_dy;
+		
+	/* get lon and lat of desired position */
+	if (data->primary_grid_projection_mode == MBV_PROJECTION_PROJECTED
+		|| data->primary_grid_projection_mode == MBV_PROJECTION_ALREADYPROJECTED)
+		{
+		mb_proj_inverse(mbv_verbose, view->primary_pjptr,
+				xgrid, ygrid, &xlon, &ylat, &error);
+		}
+	else
+		{
+		xlon = xgrid;
+		ylat = ygrid;
+		}
+
+	/* get position in secondary grid coordinates */
+	if (data->secondary_grid_projection_mode == MBV_PROJECTION_PROJECTED
+		|| data->secondary_grid_projection_mode == MBV_PROJECTION_ALREADYPROJECTED)
+		{
+		mb_proj_forward(mbv_verbose, view->secondary_pjptr,
+				xlon, ylat, &xsgrid, &ysgrid, &error);
+		}
+	else
+		{
+		xsgrid = xlon;
+		ysgrid = ylat;
+		}
+
+	/* get rounded location in secondary grid */
+	ii = (xsgrid - data->secondary_xmin) / data->secondary_dx;
+	jj = (ysgrid - data->secondary_ymin) / data->secondary_dy;
+	
+	/* answer only defined within grid bounds */
+	if (ii < 0 || ii >= data->secondary_nx
+		|| jj < 0 || jj > data->secondary_ny)
+		{
+		*secondary_value = data->secondary_nodatavalue;
+		}
+	else
+		{
+		kk = ii * data->secondary_ny + jj;
+		*secondary_value = data->secondary_data[kk];
+		}
+
+	/* print output debug statements */
+	if (mbv_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       secondary_value:  %f\n",*secondary_value);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:  %d\n",status);
 		}

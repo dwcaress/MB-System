@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbeditviz_prog.c		5/1/2007
- *    $Id: mbeditviz_prog.c,v 5.2 2007-07-05 19:53:37 caress Exp $
+ *    $Id: mbeditviz_prog.c,v 5.3 2007-10-08 16:32:08 caress Exp $
  *
  *    Copyright (c) 2007 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	May 1, 2007
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2007/07/05 19:53:37  caress
+ * Added sys/stat.h include.
+ *
  * Revision 5.1  2007/07/03 17:35:54  caress
  * Working on MBeditviz.
  *
@@ -57,7 +60,7 @@
 #include "mbview.h"
 
 /* id variables */
-static char rcs_id[] = "$Id: mbeditviz_prog.c,v 5.2 2007-07-05 19:53:37 caress Exp $";
+static char rcs_id[] = "$Id: mbeditviz_prog.c,v 5.3 2007-10-08 16:32:08 caress Exp $";
 static char program_name[] = "MBeditviz";
 static char help_message[] = "MBeditviz is a bathymetry editor and patch test tool.";
 static char usage_message[] = "mbeditviz [-H -T -V]";
@@ -199,7 +202,7 @@ int mbeditviz_init(int argc,char **argv)
 	mbdef_timegap = 1000000000.0;
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhI:i:")) != -1)
+	while ((c = getopt(argc, argv, "VvHhF:f:I:i:")) != -1)
 	  switch (c)
 		{
 		case 'H':
@@ -220,6 +223,7 @@ int mbeditviz_init(int argc,char **argv)
 			sscanf (optarg,"%s", ifile);
 			flag++;
 			fileflag++;
+			mbev_status = mbeditviz_open_data(ifile, mbdef_format);
 			break;
 		case '?':
 			errflg++;
@@ -273,12 +277,6 @@ int mbeditviz_init(int argc,char **argv)
 		for (i=0;i<argc;i++)
 			fprintf(stderr,"dbg2       argv[%d]:    %s\n",
 				i,argv[i]);
-		}
-
-	/* if file specified then use it */
-	if (fileflag > 0)
-		{
-		mbev_status = mbeditviz_open_data(ifile, mbdef_format);
 		}
 
 	/* print output debug statements */
@@ -561,7 +559,8 @@ int mbeditviz_load_file(int ifile)
 		&& mbev_files[ifile].load_status == MB_NO)
 		{
 		file = &(mbev_files[ifile]);
-fprintf(stderr,"mbeditviz_load_file:%d\n",ifile);
+fprintf(stderr,"mbeditviz_load_file:%d path:%s raw_info.file:%s\n",ifile,file->path,file->raw_info.file);
+
 		/* allocate memory for pings */
 		if (file->raw_info.nrecords > 0)
 			{
@@ -587,11 +586,12 @@ fprintf(stderr,"mbeditviz_load_file:%d\n",ifile);
 			{
 			/* use processed file if possible */
 			if (file->processed_info_loaded == MB_YES)
-				strcpy(swathfile, file->processed_info.file);
+				strcpy(swathfile, file->process.mbp_ofile);
 			else
 				strcpy(swathfile, file->path);
 			format = file->format;
 			file->esf_open = MB_NO;
+			mb_get_shortest_path(mbev_verbose, swathfile, &mbev_error);
 			
 			/* use fbt file if possible */
 			mb_get_fbt(mbev_verbose, swathfile, &format, &mbev_error);

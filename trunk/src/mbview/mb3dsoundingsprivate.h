@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb3dsoundingsprivate.h	9/24/2003
- *    $Id: mb3dsoundingsprivate.h,v 5.1 2007-07-03 17:35:54 caress Exp $
+ *    $Id: mb3dsoundingsprivate.h,v 5.2 2007-10-08 16:32:08 caress Exp $
  *
  *    Copyright (c) 2007 by
  *    David W. Caress (caress@mbari.org)
@@ -18,6 +18,9 @@
  * Date:	May 25,  2007
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2007/07/03 17:35:54  caress
+ * Working on MBeditviz.
+ *
  * Revision 5.0  2007/06/17 23:16:14  caress
  * Added MBeditviz.
  *
@@ -201,10 +204,10 @@ EXTERNAL int	mbs_verbose;
 EXTERNAL int	mbs_status;
 EXTERNAL int	mbs_error;
 EXTERNAL int	mbs_ninstance;
-EXTERNAL Widget	parent_widget;
-EXTERNAL XtAppContext	app_context;
-EXTERNAL int	work_function_set;
-EXTERNAL int	timer_count;
+EXTERNAL Widget	mbs_parent_widget;
+EXTERNAL XtAppContext	mbs_app_context;
+EXTERNAL int	mbs_work_function_set;
+EXTERNAL int	mbs_timer_count;
 EXTERNAL struct mb3dsoundings_world_struct mb3dsoundings;
 
 /* global declarations */

@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_secondary.c	9/25/2003
- *    $Id: mbview_secondary.c,v 5.8 2007-06-17 23:27:30 caress Exp $
+ *    $Id: mbview_secondary.c,v 5.9 2007-10-08 16:32:08 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  *		begun on October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2007/06/17 23:27:30  caress
+ * Added NBeditviz.
+ *
  * Revision 5.7  2006/06/22 04:45:43  caress
  * Working towards 5.1.0
  *
@@ -95,7 +98,7 @@ static Cardinal 	ac;
 static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_secondary.c,v 5.8 2007-06-17 23:27:30 caress Exp $";
+static char rcs_id[]="$Id: mbview_secondary.c,v 5.9 2007-10-08 16:32:08 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_setsecondarygrid(int verbose, int instance,
@@ -223,6 +226,9 @@ view->secondary_pj_init,view->secondary_pjptr,data->secondary_grid_projection_id
 			}
 		}
 		
+	/* reset histogram flag */
+	view->secondary_histogram_set = MB_NO;
+		
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
@@ -298,6 +304,9 @@ int mbview_updatesecondarygrid(int verbose, int instance,
 	view->lastdrawrez = MBV_REZ_NONE;
 	mbview_setcolorparms(instance);
 	mbview_colorclear(instance);
+
+	/* reset histogram flag */
+	view->secondary_histogram_set = MB_NO;
 		
 	/* print output debug statements */
 	if (verbose >= 2)

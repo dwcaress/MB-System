@@ -77,6 +77,7 @@ procedure do_mbview_colortable_sealevel();
 procedure do_mbview_data_primary();
 procedure do_mbview_data_primaryslope();
 procedure do_mbview_data_secondary();
+procedure do_mbview_histogram();
 procedure do_mbview_dismiss();
 procedure do_mbview_display_2D();
 procedure do_mbview_display_3D();
@@ -3966,6 +3967,36 @@ object mbview_separator : XmSeparator widget {
 !(BX)    };
 };
 
+object mB3DView_mbview_toggleButton_histogram : XmToggleButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Histogram Equalization");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        XmNvalueChangedCallback = procedure do_mbview_histogram();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mbview_separator21 : XmSeparator widget {
+    arguments {
+        arguments Style_use;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
 object mbview_toggleButton_overlay_none : XmToggleButton widget {
     arguments {
         arguments Style_use;
@@ -4275,6 +4306,8 @@ object mbview_pulldownMenu_view : XmPulldownMenu widget {
          managed XmToggleButton mbview_toggleButton_data_primaryslope;
          managed XmToggleButton mB3DView_mbview_toggleButton_data_secondary;
          managed XmSeparator mbview_separator;
+         managed XmToggleButton mB3DView_mbview_toggleButton_histogram;
+         managed XmSeparator mbview_separator21;
          managed XmToggleButton mbview_toggleButton_overlay_none;
          managed XmToggleButton mbview_toggleButton_overlay_illumination;
          managed XmToggleButton mbview_toggleButton_overlay_slope;
@@ -4647,6 +4680,22 @@ object mB3DView_mbview_toggleButton_mode_nav : XmToggleButton widget {
 !(BX)    };
 };
 
+object mB3DView_mbview_toggleButton_mode_navfile : XmToggleButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Select Nav File");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        XmNvalueChangedCallback = procedure do_mbview_mouse_mode();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
 object mB3DView_mbview_pulldownMenu_mouse : XmPulldownMenu widget {
     arguments {
         arguments Style_use;
@@ -4664,6 +4713,7 @@ object mB3DView_mbview_pulldownMenu_mouse : XmPulldownMenu widget {
          managed XmToggleButton mB3DView_mbview_toggleButton_mode_site;
          managed XmToggleButton mB3DView_mbview_toggleButton_mode_route;
          managed XmToggleButton mB3DView_mbview_toggleButton_mode_nav;
+         managed XmToggleButton mB3DView_mbview_toggleButton_mode_navfile;
     };
     callbacks {
         callbacks Style_useReasons;
@@ -5052,6 +5102,26 @@ object mB3DView_mbview_toggleButton_mode_rnav : XmToggleButton widget {
 !(BX)    };
 };
 
+object mB3DView_mbview_toggleButton_mode_rnavfile : XmToggleButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Pick Nav File");
+        XmNshadowThickness = 2;
+        XmNvisibleWhenOff = false;
+        XmNwidth = 125;
+        XmNheight = 32;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        XmNvalueChangedCallback = procedure do_mbview_mouse_rmode();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
 object mB3DView_mbview_radioBox_mouse : XmRadioBox widget {
     arguments {
         arguments Style_use;
@@ -5071,6 +5141,7 @@ object mB3DView_mbview_radioBox_mouse : XmRadioBox widget {
          managed XmToggleButton mB3DView_mbview_toggleButton_mode_rsite;
          managed XmToggleButton mB3DView_mbview_toggleButton_mode_rroute;
          managed XmToggleButton mB3DView_mbview_toggleButton_mode_rnav;
+         managed XmToggleButton mB3DView_mbview_toggleButton_mode_rnavfile;
     };
     callbacks {
         callbacks Style_useReasons;

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbeditviz_callbacks.c		4/27/2007
- *    $Id: mbeditviz_callbacks.c,v 5.3 2007-07-03 17:35:54 caress Exp $
+ *    $Id: mbeditviz_callbacks.c,v 5.4 2007-10-08 16:32:08 caress Exp $
  *
  *    Copyright (c) 2007 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	April 27, 2007
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2007/07/03 17:35:54  caress
+ * Working on MBeditviz.
+ *
  * Revision 5.2  2007/06/18 01:16:51  caress
  * Added MBeditviz.
  *
@@ -487,6 +490,24 @@ do_mbeditviz_quit( Widget w, XtPointer client_data, XtPointer call_data)
     XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
     
 fprintf(stderr,"do_mbeditviz_quit\n");
+
+	
+	/* destroy any mb3dsoundings window */
+	mbev_status = mb3dsoundings_end(mbev_verbose, &mbev_verbose);
+	mbeditviz_mb3dsoundings_dismiss();
+fprintf(stderr,"1 do_mbeditviz_mbview_dismiss_notify status:%d\n", mbev_status);
+	
+	/* destroy the grid */
+fprintf(stderr,"mbev_grid.status:%d\n",mbev_grid.status);
+	if (mbev_grid.status != MBEV_GRID_NONE)
+		mbeditviz_destroy_grid();
+fprintf(stderr,"2 do_mbeditviz_mbview_dismiss_notify status:%d\n", mbev_status);
+	
+	/* reset the gui */
+	do_mbeditviz_update_gui();
+
+fprintf(stderr,"return do_mbeditviz_mbview_dismiss_notify status:%d\n", mbev_status);
+
 fprintf(stderr,"return do_mbeditviz_quit status:%d\n", mbev_status);
     
 }
@@ -638,6 +659,9 @@ do_mbeditviz_viewgrid()
 	int	mbv_display_mode;
 	int	mbv_mouse_mode;
 	int	mbv_grid_mode;
+	int	mbv_primary_histogram;
+	int	mbv_primaryslope_histogram;
+	int	mbv_secondary_histogram;
 	int	mbv_primary_shade_mode;
 	int	mbv_slope_shade_mode;
 	int	mbv_secondary_shade_mode;
@@ -704,6 +728,9 @@ fprintf(stderr,"do_mbeditviz_viewgrid\n");
 		mbv_display_mode = MBV_DISPLAY_2D;
 		mbv_mouse_mode = MBV_MOUSE_MOVE;
 		mbv_grid_mode = MBV_GRID_VIEW_PRIMARY;
+		mbv_primary_histogram = MB_NO;
+		mbv_primaryslope_histogram = MB_NO;
+		mbv_secondary_histogram = MB_NO;
 		mbv_primary_shade_mode = MBV_SHADE_VIEW_SLOPE;
 		mbv_slope_shade_mode = MBV_SHADE_VIEW_NONE;
 		mbv_secondary_shade_mode = MBV_SHADE_VIEW_NONE;
@@ -764,6 +791,9 @@ fprintf(stderr,"do_mbeditviz_viewgrid\n");
 					mbv_display_mode,
 					mbv_mouse_mode,
 					mbv_grid_mode,
+					mbv_primary_histogram,
+					mbv_primaryslope_histogram,
+					mbv_secondary_histogram,
 					mbv_primary_shade_mode,
 					mbv_slope_shade_mode,
 					mbv_secondary_shade_mode,
@@ -951,9 +981,12 @@ fprintf(stderr,"do_mbeditviz_viewgrid\n");
 						MBV_COLOR_BLACK,
 						2,
 						file->name,
+						file->path,
+						file->format,
 						MB_YES,
 						MB_NO,
 						MB_NO,
+						1,
 						&mbev_error);
 
 				/* deallocate memory used for data arrays */
