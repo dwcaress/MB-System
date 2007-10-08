@@ -104,7 +104,9 @@
  * dhg 09-27-06  Added sensor ID for gsfGeoSwathPlusSpecific data received via GeoSwath interferometric
  *               250 Khz sonar.
  * dhg 10-04-06  Added more sensor specific fields for the GeoSwathPlus interferometric sonar.
- *
+ * jsb 07-24-07  GSFv2.07 includes some additional parameters in the imagery sensor specific structure
+ *                to support calculating back to the exact original intensity values received from the
+ *                sonar.
  *
  * Classification : Unclassified
  *
@@ -140,7 +142,7 @@ extern          "C"
 #endif
 
 /* Define this version of the GSF library */
-#define GSF_VERSION       "GSF-v02.05"
+#define GSF_VERSION       "GSF-v02.07"
 
 /* Define largest ever expected record size */
 #define GSF_MAX_RECORD_SIZE    262144
@@ -219,7 +221,7 @@ gsfDataID;
  * subrecords allowed in a gsf file.  This define dimensions the scale
  * factors structure.
  */
-#define GSF_MAX_PING_ARRAY_SUBRECORDS 20
+#define GSF_MAX_PING_ARRAY_SUBRECORDS 26
 
 /* Specify the GSF swath bathymetry ping subrecord identifiers. The beam
  *  data definitions specify the index into the scale factor table, and
@@ -246,6 +248,11 @@ gsfDataID;
 #define GSF_SWATH_BATHY_SUBRECORD_VERTICAL_ERROR_ARRAY         (unsigned)19 /* This record replaces DEPTH_ERROR_ARRAY */
 #define GSF_SWATH_BATHY_SUBRECORD_HORIZONTAL_ERROR_ARRAY       (unsigned)20 /* This record replaces ACROSS_TRACK_ERROR_ARRAY and ALONG_TRACK_ERROR_ARRAY */
 #define GSF_SWATH_BATHY_SUBRECORD_INTENSITY_SERIES_ARRAY       (unsigned)21
+#define GSF_SWATH_BATHY_SUBRECORD_SECTOR_NUMBER_ARRAY          (unsigned)22
+#define GSF_SWATH_BATHY_SUBRECORD_DETECTION_INFO_ARRAY         (unsigned)23
+#define GSF_SWATH_BATHY_SUBRECORD_INCIDENT_BEAM_ADJ_ARRAY      (unsigned)24
+#define GSF_SWATH_BATHY_SUBRECORD_SYSTEM_CLEANING_ARRAY        (unsigned)25
+#define GSF_SWATH_BATHY_SUBRECORD_DOPPLER_CORRECTION_ARRAY     (unsigned)26
 
 /* Define the additional swath bathymetry subrecords, to which the scale
  * factors do not apply.
@@ -705,17 +712,17 @@ typedef struct t_gsfReson8100Specific
 t_gsfReson8100Specific;
 
 /* Macro definitions for the SeaBat8100Specific mode field */
-#define GSF_8100_WIDE_MODE         0x01   /* set if transmit on receiver */
-#define GSF_8100_TWO_HEADS         0x02   /* set if two sonar heads */
-#define GSF_8100_STBD_HEAD         0x04   /* set if starboard ping (seabat head 2) */
-#define GSF_8100_AMPLITUDE         0x08   /* set if beam amplitude is available (RITHETA packet) */
-#define GSF_8100_PITCH_STAB        0x10   /* set if pitch stabilized */
-#define GSF_8100_ROLL_STAB         0x20   /* set if roll stabilized */
+#define GSF_8100_WIDE_MODE              0x01 /* set if transmit on receiver */
+#define GSF_8100_TWO_HEADS              0x02 /* set if two sonar heads */
+#define GSF_8100_STBD_HEAD              0x04 /* set if starboard ping (seabat head 2) */
+#define GSF_8100_AMPLITUDE              0x08 /* set if beam amplitude is available (RITHETA packet) */
+#define GSF_8100_PITCH_STAB             0x10 /* set if pitch stabilized */
+#define GSF_8100_ROLL_STAB              0x20 /* set if roll stabilized */
 
 /* Define the Echotrac Single-Beam sensor specific data structure. */
 
-#define GSF_SB_MPP_SOURCE_UNKNOWN               0x00 /* Unknown MPP source */
-#define GSF_SB_MPP_SOURCE_GPS_3S                0x01 /* GPS 3S */
+#define GSF_SB_MPP_SOURCE_UNKNOWN       0x00 /* Unknown MPP source */
+#define GSF_SB_MPP_SOURCE_GPS_3S        0x01 /* GPS 3S */
 #define GSF_SB_MPP_SOURCE_GPS_TASMAN    0x02 /* GPS Tasman */
 #define GSF_SB_MPP_SOURCE_DGPS_TRIMBLE  0x03 /* DGPS Trimble */
 #define GSF_SB_MPP_SOURCE_DGPS_TASMAN   0x04 /* DGPS Tasman */
@@ -781,6 +788,111 @@ typedef struct t_gsfSBNavisoundSpecific
 }
 t_gsfSBNavisoundSpecific;
 
+/* Macro definitions for EM4 series sector data details */
+#define  GSF_MAX_EM4_SECTORS     9
+
+/* Define sub-structure for the transmit sectors */
+#define  GSF_EM_WAVEFORM_CW      0
+#define  GSF_EM_WAVEFORM_FM_UP   1
+#define  GSF_EM_WAVEFORM_FM_DOWN 2
+
+typedef struct t_gsfEM4TxSector
+{
+    double          tilt_angle;                     /* transmitter tilt angle in degrees */
+    double          focus_range;                    /* focusing range, 0.0 for no focusing */
+    double          signal_length;                  /* transmit signal duration in seconds */
+    double          transmit_delay;                 /* Sector transmit delay from first transmission in seconds */
+    double          center_frequency;               /* center frequency in Hz */
+    double          mean_absorption;                /* mean absorption coefficient in 0.01 dB/kilometer */
+    int             waveform_id;                    /* signal waveform ID 0=CW; 1=FM upsweep; 2=FM downsweep */
+    int             sector_number;                  /* transmit sector number */
+    double          signal_bandwidth;               /* signal bandwidth in Hz */
+    unsigned char   spare[16];                      /* spare space */
+} 
+t_gsfEM4TxSector;
+
+/* Define a data structure to hold the Simrad EM series run time parameters per datagram document rev I. */
+typedef struct t_gsfEMRunTime
+{
+    int              model_number;                  /* from the run-time parameter datagram */
+    struct timespec  dg_time;                       /* from the run-time parameter datagram */
+    int              ping_counter;                  /* sequential counter 0 - 65535 */
+    int              serial_number;                 /* The primary sonar head serial number */
+    unsigned char    operator_station_status;       /* Bit mask of status information for operator station */
+    unsigned char    processing_unit_status;        /* Bit mask of status information for sonar processor unit */
+    unsigned char    bsp_status;                    /* Bit mask of status information for BSP status */
+    unsigned char    head_transceiver_status;       /* Bit mask of status information for sonar head or sonar transceiver */     
+    unsigned char    mode;                          /* 0=nearfield, 1=normal, 2=target, 3=deep, 4=very deep */
+    unsigned char    filter_id;                     /* one byte tit mask for various sonar processing filter settings */
+    double           min_depth;                     /* meters */
+    double           max_depth;                     /* meters */
+    double           absorption;                    /* dB/km */
+    double           tx_pulse_length;               /* in micro seconds */
+    double           tx_beam_width;                 /* degrees */
+    double           tx_power_re_max;               /* The transmit power referenced to maximum power in dB */
+    double           rx_beam_width;                 /* degrees */
+    double           rx_bandwidth;                  /* Hz */
+    double           rx_fixed_gain;                 /* dB */
+    double           tvg_cross_over_angle;          /* degrees */
+    unsigned char    ssv_source;                    /* one byte bit mask defining SSSV source -> 0=sensor, 1=manual, 2=profile */
+    int              max_port_swath_width;          /* total swath width to port side in meters */
+    unsigned char    beam_spacing;                  /* one byte bit mask -> 0=beamwidth, 1=equiangle, 2=equidistant, 3=intermediate */
+    int              max_port_coverage;             /* coverage to port side in degrees */
+    unsigned char    stabilization;                 /* one byte bit mask defining yaw and pitch stabilization mode */
+    int              max_stbd_coverage;             /* coverage to starboard side in degrees */
+    int              max_stbd_swath_width;          /* total swath width to starboard side in meters */
+    double           durotong_speed;                /* Sound speed in durotong for the EM1002 transducer, zero if not available */
+    double           hi_low_absorption_ratio;       /* Absorption coeffieceint ratio */
+    unsigned char    spare[16];                     /* 32 spare bytes */
+}
+t_gsfEMRunTime;
+
+/* Macro definitions for bits of pu_status field */
+#define GSF_EM_VALID_1_PPS      0x0001              /* If set, then 1 PPS timing is valid */
+#define GSF_EM_VALID_POSITION   0x0002              /* If set, then position input is valid */
+#define GSF_EM_VALID_ATTITUDE   0x0004              /* If set, then attitude input is valid */
+#define GSF_EM_VALID_CLOCK      0x0008              /* If set, then clock status is valid */
+#define GSF_EM_VALID_HEADING    0x0010              /* If set, then heading status is valid */
+#define GSF_EM_PU_ACTIVE        0x0020              /* If set, then PU is active (i.e. pinging) */
+
+/* Define a data structure to hold the Simrad EM series PU status values per datagram document rev I. */
+typedef struct t_gsfEMPUStatus
+{
+    double           pu_cpu_load;                   /* Percent CPU load in the processor unit */
+    unsigned short   sensor_status;                 /* Bit mask containing status of sensor inputs */
+    int              achieved_port_coverage;        /* Achieved coverage to port in degrees */
+    int              achieved_stbd_coverage;        /* Achieved coverage to starboard in degrees */
+    double           yaw_stabilization;             /* in degrees */
+    unsigned char    spare[16];
+}
+t_gsfEMPUStatus;
+
+/* Define sensor specific data structures for the Kongsberg 710/302/122 */
+typedef struct t_gsfEM4Specific
+{
+    /* values from the XYZ datagram and raw range datagram */
+    int              model_number;                  /* 122, or 302, or 710, or ... */
+    int              ping_counter;                  /* Sequential ping counter, 1 through 65535 */
+    int              serial_number;                 /* System unique serial number, 100 - ? */
+    double           surface_velocity;              /* Measured sound speed near the surface in m/s */
+    double           transducer_depth;              /* The transmit transducer depth in meters re water level at ping time */
+    int              valid_detections;              /* number of beams with a valid bottom detection for this ping */
+    double           sampling_frequency;            /* The system digitizing rate in Hz */
+    unsigned int     doppler_corr_scale;            /* Scale factor value to be applied to Doppler correction field prior to applying corrections */
+    double           vehicle_depth;                 /* From 0x66 datagram, non-zero when sonar head is mounted on a sub-sea platform */
+    unsigned char    spare_1[16];
+    int              transmit_sectors;              /* The number of transmit sectors for this ping */
+    t_gsfEM4TxSector sector[GSF_MAX_EM4_SECTORS];   /* Array of structures with transmit sector information */
+    unsigned char    spare_2[16];
+
+    /* Values from the run-time parameters datagram */
+    t_gsfEMRunTime   run_time;                  
+    
+    /* Values from the PU status datagram */
+    t_gsfEMPUStatus  pu_status;
+}
+t_gsfEM4Specific;
+
 /*DHG 2006/09/27 Added support for GeoSwath interferometric 250 Khz sonar */
 /* Define the GeoSwath sensor specific data structure */
 typedef struct t_gsfGeoSwathPlusSpecific
@@ -843,9 +955,10 @@ typedef union t_gsfSensorSpecific
     t_gsfElacMkIISpecific     gsfElacMkIISpecific;
     t_gsfEM3Specific          gsfEM3Specific;          /* used for EM120, EM300, EM1002, EM3000, EM3002, and EM121A_SIS */
     t_gsfReson8100Specific    gsfReson8100Specific;
+    t_gsfEM4Specific          gsfEM4Specific;          /* used for EM710, EM302, and EM122 */
     t_gsfGeoSwathPlusSpecific gsfGeoSwathPlusSpecific; /* DHG 2006/09/27 Use for GeoSwath+ interferometer */
 
-    /* Single beam sensors added */
+        /* Single beam sensors added */
     t_gsfSBEchotracSpecific   gsfSBEchotracSpecific;
     t_gsfSBEchotracSpecific   gsfSBBathy2000Specific;
     t_gsfSBMGD77Specific      gsfSBMGD77Specific;
@@ -964,7 +1077,7 @@ typedef union t_gsfSBSensorSpecific
  */
 typedef struct t_gsfScaleInfo
 {
-    unsigned char   compressionFlag;    /* flag for applicable compression routine */
+    unsigned char   compressionFlag;    /* Specifies bytes of storage in high order nibble and type of compression in low order nibble */
     double          multiplier;         /* the scale factor (millionths)for the array */
     double          offset;             /* dc offset to scale data by */
 } gsfScaleInfo;
@@ -974,6 +1087,21 @@ typedef struct t_gsfScaleFactors
     gsfScaleInfo    scaleTable[GSF_MAX_PING_ARRAY_SUBRECORDS];
 } gsfScaleFactors;
 
+/* Macro definitions for populating the compression flag (c_flag) argument passed through the 
+ * gsfLoadScaleFactors(), gsfGetScaleFactor, and gsfLoadDepthScaleFactorAutoOffset() APIs 
+ */
+
+/* The high order 4 bits are used to define the field size for this array */
+#define GSF_FIELD_SIZE_DEFAULT  0x00  /* Default values for field size are used used for all beam arrays */
+#define GSF_FIELD_SIZE_ONE      0x10  /* value saved as a one byte value after applying scale and offset */
+#define GSF_FIELD_SIZE_TWO      0x20  /* value saved as a two byte value after applying scale and offset */
+#define GSF_FIELD_SIZE_FOUR     0x40  /* value saved as a four byte value after applying scale and offset */
+
+/* The low order 4 bits are used to define the compression approach */
+#define GSF_DISABLE_COMPRESSION 0x00  /* no compression to be applied to the beam array data. */
+                                      /* no compression supported in this version, but may be added in a future release */
+
+
 typedef struct t_gsfEM3ImagerySpecific
 {
     unsigned short range_norm;          /* range to normal incidence used to correct sample amplitudes (in samples) */
@@ -981,8 +1109,10 @@ typedef struct t_gsfEM3ImagerySpecific
     unsigned short stop_tvg_ramp;       /* stop range sample of TVG ramp if not enough dynamic range (0 else) */
     char           bsn;                 /* normal incidence BS in dB */
     char           bso;                 /* oblique BS in dB */
-    double         mean_absorption;     /* mean absorption coeffiecien in dB/km, resolution of 0.01 dB/km) */
-    unsigned char  spare[8];            /* spare sensor specific subrecord space, reserved for future expansion */
+    double         mean_absorption;     /* mean absorption coeffiecient in dB/km, resolution of 0.01 dB/km) */
+    short          offset;              /* Value that has been added to all imagery samples to convert to a positive value */
+    short          scale;               /* Manufacturer's specified scale value for each sample. This value is 2 for data from EM3000/EM3002/EM1002/EM300/EM120 */
+    unsigned char  spare[4];            /* spare sensor specific subrecord space, reserved for future expansion */
 } t_gsfEM3ImagerySpecific;
 
 typedef struct t_gsfReson8100ImagerySpecific
@@ -990,15 +1120,33 @@ typedef struct t_gsfReson8100ImagerySpecific
     unsigned char  spare[8];            /* spare sensor specific subrecord space, reserved for future expansion */
 } t_gsfReson8100ImagerySpecific;
 
+typedef struct t_gsfEM4ImagerySpecific
+{
+    double         sampling_frequency;  /* The system digitizing rate in Hz, value retrieved from the imagery datagram */
+    double         mean_absorption;     /* mean absorption coefficient in dB/km, from 0x53 datagram, 0 if data is from 0x59  */
+    double         tx_pulse_length;     /* transmit pulse length in microseconds from imagery datagram 0x53, or 0x59 */
+    int            range_norm;          /* range to normal incidence used to correct sample amplitudes (in samples) */
+    int            start_tvg_ramp;      /* start range (in samples) of TVG ramp if not enough dynamic range 0 means not used */
+    int            stop_tvg_ramp;       /* stop range (in samples) of TVG ramp if not enough dynamic range 0 means not used */
+    double         bsn;                 /* normal incidence BS in dB */
+    double         bso;                 /* oblique incidence BS in dB */
+    double         tx_beam_width;       /* transmit beam width in degrees from imagery datagram */
+    double         tvg_cross_over;      /* The TVG law crossover angle in degrees */
+    short          offset;              /* Value that has been added to all imagery samples to convert to a positive value */
+    short          scale;               /* Manufacturer's specified scale value for each sample. This value is 10 for data from EM710/EM302/EM122 */
+    unsigned char  spare[20];           /* spare sensor specific subrecord space, reserved for future expansion */
+} t_gsfEM4ImagerySpecific;
+
 typedef union t_gsfSensorImagery
 {
     t_gsfEM3ImagerySpecific         gsfEM3ImagerySpecific;          /* used for EM120, EM300, EM1002, EM3000 */
     t_gsfReson8100ImagerySpecific   gsfReson8100ImagerySpecific;    /* For Reson 81P "snippet" imagery */
+    t_gsfEM4ImagerySpecific         gsfEM4ImagerySpecific;          /* used for EM122, EM302, EM710 */
 } gsfSensorImagery;
 
 typedef struct gsfTimeSeriesIntensity
 {
-    unsigned short sample_count;       /* number of amplitude samples ber beam */
+    unsigned short sample_count;       /* number of amplitude samples per beam */
     unsigned short detect_sample;      /* index of bottom detection sample for the beam */
     unsigned char  spare[8];           /* for future use */
     unsigned int  *samples;            /* Array of per-beam time series intensity samples  */
@@ -1015,7 +1163,7 @@ typedef struct t_gsfBRBIntensity
     unsigned int            applied_corrections;   /* flags to describe corrections applied to intensity values */
     unsigned char           spare[16];             /* spare header space */
     gsfSensorImagery        sensor_imagery;        /* sensor specific per-ping imagery information */
-    gsfTimeSeriesIntensity *time_series;           /* array of per-beam time series intenstites records */
+    gsfTimeSeriesIntensity *time_series;           /* array of per-beam time series intensity values */
 } gsfBRBIntensity;
 
 /* Define the data structure for a ping from a swath bathymetric system */
@@ -1057,6 +1205,11 @@ typedef struct t_gsfSwathBathyPing
     double            *beam_angle_forward; /* beam angle forward array (degrees counterclockwise from stbd.) */
     double            *vertical_error;     /* Array of estimated vertical error (meters, at 95% confidence) */
     double            *horizontal_error;   /* Array of estimated horizontal error (meters, at 95% confidence) */
+    unsigned short    *sector_number;      /* Array of values that specify the transit sector for this beam */
+    unsigned short    *detection_info;     /* Array of values that specify the method of bottom detection */
+    double            *incident_beam_adj;  /* Array of values that specify incident beam angle adjustment from beam_angle */
+    unsigned short    *system_cleaning;    /* Array of values that specify data cleaning information from the sensor system */
+    double            *doppler_corr;       /* Array of values used to correct the travel times for Doppler when transmission is FM */
     int                sensor_id;          /* a definition which specifies the sensor */
     gsfSensorSpecific  sensor_data;        /* union of known sensor specific data */
     gsfBRBIntensity   *brb_inten;          /* Structure containing bathymetric receive beam time series intensities */
@@ -1414,7 +1567,6 @@ typedef struct t_gsfMBParams
 #define GSF_HV_NAV_ERROR_RECORD_DECODE_FAILED    -48
 #define GSF_ATTITUDE_RECORD_ENCODE_FAILED        -49
 #define GSF_ATTITUDE_RECORD_DECODE_FAILED        -50
-
 
 /* The following are the function protoytpes for all functions intended
  * to be exported by the library.
