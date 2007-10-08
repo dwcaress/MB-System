@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_prog.c	6/23/95
- *    $Id: mbnavedit_prog.c,v 5.19 2006-02-16 21:15:07 caress Exp $
+ *    $Id: mbnavedit_prog.c,v 5.20 2007-10-08 16:17:00 caress Exp $
  *
  *    Copyright (c) 1995, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	August 28, 2000 (New version - no buffered i/o)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.19  2006/02/16 21:15:07  caress
+ * Made smooth inversion weights work as small as 0.01 in the interface. Redimensioned some strings too.
+ *
  * Revision 5.18  2006/01/24 19:19:24  caress
  * Version 5.0.8 beta.
  *
@@ -251,7 +254,7 @@ struct mbnavedit_plot_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbnavedit_prog.c,v 5.19 2006-02-16 21:15:07 caress Exp $";
+static char rcs_id[] = "$Id: mbnavedit_prog.c,v 5.20 2007-10-08 16:17:00 caress Exp $";
 static char program_name[] = "MBNAVEDIT";
 static char help_message[] =  "MBNAVEDIT is an interactive navigation editor for swath sonar data.\n\tIt can work with any data format supported by the MBIO library.\n";
 static char usage_message[] = "mbnavedit [-Byr/mo/da/hr/mn/sc -D  -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ooutfile -X -V -H]";
@@ -334,7 +337,7 @@ static double	plot_start_time;
 static double	plot_end_time;
 static int	nplot;
 static int	mbnavedit_xgid;
-static struct mbnavedit_plot_struct plot[NUMBER_PLOTS_MAX];
+static struct mbnavedit_plot_struct mbnavplot[NUMBER_PLOTS_MAX];
 static int	data_save;
 static double	file_start_time_d;
 
@@ -1265,6 +1268,13 @@ int mbnavedit_load_data()
 			ping[nbuff].heading_select = MB_NO;
 			ping[nbuff].draft_select = MB_NO;
 			ping[nbuff].lonlat_flag = MB_NO;
+			
+			/* select repeated data */
+			if (nbuff > 0 && ping[nbuff].lon == ping[nbuff-1].lon 
+				&& ping[nbuff].lat == ping[nbuff-1].lat)
+				{
+				ping[nbuff].lonlat_flag = MB_YES;
+				}
 
 			/* print output debug statements */
 			if (verbose >= 5)
@@ -1873,10 +1883,10 @@ int mbnavedit_action_mouse_pick(int xx, int yy)
 		/* figure out which plot the cursor is in */
 		for (iplot=0;iplot<number_plots;iplot++)
 			{
-			if (xx >= plot[iplot].ixmin
-				&& xx <= plot[iplot].ixmax
-				&& yy <= plot[iplot].iymin
-				&& yy >= plot[iplot].iymax)
+			if (xx >= mbnavplot[iplot].ixmin
+				&& xx <= mbnavplot[iplot].ixmax
+				&& yy <= mbnavplot[iplot].iymin
+				&& yy >= mbnavplot[iplot].iymax)
 				active_plot = iplot;
 			}
 		}
@@ -1892,7 +1902,7 @@ int mbnavedit_action_mouse_pick(int xx, int yy)
 		if (iplot != active_plot)
 			{
 			status = mbnavedit_action_deselect_all(
-					plot[iplot].type);
+					mbnavplot[iplot].type);
 			if (status == MB_SUCCESS)
 				deselect = MB_YES;
 			}
@@ -1913,32 +1923,32 @@ int mbnavedit_action_mouse_pick(int xx, int yy)
 	range_min = 100000;
 	for (i=current_id+1;i<current_id+nplot;i++)
 		{
-		if (plot[active_plot].type == PLOT_TINT)
+		if (mbnavplot[active_plot].type == PLOT_TINT)
 			{
 			ix = xx - ping[i].tint_x;
 			iy = yy - ping[i].tint_y;
 			}
-		else if (plot[active_plot].type == PLOT_LONGITUDE)
+		else if (mbnavplot[active_plot].type == PLOT_LONGITUDE)
 			{
 			ix = xx - ping[i].lon_x;
 			iy = yy - ping[i].lon_y;
 			}
-		else if (plot[active_plot].type == PLOT_LATITUDE)
+		else if (mbnavplot[active_plot].type == PLOT_LATITUDE)
 			{
 			ix = xx - ping[i].lat_x;
 			iy = yy - ping[i].lat_y;
 			}
-		else if (plot[active_plot].type == PLOT_SPEED)
+		else if (mbnavplot[active_plot].type == PLOT_SPEED)
 			{
 			ix = xx - ping[i].speed_x;
 			iy = yy - ping[i].speed_y;
 			}
-		else if (plot[active_plot].type == PLOT_HEADING)
+		else if (mbnavplot[active_plot].type == PLOT_HEADING)
 			{
 			ix = xx - ping[i].heading_x;
 			iy = yy - ping[i].heading_y;
 			}
-		else if (plot[active_plot].type == PLOT_DRAFT)
+		else if (mbnavplot[active_plot].type == PLOT_DRAFT)
 			{
 			ix = xx - ping[i].draft_x;
 			iy = yy - ping[i].draft_y;
@@ -1955,7 +1965,7 @@ int mbnavedit_action_mouse_pick(int xx, int yy)
 		and replot it */
 	if (range_min <= MBNAVEDIT_PICK_DISTANCE)
 		{
-		if (plot[active_plot].type == PLOT_TINT)
+		if (mbnavplot[active_plot].type == PLOT_TINT)
 			{
 			if (ping[iping].tint_select == MB_YES)
 				ping[iping].tint_select = MB_NO;
@@ -1963,7 +1973,7 @@ int mbnavedit_action_mouse_pick(int xx, int yy)
 				ping[iping].tint_select = MB_YES;
 			mbnavedit_plot_tint_value(active_plot,iping); 
 			}
-		else if (plot[active_plot].type == PLOT_LONGITUDE)
+		else if (mbnavplot[active_plot].type == PLOT_LONGITUDE)
 			{
 			if (ping[iping].lon_select == MB_YES)
 				ping[iping].lon_select = MB_NO;
@@ -1971,7 +1981,7 @@ int mbnavedit_action_mouse_pick(int xx, int yy)
 				ping[iping].lon_select = MB_YES;
 			mbnavedit_plot_lon_value(active_plot,iping); 
 			}
-		else if (plot[active_plot].type == PLOT_LATITUDE)
+		else if (mbnavplot[active_plot].type == PLOT_LATITUDE)
 			{
 			if (ping[iping].lat_select == MB_YES)
 				ping[iping].lat_select = MB_NO;
@@ -1979,7 +1989,7 @@ int mbnavedit_action_mouse_pick(int xx, int yy)
 				ping[iping].lat_select = MB_YES;
 			mbnavedit_plot_lat_value(active_plot,iping); 
 			}
-		else if (plot[active_plot].type == PLOT_SPEED)
+		else if (mbnavplot[active_plot].type == PLOT_SPEED)
 			{
 			if (ping[iping].speed_select == MB_YES)
 				ping[iping].speed_select = MB_NO;
@@ -1987,7 +1997,7 @@ int mbnavedit_action_mouse_pick(int xx, int yy)
 				ping[iping].speed_select = MB_YES;
 			mbnavedit_plot_speed_value(active_plot,iping); 
 			}
-		else if (plot[active_plot].type == PLOT_HEADING)
+		else if (mbnavplot[active_plot].type == PLOT_HEADING)
 			{
 			if (ping[iping].heading_select == MB_YES)
 				ping[iping].heading_select = MB_NO;
@@ -1995,7 +2005,7 @@ int mbnavedit_action_mouse_pick(int xx, int yy)
 				ping[iping].heading_select = MB_YES;
 			mbnavedit_plot_heading_value(active_plot,iping); 
 			}
-		else if (plot[active_plot].type == PLOT_DRAFT)
+		else if (mbnavplot[active_plot].type == PLOT_DRAFT)
 			{
 			if (ping[iping].draft_select == MB_YES)
 				ping[iping].draft_select = MB_NO;
@@ -2054,10 +2064,10 @@ int mbnavedit_action_mouse_select(int xx, int yy)
 		/* figure out which plot the cursor is in */
 		for (iplot=0;iplot<number_plots;iplot++)
 			{
-			if (xx >= plot[iplot].ixmin
-				&& xx <= plot[iplot].ixmax
-				&& yy <= plot[iplot].iymin
-				&& yy >= plot[iplot].iymax)
+			if (xx >= mbnavplot[iplot].ixmin
+				&& xx <= mbnavplot[iplot].ixmax
+				&& yy <= mbnavplot[iplot].iymin
+				&& yy >= mbnavplot[iplot].iymax)
 				active_plot = iplot;
 			}
 		}
@@ -2073,7 +2083,7 @@ int mbnavedit_action_mouse_select(int xx, int yy)
 		if (iplot != active_plot)
 			{
 			status = mbnavedit_action_deselect_all(
-					plot[iplot].type);
+					mbnavplot[iplot].type);
 			if (status == MB_SUCCESS)
 				deselect = MB_YES;
 			}
@@ -2093,32 +2103,32 @@ int mbnavedit_action_mouse_select(int xx, int yy)
 	/* find all data points that are close enough */
 	for (i=current_id;i<current_id+nplot;i++)
 		{
-		if (plot[active_plot].type == PLOT_TINT)
+		if (mbnavplot[active_plot].type == PLOT_TINT)
 			{
 			ix = xx - ping[i].tint_x;
 			iy = yy - ping[i].tint_y;
 			}
-		else if (plot[active_plot].type == PLOT_LONGITUDE)
+		else if (mbnavplot[active_plot].type == PLOT_LONGITUDE)
 			{
 			ix = xx - ping[i].lon_x;
 			iy = yy - ping[i].lon_y;
 			}
-		else if (plot[active_plot].type == PLOT_LATITUDE)
+		else if (mbnavplot[active_plot].type == PLOT_LATITUDE)
 			{
 			ix = xx - ping[i].lat_x;
 			iy = yy - ping[i].lat_y;
 			}
-		else if (plot[active_plot].type == PLOT_SPEED)
+		else if (mbnavplot[active_plot].type == PLOT_SPEED)
 			{
 			ix = xx - ping[i].speed_x;
 			iy = yy - ping[i].speed_y;
 			}
-		else if (plot[active_plot].type == PLOT_HEADING)
+		else if (mbnavplot[active_plot].type == PLOT_HEADING)
 			{
 			ix = xx - ping[i].heading_x;
 			iy = yy - ping[i].heading_y;
 			}
-		else if (plot[active_plot].type == PLOT_DRAFT)
+		else if (mbnavplot[active_plot].type == PLOT_DRAFT)
 			{
 			ix = xx - ping[i].draft_x;
 			iy = yy - ping[i].draft_y;
@@ -2129,32 +2139,32 @@ int mbnavedit_action_mouse_select(int xx, int yy)
 			and replot it */
 		if (range <= MBNAVEDIT_ERASE_DISTANCE)
 			{
-			if (plot[active_plot].type == PLOT_TINT)
+			if (mbnavplot[active_plot].type == PLOT_TINT)
 				{
 				ping[i].tint_select = MB_YES;
 				mbnavedit_plot_tint_value(active_plot,i); 
 				}
-			else if (plot[active_plot].type == PLOT_LONGITUDE)
+			else if (mbnavplot[active_plot].type == PLOT_LONGITUDE)
 				{
 				ping[i].lon_select = MB_YES;
 				mbnavedit_plot_lon_value(active_plot,i); 
 				}
-			else if (plot[active_plot].type == PLOT_LATITUDE)
+			else if (mbnavplot[active_plot].type == PLOT_LATITUDE)
 				{
 				ping[i].lat_select = MB_YES;
 				mbnavedit_plot_lat_value(active_plot,i); 
 				}
-			else if (plot[active_plot].type == PLOT_SPEED)
+			else if (mbnavplot[active_plot].type == PLOT_SPEED)
 				{
 				ping[i].speed_select = MB_YES;
 				mbnavedit_plot_speed_value(active_plot,i); 
 				}
-			else if (plot[active_plot].type == PLOT_HEADING)
+			else if (mbnavplot[active_plot].type == PLOT_HEADING)
 				{
 				ping[i].heading_select = MB_YES;
 				mbnavedit_plot_heading_value(active_plot,i); 
 				}
-			else if (plot[active_plot].type == PLOT_DRAFT)
+			else if (mbnavplot[active_plot].type == PLOT_DRAFT)
 				{
 				ping[i].draft_select = MB_YES;
 				mbnavedit_plot_draft_value(active_plot,i); 
@@ -2211,10 +2221,10 @@ int mbnavedit_action_mouse_deselect(int xx, int yy)
 		/* figure out which plot the cursor is in */
 		for (iplot=0;iplot<number_plots;iplot++)
 			{
-			if (xx >= plot[iplot].ixmin
-				&& xx <= plot[iplot].ixmax
-				&& yy <= plot[iplot].iymin
-				&& yy >= plot[iplot].iymax)
+			if (xx >= mbnavplot[iplot].ixmin
+				&& xx <= mbnavplot[iplot].ixmax
+				&& yy <= mbnavplot[iplot].iymin
+				&& yy >= mbnavplot[iplot].iymax)
 				active_plot = iplot;
 			}
 		}
@@ -2230,7 +2240,7 @@ int mbnavedit_action_mouse_deselect(int xx, int yy)
 		if (iplot != active_plot)
 			{
 			status = mbnavedit_action_deselect_all(
-					plot[iplot].type);
+					mbnavplot[iplot].type);
 			if (status == MB_SUCCESS)
 				deselect = MB_YES;
 			}
@@ -2250,32 +2260,32 @@ int mbnavedit_action_mouse_deselect(int xx, int yy)
 	/* find all data points that are close enough */
 	for (i=current_id;i<current_id+nplot;i++)
 		{
-		if (plot[active_plot].type == PLOT_TINT)
+		if (mbnavplot[active_plot].type == PLOT_TINT)
 			{
 			ix = xx - ping[i].tint_x;
 			iy = yy - ping[i].tint_y;
 			}
-		else if (plot[active_plot].type == PLOT_LONGITUDE)
+		else if (mbnavplot[active_plot].type == PLOT_LONGITUDE)
 			{
 			ix = xx - ping[i].lon_x;
 			iy = yy - ping[i].lon_y;
 			}
-		else if (plot[active_plot].type == PLOT_LATITUDE)
+		else if (mbnavplot[active_plot].type == PLOT_LATITUDE)
 			{
 			ix = xx - ping[i].lat_x;
 			iy = yy - ping[i].lat_y;
 			}
-		else if (plot[active_plot].type == PLOT_SPEED)
+		else if (mbnavplot[active_plot].type == PLOT_SPEED)
 			{
 			ix = xx - ping[i].speed_x;
 			iy = yy - ping[i].speed_y;
 			}
-		else if (plot[active_plot].type == PLOT_HEADING)
+		else if (mbnavplot[active_plot].type == PLOT_HEADING)
 			{
 			ix = xx - ping[i].heading_x;
 			iy = yy - ping[i].heading_y;
 			}
-		else if (plot[active_plot].type == PLOT_DRAFT)
+		else if (mbnavplot[active_plot].type == PLOT_DRAFT)
 			{
 			ix = xx - ping[i].draft_x;
 			iy = yy - ping[i].draft_y;
@@ -2286,32 +2296,32 @@ int mbnavedit_action_mouse_deselect(int xx, int yy)
 			and replot it */
 		if (range <= MBNAVEDIT_ERASE_DISTANCE)
 			{
-			if (plot[active_plot].type == PLOT_TINT)
+			if (mbnavplot[active_plot].type == PLOT_TINT)
 				{
 				ping[i].tint_select = MB_NO;
 				mbnavedit_plot_tint_value(active_plot,i); 
 				}
-			else if (plot[active_plot].type == PLOT_LONGITUDE)
+			else if (mbnavplot[active_plot].type == PLOT_LONGITUDE)
 				{
 				ping[i].lon_select = MB_NO;
 				mbnavedit_plot_lon_value(active_plot,i); 
 				}
-			else if (plot[active_plot].type == PLOT_LATITUDE)
+			else if (mbnavplot[active_plot].type == PLOT_LATITUDE)
 				{
 				ping[i].lat_select = MB_NO;
 				mbnavedit_plot_lat_value(active_plot,i); 
 				}
-			else if (plot[active_plot].type == PLOT_SPEED)
+			else if (mbnavplot[active_plot].type == PLOT_SPEED)
 				{
 				ping[i].speed_select = MB_NO;
 				mbnavedit_plot_speed_value(active_plot,i); 
 				}
-			else if (plot[active_plot].type == PLOT_HEADING)
+			else if (mbnavplot[active_plot].type == PLOT_HEADING)
 				{
 				ping[i].heading_select = MB_NO;
 				mbnavedit_plot_heading_value(active_plot,i); 
 				}
-			else if (plot[active_plot].type == PLOT_DRAFT)
+			else if (mbnavplot[active_plot].type == PLOT_DRAFT)
 				{
 				ping[i].draft_select = MB_NO;
 				mbnavedit_plot_draft_value(active_plot,i); 
@@ -2365,10 +2375,10 @@ int mbnavedit_action_mouse_selectall(int xx, int yy)
 		/* figure out which plot the cursor is in */
 		for (iplot=0;iplot<number_plots;iplot++)
 			{
-			if (xx >= plot[iplot].ixmin
-				&& xx <= plot[iplot].ixmax
-				&& yy <= plot[iplot].iymin
-				&& yy >= plot[iplot].iymax)
+			if (xx >= mbnavplot[iplot].ixmin
+				&& xx <= mbnavplot[iplot].ixmax
+				&& yy <= mbnavplot[iplot].iymin
+				&& yy >= mbnavplot[iplot].iymax)
 				active_plot = iplot;
 			}
 		}
@@ -2383,24 +2393,24 @@ int mbnavedit_action_mouse_selectall(int xx, int yy)
 		if (iplot != active_plot)
 			{
 			mbnavedit_action_deselect_all(
-					plot[iplot].type);
+					mbnavplot[iplot].type);
 			}
 		}
 
 	/* select all data points in active plot */
 	for (i=current_id;i<current_id+nplot;i++)
 		{
-		if (plot[active_plot].type == PLOT_TINT)
+		if (mbnavplot[active_plot].type == PLOT_TINT)
 			ping[i].tint_select = MB_YES;
-		else if (plot[active_plot].type == PLOT_LONGITUDE)
+		else if (mbnavplot[active_plot].type == PLOT_LONGITUDE)
 			ping[i].lon_select = MB_YES;
-		else if (plot[active_plot].type == PLOT_LATITUDE)
+		else if (mbnavplot[active_plot].type == PLOT_LATITUDE)
 			ping[i].lat_select = MB_YES;
-		else if (plot[active_plot].type == PLOT_SPEED)
+		else if (mbnavplot[active_plot].type == PLOT_SPEED)
 			ping[i]. speed_select = MB_YES;
-		else if (plot[active_plot].type == PLOT_HEADING)
+		else if (mbnavplot[active_plot].type == PLOT_HEADING)
 			ping[i].heading_select = MB_YES;
-		else if (plot[active_plot].type == PLOT_DRAFT)
+		else if (mbnavplot[active_plot].type == PLOT_DRAFT)
 			ping[i].draft_select = MB_YES;
 		}
 
@@ -2618,21 +2628,21 @@ int mbnavedit_action_set_interval(int xx, int yy, int which)
 			{
 			xg_drawline(mbnavedit_xgid,
 				interval_bound1, 
-				plot[i].iymin, 
+				mbnavplot[i].iymin, 
 				interval_bound1, 
-				plot[i].iymax, 
+				mbnavplot[i].iymax, 
 				pixel_values[WHITE],XG_DASHLINE);
 			}
 
-		if (xx < plot[0].ixmin)
-			xx = plot[0].ixmin;
-		if (xx > plot[0].ixmax)
-			xx = plot[0].ixmax;
+		if (xx < mbnavplot[0].ixmin)
+			xx = mbnavplot[0].ixmin;
+		if (xx > mbnavplot[0].ixmax)
+			xx = mbnavplot[0].ixmax;
 
 		/* get lower bound time and location */
 		interval_bound1 = xx;
-		interval_time1 = plot[0].xmin + 
-			(xx - plot[0].ixmin)/plot[0].xscale;
+		interval_time1 = mbnavplot[0].xmin + 
+			(xx - mbnavplot[0].ixmin)/mbnavplot[0].xscale;
 		interval_set1 = MB_YES;
 
 		/* plot line on all plots */
@@ -2640,9 +2650,9 @@ int mbnavedit_action_set_interval(int xx, int yy, int which)
 			{
 			xg_drawline(mbnavedit_xgid,
 				interval_bound1, 
-				plot[i].iymin, 
+				mbnavplot[i].iymin, 
 				interval_bound1, 
-				plot[i].iymax, 
+				mbnavplot[i].iymax, 
 				pixel_values[RED],XG_DASHLINE);
 			}
 				
@@ -2657,21 +2667,21 @@ int mbnavedit_action_set_interval(int xx, int yy, int which)
 			{
 			xg_drawline(mbnavedit_xgid,
 				interval_bound2, 
-				plot[i].iymin, 
+				mbnavplot[i].iymin, 
 				interval_bound2, 
-				plot[i].iymax, 
+				mbnavplot[i].iymax, 
 				pixel_values[WHITE],XG_DASHLINE);
 			}
 
-		if (xx < plot[0].ixmin)
-			xx = plot[0].ixmin;
-		if (xx > plot[0].ixmax)
-			xx = plot[0].ixmax;
+		if (xx < mbnavplot[0].ixmin)
+			xx = mbnavplot[0].ixmin;
+		if (xx > mbnavplot[0].ixmax)
+			xx = mbnavplot[0].ixmax;
 
 		/* get lower bound time and location */
 		interval_bound2 = xx;
-		interval_time2 = plot[0].xmin + 
-			(xx - plot[0].ixmin)/plot[0].xscale;
+		interval_time2 = mbnavplot[0].xmin + 
+			(xx - mbnavplot[0].ixmin)/mbnavplot[0].xscale;
 		interval_set2 = MB_YES;
 
 		/* plot line on all plots */
@@ -2679,9 +2689,9 @@ int mbnavedit_action_set_interval(int xx, int yy, int which)
 			{
 			xg_drawline(mbnavedit_xgid,
 				interval_bound2, 
-				plot[i].iymin, 
+				mbnavplot[i].iymin, 
 				interval_bound2, 
-				plot[i].iymax, 
+				mbnavplot[i].iymax, 
 				pixel_values[RED],XG_DASHLINE);
 			}
 				
@@ -2788,9 +2798,9 @@ int mbnavedit_action_use_dr()
 	active_plot = -1;
 	for (iplot=0;iplot<number_plots;iplot++)
 		{
-		if (plot[iplot].type == PLOT_LONGITUDE)
+		if (mbnavplot[iplot].type == PLOT_LONGITUDE)
 			active_plot = iplot;
-		else if (plot[iplot].type == PLOT_LATITUDE)
+		else if (mbnavplot[iplot].type == PLOT_LATITUDE)
 			active_plot = iplot;
 		}
 
@@ -2867,7 +2877,7 @@ int mbnavedit_action_use_smg()
 	active_plot = -1;
 	for (iplot=0;iplot<number_plots;iplot++)
 		{
-		if (plot[iplot].type == PLOT_SPEED)
+		if (mbnavplot[iplot].type == PLOT_SPEED)
 			active_plot = iplot;
 		}
 
@@ -2945,7 +2955,7 @@ int mbnavedit_action_use_cmg()
 	active_plot = -1;
 	for (iplot=0;iplot<number_plots;iplot++)
 		{
-		if (plot[iplot].type == PLOT_HEADING)
+		if (mbnavplot[iplot].type == PLOT_HEADING)
 			active_plot = iplot;
 		}
 
@@ -3602,7 +3612,7 @@ int mbnavedit_action_revert()
 		{
 		for (i=current_id;i<current_id+nplot;i++)
 			{
-			if (plot[iplot].type == PLOT_TINT)
+			if (mbnavplot[iplot].type == PLOT_TINT)
 				{
 				if (ping[i].tint_select == MB_YES)
 					{
@@ -3618,7 +3628,7 @@ int mbnavedit_action_revert()
 					status = mb_get_date(verbose, ping[i].time_d, ping[i].time_i);
 					}
 				}
-			else if (plot[iplot].type == PLOT_LONGITUDE)
+			else if (mbnavplot[iplot].type == PLOT_LONGITUDE)
 				{
 				if (ping[i].lon_select == MB_YES)
 					{
@@ -3626,7 +3636,7 @@ int mbnavedit_action_revert()
 					timelonlat_change = MB_YES;
 					}
 				}
-			else if (plot[iplot].type == PLOT_LATITUDE)
+			else if (mbnavplot[iplot].type == PLOT_LATITUDE)
 				{
 				if (ping[i].lat_select == MB_YES)
 					{
@@ -3634,7 +3644,7 @@ int mbnavedit_action_revert()
 					timelonlat_change = MB_YES;
 					}
 				}
-			else if (plot[iplot].type == PLOT_SPEED)
+			else if (mbnavplot[iplot].type == PLOT_SPEED)
 				{
 				if (ping[i].speed_select == MB_YES)
 					{
@@ -3642,7 +3652,7 @@ int mbnavedit_action_revert()
 					speedheading_change = MB_YES;
 					}
 				}
-			else if (plot[iplot].type == PLOT_HEADING)
+			else if (mbnavplot[iplot].type == PLOT_HEADING)
 				{
 				if (ping[i].heading_select == MB_YES)
 					{
@@ -3650,7 +3660,7 @@ int mbnavedit_action_revert()
 					speedheading_change = MB_YES;
 					}
 				}
-			else if (plot[iplot].type == PLOT_DRAFT)
+			else if (mbnavplot[iplot].type == PLOT_DRAFT)
 				{
 				if (ping[i].draft_select == MB_YES)
 					{
@@ -3721,14 +3731,14 @@ int mbnavedit_action_flag()
 		{
 		for (i=current_id;i<current_id+nplot;i++)
 			{
-			if (plot[iplot].type == PLOT_LONGITUDE)
+			if (mbnavplot[iplot].type == PLOT_LONGITUDE)
 				{
 				if (ping[i].lon_select == MB_YES)
 					{
 					ping[i].lonlat_flag = MB_YES;
 					}
 				}
-			else if (plot[iplot].type == PLOT_LATITUDE)
+			else if (mbnavplot[iplot].type == PLOT_LATITUDE)
 				{
 				if (ping[i].lat_select == MB_YES)
 					{
@@ -3789,14 +3799,14 @@ int mbnavedit_action_unflag()
 		{
 		for (i=current_id;i<current_id+nplot;i++)
 			{
-			if (plot[iplot].type == PLOT_LONGITUDE)
+			if (mbnavplot[iplot].type == PLOT_LONGITUDE)
 				{
 				if (ping[i].lon_select == MB_YES)
 					{
 					ping[i].lonlat_flag = MB_NO;
 					}
 				}
-			else if (plot[iplot].type == PLOT_LATITUDE)
+			else if (mbnavplot[iplot].type == PLOT_LATITUDE)
 				{
 				if (ping[i].lat_select == MB_YES)
 					{
@@ -4224,6 +4234,7 @@ int mbnavedit_get_inversion()
 	double	mtodeglon, mtodeglat;
 	double	dtime_d, dtime_d_sq;
 	char	string[MB_PATH_MAXLINE];
+	int	first, last;
 	int	i, ii, j, k;
 
 	/* print input debug statements */
@@ -4246,6 +4257,8 @@ int mbnavedit_get_inversion()
 	nlon_avg = 0;
 	lat_avg = 0.0;
 	nlat_avg = 0;
+	first = current_id;
+	last = current_id;
 	for (i=current_id;i<current_id+nplot;i++)
 		{
 		/* constrain lon unless flagged by user */
@@ -4255,6 +4268,11 @@ int mbnavedit_get_inversion()
 			nlon_avg++;
 			lat_avg += ping[i].lat;
 			nlat_avg++;
+			last = i;
+			}
+		else if (first == i && i < current_id+nplot-1)
+			{
+			first = i + 1;
 			}
 		}
 	if (nlon_avg > 0)
@@ -4418,6 +4436,18 @@ int mbnavedit_get_inversion()
 		ii = i - current_id;
 		ping[i].lon_dr = lon_avg + mtodeglon * x[ii];
 		}
+		
+	    /* make flagged ends of data flat */
+	    for (i=current_id;i<first;i++)
+		{
+		ii = first - current_id;
+		ping[i].lon_dr = lon_avg + mtodeglon * x[ii];
+		}
+	    for (i=last+1;i<current_id+nplot;i++)
+		{
+		ii = last - current_id;
+		ping[i].lon_dr = lon_avg + mtodeglon * x[ii];
+		}
 
 	    /* set message */
 	    sprintf(string,"Setting up inversion of %d latitude points",
@@ -4556,6 +4586,18 @@ int mbnavedit_get_inversion()
 	    for (i=current_id;i<current_id+nplot;i++)
 		{
 		ii = i - current_id;
+		ping[i].lat_dr = lat_avg + mtodeglat * x[ii];
+		}
+		
+	    /* make flagged ends of data flat */
+	    for (i=current_id;i<first;i++)
+		{
+		ii = first - current_id;
+		ping[i].lat_dr = lat_avg + mtodeglat * x[ii];
+		}
+	    for (i=last+1;i<current_id+nplot;i++)
+		{
+		ii = last - current_id;
 		ping[i].lat_dr = lat_avg + mtodeglat * x[ii];
 		}
 
@@ -4931,307 +4973,307 @@ int mbnavedit_plot_all()
 	number_plots = 0;
 	if (plot_tint == MB_YES)
 		{
-		plot[number_plots].type = PLOT_TINT;
-		plot[number_plots].ixmin = 1.25*margin_x;
-		plot[number_plots].ixmax = plot_width - margin_x/2;
-		plot[number_plots].iymin = plot_height - margin_y
+		mbnavplot[number_plots].type = PLOT_TINT;
+		mbnavplot[number_plots].ixmin = 1.25*margin_x;
+		mbnavplot[number_plots].ixmax = plot_width - margin_x/2;
+		mbnavplot[number_plots].iymin = plot_height - margin_y
 			+ number_plots*plot_height;
-		plot[number_plots].iymax = number_plots*plot_height 
+		mbnavplot[number_plots].iymax = number_plots*plot_height 
 			+ margin_y;
-		plot[number_plots].xmin = time_min;
-		plot[number_plots].xmax = time_max;
-		plot[number_plots].ymin = tint_min;
-		plot[number_plots].ymax = tint_max;
-		plot[number_plots].xscale = 
-			(plot[number_plots].ixmax 
-			- plot[number_plots].ixmin)
-			/(plot[number_plots].xmax 
-			- plot[number_plots].xmin);
-		plot[number_plots].yscale = 
-			(plot[number_plots].iymax 
-			- plot[number_plots].iymin)
-			/(plot[number_plots].ymax 
-			- plot[number_plots].ymin);
-		plot[number_plots].xinterval = 100.0;
-		plot[number_plots].yinterval = 5.0;
-		sprintf(plot[number_plots].xlabel, 
+		mbnavplot[number_plots].xmin = time_min;
+		mbnavplot[number_plots].xmax = time_max;
+		mbnavplot[number_plots].ymin = tint_min;
+		mbnavplot[number_plots].ymax = tint_max;
+		mbnavplot[number_plots].xscale = 
+			(mbnavplot[number_plots].ixmax 
+			- mbnavplot[number_plots].ixmin)
+			/(mbnavplot[number_plots].xmax 
+			- mbnavplot[number_plots].xmin);
+		mbnavplot[number_plots].yscale = 
+			(mbnavplot[number_plots].iymax 
+			- mbnavplot[number_plots].iymin)
+			/(mbnavplot[number_plots].ymax 
+			- mbnavplot[number_plots].ymin);
+		mbnavplot[number_plots].xinterval = 100.0;
+		mbnavplot[number_plots].yinterval = 5.0;
+		sprintf(mbnavplot[number_plots].xlabel, 
 			"Time (HH:MM:SS.SSS) beginning on %2.2d/%2.2d/%4.4d", 
 			xtime_i[1], xtime_i[2], xtime_i[0]);
-		sprintf(plot[number_plots].ylabel1, 
+		sprintf(mbnavplot[number_plots].ylabel1, 
 			"dT");
-		sprintf(plot[number_plots].ylabel2, 
+		sprintf(mbnavplot[number_plots].ylabel2, 
 			"(seconds)");
 		number_plots++;
 		}
 	if (plot_lon == MB_YES)
 		{
-		plot[number_plots].type = PLOT_LONGITUDE;
-		plot[number_plots].ixmin = 1.25*margin_x;
-		plot[number_plots].ixmax = plot_width - margin_x/2;
-		plot[number_plots].iymin = plot_height - margin_y
+		mbnavplot[number_plots].type = PLOT_LONGITUDE;
+		mbnavplot[number_plots].ixmin = 1.25*margin_x;
+		mbnavplot[number_plots].ixmax = plot_width - margin_x/2;
+		mbnavplot[number_plots].iymin = plot_height - margin_y
 			+ number_plots*plot_height;
-		plot[number_plots].iymax = number_plots*plot_height 
+		mbnavplot[number_plots].iymax = number_plots*plot_height 
 			+ margin_y;
-		plot[number_plots].xmin = time_min;
-		plot[number_plots].xmax = time_max;
-		plot[number_plots].ymin = lon_min;
-		plot[number_plots].ymax = lon_max;
-		plot[number_plots].xscale = 
-			(plot[number_plots].ixmax 
-			- plot[number_plots].ixmin)
-			/(plot[number_plots].xmax 
-			- plot[number_plots].xmin);
-		plot[number_plots].yscale = 
-			(plot[number_plots].iymax 
-			- plot[number_plots].iymin)
-			/(plot[number_plots].ymax 
-			- plot[number_plots].ymin);
-		plot[number_plots].xinterval = 100.0;
-		plot[number_plots].yinterval = 45.0;
-		sprintf(plot[number_plots].xlabel, 
+		mbnavplot[number_plots].xmin = time_min;
+		mbnavplot[number_plots].xmax = time_max;
+		mbnavplot[number_plots].ymin = lon_min;
+		mbnavplot[number_plots].ymax = lon_max;
+		mbnavplot[number_plots].xscale = 
+			(mbnavplot[number_plots].ixmax 
+			- mbnavplot[number_plots].ixmin)
+			/(mbnavplot[number_plots].xmax 
+			- mbnavplot[number_plots].xmin);
+		mbnavplot[number_plots].yscale = 
+			(mbnavplot[number_plots].iymax 
+			- mbnavplot[number_plots].iymin)
+			/(mbnavplot[number_plots].ymax 
+			- mbnavplot[number_plots].ymin);
+		mbnavplot[number_plots].xinterval = 100.0;
+		mbnavplot[number_plots].yinterval = 45.0;
+		sprintf(mbnavplot[number_plots].xlabel, 
 			"Time (HH:MM:SS.SSS) beginning on %2.2d/%2.2d/%4.4d", 
 			xtime_i[1], xtime_i[2], xtime_i[0]);
-		sprintf(plot[number_plots].ylabel1, 
+		sprintf(mbnavplot[number_plots].ylabel1, 
 			"Longitude");
-		sprintf(plot[number_plots].ylabel2, 
+		sprintf(mbnavplot[number_plots].ylabel2, 
 			"(degrees)");
 		number_plots++;
 		}
 	if (plot_lat == MB_YES)
 		{
-		plot[number_plots].type = PLOT_LATITUDE;
-		plot[number_plots].ixmin = 1.25*margin_x;
-		plot[number_plots].ixmax = plot_width - margin_x/2;
-		plot[number_plots].iymin = plot_height - margin_y
+		mbnavplot[number_plots].type = PLOT_LATITUDE;
+		mbnavplot[number_plots].ixmin = 1.25*margin_x;
+		mbnavplot[number_plots].ixmax = plot_width - margin_x/2;
+		mbnavplot[number_plots].iymin = plot_height - margin_y
 			+ number_plots*plot_height;
-		plot[number_plots].iymax = number_plots*plot_height 
+		mbnavplot[number_plots].iymax = number_plots*plot_height 
 			+ margin_y;
-		plot[number_plots].xmin = time_min;
-		plot[number_plots].xmax = time_max;
-		plot[number_plots].ymin = lat_min;
-		plot[number_plots].ymax = lat_max;
-		plot[number_plots].xscale = 
-			(plot[number_plots].ixmax 
-			- plot[number_plots].ixmin)
-			/(plot[number_plots].xmax 
-			- plot[number_plots].xmin);
-		plot[number_plots].yscale = 
-			(plot[number_plots].iymax 
-			- plot[number_plots].iymin)
-			/(plot[number_plots].ymax 
-			- plot[number_plots].ymin);
-		plot[number_plots].xinterval = 100.0;
-		plot[number_plots].yinterval = 45.0;
-		sprintf(plot[number_plots].xlabel, 
+		mbnavplot[number_plots].xmin = time_min;
+		mbnavplot[number_plots].xmax = time_max;
+		mbnavplot[number_plots].ymin = lat_min;
+		mbnavplot[number_plots].ymax = lat_max;
+		mbnavplot[number_plots].xscale = 
+			(mbnavplot[number_plots].ixmax 
+			- mbnavplot[number_plots].ixmin)
+			/(mbnavplot[number_plots].xmax 
+			- mbnavplot[number_plots].xmin);
+		mbnavplot[number_plots].yscale = 
+			(mbnavplot[number_plots].iymax 
+			- mbnavplot[number_plots].iymin)
+			/(mbnavplot[number_plots].ymax 
+			- mbnavplot[number_plots].ymin);
+		mbnavplot[number_plots].xinterval = 100.0;
+		mbnavplot[number_plots].yinterval = 45.0;
+		sprintf(mbnavplot[number_plots].xlabel, 
 			"Time (HH:MM:SS.SSS) beginning on %2.2d/%2.2d/%4.4d", 
 			xtime_i[1], xtime_i[2], xtime_i[0]);
-		sprintf(plot[number_plots].ylabel1, 
+		sprintf(mbnavplot[number_plots].ylabel1, 
 			"Latitude");
-		sprintf(plot[number_plots].ylabel2, 
+		sprintf(mbnavplot[number_plots].ylabel2, 
 			"(degrees)");
 		number_plots++;
 		}
 	if (plot_speed == MB_YES)
 		{
-		plot[number_plots].type = PLOT_SPEED;
-		plot[number_plots].ixmin = 1.25*margin_x;
-		plot[number_plots].ixmax = plot_width - margin_x/2;
-		plot[number_plots].iymin = plot_height - margin_y
+		mbnavplot[number_plots].type = PLOT_SPEED;
+		mbnavplot[number_plots].ixmin = 1.25*margin_x;
+		mbnavplot[number_plots].ixmax = plot_width - margin_x/2;
+		mbnavplot[number_plots].iymin = plot_height - margin_y
 			+ number_plots*plot_height;
-		plot[number_plots].iymax = number_plots*plot_height 
+		mbnavplot[number_plots].iymax = number_plots*plot_height 
 			+ margin_y;
-		plot[number_plots].xmin = time_min;
-		plot[number_plots].xmax = time_max;
-		plot[number_plots].ymin = speed_min;
-		plot[number_plots].ymax = speed_max;
-		plot[number_plots].xscale = 
-			(plot[number_plots].ixmax 
-			- plot[number_plots].ixmin)
-			/(plot[number_plots].xmax 
-			- plot[number_plots].xmin);
-		plot[number_plots].yscale = 
-			(plot[number_plots].iymax 
-			- plot[number_plots].iymin)
-			/(plot[number_plots].ymax 
-			- plot[number_plots].ymin);
-		plot[number_plots].xinterval = 100.0;
-		plot[number_plots].yinterval = 10;
-		sprintf(plot[number_plots].xlabel, 
+		mbnavplot[number_plots].xmin = time_min;
+		mbnavplot[number_plots].xmax = time_max;
+		mbnavplot[number_plots].ymin = speed_min;
+		mbnavplot[number_plots].ymax = speed_max;
+		mbnavplot[number_plots].xscale = 
+			(mbnavplot[number_plots].ixmax 
+			- mbnavplot[number_plots].ixmin)
+			/(mbnavplot[number_plots].xmax 
+			- mbnavplot[number_plots].xmin);
+		mbnavplot[number_plots].yscale = 
+			(mbnavplot[number_plots].iymax 
+			- mbnavplot[number_plots].iymin)
+			/(mbnavplot[number_plots].ymax 
+			- mbnavplot[number_plots].ymin);
+		mbnavplot[number_plots].xinterval = 100.0;
+		mbnavplot[number_plots].yinterval = 10;
+		sprintf(mbnavplot[number_plots].xlabel, 
 			"Time (HH:MM:SS.SSS) beginning on %2.2d/%2.2d/%4.4d", 
 			xtime_i[1], xtime_i[2], xtime_i[0]);
-		sprintf(plot[number_plots].ylabel1, 
+		sprintf(mbnavplot[number_plots].ylabel1, 
 			"Speed");
-		sprintf(plot[number_plots].ylabel2, 
+		sprintf(mbnavplot[number_plots].ylabel2, 
 			"(km/hr)");
 		number_plots++;
 		}
 	if (plot_heading == MB_YES)
 		{
-		plot[number_plots].type = PLOT_HEADING;
-		plot[number_plots].ixmin = 1.25*margin_x;
-		plot[number_plots].ixmax = plot_width - margin_x/2;
-		plot[number_plots].iymin = plot_height - margin_y
+		mbnavplot[number_plots].type = PLOT_HEADING;
+		mbnavplot[number_plots].ixmin = 1.25*margin_x;
+		mbnavplot[number_plots].ixmax = plot_width - margin_x/2;
+		mbnavplot[number_plots].iymin = plot_height - margin_y
 			+ number_plots*plot_height;
-		plot[number_plots].iymax = number_plots*plot_height 
+		mbnavplot[number_plots].iymax = number_plots*plot_height 
 			+ margin_y;
-		plot[number_plots].xmin = time_min;
-		plot[number_plots].xmax = time_max;
-		plot[number_plots].ymin = heading_min;
-		plot[number_plots].ymax = heading_max;
-		plot[number_plots].xscale = 
-			(plot[number_plots].ixmax 
-			- plot[number_plots].ixmin)
-			/(plot[number_plots].xmax 
-			- plot[number_plots].xmin);
-		plot[number_plots].yscale = 
-			(plot[number_plots].iymax 
-			- plot[number_plots].iymin)
-			/(plot[number_plots].ymax 
-			- plot[number_plots].ymin);
-		plot[number_plots].xinterval = 100.0;
-		plot[number_plots].yinterval = 45.0;
-		sprintf(plot[number_plots].xlabel, 
+		mbnavplot[number_plots].xmin = time_min;
+		mbnavplot[number_plots].xmax = time_max;
+		mbnavplot[number_plots].ymin = heading_min;
+		mbnavplot[number_plots].ymax = heading_max;
+		mbnavplot[number_plots].xscale = 
+			(mbnavplot[number_plots].ixmax 
+			- mbnavplot[number_plots].ixmin)
+			/(mbnavplot[number_plots].xmax 
+			- mbnavplot[number_plots].xmin);
+		mbnavplot[number_plots].yscale = 
+			(mbnavplot[number_plots].iymax 
+			- mbnavplot[number_plots].iymin)
+			/(mbnavplot[number_plots].ymax 
+			- mbnavplot[number_plots].ymin);
+		mbnavplot[number_plots].xinterval = 100.0;
+		mbnavplot[number_plots].yinterval = 45.0;
+		sprintf(mbnavplot[number_plots].xlabel, 
 			"Time (HH:MM:SS.SSS) beginning on %2.2d/%2.2d/%4.4d", 
 			xtime_i[1], xtime_i[2], xtime_i[0]);
-		sprintf(plot[number_plots].ylabel1, 
+		sprintf(mbnavplot[number_plots].ylabel1, 
 			"Heading");
-		sprintf(plot[number_plots].ylabel2, 
+		sprintf(mbnavplot[number_plots].ylabel2, 
 			"(degrees)");
 		number_plots++;
 		}
 	if (plot_draft == MB_YES)
 		{
-		plot[number_plots].type = PLOT_DRAFT;
-		plot[number_plots].ixmin = 1.25*margin_x;
-		plot[number_plots].ixmax = plot_width - margin_x/2;
-		plot[number_plots].iymin = plot_height - margin_y
+		mbnavplot[number_plots].type = PLOT_DRAFT;
+		mbnavplot[number_plots].ixmin = 1.25*margin_x;
+		mbnavplot[number_plots].ixmax = plot_width - margin_x/2;
+		mbnavplot[number_plots].iymin = plot_height - margin_y
 			+ number_plots*plot_height;
-		plot[number_plots].iymax = number_plots*plot_height 
+		mbnavplot[number_plots].iymax = number_plots*plot_height 
 			+ margin_y;
-		plot[number_plots].xmin = time_min;
-		plot[number_plots].xmax = time_max;
-		plot[number_plots].ymin = draft_max;
-		plot[number_plots].ymax = draft_min;
-		plot[number_plots].xscale = 
-			(plot[number_plots].ixmax 
-			- plot[number_plots].ixmin)
-			/(plot[number_plots].xmax 
-			- plot[number_plots].xmin);
-		plot[number_plots].yscale = 
-			(plot[number_plots].iymax 
-			- plot[number_plots].iymin)
-			/(plot[number_plots].ymax 
-			- plot[number_plots].ymin);
-		plot[number_plots].xinterval = 100.0;
-		plot[number_plots].yinterval = 45.0;
-		sprintf(plot[number_plots].xlabel, 
+		mbnavplot[number_plots].xmin = time_min;
+		mbnavplot[number_plots].xmax = time_max;
+		mbnavplot[number_plots].ymin = draft_max;
+		mbnavplot[number_plots].ymax = draft_min;
+		mbnavplot[number_plots].xscale = 
+			(mbnavplot[number_plots].ixmax 
+			- mbnavplot[number_plots].ixmin)
+			/(mbnavplot[number_plots].xmax 
+			- mbnavplot[number_plots].xmin);
+		mbnavplot[number_plots].yscale = 
+			(mbnavplot[number_plots].iymax 
+			- mbnavplot[number_plots].iymin)
+			/(mbnavplot[number_plots].ymax 
+			- mbnavplot[number_plots].ymin);
+		mbnavplot[number_plots].xinterval = 100.0;
+		mbnavplot[number_plots].yinterval = 45.0;
+		sprintf(mbnavplot[number_plots].xlabel, 
 			"Time (HH:MM:SS.SSS) beginning on %2.2d/%2.2d/%4.4d", 
 			xtime_i[1], xtime_i[2], xtime_i[0]);
-		sprintf(plot[number_plots].ylabel1, 
+		sprintf(mbnavplot[number_plots].ylabel1, 
 			"Sonar Depth");
-		sprintf(plot[number_plots].ylabel2, 
+		sprintf(mbnavplot[number_plots].ylabel2, 
 			"(meters)");
 		number_plots++;
 		}
 	if (plot_roll == MB_YES)
 		{
-		plot[number_plots].type = PLOT_ROLL;
-		plot[number_plots].ixmin = 1.25*margin_x;
-		plot[number_plots].ixmax = plot_width - margin_x/2;
-		plot[number_plots].iymin = plot_height - margin_y
+		mbnavplot[number_plots].type = PLOT_ROLL;
+		mbnavplot[number_plots].ixmin = 1.25*margin_x;
+		mbnavplot[number_plots].ixmax = plot_width - margin_x/2;
+		mbnavplot[number_plots].iymin = plot_height - margin_y
 			+ number_plots*plot_height;
-		plot[number_plots].iymax = number_plots*plot_height 
+		mbnavplot[number_plots].iymax = number_plots*plot_height 
 			+ margin_y;
-		plot[number_plots].xmin = time_min;
-		plot[number_plots].xmax = time_max;
-		plot[number_plots].ymin = roll_min;
-		plot[number_plots].ymax = roll_max;
-		plot[number_plots].xscale = 
-			(plot[number_plots].ixmax 
-			- plot[number_plots].ixmin)
-			/(plot[number_plots].xmax 
-			- plot[number_plots].xmin);
-		plot[number_plots].yscale = 
-			(plot[number_plots].iymax 
-			- plot[number_plots].iymin)
-			/(plot[number_plots].ymax 
-			- plot[number_plots].ymin);
-		plot[number_plots].xinterval = 100.0;
-		plot[number_plots].yinterval = 45.0;
-		sprintf(plot[number_plots].xlabel, 
+		mbnavplot[number_plots].xmin = time_min;
+		mbnavplot[number_plots].xmax = time_max;
+		mbnavplot[number_plots].ymin = roll_min;
+		mbnavplot[number_plots].ymax = roll_max;
+		mbnavplot[number_plots].xscale = 
+			(mbnavplot[number_plots].ixmax 
+			- mbnavplot[number_plots].ixmin)
+			/(mbnavplot[number_plots].xmax 
+			- mbnavplot[number_plots].xmin);
+		mbnavplot[number_plots].yscale = 
+			(mbnavplot[number_plots].iymax 
+			- mbnavplot[number_plots].iymin)
+			/(mbnavplot[number_plots].ymax 
+			- mbnavplot[number_plots].ymin);
+		mbnavplot[number_plots].xinterval = 100.0;
+		mbnavplot[number_plots].yinterval = 45.0;
+		sprintf(mbnavplot[number_plots].xlabel, 
 			"Time (HH:MM:SS.SSS) beginning on %2.2d/%2.2d/%4.4d", 
 			xtime_i[1], xtime_i[2], xtime_i[0]);
-		sprintf(plot[number_plots].ylabel1, 
+		sprintf(mbnavplot[number_plots].ylabel1, 
 			"Roll");
-		sprintf(plot[number_plots].ylabel2, 
+		sprintf(mbnavplot[number_plots].ylabel2, 
 			"(degrees)");
 		number_plots++;
 		}
 	if (plot_pitch == MB_YES)
 		{
-		plot[number_plots].type = PLOT_PITCH;
-		plot[number_plots].ixmin = 1.25*margin_x;
-		plot[number_plots].ixmax = plot_width - margin_x/2;
-		plot[number_plots].iymin = plot_height - margin_y
+		mbnavplot[number_plots].type = PLOT_PITCH;
+		mbnavplot[number_plots].ixmin = 1.25*margin_x;
+		mbnavplot[number_plots].ixmax = plot_width - margin_x/2;
+		mbnavplot[number_plots].iymin = plot_height - margin_y
 			+ number_plots*plot_height;
-		plot[number_plots].iymax = number_plots*plot_height 
+		mbnavplot[number_plots].iymax = number_plots*plot_height 
 			+ margin_y;
-		plot[number_plots].xmin = time_min;
-		plot[number_plots].xmax = time_max;
-		plot[number_plots].ymin = pitch_min;
-		plot[number_plots].ymax = pitch_max;
-		plot[number_plots].xscale = 
-			(plot[number_plots].ixmax 
-			- plot[number_plots].ixmin)
-			/(plot[number_plots].xmax 
-			- plot[number_plots].xmin);
-		plot[number_plots].yscale = 
-			(plot[number_plots].iymax 
-			- plot[number_plots].iymin)
-			/(plot[number_plots].ymax 
-			- plot[number_plots].ymin);
-		plot[number_plots].xinterval = 100.0;
-		plot[number_plots].yinterval = 45.0;
-		sprintf(plot[number_plots].xlabel, 
+		mbnavplot[number_plots].xmin = time_min;
+		mbnavplot[number_plots].xmax = time_max;
+		mbnavplot[number_plots].ymin = pitch_min;
+		mbnavplot[number_plots].ymax = pitch_max;
+		mbnavplot[number_plots].xscale = 
+			(mbnavplot[number_plots].ixmax 
+			- mbnavplot[number_plots].ixmin)
+			/(mbnavplot[number_plots].xmax 
+			- mbnavplot[number_plots].xmin);
+		mbnavplot[number_plots].yscale = 
+			(mbnavplot[number_plots].iymax 
+			- mbnavplot[number_plots].iymin)
+			/(mbnavplot[number_plots].ymax 
+			- mbnavplot[number_plots].ymin);
+		mbnavplot[number_plots].xinterval = 100.0;
+		mbnavplot[number_plots].yinterval = 45.0;
+		sprintf(mbnavplot[number_plots].xlabel, 
 			"Time (HH:MM:SS.SSS) beginning on %2.2d/%2.2d/%4.4d", 
 			xtime_i[1], xtime_i[2], xtime_i[0]);
-		sprintf(plot[number_plots].ylabel1, 
+		sprintf(mbnavplot[number_plots].ylabel1, 
 			"Pitch");
-		sprintf(plot[number_plots].ylabel2, 
+		sprintf(mbnavplot[number_plots].ylabel2, 
 			"(degrees)");
 		number_plots++;
 		}
 	if (plot_heave == MB_YES)
 		{
-		plot[number_plots].type = PLOT_HEAVE;
-		plot[number_plots].ixmin = 1.25*margin_x;
-		plot[number_plots].ixmax = plot_width - margin_x/2;
-		plot[number_plots].iymin = plot_height - margin_y
+		mbnavplot[number_plots].type = PLOT_HEAVE;
+		mbnavplot[number_plots].ixmin = 1.25*margin_x;
+		mbnavplot[number_plots].ixmax = plot_width - margin_x/2;
+		mbnavplot[number_plots].iymin = plot_height - margin_y
 			+ number_plots*plot_height;
-		plot[number_plots].iymax = number_plots*plot_height 
+		mbnavplot[number_plots].iymax = number_plots*plot_height 
 			+ margin_y;
-		plot[number_plots].xmin = time_min;
-		plot[number_plots].xmax = time_max;
-		plot[number_plots].ymin = heave_min;
-		plot[number_plots].ymax = heave_max;
-		plot[number_plots].xscale = 
-			(plot[number_plots].ixmax 
-			- plot[number_plots].ixmin)
-			/(plot[number_plots].xmax 
-			- plot[number_plots].xmin);
-		plot[number_plots].yscale = 
-			(plot[number_plots].iymax 
-			- plot[number_plots].iymin)
-			/(plot[number_plots].ymax 
-			- plot[number_plots].ymin);
-		plot[number_plots].xinterval = 100.0;
-		plot[number_plots].yinterval = 45.0;
-		sprintf(plot[number_plots].xlabel, 
+		mbnavplot[number_plots].xmin = time_min;
+		mbnavplot[number_plots].xmax = time_max;
+		mbnavplot[number_plots].ymin = heave_min;
+		mbnavplot[number_plots].ymax = heave_max;
+		mbnavplot[number_plots].xscale = 
+			(mbnavplot[number_plots].ixmax 
+			- mbnavplot[number_plots].ixmin)
+			/(mbnavplot[number_plots].xmax 
+			- mbnavplot[number_plots].xmin);
+		mbnavplot[number_plots].yscale = 
+			(mbnavplot[number_plots].iymax 
+			- mbnavplot[number_plots].iymin)
+			/(mbnavplot[number_plots].ymax 
+			- mbnavplot[number_plots].ymin);
+		mbnavplot[number_plots].xinterval = 100.0;
+		mbnavplot[number_plots].yinterval = 45.0;
+		sprintf(mbnavplot[number_plots].xlabel, 
 			"Time (HH:MM:SS.SSS) beginning on %2.2d/%2.2d/%4.4d", 
 			xtime_i[1], xtime_i[2], xtime_i[0]);
-		sprintf(plot[number_plots].ylabel1, 
+		sprintf(mbnavplot[number_plots].ylabel1, 
 			"Heave");
-		sprintf(plot[number_plots].ylabel2, 
+		sprintf(mbnavplot[number_plots].ylabel2, 
 			"(meters)");
 		number_plots++;
 		}
@@ -5243,10 +5285,10 @@ int mbnavedit_plot_all()
 	for (iplot=0;iplot<number_plots;iplot++)
 		{
 		/* get center locations */
-		center_x = (plot[iplot].ixmin 
-			+ plot[iplot].ixmax)/2;
-		center_y = (plot[iplot].iymin 
-			+ plot[iplot].iymax)/2;
+		center_x = (mbnavplot[iplot].ixmin 
+			+ mbnavplot[iplot].ixmax)/2;
+		center_y = (mbnavplot[iplot].iymin 
+			+ mbnavplot[iplot].iymax)/2;
 
 		/* plot filename */
 		sprintf(string,"Data File: %s", ifile);
@@ -5254,14 +5296,14 @@ int mbnavedit_plot_all()
 			&sascent,&sdescent);
 		xg_drawstring(mbnavedit_xgid,
 			center_x - swidth / 2,
-			plot[iplot].iymax - 5 * sascent / 2,
+			mbnavplot[iplot].iymax - 5 * sascent / 2,
 			string,pixel_values[BLACK],XG_SOLIDLINE);
 	
 		/* get bounds for position bar */
 		fpx = center_x - 2 * margin_x 
 			+ (4 * margin_x * current_id) / nbuff;
 		fpdx = MAX(((4 * margin_x * nplot) / nbuff), 5);
-		fpy = plot[iplot].iymax - 2 * sascent;
+		fpy = mbnavplot[iplot].iymax - 2 * sascent;
 		fpdy = sascent;
 		if (fpdx > 4 * margin_x)
 		    fpx = center_x + 2 * margin_x - fpdx;
@@ -5302,30 +5344,30 @@ int mbnavedit_plot_all()
 
 		/* plot x label */
 		xg_justify(mbnavedit_xgid,
-			plot[iplot].xlabel,
+			mbnavplot[iplot].xlabel,
 			&swidth,&sascent,&sdescent);
 		xg_drawstring(mbnavedit_xgid,
 			(int)(center_x - swidth/2), 
-			(int)(plot[iplot].iymin+0.75*margin_y),
-			plot[iplot].xlabel,
+			(int)(mbnavplot[iplot].iymin+0.75*margin_y),
+			mbnavplot[iplot].xlabel,
 			pixel_values[BLACK],XG_SOLIDLINE);
 
 		/* plot y labels */
 		xg_justify(mbnavedit_xgid,
-			plot[iplot].ylabel1,
+			mbnavplot[iplot].ylabel1,
 			&swidth,&sascent,&sdescent);
 		xg_drawstring(mbnavedit_xgid,
-			(int)(plot[iplot].ixmin - swidth/2 - 0.75*margin_x), 
+			(int)(mbnavplot[iplot].ixmin - swidth/2 - 0.75*margin_x), 
 			(int)(center_y-sascent),
-			plot[iplot].ylabel1,
+			mbnavplot[iplot].ylabel1,
 			pixel_values[BLACK],XG_SOLIDLINE);
 		xg_justify(mbnavedit_xgid,
-			plot[iplot].ylabel2,
+			mbnavplot[iplot].ylabel2,
 			&swidth,&sascent,&sdescent);
 		xg_drawstring(mbnavedit_xgid,
-			(int)(plot[iplot].ixmin - swidth/2 - 0.75*margin_x), 
+			(int)(mbnavplot[iplot].ixmin - swidth/2 - 0.75*margin_x), 
 			(int)(center_y+2*sascent),
-			plot[iplot].ylabel2,
+			mbnavplot[iplot].ylabel2,
 			pixel_values[BLACK],XG_SOLIDLINE);
 
 		/* plot x axis time annotation */
@@ -5334,17 +5376,17 @@ int mbnavedit_plot_all()
 			{
 			/* get x position */
 			x = plot_start_time + i * dx;
-			ix = plot[iplot].ixmin 
-				+ plot[iplot].xscale 
-				    * (x - plot[iplot].xmin);
+			ix = mbnavplot[iplot].ixmin 
+				+ mbnavplot[iplot].xscale 
+				    * (x - mbnavplot[iplot].xmin);
 			x += file_start_time_d;
 				    
 			/* draw tickmarks */
 			xg_drawline(mbnavedit_xgid,
 				ix, 
-				plot[iplot].iymin, 
+				mbnavplot[iplot].iymin, 
 				ix, 
-				plot[iplot].iymin + 5, 
+				mbnavplot[iplot].iymin + 5, 
 				pixel_values[BLACK],XG_SOLIDLINE);
 				
 			/* draw annotations */
@@ -5359,43 +5401,43 @@ int mbnavedit_plot_all()
 				&swidth,&sascent,&sdescent);
 			xg_drawstring(mbnavedit_xgid,
 				(int)(ix - swidth/2), 
-				(int)(plot[iplot].iymin 
+				(int)(mbnavplot[iplot].iymin 
 					+ 5 + 1.75*sascent),
 				string,
 				pixel_values[BLACK],XG_SOLIDLINE);
 			}
 			
 		/* plot y min max values */
-		if (plot[iplot].type == PLOT_LONGITUDE ||
-			plot[iplot].type == PLOT_LATITUDE)
+		if (mbnavplot[iplot].type == PLOT_LONGITUDE ||
+			mbnavplot[iplot].type == PLOT_LATITUDE)
 			strcpy(yformat, "%11.6f");
 		else
 			strcpy(yformat, "%6.2f");
-		sprintf(string, yformat, plot[iplot].ymin);
+		sprintf(string, yformat, mbnavplot[iplot].ymin);
 		xg_justify(mbnavedit_xgid,
 			string,
 			&swidth,&sascent,&sdescent);
 		xg_drawstring(mbnavedit_xgid,
-			(int)(plot[iplot].ixmin - swidth - 0.03*margin_x), 
-			(int)(plot[iplot].iymin + 0.5*sascent),
+			(int)(mbnavplot[iplot].ixmin - swidth - 0.03*margin_x), 
+			(int)(mbnavplot[iplot].iymin + 0.5*sascent),
 			string,
 			pixel_values[BLACK],XG_SOLIDLINE);
-		sprintf(string, yformat, plot[iplot].ymax);
+		sprintf(string, yformat, mbnavplot[iplot].ymax);
 		xg_justify(mbnavedit_xgid,
 			string,
 			&swidth,&sascent,&sdescent);
 		xg_drawstring(mbnavedit_xgid,
-			(int)(plot[iplot].ixmin - swidth - 0.03*margin_x), 
-			(int)(plot[iplot].iymax + 0.5*sascent),
+			(int)(mbnavplot[iplot].ixmin - swidth - 0.03*margin_x), 
+			(int)(mbnavplot[iplot].iymax + 0.5*sascent),
 			string,
 			pixel_values[BLACK],XG_SOLIDLINE);
 
 		/* plot zero values */
-		if (plot[iplot].ymax > 0.0 && plot[iplot].ymin < 0.0
-			|| plot[iplot].ymax < 0.0 && plot[iplot].ymin > 0.0)
+		if (mbnavplot[iplot].ymax > 0.0 && mbnavplot[iplot].ymin < 0.0
+			|| mbnavplot[iplot].ymax < 0.0 && mbnavplot[iplot].ymin > 0.0)
 			{
-			if (plot[iplot].type == PLOT_LONGITUDE ||
-				plot[iplot].type == PLOT_LATITUDE)
+			if (mbnavplot[iplot].type == PLOT_LONGITUDE ||
+				mbnavplot[iplot].type == PLOT_LATITUDE)
 				strcpy(yformat, "%11.6f");
 			else
 				strcpy(yformat, "%6.2f");
@@ -5403,50 +5445,50 @@ int mbnavedit_plot_all()
 			xg_justify(mbnavedit_xgid,
 				string,
 				&swidth,&sascent,&sdescent);
-			iyzero = plot[iplot].iymin - plot[iplot].yscale*plot[iplot].ymin;
+			iyzero = mbnavplot[iplot].iymin - mbnavplot[iplot].yscale*mbnavplot[iplot].ymin;
 			xg_drawstring(mbnavedit_xgid,
-				(int)(plot[iplot].ixmin - swidth - 0.03*margin_x), 
+				(int)(mbnavplot[iplot].ixmin - swidth - 0.03*margin_x), 
 				(int)(iyzero + 0.5*sascent),
 				string,
 				pixel_values[BLACK],XG_SOLIDLINE);
 			xg_drawline(mbnavedit_xgid,
-				plot[iplot].ixmin, iyzero, 
-				plot[iplot].ixmax, iyzero, 
+				mbnavplot[iplot].ixmin, iyzero, 
+				mbnavplot[iplot].ixmax, iyzero, 
 				pixel_values[BLACK],XG_DASHLINE);
 			}
 
 		/* plot bounding box */
 		xg_drawrectangle(mbnavedit_xgid,
-			plot[iplot].ixmin, 
-			plot[iplot].iymax, 
-			plot[iplot].ixmax - plot[iplot].ixmin, 
-			plot[iplot].iymin - plot[iplot].iymax, 
+			mbnavplot[iplot].ixmin, 
+			mbnavplot[iplot].iymax, 
+			mbnavplot[iplot].ixmax - mbnavplot[iplot].ixmin, 
+			mbnavplot[iplot].iymin - mbnavplot[iplot].iymax, 
 			pixel_values[BLACK],XG_SOLIDLINE);
 		xg_drawrectangle(mbnavedit_xgid,
-			plot[iplot].ixmin-1, 
-			plot[iplot].iymax-1, 
-			plot[iplot].ixmax - plot[iplot].ixmin + 2, 
-			plot[iplot].iymin - plot[iplot].iymax + 2, 
+			mbnavplot[iplot].ixmin-1, 
+			mbnavplot[iplot].iymax-1, 
+			mbnavplot[iplot].ixmax - mbnavplot[iplot].ixmin + 2, 
+			mbnavplot[iplot].iymin - mbnavplot[iplot].iymax + 2, 
 			pixel_values[BLACK],XG_SOLIDLINE);
 
 		/* now plot the data */
-		if (plot[iplot].type == PLOT_TINT)
+		if (mbnavplot[iplot].type == PLOT_TINT)
 			mbnavedit_plot_tint(iplot);
-		else if (plot[iplot].type == PLOT_LONGITUDE)
+		else if (mbnavplot[iplot].type == PLOT_LONGITUDE)
 			mbnavedit_plot_lon(iplot);
-		else if (plot[iplot].type == PLOT_LATITUDE)
+		else if (mbnavplot[iplot].type == PLOT_LATITUDE)
 			mbnavedit_plot_lat(iplot);
-		else if (plot[iplot].type == PLOT_SPEED)
+		else if (mbnavplot[iplot].type == PLOT_SPEED)
 			mbnavedit_plot_speed(iplot);
-		else if (plot[iplot].type == PLOT_HEADING)
+		else if (mbnavplot[iplot].type == PLOT_HEADING)
 			mbnavedit_plot_heading(iplot);
-		else if (plot[iplot].type == PLOT_DRAFT)
+		else if (mbnavplot[iplot].type == PLOT_DRAFT)
 			mbnavedit_plot_draft(iplot);
-		else if (plot[iplot].type == PLOT_ROLL)
+		else if (mbnavplot[iplot].type == PLOT_ROLL)
 			mbnavedit_plot_roll(iplot);
-		else if (plot[iplot].type == PLOT_PITCH)
+		else if (mbnavplot[iplot].type == PLOT_PITCH)
 			mbnavedit_plot_pitch(iplot);
-		else if (plot[iplot].type == PLOT_HEAVE)
+		else if (mbnavplot[iplot].type == PLOT_HEAVE)
 			mbnavedit_plot_heave(iplot);
 		}
 
@@ -5494,16 +5536,16 @@ int mbnavedit_plot_tint(int iplot)
 		}
 
 	/* get scaling values */
-	ixmin = plot[iplot].ixmin;
-	ixmax = plot[iplot].ixmax;
-	iymin = plot[iplot].iymin;
-	iymax = plot[iplot].iymax;
-	xmin = plot[iplot].xmin;
-	xmax = plot[iplot].xmax;
-	ymin = plot[iplot].ymin;
-	ymax = plot[iplot].ymax;
-	xscale = plot[iplot].xscale;
-	yscale = plot[iplot].yscale;
+	ixmin = mbnavplot[iplot].ixmin;
+	ixmax = mbnavplot[iplot].ixmax;
+	iymin = mbnavplot[iplot].iymin;
+	iymax = mbnavplot[iplot].iymax;
+	xmin = mbnavplot[iplot].xmin;
+	xmax = mbnavplot[iplot].xmax;
+	ymin = mbnavplot[iplot].ymin;
+	ymax = mbnavplot[iplot].ymax;
+	xscale = mbnavplot[iplot].xscale;
+	yscale = mbnavplot[iplot].yscale;
 
 	/* plot original expected time data */
 	if (plot_tint_org == MB_YES)
@@ -5580,16 +5622,16 @@ int mbnavedit_plot_lon(int iplot)
 		}
 
 	/* get scaling values */
-	ixmin = plot[iplot].ixmin;
-	ixmax = plot[iplot].ixmax;
-	iymin = plot[iplot].iymin;
-	iymax = plot[iplot].iymax;
-	xmin = plot[iplot].xmin;
-	xmax = plot[iplot].xmax;
-	ymin = plot[iplot].ymin;
-	ymax = plot[iplot].ymax;
-	xscale = plot[iplot].xscale;
-	yscale = plot[iplot].yscale;
+	ixmin = mbnavplot[iplot].ixmin;
+	ixmax = mbnavplot[iplot].ixmax;
+	iymin = mbnavplot[iplot].iymin;
+	iymax = mbnavplot[iplot].iymax;
+	xmin = mbnavplot[iplot].xmin;
+	xmax = mbnavplot[iplot].xmax;
+	ymin = mbnavplot[iplot].ymin;
+	ymax = mbnavplot[iplot].ymax;
+	xscale = mbnavplot[iplot].xscale;
+	yscale = mbnavplot[iplot].yscale;
 
 	/* plot original longitude data */
 	if (plot_lon_org == MB_YES)
@@ -5626,6 +5668,18 @@ int mbnavedit_plot_lon(int iplot)
 		}
 	}
 
+	/* plot flagged longitude data first so it is overlain by all else */
+	for (i=current_id;i<current_id+nplot;i++)
+		{
+		ping[i].lon_x = ixmin + xscale*(ping[i].file_time_d - xmin);
+		ping[i].lon_y = iymin + yscale*(ping[i].lon - ymin);
+		if (ping[i].lonlat_flag == MB_YES)
+			xg_drawrectangle(mbnavedit_xgid, 
+				ping[i].lon_x-2, 
+				ping[i].lon_y-2, 4, 4, 
+				pixel_values[ORANGE],XG_SOLIDLINE);
+		}
+
 	/* plot basic longitude data */
 	for (i=current_id;i<current_id+nplot;i++)
 		{
@@ -5637,10 +5691,9 @@ int mbnavedit_plot_lon(int iplot)
 				ping[i].lon_y-2, 4, 4, 
 				pixel_values[RED],XG_SOLIDLINE);
 		else if (ping[i].lonlat_flag == MB_YES)
-			xg_drawrectangle(mbnavedit_xgid, 
-				ping[i].lon_x-2, 
-				ping[i].lon_y-2, 4, 4, 
-				pixel_values[ORANGE],XG_SOLIDLINE);
+			{
+			;
+			}
 		else if (ping[i].lon != ping[i].lon_org)
 			xg_drawrectangle(mbnavedit_xgid, 
 				ping[i].lon_x-2, 
@@ -5689,16 +5742,16 @@ int mbnavedit_plot_lat(int iplot)
 		}
 
 	/* get scaling values */
-	ixmin = plot[iplot].ixmin;
-	ixmax = plot[iplot].ixmax;
-	iymin = plot[iplot].iymin;
-	iymax = plot[iplot].iymax;
-	xmin = plot[iplot].xmin;
-	xmax = plot[iplot].xmax;
-	ymin = plot[iplot].ymin;
-	ymax = plot[iplot].ymax;
-	xscale = plot[iplot].xscale;
-	yscale = plot[iplot].yscale;
+	ixmin = mbnavplot[iplot].ixmin;
+	ixmax = mbnavplot[iplot].ixmax;
+	iymin = mbnavplot[iplot].iymin;
+	iymax = mbnavplot[iplot].iymax;
+	xmin = mbnavplot[iplot].xmin;
+	xmax = mbnavplot[iplot].xmax;
+	ymin = mbnavplot[iplot].ymin;
+	ymax = mbnavplot[iplot].ymax;
+	xscale = mbnavplot[iplot].xscale;
+	yscale = mbnavplot[iplot].yscale;
 
 	/* plot original latitude data */
 	if (plot_lat_org == MB_YES)
@@ -5735,6 +5788,18 @@ int mbnavedit_plot_lat(int iplot)
 		}
 	}
 
+	/* plot flagged latitude data first so it is overlain by all else */
+	for (i=current_id;i<current_id+nplot;i++)
+		{
+		ping[i].lat_x = ixmin + xscale*(ping[i].file_time_d - xmin);
+		ping[i].lat_y = iymin + yscale*(ping[i].lat - ymin);
+		if (ping[i].lonlat_flag == MB_YES)
+			xg_drawrectangle(mbnavedit_xgid, 
+				ping[i].lat_x-2, 
+				ping[i].lat_y-2, 4, 4, 
+				pixel_values[ORANGE],XG_SOLIDLINE);
+		}
+
 	/* plot basic latitude data */
 	for (i=current_id;i<current_id+nplot;i++)
 		{
@@ -5746,10 +5811,9 @@ int mbnavedit_plot_lat(int iplot)
 				ping[i].lat_y-2, 4, 4, 
 				pixel_values[RED],XG_SOLIDLINE);
 		else if (ping[i].lonlat_flag == MB_YES)
-			xg_drawrectangle(mbnavedit_xgid, 
-				ping[i].lat_x-2, 
-				ping[i].lat_y-2, 4, 4, 
-				pixel_values[ORANGE],XG_SOLIDLINE);
+			{
+			;
+			}
 		else if (ping[i].lat != ping[i].lat_org)
 			xg_drawrectangle(mbnavedit_xgid, 
 				ping[i].lat_x-2, 
@@ -5798,16 +5862,16 @@ int mbnavedit_plot_speed(int iplot)
 		}
 
 	/* get scaling values */
-	ixmin = plot[iplot].ixmin;
-	ixmax = plot[iplot].ixmax;
-	iymin = plot[iplot].iymin;
-	iymax = plot[iplot].iymax;
-	xmin = plot[iplot].xmin;
-	xmax = plot[iplot].xmax;
-	ymin = plot[iplot].ymin;
-	ymax = plot[iplot].ymax;
-	xscale = plot[iplot].xscale;
-	yscale = plot[iplot].yscale;
+	ixmin = mbnavplot[iplot].ixmin;
+	ixmax = mbnavplot[iplot].ixmax;
+	iymin = mbnavplot[iplot].iymin;
+	iymax = mbnavplot[iplot].iymax;
+	xmin = mbnavplot[iplot].xmin;
+	xmax = mbnavplot[iplot].xmax;
+	ymin = mbnavplot[iplot].ymin;
+	ymax = mbnavplot[iplot].ymax;
+	xscale = mbnavplot[iplot].xscale;
+	yscale = mbnavplot[iplot].yscale;
 
 	/* plot original speed data */
 	if (plot_speed_org == MB_YES)
@@ -5901,16 +5965,16 @@ int mbnavedit_plot_heading(int iplot)
 		}
 
 	/* get scaling values */
-	ixmin = plot[iplot].ixmin;
-	ixmax = plot[iplot].ixmax;
-	iymin = plot[iplot].iymin;
-	iymax = plot[iplot].iymax;
-	xmin = plot[iplot].xmin;
-	xmax = plot[iplot].xmax;
-	ymin = plot[iplot].ymin;
-	ymax = plot[iplot].ymax;
-	xscale = plot[iplot].xscale;
-	yscale = plot[iplot].yscale;
+	ixmin = mbnavplot[iplot].ixmin;
+	ixmax = mbnavplot[iplot].ixmax;
+	iymin = mbnavplot[iplot].iymin;
+	iymax = mbnavplot[iplot].iymax;
+	xmin = mbnavplot[iplot].xmin;
+	xmax = mbnavplot[iplot].xmax;
+	ymin = mbnavplot[iplot].ymin;
+	ymax = mbnavplot[iplot].ymax;
+	xscale = mbnavplot[iplot].xscale;
+	yscale = mbnavplot[iplot].yscale;
 
 	/* plot original heading data */
 	if (plot_heading_org == MB_YES)
@@ -6004,16 +6068,16 @@ int mbnavedit_plot_draft(int iplot)
 		}
 
 	/* get scaling values */
-	ixmin = plot[iplot].ixmin;
-	ixmax = plot[iplot].ixmax;
-	iymin = plot[iplot].iymin;
-	iymax = plot[iplot].iymax;
-	xmin = plot[iplot].xmin;
-	xmax = plot[iplot].xmax;
-	ymin = plot[iplot].ymin;
-	ymax = plot[iplot].ymax;
-	xscale = plot[iplot].xscale;
-	yscale = plot[iplot].yscale;
+	ixmin = mbnavplot[iplot].ixmin;
+	ixmax = mbnavplot[iplot].ixmax;
+	iymin = mbnavplot[iplot].iymin;
+	iymax = mbnavplot[iplot].iymax;
+	xmin = mbnavplot[iplot].xmin;
+	xmax = mbnavplot[iplot].xmax;
+	ymin = mbnavplot[iplot].ymin;
+	ymax = mbnavplot[iplot].ymax;
+	xscale = mbnavplot[iplot].xscale;
+	yscale = mbnavplot[iplot].yscale;
 
 	/* plot original draft data */
 	if (plot_draft_org == MB_YES)
@@ -6090,16 +6154,16 @@ int mbnavedit_plot_roll(int iplot)
 		}
 
 	/* get scaling values */
-	ixmin = plot[iplot].ixmin;
-	ixmax = plot[iplot].ixmax;
-	iymin = plot[iplot].iymin;
-	iymax = plot[iplot].iymax;
-	xmin = plot[iplot].xmin;
-	xmax = plot[iplot].xmax;
-	ymin = plot[iplot].ymin;
-	ymax = plot[iplot].ymax;
-	xscale = plot[iplot].xscale;
-	yscale = plot[iplot].yscale;
+	ixmin = mbnavplot[iplot].ixmin;
+	ixmax = mbnavplot[iplot].ixmax;
+	iymin = mbnavplot[iplot].iymin;
+	iymax = mbnavplot[iplot].iymax;
+	xmin = mbnavplot[iplot].xmin;
+	xmax = mbnavplot[iplot].xmax;
+	ymin = mbnavplot[iplot].ymin;
+	ymax = mbnavplot[iplot].ymax;
+	xscale = mbnavplot[iplot].xscale;
+	yscale = mbnavplot[iplot].yscale;
 
 	/* plot roll data */
 	if (plot_roll == MB_YES)
@@ -6154,16 +6218,16 @@ int mbnavedit_plot_pitch(int iplot)
 		}
 
 	/* get scaling values */
-	ixmin = plot[iplot].ixmin;
-	ixmax = plot[iplot].ixmax;
-	iymin = plot[iplot].iymin;
-	iymax = plot[iplot].iymax;
-	xmin = plot[iplot].xmin;
-	xmax = plot[iplot].xmax;
-	ymin = plot[iplot].ymin;
-	ymax = plot[iplot].ymax;
-	xscale = plot[iplot].xscale;
-	yscale = plot[iplot].yscale;
+	ixmin = mbnavplot[iplot].ixmin;
+	ixmax = mbnavplot[iplot].ixmax;
+	iymin = mbnavplot[iplot].iymin;
+	iymax = mbnavplot[iplot].iymax;
+	xmin = mbnavplot[iplot].xmin;
+	xmax = mbnavplot[iplot].xmax;
+	ymin = mbnavplot[iplot].ymin;
+	ymax = mbnavplot[iplot].ymax;
+	xscale = mbnavplot[iplot].xscale;
+	yscale = mbnavplot[iplot].yscale;
 
 	/* plot pitch data */
 	if (plot_pitch == MB_YES)
@@ -6218,16 +6282,16 @@ int mbnavedit_plot_heave(int iplot)
 		}
 
 	/* get scaling values */
-	ixmin = plot[iplot].ixmin;
-	ixmax = plot[iplot].ixmax;
-	iymin = plot[iplot].iymin;
-	iymax = plot[iplot].iymax;
-	xmin = plot[iplot].xmin;
-	xmax = plot[iplot].xmax;
-	ymin = plot[iplot].ymin;
-	ymax = plot[iplot].ymax;
-	xscale = plot[iplot].xscale;
-	yscale = plot[iplot].yscale;
+	ixmin = mbnavplot[iplot].ixmin;
+	ixmax = mbnavplot[iplot].ixmax;
+	iymin = mbnavplot[iplot].iymin;
+	iymax = mbnavplot[iplot].iymax;
+	xmin = mbnavplot[iplot].xmin;
+	xmax = mbnavplot[iplot].xmax;
+	ymin = mbnavplot[iplot].ymin;
+	ymax = mbnavplot[iplot].ymax;
+	xscale = mbnavplot[iplot].xscale;
+	yscale = mbnavplot[iplot].yscale;
 
 	/* plot heave data */
 	if (plot_heave == MB_YES)
