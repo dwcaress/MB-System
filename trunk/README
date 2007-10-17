@@ -27,6 +27,7 @@ adjusting survey navigation.
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
 Version 5.1.1          To be determined
+Version 5.1.1beta11    October 17, 2007
 Version 5.1.1beta10    October 8, 2007
 Version 5.1.1beta5     July 5, 2007
 Version 5.1.0          November 26, 2006
@@ -223,6 +224,13 @@ can now use a topography grid to calculate grazing angles.
 Altered several programs so that sidescan data can have valid zero or
 negative values. Stopped applying a shift to Simrad sidescan and amplitude
 values to force them to be positive.
+
+Added decimation feature to mblist, mbnavlist, and mbsegylist. Also added
+and/or fixed the delimiter, segment, and binary output features for all
+three listing programs.
+
+Added mbcopy capability to merge bathymetry and beam flags from a third
+"merge" swath file. This is a Gordon Keith contribution.
 
 MB-SYSTEM VERSION 5.1.0 RELEASE NOTES:
 ------------------------------------------
@@ -1417,10 +1425,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.102 2007-10-08 17:50:47 caress Exp $
+RCS ID: $Id: README,v 5.103 2007-10-17 20:24:43 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.102  2007/10/08 17:50:47  caress
+Updates to reflect present state.
+
 Revision 5.101  2007/10/08 17:22:22  caress
 New MB-System version number.
 

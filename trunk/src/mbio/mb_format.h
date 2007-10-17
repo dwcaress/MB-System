@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.h	1/19/93
- *    $Id: mb_format.h,v 5.21 2006-11-10 22:36:04 caress Exp $
+ *    $Id: mb_format.h,v 5.22 2007-10-17 20:26:03 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2001, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -19,6 +19,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.21  2006/11/10 22:36:04  caress
+ * Working towards release 5.1.0
+ *
  * Revision 5.20  2006/10/05 18:58:28  caress
  * Changes for 5.1.0beta4
  *
@@ -226,7 +229,7 @@
 #define MB_FORMAT_DEF
 
 /* define date of last format update */
-static char mb_format_updatedate[] = "$Date: 2006-11-10 22:36:04 $ $Revision: 5.21 $";
+static char mb_format_updatedate[] = "$Date: 2007-10-17 20:26:03 $ $Revision: 5.22 $";
 
 /* Supported swath sonar systems */
 #define	MB_SYS_NONE		0
@@ -265,7 +268,7 @@ static char mb_format_updatedate[] = "$Date: 2006-11-10 22:36:04 $ $Revision: 5.
 
 /* Data formats supported by MBIO */
 #define MBF_DATALIST	-1
-#define MBF_NONE		0
+#define MBF_NONE	0
 #define	MBF_SBSIOMRG	11	/* SeaBeam, 16 beam, bathymetry, 
  					binary, uncentered, SIO. */
 #define	MBF_SBSIOCEN	12	/* SeaBeam, 19 beam, bathymetry, 
