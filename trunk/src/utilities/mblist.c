@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mblist.c	2/1/93
- *    $Id: mblist.c,v 5.24 2007-10-08 16:48:07 caress Exp $
+ *    $Id: mblist.c,v 5.25 2007-10-17 20:34:00 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -28,6 +28,9 @@
  *		in 1990.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.24  2007/10/08 16:48:07  caress
+ * State of the code on 8 October 2007.
+ *
  * Revision 5.23  2007/07/05 19:17:05  caress
  * Fixed calculation of grazing angles by adding sonar depth to calculation.
  *
@@ -355,7 +358,7 @@ int mb_get_raw_simrad2(int verbose, void *mbio_ptr,
 /* NaN value */
 double	NaN;
 
-static char rcs_id[] = "$Id: mblist.c,v 5.24 2007-10-08 16:48:07 caress Exp $";
+static char rcs_id[] = "$Id: mblist.c,v 5.25 2007-10-17 20:34:00 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
@@ -363,7 +366,7 @@ main (int argc, char **argv)
 {
 	static char program_name[] = "MBLIST";
 	static char help_message[] =  "MBLIST prints the specified contents of a swath data \nfile to stdout. The form of the output is quite flexible; \nMBLIST is tailored to produce ascii files in spreadsheet \nstyle with data columns separated by tabs.";
-	static char usage_message[] = "mblist [-Byr/mo/da/hr/mn/sc -C -Ddump_mode -Eyr/mo/da/hr/mn/sc \n-Fformat -Gdelimiter -H -Ifile -Llonflip -Mbeam_start/beam_end -Npixel_start/pixel_end \n-Ooptions -Ppings -Rw/e/s/n -Sspeed -Ttimegap -Ucheck -Xoutfile -V -W -Zsegment]";
+	static char usage_message[] = "mblist [-Byr/mo/da/hr/mn/sc -C -Ddump_mode -Eyr/mo/da/hr/mn/sc \n-Fformat -Gdelimiter -H -Ifile -Kdecimate -Llonflip -Mbeam_start/beam_end -Npixel_start/pixel_end \n-Ooptions -Ppings -Rw/e/s/n -Sspeed -Ttimegap -Ucheck -Xoutfile -V -W -Zsegment]";
 	extern char *optarg;
 	extern int optkind;
 	int	errflg = 0;
@@ -386,6 +389,7 @@ main (int argc, char **argv)
 	int	format;
 	int	pings;
 	int	pings_read;
+	int	decimate;
 	int	lonflip;
 	double	bounds[4];
 	int	btime_i[7];
@@ -436,8 +440,8 @@ main (int argc, char **argv)
 	int	netcdf = MB_NO;
 	int	netcdf_cdl = MB_YES;
 	int	segment = MB_NO;
-	char	delimiter[MB_PATH_MAXLINE];
 	char	segment_tag[MB_PATH_MAXLINE];
+	char	delimiter[MB_PATH_MAXLINE];
 
 	/* MBIO read values */
 	void	*mbio_ptr = NULL;
@@ -578,6 +582,7 @@ main (int argc, char **argv)
 
 	/* set dump mode flag to DUMP_MODE_LIST */
 	dump_mode = DUMP_MODE_LIST;
+	decimate = 1;
 
 	/* get NaN value */
 	GMT_make_dnan(NaN);
@@ -585,7 +590,7 @@ main (int argc, char **argv)
 	strcpy(output_file, "-");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "AaB:b:CcD:d:E:e:F:f:G:g:I:i:L:l:M:m:N:n:O:o:P:p:QqR:r:S:s:T:t:U:u:X:x:Z:z:VvWwHh")) != -1)
+	while ((c = getopt(argc, argv, "AaB:b:CcD:d:E:e:F:f:G:g:I:i:K:k:L:l:M:m:N:n:O:o:P:p:QqR:r:S:s:T:t:U:u:X:x:Z:z:VvWwHh")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -649,6 +654,11 @@ main (int argc, char **argv)
 		case 'I':
 		case 'i':
 			sscanf (optarg,"%s", read_file);
+			flag++;
+			break;
+		case 'K':
+		case 'k':
+			sscanf (optarg,"%d", &decimate);
 			flag++;
 			break;
 		case 'L':
@@ -769,6 +779,7 @@ main (int argc, char **argv)
 		fprintf(stderr,"dbg2       help:           %d\n",help);
 		fprintf(stderr,"dbg2       format:         %d\n",format);
 		fprintf(stderr,"dbg2       pings:          %d\n",pings);
+		fprintf(stderr,"dbg2       decimate:       %d\n",decimate);
 		fprintf(stderr,"dbg2       lonflip:        %d\n",lonflip);
 		fprintf(stderr,"dbg2       bounds[0]:      %f\n",bounds[0]);
 		fprintf(stderr,"dbg2       bounds[1]:      %f\n",bounds[1]);
@@ -797,6 +808,7 @@ main (int argc, char **argv)
 		fprintf(stderr,"dbg2       netcdf_cdl:     %d\n",netcdf_cdl);
 		fprintf(stderr,"dbg2       segment:        %d\n",segment);
 		fprintf(stderr,"dbg2       segment_tag:    %s\n",segment_tag);
+		fprintf(stderr,"dbg2       delimiter:      %s\n",delimiter);
 		fprintf(stderr,"dbg2       beam_set:       %d\n",beam_set);
 		fprintf(stderr,"dbg2       beam_start:     %d\n",beam_start);
 		fprintf(stderr,"dbg2       beam_end:       %d\n",beam_end);
@@ -2575,7 +2587,7 @@ main (int argc, char **argv)
 			}  
 
 		/* now loop over beams */
-		if (error == MB_ERROR_NO_ERROR)
+		if (error == MB_ERROR_NO_ERROR && (nread - 1) % decimate == 0)
 		for (j=beam_start;j<=beam_end;j++)
 		  {
 		  /* check beam status */
@@ -3463,7 +3475,7 @@ main (int argc, char **argv)
 		  }
 
 		/* now loop over pixels */
-		if (error == MB_ERROR_NO_ERROR)
+		if (error == MB_ERROR_NO_ERROR && (nread - 1) % decimate == 0)
 		for (j=pixel_start;j<=pixel_end;j++)
 		  {
 		  /* check pixel status */

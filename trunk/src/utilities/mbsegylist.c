@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsegylist.c	5/29/2004
- *    $Id: mbsegylist.c,v 5.5 2006-11-10 22:36:05 caress Exp $
+ *    $Id: mbsegylist.c,v 5.6 2007-10-17 20:34:00 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	May 29, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2006/11/10 22:36:05  caress
+ * Working towards release 5.1.0
+ *
  * Revision 5.4  2006/01/18 15:17:00  caress
  * Added stdlib.h include.
  *
@@ -72,7 +75,7 @@
 /* NaN value */
 double	NaN;
 
-static char rcs_id[] = "$Id: mbsegylist.c,v 5.5 2006-11-10 22:36:05 caress Exp $";
+static char rcs_id[] = "$Id: mbsegylist.c,v 5.6 2007-10-17 20:34:00 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
@@ -80,7 +83,7 @@ main (int argc, char **argv)
 {
 	static char program_name[] = "MBsegylist";
 	static char help_message[] =  "MBsegylist lists table data from a segy data file.";
-	static char usage_message[] = "MBsegylist -Ifile [-A -Llonflip -Olist -H -V]";
+	static char usage_message[] = "MBsegylist -Ifile [-A -Ddecimate -Gdelimiter -Llonflip -Olist -H -V]";
 	extern char *optarg;
 	extern int optkind;
 	int	errflg = 0;
@@ -97,6 +100,7 @@ main (int argc, char **argv)
 	/* MBIO read control parameters */
 	char	file[MB_PATH_MAXLINE];
 	int	pings;
+	int	decimate;
 	int	lonflip;
 	double	bounds[4];
 	int	btime_i[7];
@@ -125,6 +129,7 @@ main (int argc, char **argv)
 	int	ascii = MB_YES;
 	int	segment = MB_NO;
 	char	segment_tag[MB_PATH_MAXLINE];
+	char	delimiter[MB_PATH_MAXLINE];
 	
 	/* additional time variables */
 	int	first_m = MB_YES;
@@ -170,12 +175,14 @@ main (int argc, char **argv)
 	list[n_list]='I'; n_list++;
 	list[n_list]='N'; n_list++;
 	list[n_list]='L'; n_list++;
+	sprintf(delimiter, "\t");
+	decimate = 1;
 
 	/* get NaN value */
 	GMT_make_dnan(NaN);
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "AaI:i:L:l:O:o:VvWwHh")) != -1)
+	while ((c = getopt(argc, argv, "AaD:d:G:g:I:i:L:l:O:o:VvWwZ:z:Hh")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -189,6 +196,16 @@ main (int argc, char **argv)
 		case 'A':
 		case 'a':
 			ascii = MB_NO;
+			flag++;
+			break;
+		case 'D':
+		case 'd':
+			sscanf (optarg,"%d", &decimate);
+			flag++;
+			break;
+		case 'G':
+		case 'g':
+			sscanf (optarg,"%s", delimiter);
 			flag++;
 			break;
 		case 'I':
@@ -206,6 +223,12 @@ main (int argc, char **argv)
 			for(j=0,n_list=0;j<(int)strlen(optarg);j++,n_list++)
 				if (n_list<MAX_OPTIONS)
 					list[n_list] = optarg[j];
+			flag++;
+			break;
+		case 'Z':
+		case 'z':
+			segment = MB_YES;
+			sscanf (optarg,"%s", segment_tag);
 			flag++;
 			break;
 		case '?':
@@ -240,6 +263,7 @@ main (int argc, char **argv)
 		fprintf(stderr,"dbg2       verbose:        %d\n",verbose);
 		fprintf(stderr,"dbg2       help:           %d\n",help);
 		fprintf(stderr,"dbg2       lonflip:        %d\n",lonflip);
+		fprintf(stderr,"dbg2       decimate:       %d\n",decimate);
 		fprintf(stderr,"dbg2       bounds[0]:      %f\n",bounds[0]);
 		fprintf(stderr,"dbg2       bounds[1]:      %f\n",bounds[1]);
 		fprintf(stderr,"dbg2       bounds[2]:      %f\n",bounds[2]);
@@ -262,6 +286,9 @@ main (int argc, char **argv)
 		fprintf(stderr,"dbg2       timegap:        %f\n",timegap);
 		fprintf(stderr,"dbg2       file:           %s\n",file);
 		fprintf(stderr,"dbg2       ascii:          %d\n",ascii);
+		fprintf(stderr,"dbg2       segment:        %d\n",segment);
+		fprintf(stderr,"dbg2       segment_tag:    %s\n",segment_tag);
+		fprintf(stderr,"dbg2       delimiter:      %s\n",delimiter);
 		fprintf(stderr,"dbg2       n_list:         %d\n",n_list);
 		for (i=0;i<n_list;i++)
 			fprintf(stderr,"dbg2         list[%d]:      %c\n",
@@ -287,6 +314,12 @@ main (int argc, char **argv)
 			program_name);
 		exit(error);
 		}
+		
+	/* output separator for GMT style segment file output */
+	if (segment == MB_YES && ascii == MB_YES)
+		{
+		printf("%s\n", segment_tag);
+		}
 
 	/* read and print data */
 	nread = 0;
@@ -308,6 +341,7 @@ main (int argc, char **argv)
 		/* get needed values */
 		if (status == MB_SUCCESS)
 			{
+			nread++;
 			time_j[0] = traceheader.year;
 			time_j[1] = traceheader.day_of_yr;
 			time_j[2] = traceheader.min + 60 * traceheader.hour;
@@ -373,7 +407,7 @@ main (int argc, char **argv)
 			}
 		
 		/* print out info */
-		if (status == MB_SUCCESS)
+		if (status == MB_SUCCESS && (nread - 1) % decimate == 0)
 			{
 			for (i=0; i<n_list; i++) 
 				{
@@ -719,7 +753,7 @@ main (int argc, char **argv)
 					}
 				if (ascii == MB_YES)
 				    {
-				    if (i<(n_list-1)) printf ("\t");
+				    if (i<(n_list-1)) printf ("%s",delimiter);
 				    else printf ("\n");
 				    }
 				}
@@ -737,7 +771,6 @@ main (int argc, char **argv)
 			{
 			time_d_old = time_d;
 			}
-
 		}
 
 	/* close the swath file */
