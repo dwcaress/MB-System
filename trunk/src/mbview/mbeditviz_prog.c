@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbeditviz_prog.c		5/1/2007
- *    $Id: mbeditviz_prog.c,v 5.3 2007-10-08 16:32:08 caress Exp $
+ *    $Id: mbeditviz_prog.c,v 5.4 2007-10-17 20:35:05 caress Exp $
  *
  *    Copyright (c) 2007 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	May 1, 2007
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2007/10/08 16:32:08  caress
+ * Code status as of 8 October 2007.
+ *
  * Revision 5.2  2007/07/05 19:53:37  caress
  * Added sys/stat.h include.
  *
@@ -60,7 +63,7 @@
 #include "mbview.h"
 
 /* id variables */
-static char rcs_id[] = "$Id: mbeditviz_prog.c,v 5.3 2007-10-08 16:32:08 caress Exp $";
+static char rcs_id[] = "$Id: mbeditviz_prog.c,v 5.4 2007-10-17 20:35:05 caress Exp $";
 static char program_name[] = "MBeditviz";
 static char help_message[] = "MBeditviz is a bathymetry editor and patch test tool.";
 static char usage_message[] = "mbeditviz [-H -T -V]";
@@ -179,7 +182,7 @@ int mbeditviz_init(int argc,char **argv)
 	/* set mbio default values */
 	mbev_status = mb_lonflip(mbev_verbose,&mbdef_lonflip);
 	mbdef_pings = 1;
-	mbdef_format = -1;
+	mbdef_format = 0;
 	mbdef_bounds[0] = -360.;
 	mbdef_bounds[1] = 360.;
 	mbdef_bounds[2] = -90.;
@@ -342,8 +345,9 @@ int mbeditviz_open_data(char *path, int format)
 	char	*function_name = "mbeditviz_open_data";
 	int	done;
 	double	weight;
-	char	file[MB_PATH_MAXLINE];
-	
+	int	filestatus;
+	char	fileraw[MB_PATH_MAXLINE];
+	char	fileprocessed[MB_PATH_MAXLINE];
 
 	/* print input debug statements */
 	if (mbev_verbose >= 2)
@@ -351,11 +355,14 @@ int mbeditviz_open_data(char *path, int format)
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       file:        %s\n",file);
+		fprintf(stderr,"dbg2       file:        %s\n",path);
 		fprintf(stderr,"dbg2       format:      %d\n",format);
 		}
-
 	
+	/* get format if required */
+	if (format == 0)
+		mb_get_format(mbev_verbose,path,NULL,&format,&mbev_error);
+
 	/* loop until all inf files are read */
 	done = MB_NO;
 	while (done == MB_NO)
@@ -372,11 +379,11 @@ int mbeditviz_open_data(char *path, int format)
 				{
 				while (done == MB_NO)
 					{
-					if (mbev_status = mb_datalist_read(mbev_verbose,datalist,
-							file,&format,&weight,&mbev_error)
+					if (mbev_status = mb_datalist_read2(mbev_verbose,datalist,
+							&filestatus,fileraw,fileprocessed,&format,&weight,&mbev_error)
 							== MB_SUCCESS)
 						{
-						mbev_status = mbeditviz_import_file(file,format);
+						mbev_status = mbeditviz_import_file(fileraw,format);
 						}
 					else
 						{

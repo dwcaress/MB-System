@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbeditviz_callbacks.c		4/27/2007
- *    $Id: mbeditviz_callbacks.c,v 5.4 2007-10-08 16:32:08 caress Exp $
+ *    $Id: mbeditviz_callbacks.c,v 5.5 2007-10-17 20:35:05 caress Exp $
  *
  *    Copyright (c) 2007 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	April 27, 2007
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2007/10/08 16:32:08  caress
+ * Code status as of 8 October 2007.
+ *
  * Revision 5.3  2007/07/03 17:35:54  caress
  * Working on MBeditviz.
  *
@@ -609,11 +612,18 @@ fprintf(stderr,"  %d %d\n",i,position_list[i]);
 			do_mbeditviz_message_on(value_text);
 			mbeditviz_load_file(ifile);
 			}
+		else if (selected == MB_YES && file->load_status == MB_YES)
+			{
+			loadcount++;
+			}
 		else if (selected == MB_NO && file->load_status == MB_YES)
+			{
 			mbeditviz_unload_file(ifile);
+			}
 		}
 		
 	/* make the grid and display grid */
+fprintf(stderr," mbev_status:%d loadcount:%d\n",mbev_status,loadcount);
 	if (mbev_status == MB_SUCCESS && loadcount > 0)
 		{
 		/* make the grid */
@@ -981,6 +991,8 @@ fprintf(stderr,"do_mbeditviz_viewgrid\n");
 						MBV_COLOR_BLACK,
 						2,
 						file->name,
+						MB_PROCESSED_NONE,
+						file->path,
 						file->path,
 						file->format,
 						MB_YES,

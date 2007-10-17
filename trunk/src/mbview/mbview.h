@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbview.h	10/9/2002
- *    $Id: mbview.h,v 5.18 2007-10-08 16:32:08 caress Exp $
+ *    $Id: mbview.h,v 5.19 2007-10-17 20:35:05 caress Exp $
  *
  *    Copyright (c) 2002, 2003, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -18,6 +18,9 @@
  * Date:	October 10,  2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.18  2007/10/08 16:32:08  caress
+ * Code status as of 8 October 2007.
+ *
  * Revision 5.17  2007/07/03 17:35:54  caress
  * Working on MBeditviz.
  *
@@ -409,7 +412,9 @@ struct mbview_nav_struct {
 	int	color;
 	int	size;
 	mb_path	name;
-	mb_path	path;
+	int	pathstatus;
+	mb_path	pathraw;
+	mb_path	pathprocessed;
 	int	format;
 	int	swathbounds;
 	int	shot;
@@ -473,6 +478,7 @@ struct mbview_struct {
 	void (*mbview_picksite_notify)(int id);
 	void (*mbview_pickroute_notify)(int id);
 	void (*mbview_picknav_notify)(int id);
+	void (*mbview_sensitivity_notify)();
 	
 	/* active flag */
 	int	active;
@@ -958,7 +964,9 @@ int mbview_addnav(int verbose, int instance,
 			int	navcolor,
 			int	navsize,
 			mb_path	navname,
-			mb_path	navpath,
+			int	navpathstatus,
+			mb_path	navpathraw,
+			mb_path	navpathprocessed,
 			int	navformat,
 			int	navswathbounds,
 			int	navshot,
@@ -1030,6 +1038,9 @@ int mbview_addaction(int verbose, int instance,
 int mbview_addpicknotify(int verbose, int instance,
 			int	picktype,
 			void	(mbview_pick_notify)(int),
+			int *error);
+int mbview_setsensitivitynotify(int verbose, int instance,
+			void	(mbview_sensitivity_notify)(int),
 			int *error);
 
 int mbview_open(int verbose, int instance, int *error);

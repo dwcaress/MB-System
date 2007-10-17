@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrdviz_callbacks.c		10/9/2002
- *    $Id: mbgrdviz_callbacks.c,v 5.25 2007-10-08 16:32:08 caress Exp $
+ *    $Id: mbgrdviz_callbacks.c,v 5.26 2007-10-17 20:35:05 caress Exp $
  *
  *    Copyright (c) 2002, 2003, 2006, 2007 by
  *    David W. Caress (caress@mbari.org)
@@ -121,7 +121,7 @@ static int	realtime_update = 5;
 static int	realtime_icon = MBGRDVIZ_REALTIME_ICON_SHIP;
 
 /* id variables */
-static char rcs_id[] = "$Id: mbgrdviz_callbacks.c,v 5.25 2007-10-08 16:32:08 caress Exp $";
+static char rcs_id[] = "$Id: mbgrdviz_callbacks.c,v 5.26 2007-10-17 20:35:05 caress Exp $";
 static char program_name[] = "MBgrdviz";
 static char help_message[] = "MBgrdviz is an interactive 2D/3D visualization tool for GMT grid files.";
 static char usage_message[] = "mbgrdviz [-H -T -V]";
@@ -443,15 +443,23 @@ do_mbgrdviz_sensitivity()
    	int	mbview_allactive;
         Cardinal ac = 0;
         Arg	args[256];
+	int	instance;
+	int	nsite, nroute;
 	int	i;
-    
+
+fprintf(stderr,"do_mbgrdviz_sensitivity called\n");
     	/* set file opening menu items only if an mbview instance is active */
 	mbview_active = MB_NO;
 	mbview_allactive = MB_YES;
+	instance = -1;
 	for (i=0;i<MBV_MAX_WINDOWS;i++)
 		{
 		if (mbview_id[i] == MB_YES)
+			{
 			mbview_active = MB_YES;
+			if (instance < 0) 
+				instance == i;
+			}
 		else
 			mbview_allactive = MB_NO;
 		}
@@ -484,7 +492,31 @@ do_mbgrdviz_sensitivity()
 	XtSetValues(pushButton_openroute, args, ac);
 	XtSetValues(pushButton_opennav, args, ac);
 	XtSetValues(pushButton_openswath, args, ac);
+	
+	mbview_getsitecount(verbose, instance, &nsite, &error);
+	if (mbview_active == MB_YES && nsite > 0)
+		{
+		ac = 0;
+		XtSetArg(args[ac], XmNsensitive, True); ac++; 
+		}
+	else
+		{
+		ac = 0;
+		XtSetArg(args[ac], XmNsensitive, False); ac++; 
+		}
 	XtSetValues(pushButton_savesite, args, ac);
+	
+	mbview_getroutecount(verbose, instance, &nroute, &error);
+	if (mbview_active == MB_YES && nroute > 0)
+		{
+		ac = 0;
+		XtSetArg(args[ac], XmNsensitive, True); ac++; 
+		}
+	else
+		{
+		ac = 0;
+		XtSetArg(args[ac], XmNsensitive, False); ac++; 
+		}
 	XtSetValues(pushButton_saveroute, args, ac);
     
 }
@@ -1434,6 +1466,13 @@ int do_mbgrdviz_openprimary(char *input_file_ptr)
 			else
 				mbview_id[instance] = MB_NO;
 
+			/* set sensitivity callback routine */
+			if (status == MB_SUCCESS)
+				{
+				mbview_setsensitivitynotify(verbose, instance,
+					do_mbgrdviz_sensitivity, &error);
+				}
+
 			/* add action button */
 			if (status == MB_SUCCESS)
 				{
@@ -1779,6 +1818,9 @@ int do_mbgrdviz_opensite(int instance, char *input_file_ptr)
 		}
 
 	    }
+	    
+	/* set sensitivity of widgets that require an mbview instance to be active */
+	do_mbgrdviz_sensitivity( );
 }
 /*---------------------------------------------------------------------------------------*/
 
@@ -2077,6 +2119,9 @@ fprintf(stderr,"Calling mbview_addroute npoint:%d\n", npoint);
 	    status = mbview_update(verbose, instance, &error);
 	    }
 			
+	    
+	/* set sensitivity of widgets that require an mbview instance to be active */
+	do_mbgrdviz_sensitivity( );
 }
 /*---------------------------------------------------------------------------------------*/
 
@@ -2741,7 +2786,9 @@ int do_mbgrdviz_opennav(int instance, int swathbounds, char *input_file_ptr)
 	int	status = MB_SUCCESS;
 	void	*datalist;
 	mb_path	swathfile;
-	mb_path	swathfileorg;
+	int	swathfilestatus;
+	mb_path	swathfileraw;
+	mb_path	swathfileprocessed;
 	int	format;
 	int	formatorg;
 	double	weight;
@@ -2764,8 +2811,9 @@ int do_mbgrdviz_opennav(int instance, int swathbounds, char *input_file_ptr)
 			{
 			while (done == MB_NO)
 				{
-				if (status = mb_datalist_read(verbose,datalist,
-						swathfile,&format,&weight,&error)
+				if (status = mb_datalist_read2(verbose,datalist,
+						&swathfilestatus,swathfileraw,swathfileprocessed,
+						&format,&weight,&error)
 						== MB_SUCCESS)
 					{
 					nfiledatalist++;
@@ -2776,7 +2824,10 @@ int do_mbgrdviz_opennav(int instance, int swathbounds, char *input_file_ptr)
 						{
 						/* check for available nav file if that is
 						   all that is needed */
-						strcpy(swathfileorg, swathfile);
+						if (swathfilestatus == MB_PROCESSED_USE)
+							strcpy(swathfile, swathfileprocessed);
+						else
+							strcpy(swathfile, swathfileraw);
 						formatorg = format;
 						if (swathbounds == MB_NO)
 							mb_get_fnv(verbose, swathfile, &format, &error);
@@ -2802,8 +2853,9 @@ fprintf(stderr,"%s\n",messagestr);
 
 						/* read the data */
 						nfileread++;
-						do_mbgrdviz_readnav(instance, swathfile, swathfileorg,
-									format, formatorg, weight, &error);
+						do_mbgrdviz_readnav(instance, swathfile, 
+							swathfilestatus, swathfileraw, swathfileprocessed,
+							format, formatorg, weight, &error);
 						}
 else
 fprintf(stderr,"Skipped xyz data: %s\n",swathfile);
@@ -2826,7 +2878,8 @@ fprintf(stderr,"Attempted to load %d files, actually read %d files\n",nfiledatal
 }
 /*---------------------------------------------------------------------------------------*/
 
-int do_mbgrdviz_readnav(int instance, char *swathfile, char *swathfileorg,
+int do_mbgrdviz_readnav(int instance, char *swathfile, 
+				int pathstatus, char *pathraw, char *pathprocessed,
 				int format, int formatorg, double weight, int *error)
 {
 	char function_name[] = "do_mbgrdviz_readnav";
@@ -3241,7 +3294,9 @@ fprintf(stderr,"    Adding %d nav points from %s\n",npoint,name);
 				color,
 				size,
 				name,
-				swathfileorg,
+				pathstatus,
+				pathraw,
+				pathprocessed,
 				formatorg,
 				swathbounds,
 				shot,
@@ -4065,11 +4120,11 @@ fprintf(stderr,"Called do_mbgrdviz_open_mbeditviz instance:%d\n", instance);
 			{
 			nav = (struct mbview_nav_struct *) &(shareddata->navs[i]);
 fprintf(stderr,"Nav %d name:%s path:%s format:%d nselected:%d\n",
-i, nav->name, nav->path, nav->format, nav->nselected);
+i, nav->name, nav->pathraw, nav->format, nav->nselected);
 			nselected += nav->nselected;
 			if (nav->nselected > 0)
 				{
-				sprintf(filearg, " -F%d -I%s", nav->format, nav->path);
+				sprintf(filearg, " -F%d -I%s", nav->format, nav->pathraw);
 				strncat(mbeditviz_cmd, filearg, MB_PATH_MAXLINE-3);
 fprintf(stderr, "nselected: %d %d    Adding filearg:%s\n",nav->nselected, nselected, filearg);
 				}
