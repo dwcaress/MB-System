@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrid.c	5/2/94
- *    $Id: mbgrid.c,v 5.39 2007-10-08 16:48:07 caress Exp $
+ *    $Id: mbgrid.c,v 5.40 2007-10-17 20:33:25 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 2000, 2002, 2003, 2006, 2007 by
  *    David W. Caress (caress@mbari.org)
@@ -38,6 +38,9 @@
  * Rererewrite:	January 2, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.39  2007/10/08 16:48:07  caress
+ * State of the code on 8 October 2007.
+ *
  * Revision 5.38  2007/05/12 19:34:37  caress
  * Fixed -G4 option.
  *
@@ -434,7 +437,7 @@ double mbgrid_erf();
 FILE	*outfp;
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbgrid.c,v 5.39 2007-10-08 16:48:07 caress Exp $";
+static char rcs_id[] = "$Id: mbgrid.c,v 5.40 2007-10-17 20:33:25 caress Exp $";
 static char program_name[] = "mbgrid";
 static char help_message[] =  "mbgrid is an utility used to grid bathymetry, amplitude, or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbgrid -Ifilelist -Oroot \
@@ -516,7 +519,9 @@ main (int argc, char **argv)
 	int	first_in_stays = MB_YES;
 	double	timediff = 300.0;
 	int	rformat;
-	char	ifile[MB_PATH_MAXLINE];
+	int	pstatus;
+	char	path[MB_PATH_MAXLINE];
+	char	ppath[MB_PATH_MAXLINE];
 	char	rfile[MB_PATH_MAXLINE];
 	char	ofile[MB_PATH_MAXLINE];
 	char	dfile[MB_PATH_MAXLINE];
@@ -893,7 +898,7 @@ main (int argc, char **argv)
 		fprintf(outfp,"dbg2       etime_i[6]:           %d\n",etime_i[6]);
 		fprintf(outfp,"dbg2       speedmin:             %f\n",speedmin);
 		fprintf(outfp,"dbg2       timegap:              %f\n",timegap);
-		fprintf(outfp,"dbg2       file list:            %s\n",ifile);
+		fprintf(outfp,"dbg2       file list:            %s\n",filelist);
 		fprintf(outfp,"dbg2       output file root:     %s\n",fileroot);
 		fprintf(outfp,"dbg2       grid x dimension:     %d\n",xdim);
 		fprintf(outfp,"dbg2       grid y dimension:     %d\n",ydim);
@@ -1591,15 +1596,21 @@ fprintf(outfp,"dx:%f dy:%f dy-dx:%g\n",dx,dy,dy-dx);
 		mb_memory_clear(verbose, &error);
 		exit(error);
 		}
-	while ((status = mb_datalist_read(verbose,datalist,
-			file,&format,&file_weight,&error))
+	while ((status = mb_datalist_read2(verbose,datalist,
+			&pstatus,path,ppath,&format,&file_weight,&error))
 			== MB_SUCCESS)
 		{
 		ndatafile = 0;
 		
 		/* if format > 0 then input is swath sonar file */
-		if (format > 0 && file[0] != '#')
+		if (format > 0 && path[0] != '#')
 		{
+		/* apply pstatus */
+		if (pstatus == MB_PROCESSED_USE)
+			strcpy(file, ppath);
+		else
+			strcpy(file, path);
+
 		/* check for mbinfo file - get file bounds if possible */
 		rformat = format;
 		strcpy(rfile,file);
@@ -1966,7 +1977,11 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 		/* add to datalist if data actually contributed */
 		if (ndatafile > 0 && dfp != NULL)
 			{
-			fprintf(dfp, "%s %d %f\n", file, format, file_weight);
+			if (pstatus == MB_PROCESSED_USE)
+				fprintf(dfp, "P:");
+			else
+				fprintf(dfp, "R:");
+			fprintf(dfp, "%s %d %f\n", path, format, file_weight);
 			fflush(dfp);
 			}
 		} /* end if (format > 0) */
@@ -2056,15 +2071,21 @@ num[kgrid],cnt[kgrid],norm[kgrid],sigma[kgrid]);*/
 		mb_memory_clear(verbose, &error);
 		exit(error);
 		}
-	while ((status = mb_datalist_read(verbose,datalist,
-			file,&format,&file_weight,&error))
+	while ((status = mb_datalist_read2(verbose,datalist,
+			&pstatus,path,ppath,&format,&file_weight,&error))
 			== MB_SUCCESS)
 		{
 		ndatafile = 0;
 		
 		/* if format > 0 then input is swath sonar file */
-		if (format > 0 && file[0] != '#')
+		if (format > 0 && path[0] != '#')
 		{
+		/* apply pstatus */
+		if (pstatus == MB_PROCESSED_USE)
+			strcpy(file, ppath);
+		else
+			strcpy(file, path);
+
 		/* check for mbinfo file - get file bounds if possible */
 		rformat = format;
 		strcpy(rfile,file);
@@ -2552,7 +2573,14 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 				
 		/* add to datalist if data actually contributed */
 		if (ndatafile > 0 && dfp != NULL)
-			fprintf(dfp, "%s %d %f\n", file, format, file_weight);
+			{
+			if (pstatus == MB_PROCESSED_USE)
+				fprintf(dfp, "P:");
+			else
+				fprintf(dfp, "R:");
+			fprintf(dfp, "%s %d %f\n", path, format, file_weight);
+			fflush(dfp);
+			}
 		} /* end if (format > 0) */
 
 		/* if format == 0 then input is lon,lat,values triples file */
@@ -2673,7 +2701,14 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 				
 		/* add to datalist if data actually contributed */
 		if (ndatafile > 0 && dfp != NULL)
-			fprintf(dfp, "%s %d %f\n", file, format, file_weight);
+			{
+			if (pstatus == MB_PROCESSED_USE)
+				fprintf(dfp, "P:");
+			else
+				fprintf(dfp, "R:");
+			fprintf(dfp, "%s %d %f\n", path, format, file_weight);
+			fflush(dfp);
+			}
 		} /* end if (format == 0) */
 
 		}
@@ -2759,15 +2794,21 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 		mb_memory_clear(verbose, &error);
 		exit(error);
 		}
-	while ((status = mb_datalist_read(verbose,datalist,
-			file,&format,&file_weight,&error))
+	while ((status = mb_datalist_read2(verbose,datalist,
+			&pstatus,path,ppath,&format,&file_weight,&error))
 			== MB_SUCCESS)
 		{
 		ndatafile = 0;
-
+		
 		/* if format > 0 then input is swath sonar file */
-		if (format > 0 && file[0] != '#')
+		if (format > 0 && path[0] != '#')
 		{
+		/* apply pstatus */
+		if (pstatus == MB_PROCESSED_USE)
+			strcpy(file, ppath);
+		else
+			strcpy(file, path);
+
 		/* check for mbinfo file - get file bounds if possible */
 		rformat = format;
 		strcpy(rfile,file);
@@ -3157,7 +3198,14 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 				
 		/* add to datalist if data actually contributed */
 		if (ndatafile > 0 && dfp != NULL)
-			fprintf(dfp, "%s %d %f\n", file, format, file_weight);
+			{
+			if (pstatus == MB_PROCESSED_USE)
+				fprintf(dfp, "P:");
+			else
+				fprintf(dfp, "R:");
+			fprintf(dfp, "%s %d %f\n", path, format, file_weight);
+			fflush(dfp);
+			}
 		} /* end if (format > 0) */
 
 		/* if format == 0 then input is lon,lat,values triples file */
@@ -3249,7 +3297,14 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 				
 		/* add to datalist if data actually contributed */
 		if (ndatafile > 0 && dfp != NULL)
-			fprintf(dfp, "%s %d %f\n", file, format, file_weight);
+			{
+			if (pstatus == MB_PROCESSED_USE)
+				fprintf(dfp, "P:");
+			else
+				fprintf(dfp, "R:");
+			fprintf(dfp, "%s %d %f\n", path, format, file_weight);
+			fflush(dfp);
+			}
 		} /* end if (format == 0) */
 
 		}
