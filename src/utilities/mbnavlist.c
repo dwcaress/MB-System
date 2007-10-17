@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavlist.c	2/1/93
- *    $Id: mbnavlist.c,v 5.11 2006-01-18 15:17:00 caress Exp $
+ *    $Id: mbnavlist.c,v 5.12 2007-10-17 20:34:00 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  *
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.11  2006/01/18 15:17:00  caress
+ * Added stdlib.h include.
+ *
  * Revision 5.10  2005/11/05 01:07:54  caress
  * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
  *
@@ -107,10 +110,10 @@ double	NaN;
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbnavlist.c,v 5.11 2006-01-18 15:17:00 caress Exp $";
+	static char rcs_id[] = "$Id: mbnavlist.c,v 5.12 2007-10-17 20:34:00 caress Exp $";
 	static char program_name[] = "mbnavlist";
 	static char help_message[] =  "mbnavlist prints the specified contents of navigation records\nin a swath sonar data file to stdout. The form of the \noutput is quite flexible; mbnavlist is tailored to produce \nascii files in spreadsheet style with data columns separated by tabs.";
-	static char usage_message[] = "mbnavlist [-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc \n-Fformat -H -Ifile -Llonflip \n-Ooptions -Rw/e/s/n -Sspeed \n-Ttimegap -V -Zsegment]";
+	static char usage_message[] = "mbnavlist [-Byr/mo/da/hr/mn/sc -Ddecimate -Eyr/mo/da/hr/mn/sc \n-Fformat -Gdelimiter -H -Ifile -Llonflip \n-Ooptions -Rw/e/s/n -Sspeed \n-Ttimegap -V -Zsegment]";
 	extern char *optarg;
 	extern int optkind;
 	int	errflg = 0;
@@ -132,6 +135,7 @@ main (int argc, char **argv)
 	double	file_weight;
 	int	format;
 	int	pings;
+	int	decimate;
 	int	lonflip;
 	double	bounds[4];
 	int	btime_i[7];
@@ -164,6 +168,7 @@ main (int argc, char **argv)
 	int	ascii = MB_YES;
 	int	segment = MB_NO;
 	char	segment_tag[MB_PATH_MAXLINE];
+	char	delimiter[MB_PATH_MAXLINE];
 
 	/* MBIO read values */
 	void	*mbio_ptr = NULL;
@@ -226,6 +231,7 @@ main (int argc, char **argv)
 
 	int	read_data;
 	int	inav, n;
+	int	nnav;
 	int	i, j, k;
 
 	/* get current default values */
@@ -244,9 +250,11 @@ main (int argc, char **argv)
 	list[4]='H';
 	list[5]='s';
 	n_list = 6;
+	sprintf(delimiter, "\t");
+	decimate = 1;
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "B:b:E:e:F:f:I:i:L:l:N:n:O:o:R:r:S:s:T:t:Z:z:VvHh")) != -1)
+	while ((c = getopt(argc, argv, "AaB:b:D:d:E:e:F:f:G:g:I:i:L:l:N:n:O:o:R:r:S:s:T:t:Z:z:VvHh")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -257,12 +265,22 @@ main (int argc, char **argv)
 		case 'v':
 			verbose++;
 			break;
+		case 'A':
+		case 'a':
+			ascii = MB_NO;
+			flag++;
+			break;
 		case 'B':
 		case 'b':
 			sscanf (optarg,"%d/%d/%d/%d/%d/%d",
 				&btime_i[0],&btime_i[1],&btime_i[2],
 				&btime_i[3],&btime_i[4],&btime_i[5]);
 			btime_i[6] = 0;
+			flag++;
+			break;
+		case 'D':
+		case 'd':
+			sscanf (optarg,"%d", &decimate);
 			flag++;
 			break;
 		case 'E':
@@ -276,6 +294,11 @@ main (int argc, char **argv)
 		case 'F':
 		case 'f':
 			sscanf (optarg,"%d", &format);
+			flag++;
+			break;
+		case 'G':
+		case 'g':
+			sscanf (optarg,"%s", delimiter);
 			flag++;
 			break;
 		case 'I':
@@ -355,6 +378,7 @@ main (int argc, char **argv)
 		fprintf(stderr,"dbg2       format:         %d\n",format);
 		fprintf(stderr,"dbg2       pings:          %d\n",pings);
 		fprintf(stderr,"dbg2       lonflip:        %d\n",lonflip);
+		fprintf(stderr,"dbg2       decimate:       %d\n",decimate);
 		fprintf(stderr,"dbg2       bounds[0]:      %f\n",bounds[0]);
 		fprintf(stderr,"dbg2       bounds[1]:      %f\n",bounds[1]);
 		fprintf(stderr,"dbg2       bounds[2]:      %f\n",bounds[2]);
@@ -378,6 +402,7 @@ main (int argc, char **argv)
 		fprintf(stderr,"dbg2       ascii:          %d\n",ascii);
 		fprintf(stderr,"dbg2       segment:        %d\n",segment);
 		fprintf(stderr,"dbg2       segment_tag:    %s\n",segment_tag);
+		fprintf(stderr,"dbg2       delimiter:      %s\n",delimiter);
 		fprintf(stderr,"dbg2       file:           %s\n",file);
 		fprintf(stderr,"dbg2       n_list:         %d\n",n_list);
 		for (i=0;i<n_list;i++)
@@ -516,6 +541,7 @@ main (int argc, char **argv)
 	/* read and print data */
 	distance_total = 0.0;
 	nread = 0;
+	nnav = 0;
 	first = MB_YES;
 	while (error <= MB_ERROR_NO_ERROR)
 		{
@@ -638,6 +664,7 @@ time_i[3],  time_i[4],  time_i[5],   time_i[6]);*/
 				time_d_old = time_d;
 
 				/* now loop over list of output parameters */
+				if (nnav % decimate == 0)
 				for (i=0; i<n_list; i++) 
 					{
 					switch (list[i]) 
@@ -921,10 +948,11 @@ time_i[3],  time_i[4],  time_i[5],   time_i[6]);*/
 						}
 					if (ascii == MB_YES)
 						{
-						if (i<(n_list-1)) printf ("\t");
+						if (i<(n_list-1)) printf ("%s", delimiter);
 						else printf ("\n");
 						}
 					}
+				nnav++;				
 				first = MB_NO;
 				}
 			}
