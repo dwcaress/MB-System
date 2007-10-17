@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbswath.c	5/30/93
- *    $Id: mbswath.c,v 5.18 2007-07-04 03:00:19 caress Exp $
+ *    $Id: mbswath.c,v 5.19 2007-10-17 20:35:53 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2003, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -29,6 +29,9 @@
  * Date:	May 30, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.18  2007/07/04 03:00:19  caress
+ * Now works with xyz data.
+ *
  * Revision 5.17  2006/12/15 21:42:49  caress
  * Incremental CVS update.
  *
@@ -333,7 +336,7 @@ unsigned char r, g, b, gray;
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbswath.c,v 5.18 2007-07-04 03:00:19 caress Exp $";
+	static char rcs_id[] = "$Id: mbswath.c,v 5.19 2007-10-17 20:35:53 caress Exp $";
 	static char program_name[] = "MBSWATH";
 	static char help_message[] =  "MBSWATH is a GMT compatible utility which creates a color postscript \nimage of swath bathymetry or backscatter data.  The image \nmay be shaded relief as well.  Complete maps are made by using \nMBSWATH in conjunction with the usual GMT programs.";
 	static char usage_message[] = "mbswath -Ccptfile -Jparameters -Rwest/east/south/north \n\t[-Afactor -Btickinfo -byr/mon/day/hour/min/sec \n\t-ccopies -Dmode/ampscale/ampmin/ampmax \n\t-Eyr/mon/day/hour/min/sec -fformat \n\t-Fred/green/blue -Gmagnitude/azimuth -Idatalist \n\t-K -Ncptfile -O -P -ppings -Qdpi -Ttimegap -U -W -Xx-shift -Yy-shift \n\t-Zmode -V -H]";
@@ -1249,25 +1252,25 @@ main (int argc, char **argv)
 			    {
 			    for (i=0;i<pingcur->pixels_ss;i++)
 				    {
-				    if (ss[i] > 0 && ampscale_mode == 1)
+				    if (ss[i] > MB_SIDESCAN_NULL && ampscale_mode == 1)
 					{
 					ss[i] = ampscale*(ss[i] - ampmin)
 					    /(ampmax - ampmin);
 					}
-				    else if (ss[i] > 0 && ampscale_mode == 2)
+				    else if (ss[i] > MB_SIDESCAN_NULL && ampscale_mode == 2)
 					{
 					ss[i] = MIN(ss[i],ampmax);
 					ss[i] = MAX(ss[i],ampmin);
 					ss[i] = ampscale*(ss[i] - ampmin)
 					    /(ampmax - ampmin);
 					}
-				    else if (ss[i] > 0 && ampscale_mode == 3)
+				    else if (ss[i] > MB_SIDESCAN_NULL && ampscale_mode == 3)
 					{
 					amplog = 20.0*log10(ss[i]);
 					ss[i] = ampscale*(amplog - ampmin)
 					    /(ampmax - ampmin);
 					}
-				    else if (ss[i] > 0 && ampscale_mode == 4)
+				    else if (ss[i] > MB_SIDESCAN_NULL && ampscale_mode == 4)
 					{
 					amplog = 20.0*log10(ss[i]);
 					amplog = MIN(amplog,ampmax);
@@ -1686,13 +1689,13 @@ int get_footprints(int verbose, int mode, int fp_mode,
 		/* do sidescan */
 		if (doss == MB_YES)
 		  for (j=1;j<pingcur->pixels_ss-1;j++)
-		    if (pingcur->ss[j] > 0.0)
+		    if (pingcur->ss[j] > MB_SIDESCAN_NULL)
 			{
 			x = pingcur->sslon[j];
 			y = pingcur->sslat[j];
 			setprint = MB_NO;
-			if (pingcur->ss[j-1] > 0.0 
-				&& pingcur->ss[j+1] > 0.0)
+			if (pingcur->ss[j-1] > MB_SIDESCAN_NULL 
+				&& pingcur->ss[j+1] > MB_SIDESCAN_NULL)
 				{
 				setprint = MB_YES;
 				dlon1 = pingcur->sslon[j-1] 
@@ -1704,7 +1707,7 @@ int get_footprints(int verbose, int mode, int fp_mode,
 				dlat2 = pingcur->sslat[j+1] 
 					- pingcur->sslat[j];
 				}
-			else if (pingcur->ss[j-1] > 0.0)
+			else if (pingcur->ss[j-1] > MB_SIDESCAN_NULL)
 				{
 				setprint = MB_YES;
 				dlon1 = pingcur->sslon[j-1] 
@@ -1714,7 +1717,7 @@ int get_footprints(int verbose, int mode, int fp_mode,
 				dlon2 = -dlon1;
 				dlat2 = -dlat1;
 				}
-			else if (pingcur->ss[j+1] > 0.0)
+			else if (pingcur->ss[j+1] > MB_SIDESCAN_NULL)
 				{
 				setprint = MB_YES;
 				dlon2 = pingcur->sslon[j+1] 
@@ -1929,7 +1932,7 @@ int get_footprints(int verbose, int mode, int fp_mode,
 		if (doss == MB_YES && pingcur->pixels_ss > 2)
 		  {
 		  j = 0;
-		  if (pingcur->ss[j] > 0.0 && pingcur->ss[j+1] > 0.0)
+		  if (pingcur->ss[j] > MB_SIDESCAN_NULL && pingcur->ss[j+1] > MB_SIDESCAN_NULL)
 			{
 			x = pingcur->sslon[j];
 			y = pingcur->sslat[j];
@@ -1975,7 +1978,7 @@ int get_footprints(int verbose, int mode, int fp_mode,
 			}
 
 		  j = pingcur->pixels_ss-1;
-		  if (pingcur->ss[j] > 0.0 && pingcur->ss[j-1] > 0.0)
+		  if (pingcur->ss[j] > MB_SIDESCAN_NULL && pingcur->ss[j-1] > MB_SIDESCAN_NULL)
 			{
 			x = pingcur->sslon[j];
 			y = pingcur->sslat[j];
@@ -2538,7 +2541,7 @@ int plot_data_point(int verbose, int mode,
 			{
 			pingcur = &swath->data[i];
 			for (j=0;j<pingcur->pixels_ss;j++)
-			  if (pingcur->ss[j] > 0.0)
+			  if (pingcur->ss[j] > MB_SIDESCAN_NULL)
 				{
 				GMT_geo_to_xy(pingcur->sslon[j], 
 					pingcur->sslat[j], 

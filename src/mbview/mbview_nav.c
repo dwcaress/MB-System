@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_nav.c	10/28/2003
- *    $Id: mbview_nav.c,v 5.15 2007-10-08 16:32:08 caress Exp $
+ *    $Id: mbview_nav.c,v 5.16 2007-10-17 20:35:05 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -18,6 +18,9 @@
  * Date:	October 28, 2003
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.15  2007/10/08 16:32:08  caress
+ * Code status as of 8 October 2007.
+ *
  * Revision 5.14  2007/06/17 23:27:30  caress
  * Added NBeditviz.
  *
@@ -114,7 +117,7 @@ static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 static char		value_string[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_nav.c,v 5.15 2007-10-08 16:32:08 caress Exp $";
+static char rcs_id[]="$Id: mbview_nav.c,v 5.16 2007-10-17 20:35:05 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_getnavcount(int verbose, int instance,
@@ -454,7 +457,9 @@ int mbview_addnav(int verbose, int instance,
 			int	navcolor,
 			int	navsize,
 			mb_path	navname,
-			mb_path	navpath,
+			int	navpathstatus,
+			mb_path	navpathraw,
+			mb_path	navpathprocessed,
 			int	navformat,
 			int	navswathbounds,
 			int	navshot,
@@ -511,7 +516,9 @@ int mbview_addnav(int verbose, int instance,
 		fprintf(stderr,"dbg2       navcolor:                  %d\n", navcolor);
 		fprintf(stderr,"dbg2       navsize:                   %d\n", navsize);
 		fprintf(stderr,"dbg2       navname:                   %s\n", navname);
-		fprintf(stderr,"dbg2       navpath:                   %s\n", navpath);
+		fprintf(stderr,"dbg2       navpathstatus:             %d\n", navpathstatus);
+		fprintf(stderr,"dbg2       navpathraw:                %s\n", navpathraw);
+		fprintf(stderr,"dbg2       navpathprocessed:          %s\n", navpathprocessed);
 		fprintf(stderr,"dbg2       navformat:                 %d\n", navformat);
 		fprintf(stderr,"dbg2       navswathbounds:            %d\n", navswathbounds);
 		fprintf(stderr,"dbg2       navshot:                   %d\n", navshot);
@@ -548,7 +555,9 @@ int mbview_addnav(int verbose, int instance,
 				shared.shareddata.navs[i].color = MBV_COLOR_RED;
 				shared.shareddata.navs[i].size = 4;
 				shared.shareddata.navs[i].name[0] = '\0';
-				shared.shareddata.navs[i].path[0] = '\0';
+				shared.shareddata.navs[i].pathstatus = MB_PROCESSED_NONE;
+				shared.shareddata.navs[i].pathraw[0] = '\0';
+				shared.shareddata.navs[i].pathprocessed[0] = '\0';
 				shared.shareddata.navs[i].format = 0;
 				shared.shareddata.navs[i].swathbounds = MB_NO;
 				shared.shareddata.navs[i].shot = MB_NO;
@@ -593,7 +602,9 @@ int mbview_addnav(int verbose, int instance,
 		shared.shareddata.navs[inav].color = navcolor;
 		shared.shareddata.navs[inav].size = navsize;
 		strcpy(shared.shareddata.navs[inav].name,navname);
-		strcpy(shared.shareddata.navs[inav].path,navpath);
+		shared.shareddata.navs[inav].pathstatus = navpathstatus;
+		strcpy(shared.shareddata.navs[inav].pathraw,navpathraw);
+		strcpy(shared.shareddata.navs[inav].pathprocessed,navpathprocessed);
 		shared.shareddata.navs[inav].format = navformat;
 		shared.shareddata.navs[inav].swathbounds = navswathbounds;
 		shared.shareddata.navs[inav].shot = navshot;
@@ -753,6 +764,9 @@ shared.shareddata.navs[inav].navpts[i].point.zdisplay[instance]);*/
 			fprintf(stderr,"dbg2       nav %d color:         %d\n",i,shared.shareddata.navs[i].color);
 			fprintf(stderr,"dbg2       nav %d size:          %d\n",i,shared.shareddata.navs[i].size);
 			fprintf(stderr,"dbg2       nav %d name:          %s\n",i,shared.shareddata.navs[i].name);
+			fprintf(stderr,"dbg2       nav %d pathstatus:    %d\n",i,shared.shareddata.navs[i].pathstatus);
+			fprintf(stderr,"dbg2       nav %d pathraw:       %s\n",i,shared.shareddata.navs[i].pathraw);
+			fprintf(stderr,"dbg2       nav %d pathprocessed: %s\n",i,shared.shareddata.navs[i].pathprocessed);
 			fprintf(stderr,"dbg2       nav %d swathbounds:   %d\n",i,shared.shareddata.navs[i].swathbounds);
 			fprintf(stderr,"dbg2       nav %d shot:          %d\n",i,shared.shareddata.navs[i].shot);
 			fprintf(stderr,"dbg2       nav %d cdp:           %d\n",i,shared.shareddata.navs[i].cdp);
@@ -1554,7 +1568,9 @@ int mbview_nav_delete(int instance, int inav)
 		shared.shareddata.navs[shared.shareddata.nnav-1].color = MBV_COLOR_RED;
 		shared.shareddata.navs[shared.shareddata.nnav-1].size = 4;
 		shared.shareddata.navs[shared.shareddata.nnav-1].name[0] = '\0';
-		shared.shareddata.navs[shared.shareddata.nnav-1].path[0] = '\0';
+		shared.shareddata.navs[shared.shareddata.nnav-1].pathstatus = MB_PROCESSED_NONE;
+		shared.shareddata.navs[shared.shareddata.nnav-1].pathraw[0] = '\0';
+		shared.shareddata.navs[shared.shareddata.nnav-1].pathprocessed[0] = '\0';
 		shared.shareddata.navs[shared.shareddata.nnav-1].format = 0;
 		shared.shareddata.navs[shared.shareddata.nnav-1].swathbounds = MB_NO;
 		shared.shareddata.navs[shared.shareddata.nnav-1].shot = MB_NO;

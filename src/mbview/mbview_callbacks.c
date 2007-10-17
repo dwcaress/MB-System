@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbview_callbacks.c	10/7/2002
- *    $Id: mbview_callbacks.c,v 5.16 2007-10-08 16:32:08 caress Exp $
+ *    $Id: mbview_callbacks.c,v 5.17 2007-10-17 20:35:05 caress Exp $
  *
  *    Copyright (c) 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -18,6 +18,9 @@
  * Date:	October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.16  2007/10/08 16:32:08  caress
+ * Code status as of 8 October 2007.
+ *
  * Revision 5.15  2007/07/03 17:35:54  caress
  * Working on MBeditviz.
  *
@@ -139,7 +142,7 @@ static Cardinal 	ac;
 static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_callbacks.c,v 5.16 2007-10-08 16:32:08 caress Exp $";
+static char rcs_id[]="$Id: mbview_callbacks.c,v 5.17 2007-10-17 20:35:05 caress Exp $";
 
 /* function prototypes */
 /*------------------------------------------------------------------------------*/
@@ -604,6 +607,7 @@ int mbview_reset(int instance)
 		data->mbview_picksite_notify = NULL;
 		data->mbview_pickroute_notify = NULL;
 		data->mbview_picknav_notify = NULL;
+		data->mbview_sensitivity_notify = NULL;
 
 		/* initialize data structure */
 		data->active = MB_NO;
@@ -2582,6 +2586,11 @@ int mbview_update_sensitivity(int verbose, int instance, int *error)
 	
 	/* now set action buttons according to current pick states */
 	mbview_action_sensitivity(instance);
+	
+	/* reset sensitivity in parent program */
+fprintf(stderr,"could call mbview_sensitivity_notify:%d\n",data->mbview_sensitivity_notify);
+	if (data->mbview_sensitivity_notify != NULL)
+		(data->mbview_sensitivity_notify)();
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -2969,6 +2978,53 @@ int mbview_addpicknotify(int verbose, int instance,
 
 	/* print output debug statements */
 	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:        %d\n",error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return */
+	return(status);
+}
+
+
+/*------------------------------------------------------------------------------*/
+int mbview_setsensitivitynotify(int verbose, int instance,
+			void	(mbview_sensitivity_notify)(),
+			int *error)
+{
+	/* local variables */
+	char	*function_name = "mbview_setsensitivitynotify";
+	int	status = MB_SUCCESS;
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
+
+	/* print starting debug statements */
+	if (verbose >= 0)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
+		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:                   %d\n",verbose);
+		fprintf(stderr,"dbg2       instance:                  %d\n",instance);
+		fprintf(stderr,"dbg2       mbview_sensitivity_notify: %d\n",mbview_sensitivity_notify);
+		}
+
+	/* get view */
+	view = &(mbviews[instance]);
+	data = &(view->data);
+	
+	/* set the pick notify function */
+	data->mbview_sensitivity_notify = mbview_sensitivity_notify;
+
+	/* print output debug statements */
+	if (verbose >= 0)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
@@ -4799,9 +4855,6 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 	  view->button1down = MB_NO;
 	  view->button2down = MB_NO;
 	  view->button3down = MB_NO;
-	  
-	  /* update action buttons according to pick state */
-	  mbview_action_sensitivity(instance);
 		
 	  /* replot in high rez if last draw was low rez */
 	  if (view->lastdrawrez == MBV_REZ_LOW)
@@ -4858,6 +4911,9 @@ fprintf(stderr,"KeyPress event\n");
 	  /* now replot profile */
 	  mbview_plotprofile(instance);
 	  }
+	  
+     /* update action buttons according to pick state */
+     mbview_action_sensitivity(instance);
  
      } /* end of inputs from window */
 
