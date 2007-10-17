@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcopy.c	2/4/93
- *    $Id: mbcopy.c,v 5.21 2007-05-21 16:15:11 caress Exp $
+ *    $Id: mbcopy.c,v 5.22 2007-10-17 20:32:26 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003, 2004, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	February 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.21  2007/05/21 16:15:11  caress
+ * Fixed translation to and from XSE format.
+ *
  * Revision 5.20  2006/09/11 18:55:53  caress
  * Changes during Western Flyer and Thomas Thompson cruises, August-September
  * 2006.
@@ -236,10 +239,10 @@ int mbcopy_any_to_mbldeoih(int verbose,
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbcopy.c,v 5.21 2007-05-21 16:15:11 caress Exp $";
+	static char rcs_id[] = "$Id: mbcopy.c,v 5.22 2007-10-17 20:32:26 caress Exp $";
 	static char program_name[] = "MBcopy";
 	static char help_message[] =  "MBcopy copies an input swath sonar data file to an output \nswath sonar data file with the specified conversions.  Options include \nwindowing in time and space and ping averaging.  The input and \noutput data formats may differ, though not all possible combinations \nmake sense.  The default input and output streams are stdin and stdout.";
-	static char usage_message[] = "mbcopy [-Byr/mo/da/hr/mn/sc -Ccommentfile -D -Eyr/mo/da/hr/mn/sc \n\t-Fiformat/oformat -H  -Iinfile -Llonflip -N -Ooutfile \n\t-Ppings -Qsleep_factor -Rw/e/s/n -Sspeed -V]";
+	static char usage_message[] = "mbcopy [-Byr/mo/da/hr/mn/sc -Ccommentfile -D -Eyr/mo/da/hr/mn/sc \n\t-Fiformat/oformat/mformat -H  -Iinfile -Llonflip -Mmergefile -N -Ooutfile \n\t-Ppings -Qsleep_factor -Rw/e/s/n -Sspeed -V]";
 
 	/* parsing variables */
 	extern char *optarg;
@@ -280,11 +283,22 @@ main (int argc, char **argv)
 	int	opixels_ss;
 	void	*ombio_ptr = NULL;
 
+	/* MBIO merge control parameters */
+	int	merge = MB_NO;
+	int	mformat = 0;
+	char	mfile[MB_PATH_MAXLINE];
+	int	mbeams_bath;
+	int	mbeams_amp;
+	int	mpixels_ss;
+	void	*mmbio_ptr = NULL;
+
 	/* MBIO read and write values */
 	struct mb_io_struct *omb_io_ptr;
 	struct mb_io_struct *imb_io_ptr;
+	struct mb_io_struct *mmb_io_ptr;
 	void	*istore_ptr;
 	void	*ostore_ptr;
+	void	*mstore_ptr;
 	int	kind;
 	int	time_i[7];
 	double	time_d;
@@ -315,6 +329,35 @@ main (int argc, char **argv)
 	double	roll;
 	double	pitch;
 	double	heave;
+	int	mstatus;
+	int	merror = MB_ERROR_NO_ERROR;
+	int	mkind;
+	int	mpings;
+	int	mtime_i[7];
+	double	mtime_d;
+	double	mnavlon;
+	double	mnavlat;
+	double	mspeed;
+	double	mheading;
+	double	mdistance;
+	double	maltitude;
+	double	msonardepth;
+	double	mdraft;
+	double	mroll;
+	double	mpitch;
+	double	mheave;
+	int	mdata = 0;
+
+	char	mcomment[MB_COMMENT_MAXLINE];
+	int	mnbath, mnamp, mnss;
+	char	*mbeamflag = NULL;
+	double	*mbath = NULL;
+	double	*mbathacrosstrack = NULL;
+	double	*mbathalongtrack = NULL;
+	double	*mamp = NULL;
+	double	*mss = NULL;
+	double	*mssacrosstrack = NULL;
+	double	*mssalongtrack = NULL;
 	int	idata = 0;
 	int	icomment = 0;
 	int	odata = 0;
@@ -356,12 +399,13 @@ main (int argc, char **argv)
 	/* set default input and output */
 	iformat = 0;
 	oformat = 0;
+	mformat = 0;
 	strcpy (commentfile, "\0");
 	strcpy (ifile, "stdin");
 	strcpy (ofile, "stdout");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "B:b:C:c:DdE:e:F:f:HhI:i:L:l:NnO:o:P:p:Q:q:R:r:S:s:T:t:Vv")) != -1)
+	while ((c = getopt(argc, argv, "B:b:C:c:DdE:e:F:f:HhI:i:L:l:M:m:NnO:o:P:p:Q:q:R:r:S:s:T:t:Vv")) != -1)
 	  switch (c) 
 		{
 		case 'B':
@@ -393,7 +437,7 @@ main (int argc, char **argv)
 			break;
 		case 'F':
 		case 'f':
-			i = sscanf (optarg,"%d/%d", &iformat,&oformat);
+			i = sscanf (optarg,"%d/%d/%d", &iformat,&oformat,&mformat);
 			if (i == 1)
 				oformat = iformat;
 			flag++;
@@ -410,6 +454,13 @@ main (int argc, char **argv)
 		case 'L':
 		case 'l':
 			sscanf (optarg,"%d", &lonflip);
+			flag++;
+			break;
+		case 'M':
+		case 'm':
+			i = sscanf (optarg,"%s", mfile);
+			if (i == 1)
+				merge = MB_YES;
 			flag++;
 			break;
 		case 'N':
@@ -506,8 +557,10 @@ main (int argc, char **argv)
 		fprintf(stderr,"dbg2       timegap:        %f\n",timegap);
 		fprintf(stderr,"dbg2       input format:   %d\n",iformat);
 		fprintf(stderr,"dbg2       output format:  %d\n",oformat);
+		fprintf(stderr,"dbg2       merge format:   %d\n",mformat);
 		fprintf(stderr,"dbg2       input file:     %s\n",ifile);
 		fprintf(stderr,"dbg2       output file:    %s\n",ofile);
+		fprintf(stderr,"dbg2       merge file:     %s\n",mfile);
 		fprintf(stderr,"dbg2       insert comments:%d\n",insertcomments);
 		fprintf(stderr,"dbg2       comment file:   %s\n",commentfile);
 		fprintf(stderr,"dbg2       strip comments: %d\n",stripcomments);
@@ -537,6 +590,10 @@ main (int argc, char **argv)
 	else if (iformat > 0 && oformat <= 0)
 		oformat = iformat;
 
+	if (merge == MB_YES && mformat <=0)
+		mb_get_format(verbose,mfile,NULL,&mformat,&error);
+		
+
 	/* obtain format array locations - format ids will 
 		be aliased to current ids if old format ids given */
 	if ((status = mb_format(verbose,&iformat,&error)) 
@@ -557,6 +614,15 @@ main (int argc, char **argv)
 			program_name);
 		exit(error);
 		}
+	if (merge == MB_YES && (status = mb_format(verbose,&mformat,&error)) 
+		!= MB_SUCCESS)
+		{
+		mb_error(verbose,error,&message);
+		fprintf(stderr,"\nMBIO Error returned from function <mb_format> regarding merge format %d:\n%s\n",mformat,message);
+		fprintf(stderr,"\nProgram <%s> Terminated\n",
+			program_name);
+		exit(error);
+		}
 
 	/* initialize reading the input swath sonar file */
 	if ((status = mb_read_init(
@@ -573,6 +639,22 @@ main (int argc, char **argv)
 		exit(error);
 		}
 	imb_io_ptr = (struct mb_io_struct *) imbio_ptr; 
+
+	/* initialize reading the merge swath sonar file */
+	if (merge == MB_YES && (status = mb_read_init(
+		verbose,mfile,mformat,pings,lonflip,bounds,
+		btime_i,etime_i,speedmin,timegap,
+		&mmbio_ptr,&btime_d,&etime_d,
+		&mbeams_bath,&mbeams_amp,&mpixels_ss,&error)) != MB_SUCCESS)
+		{
+		mb_error(verbose,error,&message);
+		fprintf(stderr,"\nMBIO Error returned from function <mb_read_init>:\n%s\n",message);
+		fprintf(stderr,"\nMultibeam File <%s> not initialized for reading\n",mfile);
+		fprintf(stderr,"\nProgram <%s> Terminated\n",
+			program_name);
+		exit(error);
+		}
+	mmb_io_ptr = (struct mb_io_struct *) mmbio_ptr; 
 
 	/* initialize writing the output swath sonar file */
 	if ((status = mb_write_init(
@@ -691,6 +773,33 @@ main (int argc, char **argv)
 		status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_SIDESCAN, 
 						sizeof(double), (void **)&ossalongtrack, &error);
 
+	if (MB_YES == merge) {
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mmbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(char), (void **)&mbeamflag, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mmbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(double), (void **)&mbath, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mmbio_ptr, MB_MEM_TYPE_AMPLITUDE,
+						sizeof(double), (void **)&mamp, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mmbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(double), (void **)&mbathacrosstrack, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mmbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(double), (void **)&mbathalongtrack, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mmbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+						sizeof(double), (void **)&mss, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mmbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+						sizeof(double), (void **)&mssacrosstrack, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mmbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+						sizeof(double), (void **)&mssalongtrack, &error);
+	}
+
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
 		{
@@ -792,6 +901,19 @@ main (int argc, char **argv)
 		status = mb_put_comment(verbose,ombio_ptr,
 				comment,&error);
 		if (error == MB_ERROR_NO_ERROR) ocomment++;
+		if (merge == MB_YES)
+			{
+			strncpy(comment,"\0",256);
+			sprintf(comment,"  Merge file:         %s",mfile);
+			status = mb_put_comment(verbose,ombio_ptr,
+					comment,&error);
+			if (error == MB_ERROR_NO_ERROR) ocomment++;
+			strncpy(comment,"\0",256);
+			sprintf(comment,"  Merge MBIO format:  %d",mformat);
+			status = mb_put_comment(verbose,ombio_ptr,
+					comment,&error);
+			if (error == MB_ERROR_NO_ERROR) ocomment++;
+			}
 		strncpy(comment,"\0",256);
 		sprintf(comment,"  Output file:        %s",ofile);
 		status = mb_put_comment(verbose,ombio_ptr,
@@ -917,6 +1039,38 @@ main (int argc, char **argv)
 				inbounds = MB_NO;
 			}
 
+
+		if(merge == MB_YES
+			&& kind == MB_DATA_DATA
+			&& error == MB_ERROR_NO_ERROR
+			&& inbounds == MB_YES)
+			{
+			  while (merror <= MB_ERROR_NO_ERROR
+				 && mkind != MB_DATA_DATA
+				 && time_d - .001 > mtime_d)
+			    {
+			      /* find merge record */
+			      
+			      mstatus = mb_get(verbose,mmbio_ptr,&mkind,&mpings,
+					       mtime_i,&mtime_d,
+					       &mnavlon,&mnavlat,
+					       &mspeed,&mheading,
+					       &mdistance,&maltitude,&msonardepth,
+					       &mnbath,&mnamp,&mnss,
+					       mbeamflag,mbath,mamp,
+					       mbathacrosstrack,mbathalongtrack,
+					       mss,mssacrosstrack,mssalongtrack,
+					       mcomment,&merror);
+			      
+			    }
+			  
+			  if (time_d + .001 < mtime_d ||
+			      merror > 0)
+			    {
+			      inbounds = MB_NO;
+			    }
+			}
+
 		/* check numbers of input and output beams */
 		if (copymode == MBCOPY_PARTIAL
 			&& kind == MB_DATA_DATA
@@ -1017,14 +1171,30 @@ main (int argc, char **argv)
 				obathacrosstrack[j] = 0.0;
 				obathalongtrack[j] = 0.0;
 				}
-			for (i=istart_bath;i<iend_bath;i++)
+			/* do bathymetry */
+			if (merge == MB_YES)
 				{
-				j = i + offset_bath;
-				obeamflag[j] = ibeamflag[i];
-				obath[j] = ibath[i];
-				obathacrosstrack[j] = ibathacrosstrack[i];
-				obathalongtrack[j] = ibathalongtrack[i];
-				}
+				/* merge data */
+				for (i=istart_bath;i<iend_bath;i++)
+					{
+					j = i + offset_bath;
+					obeamflag[j] = mbeamflag[i];
+					obath[j] = mbath[i];
+					obathacrosstrack[j] = mbathacrosstrack[i];
+					obathalongtrack[j] = mbathalongtrack[i];
+					}
+			}
+			else
+			{
+				for (i=istart_bath;i<iend_bath;i++)
+					{
+					j = i + offset_bath;
+					obeamflag[j] = ibeamflag[i];
+					obath[j] = ibath[i];
+					obathacrosstrack[j] = ibathacrosstrack[i];
+					obathalongtrack[j] = ibathalongtrack[i];
+					}
+			}
 			for (j=iend_bath+offset_bath;j<obeams_bath;j++)
 				{
 				obeamflag[j] = MB_FLAG_NULL;
@@ -1126,18 +1296,36 @@ main (int argc, char **argv)
 				    }
 				    
 				/* copy the data to mbldeoih */
-				status = mbcopy_any_to_mbldeoih(verbose, 
-				    kind, time_i, time_d, 
-				    navlon, navlat, speed, heading, 
-				    draft, roll, pitch, heave, 
-				    imb_io_ptr->beamwidth_xtrack, 
-				    imb_io_ptr->beamwidth_ltrack, 
-				    nbath,namp,nss,
-				    ibeamflag,ibath,iamp,ibathacrosstrack,
-				    ibathalongtrack,
-				    iss,issacrosstrack,issalongtrack,
-				    comment, 
-				    ombio_ptr, ostore_ptr, &error);
+				if (merge == MB_YES)
+					{
+					status = mbcopy_any_to_mbldeoih(verbose, 
+						kind, time_i, time_d, 
+						navlon, navlat, speed, heading, 
+						draft, roll, pitch, heave, 
+						imb_io_ptr->beamwidth_xtrack, 
+						imb_io_ptr->beamwidth_ltrack, 
+						nbath,namp,nss,
+						mbeamflag,mbath,iamp,mbathacrosstrack,
+						mbathalongtrack,
+						iss,issacrosstrack,issalongtrack,
+						comment, 
+						ombio_ptr, ostore_ptr, &error);
+					}
+				else
+					{
+					  status = mbcopy_any_to_mbldeoih(verbose, 
+						kind, time_i, time_d, 
+						navlon, navlat, speed, heading, 
+						draft, roll, pitch, heave, 
+						imb_io_ptr->beamwidth_xtrack, 
+						imb_io_ptr->beamwidth_ltrack, 
+						nbath,namp,nss,
+						ibeamflag,ibath,iamp,ibathacrosstrack,
+						ibathalongtrack,
+						iss,issacrosstrack,issalongtrack,
+						comment, 
+						ombio_ptr, ostore_ptr, &error);
+					}
 				}
 			else 
 				error = MB_ERROR_OTHER;
@@ -1169,6 +1357,33 @@ main (int argc, char **argv)
 						oss,ossacrosstrack,ossalongtrack,
 						comment, &error);
 			}
+
+		if (merge == MB_YES
+		    && kind == MB_DATA_DATA
+		    && error == MB_ERROR_NO_ERROR)
+		  {
+		    switch(copymode) {
+		    case MBCOPY_PARTIAL:
+		    case MBCOPY_ANY_TO_MBLDEOIH:
+		      /* Already looked after */
+		      break;
+		    case MBCOPY_FULL :
+		    case MBCOPY_SIMRAD_TO_SIMRAD2:
+		    case MBCOPY_ELACMK2_TO_XSE:
+		    case MBCOPY_XSE_TO_ELACMK2:
+		    case MBCOPY_HDSD_TO_GSF:
+		    case MBCOPY_RESON8K_TO_GSF:
+		      status = mb_insert(verbose, ombio_ptr, ostore_ptr,
+						kind, time_i, time_d, 
+						navlon, navlat, speed, heading, 
+						mbeams_bath,ibeams_amp,ipixels_ss,
+						mbeamflag,mbath,iamp,mbathacrosstrack,
+						mbathalongtrack,
+						iss,issacrosstrack,issalongtrack,
+						comment, &error);
+		      break;
+		    }
+		  }
 
 		/* write some data */
 		if ((error == MB_ERROR_NO_ERROR 
