@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbio_status.h	2/1/93
- *    $Id: mb_status.h,v 5.82 2007-10-08 17:20:20 caress Exp $
+ *    $Id: mb_status.h,v 5.83 2007-10-17 20:26:03 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003, 2004, 2005, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.82  2007/10/08 17:20:20  caress
+ * New MB-System version number.
+ *
  * Revision 5.81  2007/10/08 15:59:34  caress
  * MBIO changes as of 8 October 2007.
  *
@@ -358,8 +361,8 @@
 #define MB_STATUS_DEF
 
 /* MB-system version id */
-#define	MB_VERSION	"5.1.1beta10"
-#define	MB_BUILD_DATE	"October 8, 2007"
+#define	MB_VERSION	"5.1.1beta11"
+#define	MB_BUILD_DATE	"October 17, 2007"
 
 /* MBIO function boolean convention */
 #define	MB_YES	1
@@ -472,6 +475,11 @@
 #define	MB_PROBLEM_AVG_TOO_FAST		4
 #define	MB_PROBLEM_TOO_DEEP		5
 #define	MB_PROBLEM_BAD_DATAGRAM		6
+
+/* processing status values returned by mb_datalist_read2() */
+#define MB_PROCESSED_NONE	0
+#define MB_PROCESSED_EXIST	1
+#define MB_PROCESSED_USE	2
 
 /* MBIO function error messages */
 static char *fatal_error_msg[] = 

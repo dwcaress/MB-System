@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.c	2/18/94
- *    $Id: mb_format.c,v 5.41 2006-11-10 22:36:04 caress Exp $
+ *    $Id: mb_format.c,v 5.42 2007-10-17 20:26:03 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2002, 2003, 2004, 2005 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	Februrary 18, 1994
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.41  2006/11/10 22:36:04  caress
+ * Working towards release 5.1.0
+ *
  * Revision 5.40  2006/10/05 18:58:28  caress
  * Changes for 5.1.0beta4
  *
@@ -225,7 +228,7 @@
 #include "../../include/mbsys_simrad.h"
 #include "../../include/mbsys_simrad2.h"
 
-static char rcs_id[]="$Id: mb_format.c,v 5.41 2006-11-10 22:36:04 caress Exp $";
+static char rcs_id[]="$Id: mb_format.c,v 5.42 2007-10-17 20:26:03 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_format_register(int verbose, 
@@ -1514,7 +1517,7 @@ int mb_format(int verbose, int *format, int *error)
 /*--------------------------------------------------------------------*/
 int mb_format_system(int verbose, int *format, int *system, int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.41 2006-11-10 22:36:04 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.42 2007-10-17 20:26:03 caress Exp $";
 	char	*function_name = "mb_format_system";
 	int	status;
 
@@ -1584,7 +1587,7 @@ int mb_format_dimensions(int verbose, int *format,
 		int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.41 2006-11-10 22:36:04 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.42 2007-10-17 20:26:03 caress Exp $";
 	char	*function_name = "mb_format_dimensions";
 	int	status;
 
@@ -1653,7 +1656,7 @@ int mb_format_dimensions(int verbose, int *format,
 /*--------------------------------------------------------------------*/
 int mb_format_description(int verbose, int *format, char *description, int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.41 2006-11-10 22:36:04 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.42 2007-10-17 20:26:03 caress Exp $";
 	char	*function_name = "mb_format_description";
 	int	status;
 
@@ -1719,7 +1722,7 @@ int mb_format_flags(int verbose, int *format,
 		int *variable_beams, int *traveltime, int *beam_flagging, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.41 2006-11-10 22:36:04 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.42 2007-10-17 20:26:03 caress Exp $";
 	char	*function_name = "mb_format_flags";
 	int	status;
 
@@ -1792,7 +1795,7 @@ int mb_format_source(int verbose, int *format,
 		int *vru_source, int *svp_source, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.41 2006-11-10 22:36:04 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.42 2007-10-17 20:26:03 caress Exp $";
 	char	*function_name = "mb_format_source";
 	int	status;
 
@@ -1863,7 +1866,7 @@ int mb_format_beamwidth(int verbose, int *format,
 		double *beamwidth_xtrack, double *beamwidth_ltrack,
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.41 2006-11-10 22:36:04 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.42 2007-10-17 20:26:03 caress Exp $";
 	char	*function_name = "mb_format_beamwidth";
 	int	status;
 
@@ -3015,6 +3018,72 @@ int mb_datalist_read(int verbose,
 	char	*function_name = "mb_datalist_read";
 	int	status = MB_SUCCESS;
 	struct mb_datalist_struct *datalist_ptr;
+	char	ppath[MB_PATH_MAXLINE];
+	int	pstatus;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2       rcs_id:        %s\n",rcs_id);
+		fprintf(stderr,"dbg2       verbose:       %d\n",verbose);
+		fprintf(stderr,"dbg2       datalist:      %d\n",datalist);
+		}
+
+	/* get datalist pointer */
+	datalist_ptr = (struct mb_datalist_struct *) datalist;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"dbg2       datalist_ptr->open:       %d\n",datalist_ptr->open);
+		fprintf(stderr,"dbg2       datalist_ptr->fp:         %d\n",datalist_ptr->fp);
+		fprintf(stderr,"dbg2       datalist_ptr->recursion:  %d\n",datalist_ptr->recursion);
+		fprintf(stderr,"dbg2       datalist_ptr->path:       %s\n",datalist_ptr->path);
+		fprintf(stderr,"dbg2       datalist_ptr->datalist:   %d\n",datalist_ptr->datalist);
+		fprintf(stderr,"dbg2       datalist_ptr->look_processed:   %d\n",datalist_ptr->look_processed);
+		}
+		
+	/* call mb_datalist_read2() */
+	status = mb_datalist_read2(verbose, datalist, &pstatus, path, ppath, format, weight, error);
+	
+	/* deal with pstatus */
+	if (status == MB_SUCCESS && *error == MB_ERROR_NO_ERROR)
+		{
+		if (pstatus == MB_PROCESSED_USE)
+			{
+			strcpy(path, ppath);
+			}
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       path:        %s\n",path);
+		fprintf(stderr,"dbg2       format:      %d\n",*format);
+		fprintf(stderr,"dbg2       weight:      %f\n",*weight);
+		fprintf(stderr,"dbg2       error:       %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:      %d\n",status);
+		}
+
+	return(status);
+}
+		
+/*--------------------------------------------------------------------*/
+int mb_datalist_readorg(int verbose,
+		void *datalist,
+		char *path, int *format, double *weight,
+		int *error)
+{
+	/* local variables */
+	char	*function_name = "mb_datalist_read";
+	int	status = MB_SUCCESS;
+	struct mb_datalist_struct *datalist_ptr;
 	struct mb_datalist_struct *datalist2_ptr;
 	char	buffer[MB_PATH_MAXLINE];
 	char	root[MB_PATH_MAXLINE];
@@ -3288,6 +3357,345 @@ int mb_datalist_read(int verbose,
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       path:        %s\n",path);
+		fprintf(stderr,"dbg2       format:      %d\n",*format);
+		fprintf(stderr,"dbg2       weight:      %f\n",*weight);
+		fprintf(stderr,"dbg2       error:       %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:      %d\n",status);
+		}
+
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_datalist_read2(int verbose,
+		void *datalist,
+		int *pstatus, char *path, char *ppath, int *format, double *weight,
+		int *error)
+{
+	/* local variables */
+	char	*function_name = "mb_datalist_read2";
+	int	status = MB_SUCCESS;
+	struct mb_datalist_struct *datalist_ptr;
+	struct mb_datalist_struct *datalist2_ptr;
+	char	buffer[MB_PATH_MAXLINE];
+	char	root[MB_PATH_MAXLINE];
+	char	tmpstr[MB_PATH_MAXLINE];
+	char	pfile[MB_PATH_MAXLINE];
+	int	pfile_specified;
+	char	*buffer_ptr;
+	int	len;
+	int	nscan, done, rdone;
+	int	pformat;
+	struct stat file_status;
+	int	fstat, file_ok;
+	int	rawspecified = MB_NO;
+	int	processedspecified = MB_NO;
+	int	istart;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2       rcs_id:        %s\n",rcs_id);
+		fprintf(stderr,"dbg2       verbose:       %d\n",verbose);
+		fprintf(stderr,"dbg2       datalist:      %d\n",datalist);
+		}
+
+	/* get datalist pointer */
+	datalist_ptr = (struct mb_datalist_struct *) datalist;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"dbg2       datalist_ptr->open:             %d\n",datalist_ptr->open);
+		fprintf(stderr,"dbg2       datalist_ptr->fp:               %d\n",datalist_ptr->fp);
+		fprintf(stderr,"dbg2       datalist_ptr->recursion:        %d\n",datalist_ptr->recursion);
+		fprintf(stderr,"dbg2       datalist_ptr->path:             %s\n",datalist_ptr->path);
+		fprintf(stderr,"dbg2       datalist_ptr->datalist:         %d\n",datalist_ptr->datalist);
+		fprintf(stderr,"dbg2       datalist_ptr->look_processed:   %d\n",datalist_ptr->look_processed);
+		}
+		
+	/* loop over reading from datalist_ptr */
+	done = MB_NO;
+	if (datalist_ptr->open == MB_YES
+		&& done == MB_NO)
+		{
+		while (done == MB_NO)
+		    {
+		    /* if recursive datalist closed read current datalist */
+		    if (datalist_ptr->datalist == NULL)
+			{
+			rdone = MB_NO;
+			while (rdone == MB_NO)
+			    {
+			    buffer_ptr = fgets(buffer,MB_PATH_MAXLINE,datalist_ptr->fp);
+
+			    /* deal with end of datalist file */
+			    if (buffer_ptr != buffer)
+				{
+				rdone = MB_YES;
+				done = MB_YES;
+				*pstatus = MB_PROCESSED_NONE;
+				status = MB_FAILURE;
+				*error = MB_ERROR_EOF;
+				}
+
+			    /* look for special $PROCESSED command */
+			    else if (strncmp(buffer,"$PROCESSED",10) == 0)
+				{
+				if (datalist_ptr->look_processed 
+						== MB_DATALIST_LOOK_UNSET)
+						datalist_ptr->look_processed = MB_DATALIST_LOOK_YES;
+				}
+
+			    /* look for special $RAW command */
+			    else if (strncmp(buffer,"$RAW",4) == 0)
+				{
+				if (datalist_ptr->look_processed 
+						== MB_DATALIST_LOOK_UNSET)
+						datalist_ptr->look_processed = MB_DATALIST_LOOK_NO;
+				}
+
+			    /* look for special $NOLOCALWEIGHT command */
+			    else if (strncmp(buffer,"$NOLOCALWEIGHT",14) == 0)
+				{
+				datalist_ptr->local_weight = MB_NO;
+				}
+
+			    /* get filename */
+			    else if (buffer[0] != '#')
+				{
+				/* check for R: and P: prefixes on paths. If either prefix is found,
+					then the file path is for a raw file, and the R: or P: indicates
+					whether the raw or processed file should be used. These prefixes
+					override the datalist_ptr->look_processed value. In general these
+					prefixes are placed in datalists by mbgrid and mbmosaic to indicate 
+					which file was used in gridding/mosaicing */
+				if (buffer[1] == ':')
+					{
+					if (strncmp(buffer, "R:", 2) == 0)
+						{
+						istart = 2;
+						rawspecified = MB_YES;
+						}
+					else if (strncmp(buffer, "P:", 2) == 0)
+						{
+						istart = 2;
+						processedspecified = MB_YES;
+						}
+					}
+				else
+					istart = 0;
+				
+				/* read datalist item */
+				nscan = sscanf(&(buffer[istart]),"%s %d %lf",path,format,weight);
+
+				/* get path */
+				if (nscan >= 1 && path[0] != '/'
+					&& strrchr(datalist_ptr->path,'/') != NULL
+					&& (len = strrchr(datalist_ptr->path,'/') 
+						    - datalist_ptr->path + 1) > 1)
+				    {
+				    strcpy(tmpstr,path);
+				    strncpy(path,datalist_ptr->path,len);
+				    path[len] = '\0';
+				    strcat(path,tmpstr);
+				    }
+				    
+				/* guess format if no format specified */
+				if (nscan == 1)
+				    {
+				    fstat = mb_get_format(verbose, path, root, &pformat, error);
+				    
+				    /* if no format specified set it */
+				    if (nscan == 1 && pformat != 0)
+					    {
+					    nscan = 2;
+					    *format = pformat;
+					    }
+				    }
+				
+				/* check if file or datalist can be opened */
+				if (nscan >= 2)
+				    {
+				    fstat = stat(path, &file_status);
+				    if (fstat == 0
+					    && (file_status.st_mode & S_IFMT) != S_IFDIR
+					    && file_status.st_size > 0)
+					    {
+					    file_ok = MB_YES;
+					    }
+				    else
+					    {
+					    file_ok = MB_NO;
+					    /* print warning if verbose > 0 */
+					    if (verbose > 0)
+						    {
+						    fprintf(stderr, "MBIO Warning: Datalist entry skipped because it could not be opened!\n");
+						    fprintf(stderr, "\tDatalist: %s\n", datalist_ptr->path);					    
+						    fprintf(stderr, "\tFile:     %s\n", path);					    
+						    }
+					    }
+				    }
+
+				/* check for processed file */
+				*pstatus = MB_PROCESSED_NONE;
+				pfile[0] = '\0';
+				if (file_ok == MB_YES)
+				    {
+				    mb_pr_get_ofile(verbose, path, 
+					    &pfile_specified, pfile, error);
+				    if (strlen(pfile) > 0 && pfile[0] != '/'
+					    && strrchr(path,'/') != NULL
+					    && (len = strrchr(path,'/') 
+							- path + 1) > 1)
+					{
+					strcpy(tmpstr,pfile);
+					strncpy(pfile,path,len);
+					pfile[len] = '\0';
+					strcat(pfile,tmpstr);
+					}
+
+				    if (pfile_specified == MB_YES)
+					{
+					if ((fstat = stat(pfile, &file_status)) == 0
+					    && (file_status.st_mode & S_IFMT) != S_IFDIR
+					    && file_status.st_size > 0)
+					    {
+					    strcpy(ppath,pfile);
+					    if (datalist_ptr->look_processed 
+						== MB_DATALIST_LOOK_YES)
+						*pstatus = MB_PROCESSED_USE;
+					    else
+						*pstatus = MB_PROCESSED_EXIST;
+					    }
+					}
+					
+				    /* apply processed or raw prefixes */
+				    if (*pstatus ==  MB_PROCESSED_EXIST
+				    		&& processedspecified == MB_YES)
+					*pstatus = MB_PROCESSED_USE;
+				    else if (*pstatus ==  MB_PROCESSED_USE
+				    		&& rawspecified == MB_YES)
+					*pstatus = MB_PROCESSED_EXIST;
+				    }
+				    
+				/* set weight value - recursive weight from above
+				   overrides local weight as long as local_weight == MB_YES */
+				if (nscan >= 2 && file_ok == MB_YES)
+				    {
+				    /* use recursive weight from above unless prohibited */
+				    if (datalist_ptr->weight_set == MB_YES
+				    	&& (datalist_ptr->local_weight == MB_NO
+						|| nscan != 3))
+					*weight = datalist_ptr->weight;
+
+				    /* else if weight not locally specified set to 1.0 */
+				    else if (nscan != 3)
+					    *weight = 1.0;
+				    }
+
+				/* deal with file */
+				if (nscan >= 2 && file_ok == MB_YES && *format >= 0)
+				    {
+				    /* set done */
+				    done = MB_YES;
+				    rdone = MB_YES;
+				    }
+				    
+				/* deal with recursive datalist */
+				else if (nscan >= 2 && file_ok == MB_YES && *format == -1
+					&& datalist_ptr->recursion < MB_DATALIST_RECURSION_MAX)
+				    {
+				    if (status = mb_datalist_open(verbose,
+						    (void **)&(datalist_ptr->datalist), path,
+							datalist_ptr->look_processed, error)
+					    == MB_SUCCESS)
+					{
+					datalist2_ptr = (struct mb_datalist_struct *) datalist_ptr->datalist;
+					datalist2_ptr->recursion =
+						datalist_ptr->recursion + 1;
+					datalist2_ptr->local_weight 
+					    		= datalist_ptr->local_weight;
+					rdone = MB_YES;
+					
+					/* set weight to recursive value if available */
+					if (nscan >= 3
+						&& (datalist_ptr->weight_set == MB_NO
+							|| datalist_ptr->local_weight == MB_YES))
+					    {
+					    datalist2_ptr->weight_set = MB_YES;
+					    datalist2_ptr->weight = *weight;
+					    }
+					
+					else if (datalist_ptr->weight_set == MB_YES)
+					    {
+					    datalist2_ptr->weight_set = MB_YES;
+					    datalist2_ptr->weight = datalist_ptr->weight;
+					    }
+					
+					/* else set weight to local value if available */
+					/* else do not set weight */
+					else
+					    {
+					    datalist2_ptr->weight_set = MB_NO;
+					    datalist2_ptr->weight = 0.0;
+					    }
+					}
+				    else
+					{
+					status = MB_SUCCESS;
+					*error = MB_ERROR_NO_ERROR;
+					}
+				    }
+				}
+			    }
+			}
+		    
+		    /* if open read next entry from recursive datalist */
+		    if (done == MB_NO
+			&& datalist_ptr->open == MB_YES
+			&& datalist_ptr->datalist != NULL)
+			{
+			datalist2_ptr = (struct mb_datalist_struct *) datalist_ptr->datalist;
+			if (datalist2_ptr->open == MB_YES)
+			    {
+			    /* recursively call mb_read_datalist */
+			    status = mb_datalist_read2(verbose,
+					    (void *)datalist_ptr->datalist,
+					    pstatus,
+					    path,
+					    ppath,
+					    format,
+					    weight,
+					    error);
+			    
+			    /* if datalist read fails close it */
+			    if (status == MB_FAILURE)
+				{
+				status = mb_datalist_close(verbose,
+					    (void **)&(datalist_ptr->datalist),
+					    error);
+				}
+			    else
+				{
+				done = MB_YES;
+				}
+			    }
+			}
+		    }
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       pstatus      %d\n",*pstatus);
+		fprintf(stderr,"dbg2       path:        %s\n",path);
+		fprintf(stderr,"dbg2       ppath:       %s\n",ppath);
 		fprintf(stderr,"dbg2       format:      %d\n",*format);
 		fprintf(stderr,"dbg2       weight:      %f\n",*weight);
 		fprintf(stderr,"dbg2       error:       %d\n",*error);
