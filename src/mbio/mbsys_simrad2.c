@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad2.c	3.00	10/9/98
- *	$Id: mbsys_simrad2.c,v 5.27 2007-10-08 15:59:34 caress Exp $
+ *	$Id: mbsys_simrad2.c,v 5.28 2007-10-31 18:38:41 caress Exp $
  *
  *    Copyright (c) 1998, 2001, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -31,6 +31,9 @@
  * Date:	October 9, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.27  2007/10/08 15:59:34  caress
+ * MBIO changes as of 8 October 2007.
+ *
  * Revision 5.26  2006/11/10 22:36:05  caress
  * Working towards release 5.1.0
  *
@@ -145,7 +148,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_simrad2.h"
 
-static char res_id[]="$Id: mbsys_simrad2.c,v 5.27 2007-10-08 15:59:34 caress Exp $";
+static char res_id[]="$Id: mbsys_simrad2.c,v 5.28 2007-10-31 18:38:41 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_simrad2_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
@@ -816,9 +819,9 @@ int mbsys_simrad2_survey_alloc(int verbose,
 		ping->png_pixels_ss = 0;
 		for (i=0;i<MBSYS_SIMRAD2_MAXPIXELS;i++)
 		    {
-		    ping->png_ss[i] = 0;
+		    ping->png_ss[i] = EM2_INVALID_AMP;
 				/* the processed sidescan ordered port to starboard */
-		    ping->png_ssalongtrack[i] = 0;
+		    ping->png_ssalongtrack[i] = EM2_INVALID_AMP;
 				/* the processed sidescan alongtrack distances 
 					in distance resolution units */
 		    }
@@ -1412,9 +1415,9 @@ int mbsys_simrad2_zero_ss(int verbose, void *store_ptr, int *error)
 		    }
 		for (i=0;i<MBSYS_SIMRAD2_MAXPIXELS;i++)
 		    {
-		    ping->png_ss[i] = 0;
+		    ping->png_ss[i] = EM2_INVALID_AMP;
 				/* the sidescan ordered port to starboard */
-		    ping->png_ssalongtrack[i] = 0;
+		    ping->png_ssalongtrack[i] = EM2_INVALID_AMP;
 				/* the sidescan ordered port to starboard */
 		    }
 		}
@@ -1729,10 +1732,20 @@ int mbsys_simrad2_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		pixel_size = 0.01 * ping->png_pixel_size;
 		for (i=0;i<MBSYS_SIMRAD2_MAXPIXELS;i++)
 			{
-			ss[i] = 0.01 * ping->png_ss[i];
-			ssacrosstrack[i] = pixel_size 
-					* (i - MBSYS_SIMRAD2_MAXPIXELS / 2);
-			ssalongtrack[i] = daloscale * ping->png_ssalongtrack[i];
+			if (ping->png_ss[i] != EM2_INVALID_AMP)
+				{
+				ss[i] = 0.01 * ping->png_ss[i];
+				ssacrosstrack[i] = pixel_size 
+						* (i - MBSYS_SIMRAD2_MAXPIXELS / 2);
+				ssalongtrack[i] = daloscale * ping->png_ssalongtrack[i];
+				}
+			else
+				{
+				ss[i] = MB_SIDESCAN_NULL;
+				ssacrosstrack[i] = pixel_size 
+						* (i - MBSYS_SIMRAD2_MAXPIXELS / 2);
+				ssalongtrack[i] = 0.0;
+				}
 			}
 
 		/* print debug statements */
@@ -2219,8 +2232,16 @@ int mbsys_simrad2_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			{
 			for (i=0;i<nss;i++)
 				{
-				ping->png_ss[i] = (int) rint(100 * ss[i]);
-				ping->png_ssalongtrack[i] = (int) rint(ssalongtrack[i] / daloscale);
+				if (ss[i] > MB_SIDESCAN_NULL)
+					{
+					ping->png_ss[i] = (int) rint(100 * ss[i]);
+					ping->png_ssalongtrack[i] = (int) rint(ssalongtrack[i] / daloscale);
+					}
+				else
+					{
+					ping->png_ss[i] = EM2_INVALID_AMP;
+					ping->png_ssalongtrack[i] = EM2_INVALID_AMP;
+					}
 				}
 			}
 		}
@@ -3874,8 +3895,8 @@ ping->png_beam_samples[i] * ss_spacing / beam_foot);*/
 			}
 		    else
 		    	{
-		    	ping->png_ss[i] = 0;
-		    	ping->png_ssalongtrack[i] = 0;
+		    	ping->png_ss[i] = EM2_INVALID_AMP;
+		    	ping->png_ssalongtrack[i] = EM2_INVALID_AMP;
 			}
 		    }
 
