@@ -1,4 +1,4 @@
-.TH mblist l9 "19 September 2007" "MB-System 5.0" "MB-System 5.0"
+.TH mblist l9 "12 October 2007" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmblist\fP - List data in swath data files.
 
@@ -10,7 +10,7 @@ Version 5.0
 \fB-C\fP 
 \fB-D\fP\fIdumpmode\fP 
 \fB-E\fP\fIyr/mo/da/hr/mn/sc\fP \fB-F\fP\fIformat\fP \fB-G\fP\fIdelimiter\fP
-\fB-H\fP \fB-I\fP\fIinfilename\fP 
+\fB-H\fP \fB-I\fP\fIinfilename\fP \fB-K\fP\fIdecimate\fP
 \fB-L\fP\fIlonflip\fP \fB-M\fP\fIstart_beam/end_beam\fP 
 \fB-N\fP\fIstart_pixel/end_pixel\fP 
 \fB-O\fP\fIoutput_format\fP \fB-P\fP\fIpings\fP \fB-Q\fP 
@@ -175,6 +175,13 @@ format supported by \fBMBIO\fP. A list of the swath data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page. 
 Default: \fIinfile\fP = "datalist.mb-1".
+.TP
+.B \-K
+\fIdecimate\fP
+.br
+Sets the decimation of the output data. By default (i.e. \fIdecimate\fP=1), 
+every available data record is output. If \fIdecimate\fP>1, then only 
+every "\fIdecimate\fP"th record will be output. Default: \fIdecimate\fP=1.
 .TP
 .B \-L
 \fIlonflip\fP

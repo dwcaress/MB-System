@@ -1,4 +1,4 @@
-.TH mbnavlist l "21 November 2004" "MB-System 5.0" "MB-System 5.0"
+.TH mbnavlist l "12 October 2007" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbnavlist\fP - List navigation data in swath sonar data files.
 
@@ -6,8 +6,9 @@
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbnavlist\fP [\fB-B\fP\fIyr/mo/da/hr/mn/sc \fP
-\fB-E\fP\fIyr/mo/da/hr/mn/sc\fP \fB-F\fP\fIformat\fP \fB-H -I\fP\fIfile \fP
+\fBmbnavlist\fP [\fB-B\fP\fIyr/mo/da/hr/mn/sc\fP \fB-D\fP\fIdecimate\fP
+\fB-E\fP\fIyr/mo/da/hr/mn/sc\fP \fB-F\fP\fIformat\fP 
+\fB-G\fP\fIdelimeter\fP \fB-H\fP \fB-I\fP\fIfile \fP
 \fB-L\fP\fIlonflip\fP \fB-N\fP\fInavchannel\fP
 \fB-O\fP\fIoutput_format\fP \fB-R\fP\fIwest/east/south/north\fP 
 \fB-S\fP\fIspeed\fP \fB-T\fP\fItimegap\fP \fB-V\fP \fB-Z\fP\fIsegment\fP]
@@ -17,8 +18,10 @@ Version 5.0
 in a swath sonar data file to stdout. By default, \fBmbnavlist\fP 
 produces ASCII files in
 spreadsheet style, with data columns separated by tabs. Alternatively,
+other column delimiters can be used (\fB-G\fP option), or
 the output can be binary, with each field represented 
-as a double precision float (\fB-A\fP option). The output of
+as a double precision float (\fB-A\fP option).  The output stream can
+be decimated using the \fB-D\fP option. The output of
 \fBmbnavlist\fP can be piped to plotting and data analysis programs. The
 option \fB-O\fP\fIoutput_format\fP can be 
 used to control the data types that
@@ -82,6 +85,13 @@ and starting time will be ignored. This scheme allows time
 windowing both inside and outside a specified interval.
 Default: \fIyr/mo/da/hr/mn/sc\fP = 1962/2/21/10/30/0.
 .TP
+.B \-D
+\fIdecimate\fP
+.br
+Sets the decimation of the output data. By default (i.e. \fIdecimate\fP=1), 
+every available data record is output. If \fIdecimate\fP>1, then only 
+every "\fIdecimate\fP"th record will be output. Default: \fIdecimate\fP=1.
+.TP
 .B \-E
 \fIyr/mo/da/hr/mn/sc\fP
 .br
@@ -104,6 +114,12 @@ This program uses the \fBMBIO\fP library and will read any swath sonar
 format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page. Default: \fIformat\fP = 11.
+.TP
+.B \-G
+\fIdelimiter\fP
+.br
+Sets the character(s) used to separate output fields when ascii
+columns are output. Default: tabs are used as delimiters.
 .TP
 .B \-H
 This "help" flag cause the program to print out a description

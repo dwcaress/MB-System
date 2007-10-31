@@ -1,4 +1,4 @@
-.TH mbgrdviz l "18 February 2005" "MB-System 5.0" "MB-System 5.0"
+.TH mbgrdviz l "22 October 2007" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbgrdviz\fP - Simple interactive 2D/3D visualization of GMT grids..
 
@@ -9,18 +9,65 @@ Version 5.0
 \fBmbgrdviz\fP [-I\fIgridfile\fP \fB-T -V -H\fP]
 
 .SH DESCRIPTION
-\fBMBgrdviz\fP is a simple, interactive 2D/3D vizualization tool
-for GMT grid files. Essentially, this program is a demonstration and
-test platform for a vizualization API called \fBMBview\fP that will be used
-in planned (version 6) \fBMB-System\fP processing tools.
 
-This man page does not yet include either a description of the 
-program's capabilities or documentation of the interface. The user's success
-will therefore depend on some combination of the author's success in 
-providing an intutitive interface and the user's cleverness and/or 
-determination.
+\fIOverview\fP
 
-Good luck.
+\fBMBgrdviz\fP is an interactive 2D/3D visualization tool for \fBGMT\fP topography 
+grid files. \fBMBgrdviz\fP can be used for general data visualization and also has features 
+integrating it with swath mapping data processing and swath survey planning.
+
+Once a topographic grid has been read, it may be displayed either as a 2D map or as 
+a 3D model. The 2D view can be panned and zoomed; the 3D view also allows arbitrary 
+rotations of both the topography model and the viewpoint. 
+
+In addition to the primary topography, other data sets (e.g. sidescan sonar
+mosaics) can be read and displayed as overlays on the topography. Navigation
+of ships or underwater vehicles can be read and displayed; if associated with
+swath data the extent of mapping coverage can be displayed. Site data (individual
+point locations) can be read, displayed, interactively created and modified, and
+saved. Route data (collections of waypoints) can also be read, displayed, 
+interactively created and modified, and saved.
+
+The topography data can be shown using a number of colortables. The colortables can
+be linearly stretched between minimum and maximum values, or applied using
+a histogram equalization. The display may also be shaded using an
+illumination model, slope magnitude, or overlay grid data. Overlay data
+can be displayed draped on the topography. Topographic 
+contours can be displayed using a user defined contour interval. 
+
+In addition to modifying the view, users can interact with the display in 
+several ways. Users can pick single points on the surface to determine position 
+and topography values, or pick and drag to determine range and bearing between 
+two locations. Arbitrary rectangular regions with north-south and east-west boundaries or
+arbitrarily oriented rectangular areas can be defined by picking and dragging. 
+The data within a region can be opened as a new display; areas can be used
+for survey planning.
+
+Topographic profiles associated with two-point picks, selected navigation, or 
+selected routes can be displayed in a separate window and saved.
+
+\fBMBgrdviz\fP supports as many as ten displays deriving either from reading
+topography grids or extracting user defined regions from existing displays.
+
+\fIStarting Up\fP
+
+When \fBmbgrdviz\fP is invoked on the command line, a single window comes up with
+the title \fBMBgrdviz\fP and two menus: \fBFile\fP and \fBHelp\fP. The \fBHelp\fP 
+menu contains a single item named \fBAbout\fP, which brings up a simple 
+information window including the MB-System release version identifier. 
+The \fBFile\fP menu contains several items, but initially only the \fBOpen Primary 
+Grid\fP and \fBQuit\fP items are enabled. Selecting \fBOpen Primary Grid\fP brings 
+up a filesystem browser window that allows users to find and select the desired 
+\fBGMT\fP topography grid. By default, the browser filter is set to display only 
+files ending with a ".grd" suffix. Users can change this filter (e.g. setting it 
+to "*" will display all files) and then hit the \fBFilter\fP button to relist the 
+files as desired. Once the desired topography grid file has been located and 
+selected so that its full path appears in the \fBSelection\fP text item, clicking 
+the \fBOK\fP button will cause \fBMBgrdviz\fP to read the grid and open an \fBMBview\fP 
+display window.
+
+Initially, the topography will be displayed in 2D, or map view mode. The color 
+
 
 .SH AUTHORSHIP
 David W. Caress (caress@mbari.org)
@@ -56,13 +103,20 @@ outputs the program version being used, all error status messages,
 and a large amount of other information including all of the
 beams flagged or zeroed.
 
-.SH INTERACTIVE CONTROLS: MBgrdviz Main Window
+.SH INTERACTIVE CONTROLS: MBgrdviz Startup Window
 .TP
-.B [MBgrdviz]:<File->Open Primary Grid
+.B [MBgrdviz]:<File->Open Primary Grid>
 This menu button pops up a file browser that allows the user to
-select an input GMT grid file.
+select an input \fBGMT\fP grid file. If the OK button is clicked, \fBMBgrdviz\fP will
+attempt to read a topography grid from the specified file. If successful,
+a new \fBMBview\fP window will appear displaying the topography.
 .TP
 .B [MBgrdviz]:<File->Open Site>
+This menu button pops up a file browser that allows the user to
+select an input site file. A site file specifies one or more 
+individual locations that can be displayed and interactively moved.
+Site files are text with each line delineating a single site with
+white space delimited columns
 .TP
 .B [MBgrdviz]:<File->Open Route>
 .TP

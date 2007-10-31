@@ -232,6 +232,10 @@ three listing programs.
 Added mbcopy capability to merge bathymetry and beam flags from a third
 "merge" swath file. This is a Gordon Keith contribution.
 
+MB-System programs will now recognize filename suffixes of the form
+".MB***" as well as ".mb***". Capitalized versions of many vendor
+format suffixes are also supported.
+
 MB-SYSTEM VERSION 5.1.0 RELEASE NOTES:
 ------------------------------------------
 
@@ -1425,10 +1429,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.103 2007-10-17 20:24:43 caress Exp $
+RCS ID: $Id: README,v 5.104 2007-10-31 18:44:11 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.103  2007/10/17 20:24:43  caress
+Release 5.1.1beta11
+
 Revision 5.102  2007/10/08 17:50:47  caress
 Updates to reflect present state.
 
