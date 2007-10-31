@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbview_callbacks.c	10/7/2002
- *    $Id: mbview_callbacks.c,v 5.17 2007-10-17 20:35:05 caress Exp $
+ *    $Id: mbview_callbacks.c,v 5.18 2007-10-31 18:42:37 caress Exp $
  *
  *    Copyright (c) 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -18,6 +18,9 @@
  * Date:	October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.17  2007/10/17 20:35:05  caress
+ * Release 5.1.1beta11
+ *
  * Revision 5.16  2007/10/08 16:32:08  caress
  * Code status as of 8 October 2007.
  *
@@ -142,7 +145,7 @@ static Cardinal 	ac;
 static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_callbacks.c,v 5.17 2007-10-17 20:35:05 caress Exp $";
+static char rcs_id[]="$Id: mbview_callbacks.c,v 5.18 2007-10-31 18:42:37 caress Exp $";
 
 /* function prototypes */
 /*------------------------------------------------------------------------------*/
@@ -2734,6 +2737,11 @@ int mbview_action_sensitivity(int instance)
 			XtSetValues(view->pushButton_action[i], args, ac);
 			}
 		}
+		
+	/* reset sensitivity in parent program */
+fprintf(stderr,"could call mbview_sensitivity_notify:%d\n",data->mbview_sensitivity_notify);
+	if (data->mbview_sensitivity_notify != NULL)
+		(data->mbview_sensitivity_notify)();
 
 	/* return */
 	return(status);
@@ -4913,6 +4921,7 @@ fprintf(stderr,"KeyPress event\n");
 	  }
 	  
      /* update action buttons according to pick state */
+fprintf(stderr,"About to call mbview_action_sensitivity %d\n",instance);
      mbview_action_sensitivity(instance);
  
      } /* end of inputs from window */
@@ -8314,6 +8323,9 @@ fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_sitelistselect: instan
 			mbview_plotprofile(i);
 			}
 		}
+		
+	/* set widget sensitivity */
+	mbview_action_sensitivityall();
 }
 
 /*------------------------------------------------------------------------------*/
@@ -8377,6 +8389,9 @@ fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_sitelist_delete\n");
 		/* update site list */
 		mbview_updatesitelist();
 		}
+		
+	/* set widget sensitivity */
+	mbview_action_sensitivityall();
 }
 
 /*------------------------------------------------------------------------------*/
@@ -8451,6 +8466,9 @@ fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_routelist_delete\n");
 		/* update route list */
 		mbview_updateroutelist();
 		}
+		
+	/* set widget sensitivity */
+	mbview_action_sensitivityall();
 }
 /*------------------------------------------------------------------------------*/
 void
@@ -8522,6 +8540,9 @@ fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_navlist_delete\n");
 		/* update nav list */
 		mbview_updatenavlist();
 		}
+		
+	/* set widget sensitivity */
+	mbview_action_sensitivityall();
 }
 
 /*------------------------------------------------------------------------------*/
@@ -8754,6 +8775,11 @@ fprintf(stderr,"do_mbview_clearpicks\n");
 		
 	/* set pick annotation */
 	mbview_pick_text(instance);
+	
+	/* update nav, site, and route lists */
+	mbview_updatenavlist();
+	mbview_updatesitelist();
+	mbview_updateroutelist();
    
     /* draw */
     if (replotinstance == MB_YES || replotall == MB_YES)
