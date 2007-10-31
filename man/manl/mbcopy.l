@@ -7,9 +7,9 @@ Version 5.0
 
 .SH SYNOPSIS
 \fBmbcopy\fP [\fB-B\fIyr/mo/da/hr/mn/sc\fP \fB-C\fIcommentfile\fP \fB-D\fP
-\fB-E\fIyr/mo/da/hr/mn/sc\fP \fB-F\fIinformat/outformat\fP 
+\fB-E\fIyr/mo/da/hr/mn/sc\fP \fB-F\fIinformat[/outformat[/mergeformat]]\fP 
 \fB-H\fP \fB-I\fIinfilename\fP 
-\fB-L\fIlonflip\fP \fB-N\fP \fB-O\fIoutfilename\fP 
+\fB-L\fIlonflip\fP \fB-M\fImergefilename\fP \fB-N\fP \fB-O\fIoutfilename\fP 
 \fB-P\fIpings\fP \fB-Q\fIsleep_factor\fP \fB-R\fIwest/east/south/north\fP 
 \fB-S\fIspeed\fP \fB-V\fP]
 
@@ -73,10 +73,13 @@ windowing both inside and outside a specified interval.
 Default: \fIyr/mo/da/hr/mn/sc\fP = 2062/2/21/10/30/0.
 .TP
 .B \-F
-\fIinformat/outformat\fP
+\fIinformat[/outformat[/mergeformat]]\fP
 .br
 Sets the format for the input and output swath sonar data using 
-\fBMBIO\fP integer format identifiers. 
+\fBMBIO\fP integer format identifiers. If only \fIinformat\fP is specified,
+then \fIoutformat\fP is assumed to be the same. If bathymetry merging is
+specified with the \fB-M\fP option, then the optional \fImergeformat\fP 
+specifies the format of the merge file.
 This program uses the \fBMBIO\fP library and will read or write any swath sonar
 format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
@@ -113,6 +116,16 @@ the range from -180 to 180 degrees. If \fIlonflip\fP=1
 then the longitude values will be in
 the range from 0 to 360 degrees.
 Default: \fIlonflip\fP = 0.
+.TP
+.B \-M
+\fImergefilename\fP
+.br
+If a merge file is specified then the bathymetry data and flags
+from the merge file will be written to the output file along with 
+the remaining data from the input file.
+This can be used to merge two processing streams, one for bathymetry
+data and the other for other data sets. The input file and merge file 
+must both be based on the same raw data.
 .TP
 .B \-N
 Normally, \fBmbcopy\fP generates a set of comment records at
@@ -193,6 +206,12 @@ data is in a raw Hydrosweep file (format 21).  The following will work:
 
 where a pipe (|) has been used to direct the stdout stream from \fBmbcopy\fP
 to the stdin stream of thrash_prog.
+
+Suppose one has some raw data from a Simrad EM300 that has been cleaned and processed
+by a third party using other software and exported as a GSF file, but one wants to 
+access the original Simrad attitude and backscatter data with the corrected bathymetry 
+data.  The following will work:
+ 	mbcopy -F56/57/121 -I0015_20040212_052714_raw.all -M20040212_052714.gsf -O20040212_052714.mb57
 
 .SH SEE ALSO
 \fBmbsystem\fP(l), \fBmbio\fP(l)

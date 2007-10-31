@@ -1,4 +1,4 @@
-.TH mbsegylist l "27 April 2005" "MB-System 5.0" "MB-System 5.0"
+.TH mbsegylist l "12 October 2007" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbsegylist\fP - List selected header values in segy format seismic data files.
 
@@ -6,9 +6,10 @@
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbsegylist\fP [\fB-A\fP \fB-I\fP\fIinfilename\fP 
+\fBmbsegylist\fP [\fB-A\fP \fB-D\fP\fIdecimate\fP 
+\fB-H\fP \fB-G\fP\fIdelimeter\fP \fB-I\fP\fIinfilename\fP 
 \fB-L\fP\fIlonflip\fP \fB-O\fP\fIoutput_format\fP 
-\fB-U\fP\fIcheck\fP \fB-H\fP \fB-V\fP]
+\fB-U\fP\fIcheck\fP \fB-V\fP \fB-Z\fP\fIsegment\fP]
 
 .SH DESCRIPTION
 \fBMBsegylist\fP is a utility to output specified header values
@@ -40,6 +41,19 @@ time strings and longitude or latitude broken into degrees
 and minutes. These values are output as multiple fields as
 appropriate.
 Default: ASCII output with fields separated by tabs.
+.TP
+.B \-D
+\fIdecimate\fP
+.br
+Sets the decimation of the output data. By default (i.e. \fIdecimate\fP=1), 
+every available data record is output. If \fIdecimate\fP>1, then only 
+every "\fIdecimate\fP"th record will be output. Default: \fIdecimate\fP=1.
+.TP
+.B \-G
+\fIdelimiter\fP
+.br
+Sets the character(s) used to separate output fields when ascii
+columns are output. Default: tabs are used as delimiters.
 .TP
 .B \-H
 This "help" flag cause the program to print out a description
@@ -162,6 +176,18 @@ Normally, \fBmbsegylist\fP works "silently" without outputting
 anything to the stderr stream.  If the
 \fB-V\fP flag is given, then \fBmbsegylist\fP works in a "verbose" mode and
 outputs the program version being used and all error status messages.
+.TP
+.B \-Z
+\fIsegment\fP
+.br
+Causes the ascii output of different input segy files
+(e.g. when a datalist is specified with the \fB-I\fP option)
+to be separated by lines with \fIsegment\fP. If \fIsegment\fP
+is a single character, then the output is a multiple segment
+file of the sort accepted by the \fBGMT\fP program \fBpsxy\fP.
+This option only works with ascii output, and is thus disabled
+when the \fB-A\fP option is specified. The most common usage
+is \fB-Z\fP\I>\fP.
 
 .SH EXAMPLES
 Suppose one has a subbottom profiler segy data file called 
