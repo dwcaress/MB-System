@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.c	2/18/94
- *    $Id: mb_format.c,v 5.42 2007-10-17 20:26:03 caress Exp $
+ *    $Id: mb_format.c,v 5.43 2007-10-31 18:37:01 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2002, 2003, 2004, 2005 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	Februrary 18, 1994
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.42  2007/10/17 20:26:03  caress
+ * Release 5.1.1beta11
+ *
  * Revision 5.41  2006/11/10 22:36:04  caress
  * Working towards release 5.1.0
  *
@@ -228,7 +231,7 @@
 #include "../../include/mbsys_simrad.h"
 #include "../../include/mbsys_simrad2.h"
 
-static char rcs_id[]="$Id: mb_format.c,v 5.42 2007-10-17 20:26:03 caress Exp $";
+static char rcs_id[]="$Id: mb_format.c,v 5.43 2007-10-31 18:37:01 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_format_register(int verbose, 
@@ -1517,7 +1520,7 @@ int mb_format(int verbose, int *format, int *error)
 /*--------------------------------------------------------------------*/
 int mb_format_system(int verbose, int *format, int *system, int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.42 2007-10-17 20:26:03 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.43 2007-10-31 18:37:01 caress Exp $";
 	char	*function_name = "mb_format_system";
 	int	status;
 
@@ -1587,7 +1590,7 @@ int mb_format_dimensions(int verbose, int *format,
 		int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.42 2007-10-17 20:26:03 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.43 2007-10-31 18:37:01 caress Exp $";
 	char	*function_name = "mb_format_dimensions";
 	int	status;
 
@@ -1656,7 +1659,7 @@ int mb_format_dimensions(int verbose, int *format,
 /*--------------------------------------------------------------------*/
 int mb_format_description(int verbose, int *format, char *description, int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.42 2007-10-17 20:26:03 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.43 2007-10-31 18:37:01 caress Exp $";
 	char	*function_name = "mb_format_description";
 	int	status;
 
@@ -1722,7 +1725,7 @@ int mb_format_flags(int verbose, int *format,
 		int *variable_beams, int *traveltime, int *beam_flagging, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.42 2007-10-17 20:26:03 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.43 2007-10-31 18:37:01 caress Exp $";
 	char	*function_name = "mb_format_flags";
 	int	status;
 
@@ -1795,7 +1798,7 @@ int mb_format_source(int verbose, int *format,
 		int *vru_source, int *svp_source, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.42 2007-10-17 20:26:03 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.43 2007-10-31 18:37:01 caress Exp $";
 	char	*function_name = "mb_format_source";
 	int	status;
 
@@ -1866,7 +1869,7 @@ int mb_format_beamwidth(int verbose, int *format,
 		double *beamwidth_xtrack, double *beamwidth_ltrack,
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.42 2007-10-17 20:26:03 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.43 2007-10-31 18:37:01 caress Exp $";
 	char	*function_name = "mb_format_beamwidth";
 	int	status;
 
@@ -1966,7 +1969,8 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 	    i = strlen(filename) - 6;
 	else
 	    i = 0;
-	if ((suffix = strstr(&filename[i],".mb")) != NULL)
+	if ((suffix = strstr(&filename[i],".mb")) != NULL 
+		|| (suffix = strstr(&filename[i],".MB")) != NULL)
 	    {
 	    suffix_len = strlen(suffix);
 	    if (suffix_len >= 4 && suffix_len <= 6)
@@ -1976,7 +1980,8 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 		    strncpy(fileroot, filename, strlen(filename)-suffix_len);
 		    fileroot[strlen(filename)-suffix_len] = '\0';
 		    }
-		if (sscanf(suffix, ".mb%d", format) > 0)
+		if (sscanf(suffix, ".mb%d", format) > 0 
+			|| sscanf(suffix, ".MB%d", format) > 0)
 		    found = MB_YES;
 		}
 	    }
@@ -1988,7 +1993,8 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 		i = strlen(filename) - 4;
 	    else
 		i = 0;
-	    if ((suffix = strstr(&filename[i],".nve")) != NULL)
+	    if ((suffix = strstr(&filename[i],".nve")) != NULL 
+	    	|| (suffix = strstr(&filename[i],".MVE")) != NULL)
 		{
 		suffix_len = strlen(suffix);
 		if (suffix_len == 4)
@@ -2011,7 +2017,8 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 		i = strlen(filename) - 4;
 	    else
 		i = 0;
-	    if ((suffix = strstr(&filename[i],".na")) != NULL)
+	    if ((suffix = strstr(&filename[i],".na")) != NULL 
+	    	|| (suffix = strstr(&filename[i],".NA")) != NULL)
 		{
 		suffix_len = strlen(suffix);
 		if (suffix_len == 4)
@@ -2034,7 +2041,8 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 		i = strlen(filename) - 4;
 	    else
 		i = 0;
-	    if ((suffix = strstr(&filename[i],".fbt")) != NULL)
+	    if ((suffix = strstr(&filename[i],".fbt")) != NULL 
+	    	|| (suffix = strstr(&filename[i],".FBT")) != NULL)
 		{
 		suffix_len = strlen(suffix);
 		if (suffix_len == 4)
@@ -2057,7 +2065,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 		i = strlen(filename) - 4;
 	    else
 		i = 0;
-	    if ((suffix = strstr(&filename[i],".fnv")) != NULL)
+	    if ((suffix = strstr(&filename[i],".fnv")) != NULL || (suffix = strstr(&filename[i],".FNV")) != NULL)
 		{
 		suffix_len = strlen(suffix);
 		if (suffix_len == 4)
@@ -2080,7 +2088,8 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 		i = strlen(filename) - 4;
 	    else
 		i = 0;
-	    if ((suffix = strstr(&filename[i],".dls")) != NULL)
+	    if ((suffix = strstr(&filename[i],".dls")) != NULL
+	    	|| (suffix = strstr(&filename[i],".DLS")) != NULL)
 		{
 		suffix_len = strlen(suffix);
 		if (suffix_len == 4)
@@ -2103,7 +2112,8 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 		i = strlen(filename) - 4;
 	    else
 		i = 0;
-	    if ((suffix = strstr(&filename[i],".rec")) != NULL)
+	    if ((suffix = strstr(&filename[i],".rec")) != NULL 
+	    	|| (suffix = strstr(&filename[i],".REC")) != NULL)
 		{
 		suffix_len = strlen(suffix);
 		if (suffix_len == 4)
@@ -2126,7 +2136,8 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 		i = strlen(filename) - 4;
 	    else
 		i = 0;
-	    if ((suffix = strstr(&filename[i],".xse")) != NULL)
+	    if ((suffix = strstr(&filename[i],".xse")) != NULL
+	    	|| (suffix = strstr(&filename[i],".XSE")) != NULL)
 		{
 		suffix_len = strlen(suffix);
 		if (suffix_len == 4)
@@ -2150,7 +2161,9 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 	    else
 		i = 0;
 	    if ((suffix = strstr(&filename[i],"_raw.all")) != NULL
-	    	|| (suffix = strstr(&filename[i],"-raw.all")) != NULL)
+	    	|| (suffix = strstr(&filename[i],"-raw.all")) != NULL
+		|| (suffix = strstr(&filename[i],"_RAW.ALL")) != NULL
+	    	|| (suffix = strstr(&filename[i],"-RAW.ALL")) != NULL)
 		{
 		suffix_len = strlen(suffix);
 		if (suffix_len == 8)
@@ -2214,7 +2227,8 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 		i = strlen(filename) - 4;
 	    else
 		i = 0;
-	    if ((suffix = strstr(&filename[i],".all")) != NULL)
+	    if ((suffix = strstr(&filename[i],".all")) != NULL
+	    	|| (suffix = strstr(&filename[i],".ALL")) != NULL)
 		{
 		suffix_len = strlen(suffix);
 		if (suffix_len == 4)
@@ -2237,7 +2251,8 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 		i = strlen(filename) - 7;
 	    else
 		i = 0;
-	    if ((suffix = strstr(&filename[i],".merged")) != NULL)
+	    if ((suffix = strstr(&filename[i],".merged")) != NULL
+	    	|| (suffix = strstr(&filename[i],".MERGED")) != NULL)
 		{
 		suffix_len = strlen(suffix);
 		if (suffix_len == 7)
@@ -2342,7 +2357,8 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 		i = strlen(filename) - 4;
 	    else
 		i = 0;
-	    if ((suffix = strstr(&filename[i],".fsw")) != NULL)
+	    if ((suffix = strstr(&filename[i],".fsw")) != NULL
+	    	|| (suffix = strstr(&filename[i],".FSW")) != NULL)
 		suffix_len = 4;
 	    else
 		suffix_len = 0;
@@ -2365,9 +2381,8 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 		i = strlen(filename) - 4;
 	    else
 		i = 0;
-	    if ((suffix = strstr(&filename[i],".xtf")) != NULL)
-		suffix_len = 4;
-	    else if ((suffix = strstr(&filename[i],".XTF")) != NULL)
+	    if ((suffix = strstr(&filename[i],".xtf")) != NULL
+	    	|| (suffix = strstr(&filename[i],".XTF")) != NULL)
 		suffix_len = 4;
 	    else
 		suffix_len = 0;
@@ -2390,9 +2405,8 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 		i = strlen(filename) - 6;
 	    else
 		i = 0;
-	    if ((suffix = strstr(&filename[i],".mgd77")) != NULL)
-		suffix_len = 6;
-	    else if ((suffix = strstr(&filename[i],".MGD77")) != NULL)
+	    if ((suffix = strstr(&filename[i],".mgd77")) != NULL
+	    	|| (suffix = strstr(&filename[i],".MGD77")) != NULL)
 		suffix_len = 6;
 	    else
 		suffix_len = 0;
@@ -2415,9 +2429,8 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 		i = strlen(filename) - 5;
 	    else
 		i = 0;
-	    if ((suffix = strstr(&filename[i],".segy")) != NULL)
-		suffix_len = 5;
-	    else if ((suffix = strstr(&filename[i],".SEGY")) != NULL)
+	    if ((suffix = strstr(&filename[i],".segy")) != NULL
+	    	|| (suffix = strstr(&filename[i],".SEGY")) != NULL)
 		suffix_len = 5;
 	    else
 		suffix_len = 0;
@@ -2440,7 +2453,8 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 		i = strlen(filename) - 3;
 	    else
 		i = 0;
-	    if ((suffix = strstr(&filename[i],".SO")) != NULL)
+	    if ((suffix = strstr(&filename[i],".so")) != NULL
+	    	|| (suffix = strstr(&filename[i],".SO")) != NULL)
 		suffix_len = 3;
 	    else
 		suffix_len = 0;
@@ -2463,9 +2477,8 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 		i = strlen(filename) - 4;
 	    else
 		i = 0;
-	    if ((suffix = strstr(&filename[i],".mbb")) != NULL)
-		suffix_len = 4;
-	    else if ((suffix = strstr(&filename[i],".MBB")) != NULL)
+	    if ((suffix = strstr(&filename[i],".mbb")) != NULL
+	    	|| (suffix = strstr(&filename[i],".MBB")) != NULL)
 		suffix_len = 4;
 	    else
 		suffix_len = 0;
@@ -2488,9 +2501,8 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 		i = strlen(filename) - 4;
 	    else
 		i = 0;
-	    if ((suffix = strstr(&filename[i],".nvi")) != NULL)
-		suffix_len = 4;
-	    else if ((suffix = strstr(&filename[i],".NVI")) != NULL)
+	    if ((suffix = strstr(&filename[i],".nvi")) != NULL
+	    	|| (suffix = strstr(&filename[i],".NVI")) != NULL)
 		suffix_len = 4;
 	    else
 		suffix_len = 0;
