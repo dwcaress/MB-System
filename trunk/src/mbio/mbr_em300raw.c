@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em300raw.c	10/16/98
- *	$Id: mbr_em300raw.c,v 5.39 2006-11-26 09:37:09 caress Exp $
+ *	$Id: mbr_em300raw.c,v 5.40 2007-10-31 18:38:41 caress Exp $
  *
  *    Copyright (c) 1998, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	October 16,  1998
  * $Log: not supported by cvs2svn $
+ * Revision 5.39  2006/11/26 09:37:09  caress
+ * Making distribution 5.1.0.
+ *
  * Revision 5.38  2006/11/10 22:36:05  caress
  * Working towards release 5.1.0
  *
@@ -322,7 +325,7 @@ int mbr_em300raw_wr_ss(int verbose, FILE *mbfp, int swap,
 int mbr_em300raw_wr_wc(int verbose, FILE *mbfp, int swap, 
 		struct mbsys_simrad2_struct *store, int *error);
 
-static char res_id[]="$Id: mbr_em300raw.c,v 5.39 2006-11-26 09:37:09 caress Exp $";
+static char res_id[]="$Id: mbr_em300raw.c,v 5.40 2007-10-31 18:38:41 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_em300raw(int verbose, void *mbio_ptr, int *error)
@@ -753,6 +756,8 @@ int mbr_rt_em300raw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		time_i[5] = (ping->png_ss_msec % 60000) / 1000;
 		time_i[6] = (ping->png_ss_msec % 1000) * 1000;
 		mb_get_time(verbose, time_i, &ss_time_d);
+/* fprintf(stderr,"Check: png_count:%d png_raw3_count:%d png_ss_count:%d    Beams:%d %d %d\n",
+ping->png_count,ping->png_raw3_count,ping->png_ss_count,ping->png_nbeams,ping->png_raw3_nbeams,ping->png_nbeams_ss);*/
 		
 		/* check for time match - if bath newer than
 		   sidescan then zero sidescan,  if sidescan

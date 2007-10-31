@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad.c	3.00	8/5/94
- *	$Id: mbsys_simrad.c,v 5.15 2007-10-08 15:59:34 caress Exp $
+ *	$Id: mbsys_simrad.c,v 5.16 2007-10-31 18:38:41 caress Exp $
  *
  *    Copyright (c) 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -31,6 +31,9 @@
  * Date:	August 5, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.15  2007/10/08 15:59:34  caress
+ * MBIO changes as of 8 October 2007.
+ *
  * Revision 5.14  2007/06/18 01:19:48  caress
  * Changes as of 17 June 2007.
  *
@@ -167,7 +170,7 @@
 #define MBSYS_SIMRAD_C
 #include "../../include/mbsys_simrad.h"
 
-static char res_id[]="$Id: mbsys_simrad.c,v 5.15 2007-10-08 15:59:34 caress Exp $";
+static char res_id[]="$Id: mbsys_simrad.c,v 5.16 2007-10-31 18:38:41 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_simrad_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
@@ -710,10 +713,20 @@ int mbsys_simrad_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			pixel_size = 0.01 * ping->pixel_size;
 			for (i=0;i<MBSYS_SIMRAD_MAXPIXELS;i++)
 				{
-				ss[i] = 0.01 * ping->ss[i];
-				ssacrosstrack[i] = pixel_size 
-						* (i - MBSYS_SIMRAD_MAXPIXELS / 2);
-				ssalongtrack[i] = daloscale * ping->ssalongtrack[i];
+				if (ping->ss[i] != 0)
+					{
+					ss[i] = 0.01 * ping->ss[i];
+					ssacrosstrack[i] = pixel_size 
+							* (i - MBSYS_SIMRAD_MAXPIXELS / 2);
+					ssalongtrack[i] = daloscale * ping->ssalongtrack[i];
+					}
+				else
+					{
+					ss[i] = MB_SIDESCAN_NULL;
+					ssacrosstrack[i] = pixel_size 
+							* (i - MBSYS_SIMRAD_MAXPIXELS / 2);
+					ssalongtrack[i] = 0.0;
+					}
 				}
 			}
 		else
@@ -1144,8 +1157,16 @@ int mbsys_simrad_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			{
 			for (i=0;i<nss;i++)
 				{
-				ping->ss[i] = 100 * ss[i];
-				ping->ssalongtrack[i] = ssalongtrack[i] / daloscale;
+				if (ss[i] > MB_SIDESCAN_NULL)
+					{
+					ping->ss[i] = 100 * ss[i];
+					ping->ssalongtrack[i] = ssalongtrack[i] / daloscale;
+					}
+				else
+					{
+					ping->ss[i] = 0;
+					ping->ssalongtrack[i] = 0;
+					}
 				}
 			}
 		}
