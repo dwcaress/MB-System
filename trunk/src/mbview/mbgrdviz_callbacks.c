@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrdviz_callbacks.c		10/9/2002
- *    $Id: mbgrdviz_callbacks.c,v 5.26 2007-10-17 20:35:05 caress Exp $
+ *    $Id: mbgrdviz_callbacks.c,v 5.27 2007-10-31 18:42:37 caress Exp $
  *
  *    Copyright (c) 2002, 2003, 2006, 2007 by
  *    David W. Caress (caress@mbari.org)
@@ -121,7 +121,7 @@ static int	realtime_update = 5;
 static int	realtime_icon = MBGRDVIZ_REALTIME_ICON_SHIP;
 
 /* id variables */
-static char rcs_id[] = "$Id: mbgrdviz_callbacks.c,v 5.26 2007-10-17 20:35:05 caress Exp $";
+static char rcs_id[] = "$Id: mbgrdviz_callbacks.c,v 5.27 2007-10-31 18:42:37 caress Exp $";
 static char program_name[] = "MBgrdviz";
 static char help_message[] = "MBgrdviz is an interactive 2D/3D visualization tool for GMT grid files.";
 static char usage_message[] = "mbgrdviz [-H -T -V]";
@@ -2928,7 +2928,7 @@ int do_mbgrdviz_readnav(int instance, char *swathfile,
 	double	*ss = NULL;
 	double	*ssacrosstrack = NULL;
 	double	*ssalongtrack = NULL;
-	char	comment[256];
+	char	comment[MB_COMMENT_MAXLINE];
 
 	int	npoint;
 	int	npointread;
@@ -3040,7 +3040,6 @@ int do_mbgrdviz_readnav(int instance, char *swathfile,
 		fprintf(stderr,"\nMBIO Error returned from function <mb_read_init>:\n%s\n",error_message);
 		fprintf(stderr,"\nSwath sonar File <%s> not initialized for reading\n",swathfile);
 		}
-
 	/* allocate memory for data arrays */
 	if (status == MB_SUCCESS)
 		{
@@ -3076,7 +3075,6 @@ int do_mbgrdviz_readnav(int instance, char *swathfile,
 				error_message);
 			}
  		}
-
 
 	/* read data */
 	if (status == MB_SUCCESS)
@@ -3276,7 +3274,6 @@ npoint,time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],lon
 		if (npoint > 0)
 			{
 			decimation = npointread / npoint;
-fprintf(stderr,"    Adding %d nav points from %s\n",npoint,name);
 			status = mbview_addnav(verbose, instance,
 				npoint,
 				navtime_d,
