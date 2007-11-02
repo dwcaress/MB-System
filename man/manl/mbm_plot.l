@@ -1041,6 +1041,11 @@ is selected automatically so as to maximize the plot scale.
 The \fB-U\fP option allows the user to set the plot orientation. If
 \fIorientation\fP = 1, a portrait plot will be produced; if
 \fIorientation\fP = 2, a landscape plot will be produced.
+.TP
+.B \-V
+Causes \fBmbm_plot\fP to operate in "verbose" mode so that it 
+outputs more information than usual.
+.TP
 .B \-W
 \fI[color_style\fP[\fI/pallette\fP[\fIncolors\fP]] | cptfile]
 .br
@@ -1120,11 +1125,6 @@ stepped, discrete color scale [default is 11].
 If the option argument is the path to an existing \fBGMT\fP 
 color pallette (CPT) file, then that CPT file and its
 color scheme will be used for the plot
-.TP
-.B \-V
-Causes \fBmbm_plot\fP to operate in "verbose" mode 
-so that it outputs
-more information than usual.
 .TP
 .B \-X
 Normally, \fBmbm_plot\fP creates an executable shellscript and

@@ -375,7 +375,7 @@ for ping count
 .IP
 \fBZ\fP  for topography (positive upwards) (m)
 .IP
-.\fBz\fP  for depth (positive downwards) (m)
+\fBz\fP  for depth (positive downwards) (m)
 .IP
 \fB#\fP  for beam or pixel number
 .IP

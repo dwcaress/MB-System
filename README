@@ -236,6 +236,11 @@ MB-System programs will now recognize filename suffixes of the form
 ".MB***" as well as ".mb***". Capitalized versions of many vendor
 format suffixes are also supported.
 
+Fixed error in mblist manual page.
+
+Fixed mbswath handling  of time gap errors that made plotting of 
+single beam data problematic.
+
 MB-SYSTEM VERSION 5.1.0 RELEASE NOTES:
 ------------------------------------------
 
@@ -1429,10 +1434,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.104 2007-10-31 18:44:11 caress Exp $
+RCS ID: $Id: README,v 5.105 2007-11-02 22:37:21 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.104  2007/10/31 18:44:11  caress
+Update on 31 October 2007.
+
 Revision 5.103  2007/10/17 20:24:43  caress
 Release 5.1.1beta11
 
