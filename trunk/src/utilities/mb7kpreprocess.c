@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb7kpreprocess.c	10/12/2005
- *    $Id: mb7kpreprocess.c,v 5.12 2007-10-08 16:48:07 caress Exp $
+ *    $Id: mb7kpreprocess.c,v 5.13 2007-11-16 17:53:02 caress Exp $
  *
  *    Copyright (c) 2005 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	October 12, 2005
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.12  2007/10/08 16:48:07  caress
+ * State of the code on 8 October 2007.
+ *
  * Revision 5.11  2007/07/03 17:34:37  caress
  * Added time delay value to bluefin nav records.
  *
@@ -86,7 +89,7 @@
 #define	MB7KPREPROCESS_TIMELAG_CONSTANT	1
 #define	MB7KPREPROCESS_TIMELAG_MODEL	2
 
-static char rcs_id[] = "$Id: mb7kpreprocess.c,v 5.12 2007-10-08 16:48:07 caress Exp $";
+static char rcs_id[] = "$Id: mb7kpreprocess.c,v 5.13 2007-11-16 17:53:02 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
@@ -197,12 +200,12 @@ main (int argc, char **argv)
 	/* counting variables */
 	int	nreadfileheader = 0;
 	int	nreadmultibeam = 0;
-		int	nreadmbvolatilesettings = 0;
-		int	nreadmbbeamgeometry = 0;
-		int	nreadmbbathymetry = 0;
-		int	nreadmbbackscatter = 0;
-		int	nreadmbbeam = 0;
-		int	nreadmbimage = 0;
+	int	nreadmbvolatilesettings = 0;
+	int	nreadmbbeamgeometry = 0;
+	int	nreadmbbathymetry = 0;
+	int	nreadmbbackscatter = 0;
+	int	nreadmbbeam = 0;
+	int	nreadmbimage = 0;
 	int	nreadssv = 0;
 	int	nreadnav1 = 0;
 	int	nreadsbp = 0;
@@ -211,12 +214,12 @@ main (int argc, char **argv)
 	int	nreadother = 0;
 	int	nreadfileheadertot = 0;
 	int	nreadmultibeamtot = 0;
-		int	nreadmbvolatilesettingstot = 0;
-		int	nreadmbbeamgeometrytot = 0;
-		int	nreadmbbathymetrytot = 0;
-		int	nreadmbbackscattertot = 0;
-		int	nreadmbbeamtot = 0;
-		int	nreadmbimagetot = 0;
+	int	nreadmbvolatilesettingstot = 0;
+	int	nreadmbbeamgeometrytot = 0;
+	int	nreadmbbathymetrytot = 0;
+	int	nreadmbbackscattertot = 0;
+	int	nreadmbbeamtot = 0;
+	int	nreadmbimagetot = 0;
 	int	nreadssvtot = 0;
 	int	nreadnav1tot = 0;
 	int	nreadsbptot = 0;
@@ -227,7 +230,9 @@ main (int argc, char **argv)
 	/* merge navigation and attitude from separate ins data file */
 	char	insfile[MB_PATH_MAXLINE];
 	int	insdata = MB_NO;
-	int	nins, nins_altitude, nins_speed;
+	int	nins = 0;
+	int	nins_altitude = 0;
+	int	nins_speed = 0;
 	double	*ins_time_d = NULL;
 	double	*ins_lon = NULL;
 	double	*ins_lat = NULL;
@@ -244,7 +249,7 @@ main (int argc, char **argv)
 	/* merge sonardepth from separate parosci pressure sensor data file */
 	char	sonardepthfile[MB_PATH_MAXLINE];
 	int	sonardepthdata = MB_NO;
-	int	nsonardepth;
+	int	nsonardepth = 0;
 	double	*sonardepth_time_d = NULL;
 	double	*sonardepth_sonardepth = NULL;
 	int	sonardepth_output_index = -1;

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbextractsegy.c	4/18/2004
- *    $Id: mbextractsegy.c,v 5.16 2007-10-08 16:48:07 caress Exp $
+ *    $Id: mbextractsegy.c,v 5.17 2007-11-16 17:53:03 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	April 18, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.16  2007/10/08 16:48:07  caress
+ * State of the code on 8 October 2007.
+ *
  * Revision 5.15  2007/03/02 18:22:54  caress
  * When extracting lines using a route file, now omits data between where a waypoint is crossed and the sonar comes onto the next line, thus eliminating data during turns.
  *
@@ -96,7 +99,7 @@
 #define MBES_ONLINE_THRESHOLD		15.0
 #define MBES_ONLINE_COUNT		30
 
-static char rcs_id[] = "$Id: mbextractsegy.c,v 5.16 2007-10-08 16:48:07 caress Exp $";
+static char rcs_id[] = "$Id: mbextractsegy.c,v 5.17 2007-11-16 17:53:03 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
@@ -986,6 +989,42 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 				    segyfileheader.sample_interval = segytraceheader.si_micros;
 				    segyfileheader.sample_interval_org = segytraceheader.si_micros;
 				    segyfileheader.number_samples = segytraceheader.nsamps;
+
+				    /* insert file header data into output buffer */
+				    index = 0;
+				    mb_put_binary_int(MB_NO, segyfileheader.jobid, (void *) &(buffer[index])); index += 4;
+				    mb_put_binary_int(MB_NO, segyfileheader.line, (void *) &(buffer[index])); index += 4;
+				    mb_put_binary_int(MB_NO, segyfileheader.reel, (void *) &(buffer[index])); index += 4;
+				    mb_put_binary_short(MB_NO, segyfileheader.channels, (void *) &(buffer[index])); index += 2;
+				    mb_put_binary_short(MB_NO, segyfileheader.aux_channels, (void *) &(buffer[index])); index += 2;
+				    mb_put_binary_short(MB_NO, segyfileheader.sample_interval, (void *) &(buffer[index])); index += 2;
+				    mb_put_binary_short(MB_NO, segyfileheader.sample_interval_org, (void *) &(buffer[index])); index += 2;
+				    mb_put_binary_short(MB_NO, segyfileheader.number_samples, (void *) &(buffer[index])); index += 2;
+				    mb_put_binary_short(MB_NO, segyfileheader.number_samples_org, (void *) &(buffer[index])); index += 2;
+				    mb_put_binary_short(MB_NO, segyfileheader.format, (void *) &(buffer[index])); index += 2;
+				    mb_put_binary_short(MB_NO, segyfileheader.cdp_fold, (void *) &(buffer[index])); index += 2;
+				    mb_put_binary_short(MB_NO, segyfileheader.trace_sort, (void *) &(buffer[index])); index += 2;
+				    mb_put_binary_short(MB_NO, segyfileheader.vertical_sum, (void *) &(buffer[index])); index += 2;
+				    mb_put_binary_short(MB_NO, segyfileheader.sweep_start, (void *) &(buffer[index])); index += 2;
+				    mb_put_binary_short(MB_NO, segyfileheader.sweep_end, (void *) &(buffer[index])); index += 2;
+				    mb_put_binary_short(MB_NO, segyfileheader.sweep_length, (void *) &(buffer[index])); index += 2;
+				    mb_put_binary_short(MB_NO, segyfileheader.sweep_type, (void *) &(buffer[index])); index += 2;
+				    mb_put_binary_short(MB_NO, segyfileheader.sweep_trace, (void *) &(buffer[index])); index += 2;
+				    mb_put_binary_short(MB_NO, segyfileheader.sweep_taper_start, (void *) &(buffer[index])); index += 2;
+				    mb_put_binary_short(MB_NO, segyfileheader.sweep_taper_end, (void *) &(buffer[index])); index += 2;
+				    mb_put_binary_short(MB_NO, segyfileheader.sweep_taper, (void *) &(buffer[index])); index += 2;
+				    mb_put_binary_short(MB_NO, segyfileheader.correlated, (void *) &(buffer[index])); index += 2;
+				    mb_put_binary_short(MB_NO, segyfileheader.binary_gain, (void *) &(buffer[index])); index += 2;
+				    mb_put_binary_short(MB_NO, segyfileheader.amplitude, (void *) &(buffer[index])); index += 2;
+				    mb_put_binary_short(MB_NO, segyfileheader.units, (void *) &(buffer[index])); index += 2;
+				    mb_put_binary_short(MB_NO, segyfileheader.impulse_polarity, (void *) &(buffer[index])); index += 2;
+				    mb_put_binary_short(MB_NO, segyfileheader.vibrate_polarity, (void *) &(buffer[index])); index += 2;
+				    mb_put_binary_short(MB_NO, segyfileheader.domain, (void *) &(buffer[index])); index += 2;
+				    for (i=0;i<338;i++)
+					    {
+					    buffer[index] = segyfileheader.extra[i]; index++;
+					    }
+
 				    segyfileheader.number_samples_org = segytraceheader.nsamps;
 				    if (fwrite(&segyasciiheader, 1, MB_SEGY_ASCIIHEADER_LENGTH, fp) 
 							    != MB_SEGY_ASCIIHEADER_LENGTH)
@@ -993,7 +1032,7 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 					    status = MB_FAILURE;
 					    error = MB_ERROR_WRITE_FAIL;
 					    }
-				    else if (fwrite(&segyfileheader, 1, MB_SEGY_FILEHEADER_LENGTH, fp) 
+				    else if (fwrite(buffer, 1, MB_SEGY_FILEHEADER_LENGTH, fp) 
 							    != MB_SEGY_FILEHEADER_LENGTH)
 					    {
 					    status = MB_FAILURE;

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcopy.c	2/4/93
- *    $Id: mbcopy.c,v 5.23 2007-10-31 18:41:42 caress Exp $
+ *    $Id: mbcopy.c,v 5.24 2007-11-16 17:53:02 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003, 2004, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	February 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.23  2007/10/31 18:41:42  caress
+ * Fixed handling of null sidescan values.
+ *
  * Revision 5.22  2007/10/17 20:32:26  caress
  * Release 5.1.1beta11
  * Added Gordon Keith mods to merge bathy from third file.
@@ -243,7 +246,7 @@ int mbcopy_any_to_mbldeoih(int verbose,
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbcopy.c,v 5.23 2007-10-31 18:41:42 caress Exp $";
+	static char rcs_id[] = "$Id: mbcopy.c,v 5.24 2007-11-16 17:53:02 caress Exp $";
 	static char program_name[] = "MBcopy";
 	static char help_message[] =  "MBcopy copies an input swath sonar data file to an output \nswath sonar data file with the specified conversions.  Options include \nwindowing in time and space and ping averaging.  The input and \noutput data formats may differ, though not all possible combinations \nmake sense.  The default input and output streams are stdin and stdout.";
 	static char usage_message[] = "mbcopy [-Byr/mo/da/hr/mn/sc -Ccommentfile -D -Eyr/mo/da/hr/mn/sc \n\t-Fiformat/oformat/mformat -H  -Iinfile -Llonflip -Mmergefile -N -Ooutfile \n\t-Ppings -Qsleep_factor -Rw/e/s/n -Sspeed -V]";
@@ -1050,8 +1053,8 @@ main (int argc, char **argv)
 			&& inbounds == MB_YES)
 			{
 			  while (merror <= MB_ERROR_NO_ERROR
-				 && mkind != MB_DATA_DATA
-				 && time_d - .001 > mtime_d)
+				 && (mkind != MB_DATA_DATA
+				 	|| time_d - .001 > mtime_d))
 			    {
 			      /* find merge record */
 			      
