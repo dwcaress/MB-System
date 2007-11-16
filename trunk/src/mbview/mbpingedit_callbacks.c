@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbpingedit_callbacks.c		11/13/2007
- *    $Id: mbpingedit_callbacks.c,v 1.1 2007-11-16 17:47:31 caress Exp $
+ *    $Id: mbpingedit_callbacks.c,v 5.0 2007-11-16 17:48:07 caress Exp $
  *
  *    Copyright (c) 2007 by
  *    David W. Caress (caress@mbari.org)
@@ -78,7 +78,7 @@ static Cardinal 	ac;
 static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbpingedit_callbacks.c,v 1.1 2007-11-16 17:47:31 caress Exp $";
+static char rcs_id[]="$Id: mbpingedit_callbacks.c,v 5.0 2007-11-16 17:48:07 caress Exp $";
 
 /* function prototypes */
 /*------------------------------------------------------------------------------*/
