@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb3dsoundings_callbacks.c		5/25/2007
- *    $Id: mb3dsoundings_callbacks.c,v 5.3 2007-10-08 16:32:08 caress Exp $
+ *    $Id: mb3dsoundings_callbacks.c,v 5.4 2007-11-16 17:26:56 caress Exp $
  *
  *    Copyright (c) 2007 by
  *    David W. Caress (caress@mbari.org)
@@ -74,7 +74,7 @@ static Cardinal 	ac;
 static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mb3dsoundings_callbacks.c,v 5.3 2007-10-08 16:32:08 caress Exp $";
+static char rcs_id[]="$Id: mb3dsoundings_callbacks.c,v 5.4 2007-11-16 17:26:56 caress Exp $";
 
 /* function prototypes */
 /*------------------------------------------------------------------------------*/
@@ -1335,6 +1335,16 @@ event->xbutton.x,event->xmotion.y, mb3dsoundings.mouse_mode);
 						- mb3dsoundings.button_move_y)) 
 					/ ((double)mb3dsoundings.gl_height);
 
+			/* keep elevation and azimuth values in appropriate bounds */
+			if (mb3dsoundings.elevation > 180.0) 
+				mb3dsoundings.elevation -= 360.0;
+			if (mb3dsoundings.elevation < -180.0) 
+				mb3dsoundings.elevation += 360.0;
+			if (mb3dsoundings.azimuth < 0.0)
+				mb3dsoundings.azimuth += 360.0;
+			if (mb3dsoundings.azimuth > 360.0)
+				mb3dsoundings.azimuth -= 360.0;
+
 			mb3dsoundings_updatestatus();
 			mb3dsoundings_plot(mbs_verbose, &mbs_error);
 			}
@@ -1914,6 +1924,7 @@ soundingdata->num_soundings);
 			MBS_OPENGL_ZMIN2D);
 	glRotated ((float)(mb3dsoundings.elevation - 90.0), 1.0, 0.0, 0.0); 
 	glRotated ((float)(mb3dsoundings.azimuth), 0.0, 0.0, 1.0); 
+fprintf(stderr,"elevation:%f azimuth:%f\n",mb3dsoundings.elevation,mb3dsoundings.azimuth);
 
 	/* get modelview and projection matrices and viewport */
 	glGetDoublev(GL_MODELVIEW_MATRIX, model_matrix);
@@ -1929,36 +1940,125 @@ soundingdata->num_soundings);
 		glymax = soundingdata->scale * soundingdata->ymax;
 		glzmin = mb3dsoundings.exageration * soundingdata->zscale * soundingdata->zmin;
 		glzmax = mb3dsoundings.exageration * soundingdata->zscale * soundingdata->zmax;	
+		glLineWidth(1.0);
 		glColor3f(0.0, 0.0, 0.0);
+		glEnable(GL_LINE_STIPPLE);
+		
+		if (mb3dsoundings.elevation <= 0.0)
+			glLineStipple(1, 0xFFFF);
+		else
+			glLineStipple(1, 0x1111);
 		glBegin(GL_LINE_LOOP);
 		glVertex3f(glxmin, glymin, glzmin);
 		glVertex3f(glxmax, glymin, glzmin);
 		glVertex3f(glxmax, glymax, glzmin);
 		glVertex3f(glxmin, glymax, glzmin);
 		glEnd();
+		
+		if (mb3dsoundings.elevation >= 0.0)
+			glLineStipple(1, 0xFFFF);
+		else
+			glLineStipple(1, 0x1111);
 		glBegin(GL_LINE_LOOP);
 		glVertex3f(glxmin, glymin, glzmax);
 		glVertex3f(glxmax, glymin, glzmax);
 		glVertex3f(glxmax, glymax, glzmax);
 		glVertex3f(glxmin, glymax, glzmax);
 		glEnd();
+		
+		if ((mb3dsoundings.azimuth >= 0.0 && mb3dsoundings.azimuth <= 90.0)
+			|| (mb3dsoundings.azimuth >= 270.0 && mb3dsoundings.azimuth <= 360.0))
+			{
+			if (mb3dsoundings.elevation >= -90.0 && mb3dsoundings.elevation <= 90.0)
+				glLineStipple(1, 0xFFFF);
+			else
+				glLineStipple(1, 0x1111);
+			}
+		else
+			{
+			if (mb3dsoundings.elevation >= -90.0 && mb3dsoundings.elevation <= 90.0)
+				glLineStipple(1, 0x1111);
+			else
+				glLineStipple(1, 0xFFFF);
+			}
 		glBegin(GL_LINE_LOOP);
+		glVertex3f(glxmin, glymin, glzmin);
+		glVertex3f(glxmax, glymin, glzmin);
+		glVertex3f(glxmax, glymin, glzmax);
+		glVertex3f(glxmin, glymin, glzmax);
+		glEnd();
+		
+		if (mb3dsoundings.azimuth >= 180.0 && mb3dsoundings.azimuth <= 360.0)
+			{
+			if (mb3dsoundings.elevation >= -90.0 && mb3dsoundings.elevation <= 90.0)
+				glLineStipple(1, 0xFFFF);
+			else
+				glLineStipple(1, 0x1111);
+			}
+		else
+			{
+			if (mb3dsoundings.elevation >= -90.0 && mb3dsoundings.elevation <= 90.0)
+				glLineStipple(1, 0x1111);
+			else
+				glLineStipple(1, 0xFFFF);
+			}
+		glBegin(GL_LINE_LOOP);
+		glVertex3f(glxmax, glymin, glzmin);
+		glVertex3f(glxmax, glymax, glzmin);
+		glVertex3f(glxmax, glymax, glzmax);
+		glVertex3f(glxmax, glymin, glzmax);
+		glEnd();
+		
+		if (mb3dsoundings.azimuth >= 90.0 && mb3dsoundings.azimuth <= 270.0)
+			{
+			if (mb3dsoundings.elevation >= -90.0 && mb3dsoundings.elevation <= 90.0)
+				glLineStipple(1, 0xFFFF);
+			else
+				glLineStipple(1, 0x1111);
+			}
+		else
+			{
+			if (mb3dsoundings.elevation >= -90.0 && mb3dsoundings.elevation <= 90.0)
+				glLineStipple(1, 0x1111);
+			else
+				glLineStipple(1, 0xFFFF);
+			}
+		glBegin(GL_LINE_LOOP);
+		glVertex3f(glxmax, glymax, glzmin);
+		glVertex3f(glxmin, glymax, glzmin);
+		glVertex3f(glxmin, glymax, glzmax);
+		glVertex3f(glxmax, glymax, glzmax);
+		glEnd();
+		
+		if ((mb3dsoundings.azimuth >= 0.0 && mb3dsoundings.azimuth <= 180.0)
+			|| (mb3dsoundings.azimuth >= 0.0 && mb3dsoundings.azimuth <= 90.0))
+			{
+			if (mb3dsoundings.elevation >= -90.0 && mb3dsoundings.elevation <= 90.0)
+				glLineStipple(1, 0xFFFF);
+			else
+				glLineStipple(1, 0x1111);
+			}
+		else
+			{
+			if (mb3dsoundings.elevation >= -90.0 && mb3dsoundings.elevation <= 90.0)
+				glLineStipple(1, 0x1111);
+			else
+				glLineStipple(1, 0xFFFF);
+			}
+		glBegin(GL_LINE_LOOP);
+		glVertex3f(glxmin, glymax, glzmin);
 		glVertex3f(glxmin, glymin, glzmin);
 		glVertex3f(glxmin, glymin, glzmax);
 		glVertex3f(glxmin, glymax, glzmax);
-		glVertex3f(glxmin, glymax, glzmin);
 		glEnd();
-		glBegin(GL_LINE_LOOP);
-		glVertex3f(glxmax, glymin, glzmin);
-		glVertex3f(glxmax, glymin, glzmax);
-		glVertex3f(glxmax, glymax, glzmax);
-		glVertex3f(glxmax, glymax, glzmin);
-		glEnd();
+				
+		glDisable(GL_LINE_STIPPLE);
 		}
 	
 	/* Plot the profiles if desired */
 	if (mb3dsoundings.view_profiles != MBS_VIEW_PROFILES_NONE)
 		{
+		glLineWidth(1.0);
 		glBegin(GL_LINES);
 		for (i=0;i<soundingdata->num_soundings-1;i++)
 			{
@@ -2083,6 +2183,20 @@ fprintf(stderr,"glxmin:%f glxmax:%f glymin:%f glymax:%f\n", glxmin, glxmax, glym
 	/* swap opengl buffers */
 	glXSwapBuffers (XtDisplay(mb3dsoundings.glwmda), 
 			XtWindow(mb3dsoundings.glwmda));
+
+}
+
+/*---------------------------------------------------------------------------------------*/
+int 
+mb3dsoundings_get_bias_values(int verbose, double *rollbias, double *pitchbias, 
+				double *headingbias, int *error)
+{
+fprintf(stderr,"Called mb3dsoundings_get_bias_values\n");
+			
+	/* get bias parameters */
+	*rollbias = 0.01 * ((double)mb3dsoundings.irollbias);
+	*pitchbias = 0.01 * ((double)mb3dsoundings.ipitchbias);
+	*headingbias = 0.01 * ((double)mb3dsoundings.iheadingbias);
 
 }
 

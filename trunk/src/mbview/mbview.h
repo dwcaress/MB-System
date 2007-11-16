@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbview.h	10/9/2002
- *    $Id: mbview.h,v 5.19 2007-10-17 20:35:05 caress Exp $
+ *    $Id: mbview.h,v 5.20 2007-11-16 17:26:56 caress Exp $
  *
  *    Copyright (c) 2002, 2003, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -18,6 +18,9 @@
  * Date:	October 10,  2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.19  2007/10/17 20:35:05  caress
+ * Release 5.1.1beta11
+ *
  * Revision 5.18  2007/10/08 16:32:08  caress
  * Code status as of 8 October 2007.
  *
@@ -1081,4 +1084,5 @@ int mb3dsoundings_set_edit_notify(int verbose, void (edit_notify)(int, int, int,
 int mb3dsoundings_set_info_notify(int verbose, void (edit_notify)(int, int, int, char *), int *error);
 int mb3dsoundings_set_bias_notify(int verbose, void (bias_notify)(double, double, double), int *error);
 int mb3dsoundings_plot(int verbose, int *error);
+int mb3dsoundings_get_bias_values(int verbose, double *rollbias, double *pitchbias, double *headingbias, int *error);
 /*--------------------------------------------------------------------*/

@@ -1,7 +1,7 @@
 #     The MB-system:	Makefile.template  7/27/2003
-#	$Id: Makefile.template,v 5.10 2007-10-08 16:32:08 caress Exp $
+#	$Id: Makefile.template,v 5.11 2007-11-16 17:26:56 caress Exp $
 #
-#     Copyright (c) 2003 by
+#     Copyright (c) 2003 - 2007 by
 #     David W. Caress (caress@mbari.org)
 #       Monterey Bay Aquarium Research Institute
 #       Moss Landing, CA 95039
@@ -16,6 +16,9 @@
 # Date:		August 31, 2002
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.10  2007/10/08 16:32:08  caress
+# Code status as of 8 October 2007.
+#
 # Revision 5.9  2007/06/17 23:27:30  caress
 # Added NBeditviz.
 #
@@ -99,7 +102,9 @@ $(LIBDIR)/libmbview.a:	MB3DView.o \
 		mbview_nav.o \
 		mb_glwdrawa.o \
 		Mb3dsdg.o \
-		mb3dsoundings_callbacks.o
+		mb3dsoundings_callbacks.o \
+		MBpedit.o \
+		mbpingedit_callbacks.o
 	$(ARCHIVE) $(LIBDIR)/libmbview.a \
 		MB3DView.o \
 		MB3DSiteList.o\
@@ -117,7 +122,9 @@ $(LIBDIR)/libmbview.a:	MB3DView.o \
 		mbview_nav.o \
 		mb_glwdrawa.o \
 		Mb3dsdg.o \
-		mb3dsoundings_callbacks.o
+		mb3dsoundings_callbacks.o \
+		MBpedit.o \
+		mbpingedit_callbacks.o
 	ranlib $(LIBDIR)/libmbview.a
 
 ### link the executables
@@ -223,6 +230,10 @@ Mb3dsdg.o: Mb3dsdg.c Mb3dsdg.h
 	$(CC) $(CFLAGS) -I$(INCDIR) -I$(MOTIFINCDIR) -I$(NETCDFINCDIR) -I$(GMTINCDIR) -c Mb3dsdg.c
 mb3dsoundings_callbacks.o: mb3dsoundings_callbacks.c Mb3dsdg.h mb3dsoundingsprivate.h 
 	$(CC) $(CFLAGS) -DMBVIEW_LIBRARY -I$(INCDIR) -I$(MOTIFINCDIR) -I$(NETCDFINCDIR) -I$(GMTINCDIR) -c mb3dsoundings_callbacks.c
+MBpedit.o: MBpedit.c MBpedit.h
+	$(CC) $(CFLAGS) -I$(INCDIR) -I$(MOTIFINCDIR) -I$(NETCDFINCDIR) -I$(GMTINCDIR) -c MBpedit.c
+mbpingedit_callbacks.o: mbpingedit_callbacks.c Mb3dsdg.h mbpingeditprivate.h 
+	$(CC) $(CFLAGS) -DMBVIEW_LIBRARY -I$(INCDIR) -I$(MOTIFINCDIR) -I$(NETCDFINCDIR) -I$(GMTINCDIR) -c mbpingedit_callbacks.c
 mbeditviz_bxutils.o: mbeditviz_bxutils.c
 	$(CC) $(CFLAGS) -I$(INCDIR) -I$(MOTIFINCDIR) -c mbeditviz_bxutils.c
 mbeditviz_creation.o: mbeditviz_creation.c mbeditviz_creation.h 

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbeditviz.h		4/27/2007
- *    $Id: mbeditviz.h,v 5.0 2007-06-17 23:24:12 caress Exp $
+ *    $Id: mbeditviz.h,v 5.1 2007-11-16 17:26:56 caress Exp $
  *
  *    Copyright (c) 2007 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	April 27, 2007
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2007/06/17 23:24:12  caress
+ * Added NBeditviz.
+ *
  *
  */
 
@@ -185,6 +188,13 @@ EXTERNAL double mbev_bounds[4];
 EXTERNAL struct mbev_file_struct *mbev_files;
 EXTERNAL struct mbev_grid_struct mbev_grid;
 EXTERNAL int	mbev_instance;
+
+/* gridding parameters */
+EXTERNAL double	mbev_grid_bounds[4];
+EXTERNAL double	mbev_grid_boundsutm[4];
+EXTERNAL double mbev_grid_cellsize;
+EXTERNAL int mbev_grid_nx;
+EXTERNAL int mbev_grid_ny;
 
 /* global patch test parameters */
 EXTERNAL double	mbev_rollbias;

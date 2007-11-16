@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbeditviz_callbacks.c		4/27/2007
- *    $Id: mbeditviz_callbacks.c,v 5.5 2007-10-17 20:35:05 caress Exp $
+ *    $Id: mbeditviz_callbacks.c,v 5.6 2007-11-16 17:26:56 caress Exp $
  *
  *    Copyright (c) 2007 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	April 27, 2007
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2007/10/17 20:35:05  caress
+ * Release 5.1.1beta11
+ *
  * Revision 5.4  2007/10/08 16:32:08  caress
  * Code status as of 8 October 2007.
  *
@@ -122,6 +125,10 @@ void do_mbeditviz_pickregion_notify(int instance);
 void do_mbeditviz_picksite_notify(int instance);
 void do_mbeditviz_pickroute_notify(int instance);
 void do_mbeditviz_picknav_notify(int instance);
+void do_mbeditviz_regrid_notify( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbeditviz_gridparameters( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbeditviz_chengecellsize( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbeditviz_updategrid( Widget w, XtPointer client_data, XtPointer call_data);
 
 /*
  * Motif required Headers
@@ -477,7 +484,7 @@ fprintf(stderr,"do_mbeditviz_fileSelectionBox_openswath\n");
 	
 	/* set filter */
 	ac = 0;
-	tmp0 = (XmString) BX_CONVERT(dialogShell_open, "*", 
+	tmp0 = (XmString) BX_CONVERT(dialogShell_open, "*.mb*", 
                 				XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNpattern, tmp0); ac++;
 	XtSetValues(fileSelectionBox, args, ac);
@@ -493,23 +500,24 @@ do_mbeditviz_quit( Widget w, XtPointer client_data, XtPointer call_data)
     XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
     
 fprintf(stderr,"do_mbeditviz_quit\n");
-
 	
-	/* destroy any mb3dsoundings window */
-	mbev_status = mb3dsoundings_end(mbev_verbose, &mbev_verbose);
-	mbeditviz_mb3dsoundings_dismiss();
-fprintf(stderr,"1 do_mbeditviz_mbview_dismiss_notify status:%d\n", mbev_status);
+	/* destroy any mbview window */
+	if (mbev_grid.status == MBEV_GRID_VIEWED)
+		{
+		/* destroy any mb3dsoundings window */
+		mbev_status = mb3dsoundings_end(mbev_verbose, &mbev_error);
+		mbeditviz_mb3dsoundings_dismiss();
+
+		mbev_status = mbview_destroy(mbev_verbose, 0, MB_YES, &mbev_error);
+		mbev_grid.status == MBEV_GRID_NOTVIEWED;
+		}
 	
 	/* destroy the grid */
-fprintf(stderr,"mbev_grid.status:%d\n",mbev_grid.status);
 	if (mbev_grid.status != MBEV_GRID_NONE)
 		mbeditviz_destroy_grid();
-fprintf(stderr,"2 do_mbeditviz_mbview_dismiss_notify status:%d\n", mbev_status);
 	
 	/* reset the gui */
 	do_mbeditviz_update_gui();
-
-fprintf(stderr,"return do_mbeditviz_mbview_dismiss_notify status:%d\n", mbev_status);
 
 fprintf(stderr,"return do_mbeditviz_quit status:%d\n", mbev_status);
     
@@ -522,9 +530,21 @@ do_mbeditviz_viewall( Widget w, XtPointer client_data, XtPointer call_data)
     XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
     struct mbev_file_struct *file;
     int	ifile;
+    int	loadcount;
     int	i;
     
 fprintf(stderr,"do_mbeditviz_viewall\n");
+	
+	/* destroy any mbview window */
+	if (mbev_grid.status == MBEV_GRID_VIEWED)
+		{
+		/* destroy any mb3dsoundings window */
+		mbev_status = mb3dsoundings_end(mbev_verbose, &mbev_error);
+		mbeditviz_mb3dsoundings_dismiss();
+
+		mbev_status = mbview_destroy(mbev_verbose, 0, MB_YES, &mbev_error);
+		mbev_grid.status == MBEV_GRID_NOTVIEWED;
+		}
 
 	/* destroy old grid */
 	if (mbev_grid.status != MBEV_GRID_NONE)
@@ -532,6 +552,7 @@ fprintf(stderr,"do_mbeditviz_viewall\n");
 	
 	/* loop over all files to be sure all files are loaded */
 	do_mbeditviz_message_on("Loading files...");
+	loadcount = 0;
 	for (ifile=0;ifile<mbev_num_files;ifile++)
 		{
 		file = &(mbev_files[ifile]);
@@ -541,19 +562,19 @@ fprintf(stderr,"do_mbeditviz_viewall\n");
 			do_mbeditviz_message_on(value_text);
 			mbeditviz_load_file(ifile);
 			}
+		loadcount++;
 		}
-		
-	/* make the grid */
-	do_mbeditviz_message_on("Making grid...");
-	mbev_status = mbeditviz_setup_grid();	
-	mbeditviz_project_soundings();
-	mbev_status = mbeditviz_make_grid();	
 	do_mbeditviz_message_off();
-	
-	/* display grid */
-	if (mbev_status == MB_SUCCESS)
+		
+	/* put up dialog on grid parameters */
+fprintf(stderr," mbev_status:%d loadcount:%d\n",mbev_status,loadcount);
+	if (mbev_status == MB_SUCCESS && loadcount > 0)
 		{
-		do_mbeditviz_viewgrid();
+		do_mbeditviz_gridparameters(w, client_data, call_data);
+		}
+	else
+		{
+		XBell(XtDisplay(list_filelist),100);
 		}
 	
 	/* reset the gui */
@@ -576,6 +597,21 @@ do_mbeditviz_viewselected( Widget w, XtPointer client_data, XtPointer call_data)
     int	i;
     
 fprintf(stderr,"do_mbeditviz_viewselected\n");
+	
+	/* destroy any mbview window */
+	if (mbev_grid.status == MBEV_GRID_VIEWED)
+		{
+		/* destroy any mb3dsoundings window */
+		mbev_status = mb3dsoundings_end(mbev_verbose, &mbev_error);
+		mbeditviz_mb3dsoundings_dismiss();
+
+		mbev_status = mbview_destroy(mbev_verbose, 0, MB_YES, &mbev_error);
+		mbev_grid.status == MBEV_GRID_NOTVIEWED;
+		}
+
+	/* destroy old grid */
+	if (mbev_grid.status != MBEV_GRID_NONE)
+		mbeditviz_destroy_grid();
 
 	/* get positions of selected list items */
 	ac = 0;
@@ -585,10 +621,6 @@ fprintf(stderr,"do_mbeditviz_viewselected\n");
 fprintf(stderr,"position_count:%d\n",position_count);
 for(i=0;i<position_count;i++)
 fprintf(stderr,"  %d %d\n",i,position_list[i]);
-
-	/* destroy old grid */
-	if (mbev_grid.status != MBEV_GRID_NONE)
-		mbeditviz_destroy_grid();
 	
 	/* loop over all files to be sure selected files are loaded */
 	do_mbeditviz_message_on("Loading files...");
@@ -621,9 +653,110 @@ fprintf(stderr,"  %d %d\n",i,position_list[i]);
 			mbeditviz_unload_file(ifile);
 			}
 		}
+	do_mbeditviz_message_off();
+		
+	/* put up dialog on grid parameters */
+fprintf(stderr," mbev_status:%d loadcount:%d\n",mbev_status,loadcount);
+	if (mbev_status == MB_SUCCESS && loadcount > 0)
+		{
+		do_mbeditviz_gridparameters(w, client_data, call_data);
+		}
+	else
+		{
+		XBell(XtDisplay(list_filelist),100);
+		}
+	
+	/* reset the gui */
+	do_mbeditviz_update_gui();
+	
+	/* reset status */
+	mbev_status = MB_SUCCESS;
+	mbev_error = MB_ERROR_NO_ERROR;
+	
+fprintf(stderr,"return do_mbeditviz_viewselected status:%d\n", mbev_status);
+}
+/*---------------------------------------------------------------------------------------*/
+void
+do_mbeditviz_regrid( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    struct mbev_file_struct *file;
+    int	*position_list = NULL;
+    int position_count = 0;
+    int	selected;
+    int	ifile;
+    int	loadcount;
+    int	i;
+    
+fprintf(stderr,"do_mbeditviz_regrid\n");
+	
+	/* destroy any mbview window */
+	if (mbev_grid.status == MBEV_GRID_VIEWED)
+		{
+		/* destroy any mb3dsoundings window */
+		mbev_status = mb3dsoundings_end(mbev_verbose, &mbev_error);
+		mbeditviz_mb3dsoundings_dismiss();
+
+		mbev_status = mbview_destroy(mbev_verbose, 0, MB_YES, &mbev_error);
+		mbev_grid.status == MBEV_GRID_NOTVIEWED;
+		}
+
+	/* destroy old grid */
+	if (mbev_grid.status != MBEV_GRID_NONE)
+		mbeditviz_destroy_grid();
+	
+	/* loop over all files to be count loaded files */
+	loadcount = 0;
+	for (ifile=0;ifile<mbev_num_files;ifile++)
+		{
+		file = &(mbev_files[ifile]);
+		if (file->load_status == MB_YES)
+			loadcount++;
+		}
+		
+	/* put up dialog on grid parameters */
+fprintf(stderr," mbev_status:%d loadcount:%d\n",mbev_status,loadcount);
+	if (mbev_status == MB_SUCCESS && loadcount > 0)
+		{
+		do_mbeditviz_gridparameters(w, client_data, call_data);
+		}
+	else
+		{
+		XBell(XtDisplay(list_filelist),100);
+		}
+	
+	/* reset the gui */
+	do_mbeditviz_update_gui();
+	
+	/* reset status */
+	mbev_status = MB_SUCCESS;
+	mbev_error = MB_ERROR_NO_ERROR;
+	
+fprintf(stderr,"return do_mbeditviz_regrid status:%d\n", mbev_status);
+}
+/*---------------------------------------------------------------------------------------*/
+
+void
+do_mbeditviz_updategrid( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+	struct mbev_file_struct *file;
+	int	loadcount;
+	int	ifile;
+
+fprintf(stderr,"do_mbeditviz_updategrid\n");
+	do_mbeditviz_mbview_dismiss_notify(0);
+	
+	/* loop over all files to be sure all files are loaded */
+	loadcount = 0;
+	for (ifile=0;ifile<mbev_num_files;ifile++)
+		{
+		file = &(mbev_files[ifile]);
+		if (file->load_status == MB_YES)
+			loadcount++;
+		}
 		
 	/* make the grid and display grid */
-fprintf(stderr," mbev_status:%d loadcount:%d\n",mbev_status,loadcount);
 	if (mbev_status == MB_SUCCESS && loadcount > 0)
 		{
 		/* make the grid */
@@ -631,10 +764,11 @@ fprintf(stderr," mbev_status:%d loadcount:%d\n",mbev_status,loadcount);
 		mbev_status = mbeditviz_setup_grid();	
 		mbeditviz_project_soundings();
 		mbev_status = mbeditviz_make_grid();	
-		do_mbeditviz_message_off();
 	
 		/* display grid */
 		do_mbeditviz_viewgrid();
+		
+		do_mbeditviz_message_off();
 		}
 	else
 		{
@@ -649,9 +783,73 @@ fprintf(stderr," mbev_status:%d loadcount:%d\n",mbev_status,loadcount);
 	mbev_status = MB_SUCCESS;
 	mbev_error = MB_ERROR_NO_ERROR;
 	
-fprintf(stderr,"return do_mbeditviz_viewselected status:%d\n", mbev_status);
+fprintf(stderr,"return do_mbeditviz_updategrid status:%d\n", mbev_status);
+
 }
-/*---------------------------------------------------------------------------------------*/
+
+/*--------------------------------------------------------------------*/
+void
+do_mbeditviz_chengecellsize( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+	char	string[MB_PATH_MAXLINE];
+	int	icellsize;
+
+fprintf(stderr,"do_mbeditviz_chengecellsize\n");
+    
+    	/* get cell size value */
+	ac = 0;
+        XtSetArg(args[ac], XmNvalue, &icellsize); ac++;
+	XtGetValues(scale_cellsize, args, ac);
+	mbev_grid_cellsize = 0.1 * icellsize;
+		
+	/* get updated grid dimensions */
+	mbev_grid_nx = (mbev_grid_boundsutm[1] - mbev_grid_boundsutm[0]) / mbev_grid_cellsize + 1;
+	mbev_grid_ny = (mbev_grid_boundsutm[3] - mbev_grid_boundsutm[2]) / mbev_grid_cellsize + 1;
+fprintf(stderr,"Grid bounds: %f %f %f %f    %f %f %f %f\n",
+mbev_grid_bounds[0], mbev_grid_bounds[1], mbev_grid_bounds[2], mbev_grid_bounds[3],
+mbev_grid_boundsutm[0], mbev_grid_boundsutm[1], mbev_grid_boundsutm[2], mbev_grid_boundsutm[3]);
+fprintf(stderr,"cell size:%f dimensions: %d %d\n",
+mbev_grid_cellsize, mbev_grid_nx, mbev_grid_ny);
+	
+	/* reset the widgets */
+	sprintf(string,":::t\"Selected Grid Parameters:\":t\"    Cell Size: %.1f m\":t\"    Dimensions: %d %d\"", 
+		mbev_grid_cellsize, mbev_grid_nx, mbev_grid_ny);
+	set_label_multiline_string(label_implied, (String) string);
+
+}
+
+
+/*--------------------------------------------------------------------*/
+void
+do_mbeditviz_gridparameters( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+	int	icellsize;
+	char	string[MB_PATH_MAXLINE];
+
+fprintf(stderr,"do_mbeditviz_gridparameters\n");
+
+	/* get calculated grid parameters */
+	mbeditviz_get_grid_bounds();
+	
+	/* set the widgets */
+	ac = 0;
+	icellsize = (int)(10 * mbev_grid_cellsize);
+        XtSetArg(args[ac], XmNvalue, icellsize); ac++;
+	XtSetValues(scale_cellsize, args, ac);
+	sprintf(string,":::t\"Grid Bounds:\":t\"    Longitude: %10.5f %10.5f  | %6.3f km\":t\"    Latitude: %9.5f %9.5f | %6.3f km\":t\"Suggested Grid Parameters:\":t\"    Cell Size: %.2f m\":t\"    Dimensions: %d %d\"", 
+		mbev_grid_bounds[0], mbev_grid_bounds[1], 0.001 * (mbev_grid_boundsutm[1] - mbev_grid_boundsutm[0]),
+		mbev_grid_bounds[2], mbev_grid_bounds[3], 0.001 * (mbev_grid_boundsutm[3] - mbev_grid_boundsutm[2]),
+		mbev_grid_cellsize, mbev_grid_nx, mbev_grid_ny);
+	set_label_multiline_string(label_current, (String) string);
+	sprintf(string,":::t\"Selected Grid Parameters:\":t\"    Cell Size: %.2f m\":t\"    Dimensions: %d %d\"", 
+		mbev_grid_cellsize, mbev_grid_nx, mbev_grid_ny);
+	set_label_multiline_string(label_implied, (String) string);
+
+}
+
+/*--------------------------------------------------------------------*/
 void
 do_mbeditviz_viewgrid()
 {
@@ -1061,6 +1259,12 @@ fprintf(stderr,"do_mbeditviz_viewgrid\n");
 					MBV_PICK_NAV,
 					do_mbeditviz_picknav_notify,
 					&mbev_error);
+
+		/* add action button */
+		mbview_addaction(mbev_verbose, mbev_instance,
+			do_mbeditviz_regrid_notify,
+			"Update Bathymetry Grid", 
+			MBV_PICKMASK_NONE, &mbev_error);
 		}
 	
 	/* reset the gui */
@@ -1282,6 +1486,9 @@ fprintf(stderr,"do_mbeditviz_update_gui status:%d\n", mbev_status);
 		XtVaSetValues(toggleButton_mode_browse,
 			XmNsensitive, True,
 			NULL);
+		XtVaSetValues(pushButton_updategrid,
+			XmNsensitive, False,
+			NULL);
 		}
 	else
 		{
@@ -1299,6 +1506,9 @@ fprintf(stderr,"do_mbeditviz_update_gui status:%d\n", mbev_status);
 			NULL);
 		XtVaSetValues(toggleButton_mode_browse,
 			XmNsensitive, False,
+			NULL);
+		XtVaSetValues(pushButton_updategrid,
+			XmNsensitive, True,
 			NULL);
 		}
 
@@ -1395,6 +1605,11 @@ fprintf(stderr,"do_mbeditviz_picknav_notify:%d\n", instance);
 	
 
 	mbeditviz_selectnav(instance);
+	
+	/* open ping editor */
+	BxManageCB(parent, (XtPointer)"form_pingedit", NULL);
+	
+	/* open mb3dsoundings 3d editor */
 	mbev_status = mb3dsoundings_open(mbev_verbose, &mbev_selected, &mbev_error);
 	mbev_status = mb3dsoundings_set_dismiss_notify(mbev_verbose, &mbeditviz_mb3dsoundings_dismiss, &mbev_error);
 	mbev_status = mb3dsoundings_set_edit_notify(mbev_verbose, &mbeditviz_mb3dsoundings_edit, &mbev_error);
@@ -1404,6 +1619,32 @@ fprintf(stderr,"do_mbeditviz_picknav_notify:%d\n", instance);
 
 fprintf(stderr,"return do_mbeditviz_picknav_notify status:%d\n", mbev_status);
 }	
+/*------------------------------------------------------------------------------*/
+void
+do_mbeditviz_regrid_notify( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    double	rollbias;
+    double	pitchbias;
+    double	headingbias;
+    
+fprintf(stderr,"do_mbeditviz_regrid_notify\n");
+
+	/* get current bias parameters */
+	mb3dsoundings_get_bias_values(mbev_verbose, &rollbias, &pitchbias, &headingbias, &mbev_error);
+
+	/* regrid the bathymetry */
+	mbeditviz_mb3dsoundings_biasapply(rollbias, pitchbias, headingbias);
+	
+	/* reset the gui */
+	do_mbeditviz_update_gui();
+
+fprintf(stderr,"return do_mbeditviz_regrid_notify status:%d\n", mbev_status);
+
+}
+
+/*--------------------------------------------------------------------*/
+/* Mbeditviz message functions */
 /*------------------------------------------------------------------------------*/
 
 int

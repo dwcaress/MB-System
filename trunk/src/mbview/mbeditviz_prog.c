@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbeditviz_prog.c		5/1/2007
- *    $Id: mbeditviz_prog.c,v 5.4 2007-10-17 20:35:05 caress Exp $
+ *    $Id: mbeditviz_prog.c,v 5.5 2007-11-16 17:26:56 caress Exp $
  *
  *    Copyright (c) 2007 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	May 1, 2007
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2007/10/17 20:35:05  caress
+ * Release 5.1.1beta11
+ *
  * Revision 5.3  2007/10/08 16:32:08  caress
  * Code status as of 8 October 2007.
  *
@@ -63,7 +66,7 @@
 #include "mbview.h"
 
 /* id variables */
-static char rcs_id[] = "$Id: mbeditviz_prog.c,v 5.4 2007-10-17 20:35:05 caress Exp $";
+static char rcs_id[] = "$Id: mbeditviz_prog.c,v 5.5 2007-11-16 17:26:56 caress Exp $";
 static char program_name[] = "MBeditviz";
 static char help_message[] = "MBeditviz is a bathymetry editor and patch test tool.";
 static char usage_message[] = "mbeditviz [-H -T -V]";
@@ -90,10 +93,6 @@ double	mbdef_btime_d;
 double	mbdef_etime_d;
 double	mbdef_speedmin;
 double	mbdef_timegap;
-
-/* system function declarations */
-char	*ctime();
-char	*getenv();
 
 int mbeditviz_beam_position(double navlon, double navlat, double headingx, double headingy,
 				double mtodeglon, double mtodeglat,
@@ -156,6 +155,14 @@ int mbeditviz_init(int argc,char **argv)
 	mbev_grid.wgt = NULL;
 	mbev_grid.val = NULL;
 	mbev_grid.sgm = NULL;
+	for (i=0;i<4;i++)
+		{
+		mbev_grid_bounds[i] = 0.0;
+		mbev_grid_boundsutm[i] = 0.0;
+		}
+	mbev_grid_cellsize = 0.0;
+	mbev_grid_nx = 0;
+	mbev_grid_ny = 0;
 	mbev_selected.xorigin = 0.0;
 	mbev_selected.yorigin = 0.0;
 	mbev_selected.zorigin = 0.0;
@@ -1467,10 +1474,10 @@ int mbeditviz_bin_weight(double foot_a, double foot_b, double scale,
 	return(mbev_status);
 }				   
 /*--------------------------------------------------------------------*/
-int mbeditviz_setup_grid()
+int mbeditviz_get_grid_bounds()
 {
 	/* local variables */
-	char	*function_name = "mbeditviz_setup_grid";
+	char	*function_name = "mbeditviz_get_grid_bounds";
 	struct mbev_file_struct *file;
 	struct mbev_ping_struct *ping;
 	struct mb_info_struct *info;
@@ -1480,6 +1487,8 @@ int mbeditviz_setup_grid()
 	double	reference_lon, reference_lat;
 	int	utm_zone;
 	int	proj_status;
+	char	projection_id[MB_PATH_MAXLINE];
+	void	*pjptr;
 	int	ifile, iping, ibeam;
 	int	filecount;
 	int	i, j, k;	
@@ -1508,33 +1517,181 @@ fprintf(stderr,"mbev_num_files_loaded:%d\n",mbev_num_files_loaded);
 					info = &(file->raw_info);
 				if (first == MB_YES)
 					{
-					mbev_grid.bounds[0] = info->lon_min;
-					mbev_grid.bounds[1] = info->lon_max;
-					mbev_grid.bounds[2] = info->lat_min;
-					mbev_grid.bounds[3] = info->lat_max;
+					mbev_grid_bounds[0] = info->lon_min;
+					mbev_grid_bounds[1] = info->lon_max;
+					mbev_grid_bounds[2] = info->lat_min;
+					mbev_grid_bounds[3] = info->lat_max;
 					altitude_min = info->altitude_min;
 					altitude_max = info->altitude_max;
 					first = MB_NO;
 fprintf(stderr,"Processed:%d Name:%s Bounds: %f %f %f %F   File Bounds: %f %f %f %f\n",
 file->processed_info_loaded,file->name,
-mbev_grid.bounds[0],mbev_grid.bounds[1],mbev_grid.bounds[2],mbev_grid.bounds[3],
+mbev_grid_bounds[0],mbev_grid_bounds[1],mbev_grid_bounds[2],mbev_grid_bounds[3],
 info->lon_min,info->lon_max,info->lat_min,info->lat_max);
 					}
 				else
 					{
-					mbev_grid.bounds[0] = MIN(mbev_grid.bounds[0],info->lon_min);
-					mbev_grid.bounds[1] = MAX(mbev_grid.bounds[1],info->lon_max);
-					mbev_grid.bounds[2] = MIN(mbev_grid.bounds[2],info->lat_min);
-					mbev_grid.bounds[3] = MAX(mbev_grid.bounds[3],info->lat_max);
+					mbev_grid_bounds[0] = MIN(mbev_grid_bounds[0],info->lon_min);
+					mbev_grid_bounds[1] = MAX(mbev_grid_bounds[1],info->lon_max);
+					mbev_grid_bounds[2] = MIN(mbev_grid_bounds[2],info->lat_min);
+					mbev_grid_bounds[3] = MAX(mbev_grid_bounds[3],info->lat_max);
 					altitude_min = MIN(altitude_min,info->altitude_min);
 					altitude_max = MIN(altitude_max,info->altitude_max);
 fprintf(stderr,"Processed:%d Name:%s Bounds: %f %f %f %F   File Bounds: %f %f %f %f\n",
 file->processed_info_loaded,file->name,
-mbev_grid.bounds[0],mbev_grid.bounds[1],mbev_grid.bounds[2],mbev_grid.bounds[3],
+mbev_grid_bounds[0],mbev_grid_bounds[1],mbev_grid_bounds[2],mbev_grid_bounds[3],
 info->lon_min,info->lon_max,info->lat_min,info->lat_max);
 					}
 				}
 			}
+		}
+	if (mbev_num_files_loaded <= 0 || mbev_grid_bounds[1] <= mbev_grid_bounds[0] 
+		|| mbev_grid_bounds[3] <= mbev_grid_bounds[2])
+		{
+		mbev_status = MB_FAILURE;
+		mbev_error = MB_ERROR_BAD_PARAMETER;
+		}
+	else
+		{
+		mbev_status = MB_SUCCESS;
+		mbev_error = MB_ERROR_NO_ERROR;
+		}
+		
+	/* get projection */
+	if (mbev_status == MB_SUCCESS)
+		{
+		/* get projection */
+		reference_lon = 0.5 * (mbev_grid_bounds[0] + mbev_grid_bounds[1]);
+		reference_lat = 0.5 * (mbev_grid_bounds[2] + mbev_grid_bounds[3]);
+		if (reference_lon < 180.0)
+			reference_lon += 360.0;
+		if (reference_lon >= 180.0)
+			reference_lon -= 360.0;
+		utm_zone = (int)(((reference_lon + 183.0)
+			/ 6.0) + 0.5);
+		if (reference_lat >= 0.0)
+			sprintf(projection_id, "UTM%2.2dN", utm_zone); 
+		else
+			sprintf(projection_id, "UTM%2.2dS", utm_zone); 
+		proj_status = mb_proj_init(mbev_verbose,projection_id, 
+			&(pjptr), &mbev_error);
+		if (proj_status != MB_SUCCESS)
+			{
+			mbev_status = MB_FAILURE;
+			mbev_error = MB_ERROR_BAD_PARAMETER;
+			}
+		}
+		
+	/* get grid cell size and dimensions */
+	if (mbev_status == MB_SUCCESS)
+		{
+		/* get projected bounds */
+
+		/* first point */
+		mb_proj_forward(mbev_verbose, pjptr, mbev_grid_bounds[0], mbev_grid_bounds[2],
+				&xx, &yy, &mbev_error);
+		mbev_grid_boundsutm[0] = xx;
+		mbev_grid_boundsutm[1] = xx;
+		mbev_grid_boundsutm[2] = yy;
+		mbev_grid_boundsutm[3] = yy;
+
+		/* second point */
+		mb_proj_forward(mbev_verbose, pjptr, mbev_grid_bounds[1], mbev_grid_bounds[2],
+				&xx, &yy, &mbev_error);
+		mbev_grid_boundsutm[0] = MIN(mbev_grid_boundsutm[0], xx);
+		mbev_grid_boundsutm[1] = MAX(mbev_grid_boundsutm[1], xx);
+		mbev_grid_boundsutm[2] = MIN(mbev_grid_boundsutm[2], yy);
+		mbev_grid_boundsutm[3] = MAX(mbev_grid.boundsutm[3], yy);
+
+		/* third point */
+		mb_proj_forward(mbev_verbose, pjptr, mbev_grid_bounds[0], mbev_grid_bounds[3],
+				&xx, &yy, &mbev_error);
+		mbev_grid_boundsutm[0] = MIN(mbev_grid_boundsutm[0], xx);
+		mbev_grid_boundsutm[1] = MAX(mbev_grid_boundsutm[1], xx);
+		mbev_grid_boundsutm[2] = MIN(mbev_grid_boundsutm[2], yy);
+		mbev_grid_boundsutm[3] = MAX(mbev_grid_boundsutm[3], yy);
+
+		/* fourth point */
+		mb_proj_forward(mbev_verbose, pjptr, mbev_grid_bounds[1], mbev_grid_bounds[3],
+				&xx, &yy, &mbev_error);
+		mbev_grid_boundsutm[0] = MIN(mbev_grid_boundsutm[0], xx);
+		mbev_grid_boundsutm[1] = MAX(mbev_grid_boundsutm[1], xx);
+		mbev_grid_boundsutm[2] = MIN(mbev_grid_boundsutm[2], yy);
+		mbev_grid_boundsutm[3] = MAX(mbev_grid_boundsutm[3], yy);
+		
+		/* get grid spacing */
+fprintf(stderr,"altitude: %f %f\n", altitude_min, altitude_max);
+		mbev_grid_cellsize = 0.02 * altitude_max;
+		
+		/* get grid dimensions */
+		mbev_grid_nx = (mbev_grid_boundsutm[1] - mbev_grid_boundsutm[0]) / mbev_grid_cellsize + 1;
+		mbev_grid_ny = (mbev_grid_boundsutm[3] - mbev_grid_boundsutm[2]) / mbev_grid_cellsize + 1;
+		mbev_grid_boundsutm[1] = mbev_grid_boundsutm[0] + (mbev_grid_nx - 1) * mbev_grid_cellsize;
+		mbev_grid_boundsutm[3] = mbev_grid_boundsutm[2] + (mbev_grid_ny - 1) * mbev_grid_cellsize;
+fprintf(stderr,"Grid bounds: %f %f %f %f    %f %f %f %f\n",
+mbev_grid_bounds[0],mbev_grid_bounds[1],mbev_grid_bounds[2],mbev_grid_bounds[3],
+mbev_grid_boundsutm[0],mbev_grid_boundsutm[1],mbev_grid_boundsutm[2],mbev_grid_boundsutm[3]);
+fprintf(stderr,"cell size:%f dimensions: %d %d\n",
+mbev_grid_cellsize,mbev_grid_nx,mbev_grid_ny);
+		
+		/* release projection */
+		mb_proj_free(mbev_verbose, &(pjptr), &mbev_error);
+		}
+
+	/* print output debug statements */
+	if (mbev_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",mbev_error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       mbev_status: %d\n",mbev_status);
+		}
+
+	/* return */
+	return(mbev_status);
+}
+		
+/*--------------------------------------------------------------------*/
+int mbeditviz_setup_grid()
+{
+	/* local variables */
+	char	*function_name = "mbeditviz_setup_grid";
+	struct mbev_file_struct *file;
+	struct mbev_ping_struct *ping;
+	struct mb_info_struct *info;
+	double	altitude_min, altitude_max;
+	int	first;
+	double	xx, yy;
+	double	reference_lon, reference_lat;
+	int	utm_zone;
+	int	proj_status;
+	int	ifile, iping, ibeam;
+	int	filecount;
+	int	i, j, k;	
+
+	/* print input debug statements */
+	if (mbev_verbose >= 0)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		}
+		
+	/* find lon lat bounds of loaded files */
+fprintf(stderr,"mbev_num_files_loaded:%d\n",mbev_num_files_loaded);
+	if (mbev_num_files_loaded > 0)
+		{	
+		/* get grid bounds */
+		mbev_grid.bounds[0] = mbev_grid_bounds[0];
+		mbev_grid.bounds[1] = mbev_grid_bounds[1];
+		mbev_grid.bounds[2] = mbev_grid_bounds[2];
+		mbev_grid.bounds[3] = mbev_grid_bounds[3];
+		
+		/* get grid spacing */
+		mbev_grid.dx = mbev_grid_cellsize;
+		mbev_grid.dy = mbev_grid_cellsize;
 		}
 	if (mbev_num_files_loaded <= 0 || mbev_grid.bounds[1] <= mbev_grid.bounds[0] 
 		|| mbev_grid.bounds[3] <= mbev_grid.bounds[2])
@@ -1610,11 +1767,6 @@ info->lon_min,info->lon_max,info->lat_min,info->lat_max);
 		mbev_grid.boundsutm[2] = MIN(mbev_grid.boundsutm[2], yy);
 		mbev_grid.boundsutm[3] = MAX(mbev_grid.boundsutm[3], yy);
 		
-		/* get grid spacing */
-fprintf(stderr,"altitude: %f %f\n", altitude_min, altitude_max);
-		mbev_grid.dx = 0.02 * altitude_max;
-		mbev_grid.dy = 0.02 * altitude_max;
-		
 		/* get grid dimensions */
 		mbev_grid.nx = (mbev_grid.boundsutm[1] - mbev_grid.boundsutm[0]) / mbev_grid.dx + 1;
 		mbev_grid.ny = (mbev_grid.boundsutm[3] - mbev_grid.boundsutm[2]) / mbev_grid.dy + 1;
@@ -1650,7 +1802,7 @@ mbev_grid.dx,mbev_grid.dy,mbev_grid.nx,mbev_grid.ny);
 		}
 
 	/* print output debug statements */
-	if (mbev_verbose >= 2)
+	if (mbev_verbose >= 0)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
@@ -1822,7 +1974,8 @@ int mbeditviz_make_grid()
 				mbev_grid.sgm[k] = mbev_grid.nodatavalue;
 				}
 			}
-	mbev_grid.status = MBEV_GRID_NOTVIEWED;
+	if (mbev_grid.status == MBEV_GRID_NONE)
+		mbev_grid.status = MBEV_GRID_NOTVIEWED;
 
 	/* print output debug statements */
 	if (mbev_verbose >= 2)
@@ -2348,9 +2501,17 @@ ifile,iping,ibeam,action);
 					}
 				}
 				
+			/* update the process structure */
+			file->process.mbp_edit_mode = MBP_EDIT_ON;
+			strcpy(file->process.mbp_editfile, file->esf.esffile);
+				
 			/* close the esf file */
 			mb_esf_close(mbev_verbose, &(file->esf), &mbev_error);
 			file->esf_open = MB_NO;
+			
+			/* update mbprocess parameter file */
+			mb_pr_writepar(mbev_verbose, file->path, 
+						&(file->process), &mbev_error);
 			}
 		}
 		
