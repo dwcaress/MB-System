@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_plot.perl	6/18/93
-#    $Id: mbm_plot.perl,v 5.25 2007-10-08 04:30:07 caress Exp $
+#    $Id: mbm_plot.perl,v 5.26 2007-11-16 17:54:10 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 2000, 2003, 2005 by 
 #    D. W. Caress (caress@mbari.org)
@@ -74,10 +74,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   June 17, 1993
 #
 # Version:
-#   $Id: mbm_plot.perl,v 5.25 2007-10-08 04:30:07 caress Exp $
+#   $Id: mbm_plot.perl,v 5.26 2007-11-16 17:54:10 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.25  2007/10/08 04:30:07  caress
+#   Added some large page definitions.
+#
 #   Revision 5.24  2007/05/14 17:09:45  caress
 #   Val Schmidt improved the error notices.
 #
@@ -518,7 +521,7 @@ if ($help)
 	print "\t\t-MGQdpi -MGU[/dx/dy/][label]\n";
 	print "\t\t-MMAfactor/mode/depth -MMByr/mo/da/hr/mn/sc\n";
 	print "\t\t-MMDmode/scale[/min/max] -MMEyr/mo/da/hr/mn/sc\n";
-	print "\t\t-MMNnplot -MMPpings -MMSspeedmin\n";
+	print "\t\t-MMLlonflip -MMNnplot -MMPpings -MMSspeedmin\n";
 	print "\t\t-MMTtimegap -MMZalgorithm\n";
 	print "\t\t-MNA[name_hgt[/P] | P]\n";
 	print "\t\t-MNP[pingnumber_tick/pingnumber_annot/pingnumber_tick_len]\n";
@@ -661,6 +664,12 @@ if ($misc)
 		if ($cmd =~ /^[Mm][Nn]./)
 			{
 			($contour_nplot) = $cmd =~ /^[Mm][Nn](.+)/;
+			}
+
+		# set lonflip
+		if ($cmd =~ /^[Mm][Ll]./)
+			{
+			($lonflip) = $cmd =~ /^[Mm][Ll](.+)/;
 			}
 
 		# set ping averaging
@@ -1018,7 +1027,7 @@ elsif ($navigation_control)
 	}
 elsif ($navigation_mode)
 	{
-	$navigation_control = "0.25/1/4/0.15";
+	$navigation_control = "100000/100000/100000/0.15";
 	}
 if ($pingnumber_mode)
 	{
@@ -1092,26 +1101,25 @@ if ($ENV{"MB_PS_VIEWER"})
 	{
 	$ps_viewer = $ENV{"MB_PS_VIEWER"};
 	}
+	
 # check for .mbio_defaults file
-if (!$ps_viewer)
+$home = $ENV{"HOME"};
+$mbdef = "$home/.mbio_defaults";
+if (open(MBDEF,"<$mbdef"))
 	{
-	$home = $ENV{"HOME"};
-	$mbdef = "$home/.mbio_defaults";
-	if (open(MBDEF,"<$mbdef"))
+	while (<MBDEF>)
 		{
-		while (<MBDEF>)
+		if (!$ps_viewer && /ps viewer:\s+(\S+)/)
 			{
-			if (/ps viewer:\s+(\S+)/)
-				{
-				($ps_viewer) = /ps viewer:\s+(\S+)/;
-				}
-			if (/lonflip:\s+(\S+)/)
-				{
-				($lonflip) = /lonflip:\s+(\S+)/;
-				}
+			($ps_viewer) = /ps viewer:\s+(\S+)/;
+			}
+		if (!$lonflip && /lonflip:\s+(\S+)/)
+			{
+			($lonflip) = /lonflip:\s+(\S+)/;
 			}
 		}
 	}
+
 # just set $ps_viewer to ghostview
 if (!$ps_viewer)
 	{
@@ -1201,32 +1209,6 @@ foreach $file_mb (@files_data)
 					}
 				}
 			close FILEINF;
-			
-			# reset longitude min max if they conflict with $lonflip
-			if ($lonflip == 0
-				&& $xmin_f < -180.0) 
-				{
-				$xmin_f = $xmin_f + 360.0;
-				$xmax_f = $xmax_f + 360.0;
-				}
-			elsif ($lonflip == 0
-				&& $xmax_f > 180.0) 
-				{
-				$xmin_f = $xmin_f - 360.0;
-				$xmax_f = $xmax_f - 360.0;
-				}
-			elsif ($lonflip == -1
-				&& $xmax_f > 0.0) 
-				{
-				$xmin_f = $xmin_f - 360.0;
-				$xmax_f = $xmax_f - 360.0;
-				}
-			elsif ($lonflip == 1
-				&& $xmin_f < 0.0) 
-				{
-				$xmin_f = $xmin_f + 360.0;
-				$xmax_f = $xmax_f + 360.0;
-				}
 
 			if (!$bounds)
 			    {
@@ -1319,6 +1301,13 @@ foreach $file_mb (@files_data)
 			
 	# reset longitude min max if they conflict with $lonflip
 	if ($lonflip == 0
+		&& (($xmin_f < -180.0 && $xmax_f > -180.0)
+			|| ($xmin_f < 180.0 && $xmax_f > 180.0)))
+		{
+		$xmin_f = -180.0;
+		$xmax_f = 180.0;
+		}
+	elsif ($lonflip == 0
 		&& $xmin_f < -180.0) 
 		{
 		$xmin_f = $xmin_f + 360.0;
@@ -1331,10 +1320,22 @@ foreach $file_mb (@files_data)
 		$xmax_f = $xmax_f - 360.0;
 		}
 	elsif ($lonflip == -1
-		&& $xmax_f > 0.0) 
+		&& $xmin_f < 0.0 && $xmax_f > 0.0)
+		{
+		$xmin_f = -360.0;
+		$xmax_f = 0.0;
+		}
+	elsif ($lonflip == -1
+		&& $xmax_f > 0.0)
 		{
 		$xmin_f = $xmin_f - 360.0;
 		$xmax_f = $xmax_f - 360.0;
+		}
+	elsif ($lonflip == 1
+		&& $xmin_f < 0.0 && $xmax_f > 0.0) 
+		{
+		$xmin_f = 0.0;
+		$xmax_f = 360.0;
 		}
 	elsif ($lonflip == 1
 		&& $xmin_f < 0.0) 
@@ -1451,10 +1452,26 @@ else
 	# get first cut bounds
 	$delx = 0.05 * ($xmax_data - $xmin_data);
 	$dely = 0.05 * ($ymax_data - $ymin_data);
-	$xmin = $xmin_data - $delx;
-	$xmax = $xmax_data + $delx;
+	if (($xmax_data - $xmin_data) < (0.95 * 360.0))
+		{
+		$xmin = $xmin_data - $delx;
+		$xmax = $xmax_data + $delx;
+		}
+	else
+		{
+		$xmin = $xmin_data;
+		$xmax = $xmax_data;
+		}
 	$ymin = $ymin_data - $dely;
 	$ymax = $ymax_data + $dely;
+	if ($ymin < -89.0)
+		{
+		$ymin = -89.0;
+		}
+	if ($ymax > 89.0)
+		{
+		$ymax = 89.0;
+		}
 	
 	# get aspect ratio in approximate real distances
 	$C1 = 111412.84;
@@ -1484,6 +1501,14 @@ else
 		$dely = (0.5 * (0.5 * $dx - $dy)) * $mtodeglat;
 		$ymin = $ymin - $dely;
 		$ymax = $ymax + $dely;
+		if ($ymin < -89.0)
+			{
+			$ymin = -89.0;
+			}
+		if ($ymax > 89.0)
+			{
+			$ymax = 89.0;
+			}
 		}
 	$bounds_plot = sprintf ("%1.8g/%1.8g/%1.8g/%1.8g",
 		$xmin, $xmax, $ymin, $ymax);

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavadjust_prog.c	3/23/00
- *    $Id: mbnavadjust_prog.c,v 5.26 2007-10-08 16:02:46 caress Exp $
+ *    $Id: mbnavadjust_prog.c,v 5.27 2007-11-16 17:54:10 caress Exp $
  *
  *    Copyright (c) 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	March 23, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.26  2007/10/08 16:02:46  caress
+ * MBnavadjust now performs an initial inversion for the average offsets for each independent block of data and then removes that average signal before performing the full inversion.
+ *
  * Revision 5.25  2007/05/14 06:34:11  caress
  * Many changes to mbnavadjust, including adding z offsets and 3D search grids.
  *
@@ -160,7 +163,7 @@ struct swathraw
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbnavadjust_prog.c,v 5.26 2007-10-08 16:02:46 caress Exp $";
+static char rcs_id[] = "$Id: mbnavadjust_prog.c,v 5.27 2007-11-16 17:54:10 caress Exp $";
 static char program_name[] = "mbnavadjust";
 static char help_message[] =  "mbnavadjust is an interactive navigation adjustment package for swath sonar data.\n";
 static char usage_message[] = "mbnavadjust [-Iproject -V -H]";
@@ -6673,7 +6676,7 @@ mbnavadjust_invertnav()
 		    {
 		    crossing = &project.crossings[icrossing];
 		    if (crossing->status == MBNA_CROSSING_STATUS_SET)
-		    ntie++;
+		    ntie += crossing->num_ties;
 		    }
 		
 		/* invert for block offsets only if there is more than one block */
@@ -6878,7 +6881,7 @@ i,file->block,file->block_offset_x,file->block_offset_y,file->block_offset_z);
      		/* retrieve crossing parameters */
 		/* count up the unknowns and constraints to get size of
 		 * inverse problem:
-		 *	    nconstraint = 2 * nsnav + ntie
+		 *	    nconstraint = ndf * nsnav + ntie
 		 */
 		nnav = 0;
 		nsnav = 0;
@@ -7258,7 +7261,7 @@ fprintf(stderr,"element %d column %d    a:%g  x:%g  s:%g\n", j, ia[k], a[k], x[i
     }
 sigma_total += (d[i] - s) * (d[i] - s);
 fprintf(stderr,"row %d result:  s:%g d:%g sigma_total:%g %g\n\n", i, s, d[i], (d[i] - s) * (d[i] - s), sigma_total);
-if (i >= (nr - 3 * ntie))
+if (i >= (nr - ndf * ntie))
     sigma_crossing += (d[i] - s) * (d[i] - s);
 }
 sigma_total = sqrt(sigma_total) / nr;
@@ -7365,7 +7368,7 @@ fprintf(stderr,"INITIAL SIGMA: sigma_total:%g sigma_crossing:%g\n", sigma_total,
 			    s += x[ia[k]] * a[k];
 			    }
 			sigma_total += (d[i] - s) * (d[i] - s);
-			if (i >= (nr - 3 * ntie))
+			if (i >= (nr - ndf * ntie))
 			    sigma_crossing += (d[i] - s) * (d[i] - s);
 			}
 		    sigma_total = sqrt(sigma_total) / nr;
@@ -7849,7 +7852,7 @@ mbnavadjust_interpolatesolution()
 					ok = MB_YES;
 					if (ii == ifilestart && jj < isectionstart)
 						ok = MB_NO;
-					if (ii == ifilestart && jj == isectionstart && iisnav <= isnavstart)
+					if (ii == ifilestart && jj == isectionstart && iisnav < isnavstart)
 						ok = MB_NO;
 					if (ii == i && jj > j)
 						ok = MB_NO;
@@ -7860,6 +7863,11 @@ mbnavadjust_interpolatesolution()
 						psection->snav_lon_offset_int[iisnav] = section->snav_lon_offset[isnav];
 						psection->snav_lat_offset_int[iisnav] = section->snav_lat_offset[isnav];
 						psection->snav_z_offset_int[iisnav] = section->snav_z_offset[isnav];
+/*fprintf(stderr,"SET1: %d %d %d   %f %f %f\n",
+ii,jj,iisnav,
+psection->snav_lon_offset_int[iisnav],
+psection->snav_lat_offset_int[iisnav],
+psection->snav_z_offset_int[iisnav]);*/
 						}
 					}
 				    }
@@ -7902,6 +7910,11 @@ mbnavadjust_interpolatesolution()
 							+ factor * (section->snav_lat_offset[isnav] - platoffset);
 						psection->snav_z_offset_int[iisnav] = pzoffset 
 							+ factor * (section->snav_z_offset[isnav] - pzoffset);
+/*fprintf(stderr,"SET2: %d %d %d   %f %f %f\n",
+ii,jj,iisnav,
+psection->snav_lon_offset_int[iisnav],
+psection->snav_lat_offset_int[iisnav],
+psection->snav_z_offset_int[iisnav]);*/
 						}
 					}
 				    }
@@ -7948,6 +7961,11 @@ mbnavadjust_interpolatesolution()
 						psection->snav_lon_offset_int[iisnav] = plonoffset;
 						psection->snav_lat_offset_int[iisnav] = platoffset;
 						psection->snav_z_offset_int[iisnav] = pzoffset;
+/*fprintf(stderr,"SET3: %d %d %d   %f %f %f\n",
+ii,jj,iisnav,
+psection->snav_lon_offset_int[iisnav],
+psection->snav_lat_offset_int[iisnav],
+psection->snav_z_offset_int[iisnav]);*/
 						}
 					
 					}
@@ -7965,7 +7983,7 @@ mbnavadjust_interpolatesolution()
 		    /* deal with end of data */
 		    else if (i == project.num_files - 1 
 		    	&& j == file->num_sections - 1 
-			&& j == section->num_snav - 1)
+			&& isnav == section->num_snav - 1)
 		    	{
 			/* if previous tie set apply that offset to intervening snav points */
 			if (previoustie == MB_YES)
@@ -7990,13 +8008,18 @@ mbnavadjust_interpolatesolution()
 						ok = MB_NO;
 					if (ii == i && jj > j)
 						ok = MB_NO;
-					if (ii == i && jj == j && iisnav >= isnav)
+					if (ii == i && jj == j && iisnav > isnav)
 						ok = MB_NO;
 					if (ok == MB_YES)
 						{
 						psection->snav_lon_offset_int[iisnav] = plonoffset;
 						psection->snav_lat_offset_int[iisnav] = platoffset;
 						psection->snav_z_offset_int[iisnav] = pzoffset;
+/*fprintf(stderr,"SET4: %d %d %d   %f %f %f\n",
+ii,jj,iisnav,
+psection->snav_lon_offset_int[iisnav],
+psection->snav_lat_offset_int[iisnav],
+psection->snav_z_offset_int[iisnav]);*/
 						}
 					
 					}
@@ -8017,10 +8040,31 @@ mbnavadjust_interpolatesolution()
 		    	section->snav_lon_offset_int[isnav] = 0.0;
 		    	section->snav_lat_offset_int[isnav] = 0.0;
 		    	section->snav_z_offset_int[isnav] = 0.0;
+/*fprintf(stderr,"SET5: %d %d %d   %f %f %f\n",
+i,j,isnav,
+section->snav_lon_offset_int[isnav],
+section->snav_lat_offset_int[isnav],
+section->snav_z_offset_int[isnav]);*/
 		        }
 		    }
 		}
 	    }
+/*for (i=0;i<project.num_files;i++)
+{
+file = &project.files[i];
+for (j=0;j<file->num_sections;j++)
+{
+section = &file->sections[j];
+for (isnav=0;isnav<section->num_snav;isnav++)
+{
+fprintf(stderr,"INTERPOLATION: %2d %2d %2d   %f %f %f\n",
+i,j,isnav,
+section->snav_lon_offset_int[isnav],
+section->snav_lat_offset_int[isnav],
+section->snav_z_offset_int[isnav]);
+}
+}
+}*/
 
  	/* print output debug statements */
 	if (mbna_verbose >= 2)
@@ -8050,6 +8094,7 @@ mbnavadjust_invertnav2()
 	int	nnav, nsnav, nsnavuse, nfix, ndx, ndx2, ntie, nconstraint;
 	int	nseq;
 	int	nnz = 3;
+	int	ndf = 3;
 	int	nrows = 0;
 	int	ncols = 0;
 	double	*a;
@@ -8124,7 +8169,7 @@ mbnavadjust_invertnav2()
      		/* retrieve crossing parameters */
 		/* count up the unknowns and constraints to get size of
 		 * inverse problem:
-		 *	    nconstraint = 2 * nsnav + ntie
+		 *	    nconstraint = ndf * (nsnav + ntie)
 		 */
 		/* set message dialog on */
 		sprintf(message,"Setting up navigation inversion...");
@@ -8217,9 +8262,9 @@ mbnavadjust_invertnav2()
 		    avg_offset /= ntie;
 		
 		/* allocate space for the inverse problem */
-		nconstraint = 3 * (nfix + ndx + ndx2 + ntie);
+		nconstraint = ndf * (nfix + ndx + ndx2 + ntie);
 		nrows = nconstraint;
-		ncols = 3 * nsnavuse;
+		ncols = ndf * nsnavuse;
 		status = mb_malloc(mbna_verbose, nnz * nrows * sizeof(double), &a,&error);
 		status = mb_malloc(mbna_verbose, nnz * nrows * sizeof(int), &ia,&error);
 		status = mb_malloc(mbna_verbose, nrows * sizeof(int), &nia,&error);
@@ -8530,7 +8575,7 @@ fprintf(stderr,"element %d column %d    a:%g  x:%g  s:%g\n", j, ia[k], a[k], x[i
     }
 sigma_total += (d[i] - s) * (d[i] - s);
 fprintf(stderr,"row %d result:  s:%g d:%g sigma_total:%g %g\n\n", i, s, d[i], (d[i] - s) * (d[i] - s), sigma_total);
-if (i >= (nr - 2 * ntie))
+if (i >= (nr - ndf * ntie))
     sigma_crossing += (d[i] - s) * (d[i] - s);
 }
 sigma_total = sqrt(sigma_total) / nr;
@@ -8641,7 +8686,7 @@ fprintf(stderr,"INITIAL SIGMA: sigma_total:%g sigma_crossing:%g\n", sigma_total,
 			    s += x[ia[k]] * a[k];
 			    }
 			sigma_total += (d[i] - s) * (d[i] - s);
-			if (i >= (nr - 3 * ntie))
+			if (i >= (nr - ndf * ntie))
 			    sigma_crossing += (d[i] - s) * (d[i] - s);
 			}
 		    sigma_total = sqrt(sigma_total / nr);
