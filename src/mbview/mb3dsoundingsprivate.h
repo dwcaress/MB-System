@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb3dsoundingsprivate.h	9/24/2003
- *    $Id: mb3dsoundingsprivate.h,v 5.2 2007-10-08 16:32:08 caress Exp $
+ *    $Id: mb3dsoundingsprivate.h,v 5.3 2007-11-16 17:26:56 caress Exp $
  *
  *    Copyright (c) 2007 by
  *    David W. Caress (caress@mbari.org)
@@ -18,6 +18,9 @@
  * Date:	May 25,  2007
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2007/10/08 16:32:08  caress
+ * Code status as of 8 October 2007.
+ *
  * Revision 5.1  2007/07/03 17:35:54  caress
  * Working on MBeditviz.
  *
@@ -263,5 +266,10 @@ void do_mb3dsdg_view_flagged( Widget w, XtPointer client_data, XtPointer call_da
 void do_mb3dsdg_view_noprofile( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_view_goodprofile( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_view_allprofile( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mb3dsdg_action_applybias( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mb3dsdg_view_boundingbox( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mb3dsdg_view_reset( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mb3dsdg_mouse_panzoom( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mb3dsdg_mouse_rotate( Widget w, XtPointer client_data, XtPointer call_data);
 
 /*--------------------------------------------------------------------*/

@@ -2,7 +2,7 @@
 /* Begin user code block <abstract> */
 /*--------------------------------------------------------------------
  *    The MB-system:	mbeditviz_main.c		4/27/2007
- *    $Id: mbeditviz_main.c,v 5.2 2007-06-18 01:16:51 caress Exp $
+ *    $Id: mbeditviz_main.c,v 5.3 2007-11-16 17:26:56 caress Exp $
  *
  *    Copyright (c) 2007 by
  *    David W. Caress (caress@mbari.org)
@@ -185,8 +185,8 @@ int main( int argc, char **argv)
     
     ac = 0;
     XtSetArg(args[ac], XmNtitle, "MBeditviz"); ac++;
-    XtSetArg(args[ac], XmNx, 76); ac++;
-    XtSetArg(args[ac], XmNy, 176); ac++;
+    XtSetArg(args[ac], XmNx, 69); ac++;
+    XtSetArg(args[ac], XmNy, 431); ac++;
     XtSetArg(args[ac], XmNwidth, 453); ac++;
     XtSetArg(args[ac], XmNheight, 557); ac++;
     topLevelShell = XtCreatePopupShell((char *)"topLevelShell",

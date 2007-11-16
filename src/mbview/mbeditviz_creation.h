@@ -30,6 +30,9 @@
 /**
  * Start Global Widget Declarations.
  */
+EXTERNAL Widget   scale_cellsize;
+EXTERNAL Widget   label_current;
+EXTERNAL Widget   label_implied;
 EXTERNAL Widget   dialogShell_open;
 EXTERNAL Widget   form_open;
 EXTERNAL Widget   radioBox_openmode;
@@ -42,6 +45,7 @@ EXTERNAL Widget   bulletinBoard_mbeditviz_message;
 EXTERNAL Widget   label_mbeditviz_message;
 EXTERNAL Widget   label_about_version;
 EXTERNAL Widget   pushButton_openswath;
+EXTERNAL Widget   pushButton_updategrid;
 EXTERNAL Widget   label_mbeditviz_status;
 EXTERNAL Widget   toggleButton_mode_edit;
 EXTERNAL Widget   toggleButton_mode_browse;

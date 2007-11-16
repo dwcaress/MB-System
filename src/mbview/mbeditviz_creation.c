@@ -24,14 +24,15 @@
 #include <Xm/DialogS.h>
 #include <Xm/MwmUtil.h>
 #include <Xm/Form.h>
+#include <Xm/Scale.h>
+#include <Xm/Label.h>
+#include <Xm/PushB.h>
 #include <Xm/RowColumn.h>
 #include <Xm/ToggleB.h>
-#include <Xm/Label.h>
 #include <Xm/Text.h>
 #include <Xm/FileSB.h>
 #include <Xm/BulletinB.h>
 #include <Xm/Separator.h>
-#include <Xm/PushB.h>
 #include <Xm/CascadeB.h>
 #include <Xm/ScrolledW.h>
 #include <Xm/List.h>
@@ -39,14 +40,15 @@
 #include <Xm/DialogS.h>
 #include <Xm/MwmUtil.h>
 #include <Xm/Form.h>
+#include <Xm/Scale.h>
+#include <Xm/Label.h>
+#include <Xm/PushB.h>
 #include <Xm/RowColumn.h>
 #include <Xm/ToggleB.h>
-#include <Xm/Label.h>
 #include <Xm/Text.h>
 #include <Xm/FileSB.h>
 #include <Xm/BulletinB.h>
 #include <Xm/Separator.h>
-#include <Xm/PushB.h>
 #include <Xm/CascadeB.h>
 #include <Xm/ScrolledW.h>
 #include <Xm/List.h>
@@ -85,11 +87,14 @@ extern void BX_SET_BACKGROUND_COLOR(Widget, ArgList, Cardinal *, Pixel);
  */
 extern void do_mbeditviz_quit(Widget, XtPointer, XtPointer);
 extern void BxExitCB(Widget, XtPointer, XtPointer);
-extern void do_mbeditviz_openfile(Widget, XtPointer, XtPointer);
+extern void do_mbeditviz_chengecellsize(Widget, XtPointer, XtPointer);
 extern void BxUnmanageCB(Widget, XtPointer, XtPointer);
+extern void do_mbeditviz_updategrid(Widget, XtPointer, XtPointer);
+extern void do_mbeditviz_openfile(Widget, XtPointer, XtPointer);
 extern void do_mbeditviz_changeoutputmode(Widget, XtPointer, XtPointer);
 extern void do_mbeditviz_fileSelectionBox_openswath(Widget, XtPointer, XtPointer);
 extern void BxManageCB(Widget, XtPointer, XtPointer);
+extern void do_mbeditviz_regrid(Widget, XtPointer, XtPointer);
 extern void do_mbeditviz_deleteselected(Widget, XtPointer, XtPointer);
 extern void do_mbeditviz_viewselected(Widget, XtPointer, XtPointer);
 extern void do_mbeditviz_viewall(Widget, XtPointer, XtPointer);
@@ -106,6 +111,10 @@ CreatemainWindow_mbeditviz(Widget parent)
     Cardinal cdc = 0;
     Boolean  argok = False;
     Widget   mainWindow_mbeditviz;
+    Widget   dialogShell_gridparameters;
+    Widget   form_gridparameters;
+    Widget   pushButton_gridparameters_dismiss;
+    Widget   pushButton_gridparameters_apply;
     Widget   label_outputmode;
     Widget   label_open_mbio;
     Widget   label_mbeditviz_patience;
@@ -124,6 +133,8 @@ CreatemainWindow_mbeditviz(Widget parent)
     Widget   pulldownMenu_file;
     Widget   separator2;
     Widget   pushButton_quit;
+    Widget   cascadeButton_options;
+    Widget   pulldownMenu_options;
     Widget   cascadeButton_help;
     Widget   pulldownMenu_help;
     Widget   pushButton_help_about;
@@ -141,14 +152,15 @@ CreatemainWindow_mbeditviz(Widget parent)
     XtInitializeWidgetClass((WidgetClass)xmMainWindowWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmDialogShellWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmFormWidgetClass);
+    XtInitializeWidgetClass((WidgetClass)xmScaleWidgetClass);
+    XtInitializeWidgetClass((WidgetClass)xmLabelWidgetClass);
+    XtInitializeWidgetClass((WidgetClass)xmPushButtonWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmRowColumnWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmToggleButtonWidgetClass);
-    XtInitializeWidgetClass((WidgetClass)xmLabelWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmTextWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmFileSelectionBoxWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmBulletinBoardWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmSeparatorWidgetClass);
-    XtInitializeWidgetClass((WidgetClass)xmPushButtonWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmRowColumnWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmCascadeButtonWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmRowColumnWidgetClass);
@@ -157,8 +169,8 @@ CreatemainWindow_mbeditviz(Widget parent)
     XtInitializeWidgetClass((WidgetClass)xmListWidgetClass);
     
     ac = 0;
-    XtSetArg(args[ac], XmNx, 76); ac++;
-    XtSetArg(args[ac], XmNy, 176); ac++;
+    XtSetArg(args[ac], XmNx, 69); ac++;
+    XtSetArg(args[ac], XmNy, 431); ac++;
     XtSetArg(args[ac], XmNwidth, 453); ac++;
     XtSetArg(args[ac], XmNheight, 557); ac++;
     mainWindow_mbeditviz = XmCreateMainWindow(parent,
@@ -273,6 +285,72 @@ CreatemainWindow_mbeditviz(Widget parent)
     ac = 0;
     XtSetArg(args[ac], XmNsubMenuId, pulldownMenu_file); ac++;
     XtSetValues(cascadeButton_file, args, ac);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(menuBar_mbeditviz, (char *)"Options", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNx, 46); ac++;
+        XtSetArg(args[ac], XmNy, 5); ac++;
+        XtSetArg(args[ac], XmNwidth, 72); ac++;
+        XtSetArg(args[ac], XmNheight, 24); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(menuBar_mbeditviz, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        cascadeButton_options = XmCreateCascadeButton(menuBar_mbeditviz,
+            (char *)"cascadeButton_options",
+            args, 
+            ac);
+        XtManageChild(cascadeButton_options);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNx, 0); ac++;
+    XtSetArg(args[ac], XmNy, 0); ac++;
+    XtSetArg(args[ac], XmNwidth, 142); ac++;
+    XtSetArg(args[ac], XmNheight, 28); ac++;
+    pulldownMenu_options = XmCreatePulldownMenu(XtParent(cascadeButton_options),
+        (char *)"pulldownMenu_options",
+        args, 
+        ac);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(pulldownMenu_options, (char *)"Generate New Grid", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(pulldownMenu_options, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        pushButton_updategrid = XmCreatePushButton(pulldownMenu_options,
+            (char *)"pushButton_updategrid",
+            args, 
+            ac);
+        XtManageChild(pushButton_updategrid);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(pushButton_updategrid, XmNactivateCallback, BxManageCB, (XtPointer)"form_gridparameters");
+    XtAddCallback(pushButton_updategrid, XmNactivateCallback, do_mbeditviz_regrid, (XtPointer)0);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNsubMenuId, pulldownMenu_options); ac++;
+    XtSetValues(cascadeButton_options, args, ac);
     
     ac = 0;
     {
@@ -506,7 +584,7 @@ CreatemainWindow_mbeditviz(Widget parent)
     {
         XmString    tmp0;
         
-        tmp0 = (XmString) BX_CONVERT(form_mbeditviz, (char *)":::t\"Delete\":t\"Selected\"\"Files\"", 
+        tmp0 = (XmString) BX_CONVERT(form_mbeditviz, (char *)":::t\"Remove\":t\"Selected\"\"Files\"", 
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNx, 376); ac++;
@@ -557,6 +635,7 @@ CreatemainWindow_mbeditviz(Widget parent)
     }
     
     XtAddCallback(pushButton_viewselected, XmNactivateCallback, do_mbeditviz_viewselected, (XtPointer)0);
+    XtAddCallback(pushButton_viewselected, XmNactivateCallback, BxManageCB, (XtPointer)"form_gridparameters");
     
     ac = 0;
     {
@@ -585,6 +664,7 @@ CreatemainWindow_mbeditviz(Widget parent)
     }
     
     XtAddCallback(pushButton_viewall, XmNactivateCallback, do_mbeditviz_viewall, (XtPointer)0);
+    XtAddCallback(pushButton_viewall, XmNactivateCallback, BxManageCB, (XtPointer)"form_gridparameters");
     
     ac = 0;
     {
@@ -649,8 +729,8 @@ CreatemainWindow_mbeditviz(Widget parent)
     
     ac = 0;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNx, 775); ac++;
-    XtSetArg(args[ac], XmNy, 564); ac++;
+    XtSetArg(args[ac], XmNx, 871); ac++;
+    XtSetArg(args[ac], XmNy, 559); ac++;
     XtSetArg(args[ac], XmNwidth, 463); ac++;
     XtSetArg(args[ac], XmNheight, 531); ac++;
     bulletinBoard_about = XtCreateWidget((char *)"bulletinBoard_about",
@@ -667,7 +747,7 @@ CreatemainWindow_mbeditviz(Widget parent)
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(bulletinBoard_about, (char *)"-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14", 
+            BX_CONVERT(bulletinBoard_about, (char *)"-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1=TimesMedium14", 
             XmRFontList, 0, &argok)); if (argok) ac++;
         XtSetArg(args[ac], XmNrecomputeSize, False); ac++;
         XtSetArg(args[ac], XmNx, 10); ac++;
@@ -695,7 +775,7 @@ CreatemainWindow_mbeditviz(Widget parent)
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(bulletinBoard_about, (char *)"-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12", 
+            BX_CONVERT(bulletinBoard_about, (char *)"-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12", 
             XmRFontList, 0, &argok)); if (argok) ac++;
         XtSetArg(args[ac], XmNx, 10); ac++;
         XtSetArg(args[ac], XmNy, 280); ac++;
@@ -722,7 +802,7 @@ CreatemainWindow_mbeditviz(Widget parent)
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(bulletinBoard_about, (char *)"-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12", 
+            BX_CONVERT(bulletinBoard_about, (char *)"-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12", 
             XmRFontList, 0, &argok)); if (argok) ac++;
         XtSetArg(args[ac], XmNx, 70); ac++;
         XtSetArg(args[ac], XmNy, 340); ac++;
@@ -749,7 +829,7 @@ CreatemainWindow_mbeditviz(Widget parent)
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(bulletinBoard_about, (char *)"-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12", 
+            BX_CONVERT(bulletinBoard_about, (char *)"-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1=TimesBold12", 
             XmRFontList, 0, &argok)); if (argok) ac++;
         XtSetArg(args[ac], XmNx, 230); ac++;
         XtSetArg(args[ac], XmNy, 340); ac++;
@@ -787,7 +867,7 @@ CreatemainWindow_mbeditviz(Widget parent)
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(bulletinBoard_about, (char *)"-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24", 
+            BX_CONVERT(bulletinBoard_about, (char *)"-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1=TimesBold14,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24", 
             XmRFontList, 0, &argok)); if (argok) ac++;
         XtSetArg(args[ac], XmNx, 10); ac++;
         XtSetArg(args[ac], XmNy, 120); ac++;
@@ -825,7 +905,7 @@ CreatemainWindow_mbeditviz(Widget parent)
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(bulletinBoard_about, (char *)"-*-times-bold-r-*-*-*-180-*-*-*-*-iso8859-1=TimesBold18,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24", 
+            BX_CONVERT(bulletinBoard_about, (char *)"-*-times-bold-r-*-*-*-180-*-*-*-*-iso8859-1=TimesBold18,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24,-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1=TimesBold24", 
             XmRFontList, 0, &argok)); if (argok) ac++;
         XtSetArg(args[ac], XmNx, 10); ac++;
         XtSetArg(args[ac], XmNy, 10); ac++;
@@ -883,8 +963,8 @@ CreatemainWindow_mbeditviz(Widget parent)
     
     ac = 0;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNx, 1316); ac++;
-    XtSetArg(args[ac], XmNy, 576); ac++;
+    XtSetArg(args[ac], XmNx, 199); ac++;
+    XtSetArg(args[ac], XmNy, 774); ac++;
     XtSetArg(args[ac], XmNwidth, 409); ac++;
     XtSetArg(args[ac], XmNheight, 93); ac++;
     bulletinBoard_mbeditviz_message = XtCreateWidget((char *)"bulletinBoard_mbeditviz_message",
@@ -960,8 +1040,8 @@ CreatemainWindow_mbeditviz(Widget parent)
     
     ac = 0;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNx, 537); ac++;
-    XtSetArg(args[ac], XmNy, 381); ac++;
+    XtSetArg(args[ac], XmNx, 451); ac++;
+    XtSetArg(args[ac], XmNy, 578); ac++;
     XtSetArg(args[ac], XmNwidth, 504); ac++;
     XtSetArg(args[ac], XmNheight, 550); ac++;
     form_open = XtCreateWidget((char *)"form_open",
@@ -1117,6 +1197,233 @@ CreatemainWindow_mbeditviz(Widget parent)
     XtAddCallback(fileSelectionBox, XmNokCallback, do_mbeditviz_openfile, (XtPointer)0);
     XtAddCallback(fileSelectionBox, XmNokCallback, BxUnmanageCB, (XtPointer)"form_open");
     XtAddCallback(fileSelectionBox, XmNcancelCallback, BxUnmanageCB, (XtPointer)"form_open");
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNtitle, "Grid Parameters"); ac++;
+    XtSetArg(args[ac], XmNwidth, 453); ac++;
+    XtSetArg(args[ac], XmNheight, 337); ac++;
+    dialogShell_gridparameters = XmCreateDialogShell(mainWindow_mbeditviz,
+        (char *)"dialogShell_gridparameters",
+        args, 
+        ac);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
+    XtSetArg(args[ac], XmNx, 173); ac++;
+    XtSetArg(args[ac], XmNy, 642); ac++;
+    XtSetArg(args[ac], XmNwidth, 453); ac++;
+    XtSetArg(args[ac], XmNheight, 337); ac++;
+    form_gridparameters = XtCreateWidget((char *)"form_gridparameters",
+        xmFormWidgetClass,
+        dialogShell_gridparameters,
+        args, 
+        ac);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(form_gridparameters, (char *)"Grid Cell Size (m)", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNtitleString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNminimum, 1); ac++;
+        XtSetArg(args[ac], XmNdecimalPoints, 1); ac++;
+        XtSetArg(args[ac], XmNvalue, 10); ac++;
+        XtSetArg(args[ac], XmNmaximum, 2500); ac++;
+        XtSetArg(args[ac], XmNshowArrows, TRUE); ac++;
+        XtSetArg(args[ac], XmNshowValue, TRUE); ac++;
+        XtSetArg(args[ac], XmNhighlightThickness, 1); ac++;
+        XtSetArg(args[ac], XmNorientation, XmHORIZONTAL); ac++;
+        XtSetArg(args[ac], XmNx, 10); ac++;
+        XtSetArg(args[ac], XmNy, 128); ac++;
+        XtSetArg(args[ac], XmNwidth, 430); ac++;
+        XtSetArg(args[ac], XmNheight, 61); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(form_gridparameters, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        scale_cellsize = XmCreateScale(form_gridparameters,
+            (char *)"scale_cellsize",
+            args, 
+            ac);
+        XtManageChild(scale_cellsize);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(scale_cellsize, XmNvalueChangedCallback, do_mbeditviz_chengecellsize, (XtPointer)0);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(form_gridparameters, (char *)":::t\"Current Grid Parameters:\":t\"    Longitude: -151.56667 -150.00000\":t\"    Latitude:     23.4567 24.0000\":t\"    Cell Size: 10.00 m\"\"    Dimensions:  1234 X 2345\"", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNborderWidth, 0); ac++;
+        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
+        XtSetArg(args[ac], XmNx, 10); ac++;
+        XtSetArg(args[ac], XmNy, 10); ac++;
+        XtSetArg(args[ac], XmNwidth, 432); ac++;
+        XtSetArg(args[ac], XmNheight, 110); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(form_gridparameters, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        label_current = XmCreateLabel(form_gridparameters,
+            (char *)"label_current",
+            args, 
+            ac);
+        XtManageChild(label_current);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(form_gridparameters, (char *)":::t\"Selected Grid Parameters:\":t\"    Cell Size: 5.00 m\"\"    Dimensions 2345 X 3456\"", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNborderWidth, 1); ac++;
+        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
+        XtSetArg(args[ac], XmNbackground, 
+            BX_CONVERT(form_gridparameters, (char *)"white", 
+            XmRPixel, 0, &argok)); if (argok) ac++;
+        XtSetArg(args[ac], XmNx, 10); ac++;
+        XtSetArg(args[ac], XmNy, 200); ac++;
+        XtSetArg(args[ac], XmNwidth, 430); ac++;
+        XtSetArg(args[ac], XmNheight, 70); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(form_gridparameters, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        label_implied = XmCreateLabel(form_gridparameters,
+            (char *)"label_implied",
+            args, 
+            ac);
+        XtManageChild(label_implied);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(form_gridparameters, (char *)"Dismiss", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNx, 290); ac++;
+        XtSetArg(args[ac], XmNy, 290); ac++;
+        XtSetArg(args[ac], XmNwidth, 100); ac++;
+        XtSetArg(args[ac], XmNheight, 32); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(form_gridparameters, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        pushButton_gridparameters_dismiss = XmCreatePushButton(form_gridparameters,
+            (char *)"pushButton_gridparameters_dismiss",
+            args, 
+            ac);
+        XtManageChild(pushButton_gridparameters_dismiss);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(pushButton_gridparameters_dismiss, XmNactivateCallback, BxUnmanageCB, (XtPointer)"form_gridparameters");
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(form_gridparameters, (char *)"Apply", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNx, 70); ac++;
+        XtSetArg(args[ac], XmNy, 290); ac++;
+        XtSetArg(args[ac], XmNwidth, 100); ac++;
+        XtSetArg(args[ac], XmNheight, 32); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(form_gridparameters, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        pushButton_gridparameters_apply = XmCreatePushButton(form_gridparameters,
+            (char *)"pushButton_gridparameters_apply",
+            args, 
+            ac);
+        XtManageChild(pushButton_gridparameters_apply);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(pushButton_gridparameters_apply, XmNactivateCallback, BxUnmanageCB, (XtPointer)"form_gridparameters");
+    XtAddCallback(pushButton_gridparameters_apply, XmNactivateCallback, do_mbeditviz_updategrid, (XtPointer)0);
+    ac = 0;
+    XtSetArg(args[ac], XmNtopAttachment, XmATTACH_WIDGET); ac++;
+    XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_NONE); ac++;
+    XtSetArg(args[ac], XmNbottomOffset, 0); ac++;
+    XtSetArg(args[ac], XmNleftOffset, 10); ac++;
+    XtSetArg(args[ac], XmNrightOffset, 13); ac++;
+    XtSetArg(args[ac], XmNtopOffset, 8); ac++;
+    XtSetArg(args[ac], XmNtopWidget, label_current); ac++;
+    XtSetValues(scale_cellsize, args, ac);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNtopAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNleftOffset, 10); ac++;
+    XtSetArg(args[ac], XmNrightOffset, 11); ac++;
+    XtSetArg(args[ac], XmNtopOffset, 10); ac++;
+    XtSetValues(label_current, args, ac);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNtopAttachment, XmATTACH_WIDGET); ac++;
+    XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_NONE); ac++;
+    XtSetArg(args[ac], XmNbottomOffset, 0); ac++;
+    XtSetArg(args[ac], XmNleftOffset, 10); ac++;
+    XtSetArg(args[ac], XmNrightOffset, 11); ac++;
+    XtSetArg(args[ac], XmNtopOffset, 11); ac++;
+    XtSetArg(args[ac], XmNtopWidget, scale_cellsize); ac++;
+    XtSetValues(label_implied, args, ac);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNtopAttachment, XmATTACH_WIDGET); ac++;
+    XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_NONE); ac++;
+    XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_NONE); ac++;
+    XtSetArg(args[ac], XmNrightOffset, 63); ac++;
+    XtSetArg(args[ac], XmNtopOffset, 18); ac++;
+    XtSetArg(args[ac], XmNtopWidget, label_implied); ac++;
+    XtSetValues(pushButton_gridparameters_dismiss, args, ac);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNtopAttachment, XmATTACH_WIDGET); ac++;
+    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_NONE); ac++;
+    XtSetArg(args[ac], XmNleftOffset, 70); ac++;
+    XtSetArg(args[ac], XmNtopOffset, 18); ac++;
+    XtSetArg(args[ac], XmNtopWidget, label_implied); ac++;
+    XtSetValues(pushButton_gridparameters_apply, args, ac);
+    
     ac = 0;
     XtSetArg(args[ac], XmNtopAttachment, XmATTACH_NONE); ac++;
     XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
