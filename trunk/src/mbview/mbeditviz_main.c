@@ -2,7 +2,7 @@
 /* Begin user code block <abstract> */
 /*--------------------------------------------------------------------
  *    The MB-system:	mbeditviz_main.c		4/27/2007
- *    $Id: mbeditviz_main.c,v 5.3 2007-11-16 17:26:56 caress Exp $
+ *    $Id: mbeditviz_main.c,v 5.4 2008-01-14 18:20:13 caress Exp $
  *
  *    Copyright (c) 2007 by
  *    David W. Caress (caress@mbari.org)
@@ -144,6 +144,10 @@ int main( int argc, char **argv)
     
     /* Begin user code block <declarations> */
     
+    int		argcsave;
+    argcsave = argc;
+    argc = 1;
+        
     /* End user code block <declarations> */
     
     /*
@@ -216,7 +220,7 @@ int main( int argc, char **argv)
     mb3dsoundings_set_edit_notify(mbev_verbose, mbeditviz_mb3dsoundings_edit, &mbev_error);
    
     /* initialize the program code */
-    mbeditviz_init(argc,argv);
+    mbeditviz_init(argcsave,argv);
     
     /* End user code block <main_loop> */
     
