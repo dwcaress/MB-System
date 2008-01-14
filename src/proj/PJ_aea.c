@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: PJ_aea.c,v 5.3 2007-10-07 20:05:48 caress Exp $
+ * $Id: PJ_aea.c,v 5.4 2008-01-14 18:21:58 caress Exp $
  *
  * Project:  PROJ.4
  * Purpose:  Implementation of the aea (Albers Equal Area) projection.
@@ -52,7 +52,7 @@
 #define PJ_LIB__
 #include <projects.h>
 
-PJ_CVSID("$Id: PJ_aea.c,v 5.3 2007-10-07 20:05:48 caress Exp $");
+PJ_CVSID("$Id: PJ_aea.c,v 5.4 2008-01-14 18:21:58 caress Exp $");
 
 # define EPS10	1.e-10
 # define TOL7	1.e-7

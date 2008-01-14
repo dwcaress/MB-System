@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: pj_latlong.c,v 5.4 2007-10-07 20:05:48 caress Exp $
+ * $Id: pj_latlong.c,v 5.5 2008-01-14 18:21:58 caress Exp $
  *
  * Project:  PROJ.4
  * Purpose:  Stub projection implementation for lat/long coordinates. We 
@@ -30,6 +30,9 @@
  ******************************************************************************
  *
  * $Log: not supported by cvs2svn $
+ * Revision 1.3  2007/11/30 20:02:31  fwarmerdam
+ * add latlon and lonlat aliases
+ *
  * Revision 1.2  2000/07/07 06:04:23  warmerda
  * added longlat alias
  *
@@ -41,8 +44,10 @@
 /* very loosely based upon DMA code by Bradford W. Drew */
 #define PJ_LIB__
 #include	<projects.h>
-PROJ_HEAD(latlong, "Lat/long (Geodetic)")  "\n\t";
-PROJ_HEAD(longlat, "Lat/long (Geodetic)")  "\n\t";
+PROJ_HEAD(lonlat, "Lat/long (Geodetic)")  "\n\t";
+PROJ_HEAD(latlon, "Lat/long (Geodetic alias)")  "\n\t";
+PROJ_HEAD(latlong, "Lat/long (Geodetic alias)")  "\n\t";
+PROJ_HEAD(longlat, "Lat/long (Geodetic alias)")  "\n\t";
 
 FORWARD(forward);
 
@@ -66,6 +71,20 @@ ENTRY0(latlong)
 ENDENTRY(P)
 
 ENTRY0(longlat)
+        P->is_latlong = 1;
+        P->x0 = 0.0;
+        P->y0 = 0.0;
+	P->inv = inverse; P->fwd = forward;
+ENDENTRY(P)
+
+ENTRY0(latlon)
+        P->is_latlong = 1;
+        P->x0 = 0.0;
+        P->y0 = 0.0;
+	P->inv = inverse; P->fwd = forward;
+ENDENTRY(P)
+
+ENTRY0(lonlat)
         P->is_latlong = 1;
         P->x0 = 0.0;
         P->y0 = 0.0;
