@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_gsfgenmb.c	2/27/98
- *	$Id: mbr_gsfgenmb.c,v 5.8 2006-03-06 21:47:48 caress Exp $
+ *	$Id: mbr_gsfgenmb.c,v 5.9 2008-01-14 18:08:17 caress Exp $
  *
  *    Copyright (c) 1998, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	February 27, 1998
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2006/03/06 21:47:48  caress
+ * Implemented changes suggested by Bob Courtney of the Geological Survey of Canada to support translating Reson data to GSF.
+ *
  * Revision 5.7  2005/11/05 00:48:03  caress
  * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
  *
@@ -117,7 +120,7 @@ int mbr_wt_gsfgenmb(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_gsfgenmb(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_gsfgenmb.c,v 5.8 2006-03-06 21:47:48 caress Exp $";
+	static char res_id[]="$Id: mbr_gsfgenmb.c,v 5.9 2008-01-14 18:08:17 caress Exp $";
 	char	*function_name = "mbr_register_gsfgenmb";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -250,7 +253,7 @@ int mbr_info_gsfgenmb(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_gsfgenmb.c,v 5.8 2006-03-06 21:47:48 caress Exp $";
+	static char res_id[]="$Id: mbr_gsfgenmb.c,v 5.9 2008-01-14 18:08:17 caress Exp $";
 	char	*function_name = "mbr_info_gsfgenmb";
 	int	status = MB_SUCCESS;
 
@@ -320,7 +323,7 @@ int mbr_info_gsfgenmb(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_gsfgenmb(int verbose, void *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_gsfgenmb.c,v 5.8 2006-03-06 21:47:48 caress Exp $";
+ static char res_id[]="$Id: mbr_gsfgenmb.c,v 5.9 2008-01-14 18:08:17 caress Exp $";
 	char	*function_name = "mbr_alm_gsfgenmb";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -566,6 +569,8 @@ int mbr_rt_gsfgenmb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			mb_io_ptr->new_error);
 		fprintf(stderr,"dbg4       kind:       %d\n",
 			mb_io_ptr->new_kind);
+		fprintf(stderr,"dbg4       dataID->recordID: %d\n",
+			dataID->recordID);
 		}
 	if (verbose >= 4 && data->kind == MB_DATA_COMMENT)
 		{
