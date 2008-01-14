@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	4/8/93
- *    $Id: mbedit_prog.c,v 5.36 2007-10-08 07:20:21 caress Exp $
+ *    $Id: mbedit_prog.c,v 5.37 2008-01-14 17:49:48 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997, 2000, 2003, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -27,6 +27,9 @@
  * Date:	September 19, 2000 (New version - no buffered i/o)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.36  2007/10/08 07:20:21  caress
+ * Fixed vertical scaling of large numbers of pings. Augmented zap box function.
+ *
  * Revision 5.35  2007/05/14 06:30:29  caress
  * The acrosstrack view of MBedit now shows the real alongtrack
  * positions of the soundings.
@@ -393,7 +396,7 @@ struct mbedit_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbedit_prog.c,v 5.36 2007-10-08 07:20:21 caress Exp $";
+static char rcs_id[] = "$Id: mbedit_prog.c,v 5.37 2008-01-14 17:49:48 caress Exp $";
 static char program_name[] = "MBedit";
 static char help_message[] =  
 "MBedit is an interactive editor used to identify and flag\n\
@@ -5249,6 +5252,7 @@ int mbedit_load_data(int buffer_size,
 	int	namp, nss;
 	char	string[50];
 	int	detect_status, detect_error, nbeams;
+	double	speed_nav;
 	int	i, j, k;
 
 	/* print input debug statements */
@@ -5294,7 +5298,7 @@ int mbedit_load_data(int buffer_size,
 						&ping[nbuff].time_d,
 						&ping[nbuff].navlon,
 						&ping[nbuff].navlat,
-						&ping[nbuff].speed,
+						&speed_nav,
 						&ping[nbuff].heading,
 						&draft, 
 						&ping[nbuff].roll,
