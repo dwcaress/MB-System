@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_reson7kr.c	4/4/2004
- *	$Id: mbr_reson7kr.c,v 5.16 2007-07-03 17:25:51 caress Exp $
+ *	$Id: mbr_reson7kr.c,v 5.17 2008-01-14 18:11:55 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	April 4,2004
  * $Log: not supported by cvs2svn $
+ * Revision 5.16  2007/07/03 17:25:51  caress
+ * Changes to handle new time lag value in bluefin nav records.
+ *
  * Revision 5.15  2006/11/10 22:36:05  caress
  * Working towards release 5.1.0
  *
@@ -211,7 +214,7 @@ int mbr_reson7kr_wr_soundvelocity(int verbose, int *bufferalloc, char **bufferpt
 int mbr_reson7kr_wr_absorptionloss(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 int mbr_reson7kr_wr_spreadingloss(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 
-static char res_id[]="$Id: mbr_reson7kr.c,v 5.16 2007-07-03 17:25:51 caress Exp $";
+static char res_id[]="$Id: mbr_reson7kr.c,v 5.17 2008-01-14 18:11:55 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_reson7kr(int verbose, void *mbio_ptr, int *error)
@@ -1844,7 +1847,7 @@ int mbr_reson7kr_chk_header(int verbose, void *mbio_ptr, char *buffer,
 	mb_get_binary_short(MB_YES, &buffer[40], &reserved); 
 	mb_get_binary_short(MB_YES, &buffer[42], enumerator); 
 #ifdef MBR_RESON7KR_DEBUG
-	if (verbose > 0)
+	if (verbose >= 0)
 		{
 		fprintf(stderr, "\nChecking header in mbr_reson7kr_chk_header:\n");
 		fprintf(stderr, "Version:      %4.4hX | %d\n", version, version);
@@ -2230,7 +2233,7 @@ int mbr_reson7kr_rd_reference(int verbose, char *buffer, void *store_ptr, int *e
 
 	/* print out the results */
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr,"R7KRECID_ReferencePoint:           7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+fprintf(stderr,"R7KRECID_ReferencePoint:                7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
 store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
 header->RecordNumber);
@@ -2321,7 +2324,7 @@ int mbr_reson7kr_rd_sensoruncal(int verbose, char *buffer, void *store_ptr, int 
 
 	/* print out the results */
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr,"R7KRECID_UncalibratedSensorOffset: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+fprintf(stderr,"R7KRECID_UncalibratedSensorOffset:      7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
 store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
 header->RecordNumber);
@@ -2412,7 +2415,7 @@ int mbr_reson7kr_rd_sensorcal(int verbose, char *buffer, void *store_ptr, int *e
 
 	/* print out the results */
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr,"R7KRECID_CalibratedSensorOffset:   7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+fprintf(stderr,"R7KRECID_CalibratedSensorOffset:        7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
 store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
 header->RecordNumber);
@@ -2506,7 +2509,7 @@ int mbr_reson7kr_rd_position(int verbose, char *buffer, void *store_ptr, int *er
 
 	/* print out the results */
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr,"R7KRECID_Position:                 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+fprintf(stderr,"R7KRECID_Position:                      7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
 store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
 header->RecordNumber);
@@ -2667,7 +2670,7 @@ int mbr_reson7kr_rd_customattitude(int verbose, char *buffer, void *store_ptr, i
 
 	/* print out the results */
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr,"R7KRECID_CustomAttitude:           7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+fprintf(stderr,"R7KRECID_CustomAttitude:                7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
 store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
 header->RecordNumber);
@@ -2763,7 +2766,7 @@ int mbr_reson7kr_rd_tide(int verbose, char *buffer, void *store_ptr, int *error)
 
 	/* print out the results */
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr,"R7KRECID_Tide:                     7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+fprintf(stderr,"R7KRECID_Tide:                          7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
 store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
 header->RecordNumber);
@@ -2849,7 +2852,7 @@ int mbr_reson7kr_rd_altitude(int verbose, char *buffer, void *store_ptr, int *er
 
 	/* print out the results */
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr,"R7KRECID_Altitude:                 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+fprintf(stderr,"R7KRECID_Altitude:                      7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
 store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
 header->RecordNumber);
@@ -2996,7 +2999,7 @@ int mbr_reson7kr_rd_motion(int verbose, char *buffer, void *store_ptr, int *erro
 
 	/* print out the results */
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr,"R7KRECID_MotionOverGround:         7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+fprintf(stderr,"R7KRECID_MotionOverGround:              7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
 store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
 header->RecordNumber);
@@ -3085,7 +3088,7 @@ int mbr_reson7kr_rd_depth(int verbose, char *buffer, void *store_ptr, int *error
 
 	/* print out the results */
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr,"R7KRECID_Depth:                    7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+fprintf(stderr,"R7KRECID_Depth:                         7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
 store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
 header->RecordNumber);
@@ -3201,7 +3204,7 @@ int mbr_reson7kr_rd_svp(int verbose, char *buffer, void *store_ptr, int *error)
 
 	/* print out the results */
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr,"R7KRECID_SoundVelocityProfile:     7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+fprintf(stderr,"R7KRECID_SoundVelocityProfile:          7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
 store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
 header->RecordNumber);
@@ -3332,7 +3335,7 @@ int mbr_reson7kr_rd_ctd(int verbose, char *buffer, void *store_ptr, int *error)
 
 	/* print out the results */
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr,"R7KRECID_CTD:                      7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+fprintf(stderr,"R7KRECID_CTD:                           7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
 store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
 header->RecordNumber);
@@ -3461,7 +3464,7 @@ int mbr_reson7kr_rd_geodesy(int verbose, char *buffer, void *store_ptr, int *err
 
 	/* print out the results */
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr,"R7KRECID_Geodesy:                  7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+fprintf(stderr,"R7KRECID_Geodesy:                       7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
 store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
 header->RecordNumber);
@@ -3550,7 +3553,7 @@ int mbr_reson7kr_rd_rollpitchheave(int verbose, char *buffer, void *store_ptr, i
 
 	/* print out the results */
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr,"R7KRECID_RollPitchHeave:           7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+fprintf(stderr,"R7KRECID_RollPitchHeave:                7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
 store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
 header->RecordNumber);
@@ -3637,7 +3640,7 @@ int mbr_reson7kr_rd_heading(int verbose, char *buffer, void *store_ptr, int *err
 
 	/* print out the results */
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr,"R7KRECID_Heading:                  7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+fprintf(stderr,"R7KRECID_Heading:                       7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
 store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
 header->RecordNumber);
@@ -3758,7 +3761,7 @@ int mbr_reson7kr_rd_attitude(int verbose, char *buffer, void *store_ptr, int *er
 
 	/* print out the results */
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr,"R7KRECID_Attitude:                 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+fprintf(stderr,"R7KRECID_Attitude:                      7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
 store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
 header->RecordNumber);
@@ -5246,7 +5249,7 @@ int mbr_reson7kr_rd_volatilesonarsettings(int verbose, char *buffer, void *store
 
 	/* print out the results */
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr,"R7KRECID_7kVolatileSonarSettings:  7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+fprintf(stderr,"R7KRECID_7kVolatileSonarSettings:       7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
 store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
 header->RecordNumber);
@@ -5369,7 +5372,7 @@ int mbr_reson7kr_rd_configuration(int verbose, char *buffer, void *store_ptr, in
 
 	/* print out the results */
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr,"R7KRECID_7kConfiguration:          7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+fprintf(stderr,"R7KRECID_7kConfiguration:               7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
 store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
 header->RecordNumber);
@@ -5460,7 +5463,7 @@ int mbr_reson7kr_rd_matchfilter(int verbose, char *buffer, void *store_ptr, int 
 
 	/* print out the results */
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr,"R7KRECID_7kMatchFilter:            7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+fprintf(stderr,"R7KRECID_7kMatchFilter:                 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
 store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
 header->RecordNumber);
@@ -5566,7 +5569,7 @@ int mbr_reson7kr_rd_beamgeometry(int verbose, char *buffer, void *store_ptr, int
 
 	/* print out the results */
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr,"R7KRECID_7kBeamGeometry:           7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+fprintf(stderr,"R7KRECID_7kBeamGeometry:                7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
 store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
 header->RecordNumber);
@@ -5664,7 +5667,7 @@ int mbr_reson7kr_rd_calibration(int verbose, char *buffer, void *store_ptr, int 
 
 	/* print out the results */
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr,"R7KRECID_7kCalibrationData:        7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+fprintf(stderr,"R7KRECID_7kCalibrationData:             7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
 store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
 header->RecordNumber);
@@ -5829,7 +5832,7 @@ int mbr_reson7kr_rd_bathymetry(int verbose, char *buffer, void *store_ptr, int *
 
 	/* print out the results */
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr,"R7KRECID_7kBathymetricData:        7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d ping:%d\n",
+fprintf(stderr,"R7KRECID_7kBathymetricData:             7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d ping:%d\n",
 store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
 header->RecordNumber,bathymetry->ping_number);
@@ -6013,7 +6016,7 @@ int mbr_reson7kr_rd_backscatter(int verbose, char *buffer, void *store_ptr, int 
 
 	/* print out the results */
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr,"R7KRECID_7kBackscatterImageData:   7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d ping:%d\n",
+fprintf(stderr,"R7KRECID_7kBackscatterImageData:        7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d ping:%d\n",
 store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
 header->RecordNumber,backscatter->ping_number);
@@ -6367,7 +6370,7 @@ int mbr_reson7kr_rd_verticaldepth(int verbose, char *buffer, void *store_ptr, in
 
 	/* print out the results */
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr,"R7KRECID_7kVerticalDepth:          7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d ping:%d\n",
+fprintf(stderr,"R7KRECID_7kVerticalDepth:               7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d ping:%d\n",
 store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
 header->RecordNumber,verticaldepth->ping_number);
@@ -6515,7 +6518,7 @@ int mbr_reson7kr_rd_image(int verbose, char *buffer, void *store_ptr, int *error
 
 	/* print out the results */
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr,"R7KRECID_7kImageData:              7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d ping:%d\n",
+fprintf(stderr,"R7KRECID_7kImageData:                   7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d ping:%d\n",
 store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
 header->RecordNumber,image->ping_number);
@@ -6647,7 +6650,7 @@ int mbr_reson7kr_rd_installation(int verbose, char *buffer, void *store_ptr, int
 
 	/* print out the results */
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr,"R7KRECID_7kInstallationParameters: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+fprintf(stderr,"R7KRECID_7kInstallationParameters:      7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
 store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
 header->RecordNumber);
@@ -6769,7 +6772,7 @@ int mbr_reson7kr_rd_fileheader(int verbose, char *buffer, void *store_ptr, int *
 
 	/* print out the results */
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr,"R7KRECID_7kFileHeader:             7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+fprintf(stderr,"R7KRECID_7kFileHeader:                  7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
 store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
 header->RecordNumber);
@@ -6998,7 +7001,13 @@ int mbr_reson7kr_rd_remotecontrolsettings(int verbose, char *buffer, void *store
 
 	/* print out the results */
 #ifdef MBR_RESON7KR_DEBUG
-	if (verbose >= 0)
+fprintf(stderr,"R7KRECID_7kRemoteControlSonarSettings:  7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+store->time_i[0],store->time_i[1],store->time_i[2],
+store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
+header->RecordNumber);
+#endif
+#ifdef MBR_RESON7KR_DEBUG
+	if (verbose > 0)
 #else
 	if (verbose >= 2)
 #endif

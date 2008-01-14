@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_reson7k.c	3.00	3/23/2004
- *	$Id: mbsys_reson7k.c,v 5.16 2007-10-08 15:59:34 caress Exp $
+ *	$Id: mbsys_reson7k.c,v 5.17 2008-01-14 18:11:28 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -26,6 +26,9 @@
  * Date:	March 23, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.16  2007/10/08 15:59:34  caress
+ * MBIO changes as of 8 October 2007.
+ *
  * Revision 5.15  2007/07/03 17:25:51  caress
  * Changes to handle new time lag value in bluefin nav records.
  *
@@ -95,7 +98,7 @@
 /* turn on debug statements here */
 /* #define MSYS_RESON7KR_DEBUG 1 */
 
-static char res_id[]="$Id: mbsys_reson7k.c,v 5.16 2007-10-08 15:59:34 caress Exp $";
+static char res_id[]="$Id: mbsys_reson7k.c,v 5.17 2008-01-14 18:11:28 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_zero7kheader(int verbose, s7k_header	*header, 
@@ -4309,7 +4312,44 @@ int mbsys_reson7k_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		for (i=0;i<*nbath;i++)
 			{
 			bath[i] = bathymetry->depth[i];
-			if ((bathymetry->quality[i] & 15) > 7)
+			
+			/* beamflagging scheme:
+				Reson quality flags use bits 0-3
+					bit 0: brightness test
+					bit 1: colinearity test
+					bit 2: amplitude pick
+					bit 3: phase pick
+				Early MB scheme (through 2007) - use bits 0-5
+					null: 0
+					flagged: 2
+					good: 15
+					amplitude: +16
+					phase: +32
+				Current MB scheme (>= 2008) - use bits 4-7
+					- bits 0-3 left in original values
+					- beam valid if bit 4 or 5 are set
+					- beam flagged if bit 6 or 7 set
+					bit 4: on = amplitude
+					bit 5: on = phase
+					bit 6: on = auto flag
+					bit 7: on = manual flag */
+			if (bathymetry->quality[i] == 0)
+				{
+				beamflag[i] = MB_FLAG_NULL;
+				}
+			else if (bathymetry->quality[i] & 64)
+				{
+				beamflag[i] = MB_FLAG_FLAG + MB_FLAG_FILTER;
+				}
+			else if (bathymetry->quality[i] & 128)
+				{
+				beamflag[i] = MB_FLAG_FLAG + MB_FLAG_MANUAL;
+				}
+			else if (bathymetry->quality[i] & 240 > 0)
+				{
+				beamflag[i] = MB_FLAG_NONE;
+				}			
+			else if ((bathymetry->quality[i] & 3) == 3)
 				{
 				beamflag[i] = MB_FLAG_NONE;
 				}
@@ -4319,8 +4359,18 @@ int mbsys_reson7k_extract(int verbose, void *mbio_ptr, void *store_ptr,
 				}
 			else
 				{
-				beamflag[i] = MB_FLAG_FLAG + MB_FLAG_SONAR;
+				beamflag[i] = MB_FLAG_FLAG + MB_FLAG_MANUAL;
 				}
+/* fprintf(stderr,"beam:%d quality:%d ",i,bathymetry->quality[i]);
+if (bathymetry->quality[i] & 1) fprintf(stderr,"1"); else fprintf(stderr,"0");
+if (bathymetry->quality[i] & 2) fprintf(stderr,"1"); else fprintf(stderr,"0");
+if (bathymetry->quality[i] & 4) fprintf(stderr,"1"); else fprintf(stderr,"0");
+if (bathymetry->quality[i] & 8) fprintf(stderr,"1"); else fprintf(stderr,"0");
+if (bathymetry->quality[i] & 16) fprintf(stderr,"1"); else fprintf(stderr,"0");
+if (bathymetry->quality[i] & 32) fprintf(stderr,"1"); else fprintf(stderr,"0");
+if (bathymetry->quality[i] & 64) fprintf(stderr,"1"); else fprintf(stderr,"0");
+if (bathymetry->quality[i] & 128) fprintf(stderr,"1"); else fprintf(stderr,"0");
+fprintf(stderr," flag:%d\n",beamflag[i]);*/
 			bathacrosstrack[i] = bathymetry->acrosstrack[i];
 			bathalongtrack[i] = bathymetry->alongtrack[i];
 			amp[i] = bathymetry->intensity[i];
@@ -4786,11 +4836,13 @@ int mbsys_reson7k_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			{
 			bathymetry->depth[i] = bath[i];
 			if (beamflag[i] == MB_FLAG_NULL)
-				bathymetry->quality[i] = bathymetry->quality[i] & 240;
+				bathymetry->quality[i] = 0;
+			else if (mb_beam_check_flag_manual(beamflag[i]))
+				bathymetry->quality[i] = (bathymetry->quality[i] & 63) + 128;
 			else if (mb_beam_check_flag(beamflag[i]))
-				bathymetry->quality[i] = (bathymetry->quality[i] & 240) + 2;
+				bathymetry->quality[i] = (bathymetry->quality[i] & 63) + 64;
 			else
-				bathymetry->quality[i] = (bathymetry->quality[i] & 240) + 15;
+				bathymetry->quality[i] = (bathymetry->quality[i] & 63);
 			bathymetry->acrosstrack[i] = bathacrosstrack[i];
 			bathymetry->alongtrack[i] = bathalongtrack[i];
 			bathymetry->intensity[i] = amp[i];
