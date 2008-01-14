@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mgd77dat.c	5/18/99
- *	$Id: mbr_mgd77dat.c,v 5.10 2005-11-05 00:48:03 caress Exp $
+ *	$Id: mbr_mgd77dat.c,v 5.11 2008-01-14 17:52:34 caress Exp $
  *
  *    Copyright (c) 1999, 2000, 2002, 2003, 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	May 18, 1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.10  2005/11/05 00:48:03  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.9  2004/09/24 20:44:44  caress
  * Implemented code fixes provided by Bob Covill.
  *
@@ -111,7 +114,7 @@ int mbr_dem_mgd77dat(int verbose, void *mbio_ptr, int *error);
 int mbr_rt_mgd77dat(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_mgd77dat(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
-static char res_id[]="$Id: mbr_mgd77dat.c,v 5.10 2005-11-05 00:48:03 caress Exp $";
+static char res_id[]="$Id: mbr_mgd77dat.c,v 5.11 2008-01-14 17:52:34 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_mgd77dat(int verbose, void *mbio_ptr, int *error)
@@ -721,6 +724,10 @@ int mbr_mgd77dat_rd_data(int verbose, void *mbio_ptr, int *error)
 		status = MB_FAILURE;
 		*error = MB_ERROR_EOF;
 		}
+/*fprintf(stderr,"_RAWLINE:");
+for (i=0;i<MBF_MGD77DAT_DATA_LEN;i++)
+fprintf(stderr,"%c",line[i]);
+fprintf(stderr,"\n");*/
 		
 	/* handle "pseudo-mgd77" in which each record is
 	 * followed by a cr or lf */
@@ -747,6 +754,10 @@ int mbr_mgd77dat_rd_data(int verbose, void *mbio_ptr, int *error)
 		    }
 		}
 	    }
+/*fprintf(stderr,"+FIXLINE:");
+for (i=0;i<MBF_MGD77DAT_DATA_LEN;i++)
+fprintf(stderr,"%c",line[i]);
+fprintf(stderr,"\n");*/
 	
 	mb_io_ptr->file_bytes = ftell(mb_io_ptr->mbfp);	
 
@@ -1004,13 +1015,16 @@ int mbr_mgd77dat_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 	/* handle the data */
 	if (data->kind == MB_DATA_HEADER)
 	    {
-	    for (i=0;i<MBF_MGD77DAT_DATA_LEN;i++)
-		line[i] = data->comment[i];
+	    strcpy(line, data->comment);
+	    for (i=strlen(line);i<MBF_MGD77DAT_DATA_LEN;i++)
+		line[i] = ' ';
 	    }
 	else if (data->kind == MB_DATA_COMMENT)
 	    {
 	    line[0] = '#';
             strncpy(&line[1],data->comment,MBF_MGD77DAT_DATA_LEN-1);
+	    for (i=strlen(line);i<MBF_MGD77DAT_DATA_LEN;i++)
+		line[i] = ' ';
 	    }
 	else if (data->kind == MB_DATA_DATA)
 	    {
