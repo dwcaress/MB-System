@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: PJ_aeqd.c,v 5.3 2007-10-07 20:05:48 caress Exp $
+ * $Id: PJ_aeqd.c,v 5.4 2008-01-14 18:21:58 caress Exp $
  *
  * Project:  PROJ.4
  * Purpose:  Implementation of the aeqd (Azimuthal Equidistant) projection.
@@ -46,7 +46,7 @@
 #define PJ_LIB__
 #include	<projects.h>
 
-PJ_CVSID("$Id: PJ_aeqd.c,v 5.3 2007-10-07 20:05:48 caress Exp $");
+PJ_CVSID("$Id: PJ_aeqd.c,v 5.4 2008-01-14 18:21:58 caress Exp $");
 
 PROJ_HEAD(aeqd, "Azimuthal Equidistant") "\n\tAzi, Sph&Ell\n\tlat_0 guam";
 

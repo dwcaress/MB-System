@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  7/16/2002
-#	$Id: Makefile.template,v 5.6 2007-10-07 20:05:48 caress Exp $
+#	$Id: Makefile.template,v 5.7 2008-01-14 18:21:58 caress Exp $
 #
 #     Copyright (c) 2002, 2003 by
 #     David W. Caress (caress@mbari.org)
@@ -16,6 +16,9 @@
 # Date:		July 16, 2002
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.6  2007/10/07 20:05:48  caress
+# New proj version 4.5.0
+#
 # Revision 5.5  2006/03/06 21:49:27  caress
 # Implemented changes suggested by Bob Courtney of the Geological Survey of Canada to support translating Reson data to GSF.
 #
@@ -121,7 +124,6 @@ $(LIBDIR)/libmbproj.a: \
 		PJ_mill.o \
 		PJ_mod_ster.o \
 		PJ_moll.o \
-		PJ_mpoly.o \
 		PJ_nell.o \
 		PJ_nell_h.o \
 		PJ_nocol.o \
@@ -265,7 +267,6 @@ $(LIBDIR)/libmbproj.a: \
 		PJ_mill.o \
 		PJ_mod_ster.o \
 		PJ_moll.o \
-		PJ_mpoly.o \
 		PJ_nell.o \
 		PJ_nell_h.o \
 		PJ_nocol.o \
@@ -564,10 +565,6 @@ PJ_moll.o:	PJ_moll.c \
 		emess.h  geocent.h  geodesic.h \
 		nad_list.h  pj_list.h  proj_api.h  projects.h
 	$(CC) -c $(CFLAGS) -I. PJ_moll.c
-PJ_mpoly.o:	PJ_mpoly.c \
-		emess.h  geocent.h  geodesic.h \
-		nad_list.h  pj_list.h  proj_api.h  projects.h
-	$(CC) -c $(CFLAGS) -I. PJ_mpoly.c
 PJ_nell.o:	PJ_nell.c \
 		emess.h  geocent.h  geodesic.h \
 		nad_list.h  pj_list.h  proj_api.h  projects.h
