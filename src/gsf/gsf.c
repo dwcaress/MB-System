@@ -106,6 +106,9 @@
  * bac 06-28-06   Updated gsfIsStarboardPing to work with EM3000D and EM3002D.  Updated gsfCopyRecords
  *                to copy the hv_nav_error record.  Added  for EM121A data received via Kongsberg SIS.
  *                Replaced references to long types with int types, for compilation on 64-bit architectures.
+ * jsb 11-06-07   Updates to utilize the subrecord size in termining the field size for the array subrecords
+ *                that support more than one field size.  Also replaced use of strstr with strcmp in gsfGetMBParams
+ *                to resolve potential problem where one keyword name may be fully contained in another.
  *
  * Classification : Unclassified
  *
@@ -5165,12 +5168,12 @@ gsfGetMBParams(gsfRecords *rec, gsfMBParams *p, int *numArrays)
 
     for (i=0; i<rec->process_parameters.number_parameters; i++)
     {
-        if (strstr(rec->process_parameters.param[i], "REFERENCE TIME"))
+        if (strncmp(rec->process_parameters.param[i], "REFERENCE TIME", strlen("REFERENCE TIME")) == 0)
         {
             memset(p->start_of_epoch, 0, sizeof(p->start_of_epoch));
             strncpy(p->start_of_epoch, rec->process_parameters.param[i], sizeof(p->start_of_epoch));
         }
-        else if (strstr(rec->process_parameters.param[i], "ROLL_COMPENSATED"))
+        else if (strncmp(rec->process_parameters.param[i], "ROLL_COMPENSATED", strlen("ROLL_COMPENSATED")) == 0)
         {
             if (strstr(rec->process_parameters.param[i], "YES"))
             {
@@ -5181,7 +5184,7 @@ gsfGetMBParams(gsfRecords *rec, gsfMBParams *p, int *numArrays)
                 p->roll_compensated = GSF_UNCOMPENSATED;
             }
         }
-        else if (strstr(rec->process_parameters.param[i], "PITCH_COMPENSATED"))
+        else if (strncmp(rec->process_parameters.param[i], "PITCH_COMPENSATED", strlen("PITCH_COMPENSATED")) == 0)
         {
             if (strstr(rec->process_parameters.param[i], "YES"))
             {
@@ -5192,7 +5195,7 @@ gsfGetMBParams(gsfRecords *rec, gsfMBParams *p, int *numArrays)
                 p->pitch_compensated = GSF_UNCOMPENSATED;
             }
         }
-        else if (strstr(rec->process_parameters.param[i], "HEAVE_COMPENSATED"))
+        else if (strncmp(rec->process_parameters.param[i], "HEAVE_COMPENSATED", strlen("HEAVE_COMPENSATED")) == 0)
         {
             if (strstr(rec->process_parameters.param[i], "YES"))
             {
@@ -5203,7 +5206,7 @@ gsfGetMBParams(gsfRecords *rec, gsfMBParams *p, int *numArrays)
                 p->heave_compensated = GSF_UNCOMPENSATED;
             }
         }
-        else if (strstr(rec->process_parameters.param[i], "TIDE_COMPENSATED"))
+        else if (strncmp(rec->process_parameters.param[i], "TIDE_COMPENSATED", strlen("TIDE_COMPENSATED")) == 0)
         {
             if (strstr(rec->process_parameters.param[i], "YES"))
             {
@@ -5214,13 +5217,14 @@ gsfGetMBParams(gsfRecords *rec, gsfMBParams *p, int *numArrays)
                 p->tide_compensated = GSF_UNCOMPENSATED;
             }
         }
-        else if (strstr(rec->process_parameters.param[i], "DEPTH_CALCULATION"))
+        else if (strncmp(rec->process_parameters.param[i], "DEPTH_CALCULATION", strlen("DEPTH_CALCULATION")) == 0)
         {
-            if (strstr(rec->process_parameters.param[i], "CORRECTED"))
+            sscanf (rec->process_parameters.param[i], "DEPTH_CALCULATION=%s", str);
+            if (strcmp(str, "CORRECTED") == 0)
             {
                 p->depth_calculation = GSF_TRUE_DEPTHS;
             }
-            else if (strstr(rec->process_parameters.param[i], "CALCULATED_RE_1500_MS"))
+            else if (strcmp(str, "CALCULATED_RE_1500_MS") == 0)
             {
                 p->depth_calculation = GSF_DEPTHS_RE_1500_MS;
             }
@@ -5233,9 +5237,10 @@ gsfGetMBParams(gsfRecords *rec, gsfMBParams *p, int *numArrays)
         /* This parameter indicates whether the angle travel time
          * pairs have been corrected for ray tracing.
          */
-        else if (strstr(rec->process_parameters.param[i], "RAY_TRACING"))
+        else if (strncmp(rec->process_parameters.param[i], "RAY_TRACING", strlen("RAY_TRACING")) == 0)
         {
-            if (strstr(rec->process_parameters.param[i], "YES"))
+            sscanf (rec->process_parameters.param[i], "RAY_TRACING=%s", str);
+            if (strcmp(str, "YES") == 0)
             {
                 p->ray_tracing = GSF_COMPENSATED;
             }
@@ -5244,7 +5249,7 @@ gsfGetMBParams(gsfRecords *rec, gsfMBParams *p, int *numArrays)
                 p->ray_tracing = GSF_UNCOMPENSATED;
             }
         }
-        else if (strstr(rec->process_parameters.param[i], "DRAFT_TO_APPLY"))
+        else if (strncmp(rec->process_parameters.param[i], "DRAFT_TO_APPLY", strlen("DRAFT_TO_APPLY")) == 0)
         {
             p->to_apply.draft[0] = GSF_UNKNOWN_PARAM_VALUE;
             p->to_apply.draft[1] = GSF_UNKNOWN_PARAM_VALUE;
@@ -5257,7 +5262,7 @@ gsfGetMBParams(gsfRecords *rec, gsfMBParams *p, int *numArrays)
             /* Get the number of array pairs from each sonar alignment parameter */
             *numArrays = gsfNumberParams(rec->process_parameters.param[i]);
         }
-        else if (strstr(rec->process_parameters.param[i], "PITCH_TO_APPLY"))
+        else if (strncmp(rec->process_parameters.param[i], "PITCH_TO_APPLY", strlen("PITCH_TO_APPLY")) == 0)
         {
             p->to_apply.pitch_bias[0] = GSF_UNKNOWN_PARAM_VALUE;
             p->to_apply.pitch_bias[1] = GSF_UNKNOWN_PARAM_VALUE;
@@ -5270,7 +5275,7 @@ gsfGetMBParams(gsfRecords *rec, gsfMBParams *p, int *numArrays)
             /* Get the number of array pairs from each sonar alignment parameter */
             *numArrays = gsfNumberParams(rec->process_parameters.param[i]);
         }
-        else if (strstr(rec->process_parameters.param[i], "ROLL_TO_APPLY"))
+        else if (strncmp(rec->process_parameters.param[i], "ROLL_TO_APPLY", strlen("ROLL_TO_APPLY")) == 0)
         {
             p->to_apply.roll_bias[0] = GSF_UNKNOWN_PARAM_VALUE;
             p->to_apply.roll_bias[1] = GSF_UNKNOWN_PARAM_VALUE;
@@ -5283,7 +5288,7 @@ gsfGetMBParams(gsfRecords *rec, gsfMBParams *p, int *numArrays)
             /* Get the number of array pairs from each sonar alignment parameter */
             *numArrays = gsfNumberParams(rec->process_parameters.param[i]);
         }
-        else if (strstr(rec->process_parameters.param[i], "GYRO_TO_APPLY"))
+        else if (strncmp(rec->process_parameters.param[i], "GYRO_TO_APPLY", strlen("GYRO_TO_APPLY")) == 0)
         {
             p->to_apply.gyro_bias[0] = GSF_UNKNOWN_PARAM_VALUE;
             p->to_apply.gyro_bias[1] = GSF_UNKNOWN_PARAM_VALUE;
@@ -5301,7 +5306,7 @@ gsfGetMBParams(gsfRecords *rec, gsfMBParams *p, int *numArrays)
          * contains an x,y,z triplet which defines the location on the
          * vessel to which the latitude and longitude are relative.
          */
-        else if (strstr(rec->process_parameters.param[i], "POSITION_OFFSET_TO_APPLY"))
+        else if (strncmp(rec->process_parameters.param[i], "POSITION_OFFSET_TO_APPLY", strlen("POSITION_OFFSET_TO_APPLY")) == 0)
         {
             p->to_apply.position_x_offset = GSF_UNKNOWN_PARAM_VALUE;
             p->to_apply.position_y_offset = GSF_UNKNOWN_PARAM_VALUE;
@@ -5314,7 +5319,7 @@ gsfGetMBParams(gsfRecords *rec, gsfMBParams *p, int *numArrays)
                     &p->to_apply.position_z_offset);
             }
         }
-        else if (strstr(rec->process_parameters.param[i], "TRANSDUCER_OFFSET_TO_APPLY"))
+        else if (strncmp(rec->process_parameters.param[i], "TRANSDUCER_OFFSET_TO_APPLY", strlen("TRANSDUCER_OFFSET_TO_APPLY")) == 0)
         {
             p->to_apply.transducer_x_offset[0] = GSF_UNKNOWN_PARAM_VALUE;
             p->to_apply.transducer_y_offset[0] = GSF_UNKNOWN_PARAM_VALUE;
@@ -5333,7 +5338,7 @@ gsfGetMBParams(gsfRecords *rec, gsfMBParams *p, int *numArrays)
                     &p->to_apply.transducer_z_offset[1]);
             }
         }
-        else if (strstr(rec->process_parameters.param[i], "MRU_PITCH_TO_APPLY"))
+        else if (strncmp(rec->process_parameters.param[i], "MRU_PITCH_TO_APPLY", strlen("MRU_PITCH_TO_APPLY")) == 0)
         {
             p->to_apply.mru_pitch_bias = GSF_UNKNOWN_PARAM_VALUE;
             if (!strstr(rec->process_parameters.param[i], GSF_UNKNOWN_PARAM_TEXT))
@@ -5342,7 +5347,7 @@ gsfGetMBParams(gsfRecords *rec, gsfMBParams *p, int *numArrays)
                     &p->to_apply.mru_pitch_bias);
             }
         }
-        else if (strstr(rec->process_parameters.param[i], "MRU_ROLL_TO_APPLY"))
+        else if (strncmp(rec->process_parameters.param[i], "MRU_ROLL_TO_APPLY", strlen("MRU_ROLL_TO_APPLY")) == 0)
         {
             p->to_apply.mru_roll_bias = GSF_UNKNOWN_PARAM_VALUE;
             if (!strstr(rec->process_parameters.param[i], GSF_UNKNOWN_PARAM_TEXT))
@@ -5351,7 +5356,7 @@ gsfGetMBParams(gsfRecords *rec, gsfMBParams *p, int *numArrays)
                     &p->to_apply.mru_roll_bias);
             }
         }
-        else if (strstr(rec->process_parameters.param[i], "MRU_HEADING_TO_APPLY"))
+        else if (strncmp(rec->process_parameters.param[i], "MRU_HEADING_TO_APPLY", strlen("MRU_HEADING_TO_APPLY")) == 0)
         {
             p->to_apply.mru_heading_bias = GSF_UNKNOWN_PARAM_VALUE;
             if (!strstr(rec->process_parameters.param[i], GSF_UNKNOWN_PARAM_TEXT))
@@ -5360,7 +5365,7 @@ gsfGetMBParams(gsfRecords *rec, gsfMBParams *p, int *numArrays)
                     &p->to_apply.mru_heading_bias);
             }
         }
-        else if (strstr(rec->process_parameters.param[i], "MRU_OFFSET_TO_APPLY"))
+        else if (strncmp(rec->process_parameters.param[i], "MRU_OFFSET_TO_APPLY", strlen("MRU_OFFSET_TO_APPLY")) == 0)
         {
             p->to_apply.mru_x_offset = GSF_UNKNOWN_PARAM_VALUE;
             p->to_apply.mru_y_offset = GSF_UNKNOWN_PARAM_VALUE;
@@ -5373,7 +5378,7 @@ gsfGetMBParams(gsfRecords *rec, gsfMBParams *p, int *numArrays)
                     &p->to_apply.mru_z_offset);
             }
         }
-        else if (strstr(rec->process_parameters.param[i], "CENTER_OF_ROTATION_OFFSET_TO_APPLY"))
+        else if (strncmp(rec->process_parameters.param[i], "CENTER_OF_ROTATION_OFFSET_TO_APPLY", strlen("CENTER_OF_ROTATION_OFFSET_TO_APPLY")) == 0)
         {
             p->to_apply.center_of_rotation_x_offset = GSF_UNKNOWN_PARAM_VALUE;
             p->to_apply.center_of_rotation_y_offset = GSF_UNKNOWN_PARAM_VALUE;
@@ -5386,7 +5391,7 @@ gsfGetMBParams(gsfRecords *rec, gsfMBParams *p, int *numArrays)
                     &p->to_apply.center_of_rotation_z_offset);
             }
         }
-        else if (strstr(rec->process_parameters.param[i], "APPLIED_DRAFT"))
+        else if (strncmp(rec->process_parameters.param[i], "APPLIED_DRAFT", strlen("APPLIED_DRAFT")) == 0)
         {
             p->applied.draft[0] = GSF_UNKNOWN_PARAM_VALUE;
             p->applied.draft[1] = GSF_UNKNOWN_PARAM_VALUE;
@@ -5399,7 +5404,7 @@ gsfGetMBParams(gsfRecords *rec, gsfMBParams *p, int *numArrays)
             /* Get the number of array pairs from each sonar alignment parameter */
             *numArrays = gsfNumberParams(rec->process_parameters.param[i]);
         }
-        else if (strstr(rec->process_parameters.param[i], "APPLIED_PITCH_BIAS"))
+        else if (strncmp(rec->process_parameters.param[i], "APPLIED_PITCH_BIAS", strlen("APPLIED_PITCH_BIAS")) == 0)
         {
             p->applied.pitch_bias[0] = GSF_UNKNOWN_PARAM_VALUE;
             p->applied.pitch_bias[1] = GSF_UNKNOWN_PARAM_VALUE;
@@ -5412,7 +5417,7 @@ gsfGetMBParams(gsfRecords *rec, gsfMBParams *p, int *numArrays)
             /* Get the number of array pairs from each sonar alignment parameter */
             *numArrays = gsfNumberParams(rec->process_parameters.param[i]);
         }
-        else if (strstr(rec->process_parameters.param[i], "APPLIED_ROLL_BIAS"))
+        else if (strncmp(rec->process_parameters.param[i], "APPLIED_ROLL_BIAS", strlen("APPLIED_ROLL_BIAS")) == 0)
         {
             p->applied.roll_bias[0] = GSF_UNKNOWN_PARAM_VALUE;
             p->applied.roll_bias[1] = GSF_UNKNOWN_PARAM_VALUE;
@@ -5425,7 +5430,7 @@ gsfGetMBParams(gsfRecords *rec, gsfMBParams *p, int *numArrays)
             /* Get the number of array pairs from each sonar alignment parameter */
             *numArrays = gsfNumberParams(rec->process_parameters.param[i]);
         }
-        else if (strstr(rec->process_parameters.param[i], "APPLIED_GYRO_BIAS"))
+        else if (strncmp(rec->process_parameters.param[i], "APPLIED_GYRO_BIAS", strlen("APPLIED_GYRO_BIAS")) == 0)
         {
             p->applied.gyro_bias[0] = GSF_UNKNOWN_PARAM_VALUE;
             p->applied.gyro_bias[1] = GSF_UNKNOWN_PARAM_VALUE;
@@ -5441,8 +5446,8 @@ gsfGetMBParams(gsfRecords *rec, gsfMBParams *p, int *numArrays)
         /* The APPLIED_POSITION_OFFSET parameter defines the x,y,z position in
          * ship coordinates to which the lat lons are relative.
          */
-        else if (strstr(rec->process_parameters.param[i], "APPLIED_POSITION_OFFSET"))
-        {
+         else if (strncmp(rec->process_parameters.param[i], "APPLIED_POSITION_OFFSET", strlen("APPLIED_POSITION_OFFSET")) == 0)
+         {
             p->applied.position_x_offset = GSF_UNKNOWN_PARAM_VALUE;
             p->applied.position_y_offset = GSF_UNKNOWN_PARAM_VALUE;
             p->applied.position_z_offset = GSF_UNKNOWN_PARAM_VALUE;
@@ -5453,12 +5458,12 @@ gsfGetMBParams(gsfRecords *rec, gsfMBParams *p, int *numArrays)
                     &p->applied.position_y_offset,
                     &p->applied.position_z_offset);
             }
-        }
+         }
         /* The APPLIED_TRANSDUCER_OFFSET parameter defines the x,y,z offsets
          * in ship coordinates to which have been applied to refer the x,y,z
          * beam values to the ship reference point.
          */
-        else if (strstr(rec->process_parameters.param[i], "APPLIED_TRANSDUCER_OFFSET"))
+        else if (strncmp(rec->process_parameters.param[i], "APPLIED_TRANSDUCER_OFFSET", strlen("APPLIED_TRANSDUCER_OFFSET")) == 0)
         {
             p->applied.transducer_x_offset[0] = GSF_UNKNOWN_PARAM_VALUE;
             p->applied.transducer_y_offset[0] = GSF_UNKNOWN_PARAM_VALUE;
@@ -5477,7 +5482,7 @@ gsfGetMBParams(gsfRecords *rec, gsfMBParams *p, int *numArrays)
                     &p->applied.transducer_z_offset[1]);
             }
         }
-        else if (strstr(rec->process_parameters.param[i], "APPLIED_MRU_PITCH"))
+        else if (strncmp(rec->process_parameters.param[i], "APPLIED_MRU_PITCH", strlen("APPLIED_MRU_PITCH")) == 0)
         {
             p->applied.mru_pitch_bias = GSF_UNKNOWN_PARAM_VALUE;
             if (!strstr(rec->process_parameters.param[i], GSF_UNKNOWN_PARAM_TEXT))
@@ -5486,7 +5491,7 @@ gsfGetMBParams(gsfRecords *rec, gsfMBParams *p, int *numArrays)
                     &p->applied.mru_pitch_bias);
             }
         }
-        else if (strstr(rec->process_parameters.param[i], "APPLIED_MRU_ROLL"))
+        else if (strncmp(rec->process_parameters.param[i], "APPLIED_MRU_ROLL", strlen("APPLIED_MRU_ROLL")) == 0)
         {
             p->applied.mru_roll_bias = GSF_UNKNOWN_PARAM_VALUE;
             if (!strstr(rec->process_parameters.param[i], GSF_UNKNOWN_PARAM_TEXT))
@@ -5495,7 +5500,7 @@ gsfGetMBParams(gsfRecords *rec, gsfMBParams *p, int *numArrays)
                     &p->applied.mru_roll_bias);
             }
         }
-        else if (strstr(rec->process_parameters.param[i], "APPLIED_MRU_HEADING"))
+        else if (strncmp(rec->process_parameters.param[i], "APPLIED_MRU_HEADING", strlen("APPLIED_MRU_HEADING")) == 0)
         {
             p->applied.mru_heading_bias = GSF_UNKNOWN_PARAM_VALUE;
             if (!strstr(rec->process_parameters.param[i], GSF_UNKNOWN_PARAM_TEXT))
@@ -5504,7 +5509,7 @@ gsfGetMBParams(gsfRecords *rec, gsfMBParams *p, int *numArrays)
                     &p->applied.mru_heading_bias);
             }
         }
-        else if (strstr(rec->process_parameters.param[i], "APPLIED_MRU_OFFSET"))
+        else if (strncmp(rec->process_parameters.param[i], "APPLIED_MRU_OFFSET", strlen("APPLIED_MRU_OFFSET")) == 0)
         {
             p->applied.mru_x_offset = GSF_UNKNOWN_PARAM_VALUE;
             p->applied.mru_y_offset = GSF_UNKNOWN_PARAM_VALUE;
@@ -5517,7 +5522,7 @@ gsfGetMBParams(gsfRecords *rec, gsfMBParams *p, int *numArrays)
                     &p->applied.mru_z_offset);
             }
         }
-        else if (strstr(rec->process_parameters.param[i], "APPLIED_CENTER_OF_ROTATION_OFFSET"))
+        else if (strncmp(rec->process_parameters.param[i], "APPLIED_CENTER_OF_ROTATION_OFFSET", strlen("APPLIED_CENTER_OF_ROTATION_OFFSET")) == 0)
         {
             p->applied.center_of_rotation_x_offset = GSF_UNKNOWN_PARAM_VALUE;
             p->applied.center_of_rotation_y_offset = GSF_UNKNOWN_PARAM_VALUE;
@@ -5533,7 +5538,7 @@ gsfGetMBParams(gsfRecords *rec, gsfMBParams *p, int *numArrays)
         /* The horizontal datum parameter defines the elipsoid to which
          * the latitude and longitude values are referenced.
          */
-        else if (strstr(rec->process_parameters.param[i], "GEOID"))
+        else if (strncmp(rec->process_parameters.param[i], "GEOID", strlen("GEOID")) == 0)
         {
             sscanf (rec->process_parameters.param[i], "GEOID=%s", str);
             if (strstr(str, "WGS-84"))
@@ -5549,56 +5554,56 @@ gsfGetMBParams(gsfRecords *rec, gsfMBParams *p, int *numArrays)
         /* The TIDAL_DATUM paremeter defines the reference datum for tide
          * corrections
          */
-        else if (strstr(rec->process_parameters.param[i], "TIDAL_DATUM"))
+        else if (strncmp(rec->process_parameters.param[i], "TIDAL_DATUM", strlen("TIDAL_DATUM")) == 0)
         {
             sscanf (rec->process_parameters.param[i], "TIDAL_DATUM=%s",
                 str);
 
-            if (strstr(str, "MLLW"))
+            if (strcmp(str, "MLLW") == 0)
             {
                 p->vertical_datum = GSF_V_DATUM_MLLW;
             }
-            else if (strstr(str, "MLW"))
+            else if (strcmp(str, "MLW") == 0)
             {
                 p->vertical_datum = GSF_V_DATUM_MLW;
             }
-            else if (strstr(str, "ALAT"))
+            else if (strcmp(str, "ALAT") == 0)
             {
                 p->vertical_datum = GSF_V_DATUM_ALAT;
             }
-            else if (strstr(str, "ESLW"))
+            else if (strcmp(str, "ESLW") == 0)
             {
                 p->vertical_datum = GSF_V_DATUM_ESLW;
             }
-            else if (strstr(str, "ISLW"))
+            else if (strcmp(str, "ISLW") == 0)
             {
                 p->vertical_datum = GSF_V_DATUM_ISLW;
             }
-            else if (strstr(str, "LAT"))
+            else if (strcmp(str, "LAT") == 0)
             {
                 p->vertical_datum = GSF_V_DATUM_LAT;
             }
-            else if (strstr(str, "LLW"))
+            else if (strcmp(str, "LLW") == 0)
             {
                 p->vertical_datum = GSF_V_DATUM_LLW;
             }
-            else if (strstr(str, "LNLW"))
+            else if (strcmp(str, "LNLW") == 0)
             {
                 p->vertical_datum = GSF_V_DATUM_LNLW;
             }
-            else if (strstr(str, "LWD"))
+            else if (strcmp(str, "LWD") == 0)
             {
                 p->vertical_datum = GSF_V_DATUM_LWD;
             }
-            else if (strstr(str, "MLHW"))
+            else if (strcmp(str, "MLHW") == 0)
             {
                 p->vertical_datum = GSF_V_DATUM_MLHW;
             }
-            else if (strstr(str, "MLLWS"))
+            else if (strcmp(str, "MLLWS") == 0)
             {
                 p->vertical_datum = GSF_V_DATUM_MLLWS;
             }
-            else if (strstr(str, "MLWN"))
+            else if (strcmp(str, "MLWN") == 0)
             {
                 p->vertical_datum = GSF_V_DATUM_MLWN;
             }

@@ -142,7 +142,7 @@ static int      EncodeSASSSpecific(unsigned char *sptr, gsfSensorSpecific * sdat
 
 static int      EncodeCmpSassSpecific(unsigned char *sptr, gsfSensorSpecific * sdata);
 
-static int      EncodeSeaMapSpecific(unsigned char *sptr, gsfSensorSpecific * sdata);
+static int      EncodeSeaMapSpecific(unsigned char *sptr, gsfSensorSpecific * sdata, GSF_FILE_TABLE *ft);
 static int      EncodeSeaBatSpecific(unsigned char *sptr, gsfSensorSpecific * sdata);
 static int      EncodeEchotracSpecific(unsigned char *sptr, gsfSBSensorSpecific * sdata);
 static int      EncodeMGD77Specific(unsigned char *sptr, gsfSBSensorSpecific * sdata);
@@ -1469,7 +1469,7 @@ gsfEncodeSwathBathymetryPing(unsigned char *sptr, gsfSwathBathyPing * ping, GSF_
             break;
 
         case (GSF_SWATH_BATHY_SUBRECORD_SEAMAP_SPECIFIC):
-            sensor_size = EncodeSeaMapSpecific(p, &ping->sensor_data);
+            sensor_size = EncodeSeaMapSpecific(p, &ping->sensor_data, ft);
             break;
 
         case (GSF_SWATH_BATHY_SUBRECORD_SEABAT_SPECIFIC):
@@ -2936,7 +2936,7 @@ EncodeTypeIIISeaBeamSpecific(unsigned char *sptr, gsfSensorSpecific * sdata)
  ********************************************************************/
 
 static int
-EncodeSeaMapSpecific(unsigned char *sptr, gsfSensorSpecific * sdata)
+EncodeSeaMapSpecific(unsigned char *sptr, gsfSensorSpecific * sdata, GSF_FILE_TABLE *ft)
 {
     unsigned char  *p = sptr;
     gsfuShort       stemp;
@@ -3048,7 +3048,7 @@ EncodeSeaMapSpecific(unsigned char *sptr, gsfSensorSpecific * sdata)
 
     dtemp = (sdata->gsfSeamapSpecific.pressureDepth * 10.0);
     if (dtemp < 0.0)
-    {
+    {		    
         dtemp -= 0.501;
     }
     else
@@ -3057,6 +3057,13 @@ EncodeSeaMapSpecific(unsigned char *sptr, gsfSensorSpecific * sdata)
     }
     stemp = htons((gsfuShort) dtemp);
     memcpy(p, &stemp, 2);
+    /* JSB 11/08/2007; looks like the pointer increment for this field in the encode processing has been missing 
+     *  since this code block was first written in GSFv1.03 
+     */
+    if ((ft->major_version_number > 2) || ((ft->major_version_number == 2) && (ft->minor_version_number > 7)))
+    {
+        p += 2;    
+    }
 
     dtemp = (sdata->gsfSeamapSpecific.altitude * 10.0);
     if (dtemp < 0.0)

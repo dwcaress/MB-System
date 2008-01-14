@@ -107,6 +107,9 @@
  * jsb 07-24-07  GSFv2.07 includes some additional parameters in the imagery sensor specific structure
  *                to support calculating back to the exact original intensity values received from the
  *                sonar.
+ * jsb 11-06-07  Updates to utilize the subrecord size in termining the field size for the array subrecords
+ *                that support more than one field size.  Also replaced use of strstr with strcmp in gsfGetMBParams
+ *                to resolve potential problem where one keyword name may be fully contained in another.
  *
  * Classification : Unclassified
  *
@@ -142,7 +145,7 @@ extern          "C"
 #endif
 
 /* Define this version of the GSF library */
-#define GSF_VERSION       "GSF-v02.07"
+#define GSF_VERSION       "GSF-v02.08"
 
 /* Define largest ever expected record size */
 #define GSF_MAX_RECORD_SIZE    262144
