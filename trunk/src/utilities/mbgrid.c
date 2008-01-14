@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrid.c	5/2/94
- *    $Id: mbgrid.c,v 5.40 2007-10-17 20:33:25 caress Exp $
+ *    $Id: mbgrid.c,v 5.41 2008-01-14 18:27:01 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 2000, 2002, 2003, 2006, 2007 by
  *    David W. Caress (caress@mbari.org)
@@ -38,6 +38,10 @@
  * Rererewrite:	January 2, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.40  2007/10/17 20:33:25  caress
+ * Release 5.1.1beta11
+ * Added new handling of datalists.
+ *
  * Revision 5.39  2007/10/08 16:48:07  caress
  * State of the code on 8 October 2007.
  *
@@ -437,7 +441,7 @@ double mbgrid_erf();
 FILE	*outfp;
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbgrid.c,v 5.40 2007-10-17 20:33:25 caress Exp $";
+static char rcs_id[] = "$Id: mbgrid.c,v 5.41 2008-01-14 18:27:01 caress Exp $";
 static char program_name[] = "mbgrid";
 static char help_message[] =  "mbgrid is an utility used to grid bathymetry, amplitude, or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbgrid -Ifilelist -Oroot \
@@ -2723,6 +2727,7 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 	nbinset = 0;
 	nbinzero = 0;
 	nbinspline = 0;
+	nbinbackground = 0;
 	for (i=0;i<gxdim;i++)
 		for (j=0;j<gydim;j++)
 			{
@@ -3319,6 +3324,7 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 	nbinset = 0;
 	nbinzero = 0;
 	nbinspline = 0;
+	nbinbackground = 0;
 	for (i=0;i<gxdim;i++)
 		for (j=0;j<gydim;j++)
 			{
