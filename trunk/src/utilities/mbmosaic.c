@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmosaic.c	2/10/97
- *    $Id: mbmosaic.c,v 5.25 2007-10-08 16:48:07 caress Exp $
+ *    $Id: mbmosaic.c,v 5.26 2008-01-14 18:35:49 caress Exp $
  *
  *    Copyright (c) 1997, 2000, 2002, 2003, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	February 10, 1997
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.25  2007/10/08 16:48:07  caress
+ * State of the code on 8 October 2007.
+ *
  * Revision 5.24  2006/09/11 18:55:54  caress
  * Changes during Western Flyer and Thomas Thompson cruises, August-September
  * 2006.
@@ -236,7 +239,7 @@ int mbmosaic_get_priorities(
 		int	*error);
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbmosaic.c,v 5.25 2007-10-08 16:48:07 caress Exp $";
+static char rcs_id[] = "$Id: mbmosaic.c,v 5.26 2008-01-14 18:35:49 caress Exp $";
 static char program_name[] = "mbmosaic";
 static char help_message[] =  "mbmosaic is an utility used to mosaic amplitude or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered by multibeam swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbmosaic -Ifilelist -Oroot \
@@ -319,8 +322,12 @@ main (int argc, char **argv)
 	double	*priority_angle_angle = NULL;
 	double	*priority_angle_priority = NULL;
 	double	altitude_default = 1000.0;
+	int	pstatus;
+	char	path[MB_PATH_MAXLINE];
+	char	ppath[MB_PATH_MAXLINE];
 	char	ifile[MB_PATH_MAXLINE];
 	char	ofile[MB_PATH_MAXLINE];
+	char	dfile[MB_PATH_MAXLINE];
 	char	plot_cmd[MB_COMMENT_MAXLINE];
 	int	plot_status;
 	int	use_beams = MB_NO;
@@ -427,7 +434,7 @@ main (int argc, char **argv)
 	float	NaN;
 
 	/* other variables */
-	FILE	*fp;
+	FILE	*dfp, *fp;
 	char	buffer[MB_PATH_MAXLINE], *result;
 	int	nscan;
 	double	norm_weight;
@@ -1356,6 +1363,16 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 			sigma[kgrid] = 0.0;
 			maxpriority[kgrid] = 0.0;
 			}
+		
+	/* open datalist file for list of all files that contribute to the grid */
+	strcpy(dfile,fileroot);
+	strcat(dfile,".mb-1");
+	if ((dfp = fopen(dfile,"w")) == NULL)
+		{
+		error = MB_ERROR_OPEN_FAIL;
+		fprintf(outfp,"\nUnable to open datalist file: %s\n",
+			dfile);
+		}
 
 	/***** do first pass gridding *****/
 	if (grid_mode == MBMOSAIC_SINGLE_BEST
@@ -1375,8 +1392,8 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 		mb_memory_clear(verbose, &error);
 		exit(error);
 		}
-	while ((status = mb_datalist_read(verbose,datalist,
-			file,&format,&file_weight,&error))
+	while ((status = mb_datalist_read2(verbose,datalist,
+			&pstatus,path,ppath,&format,&file_weight,&error))
 			== MB_SUCCESS)
 		{
 		ndatafile = 0;
@@ -1384,6 +1401,12 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 		/* if format > 0 then input is multibeam file */
 		if (format > 0 && file[0] != '#')
 		{
+		/* apply pstatus */
+		if (pstatus == MB_PROCESSED_USE)
+			strcpy(file, ppath);
+		else
+			strcpy(file, path);
+
 		/* check for mbinfo file - get file bounds if possible */
 		status = mb_check_info(verbose, file, lonflip, bounds, 
 				&file_in_bounds, &error);
@@ -1854,6 +1877,18 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 		if (verbose > 0 || file_in_bounds == MB_YES)
 			fprintf(outfp,"%u data points processed in %s\n",
 				ndatafile,file);
+				
+		/* add to datalist if data actually contributed */
+		if (grid_mode != MBMOSAIC_AVERAGE 
+			&& ndatafile > 0 && dfp != NULL)
+			{
+			if (pstatus == MB_PROCESSED_USE)
+				fprintf(dfp, "P:");
+			else
+				fprintf(dfp, "R:");
+			fprintf(dfp, "%s %d %f\n", path, format, file_weight);
+			fflush(dfp);
+			}
 		} /* end if (format > 0) */
 
 		}
@@ -1894,8 +1929,8 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 		mb_memory_clear(verbose, &error);
 		exit(error);
 		}
-	while ((status = mb_datalist_read(verbose,datalist,
-			file,&format,&file_weight,&error))
+	while ((status = mb_datalist_read2(verbose,datalist,
+			&pstatus,path,ppath,&format,&file_weight,&error))
 			== MB_SUCCESS)
 		{
 		ndatafile = 0;
@@ -1903,6 +1938,12 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 		/* if format > 0 then input is multibeam file */
 		if (format > 0 && file[0] != '#')
 		{
+		/* apply pstatus */
+		if (pstatus == MB_PROCESSED_USE)
+			strcpy(file, ppath);
+		else
+			strcpy(file, path);
+
 		/* check for mbinfo file - get file bounds if possible */
 		status = mb_check_info(verbose, file, lonflip, bounds, 
 				&file_in_bounds, &error);
@@ -2394,6 +2435,17 @@ kgrid,norm_weight,grid[kgrid],norm[kgrid],cnt[kgrid]);*/
 		if (verbose > 0 || file_in_bounds == MB_YES)
 			fprintf(outfp,"%u data points processed in %s\n",
 				ndatafile,file);
+				
+		/* add to datalist if data actually contributed */
+		if (ndatafile > 0 && dfp != NULL)
+			{
+			if (pstatus == MB_PROCESSED_USE)
+				fprintf(dfp, "P:");
+			else
+				fprintf(dfp, "R:");
+			fprintf(dfp, "%s %d %f\n", path, format, file_weight);
+			fflush(dfp);
+			}
 		} /* end if (format > 0) */
 
 		}
@@ -2404,6 +2456,10 @@ kgrid,norm_weight,grid[kgrid],norm[kgrid],cnt[kgrid]);*/
 
 	}
 	/***** end of second pass gridding *****/
+				
+	/* close datalist if necessary */
+	if (dfp != NULL)
+		fclose(dfp);
 
 	/* now loop over all points in the output grid */
 	if (verbose >= 1)
