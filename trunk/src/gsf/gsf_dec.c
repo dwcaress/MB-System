@@ -148,7 +148,7 @@ static int      DecodeSASSSpecific(gsfSensorSpecific * sdata, unsigned char *spt
 
 static int      DecodeCmpSassSpecific(gsfSensorSpecific * sdata, unsigned char *sptr);
 
-static int      DecodeSeaMapSpecific(gsfSensorSpecific * sdata, unsigned char *sptr);
+static int      DecodeSeaMapSpecific(gsfSensorSpecific * sdata, unsigned char *sptr, GSF_FILE_TABLE *ft);
 static int      DecodeSeaBatSpecific(gsfSensorSpecific * sdata, unsigned char *sptr);
 static int      DecodeEchotracSpecific(gsfSBSensorSpecific * sdata, unsigned char *sptr);
 static int      DecodeMGD77Specific(gsfSBSensorSpecific * sdata, unsigned char *sptr);
@@ -834,6 +834,13 @@ gsfDecodeSwathBathymetryPing(gsfSwathBathyPing *ping, unsigned char *sptr, GSF_F
     bytes = p - sptr;
     while ((record_size - bytes) > 4)
     {
+        int bytes_per_value;
+        int field_size;
+        int next_id;
+        int next_size;
+        int sr_size;
+        int count;
+
         /* First four byte integer in subrecord contains the subrecord
         *  size and subrecord identifier.
         */
@@ -842,6 +849,76 @@ gsfDecodeSwathBathymetryPing(gsfSwathBathyPing *ping, unsigned char *sptr, GSF_F
         ltemp = ntohl(ltemp);
         subrecord_id = (ltemp & 0xFF000000) >> 24;
         subrecord_size = ltemp & 0x00FFFFFF;
+        
+        bytes_per_value = subrecord_size / (int) ping->number_beams;
+        switch (bytes_per_value) 
+        {
+            case 1:
+                field_size = GSF_FIELD_SIZE_ONE;
+                break;    
+            case 2:
+                field_size = GSF_FIELD_SIZE_TWO;
+                break;    
+            case 4:
+                field_size = GSF_FIELD_SIZE_FOUR;
+                break;    
+            default:
+                field_size = (ft->rec.mb_ping.scaleFactors.scaleTable[subrecord_id - 1].compressionFlag & 0xF0);
+                break;
+        }
+
+        /* Verification check on the next sub record id and size */
+        sr_size = subrecord_size;
+        count = 0;
+        while (((record_size - bytes - sr_size) > 4) && (count <= 3))
+        {
+            int test_sizes[3] = {1, 2, 4};
+            int test_fs;
+
+            memcpy(&ltemp, (p + sr_size), 4);
+            ltemp = ntohl(ltemp);
+            next_id = (ltemp & 0xFF000000) >> 24;
+            next_size = ltemp & 0x00FFFFFF;
+
+            /* The test on valid IDs is limited to array sub records as these are effected by the field_size, whereas
+             *  the sensor specific subrecords are not dependent on the field size parameter.
+             */
+            if ( (next_id > 0) && (next_id <= GSF_MAX_PING_ARRAY_SUBRECORDS) &&
+                ((next_size == ping->number_beams) || (next_size == 2 * ping->number_beams) || (next_size == 4 * ping->number_beams)))
+            {
+                bytes_per_value = sr_size / (int) ping->number_beams;
+                switch (bytes_per_value) 
+                {
+                    case 1:
+                        field_size = GSF_FIELD_SIZE_ONE;
+                        break;
+                    case 2:
+                        field_size = GSF_FIELD_SIZE_TWO;
+                        break;
+                    case 4:
+                        field_size = GSF_FIELD_SIZE_FOUR;
+                        break;
+                    default:
+                        field_size = (ft->rec.mb_ping.scaleFactors.scaleTable[subrecord_id - 1].compressionFlag & 0xF0);
+                        break;
+                }
+                break;
+            }
+
+            test_fs = test_sizes[count];
+            count += 1;
+            sr_size = (int) ping->number_beams * test_fs;
+        }
+
+        /* Clear the high order 4 bits of the compression flag field, then set these bits to specify the field size we have just decoded. 
+         *  The field size is determined above just for the beam-array subcords. (I.E. not for the scale factor or sensor specific subrecords.) 
+         */
+        if ((subrecord_id > 0) && (subrecord_id <= GSF_MAX_PING_ARRAY_SUBRECORDS))
+        {
+            ft->rec.mb_ping.scaleFactors.scaleTable[subrecord_id - 1].compressionFlag &= 0x0F;
+            ft->rec.mb_ping.scaleFactors.scaleTable[subrecord_id - 1].compressionFlag |= field_size;
+            ping->scaleFactors.scaleTable[subrecord_id - 1].compressionFlag = ft->rec.mb_ping.scaleFactors.scaleTable[subrecord_id - 1].compressionFlag;
+        }
 
         switch (subrecord_id)
         {
@@ -882,10 +959,10 @@ gsfDecodeSwathBathymetryPing(gsfSwathBathyPing *ping, unsigned char *sptr, GSF_F
                         }
                     }
                 }
-                break;
+                break; 
 
             case (GSF_SWATH_BATHY_SUBRECORD_DEPTH_ARRAY):
-                switch (ft->rec.mb_ping.scaleFactors.scaleTable[GSF_SWATH_BATHY_SUBRECORD_DEPTH_ARRAY - 1].compressionFlag & 0xF0)
+                switch (field_size)
                 {
                     default:
                     case GSF_FIELD_SIZE_DEFAULT:
@@ -906,7 +983,7 @@ gsfDecodeSwathBathymetryPing(gsfSwathBathyPing *ping, unsigned char *sptr, GSF_F
                 break;
 
             case (GSF_SWATH_BATHY_SUBRECORD_NOMINAL_DEPTH_ARRAY):
-                switch (ft->rec.mb_ping.scaleFactors.scaleTable[GSF_SWATH_BATHY_SUBRECORD_NOMINAL_DEPTH_ARRAY - 1].compressionFlag & 0xF0)
+                switch (field_size)
                 {
                     default:
                     case GSF_FIELD_SIZE_DEFAULT:
@@ -927,7 +1004,7 @@ gsfDecodeSwathBathymetryPing(gsfSwathBathyPing *ping, unsigned char *sptr, GSF_F
                 break;
 
             case (GSF_SWATH_BATHY_SUBRECORD_ACROSS_TRACK_ARRAY):
-                switch (ft->rec.mb_ping.scaleFactors.scaleTable[GSF_SWATH_BATHY_SUBRECORD_ACROSS_TRACK_ARRAY - 1].compressionFlag & 0xF0)
+                switch (field_size)
                 {
                     default:
                     case GSF_FIELD_SIZE_DEFAULT:
@@ -948,7 +1025,7 @@ gsfDecodeSwathBathymetryPing(gsfSwathBathyPing *ping, unsigned char *sptr, GSF_F
                 break;
 
             case (GSF_SWATH_BATHY_SUBRECORD_ALONG_TRACK_ARRAY):
-                switch (ft->rec.mb_ping.scaleFactors.scaleTable[GSF_SWATH_BATHY_SUBRECORD_ALONG_TRACK_ARRAY - 1].compressionFlag & 0xF0)
+                switch (field_size)
                 {
                     default:
                     case GSF_FIELD_SIZE_DEFAULT:
@@ -969,7 +1046,7 @@ gsfDecodeSwathBathymetryPing(gsfSwathBathyPing *ping, unsigned char *sptr, GSF_F
                 break;
 
             case (GSF_SWATH_BATHY_SUBRECORD_TRAVEL_TIME_ARRAY):
-                switch (ft->rec.mb_ping.scaleFactors.scaleTable[GSF_SWATH_BATHY_SUBRECORD_TRAVEL_TIME_ARRAY - 1].compressionFlag & 0xF0)
+                switch (field_size)
                 {
                     default:
                     case GSF_FIELD_SIZE_DEFAULT:
@@ -1001,7 +1078,7 @@ gsfDecodeSwathBathymetryPing(gsfSwathBathyPing *ping, unsigned char *sptr, GSF_F
                 break;
 
             case (GSF_SWATH_BATHY_SUBRECORD_MEAN_CAL_AMPLITUDE_ARRAY):
-                switch (ft->rec.mb_ping.scaleFactors.scaleTable[GSF_SWATH_BATHY_SUBRECORD_MEAN_CAL_AMPLITUDE_ARRAY - 1].compressionFlag & 0xF0)
+                switch (field_size)
                 {
                     default:
                     case GSF_FIELD_SIZE_DEFAULT:
@@ -1022,7 +1099,7 @@ gsfDecodeSwathBathymetryPing(gsfSwathBathyPing *ping, unsigned char *sptr, GSF_F
                 break;
 
             case (GSF_SWATH_BATHY_SUBRECORD_MEAN_REL_AMPLITUDE_ARRAY):
-                switch (ft->rec.mb_ping.scaleFactors.scaleTable[GSF_SWATH_BATHY_SUBRECORD_MEAN_REL_AMPLITUDE_ARRAY - 1].compressionFlag & 0xF0)
+                switch (field_size)
                 {
                     default:
                     case GSF_FIELD_SIZE_DEFAULT:
@@ -1043,7 +1120,7 @@ gsfDecodeSwathBathymetryPing(gsfSwathBathyPing *ping, unsigned char *sptr, GSF_F
                 break;
 
             case (GSF_SWATH_BATHY_SUBRECORD_ECHO_WIDTH_ARRAY):
-                switch (ft->rec.mb_ping.scaleFactors.scaleTable[GSF_SWATH_BATHY_SUBRECORD_ECHO_WIDTH_ARRAY - 1].compressionFlag & 0xF0)
+                switch (field_size)
                 {
                     default:
                     case GSF_FIELD_SIZE_DEFAULT:
@@ -1185,7 +1262,6 @@ gsfDecodeSwathBathymetryPing(gsfSwathBathyPing *ping, unsigned char *sptr, GSF_F
                 break;
 
             case (GSF_SWATH_BATHY_SUBRECORD_SECTOR_NUMBER_ARRAY):
-
                 ret = DecodeFromByteToUnsignedShortArray(&ft->rec.mb_ping.sector_number, p, ping->number_beams,
                     &ft->rec.mb_ping.scaleFactors, GSF_SWATH_BATHY_SUBRECORD_SECTOR_NUMBER_ARRAY, handle);
                 if (ret < 0)
@@ -1276,7 +1352,7 @@ gsfDecodeSwathBathymetryPing(gsfSwathBathyPing *ping, unsigned char *sptr, GSF_F
                 break;
 
             case (GSF_SWATH_BATHY_SUBRECORD_SEAMAP_SPECIFIC):
-                p += DecodeSeaMapSpecific(&ping->sensor_data, p);
+                p += DecodeSeaMapSpecific(&ping->sensor_data, p, ft);
                 ping->sensor_id = GSF_SWATH_BATHY_SUBRECORD_SEAMAP_SPECIFIC;
                 break;
 
@@ -3017,7 +3093,7 @@ DecodeTypeIIISeaBeamSpecific(gsfSensorSpecific * sdata, unsigned char *sptr)
  ********************************************************************/
 
 static int
-DecodeSeaMapSpecific(gsfSensorSpecific * sdata, unsigned char *sptr)
+DecodeSeaMapSpecific(gsfSensorSpecific * sdata, unsigned char *sptr, GSF_FILE_TABLE *ft)
 {
     unsigned char  *p = sptr;
     gsfuShort       stemp;
@@ -3056,7 +3132,13 @@ DecodeSeaMapSpecific(gsfSensorSpecific * sdata, unsigned char *sptr)
 
     memcpy(&stemp, p, 2);
     sdata->gsfSeamapSpecific.pressureDepth = ((double) ntohs(stemp)) / 10.0;
-    p += 2;
+    /* JSB 11/08/2007; looks like the pointer increment for this field in the encode processing has been missing 
+     *  since this code block was first written in GSFv1.03 
+     */
+    if ((ft->major_version_number > 2) || ((ft->major_version_number == 2) && (ft->minor_version_number > 7)))
+    {
+        p += 2;
+    }
 
     memcpy(&stemp, p, 2);
     sdata->gsfSeamapSpecific.altitude = ((double) ntohs(stemp)) / 10.0;
