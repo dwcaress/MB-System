@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grdplot.perl	8/6/95
-#    $Id: mbm_grdplot.perl,v 5.28 2007-10-08 04:30:55 caress Exp $
+#    $Id: mbm_grdplot.perl,v 5.29 2008-01-14 17:47:41 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 2000, 2003 by 
 #    D. W. Caress (caress@mbari.org)
@@ -69,10 +69,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   October 19, 1994
 #
 # Version:
-#   $Id: mbm_grdplot.perl,v 5.28 2007-10-08 04:30:55 caress Exp $
+#   $Id: mbm_grdplot.perl,v 5.29 2008-01-14 17:47:41 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.28  2007/10/08 04:30:55  caress
+#   Added some large page definitions.
+#
 #   Revision 5.27  2007/03/02 20:34:26  caress
 #   Fixed plotting of ping/shot number annotation along navigation tracks.
 #
@@ -2581,7 +2584,7 @@ if ($gridprojected == 2 && $tick_info && $tick_info =~ /\S+\/\S+/)
 	($base_tick_x, $base_tick_y) = $tick_info =~ /(\S+)\/(\S+)/;
 	$base_tick_x = "$base_tick_x" . "\":Trace Number:\"";
 	$base_tick_y = "$base_tick_y" . "\":Time (sec):\"";
-	$axes = "$base_tick_x/$base_tick_y:.\"$tlabel\":WESn";
+	$axes = "$base_tick_x/$base_tick_y:.\"$tlabel\":WESN";
 	}
 elsif ($tick_info)
 	{
