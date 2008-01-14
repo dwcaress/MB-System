@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbprocess.c	3/31/93
- *    $Id: mbprocess.c,v 5.50 2007-10-31 18:41:42 caress Exp $
+ *    $Id: mbprocess.c,v 5.51 2008-01-14 18:37:12 caress Exp $
  *
  *    Copyright (c) 2000, 2002, 2003, 2004, 2007 by
  *    David W. Caress (caress@mbari.org)
@@ -36,6 +36,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.50  2007/10/31 18:41:42  caress
+ * Fixed handling of null sidescan values.
+ *
  * Revision 5.49  2007/10/08 16:48:07  caress
  * State of the code on 8 October 2007.
  *
@@ -271,7 +274,7 @@ int get_anglecorr(int verbose,
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbprocess.c,v 5.50 2007-10-31 18:41:42 caress Exp $";
+	static char rcs_id[] = "$Id: mbprocess.c,v 5.51 2008-01-14 18:37:12 caress Exp $";
 	static char program_name[] = "mbprocess";
 	static char help_message[] =  "mbprocess is a tool for processing swath sonar bathymetry data.\n\
 This program performs a number of functions, including:\n\
@@ -4180,175 +4183,175 @@ and mbedit edit save files.\n";
 			}
 
 	    strncpy(comment,"\0",MBP_FILENAMESIZE);
-	    sprintf(comment,"\nAmplitude Corrections:\n");
+	    sprintf(comment,"Amplitude Corrections:");
 	    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	    if (process.mbp_ampcorr_mode == MBP_AMPCORR_ON)
 		{
 		strncpy(comment,"\0",MBP_FILENAMESIZE);
-		sprintf(comment,"  Amplitude vs grazing angle corrections applied to amplitudes.\n");
+		sprintf(comment,"  Amplitude vs grazing angle corrections applied to amplitudes.");
 		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	    	strncpy(comment,"\0",MBP_FILENAMESIZE);
-		sprintf(comment,"  Amplitude correction file:      %s m\n", process.mbp_ampcorrfile);
+		sprintf(comment,"  Amplitude correction file:      %s m", process.mbp_ampcorrfile);
 		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		if (process.mbp_ampcorr_type == MBP_AMPCORR_SUBTRACTION)
 	    		{
 	    		strncpy(comment,"\0",MBP_FILENAMESIZE);
-			sprintf(comment,"  Amplitude correction by subtraction (dB scale)\n");
+			sprintf(comment,"  Amplitude correction by subtraction (dB scale)");
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			}
 		else
 	    		{
 	    		strncpy(comment,"\0",MBP_FILENAMESIZE);
-			sprintf(comment,"  Amplitude correction by division (linear scale)\n");
+			sprintf(comment,"  Amplitude correction by division (linear scale)");
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			}
 		if (process.mbp_ampcorr_symmetry == MBP_AMPCORR_SYMMETRIC)
 	    		{
 	    		strncpy(comment,"\0",MBP_FILENAMESIZE);
-			sprintf(comment,"  AVGA tables forced to be symmetric\n");
+			sprintf(comment,"  AVGA tables forced to be symmetric");
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			}
 		else
 	    		{
 	    		strncpy(comment,"\0",MBP_FILENAMESIZE);
-			sprintf(comment,"  AVGA tables allowed to be asymmetric\n");
+			sprintf(comment,"  AVGA tables allowed to be asymmetric");
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			}
 	    	strncpy(comment,"\0",MBP_FILENAMESIZE);
-		sprintf(comment,"  Reference grazing angle:       %f deg\n", process.mbp_ampcorr_angle);
+		sprintf(comment,"  Reference grazing angle:       %f deg", process.mbp_ampcorr_angle);
 		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		if (process.mbp_ampcorr_slope == MBP_AMPCORR_IGNORESLOPE
 			|| process.mbp_ampcorr_slope == MBP_AMPCORR_USESLOPE)
 	    		{
 			strncpy(comment,"\0",MBP_FILENAMESIZE);
-			sprintf(comment,"  Amplitude correction uses swath bathymetry in file\n");
+			sprintf(comment,"  Amplitude correction uses swath bathymetry in file");
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			}
 		else
 	    		{
 			strncpy(comment,"\0",MBP_FILENAMESIZE);
-			sprintf(comment,"  Amplitude correction uses topography grid\n");
+			sprintf(comment,"  Amplitude correction uses topography grid");
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			strncpy(comment,"\0",MBP_FILENAMESIZE);
-			sprintf(comment,"  Topography grid file:      %s m\n", process.mbp_ampsscorr_topofile);
+			sprintf(comment,"  Topography grid file:      %s m", process.mbp_ampsscorr_topofile);
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			}
 		if (process.mbp_ampcorr_slope == MBP_AMPCORR_IGNORESLOPE)
 	    		{
 	    		strncpy(comment,"\0",MBP_FILENAMESIZE);
-			sprintf(comment,"  Amplitude correction ignores seafloor slope\n");
+			sprintf(comment,"  Amplitude correction ignores seafloor slope");
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			}
 		else
 	    		{
 			strncpy(comment,"\0",MBP_FILENAMESIZE);
-			sprintf(comment,"  Amplitude correction uses seafloor slope\n");
+			sprintf(comment,"  Amplitude correction uses seafloor slope");
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			}
  		}
 	    else
 		{
 		strncpy(comment,"\0",MBP_FILENAMESIZE);
-		sprintf(comment,"  Amplitude correction off.\n");
+		sprintf(comment,"  Amplitude correction off.");
 		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
  		}
 
 	    strncpy(comment,"\0",MBP_FILENAMESIZE);
-	    sprintf(comment,"\nSidescan Corrections:\n");
+	    sprintf(comment,"Sidescan Corrections:");
 	    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	    if (process.mbp_sscorr_mode == MBP_SSCORR_ON)
 		{
 		strncpy(comment,"\0",MBP_FILENAMESIZE);
-		sprintf(comment,"  Amplitude vs grazing angle corrections applied to sidescan.\n");
+		sprintf(comment,"  Amplitude vs grazing angle corrections applied to sidescan.");
 		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	    	strncpy(comment,"\0",MBP_FILENAMESIZE);
-		sprintf(comment,"  Sidescan correction file:      %s m\n", process.mbp_sscorrfile);
+		sprintf(comment,"  Sidescan correction file:      %s m", process.mbp_sscorrfile);
 		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		if (process.mbp_sscorr_type == MBP_SSCORR_SUBTRACTION)
 	    		{
 			strncpy(comment,"\0",MBP_FILENAMESIZE);
-			sprintf(comment,"  Sidescan correction by subtraction (dB scale)\n");
+			sprintf(comment,"  Sidescan correction by subtraction (dB scale)");
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			}
 		else
 	    		{
 	    		strncpy(comment,"\0",MBP_FILENAMESIZE);
-			sprintf(comment,"  Sidescan correction by division (linear scale)\n");
+			sprintf(comment,"  Sidescan correction by division (linear scale)");
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			}
 		if (process.mbp_sscorr_symmetry == MBP_SSCORR_SYMMETRIC)
 	    		{
 	    		strncpy(comment,"\0",MBP_FILENAMESIZE);
-			sprintf(comment,"  AVGA tables forced to be symmetric\n");
+			sprintf(comment,"  AVGA tables forced to be symmetric");
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			}
 		else
 	    		{
 	    		strncpy(comment,"\0",MBP_FILENAMESIZE);
-			sprintf(comment,"  AVGA tables allowed to be asymmetric\n");
+			sprintf(comment,"  AVGA tables allowed to be asymmetric");
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			}
 	    	strncpy(comment,"\0",MBP_FILENAMESIZE);
-		sprintf(comment,"  Reference grazing angle:       %f deg\n", process.mbp_sscorr_angle);
+		sprintf(comment,"  Reference grazing angle:       %f deg", process.mbp_sscorr_angle);
 		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		if (process.mbp_sscorr_slope == MBP_SSCORR_IGNORESLOPE
 			|| process.mbp_sscorr_slope == MBP_SSCORR_USESLOPE)
 	    		{
 			strncpy(comment,"\0",MBP_FILENAMESIZE);
-			sprintf(comment,"  Sidescan correction uses swath bathymetry in file\n");
+			sprintf(comment,"  Sidescan correction uses swath bathymetry in file");
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			}
 		else
 	    		{
 			strncpy(comment,"\0",MBP_FILENAMESIZE);
-			sprintf(comment,"  Sidescan correction uses topography grid\n");
+			sprintf(comment,"  Sidescan correction uses topography grid");
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			strncpy(comment,"\0",MBP_FILENAMESIZE);
-			sprintf(comment,"  Topography grid file:      %s m\n", process.mbp_ampsscorr_topofile);
+			sprintf(comment,"  Topography grid file:      %s m", process.mbp_ampsscorr_topofile);
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			}
 		if (process.mbp_sscorr_slope == MBP_SSCORR_IGNORESLOPE)
 	    		{
 	    		strncpy(comment,"\0",MBP_FILENAMESIZE);
-			sprintf(comment,"  Sidescan correction ignores seafloor slope\n");
+			sprintf(comment,"  Sidescan correction ignores seafloor slope");
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			}
 		else
 	    		{
 			strncpy(comment,"\0",MBP_FILENAMESIZE);
-			sprintf(comment,"  Sidescan correction uses seafloor slope\n");
+			sprintf(comment,"  Sidescan correction uses seafloor slope");
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			}
  		}
 	    else
 		{
 		strncpy(comment,"\0",MBP_FILENAMESIZE);
-		sprintf(comment,"  Sidescan correction off.\n");
+		sprintf(comment,"  Sidescan correction off.");
 		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		}
 
 	    strncpy(comment,"\0",MBP_FILENAMESIZE);
-	    sprintf(comment,"\nSidescan Recalculation:\n");
+	    sprintf(comment,"Sidescan Recalculation:");
 	    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 	    if (process.mbp_ssrecalc_mode == MBP_SSRECALC_ON)
 		{
 		strncpy(comment,"\0",MBP_FILENAMESIZE);
-		sprintf(comment,"  Sidescan recalculated.\n");
+		sprintf(comment,"  Sidescan recalculated.");
 		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		strncpy(comment,"\0",MBP_FILENAMESIZE);
-		sprintf(comment,"  Sidescan pixel size:           %f\n",process.mbp_ssrecalc_pixelsize);
+		sprintf(comment,"  Sidescan pixel size:           %f",process.mbp_ssrecalc_pixelsize);
 		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		strncpy(comment,"\0",MBP_FILENAMESIZE);
-		sprintf(comment,"  Sidescan swath width:          %f\n",process.mbp_ssrecalc_swathwidth);
+		sprintf(comment,"  Sidescan swath width:          %f",process.mbp_ssrecalc_swathwidth);
 		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		strncpy(comment,"\0",MBP_FILENAMESIZE);
-		sprintf(comment,"  Sidescan interpolation:        %d\n",process.mbp_ssrecalc_interpolate);
+		sprintf(comment,"  Sidescan interpolation:        %d",process.mbp_ssrecalc_interpolate);
 		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		}
 	    else
 		{
 		strncpy(comment,"\0",MBP_FILENAMESIZE);
-		sprintf(comment,"  Sidescan not recalculated.\n");
+		sprintf(comment,"  Sidescan not recalculated.");
 		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 		}
 
@@ -4366,7 +4369,7 @@ and mbedit edit save files.\n";
 				i, process.mbp_cut_kind[i], process.mbp_cut_mode[i], 
 				process.mbp_cut_min[i], process.mbp_cut_max[i]);
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
-			sprintf(comment, "  %f %f\n", process.mbp_cut_min[i], process.mbp_cut_max[i]);
+			sprintf(comment, "  %f %f", process.mbp_cut_min[i], process.mbp_cut_max[i]);
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			if (error == MB_ERROR_NO_ERROR) ocomment++;
 			}
