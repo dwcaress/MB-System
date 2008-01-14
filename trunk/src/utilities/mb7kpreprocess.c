@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb7kpreprocess.c	10/12/2005
- *    $Id: mb7kpreprocess.c,v 5.13 2007-11-16 17:53:02 caress Exp $
+ *    $Id: mb7kpreprocess.c,v 5.14 2008-01-14 18:24:28 caress Exp $
  *
  *    Copyright (c) 2005 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	October 12, 2005
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.13  2007/11/16 17:53:02  caress
+ * Fixes applied.
+ *
  * Revision 5.12  2007/10/08 16:48:07  caress
  * State of the code on 8 October 2007.
  *
@@ -89,7 +92,7 @@
 #define	MB7KPREPROCESS_TIMELAG_CONSTANT	1
 #define	MB7KPREPROCESS_TIMELAG_MODEL	2
 
-static char rcs_id[] = "$Id: mb7kpreprocess.c,v 5.13 2007-11-16 17:53:02 caress Exp $";
+static char rcs_id[] = "$Id: mb7kpreprocess.c,v 5.14 2008-01-14 18:24:28 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
@@ -2108,11 +2111,15 @@ fclose(tfp);
 							{
 							if (bathymetry->range[i] > 0.007)
 								{
-								bathymetry->quality[i] = (bathymetry->quality[i] & 240) + 15;
+								bathymetry->quality[i] = 23;
+								}
+							else if (bathymetry->range[i] > 0.0)
+								{
+								bathymetry->quality[i] = 20;
 								}
 							else
 								{
-								bathymetry->quality[i] = (bathymetry->quality[i] & 240) + 3;
+								bathymetry->quality[i] = 0;
 								}
 							}
 						}
@@ -2141,7 +2148,8 @@ fclose(tfp);
 					}
 					
 				/* fix early version 5 quality flags */
-				else if (bathymetry->header.Version == 5)
+				else if (bathymetry->header.Version == 5
+						&& header->s7kTime.Year < 2008)
 					{
 					for (i=0;i<bathymetry->number_beams;i++)
 						{
@@ -2157,6 +2165,35 @@ fclose(tfp);
 /*fprintf(stderr,"beam %d: AMPLI quality: %d",i,bathymetry->quality[i]);*/
 							bathymetry->quality[i] = 16 + 15;
 /*fprintf(stderr," %d\n",bathymetry->quality[i]);*/
+							}
+						}
+					}
+					
+				/* fix upgraded version 5 quality flags */
+				else if (bathymetry->header.Version == 5)
+					{
+					for (i=0;i<bathymetry->number_beams;i++)
+						{
+						bathymetry->quality[i] = bathymetry->quality[i] & 15;
+						
+						/* phase or amplitude picks */
+						if (bathymetry->quality[i] & 8)
+							{
+/*fprintf(stderr,"beam %d: PHASE quality: %d",i,bathymetry->quality[i]);*/
+							bathymetry->quality[i] += 32;
+/*fprintf(stderr," %d\n",bathymetry->quality[i]);*/
+							}
+						else if (bathymetry->quality[i] & 4)
+							{
+/*fprintf(stderr,"beam %d: AMPLI quality: %d",i,bathymetry->quality[i]);*/
+							bathymetry->quality[i] += 16;
+/*fprintf(stderr," %d\n",bathymetry->quality[i]);*/
+							}
+							
+						/* flagged by sonar */
+						if (bathymetry->quality[i] & 3 < 3)
+							{
+							bathymetry->quality[i] += 64;
 							}
 						}
 					}
