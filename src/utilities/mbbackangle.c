@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbbackangle.c	1/6/95
- *    $Id: mbbackangle.c,v 5.19 2007-10-08 16:48:07 caress Exp $
+ *    $Id: mbbackangle.c,v 5.20 2008-01-14 18:25:52 caress Exp $
  *
  *    Copyright (c) 1995, 2000, 2002, 2003, 2004m 2007 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	January 6, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.19  2007/10/08 16:48:07  caress
+ * State of the code on 8 October 2007.
+ *
  * Revision 5.18  2006/08/09 22:41:27  caress
  * Fixed programs that read or write grids so that they do not use the GMT_begin() function; these programs will now work when GMT is built in the default fashion, when GMT is built in the default fashion, with "advisory file locking" enabled.
  *
@@ -203,7 +206,7 @@ int output_model(int verbose, FILE *tfp,
 	int *nmean, double *mean, double *sigma, 
 	int *error);
 						
-static char rcs_id[] = "$Id: mbbackangle.c,v 5.19 2007-10-08 16:48:07 caress Exp $";
+static char rcs_id[] = "$Id: mbbackangle.c,v 5.20 2008-01-14 18:25:52 caress Exp $";
 static char program_name[] = "mbbackangle";
 static int	pargc;
 static char	**pargv;
@@ -1513,7 +1516,7 @@ r[0],r[1],r[2],v1[0],v1[1],v1[2],v2[0],v2[1],v2[2],v[0],v[1],v[2],angle);*/
 					    bathy = altitude + sonardepth;
 					else
 					    bathy = altitude_default + sonardepth;
-					angle = RTD * atan(bathacrosstrack[i] / (bathy - sonardepth));
+					angle = RTD * atan(ssacrosstrack[i] / (bathy - sonardepth));
 					slope = 0.0;
 					}
 				}
