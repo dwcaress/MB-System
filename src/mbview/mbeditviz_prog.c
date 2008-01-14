@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbeditviz_prog.c		5/1/2007
- *    $Id: mbeditviz_prog.c,v 5.5 2007-11-16 17:26:56 caress Exp $
+ *    $Id: mbeditviz_prog.c,v 5.6 2008-01-14 18:20:13 caress Exp $
  *
  *    Copyright (c) 2007 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	May 1, 2007
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2007/11/16 17:26:56  caress
+ * Progress on MBeditviz
+ *
  * Revision 5.4  2007/10/17 20:35:05  caress
  * Release 5.1.1beta11
  *
@@ -66,7 +69,7 @@
 #include "mbview.h"
 
 /* id variables */
-static char rcs_id[] = "$Id: mbeditviz_prog.c,v 5.5 2007-11-16 17:26:56 caress Exp $";
+static char rcs_id[] = "$Id: mbeditviz_prog.c,v 5.6 2008-01-14 18:20:13 caress Exp $";
 static char program_name[] = "MBeditviz";
 static char help_message[] = "MBeditviz is a bathymetry editor and patch test tool.";
 static char usage_message[] = "mbeditviz [-H -T -V]";
@@ -386,7 +389,7 @@ int mbeditviz_open_data(char *path, int format)
 				{
 				while (done == MB_NO)
 					{
-					if (mbev_status = mb_datalist_read2(mbev_verbose,datalist,
+					if (mbev_status = mb_datalist_read2(5,datalist,
 							&filestatus,fileraw,fileprocessed,&format,&weight,&mbev_error)
 							== MB_SUCCESS)
 						{
@@ -474,7 +477,8 @@ int mbeditviz_import_file(char *path, int format)
 		file->esf_open = MB_NO;
 				
 		/* load info */
-		mbev_status = mb_get_info(mbev_verbose, file->path, &(file->raw_info), mbdef_lonflip, &mbev_error);
+		/*mbev_status = mb_get_info(mbev_verbose, file->path, &(file->raw_info), mbdef_lonflip, &mbev_error);*/
+		mbev_status = mb_get_info(5, file->path, &(file->raw_info), mbdef_lonflip, &mbev_error);
 		if (mbev_status == MB_SUCCESS)
 			{
 			file->raw_info_loaded = MB_YES;
@@ -573,7 +577,6 @@ int mbeditviz_load_file(int ifile)
 		&& mbev_files[ifile].load_status == MB_NO)
 		{
 		file = &(mbev_files[ifile]);
-fprintf(stderr,"mbeditviz_load_file:%d path:%s raw_info.file:%s\n",ifile,file->path,file->raw_info.file);
 
 		/* allocate memory for pings */
 		if (file->raw_info.nrecords > 0)
@@ -610,6 +613,7 @@ fprintf(stderr,"mbeditviz_load_file:%d path:%s raw_info.file:%s\n",ifile,file->p
 			/* use fbt file if possible */
 			mb_get_fbt(mbev_verbose, swathfile, &format, &mbev_error);
 
+fprintf(stderr,"mbeditviz_load_file:%d swathfile:%s raw_info.file:%s\n",ifile,swathfile,file->raw_info.file);
 			/* initialize reading the swath file */
 			if ((mbev_status = mb_read_init(
 				mbev_verbose,swathfile,format,mbdef_pings,mbdef_lonflip,mbdef_bounds,
@@ -1017,7 +1021,8 @@ fprintf(stderr,"MEMORY FAILURE in mbeditviz_load_file\n");
 					load_esf = MB_YES;
 					}
 				}
-			
+fprintf(stderr,"file->processed_info_loaded:%d file->process.mbp_edit_mode:%d load_esf:%d\n",
+file->processed_info_loaded,file->process.mbp_edit_mode,load_esf);
 			
 			/* load bathymetry edits if needed */
 			if (load_esf == MB_YES)
