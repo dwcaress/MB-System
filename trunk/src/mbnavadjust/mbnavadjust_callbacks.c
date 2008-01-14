@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavadjust_callbacks.c	2/22/2000
- *    $Id: mbnavadjust_callbacks.c,v 5.11 2007-05-14 06:34:11 caress Exp $
+ *    $Id: mbnavadjust_callbacks.c,v 5.12 2008-01-14 18:15:46 caress Exp $
  *
  *    Copyright (c) 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	March 22, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.11  2007/05/14 06:34:11  caress
+ * Many changes to mbnavadjust, including adding z offsets and 3D search grids.
+ *
  * Revision 5.10  2006/06/16 19:30:58  caress
  * Check in after the Santa Monica Basin Mapping AUV Expedition.
  *
@@ -168,6 +171,11 @@ static int mod_loc_x, mod_loc_y;
 
 int	status;
 char	string[STRING_MAX];
+
+Cardinal  ac = 0;
+Arg       args[256];
+int       argok;
+XmString  tmp0;
 
 /*--------------------------------------------------------------------*/
 
@@ -537,10 +545,6 @@ GRAU( XtPointer, call)
 void
 do_mbnavadjust_init(int argc, char **argv)
 {
-    Cardinal  ac = 0;
-    Arg       args[256];
-    int               argok;
-    XmString  tmp0;
     int	    i,j;
     String translations = 
 	    "<Btn1Down>:	DrawingAreaInput() ManagerGadgetArm() \n\
@@ -1499,6 +1503,7 @@ do_update_naverr()
     struct mbna_tie *tie;
     double	plot_width, misfit_width;
     double	zoom_factor;
+    double	timediff;
 
     if (mbna_current_crossing >= 0)
     	{
@@ -1515,6 +1520,10 @@ do_update_naverr()
     			/ mbna_mtodeglon;
     	misfit_width = (mbna_plot_lon_max - mbna_plot_lon_min)
     			/ mbna_mtodeglon;
+			
+	/* get time difference */
+    	timediff = (project.files[mbna_file_id_1].sections[mbna_section_1].btime_d 
+		- project.files[mbna_file_id_2].sections[mbna_section_2].btime_d) / 86400.0;
 
     	/* set main naverr status label */
 	crossing = &project.crossings[mbna_current_crossing];
@@ -1523,6 +1532,7 @@ do_update_naverr()
 		{
         	sprintf(string,":::t\"Crossing: %d of %d\"\
 :t\"Sections: %4.4d:%4.4d and %4.4d:%4.4d\"\
+:t\"Time Difference: %f days \"\
 :t\"Status: Unset \"\
 :t\"Contour Plot Width:   %.2f m\"\
 :t\"Misfit Plot Width:    %.2f m\"\
@@ -1533,12 +1543,14 @@ do_update_naverr()
                	 	mbna_current_crossing, project.num_crossings,
                 	crossing->file_id_1,crossing->section_1,
                 	crossing->file_id_2,crossing->section_2,
+			timediff,
                	 	plot_width, misfit_width, project.zoffsetwidth, zoom_factor);
                 }
 	else if (crossing->status == MBNA_CROSSING_STATUS_SET)
 		{
         	sprintf(string,":::t\"Crossing: %d of %d\"\
 :t\"Sections: %4.4d:%4.4d and %4.4d:%4.4d\"\
+:t\"Time Difference: %f days \"\
 :t\"Current Tie Point: %2d of %2d\"\
 :t\"Contour Plot Width: %.2f m\"\
 :t\"Misfit Plot Width:  %.2f m\"\
@@ -1549,6 +1561,7 @@ do_update_naverr()
                	 	mbna_current_crossing, project.num_crossings,
                 	crossing->file_id_1,crossing->section_1,
                 	crossing->file_id_2,crossing->section_2,
+			timediff,
                 	mbna_current_tie, crossing->num_ties,
                	 	plot_width, misfit_width, project.zoffsetwidth, zoom_factor,
                 	tie->snav_1,
@@ -1561,15 +1574,18 @@ do_update_naverr()
 		{
         	sprintf(string,":::t\"Crossing: %d of %d\"\
 :t\"Sections: %4.4d:%4.4d and %4.4d:%4.4d\"\
+:t\"Time Difference: %f days \"\
 :t\"Status: Skipped \"\
 :t\"Contour Plot Width: %.2f m\"\
 :t\"Misfit Plot Width:  %.2f m\"\
+:t\"Z Offset Plot Width:  %.2f m\"\
 :t\"Zoom Factor: %.2f \"\
 :t\"Tie Points: Skipped\"\
 :t\"Relative Offsets:   Skipped Skipped Skipped\"",
                	 	mbna_current_crossing, project.num_crossings,
                  	crossing->file_id_1,crossing->section_1,
                 	crossing->file_id_2,crossing->section_2,
+			timediff,
               	 	plot_width, misfit_width, project.zoffsetwidth, zoom_factor);
                 }
 	set_label_multiline_string(label_naverr_status, string);
@@ -2955,6 +2971,33 @@ do_fileselection_mode( Widget w, XtPointer client_data, XtPointer call_data)
 
     file_mode = (int) client_data;
 
+    /* desl with selection */
+    if (file_mode == FILE_MODE_NEW)
+    	{
+	tmp0 = (XmString) BX_CONVERT(fileSelectionBox, "*.nvh", 
+                                          XmRXmString, 0, &argok);
+    	}
+    else if (file_mode == FILE_MODE_OPEN)
+    	{
+	tmp0 = (XmString) BX_CONVERT(fileSelectionBox, "*.nvh", 
+                                          XmRXmString, 0, &argok);
+    	}
+    else if (file_mode == FILE_MODE_IMPORT)
+    	{
+	tmp0 = (XmString) BX_CONVERT(fileSelectionBox, "*.mb-1", 
+                                          XmRXmString, 0, &argok);
+    	}
+    else
+    	{
+	tmp0 = (XmString) BX_CONVERT(fileSelectionBox, "*.nvh", 
+                                          XmRXmString, 0, &argok);
+    	}
+
+    ac = 0;
+    XtSetArg(args[ac], XmNpattern, tmp0); ac++;
+    XtSetValues(fileSelectionBox, args, ac);
+    XmStringFree((XmString)tmp0);
+
 }
 
 /*--------------------------------------------------------------------*/
@@ -3197,8 +3240,6 @@ do_modelplot_resize( Widget w, XtPointer client_data, XEvent *event, Boolean *un
 {
     Window	modp_xid;
 	XConfigureEvent *cevent = (XConfigureEvent *) event;
-	Cardinal	ac;
-	Arg		args[256];
 	Dimension	width, height;
 	
 	/* do this only if a resize event happens */
