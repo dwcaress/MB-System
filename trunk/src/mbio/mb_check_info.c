@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_check_info.c	1/25/93
- *    $Id: mb_check_info.c,v 5.19 2007-10-08 15:59:34 caress Exp $
+ *    $Id: mb_check_info.c,v 5.20 2008-01-14 18:05:09 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	September 3, 1996
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.19  2007/10/08 15:59:34  caress
+ * MBIO changes as of 8 October 2007.
+ *
  * Revision 5.18  2007/06/18 01:19:48  caress
  * Changes as of 17 June 2007.
  *
@@ -121,7 +124,7 @@
 /*--------------------------------------------------------------------*/
 int mb_check_info(int verbose, char *file, int lonflip, double bounds[4], int *file_in_bounds, int *error)
 {
-	static char rcs_id[]="$Id: mb_check_info.c,v 5.19 2007-10-08 15:59:34 caress Exp $";
+	static char rcs_id[]="$Id: mb_check_info.c,v 5.20 2008-01-14 18:05:09 caress Exp $";
 	char	*function_name = "mb_check_info";
 	int	status;
 	char	file_inf[MB_PATH_MAXLINE];
@@ -358,7 +361,7 @@ int mb_check_info(int verbose, char *file, int lonflip, double bounds[4], int *f
 int mb_get_info(int verbose, char *file, struct mb_info_struct *mb_info, int lonflip,
 		    int *error)
 {
-	static char rcs_id[]="$Id: mb_check_info.c,v 5.19 2007-10-08 15:59:34 caress Exp $";
+	static char rcs_id[]="$Id: mb_check_info.c,v 5.20 2008-01-14 18:05:09 caress Exp $";
 	char	*function_name = "mb_get_info";
 	int	status;
 	char	file_inf[MB_PATH_MAXLINE];
@@ -410,6 +413,9 @@ int mb_get_info(int verbose, char *file, struct mb_info_struct *mb_info, int lon
 	/* load information from inf file */
 	else
 		{
+		/* set file name */
+		strcpy(mb_info->file, file);
+		
 		/* read the inf file */
 		while (fgets(line, MB_PATH_MAXLINE, fp) != NULL)
 			{
@@ -760,17 +766,20 @@ int mb_make_info(int verbose, int force,
 		datmodtime = file_status.st_mtime;
 		}
 	if ((fstat = stat(inffile, &file_status)) == 0
-		&& (file_status.st_mode & S_IFMT) != S_IFDIR)
+		&& (file_status.st_mode & S_IFMT) != S_IFDIR
+		&& file_status.st_size  > 0)
 		{
 		infmodtime = file_status.st_mtime;
 		}
 	if ((fstat = stat(fbtfile, &file_status)) == 0
-		&& (file_status.st_mode & S_IFMT) != S_IFDIR)
+		&& (file_status.st_mode & S_IFMT) != S_IFDIR
+		&& file_status.st_size  > 0)
 		{
 		fbtmodtime = file_status.st_mtime;
 		}
 	if ((fstat = stat(fnvfile, &file_status)) == 0
-		&& (file_status.st_mode & S_IFMT) != S_IFDIR)
+		&& (file_status.st_mode & S_IFMT) != S_IFDIR
+		&& file_status.st_size  > 0)
 		{
 		fnvmodtime = file_status.st_mtime;
 		}
@@ -1150,7 +1159,7 @@ int mb_swathbounds(int verbose, int checkgood,
 /*--------------------------------------------------------------------*/
 int mb_info_init(int verbose, struct mb_info_struct *mb_info, int *error)
 {
-	static char rcs_id[]="$Id: mb_check_info.c,v 5.19 2007-10-08 15:59:34 caress Exp $";
+	static char rcs_id[]="$Id: mb_check_info.c,v 5.20 2008-01-14 18:05:09 caress Exp $";
 	char	*function_name = "mb_info_init";
 	int	status = MB_SUCCESS;
 
@@ -1258,7 +1267,7 @@ int mb_info_init(int verbose, struct mb_info_struct *mb_info, int *error)
 int mb_get_info_datalist(int verbose, char *read_file, int *format, 
 			struct mb_info_struct *mb_info, int lonflip, int *error)
 {
-	static char rcs_id[]="$Id: mb_check_info.c,v 5.19 2007-10-08 15:59:34 caress Exp $";
+	static char rcs_id[]="$Id: mb_check_info.c,v 5.20 2008-01-14 18:05:09 caress Exp $";
 	char	*function_name = "mb_get_info_datalist";
 	int	status = MB_SUCCESS;
 	char	file_inf[MB_PATH_MAXLINE];
@@ -1331,99 +1340,116 @@ int mb_get_info_datalist(int verbose, char *read_file, int *format,
 		/* read inf file */
 		status = mb_get_info(verbose, swathfile, &mb_info_file, lonflip, error);
 		
-		/* add in the results */
-                mb_info->nrecords += mb_info_file.nrecords;
-                mb_info->nrecords_ss1 += mb_info_file.nrecords_ss1;
-                mb_info->nrecords_ss2 += mb_info_file.nrecords_ss2;
-                mb_info->nrecords_sbp += mb_info_file.nrecords_sbp;
-                mb_info->nbeams_bath += mb_info_file.nbeams_bath;
-                mb_info->nbeams_bath_total += mb_info_file.nbeams_bath_total;
-                mb_info->nbeams_bath_good += mb_info_file.nbeams_bath_good;
-                mb_info->nbeams_bath_zero += mb_info_file.nbeams_bath_zero;
-                mb_info->nbeams_bath_flagged += mb_info_file.nbeams_bath_flagged;
-                mb_info->nbeams_amp += mb_info_file.nbeams_amp;
-                mb_info->nbeams_amp_total += mb_info_file.nbeams_amp_total;
-                mb_info->nbeams_amp_good += mb_info_file.nbeams_amp_good;
-                mb_info->nbeams_amp_zero += mb_info_file.nbeams_amp_zero;
-                mb_info->nbeams_amp_flagged += mb_info_file.nbeams_amp_flagged;
-                mb_info->npixels_ss += mb_info_file.npixels_ss;
-                mb_info->npixels_ss_total += mb_info_file.npixels_ss_total;
-                mb_info->npixels_ss_good += mb_info_file.npixels_ss_good;
-                mb_info->npixels_ss_zero += mb_info_file.npixels_ss_zero;
-                mb_info->npixels_ss_flagged += mb_info_file.npixels_ss_flagged;
-
-                mb_info->time_total += mb_info_file.time_total;
-                mb_info->dist_total += mb_info_file.dist_total;
-                /* mb_info.speed_avg += mb_info_file.speed_avg;*/
-
-		if (nfile == 0)
+		/* only use if there are data */
+		if (mb_info_file.nrecords > 0)
 			{
-                	mb_info->time_start += mb_info_file.time_start;
-                	mb_info->lon_start += mb_info_file.lon_start;
-                	mb_info->lat_start += mb_info_file.lat_start;
-                	mb_info->depth_start += mb_info_file.depth_start;
-                	mb_info->heading_start += mb_info_file.heading_start;
-                	mb_info->speed_start += mb_info_file.speed_start;
-                	mb_info->sonardepth_start += mb_info_file.sonardepth_start;
-                	mb_info->sonaraltitude_start += mb_info_file.sonaraltitude_start;
+		
+			/* add in the results */
+                	mb_info->nrecords += mb_info_file.nrecords;
+                	mb_info->nrecords_ss1 += mb_info_file.nrecords_ss1;
+                	mb_info->nrecords_ss2 += mb_info_file.nrecords_ss2;
+                	mb_info->nrecords_sbp += mb_info_file.nrecords_sbp;
+                	mb_info->nbeams_bath += mb_info_file.nbeams_bath;
+                	mb_info->nbeams_bath_total += mb_info_file.nbeams_bath_total;
+                	mb_info->nbeams_bath_good += mb_info_file.nbeams_bath_good;
+                	mb_info->nbeams_bath_zero += mb_info_file.nbeams_bath_zero;
+                	mb_info->nbeams_bath_flagged += mb_info_file.nbeams_bath_flagged;
+                	mb_info->nbeams_amp += mb_info_file.nbeams_amp;
+                	mb_info->nbeams_amp_total += mb_info_file.nbeams_amp_total;
+                	mb_info->nbeams_amp_good += mb_info_file.nbeams_amp_good;
+                	mb_info->nbeams_amp_zero += mb_info_file.nbeams_amp_zero;
+                	mb_info->nbeams_amp_flagged += mb_info_file.nbeams_amp_flagged;
+                	mb_info->npixels_ss += mb_info_file.npixels_ss;
+                	mb_info->npixels_ss_total += mb_info_file.npixels_ss_total;
+                	mb_info->npixels_ss_good += mb_info_file.npixels_ss_good;
+                	mb_info->npixels_ss_zero += mb_info_file.npixels_ss_zero;
+                	mb_info->npixels_ss_flagged += mb_info_file.npixels_ss_flagged;
+
+                	mb_info->time_total += mb_info_file.time_total;
+                	mb_info->dist_total += mb_info_file.dist_total;
+                	/* mb_info.speed_avg += mb_info_file.speed_avg;*/
+
+			if (nfile == 0)
+				{
+                		mb_info->time_start += mb_info_file.time_start;
+                		mb_info->lon_start += mb_info_file.lon_start;
+                		mb_info->lat_start += mb_info_file.lat_start;
+                		mb_info->depth_start += mb_info_file.depth_start;
+                		mb_info->heading_start += mb_info_file.heading_start;
+                		mb_info->speed_start += mb_info_file.speed_start;
+                		mb_info->sonardepth_start += mb_info_file.sonardepth_start;
+                		mb_info->sonaraltitude_start += mb_info_file.sonaraltitude_start;
+				}
+
+                	mb_info->time_end += mb_info_file.time_end;
+                	mb_info->lon_end += mb_info_file.lon_end;
+                	mb_info->lat_end += mb_info_file.lat_end;
+                	mb_info->depth_end += mb_info_file.depth_end;
+                	mb_info->heading_end += mb_info_file.heading_end;
+                	mb_info->speed_end += mb_info_file.speed_end;
+                	mb_info->sonardepth_end += mb_info_file.sonardepth_end;
+                	mb_info->sonaraltitude_end += mb_info_file.sonaraltitude_end;
+
+			if (nfile == 0)
+				{
+                		mb_info->lon_min = mb_info_file.lon_min;
+                		mb_info->lon_max = mb_info_file.lon_max;
+                		mb_info->lat_min = mb_info_file.lat_min;
+                		mb_info->lat_max = mb_info_file.lat_max;
+                		mb_info->sonardepth_min = mb_info_file.sonardepth_min;
+                		mb_info->sonardepth_max = mb_info_file.sonardepth_max;
+                		mb_info->altitude_min = mb_info_file.altitude_min;
+                		mb_info->altitude_max = mb_info_file.altitude_max;
+                		mb_info->depth_min = mb_info_file.depth_min;
+                		mb_info->depth_max = mb_info_file.depth_max;
+                		mb_info->amp_min = mb_info_file.amp_min;
+                		mb_info->amp_max = mb_info_file.amp_max;
+                		mb_info->ss_min = mb_info_file.ss_min;
+                		mb_info->ss_max = mb_info_file.ss_max;
+				}
+			else
+				{
+				if (mb_info->lon_min == 0.0) 
+					mb_info->lon_min = mb_info_file.lon_min;
+                		else 
+					mb_info->lon_min = MIN(mb_info_file.lon_min, mb_info->lon_min);
+                		if (mb_info->lon_max == 0.0) 
+					mb_info->lon_max = mb_info_file.lon_max;
+                		else 
+					mb_info->lon_max = MAX(mb_info_file.lon_max, mb_info->lon_max);
+                		if (mb_info->lat_min == 0.0) 
+					mb_info->lat_min = mb_info_file.lat_min;
+                		else 
+					mb_info->lat_min = MIN(mb_info_file.lat_min, mb_info->lat_min);
+                		if (mb_info->lat_max == 0.0) 
+					mb_info->lat_max = mb_info_file.lat_max;
+                		else 
+					mb_info->lat_max = MAX(mb_info_file.lat_max, mb_info->lat_max);
+                		mb_info->sonardepth_min = MIN(mb_info_file.sonardepth_min, mb_info->sonardepth_min);
+                		mb_info->sonardepth_max = MAX(mb_info_file.sonardepth_max, mb_info->sonardepth_max);
+                		mb_info->altitude_min = MIN(mb_info_file.altitude_min, mb_info->altitude_min);
+                		mb_info->altitude_max = MAX(mb_info_file.altitude_max, mb_info->altitude_max);
+                		mb_info->depth_min = MIN(mb_info_file.depth_min, mb_info->depth_min);
+                		mb_info->depth_max = MAX(mb_info_file.depth_max, mb_info->depth_max);
+                		mb_info->amp_min = MIN(mb_info_file.amp_min, mb_info->amp_min);
+                		mb_info->amp_max = MAX(mb_info_file.amp_max, mb_info->amp_max);
+                		mb_info->ss_min = MIN(mb_info_file.ss_min, mb_info->ss_min);
+                		mb_info->ss_max = MAX(mb_info_file.ss_max, mb_info->ss_max);
+				}
+
+                	mb_info->problem_nodata += mb_info_file.problem_nodata;
+                	mb_info->problem_zeronav += mb_info_file.problem_zeronav;
+                	mb_info->problem_toofast += mb_info_file.problem_toofast;
+                	mb_info->problem_avgtoofast += mb_info_file.problem_avgtoofast;
+                	mb_info->problem_toodeep += mb_info_file.problem_toodeep;
+                	mb_info->problem_baddatagram += mb_info_file.problem_baddatagram;
+
+			nfile++;
 			}
-
-                mb_info->time_end += mb_info_file.time_end;
-                mb_info->lon_end += mb_info_file.lon_end;
-                mb_info->lat_end += mb_info_file.lat_end;
-                mb_info->depth_end += mb_info_file.depth_end;
-                mb_info->heading_end += mb_info_file.heading_end;
-                mb_info->speed_end += mb_info_file.speed_end;
-                mb_info->sonardepth_end += mb_info_file.sonardepth_end;
-                mb_info->sonaraltitude_end += mb_info_file.sonaraltitude_end;
-
-		if (nfile == 0)
-			{
-                	mb_info->lon_min = mb_info_file.lon_min;
-                	mb_info->lon_max = mb_info_file.lon_max;
-                	mb_info->lat_min = mb_info_file.lat_min;
-                	mb_info->lat_max = mb_info_file.lat_max;
-                	mb_info->sonardepth_min = mb_info_file.sonardepth_min;
-                	mb_info->sonardepth_max = mb_info_file.sonardepth_max;
-                	mb_info->altitude_min = mb_info_file.altitude_min;
-                	mb_info->altitude_max = mb_info_file.altitude_max;
-                	mb_info->depth_min = mb_info_file.depth_min;
-                	mb_info->depth_max = mb_info_file.depth_max;
-                	mb_info->amp_min = mb_info_file.amp_min;
-                	mb_info->amp_max = mb_info_file.amp_max;
-                	mb_info->ss_min = mb_info_file.ss_min;
-                	mb_info->ss_max = mb_info_file.ss_max;
-			}
-		else
-			{
-                	mb_info->lon_min = MIN(mb_info_file.lon_min, mb_info->lon_min);
-                	mb_info->lon_max = MAX(mb_info_file.lon_max, mb_info->lon_max);
-                	mb_info->lat_min = MIN(mb_info_file.lat_min, mb_info->lat_min);
-                	mb_info->lat_max = MAX(mb_info_file.lat_max, mb_info->lat_max);
-                	mb_info->sonardepth_min = MIN(mb_info_file.sonardepth_min, mb_info->sonardepth_min);
-                	mb_info->sonardepth_max = MAX(mb_info_file.sonardepth_max, mb_info->sonardepth_max);
-                	mb_info->altitude_min = MIN(mb_info_file.altitude_min, mb_info->altitude_min);
-                	mb_info->altitude_max = MAX(mb_info_file.altitude_max, mb_info->altitude_max);
-                	mb_info->depth_min = MIN(mb_info_file.depth_min, mb_info->depth_min);
-                	mb_info->depth_max = MAX(mb_info_file.depth_max, mb_info->depth_max);
-                	mb_info->amp_min = MIN(mb_info_file.amp_min, mb_info->amp_min);
-                	mb_info->amp_max = MAX(mb_info_file.amp_max, mb_info->amp_max);
-                	mb_info->ss_min = MIN(mb_info_file.ss_min, mb_info->ss_min);
-                	mb_info->ss_max = MAX(mb_info_file.ss_max, mb_info->ss_max);
-			}
-
-                mb_info->problem_nodata += mb_info_file.problem_nodata;
-                mb_info->problem_zeronav += mb_info_file.problem_zeronav;
-                mb_info->problem_toofast += mb_info_file.problem_toofast;
-                mb_info->problem_avgtoofast += mb_info_file.problem_avgtoofast;
-                mb_info->problem_toodeep += mb_info_file.problem_toodeep;
-                mb_info->problem_baddatagram += mb_info_file.problem_baddatagram;
-
-		nfile++;
 
 		/* check memory */
 		if (verbose >= 4)
-			status = mb_memory_list(verbose,&error);
+			status = mb_memory_list(verbose,error);
 
 		/* figure out whether and what to read next */
         	if (read_datalist == MB_YES)
@@ -1447,7 +1473,7 @@ int mb_get_info_datalist(int verbose, char *read_file, int *format,
 
 	/* check memory */
 	if (verbose >= 4)
-		status = mb_memory_list(verbose,&error);
+		status = mb_memory_list(verbose,error);
 
 	/* set error and status (if you got here you succeeded */
 	*error = MB_ERROR_NO_ERROR;
