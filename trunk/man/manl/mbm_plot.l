@@ -1,4 +1,4 @@
-.TH mbm_plot l "14 September 2007" "MB-System 5.0" "MB-System 5.0"
+.TH mbm_plot l "7 November 2007" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbm_plot\fP - Create an executable shellscript which will generate
 a GMT plot of swath sonar swath data.
@@ -38,6 +38,7 @@ Miscellaneous Options:
 \fB-MMB\fP\fIyr/mo/da/hr/mn/sc\fP
 \fB-MMD\fP\fImode/scale[/min/max]\fP
 \fB-MME\fP\fIyr/mo/da/hr/mn/sc\fP
+\fB-MML\fP\fIlonflip\fP
 \fB-MMN\fP\fInplot\fP \fB-MMP\fP\fIpings \fP
 \fB-MMS\fP\fIspeedmin\fP 
 \fB-MMT\fP\fItimegap\fP \fB-MMZ\fP\fIalgorithm\fP
@@ -183,9 +184,8 @@ is given in the \fBMBIO\fP manual page. The default input filename is
 "datalist.mb-1".
 .TP
 .B \-N
-Given by itself, this option causes an annotated 
-navigation track plot to be generated.
-Additional optional parameters are
+Given by itself, this option causes a navigation track plot to be generated.
+Additional optional parameters, including annotation control, are
 described in the COMPLETE DESCRIPTION OF OPTIONS section below.
 .TP
 .B \-O
@@ -609,6 +609,16 @@ Sets the ending time for data allowed in the input data; pings
 with times after the ending time will be ignored. 
 Default: \fIyr/mo/da/hr/mn/sc\fP = 2062/2/21/10/30/0.
 .TP
+\fB-MML\fP\fIlonflip\fP
+If the \fB-R\fP option is not used to explicitly set the plot bounds, then
+the \fIlonflip\fP value sets the range of the longitude values used for
+calculating the desired bounds.  If  lonflip=-1
+then  the  longitude  values will be in the range from -360 to 0
+degrees. If lonflip=0 then the longitude values will be  in  the
+range  from -180 to 180 degrees. If lonflip=1 then the longitude
+values will be in the range from 0  to  360  degrees.   Default:
+\fBmbm_plot\fP uses the \fIlonflip\fP value set by \fBmbdefaults\fP.
+.TP
 \fB-MMN\fP\fInplot\fP
 Sets the number of pings to be read in before each contouring
 episode. See the description of the \fB-MMZ\fP\fIalgorithm\fP option
@@ -883,10 +893,10 @@ texture = solid].
 .B \-N
 \fI[time_tick/time_annot/date_annot/time_tick_len[/name_hgt/name_perp]] | F | FP]\fP
 .br
-This option causes a navigation track plot to be generated, 
-and can also set the start of each swath file to be annotated 
-with the filename. If the \fB-N\fP option is given alone, then 
-the default parameters given below will be used,  These optional 
+This option causes a navigation track plot to be generated, and 
+can also set the start of each swath file to be annotated with the 
+filename. If the \fB-N\fP option is given alone, then the 
+navigation track will be plotted without any annotation,  The optional 
 parameters allow users to control the details of the navigation 
 track annotation. Time marks are made with "X" marks along the 
 shiptrack; annotated time marks show the time in HH:MM format 
@@ -908,7 +918,8 @@ and also with filename annotation along the shiptrack. If the
 \fB-N\fP\fIFP\fP is given, then a navigation track will be generated 
 with the default parameters and also with filename annotation 
 perpendicular to the shiptrack.
-Defaults: \fItime_tick\fP = 0.25; \fItime_annot\fP = 1.0; \fIdate_annot\fP = 4.0; 
+Defaults if annotation is enabled: \fItime_tick\fP = 0.25; 
+\fItime_annot\fP = 1.0; \fIdate_annot\fP = 4.0; 
 \fItime_tick_len\fP = 0.1; \fIname_hgt\fP = 0.1; \fIname_perp\fP = 0.
 .TP
 .B \-O
