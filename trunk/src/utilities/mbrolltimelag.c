@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbrolltimelag.c	11/10/2005
  *
- *    $Id: mbrolltimelag.c,v 5.5 2006-06-16 19:30:58 caress Exp $
+ *    $Id: mbrolltimelag.c,v 5.6 2008-02-12 02:48:39 caress Exp $
  *
  *    Copyright (c) 2005 by
  *    David W. Caress (caress@mbari.org)
@@ -27,6 +27,9 @@
  * Date:	November 11, 2005
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2006/06/16 19:30:58  caress
+ * Check in after the Santa Monica Basin Mapping AUV Expedition.
+ *
  * Revision 5.4  2006/04/26 22:05:26  caress
  * Changes to handle MBARI Mapping AUV data better.
  *
@@ -66,10 +69,10 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbrolltimelag.c,v 5.5 2006-06-16 19:30:58 caress Exp $";
+	static char rcs_id[] = "$Id: mbrolltimelag.c,v 5.6 2008-02-12 02:48:39 caress Exp $";
 	static char program_name[] = "MBrolltimelag";
 	static char help_message[] = "MBrolltimelag extracts the roll time series and the apparent \nbottom slope time series from swath data, and then calculates \nthe cross correlation between the roll and the slope minus roll \nfor a specified set of time lags.";
-	static char usage_message[] = "mbrolltimelag -Iswathdata [-Fformat -Nnping -Snavchannel -Tnlag/lagmin/lagmax -V -H ]";
+	static char usage_message[] = "mbrolltimelag -Iswathdata [-Fformat -Nnping -Ooutputname -Snavchannel -Tnlag/lagmin/lagmax -V -H ]";
 
 	/* parsing variables */
 	extern char *optarg;
@@ -89,6 +92,8 @@ main (int argc, char **argv)
 	char	swathdata[MB_PATH_MAXLINE];
 	char	swathfile[MB_PATH_MAXLINE];
 	char	swathroot[MB_PATH_MAXLINE];
+	char	outroot[MB_PATH_MAXLINE];
+	char	outroot_defined = MB_NO;
 	char	xcorfile[MB_PATH_MAXLINE];
 	char	xcorfiletot[MB_PATH_MAXLINE];
 	char	cmdfile[MB_PATH_MAXLINE];
@@ -198,6 +203,12 @@ main (int argc, char **argv)
 			sscanf (optarg,"%d", &npings);
 			flag++;
 			break;
+		case 'O':
+		case 'o':
+			sscanf (optarg,"%s", outroot);
+			outroot_defined = MB_YES;
+			flag++;
+			break;
 		case 'S':
 		case 's':
 			sscanf (optarg,"%d", &navchannel);
@@ -260,6 +271,8 @@ main (int argc, char **argv)
 	mb_get_format(verbose,swathdata,swathroot,&formatguess,&error);
 	if (format == 0)
 		format = formatguess;
+	if (outroot_defined == MB_NO)
+		strcpy(outroot, swathroot);
 
 	/* determine whether to read one file or a list of files */
 	if (format < 0)
@@ -308,7 +321,7 @@ main (int argc, char **argv)
 	/* open total cross correlation file */
 	if (read_datalist == MB_YES)
 		{
-		sprintf(xcorfiletot, "%s_xcorr.txt", swathroot);
+		sprintf(xcorfiletot, "%s_xcorr.txt", outroot);
 		if ((fpt = fopen(xcorfiletot, "w")) == NULL)
 			{
 			error = MB_ERROR_OPEN_FAIL;
@@ -321,7 +334,7 @@ main (int argc, char **argv)
 		}
 	
 	/* open time lag histogram file */
-	sprintf(histfile, "%s_timelaghist.txt", swathroot);
+	sprintf(histfile, "%s_timelaghist.txt", outroot);
 	if ((fph = fopen(histfile, "w")) == NULL)
 		{
 		error = MB_ERROR_OPEN_FAIL;
@@ -333,7 +346,7 @@ main (int argc, char **argv)
 		}
 	
 	/* open time lag model file */
-	sprintf(modelfile, "%s_timelagmodel.txt", swathroot);
+	sprintf(modelfile, "%s_timelagmodel.txt", outroot);
 	if ((fpm = fopen(modelfile, "w")) == NULL)
 		{
 		error = MB_ERROR_OPEN_FAIL;
