@@ -1,4 +1,4 @@
-.TH mbio l "21 August 2003" "MB-System 5.0" "MB-System 5.0"
+.TH mbio l "9 February 2008" "MB-System 5.0" "MB-System 5.0"
 
 .SH NAME
 \fBmbio\fP - Format independent input/output library for swath mapping sonar data.
@@ -2111,6 +2111,81 @@ The return values are:
 A status value indicating success or failure is returned; the error value
 argument \fIerror\fP passes more detailed information about 
 data extraction failures. 
+
+---------------------------------------------------------
+.br
+int \fBmb_detects\fP(
+ 		int \fIverbose\fP, 
+ 		void \fI*mbio_ptr\fP, 
+ 		void \fI*store_ptr\fP,
+ 		int \fI*kind\fP, 
+ 		int \fI*nbeams\fP, 
+ 		int \fI*detects\fP, 
+ 		int \fI*error\fP);
+
+The function \fBmb_detects\fP extracts beam bottom detect
+types from a sonar-specific data structure pointed to by 
+\fIstore_ptr\fP. These values indicate whether the depth
+value associated with a particular beam i derived from an
+amplitude detect (e.g. detects[i] = 1), a phase detect
+(e.g. detects[i] = 2), or the algorithm is unknown
+(e.g. detects[i] = 0). The \fIverbose\fP value controls 
+the standard error output verbosity of the function.  
+
+The return values are:
+ 	\fIkind\fP:		kind of data record read (error
+ 				if not survey data):
+ 					1	survey data
+ 	\fInbeams\fP:		number of beams
+ 	\fIdetects\fP:		array of \fInbeams\fP bottom detect algorithm flags
+ 					0 = unknown
+					1 = amplitude detect
+					2 = phase detect
+ 	\fIerror\fP:		error value
+
+A status value indicating success or failure is returned; the error value
+argument \fIerror\fP passes more detailed information about 
+data extraction failures. This functionality is available for 
+only a subset of the supported sonars. If the corresponding low
+level routine is undefined, \fI*error\fP will be set to
+MB_ERROR_BAD_SYSTEM (14). 
+
+---------------------------------------------------------
+.br
+int \fBmb_gains\fP(
+ 		int \fIverbose\fP, 
+ 		void \fI*mbio_ptr\fP, 
+ 		void \fI*store_ptr\fP,
+ 		int \fI*kind\fP, 
+ 		double \fI*transmit_gain\fP, 
+ 		double \fI*pulse_length\fP, 
+ 		double \fI*receive_gain\fP, 
+ 		int \fI*error\fP);
+
+The function \fBmb_gains\fP extracts the most basic gain
+settings from a sonar-specific data structure pointed to by 
+\fIstore_ptr\fP. In many cases, sonars have more complicated
+gain functions, particularly with respect to the receiver
+TVG function. In those cases, the receive gain returned here
+refers to the constant gain setting and does not include any
+TVG parameters. The \fIverbose\fP value controls 
+the standard error output verbosity of the function.
+
+The return values are:
+ 	\fIkind\fP:		kind of data record read (error
+ 				if not survey data):
+ 					1	survey data
+ 	\fItransmit_gain\fP:	transmit gain (dB)
+ 	\fIpulse_length\fP:	transmit pulse length (sec)
+ 	\fIreceive_gain\fP:	receive gain (dB)
+ 	\fIerror\fP:		error value
+
+A status value indicating success or failure is returned; the error value
+argument \fIerror\fP passes more detailed information about 
+data extraction failures.  This functionality is available for 
+only a subset of the supported sonars. If the corresponding low
+level routine is undefined, \fI*error\fP will be set to
+MB_ERROR_BAD_SYSTEM (14). 
 
 ---------------------------------------------------------
 .br
