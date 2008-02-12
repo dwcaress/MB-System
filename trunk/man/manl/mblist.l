@@ -1,4 +1,4 @@
-.TH mblist l9 "12 October 2007" "MB-System 5.0" "MB-System 5.0"
+.TH mblist l9 "9 February 2008" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmblist\fP - List data in swath data files.
 
@@ -405,7 +405,9 @@ not be supported by all formats.
 .IP
 \fB .g\fP  Stop of TVG ramp in samples (formats 56 & 67 - Simrad multibeam only)
 .IP
-\fB .L\fP  Pulse length (formats 56 & 67 - Simrad multibeam only)
+\fB .L\fP  Transmit pulse length (usec) (formats 56 & 67 - Simrad multibeam only)
+.IP
+\fB .l\fP  Transmit pulse length (sec)
 .IP
 \fB .M\fP  Sounder mode (formats 56 & 67 - Simrad multibeam only)
 .IP
@@ -422,6 +424,10 @@ for example\fB .30p\fP will give the first 30 sidescan pixels of each beam.
 \fB .S\fP  Number of raw sidescan pixels per ping (formats 56 & 67 - Simrad multibeam only)
 .IP
 \fB .s\fP  Number of raw sidescan pixels per beam (formats 56 & 67 - Simrad multibeam only)
+.IP
+\fB .T\fP  Transmit gain (dB)
+.IP
+\fB .t\fP  Receive gain (dB)
 
 .br
 Default \fIoutput_format\fP = \fBYXLZ\fP (latitude, longitude, cumulative
