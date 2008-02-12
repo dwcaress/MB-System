@@ -1,4 +1,4 @@
-.TH mbrolltimelag l "6 January 2006" "MB-System 5.0" "MB-System 5.0"
+.TH mbrolltimelag l "9 January 2008" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbrolltimelag\fP - Calculates cross correlation between the apparent
 bottom slope in swath bathymetry data and the roll time series used by
@@ -9,7 +9,7 @@ Version 5.0
 
 .SH SYNOPSIS
 \fBmbrolltimelag\fP \fB-I\fP\fIswathdata\fP [\fB-F\fP\fIformat\fP 
-\fB-N\fP\fInping\fP \fB-S\fP\fInavchannel\fP 
+\fB-N\fP\fInping\fP \fB-O\fP\fIoutroot\fP \fB-S\fP\fInavchannel\fP 
 \fB-T\fP\fInlag/lagmin/lagmax\fP \fB-V -H\fP ]
 .SH DESCRIPTION
 \fBMBrolltimelag\fP is an utility used to assess relative time errors,
@@ -57,10 +57,6 @@ Dale N. Chayes (dale@ldeo.columbia.edu)
 .br
   Lamont-Doherty Earth Observatory
 
-\fBmbrolltimelag\fP \fB-I\fP\fIswathdata\fP [\fB-F\fP\fIformat\fP 
-\fB-N\fP\fInping\fP \fB-S\fP\fInavchannel\fP 
-\fB-T\fP\fInlag/lagmin/lagmax\fP \fB-V -H\fP ]
-
 .SH OPTIONS
 .TP
 .B \-F
@@ -101,6 +97,14 @@ is given in the \fBMBIO\fP manual page. Default: \fIinfile\fP = "datalist.mb-1".
 .br
 Sets the number of pings to be read for each cross correlation calculation.
 Default: \fIlonflip\fP = 0.
+.TP
+.B \-O
+\fIoutroot\fP
+.br
+Sets the root of the output filenames.
+Default: output root is is the input filename minus any \fBMB-System\fP
+filename suffixe (e.g. the root derived from "datalistp.mb-1" will be 
+"datalist").
 .TP
 .B \-S
 \fInavchannel\fP
