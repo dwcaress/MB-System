@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 5.24 2007-10-08 16:48:07 caress Exp $
+#	$Id: Makefile.template,v 5.25 2008-02-12 02:49:51 caress Exp $
 #
 #     Copyright (c) 1993, 1994, 2000, 2002, 2003, 2005, 2007 by
 #     David W. Caress (caress@mbari.org)
@@ -16,6 +16,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.24  2007/10/08 16:48:07  caress
+# State of the code on 8 October 2007.
+#
 # Revision 5.23  2006/09/11 18:55:53  caress
 # Changes during Western Flyer and Thomas Thompson cruises, August-September
 # 2006.
@@ -232,7 +235,8 @@ all:	$(BINDIR)/mbformat \
 	$(BINDIR)/mb7kpreprocess \
 	$(BINDIR)/mbrolltimelag	\
 	$(BINDIR)/mbauvloglist\
-	$(BINDIR)/mb7k2ss
+	$(BINDIR)/mb7k2ss \
+	$(BINDIR)/mbabsorption
 
 ### make clean removes the object files
 clean:
@@ -380,10 +384,13 @@ $(BINDIR)/mbrolltimelag:	mbrolltimelag.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj
 $(BINDIR)/mbauvloglist:	mbauvloglist.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbaux.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
 	$(CC) $(CFLAGS) mbauvloglist.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbaux.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a \
 		$(LFLAGS) -o $(BINDIR)/mbauvloglist
-$(BINDIR)/mb7k2ss:	mb7k2ss.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbaux.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbaux.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
-	$(CC) $(CFLAGS) mb7k2ss.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbaux.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbaux.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a \
+$(BINDIR)/mb7k2ss:	mb7k2ss.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbaux.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
+	$(CC) $(CFLAGS) mb7k2ss.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbaux.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a \
 		$(GMTLIBDIR)/libgmt.a \
 		$(LFLAGS) -o $(BINDIR)/mb7k2ss
+$(BINDIR)/mbabsorption:	mbabsorption.o $(LIBDIR)/libmbio.a
+	$(CC) $(CFLAGS) mbabsorption.o $(LIBDIR)/libmbio.a \
+		$(LFLAGS) -o $(BINDIR)/mbabsorption
 
 ### compile the source files
 mbformat.o:	mbformat.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
@@ -479,3 +486,5 @@ mbauvloglist.o:	mbauvloglist.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(IN
 	$(CC) -c $(CFLAGS) mbauvloglist.c
 mb7k2ss.o:	mb7k2ss.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h $(INCDIR)/mbsys_reson7k.h $(INCDIR)/mbsys_ldeoih.h
 	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) -I$(NETCDFINCDIR) mb7k2ss.c
+mbabsorption.o:	mbabsorption.c  $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
+	$(CC) -c $(CFLAGS) mbabsorption.c
