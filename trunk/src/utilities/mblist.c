@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mblist.c	2/1/93
- *    $Id: mblist.c,v 5.25 2007-10-17 20:34:00 caress Exp $
+ *    $Id: mblist.c,v 5.26 2008-02-12 02:49:15 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -28,6 +28,10 @@
  *		in 1990.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.25  2007/10/17 20:34:00  caress
+ * Release 5.1.1beta11
+ * Added decimation option.
+ *
  * Revision 5.24  2007/10/08 16:48:07  caress
  * State of the code on 8 October 2007.
  *
@@ -308,7 +312,7 @@ int printsimplevalue(int verbose, FILE *output,
 int printNaN(int verbose, FILE *output, int ascii, int *invert, int *flipsign, int *error);
 int mb_get_raw(int verbose, void *mbio_ptr,
 		int *mode,
-		int *pulse_length,
+		int *ipulse_length,
 		int *png_count,
 		int *sample_rate,
 		double *absorption,
@@ -332,7 +336,7 @@ int mb_get_raw(int verbose, void *mbio_ptr,
 		int *error);
 int mb_get_raw_simrad2(int verbose, void *mbio_ptr, 
 		int *mode,
-		int *pulse_length,
+		int *ipulse_length,
 		int *png_count,
 		int *sample_rate,
 		double *absorption,
@@ -358,7 +362,7 @@ int mb_get_raw_simrad2(int verbose, void *mbio_ptr,
 /* NaN value */
 double	NaN;
 
-static char rcs_id[] = "$Id: mblist.c,v 5.25 2007-10-17 20:34:00 caress Exp $";
+static char rcs_id[] = "$Id: mblist.c,v 5.26 2008-02-12 02:49:15 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
@@ -425,6 +429,7 @@ main (int argc, char **argv)
 	int	use_ss = MB_NO;
 	int	use_slope = MB_NO;
 	int	use_nav = MB_NO;
+	int	use_gains = MB_NO;
 	int	check_values = MBLIST_CHECK_ON;
 	int	check_bath = MB_NO;
 	int	check_amp = MB_NO;
@@ -434,7 +439,7 @@ main (int argc, char **argv)
 	int	raw_next_value = MB_NO;
 	int	port_next_value = MB_NO;
 	int	stbd_next_value = MB_NO;
-	int	read_raw = MB_NO;
+	int	use_raw = MB_NO;
 	int	first = MB_YES;
 	int	ascii = MB_YES;
 	int	netcdf = MB_NO;
@@ -519,7 +524,7 @@ main (int argc, char **argv)
 	int	invert;
 	int	flip;
 	int	mode;
-	int	pulse_length;
+	int	ipulse_length;
 	int	png_count;
 	int	sample_rate;
 	double	absorption;
@@ -542,6 +547,9 @@ main (int argc, char **argv)
 	double	*depression = NULL;
 	double	*bs = NULL;
 	double	*ss_pixels = NULL;
+	double	transmit_gain;
+	double	pulse_length;
+	double	receive_gain;
 
 	int	read_data;
 	double	distmin;
@@ -1994,6 +2002,29 @@ main (int argc, char **argv)
 			fprintf(outfile, "us");
 			break;
 
+		  case 'l': /* Transmit pulse length */
+			strcpy(variable, "pulse_length");
+			if (signflip_next_value == MB_YES)
+			  strcat(variable, "-");
+			if (invert_next_value == MB_YES)
+			  strcat(variable, "_");
+			
+			fprintf(output[i], "\t%s = ", variable);
+			
+			fprintf(outfile, "\tfloat %s(data);\n", variable);
+			fprintf(outfile, "\t\t%s:long_name = \"Pulse length\";\n", variable);
+			fprintf(outfile, "\t\t%s:units = \"", variable);
+			if (signflip_next_value == MB_YES)
+			  fprintf(outfile, "-");
+			if (invert_next_value == MB_YES)
+			  fprintf(outfile, "1/");
+			fprintf(outfile, "seconds\";\n");
+			
+			signflip_next_value = MB_NO;
+			invert_next_value = MB_NO;
+			raw_next_value = MB_NO;
+			break;
+
 		  case 'M' : /* Mode */
 		    	strcpy(variable, "mode");
 
@@ -2135,6 +2166,52 @@ main (int argc, char **argv)
 			raw_next_value = MB_NO;
 			break;
 
+		  case 'T': /* Transmit gain */
+			strcpy(variable, "transmit_gain");
+			if (signflip_next_value == MB_YES)
+			  strcat(variable, "-");
+			if (invert_next_value == MB_YES)
+			  strcat(variable, "_");
+			
+			fprintf(output[i], "\t%s = ", variable);
+			
+			fprintf(outfile, "\tfloat %s(data);\n", variable);
+			fprintf(outfile, "\t\t%s:long_name = \"Transmit gain\";\n", variable);
+			fprintf(outfile, "\t\t%s:units = \"", variable);
+			if (signflip_next_value == MB_YES)
+			  fprintf(outfile, "-");
+			if (invert_next_value == MB_YES)
+			  fprintf(outfile, "1/");
+			fprintf(outfile, "dB\";\n");
+			
+			signflip_next_value = MB_NO;
+			invert_next_value = MB_NO;
+			raw_next_value = MB_NO;
+			break;
+
+		  case 't': /* Receive gain */
+			strcpy(variable, "receive_gain");
+			if (signflip_next_value == MB_YES)
+			  strcat(variable, "-");
+			if (invert_next_value == MB_YES)
+			  strcat(variable, "_");
+			
+			fprintf(output[i], "\t%s = ", variable);
+			
+			fprintf(outfile, "\tfloat %s(data);\n", variable);
+			fprintf(outfile, "\t\t%s:long_name = \"Receive gain\";\n", variable);
+			fprintf(outfile, "\t\t%s:units = \"", variable);
+			if (signflip_next_value == MB_YES)
+			  fprintf(outfile, "-");
+			if (invert_next_value == MB_YES)
+			  fprintf(outfile, "1/");
+			fprintf(outfile, "dB\";\n");
+			
+			signflip_next_value = MB_NO;
+			invert_next_value = MB_NO;
+			raw_next_value = MB_NO;
+			break;
+
 
 
 		  default:
@@ -2206,11 +2283,18 @@ main (int argc, char **argv)
 			}
 		    else
 			{
-			read_raw = MB_YES;
-			if (list[i] == 'R'|| list[i] == 'd')
-				use_bath = MB_YES;
-			if (list[i] == 'B' || list[i] == 'b' || list[i] == 'c')
-				use_amp = MB_YES;
+			if (list[i] == 'T' || list[i] == 't' || list[i] == 'U')
+				use_gains = MB_YES;
+			else if (list[i] == 'F' || list[i] == 'f')
+				;// ignore
+			else
+				{
+				use_raw = MB_YES;
+				if (list[i] == 'R' || list[i] == 'd')
+					use_bath = MB_YES;
+				if (list[i] == 'B' || list[i] == 'b' || list[i] == 'c')
+					use_amp = MB_YES;
+				}
 			if (list[i] != '/' &&  list[i] != '-' && list[i] != '.')
 				raw_next_value = MB_NO;
 			}
@@ -2260,7 +2344,7 @@ main (int argc, char **argv)
 	if (error == MB_ERROR_NO_ERROR)
 		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
 						2 * sizeof(double), (void **)&slopeacrosstrack, &error);
-	if (read_raw == MB_YES)
+	if (use_raw == MB_YES)
 		{
 		if (error == MB_ERROR_NO_ERROR)
 			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
@@ -2558,11 +2642,12 @@ main (int argc, char **argv)
 			}
 
 		/* get raw values if required */
-		if (read_raw == MB_YES)
+		if (error == MB_ERROR_NO_ERROR 
+			&& use_raw == MB_YES)
 			{
 			status = mb_get_raw(verbose, mbio_ptr,
 					&mode,
-					&pulse_length,
+					&ipulse_length,
 					&png_count,
 					&sample_rate,
 					&absorption,
@@ -2584,6 +2669,14 @@ main (int argc, char **argv)
 					bs,
 					ss_pixels,
 					&error);
+			}  
+
+		/* get gains values if required */
+		if (error == MB_ERROR_NO_ERROR 
+			&& use_gains == MB_YES)
+			{
+			status = mb_gains(verbose,mbio_ptr,store_ptr,&kind,
+					&transmit_gain,&pulse_length,&receive_gain,&error);
 			}  
 
 		/* now loop over beams */
@@ -3354,12 +3447,18 @@ main (int argc, char **argv)
 					break;
 				case 'L': /* Pulse length */
 					if (ascii == MB_YES)
-					    fprintf(output[i],"%6d",pulse_length);
+					    fprintf(output[i],"%6d",ipulse_length);
 					else
 					    {
-					    b = pulse_length;
+					    b = ipulse_length;
 					    fwrite(&b, sizeof(double), 1, outfile);
 					    }
+					raw_next_value = MB_NO;
+					break;
+				case 'l': /* Transmit pulse length (sec) */
+					printsimplevalue(verbose, output[i], pulse_length, 9, 6, ascii, 
+							    &invert_next_value, 
+							    &signflip_next_value, &error);
 					raw_next_value = MB_NO;
 					break;
 				case 'M': /* mode */
@@ -3454,6 +3553,18 @@ main (int argc, char **argv)
 					    b = beam_samples[k];
 					    fwrite(&b, sizeof(double), 1, outfile);
 					    }
+					raw_next_value = MB_NO;
+					break;
+				case 'T': /* Transmit gain (dB) */
+					printsimplevalue(verbose, output[i], transmit_gain, 5, 1, ascii, 
+							    &invert_next_value, 
+							    &signflip_next_value, &error);
+					raw_next_value = MB_NO;
+					break;
+				case 't': /* Receive gain (dB) */
+					printsimplevalue(verbose, output[i], receive_gain, 5, 1, ascii, 
+							    &invert_next_value, 
+							    &signflip_next_value, &error);
 					raw_next_value = MB_NO;
 					break;
 
@@ -4116,12 +4227,18 @@ main (int argc, char **argv)
 					break;
 				case 'L': /* Pulse length */
 					if (ascii == MB_YES)
-					    fprintf(output[i],"%6d",pulse_length);
+					    fprintf(output[i],"%6d",ipulse_length);
 					else
 					    {
-					    b = pulse_length;
+					    b = ipulse_length;
 					    fwrite(&b, sizeof(double), 1, outfile);
 					    }
+					raw_next_value = MB_NO;
+					break;
+				case 'l': /* Transmit pulse length (sec) */
+					printsimplevalue(verbose, output[i], pulse_length, 9, 6, ascii, 
+							    &invert_next_value, 
+							    &signflip_next_value, &error);
 					raw_next_value = MB_NO;
 					break;
 				case 'M': /* mode */
@@ -4221,6 +4338,18 @@ main (int argc, char **argv)
 					    }
 					raw_next_value = MB_NO;
 					break;
+				case 'T': /* Transmit gain (dB) */
+					printsimplevalue(verbose, output[i], transmit_gain, 5, 1, ascii, 
+							    &invert_next_value, 
+							    &signflip_next_value, &error);
+					raw_next_value = MB_NO;
+					break;
+				case 't': /* Receive gain (dB) */
+					printsimplevalue(verbose, output[i], receive_gain, 5, 1, ascii, 
+							    &invert_next_value, 
+							    &signflip_next_value, &error);
+					raw_next_value = MB_NO;
+					break;
 
 				default:
 					if (ascii == MB_YES)
@@ -4251,7 +4380,7 @@ main (int argc, char **argv)
 	status = mb_close(verbose,&mbio_ptr,&error);
 
 	/* deallocate memory used for data arrays */
-	if (read_raw == MB_YES)
+	if (use_raw == MB_YES)
 		{
 		mb_free(verbose,(char **)&ss_pixels,&error); 
 		}
@@ -4864,7 +4993,7 @@ Method to get fields from raw data, similar to mb_get_all.
 */
 int mb_get_raw(int verbose, void *mbio_ptr,
 		   int	*mode,
-		   int	*pulse_length,
+		   int	*ipulse_length,
 	       int	*png_count,
 	       int	*sample_rate,
 	       double	*absorption,
@@ -4894,7 +5023,7 @@ int mb_get_raw(int verbose, void *mbio_ptr,
 	struct mb_io_struct     *mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 	
 	*mode = -1;
-	*pulse_length = 0;
+	*ipulse_length = 0;
 	*png_count = 0;
 	*sample_rate = 0;
 	*absorption = 0;
@@ -4925,7 +5054,7 @@ int mb_get_raw(int verbose, void *mbio_ptr,
 	  case MBF_EM300RAW:
 	    mb_get_raw_simrad2(verbose, mbio_ptr, 
 			   	   mode,
-			   	   pulse_length,
+			   	   ipulse_length,
 			       png_count,
 			       sample_rate,
 			       absorption,
@@ -4961,7 +5090,7 @@ Method to get fields from simrad2 raw data.
 
 int mb_get_raw_simrad2(int verbose, void *mbio_ptr, 
 			   int	*mode,
-			   int	*pulse_length,
+			   int	*ipulse_length,
 		       int	*png_count,
 		       int	*sample_rate,
 		       double	*absorption,
@@ -4995,7 +5124,7 @@ int mb_get_raw_simrad2(int verbose, void *mbio_ptr,
 	if (store_ptr->kind == MB_DATA_DATA)
 	  {
 	    *mode = store_ptr->run_mode;
-	    *pulse_length = store_ptr->run_tran_pulse;
+	    *ipulse_length = store_ptr->run_tran_pulse;
 	    *png_count = ping_ptr->png_count;
 	    *sample_rate =  ping_ptr->png_sample_rate;
 	    *absorption = ping_ptr->png_max_range * 0.01;
