@@ -1,0 +1,183 @@
+.TH mblevitus l "11 February 2008" "MB-System 5.0" "MB-System 5.0"
+.SH NAME
+\fBmbabsorption\fP - calculates the absorption of sound in sea water in dB/km
+as a function of frequency, temperature, salinity, sound speed, and depth.
+
+
+.SH VERSION
+Version 5.0
+
+.SH SYNOPSIS
+\fBmbabsorption\fP [\fB-C\fP\fIsoundspeed\fP \fB-D\fP\fIdepth\fP 
+\fB-F\fP\fIfrequency\fP \fB-P\fP\fIph\fP \fB-S\fP\fIsalinity\fP \fB-T\fP\fItemperature\fP \fB-V -H\fP]
+
+.SH DESCRIPTION
+\fBmbabsorption\fP - calculates the absorption of sound in sea water in dB/km
+ as a function of frequency (kHz), temperature (degrees C), salinity (per mil), 
+depth (m), pH, and water sound speed (m/sec). 
+
+ We use the Francois and Garrison equations from:
+    Francois, R.E., Garrison, G.R., "Sound absorption based
+      on ocean measurements: Part I: Pure water and magnesium
+      sulfate contributions", J. Acoust. Soc. Am., 72(3), 
+      896-907, 1982.
+    Francois, R.E., Garrison, G.R., "Sound absorption based
+      on ocean measurements: Part II: Boric acid contribution
+      and equation for total absorption", J. Acoust. Soc. Am., 
+      72(6), 1879-1890, 1982.
+
+Francois and Garrison [1982] model the sound absorption in
+sea water as resulting from contributions from pure water,
+magnesium sulfate, and boric acid. The boric acid contribution
+is significant below 10 kHz. The equations are:
+
+ 	absorption = Boric Acid Contribution
+ 			+ MbSO4 Contribution
+ 			+ Pure Water Contribution
+ 	
+.br
+Boric Acid Contribution:
+ 	AlphaB = Ab * Pb * Fb * f**2
+ 	         -------------------
+ 	            f**2 + Fb**2
+ 	    
+ 	Ab = 8.86 / c * 10**(0.78 * pH - 5) (dB/km/kHz)
+ 	Pb = 1
+ 	Fb = 2.8 * (S / 35)**0.5 * 10**(4 - 1245 / Tk) (kHz)
+ 		
+.br
+MgSO4 Contribution:
+ 	AlphaM = Am * Pm * Fm * f**2
+ 	         -------------------
+ 	            f**2 + Fm**2
+		
+ 	Am = 21.44 * S * (1 + 0.025 * T) / c (dB/km/kHZ)
+ 	Pm = 1 - 0.000137 * D + 0.0000000062 * D**2
+ 	Fm = (8.17 * 10**(8 - 1990 / Tk)) / (1 + 0.0018 * (S - 35))  (kHz)
+ 
+.br
+Pure Water Contribution:
+ 	AlphaW = Aw * Pw * f**2
+  
+ 	For T <= 20 deg C
+ 	  Aw = 0.0004397 - 0.0000259 * T
+ 	          + 0.000000911 * T**2 - 0.000000015 * T**3 (dB/km/kHz) 
+ 	For T > 20 deg C
+ 	  Aw = 0.0003964 - 0.00001146 * T
+ 	          + 0.000000145 * T**2 - 0.00000000049 * T**3 (dB/km/kHz) 
+ 	Pw = 1 - 0.0000383 * D + 0.00000000049 * D**2 
+ 
+.br
+Parameters:
+ 	f = sound frequency (kHz)
+ 	c = speed of sound (m/s)
+ 	T = temperature (deg C)
+ 	Tk = temperature (deg K) = T + 273 (deg K)
+ 	S = salinity (per mil)
+ 	D = depth (m)
+
+.br
+If the speed of sound is not specified by the user, it will be
+calculated from temperature, salinity, and depth using:
+.br
+ 	c =~ 1412 + 3.21 * T + 1.19 * S + 0.0167 * D
+
+.br
+Normally, \fBmbabsorption\fP simply prints the resulting absorption
+value to stdout. If the \fB-V\fP option is specified, the output will
+include a listing of the parameters used in calculating the absorption.
+ 
+.SH AUTHORSHIP
+David W. Caress (caress@mbari.org)
+.br
+  Monterey Bay Aquarium Research Institute
+.br
+Dale N. Chayes (dale@ldeo.columbia.edu)
+.br
+  Lamont-Doherty Earth Observatory
+
+.SH OPTIONS
+.TP
+.B \-H
+This "help" flag cause the program to print out a description
+of its operation and then exit immediately.
+.TP
+.B \-C
+\fIsoundspeed\fP
+.br
+Specifies the water sound speed in m/sec. If the option is
+not used, the water sound speed will be calculated from the
+temperature, salinity, and depth. 
+.TP
+.B \-D
+\fIdepth\fP
+.br
+Sets the depth in meters at which the sound absorption should be calculated.
+Default: \fIdepth\fP = 0.0 m (i.e. the sea surface).
+.TP
+.B \-F
+\fIfrequency\fP
+.br
+Sets the sound frequency in kHz at which the sound absorption should be calculated.
+Default: \fIfrequency\fP = 200 kHz.
+.TP
+.B \-P
+\fIph\fP
+.br
+Sets the pH value at which the sound absorption should be calculated.
+Default: \fIph\fP = 8.
+.TP
+.B \-S
+\fIsalinity\fP
+.br
+Sets the salinity in per mil at which the sound absorption should be calculated.
+Default: \fIsalinity\fP = 35 per mil.
+.TP
+.B \-T
+\fItemperature\fP
+.br
+Sets the temperature in degrees C at which the sound absorption should be calculated.
+Default: \fItemperature\fP = 10.0 degrees C.
+.TP
+.B \-V
+Normally, \fBmbabsorption\fP outputs only a single absorption value 
+to the stdout stream.  If the
+\fB-V\fP flag is given, then \fBmbabsorption\fP works in a "verbose" mode and
+also outputs the parameters used to calculate the absorption.
+
+.SH EXAMPLES
+Suppose that one wishes to obtain the water sound absorption for
+a 200 kHz multibeam sonar operating at a depth of 1000 meters (on
+an AUV, for instance) in water with a salinity of 35 per mil, a pH
+of 8, and a temperature of 4 degrees C. The following will suffice:
+.br
+ 	mbabsorption -D1000 -F200 -P8 -S35 -T4
+.br
+The output will be:
+ 37.692561
+ 
+.br
+In order to obtain a more readable result, use the \fB-V\fP option:
+.br
+ 	mbabsorption -D1000 -F200 -P8 -S35 -T4 -V
+.br
+The output will be:
+.br
+ Program MBabsorption
+ Version $Id: mbabsorption.l,v 5.0 2008-02-12 02:35:16 caress Exp $
+ MB-system Version 5.1.1beta15
+ 
+ Input Parameters:
+      Frequency:        200.000000 kHz
+      Temperature:      4.000000 deg C
+      Salinity:         35.000000 per mil
+      Depth:            1000.000000 m
+      pH:               8.000000
+ Result:
+      Sound absorption: 37.692561 dB/km
+
+.SH SEE ALSO
+\fBmbsystem\fP(l)
+
+.SH BUGS
+None known.
