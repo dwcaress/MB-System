@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	4/21/96
- *    $Id: mb_define.h,v 5.33 2007-10-08 15:59:34 caress Exp $
+ *    $Id: mb_define.h,v 5.34 2008-02-12 02:58:30 caress Exp $
  *
  *    Copyright (c) 1996, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	April 21, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.33  2007/10/08 15:59:34  caress
+ * MBIO changes as of 8 October 2007.
+ *
  * Revision 5.32  2006/11/10 22:36:04  caress
  * Working towards release 5.1.0
  *
@@ -459,6 +462,11 @@ int mb_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 		double *angles_forward, double *angles_null,
 		double *heave, double *alongtrack_offset, 
 		double *draft, double *ssv, int *error);
+int mb_detects(int verbose, void *mbio_ptr, void *store_ptr,
+		int *kind, int *nbeams, int *detects, int *error);
+int mb_gains(int verbose, void *mbio_ptr, void *store_ptr,
+		int *kind, double *transmit_gain, double *pulse_length, 
+		double *receive_gain, int *error);
 int mb_extract_rawss(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind,
 		int *nrawss,
