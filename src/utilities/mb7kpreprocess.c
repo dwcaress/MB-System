@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb7kpreprocess.c	10/12/2005
- *    $Id: mb7kpreprocess.c,v 5.14 2008-01-14 18:24:28 caress Exp $
+ *    $Id: mb7kpreprocess.c,v 5.15 2008-02-12 02:47:42 caress Exp $
  *
  *    Copyright (c) 2005 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	October 12, 2005
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.14  2008/01/14 18:24:28  caress
+ * Changed handling of beam quality values and beam flags following upgrade to Reson 7k multibeams.
+ *
  * Revision 5.13  2007/11/16 17:53:02  caress
  * Fixes applied.
  *
@@ -92,7 +95,7 @@
 #define	MB7KPREPROCESS_TIMELAG_CONSTANT	1
 #define	MB7KPREPROCESS_TIMELAG_MODEL	2
 
-static char rcs_id[] = "$Id: mb7kpreprocess.c,v 5.14 2008-01-14 18:24:28 caress Exp $";
+static char rcs_id[] = "$Id: mb7kpreprocess.c,v 5.15 2008-02-12 02:47:42 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
@@ -304,6 +307,9 @@ main (int argc, char **argv)
 	int	ntimelag = 0;
 	double	*timelag_time_d = NULL;
 	double	*timelag_model = NULL;
+	int	timelagoutput = MB_NO;
+	char	timelagoutfile[MB_PATH_MAXLINE];
+	FILE	*tofp;
 	
 	/* range offset parameters */
 	int	nrangeoffset = 0;
@@ -471,6 +477,11 @@ main (int argc, char **argv)
 				}
 			flag++;
 			break;
+		case 'U':
+		case 'u':
+			timelagoutput = MB_YES;
+			flag++;
+			break;
 		case '?':
 			errflg++;
 		}
@@ -543,7 +554,10 @@ main (int argc, char **argv)
 					i, timelag_time_d[i], timelag_model[i]);
 			}
 		else
+			{
 			fprintf(stderr,"dbg2       timelag:             %f\n",timelag);
+			fprintf(stderr,"dbg2       timelagoutput:       %d\n",timelagoutput);
+			}
 		fprintf(stderr,"dbg2       timelag:             %f\n",timelag);
 		fprintf(stderr,"dbg2       sonardepthfile:      %s\n",sonardepthfile);
 		fprintf(stderr,"dbg2       sonardepthdata:      %d\n",sonardepthdata);
@@ -1571,7 +1585,9 @@ fclose(tfp);
 							ntimelag, ins_time_d[i], &timelag, &j, 
 							&error);
 				}
+fprintf(stderr,"INS TIME LAG CORRECTION: %f %f",timelag,ins_time_d[i]);
 			ins_time_d[i] -= timelag;
+fprintf(stderr," %f\n",ins_time_d[i]);
 			}
 		for (i=0;i<nins_altitude;i++)
 			{
@@ -2492,11 +2508,36 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]);*/
 			mb_get_itime(verbose, time_j, time_i);
 			mb_get_time(verbose, time_i, &time_d);
 
+			/* get timelag value */
+			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
+				{
+				interp_status = mb_linear_interp(verbose, 
+							timedelay_time_d-1, timedelay_timedelay-1,
+							ntimedelay, time_d, &timelag, &j, 
+							&error);
+				timelag += timelagconstant;
+				}
+			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
+				{
+				interp_status = mb_linear_interp(verbose, 
+							timelag_time_d-1, timelag_model-1,
+							ntimelag, time_d, &timelag, &j, 
+							&error);
+				}
+			time_d -= timelag;
+			mb_get_date(verbose, time_d,time_i);
+			mb_get_jtime(verbose, time_i, time_j);
+			header->s7kTime.Year = time_i[0];
+			header->s7kTime.Day = time_j[1];
+			header->s7kTime.Hours = time_i[3];
+			header->s7kTime.Minutes = time_i[4];
+			header->s7kTime.Seconds = time_i[5] + 0.000001 * time_i[6];
+
 			if (verbose > 0)
 				fprintf(stderr,"R7KRECID_BluefinEnvironmental:     7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
-			time_i[0],time_i[1],time_i[2],
-			time_i[3],time_i[4],time_i[5],time_i[6],
-			header->RecordNumber);
+					time_i[0],time_i[1],time_i[2],
+					time_i[3],time_i[4],time_i[5],time_i[6],
+					header->RecordNumber);
 			for (i=0;i<bluefin->number_frames;i++)
 				{
 				time_j[0] = bluefin->environmental[i].s7kTime.Year;
@@ -2506,6 +2547,16 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]);*/
 				time_j[4] = (int) (1000000 * (bluefin->environmental[i].s7kTime.Seconds - time_j[3]));
 				mb_get_itime(verbose, time_j, time_i);
 				mb_get_time(verbose, time_i, &time_d);
+				time_d -= timelag;
+				bluefin->environmental[i].ctd_time = time_d;
+				bluefin->environmental[i].temperature_time = time_d;
+				mb_get_date(verbose, time_d,time_i);
+				mb_get_jtime(verbose, time_i, time_j);
+				bluefin->environmental[i].s7kTime.Year = time_i[0];
+				bluefin->environmental[i].s7kTime.Day = time_j[1];
+				bluefin->environmental[i].s7kTime.Hours = time_i[3];
+				bluefin->environmental[i].s7kTime.Minutes = time_i[4];
+				bluefin->environmental[i].s7kTime.Seconds = time_i[5] + 0.000001 * time_i[6];
 				if (verbose > 0)
 				fprintf(stderr,"                       %2.2d          7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) CTD_time:%f T_time:%f\n",
 					i,time_i[0],time_i[1],time_i[2],
@@ -2608,11 +2659,36 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]);*/
 			mb_get_itime(verbose, time_j, time_i);
 			mb_get_time(verbose, time_i, &time_d);
 
+			/* get timelag value */
+			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
+				{
+				interp_status = mb_linear_interp(verbose, 
+							timedelay_time_d-1, timedelay_timedelay-1,
+							ntimedelay, time_d, &timelag, &j, 
+							&error);
+				timelag += timelagconstant;
+				}
+			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
+				{
+				interp_status = mb_linear_interp(verbose, 
+							timelag_time_d-1, timelag_model-1,
+							ntimelag, time_d, &timelag, &j, 
+							&error);
+				}
+			time_d -= timelag;
+			mb_get_date(verbose, time_d,time_i);
+			mb_get_jtime(verbose, time_i, time_j);
+			header->s7kTime.Year = time_i[0];
+			header->s7kTime.Day = time_j[1];
+			header->s7kTime.Hours = time_i[3];
+			header->s7kTime.Minutes = time_i[4];
+			header->s7kTime.Seconds = time_i[5] + 0.000001 * time_i[6];
+
 			if (verbose > 0)
 				fprintf(stderr,"R7KRECID_BluefinNav:               7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
-			time_i[0],time_i[1],time_i[2],
-			time_i[3],time_i[4],time_i[5],time_i[6],
-			header->RecordNumber);
+						time_i[0],time_i[1],time_i[2],
+						time_i[3],time_i[4],time_i[5],time_i[6],
+						header->RecordNumber);
 			for (i=0;i<bluefin->number_frames;i++)
 				{
 				time_j[0] = bluefin->nav[i].s7kTime.Year;
@@ -2621,6 +2697,17 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]);*/
 				time_j[3] = (int) bluefin->nav[i].s7kTime.Seconds;
 				time_j[4] = (int) (1000000 * (bluefin->nav[i].s7kTime.Seconds - time_j[3]));
 				mb_get_itime(verbose, time_j, time_i);
+				mb_get_time(verbose, time_i, &time_d);
+				time_d -= timelag;
+				bluefin->nav[i].position_time -= timelag;
+				bluefin->nav[i].altitude_time -= timelag;
+				mb_get_date(verbose, time_d,time_i);
+				mb_get_jtime(verbose, time_i, time_j);
+				bluefin->nav[i].s7kTime.Year = time_i[0];
+				bluefin->nav[i].s7kTime.Day = time_j[1];
+				bluefin->nav[i].s7kTime.Hours = time_i[3];
+				bluefin->nav[i].s7kTime.Minutes = time_i[4];
+				bluefin->nav[i].s7kTime.Seconds = time_i[5] + 0.000001 * time_i[6];
 				if (verbose > 0)
 				fprintf(stderr,"                       %2.2d          7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) Pos_time:%f\n",
 					i,time_i[0],time_i[1],time_i[2],
@@ -2834,10 +2921,11 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]);*/
 					bluefin->nav[i].quality = 0;
 					bluefin->nav[i].latitude = DTR * ins_lat[ins_output_index];
 					bluefin->nav[i].longitude = DTR * ins_lon[ins_output_index];
+					speed = bluefin->nav[i].speed;
 					mb_linear_interp(verbose, 
 								ins_speed_time_d-1, ins_speed-1,
 								nins_speed, ins_time_d[ins_output_index], 
-								&(bluefin->nav[i].speed), &j, 
+								&speed, &j, 
 								&error);
 					bluefin->nav[i].depth = ins_sonardepth[ins_output_index];
 					mb_linear_interp(verbose, 
