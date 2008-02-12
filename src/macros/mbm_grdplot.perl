@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grdplot.perl	8/6/95
-#    $Id: mbm_grdplot.perl,v 5.29 2008-01-14 17:47:41 caress Exp $
+#    $Id: mbm_grdplot.perl,v 5.30 2008-02-12 02:52:50 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 2000, 2003 by 
 #    D. W. Caress (caress@mbari.org)
@@ -69,10 +69,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   October 19, 1994
 #
 # Version:
-#   $Id: mbm_grdplot.perl,v 5.29 2008-01-14 17:47:41 caress Exp $
+#   $Id: mbm_grdplot.perl,v 5.30 2008-02-12 02:52:50 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.29  2008/01/14 17:47:41  caress
+#   Fixed typo.
+#
 #   Revision 5.28  2007/10/08 04:30:55  caress
 #   Added some large page definitions.
 #
@@ -323,7 +326,8 @@ $ncpt = 11;
 			    "Grayscale", 
 			    "Uniform Gray",
 			    "Uniform Black",
-			    "Uniform White");
+			    "Uniform White",
+			    "Sealevel");
 
 # original Haxby color pallette
 #	$ncolors = 15;
@@ -925,7 +929,7 @@ if ($color_control)
 		($color_style, $color_pallette, $ncolors) 
 			= $color_control =~  /(\S+)\/(\S+)\/(\S+)/;
 		if ($color_pallette < 1 
-			|| $color_pallette > 7)
+			|| $color_pallette > 8)
 			{
 			$color_pallette = 1;
 			}
@@ -939,7 +943,7 @@ if ($color_control)
 		($color_style, $color_pallette) = $color_control
 			=~  /(\S+)\/(\S+)/;
 		if ($color_pallette < 1 
-			|| $color_pallette > 7)
+			|| $color_pallette > 8)
 			{
 			$color_pallette = 1;
 			}
@@ -2748,7 +2752,7 @@ if ($swathnavdatalist)
 	}
 
 # do psscale plot
-if ($color_mode && $color_pallette < 5 && $gridprojected != 2)
+if ($color_mode && ($color_pallette < 5 || $color_pallette == 8) && $gridprojected != 2)
 	{
 	printf FCMD "#\n# Make color scale\n";
 	printf FCMD "echo Running psscale...\n";
@@ -2948,7 +2952,7 @@ if ($verbose)
 		{
 		print "    XY Plots of ", scalar(@xyfiles), " Datasets\n";
 		}
-	if ($color_mode && $color_pallette < 5)
+	if ($color_mode && ($color_pallette < 5 || $color_pallette == 8))
 		{
 		if ($colorscale_vh eq "v")
 			{
