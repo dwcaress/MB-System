@@ -247,6 +247,14 @@ single beam echosounder bathymetry.
 Made checking for data min maxes and bounds more robust to improve 
 parsing through large databases.
 
+Added some generic gain values to mblist as part of the "raw" list.
+To do this, added mb_gains() function to MBIO. This is currently
+defined for SeaBeam 2112, Simrad, and Reson 7k multibeams.
+
+Added new program mbabsorption to calculate the sound absorption of
+seawater as a function of salinity, pH, temperature, depth, and
+frequency.
+
 MB-SYSTEM VERSION 5.1.0 RELEASE NOTES:
 ------------------------------------------
 
@@ -1440,10 +1448,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.106 2008-01-14 18:40:23 caress Exp $
+RCS ID: $Id: README,v 5.107 2008-02-12 02:31:43 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.106  2008/01/14 18:40:23  caress
+Working towards 5.1.1 release.
+
 Revision 5.105  2007/11/02 22:37:21  caress
 Distribution 5.1.beta12
 
