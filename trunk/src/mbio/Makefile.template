@@ -1,7 +1,7 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 5.23 2006-11-10 22:36:04 caress Exp $
+#	$Id: Makefile.template,v 5.24 2008-03-01 09:12:52 caress Exp $
 #
-#     Copyright (c) 1993, 1994, 2000, 2002, 2003, 2006 by
+#     Copyright (c) 1993-2008 by
 #     David W. Caress (caress@mbari.org)
 #       Monterey Bay Aquarium Research Institute
 #       Moss Landing, CA 95039
@@ -16,6 +16,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.23  2006/11/10 22:36:04  caress
+# Working towards release 5.1.0
+#
 # Revision 5.22  2006/10/05 18:58:28  caress
 # Changes for 5.1.0beta4
 #
@@ -184,8 +187,8 @@ all:	$(INCDIR)/mb_format.h $(INCDIR)/mb_status.h \
 	$(INCDIR)/mb_define.h $(INCDIR)/mb_process.h \
 	$(INCDIR)/mb_segy.h $(INCDIR)/mb_info.h \
 	$(INCDIR)/mbsys_sb.h $(INCDIR)/mbsys_hsds.h \
-	$(INCDIR)/mbsys_sb2100.h \
-	$(INCDIR)/mbsys_simrad.h $(INCDIR)/mbsys_simrad2.h \
+	$(INCDIR)/mbsys_sb2100.h $(INCDIR)/mbsys_simrad.h \
+	$(INCDIR)/mbsys_simrad2.h $(INCDIR)/mbsys_simrad3.h \
 	$(INCDIR)/mbsys_mr1.h $(INCDIR)/mbsys_mr1b.h $(INCDIR)/mbsys_mr1v2001.h \
 	$(INCDIR)/mbsys_ldeoih.h \
 	$(INCDIR)/mbsys_reson.h $(INCDIR)/mbsys_sb2000.h \
@@ -231,7 +234,8 @@ $(LIBDIR)/libmbio.a:	mb_format.o mb_error.o \
 		mb_read_init.o mb_write_init.o mb_close.o \
 		mb_mem.o \
 		mb_coor_scale.o mb_check_info.o \
-		mb_time.o mb_angle.o mb_proj.o \
+		mb_time.o mb_angle.o \
+		mb_absorption.o mb_proj.o \
 		mb_get_value.o mb_defaults.o \
 		mb_process.o mb_esf.o \
 		mb_get.o mb_get_all.o mb_read.o \
@@ -240,8 +244,8 @@ $(LIBDIR)/libmbio.a:	mb_format.o mb_error.o \
 		mb_read_ping.o mb_write_ping.o \
 		mb_access.o mb_segy.o\
 		mbsys_sb.o mbsys_hsds.o \
-		mbsys_sb2100.o \
-		mbsys_simrad.o mbsys_simrad2.o \
+		mbsys_sb2100.o mbsys_simrad.o \
+		mbsys_simrad2.o mbsys_simrad3.o \
 		mbsys_mr1.o mbsys_mr1b.o mbsys_mr1v2001.o \
 		mbsys_ldeoih.o mbsys_reson.o \
 		mbsys_elac.o mbsys_elacmk2.o \
@@ -264,6 +268,7 @@ $(LIBDIR)/libmbio.a:	mb_format.o mb_error.o \
 		mbr_emoldraw.o mbr_em12darw.o \
 		mbr_em12ifrm.o \
 		mbr_em300raw.o mbr_em300mba.o \
+		mbr_em710raw.o mbr_em710mba.o \
 		mbr_mr1prhig.o mbr_mr1aldeo.o \
 		mbr_mr1bldeo.o mbr_mr1prvr2.o \
 		mbr_mbldeoih.o mbr_cbat9001.o \
@@ -291,7 +296,8 @@ $(LIBDIR)/libmbio.a:	mb_format.o mb_error.o \
 		mb_read_init.o mb_write_init.o mb_close.o \
 		mb_mem.o \
 		mb_coor_scale.o mb_check_info.o\
-		mb_time.o mb_angle.o mb_proj.o \
+		mb_time.o mb_angle.o \
+		mb_absorption.o mb_proj.o \
 		mb_get_value.o mb_defaults.o \
 		mb_process.o mb_esf.o \
 		mb_get.o mb_get_all.o mb_read.o \
@@ -300,8 +306,8 @@ $(LIBDIR)/libmbio.a:	mb_format.o mb_error.o \
 		mb_read_ping.o mb_write_ping.o \
 		mb_access.o mb_segy.o \
 		mbsys_sb.o mbsys_hsds.o \
-		mbsys_sb2100.o \
-		mbsys_simrad.o mbsys_simrad2.o \
+		mbsys_sb2100.o mbsys_simrad.o \
+		mbsys_simrad2.o mbsys_simrad3.o \
 		mbsys_mr1.o mbsys_mr1b.o mbsys_mr1v2001.o \
 		mbsys_ldeoih.o mbsys_reson.o \
 		mbsys_elac.o mbsys_elacmk2.o \
@@ -324,6 +330,7 @@ $(LIBDIR)/libmbio.a:	mb_format.o mb_error.o \
 		mbr_emoldraw.o mbr_em12darw.o \
 		mbr_em12ifrm.o \
 		mbr_em300raw.o mbr_em300mba.o \
+		mbr_em710raw.o mbr_em710mba.o \
 		mbr_mr1prhig.o mbr_mr1aldeo.o \
 		mbr_mr1bldeo.o mbr_mr1prvr2.o \
 		mbr_mbldeoih.o mbr_cbat9001.o \
@@ -374,6 +381,8 @@ mb_time.o:	mb_time.c $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mb_time.c
 mb_angle.o:	mb_angle.c $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mb_angle.c
+mb_absorption.o:	mb_absorption.c $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
+	$(CC) -c $(CFLAGS) mb_absorption.c
 mb_proj.o:	mb_proj.c $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h $(INCDIR)/proj_api.h Makefile.template
 	echo "	char *projectionfile = "'"$(PROJECTIONS)"'";" > projections.h
 	$(CC) -c $(CFLAGS) mb_proj.c
@@ -415,6 +424,8 @@ mbsys_simrad.o:	mbsys_simrad.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INC
 	$(CC) -c $(CFLAGS) mbsys_simrad.c
 mbsys_simrad2.o: mbsys_simrad2.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mbsys_simrad2.h
 	$(CC) -c $(CFLAGS) mbsys_simrad2.c
+mbsys_simrad3.o: mbsys_simrad3.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mbsys_simrad3.h
+	$(CC) -c $(CFLAGS) mbsys_simrad3.c
 mbsys_mr1.o:	mbsys_mr1.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mbsys_mr1.h
 	$(CC) -c $(CFLAGS) mbsys_mr1.c
 mbsys_mr1b.o:	mbsys_mr1b.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mbsys_mr1b.h
@@ -499,6 +510,10 @@ mbr_em300raw.o: mbr_em300raw.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INC
 	$(CC) -c $(CFLAGS) mbr_em300raw.c
 mbr_em300mba.o: mbr_em300mba.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h  $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbsys_simrad2.h
 	$(CC) -c $(CFLAGS) mbr_em300mba.c
+mbr_em710raw.o: mbr_em710raw.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h  $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbsys_simrad3.h
+	$(CC) -c $(CFLAGS) mbr_em710raw.c
+mbr_em710mba.o: mbr_em710mba.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h  $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbsys_simrad3.h
+	$(CC) -c $(CFLAGS) mbr_em710mba.c
 mbr_mr1prhig.o: mbr_mr1prhig.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbf_mr1prhig.h $(INCDIR)/mbsys_mr1.h
 	$(CC) -c $(CFLAGS) mbr_mr1prhig.c
 mbr_mr1aldeo.o: mbr_mr1aldeo.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbf_mr1aldeo.h $(INCDIR)/mbsys_mr1.h
@@ -620,6 +635,9 @@ $(INCDIR)/mbsys_simrad.h:	mbsys_simrad.h
 $(INCDIR)/mbsys_simrad2.h:	mbsys_simrad2.h
 	cp mbsys_simrad2.h $(INCDIR)/mbsys_simrad2.h
 	chmod 664 $(INCDIR)/mbsys_simrad2.h
+$(INCDIR)/mbsys_simrad3.h:	mbsys_simrad3.h
+	cp mbsys_simrad3.h $(INCDIR)/mbsys_simrad3.h
+	chmod 664 $(INCDIR)/mbsys_simrad3.h
 $(INCDIR)/mbsys_mr1.h:	mbsys_mr1.h
 	cp mbsys_mr1.h $(INCDIR)/mbsys_mr1.h
 	chmod 664 $(INCDIR)/mbsys_mr1.h

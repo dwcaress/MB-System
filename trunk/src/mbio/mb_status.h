@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbio_status.h	2/1/93
- *    $Id: mb_status.h,v 5.84 2007-11-02 22:39:17 caress Exp $
+ *    $Id: mb_status.h,v 5.85 2008-03-01 09:12:52 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003, 2004, 2005, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.84  2007/11/02 22:39:17  caress
+ * Distribution 5.1.beta12
+ *
  * Revision 5.83  2007/10/17 20:26:03  caress
  * Release 5.1.1beta11
  *
@@ -419,6 +422,7 @@
 #define	MB_DATA_SPREADINGLOSS		43	/* Reson 7k */
 #define	MB_DATA_INSTALLATION		44	/* Reson 7k */
 #define	MB_DATA_WATER_COLUMN		45	/* Simrad */
+#define	MB_DATA_STATUS			46	/* Simrad */
 
 /* MBIO function status convention */
 #define	MB_SUCCESS			1

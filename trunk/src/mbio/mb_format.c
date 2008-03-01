@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.c	2/18/94
- *    $Id: mb_format.c,v 5.43 2007-10-31 18:37:01 caress Exp $
+ *    $Id: mb_format.c,v 5.44 2008-03-01 09:12:52 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000, 2002, 2002, 2003, 2004, 2005 by
+ *    Copyright (c) 1993-2008 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -20,6 +20,11 @@
  * Date:	Februrary 18, 1994
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.43  2007/10/31 18:37:01  caress
+ * MB-System programs will now recognize filename suffixes of the form
+ * ".MB***" as well as ".mb***". Capitalized versions of many vendor
+ * format suffixes are also supported.
+ *
  * Revision 5.42  2007/10/17 20:26:03  caress
  * Release 5.1.1beta11
  *
@@ -231,7 +236,7 @@
 #include "../../include/mbsys_simrad.h"
 #include "../../include/mbsys_simrad2.h"
 
-static char rcs_id[]="$Id: mb_format.c,v 5.43 2007-10-31 18:37:01 caress Exp $";
+static char rcs_id[]="$Id: mb_format.c,v 5.44 2008-03-01 09:12:52 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_format_register(int verbose, 
@@ -382,6 +387,14 @@ int mb_format_register(int verbose,
 	else if (*format == MBF_EM300MBA)
 		{
 		status = mbr_register_em300mba(verbose, mbio_ptr, error); 
+		}
+	else if (*format == MBF_EM710RAW)
+		{
+		status = mbr_register_em710raw(verbose, mbio_ptr, error); 
+		}
+	else if (*format == MBF_EM710MBA)
+		{
+		status = mbr_register_em710mba(verbose, mbio_ptr, error); 
 		}
 	else if (*format == MBF_MR1PRHIG)
 		{
@@ -912,6 +925,28 @@ int mb_format_info(int verbose,
 	else if (*format == MBF_EM300MBA)
 		{
 		status = mbr_info_em300mba(verbose, system, 
+			beams_bath_max, beams_amp_max, pixels_ss_max, 
+			format_name, system_name, format_description, 
+			numfile, filetype, 
+			variable_beams, traveltime, beam_flagging, 
+			nav_source, heading_source, vru_source, svp_source, 
+			beamwidth_xtrack, beamwidth_ltrack, 
+			error);
+		}
+	else if (*format == MBF_EM710RAW)
+		{
+		status = mbr_info_em710raw(verbose, system, 
+			beams_bath_max, beams_amp_max, pixels_ss_max, 
+			format_name, system_name, format_description, 
+			numfile, filetype, 
+			variable_beams, traveltime, beam_flagging, 
+			nav_source, heading_source, vru_source, svp_source, 
+			beamwidth_xtrack, beamwidth_ltrack, 
+			error);
+		}
+	else if (*format == MBF_EM710MBA)
+		{
+		status = mbr_info_em710mba(verbose, system, 
 			beams_bath_max, beams_amp_max, pixels_ss_max, 
 			format_name, system_name, format_description, 
 			numfile, filetype, 
@@ -1520,7 +1555,7 @@ int mb_format(int verbose, int *format, int *error)
 /*--------------------------------------------------------------------*/
 int mb_format_system(int verbose, int *format, int *system, int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.43 2007-10-31 18:37:01 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.44 2008-03-01 09:12:52 caress Exp $";
 	char	*function_name = "mb_format_system";
 	int	status;
 
@@ -1590,7 +1625,7 @@ int mb_format_dimensions(int verbose, int *format,
 		int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.43 2007-10-31 18:37:01 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.44 2008-03-01 09:12:52 caress Exp $";
 	char	*function_name = "mb_format_dimensions";
 	int	status;
 
@@ -1659,7 +1694,7 @@ int mb_format_dimensions(int verbose, int *format,
 /*--------------------------------------------------------------------*/
 int mb_format_description(int verbose, int *format, char *description, int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.43 2007-10-31 18:37:01 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.44 2008-03-01 09:12:52 caress Exp $";
 	char	*function_name = "mb_format_description";
 	int	status;
 
@@ -1725,7 +1760,7 @@ int mb_format_flags(int verbose, int *format,
 		int *variable_beams, int *traveltime, int *beam_flagging, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.43 2007-10-31 18:37:01 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.44 2008-03-01 09:12:52 caress Exp $";
 	char	*function_name = "mb_format_flags";
 	int	status;
 
@@ -1798,7 +1833,7 @@ int mb_format_source(int verbose, int *format,
 		int *vru_source, int *svp_source, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.43 2007-10-31 18:37:01 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.44 2008-03-01 09:12:52 caress Exp $";
 	char	*function_name = "mb_format_source";
 	int	status;
 
@@ -1869,7 +1904,7 @@ int mb_format_beamwidth(int verbose, int *format,
 		double *beamwidth_xtrack, double *beamwidth_ltrack,
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.43 2007-10-31 18:37:01 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.44 2008-03-01 09:12:52 caress Exp $";
 	char	*function_name = "mb_format_beamwidth";
 	int	status;
 
@@ -1945,8 +1980,9 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 	char	*suffix;
 	int	suffix_len;
 	FILE	*checkfp;
-	char	buffer[6];
-	short	*type1, *type2;
+	char	buffer[8];
+	short	*shortptr;
+	short	type1, sonar1, type2, sonar2, type1swap, sonar1swap, type2swap, sonar2swap;
 	int	i;
 
 	/* print input debug statements */
@@ -2172,36 +2208,67 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 			whether data is old or new Simrad format */
 		    if ((checkfp = fopen(filename,"r")) != NULL)
 			{
-			type1 = (short *) &buffer[0];
-			type2 = (short *) &buffer[4];
-			if (fread(buffer,1,6,checkfp) == 6)
+			if (fread(buffer,1,8,checkfp) == 8)
 			    {
-			    if (mb_swap_check() == MB_YES)
-			    	{
-			    	*type1 = (short) mb_swap_short(*type1);
-			    	*type2 = (short) mb_swap_short(*type2);
-				}
-			    if (*type2 == EM_START
-				|| *type2 == EM_STOP
-				|| *type2 == EM_PARAMETER)
+			    shortptr = (short *) &buffer[0];
+			    type1 = *shortptr;
+			    type1swap = (short) mb_swap_short(type1);
+			    shortptr = (short *) &buffer[2];
+			    sonar1 = *shortptr;
+			    sonar1swap = (short) mb_swap_short(sonar1);
+
+			    shortptr = (short *) &buffer[4];
+			    type2 = *shortptr;
+			    type2swap = (short) mb_swap_short(type2);
+			    shortptr = (short *) &buffer[6];
+			    sonar2 = *shortptr;
+			    sonar2swap = (short) mb_swap_short(sonar2);
+
+			    if (sonar2 == 710 || sonar2swap == 710)
+				*format = MBF_EM710RAW;
+			    else if (type2 == EM_START
+				|| type2 == EM_STOP
+				|| type2 == EM_PARAMETER)
 				*format = MBF_EMOLDRAW;
-			    else if (*type2 == EM2_START
-				|| *type2 == EM2_STOP
-				|| *type1 == EM2_STOP2
-				|| *type1 == EM2_OFF
-				|| *type1 == EM2_ON
-				|| *type2 == EM2_RUN_PARAMETER)
+			    else if (type2 == EM2_START
+				|| type2 == EM2_STOP
+				|| type2 == EM2_STOP2
+				|| type2 == EM2_STATUS
+				|| type2 == EM2_ON
+				|| type2 == EM2_RUN_PARAMETER)
 				*format = MBF_EM300RAW;
-			    else if (*type1 == EM_START
-				|| *type1 == EM_STOP
-				|| *type1 == EM_PARAMETER)
+			    else if (type2swap == EM_START
+				|| type2swap == EM_STOP
+				|| type2swap == EM_PARAMETER)
 				*format = MBF_EMOLDRAW;
-			    else if (*type1 == EM2_START
-				|| *type1 == EM2_STOP
-				|| *type1 == EM2_STOP2
-				|| *type1 == EM2_OFF
-				|| *type1 == EM2_ON
-				|| *type1 == EM2_RUN_PARAMETER)
+			    else if (type2swap == EM2_START
+				|| type2swap == EM2_STOP
+				|| type2swap == EM2_STOP2
+				|| type2swap == EM2_STATUS
+				|| type2swap == EM2_ON
+				|| type2swap == EM2_RUN_PARAMETER)
+				*format = MBF_EM300RAW;
+			    else if (type1 == EM_START
+				|| type1 == EM_STOP
+				|| type1 == EM_PARAMETER)
+				*format = MBF_EMOLDRAW;
+			    else if (type1 == EM2_START
+				|| type1 == EM2_STOP
+				|| type1 == EM2_STOP2
+				|| type1 == EM2_STATUS
+				|| type1 == EM2_ON
+				|| type1 == EM2_RUN_PARAMETER)
+				*format = MBF_EM300RAW;
+			    else if (type1swap == EM_START
+				|| type1swap == EM_STOP
+				|| type1swap == EM_PARAMETER)
+				*format = MBF_EMOLDRAW;
+			    else if (type1swap == EM2_START
+				|| type1swap == EM2_STOP
+				|| type1swap == EM2_STOP2
+				|| type1swap == EM2_STATUS
+				|| type1swap == EM2_ON
+				|| type1swap == EM2_RUN_PARAMETER)
 				*format = MBF_EM300RAW;
 			    else
 				*format = MBF_EM300RAW;
@@ -2233,7 +2300,79 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 		suffix_len = strlen(suffix);
 		if (suffix_len == 4)
 		    {
-		    *format = MBF_EM300RAW;
+		    /* examine the first datagram to determine
+			whether data is old or new Simrad format */
+		    if ((checkfp = fopen(filename,"r")) != NULL)
+			{
+			if (fread(buffer,1,8,checkfp) == 8)
+			    {
+			    shortptr = (short *) &buffer[0];
+			    type1 = *shortptr;
+			    type1swap = (short) mb_swap_short(type1);
+			    shortptr = (short *) &buffer[2];
+			    sonar1 = *shortptr;
+			    sonar1swap = (short) mb_swap_short(sonar1);
+
+			    shortptr = (short *) &buffer[4];
+			    type2 = *shortptr;
+			    type2swap = (short) mb_swap_short(type2);
+			    shortptr = (short *) &buffer[6];
+			    sonar2 = *shortptr;
+			    sonar2swap = (short) mb_swap_short(sonar2);
+
+			    if (sonar2 == 710 || sonar2swap == 710)
+				*format = MBF_EM710RAW;
+			    else if (type2 == EM_START
+				|| type2 == EM_STOP
+				|| type2 == EM_PARAMETER)
+				*format = MBF_EMOLDRAW;
+			    else if (type2 == EM2_START
+				|| type2 == EM2_STOP
+				|| type2 == EM2_STOP2
+				|| type2 == EM2_STATUS
+				|| type2 == EM2_ON
+				|| type2 == EM2_RUN_PARAMETER)
+				*format = MBF_EM300RAW;
+			    else if (type2swap == EM_START
+				|| type2swap == EM_STOP
+				|| type2swap == EM_PARAMETER)
+				*format = MBF_EMOLDRAW;
+			    else if (type2swap == EM2_START
+				|| type2swap == EM2_STOP
+				|| type2swap == EM2_STOP2
+				|| type2swap == EM2_STATUS
+				|| type2swap == EM2_ON
+				|| type2swap == EM2_RUN_PARAMETER)
+				*format = MBF_EM300RAW;
+			    else if (type1 == EM_START
+				|| type1 == EM_STOP
+				|| type1 == EM_PARAMETER)
+				*format = MBF_EMOLDRAW;
+			    else if (type1 == EM2_START
+				|| type1 == EM2_STOP
+				|| type1 == EM2_STOP2
+				|| type1 == EM2_STATUS
+				|| type1 == EM2_ON
+				|| type1 == EM2_RUN_PARAMETER)
+				*format = MBF_EM300RAW;
+			    else if (type1swap == EM_START
+				|| type1swap == EM_STOP
+				|| type1swap == EM_PARAMETER)
+				*format = MBF_EMOLDRAW;
+			    else if (type1swap == EM2_START
+				|| type1swap == EM2_STOP
+				|| type1swap == EM2_STOP2
+				|| type1swap == EM2_STATUS
+				|| type1swap == EM2_ON
+				|| type1swap == EM2_RUN_PARAMETER)
+				*format = MBF_EM300RAW;
+			    else
+				*format = MBF_EM300RAW;
+			    }
+			fclose(checkfp);
+			}
+		    else
+		    	*format = MBF_EM300RAW;
 		    if (fileroot != NULL)
 			{
 			strncpy(fileroot, filename, strlen(filename)-suffix_len);
@@ -2411,6 +2550,28 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 	    else
 		suffix_len = 0;
 	    if (suffix_len == 6)
+		{
+		if (fileroot != NULL)
+		    {
+		    strncpy(fileroot, filename, strlen(filename)-suffix_len);
+		    fileroot[strlen(filename)-suffix_len] = '\0';
+		    }
+		*format = MBF_MGD77DAT;
+		found = MB_YES;
+		}
+	    }
+	if (found == MB_NO)
+	    {
+	    if (strlen(filename) >= 5)
+		i = strlen(filename) - 4;
+	    else
+		i = 0;
+	    if ((suffix = strstr(&filename[i],".a77")) != NULL
+	    	|| (suffix = strstr(&filename[i],".A77")) != NULL)
+		suffix_len = 4;
+	    else
+		suffix_len = 0;
+	    if (suffix_len == 4)
 		{
 		if (fileroot != NULL)
 		    {

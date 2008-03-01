@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.h	1/19/93
- *    $Id: mb_format.h,v 5.22 2007-10-17 20:26:03 caress Exp $
+ *    $Id: mb_format.h,v 5.23 2008-03-01 09:12:52 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2001, 2002, 2003 by
+ *    Copyright (c) 1993-2008 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -19,6 +19,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.22  2007/10/17 20:26:03  caress
+ * Release 5.1.1beta11
+ *
  * Revision 5.21  2006/11/10 22:36:04  caress
  * Working towards release 5.1.0
  *
@@ -229,7 +232,7 @@
 #define MB_FORMAT_DEF
 
 /* define date of last format update */
-static char mb_format_updatedate[] = "$Date: 2007-10-17 20:26:03 $ $Revision: 5.22 $";
+static char mb_format_updatedate[] = "$Date: 2008-03-01 09:12:52 $ $Revision: 5.23 $";
 
 /* Supported swath sonar systems */
 #define	MB_SYS_NONE		0
@@ -239,32 +242,33 @@ static char mb_format_updatedate[] = "$Date: 2007-10-17 20:26:03 $ $Revision: 5.
 #define	MB_SYS_SB2100		4
 #define	MB_SYS_SIMRAD		5
 #define	MB_SYS_SIMRAD2		6
-#define	MB_SYS_MR1		7
-#define	MB_SYS_MR1B		8
-#define	MB_SYS_MR1V2001		9
-#define	MB_SYS_LDEOIH		10
-#define	MB_SYS_RESON		11
-#define	MB_SYS_RESON8K		12
-#define	MB_SYS_ELAC		13
-#define	MB_SYS_ELACMK2		14
-#define MB_SYS_HSMD		15
-#define MB_SYS_DSL		16
-#define MB_SYS_GSF		17
-#define MB_SYS_MSTIFF		18
-#define MB_SYS_OIC		19
-#define MB_SYS_HDCS		20
-#define MB_SYS_SINGLEBEAM	21
-#define MB_SYS_XSE		22
-#define MB_SYS_HS10		23
-#define	MB_SYS_NETCDF		24
-#define	MB_SYS_ATLAS		25
-#define	MB_SYS_NAVNETCDF	26
-#define	MB_SYS_SURF		27
-#define	MB_SYS_RESON7K		28
-#define	MB_SYS_JSTAR		29
+#define	MB_SYS_SIMRAD3		7
+#define	MB_SYS_MR1		8
+#define	MB_SYS_MR1B		9
+#define	MB_SYS_MR1V2001		10
+#define	MB_SYS_LDEOIH		11
+#define	MB_SYS_RESON		12
+#define	MB_SYS_RESON8K		13
+#define	MB_SYS_ELAC		14
+#define	MB_SYS_ELACMK2		15
+#define MB_SYS_HSMD		16
+#define MB_SYS_DSL		17
+#define MB_SYS_GSF		18
+#define MB_SYS_MSTIFF		19
+#define MB_SYS_OIC		20
+#define MB_SYS_HDCS		21
+#define MB_SYS_SINGLEBEAM	22
+#define MB_SYS_XSE		23
+#define MB_SYS_HS10		24
+#define	MB_SYS_NETCDF		25
+#define	MB_SYS_ATLAS		26
+#define	MB_SYS_NAVNETCDF	27
+#define	MB_SYS_SURF		28
+#define	MB_SYS_RESON7K		29
+#define	MB_SYS_JSTAR		30
 
 /* Number of supported MBIO data formats */
-#define	MB_FORMATS	61
+#define	MB_FORMATS	63
 
 /* Data formats supported by MBIO */
 #define MBF_DATALIST	-1
@@ -343,6 +347,14 @@ static char mb_format_updatedate[] = "$Date: 2007-10-17 20:26:03 $ $Revision: 5.
 					up to 254 beam bathymetry and 
 					amplitude, variable pixel sidescan, 
 					ascii + binary, MBARI */ 
+#define	MBF_EM710RAW	58	/* Simrad EM710 multibeam vendor format, 
+					up to 400 beam bathymetry and 
+					amplitude, variable pixel sidescan, 
+					binary, Simrad */ 
+#define	MBF_EM710MBA	59	/* Simrad EM710 multibeam processing format, 
+					up to 400 beam bathymetry and 
+					amplitude, variable pixel sidescan, 
+					binary, MBARI */ 
 #define	MBF_MR1PRHIG	61	/* Obsolete MR1 post processed format, 
 					variable beam bathymetry, variable
 					pixel sidescan, xdr binary, SOEST */ 
