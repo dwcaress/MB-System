@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbprocess.c	3/31/93
- *    $Id: mbprocess.c,v 5.51 2008-01-14 18:37:12 caress Exp $
+ *    $Id: mbprocess.c,v 5.52 2008-03-01 09:22:29 caress Exp $
  *
  *    Copyright (c) 2000, 2002, 2003, 2004, 2007 by
  *    David W. Caress (caress@mbari.org)
@@ -36,6 +36,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.51  2008/01/14 18:37:12  caress
+ * Fixed problems in comments embedded in output processed files.
+ *
  * Revision 5.50  2007/10/31 18:41:42  caress
  * Fixed handling of null sidescan values.
  *
@@ -274,7 +277,7 @@ int get_anglecorr(int verbose,
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbprocess.c,v 5.51 2008-01-14 18:37:12 caress Exp $";
+	static char rcs_id[] = "$Id: mbprocess.c,v 5.52 2008-03-01 09:22:29 caress Exp $";
 	static char program_name[] = "mbprocess";
 	static char help_message[] =  "mbprocess is a tool for processing swath sonar bathymetry data.\n\
 This program performs a number of functions, including:\n\
@@ -806,8 +809,9 @@ and mbedit edit save files.\n";
 	if (status == MB_FAILURE)
 	    {
 	    proceedprocess = MB_NO;
-	    fprintf(stderr,"Data skipped - processing unknown: %s\n",
-		mbp_ifile);
+	    if (verbose > 0 || testonly == MB_YES)
+	    	fprintf(stderr,"Data skipped - processing unknown: %s\n",
+			mbp_ifile);
 	    }
 
 	/* check for up to date if required */
@@ -824,8 +828,9 @@ and mbedit edit save files.\n";
 		else
 			{
 			proceedprocess = MB_NO;
-	    		fprintf(stderr,"Data skipped - no parameter file: %s\n",
-				mbp_pfile);
+	    		if (verbose > 0 || testonly == MB_YES)
+	    			fprintf(stderr,"Data skipped - no parameter file: %s\n",
+					mbp_pfile);
 			}
 
 		/* get mod time for the input file */
@@ -837,8 +842,9 @@ and mbedit edit save files.\n";
 		else
 			{
 			proceedprocess = MB_NO;
-	    		fprintf(stderr,"Data skipped - no input file: %s\n",
-				process.mbp_ifile);
+	    		if (verbose > 0 || testonly == MB_YES)
+	    			fprintf(stderr,"Data skipped - no input file: %s\n",
+					process.mbp_ifile);
 			}
 
 		/* if input and parameter files found check output and dependencies */
@@ -911,8 +917,9 @@ and mbedit edit save files.\n";
 			    && ofilemodtime >= svpmodtime)
 			{
 			proceedprocess = MB_NO;
-	    		fprintf(stderr,"Data skipped - up to date: %s\n",
-				process.mbp_ifile);
+	    		if (verbose > 0 || testonly == MB_YES)
+	    			fprintf(stderr,"Data skipped - up to date: %s\n",
+					process.mbp_ifile);
 			}
 		    else if (testonly == MB_YES)
 			{
