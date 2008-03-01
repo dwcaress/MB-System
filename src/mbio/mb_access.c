@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_access.c	11/1/00
- *    $Id: mb_access.c,v 5.15 2007-10-08 15:59:34 caress Exp $
+ *    $Id: mb_access.c,v 5.16 2008-03-01 09:12:52 caress Exp $
 
- *    Copyright (c) 2000, 2002, 2003 by
+ *    Copyright (c) 2000-2008 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -20,51 +20,6 @@
  * Date:	October 1, 2000
  *
  * $Log: not supported by cvs2svn $
- * Revision 5.14  2006/11/10 22:36:04  caress
- * Working towards release 5.1.0
- *
- * Revision 5.13  2005/11/05 00:48:05  caress
- * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
- *
- * Revision 5.12  2004/12/02 06:33:32  caress
- * Fixes while supporting Reson 7k data.
- *
- * Revision 5.11  2004/09/16 19:02:33  caress
- * Changes to better support segy data.
- *
- * Revision 5.10  2004/06/18 03:07:15  caress
- * Adding support for segy i/o and working on support for Reson 7k format 88.
- *
- * Revision 5.9  2004/05/21 23:46:22  caress
- * Progress supporting Reson 7k data, including support for extracing subbottom profiler data.
- *
- * Revision 5.8  2004/04/27 01:46:13  caress
- * Various updates of April 26, 2004.
- *
- * Revision 5.7  2003/04/17 21:05:23  caress
- * Release 5.0.beta30
- *
- * Revision 5.6  2002/09/18 23:32:59  caress
- * Release 5.0.beta23
- *
- * Revision 5.5  2002/07/20 20:42:40  caress
- * Release 5.0.beta20
- *
- * Revision 5.4  2002/05/02 03:55:34  caress
- * Release 5.0.beta17
- *
- * Revision 5.3  2001/07/20 00:31:11  caress
- * Release 5.0.beta03
- *
- * Revision 5.2  2001/03/22 20:45:56  caress
- * Trying to make 5.0.beta0...
- *
- * Revision 5.1  2001/01/22  07:43:34  caress
- * Version 5.0.beta01
- *
- * Revision 5.0  2000/12/01  22:48:41  caress
- * First cut at Version 5.0.
- *
  *
  */
 
@@ -80,7 +35,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mb_segy.h"
 
-static char rcs_id[]="$Id: mb_access.c,v 5.15 2007-10-08 15:59:34 caress Exp $";
+static char rcs_id[]="$Id: mb_access.c,v 5.16 2008-03-01 09:12:52 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_alloc(int verbose, void *mbio_ptr,
@@ -1536,6 +1491,67 @@ int mb_detects(int verbose, void *mbio_ptr, void *store_ptr,
 		for (i=0;i<*nbeams;i++)
 			fprintf(stderr,"dbg2       beam %d: detects:%d\n",
 				i,detects[i]);
+		}
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_gains(int verbose, void *mbio_ptr, void *store_ptr,
+	int *kind, double *transmit_gain, double *pulse_length, 
+	double *receive_gain, int *error)
+{
+	char	*function_name = "mb_gains";
+	int	status;
+	struct mb_io_struct *mb_io_ptr;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mb_ptr:     %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* call the appropriate mbsys_ extraction routine */
+	if (mb_io_ptr->mb_io_gains != NULL)
+		{
+		status = (*mb_io_ptr->mb_io_gains)
+				(verbose,mbio_ptr,store_ptr,
+				kind,transmit_gain,pulse_length,receive_gain,error);
+		}
+	else
+		{
+		status = MB_FAILURE;
+		*error = MB_ERROR_BAD_SYSTEM;
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
+		}
+	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR)
+		{
+		fprintf(stderr,"dbg2       transmit_gain: %f\n",*transmit_gain);
+		fprintf(stderr,"dbg2       pulse_length:  %f\n",*pulse_length);
+		fprintf(stderr,"dbg2       receive_gain:  %f\n",*receive_gain);
 		}
 	if (verbose >= 2)
 		{
