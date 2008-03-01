@@ -255,6 +255,14 @@ Added new program mbabsorption to calculate the sound absorption of
 seawater as a function of salinity, pH, temperature, depth, and
 frequency.
 
+Changed macro mbm_grdplot so that the -T option causes the coastline
+to be drawn without grayscale filling of dry areas. To obtain the
+previously default behavior, add -MTG128.
+
+Added support for newer Simrad multibeam data (e.g. EM710) in
+vendor format MBF_EM710RAW (format id 58) and processing 
+format MBF_EM710MBA (format id 59)
+
 MB-SYSTEM VERSION 5.1.0 RELEASE NOTES:
 ------------------------------------------
 
@@ -1448,10 +1456,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.107 2008-02-12 02:31:43 caress Exp $
+RCS ID: $Id: README,v 5.108 2008-03-01 09:05:10 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.107  2008/02/12 02:31:43  caress
+Changes as of 11 February 2008.
+
 Revision 5.106  2008/01/14 18:40:23  caress
 Working towards 5.1.1 release.
 
