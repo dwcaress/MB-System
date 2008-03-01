@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
- *    The MB-system:	mbsys_simrad2.h	10/9/98
- *	$Id: mbsys_simrad2.h,v 5.20 2006-11-10 22:36:05 caress Exp $
+ *    The MB-system:	mbsys_simrad2.h		10/9/98
+ *	$Id: mbsys_simrad2.h,v 5.21 2008-03-01 09:14:03 caress Exp $
  *
- *    Copyright (c) 1998, 2001, 2002, 2003 by
+ *    Copyright (c) 1998-2008 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -14,7 +14,7 @@
  *--------------------------------------------------------------------*/
 /*
  * mbsys_simrad2.h defines the MBIO data structures for handling data from 
- * new (post-1997) Simrad multibeam sonars (e.g. EM120, EM300, EM3000).
+ * new (post-2006) Simrad multibeam sonars (e.g. EM710).
  * The data formats associated with Simrad multibeams 
  * (both old and new) include:
  *    MBSYS_SIMRAD formats (code in mbsys_simrad.c and mbsys_simrad.h):
@@ -25,90 +25,16 @@
  *                   : MBIO ID 55 - aliased to 51
  *    MBSYS_SIMRAD2 formats (code in mbsys_simrad2.c and mbsys_simrad2.h):
  *      MBF_EM300RAW : MBIO ID 56 - Vendor EM3000, EM300, EM120 
- *      MBF_EM300MBA : MBIO ID 57 - MBARI EM3000, EM300, EM120
+ *      MBF_EM300MBA : MBIO ID 57 - MBARI EM3000, EM300, EM120 for processing
+ *    MBSYS_SIMRAD2 formats (code in mbsys_simrad2.c and mbsys_simrad2.h):
+ *      MBF_EM710RAW : MBIO ID 58 - Vendor EM710 
+ *      MBF_EM710MBA : MBIO ID 59 - MBARI EM710 for processing
  *
  *
- * Author:	D. W. Caress (L-DEO)
+ * Author:	D. W. Caress
  * Date:	October 9, 1998
  *
  * $Log: not supported by cvs2svn $
- * Revision 5.19  2006/07/27 18:42:52  caress
- * Working towards 5.1.0
- *
- * Revision 5.18  2006/02/03 21:08:51  caress
- * Working on supporting water column datagrams in Simrad formats.
- *
- * Revision 5.17  2006/02/02 19:42:09  caress
- * Fixed handling of unknown datagrams on little-endian systems.
- *
- * Revision 5.16  2006/01/27 20:09:47  caress
- * Added support for EM3002
- *
- * Revision 5.15  2006/01/06 18:27:18  caress
- * Working towards 5.0.8
- *
- * Revision 5.14  2005/11/05 00:48:04  caress
- * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
- *
- * Revision 5.13  2005/04/07 04:24:34  caress
- * 5.0.7 Release.
- *
- * Revision 5.12  2003/11/24 19:04:21  caress
- * Added remaining unsupported Simrad datagrams to defines so that all are listed and can be recognized by the parsing code.
- *
- * Revision 5.11  2003/04/17 21:05:23  caress
- * Release 5.0.beta30
- *
- * Revision 5.10  2002/08/21 00:55:46  caress
- * Release 5.0.beta22
- *
- * Revision 5.9  2002/07/20 20:42:40  caress
- * Release 5.0.beta20
- *
- * Revision 5.8  2002/05/29 23:41:49  caress
- * Release 5.0.beta18
- *
- * Revision 5.7  2001/07/20 00:32:54  caress
- * Release 5.0.beta03
- *
- * Revision 5.6  2001/06/08  21:44:01  caress
- * Version 5.0.beta01
- *
- * Revision 5.5  2001/06/01  00:14:06  caress
- * Redid support for current Simrad multibeam data.
- *
- * Revision 5.4  2001/05/30  17:57:26  caress
- * Fixed New Simrad data handling, plus removed use of
- * intermediate data structure. Still need to reduce use
- * of #ifdefs related to byteswapping.
- *
- * Revision 5.3  2001/05/24  23:18:07  caress
- * Fixed handling of Revelle EM120 data (first cut).
- *
- * Revision 5.2  2001/03/22  20:50:02  caress
- * Trying to make version 5.0.beta0
- *
- * Revision 5.1  2001/01/22  07:43:34  caress
- * Version 5.0.beta01
- *
- * Revision 5.0  2000/12/01  22:48:41  caress
- * First cut at Version 5.0.
- *
- * Revision 4.4  2000/10/11  01:03:21  caress
- * Convert to ANSI C
- *
- * Revision 4.3  2000/09/30  06:31:19  caress
- * Snapshot for Dale.
- *
- * Revision 4.2  2000/07/20  20:24:59  caress
- * First cut at supporting both EM120 and EM1002.
- *
- * Revision 4.1  2000/07/19  03:54:23  caress
- * Added support for EM120.
- *
- * Revision 4.0  1998/12/17  22:59:14  caress
- * MB-System version 4.6beta4
- *
  *
  */
 /*
@@ -350,6 +276,7 @@
 /* datagram types including start byte */
 #define	EM2_NONE		0
 #define	EM2_STOP2		0x0230
+#define	EM2_STATUS		0x0231
 #define	EM2_OFF			0x0231
 #define	EM2_ON			0x0232
 #define	EM2_ATTITUDE		0x0241
@@ -381,6 +308,7 @@
 
 /* datagram types */
 #define	EM2_ID_STOP2		0x30
+#define	EM2_ID_STATUS		0x31
 #define	EM2_ID_OFF		0x31
 #define	EM2_ID_ON		0x32
 #define	EM2_ID_ATTITUDE		0x41
@@ -1151,6 +1079,9 @@ int mbsys_simrad2_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 			double *draft, double *ssv, int *error);
 int mbsys_simrad2_detects(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbeams, int *detects, int *error);
+int mbsys_simrad2_gains(int verbose, void *mbio_ptr, void *store_ptr,
+			int *kind, double *transmit_gain, double *pulse_length, 
+			double *receive_gain, int *error);
 int mbsys_simrad2_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, double *transducer_depth, double *altitude, 
 			int *error);

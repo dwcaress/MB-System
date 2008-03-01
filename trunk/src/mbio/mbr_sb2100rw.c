@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sb2100rw.c	3/3/94
- *	$Id: mbr_sb2100rw.c,v 5.12 2005-11-05 00:48:04 caress Exp $
+ *	$Id: mbr_sb2100rw.c,v 5.13 2008-03-01 09:14:03 caress Exp $
  *
  *    Copyright (c) 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	March 3, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 5.12  2005/11/05 00:48:04  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.11  2003/05/20 18:05:32  caress
  * Added svp_source to data source parameters.
  *
@@ -221,7 +224,7 @@ int mbr_wt_sb2100rw(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_sb2100rw(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_sb2100rw.c,v 5.12 2005-11-05 00:48:04 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2100rw.c,v 5.13 2008-03-01 09:14:03 caress Exp $";
 	char	*function_name = "mbr_register_sb2100rw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -278,6 +281,7 @@ int mbr_register_sb2100rw(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr->mb_io_insert_svp = &mbsys_sb2100_insert_svp; 
 	mb_io_ptr->mb_io_ttimes = &mbsys_sb2100_ttimes; 
 	mb_io_ptr->mb_io_detects = &mbsys_sb2100_detects; 
+	mb_io_ptr->mb_io_gains = &mbsys_sb2100_gains; 
 	mb_io_ptr->mb_io_copyrecord = &mbsys_sb2100_copy; 
 	mb_io_ptr->mb_io_extract_rawss = NULL; 
 	mb_io_ptr->mb_io_insert_rawss = NULL; 
@@ -356,7 +360,7 @@ int mbr_info_sb2100rw(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_sb2100rw.c,v 5.12 2005-11-05 00:48:04 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2100rw.c,v 5.13 2008-03-01 09:14:03 caress Exp $";
 	char	*function_name = "mbr_info_sb2100rw";
 	int	status = MB_SUCCESS;
 
@@ -426,7 +430,7 @@ int mbr_info_sb2100rw(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_sb2100rw(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_sb2100rw.c,v 5.12 2005-11-05 00:48:04 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2100rw.c,v 5.13 2008-03-01 09:14:03 caress Exp $";
 	char	*function_name = "mbr_alm_sb2100rw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

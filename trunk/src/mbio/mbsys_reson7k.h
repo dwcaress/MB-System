@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_reson7k.h	3/3/2004
- *	$Id: mbsys_reson7k.h,v 5.12 2007-07-03 17:25:50 caress Exp $
+ *	$Id: mbsys_reson7k.h,v 5.13 2008-03-01 09:14:03 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	March 3, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.12  2007/07/03 17:25:50  caress
+ * Changes to handle new time lag value in bluefin nav records.
+ *
  * Revision 5.11  2006/11/10 22:36:05  caress
  * Working towards release 5.1.0
  *
@@ -1183,13 +1186,19 @@ typedef struct s7kr_bathymetry_struct
 							****Not present prior to Version 5!!! */
 	float		range[MBSYS_RESON7K_MAX_BEAMS];	/* Two way travel time (seconds) */
 	mb_u_char	quality[MBSYS_RESON7K_MAX_BEAMS];	/* Beam quality bitfield:
-							0-3: quality value 
-								0 = bad
-								15 = best
-							4-7: Bottom detection method
-								0 = both amplitude and phase
-								1 = amplitude only
-								2 = phase only */
+							0-3: Reson quality flags use bits 0-3
+								bit 0: brightness test
+								bit 1: colinearity test
+								bit 2: amplitude pick
+								bit 3: phase pick
+							4-7: MB beam flagging - use bits 4-7
+								- bits 0-3 left in original values
+								- beam valid if bit 4 or 5 are set
+								- beam flagged if bit 6 or 7 set
+								bit 4: on = amplitude
+								bit 5: on = phase
+								bit 6: on = auto flag
+								bit 7: on = manual flag */
 	float		intensity[MBSYS_RESON7K_MAX_BEAMS];	/* Signal strength (dB/uPa) */
 	unsigned int	optionaldata;		/* Flag indicating if bathymetry calculated and
 							values below filled in
@@ -1799,6 +1808,9 @@ int mbsys_reson7k_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 			double *draft, double *ssv, int *error);
 int mbsys_reson7k_detects(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbeams, int *detects, int *error);
+int mbsys_reson7k_gains(int verbose, void *mbio_ptr, void *store_ptr,
+			int *kind, double *transmit_gain, double *pulse_length, 
+			double *receive_gain, int *error);
 int mbsys_reson7k_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, double *transducer_depth, double *altitude, 
 			int *error);

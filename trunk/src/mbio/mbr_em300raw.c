@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em300raw.c	10/16/98
- *	$Id: mbr_em300raw.c,v 5.40 2007-10-31 18:38:41 caress Exp $
+ *	$Id: mbr_em300raw.c,v 5.41 2008-03-01 09:14:03 caress Exp $
  *
  *    Copyright (c) 1998, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	October 16,  1998
  * $Log: not supported by cvs2svn $
+ * Revision 5.40  2007/10/31 18:38:41  caress
+ * Fixed handling of null sidescan values.
+ *
  * Revision 5.39  2006/11/26 09:37:09  caress
  * Making distribution 5.1.0.
  *
@@ -325,7 +328,7 @@ int mbr_em300raw_wr_ss(int verbose, FILE *mbfp, int swap,
 int mbr_em300raw_wr_wc(int verbose, FILE *mbfp, int swap, 
 		struct mbsys_simrad2_struct *store, int *error);
 
-static char res_id[]="$Id: mbr_em300raw.c,v 5.40 2007-10-31 18:38:41 caress Exp $";
+static char res_id[]="$Id: mbr_em300raw.c,v 5.41 2008-03-01 09:14:03 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_em300raw(int verbose, void *mbio_ptr, int *error)
@@ -388,6 +391,7 @@ int mbr_register_em300raw(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr->mb_io_insert_svp = &mbsys_simrad2_insert_svp; 
 	mb_io_ptr->mb_io_ttimes = &mbsys_simrad2_ttimes; 
 	mb_io_ptr->mb_io_detects = &mbsys_simrad2_detects; 
+	mb_io_ptr->mb_io_gains = &mbsys_simrad2_gains; 
 	mb_io_ptr->mb_io_copyrecord = &mbsys_simrad2_copy; 
 	mb_io_ptr->mb_io_extract_rawss = NULL; 
 	mb_io_ptr->mb_io_insert_rawss = NULL; 
