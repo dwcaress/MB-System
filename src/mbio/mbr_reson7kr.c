@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_reson7kr.c	4/4/2004
- *	$Id: mbr_reson7kr.c,v 5.17 2008-01-14 18:11:55 caress Exp $
+ *	$Id: mbr_reson7kr.c,v 5.18 2008-03-01 09:14:03 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	April 4,2004
  * $Log: not supported by cvs2svn $
+ * Revision 5.17  2008/01/14 18:11:55  caress
+ * Fixes to handling beamflagging following upgrades to Reson 7k multibeams.
+ *
  * Revision 5.16  2007/07/03 17:25:51  caress
  * Changes to handle new time lag value in bluefin nav records.
  *
@@ -214,7 +217,7 @@ int mbr_reson7kr_wr_soundvelocity(int verbose, int *bufferalloc, char **bufferpt
 int mbr_reson7kr_wr_absorptionloss(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 int mbr_reson7kr_wr_spreadingloss(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 
-static char res_id[]="$Id: mbr_reson7kr.c,v 5.17 2008-01-14 18:11:55 caress Exp $";
+static char res_id[]="$Id: mbr_reson7kr.c,v 5.18 2008-03-01 09:14:03 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_reson7kr(int verbose, void *mbio_ptr, int *error)
@@ -278,6 +281,7 @@ int mbr_register_reson7kr(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr->mb_io_insert_svp = &mbsys_reson7k_insert_svp; 
 	mb_io_ptr->mb_io_ttimes = &mbsys_reson7k_ttimes; 
 	mb_io_ptr->mb_io_detects = &mbsys_reson7k_detects; 
+	mb_io_ptr->mb_io_gains = &mbsys_reson7k_gains; 
 	mb_io_ptr->mb_io_copyrecord = &mbsys_reson7k_copy; 
 	mb_io_ptr->mb_io_extract_rawss = NULL; 
 	mb_io_ptr->mb_io_insert_rawss = NULL; 

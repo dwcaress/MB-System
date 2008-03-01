@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_reson7k.c	3.00	3/23/2004
- *	$Id: mbsys_reson7k.c,v 5.17 2008-01-14 18:11:28 caress Exp $
+ *	$Id: mbsys_reson7k.c,v 5.18 2008-03-01 09:14:03 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -26,6 +26,9 @@
  * Date:	March 23, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.17  2008/01/14 18:11:28  caress
+ * Fixes to handling beamflagging following upgrades to Reson 7k multibeams.
+ *
  * Revision 5.16  2007/10/08 15:59:34  caress
  * MBIO changes as of 8 October 2007.
  *
@@ -98,7 +101,7 @@
 /* turn on debug statements here */
 /* #define MSYS_RESON7KR_DEBUG 1 */
 
-static char res_id[]="$Id: mbsys_reson7k.c,v 5.17 2008-01-14 18:11:28 caress Exp $";
+static char res_id[]="$Id: mbsys_reson7k.c,v 5.18 2008-03-01 09:14:03 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_zero7kheader(int verbose, s7k_header	*header, 
@@ -4345,7 +4348,7 @@ int mbsys_reson7k_extract(int verbose, void *mbio_ptr, void *store_ptr,
 				{
 				beamflag[i] = MB_FLAG_FLAG + MB_FLAG_MANUAL;
 				}
-			else if (bathymetry->quality[i] & 240 > 0)
+			else if (bathymetry->quality[i] & 240)
 				{
 				beamflag[i] = MB_FLAG_NONE;
 				}			
@@ -4361,7 +4364,8 @@ int mbsys_reson7k_extract(int verbose, void *mbio_ptr, void *store_ptr,
 				{
 				beamflag[i] = MB_FLAG_FLAG + MB_FLAG_MANUAL;
 				}
-/* fprintf(stderr,"beam:%d quality:%d ",i,bathymetry->quality[i]);
+#ifdef MSYS_RESON7KR_DEBUG
+fprintf(stderr,"EXTRACT: beam:%d quality:%d q&240:%d ",i,bathymetry->quality[i],bathymetry->quality[i] & 240);
 if (bathymetry->quality[i] & 1) fprintf(stderr,"1"); else fprintf(stderr,"0");
 if (bathymetry->quality[i] & 2) fprintf(stderr,"1"); else fprintf(stderr,"0");
 if (bathymetry->quality[i] & 4) fprintf(stderr,"1"); else fprintf(stderr,"0");
@@ -4370,7 +4374,8 @@ if (bathymetry->quality[i] & 16) fprintf(stderr,"1"); else fprintf(stderr,"0");
 if (bathymetry->quality[i] & 32) fprintf(stderr,"1"); else fprintf(stderr,"0");
 if (bathymetry->quality[i] & 64) fprintf(stderr,"1"); else fprintf(stderr,"0");
 if (bathymetry->quality[i] & 128) fprintf(stderr,"1"); else fprintf(stderr,"0");
-fprintf(stderr," flag:%d\n",beamflag[i]);*/
+fprintf(stderr," flag:%d\n",beamflag[i]);
+#endif
 			bathacrosstrack[i] = bathymetry->acrosstrack[i];
 			bathalongtrack[i] = bathymetry->alongtrack[i];
 			amp[i] = bathymetry->intensity[i];
@@ -4846,6 +4851,18 @@ int mbsys_reson7k_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			bathymetry->acrosstrack[i] = bathacrosstrack[i];
 			bathymetry->alongtrack[i] = bathalongtrack[i];
 			bathymetry->intensity[i] = amp[i];
+#ifdef MSYS_RESON7KR_DEBUG
+fprintf(stderr,"INSERT: beam:%d quality:%d q&240:%d ",i,bathymetry->quality[i],bathymetry->quality[i] & 240);
+if (bathymetry->quality[i] & 1) fprintf(stderr,"1"); else fprintf(stderr,"0");
+if (bathymetry->quality[i] & 2) fprintf(stderr,"1"); else fprintf(stderr,"0");
+if (bathymetry->quality[i] & 4) fprintf(stderr,"1"); else fprintf(stderr,"0");
+if (bathymetry->quality[i] & 8) fprintf(stderr,"1"); else fprintf(stderr,"0");
+if (bathymetry->quality[i] & 16) fprintf(stderr,"1"); else fprintf(stderr,"0");
+if (bathymetry->quality[i] & 32) fprintf(stderr,"1"); else fprintf(stderr,"0");
+if (bathymetry->quality[i] & 64) fprintf(stderr,"1"); else fprintf(stderr,"0");
+if (bathymetry->quality[i] & 128) fprintf(stderr,"1"); else fprintf(stderr,"0");
+fprintf(stderr," flag:%d\n",beamflag[i]);
+#endif
 			}
 
 		/* do nothing for sidescan now */
@@ -5204,6 +5221,103 @@ int mbsys_reson7k_detects(int verbose, void *mbio_ptr, void *store_ptr,
 		for (i=0;i<*nbeams;i++)
 			fprintf(stderr,"dbg2       beam %d: detects:%d\n",
 				i,detects[i]);
+		}
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbsys_reson7k_gains(int verbose, void *mbio_ptr, void *store_ptr,
+			int *kind, double *transmit_gain, double *pulse_length, 
+			double *receive_gain, int *error)
+{
+	char	*function_name = "mbsys_reson7k_gains";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	struct mbsys_reson7k_struct *store;
+	s7k_header *header;
+	s7kr_volatilesettings *volatilesettings;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mb_ptr:     %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* get data structure pointer */
+	store = (struct mbsys_reson7k_struct *) store_ptr;
+
+	/* get data kind */
+	*kind = store->kind;
+
+	/* extract data from structure */
+	if (*kind == MB_DATA_DATA)
+		{
+		/* get survey data structure */
+		volatilesettings = &(store->volatilesettings);
+		header = &(volatilesettings->header);
+
+		/* get transmit_gain (dB) */
+		*transmit_gain = (double)volatilesettings->power_selection;
+
+		/* get pulse_length (usec) */
+		*pulse_length = (double)volatilesettings->pulse_width;
+
+		/* get receive_gain (dB) */
+		*receive_gain = (double)volatilesettings->gain_selection;
+
+		/* set status */
+		*error = MB_ERROR_NO_ERROR;
+		status = MB_SUCCESS;
+
+		/* done translating values */
+
+		}
+
+	/* deal with comment */
+	else if (*kind == MB_DATA_COMMENT)
+		{
+		/* set status */
+		*error = MB_ERROR_COMMENT;
+		status = MB_FAILURE;
+		}
+
+	/* deal with other record type */
+	else
+		{
+		/* set status */
+		*error = MB_ERROR_OTHER;
+		status = MB_FAILURE;
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
+		}
+	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR)
+		{
+		fprintf(stderr,"dbg2       transmit_gain: %f\n",*transmit_gain);
+		fprintf(stderr,"dbg2       pulse_length:  %f\n",*pulse_length);
+		fprintf(stderr,"dbg2       receive_gain:  %f\n",*receive_gain);
 		}
 	if (verbose >= 2)
 		{

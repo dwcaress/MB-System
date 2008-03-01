@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad.h	8/5/94
- *	$Id: mbsys_simrad.h,v 5.10 2007-06-18 01:19:48 caress Exp $
+ *	$Id: mbsys_simrad.h,v 5.11 2008-03-01 09:14:03 caress Exp $
  *
  *    Copyright (c) 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -32,6 +32,9 @@
  * Date:	August 5, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.10  2007/06/18 01:19:48  caress
+ * Changes as of 17 June 2007.
+ *
  * Revision 5.9  2005/11/05 00:48:03  caress
  * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
  *
@@ -1431,6 +1434,9 @@ int mbsys_simrad_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 int mbsys_simrad_detects(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbeams,
 			int *detects, int *error);
+int mbsys_simrad_gains(int verbose, void *mbio_ptr, void *store_ptr,
+			int *kind, double *transmit_gain, double *pulse_length, 
+			double *receive_gain, int *error);
 int mbsys_simrad_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, double *transducer_depth, double *altitude, 
 			int *error);

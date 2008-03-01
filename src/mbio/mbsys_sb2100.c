@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_sb2100.c	3/2/94
- *	$Id: mbsys_sb2100.c,v 5.7 2005-11-05 00:48:03 caress Exp $
+ *	$Id: mbsys_sb2100.c,v 5.8 2008-03-01 09:14:03 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Author:	D. W. Caress
  * Date:	March 2, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2005/11/05 00:48:03  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.6  2003/04/17 21:05:23  caress
  * Release 5.0.beta30
  *
@@ -137,7 +140,7 @@
 int mbsys_sb2100_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_sb2100.c,v 5.7 2005-11-05 00:48:03 caress Exp $";
+ static char res_id[]="$Id: mbsys_sb2100.c,v 5.8 2008-03-01 09:14:03 caress Exp $";
 	char	*function_name = "mbsys_sb2100_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -822,7 +825,7 @@ int mbsys_sb2100_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 int mbsys_sb2100_detects(int verbose, void *mbio_ptr, void *store_ptr,
 	int *kind, int *nbeams, int *detects, int *error)
 {
-	char	*function_name = "mbsys_sb2100_ttimes";
+	char	*function_name = "mbsys_sb2100_detects";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_sb2100_struct *store;
@@ -904,6 +907,97 @@ int mbsys_sb2100_detects(int verbose, void *mbio_ptr, void *store_ptr,
 		for (i=0;i<*nbeams;i++)
 			fprintf(stderr,"dbg2       beam %d: detect:%d\n",
 				i,detects[i]);
+		}
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbsys_sb2100_gains(int verbose, void *mbio_ptr, void *store_ptr,
+			int *kind, double *transmit_gain, double *pulse_length, 
+			double *receive_gain, int *error)
+{
+	char	*function_name = "mbsys_sb2100_gains";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	struct mbsys_sb2100_struct *store;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mb_ptr:     %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* get data structure pointer */
+	store = (struct mbsys_sb2100_struct *) store_ptr;
+
+	/* get data kind */
+	*kind = store->kind;
+
+	/* extract data from structure */
+	if (*kind == MB_DATA_DATA)
+		{
+		/* get transmit_gain (dB) */
+		*transmit_gain = (double)store->transmitter_attenuation;
+
+		/* get pulse_length (sec) */
+		*pulse_length = 0.001 * ((double)store->ping_pulse_width);
+
+		/* get receive_gain (dB) */
+		*receive_gain = (double)store->ping_gain;
+
+		/* set status */
+		*error = MB_ERROR_NO_ERROR;
+		status = MB_SUCCESS;
+
+		/* done translating values */
+
+		}
+
+	/* deal with comment */
+	else if (*kind == MB_DATA_COMMENT)
+		{
+		/* set status */
+		*error = MB_ERROR_COMMENT;
+		status = MB_FAILURE;
+		}
+
+	/* deal with other record type */
+	else
+		{
+		/* set status */
+		*error = MB_ERROR_OTHER;
+		status = MB_FAILURE;
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
+		}
+	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR)
+		{
+		fprintf(stderr,"dbg2       transmit_gain: %f\n",*transmit_gain);
+		fprintf(stderr,"dbg2       pulse_length:  %f\n",*pulse_length);
+		fprintf(stderr,"dbg2       receive_gain:  %f\n",*receive_gain);
 		}
 	if (verbose >= 2)
 		{

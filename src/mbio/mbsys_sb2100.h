@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_sb2100.h	2/4/94
- *	$Id: mbsys_sb2100.h,v 5.7 2005-11-05 00:48:04 caress Exp $
+ *	$Id: mbsys_sb2100.h,v 5.8 2008-03-01 09:14:03 caress Exp $
  *
  *    Copyright (c) 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Author:	D. W. Caress
  * Date:	February 4, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2005/11/05 00:48:04  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.6  2003/12/24 06:56:34  caress
  * Fixed problem with formats 42 and 43. Combined former files mbr_sb2100b1.c and mbr_sb2100b2.c into new file mbr_sb2100bi.c. Files mbf_sb2100b1.h and mbf_sb2100b2.h are no longer part of the archive.
  *
@@ -380,6 +383,9 @@ int mbsys_sb2100_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 			double *draft, double *ssv, int *error);
 int mbsys_sb2100_detects(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbeams, int *detects, int *error);
+int mbsys_sb2100_gains(int verbose, void *mbio_ptr, void *store_ptr,
+			int *kind, double *transmit_gain, double *pulse_length, 
+			double *receive_gain, int *error);
 int mbsys_sb2100_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, double *transducer_depth, double *altitude, 
 			int *error);

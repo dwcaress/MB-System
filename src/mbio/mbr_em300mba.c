@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em300mba.c	10/16/98
- *	$Id: mbr_em300mba.c,v 5.35 2007-07-03 17:31:03 caress Exp $
+ *	$Id: mbr_em300mba.c,v 5.36 2008-03-01 09:14:03 caress Exp $
  *
  *    Copyright (c) 1998, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	October 16,  1998
  * $Log: not supported by cvs2svn $
+ * Revision 5.35  2007/07/03 17:31:03  caress
+ * Fixed handling of EM121A data.
+ *
  * Revision 5.34  2006/11/10 22:36:04  caress
  * Working towards release 5.1.0
  *
@@ -304,7 +307,7 @@ int mbr_em300mba_wr_ss(int verbose, FILE *mbfp, int swap,
 int mbr_em300mba_wr_wc(int verbose, FILE *mbfp, int swap, 
 		struct mbsys_simrad2_struct *store, int *error);
 
-static char res_id[]="$Id: mbr_em300mba.c,v 5.35 2007-07-03 17:31:03 caress Exp $";
+static char res_id[]="$Id: mbr_em300mba.c,v 5.36 2008-03-01 09:14:03 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_em300mba(int verbose, void *mbio_ptr, int *error)
@@ -367,6 +370,7 @@ int mbr_register_em300mba(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr->mb_io_insert_svp = &mbsys_simrad2_insert_svp; 
 	mb_io_ptr->mb_io_ttimes = &mbsys_simrad2_ttimes; 
 	mb_io_ptr->mb_io_detects = &mbsys_simrad2_detects; 
+	mb_io_ptr->mb_io_gains = &mbsys_simrad2_gains; 
 	mb_io_ptr->mb_io_copyrecord = &mbsys_simrad2_copy; 
 	mb_io_ptr->mb_io_extract_rawss = NULL; 
 	mb_io_ptr->mb_io_insert_rawss = NULL; 
@@ -1156,7 +1160,7 @@ Have a nice day...\n");
 			status = MB_SUCCESS;
 			}
 		else if (type !=  EM2_STOP2
-			&& type != EM2_OFF
+			&& type != EM2_STATUS
 			&& type != EM2_ON
 			&& type != EM2_ATTITUDE
 			&& type != EM2_CLOCK
@@ -1692,7 +1696,7 @@ int mbr_em300mba_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 	typebyte = label[1];
 	if (startbyte ==  EM2_START_BYTE && 
 		(typebyte == EM2_ID_STOP2
-		|| typebyte == EM2_ID_OFF
+		|| typebyte == EM2_ID_STATUS
 		|| typebyte == EM2_ID_ON
 		|| typebyte == EM2_ID_ATTITUDE
 		|| typebyte == EM2_ID_CLOCK
@@ -2155,8 +2159,8 @@ int mbr_em300mba_rd_start(int verbose, FILE *mbfp, int swap,
 		    store->kind = MB_DATA_STOP;
 		else if (store->type == EM2_STOP2)
 		    store->kind = MB_DATA_STOP;
-		else if (store->type == EM2_OFF)
-		    store->kind = MB_DATA_STOP;
+		else if (store->type == EM2_STATUS)
+		    store->kind = MB_DATA_STATUS;
 		else if (store->type == EM2_ON)
 		    store->kind = MB_DATA_START;
 		}
@@ -4956,8 +4960,7 @@ int mbr_em300mba_rd_ss(int verbose, FILE *mbfp, int swap,
 			{
 			ping->png_ss[i] = 0;
 			}
-		read_len = fread(line,1,
-				    ping->png_pixels_ss * sizeof(short),mbfp);
+		read_len = fread(line, 1, ping->png_pixels_ss * sizeof(short),mbfp);
 		if (read_len == ping->png_pixels_ss * sizeof(short))
 			status = MB_SUCCESS;
 		else
