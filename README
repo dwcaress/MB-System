@@ -263,6 +263,10 @@ Added support for newer Simrad multibeam data (e.g. EM710) in
 vendor format MBF_EM710RAW (format id 58) and processing 
 format MBF_EM710MBA (format id 59)
 
+Updated format MBF_OMGHDCSJ (151), which supports the John Hughes 
+Clark HDCS (SwathEd) format, to handle all of John's "version 3"
+data. John's "version 4" format is not yet supported.
+
 MB-SYSTEM VERSION 5.1.0 RELEASE NOTES:
 ------------------------------------------
 
@@ -1456,10 +1460,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.108 2008-03-01 09:05:10 caress Exp $
+RCS ID: $Id: README,v 5.109 2008-03-14 18:29:45 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.108  2008/03/01 09:05:10  caress
+Added support for EM710 multibeam using formats 58 and 59.
+
 Revision 5.107  2008/02/12 02:31:43  caress
 Changes as of 11 February 2008.
 
