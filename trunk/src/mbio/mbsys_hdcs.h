@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_hdcs.h	3/16/99
- *	$Id: mbsys_hdcs.h,v 5.5 2005-11-05 00:48:04 caress Exp $
+ *	$Id: mbsys_hdcs.h,v 5.6 2008-03-14 18:33:03 caress Exp $
  *
  *    Copyright (c) 1999, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	March 16, 1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2005/11/05 00:48:04  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.4  2003/04/17 21:05:23  caress
  * Release 5.0.beta30
  *
@@ -86,7 +89,7 @@
 #define	MBSYS_HDCS_MAX_PIXELS		1024
 
 /* define tools (sonars) supported by OMG_HDCS */
-#define MBSYS_HDCS_NUM_TOOLS		25   /* as of March 1998 */
+#define MBSYS_HDCS_NUM_TOOLS		40   /* as of March 2008 */
 #define MBSYS_HDCS_None			-1
 #define MBSYS_HDCS_SingleBeam		0
 #define MBSYS_HDCS_ELAC_BottomChart	1
@@ -95,25 +98,84 @@
 #define MBSYS_HDCS_FanSweep		4
 #define MBSYS_HDCS_SeaBeam		5
 #define MBSYS_HDCS_EM3000		6
-#define MBSYS_HDCS_Navitronics_Smith	7
+#define MBSYS_HDCS_ROSS_Profiler	7
 #define MBSYS_HDCS_EM12_single		8
 #define MBSYS_HDCS_EM100_depth_ss	9
 #define MBSYS_HDCS_EM1000		10
 #define MBSYS_HDCS_LADS_2ndary		11
-#define MBSYS_HDCS_EM3000D 		12
+#define MBSYS_HDCS_EM3000D		12
 #define MBSYS_HDCS_SB2100		13
 #define MBSYS_HDCS_ISIS_Submetrix	14
 #define MBSYS_HDCS_EM1000_ampl		15
-#define MBSYS_HDCS_SB2K      		16
+#define MBSYS_HDCS_SB2K			16
 #define MBSYS_HDCS_Seabat9001		17
 #define MBSYS_HDCS_FanSweep_10A		18
 #define MBSYS_HDCS_FanSweep_20		19
 #define MBSYS_HDCS_ISIS_SWA		20
 #define MBSYS_HDCS_SeaBeam_1180_MkII	21
 #define MBSYS_HDCS_SeaBat_8101		22
-#define MBSYS_HDCS_EM300		23
-#define MBSYS_HDCS_EM121A		24
+#define MBSYS_HDCS_EM300 		23
+#define MBSYS_HDCS_EM121A 		24
+#define MBSYS_HDCS_SM2000 		25
+#define MBSYS_HDCS_HydroSweep_MD2	26
+#define MBSYS_HDCS_EM1002		27
+#define MBSYS_HDCS_Humminbird		28
+#define MBSYS_HDCS_Knudsen_320		29
+#define MBSYS_HDCS_EM120		30
+#define MBSYS_HDCS_SeaBat_8125		31
+#define MBSYS_HDCS_SeaBat_8111		32
+#define MBSYS_HDCS_SeaBat_8150		33
+#define MBSYS_HDCS_EM3002		34
+#define MBSYS_HDCS_Optech_Laser		35
+#define MBSYS_HDCS_EM710		36
+#define MBSYS_HDCS_EM3002D		37
+#define MBSYS_HDCS_SeaBat_8160		38
+#define MBSYS_HDCS_SEA_SwathPlus 	39
 #define MBSYS_HDCS_COMMENT		999
+
+static char *mbsys_hdcs_tool_names[MBSYS_HDCS_NUM_TOOLS] = {
+   "Single Beam Echo-Sounder",
+   "HoneyWell Elac BottomChart Mk I",
+   "Simrad EM-12 (dual system)",
+   "Simrad EM-100 (depths only)",
+   "Krupp-Atlas FanSweep 10",
+   "General Instruments SeaBeam (Classic)",
+   "Simrad - EM3000S",
+   "ROSS Sweep - MV Profiler DPW",
+   "Simrad EM-12 (single system)",
+   "Simrad EM-100 (depths and amplitudes)",
+   "Simrad EM-1000",
+   "RAN -- LADS (secondary format) ",
+   "Simrad - EM3000 dual head",
+   "SeaBeam 2100 series",
+   "ISIS Submetrix 100/ 2000",
+   "EM1000 with reflectivities",
+   "Seabeam 2000 ",
+   "Reson Seabat 9001 ",
+   "STN-Atlas FanSweep 10A",
+   "STN-Atlas FanSweep 20",
+   "ISIS Submetrix 100SWA",
+   "SeaBeam 1180 MkII",
+   "Reson 8101",
+   "Simrad EM300",
+   "Simrad EM121A",
+   "Simrad SM2000",
+   "HydroSweep MD2",
+   "Simrad EM1002",
+   "Hummin'bird 3D",
+   "Knudsen 320",
+   "Kongsberg Simrad EM120",
+   "Reson 8125",
+   "Reson 8111",
+   "Reson 8150",
+   "Kongsberg - EM3002",
+   "Optech - Laser",
+   "Kongsberg - EM710",
+   "Kongsberg - EM3002D",
+   "Reson 8160",
+   "SEA SwathPlus - Dual sided",
+};
+
 
 /* define beam record structure */
 struct mbsys_hdcs_beam_struct 

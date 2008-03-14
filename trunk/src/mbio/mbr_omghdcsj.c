@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_omghdcsj.c	3/10/99
- *	$Id: mbr_omghdcsj.c,v 5.8 2006-08-09 22:41:27 caress Exp $
+ *	$Id: mbr_omghdcsj.c,v 5.9 2008-03-14 18:33:03 caress Exp $
  *
  *    Copyright (c) 1999, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	March 10, 1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2006/08/09 22:41:27  caress
+ * Fixed programs that read or write grids so that they do not use the GMT_begin() function; these programs will now work when GMT is built in the default fashion, when GMT is built in the default fashion, with "advisory file locking" enabled.
+ *
  * Revision 5.7  2005/11/05 00:48:04  caress
  * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
  *
@@ -84,8 +87,8 @@
 #include "../../include/mb_format.h"
 #include "../../include/mb_io.h"
 #include "../../include/mb_define.h"
-#include "../../include/mbf_omghdcsj.h"
 #include "../../include/mbsys_hdcs.h"
+#include "../../include/mbf_omghdcsj.h"
 
 /* include for byte swapping on little-endian machines */
 #ifdef BYTESWAPPED
@@ -123,7 +126,7 @@ int mbr_wt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_omghdcsj(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_omghdcsj.c,v 5.8 2006-08-09 22:41:27 caress Exp $";
+	static char res_id[]="$Id: mbr_omghdcsj.c,v 5.9 2008-03-14 18:33:03 caress Exp $";
 	char	*function_name = "mbr_register_omghdcsj";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -256,7 +259,7 @@ int mbr_info_omghdcsj(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_omghdcsj.c,v 5.8 2006-08-09 22:41:27 caress Exp $";
+	static char res_id[]="$Id: mbr_omghdcsj.c,v 5.9 2008-03-14 18:33:03 caress Exp $";
 	char	*function_name = "mbr_info_omghdcsj";
 	int	status = MB_SUCCESS;
 
@@ -326,7 +329,7 @@ int mbr_info_omghdcsj(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_omghdcsj(int verbose, void *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_omghdcsj.c,v 5.8 2006-08-09 22:41:27 caress Exp $";
+ static char res_id[]="$Id: mbr_omghdcsj.c,v 5.9 2008-03-14 18:33:03 caress Exp $";
 	char	*function_name = "mbr_alm_omghdcsj";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -398,7 +401,7 @@ int mbr_alm_omghdcsj(int verbose, void *mbio_ptr, int *error)
 	    /* initialize saved values */
 	    *read_summary = MB_NO;
 	    *fileVersion = 0;
-	    *toolType = MBF_OMGHDCSJ_None;
+	    *toolType = MBSYS_HDCS_None;
 	    *profile_size = 0;
 	    *num_beam = 0;
 	    *beam_size = 0;
@@ -410,7 +413,7 @@ int mbr_alm_omghdcsj(int verbose, void *mbio_ptr, int *error)
 	    summary->sensorNumber = 1;
 	    summary->subFileID = 1;
 	    summary->fileVersion = 0;
-	    summary->toolType = MBF_OMGHDCSJ_None;
+	    summary->toolType = MBSYS_HDCS_None;
 	    summary->numProfiles = 0;
 	    summary->numDepths = 0;
 	    summary->timeScale = 0;
@@ -983,17 +986,17 @@ int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    int_ptr = (int *) &buffer[offset];
 		    profile->vesselLongOffset = mb_swap_int(*int_ptr); offset +=4;
 		    short_ptr = (short *) &buffer[offset];
-		    profile->vesselHeading = 10000 * (mb_swap_short(*short_ptr)); offset +=2;
+		    profile->vesselHeading = 10000 * ((short)mb_swap_short(*short_ptr)); offset +=2;
 		    short_ptr = (short *) &buffer[offset];
-		    profile->vesselHeave = mb_swap_short(*short_ptr); offset +=2;
+		    profile->vesselHeave = (short)mb_swap_short(*short_ptr); offset +=2;
 		    short_ptr = (short *) &buffer[offset];
-		    profile->vesselPitch = 1000 * (mb_swap_short(*short_ptr)); offset +=2;
+		    profile->vesselPitch = 1000 * ((short)mb_swap_short(*short_ptr)); offset +=2;
 		    short_ptr = (short *) &buffer[offset];
-		    profile->vesselRoll = 1000 * (mb_swap_short(*short_ptr)); offset +=2;
+		    profile->vesselRoll = 1000 * ((short)mb_swap_short(*short_ptr)); offset +=2;
 		    short_ptr = (short *) &buffer[offset];
-		    profile->tide = mb_swap_short(*short_ptr); offset +=2;
+		    profile->tide = (short)mb_swap_short(*short_ptr); offset +=2;
 		    short_ptr = (short *) &buffer[offset];
-		    profile->numDepths = mb_swap_short(*short_ptr); offset +=2;
+		    profile->numDepths = (short)mb_swap_short(*short_ptr); offset +=2;
 		    profile->power = buffer[offset]; offset +=1;
 		    profile->TVG = buffer[offset]; offset +=1;
 		    profile->attenuation = buffer[offset]; offset +=1;
@@ -1064,17 +1067,17 @@ int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    int_ptr = (int *) &buffer[offset];
 		    profile->vesselLongOffset = mb_swap_int(*int_ptr); offset +=4;
 		    short_ptr = (short *) &buffer[offset];
-		    profile->vesselHeading = 10000 * (mb_swap_short(*short_ptr)); offset +=2;
+		    profile->vesselHeading = 10000 * ((short)mb_swap_short(*short_ptr)); offset +=2;
 		    short_ptr = (short *) &buffer[offset];
-		    profile->vesselHeave = mb_swap_short(*short_ptr); offset +=2;
+		    profile->vesselHeave = (short)mb_swap_short(*short_ptr); offset +=2;
 		    short_ptr = (short *) &buffer[offset];
-		    profile->vesselPitch = 1000 * (mb_swap_short(*short_ptr)); offset +=2;
+		    profile->vesselPitch = 1000 * ((short)mb_swap_short(*short_ptr)); offset +=2;
 		    short_ptr = (short *) &buffer[offset];
-		    profile->vesselRoll = 1000 * (mb_swap_short(*short_ptr)); offset +=2;
+		    profile->vesselRoll = 1000 * ((short)mb_swap_short(*short_ptr)); offset +=2;
 		    short_ptr = (short *) &buffer[offset];
-		    profile->tide = mb_swap_short(*short_ptr); offset +=2;
+		    profile->tide = (short)mb_swap_short(*short_ptr); offset +=2;
 		    short_ptr = (short *) &buffer[offset];
-		    profile->numDepths = mb_swap_short(*short_ptr); offset +=2;
+		    profile->numDepths = (short)mb_swap_short(*short_ptr); offset +=2;
 		    profile->power = buffer[offset]; offset +=1;
 		    profile->TVG = buffer[offset]; offset +=1;
 		    profile->attenuation = buffer[offset]; offset +=1;
@@ -1086,21 +1089,21 @@ int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    if (offset < *profile_size)
 			{
 			short_ptr = (short *) &buffer[offset];
-			profile->td_sound_speed = mb_swap_short(*short_ptr); offset +=2;
+			profile->td_sound_speed = (short)mb_swap_short(*short_ptr); offset +=2;
 			short_ptr = (short *) &buffer[offset];
-			profile->samp_rate = mb_swap_short(*short_ptr); offset +=2;
+			profile->samp_rate = (short)mb_swap_short(*short_ptr); offset +=2;
 			profile->z_res_cm = buffer[offset]; offset +=1;
 			profile->xy_res_cm = buffer[offset]; offset +=1;
 			profile->ssp_source = buffer[offset]; offset +=1;
 			profile->filter_ID = buffer[offset]; offset +=1;
 			short_ptr = (short *) &buffer[offset];
-			profile->absorp_coeff = mb_swap_short(*short_ptr); offset +=2;
+			profile->absorp_coeff = (short)mb_swap_short(*short_ptr); offset +=2;
 			short_ptr = (short *) &buffer[offset];
-			profile->tx_pulse_len = mb_swap_short(*short_ptr); offset +=2;
+			profile->tx_pulse_len = (short)mb_swap_short(*short_ptr); offset +=2;
 			short_ptr = (short *) &buffer[offset];
-			profile->tx_beam_width = mb_swap_short(*short_ptr); offset +=2;
+			profile->tx_beam_width = (short)mb_swap_short(*short_ptr); offset +=2;
 			short_ptr = (short *) &buffer[offset];
-			profile->max_swath_width = mb_swap_short(*short_ptr); offset +=2;
+			profile->max_swath_width = (short)mb_swap_short(*short_ptr); offset +=2;
 			profile->tx_power_reduction = buffer[offset]; offset +=1;
 			profile->rx_beam_width = buffer[offset]; offset +=1;
 			profile->rx_bandwidth = buffer[offset]; offset +=1;
@@ -1172,7 +1175,7 @@ int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    profile->Q_factor = 0;
 		    }		
 		}
-		
+
 	    /* now read next data */
 	    if (status == MB_SUCCESS)
 		{
@@ -1310,9 +1313,9 @@ int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			if ((offset - offset_start) < *beam_size)
 			    {
 			    short_ptr = (short *) &buffer[offset];
-			    beam->observedDepth = mb_swap_short(*short_ptr); offset+=2;
+			    beam->observedDepth = (short)mb_swap_short(*short_ptr); offset+=2;
 			    short_ptr = (short *) &buffer[offset];
-			    beam->acrossTrack = mb_swap_short(*short_ptr); offset+=2;
+			    beam->acrossTrack = (short)mb_swap_short(*short_ptr); offset+=2;
 			    beam->status = buffer[offset]; offset+=1;
 			    }
 			if ((offset - offset_start) < *beam_size)
@@ -1324,21 +1327,21 @@ int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			if ((offset - offset_start) < *beam_size)
 			    {
 			    short_ptr = (short *) &buffer[offset];
-			    beam->alongTrack = mb_swap_short(*short_ptr); offset+=2;
+			    beam->alongTrack = (short)mb_swap_short(*short_ptr); offset+=2;
 			    }
 			if ((offset - offset_start) < *beam_size)
 			    {
 			    short_ptr = (short *) &buffer[offset];
-			    beam->range = mb_swap_short(*short_ptr); offset+=2;
+			    beam->range = (short)mb_swap_short(*short_ptr); offset+=2;
 			    }
 			if ((offset - offset_start) < *beam_size)
 			    {
 			    int_ptr = (int *) &buffer[offset];
 			    beam->offset = mb_swap_int(*int_ptr); offset+=4;
 			    short_ptr = (short *) &buffer[offset];
-			    beam->no_samples = mb_swap_short(*short_ptr); offset+=2;
+			    beam->no_samples = (short)mb_swap_short(*short_ptr); offset+=2;
 			    short_ptr = (short *) &buffer[offset];
-			    beam->centre_no = mb_swap_short(*short_ptr); offset+=2;
+			    beam->centre_no = (short)mb_swap_short(*short_ptr); offset+=2;
 			    }
 #else
 			if ((offset - offset_start) < *beam_size)
@@ -1424,9 +1427,9 @@ int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			if ((offset - offset_start) < *beam_size)
 			    {
 			    short_ptr = (short *) &buffer[offset];
-			    beam->observedDepth = mb_swap_short(*short_ptr); offset+=2;
+			    beam->observedDepth = (short)mb_swap_short(*short_ptr); offset+=2;
 			    short_ptr = (short *) &buffer[offset];
-			    beam->acrossTrack = mb_swap_short(*short_ptr); offset+=2;
+			    beam->acrossTrack = (short)mb_swap_short(*short_ptr); offset+=2;
 			    beam->status = buffer[offset]; offset+=1;
 			    }
 			if ((offset - offset_start) < *beam_size)
@@ -1438,28 +1441,28 @@ int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			if ((offset - offset_start) < *beam_size)
 			    {
 			    short_ptr = (short *) &buffer[offset];
-			    beam->alongTrack = mb_swap_short(*short_ptr); offset+=2;
+			    beam->alongTrack = (short)mb_swap_short(*short_ptr); offset+=2;
 			    }
 			if ((offset - offset_start) < *beam_size)
 			    {
 			    short_ptr = (short *) &buffer[offset];
-			    beam->range = mb_swap_short(*short_ptr); offset+=2;
+			    beam->range = (short)mb_swap_short(*short_ptr); offset+=2;
 			    }
 			if ((offset - offset_start) < *beam_size)
 			    {
 			    int_ptr = (int *) &buffer[offset];
 			    beam->offset = mb_swap_int(*int_ptr); offset+=4;
 			    short_ptr = (short *) &buffer[offset];
-			    beam->no_samples = mb_swap_short(*short_ptr); offset+=2;
+			    beam->no_samples = (short)mb_swap_short(*short_ptr); offset+=2;
 			    short_ptr = (short *) &buffer[offset];
-			    beam->centre_no = mb_swap_short(*short_ptr); offset+=2;
+			    beam->centre_no = (short)mb_swap_short(*short_ptr); offset+=2;
 			    }
 			if ((offset - offset_start) < *beam_size)
 			    {
 			    short_ptr = (short *) &buffer[offset];
-			    beam->beam_depress_angle = mb_swap_short(*short_ptr); offset+=2;
+			    beam->beam_depress_angle = (short)mb_swap_short(*short_ptr); offset+=2;
 			    short_ptr = (short *) &buffer[offset];
-			    beam->beam_heading_angle = mb_swap_short(*short_ptr); offset+=2;
+			    beam->beam_heading_angle = (short)mb_swap_short(*short_ptr); offset+=2;
 			    beam->samp_win_length = buffer[offset]; offset+=1;
 			    scaling_factor = buffer[offset]; offset+=1;
 			    beam->Q_factor = buffer[offset]; offset+=1;
@@ -1544,13 +1547,23 @@ int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    /* now deal with sidescan in parallel file */
 	    if (status == MB_SUCCESS 
 		&& mb_io_ptr->mbfp2 != NULL
-		&& (summary->toolType == MBF_OMGHDCSJ_EM1000
-		    || summary->toolType == MBF_OMGHDCSJ_EM12_single
-		    || summary->toolType == MBF_OMGHDCSJ_EM12_dual
-		    || summary->toolType == MBF_OMGHDCSJ_EM300
-		    || summary->toolType == MBF_OMGHDCSJ_EM3000
-		    || summary->toolType == MBF_OMGHDCSJ_EM3000D
-		    || summary->toolType == MBF_OMGHDCSJ_EM121A))
+		&& (summary->toolType == MBSYS_HDCS_EM1000
+		    || summary->toolType == MBSYS_HDCS_EM12_single
+		    || summary->toolType == MBSYS_HDCS_EM12_dual
+		    || summary->toolType == MBSYS_HDCS_EM300
+		    || summary->toolType == MBSYS_HDCS_EM3000
+		    || summary->toolType == MBSYS_HDCS_EM3000D
+		    || summary->toolType == MBSYS_HDCS_EM121A
+		    || summary->toolType == MBSYS_HDCS_EM1002
+		    || summary->toolType == MBSYS_HDCS_EM120
+		    || summary->toolType == MBSYS_HDCS_SeaBat_8125
+		    || summary->toolType == MBSYS_HDCS_SeaBat_8111
+		    || summary->toolType == MBSYS_HDCS_SeaBat_8150
+		    || summary->toolType == MBSYS_HDCS_EM3002
+		    || summary->toolType == MBSYS_HDCS_EM710
+		    || summary->toolType == MBSYS_HDCS_EM3002
+		    || summary->toolType == MBSYS_HDCS_EM3002D
+		    || summary->toolType == MBSYS_HDCS_SeaBat_8160))
 		{
 		/* count samples and get first offset */
 		nrawpixels = 0;
@@ -1847,15 +1860,25 @@ int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		/* get raw pixel size */
 		if (profile->samp_rate > 0)
 		    ss_spacing = 750.0 / profile->samp_rate;		
-		else if (summary->toolType == MBF_OMGHDCSJ_EM3000 
-			|| summary->toolType == MBF_OMGHDCSJ_EM3000D)
+		else if (summary->toolType == MBSYS_HDCS_EM3000 
+			|| summary->toolType == MBSYS_HDCS_EM3000D)
 		    ss_spacing = 750.0 / 14000;
-		else if (summary->toolType == MBF_OMGHDCSJ_EM300)
+		else if (summary->toolType == MBSYS_HDCS_EM300)
 		    ss_spacing = 750.0 / 4512;
-		else if (summary->toolType == MBF_OMGHDCSJ_EM1000
-			|| summary->toolType == MBF_OMGHDCSJ_EM12_single
-			|| summary->toolType == MBF_OMGHDCSJ_EM12_dual
-			|| summary->toolType == MBF_OMGHDCSJ_EM121A)
+		else if (summary->toolType == MBSYS_HDCS_EM1000
+			|| summary->toolType == MBSYS_HDCS_EM12_single
+			|| summary->toolType == MBSYS_HDCS_EM12_dual
+			|| summary->toolType == MBSYS_HDCS_EM121A
+			|| summary->toolType == MBSYS_HDCS_EM1002
+			|| summary->toolType == MBSYS_HDCS_EM120
+			|| summary->toolType == MBSYS_HDCS_SeaBat_8125
+			|| summary->toolType == MBSYS_HDCS_SeaBat_8111
+			|| summary->toolType == MBSYS_HDCS_SeaBat_8150
+			|| summary->toolType == MBSYS_HDCS_EM3002
+			|| summary->toolType == MBSYS_HDCS_EM710
+			|| summary->toolType == MBSYS_HDCS_EM3002
+			|| summary->toolType == MBSYS_HDCS_EM3002D
+			|| summary->toolType == MBSYS_HDCS_SeaBat_8160)
 		    {
 		    if (profile->power == 1)
 			    ss_spacing = 0.6;
@@ -2870,17 +2893,17 @@ int mbr_wt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		int_ptr = (int *) &buffer[offset];
 		*int_ptr = mb_swap_int(profile->vesselLongOffset); offset +=4;
 		short_ptr = (short *) &buffer[offset];
-		*short_ptr = mb_swap_short((short)(profile->vesselHeading / 10000)); offset +=2;
+		*short_ptr = (short)mb_swap_short((short)(profile->vesselHeading / 10000)); offset +=2;
 		short_ptr = (short *) &buffer[offset];
-		*short_ptr = mb_swap_short((short)(profile->vesselHeave)); offset +=2;
+		*short_ptr = (short)mb_swap_short((short)(profile->vesselHeave)); offset +=2;
 		short_ptr = (short *) &buffer[offset];
-		*short_ptr = mb_swap_short((short)(profile->vesselPitch / 1000)); offset +=2;
+		*short_ptr = (short)mb_swap_short((short)(profile->vesselPitch / 1000)); offset +=2;
 		short_ptr = (short *) &buffer[offset];
-		*short_ptr = mb_swap_short((short)(profile->vesselRoll / 1000)); offset +=2;
+		*short_ptr = (short)mb_swap_short((short)(profile->vesselRoll / 1000)); offset +=2;
 		short_ptr = (short *) &buffer[offset];
-		*short_ptr = mb_swap_short((short)(profile->tide)); offset +=2;
+		*short_ptr = (short)mb_swap_short((short)(profile->tide)); offset +=2;
 		short_ptr = (short *) &buffer[offset];
-		*short_ptr = mb_swap_short((short)(profile->numDepths)); offset +=2;
+		*short_ptr = (short)mb_swap_short((short)(profile->numDepths)); offset +=2;
 		buffer[offset] = profile->power; offset +=1;
 		buffer[offset] = profile->TVG; offset +=1;
 		buffer[offset] = profile->attenuation; offset +=1;
@@ -2928,17 +2951,17 @@ int mbr_wt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		int_ptr = (int *) &buffer[offset];
 		*int_ptr = mb_swap_int(profile->vesselLongOffset); offset +=4;
 		short_ptr = (short *) &buffer[offset];
-		*short_ptr = mb_swap_short((short)(profile->vesselHeading / 10000)); offset +=2;
+		*short_ptr = (short)mb_swap_short((short)(profile->vesselHeading / 10000)); offset +=2;
 		short_ptr = (short *) &buffer[offset];
-		*short_ptr = mb_swap_short((short)(profile->vesselHeave)); offset +=2;
+		*short_ptr = (short)mb_swap_short((short)(profile->vesselHeave)); offset +=2;
 		short_ptr = (short *) &buffer[offset];
-		*short_ptr = mb_swap_short((short)(profile->vesselPitch / 1000)); offset +=2;
+		*short_ptr = (short)mb_swap_short((short)(profile->vesselPitch / 1000)); offset +=2;
 		short_ptr = (short *) &buffer[offset];
-		*short_ptr = mb_swap_short((short)(profile->vesselRoll / 1000)); offset +=2;
+		*short_ptr = (short)mb_swap_short((short)(profile->vesselRoll / 1000)); offset +=2;
 		short_ptr = (short *) &buffer[offset];
-		*short_ptr = mb_swap_short((short)(profile->tide)); offset +=2;
+		*short_ptr = (short)mb_swap_short((short)(profile->tide)); offset +=2;
 		short_ptr = (short *) &buffer[offset];
-		*short_ptr = mb_swap_short((short)(profile->numDepths)); offset +=2;
+		*short_ptr = (short)mb_swap_short((short)(profile->numDepths)); offset +=2;
 		buffer[offset] = profile->power; offset +=1;
 		buffer[offset] = profile->TVG; offset +=1;
 		buffer[offset] = profile->attenuation; offset +=1;
@@ -2950,21 +2973,21 @@ int mbr_wt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		if (offset < *profile_size)
 		    {
 		    short_ptr = (short *) &buffer[offset];
-		    *short_ptr = mb_swap_short((short)(profile->td_sound_speed)); offset +=2;
+		    *short_ptr = (short)mb_swap_short((short)(profile->td_sound_speed)); offset +=2;
 		    short_ptr = (short *) &buffer[offset];
-		    *short_ptr = mb_swap_short((short)(profile->samp_rate)); offset +=2;
+		    *short_ptr = (short)mb_swap_short((short)(profile->samp_rate)); offset +=2;
 		    buffer[offset] = profile->z_res_cm; offset +=1;
 		    buffer[offset] = profile->xy_res_cm; offset +=1;
 		    buffer[offset] = profile->ssp_source; offset +=1;
 		    buffer[offset] = profile->filter_ID; offset +=1;
 		    short_ptr = (short *) &buffer[offset];
-		    *short_ptr = mb_swap_short((short)(profile->absorp_coeff)); offset +=2;
+		    *short_ptr = (short)mb_swap_short((short)(profile->absorp_coeff)); offset +=2;
 		    short_ptr = (short *) &buffer[offset];
-		    *short_ptr = mb_swap_short((short)(profile->tx_pulse_len)); offset +=2;
+		    *short_ptr = (short)mb_swap_short((short)(profile->tx_pulse_len)); offset +=2;
 		    short_ptr = (short *) &buffer[offset];
-		    *short_ptr = mb_swap_short((short)(profile->tx_beam_width)); offset +=2;
+		    *short_ptr = (short)mb_swap_short((short)(profile->tx_beam_width)); offset +=2;
 		    short_ptr = (short *) &buffer[offset];
-		    *short_ptr = mb_swap_short((short)(profile->max_swath_width)); offset +=2;
+		    *short_ptr = (short)mb_swap_short((short)(profile->max_swath_width)); offset +=2;
 		    buffer[offset] = profile->tx_power_reduction; offset +=1;
 		    buffer[offset] = profile->rx_beam_width; offset +=1;
 		    buffer[offset] = profile->rx_bandwidth; offset +=1;
@@ -3187,42 +3210,9 @@ int mbr_wt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			if ((offset - offset_start) < *beam_size)
 			    {
 			    short_ptr = (short *) &buffer[offset];
-			    *short_ptr = mb_swap_short(beam->observedDepth); offset+=2;
+			    *short_ptr = (short)mb_swap_short((short)(beam->observedDepth)); offset+=2;
 			    short_ptr = (short *) &buffer[offset];
-			    *short_ptr = mb_swap_short(beam->status); offset+=2;
-			    }
-			if ((offset - offset_start) < *beam_size)
-			    {
-			    buffer[offset] = beam->reflectivity; offset+=1;
-			    buffer[offset] = beam->calibratedBackscatter; offset+=1;
-			    buffer[offset] = beam->pseudoAngleIndependentBackscatter; offset+=1;
-			    }
-			if ((offset - offset_start) < *beam_size)
-			    {
-			    short_ptr = (short *) &buffer[offset];
-			    *short_ptr = mb_swap_short(beam->alongTrack); offset+=2;
-			    }
-			if ((offset - offset_start) < *beam_size)
-			    {
-			    short_ptr = (short *) &buffer[offset];
-			    *short_ptr = mb_swap_short(beam->range); offset+=2;
-			    }
-			if ((offset - offset_start) < *beam_size)
-			    {
-			    int_ptr = (int *) &buffer[offset];
-			    *int_ptr = mb_swap_int(beam->offset); offset +=4;
-			    short_ptr = (short *) &buffer[offset];
-			    *short_ptr = mb_swap_short(beam->no_samples); offset+=2;
-			    short_ptr = (short *) &buffer[offset];
-			    *short_ptr = mb_swap_short(beam->centre_no); offset+=2;
-			    }
-#else
-			if ((offset - offset_start) < *beam_size)
-			    {
-			    short_ptr = (short *) &buffer[offset];
-			    *short_ptr = beam->observedDepth; offset+=2;
-			    short_ptr = (short *) &buffer[offset];
-			    *short_ptr = beam->acrossTrack; offset+=2;
+			    *short_ptr = (short)mb_swap_short((short)(beam->acrossTrack)); offset+=2;
 			    buffer[offset] = beam->status; offset+=1;
 			    }
 			if ((offset - offset_start) < *beam_size)
@@ -3234,21 +3224,55 @@ int mbr_wt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			if ((offset - offset_start) < *beam_size)
 			    {
 			    short_ptr = (short *) &buffer[offset];
-			    *short_ptr = beam->alongTrack; offset+=2;
+			    *short_ptr = (short)mb_swap_short((short)(beam->alongTrack)); offset+=2;
 			    }
 			if ((offset - offset_start) < *beam_size)
 			    {
 			    short_ptr = (short *) &buffer[offset];
-			    *short_ptr = beam->range; offset+=2;
+			    *short_ptr = (short)mb_swap_short((short)(beam->range)); offset+=2;
+			    }
+			if ((offset - offset_start) < *beam_size)
+			    {
+			    int_ptr = (int *) &buffer[offset];
+			    *int_ptr = mb_swap_int(beam->offset); offset +=4;
+			    short_ptr = (short *) &buffer[offset];
+			    *short_ptr = (short)mb_swap_short((short)(beam->no_samples)); offset+=2;
+			    short_ptr = (short *) &buffer[offset];
+			    *short_ptr = (short)mb_swap_short((short)(beam->centre_no)); offset+=2;
+			    }
+#else
+			if ((offset - offset_start) < *beam_size)
+			    {
+			    short_ptr = (short *) &buffer[offset];
+			    *short_ptr = (short)beam->observedDepth; offset+=2;
+			    short_ptr = (short *) &buffer[offset];
+			    *short_ptr = (short)beam->acrossTrack; offset+=2;
+			    buffer[offset] = beam->status; offset+=1;
+			    }
+			if ((offset - offset_start) < *beam_size)
+			    {
+			    buffer[offset] = beam->reflectivity; offset+=1;
+			    buffer[offset] = beam->calibratedBackscatter; offset+=1;
+			    buffer[offset] = beam->pseudoAngleIndependentBackscatter; offset+=1;
+			    }
+			if ((offset - offset_start) < *beam_size)
+			    {
+			    short_ptr = (short *) &buffer[offset];
+			    *short_ptr = (short)beam->alongTrack; offset+=2;
+			    }
+			if ((offset - offset_start) < *beam_size)
+			    {
+			    short_ptr = (short *) &buffer[offset];
+			    *short_ptr = (short)beam->range; offset+=2;
 			    }
 			if ((offset - offset_start) < *beam_size)
 			    {
 			    int_ptr = (int *) &buffer[offset];
 			    *int_ptr = beam->offset; offset+=4;
 			    short_ptr = (short *) &buffer[offset];
-			    *short_ptr = beam->no_samples; offset+=2;
+			    *short_ptr = (short)beam->no_samples; offset+=2;
 			    short_ptr = (short *) &buffer[offset];
-			    *short_ptr = beam->centre_no; offset+=2;
+			    *short_ptr = (short)beam->centre_no; offset+=2;
 			    }
 #endif
 			}
@@ -3313,9 +3337,9 @@ int mbr_wt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			if ((offset - offset_start) < *beam_size)
 			    {
 			    short_ptr = (short *) &buffer[offset];
-			    *short_ptr = mb_swap_short(beam->observedDepth); offset+=2;
+			    *short_ptr = (short)mb_swap_short((short)(beam->observedDepth)); offset+=2;
 			    short_ptr = (short *) &buffer[offset];
-			    *short_ptr = mb_swap_short(beam->acrossTrack); offset+=2;
+			    *short_ptr = (short)mb_swap_short((short)(beam->acrossTrack)); offset+=2;
 			    buffer[offset] = beam->status; offset+=1;
 			    }
 			if ((offset - offset_start) < *beam_size)
@@ -3327,28 +3351,28 @@ int mbr_wt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			if ((offset - offset_start) < *beam_size)
 			    {
 			    short_ptr = (short *) &buffer[offset];
-			    *short_ptr = mb_swap_short(beam->alongTrack); offset+=2;
+			    *short_ptr = (short)mb_swap_short((short)(beam->alongTrack)); offset+=2;
 			    }
 			if ((offset - offset_start) < *beam_size)
 			    {
 			    short_ptr = (short *) &buffer[offset];
-			    *short_ptr = mb_swap_short(beam->range); offset+=2;
+			    *short_ptr = (short)mb_swap_short((short)(beam->range)); offset+=2;
 			    }
 			if ((offset - offset_start) < *beam_size)
 			    {
 			    int_ptr = (int *) &buffer[offset];
 			    *int_ptr = mb_swap_int(beam->offset); offset +=4;
 			    short_ptr = (short *) &buffer[offset];
-			    *short_ptr = mb_swap_short(beam->no_samples); offset+=2;
+			    *short_ptr = (short)mb_swap_short((short)(beam->no_samples)); offset+=2;
 			    short_ptr = (short *) &buffer[offset];
-			    *short_ptr = mb_swap_short(beam->centre_no); offset+=2;
+			    *short_ptr = (short)mb_swap_short((short)(beam->centre_no)); offset+=2;
 			    }
 			if ((offset - offset_start) < *beam_size)
 			    {
 			    short_ptr = (short *) &buffer[offset];
-			    *short_ptr = mb_swap_short(beam->beam_depress_angle); offset+=2;
+			    *short_ptr = (short)mb_swap_short((short)(beam->beam_depress_angle)); offset+=2;
 			    short_ptr = (short *) &buffer[offset];
-			    *short_ptr = mb_swap_short(beam->beam_heading_angle); offset+=2;
+			    *short_ptr = (short)mb_swap_short((short)(beam->beam_heading_angle)); offset+=2;
 			    buffer[offset] = beam->samp_win_length; offset+=1;
 			    buffer[offset] = scaling_factor; offset+=1;
 			    buffer[offset] = beam->Q_factor; offset+=1;
@@ -3358,9 +3382,9 @@ int mbr_wt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			if ((offset - offset_start) < *beam_size)
 			    {
 			    short_ptr = (short *) &buffer[offset];
-			    *short_ptr = beam->observedDepth; offset+=2;
+			    *short_ptr = (short)beam->observedDepth; offset+=2;
 			    short_ptr = (short *) &buffer[offset];
-			    *short_ptr = beam->acrossTrack; offset+=2;
+			    *short_ptr = (short)beam->acrossTrack; offset+=2;
 			    buffer[offset] = beam->status; offset+=1;
 			    }
 			if ((offset - offset_start) < *beam_size)
@@ -3372,28 +3396,28 @@ int mbr_wt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			if ((offset - offset_start) < *beam_size)
 			    {
 			    short_ptr = (short *) &buffer[offset];
-			    *short_ptr = beam->alongTrack; offset+=2;
+			    *short_ptr =(short) beam->alongTrack; offset+=2;
 			    }
 			if ((offset - offset_start) < *beam_size)
 			    {
 			    short_ptr = (short *) &buffer[offset];
-			    *short_ptr = beam->range; offset+=2;
+			    *short_ptr = (short)beam->range; offset+=2;
 			    }
 			if ((offset - offset_start) < *beam_size)
 			    {
 			    int_ptr = (int *) &buffer[offset];
 			    *int_ptr = beam->offset; offset+=4;
 			    short_ptr = (short *) &buffer[offset];
-			    *short_ptr = beam->no_samples; offset+=2;
+			    *short_ptr = (short)beam->no_samples; offset+=2;
 			    short_ptr = (short *) &buffer[offset];
-			    *short_ptr = beam->centre_no; offset+=2;
+			    *short_ptr = (short)beam->centre_no; offset+=2;
 			    }
 			if ((offset - offset_start) < *beam_size)
 			    {
 			    short_ptr = (short *) &buffer[offset];
-			    *short_ptr = beam->beam_depress_angle; offset+=2;
+			    *short_ptr = (short)beam->beam_depress_angle; offset+=2;
 			    short_ptr = (short *) &buffer[offset];
-			    *short_ptr = beam->beam_heading_angle; offset+=2;
+			    *short_ptr = (short)beam->beam_heading_angle; offset+=2;
 			    buffer[offset] = beam->samp_win_length; offset+=1;
 			    buffer[offset] = scaling_factor; offset+=1;
 			    buffer[offset] = beam->Q_factor; offset+=1;
@@ -3421,13 +3445,23 @@ int mbr_wt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    /* now deal with sidescan in parallel file */
 	    if (status == MB_SUCCESS 
 		&& mb_io_ptr->mbfp2 != NULL
-		&& (summary->toolType == MBF_OMGHDCSJ_EM1000
-		    || summary->toolType == MBF_OMGHDCSJ_EM12_single
-		    || summary->toolType == MBF_OMGHDCSJ_EM12_dual
-		    || summary->toolType == MBF_OMGHDCSJ_EM300
-		    || summary->toolType == MBF_OMGHDCSJ_EM3000
-		    || summary->toolType == MBF_OMGHDCSJ_EM3000D
-		    || summary->toolType == MBF_OMGHDCSJ_EM121A))
+		&& (summary->toolType == MBSYS_HDCS_EM1000
+		    || summary->toolType == MBSYS_HDCS_EM12_single
+		    || summary->toolType == MBSYS_HDCS_EM12_dual
+		    || summary->toolType == MBSYS_HDCS_EM300
+		    || summary->toolType == MBSYS_HDCS_EM3000
+		    || summary->toolType == MBSYS_HDCS_EM3000D
+		    || summary->toolType == MBSYS_HDCS_EM121A
+		    || summary->toolType == MBSYS_HDCS_EM1002
+		    || summary->toolType == MBSYS_HDCS_EM120
+		    || summary->toolType == MBSYS_HDCS_SeaBat_8125
+		    || summary->toolType == MBSYS_HDCS_SeaBat_8111
+		    || summary->toolType == MBSYS_HDCS_SeaBat_8150
+		    || summary->toolType == MBSYS_HDCS_EM3002
+		    || summary->toolType == MBSYS_HDCS_EM710
+		    || summary->toolType == MBSYS_HDCS_EM3002
+		    || summary->toolType == MBSYS_HDCS_EM3002D
+		    || summary->toolType == MBSYS_HDCS_SeaBat_8160))
 		{
 		/* write the sidescan */
 		if (status == MB_SUCCESS)
