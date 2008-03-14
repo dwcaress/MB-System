@@ -1,4 +1,4 @@
-.TH mbio l "9 February 2008" "MB-System 5.0" "MB-System 5.0"
+.TH mbio l "14 March 2008" "MB-System 5.0" "MB-System 5.0"
 
 .SH NAME
 \fBmbio\fP - Format independent input/output library for swath mapping sonar data.
@@ -409,6 +409,22 @@ The following swath mapping sonar data formats are supported in this version of
                           up to 254 beams, variable pixels,  
                           ascii + binary, MBARI.
     
+    MBIO Data Format ID:  58
+    Format name:          MBF_EM710RAW
+    Informal Description: Simrad current multibeam vendor format
+    Attributes:           Simrad EM710,
+                          bathymetry, amplitude, and sidescan,
+                          up to 400 beams, variable pixels, 
+    			  binary, Simrad.
+    
+    MBIO Data Format ID:  59
+    Format name:          MBF_EM710MBA
+    Informal Description: Simrad current multibeam vendor format
+    Attributes:           Simrad EM710,
+                          bathymetry, amplitude, and sidescan,
+                          up to 400 beams, variable pixels, 
+    			  binary, Simrad.
+        
     MBIO Data Format ID:  61
     Format name:          MBF_MR1PRHIG
     Informal Description: SOEST MR1 post processed format
@@ -619,6 +635,13 @@ The following swath mapping sonar data formats are supported in this version of
                           amplitude, variable pixel  
                           sidescan, binary, UNB
     
+    MBIO Data Format ID:  160
+    Format name:          MBF_SEGYSEGY
+    Informal Description: SEGY seismic data format
+    Attributes:           seismic or subbottom trace data,
+                          single beam bathymetry, nav,
+                          binary, SEG (SIOSEIS variant)
+    
     MBIO Data Format ID:  161
     Format name:          MBF_MGD77DAT
     Informal Description: NGDC MGD77 underway geophysics  
@@ -673,6 +696,11 @@ The following swath mapping sonar data formats are supported in this version of
     Informal Description: Generic YXT sounding format
     Attributes:           YXT (lat lon topograpy) ASCII 
                           soundings, generic
+    
+    MBIO Data Format ID:  170
+    Format name:          MBF_MBARROV2
+    Informal Description: MBARI ROV navigation format
+    Attributes:           ROV navigation, MBARI
     
     MBIO Data Format ID:  171
     Format name:          MBF_HS10JAMS

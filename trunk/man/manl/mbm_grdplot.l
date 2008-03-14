@@ -204,9 +204,10 @@ equalizing the color table.
 .TP
 .B \-T
 If \fB-T\fP is given, it causes a coastline to be drawn
-on the map. The default is to draw the coastline and shade
-all dry land a uniform gray. To exercise greater control of
-the coastline plotting, use the 
+on the map. The default is to draw the coastline as the thinnest possible
+line. To exercise greater control of
+the coastline plotting, including color fill of "dry" areas and 
+display of lakes, rivers, and political boundaries, use the 
 \fB-MTC\fP, \fB-MTD\fP, \fB-MTG\fP, \fB-MTI\fP, 
 \fB-MTN\fP, \fB-MTS\fP, and \fB-MTW\fP options described in the
 COMPLETE DESCRIPTION OF OPTIONS section below.
@@ -1002,11 +1003,12 @@ equalizing the color table.
 .TP
 .B \-T
 If \fB-T\fP is given, it causes a coastline to be drawn
-on the map. The default is to draw the coastline and shade
-all dry land a uniform gray. To exercise greater control of
-the coastline plotting, use the 
+on the map. The default is to draw the coastline as the thinnest possible
+line. To exercise greater control of
+the coastline plotting, including color fill of "dry" areas and 
+display of lakes, rivers, and political boundaries, use the 
 \fB-MTC\fP, \fB-MTD\fP, \fB-MTG\fP, \fB-MTI\fP, 
-\fB-MTN\fP, \fB-MTS\fP, and \fB-MTW\fP options described in the
+\fB-MTN\fP, \fB-MTS\fP, and \fB-MTW\fP options.
 .TP
 .B \-U
 \fIorientation\fP
