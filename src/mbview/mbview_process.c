@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_process.c	9/25/2003
- *    $Id: mbview_process.c,v 5.14 2007-10-08 16:32:08 caress Exp $
+ *    $Id: mbview_process.c,v 5.15 2008-03-14 19:04:32 caress Exp $
  *
  *    Copyright (c) 2003, 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  *		begun on October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.14  2007/10/08 16:32:08  caress
+ * Code status as of 8 October 2007.
+ *
  * Revision 5.13  2007/06/17 23:27:31  caress
  * Added NBeditviz.
  *
@@ -116,7 +119,7 @@ static Cardinal 	ac;
 static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_process.c,v 5.14 2007-10-08 16:32:08 caress Exp $";
+static char rcs_id[]="$Id: mbview_process.c,v 5.15 2008-03-14 19:04:32 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_projectdata(int instance)
@@ -1359,7 +1362,7 @@ fprintf(stderr,"mbview_zscale: %d\n", instance);
 			{
 			for (j=0;j<2;j++)
 				{
-				mbview_zscalepoint(instance, globalview, offset_factor, data->area.segments[i].endpoints[j]);
+				mbview_zscalepoint(instance, globalview, offset_factor, &(data->area.segments[i].endpoints[j]));
 				}
 			for (j=0;j<data->area.segments[i].nls;j++)
 				{

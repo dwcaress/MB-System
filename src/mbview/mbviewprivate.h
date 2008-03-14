@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbviewprivate.h	9/24/2003
- *    $Id: mbviewprivate.h,v 5.13 2007-10-08 16:32:08 caress Exp $
+ *    $Id: mbviewprivate.h,v 5.14 2008-03-14 19:04:32 caress Exp $
  *
  *    Copyright (c) 2003, 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -18,6 +18,9 @@
  * Date:	September 24,  2003
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.13  2007/10/08 16:32:08  caress
+ * Code status as of 8 October 2007.
+ *
  * Revision 5.12  2007/06/17 23:27:31  caress
  * Added NBeditviz.
  *
@@ -273,6 +276,7 @@ struct mbview_world_struct
     double scale;
 
     /* relevant mbio defaults */
+    int lonflip;
     double timegap;
     
     float offset2d_x;

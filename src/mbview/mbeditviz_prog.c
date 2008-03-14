@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbeditviz_prog.c		5/1/2007
- *    $Id: mbeditviz_prog.c,v 5.6 2008-01-14 18:20:13 caress Exp $
+ *    $Id: mbeditviz_prog.c,v 5.7 2008-03-14 19:04:32 caress Exp $
  *
  *    Copyright (c) 2007 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	May 1, 2007
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2008/01/14 18:20:13  caress
+ * Improved ability to identify raw vs processed data files regardless of source datalist.
+ *
  * Revision 5.5  2007/11/16 17:26:56  caress
  * Progress on MBeditviz
  *
@@ -69,7 +72,7 @@
 #include "mbview.h"
 
 /* id variables */
-static char rcs_id[] = "$Id: mbeditviz_prog.c,v 5.6 2008-01-14 18:20:13 caress Exp $";
+static char rcs_id[] = "$Id: mbeditviz_prog.c,v 5.7 2008-03-14 19:04:32 caress Exp $";
 static char program_name[] = "MBeditviz";
 static char help_message[] = "MBeditviz is a bathymetry editor and patch test tool.";
 static char usage_message[] = "mbeditviz [-H -T -V]";
@@ -573,6 +576,8 @@ int mbeditviz_load_file(int ifile)
 		}
 		
 	/* load the file */
+	mbev_status = MB_SUCCESS;
+	mbev_error = MB_ERROR_NO_ERROR;
 	if (ifile >= 0 && ifile < mbev_num_files 
 		&& mbev_files[ifile].load_status == MB_NO)
 		{
@@ -582,10 +587,10 @@ int mbeditviz_load_file(int ifile)
 		if (file->raw_info.nrecords > 0)
 			{
 			file->pings = (struct mbev_ping_struct *)
-				malloc(sizeof(struct mbev_ping_struct) * (file->raw_info.nrecords));
+				malloc(sizeof(struct mbev_ping_struct) * (file->raw_info.nrecords + 1));
 			if (mbev_files != NULL)
 				{
-				file->num_pings_alloc = file->raw_info.nrecords;
+				file->num_pings_alloc = file->raw_info.nrecords + 1;
 				memset(file->pings,0,sizeof(struct mbev_ping_struct) * (file->num_pings_alloc));
 				file->num_pings = 0;
 				}
@@ -613,7 +618,6 @@ int mbeditviz_load_file(int ifile)
 			/* use fbt file if possible */
 			mb_get_fbt(mbev_verbose, swathfile, &format, &mbev_error);
 
-fprintf(stderr,"mbeditviz_load_file:%d swathfile:%s raw_info.file:%s\n",ifile,swathfile,file->raw_info.file);
 			/* initialize reading the swath file */
 			if ((mbev_status = mb_read_init(
 				mbev_verbose,swathfile,format,mbdef_pings,mbdef_lonflip,mbdef_bounds,
@@ -828,6 +832,7 @@ fprintf(stderr,"MEMORY FAILURE in mbeditviz_load_file\n");
 							}
 						}
 					}
+fprintf(stderr,"return mbeditviz_load_file 8 status:%d\n", mbev_status);
 					
 				/* copy data into ping arrays */
 				if (mbev_error == MB_ERROR_NO_ERROR
@@ -858,6 +863,7 @@ fprintf(stderr,"MEMORY FAILURE in mbeditviz_load_file\n");
 						}
 					}
 				
+fprintf(stderr,"return mbeditviz_load_file 9 status:%d\n", mbev_status);
 
 				/* extract some more values */
 				if (mbev_error == MB_ERROR_NO_ERROR
@@ -950,6 +956,7 @@ fprintf(stderr,"MEMORY FAILURE in mbeditviz_load_file\n");
 							}
 						}
 					}
+fprintf(stderr,"return mbeditviz_load_file 10 status:%d\n", mbev_status);
 
 				/* increment counters */
 				if (mbev_error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA)
@@ -985,6 +992,7 @@ fprintf(stderr,"MEMORY FAILURE in mbeditviz_load_file\n");
 					fprintf(stderr,"dbg2       pixels_ss:      %d\n",pixels_ss);
 					}
 				}
+fprintf(stderr,"return mbeditviz_load_file 11 status:%d\n", mbev_status);
 
 			/* close the file */
 			mbev_status = mb_close(mbev_verbose,&imbio_ptr,&mbev_error);

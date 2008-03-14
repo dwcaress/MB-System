@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbeditviz_callbacks.c		4/27/2007
- *    $Id: mbeditviz_callbacks.c,v 5.6 2007-11-16 17:26:56 caress Exp $
+ *    $Id: mbeditviz_callbacks.c,v 5.7 2008-03-14 19:04:32 caress Exp $
  *
  *    Copyright (c) 2007 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	April 27, 2007
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2007/11/16 17:26:56  caress
+ * Progress on MBeditviz
+ *
  * Revision 5.5  2007/10/17 20:35:05  caress
  * Release 5.1.1beta11
  *
@@ -544,32 +547,41 @@ fprintf(stderr,"do_mbeditviz_viewall\n");
 
 		mbev_status = mbview_destroy(mbev_verbose, 0, MB_YES, &mbev_error);
 		mbev_grid.status == MBEV_GRID_NOTVIEWED;
+fprintf(stderr,"do_mbeditviz_viewall destroyed previous windows\n");
 		}
 
 	/* destroy old grid */
 	if (mbev_grid.status != MBEV_GRID_NONE)
+		{
 		mbeditviz_destroy_grid();
+fprintf(stderr,"do_mbeditviz_viewall destroyed old grid\n");
+		}
 	
 	/* loop over all files to be sure all files are loaded */
+fprintf(stderr,"do_mbeditviz_viewall loading files...\n");
 	do_mbeditviz_message_on("Loading files...");
 	loadcount = 0;
 	for (ifile=0;ifile<mbev_num_files;ifile++)
 		{
+fprintf(stderr,"do_mbeditviz_viewall loading file %d\n",ifile);
 		file = &(mbev_files[ifile]);
 		if (file->load_status == MB_NO)
 			{
 			sprintf(value_text, "Loading file %d of %d...", ifile+1, mbev_num_files);
 			do_mbeditviz_message_on(value_text);
+fprintf(stderr,"do_mbeditviz_viewall loading file %d of %d...\n", ifile+1, mbev_num_files);
 			mbeditviz_load_file(ifile);
 			}
 		loadcount++;
+fprintf(stderr,"do_mbeditviz_viewall mbev_status:%d loadcount:%d\n",mbev_status,loadcount);
 		}
 	do_mbeditviz_message_off();
 		
 	/* put up dialog on grid parameters */
-fprintf(stderr," mbev_status:%d loadcount:%d\n",mbev_status,loadcount);
+fprintf(stderr,"do_mbeditviz_viewall mbev_status:%d loadcount:%d\n",mbev_status,loadcount);
 	if (mbev_status == MB_SUCCESS && loadcount > 0)
 		{
+fprintf(stderr,"do_mbeditviz_viewall calling do_mbeditviz_gridparameters\n");
 		do_mbeditviz_gridparameters(w, client_data, call_data);
 		}
 	else
@@ -578,6 +590,7 @@ fprintf(stderr," mbev_status:%d loadcount:%d\n",mbev_status,loadcount);
 		}
 	
 	/* reset the gui */
+fprintf(stderr,"do_mbeditviz_viewall calling do_mbeditviz_update_gui\n");
 	do_mbeditviz_update_gui();
 	
 fprintf(stderr,"return do_mbeditviz_viewall status:%d\n", mbev_status);

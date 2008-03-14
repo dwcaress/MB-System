@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_route.c	9/25/2003
- *    $Id: mbview_route.c,v 5.17 2007-06-17 23:27:30 caress Exp $
+ *    $Id: mbview_route.c,v 5.18 2008-03-14 19:04:32 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  *		begun on October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.17  2007/06/17 23:27:30  caress
+ * Added NBeditviz.
+ *
  * Revision 5.16  2006/10/05 18:58:29  caress
  * Changes for 5.1.0beta4
  *
@@ -124,7 +127,7 @@ static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 static char		value_string[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_route.c,v 5.17 2007-06-17 23:27:30 caress Exp $";
+static char rcs_id[]="$Id: mbview_route.c,v 5.18 2008-03-14 19:04:32 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_getroutecount(int verbose, int instance,
@@ -1122,11 +1125,14 @@ int mbview_pick_route_select(int instance, int which, int xpixel, int ypixel)
 			shared.shareddata.routes[iroute].points[jpoint].ydisplay[instance] = ydisplay;
 			shared.shareddata.routes[iroute].points[jpoint].zdisplay[instance] = zdisplay;
 			mbview_updatepointw(instance, &(shared.shareddata.routes[iroute].points[jpoint]));
+fprintf(stderr,"mbview_pick_route_select: Point Select Move: iroute:%d jpoint:%d of %d\n",
+iroute,jpoint,shared.shareddata.routes[iroute].npoints);
 			
 			/* drape the affected segments */
 			if (jpoint > 0)
 				{
 				/* drape the segment */
+				shared.shareddata.routes[iroute].segments[jpoint-1].endpoints[1] = shared.shareddata.routes[iroute].points[jpoint];
 				mbview_drapesegmentw(instance, &(shared.shareddata.routes[iroute].segments[jpoint-1]));
 			
 				/* update the segment for all active instances */
@@ -1135,6 +1141,7 @@ int mbview_pick_route_select(int instance, int which, int xpixel, int ypixel)
 			if (jpoint < shared.shareddata.routes[iroute].npoints - 1)
 				{
 				/* drape the segment */
+				shared.shareddata.routes[iroute].segments[jpoint].endpoints[0] = shared.shareddata.routes[iroute].points[jpoint];
 				mbview_drapesegmentw(instance, &(shared.shareddata.routes[iroute].segments[jpoint]));
 			
 				/* update the segment for all active instances */
@@ -1525,6 +1532,8 @@ int mbview_pick_route_add(int instance, int which, int xpixel, int ypixel)
 			if (shared.shareddata.route_point_selected > 0)
 				{
 				/* drape the segment */
+				shared.shareddata.routes[shared.shareddata.route_selected].segments[shared.shareddata.route_point_selected-1].endpoints[1] 
+					= shared.shareddata.routes[shared.shareddata.route_selected].points[shared.shareddata.route_point_selected];
 				mbview_drapesegmentw(instance, 
 					&(shared.shareddata.routes[shared.shareddata.route_selected].segments[shared.shareddata.route_point_selected-1]));
 			
@@ -1534,6 +1543,8 @@ int mbview_pick_route_add(int instance, int which, int xpixel, int ypixel)
 			if (shared.shareddata.route_point_selected < shared.shareddata.routes[shared.shareddata.route_selected].npoints - 1)
 				{
 				/* drape the segment */
+				shared.shareddata.routes[shared.shareddata.route_selected].segments[shared.shareddata.route_point_selected].endpoints[0] 
+					= shared.shareddata.routes[shared.shareddata.route_selected].points[shared.shareddata.route_point_selected];
 				mbview_drapesegmentw(instance, 
 					&(shared.shareddata.routes[shared.shareddata.route_selected].segments[shared.shareddata.route_point_selected]));
 			
@@ -1811,8 +1822,8 @@ int mbview_route_add(int instance, int inew, int jnew, int waypoint,
 						shared.shareddata.routes[i].segments[j].nls = 0;
 						shared.shareddata.routes[i].segments[j].nls_alloc = 0;
 						shared.shareddata.routes[i].segments[j].lspoints = NULL;
-						shared.shareddata.routes[i].segments[j].endpoints[0] = &(shared.shareddata.routes[i].points[j]);
-						shared.shareddata.routes[i].segments[j].endpoints[1] = &(shared.shareddata.routes[i].points[j+1]);
+						shared.shareddata.routes[i].segments[j].endpoints[0] = shared.shareddata.routes[i].points[j];
+						shared.shareddata.routes[i].segments[j].endpoints[1] = shared.shareddata.routes[i].points[j+1];
 						}
 					}
 				}
@@ -1862,8 +1873,8 @@ int mbview_route_add(int instance, int inew, int jnew, int waypoint,
 		for (j=shared.shareddata.routes[inew].npoints-1;j>jnew;j--)
 			{
 			shared.shareddata.routes[inew].segments[j] = shared.shareddata.routes[inew].segments[j-1];
-			shared.shareddata.routes[inew].segments[j].endpoints[0] = &(shared.shareddata.routes[inew].points[j]);
-			shared.shareddata.routes[inew].segments[j].endpoints[1] = &(shared.shareddata.routes[inew].points[j+1]);
+			shared.shareddata.routes[inew].segments[j].endpoints[0] = shared.shareddata.routes[inew].points[j];
+			shared.shareddata.routes[inew].segments[j].endpoints[1] = shared.shareddata.routes[inew].points[j+1];
 			}
 		
 		/* add the new point */
@@ -1882,12 +1893,12 @@ int mbview_route_add(int instance, int inew, int jnew, int waypoint,
 		shared.shareddata.routes[inew].segments[jnew].nls = 0;
 		shared.shareddata.routes[inew].segments[jnew].nls_alloc = 0;
 		shared.shareddata.routes[inew].segments[jnew].lspoints = NULL;
-		shared.shareddata.routes[inew].segments[jnew].endpoints[0] = &(shared.shareddata.routes[inew].points[jnew]);
-		shared.shareddata.routes[inew].segments[jnew].endpoints[1] = &(shared.shareddata.routes[inew].points[jnew+1]);
+		shared.shareddata.routes[inew].segments[jnew].endpoints[0] = shared.shareddata.routes[inew].points[jnew];
+		shared.shareddata.routes[inew].segments[jnew].endpoints[1] = shared.shareddata.routes[inew].points[jnew+1];
 		if (jnew > 0)
 			{
-			shared.shareddata.routes[inew].segments[jnew-1].endpoints[0] = &(shared.shareddata.routes[inew].points[jnew-1]);
-			shared.shareddata.routes[inew].segments[jnew-1].endpoints[1] = &(shared.shareddata.routes[inew].points[jnew]);
+			shared.shareddata.routes[inew].segments[jnew-1].endpoints[0] = shared.shareddata.routes[inew].points[jnew-1];
+			shared.shareddata.routes[inew].segments[jnew-1].endpoints[1] = shared.shareddata.routes[inew].points[jnew];
 			}
 
 		/* set npoints */
@@ -1898,8 +1909,8 @@ int mbview_route_add(int instance, int inew, int jnew, int waypoint,
 			{
 			for (j=MAX(0,jnew-1);j<MIN(shared.shareddata.routes[inew].npoints-1,jnew+1);j++)
 				{
-				shared.shareddata.routes[inew].segments[j].endpoints[0] = &(shared.shareddata.routes[inew].points[j]);
-				shared.shareddata.routes[inew].segments[j].endpoints[1] = &(shared.shareddata.routes[inew].points[j+1]);
+				shared.shareddata.routes[inew].segments[j].endpoints[0] = shared.shareddata.routes[inew].points[j];
+				shared.shareddata.routes[inew].segments[j].endpoints[1] = shared.shareddata.routes[inew].points[j+1];
 
 				/* drape the segment */
 				mbview_drapesegmentw(instance, &(shared.shareddata.routes[inew].segments[j]));
@@ -2039,8 +2050,8 @@ int mbview_route_delete(int instance, int iroute, int ipoint)
 			{
 			for (j=MAX(0,ipoint-1);j<shared.shareddata.routes[iroute].npoints-1;j++)
 				{
-				shared.shareddata.routes[iroute].segments[j].endpoints[0] = &(shared.shareddata.routes[iroute].points[j]);
-				shared.shareddata.routes[iroute].segments[j].endpoints[1] = &(shared.shareddata.routes[iroute].points[j+1]);
+				shared.shareddata.routes[iroute].segments[j].endpoints[0] = shared.shareddata.routes[iroute].points[j];
+				shared.shareddata.routes[iroute].segments[j].endpoints[1] = shared.shareddata.routes[iroute].points[j+1];
 
 				/* drape the segment */
 				mbview_drapesegmentw(instance, &(shared.shareddata.routes[iroute].segments[j]));

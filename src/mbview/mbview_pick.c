@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_pick.c	9/29/2003
- *    $Id: mbview_pick.c,v 5.14 2007-06-17 23:27:30 caress Exp $
+ *    $Id: mbview_pick.c,v 5.15 2008-03-14 19:04:32 caress Exp $
  *
  *    Copyright (c) 2003, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  *		begun on October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.14  2007/06/17 23:27:30  caress
+ * Added NBeditviz.
+ *
  * Revision 5.13  2006/09/11 18:55:53  caress
  * Changes during Western Flyer and Thomas Thompson cruises, August-September
  * 2006.
@@ -115,7 +118,7 @@ static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 static char		value_list[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_pick.c,v 5.14 2007-06-17 23:27:30 caress Exp $";
+static char rcs_id[]="$Id: mbview_pick.c,v 5.15 2008-03-14 19:04:32 caress Exp $";
 	
 
 /*------------------------------------------------------------------------------*/
@@ -234,6 +237,8 @@ int mbview_pick(int instance, int which, int xpixel, int ypixel)
 				|| data->profile_view_mode == MBV_VIEW_ON
 				|| which == MBV_PICK_UP))
 			{
+			data->pick.segment.endpoints[0] = data->pick.endpoints[0];
+			data->pick.segment.endpoints[1] = data->pick.endpoints[1];
 			mbview_drapesegment(instance, &(data->pick.segment));
 			}
 		}
@@ -501,6 +506,8 @@ int mbview_picksize(int instance)
 		/* drape the x marker line segments */
 		for (i=0;i<2;i++)
 			{
+			data->pick.xsegments[i].endpoints[0] = data->pick.xpoints[2*i];
+			data->pick.xsegments[i].endpoints[1] = data->pick.xpoints[2*i+1];
 			mbview_drapesegment(instance, &(data->pick.xsegments[i]));
 			}
 		}
@@ -550,6 +557,8 @@ int mbview_picksize(int instance)
 		/* drape the x marker line segments */
 		for (i=0;i<2;i++)
 			{
+			data->pick.xsegments[i+2].endpoints[0] = data->pick.xpoints[2*i+4];
+			data->pick.xsegments[i+2].endpoints[1] = data->pick.xpoints[2*i+5];
 			mbview_drapesegment(instance, &(data->pick.xsegments[i+2]));
 			}
 		}
@@ -579,6 +588,8 @@ int mbview_pick_text(int instance)
 	char	lonstr0[24], lonstr1[24];
 	char	latstr0[24], latstr1[24];
 	char	date0[24], date1[24];
+	double	lonmin, lonmax, latmin, latmax;
+	int	i;
 
 	/* print starting debug statements */
 	if (mbv_verbose >= 2)
@@ -644,20 +655,60 @@ int mbview_pick_text(int instance)
 		}
 	else if (data->pickinfo_mode == MBV_PICK_REGION)
 		{
-		mbview_setlonlatstrings(shared.lonlatstyle, 
-					data->region.cornerpoints[0].xlon, data->region.cornerpoints[0].ylat, 
-					lonstr0, latstr0);
-		mbview_setlonlatstrings(shared.lonlatstyle, 
-					data->region.cornerpoints[3].xlon, data->region.cornerpoints[3].ylat, 
-					lonstr1, latstr1);
+		lonmin = data->region.cornerpoints[0].xlon;
+		lonmax = data->region.cornerpoints[0].xlon;
+		latmin = data->region.cornerpoints[0].ylat;
+		latmax = data->region.cornerpoints[0].ylat;
+		for (i=1;i<4;i++)
+			{
+			lonmin = MIN(lonmin, data->region.cornerpoints[i].xlon);
+			lonmax = MAX(lonmax, data->region.cornerpoints[i].xlon);
+			latmin = MIN(latmin, data->region.cornerpoints[i].ylat);
+			latmax = MAX(latmax, data->region.cornerpoints[i].ylat);
+			}
+		if (view->lonflip < 0)
+			{
+			if (lonmin > 0.) 
+				lonmin = lonmin - 360.;
+			else if (lonmin < -360.)
+				lonmin = lonmin + 360.;
+			if (lonmax > 0.) 
+				lonmax = lonmax - 360.;
+			else if (lonmax < -360.)
+				lonmax = lonmax + 360.;
+			}
+		else if (view->lonflip == 0)
+			{
+			if (lonmin > 180.) 
+				lonmin = lonmin - 360.;
+			else if (lonmin < -180.)
+				lonmin = lonmin + 360.;
+			if (lonmax > 180.) 
+				lonmax = lonmax - 360.;
+			else if (lonmax < -180.)
+				lonmax = lonmax + 360.;
+			}
+		else
+			{
+			if (lonmin > 360.) 
+				lonmin = lonmin - 360.;
+			else if (lonmin < 0.)
+				lonmin = lonmin + 360.;
+			if (lonmax > 360.) 
+				lonmax = lonmax - 360.;
+			else if (lonmax < 0.)
+				lonmax = lonmax + 360.;
+			}
+		mbview_setlonlatstrings(shared.lonlatstyle, lonmin,latmin, lonstr0, latstr0);
+		mbview_setlonlatstrings(shared.lonlatstyle, lonmax,latmax, lonstr1, latstr1);
 		sprintf(value_text,
-		":::t\"Region Info:\":t\" West: %s\":t\" North: %s\":t\" East: %s\":t\" South: %s\":t\" Width: %.3f m\":t\" Height: %.3f m\"", 
-			lonstr0, latstr0, lonstr1, latstr1,
+		":::t\"Region Info:\":t\" West: %s\":t\" East: %s\":t\" South: %s\":t\" North: %s\":t\" Width: %.3f m\":t\" Height: %.3f m\"", 
+			lonstr0, lonstr1, latstr0, latstr1,
 			data->region.width,
 			data->region.height);
 		sprintf(value_list,
-		"Region Info: West: %s North: %s East: %s South: %s Width: %.3f m Height: %.3f m", 
-			lonstr0, latstr0, lonstr1, latstr1,
+		"Region Info: Bounds: %.6f/%.6f/%.6f/%.6f  Width: %.3f m Height: %.3f m", 
+			lonmin, lonmax, latmin, latmax,
 			data->region.width,
 			data->region.height);
 		}
@@ -1442,7 +1493,22 @@ xgrid,ygrid,xlon,ylat,zdata,xdisplay,ydisplay,zdisplay);*/
 				data->region.cornerpoints[1].ylat, 
 				&bearing, &data->region.height);
 			}
-			
+
+		/* reset segment endpoints */
+		for (i=0;i<4;i++)
+			{
+			if (i == 0)
+				k = 1;
+			else if (i == 1)
+				k = 3;
+			else if (i == 2)
+				k = 0;
+			else if (i == 3)
+				k = 2;
+			data->region.segments[i].endpoints[0] = data->region.cornerpoints[i];
+			data->region.segments[i].endpoints[1] = data->region.cornerpoints[k];
+			}
+
 		/* set pick info */
 		data->pickinfo_mode = MBV_PICK_REGION;
 		
@@ -1809,6 +1875,19 @@ int mbview_area(int instance, int which, int xpixel, int ypixel)
 
 			/* set pick info */
 			data->pickinfo_mode = MBV_PICK_AREA;
+			
+			/* reset segment endpoints */
+			for (i=0;i<2;i++)
+				{
+				data->area.segment.endpoints[i] = data->area.endpoints[i];
+				}
+			for (i=0;i<4;i++)
+				{
+				k = i + 1;
+				if (k > 3) k = 0;
+				data->area.segments[i].endpoints[0] = data->area.cornerpoints[i];
+				data->area.segments[i].endpoints[1] = data->area.cornerpoints[k];
+				}
 
 			/* now project the segment endpoints */
 			for (i=0;i<4;i++)
@@ -1816,34 +1895,34 @@ int mbview_area(int instance, int which, int xpixel, int ypixel)
 				for (j=0;j<2;j++)
 					{
 					mbview_projectinverse(instance, MB_YES,
-							data->area.segments[i].endpoints[j]->xdisplay, 
-							data->area.segments[i].endpoints[j]->ydisplay, 
-							data->area.segments[i].endpoints[j]->zdisplay, 
-							&(data->area.segments[i].endpoints[j]->xlon), 
-							&(data->area.segments[i].endpoints[j]->ylat),
-							&(data->area.segments[i].endpoints[j]->xgrid), 
-							&(data->area.segments[i].endpoints[j]->ygrid));
+							data->area.segments[i].endpoints[j].xdisplay, 
+							data->area.segments[i].endpoints[j].ydisplay, 
+							data->area.segments[i].endpoints[j].zdisplay, 
+							&(data->area.segments[i].endpoints[j].xlon), 
+							&(data->area.segments[i].endpoints[j].ylat),
+							&(data->area.segments[i].endpoints[j].xgrid), 
+							&(data->area.segments[i].endpoints[j].ygrid));
 					mbview_getzdata(instance, 
-							data->area.segments[i].endpoints[j]->xgrid, 
-							data->area.segments[i].endpoints[j]->ygrid, 
+							data->area.segments[i].endpoints[j].xgrid, 
+							data->area.segments[i].endpoints[j].ygrid, 
 							&ok,
-							&(data->area.segments[i].endpoints[j]->zdata));
+							&(data->area.segments[i].endpoints[j].zdata));
 					if (ok == MB_NO &&
 						(   (i == 0)
 						 || (i == 1 && j == 0)
 						 || (i == 3 && j == 1)))
-						data->area.segments[i].endpoints[j]->zdata
+						data->area.segments[i].endpoints[j].zdata
 							= data->area.endpoints[0].zdata;
 					else if (ok == MB_NO)
-						data->area.segments[i].endpoints[j]->zdata
+						data->area.segments[i].endpoints[j].zdata
 							= data->area.endpoints[1].zdata;
 					mbview_projectll2display(instance,
-						data->area.segments[i].endpoints[j]->xlon, 
-						data->area.segments[i].endpoints[j]->ylat, 
-						data->area.segments[i].endpoints[j]->zdata ,
-						&data->area.segments[i].endpoints[j]->xdisplay, 
-						&data->area.segments[i].endpoints[j]->ydisplay,
-						&data->area.segments[i].endpoints[j]->zdisplay);
+						data->area.segments[i].endpoints[j].xlon, 
+						data->area.segments[i].endpoints[j].ylat, 
+						data->area.segments[i].endpoints[j].zdata ,
+						&data->area.segments[i].endpoints[j].xdisplay, 
+						&data->area.segments[i].endpoints[j].ydisplay,
+						&data->area.segments[i].endpoints[j].zdisplay);
 					}
 				}
 			}
@@ -1941,6 +2020,19 @@ int mbview_area(int instance, int which, int xpixel, int ypixel)
 
 			/* set pick info */
 			data->pickinfo_mode = MBV_PICK_AREA;
+			
+			/* reset segment endpoints */
+			for (i=0;i<2;i++)
+				{
+				data->area.segment.endpoints[i] = data->area.endpoints[i];
+				}
+			for (i=0;i<4;i++)
+				{
+				k = i + 1;
+				if (k > 3) k = 0;
+				data->area.segments[i].endpoints[0] = data->area.cornerpoints[i];
+				data->area.segments[i].endpoints[1] = data->area.cornerpoints[k];
+				}
 
 			/* now project the segment endpoints */
 			for (i=0;i<4;i++)
@@ -1948,26 +2040,26 @@ int mbview_area(int instance, int which, int xpixel, int ypixel)
 				for (j=0;j<2;j++)
 					{
 					mbview_getzdata(instance, 
-							data->area.segments[i].endpoints[j]->xgrid, 
-							data->area.segments[i].endpoints[j]->ygrid, 
+							data->area.segments[i].endpoints[j].xgrid, 
+							data->area.segments[i].endpoints[j].ygrid, 
 							&ok,
-							&(data->area.segments[i].endpoints[j]->zdata));
+							&(data->area.segments[i].endpoints[j].zdata));
 					if (ok == MB_NO &&
 						(   (i == 0)
 						 || (i == 1 && j == 0)
 						 || (i == 3 && j == 1)))
-						data->area.segments[i].endpoints[j]->zdata
+						data->area.segments[i].endpoints[j].zdata
 							= data->area.endpoints[0].zdata;
 					else if (ok == MB_NO)
-						data->area.segments[i].endpoints[j]->zdata
+						data->area.segments[i].endpoints[j].zdata
 							= data->area.endpoints[1].zdata;
 					mbview_projectll2display(instance,
-						data->area.segments[i].endpoints[j]->xlon, 
-						data->area.segments[i].endpoints[j]->ylat, 
-						data->area.segments[i].endpoints[j]->zdata ,
-						&data->area.segments[i].endpoints[j]->xdisplay, 
-						&data->area.segments[i].endpoints[j]->ydisplay,
-						&data->area.segments[i].endpoints[j]->zdisplay);
+						data->area.segments[i].endpoints[j].xlon, 
+						data->area.segments[i].endpoints[j].ylat, 
+						data->area.segments[i].endpoints[j].zdata ,
+						&data->area.segments[i].endpoints[j].xdisplay, 
+						&data->area.segments[i].endpoints[j].ydisplay,
+						&data->area.segments[i].endpoints[j].zdisplay);
 					}
 				}
 			}
@@ -2248,12 +2340,12 @@ int mbview_drawregion(int instance)
 			else
 				{
 				glBegin(GL_LINES);
-				glVertex3f((float)(data->region.segments[i].endpoints[0]->xdisplay), 
-						(float)(data->region.segments[i].endpoints[0]->ydisplay), 
-						(float)(data->region.segments[i].endpoints[0]->zdisplay));
-				glVertex3f((float)(data->region.segments[i].endpoints[1]->xdisplay), 
-						(float)(data->region.segments[i].endpoints[1]->ydisplay), 
-						(float)(data->region.segments[i].endpoints[1]->zdisplay));
+				glVertex3f((float)(data->region.segments[i].endpoints[0].xdisplay), 
+						(float)(data->region.segments[i].endpoints[0].ydisplay), 
+						(float)(data->region.segments[i].endpoints[0].zdisplay));
+				glVertex3f((float)(data->region.segments[i].endpoints[1].xdisplay), 
+						(float)(data->region.segments[i].endpoints[1].ydisplay), 
+						(float)(data->region.segments[i].endpoints[1].zdisplay));
 				glEnd();
 #ifdef MBV_GETERRORS
 mbview_glerrorcheck(instance, 1, function_name);
@@ -2329,12 +2421,12 @@ mbview_glerrorcheck(instance, 1, function_name);
 		else
 			{
 			glBegin(GL_LINES);
-			glVertex3f((float)(data->area.segment.endpoints[0]->xdisplay), 
-					(float)(data->area.segment.endpoints[0]->ydisplay), 
-					(float)(data->area.segment.endpoints[0]->zdisplay));
-			glVertex3f((float)(data->area.segment.endpoints[1]->xdisplay), 
-					(float)(data->area.segment.endpoints[1]->ydisplay), 
-					(float)(data->area.segment.endpoints[1]->zdisplay));
+			glVertex3f((float)(data->area.segment.endpoints[0].xdisplay), 
+					(float)(data->area.segment.endpoints[0].ydisplay), 
+					(float)(data->area.segment.endpoints[0].zdisplay));
+			glVertex3f((float)(data->area.segment.endpoints[1].xdisplay), 
+					(float)(data->area.segment.endpoints[1].ydisplay), 
+					(float)(data->area.segment.endpoints[1].zdisplay));
 			glEnd();
 #ifdef MBV_GETERRORS
 mbview_glerrorcheck(instance, 1, function_name);
@@ -2362,12 +2454,12 @@ mbview_glerrorcheck(instance, 1, function_name);
 			else
 				{
 				glBegin(GL_LINES);
-				glVertex3f((float)(data->area.segments[i].endpoints[0]->xdisplay), 
-						(float)(data->area.segments[i].endpoints[0]->ydisplay), 
-						(float)(data->area.segments[i].endpoints[0]->zdisplay));
-				glVertex3f((float)(data->area.segments[i].endpoints[1]->xdisplay), 
-						(float)(data->area.segments[i].endpoints[1]->ydisplay), 
-						(float)(data->area.segments[i].endpoints[1]->zdisplay));
+				glVertex3f((float)(data->area.segments[i].endpoints[0].xdisplay), 
+						(float)(data->area.segments[i].endpoints[0].ydisplay), 
+						(float)(data->area.segments[i].endpoints[0].zdisplay));
+				glVertex3f((float)(data->area.segments[i].endpoints[1].xdisplay), 
+						(float)(data->area.segments[i].endpoints[1].ydisplay), 
+						(float)(data->area.segments[i].endpoints[1].zdisplay));
 				glEnd();
 #ifdef MBV_GETERRORS
 mbview_glerrorcheck(instance, 1, function_name);

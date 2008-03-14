@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbview_callbacks.c	10/7/2002
- *    $Id: mbview_callbacks.c,v 5.18 2007-10-31 18:42:37 caress Exp $
+ *    $Id: mbview_callbacks.c,v 5.19 2008-03-14 19:04:32 caress Exp $
  *
  *    Copyright (c) 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -18,6 +18,9 @@
  * Date:	October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.18  2007/10/31 18:42:37  caress
+ * Fixed bug in importing navigation.
+ *
  * Revision 5.17  2007/10/17 20:35:05  caress
  * Release 5.1.1beta11
  *
@@ -145,7 +148,7 @@ static Cardinal 	ac;
 static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_callbacks.c,v 5.18 2007-10-31 18:42:37 caress Exp $";
+static char rcs_id[]="$Id: mbview_callbacks.c,v 5.19 2008-03-14 19:04:32 caress Exp $";
 
 /* function prototypes */
 /*------------------------------------------------------------------------------*/
@@ -523,7 +526,7 @@ int mbview_reset_shared(int mode)
 		    shared.shareddata.navpick.endpoints[i].ydisplay[instance] = 0.0;
 		    shared.shareddata.navpick.endpoints[i].zdisplay[instance] = 0.0;
 		    shared.shareddata.navpick.segment.endpoints[i] 
-		    		= &(shared.shareddata.navpick.endpoints[i]);
+		    		= shared.shareddata.navpick.endpoints[i];
 		    }
 		shared.shareddata.navpick.segment.nls = 0;
 		shared.shareddata.navpick.segment.nls_alloc = 0;
@@ -548,7 +551,7 @@ int mbview_reset_shared(int mode)
 	    for (i=0;i<2;i++)
 		{
 		shared.shareddata.navpick.xsegments[j].endpoints[i] 
-		    	    = &(shared.shareddata.navpick.xpoints[2*j+i]);
+		    	    = shared.shareddata.navpick.xpoints[2*j+i];
 		}
 	    }
 		
@@ -738,7 +741,7 @@ int mbview_reset(int instance)
 		    data->pick.endpoints[i].ydisplay = 0.0;
 		    data->pick.endpoints[i].zdisplay = 0.0;
 		    data->pick.segment.endpoints[i] 
-		    		= &(data->pick.endpoints[i]);
+		    		= data->pick.endpoints[i];
 		    }
 		data->pick.segment.nls = 0;
 		data->pick.segment.nls_alloc = 0;
@@ -762,7 +765,7 @@ int mbview_reset(int instance)
 		    for (i=0;i<2;i++)
 			{
 			data->pick.xsegments[j].endpoints[i] 
-		    		    = &(data->pick.xpoints[2*j+i]);
+		    		    = data->pick.xpoints[2*j+i];
 			}
 		    }
 
@@ -791,8 +794,8 @@ int mbview_reset(int instance)
 		    	ii = 0;
 		    else if (i == 3)
 		    	ii = 2;
-		    data->region.segments[i].endpoints[0] = &(data->region.cornerpoints[i]);
-		    data->region.segments[i].endpoints[1] = &(data->region.cornerpoints[ii]);
+		    data->region.segments[i].endpoints[0] = data->region.cornerpoints[i];
+		    data->region.segments[i].endpoints[1] = data->region.cornerpoints[ii];
 		    data->region.segments[i].nls = 0;
 		    data->region.segments[i].nls_alloc = 0;
 		    data->region.segments[i].lspoints = NULL;
@@ -813,7 +816,7 @@ int mbview_reset(int instance)
 		    data->area.endpoints[i].xdisplay = 0.0;
 		    data->area.endpoints[i].ydisplay = 0.0;
 		    data->area.endpoints[i].zdisplay = 0.0;
-	    	    data->area.segment.endpoints[i] = &(data->area.endpoints[i]);
+	    	    data->area.segment.endpoints[i] = data->area.endpoints[i];
 		    }
 	    	data->area.segment.nls = 0;
 	    	data->area.segment.nls_alloc = 0;
@@ -833,8 +836,8 @@ int mbview_reset(int instance)
 		    {
 		    ii = i + 1;
 		    if (ii > 3) ii = 0;
-		    data->area.segments[i].endpoints[0] = &(data->area.cornerpoints[i]);
-		    data->area.segments[i].endpoints[1] = &(data->area.cornerpoints[ii]);
+		    data->area.segments[i].endpoints[0] = data->area.cornerpoints[i];
+		    data->area.segments[i].endpoints[1] = data->area.cornerpoints[ii];
 		    data->area.segments[i].nls = 0;
 		    data->area.segments[i].nls_alloc = 0;
 		    data->area.segments[i].lspoints = NULL;
@@ -928,8 +931,10 @@ int mbview_reset(int instance)
 		view->overlay_shade_magnitude_save = 0.0;
 
 		/* set mbio default values */
-		status = mb_defaults(mbv_verbose,&dummy_format,&dummy_pings,&dummy_lonflip,dummy_bounds,
-			dummy_btime_i,dummy_etime_i,&dummy_speedmin,&(view->timegap));
+		status = mb_defaults(mbv_verbose,&dummy_format,&dummy_pings,
+					&(view->lonflip),dummy_bounds,
+					dummy_btime_i,dummy_etime_i,
+					&dummy_speedmin,&(view->timegap));
 		}
 		
 	/* print output debug statements */
@@ -2591,7 +2596,7 @@ int mbview_update_sensitivity(int verbose, int instance, int *error)
 	mbview_action_sensitivity(instance);
 	
 	/* reset sensitivity in parent program */
-fprintf(stderr,"could call mbview_sensitivity_notify:%d\n",data->mbview_sensitivity_notify);
+/* fprintf(stderr,"could call mbview_sensitivity_notify:%d\n",data->mbview_sensitivity_notify); */
 	if (data->mbview_sensitivity_notify != NULL)
 		(data->mbview_sensitivity_notify)();
 
@@ -2739,7 +2744,7 @@ int mbview_action_sensitivity(int instance)
 		}
 		
 	/* reset sensitivity in parent program */
-fprintf(stderr,"could call mbview_sensitivity_notify:%d\n",data->mbview_sensitivity_notify);
+/* fprintf(stderr,"could call mbview_sensitivity_notify:%d\n",data->mbview_sensitivity_notify); */
 	if (data->mbview_sensitivity_notify != NULL)
 		(data->mbview_sensitivity_notify)();
 
@@ -3012,7 +3017,7 @@ int mbview_setsensitivitynotify(int verbose, int instance,
 	struct mbview_struct *data;
 
 	/* print starting debug statements */
-	if (verbose >= 0)
+	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
@@ -3032,7 +3037,7 @@ int mbview_setsensitivitynotify(int verbose, int instance,
 	data->mbview_sensitivity_notify = mbview_sensitivity_notify;
 
 	/* print output debug statements */
-	if (verbose >= 0)
+	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
@@ -4887,7 +4892,7 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
       /* Deal with KeyPress events */
       if(event->xany.type == KeyPress)
       {
-fprintf(stderr,"KeyPress event\n");
+/* fprintf(stderr,"KeyPress event\n"); */
       /* Get key pressed - buffer[0] */
       actual = XLookupString((XKeyEvent *)event, 
 		    buffer, 1, &keysym, NULL);
@@ -4921,7 +4926,7 @@ fprintf(stderr,"KeyPress event\n");
 	  }
 	  
      /* update action buttons according to pick state */
-fprintf(stderr,"About to call mbview_action_sensitivity %d\n",instance);
+/* fprintf(stderr,"About to call mbview_action_sensitivity %d\n",instance); */
      mbview_action_sensitivity(instance);
  
      } /* end of inputs from window */
