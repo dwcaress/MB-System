@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrdviz_callbacks.c		10/9/2002
- *    $Id: mbgrdviz_callbacks.c,v 5.27 2007-10-31 18:42:37 caress Exp $
+ *    $Id: mbgrdviz_callbacks.c,v 5.28 2008-03-14 19:04:32 caress Exp $
  *
  *    Copyright (c) 2002, 2003, 2006, 2007 by
  *    David W. Caress (caress@mbari.org)
@@ -108,6 +108,7 @@ static int	survey_mode = MBGRDVIZ_SURVEY_MODE_UNIFORM;
 static int	survey_platform = MBGRDVIZ_SURVEY_PLATFORM_SUBMERGED_ALTITUDE;
 static int	survey_interleaving = 1;
 static int	survey_direction = MBGRDVIZ_SURVEY_DIRECTION_SW;
+static int	survey_crosslines_first = MB_YES;
 static int	survey_crosslines = 0;
 static int	survey_linespacing = 200;
 static int	survey_swathwidth = 120;
@@ -121,7 +122,7 @@ static int	realtime_update = 5;
 static int	realtime_icon = MBGRDVIZ_REALTIME_ICON_SHIP;
 
 /* id variables */
-static char rcs_id[] = "$Id: mbgrdviz_callbacks.c,v 5.27 2007-10-31 18:42:37 caress Exp $";
+static char rcs_id[] = "$Id: mbgrdviz_callbacks.c,v 5.28 2008-03-14 19:04:32 caress Exp $";
 static char program_name[] = "MBgrdviz";
 static char help_message[] = "MBgrdviz is an interactive 2D/3D visualization tool for GMT grid files.";
 static char usage_message[] = "mbgrdviz [-H -T -V]";
@@ -310,6 +311,113 @@ GRAU( XtPointer, call)
     }
     XtFree((char *)widgets);
 }
+/*      Function Name:	BxPopdownCB
+ *
+ *      Description:   	This function accepts a string of the form:
+ *			"(WL)[widgetName, widgetName, ...]"
+ *			It attempts to convert the widget names to Widget IDs
+ *			and then popdown the widgets WITHOUT any grab.
+ *
+ *      Arguments:      Widget		w:	the activating widget.
+ *			XtPointer	client:	the string of widget names to
+ *						popup.
+ *			XtPointer	call:	the call data (unused).
+ *
+ *      Notes:        * This function expects that there is an application
+ *                      shell from which all other widgets are descended.
+ *		      * BxPopdownCB can only work on Shell widgets.  It will
+ *			not work on other object types.  This is because
+ *			popping down can only be done to a shell.  A check
+ *			is made using XtIsShell() and an appropriate error
+ *			is output if the passed object is not a Shell.
+ */
+
+/* ARGSUSED */
+void
+BxPopdownCB ARGLIST((w, client, call))
+ARG( Widget, w)
+ARG( XtPointer, client)
+GRAU( XtPointer, call)
+{
+    WidgetList		widgets;
+    int			i;
+
+    /*
+     * This function returns a NULL terminated WidgetList.  The memory for
+     * the list needs to be freed when it is no longer needed.
+     */
+    widgets = BxWidgetIdsFromNames(w, "BxPopdownCB", (String)client);
+    
+    i = 0;
+    while ( widgets && widgets[i] != NULL )
+    {
+	if ( XtIsShell(widgets[i]) )
+	{
+	    XtPopdown(widgets[i]);
+	}
+	else
+	{
+	    printf("Callback Error (BxPopdownCB):\n\t\
+Object %s is not a Shell\n", XtName(widgets[i]));
+	}
+	i++;
+    }
+    XtFree((char *)widgets);
+}
+
+/*      Function Name:	BxPopupCB
+ *
+ *      Description:   	This function accepts a string of the form:
+ *			"(WL)[widgetName, widgetName, ...]"
+ *			It attempts to convert the widget names to Widget IDs
+ *			and then popup the widgets WITHOUT any grab.
+ *
+ *      Arguments:      Widget		w:	the activating widget.
+ *			XtPointer	client:	the string of widget names to
+ *						popup.
+ *			XtPointer	call:	the call data (unused).
+ *
+ *      Notes:        * This function expects that there is an application
+ *                      shell from which all other widgets are descended.
+ *		      * BxPopupCB can only work on Shell widgets.  It will not
+ *			work on other object types.  This is because popping up
+ *			can only be done to a shell.  A check is made using
+ *			XtIsShell() and an appropriate error is output if the
+ *			passed object is not a Shell.
+ */
+
+/* ARGSUSED */
+void
+BxPopupCB ARGLIST((w, client, call))
+ARG( Widget, w)
+ARG( XtPointer, client)
+GRAU( XtPointer, call)
+{
+    WidgetList		widgets;
+    int			i;
+
+    /*
+     * This function returns a NULL terminated WidgetList.  The memory for
+     * the list needs to be freed when it is no longer needed.
+     */
+    widgets = BxWidgetIdsFromNames(w, "BxPopupCB", (String)client);
+
+    i = 0;
+    while( widgets && widgets[i] != NULL )
+    {
+	if ( XtIsShell(widgets[i]) )
+	{
+	    XtPopup(widgets[i], XtGrabNone);
+	}
+	else
+	{
+	    printf("Callback Error (BxPopupCB):\n\t\
+Object %s is not a Shell\n", XtName(widgets[i]));
+	}
+	i++;
+    }
+    XtFree((char *)widgets);
+}
 /*---------------------------------------------------------------------------------------*/
 
 int do_mbgrdviz_init(int argc, char **argv, int verbosity)
@@ -447,7 +555,7 @@ do_mbgrdviz_sensitivity()
 	int	nsite, nroute;
 	int	i;
 
-fprintf(stderr,"do_mbgrdviz_sensitivity called\n");
+/* fprintf(stderr,"do_mbgrdviz_sensitivity called\n");*/
     	/* set file opening menu items only if an mbview instance is active */
 	mbview_active = MB_NO;
 	mbview_allactive = MB_YES;
@@ -4299,7 +4407,7 @@ void do_mbgrdviz_generate_survey( Widget w, XtPointer client_data, XtPointer cal
 	double	dx, dy, r, dxuse, dyuse, dxd, dyd, dxextra, dyextra;
 	double	rrr[4], xxx, yyy;
 	int	iline, jendpoint, ok;
-	int	endcorner, jstart, kend;
+	int	startcorner, endcorner, jstart, kend;
 	int	nlines_alloc = 0;
 	int	i, j, k;
 
@@ -4399,12 +4507,15 @@ fprintf(stderr,"Called do_mbgrdviz_generate_survey instance:%d\n", instance);
 			color = MBV_COLOR_BLUE;
 		else if (survey_color == 5)
 			color = MBV_COLOR_PURPLE;
+			
+		/* initialize number of waypoints */
+		npoints = 0;
+		first = MB_YES;
 
 		/* do uniform line spacing */
 		if (survey_mode == MBGRDVIZ_SURVEY_MODE_UNIFORM)
 			{
 			/* get number of lines */
-			first = MB_YES;
 			line_spacing = (double) survey_linespacing;
 			line_spacing_use = line_spacing * r / data->area.width;
 			nlines = (data->area.width / line_spacing) + 1;
@@ -4436,7 +4547,6 @@ fprintf(stderr,"Called do_mbgrdviz_generate_survey instance:%d\n", instance);
 			&& survey_platform == MBGRDVIZ_SURVEY_PLATFORM_SUBMERGED_ALTITUDE)
 			{
 			/* get number of lines */
-			first = MB_YES;
 			line_spacing = (double) survey_altitude * 2.0 * tan(0.5 * survey_swathwidth);
 			line_spacing_use = line_spacing * r / data->area.width;
 			nlines = (data->area.width / line_spacing) + 1;
@@ -4472,7 +4582,6 @@ fprintf(stderr,"Called do_mbgrdviz_generate_survey instance:%d\n", instance);
 			/* start in the center of the survey */
 				 
 			/* get number of lines */
-			first = MB_YES;
 			line_spacing = (double) survey_altitude * 2.0 * tan(0.5 * survey_swathwidth);
 			line_spacing_use = line_spacing * r / data->area.width;
 			nlines = (data->area.width / line_spacing) + 1;
@@ -4501,13 +4610,204 @@ fprintf(stderr,"Called do_mbgrdviz_generate_survey instance:%d\n", instance);
 					}
 				}
 			}
+			
+		/* do crosslines if requested */
+		if (survey_crosslines > 0 && survey_crosslines_first != MB_NO && status == MB_SUCCESS)
+			{
+			/* figure out which corner the main lines start at */
+			dxuse = dx * xx[0];
+			dyuse = dy * xx[0];
+			dxextra = 0.0;
+			dyextra = 0.0;
+			xdisplay = data->area.endpoints[jendpoint].xdisplay
+				+ dxuse + dxextra;
+			ydisplay = data->area.endpoints[jendpoint].ydisplay
+				+ dyuse + dyextra;
+			for (i=0;i<4;i++)
+				{
+				xxx = xdisplay - data->area.cornerpoints[i].xdisplay;
+				yyy = ydisplay - data->area.cornerpoints[i].ydisplay;
+				rrr[i] = sqrt(xxx * xxx + yyy * yyy);
+				}
+			startcorner = 0;
+			for (i=1;i<4;i++)
+				{
+				if (rrr[i] < rrr[startcorner])
+					startcorner = i;
+				}
+				
+			/* figure out which corner the cross lines should start at */
+			if (survey_crosslines % 2 == 0)
+				{
+				if (startcorner == 0)
+					startcorner = 3;
+				else if (startcorner == 1)
+					startcorner = 2;
+				else if (startcorner == 2)
+					startcorner = 1;
+				else if (startcorner == 3)
+					startcorner = 0;
+				}
+			else
+				{
+				if (startcorner == 0)
+					startcorner = 2;
+				else if (startcorner == 1)
+					startcorner = 3;
+				else if (startcorner == 2)
+					startcorner = 0;
+				else if (startcorner == 3)
+					startcorner = 1;
+				}
+					
+			/* get crossline vector */
+			if (startcorner == 0 || startcorner == 3)
+				{
+				dx = data->area.cornerpoints[1].xdisplay 
+					- data->area.cornerpoints[0].xdisplay;
+				dy = data->area.cornerpoints[1].ydisplay 
+					- data->area.cornerpoints[0].ydisplay;
+				}
+			else
+				{
+				dx = data->area.cornerpoints[0].xdisplay 
+					- data->area.cornerpoints[1].xdisplay;
+				dy = data->area.cornerpoints[0].ydisplay 
+					- data->area.cornerpoints[1].ydisplay;
+				}
+			r = sqrt(dx * dx + dy * dy);
+			dxd = dx / r;
+			dyd = dy / r;
+
+			/* get crossline spacing */
+			crossline_spacing = (data->area.length / (crossline_spacing + 1)) * (r / data->area.width);
+			
+			/* generate cross lines */
+			jstart = startcorner;
+			if (startcorner == 0 || startcorner == 2)
+				kend = jstart + 1;
+			else
+				kend = jstart - 1;
+			dx = (data->area.endpoints[1].xdisplay 
+				- data->area.endpoints[0].xdisplay) / (survey_crosslines + 1);
+			dy = (data->area.endpoints[1].ydisplay 
+				- data->area.endpoints[0].ydisplay) / (survey_crosslines + 1);
+			if (startcorner >= 2)
+				{
+				dx = -dx;
+				dy = -dy;
+				}
+			j = jstart;
+			for (i=0;i<survey_crosslines;i++)
+				{
+				/* get offset from corners */
+				dxuse = (i + 1) * dx;
+				dyuse = (i + 1) * dy;
+				if (j == jstart)
+					{
+					dxextra = -dxd * line_spacing_use;
+					dyextra = -dyd * line_spacing_use;
+					}
+				else
+					{
+					dxextra = dxd * line_spacing_use;
+					dyextra = dyd * line_spacing_use;
+					}
+				
+				/* get first point */
+				waypoint = MBV_ROUTE_WAYPOINT_STARTLINE;
+				xdisplay = data->area.cornerpoints[j].xdisplay
+					+ dxuse + dxextra;
+				ydisplay = data->area.cornerpoints[j].ydisplay
+					+ dyuse + dyextra;
+				zdisplay = data->area.cornerpoints[j].zdisplay;
+				mbview_projectinverse(instance, MB_YES,
+						xdisplay, ydisplay, zdisplay, 
+						&xlon, &ylat,
+						&xgrid, &ygrid);
+				mbview_getzdata(instance, 
+						xgrid, ygrid, 
+						&ok, &zdata);
+				if (ok == MB_NO)
+					zdata = data->area.cornerpoints[jendpoint].zdata;
+				mbview_projectll2display(instance,
+					xlon, ylat, zdata, 
+					&xdisplay, &ydisplay, &zdisplay);
+				if (first == MB_YES)
+					{
+					mbview_addroute(verbose, instance,
+							1, &xlon, &ylat, &waypoint,
+							color, 2,
+							survey_name, 
+							&working_route, &error);
+					first = MB_NO;
+					}
+				else
+					{
+					mbview_route_add(instance, working_route, npoints, waypoint,
+							xgrid, ygrid,
+							xlon, ylat, zdata,
+							xdisplay, ydisplay, zdisplay);
+					}
+				npoints++;
+				
+				/* get second point */
+				if (j == jstart)
+					j = kend;
+				else
+					j = jstart;
+				if (j == jstart)
+					{
+					dxextra = -dxd * line_spacing_use;
+					dyextra = -dyd * line_spacing_use;
+					}
+				else
+					{
+					dxextra = dxd * line_spacing_use;
+					dyextra = dyd * line_spacing_use;
+					}
+				
+				/* get second point */
+				waypoint = MBV_ROUTE_WAYPOINT_ENDLINE;
+				xdisplay = data->area.cornerpoints[j].xdisplay
+					+ dxuse + dxextra;
+				ydisplay = data->area.cornerpoints[j].ydisplay
+					+ dyuse + dyextra;
+				zdisplay = data->area.cornerpoints[j].zdisplay;
+				mbview_projectinverse(instance, MB_YES,
+						xdisplay, ydisplay, zdisplay, 
+						&xlon, &ylat,
+						&xgrid, &ygrid);
+				mbview_getzdata(instance, 
+						xgrid, ygrid, 
+						&ok, &zdata);
+				if (ok == MB_NO)
+					zdata = data->area.cornerpoints[jendpoint].zdata;
+				mbview_projectll2display(instance,
+					xlon, ylat, zdata, 
+					&xdisplay, &ydisplay, &zdisplay);
+				mbview_route_add(instance, working_route, npoints, waypoint,
+						xgrid, ygrid,
+						xlon, ylat, zdata,
+						xdisplay, ydisplay, zdisplay);
+				npoints++;
+				}
+			}
 
 		/* generate the lines */
 		if (nlines > 0 && status == MB_SUCCESS)
-			{			
+			{						
+			/* get unit vector for survey area boundaries */
+			dx = data->area.cornerpoints[1].xdisplay 
+				- data->area.cornerpoints[0].xdisplay;
+			dy = data->area.cornerpoints[1].ydisplay 
+				- data->area.cornerpoints[0].ydisplay;
+			r = sqrt(dx * dx + dy * dy);
+			dx = dx / r;
+			dy = dy / r;
+
 			/* generate points */
 			/* work in display coordinates */
-			npoints = 0;
 			nlinegroups = nlines / survey_interleaving + 1;
 			for (j=0;j<survey_interleaving;j++)
 			for (i=0;i<nlinegroups;i++)
@@ -4626,7 +4926,7 @@ iline, jendpoint, xlon, ylat, zdata, xgrid, ygrid, xdisplay, ydisplay, zdisplay)
 			}
 			
 		/* do crosslines if requested */
-		if (survey_crosslines > 0 && status == MB_SUCCESS)
+		if (survey_crosslines > 0 && survey_crosslines_first == MB_NO && status == MB_SUCCESS)
 			{
 			/* figure out which corner the mail lines ended at */
 			for (i=0;i<4;i++)
@@ -4879,17 +5179,18 @@ fprintf(stderr,"Called do_mbgrdviz_arearoute_parameterchange instance:%d\n", ins
 			XtFree(tmp);
 		
 fprintf(stderr,"\nIn do_mbgrdviz_arearoute_parameterchange:\n");
-fprintf(stderr,"  survey_mode:        %d\n",survey_mode);
-fprintf(stderr,"  survey_platform:    %d\n",survey_platform);
-fprintf(stderr,"  survey_interleaving:%d\n",survey_interleaving);
-fprintf(stderr,"  survey_direction:   %d\n",survey_direction);
-fprintf(stderr,"  survey_crosslines:  %d\n",survey_crosslines);
-fprintf(stderr,"  survey_linespacing: %d\n",survey_linespacing);
-fprintf(stderr,"  survey_swathwidth:  %d\n",survey_swathwidth);
-fprintf(stderr,"  survey_depth:       %d\n",survey_depth);
-fprintf(stderr,"  survey_altitude:    %d\n",survey_altitude);
-fprintf(stderr,"  survey_color:       %d\n",survey_color);
-fprintf(stderr,"  survey_name:        %s\n",survey_name);
+fprintf(stderr,"  survey_mode:              %d\n",survey_mode);
+fprintf(stderr,"  survey_platform:          %d\n",survey_platform);
+fprintf(stderr,"  survey_interleaving:      %d\n",survey_interleaving);
+fprintf(stderr,"  survey_direction:         %d\n",survey_direction);
+fprintf(stderr,"  survey_crosslines_first:  %d\n",survey_crosslines_first);
+fprintf(stderr,"  survey_crosslines:        %d\n",survey_crosslines);
+fprintf(stderr,"  survey_linespacing:       %d\n",survey_linespacing);
+fprintf(stderr,"  survey_swathwidth:        %d\n",survey_swathwidth);
+fprintf(stderr,"  survey_depth:             %d\n",survey_depth);
+fprintf(stderr,"  survey_altitude:          %d\n",survey_altitude);
+fprintf(stderr,"  survey_color:             %d\n",survey_color);
+fprintf(stderr,"  survey_name:              %s\n",survey_name);
 
 		/* reset widgets accordingly (sensitivity and info) */
 		do_mbgrdviz_arearoute_recalc(instance);
@@ -5213,113 +5514,6 @@ void
 do_mbgrdviz_realtimesetup_path_apply( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
-}
-/*      Function Name:	BxPopdownCB
- *
- *      Description:   	This function accepts a string of the form:
- *			"(WL)[widgetName, widgetName, ...]"
- *			It attempts to convert the widget names to Widget IDs
- *			and then popdown the widgets WITHOUT any grab.
- *
- *      Arguments:      Widget		w:	the activating widget.
- *			XtPointer	client:	the string of widget names to
- *						popup.
- *			XtPointer	call:	the call data (unused).
- *
- *      Notes:        * This function expects that there is an application
- *                      shell from which all other widgets are descended.
- *		      * BxPopdownCB can only work on Shell widgets.  It will
- *			not work on other object types.  This is because
- *			popping down can only be done to a shell.  A check
- *			is made using XtIsShell() and an appropriate error
- *			is output if the passed object is not a Shell.
- */
-
-/* ARGSUSED */
-void
-BxPopdownCB ARGLIST((w, client, call))
-ARG( Widget, w)
-ARG( XtPointer, client)
-GRAU( XtPointer, call)
-{
-    WidgetList		widgets;
-    int			i;
-
-    /*
-     * This function returns a NULL terminated WidgetList.  The memory for
-     * the list needs to be freed when it is no longer needed.
-     */
-    widgets = BxWidgetIdsFromNames(w, "BxPopdownCB", (String)client);
-    
-    i = 0;
-    while ( widgets && widgets[i] != NULL )
-    {
-	if ( XtIsShell(widgets[i]) )
-	{
-	    XtPopdown(widgets[i]);
-	}
-	else
-	{
-	    printf("Callback Error (BxPopdownCB):\n\t\
-Object %s is not a Shell\n", XtName(widgets[i]));
-	}
-	i++;
-    }
-    XtFree((char *)widgets);
-}
-
-/*      Function Name:	BxPopupCB
- *
- *      Description:   	This function accepts a string of the form:
- *			"(WL)[widgetName, widgetName, ...]"
- *			It attempts to convert the widget names to Widget IDs
- *			and then popup the widgets WITHOUT any grab.
- *
- *      Arguments:      Widget		w:	the activating widget.
- *			XtPointer	client:	the string of widget names to
- *						popup.
- *			XtPointer	call:	the call data (unused).
- *
- *      Notes:        * This function expects that there is an application
- *                      shell from which all other widgets are descended.
- *		      * BxPopupCB can only work on Shell widgets.  It will not
- *			work on other object types.  This is because popping up
- *			can only be done to a shell.  A check is made using
- *			XtIsShell() and an appropriate error is output if the
- *			passed object is not a Shell.
- */
-
-/* ARGSUSED */
-void
-BxPopupCB ARGLIST((w, client, call))
-ARG( Widget, w)
-ARG( XtPointer, client)
-GRAU( XtPointer, call)
-{
-    WidgetList		widgets;
-    int			i;
-
-    /*
-     * This function returns a NULL terminated WidgetList.  The memory for
-     * the list needs to be freed when it is no longer needed.
-     */
-    widgets = BxWidgetIdsFromNames(w, "BxPopupCB", (String)client);
-
-    i = 0;
-    while( widgets && widgets[i] != NULL )
-    {
-	if ( XtIsShell(widgets[i]) )
-	{
-	    XtPopup(widgets[i], XtGrabNone);
-	}
-	else
-	{
-	    printf("Callback Error (BxPopupCB):\n\t\
-Object %s is not a Shell\n", XtName(widgets[i]));
-	}
-	i++;
-    }
-    XtFree((char *)widgets);
 }
 
 

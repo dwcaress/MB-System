@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_nav.c	10/28/2003
- *    $Id: mbview_nav.c,v 5.16 2007-10-17 20:35:05 caress Exp $
+ *    $Id: mbview_nav.c,v 5.17 2008-03-14 19:04:32 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -18,6 +18,9 @@
  * Date:	October 28, 2003
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.16  2007/10/17 20:35:05  caress
+ * Release 5.1.1beta11
+ *
  * Revision 5.15  2007/10/08 16:32:08  caress
  * Code status as of 8 October 2007.
  *
@@ -117,7 +120,7 @@ static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 static char		value_string[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_nav.c,v 5.16 2007-10-17 20:35:05 caress Exp $";
+static char rcs_id[]="$Id: mbview_nav.c,v 5.17 2008-03-14 19:04:32 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_getnavcount(int verbose, int instance,
@@ -587,8 +590,8 @@ int mbview_addnav(int verbose, int instance,
 			shared.shareddata.navs[inav].segments[j].nls = 0;
 			shared.shareddata.navs[inav].segments[j].nls_alloc = 0;
 			shared.shareddata.navs[inav].segments[j].lspoints = NULL;
-			shared.shareddata.navs[inav].segments[j].endpoints[0] = &(shared.shareddata.navs[inav].navpts[j].pointcntr);
-			shared.shareddata.navs[inav].segments[j].endpoints[1] = &(shared.shareddata.navs[inav].navpts[j+1].pointcntr);
+			shared.shareddata.navs[inav].segments[j].endpoints[0] = shared.shareddata.navs[inav].navpts[j].pointcntr;
+			shared.shareddata.navs[inav].segments[j].endpoints[1] = shared.shareddata.navs[inav].navpts[j+1].pointcntr;
 			}
 		}
 		
@@ -917,7 +920,7 @@ int mbview_pick_nav_select(int instance, int select, int which, int xpixel, int 
 	int	ii,jj;
 
 	/* print starting debug statements */
-	if (mbv_verbose >= 0)
+	if (mbv_verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
@@ -1136,8 +1139,8 @@ int mbview_pick_nav_select(int instance, int select, int which, int xpixel, int 
 		&& which == MBV_PICK_UP
 		&& data->mouse_mode == MBV_MOUSE_NAVFILE)
 		{
-fprintf(stderr,"nav selected: %d %d select:%d\n",
-shared.shareddata.nav_selected[0],shared.shareddata.nav_selected[1],select);
+/* fprintf(stderr,"nav selected: %d %d select:%d\n",
+shared.shareddata.nav_selected[0],shared.shareddata.nav_selected[1],select);*/
 		/* select range of nav files if one or two different points have been selected */
 		if (shared.shareddata.nav_selected[0] != MBV_SELECT_NONE)
 			{
@@ -2138,8 +2141,8 @@ shared.shareddata.navs[inav].segments[jpoint].lspoints[k].zdisplay[instance]);*/
 						if (data->display_mode == MBV_DISPLAY_3D && stride == 1)
 							{
 							/* drape segment on the fly */
-							segment.endpoints[0] = &(shared.shareddata.navs[inav].navpts[jpoint].pointcntr);
-							segment.endpoints[1] = &(shared.shareddata.navs[inav].navpts[jpoint].pointport);
+							segment.endpoints[0] = shared.shareddata.navs[inav].navpts[jpoint].pointcntr;
+							segment.endpoints[1] = shared.shareddata.navs[inav].navpts[jpoint].pointport;
 							mbview_drapesegmentw(instance, &(segment));
 
 							/* draw the segment */
@@ -2178,8 +2181,8 @@ shared.shareddata.navs[inav].segments[jpoint].lspoints[k].zdisplay[instance]);*/
 						if (data->display_mode == MBV_DISPLAY_3D && stride == 1)
 							{
 							/* drape segment on the fly */
-							segment.endpoints[0] = &(shared.shareddata.navs[inav].navpts[jpoint].pointport);
-							segment.endpoints[1] = &(shared.shareddata.navs[inav].navpts[jpoint].pointcntr);
+							segment.endpoints[0] = shared.shareddata.navs[inav].navpts[jpoint].pointport;
+							segment.endpoints[1] = shared.shareddata.navs[inav].navpts[jpoint].pointcntr;
 							mbview_drapesegmentw(instance, &(segment));
 
 							/* draw the segment */
@@ -2216,8 +2219,8 @@ shared.shareddata.navs[inav].segments[jpoint].lspoints[k].zdisplay[instance]);*/
 						if (data->display_mode == MBV_DISPLAY_3D && stride == 1)
 							{
 							/* drape segment on the fly */
-							segment.endpoints[0] = &(shared.shareddata.navs[inav].navpts[jpoint].pointcntr);
-							segment.endpoints[1] = &(shared.shareddata.navs[inav].navpts[jpoint].pointstbd);
+							segment.endpoints[0] = shared.shareddata.navs[inav].navpts[jpoint].pointcntr;
+							segment.endpoints[1] = shared.shareddata.navs[inav].navpts[jpoint].pointstbd;
 							mbview_drapesegmentw(instance, &(segment));
 
 							/* draw the segment */
@@ -2256,8 +2259,8 @@ shared.shareddata.navs[inav].segments[jpoint].lspoints[k].zdisplay[instance]);*/
 						if (data->display_mode == MBV_DISPLAY_3D && stride == 1)
 							{
 							/* drape segment on the fly */
-							segment.endpoints[0] = &(shared.shareddata.navs[inav].navpts[jpoint].pointstbd);
-							segment.endpoints[1] = &(shared.shareddata.navs[inav].navpts[jpoint].pointcntr);
+							segment.endpoints[0] = shared.shareddata.navs[inav].navpts[jpoint].pointstbd;
+							segment.endpoints[1] = shared.shareddata.navs[inav].navpts[jpoint].pointcntr;
 							mbview_drapesegmentw(instance, &(segment));
 
 							/* draw the segment */

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbview.h	10/9/2002
- *    $Id: mbview.h,v 5.20 2007-11-16 17:26:56 caress Exp $
+ *    $Id: mbview.h,v 5.21 2008-03-14 19:04:32 caress Exp $
  *
  *    Copyright (c) 2002, 2003, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -18,6 +18,9 @@
  * Date:	October 10,  2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.20  2007/11/16 17:26:56  caress
+ * Progress on MBeditviz
+ *
  * Revision 5.19  2007/10/17 20:35:05  caress
  * Release 5.1.1beta11
  *
@@ -344,14 +347,14 @@ struct mbview_profilepoint_struct {
 	};
 
 struct mbview_linesegment_struct {
-	struct mbview_point_struct *endpoints[2];
+	struct mbview_point_struct endpoints[2];
 	int	nls;
 	int	nls_alloc;
 	struct mbview_point_struct *lspoints;
 	};
 
 struct mbview_linesegmentw_struct {
-	struct mbview_pointw_struct *endpoints[2];
+	struct mbview_pointw_struct endpoints[2];
 	int	nls;
 	int	nls_alloc;
 	struct mbview_pointw_struct *lspoints;

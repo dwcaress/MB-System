@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_plot.c	9/26/2003
- *    $Id: mbview_plot.c,v 5.12 2007-10-08 16:32:08 caress Exp $
+ *    $Id: mbview_plot.c,v 5.13 2008-03-14 19:04:32 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  *		begun on October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.12  2007/10/08 16:32:08  caress
+ * Code status as of 8 October 2007.
+ *
  * Revision 5.11  2007/06/17 23:27:30  caress
  * Added NBeditviz.
  *
@@ -107,7 +110,7 @@ static Cardinal 	ac;
 static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_plot.c,v 5.12 2007-10-08 16:32:08 caress Exp $";
+static char rcs_id[]="$Id: mbview_plot.c,v 5.13 2008-03-14 19:04:32 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_reset_glx(int instance)
@@ -2091,14 +2094,14 @@ int mbview_drapesegment(int instance, struct mbview_linesegment_struct *seg)
 		fprintf(stderr,"dbg2       instance:         %d\n",instance);
 		fprintf(stderr,"dbg2       seg:              %d\n",seg);
 		fprintf(stderr,"dbg2       seg->endpoints:\n");
-		fprintf(stderr,"dbg2            xgrid[0]:    %f\n",seg->endpoints[0]->xgrid);
-		fprintf(stderr,"dbg2            ygrid[0]:    %f\n",seg->endpoints[0]->ygrid);
-		fprintf(stderr,"dbg2            xlon[0]:     %f\n",seg->endpoints[0]->xlon);
-		fprintf(stderr,"dbg2            ylat[0]:     %f\n",seg->endpoints[0]->ylat);
-		fprintf(stderr,"dbg2            xgrid[1]:    %f\n",seg->endpoints[1]->xgrid);
-		fprintf(stderr,"dbg2            ygrid[1]:    %f\n",seg->endpoints[1]->ygrid);
-		fprintf(stderr,"dbg2            xlon[1]:     %f\n",seg->endpoints[1]->xlon);
-		fprintf(stderr,"dbg2            ylat[1]:     %f\n",seg->endpoints[1]->ylat);
+		fprintf(stderr,"dbg2            xgrid[0]:    %f\n",seg->endpoints[0].xgrid);
+		fprintf(stderr,"dbg2            ygrid[0]:    %f\n",seg->endpoints[0].ygrid);
+		fprintf(stderr,"dbg2            xlon[0]:     %f\n",seg->endpoints[0].xlon);
+		fprintf(stderr,"dbg2            ylat[0]:     %f\n",seg->endpoints[0].ylat);
+		fprintf(stderr,"dbg2            xgrid[1]:    %f\n",seg->endpoints[1].xgrid);
+		fprintf(stderr,"dbg2            ygrid[1]:    %f\n",seg->endpoints[1].ygrid);
+		fprintf(stderr,"dbg2            xlon[1]:     %f\n",seg->endpoints[1].xlon);
+		fprintf(stderr,"dbg2            ylat[1]:     %f\n",seg->endpoints[1].ylat);
 		}
 		
 	/* get view */
@@ -2125,14 +2128,14 @@ int mbview_drapesegment(int instance, struct mbview_linesegment_struct *seg)
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:          %d\n",status);
 		fprintf(stderr,"dbg2       seg->endpoints:\n");
-		fprintf(stderr,"dbg2            xgrid[0]:    %f\n",seg->endpoints[0]->xgrid);
-		fprintf(stderr,"dbg2            ygrid[0]:    %f\n",seg->endpoints[0]->ygrid);
-		fprintf(stderr,"dbg2            xlon[0]:     %f\n",seg->endpoints[0]->xlon);
-		fprintf(stderr,"dbg2            ylat[0]:     %f\n",seg->endpoints[0]->ylat);
-		fprintf(stderr,"dbg2            xgrid[1]:    %f\n",seg->endpoints[1]->xgrid);
-		fprintf(stderr,"dbg2            ygrid[1]:    %f\n",seg->endpoints[1]->ygrid);
-		fprintf(stderr,"dbg2            xlon[1]:     %f\n",seg->endpoints[1]->xlon);
-		fprintf(stderr,"dbg2            ylat[1]:     %f\n",seg->endpoints[1]->ylat);
+		fprintf(stderr,"dbg2            xgrid[0]:    %f\n",seg->endpoints[0].xgrid);
+		fprintf(stderr,"dbg2            ygrid[0]:    %f\n",seg->endpoints[0].ygrid);
+		fprintf(stderr,"dbg2            xlon[0]:     %f\n",seg->endpoints[0].xlon);
+		fprintf(stderr,"dbg2            ylat[0]:     %f\n",seg->endpoints[0].ylat);
+		fprintf(stderr,"dbg2            xgrid[1]:    %f\n",seg->endpoints[1].xgrid);
+		fprintf(stderr,"dbg2            ygrid[1]:    %f\n",seg->endpoints[1].ygrid);
+		fprintf(stderr,"dbg2            xlon[1]:     %f\n",seg->endpoints[1].xlon);
+		fprintf(stderr,"dbg2            ylat[1]:     %f\n",seg->endpoints[1].ylat);
 		fprintf(stderr,"dbg2       seg->nls:        %d\n",seg->nls);
 		fprintf(stderr,"dbg2       seg->nls_alloc:  %d\n",seg->nls_alloc);
 		fprintf(stderr,"dbg2       seg->lspoints:\n");
@@ -2181,14 +2184,14 @@ int mbview_drapesegment_gc(int instance, struct mbview_linesegment_struct *seg)
 		fprintf(stderr,"dbg2       instance:         %d\n",instance);
 		fprintf(stderr,"dbg2       seg:              %d\n",seg);
 		fprintf(stderr,"dbg2       seg->endpoints:\n");
-		fprintf(stderr,"dbg2            xgrid[0]:    %f\n",seg->endpoints[0]->xgrid);
-		fprintf(stderr,"dbg2            ygrid[0]:    %f\n",seg->endpoints[0]->ygrid);
-		fprintf(stderr,"dbg2            xlon[0]:     %f\n",seg->endpoints[0]->xlon);
-		fprintf(stderr,"dbg2            ylat[0]:     %f\n",seg->endpoints[0]->ylat);
-		fprintf(stderr,"dbg2            xgrid[1]:    %f\n",seg->endpoints[1]->xgrid);
-		fprintf(stderr,"dbg2            ygrid[1]:    %f\n",seg->endpoints[1]->ygrid);
-		fprintf(stderr,"dbg2            xlon[1]:     %f\n",seg->endpoints[1]->xlon);
-		fprintf(stderr,"dbg2            ylat[1]:     %f\n",seg->endpoints[1]->ylat);
+		fprintf(stderr,"dbg2            xgrid[0]:    %f\n",seg->endpoints[0].xgrid);
+		fprintf(stderr,"dbg2            ygrid[0]:    %f\n",seg->endpoints[0].ygrid);
+		fprintf(stderr,"dbg2            xlon[0]:     %f\n",seg->endpoints[0].xlon);
+		fprintf(stderr,"dbg2            ylat[0]:     %f\n",seg->endpoints[0].ylat);
+		fprintf(stderr,"dbg2            xgrid[1]:    %f\n",seg->endpoints[1].xgrid);
+		fprintf(stderr,"dbg2            ygrid[1]:    %f\n",seg->endpoints[1].ygrid);
+		fprintf(stderr,"dbg2            xlon[1]:     %f\n",seg->endpoints[1].xlon);
+		fprintf(stderr,"dbg2            ylat[1]:     %f\n",seg->endpoints[1].ylat);
 		}
 		
 	/* get view */
@@ -2231,8 +2234,8 @@ int mbview_drapesegment_gc(int instance, struct mbview_linesegment_struct *seg)
 	
 	/* get number of preliminary points along the segment */
 	mbview_greatcircle_distbearing(instance, 
-			seg->endpoints[0]->xlon, seg->endpoints[0]->ylat, 
-			seg->endpoints[1]->xlon, seg->endpoints[1]->ylat, 
+			seg->endpoints[0].xlon, seg->endpoints[0].ylat, 
+			seg->endpoints[1].xlon, seg->endpoints[1].ylat, 
 			&segbearing, &segdist);
 	nsegpoint = MAX(((int)((segdist / dsegdist) + 1)), 2);
 
@@ -2268,11 +2271,11 @@ int mbview_drapesegment_gc(int instance, struct mbview_linesegment_struct *seg)
 		{
 		/* put begin point in list */
 		seg->nls = 0;
-		seg->lspoints[seg->nls].xgrid = seg->endpoints[0]->xgrid;
-		seg->lspoints[seg->nls].ygrid = seg->endpoints[0]->ygrid;
-		seg->lspoints[seg->nls].zdata = seg->endpoints[0]->zdata;
-		seg->lspoints[seg->nls].xlon = seg->endpoints[0]->xlon;
-		seg->lspoints[seg->nls].ylat = seg->endpoints[0]->ylat;
+		seg->lspoints[seg->nls].xgrid = seg->endpoints[0].xgrid;
+		seg->lspoints[seg->nls].ygrid = seg->endpoints[0].ygrid;
+		seg->lspoints[seg->nls].zdata = seg->endpoints[0].zdata;
+		seg->lspoints[seg->nls].xlon = seg->endpoints[0].xlon;
+		seg->lspoints[seg->nls].ylat = seg->endpoints[0].ylat;
 		seg->nls++;
 
 		for (i=1;i<nsegpoint-1;i++)
@@ -2297,11 +2300,11 @@ int mbview_drapesegment_gc(int instance, struct mbview_linesegment_struct *seg)
 			}
 
 		/* put end point in list */
-		seg->lspoints[seg->nls].xgrid = seg->endpoints[1]->xgrid;
-		seg->lspoints[seg->nls].ygrid = seg->endpoints[1]->ygrid;
-		seg->lspoints[seg->nls].zdata = seg->endpoints[1]->zdata;
-		seg->lspoints[seg->nls].xlon = seg->endpoints[1]->xlon;
-		seg->lspoints[seg->nls].ylat = seg->endpoints[1]->ylat;
+		seg->lspoints[seg->nls].xgrid = seg->endpoints[1].xgrid;
+		seg->lspoints[seg->nls].ygrid = seg->endpoints[1].ygrid;
+		seg->lspoints[seg->nls].zdata = seg->endpoints[1].zdata;
+		seg->lspoints[seg->nls].xlon = seg->endpoints[1].xlon;
+		seg->lspoints[seg->nls].ylat = seg->endpoints[1].ylat;
 		seg->nls++;			
 
 		/* now calculate rest of point values */
@@ -2345,14 +2348,14 @@ int mbview_drapesegment_gc(int instance, struct mbview_linesegment_struct *seg)
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:          %d\n",status);
 		fprintf(stderr,"dbg2       seg->endpoints:\n");
-		fprintf(stderr,"dbg2            xgrid[0]:    %f\n",seg->endpoints[0]->xgrid);
-		fprintf(stderr,"dbg2            ygrid[0]:    %f\n",seg->endpoints[0]->ygrid);
-		fprintf(stderr,"dbg2            xlon[0]:     %f\n",seg->endpoints[0]->xlon);
-		fprintf(stderr,"dbg2            ylat[0]:     %f\n",seg->endpoints[0]->ylat);
-		fprintf(stderr,"dbg2            xgrid[1]:    %f\n",seg->endpoints[1]->xgrid);
-		fprintf(stderr,"dbg2            ygrid[1]:    %f\n",seg->endpoints[1]->ygrid);
-		fprintf(stderr,"dbg2            xlon[1]:     %f\n",seg->endpoints[1]->xlon);
-		fprintf(stderr,"dbg2            ylat[1]:     %f\n",seg->endpoints[1]->ylat);
+		fprintf(stderr,"dbg2            xgrid[0]:    %f\n",seg->endpoints[0].xgrid);
+		fprintf(stderr,"dbg2            ygrid[0]:    %f\n",seg->endpoints[0].ygrid);
+		fprintf(stderr,"dbg2            xlon[0]:     %f\n",seg->endpoints[0].xlon);
+		fprintf(stderr,"dbg2            ylat[0]:     %f\n",seg->endpoints[0].ylat);
+		fprintf(stderr,"dbg2            xgrid[1]:    %f\n",seg->endpoints[1].xgrid);
+		fprintf(stderr,"dbg2            ygrid[1]:    %f\n",seg->endpoints[1].ygrid);
+		fprintf(stderr,"dbg2            xlon[1]:     %f\n",seg->endpoints[1].xlon);
+		fprintf(stderr,"dbg2            ylat[1]:     %f\n",seg->endpoints[1].ylat);
 		fprintf(stderr,"dbg2       seg->nls:        %d\n",seg->nls);
 		fprintf(stderr,"dbg2       seg->nls_alloc:  %d\n",seg->nls_alloc);
 		fprintf(stderr,"dbg2       seg->lspoints:\n");
@@ -2402,10 +2405,10 @@ int mbview_drapesegment_grid(int instance, struct mbview_linesegment_struct *seg
 		fprintf(stderr,"dbg2       instance:         %d\n",instance);
 		fprintf(stderr,"dbg2       seg:              %d\n",seg);
 		fprintf(stderr,"dbg2       seg->endpoints:\n");
-		fprintf(stderr,"dbg2            xgrid[0]:    %f\n",seg->endpoints[0]->xgrid);
-		fprintf(stderr,"dbg2            ygrid[0]:    %f\n",seg->endpoints[0]->ygrid);
-		fprintf(stderr,"dbg2            xgrid[1]:    %f\n",seg->endpoints[1]->xgrid);
-		fprintf(stderr,"dbg2            ygrid[1]:    %f\n",seg->endpoints[1]->ygrid);
+		fprintf(stderr,"dbg2            xgrid[0]:    %f\n",seg->endpoints[0].xgrid);
+		fprintf(stderr,"dbg2            ygrid[0]:    %f\n",seg->endpoints[0].ygrid);
+		fprintf(stderr,"dbg2            xgrid[1]:    %f\n",seg->endpoints[1].xgrid);
+		fprintf(stderr,"dbg2            ygrid[1]:    %f\n",seg->endpoints[1].ygrid);
 		}
 		
 	/* get view */
@@ -2431,13 +2434,13 @@ int mbview_drapesegment_grid(int instance, struct mbview_linesegment_struct *seg
 		}
 	
 	/* figure out how many points to calculate along the segment */
-	istart = (int)((seg->endpoints[0]->xgrid - data->primary_xmin)
+	istart = (int)((seg->endpoints[0].xgrid - data->primary_xmin)
 			/ data->primary_dx);
-	iend = (int)((seg->endpoints[1]->xgrid - data->primary_xmin)
+	iend = (int)((seg->endpoints[1].xgrid - data->primary_xmin)
 			/ data->primary_dx);
-	jstart = (int)((seg->endpoints[0]->ygrid - data->primary_ymin)
+	jstart = (int)((seg->endpoints[0].ygrid - data->primary_ymin)
 			/ data->primary_dy);
-	jend = (int)((seg->endpoints[1]->ygrid - data->primary_ymin)
+	jend = (int)((seg->endpoints[1].ygrid - data->primary_ymin)
 			/ data->primary_dy);
 			
 	/* no need to fill in if the segment doesn't cross grid boundaries */
@@ -2494,17 +2497,17 @@ int mbview_drapesegment_grid(int instance, struct mbview_linesegment_struct *seg
 		{		
 		/* put begin point in list */
 		seg->nls = 0;
-		seg->lspoints[seg->nls].xgrid = seg->endpoints[0]->xgrid;
-		seg->lspoints[seg->nls].ygrid = seg->endpoints[0]->ygrid;
-		seg->lspoints[seg->nls].zdata = seg->endpoints[0]->zdata;
+		seg->lspoints[seg->nls].xgrid = seg->endpoints[0].xgrid;
+		seg->lspoints[seg->nls].ygrid = seg->endpoints[0].ygrid;
+		seg->lspoints[seg->nls].zdata = seg->endpoints[0].zdata;
 		seg->nls++;
 		
 		/* get line equation */
-		if (ni > 0 && seg->endpoints[1]->xgrid != seg->endpoints[0]->xgrid) 
+		if (ni > 0 && seg->endpoints[1].xgrid != seg->endpoints[0].xgrid) 
 			{
-			mm = (seg->endpoints[1]->ygrid - seg->endpoints[0]->ygrid) 
-				/ (seg->endpoints[1]->xgrid - seg->endpoints[0]->xgrid);
-			bb = seg->endpoints[0]->ygrid - mm * seg->endpoints[0]->xgrid;
+			mm = (seg->endpoints[1].ygrid - seg->endpoints[0].ygrid) 
+				/ (seg->endpoints[1].xgrid - seg->endpoints[0].xgrid);
+			bb = seg->endpoints[0].ygrid - mm * seg->endpoints[0].xgrid;
 			}
 
 		/* loop over xgrid */
@@ -2540,17 +2543,17 @@ int mbview_drapesegment_grid(int instance, struct mbview_linesegment_struct *seg
 			}
 
 		/* put end point in list */
-		seg->lspoints[seg->nls].xgrid = seg->endpoints[1]->xgrid;
-		seg->lspoints[seg->nls].ygrid = seg->endpoints[1]->ygrid;
-		seg->lspoints[seg->nls].zdata = seg->endpoints[1]->zdata;
+		seg->lspoints[seg->nls].xgrid = seg->endpoints[1].xgrid;
+		seg->lspoints[seg->nls].ygrid = seg->endpoints[1].ygrid;
+		seg->lspoints[seg->nls].zdata = seg->endpoints[1].zdata;
 		seg->nls++;
 		
 		/* get line equation */
-		if (nj > 0 && seg->endpoints[1]->ygrid != seg->endpoints[0]->ygrid) 
+		if (nj > 0 && seg->endpoints[1].ygrid != seg->endpoints[0].ygrid) 
 			{
-			mm = (seg->endpoints[1]->xgrid - seg->endpoints[0]->xgrid) 
-				/ (seg->endpoints[1]->ygrid - seg->endpoints[0]->ygrid);
-			bb = seg->endpoints[0]->xgrid - mm * seg->endpoints[0]->ygrid;
+			mm = (seg->endpoints[1].xgrid - seg->endpoints[0].xgrid) 
+				/ (seg->endpoints[1].ygrid - seg->endpoints[0].ygrid);
+			bb = seg->endpoints[0].xgrid - mm * seg->endpoints[0].ygrid;
 			}
 
 		/* loop over ygrid */
@@ -2708,7 +2711,6 @@ int mbview_drapesegment_grid(int instance, struct mbview_linesegment_struct *seg
 }
 
 /*------------------------------------------------------------------------------*/
-/*------------------------------------------------------------------------------*/
 int mbview_drapesegmentw(int instance, struct mbview_linesegmentw_struct *seg)
 {
 
@@ -2740,14 +2742,14 @@ int mbview_drapesegmentw(int instance, struct mbview_linesegmentw_struct *seg)
 		fprintf(stderr,"dbg2       instance:         %d\n",instance);
 		fprintf(stderr,"dbg2       seg:              %d\n",seg);
 		fprintf(stderr,"dbg2       seg->endpoints:\n");
-		fprintf(stderr,"dbg2            xgrid[0]:    %f\n",seg->endpoints[0]->xgrid[instance]);
-		fprintf(stderr,"dbg2            ygrid[0]:    %f\n",seg->endpoints[0]->ygrid[instance]);
-		fprintf(stderr,"dbg2            xlon[0]:     %f\n",seg->endpoints[0]->xlon);
-		fprintf(stderr,"dbg2            ylat[0]:     %f\n",seg->endpoints[0]->ylat);
-		fprintf(stderr,"dbg2            xgrid[1]:    %f\n",seg->endpoints[1]->xgrid[instance]);
-		fprintf(stderr,"dbg2            ygrid[1]:    %f\n",seg->endpoints[1]->ygrid[instance]);
-		fprintf(stderr,"dbg2            xlon[1]:     %f\n",seg->endpoints[1]->xlon);
-		fprintf(stderr,"dbg2            ylat[1]:     %f\n",seg->endpoints[1]->ylat);
+		fprintf(stderr,"dbg2            xgrid[0]:    %f\n",seg->endpoints[0].xgrid[instance]);
+		fprintf(stderr,"dbg2            ygrid[0]:    %f\n",seg->endpoints[0].ygrid[instance]);
+		fprintf(stderr,"dbg2            xlon[0]:     %f\n",seg->endpoints[0].xlon);
+		fprintf(stderr,"dbg2            ylat[0]:     %f\n",seg->endpoints[0].ylat);
+		fprintf(stderr,"dbg2            xgrid[1]:    %f\n",seg->endpoints[1].xgrid[instance]);
+		fprintf(stderr,"dbg2            ygrid[1]:    %f\n",seg->endpoints[1].ygrid[instance]);
+		fprintf(stderr,"dbg2            xlon[1]:     %f\n",seg->endpoints[1].xlon);
+		fprintf(stderr,"dbg2            ylat[1]:     %f\n",seg->endpoints[1].ylat);
 		}
 		
 	/* get view */
@@ -2774,14 +2776,14 @@ int mbview_drapesegmentw(int instance, struct mbview_linesegmentw_struct *seg)
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:          %d\n",status);
 		fprintf(stderr,"dbg2       seg->endpoints:\n");
-		fprintf(stderr,"dbg2            xgrid[0]:    %f\n",seg->endpoints[0]->xgrid[instance]);
-		fprintf(stderr,"dbg2            ygrid[0]:    %f\n",seg->endpoints[0]->ygrid[instance]);
-		fprintf(stderr,"dbg2            xlon[0]:     %f\n",seg->endpoints[0]->xlon);
-		fprintf(stderr,"dbg2            ylat[0]:     %f\n",seg->endpoints[0]->ylat);
-		fprintf(stderr,"dbg2            xgrid[1]:    %f\n",seg->endpoints[1]->xgrid[instance]);
-		fprintf(stderr,"dbg2            ygrid[1]:    %f\n",seg->endpoints[1]->ygrid[instance]);
-		fprintf(stderr,"dbg2            xlon[1]:     %f\n",seg->endpoints[1]->xlon);
-		fprintf(stderr,"dbg2            ylat[1]:     %f\n",seg->endpoints[1]->ylat);
+		fprintf(stderr,"dbg2            xgrid[0]:    %f\n",seg->endpoints[0].xgrid[instance]);
+		fprintf(stderr,"dbg2            ygrid[0]:    %f\n",seg->endpoints[0].ygrid[instance]);
+		fprintf(stderr,"dbg2            xlon[0]:     %f\n",seg->endpoints[0].xlon);
+		fprintf(stderr,"dbg2            ylat[0]:     %f\n",seg->endpoints[0].ylat);
+		fprintf(stderr,"dbg2            xgrid[1]:    %f\n",seg->endpoints[1].xgrid[instance]);
+		fprintf(stderr,"dbg2            ygrid[1]:    %f\n",seg->endpoints[1].ygrid[instance]);
+		fprintf(stderr,"dbg2            xlon[1]:     %f\n",seg->endpoints[1].xlon);
+		fprintf(stderr,"dbg2            ylat[1]:     %f\n",seg->endpoints[1].ylat);
 		fprintf(stderr,"dbg2       seg->nls:        %d\n",seg->nls);
 		fprintf(stderr,"dbg2       seg->nls_alloc:  %d\n",seg->nls_alloc);
 		fprintf(stderr,"dbg2       seg->lspoints:\n");
@@ -2830,14 +2832,14 @@ int mbview_drapesegmentw_gc(int instance, struct mbview_linesegmentw_struct *seg
 		fprintf(stderr,"dbg2       instance:         %d\n",instance);
 		fprintf(stderr,"dbg2       seg:              %d\n",seg);
 		fprintf(stderr,"dbg2       seg->endpoints:\n");
-		fprintf(stderr,"dbg2            xgrid[0]:    %f\n",seg->endpoints[0]->xgrid[instance]);
-		fprintf(stderr,"dbg2            ygrid[0]:    %f\n",seg->endpoints[0]->ygrid[instance]);
-		fprintf(stderr,"dbg2            xlon[0]:     %f\n",seg->endpoints[0]->xlon);
-		fprintf(stderr,"dbg2            ylat[0]:     %f\n",seg->endpoints[0]->ylat);
-		fprintf(stderr,"dbg2            xgrid[1]:    %f\n",seg->endpoints[1]->xgrid[instance]);
-		fprintf(stderr,"dbg2            ygrid[1]:    %f\n",seg->endpoints[1]->ygrid[instance]);
-		fprintf(stderr,"dbg2            xlon[1]:     %f\n",seg->endpoints[1]->xlon);
-		fprintf(stderr,"dbg2            ylat[1]:     %f\n",seg->endpoints[1]->ylat);
+		fprintf(stderr,"dbg2            xgrid[0]:    %f\n",seg->endpoints[0].xgrid[instance]);
+		fprintf(stderr,"dbg2            ygrid[0]:    %f\n",seg->endpoints[0].ygrid[instance]);
+		fprintf(stderr,"dbg2            xlon[0]:     %f\n",seg->endpoints[0].xlon);
+		fprintf(stderr,"dbg2            ylat[0]:     %f\n",seg->endpoints[0].ylat);
+		fprintf(stderr,"dbg2            xgrid[1]:    %f\n",seg->endpoints[1].xgrid[instance]);
+		fprintf(stderr,"dbg2            ygrid[1]:    %f\n",seg->endpoints[1].ygrid[instance]);
+		fprintf(stderr,"dbg2            xlon[1]:     %f\n",seg->endpoints[1].xlon);
+		fprintf(stderr,"dbg2            ylat[1]:     %f\n",seg->endpoints[1].ylat);
 		}
 		
 	/* get view */
@@ -2880,8 +2882,8 @@ int mbview_drapesegmentw_gc(int instance, struct mbview_linesegmentw_struct *seg
 	
 	/* get number of preliminary points along the segment */
 	mbview_greatcircle_distbearing(instance, 
-			seg->endpoints[0]->xlon, seg->endpoints[0]->ylat, 
-			seg->endpoints[1]->xlon, seg->endpoints[1]->ylat, 
+			seg->endpoints[0].xlon, seg->endpoints[0].ylat, 
+			seg->endpoints[1].xlon, seg->endpoints[1].ylat, 
 			&segbearing, &segdist);
 	nsegpoint = MAX(((int)((segdist / dsegdist) + 1)), 2);
 
@@ -2917,11 +2919,11 @@ int mbview_drapesegmentw_gc(int instance, struct mbview_linesegmentw_struct *seg
 		{
 		/* put begin point in list */
 		seg->nls = 0;
-		seg->lspoints[seg->nls].xgrid[instance] = seg->endpoints[0]->xgrid[instance];
-		seg->lspoints[seg->nls].ygrid[instance] = seg->endpoints[0]->ygrid[instance];
-		seg->lspoints[seg->nls].zdata = seg->endpoints[0]->zdata;
-		seg->lspoints[seg->nls].xlon = seg->endpoints[0]->xlon;
-		seg->lspoints[seg->nls].ylat = seg->endpoints[0]->ylat;
+		seg->lspoints[seg->nls].xgrid[instance] = seg->endpoints[0].xgrid[instance];
+		seg->lspoints[seg->nls].ygrid[instance] = seg->endpoints[0].ygrid[instance];
+		seg->lspoints[seg->nls].zdata = seg->endpoints[0].zdata;
+		seg->lspoints[seg->nls].xlon = seg->endpoints[0].xlon;
+		seg->lspoints[seg->nls].ylat = seg->endpoints[0].ylat;
 		seg->nls++;
 
 		for (i=1;i<nsegpoint-1;i++)
@@ -2946,11 +2948,11 @@ int mbview_drapesegmentw_gc(int instance, struct mbview_linesegmentw_struct *seg
 			}
 
 		/* put end point in list */
-		seg->lspoints[seg->nls].xgrid[instance] = seg->endpoints[1]->xgrid[instance];
-		seg->lspoints[seg->nls].ygrid[instance] = seg->endpoints[1]->ygrid[instance];
-		seg->lspoints[seg->nls].zdata = seg->endpoints[1]->zdata;
-		seg->lspoints[seg->nls].xlon = seg->endpoints[1]->xlon;
-		seg->lspoints[seg->nls].ylat = seg->endpoints[1]->ylat;
+		seg->lspoints[seg->nls].xgrid[instance] = seg->endpoints[1].xgrid[instance];
+		seg->lspoints[seg->nls].ygrid[instance] = seg->endpoints[1].ygrid[instance];
+		seg->lspoints[seg->nls].zdata = seg->endpoints[1].zdata;
+		seg->lspoints[seg->nls].xlon = seg->endpoints[1].xlon;
+		seg->lspoints[seg->nls].ylat = seg->endpoints[1].ylat;
 		seg->nls++;			
 
 		/* now calculate rest of point values */
@@ -2994,14 +2996,14 @@ int mbview_drapesegmentw_gc(int instance, struct mbview_linesegmentw_struct *seg
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:          %d\n",status);
 		fprintf(stderr,"dbg2       seg->endpoints:\n");
-		fprintf(stderr,"dbg2            xgrid[0]:    %f\n",seg->endpoints[0]->xgrid[instance]);
-		fprintf(stderr,"dbg2            ygrid[0]:    %f\n",seg->endpoints[0]->ygrid[instance]);
-		fprintf(stderr,"dbg2            xlon[0]:     %f\n",seg->endpoints[0]->xlon);
-		fprintf(stderr,"dbg2            ylat[0]:     %f\n",seg->endpoints[0]->ylat);
-		fprintf(stderr,"dbg2            xgrid[1]:    %f\n",seg->endpoints[1]->xgrid[instance]);
-		fprintf(stderr,"dbg2            ygrid[1]:    %f\n",seg->endpoints[1]->ygrid[instance]);
-		fprintf(stderr,"dbg2            xlon[1]:     %f\n",seg->endpoints[1]->xlon);
-		fprintf(stderr,"dbg2            ylat[1]:     %f\n",seg->endpoints[1]->ylat);
+		fprintf(stderr,"dbg2            xgrid[0]:    %f\n",seg->endpoints[0].xgrid[instance]);
+		fprintf(stderr,"dbg2            ygrid[0]:    %f\n",seg->endpoints[0].ygrid[instance]);
+		fprintf(stderr,"dbg2            xlon[0]:     %f\n",seg->endpoints[0].xlon);
+		fprintf(stderr,"dbg2            ylat[0]:     %f\n",seg->endpoints[0].ylat);
+		fprintf(stderr,"dbg2            xgrid[1]:    %f\n",seg->endpoints[1].xgrid[instance]);
+		fprintf(stderr,"dbg2            ygrid[1]:    %f\n",seg->endpoints[1].ygrid[instance]);
+		fprintf(stderr,"dbg2            xlon[1]:     %f\n",seg->endpoints[1].xlon);
+		fprintf(stderr,"dbg2            ylat[1]:     %f\n",seg->endpoints[1].ylat);
 		fprintf(stderr,"dbg2       seg->nls:        %d\n",seg->nls);
 		fprintf(stderr,"dbg2       seg->nls_alloc:  %d\n",seg->nls_alloc);
 		fprintf(stderr,"dbg2       seg->lspoints:\n");
@@ -3051,10 +3053,10 @@ int mbview_drapesegmentw_grid(int instance, struct mbview_linesegmentw_struct *s
 		fprintf(stderr,"dbg2       instance:         %d\n",instance);
 		fprintf(stderr,"dbg2       seg:              %d\n",seg);
 		fprintf(stderr,"dbg2       seg->endpoints:\n");
-		fprintf(stderr,"dbg2            xgrid[0]:    %f\n",seg->endpoints[0]->xgrid[instance]);
-		fprintf(stderr,"dbg2            ygrid[0]:    %f\n",seg->endpoints[0]->ygrid[instance]);
-		fprintf(stderr,"dbg2            xgrid[1]:    %f\n",seg->endpoints[1]->xgrid[instance]);
-		fprintf(stderr,"dbg2            ygrid[1]:    %f\n",seg->endpoints[1]->ygrid[instance]);
+		fprintf(stderr,"dbg2            xgrid[0]:    %f\n",seg->endpoints[0].xgrid[instance]);
+		fprintf(stderr,"dbg2            ygrid[0]:    %f\n",seg->endpoints[0].ygrid[instance]);
+		fprintf(stderr,"dbg2            xgrid[1]:    %f\n",seg->endpoints[1].xgrid[instance]);
+		fprintf(stderr,"dbg2            ygrid[1]:    %f\n",seg->endpoints[1].ygrid[instance]);
 		}
 		
 	/* get view */
@@ -3080,13 +3082,13 @@ int mbview_drapesegmentw_grid(int instance, struct mbview_linesegmentw_struct *s
 		}
 	
 	/* figure out how many points to calculate along the segment */
-	istart = (int)((seg->endpoints[0]->xgrid[instance] - data->primary_xmin)
+	istart = (int)((seg->endpoints[0].xgrid[instance] - data->primary_xmin)
 			/ data->primary_dx);
-	iend = (int)((seg->endpoints[1]->xgrid[instance] - data->primary_xmin)
+	iend = (int)((seg->endpoints[1].xgrid[instance] - data->primary_xmin)
 			/ data->primary_dx);
-	jstart = (int)((seg->endpoints[0]->ygrid[instance] - data->primary_ymin)
+	jstart = (int)((seg->endpoints[0].ygrid[instance] - data->primary_ymin)
 			/ data->primary_dy);
-	jend = (int)((seg->endpoints[1]->ygrid[instance] - data->primary_ymin)
+	jend = (int)((seg->endpoints[1].ygrid[instance] - data->primary_ymin)
 			/ data->primary_dy);
 			
 	/* no need to fill in if the segment doesn't cross grid boundaries */
@@ -3143,17 +3145,17 @@ int mbview_drapesegmentw_grid(int instance, struct mbview_linesegmentw_struct *s
 		{		
 		/* put begin point in list */
 		seg->nls = 0;
-		seg->lspoints[seg->nls].xgrid[instance] = seg->endpoints[0]->xgrid[instance];
-		seg->lspoints[seg->nls].ygrid[instance] = seg->endpoints[0]->ygrid[instance];
-		seg->lspoints[seg->nls].zdata = seg->endpoints[0]->zdata;
+		seg->lspoints[seg->nls].xgrid[instance] = seg->endpoints[0].xgrid[instance];
+		seg->lspoints[seg->nls].ygrid[instance] = seg->endpoints[0].ygrid[instance];
+		seg->lspoints[seg->nls].zdata = seg->endpoints[0].zdata;
 		seg->nls++;
 		
 		/* get line equation */
-		if (ni > 0 && seg->endpoints[1]->xgrid[instance] != seg->endpoints[0]->xgrid[instance]) 
+		if (ni > 0 && seg->endpoints[1].xgrid[instance] != seg->endpoints[0].xgrid[instance]) 
 			{
-			mm = (seg->endpoints[1]->ygrid[instance] - seg->endpoints[0]->ygrid[instance]) 
-				/ (seg->endpoints[1]->xgrid[instance] - seg->endpoints[0]->xgrid[instance]);
-			bb = seg->endpoints[0]->ygrid[instance] - mm * seg->endpoints[0]->xgrid[instance];
+			mm = (seg->endpoints[1].ygrid[instance] - seg->endpoints[0].ygrid[instance]) 
+				/ (seg->endpoints[1].xgrid[instance] - seg->endpoints[0].xgrid[instance]);
+			bb = seg->endpoints[0].ygrid[instance] - mm * seg->endpoints[0].xgrid[instance];
 			}
 
 		/* loop over xgrid */
@@ -3189,17 +3191,17 @@ int mbview_drapesegmentw_grid(int instance, struct mbview_linesegmentw_struct *s
 			}
 
 		/* put end point in list */
-		seg->lspoints[seg->nls].xgrid[instance] = seg->endpoints[1]->xgrid[instance];
-		seg->lspoints[seg->nls].ygrid[instance] = seg->endpoints[1]->ygrid[instance];
-		seg->lspoints[seg->nls].zdata = seg->endpoints[1]->zdata;
+		seg->lspoints[seg->nls].xgrid[instance] = seg->endpoints[1].xgrid[instance];
+		seg->lspoints[seg->nls].ygrid[instance] = seg->endpoints[1].ygrid[instance];
+		seg->lspoints[seg->nls].zdata = seg->endpoints[1].zdata;
 		seg->nls++;
 		
 		/* get line equation */
-		if (nj > 0 && seg->endpoints[1]->ygrid[instance] != seg->endpoints[0]->ygrid[instance]) 
+		if (nj > 0 && seg->endpoints[1].ygrid[instance] != seg->endpoints[0].ygrid[instance]) 
 			{
-			mm = (seg->endpoints[1]->xgrid[instance] - seg->endpoints[0]->xgrid[instance]) 
-				/ (seg->endpoints[1]->ygrid[instance] - seg->endpoints[0]->ygrid[instance]);
-			bb = seg->endpoints[0]->xgrid[instance] - mm * seg->endpoints[0]->ygrid[instance];
+			mm = (seg->endpoints[1].xgrid[instance] - seg->endpoints[0].xgrid[instance]) 
+				/ (seg->endpoints[1].ygrid[instance] - seg->endpoints[0].ygrid[instance]);
+			bb = seg->endpoints[0].xgrid[instance] - mm * seg->endpoints[0].ygrid[instance];
 			}
 
 		/* loop over ygrid */
