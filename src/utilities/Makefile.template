@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 5.25 2008-02-12 02:49:51 caress Exp $
+#	$Id: Makefile.template,v 5.26 2008-05-13 20:23:56 caress Exp $
 #
 #     Copyright (c) 1993, 1994, 2000, 2002, 2003, 2005, 2007 by
 #     David W. Caress (caress@mbari.org)
@@ -16,6 +16,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.25  2008/02/12 02:49:51  caress
+# Added new program mbabsorption.
+#
 # Revision 5.24  2007/10/08 16:48:07  caress
 # State of the code on 8 October 2007.
 #
@@ -236,7 +239,8 @@ all:	$(BINDIR)/mbformat \
 	$(BINDIR)/mbrolltimelag	\
 	$(BINDIR)/mbauvloglist\
 	$(BINDIR)/mb7k2ss \
-	$(BINDIR)/mbabsorption
+	$(BINDIR)/mbabsorption \
+	$(BINDIR)/mbdumpesf
 
 ### make clean removes the object files
 clean:
@@ -391,6 +395,9 @@ $(BINDIR)/mb7k2ss:	mb7k2ss.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbaux.a $(LIBDIR)/
 $(BINDIR)/mbabsorption:	mbabsorption.o $(LIBDIR)/libmbio.a
 	$(CC) $(CFLAGS) mbabsorption.o $(LIBDIR)/libmbio.a \
 		$(LFLAGS) -o $(BINDIR)/mbabsorption
+$(BINDIR)/mbdumpesf:	mbdumpesf.o $(LIBDIR)/libmbio.a
+	$(CC) $(CFLAGS) mbdumpesf.o $(LIBDIR)/libmbio.a \
+		$(LFLAGS) -o $(BINDIR)/mbdumpesf
 
 ### compile the source files
 mbformat.o:	mbformat.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
@@ -488,3 +495,5 @@ mb7k2ss.o:	mb7k2ss.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_d
 	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) -I$(NETCDFINCDIR) mb7k2ss.c
 mbabsorption.o:	mbabsorption.c  $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbabsorption.c
+mbdumpesf.o:	mbdumpesf.c  $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
+	$(CC) -c $(CFLAGS) mbdumpesf.c
