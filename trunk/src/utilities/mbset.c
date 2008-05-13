@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbset.c	1/4/2000
- *    $Id: mbset.c,v 5.28 2007-10-08 16:48:06 caress Exp $
+ *    $Id: mbset.c,v 5.29 2008-05-13 20:22:07 caress Exp $
  *
  *    Copyright (c) 2000, 2002, 2003, 2004, 2007 by
  *    David W. Caress (caress@mbari.org)
@@ -30,6 +30,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.28  2007/10/08 16:48:06  caress
+ * State of the code on 8 October 2007.
+ *
  * Revision 5.27  2006/01/24 22:23:15  caress
  * 5.0.8beta.
  *
@@ -142,7 +145,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbset.c,v 5.28 2007-10-08 16:48:06 caress Exp $";
+	static char rcs_id[] = "$Id: mbset.c,v 5.29 2008-05-13 20:22:07 caress Exp $";
 	static char program_name[] = "mbset";
 	static char help_message[] = "MBset is a tool for setting values in an mbprocess parameter file.\n\
 MBprocess is a tool for processing swath sonar bathymetry data  \n\
@@ -412,6 +415,10 @@ the manual pages for mbprocess and mbset. \n\n";
 		else if (strncmp(pargv[i], "NAVADJMODE", 10) == 0)
 		    {
 		    sscanf(pargv[i], "NAVADJMODE:%d", &process.mbp_navadj_mode);
+		    if (explicit == MB_NO)
+			{
+			process.mbp_navadjfile[0] = '\0';
+			}
 		    }
 		else if (strncmp(pargv[i], "NAVADJFILE", 10) == 0)
 		    {
