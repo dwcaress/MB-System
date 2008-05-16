@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgetesf.c	6/15/93
- *    $Id: mbgetesf.c,v 5.6 2006-01-18 15:17:00 caress Exp $
+ *    $Id: mbgetesf.c,v 5.7 2008-05-16 22:44:37 caress Exp $
  *
- *    Copyright (c) 2001, 2003 by
+ *    Copyright (c) 2001-2008 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -24,6 +24,9 @@
  * Date:	January 24, 2001
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2006/01/18 15:17:00  caress
+ * Added stdlib.h include.
+ *
  * Revision 5.5  2005/11/05 01:07:54  caress
  * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
  *
@@ -68,7 +71,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbgetesf.c,v 5.6 2006-01-18 15:17:00 caress Exp $";
+	static char rcs_id[] = "$Id: mbgetesf.c,v 5.7 2008-05-16 22:44:37 caress Exp $";
 	static char program_name[] = "mbgetest";
 	static char help_message[] =  "mbgetesf reads a multibeam data file and writes out\nan edit save file which can be applied to other data files\ncontaining the same data (but presumably in a different\nstate of processing).  This allows editing of one data file to\nbe transferred to another with ease.  The programs mbedit and\nmbprocess can be used to apply the edit events to another file.";
 	static char usage_message[] = "mbgetesf [-Fformat -Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc -Sspeed -Iinfile -Oesffile -V -H]";
