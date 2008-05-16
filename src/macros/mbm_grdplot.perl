@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grdplot.perl	8/6/95
-#    $Id: mbm_grdplot.perl,v 5.30 2008-02-12 02:52:50 caress Exp $
+#    $Id: mbm_grdplot.perl,v 5.31 2008-05-16 22:36:21 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 2000, 2003 by 
 #    D. W. Caress (caress@mbari.org)
@@ -69,10 +69,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   October 19, 1994
 #
 # Version:
-#   $Id: mbm_grdplot.perl,v 5.30 2008-02-12 02:52:50 caress Exp $
+#   $Id: mbm_grdplot.perl,v 5.31 2008-05-16 22:36:21 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.30  2008/02/12 02:52:50  caress
+#   Working on adding sealevel colormap, but haven't finished it at this point.
+#
 #   Revision 5.29  2008/01/14 17:47:41  caress
 #   Fixed typo.
 #
@@ -739,6 +742,7 @@ if ($misc)
 		if ($cmd =~ /^[Tt][Dd]./)
 			{
 			($coast_resolution) = $cmd =~ /^[Tt][Dd](.+)/;
+			$coast_control = 1;
 			}
 
 		# set pscoast dry fill
@@ -1907,8 +1911,7 @@ if ($coast_control
 	&& !$coast_boundary
 	&& !$coast_river)
 	{
-	$coast_dryfill = "200";
-	$coast_pen = "1p";
+	$coast_pen = "1";
 	}
 if ($coast_control
 	&& !$coast_resolution)
@@ -1917,6 +1920,12 @@ if ($coast_control
 	}
 	
 # set swath navigation controls
+if ($swathnavdatalist && !$navigation_control && !$navigation_mode)
+	{
+	$navigation_mode = 1;
+	$navigation_control = "100000/100000/100000/0.15";
+	}
+
 if ($navigation_control && $navigation_control =~ /\S+\/\S+\/\S+\/\S+/)
 	{
 	$navigation_mode = 1;

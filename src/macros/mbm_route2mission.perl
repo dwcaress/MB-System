@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system: mbm_route2mission.perl   7/18/2004
-#    $Id: mbm_route2mission.perl,v 5.15 2008-02-12 02:51:51 caress Exp $
+#    $Id: mbm_route2mission.perl,v 5.16 2008-05-16 22:36:21 caress Exp $
 #
 #    Copyright (c) 2004, 2006 by 
 #    D. W. Caress (caress@mbari.org)
@@ -37,10 +37,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #      Moss Landing, CA
 #
 # Version:
-# $Id: mbm_route2mission.perl,v 5.15 2008-02-12 02:51:51 caress Exp $
+# $Id: mbm_route2mission.perl,v 5.16 2008-05-16 22:36:21 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.15  2008/02/12 02:51:51  caress
+#   Changes in preparation for 2008 MBARI Mapping AUV operations.
+#
 #   Revision 5.14  2007/10/08 05:45:46  caress
 #   Added zero point setpoint to descent sequences and can output WPL files.
 #
@@ -110,7 +113,7 @@ $program_name = "mbm_route2mission";
 $durationfactorwaypoint = 1.5;
 $durationfactormission = 1.3;
 $durationmax = 28800;
-$batterylife = 36000;
+$batterylife = 64800; # 18 hours
 $safetymargin = 1800;
 
 # set defaults
@@ -125,7 +128,7 @@ $altitudedesired = $altitudemin;
 $mission_speed = 1.5;
 
 # behavior gps
-$gpsminhits = 30;
+$gpsminhits = 10; # used to be 30, but vehicle started to time out and abort 3/20/2008
 $gpsduration = 600;
 $gpsmode = 0;
 
@@ -148,15 +151,15 @@ $resonduration = 6;
 $sonaraltitudemax = 100.0;
 $mb_pingrate = 2.0;
 $mb_transmitgain = 220.0;
-$mb_receivegain = 70.0;
+$mb_receivegain = 75.0;
 $mb_pulsewidth = 0.000030;
 $resongainsetcount = 0;
 
 # behavior waypoint and waypoint_depth
 $behaviorWaypointID = 0;
 $behaviorWaypointDepthID = 1;
-$depthmax = 130.0;
-$depthabort = 150.0;
+$depthmax = 5900.0;
+$depthabort = 6000.0;
 $maxcrosstrackerror = 30.0;
 $maxclimbslope = 0.5734;
 
@@ -237,12 +240,14 @@ if ($altitudearg)
 		$altitudedesired = $altitudemin;
 		}
 	}
-if ($deptharg
-	&& $deptharg =~ /^(\S+)\/(\S+)\/(\S+)/)
-	{
-	($depthmax, $depthabort, $descentdepth) 
-		= $deptharg =~ /^(\S+)\/(\S+)\/(\S+)/;
-	}
+# IGNORE depth args now 
+# 3/29/08 R/V Zephyr, off Mission Bay, San Diego, DWC
+#if ($deptharg
+#	&& $deptharg =~ /^(\S+)\/(\S+)\/(\S+)/)
+##	{
+#	($depthmax, $depthabort, $descentdepth) 
+#		= $deptharg =~ /^(\S+)\/(\S+)\/(\S+)/;
+#	}
 elsif ($deptharg
 	&& $deptharg =~ /^(\S+)\/(\S+)/)
 	{
@@ -533,7 +538,8 @@ else
 	$startdistance = 500.0;
 	}
 	
-# calculate first cut depths
+# calculate first cut depths and abort depth
+$depthabort = 0.0;
 for ($i = 0; $i < $nmissionpoints; $i++)
 	{
 	if ($ndppoints > 0)
@@ -546,7 +552,13 @@ for ($i = 0; $i < $nmissionpoints; $i++)
 		$mmissiondepths[$i] = -$mtopomaxs[$i] - $altitudedesired;
 #printf "DEPTHS %f\n", $mmissiondepths[$i];
 		}
+	if ($mmissiondepths[$i] > $depthabort)
+		{
+		$depthabort = $mmissiondepths[$i];
+		}
 	}
+$depthabort = $depthabort + $altitudedesired;
+$depthmax = $depthabort - 0.5 * $altitudemin;
 	
 # calculate slopes
 #for ($i = 0; $i < $nmissionpoints; $i++)
@@ -897,6 +909,15 @@ print "Output Behavior: gps\n";
 	print MFILE "} \r\n";
 print "Output Behavior: ascend\n";
 	print MFILE "# \r\n";
+	print MFILE "# Acoustic update - sent status ping after end of survey \r\n";
+	print MFILE "# \r\n";
+	print MFILE "behavior acousticUpdate \r\n";
+	print MFILE "{ \r\n";
+	print MFILE "duration  = 2; \r\n";	
+	print MFILE "dummy  = 1; \r\n";	
+	print MFILE "} \r\n";
+	print MFILE "# \r\n";
+print "Output Behavior: acousticUpdate\n";
 	if ($mappingsonar)
 		{
 		print MFILE "# Turn off power to sonars and stop logging on the PLC \r\n";
@@ -1128,6 +1149,14 @@ print "Output Behavior: reson (reset, Log_Mode = 0, line  = $iwaypoint, waypoint
 			print MFILE "Log_Mode = 0; \r\n";
 			print MFILE "} \r\n";
 			print MFILE "# \r\n";
+			print MFILE "# Acoustic update - sent status ping before start of logging \r\n";
+			print MFILE "# \r\n";
+			print MFILE "behavior acousticUpdate \r\n";
+			print MFILE "{ \r\n";
+			print MFILE "duration  = 2; \r\n";	
+			print MFILE "dummy  = 1; \r\n";	
+			print MFILE "} \r\n";
+			print MFILE "# \r\n";
 			print MFILE "#######################################################\r\n";
 			}
 
@@ -1285,7 +1314,14 @@ print "Output Behavior: waypoint_depth (during line $iwaypoint) ";
 			printf MFILE "latitude          = %f; \r\n", $mlats[$i];
 			printf MFILE "longitude         = %f; \r\n", $mlons[$i];
 			print MFILE "captureRadius      = 10; \r\n";
-			printf MFILE "duration          = %d; \r\n", ($durationfactorwaypoint * $distance / $mission_speed);
+			if ($mwaypoints[$i] != 0 && $iwaypoint == 0)
+				{
+				printf MFILE "duration          = %d; \r\n", 600;
+				}
+			else
+				{
+				printf MFILE "duration          = %d; \r\n", ($durationfactorwaypoint * $distance / $mission_speed);
+				}
 			if ($mwaypoints[$i] != 0 && $iwaypoint != 0)
 				{
 				printf MFILE "# abortOnTimeout    = True; \r\n";
@@ -1314,7 +1350,7 @@ print " $mmissiondepths[$i]\n";
 			print MFILE "#######################################################\r\n";
 			print MFILE "# Acoustic update - sent status ping after end of line \r\n";
 			print MFILE "# \r\n";
-			print MFILE "behavior acousticupdate \r\n";
+			print MFILE "behavior acousticUpdate \r\n";
 			print MFILE "{ \r\n";
 			print MFILE "duration  = 2; \r\n";	
 			print MFILE "dummy  = 1; \r\n";	
@@ -1383,7 +1419,7 @@ print "Output Behavior: reson (reset, Log_Mode = 1, line  = $iwaypoint, waypoint
 			{
 			print MFILE "# Acoustic update - sent status ping before start of line \r\n";
 			print MFILE "# \r\n";
-			print MFILE "behavior acousticupdate \r\n";
+			print MFILE "behavior acousticUpdate \r\n";
 			print MFILE "{ \r\n";
 			print MFILE "duration  = 2; \r\n";	
 			print MFILE "dummy  = 1; \r\n";	
@@ -1402,6 +1438,14 @@ print "Output Behavior: reson (reset, Log_Mode = 1, line  = $iwaypoint, waypoint
 	# output beginning of mission
 	print MFILE "#######################################################\r\n";
 	print MFILE "# \r\n";
+	print MFILE "# \r\n";
+	print MFILE "# Acoustic update - sent status ping before start of line \r\n";
+	print MFILE "# \r\n";
+	print MFILE "behavior acousticUpdate \r\n";
+	print MFILE "{ \r\n";
+	print MFILE "duration  = 2; \r\n";	
+	print MFILE "dummy  = 1; \r\n";	
+	print MFILE "} \r\n";
 	print MFILE "# \r\n";
 	print MFILE "# Descend behavior \r\n";
 	print MFILE "behavior descend  \r\n";
