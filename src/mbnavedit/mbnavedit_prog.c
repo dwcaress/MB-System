@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_prog.c	6/23/95
- *    $Id: mbnavedit_prog.c,v 5.20 2007-10-08 16:17:00 caress Exp $
+ *    $Id: mbnavedit_prog.c,v 5.21 2008-05-16 23:05:05 caress Exp $
  *
- *    Copyright (c) 1995, 2000, 2003 by
+ *    Copyright (c) 1995-2008 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -24,6 +24,9 @@
  * Date:	August 28, 2000 (New version - no buffered i/o)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.20  2007/10/08 16:17:00  caress
+ * Repeated positions are now automatically flagged for modeling or smooth inversion.
+ *
  * Revision 5.19  2006/02/16 21:15:07  caress
  * Made smooth inversion weights work as small as 0.01 in the interface. Redimensioned some strings too.
  *
@@ -254,7 +257,7 @@ struct mbnavedit_plot_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbnavedit_prog.c,v 5.20 2007-10-08 16:17:00 caress Exp $";
+static char rcs_id[] = "$Id: mbnavedit_prog.c,v 5.21 2008-05-16 23:05:05 caress Exp $";
 static char program_name[] = "MBNAVEDIT";
 static char help_message[] =  "MBNAVEDIT is an interactive navigation editor for swath sonar data.\n\tIt can work with any data format supported by the MBIO library.\n";
 static char usage_message[] = "mbnavedit [-Byr/mo/da/hr/mn/sc -D  -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ooutfile -X -V -H]";
@@ -3925,19 +3928,29 @@ int mbnavedit_action_deletebadtime()
 		}
 
 	/* loop over the data looking for bad times */
-	for (i=0;i<nbuff;i++)
+	lastgood_time_d = ping[0].time_d;
+	for (i=1;i<nbuff;i++)
 		{
-		if (i == 0)
-			{
-			lastgood_time_d = ping[i].time_d;
-			}
-		else if (ping[i].time_d > lastgood_time_d)
-			{
-			lastgood_time_d = ping[i].time_d;
-			}
-		else if (ping[i].time_d <= lastgood_time_d)
+		if ((ping[i].time_d - lastgood_time_d) <= 0.0)
 			{
 			ping[i].id = -1;
+			}
+		else if ((ping[i].time_d - lastgood_time_d) > 60.0)
+			{
+			if (i == nbuff - 1)
+				ping[i].id = -1;
+			else if (ping[i+1].time_d - ping[i].time_d <= 0.0)
+				ping[i].id = -1;
+			else
+				lastgood_time_d = ping[i].time_d;
+			}
+		else if (ping[i].time_d > ping[nbuff-1].time_d)
+			{
+			ping[i].id = -1;
+			}
+		else
+			{
+			lastgood_time_d = ping[i].time_d;
 			}
 		}
 
@@ -4284,15 +4297,15 @@ int mbnavedit_get_inversion()
 			&mtodeglon, &mtodeglat);
 
 	/* allocate space for the inverse problem */
-	status = mb_malloc(verbose, nnz * nrows * sizeof(double), &a,&error);
-	status = mb_malloc(verbose, nnz * nrows * sizeof(int), &ia,&error);
-	status = mb_malloc(verbose, nrows * sizeof(int), &nia,&error);
-	status = mb_malloc(verbose, nrows * sizeof(double), &d,&error);
-	status = mb_malloc(verbose, ncols * sizeof(double), &x,&error);
-	status = mb_malloc(verbose, ncols * sizeof(int), &nx,&error);
-	status = mb_malloc(verbose, ncols * sizeof(double), &dx,&error);
-	status = mb_malloc(verbose, ncycle * sizeof(double), &sigma,&error);
-	status = mb_malloc(verbose, ncycle * sizeof(double), &work,&error);
+	status = mb_mallocd(verbose, __FILE__, __LINE__, nnz * nrows * sizeof(double), (void **)&a,&error);
+	status = mb_mallocd(verbose, __FILE__, __LINE__, nnz * nrows * sizeof(int), (void **)&ia,&error);
+	status = mb_mallocd(verbose, __FILE__, __LINE__, nrows * sizeof(int), (void **)&nia,&error);
+	status = mb_mallocd(verbose, __FILE__, __LINE__, nrows * sizeof(double), (void **)&d,&error);
+	status = mb_mallocd(verbose, __FILE__, __LINE__, ncols * sizeof(double), (void **)&x,&error);
+	status = mb_mallocd(verbose, __FILE__, __LINE__, ncols * sizeof(int), (void **)&nx,&error);
+	status = mb_mallocd(verbose, __FILE__, __LINE__, ncols * sizeof(double), (void **)&dx,&error);
+	status = mb_mallocd(verbose, __FILE__, __LINE__, ncycle * sizeof(double), (void **)&sigma,&error);
+	status = mb_mallocd(verbose, __FILE__, __LINE__, ncycle * sizeof(double), (void **)&work,&error);
 		
 	/* do inversion */
 	if (error == MB_ERROR_NO_ERROR)
@@ -4602,15 +4615,15 @@ int mbnavedit_get_inversion()
 		}
 
 	    /* deallocate arrays */
-	    status = mb_free(verbose, &a,&error);
-	    status = mb_free(verbose, &ia,&error);
-	    status = mb_free(verbose, &nia,&error);
-	    status = mb_free(verbose, &d,&error);
-	    status = mb_free(verbose, &x,&error);
-	    status = mb_free(verbose, &nx,&error);
-	    status = mb_free(verbose, &dx,&error);
-	    status = mb_free(verbose, &sigma,&error);
-	    status = mb_free(verbose, &work,&error);
+	    status = mb_freed(verbose, __FILE__, __LINE__, (void **) &a,&error);
+	    status = mb_freed(verbose, __FILE__, __LINE__, (void **) &ia,&error);
+	    status = mb_freed(verbose, __FILE__, __LINE__, (void **) &nia,&error);
+	    status = mb_freed(verbose, __FILE__, __LINE__, (void **) &d,&error);
+	    status = mb_freed(verbose, __FILE__, __LINE__, (void **) &x,&error);
+	    status = mb_freed(verbose, __FILE__, __LINE__, (void **) &nx,&error);
+	    status = mb_freed(verbose, __FILE__, __LINE__, (void **) &dx,&error);
+	    status = mb_freed(verbose, __FILE__, __LINE__, (void **) &sigma,&error);
+	    status = mb_freed(verbose, __FILE__, __LINE__, (void **) &work,&error);
 	
 	    /* turn message off */
 	    do_message_off();
