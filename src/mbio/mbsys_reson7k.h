@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_reson7k.h	3/3/2004
- *	$Id: mbsys_reson7k.h,v 5.13 2008-03-01 09:14:03 caress Exp $
+ *	$Id: mbsys_reson7k.h,v 5.14 2008-05-16 22:56:24 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	March 3, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.13  2008/03/01 09:14:03  caress
+ * Some housekeeping changes.
+ *
  * Revision 5.12  2007/07/03 17:25:50  caress
  * Changes to handle new time lag value in bluefin nav records.
  *
@@ -344,7 +347,7 @@
 #define	MBSYS_RESON7K_BUFFER_STARTSIZE	32768
 #define	MBSYS_RESON7K_MAX_DEVICE	10
 #define MBSYS_RESON7K_MAX_RECEIVERS	1024
-#define	MBSYS_RESON7K_MAX_BEAMS		256
+#define	MBSYS_RESON7K_MAX_BEAMS		512
 #define	MBSYS_RESON7K_MAX_PIXELS	4096
 
 typedef struct s7k_time_struct

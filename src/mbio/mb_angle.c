@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_angle.c	1/21/93
- *    $Id: mb_angle.c,v 5.7 2006-12-15 21:35:31 caress Exp $
+ *    $Id: mb_angle.c,v 5.8 2008-05-16 22:56:24 caress Exp $
  *
- *    Copyright (c) 1998, 2000, 2002, 2003 by
+ *    Copyright (c) 1998-2008 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -151,7 +151,7 @@
  * Some sonar data formats provide angle values along with
  * travel times. The angles are converted to takoff-angle 
  * coordinates regardless of the  storage form of the 
- * particular data format. Currently, most data formats
+ * particular data format. Older data formats often
  * do not contain an alongtrack component to the position
  * values; in these cases the conversion is trivial since
  * phi = roll = 0 and theta = pitch. The angle and travel time 
@@ -175,6 +175,9 @@
  * Date:	December 30, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2006/12/15 21:35:31  caress
+ * Fixed longstanding bug in coordinate translation code. Previously, the application of roll and pitch angles was done in the wrong order (pitch first). The errors due to this bug only became significant with large pitch values. The rotations are now done properly.
+ *
  * Revision 5.6  2006/09/11 18:55:52  caress
  * Changes during Western Flyer and Thomas Thompson cruises, August-September
  * 2006.

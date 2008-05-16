@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbio_status.h	2/1/93
- *    $Id: mb_status.h,v 5.86 2008-03-14 19:00:45 caress Exp $
+ *    $Id: mb_status.h,v 5.87 2008-05-16 22:56:24 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003, 2004, 2005, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.86  2008/03/14 19:00:45  caress
+ * Updated version to 5.1.1beta16.
+ *
  * Revision 5.85  2008/03/01 09:12:52  caress
  * Added support for Simrad EM710 multibeam in new formats 58 and 59.
  *
@@ -370,8 +373,8 @@
 #define MB_STATUS_DEF
 
 /* MB-system version id */
-#define	MB_VERSION	"5.1.1beta16"
-#define	MB_BUILD_DATE	"March 14, 2008"
+#define	MB_VERSION	"5.1.1beta18"
+#define	MB_BUILD_DATE	"May 16, 2008"
 
 /* MBIO function boolean convention */
 #define	MB_YES	1

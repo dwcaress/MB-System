@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbeditviz_prog.c		5/1/2007
- *    $Id: mbeditviz_prog.c,v 5.7 2008-03-14 19:04:32 caress Exp $
+ *    $Id: mbeditviz_prog.c,v 5.8 2008-05-16 22:59:42 caress Exp $
  *
- *    Copyright (c) 2007 by
+ *    Copyright (c) 2007-2008 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -24,6 +24,9 @@
  * Date:	May 1, 2007
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2008/03/14 19:04:32  caress
+ * Fixed memory problems with route editing.
+ *
  * Revision 5.6  2008/01/14 18:20:13  caress
  * Improved ability to identify raw vs processed data files regardless of source datalist.
  *
@@ -72,7 +75,7 @@
 #include "mbview.h"
 
 /* id variables */
-static char rcs_id[] = "$Id: mbeditviz_prog.c,v 5.7 2008-03-14 19:04:32 caress Exp $";
+static char rcs_id[] = "$Id: mbeditviz_prog.c,v 5.8 2008-05-16 22:59:42 caress Exp $";
 static char program_name[] = "MBeditviz";
 static char help_message[] = "MBeditviz is a bathymetry editor and patch test tool.";
 static char usage_message[] = "mbeditviz [-H -T -V]";
@@ -480,8 +483,7 @@ int mbeditviz_import_file(char *path, int format)
 		file->esf_open = MB_NO;
 				
 		/* load info */
-		/*mbev_status = mb_get_info(mbev_verbose, file->path, &(file->raw_info), mbdef_lonflip, &mbev_error);*/
-		mbev_status = mb_get_info(5, file->path, &(file->raw_info), mbdef_lonflip, &mbev_error);
+		mbev_status = mb_get_info(mbev_verbose, file->path, &(file->raw_info), mbdef_lonflip, &mbev_error);
 		if (mbev_status == MB_SUCCESS)
 			{
 			file->raw_info_loaded = MB_YES;
@@ -832,7 +834,6 @@ fprintf(stderr,"MEMORY FAILURE in mbeditviz_load_file\n");
 							}
 						}
 					}
-fprintf(stderr,"return mbeditviz_load_file 8 status:%d\n", mbev_status);
 					
 				/* copy data into ping arrays */
 				if (mbev_error == MB_ERROR_NO_ERROR
@@ -863,7 +864,6 @@ fprintf(stderr,"return mbeditviz_load_file 8 status:%d\n", mbev_status);
 						}
 					}
 				
-fprintf(stderr,"return mbeditviz_load_file 9 status:%d\n", mbev_status);
 
 				/* extract some more values */
 				if (mbev_error == MB_ERROR_NO_ERROR
@@ -956,7 +956,6 @@ fprintf(stderr,"return mbeditviz_load_file 9 status:%d\n", mbev_status);
 							}
 						}
 					}
-fprintf(stderr,"return mbeditviz_load_file 10 status:%d\n", mbev_status);
 
 				/* increment counters */
 				if (mbev_error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA)
@@ -992,7 +991,6 @@ fprintf(stderr,"return mbeditviz_load_file 10 status:%d\n", mbev_status);
 					fprintf(stderr,"dbg2       pixels_ss:      %d\n",pixels_ss);
 					}
 				}
-fprintf(stderr,"return mbeditviz_load_file 11 status:%d\n", mbev_status);
 
 			/* close the file */
 			mbev_status = mb_close(mbev_verbose,&imbio_ptr,&mbev_error);
@@ -1494,6 +1492,7 @@ int mbeditviz_get_grid_bounds()
 	struct mbev_file_struct *file;
 	struct mbev_ping_struct *ping;
 	struct mb_info_struct *info;
+	double	depth_min, depth_max;
 	double	altitude_min, altitude_max;
 	int	first;
 	double	xx, yy;
@@ -1534,6 +1533,8 @@ fprintf(stderr,"mbev_num_files_loaded:%d\n",mbev_num_files_loaded);
 					mbev_grid_bounds[1] = info->lon_max;
 					mbev_grid_bounds[2] = info->lat_min;
 					mbev_grid_bounds[3] = info->lat_max;
+					depth_min = info->depth_min;
+					depth_max = info->depth_max;
 					altitude_min = info->altitude_min;
 					altitude_max = info->altitude_max;
 					first = MB_NO;
@@ -1548,6 +1549,8 @@ info->lon_min,info->lon_max,info->lat_min,info->lat_max);
 					mbev_grid_bounds[1] = MAX(mbev_grid_bounds[1],info->lon_max);
 					mbev_grid_bounds[2] = MIN(mbev_grid_bounds[2],info->lat_min);
 					mbev_grid_bounds[3] = MAX(mbev_grid_bounds[3],info->lat_max);
+					depth_min = MIN(depth_min,info->depth_min);
+					depth_max = MIN(depth_max,info->depth_max);
 					altitude_min = MIN(altitude_min,info->altitude_min);
 					altitude_max = MIN(altitude_max,info->altitude_max);
 fprintf(stderr,"Processed:%d Name:%s Bounds: %f %f %f %F   File Bounds: %f %f %f %f\n",
@@ -1634,7 +1637,12 @@ info->lon_min,info->lon_max,info->lat_min,info->lat_max);
 		
 		/* get grid spacing */
 fprintf(stderr,"altitude: %f %f\n", altitude_min, altitude_max);
-		mbev_grid_cellsize = 0.02 * altitude_max;
+		if (altitude_max > 0.0)
+			mbev_grid_cellsize = 0.02 * altitude_max;
+		else if (depth_max > 0.0)
+			mbev_grid_cellsize = 0.02 * depth_max;
+		else
+			mbev_grid_cellsize = (mbev_grid_boundsutm[1] - mbev_grid_boundsutm[0]) / 250;
 		
 		/* get grid dimensions */
 		mbev_grid_nx = (mbev_grid_boundsutm[1] - mbev_grid_boundsutm[0]) / mbev_grid_cellsize + 1;
@@ -1674,7 +1682,6 @@ int mbeditviz_setup_grid()
 	struct mbev_file_struct *file;
 	struct mbev_ping_struct *ping;
 	struct mb_info_struct *info;
-	double	altitude_min, altitude_max;
 	int	first;
 	double	xx, yy;
 	double	reference_lon, reference_lat;
@@ -1907,7 +1914,6 @@ int mbeditviz_make_grid()
 	struct mbev_file_struct *file;
 	struct mbev_ping_struct *ping;
 	struct mb_info_struct *info;
-	double	altitude_min, altitude_max;
 	int	first;
 	double	xx, yy;
 	double	reference_lon, reference_lat;
@@ -2195,6 +2201,7 @@ int mbeditviz_make_grid_simple()
 	struct mbev_file_struct *file;
 	struct mbev_ping_struct *ping;
 	struct mb_info_struct *info;
+	double	depth_min, depth_max;
 	double	altitude_min, altitude_max;
 	int	first;
 	double	xx, yy;
@@ -2233,6 +2240,8 @@ fprintf(stderr,"mbev_num_files_loaded:%d\n",mbev_num_files_loaded);
 					mbev_grid.bounds[1] = info->lon_max;
 					mbev_grid.bounds[2] = info->lat_min;
 					mbev_grid.bounds[3] = info->lat_max;
+					depth_min = info->depth_min;
+					depth_max = info->depth_max;
 					altitude_min = info->altitude_min;
 					altitude_max = info->altitude_max;
 					first = MB_NO;
@@ -2247,6 +2256,8 @@ info->lon_min,info->lon_max,info->lat_min,info->lat_max);
 					mbev_grid.bounds[1] = MAX(mbev_grid.bounds[1],info->lon_max);
 					mbev_grid.bounds[2] = MIN(mbev_grid.bounds[2],info->lat_min);
 					mbev_grid.bounds[3] = MAX(mbev_grid.bounds[3],info->lat_max);
+					depth_min = MIN(depth_min,info->depth_min);
+					depth_max = MIN(depth_max,info->depth_max);
 					altitude_min = MIN(altitude_min,info->altitude_min);
 					altitude_max = MIN(altitude_max,info->altitude_max);
 fprintf(stderr,"Processed:%d Name:%s Bounds: %f %f %f %F   File Bounds: %f %f %f %f\n",
@@ -2334,6 +2345,21 @@ info->lon_min,info->lon_max,info->lat_min,info->lat_max);
 		/* get grid spacing */
 		mbev_grid.dx = 0.14 * altitude_max;
 		mbev_grid.dy = 0.14 * altitude_max;
+		if (altitude_max > 0.0)
+			{
+			mbev_grid.dx = 0.02 * altitude_max;
+			mbev_grid.dy = 0.02 * altitude_max;
+			}
+		else if (depth_max > 0.0)
+			{
+			mbev_grid.dx = 0.02 * depth_max;
+			mbev_grid.dy = 0.02 * depth_max;
+			}
+		else
+			{
+			mbev_grid.dx = (mbev_grid.boundsutm[1] - mbev_grid.boundsutm[0]) / 250;
+			mbev_grid.dy = (mbev_grid.boundsutm[1] - mbev_grid.boundsutm[0]) / 250;
+			}
 		
 		/* get grid dimensions */
 		mbev_grid.nx = (mbev_grid.boundsutm[1] - mbev_grid.boundsutm[0]) / mbev_grid.dx + 1;

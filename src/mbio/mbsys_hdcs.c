@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_hdcs.c	3/1/99
- *	$Id: mbsys_hdcs.c,v 5.8 2008-03-14 18:33:03 caress Exp $
+ *	$Id: mbsys_hdcs.c,v 5.9 2008-05-16 22:56:24 caress Exp $
  *
  *    Copyright (c) 1999, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	March 16, 1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2008/03/14 18:33:03  caress
+ * Updated support for JHC format 151.
+ *
  * Revision 5.7  2005/11/05 00:48:03  caress
  * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
  *
@@ -80,7 +83,7 @@
 int mbsys_hdcs_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_hdcs.c,v 5.8 2008-03-14 18:33:03 caress Exp $";
+ static char res_id[]="$Id: mbsys_hdcs.c,v 5.9 2008-05-16 22:56:24 caress Exp $";
 	char	*function_name = "mbsys_hdcs_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -810,8 +813,8 @@ int mbsys_hdcs_insert(int verbose, void *mbio_ptr, void *store_ptr,
 	if (store->kind == MB_DATA_DATA)
 	    {
 	    /* get time */
-	    store->timeOffset = (time_d - 100.0 * store->refTime)
-				    / (1.0e-6 * store->timeScale);
+	    store->timeOffset = (int) rint((time_d - 100.0 * store->refTime)
+				    / (1.0e-6 * store->timeScale));
 
 	    /* get navigation */
 	    if (navlon != 0.0
@@ -1019,6 +1022,7 @@ int mbsys_hdcs_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_hdcs_struct *store;
+	struct mbsys_hdcs_beam_struct *beam;
 	int	i;
 
 	/* print input debug statements */
@@ -1045,7 +1049,11 @@ int mbsys_hdcs_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 	if (*kind == MB_DATA_DATA)
 	    {
 	    *transducer_depth = 0.0;
-	    *altitude = 0.0;
+	    if (store->num_beam > 0)
+	    	{
+		beam = 	(struct mbsys_hdcs_beam_struct *) &(store->beams[store->num_beam/2]);
+	    	*altitude = 0.001 * beam->observedDepth - *transducer_depth;
+		}
 	    }
 
 	/* deal with comment */
@@ -1217,7 +1225,7 @@ int mbsys_hdcs_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 	    *speed = 3.6e-3 * store->vesselVelocity;
 
 	    /* get draft */
-	    *draft = 0.0;
+	    *draft = 0.0;;
 
 	    /* get roll pitch and heave */
 	    *roll = RTD * 1E-7 * store->vesselRoll;
@@ -1377,8 +1385,8 @@ int mbsys_hdcs_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 	if (store->kind == MB_DATA_DATA)
 	    {
 	    /* get time */
-	    store->timeOffset = (time_d - 100.0 * store->refTime)
-				    / (1.0e-6 * store->timeScale);
+	    store->timeOffset = (int) rint((time_d - 100.0 * store->refTime)
+				    / (1.0e-6 * store->timeScale));
 
 	    /* get navigation */
 	    if (navlon != 0.0

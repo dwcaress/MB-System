@@ -1,8 +1,8 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_route.c	9/25/2003
- *    $Id: mbview_route.c,v 5.18 2008-03-14 19:04:32 caress Exp $
+ *    $Id: mbview_route.c,v 5.19 2008-05-16 22:59:42 caress Exp $
  *
- *    Copyright (c) 2003 by
+ *    Copyright (c) 2003-2008 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -21,6 +21,9 @@
  *		begun on October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.18  2008/03/14 19:04:32  caress
+ * Fixed memory problems with route editing.
+ *
  * Revision 5.17  2007/06/17 23:27:30  caress
  * Added NBeditviz.
  *
@@ -127,7 +130,7 @@ static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 static char		value_string[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_route.c,v 5.18 2008-03-14 19:04:32 caress Exp $";
+static char rcs_id[]="$Id: mbview_route.c,v 5.19 2008-05-16 22:59:42 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_getroutecount(int verbose, int instance,
@@ -373,21 +376,21 @@ int mbview_allocroutearrays(int verbose,
 		}
 
 	/* allocate the arrays using mb_realloc */
-	status = mb_realloc(verbose,npointtotal*sizeof(double),routelon,error);
+	status = mb_reallocd(verbose,__FILE__,__LINE__,npointtotal*sizeof(double),(void **)routelon,error);
 	if (status == MB_SUCCESS)
-		status = mb_realloc(verbose,npointtotal*sizeof(double),routelat,error);
+		status = mb_reallocd(verbose,__FILE__,__LINE__,npointtotal*sizeof(double),(void **)routelat,error);
 	if (status == MB_SUCCESS && waypoint != NULL)
-		status = mb_realloc(verbose,npointtotal*sizeof(int),waypoint,error);
+		status = mb_reallocd(verbose,__FILE__,__LINE__,npointtotal*sizeof(int),(void **)waypoint,error);
 	if (status == MB_SUCCESS && routetopo != NULL)
-		status = mb_realloc(verbose,npointtotal*sizeof(double),routetopo,error);
+		status = mb_reallocd(verbose,__FILE__,__LINE__,npointtotal*sizeof(double),(void **)routetopo,error);
 	if (status == MB_SUCCESS && routebearing != NULL)
-		status = mb_realloc(verbose,npointtotal*sizeof(double),routebearing,error);
+		status = mb_reallocd(verbose,__FILE__,__LINE__,npointtotal*sizeof(double),(void **)routebearing,error);
 	if (status == MB_SUCCESS && distlateral != NULL)
-		status = mb_realloc(verbose,npointtotal*sizeof(double),distlateral,error);
+		status = mb_reallocd(verbose,__FILE__,__LINE__,npointtotal*sizeof(double),(void **)distlateral,error);
 	if (status == MB_SUCCESS && distovertopo != NULL)
-		status = mb_realloc(verbose,npointtotal*sizeof(double),distovertopo,error);
+		status = mb_reallocd(verbose,__FILE__,__LINE__,npointtotal*sizeof(double),(void **)distovertopo,error);
 	if (status == MB_SUCCESS && slope != NULL)
-		status = mb_realloc(verbose,npointtotal*sizeof(double),slope,error);
+		status = mb_reallocd(verbose,__FILE__,__LINE__,npointtotal*sizeof(double),(void **)slope,error);
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -461,20 +464,20 @@ int mbview_freeroutearrays(int verbose,
 		}
 
 	/* free the arrays using mb_free */
-	status = mb_free(verbose,routelon,error);
-	status = mb_free(verbose,routelat,error);
+	status = mb_freed(verbose,__FILE__,__LINE__,(void **)routelon,error);
+	status = mb_freed(verbose,__FILE__,__LINE__,(void **)routelat,error);
 	if (waypoint != NULL)
-		status = mb_free(verbose,waypoint,error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)waypoint,error);
 	if (routetopo != NULL)
-		status = mb_free(verbose,routetopo,error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)routetopo,error);
 	if (routebearing != NULL)
-		status = mb_free(verbose,routebearing,error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)routebearing,error);
 	if (distlateral != NULL)
-		status = mb_free(verbose,distlateral,error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)distlateral,error);
 	if (distovertopo != NULL)
-		status = mb_free(verbose,distovertopo,error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)distovertopo,error);
 	if (slope != NULL)
-		status = mb_free(verbose,slope,error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)slope,error);
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -1754,7 +1757,8 @@ int mbview_route_add(int instance, int inew, int jnew, int waypoint,
 	int	error = MB_ERROR_NO_ERROR;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
-	int	i, j;
+	struct mbview_linesegmentw_struct *seg;
+	int	i, j, k;
 
 	/* print starting debug statements */
 	if (mbv_verbose >= 2)
@@ -1789,9 +1793,9 @@ int mbview_route_add(int instance, int inew, int jnew, int waypoint,
 		if (shared.shareddata.nroute_alloc < shared.shareddata.nroute + 1)
 			{
 			shared.shareddata.nroute_alloc += MBV_ALLOC_NUM;
-			status = mb_realloc(mbv_verbose, 
+			status = mb_reallocd(mbv_verbose, __FILE__, __LINE__,
 			    		shared.shareddata.nroute_alloc * sizeof(struct mbview_route_struct),
-			    		&(shared.shareddata.routes), &error);
+			    		(void **)&(shared.shareddata.routes), &error);
 			if (status == MB_FAILURE)
 				{
 				shared.shareddata.nroute_alloc = 0;
@@ -1808,15 +1812,15 @@ int mbview_route_add(int instance, int inew, int jnew, int waypoint,
 					shared.shareddata.routes[i].waypoint = NULL;
 					shared.shareddata.routes[i].points = NULL;
 					shared.shareddata.routes[i].segments = NULL;
-					status = mb_realloc(mbv_verbose, 
+					status = mb_reallocd(mbv_verbose,  __FILE__, __LINE__,
 			    				shared.shareddata.routes[i].npoints_alloc * sizeof(int),
-			    				&(shared.shareddata.routes[i].waypoint), &error);
-					status = mb_realloc(mbv_verbose, 
+			    				(void **)&(shared.shareddata.routes[i].waypoint), &error);
+					status = mb_reallocd(mbv_verbose,  __FILE__, __LINE__,
 			    				shared.shareddata.routes[i].npoints_alloc * sizeof(struct mbview_pointw_struct),
-			    				&(shared.shareddata.routes[i].points), &error);
-					status = mb_realloc(mbv_verbose, 
+			    				(void **)&(shared.shareddata.routes[i].points), &error);
+					status = mb_reallocd(mbv_verbose,  __FILE__, __LINE__,
 			    				shared.shareddata.routes[i].npoints_alloc * sizeof(struct mbview_linesegmentw_struct),
-			    				&(shared.shareddata.routes[i].segments), &error);
+			    				(void **)&(shared.shareddata.routes[i].segments), &error);
 					for (j=0;j<shared.shareddata.routes[i].npoints_alloc-1;j++)
 						{
 						shared.shareddata.routes[i].segments[j].nls = 0;
@@ -1843,15 +1847,15 @@ int mbview_route_add(int instance, int inew, int jnew, int waypoint,
 		&& shared.shareddata.routes[inew].npoints_alloc < shared.shareddata.routes[inew].npoints + 1)
 		{
 		shared.shareddata.routes[inew].npoints_alloc += MBV_ALLOC_NUM;
-		status = mb_realloc(mbv_verbose, 
+		status = mb_reallocd(mbv_verbose,  __FILE__, __LINE__, 
 			    	shared.shareddata.routes[inew].npoints_alloc * sizeof(int),
-			    	&(shared.shareddata.routes[inew].waypoint), &error);
-		status = mb_realloc(mbv_verbose, 
+			    	(void **)&(shared.shareddata.routes[inew].waypoint), &error);
+		status = mb_reallocd(mbv_verbose,  __FILE__, __LINE__, 
 			    	shared.shareddata.routes[inew].npoints_alloc * sizeof(struct mbview_pointw_struct),
-			    	&(shared.shareddata.routes[inew].points), &error);
-		status = mb_realloc(mbv_verbose, 
+			    	(void **)&(shared.shareddata.routes[inew].points), &error);
+		status = mb_reallocd(mbv_verbose,  __FILE__, __LINE__, 
 			    	shared.shareddata.routes[inew].npoints_alloc * sizeof(struct mbview_linesegmentw_struct),
-			    	&(shared.shareddata.routes[inew].segments), &error);
+			    	(void **)&(shared.shareddata.routes[inew].segments), &error);
 		if (status == MB_FAILURE)
 			{
 			shared.shareddata.routes[inew].npoints = 0;
@@ -1951,23 +1955,55 @@ int mbview_route_add(int instance, int inew, int jnew, int waypoint,
 			fprintf(stderr,"dbg2       route %d name:          %s\n",i,shared.shareddata.routes[i].name);
 			fprintf(stderr,"dbg2       route %d npoints:       %d\n",i,shared.shareddata.routes[i].npoints);
 			fprintf(stderr,"dbg2       route %d npoints_alloc: %d\n",i,shared.shareddata.routes[i].npoints_alloc);
+			fprintf(stderr,"dbg2       route points: iroute jpoint xgrid[instance] ygrid[instance] xlon ylat zdata xdisplay[instance] ydisplay[instance] zdisplay[instance]\n");
 			for (j=0;j<shared.shareddata.routes[i].npoints;j++)
 				{
-				fprintf(stderr,"dbg2       route %d %d xgrid:    %f\n",i,j,shared.shareddata.routes[i].points[j].xgrid[instance]);
-				fprintf(stderr,"dbg2       route %d %d ygrid:    %f\n",i,j,shared.shareddata.routes[i].points[j].ygrid[instance]);
-				fprintf(stderr,"dbg2       route %d %d xlon:     %f\n",i,j,shared.shareddata.routes[i].points[j].xlon);
-				fprintf(stderr,"dbg2       route %d %d ylat:     %f\n",i,j,shared.shareddata.routes[i].points[j].ylat);
-				fprintf(stderr,"dbg2       route %d %d zdata:    %f\n",i,j,shared.shareddata.routes[i].points[j].zdata);
-				fprintf(stderr,"dbg2       route %d %d xdisplay: %f\n",i,j,shared.shareddata.routes[i].points[j].xdisplay[instance]);
-				fprintf(stderr,"dbg2       route %d %d ydisplay: %f\n",i,j,shared.shareddata.routes[i].points[j].ydisplay[instance]);
-				fprintf(stderr,"dbg2       route %d %d zdisplay: %f\n",i,j,shared.shareddata.routes[i].points[j].zdisplay[instance]);
+				fprintf(stderr,"dbg2       %d %d %f %f %f %f %f %f %f %f\n",
+					i,j,shared.shareddata.routes[i].points[j].xgrid[instance],
+					shared.shareddata.routes[i].points[j].ygrid[instance],
+					shared.shareddata.routes[i].points[j].xlon,
+					shared.shareddata.routes[i].points[j].ylat,
+					shared.shareddata.routes[i].points[j].zdata,
+					shared.shareddata.routes[i].points[j].xdisplay[instance],
+					shared.shareddata.routes[i].points[j].ydisplay[instance],
+					shared.shareddata.routes[i].points[j].zdisplay[instance]);
 				}
 			for (j=0;j<shared.shareddata.routes[i].npoints-1;j++)
 				{
 				fprintf(stderr,"dbg2       route %d %d nls:          %d\n",i,j,shared.shareddata.routes[i].segments[j].nls);
 				fprintf(stderr,"dbg2       route %d %d nls_alloc:    %d\n",i,j,shared.shareddata.routes[i].segments[j].nls_alloc);
-				fprintf(stderr,"dbg2       route %d %d endpoints[0]: %f\n",i,j,shared.shareddata.routes[i].segments[j].endpoints[0]);
-				fprintf(stderr,"dbg2       route %d %d endpoints[1]: %d\n",i,j,shared.shareddata.routes[i].segments[j].endpoints[1]);
+				fprintf(stderr,"dbg2       route %d %d endpoints[0]: %f %f %f %f %f %f %f %f\n",
+					i,j,shared.shareddata.routes[i].segments[j].endpoints[0].xgrid[instance],
+					shared.shareddata.routes[i].segments[j].endpoints[0].ygrid[instance],
+					shared.shareddata.routes[i].segments[j].endpoints[0].xlon,
+					shared.shareddata.routes[i].segments[j].endpoints[0].ylat,
+					shared.shareddata.routes[i].segments[j].endpoints[0].zdata,
+					shared.shareddata.routes[i].segments[j].endpoints[0].xdisplay[instance],
+					shared.shareddata.routes[i].segments[j].endpoints[0].ydisplay[instance],
+					shared.shareddata.routes[i].segments[j].endpoints[0].zdisplay[instance]);
+				fprintf(stderr,"dbg2       route %d %d endpoints[1]: %f %f %f %f %f %f %f %f\n",
+					i,j,shared.shareddata.routes[i].segments[j].endpoints[1].xgrid[instance],
+					shared.shareddata.routes[i].segments[j].endpoints[1].ygrid[instance],
+					shared.shareddata.routes[i].segments[j].endpoints[1].xlon,
+					shared.shareddata.routes[i].segments[j].endpoints[1].ylat,
+					shared.shareddata.routes[i].segments[j].endpoints[1].zdata,
+					shared.shareddata.routes[i].segments[j].endpoints[1].xdisplay[instance],
+					shared.shareddata.routes[i].segments[j].endpoints[1].ydisplay[instance],
+					shared.shareddata.routes[i].segments[j].endpoints[1].zdisplay[instance]);
+				fprintf(stderr,"dbg2       segment points: kpoint xgrid[instance] ygrid[instance] xlon ylat zdata xdisplay[instance] ydisplay[instance] zdisplay[instance]\n");
+				seg = (struct mbview_linesegmentw_struct *) &(shared.shareddata.routes[inew].segments[j]);
+				for (k=0;k<seg->nls;k++)
+					{
+					fprintf(stderr,"dbg2         %d %f %f %f  %f %f  %f %f %f\n",
+						k, seg->lspoints[k].xgrid[instance], 
+						seg->lspoints[k].ygrid[instance],  
+						seg->lspoints[k].zdata, 
+						seg->lspoints[k].xlon, 
+						seg->lspoints[k].ylat, 
+						seg->lspoints[k].xdisplay[instance], 
+						seg->lspoints[k].ydisplay[instance],
+						seg->lspoints[k].zdisplay[instance]);
+					}
 				}
 			}
 		}
@@ -2023,7 +2059,7 @@ int mbview_route_delete(int instance, int iroute, int ipoint)
 			{
 			if (ipoint < shared.shareddata.routes[iroute].npoints - 1)
 				{
-				mb_free(mbv_verbose,&(shared.shareddata.routes[iroute].segments[ipoint].lspoints),&error);
+				mb_freed(mbv_verbose,__FILE__,__LINE__,(void **)&(shared.shareddata.routes[iroute].segments[ipoint].lspoints),&error);
 				shared.shareddata.routes[iroute].segments[ipoint].nls = 0;
 				shared.shareddata.routes[iroute].segments[ipoint].nls_alloc = 0;
 				}
@@ -2478,6 +2514,7 @@ int mbview_updateroutelist()
 	int	iitem;
 	char	lonstr0[24];
 	char	latstr0[24];
+	char	waypointstr[8];
 	
 
 	/* print starting debug statements */
@@ -2520,9 +2557,21 @@ int mbview_updateroutelist()
 								shared.shareddata.routes[iroute].points[jpoint].xlon,
 								shared.shareddata.routes[iroute].points[jpoint].ylat,
 								lonstr0, latstr0);
-					sprintf(value_string,"%3d | %3d | %s | %s | %.3f | %s | %d | %s", 
+				
+					if (shared.shareddata.routes[iroute].waypoint[jpoint] == MBV_ROUTE_WAYPOINT_SIMPLE)
+						strcpy(waypointstr, "-------");
+					else if (shared.shareddata.routes[iroute].waypoint[jpoint] == MBV_ROUTE_WAYPOINT_TRANSIT)
+						strcpy(waypointstr, "TRANSIT");
+					else if (shared.shareddata.routes[iroute].waypoint[jpoint] == MBV_ROUTE_WAYPOINT_STARTLINE)
+						strcpy(waypointstr, "-START-");
+					else if (shared.shareddata.routes[iroute].waypoint[jpoint] == MBV_ROUTE_WAYPOINT_ENDLINE)
+						strcpy(waypointstr, "--END--");
+					else
+						strcpy(waypointstr, "-------");
+					sprintf(value_string,"%3d | %3d | %s | %s | %.3f | %s | %s | %d | %s", 
 						iroute, jpoint, lonstr0, latstr0,
 						shared.shareddata.routes[iroute].points[jpoint].zdata,
+						waypointstr,
 						mbview_colorname[shared.shareddata.routes[iroute].color],
 						shared.shareddata.routes[iroute].size,
 						shared.shareddata.routes[iroute].name);

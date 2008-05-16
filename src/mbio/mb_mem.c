@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_mem.c	3/1/93
- *    $Id: mb_mem.c,v 5.9 2006-01-24 19:11:17 caress Exp $
+ *    $Id: mb_mem.c,v 5.10 2008-05-16 22:56:24 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
+ *    Copyright (c) 1993-2008 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -22,6 +22,9 @@
  * Date:	March 1, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.9  2006/01/24 19:11:17  caress
+ * Version 5.0.8 beta.
+ *
  * Revision 5.8  2005/11/05 00:48:04  caress
  * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
  *
@@ -112,6 +115,7 @@
 /* standard include files */
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 /* mbio include files */
 #include "../../include/mb_status.h"
@@ -121,15 +125,108 @@
 /* memory allocation list variables */
 #define	MB_MEMORY_ALLOC_STEP	100
 #define	MB_MEMORY_HEAP_MAX	10000
+static int	mb_mem_debug = MB_NO;
 static int	n_mb_alloc = 0;
-static char	*mb_alloc_ptr[MB_MEMORY_HEAP_MAX];
+static void	*mb_alloc_ptr[MB_MEMORY_HEAP_MAX];
 static size_t	mb_alloc_size[MB_MEMORY_HEAP_MAX];
+static mb_name	mb_alloc_sourcefile[MB_MEMORY_HEAP_MAX];
+static int	mb_alloc_sourceline[MB_MEMORY_HEAP_MAX];
 static int	mb_alloc_overflow = MB_NO;
 
 /* Local debug define */
 /* #define MB_MEM_DEBUG 1 */
 
-static char rcs_id[]="$Id: mb_mem.c,v 5.9 2006-01-24 19:11:17 caress Exp $";
+static char rcs_id[]="$Id: mb_mem.c,v 5.10 2008-05-16 22:56:24 caress Exp $";
+
+/*--------------------------------------------------------------------*/
+int mb_mem_debug_on(int verbose, int *error)
+{
+	char	*function_name = "mb_mem_debug_on";
+	int	status = MB_SUCCESS;
+	int	i;
+	
+	/* turn debug output on */
+	mb_mem_debug = MB_YES;
+
+	/* print input debug statements */
+	if (verbose >= 2 || mb_mem_debug)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		}
+
+	/* print debug statements */
+	if (verbose >= 6 || mb_mem_debug)
+		{
+		fprintf(stderr,"\ndbg6  Allocated memory list in MBIO function <%s>\n",
+			function_name);
+		for (i=0;i<n_mb_alloc;i++)
+			fprintf(stderr,"dbg6       i:%d  ptr:%d  size:%d source:%s line:%d\n",
+				i,mb_alloc_ptr[i],mb_alloc_size[i],
+				mb_alloc_sourcefile[i],mb_alloc_sourceline[i]);
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2 || mb_mem_debug)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+
+/*--------------------------------------------------------------------*/
+int mb_mem_debug_off(int verbose, int *error)
+{
+	char	*function_name = "mb_mem_debug_off";
+	int	status = MB_SUCCESS;
+	int	i;
+	
+	/* turn debug output off */
+	mb_mem_debug = MB_NO;
+
+	/* print input debug statements */
+	if (verbose >= 2 || mb_mem_debug)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		}
+
+	/* print debug statements */
+	if (verbose >= 6 || mb_mem_debug)
+		{
+		fprintf(stderr,"\ndbg6  Allocated memory list in MBIO function <%s>\n",
+			function_name);
+		for (i=0;i<n_mb_alloc;i++)
+			fprintf(stderr,"dbg6       i:%d  ptr:%d  size:%d source:%s line:%d\n",
+				i,mb_alloc_ptr[i],mb_alloc_size[i],
+				mb_alloc_sourcefile[i],mb_alloc_sourceline[i]);
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2 || mb_mem_debug)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
 
 /*--------------------------------------------------------------------*/
 int mb_malloc(int verbose, size_t size, void **ptr, int *error)
@@ -139,7 +236,7 @@ int mb_malloc(int verbose, size_t size, void **ptr, int *error)
 	int	i;
 
 	/* print input debug statements */
-	if (verbose >= 2)
+	if (verbose >= 2 || mb_mem_debug)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
@@ -173,7 +270,7 @@ int mb_malloc(int verbose, size_t size, void **ptr, int *error)
 		}
 
 	/* print debug statements */
-	if (verbose >= 5 && size > 0)
+	if ((verbose >= 5 || mb_mem_debug) && size > 0)
 		{
 		fprintf(stderr,"\ndbg5  Memory allocated in MBIO function <%s>\n",
 			function_name);
@@ -200,17 +297,117 @@ int mb_malloc(int verbose, size_t size, void **ptr, int *error)
 		}
 
 	/* print debug statements */
-	if (verbose >= 6)
+	if (verbose >= 6 || mb_mem_debug)
 		{
 		fprintf(stderr,"\ndbg6  Allocated memory list in MBIO function <%s>\n",
 			function_name);
 		for (i=0;i<n_mb_alloc;i++)
-			fprintf(stderr,"dbg6       i:%d  ptr:%d  size:%d\n",
-				i,mb_alloc_ptr[i],mb_alloc_size[i]);
+			fprintf(stderr,"dbg6       i:%d  ptr:%d  size:%d source:%s line:%d\n",
+				i,mb_alloc_ptr[i],mb_alloc_size[i],
+				mb_alloc_sourcefile[i],mb_alloc_sourceline[i]);
 		}
 
 	/* print output debug statements */
-	if (verbose >= 2)
+	if (verbose >= 2 || mb_mem_debug)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       ptr:        %d\n",*ptr);
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_mallocd(int verbose, char *sourcefile, int sourceline, 
+		size_t size, void **ptr, int *error)
+{
+	char	*function_name = "mb_mallocd";
+	int	status = MB_SUCCESS;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2 || mb_mem_debug)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       sourcefile: %s\n",sourcefile);
+		fprintf(stderr,"dbg2       sourceline: %d\n",sourceline);
+		fprintf(stderr,"dbg2       size:       %d\n",size);
+		fprintf(stderr,"dbg2       ptr:        %d\n",ptr);
+		fprintf(stderr,"dbg2       *ptr:       %d\n",*ptr);
+		}
+
+	/* allocate memory */
+	*ptr = NULL;
+	if (size > 0)
+		{
+		if ((*ptr = (char *) malloc(size)) == NULL)
+			{
+			*error = MB_ERROR_MEMORY_FAIL;
+			status = MB_FAILURE;
+			}
+		else
+			{
+			*error = MB_ERROR_NO_ERROR;
+			status = MB_SUCCESS;
+			}
+		}
+	else
+		{
+		*ptr = NULL;
+		*error = MB_ERROR_NO_ERROR;
+		status = MB_SUCCESS;
+		}
+
+	/* print debug statements */
+	if ((verbose >= 5 || mb_mem_debug) && size > 0)
+		{
+		fprintf(stderr,"\ndbg5  Memory allocated in MBIO function <%s>\n",
+			function_name);
+		fprintf(stderr,"dbg5       i:%d  ptr:%d  size:%d\n",
+			n_mb_alloc,*ptr,size);
+		}
+
+	/* add to list if size > 0 */
+	if (size > 0)
+		{
+		if (n_mb_alloc < MB_MEMORY_HEAP_MAX)
+			{
+			mb_alloc_ptr[n_mb_alloc] = *ptr;
+			mb_alloc_size[n_mb_alloc] = size;
+			strncpy(mb_alloc_sourcefile[n_mb_alloc],sourcefile,MB_NAME_LENGTH-1);
+			mb_alloc_sourceline[n_mb_alloc] = sourceline;
+			n_mb_alloc++;
+			}
+		else
+			{
+			mb_alloc_overflow = MB_YES;
+#ifdef MB_MEM_DEBUG
+		fprintf(stderr,"NOTICE: mbm_mem overflow pointer allocated %d in function %s\n",*ptr, function_name);
+#endif		
+			}
+		}
+
+	/* print debug statements */
+	if (verbose >= 6 || mb_mem_debug)
+		{
+		fprintf(stderr,"\ndbg6  Allocated memory list in MBIO function <%s>\n",
+			function_name);
+		for (i=0;i<n_mb_alloc;i++)
+			fprintf(stderr,"dbg6       i:%d  ptr:%d  size:%d source:%s line:%d\n",
+				i,mb_alloc_ptr[i],mb_alloc_size[i],
+				mb_alloc_sourcefile[i],mb_alloc_sourceline[i]);
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2 || mb_mem_debug)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
@@ -233,7 +430,7 @@ int mb_realloc(int verbose, size_t size, void **ptr, int *error)
 	int	iptr;
 
 	/* print input debug statements */
-	if (verbose >= 2)
+	if (verbose >= 2 || mb_mem_debug)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
@@ -313,7 +510,7 @@ int mb_realloc(int verbose, size_t size, void **ptr, int *error)
 	    }
 
 	/* print debug statements */
-	if (verbose >= 5 && size > 0)
+	if ((verbose >= 5 || mb_mem_debug) && size > 0)
 		{
 		fprintf(stderr,"\ndbg5  Memory reallocated in MBIO function <%s>\n",
 			function_name);
@@ -322,13 +519,14 @@ int mb_realloc(int verbose, size_t size, void **ptr, int *error)
 		}
 
 	/* print debug statements */
-	if (verbose >= 6)
+	if (verbose >= 6 || mb_mem_debug)
 		{
 		fprintf(stderr,"\ndbg6  Allocated memory list in MBIO function <%s>\n",
 			function_name);
 		for (i=0;i<n_mb_alloc;i++)
-			fprintf(stderr,"dbg6       i:%d  ptr:%d  size:%d\n",
-				i,mb_alloc_ptr[i],mb_alloc_size[i]);
+			fprintf(stderr,"dbg6       i:%d  ptr:%d  size:%d source:%s line:%d\n",
+				i,mb_alloc_ptr[i],mb_alloc_size[i],
+				mb_alloc_sourcefile[i],mb_alloc_sourceline[i]);
 		}
 
 	/* assume success */
@@ -336,7 +534,143 @@ int mb_realloc(int verbose, size_t size, void **ptr, int *error)
 	status = MB_SUCCESS;
 
 	/* print output debug statements */
-	if (verbose >= 2)
+	if (verbose >= 2 || mb_mem_debug)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       ptr:        %d\n",*ptr);
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_reallocd(int verbose, char *sourcefile, int sourceline, 
+		size_t size, void **ptr, int *error)
+{
+	char	*function_name = "mb_reallocd";
+	int	status = MB_SUCCESS;
+	int	i;
+	int	iptr;
+
+	/* print input debug statements */
+	if (verbose >= 2 || mb_mem_debug)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       sourcefile: %s\n",sourcefile);
+		fprintf(stderr,"dbg2       sourceline: %d\n",sourceline);
+		fprintf(stderr,"dbg2       size:       %d\n",size);
+		fprintf(stderr,"dbg2       ptr:        %d\n",ptr);
+		fprintf(stderr,"dbg2       *ptr:       %d\n",*ptr);
+		}
+
+	/* check if pointer is in list */
+	iptr = -1;
+	for (i=0;i<n_mb_alloc;i++)
+		if (mb_alloc_ptr[i] == *ptr)
+			iptr = i;
+			
+	/* if pointer is non-NULL use realloc */
+	if (*ptr != NULL)
+	    *ptr = (char *) realloc(*ptr, size);
+
+	/* if pointer is NULL use malloc */
+	else if (size > 0)
+	    *ptr = (char *) malloc(size);
+	    
+	/* check for success */
+	if (size > 0 && *ptr == NULL)
+	    {
+	    *error = MB_ERROR_MEMORY_FAIL;
+	    status = MB_FAILURE;
+	    }
+	else
+	    {
+	    *error = MB_ERROR_NO_ERROR;
+	    status = MB_SUCCESS;
+	    }
+
+	/* if pointer was already in list update it */
+	if (status == MB_SUCCESS
+	    && iptr > -1)
+	    {
+	    /* if pointer non-NULL update it */
+	    if (size > 0 && *ptr != NULL)
+		{
+		mb_alloc_ptr[iptr] = *ptr;
+		mb_alloc_size[iptr] = size;
+		strncpy(mb_alloc_sourcefile[iptr],sourcefile,MB_NAME_LENGTH-1);
+		mb_alloc_sourceline[iptr] = sourceline;
+		}
+		    
+	    /* else remove it from list */
+	    else
+		{
+		for (i=iptr;i<n_mb_alloc-1;i++)
+			{
+			mb_alloc_ptr[i] = mb_alloc_ptr[i+1];
+			mb_alloc_size[i] = mb_alloc_size[i+1];
+			strncpy(mb_alloc_sourcefile[i],mb_alloc_sourcefile[i+1],MB_NAME_LENGTH-1);
+			mb_alloc_sourceline[i] = mb_alloc_sourceline[i+1];
+			}
+		n_mb_alloc--;
+		}
+	    }
+    
+	/* else add to list if possible if size > 0 */
+	else if (status == MB_SUCCESS
+	    && size > 0)
+	    {
+	    if (n_mb_alloc < MB_MEMORY_HEAP_MAX)
+		{
+		mb_alloc_ptr[n_mb_alloc] = *ptr;
+		mb_alloc_size[n_mb_alloc] = size;
+		strncpy(mb_alloc_sourcefile[n_mb_alloc],sourcefile,MB_NAME_LENGTH-1);
+		mb_alloc_sourceline[n_mb_alloc] = sourceline;
+		n_mb_alloc++;
+		}
+	    else
+		{
+		mb_alloc_overflow = MB_YES;
+#ifdef MB_MEM_DEBUG
+		fprintf(stderr,"NOTICE: mbm_mem overflow pointer allocated %d in function %s\n",*ptr, function_name);
+#endif		
+		}
+	    }
+
+	/* print debug statements */
+	if ((verbose >= 5 || mb_mem_debug) && size > 0)
+		{
+		fprintf(stderr,"\ndbg5  Memory reallocated in MBIO function <%s>\n",
+			function_name);
+		fprintf(stderr,"dbg5       i:%d  ptr:%d  size:%d source:%s line:%d\n",
+			n_mb_alloc,*ptr,size,sourcefile,sourceline);
+		}
+
+	/* print debug statements */
+	if (verbose >= 6 || mb_mem_debug)
+		{
+		fprintf(stderr,"\ndbg6  Allocated memory list in MBIO function <%s>\n",
+			function_name);
+		for (i=0;i<n_mb_alloc;i++)
+			fprintf(stderr,"dbg6       i:%d  ptr:%d  size:%d source:%s line:%d\n",
+				i,mb_alloc_ptr[i],mb_alloc_size[i],
+				mb_alloc_sourcefile[i],mb_alloc_sourceline[i]);
+		}
+
+	/* assume success */
+	*error = MB_ERROR_NO_ERROR;
+	status = MB_SUCCESS;
+
+	/* print output debug statements */
+	if (verbose >= 2 || mb_mem_debug)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
@@ -359,7 +693,7 @@ int mb_free(int verbose, void **ptr, int *error)
 	int	iptr, ptrvalue, ptrsize;
 
 	/* print input debug statements */
-	if (verbose >= 2)
+	if (verbose >= 2 || mb_mem_debug)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
@@ -385,6 +719,8 @@ int mb_free(int verbose, void **ptr, int *error)
 			{
 			mb_alloc_ptr[i] = mb_alloc_ptr[i+1];
 			mb_alloc_size[i] = mb_alloc_size[i+1];
+			strncpy(mb_alloc_sourcefile[i],mb_alloc_sourcefile[i+1],MB_NAME_LENGTH-1);
+			mb_alloc_sourceline[i] = mb_alloc_sourceline[i+1];
 			}
 		n_mb_alloc--;
 
@@ -406,7 +742,7 @@ int mb_free(int verbose, void **ptr, int *error)
 		}
 
 	/* print debug statements */
-	if (verbose >= 5 && iptr > -1)
+	if ((verbose >= 5 || mb_mem_debug) && iptr > -1)
 		{
 		fprintf(stderr,"\ndbg5  Allocated memory freed in MBIO function <%s>\n",
 			function_name);
@@ -415,13 +751,14 @@ int mb_free(int verbose, void **ptr, int *error)
 		}
 
 	/* print debug statements */
-	if (verbose >= 6)
+	if (verbose >= 6 || mb_mem_debug)
 		{
 		fprintf(stderr,"\ndbg6  Allocated memory list in MBIO function <%s>\n",
 			function_name);
 		for (i=0;i<n_mb_alloc;i++)
-			fprintf(stderr,"dbg6       i:%d  ptr:%d  size:%d\n",
-				i,mb_alloc_ptr[i],mb_alloc_size[i]);
+			fprintf(stderr,"dbg6       i:%d  ptr:%d  size:%d source:%s line:%d\n",
+				i,mb_alloc_ptr[i],mb_alloc_size[i],
+				mb_alloc_sourcefile[i],mb_alloc_sourceline[i]);
 		}
 
 	/* assume success */
@@ -429,7 +766,104 @@ int mb_free(int verbose, void **ptr, int *error)
 	status = MB_SUCCESS;
 
 	/* print output debug statements */
-	if (verbose >= 2)
+	if (verbose >= 2 || mb_mem_debug)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_freed(int verbose, char *sourcefile, int sourceline, void **ptr, int *error)
+{
+	char	*function_name = "mb_freed";
+	int	status = MB_SUCCESS;
+	int	i;
+	int	iptr, ptrvalue, ptrsize;
+
+	/* print input debug statements */
+	if (verbose >= 2 || mb_mem_debug)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       sourcefile: %s\n",sourcefile);
+		fprintf(stderr,"dbg2       sourceline: %d\n",sourceline);
+		fprintf(stderr,"dbg2       ptr:        %d\n",*ptr);
+		}
+
+	/* check if pointer is in list */
+	iptr = -1;
+	for (i=0;i<n_mb_alloc;i++)
+		if (mb_alloc_ptr[i] == *ptr)
+			iptr = i;
+
+	/* if pointer is in list remove it from list
+		and deallocate the memory */
+	if (iptr > -1)
+		{
+		/* remove it from list */
+		ptrvalue = (int) mb_alloc_ptr[iptr];
+		ptrsize = mb_alloc_size[iptr];
+		for (i=iptr;i<n_mb_alloc-1;i++)
+			{
+			mb_alloc_ptr[i] = mb_alloc_ptr[i+1];
+			mb_alloc_size[i] = mb_alloc_size[i+1];
+			strncpy(mb_alloc_sourcefile[i],mb_alloc_sourcefile[i+1],MB_NAME_LENGTH-1);
+			mb_alloc_sourceline[i] = mb_alloc_sourceline[i+1];
+			}
+		n_mb_alloc--;
+
+		/* free the memory */
+		free(*ptr);
+		*ptr = NULL;
+		}
+
+	/* else deallocate the memory if pointer is non-null and
+		heap overflow has occurred */
+	else if (mb_alloc_overflow == MB_YES && *ptr != NULL)
+		{
+#ifdef MB_MEM_DEBUG
+		fprintf(stderr,"NOTICE: mbm_mem overflow pointer freed %d in function %s\n",*ptr, function_name);
+#endif		
+		/* free the memory */
+		free(*ptr);
+		*ptr = NULL;
+		}
+
+	/* print debug statements */
+	if ((verbose >= 5 || mb_mem_debug) && iptr > -1)
+		{
+		fprintf(stderr,"\ndbg5  Allocated memory freed in MBIO function <%s>\n",
+			function_name);
+		fprintf(stderr,"dbg5       i:%d  ptr:%d  size:%d\n",
+			iptr,ptrvalue,ptrsize);
+		}
+
+	/* print debug statements */
+	if (verbose >= 6 || mb_mem_debug)
+		{
+		fprintf(stderr,"\ndbg6  Allocated memory list in MBIO function <%s>\n",
+			function_name);
+		for (i=0;i<n_mb_alloc;i++)
+			fprintf(stderr,"dbg6       i:%d  ptr:%d  size:%d source:%s line:%d\n",
+				i,mb_alloc_ptr[i],mb_alloc_size[i],
+				mb_alloc_sourcefile[i],mb_alloc_sourceline[i]);
+		}
+
+	/* assume success */
+	*error = MB_ERROR_NO_ERROR;
+	status = MB_SUCCESS;
+
+	/* print output debug statements */
+	if (verbose >= 2 || mb_mem_debug)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
@@ -450,7 +884,7 @@ int mb_memory_clear(int verbose, int *error)
 	int	i;
 
 	/* print input debug statements */
-	if (verbose >= 2)
+	if (verbose >= 2 || mb_mem_debug)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
@@ -462,7 +896,7 @@ int mb_memory_clear(int verbose, int *error)
 	for (i=0;i<n_mb_alloc;i++)
 		{
 		/* print debug statements */
-		if (verbose >= 5)
+		if (verbose >= 5 || mb_mem_debug)
 			{
 			fprintf(stderr,"\ndbg5  Allocated memory freed in MBIO function <%s>\n",
 				function_name);
@@ -475,6 +909,8 @@ int mb_memory_clear(int verbose, int *error)
 			free(mb_alloc_ptr[i]);
 		mb_alloc_ptr[i] = NULL;
 		mb_alloc_size[i] = 0;
+		(mb_alloc_sourcefile[i])[0] = 0;
+		mb_alloc_sourceline[i] = 0;
 		}
 	n_mb_alloc = 0;
 	
@@ -483,11 +919,58 @@ int mb_memory_clear(int verbose, int *error)
 	status = MB_SUCCESS;
 
 	/* print output debug statements */
-	if (verbose >= 2)
+	if (verbose >= 2 || mb_mem_debug)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_memory_status(int verbose, int *nalloc, int *nallocmax, 
+			int *overflow, size_t *allocsize, int *error)
+{
+	char	*function_name = "mb_memory_status";
+	int	status = MB_SUCCESS;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2 || mb_mem_debug)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		}
+
+	/* get status */
+	*nalloc = n_mb_alloc;
+	*nallocmax = MB_MEMORY_HEAP_MAX;
+	*overflow = mb_alloc_overflow;
+	*allocsize = 0;
+	for (i=0;i<n_mb_alloc;i++)
+		*allocsize += mb_alloc_size[i];
+
+	/* assume success */
+	*error = MB_ERROR_NO_ERROR;
+	status = MB_SUCCESS;
+
+	/* print output debug statements */
+	if (verbose >= 2 || mb_mem_debug)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       nalloc:     %d\n",*nalloc);
+		fprintf(stderr,"dbg2       nallocmax:  %d\n",*nallocmax);
+		fprintf(stderr,"dbg2       overflow:   %d\n",*overflow);
+		fprintf(stderr,"dbg2       allocsize:  %d\n",*allocsize);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:  %d\n",status);
@@ -504,7 +987,7 @@ int mb_memory_list(int verbose, int *error)
 	int	i;
 
 	/* print input debug statements */
-	if (verbose >= 2)
+	if (verbose >= 2 || mb_mem_debug)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
@@ -513,15 +996,16 @@ int mb_memory_list(int verbose, int *error)
 		}
 
 	/* print debug statements */
-	if (verbose >= 4 && n_mb_alloc > 0)
+	if ((verbose >= 4  || mb_mem_debug) && n_mb_alloc > 0)
 		{
 		fprintf(stderr,"\ndbg4  Allocated memory list in MBIO function <%s>\n",
 			function_name);
 		for (i=0;i<n_mb_alloc;i++)
-			fprintf(stderr,"dbg4       i:%d  ptr:%12d %12x  size:%d\n",
-				i,mb_alloc_ptr[i],mb_alloc_ptr[i],mb_alloc_size[i]);
+			fprintf(stderr,"dbg6       i:%d  ptr:%d  size:%d source:%s line:%d\n",
+				i,mb_alloc_ptr[i],mb_alloc_size[i],
+				mb_alloc_sourcefile[i],mb_alloc_sourceline[i]);
 		}
-	else if (verbose >= 4)
+	else if (verbose >= 4 || mb_mem_debug)
 		{
 		fprintf(stderr,"\ndbg4  No memory currently allocated in MBIO function <%s>\n",
 			function_name);
@@ -532,7 +1016,7 @@ int mb_memory_list(int verbose, int *error)
 	status = MB_SUCCESS;
 
 	/* print output debug statements */
-	if (verbose >= 2)
+	if (verbose >= 2 || mb_mem_debug)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
@@ -549,7 +1033,7 @@ int mb_memory_list(int verbose, int *error)
 int mb_register_array(int verbose, void *mbio_ptr, 
 		int type, int size, void **handle, int *error)
 {
-	static char rcs_id[]="$Id: mb_mem.c,v 5.9 2006-01-24 19:11:17 caress Exp $";
+	static char rcs_id[]="$Id: mb_mem.c,v 5.10 2008-05-16 22:56:24 caress Exp $";
 	char	*function_name = "mb_update_arrays";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -557,7 +1041,7 @@ int mb_register_array(int verbose, void *mbio_ptr,
 	int	i;
 
 	/* print input debug statements */
-	if (verbose >= 2)
+	if (verbose >= 2 || mb_mem_debug)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
@@ -634,7 +1118,7 @@ mb_io_ptr->regarray_ptr[mb_io_ptr->n_regarray-1]);*/
 		}
 
 	/* print output debug statements */
-	if (verbose >= 2)
+	if (verbose >= 2 || mb_mem_debug)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
@@ -652,7 +1136,7 @@ mb_io_ptr->regarray_ptr[mb_io_ptr->n_regarray-1]);*/
 int mb_update_arrays(int verbose, void *mbio_ptr, 
 		int nbath, int namp, int nss, int *error)
 {
-	static char rcs_id[]="$Id: mb_mem.c,v 5.9 2006-01-24 19:11:17 caress Exp $";
+	static char rcs_id[]="$Id: mb_mem.c,v 5.10 2008-05-16 22:56:24 caress Exp $";
 	char	*function_name = "mb_update_arrays";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -660,7 +1144,7 @@ int mb_update_arrays(int verbose, void *mbio_ptr,
 	int	i;
 
 	/* print input debug statements */
-	if (verbose >= 2)
+	if (verbose >= 2 || mb_mem_debug)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
@@ -926,7 +1410,7 @@ namp,mb_io_ptr->beams_amp_alloc,
 nss,mb_io_ptr->pixels_ss_alloc);*/
 
 	/* print output debug statements */
-	if (verbose >= 2)
+	if (verbose >= 2 || mb_mem_debug)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
@@ -943,7 +1427,7 @@ nss,mb_io_ptr->pixels_ss_alloc);*/
 int mb_update_arrayptr(int verbose, void *mbio_ptr, 
 		void **handle, int *error)
 {
-	static char rcs_id[]="$Id: mb_mem.c,v 5.9 2006-01-24 19:11:17 caress Exp $";
+	static char rcs_id[]="$Id: mb_mem.c,v 5.10 2008-05-16 22:56:24 caress Exp $";
 	char	*function_name = "mb_update_arrayptr";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -951,7 +1435,7 @@ int mb_update_arrayptr(int verbose, void *mbio_ptr,
 	int	i;
 
 	/* print input debug statements */
-	if (verbose >= 2)
+	if (verbose >= 2 || mb_mem_debug)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
@@ -979,7 +1463,7 @@ fprintf(stderr,"\n");*/
 		}
 
 	/* print output debug statements */
-	if (verbose >= 2)
+	if (verbose >= 2 || mb_mem_debug)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
@@ -996,14 +1480,14 @@ fprintf(stderr,"\n");*/
 /*--------------------------------------------------------------------*/
 int mb_deall_ioarrays(int verbose, void *mbio_ptr, int *error)
 {
-	static char rcs_id[]="$Id: mb_mem.c,v 5.9 2006-01-24 19:11:17 caress Exp $";
+	static char rcs_id[]="$Id: mb_mem.c,v 5.10 2008-05-16 22:56:24 caress Exp $";
 	char	*function_name = "mb_deall_ioarrays";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	int	i;
 
 	/* print input debug statements */
-	if (verbose >= 2)
+	if (verbose >= 2 || mb_mem_debug)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
@@ -1064,7 +1548,7 @@ int mb_deall_ioarrays(int verbose, void *mbio_ptr, int *error)
 		status = mb_free(verbose, (void **)&(mb_io_ptr->regarray_size), error);
 
 	/* print output debug statements */
-	if (verbose >= 2)
+	if (verbose >= 2 || mb_mem_debug)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);

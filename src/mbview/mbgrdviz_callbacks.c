@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrdviz_callbacks.c		10/9/2002
- *    $Id: mbgrdviz_callbacks.c,v 5.28 2008-03-14 19:04:32 caress Exp $
+ *    $Id: mbgrdviz_callbacks.c,v 5.29 2008-05-16 22:59:42 caress Exp $
  *
- *    Copyright (c) 2002, 2003, 2006, 2007 by
+ *    Copyright (c) 2002-2008 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -122,7 +122,7 @@ static int	realtime_update = 5;
 static int	realtime_icon = MBGRDVIZ_REALTIME_ICON_SHIP;
 
 /* id variables */
-static char rcs_id[] = "$Id: mbgrdviz_callbacks.c,v 5.28 2008-03-14 19:04:32 caress Exp $";
+static char rcs_id[] = "$Id: mbgrdviz_callbacks.c,v 5.29 2008-05-16 22:59:42 caress Exp $";
 static char program_name[] = "MBgrdviz";
 static char help_message[] = "MBgrdviz is an interactive 2D/3D visualization tool for GMT grid files.";
 static char usage_message[] = "mbgrdviz [-H -T -V]";
@@ -1541,7 +1541,7 @@ int do_mbgrdviz_openprimary(char *input_file_ptr)
 					mbv_primary_dy,
 					mbv_primary_data,
 					&error);
-		mb_free(verbose, &mbv_primary_data, &error);
+		mb_freed(verbose, __FILE__, __LINE__, (void **)&mbv_primary_data, &error);
 		
 		/* set more mbview control values */
 		if (status == MB_SUCCESS)
@@ -1757,7 +1757,7 @@ int do_mbgrdviz_openoverlay(int instance, char *input_file_ptr)
 					mbv_secondary_dy,
 					mbv_secondary_data,
 					&error);
-		mb_free(verbose, &mbv_secondary_data, &error);
+		mb_freed(verbose, __FILE__, __LINE__, (void **)&mbv_secondary_data, &error);
 		if (status == MB_SUCCESS)
 		status = mbview_setsecondarycolortable(verbose, instance,
 					mbv_secondary_colortable,
@@ -3151,29 +3151,29 @@ int do_mbgrdviz_readnav(int instance, char *swathfile,
 	/* allocate memory for data arrays */
 	if (status == MB_SUCCESS)
 		{
-		status = mb_malloc(verbose,beams_bath*sizeof(char),
-					&beamflag,error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(char),
+					(void **)&beamflag,error);
 		if (status == MB_SUCCESS)
-			status = mb_malloc(verbose,beams_bath*sizeof(double),
-						&bath,error);
+			status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),
+						(void **)&bath,error);
 		if (status == MB_SUCCESS)
-			status = mb_malloc(verbose,beams_bath*sizeof(double),
-						&bathacrosstrack,error);
+			status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),
+						(void **)&bathacrosstrack,error);
 		if (status == MB_SUCCESS)
-			status = mb_malloc(verbose,beams_bath*sizeof(double),
-						&bathalongtrack,error);
+			status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),
+						(void **)&bathalongtrack,error);
 		if (status == MB_SUCCESS)
-			status = mb_malloc(verbose,beams_amp*sizeof(double),
-						&amp,error);
+			status = mb_mallocd(verbose,__FILE__,__LINE__,beams_amp*sizeof(double),
+						(void **)&amp,error);
 		if (status == MB_SUCCESS)
-			status = mb_malloc(verbose,pixels_ss*sizeof(double),
-						&ss,error);
+			status = mb_mallocd(verbose,__FILE__,__LINE__,pixels_ss*sizeof(double),
+						(void **)&ss,error);
 		if (status == MB_SUCCESS)
-			status = mb_malloc(verbose,pixels_ss*sizeof(double),
-						&ssacrosstrack,error);
+			status = mb_mallocd(verbose,__FILE__,__LINE__,pixels_ss*sizeof(double),
+						(void **)&ssacrosstrack,error);
 		if (status == MB_SUCCESS)
-			status = mb_malloc(verbose,pixels_ss*sizeof(double),
-						&ssalongtrack,error);
+			status = mb_mallocd(verbose,__FILE__,__LINE__,pixels_ss*sizeof(double),
+						(void **)&ssalongtrack,error);
 
 		/* if error initializing memory then don't read the file */
 		if (*error != MB_ERROR_NO_ERROR)
@@ -3239,41 +3239,41 @@ npoint,time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],lon
 				if (npoint >= npointalloc)
 					{
 					npointalloc += MBV_ALLOC_NUM;
-					status = mb_realloc(verbose,npointalloc*sizeof(double),
-								&navtime_d,error);
+					status = mb_reallocd(verbose, __FILE__, __LINE__, npointalloc*sizeof(double),
+								(void **)&navtime_d,error);
 					if (status == MB_SUCCESS)
-						status = mb_realloc(verbose,npointalloc*sizeof(double),
-									&navlon,error);
+						status = mb_reallocd(verbose, __FILE__, __LINE__, npointalloc*sizeof(double),
+									(void **)&navlon,error);
 					if (status == MB_SUCCESS)
-						status = mb_realloc(verbose,npointalloc*sizeof(double),
-									&navlat,error);
+						status = mb_reallocd(verbose, __FILE__, __LINE__, npointalloc*sizeof(double),
+									(void **)&navlat,error);
 					if (status == MB_SUCCESS)
-						status = mb_realloc(verbose,npointalloc*sizeof(double),
-									&navz,error);
+						status = mb_reallocd(verbose, __FILE__, __LINE__, npointalloc*sizeof(double),
+									(void **)&navz,error);
 					if (status == MB_SUCCESS)
-						status = mb_realloc(verbose,npointalloc*sizeof(double),
-									&navheading,error);
+						status = mb_reallocd(verbose, __FILE__, __LINE__, npointalloc*sizeof(double),
+									(void **)&navheading,error);
 					if (status == MB_SUCCESS)
-						status = mb_realloc(verbose,npointalloc*sizeof(double),
-									&navspeed,error);
+						status = mb_reallocd(verbose, __FILE__, __LINE__, npointalloc*sizeof(double),
+									(void **)&navspeed,error);
 					if (status == MB_SUCCESS)
-						status = mb_realloc(verbose,npointalloc*sizeof(double),
-									&navportlon,error);
+						status = mb_reallocd(verbose, __FILE__, __LINE__, npointalloc*sizeof(double),
+									(void **)&navportlon,error);
 					if (status == MB_SUCCESS)
-						status = mb_realloc(verbose,npointalloc*sizeof(double),
-									&navportlat,error);
+						status = mb_reallocd(verbose, __FILE__, __LINE__, npointalloc*sizeof(double),
+									(void **)&navportlat,error);
 					if (status == MB_SUCCESS)
-						status = mb_realloc(verbose,npointalloc*sizeof(double),
-									&navstbdlon,error);
+						status = mb_reallocd(verbose, __FILE__, __LINE__, npointalloc*sizeof(double),
+									(void **)&navstbdlon,error);
 					if (status == MB_SUCCESS)
-						status = mb_realloc(verbose,npointalloc*sizeof(double),
-									&navstbdlat,error);
+						status = mb_reallocd(verbose, __FILE__, __LINE__, npointalloc*sizeof(double),
+									(void **)&navstbdlat,error);
 					if (status == MB_SUCCESS)
-						status = mb_realloc(verbose,npointalloc*sizeof(int),
-									&navcdp,error);
+						status = mb_reallocd(verbose, __FILE__, __LINE__, npointalloc*sizeof(int),
+									(void **)&navcdp,error);
 					if (status == MB_SUCCESS)
-						status = mb_realloc(verbose,npointalloc*sizeof(int),
-									&navshot,error);
+						status = mb_reallocd(verbose, __FILE__, __LINE__, npointalloc*sizeof(int),
+									(void **)&navshot,error);
 
 					/* if error initializing memory then don't read the file */
 					if (*error != MB_ERROR_NO_ERROR)
@@ -3413,27 +3413,27 @@ else
 fprintf(stderr,"    Skipping %s because of 0 nav points read\n",name);
 
 	/* deallocate memory used for data arrays */
-	mb_free(verbose,&beamflag,error);
-	mb_free(verbose,&bath,error);
-	mb_free(verbose,&bathacrosstrack,error);
-	mb_free(verbose,&bathalongtrack,error);
-	mb_free(verbose,&amp,error);
-	mb_free(verbose,&ss,error);
-	mb_free(verbose,&ssacrosstrack,error);
-	mb_free(verbose,&ssalongtrack,error);
+	mb_freed(verbose, __FILE__, __LINE__, (void **)&beamflag, error);
+	mb_freed(verbose, __FILE__, __LINE__, (void **)&bath, error);
+	mb_freed(verbose, __FILE__, __LINE__, (void **)&bathacrosstrack, error);
+	mb_freed(verbose, __FILE__, __LINE__, (void **)&bathalongtrack, error);
+	mb_freed(verbose, __FILE__, __LINE__, (void **)&amp, error);
+	mb_freed(verbose, __FILE__, __LINE__, (void **)&ss, error);
+	mb_freed(verbose, __FILE__, __LINE__, (void **)&ssacrosstrack, error);
+	mb_freed(verbose, __FILE__, __LINE__, (void **)&ssalongtrack, error);
 
-	mb_free(verbose,&navtime_d,error);
-	mb_free(verbose,&navlon,error);
-	mb_free(verbose,&navlat,error);
-	mb_free(verbose,&navz,error);
-	mb_free(verbose,&navheading,error);
-	mb_free(verbose,&navspeed,error);
-	mb_free(verbose,&navportlon,error);
-	mb_free(verbose,&navportlat,error);
-	mb_free(verbose,&navstbdlon,error);
-	mb_free(verbose,&navstbdlat,error);
-	mb_free(verbose,&navcdp,error);
-	mb_free(verbose,&navshot,error);
+	mb_freed(verbose, __FILE__, __LINE__, (void **)&navtime_d, error);
+	mb_freed(verbose, __FILE__, __LINE__, (void **)&navlon, error);
+	mb_freed(verbose, __FILE__, __LINE__, (void **)&navlat, error);
+	mb_freed(verbose, __FILE__, __LINE__, (void **)&navz, error);
+	mb_freed(verbose, __FILE__, __LINE__, (void **)&navheading, error);
+	mb_freed(verbose, __FILE__, __LINE__, (void **)&navspeed, error);
+	mb_freed(verbose, __FILE__, __LINE__, (void **)&navportlon, error);
+	mb_freed(verbose, __FILE__, __LINE__, (void **)&navportlat, error);
+	mb_freed(verbose, __FILE__, __LINE__, (void **)&navstbdlon, error);
+	mb_freed(verbose, __FILE__, __LINE__, (void **)&navstbdlat, error);
+	mb_freed(verbose, __FILE__, __LINE__, (void **)&navcdp, error);
+	mb_freed(verbose, __FILE__, __LINE__, (void **)&navshot, error);
 	}
 			
 }
@@ -3566,13 +3566,11 @@ int do_mbgrdviz_readgrd(int instance, char *grdfile,
     	*min = header.z_min; 
     	*max = header.z_max; 
 
-    	status = mb_malloc(verbose, sizeof(float) * (*nxy), 
-    				&rawdata,
-				&error);
+    	status = mb_mallocd(verbose,__FILE__,__LINE__, sizeof(float) * (*nxy), 
+    				(void **)&rawdata,&error);
     	if (status == MB_SUCCESS)
-	status = mb_malloc(verbose, sizeof(float) * (*nxy), 
-    				&usedata,
-				&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__, sizeof(float) * (*nxy), 
+    				(void **)&usedata,&error);
 	*data = usedata;
 	if (status != MB_SUCCESS)
 	    {
@@ -3621,7 +3619,7 @@ int do_mbgrdviz_readgrd(int instance, char *grdfile,
 		else
 			usedata[k] = rawdata[kk];
 		}
-	mb_free(verbose, &rawdata, &error);
+	mb_freed(verbose, __FILE__, __LINE__, (void **)&rawdata, &error);
 
 	/* print debug info */
 	if (verbose > 0)
@@ -3716,9 +3714,8 @@ int do_mbgrdviz_opentest(int instance,
     	*max = 0.0;
 
     	if (status == MB_SUCCESS)
-    	status = mb_malloc(verbose, sizeof(float) * *nxy, 
-    				data,
-				&error);
+    	status = mb_mallocd(verbose,__FILE__,__LINE__, sizeof(float) * (*nxy), 
+    				(void **)data,&error);
 	usedata = *data;
 	if (status != MB_SUCCESS)
 	    {
@@ -3906,9 +3903,8 @@ fprintf(stderr,"Called do_mbgrdviz_open_region instance:%d\n", instance_source);
 		mbv_primary_nx = ixmax - ixmin + 1;
 		mbv_primary_ny = jymax - jymin + 1;
 		mbv_primary_nxy = mbv_primary_nx * mbv_primary_ny;
-		status = mb_malloc(verbose, sizeof(float) * mbv_primary_nxy, 
-    				&mbv_primary_data,
-				&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__, sizeof(float) * mbv_primary_nxy, 
+    				(void **)&mbv_primary_data,&error);
 		mbv_primary_min = data_source->primary_nodatavalue;
 		mbv_primary_max = data_source->primary_nodatavalue;
 		for (i=0;i<mbv_primary_nx;i++)
@@ -3986,7 +3982,7 @@ fprintf(stderr,"Called do_mbgrdviz_open_region instance:%d\n", instance_source);
 					mbv_primary_dy,
 					mbv_primary_data,
 					&error);
-		mb_free(verbose, &mbv_primary_data, &error);
+		mb_freed(verbose, __FILE__, __LINE__, (void **)&mbv_primary_data, &error);
 		if (status == MB_SUCCESS)
 		status = mbview_setprimarycolortable(verbose, instance,
 					data_source->primary_colortable,
@@ -4117,9 +4113,8 @@ fprintf(stderr,"done opening mbview instance:%d\n",instance);
 			mbv_secondary_nx = ixmax - ixmin + 1;
 			mbv_secondary_ny = jymax - jymin + 1;
 			mbv_secondary_nxy = mbv_secondary_nx * mbv_secondary_ny;
-			status = mb_malloc(verbose, sizeof(float) * mbv_secondary_nxy, 
-    					&mbv_secondary_data,
-					&error);
+			status = mb_mallocd(verbose,__FILE__,__LINE__, sizeof(float) * mbv_secondary_nxy, 
+    					(void **)&mbv_secondary_data,&error);
 			mbv_secondary_min = data_source->secondary_nodatavalue;
 			mbv_secondary_max = data_source->secondary_nodatavalue;
 			for (i=0;i<mbv_secondary_nx;i++)
@@ -4163,7 +4158,7 @@ fprintf(stderr,"done opening mbview instance:%d\n",instance);
 						mbv_secondary_dy,
 						mbv_secondary_data,
 						&error);
-			mb_free(verbose, &mbv_secondary_data, &error);
+			mb_freed(verbose, __FILE__, __LINE__, (void **)&mbv_secondary_data, &error);
 			if (status == MB_SUCCESS)
 			status = mbview_setsecondarycolortable(verbose, instance,
 						data_source->secondary_colortable,
@@ -4521,7 +4516,7 @@ fprintf(stderr,"Called do_mbgrdviz_generate_survey instance:%d\n", instance);
 			nlines = (data->area.width / line_spacing) + 1;
 			
 			/* allocate space for line position array */
-			status = mb_malloc(verbose, nlines * sizeof(double), &xx, &error);
+			status = mb_mallocd(verbose,__FILE__,__LINE__, nlines * sizeof(double), (void **)&xx, &error);
 			if (status != MB_SUCCESS)
 				{
 				nlines_alloc = 0;
@@ -4552,7 +4547,7 @@ fprintf(stderr,"Called do_mbgrdviz_generate_survey instance:%d\n", instance);
 			nlines = (data->area.width / line_spacing) + 1;
 			
 			/* allocate space for line position array */
-			status = mb_malloc(verbose, nlines * sizeof(double), &xx, &error);
+			status = mb_mallocd(verbose,__FILE__,__LINE__, nlines * sizeof(double), (void **)&xx, &error);
 			if (status != MB_SUCCESS)
 				{
 				nlines_alloc = 0;
@@ -4588,7 +4583,7 @@ fprintf(stderr,"Called do_mbgrdviz_generate_survey instance:%d\n", instance);
 			
 			/* allocate space for line position array */
 			nlines_alloc += 100;
-			status = mb_realloc(verbose, nlines_alloc * sizeof(double), &xx, &error);
+			status = mb_reallocd(verbose, __FILE__, __LINE__, nlines_alloc * sizeof(double), (void **)&xx, &error);
 			if (status != MB_SUCCESS)
 				{
 				nlines_alloc = 0;
@@ -4922,7 +4917,7 @@ iline, jendpoint, xlon, ylat, zdata, xgrid, ygrid, xdisplay, ydisplay, zdisplay)
 				}
 				
 			/* deallocate line position array */
-			mb_free(verbose, &xx, &error);
+			mb_freed(verbose, __FILE__, __LINE__, (void **)&xx, &error);
 			}
 			
 		/* do crosslines if requested */

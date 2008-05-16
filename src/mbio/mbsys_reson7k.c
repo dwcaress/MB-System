@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_reson7k.c	3.00	3/23/2004
- *	$Id: mbsys_reson7k.c,v 5.18 2008-03-01 09:14:03 caress Exp $
+ *	$Id: mbsys_reson7k.c,v 5.19 2008-05-16 22:56:24 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -26,6 +26,9 @@
  * Date:	March 23, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.18  2008/03/01 09:14:03  caress
+ * Some housekeeping changes.
+ *
  * Revision 5.17  2008/01/14 18:11:28  caress
  * Fixes to handling beamflagging following upgrades to Reson 7k multibeams.
  *
@@ -101,7 +104,7 @@
 /* turn on debug statements here */
 /* #define MSYS_RESON7KR_DEBUG 1 */
 
-static char res_id[]="$Id: mbsys_reson7k.c,v 5.18 2008-03-01 09:14:03 caress Exp $";
+static char res_id[]="$Id: mbsys_reson7k.c,v 5.19 2008-05-16 22:56:24 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_zero7kheader(int verbose, s7k_header	*header, 
@@ -225,8 +228,8 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* allocate memory for data structure */
-	status = mb_malloc(verbose,sizeof(struct mbsys_reson7k_struct),
-				store_ptr,error);
+	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_reson7k_struct),
+				(void **)store_ptr, error);
 
 	/* get data structure pointer */
 	store = (struct mbsys_reson7k_struct *) *store_ptr;
@@ -1005,73 +1008,73 @@ int mbsys_reson7k_deall(int verbose, void *mbio_ptr, void **store_ptr,
 	customattitude->n = 0;
 	customattitude->nalloc = 0;
 	if (customattitude->pitch != NULL)
-		status = mb_free(verbose,&(customattitude->pitch),error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&(customattitude->pitch),error);
 	if (customattitude->roll != NULL)
-		status = mb_free(verbose,&(customattitude->roll),error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&(customattitude->roll),error);
 	if (customattitude->heading != NULL)
-		status = mb_free(verbose,&(customattitude->heading),error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&(customattitude->heading),error);
 	if (customattitude->heave != NULL)
-		status = mb_free(verbose,&(customattitude->heave),error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&(customattitude->heave),error);
 	if (customattitude->pitchrate != NULL)
-		status = mb_free(verbose,&(customattitude->pitchrate),error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&(customattitude->pitchrate),error);
 	if (customattitude->rollrate != NULL)
-		status = mb_free(verbose,&(customattitude->rollrate),error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&(customattitude->rollrate),error);
 	if (customattitude->headingrate != NULL)
-		status = mb_free(verbose,&(customattitude->headingrate),error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&(customattitude->headingrate),error);
 	if (customattitude->heaverate != NULL)
-		status = mb_free(verbose,&(customattitude->heaverate),error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&(customattitude->heaverate),error);
 	
 	/* Motion over ground (record 1007) */
 	motion = &store->motion;
 	motion->n = 0;
 	motion->nalloc = 0;
 	if (motion->x != NULL)
-		status = mb_free(verbose,&(motion->x),error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&(motion->x),error);
 	if (motion->y != NULL)
-		status = mb_free(verbose,&(motion->y),error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&(motion->y),error);
 	if (motion->z != NULL)
-		status = mb_free(verbose,&(motion->z),error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&(motion->z),error);
 	if (motion->xa != NULL)
-		status = mb_free(verbose,&(motion->xa),error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&(motion->xa),error);
 	if (motion->ya != NULL)
-		status = mb_free(verbose,&(motion->ya),error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&(motion->ya),error);
 	if (motion->za != NULL)
-		status = mb_free(verbose,&(motion->za),error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&(motion->za),error);
 	
 	/* Sound velocity profile (record 1009) */
 	svp = &store->svp;
 	svp->n = 0;
 	svp->nalloc = 0;
 	if (svp->depth != NULL)
-		status = mb_free(verbose,&(svp->depth),error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&(svp->depth),error);
 	if (svp->sound_velocity != NULL)
-		status = mb_free(verbose,&(svp->sound_velocity),error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&(svp->sound_velocity),error);
 	
 	/* CTD (record 1010) */
 	ctd = &store->ctd;
 	ctd->n = 0;
 	ctd->nalloc = 0;
 	if (ctd->conductivity_salinity != NULL)
-		status = mb_free(verbose,&(ctd->conductivity_salinity),error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&(ctd->conductivity_salinity),error);
 	if (ctd->temperature != NULL)
-		status = mb_free(verbose,&(ctd->temperature),error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&(ctd->temperature),error);
 	if (ctd->pressure_depth != NULL)
-		status = mb_free(verbose,&(ctd->pressure_depth),error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&(ctd->pressure_depth),error);
 	if (ctd->sound_velocity != NULL)
-		status = mb_free(verbose,&(ctd->sound_velocity),error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&(ctd->sound_velocity),error);
 
 	/* Attitude (record 1016) */
 	attitude = &store->attitude;
 	attitude->n = 0;
 	attitude->nalloc = 0;
 	if (attitude->pitch != NULL)
-		status = mb_free(verbose,&(attitude->pitch),error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&(attitude->pitch),error);
 	if (attitude->roll != NULL)
-		status = mb_free(verbose,&(attitude->roll),error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&(attitude->roll),error);
 	if (attitude->heading != NULL)
-		status = mb_free(verbose,&(attitude->heading),error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&(attitude->heading),error);
 	if (attitude->heave != NULL)
-		status = mb_free(verbose,&(attitude->heave),error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&(attitude->heave),error);
 
 	/* Edgetech FS-DW low frequency sidescan (record 3000) */
 	fsdwsslo = &store->fsdwsslo;
@@ -1079,7 +1082,7 @@ int mbsys_reson7k_deall(int verbose, void *mbio_ptr, void **store_ptr,
 		{
 		fsdwsslo->channel[i].data_alloc = 0;
 		if (fsdwsslo->channel[i].data != NULL)
-			status = mb_free(verbose,&(fsdwsslo->channel[i].data),error);
+			status = mb_freed(verbose,__FILE__,__LINE__,(void **)&(fsdwsslo->channel[i].data),error);
 		}
 
 	/* Edgetech FS-DW high frequency sidescan (record 3000) */
@@ -1088,14 +1091,14 @@ int mbsys_reson7k_deall(int verbose, void *mbio_ptr, void **store_ptr,
 		{
 		fsdwsshi->channel[i].data_alloc = 0;
 		if (fsdwsshi->channel[i].data != NULL)
-			status = mb_free(verbose,&(fsdwsshi->channel[i].data),error);
+			status = mb_freed(verbose,__FILE__,__LINE__,(void **)&(fsdwsshi->channel[i].data),error);
 		}
 
 	/* Edgetech FS-DW subbottom (record 3001) */
 	fsdwsb = &store->fsdwsb;
 	fsdwsb->channel.data_alloc = 0;
 	if (fsdwsb->channel.data != NULL)
-		status = mb_free(verbose,&(fsdwsb->channel.data),error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&(fsdwsb->channel.data),error);
 
 	/* Reson 7k configuration (record 7001) */
 	configuration = &store->configuration;
@@ -1104,7 +1107,7 @@ int mbsys_reson7k_deall(int verbose, void *mbio_ptr, void **store_ptr,
 		configuration->device[i].info_length = 0;
 		configuration->device[i].info_alloc = 0;
 		if (configuration->device[i].info != NULL)
-			status = mb_free(verbose,&(configuration->device[i].info),error);
+			status = mb_freed(verbose,__FILE__,__LINE__,(void **)&(configuration->device[i].info),error);
 		}
 
 	/* Reson 7k backscatter imagery data (record 7007) */
@@ -1112,9 +1115,9 @@ int mbsys_reson7k_deall(int verbose, void *mbio_ptr, void **store_ptr,
 	backscatter->number_samples = 0;
 	backscatter->nalloc = 0;
 	if (backscatter->port_data != NULL)
-			status = mb_free(verbose,&(backscatter->port_data),error);
+			status = mb_freed(verbose,__FILE__,__LINE__,(void **)&(backscatter->port_data),error);
 	if (backscatter->stbd_data != NULL)
-			status = mb_free(verbose,&(backscatter->stbd_data),error);
+			status = mb_freed(verbose,__FILE__,__LINE__,(void **)&(backscatter->stbd_data),error);
 
 	/* Reson 7k beam data (record 7008) */
 	beam = &store->beam;
@@ -1124,9 +1127,9 @@ int mbsys_reson7k_deall(int verbose, void *mbio_ptr, void **store_ptr,
 		beam->snippets[i].end_sample = 0;
 		beam->snippets[i].nalloc = 0;
 		if (beam->snippets[i].amplitude != NULL)
-			status = mb_free(verbose,&(beam->snippets[i].amplitude),error);
+			status = mb_freed(verbose,__FILE__,__LINE__,(void **)&(beam->snippets[i].amplitude),error);
 		if (beam->snippets[i].phase != NULL)
-			status = mb_free(verbose,&(beam->snippets[i].phase),error);
+			status = mb_freed(verbose,__FILE__,__LINE__,(void **)&(beam->snippets[i].phase),error);
 		}
 
 	/* Reson 7k image data (record 7011) */
@@ -1135,7 +1138,7 @@ int mbsys_reson7k_deall(int verbose, void *mbio_ptr, void **store_ptr,
 	image->height = 0;
 	image->nalloc = 0;
 	if (image->image != NULL)
-		status = mb_free(verbose,&(image->image),error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&(image->image),error);
 
 	/* Reson 7k system event (record 7051) */
 	systemeventmessage = &store->systemeventmessage;
@@ -1143,10 +1146,10 @@ int mbsys_reson7k_deall(int verbose, void *mbio_ptr, void **store_ptr,
 	systemeventmessage->event_identifier = 0;
 	systemeventmessage->message_alloc = 0;
 	if (systemeventmessage->message != NULL)
-		status = mb_free(verbose,&(systemeventmessage->message),error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&(systemeventmessage->message),error);
 
 	/* deallocate memory for data structure */
-	status = mb_free(verbose,store_ptr,error);
+	status = mb_freed(verbose,__FILE__,__LINE__,(void **)store_ptr,error);
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -4894,8 +4897,8 @@ fprintf(stderr," flag:%d\n",beamflag[i]);
 			msglen++;
 		if (systemeventmessage->message_alloc < msglen)
 			{
-			status = mb_realloc(verbose, msglen,
-						&(systemeventmessage->message), error);
+			status = mb_reallocd(verbose, __FILE__, __LINE__, msglen,
+						(void **)&(systemeventmessage->message), error);
 			if (status != MB_SUCCESS)
 				{
 				systemeventmessage->message_alloc = 0;
@@ -6215,10 +6218,10 @@ int mbsys_reson7k_insert_svp(int verbose, void *mbio_ptr, void *store_ptr,
 		/* allocate memory if necessary */
 		if (svp->nalloc < nsvp)
 			{
-			status = mb_realloc(verbose, nsvp * sizeof(float),
-						(char **) &(svp->depth), error);
-			status = mb_realloc(verbose, nsvp * sizeof(float),
-						(char **) &(svp->sound_velocity), error);
+			status = mb_reallocd(verbose, __FILE__, __LINE__, nsvp * sizeof(float),
+						(void **)&(svp->depth), error);
+			status = mb_reallocd(verbose, __FILE__, __LINE__, nsvp * sizeof(float),
+						(void **)&(svp->sound_velocity), error);
 			if (status == MB_SUCCESS)
 				{
 				svp->nalloc = nsvp;
@@ -6896,7 +6899,7 @@ int mbsys_reson7k_insert_segy(int verbose, void *mbio_ptr, void *store_ptr,
 		data_size = fsdwchannel->bytespersample * fsdwchannel->number_samples;
 		if (fsdwchannel->data_alloc < data_size)
 			{
-			status = mb_realloc(verbose, data_size, &(fsdwchannel->data), error);
+			status = mb_reallocd(verbose, __FILE__, __LINE__, data_size, (void **)&(fsdwchannel->data), error);
 			if (status == MB_SUCCESS)
 				{
 				fsdwchannel->data_alloc = data_size;
@@ -7114,17 +7117,17 @@ int mbsys_reson7k_copy(int verbose, void *mbio_ptr,
 		{
 		copy->attitude.nalloc = copy->attitude.n * sizeof(float);
 		if (status == MB_SUCCESS)
-		status = mb_realloc(verbose, copy->attitude.nalloc,
-					(char **) &(copy->attitude.pitch), error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, copy->attitude.nalloc,
+					(void **)&(copy->attitude.pitch), error);
 		if (status == MB_SUCCESS)
-		status = mb_realloc(verbose, copy->attitude.nalloc,
-					(char **) &(copy->attitude.roll), error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, copy->attitude.nalloc,
+					(void **)&(copy->attitude.roll), error);
 		if (status == MB_SUCCESS)
-		status = mb_realloc(verbose, copy->attitude.nalloc,
-					(char **) &(copy->attitude.heading), error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, copy->attitude.nalloc,
+					(void **)&(copy->attitude.heading), error);
 		if (status == MB_SUCCESS)
-		status = mb_realloc(verbose, copy->attitude.nalloc,
-					(char **) &(copy->attitude.heave), error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, copy->attitude.nalloc,
+					(void **)&(copy->attitude.heave), error);
 		if (status != MB_SUCCESS)
 			{
 			copy->attitude.n = 0;
@@ -7163,23 +7166,23 @@ int mbsys_reson7k_copy(int verbose, void *mbio_ptr,
 		{
 		copy->motion.nalloc = copy->motion.n * sizeof(float);
 		if (status == MB_SUCCESS)
-		status = mb_realloc(verbose, copy->motion.nalloc,
-					(char **) &(copy->motion.x), error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, copy->motion.nalloc,
+					(void **)&(copy->motion.x), error);
 		if (status == MB_SUCCESS)
-		status = mb_realloc(verbose, copy->motion.nalloc,
-					(char **) &(copy->motion.y), error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, copy->motion.nalloc,
+					(void **)&(copy->motion.y), error);
 		if (status == MB_SUCCESS)
-		status = mb_realloc(verbose, copy->motion.nalloc,
-					(char **) &(copy->motion.z), error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, copy->motion.nalloc,
+					(void **)&(copy->motion.z), error);
 		if (status == MB_SUCCESS)
-		status = mb_realloc(verbose, copy->motion.nalloc,
-					(char **) &(copy->motion.xa), error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, copy->motion.nalloc,
+					(void **)&(copy->motion.xa), error);
 		if (status == MB_SUCCESS)
-		status = mb_realloc(verbose, copy->motion.nalloc,
-					(char **) &(copy->motion.ya), error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, copy->motion.nalloc,
+					(void **)&(copy->motion.ya), error);
 		if (status == MB_SUCCESS)
-		status = mb_realloc(verbose, copy->motion.nalloc,
-					(char **) &(copy->motion.za), error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, copy->motion.nalloc,
+					(void **)&(copy->motion.za), error);
 		if (status != MB_SUCCESS)
 			{
 			copy->motion.n = 0;
@@ -7213,11 +7216,11 @@ int mbsys_reson7k_copy(int verbose, void *mbio_ptr,
 		{
 		copy->svp.nalloc = copy->svp.n * sizeof(float);
 		if (status == MB_SUCCESS)
-		status = mb_realloc(verbose, copy->svp.nalloc,
-					(char **) &(copy->svp.depth), error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, copy->svp.nalloc,
+					(void **)&(copy->svp.depth), error);
 		if (status == MB_SUCCESS)
-		status = mb_realloc(verbose, copy->svp.nalloc,
-					(char **) &(copy->svp.sound_velocity), error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, copy->svp.nalloc,
+					(void **)&(copy->svp.sound_velocity), error);
 		if (status != MB_SUCCESS)
 			{
 			copy->svp.n = 0;
@@ -7246,17 +7249,17 @@ int mbsys_reson7k_copy(int verbose, void *mbio_ptr,
 		{
 		copy->ctd.nalloc = copy->ctd.n * sizeof(float);
 		if (status == MB_SUCCESS)
-		status = mb_realloc(verbose, copy->ctd.nalloc,
-					(char **) &(copy->ctd.conductivity_salinity), error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, copy->ctd.nalloc,
+					(void **)&(copy->ctd.conductivity_salinity), error);
 		if (status == MB_SUCCESS)
-		status = mb_realloc(verbose, copy->ctd.nalloc,
-					(char **) &(copy->ctd.temperature), error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, copy->ctd.nalloc,
+					(void **)&(copy->ctd.temperature), error);
 		if (status == MB_SUCCESS)
-		status = mb_realloc(verbose, copy->ctd.nalloc,
-					(char **) &(copy->ctd.pressure_depth), error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, copy->ctd.nalloc,
+					(void **)&(copy->ctd.pressure_depth), error);
 		if (status == MB_SUCCESS)
-		status = mb_realloc(verbose, copy->ctd.nalloc,
-					(char **) &(copy->ctd.sound_velocity), error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, copy->ctd.nalloc,
+					(void **)&(copy->ctd.sound_velocity), error);
 		if (status != MB_SUCCESS)
 			{
 			copy->ctd.n = 0;
@@ -7293,8 +7296,8 @@ int mbsys_reson7k_copy(int verbose, void *mbio_ptr,
 				= copy->fsdwsslo.channel[j].number_samples 
 					* copy->fsdwsslo.channel[j].bytespersample;
 			if (status == MB_SUCCESS)
-			status = mb_realloc(verbose, store->fsdwsslo.channel[j].data_alloc,
-						(char **) &(copy->fsdwsslo.channel[j].data), error);
+			status = mb_reallocd(verbose, __FILE__, __LINE__, store->fsdwsslo.channel[j].data_alloc,
+						(void **)&(copy->fsdwsslo.channel[j].data), error);
 			if (status != MB_SUCCESS)
 				{
 				copy->fsdwsslo.channel[j].data_alloc = 0;
@@ -7327,8 +7330,8 @@ int mbsys_reson7k_copy(int verbose, void *mbio_ptr,
 				= copy->fsdwsshi.channel[j].number_samples 
 					* copy->fsdwsshi.channel[j].bytespersample;
 			if (status == MB_SUCCESS)
-			status = mb_realloc(verbose, store->fsdwsshi.channel[j].data_alloc,
-						(char **) &(copy->fsdwsshi.channel[j].data), error);
+			status = mb_reallocd(verbose, __FILE__, __LINE__, store->fsdwsshi.channel[j].data_alloc,
+						(void **)&(copy->fsdwsshi.channel[j].data), error);
 			if (status != MB_SUCCESS)
 				{
 				copy->fsdwsshi.channel[j].data_alloc = 0;
@@ -7359,8 +7362,8 @@ int mbsys_reson7k_copy(int verbose, void *mbio_ptr,
 			= copy->fsdwsb.channel.number_samples 
 				* copy->fsdwsb.channel.bytespersample;
 		if (status == MB_SUCCESS)
-		status = mb_realloc(verbose, store->fsdwsb.channel.data_alloc,
-					(char **) &(copy->fsdwsb.channel.data), error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, store->fsdwsb.channel.data_alloc,
+					(void **)&(copy->fsdwsb.channel.data), error);
 		if (status != MB_SUCCESS)
 			{
 			copy->fsdwsb.channel.data_alloc = 0;
@@ -7395,8 +7398,8 @@ int mbsys_reson7k_copy(int verbose, void *mbio_ptr,
 			{
 			copy->configuration.device[j].info_alloc = copy->configuration.device[j].info_length;
 			if (status == MB_SUCCESS)
-			status = mb_realloc(verbose, copy->configuration.device[j].info_alloc,
-						(char **) &(copy->configuration.device[j].info), error);
+			status = mb_reallocd(verbose, __FILE__, __LINE__, copy->configuration.device[j].info_alloc,
+						(void **)&(copy->configuration.device[j].info), error);
 			if (status != MB_SUCCESS)
 				{
 				copy->configuration.device[j].info_alloc = 0;
@@ -7435,11 +7438,11 @@ int mbsys_reson7k_copy(int verbose, void *mbio_ptr,
 		{
 		copy->backscatter.nalloc = copy->backscatter.number_samples * copy->backscatter.sample_size;
 		if (status == MB_SUCCESS)
-		status = mb_realloc(verbose, copy->backscatter.nalloc,
-					(char **) &(copy->backscatter.port_data), error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, copy->backscatter.nalloc,
+					(void **)&(copy->backscatter.port_data), error);
 		if (status == MB_SUCCESS)
-		status = mb_realloc(verbose, copy->backscatter.nalloc,
-					(char **) &(copy->backscatter.stbd_data), error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, copy->backscatter.nalloc,
+					(void **)&(copy->backscatter.stbd_data), error);
 		if (status != MB_SUCCESS)
 			{
 			copy->backscatter.nalloc = 0;
@@ -7486,11 +7489,11 @@ int mbsys_reson7k_copy(int verbose, void *mbio_ptr,
 			{
 			copy->beam.snippets[i].nalloc = nalloc;
 			if (status == MB_SUCCESS)
-			status = mb_realloc(verbose, copy->beam.snippets[i].nalloc,
-						(char **) &(copy->beam.snippets[i].amplitude), error);
+			status = mb_reallocd(verbose, __FILE__, __LINE__, copy->beam.snippets[i].nalloc,
+						(void **)&(copy->beam.snippets[i].amplitude), error);
 			if (status == MB_SUCCESS)
-			status = mb_realloc(verbose, copy->beam.snippets[i].nalloc,
-						(char **) &(copy->beam.snippets[i].phase), error);
+			status = mb_reallocd(verbose, __FILE__, __LINE__, copy->beam.snippets[i].nalloc,
+						(void **)&(copy->beam.snippets[i].phase), error);
 			if (status != MB_SUCCESS)
 				{
 				copy->beam.snippets[i].nalloc = 0;
@@ -7523,8 +7526,8 @@ int mbsys_reson7k_copy(int verbose, void *mbio_ptr,
 		{
 		copy->image.nalloc = nalloc;
 		if (status == MB_SUCCESS)
-		status = mb_realloc(verbose, copy->image.nalloc,
-					(char **) &(copy->image.image), error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, copy->image.nalloc,
+					(void **)&(copy->image.image), error);
 		if (status != MB_SUCCESS)
 			{
 			copy->image.nalloc = 0;
@@ -7552,8 +7555,8 @@ int mbsys_reson7k_copy(int verbose, void *mbio_ptr,
 		{
 		copy->systemeventmessage.message_alloc = copy->systemeventmessage.message_length;
 		if (status == MB_SUCCESS)
-		status = mb_realloc(verbose, copy->systemeventmessage.message_alloc,
-					(char **) &(copy->systemeventmessage.message), error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, copy->systemeventmessage.message_alloc,
+					(void **)&(copy->systemeventmessage.message), error);
 		if (status != MB_SUCCESS)
 			{
 			copy->systemeventmessage.event_id = 0;

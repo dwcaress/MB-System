@@ -1,8 +1,8 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_pick.c	9/29/2003
- *    $Id: mbview_pick.c,v 5.15 2008-03-14 19:04:32 caress Exp $
+ *    $Id: mbview_pick.c,v 5.16 2008-05-16 22:59:42 caress Exp $
  *
- *    Copyright (c) 2003, 2006 by
+ *    Copyright (c) 2003-2008 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -21,6 +21,9 @@
  *		begun on October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.15  2008/03/14 19:04:32  caress
+ * Fixed memory problems with route editing.
+ *
  * Revision 5.14  2007/06/17 23:27:30  caress
  * Added NBeditviz.
  *
@@ -118,7 +121,7 @@ static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 static char		value_list[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_pick.c,v 5.15 2008-03-14 19:04:32 caress Exp $";
+static char rcs_id[]="$Id: mbview_pick.c,v 5.16 2008-05-16 22:59:42 caress Exp $";
 	
 
 /*------------------------------------------------------------------------------*/

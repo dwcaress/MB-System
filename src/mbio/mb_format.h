@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.h	1/19/93
- *    $Id: mb_format.h,v 5.23 2008-03-01 09:12:52 caress Exp $
+ *    $Id: mb_format.h,v 5.24 2008-05-16 22:56:24 caress Exp $
  *
  *    Copyright (c) 1993-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -19,6 +19,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.23  2008/03/01 09:12:52  caress
+ * Added support for Simrad EM710 multibeam in new formats 58 and 59.
+ *
  * Revision 5.22  2007/10/17 20:26:03  caress
  * Release 5.1.1beta11
  *
@@ -232,7 +235,7 @@
 #define MB_FORMAT_DEF
 
 /* define date of last format update */
-static char mb_format_updatedate[] = "$Date: 2008-03-01 09:12:52 $ $Revision: 5.23 $";
+static char mb_format_updatedate[] = "$Date: 2008-05-16 22:56:24 $ $Revision: 5.24 $";
 
 /* Supported swath sonar systems */
 #define	MB_SYS_NONE		0
@@ -266,9 +269,10 @@ static char mb_format_updatedate[] = "$Date: 2008-03-01 09:12:52 $ $Revision: 5.
 #define	MB_SYS_SURF		28
 #define	MB_SYS_RESON7K		29
 #define	MB_SYS_JSTAR		30
+#define	MB_SYS_IMAGE83P		31
 
 /* Number of supported MBIO data formats */
-#define	MB_FORMATS	63
+#define	MB_FORMATS	64
 
 /* Data formats supported by MBIO */
 #define MBF_DATALIST	-1
@@ -490,6 +494,8 @@ static char mb_format_updatedate[] = "$Date: 2008-03-01 09:12:52 $ $Revision: 5.
 					Reson 7K series multibeam sonars, 
 					bathymetry, amplitude, three channels sidescan, and subbottom
 					up to 254 beams, variable pixels, binary, Reson. */
+#define MBF_IMAGE83P	191	/*Imagenex Multibeam 83p vendor format
+					480 beams bathymetry */
 
 
 /* Alias table for old (pre-version 4.0) format id's */

@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbeditviz_callbacks.c		4/27/2007
- *    $Id: mbeditviz_callbacks.c,v 5.7 2008-03-14 19:04:32 caress Exp $
+ *    $Id: mbeditviz_callbacks.c,v 5.8 2008-05-16 22:59:42 caress Exp $
  *
- *    Copyright (c) 2007 by
+ *    Copyright (c) 2007-2008 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -24,6 +24,9 @@
  * Date:	April 27, 2007
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2008/03/14 19:04:32  caress
+ * Fixed memory problems with route editing.
+ *
  * Revision 5.6  2007/11/16 17:26:56  caress
  * Progress on MBeditviz
  *

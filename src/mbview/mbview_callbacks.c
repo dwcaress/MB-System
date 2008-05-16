@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbview_callbacks.c	10/7/2002
- *    $Id: mbview_callbacks.c,v 5.19 2008-03-14 19:04:32 caress Exp $
+ *    $Id: mbview_callbacks.c,v 5.20 2008-05-16 22:59:42 caress Exp $
  *
- *    Copyright (c) 2002, 2003 by
+ *    Copyright (c) 2002-2008 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -18,6 +18,9 @@
  * Date:	October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.19  2008/03/14 19:04:32  caress
+ * Fixed memory problems with route editing.
+ *
  * Revision 5.18  2007/10/31 18:42:37  caress
  * Fixed bug in importing navigation.
  *
@@ -148,7 +151,7 @@ static Cardinal 	ac;
 static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_callbacks.c,v 5.19 2008-03-14 19:04:32 caress Exp $";
+static char rcs_id[]="$Id: mbview_callbacks.c,v 5.20 2008-05-16 22:59:42 caress Exp $";
 
 /* function prototypes */
 /*------------------------------------------------------------------------------*/
@@ -5049,45 +5052,45 @@ int mbview_destroy(int verbose, int instance, int destroywidgets, int *error)
 	    /* deallocate memory */
     	    if (status == MB_SUCCESS 
 		    && data->primary_data != NULL)
-    	    status = mb_free(mbv_verbose, &data->primary_data, error);
+    	    status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&data->primary_data, error);
     	    if (status == MB_SUCCESS 
 		    && data->primary_x != NULL)
-	    status = mb_free(mbv_verbose, &data->primary_x, error);
+	    status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&data->primary_x, error);
     	    if (status == MB_SUCCESS 
 		    && data->primary_y != NULL)
-    	    status = mb_free(mbv_verbose, &data->primary_y, error);
+    	    status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&data->primary_y, error);
     	    if (status == MB_SUCCESS 
 		    && data->primary_z != NULL)
-    	    status = mb_free(mbv_verbose, &data->primary_z,error);
+    	    status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&data->primary_z,error);
     	    if (status == MB_SUCCESS 
 		    && data->primary_dzdx != NULL)
-    	    status = mb_free(mbv_verbose, &data->primary_dzdx, error);
+    	    status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&data->primary_dzdx, error);
     	    if (status == MB_SUCCESS 
 		    && data->primary_dzdy != NULL)
-    	    status = mb_free(mbv_verbose, &data->primary_dzdy, error);
+    	    status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&data->primary_dzdy, error);
     	    if (status == MB_SUCCESS 
 		    && data->primary_r != NULL)
-    	    status = mb_free(mbv_verbose, &data->primary_r, error);
+    	    status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&data->primary_r, error);
     	    if (status == MB_SUCCESS 
 		    && data->primary_g != NULL)
-    	    status = mb_free(mbv_verbose, &data->primary_g, error);
+    	    status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&data->primary_g, error);
      	    if (status == MB_SUCCESS 
 		    && data->primary_b != NULL)
-   	    status = mb_free(mbv_verbose, &data->primary_b, error);
+   	    status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&data->primary_b, error);
      	    if (status == MB_SUCCESS 
 		    && data->primary_stat_color != NULL)
-   	    status = mb_free(mbv_verbose, &data->primary_stat_color, error);
+   	    status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&data->primary_stat_color, error);
      	    if (status == MB_SUCCESS 
 		    && data->primary_stat_z != NULL)
-   	    status = mb_free(mbv_verbose, &data->primary_stat_z, error);
+   	    status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&data->primary_stat_z, error);
     	    if (status == MB_SUCCESS 
 		    && data->secondary_data != NULL)
-    	    status = mb_free(mbv_verbose, &data->secondary_data, error);
+    	    status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&data->secondary_data, error);
 	    if (status == MB_SUCCESS
 		    && data->pick.segment.nls_alloc != 0
 		    && data->pick.segment.lspoints != NULL)
 		    {
-		    status = mb_free(mbv_verbose, &data->pick.segment.lspoints, error);
+		    status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&data->pick.segment.lspoints, error);
 		    data->pick.segment.nls_alloc = 0;
 		    }
 	    for (i=0;i<4;i++)
@@ -5096,7 +5099,7 @@ int mbview_destroy(int verbose, int instance, int destroywidgets, int *error)
 		    && data->pick.xsegments[i].nls_alloc != 0
 		    && data->pick.xsegments[i].lspoints != NULL)
 			    {
-   			    status = mb_free(mbv_verbose, &data->pick.xsegments[i].lspoints, error);
+   			    status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&data->pick.xsegments[i].lspoints, error);
 			    data->pick.xsegments[i].nls_alloc = 0;
 			    }
 		    }
@@ -5104,7 +5107,7 @@ int mbview_destroy(int verbose, int instance, int destroywidgets, int *error)
 		    && data->area.segment.nls_alloc != 0
 		    && data->area.segment.lspoints != NULL)
 		    {
-   		    status = mb_free(mbv_verbose, &data->area.segment.lspoints, error);
+   		    status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&data->area.segment.lspoints, error);
 		    data->area.segment.nls_alloc = 0;
 		    }
 	    for (i=0;i<4;i++)
@@ -5113,7 +5116,7 @@ int mbview_destroy(int verbose, int instance, int destroywidgets, int *error)
 		    && data->area.segments[i].nls_alloc != 0
 		    && data->area.segments[i].lspoints != NULL)
 			    {
-   			    status = mb_free(mbv_verbose, &data->area.segments[i].lspoints, error);
+   			    status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&data->area.segments[i].lspoints, error);
 			    data->area.segments[i].nls_alloc = 0;
 			    }
 		    }
@@ -5123,13 +5126,13 @@ int mbview_destroy(int verbose, int instance, int destroywidgets, int *error)
 		    && data->region.segments[i].nls_alloc != 0
 		    && data->region.segments[i].lspoints != NULL)
 			    {
-   			    status = mb_free(mbv_verbose, &data->region.segments[i].lspoints, error);
+   			    status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&data->region.segments[i].lspoints, error);
 			    data->region.segments[i].nls_alloc = 0;
 			    }
 		    }
 	    if (data->profile.npoints_alloc > 0)
 	    	    {
-   		    status = mb_free(mbv_verbose, &data->profile.points, error);
+   		    status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&data->profile.points, error);
 		    data->profile.npoints_alloc = 0;
 		    }
 		    
@@ -5152,7 +5155,7 @@ int mbview_destroy(int verbose, int instance, int destroywidgets, int *error)
 		    && shared.shareddata.navpick.segment.nls_alloc != 0
 		    && shared.shareddata.navpick.segment.lspoints != NULL)
 		    {
-		    status = mb_free(mbv_verbose, &shared.shareddata.navpick.segment.lspoints, error);
+		    status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&shared.shareddata.navpick.segment.lspoints, error);
 		    shared.shareddata.navpick.segment.nls_alloc = 0;
 		    }
 		for (i=0;i<4;i++)
@@ -5160,13 +5163,13 @@ int mbview_destroy(int verbose, int instance, int destroywidgets, int *error)
 		    if (status == MB_SUCCESS
 		    && shared.shareddata.navpick.xsegments[i].lspoints != 0
 		    && shared.shareddata.navpick.xsegments[i].lspoints != NULL)
-		    status = mb_free(mbv_verbose, &shared.shareddata.navpick.xsegments[i].lspoints, error);
+		    status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&shared.shareddata.navpick.xsegments[i].lspoints, error);
 		    }
 		if (status == MB_SUCCESS
 		    && shared.shareddata.nsite_alloc != 0
 		    && shared.shareddata.sites != NULL)
 		    {
-		    status = mb_free(mbv_verbose, &(shared.shareddata.sites), error);
+		    status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&(shared.shareddata.sites), error);
 		    shared.shareddata.nsite_alloc = 0;
 		    shared.shareddata.sites = NULL;
 		    }
@@ -5174,7 +5177,7 @@ int mbview_destroy(int verbose, int instance, int destroywidgets, int *error)
 		    && shared.shareddata.nroute_alloc != 0
 		    && shared.shareddata.routes != NULL)
 		    {
-		    status = mb_free(mbv_verbose, &(shared.shareddata.routes), error);
+		    status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&(shared.shareddata.routes), error);
 		    shared.shareddata.nroute_alloc = 0;
 		    shared.shareddata.routes = NULL;
 		    }
@@ -5182,7 +5185,7 @@ int mbview_destroy(int verbose, int instance, int destroywidgets, int *error)
 		    && shared.shareddata.nnav_alloc != 0
 		    && shared.shareddata.navs != NULL)
 		    {
-		    status = mb_free(mbv_verbose, &(shared.shareddata.navs), error);
+		    status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&(shared.shareddata.navs), error);
 		    shared.shareddata.nnav_alloc = 0;
 		    shared.shareddata.navs = NULL;
 		    }
@@ -8165,6 +8168,9 @@ do_mbview_routelistselect( Widget w, XtPointer client_data, XtPointer call_data)
     int	iroute, iposition;
     int	iroutepos;
     int	instance;
+    int	route_selected_old;
+    int	route_point_selected_old;
+    int	iwaypoint;
     int	i;
 
 if (mbv_verbose >= 2)
@@ -8175,6 +8181,10 @@ fprintf(stderr,"do_mbview_routelistselect:\n");
 	XtSetArg(args[ac], XmNselectedPositionCount, (XtPointer) &position_count); ac++;
 	XtSetArg(args[ac], XmNselectedPositions, (XtPointer) &position_list); ac++;
 	XtGetValues(shared.mb3d_routelist.mbview_list_routelist, args, ac);
+	
+	/* save last route selection if any */
+	route_selected_old = shared.shareddata.route_selected;
+	route_point_selected_old = shared.shareddata.route_point_selected;
 
 	/* find selected route point if any */
 	shared.shareddata.route_selected = MBV_SELECT_NONE;
@@ -8192,6 +8202,23 @@ fprintf(stderr,"do_mbview_routelistselect:\n");
 				shared.shareddata.route_point_selected = iposition - iroutepos;
 				}
 			iroutepos += shared.shareddata.routes[iroute].npoints;
+			}
+			
+		/* change waypoint type if waypoint clicked more than once */
+		if (route_selected_old == shared.shareddata.route_selected
+			&& route_point_selected_old == shared.shareddata.route_point_selected)
+			{
+			iroute = shared.shareddata.route_selected;
+			iwaypoint = shared.shareddata.route_point_selected;
+			
+			/* increment waypoint type */
+			shared.shareddata.routes[iroute].waypoint[iwaypoint]++;
+			if (shared.shareddata.routes[iroute].waypoint[iwaypoint] < MBV_ROUTE_WAYPOINT_SIMPLE
+				|| shared.shareddata.routes[iroute].waypoint[iwaypoint] > MBV_ROUTE_WAYPOINT_ENDLINE)
+				shared.shareddata.routes[iroute].waypoint[iwaypoint] = MBV_ROUTE_WAYPOINT_SIMPLE;
+
+			/* update route list */
+			mbview_updateroutelist();
 			}
 		}
 		

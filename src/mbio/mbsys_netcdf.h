@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_netcdf.h	4/8/2002
- *	$Id: mbsys_netcdf.h,v 5.4 2008-03-01 09:14:03 caress Exp $
+ *	$Id: mbsys_netcdf.h,v 5.5 2008-05-16 22:56:24 caress Exp $
  *
- *    Copyright (c) 2002, 2003 by
+ *    Copyright (c) 2002-2008 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -23,6 +23,9 @@
  * Date:	April 8, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2008/03/01 09:14:03  caress
+ * Some housekeeping changes.
+ *
  * Revision 5.3  2005/11/05 00:48:04  caress
  * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
  *
@@ -202,7 +205,7 @@ struct mbsys_netcdf_struct
         char *mbHistAutor;
         char *mbHistModule;
         char *mbHistComment;
-        short *mbCycle;
+        int *mbCycle;
         int *mbDate;
         int *mbTime;
         int *mbOrdinate;
@@ -219,7 +222,7 @@ struct mbsys_netcdf_struct
         short *mbTransmissionHeave;
         char *mbDistanceScale;
         char *mbDepthScale;
-        short *mbVerticalDepth;
+        int *mbVerticalDepth;
         char *mbCQuality;
         char *mbCFlag;
         char *mbInterlacing;

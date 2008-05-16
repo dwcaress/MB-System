@@ -1,8 +1,8 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_primary.c	9/25/2003
- *    $Id: mbview_primary.c,v 5.7 2007-10-08 16:32:08 caress Exp $
+ *    $Id: mbview_primary.c,v 5.8 2008-05-16 22:59:42 caress Exp $
  *
- *    Copyright (c) 2003 by
+ *    Copyright (c) 2003-2008 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -21,6 +21,9 @@
  *		begun on October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2007/10/08 16:32:08  caress
+ * Code status as of 8 October 2007.
+ *
  * Revision 5.6  2007/06/17 23:27:30  caress
  * Added NBeditviz.
  *
@@ -92,7 +95,7 @@ static Cardinal 	ac;
 static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_primary.c,v 5.7 2007-10-08 16:32:08 caress Exp $";
+static char rcs_id[]="$Id: mbview_primary.c,v 5.8 2008-05-16 22:59:42 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_setprimarygrid(int verbose, int instance,
@@ -170,38 +173,38 @@ int mbview_setprimarygrid(int verbose, int instance,
 	data->viewbounds[3] = data->primary_ny;
 	
 	/* allocate required arrays */
-    	status = mb_malloc(verbose, sizeof(float) * data->primary_nxy, 
-    				&data->primary_data, error);
+    	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(float) * data->primary_nxy, 
+    				(void **)&data->primary_data, error);
     	if (status == MB_SUCCESS)
-	status = mb_malloc(verbose, sizeof(float) * data->primary_nxy, 
-    				&data->primary_x, error);
+	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(float) * data->primary_nxy, 
+    				(void **)&data->primary_x, error);
     	if (status == MB_SUCCESS)
-    	status = mb_malloc(verbose, sizeof(float) * data->primary_nxy, 
-    				&data->primary_y, error);
+    	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(float) * data->primary_nxy, 
+    				(void **)&data->primary_y, error);
     	if (status == MB_SUCCESS)
-    	status = mb_malloc(verbose, sizeof(float) * data->primary_nxy, 
-    				&data->primary_z, error);
+    	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(float) * data->primary_nxy, 
+    				(void **)&data->primary_z, error);
     	if (status == MB_SUCCESS)
-    	status = mb_malloc(verbose, sizeof(float) * data->primary_nxy, 
-    				&data->primary_dzdx, error);
+    	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(float) * data->primary_nxy, 
+    				(void **)&data->primary_dzdx, error);
     	if (status == MB_SUCCESS)
-    	status = mb_malloc(verbose, sizeof(float) * data->primary_nxy, 
-    				&data->primary_dzdy, error);
+    	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(float) * data->primary_nxy, 
+    				(void **)&data->primary_dzdy, error);
     	if (status == MB_SUCCESS)
-    	status = mb_malloc(verbose, sizeof(float) * data->primary_nxy, 
-    				&data->primary_r, error);
+    	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(float) * data->primary_nxy, 
+    				(void **)&data->primary_r, error);
     	if (status == MB_SUCCESS)
-    	status = mb_malloc(verbose, sizeof(float) * data->primary_nxy, 
-    				&data->primary_g, error);
+    	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(float) * data->primary_nxy, 
+    				(void **)&data->primary_g, error);
      	if (status == MB_SUCCESS)
-   	status = mb_malloc(verbose, sizeof(float) * data->primary_nxy, 
-    				&data->primary_b, error);
+   	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(float) * data->primary_nxy, 
+    				(void **)&data->primary_b, error);
      	if (status == MB_SUCCESS)
-   	status = mb_malloc(verbose, (data->primary_nxy / 8) + 1, 
-    				&data->primary_stat_color, error);
+   	status = mb_mallocd(verbose, __FILE__, __LINE__, (data->primary_nxy / 8) + 1, 
+    				(void **)&data->primary_stat_color, error);
      	if (status == MB_SUCCESS)
-   	status = mb_malloc(verbose, (data->primary_nxy / 8) + 1, 
-    				&data->primary_stat_z, error);
+   	status = mb_mallocd(verbose, __FILE__, __LINE__, (data->primary_nxy / 8) + 1, 
+    				(void **)&data->primary_stat_z, error);
 	if (status != MB_SUCCESS)
 	    {
 	    fprintf(stderr,"\nUnable to allocate memory to store primary grid data\n");

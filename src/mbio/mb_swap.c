@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_swap.c	7/6/94
- *    $Id: mb_swap.c,v 5.5 2006-02-12 04:28:09 caress Exp $
+ *    $Id: mb_swap.c,v 5.6 2008-05-16 22:56:24 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -28,6 +28,9 @@
  * Date:	July 6, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2006/02/12 04:28:09  caress
+ * For 5.0.9.
+ *
  * Revision 5.4  2006/01/06 18:27:18  caress
  * Working towards 5.0.8
  *
@@ -76,6 +79,10 @@
  *
  *
  */
+
+/* standard include files */
+#include <stdio.h>
+#include <stdlib.h>
 
 /* include for byte swapping on little-endian machines */
 #include "../../include/mb_status.h"

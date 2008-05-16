@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_navnetcdf.c	4/11/2002
- *	$Id: mbsys_navnetcdf.c,v 5.3 2005-11-05 00:48:05 caress Exp $
+ *	$Id: mbsys_navnetcdf.c,v 5.4 2008-05-16 22:56:24 caress Exp $
  *
- *    Copyright (c) 2002, 2003 by
+ *    Copyright (c) 2002-2008 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -16,12 +16,15 @@
  * mbsys_navnetcdf.c includes the functions used by MBIO functions
  * to extract and insert data from the IFREMER netCDF multibeam format.
  * The MBIO format id is:
- *      MBF_MBNAVNETCDF : MBIO ID 75
+ *      MBF_NVNETCDF : MBIO ID 167
  *
  * Author:	D. W. Caress
  * Date:	April 11, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2005/11/05 00:48:05  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.2  2003/04/17 21:05:23  caress
  * Release 5.0.beta30
  *
@@ -46,7 +49,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_navnetcdf.h"
 
-static char res_id[]="$Id: mbsys_navnetcdf.c,v 5.3 2005-11-05 00:48:05 caress Exp $";
+static char res_id[]="$Id: mbsys_navnetcdf.c,v 5.4 2008-05-16 22:56:24 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_navnetcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr, 

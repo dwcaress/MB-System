@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mbnetcdf.c	1/25/02
- *	$Id: mbr_mbnetcdf.c,v 5.6 2008-03-01 09:14:03 caress Exp $
+ *	$Id: mbr_mbnetcdf.c,v 5.7 2008-05-16 22:56:24 caress Exp $
  *
- *    Copyright (c) 2002, 2003 by
+ *    Copyright (c) 2002-2008 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -25,6 +25,9 @@
  * Date:	January 25, 2002
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2008/03/01 09:14:03  caress
+ * Some housekeeping changes.
+ *
  * Revision 5.5  2005/11/05 00:48:05  caress
  * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
  *
@@ -106,9 +109,9 @@ int mbr_dem_mbnetcdf(int verbose, void *mbio_ptr, int *error);
 int mbr_rt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
-/*#define MBNETCDF_DEBUG 1*/
+#define MBNETCDF_DEBUG 1
 
-static char res_id[]="$Id: mbr_mbnetcdf.c,v 5.6 2008-03-01 09:14:03 caress Exp $";
+static char res_id[]="$Id: mbr_mbnetcdf.c,v 5.7 2008-05-16 22:56:24 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_mbnetcdf(int verbose, void *mbio_ptr, int *error)
@@ -417,11 +420,12 @@ int mbr_rt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	int	*dataread;
 	int	*commentread;
 	int	*recread;
+	int	recreadmax;
 	double	*lastrawtime;
 	int	*nrawtimerepeat;
 	double	time_d;
 	int	dim_id;
-	size_t	index[2], count[2];
+	size_t	index[3], count[3];
 	int nc_status;
 	int	i;
 #ifdef MBNETCDF_DEBUG
@@ -460,37 +464,92 @@ int mbr_rt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 
 	    /* get dimensions */
 	    nc_status = nc_inq_dimid((int)mb_io_ptr->mbfp, "CIB_BLOCK_DIM", &dim_id);
-	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_inq_dimid CIB_BLOCK_DIM error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_inq_dimlen((int)mb_io_ptr->mbfp, dim_id, &store->CIB_BLOCK_DIM);
+	    if (nc_status != NC_NOERR)
+	    	{
+	    	if (verbose >= 2 || nc_verbose >= 1) fprintf(stderr, "nc_inq_dimid CIB_BLOCK_DIM error: %s\n", nc_strerror(nc_status));
+		}
+	    else
+	    	{
+	    	nc_status = nc_inq_dimlen((int)mb_io_ptr->mbfp, dim_id, &store->CIB_BLOCK_DIM);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_inq_dimlen CIB_BLOCK_DIM error: %s\n", nc_strerror(nc_status));
+		}
+		
 	    nc_status = nc_inq_dimid((int)mb_io_ptr->mbfp, "mbHistoryRecNbr", &dim_id);
-	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_inq_dimid mbHistoryRecNbr error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_inq_dimlen((int)mb_io_ptr->mbfp, dim_id, &store->mbHistoryRecNbr);
+	    if (nc_status != NC_NOERR)
+	    	{
+	    	if (verbose >= 2 || nc_verbose >= 1) fprintf(stderr, "nc_inq_dimid mbHistoryRecNbr error: %s\n", nc_strerror(nc_status));
+		}
+	    else
+	    	{
+	    	nc_status = nc_inq_dimlen((int)mb_io_ptr->mbfp, dim_id, &store->mbHistoryRecNbr);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_inq_dimlen mbHistoryRecNbr error: %s\n", nc_strerror(nc_status));
+		}
+		
 	    nc_status = nc_inq_dimid((int)mb_io_ptr->mbfp, "mbNameLength", &dim_id);
-	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_inq_dimid mbNameLength error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_inq_dimlen((int)mb_io_ptr->mbfp, dim_id, &store->mbNameLength);
+	    if (nc_status != NC_NOERR)
+	    	{
+	    	if (verbose >= 2 || nc_verbose >= 1) fprintf(stderr, "nc_inq_dimid mbNameLength error: %s\n", nc_strerror(nc_status));
+		}
+	    else
+	    	{
+	    	nc_status = nc_inq_dimlen((int)mb_io_ptr->mbfp, dim_id, &store->mbNameLength);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_inq_dimlen mbNameLength error: %s\n", nc_strerror(nc_status));
+		}
+		
 	    nc_status = nc_inq_dimid((int)mb_io_ptr->mbfp, "mbCommentLength", &dim_id);
-	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_inq_dimid mbCommentLength error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_inq_dimlen((int)mb_io_ptr->mbfp, dim_id, &store->mbCommentLength);
+	    if (nc_status != NC_NOERR)
+	    	{
+	    	if (verbose >= 2 || nc_verbose >= 1) fprintf(stderr, "nc_inq_dimid mbCommentLength error: %s\n", nc_strerror(nc_status));
+		}
+	    else
+	    	{
+	    	nc_status = nc_inq_dimlen((int)mb_io_ptr->mbfp, dim_id, &store->mbCommentLength);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_inq_dimlen mbCommentLength error: %s\n", nc_strerror(nc_status));
+		}
+		
 	    nc_status = nc_inq_dimid((int)mb_io_ptr->mbfp, "mbAntennaNbr", &dim_id);
-	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_inq_dimid mbAntennaNbr error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_inq_dimlen((int)mb_io_ptr->mbfp, dim_id, &store->mbAntennaNbr);
+	    if (nc_status != NC_NOERR)
+	    	{
+	    	if (verbose >= 2 || nc_verbose >= 1) fprintf(stderr, "nc_inq_dimid mbAntennaNbr error: %s\n", nc_strerror(nc_status));
+		}
+	    else
+	    	{
+	    	nc_status = nc_inq_dimlen((int)mb_io_ptr->mbfp, dim_id, &store->mbAntennaNbr);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_inq_dimlen mbAntennaNbr error: %s\n", nc_strerror(nc_status));
+		}
+		
 	    nc_status = nc_inq_dimid((int)mb_io_ptr->mbfp, "mbBeamNbr", &dim_id);
-	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_inq_dimid mbBeamNbr error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_inq_dimlen((int)mb_io_ptr->mbfp, dim_id, &store->mbBeamNbr);
+	    if (nc_status != NC_NOERR)
+	    	{
+	    	if (verbose >= 2 || nc_verbose >= 1) fprintf(stderr, "nc_inq_dimid mbBeamNbr error: %s\n", nc_strerror(nc_status));
+		}
+	    else
+	    	{
+	    	nc_status = nc_inq_dimlen((int)mb_io_ptr->mbfp, dim_id, &store->mbBeamNbr);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_inq_dimlen mbBeamNbr error: %s\n", nc_strerror(nc_status));
+		}
+		
 	    nc_status = nc_inq_dimid((int)mb_io_ptr->mbfp, "mbCycleNbr", &dim_id);
-	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_inq_dimid mbCycleNbr error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_inq_dimlen((int)mb_io_ptr->mbfp, dim_id, &store->mbCycleNbr);
+	    if (nc_status != NC_NOERR)
+	    	{
+	    	if (verbose >= 2 || nc_verbose >= 1) fprintf(stderr, "nc_inq_dimid mbCycleNbr error: %s\n", nc_strerror(nc_status));
+		}
+	    else
+	    	{
+	    	nc_status = nc_inq_dimlen((int)mb_io_ptr->mbfp, dim_id, &store->mbCycleNbr);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_inq_dimlen mbCycleNbr error: %s\n", nc_strerror(nc_status));
+		}
+		
 	    nc_status = nc_inq_dimid((int)mb_io_ptr->mbfp, "mbVelocityProfilNbr", &dim_id);
+	    if (nc_status != NC_NOERR)
+	    	{
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_inq_dimid mbVelocityProfilNbr error: %s\n", nc_strerror(nc_status));
-	    nc_status = nc_inq_dimlen((int)mb_io_ptr->mbfp, dim_id, &store->mbVelocityProfilNbr);
+		}
+	    else
+	    	{
+	    	nc_status = nc_inq_dimlen((int)mb_io_ptr->mbfp, dim_id, &store->mbVelocityProfilNbr);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_inq_dimlen mbVelocityProfilNbr error: %s\n", nc_strerror(nc_status));
+		}
 	    if (nc_status != NC_NOERR)
 		{
 		status = MB_FAILURE;
@@ -851,7 +910,7 @@ int mbr_rt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			    store->mbHistoryRecNbr * store->mbCommentLength * sizeof(char),
 			    (char **)&store->mbHistComment,error);
 		status = mb_malloc(verbose, 
-			    store->mbAntennaNbr * sizeof(short),
+			    store->mbAntennaNbr * sizeof(int),
 			    (char **)&store->mbCycle,error);
 		status = mb_malloc(verbose, 
 			    store->mbAntennaNbr * sizeof(int),
@@ -1093,6 +1152,7 @@ int mbr_rt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    nc_status = nc_get_att_text((int)mb_io_ptr->mbfp, store->mbHistCode_id, "name_code", store->mbHistCode_name_code);
 		    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_att mbHistCode_name_code error: %s\n", nc_strerror(nc_status));
 		    nc_status = nc_get_att_text((int)mb_io_ptr->mbfp, store->mbHistCode_id, "units", store->mbHistCode_units);
+fprintf(stderr,"store->mbHistCode_units:%d\n",store->mbHistCode_units);
 		    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_att mbHistCode_units error: %s\n", nc_strerror(nc_status));
 		    nc_status = nc_get_att_text((int)mb_io_ptr->mbfp, store->mbHistCode_id, "unit_code", store->mbHistCode_unit_code);
 		    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_att mbHistCode_unit_code error: %s\n", nc_strerror(nc_status));
@@ -2142,16 +2202,12 @@ int mbr_rt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_att mbVelProfilRef_long_name error: %s\n", nc_strerror(nc_status));
 		    nc_status = nc_get_att_text((int)mb_io_ptr->mbfp, store->mbVelProfilRef_id, "name_code", store->mbVelProfilRef_name_code);
 		    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_att mbVelProfilRef_name_code error: %s\n", nc_strerror(nc_status));
-		    nc_status = nc_get_att_text((int)mb_io_ptr->mbfp, store->mbVelProfilIdx_id, "type", store->mbVelProfilIdx_type);
-		    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_att mbVelProfilIdx_type error: %s\n", nc_strerror(nc_status));
-		    nc_status = nc_get_att_text((int)mb_io_ptr->mbfp, store->mbVelProfilIdx_id, "long_name", store->mbVelProfilIdx_long_name);
-		    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_att mbVelProfilIdx_long_name error: %s\n", nc_strerror(nc_status));
-		    nc_status = nc_get_att_text((int)mb_io_ptr->mbfp, store->mbVelProfilIdx_id, "name_code", store->mbVelProfilIdx_name_code);
-		    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_att mbVelProfilIdx_name_code error: %s\n", nc_strerror(nc_status));
-		    nc_status = nc_get_att_text((int)mb_io_ptr->mbfp, store->mbVelProfilIdx_id, "units", store->mbVelProfilIdx_units);
-		    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_att mbVelProfilIdx_units error: %s\n", nc_strerror(nc_status));
-		    nc_status = nc_get_att_text((int)mb_io_ptr->mbfp, store->mbVelProfilIdx_id, "unit_code", store->mbVelProfilIdx_unit_code);
-		    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_att mbVelProfilIdx_unit_code error: %s\n", nc_strerror(nc_status));
+		    nc_status = nc_get_att_text((int)mb_io_ptr->mbfp, store->mbVelProfilRef_id, "type", store->mbVelProfilRef_type);
+		    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_att mbVelProfilRef_type error: %s\n", nc_strerror(nc_status));
+		    nc_status = nc_get_att_text((int)mb_io_ptr->mbfp, store->mbVelProfilRef_id, "long_name", store->mbVelProfilRef_long_name);
+		    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_att mbVelProfilRef_long_name error: %s\n", nc_strerror(nc_status));
+		    nc_status = nc_get_att_text((int)mb_io_ptr->mbfp, store->mbVelProfilRef_id, "name_code", store->mbVelProfilRef_name_code);
+		    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_att mbVelProfilRef_name_code error: %s\n", nc_strerror(nc_status));
 		    }
 		if (store->mbVelProfilIdx_id >= 0)
 		    {
@@ -2936,6 +2992,16 @@ int mbr_rt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    }
 		}
 	    }
+	    
+	/* set maximum number of pings to read */
+	if (store->CIB_BLOCK_DIM > 0)
+	    {
+	    recreadmax = store->CIB_BLOCK_DIM * store->mbCycleNbr;
+	    }
+	else
+	    {
+	    recreadmax = store->mbCycleNbr;
+	    }
 
 	/* read next data from file */
 	/* first run through all comment records */
@@ -2965,253 +3031,189 @@ int mbr_rt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    }
 	
 	/* next run through all survey records */
-	else if (status == MB_SUCCESS && store->mbCycleNbr > *recread)
+	else if (status == MB_SUCCESS && recreadmax > *recread)
 	    {
 	    /* set kind */
 	    store->kind = MB_DATA_DATA;
-fprintf(stderr,"*recread:%d mbCycleNbr:%d mbCycle_id:%d mbAntennaNbr:%d\n",*recread,store->mbCycleNbr,store->mbCycle_id,store->mbAntennaNbr);
-	    /* read the variables from next record */
-	    if (store->mbCycle_id >= 0)
-		{
+/*fprintf(stderr,"*recread:%d mbCycleNbr:%d mbCycle_id:%d mbAntennaNbr:%d CIB_BLOCK_DIM:%d\n",
+*recread,store->mbCycleNbr,store->mbCycle_id,store->mbAntennaNbr,store->CIB_BLOCK_DIM);*/
+
+	    /* set index and count arrays for per-ping variables */
+	    if (store->CIB_BLOCK_DIM > 0)
+	    	{
+		index[0] = (*recread / store->CIB_BLOCK_DIM);
+		index[1] = *recread - store->CIB_BLOCK_DIM * index[0];
+		index[2] = 0;
+		count[0] = 1;
+		count[1] = 1;
+		count[2] = store->mbAntennaNbr;
+		}
+	    else
+	    	{
 		index[0] = *recread;
 		index[1] = 0;
+		index[2] = 0;
 		count[0] = 1;
 		count[1] = store->mbAntennaNbr;
-fprintf(stderr,"index: %d %d count:%d %d mbCycleNbr:%d mbCycle_id:%d\n",index[0],index[1],count[0],count[1],store->mbCycleNbr,store->mbCycle_id);
-		nc_status = nc_get_vara_short((int)mb_io_ptr->mbfp, store->mbCycle_id, index, count, store->mbCycle);
+		count[2] = 0;
+		}
+
+	    /* read the per-ping variables from next record */
+	    if (store->mbCycle_id >= 0)
+		{
+/* fprintf(stderr,"index: %d %d count:%d %d mbCycleNbr:%d mbCycle_id:%d\n",index[0],index[1],count[0],count[1],store->mbCycleNbr,store->mbCycle_id);*/
+		nc_status = nc_get_vara_int((int)mb_io_ptr->mbfp, store->mbCycle_id, index, count, store->mbCycle);
 		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_vara mbCycle error: %s\n", nc_strerror(nc_status));
 		}
 	    if (store->mbDate_id >= 0)
 		{
-		index[0] = *recread;
-		index[1] = 0;
-		count[0] = 1;
-		count[1] = store->mbAntennaNbr;
 		nc_status = nc_get_vara_int((int)mb_io_ptr->mbfp, store->mbDate_id, index, count, store->mbDate);
 		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_vara mbDate error: %s\n", nc_strerror(nc_status));
 		}
 	    if (store->mbTime_id >= 0)
 		{
-		index[0] = *recread;
-		index[1] = 0;
-		count[0] = 1;
-		count[1] = store->mbAntennaNbr;
 		nc_status = nc_get_vara_int((int)mb_io_ptr->mbfp, store->mbTime_id, index, count, store->mbTime);
 		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_vara mbTime error: %s\n", nc_strerror(nc_status));
 		}
 	    if (store->mbOrdinate_id >= 0)
 		{
-		index[0] = *recread;
-		index[1] = 0;
-		count[0] = 1;
-		count[1] = store->mbAntennaNbr;
 		nc_status = nc_get_vara_int((int)mb_io_ptr->mbfp, store->mbOrdinate_id, index, count, store->mbOrdinate);
 		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_vara mbOrdinate error: %s\n", nc_strerror(nc_status));
 		}
 	    if (store->mbAbscissa_id >= 0)
 		{
-		index[0] = *recread;
-		index[1] = 0;
-		count[0] = 1;
-		count[1] = store->mbAntennaNbr;
 		nc_status = nc_get_vara_int((int)mb_io_ptr->mbfp, store->mbAbscissa_id, index, count, store->mbAbscissa);
 		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_vara mbAbscissa error: %s\n", nc_strerror(nc_status));
 		}
 	    if (store->mbFrequency_id >= 0)
 		{
-		index[0] = *recread;
-		index[1] = 0;
-		count[0] = 1;
-		count[1] = store->mbAntennaNbr;
 		nc_status = nc_get_vara_text((int)mb_io_ptr->mbfp, store->mbFrequency_id, index, count, store->mbFrequency);
 		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_vara mbFrequency error: %s\n", nc_strerror(nc_status));
 		}
 	    if (store->mbSounderMode_id >= 0)
 		{
-		index[0] = *recread;
-		index[1] = 0;
-		count[0] = 1;
-		count[1] = store->mbAntennaNbr;
 		nc_status = nc_get_vara_text((int)mb_io_ptr->mbfp, store->mbSounderMode_id, index, count, store->mbSounderMode);
 		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_vara mbSounderMode error: %s\n", nc_strerror(nc_status));
 		}
 	    if (store->mbReferenceDepth_id >= 0)
 		{
-		index[0] = *recread;
-		index[1] = 0;
-		count[0] = 1;
-		count[1] = store->mbAntennaNbr;
 		nc_status = nc_get_vara_short((int)mb_io_ptr->mbfp, store->mbReferenceDepth_id, index, count, store->mbReferenceDepth);
 		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_vara mbReferenceDepth error: %s\n", nc_strerror(nc_status));
 		}
 	    if (store->mbDynamicDraught_id >= 0)
 		{
-		index[0] = *recread;
-		index[1] = 0;
-		count[0] = 1;
-		count[1] = store->mbAntennaNbr;
 		nc_status = nc_get_vara_short((int)mb_io_ptr->mbfp, store->mbDynamicDraught_id, index, count, store->mbDynamicDraught);
 		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_vara mbDynamicDraught error: %s\n", nc_strerror(nc_status));
 		}
 	    if (store->mbTide_id >= 0)
 		{
-		index[0] = *recread;
-		index[1] = 0;
-		count[0] = 1;
-		count[1] = store->mbAntennaNbr;
 		nc_status = nc_get_vara_short((int)mb_io_ptr->mbfp, store->mbTide_id, index, count, store->mbTide);
 		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_vara mbTide error: %s\n", nc_strerror(nc_status));
 		}
 	    if (store->mbSoundVelocity_id >= 0)
 		{
-		index[0] = *recread;
-		index[1] = 0;
-		count[0] = 1;
-		count[1] = store->mbAntennaNbr;
 		nc_status = nc_get_vara_short((int)mb_io_ptr->mbfp, store->mbSoundVelocity_id, index, count, store->mbSoundVelocity);
 		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_vara mbSoundVelocity error: %s\n", nc_strerror(nc_status));
 		}
 	    if (store->mbHeading_id >= 0)
 		{
-		index[0] = *recread;
-		index[1] = 0;
-		count[0] = 1;
-		count[1] = store->mbAntennaNbr;
 		nc_status = nc_get_vara_short((int)mb_io_ptr->mbfp, store->mbHeading_id, index, count, (short *)store->mbHeading);
 		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_vara mbHeading error: %s\n", nc_strerror(nc_status));
 		}
 	    if (store->mbRoll_id >= 0)
 		{
-		index[0] = *recread;
-		index[1] = 0;
-		count[0] = 1;
-		count[1] = store->mbAntennaNbr;
 		nc_status = nc_get_vara_short((int)mb_io_ptr->mbfp, store->mbRoll_id, index, count, store->mbRoll);
 		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_vara mbRoll error: %s\n", nc_strerror(nc_status));
 		}
 	    if (store->mbPitch_id >= 0)
 		{
-		index[0] = *recread;
-		index[1] = 0;
-		count[0] = 1;
-		count[1] = store->mbAntennaNbr;
 		nc_status = nc_get_vara_short((int)mb_io_ptr->mbfp, store->mbPitch_id, index, count, store->mbPitch);
 		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_vara mbPitch error: %s\n", nc_strerror(nc_status));
 		}
 	    if (store->mbTransmissionHeave_id >= 0)
 		{
-		index[0] = *recread;
-		index[1] = 0;
-		count[0] = 1;
-		count[1] = store->mbAntennaNbr;
 		nc_status = nc_get_vara_short((int)mb_io_ptr->mbfp, store->mbTransmissionHeave_id, index, count, store->mbTransmissionHeave);
 		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_vara mbTransmissionHeave error: %s\n", nc_strerror(nc_status));
 		}
 	    if (store->mbDistanceScale_id >= 0)
 		{
-		index[0] = *recread;
-		index[1] = 0;
-		count[0] = 1;
-		count[1] = store->mbAntennaNbr;
 		nc_status = nc_get_vara_text((int)mb_io_ptr->mbfp, store->mbDistanceScale_id, index, count, store->mbDistanceScale);
 		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_vara mbDistanceScale error: %s\n", nc_strerror(nc_status));
 		}
 	    if (store->mbDepthScale_id >= 0)
 		{
-		index[0] = *recread;
-		index[1] = 0;
-		count[0] = 1;
-		count[1] = store->mbAntennaNbr;
 		nc_status = nc_get_vara_text((int)mb_io_ptr->mbfp, store->mbDepthScale_id, index, count, store->mbDepthScale);
 		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_vara mbDepthScale error: %s\n", nc_strerror(nc_status));
 		}
 	    if (store->mbVerticalDepth_id >= 0)
 		{
-		index[0] = *recread;
-		index[1] = 0;
-		count[0] = 1;
-		count[1] = store->mbAntennaNbr;
-		nc_status = nc_get_vara_short((int)mb_io_ptr->mbfp, store->mbVerticalDepth_id, index, count, store->mbVerticalDepth);
+		nc_status = nc_get_vara_int((int)mb_io_ptr->mbfp, store->mbVerticalDepth_id, index, count, store->mbVerticalDepth);
 		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_vara mbVerticalDepth error: %s\n", nc_strerror(nc_status));
 		}
 	    if (store->mbCQuality_id >= 0)
 		{
-		index[0] = *recread;
-		index[1] = 0;
-		count[0] = 1;
-		count[1] = store->mbAntennaNbr;
 		nc_status = nc_get_vara_text((int)mb_io_ptr->mbfp, store->mbCQuality_id, index, count, store->mbCQuality);
 		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_vara mbCQuality error: %s\n", nc_strerror(nc_status));
 		}
 	    if (store->mbCFlag_id >= 0)
 		{
-		index[0] = *recread;
-		index[1] = 0;
-		count[0] = 1;
-		count[1] = store->mbAntennaNbr;
 		nc_status = nc_get_vara_text((int)mb_io_ptr->mbfp, store->mbCFlag_id, index, count, store->mbCFlag);
 		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_vara mbCFlag error: %s\n", nc_strerror(nc_status));
 		}
 	    if (store->mbInterlacing_id >= 0)
 		{
-		index[0] = *recread;
-		index[1] = 0;
-		count[0] = 1;
-		count[1] = store->mbAntennaNbr;
 		nc_status = nc_get_vara_text((int)mb_io_ptr->mbfp, store->mbInterlacing_id, index, count, store->mbInterlacing);
 		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_vara mbInterlacing error: %s\n", nc_strerror(nc_status));
 		}
 	    if (store->mbSamplingRate_id >= 0)
 		{
-		index[0] = *recread;
-		index[1] = 0;
-		count[0] = 1;
-		count[1] = store->mbAntennaNbr;
 		nc_status = nc_get_vara_short((int)mb_io_ptr->mbfp, store->mbSamplingRate_id, index, count, store->mbSamplingRate);
 		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_vara mbSamplingRate error: %s\n", nc_strerror(nc_status));
 		}
-	    if (store->mbAlongDistance_id >= 0)
-		{
+
+	    /* set index and count arrays for per-beam variables */
+	    if (store->CIB_BLOCK_DIM > 0)
+	    	{
+		index[0] = (*recread / store->CIB_BLOCK_DIM);
+		index[1] = *recread - store->CIB_BLOCK_DIM * index[0];
+		index[2] = 0;
+		count[0] = 1;
+		count[1] = 1;
+		count[2] = store->mbBeamNbr;
+		}
+	    else
+	    	{
 		index[0] = *recread;
 		index[1] = 0;
+		index[2] = 0;
 		count[0] = 1;
 		count[1] = store->mbBeamNbr;
+		count[2] = 0;
+		}
+
+	    /* read the per-beam variables from next record */
+	    if (store->mbAlongDistance_id >= 0)
+		{
 		nc_status = nc_get_vara_short((int)mb_io_ptr->mbfp, store->mbAlongDistance_id, index, count, store->mbAlongDistance);
 		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_vara mbAlongDistance error: %s\n", nc_strerror(nc_status));
 		}
 	    if (store->mbAcrossDistance_id >= 0)
 		{
-		index[0] = *recread;
-		index[1] = 0;
-		count[0] = 1;
-		count[1] = store->mbBeamNbr;
 		nc_status = nc_get_vara_short((int)mb_io_ptr->mbfp, store->mbAcrossDistance_id, index, count, store->mbAcrossDistance);
 		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_vara mbAcrossDistance error: %s\n", nc_strerror(nc_status));
 		}
 	    if (store->mbDepth_id >= 0)
 		{
-		index[0] = *recread;
-		index[1] = 0;
-		count[0] = 1;
-		count[1] = store->mbBeamNbr;
 		nc_status = nc_get_vara_short((int)mb_io_ptr->mbfp, store->mbDepth_id, index, count, store->mbDepth);
 		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_vara mbDepth error: %s\n", nc_strerror(nc_status));
 		}
 	    if (store->mbSQuality_id >= 0)
 		{
-		index[0] = *recread;
-		index[1] = 0;
-		count[0] = 1;
-		count[1] = store->mbBeamNbr;
 		nc_status = nc_get_vara_text((int)mb_io_ptr->mbfp, store->mbSQuality_id, index, count, store->mbSQuality);
 		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_vara mbSQuality error: %s\n", nc_strerror(nc_status));
 		}
 	    if (store->mbSFlag_id >= 0)
 		{
-		index[0] = *recread;
-		index[1] = 0;
-		count[0] = 1;
-		count[1] = store->mbBeamNbr;
 		nc_status = nc_get_vara_text((int)mb_io_ptr->mbfp, store->mbSFlag_id, index, count, store->mbSFlag);
 		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_vara mbSFlag error: %s\n", nc_strerror(nc_status));
 		}
@@ -3220,21 +3222,27 @@ fprintf(stderr,"index: %d %d count:%d %d mbCycleNbr:%d mbCycle_id:%d\n",index[0]
 		{
 		status = MB_FAILURE;
 		*error = MB_ERROR_EOF;
-		}		
+		}
 	    
 	    /* set counters */
 	    (*recread)++;
 	    (*dataread)++;
 	    
-	    /* KLUGE to handle multiple pings with the same time stamp
-	    	- this is a problem because the edit save file scheme differentiates between
-			pings based on the time stamp.
-		- this code detects multiple pings with the same time stamp and adds a small
-			amount of time to subsequent pings
-		David W. Caress 
-		2 May 2005 */
-	    if (store->mbDate_id >= 0 && store->mbTime_id >= 0)
+	    /* check for bad record - often found towards end of files */
+	    if (store->mbDate[0] == 0 && store->mbTime[0] == 0)
 		{
+		status = MB_FAILURE;
+		*error = MB_ERROR_UNINTELLIGIBLE;
+		}
+	    else
+		{
+		/* KLUGE to handle multiple pings with the same time stamp
+	    	    - this is a problem because the edit save file scheme differentiates between
+			    pings based on the time stamp.
+		    - this code detects multiple pings with the same time stamp and adds a small
+			    amount of time to subsequent pings
+		    David W. Caress 
+		    2 May 2005 */
 		time_d = store->mbDate[0] * SECINDAY
 			    + store->mbTime[0] * 0.001;
 		if (time_d != *lastrawtime)
@@ -3401,6 +3409,7 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	int	*commentwrite;
 	int	*recwrite;
 	int 	nc_status;
+	int	CIB_BLOCK_DIM_id;
 	int	mbHistoryRecNbr_id;
 	int	mbNameLength_id;
 	int	mbCommentLength_id;
@@ -3408,8 +3417,9 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	int	mbBeamNbr_id;
 	int	mbCycleNbr_id;
 	int	mbVelocityProfilNbr_id;
-	int	dims[2];
-	size_t	index[2], count[2];
+	int	dimsNbr;
+	int	dims[3];
+	size_t	index[3], count[3];
 	char	*user_ptr;
 	double	time_d;
 	int	icomment;
@@ -3550,12 +3560,19 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    && status == MB_SUCCESS)
 	    {
 	    /* copy over noncomment dimensions */
+	    storelocal->CIB_BLOCK_DIM = store->CIB_BLOCK_DIM;
 	    storelocal->mbAntennaNbr = store->mbAntennaNbr;
 	    storelocal->mbBeamNbr = store->mbBeamNbr;
 	    storelocal->mbCycleNbr = 0;
 	    storelocal->mbVelocityProfilNbr = store->mbVelocityProfilNbr;
 		
 	    /* define the dimensions */
+	    if (storelocal->CIB_BLOCK_DIM > 0)
+	    	{
+   	    	nc_status = nc_def_dim((int)mb_io_ptr->mbfp, "CIB_BLOCK_DIM", storelocal->CIB_BLOCK_DIM, &CIB_BLOCK_DIM_id);
+	    	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_def_dim CIB_BLOCK_DIM error: %s\n", nc_strerror(nc_status));
+fprintf(stderr,"storelocal->CIB_BLOCK_DIM:%d\n",storelocal->CIB_BLOCK_DIM);
+		}
    	    nc_status = nc_def_dim((int)mb_io_ptr->mbfp, "mbHistoryRecNbr", storelocal->mbHistoryRecNbr, &mbHistoryRecNbr_id);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_def_dim mbHistoryRecNbr error: %s\n", nc_strerror(nc_status));
 	    nc_status = nc_def_dim((int)mb_io_ptr->mbfp, "mbNameLength", storelocal->mbNameLength, &mbNameLength_id);
@@ -3580,6 +3597,7 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"dbg2       status:                  %d\n", status);
 		fprintf(stderr,"dbg2       error:                   %d\n", *error);
 		fprintf(stderr,"dbg2       nc_status:               %d\n", nc_status);
+		fprintf(stderr,"dbg2       CIB_BLOCK_DIM:           %d\n", storelocal->CIB_BLOCK_DIM);
 		fprintf(stderr,"dbg2       mbHistoryRecNbr:         %d\n", storelocal->mbHistoryRecNbr);
 		fprintf(stderr,"dbg2       mbNameLength:            %d\n", storelocal->mbNameLength);
 		fprintf(stderr,"dbg2       mbCommentLength:         %d\n", storelocal->mbCommentLength);
@@ -3589,7 +3607,7 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"dbg2       mbVelocityProfilNbr:     %d\n", storelocal->mbVelocityProfilNbr);
 		}
 	    
-	    /* define the variables */
+	    /* define global variables */
 	    dims[0] = mbHistoryRecNbr_id;
 	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbHistDate", NC_INT, 1, dims, &storelocal->mbHistDate_id);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_def_var mbHistDate_id error: %s\n", nc_strerror(nc_status));
@@ -3611,141 +3629,121 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    dims[1] = mbCommentLength_id;
 	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbHistComment", NC_CHAR, 2, dims, &storelocal->mbHistComment_id);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_def_var mbHistComment_id error: %s\n", nc_strerror(nc_status));
-	    dims[0] = mbCycleNbr_id;
-	    dims[1] = mbAntennaNbr_id;
-	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbCycle", NC_SHORT, 2, dims, &storelocal->mbCycle_id);
+
+	    /* define per ping variables */
+	    if (storelocal->CIB_BLOCK_DIM > 0)
+	    	{
+		dimsNbr = 3;
+	    	dims[0] = mbCycleNbr_id;
+	    	dims[1] = CIB_BLOCK_DIM_id;
+	    	dims[2] = mbAntennaNbr_id;
+		}
+	    else
+		{
+		dimsNbr = 2;
+	    	dims[0] = mbCycleNbr_id;
+	    	dims[1] = mbAntennaNbr_id;
+	    	dims[2] = 0;
+		}
+	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbCycle", NC_INT, dimsNbr, dims, &storelocal->mbCycle_id);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_def_var mbCycle_id error: %s\n", nc_strerror(nc_status));
-	    dims[0] = mbCycleNbr_id;
-	    dims[1] = mbAntennaNbr_id;
-	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbDate", NC_INT, 2, dims, &storelocal->mbDate_id);
+	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbDate", NC_INT, dimsNbr, dims, &storelocal->mbDate_id);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_def_var mbDate_id error: %s\n", nc_strerror(nc_status));
-	    dims[0] = mbCycleNbr_id;
-	    dims[1] = mbAntennaNbr_id;
-	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbTime", NC_INT, 2, dims, &storelocal->mbTime_id);
+	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbTime", NC_INT, dimsNbr, dims, &storelocal->mbTime_id);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_def_var mbTime_id error: %s\n", nc_strerror(nc_status));
-	    dims[0] = mbCycleNbr_id;
-	    dims[1] = mbAntennaNbr_id;
-	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbOrdinate", NC_INT, 2, dims, &storelocal->mbOrdinate_id);
+	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbOrdinate", NC_INT, dimsNbr, dims, &storelocal->mbOrdinate_id);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_def_var mbOrdinate_id error: %s\n", nc_strerror(nc_status));
-	    dims[0] = mbCycleNbr_id;
-	    dims[1] = mbAntennaNbr_id;
-	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbAbscissa", NC_INT, 2, dims, &storelocal->mbAbscissa_id);
+	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbAbscissa", NC_INT, dimsNbr, dims, &storelocal->mbAbscissa_id);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_def_var mbAbscissa_id error: %s\n", nc_strerror(nc_status));
-	    dims[0] = mbCycleNbr_id;
-	    dims[1] = mbAntennaNbr_id;
-	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbFrequency", NC_CHAR, 2, dims, &storelocal->mbFrequency_id);
+	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbFrequency", NC_CHAR, dimsNbr, dims, &storelocal->mbFrequency_id);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_def_var mbFrequency_id error: %s\n", nc_strerror(nc_status));
-	    dims[0] = mbCycleNbr_id;
-	    dims[1] = mbAntennaNbr_id;
-	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbSounderMode", NC_CHAR, 2, dims, &storelocal->mbSounderMode_id);
+	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbSounderMode", NC_CHAR, dimsNbr, dims, &storelocal->mbSounderMode_id);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_def_var mbSounderMode_id error: %s\n", nc_strerror(nc_status));
-	    dims[0] = mbCycleNbr_id;
-	    dims[1] = mbAntennaNbr_id;
-	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbReferenceDepth", NC_SHORT, 2, dims, &storelocal->mbReferenceDepth_id);
+	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbReferenceDepth", NC_SHORT, dimsNbr, dims, &storelocal->mbReferenceDepth_id);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_def_var mbReferenceDepth_id error: %s\n", nc_strerror(nc_status));
-	    dims[0] = mbCycleNbr_id;
-	    dims[1] = mbAntennaNbr_id;
-	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbDynamicDraught", NC_SHORT, 2, dims, &storelocal->mbDynamicDraught_id);
+	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbDynamicDraught", NC_SHORT, dimsNbr, dims, &storelocal->mbDynamicDraught_id);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_def_var mbDynamicDraught_id error: %s\n", nc_strerror(nc_status));
-	    dims[0] = mbCycleNbr_id;
-	    dims[1] = mbAntennaNbr_id;
-	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbTide", NC_SHORT, 2, dims, &storelocal->mbTide_id);
+	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbTide", NC_SHORT, dimsNbr, dims, &storelocal->mbTide_id);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_def_var mbTide_id error: %s\n", nc_strerror(nc_status));
-	    dims[0] = mbCycleNbr_id;
-	    dims[1] = mbAntennaNbr_id;
-	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbSoundVelocity", NC_SHORT, 2, dims, &storelocal->mbSoundVelocity_id);
+	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbSoundVelocity", NC_SHORT, dimsNbr, dims, &storelocal->mbSoundVelocity_id);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_def_var mbSoundVelocity_id error: %s\n", nc_strerror(nc_status));
-	    dims[0] = mbCycleNbr_id;
-	    dims[1] = mbAntennaNbr_id;
-	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbHeading", NC_SHORT, 2, dims, &storelocal->mbHeading_id);
+	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbHeading", NC_SHORT, dimsNbr, dims, &storelocal->mbHeading_id);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_def_var mbHeading_id error: %s\n", nc_strerror(nc_status));
-	    dims[0] = mbCycleNbr_id;
-	    dims[1] = mbAntennaNbr_id;
-	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbRoll", NC_SHORT, 2, dims, &storelocal->mbRoll_id);
+	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbRoll", NC_SHORT, dimsNbr, dims, &storelocal->mbRoll_id);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_def_var mbRoll_id error: %s\n", nc_strerror(nc_status));
-	    dims[0] = mbCycleNbr_id;
-	    dims[1] = mbAntennaNbr_id;
-	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbPitch", NC_SHORT, 2, dims, &storelocal->mbPitch_id);
+	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbPitch", NC_SHORT, dimsNbr, dims, &storelocal->mbPitch_id);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_def_var mbPitch_id error: %s\n", nc_strerror(nc_status));
-	    dims[0] = mbCycleNbr_id;
-	    dims[1] = mbAntennaNbr_id;
-	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbTransmissionHeave", NC_SHORT, 2, dims, &storelocal->mbTransmissionHeave_id);
+	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbTransmissionHeave", NC_SHORT, dimsNbr, dims, &storelocal->mbTransmissionHeave_id);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_def_var mbTransmissionHeave_id error: %s\n", nc_strerror(nc_status));
-	    dims[0] = mbCycleNbr_id;
-	    dims[1] = mbAntennaNbr_id;
-	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbDistanceScale", NC_CHAR, 2, dims, &storelocal->mbDistanceScale_id);
+	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbDistanceScale", NC_CHAR, dimsNbr, dims, &storelocal->mbDistanceScale_id);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_def_var mbDistanceScale_id error: %s\n", nc_strerror(nc_status));
-	    dims[0] = mbCycleNbr_id;
-	    dims[1] = mbAntennaNbr_id;
-	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbDepthScale", NC_CHAR, 2, dims, &storelocal->mbDepthScale_id);
+	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbDepthScale", NC_CHAR, dimsNbr, dims, &storelocal->mbDepthScale_id);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_def_var mbDepthScale_id error: %s\n", nc_strerror(nc_status));
-	    dims[0] = mbCycleNbr_id;
-	    dims[1] = mbAntennaNbr_id;
-	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbVerticalDepth", NC_SHORT, 2, dims, &storelocal->mbVerticalDepth_id);
+	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbVerticalDepth", NC_SHORT, dimsNbr, dims, &storelocal->mbVerticalDepth_id);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_def_var mbVerticalDepth_id error: %s\n", nc_strerror(nc_status));
-	    dims[0] = mbCycleNbr_id;
-	    dims[1] = mbAntennaNbr_id;
-	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbCQuality", NC_CHAR, 2, dims, &storelocal->mbCQuality_id);
+	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbCQuality", NC_CHAR, dimsNbr, dims, &storelocal->mbCQuality_id);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_def_var mbCQuality_id error: %s\n", nc_strerror(nc_status));
-	    dims[0] = mbCycleNbr_id;
-	    dims[1] = mbAntennaNbr_id;
-	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbCFlag", NC_CHAR, 2, dims, &storelocal->mbCFlag_id);
+	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbCFlag", NC_CHAR, dimsNbr, dims, &storelocal->mbCFlag_id);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_def_var mbCFlag_id error: %s\n", nc_strerror(nc_status));
-	    dims[0] = mbCycleNbr_id;
-	    dims[1] = mbAntennaNbr_id;
-	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbInterlacing", NC_CHAR, 2, dims, &storelocal->mbInterlacing_id);
+	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbInterlacing", NC_CHAR, dimsNbr, dims, &storelocal->mbInterlacing_id);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_def_var mbInterlacing_id error: %s\n", nc_strerror(nc_status));
-	    dims[0] = mbCycleNbr_id;
-	    dims[1] = mbAntennaNbr_id;
-	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbSamplingRate", NC_SHORT, 2, dims, &storelocal->mbSamplingRate_id);
+	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbSamplingRate", NC_SHORT, dimsNbr, dims, &storelocal->mbSamplingRate_id);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_def_var mbSamplingRate_id error: %s\n", nc_strerror(nc_status));
-	    dims[0] = mbCycleNbr_id;
-	    dims[1] = mbBeamNbr_id;
-	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbAlongDistance", NC_SHORT, 2, dims, &storelocal->mbAlongDistance_id);
+
+
+	    /* define per beam variables */
+	    if (storelocal->CIB_BLOCK_DIM > 0)
+	    	{
+		dimsNbr = 3;
+	    	dims[0] = mbCycleNbr_id;
+	    	dims[2] = CIB_BLOCK_DIM_id;
+	    	dims[2] = mbBeamNbr_id;
+		}
+	    else
+		{
+		dimsNbr = 2;
+	    	dims[0] = mbCycleNbr_id;
+	    	dims[1] = mbBeamNbr_id;
+	    	dims[2] = 0;
+		}
+	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbAlongDistance", NC_SHORT, dimsNbr, dims, &storelocal->mbAlongDistance_id);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_def_var mbAlongDistance_id error: %s\n", nc_strerror(nc_status));
-	    dims[0] = mbCycleNbr_id;
-	    dims[1] = mbBeamNbr_id;
-	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbAcrossDistance", NC_SHORT, 2, dims, &storelocal->mbAcrossDistance_id);
+	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbAcrossDistance", NC_SHORT, dimsNbr, dims, &storelocal->mbAcrossDistance_id);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_def_var mbAcrossDistance_id error: %s\n", nc_strerror(nc_status));
-	    dims[0] = mbCycleNbr_id;
-	    dims[1] = mbBeamNbr_id;
-	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbDepth", NC_SHORT, 2, dims, &storelocal->mbDepth_id);
+	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbDepth", NC_SHORT, dimsNbr, dims, &storelocal->mbDepth_id);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_def_var mbDepth_id error: %s\n", nc_strerror(nc_status));
-	    dims[0] = mbCycleNbr_id;
-	    dims[1] = mbBeamNbr_id;
-	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbSQuality", NC_CHAR, 2, dims, &storelocal->mbSQuality_id);
+	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbSQuality", NC_CHAR, dimsNbr, dims, &storelocal->mbSQuality_id);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_def_var mbSQuality_id error: %s\n", nc_strerror(nc_status));
-	    dims[0] = mbCycleNbr_id;
-	    dims[1] = mbBeamNbr_id;
-	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbSFlag", NC_CHAR, 2, dims, &storelocal->mbSFlag_id);
+	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbSFlag", NC_CHAR, dimsNbr, dims, &storelocal->mbSFlag_id);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_def_var mbSFlag_id error: %s\n", nc_strerror(nc_status));
+	    dimsNbr = 1;
 	    dims[0] = mbBeamNbr_id;
-	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbAntenna", NC_CHAR, 1, dims, &storelocal->mbAntenna_id);
+	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbAntenna", NC_CHAR, dimsNbr, dims, &storelocal->mbAntenna_id);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_def_var mbAntenna_id error: %s\n", nc_strerror(nc_status));
-	    dims[0] = mbBeamNbr_id;
-	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbBeamBias", NC_SHORT, 1, dims, &storelocal->mbBeamBias_id);
+	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbBeamBias", NC_SHORT, dimsNbr, dims, &storelocal->mbBeamBias_id);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_def_var mbBeamBias_id error: %s\n", nc_strerror(nc_status));
-	    dims[0] = mbBeamNbr_id;
-	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbBFlag", NC_CHAR, 1, dims, &storelocal->mbBFlag_id);
+	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbBFlag", NC_CHAR, dimsNbr, dims, &storelocal->mbBFlag_id);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_def_var mbBFlag_id error: %s\n", nc_strerror(nc_status));
+
+	    /* define global variables */
+	    dimsNbr = 1;
 	    dims[0] = mbAntennaNbr_id;
-	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbBeam", NC_SHORT, 1, dims, &storelocal->mbBeam_id);
+	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbBeam", NC_SHORT, dimsNbr, dims, &storelocal->mbBeam_id);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_def_var mbBeam_id error: %s\n", nc_strerror(nc_status));
-	    dims[0] = mbAntennaNbr_id;
-	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbAFlag", NC_CHAR, 1, dims, &storelocal->mbAFlag_id);
+	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbAFlag", NC_CHAR, dimsNbr, dims, &storelocal->mbAFlag_id);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_def_var mbAFlag_id error: %s\n", nc_strerror(nc_status));
+	    dimsNbr = 2;
 	    dims[0] = mbVelocityProfilNbr_id;
 	    dims[1] = mbCommentLength_id;
-	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbVelProfilRef", NC_CHAR, 2, dims, &storelocal->mbVelProfilRef_id);
+	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbVelProfilRef", NC_CHAR, dimsNbr, dims, &storelocal->mbVelProfilRef_id);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_def_var mbVelProfilRef_id error: %s\n", nc_strerror(nc_status));
+	    dimsNbr = 1;
 	    dims[0] = mbVelocityProfilNbr_id;
-	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbVelProfilIdx", NC_SHORT, 1, dims, &storelocal->mbVelProfilIdx_id);
+	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbVelProfilIdx", NC_SHORT, dimsNbr, dims, &storelocal->mbVelProfilIdx_id);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_def_var mbVelProfilIdx_id error: %s\n", nc_strerror(nc_status));
-	    dims[0] = mbVelocityProfilNbr_id;
-	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbVelProfilDate", NC_INT, 1, dims, &storelocal->mbVelProfilDate_id);
+	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbVelProfilDate", NC_INT, dimsNbr, dims, &storelocal->mbVelProfilDate_id);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_def_var mbVelProfilDate_id error: %s\n", nc_strerror(nc_status));
-	    dims[0] = mbVelocityProfilNbr_id;
-	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbVelProfilTime", NC_INT, 1, dims, &storelocal->mbVelProfilTime_id);
+	    nc_status = nc_def_var((int)mb_io_ptr->mbfp, "mbVelProfilTime", NC_INT, dimsNbr, dims, &storelocal->mbVelProfilTime_id);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_def_var mbVelProfilTime_id error: %s\n", nc_strerror(nc_status));
 
 	    /* print input debug statements */
@@ -5589,38 +5587,38 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		{
 		index[0] = 0;
 		count[0] = storelocal->mbHistoryRecNbr;
-		nc_status = nc_put_vara_int((int)mb_io_ptr->mbfp, storelocal->mbHistDate_id, index, count, storelocal->mbHistDate);
+		nc_status = nc_put_vara_int((int)mb_io_ptr->mbfp, storelocal->mbHistDate_id, index, count, store->mbHistDate);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_vara mbHistDate error: %s\n", nc_strerror(nc_status));
 
 		index[0] = 0;
 		count[0] = storelocal->mbHistoryRecNbr;
-		nc_status = nc_put_vara_int((int)mb_io_ptr->mbfp, storelocal->mbHistTime_id, index, count, storelocal->mbHistTime);
+		nc_status = nc_put_vara_int((int)mb_io_ptr->mbfp, storelocal->mbHistTime_id, index, count, store->mbHistTime);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_vara mbHistTime error: %s\n", nc_strerror(nc_status));
 		
 		index[0] = 0;
 		count[0] = storelocal->mbHistoryRecNbr;
-		nc_status = nc_put_vara_text((int)mb_io_ptr->mbfp, storelocal->mbHistCode_id, index, count, storelocal->mbHistCode);
+		nc_status = nc_put_vara_text((int)mb_io_ptr->mbfp, storelocal->mbHistCode_id, index, count, store->mbHistCode);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_vara mbHistCode error: %s\n", nc_strerror(nc_status));
 		
 		index[0] = 0;
 		index[1] = 0;
 		count[0] = storelocal->mbHistoryRecNbr;
 		count[1] = storelocal->mbNameLength;
-		nc_status = nc_put_vara_text((int)mb_io_ptr->mbfp, storelocal->mbHistAutor_id, index, count, storelocal->mbHistAutor);
+		nc_status = nc_put_vara_text((int)mb_io_ptr->mbfp, storelocal->mbHistAutor_id, index, count, store->mbHistAutor);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_vara mbHistAutor error: %s\n", nc_strerror(nc_status));
 		
 		index[0] = 0;
 		index[1] = 0;
 		count[0] = storelocal->mbHistoryRecNbr;
 		count[1] = storelocal->mbNameLength;
-		nc_status = nc_put_vara_text((int)mb_io_ptr->mbfp, storelocal->mbHistModule_id, index, count, storelocal->mbHistModule);
+		nc_status = nc_put_vara_text((int)mb_io_ptr->mbfp, storelocal->mbHistModule_id, index, count, store->mbHistModule);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_vara mbHistModule error: %s\n", nc_strerror(nc_status));
 		
 		index[0] = 0;
 		index[1] = 0;
 		count[0] = storelocal->mbHistoryRecNbr;
 		count[1] = storelocal->mbCommentLength;
-		nc_status = nc_put_vara_text((int)mb_io_ptr->mbfp, storelocal->mbHistComment_id, index, count, storelocal->mbHistComment);
+		nc_status = nc_put_vara_text((int)mb_io_ptr->mbfp, storelocal->mbHistComment_id, index, count, store->mbHistComment);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_vara mbHistComment error: %s\n", nc_strerror(nc_status));
 
 		index[0] = 0;
@@ -5683,166 +5681,96 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    && status == MB_SUCCESS)
 	    {
 	    /* write the variables from next record */
-	    index[0] = *recwrite;
-	    index[1] = 0;
-	    count[0] = 1;
-	    count[1] = storelocal->mbAntennaNbr;
-	    nc_status = nc_put_vara_short((int)mb_io_ptr->mbfp, storelocal->mbCycle_id, index, count, store->mbCycle);
+	    if (storelocal->CIB_BLOCK_DIM > 0)
+	    	{
+	    	index[0] = (*recwrite / storelocal->CIB_BLOCK_DIM);
+	    	index[1] = *recwrite - storelocal->CIB_BLOCK_DIM * index[0];
+	    	index[2] = 0;
+	    	count[0] = 1;
+	    	count[1] = 1;
+	    	count[2] = storelocal->mbAntennaNbr;
+		}
+	    else
+		{
+	    	index[0] = *recwrite;
+	    	index[1] = 0;
+	    	index[2] = 0;
+	    	count[0] = 1;
+	    	count[1] = storelocal->mbAntennaNbr;
+	    	count[2] = 0;
+		}
+/* fprintf(stderr,"storelocal->CIB_BLOCK_DIM:%d index: %d %d %d count: %d %d %d\n",
+storelocal->CIB_BLOCK_DIM,index[0],index[1],index[2],count[0],count[1],count[2]); */
+	    nc_status = nc_put_vara_int((int)mb_io_ptr->mbfp, storelocal->mbCycle_id, index, count, store->mbCycle);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_vara mbCycle error: %s\n", nc_strerror(nc_status));
-	    index[0] = *recwrite;
-	    index[1] = 0;
-	    count[0] = 1;
-	    count[1] = storelocal->mbAntennaNbr;
 	    nc_status = nc_put_vara_int((int)mb_io_ptr->mbfp, storelocal->mbDate_id, index, count, store->mbDate);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_vara mbDate error: %s\n", nc_strerror(nc_status));
-	    index[0] = *recwrite;
-	    index[1] = 0;
-	    count[0] = 1;
-	    count[1] = storelocal->mbAntennaNbr;
 	    nc_status = nc_put_vara_int((int)mb_io_ptr->mbfp, storelocal->mbTime_id, index, count, store->mbTime);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_vara mbTime error: %s\n", nc_strerror(nc_status));
-	    index[0] = *recwrite;
-	    index[1] = 0;
-	    count[0] = 1;
-	    count[1] = storelocal->mbAntennaNbr;
 	    nc_status = nc_put_vara_int((int)mb_io_ptr->mbfp, storelocal->mbOrdinate_id, index, count, store->mbOrdinate);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_vara mbOrdinate error: %s\n", nc_strerror(nc_status));
-	    index[0] = *recwrite;
-	    index[1] = 0;
-	    count[0] = 1;
-	    count[1] = storelocal->mbAntennaNbr;
 	    nc_status = nc_put_vara_int((int)mb_io_ptr->mbfp, storelocal->mbAbscissa_id, index, count, store->mbAbscissa);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_vara mbAbscissa error: %s\n", nc_strerror(nc_status));
-	    index[0] = *recwrite;
-	    index[1] = 0;
-	    count[0] = 1;
-	    count[1] = storelocal->mbAntennaNbr;
 	    nc_status = nc_put_vara_text((int)mb_io_ptr->mbfp, storelocal->mbFrequency_id, index, count, store->mbFrequency);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_vara mbFrequency error: %s\n", nc_strerror(nc_status));
-	    index[0] = *recwrite;
-	    index[1] = 0;
-	    count[0] = 1;
-	    count[1] = storelocal->mbAntennaNbr;
 	    nc_status = nc_put_vara_text((int)mb_io_ptr->mbfp, storelocal->mbSounderMode_id, index, count, store->mbSounderMode);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_vara mbSounderMode error: %s\n", nc_strerror(nc_status));
-	    index[0] = *recwrite;
-	    index[1] = 0;
-	    count[0] = 1;
-	    count[1] = storelocal->mbAntennaNbr;
 	    nc_status = nc_put_vara_short((int)mb_io_ptr->mbfp, storelocal->mbReferenceDepth_id, index, count, store->mbReferenceDepth);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_vara mbReferenceDepth error: %s\n", nc_strerror(nc_status));
-	    index[0] = *recwrite;
-	    index[1] = 0;
-	    count[0] = 1;
-	    count[1] = storelocal->mbAntennaNbr;
 	    nc_status = nc_put_vara_short((int)mb_io_ptr->mbfp, storelocal->mbDynamicDraught_id, index, count, store->mbDynamicDraught);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_vara mbDynamicDraught error: %s\n", nc_strerror(nc_status));
-	    index[0] = *recwrite;
-	    index[1] = 0;
-	    count[0] = 1;
-	    count[1] = storelocal->mbAntennaNbr;
 	    nc_status = nc_put_vara_short((int)mb_io_ptr->mbfp, storelocal->mbTide_id, index, count, store->mbTide);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_vara mbTide error: %s\n", nc_strerror(nc_status));
-	    index[0] = *recwrite;
-	    index[1] = 0;
-	    count[0] = 1;
-	    count[1] = storelocal->mbAntennaNbr;
 	    nc_status = nc_put_vara_short((int)mb_io_ptr->mbfp, storelocal->mbSoundVelocity_id, index, count, store->mbSoundVelocity);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_vara mbSoundVelocity error: %s\n", nc_strerror(nc_status));
-	    index[0] = *recwrite;
-	    index[1] = 0;
-	    count[0] = 1;
-	    count[1] = storelocal->mbAntennaNbr;
 	    nc_status = nc_put_vara_short((int)mb_io_ptr->mbfp, storelocal->mbHeading_id, index, count, (short *)store->mbHeading);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_vara mbHeading error: %s\n", nc_strerror(nc_status));
-	    index[0] = *recwrite;
-	    index[1] = 0;
-	    count[0] = 1;
-	    count[1] = storelocal->mbAntennaNbr;
 	    nc_status = nc_put_vara_short((int)mb_io_ptr->mbfp, storelocal->mbRoll_id, index, count, store->mbRoll);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_vara mbRoll error: %s\n", nc_strerror(nc_status));
-	    index[0] = *recwrite;
-	    index[1] = 0;
-	    count[0] = 1;
-	    count[1] = storelocal->mbAntennaNbr;
 	    nc_status = nc_put_vara_short((int)mb_io_ptr->mbfp, storelocal->mbPitch_id, index, count, store->mbPitch);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_vara mbPitch error: %s\n", nc_strerror(nc_status));
-	    index[0] = *recwrite;
-	    index[1] = 0;
-	    count[0] = 1;
-	    count[1] = storelocal->mbAntennaNbr;
 	    nc_status = nc_put_vara_short((int)mb_io_ptr->mbfp, storelocal->mbTransmissionHeave_id, index, count, store->mbTransmissionHeave);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_vara mbTransmissionHeave error: %s\n", nc_strerror(nc_status));
-	    index[0] = *recwrite;
-	    index[1] = 0;
-	    count[0] = 1;
-	    count[1] = storelocal->mbAntennaNbr;
 	    nc_status = nc_put_vara_text((int)mb_io_ptr->mbfp, storelocal->mbDistanceScale_id, index, count, store->mbDistanceScale);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_vara mbDistanceScale error: %s\n", nc_strerror(nc_status));
-	    index[0] = *recwrite;
-	    index[1] = 0;
-	    count[0] = 1;
-	    count[1] = storelocal->mbAntennaNbr;
 	    nc_status = nc_put_vara_text((int)mb_io_ptr->mbfp, storelocal->mbDepthScale_id, index, count, store->mbDepthScale);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_vara mbDepthScale error: %s\n", nc_strerror(nc_status));
-	    index[0] = *recwrite;
-	    index[1] = 0;
-	    count[0] = 1;
-	    count[1] = storelocal->mbAntennaNbr;
-	    nc_status = nc_put_vara_short((int)mb_io_ptr->mbfp, storelocal->mbVerticalDepth_id, index, count, store->mbVerticalDepth);
+	    nc_status = nc_put_vara_int((int)mb_io_ptr->mbfp, storelocal->mbVerticalDepth_id, index, count, store->mbVerticalDepth);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_vara mbVerticalDepth error: %s\n", nc_strerror(nc_status));
-	    index[0] = *recwrite;
-	    index[1] = 0;
-	    count[0] = 1;
-	    count[1] = storelocal->mbAntennaNbr;
 	    nc_status = nc_put_vara_text((int)mb_io_ptr->mbfp, storelocal->mbCQuality_id, index, count, store->mbCQuality);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_vara mbCQuality error: %s\n", nc_strerror(nc_status));
-	    index[0] = *recwrite;
-	    index[1] = 0;
-	    count[0] = 1;
-	    count[1] = storelocal->mbAntennaNbr;
 	    nc_status = nc_put_vara_text((int)mb_io_ptr->mbfp, storelocal->mbCFlag_id, index, count, store->mbCFlag);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_vara mbCFlag error: %s\n", nc_strerror(nc_status));
-	    index[0] = *recwrite;
-	    index[1] = 0;
-	    count[0] = 1;
-	    count[1] = storelocal->mbAntennaNbr;
 	    nc_status = nc_put_vara_text((int)mb_io_ptr->mbfp, storelocal->mbInterlacing_id, index, count, store->mbInterlacing);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_vara mbInterlacing error: %s\n", nc_strerror(nc_status));
-	    index[0] = *recwrite;
-	    index[1] = 0;
-	    count[0] = 1;
-	    count[1] = storelocal->mbAntennaNbr;
 	    nc_status = nc_put_vara_short((int)mb_io_ptr->mbfp, storelocal->mbSamplingRate_id, index, count, store->mbSamplingRate);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_vara mbSamplingRate error: %s\n", nc_strerror(nc_status));
-	    index[0] = *recwrite;
-	    index[1] = 0;
-	    count[0] = 1;
-	    count[1] = storelocal->mbBeamNbr;
+	    if (storelocal->CIB_BLOCK_DIM > 0)
+	    	{
+	    	index[0] = (*recwrite / storelocal->CIB_BLOCK_DIM);
+	    	index[1] = *recwrite - storelocal->CIB_BLOCK_DIM * index[0];
+	    	index[2] = 0;
+	    	count[0] = 1;
+	    	count[1] = 1;
+	    	count[2] = storelocal->mbBeamNbr;
+		}
+	    else
+		{
+	    	index[0] = *recwrite;
+	    	index[1] = 0;
+	    	index[2] = 0;
+	    	count[0] = 1;
+	    	count[1] = storelocal->mbBeamNbr;
+	    	count[2] = 0;
+		}
 	    nc_status = nc_put_vara_short((int)mb_io_ptr->mbfp, storelocal->mbAlongDistance_id, index, count, store->mbAlongDistance);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_vara mbAlongDistance error: %s\n", nc_strerror(nc_status));
-	    index[0] = *recwrite;
-	    index[1] = 0;
-	    count[0] = 1;
-	    count[1] = storelocal->mbBeamNbr;
 	    nc_status = nc_put_vara_short((int)mb_io_ptr->mbfp, storelocal->mbAcrossDistance_id, index, count, store->mbAcrossDistance);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_vara mbAcrossDistance error: %s\n", nc_strerror(nc_status));
-	    index[0] = *recwrite;
-	    index[1] = 0;
-	    count[0] = 1;
-	    count[1] = storelocal->mbBeamNbr;
 	    nc_status = nc_put_vara_short((int)mb_io_ptr->mbfp, storelocal->mbDepth_id, index, count, store->mbDepth);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_vara mbDepth error: %s\n", nc_strerror(nc_status));
-	    index[0] = *recwrite;
-	    index[1] = 0;
-	    count[0] = 1;
-	    count[1] = storelocal->mbBeamNbr;
 	    nc_status = nc_put_vara_text((int)mb_io_ptr->mbfp, storelocal->mbSQuality_id, index, count, store->mbSQuality);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_vara mbSQuality error: %s\n", nc_strerror(nc_status));
-	    index[0] = *recwrite;
-	    index[1] = 0;
-	    count[0] = 1;
-	    count[1] = storelocal->mbBeamNbr;
 	    nc_status = nc_put_vara_text((int)mb_io_ptr->mbfp, storelocal->mbSFlag_id, index, count, store->mbSFlag);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_put_vara mbSQuality error: %s\n", nc_strerror(nc_status));
 	    

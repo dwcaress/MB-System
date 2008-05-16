@@ -1,8 +1,8 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_profile.c	3/8/2006
- *    $Id: mbview_profile.c,v 5.0 2007-06-17 23:16:58 caress Exp $
+ *    $Id: mbview_profile.c,v 5.1 2008-05-16 22:59:42 caress Exp $
  *
- *    Copyright (c) 2006 by
+ *    Copyright (c) 2006-2008 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -18,6 +18,9 @@
  * Date:	March 8, 2006
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2007/06/17 23:16:58  caress
+ * Added profiling to mbview.
+ *
  *
  *
  */
@@ -78,7 +81,7 @@ static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 static char		value_list[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_profile.c,v 5.0 2007-06-17 23:16:58 caress Exp $";
+static char rcs_id[]="$Id: mbview_profile.c,v 5.1 2008-05-16 22:59:42 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_getprofilecount(int verbose, int instance,
@@ -152,8 +155,9 @@ int mbview_allocprofilepoints(int verbose,
 		}
 
 	/* allocate the arrays using mb_realloc */
-	status = mb_realloc(verbose,npoints * sizeof(struct mbview_profilepoint_struct),
-				points,error);
+	status = mb_reallocd(verbose, __FILE__, __LINE__, 
+				npoints * sizeof(struct mbview_profilepoint_struct),
+				(void **)points,error);
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -195,7 +199,7 @@ int mbview_freeprofilepoints(int verbose,
 		}
 
 	/* free the arrays using mb_free */
-	status = mb_free(verbose,points,error);
+	status = mb_freed(verbose,__FILE__,__LINE__,(void **)points,error);
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -253,14 +257,14 @@ int mbview_allocprofilearrays(int verbose,
 		}
 
 	/* allocate the arrays using mb_realloc */
-	status = mb_realloc(verbose,npoints * sizeof(double),distance,error);
-	status = mb_realloc(verbose,npoints * sizeof(double),zdata,error);
-	status = mb_realloc(verbose,npoints * sizeof(double),boundary,error);
-	status = mb_realloc(verbose,npoints * sizeof(double),xlon,error);
-	status = mb_realloc(verbose,npoints * sizeof(double),ylat,error);
-	status = mb_realloc(verbose,npoints * sizeof(double),distovertopo,error);
-	status = mb_realloc(verbose,npoints * sizeof(double),bearing,error);
-	status = mb_realloc(verbose,npoints * sizeof(double),slope,error);
+	status = mb_reallocd(verbose, __FILE__, __LINE__, npoints * sizeof(double), (void **)distance,error);
+	status = mb_reallocd(verbose, __FILE__, __LINE__, npoints * sizeof(double), (void **)zdata,error);
+	status = mb_reallocd(verbose, __FILE__, __LINE__, npoints * sizeof(double), (void **)boundary,error);
+	status = mb_reallocd(verbose, __FILE__, __LINE__, npoints * sizeof(double), (void **)xlon,error);
+	status = mb_reallocd(verbose, __FILE__, __LINE__, npoints * sizeof(double), (void **)ylat,error);
+	status = mb_reallocd(verbose, __FILE__, __LINE__, npoints * sizeof(double), (void **)distovertopo,error);
+	status = mb_reallocd(verbose, __FILE__, __LINE__, npoints * sizeof(double), (void **)bearing,error);
+	status = mb_reallocd(verbose, __FILE__, __LINE__, npoints * sizeof(double), (void **)slope,error);
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -323,14 +327,14 @@ int mbview_freeprofilearrays(int verbose,
 		}
 
 	/* free the arrays using mb_free */
-	status = mb_free(verbose,distance,error);
-	status = mb_free(verbose,zdata,error);
-	status = mb_free(verbose,boundary,error);
-	status = mb_free(verbose,xlon,error);
-	status = mb_free(verbose,ylat,error);
-	status = mb_free(verbose,distovertopo,error);
-	status = mb_free(verbose,bearing,error);
-	status = mb_free(verbose,slope,error);
+	status = mb_freed(verbose,__FILE__,__LINE__,(void **)distance,error);
+	status = mb_freed(verbose,__FILE__,__LINE__,(void **)zdata,error);
+	status = mb_freed(verbose,__FILE__,__LINE__,(void **)boundary,error);
+	status = mb_freed(verbose,__FILE__,__LINE__,(void **)xlon,error);
+	status = mb_freed(verbose,__FILE__,__LINE__,(void **)ylat,error);
+	status = mb_freed(verbose,__FILE__,__LINE__,(void **)distovertopo,error);
+	status = mb_freed(verbose,__FILE__,__LINE__,(void **)bearing,error);
+	status = mb_freed(verbose,__FILE__,__LINE__,(void **)slope,error);
 
 	/* print output debug statements */
 	if (verbose >= 2)
