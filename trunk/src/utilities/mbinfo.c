@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbinfo.c	2/1/93
- *    $Id: mbinfo.c,v 5.25 2007-10-08 16:48:07 caress Exp $
+ *    $Id: mbinfo.c,v 5.26 2008-05-16 22:44:37 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -26,6 +26,9 @@
  * Date:	February 1, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.25  2007/10/08 16:48:07  caress
+ * State of the code on 8 October 2007.
+ *
  * Revision 5.24  2006/02/03 21:10:39  caress
  * Working on supporting water column datagrams in Simrad formats.
  *
@@ -231,7 +234,7 @@ struct ping
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbinfo.c,v 5.25 2007-10-08 16:48:07 caress Exp $";
+	static char rcs_id[] = "$Id: mbinfo.c,v 5.26 2008-05-16 22:44:37 caress Exp $";
 	static char program_name[] = "MBINFO";
 	static char help_message[] =  "MBINFO reads a swath sonar data file and outputs \nsome basic statistics.  If pings are averaged (pings > 2) \nMBINFO estimates the variance for each of the swath \nbeams by reading a set number of pings (>2) and then finding \nthe variance of the detrended values for each beam. \nThe results are dumped to stdout.";
 	static char usage_message[] = "mbinfo [-Byr/mo/da/hr/mn/sc -C -Eyr/mo/da/hr/mn/sc -Fformat -Ifile -Llonflip -Mnx/ny -N -Ppings -Rw/e/s/n -Sspeed -V -H]";
@@ -760,8 +763,8 @@ main (int argc, char **argv)
 	for (i=0;i<pings_read;i++)
 		{
 		data[i] = NULL;
-		status = mb_malloc(verbose,pings_read*sizeof(struct ping),
-				&data[i],&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,pings_read*sizeof(struct ping),
+				(void **)&data[i],&error);
 		if (error == MB_ERROR_NO_ERROR)
 			{
 			datacur = data[i];
@@ -855,8 +858,8 @@ main (int argc, char **argv)
 	    mask_dy = (latmax - latmin) / mask_ny;
 
 	    /* allocate mask */
-	    status = mb_malloc(verbose,mask_nx*mask_ny*sizeof(int),
-				&mask,&error);
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,mask_nx*mask_ny*sizeof(int),
+				(void **)&mask,&error);
 	    }
 
 	/* if error initializing memory then quit */
@@ -1719,12 +1722,12 @@ main (int argc, char **argv)
 		/* allocate total statistics arrays if needed */
 		if (nbathtot_alloc < beams_bath_max)
 			{
-			status = mb_realloc(verbose,beams_bath_max*sizeof(double),
-						&bathmeantot,&error);
-			status = mb_realloc(verbose,beams_bath_max*sizeof(double),
-						&bathvartot,&error);
-			status = mb_realloc(verbose,beams_bath_max*sizeof(int),
-						&nbathvartot,&error);
+			status = mb_reallocd(verbose,__FILE__,__LINE__,beams_bath_max*sizeof(double),
+						(void **)&bathmeantot,&error);
+			status = mb_reallocd(verbose,__FILE__,__LINE__,beams_bath_max*sizeof(double),
+						(void **)&bathvartot,&error);
+			status = mb_reallocd(verbose,__FILE__,__LINE__,beams_bath_max*sizeof(int),
+						(void **)&nbathvartot,&error);
 			nbathtot_alloc = beams_bath_max;
 			if (error != MB_ERROR_NO_ERROR)
 				{
@@ -1737,12 +1740,12 @@ main (int argc, char **argv)
 			}
 		if (namptot_alloc < beams_amp_max)
 			{
-			status = mb_realloc(verbose,beams_amp_max*sizeof(double),
-						&ampmeantot,&error);
-			status = mb_realloc(verbose,beams_amp_max*sizeof(double),
-						&ampvartot,&error);
-			status = mb_realloc(verbose,beams_amp_max*sizeof(int),
-						&nampvartot,&error);
+			status = mb_reallocd(verbose,__FILE__,__LINE__,beams_amp_max*sizeof(double),
+						(void **)&ampmeantot,&error);
+			status = mb_reallocd(verbose,__FILE__,__LINE__,beams_amp_max*sizeof(double),
+						(void **)&ampvartot,&error);
+			status = mb_reallocd(verbose,__FILE__,__LINE__,beams_amp_max*sizeof(int),
+						(void **)&nampvartot,&error);
 			namptot_alloc = beams_amp_max;
 			if (error != MB_ERROR_NO_ERROR)
 				{
@@ -1755,12 +1758,12 @@ main (int argc, char **argv)
 			}
 		if (nsstot_alloc < pixels_ss_max)
 			{
-			status = mb_realloc(verbose,pixels_ss_max*sizeof(double),
-						&ssmeantot,&error);
-			status = mb_realloc(verbose,pixels_ss_max*sizeof(double),
-						&ssvartot,&error);
-			status = mb_realloc(verbose,pixels_ss_max*sizeof(int),
-						&nssvartot,&error);
+			status = mb_reallocd(verbose,__FILE__,__LINE__,pixels_ss_max*sizeof(double),
+						(void **)&ssmeantot,&error);
+			status = mb_reallocd(verbose,__FILE__,__LINE__,pixels_ss_max*sizeof(double),
+						(void **)&ssvartot,&error);
+			status = mb_reallocd(verbose,__FILE__,__LINE__,pixels_ss_max*sizeof(int),
+						(void **)&nssvartot,&error);
 			nsstot_alloc = pixels_ss_max;
 			if (error != MB_ERROR_NO_ERROR)
 				{
@@ -2074,16 +2077,16 @@ main (int argc, char **argv)
 	    }
 
 	/* deallocate memory used for data arrays */
-	mb_free(verbose,&bathmeantot,&error);
-	mb_free(verbose,&bathvartot,&error);
-	mb_free(verbose,&nbathvartot,&error);
-	mb_free(verbose,&ampmeantot,&error);
-	mb_free(verbose,&ampvartot,&error);
-	mb_free(verbose,&nampvartot,&error);
-	mb_free(verbose,&ssmeantot,&error);
-	mb_free(verbose,&ssvartot,&error);
-	mb_free(verbose,&nssvartot,&error);
-	mb_free(verbose,&mask,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&bathmeantot,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&bathvartot,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&nbathvartot,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&ampmeantot,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&ampvartot,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&nampvartot,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&ssmeantot,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&ssvartot,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&nssvartot,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&mask,&error);
 
 	/* set program status */
 	status = MB_SUCCESS;

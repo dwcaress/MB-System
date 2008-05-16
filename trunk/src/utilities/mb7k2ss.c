@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb7k2ss.c		8/15/2007
- *    $Id: mb7k2ss.c,v 5.0 2007-10-08 17:04:13 caress Exp $
+ *    $Id: mb7k2ss.c,v 5.1 2008-05-16 22:44:37 caress Exp $
  *
- *    Copyright (c) 2007 by
+ *    Copyright (c) 2007-2008 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -22,6 +22,9 @@
  *              R/V Atlantis, Axial Seamount
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2007/10/08 17:04:13  caress
+ * Update version number.
+ *
  * Revision 1.1  2007/10/08 16:51:01  caress
  * Initial version of a program to extract Edgetech sidescan from MBARI Mapping AUV data into format 71.
  *
@@ -130,7 +133,7 @@ int mb7k2ss_intersect_grid(int verbose, double navlon, double navlat, double alt
 					struct mb7k2ss_grid_struct *grid,
 					double	 *range, int *error);
 
-static char rcs_id[] = "$Id: mb7k2ss.c,v 5.0 2007-10-08 17:04:13 caress Exp $";
+static char rcs_id[] = "$Id: mb7k2ss.c,v 5.1 2008-05-16 22:44:37 caress Exp $";
 static char program_name[] = "mb7k2ss";
 static int	pargc;
 static char	**pargv;
@@ -284,6 +287,7 @@ main (int argc, char **argv)
 	double	range;
 	double	rangethreshold = 50.0;
 	double	rangelast;
+	int	rangeok = MB_NO;
 	int	activewaypoint = 0;
 	int	startline = 1;
 	int	linenumber;
@@ -369,7 +373,7 @@ main (int argc, char **argv)
 	/* process argument list */
 	pargc = 1;
 	pargv = argv;
-	while ((c = getopt(argc, argv, "A:a:B:b:CcF:f:G:g:I:i:L:l:MmO:o:R:r:S:s:T:t:XxVvHh")) != -1)
+	while ((c = getopt(argc, argv, "A:a:B:b:CcF:f:G:g:I:i:L:l:MmO:o:R:r:S:s:T:t:U:u:XxVvHh")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -461,6 +465,11 @@ main (int argc, char **argv)
 		case 't':
 			sscanf (optarg,"%s", &grid.file);
 			sslayoutmode = MB7K2SS_SS_3D_BOTTOM;
+			flag++;
+			break;
+		case 'U':
+		case 'u':
+			sscanf (optarg,"%lf", &rangethreshold);
 			flag++;
 			break;
 		case 'X':
@@ -614,14 +623,14 @@ main (int argc, char **argv)
 					&& nroutepoint + 1 > nroutepointalloc)
 				    	{
 				    	nroutepointalloc += MB7K2SS_ALLOC_NUM;
-					status = mb_realloc(verbose, nroutepointalloc * sizeof(double),
-								(char **)&routelon, &error);
-					status = mb_realloc(verbose, nroutepointalloc * sizeof(double),
-								(char **)&routelat, &error);
-					status = mb_realloc(verbose, nroutepointalloc * sizeof(double),
-								(char **)&routeheading, &error);
-					status = mb_realloc(verbose, nroutepointalloc * sizeof(int),
-								(char **)&routewaypoint, &error);
+					status = mb_reallocd(verbose, __FILE__, __LINE__, nroutepointalloc * sizeof(double),
+								(void **)&routelon, &error);
+					status = mb_reallocd(verbose, __FILE__, __LINE__, nroutepointalloc * sizeof(double),
+								(void **)&routelat, &error);
+					status = mb_reallocd(verbose, __FILE__, __LINE__, nroutepointalloc * sizeof(double),
+								(void **)&routeheading, &error);
+					status = mb_reallocd(verbose, __FILE__, __LINE__, nroutepointalloc * sizeof(int),
+								(void **)&routewaypoint, &error);
 				    	if (status != MB_SUCCESS)
 					    	{
 						mb_error(verbose,error,&message);
@@ -654,6 +663,7 @@ main (int argc, char **argv)
 		mb_coor_scale(verbose,routelat[activewaypoint], &mtodeglon, &mtodeglat);
 		rangelast = 1000 * rangethreshold;
 		oktowrite = 0;
+		rangeok = MB_NO;
 
 		/* output status */
 		if (verbose > 0)
@@ -941,9 +951,11 @@ status,error,kind,route_file_set,nroutepoint,navlon,navlat); */
 			dx = (navlon - routelon[activewaypoint]) / mtodeglon;
 			dy = (navlat - routelat[activewaypoint]) / mtodeglat;
 			range = sqrt(dx * dx + dy * dy);
-/* fprintf(stderr,"activewaypoint:%d range:%f lon:%f %f lat:%f %f dx:%f dy:%f\n",
-activewaypoint, range, navlon, routelon[activewaypoint], navlat, routelat[activewaypoint], dx, dy);*/
-			if (range < rangethreshold 
+/* fprintf(stderr,"activewaypoint:%d range:%f rangelast:%f lon:%f %f lat:%f %f\n",
+activewaypoint, range, rangelast, navlon, routelon[activewaypoint], navlat, routelat[activewaypoint]); */
+			if (range < rangethreshold)
+				rangeok = MB_YES;
+			if (rangeok == MB_YES 
 				&& (activewaypoint == 0 || range > rangelast) 
 				&& activewaypoint < nroutepoint - 1)
 				{
@@ -970,9 +982,13 @@ activewaypoint, range, navlon, routelon[activewaypoint], navlat, routelat[active
 				mb_coor_scale(verbose,routelat[activewaypoint], &mtodeglon, &mtodeglat);
 				rangelast = 1000 * rangethreshold;
 				oktowrite = 0;
+				rangeok = MB_NO;
 				}
 			else
 				rangelast = range;
+/* fprintf(stderr,"> activewaypoint:%d linenumber:%d range:%f   lon: %f %f   lat: %f %f oktowrite:%d\n", 
+activewaypoint,linenumber,range, navlon, 
+routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 			}
 				
 		if (kind == MB_DATA_DATA 
@@ -1841,15 +1857,15 @@ table_range[kstart],table_xtrack[kstart],table_ltrack[kstart]);*/
 	/* deallocate route arrays */
 	if (route_file_set == MB_YES)
 		{	    
-		status = mb_free(verbose, (char **)&routelon, &error);
-		status = mb_free(verbose, (char **)&routelat, &error);
-		status = mb_free(verbose, (char **)&routeheading, &error);
-		status = mb_free(verbose, (char **)&routewaypoint, &error);
+		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&routelon, &error);
+		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&routelat, &error);
+		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&routeheading, &error);
+		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&routewaypoint, &error);
 		}
 		
 	/* deallocate topography grid array */
 	if (sslayoutmode == MB7K2SS_SS_3D_BOTTOM)
-		status = mb_free(verbose, (char **)&grid.data, &error);
+		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&grid.data, &error);
 
 	/* check memory */
 	if (verbose >= 4)

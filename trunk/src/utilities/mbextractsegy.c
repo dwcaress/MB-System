@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbextractsegy.c	4/18/2004
- *    $Id: mbextractsegy.c,v 5.17 2007-11-16 17:53:03 caress Exp $
+ *    $Id: mbextractsegy.c,v 5.18 2008-05-16 22:44:37 caress Exp $
  *
- *    Copyright (c) 2004 by
+ *    Copyright (c) 2004-2008 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -21,6 +21,9 @@
  * Date:	April 18, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.17  2007/11/16 17:53:03  caress
+ * Fixes applied.
+ *
  * Revision 5.16  2007/10/08 16:48:07  caress
  * State of the code on 8 October 2007.
  *
@@ -99,7 +102,7 @@
 #define MBES_ONLINE_THRESHOLD		15.0
 #define MBES_ONLINE_COUNT		30
 
-static char rcs_id[] = "$Id: mbextractsegy.c,v 5.17 2007-11-16 17:53:03 caress Exp $";
+static char rcs_id[] = "$Id: mbextractsegy.c,v 5.18 2008-05-16 22:44:37 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
@@ -238,6 +241,7 @@ main (int argc, char **argv)
 	double	lastlat;
 	double	lastheading;
 	double	headingdiff;
+	int	rangeok;
 	int	oktowrite;
 	double	dx, dy;
 	FILE	*fp = NULL;
@@ -300,7 +304,7 @@ main (int argc, char **argv)
 		segyfileheader.extra[i] = 0;
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "B:b:D:d:E:e:F:f:I:i:J:j:L:l:MmO:o:R:r:S:s:T:t:VvHh")) != -1)
+	while ((c = getopt(argc, argv, "B:b:D:d:E:e:F:f:I:i:J:j:L:l:MmO:o:R:r:S:s:T:t:U:u:VvHh")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -372,6 +376,11 @@ main (int argc, char **argv)
 		case 'T':
 		case 't':
 			sscanf (optarg,"%lf", &timeshift);
+			flag++;
+			break;
+		case 'U':
+		case 'u':
+			sscanf (optarg,"%lf", &rangethreshold);
 			flag++;
 			break;
 		case '?':
@@ -500,14 +509,14 @@ main (int argc, char **argv)
 					&& nroutepoint + 1 > nroutepointalloc)
 				    	{
 				    	nroutepointalloc += MBES_ALLOC_NUM;
-					status = mb_realloc(verbose, nroutepointalloc * sizeof(double),
-								(char **)&routelon, &error);
-					status = mb_realloc(verbose, nroutepointalloc * sizeof(double),
-								(char **)&routelat, &error);
-					status = mb_realloc(verbose, nroutepointalloc * sizeof(double),
-								(char **)&routeheading, &error);
-					status = mb_realloc(verbose, nroutepointalloc * sizeof(int),
-								(char **)&routewaypoint, &error);
+					status = mb_reallocd(verbose, __FILE__, __LINE__, nroutepointalloc * sizeof(double),
+								(void **)&routelon, &error);
+					status = mb_reallocd(verbose, __FILE__, __LINE__, nroutepointalloc * sizeof(double),
+								(void **)&routelat, &error);
+					status = mb_reallocd(verbose, __FILE__, __LINE__, nroutepointalloc * sizeof(double),
+								(void **)&routeheading, &error);
+					status = mb_reallocd(verbose, __FILE__, __LINE__, nroutepointalloc * sizeof(int),
+								(void **)&routewaypoint, &error);
 				    	if (status != MB_SUCCESS)
 					    	{
 						mb_error(verbose,error,&message);
@@ -542,6 +551,7 @@ main (int argc, char **argv)
 		seafloordepthmin = -1.0;
 		seafloordepthmax = -1.0;
 		oktowrite = 0;
+		rangeok = MB_NO;
 
 		/* output status */
 		if (verbose > 0)
@@ -702,7 +712,9 @@ main (int argc, char **argv)
 			dx = (navlon - routelon[activewaypoint]) / mtodeglon;
 			dy = (navlat - routelat[activewaypoint]) / mtodeglat;
 			range = sqrt(dx * dx + dy * dy);
-			if (range < rangethreshold 
+			if (range < rangethreshold)
+				rangeok = MB_YES;
+			if (rangeok == MB_YES 
 				&& (activewaypoint == 0 || range > rangelast) 
 				&& activewaypoint < nroutepoint - 1)
 				{
@@ -794,12 +806,13 @@ main (int argc, char **argv)
 				seafloordepthmin = -1.0;
 				seafloordepthmax = -1.0;
 				oktowrite = 0;
+				rangeok = MB_NO;
 				}
 			else
 				rangelast = range;
 /* fprintf(stderr,"> activewaypoint:%d linenumber:%d range:%f   lon: %f %f   lat: %f %f oktowrite:%d\n", 
 activewaypoint,linenumber,range, navlon, 
-routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
+routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite); */
 			}
 
 		/* if desired extract subbottom data */
@@ -853,8 +866,8 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 		    if (status == MB_SUCCESS 
 		    	&& segytraceheader.nsamps > segydata_alloc)
 			{
-			status = mb_malloc(verbose, segytraceheader.nsamps * samplesize,
-						(char **)&segydata, &error);
+			status = mb_mallocd(verbose, __FILE__, __LINE__, segytraceheader.nsamps * samplesize,
+						(void **)&segydata, &error);
 			if (status == MB_SUCCESS)
 				segydata_alloc = segytraceheader.nsamps;
 			else
@@ -865,7 +878,7 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 				|| buffer_alloc < segytraceheader.nsamps * samplesize))
 			{
 			buffer_alloc = MAX(MB_SEGY_TRACEHEADER_LENGTH, segytraceheader.nsamps * samplesize);
-			status = mb_malloc(verbose, buffer_alloc, (char **)&buffer, &error);
+			status = mb_mallocd(verbose, __FILE__, __LINE__, buffer_alloc, (void **)&buffer, &error);
 			if (status != MB_SUCCESS)
 				buffer_alloc = 0;
 			}
@@ -1170,9 +1183,9 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 	fprintf(stderr,"%d records read from %s\n", nread, file);
 
 	/* deallocate memory used for segy data arrays */
-	mb_free(verbose,(char **)&segydata,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&segydata,&error); 
 	segydata_alloc = 0;
-	mb_free(verbose,(char **)&buffer,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&buffer,&error); 
 	buffer_alloc = 0;
 
 	/* figure out whether and what to read next */
@@ -1229,7 +1242,7 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 		    nplot = nshot / nshotmax;
 		    if (nwrite % nshotmax > 0)
 		    	nplot++;
-fprintf(stderr,"seafloordepthmin:%f seafloordepthmax:%f\n", seafloordepthmin, seafloordepthmax);
+/*fprintf(stderr,"seafloordepthmin:%f seafloordepthmax:%f\n", seafloordepthmin, seafloordepthmax);*/
 		    sweep = (seafloordepthmax - seafloordepthmin) / 750.0 + 0.1;
 		    sweep = (1 + (int)(sweep / 0.05)) * 0.05; 
 		    delay = seafloordepthmin / 750.0;
@@ -1289,10 +1302,10 @@ fprintf(stderr,"seafloordepthmin:%f seafloordepthmax:%f\n", seafloordepthmin, se
 	/* deallocate route arrays */
 	if (route_file_set == MB_YES)
 		{	    
-		status = mb_free(verbose, (char **)&routelon, &error);
-		status = mb_free(verbose, (char **)&routelat, &error);
-		status = mb_free(verbose, (char **)&routeheading, &error);
-		status = mb_free(verbose, (char **)&routewaypoint, &error);
+		status = mb_freed(verbose,__FILE__,__LINE__, (void **)&routelon, &error);
+		status = mb_freed(verbose,__FILE__,__LINE__, (void **)&routelat, &error);
+		status = mb_freed(verbose,__FILE__,__LINE__, (void **)&routeheading, &error);
+		status = mb_freed(verbose,__FILE__,__LINE__, (void **)&routewaypoint, &error);
 		}
 
 	/* check memory */

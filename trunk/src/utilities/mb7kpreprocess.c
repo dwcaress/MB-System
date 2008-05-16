@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb7kpreprocess.c	10/12/2005
- *    $Id: mb7kpreprocess.c,v 5.15 2008-02-12 02:47:42 caress Exp $
+ *    $Id: mb7kpreprocess.c,v 5.16 2008-05-16 22:44:37 caress Exp $
  *
- *    Copyright (c) 2005 by
+ *    Copyright (c) 2005-2008 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -24,6 +24,9 @@
  * Date:	October 12, 2005
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.15  2008/02/12 02:47:42  caress
+ * Fixed handling of time lag correction to attitude data. The raw attitude data in the output file are now time lag corrected. Before the corrections were applied to the attitude values in bathymetry calculation, but not otherwise kept in the output.
+ *
  * Revision 5.14  2008/01/14 18:24:28  caress
  * Changed handling of beam quality values and beam flags following upgrade to Reson 7k multibeams.
  *
@@ -95,7 +98,7 @@
 #define	MB7KPREPROCESS_TIMELAG_CONSTANT	1
 #define	MB7KPREPROCESS_TIMELAG_MODEL	2
 
-static char rcs_id[] = "$Id: mb7kpreprocess.c,v 5.15 2008-02-12 02:47:42 caress Exp $";
+static char rcs_id[] = "$Id: mb7kpreprocess.c,v 5.16 2008-05-16 22:44:37 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
@@ -187,6 +190,7 @@ main (int argc, char **argv)
 	/* data structure pointers */
 	s7kr_fileheader		*fileheader;
 	s7kr_position 		*position;
+	s7kr_rollpitchheave 	*rollpitchheave;
 	s7kr_attitude 		*attitude;
 	s7kr_volatilesettings	*volatilesettings;
 	s7kr_beamgeometry	*beamgeometry;
@@ -214,6 +218,8 @@ main (int argc, char **argv)
 	int	nreadmbimage = 0;
 	int	nreadssv = 0;
 	int	nreadnav1 = 0;
+	int	nreadnav2 = 0;
+	int	nreadrph = 0;
 	int	nreadsbp = 0;
 	int	nreadsslo = 0;
 	int	nreadsshi = 0;
@@ -228,10 +234,27 @@ main (int argc, char **argv)
 	int	nreadmbimagetot = 0;
 	int	nreadssvtot = 0;
 	int	nreadnav1tot = 0;
+	int	nreadnav2tot = 0;
+	int	nreadrphtot = 0;
 	int	nreadsbptot = 0;
 	int	nreadsslotot = 0;
 	int	nreadsshitot = 0;
 	int	nreadothertot = 0;
+	
+	/* merge navigation and attitude from separate Steve Rock data file */
+	char	rockfile[MB_PATH_MAXLINE];
+	int	rockdata = MB_NO;
+	int	nrock = 0;
+	int	nrock_altitude = 0;
+	int	nrock_speed = 0;
+	double	*rock_time_d = NULL;
+	double	*rock_lon = NULL;
+	double	*rock_lat = NULL;
+	double	*rock_heading = NULL;
+	double	*rock_roll = NULL;
+	double	*rock_pitch = NULL;
+	double	*rock_sonardepth = NULL;
+	int	rock_output_index = -1;
 	
 	/* merge navigation and attitude from separate ins data file */
 	char	insfile[MB_PATH_MAXLINE];
@@ -246,6 +269,7 @@ main (int argc, char **argv)
 	double	*ins_roll = NULL;
 	double	*ins_pitch = NULL;
 	double	*ins_sonardepth = NULL;
+	double	*ins_sonardepthfilter = NULL;
 	double	*ins_altitude_time_d = NULL;
 	double	*ins_altitude = NULL;
 	double	*ins_speed_time_d = NULL;
@@ -258,6 +282,7 @@ main (int argc, char **argv)
 	int	nsonardepth = 0;
 	double	*sonardepth_time_d = NULL;
 	double	*sonardepth_sonardepth = NULL;
+	double	*sonardepth_filter = NULL;
 	int	sonardepth_output_index = -1;
 	
 	/* navigation, heading, attitude data */
@@ -269,6 +294,7 @@ main (int argc, char **argv)
 	double	*nav_lat = NULL;
 	double	*nav_sonardepth = NULL;
 	double	*nav_sonardepthrate = NULL;
+	double	*nav_sonardepthfilter = NULL;
 	double	*nav_heading = NULL;
 	double	*nav_speed = NULL;
 	double	*nav_roll = NULL;
@@ -281,6 +307,17 @@ main (int argc, char **argv)
 	int	ntimedelay_alloc = 0;
 	double	*timedelay_time_d = NULL;
 	double	*timedelay_timedelay = NULL;
+	int	npos = 0;
+	int	npos_alloc = 0;
+	double	*pos_time_d = NULL;
+	double	*pos_lon = NULL;
+	double	*pos_lat = NULL;
+	int	nrph = 0;
+	int	nrph_alloc = 0;
+	double	*rph_time_d = NULL;
+	double	*rph_roll = NULL;
+	double	*rph_pitch = NULL;
+	double	*rph_heave = NULL;
 	
 	/* bathymetry timetag data */
 	int	nbatht = 0;
@@ -317,6 +354,13 @@ main (int argc, char **argv)
 	int	rangeoffsetend[3];
 	double	rangeoffset[3];
 	
+	/* depth sensor filtering */
+	int	sonardepthfilter = MB_NO;
+	double	sonardepthfilterlength = 20.0;
+	
+	/* depth sensor offset (+ makes vehicle deeper) */
+	double	sonardepthoffset = 0.0;
+	
 	/* depth sensor lever arm parameter */
 	double	depthsensoroffx = 0.0;
 	double	depthsensoroffz = 0.0;
@@ -333,6 +377,9 @@ main (int argc, char **argv)
 	double	soundspeed;
 	double	alpha, beta, theta, phi;
 	double	rr, xx, zz;
+	double	mtodeglon, mtodeglat;
+	double	dx, dy, dist, dt;
+	int	j1, j2;
 	
 	struct stat file_status;
 	int	fstat;
@@ -364,6 +411,9 @@ main (int argc, char **argv)
 	int	sonardepth_time_d_index;
 	int	sonardepth_sonardepth_index;
 	int	sonardepth_len;
+	double	sonardepth_filterweight;
+	double	dtol, weight;
+	double	factor;
 	int	type_save, kind_save;
 	char	type[MB_PATH_MAXLINE], value[MB_PATH_MAXLINE];
 	int	i, j, n;
@@ -376,7 +426,7 @@ main (int argc, char **argv)
 	strcpy (read_file, "datalist.mb-1");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "AaBbD:d:F:f:I:i:LlN:n:O:o:P:p:R:r:T:t:VvHh")) != -1)
+	while ((c = getopt(argc, argv, "AaBbD:d:F:f:I:i:LlM:m:N:n:O:o:P:p:R:r:T:t:VvHh")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -398,7 +448,13 @@ main (int argc, char **argv)
 			break;
 		case 'D':
 		case 'd':
-			sscanf (optarg,"%lf/%lf", &depthsensoroffx, &depthsensoroffz);
+			nscan = sscanf (optarg,"%lf/%lf/%lf", &depthsensoroffx, &depthsensoroffz, &sonardepthoffset);
+			if (nscan < 3)
+				sonardepthoffset = 0.0;
+			if (nscan < 2)
+				depthsensoroffz = 0.0;
+			if (nscan < 1)
+				depthsensoroffx = 0.0;
 			flag++;
 			break;
 		case 'F':
@@ -414,6 +470,12 @@ main (int argc, char **argv)
 		case 'L':
 		case 'l':
 			mode = MB7KPREPROCESS_TIMESTAMPLIST;
+			flag++;
+			break;
+		case 'M':
+		case 'm':
+			sscanf (optarg,"%s", rockfile);
+			rockdata  = MB_YES;
 			flag++;
 			break;
 		case 'N':
@@ -436,6 +498,14 @@ main (int argc, char **argv)
 					{
 					sonardepthdata  = MB_YES;
 					}
+			else if (optarg[0] == 'F' || optarg[0] == 'f')
+				{
+				nscan = sscanf (&(optarg[1]),"%lf", &sonardepthfilterlength);
+				if (nscan == 1) 
+					sonardepthfilter = MB_YES;
+				else
+					sonardepthfilter = MB_NO;
+				}
 			else
 				{
 				nscan = sscanf (optarg,"%lf/%lf", &sonardepthlagmax, &sonardepthratemax);
@@ -539,6 +609,8 @@ main (int argc, char **argv)
 		fprintf(stderr,"dbg2       read_file:           %s\n",read_file);
 		fprintf(stderr,"dbg2       ofile:               %s\n",ofile);
 		fprintf(stderr,"dbg2       ofile_set:           %d\n",ofile_set);
+		fprintf(stderr,"dbg2       rockfile:            %s\n",rockfile);
+		fprintf(stderr,"dbg2       rockdata:            %d\n",rockdata);
 		fprintf(stderr,"dbg2       insfile:             %s\n",insfile);
 		fprintf(stderr,"dbg2       insdata:             %d\n",insdata);
 		fprintf(stderr,"dbg2       mode:                %d\n",mode);
@@ -564,6 +636,7 @@ main (int argc, char **argv)
 		fprintf(stderr,"dbg2       sonardepthlagfix:    %d\n",sonardepthlagfix);
 		fprintf(stderr,"dbg2       sonardepthlagmax:    %f\n",sonardepthlagmax);
 		fprintf(stderr,"dbg2       sonardepthratemax:   %f\n",sonardepthratemax);
+		fprintf(stderr,"dbg2       sonardepthoffset:    %f\n",sonardepthoffset);
 		fprintf(stderr,"dbg2       depthsensoroffx:     %f\n",depthsensoroffx);
 		fprintf(stderr,"dbg2       depthsensoroffz:     %f\n",depthsensoroffz);
 		for (i=0;i<nrangeoffset;i++)
@@ -641,27 +714,29 @@ main (int argc, char **argv)
 		/* allocate arrays for ins data */
 		if (nins > 0)
 		    {
-		    status = mb_malloc(verbose, nins * sizeof(double), &ins_time_d,&error);
+		    status = mb_mallocd(verbose, __FILE__, __LINE__, nins * sizeof(double), (void **)&ins_time_d,&error);
 		    if (error == MB_ERROR_NO_ERROR)
-		    	status = mb_malloc(verbose, nins * sizeof(double), &ins_lon,&error);
+		    	status = mb_mallocd(verbose, __FILE__, __LINE__, nins * sizeof(double), (void **)&ins_lon,&error);
 		    if (error == MB_ERROR_NO_ERROR)
-		    	status = mb_malloc(verbose, nins * sizeof(double), &ins_lat,&error);
+		    	status = mb_mallocd(verbose, __FILE__, __LINE__, nins * sizeof(double), (void **)&ins_lat,&error);
 		    if (error == MB_ERROR_NO_ERROR)
-		    	status = mb_malloc(verbose, nins * sizeof(double), &ins_heading,&error);
+		    	status = mb_mallocd(verbose, __FILE__, __LINE__, nins * sizeof(double), (void **)&ins_heading,&error);
 		    if (error == MB_ERROR_NO_ERROR)
-		    	status = mb_malloc(verbose, nins * sizeof(double), &ins_roll,&error);
+		    	status = mb_mallocd(verbose, __FILE__, __LINE__, nins * sizeof(double), (void **)&ins_roll,&error);
 		    if (error == MB_ERROR_NO_ERROR)
-		    	status = mb_malloc(verbose, nins * sizeof(double), &ins_pitch,&error);
+		    	status = mb_mallocd(verbose, __FILE__, __LINE__, nins * sizeof(double), (void **)&ins_pitch,&error);
 		    if (error == MB_ERROR_NO_ERROR)
-		    	status = mb_malloc(verbose, nins * sizeof(double), &ins_sonardepth,&error);
+		    	status = mb_mallocd(verbose, __FILE__, __LINE__, nins * sizeof(double), (void **)&ins_sonardepth,&error);
 		    if (error == MB_ERROR_NO_ERROR)
-		    	status = mb_malloc(verbose, nins * sizeof(double), &ins_altitude_time_d,&error);
+		    	status = mb_mallocd(verbose, __FILE__, __LINE__, nins * sizeof(double), (void **)&ins_sonardepthfilter,&error);
 		    if (error == MB_ERROR_NO_ERROR)
-		    	status = mb_malloc(verbose, nins * sizeof(double), &ins_altitude,&error);
+		    	status = mb_mallocd(verbose, __FILE__, __LINE__, nins * sizeof(double), (void **)&ins_altitude_time_d,&error);
 		    if (error == MB_ERROR_NO_ERROR)
-		    	status = mb_malloc(verbose, nins * sizeof(double), &ins_speed_time_d,&error);
+		    	status = mb_mallocd(verbose, __FILE__, __LINE__, nins * sizeof(double), (void **)&ins_altitude,&error);
 		    if (error == MB_ERROR_NO_ERROR)
-		    	status = mb_malloc(verbose, nins * sizeof(double), &ins_speed,&error);
+		    	status = mb_mallocd(verbose, __FILE__, __LINE__, nins * sizeof(double), (void **)&ins_speed_time_d,&error);
+		    if (error == MB_ERROR_NO_ERROR)
+		    	status = mb_mallocd(verbose, __FILE__, __LINE__, nins * sizeof(double), (void **)&ins_speed,&error);
 		    if (error != MB_ERROR_NO_ERROR)
 			{
 			mb_error(verbose,error,&message);
@@ -700,6 +775,7 @@ main (int argc, char **argv)
 			mb_get_binary_double(MB_YES, &buffer[ins_heading_index], &(ins_heading[nins])); 
 				ins_heading[nins] *= RTD;
 			mb_get_binary_double(MB_YES, &buffer[ins_sonardepth_index], &(ins_sonardepth[nins]));
+			ins_sonardepth[nins] += sonardepthoffset;
 			mb_get_binary_double(MB_YES, &buffer[ins_altitude_index], &(ins_altitude[nins_altitude]));
 				ins_altitude_time_d[nins_altitude] = ins_time_d[nins];
 			mb_get_binary_double(MB_YES, &buffer[ins_speed_index], &(ins_speed[nins_speed]));
@@ -718,6 +794,87 @@ ins_altitude[nins]);*/
 				nins_altitude++;
 			if (ins_speed[nins_speed] > 0.0) 
 				nins_speed++;
+			}
+		fclose(tfp);
+		}
+		
+	/* read navigation and attitude data from rock file if specified */
+	if (rockdata == MB_YES)
+		{
+		/* count the data points in the auv log file */
+		if ((tfp = fopen(rockfile, "r")) == NULL) 
+			{
+			error = MB_ERROR_OPEN_FAIL;
+			fprintf(stderr,"\nUnable to open rock data file <%s> for reading\n",rockfile);
+			fprintf(stderr,"\nProgram <%s> Terminated\n",
+				program_name);
+			exit(error);
+			}
+
+		/* count the data records */
+		nrock = 0;
+		while ((result = fgets(buffer,MB_PATH_MAXLINE,tfp)) == buffer)
+			if (buffer[0] != '#')
+			    nrock++;
+		rewind(tfp);
+fprintf(stderr,"nrock:%d\n",nrock);
+
+		/* allocate arrays for rock data */
+		if (nrock > 0)
+		    {
+		    status = mb_mallocd(verbose, __FILE__, __LINE__, nrock * sizeof(double), (void **)&rock_time_d,&error);
+		    if (error == MB_ERROR_NO_ERROR)
+		    	status = mb_mallocd(verbose, __FILE__, __LINE__, nrock * sizeof(double), (void **)&rock_lon,&error);
+		    if (error == MB_ERROR_NO_ERROR)
+		    	status = mb_mallocd(verbose, __FILE__, __LINE__, nrock * sizeof(double), (void **)&rock_lat,&error);
+		    if (error == MB_ERROR_NO_ERROR)
+		    	status = mb_mallocd(verbose, __FILE__, __LINE__, nrock * sizeof(double), (void **)&rock_sonardepth,&error);
+		    if (error == MB_ERROR_NO_ERROR)
+		    	status = mb_mallocd(verbose, __FILE__, __LINE__, nrock * sizeof(double), (void **)&rock_heading,&error);
+		    if (error == MB_ERROR_NO_ERROR)
+		    	status = mb_mallocd(verbose, __FILE__, __LINE__, nrock * sizeof(double), (void **)&rock_roll,&error);
+		    if (error == MB_ERROR_NO_ERROR)
+		    	status = mb_mallocd(verbose, __FILE__, __LINE__, nrock * sizeof(double), (void **)&rock_pitch,&error);
+		    if (error != MB_ERROR_NO_ERROR)
+			{
+			mb_error(verbose,error,&message);
+			fprintf(stderr,"\nMBIO Error allocating rock data arrays:\n%s\n",message);
+			fprintf(stderr,"\nProgram <%s> Terminated\n",
+				program_name);
+			exit(error);
+			}		    
+		    }
+
+		/* if no rock data then quit */
+		else
+		    {
+		    error = MB_ERROR_BAD_DATA;
+		    fprintf(stderr,"\nUnable to read data from rock file <%s>\n",rockfile);
+		    fprintf(stderr,"\nProgram <%s> Terminated\n",
+			    program_name);
+		    exit(error);
+		    }		    
+
+		/* read the data points in the rock file */
+		nrock = 0;
+		while ((result = fgets(buffer,MB_PATH_MAXLINE,tfp)) == buffer)
+			{
+			if (buffer[0] != '#')
+			    if (sscanf(buffer,"%lf %lf %lf %lf %lf %lf %lf",
+					&rock_time_d[nrock], &rock_lon[nrock], &rock_lat[nrock], &rock_sonardepth[nrock],
+					&rock_heading[nrock], &rock_roll[nrock], &rock_pitch[nrock]) == 7)
+			    	{
+/*fprintf(stderr,"ROCK DATA: %f %f %f %f %f %f\n", 
+rock_time_d[nrock],
+rock_lon[nrock],
+rock_lat[nrock],
+rock_sonardepth[nrock],
+rock_heading[nrock],
+rock_roll[nrock],
+rock_pitch[nrock],
+rock_heading[nrock]);*/
+			    	nrock++;
+				}
 			}
 		fclose(tfp);
 		}
@@ -770,9 +927,11 @@ ins_altitude[nins]);*/
 		/* allocate arrays for sonardepth data */
 		if (nsonardepth > 0)
 		    {
-		    status = mb_malloc(verbose, nsonardepth * sizeof(double), &sonardepth_time_d,&error);
+		    status = mb_mallocd(verbose, __FILE__, __LINE__, nsonardepth * sizeof(double), (void **)&sonardepth_time_d,&error);
 		    if (error == MB_ERROR_NO_ERROR)
-		    	status = mb_malloc(verbose, nsonardepth * sizeof(double), &sonardepth_sonardepth,&error);
+		    	status = mb_mallocd(verbose, __FILE__, __LINE__, nsonardepth * sizeof(double), (void **)&sonardepth_sonardepth,&error);
+		    if (error == MB_ERROR_NO_ERROR)
+		    	status = mb_mallocd(verbose, __FILE__, __LINE__, nsonardepth * sizeof(double), (void **)&sonardepth_filter,&error);
 		    if (error != MB_ERROR_NO_ERROR)
 			{
 			mb_error(verbose,error,&message);
@@ -802,6 +961,7 @@ ins_altitude[nins]);*/
 /*fprintf(stderr,"SONARDEPTH DATA: %f %f\n", 
 sonardepth_time_d[nsonardepth],
 sonardepth_sonardepth[nsonardepth]);*/
+			sonardepth_sonardepth[nsonardepth] += sonardepthoffset;
 			nsonardepth++;
 			}
 		fclose(tfp);
@@ -828,9 +988,9 @@ sonardepth_sonardepth[nsonardepth]);*/
 		/* allocate arrays for time lag */
 		if (ntimelag > 0)
 		    {
-		    status = mb_malloc(verbose,ntimelag * sizeof(double), &timelag_time_d,&error);
+		    status = mb_mallocd(verbose, __FILE__, __LINE__,ntimelag * sizeof(double), (void **)&timelag_time_d,&error);
 		    if (error == MB_ERROR_NO_ERROR)
-		    	status = mb_malloc(verbose,ntimelag * sizeof(double), &timelag_model,&error);
+		    	status = mb_mallocd(verbose, __FILE__, __LINE__,ntimelag * sizeof(double), (void **)&timelag_model,&error);
 		    if (error != MB_ERROR_NO_ERROR)
 			{
 			mb_error(verbose,error,&message);
@@ -994,6 +1154,8 @@ if ((tfp = fopen(timelagfile, "w")) == NULL)
 	nreadmbimage = 0;
 	nreadssv = 0;
 	nreadnav1 = 0;
+	nreadnav2 = 0;
+	nreadrph = 0;
 	nreadsbp = 0;
 	nreadsslo = 0;
 	nreadsshi = 0;
@@ -1096,12 +1258,12 @@ if ((tfp = fopen(timelagfile, "w")) == NULL)
 				if (nbatht == 0 || nbatht >= nbatht_alloc)
 					{
 					nbatht_alloc +=  MB7KPREPROCESS_ALLOC_CHUNK;
-					status = mb_realloc(verbose,nbatht_alloc*sizeof(double),&batht_time_d,&error);
-					status = mb_realloc(verbose,nbatht_alloc*sizeof(int),&batht_ping,&error);
-					status = mb_realloc(verbose,nbatht_alloc*sizeof(double),&batht_time_d_new,&error);
-					status = mb_realloc(verbose,nbatht_alloc*sizeof(double),&batht_time_offset,&error);
-					status = mb_realloc(verbose,nbatht_alloc*sizeof(int),&batht_ping_offset,&error);
-					status = mb_realloc(verbose,nbatht_alloc*sizeof(int),&batht_good_offset,&error);
+					status = mb_reallocd(verbose,__FILE__,__LINE__,nbatht_alloc*sizeof(double),(void **)&batht_time_d,&error);
+					status = mb_reallocd(verbose,__FILE__,__LINE__,nbatht_alloc*sizeof(int),(void **)&batht_ping,&error);
+					status = mb_reallocd(verbose,__FILE__,__LINE__,nbatht_alloc*sizeof(double),(void **)&batht_time_d_new,&error);
+					status = mb_reallocd(verbose,__FILE__,__LINE__,nbatht_alloc*sizeof(double),(void **)&batht_time_offset,&error);
+					status = mb_reallocd(verbose,__FILE__,__LINE__,nbatht_alloc*sizeof(int),(void **)&batht_ping_offset,&error);
+					status = mb_reallocd(verbose,__FILE__,__LINE__,nbatht_alloc*sizeof(int),(void **)&batht_good_offset,&error);
 					if (error != MB_ERROR_NO_ERROR)
 						{
 						mb_error(verbose,error,&message);
@@ -1249,7 +1411,7 @@ if ((tfp = fopen(timelagfile, "w")) == NULL)
 	   	/* handle bluefin nav data */
 		else if (status == MB_SUCCESS && kind == MB_DATA_NAV2) 
 			{
-			nreadnav1++;
+			nreadnav2++;
 			
 			bluefin = &(istore->bluefin);
 			header = &(bluefin->header);
@@ -1288,16 +1450,17 @@ bluefin->nav[i].position_time,(-0.001*(double)bluefin->nav[i].timedelay));
 				&& nnav + bluefin->number_frames >= nnav_alloc)
 				{
 				nnav_alloc +=  MB7KPREPROCESS_ALLOC_CHUNK;
-				status = mb_realloc(verbose,nnav_alloc*sizeof(double),&nav_time_d,&error);
-				status = mb_realloc(verbose,nnav_alloc*sizeof(int),&nav_quality,&error);
-				status = mb_realloc(verbose,nnav_alloc*sizeof(double),&nav_lon,&error);
-				status = mb_realloc(verbose,nnav_alloc*sizeof(double),&nav_lat,&error);
-				status = mb_realloc(verbose,nnav_alloc*sizeof(double),&nav_speed,&error);
-				status = mb_realloc(verbose,nnav_alloc*sizeof(double),&nav_sonardepth,&error);
-				status = mb_realloc(verbose,nnav_alloc*sizeof(double),&nav_sonardepthrate,&error);
-				status = mb_realloc(verbose,nnav_alloc*sizeof(double),&nav_heading,&error);
-				status = mb_realloc(verbose,nnav_alloc*sizeof(double),&nav_roll,&error);
-				status = mb_realloc(verbose,nnav_alloc*sizeof(double),&nav_pitch,&error);
+				status = mb_reallocd(verbose,__FILE__,__LINE__,nnav_alloc*sizeof(double),(void **)&nav_time_d,&error);
+				status = mb_reallocd(verbose,__FILE__,__LINE__,nnav_alloc*sizeof(int),(void **)&nav_quality,&error);
+				status = mb_reallocd(verbose,__FILE__,__LINE__,nnav_alloc*sizeof(double),(void **)&nav_lon,&error);
+				status = mb_reallocd(verbose,__FILE__,__LINE__,nnav_alloc*sizeof(double),(void **)&nav_lat,&error);
+				status = mb_reallocd(verbose,__FILE__,__LINE__,nnav_alloc*sizeof(double),(void **)&nav_speed,&error);
+				status = mb_reallocd(verbose,__FILE__,__LINE__,nnav_alloc*sizeof(double),(void **)&nav_sonardepth,&error);
+				status = mb_reallocd(verbose,__FILE__,__LINE__,nnav_alloc*sizeof(double),(void **)&nav_sonardepthrate,&error);
+				status = mb_reallocd(verbose,__FILE__,__LINE__,nnav_alloc*sizeof(double),(void **)&nav_sonardepthfilter,&error);
+				status = mb_reallocd(verbose,__FILE__,__LINE__,nnav_alloc*sizeof(double),(void **)&nav_heading,&error);
+				status = mb_reallocd(verbose,__FILE__,__LINE__,nnav_alloc*sizeof(double),(void **)&nav_roll,&error);
+				status = mb_reallocd(verbose,__FILE__,__LINE__,nnav_alloc*sizeof(double),(void **)&nav_pitch,&error);
 				if (error != MB_ERROR_NO_ERROR)
 					{
 					mb_error(verbose,error,&message);
@@ -1311,15 +1474,15 @@ bluefin->nav[i].position_time,(-0.001*(double)bluefin->nav[i].timedelay));
 				&& nalt + bluefin->number_frames >= nalt_alloc)
 				{
 				nalt_alloc +=  MB7KPREPROCESS_ALLOC_CHUNK;
-				status = mb_realloc(verbose,nalt_alloc*sizeof(double),&alt_time_d,&error);
-				status = mb_realloc(verbose,nalt_alloc*sizeof(double),&alt_altitude,&error);
+				status = mb_reallocd(verbose,__FILE__,__LINE__,nalt_alloc*sizeof(double),(void **)&alt_time_d,&error);
+				status = mb_reallocd(verbose,__FILE__,__LINE__,nalt_alloc*sizeof(double),(void **)&alt_altitude,&error);
 				}
 			if (bluefin->number_frames > 0 
 				&& ntimedelay + bluefin->number_frames >= ntimedelay_alloc)
 				{
 				ntimedelay_alloc +=  MB7KPREPROCESS_ALLOC_CHUNK;
-				status = mb_realloc(verbose,ntimedelay_alloc*sizeof(double),&timedelay_time_d,&error);
-				status = mb_realloc(verbose,ntimedelay_alloc*sizeof(double),&timedelay_timedelay,&error);
+				status = mb_reallocd(verbose,__FILE__,__LINE__,ntimedelay_alloc*sizeof(double),(void **)&timedelay_time_d,&error);
+				status = mb_reallocd(verbose,__FILE__,__LINE__,ntimedelay_alloc*sizeof(double),(void **)&timedelay_timedelay,&error);
 				}
 				
 			/* store the navigation and attitude data */
@@ -1334,7 +1497,8 @@ bluefin->nav[i].position_time,(-0.001*(double)bluefin->nav[i].timedelay));
 					nav_speed[nnav] = bluefin->nav[i].speed;
 					nav_sonardepth[nnav] = bluefin->nav[i].depth 
 						+ depthsensoroffx * sin(bluefin->nav[i].pitch)
-						+ depthsensoroffz * cos(bluefin->nav[i].pitch);
+						+ depthsensoroffz * cos(bluefin->nav[i].pitch)
+						+ sonardepthoffset;
 					nav_heading[nnav] = RTD * bluefin->nav[i].yaw;
 					nav_roll[nnav] = RTD * bluefin->nav[i].roll;
 					nav_pitch[nnav] = RTD * bluefin->nav[i].pitch;
@@ -1354,6 +1518,107 @@ bluefin->nav[i].position_time,(-0.001*(double)bluefin->nav[i].timedelay));
 					timedelay_timedelay[ntimedelay] = (-0.001 * (double)bluefin->nav[i].timedelay);
 					ntimedelay++;
 					}
+				}
+			
+			}
+			
+	   	/* handle position data */
+		else if (status == MB_SUCCESS && kind == MB_DATA_NAV1) 
+			{
+			nreadnav1++;
+			
+			position = &(istore->position);
+			header = &(position->header);
+			time_j[0] = header->s7kTime.Year;
+			time_j[1] = header->s7kTime.Day;
+			time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+			time_j[3] = (int) header->s7kTime.Seconds;
+			time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+			mb_get_itime(verbose, time_j, time_i);
+			mb_get_time(verbose, time_i, &time_d);
+
+			if (verbose > 0)
+				fprintf(stderr,"R7KRECID_Position:               7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+			time_i[0],time_i[1],time_i[2],
+			time_i[3],time_i[4],time_i[5],time_i[6],
+			header->RecordNumber);
+				
+			/* allocate memory for position arrays if needed */
+			if (npos + 1 >= npos_alloc)
+				{
+				npos_alloc +=  MB7KPREPROCESS_ALLOC_CHUNK;
+				status = mb_reallocd(verbose,__FILE__,__LINE__,npos_alloc*sizeof(double),(void **)&pos_time_d,&error);
+				status = mb_reallocd(verbose,__FILE__,__LINE__,npos_alloc*sizeof(double),(void **)&pos_lon,&error);
+				status = mb_reallocd(verbose,__FILE__,__LINE__,npos_alloc*sizeof(double),(void **)&pos_lat,&error);
+				if (error != MB_ERROR_NO_ERROR)
+					{
+					mb_error(verbose,error,&message);
+					fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
+					fprintf(stderr,"\nProgram <%s> Terminated\n",
+					    program_name);
+					exit(error);
+					}		    
+				}
+				
+			/* store the position data */
+			if (npos == 0 || pos_time_d[npos-1] < time_d)
+				{
+				pos_time_d[npos] = time_d + position->latency;
+				pos_lon[npos] = RTD * position->longitude;
+				pos_lat[npos] = RTD * position->latitude;
+				npos++;
+				}
+			
+			}
+			
+	   	/* handle rollpitchheave data */
+		else if (status == MB_SUCCESS && kind == MB_DATA_ATTITUDE
+			&& istore->type == R7KRECID_RollPitchHeave) 
+			{
+			nreadrph++;
+			
+			rollpitchheave = &(istore->rollpitchheave);
+			header = &(rollpitchheave->header);
+			time_j[0] = header->s7kTime.Year;
+			time_j[1] = header->s7kTime.Day;
+			time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+			time_j[3] = (int) header->s7kTime.Seconds;
+			time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+			mb_get_itime(verbose, time_j, time_i);
+			mb_get_time(verbose, time_i, &time_d);
+
+			if (verbose > 0)
+				fprintf(stderr,"R7KRECID_RollPitchHeave:               7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+			time_i[0],time_i[1],time_i[2],
+			time_i[3],time_i[4],time_i[5],time_i[6],
+			header->RecordNumber);
+				
+			/* allocate memory for rollpitchheave arrays if needed */
+			if (nrph + 1 >= nrph_alloc)
+				{
+				nrph_alloc +=  MB7KPREPROCESS_ALLOC_CHUNK;
+				status = mb_reallocd(verbose,__FILE__,__LINE__,nrph_alloc*sizeof(double),(void **)&rph_time_d,&error);
+				status = mb_reallocd(verbose,__FILE__,__LINE__,nrph_alloc*sizeof(double),(void **)&rph_roll,&error);
+				status = mb_reallocd(verbose,__FILE__,__LINE__,nrph_alloc*sizeof(double),(void **)&rph_pitch,&error);
+				status = mb_reallocd(verbose,__FILE__,__LINE__,nrph_alloc*sizeof(double),(void **)&rph_heave,&error);
+				if (error != MB_ERROR_NO_ERROR)
+					{
+					mb_error(verbose,error,&message);
+					fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
+					fprintf(stderr,"\nProgram <%s> Terminated\n",
+					    program_name);
+					exit(error);
+					}		    
+				}
+				
+			/* store the rollpitchheave data */
+			if (nrph == 0 || rph_time_d[nrph-1] < time_d)
+				{
+				rph_time_d[nrph] = time_d;
+				rph_roll[nrph] = RTD * rollpitchheave->roll;
+				rph_pitch[nrph] = RTD * rollpitchheave->pitch;
+				rph_heave[nrph] = rollpitchheave->heave;
+				nrph++;
 				}
 			
 			}
@@ -1415,8 +1680,8 @@ bluefin->nav[i].position_time,(-0.001*(double)bluefin->nav[i].timedelay));
 			if (nedget == 0 || nedget >= nedget_alloc)
 				{
 				nedget_alloc +=  MB7KPREPROCESS_ALLOC_CHUNK;
-				status = mb_realloc(verbose,nedget_alloc*sizeof(double),&edget_time_d,&error);
-				status = mb_realloc(verbose,nedget_alloc*sizeof(int),&edget_ping,&error);
+				status = mb_reallocd(verbose,__FILE__,__LINE__,nedget_alloc*sizeof(double),(void **)&edget_time_d,&error);
+				status = mb_reallocd(verbose,__FILE__,__LINE__,nedget_alloc*sizeof(int),(void **)&edget_ping,&error);
 				if (error != MB_ERROR_NO_ERROR)
 					{
 					mb_error(verbose,error,&message);
@@ -1521,7 +1786,9 @@ bluefin->nav[i].position_time,(-0.001*(double)bluefin->nav[i].timedelay));
 	fprintf(stdout, "          Beam:              %d\n", nreadmbbeam);
 	fprintf(stdout, "          Image:             %d\n", nreadmbimage);
 	fprintf(stdout, "     Bluefin CTD:       %d\n", nreadssv);
-	fprintf(stdout, "     Bluefin Nav:       %d\n", nreadnav1);
+	fprintf(stdout, "     Bluefin Nav:       %d\n", nreadnav2);
+	fprintf(stdout, "     Position:          %d\n", nreadnav1);	
+	fprintf(stdout, "     RollPitchHeave:    %d\n", nreadrph);
 	fprintf(stdout, "     Subbottom:         %d\n", nreadsbp);
 	fprintf(stdout, "     Low Sidescan:      %d\n", nreadsslo);
 	fprintf(stdout, "     High Sidescan:     %d\n", nreadsshi);
@@ -1535,6 +1802,8 @@ bluefin->nav[i].position_time,(-0.001*(double)bluefin->nav[i].timedelay));
 	nreadmbimagetot += nreadmbimage;
 	nreadssvtot += nreadssv;
 	nreadnav1tot += nreadnav1;
+	nreadnav2tot += nreadnav2;
+	nreadrphtot += nreadrph;
 	nreadsbptot += nreadsbp;
 	nreadsslotot += nreadsslo;
 	nreadsshitot += nreadsshi;
@@ -1679,6 +1948,109 @@ fprintf(stderr," %f\n",ins_time_d[i]);
 				}
 			sonardepth_time_d[i] -= timelag;
 /*fprintf(stderr,"sonardepth_time_d[%d]:%f timelag:%f\n", i, sonardepth_time_d[i], timelag);*/
+			}
+		}
+		
+	/* apply filtering to sonardepth data */
+	if (nsonardepth > 0 && sonardepthfilter == MB_YES)
+		{
+		/* correct time_d of sonardepth data */
+		for (i=0;i<nsonardepth;i++)
+			{
+			sonardepth_filter[i] = 0.0;
+			sonardepth_filterweight = 0.0;
+			for (j=0;j<nsonardepth;j++)
+				{
+				dtol = (sonardepth_time_d[j] - sonardepth_time_d[i]) / sonardepthfilterlength;
+				if (fabs(dtol) < 4.0)
+					{
+					weight = exp(-dtol * dtol);
+					sonardepth_filter[i] += weight * sonardepth_sonardepth[j];
+					sonardepth_filterweight += weight;
+					}
+				}
+			if (sonardepth_filterweight > 0.0)
+				sonardepth_filter[i] /= sonardepth_filterweight;
+			}
+		for (i=0;i<nsonardepth;i++)
+			{
+			if (sonardepth_sonardepth[i] < 2.0 * sonardepthfilterlength)
+				factor = 1.0;
+			else
+				factor = exp(-(sonardepth_sonardepth[i] - 2.0 * sonardepthfilterlength)
+						/ (sonardepthfilterlength));
+			sonardepth_sonardepth[i] = (1.0 - factor) * sonardepth_sonardepth[i]
+						+ factor * sonardepth_filter[i];
+			}
+		}
+		
+	/* apply filtering to nav sonardepth data */
+	if (nnav > 0 && sonardepthfilter == MB_YES)
+		{
+		/* correct time_d of sonardepth data */
+		for (i=0;i<nnav;i++)
+			{
+			nav_sonardepthfilter[i] = 0.0;
+			sonardepth_filterweight = 0.0;
+			for (j=0;j<nnav;j++)
+				{
+				dtol = (nav_time_d[j] - nav_time_d[i]) / sonardepthfilterlength;
+				if (fabs(dtol) < 4.0)
+					{
+					weight = exp(-dtol * dtol);
+					nav_sonardepthfilter[i] += weight * nav_sonardepth[j];
+					sonardepth_filterweight += weight;
+					}
+				}
+			if (sonardepth_filterweight > 0.0)
+				nav_sonardepthfilter[i] /= sonardepth_filterweight;
+			}
+		for (i=0;i<nnav;i++)
+			{
+/*fprintf(stderr,"nav_time_d[%d]:%f raw:%f filter:%f\n", 
+i, nav_time_d[i], nav_sonardepth[i], nav_sonardepthfilter[i]);*/
+			if (nav_sonardepth[i] < 2.0 * sonardepthfilterlength)
+				factor = 1.0;
+			else
+				factor = exp(-(nav_sonardepth[i] - 2.0 * sonardepthfilterlength)
+						/ (sonardepthfilterlength));
+			nav_sonardepth[i] = (1.0 - factor) * nav_sonardepth[i]
+						+ factor * nav_sonardepthfilter[i];
+			}
+		}
+		
+	/* apply filtering to ins sonardepth data */
+	if (nins > 0 && sonardepthfilter == MB_YES)
+		{
+		/* correct time_d of sonardepth data */
+		for (i=0;i<nins;i++)
+			{
+			ins_sonardepthfilter[i] = 0.0;
+			sonardepth_filterweight = 0.0;
+			for (j=0;j<nins;j++)
+				{
+				dtol = (ins_time_d[j] - ins_time_d[i]) / sonardepthfilterlength;
+				if (fabs(dtol) < 4.0)
+					{
+					weight = exp(-dtol * dtol);
+					ins_sonardepthfilter[i] += weight * ins_sonardepth[j];
+					sonardepth_filterweight += weight;
+					}
+				}
+			if (sonardepth_filterweight > 0.0)
+				ins_sonardepthfilter[i] /= sonardepth_filterweight;
+			}
+		for (i=0;i<nins;i++)
+			{
+/*fprintf(stderr,"ins_time_d[%d]:%f raw:%f filter:%f\n", 
+i, ins_time_d[i], ins_sonardepth[i], ins_sonardepthfilter[i]);*/
+			if (ins_sonardepth[i] < 2.0 * sonardepthfilterlength)
+				factor = 1.0;
+			else
+				factor = exp(-(ins_sonardepth[i] - 2.0 * sonardepthfilterlength)
+						/ (sonardepthfilterlength));
+			ins_sonardepth[i] = (1.0 - factor) * ins_sonardepth[i]
+						+ factor * ins_sonardepthfilter[i];
 			}
 		}
 		
@@ -1832,7 +2204,9 @@ fprintf(stderr," %f\n",ins_time_d[i]);
 	fprintf(stdout, "          Beam:              %d\n", nreadmbbeamtot);
 	fprintf(stdout, "          Image:             %d\n", nreadmbimagetot);
 	fprintf(stdout, "     Bluefin CTD:       %d\n", nreadssvtot);
-	fprintf(stdout, "     Bluefin Nav:       %d\n", nreadnav1tot);
+	fprintf(stdout, "     Bluefin Nav:       %d\n", nreadnav2tot);
+	fprintf(stdout, "     Position:          %d\n", nreadnav1tot);
+	fprintf(stdout, "     RollPitchHeave:    %d\n", nreadrphtot);
 	fprintf(stdout, "     Subbottom:         %d\n", nreadsbptot);
 	fprintf(stdout, "     Low Sidescan:      %d\n", nreadsslotot);
 	fprintf(stdout, "     High Sidescan:     %d\n", nreadsshitot);
@@ -1847,6 +2221,8 @@ fprintf(stderr," %f\n",ins_time_d[i]);
 	nreadmbimagetot = 0;
 	nreadssvtot = 0;
 	nreadnav1tot = 0;
+	nreadnav2tot = 0;
+	nreadrphtot = 0;
 	nreadsbptot = 0;
 	nreadsslotot = 0;
 	nreadsshitot = 0;
@@ -1889,7 +2265,7 @@ fprintf(stderr," %f\n",ins_time_d[i]);
 	while (read_data == MB_YES && format == MBF_RESON7KR)
 	{
 	/* figure out the output file name */
-	status = mb_get_format(verbose, ifile, fileroot, &testformat, error);
+	status = mb_get_format(verbose, ifile, fileroot, &testformat, &error);
 	if (testformat == MBF_RESON7KR 
 		&& strncmp(".s7k",&ifile[strlen(ifile)-4],4) == 0)
 		sprintf(ofile, "%s.mb%d", fileroot, testformat);
@@ -2000,6 +2376,8 @@ fprintf(stderr," %f\n",ins_time_d[i]);
 	nreadmbimage = 0;
 	nreadssv = 0;
 	nreadnav1 = 0;
+	nreadnav2 = 0;
+	nreadrph = 0;
 	nreadsbp = 0;
 	nreadsslo = 0;
 	nreadsshi = 0;
@@ -2226,7 +2604,7 @@ fprintf(stderr," %f\n",ins_time_d[i]);
 				/* recalculate optional values in bathymetry record */
 				interp_status == MB_SUCCESS;
 				
-				/* get navigation, etc */
+				/* get position */
 				if (nins > 0)
 					{
 					interp_status = mb_linear_interp_degrees(verbose, 
@@ -2239,46 +2617,25 @@ fprintf(stderr," %f\n",ins_time_d[i]);
 								nins, time_d, &navlat, &j, 
 								&error);
 					if (interp_status == MB_SUCCESS)
-					interp_status = mb_linear_interp_degrees(verbose, 
-								ins_time_d-1, ins_heading-1,
-								nins, time_d, &heading, &j, 
-								&error);
-					if (interp_status == MB_SUCCESS)
-					interp_status = mb_linear_interp(verbose, 
-								ins_time_d-1, ins_sonardepth-1,
-								nins, time_d, &sonardepth, &j, 
-								&error);
-					if (interp_status == MB_SUCCESS)
-					interp_status = mb_linear_interp(verbose, 
-								ins_time_d-1, ins_roll-1,
-								nins, time_d, &roll, &j, 
-								&error);
-					if (interp_status == MB_SUCCESS)
-					interp_status = mb_linear_interp(verbose, 
-								ins_time_d-1, ins_pitch-1,
-								nins, time_d, &pitch, &j, 
-								&error);
-					if (interp_status == MB_SUCCESS)
-					interp_status = mb_linear_interp(verbose, 
-								ins_altitude_time_d-1, ins_altitude-1,
-								nins_altitude, time_d, &altitude, &j, 
-								&error);
-					if (interp_status == MB_SUCCESS)
 					interp_status = mb_linear_interp(verbose, 
 								ins_speed_time_d-1, ins_speed-1,
 								nins_speed, time_d, &speed, &j, 
 								&error);
-/* fprintf(stderr,"Nav Interp INS: %f %f %f %f %f %f %f %f %f\n",
-time_d,navlon,navlat,heading,sonardepth,altitude,roll,pitch,speed);*/
 					}
-				else
+				else if (nrock > 0)
 					{
-					speed = 0.0;
 					interp_status = mb_linear_interp_degrees(verbose, 
-								nav_time_d-1, nav_heading-1,
-								nnav, time_d, &heading, &j, 
+								rock_time_d-1, rock_lon-1,
+								nrock, time_d, &navlon, &j, 
 								&error);
 					if (interp_status == MB_SUCCESS)
+					interp_status = mb_linear_interp_degrees(verbose, 
+								rock_time_d-1, rock_lat-1,
+								nrock, time_d, &navlat, &j, 
+								&error);
+					}
+				else if (nnav > 0)
+					{
 					interp_status = mb_linear_interp_degrees(verbose, 
 								nav_time_d-1, nav_lon-1,
 								nnav, time_d, &navlon, &j, 
@@ -2288,6 +2645,115 @@ time_d,navlon,navlat,heading,sonardepth,altitude,roll,pitch,speed);*/
 								nav_time_d-1, nav_lat-1,
 								nnav, time_d, &navlat, &j, 
 								&error);
+					speed = 0.0;
+					}
+				else if (npos > 0)
+					{
+					interp_status = mb_linear_interp_degrees(verbose, 
+								pos_time_d-1, pos_lon-1,
+								npos, time_d, &navlon, &j, 
+								&error);
+					if (interp_status == MB_SUCCESS)
+					interp_status = mb_linear_interp_degrees(verbose, 
+								pos_time_d-1, pos_lat-1,
+								npos, time_d, &navlat, &j, 
+								&error);
+					speed = 0.0;
+					}
+				else
+					{
+					navlon = 0.0;
+					navlat = 0.0;
+					speed = 0.0;
+					}
+				
+				/* get heading */
+				if (interp_status != MB_SUCCESS)
+					{
+					}
+				else if (nins > 0)
+					{
+					interp_status = mb_linear_interp_degrees(verbose, 
+								ins_time_d-1, ins_heading-1,
+								nins, time_d, &heading, &j, 
+								&error);
+					}
+				else if (nrock > 0)
+					{
+					interp_status = mb_linear_interp_degrees(verbose, 
+								rock_time_d-1, rock_heading-1,
+								nrock, time_d, &heading, &j, 
+								&error);
+					}
+				else if (nnav > 0)
+					{
+					interp_status = mb_linear_interp_degrees(verbose, 
+								nav_time_d-1, nav_heading-1,
+								nnav, time_d, &heading, &j, 
+								&error);
+					}
+				else if (npos > 1)
+					{
+					interp_status = mb_linear_interp_degrees(verbose, 
+								pos_time_d-1, pos_lat-1,
+								npos, time_d, &navlat, &j, 
+								&error);
+					if (j > 1)
+						{
+						j1 = j - 2;
+						j2 = j - 1;
+						}
+					else
+						{
+						j1 = j - 1;
+						j2 = j;
+						}
+					
+					mb_coor_scale(verbose,navlat,&mtodeglon,&mtodeglat);
+					dx = (pos_lon[j2] - pos_lon[j1])/mtodeglon;
+					dy = (pos_lat[j2] - pos_lat[j1])/mtodeglat;
+					dist = sqrt(dx*dx + dy*dy);
+					if (dist > 0.0)
+						heading = RTD*atan2(dx/dist,dy/dist);
+					if (heading < 0.0)
+						heading = heading + 360.0;
+					dt = (pos_time_d[j2] - pos_time_d[j1]);
+					if (dt > 0.0)
+						speed = 3.6 * dist / dt;
+					}
+				else
+					{
+					heading = 0.0;
+					}
+				
+				/* get sonar depth */
+				if (interp_status != MB_SUCCESS)
+					{
+					}
+				else if (nsonardepth > 0)
+					{
+					if (interp_status == MB_SUCCESS)
+					interp_status = mb_linear_interp(verbose, 
+								sonardepth_time_d-1, sonardepth_sonardepth-1,
+								nsonardepth, time_d, &sonardepth, &j, 
+								&error);
+					}
+				else if (nins > 0)
+					{
+					interp_status = mb_linear_interp(verbose, 
+								ins_time_d-1, ins_sonardepth-1,
+								nins, time_d, &sonardepth, &j, 
+								&error);
+					}
+				else if (nrock > 0)
+					{
+					interp_status = mb_linear_interp(verbose, 
+								rock_time_d-1, rock_sonardepth-1,
+								nrock, time_d, &sonardepth, &j, 
+								&error);
+					}
+				else if (nnav > 0)
+					{
 					if (sonardepthlagfix == MB_YES && nnav > 1 
 						&& sonardepthratemax > 0.0
 						&& interp_status == MB_SUCCESS)
@@ -2305,12 +2771,73 @@ time_d,navlon,navlat,heading,sonardepth,altitude,roll,pitch,speed);*/
 								nav_time_d-1, nav_sonardepth-1,
 								nnav, time_d + sonardepthlag, &sonardepth, &j, 
 								&error);
-					if (interp_status == MB_SUCCESS)
+					}
+				else if (nrph > 0)
+					{
+					interp_status = mb_linear_interp(verbose, 
+								rph_time_d-1, rph_heave-1,
+								nrph, time_d, &heave, &j, 
+								&error);
+					sonardepth = heave;
+					}
+				else
+					{
+					sonardepth = 0.0;
+					}
+				
+				/* get altitude */
+				if (interp_status != MB_SUCCESS)
+					{
+					}
+				else if (nins > 0)
+					{
+					interp_status = mb_linear_interp(verbose, 
+								ins_altitude_time_d-1, ins_altitude-1,
+								nins_altitude, time_d, &altitude, &j, 
+								&error);
+					}
+				else if (nnav > 0)
+					{
 					interp_status = mb_linear_interp(verbose, 
 								alt_time_d-1, alt_altitude-1,
 								nalt, time_d, &altitude, &j, 
 								&error);
+					}
+				else
+					{
+					altitude = 0.0;
+					}
+				
+				/* get attitude */
+				if (interp_status != MB_SUCCESS)
+					{
+					}
+				else if (nins > 0)
+					{
+					interp_status = mb_linear_interp(verbose, 
+								ins_time_d-1, ins_roll-1,
+								nins, time_d, &roll, &j, 
+								&error);
 					if (interp_status == MB_SUCCESS)
+					interp_status = mb_linear_interp(verbose, 
+								ins_time_d-1, ins_pitch-1,
+								nins, time_d, &pitch, &j, 
+								&error);
+					}
+				else if (nrock > 0)
+					{
+					interp_status = mb_linear_interp(verbose, 
+								rock_time_d-1, rock_roll-1,
+								nrock, time_d, &roll, &j, 
+								&error);
+					if (interp_status == MB_SUCCESS)
+					interp_status = mb_linear_interp(verbose, 
+								rock_time_d-1, rock_pitch-1,
+								nrock, time_d, &pitch, &j, 
+								&error);
+					}
+				else if (nnav > 0)
+					{
 					interp_status = mb_linear_interp(verbose, 
 								nav_time_d-1, nav_roll-1,
 								nnav, time_d, &roll, &j, 
@@ -2321,17 +2848,22 @@ time_d,navlon,navlat,heading,sonardepth,altitude,roll,pitch,speed);*/
 								nnav, time_d, &pitch, &j, 
 								&error);
 					}
-				
-				/* get sonardepth */
-				if (nsonardepth > 0)
+				else if (nrph > 0)
 					{
-/*fprintf(stderr,"time_d:%f sonardepth:%f", time_d, sonardepth);*/
+					interp_status = mb_linear_interp(verbose, 
+								rph_time_d-1, rph_roll-1,
+								nrph, time_d, &roll, &j, 
+								&error);
 					if (interp_status == MB_SUCCESS)
 					interp_status = mb_linear_interp(verbose, 
-								sonardepth_time_d-1, sonardepth_sonardepth-1,
-								nsonardepth, time_d, &sonardepth, &j, 
+								rph_time_d-1, rph_pitch-1,
+								nrph, time_d, &pitch, &j, 
 								&error);
-/*fprintf(stderr," sonardepth:%f\n", sonardepth);*/
+					}
+				else
+					{
+					roll = 0.0;
+					pitch = 0.0;
 					}
 
 				/* if the optional data are not all available, this ping
@@ -2342,18 +2874,6 @@ time_d,navlon,navlat,heading,sonardepth,altitude,roll,pitch,speed);*/
 					{
 					status = MB_FAILURE;
 					error = MB_ERROR_MISSING_NAVATTITUDE;
-					}
-
-				/* go ahead and use zero values */
-				else if (interp_status == MB_FAILURE)
-					{
-					navlon = 0.0;
-					navlat = 0.0;
-					heading = 0.0;
-					altitude = 0.0;
-					sonardepth = 0.0;
-					roll = 0.0;
-					pitch = 0.0;
 					}
 
 				/* if the optional data are available, then proceed */
@@ -2647,7 +3167,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]);*/
 	   	/* handle bluefin nav data */
 		else if (status == MB_SUCCESS && kind == MB_DATA_NAV2) 
 			{
-			nreadnav1++;
+			nreadnav2++;
 			
 			bluefin = &(istore->bluefin);
 			header = &(bluefin->header);
@@ -2686,6 +3206,78 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]);*/
 
 			if (verbose > 0)
 				fprintf(stderr,"R7KRECID_BluefinNav:               7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+						time_i[0],time_i[1],time_i[2],
+						time_i[3],time_i[4],time_i[5],time_i[6],
+						header->RecordNumber);
+			for (i=0;i<bluefin->number_frames;i++)
+				{
+				time_j[0] = bluefin->nav[i].s7kTime.Year;
+				time_j[1] = bluefin->nav[i].s7kTime.Day;
+				time_j[2] = 60 * bluefin->nav[i].s7kTime.Hours + bluefin->nav[i].s7kTime.Minutes;
+				time_j[3] = (int) bluefin->nav[i].s7kTime.Seconds;
+				time_j[4] = (int) (1000000 * (bluefin->nav[i].s7kTime.Seconds - time_j[3]));
+				mb_get_itime(verbose, time_j, time_i);
+				mb_get_time(verbose, time_i, &time_d);
+				time_d -= timelag;
+				bluefin->nav[i].position_time -= timelag;
+				bluefin->nav[i].altitude_time -= timelag;
+				mb_get_date(verbose, time_d,time_i);
+				mb_get_jtime(verbose, time_i, time_j);
+				bluefin->nav[i].s7kTime.Year = time_i[0];
+				bluefin->nav[i].s7kTime.Day = time_j[1];
+				bluefin->nav[i].s7kTime.Hours = time_i[3];
+				bluefin->nav[i].s7kTime.Minutes = time_i[4];
+				bluefin->nav[i].s7kTime.Seconds = time_i[5] + 0.000001 * time_i[6];
+				if (verbose > 0)
+				fprintf(stderr,"                       %2.2d          7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) Pos_time:%f\n",
+					i,time_i[0],time_i[1],time_i[2],
+					time_i[3],time_i[4],time_i[5],time_i[6],
+					bluefin->nav[i].position_time);
+				}			
+			}
+			
+	   	/* handle position data */
+		else if (status == MB_SUCCESS && kind == MB_DATA_NAV1) 
+			{
+			nreadnav1++;
+			
+			position = &(istore->position);
+			header = &(position->header);
+			time_j[0] = header->s7kTime.Year;
+			time_j[1] = header->s7kTime.Day;
+			time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+			time_j[3] = (int) header->s7kTime.Seconds;
+			time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+			mb_get_itime(verbose, time_j, time_i);
+			mb_get_time(verbose, time_i, &time_d);
+
+			/* get timelag value */
+			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
+				{
+				interp_status = mb_linear_interp(verbose, 
+							timedelay_time_d-1, timedelay_timedelay-1,
+							ntimedelay, time_d, &timelag, &j, 
+							&error);
+				timelag += timelagconstant;
+				}
+			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
+				{
+				interp_status = mb_linear_interp(verbose, 
+							timelag_time_d-1, timelag_model-1,
+							ntimelag, time_d, &timelag, &j, 
+							&error);
+				}
+			time_d -= timelag;
+			mb_get_date(verbose, time_d,time_i);
+			mb_get_jtime(verbose, time_i, time_j);
+			header->s7kTime.Year = time_i[0];
+			header->s7kTime.Day = time_j[1];
+			header->s7kTime.Hours = time_i[3];
+			header->s7kTime.Minutes = time_i[4];
+			header->s7kTime.Seconds = time_i[5] + 0.000001 * time_i[6];
+
+			if (verbose > 0)
+				fprintf(stderr,"R7KRECID_Position:               7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
 						time_i[0],time_i[1],time_i[2],
 						time_i[3],time_i[4],time_i[5],time_i[6],
 						header->RecordNumber);
@@ -3003,7 +3595,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]);*/
 	fclose(tfp);
 	
 	/* output counts */
-	fprintf(stdout, "\nData records read from: %s\n", ifile);
+	fprintf(stdout, "\nData records written to: %s\n", ofile);
 	fprintf(stdout, "     File Header:       %d\n", nreadfileheader);
 	fprintf(stdout, "     Multibeam:         %d\n", nreadmultibeam);
 	fprintf(stdout, "          Volatile Settings: %d\n", nreadmbvolatilesettings);
@@ -3013,7 +3605,9 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]);*/
 	fprintf(stdout, "          Beam:              %d\n", nreadmbbeam);
 	fprintf(stdout, "          Image:             %d\n", nreadmbimage);
 	fprintf(stdout, "     Bluefin CTD:       %d\n", nreadssv);
-	fprintf(stdout, "     Bluefin Nav:       %d\n", nreadnav1);
+	fprintf(stdout, "     Bluefin Nav:       %d\n", nreadnav2);
+	fprintf(stdout, "     Position:          %d\n", nreadnav1);
+	fprintf(stdout, "     RollPitchHeave:    %d\n", nreadrph);
 	fprintf(stdout, "     Subbottom:         %d\n", nreadsbp);
 	fprintf(stdout, "     Low Sidescan:      %d\n", nreadsslo);
 	fprintf(stdout, "     High Sidescan:     %d\n", nreadsshi);
@@ -3027,6 +3621,8 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]);*/
 	nreadmbimagetot += nreadmbimage;
 	nreadssvtot += nreadssv;
 	nreadnav1tot += nreadnav1;
+	nreadnav2tot += nreadnav2;
+	nreadrphtot += nreadrph;
 	nreadsbptot += nreadsbp;
 	nreadsslotot += nreadsslo;
 	nreadsshitot += nreadsshi;
@@ -3053,7 +3649,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]);*/
 		mb_datalist_close(verbose,&datalist,&error);
 			
 	/* output counts */
-	fprintf(stdout, "\nTotal data records read from: %s\n", read_file);
+	fprintf(stdout, "\nTotal data records written from: %s\n", read_file);
 	fprintf(stdout, "     File Header:       %d\n", nreadfileheadertot);
 	fprintf(stdout, "     Multibeam:         %d\n", nreadmultibeamtot);
 	fprintf(stdout, "          Volatile Settings: %d\n", nreadmbvolatilesettingstot);
@@ -3063,7 +3659,9 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]);*/
 	fprintf(stdout, "          Beam:              %d\n", nreadmbbeamtot);
 	fprintf(stdout, "          Image:             %d\n", nreadmbimagetot);
 	fprintf(stdout, "     Bluefin CTD:       %d\n", nreadssvtot);
-	fprintf(stdout, "     Bluefin Nav:       %d\n", nreadnav1tot);
+	fprintf(stdout, "     Bluefin Nav:       %d\n", nreadnav2tot);
+	fprintf(stdout, "     Position:          %d\n", nreadnav1tot);
+	fprintf(stdout, "     RollPitchHeave:    %d\n", nreadrphtot);
 	fprintf(stdout, "     Subbottom:         %d\n", nreadsbptot);
 	fprintf(stdout, "     Low Sidescan:      %d\n", nreadsslotot);
 	fprintf(stdout, "     High Sidescan:     %d\n", nreadsshitot);
@@ -3071,49 +3669,78 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]);*/
 		
 	
 	/* deallocate navigation arrays */
-	status = mb_free(verbose,&nav_time_d,&error);
-	status = mb_free(verbose,&nav_quality,&error);
-	status = mb_free(verbose,&nav_lon,&error);
-	status = mb_free(verbose,&nav_lat,&error);
-	status = mb_free(verbose,&nav_speed,&error);
-	status = mb_free(verbose,&nav_sonardepth,&error);
-	status = mb_free(verbose,&nav_sonardepthrate,&error);
-	status = mb_free(verbose,&nav_heading,&error);
-	status = mb_free(verbose,&nav_roll,&error);
-	status = mb_free(verbose,&nav_pitch,&error);
-	status = mb_free(verbose,&alt_time_d,&error);
-	status = mb_free(verbose,&alt_altitude,&error);
-	status = mb_free(verbose,&timedelay_time_d,&error);
-	status = mb_free(verbose,&timedelay_timedelay,&error);
-	status = mb_free(verbose,&batht_time_d,&error);
-	status = mb_free(verbose,&batht_ping,&error);
-	status = mb_free(verbose,&batht_time_d_new,&error);
-	status = mb_free(verbose,&edget_time_d,&error);
-	status = mb_free(verbose,&edget_ping,&error);
+	if (nnav > 0)
+		{
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&nav_time_d,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&nav_quality,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&nav_lon,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&nav_lat,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&nav_speed,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&nav_sonardepth,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&nav_sonardepthrate,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&nav_sonardepthfilter,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&nav_heading,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&nav_roll,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&nav_pitch,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&alt_time_d,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&alt_altitude,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&timedelay_time_d,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&timedelay_timedelay,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&batht_time_d,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&batht_ping,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&batht_time_d_new,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&edget_time_d,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&edget_ping,&error);
+		}
 	if (nins > 0)
 		{
-		status = mb_free(verbose,&ins_time_d,&error);
-		status = mb_free(verbose,&ins_lon,&error);
-		status = mb_free(verbose,&ins_lat,&error);
-		status = mb_free(verbose,&ins_heading,&error);
-		status = mb_free(verbose,&ins_roll,&error);
-		status = mb_free(verbose,&ins_pitch,&error);
-		status = mb_free(verbose,&ins_sonardepth,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&ins_time_d,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&ins_lon,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&ins_lat,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&ins_heading,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&ins_roll,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&ins_pitch,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&ins_sonardepth,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&ins_sonardepthfilter,&error);
+		}
+	if (nrock > 0)
+		{
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&rock_time_d,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&rock_lon,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&rock_lat,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&rock_sonardepth,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&rock_heading,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&rock_roll,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&rock_pitch,&error);
 		}
 	if (nins_altitude > 0)
 		{
-		status = mb_free(verbose,&ins_altitude_time_d,&error);
-		status = mb_free(verbose,&ins_altitude,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&ins_altitude_time_d,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&ins_altitude,&error);
 		}
 	if (nins_speed > 0)
 		{
-		status = mb_free(verbose,&ins_speed_time_d,&error);
-		status = mb_free(verbose,&ins_speed,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&ins_speed_time_d,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&ins_speed,&error);
 		}
 	if (nsonardepth > 0)
 		{
-		status = mb_free(verbose,&sonardepth_time_d,&error);
-		status = mb_free(verbose,&sonardepth_sonardepth,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&sonardepth_time_d,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&sonardepth_sonardepth,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&sonardepth_filter,&error);
+		}
+	if (npos > 0)
+		{
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&pos_time_d,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&pos_lon,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&pos_lat,&error);
+		}
+	if (nrph > 0)
+		{
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&rph_time_d,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&rph_roll,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&rph_pitch,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&rph_heave,&error);
 		}
 
 	/* check memory */

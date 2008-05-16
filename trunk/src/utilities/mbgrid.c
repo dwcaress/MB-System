@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrid.c	5/2/94
- *    $Id: mbgrid.c,v 5.41 2008-01-14 18:27:01 caress Exp $
+ *    $Id: mbgrid.c,v 5.42 2008-05-16 22:44:37 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 1995, 2000, 2002, 2003, 2006, 2007 by
+ *    Copyright (c) 1993-2008 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -38,6 +38,9 @@
  * Rererewrite:	January 2, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.41  2008/01/14 18:27:01  caress
+ * Fixed minor bug.
+ *
  * Revision 5.40  2007/10/17 20:33:25  caress
  * Release 5.1.1beta11
  * Added new handling of datalists.
@@ -441,7 +444,7 @@ double mbgrid_erf();
 FILE	*outfp;
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbgrid.c,v 5.41 2008-01-14 18:27:01 caress Exp $";
+static char rcs_id[] = "$Id: mbgrid.c,v 5.42 2008-05-16 22:44:37 caress Exp $";
 static char program_name[] = "mbgrid";
 static char help_message[] =  "mbgrid is an utility used to grid bathymetry, amplitude, or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbgrid -Ifilelist -Oroot \
@@ -1521,17 +1524,17 @@ fprintf(outfp,"dx:%f dy:%f dy-dx:%g\n",dx,dy,dy-dx);
 		fprintf(outfp,"\n");
 
 	/* allocate memory for arrays */
-	status = mb_malloc(verbose,gxdim*gydim*sizeof(double),&grid,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,gxdim*gydim*sizeof(double),(void **)&grid,&error);
 	if (status == MB_SUCCESS) 
-	status = mb_malloc(verbose,gxdim*gydim*sizeof(double),&sigma,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,gxdim*gydim*sizeof(double),(void **)&sigma,&error);
 	if (status == MB_SUCCESS) 
-	status = mb_malloc(verbose,gxdim*gydim*sizeof(double),&firsttime,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,gxdim*gydim*sizeof(double),(void **)&firsttime,&error);
 	if (status == MB_SUCCESS) 
-	status = mb_malloc(verbose,gxdim*gydim*sizeof(int),&cnt,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,gxdim*gydim*sizeof(int),(void **)&cnt,&error);
 	if (status == MB_SUCCESS) 
-	status = mb_malloc(verbose,gxdim*gydim*sizeof(int),&num,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,gxdim*gydim*sizeof(int),(void **)&num,&error);
 	if (status == MB_SUCCESS) 
-	status = mb_malloc(verbose,xdim*ydim*sizeof(float),&output,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,xdim*ydim*sizeof(float),(void **)&output,&error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
@@ -1560,7 +1563,7 @@ fprintf(outfp,"dx:%f dy:%f dy-dx:%g\n",dx,dy,dy-dx);
 	{
 
 	/* allocate memory for additional arrays */
-	status = mb_malloc(verbose,gxdim*gydim*sizeof(double),&norm,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,gxdim*gydim*sizeof(double),(void **)&norm,&error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
@@ -2035,7 +2038,7 @@ num[kgrid],cnt[kgrid],norm[kgrid],sigma[kgrid]);*/
 
 	/* allocate memory for additional arrays */
 	if (status == MB_SUCCESS)
-	status = mb_malloc(verbose,gxdim*gydim*sizeof(double),&norm,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,gxdim*gydim*sizeof(double),(void **)&norm,&error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
@@ -2759,7 +2762,7 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 	{
 
 	/* allocate memory for additional arrays */
-	status = mb_malloc(verbose,gxdim*gydim*sizeof(double *),&data,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,gxdim*gydim*sizeof(double *),(void **)&data,&error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
@@ -3398,13 +3401,13 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 
 #ifdef USESURFACE
 		/* allocate and initialize sgrid */
-		status = mb_malloc(verbose,ndata*sizeof(float),&sxdata,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,ndata*sizeof(float),(void **)&sxdata,&error);
 		if (status == MB_SUCCESS)
-			status = mb_malloc(verbose,ndata*sizeof(float),&sydata,&error);
+			status = mb_mallocd(verbose,__FILE__,__LINE__,ndata*sizeof(float),(void **)&sydata,&error);
 		if (status == MB_SUCCESS)
-			status = mb_malloc(verbose,ndata*sizeof(float),&szdata,&error);
+			status = mb_mallocd(verbose,__FILE__,__LINE__,ndata*sizeof(float),(void **)&szdata,&error);
 		if (status == MB_SUCCESS)
-			status = mb_malloc(verbose,gxdim*gydim*sizeof(float),&sgrid,&error);
+			status = mb_mallocd(verbose,__FILE__,__LINE__,gxdim*gydim*sizeof(float),(void **)&sgrid,&error);
 		if (error != MB_ERROR_NO_ERROR)
 			{
 			mb_error(verbose,MB_ERROR_MEMORY_FAIL,&message);
@@ -3488,15 +3491,15 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 			tension,sgrid);
 #else
 		/* allocate and initialize sgrid */
-		status = mb_malloc(verbose,3*ndata*sizeof(float),&sdata,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,3*ndata*sizeof(float),(void **)&sdata,&error);
 		if (status == MB_SUCCESS)
-			status = mb_malloc(verbose,gxdim*gydim*sizeof(float),&sgrid,&error);
+			status = mb_mallocd(verbose,__FILE__,__LINE__,gxdim*gydim*sizeof(float),(void **)&sgrid,&error);
 		if (status == MB_SUCCESS)
-			status = mb_malloc(verbose,ndata*sizeof(float),&work1,&error);
+			status = mb_mallocd(verbose,__FILE__,__LINE__,ndata*sizeof(float),(void **)&work1,&error);
 		if (status == MB_SUCCESS)
-			status = mb_malloc(verbose,ndata*sizeof(int),&work2,&error);
+			status = mb_mallocd(verbose,__FILE__,__LINE__,ndata*sizeof(int),(void **)&work2,&error);
 		if (status == MB_SUCCESS)
-			status = mb_malloc(verbose,(gxdim+gydim)*sizeof(int),&work3,&error);
+			status = mb_mallocd(verbose,__FILE__,__LINE__,(gxdim+gydim)*sizeof(int),(void **)&work3,&error);
 		if (error != MB_ERROR_NO_ERROR)
 			{
 			mb_error(verbose,MB_ERROR_MEMORY_FAIL,&message);
@@ -3822,16 +3825,16 @@ fprintf(stderr,"%d %f\n",i,sdata[3*i+2]);
 			
 		/* deallocate the interpolation arrays */
 #ifdef USESURFACE
-		mb_free(verbose,&sxdata,&error);
-		mb_free(verbose,&sydata,&error);
-		mb_free(verbose,&szdata,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&sxdata,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&sydata,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&szdata,&error);
 #else
-		mb_free(verbose,&sdata,&error);
-		mb_free(verbose,&work1,&error);
-		mb_free(verbose,&work2,&error);
-		mb_free(verbose,&work3,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&sdata,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&work1,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&work2,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&work3,&error);
 #endif
-		mb_free(verbose,&sgrid,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&sgrid,&error);
 		}
 
 	/* if grdrasterid set extract background data 
@@ -3851,11 +3854,11 @@ fprintf(stderr,"%d %f\n",i,sdata[3*i+2]);
 
 		/* allocate and initialize background data arrays */
 #ifdef USESURFACE
-		status = mb_malloc(verbose,nbackground_alloc*sizeof(float),&bxdata,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,nbackground_alloc*sizeof(float),(void **)&bxdata,&error);
 		if (status == MB_SUCCESS) 
-			status = mb_malloc(verbose,nbackground_alloc*sizeof(float),&bydata,&error);
+			status = mb_mallocd(verbose,__FILE__,__LINE__,nbackground_alloc*sizeof(float),(void **)&bydata,&error);
 		if (status == MB_SUCCESS) 
-			status = mb_malloc(verbose,nbackground_alloc*sizeof(float),&bzdata,&error);
+			status = mb_mallocd(verbose,__FILE__,__LINE__,nbackground_alloc*sizeof(float),(void **)&bzdata,&error);
 		if (error != MB_ERROR_NO_ERROR)
 			{
 			mb_error(verbose,MB_ERROR_MEMORY_FAIL,&message);
@@ -3870,7 +3873,7 @@ fprintf(stderr,"%d %f\n",i,sdata[3*i+2]);
 		memset((char *)bydata,0,nbackground_alloc*sizeof(float));
 		memset((char *)bzdata,0,nbackground_alloc*sizeof(float));
 #else
-		status = mb_malloc(verbose,3*nbackground_alloc*sizeof(float),&bdata,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,3*nbackground_alloc*sizeof(float),(void **)&bdata,&error);
 		if (error != MB_ERROR_NO_ERROR)
 			{
 			mb_error(verbose,MB_ERROR_MEMORY_FAIL,&message);
@@ -3996,11 +3999,11 @@ fprintf(stderr,"%d %f\n",i,sdata[3*i+2]);
 				if (nbackground >= nbackground_alloc)
 					{
 					nbackground_alloc += 10000;
-					status = mb_realloc(verbose,nbackground_alloc*sizeof(float),&bxdata,&error);
+					status = mb_reallocd(verbose,__FILE__,__LINE__,nbackground_alloc*sizeof(float),(void **)&bxdata,&error);
 					if (status == MB_SUCCESS) 
-						status = mb_realloc(verbose,nbackground_alloc*sizeof(float),&bydata,&error);
+						status = mb_reallocd(verbose,__FILE__,__LINE__,nbackground_alloc*sizeof(float),(void **)&bydata,&error);
 					if (status == MB_SUCCESS) 
-						status = mb_realloc(verbose,nbackground_alloc*sizeof(float),&bzdata,&error);
+						status = mb_reallocd(verbose,__FILE__,__LINE__,nbackground_alloc*sizeof(float),(void **)&bzdata,&error);
 					if (error != MB_ERROR_NO_ERROR)
 						{
 						mb_error(verbose,MB_ERROR_MEMORY_FAIL,&message);
@@ -4019,7 +4022,7 @@ fprintf(stderr,"%d %f\n",i,sdata[3*i+2]);
 				if (nbackground >= nbackground_alloc)
 					{
 					nbackground_alloc += 10000;
-					status = mb_realloc(verbose,3*nbackground_alloc*sizeof(float),&bdata,&error);
+					status = mb_reallocd(verbose,__FILE__,__LINE__,3*nbackground_alloc*sizeof(float),(void **)&bdata,&error);
 					if (error != MB_ERROR_NO_ERROR)
 						{
 						mb_error(verbose,MB_ERROR_MEMORY_FAIL,&message);
@@ -4066,7 +4069,7 @@ fprintf(stderr,"%d %f\n",i,sdata[3*i+2]);
 
 		/* allocate and initialize grid and work arrays */
 #ifdef USESURFACE
-		status = mb_malloc(verbose,gxdim*gydim*sizeof(float),&sgrid,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,gxdim*gydim*sizeof(float),(void **)&sgrid,&error);
 		if (error != MB_ERROR_NO_ERROR)
 			{
 			mb_error(verbose,MB_ERROR_MEMORY_FAIL,&message);
@@ -4079,13 +4082,13 @@ fprintf(stderr,"%d %f\n",i,sdata[3*i+2]);
 			}
 		memset((char *)sgrid,0,gxdim*gydim*sizeof(float));
 #else
-		status = mb_malloc(verbose,gxdim*gydim*sizeof(float),&sgrid,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,gxdim*gydim*sizeof(float),(void **)&sgrid,&error);
 		if (status == MB_SUCCESS)
-			status = mb_malloc(verbose,nbackground*sizeof(float),&work1,&error);
+			status = mb_mallocd(verbose,__FILE__,__LINE__,nbackground*sizeof(float),(void **)&work1,&error);
 		if (status == MB_SUCCESS)
-			status = mb_malloc(verbose,nbackground*sizeof(int),&work2,&error);
+			status = mb_mallocd(verbose,__FILE__,__LINE__,nbackground*sizeof(int),(void **)&work2,&error);
 		if (status == MB_SUCCESS)
-			status = mb_malloc(verbose,(gxdim+gydim)*sizeof(int),&work3,&error);
+			status = mb_mallocd(verbose,__FILE__,__LINE__,(gxdim+gydim)*sizeof(int),(void **)&work3,&error);
 		if (error != MB_ERROR_NO_ERROR)
 			{
 			mb_error(verbose,MB_ERROR_MEMORY_FAIL,&message);
@@ -4141,16 +4144,16 @@ fprintf(stderr,"%d %f\n",i,sdata[3*i+2]);
 				}
 			}
 #ifdef USESURFACE
-		mb_free(verbose,&bxdata,&error);
-		mb_free(verbose,&bydata,&error);
-		mb_free(verbose,&bzdata,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&bxdata,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&bydata,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&bzdata,&error);
 #else
-		mb_free(verbose,&bdata,&error);
-		mb_free(verbose,&work1,&error);
-		mb_free(verbose,&work2,&error);
-		mb_free(verbose,&work3,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&bdata,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&work1,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&work2,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&work3,&error);
 #endif
-		mb_free(verbose,&sgrid,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&sgrid,&error);
 		}
 
 	/* get min max of data */
@@ -4478,13 +4481,13 @@ fprintf(stderr,"%d %f\n",i,sdata[3*i+2]);
 		}
 
 	/* deallocate arrays */
-	mb_free(verbose,&grid,&error); 
-	mb_free(verbose,&norm,&error); 
-	mb_free(verbose,&num,&error); 
-	mb_free(verbose,&cnt,&error); 
-	mb_free(verbose,&sigma,&error); 
-	mb_free(verbose,&firsttime,&error); 
-	mb_free(verbose,&output,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&grid,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&norm,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&num,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&cnt,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&sigma,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&firsttime,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&output,&error); 
 
 	/* deallocate projection */
 	if (use_projection == MB_YES)
@@ -4916,7 +4919,7 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 	complex = 0;
 
 	/* allocate memory for output array */
-	status = mb_malloc(verbose,grd.nx*grd.ny*sizeof(float),&a,error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,grd.nx*grd.ny*sizeof(float),(void **)&a,error);
 	if (*error != MB_ERROR_NO_ERROR)
 		{
 		mb_error(verbose,MB_ERROR_MEMORY_FAIL,&message);
@@ -4924,7 +4927,7 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 			message);
 		fprintf(outfp,"\nProgram <%s> Terminated\n",
 			program_name);
-		mb_memory_clear(verbose, &error);
+		mb_memory_clear(verbose, error);
 		exit(status);
 		}
 
@@ -4944,7 +4947,7 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 		GMT_write_grd(outfile, &grd, a, w, e, s, n, pad, complex);
 
 		/* free memory for output array */
-		mb_free(verbose, &a, error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **) &a, error);
 		}
 	    
 	/* free GMT memory */
