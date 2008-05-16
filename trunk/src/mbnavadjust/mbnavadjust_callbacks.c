@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavadjust_callbacks.c	2/22/2000
- *    $Id: mbnavadjust_callbacks.c,v 5.12 2008-01-14 18:15:46 caress Exp $
+ *    $Id: mbnavadjust_callbacks.c,v 5.13 2008-05-16 22:42:32 caress Exp $
  *
- *    Copyright (c) 2000, 2003 by
+ *    Copyright (c) 2000-2008 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -22,6 +22,9 @@
  * Date:	March 22, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.12  2008/01/14 18:15:46  caress
+ * Minor fixes.
+ *
  * Revision 5.11  2007/05/14 06:34:11  caress
  * Many changes to mbnavadjust, including adding z offsets and 3D search grids.
  *
@@ -765,6 +768,7 @@ void do_update_status()
     	char	truecrossing;
 	int	ivalue, imax;
 	int	tie_pos;
+	double	dr1, dr2, dr3;
     	int	i, j, k;
 
 	/* set status label */
@@ -1029,7 +1033,52 @@ void do_update_status()
 			    for (j=0;j<crossing->num_ties;j++)
 				{
 				tie = (struct mbna_tie *) &crossing->ties[j];
+				if (tie->inversion_status == MBNA_INVERSION_CURRENT
+					|| tie->inversion_status == MBNA_INVERSION_OLD)
+					{
+					dr1 = fabs((tie->inversion_offset_x_m - tie->offset_x_m) * tie->sigmax1[0]
+						+ (tie->inversion_offset_y_m - tie->offset_y_m) * tie->sigmax1[1]
+						+ (tie->inversion_offset_z_m - tie->offset_z_m) * tie->sigmax1[2]) / tie->sigmar1;
+					dr2 = fabs((tie->inversion_offset_x_m - tie->offset_x_m) * tie->sigmax2[0]
+						+ (tie->inversion_offset_y_m - tie->offset_y_m) * tie->sigmax2[1]
+						+ (tie->inversion_offset_z_m - tie->offset_z_m) * tie->sigmax2[2]) / tie->sigmar2;
+					dr3 = fabs((tie->inversion_offset_x_m - tie->offset_x_m) * tie->sigmax3[0]
+						+ (tie->inversion_offset_y_m - tie->offset_y_m) * tie->sigmax3[1]
+						+ (tie->inversion_offset_z_m - tie->offset_z_m) * tie->sigmax3[2]) / tie->sigmar3;
+					}
 				if (tie->inversion_status == MBNA_INVERSION_CURRENT)
+				    sprintf(string,"%4d %2d %3.3d:%3.3d:%2.2d %3.3d:%3.3d:%2.2d %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %4.3f %4.3f %4.3f",
+					i, j,
+					crossing->file_id_1,
+					crossing->section_1,
+					tie->snav_1,
+					crossing->file_id_2,
+					crossing->section_2,
+					tie->snav_2,
+					tie->offset_x_m,
+					tie->offset_y_m,
+					tie->offset_z_m,
+					tie->sigmar1,
+					tie->sigmar2,
+					tie->sigmar3,
+					dr1, dr2, dr3);
+				else if (tie->inversion_status == MBNA_INVERSION_OLD)
+				    sprintf(string,"%4d %2d %3.3d:%3.3d:%2.2d %3.3d:%3.3d:%2.2d %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %4.3f %4.3f %4.3f ***",
+					i, j,
+					crossing->file_id_1,
+					crossing->section_1,
+					tie->snav_1,
+					crossing->file_id_2,
+					crossing->section_2,
+					tie->snav_2,
+					tie->offset_x_m,
+					tie->offset_y_m,
+					tie->offset_z_m,
+					tie->sigmar1,
+					tie->sigmar2,
+					tie->sigmar3,
+					dr1, dr2, dr3);
+				else
 				    sprintf(string,"%4d %2d %3.3d:%3.3d:%2.2d %3.3d:%3.3d:%2.2d %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f",
 					i, j,
 					crossing->file_id_1,
@@ -1041,36 +1090,9 @@ void do_update_status()
 					tie->offset_x_m,
 					tie->offset_y_m,
 					tie->offset_z_m,
-					tie->inversion_offset_x_m - tie->offset_x_m,
-					tie->inversion_offset_y_m - tie->offset_y_m,
-					tie->inversion_offset_z_m - tie->offset_z_m);
-				else if (tie->inversion_status == MBNA_INVERSION_OLD)
-				    sprintf(string,"%4d %2d %3.3d:%3.3d:%2.2d %3.3d:%3.3d:%2.2d %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f ***",
-					i, j,
-					crossing->file_id_1,
-					crossing->section_1,
-					tie->snav_1,
-					crossing->file_id_2,
-					crossing->section_2,
-					tie->snav_2,
-					tie->offset_x_m,
-					tie->offset_y_m,
-					tie->offset_z_m,
-					tie->inversion_offset_x_m - tie->offset_x_m,
-					tie->inversion_offset_y_m - tie->offset_y_m,
-					tie->inversion_offset_z_m - tie->offset_z_m);
-				else
-				    sprintf(string,"%4d %2d %3.3d:%3.3d:%2.2d %3.3d:%3.3d:%2.2d %8.2f %8.2f %8.2f",
-					i, j,
-					crossing->file_id_1,
-					crossing->section_1,
-					tie->snav_1,
-					crossing->file_id_2,
-					crossing->section_2,
-					tie->snav_2,
-					tie->offset_x_m,
-					tie->offset_y_m,
-					tie->offset_z_m);
+					tie->sigmar1,
+					tie->sigmar2,
+					tie->sigmar3);
     				xstr[k] = XmStringCreateLocalized(string);
 				if (mbna_verbose > 0)
 					fprintf(stderr,"%s\n",string);
@@ -1199,6 +1221,15 @@ void do_update_status()
 			XtVaSetValues(pushButton_showties,
 				XmNsensitive, True,
 				NULL);
+			XtVaSetValues(pushButton_naverr_previous,
+				XmNsensitive, False,
+				NULL);
+			XtVaSetValues(pushButton_naverr_next,
+				XmNsensitive, False,
+				NULL);
+			XtVaSetValues(pushButton_naverr_nextunset,
+				XmNsensitive, False,
+				NULL);
 			}
 		else if (mbna_view_list == MBNA_VIEW_LIST_CROSSINGS)
 			{
@@ -1217,6 +1248,20 @@ void do_update_status()
 			XtVaSetValues(pushButton_showties,
 				XmNsensitive, True,
 				NULL);
+			XtVaSetValues(pushButton_naverr_previous,
+				XmNsensitive, True,
+				NULL);
+			XtVaSetValues(pushButton_naverr_next,
+				XmNsensitive, True,
+				NULL);
+			if (project.num_crossings == project.num_crossings_analyzed)
+				XtVaSetValues(pushButton_naverr_nextunset,
+					XmNsensitive, False,
+					NULL);
+			else
+				XtVaSetValues(pushButton_naverr_nextunset,
+					XmNsensitive, True,
+					NULL);
 			}
 		else if (mbna_view_list == MBNA_VIEW_LIST_GOODCROSSINGS)
 			{
@@ -1235,6 +1280,20 @@ void do_update_status()
 			XtVaSetValues(pushButton_showties,
 				XmNsensitive, True,
 				NULL);
+			XtVaSetValues(pushButton_naverr_previous,
+				XmNsensitive, True,
+				NULL);
+			XtVaSetValues(pushButton_naverr_next,
+				XmNsensitive, True,
+				NULL);
+			if (project.num_crossings == project.num_crossings_analyzed)
+				XtVaSetValues(pushButton_naverr_nextunset,
+					XmNsensitive, False,
+					NULL);
+			else
+				XtVaSetValues(pushButton_naverr_nextunset,
+					XmNsensitive, True,
+					NULL);
 			}
 		else if (mbna_view_list == MBNA_VIEW_LIST_TRUECROSSINGS)
 			{
@@ -1253,6 +1312,20 @@ void do_update_status()
 			XtVaSetValues(pushButton_showties,
 				XmNsensitive, True,
 				NULL);
+			XtVaSetValues(pushButton_naverr_previous,
+				XmNsensitive, True,
+				NULL);
+			XtVaSetValues(pushButton_naverr_next,
+				XmNsensitive, True,
+				NULL);
+			if (project.num_truecrossings == project.num_truecrossings_analyzed)
+				XtVaSetValues(pushButton_naverr_nextunset,
+					XmNsensitive, False,
+					NULL);
+			else
+				XtVaSetValues(pushButton_naverr_nextunset,
+					XmNsensitive, True,
+					NULL);
 			}
 		else if (mbna_view_list == MBNA_VIEW_LIST_TIES)
 			{
@@ -1269,6 +1342,15 @@ void do_update_status()
 				XmNsensitive, True,
 				NULL);
 			XtVaSetValues(pushButton_showties,
+				XmNsensitive, False,
+				NULL);
+			XtVaSetValues(pushButton_naverr_previous,
+				XmNsensitive, True,
+				NULL);
+			XtVaSetValues(pushButton_naverr_next,
+				XmNsensitive, True,
+				NULL);
+			XtVaSetValues(pushButton_naverr_nextunset,
 				XmNsensitive, False,
 				NULL);
 			}
@@ -1289,6 +1371,15 @@ void do_update_status()
 			NULL);
 		XtVaSetValues(pushButton_showties,
 			XmNsensitive, False,
+			NULL);
+		XtVaSetValues(pushButton_naverr_previous,
+			XmNsensitive, True,
+			NULL);
+		XtVaSetValues(pushButton_naverr_next,
+			XmNsensitive, True,
+			NULL);
+		XtVaSetValues(pushButton_naverr_nextunset,
+			XmNsensitive, True,
 			NULL);
 		}
 		
@@ -1534,11 +1625,8 @@ do_update_naverr()
 :t\"Sections: %4.4d:%4.4d and %4.4d:%4.4d\"\
 :t\"Time Difference: %f days \"\
 :t\"Status: Unset \"\
-:t\"Contour Plot Width:   %.2f m\"\
-:t\"Misfit Plot Width:    %.2f m\"\
-:t\"Z Offset Plot Width:  %.2f m\"\
+:t\"Plot Widths (m): Contour: %.2f Misfit: %.2f Z: %.2f\"\
 :t\"Zoom Factor: %.2f \"\
-:t\"Tie Points: None\"\
 :t\"Relative Offsets:   None None None\"",
                	 	mbna_current_crossing, project.num_crossings,
                 	crossing->file_id_1,crossing->section_1,
@@ -1551,24 +1639,25 @@ do_update_naverr()
         	sprintf(string,":::t\"Crossing: %d of %d\"\
 :t\"Sections: %4.4d:%4.4d and %4.4d:%4.4d\"\
 :t\"Time Difference: %f days \"\
-:t\"Current Tie Point: %2d of %2d\"\
-:t\"Contour Plot Width: %.2f m\"\
-:t\"Misfit Plot Width:  %.2f m\"\
-:t\"Z Offset Plot Width:  %.2f m\"\
+:t\"Current Tie Point: %2d of %2d  Nav Points: %4d %4d\"\
+:t\"Plot Widths (m): Contour: %.2f Misfit: %.2f Z: %.2f\"\
 :t\"Zoom Factor: %.2f \"\
-:t\"Nav Points: %4d %4d\"\
-:t\"Relative Offsets (m):   %.3f %.3f %.3f\"",
+:t\"Relative Offsets (m):   %.3f %.3f %.3f\"\
+:t\"Sigma (m):   %.3f %.3f %.3f\"",
                	 	mbna_current_crossing, project.num_crossings,
                 	crossing->file_id_1,crossing->section_1,
                 	crossing->file_id_2,crossing->section_2,
 			timediff,
                 	mbna_current_tie, crossing->num_ties,
-               	 	plot_width, misfit_width, project.zoffsetwidth, zoom_factor,
                 	tie->snav_1,
 			tie->snav_2,
+               	 	plot_width, misfit_width, project.zoffsetwidth, zoom_factor,
                 	tie->offset_x_m,
 			tie->offset_y_m,
-			tie->offset_z_m);
+			tie->offset_z_m,
+			tie->sigmar1,
+			tie->sigmar2,
+			tie->sigmar3);
                 }
 	else
 		{
@@ -1576,11 +1665,8 @@ do_update_naverr()
 :t\"Sections: %4.4d:%4.4d and %4.4d:%4.4d\"\
 :t\"Time Difference: %f days \"\
 :t\"Status: Skipped \"\
-:t\"Contour Plot Width: %.2f m\"\
-:t\"Misfit Plot Width:  %.2f m\"\
-:t\"Z Offset Plot Width:  %.2f m\"\
+:t\"Plot Widths (m): Contour: %.2f Misfit: %.2f Z: %.2f\"\
 :t\"Zoom Factor: %.2f \"\
-:t\"Tie Points: Skipped\"\
 :t\"Relative Offsets:   Skipped Skipped Skipped\"",
                	 	mbna_current_crossing, project.num_crossings,
                  	crossing->file_id_1,crossing->section_1,
@@ -1603,6 +1689,81 @@ do_update_naverr()
 				|| mbna_plot_lat_min != mbna_lat_min
 				|| mbna_plot_lat_max != mbna_lat_max),
 		NULL);
+	if (mbna_view_list == MBNA_VIEW_LIST_FILES)
+		{
+		XtVaSetValues(pushButton_naverr_previous,
+			XmNsensitive, False,
+			NULL);
+		XtVaSetValues(pushButton_naverr_next,
+			XmNsensitive, False,
+			NULL);
+		XtVaSetValues(pushButton_naverr_nextunset,
+			XmNsensitive, False,
+			NULL);
+		}
+	else if (mbna_view_list == MBNA_VIEW_LIST_CROSSINGS)
+		{
+		XtVaSetValues(pushButton_naverr_previous,
+			XmNsensitive, True,
+			NULL);
+		XtVaSetValues(pushButton_naverr_next,
+			XmNsensitive, True,
+			NULL);
+		if (project.num_crossings == project.num_crossings_analyzed)
+			XtVaSetValues(pushButton_naverr_nextunset,
+				XmNsensitive, False,
+				NULL);
+		else
+			XtVaSetValues(pushButton_naverr_nextunset,
+				XmNsensitive, True,
+				NULL);
+		}
+	else if (mbna_view_list == MBNA_VIEW_LIST_GOODCROSSINGS)
+		{
+		XtVaSetValues(pushButton_naverr_previous,
+			XmNsensitive, True,
+			NULL);
+		XtVaSetValues(pushButton_naverr_next,
+			XmNsensitive, True,
+			NULL);
+		if (project.num_crossings == project.num_crossings_analyzed)
+			XtVaSetValues(pushButton_naverr_nextunset,
+				XmNsensitive, False,
+				NULL);
+		else
+			XtVaSetValues(pushButton_naverr_nextunset,
+				XmNsensitive, True,
+				NULL);
+		}
+	else if (mbna_view_list == MBNA_VIEW_LIST_TRUECROSSINGS)
+		{
+		XtVaSetValues(pushButton_naverr_previous,
+			XmNsensitive, True,
+			NULL);
+		XtVaSetValues(pushButton_naverr_next,
+			XmNsensitive, True,
+			NULL);
+		if (project.num_truecrossings == project.num_truecrossings_analyzed)
+			XtVaSetValues(pushButton_naverr_nextunset,
+				XmNsensitive, False,
+				NULL);
+		else
+			XtVaSetValues(pushButton_naverr_nextunset,
+				XmNsensitive, True,
+				NULL);
+		}
+	else if (mbna_view_list == MBNA_VIEW_LIST_TIES)
+		{
+		XtVaSetValues(pushButton_naverr_previous,
+			XmNsensitive, True,
+			NULL);
+		XtVaSetValues(pushButton_naverr_next,
+			XmNsensitive, True,
+			NULL);
+		XtVaSetValues(pushButton_naverr_nextunset,
+			XmNsensitive, True,
+			NULL);
+		}
     	
     	do_naverr_offsetlabel();
     	}
@@ -1617,11 +1778,12 @@ do_naverr_offsetlabel()
     if (mbna_current_crossing >= 0)
     	{
     	/* set main naverr status label */
-        sprintf(string,":::t\"Working Offsets (m): %.3f %.3f %.3f\":t\"Working Tie Points: %d:%d\"",
+        sprintf(string,":::t\"Working Offsets (m): %.3f %.3f %.3f %d:%d\":t\"Sigma (m): %.3f %.3f %.3f\"",
         		mbna_offset_x / mbna_mtodeglon,
 			mbna_offset_y / mbna_mtodeglat,
 			mbna_offset_z,
-			mbna_snav_1, mbna_snav_2);
+			mbna_snav_1, mbna_snav_2,
+			mbna_minmisfit_sr1,mbna_minmisfit_sr2,mbna_minmisfit_sr3);
     	}
 
     else

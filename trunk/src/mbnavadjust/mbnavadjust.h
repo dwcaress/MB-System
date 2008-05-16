@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavadjust.h	6/24/95
- *    $Id: mbnavadjust.h,v 5.9 2007-10-08 16:02:46 caress Exp $
+ *    $Id: mbnavadjust.h,v 5.10 2008-05-16 22:42:32 caress Exp $
  *
- *    Copyright (c) 2000 by
+ *    Copyright (c) 2000-2008 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -23,6 +23,9 @@
  * Date:	March 22, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.9  2007/10/08 16:02:46  caress
+ * MBnavadjust now performs an initial inversion for the average offsets for each independent block of data and then removes that average signal before performing the full inversion.
+ *
  * Revision 5.8  2007/05/14 06:34:11  caress
  * Many changes to mbnavadjust, including adding z offsets and 3D search grids.
  *
@@ -110,6 +113,7 @@
 #define MBNA_MASK_DIM			25
 #define MBNA_MISFIT_ZEROCENTER		0
 #define MBNA_MISFIT_AUTOCENTER		1
+#define MBNA_MISFIT_NTHRESHOLD		(MBNA_MISFIT_DIMXY * MBNA_MISFIT_DIMXY / 36)
 #define MBNA_MISFIT_DIMXY		61
 #define MBNA_MISFIT_DIMZ		51
 #define MBNA_BIAS_SAME			0
@@ -191,6 +195,12 @@ struct mbna_tie {
 	double	offset_x_m;
 	double	offset_y_m;
 	double	offset_z_m;
+	double	sigmar1;
+	double	sigmax1[3];
+	double	sigmar2;
+	double	sigmax2[3];
+	double	sigmar3;
+	double	sigmax3[3];
 	int	inversion_status;
 	double	inversion_offset_x;
 	double	inversion_offset_y;
@@ -315,9 +325,18 @@ EXTERNAL double	mbna_misfit_scale;
 EXTERNAL double mbna_misfit_offset_x;
 EXTERNAL double mbna_misfit_offset_y;
 EXTERNAL double mbna_misfit_offset_z;
+EXTERNAL int	mbna_minmisfit_nthreshold;
+EXTERNAL double	mbna_minmisfit;
+EXTERNAL int	mbna_minmisfit_n;
 EXTERNAL double mbna_minmisfit_x;
 EXTERNAL double mbna_minmisfit_y;
 EXTERNAL double mbna_minmisfit_z;
+EXTERNAL double mbna_minmisfit_sr1;
+EXTERNAL double mbna_minmisfit_sx1[4];
+EXTERNAL double mbna_minmisfit_sr2;
+EXTERNAL double mbna_minmisfit_sx2[4];
+EXTERNAL double mbna_minmisfit_sr3;
+EXTERNAL double mbna_minmisfit_sx3[4];
 EXTERNAL double	mbna_zoff_scale_x;
 EXTERNAL double	mbna_zoff_scale_y;
 
