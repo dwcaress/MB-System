@@ -27,6 +27,13 @@ adjusting survey navigation.
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
 Version 5.1.1          To be determined
+Version 5.1.1beta18    May 16, 2008
+Version 5.1.1beta17    March 21, 2008
+Version 5.1.1beta16    March 14, 2008
+Version 5.1.1beta15    February 8, 2008
+Version 5.1.1beta14    January 15, 2008
+Version 5.1.1beta13    November 16, 2007
+Version 5.1.1beta12    November 2, 2007
 Version 5.1.1beta11    October 17, 2007
 Version 5.1.1beta10    October 8, 2007
 Version 5.1.1beta5     July 5, 2007
@@ -99,7 +106,7 @@ Palisades, NY 10964
 
 MB-SYSTEM COPYRIGHT, LICENSING AND CAVEAT:
 -----------------------------------------
-MB-System Copyright (C) 1993-2007 by
+MB-System Copyright (C) 1993-2008 by
 David W. Caress (caress@mbari.org)
   Monterey Bay Aquarium Research Institute
   Moss Landing, CA 95039
@@ -266,6 +273,12 @@ format MBF_EM710MBA (format id 59)
 Updated format MBF_OMGHDCSJ (151), which supports the John Hughes 
 Clark HDCS (SwathEd) format, to handle all of John's "version 3"
 data. John's "version 4" format is not yet supported.
+
+Added new format 191 supporting data from Imagenex 83P DeltaT multibeams.
+As of 5.1.1beta18 this support is readonly.
+
+Added calculation and use of three dimensional covariance in
+the xyz nav offsets used by mbnavadjust.
 
 MB-SYSTEM VERSION 5.1.0 RELEASE NOTES:
 ------------------------------------------
@@ -1460,10 +1473,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.109 2008-03-14 18:29:45 caress Exp $
+RCS ID: $Id: README,v 5.110 2008-05-16 23:17:22 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.109  2008/03/14 18:29:45  caress
+Updated support for JHC format 151.
+
 Revision 5.108  2008/03/01 09:05:10  caress
 Added support for EM710 multibeam using formats 58 and 59.
 
